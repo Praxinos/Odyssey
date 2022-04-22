@@ -2,7 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
 #include "OdysseyToolEllipse.h"
-
+/*
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
 
@@ -14,7 +14,7 @@ void UOdysseyToolEllipse::Init()
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Drawing
 
-void UOdysseyToolEllipse::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
+void UOdysseyToolEllipse::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform)
 {
     mEllipse->Draw( ioBlock, iTransform );
     mPreviousTransform = iTransform;
@@ -83,4 +83,4 @@ void UOdysseyToolEllipse::CapturedMouseMove(FViewport* iViewport, int32 iX, int3
     ::ULIS::GenerateRotatedEllipsePoints( ::ULIS::FVec2I( mEllipse->mCenterPoint.X, mEllipse->mCenterPoint.Y), transformedEllipseAaxis, transformedEllipseBaxis, ULIS::FMath::RadToDeg(mPreviousTransform.GetMatrix().GetRotationAngle()), pointsArray );
 
     return pointsArray;
-}
+} */

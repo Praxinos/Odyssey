@@ -56,8 +56,12 @@ FOdysseyPainterEditorColorWheelTab::OnColorChange( eOdysseyEventState::Type iEve
     {
         //TriggerStateChanged
         //PATCH: should be automatic in the new drawing Tool, fix it asap
-        
-        FObjectEditorUtils::SetPropertyValue(mEditor->StrokeEngine()->GetBrushOptions(), "Color", FOdysseyBrushColor(mEditor->PaintColor()));
+
+        UOdysseyDrawingTool* drawingTool = Cast<UOdysseyDrawingTool>(mEditor->GetSelectedTool());
+        if (!drawingTool)
+            return;
+
+        FObjectEditorUtils::SetPropertyValue(drawingTool->GetBrushOptions(), "Color", FOdysseyBrushColor(mEditor->PaintColor()));
     }
 }
 

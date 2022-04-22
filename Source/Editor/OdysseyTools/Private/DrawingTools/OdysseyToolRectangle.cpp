@@ -2,7 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
 #include "OdysseyToolRectangle.h"
-
+/*
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
 
@@ -14,7 +14,7 @@ void UOdysseyToolRectangle::Init()
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Drawing
 
-void UOdysseyToolRectangle::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
+void UOdysseyToolRectangle::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform)
 {
     mLastTransform = iTransform;
     mRectangle->Draw( ioBlock, iTransform );
@@ -68,3 +68,4 @@ void UOdysseyToolRectangle::CapturedMouseMove(FViewport* iViewport, int32 iX, in
 
     return pointsArray;
 }
+*/

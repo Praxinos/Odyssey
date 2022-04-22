@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "StrokeEngine/Smoothing/IOdysseySmoothing.h"
+#include "Tools/DrawingTool/Shapes/Freehand/Smoothing/IOdysseySmoothing.h"
 
 #define LOCTEXT_NAMESPACE "IOdysseySmoothing"
 
@@ -13,9 +13,9 @@ IOdysseySmoothing::~IOdysseySmoothing()
 {
 }
 
-IOdysseySmoothing::IOdysseySmoothing(FOdysseyStrokeOptions* iStrokeOptions)
+IOdysseySmoothing::IOdysseySmoothing(FOdysseySmoothingOptions* iSmoothingOptions)
     : mPoints()
-    , mStrokeOptions(iStrokeOptions)
+    , mSmoothingOptions(iSmoothingOptions)
 {
 }
 

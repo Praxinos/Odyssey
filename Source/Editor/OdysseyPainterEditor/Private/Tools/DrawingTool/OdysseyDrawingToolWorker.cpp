@@ -3,30 +3,30 @@
 
 #pragma once
 
-#include "StrokeEngine/OdysseyStrokeEngineWorker.h"
+#include "Tools/DrawingTool/OdysseyDrawingToolWorker.h"
 
 #include "CoreMinimal.h"
 
 #include <functional>
 
-FOdysseyStrokeEngineWorker::~FOdysseyStrokeEngineWorker()
+FOdysseyDrawingToolWorker::~FOdysseyDrawingToolWorker()
 {
 }
 
-FOdysseyStrokeEngineWorker::FOdysseyStrokeEngineWorker()
+FOdysseyDrawingToolWorker::FOdysseyDrawingToolWorker()
     : mQueue()
 {
 }
 
 void
-FOdysseyStrokeEngineWorker::Push(tFunction iFunction)
+FOdysseyDrawingToolWorker::Push(tFunction iFunction)
 {
     //mQueue is ThreadSafe
     mQueue.Enqueue(iFunction);
 }
 
 void
-FOdysseyStrokeEngineWorker::Execute(int iNum)
+FOdysseyDrawingToolWorker::Execute(int iNum)
 {    
     tFunction func;
     for( int i = 0; !mQueue.IsEmpty() && (i < iNum || iNum <= 0); i++)
@@ -38,7 +38,7 @@ FOdysseyStrokeEngineWorker::Execute(int iNum)
 }
 
 void
-FOdysseyStrokeEngineWorker::ExecuteFor(long long iMaxTimeMs)
+FOdysseyDrawingToolWorker::ExecuteFor(long long iMaxTimeMs)
 {
     auto start_time = std::chrono::steady_clock::now();
     long long delta = 0;
@@ -56,13 +56,13 @@ FOdysseyStrokeEngineWorker::ExecuteFor(long long iMaxTimeMs)
 }
 
 void
-FOdysseyStrokeEngineWorker::Finish()
+FOdysseyDrawingToolWorker::Finish()
 {
     Execute(0);
 }
 
 void
-FOdysseyStrokeEngineWorker::Clear()
+FOdysseyDrawingToolWorker::Clear()
 {
     mQueue.Empty();
 }

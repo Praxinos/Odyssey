@@ -2,7 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
 #include "OdysseyToolFreeHand.h"
-
+/*
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
 
@@ -14,7 +14,7 @@ void UOdysseyToolFreeHand::Init()
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Drawing
 
-void UOdysseyToolFreeHand::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
+void UOdysseyToolFreeHand::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform)
 {
 }
 
@@ -42,4 +42,4 @@ void UOdysseyToolFreeHand::CapturedMouseMove(FViewport* iViewport, int32 iX, int
     ::ULIS::TArray<::ULIS::FVec2I> pointsArray;
 
     return pointsArray;
-}
+} */

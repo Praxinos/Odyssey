@@ -2,7 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
 #include "OdysseyViewportDrawingEditorTextureBasedAdapter.h"
-#include "StrokeEngine/OdysseyStrokeEngine.h"
+#include "Tools/DrawingTool/OdysseyDrawingTool.h"
 #include "MeshPaintHelpers.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyViewportDrawingEditorTextureBasedAdapter"
@@ -106,8 +106,9 @@ void FOdysseyViewportDrawingEditorTextureBasedAdapter::StartPainting()
         lastStrokePoint.y = coord.Y * mEditor->Texture()->GetSurfaceHeight();
 
         currentStrokePoint.ComputeRelativeParameters(lastStrokePoint);
-        
-        mEditor->StrokeEngine()->Begin(currentStrokePoint);
+
+        //ES: That feels weird, as we don't have the "PointInViewport", we only have the "PointInTexture", and we don't know what mouse button is being pressed.
+        mEditor->GetSelectedTool()->OnMouseDown(currentStrokePoint, currentStrokePoint, EKeys::LeftMouseButton);
     }
 
     //A simple copy is all we need for the texture based algorithm
@@ -136,7 +137,9 @@ void FOdysseyViewportDrawingEditorTextureBasedAdapter::Paint()
     {
         mCurrentStrokeRay.mStrokePoint.x = coord.X * mEditor->Texture()->GetSurfaceWidth();
         mCurrentStrokeRay.mStrokePoint.y = coord.Y * mEditor->Texture()->GetSurfaceHeight();
-        mEditor->StrokeEngine()->To(mCurrentStrokeRay.mStrokePoint);
+        //ES: That feels weird, as we don't have the "PointInViewport", we only have the "PointInTexture", and we don't know what mouse button is being pressed.
+        mEditor->GetSelectedTool()->OnMouseDrag(mCurrentStrokeRay.mStrokePoint, mCurrentStrokeRay.mStrokePoint);
+        //mEditor->StrokeEngine()->To(mCurrentStrokeRay.mStrokePoint);
     }
 
     //A simple copy is all we need for the texture based algorithm
@@ -146,7 +149,9 @@ void FOdysseyViewportDrawingEditorTextureBasedAdapter::Paint()
 
 void FOdysseyViewportDrawingEditorTextureBasedAdapter::FinishPainting()
 {
-    mEditor->StrokeEngine()->End();
+    //ES: That feels weird, as we don't have the "PointInViewport", we only have the "PointInTexture", and we don't know what mouse button is being pressed.
+    mEditor->GetSelectedTool()->OnMouseUp(mCurrentStrokeRay.mStrokePoint, mCurrentStrokeRay.mStrokePoint, EKeys::LeftMouseButton);
+    //mEditor->StrokeEngine()->End();
 
     //A simple copy is all we need for the texture based algorithm
     if ( mPaintingTexture2DRenderTarget )

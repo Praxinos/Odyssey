@@ -37,9 +37,18 @@ FOdysseyPainterEditorViewportTab::CreateWidget()
 
     //TODO: not cool to have to go through the whole GUI for an info, move that in the painterEditor Data
 	TSharedPtr<FOdysseyPainterEditorViewportClient> viewportClient = MakeShareable(new FOdysseyPainterEditorViewportClient(mEditor, mViewport, mEditor->GetGUI()->GetMeshSelectorTab()->MeshSelector()->GetMeshSelectorPtr()));
-	viewportClient->OnPickColor().AddRaw(this, &FOdysseyPainterEditorViewportTab::HandleViewportColorPicked);
-	mViewport->SetViewportClient(viewportClient);
+	
+    //TODO: manage colorpicking here, viewportClient itself should not know the action to pick a color
+    viewportClient->OnPickColor().AddRaw(this, &FOdysseyPainterEditorViewportTab::HandleViewportColorPicked);
+    
+    viewportClient->OnMouseDown().AddRaw(this, &FOdysseyPainterEditorViewportTab::OnViewportMouseDown);
+    viewportClient->OnMouseUp().AddRaw(this, &FOdysseyPainterEditorViewportTab::OnViewportMouseUp);
+    viewportClient->OnMouseHover().AddRaw(this, &FOdysseyPainterEditorViewportTab::OnViewportMouseHover);
+    viewportClient->OnMouseDrag().AddRaw(this, &FOdysseyPainterEditorViewportTab::OnViewportMouseDrag);
+    viewportClient->OnKeyDown().AddRaw(this, &FOdysseyPainterEditorViewportTab::OnViewportKeyDown);
+    viewportClient->OnKeyUp().AddRaw(this, &FOdysseyPainterEditorViewportTab::OnViewportKeyUp);
 
+	mViewport->SetViewportClient(viewportClient);
     mViewport->GetViewport()->ViewportResizedEvent.AddRaw(this, &FOdysseyPainterEditorViewportTab::OnViewportSizeChanged);
 
     return mViewport;
@@ -114,10 +123,51 @@ FOdysseyPainterEditorViewportTab::HandleViewportColorPicked(eOdysseyEventState::
     {
         //TriggerStateChanged
         //PATCH: should be automatic in the new drawing Tool, fix it asap
-        
-        FObjectEditorUtils::SetPropertyValue(mEditor->StrokeEngine()->GetBrushOptions(), "Color", FOdysseyBrushColor(mEditor->PaintColor()));
+
+        UOdysseyDrawingTool* drawingTool = Cast<UOdysseyDrawingTool>(mEditor->GetSelectedTool());
+        if (!drawingTool)
+            return;
+
+        FObjectEditorUtils::SetPropertyValue(drawingTool->GetBrushOptions(), "Color", FOdysseyBrushColor(mEditor->PaintColor()));
     }
 }
+
+void
+FOdysseyPainterEditorViewportTab::OnViewportMouseDown(const FOdysseyPoint& iPointInViewport, const FOdysseyPoint& iPointInTexture, const FKey& iKey)
+{
+    mEditor->GetSelectedTool()->OnMouseDown(iPointInViewport, iPointInTexture, iKey);
+}
+
+void
+FOdysseyPainterEditorViewportTab::OnViewportMouseUp(const FOdysseyPoint& iPointInViewport, const FOdysseyPoint& iPointInTexture, const FKey& iKey)
+{
+    mEditor->GetSelectedTool()->OnMouseUp(iPointInViewport, iPointInTexture, iKey);
+}
+
+void
+FOdysseyPainterEditorViewportTab::OnViewportMouseHover(const FOdysseyPoint& iPointInViewport, const FOdysseyPoint& iPointInTexture)
+{
+    mEditor->GetSelectedTool()->OnMouseHover(iPointInViewport, iPointInTexture);
+}
+
+void
+FOdysseyPainterEditorViewportTab::OnViewportMouseDrag(const FOdysseyPoint& iPointInViewport, const FOdysseyPoint& iPointInTexture)
+{
+    mEditor->GetSelectedTool()->OnMouseDrag(iPointInViewport, iPointInTexture);
+}
+
+void
+FOdysseyPainterEditorViewportTab::OnViewportKeyDown(const FKey& iKey)
+{
+    mEditor->GetSelectedTool()->OnKeyDown(iKey);
+}
+
+void
+FOdysseyPainterEditorViewportTab::OnViewportKeyUp(const FKey& iKey)
+{
+    mEditor->GetSelectedTool()->OnKeyUp(iKey);
+}
+
 
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------- Shortcuts

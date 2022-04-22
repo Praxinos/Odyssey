@@ -1,7 +1,7 @@
 // IDDN FR.001.250001.005.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
-#include "StrokeEngine/Shapes/OdysseyFreehandShapeOverrides.h"
+#include "Tools/DrawingTool/Shapes/Freehand/OdysseyFreehandShapeOverrides.h"
 
 UOdysseyFreehandShapeOverrides::UOdysseyFreehandShapeOverrides()
     : bOverride_SmoothingMethod      ( false                                         )
@@ -19,16 +19,16 @@ UOdysseyFreehandShapeOverrides::UOdysseyFreehandShapeOverrides()
 void
 UOdysseyFreehandShapeOverrides::Override(UOdysseyFreehandShape* iFreehandShape) const
 {
-    FOdysseyStrokeOptions strokeOptions = iFreehandShape->GetStrokeOptions();
+    FOdysseySmoothingOptions smoothingOptions = iFreehandShape->GetSmoothingOptions();
     if(bOverride_SmoothingMethod)
-        strokeOptions.SmoothingMethod = SmoothingMethod;
+        smoothingOptions.SmoothingMethod = SmoothingMethod;
     if(bOverride_SmoothingStrength)
-        strokeOptions.SmoothingStrength = SmoothingStrength;
+        smoothingOptions.SmoothingStrength = SmoothingStrength;
     if(bOverride_SmoothingEnabled)
-        strokeOptions.SmoothingEnabled = SmoothingEnabled;
+        smoothingOptions.SmoothingEnabled = SmoothingEnabled;
     if(bOverride_SmoothingRealTime)
-        strokeOptions.SmoothingRealTime = SmoothingRealTime;
+        smoothingOptions.SmoothingRealTime = SmoothingRealTime;
     if(bOverride_SmoothingCatchUp)
-        strokeOptions.SmoothingCatchUp = SmoothingCatchUp;
-    FObjectEditorUtils::SetPropertyValue(iFreehandShape, "StrokeOptions", strokeOptions);
+        smoothingOptions.SmoothingCatchUp = SmoothingCatchUp;
+    FObjectEditorUtils::SetPropertyValue(iFreehandShape, "SmoothingOptions", smoothingOptions);
 }

@@ -5,7 +5,7 @@
 
 #include "CoreMinimal.h"
 
-#include "StrokeEngine/Smoothing/OdysseySmoothingTypes.h"
+#include "Tools/DrawingTool/Shapes/Freehand/Smoothing/OdysseySmoothingTypes.h"
 
 #include "OdysseyFreehandShapeOverrides.generated.h"
 

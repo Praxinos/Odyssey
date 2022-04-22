@@ -1,7 +1,7 @@
 // IDDN FR.001.250001.005.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
-#include "StrokeEngine/Smoothing/OdysseySmoothingAverage.h"
+#include "Tools/DrawingTool/Shapes/Freehand/Smoothing/OdysseySmoothingAverage.h"
 #include "Math/OdysseyMathUtils.h"
 
 
@@ -14,8 +14,8 @@ FOdysseySmoothingAverage::~FOdysseySmoothingAverage()
 {
 }
 
-FOdysseySmoothingAverage::FOdysseySmoothingAverage(FOdysseyStrokeOptions* iStrokeOptions)
-    : IOdysseySmoothing(iStrokeOptions)
+FOdysseySmoothingAverage::FOdysseySmoothingAverage(FOdysseySmoothingOptions* iSmoothingOptions)
+    : IOdysseySmoothing(iSmoothingOptions)
 {
 }
 
@@ -25,13 +25,13 @@ FOdysseySmoothingAverage::FOdysseySmoothingAverage(FOdysseyStrokeOptions* iStrok
 bool
 FOdysseySmoothingAverage::IsReady() const
 {
-    return mPoints.Num() > mStrokeOptions->SmoothingStrength;
+    return mPoints.Num() > mSmoothingOptions->SmoothingStrength;
 }
 
 void
 FOdysseySmoothingAverage::AddPoint( const FOdysseyPoint& iPoint )
 {
-    for (int i = mPoints.Num(); i < mStrokeOptions->SmoothingStrength + 1; i++)
+    for (int i = mPoints.Num(); i < mSmoothingOptions->SmoothingStrength + 1; i++)
     {
         IOdysseySmoothing::AddPoint(iPoint);
     }

@@ -17,6 +17,7 @@ public class OdysseyTools : ModuleRules
                 "InputCore",
                 "SlateCore",
                 "Engine",
+                "OdysseyCore",
                 "OdysseyWidgets"
              }
         );

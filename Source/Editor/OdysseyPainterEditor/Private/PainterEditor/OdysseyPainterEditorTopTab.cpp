@@ -6,7 +6,7 @@
 #include "SOdysseyPaintModifiers.h"
 #include "OdysseyPainterEditorCommands.h"
 #include "OdysseyPainterEditor.h"
-#include "StrokeEngine/OdysseyStrokeEngine.h"
+#include "Tools/DrawingTool/OdysseyDrawingTool.h"
 #include "OdysseyBrushOptions.h"
 #include "OdysseyBlendParameters.h"
 
@@ -55,7 +55,11 @@ FOdysseyPainterEditorTopTab::SpawnTab( const FSpawnTabArgs& iArgs )
 bool
 FOdysseyPainterEditorTopTab::IsEraserButtonActive() const
 {
-    FOdysseyBlendParameters blendParameters = mEditor->StrokeEngine()->GetBlendParameters();
+    UOdysseyDrawingTool* drawingTool = Cast<UOdysseyDrawingTool>(mEditor->GetSelectedTool());
+    if (!drawingTool)
+        return false;
+
+    FOdysseyBlendParameters blendParameters = drawingTool->GetBlendParameters();
     return blendParameters.bEraserMode;
 }
 
@@ -165,13 +169,21 @@ FOdysseyPainterEditorTopTab::BindShortcuts(FBaseToolkit* iToolkit)
 ::ULIS::eBlendMode
 FOdysseyPainterEditorTopTab::BlendingMode() const
 {
-    return static_cast<::ULIS::eBlendMode>(mEditor->StrokeEngine()->GetBlendParameters().BlendingMode);
+    UOdysseyDrawingTool* drawingTool = Cast<UOdysseyDrawingTool>(mEditor->GetSelectedTool());
+    if (!drawingTool)
+        return ::ULIS::Blend_Normal;
+
+    return static_cast<::ULIS::eBlendMode>(drawingTool->GetBlendParameters().BlendingMode);
 }
 
 ::ULIS::eAlphaMode
 FOdysseyPainterEditorTopTab::AlphaMode() const
 {
-    return static_cast<::ULIS::eAlphaMode>(mEditor->StrokeEngine()->GetBlendParameters().AlphaMode);
+    UOdysseyDrawingTool* drawingTool = Cast<UOdysseyDrawingTool>(mEditor->GetSelectedTool());
+    if (!drawingTool)
+        return ::ULIS::Alpha_Normal;
+
+    return static_cast<::ULIS::eAlphaMode>(drawingTool->GetBlendParameters().AlphaMode);
 }
 
 //--------------------------------------------------------------------------------------
@@ -180,62 +192,94 @@ FOdysseyPainterEditorTopTab::AlphaMode() const
 void
 FOdysseyPainterEditorTopTab::OnSizeChanged( int32 iValue )
 {
+    UOdysseyDrawingTool* drawingTool = Cast<UOdysseyDrawingTool>(mEditor->GetSelectedTool());
+    if (!drawingTool)
+        return;
+
     //TODO: Remove when the top will use singlePropertyview
-    UOdysseyBrushOptions* brushOptions = mEditor->StrokeEngine()->GetBrushInstance()->GetBrushOptions();
+    UOdysseyBrushOptions* brushOptions = drawingTool->GetBrushInstance()->GetBrushOptions();
     FObjectEditorUtils::SetPropertyValue(brushOptions, "Size", float(iValue));
 }
 
 void
 FOdysseyPainterEditorTopTab::OnOpacityChanged( int32 iValue )
 {
+    UOdysseyDrawingTool* drawingTool = Cast<UOdysseyDrawingTool>(mEditor->GetSelectedTool());
+    if (!drawingTool)
+        return;
+
     //TODO: Remove when the top will use singlePropertyview
-    FOdysseyBlendParameters blendParameters = mEditor->StrokeEngine()->GetBlendParameters();
+    FOdysseyBlendParameters blendParameters = drawingTool->GetBlendParameters();
     blendParameters.Opacity = float(iValue);
-    FObjectEditorUtils::SetPropertyValue(mEditor->StrokeEngine(), "BlendParameters", blendParameters);
+    FObjectEditorUtils::SetPropertyValue(drawingTool, "BlendParameters", blendParameters);
 }
 
 void
 FOdysseyPainterEditorTopTab::OnFlowChanged( int32 iValue )
 {
+    UOdysseyDrawingTool* drawingTool = Cast<UOdysseyDrawingTool>(mEditor->GetSelectedTool());
+    if (!drawingTool)
+        return;
+
     //TODO: Remove when the top will use singlePropertyview
-    UOdysseyBrushOptions* brushOptions = mEditor->StrokeEngine()->GetBrushInstance()->GetBrushOptions();
+    UOdysseyBrushOptions* brushOptions = drawingTool->GetBrushInstance()->GetBrushOptions();
     FObjectEditorUtils::SetPropertyValue(brushOptions, "Flow", float(iValue));
 }
 
 void
 FOdysseyPainterEditorTopTab::OnBlendingModeChanged( int32 iValue )
 {
+    UOdysseyDrawingTool* drawingTool = Cast<UOdysseyDrawingTool>(mEditor->GetSelectedTool());
+    if (!drawingTool)
+        return;
+
     //TODO: Remove when the top will use singlePropertyview
-    FOdysseyBlendParameters blendParameters = mEditor->StrokeEngine()->GetBlendParameters();
+    FOdysseyBlendParameters blendParameters = drawingTool->GetBlendParameters();
     blendParameters.BlendingMode = static_cast<EOdysseyBlendingMode>(iValue);
-    FObjectEditorUtils::SetPropertyValue(mEditor->StrokeEngine(), "BlendParameters", blendParameters);
+    FObjectEditorUtils::SetPropertyValue(drawingTool, "BlendParameters", blendParameters);
 }
 
 void
 FOdysseyPainterEditorTopTab::OnAlphaModeChanged( int32 iValue )
 {
+    UOdysseyDrawingTool* drawingTool = Cast<UOdysseyDrawingTool>(mEditor->GetSelectedTool());
+    if (!drawingTool)
+        return;
+
     //TODO: Remove when the top will use singlePropertyview
-    FOdysseyBlendParameters blendParameters = mEditor->StrokeEngine()->GetBlendParameters();
+    FOdysseyBlendParameters blendParameters = drawingTool->GetBlendParameters();
     blendParameters.AlphaMode = static_cast<EOdysseyAlphaMode>(iValue);
-    FObjectEditorUtils::SetPropertyValue(mEditor->StrokeEngine(), "BlendParameters", blendParameters);
+    FObjectEditorUtils::SetPropertyValue(drawingTool, "BlendParameters", blendParameters);
 }
 
 int
 FOdysseyPainterEditorTopTab::OnGetSize() const
 {
-    return static_cast<int>(mEditor->StrokeEngine()->GetBrushInstance()->GetBrushOptions()->Size);
+    UOdysseyDrawingTool* drawingTool = Cast<UOdysseyDrawingTool>(mEditor->GetSelectedTool());
+    if (!drawingTool)
+        return 0;
+
+    return static_cast<int>(drawingTool->GetBrushInstance()->GetBrushOptions()->Size);
 }
 
 float
 FOdysseyPainterEditorTopTab::OnGetOpacity() const
 {
-    return mEditor->StrokeEngine()->GetBlendParameters().Opacity;
+    UOdysseyDrawingTool* drawingTool = Cast<UOdysseyDrawingTool>(mEditor->GetSelectedTool());
+    if (!drawingTool)
+        return 0.f;
+
+    return drawingTool->GetBlendParameters().Opacity;
 }
 
 float
 FOdysseyPainterEditorTopTab::OnGetFlow() const
 {
-    return mEditor->StrokeEngine()->GetBrushInstance()->GetBrushOptions()->Flow;
+    UOdysseyDrawingTool* drawingTool = Cast<UOdysseyDrawingTool>(mEditor->GetSelectedTool());
+    if (!drawingTool)
+        return 0.f;
+
+    return drawingTool->GetBrushInstance()->GetBrushOptions()->Flow;
 }
 
 FReply
@@ -268,9 +312,13 @@ FOdysseyPainterEditorTopTab::OnRedoButtonClicked()
 void
 FOdysseyPainterEditorTopTab::ToggleEraserButton()
 {
-    FOdysseyBlendParameters blendParameters = mEditor->StrokeEngine()->GetBlendParameters();
+    UOdysseyDrawingTool* drawingTool = Cast<UOdysseyDrawingTool>(mEditor->GetSelectedTool());
+    if (!drawingTool)
+        return;
+
+    FOdysseyBlendParameters blendParameters = drawingTool->GetBlendParameters();
     blendParameters.bEraserMode = !blendParameters.bEraserMode;
-    FObjectEditorUtils::SetPropertyValue(mEditor->StrokeEngine(), "BlendParameters", blendParameters);
+    FObjectEditorUtils::SetPropertyValue(drawingTool, "BlendParameters", blendParameters);
 }
 
 FReply
@@ -286,23 +334,35 @@ FOdysseyPainterEditorTopTab::OnEraserButtonClicked()
 void
 FOdysseyPainterEditorTopTab::SetAlphaMode(::ULIS::eAlphaMode iAlphaMode)
 {
-    FOdysseyBlendParameters blendParameters = mEditor->StrokeEngine()->GetBlendParameters();
+    UOdysseyDrawingTool* drawingTool = Cast<UOdysseyDrawingTool>(mEditor->GetSelectedTool());
+    if (!drawingTool)
+        return;
+
+    FOdysseyBlendParameters blendParameters = drawingTool->GetBlendParameters();
     blendParameters.AlphaMode = static_cast<EOdysseyAlphaMode>(iAlphaMode);
-    FObjectEditorUtils::SetPropertyValue(mEditor->StrokeEngine(), "BlendParameters", blendParameters);
+    FObjectEditorUtils::SetPropertyValue(drawingTool, "BlendParameters", blendParameters);
 }
 
 void
 FOdysseyPainterEditorTopTab::SetBlendingMode(::ULIS::eBlendMode iBlendingMode)
 {
-    FOdysseyBlendParameters blendParameters = mEditor->StrokeEngine()->GetBlendParameters();
+    UOdysseyDrawingTool* drawingTool = Cast<UOdysseyDrawingTool>(mEditor->GetSelectedTool());
+    if (!drawingTool)
+        return;
+
+    FOdysseyBlendParameters blendParameters = drawingTool->GetBlendParameters();
     blendParameters.BlendingMode = static_cast<EOdysseyBlendingMode>(iBlendingMode);
-    FObjectEditorUtils::SetPropertyValue(mEditor->StrokeEngine(), "BlendParameters", blendParameters);
+    FObjectEditorUtils::SetPropertyValue(drawingTool, "BlendParameters", blendParameters);
 }
 
 void
 FOdysseyPainterEditorTopTab::AddSize(int32 iValue)
 {
-    UOdysseyBrushOptions* brushOptions = mEditor->StrokeEngine()->GetBrushInstance()->GetBrushOptions();
+    UOdysseyDrawingTool* drawingTool = Cast<UOdysseyDrawingTool>(mEditor->GetSelectedTool());
+    if (!drawingTool)
+        return;
+
+    UOdysseyBrushOptions* brushOptions = drawingTool->GetBrushInstance()->GetBrushOptions();
     FObjectEditorUtils::SetPropertyValue(brushOptions, "Size", brushOptions->Size + iValue);
 }
 

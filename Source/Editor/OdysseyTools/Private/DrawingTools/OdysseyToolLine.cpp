@@ -2,7 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
 #include "OdysseyToolLine.h"
-
+/*
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
 
@@ -14,7 +14,7 @@ void UOdysseyToolLine::Init()
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Drawing
 
-void UOdysseyToolLine::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
+void UOdysseyToolLine::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform)
 {
     mLine->Draw( ioBlock, iTransform );
 }
@@ -65,4 +65,4 @@ void UOdysseyToolLine::CapturedMouseMove(FViewport* iViewport, int32 iX, int32 i
     ::ULIS::GenerateLinePoints( ::ULIS::FVec2I( mLine->mStartPoint.X, mLine->mStartPoint.Y), ::ULIS::FVec2I( mLine->mFinishPoint.X, mLine->mFinishPoint.Y ), pointsArray );
 
     return pointsArray;
-}
+}*/

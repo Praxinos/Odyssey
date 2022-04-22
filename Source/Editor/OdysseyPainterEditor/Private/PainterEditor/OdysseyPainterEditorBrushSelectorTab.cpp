@@ -11,7 +11,7 @@
 #include "OdysseyPainterEditorViewportTab.h"
 #include "SOdysseyPaintModifiers.h"
 #include "Models/OdysseyPainterEditorCommands.h"
-#include "StrokeEngine/OdysseyStrokeEngine.h"
+#include "Tools/DrawingTool/OdysseyDrawingTool.h"
 #include "ObjectEditorUtils.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorBrushSelectorTab"
@@ -74,7 +74,12 @@ FOdysseyPainterEditorBrushSelectorTab::BindShortcuts(FBaseToolkit* iToolkit)
 UOdysseyBrush*
 FOdysseyPainterEditorBrushSelectorTab::Brush() const
 {
-    return mEditor->StrokeEngine()->GetBrush();
+    UOdysseyDrawingTool* drawingTool = Cast<UOdysseyDrawingTool>(mEditor->GetSelectedTool());
+    if (!drawingTool)
+        return nullptr;
+    return drawingTool->GetBrush();
+
+    //return mEditor->StrokeEngine()->GetBrush();
 }
 
 //--------------------------------------------------------------------------------------
@@ -84,7 +89,7 @@ void
 FOdysseyPainterEditorBrushSelectorTab::OnBrushSelected( UOdysseyBrush* iBrush )
 {
 	//mEditor->StrokeEngine()->SetBrush(iBrush);
-    FObjectEditorUtils::SetPropertyValue(mEditor->StrokeEngine(), "Brush", iBrush);
+    FObjectEditorUtils::SetPropertyValue(mEditor->GetSelectedTool(), "Brush", iBrush);
 }
 
 //--------------------------------------------------------------------------------------
@@ -93,7 +98,10 @@ FOdysseyPainterEditorBrushSelectorTab::OnBrushSelected( UOdysseyBrush* iBrush )
 void
 FOdysseyPainterEditorBrushSelectorTab::RefreshBrush()
 {
-    mEditor->StrokeEngine()->RefreshBrushInstance();
+    UOdysseyDrawingTool* drawingTool = Cast<UOdysseyDrawingTool>(mEditor->GetSelectedTool());
+    if (!drawingTool)
+        return;
+    drawingTool->RefreshBrushInstance();
 }
 
 //--------------------------------------------------------------------------------------
@@ -102,7 +110,11 @@ FOdysseyPainterEditorBrushSelectorTab::RefreshBrush()
 UOdysseyBrushAssetBase*
 FOdysseyPainterEditorBrushSelectorTab::BrushInstance() const
 {
-    return mEditor->StrokeEngine()->GetBrushInstance();
+    UOdysseyDrawingTool* drawingTool = Cast<UOdysseyDrawingTool>(mEditor->GetSelectedTool());
+    if (!drawingTool)
+        return nullptr;
+
+    return drawingTool->GetBrushInstance();
 }
 
 //--------------------------------------------------------------------------------------

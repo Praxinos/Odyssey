@@ -2,7 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
 #include "OdysseyToolCircle.h"
-
+/*
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
 
@@ -14,7 +14,7 @@ void UOdysseyToolCircle::Init()
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Drawing
 
-void UOdysseyToolCircle::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
+void UOdysseyToolCircle::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform)
 {
     mCircle->Draw( ioBlock, iTransform );
 }
@@ -69,4 +69,4 @@ void UOdysseyToolCircle::CapturedMouseMove(FViewport* iViewport, int32 iX, int32
     ::ULIS::GenerateCirclePoints( ::ULIS::FVec2I( mCircle->mCenterPoint.X, mCircle->mCenterPoint.Y), mCircle->mRadius, pointsArray );
 
     return pointsArray;
-}
+} */

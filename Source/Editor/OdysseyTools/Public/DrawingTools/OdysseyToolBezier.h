@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
+/* #include "CoreMinimal.h"
 #include "OdysseyHUDBezier.h"
 #include "OdysseyTool.h"
 
@@ -33,4 +33,4 @@ private:
     UOdysseyHUDBezier* mBezier;
     bool mIsEndPointSet;
     bool mIsControlPointSet;
-};
+}; */

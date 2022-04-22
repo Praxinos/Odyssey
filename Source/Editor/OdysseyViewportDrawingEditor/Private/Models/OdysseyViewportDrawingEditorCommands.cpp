@@ -16,7 +16,7 @@ void FOdysseyViewportDrawingEditorCommands::RegisterCommands()
 	Commands.Add(SaveTexturePaint);
 
 	UI_COMMAND( SetOdysseyBrushSettingsView, "BrushSettings", "Brush Settings", EUserInterfaceActionType::ToggleButton, FInputChord() );
-	UI_COMMAND( SetOdysseyStrokeOptionsView, "StrokeOptions", "Stroke Options", EUserInterfaceActionType::ToggleButton, FInputChord() );
+	UI_COMMAND( SetOdysseyToolOptionsView, "ToolOptions", "Tool Options", EUserInterfaceActionType::ToggleButton, FInputChord() );
 	UI_COMMAND( SetOdysseyLayerStackView, "LayerStack", "Layer Stack", EUserInterfaceActionType::ToggleButton, FInputChord() );
 	UI_COMMAND( SetOdysseyToolsView, "Tools", "Tools", EUserInterfaceActionType::ToggleButton, FInputChord() );
 }

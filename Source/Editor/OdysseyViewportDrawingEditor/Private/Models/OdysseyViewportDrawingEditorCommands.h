@@ -24,7 +24,7 @@ public:
 
 	/** Commands for the tools toolbar. */
 	TSharedPtr< FUICommandInfo > SetOdysseyBrushSettingsView;
-	TSharedPtr< FUICommandInfo > SetOdysseyStrokeOptionsView;
+	TSharedPtr< FUICommandInfo > SetOdysseyToolOptionsView;
 	TSharedPtr< FUICommandInfo > SetOdysseyLayerStackView;
     TSharedPtr< FUICommandInfo > SetOdysseyToolsView;
 

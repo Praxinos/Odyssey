@@ -1,10 +1,10 @@
 // IDDN FR.001.250001.005.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
-#include "StrokeEngine/Shapes/OdysseyFreehandShape.h"
+#include "Tools/DrawingTool/Shapes/Freehand/OdysseyFreehandShape.h"
 
-#include "StrokeEngine/Smoothing/OdysseySmoothingAverage.h"
-#include "StrokeEngine/Smoothing/OdysseySmoothingPull.h"
+#include "Tools/DrawingTool/Shapes/Freehand/Smoothing/OdysseySmoothingAverage.h"
+#include "Tools/DrawingTool/Shapes/Freehand/Smoothing/OdysseySmoothingPull.h"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
@@ -15,7 +15,7 @@ UOdysseyFreehandShape::~UOdysseyFreehandShape()
 UOdysseyFreehandShape::UOdysseyFreehandShape(const FObjectInitializer& iObjectInitializer)
     : Super(iObjectInitializer)
     //Properties
-    , StrokeOptions()
+    , SmoothingOptions()
 
     //Internal
     , mRawStroke()
@@ -32,7 +32,7 @@ UOdysseyFreehandShape::Begin( const FOdysseyPoint& iPoint )
 {
     mIsPainting = true;
 
-    //Reset the smoother to use the one selected in the StrokeOptions
+    //Reset the smoother to use the one selected in the SmoothingOptions
     ResetSmoother();
 
     //Prepare Raw Stroke Array
@@ -105,7 +105,7 @@ bool
 UOdysseyFreehandShape::InternalStrokeBegin(const FOdysseyPoint& iPoint)
 {
     //Add the first point to the smoothing system
-    if(StrokeOptions.SmoothingEnabled && StrokeOptions.SmoothingRealTime)
+    if(SmoothingOptions.SmoothingEnabled && SmoothingOptions.SmoothingRealTime)
         mSmoother->AddPoint( iPoint );
 
     mOnPathBeginDelegate.Broadcast(iPoint);
@@ -117,7 +117,7 @@ UOdysseyFreehandShape::InternalStrokeTo(const FOdysseyPoint& iPoint, bool iIsStr
 {
     //Apply smoothing if needed, otherwise skip it
     FOdysseyPoint point = iPoint;
-    if(StrokeOptions.SmoothingEnabled && (StrokeOptions.SmoothingRealTime || iIsStrokeEnd ) )
+    if(SmoothingOptions.SmoothingEnabled && (SmoothingOptions.SmoothingRealTime || iIsStrokeEnd ) )
     {
         mSmoother->AddPoint( iPoint );
 
@@ -135,10 +135,10 @@ UOdysseyFreehandShape::InternalStrokeTo(const FOdysseyPoint& iPoint, bool iIsStr
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Getters
 
-FOdysseyStrokeOptions&
-UOdysseyFreehandShape::GetStrokeOptions()
+FOdysseySmoothingOptions&
+UOdysseyFreehandShape::GetSmoothingOptions()
 {
-    return StrokeOptions;
+    return SmoothingOptions;
 }
 
 //--------------------------------------------------------------------------------------
@@ -148,7 +148,7 @@ void
 UOdysseyFreehandShape::ApplySmoothing()
 {
     //Ensure the smoothing is enabled, is not realtime and we have some raw inputs to work with
-    if (!StrokeOptions.SmoothingEnabled || StrokeOptions.SmoothingRealTime || mRawStroke.Num() <= 0 )
+    if (!SmoothingOptions.SmoothingEnabled || SmoothingOptions.SmoothingRealTime || mRawStroke.Num() <= 0 )
         return;
 
     //
@@ -177,7 +177,7 @@ UOdysseyFreehandShape::ApplySmoothing()
 void
 UOdysseyFreehandShape::CatchUp()
 {
-    if (!mIsPainting || !StrokeOptions.SmoothingEnabled || !StrokeOptions.SmoothingCatchUp || !mSmoother->CanCatchUp() || mRawStroke.Num() <= 0)
+    if (!mIsPainting || !SmoothingOptions.SmoothingEnabled || !SmoothingOptions.SmoothingCatchUp || !mSmoother->CanCatchUp() || mRawStroke.Num() <= 0)
         return;
 
     To(mRawStroke[mRawStroke.Num() - 1]);
@@ -186,10 +186,10 @@ UOdysseyFreehandShape::CatchUp()
 void
 UOdysseyFreehandShape::ResetSmoother()
 {
-    switch(StrokeOptions.SmoothingMethod)
+    switch(SmoothingOptions.SmoothingMethod)
     {
-        case EOdysseySmoothingMethod::kAverage : mSmoother = MakeShared<FOdysseySmoothingAverage>(&StrokeOptions); break;
-        case EOdysseySmoothingMethod::kPull : mSmoother = MakeShared<FOdysseySmoothingPull>(&StrokeOptions) ; break;
+        case EOdysseySmoothingMethod::kAverage : mSmoother = MakeShared<FOdysseySmoothingAverage>(&SmoothingOptions); break;
+        case EOdysseySmoothingMethod::kPull : mSmoother = MakeShared<FOdysseySmoothingPull>(&SmoothingOptions) ; break;
         default: break;
     }
     mSmoother->Reset();

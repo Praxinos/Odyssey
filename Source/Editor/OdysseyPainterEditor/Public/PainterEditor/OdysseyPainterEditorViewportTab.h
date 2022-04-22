@@ -35,6 +35,13 @@ protected:
     // Event Listeners
     virtual void HandleViewportColorPicked(eOdysseyEventState::Type iEventState, const FVector2D& iPositionInTexture);
 
+    virtual void OnViewportMouseDown(const FOdysseyPoint& iPointInViewport, const FOdysseyPoint& iPointInTexture, const FKey& iKey);
+    virtual void OnViewportMouseUp(const FOdysseyPoint& iPointInViewport, const FOdysseyPoint& iPointInTexture, const FKey& iKey);
+    virtual void OnViewportMouseHover(const FOdysseyPoint& iPointInViewport, const FOdysseyPoint& iPointInTexture);
+    virtual void OnViewportMouseDrag(const FOdysseyPoint& iPointInViewport, const FOdysseyPoint& iPointInTexture);
+    virtual void OnViewportKeyDown(const FKey& iKey);
+    virtual void OnViewportKeyUp(const FKey& iKey);
+
 protected:
     //Shortcuts
     virtual void OnResetViewportPosition();

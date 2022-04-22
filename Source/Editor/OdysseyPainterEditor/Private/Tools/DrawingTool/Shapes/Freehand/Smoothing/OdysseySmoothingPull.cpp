@@ -1,7 +1,7 @@
 // IDDN FR.001.250001.005.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
-#include "StrokeEngine/Smoothing/OdysseySmoothingPull.h"
+#include "Tools/DrawingTool/Shapes/Freehand/Smoothing/OdysseySmoothingPull.h"
 #include "Math/OdysseyMathUtils.h"
 #include "GenericPlatform/GenericPlatformMath.h"
 
@@ -15,8 +15,8 @@ FOdysseySmoothingPull::~FOdysseySmoothingPull()
 {
 }
 
-FOdysseySmoothingPull::FOdysseySmoothingPull(FOdysseyStrokeOptions* iStrokeOptions)
-    : IOdysseySmoothing(iStrokeOptions)
+FOdysseySmoothingPull::FOdysseySmoothingPull(FOdysseySmoothingOptions* iSmoothingOptions)
+    : IOdysseySmoothing(iSmoothingOptions)
 {
 }
 
@@ -36,7 +36,7 @@ FOdysseySmoothingPull::IsReady() const
     float x = point.x - mPoints[0].x;
     float y = point.y - mPoints[0].y;
     float dist2 = x * x + y * y;
-    return dist2 >= mStrokeOptions->SmoothingStrength * mStrokeOptions->SmoothingStrength;
+    return dist2 >= mSmoothingOptions->SmoothingStrength * mSmoothingOptions->SmoothingStrength;
 }
 
 FOdysseyPoint
@@ -48,7 +48,7 @@ FOdysseySmoothingPull::ComputePoint()
 	if (mPoints.Num() == 1)
 		return mPoints[0];
 
-	if (mStrokeOptions->SmoothingStrength <= 0)
+	if (mSmoothingOptions->SmoothingStrength <= 0)
 	{
 		FOdysseyPoint outPoint = mPoints[mPoints.Num() - 1];
 		mPoints.Empty();
@@ -60,7 +60,7 @@ FOdysseySmoothingPull::ComputePoint()
     float x = point.x - mPoints[0].x;
     float y = point.y - mPoints[0].y;
     float dist = FGenericPlatformMath::Sqrt(x * x + y * y);
-    float ratio = (dist - mStrokeOptions->SmoothingStrength) / dist;
+    float ratio = (dist - mSmoothingOptions->SmoothingStrength) / dist;
 
     point.x = mPoints[0].x + x * ratio;
     point.y = mPoints[0].y + y * ratio;

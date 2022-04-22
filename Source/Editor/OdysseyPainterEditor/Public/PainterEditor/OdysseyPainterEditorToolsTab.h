@@ -12,13 +12,13 @@ class UOdysseyTool;
 
 enum eToolType
 {
-    kTool_FreeHand,
-    kTool_Line,
+    kTool_Drawing,
+    /* kTool_Line,
     kTool_Rectangle,
     kTool_Polygon,
     kTool_Circle,
     kTool_Ellipse,
-    kTool_Bezier
+    kTool_Bezier */
 };
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorToolsTab :

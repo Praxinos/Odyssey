@@ -4,8 +4,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "StrokeEngine/OdysseyStrokeOptions.h"
-#include "StrokeEngine/Smoothing/IOdysseySmoothing.h"
+#include "Tools/DrawingTool/Shapes/Freehand/Smoothing/OdysseySmoothingOptions.h"
+#include "Tools/DrawingTool/Shapes/Freehand/Smoothing/IOdysseySmoothing.h"
 
 #include "OdysseyFreehandShape.generated.h"
 
@@ -49,8 +49,8 @@ public:
 
 public:
     // Getters
-    //Returns the StrokeOptions
-    FOdysseyStrokeOptions& GetStrokeOptions();
+    //Returns the SmoothingOptions
+    FOdysseySmoothingOptions& GetSmoothingOptions();
 
     FOnPathBegin& OnPathBeginDelegate() { return mOnPathBeginDelegate; }
     FOnPathTo& OnPathToDelegate() { return mOnPathToDelegate; }
@@ -75,14 +75,14 @@ private:
     // Applies the smoothing if enabled and not in realtime
     void ApplySmoothing();
 
-    //Reset the smoother to use the one selected in the StrokeOptions
+    //Reset the smoother to use the one selected in the SmoothingOptions
     void ResetSmoother();
 
 private:
     //PROPERTIES
     
     UPROPERTY(EditInstanceOnly)
-    FOdysseyStrokeOptions StrokeOptions;
+    FOdysseySmoothingOptions SmoothingOptions;
 
 protected:
     // protected Data Members

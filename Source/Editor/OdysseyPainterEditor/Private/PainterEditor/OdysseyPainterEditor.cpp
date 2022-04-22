@@ -27,7 +27,7 @@ FOdysseyPainterEditor::FOdysseyPainterEditor()
     : mPaintEngine()
 	, mSelectedTool(nullptr)
     , mHUDSystem(new FOdysseyHUDSystem())
-	, mStrokeEngine(nullptr)
+	//, mStrokeEngine(nullptr)
 	, mBrushContexts()
 	, mPaintColor(::ULIS::FColor::Black)
 {
@@ -40,18 +40,16 @@ FOdysseyPainterEditor::FOdysseyPainterEditor()
 void
 FOdysseyPainterEditor::InitData()
 {
-	mStrokeEngine = NewObject<UOdysseyStrokeEngine>();
-	mSelectedTool = NewObject<UOdysseyToolFreeHand>();
+	//Init DrawingTool
+	UOdysseyDrawingTool* drawingTool = NewObject<UOdysseyDrawingTool>();
+	drawingTool->OnApplyOverridesDelegate().AddRaw(this, &FOdysseyPainterEditor::OnApplyOverrides);
+	drawingTool->Initialize(&mPaintEngine);
+	drawingTool->SetBrushContexts(mBrushContexts);
+	FObjectEditorUtils::SetPropertyValue(drawingTool->GetBrushOptions(), "Color", FOdysseyBrushColor(mPaintColor)); //Set the paint color in the brushOptions at startup for synchronization
 
-	mStrokeEngine->OnApplyOverridesDelegate().AddRaw(this, &FOdysseyPainterEditor::OnApplyOverrides);
 
-	mStrokeEngine->Initialize(&mPaintEngine);
-	mStrokeEngine->SetBrushContexts(mBrushContexts);
-	
-	//Set the paint color in the brushOptions at startup for synchronization
-	FObjectEditorUtils::SetPropertyValue(mStrokeEngine->GetBrushOptions(), "Color", FOdysseyBrushColor(mPaintColor));
-	
-	mStrokeEngine->Activate();
+	mSelectedTool = drawingTool;
+	mSelectedTool->Activate();
     //---
 }
 
@@ -81,16 +79,16 @@ void
 FOdysseyPainterEditor::Undo()
 {
 	//End stroke before undoing, allows to manage PaintEngine->OnTick Undo
-	mStrokeEngine->Flush();
-	mStrokeEngine->Commit();
+	mSelectedTool->Flush();
+	mSelectedTool->Commit();
 }
 
 void
 FOdysseyPainterEditor::Redo()
 {
 	//End stroke before redoing, allows to manage PaintEngine->OnTick Redo
-	mStrokeEngine->Flush();
-	mStrokeEngine->Commit();
+	mSelectedTool->Flush();
+	mSelectedTool->Commit();
 }
 
 void
@@ -98,8 +96,8 @@ FOdysseyPainterEditor::ClearUndo()
 {
 	//PaintEngine()->Flush();
 	//End stroke before clearing undo
-	mStrokeEngine->Flush();
-	mStrokeEngine->Commit();
+	mSelectedTool->Flush();
+	mSelectedTool->Commit();
 }
 
 //--------------------------------------------------------------------------------------
@@ -111,11 +109,11 @@ FOdysseyPainterEditor::PaintEngine()
 	return mPaintEngine;
 }
 
-UOdysseyStrokeEngine*
+/* UOdysseyStrokeEngine*
 FOdysseyPainterEditor::StrokeEngine()
 {
     return mStrokeEngine;
-}
+} */
 
 FOdysseyHUDSystem* 
 FOdysseyPainterEditor::HUDSystem() const
@@ -177,8 +175,8 @@ FOdysseyPainterEditor::AddReferencedObjects(FReferenceCollector& Collector)
 	if (mSelectedTool)
 		Collector.AddReferencedObject(mSelectedTool);
 
-	if (mStrokeEngine)
-        Collector.AddReferencedObject(mStrokeEngine);
+	/* if (mStrokeEngine)
+        Collector.AddReferencedObject(mStrokeEngine); */
 }
 
 //--------------------------------------------------------------------------------------
@@ -189,9 +187,9 @@ FOdysseyPainterEditor::Tick(float iDeltaTime)
 {
 	FOdysseyEditor::Tick(iDeltaTime);
 
-	/* if (mActiveTool)
-		mActiveTool->Tick(iDeltaTime); */
+	if (mSelectedTool)
+		mSelectedTool->Tick(iDeltaTime);
 		
-	if (mStrokeEngine)
-		mStrokeEngine->Tick(iDeltaTime);
+	/* if (mStrokeEngine)
+		mStrokeEngine->Tick(iDeltaTime); */
 }

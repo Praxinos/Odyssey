@@ -61,17 +61,17 @@ FOdysseyPainterEditorToolsTab::CreateWidget()
                 [
                     SNew( SCheckBox )
                     .Style( &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("OdysseyCheckBoxStyle.TransparentCheckBox") )
-                    .OnCheckStateChanged( this, &FOdysseyPainterEditorToolsTab::OnToolCheckBoxClicked, kTool_FreeHand )
+                    .OnCheckStateChanged( this, &FOdysseyPainterEditorToolsTab::OnToolCheckBoxClicked, kTool_Drawing )
                     .IsChecked_Lambda([&]() -> ECheckBoxState
                     {
-                        return Cast<UOdysseyToolFreeHand>(mEditor->GetSelectedTool()) != nullptr ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+                        return Cast<UOdysseyDrawingTool>(mEditor->GetSelectedTool()) != nullptr ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
                     })
                     [
                         SNew( SImage )
                         .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.FreeHand32" ) )
                     ]
                 ]
-                + SWrapBox::Slot()
+                /* + SWrapBox::Slot()
                 [
                     SNew( SCheckBox )
                     .Style(&FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("OdysseyCheckBoxStyle.TransparentCheckBox"))
@@ -154,7 +154,7 @@ FOdysseyPainterEditorToolsTab::CreateWidget()
                         SNew(SImage)
                         .Image(FOdysseyStyle::GetBrush("PainterEditor.ToolsTab.Bezier32"))
                     ]
-                ]
+                ] */
             ]
         ]
         +SScrollBox::Slot()
@@ -263,6 +263,50 @@ FOdysseyPainterEditorToolsTab::OnClearUndo()
 void 
 FOdysseyPainterEditorToolsTab::OnToolCheckBoxClicked(ECheckBoxState iCheckBoxState, eToolType iToolType)
 {
+	switch(iToolType)
+	{
+		case kTool_Drawing:
+		{
+    		//mEditor->SetSelectedTool( new );
+		}
+		break;
+
+		/*case kTool_Line:
+		{
+
+		}
+		break;
+
+		case kTool_Rectangle:
+		{
+
+		}
+		break;
+
+		case kTool_Polygon:
+		{
+
+		}
+		break;
+
+		case kTool_Circle:
+		{
+
+		}
+		break;
+
+		case kTool_Ellipse:
+		{
+
+		}
+		break;
+
+		case kTool_Bezier:
+		{
+
+		}
+		break; */
+	}
     //mEditor->SetSelectedTool( iTool );
 }
 

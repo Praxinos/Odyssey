@@ -2,7 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
 #include "OdysseyToolBezier.h"
-
+/*
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
 
@@ -16,7 +16,7 @@ void UOdysseyToolBezier::Init()
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Drawing
 
-void UOdysseyToolBezier::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
+void UOdysseyToolBezier::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform)
 {
     mBezier->Draw( ioBlock, iTransform );
 }
@@ -94,4 +94,4 @@ void UOdysseyToolBezier::CapturedMouseMove(FViewport* iViewport, int32 iX, int32
     );
 
     return pointsArray;
-}
+} */

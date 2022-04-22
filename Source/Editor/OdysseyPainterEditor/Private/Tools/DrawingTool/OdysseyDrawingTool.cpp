@@ -1,42 +1,42 @@
 // IDDN FR.001.250001.005.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
-#include "StrokeEngine/OdysseyStrokeEngine.h"
+#include "Tools/DrawingTool/OdysseyDrawingTool.h"
 
-#include "StrokeEngine/OdysseyBlendParametersOverrides.h"
-#include "StrokeEngine/OdysseyBrushOptionsOverrides.h"
+#include "Tools/DrawingTool/OdysseyBlendParametersOverrides.h"
+#include "Tools/DrawingTool/OdysseyBrushOptionsOverrides.h"
 #include "ObjectEditorUtils.h"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
-UOdysseyStrokeEngine::~UOdysseyStrokeEngine()
+UOdysseyDrawingTool::~UOdysseyDrawingTool()
 {
 }
 
-UOdysseyStrokeEngine::UOdysseyStrokeEngine(const FObjectInitializer& iObjectInitializer)
+UOdysseyDrawingTool::UOdysseyDrawingTool(const FObjectInitializer& iObjectInitializer)
     : Super(iObjectInitializer)
     //Properties
     , Brush(nullptr)
-    , Shape(iObjectInitializer.CreateDefaultSubobject<UOdysseyFreehandShape>(GetTransientPackage(), "UOdysseyStrokeEngine::Shape"))
+    , Shape(iObjectInitializer.CreateDefaultSubobject<UOdysseyFreehandShape>(GetTransientPackage(), "UOdysseyDrawingTool::Shape"))
     , BlendParameters()
     , BrushInstance(nullptr)
-    , BrushOptions(iObjectInitializer.CreateDefaultSubobject<UOdysseyBrushOptions>(GetTransientPackage(), "UOdysseyStrokeEngine::BrushOptions"))
+    , BrushOptions(iObjectInitializer.CreateDefaultSubobject<UOdysseyBrushOptions>(GetTransientPackage(), "UOdysseyDrawingTool::BrushOptions"))
 
     //Internal
     , mPaintEngine(nullptr)
     , mIsPainting(false)
 {
-    Shape->OnPathBeginDelegate().AddUObject(this, &UOdysseyStrokeEngine::OnShapePathBegin);
-    Shape->OnPathToDelegate().AddUObject(this, &UOdysseyStrokeEngine::OnShapePathTo);
-    Shape->OnPathEndDelegate().AddUObject(this, &UOdysseyStrokeEngine::OnShapePathEnd);
-    Shape->OnResetDelegate().AddUObject(this, &UOdysseyStrokeEngine::OnShapeReset);
+    Shape->OnPathBeginDelegate().AddUObject(this, &UOdysseyDrawingTool::OnShapePathBegin);
+    Shape->OnPathToDelegate().AddUObject(this, &UOdysseyDrawingTool::OnShapePathTo);
+    Shape->OnPathEndDelegate().AddUObject(this, &UOdysseyDrawingTool::OnShapePathEnd);
+    Shape->OnResetDelegate().AddUObject(this, &UOdysseyDrawingTool::OnShapeReset);
 }
 
 //--------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------- Tool
 
 void
-UOdysseyStrokeEngine::Initialize(FOdysseyPaintEngine* iPaintEngine)
+UOdysseyDrawingTool::Initialize(FOdysseyPaintEngine* iPaintEngine)
 {
     SetPaintEngine(iPaintEngine);
 
@@ -45,23 +45,110 @@ UOdysseyStrokeEngine::Initialize(FOdysseyPaintEngine* iPaintEngine)
     FObjectEditorUtils::SetPropertyValue(this, "Brush", settings->BrushDefaults.DefaultBrush.LoadSynchronous());
 }
 
+//--------------------------------------------------------------------------------------
+//---------------------------------------------------------------- OdysseyTool overrides
+
 void
-UOdysseyStrokeEngine::Activate()
+UOdysseyDrawingTool::Activate()
 {
+
 }
 
 void
-UOdysseyStrokeEngine::Inactivate()
+UOdysseyDrawingTool::Inactivate()
 {
     Flush(); //Finish everything
     Commit(); //Commit the jobs that has been done
+}
+
+void
+UOdysseyDrawingTool::OnMouseDown(const FOdysseyPoint& iPointInViewport, const FOdysseyPoint& iPointInTexture, const FKey& iKey)
+{
+    Begin( iPointInTexture );
+}
+
+void
+UOdysseyDrawingTool::OnMouseUp(const FOdysseyPoint& iPointInViewport, const FOdysseyPoint& iPointInTexture, const FKey& iKey)
+{
+    End();
+}
+
+void
+UOdysseyDrawingTool::OnMouseHover(const FOdysseyPoint& iPointInViewport, const FOdysseyPoint& iPointInTexture)
+{
+    if (BrushInstance)
+        BrushInstance->StrokeMoveTo(iPointInTexture);
+}
+
+void
+UOdysseyDrawingTool::OnMouseDrag(const FOdysseyPoint& iPointInViewport, const FOdysseyPoint& iPointInTexture)
+{
+    To( iPointInTexture );
+}
+
+void
+UOdysseyDrawingTool::OnKeyDown(const FKey& iKey)
+{
+    if (iKey == EKeys::Escape)
+    {
+        Abort();
+        return;
+    }
+}
+
+void
+UOdysseyDrawingTool::OnKeyUp(const FKey& iKey)
+{
+
+}
+
+void
+UOdysseyDrawingTool::Tick(float iDeltaTime)
+{
+    // Check if everything is alright
+    if (!BrushInstance)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Cannot call UOdysseyDrawingTool::Tick() without a brush instance") );
+        return;
+    }
+
+    mWorker.Push([this, iDeltaTime]()
+    {
+        //Execute a the brush tick node before executing anything else
+        BrushInstance->Tick(iDeltaTime, false);
+    });
+
+    //Ticke the shape
+    Shape->Tick(iDeltaTime);
+
+    //Update the paintEngine
+    mWorker.ExecuteFor(1000/60); //60fps
+
+    BrushInstance->StrokeFlush();
+
+    if (mPaintEngine)
+        mPaintEngine->Update(BlendParameters);
+}
+
+void
+UOdysseyDrawingTool::Flush()
+{
+    mWorker.Finish();
+    BrushInstance->StrokeFlush();
+}
+
+void
+UOdysseyDrawingTool::Commit()
+{
+    if (mPaintEngine)
+        mPaintEngine->Commit(BlendParameters);
 }
 
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------- PaintEngine Callbacks
 
 void
-UOdysseyStrokeEngine::OnPaintEngineBlockChanged()
+UOdysseyDrawingTool::OnPaintEngineBlockChanged()
 {
     if (BrushInstance)
         BrushInstance->SetBlock(mPaintEngine->PaintBlock());
@@ -71,7 +158,7 @@ UOdysseyStrokeEngine::OnPaintEngineBlockChanged()
 //---------------------------------------------------------------------- Shape Callbacks
 
 void
-UOdysseyStrokeEngine::OnShapePathBegin( const FOdysseyPoint& iPoint )
+UOdysseyDrawingTool::OnShapePathBegin( const FOdysseyPoint& iPoint )
 {
     if (!BrushInstance)
     {
@@ -100,7 +187,7 @@ UOdysseyStrokeEngine::OnShapePathBegin( const FOdysseyPoint& iPoint )
 }
 
 void
-UOdysseyStrokeEngine::OnShapePathTo( const TArray<FOdysseyPoint>& iPoints )
+UOdysseyDrawingTool::OnShapePathTo( const TArray<FOdysseyPoint>& iPoints )
 {
     if (!BrushInstance)
     {
@@ -123,7 +210,7 @@ UOdysseyStrokeEngine::OnShapePathTo( const TArray<FOdysseyPoint>& iPoints )
 }
 
 void
-UOdysseyStrokeEngine::OnShapePathEnd( const FOdysseyPoint& iPoint )
+UOdysseyDrawingTool::OnShapePathEnd( const FOdysseyPoint& iPoint )
 {
     if (!BrushInstance)
     {
@@ -139,7 +226,7 @@ UOdysseyStrokeEngine::OnShapePathEnd( const FOdysseyPoint& iPoint )
 }
 
 void
-UOdysseyStrokeEngine::OnShapeReset()
+UOdysseyDrawingTool::OnShapeReset()
 {
 
     if (!BrushInstance)
@@ -161,12 +248,12 @@ UOdysseyStrokeEngine::OnShapeReset()
 //--------------------------------------------------------------------------- Stroke API
 
 bool
-UOdysseyStrokeEngine::Begin( const FOdysseyPoint& iPoint )
+UOdysseyDrawingTool::Begin( const FOdysseyPoint& iPoint )
 {
     // Check if everything is alright
     if (mIsPainting)
     {
-        UE_LOG(LogTemp, Warning, TEXT("Cannot call UOdysseyStrokeEngine::Begin() while Painting") );
+        UE_LOG(LogTemp, Warning, TEXT("Cannot call UOdysseyDrawingTool::Begin() while Painting") );
         return false;
     }
 
@@ -183,12 +270,12 @@ UOdysseyStrokeEngine::Begin( const FOdysseyPoint& iPoint )
 }
 
 bool
-UOdysseyStrokeEngine::To( const FOdysseyPoint& iPoint )
+UOdysseyDrawingTool::To( const FOdysseyPoint& iPoint )
 {
     // Check if everything is alright
     if (!mIsPainting)
     {
-        UE_LOG(LogTemp, Warning, TEXT("Cannot call UOdysseyStrokeEngine::To() before UOdysseyStrokeEngine::Begin()") );
+        UE_LOG(LogTemp, Warning, TEXT("Cannot call UOdysseyDrawingTool::To() before UOdysseyDrawingTool::Begin()") );
         return false;
     }
 
@@ -203,12 +290,12 @@ UOdysseyStrokeEngine::To( const FOdysseyPoint& iPoint )
 }
 
 bool
-UOdysseyStrokeEngine::End()
+UOdysseyDrawingTool::End()
 {
     // Check if everything is alright
     if (!mIsPainting)
     {
-        UE_LOG(LogTemp, Warning, TEXT("Cannot call UOdysseyStrokeEngine::End() before UOdysseyStrokeEngine::Begin()") );
+        UE_LOG(LogTemp, Warning, TEXT("Cannot call UOdysseyDrawingTool::End() before UOdysseyDrawingTool::Begin()") );
         return false;
     }
     
@@ -229,12 +316,12 @@ UOdysseyStrokeEngine::End()
 }
 
 bool
-UOdysseyStrokeEngine::Abort()
+UOdysseyDrawingTool::Abort()
 {
     // Check if everything is alright
     if (!mIsPainting)
     {
-        UE_LOG(LogTemp, Warning, TEXT("Cannot call UOdysseyStrokeEngine::Abort() before UOdysseyStrokeEngine::Begin()") );
+        UE_LOG(LogTemp, Warning, TEXT("Cannot call UOdysseyDrawingTool::Abort() before UOdysseyDrawingTool::Begin()") );
         return false;
     }
     
@@ -254,56 +341,11 @@ UOdysseyStrokeEngine::Abort()
     return true;
 }
 
-void
-UOdysseyStrokeEngine::Flush()
-{
-    mWorker.Finish();
-    BrushInstance->StrokeFlush();
-}
-
-void
-UOdysseyStrokeEngine::Commit()
-{
-    if (mPaintEngine)
-        mPaintEngine->Commit(BlendParameters);
-}
-
-//--------------------------------------------------------------------------------------
-//----------------------------------------------------------------------------- Tick API
-    
-void
-UOdysseyStrokeEngine::Tick(float iDeltaTime)
-{
-    // Check if everything is alright
-    if (!BrushInstance)
-    {
-        UE_LOG(LogTemp, Warning, TEXT("Cannot call UOdysseyStrokeEngine::Tick() without a brush instance") );
-        return;
-    }
-
-    mWorker.Push([this, iDeltaTime]()
-    {
-        //Execute a the brush tick node before executing anything else
-        BrushInstance->Tick(iDeltaTime, false);
-    });
-
-    //Ticke the shape
-    Shape->Tick(iDeltaTime);
-
-    //Update the paintEngine
-    mWorker.ExecuteFor(1000/60); //60fps
-
-    BrushInstance->StrokeFlush();
-
-    if (mPaintEngine)
-        mPaintEngine->Update(BlendParameters);
-}
-
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Setters
 
 void
-UOdysseyStrokeEngine::SetPaintEngine(FOdysseyPaintEngine* iPaintEngine)
+UOdysseyDrawingTool::SetPaintEngine(FOdysseyPaintEngine* iPaintEngine)
 {
     if (mIsPainting)
     {
@@ -319,20 +361,20 @@ UOdysseyStrokeEngine::SetPaintEngine(FOdysseyPaintEngine* iPaintEngine)
     if (!mPaintEngine)
         return;
         
-    mPaintEngine->OnBlockChangedDelegate().AddUObject(this, &UOdysseyStrokeEngine::OnPaintEngineBlockChanged);
+    mPaintEngine->OnBlockChangedDelegate().AddUObject(this, &UOdysseyDrawingTool::OnPaintEngineBlockChanged);
 
     if (BrushInstance)
         BrushInstance->SetBlock(mPaintEngine->PaintBlock());
 }
 
 void
-UOdysseyStrokeEngine::SetBrushContexts(TArray<FOdysseyBrushContext*> iContexts)
+UOdysseyDrawingTool::SetBrushContexts(TArray<FOdysseyBrushContext*> iContexts)
 {
     mBrushContexts = iContexts;
 }
 
 void
-UOdysseyStrokeEngine::RefreshBrushInstance()
+UOdysseyDrawingTool::RefreshBrushInstance()
 {
     DestroyBrushInstance();
     CreateBrushInstance(true);
@@ -342,20 +384,20 @@ UOdysseyStrokeEngine::RefreshBrushInstance()
 //------------------------------------------------------------------------------ Getters
 
 UOdysseyBrush*
-UOdysseyStrokeEngine::GetBrush()
+UOdysseyDrawingTool::GetBrush()
 {
 	return Brush;
 }
 
 UOdysseyBrushAssetBase*
-UOdysseyStrokeEngine::GetBrushInstance()
+UOdysseyDrawingTool::GetBrushInstance()
 {
     return BrushInstance; 
 }
 
 // Returns the BlendParameters
 FOdysseyBlendParameters
-UOdysseyStrokeEngine::GetBlendParameters() const
+UOdysseyDrawingTool::GetBlendParameters() const
 {
     return BlendParameters;
 }
@@ -364,13 +406,13 @@ UOdysseyStrokeEngine::GetBlendParameters() const
 
 // Returns the BrushOptions
 UOdysseyBrushOptions*
-UOdysseyStrokeEngine::GetBrushOptions()
+UOdysseyDrawingTool::GetBrushOptions()
 {
     return BrushOptions;
 }
 
-UOdysseyStrokeEngine::FOnApplyOverrides&
-UOdysseyStrokeEngine::OnApplyOverridesDelegate()
+UOdysseyDrawingTool::FOnApplyOverrides&
+UOdysseyDrawingTool::OnApplyOverridesDelegate()
 {
     return mOnApplyOverridesDelegate;
 }
@@ -379,7 +421,7 @@ UOdysseyStrokeEngine::OnApplyOverridesDelegate()
 //------------------------------------------------------------- Internal - BrushInstance
 
 void
-UOdysseyStrokeEngine::DestroyBrushInstance()
+UOdysseyDrawingTool::DestroyBrushInstance()
 {
 	if (!BrushInstance)
 		return;
@@ -388,7 +430,7 @@ UOdysseyStrokeEngine::DestroyBrushInstance()
 }
 
 void
-UOdysseyStrokeEngine::CreateBrushInstance(bool iApplyOverrides)
+UOdysseyDrawingTool::CreateBrushInstance(bool iApplyOverrides)
 {
 	if (!Brush)
 		return;
@@ -414,14 +456,14 @@ UOdysseyStrokeEngine::CreateBrushInstance(bool iApplyOverrides)
 }
 
 void
-UOdysseyStrokeEngine::OnBrushCompiled(UBlueprint* iBlueprint)
+UOdysseyDrawingTool::OnBrushCompiled(UBlueprint* iBlueprint)
 {
 	DestroyBrushInstance();
 	CreateBrushInstance(false);
 }
 
 void
-UOdysseyStrokeEngine::ApplyOverrides(UOdysseyBrushAssetBase* iBrushInstance)
+UOdysseyDrawingTool::ApplyOverrides(UOdysseyBrushAssetBase* iBrushInstance)
 {
     if (BrushInstance)
         UE_LOG(LogTemp, Warning, TEXT("ApplyOverrides whould only called when no BrushInstance is active, to avoid calling ExecuteStateChanged at each value change") );
@@ -447,14 +489,14 @@ UOdysseyStrokeEngine::ApplyOverrides(UOdysseyBrushAssetBase* iBrushInstance)
 //-------------------------------------------------------------------- UObject Overrides
 
 void
-UOdysseyStrokeEngine::PreEditChange(FEditPropertyChain& PropertyAboutToChange)
+UOdysseyDrawingTool::PreEditChange(FEditPropertyChain& PropertyAboutToChange)
 {
     Super::PreEditChange(PropertyAboutToChange);
     //Nothing to do
 }
 
 void
-UOdysseyStrokeEngine::PreEditChange(FProperty* PropertyAboutToChange)
+UOdysseyDrawingTool::PreEditChange(FProperty* PropertyAboutToChange)
 {
     Super::PreEditChange(PropertyAboutToChange);
 
@@ -464,7 +506,7 @@ UOdysseyStrokeEngine::PreEditChange(FProperty* PropertyAboutToChange)
 }
 
 void
-UOdysseyStrokeEngine::PostEditChangeChainProperty( struct FPropertyChangedChainEvent & PropertyChangedEvent)
+UOdysseyDrawingTool::PostEditChangeChainProperty( struct FPropertyChangedChainEvent & PropertyChangedEvent)
 {
     Super::PostEditChangeChainProperty(PropertyChangedEvent);
 
@@ -478,7 +520,7 @@ UOdysseyStrokeEngine::PostEditChangeChainProperty( struct FPropertyChangedChainE
 }
 
 void
-UOdysseyStrokeEngine::PostEditChangeProperty(struct FPropertyChangedEvent & PropertyChangedEvent)
+UOdysseyDrawingTool::PostEditChangeProperty(struct FPropertyChangedEvent & PropertyChangedEvent)
 {
     Super::PostEditChangeProperty(PropertyChangedEvent);
 
@@ -501,7 +543,7 @@ UOdysseyStrokeEngine::PostEditChangeProperty(struct FPropertyChangedEvent & Prop
 }
 
 void
-UOdysseyStrokeEngine::OnPreBrushChanged()
+UOdysseyDrawingTool::OnPreBrushChanged()
 {
     //Destroy the brushInstance
     DestroyBrushInstance();
@@ -512,13 +554,13 @@ UOdysseyStrokeEngine::OnPreBrushChanged()
 }
 
 void
-UOdysseyStrokeEngine::OnPostBrushChanged()
+UOdysseyDrawingTool::OnPostBrushChanged()
 {
     if (!Brush)
         return;
 
     //Bind OnCompiled delegate
-    Brush->OnCompiled().AddUObject(this, &UOdysseyStrokeEngine::OnBrushCompiled);
+    Brush->OnCompiled().AddUObject(this, &UOdysseyDrawingTool::OnBrushCompiled);
 
     //Create the BrushInstance to use for drawing
     CreateBrushInstance(true);

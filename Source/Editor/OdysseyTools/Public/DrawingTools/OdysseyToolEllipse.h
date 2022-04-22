@@ -2,7 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
 #pragma once
-
+/* 
 #include "CoreMinimal.h"
 #include "OdysseyHUDEllipse.h"
 #include "OdysseyTool.h"
@@ -33,3 +33,4 @@ private:
     UOdysseyHUDEllipse* mEllipse;
     FTransform2D mPreviousTransform;
 };
+*/

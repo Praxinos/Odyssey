@@ -5,16 +5,16 @@
 
 #include "CoreMinimal.h"
 
-#include "StrokeEngine/Smoothing/OdysseySmoothingTypes.h"
+#include "Tools/DrawingTool/Shapes/Freehand/Smoothing/OdysseySmoothingTypes.h"
 #include "OdysseyBrushInterpolationTypes.h"
-#include "OdysseyStrokeOptions.generated.h"
+#include "OdysseySmoothingOptions.generated.h"
 
 USTRUCT(Blueprintable)
-struct ODYSSEYPAINTEREDITOR_API FOdysseyStrokeOptions
+struct ODYSSEYPAINTEREDITOR_API FOdysseySmoothingOptions
 {
     GENERATED_BODY()
 
-    FOdysseyStrokeOptions()
+    FOdysseySmoothingOptions()
         : SmoothingMethod        ( EOdysseySmoothingMethod::kAverage )
         , SmoothingStrength      ( 10 )
         , SmoothingEnabled       ( true )

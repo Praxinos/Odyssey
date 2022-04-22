@@ -3,10 +3,90 @@
 
 #include "OdysseyTool.h"
 
+
+/* void
+UOdysseyTool::Init()
+{
+
+}
+
+void
+UOdysseyTool::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform)
+{
+
+} */
+
+
+void
+UOdysseyTool::Activate()
+{
+
+}
+
+void
+UOdysseyTool::Inactivate()
+{
+
+}
+
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------- Mouse events
 
-void UOdysseyTool::MouseMove(FViewport* iViewport, int32 iX, int32 iY)
+void
+UOdysseyTool::OnMouseDown(const FOdysseyPoint& iPointInViewport, const FOdysseyPoint& iPointInTexture, const FKey& iKey)
+{
+
+}
+
+void
+UOdysseyTool::OnMouseUp(const FOdysseyPoint& iPointInViewport, const FOdysseyPoint& iPointInTexture, const FKey& iKey)
+{
+
+}
+
+void
+UOdysseyTool::OnMouseHover(const FOdysseyPoint& iPointInViewport, const FOdysseyPoint& iPointInTexture)
+{
+
+}
+
+void
+UOdysseyTool::OnMouseDrag(const FOdysseyPoint& iPointInViewport, const FOdysseyPoint& iPointInTexture)
+{
+
+}
+
+void
+UOdysseyTool::OnKeyDown(const FKey& iKey)
+{
+
+}
+
+void
+UOdysseyTool::OnKeyUp(const FKey& iKey)
+{
+
+}
+
+void
+UOdysseyTool::Tick(float iDeltaTime)
+{
+
+}
+
+void
+UOdysseyTool::Flush()
+{
+
+}
+
+void
+UOdysseyTool::Commit()
+{
+
+}
+
+/* void UOdysseyTool::MouseMove(FViewport* iViewport, int32 iX, int32 iY)
 {
 
 }
@@ -24,4 +104,4 @@ void UOdysseyTool::CapturedMouseMove(FViewport* iViewport, int32 iX, int32 iY)
 bool UOdysseyTool::IsReadyToBeApplied() const
 {
     return mIsReadyToBeApplied;
-}
+} */

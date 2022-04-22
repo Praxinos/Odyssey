@@ -9,31 +9,30 @@
 #include "Misc/NotifyHook.h"
 #include "Framework/SlateDelegates.h"
 #include "IStructureDetailsView.h"
-#include "StrokeEngine/OdysseyStrokeOptions.h"
 
-class UOdysseyStrokeEngine;
+class UOdysseyTool;
 
 /////////////////////////////////////////////////////
-// SOdysseyStrokeOptions
-class ODYSSEYPAINTEREDITOR_API SOdysseyStrokeOptions
+// SOdysseyToolOptions
+class ODYSSEYPAINTEREDITOR_API SOdysseyToolOptions
     : public SCompoundWidget
     , public FNotifyHook
 {
     typedef SCompoundWidget         tSuperClass;
-    typedef SOdysseyStrokeOptions   tSelf;
+    typedef SOdysseyToolOptions   tSelf;
 
 public:
     // Construction / Destruction
-    SLATE_BEGIN_ARGS( SOdysseyStrokeOptions )
+    SLATE_BEGIN_ARGS( SOdysseyToolOptions )
         {}
-        SLATE_ARGUMENT(UOdysseyStrokeEngine*, StrokeEngine )
+        SLATE_ARGUMENT(UOdysseyTool*, Tool)
     SLATE_END_ARGS()
 
     void  Construct( const  FArguments&  InArgs );
 
 private:
     // Private data members
-    UOdysseyStrokeEngine*               mStrokeEngine;
+    UOdysseyTool*                       mTool;
 
     TSharedPtr<IDetailsView>            DetailsView;
     //TSharedPtr< IStructureDetailsView > DetailsView;

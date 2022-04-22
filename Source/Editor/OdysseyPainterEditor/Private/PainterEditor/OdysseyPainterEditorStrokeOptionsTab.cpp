@@ -3,7 +3,7 @@
 
 #include "OdysseyPainterEditorStrokeOptionsTab.h"
 
-#include "Widgets/SOdysseyStrokeOptions.h"
+#include "Tools/Widgets/SOdysseyToolOptions.h"
 #include "OdysseyPainterEditor.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorStrokeOptionsTab"
@@ -34,8 +34,8 @@ FOdysseyPainterEditorStrokeOptionsTab::CreateWidget()
         + SVerticalBox::Slot()
         .FillHeight(1.0f)
         [
-            SNew(SOdysseyStrokeOptions)
-		    .StrokeEngine(mEditor->StrokeEngine())
+            SNew(SOdysseyToolOptions)
+		    .Tool(mEditor->GetSelectedTool())
         ];
 }
 

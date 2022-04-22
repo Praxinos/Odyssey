@@ -2,7 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
 #pragma once
-
+/*
 #include "CoreMinimal.h"
 #include "OdysseyHUDBezier.h"
 #include "OdysseyTool.h"
@@ -29,3 +29,4 @@ public:
 public:
     ::ULIS::TArray<::ULIS::FVec2I> GenerateToolPoints() override;
 };
+*/

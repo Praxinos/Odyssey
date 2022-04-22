@@ -1,10 +1,10 @@
 // IDDN FR.001.250001.005.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
-#include "StrokeEngine/OdysseyBlendParametersOverrides.h"
+#include "Tools/DrawingTool/OdysseyBlendParametersOverrides.h"
 
 #include "ObjectEditorUtils.h"
-#include "StrokeEngine/OdysseyStrokeEngine.h"
+#include "Tools/DrawingTool/OdysseyDrawingTool.h"
 
 UOdysseyBlendParametersOverrides::UOdysseyBlendParametersOverrides()
     : bOverride_Opacity     ( false                                         )

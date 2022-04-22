@@ -4,22 +4,24 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "InputCoreTypes.h"
+#include "OdysseyTool.h"
 #include "OdysseyBrushBlueprint.h"
 #include "OdysseyBrushOptions.h"
 #include "OdysseyBlendParameters.h"
-#include "StrokeEngine/OdysseyStrokeEngineWorker.h"
-#include "StrokeEngine/OdysseyStrokeOptions.h"
-#include "StrokeEngine/Shapes/OdysseyFreehandShape.h"
-#include "StrokeEngine/Smoothing/IOdysseySmoothing.h"
+#include "Tools/DrawingTool/OdysseyDrawingToolWorker.h"
+#include "Tools/DrawingTool/Shapes/Freehand/Smoothing/IOdysseySmoothing.h"
+#include "Tools/DrawingTool/Shapes/Freehand/Smoothing/OdysseySmoothingOptions.h"
+#include "Tools/DrawingTool/Shapes/Freehand/OdysseyFreehandShape.h"
 
-#include "OdysseyStrokeEngine.generated.h"
+#include "OdysseyDrawingTool.generated.h"
 
 class UOdysseyBrushAssetBase;
 class FOdysseyPaintEngine;
 class FOdysseyStrokeEngineBrushOptions;
 
 UCLASS()
-class ODYSSEYPAINTEREDITOR_API UOdysseyStrokeEngine : public UObject
+class ODYSSEYPAINTEREDITOR_API UOdysseyDrawingTool : public UOdysseyTool
 {
     GENERATED_UCLASS_BODY()
 
@@ -30,15 +32,30 @@ public:
 
 public:
     // Destructor
-    virtual ~UOdysseyStrokeEngine();
+    virtual ~UOdysseyDrawingTool();
     
 public:
     //TOOL
     void Initialize(FOdysseyPaintEngine* iPaintEngine);
-    void Activate();
-    void Inactivate();
 
 public:
+    //OdysseyTool overrides
+    virtual void Activate() override;
+    virtual void Inactivate() override;
+
+    virtual void OnMouseDown(const FOdysseyPoint& iPointInViewport, const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
+    virtual void OnMouseUp(const FOdysseyPoint& iPointInViewport, const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
+    virtual void OnMouseHover(const FOdysseyPoint& iPointInViewport, const FOdysseyPoint& iPointInTexture) override;
+    virtual void OnMouseDrag(const FOdysseyPoint& iPointInViewport, const FOdysseyPoint& iPointInTexture) override;
+    virtual void OnKeyDown(const FKey& iKey) override;
+    virtual void OnKeyUp(const FKey& iKey) override;
+
+    virtual void Tick(float iDeltaTime) override;
+
+    virtual void Flush() override;
+    virtual void Commit() override;
+
+private:
     // Paint Engine Stroke API
 
     //Begins a stroke at iPoint
@@ -53,16 +70,6 @@ public:
 
     //Aborts the stroke
     bool Abort();
-
-    //Finishes everything the StrokeEngine that is currently doing (not actually ending anything, but just finish the all the jobs in the worker)
-    void Flush();
-
-    //Finishes everything the StrokeEngine that is currently doing (not actually ending anything, but just finish the all the jobs in the worker)
-    void Commit();
-
-public:
-    // Tick
-    void Tick(float iDeltaTime);
 
 public:
     // Setters
@@ -171,7 +178,7 @@ protected:
     //Resources
     FOdysseyPaintEngine*                mPaintEngine;
     TArray<FOdysseyBrushContext*>       mBrushContexts;
-    FOdysseyStrokeEngineWorker          mWorker;
+    FOdysseyDrawingToolWorker           mWorker;
 
     //---
 

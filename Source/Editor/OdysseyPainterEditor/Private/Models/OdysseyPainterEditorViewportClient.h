@@ -63,20 +63,21 @@ class FOdysseyPainterEditorViewportClient
 {
 public:
 	DECLARE_MULTICAST_DELEGATE_TwoParams(FOnPickColor, eOdysseyEventState::Type, const FVector2D&)
+    DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnMouseDown, const FOdysseyPoint&, const FOdysseyPoint&, const FKey&)
+    DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnMouseUp, const FOdysseyPoint&, const FOdysseyPoint&, const FKey&)
+    DECLARE_MULTICAST_DELEGATE_TwoParams(FOnMouseHover, const FOdysseyPoint&, const FOdysseyPoint&)
+    DECLARE_MULTICAST_DELEGATE_TwoParams(FOnMouseDrag, const FOdysseyPoint&, const FOdysseyPoint&)
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnKeyDown, const FKey&)
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnKeyUp, const FKey&)
 
 public:
     enum class eState
     {
         kIdle,
-        kDrawing,
         kRotate,
-        kRotating,
         kPan,
-        kPanning,
         kZoom,
-        kZooming,
-        kPick,
-        kPicking,
+        kPick
     };
 
 public:
@@ -109,7 +110,14 @@ public:
     // Public API
     void        ModifyCheckerboardTextureColors();
     FText       GetDisplayedResolution() const;
+
 	FOnPickColor&	OnPickColor() { return mOnPickColor; }
+    FOnMouseDown&   OnMouseDown()   { return mOnMouseDown; }
+    FOnMouseUp&     OnMouseUp()     { return mOnMouseUp; }
+    FOnMouseHover&  OnMouseHover()  { return mOnMouseHover; }
+    FOnMouseDrag&   OnMouseDrag()   { return mOnMouseDrag; }
+    FOnKeyDown&     OnKeyDown()     { return mOnKeyDown; }
+    FOnKeyUp&       OnKeyUp()       { return mOnKeyUp; }
 
 private:
     // Private API
@@ -121,7 +129,13 @@ private:
     FOdysseyPoint   GetLocalMousePosition( const FOdysseyPoint& iPointInViewport ) const;
     void        DrawUVsOntoViewport( const FViewport* iViewport, FCanvas* ioCanvas, int32 iUVChannel, const FStaticMeshVertexBuffer& iVertexBuffer, const FIndexArrayView& iIndices );
 
+    eState      InputChordToState();
     bool        InputKeyWithStrokePoint( const FOdysseyPoint& iPointInViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed = 1.0f, bool iGamepad = false );
+    void        OnInputEventRaw(const FOdysseyPoint& iPointInViewport, FKey iKey, EInputEvent iEvent);
+    void        OnInputEventWithState(const FOdysseyPoint& iPointInViewport, FKey iKey, EInputEvent iEvent);
+    void        ForceKeysUp(FKey iKey);
+    void        ForceKeysDown(FKey iKey);
+
     void        CapturedMouseMoveWithStrokePoint( const FOdysseyPoint& iPointInViewport ) ;
 
     void        OnStylusInputChanged( TSharedPtr<IStylusInputInterfaceInternal> iStylusInput );
@@ -151,14 +165,24 @@ private:
     eState                                  mCurrentToolState;
 
 	FOnPickColor							mOnPickColor;
+    FOnMouseDown                            mOnMouseDown;
+    FOnMouseUp                              mOnMouseUp;
+    FOnMouseHover                           mOnMouseHover;
+    FOnMouseDrag                            mOnMouseDrag;
+    FOnKeyDown                              mOnKeyDown;
+    FOnKeyUp                                mOnKeyUp;
+
     bool                                    mIsCapturedByStylus;
-	FOdysseyPoint						    mCurrentPointInTexture;
+	FOdysseyPoint						    mCurrentPointInViewport;
+    FOdysseyPoint						    mCurrentPointInTexture;
     std::chrono::steady_clock::time_point   mStylusLastEventTime;
 
     TArray<FKey>                            mKeysPressed;
 
     FTexture                                mNearestNeighbourTexture;
     FTexture                                mBilinearTexture;
+
+    bool                                    mIsCurrentModeActive;
 
     //Useful variable to handle both tool manipulation in the viewport at the creation:
     //Case 1: user down and up mouse at same position, then moves mouse to define the tool shape, and then down and up mouse to validate it

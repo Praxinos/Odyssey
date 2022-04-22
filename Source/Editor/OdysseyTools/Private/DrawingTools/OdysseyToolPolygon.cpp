@@ -2,7 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
 #include "OdysseyToolPolygon.h"
-
+/*
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
 
@@ -13,7 +13,7 @@ void UOdysseyToolPolygon::Init()
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Drawing
 
-void UOdysseyToolPolygon::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
+void UOdysseyToolPolygon::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform)
 {
     for( UOdysseyHUDLine* lineToDraw : mLines )
         lineToDraw->Draw( ioBlock, iTransform );
@@ -97,4 +97,4 @@ void UOdysseyToolPolygon::CapturedMouseMove(FViewport* iViewport, int32 iX, int3
     ::ULIS::GeneratePolygonPoints( polygonPoints, pointsArray );
 
     return pointsArray;
-}
+} */

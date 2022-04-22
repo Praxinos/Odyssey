@@ -4,14 +4,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "StrokeEngine/Smoothing/IOdysseySmoothing.h"
+#include "Tools/DrawingTool/Shapes/Freehand/Smoothing/IOdysseySmoothing.h"
 
 class ODYSSEYPAINTEREDITOR_API FOdysseySmoothingAverage : public IOdysseySmoothing
 {
 public:
     // Construction / Destruction
     virtual ~FOdysseySmoothingAverage();
-    FOdysseySmoothingAverage(FOdysseyStrokeOptions* iStrokeOptions);
+    FOdysseySmoothingAverage(FOdysseySmoothingOptions* iSmoothingOptions);
 
 public:
     // Public API
