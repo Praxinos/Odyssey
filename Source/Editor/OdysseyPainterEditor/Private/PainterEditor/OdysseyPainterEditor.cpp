@@ -3,6 +3,8 @@
 
 #include "OdysseyPainterEditor.h"
 
+#include "ObjectEditorUtils.h"
+
 #include "OdysseyBrushAssetBase.h"
 #include "OdysseyPainterEditorTopTab.h"
 #include "SOdysseyPaintModifiers.h"
@@ -45,6 +47,10 @@ FOdysseyPainterEditor::InitData()
 
 	mStrokeEngine->Initialize(&mPaintEngine);
 	mStrokeEngine->SetBrushContexts(mBrushContexts);
+	
+	//Set the paint color in the brushOptions at startup for synchronization
+	FObjectEditorUtils::SetPropertyValue(mStrokeEngine->GetBrushOptions(), "Color", FOdysseyBrushColor(mPaintColor));
+	
 	mStrokeEngine->Activate();
     //---
 }

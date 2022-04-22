@@ -7,6 +7,7 @@ UOdysseyBrushOptions::UOdysseyBrushOptions(const FObjectInitializer& iObjectInit
     :  Super(iObjectInitializer)
 
     //Properties
+    , Color( ::ULIS::FColor::Black )
     , mInterpolator(MakeShared<FOdysseyInterpolationCatmullRom>())
 {
     mInterpolator->SetStep(Step * (SizeAdaptative ? Size : 1.0));
