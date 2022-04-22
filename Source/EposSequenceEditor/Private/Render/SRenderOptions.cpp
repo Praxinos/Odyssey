@@ -673,7 +673,7 @@ SRenderOptions::GetMasterConfig()
 void
 SRenderOptions::OnMasterConfigSelected( const FAssetData& iAssetData )
 {
-    mMasterConfig = CastChecked<UMoviePipelineMasterConfig>( iAssetData.GetAsset() );
+    mMasterConfig = Cast<UMoviePipelineMasterConfig>( iAssetData.GetAsset() );
 }
 
 void
