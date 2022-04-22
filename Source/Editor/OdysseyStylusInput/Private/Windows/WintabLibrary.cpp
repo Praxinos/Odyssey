@@ -43,20 +43,16 @@ FWintabLibrary::Load()
 {
     // Load() should not be called more than once
     check( mRefCount == 0 );
+    mRefCount++;
 
     if( DLLHandle )
-    {
-        mRefCount++;
         return true;
-    }
 
     const FString Wintab32DLL = TEXT( "Wintab32.dll" );
 
     DLLHandle = FPlatformProcess::GetDllHandle( *Wintab32DLL );
     if( !DLLHandle )
         return false;
-
-    mRefCount++;
 
 #define GETPROCADDRESS(type, func) \
         func = reinterpret_cast<type>( reinterpret_cast<void*>( GetProcAddress(HMODULE(DLLHandle), #func) ) ); \

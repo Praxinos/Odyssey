@@ -3,7 +3,7 @@
 
 #include "OdysseyPainterEditorStrokeOptionsTab.h"
 
-#include "SOdysseyStrokeOptions.h"
+#include "Widgets/SOdysseyStrokeOptions.h"
 #include "OdysseyPainterEditor.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorStrokeOptionsTab"
@@ -30,17 +30,13 @@ FOdysseyPainterEditorStrokeOptionsTab::FOdysseyPainterEditorStrokeOptionsTab(FOd
 TSharedPtr<SWidget>
 FOdysseyPainterEditorStrokeOptionsTab::CreateWidget()
 {
-	return SNew(SOdysseyStrokeOptions)
-		.PaintEngine(this, &FOdysseyPainterEditorStrokeOptionsTab::PaintEngine);
-}
-
-//--------------------------------------------------------------------------------------
-//----------------------------------------------------------------------- Widget Getters
-
-FOdysseyPaintEngine*
-FOdysseyPainterEditorStrokeOptionsTab::PaintEngine() const
-{
-	return mEditor->PaintEngine();
+    return SNew( SVerticalBox )
+        + SVerticalBox::Slot()
+        .FillHeight(1.0f)
+        [
+            SNew(SOdysseyStrokeOptions)
+		    .StrokeEngine(mEditor->StrokeEngine())
+        ];
 }
 
 //--------------------------------------------------------------------------------------

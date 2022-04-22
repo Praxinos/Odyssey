@@ -41,7 +41,7 @@ FOdysseyPainterEditorColorWheelTab::CreateWidget()
 ::ULIS::FColor
 FOdysseyPainterEditorColorWheelTab::Color() const
 {
-    return mEditor->PaintColor();
+    return mEditor->PaintColor().GetValue();
 }
 
 //--------------------------------------------------------------------------------------
@@ -50,11 +50,14 @@ FOdysseyPainterEditorColorWheelTab::Color() const
 void
 FOdysseyPainterEditorColorWheelTab::OnColorChange( eOdysseyEventState::Type iEventState, const ::ULIS::FColor& iColor )
 {
-    mEditor->PaintColor(iColor);
+    mEditor->PaintColor().SetValue( iColor );
 
     if (iEventState == eOdysseyEventState::kSet)
     {
-	    mEditor->PaintEngine()->SetColor( iColor );
+        //TriggerStateChanged
+        //PATCH: should be automatic in the new drawing Tool, fix it asap
+        
+        FObjectEditorUtils::SetPropertyValue(mEditor->StrokeEngine()->GetBrushOptions(), "Color", FOdysseyBrushColor(mEditor->PaintColor()));
     }
 }
 

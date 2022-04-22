@@ -35,6 +35,7 @@ public class OdysseyPainterEditor : ModuleRules
                 "EditorStyle",
                 "PropertyEditor",
                 "Projects",
+                "OdysseyCore",
                 "OdysseyBrush",
                 "OdysseyEditor",
                 "OdysseyImaging",

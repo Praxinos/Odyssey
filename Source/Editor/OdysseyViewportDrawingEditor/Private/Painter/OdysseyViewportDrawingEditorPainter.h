@@ -6,7 +6,7 @@
 #include "IMeshPainter.h"
 #include "OdysseyViewportDrawingEditorGUI.h"
 #include "IStylusState.h"
-#include "OdysseyStrokePoint.h"
+#include "Input/OdysseyPoint.h"
 #include "MeshPaintTypes.h"
 #include "ISequencer.h"
 #include "Engine/StaticMesh.h"

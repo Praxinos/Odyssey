@@ -272,15 +272,35 @@ FOdysseyPainterEditorToolsTab::OnToolCheckBoxClicked(ECheckBoxState iCheckBoxSta
 void
 FOdysseyPainterEditorToolsTab::Clear()
 {
-    //TODO: PaintEngine->Clear() should generate its own undo 
-    mEditor->PaintEngine()->Clear();
+	//Do the fill
+	::ULIS::FBlock* paintBlock = mEditor->PaintEngine().PaintBlock();
+	::ULIS::FColor color = ::ULIS::FColor::Black;
+	::ULIS::FRectI rect = paintBlock->Rect();
+	::ULIS::eFormat format = paintBlock->Format();
+
+	::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
+	ctx.Fill(*paintBlock, color);
+	ctx.Finish();
+
+	paintBlock->Dirty();
+	mEditor->PaintEngine().Commit(FOdysseyBlendParameters(true, EOdysseyBlendingMode::kNormal, EOdysseyAlphaMode::kNormal, 100.0f));
 }
 
 void
 FOdysseyPainterEditorToolsTab::Fill()
 {
-    //TODO: PaintEngine->Fill() should generate its own undo 
-    mEditor->PaintEngine()->Fill();
+	//Do the fill
+	::ULIS::FBlock* paintBlock = mEditor->PaintEngine().PaintBlock();
+	::ULIS::FColor color = mEditor->PaintColor().GetValue();
+	::ULIS::FRectI rect = paintBlock->Rect();
+	::ULIS::eFormat format = paintBlock->Format();
+
+	::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
+	ctx.Fill(*paintBlock, color);
+	ctx.Finish();
+
+	paintBlock->Dirty();
+	mEditor->PaintEngine().Commit(FOdysseyBlendParameters());
 }
 
 #undef LOCTEXT_NAMESPACE

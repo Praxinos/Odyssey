@@ -55,7 +55,6 @@ FOdysseyRootLayer::RenderImage( ::ULIS::FBlock** ioBlocks, const ::ULIS::FRectI*
         ctx.Clear( *ioBlocks[i], rect, ::ULIS::FSchedulePolicy::MonoScanlines, 0, nullptr, &clearEvents[i] );
         ctx.Flush();
     }
-    //ctx.Finish();
 
     eventRender = clearEvents;
     for( int i = children.Num() - 1; i >= 0; --i ) {

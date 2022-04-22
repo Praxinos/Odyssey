@@ -19,16 +19,17 @@
 
 FOdysseyPainterEditor::~FOdysseyPainterEditor()
 {
-    delete mPaintEngine;
 }
 
 FOdysseyPainterEditor::FOdysseyPainterEditor()
-    : mPaintEngine( new FOdysseyPaintEngine() )
+    : mPaintEngine()
 	, mSelectedTool( NewObject<UOdysseyToolFreeHand>() )
     , mHUDSystem(new FOdysseyHUDSystem())
-	, mPaintColor( ::ULIS::FColor::RGBA8( 0, 0, 0 ) )
-    , mDrawBrushPreview( true )
+	, mStrokeEngine(nullptr)
+	, mBrushContexts()
+	, mPaintColor(::ULIS::FColor::Black)
 {
+	/* mBrushContexts.Add(new FOdysseyPainterEditorBrushContext(this)); */
 }
 
 //--------------------------------------------------------------------------------------
@@ -37,12 +38,10 @@ FOdysseyPainterEditor::FOdysseyPainterEditor()
 void
 FOdysseyPainterEditor::InitData()
 {
-    //Set Default Brush
-    const UOdysseyPainterEditorSettings& settings = *GetDefault<UOdysseyPainterEditorSettings>();
-    FOdysseyPainterEditorDrawingState* drawingState = new FOdysseyPainterEditorDrawingState(this);
-
-    mPaintEngine->AddDrawingState(drawingState);
-    mPaintEngine->Brush(settings.BrushDefaults.DefaultBrush);
+	mStrokeEngine = NewObject<UOdysseyStrokeEngine>();
+	mStrokeEngine->Initialize(&mPaintEngine);
+	mStrokeEngine->Activate();
+    //---
 }
 
 void
@@ -71,30 +70,36 @@ void
 FOdysseyPainterEditor::Undo()
 {
 	//End stroke before undoing, allows to manage PaintEngine->OnTick Undo
-	PaintEngine()->Flush();
+	//PaintEngine()->Flush();
 }
 
 void
 FOdysseyPainterEditor::Redo()
 {
 	//End stroke before redoing, allows to manage PaintEngine->OnTick Redo
-	PaintEngine()->Flush();
+	//PaintEngine()->Flush();
 }
 
 void
 FOdysseyPainterEditor::ClearUndo()
 {
 	//End stroke before undoing, just to be perfectly clean
-	PaintEngine()->Flush();
+	//PaintEngine()->Flush();
 }
 
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Getters
 
-FOdysseyPaintEngine*
-FOdysseyPainterEditor::PaintEngine() const
+FOdysseyPaintEngine&
+FOdysseyPainterEditor::PaintEngine()
 {
-    return mPaintEngine;
+	return mPaintEngine;
+}
+
+UOdysseyStrokeEngine*
+FOdysseyPainterEditor::StrokeEngine()
+{
+    return mStrokeEngine;
 }
 
 FOdysseyHUDSystem* 
@@ -109,14 +114,8 @@ FOdysseyPainterEditor::UndoHistory() const
 	return mUndoHistory;
 }
 
-bool
-FOdysseyPainterEditor::DrawBrushPreview() const
-{
-	return mDrawBrushPreview;
-}
-
-::ULIS::FColor
-FOdysseyPainterEditor::PaintColor() const
+FOdysseyBrushColor&
+FOdysseyPainterEditor::PaintColor()
 {
 	return mPaintColor;
 }
@@ -131,13 +130,7 @@ FOdysseyPainterEditor::GetSelectedTool() const
 //------------------------------------------------------------------------------ Setters
 
 void
-FOdysseyPainterEditor::DrawBrushPreview(bool iDrawBrushPreview)
-{
-	mDrawBrushPreview = iDrawBrushPreview;
-}
-
-void
-FOdysseyPainterEditor::PaintColor(::ULIS::FColor iColor)
+FOdysseyPainterEditor::PaintColor(const FOdysseyBrushColor& iColor)
 {
 	mPaintColor = iColor;
 }
@@ -148,3 +141,29 @@ FOdysseyPainterEditor::SetSelectedTool(IOdysseyTool* iSelectedTool)
     mSelectedTool = iSelectedTool;
 }
 
+//--------------------------------------------------------------------------------------
+//------------------------------------------------------------- FGCObject implementation
+
+void
+FOdysseyPainterEditor::AddReferencedObjects(FReferenceCollector& Collector)
+{
+	FOdysseyEditor::AddReferencedObjects(Collector);
+
+	if (mStrokeEngine)
+        Collector.AddReferencedObject(mStrokeEngine);
+}
+
+//--------------------------------------------------------------------------------------
+//------------------------------------------------- FTickableEditorObject implementation
+
+void
+FOdysseyPainterEditor::Tick(float iDeltaTime)
+{
+	FOdysseyEditor::Tick(iDeltaTime);
+
+	/* if (mActiveTool)
+		mActiveTool->Tick(iDeltaTime); */
+		
+	if (mStrokeEngine)
+		mStrokeEngine->Tick(iDeltaTime);
+}

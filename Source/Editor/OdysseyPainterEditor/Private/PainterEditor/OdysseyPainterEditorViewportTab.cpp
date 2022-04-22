@@ -4,6 +4,7 @@
 #include "OdysseyPainterEditorViewportTab.h"
 
 #include "OdysseyPainterEditor.h"
+#include "OdysseyBrushOptions.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorViewportTab"
 
@@ -105,12 +106,16 @@ FOdysseyPainterEditorViewportTab::HandleViewportColorPicked(eOdysseyEventState::
         iPositionInTexture.Y >= 0 && iPositionInTexture.Y < block->Height())
     {
         const ::ULIS::FColor& color = block->Color(iPositionInTexture.X, iPositionInTexture.Y);
-        mEditor->PaintColor(color);
+        mEditor->PaintColor( color );
+        //TriggerStateChanged
     }
         
     if (iEventState == eOdysseyEventState::kSet)
     {
-        mEditor->PaintEngine()->SetColor(mEditor->PaintColor());
+        //TriggerStateChanged
+        //PATCH: should be automatic in the new drawing Tool, fix it asap
+        
+        FObjectEditorUtils::SetPropertyValue(mEditor->StrokeEngine()->GetBrushOptions(), "Color", FOdysseyBrushColor(mEditor->PaintColor()));
     }
 }
 

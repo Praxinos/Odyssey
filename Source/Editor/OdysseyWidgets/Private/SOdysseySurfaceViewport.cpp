@@ -19,7 +19,7 @@
 #include "Widgets/Input/SNumericEntryBox.h"
 #include "OdysseySurface.h"
 #include "OdysseyStyleSet.h"
-#include "OdysseyMathUtils.h"
+#include "Math/OdysseyMathUtils.h"
 
 #include <ULIS>
 

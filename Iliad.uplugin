@@ -26,6 +26,11 @@
       "LoadingPhase": "Default"
     },
     {
+      "Name": "OdysseyCore",
+      "Type": "UncookedOnly",
+      "LoadingPhase": "Default"
+    },
+    {
       "Name": "OdysseyHUDSystem",
       "Type": "UncookedOnly",
       "LoadingPhase": "Default"
@@ -128,11 +133,6 @@
     {
       "Name": "OdysseyTexture2DEditor",
       "Type": "Editor",
-      "LoadingPhase": "Default"
-    },
-    {
-      "Name": "OdysseyTextureEditorBlueprint",
-      "Type": "UncookedOnly",
       "LoadingPhase": "Default"
     },
     {

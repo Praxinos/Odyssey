@@ -5,6 +5,8 @@
 
 #include "SOdysseyTimelineEvents.h"
 
+#include "Widgets/Layout/SScrollBox.h"
+
 class SOdysseyScrubWidget;
 
 class ODYSSEYWIDGETS_API SOdysseyTimeline : public SCompoundWidget

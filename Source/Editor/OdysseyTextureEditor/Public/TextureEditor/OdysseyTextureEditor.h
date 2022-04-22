@@ -39,11 +39,6 @@ public:
 	virtual IOdysseySurfaceEditable*            DisplaySurface() const override;
 
     virtual FOdysseyLayerStack*					LayerStack() const;
-    ::ULIS::eAlphaMode	                        SelectedAlphaMode() const;
-
-public:
-    // Setters
-    void SelectedAlphaMode(::ULIS::eAlphaMode iMode);
 
 public:
     // Overrides
@@ -64,11 +59,8 @@ protected:
     virtual void OnLayerStackCurrentLayerChanged(TSharedPtr<IOdysseyLayer> iOldValue);
     virtual void OnLayerStackStructureChanged();
     virtual void OnLayerStackImageResultChanged( const ::ULIS::FRectI* iRects, const uint32 iNumRects );
-    virtual void OnCurrentLayerIsAlphaLockedChanged(bool iOldValue);
 
     //Paint Engine
-    virtual void OnPaintEnginePaintEnd(const TArray<::ULIS::FRectI>& iChangedTiles);
-
-private:
-    ::ULIS::eAlphaMode                       mSelectedAlphaMode;
+    virtual void OnPaintEngineCommit(const TArray<::ULIS::FRectI>& iChangedTiles);
+    virtual FOdysseyBlendParameters OnPaintEnginePreUpdate(const FOdysseyBlendParameters& iBlendParameters);
 };

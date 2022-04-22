@@ -271,7 +271,6 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
 void
 SOdysseyPaintModifiers::SetSize( int iValue )
 {
-    UE_LOG(LogTemp, Warning, TEXT("Size value is: %d"), iValue);
     mOnSizeChangedCallback.ExecuteIfBound( FMath::Clamp( iValue, MinSize, MaxSize ) );
 }
 
@@ -333,7 +332,7 @@ SOdysseyPaintModifiers::OnGetOpacity() const
 {
     if( mOnGetOpacity.IsBound() )
     {
-        return 100 * mOnGetOpacity.Execute();
+        return mOnGetOpacity.Execute();
     }
     else 
     {
@@ -346,7 +345,7 @@ SOdysseyPaintModifiers::OnGetFlow() const
 {
     if( mOnGetFlow.IsBound() )
     {
-        return 100 * mOnGetFlow.Execute();
+        return mOnGetFlow.Execute();
     }
     else 
     {

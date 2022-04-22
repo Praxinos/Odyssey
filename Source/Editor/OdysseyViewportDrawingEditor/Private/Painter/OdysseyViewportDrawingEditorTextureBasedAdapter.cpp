@@ -2,6 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
 #include "OdysseyViewportDrawingEditorTextureBasedAdapter.h"
+#include "StrokeEngine/OdysseyStrokeEngine.h"
 #include "MeshPaintHelpers.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyViewportDrawingEditorTextureBasedAdapter"
@@ -96,15 +97,17 @@ void FOdysseyViewportDrawingEditorTextureBasedAdapter::StartPainting()
     FVector2D coord;
     if (UGameplayStatics::FindCollisionUV(traceHitResult, 0, coord))
     {
-        FOdysseyStrokePoint currentStrokePoint = mCurrentStrokeRay.mStrokePoint;
-        FOdysseyStrokePoint lastStrokePoint = mLastStrokeRay.mStrokePoint;
+        FOdysseyPoint currentStrokePoint = mCurrentStrokeRay.mStrokePoint;
+        FOdysseyPoint lastStrokePoint = mLastStrokeRay.mStrokePoint;
 
         currentStrokePoint.x = coord.X * mEditor->Texture()->GetSurfaceWidth();
         currentStrokePoint.y = coord.Y * mEditor->Texture()->GetSurfaceHeight();
         lastStrokePoint.x = coord.X * mEditor->Texture()->GetSurfaceWidth();
         lastStrokePoint.y = coord.Y * mEditor->Texture()->GetSurfaceHeight();
+
+        currentStrokePoint.ComputeRelativeParameters(lastStrokePoint);
         
-        mEditor->PaintEngine()->BeginStroke(currentStrokePoint, lastStrokePoint);
+        mEditor->StrokeEngine()->Begin(currentStrokePoint);
     }
 
     //A simple copy is all we need for the texture based algorithm
@@ -133,7 +136,7 @@ void FOdysseyViewportDrawingEditorTextureBasedAdapter::Paint()
     {
         mCurrentStrokeRay.mStrokePoint.x = coord.X * mEditor->Texture()->GetSurfaceWidth();
         mCurrentStrokeRay.mStrokePoint.y = coord.Y * mEditor->Texture()->GetSurfaceHeight();
-        mEditor->PaintEngine()->PushStroke(mCurrentStrokeRay.mStrokePoint);
+        mEditor->StrokeEngine()->To(mCurrentStrokeRay.mStrokePoint);
     }
 
     //A simple copy is all we need for the texture based algorithm
@@ -143,7 +146,7 @@ void FOdysseyViewportDrawingEditorTextureBasedAdapter::Paint()
 
 void FOdysseyViewportDrawingEditorTextureBasedAdapter::FinishPainting()
 {
-    mEditor->PaintEngine()->EndStroke();
+    mEditor->StrokeEngine()->End();
 
     //A simple copy is all we need for the texture based algorithm
     if ( mPaintingTexture2DRenderTarget )
@@ -152,7 +155,6 @@ void FOdysseyViewportDrawingEditorTextureBasedAdapter::FinishPainting()
 
 void FOdysseyViewportDrawingEditorTextureBasedAdapter::Tick()
 {
-    mEditor->PaintEngine()->Tick();
     if( mEditor->Texture() && mPaintingTexture2DRenderTarget )
         TexturePaintHelpers::CopyTextureToRenderTargetTexture(mEditor->Texture(), mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
 }

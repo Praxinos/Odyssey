@@ -5,8 +5,8 @@
 
 #include "CoreMinimal.h"
 #include "UObject/ObjectMacros.h"
-#include "OdysseyStrokeOptions.h"
-#include "Proxies/OdysseyBrushBlending.h"
+#include "OdysseyBrushInterpolationTypes.h"
+#include "Image/OdysseyBlendingMode.h"
 #include "OdysseyBrushPreferencesOverrides.generated.h"
 
 /////////////////////////////////////////////////////
@@ -17,32 +17,32 @@ struct ODYSSEYBRUSH_API FOdysseyBrushPreferencesOverrides
     GENERATED_BODY()
 
     FOdysseyBrushPreferencesOverrides()
-        : bOverride_Size        ( false                                     )
-        , bOverride_Opacity     ( false                                     )
-        , bOverride_Flow        ( false                                     )
-        , bOverride_BlendingMode( false                                     )
-        , bOverride_AlphaMode   ( false                                     )
-        , bOverride_Step        ( false                                     )
-        , bOverride_Adaptative  ( false                                     )
-        , bOverride_Type        ( false                                     )
-        , bOverride_Method      ( false                                     )
-        , bOverride_Strength    ( false                                     )
-        , bOverride_Enabled     ( false                                     )
-        , bOverride_RealTime    ( false                                     )
-        , bOverride_CatchUp     ( false                                     )
-        , Size                  ( 20                                        )
-        , Opacity               ( 100                                       )
-        , Flow                  ( 100                                       )
-        , BlendingMode          ( EOdysseyBlendingMode::kNormal             )
-        , AlphaMode             ( EOdysseyAlphaMode::kNormal                )
-        , Step                  ( 20                                        )
-        , SizeAdaptative        ( true                                      )
-        , Type                  ( EOdysseyInterpolationType::kCatmullRom    )
-        , Method                ( EOdysseySmoothingMethod::kAverage         )
-        , Strength              ( 10                                        )
-        , Enabled               ( true                                      )
-        , RealTime              ( true                                      )
-        , CatchUp               ( true                                      )
+        : bOverride_Size        ( false                                         )
+        , bOverride_Opacity     ( false                                         )
+        , bOverride_Flow        ( false                                         )
+        , bOverride_BlendingMode( false                                         )
+        , bOverride_AlphaMode   ( false                                         )
+        , bOverride_Step        ( false                                         )
+        , bOverride_Adaptative  ( false                                         )
+        , bOverride_Type        ( false                                         )
+        , bOverride_Method      ( false                                         )
+        , bOverride_Strength    ( false                                         )
+        , bOverride_Enabled     ( false                                         )
+        , bOverride_RealTime    ( false                                         )
+        , bOverride_CatchUp     ( false                                         )
+        , Size                  ( 20                                            )
+        , Opacity               ( 100                                           )
+        , Flow                  ( 100                                           )
+        , BlendingMode          ( EOdysseyBlendingMode::kNormal                 )
+        , AlphaMode             ( EOdysseyAlphaMode::kNormal                    )
+        , Step                  ( 20                                            )
+        , SizeAdaptative        ( true                                          )
+        , Type                  ( EOdysseyBrushInterpolationType::kCatmullRom   )
+        //, Method                ( EOdysseySmoothingMethod::kAverage             )
+        , Strength              ( 10                                            )
+        , Enabled               ( true                                          )
+        , RealTime              ( true                                          )
+        , CatchUp               ( true                                          )
     {}
 
     /////////////////////////////////////////////////////
@@ -132,11 +132,11 @@ struct ODYSSEYBRUSH_API FOdysseyBrushPreferencesOverrides
 
     /** Interpolation Type Override Value. */
     UPROPERTY( EditAnywhere, Category = "Interpolation", meta = ( editcondition = "bOverride_Type" ) )
-    EOdysseyInterpolationType   Type;
+    EOdysseyBrushInterpolationType   Type;
 
     /** Smoohting Method Override Value. */
-    UPROPERTY( EditAnywhere, Category = "Smoothing", meta = ( editcondition = "bOverride_Method" ) )
-    EOdysseySmoothingMethod   Method;
+    //UPROPERTY( EditAnywhere, Category = "Smoothing", meta = ( editcondition = "bOverride_Method" ) )
+    //EOdysseySmoothingMethod   Method;
 
     /** Smoothing Strength Override Value. */
     UPROPERTY( EditAnywhere, Category = "Smoothing", meta = ( ClampMin = "0", ClampMax = "200", UIMin = "0", UIMax = "200", SliderExponent = "1", editcondition = "bOverride_Strength" ) )
@@ -155,4 +155,3 @@ struct ODYSSEYBRUSH_API FOdysseyBrushPreferencesOverrides
     bool    CatchUp;
 
 };
-

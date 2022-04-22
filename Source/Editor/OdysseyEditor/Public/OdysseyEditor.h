@@ -11,6 +11,8 @@ class FOdysseyEditorGUI;
  * Base class for a Painting Editor
  */
 class ODYSSEYEDITOR_API FOdysseyEditor
+    : public FGCObject //Allows us to register External UObject in Garbage Collector
+    , public FTickableEditorObject //Allows us to react to Tick events
 {
 public:
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnAddEditedObject, UObject*);
@@ -59,6 +61,15 @@ public:
     virtual void UnregisterTabSpawners( const TSharedRef<class FTabManager>& iTabManager );
     virtual void AddEditedObject(UObject* iObject);
     virtual void RemoveEditedObject(UObject* iObject);
+
+protected:
+    // FGCObject implementation
+    virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
+    virtual FString GetReferencerName() const override;
+
+    // FTickableEditorObject implementation
+	virtual void Tick(float DeltaTime) override;
+	virtual TStatId GetStatId() const override { RETURN_QUICK_DECLARE_CYCLE_STAT( FOdysseyEditor, STATGROUP_Tickables); }
 
 public:
     TArray<UObject*> mEditedObjects;

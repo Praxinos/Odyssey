@@ -9,8 +9,9 @@
 #include "UObject/ScriptMacros.h"
 #include "InputCoreTypes.h" 
 #include "Math/Color.h"
-#include "OdysseyStrokePoint.h"
-#include "OdysseyDrawingState.h"
+#include "Input/OdysseyPoint.h"
+#include "OdysseyBrushContext.h"
+#include "OdysseyBrushOptions.h"
 #include "OdysseyBrushPreferencesOverrides.h"
 #include "Proxies/OdysseyBrushColor.h"
 #include "Proxies/OdysseyBrushPivot.h"
@@ -18,30 +19,6 @@
 #include "Proxies/OdysseyBrushRect.h"
 #include <ULIS>
 #include "OdysseyBrushAssetBase.generated.h"
-
-/////////////////////////////////////////////////////
-// FOdysseyBrushState
-struct ODYSSEYBRUSH_API FOdysseyBrushState
-{
-    FOdysseyBrushState();
-
-    void ResetEvent();
-
-    ::ULIS::FBlock*                         target_temp_buffer;
-    FOdysseyStrokePoint                     point;
-    ::ULIS::FColor                          color;
-    float                                   size_modifier;
-    float                                   opacity_modifier;
-    float                                   flow_modifier;
-    ::ULIS::eBlendMode                      blendingMode_modifier;
-    ::ULIS::eAlphaMode                      alphaMode_modifier;
-    float                                   step;
-    float                                   smoothing_strength;
-    int                                     currentPointIndex;
-    const  TArray< FOdysseyStrokePoint >*   currentStroke;
-    ::ULIS::FEvent                          event;
-};
-
 
 /////////////////////////////////////////////////////
 // BrushAssetBase
@@ -54,6 +31,19 @@ class ODYSSEYBRUSH_API UOdysseyBrushAssetBase : public UObject
 {
     GENERATED_UCLASS_BODY()
 
+    enum class eStepType
+    {
+        kSubStrokeBegin,
+        kStep,
+        kSubStrokeEnd
+    };
+
+    struct FStep
+    {
+        FOdysseyPoint mPoint;
+        eStepType mType;
+    };
+
 public:
     // Construction / Destruction
     ~UOdysseyBrushAssetBase();
@@ -61,16 +51,94 @@ public:
 public:
     /** Getter for World Pointer, this workaround may be unsafe but allows us to use Blueprint Function Libraries withing Odyssey Brushes. It is always NULL in a brush context. */
     virtual UWorld* GetWorld() const override final { return  nullptr; }
+    
+public:
+    // Paint Engine Stroke API
 
-    // Public C++ API
-    FOdysseyBrushState&             GetState();
-    const TArray< ::ULIS::FRectI >&   GetInvalidRects() const;
-    void                            PushInvalidRect( const  ::ULIS::FRectI& iRect );
-    void                            ClearInvalidRects();
+    // Moves the current position to iPoint
+    // Does NOT draw, it just moves instantly the current position to the given point
+    // Any new painting action will then begin from this position (even Tick will be able to draw according to this position)
+    void StrokeMoveTo(const FOdysseyPoint& iPoint);
 
-    void                            AddOrReplaceState( const FName& iKey, FOdysseyDrawingState* iState );
-    FOdysseyDrawingState*           FindState( const FName& iKey ); //TODO: maybe not needed ?
-    const FOdysseyDrawingState*     FindState( const FName& iKey ) const;
+    //Begins a stroke
+    bool StrokeBegin();
+
+    //Continues the stroke by interpolating from the last position to iPoint
+    bool StrokeTo( const FOdysseyPoint& iPoint, bool iShouldFlush = true );
+
+    //Continues the stroke by interpolating from the last position to iPoint
+    TArray<FStep> StepsTo( const FOdysseyPoint& iPoint );
+
+    //Executes a single step at iPoint
+    bool StrokeStep( const FStep& iStep, bool iShouldFlush = true );
+
+    //Aborts the stroke
+    bool StrokeAbort();
+
+    //Ends the stroke
+    bool StrokeEnd();
+
+    // Resets the Stroke without stopping the drawing process
+    void StrokeReset();
+
+    //Flushes the drawing in EditedBlock (calling Dirty with invalid rects and finishing ULIS drawings)
+    void StrokeFlush();
+
+public:
+    // Setters
+
+    // Sets the Stroke Options the Paint Engine will use to draw a stroke
+    void SetBrushOptions( UOdysseyBrushOptions* iBrushOptions );
+
+    // Sets the block on which the brush is drawing
+    void SetBlock(::ULIS::FBlock* mEditedBlock);
+
+public:
+    // Getters
+
+    //Returns the BrushOptions used by the Brush
+    UOdysseyBrushOptions* GetBrushOptions();
+
+public:
+    //Context Management
+    void AddContext(FOdysseyBrushContext* iContext);
+    template<class T> T* GetContext(FString iName);
+    
+public:
+    // Tick
+
+    // Called once for each engine tick
+	void Tick(float DeltaTime, bool iShouldFlush);
+
+public:
+    //Overrides
+#if WITH_EDITOR
+
+    //Applies the brush overrides
+    void ApplyOverrides();
+
+#endif
+
+private:
+    // Internal - Tick API
+
+    // Executes the brush Tick node immediately
+    void ExecuteTick();
+
+private:
+    // Internal - Callbacks
+
+    //Called when the brushoptions properties are changed
+    void OnBrushOptionsChanged();
+
+private:
+    // Internal
+
+    // Pushes stroke actions to the drawing queue based on given points
+    //void PushToPaintEngine(const TArray< FOdysseyPoint >& iPoints);
+
+    // Computes the interpolation from the interpolator, and relative parameters for all generated points
+    TArray< FOdysseyPoint > ComputeInterpolation();
 
 public:
     // OdysseyBrushBlueprint Getters
@@ -210,33 +278,32 @@ public:
     /**       State Getters        */
     /*******************************/
 
-    //Gets color from Color Selector and Color Sliders.
-    UFUNCTION( BlueprintPure, Category="Odyssey|Modifiers", meta = ( DisplayName = "Get Color Modifier" ) )
-    FOdysseyBrushColor  GetColor();
-
-    //Gets size from Top Bar.
-    UFUNCTION( BlueprintPure, Category="Odyssey|Modifiers" )
-    float  GetSizeModifier();
-
     //Gets opacity from Top Bar.
-    UFUNCTION( BlueprintPure, Category="Odyssey|Modifiers" )
-    float  GetOpacityModifier();
-
-    //Gets flow from Top Bar.
-    UFUNCTION( BlueprintPure, Category="Odyssey|Modifiers" )
-    float  GetFlowModifier();
+    //UFUNCTION( BlueprintPure, Category="Odyssey|Modifiers" )
+    // float  GetOpacityModifier();
 
     //Gets step from Stroke Options.
     UFUNCTION( BlueprintPure, Category="Odyssey|Modifiers", meta = ( DisplayName = "Get Step Modifier" ) )
     float  GetStep();
 
-    //Gets smoothing strength from Stroke Options.
-    UFUNCTION( BlueprintPure, Category="Odyssey|Modifiers", meta = ( DisplayName = "Get Smoothing Strength Modifier" ) )
-    float  GetSmoothingStrength();
+    //Gets the editor's currently selected color (in the color wheel for example).
+    UFUNCTION( BlueprintPure, Category = "Odyssey|Modifiers", meta = (DisplayName = "Get Color Modifier") )
+    FOdysseyBrushColor GetColor();
+
+    //Gets size from Top Bar.
+    UFUNCTION(BlueprintPure, Category = "Odyssey|Modifiers" )
+    float GetSizeModifier();
+
+    //Gets flow from Top Bar.
+    UFUNCTION( BlueprintPure, Category="Odyssey|Modifiers" )
+    float GetFlowModifier();
 
     //Gets index of each stamp applied in the stroke.
     UFUNCTION( BlueprintPure, Category="Odyssey|Stroke" )
     int  GetCurrentStrokePointIndex();
+
+public:
+    // Canvas Nodes
 
     //Gets width of the Texture asset currently modified.
     UFUNCTION( BlueprintPure, Category="Odyssey|Canvas" )
@@ -263,7 +330,9 @@ public:
     FOdysseyBlockProxy GetStrokeBlock( FOdysseyBrushRect Area );
 
 public:
-    // Odyssey Brush Stamps    
+    /*******************************/
+    /**   Odyssey Brush Stamps    **/
+    /*******************************/
 
     //Debug Stamp, stamps a basic shape with the current modifiers parameters. Is also pressure sensitive.
     UFUNCTION( BlueprintCallable, Category="Odyssey|Stamps", meta = (HideSelfPin) )
@@ -276,11 +345,13 @@ public:
     void  Stamp( UPARAM(DisplayName="Block") FOdysseyBlockProxy Sample, UPARAM(DisplayName="Handle Position") FOdysseyPivot Pivot, float X, float Y, float Flow = 1.f, bool AntiAliasing = false, EOdysseyBlendingMode BlendingMode = EOdysseyBlendingMode::kNormal, EOdysseyAlphaMode AlphaMode = EOdysseyAlphaMode::kNormal );
 
 public:
-    // Odyssey Brush Native events
+    /*********************************/
+    /** Odyssey Brush Native Events **/
+    /*********************************/
     
     //Event is triggered when the brush is loaded.
     UFUNCTION(BlueprintNativeEvent)
-    void OnSelected();
+    void OnSelected(); //OnInit
 
     UFUNCTION(BlueprintNativeEvent)
     void OnTick();
@@ -291,57 +362,69 @@ public:
 
     //Event is triggered when anything is changed in ILIAD interface (variables or modifiers).
     UFUNCTION(BlueprintNativeEvent)
-    void OnStateChanged();
+    void OnStateChanged(); //OnContextChanged
 
     //Event is triggered when stroke begins on the canvas (after clicking or touching the tablet with the stylus tip).
     UFUNCTION(BlueprintNativeEvent)
-    void OnStrokeBegin();
+    void OnStrokeBegin(); //OnBeginPaint
 
     //Event is triggered when the stroke ends (when the click or stylus is dropped)
     UFUNCTION(BlueprintNativeEvent)
-    void OnStrokeEnd();
+    void OnStrokeEnd(); //OnEndPaint
 
     //Event is triggered when a subdivision of the stroke stroke begins on the canvas.
     UFUNCTION(BlueprintNativeEvent)
-    void OnSubStrokeBegin();
+    void OnSubStrokeBegin(); //OnBeginSubPaint
 
     //Event is triggered when a subdivision of the stroke ends (when the click or stylus is dropped)
     UFUNCTION(BlueprintNativeEvent)
-    void OnSubStrokeEnd();
+    void OnSubStrokeEnd(); //OnEndSubPaint
 
 public:
     // Odyssey Brush Public Driving Methods
     /* Run the stamp action */
     void ExecuteSelected();
 
-    /* Run the stamp action */
-    void ExecuteTick();
-
-    /* Run the step action */
-    void ExecuteStep();
-
     /* Run the state change action */
     void ExecuteStateChanged();
 
-    /* Run the stroke begin action */
-    void ExecuteStrokeBegin();
+public:
+    //PROPERTIES
 
-    /* Run the stroke end action */
-    void ExecuteStrokeEnd();
+#if WITH_EDITORONLY_DATA
+    UPROPERTY(EditAnywhere, Category="Overrides")
+    FOdysseyBrushPreferencesOverrides       Preferences;
+#endif
 
-    /* Run the stroke begin action */
-    void ExecuteSubStrokeBegin();
-
-    /* Run the stroke end action */
-    void ExecuteSubStrokeEnd();
+    UPROPERTY(VisibleInstanceOnly, Instanced, Transient, NonTransactional)
+    UOdysseyBrushOptions*                   BrushOptions;
 
 private:
-    // Private Members Data
-    FOdysseyBrushState                      state;
-    TMap< FName, FOdysseyDrawingState* >    mStates;
-    TArray< ::ULIS::FRectI >                  invalid_rects;
+    TArray<FOdysseyBrushContext*>           mContexts;
 
-public:
-    UPROPERTY(EditAnywhere,Category="Overrides")
-    FOdysseyBrushPreferencesOverrides       Preferences;
+    // External
+    ::ULIS::FBlock*                         mEditedBlock;
+
+    //Internal
+    TArray< FOdysseyPoint >                 mStroke;
+    FOdysseyPoint                           mPoint; //The point used to draw
+    FOdysseyPoint                           mPreviousPoint;
+    uint64                                  mPointIndex; //The index in mStroke of the point used to draw
+    bool                                    mIsDrawing;
+    TArray<::ULIS::FRectI>                  mInvalidRects;
+    ::ULIS::FEvent                          mEvent;
 };
+
+template<class T> T*
+UOdysseyBrushAssetBase::GetContext(FString iName)
+{
+    for (int i = 0; i < mContexts.Num(); i++)
+    {
+        if (mContexts[i]->Name() != iName)
+            continue;
+
+        return static_cast<T*>(mContexts[i]);
+    }
+
+    return nullptr;
+}

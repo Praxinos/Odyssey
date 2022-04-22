@@ -35,10 +35,6 @@ FOdysseyTextureEditorGUI::CreateTabs()
 {
 	FOdysseyPainterEditorGUI::CreateTabs();
 
-	//REPLACE TABS
-	ODYSSEY_SET_TAB(mTopTab, FOdysseyTextureEditorTopTab, mEditor)
-    ODYSSEY_SET_TAB(mBrushSelectorTab, FOdysseyTextureEditorBrushSelectorTab, mEditor)
-
 	//ADD NEW TABS
 	ODYSSEY_ADD_TAB(mLayerStackTab, FOdysseyTextureEditorLayerStackTab, mEditor);
 	ODYSSEY_ADD_TAB(mTextureDetailsTab, FOdysseyTextureEditorTextureDetailsTab, mEditor);

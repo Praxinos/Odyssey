@@ -2,7 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
 #include "OdysseyPsdOperations.h"
-#include "OdysseyMathUtils.h"
+#include "Math/OdysseyMathUtils.h"
 #include "OdysseyPixelFormat.h"
 #include "ULISLoaderModule.h"
 

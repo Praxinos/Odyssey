@@ -5,15 +5,16 @@
 
 #include "OdysseyEditor.h"
 #include "OdysseyPainterEditorGUI.h"
+#include "OdysseyPaintEngine.h"
 #include <ULIS>
 
 class FOdysseyPaintEngine;
 class FOdysseyHUDSystem;
+class UOdysseyStrokeEngine;
 class FOdysseyUndoHistory;
-class UOdysseyBrush;
-class UOdysseyBrushAssetBase;
 class IOdysseySurfaceEditable;
 class IOdysseyTool;
+class FOdysseyBrushContext;
 
 /**
  * Base class for a Painting Editor
@@ -40,29 +41,36 @@ public:
     // Getters
     virtual FOdysseyPainterEditorGUI*                   GetGUI() = 0;
 
-    virtual FOdysseyPaintEngine*                        PaintEngine() const;
+    virtual FOdysseyPaintEngine&                        PaintEngine();
     virtual FOdysseyHUDSystem*                          HUDSystem() const;
-    virtual IOdysseySurfaceEditable*                    DisplaySurface() const = 0;
-    virtual FOdysseyUndoHistory*                        UndoHistory() const;
-    virtual bool                                        DrawBrushPreview() const;
-    virtual ::ULIS::FColor                              PaintColor() const;
+    virtual UOdysseyStrokeEngine*		                StrokeEngine();
+	virtual IOdysseySurfaceEditable*                    DisplaySurface() const = 0;
+	virtual FOdysseyUndoHistory*		                UndoHistory() const;
+    virtual FOdysseyBrushColor&                         PaintColor();
     virtual IOdysseyTool*                               GetSelectedTool() const;
 
 public:
     // Setters
-    void                         DrawBrushPreview(bool iDrawBrushPreview);
-    void                         PaintColor(::ULIS::FColor iColor);
+    void                         PaintColor(const FOdysseyBrushColor& iColor);
     void                         SetSelectedTool( IOdysseyTool* iSelectedTool );
+
 public:
     // Interface
     virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
 
-private:
-    FOdysseyUndoHistory*        mUndoHistory;
-    FOdysseyPaintEngine*        mPaintEngine; //TODO: no need for a pointer here
+protected:
+    // FGCObject implementation
+    virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
+    
+    // FTickableEditorObject implementation
+	virtual void Tick(float DeltaTime) override;
+
+protected:
+	FOdysseyUndoHistory*		mUndoHistory;
+    FOdysseyPaintEngine         mPaintEngine; //We declare a single PaintEngine which will be used for any brush we use
     IOdysseyTool*               mSelectedTool;
     FOdysseyHUDSystem*          mHUDSystem;
-    ::ULIS::FColor              mPaintColor;
-
-    bool                        mDrawBrushPreview;
+    UOdysseyStrokeEngine*       mStrokeEngine; //TODO: Should actually be a tool => FreeHandTool
+    TArray<FOdysseyBrushContext*> mBrushContexts;
+    FOdysseyBrushColor mPaintColor;
 };

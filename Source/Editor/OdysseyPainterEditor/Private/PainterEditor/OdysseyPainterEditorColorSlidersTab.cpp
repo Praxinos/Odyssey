@@ -5,6 +5,7 @@
 
 #include "Color/SOdysseyColorSliders.h"
 #include "OdysseyPainterEditor.h"
+#include "ObjectEditorUtils.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorColorSlidersTab"
 
@@ -41,7 +42,7 @@ FOdysseyPainterEditorColorSlidersTab::CreateWidget()
 ::ULIS::FColor
 FOdysseyPainterEditorColorSlidersTab::Color() const
 {
-    return mEditor->PaintColor();
+    return mEditor->PaintColor().GetValue();
 }
 
 //--------------------------------------------------------------------------------------
@@ -50,11 +51,14 @@ FOdysseyPainterEditorColorSlidersTab::Color() const
 void
 FOdysseyPainterEditorColorSlidersTab::OnColorChange( eOdysseyEventState::Type iEventState, const ::ULIS::FColor& iColor )
 {
-    mEditor->PaintColor(iColor);
+    mEditor->PaintColor().SetValue( iColor );
 
     if (iEventState == eOdysseyEventState::kSet)
     {
-	    mEditor->PaintEngine()->SetColor( iColor );
+	    //TriggerStateChanged
+        //PATCH: should be automatic in the new drawing Tool, fix it asap
+        
+        FObjectEditorUtils::SetPropertyValue(mEditor->StrokeEngine()->GetBrushOptions(), "Color", FOdysseyBrushColor(mEditor->PaintColor()));
     }
 }
 

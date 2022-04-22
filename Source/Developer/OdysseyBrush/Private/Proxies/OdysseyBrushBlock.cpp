@@ -506,7 +506,7 @@ UOdysseyBlockProxyFunctionLibrary::Blend(
         , &eventBlend
     );
 
-    ctx.Finish();
+    ctx.Flush();
 
     FOdysseyBlockProxy deps[] = { Top, Back };
     return  FOdysseyBlockProxy::MakeProxy( dst, 1, &eventBlend, 2, deps);

@@ -4,10 +4,8 @@
 #pragma once
 
 #include "OdysseyEditorTab.h"
-#include "OdysseyPaintEngine.h"
 
 class FOdysseyPainterEditor;
-class SOdysseyStrokeOptions;
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorStrokeOptionsTab :
 	public FOdysseyEditorTab
@@ -20,10 +18,6 @@ public:
 protected:
     // FOdysseyEditorTab interface
     virtual TSharedPtr<SWidget> CreateWidget() override;
-
-protected:
-    // Widget Getters
-    FOdysseyPaintEngine* PaintEngine() const;
 
 protected:
     // Event Listeners

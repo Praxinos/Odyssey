@@ -2,10 +2,16 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
 #include "OdysseyPainterEditorTopTab.h"
+
 #include "SOdysseyPaintModifiers.h"
 #include "OdysseyPainterEditorCommands.h"
 #include "OdysseyPainterEditor.h"
+#include "StrokeEngine/OdysseyStrokeEngine.h"
+#include "OdysseyBrushOptions.h"
+#include "OdysseyBlendParameters.h"
+
 #include "FileHelpers.h"
+#include "ObjectEditorUtils.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorTopTab"
 
@@ -24,9 +30,6 @@ FOdysseyPainterEditorTopTab::FOdysseyPainterEditorTopTab(FOdysseyPainterEditor* 
                             LOCTEXT( "OdysseyPainterEditorTopTab", "Top Bar" ),
                             FSlateIcon( "OdysseyStyle", "PainterEditor.BrushExposedParameters16" ))
     , mEditor( iEditor )
-    , mToolDefaultBlendingMode( ::ULIS::eBlendMode::Blend_Normal )
-    , mToolDefaultAlphaMode( ::ULIS::eAlphaMode::Alpha_Normal )
-    , mIsEraserButtonActive( false )
 {
 }
 
@@ -52,7 +55,8 @@ FOdysseyPainterEditorTopTab::SpawnTab( const FSpawnTabArgs& iArgs )
 bool
 FOdysseyPainterEditorTopTab::IsEraserButtonActive() const
 {
-    return mIsEraserButtonActive;
+    FOdysseyBlendParameters blendParameters = mEditor->StrokeEngine()->GetBlendParameters();
+    return blendParameters.bEraserMode;
 }
 
 bool
@@ -64,23 +68,6 @@ FOdysseyPainterEditorTopTab::IsPackageEdited() const
             return true;
     }
     return false;
-}
-
-//--------------------------------------------------------------------------------------
-//----------------------------------------------------------------------- Public Setters
-
-void 
-FOdysseyPainterEditorTopTab::SetToolDefaultBlendingMode( ::ULIS::eBlendMode iBlendingMode )
-{
-    mToolDefaultBlendingMode = iBlendingMode;
-    return;
-}
-
-void 
-FOdysseyPainterEditorTopTab::SetToolDefaultAlphaMode( ::ULIS::eAlphaMode iAlphaMode )
-{
-    mToolDefaultAlphaMode = iAlphaMode;
-    return;
 }
 
 //--------------------------------------------------------------------------------------
@@ -105,7 +92,7 @@ FOdysseyPainterEditorTopTab::CreateWidget()
         .OnRedoButtonClicked_Raw( this, &FOdysseyPainterEditorTopTab::OnRedoButtonClicked )
         .OnEraserButtonClicked_Raw( this, &FOdysseyPainterEditorTopTab::OnEraserButtonClicked )
         .IsPackageEdited_Raw( this, &FOdysseyPainterEditorTopTab::IsPackageEdited )
-        .IsEraserButtonActive_Lambda( [this](){return mIsEraserButtonActive;} );
+        .IsEraserButtonActive_Raw( this, &FOdysseyPainterEditorTopTab::IsEraserButtonActive );
 }
 
 void
@@ -118,15 +105,15 @@ FOdysseyPainterEditorTopTab::BindShortcuts(FBaseToolkit* iToolkit)
 
     MAP_ACTION( painterEditorCommands.IncreaseBrushSize,              AddSize,                  1 )
     MAP_ACTION( painterEditorCommands.DecreaseBrushSize,              AddSize,                 -1 )
-    MAP_ACTION( painterEditorCommands.SetAlphaModeNormal,             SetAlphaModeShortcut,    ::ULIS::eAlphaMode::Alpha_Normal )
-    MAP_ACTION( painterEditorCommands.SetAlphaModeErase,              SetAlphaModeShortcut,    ::ULIS::eAlphaMode::Alpha_Erase )
-    MAP_ACTION( painterEditorCommands.SetAlphaModeTop,                SetAlphaModeShortcut,    ::ULIS::eAlphaMode::Alpha_Top )
-    MAP_ACTION( painterEditorCommands.SetAlphaModeBack,               SetAlphaModeShortcut,    ::ULIS::eAlphaMode::Alpha_Back )
-    MAP_ACTION( painterEditorCommands.SetAlphaModeSub,                SetAlphaModeShortcut,    ::ULIS::eAlphaMode::Alpha_Sub )
-    MAP_ACTION( painterEditorCommands.SetAlphaModeAdd,                SetAlphaModeShortcut,    ::ULIS::eAlphaMode::Alpha_Add )
-    MAP_ACTION( painterEditorCommands.SetAlphaModeMul,                SetAlphaModeShortcut,    ::ULIS::eAlphaMode::Alpha_Mul )
-    MAP_ACTION( painterEditorCommands.SetAlphaModeMin,                SetAlphaModeShortcut,    ::ULIS::eAlphaMode::Alpha_Min )
-    MAP_ACTION( painterEditorCommands.SetAlphaModeMax,                SetAlphaModeShortcut,    ::ULIS::eAlphaMode::Alpha_Max )
+    MAP_ACTION( painterEditorCommands.SetAlphaModeNormal,             SetAlphaMode,            ::ULIS::eAlphaMode::Alpha_Normal )
+    MAP_ACTION( painterEditorCommands.SetAlphaModeErase,              SetAlphaMode,            ::ULIS::eAlphaMode::Alpha_Erase )
+    MAP_ACTION( painterEditorCommands.SetAlphaModeTop,                SetAlphaMode,            ::ULIS::eAlphaMode::Alpha_Top )
+    MAP_ACTION( painterEditorCommands.SetAlphaModeBack,               SetAlphaMode,            ::ULIS::eAlphaMode::Alpha_Back )
+    MAP_ACTION( painterEditorCommands.SetAlphaModeSub,                SetAlphaMode,            ::ULIS::eAlphaMode::Alpha_Sub )
+    MAP_ACTION( painterEditorCommands.SetAlphaModeAdd,                SetAlphaMode,            ::ULIS::eAlphaMode::Alpha_Add )
+    MAP_ACTION( painterEditorCommands.SetAlphaModeMul,                SetAlphaMode,            ::ULIS::eAlphaMode::Alpha_Mul )
+    MAP_ACTION( painterEditorCommands.SetAlphaModeMin,                SetAlphaMode,            ::ULIS::eAlphaMode::Alpha_Min )
+    MAP_ACTION( painterEditorCommands.SetAlphaModeMax,                SetAlphaMode,            ::ULIS::eAlphaMode::Alpha_Max )
     MAP_ACTION( painterEditorCommands.SetBlendModeNormal,             SetBlendingMode,         ::ULIS::eBlendMode::Blend_Normal )
     MAP_ACTION( painterEditorCommands.SetBlendModeTop,                SetBlendingMode,         ::ULIS::eBlendMode::Blend_Top )
     MAP_ACTION( painterEditorCommands.SetBlendModeBack,               SetBlendingMode,         ::ULIS::eBlendMode::Blend_Back )
@@ -178,13 +165,13 @@ FOdysseyPainterEditorTopTab::BindShortcuts(FBaseToolkit* iToolkit)
 ::ULIS::eBlendMode
 FOdysseyPainterEditorTopTab::BlendingMode() const
 {
-    return mEditor->PaintEngine()->GetBlendingModeModifier();
+    return static_cast<::ULIS::eBlendMode>(mEditor->StrokeEngine()->GetBlendParameters().BlendingMode);
 }
 
 ::ULIS::eAlphaMode
 FOdysseyPainterEditorTopTab::AlphaMode() const
 {
-    return mEditor->PaintEngine()->GetAlphaModeModifier();
+    return static_cast<::ULIS::eAlphaMode>(mEditor->StrokeEngine()->GetBlendParameters().AlphaMode);
 }
 
 //--------------------------------------------------------------------------------------
@@ -193,49 +180,62 @@ FOdysseyPainterEditorTopTab::AlphaMode() const
 void
 FOdysseyPainterEditorTopTab::OnSizeChanged( int32 iValue )
 {
-	mEditor->PaintEngine()->SetSizeModifier( iValue );
+    //TODO: Remove when the top will use singlePropertyview
+    UOdysseyBrushOptions* brushOptions = mEditor->StrokeEngine()->GetBrushInstance()->GetBrushOptions();
+    FObjectEditorUtils::SetPropertyValue(brushOptions, "Size", float(iValue));
 }
 
 void
 FOdysseyPainterEditorTopTab::OnOpacityChanged( int32 iValue )
 {
-	mEditor->PaintEngine()->SetOpacityModifier( iValue );
+    //TODO: Remove when the top will use singlePropertyview
+    FOdysseyBlendParameters blendParameters = mEditor->StrokeEngine()->GetBlendParameters();
+    blendParameters.Opacity = float(iValue);
+    FObjectEditorUtils::SetPropertyValue(mEditor->StrokeEngine(), "BlendParameters", blendParameters);
 }
 
 void
 FOdysseyPainterEditorTopTab::OnFlowChanged( int32 iValue )
 {
-	mEditor->PaintEngine()->SetFlowModifier( iValue );
+    //TODO: Remove when the top will use singlePropertyview
+    UOdysseyBrushOptions* brushOptions = mEditor->StrokeEngine()->GetBrushInstance()->GetBrushOptions();
+    FObjectEditorUtils::SetPropertyValue(brushOptions, "Flow", float(iValue));
 }
 
 void
 FOdysseyPainterEditorTopTab::OnBlendingModeChanged( int32 iValue )
 {
-	mEditor->PaintEngine()->SetBlendingModeModifier( static_cast<::ULIS::eBlendMode>( iValue ) );
+    //TODO: Remove when the top will use singlePropertyview
+    FOdysseyBlendParameters blendParameters = mEditor->StrokeEngine()->GetBlendParameters();
+    blendParameters.BlendingMode = static_cast<EOdysseyBlendingMode>(iValue);
+    FObjectEditorUtils::SetPropertyValue(mEditor->StrokeEngine(), "BlendParameters", blendParameters);
 }
 
 void
 FOdysseyPainterEditorTopTab::OnAlphaModeChanged( int32 iValue )
 {
-	SetAlphaMode( static_cast<::ULIS::eAlphaMode>(iValue) );
+    //TODO: Remove when the top will use singlePropertyview
+    FOdysseyBlendParameters blendParameters = mEditor->StrokeEngine()->GetBlendParameters();
+    blendParameters.AlphaMode = static_cast<EOdysseyAlphaMode>(iValue);
+    FObjectEditorUtils::SetPropertyValue(mEditor->StrokeEngine(), "BlendParameters", blendParameters);
 }
 
 int
 FOdysseyPainterEditorTopTab::OnGetSize() const
 {
-    return static_cast<int>( mEditor->PaintEngine()->GetSizeModifier() );
+    return static_cast<int>(mEditor->StrokeEngine()->GetBrushInstance()->GetBrushOptions()->Size);
 }
 
 float
 FOdysseyPainterEditorTopTab::OnGetOpacity() const
 {
-    return mEditor->PaintEngine()->GetOpacityModifier();
+    return mEditor->StrokeEngine()->GetBlendParameters().Opacity;
 }
 
 float
 FOdysseyPainterEditorTopTab::OnGetFlow() const
 {
-    return mEditor->PaintEngine()->GetFlowModifier();
+    return mEditor->StrokeEngine()->GetBrushInstance()->GetBrushOptions()->Flow;
 }
 
 FReply
@@ -268,20 +268,9 @@ FOdysseyPainterEditorTopTab::OnRedoButtonClicked()
 void
 FOdysseyPainterEditorTopTab::ToggleEraserButton()
 {
-    if( !mIsEraserButtonActive )
-    {
-        mToolDefaultBlendingMode = mEditor->PaintEngine()->GetBlendingModeModifier();
-        mToolDefaultAlphaMode = mEditor->PaintEngine()->GetAlphaModeModifier();
-        SetAlphaMode( ::ULIS::eAlphaMode::Alpha_Erase );
-        mEditor->PaintEngine()->SetBlendingModeModifier( ::ULIS::eBlendMode::Blend_Back );
-        mIsEraserButtonActive = true;
-    }
-    else
-    {
-        SetAlphaMode( mToolDefaultAlphaMode );
-        mEditor->PaintEngine()->SetBlendingModeModifier( mToolDefaultBlendingMode );
-        mIsEraserButtonActive = false;
-    }
+    FOdysseyBlendParameters blendParameters = mEditor->StrokeEngine()->GetBlendParameters();
+    blendParameters.bEraserMode = !blendParameters.bEraserMode;
+    FObjectEditorUtils::SetPropertyValue(mEditor->StrokeEngine(), "BlendParameters", blendParameters);
 }
 
 FReply
@@ -295,33 +284,26 @@ FOdysseyPainterEditorTopTab::OnEraserButtonClicked()
 //---------------------------------------------------------------------- Event Listeners
 
 void
-FOdysseyPainterEditorTopTab::SetAlphaModeShortcut(::ULIS::eAlphaMode iAlphaMode)
-{
-    if( !mIsEraserButtonActive )
-    {
-        SetAlphaMode( iAlphaMode );
-    }
-}
-
-void
 FOdysseyPainterEditorTopTab::SetAlphaMode(::ULIS::eAlphaMode iAlphaMode)
 {
-        mEditor->PaintEngine()->SetAlphaModeModifier( iAlphaMode );
+    FOdysseyBlendParameters blendParameters = mEditor->StrokeEngine()->GetBlendParameters();
+    blendParameters.AlphaMode = static_cast<EOdysseyAlphaMode>(iAlphaMode);
+    FObjectEditorUtils::SetPropertyValue(mEditor->StrokeEngine(), "BlendParameters", blendParameters);
 }
 
 void
 FOdysseyPainterEditorTopTab::SetBlendingMode(::ULIS::eBlendMode iBlendingMode)
 {
-    if( !mIsEraserButtonActive )
-    {
-        mEditor->PaintEngine()->SetBlendingModeModifier( iBlendingMode );
-    }
+    FOdysseyBlendParameters blendParameters = mEditor->StrokeEngine()->GetBlendParameters();
+    blendParameters.BlendingMode = static_cast<EOdysseyBlendingMode>(iBlendingMode);
+    FObjectEditorUtils::SetPropertyValue(mEditor->StrokeEngine(), "BlendParameters", blendParameters);
 }
 
 void
 FOdysseyPainterEditorTopTab::AddSize(int32 iValue)
 {
-    mEditor->PaintEngine()->SetSizeModifier( mEditor->PaintEngine()->GetSizeModifier() + iValue );
+    UOdysseyBrushOptions* brushOptions = mEditor->StrokeEngine()->GetBrushInstance()->GetBrushOptions();
+    FObjectEditorUtils::SetPropertyValue(brushOptions, "Size", brushOptions->Size + iValue);
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -10,7 +10,6 @@
 #include "Proxies/OdysseyBrushFormat.h"
 #include "Proxies/OdysseyBrushPivot.h"
 #include "Proxies/OdysseyBrushBlock.h"
-#include "Proxies/OdysseyBrushBlending.h"
 #include "OdysseyBrushAssetBase.h"
 #include "OdysseyBrushFunctionLibrary.generated.h"
 

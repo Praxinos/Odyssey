@@ -5,30 +5,31 @@
 
 #include "CoreMinimal.h"
 
-#include "Proxies/OdysseyBrushBlock.h"
-
+#include "proxies/OdysseyBrushColor.h"
 #include "OdysseyPainterEditorFunctionLibrary.generated.h"
 
 class UOdysseyBrushAssetBase;
 
 //---
 
-UCLASS(meta=(ScriptName="OdysseyPainterEditorLibrary"))
-class UOdysseyPainterEditorFunctionLibrary 
+UCLASS(Blueprintable)
+class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorFunctionLibrary 
     : public UBlueprintFunctionLibrary
 {
     GENERATED_BODY()
 
 public:
+    //TODO: make a GetEditorFromBrush() and 
+
     //Gets zoom value from ILIAD viewport.
-    UFUNCTION( BlueprintPure, Category = "Odyssey|Canvas", meta = (DefaultToSelf="BrushContext") )
-    static float GetViewportZoom( UOdysseyBrushAssetBase* BrushContext );
+    UFUNCTION( BlueprintPure, Category = "Odyssey|Canvas", meta = (HidePin="BrushInstance", DefaultToSelf="BrushInstance") )
+    static float GetViewportZoom( UOdysseyBrushAssetBase* BrushInstance );
     
     //Gets rotation value from ILIAD viewport.
-    UFUNCTION( BlueprintPure, Category = "Odyssey|Canvas", meta = (DefaultToSelf="BrushContext") )
-    static float GetViewportRotation( UOdysseyBrushAssetBase* BrushContext );
+    UFUNCTION( BlueprintPure, Category = "Odyssey|Canvas", meta = (HidePin="BrushInstance", DefaultToSelf="BrushInstance") )
+    static float GetViewportRotation( UOdysseyBrushAssetBase* BrushInstance );
     
     //Gets pan value from ILIAD viewport.
-    UFUNCTION( BlueprintPure, Category = "Odyssey|Canvas", meta = (DefaultToSelf="BrushContext") )
-    static FVector2D GetViewportPan( UOdysseyBrushAssetBase* BrushContext );
+    UFUNCTION( BlueprintPure, Category = "Odyssey|Canvas", meta = (HidePin="BrushInstance", DefaultToSelf="BrushInstance") )
+    static FVector2D GetViewportPan( UOdysseyBrushAssetBase* BrushInstance );
 };

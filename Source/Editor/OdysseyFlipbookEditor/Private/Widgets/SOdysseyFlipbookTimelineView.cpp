@@ -6,6 +6,7 @@
 #include "AssetRegistryModule.h"
 #include "Engine/Texture2D.h"
 #include "GenericPlatform/GenericPlatformMath.h"
+#include "Widgets/Input/SSlider.h"
 
 #include "SOdysseyPlaybackControls.h"
 #include "SOdysseyTimeline.h"

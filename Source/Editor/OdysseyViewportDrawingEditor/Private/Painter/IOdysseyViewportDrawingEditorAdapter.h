@@ -4,6 +4,7 @@
 #pragma once
 
 #include "IStylusState.h"
+#include <chrono>
 
 
 /** Painting adapter for the painter. Describes the method of painting in the viewport*/
@@ -14,7 +15,7 @@ public:
     {
         FVector mRayOrigin;
         FVector mRayDirection;
-        FOdysseyStrokePoint mStrokePoint;
+        FOdysseyPoint mStrokePoint;
     };
 
     enum class eState

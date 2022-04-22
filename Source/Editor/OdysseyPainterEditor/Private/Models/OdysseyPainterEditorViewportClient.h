@@ -11,9 +11,10 @@
 #include "UnrealClient.h"
 #include "UObject/GCObject.h"
 
-#include "OdysseyStrokePoint.h"
+#include "Input/OdysseyPoint.h"
 #include "OdysseyEventState.h"
 
+#include <chrono>
 #include <ULIS>
 
 class UOdysseyStylusInputSubsystem;
@@ -117,11 +118,11 @@ private:
     void        ZoomOutInViewport( const FVector2D& iPositionInViewport );
     double      GetZoom() const;
     FVector2D   GetLocalMousePosition( const FVector2D& iMouseInViewport ) const;
-    FOdysseyStrokePoint   GetLocalMousePosition( const FOdysseyStrokePoint& iPointInViewport ) const;
+    FOdysseyPoint   GetLocalMousePosition( const FOdysseyPoint& iPointInViewport ) const;
     void        DrawUVsOntoViewport( const FViewport* iViewport, FCanvas* ioCanvas, int32 iUVChannel, const FStaticMeshVertexBuffer& iVertexBuffer, const FIndexArrayView& iIndices );
 
-    bool        InputKeyWithStrokePoint( const FOdysseyStrokePoint& iPointInViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed = 1.0f, bool iGamepad = false );
-    void        CapturedMouseMoveWithStrokePoint( const FOdysseyStrokePoint& iPointInViewport ) ;
+    bool        InputKeyWithStrokePoint( const FOdysseyPoint& iPointInViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed = 1.0f, bool iGamepad = false );
+    void        CapturedMouseMoveWithStrokePoint( const FOdysseyPoint& iPointInViewport ) ;
 
     void        OnStylusInputChanged( TSharedPtr<IStylusInputInterfaceInternal> iStylusInput );
 
@@ -151,7 +152,7 @@ private:
 
 	FOnPickColor							mOnPickColor;
     bool                                    mIsCapturedByStylus;
-	FOdysseyStrokePoint						mCurrentPointInTexture;
+	FOdysseyPoint						    mCurrentPointInTexture;
     std::chrono::steady_clock::time_point   mStylusLastEventTime;
 
     TArray<FKey>                            mKeysPressed;

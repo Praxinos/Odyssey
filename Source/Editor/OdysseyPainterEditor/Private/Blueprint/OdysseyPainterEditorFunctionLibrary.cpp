@@ -4,84 +4,55 @@
 #include "OdysseyPainterEditorFunctionLibrary.h"
 
 #include "OdysseyBrushAssetBase.h"
-#include "OdysseyPainterEditorDrawingState.h"
+#include "StrokeEngine/OdysseyStrokeEngine.h"
+#include "OdysseyPainterEditorBrushContext.h"
 
 //---
 
-namespace
-{
-static
-FOdysseyPainterEditorDrawingState*
-GetState( UOdysseyBrushAssetBase* BrushContext )
-{
-    if( !BrushContext )
-        return nullptr;
-
-    FOdysseyDrawingState* istate = BrushContext->FindState(FOdysseyPainterEditorDrawingState::GetId() );
-    if( !istate )
-        return nullptr;
-
-    FOdysseyPainterEditorDrawingState* state = static_cast<FOdysseyPainterEditorDrawingState*>( istate );
-    check( state );
-    if( !state )
-        return nullptr;
-
-    //---
-
-    return state;
-}
-}
-
 //static
 float
-UOdysseyPainterEditorFunctionLibrary::GetViewportZoom( UOdysseyBrushAssetBase* iBrushContext )
+UOdysseyPainterEditorFunctionLibrary::GetViewportZoom( UOdysseyBrushAssetBase* BrushInstance )
 {
-    if( !iBrushContext )
+    if (!BrushInstance)
+        return 100.f;
+
+    FOdysseyPainterEditorBrushContext* context = BrushInstance->GetContext<FOdysseyPainterEditorBrushContext>("FOdysseyPainterEditorBrushContext");
+    if (!context)
         return 100.f;
 
     //---
 
-    FOdysseyPainterEditorDrawingState* state = GetState( iBrushContext );
-    if( !state )
-        return 100.f;
-
-    //---
-
-    return state->Zoom();
+    return context->Zoom();
 }
 
 //static
 float
-UOdysseyPainterEditorFunctionLibrary::GetViewportRotation( UOdysseyBrushAssetBase* iBrushContext )
+UOdysseyPainterEditorFunctionLibrary::GetViewportRotation( UOdysseyBrushAssetBase* BrushInstance )
 {
-    if( !iBrushContext )
+    if (!BrushInstance)
+        return 0.f;
+
+    FOdysseyPainterEditorBrushContext* context = BrushInstance->GetContext<FOdysseyPainterEditorBrushContext>("FOdysseyPainterEditorBrushContext");
+    if (!context)
         return 0.f;
 
     //---
 
-    FOdysseyPainterEditorDrawingState* state = GetState( iBrushContext );
-    if( !state )
-        return 0.f;
-
-    //---
-
-    return state->Rotation();
+    return context->Rotation();
 }
 
 //static
 FVector2D
-UOdysseyPainterEditorFunctionLibrary::GetViewportPan( UOdysseyBrushAssetBase* iBrushContext )
+UOdysseyPainterEditorFunctionLibrary::GetViewportPan( UOdysseyBrushAssetBase* BrushInstance )
 {
-    if( !iBrushContext )
+    if (!BrushInstance)
+        return FVector2D::ZeroVector;
+        
+    FOdysseyPainterEditorBrushContext* context = BrushInstance->GetContext<FOdysseyPainterEditorBrushContext>("FOdysseyPainterEditorBrushContext");
+    if (!context)
         return FVector2D::ZeroVector;
 
     //---
 
-    FOdysseyPainterEditorDrawingState* state = GetState( iBrushContext );
-    if( !state )
-        return FVector2D::ZeroVector;
-
-    //---
-
-    return state->Pan();
+    return context->Pan();
 }

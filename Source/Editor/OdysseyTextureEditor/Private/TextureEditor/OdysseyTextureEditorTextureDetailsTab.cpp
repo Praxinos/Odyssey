@@ -4,6 +4,7 @@
 #include "OdysseyTextureEditorTextureDetailsTab.h"
 
 #include "OdysseyTextureEditor.h"
+#include "SOdysseyTextureDetails.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyTextureEditorTextureDetailsTab"
 

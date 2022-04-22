@@ -11,8 +11,9 @@
 #include "OdysseyPainterEditorTopTab.h"
 #include "OdysseyPainterEditorViewportTab.h"
 #include "SOdysseyPaintModifiers.h"
-#include "SOdysseyStrokeOptions.h"
 #include "Models/OdysseyPainterEditorCommands.h"
+#include "StrokeEngine/OdysseyStrokeEngine.h"
+#include "ObjectEditorUtils.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorBrushSelectorTab"
 
@@ -74,7 +75,7 @@ FOdysseyPainterEditorBrushSelectorTab::BindShortcuts(FBaseToolkit* iToolkit)
 UOdysseyBrush*
 FOdysseyPainterEditorBrushSelectorTab::Brush() const
 {
-    return mEditor->PaintEngine()->Brush();
+    return mEditor->StrokeEngine()->GetBrush();
 }
 
 //--------------------------------------------------------------------------------------
@@ -83,7 +84,8 @@ FOdysseyPainterEditorBrushSelectorTab::Brush() const
 void
 FOdysseyPainterEditorBrushSelectorTab::OnBrushSelected( UOdysseyBrush* iBrush )
 {
-	mEditor->PaintEngine()->Brush(iBrush);
+	//mEditor->StrokeEngine()->SetBrush(iBrush);
+    FObjectEditorUtils::SetPropertyValue(mEditor->StrokeEngine(), "Brush", iBrush);
 }
 
 //--------------------------------------------------------------------------------------
@@ -92,12 +94,7 @@ FOdysseyPainterEditorBrushSelectorTab::OnBrushSelected( UOdysseyBrush* iBrush )
 void
 FOdysseyPainterEditorBrushSelectorTab::RefreshBrush()
 {
-	UOdysseyBrush* brush = mEditor->PaintEngine()->Brush();
-    if (brush)
-    {
-        mEditor->PaintEngine()->Brush(nullptr);
-        mEditor->PaintEngine()->Brush(brush);
-    }
+    mEditor->StrokeEngine()->RefreshBrushInstance();
 }
 
 //--------------------------------------------------------------------------------------
@@ -106,7 +103,7 @@ FOdysseyPainterEditorBrushSelectorTab::RefreshBrush()
 UOdysseyBrushAssetBase*
 FOdysseyPainterEditorBrushSelectorTab::BrushInstance() const
 {
-    return mEditor->PaintEngine()->BrushInstance();
+    return mEditor->StrokeEngine()->GetBrushInstance();
 }
 
 //--------------------------------------------------------------------------------------
@@ -115,7 +112,8 @@ FOdysseyPainterEditorBrushSelectorTab::BrushInstance() const
 void
 FOdysseyPainterEditorBrushSelectorTab::OnParameterChanged()
 {   
-    mEditor->PaintEngine()->TriggerStateChanged();
+    //TODO: Find a way to do this automatically ?
+    // mEditor->PaintEngine()->TriggerStateChanged();
 }
 
 

@@ -6,7 +6,10 @@
 #include "OdysseyBrushAssetBase.h"
 #include "OdysseyLayerStack.h"
 #include "OdysseyPaintEngine.h"
-#include "OdysseyTextureEditorDrawingState.h"
+#include "OdysseyBlendParameters.h"
+#include "OdysseyTextureEditorBrushContext.h"
+
+#include "ObjectEditorUtils.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyTextureEditor"
 
@@ -19,9 +22,9 @@ FOdysseyTextureEditor::~FOdysseyTextureEditor()
 }
 
 FOdysseyTextureEditor::FOdysseyTextureEditor() :
-	FOdysseyPainterEditor(),
-	mSelectedAlphaMode(::ULIS::Alpha_Normal)
+	FOdysseyPainterEditor()
 {
+    mBrushContexts.Add(new FOdysseyTextureEditorBrushContext(this));
 }
 
 //--------------------------------------------------------------------------------------
@@ -33,13 +36,10 @@ FOdysseyTextureEditor::InitData()
 	FOdysseyPainterEditor::InitData();
 
 	//--- Init Data
-
-    FOdysseyTextureEditorDrawingState* drawingState = new FOdysseyTextureEditorDrawingState(this);
 	
     TAttribute<bool> paintEngineIsLockedAttr;
     paintEngineIsLockedAttr.BindRaw(this, &FOdysseyTextureEditor::PaintEngineIsLocked);
-    PaintEngine()->IsLocked(paintEngineIsLockedAttr);
-    PaintEngine()->AddDrawingState(drawingState);
+    PaintEngine().IsLocked(paintEngineIsLockedAttr);
 
     //Make like if the texture changed, to set all callbacks correctly
     OnPostTextureChange();
@@ -48,7 +48,8 @@ FOdysseyTextureEditor::InitData()
 
     TextureWrapper()->OnPreTextureChangeDelegate().AddRaw(this, &FOdysseyTextureEditor::OnPreTextureChange);
     TextureWrapper()->OnPostTextureChangeDelegate().AddRaw(this, &FOdysseyTextureEditor::OnPostTextureChange);
-    PaintEngine()->OnPaintEnd().AddRaw(this, &FOdysseyTextureEditor::OnPaintEnginePaintEnd);
+    PaintEngine().OnCommitDelegate().AddRaw(this, &FOdysseyTextureEditor::OnPaintEngineCommit);
+    PaintEngine().OnPreUpdateDelegate().BindRaw(this, &FOdysseyTextureEditor::OnPaintEnginePreUpdate);
 }
 
 //--------------------------------------------------------------------------------------
@@ -105,41 +106,6 @@ FOdysseyLayerStack*
 FOdysseyTextureEditor::LayerStack() const
 {
     return TextureWrapper()->LayerStack();
-}
-
-::ULIS::eAlphaMode
-FOdysseyTextureEditor::SelectedAlphaMode() const
-{
-	return mSelectedAlphaMode;
-}
-
-//--------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------ Setters
-
-void
-FOdysseyTextureEditor::SelectedAlphaMode(::ULIS::eAlphaMode iMode)
-{
-	mSelectedAlphaMode = iMode;
-
-	//Make sure we set the right value in the Paint Engine according to the editor state
-    if (!LayerStack())
-        return;
-
-    if (!LayerStack()->GetCurrentLayer())
-        return;
-
-    if (LayerStack()->GetCurrentLayer()->GetType() != IOdysseyLayer::eType::kImage)
-        return;
-
-    TSharedPtr<FOdysseyImageLayer> imageLayer = StaticCastSharedPtr<FOdysseyImageLayer>(LayerStack()->GetCurrentLayer());
-    if (imageLayer && imageLayer->IsAlphaLocked())
-    {
-        PaintEngine()->SetAlphaModeModifier(::ULIS::Alpha_Back);
-    }
-    else
-    {
-		PaintEngine()->SetAlphaModeModifier(mSelectedAlphaMode);
-    }
 }
 
 //--------------------------------------------------------------------------------------
@@ -239,18 +205,7 @@ FOdysseyTextureEditor::OnPostTextureChange()
 void
 FOdysseyTextureEditor::OnLayerStackCurrentLayerChanged(TSharedPtr<IOdysseyLayer> iOldValue)
 {
-    //TODO: Find a good way to sync PaintEngine to LayerStack and other foreign parameters
-
-    //Remove all delegates for AlphaLock and set alpha lock to a default value
-    if (iOldValue && iOldValue->GetType() == IOdysseyLayer::eType::kImage) {
-        TSharedPtr<FOdysseyImageLayer> oldImageLayer = StaticCastSharedPtr<FOdysseyImageLayer>(iOldValue);
-        if (oldImageLayer)
-        {
-            oldImageLayer->IsAlphaLockedChangedDelegate().RemoveAll(this);
-            PaintEngine()->SetAlphaModeModifier(mSelectedAlphaMode);
-        }
-	}
-    PaintEngine()->Block(NULL);
+    PaintEngine().Block(NULL);
 
 	FOdysseyLayerStack* layerstack = LayerStack();
     if (!layerstack)
@@ -268,23 +223,7 @@ FOdysseyTextureEditor::OnLayerStackCurrentLayerChanged(TSharedPtr<IOdysseyLayer>
 	if (!imageLayer) 
         return;
 
-    PaintEngine()->Block(imageLayer->GetBlock());
-
-    //Set AlphaLock Delegate
-    PaintEngine()->SetAlphaModeModifier(imageLayer->IsAlphaLocked() ? ::ULIS::Alpha_Back : mSelectedAlphaMode);
-    imageLayer->IsAlphaLockedChangedDelegate().AddRaw(this, &FOdysseyTextureEditor::OnCurrentLayerIsAlphaLockedChanged);
-}
-
-void
-FOdysseyTextureEditor::OnCurrentLayerIsAlphaLockedChanged(bool iOldValue)
-{
-	FOdysseyLayerStack* layerstack = LayerStack();
-    if (!layerstack)
-		return;
-
-    //TODO: Find a good way to sync PaintEngine to LayerStack and other foreign parameters
-    TSharedPtr<FOdysseyImageLayer> imageLayer = StaticCastSharedPtr<FOdysseyImageLayer>(layerstack->GetCurrentLayer());
-    PaintEngine()->SetAlphaModeModifier( (imageLayer && imageLayer->IsAlphaLocked()) ? ::ULIS::Alpha_Back : mSelectedAlphaMode);
+    PaintEngine().Block(imageLayer->GetBlock());
 }
 
 void
@@ -308,7 +247,7 @@ FOdysseyTextureEditor::OnLayerStackImageResultChanged( const ::ULIS::FRectI* iRe
 }
 
 void
-FOdysseyTextureEditor::OnPaintEnginePaintEnd(const TArray<::ULIS::FRectI>& iChangedTiles)
+FOdysseyTextureEditor::OnPaintEngineCommit(const TArray<::ULIS::FRectI>& iChangedTiles)
 {
     if (iChangedTiles.Num() <= 0)
         return;
@@ -333,15 +272,38 @@ FOdysseyTextureEditor::OnPaintEnginePaintEnd(const TArray<::ULIS::FRectI>& iChan
         return;
 
     TSharedPtr<FOdysseyImageLayer> imageLayer = StaticCastSharedPtr<FOdysseyImageLayer>(layerstack->GetCurrentLayer());
-    imageLayer->SetBlock(PaintEngine()->OriginalBlock(), false, false);
+    ::ULIS::FBlock* block = imageLayer->GetBlock();
+    imageLayer->SetBlock(PaintEngine().OriginalBlock(), false, false);
 
     layerstack->mDrawingUndo->StartRecord();
     layerstack->mDrawingUndo->SaveData(iChangedTiles);
     layerstack->mDrawingUndo->EndRecord();
 
-    imageLayer->SetBlock(PaintEngine()->EditedBlock(), false, false);
+    imageLayer->SetBlock(block, false, false);
     //TODO: Move To Editor
     Texture()->MarkPackageDirty();
+}
+
+FOdysseyBlendParameters
+FOdysseyTextureEditor::OnPaintEnginePreUpdate(const FOdysseyBlendParameters& iBlendParameters)
+{
+    FOdysseyBlendParameters blendParameters = iBlendParameters;
+
+    //Make sure we set the right value in the Paint Engine according to the editor state
+    if (!LayerStack())
+        return blendParameters;
+
+    if (!LayerStack()->GetCurrentLayer())
+        return blendParameters;
+
+    if (LayerStack()->GetCurrentLayer()->GetType() != IOdysseyLayer::eType::kImage)
+        return blendParameters;
+
+    TSharedPtr<FOdysseyImageLayer> imageLayer = StaticCastSharedPtr<FOdysseyImageLayer>(LayerStack()->GetCurrentLayer());
+    if (imageLayer && imageLayer->IsAlphaLocked())
+        blendParameters.AlphaMode = EOdysseyAlphaMode(::ULIS::Alpha_Back);
+
+    return blendParameters;
 }
 
 #undef LOCTEXT_NAMESPACE

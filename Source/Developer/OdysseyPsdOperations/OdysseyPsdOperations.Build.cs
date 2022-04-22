@@ -14,6 +14,7 @@ public class OdysseyPsdOperations : ModuleRules
             new string[] {
                 "Core",
                 "Engine",
+                "OdysseyCore",
                 "OdysseyMaths",
                 "OdysseyLayer",
                 "OdysseyImaging",

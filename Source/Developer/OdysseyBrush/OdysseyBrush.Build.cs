@@ -15,15 +15,17 @@ public class OdysseyBrush : ModuleRules
                 "CoreUObject",
                 "InputCore",
                 "Engine",
-                "OdysseyStrokePipeline",
+                "OdysseyCore",
                 "OdysseyImaging",
+                "OdysseyPaintEngine",
             }
         );
 
         PublicDependencyModuleNames.AddRange(
             new string[] {
-                "OdysseyStrokePipeline",
+                "OdysseyCore",
                 "OdysseyImaging",
+                "OdysseyPaintEngine",
                 "ULIS",
                 "ULISLoader",
             }

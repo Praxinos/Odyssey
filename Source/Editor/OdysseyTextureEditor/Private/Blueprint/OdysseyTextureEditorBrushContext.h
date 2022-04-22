@@ -1,0 +1,27 @@
+// IDDN FR.001.250001.005.S.P.2019.000.00000
+// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
+
+#pragma once
+
+#include "CoreMinimal.h"
+
+#include "OdysseyBrushContext.h"
+
+class FOdysseyLayerStack;
+class FOdysseyTextureEditor;
+
+//---
+
+class ODYSSEYTEXTUREEDITOR_API FOdysseyTextureEditorBrushContext
+    : public FOdysseyBrushContext
+{
+public:
+    FOdysseyTextureEditorBrushContext( FOdysseyTextureEditor* iEditor );
+
+public:
+    FOdysseyLayerStack* LayerStack();
+
+private:
+    FOdysseyTextureEditor*           mEditor;
+};
+

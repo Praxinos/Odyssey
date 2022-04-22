@@ -179,6 +179,23 @@ IOdysseyLayer::SerializeWithChildren(FArchive &Ar)
     }
     else if (Ar.IsLoading())
     {
+        //PATCH: some old image layers are stored without the numNodes value
+        if (mType == IOdysseyLayer::eType::kImage)
+        {
+            if (Ar.AtEnd())
+                return;
+
+            int64 pos = Ar.Tell();
+            
+            int numNodes = 0;
+            Ar << numNodes;
+
+            Ar.Seek(pos);
+
+            if (numNodes != 0) //could technically be a false positive, but in our case should work all the time    
+                return;
+        }
+
         int numNodes = 0;
         Ar << numNodes;
         for (int i = 0; i < numNodes; i++)

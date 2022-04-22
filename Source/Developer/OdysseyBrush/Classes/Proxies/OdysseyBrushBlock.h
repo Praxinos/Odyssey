@@ -10,7 +10,7 @@
 
 #include "Proxies/OdysseyBrushColor.h"
 #include "Proxies/OdysseyBrushFormat.h"
-#include "Proxies/OdysseyBrushBlending.h"
+#include "Image/OdysseyBlendingMode.h"
 #include "Proxies/OdysseyBrushRect.h"
 
 #include <ULIS>

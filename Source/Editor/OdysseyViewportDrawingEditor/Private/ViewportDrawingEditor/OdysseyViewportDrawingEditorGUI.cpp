@@ -5,6 +5,7 @@
 
 #include "OdysseyViewportDrawingEditorMasterTab.h"
 #include "Widgets/Layout/SExpandableArea.h"
+#include "Widgets/Layout/SScrollBox.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyViewportDrawingEditorToolkit"
 

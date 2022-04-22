@@ -141,3 +141,27 @@ FOdysseyEditor::RemoveEditedObject(UObject* iObject)
     mEditedObjects.Remove(iObject);
     mOnRemoveEditedObject.Broadcast(iObject);
 }
+
+//--------------------------------------------------------------------------------------
+//------------------------------------------------------------- FGCObject implementation
+
+void
+FOdysseyEditor::AddReferencedObjects(FReferenceCollector& Collector)
+{
+    
+}
+
+FString
+FOdysseyEditor::GetReferencerName() const
+{
+    return "FOdysseyEditor";
+}
+
+//--------------------------------------------------------------------------------------
+//------------------------------------------------- FTickableEditorObject implementation
+
+void
+FOdysseyEditor::Tick(float DeltaTime)
+{
+    
+}

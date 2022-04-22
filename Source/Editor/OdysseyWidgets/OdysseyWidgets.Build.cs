@@ -33,7 +33,6 @@ public class OdysseyWidgets : ModuleRules
                 "OdysseyPaintEngine",
                 "OdysseyStyle",
                 "OdysseyStylusInput",
-                "OdysseyStrokePipeline",
                 "OdysseyMaths",
                 "RenderCore",
                 "Paper2D",

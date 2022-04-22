@@ -54,7 +54,7 @@ bool IOdysseyViewportDrawingEditorAdapter::MouseMove(FEditorViewportClient* iVie
     
     mCurrentStrokeRay.mRayOrigin = mouseViewportRay.GetOrigin();
     mCurrentStrokeRay.mRayDirection = mouseViewportRay.GetDirection();
-    mCurrentStrokeRay.mStrokePoint = FOdysseyStrokePoint::DefaultPoint();
+    mCurrentStrokeRay.mStrokePoint = FOdysseyPoint::DefaultPoint();
     mCurrentStrokeRay.mStrokePoint.x = iX;
     mCurrentStrokeRay.mStrokePoint.y = iY;
     mCurrentStrokeRay.mStrokePoint.keysDown = mKeysPressed;
@@ -133,7 +133,7 @@ bool IOdysseyViewportDrawingEditorAdapter::InputKey(FEditorViewportClient* iView
     FOdysseyStrokeRay strokeRay;
     strokeRay.mRayOrigin = mouseViewportRay.GetOrigin();
     strokeRay.mRayDirection = mouseViewportRay.GetDirection();
-    strokeRay.mStrokePoint = FOdysseyStrokePoint::DefaultPoint();
+    strokeRay.mStrokePoint = FOdysseyPoint::DefaultPoint();
     strokeRay.mStrokePoint.x = iViewport->GetMouseX();
     strokeRay.mStrokePoint.y = iViewport->GetMouseY();
     strokeRay.mStrokePoint.keysDown = mKeysPressed;
@@ -192,7 +192,7 @@ bool IOdysseyViewportDrawingEditorAdapter::CapturedMouseMove(FEditorViewportClie
     FOdysseyStrokeRay strokeRay;
     strokeRay.mRayOrigin = mouseViewportRay.GetOrigin();
     strokeRay.mRayDirection = mouseViewportRay.GetDirection();
-    strokeRay.mStrokePoint = FOdysseyStrokePoint::DefaultPoint();
+    strokeRay.mStrokePoint = FOdysseyPoint::DefaultPoint();
     strokeRay.mStrokePoint.x = iMouseX;
     strokeRay.mStrokePoint.y = iMouseY;
     strokeRay.mStrokePoint.keysDown = mKeysPressed;
@@ -248,7 +248,7 @@ void IOdysseyViewportDrawingEditorAdapter::OnStylusStateChanged(const TWeakPtr<S
     FOdysseyStrokeRay strokeRay;
     strokeRay.mRayOrigin = mouseViewportRay.GetOrigin();
     strokeRay.mRayDirection = mouseViewportRay.GetDirection();
-    strokeRay.mStrokePoint = FOdysseyStrokePoint( positionInViewport.X
+    strokeRay.mStrokePoint = FOdysseyPoint( positionInViewport.X
                                                 , positionInViewport.Y
                                                 , iState.GetZ()
                                                 , iState.GetPressure()

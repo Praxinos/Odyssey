@@ -132,7 +132,6 @@ FOdysseyFolderLayer::Blend( ::ULIS::FBlock** ioBlocks, const ::ULIS::FRectI* iRe
         ctx.Clear( *folderBlocks[i], rect, ::ULIS::FSchedulePolicy::CacheEfficient, 1, &iEvents[i], &eventClear[i] );
         ctx.Flush();
     }
-    //ctx.Finish();
 
     TArray<::ULIS::FEvent> eventRender = eventClear;
     for( int i = children.Num() - 1; i >= 0; --i ) {
@@ -162,7 +161,6 @@ FOdysseyFolderLayer::Blend( ::ULIS::FBlock** ioBlocks, const ::ULIS::FRectI* iRe
         ctx.Blend( *( folderBlocks[i] ), *ioBlocks[i], rect, iPositions[i], GetBlendingMode(), ::ULIS::Alpha_Normal, GetOpacity(), ::ULIS::FSchedulePolicy::MonoScanlines, 1, &eventRender[i], &eventBlend[i] );
         ctx.Flush();
     }
-    //ctx.Finish();
 
     return eventBlend;
 }
@@ -188,7 +186,6 @@ FOdysseyFolderLayer::RenderImage( ::ULIS::FBlock** ioBlocks, const ::ULIS::FRect
         ctx.Clear( *ioBlocks[i], rect, ::ULIS::FSchedulePolicy::MonoScanlines, 0, nullptr, &eventClear[i] );
         ctx.Flush();
     }
-    //ctx.Finish();
 
     TArray< TSharedPtr< IOdysseyLayer > > children = GetNodes();
     eventRender = eventClear;

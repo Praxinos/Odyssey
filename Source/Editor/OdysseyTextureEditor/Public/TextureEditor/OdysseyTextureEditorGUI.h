@@ -3,19 +3,9 @@
 
 #pragma once
 
-#include "Brush/SOdysseyBrushExposedParameters.h"
-#include "Brush/SOdysseyBrushSelector.h"
-#include "Color/SOdysseyColorSelector.h"
-#include "Color/SOdysseyColorSliders.h"
-#include "Mesh/SOdysseyMeshSelector.h"
-#include "SOdysseyPaintModifiers.h"
-#include "SOdysseyStrokeOptions.h"
-#include "SOdysseyTextureDetails.h"
 #include "OdysseyPainterEditorGUI.h"
 #include "OdysseyTextureEditorLayerStackTab.h"
 #include "OdysseyTextureEditorTextureDetailsTab.h"
-#include "OdysseyTextureEditorBrushSelectorTab.h"
-#include "OdysseyTextureEditorTopTab.h"
 
 class STextBlock;
 class SOdysseySurfaceViewport;

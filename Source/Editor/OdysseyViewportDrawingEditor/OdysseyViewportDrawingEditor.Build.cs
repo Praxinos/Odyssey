@@ -48,6 +48,7 @@ public class OdysseyViewportDrawingEditor : ModuleRules
                 "PropertyEditor",
                 "MainFrame",
                 "MeshPaint",
+                "OdysseyCore",
                 "OdysseyBrush",
                 "OdysseyMeshPaintRendering",
                 "OdysseyWidgets",
@@ -59,7 +60,6 @@ public class OdysseyViewportDrawingEditor : ModuleRules
                 "OdysseyTexture2DEditor",
                 "OdysseyImaging",
                 "OdysseyPaintEngine",
-                "OdysseyStrokePipeline",
                 "OdysseyStylusInput",
                 "OdysseyStyle"
             }

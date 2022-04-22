@@ -42,7 +42,6 @@ public class OdysseyTextureEditor : ModuleRules
                 "OdysseyImaging",
                 "OdysseyPaintEngine",
                 "OdysseyPainterEditor",
-                "OdysseyStrokePipeline",
                 "OdysseyLayer",
                 "OdysseyStyle",
                 "OdysseyStylusInput",

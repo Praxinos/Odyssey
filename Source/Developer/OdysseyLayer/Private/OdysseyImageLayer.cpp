@@ -169,7 +169,6 @@ FOdysseyImageLayer::Blend( ::ULIS::FBlock** ioBlocks, const ::ULIS::FRectI* iRec
         }
     }
     ctx.Flush();
-    //ctx.Finish();
 
     return eventBlend;
 }
@@ -193,7 +192,6 @@ FOdysseyImageLayer::RenderImage( ::ULIS::FBlock** ioBlocks, const ::ULIS::FRectI
         ctx.ConvertFormat( *mBlock, *ioBlocks[i], iRects[i], iPositions[i], ::ULIS::FSchedulePolicy::MonoScanlines, 0, nullptr, &eventRender[i] );
         ctx.Flush();
     }
-    //ctx.Finish();
 
     return eventRender;
 }

@@ -15,11 +15,10 @@ public class OdysseyPaintEngine : ModuleRules
                 "CoreUObject",
                 "InputCore",
                 "Engine",
-                "OdysseyBrush",
+                "OdysseyCore",
                 "OdysseyImaging",
                 "OdysseyLayer",
                 "OdysseyMaths",
-                "OdysseyStrokePipeline",
                 "MeshPaint"
              }
         );

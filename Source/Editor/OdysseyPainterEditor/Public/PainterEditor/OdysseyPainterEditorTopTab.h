@@ -18,16 +18,6 @@ public:
     // Spawner callback
 virtual TSharedRef<SDockTab> SpawnTab(const FSpawnTabArgs& iArgs) override;
 
-    // Public Getters
-public:
-    virtual bool IsEraserButtonActive() const;
-    virtual bool IsPackageEdited() const;
-
-    // Public Setters
-public:
-    virtual void SetToolDefaultBlendingMode( ::ULIS::eBlendMode );
-    virtual void SetToolDefaultAlphaMode( ::ULIS::eAlphaMode );
-
 protected:
     // FOdysseyEditorTab interface
     virtual TSharedPtr<SWidget> CreateWidget() override;
@@ -36,6 +26,8 @@ protected:
 protected:
     // Widget Getters
 
+    virtual bool IsPackageEdited() const;
+    virtual bool IsEraserButtonActive() const;
     virtual int OnGetSize() const;
     virtual float OnGetOpacity() const;
     virtual float OnGetFlow() const;
@@ -57,15 +49,11 @@ protected:
 protected:
     // Methods
     virtual void ToggleEraserButton();
-    virtual void SetAlphaModeShortcut( ::ULIS::eAlphaMode iAlphaMode );
     virtual void SetAlphaMode( ::ULIS::eAlphaMode iAlphaMode );
     virtual void SetBlendingMode(::ULIS::eBlendMode iBlendingMode);
     virtual void AddSize( int32 iValue );
 
 private:
     FOdysseyPainterEditor* mEditor;
-    ::ULIS::eBlendMode mToolDefaultBlendingMode;
-    ::ULIS::eAlphaMode mToolDefaultAlphaMode;
-    bool mIsEraserButtonActive;
 };
 
