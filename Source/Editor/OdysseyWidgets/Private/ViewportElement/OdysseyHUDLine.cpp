@@ -9,8 +9,12 @@ UOdysseyHUDLine::UOdysseyHUDLine(const FObjectInitializer& ObjectInitializer)
 
 }
 
-
 TSharedPtr<SWidget> UOdysseyHUDLine::CreateWidget()
 {
     return SNullWidget::NullWidget;
+}
+
+void UOdysseyHUDLine::Draw(FViewport* iViewport, FCanvas* ioCanvas)
+{
+
 }

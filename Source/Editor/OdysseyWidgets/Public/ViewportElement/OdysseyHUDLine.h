@@ -4,20 +4,30 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
+#include "OdysseyHUD.h"
+#include "IOdysseyViewportElement.h"
+
 #include "OdysseyHUDLine.generated.h"
 
 /////////////////////////////////////////////////////
 // UOdysseyHUDLine
 UCLASS()
-class ODYSSEYWIDGETS_API UOdysseyHUDLine : public UOdysseyHUD
+class ODYSSEYWIDGETS_API UOdysseyHUDLine : public UOdysseyHUD, 
+                                           public IOdysseyViewportElement
 {
 public:
     GENERATED_BODY()
 
     UOdysseyHUDLine(const FObjectInitializer& ObjectInitializer);
 
+//UOdysseyHUD overrides
 public:
     TSharedPtr<SWidget> CreateWidget() override;
+
+//IOdysseyViewportElement overrides
+public:
+    void Draw(FViewport* iViewport, FCanvas* ioCanvas) override;
 
 public:
     UPROPERTY( EditAnywhere )

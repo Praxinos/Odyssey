@@ -5,6 +5,7 @@
 
 #include "OdysseyEditor.h"
 #include "OdysseyPainterEditorGUI.h"
+#include "OdysseyPaintEngineHUD.h"
 #include <ULIS>
 
 class FOdysseyPaintEngine;
@@ -39,10 +40,11 @@ public:
     virtual FOdysseyPainterEditorGUI*                   GetGUI() = 0;
 
     virtual FOdysseyPaintEngine*		                PaintEngine() const;
+    virtual FOdysseyPaintEngineHUD*                     PaintEngineHUD() const;
 	virtual IOdysseySurfaceEditable*                    DisplaySurface() const = 0;
 	virtual FOdysseyUndoHistory*		                UndoHistory() const;
 	virtual bool                                        DrawBrushPreview() const;
-	virtual ::ULIS::FColor                          PaintColor() const;
+	virtual ::ULIS::FColor                              PaintColor() const;
 
 public:
     // Setters
@@ -56,6 +58,7 @@ public:
 private:
 	FOdysseyUndoHistory*		mUndoHistory;
     FOdysseyPaintEngine*        mPaintEngine; //TODO: no need for a pointer here
-	::ULIS::FColor			mPaintColor;
+    FOdysseyPaintEngineHUD*     mPaintEngineHUD;
+	::ULIS::FColor			    mPaintColor;
 	bool                        mDrawBrushPreview;
 };

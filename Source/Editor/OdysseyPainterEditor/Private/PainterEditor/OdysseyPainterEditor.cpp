@@ -90,6 +90,12 @@ FOdysseyPainterEditor::PaintEngine() const
     return mPaintEngine;
 }
 
+FOdysseyPaintEngineHUD* 
+FOdysseyPainterEditor::PaintEngineHUD() const
+{
+	return mPaintEngineHUD;
+}
+
 FOdysseyUndoHistory*
 FOdysseyPainterEditor::UndoHistory() const
 {

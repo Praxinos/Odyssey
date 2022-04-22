@@ -110,11 +110,12 @@ void
 FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanvas )
 {
     for( int i = 0; i < mViewportElements.Num(); i++ )
-        mViewportElements[i]->Draw();
+        mViewportElements[i]->Draw( iViewport, ioCanvas );
 
     // Send Tick to PaintEngine
     // TODO: Move the call of Tick in a FTickableEditorObject, the PaintEngine itself should be a FTickableEditorObject
 	mOdysseyPainterEditor->PaintEngine()->Tick();
+    mOdysseyPainterEditor->PaintEngineHUD()->Tick();
 
 	const UOdysseyPainterEditorSettings& settings = *GetDefault<UOdysseyPainterEditorSettings>();
 	ioCanvas->Clear(settings.BackgroundColor);

@@ -13,7 +13,5 @@ public:
     IOdysseyViewportElement();
 
 public:
-    virtual FReply OnMouseButtonDown( const FGeometry& InGeometry, const FPointerEvent& MouseEvent ) = 0;
-    virtual FReply OnMouseButtonUp( const FGeometry& InGeometry, const FPointerEvent& MouseEvent ) = 0;
-    virtual void   Draw() = 0;
+    virtual void Draw( FViewport* iViewport, FCanvas* ioCanvas ) = 0;
 };
