@@ -55,7 +55,7 @@ FOdysseyTexture2DWrapper::UpdateTextureFromSurface()
     if(!mTexture)
         return;
 
-    CopyBlockDataIntoUTexture( Surface()->Block(), mTexture);
+    CopyBlockDataIntoUTexture( Surface()->Block(), mTexture );
     mTexture->UpdateResource();
 }
 

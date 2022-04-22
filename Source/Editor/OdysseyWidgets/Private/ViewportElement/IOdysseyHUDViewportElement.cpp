@@ -3,6 +3,12 @@
 
 #include "IOdysseyHUDViewportElement.h"
 
-IOdysseyHUDViewportElement::IOdysseyHUDViewportElement()
+void IOdysseyHUDViewportElement::SetPaintEngineHUD(FOdysseyPaintEngineHUD* iPaintEngineHUD)
 {
+    mPaintEngineHUD = iPaintEngineHUD;
+}
+
+FOdysseyPaintEngineHUD* IOdysseyHUDViewportElement::GetPaintEngineHUD()
+{
+    return mPaintEngineHUD;
 }

@@ -4,16 +4,21 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "IOdysseyViewportElement.h"
 #include "OdysseyPaintEngineHUD.h"
+#include "IOdysseyViewportElement.h"
 
 /////////////////////////////////////////////////////
 // IOdysseyViewportElement
 class ODYSSEYWIDGETS_API IOdysseyHUDViewportElement : public IOdysseyViewportElement
 {
 public:
-    IOdysseyHUDViewportElement();
+    virtual void Draw() = 0;
 
+//Getters/setters
 public:
-    virtual void Draw( FViewport* iViewport, FCanvas* ioCanvas ) = 0;
+    void SetPaintEngineHUD( FOdysseyPaintEngineHUD* iPaintEngineHUD);
+    FOdysseyPaintEngineHUD* GetPaintEngineHUD();
+
+protected:
+    FOdysseyPaintEngineHUD* mPaintEngineHUD;
 };

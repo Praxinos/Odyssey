@@ -14,5 +14,5 @@ public:
     IOdysseyPaintViewportElement();
 
 public:
-    virtual void Draw( FViewport* iViewport, FCanvas* ioCanvas ) = 0;
+    virtual void Draw( FOdysseyBlock* ioBlock ) = 0;
 };

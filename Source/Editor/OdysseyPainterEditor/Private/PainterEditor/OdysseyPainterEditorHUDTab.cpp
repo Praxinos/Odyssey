@@ -13,6 +13,8 @@
 //----------------------------------------------------------- Construction / Destruction
 FOdysseyPainterEditorHUDTab::~FOdysseyPainterEditorHUDTab()
 {
+    if( mHUD )
+        mHUD->ConditionalBeginDestroy();
 }
 
 FOdysseyPainterEditorHUDTab::FOdysseyPainterEditorHUDTab(FOdysseyPainterEditor* iEditor)
@@ -29,16 +31,15 @@ FOdysseyPainterEditorHUDTab::FOdysseyPainterEditorHUDTab(FOdysseyPainterEditor* 
 
 TSharedPtr<SWidget>
 FOdysseyPainterEditorHUDTab::CreateWidget()
-{
-    return SNullWidget::NullWidget;
-/*
+{        
 	if (!mHUD)
     {
-        UOdysseyHUDLine* line = NewObject<UOdysseyHUDLine>(GetTransientPackage(), NAME_None, RF_Transient);
+        UOdysseyHUDLine* line = NewObject<UOdysseyHUDLine>();
+        line->Init( FVector2D(0,0), FVector2D(0,0), mEditor->PaintEngineHUD());
         mHUD = MakeShareable(line);
     }
 
-    return mHUD->CreateWidget();*/
+    return mHUD->CreateWidget();
 }
 
 void

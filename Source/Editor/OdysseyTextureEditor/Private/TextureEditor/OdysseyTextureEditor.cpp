@@ -7,8 +7,6 @@
 #include "OdysseyLayerStack.h"
 #include "OdysseyPaintEngine.h"
 #include "OdysseyTextureEditorDrawingState.h"
-#include "SOdysseySurfaceViewport.h"
-#include "FOdysseySceneViewport.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyTextureEditor"
 
@@ -101,11 +99,6 @@ IOdysseySurfaceEditable*
 FOdysseyTextureEditor::DisplaySurface() const
 {
 	return TextureWrapper()->Surface();
-}
-
-IOdysseySurfaceEditable* FOdysseyTextureEditor::HUDSurface() const
-{
-    return HUDWrapper()->Surface();
 }
 
 FOdysseyLayerStack*

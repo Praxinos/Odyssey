@@ -6,6 +6,7 @@
 #include "OdysseyBrushAssetBase.h"
 #include "OdysseyPainterEditorTopTab.h"
 #include "SOdysseyPaintModifiers.h"
+#include "ULISLoaderModule.h"
 
 /////////////////////////////////////////////////////
 // FOdysseyPainterEditor
@@ -96,6 +97,12 @@ FOdysseyPainterEditor::PaintEngineHUD() const
 	return mPaintEngineHUD;
 }
 
+IOdysseySurfaceEditable* 
+FOdysseyPainterEditor::HUDSurface() const
+{
+    return mHUDSurface;
+}
+
 FOdysseyUndoHistory*
 FOdysseyPainterEditor::UndoHistory() const
 {
@@ -112,6 +119,25 @@ FOdysseyPainterEditor::DrawBrushPreview() const
 FOdysseyPainterEditor::PaintColor() const
 {
 	return mPaintColor;
+}
+
+void 
+FOdysseyPainterEditor::RefreshHUDSurface(FVector2D iSizeHUD)
+{
+    //TODO: check, maybe we don't need a paintEngineHUD at all, a surface is enough.
+    //But we'll need to pass a new block to it, making it responsible for the life of both its block and texture,
+    //not just the texture as it is right now
+
+    if( mHUDSurface )
+        delete mHUDSurface;
+
+    PaintEngineHUD()->SetHUDBlock( new FOdysseyBlock(iSizeHUD.X, iSizeHUD.Y, ::ULIS::Format_BGRA8) );
+
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_BGRA8);
+    ctx.Clear(*(PaintEngineHUD()->GetHUDBlock()->GetBlock()));
+    ctx.Finish();
+
+    mHUDSurface = new FOdysseySurfaceTexture2DEditable( PaintEngineHUD()->GetHUDBlock() );
 }
 
 //--------------------------------------------------------------------------------------

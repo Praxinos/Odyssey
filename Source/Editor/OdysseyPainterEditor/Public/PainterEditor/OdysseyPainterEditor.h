@@ -42,7 +42,7 @@ public:
     virtual FOdysseyPaintEngine*		                PaintEngine() const;
     virtual FOdysseyPaintEngineHUD*                     PaintEngineHUD() const;
 	virtual IOdysseySurfaceEditable*                    DisplaySurface() const = 0;
-    virtual IOdysseySurfaceEditable*                    HUDSurface() const = 0;
+    virtual IOdysseySurfaceEditable*                    HUDSurface() const;
 	virtual FOdysseyUndoHistory*		                UndoHistory() const;
 	virtual bool                                        DrawBrushPreview() const;
 	virtual ::ULIS::FColor                              PaintColor() const;
@@ -51,6 +51,7 @@ public:
     // Setters
 	void                         DrawBrushPreview(bool iDrawBrushPreview);
 	void                         PaintColor(::ULIS::FColor iColor);
+    void                         RefreshHUDSurface( FVector2D iSizeHUD );
 
 public:
     // Interface
@@ -60,6 +61,7 @@ private:
 	FOdysseyUndoHistory*		mUndoHistory;
     FOdysseyPaintEngine*        mPaintEngine; //TODO: no need for a pointer here
     FOdysseyPaintEngineHUD*     mPaintEngineHUD;
+    IOdysseySurfaceEditable*    mHUDSurface;
 	::ULIS::FColor			    mPaintColor;
 	bool                        mDrawBrushPreview;
 };

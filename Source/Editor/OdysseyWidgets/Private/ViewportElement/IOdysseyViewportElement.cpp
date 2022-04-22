@@ -2,7 +2,3 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
 #include "IOdysseyViewportElement.h"
-
-IOdysseyViewportElement::IOdysseyViewportElement()
-{
-}

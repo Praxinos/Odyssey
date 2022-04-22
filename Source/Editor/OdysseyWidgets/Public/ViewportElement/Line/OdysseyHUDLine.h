@@ -19,8 +19,12 @@ class ODYSSEYWIDGETS_API UOdysseyHUDLine : public UOdysseyHUD,
     GENERATED_BODY()
 
 public:
-    UOdysseyHUDLine( const FObjectInitializer& ObjectInitializer );
+    void Init( FVector2D iStartPoint, FVector2D iFinishPoint, FOdysseyPaintEngineHUD* iPaintEngineHUD );
 
+//UObject overrides
+public:
+    virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+    virtual void PreEditChange(FProperty* PropertyAboutToChange) override;
 
 //UOdysseyHUD overrides
 public:
@@ -28,7 +32,7 @@ public:
 
 //IOdysseyHUDViewportElement overrides
 public:
-    void Draw(FViewport* iViewport, FCanvas* ioCanvas) override;
+    void Draw() override;
 
 public:
     UPROPERTY( EditAnywhere )

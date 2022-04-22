@@ -14,8 +14,6 @@ class ODYSSEYWIDGETS_API UOdysseyHUD : public UObject
 public:
     GENERATED_BODY()
 
-    UOdysseyHUD(const FObjectInitializer& ObjectInitializer);
-
 public:
     virtual TSharedPtr<SWidget> CreateWidget() PURE_VIRTUAL( CreateWidget, return SNullWidget::NullWidget; );
 

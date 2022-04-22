@@ -351,9 +351,6 @@ SOdysseySurfaceViewport::UpdateScrollBars()
 
 void SOdysseySurfaceViewport::SetViewportClient(TSharedPtr<class FViewportClient> InViewportClient)
 {
-    if (mViewport)
-        mViewport->ViewportResizedEvent.RemoveAll(this);
-
     if (!InViewportClient.IsValid())
         return;
 

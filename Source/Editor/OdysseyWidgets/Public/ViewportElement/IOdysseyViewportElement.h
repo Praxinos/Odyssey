@@ -4,14 +4,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "OdysseyBlock.h"
 
 /////////////////////////////////////////////////////
 // IOdysseyViewportElement
 class ODYSSEYWIDGETS_API IOdysseyViewportElement
 {
 public:
-    IOdysseyViewportElement();
-
-public:
-    virtual void Draw( FViewport* iViewport, FCanvas* ioCanvas ) = 0;
+    virtual void Draw() = 0;
 };

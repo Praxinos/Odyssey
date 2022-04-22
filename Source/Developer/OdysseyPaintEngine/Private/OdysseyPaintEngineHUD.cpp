@@ -37,6 +37,8 @@ FOdysseyPaintEngineHUD::SetHUDBlock(FOdysseyBlock* iBlock)
     if (mHUDBlock == iBlock)
         return;
 
+    delete mHUDBlock;
+
     mHUDBlock = iBlock;
     if (!mHUDBlock) 
         return;
@@ -75,7 +77,7 @@ FOdysseyPaintEngineHUD::Tick()
     if( !mHUDBlock )
         return;
 
-    UE_LOG(LogTemp, Display, TEXT("TIck HUD"));
+    
 }
 
 //--------------------------------------------------------------------------------------

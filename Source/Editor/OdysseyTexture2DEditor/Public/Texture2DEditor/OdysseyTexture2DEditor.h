@@ -22,7 +22,6 @@ public:
 
 public:
     // Getters
-    virtual FOdysseyTexture2DWrapper* HUDWrapper() const override;
     virtual FOdysseyTexture2DWrapper* TextureWrapper() const override;
 	virtual UTexture2D*				  Texture() const override;
     
@@ -33,7 +32,6 @@ public:
     
 private:
     FOdysseyTexture2DWrapper*     mTextureWrapper;
-    FOdysseyTexture2DWrapper*     mHUDWrapper;
-    
+
 	TSharedPtr<FOdysseyTexture2DEditorGUI> mGUI;
 };

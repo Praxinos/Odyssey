@@ -109,14 +109,6 @@ FOdysseyPainterEditorViewportClient::OnStylusInputChanged( TSharedPtr<IStylusInp
 void
 FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanvas )
 {
-    if( mOdysseyPainterEditor->GetGUI()->GetHUDTab()->GetHUD() )
-        mOdysseyPainterEditor->GetGUI()->GetHUDTab()->GetHUD()->Draw( iViewport, ioCanvas );
-
-    IOdysseySurface* HUDSurface = mOdysseyPainterEditor->HUDSurface();
-    UTexture* HUDTexture = nullptr;
-    if (HUDSurface)
-        HUDTexture = HUDSurface->Texture();
-
     // Send Tick to PaintEngine
     // TODO: Move the call of Tick in a FTickableEditorObject, the PaintEngine itself should be a FTickableEditorObject
 	mOdysseyPainterEditor->PaintEngine()->Tick();
@@ -211,10 +203,21 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
         // }
     }
 
+
+    //TODO Only when HUD is invalid
+    if (mOdysseyPainterEditor->GetGUI()->GetHUDTab()->GetHUD())
+        mOdysseyPainterEditor->GetGUI()->GetHUDTab()->GetHUD()->Draw();
+
+    IOdysseySurface* HUDSurface = mOdysseyPainterEditor->HUDSurface();
+    UTexture* HUDTexture = nullptr;
+    if (HUDSurface)
+    {
+        HUDTexture = HUDSurface->Texture();
+    }
     // Draw HUD Surface
     if( HUDTexture && HUDTexture->Resource )
     {
-        FCanvasTileItem tileItem(pan, HUDTexture->Resource, FVector2D( iViewport->GetSizeXY().X, iViewport->GetSizeXY().Y ), FLinearColor::White );
+        FCanvasTileItem tileItem(FVector2D(0,0), HUDTexture->Resource, FVector2D( iViewport->GetSizeXY().X, iViewport->GetSizeXY().Y ), FLinearColor::White );
         tileItem.BatchedElementParameters = batchedElementParameters;
         uint32 result = (uint32)SE_BLEND_RGBA_MASK_START;
         result += ( 1 << 0 );
