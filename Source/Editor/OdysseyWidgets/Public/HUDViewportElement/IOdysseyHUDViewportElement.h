@@ -4,12 +4,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "OdysseyPaintEngineHUD.h"
-#include "IOdysseyViewportElement.h"
+#include <ULIS>
 
 /////////////////////////////////////////////////////
 // IOdysseyViewportElement
-class ODYSSEYWIDGETS_API IOdysseyHUDViewportElement : public IOdysseyViewportElement
+class ODYSSEYWIDGETS_API IOdysseyHUDViewportElement
 {
 public:
     IOdysseyHUDViewportElement();

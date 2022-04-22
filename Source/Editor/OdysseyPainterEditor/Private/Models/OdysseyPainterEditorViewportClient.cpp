@@ -111,7 +111,6 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
     // Send Tick to PaintEngine
     // TODO: Move the call of Tick in a FTickableEditorObject, the PaintEngine itself should be a FTickableEditorObject
 	mOdysseyPainterEditor->PaintEngine()->Tick();
-    mOdysseyPainterEditor->PaintEngineHUD()->Tick();
 
 	const UOdysseyPainterEditorSettings& settings = *GetDefault<UOdysseyPainterEditorSettings>();
 	ioCanvas->Clear(settings.BackgroundColor);
@@ -202,7 +201,7 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
         // }
     }
 
-    IOdysseySurfaceEditable* HUDSurface = mOdysseyPainterEditor->HUDSurface();
+    IOdysseySurfaceEditable* HUDSurface = mOdysseyPainterEditor->HUDToolSystem()->GetHUDSurface();
     UTexture* HUDTexture = nullptr;
     if (HUDSurface)
     {

@@ -34,11 +34,6 @@ public:
     virtual void CapturedMouseMove( FViewport* iViewport, int32 iX, int32 iY ) override;
     virtual void Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D());
 
-    //UObject overrides
-public:
-    virtual void PostEditChangeProperty(FPropertyChangedEvent& iPropertyChangedEvent) override;
-    virtual void PreEditChange(FProperty* iPropertyAboutToChange) override;
-
 public:
     void AddElement( UOdysseyHUDElement* iElementToAdd );
     bool IsInvalid();

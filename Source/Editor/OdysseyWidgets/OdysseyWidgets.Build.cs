@@ -58,9 +58,7 @@ public class OdysseyWidgets : ModuleRules
         PublicIncludePaths.AddRange(
             new string[] {
                 Path.Combine(ModuleDirectory, "Public"),
-                Path.Combine(ModuleDirectory, "Public", "ViewportElement"),
-                Path.Combine(ModuleDirectory, "Public", "ViewportElement", "HUDElement"),
-                Path.Combine(ModuleDirectory, "Public", "ViewportElement", "PaintElement"),
+                Path.Combine(ModuleDirectory, "Public", "HUDViewportElement"),
                 Path.Combine(ModuleDirectory, "Public", "Timeline"),
                 Path.Combine(ModuleDirectory, "Public", "Timeline", "Events"),
                 Path.Combine(ModuleDirectory, "Public", "Common"),

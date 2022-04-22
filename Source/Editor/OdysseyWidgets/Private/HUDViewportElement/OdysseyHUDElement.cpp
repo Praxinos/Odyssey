@@ -74,22 +74,6 @@ void UOdysseyHUDElement::Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform 
     }
 }
 
-void UOdysseyHUDElement::PostEditChangeProperty(FPropertyChangedEvent& iPropertyChangedEvent)
-{
-    for (auto it = mElements.CreateConstIterator(); it; ++it)
-    {
-        it->Value->PostEditChangeProperty( iPropertyChangedEvent );
-    }
-}
-
-void UOdysseyHUDElement::PreEditChange(FProperty* iPropertyAboutToChange)
-{
-    for (auto it = mElements.CreateConstIterator(); it; ++it)
-    {
-        it->Value->PreEditChange( iPropertyAboutToChange );
-    }
-}
-
 void UOdysseyHUDElement::AddElement(UOdysseyHUDElement* iElementToAdd)
 {
     if( iElementToAdd != nullptr )

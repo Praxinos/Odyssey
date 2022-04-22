@@ -4,8 +4,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "OdysseySurfaceTexture2DEditable.h"
+#include <ULIS>
+#include "ULISLoaderModule.h"
 
-class ODYSSEYPAINTENGINE_API FOdysseyHUDToolSystem 
+class ODYSSEYHUDSYSTEM_API FOdysseyHUDToolSystem 
 {
 public:
     // Construction / Destruction
@@ -18,8 +21,8 @@ private:
 
 public:
     // Getters
-    ::ULIS::FBlock* GetHUDBlock();
-    IOdysseySurfaceEditable* GetHUDSurface();
+    ::ULIS::FBlock* GetHUDBlock() const;
+    FOdysseySurfaceTexture2DEditable* GetHUDSurface() const;
 
 public:
     // Callback usage
@@ -28,5 +31,5 @@ public:
 protected:
 
     ::ULIS::FBlock*                      mHUDBlock; // Holds the block in which we draw the HUD
-    IOdysseySurfaceEditable*             mHUDSurface;
+    FOdysseySurfaceTexture2DEditable*    mHUDSurface;
 };

@@ -6,7 +6,6 @@
 #include "CoreMinimal.h"
 #include "InputCoreTypes.h"
 #include "IStylusState.h"
-#include "ViewportElement/IOdysseyViewportElement.h"
 #include "RawIndexBuffer.h"
 #include "Rendering/StaticMeshVertexBuffer.h"
 #include "UnrealClient.h"
