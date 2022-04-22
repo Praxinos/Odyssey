@@ -526,12 +526,6 @@ FOdysseyPaintEngine::StrokeOptions()
     return &mStrokeOptions;
 }
 
-bool
-FOdysseyPaintEngine::GetSmoothingCatchUp() const
-{
-    return mSmoothingParameters->GetCatchUp();
-}
-
 void
 FOdysseyPaintEngine::ClearDrawingQueue()
 {

@@ -44,12 +44,6 @@ public:
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnPaintEnd, const TArray<::ULIS::FRectI>& iChangedTiles);
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnPaintAbort, const TArray<::ULIS::FRectI>& iChangedTiles);
 
-    /* 
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOnPreviewBlockTilesChanged, const TArray<::ULIS::FRectI>&);
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOnEditedBlockTilesWillChange, const TArray<::ULIS::FRectI>&);
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOnEditedBlockTilesChanged, const TArray<::ULIS::FRectI>&);
-    */
-
 protected:
     //type defining how to deal with tile invalidation
     typedef bool** InvalidTileMap;
@@ -62,37 +56,47 @@ public:
 public:
     // Paint Engine API
     // Drawing
-    void BeginStroke( const FOdysseyStrokePoint& iPoint, const FOdysseyStrokePoint& iPreviousPoint );
-    void PushStroke( const FOdysseyStrokePoint& iPoint );
+
+    //Moves the current position to iPoint, not drawing (usefull to make Tick() draw at the right position)
+    void MoveTo(const FOdysseyStrokePoint& iPoint); //TODO: Rename,  it allows us to set what is the current cursor position when hovering the canvas
+
+    //Begins a stroke at iPoint
+    //Some value are computed from the last call to MoveTo(), like direction for example
+    void BeginStroke( const FOdysseyStrokePoint& iPoint );
+
+    //Draws a Stroke from the last position to iPoint
+    void StrokeTo( const FOdysseyStrokePoint& iPoint );
+
+    //Ends the stroke
     void EndStroke();
+
+    //Aborts the stroke
     void AbortStroke();
-    
-    bool PaintInitialize(ePaintState iPaintState);
-    bool PaintCheck();
-    void PaintStep(bool iForceFinish);
-    void PaintFinalize();
-    void PaintAbort();
 
     // Will end safely what the PaintEngine is doing (like drawing in ticks for example)
     void Flush();
 
     // Paint Operations
+    //Clear the paint block
     void Clear();
+
+    //Clear the paint block with the current color
     void Fill();
-    
+
+private:
     // Misc
-    void SetCurrentStrokePoint(const FOdysseyStrokePoint& iPoint); //TODO: Rename,  it allows us to set what is the current cursor position when hovering the canvas
     void UpdateStrokeOptions();
     void TriggerStateChanged(); //TODO: Rename, it allows us to rebuild the BrushInstance when the brush parameters changes
 
 public:
     // Setters
     virtual void Block(::ULIS::FBlock* iBlock);
-    void Brush(UOdysseyBrush* iBrush);
-    void BrushInstance(UOdysseyBrushAssetBase* iBrushInstance, bool iApplyOverrides);
-    void IsLocked(TAttribute<bool> iIsLocked);
-    void SetColor( const ::ULIS::FColor& iColor );
+    // void Brush(UOdysseyBrush* iBrush);
+    void BrushInstance(UOdysseyBrushAssetBase* iBrushInstance, /*bool iApplyOverrides*/);
+    void IsLocked(TAttribute<bool> iIsLocked); //???
+    void SetColor( const ::ULIS::FColor& iColor ); //MOVE TO BruchOptions ?
 
+    //MOVE TO A UOBJECT/USTRUCT CALLED UBrushOptions
     void SetSizeModifier( float iValue );
     void SetOpacityModifier( float iValue );
     void SetFlowModifier( float iValue );
@@ -106,24 +110,27 @@ public:
     ::ULIS::FBlock* EditedBlock();
     ::ULIS::FBlock* OriginalBlock();
 
-    UOdysseyBrush* Brush() const;
+    // UOdysseyBrush* Brush() const;
     UOdysseyBrushAssetBase* BrushInstance() const;
-    bool IsLocked() const;
-    const ::ULIS::FColor& GetColor() const;
+    bool IsLocked() const; //???
+    
+    const ::ULIS::FColor& GetColor() const; //MOVE TO BruchOptions ?
 
+    //MOVE TO A UOBJECT/USTRUCT CALLED UBrushOptions
     float GetSizeModifier() const;
     float GetOpacityModifier() const;
     float GetFlowModifier() const;
     ::ULIS::eBlendMode GetBlendingModeModifier() const;
     ::ULIS::eAlphaMode GetAlphaModeModifier() const;
     
+    //MOVE OUTSIDE THIS CLASS AND CREATE A SETTER
     FOdysseyStrokeOptions* StrokeOptions();
-    bool GetSmoothingCatchUp() const;
 
 public:
     // PaintEnginge Ticks
 
     // The main Tick entry
+    //TODO: Make it through FTickableObject
     virtual void Tick();
     
     // Applies the CatchUp if needed
@@ -131,6 +138,13 @@ public:
 
     // Applies the smoothing if enabled and not in realtime
     void SmoothingEndStroke();
+
+private:
+    bool PaintInitialize(ePaintState iPaintState);
+    bool PaintCheck();
+    void PaintStep(bool iForceFinish);
+    void PaintFinalize();
+    void PaintAbort();
 
 private:
     // DrawingQueue
