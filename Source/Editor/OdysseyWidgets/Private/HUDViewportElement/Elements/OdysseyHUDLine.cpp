@@ -1,7 +1,7 @@
 // IDDN FR.001.250001.004.S.X.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
-#include "Line/OdysseyHUDLine.h"
+#include "OdysseyHUDLine.h"
 
 
 void UOdysseyHUDLine::Init( FName iName, FVector2D iStartPoint, FVector2D iFinishPoint, FTransform2D iTransform )

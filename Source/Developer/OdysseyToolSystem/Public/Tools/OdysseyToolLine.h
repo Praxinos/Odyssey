@@ -4,8 +4,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Line/OdysseyHUDLine.h"
-#include "Handle/OdysseyHUDHandle.h"
+#include "OdysseyHUDLine.h"
+#include "OdysseyHUDHandle.h"
 
 class FOdysseyPaintEngine;
 

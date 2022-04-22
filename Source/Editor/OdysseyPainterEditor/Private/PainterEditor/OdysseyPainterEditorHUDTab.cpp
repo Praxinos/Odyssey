@@ -4,8 +4,8 @@
 #include "OdysseyPainterEditorHUDTab.h"
 
 #include "OdysseyPainterEditor.h"
-#include "Line/OdysseyHUDLine.h"
-#include "Handle/OdysseyHUDHandle.h"
+#include "OdysseyHUDLine.h"
+#include "OdysseyHUDHandle.h"
 
 #include "ULIS/include/Math/ShapeGeneration/Line.h"
 
