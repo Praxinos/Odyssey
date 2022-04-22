@@ -12,13 +12,26 @@
 #include "Input/OdysseyPoint.h"
 #include "OdysseyBrushContext.h"
 #include "OdysseyBrushOptions.h"
-#include "OdysseyBrushPreferencesOverrides.h"
 #include "Proxies/OdysseyBrushColor.h"
 #include "Proxies/OdysseyBrushPivot.h"
 #include "Proxies/OdysseyBrushBlock.h"
 #include "Proxies/OdysseyBrushRect.h"
 #include <ULIS>
 #include "OdysseyBrushAssetBase.generated.h"
+
+//singleton
+class ODYSSEYBRUSH_API FOdysseyBrushOverride
+{
+private:
+    static FOdysseyBrushOverride* Instance();
+
+public:
+    static void Register(UClass* iClass);
+    static TArray<UClass*> GetClasses();
+
+private:
+    TArray<UClass*> mClasses;
+};
 
 /////////////////////////////////////////////////////
 // BrushAssetBase
@@ -29,8 +42,9 @@
 UCLASS(Abstract, hideCategories=(Object), Blueprintable)
 class ODYSSEYBRUSH_API UOdysseyBrushAssetBase : public UObject
 {
-    GENERATED_UCLASS_BODY()
+    GENERATED_BODY()
 
+public:
     enum class eStepType
     {
         kSubStrokeBegin,
@@ -47,10 +61,13 @@ class ODYSSEYBRUSH_API UOdysseyBrushAssetBase : public UObject
 public:
     // Construction / Destruction
     ~UOdysseyBrushAssetBase();
+    UOdysseyBrushAssetBase();
 
 public:
     /** Getter for World Pointer, this workaround may be unsafe but allows us to use Blueprint Function Libraries withing Odyssey Brushes. It is always NULL in a brush context. */
     virtual UWorld* GetWorld() const override final { return  nullptr; }
+
+    virtual void PostLoad();
     
 public:
     // Paint Engine Stroke API
@@ -109,15 +126,6 @@ public:
 
     // Called once for each engine tick
 	void Tick(float DeltaTime, bool iShouldFlush);
-
-public:
-    //Overrides
-#if WITH_EDITOR
-
-    //Applies the brush overrides
-    void ApplyOverrides();
-
-#endif
 
 private:
     // Internal - Tick API
@@ -388,16 +396,21 @@ public:
     /* Run the state change action */
     void ExecuteStateChanged();
 
+    virtual void Serialize (FArchive& Ar);
+
 public:
     //PROPERTIES
-
-#if WITH_EDITORONLY_DATA
-    UPROPERTY(EditAnywhere, Category="Overrides")
-    FOdysseyBrushPreferencesOverrides       Preferences;
-#endif
-
     UPROPERTY(VisibleInstanceOnly, Instanced, Transient, NonTransactional)
     UOdysseyBrushOptions*                   BrushOptions;
+
+#if WITH_EDITORONLY_DATA
+    UPROPERTY(VisibleDefaultsOnly, Instanced)
+    TMap<FName, UObject*>                        Overrides;
+#endif
+
+
+    // UPROPERTY(VisibleDefaultsOnly, Instanced)
+    // UObject*                                OverrideTest;
 
 private:
     TArray<FOdysseyBrushContext*>           mContexts;

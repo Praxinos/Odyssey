@@ -67,6 +67,8 @@ FOdysseyTextureEditor::Undo()
         return;
     
 	LayerStack()->mDrawingUndo->LoadData();
+
+    PaintEngine().Reset();
 }
 
 void
@@ -81,6 +83,8 @@ FOdysseyTextureEditor::Redo()
         return;
     
 	LayerStack()->mDrawingUndo->Redo();
+
+    PaintEngine().Reset();
 }
 
 void

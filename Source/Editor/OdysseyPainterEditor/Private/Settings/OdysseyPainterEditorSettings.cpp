@@ -8,9 +8,8 @@
 #include "EngineUtils.h"
 
 FBrushDefaults::FBrushDefaults()
-    : DefaultBrush( nullptr )
+    : DefaultBrush(FSoftObjectPath(TEXT("/Iliad/Brushes/Drawing_Tools/Penbrush1.Penbrush1")))
 {
-    DefaultBrush = LoadObject<UOdysseyBrush>(nullptr, TEXT("/Iliad/Brushes/Drawing_Tools/Penbrush1.Penbrush1"));
 }
 
 UOdysseyPainterEditorSettings::UOdysseyPainterEditorSettings( const FObjectInitializer& iObjectInitializer )

@@ -3,8 +3,8 @@
 
 #include "StrokeEngine/OdysseyStrokeEngine.h"
 
-#include "StrokeEngine/Smoothing/OdysseySmoothingAverage.h"
-#include "StrokeEngine/Smoothing/OdysseySmoothingPull.h"
+#include "StrokeEngine/OdysseyBlendParametersOverrides.h"
+#include "StrokeEngine/OdysseyBrushOptionsOverrides.h"
 #include "ObjectEditorUtils.h"
 
 //--------------------------------------------------------------------------------------
@@ -41,8 +41,8 @@ UOdysseyStrokeEngine::Initialize(FOdysseyPaintEngine* iPaintEngine)
     SetPaintEngine(iPaintEngine);
 
     //Set Default Brush
-    const UOdysseyPainterEditorSettings& settings = *GetDefault<UOdysseyPainterEditorSettings>();
-    FObjectEditorUtils::SetPropertyValue(this, "Brush", settings.BrushDefaults.DefaultBrush);
+    UOdysseyPainterEditorSettings* settings = UOdysseyPainterEditorSettings::Get();
+    FObjectEditorUtils::SetPropertyValue(this, "Brush", settings->BrushDefaults.DefaultBrush.LoadSynchronous());
 }
 
 void
@@ -53,12 +53,8 @@ UOdysseyStrokeEngine::Activate()
 void
 UOdysseyStrokeEngine::Inactivate()
 {
-    mWorker.Finish();
-
-    BrushInstance->StrokeFlush();
-
-    if (mPaintEngine)
-        mPaintEngine->Commit(BlendParameters);
+    Flush(); //Finish everything
+    Commit(); //Commit the jobs that has been done
 }
 
 //--------------------------------------------------------------------------------------
@@ -223,12 +219,8 @@ UOdysseyStrokeEngine::End()
         return false;
     }
 
-    mWorker.Finish();
-
-    BrushInstance->StrokeFlush();
-
-    //Commit the changes
-    mPaintEngine->Commit(BlendParameters);
+    Flush();
+    Commit();
 
     //Stop the painting
     mIsPainting = false;
@@ -262,6 +254,20 @@ UOdysseyStrokeEngine::Abort()
     return true;
 }
 
+void
+UOdysseyStrokeEngine::Flush()
+{
+    mWorker.Finish();
+    BrushInstance->StrokeFlush();
+}
+
+void
+UOdysseyStrokeEngine::Commit()
+{
+    if (mPaintEngine)
+        mPaintEngine->Commit(BlendParameters);
+}
+
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------- Tick API
     
@@ -285,7 +291,7 @@ UOdysseyStrokeEngine::Tick(float iDeltaTime)
     Shape->Tick(iDeltaTime);
 
     //Update the paintEngine
-    mWorker.Execute(1000/60); //60fps
+    mWorker.ExecuteFor(1000/60); //60fps
 
     BrushInstance->StrokeFlush();
 
@@ -357,6 +363,12 @@ UOdysseyStrokeEngine::GetBrushOptions()
     return BrushOptions;
 }
 
+UOdysseyStrokeEngine::FOnApplyOverrides&
+UOdysseyStrokeEngine::OnApplyOverridesDelegate()
+{
+    return mOnApplyOverridesDelegate;
+}
+
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------- Internal - BrushInstance
 
@@ -382,7 +394,7 @@ UOdysseyStrokeEngine::CreateBrushInstance(bool iApplyOverrides)
 
 	//Apply Overrides before setting the brushInstance in the strokeEngine properties
     if (iApplyOverrides)
-	    brushInstance->ApplyOverrides();
+	    ApplyOverrides(brushInstance);
 
     FObjectEditorUtils::SetPropertyValue(this, "BrushInstance", brushInstance);
     
@@ -395,6 +407,29 @@ UOdysseyStrokeEngine::OnBrushCompiled(UBlueprint* iBlueprint)
 {
 	DestroyBrushInstance();
 	CreateBrushInstance(false);
+}
+
+void
+UOdysseyStrokeEngine::ApplyOverrides(UOdysseyBrushAssetBase* iBrushInstance)
+{
+    if (BrushInstance)
+        UE_LOG(LogTemp, Warning, TEXT("ApplyOverrides whould only called when no BrushInstance is active, to avoid calling ExecuteStateChanged at each value change") );
+
+    UOdysseyBlendParametersOverrides* blendParametersOverrides = Cast<UOdysseyBlendParametersOverrides>(iBrushInstance->Overrides["OdysseyBlendParametersOverrides"]);
+    if (blendParametersOverrides)
+    {
+        FOdysseyBlendParameters blendParameters = GetBlendParameters();
+        blendParametersOverrides->Override(blendParameters);
+        FObjectEditorUtils::SetPropertyValue(this, "BlendParameters", blendParameters);
+    }
+
+    UOdysseyBrushOptionsOverrides* brushOptionsOverrides = Cast<UOdysseyBrushOptionsOverrides>(iBrushInstance->Overrides["OdysseyBrushOptionsOverrides"]);
+    if (brushOptionsOverrides)
+        brushOptionsOverrides->Override(BrushOptions);
+
+    Shape->ApplyOverrides(iBrushInstance->Overrides);
+
+    mOnApplyOverridesDelegate.Broadcast(iBrushInstance->Overrides);
 }
 
 //--------------------------------------------------------------------------------------
@@ -422,8 +457,6 @@ UOdysseyStrokeEngine::PostEditChangeChainProperty( struct FPropertyChangedChainE
 {
     Super::PostEditChangeChainProperty(PropertyChangedEvent);
 
-    //TODO: if PaintEngine is dirty : send ResourceBlock changed and flush paintEngine ( for undo purposes )
-
     if (PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive)
         return;
 
@@ -437,8 +470,6 @@ void
 UOdysseyStrokeEngine::PostEditChangeProperty(struct FPropertyChangedEvent & PropertyChangedEvent)
 {
     Super::PostEditChangeProperty(PropertyChangedEvent);
-
-    //TODO: if PaintEngine is dirty : send ResourceBlock changed and flush paintEngine ( for undo purposes )
 
     if (PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive)
         return;

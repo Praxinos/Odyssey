@@ -21,11 +21,20 @@ public class OdysseyBrush : ModuleRules
             }
         );
 
+        PublicIncludePathModuleNames.AddRange(
+            new string[] {
+                "InputCore",
+                "OdysseyCore",
+                "Engine",
+                "ULIS"
+            }
+        );
+
         PublicDependencyModuleNames.AddRange(
             new string[] {
-                "OdysseyCore",
-                "OdysseyImaging",
-                "OdysseyPaintEngine",
+                // "OdysseyCore",
+                // "OdysseyImaging",
+                // "OdysseyPaintEngine",
                 "ULIS",
                 "ULISLoader",
             }

@@ -1,0 +1,33 @@
+// IDDN FR.001.250001.004.S.X.2019.000.00000
+// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
+
+#include "StrokeEngine/OdysseyBrushOptionsOverrides.h"
+
+UOdysseyBrushOptionsOverrides::UOdysseyBrushOptionsOverrides()
+    : bOverride_Size        ( false                                         )
+    , bOverride_Flow        ( false                                         )
+    , bOverride_Step        ( false                                         )
+    , bOverride_Adaptative  ( false                                         )
+    , bOverride_Type        ( false                                         )
+    , Size                  ( 20                                            )
+    , Flow                  ( 100                                           )
+    , Step                  ( 20                                            )
+    , SizeAdaptative        ( true                                          )
+    , Type                  ( EOdysseyBrushInterpolationType::kCatmullRom   )
+{}
+
+//Applies the Overrides to the given object
+void
+UOdysseyBrushOptionsOverrides::Override(UOdysseyBrushOptions* iBlendParameters) const
+{
+    if (bOverride_Size)
+        FObjectEditorUtils::SetPropertyValue(iBlendParameters, "Size", Size);
+    if (bOverride_Flow)
+        FObjectEditorUtils::SetPropertyValue(iBlendParameters, "Flow", Flow);
+    if (bOverride_Step)
+        FObjectEditorUtils::SetPropertyValue(iBlendParameters, "Step", Step);
+    if (bOverride_Adaptative)
+        FObjectEditorUtils::SetPropertyValue(iBlendParameters, "SizeAdaptative", SizeAdaptative);
+    if (bOverride_Type)
+        FObjectEditorUtils::SetPropertyValue(iBlendParameters, "Type", Type);
+}

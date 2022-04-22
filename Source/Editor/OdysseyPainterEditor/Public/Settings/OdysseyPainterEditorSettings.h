@@ -40,7 +40,7 @@ public:
 
 public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Brush, meta = (AllowPrivateAccess = "true", DisplayThumbnail = "true", DisplayName = "Default Brush", AllowedClasses="OdysseyBrush"))
-    UOdysseyBrush* DefaultBrush;
+    TSoftObjectPtr<UOdysseyBrush> DefaultBrush;
 };
 
 /**

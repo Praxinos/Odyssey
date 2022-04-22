@@ -8,7 +8,7 @@
 #include "OdysseyBlendParameters.h"
 #include "StrokeEngine/OdysseyStrokeEngineWorker.h"
 #include "StrokeEngine/OdysseyStrokeOptions.h"
-#include "StrokeEngine/OdysseyFreehandShape.h"
+#include "StrokeEngine/Shapes/OdysseyFreehandShape.h"
 #include "StrokeEngine/Smoothing/IOdysseySmoothing.h"
 
 #include "OdysseyStrokeEngine.generated.h"
@@ -21,6 +21,11 @@ UCLASS()
 class ODYSSEYPAINTEREDITOR_API UOdysseyStrokeEngine : public UObject
 {
     GENERATED_UCLASS_BODY()
+
+public:
+    typedef TMap<FName, UObject*> tOverride;
+
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnApplyOverrides, const tOverride& iOverrides);
 
 public:
     // Destructor
@@ -47,6 +52,12 @@ public:
 
     //Aborts the stroke
     bool Abort();
+
+    //Finishes everything the StrokeEngine that is currently doing (not actually ending anything, but just finish the all the jobs in the worker)
+    void Flush();
+
+    //Finishes everything the StrokeEngine that is currently doing (not actually ending anything, but just finish the all the jobs in the worker)
+    void Commit();
 
 public:
     // Tick
@@ -77,6 +88,9 @@ public:
     // Returns the BrushOptions
     UOdysseyBrushOptions* GetBrushOptions();
 
+    // Returns the OnApplyOverrides delegate
+    FOnApplyOverrides& OnApplyOverridesDelegate();
+
 public:
     //UObject overrides
 
@@ -103,6 +117,9 @@ private:
 
     // Fired when the Brush is compiled
     void OnBrushCompiled(UBlueprint* iBlueprint);
+
+    //Apply brush Overrides
+    void ApplyOverrides(UOdysseyBrushAssetBase* iBrushInstance);
 
 private:
     // Internal - Property Changed
@@ -155,4 +172,5 @@ protected:
 
     //Internal
     bool                                mIsPainting;
+    FOnApplyOverrides                   mOnApplyOverridesDelegate;
 };

@@ -81,18 +81,18 @@ FOdysseyPaintEngine::Commit(const FOdysseyBlendParameters& iBlendParameters)
     //Update the EditedBlock content
     Update(iBlendParameters);
 
-    //Refresh the Original block to match the EditedBlock
-    CopyEditedBlockToOriginalBlock();
-
-    //Clear the Paint Block
-    ClearPaintBlock();
-
     //Clear the tile maps
     TArray<::ULIS::FRectI> rects = mEditedBlockInvalidTileMap.InvalidRects();
     mEditedBlockInvalidTileMap.Clear();
 
     //Inform the paintEngine has commited
     mOnCommitDelegate.Broadcast(rects);
+
+    //Refresh the Original block to match the EditedBlock
+    CopyEditedBlockToOriginalBlock();
+
+    //Clear the Paint Block
+    ClearPaintBlock();
 }
 
 void
@@ -103,6 +103,9 @@ FOdysseyPaintEngine::Reset()
 
     //Clear the Paint Block
     ClearPaintBlock();
+
+    //Refresh the Original block to match the EditedBlock
+    CopyEditedBlockToOriginalBlock();
     
     //Set Invalid Tile Map, so that the EditedBlock can refresh the right tiles on the next call of Update()
     TArray<::ULIS::FRectI> rects = mEditedBlockInvalidTileMap.InvalidRects();

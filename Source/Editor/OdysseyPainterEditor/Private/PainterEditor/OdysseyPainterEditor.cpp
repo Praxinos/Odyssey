@@ -39,6 +39,9 @@ void
 FOdysseyPainterEditor::InitData()
 {
 	mStrokeEngine = NewObject<UOdysseyStrokeEngine>();
+
+	mStrokeEngine->OnApplyOverridesDelegate().AddRaw(this, &FOdysseyPainterEditor::OnApplyOverrides);
+
 	mStrokeEngine->Initialize(&mPaintEngine);
 	mStrokeEngine->Activate();
     //---
@@ -70,21 +73,25 @@ void
 FOdysseyPainterEditor::Undo()
 {
 	//End stroke before undoing, allows to manage PaintEngine->OnTick Undo
-	//PaintEngine()->Flush();
+	mStrokeEngine->Flush();
+	mStrokeEngine->Commit();
 }
 
 void
 FOdysseyPainterEditor::Redo()
 {
 	//End stroke before redoing, allows to manage PaintEngine->OnTick Redo
-	//PaintEngine()->Flush();
+	mStrokeEngine->Flush();
+	mStrokeEngine->Commit();
 }
 
 void
 FOdysseyPainterEditor::ClearUndo()
 {
-	//End stroke before undoing, just to be perfectly clean
 	//PaintEngine()->Flush();
+	//End stroke before clearing undo
+	mStrokeEngine->Flush();
+	mStrokeEngine->Commit();
 }
 
 //--------------------------------------------------------------------------------------
@@ -139,6 +146,16 @@ void
 FOdysseyPainterEditor::SetSelectedTool(IOdysseyTool* iSelectedTool)
 {
     mSelectedTool = iSelectedTool;
+}
+
+//--------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------- Callbacks
+
+void
+FOdysseyPainterEditor::OnApplyOverrides(const TMap<FName, UObject*>& iOverrides)
+{
+	//TODO: Apply Overrides for Paint Color
+	//TODO: Apply Overrides for Other things like HUDs, Mesh Selector, or anything else
 }
 
 //--------------------------------------------------------------------------------------

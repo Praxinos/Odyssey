@@ -59,6 +59,10 @@ public:
     virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
 
 protected:
+    //Callbacks
+    virtual void OnApplyOverrides(const TMap<FName, UObject*>& iOverrides);
+
+protected:
     // FGCObject implementation
     virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
     

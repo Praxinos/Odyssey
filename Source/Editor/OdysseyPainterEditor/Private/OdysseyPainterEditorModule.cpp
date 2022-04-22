@@ -12,19 +12,14 @@
 #include "Toolkits/AssetEditorToolkit.h"
 #include "OdysseyPainterEditorSettings.h"
 #include "Models/OdysseyPainterEditorCommands.h"
+#include "OdysseyBrushAssetBase.h"
+#include "StrokeEngine/OdysseyBrushOptionsOverrides.h"
+#include "StrokeEngine/OdysseyBlendParametersOverrides.h"
+#include "StrokeEngine/Shapes/OdysseyFreehandShapeOverrides.h"
+#include "OdysseyPainterEditorBrushCustomization.h"
 #include <ULIS>
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorModule"
-
-class SimpleTestFramework {
-public:
-    void RunTest() {
-        const volatile int fenceA = 0;
-        ::ULIS::FColor* p = new ::ULIS::FColor( ::ULIS::Format_RGBA8 );
-        delete p; // No crash
-        const volatile int fenceB = 0;
-    }
-};
 
 /*-----------------------------------------------------------------------------
    FOdysseyPainterEditorModule
@@ -34,10 +29,7 @@ public:
 void
 FOdysseyPainterEditorModule::StartupModule()
 {
-    // Perform test
-    SimpleTestFramework f;
-    f.RunTest();
-
+    RegisterBrushOverrides(); //First thing to do, as it modifies the Brush CDO
     RegisterSettings();
     RegisterCommands();
 }
@@ -45,6 +37,7 @@ FOdysseyPainterEditorModule::StartupModule()
 void
 FOdysseyPainterEditorModule::ShutdownModule()
 {
+    UnregisterBrushOverrides();
     UnregisterSettings();
     UnregisterCommands();
 }
@@ -84,6 +77,21 @@ void
 FOdysseyPainterEditorModule::UnregisterCommands()
 {
     FOdysseyPainterEditorCommands::Unregister();
+}
+
+void
+FOdysseyPainterEditorModule::RegisterBrushOverrides()
+{
+    FOdysseyPainterEditorBrushCustomization::Register();
+    FOdysseyBrushOverride::Register(UOdysseyBrushOptionsOverrides::StaticClass());
+    FOdysseyBrushOverride::Register(UOdysseyBlendParametersOverrides::StaticClass());
+    FOdysseyBrushOverride::Register(UOdysseyFreehandShapeOverrides::StaticClass());
+}
+
+void
+FOdysseyPainterEditorModule::UnregisterBrushOverrides()
+{
+
 }
 
 IMPLEMENT_MODULE( FOdysseyPainterEditorModule, OdysseyPainterEditor );

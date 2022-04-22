@@ -44,6 +44,9 @@ public:
     // Tick
     void Tick(float iDeltaTime);
 
+    // Applies the shapes specific overrides
+    void ApplyOverrides(const TMap<FName, UObject*>& iOverrides);
+
 public:
     // Getters
     //Returns the StrokeOptions

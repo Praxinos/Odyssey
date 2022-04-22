@@ -4,7 +4,6 @@
 #include "OdysseyPainterEditorBrushSelectorTab.h"
 #include "Brush/SOdysseyBrushSelector.h"
 #include "Brush/SOdysseyBrushExposedParameters.h"
-#include "OdysseyBrushPreferencesOverrides.h"
 #include "OdysseyBrushAssetBase.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorStrokeOptionsTab.h"

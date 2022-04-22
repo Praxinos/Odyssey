@@ -11,6 +11,31 @@
 #include <ULIS>
 #include "ULISLoaderModule.h"
 
+//static
+FOdysseyBrushOverride*
+FOdysseyBrushOverride::Instance()
+{
+    static FOdysseyBrushOverride* instance = nullptr;
+    if (!instance)
+        instance = new FOdysseyBrushOverride();
+
+    return instance;
+}
+
+//static
+void
+FOdysseyBrushOverride::Register(UClass* iClass)
+{
+    Instance()->mClasses.Add(iClass);
+}
+
+//static
+TArray<UClass*>
+FOdysseyBrushOverride::GetClasses()
+{
+    return Instance()->mClasses;
+}
+
 /////////////////////////////////////////////////////
 // BrushAssetBase
 //--------------------------------------------------------------------------------------
@@ -20,17 +45,47 @@ UOdysseyBrushAssetBase::~UOdysseyBrushAssetBase()
 {
 }
 
-UOdysseyBrushAssetBase::UOdysseyBrushAssetBase(const FObjectInitializer& iObjectInitializer)
-    :  Super(iObjectInitializer)
-
+UOdysseyBrushAssetBase::UOdysseyBrushAssetBase()
     //Properties
-    , BrushOptions(iObjectInitializer.CreateDefaultSubobject<UOdysseyBrushOptions>(this, "UOdysseyBrushAssetBase::BrushOptions"))
+    : BrushOptions(CreateDefaultSubobject<UOdysseyBrushOptions>("UOdysseyBrushAssetBase::BrushOptions"))
 
     //Internal
     , mStroke()
     , mIsDrawing(false)
 {
     ::ULIS::FContext::MarkEventFinished(&mEvent);
+}
+
+void
+UOdysseyBrushAssetBase::PostLoad()
+{
+    Super::PostLoad();
+
+    if (HasAnyFlags(RF_ArchetypeObject))
+    {
+        //Remove all overrides which failed to load (can happen in our case when removing overrides classes)
+        TArray<FName> keysToRemove;
+        for (auto Elem : Overrides)
+        {
+            if (!Elem.Value)
+                keysToRemove.Add(Elem.Key);
+        }
+
+        for (auto& key : keysToRemove)
+        {
+            Overrides.Remove(key);
+        }
+
+        //Add missing classes (can happen in our case when adding overrides classes, in existing brushes)
+        for (auto overrideClass : FOdysseyBrushOverride::GetClasses())
+        {
+            bool containsClass = Overrides.Contains(overrideClass->GetFName());
+            if (!containsClass)
+            {
+                Overrides.Add(overrideClass->GetFName(), NewObject<UObject>(this, overrideClass, overrideClass->GetFName() ));
+            }
+        }
+    }
 }
 
 //--------------------------------------------------------------------------------------
@@ -275,19 +330,6 @@ UOdysseyBrushAssetBase::Tick(float DeltaTime, bool iShouldFlush)
     if (iShouldFlush)
         StrokeFlush();
 }
-
-//--------------------------------------------------------------------------------------
-//--------------------------------------------------------------------------------- Overrides
-    
-#if WITH_EDITOR
-
-void
-UOdysseyBrushAssetBase::ApplyOverrides()
-{
-    //TODO:
-}
-
-#endif
 
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------ Internal - Tick API
@@ -893,4 +935,21 @@ UOdysseyBrushAssetBase::ExecuteStateChanged()
 {
     FEditorScriptExecutionGuard ScriptGuard;
     OnStateChanged();
+}
+
+void UOdysseyBrushAssetBase::Serialize (FArchive& Ar)
+{
+	Super::Serialize(Ar);
+
+    //Serialize overrides
+    /* if (Ar->IsLoading())
+    {
+        UClass* ObjectClass = nullptr;
+        Ar << ObjectClass;
+    }
+
+    if (Ar->IsSaving())
+    {
+
+    } */
 }

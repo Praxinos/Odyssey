@@ -1,7 +1,7 @@
 // IDDN FR.001.250001.004.S.X.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
-#include "StrokeEngine/OdysseyFreehandShape.h"
+#include "StrokeEngine/Shapes/OdysseyFreehandShape.h"
 
 #include "StrokeEngine/Smoothing/OdysseySmoothingAverage.h"
 #include "StrokeEngine/Smoothing/OdysseySmoothingPull.h"
@@ -88,6 +88,14 @@ UOdysseyFreehandShape::Tick(float iDeltaTime)
     {
         CatchUp();
     }
+}
+
+void
+UOdysseyFreehandShape::ApplyOverrides(const TMap<FName, UObject*>& iOverrides)
+{
+    const UOdysseyFreehandShapeOverrides* freehandShapeOverrides = Cast<const UOdysseyFreehandShapeOverrides>(iOverrides["OdysseyFreehandShapeOverrides"]);
+    if (freehandShapeOverrides)
+        freehandShapeOverrides->Override(this);
 }
 
 //--------------------------------------------------------------------------------------

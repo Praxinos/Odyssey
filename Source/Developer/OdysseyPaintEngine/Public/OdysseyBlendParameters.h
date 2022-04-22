@@ -13,31 +13,13 @@ struct ODYSSEYPAINTENGINE_API FOdysseyBlendParameters
 {
     GENERATED_BODY()
 
-    FOdysseyBlendParameters()
-        : bEraserMode(false)
-        , BlendingMode(EOdysseyBlendingMode::kNormal)
-        , AlphaMode(EOdysseyAlphaMode::kNormal)
-        , Opacity(100.0f)
-    {
-    }
+    FOdysseyBlendParameters();
 
-    FOdysseyBlendParameters(bool iEraserMode, EOdysseyBlendingMode iBlendingMode, EOdysseyAlphaMode iAlphaMode, float iOpacity)
-        : bEraserMode(iEraserMode)
-        , BlendingMode(iBlendingMode)
-        , AlphaMode(iAlphaMode)
-        , Opacity(iOpacity)
-    {
-    }
+    FOdysseyBlendParameters(bool iEraserMode, EOdysseyBlendingMode iBlendingMode, EOdysseyAlphaMode iAlphaMode, float iOpacity);
 
-    bool operator==(const FOdysseyBlendParameters& rhs) const
-    {
-        return BlendingMode == rhs.BlendingMode && AlphaMode == rhs.AlphaMode && Opacity == rhs.Opacity && bEraserMode == rhs.bEraserMode; // or another approach as above
-    }
+    bool operator==(const FOdysseyBlendParameters& rhs) const;
 
-    bool operator!=(const FOdysseyBlendParameters& rhs) const
-    {
-        return !operator==(rhs);
-    }
+    bool operator!=(const FOdysseyBlendParameters& rhs) const;
 
 public:
     UPROPERTY(EditAnywhere, Category = "PaintEngine")
