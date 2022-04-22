@@ -7,13 +7,13 @@
 #include "OdysseyHUDLine.h"
 #include "IOdysseyTool.h"
 
-class ODYSSEYTOOLSYSTEM_API FOdysseyToolLine : public IOdysseyTool
+class ODYSSEYTOOLSYSTEM_API FOdysseyToolPolygon : public IOdysseyTool
 {
 public:
     // Construction / Destruction
-    virtual ~FOdysseyToolLine();
+    virtual ~FOdysseyToolPolygon();
 
-    FOdysseyToolLine( FVector2D iStartPoint );
+    FOdysseyToolPolygon( FVector2D iStartPoint );
 
 public:
     void Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) override;
@@ -28,5 +28,5 @@ public:
     ::ULIS::TArray<::ULIS::FVec2I> GenerateToolPoints() override;
 
 private:
-    UOdysseyHUDLine* mLine;
+    TArray<UOdysseyHUDLine*> mLines;
 };
