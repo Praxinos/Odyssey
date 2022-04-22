@@ -59,6 +59,7 @@ FOdysseyPainterEditorViewportClient::FOdysseyPainterEditorViewportClient( FOdyss
     , mIsCapturedByStylus(false)
     , mNearestNeighbourTexture()
     , mBilinearTexture()
+    , mViewportElements()
 {
     check( // mOdysseyPainterEditor.IsValid() &&
            mOdysseyPainterEditorViewportPtr.IsValid() );
@@ -108,6 +109,9 @@ FOdysseyPainterEditorViewportClient::OnStylusInputChanged( TSharedPtr<IStylusInp
 void
 FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanvas )
 {
+    for( int i = 0; i < mViewportElements.Num(); i++ )
+        mViewportElements[i]->Draw();
+
     // Send Tick to PaintEngine
     // TODO: Move the call of Tick in a FTickableEditorObject, the PaintEngine itself should be a FTickableEditorObject
 	mOdysseyPainterEditor->PaintEngine()->Tick();
