@@ -146,7 +146,6 @@ private:
     FVector2D                               mZoomViewportPointReference; //Where did we begin the zoom ?
     //FVector2D                               mZoomTexturePointReference; //Where did we begin the zoom ?
     FVector2D                               mPivotPointRatio; //Where is the center of the viewport from the center of the texture as a ratio, rotation independant
-    FTransform2D                            mPreviousTransform; //Last known Transformation determining position of the texture in the viewport
 
 
     eState                                  mCurrentToolState;

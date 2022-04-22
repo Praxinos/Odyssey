@@ -17,26 +17,23 @@ class ODYSSEYWIDGETS_API UOdysseyHUDHandle : public UOdysseyHUDElement
     GENERATED_BODY()
 
 public:
-    void Init(FName iName, UOdysseyHUDElement* iParent, FVector2D* iReferencePoint, FOdysseyPaintEngineHUD* iPaintEngineHUD, FTransform2D iTransform = FTransform2D());
-
-//UObject overrides
-public:
-    virtual void PostEditChangeProperty(FPropertyChangedEvent& iPropertyChangedEvent) override;
-    virtual void PreEditChange(FProperty* iPropertyAboutToChange) override;
+    void Init(FName iName, UOdysseyHUDElement* iParent, FVector2D* iReferencePoint, FTransform2D iTransform = FTransform2D());
 
 //UOdysseyHUDElement overrides
 public:
     TSharedPtr<SWidget> CreateWidget() override;
-    void Draw() override;
+    void Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) override;
     virtual void MouseMove(FViewport* iViewport, int32 iX, int32 iY) override;
     virtual FReply InputKey( FViewport* iViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed, bool iGamepad, FReply& ioReply ) override;
     virtual void CapturedMouseMove( FViewport* iViewport, int32 iX, int32 iY ) override;
-    void Erase() override;
+    void Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) override;
 
 private:
     UOdysseyHUDElement* mParent;
 
     FVector2D* mReferencePoint;
+    FVector2D mPreviousPosition;
+    int mPreviousHandleSize;
 
 public:
     UPROPERTY( EditAnywhere )

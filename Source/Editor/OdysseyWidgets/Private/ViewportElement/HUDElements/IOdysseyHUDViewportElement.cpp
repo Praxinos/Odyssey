@@ -4,32 +4,10 @@
 #include "IOdysseyHUDViewportElement.h"
 
 IOdysseyHUDViewportElement::IOdysseyHUDViewportElement()
+: mPreviousTransform( FTransform2D() )
 {
-    mPaintEngineHUD = nullptr;
 }
 
 IOdysseyHUDViewportElement::~IOdysseyHUDViewportElement()
 {
-}
-
-void 
-IOdysseyHUDViewportElement::SetPaintEngineHUD(FOdysseyPaintEngineHUD* iPaintEngineHUD)
-{
-    mPaintEngineHUD = iPaintEngineHUD;
-}
-
-FOdysseyPaintEngineHUD* 
-IOdysseyHUDViewportElement::GetPaintEngineHUD()
-{
-    return mPaintEngineHUD;
-}
-
-void IOdysseyHUDViewportElement::SetTransform( FTransform2D iTransform)
-{
-    mTransform = iTransform;
-}
-
-FTransform2D IOdysseyHUDViewportElement::GetTransform()
-{
-    return mTransform;
 }

@@ -17,11 +17,10 @@ UCLASS()
 class ODYSSEYWIDGETS_API UOdysseyHUDElement : public UOdysseyHUDSlateElement,
                                               public IOdysseyHUDViewportElement
 {
-    DECLARE_DELEGATE_RetVal(FReply, FOnApplyHUDAction);
     GENERATED_BODY()
 
 public:     
-    void Init(FName iName, FOdysseyPaintEngineHUD* iPaintEngineHUD, FTransform2D iTransform = FTransform2D());
+    void Init(FName iName, FTransform2D iTransform = FTransform2D());
 
 //UOdysseyHUDSlateElement overrides
 public:
@@ -29,11 +28,11 @@ public:
 
 //IOdysseyHUDViewportElement overrides
 public:
-    void Draw() override;
+    void Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) override;
     virtual void MouseMove(FViewport* iViewport, int32 iX, int32 iY) override;
     virtual FReply InputKey( FViewport* iViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed, bool iGamepad, FReply& ioReply ) override;
     virtual void CapturedMouseMove( FViewport* iViewport, int32 iX, int32 iY ) override;
-    virtual void Erase();
+    virtual void Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D());
 
     //UObject overrides
 public:
@@ -44,10 +43,6 @@ public:
     void AddElement( UOdysseyHUDElement* iElementToAdd );
     bool IsInvalid();
     bool IsCaptured();
-    FOnApplyHUDAction& OnApplyHUDAction();
-
-public:
-    virtual void SetTransform(FTransform2D iTransform) override;
 
 private:
     void InternalIsInvalid( bool &ioIsInvalid );
@@ -63,8 +58,4 @@ protected:
 
     /** If this element is captured by mouse or keyboard shortcut, then the associated viewport shouldn't do anything else than manipulating this HUD */
     bool mIsCaptured;
-
-private:
-    /** Action linked to the "Apply" button of the HUD in the interface. If not bound, the button won't show */
-    FOnApplyHUDAction mOnApplyHUDAction;
 };

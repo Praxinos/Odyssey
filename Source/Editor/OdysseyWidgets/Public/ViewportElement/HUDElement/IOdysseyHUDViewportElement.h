@@ -16,22 +16,13 @@ public:
     virtual ~IOdysseyHUDViewportElement();
 
 public:
-    virtual void Draw() = 0;
+    virtual void Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) = 0;
     virtual void MouseMove(FViewport* iViewport, int32 iX, int32 iY) = 0;
     virtual FReply InputKey( FViewport* iViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed, bool iGamepad, FReply& ioReply ) = 0;
     virtual void CapturedMouseMove( FViewport* iViewport, int32 iX, int32 iY ) = 0;
-    virtual void Erase() = 0;
-
-//Getters/setters
-public:
-    void SetPaintEngineHUD( FOdysseyPaintEngineHUD* iPaintEngineHUD);
-    FOdysseyPaintEngineHUD* GetPaintEngineHUD();
-    virtual void SetTransform( FTransform2D iTransform );
-    virtual FTransform2D GetTransform();
+    virtual void Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) = 0;
 
 protected:
-    FOdysseyPaintEngineHUD* mPaintEngineHUD;
-
-    /** The transform applied to the element if needed */
-    FTransform2D mTransform;
+    /** The previous transform applied to the element*/
+    FTransform2D mPreviousTransform;
 };

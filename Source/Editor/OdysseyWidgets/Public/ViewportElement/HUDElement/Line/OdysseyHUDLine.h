@@ -17,18 +17,13 @@ class ODYSSEYWIDGETS_API UOdysseyHUDLine : public UOdysseyHUDElement
     GENERATED_BODY()
 
 public:
-    void Init( FName iName, FVector2D iStartPoint, FVector2D iFinishPoint, FOdysseyPaintEngineHUD* iPaintEngineHUD, FTransform2D iTransform = FTransform2D() );
-
-//UObject overrides
-public:
-    virtual void PostEditChangeProperty(FPropertyChangedEvent& iPropertyChangedEvent) override;
-    virtual void PreEditChange(FProperty* iPropertyAboutToChange) override;
+    void Init( FName iName, FVector2D iStartPoint, FVector2D iFinishPoint, FTransform2D iTransform = FTransform2D() );
 
 //UOdysseyHUDElement overrides
 public:
     TSharedPtr<SWidget> CreateWidget() override;
-    void Draw() override;
-    void Erase() override;
+    void Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) override;
+    void Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) override;
 
 public:
     UPROPERTY( EditAnywhere )
@@ -36,6 +31,10 @@ public:
 
     UPROPERTY( EditAnywhere )
     FVector2D mFinishPoint;
+
+private:
+    FVector2D mPreviousStartPoint;
+    FVector2D mPreviousFinishPoint;
 
 private:
     /** The widget representation of the line in Editor */

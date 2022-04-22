@@ -4,26 +4,13 @@
 #include "Handle/OdysseyHUDHandle.h"
 
 
-void UOdysseyHUDHandle::Init( FName iName, UOdysseyHUDElement* iParent, FVector2D* iReferencePoint, FOdysseyPaintEngineHUD* iPaintEngineHUD, FTransform2D iTransform )
+void UOdysseyHUDHandle::Init( FName iName, UOdysseyHUDElement* iParent, FVector2D* iReferencePoint, FTransform2D iTransform )
 {
-    UOdysseyHUDElement::Init( iName, iPaintEngineHUD, iTransform );
+    UOdysseyHUDElement::Init( iName, iTransform );
     mParent = iParent;
-    mHandleSize = 2;
+    mPreviousHandleSize = mHandleSize = 2;
     mReferencePoint = iReferencePoint;
-}
-
-void UOdysseyHUDHandle::PostEditChangeProperty(FPropertyChangedEvent& iPropertyChangedEvent)
-{
-    UOdysseyHUDElement::PostEditChangeProperty( iPropertyChangedEvent );
-    
-    mIsInvalid = true;
-}
-
-void UOdysseyHUDHandle::PreEditChange(FProperty* iPropertyAboutToChange)
-{
-    UOdysseyHUDElement::PreEditChange( iPropertyAboutToChange );
-
-    Erase();
+    mPreviousPosition = *mReferencePoint;
 }
 
 TSharedPtr<SWidget> UOdysseyHUDHandle::CreateWidget()
@@ -33,27 +20,44 @@ TSharedPtr<SWidget> UOdysseyHUDHandle::CreateWidget()
     return mElementsWidget;
 }
 
-void UOdysseyHUDHandle::Draw()
+void UOdysseyHUDHandle::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
 {
-    //Draw the children of this HUDElement
-    UOdysseyHUDElement::Draw();
+    if (!ioBlock)
+        return;
 
-    FVector2D transformedReferencePoint = mTransform.TransformPoint(*mReferencePoint);
+    if ( mIsInvalid || mPreviousTransform != iTransform || mPreviousHandleSize != mHandleSize || mPreviousPosition != *mReferencePoint )
+    {
+        Erase(ioBlock, iTransform);
+        //Draw the children of this HUDElement
+        UOdysseyHUDElement::Draw(ioBlock, iTransform);
+    }
+    else
+    {
+        //Draw the children of this HUDElement
+        UOdysseyHUDElement::Draw(ioBlock, iTransform);
+        return;
+    }
+
+    FVector2D transformedReferencePoint = iTransform.TransformPoint(*mReferencePoint);
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_RGBA8);
-    ctx.DrawRectangle(*(mPaintEngineHUD->GetHUDBlock()), ::ULIS::FVec2I(transformedReferencePoint.X - mHandleSize, transformedReferencePoint.Y - mHandleSize), ::ULIS::FVec2I(transformedReferencePoint.X + mHandleSize, transformedReferencePoint.Y + mHandleSize), ::ULIS::FColor::RGBA8(255, 0, 0, 255));
+    ctx.DrawRectangle(*(ioBlock), ::ULIS::FVec2I(transformedReferencePoint.X - mHandleSize, transformedReferencePoint.Y - mHandleSize), ::ULIS::FVec2I(transformedReferencePoint.X + mHandleSize, transformedReferencePoint.Y + mHandleSize), ::ULIS::FColor::RGBA8(255, 0, 0, 255));
     ctx.Finish();
 
-    mPaintEngineHUD->GetHUDBlock()->Dirty();
+    mPreviousTransform = iTransform;
+    mPreviousHandleSize = mHandleSize;
+    mPreviousPosition = *mReferencePoint;
+
+    ioBlock->Dirty();
 }
 
-void UOdysseyHUDHandle::Erase()
+void UOdysseyHUDHandle::Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
 {
     //Erase the children of this HUDElement
-    UOdysseyHUDElement::Erase();
+    UOdysseyHUDElement::Erase(ioBlock, iTransform);
 
-    FVector2D transformedReferencePoint = mTransform.TransformPoint(*mReferencePoint);
+    FVector2D transformedReferencePoint = mPreviousTransform.TransformPoint(mPreviousPosition);
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_RGBA8);
-    ctx.DrawRectangle(*(mPaintEngineHUD->GetHUDBlock()), ::ULIS::FVec2I(transformedReferencePoint.X - mHandleSize, transformedReferencePoint.Y - mHandleSize), ::ULIS::FVec2I(transformedReferencePoint.X + mHandleSize, transformedReferencePoint.Y + mHandleSize), ::ULIS::FColor::RGBA8(255, 0, 0, 0));
+    ctx.DrawRectangle(*(ioBlock), ::ULIS::FVec2I(transformedReferencePoint.X - mPreviousHandleSize, transformedReferencePoint.Y - mPreviousHandleSize), ::ULIS::FVec2I(transformedReferencePoint.X + mPreviousHandleSize, transformedReferencePoint.Y + mPreviousHandleSize), ::ULIS::FColor::RGBA8(255, 0, 0, 0));
     ctx.Finish();
 }
 
@@ -61,25 +65,18 @@ void UOdysseyHUDHandle::MouseMove(FViewport* iViewport, int32 iX, int32 iY)
 {
     UOdysseyHUDElement::MouseMove( iViewport, iX, iY );
 
-    FVector2D pointToCheck = mTransform.TransformPoint( *mReferencePoint );
+    FVector2D pointToCheck = mPreviousTransform.TransformPoint( *mReferencePoint );
 
     float distSquared = FVector2D::DistSquared(pointToCheck, FVector2D(iX, iY));
-    UE_LOG(LogTemp, Display, TEXT("%lf"), distSquared);
     if ( mHandleSize != 5 && distSquared < 25)
     {
-        FProperty* handleSizeProperty = FindFProperty<FProperty>(this->GetClass(), "mHandleSize");
-        PreEditChange( handleSizeProperty );
         mHandleSize = 5;
-        FPropertyChangedEvent propertyChangedEvent( handleSizeProperty, EPropertyChangeType::ValueSet);
-        PostEditChangeProperty(propertyChangedEvent);
+        mIsInvalid = true;
     }
     else if( mHandleSize != 2 && distSquared > 25 )
     {
-        FProperty* handleSizeProperty = FindFProperty<FProperty>(this->GetClass(), "mHandleSize");
-        PreEditChange(handleSizeProperty);
         mHandleSize = 2;
-        FPropertyChangedEvent propertyChangedEvent(handleSizeProperty, EPropertyChangeType::ValueSet);
-        PostEditChangeProperty(propertyChangedEvent);
+        mIsInvalid = true;
     }
 }
 
@@ -89,7 +86,7 @@ FReply UOdysseyHUDHandle::InputKey( FViewport* iViewport, int32 iControllerId, F
 
     if (iKey == EKeys::LeftMouseButton && iEvent == EInputEvent::IE_Pressed)
     {
-        FVector2D pointToCheck = mTransform.TransformPoint(*mReferencePoint);
+        FVector2D pointToCheck = mPreviousTransform.TransformPoint(*mReferencePoint);
 
         float distSquared = FVector2D::DistSquared(pointToCheck, FVector2D(iViewport->GetMouseX(), iViewport->GetMouseY()));
         if( distSquared < 25 )
@@ -100,7 +97,6 @@ FReply UOdysseyHUDHandle::InputKey( FViewport* iViewport, int32 iControllerId, F
     }
     else if (iKey == EKeys::LeftMouseButton && iEvent == EInputEvent::IE_Released && mIsCaptured)
     {
-        UE_LOG(LogTemp, Display, TEXT("ReleaseCapture"));
         mIsCaptured = false;
         ioReply = FReply::Handled();
     }
@@ -114,10 +110,8 @@ void UOdysseyHUDHandle::CapturedMouseMove( FViewport* iViewport, int32 iX, int32
 
     if (mIsCaptured)
     {
-        FVector2D position = mTransform.Inverse().TransformPoint( FVector2D(iX, iY) );
-        mParent->PreEditChange(nullptr);
+        FVector2D position = mPreviousTransform.Inverse().TransformPoint( FVector2D(iX, iY) );
         mReferencePoint->Set(position.X, position.Y);
-        mParent->PostEditChange();
         mIsInvalid = true;
     }
 }

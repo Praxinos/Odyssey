@@ -3,13 +3,12 @@
 
 #include "OdysseyHUDElement.h"
 
-void UOdysseyHUDElement::Init(FName iName, FOdysseyPaintEngineHUD* iPaintEngineHUD, FTransform2D iTransform /*= FTransform2D()*/ )
+void UOdysseyHUDElement::Init(FName iName, FTransform2D iTransform /*= FTransform2D()*/ )
 {
     mName = iName;
-    mPaintEngineHUD = iPaintEngineHUD;
     mIsInvalid = true;
     mIsCaptured = false;
-    mTransform = iTransform;
+    mPreviousTransform = iTransform;
 }
 
 TSharedPtr<SWidget> UOdysseyHUDElement::CreateWidget()
@@ -23,27 +22,14 @@ TSharedPtr<SWidget> UOdysseyHUDElement::CreateWidget()
         ];
     }
 
-    if (mOnApplyHUDAction.IsBound())
-    { 
-        mElementsWidget->AddSlot()
-        [
-            SNew(SButton)
-            .OnClicked_Lambda([this]()->FReply{ return mOnApplyHUDAction.Execute(); })
-            [
-                SNew(STextBlock)
-                .Text(FText::FromString(TEXT("Apply")))
-            ]
-        ];
-    }
-
     return mElementsWidget;
 }
 
-void UOdysseyHUDElement::Draw()
+void UOdysseyHUDElement::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
 {
     for (auto it = mElements.CreateConstIterator(); it; ++it)
     {
-        it.Value()->Draw();
+        it.Value()->Draw(ioBlock, iTransform);
     }
 
     mIsInvalid = false;
@@ -79,11 +65,12 @@ void UOdysseyHUDElement::CapturedMouseMove( FViewport* iViewport, int32 iX, int3
     }
 }
 
-void UOdysseyHUDElement::Erase()
+void UOdysseyHUDElement::Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
 {
     for (auto it = mElements.CreateConstIterator(); it; ++it)
     {
-        it.Value()->Erase();
+        it.Value()->Erase(ioBlock, iTransform);
+        it.Value()->mIsInvalid = true;
     }
 }
 
@@ -123,21 +110,6 @@ bool UOdysseyHUDElement::IsCaptured()
 
     InternalIsCaptured(isCaptured);
     return isCaptured;
-}
-
-
-UOdysseyHUDElement::FOnApplyHUDAction& UOdysseyHUDElement::OnApplyHUDAction()
-{
-    return mOnApplyHUDAction;
-}
-
-void UOdysseyHUDElement::SetTransform(FTransform2D iTransform)
-{
-    for (auto it = mElements.CreateIterator(); it; ++it)
-    {
-        it.Value()->mTransform = iTransform;
-        it.Value()->SetTransform(iTransform);
-    }
 }
 
 void UOdysseyHUDElement::InternalIsInvalid( bool &ioIsInvalid )

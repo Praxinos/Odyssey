@@ -55,7 +55,6 @@ FOdysseyPainterEditorViewportClient::FOdysseyPainterEditorViewportClient( FOdyss
     , mCheckerboardTexture( NULL )
     , mCurrentMouseCursor( EMouseCursor::Default )
     , mPivotPointRatio( FVector2D( 0.5, 0.5 ) )
-    , mPreviousTransform()
     , mCurrentToolState( eState::kIdle )
     , mIsCapturedByStylus(false)
     , mNearestNeighbourTexture()
@@ -203,7 +202,7 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
         // }
     }
 
-    IOdysseySurface* HUDSurface = mOdysseyPainterEditor->HUDSurface();
+    IOdysseySurfaceEditable* HUDSurface = mOdysseyPainterEditor->HUDSurface();
     UTexture* HUDTexture = nullptr;
     if (HUDSurface)
     {
@@ -224,18 +223,8 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
 
         if (mOdysseyPainterEditor->GetGUI()->GetHUDTab()->GetHUD())
         {
-            if (mOdysseyPainterEditor->GetGUI()->GetHUDTab()->GetHUD()->IsInvalid())
-                mOdysseyPainterEditor->GetGUI()->GetHUDTab()->GetHUD()->Draw();
-
-            if (mPreviousTransform != transform)
-            {
-                mOdysseyPainterEditor->GetGUI()->GetHUDTab()->GetHUD()->Erase();
-                mOdysseyPainterEditor->GetGUI()->GetHUDTab()->GetHUD()->SetTransform(transform);
-                mOdysseyPainterEditor->GetGUI()->GetHUDTab()->GetHUD()->Draw();
-            }
+            mOdysseyPainterEditor->GetGUI()->GetHUDTab()->GetHUD()->Draw(HUDSurface->Block(), transform);
         }
-
-        mPreviousTransform = transform;
 
         FCanvasTileItem tileItem( FVector2D(0,0), HUDTexture->Resource, FVector2D( iViewport->GetSizeXY().X, iViewport->GetSizeXY().Y ), FLinearColor::White );
         tileItem.BatchedElementParameters = batchedElementParameters;

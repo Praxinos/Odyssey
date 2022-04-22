@@ -39,31 +39,16 @@ FOdysseyPainterEditorHUDTab::CreateWidget()
 	if (!mHUD)
     {
         UOdysseyHUDElement* decoratedLine = NewObject<UOdysseyHUDElement>();
-        decoratedLine->Init( FName("DecoratedLine"), mEditor->PaintEngineHUD() );
+        decoratedLine->Init( FName("DecoratedLine") );
 
         UOdysseyHUDLine* line = NewObject<UOdysseyHUDLine>();
-        line->Init( FName("Line1"), FVector2D(0, 0), FVector2D(500, 500), mEditor->PaintEngineHUD() );
+        line->Init( FName("Line1"), FVector2D(0, 0), FVector2D(500, 500) );
         decoratedLine->AddElement(line);
-       
-        FOdysseyPaintEngine* paintEngine = mEditor->PaintEngine();
-        line->OnApplyHUDAction().BindLambda( [line, paintEngine]() 
-        {
-            ::ULIS::TArray<::ULIS::FVec2I> points;
-
-            GenerateLinePoints(::ULIS::FVec2I(line->mStartPoint.X, line->mStartPoint.Y), ::ULIS::FVec2I(line->mFinishPoint.X, line->mFinishPoint.Y), points);
-            for( int i = 0; i < points.Size(); i++ )
-            {
-                paintEngine->PushStroke( FOdysseyStrokePoint( points[i].x, points[i].y ) );
-            }
-            paintEngine->EndStroke();
-
-            return FReply::Handled();
-        } );
-
+        
         UOdysseyHUDHandle* handleStart = NewObject<UOdysseyHUDHandle>();
-        handleStart->Init( FName("HandleStart"), line, &(line->mStartPoint), mEditor->PaintEngineHUD());
+        handleStart->Init( FName("HandleStart"), line, &(line->mStartPoint));
         UOdysseyHUDHandle* handleFinish = NewObject<UOdysseyHUDHandle>();
-        handleFinish->Init(FName("HandleFinish"), line, &(line->mFinishPoint), mEditor->PaintEngineHUD());
+        handleFinish->Init(FName("HandleFinish"), line, &(line->mFinishPoint));
         line->AddElement( handleStart );
         line->AddElement( handleFinish );
 

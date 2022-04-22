@@ -4,25 +4,11 @@
 #include "Line/OdysseyHUDLine.h"
 
 
-void UOdysseyHUDLine::Init( FName iName, FVector2D iStartPoint, FVector2D iFinishPoint, FOdysseyPaintEngineHUD* iPaintEngineHUD, FTransform2D iTransform )
+void UOdysseyHUDLine::Init( FName iName, FVector2D iStartPoint, FVector2D iFinishPoint, FTransform2D iTransform )
 {
-    UOdysseyHUDElement::Init( iName, iPaintEngineHUD, iTransform );
-    mStartPoint = iStartPoint;
-    mFinishPoint = iFinishPoint;
-}
-
-void UOdysseyHUDLine::PostEditChangeProperty( FPropertyChangedEvent& iPropertyChangedEvent )
-{
-    UOdysseyHUDElement::PostEditChangeProperty( iPropertyChangedEvent );
-
-    mIsInvalid = true;
-}
-
-void UOdysseyHUDLine::PreEditChange( FProperty* iPropertyAboutToChange )
-{
-    UOdysseyHUDElement::PreEditChange( iPropertyAboutToChange );
-
-    Erase();
+    UOdysseyHUDElement::Init( iName, iTransform );
+    mStartPoint = mPreviousStartPoint = iStartPoint;
+    mFinishPoint = mPreviousFinishPoint = iFinishPoint;
 }
 
 TSharedPtr<SWidget> UOdysseyHUDLine::CreateWidget()
@@ -45,32 +31,50 @@ TSharedPtr<SWidget> UOdysseyHUDLine::CreateWidget()
     return mElementsWidget;
 }
 
-void UOdysseyHUDLine::Draw()
+void UOdysseyHUDLine::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
 {
-    //Draw the children of this HUDElement
-    UOdysseyHUDElement::Draw();
-
-    if( !mPaintEngineHUD )
+    if( !ioBlock )
         return;
 
-    FVector2D transformedStartPoint = mTransform.TransformPoint(mStartPoint);
-    FVector2D transformedFinishPoint = mTransform.TransformPoint(mFinishPoint);
+    if ( mIsInvalid || mPreviousStartPoint != mStartPoint || mPreviousFinishPoint != mFinishPoint || mPreviousTransform != iTransform)
+    {
+        Erase(ioBlock, iTransform);
+        //Draw the children of this HUDElement
+        UOdysseyHUDElement::Draw(ioBlock, iTransform);
+    }
+    else
+    {
+        //Draw the children of this HUDElement
+        UOdysseyHUDElement::Draw(ioBlock, iTransform);
+        return;
+    }
+
+    FVector2D transformedStartPoint = iTransform.TransformPoint(mStartPoint);
+    FVector2D transformedFinishPoint = iTransform.TransformPoint(mFinishPoint);
 
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_RGBA8);
-    ctx.DrawLine(*(mPaintEngineHUD->GetHUDBlock()), ::ULIS::FVec2I(transformedStartPoint.X, transformedStartPoint.Y), ::ULIS::FVec2I(transformedFinishPoint.X, transformedFinishPoint.Y), ::ULIS::FColor::RGBA8(0, 255, 0, 255));
+    ctx.DrawLine(*(ioBlock), ::ULIS::FVec2I(transformedStartPoint.X, transformedStartPoint.Y), ::ULIS::FVec2I(transformedFinishPoint.X, transformedFinishPoint.Y), ::ULIS::FColor::RGBA8(0, 255, 0, 255));
     ctx.Finish();
 
-    mPaintEngineHUD->GetHUDBlock()->Dirty();
+    mPreviousFinishPoint = mFinishPoint;
+    mPreviousStartPoint = mStartPoint;
+    mPreviousTransform = iTransform;
+
+    ioBlock->Dirty();
 }
 
-void UOdysseyHUDLine::Erase()
+void UOdysseyHUDLine::Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
 {
+    if (!ioBlock)
+        return;
+ 
     //Erase the children of this HUDElement
-    UOdysseyHUDElement::Erase();
+    UOdysseyHUDElement::Erase(ioBlock, iTransform);
 
-    FVector2D transformedStartPoint = mTransform.TransformPoint(mStartPoint);
-    FVector2D transformedFinishPoint = mTransform.TransformPoint(mFinishPoint);
+    FVector2D transformedStartPoint = mPreviousTransform.TransformPoint(mPreviousStartPoint);
+    FVector2D transformedFinishPoint = mPreviousTransform.TransformPoint(mPreviousFinishPoint);
+
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_RGBA8);
-    ctx.DrawLine(*(mPaintEngineHUD->GetHUDBlock()), ::ULIS::FVec2I(transformedStartPoint.X, transformedStartPoint.Y), ::ULIS::FVec2I(transformedFinishPoint.X, transformedFinishPoint.Y), ::ULIS::FColor::RGBA8(0, 255, 0, 0));
+    ctx.DrawLine(*(ioBlock), ::ULIS::FVec2I(transformedStartPoint.X, transformedStartPoint.Y), ::ULIS::FVec2I(transformedFinishPoint.X, transformedFinishPoint.Y), ::ULIS::FColor::RGBA8(0, 255, 0, 0));
     ctx.Finish();
 }

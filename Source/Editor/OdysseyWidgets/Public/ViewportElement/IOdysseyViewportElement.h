@@ -10,5 +10,5 @@
 class ODYSSEYWIDGETS_API IOdysseyViewportElement
 {
 public:
-    virtual void Draw() = 0;
+    virtual void Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) = 0;
 };
