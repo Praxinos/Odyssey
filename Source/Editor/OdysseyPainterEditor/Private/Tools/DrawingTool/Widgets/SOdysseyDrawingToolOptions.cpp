@@ -4,7 +4,10 @@
 #include "Tools/DrawingTool/Widgets/SOdysseyDrawingToolOptions.h"
 
 #include "ObjectEditorUtils.h"
+#include "PropertyEditorModule.h"
+#include "ISinglePropertyView.h"
 #include "Widgets/SOdysseyShapeSelector.h"
+#include "Widgets/SOdysseyShape.h"
 
 #define LOCTEXT_NAMESPACE "SOdysseyDrawingToolOptions"
 
@@ -17,6 +20,8 @@ SOdysseyDrawingToolOptions::Construct( const FArguments& InArgs )
 {
     mTool = InArgs._Tool;
 
+    FPropertyEditorModule& PropertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
+
     this->ChildSlot
     [
         SNew(SVerticalBox)
@@ -27,23 +32,54 @@ SOdysseyDrawingToolOptions::Construct( const FArguments& InArgs )
             .SelectedShape(this, &SOdysseyDrawingToolOptions::GetSelectedShape)
             .OnShapeSelected(this, &SOdysseyDrawingToolOptions::OnShapeSelected)
         ]
+        + SVerticalBox::Slot()//Step
+        .AutoHeight()
+        [
+            PropertyEditorModule.CreateSingleProperty(mTool->GetBrushOptions(), "Step", FSinglePropertyParams()).ToSharedRef()
+
+            /* SNew( SHorizontalBox )
+
+            +SHorizontalBox::Slot()
+            .VAlign( VAlign_Center )
+            .Padding( 3.f, 3.f, 3.f, 3.f )
+            .MaxWidth( 45.f )
+            [
+                SNew( STextBlock )
+                .Text( LOCTEXT( "Size", "Size :" ) )
+            ]
+
+            +SHorizontalBox::Slot()
+            .VAlign( VAlign_Center )
+            .Padding( 3.f, 3.f, 13.f, 3.f )
+            [
+                SAssignNew( mSizeSpinBox, SSpinBox< int >)
+                .Value( this, &SOdysseyPaintModifiers::OnGetSize )
+                .OnValueCommitted( this, &SOdysseyPaintModifiers::HandleSizeSpinBoxChanged )
+                .OnValueChanged( this, &SOdysseyPaintModifiers::SetSize )
+                .ShiftMouseMovePixelPerDelta( 15 )
+                .Delta( 1 )
+                .SliderExponent( 0.8f ) // Can't work properly if the following options are in use :  LinearDeltaSensitivity MinValue MaxValue
+                .SliderExponentNeutralValue( 100 )
+                .MinDesiredWidth( 100.0f ) // Depends on the size of the text in the previous slot
+            ] */
+        ]
+        + SVerticalBox::Slot()//SizeAdaptative
+        .AutoHeight()
+        [
+            PropertyEditorModule.CreateSingleProperty(mTool->GetBrushOptions(), "SizeAdaptative", FSinglePropertyParams()).ToSharedRef()
+        ]
         + SVerticalBox::Slot()
         [
-            SAssignNew(mShapeSlot, SBorder)
-            [
-                SNullWidget::NullWidget
-            ]
+            SNew(SOdysseyShape)
+            .Shape(this, &SOdysseyDrawingToolOptions::GetSelectedShapeInstance)
         ]
     ];
-
-    UpdateShapeSlot();
 }
 
 void
 SOdysseyDrawingToolOptions::OnShapeSelected(EOdysseyShape iSelectedShape)
 {
     FObjectEditorUtils::SetPropertyValue(mTool, "SelectedShape", iSelectedShape);
-    UpdateShapeSlot();
 }
 
 EOdysseyShape
@@ -52,24 +88,10 @@ SOdysseyDrawingToolOptions::GetSelectedShape() const
     return mTool->GetSelectedShape();
 }
 
-void
-SOdysseyDrawingToolOptions::UpdateShapeSlot()
+UOdysseyShape*
+SOdysseyDrawingToolOptions::GetSelectedShapeInstance() const
 {
-    FPropertyEditorModule& PropertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
-    FDetailsViewArgs DetailsViewArgs(false, false, false, FDetailsViewArgs::HideNameArea, true, nullptr);
-    DetailsViewArgs.DefaultsOnlyVisibility = EEditDefaultsOnlyNodeVisibility::Hide;
-    TSharedRef<IDetailsView> details_view = PropertyEditorModule.CreateDetailView(DetailsViewArgs);
-    details_view->SetIsPropertyVisibleDelegate(
-        FIsPropertyVisible::CreateLambda(
-            [](const FPropertyAndParent& iPropertyAndParent) -> bool
-            {
-                return !iPropertyAndParent.Property.HasAnyPropertyFlags(CPF_DisableEditOnInstance); //Brush Overrides
-            }
-        )
-    );
-
-    details_view->SetObject(mTool->GetSelectedShapeInstance());
-    mShapeSlot->SetContent(details_view);
+    return mTool->GetSelectedShapeInstance();
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -6,37 +6,39 @@
 #include "CoreMinimal.h"
 #include "Widgets/DeclarativeSyntaxSupport.h"
 #include "Widgets/SCompoundWidget.h"
+#include "Misc/NotifyHook.h"
 #include "Framework/SlateDelegates.h"
+#include "IStructureDetailsView.h"
 
-class UOdysseyDrawingTool;
+class UOdysseyShape;
 
 /////////////////////////////////////////////////////
-// SOdysseyDrawingToolOptions
-class ODYSSEYPAINTEREDITOR_API SOdysseyDrawingToolOptions
+// SOdysseyShape
+class ODYSSEYSHAPES_API SOdysseyShape
     : public SCompoundWidget
+    , public FNotifyHook
 {
     typedef SCompoundWidget         tSuperClass;
-    typedef SOdysseyDrawingToolOptions   tSelf;
+    typedef SOdysseyShape   tSelf;
 
 public:
     // Construction / Destruction
-    SLATE_BEGIN_ARGS( SOdysseyDrawingToolOptions )
+    SLATE_BEGIN_ARGS( SOdysseyShape )
         {}
-        SLATE_ARGUMENT(UOdysseyDrawingTool*, Tool)
+        SLATE_ATTRIBUTE(UOdysseyShape*, Shape)
     SLATE_END_ARGS()
 
     void  Construct( const  FArguments&  InArgs );
 
-
-private:
-    void OnShapeSelected(EOdysseyShape iSelectedShape);
-    EOdysseyShape GetSelectedShape() const;
-    UOdysseyShape* GetSelectedShapeInstance() const;
+public:
+    // SWidget overrides
+    virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime);
 
 private:
     // Private data members
-    UOdysseyDrawingTool*                mTool;
-
-    TSharedPtr<SBorder>                 mShapeSlot;
+    TAttribute<UOdysseyShape*>                mShape;
+    UOdysseyShape*                            mCurrentShape;
+    
+    TSharedPtr<IDetailsView>                  mDetailsView;
 };
 
