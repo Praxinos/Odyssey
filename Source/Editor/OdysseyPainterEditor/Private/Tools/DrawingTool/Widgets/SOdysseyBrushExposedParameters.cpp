@@ -1,10 +1,11 @@
 // IDDN FR.001.250001.005.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
-#include "Brush/SOdysseyBrushExposedParameters.h"
+#include "Tools/DrawingTool/Widgets/SOdysseyBrushExposedParameters.h"
 
 #include "OdysseyBrushBlueprint.h"
 #include "OdysseyBrushAssetBase.h"
+#include "Tools/DrawingTool/OdysseyDrawingTool.h"
 #include "Modules/ModuleManager.h"
 #include "PropertyEditorModule.h"
 #include "IDetailsView.h"
@@ -21,6 +22,7 @@ void
 SOdysseyBrushExposedParameters::Construct( const FArguments& InArgs )
 {
     mBrushInstance = InArgs._BrushInstance;
+    mTool = InArgs._Tool;
     mCurrentBrushInstance = nullptr;
     OnParameterChangedCallback = InArgs._OnParameterChanged;
 
@@ -28,13 +30,22 @@ SOdysseyBrushExposedParameters::Construct( const FArguments& InArgs )
     FPropertyEditorModule& PropertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
     FNotifyHook* NotifyHook = this;
     FDetailsViewArgs DetailsViewArgs(/*bUpdateFromSelection=*/ false, /*bLockable=*/ false, /*bAllowSearch=*/ false, FDetailsViewArgs::HideNameArea, /*bHideSelectionTip=*/ true, NotifyHook );
+    DetailsViewArgs.bAllowMultipleTopLevelObjects = true;
     DetailsViewArgs.DefaultsOnlyVisibility = EEditDefaultsOnlyNodeVisibility::Hide;
     details_view = PropertyEditorModule.CreateDetailView(DetailsViewArgs);
 
     details_view->SetIsPropertyVisibleDelegate(FIsPropertyVisible::CreateLambda(
-            [](const FPropertyAndParent& iPropertyAndParent) -> bool
-            {
-            return !(iPropertyAndParent.Objects.Num() == 1 && iPropertyAndParent.Property.GetNameCPP() == "Preferences"); //Brush Overrides
+            [this](const FPropertyAndParent& iPropertyAndParent) -> bool
+            {   
+                if (iPropertyAndParent.Property.GetNameCPP() == "BlendParameters")
+                    return true;
+
+                if (iPropertyAndParent.Objects.Num() > 0 && iPropertyAndParent.Objects[0] == mTool)
+                    return false;
+
+                if (iPropertyAndParent.Property.HasAnyPropertyFlags(CPF_DisableEditOnInstance))
+                    return false;
+                return true;
             }
         )
     );
@@ -54,7 +65,10 @@ SOdysseyBrushExposedParameters::Tick(const FGeometry& AllottedGeometry, const do
     if (brushInstance != mCurrentBrushInstance)
     {
         mCurrentBrushInstance = brushInstance;
-        details_view->SetObject(brushInstance);
+        TArray<UObject*> objects;
+        objects.Add(mTool);
+        objects.Add(mCurrentBrushInstance);
+        details_view->SetObjects(objects);
     }
 }
 

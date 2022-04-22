@@ -43,7 +43,7 @@ FOdysseyPainterEditorToolsTab::CreateWidget()
     return SNew( SScrollBox )
         .Orientation( Orient_Vertical )
         .ScrollBarAlwaysVisible( false )
-        +SScrollBox::Slot()
+        /* +SScrollBox::Slot()
         [
             SNew( SExpandableArea )
             .HeaderContent()
@@ -71,7 +71,7 @@ FOdysseyPainterEditorToolsTab::CreateWidget()
                         .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.FreeHand32" ) )
                     ]
                 ]
-                /* + SWrapBox::Slot()
+                + SWrapBox::Slot()
                 [
                     SNew( SCheckBox )
                     .Style(&FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("OdysseyCheckBoxStyle.TransparentCheckBox"))
@@ -154,9 +154,9 @@ FOdysseyPainterEditorToolsTab::CreateWidget()
                         SNew(SImage)
                         .Image(FOdysseyStyle::GetBrush("PainterEditor.ToolsTab.Bezier32"))
                     ]
-                ] */
+                ]
             ]
-        ]
+        ] */
         +SScrollBox::Slot()
         [
             SNew( SExpandableArea )
@@ -316,6 +316,8 @@ FOdysseyPainterEditorToolsTab::OnToolCheckBoxClicked(ECheckBoxState iCheckBoxSta
 void
 FOdysseyPainterEditorToolsTab::Clear()
 {
+    //TODO: FLush and commit courrent tool before clearing
+
 	//Do the fill
 	::ULIS::FBlock* paintBlock = mEditor->PaintEngine().PaintBlock();
 	::ULIS::FColor color = ::ULIS::FColor::Black;
@@ -333,6 +335,8 @@ FOdysseyPainterEditorToolsTab::Clear()
 void
 FOdysseyPainterEditorToolsTab::Fill()
 {
+    //TODO: FLush and commit courrent tool before filling
+
 	//Do the fill
 	::ULIS::FBlock* paintBlock = mEditor->PaintEngine().PaintBlock();
 	::ULIS::FColor color = mEditor->PaintColor().GetValue();

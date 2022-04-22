@@ -3,8 +3,7 @@
 
 #include "OdysseyTool.h"
 
-UOdysseyTool::UOdysseyTool() :
-    mWidget(SNullWidget::NullWidget)
+UOdysseyTool::UOdysseyTool()
 {
 
 }
@@ -119,5 +118,5 @@ UOdysseyTool::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
 TSharedPtr<SWidget>
 UOdysseyTool::GetWidget()
 {
-    return mWidget;
+    return SNullWidget::NullWidget;
 }

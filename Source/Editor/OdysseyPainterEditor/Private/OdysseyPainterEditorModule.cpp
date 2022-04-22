@@ -16,7 +16,6 @@
 #include "Tools/DrawingTool/OdysseyBrushOptionsOverrides.h"
 #include "Tools/DrawingTool/OdysseyBlendParametersOverrides.h"
 #include "FreehandShape/OdysseyFreehandShapeOverrides.h"
-#include "Tools/DrawingTool/OdysseyDrawingToolDetailPanelCustomization.h"
 #include <ULIS>
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorModule"
@@ -85,8 +84,6 @@ FOdysseyPainterEditorModule::RegisterBrushOverrides()
     FOdysseyBrushOverride::Register(UOdysseyBrushOptionsOverrides::StaticClass());
     FOdysseyBrushOverride::Register(UOdysseyBlendParametersOverrides::StaticClass());
     FOdysseyBrushOverride::Register(UOdysseyFreehandShapeOverrides::StaticClass());
-
-    FOdysseyDrawingToolDetailPanelCustomization::Register();
 }
 
 void

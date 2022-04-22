@@ -78,6 +78,9 @@ UOdysseyFreehandShape::OnKeyUp(const FKey& iKey)
 bool
 UOdysseyFreehandShape::Begin( const FOdysseyPoint& iPoint )
 {
+    if (mIsPainting)
+        return false;
+
     mIsPainting = true;
 
     //Reset the smoother to use the one selected in the SmoothingOptions
@@ -96,6 +99,9 @@ UOdysseyFreehandShape::Begin( const FOdysseyPoint& iPoint )
 bool
 UOdysseyFreehandShape::To( const FOdysseyPoint& iPoint )
 {
+    if (!mIsPainting)
+        return false;
+
     //Add the raw point to the array
     //Use a temporary variable to ensure we are not adding a point that is already contained (see Add())
     FOdysseyPoint point = iPoint;
@@ -108,6 +114,9 @@ UOdysseyFreehandShape::To( const FOdysseyPoint& iPoint )
 bool
 UOdysseyFreehandShape::End()
 {
+    if (!mIsPainting)
+        return false;
+
     //Apply Smoothing if it is not realtime
     ApplySmoothing();
 
@@ -120,6 +129,9 @@ UOdysseyFreehandShape::End()
 bool
 UOdysseyFreehandShape::Abort()
 {
+    if (!mIsPainting)
+        return false;
+
     mIsPainting = false;
     
     mOnPathResetDelegate.Broadcast(); //just to be sure

@@ -93,14 +93,14 @@ FOdysseyFlipbookEditorTimelineTab::OnTimelineCurrentKeyframeChanged(int32 iKeyfr
 void
 FOdysseyFlipbookEditorTimelineTab::OnTimelineScrubStarted()
 {
-	//TODO: lock paintengine
+	//TODO: lock paintengine, to avoid drawing while scrubbing
 	SetTextureAtKeyframeIndex(mTimeline->GetCurrentKeyframeIndex());
 }
 
 void
 FOdysseyFlipbookEditorTimelineTab::OnTimelineScrubStopped()
 {
-	//TODO: unlock paintengine
+	//TODO: unlock paintengine, to avoid drawing while scrubbing
 	SetTextureAtKeyframeIndex(mTimeline->GetCurrentKeyframeIndex());
 
 	//Cleanup Preview Surface

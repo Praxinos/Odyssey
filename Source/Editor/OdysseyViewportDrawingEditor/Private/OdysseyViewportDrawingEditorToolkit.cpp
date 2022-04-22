@@ -85,11 +85,11 @@ FOdysseyViewportDrawingEditorToolkit::BuildToolPalette( FName iPalette, class FT
     );
 
     ioToolbarBuilder.AddToolBarButton(
-        FUIAction(FExecuteAction::CreateSP( viewportDrawingEditor->GetToolbar(), &FOdysseyViewportDrawingEditorModeToolbar::OpenStrokeOptionsTab) ),
+        FUIAction(FExecuteAction::CreateSP( viewportDrawingEditor->GetToolbar(), &FOdysseyViewportDrawingEditorModeToolbar::OpenToolOptionsTab) ),
         NAME_None,
-        LOCTEXT("ViewportDrawingEditorToggleStrokeOptionsTab", "Stroke Options"),
-        LOCTEXT("ViewportDrawingEditorToggleStrokeOptionsTabTooltip", "Display Stroke Options"),
-        FSlateIcon( "OdysseyStyle", "PainterEditor.StrokeOptions20" )
+        LOCTEXT("ViewportDrawingEditorToggleToolOptionsTab", "Tool Options"),
+        LOCTEXT("ViewportDrawingEditorToggleToolOptionsTabTooltip", "Display Tool Options"),
+        FSlateIcon( "OdysseyStyle", "PainterEditor.ToolOptions20" )
     );
 
     ioToolbarBuilder.AddToolBarButton(

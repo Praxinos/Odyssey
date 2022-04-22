@@ -19,17 +19,15 @@ UOdysseyDrawingTool::UOdysseyDrawingTool()
     : Super()
     //Properties
     , Brush(nullptr)
-    , SelectedShape(EOdysseyShape::kFreehand)
-    , SelectedShapeInstance(nullptr)
-    , BlendParameters()
     , BrushInstance(nullptr)
     , BrushOptions(CreateDefaultSubobject<UOdysseyBrushOptions>("UOdysseyDrawingTool::BrushOptions", true))
+    , BlendParameters()
+    , SelectedShape(EOdysseyShape::kFreehand)
+    , SelectedShapeInstance(nullptr)
 
     //Internal
     , mPaintEngine(nullptr)
 {
-    mWidget = SNew(SOdysseyDrawingToolOptions).Tool(this);
-
     AvailableShapes.Add(EOdysseyShape::kFreehand, CreateShape<UOdysseyFreehandShape>("UOdysseyDrawingTool::FreehandShape"));
     SelectedShapeInstance = AvailableShapes[SelectedShape];
 }
@@ -170,6 +168,13 @@ UOdysseyDrawingTool::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
 {
     Super::ExtendMenu(iOwner, iMenuName);
 }
+
+TSharedPtr<SWidget>
+UOdysseyDrawingTool::GetWidget()
+{
+    return SNew(SOdysseyDrawingToolOptions).Tool(this);
+}
+
 
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------- PaintEngine Callbacks
@@ -342,8 +347,6 @@ UOdysseyDrawingTool::GetBlendParameters() const
 {
     return BlendParameters;
 }
-
-
 
 // Returns the BrushOptions
 UOdysseyBrushOptions*

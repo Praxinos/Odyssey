@@ -142,9 +142,6 @@ private:
 private:
     // Internal
 
-    // Pushes stroke actions to the drawing queue based on given points
-    //void PushToPaintEngine(const TArray< FOdysseyPoint >& iPoints);
-
     // Computes the interpolation from the interpolator, and relative parameters for all generated points
     TArray< FOdysseyPoint > ComputeInterpolation();
 
@@ -404,7 +401,7 @@ public:
 
 public:
     //PROPERTIES
-    UPROPERTY(VisibleInstanceOnly, Instanced, Transient, NonTransactional)
+    UPROPERTY(Transient, NonTransactional)
     UOdysseyBrushOptions*                   BrushOptions;
 
 #if WITH_EDITORONLY_DATA

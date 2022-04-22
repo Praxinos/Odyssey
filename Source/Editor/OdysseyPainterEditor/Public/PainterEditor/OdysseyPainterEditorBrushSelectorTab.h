@@ -24,16 +24,6 @@ protected:
     virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
 
 protected:
-    // Widget Getters
-    virtual UOdysseyBrush* Brush() const;
-    virtual UOdysseyBrushAssetBase* BrushInstance() const;
-
-protected:
-    // Event Listeners
-    virtual void OnBrushSelected( UOdysseyBrush* iBrush );
-    virtual void OnParameterChanged();
-
-protected:
     // Methods
     virtual void RefreshBrush();
 

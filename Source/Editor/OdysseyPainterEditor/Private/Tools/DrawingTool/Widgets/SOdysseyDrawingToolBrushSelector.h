@@ -11,16 +11,16 @@
 class UOdysseyDrawingTool;
 
 /////////////////////////////////////////////////////
-// SOdysseyDrawingToolOptions
-class ODYSSEYPAINTEREDITOR_API SOdysseyDrawingToolOptions
+// SOdysseyDrawingToolBrushSelector
+class ODYSSEYPAINTEREDITOR_API SOdysseyDrawingToolBrushSelector
     : public SCompoundWidget
 {
     typedef SCompoundWidget         tSuperClass;
-    typedef SOdysseyDrawingToolOptions   tSelf;
+    typedef SOdysseyDrawingToolBrushSelector   tSelf;
 
 public:
     // Construction / Destruction
-    SLATE_BEGIN_ARGS( SOdysseyDrawingToolOptions )
+    SLATE_BEGIN_ARGS( SOdysseyDrawingToolBrushSelector )
         {}
         SLATE_ARGUMENT(UOdysseyDrawingTool*, Tool)
     SLATE_END_ARGS()

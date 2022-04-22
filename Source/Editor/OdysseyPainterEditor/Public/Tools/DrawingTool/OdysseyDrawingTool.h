@@ -59,6 +59,7 @@ public:
 
     virtual void BindShortcuts(class FBaseToolkit* iToolkit) override;
     virtual void ExtendMenu( FToolMenuOwner iOwner, FName iMenuName ) override;
+    virtual TSharedPtr<SWidget> GetWidget() override;
 
 private:
     // Paint Engine Stroke API
@@ -171,32 +172,32 @@ private:
     void OnPaintEngineBlockChanged();
 
 private:
-    friend class FOdysseyDrawingToolDetailCustomization;
+    friend class SOdysseyDrawingToolBrushSelector;
 
     //Visible properties
 
-    UPROPERTY(EditInstanceOnly, Category="Brush")
+    UPROPERTY(EditInstanceOnly)
     UOdysseyBrush* Brush;
 
-    UPROPERTY(EditInstanceOnly, Category="Shape")
+    UPROPERTY(EditInstanceOnly)
+    UOdysseyBrushAssetBase* BrushInstance;
+
+    UPROPERTY(EditInstanceOnly)
+    UOdysseyBrushOptions* BrushOptions;
+
+    UPROPERTY(EditInstanceOnly)
+    FOdysseyBlendParameters BlendParameters;
+
+    UPROPERTY(EditInstanceOnly)
     EOdysseyShape SelectedShape;
 
-    UPROPERTY(VisibleInstanceOnly, Transient)
+    UPROPERTY(EditInstanceOnly)
     class UOdysseyShape* SelectedShapeInstance;
-
-    UPROPERTY(EditInstanceOnly, Category="Brush", meta=(DisplayAfter="BrushInstance"))
-    FOdysseyBlendParameters BlendParameters;
 
 
     // Hidden properties
     UPROPERTY()
     TMap<EOdysseyShape, class UOdysseyShape*> AvailableShapes;
-
-    UPROPERTY(VisibleInstanceOnly, Transient)
-    UOdysseyBrushAssetBase* BrushInstance;
-
-    UPROPERTY()
-    UOdysseyBrushOptions* BrushOptions;
 
 protected:
     // protected Data Members

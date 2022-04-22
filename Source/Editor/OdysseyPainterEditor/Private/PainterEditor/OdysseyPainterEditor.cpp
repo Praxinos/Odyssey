@@ -110,7 +110,6 @@ FOdysseyPainterEditor::Redo()
 void
 FOdysseyPainterEditor::ClearUndo()
 {
-	//PaintEngine()->Flush();
 	//End stroke before clearing undo
 	mSelectedTool->Flush();
 	mSelectedTool->Commit();

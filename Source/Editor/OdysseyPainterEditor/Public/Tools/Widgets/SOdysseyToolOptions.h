@@ -39,6 +39,6 @@ private:
     TAttribute<UOdysseyTool*>                mTool;
     UOdysseyTool*                            mCurrentTool;
     
-    TSharedPtr< SBorder >                    mToolSlot;
+    SVerticalBox::FSlot*                    mToolSlot;
 };
 

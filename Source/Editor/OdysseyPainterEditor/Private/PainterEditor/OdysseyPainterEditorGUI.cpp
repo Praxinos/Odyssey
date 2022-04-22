@@ -43,7 +43,6 @@ FOdysseyPainterEditorGUI::CreateTabs()
     ODYSSEY_ADD_TAB(mColorSlidersTab, FOdysseyPainterEditorColorSlidersTab, mEditor);
     ODYSSEY_ADD_TAB(mToolsTab, FOdysseyPainterEditorToolsTab, mEditor);
     ODYSSEY_ADD_TAB(mTopTab, FOdysseyPainterEditorTopTab, mEditor);
-    ODYSSEY_ADD_TAB(mStrokeOptionsTab, FOdysseyPainterEditorStrokeOptionsTab, mEditor);
     ODYSSEY_ADD_TAB(mToolOptionsTab, FOdysseyPainterEditorToolOptionsTab, mEditor);
 }
 
@@ -167,27 +166,26 @@ FOdysseyPainterEditorGUI::CreateLeftSection()
             ->SetHideTabWell(false)
             ->SetSizeCoefficient(0.33f)
         )
-        // Mesh Selector + Stroke Options
+        // Tool Options
         ->Split
         (
             FTabManager::NewStack()
             ->SetHideTabWell(false)
             ->SetSizeCoefficient(0.33f)
-            // Mesh Selector
-            ->AddTab(mMeshSelectorTab->ID(), ETabState::OpenedTab)
+            // Tool Options
+            ->AddTab(mToolOptionsTab->ID(), ETabState::OpenedTab)
             ->SetHideTabWell(false)
             ->SetSizeCoefficient(0.33f)
-            // Stroke Options
-            ->AddTab(mStrokeOptionsTab->ID(), ETabState::OpenedTab)
-            ->SetHideTabWell(false)
-            ->SetSizeCoefficient(0.33f)
-
         )
-        // Tools
+        // Tools / Mesh Selector
         ->Split
         (
             FTabManager::NewStack()
             ->AddTab(mToolsTab->ID(), ETabState::OpenedTab)
+            ->SetHideTabWell(false)
+            ->SetSizeCoefficient(0.33f)
+            // Mesh Selector
+            ->AddTab(mMeshSelectorTab->ID(), ETabState::OpenedTab)
             ->SetHideTabWell(false)
             ->SetSizeCoefficient(0.33f)
         );
@@ -311,12 +309,6 @@ TSharedPtr<FOdysseyPainterEditorColorSlidersTab>&
 FOdysseyPainterEditorGUI::GetColorSlidersTab()
 {
     return mColorSlidersTab;
-}
-
-TSharedPtr<FOdysseyPainterEditorStrokeOptionsTab>&
-FOdysseyPainterEditorGUI::GetStrokeOptionsTab()
-{
-    return mStrokeOptionsTab;
 }
 
 TSharedPtr<FOdysseyPainterEditorTopTab>&

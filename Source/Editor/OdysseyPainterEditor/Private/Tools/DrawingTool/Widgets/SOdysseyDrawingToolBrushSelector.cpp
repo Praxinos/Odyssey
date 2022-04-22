@@ -1,23 +1,23 @@
 // IDDN FR.001.250001.005.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
-#include "Tools/DrawingTool/Widgets/SOdysseyDrawingToolOptions.h"
+#include "Tools/DrawingTool/Widgets/SOdysseyDrawingToolBrushSelector.h"
 
 #include "ObjectEditorUtils.h"
 #include "PropertyEditorModule.h"
 #include "ISinglePropertyView.h"
 #include "Widgets/SOdysseyShapeSelector.h"
 #include "Widgets/SOdysseyShape.h"
-#include "Tools/DrawingTool/Customizations/OdysseyDrawingToolOptionsCustomization.h"
+#include "Tools/DrawingTool/Customizations/OdysseyDrawingToolBrushSelectorCustomization.h"
 
-#define LOCTEXT_NAMESPACE "SOdysseyDrawingToolOptions"
+#define LOCTEXT_NAMESPACE "SOdysseyDrawingToolBrushSelector"
 
 /////////////////////////////////////////////////////
-// SOdysseyDrawingToolOptions
+// SOdysseyDrawingToolBrushSelector
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
 void
-SOdysseyDrawingToolOptions::Construct( const FArguments& InArgs )
+SOdysseyDrawingToolBrushSelector::Construct( const FArguments& InArgs )
 {
     mTool = InArgs._Tool;
 
@@ -27,7 +27,7 @@ SOdysseyDrawingToolOptions::Construct( const FArguments& InArgs )
     FDetailsViewArgs DetailsViewArgs(false, false, false, FDetailsViewArgs::HideNameArea, true);
     TSharedRef<IDetailsView> detailsView = PropertyEditorModule.CreateDetailView(DetailsViewArgs);
     detailsView->RegisterInstancedCustomPropertyLayout(UOdysseyDrawingTool::StaticClass(),
-        FOnGetDetailCustomizationInstance::CreateLambda([this]() { return FOdysseyDrawingToolOptionsCustomization::MakeInstance(); }));
+        FOnGetDetailCustomizationInstance::CreateLambda([this]() { return FOdysseyDrawingToolBrushSelectorCustomization::MakeInstance(); }));
 
     detailsView->SetObject(mTool);
 

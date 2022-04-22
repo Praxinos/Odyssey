@@ -48,7 +48,7 @@ FOdysseyViewportDrawingEditorModeToolbar::~FOdysseyViewportDrawingEditorModeTool
     if (tab.IsValid())
         tab->RequestCloseTab();
 
-    tab = mLevelEditorTabManager->FindExistingLiveTab(FTabId(mGUI->GetStrokeOptionsTab()->ID()));
+    tab = mLevelEditorTabManager->FindExistingLiveTab(FTabId(mGUI->GetToolOptionsTab()->ID()));
     if (tab.IsValid())
         tab->RequestCloseTab();
 
@@ -116,9 +116,9 @@ void FOdysseyViewportDrawingEditorModeToolbar::SaveOpenedTabs()
         buffer << str;
     }
 
-    if( mLevelEditorTabManager->FindExistingLiveTab(mGUI->GetStrokeOptionsTab()->ID() ) )
+    if( mLevelEditorTabManager->FindExistingLiveTab(mGUI->GetToolOptionsTab()->ID() ) )
     {
-        str = mGUI->GetStrokeOptionsTab()->ID().ToString();
+        str = mGUI->GetToolOptionsTab()->ID().ToString();
         buffer << str;
     }
 
@@ -238,12 +238,12 @@ void FOdysseyViewportDrawingEditorModeToolbar::OpenMeshSelectorTab()
     mLevelEditorTabManager->TryInvokeTab(FTabId(mGUI->GetMeshSelectorTab()->ID()));
 }
 
-void FOdysseyViewportDrawingEditorModeToolbar::OpenStrokeOptionsTab()
+void FOdysseyViewportDrawingEditorModeToolbar::OpenToolOptionsTab()
 {
     if( !mLevelEditorTabManager )
         return;
 
-    mLevelEditorTabManager->TryInvokeTab(FTabId(mGUI->GetStrokeOptionsTab()->ID()));
+    mLevelEditorTabManager->TryInvokeTab(FTabId(mGUI->GetToolOptionsTab()->ID()));
 }
 
 void FOdysseyViewportDrawingEditorModeToolbar::OpenTextureDetailsTab()

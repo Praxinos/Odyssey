@@ -67,6 +67,4 @@ public:
 protected:
     // bool mIsReadyToBeApplied;
     FTransform2D mTransform;
-
-    TSharedPtr<SWidget> mWidget;
 };

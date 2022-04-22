@@ -17,7 +17,6 @@ public class OdysseyBrush : ModuleRules
                 "Engine",
                 "OdysseyCore",
                 "OdysseyImaging",
-                "OdysseyPaintEngine",
             }
         );
 
@@ -32,9 +31,6 @@ public class OdysseyBrush : ModuleRules
 
         PublicDependencyModuleNames.AddRange(
             new string[] {
-                // "OdysseyCore",
-                // "OdysseyImaging",
-                // "OdysseyPaintEngine",
                 "ULIS",
                 "ULISLoader",
             }

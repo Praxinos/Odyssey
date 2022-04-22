@@ -23,23 +23,62 @@ public:
     // IDetailCustomization interface
     virtual void CustomizeDetails(IDetailLayoutBuilder& DetailLayout) override;
     // End of IDetailCustomization interface
+
+private:
+    void CustomizeOverrides(IDetailLayoutBuilder& iBuilder);
+    void CustomizeBrushOptions(IDetailLayoutBuilder& iBuilder);
 };
 
 void
 FOdysseyBrushDetails::CustomizeDetails(IDetailLayoutBuilder& iBuilder)
 {
-    IDetailCategoryBuilder& overridesCategory = iBuilder.EditCategory("Overrides", FText::FromString("Overrides"));
+    CustomizeOverrides(iBuilder);
+    CustomizeBrushOptions(iBuilder);
+}
+
+void
+FOdysseyBrushDetails::CustomizeBrushOptions(IDetailLayoutBuilder& iBuilder)
+{
+    TSharedRef<IPropertyHandle> brushOptionsHandle = iBuilder.GetProperty(GET_MEMBER_NAME_CHECKED(UOdysseyBrushAssetBase, BrushOptions));
+    if (!iBuilder.IsPropertyVisible(brushOptionsHandle))
+        return;
+
+    IDetailCategoryBuilder& globalsCategory = iBuilder.EditCategory("Globals", LOCTEXT("GlobalsCategory", "Globals"), ECategoryPriority::TypeSpecific);
+    iBuilder.HideProperty("BrushOptions");   
 
     TArray< TWeakObjectPtr<UObject> > objects;
     iBuilder.GetObjectsBeingCustomized( objects );
 
     UOdysseyBrushAssetBase* brushInstance = Cast<UOdysseyBrushAssetBase>(objects[0]);
 
+    TArray<UObject*> brushOptionsObjects; //contains only one object
+    brushOptionsObjects.Add(brushInstance->GetBrushOptions());
+
+    TSharedPtr<IPropertyHandle> sizeHandle = iBuilder.AddObjectPropertyData(brushOptionsObjects, "Size");
+    if (sizeHandle.IsValid())
+        globalsCategory.AddProperty(sizeHandle.ToSharedRef());
+
+    TSharedPtr<IPropertyHandle> flowHandle = iBuilder.AddObjectPropertyData(brushOptionsObjects, "Flow");
+    if (flowHandle.IsValid())
+        globalsCategory.AddProperty(flowHandle.ToSharedRef());
+}
+
+
+void
+FOdysseyBrushDetails::CustomizeOverrides(IDetailLayoutBuilder& iBuilder)
+{
     TSharedRef<IPropertyHandle> overridesHandle = iBuilder.GetProperty(GET_MEMBER_NAME_CHECKED(UOdysseyBrushAssetBase, Overrides));
     if (!iBuilder.IsPropertyVisible(overridesHandle))
         return;
 
     iBuilder.HideProperty("Overrides");
+
+    IDetailCategoryBuilder& overridesCategory = iBuilder.EditCategory("Overrides", LOCTEXT("OverridesCategory", "Overrides"));
+
+    TArray< TWeakObjectPtr<UObject> > objects;
+    iBuilder.GetObjectsBeingCustomized( objects );
+
+    UOdysseyBrushAssetBase* brushInstance = Cast<UOdysseyBrushAssetBase>(objects[0]);
 
     for (auto overrideElement : brushInstance->Overrides)
     {

@@ -20,7 +20,9 @@ SOdysseyToolOptions::Construct( const FArguments& InArgs )
     mCurrentTool = nullptr;
     this->ChildSlot
     [
-        SAssignNew(mToolSlot, SBorder)
+        SNew(SVerticalBox)
+        + SVerticalBox::Slot()
+        .Expose(mToolSlot)
         [
             SNullWidget::NullWidget
         ]
@@ -37,7 +39,8 @@ SOdysseyToolOptions::Tick(const FGeometry& AllottedGeometry, const double InCurr
     if (tool != mCurrentTool)
     {
         mCurrentTool = tool;
-        mToolSlot->SetContent(tool->GetWidget().ToSharedRef());
+        mToolSlot->DetachWidget();
+        mToolSlot->AttachWidget( tool->GetWidget().ToSharedRef() );
     }
 }
 
