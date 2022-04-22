@@ -5,20 +5,16 @@
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
-FOdysseyToolCircle::~FOdysseyToolCircle()
-{
-}
 
-FOdysseyToolCircle::FOdysseyToolCircle( FVector2D iCenterPoint )
-: mCircle(NewObject<UOdysseyHUDCircle>())
+void UOdysseyToolCircle::Init()
 {
-    mCircle->Init( FName("CircleTool"), iCenterPoint, iCenterPoint );
+    mCircle = NewObject<UOdysseyHUDCircle>();
 }
 
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Drawing
 
-void FOdysseyToolCircle::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
+void UOdysseyToolCircle::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
 {
     mCircle->Draw( ioBlock, iTransform );
 }
@@ -26,7 +22,7 @@ void FOdysseyToolCircle::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------- Mouse events
 
-void FOdysseyToolCircle::MouseMove(FViewport* iViewport, int32 iX, int32 iY)
+void UOdysseyToolCircle::MouseMove(FViewport* iViewport, int32 iX, int32 iY)
 {
     mCircle->MouseMove(iViewport, iX, iY);
 
@@ -37,7 +33,7 @@ void FOdysseyToolCircle::MouseMove(FViewport* iViewport, int32 iX, int32 iY)
     }
 }
 
-FReply FOdysseyToolCircle::InputKey(FViewport* iViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed, bool iGamepad, FReply& ioReply)
+FReply UOdysseyToolCircle::InputKey(FViewport* iViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed, bool iGamepad, FReply& ioReply)
 {
     mCircle->InputKey(iViewport, iControllerId, iKey, iEvent, iAmountDepressed, iGamepad, ioReply );
 
@@ -53,7 +49,7 @@ FReply FOdysseyToolCircle::InputKey(FViewport* iViewport, int32 iControllerId, F
     return ioReply;
 }
 
-void FOdysseyToolCircle::CapturedMouseMove(FViewport* iViewport, int32 iX, int32 iY)
+void UOdysseyToolCircle::CapturedMouseMove(FViewport* iViewport, int32 iX, int32 iY)
 {
     mCircle->CapturedMouseMove(iViewport, iX, iY);
 
@@ -67,7 +63,7 @@ void FOdysseyToolCircle::CapturedMouseMove(FViewport* iViewport, int32 iX, int32
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------- Path generation
 
-::ULIS::TArray<::ULIS::FVec2I> FOdysseyToolCircle::GenerateToolPoints()
+::ULIS::TArray<::ULIS::FVec2I> UOdysseyToolCircle::GenerateToolPoints()
 {
     ::ULIS::TArray<::ULIS::FVec2I> pointsArray;
     ::ULIS::GenerateCirclePoints( ::ULIS::FVec2I( mCircle->mCenterPoint.X, mCircle->mCenterPoint.Y), mCircle->mRadius, pointsArray );

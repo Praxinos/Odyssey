@@ -7,13 +7,16 @@
 #include "OdysseyHUDRectangle.h"
 #include "IOdysseyTool.h"
 
-class ODYSSEYTOOLS_API FOdysseyToolRectangle : public IOdysseyTool
-{
-public:
-    // Construction / Destruction
-    virtual ~FOdysseyToolRectangle();
+#include "OdysseyToolRectangle.Generated.h"
 
-    FOdysseyToolRectangle( FVector2D iStartPoint );
+UCLASS()
+class ODYSSEYTOOLS_API UOdysseyToolRectangle : public UObject,
+                                               public IOdysseyTool
+{
+    GENERATED_BODY()
+
+public:
+    void Init() override;
 
 public:
     void Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) override;

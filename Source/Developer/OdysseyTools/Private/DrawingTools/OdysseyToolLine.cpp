@@ -5,20 +5,16 @@
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
-FOdysseyToolLine::~FOdysseyToolLine()
-{
-}
 
-FOdysseyToolLine::FOdysseyToolLine( FVector2D iStartPoint )
-    : mLine(NewObject<UOdysseyHUDLine>())
+void UOdysseyToolLine::Init()
 {
-    mLine->Init( FName("lineTool"), iStartPoint, iStartPoint );
+    mLine = NewObject<UOdysseyHUDLine>();
 }
 
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Drawing
 
-void FOdysseyToolLine::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
+void UOdysseyToolLine::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
 {
     mLine->Draw( ioBlock, iTransform );
 }
@@ -26,7 +22,7 @@ void FOdysseyToolLine::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*=
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------- Mouse events
 
-void FOdysseyToolLine::MouseMove(FViewport* iViewport, int32 iX, int32 iY)
+void UOdysseyToolLine::MouseMove(FViewport* iViewport, int32 iX, int32 iY)
 {
     mLine->MouseMove(iViewport, iX, iY);
 
@@ -34,7 +30,7 @@ void FOdysseyToolLine::MouseMove(FViewport* iViewport, int32 iX, int32 iY)
         mLine->mFinishPoint.Set( iX, iY );
 }
 
-FReply FOdysseyToolLine::InputKey(FViewport* iViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed, bool iGamepad, FReply& ioReply)
+FReply UOdysseyToolLine::InputKey(FViewport* iViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed, bool iGamepad, FReply& ioReply)
 {
     mLine->InputKey(iViewport, iControllerId, iKey, iEvent, iAmountDepressed, iGamepad, ioReply );
 
@@ -50,7 +46,7 @@ FReply FOdysseyToolLine::InputKey(FViewport* iViewport, int32 iControllerId, FKe
     return ioReply;
 }
 
-void FOdysseyToolLine::CapturedMouseMove(FViewport* iViewport, int32 iX, int32 iY)
+void UOdysseyToolLine::CapturedMouseMove(FViewport* iViewport, int32 iX, int32 iY)
 {
     mLine->CapturedMouseMove(iViewport, iX, iY);
 
@@ -63,7 +59,7 @@ void FOdysseyToolLine::CapturedMouseMove(FViewport* iViewport, int32 iX, int32 i
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------- Path generation
 
-::ULIS::TArray<::ULIS::FVec2I> FOdysseyToolLine::GenerateToolPoints()
+::ULIS::TArray<::ULIS::FVec2I> UOdysseyToolLine::GenerateToolPoints()
 {
     ::ULIS::TArray<::ULIS::FVec2I> pointsArray;
     ::ULIS::GenerateLinePoints( ::ULIS::FVec2I( mLine->mStartPoint.X, mLine->mStartPoint.Y), ::ULIS::FVec2I( mLine->mFinishPoint.X, mLine->mFinishPoint.Y ), pointsArray );

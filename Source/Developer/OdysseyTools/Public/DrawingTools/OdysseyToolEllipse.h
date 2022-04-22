@@ -7,13 +7,16 @@
 #include "OdysseyHUDEllipse.h"
 #include "IOdysseyTool.h"
 
-class ODYSSEYTOOLS_API FOdysseyToolEllipse : public IOdysseyTool
-{
-public:
-    // Construction / Destruction
-    virtual ~FOdysseyToolEllipse();
+#include "OdysseyToolEllipse.Generated.h"
 
-    FOdysseyToolEllipse( FVector2D iCenterPoint );
+UCLASS()
+class ODYSSEYTOOLS_API UOdysseyToolEllipse : public UObject,
+                                             public IOdysseyTool
+{
+    GENERATED_BODY()
+
+public:
+    void Init() override;
 
 public:
     void Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) override;

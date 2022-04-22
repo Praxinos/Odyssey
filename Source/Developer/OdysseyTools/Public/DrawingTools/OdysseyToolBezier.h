@@ -7,13 +7,16 @@
 #include "OdysseyHUDBezier.h"
 #include "IOdysseyTool.h"
 
-class ODYSSEYTOOLS_API FOdysseyToolBezier : public IOdysseyTool
-{
-public:
-    // Construction / Destruction
-    virtual ~FOdysseyToolBezier();
+#include "OdysseyToolBezier.Generated.h"
 
-    FOdysseyToolBezier( FVector2D iStartPoint );
+UCLASS()
+class ODYSSEYTOOLS_API UOdysseyToolBezier : public UObject,
+                                            public IOdysseyTool
+{
+    GENERATED_BODY()
+
+public:
+    void Init() override;
 
 public:
     void Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) override;

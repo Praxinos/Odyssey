@@ -5,21 +5,15 @@
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
-FOdysseyToolPolygon::~FOdysseyToolPolygon()
-{
-}
 
-FOdysseyToolPolygon::FOdysseyToolPolygon( FVector2D iStartPoint )
+void UOdysseyToolPolygon::Init()
 {
-    UOdysseyHUDLine* line = NewObject<UOdysseyHUDLine>();
-    line->Init( FName("FirstLine"), iStartPoint, iStartPoint );
-    mLines.Add( line );
 }
 
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Drawing
 
-void FOdysseyToolPolygon::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
+void UOdysseyToolPolygon::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
 {
     for( UOdysseyHUDLine* lineToDraw : mLines )
         lineToDraw->Draw( ioBlock, iTransform );
@@ -28,7 +22,7 @@ void FOdysseyToolPolygon::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform 
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------- Mouse events
 
-void FOdysseyToolPolygon::MouseMove(FViewport* iViewport, int32 iX, int32 iY)
+void UOdysseyToolPolygon::MouseMove(FViewport* iViewport, int32 iX, int32 iY)
 {
     for( UOdysseyHUDLine* line : mLines )
     {
@@ -40,7 +34,7 @@ void FOdysseyToolPolygon::MouseMove(FViewport* iViewport, int32 iX, int32 iY)
         mLines.Last()->mFinishPoint.Set( iX, iY );
 }
 
-FReply FOdysseyToolPolygon::InputKey(FViewport* iViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed, bool iGamepad, FReply& ioReply)
+FReply UOdysseyToolPolygon::InputKey(FViewport* iViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed, bool iGamepad, FReply& ioReply)
 {
     for( UOdysseyHUDLine* line : mLines )
         line->InputKey( iViewport, iControllerId, iKey, iEvent, iAmountDepressed, iGamepad, ioReply );
@@ -76,7 +70,7 @@ FReply FOdysseyToolPolygon::InputKey(FViewport* iViewport, int32 iControllerId, 
     return ioReply;
 }
 
-void FOdysseyToolPolygon::CapturedMouseMove(FViewport* iViewport, int32 iX, int32 iY)
+void UOdysseyToolPolygon::CapturedMouseMove(FViewport* iViewport, int32 iX, int32 iY)
 {
     for( UOdysseyHUDLine* line : mLines )
     {
@@ -91,7 +85,7 @@ void FOdysseyToolPolygon::CapturedMouseMove(FViewport* iViewport, int32 iX, int3
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------- Path generation
 
-::ULIS::TArray<::ULIS::FVec2I> FOdysseyToolPolygon::GenerateToolPoints()
+::ULIS::TArray<::ULIS::FVec2I> UOdysseyToolPolygon::GenerateToolPoints()
 {
     std::vector< ::ULIS::FVec2I > polygonPoints;
 

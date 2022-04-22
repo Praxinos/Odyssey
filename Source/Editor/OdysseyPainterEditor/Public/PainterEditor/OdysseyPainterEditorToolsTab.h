@@ -7,6 +7,7 @@
 #include <ULIS>
 
 class FOdysseyPainterEditor;
+class IOdysseyTool;
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorToolsTab :
     public FOdysseyEditorTab
@@ -28,7 +29,7 @@ protected:
     virtual FReply OnClearUndo();
 
     /** Delegate for Tools checkBoxes button */
-    void OnToolCheckBoxClicked(ECheckBoxState iCheckBoxState, UClass* iTool);
+    void OnToolCheckBoxClicked(ECheckBoxState iCheckBoxState, IOdysseyTool* iTool);
 
 protected:
     // Methods

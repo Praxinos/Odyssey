@@ -4,6 +4,14 @@
 #include "OdysseyToolFreeHand.h"
 
 //--------------------------------------------------------------------------------------
+//----------------------------------------------------------- Construction / Destruction
+
+void UOdysseyToolFreeHand::Init()
+{
+
+}
+
+//--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Drawing
 
 void UOdysseyToolFreeHand::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)

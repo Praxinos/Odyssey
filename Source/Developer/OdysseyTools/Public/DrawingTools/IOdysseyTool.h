@@ -20,6 +20,9 @@ class ODYSSEYTOOLS_API IOdysseyTool
     GENERATED_IINTERFACE_BODY()
 
 public:
+    virtual void Init() = 0;
+
+public:
     //Drawing the HUD associated to the tool
     virtual void Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) = 0;
 

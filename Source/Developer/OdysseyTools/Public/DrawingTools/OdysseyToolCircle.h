@@ -7,13 +7,16 @@
 #include "OdysseyHUDCircle.h"
 #include "IOdysseyTool.h"
 
-class ODYSSEYTOOLS_API FOdysseyToolCircle : public IOdysseyTool
-{
-public:
-    // Construction / Destruction
-    virtual ~FOdysseyToolCircle();
+#include "OdysseyToolCircle.Generated.h"
 
-    FOdysseyToolCircle( FVector2D iCenterPoint );
+UCLASS()
+class ODYSSEYTOOLS_API UOdysseyToolCircle : public UObject,
+                                            public IOdysseyTool
+{
+    GENERATED_BODY()
+
+public:
+    void Init() override;
 
 public:
     void Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) override;

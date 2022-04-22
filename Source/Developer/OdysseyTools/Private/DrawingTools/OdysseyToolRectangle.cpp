@@ -5,20 +5,16 @@
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
-FOdysseyToolRectangle::~FOdysseyToolRectangle()
-{
-}
 
-FOdysseyToolRectangle::FOdysseyToolRectangle( FVector2D iTopLeftPoint )
-    : mRectangle(NewObject<UOdysseyHUDRectangle>())
+void UOdysseyToolRectangle::Init()
 {
-    mRectangle->Init( FName("RectangleTool"), iTopLeftPoint, iTopLeftPoint );
+    mRectangle = NewObject<UOdysseyHUDRectangle>();
 }
 
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Drawing
 
-void FOdysseyToolRectangle::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
+void UOdysseyToolRectangle::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
 {
     mLastTransform = iTransform;
     mRectangle->Draw( ioBlock, iTransform );
@@ -27,7 +23,7 @@ void FOdysseyToolRectangle::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransfor
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------- Mouse events
 
-void FOdysseyToolRectangle::MouseMove(FViewport* iViewport, int32 iX, int32 iY)
+void UOdysseyToolRectangle::MouseMove(FViewport* iViewport, int32 iX, int32 iY)
 {
     mRectangle->MouseMove(iViewport, iX, iY);
 
@@ -35,7 +31,7 @@ void FOdysseyToolRectangle::MouseMove(FViewport* iViewport, int32 iX, int32 iY)
         mRectangle->mBottomRightPoint.Set( iX, iY );
 }
 
-FReply FOdysseyToolRectangle::InputKey(FViewport* iViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed, bool iGamepad, FReply& ioReply)
+FReply UOdysseyToolRectangle::InputKey(FViewport* iViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed, bool iGamepad, FReply& ioReply)
 {
     mRectangle->InputKey(iViewport, iControllerId, iKey, iEvent, iAmountDepressed, iGamepad, ioReply );
 
@@ -51,7 +47,7 @@ FReply FOdysseyToolRectangle::InputKey(FViewport* iViewport, int32 iControllerId
     return ioReply;
 }
 
-void FOdysseyToolRectangle::CapturedMouseMove(FViewport* iViewport, int32 iX, int32 iY)
+void UOdysseyToolRectangle::CapturedMouseMove(FViewport* iViewport, int32 iX, int32 iY)
 {
     mRectangle->CapturedMouseMove(iViewport, iX, iY);
 
@@ -64,7 +60,7 @@ void FOdysseyToolRectangle::CapturedMouseMove(FViewport* iViewport, int32 iX, in
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------- Path generation
 
-::ULIS::TArray<::ULIS::FVec2I> FOdysseyToolRectangle::GenerateToolPoints()
+::ULIS::TArray<::ULIS::FVec2I> UOdysseyToolRectangle::GenerateToolPoints()
 {
     float angle = 360 + ::ULIS::FMath::RadToDeg(mLastTransform.GetMatrix().GetRotationAngle()*2);
     ::ULIS::TArray<::ULIS::FVec2I> pointsArray;

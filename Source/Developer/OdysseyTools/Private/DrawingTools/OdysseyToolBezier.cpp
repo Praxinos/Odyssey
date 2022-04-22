@@ -5,22 +5,18 @@
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
-FOdysseyToolBezier::~FOdysseyToolBezier()
-{
-}
 
-FOdysseyToolBezier::FOdysseyToolBezier( FVector2D iStartPoint )
-    : mBezier(NewObject<UOdysseyHUDBezier>())
-    , mIsEndPointSet( false )
-    , mIsControlPointSet( false )
+void UOdysseyToolBezier::Init()
 {
-    mBezier->Init( FName("bezierTool"), iStartPoint, iStartPoint, iStartPoint );
+    mBezier = NewObject<UOdysseyHUDBezier>();
+    mIsEndPointSet = false;
+    mIsControlPointSet = false;
 }
 
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Drawing
 
-void FOdysseyToolBezier::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
+void UOdysseyToolBezier::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
 {
     mBezier->Draw( ioBlock, iTransform );
 }
@@ -28,7 +24,7 @@ void FOdysseyToolBezier::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------- Mouse events
 
-void FOdysseyToolBezier::MouseMove(FViewport* iViewport, int32 iX, int32 iY)
+void UOdysseyToolBezier::MouseMove(FViewport* iViewport, int32 iX, int32 iY)
 {
     mBezier->MouseMove(iViewport, iX, iY);
 
@@ -41,7 +37,7 @@ void FOdysseyToolBezier::MouseMove(FViewport* iViewport, int32 iX, int32 iY)
     }
 }
 
-FReply FOdysseyToolBezier::InputKey(FViewport* iViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed, bool iGamepad, FReply& ioReply)
+FReply UOdysseyToolBezier::InputKey(FViewport* iViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed, bool iGamepad, FReply& ioReply)
 {
     mBezier->InputKey(iViewport, iControllerId, iKey, iEvent, iAmountDepressed, iGamepad, ioReply );
 
@@ -70,7 +66,7 @@ FReply FOdysseyToolBezier::InputKey(FViewport* iViewport, int32 iControllerId, F
     return ioReply;
 }
 
-void FOdysseyToolBezier::CapturedMouseMove(FViewport* iViewport, int32 iX, int32 iY)
+void UOdysseyToolBezier::CapturedMouseMove(FViewport* iViewport, int32 iX, int32 iY)
 {
     mBezier->CapturedMouseMove(iViewport, iX, iY);
 
@@ -86,7 +82,7 @@ void FOdysseyToolBezier::CapturedMouseMove(FViewport* iViewport, int32 iX, int32
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------- Path generation
 
-::ULIS::TArray<::ULIS::FVec2I> FOdysseyToolBezier::GenerateToolPoints()
+::ULIS::TArray<::ULIS::FVec2I> UOdysseyToolBezier::GenerateToolPoints()
 {
     ::ULIS::TArray<::ULIS::FVec2I> pointsArray;
     ::ULIS::GenerateQuadraticBezierPoints(

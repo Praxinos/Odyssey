@@ -945,32 +945,6 @@ FOdysseyPainterEditorViewportClient::GetDisplayedResolution() const
 //--------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------- Private API
 
-/*void
-FOdysseyPainterEditorViewportClient::CreateTool(eGUISelectedTool iGUISelectedTool, FVector2D iPos )
-{
-    switch (iGUISelectedTool)
-    {
-        case eGUISelectedTool::kLine:
-            mOdysseyPainterEditor->ToolSystem()->SetSelectedTool( new FOdysseyToolLine( iPos ) );
-        break;
-        case eGUISelectedTool::kRectangle:
-            mOdysseyPainterEditor->ToolSystem()->SetSelectedTool( new FOdysseyToolRectangle( iPos ) );
-        break;
-        case eGUISelectedTool::kPolygon:
-            mOdysseyPainterEditor->ToolSystem()->SetSelectedTool( new FOdysseyToolPolygon( iPos ) );
-        break;
-        case eGUISelectedTool::kCircle:
-            mOdysseyPainterEditor->ToolSystem()->SetSelectedTool( new FOdysseyToolCircle( iPos ) );
-        break;
-        case eGUISelectedTool::kEllipse:
-            mOdysseyPainterEditor->ToolSystem()->SetSelectedTool( new FOdysseyToolEllipse( iPos ) );
-        break;
-        case eGUISelectedTool::kBezier:
-            mOdysseyPainterEditor->ToolSystem()->SetSelectedTool( new FOdysseyToolBezier( iPos ) );
-        break;
-    }
-}*/
-
 void
 FOdysseyPainterEditorViewportClient::DestroyCheckerboardTexture()
 {

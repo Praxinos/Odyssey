@@ -16,6 +16,9 @@ class ODYSSEYTOOLS_API UOdysseyToolFreeHand : public UObject,
     GENERATED_BODY()
 
 public:
+    void Init() override;
+
+public:
     void Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) override;
 
 public:

@@ -7,13 +7,16 @@
 #include "OdysseyHUDLine.h"
 #include "IOdysseyTool.h"
 
-class ODYSSEYTOOLS_API FOdysseyToolLine : public IOdysseyTool
-{
-public:
-    // Construction / Destruction
-    virtual ~FOdysseyToolLine();
+#include "OdysseyToolLine.Generated.h"
 
-    FOdysseyToolLine( FVector2D iStartPoint );
+UCLASS()
+class ODYSSEYTOOLS_API UOdysseyToolLine : public UObject,
+                                          public IOdysseyTool
+{
+    GENERATED_BODY()
+
+public:
+    void Init() override;
 
 public:
     void Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) override;

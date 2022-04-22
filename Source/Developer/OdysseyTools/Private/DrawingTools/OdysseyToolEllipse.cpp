@@ -5,20 +5,16 @@
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
-FOdysseyToolEllipse::~FOdysseyToolEllipse()
-{
-}
 
-FOdysseyToolEllipse::FOdysseyToolEllipse( FVector2D iCenterPoint )
-: mEllipse(NewObject<UOdysseyHUDEllipse>())
+void UOdysseyToolEllipse::Init()
 {
-    mEllipse->Init( FName("EllipseTool"), iCenterPoint, iCenterPoint );
+    mEllipse = NewObject<UOdysseyHUDEllipse>();
 }
 
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Drawing
 
-void FOdysseyToolEllipse::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
+void UOdysseyToolEllipse::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
 {
     mEllipse->Draw( ioBlock, iTransform );
     mPreviousTransform = iTransform;
@@ -27,7 +23,7 @@ void FOdysseyToolEllipse::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform 
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------- Mouse events
 
-void FOdysseyToolEllipse::MouseMove(FViewport* iViewport, int32 iX, int32 iY)
+void UOdysseyToolEllipse::MouseMove(FViewport* iViewport, int32 iX, int32 iY)
 {
     mEllipse->MouseMove(iViewport, iX, iY);
 
@@ -39,7 +35,7 @@ void FOdysseyToolEllipse::MouseMove(FViewport* iViewport, int32 iX, int32 iY)
     }
 }
 
-FReply FOdysseyToolEllipse::InputKey(FViewport* iViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed, bool iGamepad, FReply& ioReply)
+FReply UOdysseyToolEllipse::InputKey(FViewport* iViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed, bool iGamepad, FReply& ioReply)
 {
     mEllipse->InputKey(iViewport, iControllerId, iKey, iEvent, iAmountDepressed, iGamepad, ioReply );
 
@@ -55,7 +51,7 @@ FReply FOdysseyToolEllipse::InputKey(FViewport* iViewport, int32 iControllerId, 
     return ioReply;
 }
 
-void FOdysseyToolEllipse::CapturedMouseMove(FViewport* iViewport, int32 iX, int32 iY)
+void UOdysseyToolEllipse::CapturedMouseMove(FViewport* iViewport, int32 iX, int32 iY)
 {
     mEllipse->CapturedMouseMove(iViewport, iX, iY);
  
@@ -70,7 +66,7 @@ void FOdysseyToolEllipse::CapturedMouseMove(FViewport* iViewport, int32 iX, int3
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------- Path generation
 
-::ULIS::TArray<::ULIS::FVec2I> FOdysseyToolEllipse::GenerateToolPoints()
+::ULIS::TArray<::ULIS::FVec2I> UOdysseyToolEllipse::GenerateToolPoints()
 {
     FTransform2D rotation = FTransform2D(FQuat2D(-mPreviousTransform.GetMatrix().GetRotationAngle()));
     FVector2D transformedBorderPoint = mEllipse->mBorderPoint - mEllipse->mCenterPoint;
