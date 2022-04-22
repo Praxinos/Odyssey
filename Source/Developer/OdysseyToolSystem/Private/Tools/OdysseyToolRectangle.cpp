@@ -9,10 +9,10 @@ FOdysseyToolRectangle::~FOdysseyToolRectangle()
 {
 }
 
-FOdysseyToolRectangle::FOdysseyToolRectangle( FVector2D iStartPoint )
-//: mLine(NewObject<UOdysseyHUDLine>())
+FOdysseyToolRectangle::FOdysseyToolRectangle( FVector2D iTopLeftPoint )
+    : mRectangle(NewObject<UOdysseyHUDRectangle>())
 {
-    //mLine->Init( FName("lineTool"), iStartPoint, iStartPoint );
+    mRectangle->Init( FName("RectangleTool"), iTopLeftPoint, iTopLeftPoint );
 }
 
 //--------------------------------------------------------------------------------------
@@ -20,7 +20,7 @@ FOdysseyToolRectangle::FOdysseyToolRectangle( FVector2D iStartPoint )
 
 void FOdysseyToolRectangle::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
 {
-    //mLine->Draw( ioBlock, iTransform );
+    mRectangle->Draw( ioBlock, iTransform );
 }
 
 //--------------------------------------------------------------------------------------
@@ -28,36 +28,36 @@ void FOdysseyToolRectangle::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransfor
 
 void FOdysseyToolRectangle::MouseMove(FViewport* iViewport, int32 iX, int32 iY)
 {
-    //     mLine->MouseMove(iViewport, iX, iY);
-    // 
-    //     if( !mIsReadyToBeApplied )
-    //         mLine->mFinishPoint.Set( iX, iY );
+    mRectangle->MouseMove(iViewport, iX, iY);
+
+    if( !mIsReadyToBeApplied )
+        mRectangle->mBottomRightPoint.Set( iX, iY );
 }
 
 FReply FOdysseyToolRectangle::InputKey(FViewport* iViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed, bool iGamepad, FReply& ioReply)
 {
-    //     mLine->InputKey(iViewport, iControllerId, iKey, iEvent, iAmountDepressed, iGamepad, ioReply );
-    // 
-    //     if (iKey == EKeys::LeftMouseButton)
-    //     {
-    //         if( !mIsReadyToBeApplied )
-    //         {
-    //             mIsReadyToBeApplied = true;
-    //             ioReply = FReply::Handled();
-    //         }
-    //     }
+    mRectangle->InputKey(iViewport, iControllerId, iKey, iEvent, iAmountDepressed, iGamepad, ioReply );
+
+    if (iKey == EKeys::LeftMouseButton)
+    {
+        if( !mIsReadyToBeApplied )
+        {
+            mIsReadyToBeApplied = true;
+            ioReply = FReply::Handled();
+        }
+    }
 
     return ioReply;
 }
 
 void FOdysseyToolRectangle::CapturedMouseMove(FViewport* iViewport, int32 iX, int32 iY)
 {
-    //     mLine->CapturedMouseMove(iViewport, iX, iY);
-    // 
-    //     if ( !mIsReadyToBeApplied )
-    //     {
-    //         mLine->mFinishPoint.Set(iX, iY);
-    //     }
+    mRectangle->CapturedMouseMove(iViewport, iX, iY);
+
+    if ( !mIsReadyToBeApplied )
+    {
+        mRectangle->mBottomRightPoint.Set(iX, iY);
+    }
 }
 
 //--------------------------------------------------------------------------------------
@@ -66,7 +66,7 @@ void FOdysseyToolRectangle::CapturedMouseMove(FViewport* iViewport, int32 iX, in
 ::ULIS::TArray<::ULIS::FVec2I> FOdysseyToolRectangle::GenerateToolPoints()
 {
     ::ULIS::TArray<::ULIS::FVec2I> pointsArray;
-    //::ULIS::GenerateLinePoints( ::ULIS::FVec2I( mLine->mStartPoint.X, mLine->mStartPoint.Y), ::ULIS::FVec2I( mLine->mFinishPoint.X, mLine->mFinishPoint.Y ), pointsArray );
+    ::ULIS::GenerateRectanglePoints( ::ULIS::FVec2I( mRectangle->mTopLeftPoint.X, mRectangle->mTopLeftPoint.Y), ::ULIS::FVec2I( mRectangle->mBottomRightPoint.X, mRectangle->mBottomRightPoint.Y ), pointsArray );
 
     return pointsArray;
 }

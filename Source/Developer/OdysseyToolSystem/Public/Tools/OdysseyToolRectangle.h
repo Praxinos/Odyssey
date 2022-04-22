@@ -28,5 +28,5 @@ public:
     ::ULIS::TArray<::ULIS::FVec2I> GenerateToolPoints() override;
 
 private:
-    //UOdysseyHUDRectangle* mRectangle;
+    UOdysseyHUDRectangle* mRectangle;
 };
