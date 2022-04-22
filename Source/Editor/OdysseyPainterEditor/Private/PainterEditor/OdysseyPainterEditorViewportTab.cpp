@@ -168,7 +168,7 @@ FOdysseyPainterEditorViewportTab::OnZoomOutExponential()
 
 void FOdysseyPainterEditorViewportTab::OnViewportSizeChanged(FViewport* iViewport, uint32 iUnused)
 {
-    mEditor->HUDToolSystem()->RefreshHUDSurface( FVector2D( iViewport->GetSizeXY() ));
+    mEditor->HUDSystem()->RefreshHUDSurface( FVector2D( iViewport->GetSizeXY() ));
 }
 
 #undef LOCTEXT_NAMESPACE

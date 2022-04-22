@@ -1,11 +1,12 @@
 // IDDN FR.001.250001.004.S.X.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
+using System.IO;
 using UnrealBuildTool;
 
-public class OdysseyHUDSystem : ModuleRules
+public class OdysseyToolSystem : ModuleRules
 {
-    public OdysseyHUDSystem(ReadOnlyTargetRules Target) : base(Target)
+    public OdysseyToolSystem(ReadOnlyTargetRules Target) : base(Target)
     {
         PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
@@ -16,7 +17,6 @@ public class OdysseyHUDSystem : ModuleRules
                 "InputCore",
                 "SlateCore",
                 "Engine",
-                "OdysseyImaging",
                 "OdysseyWidgets"
              }
         );
@@ -27,5 +27,12 @@ public class OdysseyHUDSystem : ModuleRules
                 "ULISLoader",
              }
         );
+
+        PublicIncludePaths.AddRange(
+            new string[] {
+                Path.Combine(ModuleDirectory, "Public", "Tools"),
+            }
+        );
+
     }
 }

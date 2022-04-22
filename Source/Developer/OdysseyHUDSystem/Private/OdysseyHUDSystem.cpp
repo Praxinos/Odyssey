@@ -1,17 +1,17 @@
 // IDDN FR.001.250001.004.S.X.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
-#include "OdysseyHUDToolSystem.h"
+#include "OdysseyHUDSystem.h"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
-FOdysseyHUDToolSystem::~FOdysseyHUDToolSystem()
+FOdysseyHUDSystem::~FOdysseyHUDSystem()
 {
     delete mHUDSurface;
     delete mHUDBlock;
 }
 
-FOdysseyHUDToolSystem::FOdysseyHUDToolSystem()
+FOdysseyHUDSystem::FOdysseyHUDSystem()
     : mHUDBlock( nullptr ),
       mHUDSurface(nullptr)
 {
@@ -21,7 +21,7 @@ FOdysseyHUDToolSystem::FOdysseyHUDToolSystem()
 //------------------------------------------------------------------------------ Setters
 
 void
-FOdysseyHUDToolSystem::SetHUDBlock(::ULIS::FBlock* iBlock)
+FOdysseyHUDSystem::SetHUDBlock(::ULIS::FBlock* iBlock)
 {
     if (mHUDBlock == iBlock)
         return;
@@ -37,12 +37,12 @@ FOdysseyHUDToolSystem::SetHUDBlock(::ULIS::FBlock* iBlock)
 //------------------------------------------------------------------------------ Getters
 
 ::ULIS::FBlock*
-FOdysseyHUDToolSystem::GetHUDBlock() const
+FOdysseyHUDSystem::GetHUDBlock() const
 {
     return mHUDBlock;
 }
 
-FOdysseySurfaceTexture2DEditable* FOdysseyHUDToolSystem::GetHUDSurface() const
+FOdysseySurfaceTexture2DEditable* FOdysseyHUDSystem::GetHUDSurface() const
 {
     return mHUDSurface;
 }
@@ -50,7 +50,7 @@ FOdysseySurfaceTexture2DEditable* FOdysseyHUDToolSystem::GetHUDSurface() const
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------------------- Callback Usage
 
-void FOdysseyHUDToolSystem::RefreshHUDSurface(FVector2D iSize)
+void FOdysseyHUDSystem::RefreshHUDSurface(FVector2D iSize)
 {
     if( mHUDSurface )
     {

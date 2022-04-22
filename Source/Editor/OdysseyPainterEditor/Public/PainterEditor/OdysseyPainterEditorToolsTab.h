@@ -8,8 +8,16 @@
 
 class FOdysseyPainterEditor;
 
+enum class eGUISelectedTool : char
+{
+    kBrush,
+    kLine,
+    kCircle,
+    kEllipse //...
+};
+
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorToolsTab :
-	public FOdysseyEditorTab
+    public FOdysseyEditorTab
 {
 public:
     // Construction / Destruction
@@ -22,13 +30,13 @@ protected:
     virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
 
 protected:
-    // Widget Getters
-
-protected:
     // Event Listeners
     virtual FReply OnClear();
     virtual FReply OnFill();
     virtual FReply OnClearUndo();
+
+    /** Delegate for Tools checkBoxes button */
+    void OnToolCheckBoxClicked(ECheckBoxState iCheckBoxState, eGUISelectedTool iTool);
 
 protected:
     // Methods

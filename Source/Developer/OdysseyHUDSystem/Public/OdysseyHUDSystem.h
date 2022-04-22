@@ -8,12 +8,12 @@
 #include <ULIS>
 #include "ULISLoaderModule.h"
 
-class ODYSSEYHUDSYSTEM_API FOdysseyHUDToolSystem 
+class ODYSSEYHUDSYSTEM_API FOdysseyHUDSystem 
 {
 public:
     // Construction / Destruction
-    ~FOdysseyHUDToolSystem();
-    FOdysseyHUDToolSystem();
+    ~FOdysseyHUDSystem();
+    FOdysseyHUDSystem();
 
 private:
     // Setters (private)
@@ -28,8 +28,7 @@ public:
     // Callback usage
     void RefreshHUDSurface(FVector2D iSize);
 
-protected:
-
+private:
     ::ULIS::FBlock*                      mHUDBlock; // Holds the block in which we draw the HUD
     FOdysseySurfaceTexture2DEditable*    mHUDSurface;
 };

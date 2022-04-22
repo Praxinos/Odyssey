@@ -6,8 +6,10 @@
 #include "OdysseyBrushAssetBase.h"
 #include "OdysseyPainterEditorTopTab.h"
 #include "SOdysseyPaintModifiers.h"
-#include "OdysseyHUDToolSystem.h"
+#include "OdysseyToolSystem.h"
+#include "OdysseyHUDSystem.h"
 #include "ULISLoaderModule.h"
+#include "OdysseyPainterEditorGUI.h"
 
 /////////////////////////////////////////////////////
 // FOdysseyPainterEditor
@@ -17,12 +19,16 @@
 FOdysseyPainterEditor::~FOdysseyPainterEditor()
 {
     delete mPaintEngine;
+    delete mToolSystem;
 }
 
 FOdysseyPainterEditor::FOdysseyPainterEditor()
     : mPaintEngine( new FOdysseyPaintEngine() )
+    , mToolSystem(new FOdysseyToolSystem())
+    , mHUDSystem(new FOdysseyHUDSystem())
 	, mPaintColor( ::ULIS::FColor::RGBA8( 0, 0, 0 ) )
     , mDrawBrushPreview( true )
+	, mGUISelectedTool( eGUISelectedTool::kBrush )
 {
 }
 
@@ -92,10 +98,16 @@ FOdysseyPainterEditor::PaintEngine() const
     return mPaintEngine;
 }
 
-FOdysseyHUDToolSystem* 
-FOdysseyPainterEditor::HUDToolSystem() const
+FOdysseyToolSystem* 
+FOdysseyPainterEditor::ToolSystem() const
 {
-	return mHUDToolSystem;
+	return mToolSystem;
+}
+
+FOdysseyHUDSystem* 
+FOdysseyPainterEditor::HUDSystem() const
+{
+	return mHUDSystem;
 }
 
 FOdysseyUndoHistory*
@@ -114,6 +126,17 @@ FOdysseyPainterEditor::DrawBrushPreview() const
 FOdysseyPainterEditor::PaintColor() const
 {
 	return mPaintColor;
+}
+
+void FOdysseyPainterEditor::SetGUISelectedTool(eGUISelectedTool iGUISelectedTool)
+{
+	mGUISelectedTool = iGUISelectedTool;
+}
+
+eGUISelectedTool 
+FOdysseyPainterEditor::GetGUISelectedTool() const
+{
+	return mGUISelectedTool;
 }
 
 //--------------------------------------------------------------------------------------

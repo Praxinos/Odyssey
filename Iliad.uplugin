@@ -26,6 +26,11 @@
       "LoadingPhase": "Default"
     },
     {
+      "Name": "OdysseyHUDSystem",
+      "Type": "UncookedOnly",
+      "LoadingPhase": "Default"
+    },
+    {
       "Name": "OdysseyLayer",
       "Type": "UncookedOnly",
       "LoadingPhase": "Default"
@@ -52,6 +57,11 @@
     },
     {
       "Name": "OdysseyStrokePipeline",
+      "Type": "UncookedOnly",
+      "LoadingPhase": "Default"
+    },
+    {
+      "Name": "OdysseyToolSystem",
       "Type": "UncookedOnly",
       "LoadingPhase": "Default"
     },

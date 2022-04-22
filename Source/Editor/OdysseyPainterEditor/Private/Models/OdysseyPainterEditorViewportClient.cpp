@@ -24,7 +24,9 @@
 
 #include "IOdysseyStylusInputModule.h"
 #include "OdysseyPaintEngine.h"
-#include "OdysseyHUDToolSystem.h"
+#include "OdysseyToolSystem.h"
+#include "OdysseyHUDSystem.h"
+#include "OdysseyToolLine.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorSettings.h"
 #include "OdysseyStylusInputSettings.h"
@@ -60,6 +62,7 @@ FOdysseyPainterEditorViewportClient::FOdysseyPainterEditorViewportClient( FOdyss
     , mIsCapturedByStylus(false)
     , mNearestNeighbourTexture()
     , mBilinearTexture()
+    , mIsReadyToCreateTool(false)
 {
     check( // mOdysseyPainterEditor.IsValid() &&
            mOdysseyPainterEditorViewportPtr.IsValid() );
@@ -202,7 +205,7 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
         // }
     }
 
-    IOdysseySurfaceEditable* HUDSurface = mOdysseyPainterEditor->HUDToolSystem()->GetHUDSurface();
+    IOdysseySurfaceEditable* HUDSurface = mOdysseyPainterEditor->HUDSystem()->GetHUDSurface();
     UTexture* HUDTexture = nullptr;
     if (HUDSurface)
     {
@@ -221,10 +224,8 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
         transform = transform.Concatenate( invertY );
         transform = transform.Inverse();
 
-        if (mOdysseyPainterEditor->GetGUI()->GetHUDTab()->GetHUD())
-        {
-            mOdysseyPainterEditor->GetGUI()->GetHUDTab()->GetHUD()->Draw(HUDSurface->Block(), transform);
-        }
+        if( mOdysseyPainterEditor->ToolSystem()->GetSelectedTool() )
+            mOdysseyPainterEditor->ToolSystem()->GetSelectedTool()->Draw( HUDSurface->Block(), transform );
 
         FCanvasTileItem tileItem( FVector2D(0,0), HUDTexture->Resource, FVector2D( iViewport->GetSizeXY().X, iViewport->GetSizeXY().Y ), FLinearColor::White );
         tileItem.BatchedElementParameters = batchedElementParameters;
@@ -313,13 +314,42 @@ FOdysseyPainterEditorViewportClient::InputKey( FViewport* iViewport, int32 iCont
     if( (mIsCapturedByStylus || delta < 500) && ( iKey == EKeys::LeftMouseButton || iKey == EKeys::RightMouseButton ) )
         return true;
 
-    if (mCurrentToolState == eState::kIdle)
+    //ToolSystem InputKey
+    if ( mCurrentToolState == eState::kIdle )
     {
         FReply replyHUD = FReply::Unhandled();
-        mOdysseyPainterEditor->GetGUI()->GetHUDTab()->GetHUD()->InputKey( iViewport, iControllerId, iKey, iEvent, iAmountDepressed, iGamepad, replyHUD );
-        if( replyHUD.IsEventHandled() )
+
+        if( mOdysseyPainterEditor->ToolSystem()->GetSelectedTool() )
+        {
+            //ReplyHUD can be changed in the function below
+            mOdysseyPainterEditor->ToolSystem()->GetSelectedTool()->InputKey(iViewport, iControllerId, iKey, iEvent, iAmountDepressed, iGamepad, replyHUD);
+        }
+        if ( !mOdysseyPainterEditor->ToolSystem()->GetSelectedTool() && mOdysseyPainterEditor->GetGUISelectedTool() != eGUISelectedTool::kBrush && iKey == EKeys::LeftMouseButton && iEvent == EInputEvent::IE_Pressed)
+        {
+            mIsReadyToCreateTool = true;
+            return true;
+        }
+        if (mOdysseyPainterEditor->ToolSystem()->GetSelectedTool() && mOdysseyPainterEditor->ToolSystem()->GetSelectedTool()->IsReadyToBeApplied())
+        {
+            ::ULIS::TArray<::ULIS::FVec2I> pointsGenerated = mOdysseyPainterEditor->ToolSystem()->GetSelectedTool()->GenerateToolPoints();
+            if( pointsGenerated.Size() > 0 )
+            {
+                mOdysseyPainterEditor->PaintEngine()->BeginStroke( FOdysseyStrokePoint( pointsGenerated[0].x, pointsGenerated[0].y ), mCurrentPointInTexture );
+
+                for (int i = 1; i < pointsGenerated.Size(); i++)
+                {
+                    mOdysseyPainterEditor->PaintEngine()->PushStroke( FOdysseyStrokePoint( pointsGenerated[i].x, pointsGenerated[i].y ) );
+                }
+
+                mOdysseyPainterEditor->PaintEngine()->EndStroke();
+            }
+            mOdysseyPainterEditor->ToolSystem()->SetSelectedTool( nullptr );
+            mOdysseyPainterEditor->HUDSystem()->RefreshHUDSurface( FVector2D( iViewport->GetSizeXY().X, iViewport->GetSizeXY().Y ) );
+        }
+        if (replyHUD.IsEventHandled())
             return true;
     }
+    //---
 
     FOdysseyStrokePoint point_in_viewport( FOdysseyStrokePoint::DefaultPoint() );
     point_in_viewport.x = iViewport->GetMouseX();
@@ -336,12 +366,27 @@ FOdysseyPainterEditorViewportClient::CapturedMouseMove( FViewport* iViewport, in
     if (mIsCapturedByStylus || delta < 500)
         return;
 
-
-    if (mOdysseyPainterEditor->GetGUI()->GetHUDTab()->GetHUD()->IsCaptured())
+    //ToolSystem CapturedMouseMove
+    if (mCurrentToolState == eState::kIdle)
     {
-        mOdysseyPainterEditor->GetGUI()->GetHUDTab()->GetHUD()->CapturedMouseMove(iViewport, iX, iY);
-        return;
+        if (mIsReadyToCreateTool)
+        {
+            mIsReadyToCreateTool = false;
+            if (mOdysseyPainterEditor->GetGUISelectedTool() != eGUISelectedTool::kBrush)
+            {
+                FVector2D posInTexture = GetLocalMousePosition( FVector2D( iX, iY ) );
+                CreateTool(mOdysseyPainterEditor->GetGUISelectedTool(), posInTexture );
+                return;
+            }
+        }
+        if (mOdysseyPainterEditor->ToolSystem()->GetSelectedTool())
+        {
+            FVector2D posInTexture = GetLocalMousePosition(FVector2D(iX, iY));
+            mOdysseyPainterEditor->ToolSystem()->GetSelectedTool()->CapturedMouseMove(iViewport, posInTexture.X, posInTexture.Y);
+            return;
+        }
     }
+    //---
 
     FOdysseyStrokePoint point_in_viewport( FOdysseyStrokePoint::DefaultPoint() );
     point_in_viewport.x = iX;
@@ -814,7 +859,21 @@ FOdysseyPainterEditorViewportClient::MouseMove(FViewport* iViewport, int32 iX, i
         auto paintengine = mOdysseyPainterEditor->PaintEngine();
         paintengine->SetCurrentStrokePoint(mCurrentPointInTexture);
 
-        mOdysseyPainterEditor->GetGUI()->GetHUDTab()->GetHUD()->MouseMove(iViewport, iX, iY);
+        //ToolSystem MouseMove
+        if (mIsReadyToCreateTool)
+        {
+            mIsReadyToCreateTool = false;
+            if( mOdysseyPainterEditor->GetGUISelectedTool() != eGUISelectedTool::kBrush )
+            {
+                CreateTool(mOdysseyPainterEditor->GetGUISelectedTool(), FVector2D(lastPointInTexture.x, lastPointInTexture.y));
+            }
+        }
+        if (mOdysseyPainterEditor->ToolSystem()->GetSelectedTool())
+        {
+            FVector2D posInTexture = GetLocalMousePosition(FVector2D(iX, iY));
+            mOdysseyPainterEditor->ToolSystem()->GetSelectedTool()->MouseMove(iViewport, posInTexture.X, posInTexture.Y);
+        }
+        //---
     }
 }
 
@@ -880,6 +939,16 @@ FOdysseyPainterEditorViewportClient::GetDisplayedResolution() const
 
 //--------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------- Private API
+
+void
+FOdysseyPainterEditorViewportClient::CreateTool(eGUISelectedTool iGUISelectedTool, FVector2D iPos )
+{
+    switch (iGUISelectedTool)
+    {
+        case eGUISelectedTool::kLine:
+            mOdysseyPainterEditor->ToolSystem()->SetSelectedTool( new FOdysseyToolLine( iPos ) );
+    }
+}
 
 void
 FOdysseyPainterEditorViewportClient::DestroyCheckerboardTexture()

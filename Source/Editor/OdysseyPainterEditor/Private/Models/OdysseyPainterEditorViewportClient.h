@@ -112,6 +112,7 @@ public:
 
 private:
     // Private API
+    void        CreateTool( eGUISelectedTool iGUISelectedTool, FVector2D iPos );
     void        DestroyCheckerboardTexture();
     void        ZoomInInViewport( const FVector2D& iPositionInViewport );
     void        ZoomOutInViewport( const FVector2D& iPositionInViewport );
@@ -158,4 +159,9 @@ private:
 
     FTexture                                mNearestNeighbourTexture;
     FTexture                                mBilinearTexture;
+
+    //Useful variable to handle both tool manipulation in the viewport at the creation:
+    //Case 1: user down and up mouse at same position, then moves mouse to define the tool shape, and then down and up mouse to validate it
+    //Case 2: user down mouse, moves mouse to define the tool shape, and then up mouse to validate it
+    bool mIsReadyToCreateTool; 
 };

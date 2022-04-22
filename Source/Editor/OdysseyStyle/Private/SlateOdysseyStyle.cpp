@@ -422,6 +422,17 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
         .SetArrowsImage(FSlateNoResource())
     );
 
+    Set("OdysseyCheckBoxStyle.TransparentCheckBox", FCheckBoxStyle()
+        .SetForegroundColor(FLinearColor(0, 0, 0, 0))
+        .SetCheckBoxType(ESlateCheckBoxType::ToggleButton)
+        .SetUncheckedImage(FSlateNoResource())
+        .SetUncheckedHoveredImage(BOX_BRUSH("Common/RoundedSelection_16x", 4.0f / 16.0f, FLinearColor(0.728f, 0.364f, 0.003f)))
+        .SetUncheckedPressedImage(BOX_BRUSH("Common/RoundedSelection_16x", 4.0f / 16.0f, FLinearColor(0.701f, 0.225f, 0.003f)))
+        .SetCheckedImage(BOX_BRUSH("Common/RoundedSelection_16x", 4.0f / 16.0f, FLinearColor(0.701f, 0.225f, 0.003f)))
+        .SetCheckedHoveredImage(BOX_BRUSH("Common/RoundedSelection_16x", 4.0f / 16.0f, FLinearColor(0.728f, 0.364f, 0.003f)))
+        .SetCheckedPressedImage(BOX_BRUSH("Common/RoundedSelection_16x", 4.0f / 16.0f, FLinearColor(0.701f, 0.225f, 0.003f)))
+    );
+
 	//For flipbook
 	Set("FlipbookTimeline.TimelineFrameBackground", new BOX_BRUSH("OdysseyFlipbook/TimelineFrameBackground", FMargin(4.f / 16.f)));
 	Set("FlipbookTimeline.TimelineFrameTimingHandle", new IMAGE_BRUSH("OdysseyFlipbook/TimelineFrameTimingHandle", FVector2D(16.f, 16.f)));

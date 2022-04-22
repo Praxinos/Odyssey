@@ -8,7 +8,8 @@
 #include <ULIS>
 
 class FOdysseyPaintEngine;
-class FOdysseyHUDToolSystem;
+class FOdysseyToolSystem;
+class FOdysseyHUDSystem;
 class FOdysseyUndoHistory;
 class UOdysseyBrush;
 class UOdysseyBrushAssetBase;
@@ -39,26 +40,32 @@ public:
     // Getters
     virtual FOdysseyPainterEditorGUI*                   GetGUI() = 0;
 
-    virtual FOdysseyPaintEngine*		                PaintEngine() const;
-    virtual FOdysseyHUDToolSystem*                      HUDToolSystem() const;
-	virtual IOdysseySurfaceEditable*                    DisplaySurface() const = 0;
-	virtual FOdysseyUndoHistory*		                UndoHistory() const;
-	virtual bool                                        DrawBrushPreview() const;
-	virtual ::ULIS::FColor                              PaintColor() const;
+    virtual FOdysseyPaintEngine*                        PaintEngine() const;
+    virtual FOdysseyToolSystem*                         ToolSystem() const;
+    virtual FOdysseyHUDSystem*                          HUDSystem() const;
+    virtual IOdysseySurfaceEditable*                    DisplaySurface() const = 0;
+    virtual FOdysseyUndoHistory*                        UndoHistory() const;
+    virtual bool                                        DrawBrushPreview() const;
+    virtual ::ULIS::FColor                              PaintColor() const;
+    virtual eGUISelectedTool                            GetGUISelectedTool() const;
 
 public:
     // Setters
-	void                         DrawBrushPreview(bool iDrawBrushPreview);
-	void                         PaintColor(::ULIS::FColor iColor);
+    void                         DrawBrushPreview(bool iDrawBrushPreview);
+    void                         PaintColor(::ULIS::FColor iColor);
+    void                         SetGUISelectedTool( eGUISelectedTool iGUISelectedTool );
 
 public:
     // Interface
     virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
 
 private:
-	FOdysseyUndoHistory*		mUndoHistory;
+    FOdysseyUndoHistory*        mUndoHistory;
     FOdysseyPaintEngine*        mPaintEngine; //TODO: no need for a pointer here
-    FOdysseyHUDToolSystem*      mHUDToolSystem;
-	::ULIS::FColor			    mPaintColor;
-	bool                        mDrawBrushPreview;
+    FOdysseyToolSystem*         mToolSystem;
+    FOdysseyHUDSystem*          mHUDSystem;
+    ::ULIS::FColor              mPaintColor;
+
+    bool                        mDrawBrushPreview;
+    eGUISelectedTool            mGUISelectedTool;
 };
