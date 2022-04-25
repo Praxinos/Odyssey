@@ -25,6 +25,7 @@ void
 FEposSequenceEditorCommands::RegisterCommands()
 {
     UI_COMMAND( NewStoryboardWithSettings,          "New Storyboard", "Create a new storyboard with settings", EUserInterfaceActionType::Button, FInputChord() );
+    UI_COMMAND( NewStoryboardImportImageSequence,   "Import Image Sequence", "Create a new storyboard from a sequence of images", EUserInterfaceActionType::Button, FInputChord() );
     UI_COMMAND( ToggleStoryboardViewportCommand,    "Storyboard Viewport", "A viewport layout tailored to storyboard preview", EUserInterfaceActionType::RadioButton, FInputChord() );
 
     //---

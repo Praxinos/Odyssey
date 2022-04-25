@@ -18,6 +18,7 @@ public:
 
 public:
     TSharedPtr<FUICommandInfo> NewStoryboardWithSettings;
+    TSharedPtr<FUICommandInfo> NewStoryboardImportImageSequence;
     TSharedPtr<FUICommandInfo> ToggleStoryboardViewportCommand;
 
     //---

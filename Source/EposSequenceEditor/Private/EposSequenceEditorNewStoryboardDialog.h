@@ -9,6 +9,8 @@
 
 class FTabManager;
 
+//---
+
 USTRUCT()
 struct FStoryboardSettings
 {
@@ -24,9 +26,27 @@ public:
     FDirectoryPath StoryboardPath { TEXT( "/Game" ) };
 };
 
+//---
+
+USTRUCT()
+struct FStoryboardImportImageSequenceSettings
+{
+    GENERATED_BODY()
+
+public:
+    /** Image sequence folder. */
+    UPROPERTY( EditAnywhere, Category=ImageSequenceImport, meta=( ContentDir ) )
+    FDirectoryPath ImageSequencePath;
+};
+
+//---
+
 class NewStoryboardDialog
 {
 public:
-    /** Open dialog for creating a storyboard */
-    static void OpenDialog( const TSharedRef<FTabManager>& TabManager );
+    /** Open dialog for creating an empty storyboard */
+    static void OpenCreationDialog( const TSharedRef<FTabManager>& TabManager );
+
+    /** Open dialog for creating a storyboard from a sequence of images */
+    static void OpenImportImageSequenceDialog( const TSharedRef<FTabManager>& TabManager );
 };

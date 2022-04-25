@@ -94,6 +94,8 @@ FEposSequenceEditorStyle::InitCommands()
 
     Set( "EposSequenceCommands.NewStoryboardWithSettings", new IMAGE_BRUSH_SVG( "new-storyboard-with-settings", Icon16x16 ) );
     Set( "EposSequenceCommands.NewStoryboardWithSettings.Small", new IMAGE_BRUSH_SVG( "new-storyboard-with-settings", Icon16x16 ) );
+    Set( "EposSequenceCommands.NewStoryboardImportImageSequence", new IMAGE_BRUSH_SVG( "new-storyboard-import-image-sequence", Icon16x16 ) );
+    Set( "EposSequenceCommands.NewStoryboardImportImageSequence.Small", new IMAGE_BRUSH_SVG( "new-storyboard-import-image-sequence", Icon16x16 ) );
 
     Set( "EposSequenceCommands.CreateCameraAtCurrentTime", new IMAGE_BRUSH_SVG( "camera-create", Icon48x48 ) );
     Set( "EposSequenceCommands.CreateCameraAtCurrentTime.Small", new IMAGE_BRUSH_SVG( "camera-create", Icon24x24 ) );

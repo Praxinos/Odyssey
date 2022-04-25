@@ -130,29 +130,34 @@ FEposSequenceEditorModule::UnregisterAssetTools()
     AssetTools.UnregisterAssetTypeActions( mShotSequenceTypeActions.ToSharedRef() );
 }
 
-//static
-void
-FEposSequenceEditorModule::OnCreateNewAssetWithSettings( UClass* iClass )
-{
-    FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>( TEXT( "LevelEditor" ) );
-    NewStoryboardDialog::OpenDialog( LevelEditorModule.GetLevelEditorTabManager().ToSharedRef() );
-}
-
 void
 FEposSequenceEditorModule::RegisterMenuExtensions()
 {
     mCommandList = MakeShareable( new FUICommandList );
     mCommandList->MapAction(
         FEposSequenceEditorCommands::Get().NewStoryboardWithSettings,
-        FExecuteAction::CreateStatic( &FEposSequenceEditorModule::OnCreateNewAssetWithSettings, UBoardSequence::StaticClass() )
+        FExecuteAction::CreateLambda( []()
+                                      {
+                                          FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>( TEXT( "LevelEditor" ) );
+                                          NewStoryboardDialog::OpenCreationDialog( LevelEditorModule.GetLevelEditorTabManager().ToSharedRef() );
+                                      } )
+    );
+    mCommandList->MapAction(
+        FEposSequenceEditorCommands::Get().NewStoryboardImportImageSequence,
+        FExecuteAction::CreateLambda( []()
+                                      {
+                                          FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>( TEXT( "LevelEditor" ) );
+                                          NewStoryboardDialog::OpenImportImageSequenceDialog( LevelEditorModule.GetLevelEditorTabManager().ToSharedRef() );
+                                      } )
     );
 
     mCinematicsMenuExtender = MakeShareable( new FExtender );
-    mCinematicsMenuExtender->AddMenuExtension( "LevelEditorNewCinematics", EExtensionHook::After, mCommandList, FMenuExtensionDelegate::CreateStatic( []( FMenuBuilder& MenuBuilder )
+    mCinematicsMenuExtender->AddMenuExtension( "LevelEditorNewCinematics", EExtensionHook::After, mCommandList, FMenuExtensionDelegate::CreateLambda( []( FMenuBuilder& MenuBuilder )
     {
         MenuBuilder.BeginSection( "CinematicsEpos", LOCTEXT( "CinematicsEpos", "Epos" ) );
         {
             MenuBuilder.AddMenuEntry( FEposSequenceEditorCommands::Get().NewStoryboardWithSettings );
+            MenuBuilder.AddMenuEntry( FEposSequenceEditorCommands::Get().NewStoryboardImportImageSequence );
         }
         MenuBuilder.EndSection();
     } ) );
