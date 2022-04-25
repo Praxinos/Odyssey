@@ -10,7 +10,8 @@ UOdysseyBrushOptions::UOdysseyBrushOptions(const FObjectInitializer& iObjectInit
     , Color( ::ULIS::FColor::Black )
     , mInterpolator(MakeShared<FOdysseyInterpolationCatmullRom>())
 {
-    mInterpolator->SetStep(Step * (SizeAdaptative ? Size : 1.0));
+    float adaptedStep = FMath::Max( 1.f, ( Step / 100.f ) * mSizeModifier );
+    mInterpolator->SetStep(SizeAdaptative ? adaptedStep : Step);
 }
 
 TSharedPtr<IOdysseyInterpolation>
@@ -43,7 +44,8 @@ UOdysseyBrushOptions::PostEditChangeProperty(struct FPropertyChangedEvent & Prop
 
     if (propertyName == "InterpolationType" || propertyName == "Step" || propertyName == "SizeAdaptative")
     {
-        mInterpolator->SetStep(Step * (SizeAdaptative ? Size : 1.0));
+        float adaptedStep = FMath::Max( 1.f, ( Step / 100.f ) * mSizeModifier );
+        mInterpolator->SetStep(SizeAdaptative ? adaptedStep : Step);
     }
 
     mOnPropertyChangedDelegate.Broadcast();

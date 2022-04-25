@@ -611,7 +611,7 @@ UOdysseyBrushAssetBase::GetKeysDown()
 float
 UOdysseyBrushAssetBase::GetStep()
 {
-    return  BrushOptions->Step; //TODO: SizeAdaptative
+    return  BrushOptions->Step;
 }
 
 FOdysseyBrushColor
