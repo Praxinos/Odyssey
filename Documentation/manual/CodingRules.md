@@ -105,8 +105,8 @@ The following documents provides the **Coding Rules** for this project.
 ### License Header
 - Comment headers:
 ```
-// Copyright © 2018-2020 Praxinos, Inc. All Rights Reserved.
-// IDDN FR.001.250001.002.S.P.2019.000.00000
+// IDDN FR.001.250001.005.S.P.2019.000.00000
+// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 ```
 
 ### Type Consistency And Possible Loss Of Data.
