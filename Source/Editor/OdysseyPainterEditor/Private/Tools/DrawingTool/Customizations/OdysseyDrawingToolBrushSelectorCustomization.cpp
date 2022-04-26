@@ -101,7 +101,7 @@ FOdysseyDrawingToolBrushSelectorCustomization::AddBrushInstance(IDetailCategoryB
                 continue;
         }
 
-        bool bShouldAutoExpand = property->GetFName() == "BlendParameters";
+        bool bShouldAutoExpand = false;
         iCategory.AddProperty(propertyHandle.ToSharedRef()).ShouldAutoExpand(bShouldAutoExpand);;
     }
 
@@ -133,8 +133,7 @@ FOdysseyDrawingToolBrushSelectorCustomization::AddBrushInstance(IDetailCategoryB
         if (!foundGroup)
             foundGroup = &groups.Add(groupName, &iCategory.AddGroup(groupName, groupText, false, true));
 
-        bool bShouldAutoExpand = property->GetFName() == "BlendParameters";
-
+        bool bShouldAutoExpand = false;
         (*foundGroup)->AddPropertyRow(propertyHandle.ToSharedRef()).ShouldAutoExpand(bShouldAutoExpand);
     }
 }
@@ -166,7 +165,7 @@ FOdysseyDrawingToolBrushSelectorCustomization::CustomizeDetails(IDetailLayoutBui
     
     AddObjectPropertyToCategory(globalsCategory, mTool->GetBrushOptions(), "Size");
     AddObjectPropertyToCategory(globalsCategory, mTool->GetBrushOptions(), "Flow");
-    globalsCategory.AddProperty("BlendParameters").ShouldAutoExpand(true);
+    globalsCategory.AddProperty("BlendParameters").ShouldAutoExpand(false);
 
     AddBrushInstance(brushParametersCategory);
 }

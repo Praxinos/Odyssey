@@ -124,7 +124,6 @@ FOdysseyDrawingToolOptionsCustomization::AddSelectedShapeInstance(IDetailCategor
             foundGroup = &groups.Add(groupName, &iCategory.AddGroup(groupName, groupText, false, true));
 
         bool bShouldAutoExpand = property->GetFName() == "SmoothingOptions";
-
         (*foundGroup)->AddPropertyRow(propertyHandle.ToSharedRef()).ShouldAutoExpand(bShouldAutoExpand);
     }
 }
