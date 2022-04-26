@@ -176,22 +176,22 @@ private:
 
     //Visible properties
 
-    UPROPERTY(EditInstanceOnly)
+    UPROPERTY(EditInstanceOnly, Category="Odyssey Drawing Tool")
     UOdysseyBrush* Brush;
 
-    UPROPERTY(EditInstanceOnly)
+    UPROPERTY(EditInstanceOnly, Category="Odyssey Drawing Tool")
     UOdysseyBrushAssetBase* BrushInstance;
 
-    UPROPERTY(EditInstanceOnly)
+    UPROPERTY(EditInstanceOnly, Category="Odyssey Drawing Tool")
     UOdysseyBrushOptions* BrushOptions;
 
-    UPROPERTY(EditInstanceOnly)
+    UPROPERTY(EditInstanceOnly, Category="Odyssey Drawing Tool")
     FOdysseyBlendParameters BlendParameters;
 
-    UPROPERTY(EditInstanceOnly)
+    UPROPERTY(EditInstanceOnly, Category="Odyssey Drawing Tool")
     EOdysseyShape SelectedShape;
 
-    UPROPERTY(EditInstanceOnly)
+    UPROPERTY(EditInstanceOnly, Category="Odyssey Drawing Tool")
     class UOdysseyShape* SelectedShapeInstance;
 
 

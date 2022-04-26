@@ -405,7 +405,7 @@ public:
     UOdysseyBrushOptions*                   BrushOptions;
 
 #if WITH_EDITORONLY_DATA
-    UPROPERTY(VisibleDefaultsOnly, Instanced)
+    UPROPERTY(VisibleDefaultsOnly, Instanced, Category="Overrides")
     TMap<FName, UObject*>                        Overrides;
 #endif
 

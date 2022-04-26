@@ -27,13 +27,13 @@ public:
     void Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) override;
 
 public:
-    UPROPERTY( EditAnywhere )
+    UPROPERTY( EditAnywhere, Category="Odyssey HUD Ellipse" )
     FVector2D mCenterPoint;
 
-    UPROPERTY( EditAnywhere )
+    UPROPERTY( EditAnywhere, Category="Odyssey HUD Ellipse" )
     int mEllipseAaxis;
 
-    UPROPERTY( EditAnywhere )
+    UPROPERTY( EditAnywhere, Category="Odyssey HUD Ellipse" )
     int mEllipseBaxis;
 
     FVector2D mBorderPoint;

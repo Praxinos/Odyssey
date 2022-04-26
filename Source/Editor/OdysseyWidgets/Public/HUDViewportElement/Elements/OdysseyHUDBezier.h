@@ -26,13 +26,13 @@ public:
     void Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) override;
 
 public:
-    UPROPERTY( EditAnywhere )
+    UPROPERTY( EditAnywhere, Category="Odyssey HUD Bezier" )
     FVector2D mStartPoint;
 
-    UPROPERTY( EditAnywhere )
+    UPROPERTY( EditAnywhere, Category="Odyssey HUD Bezier" )
     FVector2D mEndPoint;
 
-    UPROPERTY( EditAnywhere )
+    UPROPERTY( EditAnywhere, Category="Odyssey HUD Bezier" )
     FVector2D mControlPoint;
 
 private:

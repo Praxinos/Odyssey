@@ -92,7 +92,7 @@ private:
     //PROPERTIES
     
     //The smoothing options
-    UPROPERTY( EditInstanceOnly )
+    UPROPERTY( EditInstanceOnly, Category="Smoothing" )
     FOdysseySmoothingOptions SmoothingOptions;
 
 protected:

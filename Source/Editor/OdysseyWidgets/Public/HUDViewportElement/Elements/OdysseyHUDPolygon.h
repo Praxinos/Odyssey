@@ -26,7 +26,7 @@ public:
     void Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) override;
 
 public:
-    UPROPERTY( EditAnywhere )
+    UPROPERTY( EditAnywhere, Category="Odyssey HUD Polygon" )
     TArray<FVector2D> mPoints;
 
 private:

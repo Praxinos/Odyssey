@@ -36,6 +36,6 @@ private:
     int mPreviousHandleSize;
 
 public:
-    UPROPERTY( EditAnywhere )
+    UPROPERTY( EditAnywhere, Category="Odyssey HUD Handle" )
     int mHandleSize;
 };

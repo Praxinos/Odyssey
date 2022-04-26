@@ -26,10 +26,10 @@ public:
     void Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) override;
 
 public:
-    UPROPERTY( EditAnywhere )
+    UPROPERTY( EditAnywhere, Category="Odyssey HUD Line" )
     FVector2D mStartPoint;
 
-    UPROPERTY( EditAnywhere )
+    UPROPERTY( EditAnywhere, Category="Odyssey HUD Line" )
     FVector2D mFinishPoint;
 
 private:
