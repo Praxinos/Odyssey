@@ -266,9 +266,9 @@ def Build( iUPluginPathFile, iUEVersion, iOutputPath ):
 
     for module in uplugin_data['Modules']:
         if gOperatingSystem == 'windows':
-            module['WhitelistPlatforms'] = [ 'Win64' ] # https://www.unrealengine.com/en-US/marketplace-guidelines#261b
+            module['PlatformAllowList'] = [ 'Win64' ] # https://www.unrealengine.com/en-US/marketplace-guidelines#261b | https://docs.unrealengine.com/5.0/en-US/unreal-engine-5-0-release-notes/
         elif gOperatingSystem == 'darwin':
-            module['WhitelistPlatforms'] = [ 'Mac' ]
+            module['PlatformAllowList'] = [ 'Mac' ]
 
     with iUPluginPathFile.open( 'w' ) as outfile:
         json.dump( uplugin_data, outfile, indent=2 )
@@ -318,7 +318,7 @@ def PostBuildFix( iArgs, iOutputPath ):
             uplugin_data = json.load( infile )
 
         for module in uplugin_data['Modules']:
-            module['WhitelistPlatforms'] = [ 'Win64', 'Mac' ] # https://www.unrealengine.com/en-US/marketplace-guidelines#261b
+            module['PlatformAllowList'] = [ 'Win64', 'Mac' ] # https://www.unrealengine.com/en-US/marketplace-guidelines#261b
 
         del uplugin_data['PreBuildSteps'] # Remove pre-build-steps as they are (at least for now) for development stuff: https://udn.unrealengine.com/s/question/0D54z00006tMlfbCAC/plugin-cconfig-how-to-use-config-ini-file-for-a-custom-plugin-
 
