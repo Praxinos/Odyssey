@@ -95,7 +95,7 @@ def CheckIDDN( iLines ):
     if len( iLines ) == 1:
         return False
     
-    return iLines[0].startswith( '// IDDN.FR.' ) and ( iLines[1].startswith( '// ' ) and 'copyright' in iLines[1] and 'Praxinos' in iLines[1] )
+    return iLines[0].startswith( '// IDDN.FR.' ) and ( iLines[1].startswith( '// ' ) and 'copyright' in iLines[1] and 'Praxinos' in iLines[1] and 'publishing' in iLines[1] )
 
 #---
 
