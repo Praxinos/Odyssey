@@ -141,7 +141,7 @@ FOdysseyDrawingToolOptionsCustomization::CustomizeDetails(IDetailLayoutBuilder& 
 
     //shapeCategory.AddProperty("SelectedShape");
     AddObjectPropertyToCategory(shapeCategory, mTool->GetBrushOptions(), "Step");
-    AddObjectPropertyToCategory(shapeCategory, mTool->GetBrushOptions(), "SizeAdaptative");
+    AddObjectPropertyToCategory(shapeCategory, mTool->GetBrushOptions(), "AdaptativeStep");
 
     //Add Shape Options
     AddSelectedShapeInstance(shapeCategory);

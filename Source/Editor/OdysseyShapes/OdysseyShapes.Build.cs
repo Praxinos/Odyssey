@@ -19,7 +19,9 @@ public class OdysseyShapes : ModuleRules
                 "Slate",
                 "SlateCore",
                 "OdysseyCore",
-                "OdysseyStyle"
+                "OdysseyStyle",
+                "ULIS",
+                "ULISLoader"
             }
         );
 

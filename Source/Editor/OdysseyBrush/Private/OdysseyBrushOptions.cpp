@@ -8,16 +8,7 @@ UOdysseyBrushOptions::UOdysseyBrushOptions(const FObjectInitializer& iObjectInit
 
     //Properties
     , Color( ::ULIS::FColor::Black )
-    , mInterpolator(MakeShared<FOdysseyInterpolationCatmullRom>())
 {
-    float adaptedStep = FMath::Max( 1.f, ( Step / 100.f ) * Size );
-    mInterpolator->SetStep(SizeAdaptative ? adaptedStep : Step);
-}
-
-TSharedPtr<IOdysseyInterpolation>
-UOdysseyBrushOptions::GetInterpolator()
-{
-    return mInterpolator;
 }
 
 void
@@ -27,26 +18,6 @@ UOdysseyBrushOptions::PostEditChangeProperty(struct FPropertyChangedEvent & Prop
 
     if (PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive)
         return;
-        
-    FName propertyName = PropertyChangedEvent.GetPropertyName();
-
-    if (propertyName == "InterpolationType")
-    {
-        switch(InterpolationType)
-        {
-            case EOdysseyBrushInterpolationType::kCatmullRom: mInterpolator = MakeShared<FOdysseyInterpolationCatmullRom>(); break;
-            case EOdysseyBrushInterpolationType::kBezier: mInterpolator = MakeShared<FOdysseyInterpolationBezier>(); break;
-            case EOdysseyBrushInterpolationType::kLine: mInterpolator = MakeShared<FOdysseyInterpolationCatmullRom>(); break;
-
-            default: break;
-        }
-    }
-
-    if (propertyName == "InterpolationType" || propertyName == "Step" || propertyName == "SizeAdaptative")
-    {
-        float adaptedStep = FMath::Max( 1.f, ( Step / 100.f ) * Size );
-        mInterpolator->SetStep(SizeAdaptative ? adaptedStep : Step);
-    }
 
     mOnPropertyChangedDelegate.Broadcast();
 }

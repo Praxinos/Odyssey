@@ -25,6 +25,8 @@ public:
     float                           Rotation();
     FVector2D                       Pan();
 
+    float                           GetStep();
+
 private:
     FOdysseyPainterEditor*          mEditor;
 };

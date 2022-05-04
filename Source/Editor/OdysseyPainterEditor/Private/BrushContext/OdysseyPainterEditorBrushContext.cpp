@@ -7,6 +7,9 @@
 #include "OdysseyPainterEditorViewportTab.h"
 #include "SOdysseySurfaceViewport.h"
 
+#include "Tools/DrawingTool/OdysseyDrawingTool.h"
+#include "FreehandShape/OdysseyFreehandShape.h"
+
 //---
 
 FOdysseyPainterEditorBrushContext::~FOdysseyPainterEditorBrushContext()
@@ -48,4 +51,18 @@ FOdysseyPainterEditorBrushContext::Pan()
     if (!mEditor->GetGUI()->GetViewportTab())
         return FVector2D(0.0f, 0.0f);
     return mEditor->GetGUI()->GetViewportTab()->GetViewport()->GetPan();
+}
+
+float
+FOdysseyPainterEditorBrushContext::GetStep()
+{
+    UOdysseyDrawingTool* drawingTool = Cast<UOdysseyDrawingTool>(mEditor->GetSelectedTool());
+    if (!drawingTool)
+        return 0.f;
+
+    UOdysseyFreehandShape* freehandShape = Cast<UOdysseyFreehandShape>(drawingTool->GetSelectedShapeInstance());
+    if (!freehandShape)
+        return 0.f;
+
+    return  freehandShape->GetStep();
 }

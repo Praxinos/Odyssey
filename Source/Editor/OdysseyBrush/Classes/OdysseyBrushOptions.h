@@ -5,7 +5,6 @@
 
 #include "CoreMinimal.h"
 
-#include "OdysseyBrushInterpolationTypes.h"
 #include "Proxies/OdysseyBrushColor.h"
 
 #include <ULIS>
@@ -26,10 +25,6 @@ public:
     //Called when a simple property changes
     virtual void PostEditChangeProperty(struct FPropertyChangedEvent & PropertyChangedEvent);
 
-public: 
-    // Getters
-    TSharedPtr<IOdysseyInterpolation> GetInterpolator();
-
 public:
     // Delegates
     FOnPropertyChanged& OnPropertyChangedDelegate() { return mOnPropertyChangedDelegate; }
@@ -42,22 +37,9 @@ public:
     float   Flow = 100.f;
 
     UPROPERTY( EditInstanceOnly, BlueprintReadOnly, Category="Odyssey Brush Options")
-    bool    SizeAdaptative = false;
-
-    UPROPERTY( EditInstanceOnly, BlueprintReadOnly, Category="Odyssey Brush Options", meta = ( ClampMin = "1", ClampMax = "200", UIMin = "1", UIMax = "200", SliderExponent = "1" ) )
-    float   Step = 20.f;
-
-    UPROPERTY( EditInstanceOnly, BlueprintReadOnly, Category="Odyssey Brush Options")
-    EOdysseyBrushInterpolationType InterpolationType = EOdysseyBrushInterpolationType::kCatmullRom;
-
-    UPROPERTY( EditInstanceOnly, BlueprintReadOnly, Category="Odyssey Brush Options")
     FOdysseyBrushColor Color;
 
 private:
     // Delegates
     FOnPropertyChanged mOnPropertyChangedDelegate;
-
-    // ---
-
-    TSharedPtr<IOdysseyInterpolation> mInterpolator;
 };

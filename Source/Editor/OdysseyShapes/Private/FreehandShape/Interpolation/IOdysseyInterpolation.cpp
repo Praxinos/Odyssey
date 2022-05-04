@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Interpolation/IOdysseyInterpolation.h"
+#include "FreehandShape/Interpolation/IOdysseyInterpolation.h"
 
 #define LOCTEXT_NAMESPACE "IOdysseyInterpolation"
 

@@ -20,8 +20,10 @@ UOdysseyFreehandShape::UOdysseyFreehandShape(const FObjectInitializer& iObjectIn
 
     //Internal
     , mRawStroke()
+    , mSmoothedStroke()
+    , mInterpolatedStroke()
     , mSmoother(nullptr)
-    , mIsPainting(false)
+    , mHasStrokeBegun(false)
 {
 }
 
@@ -31,14 +33,14 @@ UOdysseyFreehandShape::UOdysseyFreehandShape(const FObjectInitializer& iObjectIn
 void
 UOdysseyFreehandShape::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
-    Begin(iPointInTexture);
+    BeginStroke(iPointInTexture);
     UOdysseyShape::OnMouseDown(iPointInTexture, iKey);
 }
 
 void
 UOdysseyFreehandShape::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
-    End();
+    EndStroke();
     UOdysseyShape::OnMouseUp(iPointInTexture, iKey);
 }
 
@@ -51,7 +53,7 @@ UOdysseyFreehandShape::OnMouseHover(const FOdysseyPoint& iPointInTexture)
 void
 UOdysseyFreehandShape::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 {
-    To(iPointInTexture);
+    StrokeTo(iPointInTexture);
     UOdysseyShape::OnMouseDrag(iPointInTexture);
 }
 
@@ -60,7 +62,7 @@ UOdysseyFreehandShape::OnKeyDown(const FKey& iKey)
 {
     if (iKey == EKeys::Escape)
     {
-        Abort();
+        AbortStroke();
         return;
     }
     UOdysseyShape::OnKeyDown(iKey);
@@ -76,15 +78,12 @@ UOdysseyFreehandShape::OnKeyUp(const FKey& iKey)
 //--------------------------------------------------------------------------- Stroke API
 
 bool
-UOdysseyFreehandShape::Begin( const FOdysseyPoint& iPoint )
+UOdysseyFreehandShape::BeginStroke( const FOdysseyPoint& iPoint )
 {
-    if (mIsPainting)
+    if (mHasStrokeBegun)
         return false;
 
-    mIsPainting = true;
-
-    //Reset the smoother to use the one selected in the SmoothingOptions
-    ResetSmoother();
+    mHasStrokeBegun = true;
 
     //Prepare Raw Stroke Array
     mRawStroke.Empty();
@@ -92,14 +91,22 @@ UOdysseyFreehandShape::Begin( const FOdysseyPoint& iPoint )
     //Store the first raw point
     mRawStroke.Add( iPoint );
 
-    InternalStrokeBegin(iPoint);
+    InitSmoothing();
+    InitInterpolation();
+
+    BeginSmoothing();
+    BeginInterpolation();
+
+    //Force first point to be drawn
+    mOnPathBeginDelegate.Broadcast(iPoint);
+    
     return true;
 }
 
 bool
-UOdysseyFreehandShape::To( const FOdysseyPoint& iPoint )
+UOdysseyFreehandShape::StrokeTo( const FOdysseyPoint& iPoint )
 {
-    if (!mIsPainting)
+    if (!mHasStrokeBegun)
         return false;
 
     //Add the raw point to the array
@@ -107,32 +114,49 @@ UOdysseyFreehandShape::To( const FOdysseyPoint& iPoint )
     FOdysseyPoint point = iPoint;
     mRawStroke.Add(point);
 
-    //Call the Internal Stroke To
-    return InternalStrokeTo(iPoint, false);
-}
+    //Apply smoothing if smoothing is enabled and realtime
+    if(SmoothingOptions.SmoothingEnabled && SmoothingOptions.SmoothingRealTime)
+    {
+        if (!SmoothTo(iPoint)) //false means SmoothTo has just not produced any point but it is not an error
+            return true;
 
-bool
-UOdysseyFreehandShape::End()
-{
-    if (!mIsPainting)
-        return false;
+        point = mSmoothedStroke.Last();
+    }
 
-    //Apply Smoothing if it is not realtime
-    ApplySmoothing();
+    //Apply interpolation
+    TArray<FOdysseyPoint> interpolatedPoints = InterpolateTo(point);
 
-    mOnPathEndDelegate.Broadcast({ mRawStroke.Last() });
-
-    mIsPainting = false;
+    if (interpolatedPoints.Num() > 0)
+        mOnPathToDelegate.Broadcast(interpolatedPoints);
+        
     return true;
 }
 
 bool
-UOdysseyFreehandShape::Abort()
+UOdysseyFreehandShape::EndStroke()
 {
-    if (!mIsPainting)
+    if (!mHasStrokeBegun)
         return false;
 
-    mIsPainting = false;
+    EndSmoothing();
+    EndInterpolation();
+
+    mOnPathEndDelegate.Broadcast({ mInterpolatedStroke.Last() });
+    mHasStrokeBegun = false;
+
+    return true;
+}
+
+bool
+UOdysseyFreehandShape::AbortStroke()
+{
+    if (!mHasStrokeBegun)
+        return false;
+
+    AbortSmoothing();
+    AbortInterpolation();
+
+    mHasStrokeBegun = false;
     
     mOnPathResetDelegate.Broadcast(); //just to be sure
     mOnPathAbortDelegate.Broadcast();
@@ -145,10 +169,8 @@ UOdysseyFreehandShape::Abort()
 void
 UOdysseyFreehandShape::Tick(float iDeltaTime)
 {
-    if (mIsPainting)
-    {
+    if (mHasStrokeBegun)
         CatchUp();
-    }
 }
 
 void
@@ -160,40 +182,6 @@ UOdysseyFreehandShape::ApplyOverrides(const TMap<FName, UObject*>& iOverrides)
 }
 
 //--------------------------------------------------------------------------------------
-//------------------------------------------------------------------ Internal Stroke API
-
-bool
-UOdysseyFreehandShape::InternalStrokeBegin(const FOdysseyPoint& iPoint)
-{
-    //Add the first point to the smoothing system
-    if(SmoothingOptions.SmoothingEnabled && SmoothingOptions.SmoothingRealTime)
-        mSmoother->AddPoint( iPoint );
-
-    mOnPathBeginDelegate.Broadcast(iPoint);
-    return true;
-}
-
-bool
-UOdysseyFreehandShape::InternalStrokeTo(const FOdysseyPoint& iPoint, bool iIsStrokeEnd)
-{
-    //Apply smoothing if needed, otherwise skip it
-    FOdysseyPoint point = iPoint;
-    if(SmoothingOptions.SmoothingEnabled && (SmoothingOptions.SmoothingRealTime || iIsStrokeEnd ) )
-    {
-        mSmoother->AddPoint( iPoint );
-
-        if( !mSmoother->IsReady() )
-            return true;
-
-        point = mSmoother->ComputePoint();
-    }
-
-    mOnPathToDelegate.Broadcast({ point });
-
-    return true;
-}
-
-//--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Getters
 
 FOdysseySmoothingOptions&
@@ -202,50 +190,18 @@ UOdysseyFreehandShape::GetSmoothingOptions()
     return SmoothingOptions;
 }
 
+float
+UOdysseyFreehandShape::GetStep() const
+{
+    return Step;
+}
+
+
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------------- Internal - Smoothing
 
 void
-UOdysseyFreehandShape::ApplySmoothing()
-{
-    //Ensure the smoothing is enabled, is not realtime and we have some raw inputs to work with
-    if (!SmoothingOptions.SmoothingEnabled || SmoothingOptions.SmoothingRealTime || mRawStroke.Num() <= 0 )
-        return;
-
-    //
-    // Clean up before apply the smoothing again
-    //
-
-    mOnPathResetDelegate.Broadcast();
-
-    // Reset Smoother
-    mSmoother->Reset();
-    
-    //
-    // Apply the smoothing again
-    //
-
-    //Begin the Stroke
-    InternalStrokeBegin(mRawStroke[0]);
-
-    //Continue the Stroke
-    for (int i = 1; i < mRawStroke.Num(); i++)
-    {
-        InternalStrokeTo(mRawStroke[i], true);
-    }
-}
-
-void
-UOdysseyFreehandShape::CatchUp()
-{
-    if (!mIsPainting || !SmoothingOptions.SmoothingEnabled || !SmoothingOptions.SmoothingCatchUp || !mSmoother->CanCatchUp() || mRawStroke.Num() <= 0)
-        return;
-
-    To(mRawStroke[mRawStroke.Num() - 1]);
-}
-
-void
-UOdysseyFreehandShape::ResetSmoother()
+UOdysseyFreehandShape::InitSmoothing()
 {
     switch(SmoothingOptions.SmoothingMethod)
     {
@@ -253,5 +209,156 @@ UOdysseyFreehandShape::ResetSmoother()
         case EOdysseySmoothingMethod::kPull : mSmoother = MakeShared<FOdysseySmoothingPull>(&SmoothingOptions) ; break;
         default: break;
     }
+}
+
+void
+UOdysseyFreehandShape::BeginSmoothing()
+{
+    //Add the first point to the smoothing system
+    if(SmoothingOptions.SmoothingEnabled && SmoothingOptions.SmoothingRealTime)
+        mSmoother->AddPoint( mRawStroke[0] );
+}
+
+bool
+UOdysseyFreehandShape::SmoothTo(const FOdysseyPoint& iPoint)
+{
+    mSmoother->AddPoint( iPoint );
+    if( !mSmoother->IsReady() )
+        return false;
+
+    mSmoothedStroke.Add(mSmoother->ComputePoint());
+    return true;
+}
+
+void
+UOdysseyFreehandShape::EndSmoothing()
+{
+    //Apply Smoothing if it is not realtime
+    //Reapplies the smoothing if it is enabled but not realtime
+    if (SmoothingOptions.SmoothingEnabled && !SmoothingOptions.SmoothingRealTime && mRawStroke.Num() > 0 )
+        ReapplySmoothing();
+}
+
+void
+UOdysseyFreehandShape::AbortSmoothing()
+{
+}
+
+void
+UOdysseyFreehandShape::ResetSmoothing()
+{
     mSmoother->Reset();
+    mSmoothedStroke.Empty();
+}
+
+void
+UOdysseyFreehandShape::ReapplySmoothing()
+{
+    // Reset the stroke (except the raw stroke) to reapply the smoothing and interpolation
+    ResetSmoothing();
+    ResetInterpolation();
+    mOnPathResetDelegate.Broadcast();
+    
+    // Reapply the smoothing
+
+    //Begin the smoothing and interpolation process
+    BeginSmoothing();
+    BeginInterpolation();
+
+    //Force first point to be drawn
+    mOnPathBeginDelegate.Broadcast(mRawStroke[0]);
+
+    //Continue the Stroke
+    for (int i = 1; i < mRawStroke.Num(); i++)
+    {
+        if (!SmoothTo(mRawStroke[i])) //false means SmoothTo has just not produced any point but it is not an error
+            continue;
+
+        //Apply interpolation
+        TArray<FOdysseyPoint> interpolatedPoints = InterpolateTo(mSmoothedStroke.Last());
+
+        if (interpolatedPoints.Num() > 0)
+            mOnPathToDelegate.Broadcast(interpolatedPoints);
+    }
+}
+
+void
+UOdysseyFreehandShape::CatchUp()
+{
+    if (!mHasStrokeBegun || !SmoothingOptions.SmoothingEnabled || !SmoothingOptions.SmoothingCatchUp || !mSmoother->CanCatchUp() || mRawStroke.Num() <= 0)
+        return;
+
+    StrokeTo(mRawStroke[mRawStroke.Num() - 1]);
+}
+
+//--------------------------------------------------------------------------------------
+//------------------------------------------------------------- Internal - Interpolation
+
+void
+UOdysseyFreehandShape::InitInterpolation()
+{
+    switch(InterpolationType)
+    {
+        case EOdysseyInterpolationType::kCatmullRom: mInterpolator = MakeShared<FOdysseyInterpolationCatmullRom>(); break;
+        case EOdysseyInterpolationType::kBezier: mInterpolator = MakeShared<FOdysseyInterpolationBezier>(); break;
+        case EOdysseyInterpolationType::kLine: mInterpolator = MakeShared<FOdysseyInterpolationCatmullRom>(); break;
+
+        default: break;
+    }
+
+    if (AdaptativeStep && mAdaptStepDelegate.IsBound())
+    {
+        mInterpolator->SetStep( FMath::Max( 1.f, mAdaptStepDelegate.Execute(Step) ) );
+    }
+    else
+    {
+        mInterpolator->SetStep(Step);
+    }
+}
+
+void
+UOdysseyFreehandShape::BeginInterpolation()
+{
+    //Add Point to Interpolator
+    mInterpolator->AddPoint( mRawStroke[0] );
+    mInterpolatedStroke.Add( mRawStroke[0] );
+}
+
+TArray<FOdysseyPoint>
+UOdysseyFreehandShape::InterpolateTo(const FOdysseyPoint& iPoint)
+{
+
+    //If the Interpolator is ready to produce points do it, otherwise.... don't (Thanks Captain Obvious)
+    while( !mInterpolator->IsReady() )
+    {
+        //Add Point to Interpolator
+        mInterpolator->AddPoint( iPoint );
+    }
+
+    TArray<FOdysseyPoint> newPoints = mInterpolator->ComputePoints();
+
+    for( int i = 0; i < newPoints.Num(); ++i )
+    {
+        newPoints[i].ComputeRelativeParameters(mInterpolatedStroke.Last(), true);
+        mInterpolatedStroke.Add(newPoints[i]);
+    }
+
+    return newPoints;
+}
+
+void
+UOdysseyFreehandShape::EndInterpolation()
+{
+}
+
+void
+UOdysseyFreehandShape::AbortInterpolation()
+{
+}
+
+void
+UOdysseyFreehandShape::ResetInterpolation()
+{
+    mInterpolator->Reset();
+    mInterpolatedStroke.Empty();
 }

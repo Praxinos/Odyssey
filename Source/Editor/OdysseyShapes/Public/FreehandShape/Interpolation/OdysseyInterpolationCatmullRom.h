@@ -4,14 +4,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Interpolation/IOdysseyInterpolation.h"
+#include "FreehandShape/Interpolation/IOdysseyInterpolation.h"
 
-class ODYSSEYBRUSH_API FOdysseyInterpolationBezier : public IOdysseyInterpolation
+class ODYSSEYSHAPES_API FOdysseyInterpolationCatmullRom : public IOdysseyInterpolation
 {
 public:
     // Construction / Destruction
-    virtual ~FOdysseyInterpolationBezier();
-    FOdysseyInterpolationBezier();
+    virtual ~FOdysseyInterpolationCatmullRom();
+    FOdysseyInterpolationCatmullRom();
 
 public:
     // Public API

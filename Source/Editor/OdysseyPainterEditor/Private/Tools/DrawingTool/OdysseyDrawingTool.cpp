@@ -27,7 +27,7 @@ UOdysseyDrawingTool::UOdysseyDrawingTool()
 
     //Internal
     , mPaintEngine(nullptr)
-{
+{   
     AvailableShapes.Add(EOdysseyShape::kFreehand, CreateShape<UOdysseyFreehandShape>("UOdysseyDrawingTool::FreehandShape"));
     SelectedShapeInstance = AvailableShapes[SelectedShape];
 }
@@ -43,6 +43,8 @@ UOdysseyDrawingTool::CreateShape(FName iName)
     shape->OnPathEndDelegate().AddUObject(this, &UOdysseyDrawingTool::OnShapePathEnd);
     shape->OnPathAbortDelegate().AddUObject(this, &UOdysseyDrawingTool::OnShapePathAbort);
     shape->OnPathResetDelegate().AddUObject(this, &UOdysseyDrawingTool::OnShapePathReset);
+
+    shape->AdaptStepDelegate().BindUObject(this, &UOdysseyDrawingTool::AdaptShapeStep);
 
     return shape;
 }
@@ -207,12 +209,12 @@ UOdysseyDrawingTool::OnShapePathBegin( const FOdysseyPoint& iPoint )
         return;
     }
 
-    TArray<UOdysseyBrushAssetBase::FStep> steps = BrushInstance->StepsTo(iPoint);
+    TArray<UOdysseyBrushAssetBase::FStep> steps = BrushInstance->StepsTo({ iPoint });
     for (int i = 0; i < steps.Num(); i++)
     {
         mWorker.Push([this, step = steps[i]]()
         {
-            if (!BrushInstance->StrokeStep(step, false))
+            if (!BrushInstance->StrokeStep(step))
                 UE_LOG(LogTemp, Warning, TEXT("Failed to call UOdysseyBrushAssetBase::StrokeStep() from StrokeEngine"));
         });
     }
@@ -227,17 +229,14 @@ UOdysseyDrawingTool::OnShapePathTo( const TArray<FOdysseyPoint>& iPoints )
         return;
     }
 
-    for (int i = 0; i < iPoints.Num(); i++)
+    TArray<UOdysseyBrushAssetBase::FStep> steps = BrushInstance->StepsTo(iPoints);
+    for (int j = 0; j < steps.Num(); j++)
     {
-        TArray<UOdysseyBrushAssetBase::FStep> steps = BrushInstance->StepsTo(iPoints[i]);
-        for (int j = 0; j < steps.Num(); j++)
+        mWorker.Push([this, step = steps[j]]()
         {
-            mWorker.Push([this, step = steps[j]]()
-            {
-                if (!BrushInstance->StrokeStep(step, false))
-                    UE_LOG(LogTemp, Warning, TEXT("Failed to call UOdysseyBrushAssetBase::StrokeStep() from StrokeEngine"));
-            });
-        }
+            if (!BrushInstance->StrokeStep(step))
+                UE_LOG(LogTemp, Warning, TEXT("Failed to call UOdysseyBrushAssetBase::StrokeStep() from StrokeEngine"));
+        });
     }
 }
 
@@ -291,6 +290,12 @@ UOdysseyDrawingTool::OnShapePathReset()
     //Reset the PaintEngine as if didn't draw on it
     if (mPaintEngine)
         mPaintEngine->Reset();
+}
+
+float
+UOdysseyDrawingTool::AdaptShapeStep(float iStep)
+{
+    return (iStep / 100.f) * BrushOptions->Size;
 }
 
 //--------------------------------------------------------------------------------------

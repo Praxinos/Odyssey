@@ -3,12 +3,12 @@
 
 #pragma once
 
-#include "Interpolation/OdysseyInterpolationBezier.h"
-#include "Interpolation/OdysseyInterpolationCatmullRom.h"
-#include "OdysseyBrushInterpolationTypes.generated.h"
+#include "FreehandShape/Interpolation/OdysseyInterpolationBezier.h"
+#include "FreehandShape/Interpolation/OdysseyInterpolationCatmullRom.h"
+#include "OdysseyInterpolationTypes.generated.h"
 
 UENUM()
-enum class EOdysseyBrushInterpolationType : uint8
+enum class EOdysseyInterpolationType : uint8
 {
     kBezier     UMETA( DisplayName="Bezier" ),
     kLine       UMETA( DisplayName="Line" ),

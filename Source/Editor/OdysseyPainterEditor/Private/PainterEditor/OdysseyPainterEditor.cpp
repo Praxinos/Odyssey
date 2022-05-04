@@ -43,8 +43,8 @@ FOdysseyPainterEditor::InitData()
 	//Init DrawingTool
 	UOdysseyDrawingTool* drawingTool = NewObject<UOdysseyDrawingTool>();
 	drawingTool->OnApplyOverridesDelegate().AddRaw(this, &FOdysseyPainterEditor::OnApplyOverrides);
-	drawingTool->Initialize(&mPaintEngine);
 	drawingTool->SetBrushContexts(mBrushContexts);
+	drawingTool->Initialize(&mPaintEngine);
 	FObjectEditorUtils::SetPropertyValue(drawingTool->GetBrushOptions(), "Color", FOdysseyBrushColor(mPaintColor)); //Set the paint color in the brushOptions at startup for synchronization
 
 

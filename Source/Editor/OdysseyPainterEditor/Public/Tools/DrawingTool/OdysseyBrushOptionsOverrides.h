@@ -6,7 +6,6 @@
 #include "CoreMinimal.h"
 #include "OdysseyBrushAssetBase.h"
 #include "UObject/ObjectMacros.h"
-#include "OdysseyBrushInterpolationTypes.h"
 #include "Image/OdysseyBlendingMode.h"
 #include "OdysseyBrushOptionsOverrides.generated.h"
 
@@ -29,18 +28,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyBrushOptionsOverrides : public UObject
     UPROPERTY( EditAnywhere, Category = "Modifiers", meta=(InlineEditConditionToggle) )
     bool    bOverride_Flow;
 
-    /** Enable Stroke Step Override. */
-    UPROPERTY( EditAnywhere, Category = "Stroke", meta=(InlineEditConditionToggle) )
-    bool    bOverride_Step;
-
-    /** Enable Stroke Adaptative Override. */
-    UPROPERTY( EditAnywhere, Category = "Stroke", meta=(InlineEditConditionToggle) )
-    bool    bOverride_Adaptative;
-
-    /** Enable Interpolation Type Override. */
-    UPROPERTY( EditAnywhere, Category = "Interpolation", meta=(InlineEditConditionToggle) )
-    bool    bOverride_InterpolationType;
-
 
     /////////////////////////////////////////////////////
     // Overrides Values
@@ -51,18 +38,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyBrushOptionsOverrides : public UObject
     /** Modifier Flow Override Value. */
     UPROPERTY( EditAnywhere, Category = "Modifiers", meta = ( ClampMin = "0", ClampMax = "100", UIMin = "0", UIMax = "100", SliderExponent = "1", editcondition = "bOverride_Flow" ) )
     float  Flow;
-
-    /** Stroke Step Override Value. */
-    UPROPERTY( EditAnywhere, Category = "Stroke", meta = ( ClampMin = "1", ClampMax = "200", UIMin = "1", UIMax = "200", SliderExponent = "1", editcondition = "bOverride_Step" ) )
-    float   Step;
-
-    /** Stroke Size Adaptative Override Value. */
-    UPROPERTY( EditAnywhere, Category = "Stroke", meta = ( editcondition = "bOverride_Adaptative" ) )
-    bool    SizeAdaptative;
-
-    /** Interpolation Type Override Value. */
-    UPROPERTY( EditAnywhere, Category = "Interpolation", meta = ( editcondition = "bOverride_InterpolationType" ) )
-    EOdysseyBrushInterpolationType   InterpolationType;
 
 public:
     //Applies the Overrides to the given object

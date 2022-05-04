@@ -49,7 +49,6 @@ UOdysseyBrushAssetBase::UOdysseyBrushAssetBase()
     : BrushOptions(CreateDefaultSubobject<UOdysseyBrushOptions>("UOdysseyBrushAssetBase::BrushOptions"))
 
     //Internal
-    , mStroke()
     , mIsDrawing(false)
 {
     ::ULIS::FContext::MarkEventFinished(&mEvent);
@@ -124,45 +123,29 @@ UOdysseyBrushAssetBase::StrokeBegin()
 }
 
 bool
-UOdysseyBrushAssetBase::StrokeTo( const FOdysseyPoint& iPoint, bool iShouldFlush )
+UOdysseyBrushAssetBase::StrokeTo( const TArray< FOdysseyPoint >& iPoints )
 {
-    TArray<UOdysseyBrushAssetBase::FStep> steps = StepsTo(iPoint);
+    TArray<UOdysseyBrushAssetBase::FStep> steps = StepsTo(iPoints);
     for (int i = 0; i < steps.Num(); i++)
     {
-        if (!StrokeStep(steps[i], false))
+        if (!StrokeStep(steps[i]))
             return false;
     }
-
-    if(iShouldFlush)
-        StrokeFlush();
 
     return true;
 }
 
 TArray<UOdysseyBrushAssetBase::FStep>
-UOdysseyBrushAssetBase::StepsTo(const FOdysseyPoint& iPoint)
+UOdysseyBrushAssetBase::StepsTo(const TArray< FOdysseyPoint >& iPoints)
 {
     TArray<FStep> steps;
-    
-    //If the Interpolator is ready to produce points do it, otherwise.... don't (Thanks Captain Obvious)
-    while( !BrushOptions->GetInterpolator()->IsReady() )
+
+    steps.Add(FStep(iPoints[0], (uint32)eStepType::kSubStrokeBegin));
+    for(int i = 1; i < iPoints.Num(); i++)
     {
-        //Add Point to Interpolator
-        BrushOptions->GetInterpolator()->AddPoint( iPoint );
+        steps.Add(FStep(iPoints[i], (uint32)eStepType::kNone ));
     }
-
-    TArray< FOdysseyPoint > points = ComputeInterpolation();
-    if (points.Num() <= 0)
-        return steps;
-
-    steps.Add({points[0], eStepType::kSubStrokeBegin});
-
-    for(int i = 1; i < points.Num(); i++)
-    {
-        steps.Add({points[i], eStepType::kStep});
-    }
-
-    steps.Add({points.Last(), eStepType::kSubStrokeEnd});
+    steps.Last().mType |= (uint32)eStepType::kSubStrokeEnd;
 
     return steps;
 }
@@ -181,7 +164,7 @@ UOdysseyBrushAssetBase::StrokeFlush()
 }
 
 bool
-UOdysseyBrushAssetBase::StrokeStep(const FStep& iStep, bool iShouldFlush)
+UOdysseyBrushAssetBase::StrokeStep(const FStep& iStep)
 {
     // Check if everything is alright
     if (!mIsDrawing)
@@ -190,34 +173,19 @@ UOdysseyBrushAssetBase::StrokeStep(const FStep& iStep, bool iShouldFlush)
         return false;
     }
 
-    //Call OnSubStrokeBegin node
-    if (iStep.mType == eStepType::kSubStrokeEnd)
-    {
-        FEditorScriptExecutionGuard ScriptGuard;
-        OnSubStrokeEnd();
-
-        if (iShouldFlush)
-        {
-            StrokeFlush();
-        }
-
-        return true;
-    }
-
-    mStroke.Add(iStep.mPoint);
     mPoint = iStep.mPoint;
     mPointIndex++;
 
 
     //Call OnStrokeBegin node if first point
-    if (mPointIndex == 1)
+    if (mPointIndex == 0)
     {
         FEditorScriptExecutionGuard ScriptGuard;
         OnStrokeBegin();
     }
 
     //Call OnSubStrokeBegin node
-    if (iStep.mType == eStepType::kSubStrokeBegin)
+    if (iStep.mType & (uint32)eStepType::kSubStrokeBegin)
     {
         FEditorScriptExecutionGuard ScriptGuard;
         OnSubStrokeBegin();
@@ -229,9 +197,11 @@ UOdysseyBrushAssetBase::StrokeStep(const FStep& iStep, bool iShouldFlush)
         OnStep();
     }
 
-    if (iShouldFlush)
+    //Call OnSubStrokeBegin node
+    if (iStep.mType & (uint32)eStepType::kSubStrokeEnd)
     {
-        StrokeFlush();
+        FEditorScriptExecutionGuard ScriptGuard;
+        OnSubStrokeEnd();
     }
 
     return true;
@@ -278,44 +248,8 @@ UOdysseyBrushAssetBase::StrokeAbort()
 void
 UOdysseyBrushAssetBase::StrokeReset()
 {
-    //Reset Interpolator
-    BrushOptions->GetInterpolator()->Reset();
-
-    //Reset Stroke
-    mStroke.Empty();
-
     //Invalidate current point index (don't reset mPoint, as we could need it when drawing from OnTick event)
     mPointIndex = -1;
-}
-
-//--------------------------------------------------------------------------------------
-//--------------------------------------------------------------------- Internal Stroke API
-
-TArray< FOdysseyPoint >
-UOdysseyBrushAssetBase::ComputeInterpolation()
-{
-    TArray< FOdysseyPoint > tmp = BrushOptions->GetInterpolator()->ComputePoints();
-
-	if (tmp.Num() > 0 && mStroke.Num() > 0)
-	{
-        FOdysseyPoint& previous_point = mPreviousPoint;
-        FOdysseyPoint& current_point = tmp[0];
-
-		current_point.ComputeRelativeParameters(previous_point, true);
-	}
-
-    for( int i =  1; i < tmp.Num(); ++i )
-    {
-        FOdysseyPoint& previous_point = tmp[i - 1];
-        FOdysseyPoint& current_point = tmp[i];
-        
-        current_point.ComputeRelativeParameters(previous_point, true);
-    }
-
-    if (tmp.Num() > 0)
-        mPreviousPoint = tmp.Last();
-
-    return tmp;
 }
 
 //--------------------------------------------------------------------------------------
@@ -606,13 +540,6 @@ UOdysseyBrushAssetBase::GetKeysDown()
 /*******************************/
 /**       State Getters        */
 /*******************************/
-
-/** Get Step */
-float
-UOdysseyBrushAssetBase::GetStep()
-{
-    return  BrushOptions->Step;
-}
 
 FOdysseyBrushColor
 UOdysseyBrushAssetBase::GetColor()

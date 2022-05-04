@@ -47,15 +47,20 @@ class ODYSSEYBRUSH_API UOdysseyBrushAssetBase : public UObject
 public:
     enum class eStepType
     {
-        kSubStrokeBegin,
-        kStep,
-        kSubStrokeEnd
+        kNone = 0,
+        kSubStrokeBegin = 1 << 0,
+        kSubStrokeEnd = 1 << 1
     };
 
     struct FStep
     {
+        FStep(const FOdysseyPoint& iPoint, uint32 iType)
+            : mPoint(iPoint)
+            , mType(iType)
+        {}
+
         FOdysseyPoint mPoint;
-        eStepType mType;
+        uint32 mType;
     };
 
 public:
@@ -81,13 +86,13 @@ public:
     bool StrokeBegin();
 
     //Continues the stroke by interpolating from the last position to iPoint
-    bool StrokeTo( const FOdysseyPoint& iPoint, bool iShouldFlush = true );
+    bool StrokeTo( const TArray< FOdysseyPoint >& iPoints );
 
     //Continues the stroke by interpolating from the last position to iPoint
-    TArray<FStep> StepsTo( const FOdysseyPoint& iPoint );
+    TArray<FStep> StepsTo( const TArray< FOdysseyPoint >& iPoints );
 
     //Executes a single step at iPoint
-    bool StrokeStep( const FStep& iStep, bool iShouldFlush = true );
+    bool StrokeStep( const FStep& iStep );
 
     //Aborts the stroke
     bool StrokeAbort();
@@ -286,10 +291,6 @@ public:
     //Gets opacity from Top Bar.
     //UFUNCTION( BlueprintPure, Category="Odyssey|Modifiers" )
     // float  GetOpacityModifier();
-
-    //Gets step from Stroke Options.
-    UFUNCTION( BlueprintPure, Category="Odyssey|Modifiers", meta = ( DisplayName = "Get Step Modifier" ) )
-    float  GetStep();
 
     //Gets the editor's currently selected color (in the color wheel for example).
     UFUNCTION( BlueprintPure, Category = "Odyssey|Modifiers", meta = (DisplayName = "Get Color Modifier") )

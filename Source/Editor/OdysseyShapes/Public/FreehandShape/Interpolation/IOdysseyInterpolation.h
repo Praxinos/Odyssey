@@ -9,7 +9,7 @@
 /**
  * Implements the interpolation for a stroke
  */
-class ODYSSEYBRUSH_API IOdysseyInterpolation
+class ODYSSEYSHAPES_API IOdysseyInterpolation
 {
 public:
     // Construction / Destruction

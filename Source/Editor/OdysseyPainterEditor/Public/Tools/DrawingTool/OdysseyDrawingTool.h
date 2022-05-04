@@ -171,6 +171,8 @@ private:
 
     void OnPaintEngineBlockChanged();
 
+    float AdaptShapeStep(float iStep);
+
 private:
     friend class SOdysseyDrawingToolBrushSelector;
 

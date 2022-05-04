@@ -32,4 +32,8 @@ public:
     //Gets pan value from ILIAD viewport.
     UFUNCTION( BlueprintPure, Category = "Odyssey|Canvas", meta = (HidePin="BrushInstance", DefaultToSelf="BrushInstance") )
     static FVector2D GetViewportPan( UOdysseyBrushAssetBase* BrushInstance );
+
+    //Gets step from Stroke Options.
+    UFUNCTION( BlueprintPure, Category="Odyssey|Modifiers", meta = ( DisplayName = "Get Step Modifier", HidePin = "BrushInstance", DefaultToSelf = "BrushInstance") )
+    static float  GetStep( UOdysseyBrushAssetBase* BrushInstance );
 };

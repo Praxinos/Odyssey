@@ -56,3 +56,19 @@ UOdysseyPainterEditorFunctionLibrary::GetViewportPan( UOdysseyBrushAssetBase* Br
 
     return context->Pan();
 }
+
+//static
+float
+UOdysseyPainterEditorFunctionLibrary::GetStep( UOdysseyBrushAssetBase* BrushInstance )
+{
+    if (!BrushInstance)
+        return 0.f;
+        
+    FOdysseyPainterEditorBrushContext* context = BrushInstance->GetContext<FOdysseyPainterEditorBrushContext>("FOdysseyPainterEditorBrushContext");
+    if (!context)
+        return 0.f;
+
+    //---
+
+    return context->GetStep();
+}
