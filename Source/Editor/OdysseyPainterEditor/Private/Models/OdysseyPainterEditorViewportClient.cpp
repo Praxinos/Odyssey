@@ -1119,7 +1119,7 @@ FOdysseyPainterEditorViewportClient::DrawUVsOntoViewport( const FViewport* iView
             float fudgeFactor = 1.0f / 1024.0f;
             for (int32 Corner = 0; Corner < 3; Corner++)
             {
-                UVs[Corner] = (iVertexBuffer.GetVertexUV(iIndices[i + Corner], iUVChannel));
+                UVs[Corner] = (FVector2D)(iVertexBuffer.GetVertexUV(iIndices[i + Corner], iUVChannel));
 
                 isOutOfBounds[Corner] = (UVs[Corner].X < -fudgeFactor || UVs[Corner].X >(1.0f + fudgeFactor)) || (UVs[Corner].Y < -fudgeFactor || UVs[Corner].Y >(1.0f + fudgeFactor));
             }

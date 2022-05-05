@@ -28,8 +28,8 @@ public:
     void OnAddEditedObject(UObject* iObject);
     void OnRemoveEditedObject(UObject* iObject);
 
-    virtual void RegisterTabSpawners(const TSharedRef<FTabManager>& iTabManager) override;
-    virtual void UnregisterTabSpawners(const TSharedRef<FTabManager>& iTabManager) override;
+    /*virtual void RegisterTabSpawners(const TSharedRef<FTabManager>& iTabManager) override;
+    virtual void UnregisterTabSpawners(const TSharedRef<FTabManager>& iTabManager) override;*/
 
 public:
     //from IAssetEditorInstance

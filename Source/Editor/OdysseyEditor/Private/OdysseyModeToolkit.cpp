@@ -82,6 +82,7 @@ FOdysseyModeToolkit::IsPrimaryEditor() const
     return true; //I don't know what this means
 }
 
+/*
 void
 FOdysseyModeToolkit::RegisterTabSpawners(const TSharedRef<FTabManager>& iTabManager)
 {
@@ -94,7 +95,7 @@ FOdysseyModeToolkit::UnregisterTabSpawners(const TSharedRef<FTabManager>& iTabMa
 {
     FModeToolkit::UnregisterTabSpawners( iTabManager );
 	mEditor->UnregisterTabSpawners(iTabManager);
-}
+}*/
 
 void
 FOdysseyModeToolkit::InvokeTab(const struct FTabId& TabId)

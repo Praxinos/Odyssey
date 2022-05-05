@@ -23,7 +23,8 @@ namespace OdysseyMeshPaintRendering
 
         static bool ShouldCompilePermutation(const FGlobalShaderPermutationParameters& Parameters)
         {
-            return IsFeatureLevelSupported(Parameters.Platform,ERHIFeatureLevel::SM5) && !IsConsolePlatform(Parameters.Platform);
+            return true;
+            //return IsFeatureLevelSupported(Parameters.Platform,ERHIFeatureLevel::SM5) && !IsConsolePlatform(Parameters.Platform);
         }
 
         /** Default constructor. */
@@ -33,12 +34,12 @@ namespace OdysseyMeshPaintRendering
         TOdysseyMeshPaintVertexShader(const ShaderMetaType::CompiledShaderInitializerType& Initializer)
             : FGlobalShader(Initializer)
         {
-            TransformParameter.Bind(Initializer.ParameterMap,TEXT("c_Transform"));
+            //TransformParameter.Bind(Initializer.ParameterMap,TEXT("c_Transform"));
         }
 
         void SetParameters(FRHICommandList& RHICmdList,const FMatrix& InTransform)
         {
-            SetShaderValue(RHICmdList,RHICmdList.GetBoundVertexShader(),TransformParameter,InTransform);
+            //SetShaderValue(RHICmdList,RHICmdList.GetBoundVertexShader(),TransformParameter,InTransform);
         }
 
     private:
@@ -57,7 +58,8 @@ namespace OdysseyMeshPaintRendering
 
 		static bool ShouldCompilePermutation(const FGlobalShaderPermutationParameters& Parameters)
 		{
-			return IsFeatureLevelSupported(Parameters.Platform, ERHIFeatureLevel::SM5) && !IsConsolePlatform(Parameters.Platform);
+            return true;
+			//return IsFeatureLevelSupported(Parameters.Platform, ERHIFeatureLevel::SM5) && !IsConsolePlatform(Parameters.Platform);
 		}
 
 		/** Default constructor. */
@@ -67,14 +69,14 @@ namespace OdysseyMeshPaintRendering
 		TOdysseyMeshPaintPixelShader( const ShaderMetaType::CompiledShaderInitializerType& Initializer )
 			: FGlobalShader( Initializer )
 		{
-			WorldToBrushMatrixParameter.Bind( Initializer.ParameterMap, TEXT( "c_WorldToBrushMatrix" ) );
+			/*WorldToBrushMatrixParameter.Bind(Initializer.ParameterMap, TEXT("c_WorldToBrushMatrix"));
             Stroke2DParameter.Bind(Initializer.ParameterMap,TEXT( "s_Stroke2D" ));
-            TextureHitPointParameter.Bind(Initializer.ParameterMap,TEXT("c_TextureHitPoint"));
+            TextureHitPointParameter.Bind(Initializer.ParameterMap,TEXT("c_TextureHitPoint"));*/
 		}
 
 		void SetParameters(FRHICommandList& RHICmdList, const float InGamma, const FOdysseyMeshPaintShaderParameters& InShaderParams )
 		{
-			FRHIPixelShader* ShaderRHI = RHICmdList.GetBoundPixelShader();
+			/*FRHIPixelShader* ShaderRHI = RHICmdList.GetBoundPixelShader();
 
             SetTextureParameter(
                 RHICmdList,
@@ -86,7 +88,7 @@ namespace OdysseyMeshPaintRendering
 
 			SetShaderValue(RHICmdList, ShaderRHI, WorldToBrushMatrixParameter, InShaderParams.WorldToBrushMatrix );
 
-            SetShaderValue(RHICmdList,ShaderRHI,TextureHitPointParameter,InShaderParams.TextureHitPoint);
+            SetShaderValue(RHICmdList,ShaderRHI,TextureHitPointParameter,InShaderParams.TextureHitPoint);*/
 		}
 
 	private:
@@ -114,7 +116,7 @@ namespace OdysseyMeshPaintRendering
                               const float iGamma,
 							  const FOdysseyMeshPaintShaderParameters& iShaderParams )
 	{
-        TShaderMapRef< TOdysseyMeshPaintVertexShader > VertexShader(GetGlobalShaderMap(iFeatureLevel));
+        /*TShaderMapRef< TOdysseyMeshPaintVertexShader > VertexShader(GetGlobalShaderMap(iFeatureLevel));
 		TShaderMapRef< TOdysseyMeshPaintPixelShader > PixelShader(GetGlobalShaderMap(iFeatureLevel));
 
         iGraphicsPSOInit.BoundShaderState.VertexDeclarationRHI = GMeshPaintDilateVertexDeclaration.VertexDeclarationRHI;
@@ -128,7 +130,7 @@ namespace OdysseyMeshPaintRendering
         VertexShader->SetParameters(iRHICmdList,iTransform);
 
 		// Set pixel shader parameters
-		PixelShader->SetParameters(iRHICmdList, iGamma, iShaderParams );
+		PixelShader->SetParameters(iRHICmdList, iGamma, iShaderParams );*/
 	}
 }
 

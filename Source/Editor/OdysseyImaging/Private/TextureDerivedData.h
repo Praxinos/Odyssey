@@ -59,7 +59,7 @@ static void GetTextureBuildSettings(
     OutBuildSettings.bUseLegacyGamma = Texture.bUseLegacyGamma;
     OutBuildSettings.bPreserveBorder = Texture.bPreserveBorder;
     OutBuildSettings.bDitherMipMapAlpha = Texture.bDitherMipMapAlpha;
-    OutBuildSettings.AlphaCoverageThresholds = Texture.AlphaCoverageThresholds;
+    OutBuildSettings.AlphaCoverageThresholds = (FVector4f)Texture.AlphaCoverageThresholds;
     OutBuildSettings.bComputeBokehAlpha = (Texture.LODGroup == TEXTUREGROUP_Bokeh);
     OutBuildSettings.bReplicateAlpha = false;
     OutBuildSettings.bReplicateRed = false;

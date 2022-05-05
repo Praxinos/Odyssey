@@ -25,8 +25,8 @@ public:
 protected:
     // FAssetEditorToolkit interface
     virtual FLinearColor GetWorldCentricTabColorScale() const override;
-    virtual void RegisterTabSpawners(const TSharedRef<class FTabManager>& iTabManager) override;
-    virtual void UnregisterTabSpawners(const TSharedRef<class FTabManager>& iTabManager) override;
+    /*virtual void RegisterTabSpawners(const TSharedRef<class FTabManager>& iTabManager) override;
+    virtual void UnregisterTabSpawners(const TSharedRef<class FTabManager>& iTabManager) override;*/
     virtual void ExtendMenu() = 0;
 
 protected:
@@ -77,7 +77,7 @@ TOdysseyToolkit<T>::GetWorldCentricTabColorScale() const
 
 //--------------------------------------------------------------------------------------
 //-------------------------------------------------------------------- Commands building
-
+/*
 template<typename T>
 void
 TOdysseyToolkit<T>::RegisterTabSpawners(const TSharedRef<class FTabManager>& iTabManager)
@@ -92,6 +92,6 @@ TOdysseyToolkit<T>::UnregisterTabSpawners(const TSharedRef<class FTabManager>& i
 {
     T::UnregisterTabSpawners(iTabManager);
 	mEditor->UnregisterTabSpawners(iTabManager);
-}
+}*/
 
 // #include "OdysseyToolkit.inl"

@@ -41,7 +41,7 @@ FOdysseyTexture2DAssetTypeActions::GetSupportedClass() const
 uint32
 FOdysseyTexture2DAssetTypeActions::GetCategories()
 {
-    return EAssetTypeCategories::MaterialsAndTextures | mMyAssetCategory;
+    return EAssetTypeCategories::Textures | mMyAssetCategory;
 }
 
 void 
