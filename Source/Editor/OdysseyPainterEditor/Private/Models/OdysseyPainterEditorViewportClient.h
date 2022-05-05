@@ -190,5 +190,5 @@ private:
     //Useful variable to handle both tool manipulation in the viewport at the creation:
     //Case 1: user down and up mouse at same position, then moves mouse to define the tool shape, and then down and up mouse to validate it
     //Case 2: user down mouse, moves mouse to define the tool shape, and then up mouse to validate it
-    bool mIsReadyToCreateTool; 
+    bool mIsReadyToCreateTool;
 };

@@ -1162,8 +1162,8 @@ FOdysseyPainterEditorViewportClient::DrawUVsOntoViewport( const FViewport* iView
                 FLinearColor color = ( isOutOfBounds[corner1] || isOutOfBounds[corner2] ) ? FLinearColor( 0.6f, 0.0f, 0.0f ) : FLinearColor( c.RedF(), c.GreenF(), c.BlueF(), c.AlphaF() );
 
                 FVector pIntersect;
-                FVector2D p1 = transform.TransformPoint(UVs[corner1] * textureSurfaceSize - textureSurfaceSize / 2.f);
-                FVector2D p2 = transform.TransformPoint(UVs[corner2] * textureSurfaceSize - textureSurfaceSize / 2.f);
+                FVector2D p1 = transform.TransformPoint(UVs[corner1] * textureSurfaceSize);
+                FVector2D p2 = transform.TransformPoint(UVs[corner2] * textureSurfaceSize);
 
                 #define V(p) FVector(p, 0.f)
                 bool intersect = FMath::SegmentIntersection2D(V(p1), V(p2), vp1, vp2, pIntersect) ||
