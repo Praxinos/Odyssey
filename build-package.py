@@ -19,6 +19,8 @@ init( autoreset=True )
 
 #---
 
+gVersionUE = '5.0EA'
+
 gOperatingSystem = platform.system().lower() # 'windows', 'darwin', 'linux', ...
 if gOperatingSystem != 'windows' and gOperatingSystem != 'darwin':
     print( Fore.RED + f'This platform is not supported: {gOperatingSystem}' )
