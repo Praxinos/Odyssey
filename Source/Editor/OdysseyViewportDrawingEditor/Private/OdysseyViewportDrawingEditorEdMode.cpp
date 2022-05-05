@@ -7,7 +7,6 @@
 #include "LevelEditor.h"
 #include "Interfaces/IMainFrameModule.h" 
 #include "PhysicsEngine/PhysicsSettings.h"
-#include "Widgets/Docking/SDockableTab.h" 
 #include "Toolkits/ToolkitManager.h"
 #include "AssetRegistryModule.h"
 #include "EditorReimportHandler.h"

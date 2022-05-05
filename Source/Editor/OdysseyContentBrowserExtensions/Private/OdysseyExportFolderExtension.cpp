@@ -327,7 +327,7 @@ void FOdysseyExportFolderExtension::ExportFile( UTexture2D* iCurrentTexture, FSt
 {
     std::string stringSystemPathNameExt = TCHAR_TO_UTF8( *iSystemPathNameExt );
     // The OdysseyBLock is required to be used with Ulis export function
-    FTexturePlatformData* platformData = *iCurrentTexture->GetRunningPlatformData();
+    FTexturePlatformData* platformData = iCurrentTexture->GetPlatformData();
     ::ULIS::FBlock* odysseyBlockToSave = new ::ULIS::FBlock( platformData->SizeX, platformData->SizeY, ULISFormatForTextureSourceFormat( iCurrentTexture->Source.GetFormat() ) );
     FOdysseyScopedTextureSettings settingsGuard = FOdysseyScopedTextureSettings::MakeUncompressedNoMipMaps( iCurrentTexture );
     CopyUTexturePixelDataIntoBlock( odysseyBlockToSave, iCurrentTexture );

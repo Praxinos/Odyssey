@@ -45,8 +45,8 @@ public class ULIS : ModuleRules
         string binPath      = Path.GetFullPath( Path.Combine( ModuleDirectory, "bin" ) );
         string baseName = "ULIS4";
 
-        if( iTarget.Platform == UnrealTargetPlatform.Win64 ||
-            iTarget.Platform == UnrealTargetPlatform.Win32 )
+        if( iTarget.Platform == UnrealTargetPlatform.Win64 /*||
+            iTarget.Platform == UnrealTargetPlatform.Win32*/ )
         {
             string libName = baseName + ".lib";
             string binName = baseName + ".dll";
