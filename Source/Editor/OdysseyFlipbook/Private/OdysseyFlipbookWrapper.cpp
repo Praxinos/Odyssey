@@ -250,6 +250,7 @@ FOdysseyFlipbookWrapper::CreateTexture(FString iName, ::ULIS::FBlock* iBlock, ET
     //Init is done
     texture->PostEditChange(); //This make sure that every properties are compatible with each other and with the size of our texture
 	texture->UpdateResource();
+    texture->FinishCachePlatformData(); //Wait UpdateResource Finished
 
 	FAssetRegistryModule::AssetCreated(texture);
 	UPackage::SavePackage(package, texture, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone, *AssetName);
@@ -298,6 +299,7 @@ FOdysseyFlipbookWrapper::CreateTexture(int32 iWidth, int32 iHeight, ETextureSour
     //Init is done
     texture->PostEditChange(); //This make sure that every properties are compatible with each other and with the size of our texture
 	texture->UpdateResource(); 
+    texture->FinishCachePlatformData(); //Wait UpdateResource Finished
 
 	FAssetRegistryModule::AssetCreated(texture);
 	UPackage::SavePackage(package, texture, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone, *AssetName);
@@ -356,6 +358,7 @@ FOdysseyFlipbookWrapper::CopyTextureContent(UTexture2D* iSrcTexture, UTexture2D*
     }
 
 	iDstTexture->UpdateResource();
+    iDstTexture->FinishCachePlatformData(); //Wait UpdateResource Finished
 }
 
 UPaperSprite*

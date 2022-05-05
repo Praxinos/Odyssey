@@ -583,6 +583,7 @@ FOdysseySurfaceTexture2DEditable::FOdysseySurfaceTexture2DEditable(int iWidth,in
     //texture->AddToRoot(); // Prevent GC
     mTexture->Filter = TextureFilter::TF_Nearest;
     mTexture->UpdateResource();
+    mTexture->FinishCachePlatformData(); //Wait UpdateResource Finished
     mTexture->AddToRoot();
 
     // Warning: the texture data source / bulk is allocated, then the block is allocated, then we copy the block content into bulk.
@@ -648,6 +649,7 @@ FOdysseySurfaceTexture2DEditable::FOdysseySurfaceTexture2DEditable(::ULIS::FBloc
     mTexture->SRGB = 1;
     mTexture->Filter = TextureFilter::TF_Nearest;
     mTexture->UpdateResource();
+    mTexture->FinishCachePlatformData(); //Wait UpdateResource Finished
     mTexture->AddToRoot();
 
     mBlock->OnInvalid( ::ULIS::FOnInvalidBlock( &InvalidateSurfaceCallback, static_cast< void* >( this ) ) );

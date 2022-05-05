@@ -31,6 +31,7 @@ public class OdysseyViewportDrawingEditor : ModuleRules
                 "CoreUObject",
                 "DesktopPlatform",
                 "Engine",
+                "EditorFramework",
                 "Projects",
                 "InputCore",
                 "RenderCore",

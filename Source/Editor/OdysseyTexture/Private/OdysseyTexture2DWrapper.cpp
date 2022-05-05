@@ -57,6 +57,7 @@ FOdysseyTexture2DWrapper::UpdateTextureFromSurface()
 
     CopyBlockDataIntoUTexture( Surface()->Block(), mTexture );
     mTexture->UpdateResource();
+    mTexture->FinishCachePlatformData(); //Wait UpdateResource Finished
 }
 
 void
@@ -76,6 +77,7 @@ FOdysseyTexture2DWrapper::SetTextureProperties()
     mTexture->SetLayerFormatSettings(0, textureFormatSettings);
 
     mTexture->UpdateResource();
+    mTexture->FinishCachePlatformData(); //Wait UpdateResource Finished
     mTexture->TemporarilyDisableStreaming(); //needed to be able to draw on previously streamed textures, avoids using NoMipMaps
 }
 
@@ -91,6 +93,7 @@ FOdysseyTexture2DWrapper::RestoreTextureProperties()
     mTexture->SetLayerFormatSettings(0, textureFormatSettings);
 
     mTexture->UpdateResource();
+    mTexture->FinishCachePlatformData(); //Wait UpdateResource Finished
 }
 
 void

@@ -271,6 +271,7 @@ FOdysseyTextureEditorLayerStackTab::ExportLayersAsTextures()
 
             object->PostEditChange();
             object->UpdateResource();
+            object->FinishCachePlatformData(); //Wait UpdateResource Finished
 
             FAssetRegistryModule::AssetCreated( object );
 
