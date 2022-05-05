@@ -146,15 +146,15 @@ void FOdysseyViewportDrawingEditorEdMode::Enter()
 
     if (UsesToolkits() && !Toolkit.IsValid())
     {
-        Toolkit = GetToolkit();
         Toolkit = MakeShareable(new FOdysseyViewportDrawingEditorToolkit(mEditor, this));
         Toolkit->Init(Owner->GetToolkitHost());
+        
         TSharedPtr< ILevelEditor > levelEditor = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor").GetFirstLevelEditor();
         levelEditor->AppendCommands( Toolkit->GetToolkitCommands() );
     }
 
-    if (Toolkit)
-        StaticCastSharedPtr<FOdysseyModeToolkit>(Toolkit)->ExtendMenu();
+    /* if (Toolkit)
+        StaticCastSharedPtr<FOdysseyModeToolkit>(Toolkit)->ExtendMenu(); */
 
     // Change the engine to draw selected objects without a color boost, but unselected objects will
     // be darkened slightly.  This just makes it easier to paint on selected objects without the

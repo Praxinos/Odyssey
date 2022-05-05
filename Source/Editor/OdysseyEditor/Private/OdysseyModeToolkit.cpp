@@ -45,9 +45,13 @@ void FOdysseyModeToolkit::Init(const TSharedPtr<IToolkitHost>& iInitToolkitHost,
 
     //Finish Initialization
     FModeToolkit::Init(iInitToolkitHost, iOwningMode);
+    ExtendMenu();
 
     FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>(TEXT("LevelEditor"));
     mEditor->RegisterTabSpawners(LevelEditorModule.GetLevelEditorTabManager()->AsShared());
+
+    mEditor->OnToolkitInitialized(this);
+    mEditor->BindShortcuts(this);
 }
 
 class FEdMode* FOdysseyModeToolkit::GetEditorMode() const
