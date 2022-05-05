@@ -317,6 +317,8 @@ void
 FOdysseyPainterEditorToolsTab::Clear()
 {
     //TODO: FLush and commit courrent tool before clearing
+    if (!mEditor->PaintEngine().PaintBlock())
+        return;
 
 	//Do the fill
 	::ULIS::FBlock* paintBlock = mEditor->PaintEngine().PaintBlock();
@@ -336,6 +338,8 @@ void
 FOdysseyPainterEditorToolsTab::Fill()
 {
     //TODO: FLush and commit courrent tool before filling
+    if (!mEditor->PaintEngine().PaintBlock())
+        return;
 
 	//Do the fill
 	::ULIS::FBlock* paintBlock = mEditor->PaintEngine().PaintBlock();
