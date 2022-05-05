@@ -33,12 +33,12 @@ public:
 
 public:
     //Mouse events
-    virtual void OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey);
-    virtual void OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey);
+    virtual bool OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey);
+    virtual bool OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey);
     virtual void OnMouseHover(const FOdysseyPoint& iPointInTexture);
     virtual void OnMouseDrag(const FOdysseyPoint& iPointInTexture);
-    virtual void OnKeyDown(const FKey& iKey);
-    virtual void OnKeyUp(const FKey& iKey);
+    virtual bool OnKeyDown(const FKey& iKey);
+    virtual bool OnKeyUp(const FKey& iKey);
 
     // Tick
     virtual void Tick(float iDeltaTime);

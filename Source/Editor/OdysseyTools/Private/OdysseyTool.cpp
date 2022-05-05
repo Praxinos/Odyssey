@@ -23,16 +23,16 @@ UOdysseyTool::Inactivate()
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------- Mouse events
 
-void
+bool
 UOdysseyTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
-
+    return false;
 }
 
-void
+bool
 UOdysseyTool::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
-
+    return false;
 }
 
 void
@@ -47,16 +47,16 @@ UOdysseyTool::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 
 }
 
-void
+bool
 UOdysseyTool::OnKeyDown(const FKey& iKey)
 {
-
+    return false;
 }
 
-void
+bool
 UOdysseyTool::OnKeyUp(const FKey& iKey)
 {
-
+    return false;
 }
 
 void

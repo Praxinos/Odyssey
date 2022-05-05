@@ -45,12 +45,12 @@ public:
     virtual void Activate() override;
     virtual void Inactivate() override;
 
-    virtual void OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
-    virtual void OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
+    virtual bool OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
+    virtual bool OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
     virtual void OnMouseHover(const FOdysseyPoint& iPointInTexture) override;
     virtual void OnMouseDrag(const FOdysseyPoint& iPointInTexture) override;
-    virtual void OnKeyDown(const FKey& iKey) override;
-    virtual void OnKeyUp(const FKey& iKey) override;
+    virtual bool OnKeyDown(const FKey& iKey) override;
+    virtual bool OnKeyUp(const FKey& iKey) override;
 
     virtual void Tick(float iDeltaTime) override;
 

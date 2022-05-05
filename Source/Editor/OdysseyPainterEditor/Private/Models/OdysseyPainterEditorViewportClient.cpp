@@ -612,40 +612,29 @@ FOdysseyPainterEditorViewportClient::InputKeyWithStrokePoint(const FOdysseyPoint
     if (mCurrentToolState == eState::kIdle)
     {
         if (mIsCurrentModeActive)
-        {
-            OnInputEventRaw(iPointInViewport, iKey, iEvent);
-            return true;
-        }
+            return OnInputEventRaw(iPointInViewport, iKey, iEvent);
         
         mCurrentToolState = InputChordToState();
 
         //If no state becomes active
         if (mCurrentToolState == eState::kIdle)
-        {
-            OnInputEventRaw(iPointInViewport, iKey, iEvent);
-            return true;
-        }
+            return OnInputEventRaw(iPointInViewport, iKey, iEvent);
         
         ForceKeysUp(iKey);
-        OnInputEventWithState(iPointInViewport, iKey, iEvent);
-        return true;
+        return OnInputEventWithState(iPointInViewport, iKey, iEvent);
     }
 
     //If mCurrentToolState has an active state (pan, rotate, etc...)
     mCurrentToolState = InputChordToState();
     if (mCurrentToolState != eState::kIdle)
-    {
-        OnInputEventWithState(iPointInViewport, iKey, iEvent);
-        return true;
-    }
+        return OnInputEventWithState(iPointInViewport, iKey, iEvent);
 
     //TODO: Force Down for previously pressed keys
     ForceKeysDown(iKey);
-    OnInputEventRaw(iPointInViewport, iKey, iEvent);
-    return true;
+    return OnInputEventRaw(iPointInViewport, iKey, iEvent);
 }
 
-void
+bool
 FOdysseyPainterEditorViewportClient::OnInputEventRaw(const FOdysseyPoint& iPointInViewport, FKey iKey, EInputEvent iEvent)
 {
     if (iKey == EKeys::LeftMouseButton)
@@ -656,44 +645,44 @@ FOdysseyPainterEditorViewportClient::OnInputEventRaw(const FOdysseyPoint& iPoint
             //mCurrentToolState = eState::kDrawing;
             //mKeysPressed.Contains(EKeys::LeftMouseButton);
             mIsCurrentModeActive = true;
-            mOnMouseDown.Broadcast(mCurrentPointInTexture, iKey);
+            return mOnMouseDown.IsBound() && mOnMouseDown.Execute(mCurrentPointInTexture, iKey);
         }
         else if (iEvent == EInputEvent::IE_Released)
         {
             mIsCurrentModeActive = false;
-            mOnMouseUp.Broadcast(mCurrentPointInTexture, iKey);
+            return mOnMouseUp.IsBound() && mOnMouseUp.Execute(mCurrentPointInTexture, iKey);
         }
-        return;
-    }
-    else if (iKey == EKeys::MouseScrollUp && iEvent == EInputEvent::IE_Pressed)
-    {
-        //ZoomIn
-        FVector2D position_in_viewport(iPointInViewport.x, iPointInViewport.y);
-        ZoomInInViewport(position_in_viewport);
-        return;
-    }
-    else if (iKey == EKeys::MouseScrollDown && iEvent == EInputEvent::IE_Pressed)
-    {
-        //ZoomOut
-        FVector2D position_in_viewport(iPointInViewport.x, iPointInViewport.y);
-        ZoomOutInViewport(position_in_viewport);
-        return;
     }
     else if (iEvent == EInputEvent::IE_Pressed)
     {
         //KeyDown
-        mOnKeyDown.Broadcast(iKey);
-        return;
+        if (mOnKeyDown.IsBound() && mOnKeyDown.Execute(iKey))
+            return true;
+
+        if (iKey == EKeys::MouseScrollUp)
+        {
+            //ZoomIn
+            FVector2D position_in_viewport(iPointInViewport.x, iPointInViewport.y);
+            ZoomInInViewport(position_in_viewport);
+            return true;
+        }
+        else if (iKey == EKeys::MouseScrollDown)
+        {
+            //ZoomOut
+            FVector2D position_in_viewport(iPointInViewport.x, iPointInViewport.y);
+            ZoomOutInViewport(position_in_viewport);
+            return true;
+        }
     }
     else if (iEvent == EInputEvent::IE_Released)
     {
         //KeyUp
-        mOnKeyUp.Broadcast(iKey);
-        return;
+        return mOnKeyUp.IsBound() && mOnKeyUp.Execute(iKey);
     }
+    return false;
 }
 
-void
+bool
 FOdysseyPainterEditorViewportClient::OnInputEventWithState(const FOdysseyPoint& iPointInViewport, FKey iKey, EInputEvent iEvent)
 {
     if( mCurrentToolState == eState::kRotate )
@@ -707,10 +696,12 @@ FOdysseyPainterEditorViewportClient::OnInputEventWithState(const FOdysseyPoint& 
             FVector2D position_in_viewport( iPointInViewport.x, iPointInViewport.y );
             FVector2D deltaCenter = position_in_viewport - center;
             mRotationReference = FMath::Atan2( -deltaCenter.Y, deltaCenter.X );
+            return true;
         }
         else if (iKey == EKeys::LeftMouseButton && iEvent == EInputEvent::IE_Released)
         {
             mIsCurrentModeActive = false;
+            return true;
         }
     }
     else if( mCurrentToolState == eState::kPan )
@@ -720,10 +711,12 @@ FOdysseyPainterEditorViewportClient::OnInputEventWithState(const FOdysseyPoint& 
             mIsCurrentModeActive = true;
 
             mPanReference = FVector2D( iPointInViewport.x, iPointInViewport.y );
+            return true;
         }
         else if (iKey == EKeys::LeftMouseButton && iEvent == EInputEvent::IE_Released)
         {
             mIsCurrentModeActive = false;
+            return true;
         }
     }
     else if (mCurrentToolState == eState::kZoom)
@@ -741,11 +734,12 @@ FOdysseyPainterEditorViewportClient::OnInputEventWithState(const FOdysseyPoint& 
             mZoomSizeReference = width;
             mZoomViewportPointReference = FVector2D(iPointInViewport.x, iPointInViewport.y);
             //mZoomTexturePointReference = mOdysseyPainterEditorViewportPtr.Pin()->ToLocal(mZoomViewportPointReference );
-
+            return true;
         }
         else if (iKey == EKeys::LeftMouseButton && iEvent == EInputEvent::IE_Released)
         {
             mIsCurrentModeActive = false;
+            return true;
         }
     }
     else if( mCurrentToolState == eState::kPick )
@@ -756,18 +750,20 @@ FOdysseyPainterEditorViewportClient::OnInputEventWithState(const FOdysseyPoint& 
 
             FOdysseyPoint strokePoint_in_texture = GetLocalMousePosition(iPointInViewport);
             FVector2D position_in_texture(strokePoint_in_texture.x, strokePoint_in_texture.y );
-			mOnPickColor.Broadcast(eOdysseyEventState::kAdjust, position_in_texture);
-
+			mOnPickColor.ExecuteIfBound(eOdysseyEventState::kAdjust, position_in_texture);
+            return true;
         }
         else if (iKey == EKeys::LeftMouseButton && iEvent == EInputEvent::IE_Released)
         {
             FOdysseyPoint strokePoint_in_texture = GetLocalMousePosition(iPointInViewport);
             FVector2D position_in_texture(strokePoint_in_texture.x, strokePoint_in_texture.y);
-            mOnPickColor.Broadcast(eOdysseyEventState::kSet, position_in_texture);
+            mOnPickColor.ExecuteIfBound(eOdysseyEventState::kSet, position_in_texture);
 
             mIsCurrentModeActive = false;
+            return true;
         }
     }
+    return false;
 }
 
 void
@@ -810,7 +806,7 @@ FOdysseyPainterEditorViewportClient::CapturedMouseMoveWithStrokePoint( const FOd
 		if (!hasMoved)
 			return;
 
-        mOnMouseDrag.Broadcast(mCurrentPointInTexture);
+        mOnMouseDrag.ExecuteIfBound(mCurrentPointInTexture);
         //mOdysseyPainterEditor->StrokeEngine()->To( mCurrentPointInTexture );
     }
     else if( mCurrentToolState == eState::kPan && mIsCurrentModeActive)
@@ -857,7 +853,7 @@ FOdysseyPainterEditorViewportClient::CapturedMouseMoveWithStrokePoint( const FOd
         if( position_in_texture.X >= 0 && position_in_texture.X < texture->Source.GetSizeX() &&
             position_in_texture.Y >= 0 && position_in_texture.Y < texture->Source.GetSizeY())
         {
-			mOnPickColor.Broadcast(eOdysseyEventState::kAdjust, position_in_texture);
+			mOnPickColor.ExecuteIfBound(eOdysseyEventState::kAdjust, position_in_texture);
         }
     }
 }
@@ -915,7 +911,7 @@ FOdysseyPainterEditorViewportClient::MouseMove(FViewport* iViewport, int32 iX, i
 
         //if (mOdysseyPainterEditor->StrokeEngine()->GetBrushInstance())
             //mOdysseyPainterEditor->StrokeEngine()->GetBrushInstance()->StrokeMoveTo(mCurrentPointInTexture);
-        mOnMouseHover.Broadcast(mCurrentPointInTexture);
+        mOnMouseHover.ExecuteIfBound(mCurrentPointInTexture);
 
         //ToolSystem MouseMove
         /*if (mIsReadyToCreateTool)

@@ -62,13 +62,13 @@ class FOdysseyPainterEditorViewportClient
     , public IStylusMessageHandler
 {
 public:
-	DECLARE_MULTICAST_DELEGATE_TwoParams(FOnPickColor, eOdysseyEventState::Type, const FVector2D&)
-    DECLARE_MULTICAST_DELEGATE_TwoParams(FOnMouseDown, const FOdysseyPoint&, const FKey&)
-    DECLARE_MULTICAST_DELEGATE_TwoParams(FOnMouseUp, const FOdysseyPoint&, const FKey&)
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOnMouseHover, const FOdysseyPoint&)
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOnMouseDrag, const FOdysseyPoint&)
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOnKeyDown, const FKey&)
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOnKeyUp, const FKey&)
+	DECLARE_DELEGATE_TwoParams(FOnPickColor, eOdysseyEventState::Type, const FVector2D&)
+    DECLARE_DELEGATE_RetVal_TwoParams(bool, FOnMouseDown, const FOdysseyPoint&, const FKey&)
+    DECLARE_DELEGATE_RetVal_TwoParams(bool, FOnMouseUp, const FOdysseyPoint&, const FKey&)
+    DECLARE_DELEGATE_OneParam(FOnMouseHover, const FOdysseyPoint&)
+    DECLARE_DELEGATE_OneParam(FOnMouseDrag, const FOdysseyPoint&)
+    DECLARE_DELEGATE_RetVal_OneParam(bool, FOnKeyDown, const FKey&)
+    DECLARE_DELEGATE_RetVal_OneParam(bool, FOnKeyUp, const FKey&)
 
 public:
     enum class eState
@@ -132,8 +132,8 @@ private:
 
     eState      InputChordToState();
     bool        InputKeyWithStrokePoint( const FOdysseyPoint& iPointInViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed = 1.0f, bool iGamepad = false );
-    void        OnInputEventRaw(const FOdysseyPoint& iPointInViewport, FKey iKey, EInputEvent iEvent);
-    void        OnInputEventWithState(const FOdysseyPoint& iPointInViewport, FKey iKey, EInputEvent iEvent);
+    bool        OnInputEventRaw(const FOdysseyPoint& iPointInViewport, FKey iKey, EInputEvent iEvent);
+    bool        OnInputEventWithState(const FOdysseyPoint& iPointInViewport, FKey iKey, EInputEvent iEvent);
     void        ForceKeysUp(FKey iKey);
     void        ForceKeysDown(FKey iKey);
 

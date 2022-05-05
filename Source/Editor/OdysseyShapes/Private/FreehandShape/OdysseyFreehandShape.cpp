@@ -30,18 +30,16 @@ UOdysseyFreehandShape::UOdysseyFreehandShape(const FObjectInitializer& iObjectIn
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------- Mouse Events
 
-void
+bool
 UOdysseyFreehandShape::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
-    BeginStroke(iPointInTexture);
-    UOdysseyShape::OnMouseDown(iPointInTexture, iKey);
+    return BeginStroke(iPointInTexture);
 }
 
-void
+bool
 UOdysseyFreehandShape::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
-    EndStroke();
-    UOdysseyShape::OnMouseUp(iPointInTexture, iKey);
+    return EndStroke();
 }
 
 void
@@ -57,21 +55,19 @@ UOdysseyFreehandShape::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
     UOdysseyShape::OnMouseDrag(iPointInTexture);
 }
 
-void
+bool
 UOdysseyFreehandShape::OnKeyDown(const FKey& iKey)
 {
     if (iKey == EKeys::Escape)
-    {
-        AbortStroke();
-        return;
-    }
-    UOdysseyShape::OnKeyDown(iKey);
+        return AbortStroke();
+
+    return UOdysseyShape::OnKeyDown(iKey);
 }
 
-void
+bool
 UOdysseyFreehandShape::OnKeyUp(const FKey& iKey)
 {
-    UOdysseyShape::OnKeyUp(iKey);
+    return UOdysseyShape::OnKeyUp(iKey);
 }
 
 //--------------------------------------------------------------------------------------

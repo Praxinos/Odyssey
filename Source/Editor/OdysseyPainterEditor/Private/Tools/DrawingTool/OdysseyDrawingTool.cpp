@@ -78,16 +78,16 @@ UOdysseyDrawingTool::Inactivate()
     Commit(); //Commit the jobs that has been done
 }
 
-void
+bool
 UOdysseyDrawingTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
-    SelectedShapeInstance->OnMouseDown(iPointInTexture, iKey);
+    return SelectedShapeInstance->OnMouseDown(iPointInTexture, iKey);
 }
 
-void
+bool
 UOdysseyDrawingTool::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
-    SelectedShapeInstance->OnMouseUp(iPointInTexture, iKey);
+    return SelectedShapeInstance->OnMouseUp(iPointInTexture, iKey);
 }
 
 void
@@ -105,16 +105,16 @@ UOdysseyDrawingTool::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
     SelectedShapeInstance->OnMouseDrag(iPointInTexture);
 }
 
-void
+bool
 UOdysseyDrawingTool::OnKeyDown(const FKey& iKey)
 {   
-    SelectedShapeInstance->OnKeyDown(iKey);
+    return SelectedShapeInstance->OnKeyDown(iKey);
 }
 
-void
+bool
 UOdysseyDrawingTool::OnKeyUp(const FKey& iKey)
 {
-    SelectedShapeInstance->OnKeyUp(iKey);
+    return SelectedShapeInstance->OnKeyUp(iKey);
 }
 
 void

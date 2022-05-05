@@ -7,16 +7,16 @@ UOdysseyShape::~UOdysseyShape()
 {
 }
 
-void
+bool
 UOdysseyShape::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
-
+	return false;
 }
 
-void
+bool
 UOdysseyShape::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
-
+	return false;
 }
 
 void
@@ -31,16 +31,16 @@ UOdysseyShape::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 
 }
 
-void
+bool
 UOdysseyShape::OnKeyDown(const FKey& iKey)
 {
-
+	return false;
 }
 
-void
+bool
 UOdysseyShape::OnKeyUp(const FKey& iKey)
 {
-
+	return false;
 }
 
 void
