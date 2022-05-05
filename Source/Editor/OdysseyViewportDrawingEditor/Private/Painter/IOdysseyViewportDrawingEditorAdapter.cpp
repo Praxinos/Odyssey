@@ -225,7 +225,7 @@ void IOdysseyViewportDrawingEditorAdapter::OnStylusStateChanged(const TWeakPtr<S
         return;
 
     //We only treat events on the main level Viewport
-    if( GCurrentLevelEditingViewportClient->GetEditorViewportWidget()->GetSceneViewport()->GetViewportWidget().Pin().Get() != iWidget.Pin().Get() )
+    if( !GCurrentLevelEditingViewportClient || GCurrentLevelEditingViewportClient->GetEditorViewportWidget()->GetSceneViewport()->GetViewportWidget().Pin().Get() != iWidget.Pin().Get() )
         return;
 
     FEditorViewportClient* viewportClient = (FEditorViewportClient*)mLastKnownViewport->GetClient();
