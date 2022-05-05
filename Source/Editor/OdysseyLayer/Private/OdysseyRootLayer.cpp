@@ -52,7 +52,7 @@ FOdysseyRootLayer::RenderImage( ::ULIS::FBlock** ioBlocks, const ::ULIS::FRectI*
 
     for( uint32 i = 0; i < iNum; ++i ) {
         ::ULIS::FRectI rect = ::ULIS::FRectI::FromPositionAndSize( iPositions[i], iRects[i].Size() );
-        ctx.Clear( *ioBlocks[i], rect, ::ULIS::FSchedulePolicy::MonoScanlines, 0, nullptr, &clearEvents[i] );
+        ctx.Clear( *ioBlocks[i], rect, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &clearEvents[i] );
         ctx.Flush();
     }
 

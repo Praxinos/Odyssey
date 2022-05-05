@@ -151,21 +151,21 @@ FOdysseyImageLayer::Blend( ::ULIS::FBlock** ioBlocks, const ::ULIS::FRectI* iRec
         for( uint32 i = 0; i < iNum; ++i ) {
             convBlocks.Emplace( new ::ULIS::FBlock( iRects[i].w, iRects[i].h, mBlock->Format() ) );
             ::ULIS::FEvent eventConvertForward;
-            ctx.ConvertFormat( *ioBlocks[i], *( convBlocks[i] ), iRects[i], ::ULIS::FVec2I( 0 ), ::ULIS::FSchedulePolicy::MonoScanlines, 1, &iEvents[i], &eventConvertForward );
+            ctx.ConvertFormat( *ioBlocks[i], *( convBlocks[i] ), iRects[i], ::ULIS::FVec2I( 0 ), ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 1, &iEvents[i], &eventConvertForward );
             ::ULIS::FEvent eventBlend1;
-            ctx.Blend( *mBlock, *convBlocks[i], iRects[i], ::ULIS::FVec2I( 0 ), GetBlendingMode(), ::ULIS::Alpha_Normal, GetOpacity(), ::ULIS::FSchedulePolicy::MonoScanlines, 1, &eventConvertForward, &eventBlend1 );
+            ctx.Blend( *mBlock, *convBlocks[i], iRects[i], ::ULIS::FVec2I( 0 ), GetBlendingMode(), ::ULIS::Alpha_Normal, GetOpacity(), ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 1, &eventConvertForward, &eventBlend1 );
             eventBlend[i] = ::ULIS::FEvent(
                 ::ULIS::FOnEventComplete(
-                    [ convBlocks, i ]( const ::ULIS::FRectI& ) {
-                        delete  convBlocks[i];
+                    [ block=convBlocks[i] ]( const ::ULIS::FRectI& ) {
+                        delete  block;
                     }
                 )
             );
-            ctx.ConvertFormat( *( convBlocks[i] ), *ioBlocks[i], ::ULIS::FRectI::Auto, iPositions[i], ::ULIS::FSchedulePolicy::MonoScanlines, 1, &eventBlend1, &eventBlend[i] );
+            ctx.ConvertFormat( *( convBlocks[i] ), *ioBlocks[i], ::ULIS::FRectI::Auto, iPositions[i], ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 1, &eventBlend1, &eventBlend[i] );
         }
     } else {
         for( uint32 i = 0; i < iNum; ++i ) {
-            ctx.Blend( *mBlock, *ioBlocks[i], iRects[i], iPositions[i], GetBlendingMode(), ::ULIS::Alpha_Normal, GetOpacity(), ::ULIS::FSchedulePolicy::MonoScanlines, 1, &iEvents[i], &eventBlend[i] );
+            ctx.Blend( *mBlock, *ioBlocks[i], iRects[i], iPositions[i], GetBlendingMode(), ::ULIS::Alpha_Normal, GetOpacity(), ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 1, &iEvents[i], &eventBlend[i] );
         }
     }
     ctx.Flush();
@@ -189,7 +189,7 @@ FOdysseyImageLayer::RenderImage( ::ULIS::FBlock** ioBlocks, const ::ULIS::FRectI
     eventRender.SetNum(iNum);
     for( uint32 i = 0; i < iNum; ++i ) {
         // Auto fallback to copy if appropriate.
-        ctx.ConvertFormat( *mBlock, *ioBlocks[i], iRects[i], iPositions[i], ::ULIS::FSchedulePolicy::MonoScanlines, 0, nullptr, &eventRender[i] );
+        ctx.ConvertFormat( *mBlock, *ioBlocks[i], iRects[i], iPositions[i], ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventRender[i] );
         ctx.Flush();
     }
 

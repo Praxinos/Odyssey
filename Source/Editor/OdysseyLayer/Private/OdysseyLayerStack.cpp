@@ -107,14 +107,14 @@ FOdysseyLayerStack::ComputeResultInBlock( ::ULIS::FBlock* ioBlock, const ::ULIS:
         const bool predA = conv[i] != output[i];
         const bool predB = output[i] != ioBlock;
         if( predA ) {
-            eventA[i] = ::ULIS::FEvent( ::ULIS::FOnEventComplete( [ &conv, i ]( const ::ULIS::FRectI& ) {
-                delete  conv[i];
+            eventA[i] = ::ULIS::FEvent( ::ULIS::FOnEventComplete( [ block = conv[i] ]( const ::ULIS::FRectI& ) {
+                delete block;
             } ) );
             ctx.ConvertFormat(
                   *conv[i]
                 , *output[i]
                 , ::ULIS::FRectI::Auto, outputPos[i]
-                , ::ULIS::FSchedulePolicy::MonoScanlines
+                , ::ULIS::FSchedulePolicy::AsyncCacheEfficient
                 , 1
                 , &eventRender[i]
                 , &eventA[i]
@@ -136,7 +136,7 @@ FOdysseyLayerStack::ComputeResultInBlock( ::ULIS::FBlock* ioBlock, const ::ULIS:
                 , *ioBlock
                 , ::ULIS::FRectI::Auto
                 , pos[i]
-                , ::ULIS::FSchedulePolicy::MonoScanlines
+                , ::ULIS::FSchedulePolicy::AsyncCacheEfficient
                 , 1
                 , &eventA[i]
                 , &eventB[i]
@@ -715,7 +715,7 @@ FOdysseyDrawingUndo::SaveData(const TArray<::ULIS::FRectI>& iRects)
 
         if (rect.x >= 0 && rect.y >= 0 && rect.w > 0 && rect.h > 0)
         {
-            ctx.Copy(*(imageLayer->GetBlock()), *tileBlock, rect, ::ULIS::FVec2I(0,0), ::ULIS::FSchedulePolicy::MonoScanlines );
+            ctx.Copy(*(imageLayer->GetBlock()), *tileBlock, rect, ::ULIS::FVec2I(0,0), ::ULIS::FSchedulePolicy::AsyncCacheEfficient );
             ctx.Flush();
         }
     }

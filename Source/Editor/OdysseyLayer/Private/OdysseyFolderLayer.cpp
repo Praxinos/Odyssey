@@ -129,7 +129,7 @@ FOdysseyFolderLayer::Blend( ::ULIS::FBlock** ioBlocks, const ::ULIS::FRectI* iRe
     for( uint32 i = 0; i < iNum; ++i )
     {
         ::ULIS::FRectI rect = ::ULIS::FRectI::FromPositionAndSize( pos[i], iRects[i].Size() );
-        ctx.Clear( *folderBlocks[i], rect, ::ULIS::FSchedulePolicy::CacheEfficient, 1, &iEvents[i], &eventClear[i] );
+        ctx.Clear( *folderBlocks[i], rect, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 1, &iEvents[i], &eventClear[i] );
         ctx.Flush();
     }
 
@@ -158,7 +158,7 @@ FOdysseyFolderLayer::Blend( ::ULIS::FBlock** ioBlocks, const ::ULIS::FRectI* iRe
                 }
             )
         );
-        ctx.Blend( *( folderBlocks[i] ), *ioBlocks[i], rect, iPositions[i], GetBlendingMode(), ::ULIS::Alpha_Normal, GetOpacity(), ::ULIS::FSchedulePolicy::MonoScanlines, 1, &eventRender[i], &eventBlend[i] );
+        ctx.Blend( *( folderBlocks[i] ), *ioBlocks[i], rect, iPositions[i], GetBlendingMode(), ::ULIS::Alpha_Normal, GetOpacity(), ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 1, &eventRender[i], &eventBlend[i] );
         ctx.Flush();
     }
 
@@ -183,7 +183,7 @@ FOdysseyFolderLayer::RenderImage( ::ULIS::FBlock** ioBlocks, const ::ULIS::FRect
     for( uint32 i = 0; i < iNum; ++i )
     {
         ::ULIS::FRectI rect = ::ULIS::FRectI::FromPositionAndSize( iPositions[i], iRects[i].Size() );
-        ctx.Clear( *ioBlocks[i], rect, ::ULIS::FSchedulePolicy::MonoScanlines, 0, nullptr, &eventClear[i] );
+        ctx.Clear( *ioBlocks[i], rect, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventClear[i] );
         ctx.Flush();
     }
 
