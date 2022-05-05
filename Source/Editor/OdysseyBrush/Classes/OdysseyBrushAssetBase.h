@@ -72,7 +72,8 @@ public:
     /** Getter for World Pointer, this workaround may be unsafe but allows us to use Blueprint Function Libraries withing Odyssey Brushes. It is always NULL in a brush context. */
     virtual UWorld* GetWorld() const override final { return  nullptr; }
 
-    virtual void PostLoad();
+    virtual void PostInitProperties() override;
+    virtual void PostLoad() override;
     
 public:
     // Paint Engine Stroke API

@@ -55,9 +55,9 @@ UOdysseyBrushAssetBase::UOdysseyBrushAssetBase()
 }
 
 void
-UOdysseyBrushAssetBase::PostLoad()
+UOdysseyBrushAssetBase::PostInitProperties()
 {
-    Super::PostLoad();
+    Super::PostInitProperties();
 
     if (HasAnyFlags(RF_ArchetypeObject))
     {
@@ -84,6 +84,38 @@ UOdysseyBrushAssetBase::PostLoad()
             }
         }
     }
+}
+
+void
+UOdysseyBrushAssetBase::PostLoad()
+{
+    Super::PostLoad();
+
+    /* if (HasAnyFlags(RF_ArchetypeObject))
+    {
+        //Remove all overrides which failed to load (can happen in our case when removing overrides classes)
+        TArray<FName> keysToRemove;
+        for (auto Elem : Overrides)
+        {
+            if (!Elem.Value)
+                keysToRemove.Add(Elem.Key);
+        }
+
+        for (auto& key : keysToRemove)
+        {
+            Overrides.Remove(key);
+        }
+
+        //Add missing classes (can happen in our case when adding overrides classes, in existing brushes)
+        for (auto overrideClass : FOdysseyBrushOverride::GetClasses())
+        {
+            bool containsClass = Overrides.Contains(overrideClass->GetFName());
+            if (!containsClass)
+            {
+                Overrides.Add(overrideClass->GetFName(), NewObject<UObject>(this, overrideClass, overrideClass->GetFName() ));
+            }
+        }
+    } */
 }
 
 //--------------------------------------------------------------------------------------
