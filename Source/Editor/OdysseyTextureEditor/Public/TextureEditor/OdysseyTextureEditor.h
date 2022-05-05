@@ -43,10 +43,6 @@ public:
 public:
     // Overrides
     virtual bool OnCloseRequested() override;
-    
-protected:
-    // Attributes
-    virtual bool PaintEngineIsLocked() const;
 
 protected:
     // Listeners
@@ -59,6 +55,8 @@ protected:
     virtual void OnLayerStackCurrentLayerChanged(TSharedPtr<IOdysseyLayer> iOldValue);
     virtual void OnLayerStackStructureChanged();
     virtual void OnLayerStackImageResultChanged( const ::ULIS::FRectI* iRects, const uint32 iNumRects );
+    virtual void OnCurrentLayerLockChanged(bool iOldValue);
+    virtual void OnCurrentLayerVisibilityChanged(bool iOldValue);
 
     //Paint Engine
     virtual void OnPaintEngineCommit(const TArray<::ULIS::FRectI>& iChangedTiles);

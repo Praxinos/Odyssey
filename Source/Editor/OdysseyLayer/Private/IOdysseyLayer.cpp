@@ -39,12 +39,12 @@ void
 IOdysseyLayer::CloneChildren(TSharedPtr<IOdysseyLayer> iSrc, TSharedPtr<IOdysseyLayer> ioDst)
 {
 	TArray<TSharedPtr<IOdysseyLayer>> layers;
-	TArray<TSharedPtr<IOdysseyLayer>> children = iSrc->GetNodes();
+	TArray<TSharedPtr<IOdysseyLayer>> children = iSrc->GetChildren();
 	for (int i = 0; i < children.Num(); i++)
 	{
 		TSharedPtr<IOdysseyLayer> layer = MakeShareable(children[i]->Clone());
 		CloneChildren(children[i], layer);
-		ioDst->AddNode(layer);
+		ioDst->AddChild(layer);
 	}
 }
 
@@ -97,17 +97,27 @@ IOdysseyLayer::IsLocked(bool iCheckParent) const
 void
 IOdysseyLayer::SetIsLocked( bool iIsLocked )
 {
-    bool oldValue = mIsLocked;
-    mIsLocked = iIsLocked;
-    mLockChangedDelegate.Broadcast(oldValue);
-
-    TSharedPtr<IOdysseyLayer> layer = GetParent();
-	TSharedPtr<IOdysseyLayer> self = SharedThis(this);
-	while (layer)
+    bool oldValue = IsLocked(true);
+    TArray<TSharedPtr<IOdysseyLayer>> children;
+    TArray<bool> oldValues;
+    DepthFirstSearchTree(&children, false);
+	for (int i = 0; i < children.Num(); i++)
 	{
-		layer->ChildIsLockedChangedDelegate().Broadcast(self, oldValue);
-		layer = layer->GetParent();
-	}
+        oldValues.Add(children[i]->IsLocked(true));
+    }
+
+    mIsLocked = iIsLocked;
+
+    if (oldValue != IsLocked(true))
+        mLockChangedDelegate.Broadcast(oldValue);
+
+    for (int i = 0; i < children.Num(); i++)
+	{
+        if (oldValues[i] != children[i]->IsLocked(true))
+        {
+            children[i]->mLockChangedDelegate.Broadcast(oldValues[i]);
+        }
+    }
 }
 
 bool
@@ -128,18 +138,28 @@ IOdysseyLayer::IsVisible(bool iCheckParent) const
 }
 
 void
-IOdysseyLayer::SetIsVisible( bool iIsVisible )
+IOdysseyLayer::SetIsVisible(bool iIsVisible)
 {
-    bool oldValue = mIsVisible;
-    mIsVisible = iIsVisible;
-    mVisibilityChangedDelegate.Broadcast(oldValue);
+    bool oldValue = IsVisible(true);
+    TArray<TSharedPtr<IOdysseyLayer>> children;
+    TArray<bool> oldValues;
+    DepthFirstSearchTree(&children, false);
+	for (int i = 0; i < children.Num(); i++)
+	{
+        oldValues.Add(children[i]->IsVisible(true));
+    }
 
-    TSharedPtr<IOdysseyLayer> layer = GetParent();
-    TSharedPtr<IOdysseyLayer> self = SharedThis(this);
-    while (layer)
-    {
-        layer->ChildIsVisibleChangedDelegate().Broadcast(self, oldValue);
-        layer = layer->GetParent();
+    mIsVisible = iIsVisible;
+
+    if (oldValue != IsVisible(true))
+        mVisibilityChangedDelegate.Broadcast(oldValue);
+
+    for (int i = 0; i < children.Num(); i++)
+	{
+        if (oldValues[i] != children[i]->IsVisible(true))
+        {
+            children[i]->mVisibilityChangedDelegate.Broadcast(oldValues[i]);
+        }
     }
 }
 
@@ -169,7 +189,7 @@ IOdysseyLayer::SerializeWithChildren(FArchive &Ar)
 
     if (Ar.IsSaving())
     {   
-        TArray<TSharedPtr<IOdysseyLayer>> children = GetNodes();
+        TArray<TSharedPtr<IOdysseyLayer>> children = GetChildren();
         int numNodes = children.Num();
         Ar << numNodes;
         for (int i = 0; i < numNodes; i++)
@@ -202,7 +222,7 @@ IOdysseyLayer::SerializeWithChildren(FArchive &Ar)
         {
             TSharedPtr<IOdysseyLayer> layer;
             Ar << layer;
-            AddNode(layer);
+            AddChild(layer);
         }
     }
 }
@@ -259,14 +279,14 @@ IOdysseyLayer::VisibilityChangedDelegate()
     return mVisibilityChangedDelegate;
 }
 
-IOdysseyLayer::FOdysseyLayerChildIsLockedChanged&
-IOdysseyLayer::ChildIsLockedChangedDelegate()
+void
+IOdysseyLayer::OnParentChanged(TSharedPtr<IOdysseyLayer> iOldParent)
 {
-    return mChildIsLockedChangedDelegate;
-}
-
-IOdysseyLayer::FOdysseyLayerChildIsVisibleChanged&
-IOdysseyLayer::ChildIsVisibleChangedDelegate()
-{
-    return mChildIsVisibleChangedDelegate;
+    bool oldIsLocked = iOldParent ? iOldParent->IsLocked(true) : mIsLocked;
+    if (oldIsLocked != IsLocked(true))
+        mLockChangedDelegate.Broadcast(oldIsLocked);
+    
+    bool oldIsVisible = iOldParent ? iOldParent->IsVisible(true) : mIsVisible;
+    if (oldIsVisible != IsVisible(true))
+        mVisibilityChangedDelegate.Broadcast(oldIsVisible);
 }

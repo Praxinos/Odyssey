@@ -35,7 +35,7 @@ FOdysseyPaintEngine::FOdysseyPaintEngine()
 void
 FOdysseyPaintEngine::Update(const FOdysseyBlendParameters& iBlendParameters)
 {
-    if (!mEditedBlock || IsLocked())
+    if (!mEditedBlock)
         return;
 
     //Apply bEraserMode if active
@@ -75,7 +75,7 @@ FOdysseyPaintEngine::Update(const FOdysseyBlendParameters& iBlendParameters)
 void
 FOdysseyPaintEngine::Commit(const FOdysseyBlendParameters& iBlendParameters)
 {
-    if (!mEditedBlock || IsLocked())
+    if (!mEditedBlock)
         return;
 
     //Update the EditedBlock content
@@ -98,7 +98,7 @@ FOdysseyPaintEngine::Commit(const FOdysseyBlendParameters& iBlendParameters)
 void
 FOdysseyPaintEngine::Reset()
 {
-    if (!mEditedBlock || IsLocked())
+    if (!mEditedBlock)
         return;
 
     //Clear the Paint Block
@@ -184,16 +184,6 @@ FOdysseyPaintEngine::Block(::ULIS::FBlock* iBlock)
     mOnBlockChangedDelegate.Broadcast();
 }
 
-
-void
-FOdysseyPaintEngine::IsLocked(TAttribute<bool> iIsLocked)
-{
-    //ensure we are in a neutral state by commiting
-    Commit(mPreviousBlendParameters);
-
-    mIsLocked = iIsLocked;
-}
-
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Getters
 
@@ -207,12 +197,6 @@ FOdysseyPaintEngine::PaintBlock()
 FOdysseyPaintEngine::OriginalBlock()
 {
     return mOriginalBlock;
-}
-
-bool
-FOdysseyPaintEngine::IsLocked() const
-{
-    return mIsLocked.Get();
 }
 
 //--------------------------------------------------------------------------------------

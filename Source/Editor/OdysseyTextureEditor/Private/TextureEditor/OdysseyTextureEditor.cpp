@@ -7,6 +7,7 @@
 #include "OdysseyLayerStack.h"
 #include "OdysseyPaintEngine.h"
 #include "OdysseyBlendParameters.h"
+#include "Tools/DrawingTool/OdysseyDrawingTool.h"
 #include "BrushContext/OdysseyTextureEditorBrushContext.h"
 
 #include "ObjectEditorUtils.h"
@@ -36,10 +37,6 @@ FOdysseyTextureEditor::InitData()
 	FOdysseyPainterEditor::InitData();
 
 	//--- Init Data
-	
-    TAttribute<bool> paintEngineIsLockedAttr;
-    paintEngineIsLockedAttr.BindRaw(this, &FOdysseyTextureEditor::PaintEngineIsLocked);
-    PaintEngine().IsLocked(paintEngineIsLockedAttr);
 
     //Make like if the texture changed, to set all callbacks correctly
     OnPostTextureChange();
@@ -118,31 +115,14 @@ FOdysseyTextureEditor::LayerStack() const
 bool
 FOdysseyTextureEditor::OnCloseRequested()
 {
-	FOdysseyPainterEditor::OnCloseRequested();
+    FOdysseyPainterEditor::OnCloseRequested();
 
     //TODO: Move in the right place
     if (LayerStack())
         LayerStack()->mDrawingUndo->Clear();
 
     TextureWrapper()->Finalize();
-	return true;
-}
-
-//--------------------------------------------------------------------------------------
-//--------------------------------------------------------------------------- Attributes
-
-bool
-FOdysseyTextureEditor::PaintEngineIsLocked() const
-{
-	FOdysseyLayerStack* layerstack = LayerStack();
-    if (!layerstack)
-		return true;
-
-    TSharedPtr<IOdysseyLayer> layer = layerstack->GetCurrentLayer();
-    if (!layer)
-        return true;
-
-    return layer->IsLocked(true) || !layer->IsVisible(true);
+    return true;
 }
 
 //--------------------------------------------------------------------------------------
@@ -159,17 +139,6 @@ FOdysseyTextureEditor::OnPreTextureChange()
     layerstack->OnCurrentLayerChanged().RemoveAll(this);
     layerstack->OnStructureChanged().RemoveAll(this);
     layerstack->OnImageResultChanged().RemoveAll(this);
-
-    TSharedPtr<IOdysseyLayer> layer = layerstack->GetCurrentLayer();
-    if ( layer && layer->GetType() == IOdysseyLayer::eType::kImage)
-    {
-        TSharedPtr<FOdysseyImageLayer> imageLayer = StaticCastSharedPtr<FOdysseyImageLayer>(layerstack->GetCurrentLayer());
-        if (imageLayer)
-        {
-            //Set AlphaLock Delegate
-            imageLayer->IsAlphaLockedChangedDelegate().RemoveAll(this);
-        }
-    }
 }
 
 void
@@ -209,6 +178,12 @@ FOdysseyTextureEditor::OnPostTextureChange()
 void
 FOdysseyTextureEditor::OnLayerStackCurrentLayerChanged(TSharedPtr<IOdysseyLayer> iOldValue)
 {
+    if (iOldValue)
+    {
+        iOldValue->LockChangedDelegate().RemoveAll(this);
+        iOldValue->VisibilityChangedDelegate().RemoveAll(this);
+    }
+
     PaintEngine().Block(NULL);
 
 	FOdysseyLayerStack* layerstack = LayerStack();
@@ -216,17 +191,20 @@ FOdysseyTextureEditor::OnLayerStackCurrentLayerChanged(TSharedPtr<IOdysseyLayer>
 		return;
 
 	//Add Image Layer Callback
-    if( layerstack->GetCurrentLayer() == NULL )
-        return;
-
 	TSharedPtr<IOdysseyLayer> layer = layerstack->GetCurrentLayer();
-	if (layer->GetType() != IOdysseyLayer::eType::kImage)
+    if( !layer )
 		return;
 
-	TSharedPtr<FOdysseyImageLayer> imageLayer = StaticCastSharedPtr<FOdysseyImageLayer>(layerstack->GetCurrentLayer());
-	if (!imageLayer) 
+    layer->LockChangedDelegate().AddRaw(this, &FOdysseyTextureEditor::OnCurrentLayerLockChanged);
+    layer->VisibilityChangedDelegate().AddRaw(this, &FOdysseyTextureEditor::OnCurrentLayerVisibilityChanged);
+
+    if(layer->GetType() != IOdysseyLayer::eType::kImage)
         return;
 
+	TSharedPtr<FOdysseyImageLayer> imageLayer = StaticCastSharedPtr<FOdysseyImageLayer>(layer);
+	if (!imageLayer) 
+        return;
+    
     PaintEngine().Block(imageLayer->GetBlock());
 }
 
@@ -248,6 +226,40 @@ FOdysseyTextureEditor::OnLayerStackImageResultChanged( const ::ULIS::FRectI* iRe
     Texture()->MarkPackageDirty();
     LayerStack()->ComputeResultInBlock( DisplaySurface()->Block(), iRects, iNumRects );
     DisplaySurface()->Invalidate( iRects, iNumRects );
+}
+
+void
+FOdysseyTextureEditor::OnCurrentLayerLockChanged(bool iOldValue)
+{
+    FOdysseyLayerStack* layerstack = LayerStack();
+    if (!layerstack)
+		return;
+
+    TSharedPtr<IOdysseyLayer> layer = layerstack->GetCurrentLayer();
+    if (!layer)
+        return;
+
+    if(layer->GetType() != IOdysseyLayer::eType::kImage)
+        return;
+
+    Cast<UOdysseyDrawingTool>(mSelectedTool)->IsDrawingLocked(layer->IsLocked(true) || !layer->IsVisible(true));
+}
+
+void
+FOdysseyTextureEditor::OnCurrentLayerVisibilityChanged(bool iOldValue)
+{
+    FOdysseyLayerStack* layerstack = LayerStack();
+    if (!layerstack)
+		return;
+
+    TSharedPtr<IOdysseyLayer> layer = layerstack->GetCurrentLayer();
+    if (!layer)
+        return;
+
+    if(layer->GetType() != IOdysseyLayer::eType::kImage)
+        return;
+
+    Cast<UOdysseyDrawingTool>(mSelectedTool)->IsDrawingLocked(layer->IsLocked(true) || !layer->IsVisible(true));
 }
 
 void

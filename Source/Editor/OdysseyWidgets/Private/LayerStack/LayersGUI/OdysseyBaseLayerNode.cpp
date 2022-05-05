@@ -153,15 +153,15 @@ void IOdysseyBaseLayerNode::MoveNodeTo( EItemDropZone iItemDropZone, TSharedRef<
     
     if( iItemDropZone == EItemDropZone::BelowItem )
     {
-		layerBase->MoveNodeTo(layerTarget, ePosition::kAfter);
+		layerBase->MoveTo(layerTarget, ePosition::kAfter);
     }
     else if( iItemDropZone == EItemDropZone::AboveItem )
     {
-		layerBase->MoveNodeTo(layerTarget, ePosition::kBefore);
+		layerBase->MoveTo(layerTarget, ePosition::kBefore);
     }
     else if( iItemDropZone == EItemDropZone::OntoItem && layersData[indexTarget]->GetType() == IOdysseyLayer::eType::kFolder )
     {
-		layerBase->MoveNodeTo(layerTarget, ePosition::kIn);
+		layerBase->MoveTo(layerTarget, ePosition::kIn);
     }
     else
     {

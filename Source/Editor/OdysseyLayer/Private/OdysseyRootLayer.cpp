@@ -37,7 +37,7 @@ FOdysseyRootLayer::Clone() const
 TArray<::ULIS::FEvent>
 FOdysseyRootLayer::RenderImage( ::ULIS::FBlock** ioBlocks, const ::ULIS::FRectI* iRects, const ::ULIS::FVec2I* iPositions, const uint32 iNum)
 {
-    TArray< TSharedPtr< IOdysseyLayer > > children = GetNodes();
+    TArray< TSharedPtr< IOdysseyLayer > > children = GetChildren();
     TArray<::ULIS::FEvent> eventRender;
     if( !IsVisible() || iNum == 0 || children.Num() == 0)
     {
@@ -88,9 +88,9 @@ FOdysseyRootLayer::GetCapabilityPtrFromGuid(FGuid iGuid)
 }
 
 void
-FOdysseyRootLayer::AddNode(TSharedPtr<IOdysseyLayer> iLayer, int iIndex)
+FOdysseyRootLayer::AddChild(TSharedPtr<IOdysseyLayer> iLayer, int iIndex)
 {
-    IOdysseyLayer::AddNode(iLayer, iIndex);
+    IOdysseyLayer::AddChild(iLayer, iIndex);
     bool isBlendable = iLayer->ImplementsCapability(IOdysseyLayerImageBlendingCapability::GetGuid());
     if (isBlendable)
     {
@@ -104,9 +104,9 @@ FOdysseyRootLayer::AddNode(TSharedPtr<IOdysseyLayer> iLayer, int iIndex)
 }
 
 void
-FOdysseyRootLayer::DeleteNode(int iIndex)
+FOdysseyRootLayer::RemoveChild(int iIndex)
 {
-    TSharedPtr<IOdysseyLayer> layer = GetNode(iIndex);
+    TSharedPtr<IOdysseyLayer> layer = GetChild(iIndex);
     bool isBlendable = layer->ImplementsCapability(IOdysseyLayerImageBlendingCapability::GetGuid());
     if (isBlendable)
     {
@@ -114,7 +114,7 @@ FOdysseyRootLayer::DeleteNode(int iIndex)
 		layerBlendable->ImageResultChangedDelegate().RemoveAll(this);
     }
 
-    IOdysseyLayer::DeleteNode(iIndex);
+    IOdysseyLayer::RemoveChild(iIndex);
 
     if (isBlendable && layer->IsVisible())
     {

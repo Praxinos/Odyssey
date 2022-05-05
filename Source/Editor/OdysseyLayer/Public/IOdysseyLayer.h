@@ -26,16 +26,6 @@ public:
     // Bool is for the previous value
     DECLARE_MULTICAST_DELEGATE_OneParam(FOdysseyLayerVisibilityChanged, bool);
 
-    // Layer Child Is Locked Changed Event
-    // TSharedPtr<IOdysseyLayer> is the child that changed
-    // Bool is for the previous value
-    DECLARE_MULTICAST_DELEGATE_TwoParams(FOdysseyLayerChildIsLockedChanged, TSharedPtr<IOdysseyLayer>, bool);
-
-    // Layer Child Is Visible Changed Event
-    // TSharedPtr<IOdysseyLayer> is the child that changed
-    // Bool is for the previous value
-    DECLARE_MULTICAST_DELEGATE_TwoParams(FOdysseyLayerChildIsVisibleChanged, TSharedPtr<IOdysseyLayer>, bool);
-
 public:
     enum class eType : char
     {
@@ -82,12 +72,16 @@ public:
         return reinterpret_cast<T*>(value);
     }
     virtual void* GetCapabilityPtrFromGuid(FGuid iGuid) = 0;
+    
+    //Called when this node's parent changed
+    virtual void OnParentChanged(TSharedPtr<IOdysseyLayer> iOldParent) override;
 
 protected:
     // Overloads for save in archive
     virtual void Serialize(FArchive &Ar) = 0;
 
 private:
+
     void SerializeWithChildren(FArchive &Ar);
 
     friend ODYSSEYLAYER_API FArchive& operator<<(FArchive &Ar, TSharedPtr<IOdysseyLayer>& ioLayer );
@@ -96,8 +90,6 @@ public:
     FOdysseyLayerNameChanged& NameChangedDelegate();
     FOdysseyLayerLockChanged& LockChangedDelegate();
     FOdysseyLayerVisibilityChanged& VisibilityChangedDelegate();
-    FOdysseyLayerChildIsLockedChanged& ChildIsLockedChangedDelegate();
-    FOdysseyLayerChildIsVisibleChanged& ChildIsVisibleChangedDelegate();
 
 public:
     FName GetNextLayerName();
@@ -111,8 +103,6 @@ protected:
 	FOdysseyLayerNameChanged mNameChangedDelegate;
 	FOdysseyLayerLockChanged mLockChangedDelegate;
 	FOdysseyLayerVisibilityChanged mVisibilityChangedDelegate;
-	FOdysseyLayerChildIsLockedChanged mChildIsLockedChangedDelegate;
-    FOdysseyLayerChildIsVisibleChanged mChildIsVisibleChangedDelegate;
 };
 
 ODYSSEYLAYER_API FArchive& operator<<(FArchive &Ar, TSharedPtr<IOdysseyLayer>& ioSaveImageLayer );

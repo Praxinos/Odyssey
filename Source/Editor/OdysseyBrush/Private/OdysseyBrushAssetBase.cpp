@@ -317,6 +317,12 @@ UOdysseyBrushAssetBase::GetBrushOptions()
     return BrushOptions;
 }
 
+::ULIS::FBlock*
+UOdysseyBrushAssetBase::GetBlock() const
+{
+    return mEditedBlock;
+}
+
 //--------------------------------------------------------------------------------------
 //-------------------------------------------------------- OdysseyBrushBlueprint Getters
 /*******************************/

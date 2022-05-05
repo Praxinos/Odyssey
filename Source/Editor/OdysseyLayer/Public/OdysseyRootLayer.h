@@ -29,8 +29,8 @@ public:
     virtual bool ImplementsCapability(FGuid iGuid) const override;
     virtual void* GetCapabilityPtrFromGuid(FGuid iGuid) override;
 
-    virtual void AddNode( TSharedPtr<IOdysseyLayer> iNode, int iIndexEmplace = -1 ) override;
-    virtual void DeleteNode( int iIndex ) override;
+    virtual void AddChild( TSharedPtr<IOdysseyLayer> iNode, int iIndexEmplace = -1 ) override;
+    virtual void RemoveChild( int iIndex ) override;
 
 public:
     // Public API

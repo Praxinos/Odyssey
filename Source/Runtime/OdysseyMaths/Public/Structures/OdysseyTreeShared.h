@@ -18,21 +18,15 @@ class FOdysseyNTreeShared : public TSharedFromThis<FOdysseyNTreeShared<tDerived>
 {
 public:
     //Events
-    // Tree Node Added Event
-    // - TSharedPtr<tDerived> is the added node
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOdysseyTreeNodeAdded, TSharedPtr<tDerived>);
+    // Tree Child Added Event
+    // - TSharedPtr<tDerived> is the added Child
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnChildAdded, TSharedPtr<tDerived>);
 
-    // Tree Node Removed Event
-    // TSharedPtr<tDerived> is the removed node
-    // TSharedPtr<tDerived> is the previous parent node
-    // int is the index of the removed node in the previous parent node
-    DECLARE_MULTICAST_DELEGATE_ThreeParams(FOdysseyTreeNodeRemoved, TSharedPtr<tDerived>, TSharedPtr<tDerived>, int);
-    
-    // Tree Node Moved Event
-    // TSharedPtr<tDerived> is the moved node
-    // TSharedPtr<tDerived> is the previous parent node
-    // int is the index of the removed node in the previous parent node
-    DECLARE_MULTICAST_DELEGATE_ThreeParams(FOdysseyTreeNodeMoved, TSharedPtr<tDerived>, TSharedPtr<tDerived>, int);
+    // Tree Child Removed Event
+    // TSharedPtr<tDerived> is the removed Child
+    // TSharedPtr<tDerived> is the previous parent
+    // int is the index of the removed Child in the previous parent
+    DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnChildRemoved, TSharedPtr<tDerived>, TSharedPtr<tDerived>, int);
 
 //Construction Destruction
 public:
@@ -40,46 +34,55 @@ public:
     virtual ~FOdysseyNTreeShared() = 0;
     
 public:
-    virtual void AddNode( TSharedPtr<tDerived> iNode, int iIndexEmplace = -1 );
-    virtual void DeleteNode( int iIndex );
+    //Adds a Child to this node
+    virtual void AddChild( TSharedPtr<tDerived> iChild, int iIndexEmplace = -1 );
 
-    void DeleteNodeIfExist( TSharedPtr<tDerived> iNodeToDelete );
-    void MoveNodeTo( TSharedPtr<tDerived> iNewPositionInTree, ePosition iPosition = ePosition::kAfter );
+    //Removes a child from this node
+    virtual void RemoveChild( int iIndex );
+
+    //Moves this node to somewhere else in the tree (can go from a parent to another)
+    void MoveTo( TSharedPtr<tDerived> iNode, ePosition iPosition = ePosition::kAfter );
     
-    //Find the first node (depthSearch) which content is iToFind
-    //FOdysseyNTreeShared<T>* FindNode( T iToFind );
-    
+    //Returns the Parent node
     TSharedPtr<tDerived> GetParent() const;
-    int GetIndexInParent() const;
-    // T GetNodeContent() const;
-    // T* GetNodeContentPtr() const;
     
-    TArray<TSharedPtr<tDerived>> GetNodes() const;
-    TSharedPtr<tDerived> GetNode(int iIndex) const;
-    
-    void DepthFirstSearchTree( TArray<TSharedPtr<tDerived>>* ioContents, bool iIncludeRoot = true );
-    void BreadthFirstSearchTree( TArray<TSharedPtr<tDerived>>* ioContents, bool iIncludeRoot = true );
-    
+    //Returns the number of parent until reaching the root
     int GetNumberParents() const;
     
     //Check if iParentToSearch is a parent (direct or indirect) of the currentNode
     bool HasForParent( TSharedPtr<tDerived> iParentToSearch ) const;
 
-    FOdysseyTreeNodeAdded& NodeAdded();
-    FOdysseyTreeNodeRemoved& NodeRemoved();
-    FOdysseyTreeNodeMoved& NodeMoved();
+    //Called when this node's parent changed
+    virtual void OnParentChanged(TSharedPtr<tDerived> iOldParent);
 
-	void BroadcastNodeAdded(TSharedPtr<tDerived> iNode);
-	void BroadcastNodeRemoved(TSharedPtr<tDerived> iNode, TSharedPtr<tDerived> iParent, int iIndex);
-	void BroadcastNodeMoved(TSharedPtr<tDerived> iNode, TSharedPtr<tDerived> iParent, int iIndex);
+    //Returns the position of this node in its parent
+    int GetIndexInParent() const;
+    
+    //Retuns this node's children
+    TArray<TSharedPtr<tDerived>> GetChildren() const;
+
+    //Returns this node's child at given index
+    TSharedPtr<tDerived> GetChild(int iIndex) const;
+    
+    //Returns the children in depth order
+    void DepthFirstSearchTree( TArray<TSharedPtr<tDerived>>* ioContents, bool iIncludeRoot = true );
+
+    //Returns the children in breadth order
+    void BreadthFirstSearchTree( TArray<TSharedPtr<tDerived>>* ioContents, bool iIncludeRoot = true );
+
+    FOnChildAdded& OnChildAddedDelegate();
+    FOnChildRemoved& OnChildRemovedDelegate();
 
 private:
-    TArray<TSharedPtr<tDerived>> mNodes;
+	void BroadcastChildAdded(TSharedPtr<tDerived> iChild);
+	void BroadcastChildRemoved(TSharedPtr<tDerived> iChild, TSharedPtr<tDerived> iParent, int iIndex);
+
+private:
+    TArray<TSharedPtr<tDerived>> mChildren;
     TWeakPtr<tDerived> mParent;
     
-    FOdysseyTreeNodeAdded mNodeAdded;
-    FOdysseyTreeNodeRemoved mNodeRemoved;
-    FOdysseyTreeNodeMoved mNodeMoved;
+    FOnChildAdded mOnChildAddedDelegate;
+    FOnChildRemoved mOnChildRemovedDelegate;
 };
 
 //Implementation

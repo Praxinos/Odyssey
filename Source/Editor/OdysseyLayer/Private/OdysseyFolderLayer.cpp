@@ -66,9 +66,9 @@ FOdysseyFolderLayer::GetCapabilityPtrFromGuid(FGuid iGuid)
 }
 
 void
-FOdysseyFolderLayer::AddNode(TSharedPtr<IOdysseyLayer> iLayer, int iIndex)
+FOdysseyFolderLayer::AddChild(TSharedPtr<IOdysseyLayer> iLayer, int iIndex)
 {
-    IOdysseyLayer::AddNode(iLayer, iIndex);
+    IOdysseyLayer::AddChild(iLayer, iIndex);
     bool isBlendable = iLayer->ImplementsCapability(IOdysseyLayerImageBlendingCapability::GetGuid());
     if( isBlendable )
     {
@@ -82,9 +82,9 @@ FOdysseyFolderLayer::AddNode(TSharedPtr<IOdysseyLayer> iLayer, int iIndex)
 }
 
 void
-FOdysseyFolderLayer::DeleteNode(int iIndex)
+FOdysseyFolderLayer::RemoveChild(int iIndex)
 {
-    TSharedPtr<IOdysseyLayer> layer = GetNode(iIndex);
+    TSharedPtr<IOdysseyLayer> layer = GetChild(iIndex);
     bool isBlendable = layer->ImplementsCapability(IOdysseyLayerImageBlendingCapability::GetGuid());
     if (isBlendable)
     {
@@ -92,7 +92,7 @@ FOdysseyFolderLayer::DeleteNode(int iIndex)
 		layerBlendable->ImageResultChangedDelegate().RemoveAll(this);
     }
 
-    IOdysseyLayer::DeleteNode(iIndex);
+    IOdysseyLayer::RemoveChild(iIndex);
 
     if (isBlendable && layer->IsVisible())
     {
@@ -111,7 +111,7 @@ FOdysseyFolderLayer::OnChildImageResultChanged( const ::ULIS::FRectI* iRects, co
 TArray<::ULIS::FEvent>
 FOdysseyFolderLayer::Blend( ::ULIS::FBlock** ioBlocks, const ::ULIS::FRectI* iRects, const ::ULIS::FVec2I* iPositions, const uint32 iNum, const ::ULIS::FEvent* iEvents )
 {
-    TArray< TSharedPtr< IOdysseyLayer > > children = GetNodes();
+    TArray< TSharedPtr< IOdysseyLayer > > children = GetChildren();
     if( !IsVisible() || iNum == 0 || children.Num() == 0)
         return TArray<::ULIS::FEvent>(iEvents, iNum);
 
@@ -187,7 +187,7 @@ FOdysseyFolderLayer::RenderImage( ::ULIS::FBlock** ioBlocks, const ::ULIS::FRect
         ctx.Flush();
     }
 
-    TArray< TSharedPtr< IOdysseyLayer > > children = GetNodes();
+    TArray< TSharedPtr< IOdysseyLayer > > children = GetChildren();
     eventRender = eventClear;
     for( int i = children.Num() - 1; i >= 0; --i ) {
         TSharedPtr< IOdysseyLayer > child = children[i];

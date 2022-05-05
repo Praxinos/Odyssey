@@ -121,6 +121,9 @@ public:
     //Returns the BrushOptions used by the Brush
     UOdysseyBrushOptions* GetBrushOptions();
 
+    // Sets the block on which the brush is drawing
+    ::ULIS::FBlock* GetBlock() const;
+
 public:
     //Context Management
     void AddContext(FOdysseyBrushContext* iContext);

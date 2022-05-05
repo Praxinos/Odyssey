@@ -22,8 +22,8 @@ ComputationFormatForResultFormat(::ULIS::eFormat iFormat)
 FOdysseyLayerStack::~FOdysseyLayerStack()
 {
     mLayerRoot->ImageResultChangedDelegate().RemoveAll(this);
-    mLayerRoot->NodeAdded().RemoveAll(this);
-    mLayerRoot->NodeRemoved().RemoveAll(this);
+    mLayerRoot->OnChildAddedDelegate().RemoveAll(this);
+    mLayerRoot->OnChildRemovedDelegate().RemoveAll(this);
     delete  mDrawingUndo;
 }
 
@@ -50,12 +50,12 @@ FOdysseyLayerStack::Init(int iWidth,int iHeight, ::ULIS::eFormat iFormat)
     mFormat = ComputationFormatForResultFormat(iFormat);
 
     mLayerRoot->ImageResultChangedDelegate().RemoveAll(this); //in case Init is walled twice, which should not happen.... but actually happened once
-    mLayerRoot->NodeAdded().RemoveAll(this); //in case Init is walled twice, which should not happen.... but actually happened once
-    mLayerRoot->NodeRemoved().RemoveAll(this); //in case Init is walled twice, which should not happen.... but actually happened once
+    mLayerRoot->OnChildAddedDelegate().RemoveAll(this); //in case Init is walled twice, which should not happen.... but actually happened once
+    mLayerRoot->OnChildRemovedDelegate().RemoveAll(this); //in case Init is walled twice, which should not happen.... but actually happened once
 
     mLayerRoot->ImageResultChangedDelegate().AddRaw(this, &FOdysseyLayerStack::OnLayerRootImageResultChanged);
-    mLayerRoot->NodeAdded().AddRaw(this, &FOdysseyLayerStack::OnLayerAdded);
-    mLayerRoot->NodeRemoved().AddRaw(this, &FOdysseyLayerStack::OnLayerRemoved);
+    mLayerRoot->OnChildAddedDelegate().AddRaw(this, &FOdysseyLayerStack::OnLayerAdded);
+    mLayerRoot->OnChildRemovedDelegate().AddRaw(this, &FOdysseyLayerStack::OnLayerRemoved);
 }
 
 void
@@ -209,11 +209,11 @@ FOdysseyLayerStack::AddLayer( TSharedPtr<IOdysseyLayer> iLayer, TSharedPtr<IOdys
     //TODO: Adding a layer should only add a layer, not set the currentlayer aswell
     if (iParent)
     {
-        iParent->AddNode(iLayer, iIndex);
+        iParent->AddChild(iLayer, iIndex);
     }
     else
     {
-        mLayerRoot->AddNode(iLayer, iIndex);
+        mLayerRoot->AddChild(iLayer, iIndex);
     }
     SetCurrentLayer(iLayer);
 }
@@ -222,7 +222,7 @@ void
 FOdysseyLayerStack::AddLayer( TSharedPtr<IOdysseyLayer> iLayer, int iIndex )
 {
     //TODO: Adding a layer should only add a layer, not set the currentlayer aswell
-    mLayerRoot->AddNode(iLayer, iIndex);
+    mLayerRoot->AddChild(iLayer, iIndex);
     SetCurrentLayer(iLayer);
 }
 
@@ -238,14 +238,14 @@ FOdysseyLayerStack::SetLayerRoot(TSharedPtr<FOdysseyRootLayer> iLayerRoot)
     TSharedPtr<FOdysseyRootLayer> oldValue = mLayerRoot;
 
     mLayerRoot->ImageResultChangedDelegate().RemoveAll(this);
-    mLayerRoot->NodeAdded().RemoveAll(this);
-    mLayerRoot->NodeRemoved().RemoveAll(this);
+    mLayerRoot->OnChildAddedDelegate().RemoveAll(this);
+    mLayerRoot->OnChildRemovedDelegate().RemoveAll(this);
 
     mLayerRoot = iLayerRoot;
 
     mLayerRoot->ImageResultChangedDelegate().AddRaw(this, &FOdysseyLayerStack::OnLayerRootImageResultChanged);
-    mLayerRoot->NodeAdded().AddRaw(this, &FOdysseyLayerStack::OnLayerAdded);
-    mLayerRoot->NodeRemoved().AddRaw(this, &FOdysseyLayerStack::OnLayerRemoved);
+    mLayerRoot->OnChildAddedDelegate().AddRaw(this, &FOdysseyLayerStack::OnLayerAdded);
+    mLayerRoot->OnChildRemovedDelegate().AddRaw(this, &FOdysseyLayerStack::OnLayerRemoved);
 
     mOnRootLayerChanged.Broadcast(oldValue);
     
@@ -301,7 +301,7 @@ FOdysseyLayerStack::DeleteLayer(TSharedPtr<IOdysseyLayer> iLayer)
 
     if (mCurrentLayer == iLayer || mCurrentLayer->HasForParent(iLayer))
     {
-        TArray<TSharedPtr<IOdysseyLayer>> children = parent->GetNodes();
+        TArray<TSharedPtr<IOdysseyLayer>> children = parent->GetChildren();
         int childrenCount = children.Num();
         if(childrenCount <= 1)
         {
@@ -316,7 +316,7 @@ FOdysseyLayerStack::DeleteLayer(TSharedPtr<IOdysseyLayer> iLayer)
             SetCurrentLayer(children[index + 1]);
         }
     }
-    parent->DeleteNode(index);
+    parent->RemoveChild(index);
 }
 
 void FOdysseyLayerStack::MergeDownLayer(TSharedPtr<IOdysseyLayer> iLayer)
@@ -326,7 +326,7 @@ void FOdysseyLayerStack::MergeDownLayer(TSharedPtr<IOdysseyLayer> iLayer)
 
     TSharedPtr<IOdysseyLayer> parent = iLayer->GetParent();
     int index = iLayer->GetIndexInParent();
-    TArray<TSharedPtr<IOdysseyLayer>> children = parent->GetNodes();
+    TArray<TSharedPtr<IOdysseyLayer>> children = parent->GetChildren();
     if (index >= children.Num() - 1)
         return;
 

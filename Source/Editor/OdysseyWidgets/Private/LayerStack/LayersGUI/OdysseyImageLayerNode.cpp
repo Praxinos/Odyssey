@@ -223,10 +223,10 @@ bool FOdysseyImageLayerNode::HandleMergeLayerDownCanExecute() const
 		return false;
 
 	int index = currentLayer->GetIndexInParent();
-	if (index >= parent->GetNodes().Num() - 1)
+	if (index >= parent->GetChildren().Num() - 1)
 		return false;
 
-	return parent->GetNode(index + 1)->GetType() == IOdysseyLayer::eType::kImage;
+	return parent->GetChild(index + 1)->GetType() == IOdysseyLayer::eType::kImage;
 }
 
 bool FOdysseyImageLayerNode::HandleDuplicateLayerCanExecute() const

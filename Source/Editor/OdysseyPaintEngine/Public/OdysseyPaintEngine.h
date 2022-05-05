@@ -35,9 +35,6 @@ public:
     // Sets the Block on which the Paint Engine will draw
     void Block(::ULIS::FBlock* iBlock);
 
-    //Defines wether the PaintEngine should be locked or not
-    void IsLocked(TAttribute<bool> iIsLocked);
-
 public:
     // Getters
 
@@ -46,9 +43,6 @@ public:
 
     //Returns the OriginalBlock
     ::ULIS::FBlock* OriginalBlock();
-
-    //Defines wether the PaintEngine should be locked or not
-    bool IsLocked() const;
 
     // Delegates
     FOnBlockChanged& OnBlockChangedDelegate() { return mOnBlockChangedDelegate; }
@@ -103,6 +97,4 @@ private:
     FOdysseyInvalidTileMap              mPaintBlockInvalidTileMap;
     FOdysseyInvalidTileMap              mEditedBlockInvalidTileMap;
     FOdysseyInvalidTileMap              mResetInvalidTileMap;
-
-    TAttribute<bool>                    mIsLocked;
 };

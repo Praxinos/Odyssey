@@ -24,6 +24,7 @@ UOdysseyDrawingTool::UOdysseyDrawingTool()
     , BlendParameters()
     , SelectedShape(EOdysseyShape::kFreehand)
     , SelectedShapeInstance(nullptr)
+    , mIsDrawingLocked(false)
 
     //Internal
     , mPaintEngine(nullptr)
@@ -79,20 +80,39 @@ UOdysseyDrawingTool::Inactivate()
 }
 
 bool
+UOdysseyDrawingTool::CanDraw()
+{
+    // Check if everything is alright
+    if (!BrushInstance && BrushInstance->GetBlock())
+        return false;
+
+    return !mIsDrawingLocked;
+}
+
+bool
 UOdysseyDrawingTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
+    if (!CanDraw())
+        return false;
+
     return SelectedShapeInstance->OnMouseDown(iPointInTexture, iKey);
 }
 
 bool
 UOdysseyDrawingTool::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
+    if (!CanDraw())
+        return false;
+
     return SelectedShapeInstance->OnMouseUp(iPointInTexture, iKey);
 }
 
 void
 UOdysseyDrawingTool::OnMouseHover(const FOdysseyPoint& iPointInTexture)
 {
+    if (!CanDraw())
+        return;
+
     if (BrushInstance)
         BrushInstance->StrokeMoveTo(iPointInTexture);
 
@@ -102,30 +122,35 @@ UOdysseyDrawingTool::OnMouseHover(const FOdysseyPoint& iPointInTexture)
 void
 UOdysseyDrawingTool::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 {
+    if (!CanDraw())
+        return;
+
     SelectedShapeInstance->OnMouseDrag(iPointInTexture);
 }
 
 bool
 UOdysseyDrawingTool::OnKeyDown(const FKey& iKey)
-{   
+{
+    if (!CanDraw())
+        return false;
+
     return SelectedShapeInstance->OnKeyDown(iKey);
 }
 
 bool
 UOdysseyDrawingTool::OnKeyUp(const FKey& iKey)
 {
+    if (!CanDraw())
+        return false;
+
     return SelectedShapeInstance->OnKeyUp(iKey);
 }
 
 void
 UOdysseyDrawingTool::Tick(float iDeltaTime)
 {
-    // Check if everything is alright
-    if (!BrushInstance)
-    {
-        UE_LOG(LogTemp, Warning, TEXT("Cannot call UOdysseyDrawingTool::Tick() without a brush instance") );
+    if (!CanDraw())
         return;
-    }
 
     mWorker.Push([this, iDeltaTime]()
     {
@@ -324,6 +349,23 @@ UOdysseyDrawingTool::SetBrushContexts(TArray<FOdysseyBrushContext*> iContexts)
     mBrushContexts = iContexts;
 }
 
+// Set wether the tool can draw or not
+void
+UOdysseyDrawingTool::IsDrawingLocked(bool iValue)
+{
+    if( mIsDrawingLocked == iValue )
+        return;
+
+    mIsDrawingLocked = iValue;
+
+    if( mIsDrawingLocked )
+    {
+        //Flush and commit
+        Flush();
+        Commit();
+    }
+}
+
 void
 UOdysseyDrawingTool::RefreshBrushInstance()
 {
@@ -376,6 +418,12 @@ UOdysseyDrawingTool::FOnApplyOverrides&
 UOdysseyDrawingTool::OnApplyOverridesDelegate()
 {
     return mOnApplyOverridesDelegate;
+}
+
+bool
+UOdysseyDrawingTool::IsDrawingLocked()
+{
+    return mIsDrawingLocked;
 }
 
 //--------------------------------------------------------------------------------------

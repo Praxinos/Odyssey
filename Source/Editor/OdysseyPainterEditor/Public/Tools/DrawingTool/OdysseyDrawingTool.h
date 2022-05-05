@@ -61,22 +61,6 @@ public:
     virtual void ExtendMenu( FToolMenuOwner iOwner, FName iMenuName ) override;
     virtual TSharedPtr<SWidget> GetWidget() override;
 
-private:
-    // Paint Engine Stroke API
-
-    //Begins a stroke at iPoint
-    //Some value are computed from the last call to MoveTo(), like direction for example
-    bool Begin( const FOdysseyPoint& iPoint );
-
-    //Draws a Stroke from the last position to iPoint
-    bool To( const FOdysseyPoint& iPoint );
-
-    //Ends the stroke
-    bool End();
-
-    //Aborts the stroke
-    bool Abort();
-
 public:
     // Setters
 
@@ -86,9 +70,11 @@ public:
     // Sets the BrushContexts to apply to brushInstance
     void SetBrushContexts(TArray<FOdysseyBrushContext*> iContexts);
 
+    // Set wether the tool can draw or not
+    void IsDrawingLocked(bool iValue);
+
     // Recreates the brush instance
     void RefreshBrushInstance();
-
 
 public:
     // Getters
@@ -105,14 +91,17 @@ public:
     // Returns the BrushOptions
     UOdysseyBrushOptions* GetBrushOptions();
 
-    // Returns the OnApplyOverrides delegate
-    FOnApplyOverrides& OnApplyOverridesDelegate();
-
     // Returns the Selected Shape
     EOdysseyShape GetSelectedShape() const;
 
     // Retuns the instance of the selected Shape
     UOdysseyShape* GetSelectedShapeInstance();
+
+    // Returns the OnApplyOverrides delegate
+    FOnApplyOverrides& OnApplyOverridesDelegate();
+
+    // Get wether the tool can draw or not
+    bool IsDrawingLocked();
 
 public:
     //UObject overrides
@@ -128,6 +117,25 @@ public:
 
     //Called when a simple property changes
     virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent);
+
+private:
+    // Paint Engine Stroke API
+
+    //Begins a stroke at iPoint
+    //Some value are computed from the last call to MoveTo(), like direction for example
+    bool Begin(const FOdysseyPoint& iPoint);
+
+    //Draws a Stroke from the last position to iPoint
+    bool To(const FOdysseyPoint& iPoint);
+
+    //Ends the stroke
+    bool End();
+
+    //Aborts the stroke
+    bool Abort();
+
+    //Wether the tool can draw or not
+    bool CanDraw();
 
 private:
     // Internal - BrushInstance
@@ -212,7 +220,7 @@ protected:
     //---
 
     //Internal
-    bool                                mIsPainting;
+    bool                                mIsDrawingLocked;
     FOnApplyOverrides                   mOnApplyOverridesDelegate;
     TSharedPtr<SWidget>                 mOptionsWidget;
 };
