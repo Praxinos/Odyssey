@@ -400,6 +400,9 @@ public:
 
     virtual void Serialize (FArchive& Ar);
 
+    //Called when a simple property changes
+    virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
+
 public:
     //PROPERTIES
     UPROPERTY(Transient, NonTransactional)

@@ -864,7 +864,8 @@ UOdysseyBrushAssetBase::ExecuteStateChanged()
     OnStateChanged();
 }
 
-void UOdysseyBrushAssetBase::Serialize (FArchive& Ar)
+void
+UOdysseyBrushAssetBase::Serialize (FArchive& Ar)
 {
 	Super::Serialize(Ar);
 
@@ -879,4 +880,20 @@ void UOdysseyBrushAssetBase::Serialize (FArchive& Ar)
     {
 
     } */
+}
+
+void
+UOdysseyBrushAssetBase::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent)
+{
+    Super::PostEditChangeProperty(PropertyChangedEvent);
+
+    if (PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive)
+        return;
+
+    FName propertyName = PropertyChangedEvent.GetPropertyName();
+
+    if (propertyName == "BrushOptions" || propertyName == "Overrides")
+        return;
+
+    ExecuteStateChanged();
 }
