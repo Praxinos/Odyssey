@@ -2,6 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
 #include "OdysseyModeToolkit.h"
+#include "LevelEditor.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyModeToolkit"
 
@@ -11,29 +12,42 @@
 //----------------------------------------------------------- Construction / Destruction
 FOdysseyModeToolkit::~FOdysseyModeToolkit()
 {
+    TArray<UObject*> objects = mEditor->GetEditedObjects();
+    for (int i = 0; i < objects.Num(); i++)
+    {
+        if (objects[i])
+            OnRemoveEditedObject(objects[i]);
+    }
+    mEditor->OnAddEditedObjectDelegate().RemoveAll(this);
+    mEditor->OnRemoveEditedObjectDelegate().RemoveAll(this);
+
+    FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>(TEXT("LevelEditor"));
+    mEditor->UnregisterTabSpawners(LevelEditorModule.GetLevelEditorTabManager()->AsShared());
 }
 
 FOdysseyModeToolkit::FOdysseyModeToolkit(const FName& iAppIdentifier, TSharedPtr<FOdysseyEditor> iEditor, class FEdMode* iEditorMode)
-	: TOdysseyToolkit<FModeToolkit>(iAppIdentifier, iEditor)
+	: mEditor( iEditor )
 	, mEditorMode(iEditorMode)
 {
 }
 
-void
-FOdysseyModeToolkit::Initialize()
+void FOdysseyModeToolkit::Init(const TSharedPtr<IToolkitHost>& iInitToolkitHost, TWeakObjectPtr<UEdMode> iOwningMode)
 {
     TArray<UObject*> objects = mEditor->GetEditedObjects();
-    for(int i = 0; i < objects.Num(); i++)
+    for (int i = 0; i < objects.Num(); i++)
     {
         if (objects[i])
             OnAddEditedObject(objects[i]);
     }
 
-	mEditor->OnAddEditedObjectDelegate().AddRaw(this, &FOdysseyModeToolkit::OnAddEditedObject);
+    mEditor->OnAddEditedObjectDelegate().AddRaw(this, &FOdysseyModeToolkit::OnAddEditedObject);
     mEditor->OnRemoveEditedObjectDelegate().AddRaw(this, &FOdysseyModeToolkit::OnRemoveEditedObject);
 
     //Finish Initialization
-    TOdysseyToolkit<FModeToolkit>::Initialize();
+    FModeToolkit::Init(iInitToolkitHost, iOwningMode);
+
+    FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>(TEXT("LevelEditor"));
+    mEditor->RegisterTabSpawners(LevelEditorModule.GetLevelEditorTabManager()->AsShared());
 }
 
 class FEdMode* FOdysseyModeToolkit::GetEditorMode() const
@@ -81,21 +95,6 @@ FOdysseyModeToolkit::IsPrimaryEditor() const
 {
     return true; //I don't know what this means
 }
-
-/*
-void
-FOdysseyModeToolkit::RegisterTabSpawners(const TSharedRef<FTabManager>& iTabManager)
-{
-    FModeToolkit::RegisterTabSpawners( iTabManager );
-    WorkspaceMenuCategory = mEditor->RegisterTabSpawners( iTabManager );
-}
-
-void
-FOdysseyModeToolkit::UnregisterTabSpawners(const TSharedRef<FTabManager>& iTabManager)
-{
-    FModeToolkit::UnregisterTabSpawners( iTabManager );
-	mEditor->UnregisterTabSpawners(iTabManager);
-}*/
 
 void
 FOdysseyModeToolkit::InvokeTab(const struct FTabId& TabId)

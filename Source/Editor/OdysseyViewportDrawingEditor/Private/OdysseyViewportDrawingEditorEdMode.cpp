@@ -45,17 +45,9 @@ FOdysseyViewportDrawingEditorEdMode::~FOdysseyViewportDrawingEditorEdMode()
 void FOdysseyViewportDrawingEditorEdMode::Initialize()
 {
     mEditor = MakeShareable(new FOdysseyViewportDrawingEditor());
-	mToolkit = MakeShareable(new FOdysseyViewportDrawingEditorToolkit(mEditor, this));
     mEditor->Initialize(nullptr);
-    mToolkit->Initialize();
 
     mViewportDrawingEditorPainter = new FOdysseyViewportDrawingEditorPainter(mEditor);
-}
-
-
-TSharedPtr<class FModeToolkit> FOdysseyViewportDrawingEditorEdMode::GetToolkit()
-{
-    return mToolkit;
 }
 
 void FOdysseyViewportDrawingEditorEdMode::AddReferencedObjects(FReferenceCollector& Collector)
@@ -155,13 +147,14 @@ void FOdysseyViewportDrawingEditorEdMode::Enter()
     if (UsesToolkits() && !Toolkit.IsValid())
     {
         Toolkit = GetToolkit();
+        Toolkit = MakeShareable(new FOdysseyViewportDrawingEditorToolkit(mEditor, this));
         Toolkit->Init(Owner->GetToolkitHost());
         TSharedPtr< ILevelEditor > levelEditor = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor").GetFirstLevelEditor();
         levelEditor->AppendCommands( Toolkit->GetToolkitCommands() );
     }
 
-    if( mToolkit )
-        mToolkit->ExtendMenu();
+    if (Toolkit)
+        StaticCastSharedPtr<FOdysseyModeToolkit>(Toolkit)->ExtendMenu();
 
     // Change the engine to draw selected objects without a color boost, but unselected objects will
     // be darkened slightly.  This just makes it easier to paint on selected objects without the
@@ -215,13 +208,13 @@ void FOdysseyViewportDrawingEditorEdMode::Exit()
     }
 
     // Unbind delegates
-    FAssetRegistryModule& assetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>(TEXT("AssetRegistry"));
+    /*FAssetRegistryModule& assetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>(TEXT("AssetRegistry"));
     assetRegistryModule.Get().OnAssetRemoved().RemoveAll(this);
     FReimportManager::Instance()->OnPostReimport().RemoveAll(this);
     GEditor->GetEditorSubsystem<UImportSubsystem>()->OnAssetPostImport.RemoveAll(this);
     FEditorDelegates::PreSaveWorld.RemoveAll(this);
     FEditorDelegates::PostSaveWorld.RemoveAll(this);
-    GEditor->OnObjectsReplaced().RemoveAll(this);
+    GEditor->OnObjectsReplaced().RemoveAll(this);*/
     //USelection::SelectionChangedEvent.Remove(SelectionChangedHandle);
 
     mViewportDrawingEditorPainter->Finalize();

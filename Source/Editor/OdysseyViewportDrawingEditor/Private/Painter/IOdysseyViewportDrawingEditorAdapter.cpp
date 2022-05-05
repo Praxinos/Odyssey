@@ -314,6 +314,7 @@ void IOdysseyViewportDrawingEditorAdapter::RemoveTextureOverride()
 
         mPaintingTexture2DRenderTarget->ConditionalBeginDestroy();
         mPaintingTexture2DRenderTarget = nullptr;
+        mState = eState::kIdle;
     }
 }
 

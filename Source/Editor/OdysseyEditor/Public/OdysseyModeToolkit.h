@@ -10,7 +10,7 @@
 #include "OdysseyToolkit.h"
 
 class ODYSSEYEDITOR_API FOdysseyModeToolkit
-	: public TOdysseyToolkit<FModeToolkit>,
+	: public FModeToolkit,
       public IAssetEditorInstance
 {
 public:
@@ -19,7 +19,9 @@ public:
     FOdysseyModeToolkit(const FName& iAppIdentifier, TSharedPtr<FOdysseyEditor> iEditor, class FEdMode* iEditorMode);
 
 public:
-    virtual void Initialize() override;
+    //virtual void Initialize();
+    virtual void Init(const TSharedPtr<IToolkitHost>& iInitToolkitHost, TWeakObjectPtr<UEdMode> iOwningMode);
+
 
 	/** IToolkit interface */
 	virtual class FEdMode* GetEditorMode() const override;
@@ -27,9 +29,6 @@ public:
 
     void OnAddEditedObject(UObject* iObject);
     void OnRemoveEditedObject(UObject* iObject);
-
-    /*virtual void RegisterTabSpawners(const TSharedRef<FTabManager>& iTabManager) override;
-    virtual void UnregisterTabSpawners(const TSharedRef<FTabManager>& iTabManager) override;*/
 
 public:
     //from IAssetEditorInstance
@@ -42,8 +41,11 @@ public:
 	virtual TSharedPtr<class FTabManager> GetAssociatedTabManager() override;
 	virtual double GetLastActivationTime() override;
 	virtual void RemoveEditingAsset(UObject* Asset) override;
-	virtual void ExtendMenu() override;
+	virtual void ExtendMenu();
 
+
+	TSharedPtr<FOdysseyEditor> mEditor;
+	
 private:
 	/** Owning editor mode */
 	class FEdMode* mEditorMode;

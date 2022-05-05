@@ -27,7 +27,6 @@ public:
 	virtual void Initialize() override;
 	virtual void Enter() override;
 	virtual void Exit() override;
-	virtual TSharedPtr< FModeToolkit > GetToolkit();
 
     /** FGCObject interface */
     virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
@@ -60,6 +59,6 @@ private:
 
 private:
 	TSharedPtr<FOdysseyViewportDrawingEditor> mEditor;
-	TSharedPtr<FOdysseyViewportDrawingEditorToolkit> mToolkit;
+	//TSharedPtr<FOdysseyViewportDrawingEditorToolkit> mToolkit;
 	FOdysseyViewportDrawingEditorPainter* mViewportDrawingEditorPainter;
 };
