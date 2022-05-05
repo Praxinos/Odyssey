@@ -221,9 +221,9 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "PainterEditor.ColorSelectorBis64", new IMAGE_BRUSH( "PainterEditor/color_selector_bis_64", mIcon64x64 ) );
     Set( "PainterEditor.ColorSelectorBis16", new IMAGE_BRUSH( "PainterEditor/color_selector_bis_16", mIcon16x16 ) );
 
-    Set( "PainterEditor.StrokeOptions64", new IMAGE_BRUSH( "PainterEditor/stroke_options_64", mIcon64x64 ) );
-    Set( "PainterEditor.StrokeOptions20", new IMAGE_BRUSH( "PainterEditor/stroke_options_64", mIcon20x20 ) );
-    Set( "PainterEditor.StrokeOptions16", new IMAGE_BRUSH( "PainterEditor/stroke_options_16", mIcon16x16 ) );
+    Set( "PainterEditor.StrokeOptions64", new IMAGE_BRUSH( "PainterEditor/tool_options_64", mIcon64x64 ) );
+    Set( "PainterEditor.StrokeOptions20", new IMAGE_BRUSH( "PainterEditor/tool_options_64", mIcon20x20 ) );
+    Set( "PainterEditor.StrokeOptions16", new IMAGE_BRUSH( "PainterEditor/tool_options_16", mIcon16x16 ) );
 
     Set( "PainterEditor.BrushExposedParameters64", new IMAGE_BRUSH( "PainterEditor/brush_exposed_parameters_64", mIcon64x64 ) );
     Set( "PainterEditor.BrushExposedParameters20", new IMAGE_BRUSH( "PainterEditor/brush_exposed_parameters_20", mIcon20x20 ) );

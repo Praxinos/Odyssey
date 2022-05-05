@@ -11,7 +11,6 @@ class FOdysseyViewportDrawingEditorMasterTab;
 enum class EOdysseyViewportSelectedView: uint8
 {
     kBrushSettings,
-    kStrokeOptions,
     kLayerStack,
     kTools
 };
