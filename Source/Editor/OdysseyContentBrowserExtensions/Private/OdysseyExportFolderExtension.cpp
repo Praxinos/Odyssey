@@ -330,7 +330,7 @@ void FOdysseyExportFolderExtension::ExportFile( UTexture2D* iCurrentTexture, FSt
     FTexturePlatformData* platformData = iCurrentTexture->GetPlatformData();
     ::ULIS::FBlock* odysseyBlockToSave = new ::ULIS::FBlock( platformData->SizeX, platformData->SizeY, ULISFormatForTextureSourceFormat( iCurrentTexture->Source.GetFormat() ) );
     FOdysseyScopedTextureSettings settingsGuard = FOdysseyScopedTextureSettings::MakeUncompressedNoMipMaps( iCurrentTexture );
-    CopyUTexturePixelDataIntoBlock( odysseyBlockToSave, iCurrentTexture );
+    CopyUTextureSourceDataIntoBlock( odysseyBlockToSave, iCurrentTexture );
 
     // ::ul3::SaveToFile doesn't recreate directories
     if ( !IFileManager::Get().DirectoryExists( GetData( FPaths::GetPath( iSystemPathNameExt ) ) ) )

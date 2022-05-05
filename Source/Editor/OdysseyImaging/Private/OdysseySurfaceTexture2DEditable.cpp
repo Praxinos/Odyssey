@@ -47,56 +47,6 @@ CopyUTextureSourceDataIntoBlock(::ULIS::FBlock* iBlock,UTexture* iTexture)
 }
 
 void
-CopyUTexturePixelDataIntoBlock(::ULIS::FBlock* iBlock, UTexture* iTexture)
-{
-    FTexturePlatformData* PlatformData = *iTexture->GetRunningPlatformData();
-    checkf(
-           iBlock->Width() == PlatformData->SizeX
-        && iBlock->Height() == PlatformData->SizeY
-        , TEXT( "Sizes do not match" )
-    );
-
-    ENQUEUE_RENDER_COMMAND( GetTextureData )(
-        [ iTexture, iBlock ]( FRHICommandListImmediate& RHICmdList )
-        {
-            FTexture2DRHIRef texture2DRHI = iTexture->Resource->GetTexture2DRHI();
-            uint32 bps = iBlock->BytesPerScanLine();
-
-            uint32 stride;
-            // stride value is changed by RHILockTexture2D
-            const uint8* src = reinterpret_cast< const uint8* >(
-                RHILockTexture2D( texture2DRHI, 0, EResourceLockMode::RLM_ReadOnly, stride, true, true )
-            );
-
-            if( src )
-            {
-                if ( stride == bps )
-                {
-                    // Copy all raw
-                    FMemory::Memcpy( iBlock->Bits(), src, iBlock->BytesTotal() );
-                }
-                else
-                {
-                    // Copy line by line
-                    uint8* dest = iBlock->Bits();
-                    for ( uint32 i = 0; i < texture2DRHI->GetSizeY(); ++i )
-                    {
-                        FMemory::Memcpy( dest, src, bps );
-                        src += stride;
-                        dest += bps;
-                    }
-                }
-            }
-            RHIUnlockTexture2D( texture2DRHI, 0, true, true );
-        }
-    );
-
-    FRenderCommandFence fence;
-    fence.BeginFence();
-    fence.Wait();
-}
-
-void
 CopyURenderTargetPixelDataIntoBlock(::ULIS::FBlock* iBlock, UTextureRenderTarget2D* iRenderTarget)
 {
     checkf(iBlock->Width() == iRenderTarget->GetSurfaceWidth()  &&

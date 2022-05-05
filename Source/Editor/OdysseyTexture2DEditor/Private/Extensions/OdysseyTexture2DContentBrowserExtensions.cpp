@@ -177,7 +177,7 @@ public:
                 FTexturePlatformData* platformData = currentTexture->GetPlatformData();
                 ::ULIS::FBlock* odysseyBlockToSave = new ::ULIS::FBlock( platformData->SizeX, platformData->SizeY, ULISFormatForTextureSourceFormat( currentTexture->Source.GetFormat() ) );
                 FOdysseyScopedTextureSettings settingsGuard = FOdysseyScopedTextureSettings::MakeUncompressedNoMipMaps( currentTexture );
-                CopyUTexturePixelDataIntoBlock( odysseyBlockToSave, currentTexture );
+                CopyUTextureSourceDataIntoBlock( odysseyBlockToSave, currentTexture );
                 ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( odysseyBlockToSave->Format() );
 
                 bool canSaveDirectly = false;

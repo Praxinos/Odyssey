@@ -11,7 +11,6 @@ class FOdysseySurfaceTexture2DEditable;
 
 //TODO: Convert to / Duplicate to UTexture* for each function here
 ODYSSEYIMAGING_API void CopyUTextureSourceDataIntoBlock( ::ULIS::FBlock* iBlock,UTexture* iTexture );
-ODYSSEYIMAGING_API void CopyUTexturePixelDataIntoBlock( ::ULIS::FBlock* iBlock, UTexture* iTexture );
 ODYSSEYIMAGING_API void CopyURenderTargetPixelDataIntoBlock( ::ULIS::FBlock* iBlock,UTextureRenderTarget2D* iRenderTarget );
 ODYSSEYIMAGING_API void CopyBlockDataIntoUTexture( const ::ULIS::FBlock* iBlock,UTexture2D* iTexture );
 ODYSSEYIMAGING_API void InitTextureWithBlockData( const ::ULIS::FBlock* iBlock, UTexture2D* iTexture, ETextureSourceFormat iFormat );

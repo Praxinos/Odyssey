@@ -122,7 +122,7 @@ FOdysseyTextureEditorLayerStackTab::ExportTextureToOperatingSystem()
         , LOCTEXT("TitleExportTexture", "Select Export Path & Name").ToString()
         , FPaths::ProjectDir()
         , currentTexture->GetName()
-        , TEXT("PNG Image (.png)|*.png|BMP Image (.bmp)|*.bmp|TGA Image (.tga)|*.tga|JPG Image (.jpg)|*.jpg|HDR Image (.HDR)|*.hdr")
+        , TEXT("PNG Image (.png)|*.png|BMP Image (.bmp)|*.bmp|TGA Image (.tga)|*.tga|JPG Image (.jpg)|*.jpg")
         , EFileDialogFlags::None
         , filenames
     );
@@ -154,7 +154,7 @@ FOdysseyTextureEditorLayerStackTab::ExportTextureToOperatingSystem()
         {
             FTexturePlatformData* platformData = *currentTexture->GetRunningPlatformData();
             ::ULIS::FBlock* odysseyBlockToSave = new ::ULIS::FBlock( platformData->SizeX, platformData->SizeY, ULISFormatForTextureSourceFormat( currentTexture->Source.GetFormat() ) );
-            CopyUTexturePixelDataIntoBlock( odysseyBlockToSave, currentTexture );
+            CopyUTextureSourceDataIntoBlock( odysseyBlockToSave, currentTexture );
             ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( odysseyBlockToSave->Format() );
 
             bool canSaveDirectly = false;
