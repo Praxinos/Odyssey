@@ -5,6 +5,7 @@
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "OdysseyTextureAssetUserData.h"
 #include "OdysseyPixelFormat.h"
+#include "TextureCompiler.h"
 
 FOdysseyTexture2DWrapper::~FOdysseyTexture2DWrapper()
 {
@@ -57,7 +58,7 @@ FOdysseyTexture2DWrapper::UpdateTextureFromSurface()
 
     CopyBlockDataIntoUTexture( Surface()->Block(), mTexture );
     mTexture->UpdateResource();
-    mTexture->FinishCachePlatformData(); //Wait UpdateResource Finished
+    FTextureCompilingManager::Get().FinishCompilation({mTexture});
 }
 
 void
@@ -77,7 +78,7 @@ FOdysseyTexture2DWrapper::SetTextureProperties()
     mTexture->SetLayerFormatSettings(0, textureFormatSettings);
 
     mTexture->UpdateResource();
-    mTexture->FinishCachePlatformData(); //Wait UpdateResource Finished
+    FTextureCompilingManager::Get().FinishCompilation({mTexture});
     mTexture->TemporarilyDisableStreaming(); //needed to be able to draw on previously streamed textures, avoids using NoMipMaps
 }
 
@@ -91,9 +92,8 @@ FOdysseyTexture2DWrapper::RestoreTextureProperties()
     mTexture->GetLayerFormatSettings(0,textureFormatSettings);
     textureFormatSettings.CompressionNone = mPropertyCompressionNone;
     mTexture->SetLayerFormatSettings(0, textureFormatSettings);
-
     mTexture->UpdateResource();
-    mTexture->FinishCachePlatformData(); //Wait UpdateResource Finished
+    FTextureCompilingManager::Get().FinishCompilation({ mTexture });
 }
 
 void

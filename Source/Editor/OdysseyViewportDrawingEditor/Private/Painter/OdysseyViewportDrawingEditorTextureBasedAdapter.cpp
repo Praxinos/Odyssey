@@ -52,6 +52,7 @@ void FOdysseyViewportDrawingEditorTextureBasedAdapter::PrepareAdapterForPainting
         mPaintingTexture2DRenderTarget = NewObject<UTextureRenderTarget2D>(GetTransientPackage(),NAME_None,RF_Transient);
         mPaintingTexture2DRenderTarget->AddToRoot();
         mPaintingTexture2DRenderTarget->InitCustomFormat(textureWidth,textureHeight,mEditor->Texture()->GetPixelFormat(),false);
+        mPaintingTexture2DRenderTarget->FinishCachePlatformData();
         mPaintingTexture2DRenderTarget->UpdateResourceImmediate();
 
         //IMeshPaintGeometryAdapter::DefaultApplyOrRemoveTextureOverride(mEditor->Component(), mEditor->Texture(), mPaintingTexture2DRenderTarget);

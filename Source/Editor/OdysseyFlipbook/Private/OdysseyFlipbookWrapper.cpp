@@ -13,6 +13,7 @@
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "OdysseyPixelFormat.h"
 #include "ULISLoaderModule.h"
+#include "TextureCompiler.h"
 
 FOdysseyFlipbookWrapper::~FOdysseyFlipbookWrapper()
 {
@@ -230,14 +231,14 @@ FOdysseyFlipbookWrapper::CreateTexture(FString iName, ::ULIS::FBlock* iBlock, ET
     UPackage* package = CreatePackage( *PackageName );
     
     //Create texture
-    UTexture2D* texture = NewObject<UTexture2D>(package, FName(AssetName), RF_Public | RF_Standalone | RF_Transactional );
+    UTexture2D* texture2D = NewObject<UTexture2D>(package, FName(AssetName), RF_Public | RF_Standalone | RF_Transactional );
 
     //Set texture format
 
     // Init Texture and its layerstack with iBlock
-    InitTextureWithBlockData(blockPtr, texture, iFormat);
+    InitTextureWithBlockData(blockPtr, texture2D, iFormat);
 
-    UOdysseyTextureAssetUserData* userData = NewObject< UOdysseyTextureAssetUserData >(texture, NAME_None, RF_Public);
+    UOdysseyTextureAssetUserData* userData = NewObject< UOdysseyTextureAssetUserData >(texture2D, NAME_None, RF_Public);
     userData->GetLayerStack()->Init(blockPtr->Width(), blockPtr->Height(), ULISFormatForTextureSourceFormat(iFormat) );
 
 	FName layerName = userData->GetLayerStack()->GetLayerRoot()->GetNextLayerName();
@@ -245,20 +246,22 @@ FOdysseyFlipbookWrapper::CreateTexture(FString iName, ::ULIS::FBlock* iBlock, ET
 	TSharedPtr<FOdysseyImageLayer> imageLayer = MakeShareable(new FOdysseyImageLayer(layerName, blockPtr));
 	userData->GetLayerStack()->AddLayer(imageLayer);
 
-    texture->AddAssetUserData( userData );
+    texture2D->AddAssetUserData( userData );
 
     //Init is done
-    texture->PostEditChange(); //This make sure that every properties are compatible with each other and with the size of our texture
-	texture->UpdateResource();
-    texture->FinishCachePlatformData(); //Wait UpdateResource Finished
+    texture2D->PostEditChange(); //This make sure that every properties are compatible with each other and with the size of our texture
+    
+    UTexture* texture = texture2D;
+    TArrayView<UTexture* const> textures = MakeArrayView( &texture, 1 );// TArrayView<const UTexture*>(&texture, 1);
+    FTextureCompilingManager::Get().FinishCompilation(textures);
 
-	FAssetRegistryModule::AssetCreated(texture);
-	UPackage::SavePackage(package, texture, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone, *AssetName);
+	FAssetRegistryModule::AssetCreated(texture2D);
+	UPackage::SavePackage(package, texture2D, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone, *AssetName);
 
 	package->MarkAsFullyLoaded();
-	texture->MarkPackageDirty();
+	texture2D->MarkPackageDirty();
         
-    return texture;
+    return texture2D;
 }
 
 UTexture2D*
@@ -278,36 +281,36 @@ FOdysseyFlipbookWrapper::CreateTexture(int32 iWidth, int32 iHeight, ETextureSour
     UPackage* package = CreatePackage( *PackageName );
     
     //Create texture
-    UTexture2D* texture = NewObject<UTexture2D>(package, FName(AssetName), RF_Public | RF_Standalone | RF_Transactional );
+    UTexture2D* texture2D = NewObject<UTexture2D>(package, FName(AssetName), RF_Public | RF_Standalone | RF_Transactional );
 
     // Init Texture
-    InitTextureWithBlockData(blockPtr, texture, iFormat);
+    InitTextureWithBlockData(blockPtr, texture2D, iFormat);
 
     //Create Layer Stack
-    UOdysseyTextureAssetUserData* userData = NewObject< UOdysseyTextureAssetUserData >(texture, NAME_None, RF_Public);
+    UOdysseyTextureAssetUserData* userData = NewObject< UOdysseyTextureAssetUserData >(texture2D, NAME_None, RF_Public);
     userData->GetLayerStack()->Init(blockPtr->Width(), blockPtr->Height(), ULISFormatForTextureSourceFormat(iFormat));
     delete blockPtr;
 
     // Create Layer
 	FName layerName = userData->GetLayerStack()->GetLayerRoot()->GetNextLayerName();
-    ::ULIS::FBlock* layerBlock = NewBlockFromUTextureData(texture, userData->GetLayerStack()->Format());
+    ::ULIS::FBlock* layerBlock = NewBlockFromUTextureData(texture2D, userData->GetLayerStack()->Format());
 	TSharedPtr<FOdysseyImageLayer> imageLayer = MakeShareable(new FOdysseyImageLayer(layerName, layerBlock));
 	userData->GetLayerStack()->AddLayer(imageLayer);
 
-    texture->AddAssetUserData( userData );
+    texture2D->AddAssetUserData( userData );
 
     //Init is done
-    texture->PostEditChange(); //This make sure that every properties are compatible with each other and with the size of our texture
-	texture->UpdateResource(); 
-    texture->FinishCachePlatformData(); //Wait UpdateResource Finished
+    texture2D->PostEditChange(); //This make sure that every properties are compatible with each other and with the size of our texture
+    texture2D->UpdateResource();
+    FTextureCompilingManager::Get().FinishCompilation({ texture2D });
 
-	FAssetRegistryModule::AssetCreated(texture);
-	UPackage::SavePackage(package, texture, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone, *AssetName);
+	FAssetRegistryModule::AssetCreated(texture2D);
+	UPackage::SavePackage(package, texture2D, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone, *AssetName);
 
 	package->MarkAsFullyLoaded();
-	texture->MarkPackageDirty();
+	texture2D->MarkPackageDirty();
 
-    return texture;
+    return texture2D;
 }
 
 //Duplicate the given texture
@@ -357,8 +360,8 @@ FOdysseyFlipbookWrapper::CopyTextureContent(UTexture2D* iSrcTexture, UTexture2D*
         imageLayer->SetBlock(block, false, true);
     }
 
-	iDstTexture->UpdateResource();
-    iDstTexture->FinishCachePlatformData(); //Wait UpdateResource Finished
+    iDstTexture->UpdateResource();
+    FTextureCompilingManager::Get().FinishCompilation({iDstTexture});
 }
 
 UPaperSprite*

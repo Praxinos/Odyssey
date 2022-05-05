@@ -17,6 +17,7 @@
 #include "DeviceProfiles/DeviceProfileManager.h"
 #include "RHI.h"
 #include "Async/ParallelFor.h"
+#include "TextureCompiler.h"
 #include <ULIS>
 
 #ifdef UE_BUILD_DEBUG
@@ -127,11 +128,18 @@ InitTextureWithBlockData(const ::ULIS::FBlock* iBlock, UTexture2D* iTexture, ETe
         TArray64<uint8> dst;
         dst.SetNumUninitialized(iBlock->Width() * iBlock->Height() * TextureSourceFormatBytesPerPixel(iFormat));
         ConvertULISFormatToTextureSourceFormat(block->Bits(), dst.GetData(), iBlock->Width(), iBlock->Height(), iFormat);
-        iTexture->Source.Init(iBlock->Width(), iBlock->Height(), 1, 1, iFormat, dst.GetData());
+        uint8* mip = iTexture->Source.LockMip(0);
+        memcpy(mip, dst.GetData(), dst.Num());
+        iTexture->Source.UnlockMip(0);
+        iTexture->FinishCachePlatformData();
     }
     else
     {
-        iTexture->Source.Init(block->Width(), block->Height(), 1, 1, iFormat, block->Bits());
+        uint8* mip = iTexture->Source.LockMip(0);
+        memcpy(mip, block->Bits(), block->BytesTotal());
+        iTexture->Source.UnlockMip(0);
+        iTexture->Source.Compress();
+        iTexture->FinishCachePlatformData();
     }
 
     if (block != iBlock)
@@ -583,7 +591,7 @@ FOdysseySurfaceTexture2DEditable::FOdysseySurfaceTexture2DEditable(int iWidth,in
     //texture->AddToRoot(); // Prevent GC
     mTexture->Filter = TextureFilter::TF_Nearest;
     mTexture->UpdateResource();
-    mTexture->FinishCachePlatformData(); //Wait UpdateResource Finished
+    FTextureCompilingManager::Get().FinishCompilation({mTexture});
     mTexture->AddToRoot();
 
     // Warning: the texture data source / bulk is allocated, then the block is allocated, then we copy the block content into bulk.
@@ -649,7 +657,7 @@ FOdysseySurfaceTexture2DEditable::FOdysseySurfaceTexture2DEditable(::ULIS::FBloc
     mTexture->SRGB = 1;
     mTexture->Filter = TextureFilter::TF_Nearest;
     mTexture->UpdateResource();
-    mTexture->FinishCachePlatformData(); //Wait UpdateResource Finished
+    FTextureCompilingManager::Get().FinishCompilation({ mTexture });
     mTexture->AddToRoot();
 
     mBlock->OnInvalid( ::ULIS::FOnInvalidBlock( &InvalidateSurfaceCallback, static_cast< void* >( this ) ) );

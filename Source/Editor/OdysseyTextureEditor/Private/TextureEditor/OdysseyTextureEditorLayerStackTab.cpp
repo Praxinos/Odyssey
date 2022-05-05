@@ -15,6 +15,7 @@
 #include "Factories/Texture2dFactoryNew.h"
 #include "IOdysseyLayerImageBlendingCapability.h"
 #include "OdysseyPixelFormat.h"
+#include "TextureCompiler.h"
 #include <ULIS>
 
 #define LOCTEXT_NAMESPACE "OdysseyTextureEditorLayerStackTab"
@@ -271,7 +272,7 @@ FOdysseyTextureEditorLayerStackTab::ExportLayersAsTextures()
 
             object->PostEditChange();
             object->UpdateResource();
-            object->FinishCachePlatformData(); //Wait UpdateResource Finished
+            FTextureCompilingManager::Get().FinishCompilation({object});
 
             FAssetRegistryModule::AssetCreated( object );
 
@@ -296,10 +297,10 @@ FOdysseyTextureEditorLayerStackTab::ExportCurrentLayerAsTexture()
     if (!object)
         return;
 
-    UTexture2D* texture = Cast<UTexture2D>(object);
-    texture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
-    texture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
-    texture->LODGroup = TextureGroup::TEXTUREGROUP_Pixels2D;
+    UTexture2D* texture2D = Cast<UTexture2D>(object);
+    texture2D->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
+    texture2D->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
+    texture2D->LODGroup = TextureGroup::TEXTUREGROUP_Pixels2D;
 
     IOdysseyLayerImageRenderingCapability* renderCap = layer->GetCapability<IOdysseyLayerImageRenderingCapability>();
     ::ULIS::FBlock block(mEditor->LayerStack()->Width(), mEditor->LayerStack()->Height(), mEditor->LayerStack()->Format());
@@ -315,12 +316,12 @@ FOdysseyTextureEditorLayerStackTab::ExportCurrentLayerAsTexture()
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(block.Format());
     ctx.Finish();
 
-    InitTextureWithBlockData(&block, texture, mEditor->Texture()->Source.GetFormat());
+    InitTextureWithBlockData(&block, texture2D, mEditor->Texture()->Source.GetFormat());
 
-    texture->PostEditChange();
-    texture->UpdateResource();
-
-    texture->MarkPackageDirty();
+    texture2D->PostEditChange();
+    texture2D->UpdateResource();
+    FTextureCompilingManager::Get().FinishCompilation({texture2D});
+    texture2D->MarkPackageDirty();
 }
 
 void

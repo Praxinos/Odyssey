@@ -1,6 +1,7 @@
 // IDDN FR.001.250001.005.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 #include "OdysseyScopedTextureSettings.h"
+#include "TextureCompiler.h"
 
 FOdysseyScopedTextureSettings::~FOdysseyScopedTextureSettings()
 {
@@ -9,6 +10,7 @@ FOdysseyScopedTextureSettings::~FOdysseyScopedTextureSettings()
     mTexture->CompressionSettings = mBackupTextureCompressionSettings;
     mTexture->MipGenSettings = mBackupTextureMipGenSettings;
     mTexture->UpdateResource();
+    FTextureCompilingManager::Get().FinishCompilation({mTexture});
 }
 
 FOdysseyScopedTextureSettings::FOdysseyScopedTextureSettings(
@@ -29,6 +31,7 @@ FOdysseyScopedTextureSettings::FOdysseyScopedTextureSettings(
     mTexture->CompressionSettings = iTextureCompressionSettings;
     mTexture->MipGenSettings = iTextureMipGenSettings;
     mTexture->UpdateResource();
+    FTextureCompilingManager::Get().FinishCompilation({mTexture});
 }
 
 //static
