@@ -973,6 +973,11 @@ FOdysseyPainterEditorViewportClient::AddReferencedObjects( FReferenceCollector& 
     ioCollector.AddReferencedObject( mCheckerboardTexture );
 }
 
+FString FOdysseyPainterEditorViewportClient::GetReferencerName() const
+{
+    return TEXT("FOdysseyPainterEditorViewportClient");
+}
+
 //--------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------- Public API
 void

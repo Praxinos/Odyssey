@@ -18,7 +18,8 @@ public class OdysseyEditor : ModuleRules
                 "Slate",
                 "SlateCore",
                 "UnrealEd",
-                "ToolMenus"
+                "ToolMenus",
+                "LevelEditor"
             }
         );
     }

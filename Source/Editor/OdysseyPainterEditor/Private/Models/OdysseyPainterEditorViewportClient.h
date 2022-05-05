@@ -105,6 +105,7 @@ public:
 public:
     // FGCObject API
     virtual void AddReferencedObjects( FReferenceCollector& ioCollector ) override;
+    virtual FString GetReferencerName() const override;
 
 public:
     // Public API
