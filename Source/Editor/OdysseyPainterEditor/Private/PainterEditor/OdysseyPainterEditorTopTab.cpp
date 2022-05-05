@@ -28,7 +28,7 @@ FOdysseyPainterEditorTopTab::~FOdysseyPainterEditorTopTab()
 FOdysseyPainterEditorTopTab::FOdysseyPainterEditorTopTab(FOdysseyPainterEditor* iEditor)
 	: FOdysseyEditorTab(TEXT("OdysseyPainterEditor_TopBar"),
                             LOCTEXT( "OdysseyPainterEditorTopTab", "Top Bar" ),
-                            FSlateIcon( "OdysseyStyle", "PainterEditor.BrushExposedParameters16" ))
+                            FSlateIcon( "OdysseyStyle", "PainterEditor.Spark16" ))
     , mEditor( iEditor )
 {
 }

@@ -18,7 +18,7 @@ FOdysseyPainterEditorToolOptionsTab::~FOdysseyPainterEditorToolOptionsTab()
 FOdysseyPainterEditorToolOptionsTab::FOdysseyPainterEditorToolOptionsTab(FOdysseyPainterEditor* iEditor)
 	: FOdysseyEditorTab(TEXT("OdysseyPainterEditor_ToolOptions"),
                             LOCTEXT( "OdysseyPainterEditorToolOptionsTab", "Tool Options" ),
-                            FSlateIcon( "OdysseyStyle", "PainterEditor.BrushSelector16" ))
+                            FSlateIcon( "OdysseyStyle", "PainterEditor.BrushExposedParameters16" ))
     , mEditor(iEditor)
 {
 }
