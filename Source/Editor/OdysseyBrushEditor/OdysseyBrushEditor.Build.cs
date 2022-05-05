@@ -28,5 +28,12 @@ public class OdysseyBrushEditor : ModuleRules
             new string[] {
             }
             );
+
+        PublicDependencyModuleNames.AddRange(
+             new string[] {
+                "ULIS",
+                "ULISLoader",
+             }
+        );
     }
 }

@@ -24,11 +24,11 @@ UOdysseyDrawingTool::UOdysseyDrawingTool()
     , BlendParameters()
     , SelectedShape(EOdysseyShape::kFreehand)
     , SelectedShapeInstance(nullptr)
-    , mIsDrawingLocked(false)
 
     //Internal
     , mPaintEngine(nullptr)
-{   
+    , mIsDrawingLocked(false)
+{
     AvailableShapes.Add(EOdysseyShape::kFreehand, CreateShape<UOdysseyFreehandShape>("UOdysseyDrawingTool::FreehandShape"));
     SelectedShapeInstance = AvailableShapes[SelectedShape];
 }

@@ -123,8 +123,8 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
     if (!texture)
         return;
 
-    mNearestNeighbourTexture.TextureRHI = texture->Resource->TextureRHI;
-    mBilinearTexture.TextureRHI = texture->Resource->TextureRHI;
+    mNearestNeighbourTexture.TextureRHI = texture->GetResource()->TextureRHI;
+    mBilinearTexture.TextureRHI = texture->GetResource()->TextureRHI;
 
     uint32 width = 0;
     uint32 height = 0;
@@ -170,7 +170,7 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
 
     // Draw background Checker
     {
-        FCanvasTileItem tileItem(pan, mCheckerboardTexture->Resource, FVector2D( width, height ), FVector2D( 0.f, 0.f ), FVector2D( width / mCheckerboardTexture->GetSizeX(), height / mCheckerboardTexture->GetSizeY() ), FLinearColor::White );
+        FCanvasTileItem tileItem(pan, mCheckerboardTexture->GetResource(), FVector2D( width, height ), FVector2D( 0.f, 0.f ), FVector2D( width / mCheckerboardTexture->GetSizeX(), height / mCheckerboardTexture->GetSizeY() ), FLinearColor::White );
         tileItem.BlendMode = SE_BLEND_Opaque;
         tileItem.PivotPoint = pivotPoint;
         tileItem.Rotation.Add( 0, rotation, 0 );
@@ -178,7 +178,7 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
     }
 
     // Draw Drawing Surface
-    if( texture->Resource != nullptr )
+    if( texture->GetResource() != nullptr )
     {
         FCanvasTileItem tileItem(pan, GetZoom() <= 1.0 ? &mBilinearTexture : &mNearestNeighbourTexture, FVector2D( width, height ), FLinearColor::White );
         tileItem.BatchedElementParameters = batchedElementParameters;
@@ -212,7 +212,7 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
     // Draw HUD Surface
     if( HUDTexture && HUDTexture->Resource )
     {
-        /*FTransform2D invertY = FTransform2D(FMatrix2x2(1,0,0,-1));
+        FTransform2D invertY = FTransform2D(FMatrix2x2(1,0,0,-1));
 
         FTransform2D transformMinusCenter = FTransform2D( mOdysseyPainterEditorViewportPtr.Pin()->GetViewportCenter() * -1).Concatenate(invertY);
         FTransform2D transformAddHalfTexture = FTransform2D( FVector2D(texture->GetSurfaceWidth(), texture->GetSurfaceHeight()) / 2.f );
@@ -1006,11 +1006,11 @@ FOdysseyPainterEditorViewportClient::DestroyCheckerboardTexture()
 {
     if( mCheckerboardTexture )
     {
-        if( mCheckerboardTexture->Resource )
+        if( mCheckerboardTexture->GetResource() )
         {
             mCheckerboardTexture->ReleaseResource();
         }
-        mCheckerboardTexture->MarkPendingKill();
+        mCheckerboardTexture->MarkAsGarbage();
         mCheckerboardTexture = NULL;
     }
 }
