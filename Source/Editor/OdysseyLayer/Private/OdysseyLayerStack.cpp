@@ -91,7 +91,7 @@ FOdysseyLayerStack::ComputeResultInBlock( ::ULIS::FBlock* ioBlock, const ::ULIS:
         convPos.Emplace( predA ? ::ULIS::FVec2I( 0 ) : predB ? ::ULIS::FVec2I( 0 ) : rectPos );
         outputPos.Emplace( predA ?::ULIS:: FVec2I( 0 ) : rectPos );
         output.Emplace( predA ? new ::ULIS::FBlock( rectSize.x, rectSize.y, mOutputFormat ) : ioBlock );
-        conv.Emplace( predB ? new ::ULIS::FBlock( rectSize.x, rectSize.y, mOutputFormat ) : output[i] );
+        conv.Emplace( predB ? new ::ULIS::FBlock( rectSize.x, rectSize.y, mFormat) : output[i] );
     }
 
     TArray<::ULIS::FEvent> eventRender = mLayerRoot->RenderImage( conv.GetData(), iRects, convPos.GetData(), iNumRects );

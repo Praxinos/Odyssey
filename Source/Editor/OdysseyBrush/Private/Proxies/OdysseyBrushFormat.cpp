@@ -55,10 +55,13 @@ OdysseyColorModelFromULISFormat(::ULIS::eFormat iFormat)
 {
     uint32 format = iFormat;
     //erase
-    format &= ULIS_E_TYPE & ULIS_E_DEPTH;
+    format &= ULIS_E_TYPE & ULIS_E_DEPTH & ULIS_E_FLOATING;
 
     //set 8bits
     format |= ULIS_W_TYPE(ULIS_TYPE_UINT8) | ULIS_W_DEPTH(1);
+
+    //, Format_RGBA8 = ( ULIS_W_TYPE( ULIS_TYPE_UINT8 )  | ULIS_W_CHANNELS( 3 ) | ULIS_W_MODEL( ULIS_ColorModel_RGB ) | ULIS_W_ALPHA( 1 ) | ULIS_W_DEPTH( 1 ) | ULIS_W_PROFILE( ULIS_sRGB ) )
+    //, Format_RGBAF = ( ULIS_W_TYPE( ULIS_TYPE_UFLOAT ) | ULIS_W_CHANNELS( 3 ) | ULIS_W_MODEL( ULIS_ColorModel_RGB ) | ULIS_W_ALPHA( 1 ) | ULIS_W_DEPTH( 4 ) | ULIS_W_PROFILE( ULIS_sRGB ) )
 
     switch (format)
     {
