@@ -356,7 +356,7 @@ FOdysseyPainterEditorGUI::ManualAndReleaseNotes()
 void
 FOdysseyPainterEditorGUI::GetBrushPack()
 {
-    FString URL = "https://www.unrealengine.com/marketplace/en-US/product/brush-pack-for-iliad";
+    FString URL = "https://www.unrealengine.com/marketplace/en-US/profile/PraxinosCoop";
     FPlatformProcess::LaunchURL( *URL, NULL, NULL );
 }
 
