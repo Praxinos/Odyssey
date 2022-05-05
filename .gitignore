@@ -33,3 +33,6 @@ Binaries/
 Content/*.uasset
 Intermediate/
 .DS_Store
+
+#VScode
+.vscode/
