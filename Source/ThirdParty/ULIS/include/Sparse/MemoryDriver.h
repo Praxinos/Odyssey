@@ -63,7 +63,9 @@ public:
     void SanitizeNow();
     FTile* QueryOne();
     FTile* RedundantHashMerge( FTile* iTile );
+    FTile* SplitMutable( FTile* iElem );
     void SetBackground( const uint8* iBackground, uint32 iBackgroundHash );
+    void PrintDiagnosis();
 
 private:
     // Private Workers API

@@ -57,6 +57,7 @@ public:
     void SetBackground( const uint8* iBackground );
     void Release( tClient iClient );
     void Release( const std::list< tClient > iList );
+    void PrintDiagnosis();
 
 private:
     // Private Workers API

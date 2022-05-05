@@ -11,6 +11,7 @@
 #pragma once
 #include "Core/Core.h"
 #include "Layer/AnimatedLayer/Cel.h"
+#include "Animation/AnimatedProperty.h"
 
 ULIS_NAMESPACE_BEGIN
 /////////////////////////////////////////////////////
@@ -29,6 +30,8 @@ public:
     template< typename ... Args >
     TSequence( Args&& ... args )
         : CelTypeFactory( std::forward< Args >(args)... )
+        , mInstances()
+        , mTimeRemap( []( ufloat iFrame ){ return  iFrame; } )
     {}
 
 public:
@@ -77,12 +80,22 @@ public:
         mInstances.Erase( index );
     }
 
-    TCel< T >* CelAtFrame( uint64 iFrame ) {
-        return  CelAtIndex( IndexAtFrame( iFrame ) );
+    TCel< T >* CelAtFrame( uint64 iFrame, bool iUseTimeRemap = false ) {
+        if( iUseTimeRemap ) {
+            const uint64 frame = static_cast< uint64> ( FMath::Clamp( mTimeRemap.GetValueAtFrame( static_cast< ufloat >( iFrame ) ), 0.f, float( mInstances.Size() - 1 ) ) );
+            return  CelAtIndex( IndexAtFrame( frame ) );
+        } else {
+            return  CelAtIndex( IndexAtFrame( iFrame ) );
+        }
     }
 
-    const TCel< T >* CelAtFrame( uint64 iFrame ) const {
-        return  CelAtIndex( IndexAtFrame( iFrame ) );
+    const TCel< T >* CelAtFrame( uint64 iFrame, bool iUseTimeRemap = false ) const {
+        if( iUseTimeRemap ) {
+            const uint64 frame = static_cast< uint64> ( FMath::Clamp( mTimeRemap.GetValueAtFrame( static_cast< ufloat >( iFrame ) ), 0.f, float( mInstances.Size() - 1 ) ) );
+            return  CelAtIndex( IndexAtFrame( frame ) );
+        } else {
+            return  CelAtIndex( IndexAtFrame( iFrame ) );
+        }
     }
 
     uint64 TotalFrames() const {
@@ -94,6 +107,14 @@ public:
         return  counter;
     }
 
+    TAnimatedProperty< ufloat >& GetTimeRemapProperty() {
+        return  mTimeRemap;
+    }
+
+    const TAnimatedProperty< ufloat >& GetTimeRemapProperty() const {
+        return  mTimeRemap;
+    }
+
 private:
     TCel< T >* CelAtIndex( uint64 iIndex ) {
         return  mInstances[iIndex];
@@ -102,7 +123,7 @@ private:
     const TCel< T >* CelAtIndex( uint64 iIndex ) const {
         return  mInstances[iIndex];
     }
-
+     
     uint64 IndexAtFrame( uint64 iFrame ) const {
         const uint64 size = mInstances.Size();
         uint64 counter = 0;
@@ -117,6 +138,7 @@ private:
 
 private:
     TArray< TCel< T >* > mInstances;
+    TAnimatedProperty< ufloat > mTimeRemap;
 };
 
 ULIS_NAMESPACE_END

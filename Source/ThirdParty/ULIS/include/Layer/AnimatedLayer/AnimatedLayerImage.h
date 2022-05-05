@@ -17,6 +17,7 @@
 #include "Layer/AnimatedLayer/AnimatedLayer.h"
 #include "Layer/AnimatedLayer/Sequence.h"
 #include "Layer/Components/HasBlendInfo.h"
+#include "Animation/AnimatedProperty.h"
 
 ULIS_NAMESPACE_BEGIN
 struct ULIS_API FCelBlockFactory

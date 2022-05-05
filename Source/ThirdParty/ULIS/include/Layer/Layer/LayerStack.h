@@ -14,6 +14,7 @@
 #include "Image/Format.h"
 #include "Image/Size2D.h"
 #include "Layer/Components/Searchable.h"
+#include "Sparse/TilePool.h"
 
 ULIS_NAMESPACE_BEGIN
 
@@ -39,6 +40,7 @@ public:
         , uint16 iHeight
         , eFormat iFormat = eFormat::Format_RGBA8
         , const FColorSpace* iColorSpace = nullptr
+        , FTilePool* iPool = nullptr
         , const FOnSelfChanged& iOnSelfChanged = FOnSelfChanged()
         , const FOnNodeAdded& iOnLayerAdded = FOnNodeAdded()
         , const FOnNodeRemoved& iOnLayerRemoved = FOnNodeRemoved()
@@ -58,6 +60,7 @@ public:
         , uint16 iHeight
         , eFormat iFormat = eFormat::Format_RGBA8
         , const FColorSpace* iColorSpace = nullptr
+        , FTilePool* iPool = nullptr
         , const FOnSelfChanged& iOnSelfChanged = FOnSelfChanged()
         , const FOnNodeAdded& iOnLayerAdded = FOnNodeAdded()
         , const FOnNodeRemoved& iOnLayerRemoved = FOnNodeRemoved()
@@ -69,24 +72,15 @@ public:
     // ITypeIdentifiable Interface
     ULIS_OVERRIDE_TYPEID_INTERFACE( "Stack" );
 
-    /*
-    // TDrawable Interface
-    FEvent RenderImage(
-          FContext& iCtx
-        , BlockType& ioBlock
-        , const FRectI& iRect = FRectI::Auto
-        , const FVec2I& iPos = FVec2I( 0 )
-        , const FSchedulePolicy& iPolicy = FSchedulePolicy()
-        , uint32 iNumWait = 0
-        , const FEvent* iWaitList = nullptr
-    ) override;
-    */
-
     // TRoot Overload Shadow Interface
     // TSearchable Overload Shadow Interface
     using TRoot< ILayer >::operator[];
     using TSearchable< TRoot< ILayer > >::operator[];
 
+    FTilePool* TilePool() const;
+
+private:
+    FTilePool* mTilePool;
 };
 
 ULIS_NAMESPACE_END

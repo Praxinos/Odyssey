@@ -8,7 +8,7 @@
 * @brief        This file provides declaration for animating a property
 * @license      Please refer to LICENSE.md
 */
-/*#pragma once
+#pragma once
 #include "Core/Core.h"
 #include "DefaultValue.h"
 #include "Animation/HasKeys.h"
@@ -52,22 +52,22 @@ TAnimatedProperty<T>::~TAnimatedProperty()
 template< typename T >
 T TAnimatedProperty<T>::GetValueAtFrame( ufloat iFrame ) const
 {
-    if(GetKeys().Size() == 0)
+    if(this->GetKeys().Size() == 0)
         return  mTrueDefaultValue(0.f);
 
-    if( GetKeys()[0].mFrame >= iFrame )
-        return  GetKeys()[0].mValue;
-    else if( GetKeys()[GetKeys().Size() - 1].mFrame <= iFrame )
-        return  GetKeys()[GetKeys().Size() - 1].mValue;
+    if( this->GetKeys()[0].mFrame >= iFrame )
+        return  this->GetKeys()[0].mValue;
+    else if( this->GetKeys()[this->GetKeys().Size() - 1].mFrame <= iFrame )
+        return  this->GetKeys()[this->GetKeys().Size() - 1].mValue;
 
     int leftKeyIndex = 0;
-    int rightKeyIndex = GetKeys().Size() - 1;
+    int rightKeyIndex = this->GetKeys().Size() - 1;
 
     //Dichotomy to search for the successive keys to interpolate between them
     while(rightKeyIndex - leftKeyIndex > 1)
     {
         int searchIndex = (leftKeyIndex + rightKeyIndex) / 2;
-        if(GetKeys()[searchIndex].mFrame > iFrame)
+        if(this->GetKeys()[searchIndex].mFrame > iFrame)
         {
             rightKeyIndex = searchIndex;
         }
@@ -77,9 +77,9 @@ T TAnimatedProperty<T>::GetValueAtFrame( ufloat iFrame ) const
         }
     }
 
-    return  GetKeys()[leftKeyIndex].GetInterpolation()->Interpolate( iFrame, GetKeys()[leftKeyIndex], GetKeys()[rightKeyIndex] );
+    return  this->GetKeys()[leftKeyIndex].GetInterpolation()->Interpolate( iFrame, this->GetKeys()[leftKeyIndex], this->GetKeys()[rightKeyIndex] );
 }
 
 
-ULIS_NAMESPACE_END*/
+ULIS_NAMESPACE_END
 

@@ -8,7 +8,7 @@
 * @brief        This file provides declaration for animating a property in the time
 * @license      Please refer to LICENSE.md
 */
-/*#pragma once
+#pragma once
 #include "Core/Core.h"
 #include "Animation/AnimatedProperty.h"
 
@@ -84,5 +84,5 @@ T TBoundedAnimatedProperty<T>::GetMaxValue() const
     return  mMaxValue;
 }
 
-ULIS_NAMESPACE_END*/
+ULIS_NAMESPACE_END
 

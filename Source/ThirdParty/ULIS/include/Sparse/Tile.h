@@ -34,6 +34,7 @@ struct ULIS_API FTile
     uint32  mHash;
     std::atomic< uint32 >   mRefCount;
     std::atomic< bool >     mDirty;
+    std::atomic< bool >     mLock;
 };
 #pragma warning(pop)
 

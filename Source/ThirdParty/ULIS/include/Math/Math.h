@@ -45,6 +45,20 @@ namespace FMath
         #endif
     }
 
+    template< typename T >
+    T roundCeilMultiple( T value, T multiple )
+    {
+        if( multiple == 0 ) return  value;
+        return  static_cast< T >( std::ceil( static_cast< double >( value ) / static_cast< double >( multiple ) ) * static_cast< double >( multiple ) );
+    }
+
+    template< typename T >
+    T roundFloorMultiple( T value, T multiple )
+    {
+        if( multiple == 0 ) return  value;
+        return  static_cast< T >( std::floor( static_cast< double >( value ) / static_cast< double >( multiple ) ) * static_cast< double >( multiple ) );
+    }
+
     static ULIS_FORCEINLINE ufloat CeilToFloat( ufloat iValue ) {
         return static_cast< ufloat >( CeilToInt( iValue ) );
     }
@@ -55,6 +69,14 @@ namespace FMath
 
     static ULIS_FORCEINLINE ufloat RoundToPositiveInfinity( ufloat iValue ) {
         return  CeilToFloat( iValue );
+    }
+
+    static ULIS_FORCEINLINE int RoundToNegativeInfinityMultiple( int iValue, int iMultiple ) {
+        return  static_cast< int >( FloorToFloat( static_cast< float >( iValue ) / static_cast< float >( iMultiple ) ) * static_cast< float >( iMultiple ) );
+    }
+
+    static ULIS_FORCEINLINE int RoundToPositiveInfinityMultiple( int iValue, int iMultiple ) {
+        return  static_cast< int >( CeilToFloat( static_cast< float >( iValue ) / static_cast< float >( iMultiple ) ) * static_cast< float >( iMultiple ) );
     }
 
     template< typename S, typename T, typename U >

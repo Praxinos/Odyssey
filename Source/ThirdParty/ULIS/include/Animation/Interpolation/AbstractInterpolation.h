@@ -7,7 +7,7 @@
 * @author       Thomas Schmitt
 * @brief        This file provides declaration for the basics of interpolation between animation keys
 * @license      Please refer to LICENSE.md
-*//*
+*/
 #pragma once
 #include "Core/Core.h"
 
@@ -16,12 +16,20 @@ ULIS_NAMESPACE_BEGIN
 template<typename T>
 struct TKey;
 
+enum eInterpolationType
+{
+    kLinear, 
+    kHold,
+    kBezier
+};
+
 template< typename T >
 class TAbstractInterpolation
 {
-protected:
+public:
     TAbstractInterpolation();
-    ~TAbstractInterpolation();
+    virtual ~TAbstractInterpolation();
+    virtual TAbstractInterpolation<T>* Clone() const = 0;
 
 public:
     virtual T Interpolate( ufloat iFrame, const TKey<T>& iLeftKey, const TKey<T>& iRightKey ) const = 0;
@@ -40,4 +48,4 @@ TAbstractInterpolation<T>::~TAbstractInterpolation()
 }
 
 ULIS_NAMESPACE_END
-*/
+

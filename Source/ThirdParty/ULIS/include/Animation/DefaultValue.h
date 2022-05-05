@@ -8,7 +8,7 @@
 * @brief        This file provides declaration for TDefaultValue
 * @license      Please refer to LICENSE.md
 */
-/*#pragma once
+#pragma once
 #include "Core/Core.h"
 #include <functional>
 
@@ -43,5 +43,5 @@ private:
     tExpression mExpression;
 };
 
-ULIS_NAMESPACE_END*/
+ULIS_NAMESPACE_END
 

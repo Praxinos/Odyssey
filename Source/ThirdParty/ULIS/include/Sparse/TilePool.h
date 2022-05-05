@@ -56,6 +56,7 @@ public:
     FVec2I TileSize() const;
     uint32 EmptyCRC32Hash() const;
     const uint8* EmptyTile() const;
+    void PrintDiagnosis();
 
 private:
     void RegisterTiledBlock( FTiledBlock* iBlock );

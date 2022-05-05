@@ -20,6 +20,7 @@
 #include "Math/Geometry/Vector.h"
 #include "Scheduling/SchedulePolicy.h"
 #include "System/CPUInfo/CPUInfo.h"
+#include "Sparse/TiledBlock.h"
 #include <functional>
 
 ULIS_NAMESPACE_BEGIN
@@ -171,6 +172,7 @@ public:
         , const FEvent* iWaitList = nullptr
         , FEvent* iEvent = nullptr
     );
+
 /////////////////////////////////////////////////////
 // Gradient
     /*!
@@ -189,6 +191,21 @@ public:
         , eGradientType iType = eGradientType::Gradient_Linear
         , const FRectI& iRect = FRectI::Auto
         , const FSchedulePolicy& iPolicy = FSchedulePolicy::MultiScanlines
+        , uint32 iNumWait = 0
+        , const FEvent* iWaitList = nullptr
+        , FEvent* iEvent = nullptr
+    );
+
+/////////////////////////////////////////////////////
+// Tile Block Specific
+    /*!
+        Dump tiled block into regular block.
+    */
+    ulError
+    Dump(
+          const FTiledBlock& iSource
+        , FBlock& iDestination
+        , const FSchedulePolicy& iPolicy = FSchedulePolicy::MonoChunk
         , uint32 iNumWait = 0
         , const FEvent* iWaitList = nullptr
         , FEvent* iEvent = nullptr
@@ -224,6 +241,71 @@ public:
         , eAlphaMode iAlphaMode = Alpha_Normal
         , ufloat iOpacity = 1.0f
         , const FSchedulePolicy& iPolicy = FSchedulePolicy::MultiScanlines
+        , uint32 iNumWait = 0
+        , const FEvent* iWaitList = nullptr
+        , FEvent* iEvent = nullptr
+    );
+
+    /*!
+        Perform a blend operation with iSource composited on top of iBackdrop.
+        iBackdrop is modified to receive the result of the operation, while
+        iSource is left untouched.
+
+        You can specify a sub-portion of the iSource image by specifying the
+        iSourceRect to the desired part of the picture. If you want to blend the
+        whole image, use the FBlock::Rect() method on the iSource block.
+        You can also specify where in iBackdrop the iSource FBlock should be
+        composited, in integer coordinates.
+
+        If the iSourceRect and/or iPosition lead to a destination geometry that
+        does not intersect the rectangular geometry of iBackdrop, the call will
+        not perform any computation and will return safely, so it is safe to
+        specify out-of-bounds positions.
+
+        \sa BlendAA()
+    */
+    ulError
+    Blend(
+          const FTiledBlock& iSource
+        , FTiledBlock& iBackdrop
+        , const FRectI& iSourceRect = FRectI::Auto
+        , eBlendMode iBlendingMode = Blend_Normal
+        , eAlphaMode iAlphaMode = Alpha_Normal
+        , ufloat iOpacity = 1.0f
+        , const FSchedulePolicy& iPolicy = FSchedulePolicy::MonoChunk
+        , uint32 iNumWait = 0
+        , const FEvent* iWaitList = nullptr
+        , FEvent* iEvent = nullptr
+    );
+
+    /*!
+        Perform a blend operation with iSource composited on top of iBackdrop.
+        iBackdrop is modified to receive the result of the operation, while
+        iSource is left untouched.
+
+        You can specify a sub-portion of the iSource image by specifying the
+        iSourceRect to the desired part of the picture. If you want to blend the
+        whole image, use the FBlock::Rect() method on the iSource block.
+        You can also specify where in iBackdrop the iSource FBlock should be
+        composited, in integer coordinates.
+
+        If the iSourceRect and/or iPosition lead to a destination geometry that
+        does not intersect the rectangular geometry of iBackdrop, the call will
+        not perform any computation and will return safely, so it is safe to
+        specify out-of-bounds positions.
+
+        \sa BlendAA()
+    */
+    ulError
+    Blend(
+          const FTiledBlock& iSource
+        , FTiledBlock& iBackdrop
+        , const FRectI& iSourceRect = FRectI::Auto
+        , const FVec2I& iPosition = FVec2I( 0 )
+        , eBlendMode iBlendingMode = Blend_Normal
+        , eAlphaMode iAlphaMode = Alpha_Normal
+        , ufloat iOpacity = 1.0f
+        , const FSchedulePolicy& iPolicy = FSchedulePolicy::MonoChunk
         , uint32 iNumWait = 0
         , const FEvent* iWaitList = nullptr
         , FEvent* iEvent = nullptr
@@ -443,6 +525,29 @@ public:
         , FEvent* iEvent = nullptr
     );
 
+    /*!
+        Perform a clear operation on the input block.
+        iBlock is modified to be cleared.
+
+        You can specify a sub-portion of the iBlock image by specifying the
+        iRect to the desired part of the picture. If you want to clear the
+        whole image, use the FBlock::Rect() method on the iBlock.
+
+        If the iRect lead to a destination geometry that does not intersect the
+        rectangular geometry of iBlock, the call will not perform any
+        computation and will return safely, so it is safe to specify
+        out-of-bounds positions.
+    */
+    ulError
+    Clear(
+          FTiledBlock& iBlock
+        , const FRectI& iRect = FRectI::Auto
+        , const FSchedulePolicy& iPolicy = FSchedulePolicy::MonoChunk
+        , uint32 iNumWait = 0
+        , const FEvent* iWaitList = nullptr
+        , FEvent* iEvent = nullptr
+    );
+
 /////////////////////////////////////////////////////
 // Conv
     /*!
@@ -521,6 +626,30 @@ public:
     ulError
     Fill(
           FBlock& iBlock
+        , const ISample& iColor = FColor::RGBA8( 0, 0, 0 )
+        , const FRectI& iRect = FRectI::Auto
+        , const FSchedulePolicy& iPolicy = FSchedulePolicy::MonoChunk
+        , uint32 iNumWait = 0
+        , const FEvent* iWaitList = nullptr
+        , FEvent* iEvent = nullptr
+    );
+
+    /*!
+        Perform a fill operation in iBlock.
+        iBlock is modified to receive the result of the operation.
+
+        You can specify a sub-portion of the iBlock image by specifying the
+        iRect to the desired part of the picture. If you want to fill
+        the whole image, use the FBlock::Rect() method on the iBlock.
+
+        If the iRect lead to a destination geometry that does not intersect the
+        rectangular geometry of iBlock, the call will not perform any
+        computation and will return safely, so it is safe to specify
+        out-of-bounds positions.
+    */
+    ulError
+    Fill(
+          FTiledBlock& iBlock
         , const ISample& iColor = FColor::RGBA8( 0, 0, 0 )
         , const FRectI& iRect = FRectI::Auto
         , const FSchedulePolicy& iPolicy = FSchedulePolicy::CacheEfficient

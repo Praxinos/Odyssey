@@ -68,10 +68,10 @@ public:
     FRectI LeafGeometry() const;
 
     /*! Query const client data at pixel coordinates ( Read-only ) */
-    const uint8* QueryConst( FTilePool& iPool, uint8 iX, uint8 iY ) const;
+    const uint8* QueryConst( FTilePool& iPool, uint16 iX, uint16 iY ) const;
 
     /*! Query one mutable tile element for imminent dirty operation at pixel coordinates */
-    FTile** QueryMutable( FTilePool& iPool, uint8 iX, uint8 iY );
+    FTile** QueryMutable( FTilePool& iPool, uint16 iX, uint16 iY );
 
     /*! Check if the LQT is empty, might be deleted if so. */
     bool IsEmpty() const;

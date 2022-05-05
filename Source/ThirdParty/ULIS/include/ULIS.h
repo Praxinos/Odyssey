@@ -79,11 +79,8 @@
 #include "Scheduling/CommandQueue.h"
 #include "Scheduling/Event.h"
 #include "Scheduling/SchedulePolicy.h"
-/*
 // Sparse
-#include "Sparse/Chunk.h"
 #include "Sparse/Tile.h"
 #include "Sparse/TiledBlock.h"
 #include "Sparse/TilePool.h"
-*/
 

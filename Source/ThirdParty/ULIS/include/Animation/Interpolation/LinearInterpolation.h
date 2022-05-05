@@ -7,7 +7,7 @@
 * @author       Thomas Schmitt
 * @brief        This file provides declaration for the linear interpolation
 * @license      Please refer to LICENSE.md
-*//*
+*/
 #pragma once
 #include "Core/Core.h"
 #include "Animation/Interpolation/AbstractInterpolation.h"
@@ -17,16 +17,9 @@ ULIS_NAMESPACE_BEGIN
 template< typename T >
 class TLinearInterpolation : public TAbstractInterpolation< T >
 {
-protected:
-    TLinearInterpolation<T>();
-
-    static TLinearInterpolation<T>* mInstance = nullptr;
-
 public:
-    TLinearInterpolation<T>(TLinearInterpolation<T> &other) = delete;
-    void operator=(const TLinearInterpolation<T> &) = delete;
-    static TLinearInterpolation<T> *GetInstance();
-    static void *ReleaseInstance();
+    TLinearInterpolation<T>();
+    virtual TLinearInterpolation<T>* Clone() const;
 
 public:
     virtual T Interpolate( ufloat iFrame, const TKey<T>& iLeftKey, const TKey<T>& iRightKey ) const override;
@@ -40,21 +33,9 @@ TAbstractInterpolation<T>()
 }
 
 template< typename T >
-TLinearInterpolation<T>* TLinearInterpolation<T>::GetInstance()
+TLinearInterpolation<T>* TLinearInterpolation<T>::Clone() const
 {
-    if( mInstance == nullptr )
-        mInstance = new TLinearInterpolation<T>();
-    return  mInstance;
-}
-
-template< typename T >
-void * TLinearInterpolation<T>::ReleaseInstance()
-{
-    if( mInstance != nullptr )
-    {
-        delete mInstance;
-        mInstance = nullptr;
-    }
+    return new TLinearInterpolation<T>();
 }
 
 template< typename T >
@@ -65,5 +46,5 @@ T TLinearInterpolation<T>::Interpolate( ufloat iFrame, const TKey<T>& iLeftKey, 
     return  iLeftKey.mValue + t * (iRightKey.mValue - iLeftKey.mValue);
 }
 
-ULIS_NAMESPACE_END*/
+ULIS_NAMESPACE_END
 
