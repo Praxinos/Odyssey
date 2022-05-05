@@ -38,7 +38,7 @@ protected:
 
 template< typename T >
 TBoundedAnimatedProperty<T>::TBoundedAnimatedProperty(T iDefaultValue, T iMinValue, T iMaxValue) :
-    TAnimatedProperty(iDefaultValue)
+    TAnimatedProperty<T>(iDefaultValue)
 {
     if(iMinValue > iMaxValue)
     {
