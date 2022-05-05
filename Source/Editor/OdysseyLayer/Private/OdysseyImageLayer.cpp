@@ -151,7 +151,9 @@ FOdysseyImageLayer::Blend( ::ULIS::FBlock** ioBlocks, const ::ULIS::FRectI* iRec
         for( uint32 i = 0; i < iNum; ++i ) {
             convBlocks.Emplace( new ::ULIS::FBlock( iRects[i].w, iRects[i].h, mBlock->Format() ) );
             ::ULIS::FEvent eventConvertForward;
-            ctx.ConvertFormat( *ioBlocks[i], *( convBlocks[i] ), iRects[i], ::ULIS::FVec2I( 0 ), ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 1, &iEvents[i], &eventConvertForward );
+
+            ::ULIS::FRectI convRect = ::ULIS::FRectI::FromXYWH(iPositions[i].x, iPositions[i].y, iRects[i].w, iRects[i].h);
+            ctx.ConvertFormat( *ioBlocks[i], *( convBlocks[i] ), convRect, ::ULIS::FVec2I( 0 ), ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 1, &iEvents[i], &eventConvertForward );
             ::ULIS::FEvent eventBlend1;
             ctx.Blend( *mBlock, *convBlocks[i], iRects[i], ::ULIS::FVec2I( 0 ), GetBlendingMode(), ::ULIS::Alpha_Normal, GetOpacity(), ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 1, &eventConvertForward, &eventBlend1 );
             eventBlend[i] = ::ULIS::FEvent(
@@ -249,7 +251,7 @@ FOdysseyImageLayer::Serialize(FArchive &Ar)
     Ar << height;
 
     //Load/Save Format (compatibility with version version which don't save format)
-    ::ULIS::eFormat format = ::ULIS::Format_BGRA8;
+    ::ULIS::eFormat format = Ar.IsSaving() ? mBlock->Format() : ::ULIS::Format_BGRA8;
     //if( Ar.CustomVer(FOdysseyImageLayerObjectVersion::GUID) >= FOdysseyImageLayerObjectVersion::SavePixelFormat )
     //{
         uint32 fmt = static_cast< uint32 >( format );
