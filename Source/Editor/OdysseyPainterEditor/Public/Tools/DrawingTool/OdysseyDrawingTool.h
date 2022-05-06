@@ -26,7 +26,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyDrawingTool : public UOdysseyTool
 public:
     typedef TMap<FName, UObject*> tOverride;
 
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOnApplyOverrides, const tOverride& iOverrides);
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnApplyOverrides, const tOverride&);
+    DECLARE_DELEGATE_RetVal_OneParam(TArray<FOdysseyPoint>, FAdaptShapePoints, const TArray<FOdysseyPoint>&);
 
 public:
     // Destructor
@@ -99,6 +100,7 @@ public:
 
     // Returns the OnApplyOverrides delegate
     FOnApplyOverrides& OnApplyOverridesDelegate();
+    FAdaptShapePoints& AdaptShapePointsDelegate();
 
     // Get wether the tool can draw or not
     bool IsDrawingLocked();
@@ -222,5 +224,6 @@ protected:
     //Internal
     bool                                mIsDrawingLocked;
     FOnApplyOverrides                   mOnApplyOverridesDelegate;
+    FAdaptShapePoints                   mAdaptShapePointsDelegate;
     TSharedPtr<SWidget>                 mOptionsWidget;
 };

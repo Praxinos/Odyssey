@@ -225,8 +225,6 @@ UOdysseyDrawingTool::OnShapePathBegin( const FOdysseyPoint& iPoint )
         return;
     }
 
-    FOdysseyPoint point = iPoint;
-
     //StrokeBegin does not draw anything
     if (!BrushInstance->StrokeBegin())
     {
@@ -234,7 +232,11 @@ UOdysseyDrawingTool::OnShapePathBegin( const FOdysseyPoint& iPoint )
         return;
     }
 
-    TArray<UOdysseyBrushAssetBase::FStep> steps = BrushInstance->StepsTo({ iPoint });
+    TArray<FOdysseyPoint> points = { iPoint };
+    if (mAdaptShapePointsDelegate.IsBound())
+        points = mAdaptShapePointsDelegate.Execute({iPoint});
+
+    TArray<UOdysseyBrushAssetBase::FStep> steps = BrushInstance->StepsTo(points);
     for (int i = 0; i < steps.Num(); i++)
     {
         mWorker.Push([this, step = steps[i]]()
@@ -254,7 +256,9 @@ UOdysseyDrawingTool::OnShapePathTo( const TArray<FOdysseyPoint>& iPoints )
         return;
     }
 
-    TArray<UOdysseyBrushAssetBase::FStep> steps = BrushInstance->StepsTo(iPoints);
+    TArray<FOdysseyPoint> points = mAdaptShapePointsDelegate.IsBound() ? mAdaptShapePointsDelegate.Execute(iPoints) : iPoints;
+
+    TArray<UOdysseyBrushAssetBase::FStep> steps = BrushInstance->StepsTo(points);
     for (int j = 0; j < steps.Num(); j++)
     {
         mWorker.Push([this, step = steps[j]]()
@@ -418,6 +422,13 @@ UOdysseyDrawingTool::FOnApplyOverrides&
 UOdysseyDrawingTool::OnApplyOverridesDelegate()
 {
     return mOnApplyOverridesDelegate;
+}
+
+
+UOdysseyDrawingTool::FAdaptShapePoints&
+UOdysseyDrawingTool::AdaptShapePointsDelegate()
+{
+    return mAdaptShapePointsDelegate;
 }
 
 bool
