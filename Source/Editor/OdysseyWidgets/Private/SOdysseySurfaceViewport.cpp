@@ -26,7 +26,7 @@
 
 
 #define MinZoom 0.01
-#define MaxZoom 20.0
+#define MaxZoom 200.0
 #define NeutralZoom 1.0
 #define ZoomStep 0.025
 #define RotationStep 15
@@ -365,6 +365,7 @@ void SOdysseySurfaceViewport::SetViewportClient(TSharedPtr<class FViewportClient
     mViewport        = MakeShareable(new FOdysseySceneViewport(mViewportClient.Get(), mViewportWidget));
     mViewportWidget->SetViewportInterface(mViewport.ToSharedRef());
 
+    SetFitToViewport(true);
     UpdateScrollBars();
 }
 
@@ -626,6 +627,10 @@ SOdysseySurfaceViewport::FitToViewport()
     UTexture* texture = surface->Texture();
     if (!texture)
         return;
+
+    if (mViewport->GetSizeXY().X == 0 || mViewport->GetSizeXY().Y == 0)
+        return;
+
 
     float width = texture->GetSurfaceWidth();
     float height = texture->GetSurfaceHeight();
