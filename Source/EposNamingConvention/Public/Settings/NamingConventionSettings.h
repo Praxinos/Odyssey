@@ -102,7 +102,7 @@ public:
 public:
     /** The shot pattern. */
     UPROPERTY( config, EditAnywhere, Category="Shot" )
-    FString Pattern { TEXT( "shot_{shot-index}_{take_index}" ) };
+    FString Pattern { TEXT( "shot_{shot-index}_{take-index}" ) };
 
     /** List of all keywords.
         This list is hidden in customization.
