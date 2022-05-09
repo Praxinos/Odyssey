@@ -12,6 +12,7 @@
 
 #include "FileHelpers.h"
 #include "ObjectEditorUtils.h"
+#include "UObject/OdysseyObjectEditorUtilis.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorTopTab"
 
@@ -190,7 +191,7 @@ FOdysseyPainterEditorTopTab::AlphaMode() const
 //---------------------------------------------------------------------- Event Listeners
 
 void
-FOdysseyPainterEditorTopTab::OnSizeChanged( int32 iValue )
+FOdysseyPainterEditorTopTab::OnSizeChanged( int32 iValue, EPropertyChangeType::Type iChangeType )
 {
     UOdysseyDrawingTool* drawingTool = Cast<UOdysseyDrawingTool>(mEditor->GetSelectedTool());
     if (!drawingTool)
@@ -198,11 +199,11 @@ FOdysseyPainterEditorTopTab::OnSizeChanged( int32 iValue )
 
     //TODO: Remove when the top will use singlePropertyview
     UOdysseyBrushOptions* brushOptions = drawingTool->GetBrushInstance()->GetBrushOptions();
-    FObjectEditorUtils::SetPropertyValue(brushOptions, "Size", float(iValue));
+    FObjectEditorUtils::SetPropertyValue(brushOptions, "Size", float(iValue), iChangeType);
 }
 
 void
-FOdysseyPainterEditorTopTab::OnOpacityChanged( int32 iValue )
+FOdysseyPainterEditorTopTab::OnOpacityChanged( int32 iValue, EPropertyChangeType::Type iChangeType )
 {
     UOdysseyDrawingTool* drawingTool = Cast<UOdysseyDrawingTool>(mEditor->GetSelectedTool());
     if (!drawingTool)
@@ -211,11 +212,11 @@ FOdysseyPainterEditorTopTab::OnOpacityChanged( int32 iValue )
     //TODO: Remove when the top will use singlePropertyview
     FOdysseyBlendParameters blendParameters = drawingTool->GetBlendParameters();
     blendParameters.Opacity = float(iValue);
-    FObjectEditorUtils::SetPropertyValue(drawingTool, "BlendParameters", blendParameters);
+    FObjectEditorUtils::SetPropertyValue(drawingTool, "BlendParameters", blendParameters, iChangeType);
 }
 
 void
-FOdysseyPainterEditorTopTab::OnFlowChanged( int32 iValue )
+FOdysseyPainterEditorTopTab::OnFlowChanged( int32 iValue, EPropertyChangeType::Type iChangeType )
 {
     UOdysseyDrawingTool* drawingTool = Cast<UOdysseyDrawingTool>(mEditor->GetSelectedTool());
     if (!drawingTool)
@@ -223,7 +224,7 @@ FOdysseyPainterEditorTopTab::OnFlowChanged( int32 iValue )
 
     //TODO: Remove when the top will use singlePropertyview
     UOdysseyBrushOptions* brushOptions = drawingTool->GetBrushInstance()->GetBrushOptions();
-    FObjectEditorUtils::SetPropertyValue(brushOptions, "Flow", float(iValue));
+    FObjectEditorUtils::SetPropertyValue(brushOptions, "Flow", float(iValue), iChangeType);
 }
 
 void

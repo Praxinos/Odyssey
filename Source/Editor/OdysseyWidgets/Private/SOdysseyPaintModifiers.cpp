@@ -271,19 +271,31 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
 void
 SOdysseyPaintModifiers::SetSize( int iValue )
 {
-    mOnSizeChangedCallback.ExecuteIfBound( FMath::Clamp( iValue, MinSize, MaxSize ) );
+    int value = FMath::Clamp(iValue, MinSize, MaxSize);
+    if (value == OnGetSize())
+        return;
+
+    mOnSizeChangedCallback.ExecuteIfBound( value, EPropertyChangeType::Interactive );
 }
 
 void
 SOdysseyPaintModifiers::SetOpacity( int iValue )
 {
-    mOnOpacityChangedCallback.ExecuteIfBound( FMath::Clamp( iValue, 0, 100 ) );
+    int value = FMath::Clamp(iValue, 0, 100);
+    if (value == OnGetOpacity())
+        return;
+
+    mOnOpacityChangedCallback.ExecuteIfBound( value, EPropertyChangeType::Interactive );
 }
 
 void
 SOdysseyPaintModifiers::SetFlow( int iValue )
 {
-    mOnFlowChangedCallback.ExecuteIfBound( FMath::Clamp( iValue, 0, 100 ) );
+    int value = FMath::Clamp(iValue, 0, 100);
+    if (value == OnGetFlow())
+        return;
+
+    mOnFlowChangedCallback.ExecuteIfBound( value, EPropertyChangeType::Interactive );
 }
 
 void
@@ -356,21 +368,20 @@ SOdysseyPaintModifiers::OnGetFlow() const
 void
 SOdysseyPaintModifiers::HandleSizeSpinBoxChanged( int iValue, ETextCommit::Type iType )
 {
-
-    mOnSizeChangedCallback.ExecuteIfBound( FMath::Clamp( iValue, MinSize, MaxSize ) );
+    mOnSizeChangedCallback.ExecuteIfBound( FMath::Clamp( iValue, MinSize, MaxSize ), EPropertyChangeType::ValueSet );
 }
 
 void
 SOdysseyPaintModifiers::HandleOpacitySpinBoxChanged(int iValue, ETextCommit::Type iType )
 {
-    mOnOpacityChangedCallback.ExecuteIfBound( FMath::Clamp( iValue, 0, 100 ) );
+    mOnOpacityChangedCallback.ExecuteIfBound( FMath::Clamp( iValue, 0, 100 ), EPropertyChangeType::ValueSet );
 }
 
 void
 SOdysseyPaintModifiers::HandleFlowSpinBoxChanged(int iValue, ETextCommit::Type iType )
 {
 
-    mOnFlowChangedCallback.ExecuteIfBound( FMath::Clamp( iValue, 0, 100 ) );
+    mOnFlowChangedCallback.ExecuteIfBound( FMath::Clamp( iValue, 0, 100 ), EPropertyChangeType::ValueSet );
 }
 
 //--------------------------------------------------------------------------------------

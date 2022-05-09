@@ -36,9 +36,9 @@ protected:
 
 protected:
     // Event Listeners
-    virtual void OnSizeChanged( int32 iValue );
-    virtual void OnOpacityChanged( int32 iValue );
-    virtual void OnFlowChanged( int32 iValue );
+    virtual void OnSizeChanged( int32 iValue, EPropertyChangeType::Type iChangeType);
+    virtual void OnOpacityChanged( int32 iValue, EPropertyChangeType::Type iChangeType);
+    virtual void OnFlowChanged( int32 iValue, EPropertyChangeType::Type iChangeType);
     virtual void OnBlendingModeChanged( int32 iValue );
     virtual void OnAlphaModeChanged( int32 iValue );
     virtual FReply OnSaveButtonClicked();

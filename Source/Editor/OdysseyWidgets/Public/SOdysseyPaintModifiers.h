@@ -28,6 +28,8 @@ class ODYSSEYWIDGETS_API SOdysseyPaintModifiers : public SCompoundWidget
 public:
     DECLARE_DELEGATE_RetVal( int, FOnGetIntProperty );
     DECLARE_DELEGATE_RetVal( float, FOnGetFloatProperty );
+    DECLARE_DELEGATE_TwoParams( FOnInt32ValueChangedWithType, int32, EPropertyChangeType::Type );
+    
 
 public:
     // Construction / Destruction
@@ -40,9 +42,9 @@ public:
         SLATE_EVENT( FOnGetIntProperty, OnGetSize )
         SLATE_EVENT( FOnGetFloatProperty, OnGetOpacity )
         SLATE_EVENT( FOnGetFloatProperty, OnGetFlow )
-        SLATE_EVENT( FOnInt32ValueChanged, OnSizeChanged )
-        SLATE_EVENT( FOnInt32ValueChanged, OnOpacityChanged )
-        SLATE_EVENT( FOnInt32ValueChanged, OnFlowChanged )
+        SLATE_EVENT( FOnInt32ValueChangedWithType, OnSizeChanged )
+        SLATE_EVENT( FOnInt32ValueChangedWithType, OnOpacityChanged )
+        SLATE_EVENT( FOnInt32ValueChangedWithType, OnFlowChanged )
         SLATE_EVENT( FOnInt32ValueChanged, OnBlendingModeChanged )
         SLATE_EVENT( FOnInt32ValueChanged, OnAlphaModeChanged )
         SLATE_EVENT( FOnClicked, OnSaveButtonClicked )
@@ -121,9 +123,9 @@ private:
     TArray< TSharedPtr<FText> >                 mAlphaModes;
     TSharedPtr<SComboBox<TSharedPtr<FText> > >  mAlphaModeComboBox;
 
-    FOnInt32ValueChanged            mOnSizeChangedCallback;
-    FOnInt32ValueChanged            mOnOpacityChangedCallback;
-    FOnInt32ValueChanged            mOnFlowChangedCallback;
+    FOnInt32ValueChangedWithType            mOnSizeChangedCallback;
+    FOnInt32ValueChangedWithType            mOnOpacityChangedCallback;
+    FOnInt32ValueChangedWithType            mOnFlowChangedCallback;
     FOnInt32ValueChanged            mOnBlendingModeChangedCallback;
     FOnInt32ValueChanged            mOnAlphaModeChangedCallback;
 
