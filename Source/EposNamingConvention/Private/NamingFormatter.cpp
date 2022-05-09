@@ -59,6 +59,8 @@ UDefaultNamingFormatterShot::FormatName( const UObject* iContext )
 
     const FString name = shot_settings.Pattern.Replace( TEXT( "{shot-index}" ), *FString::Printf( TEXT( "%0*d" ), shot_settings.IndexFormat.NumDigits, name_elements.Index ) )
                                               .Replace( TEXT( "{take-index}" ), *FString::Printf( TEXT( "%0*d" ), shot_settings.TakeFormat.NumDigits, name_elements.TakeIndex ) )
+                                              //PATCH: error in default value for take index in NamingConventionSettings.h
+                                              .Replace( TEXT( "{take_index}" ), *FString::Printf( TEXT( "%0*d" ), shot_settings.TakeFormat.NumDigits, name_elements.TakeIndex ) )
 
                                               .Replace( TEXT( "{studio-name}" ),            *name_elements.StudioName )
                                               .Replace( TEXT( "{studio-acronym}" ),         *name_elements.StudioAcronym )
