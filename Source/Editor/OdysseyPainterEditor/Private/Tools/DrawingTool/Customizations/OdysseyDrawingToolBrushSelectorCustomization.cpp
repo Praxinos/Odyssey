@@ -91,18 +91,11 @@ FOdysseyDrawingToolBrushSelectorCustomization::AddBrushInstance(IDetailCategoryB
         if (property->HasAnyPropertyFlags(CPF_DisableEditOnInstance))
             continue;
 
-        if (propertyHandle->HasMetaData("Category"))
-        {
-            //By default if there is no category specified by UPROPERTY, the category is set to Class->GetName()
-            //That's why we check if it's the case, to determine if the category is explicitly specified or not
-            //(Does not work with blueprint classes)
-            FName groupName = propertyHandle->GetDefaultCategoryName();
-            if (groupName != brushInstance->GetClass()->GetFName())
-                continue;
-        }
+        //By default if there is no category specified by UPROPERTY, the category is set to Default
+        if (propertyHandle->HasMetaData("Category") && propertyHandle->GetDefaultCategoryName() != "Default")
+            continue;
 
-        bool bShouldAutoExpand = false;
-        iCategory.AddProperty(propertyHandle.ToSharedRef()).ShouldAutoExpand(bShouldAutoExpand);;
+        iCategory.AddProperty(propertyHandle.ToSharedRef());
     }
 
     //Do properties with category metadata
@@ -116,25 +109,16 @@ FOdysseyDrawingToolBrushSelectorCustomization::AddBrushInstance(IDetailCategoryB
         if (property->HasAnyPropertyFlags(CPF_DisableEditOnInstance))
             continue;
 
-        //make group
-        if (!propertyHandle->HasMetaData("Category"))
+        FName categoryName = propertyHandle->GetDefaultCategoryName();
+        FText categoryText = propertyHandle->GetDefaultCategoryText();
+
+        //By default if there is no category specified by UPROPERTY, the category is set to Default
+        if (!propertyHandle->HasMetaData("Category") || categoryName == "Default")
             continue;
 
-        FName groupName = propertyHandle->GetDefaultCategoryName();
-
-        //By default if there is no category specified by UPROPERTY, the category is set to Class->GetName()
-        //That's why we check if it's the case, to determine if the category is explicitly specified or not
-        //(Does not work with blueprint classes)
-        if (groupName == brushInstance->GetClass()->GetFName())
-            continue;
-
-        FText groupText = propertyHandle->GetDefaultCategoryText();
-        IDetailGroup** foundGroup = groups.Find(groupName);
-        if (!foundGroup)
-            foundGroup = &groups.Add(groupName, &iCategory.AddGroup(groupName, groupText, false, true));
-
-        bool bShouldAutoExpand = false;
-        (*foundGroup)->AddPropertyRow(propertyHandle.ToSharedRef()).ShouldAutoExpand(bShouldAutoExpand);
+        //Categories
+        IDetailCategoryBuilder& category = mBuilder->EditCategory(categoryName, categoryText, ECategoryPriority::Default);
+        category.AddProperty(propertyHandle);
     }
 }
 
@@ -158,16 +142,14 @@ FOdysseyDrawingToolBrushSelectorCustomization::CustomizeDetails(IDetailLayoutBui
     HideAllProperties();
 
     //Categories
-    IDetailCategoryBuilder& globalsCategory = iBuilder.EditCategory("Globals", LOCTEXT("GlobalsCategory", "Globals"), ECategoryPriority::Default);
-    IDetailCategoryBuilder& brushParametersCategory = iBuilder.EditCategory("BrushParameters", LOCTEXT("BrushParametersCategory", "Brush Parameters"), ECategoryPriority::Default);
+    IDetailCategoryBuilder& noCategory = iBuilder.EditCategory("NoCategory", LOCTEXT("noCategory", "NoCategory"), ECategoryPriority::Default);
 
-    AddBrushSelector(globalsCategory);
+    AddBrushSelector(noCategory);
     
-    AddObjectPropertyToCategory(globalsCategory, mTool->GetBrushOptions(), "Size");
-    AddObjectPropertyToCategory(globalsCategory, mTool->GetBrushOptions(), "Flow");
-    globalsCategory.AddProperty("BlendParameters").ShouldAutoExpand(false);
+    AddObjectPropertyToCategory(noCategory, mTool->GetBrushOptions(), "Size");
+    AddObjectPropertyToCategory(noCategory, mTool->GetBrushOptions(), "Flow");
 
-    AddBrushInstance(brushParametersCategory);
+    AddBrushInstance(noCategory);
 }
 
 void

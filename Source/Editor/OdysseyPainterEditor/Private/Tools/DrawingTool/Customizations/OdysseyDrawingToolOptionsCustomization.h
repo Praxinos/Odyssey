@@ -29,6 +29,7 @@ private:
     void AddObjectPropertyToCategory(IDetailCategoryBuilder& iCategory, UObject* iObject, FName iPropertyName);
     void AddObjectToCategoryInline(IDetailCategoryBuilder& iCategory, UObject* iObject);
     void AddSelectedShapeInstance(IDetailCategoryBuilder& iCategory);
+    void AddBlendParameters();
 
 private:
     void OnObjectPostEditChange(UObject* iObject, FPropertyChangedEvent& iPropertyChangedEvent);

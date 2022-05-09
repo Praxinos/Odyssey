@@ -32,8 +32,6 @@ UOdysseyFreehandShapeOverrides::Override(UOdysseyFreehandShape* iFreehandShape) 
         smoothingOptions.SmoothingMethod = SmoothingMethod;
     if(bOverride_SmoothingStrength)
         smoothingOptions.SmoothingStrength = SmoothingStrength;
-    if(bOverride_SmoothingEnabled)
-        smoothingOptions.SmoothingEnabled = SmoothingEnabled;
     if(bOverride_SmoothingRealTime)
         smoothingOptions.SmoothingRealTime = SmoothingRealTime;
     if(bOverride_SmoothingCatchUp)
@@ -41,6 +39,8 @@ UOdysseyFreehandShapeOverrides::Override(UOdysseyFreehandShape* iFreehandShape) 
     
     FObjectEditorUtils::SetPropertyValue(iFreehandShape, "SmoothingOptions", smoothingOptions);
 
+    if(bOverride_SmoothingEnabled)
+        FObjectEditorUtils::SetPropertyValue(iFreehandShape, "SmoothingEnabled", SmoothingEnabled);
     if (bOverride_Step)
         FObjectEditorUtils::SetPropertyValue(iFreehandShape, "Step", Step);
     if (bOverride_AdaptativeStep)

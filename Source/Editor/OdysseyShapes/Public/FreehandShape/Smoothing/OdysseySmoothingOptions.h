@@ -16,7 +16,6 @@ struct ODYSSEYSHAPES_API FOdysseySmoothingOptions
     FOdysseySmoothingOptions()
         : SmoothingMethod        ( EOdysseySmoothingMethod::kAverage )
         , SmoothingStrength      ( 10 )
-        , SmoothingEnabled       ( true )
         , SmoothingRealTime      ( true )
         , SmoothingCatchUp       ( true )
     {}
@@ -28,10 +27,6 @@ struct ODYSSEYSHAPES_API FOdysseySmoothingOptions
     /** Distance for Smooting computation. */
     UPROPERTY( EditAnywhere, Category="Odyssey Smoothing Options", meta = ( ClampMin = "1", ClampMax = "200", UIMin = "1", UIMax = "200", SliderExponent = "1" ) )
     int32   SmoothingStrength;
-
-    /** Should smoothing be enabled. */
-    UPROPERTY(EditAnywhere, Category="Odyssey Smoothing Options")
-    bool    SmoothingEnabled;
 
     /** Should smoothing be real-time, meaning the first input draws directly, even though the strength is not reached yet. */
     UPROPERTY( EditAnywhere, Category="Odyssey Smoothing Options" )

@@ -203,7 +203,7 @@ private:
     UPROPERTY(EditInstanceOnly, Category="Odyssey Drawing Tool")
     EOdysseyShape SelectedShape;
 
-    UPROPERTY(EditInstanceOnly, Category="Odyssey Drawing Tool")
+    UPROPERTY(VisibleInstanceOnly, Category="Odyssey Drawing Tool", meta=(ShowInnerProperties))
     class UOdysseyShape* SelectedShapeInstance;
 
 

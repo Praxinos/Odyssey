@@ -128,9 +128,11 @@ private:
 
 private:
     //PROPERTIES
-    
-    //The smoothing options
-    UPROPERTY( EditInstanceOnly, Category="Smoothing" )
+    /** Should smoothing be enabled. */
+    UPROPERTY(EditAnywhere, Category="Smoothing", meta=(InlineEditConditionToggle))
+    bool    SmoothingEnabled;
+
+    UPROPERTY( EditInstanceOnly, Category="Smoothing", meta=(DisplayName="Smoothing", editcondition = "SmoothingEnabled") )
     FOdysseySmoothingOptions SmoothingOptions;
 
     UPROPERTY( EditInstanceOnly, Category="Interpolation")

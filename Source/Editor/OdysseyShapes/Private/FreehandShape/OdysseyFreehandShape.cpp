@@ -16,6 +16,7 @@ UOdysseyFreehandShape::~UOdysseyFreehandShape()
 UOdysseyFreehandShape::UOdysseyFreehandShape(const FObjectInitializer& iObjectInitializer)
     : Super(iObjectInitializer)
     //Properties
+    , SmoothingEnabled(true)
     , SmoothingOptions()
 
     //Internal
@@ -111,7 +112,7 @@ UOdysseyFreehandShape::StrokeTo( const FOdysseyPoint& iPoint )
     mRawStroke.Add(point);
 
     //Apply smoothing if smoothing is enabled and realtime
-    if(SmoothingOptions.SmoothingEnabled && SmoothingOptions.SmoothingRealTime)
+    if(SmoothingEnabled && SmoothingOptions.SmoothingRealTime)
     {
         if (!SmoothTo(iPoint)) //false means SmoothTo has just not produced any point but it is not an error
             return true;
@@ -211,7 +212,7 @@ void
 UOdysseyFreehandShape::BeginSmoothing()
 {
     //Add the first point to the smoothing system
-    if(SmoothingOptions.SmoothingEnabled && SmoothingOptions.SmoothingRealTime)
+    if(SmoothingEnabled && SmoothingOptions.SmoothingRealTime)
         mSmoother->AddPoint( mRawStroke[0] );
 }
 
@@ -231,7 +232,7 @@ UOdysseyFreehandShape::EndSmoothing()
 {
     //Apply Smoothing if it is not realtime
     //Reapplies the smoothing if it is enabled but not realtime
-    if (SmoothingOptions.SmoothingEnabled && !SmoothingOptions.SmoothingRealTime && mRawStroke.Num() > 0 )
+    if (SmoothingEnabled && !SmoothingOptions.SmoothingRealTime && mRawStroke.Num() > 0 )
         ReapplySmoothing();
 }
 
@@ -281,7 +282,7 @@ UOdysseyFreehandShape::ReapplySmoothing()
 void
 UOdysseyFreehandShape::CatchUp()
 {
-    if (!mHasStrokeBegun || !SmoothingOptions.SmoothingEnabled || !SmoothingOptions.SmoothingCatchUp || !mSmoother->CanCatchUp() || mRawStroke.Num() <= 0)
+    if (!mHasStrokeBegun || !SmoothingEnabled || !SmoothingOptions.SmoothingCatchUp || !mSmoother->CanCatchUp() || mRawStroke.Num() <= 0)
         return;
 
     StrokeTo(mRawStroke[mRawStroke.Num() - 1]);

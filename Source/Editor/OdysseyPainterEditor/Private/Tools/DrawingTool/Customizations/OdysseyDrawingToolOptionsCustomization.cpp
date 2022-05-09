@@ -73,6 +73,10 @@ FOdysseyDrawingToolOptionsCustomization::AddSelectedShapeInstance(IDetailCategor
     if (!shapeInstance)
         return;
 
+    AddObjectPropertyToCategory(iCategory, shapeInstance, "Step");
+    AddObjectPropertyToCategory(iCategory, shapeInstance, "AdaptativeStep");
+    AddObjectPropertyToCategory(iCategory, shapeInstance, "InterpolationType");
+
     TArray<UObject*> objects; //contains only one object
     objects.Add(shapeInstance);
 
@@ -85,46 +89,26 @@ FOdysseyDrawingToolOptionsCustomization::AddSelectedShapeInstance(IDetailCategor
         if (!propertyHandle.IsValid())
             continue;
 
-        if (propertyHandle->HasMetaData("Category"))
-        {
-            //By default if there is no category specified by UPROPERTY, the category is set to Class->GetName()
-            //That's why we check if it's the case, to determine if the category is explicitly specified or not
-            //(Does not work with blueprint classes)
-            FName groupName = propertyHandle->GetDefaultCategoryName();
-            if (groupName != shapeInstance->GetClass()->GetFName())
-                continue;
-        }
-
-        bool bShouldAutoExpand = property->GetFName() == "SmoothingOptions";
-        iCategory.AddProperty(propertyHandle.ToSharedRef()).ShouldAutoExpand(bShouldAutoExpand);
-    }
-
-    //Do properties with category metadata
-    for (const FProperty* property : TFieldRange<FProperty>(shapeInstance->GetClass()))
-    {
-        TSharedPtr<IPropertyHandle> propertyHandle = mBuilder->AddObjectPropertyData(objects, property->GetFName());
-        if (!propertyHandle.IsValid())
-            continue;
-
-        //make group
-        if (!propertyHandle->HasMetaData("Category"))
-            continue;
-
-        FName groupName = propertyHandle->GetDefaultCategoryName();
-
-        //By default if there is no category specified by UPROPERTY, the category is set to Class->GetName()
-        //That's why we check if it's the case, to determine if the category is explicitly specified or not
-        //(Does not work with blueprint classes)
-        if (groupName == shapeInstance->GetClass()->GetFName())
+        if (property->GetFName() == "Step" || property->GetFName() == "AdaptativeStep" || property->GetFName() == "InterpolationType")
             continue;
             
-        FText groupText = propertyHandle->GetDefaultCategoryText();
-        IDetailGroup** foundGroup = groups.Find(groupName);
-        if (!foundGroup)
-            foundGroup = &groups.Add(groupName, &iCategory.AddGroup(groupName, groupText, false, true));
+        iCategory.AddProperty(propertyHandle.ToSharedRef());
+    }
+}
 
-        bool bShouldAutoExpand = property->GetFName() == "SmoothingOptions";
-        (*foundGroup)->AddPropertyRow(propertyHandle.ToSharedRef()).ShouldAutoExpand(bShouldAutoExpand);
+void
+FOdysseyDrawingToolOptionsCustomization::AddBlendParameters()
+{
+    IDetailCategoryBuilder& blendingCategory = mBuilder->EditCategory("BlendingCategory", LOCTEXT("ShapeCategory", "Blending"), ECategoryPriority::Default);
+    TSharedPtr<IPropertyHandle> blendingParametersHandle = mBuilder->GetProperty("BlendParameters");
+
+    uint32 numChildren = 0;
+    blendingParametersHandle->GetNumChildren(numChildren);
+
+    for (uint32 i = 0; i < numChildren; i++)
+    {
+        TSharedPtr<IPropertyHandle> propertyHandle = blendingParametersHandle->GetChildHandle(i);
+        blendingCategory.AddProperty(propertyHandle);
     }
 }
 
@@ -137,14 +121,11 @@ FOdysseyDrawingToolOptionsCustomization::CustomizeDetails(IDetailLayoutBuilder& 
     HideAllProperties();
 
     //Categories
-    IDetailCategoryBuilder& shapeCategory = mBuilder->EditCategory("Shape", LOCTEXT("ShapeCategory", "Shape"), ECategoryPriority::Default);
-
-    //shapeCategory.AddProperty("SelectedShape");
-    AddObjectPropertyToCategory(shapeCategory, mTool->GetBrushOptions(), "Step");
-    AddObjectPropertyToCategory(shapeCategory, mTool->GetBrushOptions(), "AdaptativeStep");
+    IDetailCategoryBuilder& shapeCategory = mBuilder->EditCategory("ShapeCategory", LOCTEXT("ShapeCategory", "Shape"), ECategoryPriority::Default);
 
     //Add Shape Options
     AddSelectedShapeInstance(shapeCategory);
+    AddBlendParameters();
 }
 
 void 
