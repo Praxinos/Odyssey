@@ -106,7 +106,14 @@ void
 SNewStoryboardSettings::Construct( const FArguments& InArgs, EDialogType iDialogType )
 {
     //DEBUG TOREMOVE
-    mStoryboardImportImageSequenceSettings.ImageSequencePath.Path = FPaths::ProjectPluginsDir() + "/Epos/samples/image-sequence";
+    mStoryboardImportImageSequenceSettings.ImageSequencePath.Path = FPaths::ProjectPluginsDir() + "/Epos/samples/image-sequence-board-shot-frame";
+    mStoryboardImportImageSequenceSettings.FilePattern = TEXT( "mybmp-{board}-{shot}-{frame}.jpg" );
+    //mStoryboardImportImageSequenceSettings.ImageSequencePath.Path = FPaths::ProjectPluginsDir() + "/Epos/samples/image-sequence-frame-shot-board";
+    //mStoryboardImportImageSequenceSettings.FilePattern = TEXT( "mybmp-{frame}-{shot}-{board}.jpg" );
+    //mStoryboardImportImageSequenceSettings.ImageSequencePath.Path = FPaths::ProjectPluginsDir() + "/Epos/samples/image-sequence-shot-frame";
+    //mStoryboardImportImageSequenceSettings.FilePattern = TEXT( "mybmp-{shot}-{frame}.jpg" );
+    mStoryboardImportImageSequenceSettings.ImageSequencePath.Path = FPaths::ProjectPluginsDir() + "/Epos/samples/image-sequence-board-shot-duration-frame";
+    mStoryboardImportImageSequenceSettings.FilePattern = TEXT( "mybmp-{board}-{shot}-{duration}-{frame}.jpg" );
     //DEBUG TOREMOVE
 
     mDialogType = iDialogType;
@@ -438,7 +445,7 @@ SNewStoryboardSettings::ImportImageSequence()
     if( mStoryboardImportImageSequenceSettings.ImageSequencePath.Path.IsEmpty() )
         return;
 
-    FImageSequenceImporter image_sequence_importer( mStoryboardImportImageSequenceSettings.ImageSequencePath.Path, mImageSequenceImportErrorMessage );
+    FImageSequenceImporter image_sequence_importer( mStoryboardImportImageSequenceSettings.ImageSequencePath.Path, mStoryboardImportImageSequenceSettings.FilePattern, mImageSequenceImportErrorMessage );
     if( !mImageSequenceImportErrorMessage.IsEmpty() )
         return;
 

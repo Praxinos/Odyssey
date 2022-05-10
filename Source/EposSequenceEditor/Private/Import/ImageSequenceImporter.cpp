@@ -3,15 +3,17 @@
 
 #include "Import/ImageSequenceImporter.h"
 
+#include "Internationalization/Regex.h"
 #include "Misc/FileHelper.h"
 
 #define LOCTEXT_NAMESPACE "ImageSequenceImporter"
 
 //---
 
-FImageSequenceImporter::FImageSequenceImporter( const FString& iPath, FString& oErrorMessage )
+FImageSequenceImporter::FImageSequenceImporter( const FString& iPath, const FString& iPattern, FString& oErrorMessage )
 {
     mImageSequencePath = iPath;
+    mImageSequenceFilePattern = iPattern;
 
     Build( oErrorMessage );
 }
@@ -24,13 +26,28 @@ FImageSequenceImporter::GetImageSequenceStruct() const
 
 //---
 
+enum class EPatternKey
+{
+    kBoard,
+    kShot,
+    kFrame,
+    kDuration,
+};
+
+struct FPatternStruct
+{
+    FString mKeyWithBraces;
+    FString mRegex;
+    int32   mKeyIndex { INDEX_NONE };
+    int32   mKeyPosition { 0 };
+};
+
 void
 FImageSequenceImporter::Build( FString& oErrorMessage )
 {
     TArray<FString> files;
-    IFileManager::Get().FindFiles( files, *mImageSequencePath, TEXT( "png" ) );
-    IFileManager::Get().FindFiles( files, *mImageSequencePath, TEXT( "jpg" ) );
-    IFileManager::Get().FindFiles( files, *mImageSequencePath, TEXT( "jpeg" ) );
+    IFileManager::Get().FindFiles( files, *mImageSequencePath );
+    //IFileManager::Get().FindFilesRecursive( files, *mImageSequencePath, TEXT( "*" ), true /* iFiles */, false /* iDirectories */ );
 
     if( files.IsEmpty() )
     {
@@ -38,111 +55,172 @@ FImageSequenceImporter::Build( FString& oErrorMessage )
         return;
     }
 
-    FImageSequenceFrame frame;
+    //---
 
-    FImageSequenceBoard board0;
+    TMap<EPatternKey, FPatternStruct> pattern_map;
+    pattern_map.Add( EPatternKey::kBoard    , { TEXT( "{board}" ), TEXT( "([_0-9a-zA-Z]+)" ) } );
+    pattern_map.Add( EPatternKey::kShot     , { TEXT( "{shot}" ), TEXT( "([_0-9a-zA-Z]+)" ) } );
+    pattern_map.Add( EPatternKey::kFrame    , { TEXT( "{frame}" ), TEXT( "([_0-9a-zA-Z]+)" ) } );
+    pattern_map.Add( EPatternKey::kDuration , { TEXT( "{duration}" ), TEXT( "([0-9]+)" ) } );
+
+    FString file_pattern_regex = mImageSequenceFilePattern;
+    for( auto& pair : pattern_map )
     {
-        FImageSequenceShot shot0;
-        frame.Pathfile.FilePath = mImageSequencePath / files[0];
-        shot0.Frames.Add( frame );
-        frame.Pathfile.FilePath = mImageSequencePath / files[1];
-        shot0.Frames.Add( frame );
-        frame.Pathfile.FilePath = mImageSequencePath / files[2];
-        shot0.Frames.Add( frame );
+        file_pattern_regex = file_pattern_regex.Replace( *pair.Value.mKeyWithBraces, *pair.Value.mRegex );
+    }
+    FRegexPattern file_pattern( file_pattern_regex );
 
-        board0.Shots.Add( shot0 );
+    //-
 
-        FImageSequenceShot shot1;
-        frame.Pathfile.FilePath = mImageSequencePath / files[3];
-        shot1.Frames.Add( frame );
-        frame.Pathfile.FilePath = mImageSequencePath / files[4];
-        shot1.Frames.Add( frame );
-
-        board0.Shots.Add( shot1 );
+    for( auto& pair : pattern_map )
+    {
+        pair.Value.mKeyIndex = mImageSequenceFilePattern.Find( pair.Value.mKeyWithBraces );
     }
 
-    //---
-
-    FImageSequenceBoard board1;
+    if( pattern_map[EPatternKey::kShot].mKeyIndex == INDEX_NONE
+        || pattern_map[EPatternKey::kFrame].mKeyIndex == INDEX_NONE )
     {
-        FImageSequenceShot shot0;
-        frame.Pathfile.FilePath = mImageSequencePath / files[5];
-        shot0.Frames.Add( frame );
-
-        board1.Shots.Add( shot0 );
-
-        FImageSequenceShot shot1;
-        frame.Pathfile.FilePath = mImageSequencePath / files[6];
-        shot1.Frames.Add( frame );
-
-        board1.Shots.Add( shot1 );
+        oErrorMessage = TEXT( "no {shot} or {frame} keys in pattern " ) + mImageSequenceFilePattern;
+        return;
     }
 
-    //---
+    pattern_map.ValueStableSort( []( const FPatternStruct& iA, const FPatternStruct& iB ) { return iA.mKeyIndex < iB.mKeyIndex; } );
 
-    mImageSequenceStruct.Boards.Add( board0 );
-    mImageSequenceStruct.Boards.Add( board1 );
+    int32 inc = 1;
+    for( auto& pair : pattern_map )
+    {
+        if( pair.Value.mKeyIndex == INDEX_NONE )
+            continue;
 
-    //---
-    //---
-    //---
+        pair.Value.mKeyPosition += inc;
 
-    //FImageSequenceFrame frame;
+        inc++;
+    }
 
-    //FImageSequenceBoard board0;
-    //{
-    //    FImageSequenceShot shot0;
-    //    frame.Pathfile.FilePath = mImageSequencePath / files[0];
-    //    shot0.Frames.Add( frame );
-    //    frame.Pathfile.FilePath = mImageSequencePath / files[1];
-    //    shot0.Frames.Add( frame );
-    //    frame.Pathfile.FilePath = mImageSequencePath / files[2];
-    //    shot0.Frames.Add( frame );
+    //-
 
-    //    board0.Shots.Add( shot0 );
+    for( auto file : files )
+    {
+        FRegexMatcher matcher( file_pattern, file );
 
-    //    FImageSequenceShot shot1;
-    //    frame.Pathfile.FilePath = mImageSequencePath / files[3];
-    //    shot1.Frames.Add( frame );
-    //    frame.Pathfile.FilePath = mImageSequencePath / files[4];
-    //    shot1.Frames.Add( frame );
+        if( !matcher.FindNext() )
+            continue;
 
-    //    board0.Shots.Add( shot1 );
+        //int32 full_begin = matcher.GetMatchBeginning();
+        //int32 full_end = matcher.GetMatchEnding();
+        //FTextRange full_range( full_begin, full_end );
+        //FString full_string = file.Mid( full_range.BeginIndex, full_range.Len() );
 
-    //    FImageSequenceShot shot2;
-    //    frame.Pathfile.FilePath = mImageSequencePath / files[5];
-    //    shot2.Frames.Add( frame );
+        FString id_board_string;
+        if( pattern_map[EPatternKey::kBoard].mKeyPosition != 0 )
+            id_board_string = matcher.GetCaptureGroup( pattern_map[EPatternKey::kBoard].mKeyPosition );
 
-    //    board0.Shots.Add( shot2 );
+        FString id_shot_string = matcher.GetCaptureGroup( pattern_map[EPatternKey::kShot].mKeyPosition );
 
-    //    FImageSequenceShot shot3;
-    //    frame.Pathfile.FilePath = mImageSequencePath / files[6];
-    //    shot3.Frames.Add( frame );
+        FString id_frame_string = matcher.GetCaptureGroup( pattern_map[EPatternKey::kFrame].mKeyPosition );
 
-    //    board0.Shots.Add( shot3 );
-    //}
+        int32 frame_duration = -1;
+        if( pattern_map[EPatternKey::kDuration].mKeyPosition != 0 )
+        {
+            FString duration_string = matcher.GetCaptureGroup( pattern_map[EPatternKey::kDuration].mKeyPosition );
+            if( duration_string.IsNumeric() )
+                frame_duration = FCString::Atoi( *duration_string );
+        }
 
-    //mImageSequenceStruct.Boards.Add( board0 );
+        //---
 
-    //---
-    //---
-    //---
+        FImageSequenceBoard* board = nullptr;
 
-    //FImageSequenceShot shot;
+        if( id_board_string.IsEmpty() )
+        {
+            if( mImageSequenceStruct.Boards.IsEmpty() )
+            {
+                FImageSequenceBoard new_board;
+                new_board.Id = TEXT( "auto" );
 
-    //for( auto file : files )
-    //{
-    //    FImageSequenceFrame frame;
-    //    frame.Pathfile.FilePath = mImageSequencePath / file;
-    //    //frame.Duration = 48;
+                int32 index = mImageSequenceStruct.Boards.Add( new_board );
+            }
 
-    //    shot.Frames.Add( frame );
-    //}
+            board = &mImageSequenceStruct.Boards[0];
+        }
+        else
+        {
+            for( int32 i = 0; i < mImageSequenceStruct.Boards.Num(); i++ )
+            {
+                if( mImageSequenceStruct.Boards[i].Id == id_board_string )
+                {
+                    board = &mImageSequenceStruct.Boards[i];
+                    break;
+                }
+            }
 
-    //FImageSequenceBoard board;
-    //board.Shots.Add( shot );
+            if( !board )
+            {
+                FImageSequenceBoard new_board;
+                new_board.Id = id_board_string;
 
-    //mImageSequenceStruct.Boards.Add( board );
+                int32 index = mImageSequenceStruct.Boards.Add( new_board );
+                board = &mImageSequenceStruct.Boards[index];
+            }
+        }
+
+        check( board );
+
+        //---
+
+        FImageSequenceShot* shot = nullptr;
+
+        for( int32 i = 0; i < board->Shots.Num(); i++ )
+        {
+            if( board->Shots[i].Id == id_shot_string )
+            {
+                shot = &board->Shots[i];
+                break;
+            }
+        }
+
+        if( !shot )
+        {
+            FImageSequenceShot new_shot;
+            new_shot.Id = id_shot_string;
+
+            int32 index = board->Shots.Add( new_shot );
+            shot = &board->Shots[index];
+        }
+
+        check( shot );
+
+        //---
+
+        FImageSequenceFrame* frame = nullptr;
+
+        for( int32 i = 0; i < shot->Frames.Num(); i++ )
+        {
+            if( shot->Frames[i].Id == id_frame_string )
+            {
+                frame = &shot->Frames[i];
+                break;
+            }
+        }
+
+        if( !frame )
+        {
+            FImageSequenceFrame new_frame;
+            new_frame.Id = id_frame_string;
+
+            int32 index = shot->Frames.Add( new_frame );
+            frame = &shot->Frames[index];
+        }
+
+        check( frame );
+
+        //---
+
+        frame->Pathfile.FilePath = mImageSequencePath / file;
+
+        if( frame_duration > 0 )
+            frame->Duration = frame_duration;
+    }
 }
 
 //---

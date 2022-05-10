@@ -14,7 +14,7 @@ class UBoardSequence;
 class FImageSequenceImporter
 {
 public:
-    FImageSequenceImporter( const FString& iPath, FString& oErrorMessage );
+    FImageSequenceImporter( const FString& iPath, const FString& iPattern, FString& oErrorMessage );
 
     const FImageSequenceStruct& GetImageSequenceStruct() const;
 
@@ -23,6 +23,7 @@ private:
 
 private:
     FString                 mImageSequencePath;
+    FString                 mImageSequenceFilePattern;
 
     FImageSequenceStruct    mImageSequenceStruct;
 };

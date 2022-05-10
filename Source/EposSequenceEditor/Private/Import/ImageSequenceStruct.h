@@ -15,6 +15,9 @@ struct FImageSequenceFrame
     GENERATED_BODY()
 
 public:
+    UPROPERTY( EditAnywhere, Category = ImageSequenceStruct )
+    FString Id;
+
     UPROPERTY( EditAnywhere, Category = ImageSequenceFrame )
     FFilePath Pathfile;
 
@@ -31,6 +34,9 @@ struct FImageSequenceShot
 
 public:
     UPROPERTY( EditAnywhere, Category = ImageSequenceStruct )
+    FString Id;
+
+    UPROPERTY( EditAnywhere, Category = ImageSequenceStruct )
     TArray<FImageSequenceFrame> Frames;
 };
 
@@ -42,6 +48,9 @@ struct FImageSequenceBoard
     GENERATED_BODY()
 
 public:
+    UPROPERTY( EditAnywhere, Category = ImageSequenceStruct )
+    FString Id;
+
     UPROPERTY( EditAnywhere, Category = ImageSequenceStruct )
     TArray<FImageSequenceShot> Shots;
 };

@@ -37,6 +37,10 @@ public:
     /** Image sequence folder. */
     UPROPERTY( EditAnywhere, Category=ImageSequenceImport, meta=( ContentDir ) )
     FDirectoryPath ImageSequencePath;
+
+    /** Image name pattern. */
+    UPROPERTY( EditAnywhere, Category=ImageSequenceImport )
+    FString FilePattern;
 };
 
 //---

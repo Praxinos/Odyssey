@@ -54,7 +54,7 @@ FImageSequenceConverter::CreateBoardsRecursive( const TArray<FImageSequenceBoard
 
     //---
 
-    UMovieSceneCinematicBoardTrack* boardTrack = BoardSequenceTools::FindCinematicBoardTrack( sequencer );
+    UMovieSceneCinematicBoardTrack* boardTrack = BoardSequenceTools::FindOrCreateCinematicBoardTrack( sequencer );
     TArray<UMovieSceneSection*> sections = boardTrack->GetAllSections();
 
     check( iBoards.Num() == sections.Num() );
@@ -83,7 +83,7 @@ FImageSequenceConverter::CreateBoard( const FImageSequenceBoard& iBoard, UBoardS
 
     int32 duration_in_tick = ConvertFromDisplayRateToTickResolution( duration );
 
-    UMovieSceneCinematicBoardTrack* boardTrack = BoardSequenceTools::FindCinematicBoardTrack( sequencer );
+    UMovieSceneCinematicBoardTrack* boardTrack = BoardSequenceTools::FindOrCreateCinematicBoardTrack( sequencer );
     TArray<UMovieSceneSection*> sections = boardTrack->GetAllSections();
     FFrameNumber end_frame = 0;
     for( auto& section : sections )
@@ -109,7 +109,7 @@ FImageSequenceConverter::CreateShotsRecursive( const TArray<FImageSequenceShot>&
 
     //---
 
-    UMovieSceneCinematicBoardTrack* boardTrack = BoardSequenceTools::FindCinematicBoardTrack( sequencer );
+    UMovieSceneCinematicBoardTrack* boardTrack = BoardSequenceTools::FindOrCreateCinematicBoardTrack( sequencer );
     TArray<UMovieSceneSection*> sections = boardTrack->GetAllSections();
 
     check( iShots.Num() == sections.Num() );
@@ -118,14 +118,6 @@ FImageSequenceConverter::CreateShotsRecursive( const TArray<FImageSequenceShot>&
     {
         FImageSequenceShot shot = iShots[i];
         UMovieSceneSubSection* subsection = CastChecked<UMovieSceneSubSection>( sections[i] );
-
-        //BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, *subsection, sequencer->GetFocusedTemplateID() );
-        //if( !result.mInnerSequence )
-        //    continue;
-
-        //ShotSequenceTools::cTemporarySwitchInner switch_to( *sequencer, result.mInnerSequenceId );
-
-        //ConvertToShots( board.Shots, CastChecked<UBoardSequence>( sequencer->GetFocusedMovieSceneSequence() ) );
 
         CreateDrawings( shot.Frames, subsection );
     }
@@ -140,7 +132,7 @@ FImageSequenceConverter::CreateShot( const FImageSequenceShot& iShot, UBoardSequ
 
     int32 duration_in_tick = ConvertFromDisplayRateToTickResolution( duration );
 
-    UMovieSceneCinematicBoardTrack* boardTrack = BoardSequenceTools::FindCinematicBoardTrack( sequencer );
+    UMovieSceneCinematicBoardTrack* boardTrack = BoardSequenceTools::FindOrCreateCinematicBoardTrack( sequencer );
     TArray<UMovieSceneSection*> sections = boardTrack->GetAllSections();
     FFrameNumber end_frame = 0;
     for( auto& section : sections )
@@ -205,12 +197,10 @@ FImageSequenceConverter::CreateDrawings( const TArray<FImageSequenceFrame>& iFra
     {
         FImageSequenceFrame frame = iFrames[i];
 
-        TArray<FString> pathfiles{ frame.Pathfile.FilePath };
+        TArray<FString> pathfiles { frame.Pathfile.FilePath };
         TArray<UObject*> assets = AssetToolsModule.Get().ImportAssets( pathfiles, destination_path );
         UTexture2D* texture = Cast<UTexture2D>( assets[0] );
         check( texture );
-
-        //---
 
         //---
 
