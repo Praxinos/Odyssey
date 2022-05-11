@@ -15,13 +15,15 @@
 #include "Board/BoardSequenceActions.h"
 #include "Board/BoardSequenceCustomization.h"
 #include "EposSequenceEditorCommands.h"
-#include "EposSequenceEditorNewStoryboardDialog.h"
 #include "Render/EposSequencePipelineRenderer.h"
 #include "Settings/EposSequenceEditorSettings.h"
 #include "Settings/EposSequenceEditorSettingsCustomization.h"
 #include "Shot/ShotSequence.h"
 #include "Shot/ShotSequenceActions.h"
 #include "Shot/ShotSequenceCustomization.h"
+#include "StoryboardCreationDialog/NewStoryboardDialog.h"
+#include "StoryboardCreationDialog/StoryboardImportImageSequenceSettings.h"
+#include "StoryboardCreationDialog/StoryboardImportImageSequenceSettingsCustomization.h"
 #include "StoryboardViewport/StoryboardViewportLayoutEntity.h"
 #include "Styles/EposSequenceEditorStyle.h"
 
@@ -274,6 +276,10 @@ FEposSequenceEditorModule::RegisterPropertyCustomizations()
         // this is where our MakeInstance() method is usefull
         FOnGetPropertyTypeCustomizationInstance::CreateStatic( &FInfoBarCustomization::MakeInstance ) );
 
+    PropertyModule.RegisterCustomPropertyTypeLayout(
+        FStoryboardImportImageSequenceSettings::StaticStruct()->GetFName(),
+        FOnGetPropertyTypeCustomizationInstance::CreateStatic( &FStoryboardImportImageSequenceSettingsCustomization::MakeInstance ) );
+
     PropertyModule.NotifyCustomizationModuleChanged();
 }
 
@@ -284,6 +290,7 @@ FEposSequenceEditorModule::UnregisterPropertyCustomizations()
     {
         FPropertyEditorModule& PropertyModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>( "PropertyEditor" );
         PropertyModule.UnregisterCustomPropertyTypeLayout( FInfoBarSettings::StaticStruct()->GetFName() );
+        PropertyModule.UnregisterCustomPropertyTypeLayout( FStoryboardImportImageSequenceSettings::StaticStruct()->GetFName() );
 
         PropertyModule.NotifyCustomizationModuleChanged();
     }

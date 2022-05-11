@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 
 #include "Import/ImageSequenceStruct.h"
+#include "StoryboardCreationDialog/StoryboardImportImageSequenceSettings.h"
 
 //---
 
@@ -14,12 +15,12 @@ class UBoardSequence;
 class FImageSequenceImporter
 {
 public:
-    FImageSequenceImporter( const FString& iPath, const FString& iPattern, FString& oErrorMessage );
+    FImageSequenceImporter( const FStoryboardImportImageSequenceSettings& iSettings, FString& oErrorMessage );
 
     const FImageSequenceStruct& GetImageSequenceStruct() const;
 
 private:
-    void Build( FString& oErrorMessage );
+    void Build( const TMap<EImageSequencePatternKeyword, FImageSequencePatternKeyword>& iKeywords, FString& oErrorMessage );
 
 private:
     FString                 mImageSequencePath;

@@ -63,6 +63,8 @@ FInfoBarSettings::FInfoBarSettings()
                                                          , *PatternKeywords[EInfoBarPatternKeyword::StopFrameOfSubsequence_InSequence].mKeywordWithBraces );
 }
 
+#undef ADD_PATTERN_KEYWORD
+
 //---
 
 FName

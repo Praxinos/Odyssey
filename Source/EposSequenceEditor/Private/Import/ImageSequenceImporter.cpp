@@ -10,12 +10,12 @@
 
 //---
 
-FImageSequenceImporter::FImageSequenceImporter( const FString& iPath, const FString& iPattern, FString& oErrorMessage )
+FImageSequenceImporter::FImageSequenceImporter( const FStoryboardImportImageSequenceSettings& iSettings, FString& oErrorMessage )
 {
-    mImageSequencePath = iPath;
-    mImageSequenceFilePattern = iPattern;
+    mImageSequencePath = iSettings.ImageSequencePath.Path;
+    mImageSequenceFilePattern = iSettings.FilePattern;
 
-    Build( oErrorMessage );
+    Build( iSettings.PatternKeywords, oErrorMessage );
 }
 
 const FImageSequenceStruct&
@@ -26,14 +26,6 @@ FImageSequenceImporter::GetImageSequenceStruct() const
 
 //---
 
-enum class EPatternKey
-{
-    kBoard,
-    kShot,
-    kFrame,
-    kDuration,
-};
-
 struct FPatternStruct
 {
     FString mKeyWithBraces;
@@ -43,8 +35,14 @@ struct FPatternStruct
 };
 
 void
-FImageSequenceImporter::Build( FString& oErrorMessage )
+FImageSequenceImporter::Build( const TMap<EImageSequencePatternKeyword, FImageSequencePatternKeyword>& iKeywords, FString& oErrorMessage )
 {
+    if( mImageSequencePath.IsEmpty() )
+    {
+        oErrorMessage = TEXT( "no folder to list " ) + mImageSequencePath;
+        return;
+    }
+
     TArray<FString> files;
     IFileManager::Get().FindFiles( files, *mImageSequencePath );
     //IFileManager::Get().FindFilesRecursive( files, *mImageSequencePath, TEXT( "*" ), true /* iFiles */, false /* iDirectories */ );
@@ -57,11 +55,11 @@ FImageSequenceImporter::Build( FString& oErrorMessage )
 
     //---
 
-    TMap<EPatternKey, FPatternStruct> pattern_map;
-    pattern_map.Add( EPatternKey::kBoard    , { TEXT( "{board}" ), TEXT( "([_0-9a-zA-Z]+)" ) } );
-    pattern_map.Add( EPatternKey::kShot     , { TEXT( "{shot}" ), TEXT( "([_0-9a-zA-Z]+)" ) } );
-    pattern_map.Add( EPatternKey::kFrame    , { TEXT( "{frame}" ), TEXT( "([_0-9a-zA-Z]+)" ) } );
-    pattern_map.Add( EPatternKey::kDuration , { TEXT( "{duration}" ), TEXT( "([0-9]+)" ) } );
+    TMap<EImageSequencePatternKeyword, FPatternStruct> pattern_map;
+    pattern_map.Add( EImageSequencePatternKeyword::BoardId  , { iKeywords[EImageSequencePatternKeyword::BoardId].mKeywordWithBraces, TEXT( "([_0-9a-zA-Z]+)" ) } );
+    pattern_map.Add( EImageSequencePatternKeyword::ShotId   , { iKeywords[EImageSequencePatternKeyword::ShotId].mKeywordWithBraces, TEXT( "([_0-9a-zA-Z]+)" ) } );
+    pattern_map.Add( EImageSequencePatternKeyword::FrameId  , { iKeywords[EImageSequencePatternKeyword::FrameId].mKeywordWithBraces, TEXT( "([_0-9a-zA-Z]+)" ) } );
+    pattern_map.Add( EImageSequencePatternKeyword::Duration , { iKeywords[EImageSequencePatternKeyword::Duration].mKeywordWithBraces, TEXT( "([0-9]+)" ) } );
 
     FString file_pattern_regex = mImageSequenceFilePattern;
     for( auto& pair : pattern_map )
@@ -77,8 +75,8 @@ FImageSequenceImporter::Build( FString& oErrorMessage )
         pair.Value.mKeyIndex = mImageSequenceFilePattern.Find( pair.Value.mKeyWithBraces );
     }
 
-    if( pattern_map[EPatternKey::kShot].mKeyIndex == INDEX_NONE
-        || pattern_map[EPatternKey::kFrame].mKeyIndex == INDEX_NONE )
+    if( pattern_map[EImageSequencePatternKeyword::ShotId].mKeyIndex == INDEX_NONE
+        || pattern_map[EImageSequencePatternKeyword::FrameId].mKeyIndex == INDEX_NONE )
     {
         oErrorMessage = TEXT( "no {shot} or {frame} keys in pattern " ) + mImageSequenceFilePattern;
         return;
@@ -112,17 +110,17 @@ FImageSequenceImporter::Build( FString& oErrorMessage )
         //FString full_string = file.Mid( full_range.BeginIndex, full_range.Len() );
 
         FString id_board_string;
-        if( pattern_map[EPatternKey::kBoard].mKeyPosition != 0 )
-            id_board_string = matcher.GetCaptureGroup( pattern_map[EPatternKey::kBoard].mKeyPosition );
+        if( pattern_map[EImageSequencePatternKeyword::BoardId].mKeyPosition != 0 )
+            id_board_string = matcher.GetCaptureGroup( pattern_map[EImageSequencePatternKeyword::BoardId].mKeyPosition );
 
-        FString id_shot_string = matcher.GetCaptureGroup( pattern_map[EPatternKey::kShot].mKeyPosition );
+        FString id_shot_string = matcher.GetCaptureGroup( pattern_map[EImageSequencePatternKeyword::ShotId].mKeyPosition );
 
-        FString id_frame_string = matcher.GetCaptureGroup( pattern_map[EPatternKey::kFrame].mKeyPosition );
+        FString id_frame_string = matcher.GetCaptureGroup( pattern_map[EImageSequencePatternKeyword::FrameId].mKeyPosition );
 
         int32 frame_duration = -1;
-        if( pattern_map[EPatternKey::kDuration].mKeyPosition != 0 )
+        if( pattern_map[EImageSequencePatternKeyword::Duration].mKeyPosition != 0 )
         {
-            FString duration_string = matcher.GetCaptureGroup( pattern_map[EPatternKey::kDuration].mKeyPosition );
+            FString duration_string = matcher.GetCaptureGroup( pattern_map[EImageSequencePatternKeyword::Duration].mKeyPosition );
             if( duration_string.IsNumeric() )
                 frame_duration = FCString::Atoi( *duration_string );
         }
