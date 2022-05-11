@@ -25,11 +25,17 @@
     },
     {
       "Enabled": true,
-      "Name": "AppleProResMedia"
+      "Name": "AppleProResMedia",
+      "SupportedTargetPlatforms": [
+        "Win64"
+      ]
     },
     {
       "Enabled": true,
-      "Name": "AvidDNxMedia"
+      "Name": "AvidDNxMedia",
+      "SupportedTargetPlatforms": [
+        "Win64"
+      ]
     },
     {
       "Enabled": true,
