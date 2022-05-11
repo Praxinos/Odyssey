@@ -190,7 +190,7 @@ FImageSequenceConverter::CreateDrawings( const TArray<FImageSequenceFrame>& iFra
 
     //---
 
-    int32 duration_in_tick = ConvertFromDisplayRateToTickResolution( iFrames[0].Duration.Value );
+    int32 duration_in_tick = ConvertFromDisplayRateToTickResolution( iFrames[0].Duration );
     FFrameNumber next_frame_number = iSubSection->GetTrueRange().GetLowerBoundValue() + duration_in_tick;
 
     for( int i = 1; i < iFrames.Num(); i++ )
@@ -210,7 +210,7 @@ FImageSequenceConverter::CreateDrawings( const TArray<FImageSequenceFrame>& iFra
 
         //---
 
-        duration_in_tick = ConvertFromDisplayRateToTickResolution( frame.Duration.Value );
+        duration_in_tick = ConvertFromDisplayRateToTickResolution( frame.Duration );
         next_frame_number += duration_in_tick;
     }
 }
@@ -232,7 +232,7 @@ FImageSequenceConverter::GetDuration( const FImageSequenceShot& iShot ) const
 {
     int32 duration = 0;
     for( auto& frame : iShot.Frames )
-        duration += frame.Duration.Value;
+        duration += frame.Duration;
 
     return duration;
 }

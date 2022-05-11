@@ -629,7 +629,7 @@ NewStoryboardDialog::OpenCreationDialog(const TSharedRef<FTabManager>& TabManage
             .HasCloseButton(true)
             .SupportsMaximize(false)
             .SupportsMinimize(false)
-            .ClientSize(FVector2D(600, 700));
+            .ClientSize(FVector2D(800, 900));
 
         TSharedPtr<SDockTab> OwnerTab = TabManager->GetOwnerTab();
         TSharedPtr<SWindow> RootWindow = OwnerTab.IsValid() ? OwnerTab->GetParentWindow() : TSharedPtr<SWindow>();
@@ -663,7 +663,7 @@ NewStoryboardDialog::OpenImportImageSequenceDialog( const TSharedRef<FTabManager
             .HasCloseButton( true )
             .SupportsMaximize( false )
             .SupportsMinimize( false )
-            .ClientSize( FVector2D( 600, 700 ) );
+            .ClientSize( FVector2D( 800, 900 ) );
 
         TSharedPtr<SDockTab> OwnerTab = TabManager->GetOwnerTab();
         TSharedPtr<SWindow> RootWindow = OwnerTab.IsValid() ? OwnerTab->GetParentWindow() : TSharedPtr<SWindow>();

@@ -35,7 +35,7 @@ struct FStoryboardImportImageSequenceSettings
 
 public:
     /** Image sequence folder. */
-    UPROPERTY( EditAnywhere, Category=ImageSequenceImport, meta=( ContentDir ) )
+    UPROPERTY( EditAnywhere, Category=ImageSequenceImport )
     FDirectoryPath ImageSequencePath;
 
     /** Image name pattern. */

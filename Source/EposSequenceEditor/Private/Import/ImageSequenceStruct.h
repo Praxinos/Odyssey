@@ -15,14 +15,14 @@ struct FImageSequenceFrame
     GENERATED_BODY()
 
 public:
-    UPROPERTY( EditAnywhere, Category = ImageSequenceStruct )
+    UPROPERTY( EditAnywhere, Category=ImageSequenceStruct, DisplayName="Frame Id" )
     FString Id;
 
-    UPROPERTY( EditAnywhere, Category = ImageSequenceFrame )
+    UPROPERTY( EditAnywhere, Category=ImageSequenceStruct )
     FFilePath Pathfile;
 
-    UPROPERTY( EditAnywhere, Category = ImageSequenceFrame )
-    FFrameNumber Duration { 48 };
+    UPROPERTY( EditAnywhere, Category=ImageSequenceStruct )
+    int32 Duration { 48 };
 };
 
 //---
@@ -33,10 +33,10 @@ struct FImageSequenceShot
     GENERATED_BODY()
 
 public:
-    UPROPERTY( EditAnywhere, Category = ImageSequenceStruct )
+    UPROPERTY( EditAnywhere, Category=ImageSequenceStruct, DisplayName="Shot Id" )
     FString Id;
 
-    UPROPERTY( EditAnywhere, Category = ImageSequenceStruct )
+    UPROPERTY( EditAnywhere, Category=ImageSequenceStruct )
     TArray<FImageSequenceFrame> Frames;
 };
 
@@ -48,10 +48,10 @@ struct FImageSequenceBoard
     GENERATED_BODY()
 
 public:
-    UPROPERTY( EditAnywhere, Category = ImageSequenceStruct )
+    UPROPERTY( EditAnywhere, Category=ImageSequenceStruct, DisplayName="Board Id" )
     FString Id;
 
-    UPROPERTY( EditAnywhere, Category = ImageSequenceStruct )
+    UPROPERTY( EditAnywhere, Category=ImageSequenceStruct )
     TArray<FImageSequenceShot> Shots;
 };
 
@@ -63,6 +63,6 @@ struct FImageSequenceStruct
     GENERATED_BODY()
 
 public:
-    UPROPERTY( EditAnywhere, Category = ImageSequenceStruct )
+    UPROPERTY( EditAnywhere, Category=ImageSequenceStruct )
     TArray<FImageSequenceBoard> Boards;
 };
