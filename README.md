@@ -1,4 +1,71 @@
-# Epos
+[![UE4](https://img.shields.io/badge/UE-5.0+-lightgrey?style=flat&logo=unrealengine&logoColor=whitesmoke)](https://www.unrealengine.com/marketplace/en-US/product/iliad-intelligent-layered-imaging-architecture-for-drawing-beta-version)
+[![Release](https://img.shields.io/github/release/Praxinos/Epos)](https://github.com/Praxinos/Epos/releases)
+[![License](https://img.shields.io/badge/License-CC_Attribution_NoDerivatives_4.0_International-steelblue?style=flat)](https://creativecommons.org/licenses/by-nd/4.0/legalcode)
+[![Discord](https://img.shields.io/discord/639891086369882112?label=Discord&color=mediumslateblue&style=flat&logo=Discord&logoColor=whitesmoke)](https://discordapp.com/invite/gEd6pj7)
+[![Patreon](https://img.shields.io/badge/Patreon-Donate-tomato.svg?style=flat&logo=Patreon)](https://www.patreon.com/praxinos)
+
+<br>
+<p align="center">
+    <img src="https://praxinos.coop/images/epos-logo.png" alt="Epos">
+</p>
+
+# Overview
+
+**Extended Production Of Storyboard** - or **EPOS** - is a storyboard manager plugin in Unreal Engine Editor.
+
+**EPOS** is designed for **2D storyboard artists** ; its use is simple and intuitive, yet powerful and complete:
+- use 3D environment and create shots, cameras and planes in a few clicks directly from the Sequencer
+- adjust the angle and the perspective
+- install and enable the [plugin ILIAD](https://www.unrealengine.com/marketplace/en-US/product/iliad-intelligent-layered-imaging-architecture-for-drawing-beta-version)
+- and ... **start drawing**! :writing_hand:
+
+**EPOS** is **source-control and multi-user compatible**: storyboard artists, previz artists, background artists, film directors and all other people involved in preproduction can work together in real-time to share and enhance their vision of the art.
+
+# Installation
+
+Install the plugin directly to your Unreal Engine 5 via the [EpicGames Marketplace](https://www.unrealengine.com/marketplace/en-US/product/epos-2d-storyboard-animatic-plugin-for-unreal-engine) ... **it's free !** :heart_eyes::+1:
+
+# Documentation
+
+Read the [:blue_book:User Documentation](https://praxinos.coop/epos-user-doc) to learn how to use the plugin
+
+# Links
+
+[Sample Projects](https://praxinos.coop/epos-projects): Charpy, Bear (Parallax), ...  
+[Official Repository](https://github.com/Praxinos/Epos)  
+[Official Homepage :house:](https://praxinos.coop/epos)  
+[Praxinos Website](https://praxinos.coop)  
+
+# Module hierarchy
+
+```
+    ┌──────────────────────┐   ┌──────────────────────┐    ┌──────────────────┐       ╮
+    │     EposMovieScene   │   │       EposNote       │    │     EposActors   │       │
+    └───────────┬──────────┘   └──────────┬───────────┘    └───────┬──────────┘       │
+                │                         │                        │                  │
+    ┌───────────┴─────────────────────────┴───────────┐            │                  │
+    │                    EposTracks                   │            │                  │  Runtime
+    └─────────────────────────┬───────────────────────┘            │                  │
+                              │                                    │                  │
+                ┌─────────────┴────────────────────────────────────┴───┐              │
+                │                      EposSequence                    │              │
+                └───────────────────────────┬──────────────────────────┘              ╯
+                                            │
+                                            │
+                                            │
+                                            │
+                   ┌────────────────────────┴───────────────────────┐                 ╮
+                   │                EposNamingConvention            │                 │
+                   └────────────────────────┬───────────────────────┘                 │
+                                            │                                         │
+                   ┌────────────────────────┴───────────────────────┐                 │
+                   │                EposTracksEditor                │                 │  Editor
+                   └────────────────────────┬───────────────────────┘                 │
+                                            │                                         │
+                   ┌────────────────────────┴───────────────────────┐                 │
+                   │                EposSequenceEditor              │                 │
+                   └────────────────────────────────────────────────┘                 ╯
+```
 
 # Setting Hooks (after cloning)
 
@@ -14,22 +81,12 @@
 
 ## Examples
 
-- display all options:  
-    ```
-    build-package.py -h
-    ```
-- build for beta (local):  
-    ```
-    build-package.py -t beta
-    ```
-- build for beta (with upload on pcloud):  
-    ```
-    build-package.py -t beta -u
-    ```
-- build for marketplace (with upload on pcloud):  
-    ```
-    build-package.py -t marketplace -u
-    ```
+| Command                               | Description                                       |
+| :---                                  | :---                                              |
+| `build-package.py -h`                 | display all options                               |
+| `build-package.py -t beta`            | build for beta (local)                            |
+| `build-package.py -t beta -u`         | build for beta (with upload on pcloud)            |
+| `build-package.py -t marketplace -u`  | build for marketplace (with upload on pcloud)     |
 
 # Commit comment rules
 
@@ -116,34 +173,3 @@ close #12345
 - http://karma-runner.github.io/4.0/dev/git-commit-msg.html
 - https://github.com/angular/angular/blob/master/CONTRIBUTING.md#commit-body
 - https://www.conventionalcommits.org/en/v1.0.0/
-
-# Module hierarchy
-
-```
-    ┌──────────────────────┐   ┌──────────────────────┐    ┌──────────────────┐       ╮
-    │     EposMovieScene   │   │       EposNote       │    │     EposActors   │       │
-    └───────────┬──────────┘   └──────────┬───────────┘    └───────┬──────────┘       │
-                │                         │                        │                  │
-    ┌───────────┴─────────────────────────┴───────────┐            │                  │
-    │                    EposTracks                   │            │                  │  Runtime
-    └─────────────────────────┬───────────────────────┘            │                  │
-                              │                                    │                  │
-                ┌─────────────┴────────────────────────────────────┴───┐              │
-                │                      EposSequence                    │              │
-                └───────────────────────────┬──────────────────────────┘              ╯
-                                            │
-                                            │
-                                            │
-                                            │
-                   ┌────────────────────────┴───────────────────────┐                 ╮
-                   │                EposNamingConvention            │                 │
-                   └────────────────────────┬───────────────────────┘                 │
-                                            │                                         │
-                   ┌────────────────────────┴───────────────────────┐                 │
-                   │                EposTracksEditor                │                 │  Editor
-                   └────────────────────────┬───────────────────────┘                 │
-                                            │                                         │
-                   ┌────────────────────────┴───────────────────────┐                 │
-                   │                EposSequenceEditor              │                 │
-                   └────────────────────────────────────────────────┘                 ╯
-```
