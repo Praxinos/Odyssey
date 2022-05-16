@@ -12,7 +12,7 @@
 </p>
 
 ## Overview
-**Iliad** is a digital-painting plugin for Unreal Engine 4.  
+**Iliad** is a digital-painting plugin for Unreal Engine 5.  
 It comes with a dedicated interface to create and edit textures directly within the engine, eliminating the need for a workflow with multiple software.  
 Express your art and experience new creative possibilities with a powerful blueprint-based nodal brush engine.  
 Create brushes to make traditional tools ( crayons, paintbrushes, pencils... ).  
@@ -22,6 +22,29 @@ Create brushes to make traditional tools ( crayons, paintbrushes, pencils... ).
 - Creating 2D images like tile sets or sprites for 2D video games.
 - Drawing sketches for storyboard, design or illustration.
 
+# Making a Package
+
+- open a shell/cmd at the root of the plugin
+- execute `build-package.py ...`
+
+## Examples
+
+- display all options:  
+    ```
+    build-package.py -h
+    ```
+- build for beta (local):  
+    ```
+    build-package.py -t beta
+    ```
+- build for beta (with upload on pcloud):  
+    ```
+    build-package.py -t beta -u
+    ```
+- build for marketplace (with upload on pcloud):  
+    ```
+    build-package.py -t marketplace -u
+
 ## Links
 [Official Repository](https://github.com/Praxinos/Iliad)  
 [Marketplace](https://www.unrealengine.com/marketplace/en-US/product/iliad-intelligent-layered-imaging-architecture-for-drawing-beta-version)  
@@ -29,9 +52,4 @@ Create brushes to make traditional tools ( crayons, paintbrushes, pencils... ).
 [User Documentation](https://praxinos.coop/Documentation/Iliad/User/html/)  
 [Praxinos Website](https://praxinos.coop)  
 [Iliad on Discord](https://discordapp.com/invite/gEd6pj7)  
-[Praxinos on Patreon](https://www.patreon.com/praxinos)  
-
-## Workflow
-<p align="center">
-    <img src="Meta/git/workflow.png">
-</p>
+[Praxinos on Patreon](https://www.patreon.com/praxinos)
