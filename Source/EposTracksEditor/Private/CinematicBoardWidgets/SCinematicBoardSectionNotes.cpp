@@ -322,7 +322,7 @@ SCinematicBoardSectionNotes::Construct( const FArguments& InArgs, TSharedRef<FCi
     };
 
     FSlimHorizontalToolBarBuilder MiddleToolbarBuilder( nullptr, FMultiBoxCustomization::None );
-    MiddleToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get(), "SectionFloatingToolBar" );
+    MiddleToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get(), "SectionFloatingToolBarLarge" );
 
     MiddleToolbarBuilder.AddToolBarButton(
         FUIAction(
@@ -331,7 +331,7 @@ SCinematicBoardSectionNotes::Construct( const FArguments& InArgs, TSharedRef<FCi
         NAME_None,
         FText::GetEmpty(),
         LOCTEXT( "CreateNote", "Create a new Note" ),
-        FSlateIcon( FAppStyle::Get().GetStyleSetName(), "Plus" ) );
+        FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "CreateNote" ) );
 
     TSharedRef< SWidget > middle_toolbar = MiddleToolbarBuilder.MakeWidget();
     middle_toolbar->SetVisibility( mOptionalWidgetsVisibility );

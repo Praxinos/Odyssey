@@ -1888,14 +1888,14 @@ SCinematicBoardSectionPlanes::Construct( const FArguments& InArgs, TSharedRef<FC
     //---
 
     FSlimHorizontalToolBarBuilder MiddleToolbarBuilder( nullptr, FMultiBoxCustomization::None );
-    MiddleToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get(), "SectionFloatingToolBar" );
+    MiddleToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get(), "SectionFloatingToolBarLarge" );
 
     MiddleToolbarBuilder.AddComboButton(
         FUIAction(),
         FOnGetContent::CreateRaw( this, &SCinematicBoardSectionPlanes::MakeCreatePlaneMenu ),
         FText::GetEmpty(),
         LOCTEXT( "create-plane-and-settings-tooltip", "Create a new plane" ),
-        FSlateIcon( FAppStyle::Get().GetStyleSetName(), "Plus" ) );
+        FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "CreatePlane" ) );
 
     auto IsToolBarVisible = [this]() -> EVisibility
     {

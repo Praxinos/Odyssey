@@ -23,6 +23,7 @@ namespace
 static const FVector2D Icon8x8( 8.0f, 8.0f );
 static const FVector2D Icon14x14( 14.0f, 14.0f );
 static const FVector2D Icon16x16( 16.0f, 16.0f );
+static const FVector2D Icon24x16( 24.0f, 16.0f );
 static const FVector2D Icon24x24( 24.0f, 24.0f );
 static const FVector2D Icon48x48( 48.0f, 48.0f );
 static const FVector2D Icon64x64( 64.0f, 64.0f );
@@ -81,10 +82,12 @@ FEposTracksEditorStyle::InitTracks()
 
     //---
 
+    Set( "CreateCamera", new IMAGE_BRUSH_SVG( "camera-create.large", Icon24x16 ) );
     Set( "PilotCamera", new IMAGE_BRUSH( "camera-pilot-16x", Icon16x16 ) );
     Set( "EjectCamera", new IMAGE_BRUSH( "camera-eject-16x", Icon16x16 ) );
     Set( "SnapCameraToViewport", new IMAGE_BRUSH( "camera-snap-to-viewport-24x", Icon16x16 ) );
 
+    Set( "CreatePlane", new IMAGE_BRUSH_SVG( "plane-create.large", Icon24x16 ) );
     Set( "DetachPlane", new IMAGE_BRUSH( "plane-detach-24x", Icon16x16 ) );
     Set( "CreateDrawing", new IMAGE_BRUSH( "drawing-create-24x", Icon16x16 ) );
 
@@ -94,6 +97,7 @@ FEposTracksEditorStyle::InitTracks()
     Set( "Take", new IMAGE_BRUSH_SVG( "take", Icon16x16 ) );
 
     Set( "NoteSettings", new IMAGE_BRUSH_SVG( "note", Icon16x16 ) );
+    Set( "CreateNote", new IMAGE_BRUSH_SVG( "note-create.large", Icon24x16 ) );
 
     //---
 
@@ -138,6 +142,9 @@ FEposTracksEditorStyle::InitToolbar()
         SectionToolBarStyle.SetSettingsComboButtonStyle( SectionToolBarStyle.SettingsComboButton.SetDownArrowImage( CORE_IMAGE_BRUSH_SVG( "Starship/Common/ellipsis-vertical-narrow", FVector2D( 4, 16 ) ) ) );
         SectionToolBarStyle.SetShowLabels( false );
         Set( "SectionFloatingToolBar", SectionToolBarStyle );
+
+        SectionToolBarStyle.SetIconSize( FVector2D( 24, 16 ) );
+        Set( "SectionFloatingToolBarLarge", SectionToolBarStyle );
 
         //-
 

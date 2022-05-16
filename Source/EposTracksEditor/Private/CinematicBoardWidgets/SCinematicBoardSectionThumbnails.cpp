@@ -80,14 +80,14 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
     //---
 
     FSlimHorizontalToolBarBuilder MiddleToolbarBuilder( nullptr, FMultiBoxCustomization::None );
-    MiddleToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get(), "SectionFloatingToolBar" );
+    MiddleToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get(), "SectionFloatingToolBarLarge" );
 
     MiddleToolbarBuilder.AddComboButton(
         FUIAction(),
         FOnGetContent::CreateRaw( this, &SCinematicBoardSectionThumbnails::MakeCreateCameraMenu ),
         FText::GetEmpty(),
         LOCTEXT( "create-camera-and-settings-tooltip", "Create a new camera" ),
-        FSlateIcon( FAppStyle::Get().GetStyleSetName(), "Plus" ) );
+        FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "CreateCamera" ) );
 
     auto IsToolBarVisible = [this]() -> EVisibility
     {
