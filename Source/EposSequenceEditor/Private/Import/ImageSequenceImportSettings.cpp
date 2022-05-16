@@ -28,10 +28,7 @@ FImageSequenceImportSettings::FImageSequenceImportSettings()
     ADD_PATTERN_KEYWORD( PatternKeywords, EImageSequencePatternKeyword::FrameId, "frame", "image-sequence-pattern-keyword", "the id which represents the frame (drawing)" );
     ADD_PATTERN_KEYWORD( PatternKeywords, EImageSequencePatternKeyword::Duration, "duration", "image-sequence-pattern-keyword", "the number which represents the duration of the frame (drawing)" );
 
-    // Default value of Pattern
-    FilePattern = FString::Printf( TEXT( "someprefix-%s-%s-%s.png" ), *PatternKeywords[EImageSequencePatternKeyword::BoardId].mKeywordWithBraces
-                                                                    , *PatternKeywords[EImageSequencePatternKeyword::ShotId].mKeywordWithBraces
-                                                                    , *PatternKeywords[EImageSequencePatternKeyword::FrameId].mKeywordWithBraces );
+    // No default pattern value, it's too file dependent
 }
 
 #undef ADD_PATTERN_KEYWORD

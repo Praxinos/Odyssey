@@ -108,23 +108,13 @@ private:
 void
 SNewStoryboardSettings::Construct( const FArguments& InArgs, EDialogType iDialogType )
 {
-    mImageSequenceImportSettings = &mImageSequenceImportSettingsWrapper.mImageSequenceImportSettings;
-
-    //DEBUG TOREMOVE
-    mImageSequenceImportSettings->ImageSequencePath.Path = FPaths::ProjectPluginsDir() + "/Epos/samples/image-sequence-board-shot-frame";
-    mImageSequenceImportSettings->FilePattern = TEXT( "mybmp-{board}-{shot}-{frame}.jpg" );
-    //mImageSequenceImportSettings->ImageSequencePath.Path = FPaths::ProjectPluginsDir() + "/Epos/samples/image-sequence-frame-shot-board";
-    //mImageSequenceImportSettings->FilePattern = TEXT( "mybmp-{frame}-{shot}-{board}.jpg" );
-    //mImageSequenceImportSettings->ImageSequencePath.Path = FPaths::ProjectPluginsDir() + "/Epos/samples/image-sequence-shot-frame";
-    //mImageSequenceImportSettings->FilePattern = TEXT( "mybmp-{shot}-{frame}.jpg" );
-    mImageSequenceImportSettings->ImageSequencePath.Path = FPaths::ProjectPluginsDir() + "/Epos/samples/image-sequence-board-shot-duration-frame";
-    mImageSequenceImportSettings->FilePattern = TEXT( "mybmp-{board}-{shot}-{duration}-{frame}.jpg" );
-    //DEBUG TOREMOVE
-
     mDialogType = iDialogType;
 
     mNamingConventionSettings = GetMutableDefault<UNamingConventionSettings>();
     mSequenceEditorSettings = GetMutableDefault<UEposSequenceEditorSettings>();
+
+    // Setting a link to its content to avoid always calling mImageSequenceImportSettingsWrapper.mImageSequenceImportSettings
+    mImageSequenceImportSettings = &mImageSequenceImportSettingsWrapper.mImageSequenceImportSettings;
 
     FPropertyEditorModule& PropertyEditor = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
 
@@ -446,6 +436,9 @@ void
 SNewStoryboardSettings::ImportImageSequence()
 {
     mImageSequenceImportErrorMessage.Empty();
+
+    if( mImageSequenceImportSettings->ImageSequencePath.Path.IsEmpty() )
+        return;
 
     FImageSequenceImporter image_sequence_importer( *mImageSequenceImportSettings, mImageSequenceImportErrorMessage );
     if( !mImageSequenceImportErrorMessage.IsEmpty() )
