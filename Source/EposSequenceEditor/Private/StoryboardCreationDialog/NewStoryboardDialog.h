@@ -5,9 +5,6 @@
 
 #include "CoreMinimal.h"
 
-#include "StoryboardCreationDialog/StoryboardImportImageSequenceSettings.h"
-#include "StoryboardCreationDialog/StoryboardSettings.h"
-
 class FTabManager;
 
 //---

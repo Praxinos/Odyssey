@@ -10,7 +10,7 @@
 
 //---
 
-FImageSequenceImporter::FImageSequenceImporter( const FStoryboardImportImageSequenceSettings& iSettings, FString& oErrorMessage )
+FImageSequenceImporter::FImageSequenceImporter( const FImageSequenceImportSettings& iSettings, FString& oErrorMessage )
 {
     mImageSequencePath = iSettings.ImageSequencePath.Path;
     mImageSequenceFilePattern = iSettings.FilePattern;
@@ -56,9 +56,9 @@ FImageSequenceImporter::Build( const TMap<EImageSequencePatternKeyword, FImageSe
     //---
 
     TMap<EImageSequencePatternKeyword, FPatternStruct> pattern_map;
-    pattern_map.Add( EImageSequencePatternKeyword::BoardId  , { iKeywords[EImageSequencePatternKeyword::BoardId].mKeywordWithBraces, TEXT( "([_0-9a-zA-Z]+)" ) } );
-    pattern_map.Add( EImageSequencePatternKeyword::ShotId   , { iKeywords[EImageSequencePatternKeyword::ShotId].mKeywordWithBraces, TEXT( "([_0-9a-zA-Z]+)" ) } );
-    pattern_map.Add( EImageSequencePatternKeyword::FrameId  , { iKeywords[EImageSequencePatternKeyword::FrameId].mKeywordWithBraces, TEXT( "([_0-9a-zA-Z]+)" ) } );
+    pattern_map.Add( EImageSequencePatternKeyword::BoardId  , { iKeywords[EImageSequencePatternKeyword::BoardId].mKeywordWithBraces , TEXT( "([_0-9a-zA-Z]+)" ) } );
+    pattern_map.Add( EImageSequencePatternKeyword::ShotId   , { iKeywords[EImageSequencePatternKeyword::ShotId].mKeywordWithBraces  , TEXT( "([_0-9a-zA-Z]+)" ) } );
+    pattern_map.Add( EImageSequencePatternKeyword::FrameId  , { iKeywords[EImageSequencePatternKeyword::FrameId].mKeywordWithBraces , TEXT( "([_0-9a-zA-Z]+)" ) } );
     pattern_map.Add( EImageSequencePatternKeyword::Duration , { iKeywords[EImageSequencePatternKeyword::Duration].mKeywordWithBraces, TEXT( "([0-9]+)" ) } );
 
     FString file_pattern_regex = mImageSequenceFilePattern;

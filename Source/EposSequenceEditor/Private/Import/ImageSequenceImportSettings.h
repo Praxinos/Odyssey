@@ -5,7 +5,7 @@
 
 #include "CoreMinimal.h"
 
-#include "StoryboardImportImageSequenceSettings.generated.h"
+#include "ImageSequenceImportSettings.generated.h"
 
 //---
 
@@ -30,12 +30,12 @@ public:
 };
 
 USTRUCT()
-struct FStoryboardImportImageSequenceSettings
+struct FImageSequenceImportSettings
 {
     GENERATED_BODY()
 
 public:
-    FStoryboardImportImageSequenceSettings();
+    FImageSequenceImportSettings();
 
 public:
     /** Image sequence folder. */
@@ -58,11 +58,11 @@ public:
 
 // https://udn.unrealengine.com/s/question/0D54z00007eBzPfCAK/makeinstance-of-ipropertytypecustomization-of-my-structure-is-not-called
 USTRUCT()
-struct FStoryboardImportImageSequenceSettingsWrapper
+struct FImageSequenceImportSettingsWrapper
 {
     GENERATED_BODY()
 
 public:
     UPROPERTY( EditAnywhere, Category=ImageSequenceImport )
-    FStoryboardImportImageSequenceSettings mStoryboardImportImageSequenceSettings;
+    FImageSequenceImportSettings mImageSequenceImportSettings;
 };

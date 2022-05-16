@@ -28,10 +28,10 @@
 #include "IEposSequenceEditorToolkit.h"
 #include "Import/ImageSequenceConverter.h"
 #include "Import/ImageSequenceImporter.h"
+#include "Import/ImageSequenceImportSettings.h"
 #include "Import/ImageSequenceStruct.h"
 #include "Settings/EposSequenceEditorSettings.h"
 #include "Settings/NamingConventionSettings.h"
-#include "StoryboardCreationDialog/StoryboardImportImageSequenceSettings.h"
 #include "StoryboardCreationDialog/StoryboardSettings.h"
 
 /* LevelSequenceEditorHelpers
@@ -96,8 +96,8 @@ private:
     ETabs mActiveTab;
 
     FStoryboardSettings             mStoryboardSettings;
-    FStoryboardImportImageSequenceSettingsWrapper   mStoryboardImportImageSequenceSettingsWrapper;
-    FStoryboardImportImageSequenceSettings*         mStoryboardImportImageSequenceSettings;
+    FImageSequenceImportSettingsWrapper   mImageSequenceImportSettingsWrapper;
+    FImageSequenceImportSettings*         mImageSequenceImportSettings;
     UNamingConventionSettings*      mNamingConventionSettings;
     UEposSequenceEditorSettings*    mSequenceEditorSettings;
 
@@ -108,17 +108,17 @@ private:
 void
 SNewStoryboardSettings::Construct( const FArguments& InArgs, EDialogType iDialogType )
 {
-    mStoryboardImportImageSequenceSettings = &mStoryboardImportImageSequenceSettingsWrapper.mStoryboardImportImageSequenceSettings;
+    mImageSequenceImportSettings = &mImageSequenceImportSettingsWrapper.mImageSequenceImportSettings;
 
     //DEBUG TOREMOVE
-    mStoryboardImportImageSequenceSettings->ImageSequencePath.Path = FPaths::ProjectPluginsDir() + "/Epos/samples/image-sequence-board-shot-frame";
-    mStoryboardImportImageSequenceSettings->FilePattern = TEXT( "mybmp-{board}-{shot}-{frame}.jpg" );
-    //mStoryboardImportImageSequenceSettings->ImageSequencePath.Path = FPaths::ProjectPluginsDir() + "/Epos/samples/image-sequence-frame-shot-board";
-    //mStoryboardImportImageSequenceSettings->FilePattern = TEXT( "mybmp-{frame}-{shot}-{board}.jpg" );
-    //mStoryboardImportImageSequenceSettings->ImageSequencePath.Path = FPaths::ProjectPluginsDir() + "/Epos/samples/image-sequence-shot-frame";
-    //mStoryboardImportImageSequenceSettings->FilePattern = TEXT( "mybmp-{shot}-{frame}.jpg" );
-    mStoryboardImportImageSequenceSettings->ImageSequencePath.Path = FPaths::ProjectPluginsDir() + "/Epos/samples/image-sequence-board-shot-duration-frame";
-    mStoryboardImportImageSequenceSettings->FilePattern = TEXT( "mybmp-{board}-{shot}-{duration}-{frame}.jpg" );
+    mImageSequenceImportSettings->ImageSequencePath.Path = FPaths::ProjectPluginsDir() + "/Epos/samples/image-sequence-board-shot-frame";
+    mImageSequenceImportSettings->FilePattern = TEXT( "mybmp-{board}-{shot}-{frame}.jpg" );
+    //mImageSequenceImportSettings->ImageSequencePath.Path = FPaths::ProjectPluginsDir() + "/Epos/samples/image-sequence-frame-shot-board";
+    //mImageSequenceImportSettings->FilePattern = TEXT( "mybmp-{frame}-{shot}-{board}.jpg" );
+    //mImageSequenceImportSettings->ImageSequencePath.Path = FPaths::ProjectPluginsDir() + "/Epos/samples/image-sequence-shot-frame";
+    //mImageSequenceImportSettings->FilePattern = TEXT( "mybmp-{shot}-{frame}.jpg" );
+    mImageSequenceImportSettings->ImageSequencePath.Path = FPaths::ProjectPluginsDir() + "/Epos/samples/image-sequence-board-shot-duration-frame";
+    mImageSequenceImportSettings->FilePattern = TEXT( "mybmp-{board}-{shot}-{duration}-{frame}.jpg" );
     //DEBUG TOREMOVE
 
     mDialogType = iDialogType;
@@ -151,7 +151,7 @@ SNewStoryboardSettings::Construct( const FArguments& InArgs, EDialogType iDialog
     {
         if( mDialogType == EDialogType::kImportImageSequence )
         {
-            TSharedPtr<FStructOnScope> StructOnScope = MakeShared<FStructOnScope>( FStoryboardImportImageSequenceSettingsWrapper::StaticStruct(), (uint8*)&mStoryboardImportImageSequenceSettingsWrapper );
+            TSharedPtr<FStructOnScope> StructOnScope = MakeShared<FStructOnScope>( FImageSequenceImportSettingsWrapper::StaticStruct(), (uint8*)&mImageSequenceImportSettingsWrapper );
             mDetailsViewStoryboardImportImageSequence = PropertyEditor.CreateStructureDetailView( DetailsViewArgs, StructureDetailsViewArgs, StructOnScope );
             mDetailsViewStoryboardImportImageSequence->GetOnFinishedChangingPropertiesDelegate().AddSP( this, &SNewStoryboardSettings::ImportImageSequence );
 
@@ -447,13 +447,13 @@ SNewStoryboardSettings::ImportImageSequence()
 {
     mImageSequenceImportErrorMessage.Empty();
 
-    FImageSequenceImporter image_sequence_importer( *mStoryboardImportImageSequenceSettings, mImageSequenceImportErrorMessage );
+    FImageSequenceImporter image_sequence_importer( *mImageSequenceImportSettings, mImageSequenceImportErrorMessage );
     if( !mImageSequenceImportErrorMessage.IsEmpty() )
         return;
 
     mImageSequenceStruct = image_sequence_importer.GetImageSequenceStruct();
 
-    mStoryboardSettings.StoryboardName = FPaths::GetBaseFilename( mStoryboardImportImageSequenceSettings->ImageSequencePath.Path );
+    mStoryboardSettings.StoryboardName = FPaths::GetBaseFilename( mImageSequenceImportSettings->ImageSequencePath.Path );
 }
 
 FString
@@ -520,7 +520,7 @@ SNewStoryboardSettings::CanCreateStoryboard() const
 
     if( mDialogType == EDialogType::kImportImageSequence )
     {
-        if( mStoryboardImportImageSequenceSettings->ImageSequencePath.Path.IsEmpty() )
+        if( mImageSequenceImportSettings->ImageSequencePath.Path.IsEmpty() )
             return false;
     }
 

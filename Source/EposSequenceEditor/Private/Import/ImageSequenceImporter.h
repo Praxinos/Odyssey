@@ -5,8 +5,8 @@
 
 #include "CoreMinimal.h"
 
+#include "Import/ImageSequenceImportSettings.h"
 #include "Import/ImageSequenceStruct.h"
-#include "StoryboardCreationDialog/StoryboardImportImageSequenceSettings.h"
 
 //---
 
@@ -15,7 +15,7 @@ class UBoardSequence;
 class FImageSequenceImporter
 {
 public:
-    FImageSequenceImporter( const FStoryboardImportImageSequenceSettings& iSettings, FString& oErrorMessage );
+    FImageSequenceImporter( const FImageSequenceImportSettings& iSettings, FString& oErrorMessage );
 
     const FImageSequenceStruct& GetImageSequenceStruct() const;
 

@@ -1,7 +1,7 @@
 // IDDN.FR.001.220036.001.S.P.2021.000.00000
 // EPOS is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
-#include "StoryboardCreationDialog/StoryboardImportImageSequenceSettingsCustomization.h"
+#include "Import/ImageSequenceImportSettingsCustomization.h"
 
 #include "IDetailChildrenBuilder.h"
 #include "IDetailGroup.h"
@@ -9,9 +9,9 @@
 #include "DetailWidgetRow.h"
 
 #include "Settings/SPatternTextBox.h"
-#include "StoryboardCreationDialog/StoryboardImportImageSequenceSettings.h"
+#include "Import/ImageSequenceImportSettings.h"
 
-#define LOCTEXT_NAMESPACE "StoryboardImportImageSequenceSettingsCustomization"
+#define LOCTEXT_NAMESPACE "ImageSequenceImportSettingsCustomization"
 
 //---
 
@@ -59,15 +59,15 @@ GetPatternKeywordsMap2( TSharedRef<IPropertyHandle> iStructPropertyHandle, TArra
 
 //static
 TSharedRef<IPropertyTypeCustomization>
-FStoryboardImportImageSequenceSettingsCustomization::MakeInstance()
+FImageSequenceImportSettingsCustomization::MakeInstance()
 {
-    return MakeShareable( new FStoryboardImportImageSequenceSettingsCustomization() );
+    return MakeShareable( new FImageSequenceImportSettingsCustomization() );
 }
 
 FText
-FStoryboardImportImageSequenceSettingsCustomization::GetTooltipText() const
+FImageSequenceImportSettingsCustomization::GetTooltipText() const
 {
-    return LOCTEXT( "storyboard-import-image-sequence-file-pattern-tooltip",
+    return LOCTEXT( "import-image-sequence-file-pattern-tooltip",
 R"(Each keywords will be replaced by its corresponding value.
 
 For files like:
@@ -101,7 +101,7 @@ the pattern will look like:
 }
 
 void
-FStoryboardImportImageSequenceSettingsCustomization::CustomizeHeader( TSharedRef<IPropertyHandle> iStructPropertyHandle, FDetailWidgetRow& ioHeaderRow, IPropertyTypeCustomizationUtils& ioStructCustomizationUtils ) //override
+FImageSequenceImportSettingsCustomization::CustomizeHeader( TSharedRef<IPropertyHandle> iStructPropertyHandle, FDetailWidgetRow& ioHeaderRow, IPropertyTypeCustomizationUtils& ioStructCustomizationUtils ) //override
 {
     // No header needed (to avoid the collapsing)
 
@@ -113,7 +113,7 @@ FStoryboardImportImageSequenceSettingsCustomization::CustomizeHeader( TSharedRef
 }
 
 void
-FStoryboardImportImageSequenceSettingsCustomization::CustomizeChildren( TSharedRef<IPropertyHandle> iStructPropertyHandle, IDetailChildrenBuilder& ioChildBuilder, IPropertyTypeCustomizationUtils& ioStructCustomizationUtils ) //override
+FImageSequenceImportSettingsCustomization::CustomizeChildren( TSharedRef<IPropertyHandle> iStructPropertyHandle, IDetailChildrenBuilder& ioChildBuilder, IPropertyTypeCustomizationUtils& ioStructCustomizationUtils ) //override
 {
     uint32 num_children;
     FPropertyAccess::Result result = iStructPropertyHandle->GetNumChildren( num_children );
@@ -124,7 +124,7 @@ FStoryboardImportImageSequenceSettingsCustomization::CustomizeChildren( TSharedR
         if( !handle.IsValid() )
             continue;
 
-        if( handle->GetProperty() && handle->GetProperty()->GetFName() == GET_MEMBER_NAME_CHECKED( FStoryboardImportImageSequenceSettings, FilePattern ) )
+        if( handle->GetProperty() && handle->GetProperty()->GetFName() == GET_MEMBER_NAME_CHECKED( FImageSequenceImportSettings, FilePattern ) )
         {
             mPatternHandle = handle;
 
@@ -152,7 +152,7 @@ FStoryboardImportImageSequenceSettingsCustomization::CustomizeChildren( TSharedR
                 .KeywordHelps( keyword_helps )
             ];
         }
-        else if( handle->GetProperty() && handle->GetProperty()->GetFName() == GET_MEMBER_NAME_CHECKED( FStoryboardImportImageSequenceSettings, PatternKeywords ) )
+        else if( handle->GetProperty() && handle->GetProperty()->GetFName() == GET_MEMBER_NAME_CHECKED( FImageSequenceImportSettings, PatternKeywords ) )
         {
             handle->MarkHiddenByCustomization();
         }

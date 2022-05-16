@@ -1,9 +1,9 @@
 // IDDN.FR.001.220036.001.S.P.2021.000.00000
 // EPOS is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
-#include "StoryboardCreationDialog/StoryboardImportImageSequenceSettings.h"
+#include "Import/ImageSequenceImportSettings.h"
 
-#define LOCTEXT_NAMESPACE "StoryboardImportImageSequenceSettings"
+#define LOCTEXT_NAMESPACE "ImageSequenceImportSettings"
 
 //---
 
@@ -21,7 +21,7 @@
 
 //---
 
-FStoryboardImportImageSequenceSettings::FStoryboardImportImageSequenceSettings()
+FImageSequenceImportSettings::FImageSequenceImportSettings()
 {
     ADD_PATTERN_KEYWORD( PatternKeywords, EImageSequencePatternKeyword::BoardId, "board", "image-sequence-pattern-keyword", "the id which represents the board" );
     ADD_PATTERN_KEYWORD( PatternKeywords, EImageSequencePatternKeyword::ShotId, "shot", "image-sequence-pattern-keyword", "the id which represents the shot" );
