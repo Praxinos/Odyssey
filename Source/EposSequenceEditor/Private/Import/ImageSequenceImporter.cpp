@@ -80,7 +80,7 @@ FImageSequenceImporter::Build( const TMap<EImageSequencePatternKeyword, FImageSe
     if( pattern_map[EImageSequencePatternKeyword::ShotId].mKeyIndex == INDEX_NONE
         || pattern_map[EImageSequencePatternKeyword::FrameId].mKeyIndex == INDEX_NONE )
     {
-        oErrorMessage = TEXT( "no {shot} or {frame} keys in pattern " ) + mImageSequenceFilePattern;
+        oErrorMessage = TEXT( "no {shot} or {panel} keys in pattern " ) + mImageSequenceFilePattern;
         return;
     }
 
