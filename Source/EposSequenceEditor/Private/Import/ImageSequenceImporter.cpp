@@ -47,6 +47,8 @@ FImageSequenceImporter::Build( const TMap<EImageSequencePatternKeyword, FImageSe
     IFileManager::Get().FindFiles( files, *mImageSequencePath );
     //IFileManager::Get().FindFilesRecursive( files, *mImageSequencePath, TEXT( "*" ), true /* iFiles */, false /* iDirectories */ );
 
+    files.StableSort();
+
     if( files.IsEmpty() )
     {
         oErrorMessage = TEXT( "no file to load in " ) + mImageSequencePath;
