@@ -65,10 +65,10 @@ FEposSequenceEditorStyle::InitSequencer()
     Set( "EposSequenceEditor.Tabs.Sequencer", new IMAGE_BRUSH_SVG( "sequencer-tab", Icon16x16 ) ); // Seems to be only in toolkit standalone mode, but the plugin seems to always be in world-centric mode
 
     // asset thumbnail
-    Set( "ClassIcon.BoardSequence", new IMAGE_BRUSH( "sequence-board-16x", Icon16x16 ) );
-    Set( "ClassThumbnail.BoardSequence", new IMAGE_BRUSH( "sequence-board-64x", Icon64x64 ) );
-    Set( "ClassIcon.ShotSequence", new IMAGE_BRUSH( "sequence-shot-16x", Icon16x16 ) );
-    Set( "ClassThumbnail.ShotSequence", new IMAGE_BRUSH( "sequence-shot-64x", Icon64x64 ) );
+    Set( "ClassIcon.BoardSequence", new IMAGE_BRUSH_SVG( "sequence-board", Icon16x16 ) );
+    Set( "ClassThumbnail.BoardSequence", new IMAGE_BRUSH_SVG( "sequence-board", Icon64x64 ) );
+    Set( "ClassIcon.ShotSequence", new IMAGE_BRUSH_SVG( "sequence-shot", Icon16x16 ) );
+    Set( "ClassThumbnail.ShotSequence", new IMAGE_BRUSH_SVG( "sequence-shot", Icon64x64 ) );
 
     //---
 
@@ -92,33 +92,33 @@ FEposSequenceEditorStyle::InitCommands()
 
     //---
 
-    Set( "EposSequenceCommands.NewStoryboardWithSettings", new IMAGE_BRUSH( "new-storyboard-with-settings-16x", Icon16x16 ) );
-    Set( "EposSequenceCommands.NewStoryboardWithSettings.Small", new IMAGE_BRUSH( "new-storyboard-with-settings-16x", Icon16x16 ) );
+    Set( "EposSequenceCommands.NewStoryboardWithSettings", new IMAGE_BRUSH_SVG( "new-storyboard-with-settings", Icon16x16 ) );
+    Set( "EposSequenceCommands.NewStoryboardWithSettings.Small", new IMAGE_BRUSH_SVG( "new-storyboard-with-settings", Icon16x16 ) );
 
-    Set( "EposSequenceCommands.CreateCameraAtCurrentTime", new IMAGE_BRUSH( "camera-create-24x", Icon48x48 ) );
-    Set( "EposSequenceCommands.CreateCameraAtCurrentTime.Small", new IMAGE_BRUSH( "camera-create-24x", Icon24x24 ) );
-    Set( "EposSequenceCommands.SnapCameraToViewportAtCurrentTime", new IMAGE_BRUSH( "camera-snap-to-viewport-24x", Icon48x48 ) );         // inside popup (and maybe big toolbar ?) but Icon..x.. is not used ?
-    Set( "EposSequenceCommands.SnapCameraToViewportAtCurrentTime.Small", new IMAGE_BRUSH( "camera-snap-to-viewport-24x", Icon24x24 ) );   // in the toolbar, stretch to the size Icon..x..
-    //Set( "EposSequenceCommands.PilotCameraAtCurrentTime", new IMAGE_BRUSH( "camera-pilot-16x", Icon48x48 ) );
-    //Set( "EposSequenceCommands.PilotCameraAtCurrentTime.Small", new IMAGE_BRUSH( "camera-pilot-16x", Icon24x24 ) );
-    //Set( "EposSequenceCommands.EjectCameraAtCurrentTime", new IMAGE_BRUSH( "camera-eject-16x", Icon48x48 ) );
-    //Set( "EposSequenceCommands.EjectCameraAtCurrentTime.Small", new IMAGE_BRUSH( "camera-eject-16x", Icon24x24 ) ); // Not used in a widget, only in shortcuts for the moment
-    Set( "EposSequenceCommands.GotoPreviousCameraPosition", new IMAGE_BRUSH( "camera-previous-24x", Icon48x48 ) );
-    Set( "EposSequenceCommands.GotoPreviousCameraPosition.Small", new IMAGE_BRUSH( "camera-previous-24x", Icon24x24 ) );
-    Set( "EposSequenceCommands.GotoNextCameraPosition", new IMAGE_BRUSH( "camera-next-24x", Icon48x48 ) );
-    Set( "EposSequenceCommands.GotoNextCameraPosition.Small", new IMAGE_BRUSH( "camera-next-24x", Icon24x24 ) );
+    Set( "EposSequenceCommands.CreateCameraAtCurrentTime", new IMAGE_BRUSH_SVG( "camera-create", Icon48x48 ) );
+    Set( "EposSequenceCommands.CreateCameraAtCurrentTime.Small", new IMAGE_BRUSH_SVG( "camera-create", Icon24x24 ) );
+    Set( "EposSequenceCommands.SnapCameraToViewportAtCurrentTime", new IMAGE_BRUSH_SVG( "camera-snap-to-viewport", Icon48x48 ) );         // inside popup (and maybe big toolbar ?) but Icon..x.. is not used ?
+    Set( "EposSequenceCommands.SnapCameraToViewportAtCurrentTime.Small", new IMAGE_BRUSH_SVG( "camera-snap-to-viewport", Icon24x24 ) );   // in the toolbar, stretch to the size Icon..x..
+    //Set( "EposSequenceCommands.PilotCameraAtCurrentTime", new IMAGE_BRUSH_SVG( "camera-pilot", Icon48x48 ) );
+    //Set( "EposSequenceCommands.PilotCameraAtCurrentTime.Small", new IMAGE_BRUSH_SVG( "camera-pilot", Icon24x24 ) );
+    //Set( "EposSequenceCommands.EjectCameraAtCurrentTime", new IMAGE_BRUSH_SVG( "camera-eject", Icon48x48 ) );
+    //Set( "EposSequenceCommands.EjectCameraAtCurrentTime.Small", new IMAGE_BRUSH_SVG( "camera-eject", Icon24x24 ) ); // Not used in a widget, only in shortcuts for the moment
+    Set( "EposSequenceCommands.GotoPreviousCameraPosition", new IMAGE_BRUSH_SVG( "camera-previous", Icon48x48 ) );
+    Set( "EposSequenceCommands.GotoPreviousCameraPosition.Small", new IMAGE_BRUSH_SVG( "camera-previous", Icon24x24 ) );
+    Set( "EposSequenceCommands.GotoNextCameraPosition", new IMAGE_BRUSH_SVG( "camera-next", Icon48x48 ) );
+    Set( "EposSequenceCommands.GotoNextCameraPosition.Small", new IMAGE_BRUSH_SVG( "camera-next", Icon24x24 ) );
 
-    Set( "EposSequenceCommands.CreatePlaneAtCurrentTime", new IMAGE_BRUSH( "plane-create-24x", Icon48x48 ) );
-    Set( "EposSequenceCommands.CreatePlaneAtCurrentTime.Small", new IMAGE_BRUSH( "plane-create-24x", Icon24x24 ) );
-    Set( "EposSequenceCommands.DetachPlaneAtCurrentTime", new IMAGE_BRUSH( "plane-detach-24x", Icon48x48 ) );
-    Set( "EposSequenceCommands.DetachPlaneAtCurrentTime.Small", new IMAGE_BRUSH( "plane-detach-24x", Icon24x24 ) );
+    Set( "EposSequenceCommands.CreatePlaneAtCurrentTime", new IMAGE_BRUSH_SVG( "plane-create", Icon48x48 ) );
+    Set( "EposSequenceCommands.CreatePlaneAtCurrentTime.Small", new IMAGE_BRUSH_SVG( "plane-create", Icon24x24 ) );
+    Set( "EposSequenceCommands.DetachPlaneAtCurrentTime", new IMAGE_BRUSH_SVG( "plane-detach", Icon48x48 ) );
+    Set( "EposSequenceCommands.DetachPlaneAtCurrentTime.Small", new IMAGE_BRUSH_SVG( "plane-detach", Icon24x24 ) );
 
-    Set( "EposSequenceCommands.CreateDrawingAtCurrentTime", new IMAGE_BRUSH( "drawing-create-24x", Icon48x48 ) );
-    Set( "EposSequenceCommands.CreateDrawingAtCurrentTime.Small", new IMAGE_BRUSH( "drawing-create-24x", Icon24x24 ) );
-    Set( "EposSequenceCommands.GotoPreviousDrawing", new IMAGE_BRUSH( "drawing-previous-24x", Icon48x48 ) );
-    Set( "EposSequenceCommands.GotoPreviousDrawing.Small", new IMAGE_BRUSH( "drawing-previous-24x", Icon24x24 ) );
-    Set( "EposSequenceCommands.GotoNextDrawing", new IMAGE_BRUSH( "drawing-next-24x", Icon48x48 ) );
-    Set( "EposSequenceCommands.GotoNextDrawing.Small", new IMAGE_BRUSH( "drawing-next-24x", Icon24x24 ) );
+    Set( "EposSequenceCommands.CreateDrawingAtCurrentTime", new IMAGE_BRUSH_SVG( "drawing-create", Icon48x48 ) );
+    Set( "EposSequenceCommands.CreateDrawingAtCurrentTime.Small", new IMAGE_BRUSH_SVG( "drawing-create", Icon24x24 ) );
+    Set( "EposSequenceCommands.GotoPreviousDrawing", new IMAGE_BRUSH_SVG( "drawing-previous", Icon48x48 ) );
+    Set( "EposSequenceCommands.GotoPreviousDrawing.Small", new IMAGE_BRUSH_SVG( "drawing-previous", Icon24x24 ) );
+    Set( "EposSequenceCommands.GotoNextDrawing", new IMAGE_BRUSH_SVG( "drawing-next", Icon48x48 ) );
+    Set( "EposSequenceCommands.GotoNextDrawing.Small", new IMAGE_BRUSH_SVG( "drawing-next", Icon24x24 ) );
 
     Set( "EposSequenceCommands.OpenSequenceEditorSettings", new IMAGE_BRUSH_SVG( "epos-settings", Icon48x48 ) );
     Set( "EposSequenceCommands.OpenSequenceEditorSettings.Small", new IMAGE_BRUSH_SVG( "epos-settings", Icon24x24 ) );

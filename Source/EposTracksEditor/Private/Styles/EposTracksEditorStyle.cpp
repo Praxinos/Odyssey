@@ -70,9 +70,9 @@ FEposTracksEditorStyle::InitSequencer()
 
     //---
 
-    Set( "Sequencer.Tracks.CinematicBoard", new IMAGE_BRUSH( "track-board-16x", Icon16x16 ) );
+    Set( "Sequencer.Tracks.CinematicBoard", new IMAGE_BRUSH_SVG( "track-board", Icon16x16 ) );
     Set( "Sequencer.Tracks.SingleCameraCut", new PARENT_IMAGE_BRUSH( "Sequencer/Dropdown_Icons/Icon_Camera_Cut_Track_16x", Icon16x16 ) ); // same as FAppStyle::Get().GetBrush( "Sequencer.Tracks.CameraCut" ) );
-    Set( "Sequencer.Tracks.Note", new IMAGE_BRUSH_SVG( "note", Icon16x16 ) );
+    Set( "Sequencer.Tracks.Note", new IMAGE_BRUSH_SVG( "track-note", Icon16x16 ) );
 }
 
 void
@@ -83,13 +83,13 @@ FEposTracksEditorStyle::InitTracks()
     //---
 
     Set( "CreateCamera", new IMAGE_BRUSH_SVG( "camera-create.large", Icon24x16 ) );
-    Set( "PilotCamera", new IMAGE_BRUSH( "camera-pilot-16x", Icon16x16 ) );
-    Set( "EjectCamera", new IMAGE_BRUSH( "camera-eject-16x", Icon16x16 ) );
-    Set( "SnapCameraToViewport", new IMAGE_BRUSH( "camera-snap-to-viewport-24x", Icon16x16 ) );
+    Set( "PilotCamera", new IMAGE_BRUSH_SVG( "camera-pilot", Icon16x16 ) );
+    Set( "EjectCamera", new IMAGE_BRUSH_SVG( "camera-eject", Icon16x16 ) );
+    Set( "SnapCameraToViewport", new IMAGE_BRUSH_SVG( "camera-snap-to-viewport", Icon16x16 ) );
 
     Set( "CreatePlane", new IMAGE_BRUSH_SVG( "plane-create.large", Icon24x16 ) );
-    Set( "DetachPlane", new IMAGE_BRUSH( "plane-detach-24x", Icon16x16 ) );
-    Set( "CreateDrawing", new IMAGE_BRUSH( "drawing-create-24x", Icon16x16 ) );
+    Set( "DetachPlane", new IMAGE_BRUSH_SVG( "plane-detach", Icon16x16 ) );
+    Set( "CreateDrawing", new IMAGE_BRUSH_SVG( "drawing-create", Icon16x16 ) );
 
     Set( "LighttableOff", new IMAGE_BRUSH_SVG( "lighttable-off", Icon16x16 ) );
     Set( "LighttableOn", new IMAGE_BRUSH_SVG( "lighttable-on", Icon16x16 ) );
@@ -117,12 +117,12 @@ FEposTracksEditorStyle::InitCommands()
 
     //---
 
-    Set( "EposTracksEditorCommands.NewSectionWithBoardAtCurrentFrame", new IMAGE_BRUSH( "sequence-board-16x", Icon16x16 ) );
-    Set( "EposTracksEditorCommands.NewSectionWithShotAtCurrentFrame", new IMAGE_BRUSH( "sequence-shot-16x", Icon16x16 ) );
+    Set( "EposTracksEditorCommands.NewSectionWithBoardAtCurrentFrame", new IMAGE_BRUSH_SVG( "sequence-board", Icon16x16 ) );
+    Set( "EposTracksEditorCommands.NewSectionWithShotAtCurrentFrame", new IMAGE_BRUSH_SVG( "sequence-shot", Icon16x16 ) );
 
-    Set( "EposTracksEditorCommands.ArrangeShotsManually", new IMAGE_BRUSH( "arrange-shots-manually-16x", Icon16x16 ) );
-    Set( "EposTracksEditorCommands.ArrangeShotsOnOneRow", new IMAGE_BRUSH( "arrange-shots-on-one-row-16x", Icon16x16 ) );
-    Set( "EposTracksEditorCommands.ArrangeShotsOnTwoRows", new IMAGE_BRUSH( "arrange-shots-on-two-rows-16x", Icon16x16 ) );
+    Set( "EposTracksEditorCommands.ArrangeShotsManually", new IMAGE_BRUSH_SVG( "arrange-shots-manually", Icon16x16 ) );
+    Set( "EposTracksEditorCommands.ArrangeShotsOnOneRow", new IMAGE_BRUSH_SVG( "arrange-shots-on-one-row", Icon16x16 ) );
+    Set( "EposTracksEditorCommands.ArrangeShotsOnTwoRows", new IMAGE_BRUSH_SVG( "arrange-shots-on-two-rows", Icon16x16 ) );
 }
 
 void
