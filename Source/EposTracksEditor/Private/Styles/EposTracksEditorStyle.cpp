@@ -154,6 +154,7 @@ FEposTracksEditorStyle::InitToolbar()
         SectionTitleToolBarStyle.SetButtonPadding( FMargin( 2, 0 ) );
         SectionTitleToolBarStyle.SetBackgroundPadding( 0 );
         SectionTitleToolBarStyle.SetIconSize( Icon16x16 );
+        SectionTitleToolBarStyle.SetButtonStyle( SectionTitleToolBarStyle.ButtonStyle.SetNormalPadding( FMargin( 5, 2 ) ).SetPressedPadding( FMargin( 5, 3, 5, 1 ) ) );
         SectionTitleToolBarStyle.SetSettingsComboButtonStyle( SectionTitleToolBarStyle.SettingsComboButton.SetDownArrowImage( CORE_IMAGE_BRUSH_SVG( "Starship/Common/ellipsis-vertical-narrow", FVector2D( 4, 16 ) ) ) );
         SectionTitleToolBarStyle.SetShowLabels( false );
         Set( "SectionTitleToolBar", SectionTitleToolBarStyle );
