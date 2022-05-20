@@ -575,9 +575,9 @@ UOdysseyBlockProxyFunctionLibrary::AdjustAlpha(
     return  FOdysseyBlockProxy::MakeProxy( dst, 1, &eventFilter, 1, &Block);
 }
 
-#define ADJUST(format, filterFunc, adjustEvent)                                                                                                     \
+#define ADJUST(format, filterFunc)                                                                                                      \
     TSharedPtr< ::ULIS::FBlock, ESPMode::ThreadSafe > block = Block.GetBlock();                                                                      \
-    TSharedPtr< ::ULIS::FBlock, ESPMode::ThreadSafe > dst = MakeShareable( new ::ULIS::FBlock(block->Width(), block->Height(), block->Format() ));    \
+    TSharedPtr< ::ULIS::FBlock, ESPMode::ThreadSafe > dst = MakeShareable( new ::ULIS::FBlock(block->Width(), block->Height(), block->Format() ));   \
                                                                                                                         \
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(block->Format() );                                \
                                                                                                                         \
@@ -590,6 +590,7 @@ UOdysseyBlockProxyFunctionLibrary::AdjustAlpha(
     if( src->Format() != format )                                                                                       \
     {                                                                                                                   \
         src = new ::ULIS::FBlock(block->Width(), block->Height(), format );                                             \
+        filterDst = new ::ULIS::FBlock(block->Width(), block->Height(), format );                                       \
         ctx.ConvertFormat(                                                                                              \
             *block,                                                                                                     \
             *src,                                                                                                       \
@@ -599,7 +600,6 @@ UOdysseyBlockProxyFunctionLibrary::AdjustAlpha(
             1,                                                                                                          \
             &Block.GetEvent(),                                                                                          \
             &eventConvertSrc);                                                                                          \
-        filterDst = src;                                                                                                \
     }                                                                                                                   \
     else                                                                                                                \
     {                                                                                                                   \
@@ -609,8 +609,8 @@ UOdysseyBlockProxyFunctionLibrary::AdjustAlpha(
     ::ULIS::FEvent eventFilter;                                                                                         \
     ctx.FilterInto(                                                                                                     \
         filterFunc                                                                                                      \
-        , *block                                                                                                        \
-        , *dst                                                                                                          \
+        , *src                                                                                                          \
+        , *filterDst                                                                                                    \
         , ::ULIS::FRectI::Auto                                                                                          \
         , ::ULIS::FVec2I( 0 )                                                                                           \
         , ::ULIS::FSchedulePolicy::AsyncCacheEfficient                                                                  \
@@ -621,14 +621,16 @@ UOdysseyBlockProxyFunctionLibrary::AdjustAlpha(
                                                                                                                         \
     ::ULIS::FEvent eventConvertDst(                                                                                     \
         ::ULIS::FOnEventComplete(                                                                                       \
-        [src, block](const ::ULIS::FRectI& iRect)                                                                       \
+        [src, block, filterDst, dst](const ::ULIS::FRectI& iRect)                                                       \
             {                                                                                                           \
-                if (src != block.Get())                                                                                       \
+                if (src != block.Get())                                                                                 \
                     delete  src;                                                                                        \
+                if (filterDst != dst.Get())                                                                             \
+                    delete  filterDst;                                                                                  \
             }                                                                                                           \
         )                                                                                                               \
     );                                                                                                                  \
-    if( filterDst != dst.Get() )                                                                                              \
+    if( filterDst != dst.Get() )                                                                                        \
     {                                                                                                                   \
         ctx.ConvertFormat(                                                                                              \
             *filterDst,                                                                                                 \
@@ -638,32 +640,14 @@ UOdysseyBlockProxyFunctionLibrary::AdjustAlpha(
             ::ULIS::FSchedulePolicy::AsyncCacheEfficient,                                                               \
             1,                                                                                                          \
             &eventFilter,                                                                                               \
-            &adjustEvent);                                                                                              \
+            &eventConvertDst);                                                                                          \
     }                                                                                                                   \
     else                                                                                                                \
     {                                                                                                                   \
-        ctx.Dummy_OP(1, &eventFilter, &adjustEvent);                                                                    \
+        ctx.Dummy_OP(1, &eventFilter, &eventConvertDst);                                                                \
     }                                                                                                                   \
-                                                                                                                        \
     ctx.Flush();                                                                                                        \
-    return  FOdysseyBlockProxy::MakeProxy( dst, 1, &adjustEvent, 1, &Block);
-
-#define ADJUSTEVENT(ObjectType, ...)                                                                    \
-    TArray<TStrongObjectPtr<ObjectType>>* arrayPtr = new TArray<TStrongObjectPtr<ObjectType>>();        \
-    for (auto obj : { __VA_ARGS__ })                                                                    \
-    {                                                                                                   \
-        arrayPtr->Emplace(obj);                                                                         \
-    }                                                                                                   \
-    ::ULIS::FEvent adjustEvent(                                                                         \
-        ::ULIS::FOnEventComplete(                                                                       \
-            [arrayPtr](const ::ULIS::FRectI& iRect)                                                     \
-            {                                                                                           \
-                AsyncTask(ENamedThreads::GameThread, [arrayPtr]() {                                     \
-                    delete arrayPtr;                                                                    \
-                });                                                                                     \
-            }                                                                                           \
-        )                                                                                               \
-    );
+    return  FOdysseyBlockProxy::MakeProxy( dst, 1, &eventConvertDst, 1, &Block);
 
 //static
 FOdysseyBlockProxy
@@ -679,29 +663,19 @@ UOdysseyBlockProxyFunctionLibrary::AdjustRGBA(
     if( !Block.IsValid() )
         return  FOdysseyBlockProxy::MakeNullProxy();
 
-    TStrongObjectPtr< UCurveFloat > defaultCurve( NewObject< UCurveFloat >() ); //Retains the pointer
-    defaultCurve->FloatCurve.AddKey(0.0f, 0.0f);
-    defaultCurve->FloatCurve.AddKey(1.0f, 1.0f);
-
-    if(!CurveR) CurveR = defaultCurve.Get();
-    if(!CurveG) CurveG = defaultCurve.Get();
-    if(!CurveB) CurveB = defaultCurve.Get();
-    if(!CurveAlpha) CurveAlpha = defaultCurve.Get();
-
     auto filterFunc = [CurveR, CurveG, CurveB, CurveAlpha, PreserveNullAlpha]( const ::ULIS::FBlock& iSrcBlock, const uint8* iSrcPtr, ::ULIS::FBlock& iDstBlock, uint8* iDstPtr ) {
         ::ULIS::FPixel srcProxy( iSrcPtr, iSrcBlock.Format() );
         ::ULIS::FPixel dstProxy( iDstPtr, iDstBlock.Format() );
-        dstProxy.SetRF( CurveR->GetFloatValue( srcProxy.RF() ) );
-        dstProxy.SetGF( CurveG->GetFloatValue( srcProxy.GF() ) );
-        dstProxy.SetBF( CurveB->GetFloatValue( srcProxy.BF() ) );
+        dstProxy.SetRF( CurveR ? CurveR->GetFloatValue( srcProxy.RF() ) : srcProxy.RF() );
+        dstProxy.SetGF( CurveG ? CurveG->GetFloatValue( srcProxy.GF() ) : srcProxy.GF() );
+        dstProxy.SetBF( CurveB ? CurveB->GetFloatValue( srcProxy.BF() ) : srcProxy.BF() );
         if( PreserveNullAlpha && srcProxy.AlphaF() == 0.0f )
             dstProxy.SetAlphaF( 0.0f );
         else
-            dstProxy.SetAlphaF( CurveAlpha->GetFloatValue( srcProxy.AlphaF() ) );
+            dstProxy.SetAlphaF( CurveAlpha ? CurveAlpha->GetFloatValue( srcProxy.AlphaF() ) : srcProxy.AlphaF() );
     };
 
-    ADJUSTEVENT(UCurveFloat, CurveR, CurveG, CurveB, CurveAlpha);
-    ADJUST(::ULIS::Format_RGBAF, filterFunc, adjustEvent)
+    ADJUST(::ULIS::Format_RGBAF, filterFunc)
 }
 
 
@@ -717,25 +691,17 @@ UOdysseyBlockProxyFunctionLibrary::AdjustGreyA(
     if( !Block.IsValid() )
         return  FOdysseyBlockProxy::MakeNullProxy();
 
-    TStrongObjectPtr<UCurveFloat> defaultCurve(NewObject<UCurveFloat>()); //Retains the pointer
-    defaultCurve->FloatCurve.AddKey(0.0f, 0.0f);
-    defaultCurve->FloatCurve.AddKey(1.0f, 1.0f);
-
-    if(!CurveGrey) CurveGrey = defaultCurve.Get();
-    if(!CurveAlpha) CurveAlpha = defaultCurve.Get();
-
     auto filterFUnc = [CurveGrey, CurveAlpha, PreserveNullAlpha]( const ::ULIS::FBlock& iSrcBlock, const uint8* iSrcPtr, ::ULIS::FBlock& iDstBlock, uint8* iDstPtr ) {
         ::ULIS::FPixel srcProxy( iSrcPtr, iSrcBlock.Format() );
         ::ULIS::FPixel dstProxy( iDstPtr, iDstBlock.Format() );
-        dstProxy.SetGreyF( CurveGrey->GetFloatValue(srcProxy.GreyF() ) );
+        dstProxy.SetGreyF( CurveGrey ? CurveGrey->GetFloatValue( srcProxy.GreyF() ) : srcProxy.GreyF() );
         if( PreserveNullAlpha && srcProxy.AlphaF() == 0.0f )
             dstProxy.SetAlphaF( 0.0f );
         else
-            dstProxy.SetAlphaF( CurveAlpha->GetFloatValue( srcProxy.AlphaF() ) );
+            dstProxy.SetAlphaF( CurveAlpha ? CurveAlpha->GetFloatValue( srcProxy.AlphaF() ) : srcProxy.AlphaF() );
     };
 
-    ADJUSTEVENT(UCurveFloat, CurveGrey, CurveAlpha);
-    ADJUST(::ULIS::Format_GAF, filterFUnc, adjustEvent)
+    ADJUST(::ULIS::Format_GAF, filterFUnc)
 }
 
 
@@ -752,32 +718,22 @@ UOdysseyBlockProxyFunctionLibrary::AdjustHSVA(
 {
     if( !Block.IsValid() )
         return  FOdysseyBlockProxy::MakeNullProxy();
-
-    TStrongObjectPtr<UCurveFloat> defaultCurve(NewObject<UCurveFloat>()); //Retains the pointer
-    defaultCurve->FloatCurve.AddKey(0.0f, 0.0f);
-    defaultCurve->FloatCurve.AddKey(1.0f, 1.0f);
-
-    if(!CurveH) CurveH = defaultCurve.Get();
-    if(!CurveS) CurveS = defaultCurve.Get();
-    if(!CurveV) CurveV = defaultCurve.Get();
-    if(!CurveAlpha) CurveAlpha = defaultCurve.Get();
     
     auto filterFunc = [CurveH, CurveS, CurveV, CurveAlpha, PreserveNullAlpha]( const ::ULIS::FBlock& iSrcBlock, const uint8* iSrcPtr, ::ULIS::FBlock& iDstBlock, uint8* iDstPtr ) {
         ::ULIS::FPixel srcProxy(iSrcPtr, iSrcBlock.Format());
         ::ULIS::FPixel dstProxy(iDstPtr, iDstBlock.Format());
 
-        dstProxy.SetHueF(CurveH->GetFloatValue(srcProxy.HueF()));
-        dstProxy.SetSaturationF(CurveS->GetFloatValue(srcProxy.SaturationF()));
-        dstProxy.SetValueF(CurveV->GetFloatValue(srcProxy.ValueF()));
+        dstProxy.SetHueF(CurveH ? CurveH->GetFloatValue(srcProxy.HueF()) : srcProxy.HueF());
+        dstProxy.SetSaturationF(CurveS ? CurveS->GetFloatValue(srcProxy.SaturationF()) : srcProxy.SaturationF());
+        dstProxy.SetValueF(CurveV ? CurveV->GetFloatValue(srcProxy.ValueF()) : srcProxy.ValueF());
 
         if(PreserveNullAlpha && srcProxy.AlphaF() == 0.0f)
             dstProxy.SetAlphaF(0.0f);
         else
-            dstProxy.SetAlphaF(CurveAlpha->GetFloatValue(srcProxy.AlphaF()));
+            dstProxy.SetAlphaF(CurveAlpha ? CurveAlpha->GetFloatValue(srcProxy.AlphaF()) : srcProxy.AlphaF());
     };
 
-    ADJUSTEVENT(UCurveFloat, CurveH, CurveS, CurveV, CurveAlpha);
-    ADJUST(::ULIS::Format_HSVAF, filterFunc, adjustEvent)
+    ADJUST(::ULIS::Format_HSVAF, filterFunc)
 }
 
 
@@ -795,31 +751,21 @@ UOdysseyBlockProxyFunctionLibrary::AdjustHSLA(
     if( !Block.IsValid() )
         return  FOdysseyBlockProxy::MakeNullProxy();
 
-    TStrongObjectPtr<UCurveFloat> defaultCurve(NewObject<UCurveFloat>()); //Retains the pointer
-    defaultCurve->FloatCurve.AddKey(0.0f, 0.0f);
-    defaultCurve->FloatCurve.AddKey(1.0f, 1.0f);
-
-    if(!CurveH) CurveH = defaultCurve.Get();
-    if(!CurveS) CurveS = defaultCurve.Get();
-    if(!CurveL) CurveL = defaultCurve.Get();
-    if(!CurveAlpha) CurveAlpha = defaultCurve.Get();
-    
     auto filterFunc = [CurveH, CurveS, CurveL, CurveAlpha, PreserveNullAlpha]( const ::ULIS::FBlock& iSrcBlock, const uint8* iSrcPtr, ::ULIS::FBlock& iDstBlock, uint8* iDstPtr ) {
         ::ULIS::FPixel srcProxy(iSrcPtr, iSrcBlock.Format());
         ::ULIS::FPixel dstProxy(iDstPtr, iDstBlock.Format());
 
-        dstProxy.SetHueF(CurveH->GetFloatValue(srcProxy.HueF()));
-        dstProxy.SetSaturationF(CurveS->GetFloatValue(srcProxy.SaturationF()));
-        dstProxy.SetLightnessF(CurveL->GetFloatValue(srcProxy.LightnessF()));
+        dstProxy.SetHueF(CurveH ? CurveH->GetFloatValue(srcProxy.HueF()) : srcProxy.HueF());
+        dstProxy.SetSaturationF(CurveS ? CurveS->GetFloatValue(srcProxy.SaturationF()) : srcProxy.SaturationF());
+        dstProxy.SetLightnessF(CurveL ? CurveL->GetFloatValue(srcProxy.LightnessF()) : srcProxy.LightnessF());
 
         if(PreserveNullAlpha && srcProxy.AlphaF() == 0.0f)
             dstProxy.SetAlphaF(0.0f);
         else
-            dstProxy.SetAlphaF(CurveAlpha->GetFloatValue(srcProxy.AlphaF()));
+            dstProxy.SetAlphaF(CurveAlpha ? CurveAlpha->GetFloatValue(srcProxy.AlphaF()) : srcProxy.AlphaF());
     };
 
-    ADJUSTEVENT(UCurveFloat, CurveH, CurveS, CurveL, CurveAlpha);
-    ADJUST(::ULIS::Format_HSLAF, filterFunc, adjustEvent)
+    ADJUST(::ULIS::Format_HSLAF, filterFunc)
 }
 
 
@@ -838,33 +784,22 @@ UOdysseyBlockProxyFunctionLibrary::AdjustCMYKA(
     if( !Block.IsValid() )
         return  FOdysseyBlockProxy::MakeNullProxy();
 
-    TStrongObjectPtr<UCurveFloat> defaultCurve(NewObject<UCurveFloat>()); //Retains the pointer
-    defaultCurve->FloatCurve.AddKey(0.0f, 0.0f);
-    defaultCurve->FloatCurve.AddKey(1.0f, 1.0f);
-
-    if(!CurveC) CurveC = defaultCurve.Get();
-    if(!CurveM) CurveM = defaultCurve.Get();
-    if(!CurveY) CurveY = defaultCurve.Get();
-    if(!CurveK) CurveK = defaultCurve.Get();
-    if(!CurveAlpha) CurveAlpha = defaultCurve.Get();
-
     auto filterFunc = [CurveC, CurveM, CurveY, CurveK, CurveAlpha, PreserveNullAlpha]( const ::ULIS::FBlock& iSrcBlock, const uint8* iSrcPtr, ::ULIS::FBlock& iDstBlock, uint8* iDstPtr ) {
         ::ULIS::FPixel srcProxy(iSrcPtr, iSrcBlock.Format());
         ::ULIS::FPixel dstProxy(iDstPtr, iDstBlock.Format());
 
-        dstProxy.SetCyanF(CurveC->GetFloatValue(srcProxy.CyanF()));
-        dstProxy.SetMagentaF(CurveM->GetFloatValue(srcProxy.MagentaF()));
-        dstProxy.SetYellowF(CurveY->GetFloatValue(srcProxy.YellowF()));
-        dstProxy.SetKeyF(CurveK->GetFloatValue(srcProxy.KeyF()));
+        dstProxy.SetCyanF(CurveC ? CurveC->GetFloatValue(srcProxy.CyanF()) : srcProxy.CyanF());
+        dstProxy.SetMagentaF(CurveM ? CurveM->GetFloatValue(srcProxy.MagentaF()) : srcProxy.MagentaF());
+        dstProxy.SetYellowF(CurveY ? CurveY->GetFloatValue(srcProxy.YellowF()) : srcProxy.YellowF());
+        dstProxy.SetKeyF(CurveK ? CurveK->GetFloatValue(srcProxy.KeyF()) : srcProxy.KeyF());
 
         if(PreserveNullAlpha && srcProxy.AlphaF() == 0.0f)
             dstProxy.SetAlphaF(0.0f);
         else
-            dstProxy.SetAlphaF(CurveAlpha->GetFloatValue(srcProxy.AlphaF()));
+            dstProxy.SetAlphaF(CurveAlpha ? CurveAlpha->GetFloatValue(srcProxy.AlphaF()) : srcProxy.AlphaF());
     };
 
-    ADJUSTEVENT(UCurveFloat, CurveC, CurveM, CurveY, CurveK, CurveAlpha);
-    ADJUST(::ULIS::Format_CMYKAF, filterFunc, adjustEvent)
+    ADJUST(::ULIS::Format_CMYKAF, filterFunc)
 }
 
 
@@ -882,32 +817,21 @@ UOdysseyBlockProxyFunctionLibrary::AdjustLabA(
     if( !Block.IsValid() )
         return  FOdysseyBlockProxy::MakeNullProxy();
 
-    TStrongObjectPtr<UCurveFloat> defaultCurve(NewObject<UCurveFloat>()); //Retains the pointer
-    defaultCurve->FloatCurve.AddKey(0.0f, 0.0f);
-    defaultCurve->FloatCurve.AddKey(1.0f, 1.0f);
-
-    if(!CurveL) CurveL = defaultCurve.Get();
-    if(!CurveA) CurveA = defaultCurve.Get();
-    if(!CurveB) CurveB = defaultCurve.Get();
-    if(!CurveAlpha) CurveAlpha = defaultCurve.Get();
-    
     auto filterFunc = [CurveL, CurveA, CurveB, CurveAlpha, PreserveNullAlpha]( const ::ULIS::FBlock& iSrcBlock, const uint8* iSrcPtr, ::ULIS::FBlock& iDstBlock, uint8* iDstPtr ) {
         ::ULIS::FPixel srcProxy(iSrcPtr, iSrcBlock.Format());
         ::ULIS::FPixel dstProxy(iDstPtr, iDstBlock.Format());
 
-        dstProxy.SetLF(CurveL->GetFloatValue(srcProxy.LF()));
-        dstProxy.SetaF(CurveA->GetFloatValue(srcProxy.aF()));
-        dstProxy.SetbF(CurveB->GetFloatValue(srcProxy.bF()));
+        dstProxy.SetLF(CurveL ? CurveL->GetFloatValue(srcProxy.LF()) : srcProxy.LF());
+        dstProxy.SetaF(CurveA ? CurveA->GetFloatValue(srcProxy.aF()) : srcProxy.aF());
+        dstProxy.SetbF(CurveB ? CurveB->GetFloatValue(srcProxy.bF()) : srcProxy.bF());
 
         if(PreserveNullAlpha && srcProxy.AlphaF() == 0.0f)
             dstProxy.SetAlphaF(0.0f);
         else
-            dstProxy.SetAlphaF(CurveAlpha->GetFloatValue(srcProxy.AlphaF()));
+            dstProxy.SetAlphaF(CurveAlpha ? CurveAlpha->GetFloatValue(srcProxy.AlphaF()) : srcProxy.AlphaF());
     };
 
-
-    ADJUSTEVENT(UCurveFloat, CurveL, CurveA, CurveB, CurveAlpha);
-    ADJUST(::ULIS::Format_LabAF, filterFunc, adjustEvent)
+    ADJUST(::ULIS::Format_LabAF, filterFunc)
 }
 
 //static
