@@ -28,6 +28,11 @@ public:
 
     //---
 
+    TSharedPtr<FUICommandInfo> StepToPreviousShot;
+    TSharedPtr<FUICommandInfo> StepToNextShot;
+
+    //---
+
     TSharedPtr<FUICommandInfo> CreateCameraAtCurrentTime;
     TSharedPtr<FUICommandInfo> SnapCameraToViewportAtCurrentTime;
     TSharedPtr<FUICommandInfo> PilotCameraAtCurrentTime;
