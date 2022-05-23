@@ -669,6 +669,16 @@ public:
 private:
     static void CloneInnerPlane( ISequencer* iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, UMovieScene* iMovieScene, bool iEmptyDrawings, APlaneActor* iPlaneToClone, FGuid iPlaneBinding, ACineCameraActor* iClonedCamera, bool iAttachPlaneToCamera );
 
+public:
+    static void StepToNextShot( ISequencer* iSequencer );
+    static void StepToPreviousShot( ISequencer* iSequencer );
+
+private:
+    static void StepToNextShot( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID );
+    static void StepToPreviousShot( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID );
+
+    static UMovieSceneSubSection* FindNextOrPreviousShot( UMovieSceneSequence* iSequence, FFrameNumber iSearchFromTime, bool iNextShot );
+
 // Inside EposSequenceTools
 private:
     class cTemporarySwitchInner

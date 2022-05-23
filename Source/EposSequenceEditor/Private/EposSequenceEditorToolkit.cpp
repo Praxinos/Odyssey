@@ -32,9 +32,10 @@
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "EposMovieSceneSequence.h"
 #include "EposSequenceEditorCommands.h"
-#include "ToolkitHelpers.h"
 #include "Misc/EposSequenceEditorPlaybackContext.h"
 #include "Render/EposSequencePipelineRenderer.h"
+#include "ToolkitHelpers.h"
+#include "Tools/EposSequenceTools.h"
 
 #define LOCTEXT_NAMESPACE "EposSequenceEditorToolkit"
 
@@ -290,6 +291,18 @@ void FEposSequenceEditorToolkit::GoToFocusedSequence( TArray< UEposMovieSceneSeq
 void
 FEposSequenceEditorToolkit::BindCommands( TSharedPtr<FUICommandList> CommandList )
 {
+    CommandList->MapAction(
+        FEposSequenceEditorCommands::Get().StepToNextShot,
+        FExecuteAction::CreateStatic( &ShotSequenceTools::StepToNextShot, mSequencer.Get() )
+    );
+
+    CommandList->MapAction(
+        FEposSequenceEditorCommands::Get().StepToPreviousShot,
+        FExecuteAction::CreateStatic( &ShotSequenceTools::StepToPreviousShot, mSequencer.Get() )
+    );
+
+    //---
+
     CommandList->MapAction(
         FEposSequenceEditorCommands::Get().GotoPraxinos,
         FExecuteAction::CreateStatic( &FEposSequenceEditorActionCallbacks::GotoPraxinos )

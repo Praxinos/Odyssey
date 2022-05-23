@@ -88,6 +88,165 @@ BoardSequenceTools::FindOrCreateCinematicBoardTrack( ISequencer* iSequencer )
 
 //---
 
+//static
+void
+ShotSequenceTools::StepToNextShot( ISequencer* iSequencer )
+{
+    if( !Cast<UShotSequence>( iSequencer->GetFocusedMovieSceneSequence() ) )
+        return;
+
+    StepToNextShot( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID() );
+}
+
+//static
+void
+ShotSequenceTools::StepToPreviousShot( ISequencer* iSequencer )
+{
+    if( !Cast<UShotSequence>( iSequencer->GetFocusedMovieSceneSequence() ) )
+        return;
+
+    StepToPreviousShot( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID() );
+}
+
+//static
+void
+ShotSequenceTools::StepToNextShot( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID )
+{
+    if( iSequenceID == MovieSceneSequenceID::Root )
+        return;
+
+    UMovieSceneSubSection* subsection = iSequencer.FindSubSection( iSequenceID );
+    if( !subsection )
+        return;
+
+    UMovieSceneSequence* parent_sequence = subsection->GetTypedOuter<UMovieSceneSequence>();
+    check( parent_sequence );
+
+    FFrameTime time_in_parent = iSequence->GetMovieScene()->GetPlaybackRange().GetLowerBoundValue() * subsection->OuterToInnerTransform().InverseLinearOnly();
+
+    UMovieSceneSubSection* next_subsection = FindNextOrPreviousShot( parent_sequence, time_in_parent.FloorToFrame(), true /* iNextShot */ );
+    if( !next_subsection )
+        return;
+
+    iSequencer.FocusSequenceInstance( *next_subsection );
+    iSequencer.SetLocalTime( iSequencer.GetFocusedMovieSceneSequence()->GetMovieScene()->GetPlaybackRange().GetLowerBoundValue(), ESnapTimeMode::STM_None );
+}
+
+//static
+void
+ShotSequenceTools::StepToPreviousShot( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID )
+{
+    if( iSequenceID == MovieSceneSequenceID::Root )
+        return;
+
+    UMovieSceneSubSection* subsection = iSequencer.FindSubSection( iSequenceID );
+    if( !subsection )
+        return;
+
+    UMovieSceneSequence* parent_sequence = subsection->GetTypedOuter<UMovieSceneSequence>();
+    check( parent_sequence );
+
+    FFrameTime time_in_parent = iSequence->GetMovieScene()->GetPlaybackRange().GetLowerBoundValue() * subsection->OuterToInnerTransform().InverseLinearOnly();
+
+    UMovieSceneSubSection* previous_subsection = FindNextOrPreviousShot( parent_sequence, time_in_parent.FloorToFrame(), false /* iNextShot */ );
+    if( !previous_subsection )
+        return;
+
+    iSequencer.FocusSequenceInstance( *previous_subsection );
+    iSequencer.SetLocalTime( iSequencer.GetFocusedMovieSceneSequence()->GetMovieScene()->GetPlaybackRange().GetLowerBoundValue(), ESnapTimeMode::STM_None );
+}
+
+// Same as in FSequencer::FindNextOrPreviousShot()#2600
+//static
+UMovieSceneSubSection*
+ShotSequenceTools::FindNextOrPreviousShot( UMovieSceneSequence* iSequence, FFrameNumber iSearchFromTime, bool iNextShot )
+{
+    UMovieScene* OwnerMovieScene = iSequence->GetMovieScene();
+
+    UMovieSceneTrack* CinematicBoardTrack = OwnerMovieScene->FindMasterTrack( UMovieSceneCinematicBoardTrack::StaticClass() );
+    if( !CinematicBoardTrack )
+    {
+        return nullptr;
+    }
+
+    FFrameNumber MinTime = TNumericLimits<FFrameNumber>::Max();
+
+    TMap<FFrameNumber, int32> StartTimeMap;
+    for( int32 SectionIndex = 0; SectionIndex < CinematicBoardTrack->GetAllSections().Num(); ++SectionIndex )
+    {
+        UMovieSceneSection* ShotSection = CinematicBoardTrack->GetAllSections()[SectionIndex];
+
+        if( ShotSection && ShotSection->HasStartFrame() )
+        {
+            StartTimeMap.Add( ShotSection->GetInclusiveStartFrame(), SectionIndex );
+        }
+    }
+
+    StartTimeMap.KeySort( TLess<FFrameNumber>() );
+
+    int32 MinShotIndex = -1;
+    for( auto StartTimeIt = StartTimeMap.CreateIterator(); StartTimeIt; ++StartTimeIt )
+    {
+        FFrameNumber StartTime = StartTimeIt->Key;
+        if( iNextShot )
+        {
+            if( StartTime > iSearchFromTime )
+            {
+                FFrameNumber DiffTime = FMath::Abs( StartTime - iSearchFromTime );
+                if( DiffTime < MinTime )
+                {
+                    MinTime = DiffTime;
+                    MinShotIndex = StartTimeIt->Value;
+                }
+            }
+        }
+        else
+        {
+            if( iSearchFromTime >= StartTime )
+            {
+                FFrameNumber DiffTime = FMath::Abs( StartTime - iSearchFromTime );
+                if( DiffTime < MinTime )
+                {
+                    MinTime = DiffTime;
+                    MinShotIndex = StartTimeIt->Value;
+                }
+            }
+        }
+    }
+
+    int32 TargetShotIndex = -1;
+
+    if( iNextShot )
+    {
+        TargetShotIndex = MinShotIndex;
+    }
+    else
+    {
+        int32 PreviousShotIndex = -1;
+        for( auto StartTimeIt = StartTimeMap.CreateIterator(); StartTimeIt; ++StartTimeIt )
+        {
+            if( StartTimeIt->Value == MinShotIndex )
+            {
+                if( PreviousShotIndex != -1 )
+                {
+                    TargetShotIndex = PreviousShotIndex;
+                }
+                break;
+            }
+            PreviousShotIndex = StartTimeIt->Value;
+        }
+    }
+
+    if( TargetShotIndex == -1 )
+    {
+        return nullptr;
+    }
+
+    return CastChecked<UMovieSceneSubSection>( CinematicBoardTrack->GetAllSections()[TargetShotIndex] );
+}
+
+//---
+
 //namespace
 //{
 //static bool IsPackageNameUnique( const TArray<FAssetData>& iObjectList, const FString& iNewPackageName )
@@ -562,6 +721,8 @@ CinematicBoardTrackTools::InsertShot( ISequencer* iSequencer, FFrameNumber iFram
 //    iSequencer->SelectSection( newBoard );
 //    iSequencer->ThrobSectionSelection();
 //}
+
+//---
 
 //static
 void

@@ -52,6 +52,11 @@ FEposSequenceEditorCommands::RegisterCommands()
 
     //---
 
+    UI_COMMAND( StepToPreviousShot,                 "Step to Previous Shot", "Step to previous shot", EUserInterfaceActionType::Button, FInputChord( EKeys::Y ) );
+    UI_COMMAND( StepToNextShot,                     "Step to Next Shot", "Step to next shot", EUserInterfaceActionType::Button, FInputChord( EKeys::U ) );
+
+    //---
+
     UI_COMMAND( CreateCameraAtCurrentTime,          "Create Camera", "Create a new camera and set it as the current camera cut", EUserInterfaceActionType::Button, FInputChord() );
     UI_COMMAND( SnapCameraToViewportAtCurrentTime,  "Snap Camera to Viewport", "Snap the existing camera to the viewport", EUserInterfaceActionType::Button, FInputChord() );
     UI_COMMAND( PilotCameraAtCurrentTime,           "Pilot Camera", "Pilot the existing camera", EUserInterfaceActionType::Button, FInputChord() );
