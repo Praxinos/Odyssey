@@ -217,7 +217,10 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
 
     FLinearColor Gray(.3f, .3f, .3f, 1.f);
 
-    TSharedRef<SFilmOverlayOptions> FilmOverlayOptions = SNew(SFilmOverlayOptions);
+    FilmOverlayOptions = SNew(SFilmOverlayOptions);
+
+    FilmOverlayOptions->GetFilmOverlayWidget()->SetRenderTransform( transform );
+    FilmOverlayOptions->GetFilmOverlayWidget()->SetRenderTransformPivot( FVector2D( .5f, .5f ) );
 
     //---
 
@@ -569,7 +572,7 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
                 + SHorizontalBox::Slot()
                 .AutoWidth()
                 [
-                    FilmOverlayOptions
+                    FilmOverlayOptions.ToSharedRef()
                 ]
 
                 + SHorizontalBox::Slot()
@@ -864,6 +867,7 @@ SStoryboardLevelViewport::SetViewportRotation( float iRotation )
     FSlateRenderTransform rotation = FSlateRenderTransform( FQuat2D( radian )/*, FVector2D( 0, 0 )*/ );
     //transform = transform.Concatenate( FSlateRenderTransform( .5f ) ); // No need to scale as its parent will clip this widget
     ViewportWidget->SetRenderTransform( rotation );
+    FilmOverlayOptions->GetFilmOverlayWidget()->SetRenderTransform( rotation );
 }
 
 void
@@ -876,6 +880,7 @@ SStoryboardLevelViewport::AddViewportRotation( float iDeltaRotation )
     FSlateRenderTransform rotation = FSlateRenderTransform( FQuat2D( radian )/*, FVector2D( 0, 0 )*/ );
     //transform = transform.Concatenate( FSlateRenderTransform( .5f ) ); // No need to scale as its parent will clip this widget
     ViewportWidget->SetRenderTransform( rotation );
+    FilmOverlayOptions->GetFilmOverlayWidget()->SetRenderTransform( rotation );
 }
 
 bool

@@ -170,6 +170,8 @@ private:
 
     /** Widget where the scene viewport is drawn in */
     TSharedPtr<SStoryboardPreviewViewport> ViewportWidget;
+    /** Widget where the grid option are and which contains the widget where grid is drawn in */
+    TSharedPtr<SFilmOverlayOptions> FilmOverlayOptions;
 
     /** The toolkit we're currently editing */
     TWeakPtr<FEposSequenceEditorToolkit> CurrentToolkit;
