@@ -610,6 +610,33 @@ ProjectAssetTools::CreateMaterialAndTexture( const IMovieScenePlayer& iPlayer, U
 
 //static
 UMaterialInstanceConstant*
+ProjectAssetTools::CreateMaterialAndTexture( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, UMovieSceneSequence* iSequence, UTexture2D* iTexture )
+{
+    FString package_name;
+    FString asset_name;
+    UMaterialInstanceConstant* new_material = CreateMaterial( iPlayer, iRootSequence, iSequence, package_name, asset_name );
+    if( !new_material )
+        return nullptr;
+
+    //UTexture* texture;
+    //iMaterialTemplate->GetTextureParameterValue( TEXT( "DrawingTexture" ), texture );
+    //FIntPoint texture_size( texture->GetSurfaceWidth(), texture->GetSurfaceHeight() ); // For UTexture2D, GetSurfaceWidth() returns GetSizeX() which returns an int32, so it should be ok
+
+    //UTexture2D* new_texture = CreateTexture2D( iPlayer, iRootSequence, iSequence, new_material, texture_size, package_name, asset_name );
+    UTexture2D* new_texture = iTexture;
+    if( !new_texture )
+    {
+        UEditorAssetLibrary::DeleteLoadedAsset( new_material );
+        return nullptr;
+    }
+
+    new_material->SetTextureParameterValueEditorOnly( TEXT( "DrawingTexture" ), new_texture );
+
+    return new_material;
+}
+
+//static
+UMaterialInstanceConstant*
 ProjectAssetTools::CloneMaterialAndTexture( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, UMovieSceneSequence* iSequence, UMaterialInstance* iMaterialToClone )
 {
     FString package_name;

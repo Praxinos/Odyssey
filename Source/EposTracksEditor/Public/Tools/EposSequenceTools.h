@@ -41,6 +41,12 @@ struct FCameraArgs
 struct FPlaneArgs
 {
     FString mName;
+    TWeakObjectPtr<UTexture2D> mTexture;
+};
+
+struct FDrawingArgs
+{
+    TWeakObjectPtr<UTexture2D> mTexture;
 };
 
 class EPOSTRACKSEDITOR_API CinematicBoardTrackTools
@@ -519,8 +525,8 @@ public:
     * @param FFrameNumber   iFrameNumber to get the board section.
     * @param FGuid          iPlaneBinding to get the plane track.
     */
-    static void CreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<FGuid> iPlaneBindings );
-    static void CreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding );
+    static void CreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<FGuid> iPlaneBindings, const FDrawingArgs& iDrawingArgs = FDrawingArgs() );
+    static void CreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding, const FDrawingArgs& iDrawingArgs = FDrawingArgs() );
 
     /**
     *  Create a new drawing (material & texture) in a plane in the board section
@@ -530,8 +536,8 @@ public:
     * @param FFrameNumber   iFrameNumber to get the board section.
     * @param FGuid          iPlaneBinding to get the plane track.
     */
-    static void CreateDrawing( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber, TArray<FGuid> iPlaneBindings );
-    static void CreateDrawing( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber, FGuid iPlaneBinding );
+    static void CreateDrawing( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber, TArray<FGuid> iPlaneBindings, const FDrawingArgs& iDrawingArgs = FDrawingArgs() );
+    static void CreateDrawing( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber, FGuid iPlaneBinding, const FDrawingArgs& iDrawingArgs = FDrawingArgs() );
 
     /**
     *  Can a drawing be created in the board section ?
@@ -681,7 +687,7 @@ private:
 
 // Inside EposSequenceTools
 private:
-    class cTemporarySwitchInner
+    class EPOSTRACKSEDITOR_API cTemporarySwitchInner
     {
     public:
         cTemporarySwitchInner( ISequencer& iSequencer, FMovieSceneSequenceIDRef iInnerID );
@@ -691,6 +697,8 @@ private:
         FMovieSceneSequenceID mOriginalId;
         FFrameTime mOriginalGlobalTime;
     };
+
+    friend class FImageSequenceConverter;
 
 public:
     static void RenameBinding( ISequencer* iSequencer, FGuid iBinding, FString iNewLabel );
@@ -838,8 +846,8 @@ public:
     *
     * @param ISequencer iSequencer to add a drawing.
     */
-    static void CreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<FGuid> iPlaneBindings );
-    static void CreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding );
+    static void CreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<FGuid> iPlaneBindings, const FDrawingArgs& iDrawingArgs = FDrawingArgs() );
+    static void CreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding, const FDrawingArgs& iDrawingArgs = FDrawingArgs() );
 
     static bool CanCreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding );
 
@@ -850,7 +858,7 @@ public:
     static void DeleteDrawing( ISequencer* iSequencer, TArrayView<TWeakObjectPtr<UMovieSceneSection>> iSections, TArrayView<FMovieSceneChannelHandle> iChannelHandles, TArrayView<FKeyHandle> iKeyHandles );
 
 private:
-    static void CreateDrawing( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, TArray<FGuid> iPlaneBindings );
+    static void CreateDrawing( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, TArray<FGuid> iPlaneBindings, const FDrawingArgs& iDrawingArgs );
     // FDrawing is used as parameter but only because the function is private, otherwise it should be UMovieSceneSection/FMovieSceneChannelHandle/FKeyHandle
     static bool IsDrawingInEditionMode( ISequencer* iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FDrawing& iDrawing );
     static void CloneDrawing( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, UMovieSceneSection* iSection, const FMovieSceneChannelHandle& iChannelHandle, FKeyHandle iKeyHandle, FFrameNumber iFrameNumber );

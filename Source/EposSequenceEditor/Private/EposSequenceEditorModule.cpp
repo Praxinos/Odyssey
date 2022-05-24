@@ -15,13 +15,15 @@
 #include "Board/BoardSequenceActions.h"
 #include "Board/BoardSequenceCustomization.h"
 #include "EposSequenceEditorCommands.h"
-#include "EposSequenceEditorNewStoryboardDialog.h"
+#include "Import/ImageSequenceImportSettings.h"
+#include "Import/ImageSequenceImportSettingsCustomization.h"
 #include "Render/EposSequencePipelineRenderer.h"
 #include "Settings/EposSequenceEditorSettings.h"
 #include "Settings/EposSequenceEditorSettingsCustomization.h"
 #include "Shot/ShotSequence.h"
 #include "Shot/ShotSequenceActions.h"
 #include "Shot/ShotSequenceCustomization.h"
+#include "StoryboardCreationDialog/NewStoryboardDialog.h"
 #include "StoryboardViewport/StoryboardViewportLayoutEntity.h"
 #include "Styles/EposSequenceEditorStyle.h"
 
@@ -130,29 +132,34 @@ FEposSequenceEditorModule::UnregisterAssetTools()
     AssetTools.UnregisterAssetTypeActions( mShotSequenceTypeActions.ToSharedRef() );
 }
 
-//static
-void
-FEposSequenceEditorModule::OnCreateNewAssetWithSettings( UClass* iClass )
-{
-    FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>( TEXT( "LevelEditor" ) );
-    NewStoryboardDialog::OpenDialog( LevelEditorModule.GetLevelEditorTabManager().ToSharedRef() );
-}
-
 void
 FEposSequenceEditorModule::RegisterMenuExtensions()
 {
     mCommandList = MakeShareable( new FUICommandList );
     mCommandList->MapAction(
         FEposSequenceEditorCommands::Get().NewStoryboardWithSettings,
-        FExecuteAction::CreateStatic( &FEposSequenceEditorModule::OnCreateNewAssetWithSettings, UBoardSequence::StaticClass() )
+        FExecuteAction::CreateLambda( []()
+                                      {
+                                          FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>( TEXT( "LevelEditor" ) );
+                                          NewStoryboardDialog::OpenCreationDialog( LevelEditorModule.GetLevelEditorTabManager().ToSharedRef() );
+                                      } )
+    );
+    mCommandList->MapAction(
+        FEposSequenceEditorCommands::Get().NewStoryboardImportImageSequence,
+        FExecuteAction::CreateLambda( []()
+                                      {
+                                          FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>( TEXT( "LevelEditor" ) );
+                                          NewStoryboardDialog::OpenImportImageSequenceDialog( LevelEditorModule.GetLevelEditorTabManager().ToSharedRef() );
+                                      } )
     );
 
     mCinematicsMenuExtender = MakeShareable( new FExtender );
-    mCinematicsMenuExtender->AddMenuExtension( "LevelEditorNewCinematics", EExtensionHook::After, mCommandList, FMenuExtensionDelegate::CreateStatic( []( FMenuBuilder& MenuBuilder )
+    mCinematicsMenuExtender->AddMenuExtension( "LevelEditorNewCinematics", EExtensionHook::After, mCommandList, FMenuExtensionDelegate::CreateLambda( []( FMenuBuilder& MenuBuilder )
     {
         MenuBuilder.BeginSection( "CinematicsEpos", LOCTEXT( "CinematicsEpos", "Epos" ) );
         {
             MenuBuilder.AddMenuEntry( FEposSequenceEditorCommands::Get().NewStoryboardWithSettings );
+            MenuBuilder.AddMenuEntry( FEposSequenceEditorCommands::Get().NewStoryboardImportImageSequence );
         }
         MenuBuilder.EndSection();
     } ) );
@@ -269,6 +276,10 @@ FEposSequenceEditorModule::RegisterPropertyCustomizations()
         // this is where our MakeInstance() method is usefull
         FOnGetPropertyTypeCustomizationInstance::CreateStatic( &FInfoBarCustomization::MakeInstance ) );
 
+    PropertyModule.RegisterCustomPropertyTypeLayout(
+        FImageSequenceImportSettings::StaticStruct()->GetFName(),
+        FOnGetPropertyTypeCustomizationInstance::CreateStatic( &FImageSequenceImportSettingsCustomization::MakeInstance ) );
+
     PropertyModule.NotifyCustomizationModuleChanged();
 }
 
@@ -279,6 +290,7 @@ FEposSequenceEditorModule::UnregisterPropertyCustomizations()
     {
         FPropertyEditorModule& PropertyModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>( "PropertyEditor" );
         PropertyModule.UnregisterCustomPropertyTypeLayout( FInfoBarSettings::StaticStruct()->GetFName() );
+        PropertyModule.UnregisterCustomPropertyTypeLayout( FImageSequenceImportSettings::StaticStruct()->GetFName() );
 
         PropertyModule.NotifyCustomizationModuleChanged();
     }

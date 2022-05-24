@@ -721,7 +721,7 @@ NamingConvention::GenerateTextureAssetPathName( const IMovieScenePlayer& iPlayer
 {
     //FString root_path = GetRootPath( iPlayer, iRootSequence ); // ie. /Game/MyStoryboard2
     //FString texture_path = root_path;
-    FString material_path = FPackageName::GetLongPackagePath( iMaterial->GetPackage()->GetName() );
+    FString material_path = iMaterial ? FPackageName::GetLongPackagePath( iMaterial->GetPackage()->GetName() ) : GetRootPath( iPlayer, iRootSequence );
     FString texture_path = material_path;
 
     //---

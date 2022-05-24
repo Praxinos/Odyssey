@@ -41,8 +41,6 @@ private:
     void RegisterLevelEditorExtensions();
     void UnregisterLevelEditorExtensions();
 
-    static void OnCreateNewAssetWithSettings( UClass* iClass );
-
     void RegisterSettings();
     void UnregisterSettings();
 

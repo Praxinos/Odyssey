@@ -5,9 +5,9 @@
 
 #include "CoreMinimal.h"
 
-#include "EposSequenceEditorNewStoryboardDialog.generated.h"
+#include "StoryboardSettings.generated.h"
 
-class FTabManager;
+//---
 
 USTRUCT()
 struct FStoryboardSettings
@@ -22,11 +22,4 @@ public:
     /** Storyboard path. */
     UPROPERTY( EditAnywhere, Category=Storyboard, meta=(ContentDir) )
     FDirectoryPath StoryboardPath { TEXT( "/Game" ) };
-};
-
-class NewStoryboardDialog
-{
-public:
-    /** Open dialog for creating a storyboard */
-    static void OpenDialog( const TSharedRef<FTabManager>& TabManager );
 };

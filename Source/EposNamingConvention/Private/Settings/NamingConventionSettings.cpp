@@ -5,6 +5,8 @@
 
 #define LOCTEXT_NAMESPACE "NamingConventionSettings"
 
+//---
+
 #define ADD_PATTERN_KEYWORD( ioMap, iKey, iTextKeyPrefix, iText )       \
 {                                                                       \
     FString key = TEXT( iKey );                                         \
@@ -33,7 +35,7 @@ FNamingConventionCamera::FNamingConventionCamera()
 FNamingConventionShot::FNamingConventionShot()
 {
     ADD_PATTERN_KEYWORD( PatternKeywords, "shot-index",             "shot-pattern-keyword", "an incremental index" );
-    ADD_PATTERN_KEYWORD( PatternKeywords, "take-index",             "shot-pattern-keyword", "an incremental index for take (not used)" );
+    ADD_PATTERN_KEYWORD( PatternKeywords, "take-index",             "shot-pattern-keyword", "an incremental index for take" );
 
     ADD_PATTERN_KEYWORD( PatternKeywords, "studio-name",            "shot-pattern-keyword", "the full studio name" );
     ADD_PATTERN_KEYWORD( PatternKeywords, "studio-acronym",         "shot-pattern-keyword", "the studio name acronym" );
@@ -66,6 +68,8 @@ FNamingConventionBoard::FNamingConventionBoard()
     //ADD_PATTERN_KEYWORD( PatternKeywords, "department-acronym",     "board-pattern-keyword", "the department name acronym" );
     ADD_PATTERN_KEYWORD( PatternKeywords, "initials",               "board-pattern-keyword", "some initials" );
 }
+
+#undef ADD_PATTERN_KEYWORD
 
 //---
 

@@ -86,7 +86,7 @@ ShotSequenceTools::CanCreateDrawing( ISequencer* iSequencer, FFrameNumber iFrame
 
 //static
 void
-BoardSequenceTools::CreateDrawing( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber, TArray<FGuid> iPlaneBindings )
+BoardSequenceTools::CreateDrawing( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber, TArray<FGuid> iPlaneBindings, const FDrawingArgs& iDrawingArgs )
 {
     BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSubSection, iSequencer->GetFocusedTemplateID() );
     if( !result.mInnerSequence )
@@ -99,51 +99,51 @@ BoardSequenceTools::CreateDrawing( ISequencer* iSequencer, const UMovieSceneSubS
         return;
 
     FFrameTime inner_frame = iFrameNumber * iSubSection.OuterToInnerTransform();
-    ShotSequenceTools::CreateDrawing( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, inner_frame.GetFrame(), iPlaneBindings );
+    ShotSequenceTools::CreateDrawing( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, inner_frame.GetFrame(), iPlaneBindings, iDrawingArgs );
 }
 
 //static
 void
-BoardSequenceTools::CreateDrawing( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
+BoardSequenceTools::CreateDrawing( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber, FGuid iPlaneBinding, const FDrawingArgs& iDrawingArgs )
 {
-    BoardSequenceTools::CreateDrawing( iSequencer, iSubSection, iFrameNumber, TArray<FGuid>( { iPlaneBinding } ) );
+    BoardSequenceTools::CreateDrawing( iSequencer, iSubSection, iFrameNumber, TArray<FGuid>( { iPlaneBinding } ), iDrawingArgs );
 }
 
 //static
 void
-BoardSequenceTools::CreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<FGuid> iPlaneBindings )
+BoardSequenceTools::CreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<FGuid> iPlaneBindings, const FDrawingArgs& iDrawingArgs )
 {
     BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
     if( !result.mInnerSequence )
         return;
 
-    ShotSequenceTools::CreateDrawing( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, result.mInnerTime.GetFrame(), iPlaneBindings );
+    ShotSequenceTools::CreateDrawing( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, result.mInnerTime.GetFrame(), iPlaneBindings, iDrawingArgs );
 }
 
 //static
 void
-BoardSequenceTools::CreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
+BoardSequenceTools::CreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding, const FDrawingArgs& iDrawingArgs )
 {
-    BoardSequenceTools::CreateDrawing( iSequencer, iFrameNumber, TArray<FGuid>( { iPlaneBinding } ) );
+    BoardSequenceTools::CreateDrawing( iSequencer, iFrameNumber, TArray<FGuid>( { iPlaneBinding } ), iDrawingArgs );
 }
 
 //static
 void
-ShotSequenceTools::CreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<FGuid> iPlaneBindings )
+ShotSequenceTools::CreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<FGuid> iPlaneBindings, const FDrawingArgs& iDrawingArgs )
 {
-    CreateDrawing( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber, iPlaneBindings );
+    CreateDrawing( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber, iPlaneBindings, iDrawingArgs );
 }
 
 //static
 void
-ShotSequenceTools::CreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
+ShotSequenceTools::CreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding, const FDrawingArgs& iDrawingArgs )
 {
-    ShotSequenceTools::CreateDrawing( iSequencer, iFrameNumber, TArray<FGuid>( { iPlaneBinding } ) );
+    ShotSequenceTools::CreateDrawing( iSequencer, iFrameNumber, TArray<FGuid>( { iPlaneBinding } ), iDrawingArgs );
 }
 
 //static
 void
-ShotSequenceTools::CreateDrawing( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, TArray<FGuid> iPlaneBindings )
+ShotSequenceTools::CreateDrawing( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, TArray<FGuid> iPlaneBindings, const FDrawingArgs& iDrawingArgs )
 {
     const FScopedTransaction transaction( LOCTEXT( "transaction.create-plane-drawing", "Create a new drawing" ) );
 
@@ -166,38 +166,48 @@ ShotSequenceTools::CreateDrawing( ISequencer& iSequencer, UMovieSceneSequence* i
         UMovieScenePrimitiveMaterialSection* section = result.mSections[0].Get();
         FMovieSceneObjectPathChannel* channel = &section->MaterialChannel;
 
-        TArrayView<TWeakObjectPtr<>> objects = iSequencer.FindBoundObjects( plane_binding, iSequenceID );
-        if( objects.Num() != 1 )
-            continue;
-        APlaneActor* plane = Cast<APlaneActor>( objects[0] );
-        if( !plane )
-            continue;
-
         //---
 
-        const UEposTracksEditorSettings* settings = GetDefault<UEposTracksEditorSettings>();
-        FIntPoint texture_size = plane->ComputeTextureSize( camera, settings->TextureSettings.Height );
+        UMaterialInstanceConstant* new_material = nullptr;
 
-        if( channel->GetNumKeys() )
+        if( iDrawingArgs.mTexture.IsValid() )
         {
-            FDrawing first_drawing;
-            first_drawing.mSection = result.mSections[0];
-            first_drawing.mChannel = channel;
-            first_drawing.mKeyHandle = channel->GetData().GetHandle( 0 );
-
-            UMaterialInstance* material = first_drawing.GetMaterial();
-            UTexture2D* first_texture = ProjectAssetTools::GetTexture2D( iSequence, material );
-            if( first_texture )
-                texture_size = plane->ComputeTextureSize( camera, first_texture->GetSurfaceHeight() );
+            new_material = ProjectAssetTools::CreateMaterialAndTexture( iSequencer, iSequencer.GetRootMovieSceneSequence(), iSequence, iDrawingArgs.mTexture.Get() );
         }
+        else
+        {
+            TArrayView<TWeakObjectPtr<>> objects = iSequencer.FindBoundObjects( plane_binding, iSequenceID );
+            if( objects.Num() != 1 )
+                continue;
+            APlaneActor* plane = Cast<APlaneActor>( objects[0] );
+            if( !plane )
+                continue;
+
+            const UEposTracksEditorSettings* settings = GetDefault<UEposTracksEditorSettings>();
+            FIntPoint texture_size = plane->ComputeTextureSize( camera, settings->TextureSettings.Height );
+
+            if( channel->GetNumKeys() )
+            {
+                FDrawing first_drawing;
+                first_drawing.mSection = result.mSections[0];
+                first_drawing.mChannel = channel;
+                first_drawing.mKeyHandle = channel->GetData().GetHandle( 0 );
+
+                UMaterialInstance* material = first_drawing.GetMaterial();
+                UTexture2D* first_texture = ProjectAssetTools::GetTexture2D( iSequence, material );
+                if( first_texture )
+                    texture_size = plane->ComputeTextureSize( camera, first_texture->GetSurfaceHeight() );
+            }
+
+            new_material = ProjectAssetTools::CreateMaterialAndTexture( iSequencer, iSequencer.GetRootMovieSceneSequence(), iSequence, texture_size );
+        }
+
+        if( !new_material )
+            continue;
 
         //---
 
         section->Modify();
-
-        UMaterialInstanceConstant* new_material = ProjectAssetTools::CreateMaterialAndTexture( iSequencer, iSequencer.GetRootMovieSceneSequence(), iSequence, texture_size );
-        if( !new_material )
-            continue;
 
         FMovieSceneObjectPathChannelKeyValue material_objectpath( new_material );
 
