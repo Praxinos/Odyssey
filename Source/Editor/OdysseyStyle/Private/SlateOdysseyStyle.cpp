@@ -202,7 +202,7 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "PainterEditor.Notes64", new IMAGE_BRUSH( "PainterEditor/notes_64", mIcon64x64 ) );
     Set( "PainterEditor.Notes16", new IMAGE_BRUSH( "PainterEditor/notes_16", mIcon16x16 ) );
 
-    Set( "PainterEditor.Spark64", new IMAGE_BRUSH( "PainterEditor/spark_64", mIcon64x64 ) );
+    Set( "PainterEditor.Spark32", new IMAGE_BRUSH( "PainterEditor/spark_32", mIcon32x32 ) );
     Set( "PainterEditor.Spark20", new IMAGE_BRUSH( "PainterEditor/spark_20", mIcon20x20 ) );
     Set( "PainterEditor.Spark16", new IMAGE_BRUSH( "PainterEditor/spark_16", mIcon16x16 ) );
 
