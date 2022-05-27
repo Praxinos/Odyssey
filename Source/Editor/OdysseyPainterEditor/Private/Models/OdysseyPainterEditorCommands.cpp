@@ -32,15 +32,15 @@ void
 FOdysseyPainterEditorCommands::RegisterCommands()
 {
 // Help Shortcuts Category
-    UI_CMD( AboutIliad, HelpShortcuts, "About ILIAD", "About ILIAD",                                                                                           EUserInterfaceActionType::Button, FInputChord( EKeys::F2 ) );
-    UI_CMD( VisitPraxinosWebsite, HelpShortcuts, "Praxinos Website...", "Praxinos Website...",                                                                 EUserInterfaceActionType::Button, FInputChord() );
-    UI_CMD( ManualAndReleaseNotes, HelpShortcuts, "Manual and Release Notes ...", "Manual and Release Notes ...",                                              EUserInterfaceActionType::Button, FInputChord() );
-    UI_CMD( Discord, HelpShortcuts, "Talk with the developpers ...", "Talk with the developpers ...",                                                          EUserInterfaceActionType::Button, FInputChord() );
-    UI_CMD( SwitchTabletAPI, HelpShortcuts, "Change Tablet API", "Switch between Ink and Wintab on Windows, use NSevent on Mac",                               EUserInterfaceActionType::Button, FInputChord( EKeys::F8 ) );
+    UI_CMD( AboutIliad, HelpShortcuts, "About ILIAD", "About ILIAD",                                                                             EUserInterfaceActionType::Button, FInputChord( EKeys::F2 ) );
+    UI_CMD( VisitPraxinosWebsite, HelpShortcuts, "Praxinos Website...", "Praxinos Website...",                                                   EUserInterfaceActionType::Button, FInputChord() );
+    UI_CMD( ManualAndReleaseNotes, HelpShortcuts, "Manual and Release Notes ...", "Manual and Release Notes ...",                                EUserInterfaceActionType::Button, FInputChord() );
+    UI_CMD( Discord, HelpShortcuts, "Talk with the developpers ...", "Talk with the developpers ...",                                            EUserInterfaceActionType::Button, FInputChord() );
+    UI_CMD( SwitchTabletAPI, HelpShortcuts, "Change Tablet API", "Switch between Ink and Wintab on Windows, use NSevent on Mac",                 EUserInterfaceActionType::Button, FInputChord( EKeys::F8 ) );
 
 // Uncategorized Yet Shortcuts
-    UI_CMD( FillCurrentLayer, UncategorizedYetShortcuts, "Fill Current Layer", "Fill current layer",                                                                       EUserInterfaceActionType::Button, FInputChord( EKeys::F ) );
-    UI_CMD( ClearCurrentLayer, UncategorizedYetShortcuts, "Clear Current Layer", "Clear current layer",                                                                    EUserInterfaceActionType::Button, FInputChord( EKeys::Delete ) );
+    UI_CMD( FillCurrentLayer, UncategorizedYetShortcuts, "Fill Current Layer", "Fill current layer",                                             EUserInterfaceActionType::Button, FInputChord( EKeys::F ) );
+    UI_CMD( ClearCurrentLayer, UncategorizedYetShortcuts, "Clear Current Layer", "Clear current layer",                                          EUserInterfaceActionType::Button, FInputChord( EKeys::Delete ) );
 
 // Viewport Shortcuts Category
     UI_CMD( PanViewport, ViewportShortcuts,  "Pan Viewport", "Hold the key to pan the viewport",                                                 EUserInterfaceActionType::None, FInputChord(EKeys::P));
@@ -61,8 +61,8 @@ FOdysseyPainterEditorCommands::RegisterCommands()
     UI_CMD( SetZoom90Percent, ViewportShortcuts, "Set Zoom 90 Percent", "Set zoom at 90 percent",                                                EUserInterfaceActionType::Button, FInputChord() );
     UI_CMD( SetZoom100Percent, ViewportShortcuts, "Set Zoom 100 Percent", "Set zoom at 100 percent",                                             EUserInterfaceActionType::Button, FInputChord( EModifierKey::Shift, EKeys::Z ) );
     UI_CMD( SetZoomFitScreen, ViewportShortcuts, "Set Zoom Fit Screen", "Set zoom fit screen",                                                   EUserInterfaceActionType::Button, FInputChord( EKeys::S ) );
-    UI_CMD( ZoomInExponential, ViewportShortcuts, "Zoom In (exponential)", "Zoom in (exponential)",                                              EUserInterfaceActionType::Button, FInputChord( EKeys::Add ) );
-    UI_CMD( ZoomOutExponential, ViewportShortcuts, "Zoom Out (exponential)", "Zoom out (exponential)",                                           EUserInterfaceActionType::Button, FInputChord( EKeys::Subtract ) );
+    UI_CMD( ZoomInExponential, ViewportShortcuts, "Zoom In (exponential)", "Zoom in (exponential)",                                              EUserInterfaceActionType::Button, FInputChord( EKeys::Multiply ) );
+    UI_CMD( ZoomOutExponential, ViewportShortcuts, "Zoom Out (exponential)", "Zoom out (exponential)",                                           EUserInterfaceActionType::Button, FInputChord( EKeys::Divide ) );
                                                                                                                                                 
 // Brushes Shortcuts Category                                                                                                                     
     UI_CMD( RefreshBrush, BrushStrokesShortcuts, "Refresh Brush", "Refresh Brush",                                                               EUserInterfaceActionType::Button, FInputChord( EKeys::F5 ) );                                                                                                                                                
