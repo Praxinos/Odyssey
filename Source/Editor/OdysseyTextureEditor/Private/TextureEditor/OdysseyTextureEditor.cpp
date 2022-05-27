@@ -206,6 +206,8 @@ FOdysseyTextureEditor::OnLayerStackCurrentLayerChanged(TSharedPtr<IOdysseyLayer>
         return;
     
     PaintEngine().Block(imageLayer->GetBlock());
+    
+    SetSelectedToolDrawingLocked();
 }
 
 void
@@ -231,22 +233,17 @@ FOdysseyTextureEditor::OnLayerStackImageResultChanged( const ::ULIS::FRectI* iRe
 void
 FOdysseyTextureEditor::OnCurrentLayerLockChanged(bool iOldValue)
 {
-    FOdysseyLayerStack* layerstack = LayerStack();
-    if (!layerstack)
-		return;
-
-    TSharedPtr<IOdysseyLayer> layer = layerstack->GetCurrentLayer();
-    if (!layer)
-        return;
-
-    if(layer->GetType() != IOdysseyLayer::eType::kImage)
-        return;
-
-    Cast<UOdysseyDrawingTool>(mSelectedTool)->IsDrawingLocked(layer->IsLocked(true) || !layer->IsVisible(true));
+    SetSelectedToolDrawingLocked();
 }
 
 void
 FOdysseyTextureEditor::OnCurrentLayerVisibilityChanged(bool iOldValue)
+{
+    SetSelectedToolDrawingLocked();
+}
+
+void
+FOdysseyTextureEditor::SetSelectedToolDrawingLocked()
 {
     FOdysseyLayerStack* layerstack = LayerStack();
     if (!layerstack)

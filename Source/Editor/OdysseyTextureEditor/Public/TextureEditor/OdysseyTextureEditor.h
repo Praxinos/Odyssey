@@ -58,6 +58,9 @@ protected:
     virtual void OnCurrentLayerLockChanged(bool iOldValue);
     virtual void OnCurrentLayerVisibilityChanged(bool iOldValue);
 
+    //Tool
+    virtual void SetSelectedToolDrawingLocked();
+
     //Paint Engine
     virtual void OnPaintEngineCommit(const TArray<::ULIS::FRectI>& iChangedTiles);
     virtual FOdysseyBlendParameters OnPaintEnginePreUpdate(const FOdysseyBlendParameters& iBlendParameters);
