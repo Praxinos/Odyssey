@@ -7,6 +7,7 @@
 #include "CanvasTypes.h"
 #include "CubemapUnwrapUtils.h"
 #include "Editor/UnrealEdEngine.h"
+#include "EngineModule.h"
 #include "Engine/Texture2D.h"
 #include "Engine/TextureCube.h"
 #include "Engine/TextureRenderTarget2D.h"
@@ -139,11 +140,8 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
     //FVector2D pan = mOdysseyPainterEditorViewportPtr.Pin()->GetTransformToDisplayedTexture().TransformPoint(FVector2D(0, 0));
 
     // Fully stream in the texture before drawing it.
-    if(texture)
-    {
-        texture->SetForceMipLevelsToBeResident( 30.0f );
-        texture->WaitForStreaming();
-    }
+    texture->SetForceMipLevelsToBeResident( 30.0f );
+    texture->WaitForStreaming();
 
     // Figure out the size we need
     const float mipLevel = 0; //should be -1, but as we are editing only the first mipmap, then the other mipmaps are not updated and so we cannot use -1 to have automatic mipmap selection.
@@ -180,7 +178,19 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
     // Draw Drawing Surface
     if( texture->GetResource() != nullptr )
     {
-        FCanvasTileItem tileItem(pan, GetZoom() <= 1.0 ? &mBilinearTexture : &mNearestNeighbourTexture, FVector2D( width, height ), FLinearColor::White );
+        // PATCH:
+        // This is a patch to be able to display a virtual texture
+        // As virtual textures resources NEED to be a FVirtualTexture2DResource
+        // We cannot use mBilinearTexture and mNearestNeighbourTexture as they are just simple FTexture objects
+        // TODO: find a way to force Bilinear and NearestNeighbor filtering with virtual textures without having a lag when switching from one to another.
+        FTexture* textureToDisplay = texture->GetResource();
+        if (!texture->IsCurrentlyVirtualTextured())
+        {
+            textureToDisplay = GetZoom() <= 1.0 ? &mBilinearTexture : &mNearestNeighbourTexture;
+        }
+        // END PATCH:
+
+        FCanvasTileItem tileItem(pan, textureToDisplay, FVector2D(width, height), FLinearColor::White);
         tileItem.BatchedElementParameters = batchedElementParameters;
         uint32 result = (uint32)SE_BLEND_RGBA_MASK_START;
         result += ( 1 << 0 );
@@ -190,7 +200,38 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
         tileItem.BlendMode = (ESimpleElementBlendMode)result;
         tileItem.PivotPoint = pivotPoint;
         tileItem.Rotation.Add( 0, rotation, 0 );
-        ioCanvas->DrawItem( tileItem );
+        
+        if (texture->IsCurrentlyVirtualTextured() && texture->Source.GetNumBlocks() > 1)
+        {
+            // Adjust UVs to display entire UDIM range, accounting for UE inverted V-axis
+            const FIntPoint BlockSize = texture->Source.GetSizeInBlocks();
+            tileItem.UV0 = FVector2D(0.0f, 1.0f - (float)BlockSize.Y);
+            tileItem.UV1 = FVector2D((float)BlockSize.X, 1.0f);
+        }
+
+        ioCanvas->DrawItem( tileItem ); 
+
+        // if we are presenting a virtual texture, make the appropriate tiles resident
+        if (texture->IsCurrentlyVirtualTextured())
+        {
+            FVirtualTexture2DResource* VTResource = static_cast<FVirtualTexture2DResource*>(texture->GetResource());
+            const FVector2D ScreenSpaceSize((float)width, (float)height);
+            const FVector2D ViewportPositon(-pan.X, -pan.Y);
+            const FVector2D UV0 = tileItem.UV0;
+            const FVector2D UV1 = tileItem.UV1;
+
+            const ERHIFeatureLevel::Type InFeatureLevel = GMaxRHIFeatureLevel;
+            ENQUEUE_RENDER_COMMAND(MakeTilesResident)(
+                [InFeatureLevel, VTResource, ScreenSpaceSize, ViewportPositon, ViewportSize = iViewport->GetSizeXY(), UV0, UV1](FRHICommandListImmediate& RHICmdList)
+                {
+                    // AcquireAllocatedVT() must happen on render thread
+                    IAllocatedVirtualTexture* AllocatedVT = VTResource->AcquireAllocatedVT();
+
+                    IRendererModule& RenderModule = GetRendererModule();
+                    RenderModule.RequestVirtualTextureTilesForRegion(AllocatedVT, ScreenSpaceSize, ViewportPositon, ViewportSize, UV0, UV1, 0);
+                    RenderModule.LoadPendingVirtualTextureTiles(RHICmdList, InFeatureLevel);
+                });
+        }
 
         // TODO: Unreal BoxItem doesn't support rotation, so we can't draw it properly. We'll have to come up with our own HUD
         // Draw a white border around the texture to show its extents
