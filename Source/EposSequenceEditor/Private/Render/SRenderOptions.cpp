@@ -182,10 +182,11 @@ FEncoderSettingsDetailsCustomization::OnCodecPresetChanged( int32 iCodecPreset, 
     switch( codec_preset )
     {
         case ECodecPresets::kMP4:
-            video_codec = TEXT( "libx264" );
-            // This condition is certainly due to lgpl license
+            // libopenh264 is the default, because on Mac, it seems to have problem with libx264
+            video_codec = TEXT( "libopenh264" );
+            // libopenh264 is not necessary available, but if it is the case, libx264 has a highly change to be available
             if( !mVideoCodecs.ContainsByPredicate( [video_codec]( TSharedPtr<FString> iEntry ) { return *iEntry.Get() == video_codec; } ) )
-                video_codec = TEXT( "libopenh264" );
+                video_codec = TEXT( "libx264" );
             audio_codec = TEXT( "flac" );
             extension = TEXT( "mp4" );
             break;
