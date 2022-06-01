@@ -15,6 +15,9 @@
 #include "Board/BoardSequenceActions.h"
 #include "Board/BoardSequenceCustomization.h"
 #include "EposSequenceEditorCommands.h"
+#include "Export/ImageSequenceExportRenderer.h"
+#include "Export/ExportImageSequenceSettings.h"
+#include "Export/ExportImageSequenceSettingsCustomization.h"
 #include "Import/ImageSequenceImportSettings.h"
 #include "Import/ImageSequenceImportSettingsCustomization.h"
 #include "Render/EposSequencePipelineRenderer.h"
@@ -280,6 +283,10 @@ FEposSequenceEditorModule::RegisterPropertyCustomizations()
         FImageSequenceImportSettings::StaticStruct()->GetFName(),
         FOnGetPropertyTypeCustomizationInstance::CreateStatic( &FImageSequenceImportSettingsCustomization::MakeInstance ) );
 
+    PropertyModule.RegisterCustomPropertyTypeLayout(
+        FExportImageSequenceOptions::StaticStruct()->GetFName(),
+        FOnGetPropertyTypeCustomizationInstance::CreateStatic( &FExportImageSequenceOptionsCustomization::MakeInstance ) );
+
     PropertyModule.NotifyCustomizationModuleChanged();
 }
 
@@ -291,6 +298,7 @@ FEposSequenceEditorModule::UnregisterPropertyCustomizations()
         FPropertyEditorModule& PropertyModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>( "PropertyEditor" );
         PropertyModule.UnregisterCustomPropertyTypeLayout( FInfoBarSettings::StaticStruct()->GetFName() );
         PropertyModule.UnregisterCustomPropertyTypeLayout( FImageSequenceImportSettings::StaticStruct()->GetFName() );
+        PropertyModule.UnregisterCustomPropertyTypeLayout( FExportImageSequenceOptions::StaticStruct()->GetFName() );
 
         PropertyModule.NotifyCustomizationModuleChanged();
     }
@@ -304,6 +312,7 @@ FEposSequenceEditorModule::RegisterMovieRenderer()
     ISequencerModule& SequencerModule = FModuleManager::LoadModuleChecked<ISequencerModule>( "Sequencer" );
 
     mMovieRendererDelegate = SequencerModule.RegisterMovieRenderer( TUniquePtr<IMovieRendererInterface>( new FEposSequencePipelineRenderer ) );
+    mImageSequenceExportRendererDelegate = SequencerModule.RegisterMovieRenderer( TUniquePtr<IMovieRendererInterface>( new FImageSequenceExportRenderer ) );
 }
 
 void
@@ -313,6 +322,7 @@ FEposSequenceEditorModule::UnregisterMovieRenderer()
     if( SequencerModule )
     {
         SequencerModule->UnregisterMovieRenderer( mMovieRendererDelegate );
+        SequencerModule->UnregisterMovieRenderer( mImageSequenceExportRendererDelegate );
     }
 }
 

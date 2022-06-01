@@ -51,6 +51,10 @@ public class EposSequenceEditor : ModuleRules
                 "TimeManagement",
                 "MovieSceneCapture",
                 "MovieRenderPipelineCore",
+                "ImageWrapper",
+                "ImageWriteQueue",
+                "RenderCore",
+                "RHI",
                 // [RUNTIME] custom plugin dependencies
                 "EposMovieScene",
                 "EposSequence",
