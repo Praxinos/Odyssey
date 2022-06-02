@@ -22,9 +22,13 @@ SOdysseyDrawingToolBrushSelector::Construct( const FArguments& InArgs )
     mTool = InArgs._Tool;
 
     FPropertyEditorModule& PropertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
-
-    // Create a details view
-    FDetailsViewArgs DetailsViewArgs(false, false, false, FDetailsViewArgs::HideNameArea, true);
+    
+    FDetailsViewArgs DetailsViewArgs;
+    DetailsViewArgs.bUpdatesFromSelection = false;
+    DetailsViewArgs.bLockable = false;
+    DetailsViewArgs.bAllowSearch = false;
+    DetailsViewArgs.NameAreaSettings = FDetailsViewArgs::HideNameArea;
+    
     TSharedRef<IDetailsView> detailsView = PropertyEditorModule.CreateDetailView(DetailsViewArgs);
     detailsView->RegisterInstancedCustomPropertyLayout(UOdysseyDrawingTool::StaticClass(),
         FOnGetDetailCustomizationInstance::CreateLambda([this]() { return FOdysseyDrawingToolBrushSelectorCustomization::MakeInstance(); }));

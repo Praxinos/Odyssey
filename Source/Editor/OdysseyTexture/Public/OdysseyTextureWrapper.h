@@ -82,8 +82,8 @@ protected:
 
 private:
     void OnPreGlobalObjectPropertyChanged(UObject* iObject, const FEditPropertyChain& iEditPropertyChain);
-    void OnPackagePreSave(UPackage* iPackage);
-    void OnPackageSaved(const FString& iPackageFilename, UObject* iOuter);
+    void OnPackagePreSave(UPackage* iPackage, FObjectPreSaveContext ObjectSaveContext);
+    void OnPackageSaved(const FString& iPackageFilename, UPackage* iPackage, FObjectPostSaveContext ObjectSaveContext);
 
 private:
 	// UTexture* mTexture;

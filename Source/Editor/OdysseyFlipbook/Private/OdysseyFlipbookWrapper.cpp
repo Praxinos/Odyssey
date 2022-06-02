@@ -14,6 +14,8 @@
 #include "OdysseyPixelFormat.h"
 #include "ULISLoaderModule.h"
 #include "TextureCompiler.h"
+#include "UObject/SavePackage.h"
+
 
 FOdysseyFlipbookWrapper::~FOdysseyFlipbookWrapper()
 {
@@ -256,7 +258,9 @@ FOdysseyFlipbookWrapper::CreateTexture(FString iName, ::ULIS::FBlock* iBlock, ET
     FTextureCompilingManager::Get().FinishCompilation(textures);
 
 	FAssetRegistryModule::AssetCreated(texture2D);
-	UPackage::SavePackage(package, texture2D, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone, *AssetName);
+    FSavePackageArgs packageArgs;
+    packageArgs.SaveFlags = EObjectFlags::RF_Public | EObjectFlags::RF_Standalone;
+    UPackage::SavePackage( package, texture2D, *AssetName, packageArgs );
 
 	package->MarkAsFullyLoaded();
 	texture2D->MarkPackageDirty();
@@ -305,7 +309,10 @@ FOdysseyFlipbookWrapper::CreateTexture(int32 iWidth, int32 iHeight, ETextureSour
     FTextureCompilingManager::Get().FinishCompilation({ texture2D });
 
 	FAssetRegistryModule::AssetCreated(texture2D);
-	UPackage::SavePackage(package, texture2D, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone, *AssetName);
+    
+    FSavePackageArgs packageArgs;
+    packageArgs.SaveFlags = EObjectFlags::RF_Public | EObjectFlags::RF_Standalone;
+    UPackage::SavePackage( package, texture2D, *AssetName, packageArgs );
 
 	package->MarkAsFullyLoaded();
 	texture2D->MarkPackageDirty();
@@ -398,7 +405,10 @@ FOdysseyFlipbookWrapper::CreateSprite(FString iName)
 
     //Finalize asset creation
 	FAssetRegistryModule::AssetCreated(sprite);
-	UPackage::SavePackage(package, sprite, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone, *AssetName);
+    
+    FSavePackageArgs packageArgs;
+    packageArgs.SaveFlags = EObjectFlags::RF_Public | EObjectFlags::RF_Standalone;
+    UPackage::SavePackage( package, sprite, *AssetName, packageArgs );
 
 	package->MarkAsFullyLoaded();
 	sprite->MarkPackageDirty();

@@ -21,6 +21,7 @@
 #include "OdysseyBrushAssetBase.h"
 #include "OdysseyBrushThumbnailRenderer.h"
 #include "ObjectTools.h"
+#include "UObject/SavePackage.h"
 
 #include "OdysseyBrushEditorModule.h"
 
@@ -262,7 +263,9 @@ FEditThumbnailExtension::EditThumbnails( TArray<UOdysseyBrush*>& iBrushes )
                 //Refresh the thumbnail
                 UPackage* package = iBrushes[i]->GetOutermost();
 
-                UPackage::Save(iBrushes[i]->GetOutermost(), iBrushes[i], iBrushes[i]->GetFlags(), *(iBrushes[i]->GetName()));
+                FSavePackageArgs packageArgs;
+                packageArgs.SaveFlags = iBrushes[i]->GetFlags();
+                UPackage::Save(iBrushes[i]->GetOutermost(), iBrushes[i], *(iBrushes[i]->GetName()), packageArgs);
             
                 package->SetDirtyFlag( true );
             }

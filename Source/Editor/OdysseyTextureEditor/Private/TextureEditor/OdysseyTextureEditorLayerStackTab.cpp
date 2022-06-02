@@ -16,6 +16,7 @@
 #include "IOdysseyLayerImageBlendingCapability.h"
 #include "OdysseyPixelFormat.h"
 #include "TextureCompiler.h"
+#include "UObject/SavePackage.h"
 #include <ULIS>
 
 #define LOCTEXT_NAMESPACE "OdysseyTextureEditorLayerStackTab"
@@ -276,7 +277,9 @@ FOdysseyTextureEditorLayerStackTab::ExportLayersAsTextures()
 
             FAssetRegistryModule::AssetCreated( object );
 
-            UPackage::SavePackage( package, object, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone, *( imageLayer->GetName().ToString() ) );
+            FSavePackageArgs packageArgs;
+            packageArgs.SaveFlags = EObjectFlags::RF_Public | EObjectFlags::RF_Standalone;
+            UPackage::SavePackage( package, object, *( imageLayer->GetName().ToString() ), packageArgs );
             
             package->MarkAsFullyLoaded();
             object->MarkPackageDirty();

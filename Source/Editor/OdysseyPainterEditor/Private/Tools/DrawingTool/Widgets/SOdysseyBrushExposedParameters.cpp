@@ -29,7 +29,12 @@ SOdysseyBrushExposedParameters::Construct( const FArguments& InArgs )
     // Create a details view
     FPropertyEditorModule& PropertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
     FNotifyHook* NotifyHook = this;
-    FDetailsViewArgs DetailsViewArgs(/*bUpdateFromSelection=*/ false, /*bLockable=*/ false, /*bAllowSearch=*/ false, FDetailsViewArgs::HideNameArea, /*bHideSelectionTip=*/ true, NotifyHook );
+    FDetailsViewArgs DetailsViewArgs;
+    DetailsViewArgs.bUpdatesFromSelection = false;
+    DetailsViewArgs.bLockable = false;
+    DetailsViewArgs.bAllowSearch = false;
+    DetailsViewArgs.NameAreaSettings = FDetailsViewArgs::HideNameArea;
+    DetailsViewArgs.NotifyHook = NotifyHook;
     DetailsViewArgs.bAllowMultipleTopLevelObjects = true;
     DetailsViewArgs.DefaultsOnlyVisibility = EEditDefaultsOnlyNodeVisibility::Hide;
     details_view = PropertyEditorModule.CreateDetailView(DetailsViewArgs);

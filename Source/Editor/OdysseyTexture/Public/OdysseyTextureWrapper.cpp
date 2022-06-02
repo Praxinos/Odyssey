@@ -2,19 +2,20 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "OdysseyTextureWrapper.h"
+#include "UObject/ObjectSaveContext.h"
 
 FOdysseyTextureWrapper::~FOdysseyTextureWrapper()
 {
     FCoreUObjectDelegates::OnPreObjectPropertyChanged.Remove(mOnPrePropertyChangedDelegateHandle);
-    UPackage::PreSavePackageEvent.Remove(mOnPackagePreSaveHandle);
-    UPackage::PackageSavedEvent.Remove(mOnPackageSavedHandle);
+    UPackage::PreSavePackageWithContextEvent.Remove(mOnPackagePreSaveHandle);
+    UPackage::PackageSavedWithContextEvent.Remove(mOnPackageSavedHandle);
 }
 
 FOdysseyTextureWrapper::FOdysseyTextureWrapper()
 {
     mOnPrePropertyChangedDelegateHandle = FCoreUObjectDelegates::OnPreObjectPropertyChanged.AddRaw(this, &FOdysseyTextureWrapper::OnPreGlobalObjectPropertyChanged);
-    mOnPackagePreSaveHandle = UPackage::PreSavePackageEvent.AddRaw(this, &FOdysseyTextureWrapper::OnPackagePreSave);
-	mOnPackageSavedHandle = UPackage::PackageSavedEvent.AddRaw(this, &FOdysseyTextureWrapper::OnPackageSaved);
+    mOnPackagePreSaveHandle = UPackage::PreSavePackageWithContextEvent.AddRaw(this, &FOdysseyTextureWrapper::OnPackagePreSave);
+	mOnPackageSavedHandle = UPackage::PackageSavedWithContextEvent.AddRaw(this, &FOdysseyTextureWrapper::OnPackageSaved);
 }
 
 void
@@ -92,7 +93,7 @@ FOdysseyTextureWrapper::OnPreGlobalObjectPropertyChanged(UObject* iObject, const
 }
 
 void
-FOdysseyTextureWrapper::OnPackagePreSave(UPackage* iPackage)
+FOdysseyTextureWrapper::OnPackagePreSave(UPackage* iPackage, FObjectPreSaveContext ObjectSaveContext)
 {
     UTexture* texture = Texture();
     if (!texture)
@@ -108,13 +109,14 @@ FOdysseyTextureWrapper::OnPackagePreSave(UPackage* iPackage)
 }
 
 void
-FOdysseyTextureWrapper::OnPackageSaved(const FString& iPackageFilename, UObject* iOuter)
+FOdysseyTextureWrapper::OnPackageSaved(const FString& iPackageFilename, UPackage* iPackage, FObjectPostSaveContext ObjectSaveContext)
 {
     UTexture* texture = Texture();
     if (!texture)
         return;
 
-    if (texture->GetOuter() != iOuter)
+    UPackage* package = CastChecked<UPackage>(texture->GetOuter());
+    if (package != iPackage)
         return;
 
     mOnPostSave.Broadcast();

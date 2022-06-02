@@ -251,7 +251,7 @@ void FOdysseyExportFolderExtension::ExportFolder_ReportConfirmed( TEnumAsByte<EE
                 FString srcFilename;
             
                 // Check if the Content Browser file exists
-                if (!FPackageName::DoesPackageExist(packageName, nullptr, &srcFilename))
+                if (!FPackageName::DoesPackageExist(packageName, &srcFilename))
                 {
                     const FText errorMessage = FText::Format(LOCTEXT("ExportFolder_PackageMissing", "{0} does not exist on disk."), FText::FromString(packageName));
                 }

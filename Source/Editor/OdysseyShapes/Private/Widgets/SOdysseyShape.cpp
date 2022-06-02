@@ -20,7 +20,15 @@ SOdysseyShape::Construct( const FArguments& InArgs )
     mCurrentShape = nullptr;
 
     FPropertyEditorModule& PropertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
-    FDetailsViewArgs DetailsViewArgs(false, false, false, FDetailsViewArgs::HideNameArea, true, nullptr);
+    
+    // Create a details view
+    FDetailsViewArgs DetailsViewArgs;
+    DetailsViewArgs.bUpdatesFromSelection = false;
+    DetailsViewArgs.bLockable = false;
+    DetailsViewArgs.bAllowSearch = false;
+    DetailsViewArgs.NameAreaSettings = FDetailsViewArgs::HideNameArea;
+    DetailsViewArgs.NotifyHook = nullptr;
+    
     DetailsViewArgs.DefaultsOnlyVisibility = EEditDefaultsOnlyNodeVisibility::Hide;
     mDetailsView = PropertyEditorModule.CreateDetailView(DetailsViewArgs);
     mDetailsView->SetIsPropertyVisibleDelegate(
