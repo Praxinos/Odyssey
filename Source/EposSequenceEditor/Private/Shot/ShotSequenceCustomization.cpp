@@ -258,9 +258,9 @@ FShotSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuil
     {
         TArray<FGuid> plane_bindings;
         int32 plane_count = ShotSequenceTools::GetAllPlanes( mSequencer, nullptr, &plane_bindings );
-        check( plane_count == 1 );
-        //if( plane_count != 1 )
-        //    return;
+        //check( plane_count == 1 );
+        if( plane_count != 1 )
+            return LOCTEXT( "enable-lighttable-tooltip", "Enable the lighttable" );
 
         if( LighttableTools::IsOn( *mSequencer, mSequencer->GetFocusedMovieSceneSequence(), mSequencer->GetFocusedTemplateID(), plane_bindings[0] ) )
             return LOCTEXT( "disable-lighttable-tooltip", "Disable the lighttable" );
@@ -272,9 +272,9 @@ FShotSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuil
     {
         TArray<FGuid> plane_bindings;
         int32 plane_count = ShotSequenceTools::GetAllPlanes( mSequencer, nullptr, &plane_bindings );
-        check( plane_count == 1 );
-        //if( plane_count != 1 )
-        //    return;
+        //check( plane_count == 1 );
+        if( plane_count != 1 )
+            return FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "LighttableOff" );
 
         if( LighttableTools::IsOn( *mSequencer, mSequencer->GetFocusedMovieSceneSequence(), mSequencer->GetFocusedTemplateID(), plane_bindings[0] ) )
             return FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "LighttableOn" );
