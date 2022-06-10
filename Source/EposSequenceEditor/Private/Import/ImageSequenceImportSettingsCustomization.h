@@ -26,7 +26,7 @@ public:
     virtual void CustomizeChildren( TSharedRef<IPropertyHandle> iStructPropertyHandle, IDetailChildrenBuilder& ioChildBuilder, IPropertyTypeCustomizationUtils& ioStructCustomizationUtils ) override;
 
 private:
-    FText GetTooltipText() const;
+    FText GetTooltipText( const TMap<EImageSequencePatternKeyword, FImageSequencePatternKeyword>& iMapKeywords ) const;
 
 private:
     /** Property handles of the properties we're editing */

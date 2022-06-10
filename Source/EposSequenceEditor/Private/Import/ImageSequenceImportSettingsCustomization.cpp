@@ -65,9 +65,9 @@ FImageSequenceImportSettingsCustomization::MakeInstance()
 }
 
 FText
-FImageSequenceImportSettingsCustomization::GetTooltipText() const
+FImageSequenceImportSettingsCustomization::GetTooltipText( const TMap<EImageSequencePatternKeyword, FImageSequencePatternKeyword>& iMapKeywords ) const
 {
-    return LOCTEXT( "import-image-sequence-file-pattern-tooltip",
+    return FText::Format( LOCTEXT( "import-image-sequence-file-pattern-tooltip",
 R"(Each keywords will be replaced by its corresponding value.
 
 For files like:
@@ -82,7 +82,7 @@ For files like:
 - wonder-3-003.png
 If the first number corresponds to the shot, and the second to each frame,
 the pattern will look like:
-- wonder-{shot}-{frame}.png
+- wonder-{1}-{2}.png
 
 For files like:
 - ful-bA-s01-00.png
@@ -96,8 +96,13 @@ For files like:
 - ful-bB-s03-03.png
 If the first character (A or B) corresponds to the board, the next number to the shot, and the last to each frame,
 the pattern will look like:
-- ful-b{board}-s{shot}-{frame}.png
-)" );
+- ful-b{0}-s{1}-{2}.png
+)" )
+                          , FText::FromString( iMapKeywords[EImageSequencePatternKeyword::BoardId].mKeywordWithBraces )
+                          , FText::FromString( iMapKeywords[EImageSequencePatternKeyword::ShotId].mKeywordWithBraces )
+                          , FText::FromString( iMapKeywords[EImageSequencePatternKeyword::FrameId].mKeywordWithBraces )
+                          , FText::FromString( iMapKeywords[EImageSequencePatternKeyword::Duration].mKeywordWithBraces )
+    );
 }
 
 void
@@ -128,14 +133,14 @@ FImageSequenceImportSettingsCustomization::CustomizeChildren( TSharedRef<IProper
         {
             mPatternHandle = handle;
 
-            mPatternHandle->SetToolTipText( GetTooltipText() );
-
             //ioChildBuilder.AddProperty( handle.ToSharedRef() );
 
             TArray<FString> keywords;
             TArray<FText> keyword_labels;
             TArray<FText> keyword_helps;
-            GetPatternKeywordsMap2( iStructPropertyHandle, keywords, keyword_labels, keyword_helps );
+            TMap<EImageSequencePatternKeyword, FImageSequencePatternKeyword> map_keywords = GetPatternKeywordsMap2( iStructPropertyHandle, keywords, keyword_labels, keyword_helps );
+
+            mPatternHandle->SetToolTipText( GetTooltipText( map_keywords ) );
 
             ioChildBuilder.AddCustomRow( LOCTEXT( "Pattern", "Pattern" ) )
             .NameContent()
