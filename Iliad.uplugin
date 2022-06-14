@@ -1,157 +1,166 @@
 {
-  "FileVersion": 3,
-  "Version": 11,
-  "VersionName": "0.11.50",
-  "FriendlyName": "Iliad",
-  "Description": "Painting plugin with Blueprint brushes for Unreal Engine",
-  "Category": "2D",
-  "CreatedBy": "Praxinos",
-  "CreatedByURL": "https://praxinos.coop",
-  "DocsURL": "https://praxinos.coop/Documentation/Iliad/User/html/",
-  "MarketplaceURL": "",
-  "SupportURL": "https://praxinos.coop/contact",
-  "CanContainContent": true,
-  "IsBetaVersion": true,
-  "Installed": false,
-  "Plugins": [
-    {
-      "Enabled": true,
-      "Name": "Paper2D"
-    }
-  ],
-  "Modules": [
-    {
-      "Name": "OdysseyEditorBrushBlueprints",
-      "Type": "UncookedOnly",
-      "LoadingPhase": "Default",
-      "Comment": "OdysseyBrush is UncookedOnly so that its nodes can be used in FunctionLibraries. And having this module avoids switching main editor modules to UncookedOnly"
-    },
-    {
-      "Name": "OdysseyCore",
-      "Type": "UncookedOnly",
-      "LoadingPhase": "Default"
-    },
-    {
-      "Name": "OdysseyMaths",
-      "Type": "UncookedOnly",
-      "LoadingPhase": "Default"
-    },
-    {
-      "Name": "OdysseyMeshPaintRendering",
-      "Type": "UncookedOnly",
-      "LoadingPhase": "PostConfigInit",
-      "Comment": "OdysseyMeshPaintRendering is UncookedOnly because it needs PostConfigInit as LoadingPhase (to register shaders), and it is only available in UncookedOnly"
-    },
-    {
-      "Name": "OdysseyBrush",
-      "Type": "UncookedOnly",
-      "LoadingPhase": "Default",
-      "Comment": "OdysseyBrush is UncookedOnly so that its nodes can be used in FunctionLibraries"
-    },
-    {
-      "Name": "OdysseyHUDSystem",
-      "Type": "Editor",
-      "LoadingPhase": "Default"
-    },
-    {
-      "Name": "OdysseyLayer",
-      "Type": "Editor",
-      "LoadingPhase": "Default"
-    },
-    {
-      "Name": "OdysseyPsdOperations",
-      "Type": "Editor",
-      "LoadingPhase": "Default"
-    },
-    {
-      "Name": "OdysseyPaintEngine",
-      "Type": "Editor",
-      "LoadingPhase": "Default"
-    },
-    {
-      "Name": "OdysseyTools",
-      "Type": "Editor",
-      "LoadingPhase": "Default"
-    },
-    {
-      "Name": "ULISLoader",
-      "Type": "Editor",
-      "LoadingPhase": "Default"
-    },
-    {
-      "Name": "OdysseyBrushEditor",
-      "Type": "Editor",
-      "LoadingPhase": "Default"
-    },
-    {
-      "Name": "OdysseyContentBrowserExtensions",
-      "Type": "Editor",
-      "LoadingPhase": "Default"
-    },
-    {
-      "Name": "OdysseyEditor",
-      "Type": "Editor",
-      "LoadingPhase": "Default"
-    },
-    {
-      "Name": "OdysseyFlipbook",
-      "Type": "Editor",
-      "LoadingPhase": "PostDefault"
-    },
-    {
-      "Name": "OdysseyFlipbookEditor",
-      "Type": "Editor",
-      "LoadingPhase": "PostDefault"
-    },
-    {
-      "Name": "OdysseyImaging",
-      "Type": "Editor",
-      "LoadingPhase": "Default"
-    },
-    {
-      "Name": "OdysseyPainterEditor",
-      "Type": "Editor",
-      "LoadingPhase": "Default"
-    },
-    {
-      "Name": "OdysseyShapes",
-      "Type": "Editor",
-      "LoadingPhase": "PreDefault"
-    },
-    {
-      "Name": "OdysseyStyle",
-      "Type": "Editor",
-      "LoadingPhase": "PreDefault"
-    },
-    {
-      "Name": "OdysseyStylusInput",
-      "Type": "Editor",
-      "LoadingPhase": "Default"
-    },
-    {
-      "Name": "OdysseyTexture",
-      "Type": "Editor",
-      "LoadingPhase": "Default"
-    },
-    {
-      "Name": "OdysseyTextureEditor",
-      "Type": "Editor",
-      "LoadingPhase": "Default"
-    },
-    {
-      "Name": "OdysseyTexture2DEditor",
-      "Type": "Editor",
-      "LoadingPhase": "Default"
-    },
-    {
-      "Name": "OdysseyViewportDrawingEditor",
-      "Type": "Editor",
-      "LoadingPhase": "Default"
-    },
-    {
-      "Name": "OdysseyWidgets",
-      "Type": "Editor",
-      "LoadingPhase": "Default"
-    }
-  ]
+	"FileVersion": 3,
+	"Version": 11,
+	"VersionName": "0.11.50",
+	"FriendlyName": "Iliad",
+	"Description": "Painting plugin with Blueprint brushes for Unreal Engine",
+	"Category": "2D",
+	"CreatedBy": "Praxinos",
+	"CreatedByURL": "https://praxinos.coop",
+	"DocsURL": "https://praxinos.coop/Documentation/Iliad/User/html/",
+	"MarketplaceURL": "",
+	"SupportURL": "https://praxinos.coop/contact",
+	"CanContainContent": true,
+	"IsBetaVersion": true,
+	"Installed": false,
+	"EnabledByDefault": true,
+	"IsExperimentalVersion": false,
+	"Plugins": [
+		{
+			"Enabled": false,
+			"Name": "Paper2D"
+		}
+	],
+	"Modules": [
+		{
+			"Name": "OdysseyEditorBrushBlueprints",
+			"Type": "UncookedOnly",
+			"LoadingPhase": "Default",
+			"Comment": "OdysseyBrush is UncookedOnly so that its nodes can be used in FunctionLibraries. And having this module avoids switching main editor modules to UncookedOnly"
+		},
+		{
+			"Name": "OdysseyCore",
+			"Type": "UncookedOnly",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "OdysseyMaths",
+			"Type": "UncookedOnly",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "OdysseyMeshPaintRendering",
+			"Type": "UncookedOnly",
+			"LoadingPhase": "PostConfigInit",
+			"Comment": "OdysseyMeshPaintRendering is UncookedOnly because it needs PostConfigInit as LoadingPhase (to register shaders), and it is only available in UncookedOnly"
+		},
+		{
+			"Name": "OdysseyBrush",
+			"Type": "UncookedOnly",
+			"LoadingPhase": "Default",
+			"Comment": "OdysseyBrush is UncookedOnly so that its nodes can be used in FunctionLibraries"
+		},
+		{
+			"Name": "OdysseyHUDSystem",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "OdysseyLayer",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "OdysseyPsdOperations",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "OdysseyPaintEngine",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "OdysseyTools",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "ULISLoader",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "OdysseyBrushEditor",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "OdysseyContentBrowserExtensions",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "OdysseyEditor",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "OdysseyFlipbook",
+			"Type": "Editor",
+			"LoadingPhase": "None",
+			"Comment": "Loaded by OdysseyModulesLoader at the PostDefault LoadingPhase if Paper2D is activated"
+		},
+		{
+			"Name": "OdysseyFlipbookEditor",
+			"Type": "Editor",
+			"LoadingPhase": "None",
+			"Comment": "Loaded by OdysseyModulesLoader at the PostDefault LoadingPhase if Paper2D is activated"
+		},
+		{
+			"Name": "OdysseyImaging",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "OdysseyPainterEditor",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "OdysseyShapes",
+			"Type": "Editor",
+			"LoadingPhase": "PreDefault"
+		},
+		{
+			"Name": "OdysseyStyle",
+			"Type": "Editor",
+			"LoadingPhase": "PreDefault"
+		},
+		{
+			"Name": "OdysseyStylusInput",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "OdysseyTexture",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "OdysseyTextureEditor",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "OdysseyTexture2DEditor",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "OdysseyViewportDrawingEditor",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "OdysseyWidgets",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "OdysseyModuleLoader",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		}
+	]
 }

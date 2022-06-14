@@ -35,7 +35,6 @@ public class OdysseyWidgets : ModuleRules
                 "OdysseyStylusInput",
                 "OdysseyMaths",
                 "RenderCore",
-                "Paper2D",
 				"KismetWidgets"
             }
         );
