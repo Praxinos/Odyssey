@@ -27,7 +27,7 @@ FOdysseyModuleLoaderModule::ActivateModules()
 
 	IPluginManager& pluginManager = IPluginManager::Get();
 	TSharedPtr<IPlugin> iliad = pluginManager.FindPlugin("Iliad");
-	FPluginDescriptor iliadDescriptor = iliad->GetDescriptor();
+	FPluginDescriptor& iliadDescriptor = const_cast<FPluginDescriptor&>(iliad->GetDescriptor());
 	
 	for ( FModuleDescriptor& iliadModule : iliadDescriptor.Modules )
 	{
@@ -37,9 +37,6 @@ FOdysseyModuleLoaderModule::ActivateModules()
 		if ( inactiveModules.Contains( iliadModule.Name ) )
 			iliadModule.LoadingPhase = ELoadingPhase::None;
 	}
-
-	FText failureReason;
-	iliad->UpdateDescriptor( iliadDescriptor, failureReason );
 }
 
 void FOdysseyModuleLoaderModule::ShutdownModule()

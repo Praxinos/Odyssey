@@ -18,7 +18,8 @@
 	"Plugins": [
 		{
 			"Enabled": false,
-			"Name": "Paper2D"
+			"Name": "Paper2D",
+			"Optional": true
 		}
 	],
 	"Modules": [
