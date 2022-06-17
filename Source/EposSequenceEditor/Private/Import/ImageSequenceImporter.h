@@ -15,7 +15,7 @@ class UBoardSequence;
 class FImageSequenceImporter
 {
 public:
-    FImageSequenceImporter( const FImageSequenceImportSettings& iSettings, FString& oErrorMessage );
+    FImageSequenceImporter( const FImageSequenceImportOptions& iOptions, FString& oErrorMessage );
 
     const FImageSequenceStruct& GetImageSequenceStruct() const;
 

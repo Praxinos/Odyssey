@@ -280,8 +280,8 @@ FEposSequenceEditorModule::RegisterPropertyCustomizations()
         FOnGetPropertyTypeCustomizationInstance::CreateStatic( &FInfoBarCustomization::MakeInstance ) );
 
     PropertyModule.RegisterCustomPropertyTypeLayout(
-        FImageSequenceImportSettings::StaticStruct()->GetFName(),
-        FOnGetPropertyTypeCustomizationInstance::CreateStatic( &FImageSequenceImportSettingsCustomization::MakeInstance ) );
+        FImageSequenceImportOptions::StaticStruct()->GetFName(),
+        FOnGetPropertyTypeCustomizationInstance::CreateStatic( &FImageSequenceImportOptionsCustomization::MakeInstance ) );
 
     PropertyModule.RegisterCustomPropertyTypeLayout(
         FExportImageSequenceOptions::StaticStruct()->GetFName(),
@@ -297,7 +297,7 @@ FEposSequenceEditorModule::UnregisterPropertyCustomizations()
     {
         FPropertyEditorModule& PropertyModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>( "PropertyEditor" );
         PropertyModule.UnregisterCustomPropertyTypeLayout( FInfoBarSettings::StaticStruct()->GetFName() );
-        PropertyModule.UnregisterCustomPropertyTypeLayout( FImageSequenceImportSettings::StaticStruct()->GetFName() );
+        PropertyModule.UnregisterCustomPropertyTypeLayout( FImageSequenceImportOptions::StaticStruct()->GetFName() );
         PropertyModule.UnregisterCustomPropertyTypeLayout( FExportImageSequenceOptions::StaticStruct()->GetFName() );
 
         PropertyModule.NotifyCustomizationModuleChanged();

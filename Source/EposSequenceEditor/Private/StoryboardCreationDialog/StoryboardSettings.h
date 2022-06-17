@@ -9,17 +9,18 @@
 
 //---
 
-USTRUCT()
-struct FStoryboardSettings
+UCLASS( config=Epos )
+class UStoryboardSettings
+    : public UObject
 {
     GENERATED_BODY()
 
 public:
     /** Storyboard name. */
-    UPROPERTY( EditAnywhere, Category=Storyboard )
+    UPROPERTY( config, EditAnywhere, Category=Storyboard )
     FString StoryboardName { TEXT( "MyStoryboard" ) };
 
     /** Storyboard path. */
-    UPROPERTY( EditAnywhere, Category=Storyboard, meta=(ContentDir) )
+    UPROPERTY( config, EditAnywhere, Category=Storyboard, meta=(ContentDir) )
     FDirectoryPath StoryboardPath { TEXT( "/Game" ) };
 };

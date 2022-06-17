@@ -30,12 +30,12 @@ public:
 };
 
 USTRUCT()
-struct FImageSequenceImportSettings
+struct FImageSequenceImportOptions
 {
     GENERATED_BODY()
 
 public:
-    FImageSequenceImportSettings();
+    FImageSequenceImportOptions();
 
 public:
     /** Image sequence folder. */
@@ -57,12 +57,13 @@ public:
 //---
 
 // https://udn.unrealengine.com/s/question/0D54z00007eBzPfCAK/makeinstance-of-ipropertytypecustomization-of-my-structure-is-not-called
-USTRUCT()
-struct FImageSequenceImportSettingsWrapper
+UCLASS( config=Epos )
+class UImageSequenceImportSettings
+    : public UObject
 {
     GENERATED_BODY()
 
 public:
-    UPROPERTY( EditAnywhere, Category=ImageSequenceImport )
-    FImageSequenceImportSettings mImageSequenceImportSettings;
+    UPROPERTY( config, EditAnywhere, Category=ImageSequenceImport )
+    FImageSequenceImportOptions Options;
 };

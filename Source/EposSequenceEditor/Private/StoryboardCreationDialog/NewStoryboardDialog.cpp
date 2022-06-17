@@ -75,6 +75,9 @@ private:
     void ImportImageSequence();
     void ImportImageSequence( const FPropertyChangedEvent& iPropertyEvent );
 
+    void StoryboardSettingsChanged( const FPropertyChangedEvent& iEvent );
+    void ImportImageSequenceSettingsChanged( const FPropertyChangedEvent& iEvent );
+
     FText GetFullPath() const;
     FText GetErrorText() const;
     FText GetWarningText() const;
@@ -85,9 +88,9 @@ private:
 private:
     EDialogType     mDialogType;
 
-    TSharedPtr<IStructureDetailsView>   mDetailsViewStoryboard;
-    TSharedPtr<IStructureDetailsView>   mDetailsViewStoryboardImportImageSequence;
-    TSharedPtr<IStructureDetailsView>   mDetailsViewImageSequence;
+    TSharedPtr<IDetailsView>            mDetailsViewStoryboardSettings;
+    TSharedPtr<IDetailsView>            mDetailsViewImportImageSequenceSettings;
+        TSharedPtr<IStructureDetailsView>   mDetailsViewImageSequence;
     TSharedPtr<IDetailsView>            mDetailsViewSequencer;
     TSharedPtr<IStructureDetailsView>   mDetailsViewBoardSettings;
     TSharedPtr<IStructureDetailsView>   mDetailsViewShotSettings;
@@ -95,14 +98,13 @@ private:
 
     ETabs mActiveTab;
 
-    FStoryboardSettings             mStoryboardSettings;
-    FImageSequenceImportSettingsWrapper   mImageSequenceImportSettingsWrapper;
-    FImageSequenceImportSettings*         mImageSequenceImportSettings;
-    UNamingConventionSettings*      mNamingConventionSettings;
-    UEposSequenceEditorSettings*    mSequenceEditorSettings;
+    UStoryboardSettings*                mStoryboardSettings;
+    UImageSequenceImportSettings*       mImportImageSequenceSettings;
+    UNamingConventionSettings*          mNamingConventionSettings;
+    UEposSequenceEditorSettings*        mSequenceEditorSettings;
 
-    FString                         mImageSequenceImportErrorMessage;
-    FImageSequenceStruct            mImageSequenceStruct;
+    FString                             mImageSequenceImportErrorMessage;
+    FImageSequenceStruct                mImageSequenceStruct;
 };
 
 void
@@ -110,11 +112,10 @@ SNewStoryboardSettings::Construct( const FArguments& InArgs, EDialogType iDialog
 {
     mDialogType = iDialogType;
 
+    mStoryboardSettings = GetMutableDefault<UStoryboardSettings>();
+    mImportImageSequenceSettings = GetMutableDefault<UImageSequenceImportSettings>();
     mNamingConventionSettings = GetMutableDefault<UNamingConventionSettings>();
     mSequenceEditorSettings = GetMutableDefault<UEposSequenceEditorSettings>();
-
-    // Setting a link to its content to avoid always calling mImageSequenceImportSettingsWrapper.mImageSequenceImportSettings
-    mImageSequenceImportSettings = &mImageSequenceImportSettingsWrapper.mImageSequenceImportSettings;
 
     FPropertyEditorModule& PropertyEditor = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
 
@@ -132,8 +133,9 @@ SNewStoryboardSettings::Construct( const FArguments& InArgs, EDialogType iDialog
     FStructureDetailsViewArgs StructureDetailsViewArgs;
 
     {
-        TSharedPtr<FStructOnScope> StructOnScope = MakeShared<FStructOnScope>( FStoryboardSettings::StaticStruct(), (uint8*)&mStoryboardSettings );
-        mDetailsViewStoryboard = PropertyEditor.CreateStructureDetailView( DetailsViewArgs, StructureDetailsViewArgs, StructOnScope );
+        mDetailsViewStoryboardSettings = PropertyEditor.CreateDetailView( DetailsViewArgs );
+        mDetailsViewStoryboardSettings->OnFinishedChangingProperties().AddSP( this, &SNewStoryboardSettings::StoryboardSettingsChanged );
+        mDetailsViewStoryboardSettings->SetObject( mStoryboardSettings );
     }
 
     //---
@@ -141,15 +143,13 @@ SNewStoryboardSettings::Construct( const FArguments& InArgs, EDialogType iDialog
     {
         if( mDialogType == EDialogType::kImportImageSequence )
         {
-            TSharedPtr<FStructOnScope> StructOnScope = MakeShared<FStructOnScope>( FImageSequenceImportSettingsWrapper::StaticStruct(), (uint8*)&mImageSequenceImportSettingsWrapper );
-            mDetailsViewStoryboardImportImageSequence = PropertyEditor.CreateStructureDetailView( DetailsViewArgs, StructureDetailsViewArgs, StructOnScope );
-            mDetailsViewStoryboardImportImageSequence->GetOnFinishedChangingPropertiesDelegate().AddSP( this, &SNewStoryboardSettings::ImportImageSequence );
+            mDetailsViewImportImageSequenceSettings = PropertyEditor.CreateDetailView( DetailsViewArgs );
+            mDetailsViewImportImageSequenceSettings->OnFinishedChangingProperties().AddSP( this, &SNewStoryboardSettings::ImportImageSequenceSettingsChanged );
+            mDetailsViewImportImageSequenceSettings->SetObject( mImportImageSequenceSettings );
 
             ImportImageSequence();
         }
-    }
 
-    {
         if( mDialogType == EDialogType::kImportImageSequence )
         {
             TSharedPtr<FStructOnScope> StructOnScope = MakeShared<FStructOnScope>( FImageSequenceStruct::StaticStruct(), (uint8*)&mImageSequenceStruct );
@@ -160,24 +160,27 @@ SNewStoryboardSettings::Construct( const FArguments& InArgs, EDialogType iDialog
 
     //---
 
-    USequencerSettings* sequencer_settings = USequencerSettingsContainer::GetOrCreate<USequencerSettings>( TEXT( "EposSequencerEditor" ) );
-
-    mDetailsViewSequencer = PropertyEditor.CreateDetailView( DetailsViewArgs );
-    auto IsPropertyVisible = []( const FPropertyAndParent& iPropertyAndParent ) -> bool
     {
-        if( iPropertyAndParent.Property.GetName() == TEXT( "FrameNumberDisplayFormat" ) ) // GET_MEMBER_NAME_CHECKED() can't access private members
-            return true;
+        USequencerSettings* sequencer_settings = USequencerSettingsContainer::GetOrCreate<USequencerSettings>( TEXT( "EposSequencerEditor" ) );
 
-        return false;
-    };
-    mDetailsViewSequencer->SetIsPropertyVisibleDelegate( FIsPropertyVisible::CreateLambda( IsPropertyVisible ) );
-    mDetailsViewSequencer->SetObject( sequencer_settings );
+        mDetailsViewSequencer = PropertyEditor.CreateDetailView( DetailsViewArgs );
+        auto IsPropertyVisible = []( const FPropertyAndParent& iPropertyAndParent ) -> bool
+        {
+            if( iPropertyAndParent.Property.GetName() == TEXT( "FrameNumberDisplayFormat" ) ) // GET_MEMBER_NAME_CHECKED() can't access private members
+                return true;
+
+            return false;
+        };
+        mDetailsViewSequencer->SetIsPropertyVisibleDelegate( FIsPropertyVisible::CreateLambda( IsPropertyVisible ) );
+        mDetailsViewSequencer->SetObject( sequencer_settings );
+    }
 
     //---
 
-    mDetailsViewNaming = PropertyEditor.CreateDetailView( DetailsViewArgs );
-
-    mDetailsViewNaming->SetObject( mNamingConventionSettings );
+    {
+        mDetailsViewNaming = PropertyEditor.CreateDetailView( DetailsViewArgs );
+        mDetailsViewNaming->SetObject( mNamingConventionSettings );
+    }
 
     //---
 
@@ -292,14 +295,14 @@ SNewStoryboardSettings::Construct( const FArguments& InArgs, EDialogType iDialog
         .AutoHeight()
         .Padding( 4, 4, 4, 4 )
         [
-            mDetailsViewStoryboardImportImageSequence.IsValid() ? mDetailsViewStoryboardImportImageSequence->GetWidget().ToSharedRef() : SNullWidget::NullWidget
+            mDetailsViewImportImageSequenceSettings.IsValid() ? mDetailsViewImportImageSequenceSettings.ToSharedRef() : SNullWidget::NullWidget
         ]
 
         + SVerticalBox::Slot()
         .AutoHeight()
         .Padding( 4, 4, 4, 4 )
         [
-            mDetailsViewStoryboard->GetWidget().ToSharedRef()
+            mDetailsViewStoryboardSettings.ToSharedRef()
         ]
 
         + SVerticalBox::Slot()
@@ -422,31 +425,10 @@ SNewStoryboardSettings::Construct( const FArguments& InArgs, EDialogType iDialog
 void
 SNewStoryboardSettings::AddReferencedObjects( FReferenceCollector& Collector ) //override
 {
+    Collector.AddReferencedObject( mStoryboardSettings );
+    Collector.AddReferencedObject( mImportImageSequenceSettings );
     Collector.AddReferencedObject( mNamingConventionSettings );
     Collector.AddReferencedObject( mSequenceEditorSettings );
-}
-
-void
-SNewStoryboardSettings::ImportImageSequence( const FPropertyChangedEvent& iPropertyEvent )
-{
-    ImportImageSequence();
-}
-
-void
-SNewStoryboardSettings::ImportImageSequence()
-{
-    mImageSequenceImportErrorMessage.Empty();
-
-    if( mImageSequenceImportSettings->ImageSequencePath.Path.IsEmpty() )
-        return;
-
-    FImageSequenceImporter image_sequence_importer( *mImageSequenceImportSettings, mImageSequenceImportErrorMessage );
-    if( !mImageSequenceImportErrorMessage.IsEmpty() )
-        return;
-
-    mImageSequenceStruct = image_sequence_importer.GetImageSequenceStruct();
-
-    mStoryboardSettings.StoryboardName = FPaths::GetBaseFilename( mImageSequenceImportSettings->ImageSequencePath.Path );
 }
 
 FString
@@ -455,11 +437,42 @@ SNewStoryboardSettings::GetReferencerName() const //override
     return "SNewStoryboardSettings";
 }
 
+void
+SNewStoryboardSettings::StoryboardSettingsChanged( const FPropertyChangedEvent& iEvent )
+{
+    mStoryboardSettings->SaveConfig();
+}
+
+void
+SNewStoryboardSettings::ImportImageSequenceSettingsChanged( const FPropertyChangedEvent& iPropertyEvent )
+{
+    mImportImageSequenceSettings->SaveConfig();
+
+    ImportImageSequence();
+}
+
+void
+SNewStoryboardSettings::ImportImageSequence()
+{
+    mImageSequenceImportErrorMessage.Empty();
+
+    if( mImportImageSequenceSettings->Options.ImageSequencePath.Path.IsEmpty() )
+        return;
+
+    FImageSequenceImporter image_sequence_importer( mImportImageSequenceSettings->Options, mImageSequenceImportErrorMessage );
+    if( !mImageSequenceImportErrorMessage.IsEmpty() )
+        return;
+
+    mImageSequenceStruct = image_sequence_importer.GetImageSequenceStruct();
+
+    mStoryboardSettings->StoryboardName = FPaths::GetBaseFilename( mImportImageSequenceSettings->Options.ImageSequencePath.Path );
+}
+
 FText
 SNewStoryboardSettings::GetFullPath() const
 {
-    FString FullPath = mStoryboardSettings.StoryboardPath.Path;
-    FullPath /= mStoryboardSettings.StoryboardName;
+    FString FullPath = mStoryboardSettings->StoryboardPath.Path;
+    FullPath /= mStoryboardSettings->StoryboardName;
     FullPath += TEXT(".uasset");
 
     return FText::FromString( FullPath );
@@ -470,17 +483,17 @@ SNewStoryboardSettings::GetErrorText() const
 {
     FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>(TEXT("AssetRegistry"));
 
-    FString FullPath = mStoryboardSettings.StoryboardPath.Path;
-    FullPath /= mStoryboardSettings.StoryboardName;
+    FString FullPath = mStoryboardSettings->StoryboardPath.Path;
+    FullPath /= mStoryboardSettings->StoryboardName;
 
     FAssetData AssetData = AssetRegistryModule.Get().GetAssetByObjectPath( FName(*FullPath) );
     if (AssetData.IsValid())
         return LOCTEXT("StoryboardExists", "Error: Storyboard Exists");
 
-    if( mStoryboardSettings.StoryboardName.IsEmpty() )
+    if( mStoryboardSettings->StoryboardName.IsEmpty() )
         return LOCTEXT( "StoryboardEmptyName", "Error: Empty Storyboard Name" );
 
-    if( mStoryboardSettings.StoryboardPath.Path.IsEmpty() )
+    if( mStoryboardSettings->StoryboardPath.Path.IsEmpty() )
         return LOCTEXT( "StoryboardEmptyPath", "Error: Empty Storyboard Path" );
 
     if( mNamingConventionSettings->GlobalNaming.StudioName.IsEmpty() || mNamingConventionSettings->GlobalNaming.StudioAcronym.IsEmpty() )
@@ -513,7 +526,7 @@ SNewStoryboardSettings::CanCreateStoryboard() const
 
     if( mDialogType == EDialogType::kImportImageSequence )
     {
-        if( mImageSequenceImportSettings->ImageSequencePath.Path.IsEmpty() )
+        if( mImportImageSequenceSettings->Options.ImageSequencePath.Path.IsEmpty() )
             return false;
     }
 
@@ -535,7 +548,7 @@ SNewStoryboardSettings::OnCreateStoryboard()
     {
         if( factory->CanCreateNew() && factory->ImportPriority >= 0 && factory->SupportedClass == UBoardSequence::StaticClass() )
         {
-            NewAsset = AssetTools.CreateAsset( mStoryboardSettings.StoryboardName, mStoryboardSettings.StoryboardPath.Path, UBoardSequence::StaticClass(), factory );
+            NewAsset = AssetTools.CreateAsset( mStoryboardSettings->StoryboardName, mStoryboardSettings->StoryboardPath.Path, UBoardSequence::StaticClass(), factory );
             break;
         }
     }

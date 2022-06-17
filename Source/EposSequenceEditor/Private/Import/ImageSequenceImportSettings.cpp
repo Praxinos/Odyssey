@@ -21,7 +21,7 @@
 
 //---
 
-FImageSequenceImportSettings::FImageSequenceImportSettings()
+FImageSequenceImportOptions::FImageSequenceImportOptions()
 {
     ADD_PATTERN_KEYWORD( PatternKeywords, EImageSequencePatternKeyword::BoardId, "sequence", "image-sequence-pattern-keyword", "the id which represents the board" );
     ADD_PATTERN_KEYWORD( PatternKeywords, EImageSequencePatternKeyword::ShotId, "shot", "image-sequence-pattern-keyword", "the id which represents the shot" );

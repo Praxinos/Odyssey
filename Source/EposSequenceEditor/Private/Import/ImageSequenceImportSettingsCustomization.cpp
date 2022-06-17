@@ -59,13 +59,13 @@ GetPatternKeywordsMap2( TSharedRef<IPropertyHandle> iStructPropertyHandle, TArra
 
 //static
 TSharedRef<IPropertyTypeCustomization>
-FImageSequenceImportSettingsCustomization::MakeInstance()
+FImageSequenceImportOptionsCustomization::MakeInstance()
 {
-    return MakeShareable( new FImageSequenceImportSettingsCustomization() );
+    return MakeShareable( new FImageSequenceImportOptionsCustomization() );
 }
 
 FText
-FImageSequenceImportSettingsCustomization::GetTooltipText( const TMap<EImageSequencePatternKeyword, FImageSequencePatternKeyword>& iMapKeywords ) const
+FImageSequenceImportOptionsCustomization::GetTooltipText( const TMap<EImageSequencePatternKeyword, FImageSequencePatternKeyword>& iMapKeywords ) const
 {
     return FText::Format( LOCTEXT( "import-image-sequence-file-pattern-tooltip",
 R"(Each keywords will be replaced by its corresponding value.
@@ -106,7 +106,7 @@ the pattern will look like:
 }
 
 void
-FImageSequenceImportSettingsCustomization::CustomizeHeader( TSharedRef<IPropertyHandle> iStructPropertyHandle, FDetailWidgetRow& ioHeaderRow, IPropertyTypeCustomizationUtils& ioStructCustomizationUtils ) //override
+FImageSequenceImportOptionsCustomization::CustomizeHeader( TSharedRef<IPropertyHandle> iStructPropertyHandle, FDetailWidgetRow& ioHeaderRow, IPropertyTypeCustomizationUtils& ioStructCustomizationUtils ) //override
 {
     // No header needed (to avoid the collapsing)
 
@@ -118,7 +118,7 @@ FImageSequenceImportSettingsCustomization::CustomizeHeader( TSharedRef<IProperty
 }
 
 void
-FImageSequenceImportSettingsCustomization::CustomizeChildren( TSharedRef<IPropertyHandle> iStructPropertyHandle, IDetailChildrenBuilder& ioChildBuilder, IPropertyTypeCustomizationUtils& ioStructCustomizationUtils ) //override
+FImageSequenceImportOptionsCustomization::CustomizeChildren( TSharedRef<IPropertyHandle> iStructPropertyHandle, IDetailChildrenBuilder& ioChildBuilder, IPropertyTypeCustomizationUtils& ioStructCustomizationUtils ) //override
 {
     uint32 num_children;
     FPropertyAccess::Result result = iStructPropertyHandle->GetNumChildren( num_children );
@@ -129,7 +129,7 @@ FImageSequenceImportSettingsCustomization::CustomizeChildren( TSharedRef<IProper
         if( !handle.IsValid() )
             continue;
 
-        if( handle->GetProperty() && handle->GetProperty()->GetFName() == GET_MEMBER_NAME_CHECKED( FImageSequenceImportSettings, FilePattern ) )
+        if( handle->GetProperty() && handle->GetProperty()->GetFName() == GET_MEMBER_NAME_CHECKED( FImageSequenceImportOptions, FilePattern ) )
         {
             mPatternHandle = handle;
 
@@ -157,7 +157,7 @@ FImageSequenceImportSettingsCustomization::CustomizeChildren( TSharedRef<IProper
                 .KeywordHelps( keyword_helps )
             ];
         }
-        else if( handle->GetProperty() && handle->GetProperty()->GetFName() == GET_MEMBER_NAME_CHECKED( FImageSequenceImportSettings, PatternKeywords ) )
+        else if( handle->GetProperty() && handle->GetProperty()->GetFName() == GET_MEMBER_NAME_CHECKED( FImageSequenceImportOptions, PatternKeywords ) )
         {
             handle->MarkHiddenByCustomization();
         }

@@ -15,7 +15,7 @@ class IPropertyTypeCustomizationUtils;
 
 //---
 
-struct FImageSequenceImportSettingsCustomization
+struct FImageSequenceImportOptionsCustomization
     : public IPropertyTypeCustomization
 {
 public:

@@ -10,12 +10,12 @@
 
 //---
 
-FImageSequenceImporter::FImageSequenceImporter( const FImageSequenceImportSettings& iSettings, FString& oErrorMessage )
+FImageSequenceImporter::FImageSequenceImporter( const FImageSequenceImportOptions& iOptions, FString& oErrorMessage )
 {
-    mImageSequencePath = iSettings.ImageSequencePath.Path;
-    mImageSequenceFilePattern = iSettings.FilePattern;
+    mImageSequencePath = iOptions.ImageSequencePath.Path;
+    mImageSequenceFilePattern = iOptions.FilePattern;
 
-    Build( iSettings.PatternKeywords, oErrorMessage );
+    Build( iOptions.PatternKeywords, oErrorMessage );
 }
 
 const FImageSequenceStruct&
