@@ -233,6 +233,7 @@ FEposSequenceEditorStyle::InitImportExport()
     //---
 
     Set( "ExportImageSequence.TableRow", FTableRowStyle( FAppStyle::Get().GetWidgetStyle<FTableRowStyle>( "ProjectBrowser.TableRow" ) ) );
+    Set( "ImportImageSequence.TableRow", FTableRowStyle( FAppStyle::Get().GetWidgetStyle<FTableRowStyle>( "ProjectBrowser.TableRow" ) ) );
 
     // Nearly same as ProjectBrowser.ProjectTile.*
     Set( "ExportImageSequence.PanelItem.TopAreaBackground", new FSlateRoundedBoxBrush( EStyleColor::Header, FVector4( 4.0f, 4.0f, 0.0f, 0.0f ) ) );
@@ -241,9 +242,16 @@ FEposSequenceEditorStyle::InitImportExport()
     Set( "ExportImageSequence.PanelItem.BottomAreaHoverBackground", new FSlateRoundedBoxBrush( FStyleColors::Hover, FVector4( 0.0f, 0.0f, 4.0f, 4.0f ) ) );
     Set( "ExportImageSequence.PanelItem.ThumbnailAreaBackground", new FSlateRoundedBoxBrush( COLOR( "#474747FF" ), FVector4( 0.0f, 0.0f, 0.0f, 0.0f ) ) );
 
+    Set( "ImportImageSequence.PanelItem.TopAreaBackground", new FSlateRoundedBoxBrush( EStyleColor::Header, FVector4( 4.0f, 4.0f, 0.0f, 0.0f ) ) );
+    Set( "ImportImageSequence.PanelItem.TopAreaHoverBackground", new FSlateRoundedBoxBrush( FStyleColors::Hover, FVector4( 4.0f, 4.0f, 0.0f, 0.0f ) ) );
+    Set( "ImportImageSequence.PanelItem.BottomAreaBackground", new FSlateRoundedBoxBrush( EStyleColor::Header, FVector4( 0.0f, 0.0f, 4.0f, 4.0f ) ) );
+    Set( "ImportImageSequence.PanelItem.BottomAreaHoverBackground", new FSlateRoundedBoxBrush( FStyleColors::Hover, FVector4( 0.0f, 0.0f, 4.0f, 4.0f ) ) );
+    Set( "ImportImageSequence.PanelItem.ThumbnailAreaBackground", new FSlateRoundedBoxBrush( COLOR( "#474747FF" ), FVector4( 0.0f, 0.0f, 0.0f, 0.0f ) ) );
+
     SetContentRoot( FPaths::EngineContentDir() / TEXT( "Editor" ) / TEXT( "Slate" ) );
     {
         Set( "ExportImageSequence.PanelItem.DropShadow", new BOX_BRUSH( "Starship/ContentBrowser/drop-shadow", FMargin( 4.0f / 64.0f ) ) );
+        Set( "ImportImageSequence.PanelItem.DropShadow", new BOX_BRUSH( "Starship/ContentBrowser/drop-shadow", FMargin( 4.0f / 64.0f ) ) );
     }
 }
 

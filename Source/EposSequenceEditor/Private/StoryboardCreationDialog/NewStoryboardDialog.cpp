@@ -13,15 +13,19 @@
 #include "IDetailsView.h"
 #include "IStructureDetailsView.h"
 #include "LevelEditorSequencerIntegration.h"
+#include "Math/UnitConversion.h"
 #include "PropertyEditorModule.h"
 #include "SequencerSettings.h"
 #include "Subsystems/AssetEditorSubsystem.h"
 #include "Widgets/Docking/SDockTab.h"
 #include "Widgets/Input/SButton.h"
+#include "Widgets/Input/SSpinBox.h"
+#include "Widgets/Layout/SScrollBorder.h"
 #include "Widgets/Layout/SScrollBox.h"
 #include "Widgets/Layout/SWidgetSwitcher.h"
 #include "Widgets/SWindow.h"
 #include "Widgets/Text/STextBlock.h"
+#include "Widgets/Views/STileView.h"
 #include "SPrimaryButton.h"
 
 #include "Board/BoardSequence.h"
@@ -30,6 +34,7 @@
 #include "Import/ImportImageSequenceImporter.h"
 #include "Import/ImportImageSequenceSettings.h"
 #include "Import/ImportImageSequenceStruct.h"
+#include "Import/SImportPanelTileView.h"
 #include "Settings/EposSequenceEditorSettings.h"
 #include "Settings/NamingConventionSettings.h"
 #include "StoryboardCreationDialog/StoryboardSettings.h"
@@ -78,6 +83,12 @@ private:
     void StoryboardSettingsChanged( const FPropertyChangedEvent& iEvent );
     void ImportImageSequenceSettingsChanged( const FPropertyChangedEvent& iEvent );
 
+    void MakePanelItems();
+    float GetItemScaledWidth() const;
+    float GetItemScaledHeight() const;
+    int32 GetItemScaleMultiplier() const;
+    void SetItemScaleMultiplier( int32 iItemScaleMultiplier );
+
     FText GetFullPath() const;
     FText GetErrorText() const;
     FText GetWarningText() const;
@@ -90,7 +101,10 @@ private:
 
     TSharedPtr<IDetailsView>            mDetailsViewStoryboardSettings;
     TSharedPtr<IDetailsView>            mDetailsViewImportImageSequenceSettings;
-        TSharedPtr<IStructureDetailsView>   mDetailsViewImageSequence;
+    TArray<TSharedPtr<FImportPanelItem>>                mPanelItemsList;
+    TSharedPtr<STileView<TSharedPtr<FImportPanelItem>>> mPanelListView;
+    float                                               mItemDefaultWidth { 128.f };
+    float                                               mItemDefaultHeight { 128.f };
     TSharedPtr<IDetailsView>            mDetailsViewSequencer;
     TSharedPtr<IStructureDetailsView>   mDetailsViewBoardSettings;
     TSharedPtr<IStructureDetailsView>   mDetailsViewShotSettings;
@@ -100,6 +114,7 @@ private:
 
     UStoryboardSettings*                mStoryboardSettings;
     UImportImageSequenceSettings*       mImportImageSequenceSettings;
+    UImportImageSequenceUISettings*     mImportImageSequenceUISettings;
     UNamingConventionSettings*          mNamingConventionSettings;
     UEposSequenceEditorSettings*        mSequenceEditorSettings;
 
@@ -114,6 +129,7 @@ SNewStoryboardSettings::Construct( const FArguments& InArgs, EDialogType iDialog
 
     mStoryboardSettings = GetMutableDefault<UStoryboardSettings>();
     mImportImageSequenceSettings = GetMutableDefault<UImportImageSequenceSettings>();
+    mImportImageSequenceUISettings = GetMutableDefault<UImportImageSequenceUISettings>();
     mNamingConventionSettings = GetMutableDefault<UNamingConventionSettings>();
     mSequenceEditorSettings = GetMutableDefault<UEposSequenceEditorSettings>();
 
@@ -152,9 +168,16 @@ SNewStoryboardSettings::Construct( const FArguments& InArgs, EDialogType iDialog
 
         if( mDialogType == EDialogType::kImportImageSequence )
         {
-            TSharedPtr<FStructOnScope> StructOnScope = MakeShared<FStructOnScope>( FImportImageSequenceStruct::StaticStruct(), (uint8*)&mImageSequenceStruct );
-            mDetailsViewImageSequence = PropertyEditor.CreateStructureDetailView( DetailsViewArgs, StructureDetailsViewArgs, StructOnScope );
-            //mDetailsViewImageSequence->GetOnFinishedChangingPropertiesDelegate().AddSP( this, &SNewStoryboardSettings::ImportImageSequence );
+            MakePanelItems();
+
+            mPanelListView = SNew( STileView<TSharedPtr<FImportPanelItem>> )
+                            .ListItemsSource( &mPanelItemsList )
+                            .SelectionMode( ESelectionMode::None )
+                            //.ClearSelectionOnClick( false )
+                            .ItemAlignment( EListItemAlignment::LeftAligned )
+                            .OnGenerateTile_Static( &SImportPanelTileView::BuildTile )
+                            .ItemWidth( this, &SNewStoryboardSettings::GetItemScaledWidth )
+                            .ItemHeight( this, &SNewStoryboardSettings::GetItemScaledHeight );
         }
     }
 
@@ -329,8 +352,28 @@ SNewStoryboardSettings::Construct( const FArguments& InArgs, EDialogType iDialog
                     + SVerticalBox::Slot()
                     .AutoHeight()
                     .Padding(4, 4, 4, 4)
+                    .HAlign( HAlign_Right )
                     [
-                        mDetailsViewImageSequence.IsValid() ? mDetailsViewImageSequence->GetWidget().ToSharedRef() : SNullWidget::NullWidget
+                        SNew( SSpinBox<int32> )
+                        .TypeInterface( MakeShareable( new TNumericUnitTypeInterface<int32>( EUnit::Percentage ) ) )
+                        .MinDesiredWidth( 65 )
+                        .Justification( ETextJustify::Right )
+                        .ToolTipText( LOCTEXT( "thumbnail-scale-mulitplier.tooltip", "Change the size of the thumbnails." ) )
+                        .MinValue( 50 )
+                        .MaxValue( 250 )
+                        .OnValueCommitted_Lambda( [=] ( int32 Value, ETextCommit::Type ) { SetItemScaleMultiplier( Value ); mPanelListView->RequestListRefresh(); } ) // RequestListRefresh() is only OnCommitted() to not refresh every mouse drags
+                        .OnValueChanged_Lambda( [=] ( int32 Value ) { SetItemScaleMultiplier( Value ); } )
+                        .Value( this, &SNewStoryboardSettings::GetItemScaleMultiplier )
+                    ]
+
+                    + SVerticalBox::Slot()
+                    .AutoHeight()
+                    .Padding(4, 4, 4, 4)
+                    [
+                        SNew( SScrollBorder, mPanelListView.ToSharedRef() )
+                        [
+                            mPanelListView.ToSharedRef()
+                        ]
                     ]
                 ]
 
@@ -383,7 +426,7 @@ SNewStoryboardSettings::Construct( const FArguments& InArgs, EDialogType iDialog
         .AutoHeight()
         .HAlign( HAlign_Right )
         .VAlign( VAlign_Bottom )
-        .Padding( 10.f )
+        .Padding( 10.f, 4.f )
         [
             SNew(STextBlock)
             .Text( this, &SNewStoryboardSettings::GetFullPath )
@@ -392,27 +435,29 @@ SNewStoryboardSettings::Construct( const FArguments& InArgs, EDialogType iDialog
         + SVerticalBox::Slot()
         .AutoHeight()
         .HAlign( HAlign_Right )
-        .Padding( 2.f )
+        .Padding( 10.f, 4.f )
         [
             SNew(STextBlock)
             .Text(this, &SNewStoryboardSettings::GetErrorText)
             .TextStyle( FAppStyle::Get(), TEXT("Log.Error") )
+            .Visibility_Lambda( [this]() { return GetErrorText().IsEmpty() ? EVisibility::Collapsed : EVisibility::Visible; } )
         ]
 
         + SVerticalBox::Slot()
         .AutoHeight()
         .HAlign( HAlign_Right )
-        .Padding( 2.f )
+        .Padding( 10.f, 4.f )
         [
             SNew( STextBlock )
             .Text(this, &SNewStoryboardSettings::GetWarningText)
             .TextStyle( FAppStyle::Get(), TEXT("Log.Warning") )
+            .Visibility_Lambda( [this]() { return GetWarningText().IsEmpty() ? EVisibility::Collapsed : EVisibility::Visible; } )
         ]
 
         + SVerticalBox::Slot()
         .AutoHeight()
         .HAlign( HAlign_Right )
-        .Padding( 5.f )
+        .Padding( 10.f, 4.f, 10.f, 8.f )
         [
             SNew( SPrimaryButton )
             .Text(LOCTEXT("CreateStoryboard", "Create Storyboard"))
@@ -427,6 +472,7 @@ SNewStoryboardSettings::AddReferencedObjects( FReferenceCollector& Collector ) /
 {
     Collector.AddReferencedObject( mStoryboardSettings );
     Collector.AddReferencedObject( mImportImageSequenceSettings );
+    Collector.AddReferencedObject( mImportImageSequenceUISettings );
     Collector.AddReferencedObject( mNamingConventionSettings );
     Collector.AddReferencedObject( mSequenceEditorSettings );
 }
@@ -466,6 +512,59 @@ SNewStoryboardSettings::ImportImageSequence()
     mImageSequenceStruct = image_sequence_importer.GetImageSequenceStruct();
 
     mStoryboardSettings->StoryboardName = FPaths::GetBaseFilename( mImportImageSequenceSettings->Options.ImageSequencePath.Path );
+}
+
+void
+SNewStoryboardSettings::MakePanelItems()
+{
+    // Build a list of items - one for each file
+    for( int32 b = 0; b < mImageSequenceStruct.Boards.Num(); b++ )
+    {
+        FImportImageSequenceBoard& board = mImageSequenceStruct.Boards[b];
+
+        for( int32 s = 0; s < board.Shots.Num(); s++ )
+        {
+            FImportImageSequenceShot& shot = board.Shots[s];
+
+            for( int32 f = 0; f < shot.Frames.Num(); f++ )
+            {
+                FImportImageSequenceFrame& frame = shot.Frames[f];
+
+                TSharedPtr<FImportPanelItem> panel_item = MakeShareable( new FImportPanelItem() );
+                panel_item->mBoardId = board.Id;
+                panel_item->mShotId = shot.Id;
+                panel_item->mFrame = frame;
+
+                panel_item->mOptions = &mImportImageSequenceSettings->Options;
+                panel_item->CreateThumbnail();
+
+                mPanelItemsList.Add( panel_item );
+            }
+        }
+    }
+}
+
+float
+SNewStoryboardSettings::GetItemScaledWidth() const
+{
+    return mItemDefaultWidth * mImportImageSequenceUISettings->GetThumbnailScaleMultiplier() / 100.f;
+}
+
+float
+SNewStoryboardSettings::GetItemScaledHeight() const
+{
+    return mItemDefaultHeight * mImportImageSequenceUISettings->GetThumbnailScaleMultiplier() / 100.f;
+}
+
+int32
+SNewStoryboardSettings::GetItemScaleMultiplier() const
+{
+    return mImportImageSequenceUISettings->GetThumbnailScaleMultiplier();
+}
+void
+SNewStoryboardSettings::SetItemScaleMultiplier( int32 iItemScaleMultiplier )
+{
+    mImportImageSequenceUISettings->SetThumbnailScaleMultiplier( iItemScaleMultiplier );
 }
 
 FText

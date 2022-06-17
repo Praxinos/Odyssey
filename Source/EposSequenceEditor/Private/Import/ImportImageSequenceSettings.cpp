@@ -34,5 +34,22 @@ FImportImageSequenceOptions::FImportImageSequenceOptions()
 #undef ADD_PATTERN_KEYWORD
 
 //---
+//---
+//---
+
+float
+UImportImageSequenceUISettings::GetThumbnailScaleMultiplier() const
+{
+    return mThumbnailScaleMultiplier;
+}
+
+void
+UImportImageSequenceUISettings::SetThumbnailScaleMultiplier( float iMultiplier )
+{
+    mThumbnailScaleMultiplier = iMultiplier;
+    SaveConfig();
+}
+
+//---
 
 #undef LOCTEXT_NAMESPACE

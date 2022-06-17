@@ -67,3 +67,21 @@ public:
     UPROPERTY( config, EditAnywhere, Category=ImportImageSequence )
     FImportImageSequenceOptions Options;
 };
+
+//---
+
+UCLASS( config=Epos )
+class UImportImageSequenceUISettings
+    : public UObject
+{
+    GENERATED_BODY()
+
+public:
+    float GetThumbnailScaleMultiplier() const;
+    void SetThumbnailScaleMultiplier( float iMultiplier );
+
+private:
+    /** Storyboard path. */
+    UPROPERTY( config, EditAnywhere, Category=ImportImageSequence )
+    float mThumbnailScaleMultiplier { 100.f /* % */ };
+};
