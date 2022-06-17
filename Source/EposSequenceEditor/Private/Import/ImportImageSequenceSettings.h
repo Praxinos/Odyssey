@@ -5,12 +5,12 @@
 
 #include "CoreMinimal.h"
 
-#include "ImageSequenceImportSettings.generated.h"
+#include "ImportImageSequenceSettings.generated.h"
 
 //---
 
 UENUM()
-enum class EImageSequencePatternKeyword : uint8
+enum class EImportImageSequencePatternKeyword : uint8
 {
     BoardId,
     ShotId,
@@ -19,51 +19,51 @@ enum class EImageSequencePatternKeyword : uint8
 };
 
 USTRUCT()
-struct FImageSequencePatternKeyword
+struct FImportImageSequencePatternKeyword
 {
     GENERATED_BODY()
 
 public:
-    EImageSequencePatternKeyword mKeywordId;
+    EImportImageSequencePatternKeyword mKeywordId;
     FString mKeywordWithBraces;
     FText mHelp;
 };
 
 USTRUCT()
-struct FImageSequenceImportOptions
+struct FImportImageSequenceOptions
 {
     GENERATED_BODY()
 
 public:
-    FImageSequenceImportOptions();
+    FImportImageSequenceOptions();
 
 public:
     /** Image sequence folder. */
-    UPROPERTY( EditAnywhere, Category=ImageSequenceImport )
+    UPROPERTY( EditAnywhere, Category=ImportImageSequence )
     FDirectoryPath ImageSequencePath;
 
     /** Image name pattern. */
-    UPROPERTY( EditAnywhere, Category=ImageSequenceImport )
+    UPROPERTY( EditAnywhere, Category=ImportImageSequence )
     FString FilePattern;
 
     /** List of all keywords.
         This list is hidden in customization.
         If UPROPERTY is empty, there is no access through IPropertyHandle in customization
     */
-    UPROPERTY( VisibleAnywhere, Category=ImageSequenceImport, Transient )
-    TMap<EImageSequencePatternKeyword, FImageSequencePatternKeyword> PatternKeywords;
+    UPROPERTY( VisibleAnywhere, Category=ImportImageSequence, Transient )
+    TMap<EImportImageSequencePatternKeyword, FImportImageSequencePatternKeyword> PatternKeywords;
 };
 
 //---
 
 // https://udn.unrealengine.com/s/question/0D54z00007eBzPfCAK/makeinstance-of-ipropertytypecustomization-of-my-structure-is-not-called
 UCLASS( config=Epos )
-class UImageSequenceImportSettings
+class UImportImageSequenceSettings
     : public UObject
 {
     GENERATED_BODY()
 
 public:
-    UPROPERTY( config, EditAnywhere, Category=ImageSequenceImport )
-    FImageSequenceImportOptions Options;
+    UPROPERTY( config, EditAnywhere, Category=ImportImageSequence )
+    FImportImageSequenceOptions Options;
 };

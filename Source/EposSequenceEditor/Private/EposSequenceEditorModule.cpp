@@ -18,8 +18,8 @@
 #include "Export/ImageSequenceExportRenderer.h"
 #include "Export/ExportImageSequenceSettings.h"
 #include "Export/ExportImageSequenceSettingsCustomization.h"
-#include "Import/ImageSequenceImportSettings.h"
-#include "Import/ImageSequenceImportSettingsCustomization.h"
+#include "Import/ImportImageSequenceSettings.h"
+#include "Import/ImportImageSequenceSettingsCustomization.h"
 #include "Render/EposSequencePipelineRenderer.h"
 #include "Settings/EposSequenceEditorSettings.h"
 #include "Settings/EposSequenceEditorSettingsCustomization.h"
@@ -280,8 +280,8 @@ FEposSequenceEditorModule::RegisterPropertyCustomizations()
         FOnGetPropertyTypeCustomizationInstance::CreateStatic( &FInfoBarCustomization::MakeInstance ) );
 
     PropertyModule.RegisterCustomPropertyTypeLayout(
-        FImageSequenceImportOptions::StaticStruct()->GetFName(),
-        FOnGetPropertyTypeCustomizationInstance::CreateStatic( &FImageSequenceImportOptionsCustomization::MakeInstance ) );
+        FImportImageSequenceOptions::StaticStruct()->GetFName(),
+        FOnGetPropertyTypeCustomizationInstance::CreateStatic( &FImportImageSequenceOptionsCustomization::MakeInstance ) );
 
     PropertyModule.RegisterCustomPropertyTypeLayout(
         FExportImageSequenceOptions::StaticStruct()->GetFName(),
@@ -297,7 +297,7 @@ FEposSequenceEditorModule::UnregisterPropertyCustomizations()
     {
         FPropertyEditorModule& PropertyModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>( "PropertyEditor" );
         PropertyModule.UnregisterCustomPropertyTypeLayout( FInfoBarSettings::StaticStruct()->GetFName() );
-        PropertyModule.UnregisterCustomPropertyTypeLayout( FImageSequenceImportOptions::StaticStruct()->GetFName() );
+        PropertyModule.UnregisterCustomPropertyTypeLayout( FImportImageSequenceOptions::StaticStruct()->GetFName() );
         PropertyModule.UnregisterCustomPropertyTypeLayout( FExportImageSequenceOptions::StaticStruct()->GetFName() );
 
         PropertyModule.NotifyCustomizationModuleChanged();

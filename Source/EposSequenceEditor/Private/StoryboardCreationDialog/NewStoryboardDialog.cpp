@@ -26,10 +26,10 @@
 
 #include "Board/BoardSequence.h"
 #include "IEposSequenceEditorToolkit.h"
-#include "Import/ImageSequenceConverter.h"
-#include "Import/ImageSequenceImporter.h"
-#include "Import/ImageSequenceImportSettings.h"
-#include "Import/ImageSequenceStruct.h"
+#include "Import/ImportImageSequenceConverter.h"
+#include "Import/ImportImageSequenceImporter.h"
+#include "Import/ImportImageSequenceSettings.h"
+#include "Import/ImportImageSequenceStruct.h"
 #include "Settings/EposSequenceEditorSettings.h"
 #include "Settings/NamingConventionSettings.h"
 #include "StoryboardCreationDialog/StoryboardSettings.h"
@@ -99,12 +99,12 @@ private:
     ETabs mActiveTab;
 
     UStoryboardSettings*                mStoryboardSettings;
-    UImageSequenceImportSettings*       mImportImageSequenceSettings;
+    UImportImageSequenceSettings*       mImportImageSequenceSettings;
     UNamingConventionSettings*          mNamingConventionSettings;
     UEposSequenceEditorSettings*        mSequenceEditorSettings;
 
     FString                             mImageSequenceImportErrorMessage;
-    FImageSequenceStruct                mImageSequenceStruct;
+    FImportImageSequenceStruct          mImageSequenceStruct;
 };
 
 void
@@ -113,7 +113,7 @@ SNewStoryboardSettings::Construct( const FArguments& InArgs, EDialogType iDialog
     mDialogType = iDialogType;
 
     mStoryboardSettings = GetMutableDefault<UStoryboardSettings>();
-    mImportImageSequenceSettings = GetMutableDefault<UImageSequenceImportSettings>();
+    mImportImageSequenceSettings = GetMutableDefault<UImportImageSequenceSettings>();
     mNamingConventionSettings = GetMutableDefault<UNamingConventionSettings>();
     mSequenceEditorSettings = GetMutableDefault<UEposSequenceEditorSettings>();
 
@@ -152,7 +152,7 @@ SNewStoryboardSettings::Construct( const FArguments& InArgs, EDialogType iDialog
 
         if( mDialogType == EDialogType::kImportImageSequence )
         {
-            TSharedPtr<FStructOnScope> StructOnScope = MakeShared<FStructOnScope>( FImageSequenceStruct::StaticStruct(), (uint8*)&mImageSequenceStruct );
+            TSharedPtr<FStructOnScope> StructOnScope = MakeShared<FStructOnScope>( FImportImageSequenceStruct::StaticStruct(), (uint8*)&mImageSequenceStruct );
             mDetailsViewImageSequence = PropertyEditor.CreateStructureDetailView( DetailsViewArgs, StructureDetailsViewArgs, StructOnScope );
             //mDetailsViewImageSequence->GetOnFinishedChangingPropertiesDelegate().AddSP( this, &SNewStoryboardSettings::ImportImageSequence );
         }
@@ -459,7 +459,7 @@ SNewStoryboardSettings::ImportImageSequence()
     if( mImportImageSequenceSettings->Options.ImageSequencePath.Path.IsEmpty() )
         return;
 
-    FImageSequenceImporter image_sequence_importer( mImportImageSequenceSettings->Options, mImageSequenceImportErrorMessage );
+    FImportImageSequenceImporter image_sequence_importer( mImportImageSequenceSettings->Options, mImageSequenceImportErrorMessage );
     if( !mImageSequenceImportErrorMessage.IsEmpty() )
         return;
 
@@ -608,7 +608,7 @@ SNewStoryboardSettings::OnCreateStoryboard()
         TSharedPtr<ISequencer> sequencer = eposSequenceEditor ? eposSequenceEditor->GetSequencer() : nullptr;
         check( sequencer.IsValid() );
 
-        FImageSequenceConverter( &mImageSequenceStruct, sequencer, board_sequence );
+        FImportImageSequenceConverter( &mImageSequenceStruct, sequencer, board_sequence );
     }
 
     //---
