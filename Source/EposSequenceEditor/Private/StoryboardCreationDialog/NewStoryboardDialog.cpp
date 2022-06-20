@@ -78,10 +78,11 @@ class SNewStoryboardSettings
 
 private:
     void ImportImageSequence();
-    void ImportImageSequence( const FPropertyChangedEvent& iPropertyEvent );
 
     void StoryboardSettingsChanged( const FPropertyChangedEvent& iEvent );
     void ImportImageSequenceSettingsChanged( const FPropertyChangedEvent& iEvent );
+
+    int32 GetActiveTabIndex() const;
 
     void MakePanelItems();
     float GetItemScaledWidth() const;
@@ -128,8 +129,11 @@ SNewStoryboardSettings::Construct( const FArguments& InArgs, EDialogType iDialog
     mDialogType = iDialogType;
 
     mStoryboardSettings = GetMutableDefault<UStoryboardSettings>();
-    mImportImageSequenceSettings = GetMutableDefault<UImportImageSequenceSettings>();
-    mImportImageSequenceUISettings = GetMutableDefault<UImportImageSequenceUISettings>();
+    if( mDialogType == EDialogType::kImportImageSequence )
+    {
+        mImportImageSequenceSettings = GetMutableDefault<UImportImageSequenceSettings>();
+        mImportImageSequenceUISettings = GetMutableDefault<UImportImageSequenceUISettings>();
+    }
     mNamingConventionSettings = GetMutableDefault<UNamingConventionSettings>();
     mSequenceEditorSettings = GetMutableDefault<UEposSequenceEditorSettings>();
 
@@ -310,6 +314,90 @@ SNewStoryboardSettings::Construct( const FArguments& InArgs, EDialogType iDialog
 
     //---
 
+    TSharedRef<SWidgetSwitcher> switcher =
+        SNew( SWidgetSwitcher )
+        .WidgetIndex( this, &SNewStoryboardSettings::GetActiveTabIndex );
+
+    if( mDialogType == EDialogType::kImportImageSequence )
+    {
+        switcher->AddSlot()
+        [
+            SNew( SVerticalBox )
+
+            + SVerticalBox::Slot()
+            .AutoHeight()
+            .Padding(4, 4, 4, 4)
+            .HAlign( HAlign_Right )
+            [
+                SNew( SSpinBox<int32> )
+                .TypeInterface( MakeShareable( new TNumericUnitTypeInterface<int32>( EUnit::Percentage ) ) )
+                .MinDesiredWidth( 65 )
+                .Justification( ETextJustify::Right )
+                .ToolTipText( LOCTEXT( "thumbnail-scale-mulitplier.tooltip", "Change the size of the thumbnails." ) )
+                .MinValue( 50 )
+                .MaxValue( 250 )
+                .OnValueCommitted_Lambda( [=] ( int32 Value, ETextCommit::Type ) { SetItemScaleMultiplier( Value ); mPanelListView->RequestListRefresh(); } ) // RequestListRefresh() is only OnCommitted() to not refresh every mouse drags
+                .OnValueChanged_Lambda( [=] ( int32 Value ) { SetItemScaleMultiplier( Value ); } )
+                .Value( this, &SNewStoryboardSettings::GetItemScaleMultiplier )
+            ]
+
+            + SVerticalBox::Slot()
+            .AutoHeight()
+            .Padding(4, 4, 4, 4)
+            [
+                SNew( SScrollBorder, mPanelListView.ToSharedRef() )
+                [
+                    mPanelListView.ToSharedRef()
+                ]
+            ]
+        ];
+    }
+
+    switcher->AddSlot()
+    [
+        SNew( SVerticalBox )
+
+        + SVerticalBox::Slot()
+        .AutoHeight()
+        .Padding(4, 4, 4, 4)
+        [
+            mDetailsViewNaming.ToSharedRef()
+        ]
+    ];
+
+    switcher->AddSlot()
+    [
+        SNew( SVerticalBox )
+
+        + SVerticalBox::Slot()
+        .AutoHeight()
+        .Padding(4, 4, 4, 4)
+        [
+            mDetailsViewBoardSettings->GetWidget().ToSharedRef()
+        ]
+
+        + SVerticalBox::Slot()
+        .AutoHeight()
+        .Padding(4, 4, 4, 4)
+        [
+            mDetailsViewShotSettings->GetWidget().ToSharedRef()
+        ]
+    ];
+
+    switcher->AddSlot()
+    [
+        SNew( SVerticalBox )
+
+        + SVerticalBox::Slot()
+        .AutoHeight()
+        .Padding(4, 4, 4, 4)
+        [
+            mDetailsViewSequencer.ToSharedRef()
+        ]
+    ];
+
+    //---
+
     ChildSlot
     [
         SNew(SVerticalBox)
@@ -342,83 +430,7 @@ SNewStoryboardSettings::Construct( const FArguments& InArgs, EDialogType iDialog
             SNew( SScrollBox )
             + SScrollBox::Slot()
             [
-                SNew( SWidgetSwitcher )
-                .WidgetIndex_Lambda( [this] () -> int32 { return int32(mActiveTab); } )
-
-                + SWidgetSwitcher::Slot()
-                [
-                    SNew( SVerticalBox )
-
-                    + SVerticalBox::Slot()
-                    .AutoHeight()
-                    .Padding(4, 4, 4, 4)
-                    .HAlign( HAlign_Right )
-                    [
-                        SNew( SSpinBox<int32> )
-                        .TypeInterface( MakeShareable( new TNumericUnitTypeInterface<int32>( EUnit::Percentage ) ) )
-                        .MinDesiredWidth( 65 )
-                        .Justification( ETextJustify::Right )
-                        .ToolTipText( LOCTEXT( "thumbnail-scale-mulitplier.tooltip", "Change the size of the thumbnails." ) )
-                        .MinValue( 50 )
-                        .MaxValue( 250 )
-                        .OnValueCommitted_Lambda( [=] ( int32 Value, ETextCommit::Type ) { SetItemScaleMultiplier( Value ); mPanelListView->RequestListRefresh(); } ) // RequestListRefresh() is only OnCommitted() to not refresh every mouse drags
-                        .OnValueChanged_Lambda( [=] ( int32 Value ) { SetItemScaleMultiplier( Value ); } )
-                        .Value( this, &SNewStoryboardSettings::GetItemScaleMultiplier )
-                    ]
-
-                    + SVerticalBox::Slot()
-                    .AutoHeight()
-                    .Padding(4, 4, 4, 4)
-                    [
-                        SNew( SScrollBorder, mPanelListView.ToSharedRef() )
-                        [
-                            mPanelListView.ToSharedRef()
-                        ]
-                    ]
-                ]
-
-                + SWidgetSwitcher::Slot()
-                [
-                    SNew( SVerticalBox )
-
-                    + SVerticalBox::Slot()
-                    .AutoHeight()
-                    .Padding(4, 4, 4, 4)
-                    [
-                        mDetailsViewNaming.ToSharedRef()
-                    ]
-                ]
-
-                + SWidgetSwitcher::Slot()
-                [
-                    SNew( SVerticalBox )
-
-                    + SVerticalBox::Slot()
-                    .AutoHeight()
-                    .Padding(4, 4, 4, 4)
-                    [
-                        mDetailsViewBoardSettings->GetWidget().ToSharedRef()
-                    ]
-
-                    + SVerticalBox::Slot()
-                    .AutoHeight()
-                    .Padding(4, 4, 4, 4)
-                    [
-                        mDetailsViewShotSettings->GetWidget().ToSharedRef()
-                    ]
-                ]
-
-                + SWidgetSwitcher::Slot()
-                [
-                    SNew( SVerticalBox )
-
-                    + SVerticalBox::Slot()
-                    .AutoHeight()
-                    .Padding(4, 4, 4, 4)
-                    [
-                        mDetailsViewSequencer.ToSharedRef()
-                    ]
-                ]
+                switcher
             ]
         ]
 
@@ -471,8 +483,11 @@ void
 SNewStoryboardSettings::AddReferencedObjects( FReferenceCollector& Collector ) //override
 {
     Collector.AddReferencedObject( mStoryboardSettings );
-    Collector.AddReferencedObject( mImportImageSequenceSettings );
-    Collector.AddReferencedObject( mImportImageSequenceUISettings );
+    if( mDialogType == EDialogType::kImportImageSequence )
+    {
+        Collector.AddReferencedObject( mImportImageSequenceSettings );
+        Collector.AddReferencedObject( mImportImageSequenceUISettings );
+    }
     Collector.AddReferencedObject( mNamingConventionSettings );
     Collector.AddReferencedObject( mSequenceEditorSettings );
 }
@@ -512,6 +527,14 @@ SNewStoryboardSettings::ImportImageSequence()
     mImageSequenceStruct = image_sequence_importer.GetImageSequenceStruct();
 
     mStoryboardSettings->StoryboardName = FPaths::GetBaseFilename( mImportImageSequenceSettings->Options.ImageSequencePath.Path );
+}
+
+int32
+SNewStoryboardSettings::GetActiveTabIndex() const
+{
+    // For the moment, it's quite simple to get the active tab index
+    // But if it would be more complex, use real id for mActiveTab and make them correspond to the index for the switcher
+    return mDialogType == EDialogType::kImportImageSequence ? int32(mActiveTab) : int32(mActiveTab) - 1;
 }
 
 void
