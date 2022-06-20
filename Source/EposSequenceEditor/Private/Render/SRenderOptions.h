@@ -43,6 +43,9 @@ public:
 
     UMoviePipelineMasterConfig* GetMasterConfig();
 
+private:
+    virtual FReply OnKeyDown( const FGeometry& iMyGeometry, const FKeyEvent& iKeyEvent ) override;
+
 //private:
 //    FReply  OnAccept();
 //    bool    CanAccept() const;

@@ -44,8 +44,6 @@
 
 #define LOCTEXT_NAMESPACE "NewStoryboardDialog"
 
-TWeakPtr<SWindow> NewStoryboardSettingsWindow;
-
 enum class EDialogType
 {
     kCreation,
@@ -69,12 +67,17 @@ class SNewStoryboardSettings
 {
     SLATE_BEGIN_ARGS( SNewStoryboardSettings )
         {}
+        SLATE_ARGUMENT( TSharedPtr<SWindow>, ParentWindow )
     SLATE_END_ARGS()
 
     void Construct( const FArguments& InArgs, EDialogType iDialogType );
 
+public:
     virtual void AddReferencedObjects( FReferenceCollector& Collector ) override;
     virtual FString GetReferencerName() const override;
+
+private:
+    virtual FReply OnKeyDown( const FGeometry& iMyGeometry, const FKeyEvent& iKeyEvent ) override;
 
 private:
     void ImportImageSequence();
@@ -98,7 +101,9 @@ private:
     FReply OnCreateStoryboard();
 
 private:
-    EDialogType     mDialogType;
+    TWeakPtr<SWindow>   mParentWindow;
+
+    EDialogType         mDialogType;
 
     TSharedPtr<IDetailsView>            mDetailsViewStoryboardSettings;
     TSharedPtr<IDetailsView>            mDetailsViewImportImageSequenceSettings;
@@ -126,6 +131,9 @@ private:
 void
 SNewStoryboardSettings::Construct( const FArguments& InArgs, EDialogType iDialogType )
 {
+    mParentWindow = InArgs._ParentWindow;
+    check( mParentWindow.IsValid() );
+
     mDialogType = iDialogType;
 
     mStoryboardSettings = GetMutableDefault<UStoryboardSettings>();
@@ -398,6 +406,16 @@ SNewStoryboardSettings::Construct( const FArguments& InArgs, EDialogType iDialog
 
     //---
 
+
+    TSharedRef<SPrimaryButton> create_storyboard = SNew( SPrimaryButton )
+                                                   .Text( LOCTEXT( "CreateStoryboard", "Create Storyboard" ) )
+                                                   .IsEnabled( this, &SNewStoryboardSettings::CanCreateStoryboard )
+                                                   .OnClicked( this, &SNewStoryboardSettings::OnCreateStoryboard );
+
+    mParentWindow.Pin().Get()->SetWidgetToFocusOnActivate( create_storyboard );
+
+    //---
+
     ChildSlot
     [
         SNew(SVerticalBox)
@@ -471,13 +489,12 @@ SNewStoryboardSettings::Construct( const FArguments& InArgs, EDialogType iDialog
         .HAlign( HAlign_Right )
         .Padding( 10.f, 4.f, 10.f, 8.f )
         [
-            SNew( SPrimaryButton )
-            .Text(LOCTEXT("CreateStoryboard", "Create Storyboard"))
-            .IsEnabled( this, &SNewStoryboardSettings::CanCreateStoryboard )
-            .OnClicked( this, &SNewStoryboardSettings::OnCreateStoryboard)
+            create_storyboard
         ]
     ];
 }
+
+//---
 
 void
 SNewStoryboardSettings::AddReferencedObjects( FReferenceCollector& Collector ) //override
@@ -497,6 +514,23 @@ SNewStoryboardSettings::GetReferencerName() const //override
 {
     return "SNewStoryboardSettings";
 }
+
+//---
+
+FReply
+SNewStoryboardSettings::OnKeyDown( const FGeometry& iMyGeometry, const FKeyEvent& iKeyEvent ) //override
+{
+    if( iKeyEvent.GetKey() == EKeys::Escape )
+    {
+        mParentWindow.Pin()->RequestDestroyWindow();
+
+        return FReply::Handled();
+    }
+
+    return SCompoundWidget::OnKeyDown( iMyGeometry, iKeyEvent );
+}
+
+//---
 
 void
 SNewStoryboardSettings::StoryboardSettingsChanged( const FPropertyChangedEvent& iEvent )
@@ -744,7 +778,7 @@ SNewStoryboardSettings::OnCreateStoryboard()
 
     //---
 
-    NewStoryboardSettingsWindow.Pin()->RequestDestroyWindow();
+    mParentWindow.Pin()->RequestDestroyWindow();
 
     return FReply::Handled();
 }
@@ -756,69 +790,35 @@ SNewStoryboardSettings::OnCreateStoryboard()
 void
 NewStoryboardDialog::OpenCreationDialog(const TSharedRef<FTabManager>& TabManager)
 {
-    TSharedPtr<SWindow> ExistingWindow = NewStoryboardSettingsWindow.Pin();
-    if (ExistingWindow.IsValid())
-    {
-        ExistingWindow->BringToFront();
-    }
-    else
-    {
-        ExistingWindow = SNew(SWindow)
-            .Title( LOCTEXT("NewStoryboardDialogTitle", "New Storyboard Settings") )
-            .HasCloseButton(true)
-            .SupportsMaximize(false)
-            .SupportsMinimize(false)
-            .ClientSize(FVector2D(800, 900));
+    TSharedRef<SWindow> window = SNew( SWindow )
+        .Title( LOCTEXT( "NewStoryboardDialogTitle", "New Storyboard Settings" ) )
+        .HasCloseButton( true )
+        .SupportsMaximize( false )
+        .SupportsMinimize( false )
+        .ClientSize( FVector2D( 800, 900 ) );
 
-        TSharedPtr<SDockTab> OwnerTab = TabManager->GetOwnerTab();
-        TSharedPtr<SWindow> RootWindow = OwnerTab.IsValid() ? OwnerTab->GetParentWindow() : TSharedPtr<SWindow>();
-        if(RootWindow.IsValid())
-        {
-            FSlateApplication::Get().AddWindowAsNativeChild(ExistingWindow.ToSharedRef(), RootWindow.ToSharedRef());
-        }
-        else
-        {
-            FSlateApplication::Get().AddWindow(ExistingWindow.ToSharedRef());
-        }
-    }
+    window->SetContent( SNew( SNewStoryboardSettings, EDialogType::kCreation )
+                        .ParentWindow( window )
+                        );
 
-    ExistingWindow->SetContent( SNew( SNewStoryboardSettings, EDialogType::kCreation ) );
-
-    NewStoryboardSettingsWindow = ExistingWindow;
+    GEditor->EditorAddModalWindow( window );
 }
 
 void
 NewStoryboardDialog::OpenImportImageSequenceDialog( const TSharedRef<FTabManager>& TabManager )
 {
-    TSharedPtr<SWindow> ExistingWindow = NewStoryboardSettingsWindow.Pin();
-    if( ExistingWindow.IsValid() )
-    {
-        ExistingWindow->BringToFront();
-    }
-    else
-    {
-        ExistingWindow = SNew( SWindow )
-            .Title( LOCTEXT( "NewStoryboardDialogTitle", "New Storyboard Settings" ) )
-            .HasCloseButton( true )
-            .SupportsMaximize( false )
-            .SupportsMinimize( false )
-            .ClientSize( FVector2D( 800, 900 ) );
+    TSharedRef<SWindow> window = SNew( SWindow )
+        .Title( LOCTEXT( "NewStoryboardDialogTitle", "New Storyboard Settings" ) )
+        .HasCloseButton( true )
+        .SupportsMaximize( false )
+        .SupportsMinimize( false )
+        .ClientSize( FVector2D( 800, 900 ) );
 
-        TSharedPtr<SDockTab> OwnerTab = TabManager->GetOwnerTab();
-        TSharedPtr<SWindow> RootWindow = OwnerTab.IsValid() ? OwnerTab->GetParentWindow() : TSharedPtr<SWindow>();
-        if( RootWindow.IsValid() )
-        {
-            FSlateApplication::Get().AddWindowAsNativeChild( ExistingWindow.ToSharedRef(), RootWindow.ToSharedRef() );
-        }
-        else
-        {
-            FSlateApplication::Get().AddWindow( ExistingWindow.ToSharedRef() );
-        }
-    }
+    window->SetContent( SNew( SNewStoryboardSettings, EDialogType::kImportImageSequence )
+                            .ParentWindow( window )
+                            );
 
-    ExistingWindow->SetContent( SNew( SNewStoryboardSettings, EDialogType::kImportImageSequence ) );
-
-    NewStoryboardSettingsWindow = ExistingWindow;
+    GEditor->EditorAddModalWindow( window );
 }
 
 #undef LOCTEXT_NAMESPACE

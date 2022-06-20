@@ -62,8 +62,12 @@ class SExportStoryboardSettings
 
     void Construct( const FArguments& InArgs, TWeakPtr<ISequencer> iSequencer, UMovieSceneSequence* iCurrentSequence );
 
+public:
     virtual void AddReferencedObjects( FReferenceCollector& Collector ) override;
     virtual FString GetReferencerName() const override;
+
+private:
+    virtual FReply OnKeyDown( const FGeometry& iMyGeometry, const FKeyEvent& iKeyEvent ) override;
 
 private:
     float GetMostRelevantCameraAspectRatio() const;
@@ -106,6 +110,7 @@ void
 SExportStoryboardSettings::Construct( const FArguments& InArgs, TWeakPtr<ISequencer> iSequencer, UMovieSceneSequence* iCurrentSequence )
 {
     mParentWindow = InArgs._ParentWindow;
+    check( mParentWindow.IsValid() );
 
     mSequencer = iSequencer;
     mCurrentSequence = iCurrentSequence;
@@ -153,6 +158,16 @@ SExportStoryboardSettings::Construct( const FArguments& InArgs, TWeakPtr<ISequen
                         .ItemWidth( this, &SExportStoryboardSettings::GetItemScaledWidth )
                         .ItemHeight( this, &SExportStoryboardSettings::GetItemScaledHeight );
     }
+
+    //---
+
+
+    TSharedRef<SPrimaryButton> export_panels = SNew( SPrimaryButton )
+                                               .Text( LOCTEXT( "ExportStoryboard", "Export Panels" ) )
+                                               .IsEnabled( this, &SExportStoryboardSettings::CanExportStoryboard )
+                                               .OnClicked( this, &SExportStoryboardSettings::OnExportStoryboard );
+
+    mParentWindow.Pin().Get()->SetWidgetToFocusOnActivate( export_panels );
 
     //---
 
@@ -232,13 +247,12 @@ SExportStoryboardSettings::Construct( const FArguments& InArgs, TWeakPtr<ISequen
         .HAlign( HAlign_Right )
         .Padding( 10.f, 4.f, 10.f, 8.f )
         [
-            SNew( SPrimaryButton )
-            .Text(LOCTEXT("ExportStoryboard", "Export Panels"))
-            .IsEnabled( this, &SExportStoryboardSettings::CanExportStoryboard )
-            .OnClicked( this, &SExportStoryboardSettings::OnExportStoryboard)
+            export_panels
         ]
     ];
 }
+
+//---
 
 void
 SExportStoryboardSettings::AddReferencedObjects( FReferenceCollector& Collector ) //override
@@ -252,6 +266,23 @@ SExportStoryboardSettings::GetReferencerName() const //override
 {
     return "SExportStoryboardSettings";
 }
+
+//---
+
+FReply
+SExportStoryboardSettings::OnKeyDown( const FGeometry& iMyGeometry, const FKeyEvent& iKeyEvent ) //override
+{
+    if( iKeyEvent.GetKey() == EKeys::Escape )
+    {
+        mParentWindow.Pin()->RequestDestroyWindow();
+
+        return FReply::Handled();
+    }
+
+    return SCompoundWidget::OnKeyDown( iMyGeometry, iKeyEvent );
+}
+
+//---
 
 float
 SExportStoryboardSettings::GetMostRelevantCameraAspectRatio() const
@@ -418,7 +449,6 @@ SExportStoryboardSettings::OnExportStoryboard()
 
     //---
 
-    check( mParentWindow.Pin() );
     mParentWindow.Pin()->RequestDestroyWindow();
 
     return FReply::Handled();

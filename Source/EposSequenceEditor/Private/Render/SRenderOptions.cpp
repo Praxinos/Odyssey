@@ -523,6 +523,7 @@ void
 SRenderOptions::Construct( const FArguments& iArgs )
 {
     mParentWindow = iArgs._ParentWindow;
+    check( mParentWindow.IsValid() );
 
     FContentBrowserModule& ContentBrowserModule = FModuleManager::Get().LoadModuleChecked<FContentBrowserModule>( TEXT( "ContentBrowser" ) );
 
@@ -671,6 +672,22 @@ SRenderOptions::GetMasterConfig()
     return mMasterConfig;
 }
 
+FReply
+SRenderOptions::OnKeyDown( const FGeometry& iMyGeometry, const FKeyEvent& iKeyEvent ) //override
+{
+    if( iKeyEvent.GetKey() == EKeys::Escape )
+    {
+        mUserDlgResponse = false;
+        mMasterConfig = nullptr;
+
+        mParentWindow.Pin()->RequestDestroyWindow();
+
+        return FReply::Handled();
+    }
+
+    return SCompoundWidget::OnKeyDown( iMyGeometry, iKeyEvent );
+}
+
 void
 SRenderOptions::OnMasterConfigSelected( const FAssetData& iAssetData )
 {
@@ -684,11 +701,9 @@ SRenderOptions::OnMasterConfigDoubleClicked( const FAssetData& iAssetData )
         return;
 
     mUserDlgResponse = true;
-
     mMasterConfig = CastChecked<UMoviePipelineMasterConfig>( iAssetData.GetAsset() );
 
-    if( mParentWindow.IsValid() )
-        mParentWindow.Pin()->RequestDestroyWindow();
+    mParentWindow.Pin()->RequestDestroyWindow();
 }
 
 void
@@ -701,11 +716,9 @@ SRenderOptions::OnMasterConfigEnterPressed( const TArray<FAssetData>& iAssetData
         return;
 
     mUserDlgResponse = true;
-
     mMasterConfig = CastChecked<UMoviePipelineMasterConfig>( iAssetData[0].GetAsset() );
 
-    if( mParentWindow.IsValid() )
-        mParentWindow.Pin()->RequestDestroyWindow();
+    mParentWindow.Pin()->RequestDestroyWindow();
 }
 
 EVisibility
@@ -726,8 +739,7 @@ SRenderOptions::EncoderSettingsVisibility() const
 //{
 //    mUserDlgResponse = true;
 //
-//    if( mParentWindow.IsValid() )
-//        mParentWindow.Pin()->RequestDestroyWindow();
+//    mParentWindow.Pin()->RequestDestroyWindow();
 //
 //    return FReply::Handled();
 //}
@@ -743,8 +755,7 @@ SRenderOptions::EncoderSettingsVisibility() const
 //{
 //    mUserDlgResponse = false;
 //
-//    if( mParentWindow.IsValid() )
-//        mParentWindow.Pin()->RequestDestroyWindow();
+//    mParentWindow.Pin()->RequestDestroyWindow();
 //
 //    return FReply::Handled();
 //}
