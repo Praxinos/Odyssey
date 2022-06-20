@@ -527,6 +527,12 @@ SNewStoryboardSettings::ImportImageSequence()
     mImageSequenceStruct = image_sequence_importer.GetImageSequenceStruct();
 
     mStoryboardSettings->StoryboardName = FPaths::GetBaseFilename( mImportImageSequenceSettings->Options.ImageSequencePath.Path );
+
+    if( mPanelListView.IsValid() )
+    {
+        MakePanelItems();
+        mPanelListView->RequestListRefresh();
+    }
 }
 
 int32
@@ -540,6 +546,8 @@ SNewStoryboardSettings::GetActiveTabIndex() const
 void
 SNewStoryboardSettings::MakePanelItems()
 {
+    mPanelItemsList.Empty();
+
     // Build a list of items - one for each file
     for( int32 b = 0; b < mImageSequenceStruct.Boards.Num(); b++ )
     {
