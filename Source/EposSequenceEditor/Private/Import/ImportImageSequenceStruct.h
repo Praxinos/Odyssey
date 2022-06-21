@@ -10,12 +10,12 @@
 //---
 
 USTRUCT()
-struct FImportImageSequenceFrame
+struct FImportImageSequencePanel
 {
     GENERATED_BODY()
 
 public:
-    UPROPERTY( EditAnywhere, Category=ImportImageSequenceStruct, DisplayName="Frame Id" )
+    UPROPERTY( EditAnywhere, Category=ImportImageSequenceStruct, DisplayName="Panel Id" )
     FString Id;
 
     UPROPERTY( EditAnywhere, Category=ImportImageSequenceStruct )
@@ -37,7 +37,7 @@ public:
     FString Id;
 
     UPROPERTY( EditAnywhere, Category=ImportImageSequenceStruct )
-    TArray<FImportImageSequenceFrame> Frames;
+    TArray<FImportImageSequencePanel> Panels;
 };
 
 //---

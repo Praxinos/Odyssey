@@ -253,7 +253,7 @@ FEposSequenceEditorStyle::InitImportExport()
     Set( "ImportImageSequence.PanelItem.BoardAreaOddBackground", new FSlateColorBrush( FLinearColor( FColor( 40, 40, 40 ) ) ) );
     Set( "ImportImageSequence.PanelItem.ShotAreaEvenBackground", new FSlateColorBrush( FLinearColor( FColor( 70, 70, 70 ) ) ) );
     Set( "ImportImageSequence.PanelItem.ShotAreaOddBackground", new FSlateColorBrush( FLinearColor( FColor( 90, 90, 90 ) ) ) );
-    Set( "ImportImageSequence.PanelItem.FrameAreaBackground", new FSlateColorBrush( EStyleColor::Header ) );
+    Set( "ImportImageSequence.PanelItem.PanelAreaBackground", new FSlateColorBrush( EStyleColor::Header ) );
 
     SetContentRoot( FPaths::EngineContentDir() / TEXT( "Editor" ) / TEXT( "Slate" ) );
     {

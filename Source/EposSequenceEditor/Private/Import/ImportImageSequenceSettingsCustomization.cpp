@@ -80,7 +80,7 @@ For files like:
 - wonder-3-001.png
 - wonder-3-002.png
 - wonder-3-003.png
-If the first number corresponds to the shot, and the second to each frame,
+If the first number corresponds to the shot, and the second to each panel,
 the pattern will look like:
 - wonder-{1}-{2}.png
 
@@ -94,13 +94,13 @@ For files like:
 - ful-bB-s03-01.png
 - ful-bB-s03-02.png
 - ful-bB-s03-03.png
-If the first character (A or B) corresponds to the board, the next number to the shot, and the last to each frame,
+If the first character (A or B) corresponds to the board, the next number to the shot, and the last to each panel,
 the pattern will look like:
 - ful-b{0}-s{1}-{2}.png
 )" )
                           , FText::FromString( iMapKeywords[EImportImageSequencePatternKeyword::BoardId].mKeywordWithBraces )
                           , FText::FromString( iMapKeywords[EImportImageSequencePatternKeyword::ShotId].mKeywordWithBraces )
-                          , FText::FromString( iMapKeywords[EImportImageSequencePatternKeyword::FrameId].mKeywordWithBraces )
+                          , FText::FromString( iMapKeywords[EImportImageSequencePatternKeyword::PanelId].mKeywordWithBraces )
                           , FText::FromString( iMapKeywords[EImportImageSequencePatternKeyword::Duration].mKeywordWithBraces )
     );
 }

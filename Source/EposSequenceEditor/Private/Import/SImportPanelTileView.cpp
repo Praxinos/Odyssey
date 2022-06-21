@@ -22,7 +22,7 @@
 void
 FImportPanelItem::CreateThumbnail()
 {
-    mThumbnail = FImageUtils::ImportFileAsTexture2D( mFrame->Pathfile.FilePath );
+    mThumbnail = FImageUtils::ImportFileAsTexture2D( mPanel->Pathfile.FilePath );
 
     float ratio = mThumbnail->GetSizeX() / double( mThumbnail->GetSizeY() );
 
@@ -107,18 +107,18 @@ SImportPanelTileView::Construct( const FArguments& InArgs, const TSharedRef<STab
                             ]
                         ]
 
-                        // Frame Id
+                        // Panel Id
                         + SVerticalBox::Slot()
                         .AutoHeight()
                         [
                             SNew( SBorder )
                             .Padding( 3.f )
                             .HAlign( HAlign_Fill )
-                            .BorderImage( this, &SImportPanelTileView::GetFrameAreaBackgroundBrush )
+                            .BorderImage( this, &SImportPanelTileView::GetPanelAreaBackgroundBrush )
                             [
                                 SNew( STextBlock )
                                 //.Font( FEposSequenceEditorStyle::Get().GetFontStyle( "ExportImageSequence.PanelItem.Font" ) )
-                                .Text( FText::Format( LOCTEXT( "item-label.frame-id", "Panel: {0}" ), FText::FromString( mPanelItem->mFrame->Id ) ) )
+                                .Text( FText::Format( LOCTEXT( "item-label.panel-id", "Panel: {0}" ), FText::FromString( mPanelItem->mPanel->Id ) ) )
                                 .ColorAndOpacity( this, &SImportPanelTileView::GetNameAreaTextColor )
                             ]
                         ]
@@ -158,7 +158,7 @@ SImportPanelTileView::Construct( const FArguments& InArgs, const TSharedRef<STab
                         .AutoWidth()
                         [
                             SNew( STextBlock )
-                            .Text( LOCTEXT( "item-label.frame-duration", "Duration: " ) )
+                            .Text( LOCTEXT( "item-label.panel-duration", "Duration: " ) )
                             .ColorAndOpacity( this, &SImportPanelTileView::GetNameAreaTextColor )
                         ]
 
@@ -185,7 +185,7 @@ SImportPanelTileView::GetTooltipText() const
     TArray<FText> tooltip_texts;
 
     {
-        FText line = FText::Format( LOCTEXT( "item-tooltip.frame-pathfile", "Pathfile: {0}" ), FText::FromString( mPanelItem->mFrame->Pathfile.FilePath ) );
+        FText line = FText::Format( LOCTEXT( "item-tooltip.panel-pathfile", "Pathfile: {0}" ), FText::FromString( mPanelItem->mPanel->Pathfile.FilePath ) );
         tooltip_texts.Add( line );
     }
 
@@ -202,12 +202,12 @@ SImportPanelTileView::GetTooltipText() const
     }
 
     {
-        FText line = FText::Format( LOCTEXT( "item-tooltip.frame-id", "Panel: {0}" ), FText::FromString( mPanelItem->mFrame->Id ) );
+        FText line = FText::Format( LOCTEXT( "item-tooltip.panel-id", "Panel: {0}" ), FText::FromString( mPanelItem->mPanel->Id ) );
         tooltip_texts.Add( line );
     }
 
     {
-        FText line = FText::Format( LOCTEXT( "item-tooltip.frame-duration", "Panel Duration: {0}" ), FText::AsNumber( mPanelItem->mFrame->Duration ) );
+        FText line = FText::Format( LOCTEXT( "item-tooltip.panel-duration", "Panel Duration: {0}" ), FText::AsNumber( mPanelItem->mPanel->Duration ) );
         tooltip_texts.Add( line );
     }
 
@@ -217,13 +217,13 @@ SImportPanelTileView::GetTooltipText() const
 FText
 SImportPanelTileView::GetDurationText() const
 {
-    return FText::AsNumber( mPanelItem->mFrame->Duration );
+    return FText::AsNumber( mPanelItem->mPanel->Duration );
 }
 
 void
 SImportPanelTileView::OnDurationTextCommitted( const FText& iText, ETextCommit::Type iType )
 {
-    mPanelItem->mFrame->Duration = FCString::Atoi( *iText.ToString() );
+    mPanelItem->mPanel->Duration = FCString::Atoi( *iText.ToString() );
 }
 
 bool
@@ -296,9 +296,9 @@ SImportPanelTileView::GetShotAreaBackgroundBrush() const
 }
 
 const FSlateBrush*
-SImportPanelTileView::GetFrameAreaBackgroundBrush() const
+SImportPanelTileView::GetPanelAreaBackgroundBrush() const
 {
-    return FEposSequenceEditorStyle::Get().GetBrush( "ImportImageSequence.PanelItem.FrameAreaBackground" );
+    return FEposSequenceEditorStyle::Get().GetBrush( "ImportImageSequence.PanelItem.PanelAreaBackground" );
 }
 
 //---

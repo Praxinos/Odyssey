@@ -557,15 +557,15 @@ SNewStoryboardSettings::MakePanelItems()
         {
             FImportImageSequenceShot* shot = &board->Shots[s];
 
-            for( int32 f = 0; f < shot->Frames.Num(); f++ )
+            for( int32 f = 0; f < shot->Panels.Num(); f++ )
             {
-                FImportImageSequenceFrame* frame = &shot->Frames[f];
+                FImportImageSequencePanel* panel = &shot->Panels[f];
 
                 TSharedPtr<FImportPanelItem> panel_item = MakeShareable( new FImportPanelItem() );
                 panel_item->mRootStruct = &mImageSequenceStruct;
                 panel_item->mBoard = board;
                 panel_item->mShot = shot;
-                panel_item->mFrame = frame;
+                panel_item->mPanel = panel;
 
                 panel_item->mOptions = &mImportImageSequenceSettings->Options;
                 panel_item->CreateThumbnail();

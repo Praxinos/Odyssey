@@ -14,7 +14,7 @@ enum class EImportImageSequencePatternKeyword : uint8
 {
     BoardId,
     ShotId,
-    FrameId,
+    PanelId,
     Duration,
 };
 

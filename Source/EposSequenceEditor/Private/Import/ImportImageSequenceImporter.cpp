@@ -60,7 +60,7 @@ FImportImageSequenceImporter::Build( const TMap<EImportImageSequencePatternKeywo
     TMap<EImportImageSequencePatternKeyword, FPatternStruct> pattern_map;
     pattern_map.Add( EImportImageSequencePatternKeyword::BoardId  , { iKeywords[EImportImageSequencePatternKeyword::BoardId].mKeywordWithBraces , TEXT( "([_0-9a-zA-Z]+)" ) } );
     pattern_map.Add( EImportImageSequencePatternKeyword::ShotId   , { iKeywords[EImportImageSequencePatternKeyword::ShotId].mKeywordWithBraces  , TEXT( "([_0-9a-zA-Z]+)" ) } );
-    pattern_map.Add( EImportImageSequencePatternKeyword::FrameId  , { iKeywords[EImportImageSequencePatternKeyword::FrameId].mKeywordWithBraces , TEXT( "([_0-9a-zA-Z]+)" ) } );
+    pattern_map.Add( EImportImageSequencePatternKeyword::PanelId  , { iKeywords[EImportImageSequencePatternKeyword::PanelId].mKeywordWithBraces , TEXT( "([_0-9a-zA-Z]+)" ) } );
     pattern_map.Add( EImportImageSequencePatternKeyword::Duration , { iKeywords[EImportImageSequencePatternKeyword::Duration].mKeywordWithBraces, TEXT( "([0-9]+)" ) } );
 
     FString file_pattern_regex = mImageSequenceFilePattern;
@@ -78,7 +78,7 @@ FImportImageSequenceImporter::Build( const TMap<EImportImageSequencePatternKeywo
     }
 
     if( pattern_map[EImportImageSequencePatternKeyword::ShotId].mKeyIndex == INDEX_NONE
-        || pattern_map[EImportImageSequencePatternKeyword::FrameId].mKeyIndex == INDEX_NONE )
+        || pattern_map[EImportImageSequencePatternKeyword::PanelId].mKeyIndex == INDEX_NONE )
     {
         oErrorMessage = TEXT( "no {shot} or {panel} keys in pattern " ) + mImageSequenceFilePattern;
         return;
@@ -117,7 +117,7 @@ FImportImageSequenceImporter::Build( const TMap<EImportImageSequencePatternKeywo
 
         FString id_shot_string = matcher.GetCaptureGroup( pattern_map[EImportImageSequencePatternKeyword::ShotId].mKeyPosition );
 
-        FString id_frame_string = matcher.GetCaptureGroup( pattern_map[EImportImageSequencePatternKeyword::FrameId].mKeyPosition );
+        FString id_panel_string = matcher.GetCaptureGroup( pattern_map[EImportImageSequencePatternKeyword::PanelId].mKeyPosition );
 
         int32 frame_duration = -1;
         if( pattern_map[EImportImageSequencePatternKeyword::Duration].mKeyPosition != 0 )
@@ -192,34 +192,34 @@ FImportImageSequenceImporter::Build( const TMap<EImportImageSequencePatternKeywo
 
         //---
 
-        FImportImageSequenceFrame* frame = nullptr;
+        FImportImageSequencePanel* panel = nullptr;
 
-        for( int32 i = 0; i < shot->Frames.Num(); i++ )
+        for( int32 i = 0; i < shot->Panels.Num(); i++ )
         {
-            if( shot->Frames[i].Id == id_frame_string )
+            if( shot->Panels[i].Id == id_panel_string )
             {
-                frame = &shot->Frames[i];
+                panel = &shot->Panels[i];
                 break;
             }
         }
 
-        if( !frame )
+        if( !panel )
         {
-            FImportImageSequenceFrame new_frame;
-            new_frame.Id = id_frame_string;
+            FImportImageSequencePanel new_panel;
+            new_panel.Id = id_panel_string;
 
-            int32 index = shot->Frames.Add( new_frame );
-            frame = &shot->Frames[index];
+            int32 index = shot->Panels.Add( new_panel );
+            panel = &shot->Panels[index];
         }
 
-        check( frame );
+        check( panel );
 
         //---
 
-        frame->Pathfile.FilePath = mImageSequencePath / file;
+        panel->Pathfile.FilePath = mImageSequencePath / file;
 
         if( frame_duration > 0 )
-            frame->Duration = frame_duration;
+            panel->Duration = frame_duration;
     }
 }
 

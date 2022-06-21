@@ -119,7 +119,7 @@ FImportImageSequenceConverter::CreateShotsRecursive( const TArray<FImportImageSe
         FImportImageSequenceShot shot = iShots[i];
         UMovieSceneSubSection* subsection = CastChecked<UMovieSceneSubSection>( sections[i] );
 
-        CreateDrawings( shot.Frames, subsection );
+        CreateDrawings( shot.Panels, subsection );
     }
 }
 
@@ -147,7 +147,7 @@ FImportImageSequenceConverter::CreateShot( const FImportImageSequenceShot& iShot
 }
 
 void
-FImportImageSequenceConverter::CreateDrawings( const TArray<FImportImageSequenceFrame>& iFrames, UMovieSceneSubSection* iSubSection )
+FImportImageSequenceConverter::CreateDrawings( const TArray<FImportImageSequencePanel>& iPanels, UMovieSceneSubSection* iSubSection )
 {
     ISequencer* sequencer = mSequencer.Pin().Get();
 
@@ -156,17 +156,17 @@ FImportImageSequenceConverter::CreateDrawings( const TArray<FImportImageSequence
     NamingConvention::GenerateTextureAssetPathName( *sequencer, mBoardSequence, iSubSection->GetSequence(), nullptr, path, name );
     FString destination_path = path;
 
-    check( iFrames.Num() );
+    check( iPanels.Num() );
 
     FAssetToolsModule& AssetToolsModule = FModuleManager::Get().LoadModuleChecked<FAssetToolsModule>( "AssetTools" );
 
-    //TArray<FString> pathfiles { frame.Pathfile.FilePath };
+    //TArray<FString> pathfiles { panel.Pathfile.FilePath };
     //TArray<TPair<FString, FString>> FilesAndDestinations;
     //AssetToolsModule.Get().ExpandDirectories( pathfiles, destination_path, FilesAndDestinations );
     //AssetToolsModule.Get().ImportAssets( pathfiles, destination_path, nullptr, true, &FilesAndDestinations, false );
 
     {
-        TArray<FString> pathfiles { iFrames[0].Pathfile.FilePath };
+        TArray<FString> pathfiles { iPanels[0].Pathfile.FilePath };
         TArray<UObject*> assets = AssetToolsModule.Get().ImportAssets( pathfiles, destination_path );
         UTexture2D* texture = Cast<UTexture2D>( assets[0] );
         check( texture );
@@ -190,14 +190,14 @@ FImportImageSequenceConverter::CreateDrawings( const TArray<FImportImageSequence
 
     //---
 
-    int32 duration_in_tick = ConvertFromDisplayRateToTickResolution( iFrames[0].Duration );
+    int32 duration_in_tick = ConvertFromDisplayRateToTickResolution( iPanels[0].Duration );
     FFrameNumber next_frame_number = iSubSection->GetTrueRange().GetLowerBoundValue() + duration_in_tick;
 
-    for( int i = 1; i < iFrames.Num(); i++ )
+    for( int i = 1; i < iPanels.Num(); i++ )
     {
-        FImportImageSequenceFrame frame = iFrames[i];
+        FImportImageSequencePanel panel = iPanels[i];
 
-        TArray<FString> pathfiles { frame.Pathfile.FilePath };
+        TArray<FString> pathfiles { panel.Pathfile.FilePath };
         TArray<UObject*> assets = AssetToolsModule.Get().ImportAssets( pathfiles, destination_path );
         UTexture2D* texture = Cast<UTexture2D>( assets[0] );
         check( texture );
@@ -210,7 +210,7 @@ FImportImageSequenceConverter::CreateDrawings( const TArray<FImportImageSequence
 
         //---
 
-        duration_in_tick = ConvertFromDisplayRateToTickResolution( frame.Duration );
+        duration_in_tick = ConvertFromDisplayRateToTickResolution( panel.Duration );
         next_frame_number += duration_in_tick;
     }
 }
@@ -231,8 +231,8 @@ int32
 FImportImageSequenceConverter::GetDuration( const FImportImageSequenceShot& iShot ) const
 {
     int32 duration = 0;
-    for( auto& frame : iShot.Frames )
-        duration += frame.Duration;
+    for( auto& panel : iShot.Panels )
+        duration += panel.Duration;
 
     return duration;
 }

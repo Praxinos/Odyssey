@@ -25,8 +25,8 @@ FImportImageSequenceOptions::FImportImageSequenceOptions()
 {
     ADD_PATTERN_KEYWORD( PatternKeywords, EImportImageSequencePatternKeyword::BoardId, "sequence", "image-sequence-pattern-keyword", "the id which represents the board" );
     ADD_PATTERN_KEYWORD( PatternKeywords, EImportImageSequencePatternKeyword::ShotId, "shot", "image-sequence-pattern-keyword", "the id which represents the shot" );
-    ADD_PATTERN_KEYWORD( PatternKeywords, EImportImageSequencePatternKeyword::FrameId, "panel", "image-sequence-pattern-keyword", "the id which represents the frame (drawing)" );
-    ADD_PATTERN_KEYWORD( PatternKeywords, EImportImageSequencePatternKeyword::Duration, "duration", "image-sequence-pattern-keyword", "the number which represents the duration of the frame (drawing)" );
+    ADD_PATTERN_KEYWORD( PatternKeywords, EImportImageSequencePatternKeyword::PanelId, "panel", "image-sequence-pattern-keyword", "the id which represents the panel (drawing)" );
+    ADD_PATTERN_KEYWORD( PatternKeywords, EImportImageSequencePatternKeyword::Duration, "duration", "image-sequence-pattern-keyword", "the number which represents the duration of the panel (drawing)" );
 
     // No default pattern value, it's too file dependent
 }

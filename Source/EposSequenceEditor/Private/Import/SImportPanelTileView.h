@@ -16,7 +16,7 @@ struct FImportPanelItem
     const FImportImageSequenceStruct*   mRootStruct;
     const FImportImageSequenceBoard*    mBoard;
     const FImportImageSequenceShot*     mShot;
-    FImportImageSequenceFrame*          mFrame;
+    FImportImageSequencePanel*          mPanel;
 
     FImportImageSequenceOptions*    mOptions;
 
@@ -57,7 +57,7 @@ private:
 
     const FSlateBrush* GetBoardAreaBackgroundBrush() const;
     const FSlateBrush* GetShotAreaBackgroundBrush() const;
-    const FSlateBrush* GetFrameAreaBackgroundBrush() const;
+    const FSlateBrush* GetPanelAreaBackgroundBrush() const;
 
     const FSlateBrush*  GetTopAreaBackgroundBrush() const;
     const FSlateBrush*  GetThumbnailAreaBackgroundBrush() const;
