@@ -87,7 +87,7 @@ SImportPanelTileView::Construct( const FArguments& InArgs, const TSharedRef<STab
                             .BorderImage( this, &SImportPanelTileView::GetBoardAreaBackgroundBrush )
                             [
                                 SNew( STextBlock )
-                                .Text( FText::Format( LOCTEXT( "item-label.board-id", "Sequence: {0}" ), FText::FromString( mPanelItem->mBoard->Id ) ) )
+                                .Text( FText::Format( LOCTEXT( "item-label.board-id", "Board: {0}" ), FText::FromString( mPanelItem->mBoard->Id ) ) )
                                 .ColorAndOpacity( this, &SImportPanelTileView::GetNameAreaTextColor )
                             ]
                         ]
@@ -192,7 +192,7 @@ SImportPanelTileView::GetTooltipText() const
     tooltip_texts.Add( FText::GetEmpty() );
 
     {
-        FText line = FText::Format( LOCTEXT( "item-tooltip.board-id", "Sequence: {0}" ), FText::FromString( mPanelItem->mBoard->Id ) );
+        FText line = FText::Format( LOCTEXT( "item-tooltip.board-id", "Board: {0}" ), FText::FromString( mPanelItem->mBoard->Id ) );
         tooltip_texts.Add( line );
     }
 
