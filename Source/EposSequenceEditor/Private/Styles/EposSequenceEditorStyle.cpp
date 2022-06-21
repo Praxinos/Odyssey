@@ -246,7 +246,14 @@ FEposSequenceEditorStyle::InitImportExport()
     Set( "ImportImageSequence.PanelItem.TopAreaHoverBackground", new FSlateRoundedBoxBrush( FStyleColors::Hover, FVector4( 4.0f, 4.0f, 0.0f, 0.0f ) ) );
     Set( "ImportImageSequence.PanelItem.BottomAreaBackground", new FSlateRoundedBoxBrush( EStyleColor::Header, FVector4( 0.0f, 0.0f, 4.0f, 4.0f ) ) );
     Set( "ImportImageSequence.PanelItem.BottomAreaHoverBackground", new FSlateRoundedBoxBrush( FStyleColors::Hover, FVector4( 0.0f, 0.0f, 4.0f, 4.0f ) ) );
-    Set( "ImportImageSequence.PanelItem.ThumbnailAreaBackground", new FSlateRoundedBoxBrush( COLOR( "#474747FF" ), FVector4( 0.0f, 0.0f, 0.0f, 0.0f ) ) );
+    Set( "ImportImageSequence.PanelItem.ThumbnailAreaBackground", new FSlateRoundedBoxBrush( EStyleColor::Header, FVector4( 0.0f, 0.0f, 0.0f, 0.0f ) ) );
+    Set( "ImportImageSequence.PanelItem.ThumbnailAreaHoverBackground", new FSlateRoundedBoxBrush( FStyleColors::Hover, FVector4( 0.0f, 0.0f, 0.0f, 0.0f ) ) );
+
+    Set( "ImportImageSequence.PanelItem.BoardAreaEvenBackground", new FSlateColorBrush( FLinearColor( FColor( 20, 20, 20 ) ) ) );
+    Set( "ImportImageSequence.PanelItem.BoardAreaOddBackground", new FSlateColorBrush( FLinearColor( FColor( 40, 40, 40 ) ) ) );
+    Set( "ImportImageSequence.PanelItem.ShotAreaEvenBackground", new FSlateColorBrush( FLinearColor( FColor( 70, 70, 70 ) ) ) );
+    Set( "ImportImageSequence.PanelItem.ShotAreaOddBackground", new FSlateColorBrush( FLinearColor( FColor( 90, 90, 90 ) ) ) );
+    Set( "ImportImageSequence.PanelItem.FrameAreaBackground", new FSlateColorBrush( EStyleColor::Header ) );
 
     SetContentRoot( FPaths::EngineContentDir() / TEXT( "Editor" ) / TEXT( "Slate" ) );
     {

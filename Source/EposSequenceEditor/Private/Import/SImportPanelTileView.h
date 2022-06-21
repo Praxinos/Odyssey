@@ -13,9 +13,10 @@
 
 struct FImportPanelItem
 {
-    FString                         mBoardId;
-    FString                         mShotId;
-    FImportImageSequenceFrame       mFrame;
+    const FImportImageSequenceStruct*   mRootStruct;
+    const FImportImageSequenceBoard*    mBoard;
+    const FImportImageSequenceShot*     mShot;
+    FImportImageSequenceFrame*          mFrame;
 
     FImportImageSequenceOptions*    mOptions;
 
@@ -46,8 +47,22 @@ public:
 private:
     FText GetTooltipText() const;
 
+    FText GetDurationText() const;
+
+    void OnDurationTextCommitted( const FText& iText, ETextCommit::Type iType );
+    bool OnDurationTextVerify( const FText& iText, FText& iError );
+
+    bool    IsBoardEven() const;
+    bool    IsShotEven() const;
+
+    const FSlateBrush* GetBoardAreaBackgroundBrush() const;
+    const FSlateBrush* GetShotAreaBackgroundBrush() const;
+    const FSlateBrush* GetFrameAreaBackgroundBrush() const;
+
     const FSlateBrush*  GetTopAreaBackgroundBrush() const;
+    const FSlateBrush*  GetThumbnailAreaBackgroundBrush() const;
     const FSlateBrush*  GetBottomAreaBackgroundBrush() const;
+
     FSlateColor         GetNameAreaTextColor() const;
 
 private:

@@ -104,8 +104,8 @@ private:
     TSharedPtr<IDetailsView>            mDetailsViewImportImageSequenceSettings;
     TArray<TSharedPtr<FImportPanelItem>>                mPanelItemsList;
     TSharedPtr<STileView<TSharedPtr<FImportPanelItem>>> mPanelListView;
-    float                                               mItemDefaultWidth { 128.f };
-    float                                               mItemDefaultHeight { 128.f };
+    float                                               mItemDefaultWidth { 192.f };
+    float                                               mItemDefaultHeight { 192.f };
     TSharedPtr<IDetailsView>            mDetailsViewSequencer;
     TSharedPtr<IStructureDetailsView>   mDetailsViewBoardSettings;
     TSharedPtr<IStructureDetailsView>   mDetailsViewShotSettings;
@@ -551,19 +551,20 @@ SNewStoryboardSettings::MakePanelItems()
     // Build a list of items - one for each file
     for( int32 b = 0; b < mImageSequenceStruct.Boards.Num(); b++ )
     {
-        FImportImageSequenceBoard& board = mImageSequenceStruct.Boards[b];
+        FImportImageSequenceBoard* board = &mImageSequenceStruct.Boards[b];
 
-        for( int32 s = 0; s < board.Shots.Num(); s++ )
+        for( int32 s = 0; s < board->Shots.Num(); s++ )
         {
-            FImportImageSequenceShot& shot = board.Shots[s];
+            FImportImageSequenceShot* shot = &board->Shots[s];
 
-            for( int32 f = 0; f < shot.Frames.Num(); f++ )
+            for( int32 f = 0; f < shot->Frames.Num(); f++ )
             {
-                FImportImageSequenceFrame& frame = shot.Frames[f];
+                FImportImageSequenceFrame* frame = &shot->Frames[f];
 
                 TSharedPtr<FImportPanelItem> panel_item = MakeShareable( new FImportPanelItem() );
-                panel_item->mBoardId = board.Id;
-                panel_item->mShotId = shot.Id;
+                panel_item->mRootStruct = &mImageSequenceStruct;
+                panel_item->mBoard = board;
+                panel_item->mShot = shot;
                 panel_item->mFrame = frame;
 
                 panel_item->mOptions = &mImportImageSequenceSettings->Options;
