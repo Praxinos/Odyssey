@@ -17,10 +17,10 @@ class UStoryboardSettings
 
 public:
     /** Storyboard name. */
-    UPROPERTY( config, EditAnywhere, Category=Storyboard )
+    UPROPERTY( config, EditAnywhere, Category="Root Board", DisplayName="Name" )
     FString StoryboardName { TEXT( "MyStoryboard" ) };
 
     /** Storyboard path. */
-    UPROPERTY( config, EditAnywhere, Category=Storyboard, meta=(ContentDir) )
+    UPROPERTY( config, EditAnywhere, Category="Root Board", DisplayName="Path", meta=(ContentDir) )
     FDirectoryPath StoryboardPath { TEXT( "/Game" ) };
 };
