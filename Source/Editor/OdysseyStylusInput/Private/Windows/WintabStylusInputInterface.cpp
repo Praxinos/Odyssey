@@ -133,7 +133,7 @@ TSharedPtr<IStylusInputInterfaceInternal> CreateStylusInputInterfaceWintab()
     // Load the wintab dll
     if( !FWintabLibrary::Load() )
     {
-        UE_LOG( LogStylusInput, Error, TEXT( "Could not load Wintab32.dll!" ) );
+        UE_LOG( LogStylusInput, Warning, TEXT( "Could not load Wintab32.dll!" ) );
         return nullptr;
     }
 
