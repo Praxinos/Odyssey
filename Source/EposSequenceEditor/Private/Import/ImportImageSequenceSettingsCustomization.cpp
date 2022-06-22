@@ -1,7 +1,7 @@
 // IDDN.FR.001.220036.001.S.P.2021.000.00000
 // EPOS is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
-#include "Import/ImageSequenceImportSettingsCustomization.h"
+#include "Import/ImportImageSequenceSettingsCustomization.h"
 
 #include "IDetailChildrenBuilder.h"
 #include "IDetailGroup.h"
@@ -9,16 +9,16 @@
 #include "DetailWidgetRow.h"
 
 #include "Settings/SPatternTextBox.h"
-#include "Import/ImageSequenceImportSettings.h"
+#include "Import/ImportImageSequenceSettings.h"
 
-#define LOCTEXT_NAMESPACE "ImageSequenceImportSettingsCustomization"
+#define LOCTEXT_NAMESPACE "ImportImageSequenceSettingsCustomization"
 
 //---
 
 namespace
 {
 static
-TMap<EImageSequencePatternKeyword, FImageSequencePatternKeyword>
+TMap<EImportImageSequencePatternKeyword, FImportImageSequencePatternKeyword>
 GetPatternKeywordsMap2( TSharedRef<IPropertyHandle> iStructPropertyHandle, TArray<FString>& oValidKeywords, TArray<FText>& oKeywordLabels, TArray<FText>& oKeywordHelps )
 {
     oValidKeywords.Empty();
@@ -34,7 +34,7 @@ GetPatternKeywordsMap2( TSharedRef<IPropertyHandle> iStructPropertyHandle, TArra
             void* MapDataPtr = nullptr;
             if( child_handle->GetValueData( MapDataPtr ) == FPropertyAccess::Success )
             {
-                TMap<EImageSequencePatternKeyword, FImageSequencePatternKeyword>* map = ( TMap<EImageSequencePatternKeyword, FImageSequencePatternKeyword>* )MapDataPtr;
+                TMap<EImportImageSequencePatternKeyword, FImportImageSequencePatternKeyword>* map = ( TMap<EImportImageSequencePatternKeyword, FImportImageSequencePatternKeyword>* )MapDataPtr;
                 if( map )
                 {
                     for( auto pair : *map )
@@ -49,7 +49,7 @@ GetPatternKeywordsMap2( TSharedRef<IPropertyHandle> iStructPropertyHandle, TArra
         }
     }
 
-    return TMap<EImageSequencePatternKeyword, FImageSequencePatternKeyword>();
+    return TMap<EImportImageSequencePatternKeyword, FImportImageSequencePatternKeyword>();
 }
 }
 
@@ -59,13 +59,13 @@ GetPatternKeywordsMap2( TSharedRef<IPropertyHandle> iStructPropertyHandle, TArra
 
 //static
 TSharedRef<IPropertyTypeCustomization>
-FImageSequenceImportSettingsCustomization::MakeInstance()
+FImportImageSequenceOptionsCustomization::MakeInstance()
 {
-    return MakeShareable( new FImageSequenceImportSettingsCustomization() );
+    return MakeShareable( new FImportImageSequenceOptionsCustomization() );
 }
 
 FText
-FImageSequenceImportSettingsCustomization::GetTooltipText( const TMap<EImageSequencePatternKeyword, FImageSequencePatternKeyword>& iMapKeywords ) const
+FImportImageSequenceOptionsCustomization::GetTooltipText( const TMap<EImportImageSequencePatternKeyword, FImportImageSequencePatternKeyword>& iMapKeywords ) const
 {
     return FText::Format( LOCTEXT( "import-image-sequence-file-pattern-tooltip",
 R"(Each keywords will be replaced by its corresponding value.
@@ -80,7 +80,7 @@ For files like:
 - wonder-3-001.png
 - wonder-3-002.png
 - wonder-3-003.png
-If the first number corresponds to the shot, and the second to each frame,
+If the first number corresponds to the shot, and the second to each panel,
 the pattern will look like:
 - wonder-{1}-{2}.png
 
@@ -94,19 +94,19 @@ For files like:
 - ful-bB-s03-01.png
 - ful-bB-s03-02.png
 - ful-bB-s03-03.png
-If the first character (A or B) corresponds to the board, the next number to the shot, and the last to each frame,
+If the first character (A or B) corresponds to the board, the next number to the shot, and the last to each panel,
 the pattern will look like:
 - ful-b{0}-s{1}-{2}.png
 )" )
-                          , FText::FromString( iMapKeywords[EImageSequencePatternKeyword::BoardId].mKeywordWithBraces )
-                          , FText::FromString( iMapKeywords[EImageSequencePatternKeyword::ShotId].mKeywordWithBraces )
-                          , FText::FromString( iMapKeywords[EImageSequencePatternKeyword::FrameId].mKeywordWithBraces )
-                          , FText::FromString( iMapKeywords[EImageSequencePatternKeyword::Duration].mKeywordWithBraces )
+                          , FText::FromString( iMapKeywords[EImportImageSequencePatternKeyword::BoardId].mKeywordWithBraces )
+                          , FText::FromString( iMapKeywords[EImportImageSequencePatternKeyword::ShotId].mKeywordWithBraces )
+                          , FText::FromString( iMapKeywords[EImportImageSequencePatternKeyword::PanelId].mKeywordWithBraces )
+                          , FText::FromString( iMapKeywords[EImportImageSequencePatternKeyword::Duration].mKeywordWithBraces )
     );
 }
 
 void
-FImageSequenceImportSettingsCustomization::CustomizeHeader( TSharedRef<IPropertyHandle> iStructPropertyHandle, FDetailWidgetRow& ioHeaderRow, IPropertyTypeCustomizationUtils& ioStructCustomizationUtils ) //override
+FImportImageSequenceOptionsCustomization::CustomizeHeader( TSharedRef<IPropertyHandle> iStructPropertyHandle, FDetailWidgetRow& ioHeaderRow, IPropertyTypeCustomizationUtils& ioStructCustomizationUtils ) //override
 {
     // No header needed (to avoid the collapsing)
 
@@ -118,7 +118,7 @@ FImageSequenceImportSettingsCustomization::CustomizeHeader( TSharedRef<IProperty
 }
 
 void
-FImageSequenceImportSettingsCustomization::CustomizeChildren( TSharedRef<IPropertyHandle> iStructPropertyHandle, IDetailChildrenBuilder& ioChildBuilder, IPropertyTypeCustomizationUtils& ioStructCustomizationUtils ) //override
+FImportImageSequenceOptionsCustomization::CustomizeChildren( TSharedRef<IPropertyHandle> iStructPropertyHandle, IDetailChildrenBuilder& ioChildBuilder, IPropertyTypeCustomizationUtils& ioStructCustomizationUtils ) //override
 {
     uint32 num_children;
     FPropertyAccess::Result result = iStructPropertyHandle->GetNumChildren( num_children );
@@ -129,7 +129,7 @@ FImageSequenceImportSettingsCustomization::CustomizeChildren( TSharedRef<IProper
         if( !handle.IsValid() )
             continue;
 
-        if( handle->GetProperty() && handle->GetProperty()->GetFName() == GET_MEMBER_NAME_CHECKED( FImageSequenceImportSettings, FilePattern ) )
+        if( handle->GetProperty() && handle->GetProperty()->GetFName() == GET_MEMBER_NAME_CHECKED( FImportImageSequenceOptions, FilePattern ) )
         {
             mPatternHandle = handle;
 
@@ -138,7 +138,7 @@ FImageSequenceImportSettingsCustomization::CustomizeChildren( TSharedRef<IProper
             TArray<FString> keywords;
             TArray<FText> keyword_labels;
             TArray<FText> keyword_helps;
-            TMap<EImageSequencePatternKeyword, FImageSequencePatternKeyword> map_keywords = GetPatternKeywordsMap2( iStructPropertyHandle, keywords, keyword_labels, keyword_helps );
+            TMap<EImportImageSequencePatternKeyword, FImportImageSequencePatternKeyword> map_keywords = GetPatternKeywordsMap2( iStructPropertyHandle, keywords, keyword_labels, keyword_helps );
 
             mPatternHandle->SetToolTipText( GetTooltipText( map_keywords ) );
 
@@ -157,7 +157,7 @@ FImageSequenceImportSettingsCustomization::CustomizeChildren( TSharedRef<IProper
                 .KeywordHelps( keyword_helps )
             ];
         }
-        else if( handle->GetProperty() && handle->GetProperty()->GetFName() == GET_MEMBER_NAME_CHECKED( FImageSequenceImportSettings, PatternKeywords ) )
+        else if( handle->GetProperty() && handle->GetProperty()->GetFName() == GET_MEMBER_NAME_CHECKED( FImportImageSequenceOptions, PatternKeywords ) )
         {
             handle->MarkHiddenByCustomization();
         }

@@ -1,7 +1,7 @@
 // IDDN.FR.001.220036.001.S.P.2021.000.00000
 // EPOS is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
-#include "Import/ImageSequenceConverter.h"
+#include "Import/ImportImageSequenceConverter.h"
 
 #include "AssetToolsModule.h"
 #include "ISequencer.h"
@@ -13,11 +13,11 @@
 #include "NamingConvention.h"
 #include "Tools/EposSequenceTools.h"
 
-#define LOCTEXT_NAMESPACE "ImageSequenceConverter"
+#define LOCTEXT_NAMESPACE "ImportImageSequenceConverter"
 
 //---
 
-FImageSequenceConverter::FImageSequenceConverter( const FImageSequenceStruct* iImageSequenceStruct, TWeakPtr<ISequencer> iSequencer, UBoardSequence* ioBoardSequence )
+FImportImageSequenceConverter::FImportImageSequenceConverter( const FImportImageSequenceStruct* iImageSequenceStruct, TWeakPtr<ISequencer> iSequencer, UBoardSequence* ioBoardSequence )
     : mSequencer( iSequencer )
     , mImageSequenceStruct( iImageSequenceStruct )
     , mBoardSequence( ioBoardSequence )
@@ -28,7 +28,7 @@ FImageSequenceConverter::FImageSequenceConverter( const FImageSequenceStruct* iI
 }
 
 void
-FImageSequenceConverter::Convert()
+FImportImageSequenceConverter::Convert()
 {
     ISequencer* sequencer = mSequencer.Pin().Get();
 
@@ -43,7 +43,7 @@ FImageSequenceConverter::Convert()
 }
 
 void
-FImageSequenceConverter::CreateBoardsRecursive( const TArray<FImageSequenceBoard>& iBoards, UBoardSequence* ioParentBoardSequence )
+FImportImageSequenceConverter::CreateBoardsRecursive( const TArray<FImportImageSequenceBoard>& iBoards, UBoardSequence* ioParentBoardSequence )
 {
     ISequencer* sequencer = mSequencer.Pin().Get();
 
@@ -61,7 +61,7 @@ FImageSequenceConverter::CreateBoardsRecursive( const TArray<FImageSequenceBoard
 
     for( int i = 0; i < iBoards.Num(); i++ )
     {
-        FImageSequenceBoard board = iBoards[i];
+        FImportImageSequenceBoard board = iBoards[i];
         UMovieSceneSubSection* subsection = CastChecked<UMovieSceneSubSection>( sections[i] );
 
         BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, *subsection, sequencer->GetFocusedTemplateID() );
@@ -75,7 +75,7 @@ FImageSequenceConverter::CreateBoardsRecursive( const TArray<FImageSequenceBoard
 }
 
 void
-FImageSequenceConverter::CreateBoard( const FImageSequenceBoard& iBoard, UBoardSequence* ioParentBoardSequence )
+FImportImageSequenceConverter::CreateBoard( const FImportImageSequenceBoard& iBoard, UBoardSequence* ioParentBoardSequence )
 {
     ISequencer* sequencer = mSequencer.Pin().Get();
 
@@ -98,7 +98,7 @@ FImageSequenceConverter::CreateBoard( const FImageSequenceBoard& iBoard, UBoardS
 }
 
 void
-FImageSequenceConverter::CreateShotsRecursive( const TArray<FImageSequenceShot>& iShots, UBoardSequence* ioParentBoardSequence )
+FImportImageSequenceConverter::CreateShotsRecursive( const TArray<FImportImageSequenceShot>& iShots, UBoardSequence* ioParentBoardSequence )
 {
     ISequencer* sequencer = mSequencer.Pin().Get();
 
@@ -116,15 +116,15 @@ FImageSequenceConverter::CreateShotsRecursive( const TArray<FImageSequenceShot>&
 
     for( int i = 0; i < iShots.Num(); i++ )
     {
-        FImageSequenceShot shot = iShots[i];
+        FImportImageSequenceShot shot = iShots[i];
         UMovieSceneSubSection* subsection = CastChecked<UMovieSceneSubSection>( sections[i] );
 
-        CreateDrawings( shot.Frames, subsection );
+        CreateDrawings( shot.Panels, subsection );
     }
 }
 
 void
-FImageSequenceConverter::CreateShot( const FImageSequenceShot& iShot, UBoardSequence* ioParentBoardSequence )
+FImportImageSequenceConverter::CreateShot( const FImportImageSequenceShot& iShot, UBoardSequence* ioParentBoardSequence )
 {
     ISequencer* sequencer = mSequencer.Pin().Get();
 
@@ -147,7 +147,7 @@ FImageSequenceConverter::CreateShot( const FImageSequenceShot& iShot, UBoardSequ
 }
 
 void
-FImageSequenceConverter::CreateDrawings( const TArray<FImageSequenceFrame>& iFrames, UMovieSceneSubSection* iSubSection )
+FImportImageSequenceConverter::CreateDrawings( const TArray<FImportImageSequencePanel>& iPanels, UMovieSceneSubSection* iSubSection )
 {
     ISequencer* sequencer = mSequencer.Pin().Get();
 
@@ -156,17 +156,17 @@ FImageSequenceConverter::CreateDrawings( const TArray<FImageSequenceFrame>& iFra
     NamingConvention::GenerateTextureAssetPathName( *sequencer, mBoardSequence, iSubSection->GetSequence(), nullptr, path, name );
     FString destination_path = path;
 
-    check( iFrames.Num() );
+    check( iPanels.Num() );
 
     FAssetToolsModule& AssetToolsModule = FModuleManager::Get().LoadModuleChecked<FAssetToolsModule>( "AssetTools" );
 
-    //TArray<FString> pathfiles { frame.Pathfile.FilePath };
+    //TArray<FString> pathfiles { panel.Pathfile.FilePath };
     //TArray<TPair<FString, FString>> FilesAndDestinations;
     //AssetToolsModule.Get().ExpandDirectories( pathfiles, destination_path, FilesAndDestinations );
     //AssetToolsModule.Get().ImportAssets( pathfiles, destination_path, nullptr, true, &FilesAndDestinations, false );
 
     {
-        TArray<FString> pathfiles { iFrames[0].Pathfile.FilePath };
+        TArray<FString> pathfiles { iPanels[0].Pathfile.FilePath };
         TArray<UObject*> assets = AssetToolsModule.Get().ImportAssets( pathfiles, destination_path );
         UTexture2D* texture = Cast<UTexture2D>( assets[0] );
         check( texture );
@@ -190,14 +190,14 @@ FImageSequenceConverter::CreateDrawings( const TArray<FImageSequenceFrame>& iFra
 
     //---
 
-    int32 duration_in_tick = ConvertFromDisplayRateToTickResolution( iFrames[0].Duration );
+    int32 duration_in_tick = ConvertFromDisplayRateToTickResolution( iPanels[0].Duration );
     FFrameNumber next_frame_number = iSubSection->GetTrueRange().GetLowerBoundValue() + duration_in_tick;
 
-    for( int i = 1; i < iFrames.Num(); i++ )
+    for( int i = 1; i < iPanels.Num(); i++ )
     {
-        FImageSequenceFrame frame = iFrames[i];
+        FImportImageSequencePanel panel = iPanels[i];
 
-        TArray<FString> pathfiles { frame.Pathfile.FilePath };
+        TArray<FString> pathfiles { panel.Pathfile.FilePath };
         TArray<UObject*> assets = AssetToolsModule.Get().ImportAssets( pathfiles, destination_path );
         UTexture2D* texture = Cast<UTexture2D>( assets[0] );
         check( texture );
@@ -210,7 +210,7 @@ FImageSequenceConverter::CreateDrawings( const TArray<FImageSequenceFrame>& iFra
 
         //---
 
-        duration_in_tick = ConvertFromDisplayRateToTickResolution( frame.Duration );
+        duration_in_tick = ConvertFromDisplayRateToTickResolution( panel.Duration );
         next_frame_number += duration_in_tick;
     }
 }
@@ -218,7 +218,7 @@ FImageSequenceConverter::CreateDrawings( const TArray<FImageSequenceFrame>& iFra
 //---
 
 int32
-FImageSequenceConverter::GetDuration( const FImageSequenceBoard& iBoard ) const
+FImportImageSequenceConverter::GetDuration( const FImportImageSequenceBoard& iBoard ) const
 {
     int32 duration = 0;
     for( auto& shot : iBoard.Shots )
@@ -228,17 +228,17 @@ FImageSequenceConverter::GetDuration( const FImageSequenceBoard& iBoard ) const
 }
 
 int32
-FImageSequenceConverter::GetDuration( const FImageSequenceShot& iShot ) const
+FImportImageSequenceConverter::GetDuration( const FImportImageSequenceShot& iShot ) const
 {
     int32 duration = 0;
-    for( auto& frame : iShot.Frames )
-        duration += frame.Duration;
+    for( auto& panel : iShot.Panels )
+        duration += panel.Duration;
 
     return duration;
 }
 
 int32
-FImageSequenceConverter::ConvertFromDisplayRateToTickResolution( int32 iDuration ) const
+FImportImageSequenceConverter::ConvertFromDisplayRateToTickResolution( int32 iDuration ) const
 {
     FFrameRate tick_resolution = mBoardSequence->GetMovieScene()->GetTickResolution();
     FFrameRate display_rate = mBoardSequence->GetMovieScene()->GetDisplayRate();

@@ -15,7 +15,7 @@ class IPropertyTypeCustomizationUtils;
 
 //---
 
-struct FImageSequenceImportSettingsCustomization
+struct FImportImageSequenceOptionsCustomization
     : public IPropertyTypeCustomization
 {
 public:
@@ -26,7 +26,7 @@ public:
     virtual void CustomizeChildren( TSharedRef<IPropertyHandle> iStructPropertyHandle, IDetailChildrenBuilder& ioChildBuilder, IPropertyTypeCustomizationUtils& ioStructCustomizationUtils ) override;
 
 private:
-    FText GetTooltipText( const TMap<EImageSequencePatternKeyword, FImageSequencePatternKeyword>& iMapKeywords ) const;
+    FText GetTooltipText( const TMap<EImportImageSequencePatternKeyword, FImportImageSequencePatternKeyword>& iMapKeywords ) const;
 
 private:
     /** Property handles of the properties we're editing */

@@ -698,7 +698,7 @@ private:
         FFrameTime mOriginalGlobalTime;
     };
 
-    friend class FImageSequenceConverter;
+    friend class FImportImageSequenceConverter;
 
 public:
     static void RenameBinding( ISequencer* iSequencer, FGuid iBinding, FString iNewLabel );
