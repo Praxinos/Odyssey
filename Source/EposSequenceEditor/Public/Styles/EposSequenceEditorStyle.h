@@ -25,6 +25,7 @@ private:
     void InitCommands();
     void InitAbout();
     void InitViewport();
+    void InitImportExport();
 
 private:
     static TSharedPtr<FEposSequenceEditorStyle> smSingleton;

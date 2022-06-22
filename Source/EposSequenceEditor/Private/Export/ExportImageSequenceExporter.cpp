@@ -1,0 +1,61 @@
+// IDDN.FR.001.220036.001.S.P.2021.000.00000
+// EPOS is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
+
+#include "Export/ExportImageSequenceExporter.h"
+
+#include "ImageWriteQueue.h"
+#include "ImageWriteTask.h"
+#include "ISequencer.h"
+
+#include "Export/SceneRenderer.h"
+#include "Export/ExportImageSequenceNamingFormatter.h"
+#include "Export/ExportImageSequenceSettings.h"
+#include "Export/ExportImageSequenceStruct.h"
+
+#define LOCTEXT_NAMESPACE "ExportImageSequenceExporter"
+
+//---
+
+FExportImageSequenceExporter::FExportImageSequenceExporter( TWeakPtr<ISequencer> iSequencer, const FExportImageSequenceStruct* iImageSequenceStruct, const FExportImageSequenceOptions* iOptions )
+    : mSequencer( iSequencer )
+    , mImageSequenceStruct( iImageSequenceStruct )
+    , mImageSequenceOptions( iOptions )
+{
+    mImageWriteQueue = &FModuleManager::LoadModuleChecked<IImageWriteQueueModule>( "ImageWriteQueue" ).GetWriteQueue();
+}
+
+bool
+FExportImageSequenceExporter::Export()
+{
+    TArray<FColor> samples;
+
+    for( int32 i = 0; i < mImageSequenceStruct->Panels.Num(); i++ )
+    {
+        FExportImageSequenceNamingFormatter name_formatter( mSequencer, &mImageSequenceStruct->Panels[i], i, mImageSequenceOptions );
+        FString name;
+        bool formatting = name_formatter.FormatName( name );
+        if( !formatting )
+            continue;
+
+        FString pathfile = mImageSequenceOptions->ExportPath.Path / name;
+
+        FSceneRenderer renderer( mSequencer, &mImageSequenceStruct->Panels[i], mImageSequenceOptions );
+        bool rendering = renderer.RenderPlane( samples );
+        if( !rendering )
+            continue;
+
+        TUniquePtr<FImageWriteTask> ImageTask = MakeUnique<FImageWriteTask>();
+        ImageTask->Format = EImageFormat( mImageSequenceOptions->FileFormat );
+        ImageTask->CompressionQuality = 100;
+        ImageTask->Filename = pathfile;
+        ImageTask->PixelData = MakeUnique<TImagePixelData<FColor>>( mImageSequenceOptions->ImageSize, TArray64<FColor>( MoveTemp( samples ) ) );
+
+        /*TFuture<bool> CompletionFuture =*/ mImageWriteQueue->Enqueue( MoveTemp( ImageTask ) );
+    }
+
+    return true;
+}
+
+//---
+
+#undef LOCTEXT_NAMESPACE

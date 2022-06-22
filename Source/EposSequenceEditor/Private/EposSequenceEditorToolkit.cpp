@@ -32,6 +32,7 @@
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "EposMovieSceneSequence.h"
 #include "EposSequenceEditorCommands.h"
+#include "Export/ImageSequenceExportRenderer.h"
 #include "Misc/EposSequenceEditorPlaybackContext.h"
 #include "Render/EposSequencePipelineRenderer.h"
 #include "ToolkitHelpers.h"
@@ -172,7 +173,12 @@ void FEposSequenceEditorToolkit::Initialize( const EToolkitMode::Type iMode, con
 
     // Force the epos renderer when opening a board asset
     // And there is a bug in the render movie popup display, all renderers are checked, but it's only ui
-    mSequencer->GetSequencerSettings()->SetMovieRendererName( FEposSequencePipelineRenderer::MoviePipelineQueueTabLabel.ToString() );
+    FString movie_render_name = mSequencer->GetSequencerSettings()->GetMovieRendererName();
+    if( movie_render_name != FEposSequencePipelineRenderer::MoviePipelineQueueTabLabel.ToString()
+        && movie_render_name != FImageSequenceExportRenderer::ImageSequenceExportTabLabel.ToString() )
+    {
+        mSequencer->GetSequencerSettings()->SetMovieRendererName( FEposSequencePipelineRenderer::MoviePipelineQueueTabLabel.ToString() );
+    }
 
     //if( ToolkitParams.InitialBindingClass != nullptr )
     //{

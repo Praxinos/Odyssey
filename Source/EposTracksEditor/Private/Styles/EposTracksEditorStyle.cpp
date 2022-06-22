@@ -101,7 +101,7 @@ FEposTracksEditorStyle::InitTracks()
 
     //---
 
-    SetContentRoot( FPaths::EngineContentDir() / TEXT( "Editor/Slate" ) );
+    SetContentRoot( FPaths::EngineContentDir() / TEXT( "Editor" ) / TEXT( "Slate" ) );
     {
         Set( "HyperlinkSpinBox", FSpinBoxStyle( FAppStyle::Get().GetWidgetStyle<FSpinBoxStyle>( "Sequencer.HyperlinkSpinBox" ) )
              .SetBackgroundBrush( BORDER_BRUSH( "Old/HyperlinkDotted", FMargin( 0, 0, 0, 3 / 16.0f ), FSlateColor::UseForeground() ) )
