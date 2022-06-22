@@ -13,7 +13,7 @@ class FOdysseyViewportDrawingEditorPainter;
 /**
  * Odyssey paint on viewport editor mode
  */
-class FOdysseyViewportDrawingEditorEdMode : public FEdMode
+class ODYSSEYVIEWPORTDRAWINGEDITOR_API FOdysseyViewportDrawingEditorEdMode : public FEdMode
 {
 public:
 	const static FEditorModeID EM_OdysseyViewportDrawingEditorEdModeId;
