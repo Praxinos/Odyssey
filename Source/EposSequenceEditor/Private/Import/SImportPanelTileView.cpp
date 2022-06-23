@@ -33,19 +33,22 @@ FImportPanelItem::CreateThumbnail()
 
 //static
 TSharedRef<ITableRow>
-SImportPanelTileView::BuildTile( TSharedPtr<FImportPanelItem> Item, const TSharedRef<STableViewBase>& OwnerTable )
+SImportPanelTileView::BuildTile( TSharedPtr<FImportPanelItem> Item, const TSharedRef<STableViewBase>& OwnerTable, const TArray<TSharedPtr<FImportPanelItem>>* iListItemsSource )
 {
     if( !ensure( Item.IsValid() ) )
     {
         return SNew( STableRow<TSharedPtr<FImportPanelItem>>, OwnerTable );
     }
 
-    return SNew( SImportPanelTileView, OwnerTable ).Item( Item );
+    return SNew( SImportPanelTileView, OwnerTable, iListItemsSource ).Item( Item );
 }
 
 void
-SImportPanelTileView::Construct( const FArguments& InArgs, const TSharedRef<STableViewBase>& OwnerTable )
+SImportPanelTileView::Construct( const FArguments& InArgs, const TSharedRef<STableViewBase>& OwnerTable, const TArray<TSharedPtr<FImportPanelItem>>* iListItemsSource )
 {
+    mListItemsSource = iListItemsSource;
+    check( mListItemsSource );
+
     check( InArgs._Item.IsValid() );
     mPanelItem = InArgs._Item;
 
@@ -54,13 +57,11 @@ SImportPanelTileView::Construct( const FArguments& InArgs, const TSharedRef<STab
     STableRow::Construct(
         STableRow::FArguments()
         .Style( FEposSequenceEditorStyle::Get(), "ImportImageSequence.TableRow" )
-        //.Padding( 0.0f )
-        .Padding( 2.0f )
+        .Padding( this, &SImportPanelTileView::GetShotPadding )
         .Content()
         [
             SNew( SBorder )
-            //.Padding( 0.0f )
-            .Padding( FMargin( 0.0f, 0.0f, 5.0f, 5.0f ) )
+            .Padding( FMargin( 0.f, 0.f, 1.f, 1.f ) )
             .BorderImage( FEposSequenceEditorStyle::Get().GetBrush( "ImportImageSequence.PanelItem.DropShadow" ) )
             .ToolTipText( this, &SImportPanelTileView::GetTooltipText )
             [
@@ -263,42 +264,80 @@ SImportPanelTileView::IsShotEven() const
     return true;
 }
 
+FMargin
+SImportPanelTileView::GetBoardPadding() const
+{
+    const TArray<TSharedPtr<FImportPanelItem>>& items = *mListItemsSource;
+
+    FMargin margin( 0.f, 2.f );
+
+    int32 current_index = IndexInList;
+    //int32 previous_index = IndexInList - 1;
+    int32 next_index = IndexInList + 1;
+
+    if( items.IsValidIndex( next_index ) )
+    {
+        if( items[next_index]->mBoard->Id != mPanelItem->mBoard->Id )
+            margin.Right = 10.f;
+    }
+
+    return margin;
+}
+
+FMargin
+SImportPanelTileView::GetShotPadding() const
+{
+    const TArray<TSharedPtr<FImportPanelItem>>& items = *mListItemsSource;
+
+    FMargin margin( 0.f, 2.f );
+
+    int32 current_index = IndexInList;
+    //int32 previous_index = IndexInList - 1;
+    int32 next_index = IndexInList + 1;
+
+    if( items.IsValidIndex( next_index ) )
+    {
+        if( items[next_index]->mShot->Id != mPanelItem->mShot->Id )
+            margin.Right = 10.f;
+    }
+
+    return margin;
+}
+
 //---
 
 const FSlateBrush*
 SImportPanelTileView::GetBoardAreaBackgroundBrush() const
 {
-    const bool bIsRowHovered = IsHovered();
+    static const FName even( "ImportImageSequence.PanelItem.BoardAreaBackground.Even" );
+    static const FName odd( "ImportImageSequence.PanelItem.BoardAreaBackground.Odd" );
 
-    if( IsBoardEven() )
-    {
-        return FEposSequenceEditorStyle::Get().GetBrush( "ImportImageSequence.PanelItem.BoardAreaEvenBackground" );
-    }
-    else
-    {
-        return FEposSequenceEditorStyle::Get().GetBrush( "ImportImageSequence.PanelItem.BoardAreaOddBackground" );
-    }
+    return IsBoardEven()
+        ?
+        FEposSequenceEditorStyle::Get().GetBrush( even )
+        :
+        FEposSequenceEditorStyle::Get().GetBrush( odd );
 }
 
 const FSlateBrush*
 SImportPanelTileView::GetShotAreaBackgroundBrush() const
 {
-    const bool bIsRowHovered = IsHovered();
+    static const FName even( "ImportImageSequence.PanelItem.ShotAreaBackground.Even" );
+    static const FName odd( "ImportImageSequence.PanelItem.ShotAreaBackground.Odd" );
 
-    if( IsShotEven() )
-    {
-        return FEposSequenceEditorStyle::Get().GetBrush( "ImportImageSequence.PanelItem.ShotAreaEvenBackground" );
-    }
-    else
-    {
-        return FEposSequenceEditorStyle::Get().GetBrush( "ImportImageSequence.PanelItem.ShotAreaOddBackground" );
-    }
+    return IsShotEven()
+        ?
+        FEposSequenceEditorStyle::Get().GetBrush( even )
+        :
+        FEposSequenceEditorStyle::Get().GetBrush( odd );
 }
 
 const FSlateBrush*
 SImportPanelTileView::GetPanelAreaBackgroundBrush() const
 {
-    return FEposSequenceEditorStyle::Get().GetBrush( "ImportImageSequence.PanelItem.PanelAreaBackground" );
+    static const FName brush( "ImportImageSequence.PanelItem.PanelAreaBackground" );
+
+    return FEposSequenceEditorStyle::Get().GetBrush( brush );
 }
 
 //---
@@ -308,13 +347,26 @@ SImportPanelTileView::GetTopAreaBackgroundBrush() const
 {
     const bool bIsRowHovered = IsHovered();
 
-    if( bIsRowHovered )
-    {
-        static const FName Hovered( "ImportImageSequence.PanelItem.TopAreaHoverBackground" );
-        return FEposSequenceEditorStyle::Get().GetBrush( Hovered );
-    }
+    static const FName even( "ImportImageSequence.PanelItem.TopAreaBackground.Even" );
+    static const FName odd( "ImportImageSequence.PanelItem.TopAreaBackground.Odd" );
 
-    return FEposSequenceEditorStyle::Get().GetBrush( "ImportImageSequence.PanelItem.TopAreaBackground" );
+    static const FName even_hover( "ImportImageSequence.PanelItem.TopAreaBackground.Even.Hover" );
+    static const FName odd_hover( "ImportImageSequence.PanelItem.TopAreaBackground.Odd.Hover" );
+
+    if( IsBoardEven() )
+    {
+        if( bIsRowHovered )
+            return FEposSequenceEditorStyle::Get().GetBrush( even_hover );
+        else
+            return FEposSequenceEditorStyle::Get().GetBrush( even );
+    }
+    else
+    {
+        if( bIsRowHovered )
+            return FEposSequenceEditorStyle::Get().GetBrush( odd_hover );
+        else
+            return FEposSequenceEditorStyle::Get().GetBrush( odd );
+    }
 }
 
 const FSlateBrush*
@@ -322,13 +374,26 @@ SImportPanelTileView::GetThumbnailAreaBackgroundBrush() const
 {
     const bool bIsRowHovered = IsHovered();
 
-    if( bIsRowHovered )
-    {
-        static const FName Hovered( "ImportImageSequence.PanelItem.ThumbnailAreaHoverBackground" );
-        return FEposSequenceEditorStyle::Get().GetBrush( Hovered );
-    }
+    static const FName even( "ImportImageSequence.PanelItem.ThumbnailAreaBackground.Even" );
+    static const FName odd( "ImportImageSequence.PanelItem.ThumbnailAreaBackground.Odd" );
 
-    return FEposSequenceEditorStyle::Get().GetBrush( "ImportImageSequence.PanelItem.ThumbnailAreaBackground" );
+    static const FName even_hover( "ImportImageSequence.PanelItem.ThumbnailAreaBackground.Even.Hover" );
+    static const FName odd_hover( "ImportImageSequence.PanelItem.ThumbnailAreaBackground.Odd.Hover" );
+
+    if( IsBoardEven() )
+    {
+        if( bIsRowHovered )
+            return FEposSequenceEditorStyle::Get().GetBrush( even_hover );
+        else
+            return FEposSequenceEditorStyle::Get().GetBrush( even );
+    }
+    else
+    {
+        if( bIsRowHovered )
+            return FEposSequenceEditorStyle::Get().GetBrush( odd_hover );
+        else
+            return FEposSequenceEditorStyle::Get().GetBrush( odd );
+    }
 }
 
 const FSlateBrush*
@@ -336,13 +401,26 @@ SImportPanelTileView::GetBottomAreaBackgroundBrush() const
 {
     const bool bIsRowHovered = IsHovered();
 
-    if( bIsRowHovered )
-    {
-        static const FName Hovered( "ImportImageSequence.PanelItem.BottomAreaHoverBackground" );
-        return FEposSequenceEditorStyle::Get().GetBrush( Hovered );
-    }
+    static const FName even( "ImportImageSequence.PanelItem.BottomAreaBackground.Even" );
+    static const FName odd( "ImportImageSequence.PanelItem.BottomAreaBackground.Odd" );
 
-    return FEposSequenceEditorStyle::Get().GetBrush( "ImportImageSequence.PanelItem.BottomAreaBackground" );
+    static const FName even_hover( "ImportImageSequence.PanelItem.BottomAreaBackground.Even.Hover" );
+    static const FName odd_hover( "ImportImageSequence.PanelItem.BottomAreaBackground.Odd.Hover" );
+
+    if( IsBoardEven() )
+    {
+        if( bIsRowHovered )
+            return FEposSequenceEditorStyle::Get().GetBrush( even_hover );
+        else
+            return FEposSequenceEditorStyle::Get().GetBrush( even );
+    }
+    else
+    {
+        if( bIsRowHovered )
+            return FEposSequenceEditorStyle::Get().GetBrush( odd_hover );
+        else
+            return FEposSequenceEditorStyle::Get().GetBrush( odd );
+    }
 }
 
 FSlateColor

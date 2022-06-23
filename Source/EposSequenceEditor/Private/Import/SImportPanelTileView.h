@@ -40,9 +40,9 @@ public:
         SLATE_ARGUMENT( TSharedPtr<FImportPanelItem>, Item )
     SLATE_END_ARGS()
 
-    static TSharedRef<ITableRow> BuildTile( TSharedPtr<FImportPanelItem> Item, const TSharedRef<STableViewBase>& OwnerTable );
+    static TSharedRef<ITableRow> BuildTile( TSharedPtr<FImportPanelItem> Item, const TSharedRef<STableViewBase>& OwnerTable, const TArray<TSharedPtr<FImportPanelItem>>* iListItemsSource );
 
-    void Construct( const FArguments& InArgs, const TSharedRef<STableViewBase>& OwnerTable );
+    void Construct( const FArguments& InArgs, const TSharedRef<STableViewBase>& OwnerTable, const TArray<TSharedPtr<FImportPanelItem>>* iListItemsSource );
 
 private:
     FText GetTooltipText() const;
@@ -54,6 +54,9 @@ private:
 
     bool    IsBoardEven() const;
     bool    IsShotEven() const;
+
+    FMargin GetBoardPadding() const;
+    FMargin GetShotPadding() const;
 
     const FSlateBrush* GetBoardAreaBackgroundBrush() const;
     const FSlateBrush* GetShotAreaBackgroundBrush() const;
@@ -67,4 +70,7 @@ private:
 
 private:
     TSharedPtr<FImportPanelItem> mPanelItem;
+
+    // This should not be necessary, but I don't know how to access this list through the parent owner table -_-
+    const TArray<TSharedPtr<FImportPanelItem>>* mListItemsSource;
 };

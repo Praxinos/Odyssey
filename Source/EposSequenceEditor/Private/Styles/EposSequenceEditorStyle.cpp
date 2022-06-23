@@ -233,7 +233,6 @@ FEposSequenceEditorStyle::InitImportExport()
     //---
 
     Set( "ExportImageSequence.TableRow", FTableRowStyle( FAppStyle::Get().GetWidgetStyle<FTableRowStyle>( "ProjectBrowser.TableRow" ) ) );
-    Set( "ImportImageSequence.TableRow", FTableRowStyle( FAppStyle::Get().GetWidgetStyle<FTableRowStyle>( "ProjectBrowser.TableRow" ) ) );
 
     // Nearly same as ProjectBrowser.ProjectTile.*
     Set( "ExportImageSequence.PanelItem.TopAreaBackground", new FSlateRoundedBoxBrush( EStyleColor::Header, FVector4( 4.0f, 4.0f, 0.0f, 0.0f ) ) );
@@ -242,18 +241,45 @@ FEposSequenceEditorStyle::InitImportExport()
     Set( "ExportImageSequence.PanelItem.BottomAreaHoverBackground", new FSlateRoundedBoxBrush( FStyleColors::Hover, FVector4( 0.0f, 0.0f, 4.0f, 4.0f ) ) );
     Set( "ExportImageSequence.PanelItem.ThumbnailAreaBackground", new FSlateRoundedBoxBrush( COLOR( "#474747FF" ), FVector4( 0.0f, 0.0f, 0.0f, 0.0f ) ) );
 
-    Set( "ImportImageSequence.PanelItem.TopAreaBackground", new FSlateRoundedBoxBrush( EStyleColor::Header, FVector4( 4.0f, 4.0f, 0.0f, 0.0f ) ) );
-    Set( "ImportImageSequence.PanelItem.TopAreaHoverBackground", new FSlateRoundedBoxBrush( FStyleColors::Hover, FVector4( 4.0f, 4.0f, 0.0f, 0.0f ) ) );
-    Set( "ImportImageSequence.PanelItem.BottomAreaBackground", new FSlateRoundedBoxBrush( EStyleColor::Header, FVector4( 0.0f, 0.0f, 4.0f, 4.0f ) ) );
-    Set( "ImportImageSequence.PanelItem.BottomAreaHoverBackground", new FSlateRoundedBoxBrush( FStyleColors::Hover, FVector4( 0.0f, 0.0f, 4.0f, 4.0f ) ) );
-    Set( "ImportImageSequence.PanelItem.ThumbnailAreaBackground", new FSlateRoundedBoxBrush( EStyleColor::Header, FVector4( 0.0f, 0.0f, 0.0f, 0.0f ) ) );
-    Set( "ImportImageSequence.PanelItem.ThumbnailAreaHoverBackground", new FSlateRoundedBoxBrush( FStyleColors::Hover, FVector4( 0.0f, 0.0f, 0.0f, 0.0f ) ) );
+    //---
 
-    Set( "ImportImageSequence.PanelItem.BoardAreaEvenBackground", new FSlateColorBrush( FLinearColor( FColor( 20, 20, 20 ) ) ) );
-    Set( "ImportImageSequence.PanelItem.BoardAreaOddBackground", new FSlateColorBrush( FLinearColor( FColor( 40, 40, 40 ) ) ) );
-    Set( "ImportImageSequence.PanelItem.ShotAreaEvenBackground", new FSlateColorBrush( FLinearColor( FColor( 70, 70, 70 ) ) ) );
-    Set( "ImportImageSequence.PanelItem.ShotAreaOddBackground", new FSlateColorBrush( FLinearColor( FColor( 90, 90, 90 ) ) ) );
-    Set( "ImportImageSequence.PanelItem.PanelAreaBackground", new FSlateColorBrush( EStyleColor::Header ) );
+    Set( "ImportImageSequence.TableRow", FTableRowStyle( FAppStyle::Get().GetWidgetStyle<FTableRowStyle>( "ProjectBrowser.TableRow" ) ) );
+
+    auto ModifyColorV = []( const FLinearColor& iColor, float iRatio ) -> FLinearColor
+    {
+        FLinearColor hsv( iColor.LinearRGBToHSV() );
+        hsv.B *= iRatio;
+        return hsv.HSVToLinearRGB();
+    };
+
+    FSlateColor primary( EStyleColor::Primary );
+    FSlateColor primary_hover( EStyleColor::PrimaryHover );
+
+    FSlateColor even( primary.GetSpecifiedColor() );
+    FSlateColor odd( ModifyColorV( primary.GetSpecifiedColor(), .25f ) );
+    FSlateColor even_hover( primary_hover.GetSpecifiedColor() );
+    FSlateColor odd_hover( ModifyColorV( primary_hover.GetSpecifiedColor(), .25f ) );
+
+    Set( "ImportImageSequence.PanelItem.TopAreaBackground.Even", new FSlateRoundedBoxBrush( even, FVector4( 4.0f, 4.0f, 0.0f, 0.0f ) ) );
+    Set( "ImportImageSequence.PanelItem.TopAreaBackground.Odd", new FSlateRoundedBoxBrush( odd, FVector4( 4.0f, 4.0f, 0.0f, 0.0f ) ) );
+    Set( "ImportImageSequence.PanelItem.TopAreaBackground.Even.Hover", new FSlateRoundedBoxBrush( even_hover, FVector4( 4.0f, 4.0f, 0.0f, 0.0f ) ) );
+    Set( "ImportImageSequence.PanelItem.TopAreaBackground.Odd.Hover", new FSlateRoundedBoxBrush( odd_hover, FVector4( 4.0f, 4.0f, 0.0f, 0.0f ) ) );
+    Set( "ImportImageSequence.PanelItem.BottomAreaBackground.Even", new FSlateRoundedBoxBrush( even, FVector4( 0.0f, 0.0f, 4.0f, 4.0f ) ) );
+    Set( "ImportImageSequence.PanelItem.BottomAreaBackground.Odd", new FSlateRoundedBoxBrush( odd, FVector4( 0.0f, 0.0f, 4.0f, 4.0f ) ) );
+    Set( "ImportImageSequence.PanelItem.BottomAreaBackground.Even.Hover", new FSlateRoundedBoxBrush( even_hover, FVector4( 0.0f, 0.0f, 4.0f, 4.0f ) ) );
+    Set( "ImportImageSequence.PanelItem.BottomAreaBackground.Odd.Hover", new FSlateRoundedBoxBrush( odd_hover, FVector4( 0.0f, 0.0f, 4.0f, 4.0f ) ) );
+    Set( "ImportImageSequence.PanelItem.ThumbnailAreaBackground.Even", new FSlateRoundedBoxBrush( even, FVector4( 0.0f, 0.0f, 0.0f, 0.0f ) ) );
+    Set( "ImportImageSequence.PanelItem.ThumbnailAreaBackground.Odd", new FSlateRoundedBoxBrush( odd, FVector4( 0.0f, 0.0f, 0.0f, 0.0f ) ) );
+    Set( "ImportImageSequence.PanelItem.ThumbnailAreaBackground.Even.Hover", new FSlateRoundedBoxBrush( even_hover, FVector4( 0.0f, 0.0f, 0.0f, 0.0f ) ) );
+    Set( "ImportImageSequence.PanelItem.ThumbnailAreaBackground.Odd.Hover", new FSlateRoundedBoxBrush( odd_hover, FVector4( 0.0f, 0.0f, 0.0f, 0.0f ) ) );
+
+    Set( "ImportImageSequence.PanelItem.BoardAreaBackground.Even", new FSlateNoResource() );
+    Set( "ImportImageSequence.PanelItem.BoardAreaBackground.Odd", new FSlateNoResource() );
+    Set( "ImportImageSequence.PanelItem.ShotAreaBackground.Even", new FSlateNoResource() );
+    Set( "ImportImageSequence.PanelItem.ShotAreaBackground.Odd", new FSlateNoResource() );
+    Set( "ImportImageSequence.PanelItem.PanelAreaBackground", new FSlateNoResource() );
+
+    //---
 
     SetContentRoot( FPaths::EngineContentDir() / TEXT( "Editor" ) / TEXT( "Slate" ) );
     {

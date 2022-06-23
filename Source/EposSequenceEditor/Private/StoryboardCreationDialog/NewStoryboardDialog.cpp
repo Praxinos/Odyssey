@@ -187,7 +187,7 @@ SNewStoryboardSettings::Construct( const FArguments& InArgs, EDialogType iDialog
                             .SelectionMode( ESelectionMode::None )
                             //.ClearSelectionOnClick( false )
                             .ItemAlignment( EListItemAlignment::LeftAligned )
-                            .OnGenerateTile_Static( &SImportPanelTileView::BuildTile )
+                            .OnGenerateTile_Static( &SImportPanelTileView::BuildTile, const_cast<const TArray<TSharedPtr<FImportPanelItem>>*>( &mPanelItemsList ) ) // const_cast is required, otherwise delegate won't find the signature
                             .ItemWidth( this, &SNewStoryboardSettings::GetItemScaledWidth )
                             .ItemHeight( this, &SNewStoryboardSettings::GetItemScaledHeight );
         }
