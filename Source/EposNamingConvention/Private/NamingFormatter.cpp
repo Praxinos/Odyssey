@@ -23,23 +23,31 @@ UDefaultNamingFormatterBoard::FormatName( const UObject* iContext )
     if( !name_elements.IsValid() )
         return board_sequence->GetName();
 
-    const FString name = board_settings.Pattern.Replace( TEXT( "{board-index}" ), *FString::Printf( TEXT( "%0*d" ), board_settings.IndexFormat.NumDigits, name_elements.Index ) )
+    //---
 
-                                               .Replace( TEXT( "{studio-name}" ),           *name_elements.StudioName )
-                                               .Replace( TEXT( "{studio-acronym}" ),        *name_elements.StudioAcronym )
-                                               .Replace( TEXT( "{license-name}" ),          *name_elements.LicenseName )
-                                               .Replace( TEXT( "{license-acronym}" ),       *name_elements.LicenseAcronym )
-                                               .Replace( TEXT( "{production-name}" ),       *name_elements.ProductionName )
-                                               .Replace( TEXT( "{production-acronym}" ),    *name_elements.ProductionAcronym )
-                                               .Replace( TEXT( "{season}" ),                 name_elements.IsSerie ? *FString::Printf( TEXT( "%0*d" ), global_settings.SeasonNumDigits, name_elements.Season ) : TEXT("") )
-                                               .Replace( TEXT( "{episode}" ),                name_elements.IsSerie ? *FString::Printf( TEXT( "%0*d" ), global_settings.EpisodeNumDigits, name_elements.Episode ) : TEXT( "" ) )
-                                               .Replace( TEXT( "{part}" ),                  *name_elements.Part )
-                                               //.Replace( TEXT( "{department-name}" ),       *name_elements.DepartmentName )
-                                               //.Replace( TEXT( "{department-acronym}" ),    *name_elements.DepartmentAcronym )
-                                               .Replace( TEXT( "{initials}" ),              *name_elements.Initials )
-                                               ;
+    FString parsed_string = board_settings.Pattern;
 
-    return name;
+    auto ReplaceKeywordInt        = [&]( ENamingConventionBoardPatternKeyword iKeywordId, int iValue, int32 iNumDigits )    -> FString  { return parsed_string.Replace( *board_settings.mPatternKeywords.mKeywordList[iKeywordId].mKeywordWithBraces, *FString::Printf( TEXT( "%0*d" ), iNumDigits, iValue ) ); };
+    auto ReplaceKeywordString     = [&]( ENamingConventionBoardPatternKeyword iKeywordId, FString iValue )                  -> FString  { return parsed_string.Replace( *board_settings.mPatternKeywords.mKeywordList[iKeywordId].mKeywordWithBraces, *iValue ); };
+
+    //---
+
+    parsed_string = ReplaceKeywordInt( ENamingConventionBoardPatternKeyword::BoardIndex, name_elements.Index, board_settings.IndexFormat.NumDigits );
+
+    parsed_string = ReplaceKeywordString( ENamingConventionBoardPatternKeyword::StudioName          , name_elements.StudioName );
+    parsed_string = ReplaceKeywordString( ENamingConventionBoardPatternKeyword::StudioAcronym       , name_elements.StudioAcronym );
+    parsed_string = ReplaceKeywordString( ENamingConventionBoardPatternKeyword::LicenseName         , name_elements.LicenseName );
+    parsed_string = ReplaceKeywordString( ENamingConventionBoardPatternKeyword::LicenseAcronym      , name_elements.LicenseAcronym );
+    parsed_string = ReplaceKeywordString( ENamingConventionBoardPatternKeyword::ProductionName      , name_elements.ProductionName );
+    parsed_string = ReplaceKeywordString( ENamingConventionBoardPatternKeyword::ProductionAcronym   , name_elements.ProductionAcronym );
+    parsed_string = name_elements.IsSerie ? ReplaceKeywordInt( ENamingConventionBoardPatternKeyword::Season     , name_elements.Season, global_settings.SeasonNumDigits ) : parsed_string;
+    parsed_string = name_elements.IsSerie ? ReplaceKeywordInt( ENamingConventionBoardPatternKeyword::Episode    , name_elements.Episode, global_settings.EpisodeNumDigits ) : parsed_string;
+    parsed_string = ReplaceKeywordString( ENamingConventionBoardPatternKeyword::Part                , name_elements.Part );
+    //parsed_string = ReplaceKeywordString( ENamingConventionBoardPatternKeyword::DepartmentName      , name_elements.DepartmentName );
+    //parsed_string = ReplaceKeywordString( ENamingConventionBoardPatternKeyword::DepartmentAcronym   , name_elements.DepartmentAcronym );
+    parsed_string = ReplaceKeywordString( ENamingConventionBoardPatternKeyword::Initials            , name_elements.Initials );
+
+    return parsed_string;
 }
 
 //---
@@ -57,24 +65,32 @@ UDefaultNamingFormatterShot::FormatName( const UObject* iContext )
     if( !name_elements.IsValid() )
         return shot_sequence->GetName();
 
-    const FString name = shot_settings.Pattern.Replace( TEXT( "{shot-index}" ), *FString::Printf( TEXT( "%0*d" ), shot_settings.IndexFormat.NumDigits, name_elements.Index ) )
-                                              .Replace( TEXT( "{take-index}" ), *FString::Printf( TEXT( "%0*d" ), shot_settings.TakeFormat.NumDigits, name_elements.TakeIndex ) )
-                                              //PATCH: error in default value for take index in NamingConventionSettings.h
-                                              .Replace( TEXT( "{take_index}" ), *FString::Printf( TEXT( "%0*d" ), shot_settings.TakeFormat.NumDigits, name_elements.TakeIndex ) )
+    //---
 
-                                              .Replace( TEXT( "{studio-name}" ),            *name_elements.StudioName )
-                                              .Replace( TEXT( "{studio-acronym}" ),         *name_elements.StudioAcronym )
-                                              .Replace( TEXT( "{license-name}" ),           *name_elements.LicenseName )
-                                              .Replace( TEXT( "{license-acronym}" ),        *name_elements.LicenseAcronym )
-                                              .Replace( TEXT( "{production-name}" ),        *name_elements.ProductionName )
-                                              .Replace( TEXT( "{production-acronym}" ),     *name_elements.ProductionAcronym )
-                                              .Replace( TEXT( "{season}" ),                 name_elements.IsSerie ? *FString::Printf( TEXT( "%0*d" ), global_settings.SeasonNumDigits, name_elements.Season ) : TEXT("") )
-                                              .Replace( TEXT( "{episode}" ),                name_elements.IsSerie ? *FString::Printf( TEXT( "%0*d" ), global_settings.EpisodeNumDigits, name_elements.Episode ) : TEXT( "" ) )
-                                              .Replace( TEXT( "{part}" ),                   *name_elements.Part )
-                                              //.Replace( TEXT( "{department-name}" ),        *name_elements.DepartmentName )
-                                              //.Replace( TEXT( "{department-acronym}" ),     *name_elements.DepartmentAcronym )
-                                              .Replace( TEXT( "{initials}" ),               *name_elements.Initials )
-                                              ;
+    FString parsed_string = shot_settings.Pattern;
 
-    return name;
+    auto ReplaceKeywordInt        = [&]( ENamingConventionShotPatternKeyword iKeywordId, int iValue, int32 iNumDigits )    -> FString  { return parsed_string.Replace( *shot_settings.mPatternKeywords.mKeywordList[iKeywordId].mKeywordWithBraces, *FString::Printf( TEXT( "%0*d" ), iNumDigits, iValue ) ); };
+    auto ReplaceKeywordString     = [&]( ENamingConventionShotPatternKeyword iKeywordId, FString iValue )                  -> FString  { return parsed_string.Replace( *shot_settings.mPatternKeywords.mKeywordList[iKeywordId].mKeywordWithBraces, *iValue ); };
+
+    //---
+
+    parsed_string = ReplaceKeywordInt( ENamingConventionShotPatternKeyword::ShotIndex, name_elements.Index, shot_settings.IndexFormat.NumDigits );
+    parsed_string = ReplaceKeywordInt( ENamingConventionShotPatternKeyword::TakeIndex, name_elements.TakeIndex, shot_settings.TakeFormat.NumDigits );
+    //PATCH: error in default value for take index in NamingConventionSettings.h
+    parsed_string = parsed_string.Replace( TEXT( "{take_index}" ), *FString::Printf( TEXT( "%0*d" ), shot_settings.TakeFormat.NumDigits, name_elements.TakeIndex ) );
+
+    parsed_string = ReplaceKeywordString( ENamingConventionShotPatternKeyword::StudioName          , name_elements.StudioName );
+    parsed_string = ReplaceKeywordString( ENamingConventionShotPatternKeyword::StudioAcronym       , name_elements.StudioAcronym );
+    parsed_string = ReplaceKeywordString( ENamingConventionShotPatternKeyword::LicenseName         , name_elements.LicenseName );
+    parsed_string = ReplaceKeywordString( ENamingConventionShotPatternKeyword::LicenseAcronym      , name_elements.LicenseAcronym );
+    parsed_string = ReplaceKeywordString( ENamingConventionShotPatternKeyword::ProductionName      , name_elements.ProductionName );
+    parsed_string = ReplaceKeywordString( ENamingConventionShotPatternKeyword::ProductionAcronym   , name_elements.ProductionAcronym );
+    parsed_string = name_elements.IsSerie ? ReplaceKeywordInt( ENamingConventionShotPatternKeyword::Season     , name_elements.Season, global_settings.SeasonNumDigits ) : parsed_string;
+    parsed_string = name_elements.IsSerie ? ReplaceKeywordInt( ENamingConventionShotPatternKeyword::Episode    , name_elements.Episode, global_settings.EpisodeNumDigits ) : parsed_string;
+    parsed_string = ReplaceKeywordString( ENamingConventionShotPatternKeyword::Part                , name_elements.Part );
+    //parsed_string = ReplaceKeywordString( ENamingConventionShotPatternKeyword::DepartmentName      , name_elements.DepartmentName );
+    //parsed_string = ReplaceKeywordString( ENamingConventionShotPatternKeyword::DepartmentAcronym   , name_elements.DepartmentAcronym );
+    parsed_string = ReplaceKeywordString( ENamingConventionShotPatternKeyword::Initials            , name_elements.Initials );
+
+    return parsed_string;
 }

@@ -12,6 +12,7 @@ class FDetailWidgetRow;
 class IDetailChildrenBuilder;
 class IPropertyHandle;
 class IPropertyTypeCustomizationUtils;
+struct FImportImageSequenceOptions;
 
 //---
 
@@ -26,9 +27,13 @@ public:
     virtual void CustomizeChildren( TSharedRef<IPropertyHandle> iStructPropertyHandle, IDetailChildrenBuilder& ioChildBuilder, IPropertyTypeCustomizationUtils& ioStructCustomizationUtils ) override;
 
 private:
-    FText GetTooltipText( const TMap<EImportImageSequencePatternKeyword, FImportImageSequencePatternKeyword>& iMapKeywords ) const;
+    FText GetTooltipText() const;
+
+    FImportImageSequenceOptions* GetEditStruct( TSharedRef<IPropertyHandle> iStructPropertyHandle ) const;
 
 private:
+    FImportImageSequenceOptions*    mOptions;
+
     /** Property handles of the properties we're editing */
-    TSharedPtr<IPropertyHandle> mPatternHandle;
+    TSharedPtr<IPropertyHandle>     mPatternHandle;
 };

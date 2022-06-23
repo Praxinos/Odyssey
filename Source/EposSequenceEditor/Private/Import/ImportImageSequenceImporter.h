@@ -20,7 +20,7 @@ public:
     const FImportImageSequenceStruct& GetImageSequenceStruct() const;
 
 private:
-    void Build( const TMap<EImportImageSequencePatternKeyword, FImportImageSequencePatternKeyword>& iKeywords, FString& oErrorMessage );
+    void Build( const TPatternKeywordList<EImportImageSequencePatternKeyword>& iPatternKeywordList, FString& oErrorMessage );
 
 private:
     FString mImageSequencePath;

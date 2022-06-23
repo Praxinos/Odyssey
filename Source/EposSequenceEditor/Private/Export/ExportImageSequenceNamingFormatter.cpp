@@ -45,10 +45,10 @@ FExportImageSequenceNamingFormatter::FormatName( FString& oName )
 
     FString parsed_string = mImageSequenceOptions->Pattern;
 
-    auto ReplaceKeywordInt        = [&]( EExportImageSequencePatternKeyword iKeywordId, int iValue, int32 iNumDigits )  -> FString  { return parsed_string.Replace( *mImageSequenceOptions->PatternKeywords[iKeywordId].mKeywordWithBraces, *FString::Printf( TEXT( "%0*d" ), iNumDigits, iValue ) ); };
-    //auto ReplaceKeywordIntAsFrame = [&]( EExportImageSequencePatternKeyword iKeywordId, int iValue )          -> FString  { return parsed_string.Replace( *mImageSequenceOptions->PatternKeywords[iKeywordId].mKeywordWithBraces, *type_interface->ToString( iValue ) ); };
-    auto ReplaceKeywordFrame      = [&]( EExportImageSequencePatternKeyword iKeywordId, FFrameNumber iValue )           -> FString  { return parsed_string.Replace( *mImageSequenceOptions->PatternKeywords[iKeywordId].mKeywordWithBraces, *type_interface->ToString( iValue.Value ) ); };
-    auto ReplaceKeywordString     = [&]( EExportImageSequencePatternKeyword iKeywordId, FString iValue )                -> FString  { return parsed_string.Replace( *mImageSequenceOptions->PatternKeywords[iKeywordId].mKeywordWithBraces, *iValue ); };
+    auto ReplaceKeywordInt        = [&]( EExportImageSequencePatternKeyword iKeywordId, int iValue, int32 iNumDigits )  -> FString  { return parsed_string.Replace( *mImageSequenceOptions->mPatternKeywords.mKeywordList[iKeywordId].mKeywordWithBraces, *FString::Printf( TEXT( "%0*d" ), iNumDigits, iValue ) ); };
+    //auto ReplaceKeywordIntAsFrame = [&]( EExportImageSequencePatternKeyword iKeywordId, int iValue )                    -> FString  { return parsed_string.Replace( *mImageSequenceOptions->mPatternKeywords.mKeywordList[iKeywordId].mKeywordWithBraces, *type_interface->ToString( iValue ) ); };
+    auto ReplaceKeywordFrame      = [&]( EExportImageSequencePatternKeyword iKeywordId, FFrameNumber iValue )           -> FString  { return parsed_string.Replace( *mImageSequenceOptions->mPatternKeywords.mKeywordList[iKeywordId].mKeywordWithBraces, *type_interface->ToString( iValue.Value ) ); };
+    auto ReplaceKeywordString     = [&]( EExportImageSequencePatternKeyword iKeywordId, FString iValue )                -> FString  { return parsed_string.Replace( *mImageSequenceOptions->mPatternKeywords.mKeywordList[iKeywordId].mKeywordWithBraces, *iValue ); };
 
     //---
 

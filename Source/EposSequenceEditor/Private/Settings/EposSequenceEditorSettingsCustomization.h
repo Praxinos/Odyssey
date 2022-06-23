@@ -12,6 +12,7 @@ class FDetailWidgetRow;
 class IDetailChildrenBuilder;
 class IPropertyHandle;
 class IPropertyTypeCustomizationUtils;
+struct FInfoBarSettings;
 
 //---
 
@@ -28,7 +29,11 @@ public:
 private:
     FText GetTooltipText() const;
 
+    FInfoBarSettings* GetEditStruct( TSharedRef<IPropertyHandle> iStructPropertyHandle ) const;
+
 private:
+    FInfoBarSettings* mSettings;
+
     /** Property handles of the properties we're editing */
     TSharedPtr<IPropertyHandle> mPatternHandle;
 };

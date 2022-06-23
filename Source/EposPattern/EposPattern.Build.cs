@@ -4,9 +4,9 @@
 using System.IO;
 using UnrealBuildTool;
 
-public class EposTracksEditor : ModuleRules
+public class EposPattern : ModuleRules
 {
-    public EposTracksEditor(ReadOnlyTargetRules Target) : base(Target)
+    public EposPattern(ReadOnlyTargetRules Target) : base(Target)
     {
         PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
@@ -39,35 +39,11 @@ public class EposTracksEditor : ModuleRules
                 "Slate",
                 "SlateCore",
                 // [RUNTIME] custom engine dependencies
-                "MovieScene",
-                "InputCore",
-                "RenderCore",
-                "MovieSceneTracks",
-                "Projects",
-                "CinematicCamera",
-                "AppFramework",
-                "DeveloperSettings",
                 // [RUNTIME] custom plugin dependencies
-                "EposMovieScene",
-                "EposSequence",
-                "EposNote",
-                "EposTracks",
-                "EposActors",
-                "EposPattern",
 
                 // [EDITOR]
                 // [EDITOR] custom engine dependencies
-                "Sequencer",
-                "MovieSceneTools",
-                "UnrealEd",
-                "EditorStyle",
-                "EditorWidgets",
-                "SceneOutliner",
-                "MaterialEditor",
-                "EditorScriptingUtilities",
-                "LevelEditor",
                 // [EDITOR] custom plugin dependencies
-                "EposNamingConvention"
             }
             );
 

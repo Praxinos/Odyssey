@@ -69,6 +69,11 @@
       "LoadingPhase": "Default"
     },
     {
+      "Name": "EposPattern",
+      "Type": "Editor",
+      "LoadingPhase": "Default"
+    },
+    {
       "Name": "EposNamingConvention",
       "Type": "Editor",
       "LoadingPhase": "Default"

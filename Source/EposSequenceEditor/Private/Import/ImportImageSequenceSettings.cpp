@@ -7,31 +7,15 @@
 
 //---
 
-#define ADD_PATTERN_KEYWORD( ioMap, iId, iKey, iTextKeyPrefix, iText )  \
-{                                                                       \
-    FString key = TEXT( iKey );                                         \
-                                                                        \
-    FImportImageSequencePatternKeyword value;                           \
-    value.mKeywordId = iId;                                             \
-    value.mKeywordWithBraces = FString::Printf( TEXT( "{%s}" ), *key ); \
-    value.mHelp = LOCTEXT( iTextKeyPrefix "." iKey, iText );            \
-                                                                        \
-    ioMap.Add( iId, value );                                            \
-}
-
-//---
-
 FImportImageSequenceOptions::FImportImageSequenceOptions()
 {
-    ADD_PATTERN_KEYWORD( PatternKeywords, EImportImageSequencePatternKeyword::BoardId, "board", "image-sequence-pattern-keyword", "the id which represents the board" );
-    ADD_PATTERN_KEYWORD( PatternKeywords, EImportImageSequencePatternKeyword::ShotId, "shot", "image-sequence-pattern-keyword", "the id which represents the shot" );
-    ADD_PATTERN_KEYWORD( PatternKeywords, EImportImageSequencePatternKeyword::PanelId, "panel", "image-sequence-pattern-keyword", "the id which represents the panel (drawing)" );
-    ADD_PATTERN_KEYWORD( PatternKeywords, EImportImageSequencePatternKeyword::Duration, "duration", "image-sequence-pattern-keyword", "the number which represents the duration of the panel (drawing)" );
+    mPatternKeywords.AddKeyword( EImportImageSequencePatternKeyword::BoardId    , "board"       , LOCTEXT( "image-sequence-pattern-keyword.board", "the id which represents the board" ) );
+    mPatternKeywords.AddKeyword( EImportImageSequencePatternKeyword::ShotId     , "shot"        , LOCTEXT( "image-sequence-pattern-keyword.shot", "the id which represents the board" ) );
+    mPatternKeywords.AddKeyword( EImportImageSequencePatternKeyword::PanelId    , "panel"       , LOCTEXT( "image-sequence-pattern-keyword.panel", "the id which represents the board" ) );
+    mPatternKeywords.AddKeyword( EImportImageSequencePatternKeyword::Duration   , "duration"    , LOCTEXT( "image-sequence-pattern-keyword.duration", "the id which represents the board" ) );
 
     // No default pattern value, it's too file dependent
 }
-
-#undef ADD_PATTERN_KEYWORD
 
 //---
 //---

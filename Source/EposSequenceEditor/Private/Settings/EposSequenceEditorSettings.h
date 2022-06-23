@@ -8,6 +8,8 @@
 #include "Engine/DeveloperSettings.h"
 #include "UObject/Object.h"
 
+#include "PatternKeywordList.h"
+
 #include "EposSequenceEditorSettings.generated.h"
 
 //---
@@ -98,17 +100,6 @@ enum class EInfoBarPatternKeyword : uint8
 };
 
 USTRUCT()
-struct FInfoBarPatternKeyword
-{
-    GENERATED_BODY()
-
-public:
-    EInfoBarPatternKeyword mKeywordId;
-    FString mKeywordWithBraces;
-    FText mHelp;
-};
-
-USTRUCT()
 struct FInfoBarSettings
 {
     GENERATED_BODY()
@@ -120,12 +111,7 @@ public:
     UPROPERTY(config, EditAnywhere, Category=InfoBar, meta=(MultiLine="true"))
     FString Pattern;
 
-    /** List of all keywords.
-        This list is hidden in customization.
-        If UPROPERTY is empty, there is no access through IPropertyHandle in customization
-    */
-    UPROPERTY(VisibleAnywhere, Category=InfoBar, Transient)
-    TMap<EInfoBarPatternKeyword, FInfoBarPatternKeyword> PatternKeywords;
+    TPatternKeywordList<EInfoBarPatternKeyword> mPatternKeywords;
 
     UPROPERTY(config, EditAnywhere, Category=InfoBar)
     FString Separator { TEXT( " - " ) };

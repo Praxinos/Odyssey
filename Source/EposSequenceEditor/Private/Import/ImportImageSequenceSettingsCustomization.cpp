@@ -8,53 +8,11 @@
 #include "IDetailPropertyRow.h"
 #include "DetailWidgetRow.h"
 
-#include "Settings/SPatternTextBox.h"
+#include "SPatternTextBox.h"
 #include "Import/ImportImageSequenceSettings.h"
 
 #define LOCTEXT_NAMESPACE "ImportImageSequenceSettingsCustomization"
 
-//---
-
-namespace
-{
-static
-TMap<EImportImageSequencePatternKeyword, FImportImageSequencePatternKeyword>
-GetPatternKeywordsMap2( TSharedRef<IPropertyHandle> iStructPropertyHandle, TArray<FString>& oValidKeywords, TArray<FText>& oKeywordLabels, TArray<FText>& oKeywordHelps )
-{
-    oValidKeywords.Empty();
-    oKeywordLabels.Empty();
-    oKeywordHelps.Empty();
-
-    TSharedPtr<IPropertyHandle> child_handle = iStructPropertyHandle->GetChildHandle( "PatternKeywords" );
-    if( child_handle.IsValid() )
-    {
-        TSharedPtr<IPropertyHandleMap> map_handle = child_handle->AsMap();
-        if( map_handle.IsValid() )
-        {
-            void* MapDataPtr = nullptr;
-            if( child_handle->GetValueData( MapDataPtr ) == FPropertyAccess::Success )
-            {
-                TMap<EImportImageSequencePatternKeyword, FImportImageSequencePatternKeyword>* map = ( TMap<EImportImageSequencePatternKeyword, FImportImageSequencePatternKeyword>* )MapDataPtr;
-                if( map )
-                {
-                    for( auto pair : *map )
-                    {
-                        oValidKeywords.Add( pair.Value.mKeywordWithBraces );
-                        oKeywordLabels.Add( FText::FromString( pair.Value.mKeywordWithBraces ) );
-                        oKeywordHelps.Add( pair.Value.mHelp );
-                    }
-                    return *map;
-                }
-            }
-        }
-    }
-
-    return TMap<EImportImageSequencePatternKeyword, FImportImageSequencePatternKeyword>();
-}
-}
-
-//---
-//---
 //---
 
 //static
@@ -65,7 +23,7 @@ FImportImageSequenceOptionsCustomization::MakeInstance()
 }
 
 FText
-FImportImageSequenceOptionsCustomization::GetTooltipText( const TMap<EImportImageSequencePatternKeyword, FImportImageSequencePatternKeyword>& iMapKeywords ) const
+FImportImageSequenceOptionsCustomization::GetTooltipText() const
 {
     return FText::Format( LOCTEXT( "import-image-sequence-file-pattern-tooltip",
 R"(Each keywords will be replaced by its corresponding value.
@@ -98,10 +56,10 @@ If the first character (A or B) corresponds to the board, the next number to the
 the pattern will look like:
 - ful-b{0}-s{1}-{2}.png
 )" )
-                          , FText::FromString( iMapKeywords[EImportImageSequencePatternKeyword::BoardId].mKeywordWithBraces )
-                          , FText::FromString( iMapKeywords[EImportImageSequencePatternKeyword::ShotId].mKeywordWithBraces )
-                          , FText::FromString( iMapKeywords[EImportImageSequencePatternKeyword::PanelId].mKeywordWithBraces )
-                          , FText::FromString( iMapKeywords[EImportImageSequencePatternKeyword::Duration].mKeywordWithBraces )
+                          , FText::FromString( mOptions->mPatternKeywords.mKeywordList[EImportImageSequencePatternKeyword::BoardId].mKeywordWithBraces )
+                          , FText::FromString( mOptions->mPatternKeywords.mKeywordList[EImportImageSequencePatternKeyword::ShotId].mKeywordWithBraces )
+                          , FText::FromString( mOptions->mPatternKeywords.mKeywordList[EImportImageSequencePatternKeyword::PanelId].mKeywordWithBraces )
+                          , FText::FromString( mOptions->mPatternKeywords.mKeywordList[EImportImageSequencePatternKeyword::Duration].mKeywordWithBraces )
     );
 }
 
@@ -120,6 +78,9 @@ FImportImageSequenceOptionsCustomization::CustomizeHeader( TSharedRef<IPropertyH
 void
 FImportImageSequenceOptionsCustomization::CustomizeChildren( TSharedRef<IPropertyHandle> iStructPropertyHandle, IDetailChildrenBuilder& ioChildBuilder, IPropertyTypeCustomizationUtils& ioStructCustomizationUtils ) //override
 {
+    mOptions = GetEditStruct( iStructPropertyHandle );
+    check( mOptions );
+
     uint32 num_children;
     FPropertyAccess::Result result = iStructPropertyHandle->GetNumChildren( num_children );
 
@@ -133,14 +94,17 @@ FImportImageSequenceOptionsCustomization::CustomizeChildren( TSharedRef<IPropert
         {
             mPatternHandle = handle;
 
-            //ioChildBuilder.AddProperty( handle.ToSharedRef() );
-
             TArray<FString> keywords;
             TArray<FText> keyword_labels;
             TArray<FText> keyword_helps;
-            TMap<EImportImageSequencePatternKeyword, FImportImageSequencePatternKeyword> map_keywords = GetPatternKeywordsMap2( iStructPropertyHandle, keywords, keyword_labels, keyword_helps );
+            for( auto pair : mOptions->mPatternKeywords.mKeywordList )
+            {
+                keywords.Add( pair.Value.mKeywordWithBraces );
+                keyword_labels.Add( FText::FromString( pair.Value.mKeywordWithBraces ) );
+                keyword_helps.Add( pair.Value.mHelp );
+            }
 
-            mPatternHandle->SetToolTipText( GetTooltipText( map_keywords ) );
+            mPatternHandle->SetToolTipText( GetTooltipText() );
 
             ioChildBuilder.AddCustomRow( LOCTEXT( "Pattern", "Pattern" ) )
             .NameContent()
@@ -155,17 +119,28 @@ FImportImageSequenceOptionsCustomization::CustomizeChildren( TSharedRef<IPropert
                 .Keywords( keywords )
                 .KeywordLabels( keyword_labels )
                 .KeywordHelps( keyword_helps )
+                .OnVerifyPattern_Raw( &mOptions->mPatternKeywords, &TPatternKeywordList<EImportImageSequencePatternKeyword>::IsValidPattern )
             ];
-        }
-        else if( handle->GetProperty() && handle->GetProperty()->GetFName() == GET_MEMBER_NAME_CHECKED( FImportImageSequenceOptions, PatternKeywords ) )
-        {
-            handle->MarkHiddenByCustomization();
         }
         else
         {
             ioChildBuilder.AddProperty( handle.ToSharedRef() );
         }
     }
+}
+
+FImportImageSequenceOptions*
+FImportImageSequenceOptionsCustomization::GetEditStruct( TSharedRef<IPropertyHandle> iStructPropertyHandle ) const
+{
+    TArray<FImportImageSequenceOptions*> options;
+
+    if( iStructPropertyHandle->IsValidHandle() )
+        iStructPropertyHandle->AccessRawData( reinterpret_cast<TArray<void*>&>( options ) );
+
+    if( options.Num() == 1 )
+        return options[0];
+
+    return nullptr;
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -269,10 +269,10 @@ FBoardSequenceCustomization::CreateInfoText() const
 
     FString parsed_string = infobar_settings.Pattern;
 
-    auto ReplaceKeywordInt        = [&]( EInfoBarPatternKeyword iKeywordId, int iValue )          -> FString  { return parsed_string.Replace( *infobar_settings.PatternKeywords[iKeywordId].mKeywordWithBraces, *FString::FromInt( iValue ) ); };
-    auto ReplaceKeywordIntAsFrame = [&]( EInfoBarPatternKeyword iKeywordId, int iValue )          -> FString  { return parsed_string.Replace( *infobar_settings.PatternKeywords[iKeywordId].mKeywordWithBraces, *type_interface->ToString( iValue ) ); };
-    auto ReplaceKeywordFrame      = [&]( EInfoBarPatternKeyword iKeywordId, FFrameNumber iValue ) -> FString  { return parsed_string.Replace( *infobar_settings.PatternKeywords[iKeywordId].mKeywordWithBraces, *type_interface->ToString( iValue.Value ) ); };
-    auto ReplaceKeywordString     = [&]( EInfoBarPatternKeyword iKeywordId, FString iValue )      -> FString  { return parsed_string.Replace( *infobar_settings.PatternKeywords[iKeywordId].mKeywordWithBraces, *iValue ); };
+    auto ReplaceKeywordInt        = [&]( EInfoBarPatternKeyword iKeywordId, int iValue )          -> FString  { return parsed_string.Replace( *infobar_settings.mPatternKeywords.mKeywordList[iKeywordId].mKeywordWithBraces, *FString::FromInt( iValue ) ); };
+    auto ReplaceKeywordIntAsFrame = [&]( EInfoBarPatternKeyword iKeywordId, int iValue )          -> FString  { return parsed_string.Replace( *infobar_settings.mPatternKeywords.mKeywordList[iKeywordId].mKeywordWithBraces, *type_interface->ToString( iValue ) ); };
+    auto ReplaceKeywordFrame      = [&]( EInfoBarPatternKeyword iKeywordId, FFrameNumber iValue ) -> FString  { return parsed_string.Replace( *infobar_settings.mPatternKeywords.mKeywordList[iKeywordId].mKeywordWithBraces, *type_interface->ToString( iValue.Value ) ); };
+    auto ReplaceKeywordString     = [&]( EInfoBarPatternKeyword iKeywordId, FString iValue )      -> FString  { return parsed_string.Replace( *infobar_settings.mPatternKeywords.mKeywordList[iKeywordId].mKeywordWithBraces, *iValue ); };
 
     //--- CurrentFrame_InStoryboard
     //--- CurrentFrame_InSequence

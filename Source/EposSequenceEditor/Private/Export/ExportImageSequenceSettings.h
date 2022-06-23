@@ -7,6 +7,8 @@
 
 #include "IImageWrapper.h"
 
+#include "PatternKeywordList.h"
+
 #include "ExportImageSequenceSettings.generated.h"
 
 //---
@@ -21,18 +23,16 @@ enum class EExportImageSequencePatternKeyword : uint8
     PanelFrame,
 };
 
-USTRUCT()
-struct FExportImageSequencePatternKeyword
+UENUM()
+enum class EExportImageSequenceFileFormat
 {
-    GENERATED_BODY()
-
-public:
-    EExportImageSequencePatternKeyword mKeywordId;
-    FString mKeywordWithBraces;
-    FText mHelp;
+    PNG     = int32( EImageFormat::PNG ),
+    JPEG    = int32( EImageFormat::JPEG ),
+    BMP     = int32( EImageFormat::BMP ),
+    EXR     = int32( EImageFormat::EXR ),
+    //TGA     = int32( EImageFormat::TGA ), // Compress() is not implemented
+    //TIFF    = int32( EImageFormat::TIFF ), // Compress() is not implemented
 };
-
-//---
 
 USTRUCT()
 struct FExportImageSequenceNumberFormat
@@ -43,17 +43,6 @@ public:
     /** The number of digits. */
     UPROPERTY(config, EditAnywhere, Category="Number Format", meta=(UIMin = "1", UIMax = "10"))
     uint32 NumDigits { 4 };
-};
-
-UENUM()
-enum class EExportImageSequenceFileFormat
-{
-    PNG     = int32( EImageFormat::PNG ),
-    JPEG    = int32( EImageFormat::JPEG ),
-    BMP     = int32( EImageFormat::BMP ),
-    EXR     = int32( EImageFormat::EXR ),
-    //TGA     = int32( EImageFormat::TGA ), // Compress() is not implemented
-    //TIFF    = int32( EImageFormat::TIFF ), // Compress() is not implemented
 };
 
 USTRUCT()
@@ -88,12 +77,7 @@ public:
     UPROPERTY( EditAnywhere, Category=ExportImageSequence )
     FString Pattern;
 
-    /** List of all keywords.
-        This list is hidden in customization.
-        If UPROPERTY is empty, there is no access through IPropertyHandle in customization
-    */
-    UPROPERTY( VisibleAnywhere, Category=ExportImageSequence, Transient )
-    TMap<EExportImageSequencePatternKeyword, FExportImageSequencePatternKeyword> PatternKeywords;
+    TPatternKeywordList<EExportImageSequencePatternKeyword> mPatternKeywords;
 
     /** The sequence index format. */
     UPROPERTY(EditAnywhere, Category=ExportImageSequence, AdvancedDisplay, meta=(ShowOnlyInnerProperties))

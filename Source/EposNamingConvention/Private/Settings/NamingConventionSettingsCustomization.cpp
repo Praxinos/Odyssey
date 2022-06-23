@@ -10,52 +10,10 @@
 #include "Widgets/Input/SEditableTextBox.h"
 
 #include "Settings/NamingConventionSettings.h"
-#include "Settings/SPatternTextBox.h"
+#include "SPatternTextBox.h"
 
 #define LOCTEXT_NAMESPACE "NamingConventionSettingsCustomization"
 
-//---
-
-namespace
-{
-static
-TMap<FString, FNamingConventionPatternKeyword>
-GetPatternKeywordsMap( TSharedRef<IPropertyHandle> iStructPropertyHandle, TArray<FString>& oValidKeywords, TArray<FText>& oKeywordLabels, TArray<FText>& oKeywordHelps )
-{
-    oValidKeywords.Empty();
-    oKeywordLabels.Empty();
-    oKeywordHelps.Empty();
-
-    TSharedPtr<IPropertyHandle> child_handle = iStructPropertyHandle->GetChildHandle( "PatternKeywords" );
-    if( child_handle.IsValid() )
-    {
-        TSharedPtr<IPropertyHandleMap> map_handle = child_handle->AsMap();
-        if( map_handle.IsValid() )
-        {
-            void* MapDataPtr = nullptr;
-            if( child_handle->GetValueData( MapDataPtr ) == FPropertyAccess::Success )
-            {
-                TMap<FString, FNamingConventionPatternKeyword>* map = ( TMap<FString, FNamingConventionPatternKeyword>* )MapDataPtr;
-                if( map )
-                {
-                    for( auto pair : *map )
-                    {
-                        oValidKeywords.Add( pair.Value.mKeywordWithBraces );
-                        oKeywordLabels.Add( FText::FromString( pair.Value.mKeywordWithBraces ) );
-                        oKeywordHelps.Add( pair.Value.mHelp );
-                    }
-                    return *map;
-                }
-            }
-        }
-    }
-
-    return TMap<FString, FNamingConventionPatternKeyword>();
-}
-}
-
-//---
-//---
 //---
 
 //static
@@ -68,14 +26,16 @@ FNamingConventionPlaneCustomization::MakeInstance()
 FText
 FNamingConventionPlaneCustomization::GetTooltipText() const
 {
-    return LOCTEXT( "plane-pattern-tooltip",
+    return FText::Format( LOCTEXT( "plane-pattern-tooltip",
 R"(Some examples:
 
-- plane_{plane-index} ->
+- plane_{0} ->
     plane_10
     plane_20
     plane_30
-    ...)" );
+    ...)" )
+                                   , FText::FromString( mSettings->mPatternKeywords.mKeywordList[ENamingConventionPlanePatternKeyword::PlaneIndex].mKeywordWithBraces )
+    );
 }
 
 void
@@ -93,6 +53,9 @@ FNamingConventionPlaneCustomization::CustomizeHeader( TSharedRef<IPropertyHandle
 void
 FNamingConventionPlaneCustomization::CustomizeChildren( TSharedRef<IPropertyHandle> iStructPropertyHandle, IDetailChildrenBuilder& ioChildBuilder, IPropertyTypeCustomizationUtils& ioStructCustomizationUtils ) //override
 {
+    mSettings = GetEditStruct( iStructPropertyHandle );
+    check( mSettings );
+
     uint32 num_children;
     FPropertyAccess::Result result = iStructPropertyHandle->GetNumChildren( num_children );
 
@@ -111,7 +74,12 @@ FNamingConventionPlaneCustomization::CustomizeChildren( TSharedRef<IPropertyHand
             TArray<FString> keywords;
             TArray<FText> keyword_labels;
             TArray<FText> keyword_helps;
-            GetPatternKeywordsMap( iStructPropertyHandle, keywords, keyword_labels, keyword_helps );
+            for( auto pair : mSettings->mPatternKeywords.mKeywordList )
+            {
+                keywords.Add( pair.Value.mKeywordWithBraces );
+                keyword_labels.Add( FText::FromString( pair.Value.mKeywordWithBraces ) );
+                keyword_helps.Add( pair.Value.mHelp );
+            }
 
             ioChildBuilder.AddCustomRow( LOCTEXT( "Pattern", "Pattern" ) )
             .NameContent()
@@ -126,11 +94,8 @@ FNamingConventionPlaneCustomization::CustomizeChildren( TSharedRef<IPropertyHand
                 .Keywords( keywords )
                 .KeywordLabels( keyword_labels )
                 .KeywordHelps( keyword_helps )
+                .OnVerifyPattern_Raw( &mSettings->mPatternKeywords, &TPatternKeywordList<ENamingConventionPlanePatternKeyword>::IsValidPattern )
             ];
-        }
-        else if( handle->GetProperty() && handle->GetProperty()->GetFName() == GET_MEMBER_NAME_CHECKED( FNamingConventionBoard, PatternKeywords ) )
-        {
-            handle->MarkHiddenByCustomization();
         }
         else
         {
@@ -148,6 +113,20 @@ FNamingConventionPlaneCustomization::CustomizeChildren( TSharedRef<IPropertyHand
     }
 }
 
+FNamingConventionPlane*
+FNamingConventionPlaneCustomization::GetEditStruct( TSharedRef<IPropertyHandle> iStructPropertyHandle ) const
+{
+    TArray<FNamingConventionPlane*> settings;
+
+    if( iStructPropertyHandle->IsValidHandle() )
+        iStructPropertyHandle->AccessRawData( reinterpret_cast<TArray<void*>&>( settings ) );
+
+    if( settings.Num() == 1 )
+        return settings[0];
+
+    return nullptr;
+}
+
 //---
 //---
 //---
@@ -162,14 +141,16 @@ FNamingConventionCameraCustomization::MakeInstance()
 FText
 FNamingConventionCameraCustomization::GetTooltipText() const
 {
-    return LOCTEXT( "camera-pattern-tooltip",
+    return FText::Format( LOCTEXT( "camera-pattern-tooltip",
 R"(Some examples:
 
-- camera_{camera-index} ->
+- camera_{0} ->
     camera_10
     camera_20
     camera_30
-    ...)" );
+    ...)" )
+                                   , FText::FromString( mSettings->mPatternKeywords.mKeywordList[ENamingConventionCameraPatternKeyword::CameraIndex].mKeywordWithBraces )
+    );
 }
 
 void
@@ -187,6 +168,9 @@ FNamingConventionCameraCustomization::CustomizeHeader( TSharedRef<IPropertyHandl
 void
 FNamingConventionCameraCustomization::CustomizeChildren( TSharedRef<IPropertyHandle> iStructPropertyHandle, IDetailChildrenBuilder& ioChildBuilder, IPropertyTypeCustomizationUtils& ioStructCustomizationUtils ) //override
 {
+    mSettings = GetEditStruct( iStructPropertyHandle );
+    check( mSettings );
+
     uint32 num_children;
     FPropertyAccess::Result result = iStructPropertyHandle->GetNumChildren( num_children );
 
@@ -205,7 +189,12 @@ FNamingConventionCameraCustomization::CustomizeChildren( TSharedRef<IPropertyHan
             TArray<FString> keywords;
             TArray<FText> keyword_labels;
             TArray<FText> keyword_helps;
-            GetPatternKeywordsMap( iStructPropertyHandle, keywords, keyword_labels, keyword_helps );
+            for( auto pair : mSettings->mPatternKeywords.mKeywordList )
+            {
+                keywords.Add( pair.Value.mKeywordWithBraces );
+                keyword_labels.Add( FText::FromString( pair.Value.mKeywordWithBraces ) );
+                keyword_helps.Add( pair.Value.mHelp );
+            }
 
             ioChildBuilder.AddCustomRow( LOCTEXT( "Pattern", "Pattern" ) )
             .NameContent()
@@ -220,12 +209,9 @@ FNamingConventionCameraCustomization::CustomizeChildren( TSharedRef<IPropertyHan
                 .Keywords( keywords )
                 .KeywordLabels( keyword_labels )
                 .KeywordHelps( keyword_helps )
+                .OnVerifyPattern_Raw( &mSettings->mPatternKeywords, &TPatternKeywordList<ENamingConventionCameraPatternKeyword>::IsValidPattern )
                 //.MoreExplanation( LOCTEXT( "camera-pattern-info", "(both keys are not intended to be used at the same time)" ) )
             ];
-        }
-        else if( handle->GetProperty() && handle->GetProperty()->GetFName() == GET_MEMBER_NAME_CHECKED( FNamingConventionBoard, PatternKeywords ) )
-        {
-            handle->MarkHiddenByCustomization();
         }
         else
         {
@@ -243,6 +229,20 @@ FNamingConventionCameraCustomization::CustomizeChildren( TSharedRef<IPropertyHan
     }
 }
 
+FNamingConventionCamera*
+FNamingConventionCameraCustomization::GetEditStruct( TSharedRef<IPropertyHandle> iStructPropertyHandle ) const
+{
+    TArray<FNamingConventionCamera*> settings;
+
+    if( iStructPropertyHandle->IsValidHandle() )
+        iStructPropertyHandle->AccessRawData( reinterpret_cast<TArray<void*>&>( settings ) );
+
+    if( settings.Num() == 1 )
+        return settings[0];
+
+    return nullptr;
+}
+
 //---
 //---
 //---
@@ -257,19 +257,32 @@ FNamingConventionShotCustomization::MakeInstance()
 FText
 FNamingConventionShotCustomization::GetTooltipText() const
 {
-    return LOCTEXT( "shot-pattern-tooltip",
+    return FText::Format( LOCTEXT( "shot-pattern-tooltip",
 R"(Some examples:
 
-- shot_{shot-index} ->
+- shot_{0} ->
     shot_10
     shot_20
     shot_30
     ...
-- {studio-acronym}_shot_{shot-index}_{initials} ->
+- {3}_shot_{0}_{11} ->
     MS_shot_0010_xy
     MS_shot_0020_xy
     MS_shot_0030_xy
-    ...)" );
+    ...)" )
+                          , FText::FromString( mSettings->mPatternKeywords.mKeywordList[ENamingConventionShotPatternKeyword::ShotIndex].mKeywordWithBraces )
+                          , FText::FromString( mSettings->mPatternKeywords.mKeywordList[ENamingConventionShotPatternKeyword::TakeIndex].mKeywordWithBraces )
+                          , FText::FromString( mSettings->mPatternKeywords.mKeywordList[ENamingConventionShotPatternKeyword::StudioName].mKeywordWithBraces )
+                          , FText::FromString( mSettings->mPatternKeywords.mKeywordList[ENamingConventionShotPatternKeyword::StudioAcronym].mKeywordWithBraces )
+                          , FText::FromString( mSettings->mPatternKeywords.mKeywordList[ENamingConventionShotPatternKeyword::LicenseName].mKeywordWithBraces )
+                          , FText::FromString( mSettings->mPatternKeywords.mKeywordList[ENamingConventionShotPatternKeyword::LicenseAcronym].mKeywordWithBraces )
+                          , FText::FromString( mSettings->mPatternKeywords.mKeywordList[ENamingConventionShotPatternKeyword::ProductionName].mKeywordWithBraces )
+                          , FText::FromString( mSettings->mPatternKeywords.mKeywordList[ENamingConventionShotPatternKeyword::ProductionAcronym].mKeywordWithBraces )
+                          , FText::FromString( mSettings->mPatternKeywords.mKeywordList[ENamingConventionShotPatternKeyword::Season].mKeywordWithBraces )
+                          , FText::FromString( mSettings->mPatternKeywords.mKeywordList[ENamingConventionShotPatternKeyword::Episode].mKeywordWithBraces )
+                          , FText::FromString( mSettings->mPatternKeywords.mKeywordList[ENamingConventionShotPatternKeyword::Part].mKeywordWithBraces )
+                          , FText::FromString( mSettings->mPatternKeywords.mKeywordList[ENamingConventionShotPatternKeyword::Initials].mKeywordWithBraces )
+    );
 }
 
 void
@@ -287,6 +300,9 @@ FNamingConventionShotCustomization::CustomizeHeader( TSharedRef<IPropertyHandle>
 void
 FNamingConventionShotCustomization::CustomizeChildren( TSharedRef<IPropertyHandle> iStructPropertyHandle, IDetailChildrenBuilder& ioChildBuilder, IPropertyTypeCustomizationUtils& ioStructCustomizationUtils ) //override
 {
+    mSettings = GetEditStruct( iStructPropertyHandle );
+    check( mSettings );
+
     uint32 num_children;
     FPropertyAccess::Result result = iStructPropertyHandle->GetNumChildren( num_children );
 
@@ -305,7 +321,12 @@ FNamingConventionShotCustomization::CustomizeChildren( TSharedRef<IPropertyHandl
             TArray<FString> keywords;
             TArray<FText> keyword_labels;
             TArray<FText> keyword_helps;
-            GetPatternKeywordsMap( iStructPropertyHandle, keywords, keyword_labels, keyword_helps );
+            for( auto pair : mSettings->mPatternKeywords.mKeywordList )
+            {
+                keywords.Add( pair.Value.mKeywordWithBraces );
+                keyword_labels.Add( FText::FromString( pair.Value.mKeywordWithBraces ) );
+                keyword_helps.Add( pair.Value.mHelp );
+            }
 
             ioChildBuilder.AddCustomRow( LOCTEXT( "Pattern", "Pattern" ) )
             .NameContent()
@@ -320,11 +341,8 @@ FNamingConventionShotCustomization::CustomizeChildren( TSharedRef<IPropertyHandl
                 .Keywords( keywords )
                 .KeywordLabels( keyword_labels )
                 .KeywordHelps( keyword_helps )
+                .OnVerifyPattern_Raw( &mSettings->mPatternKeywords, &TPatternKeywordList<ENamingConventionShotPatternKeyword>::IsValidPattern )
             ];
-        }
-        else if( handle->GetProperty() && handle->GetProperty()->GetFName() == GET_MEMBER_NAME_CHECKED( FNamingConventionBoard, PatternKeywords ) )
-        {
-            handle->MarkHiddenByCustomization();
         }
         else
         {
@@ -342,6 +360,20 @@ FNamingConventionShotCustomization::CustomizeChildren( TSharedRef<IPropertyHandl
     }
 }
 
+FNamingConventionShot*
+FNamingConventionShotCustomization::GetEditStruct( TSharedRef<IPropertyHandle> iStructPropertyHandle ) const
+{
+    TArray<FNamingConventionShot*> settings;
+
+    if( iStructPropertyHandle->IsValidHandle() )
+        iStructPropertyHandle->AccessRawData( reinterpret_cast<TArray<void*>&>( settings ) );
+
+    if( settings.Num() == 1 )
+        return settings[0];
+
+    return nullptr;
+}
+
 //---
 //---
 //---
@@ -356,19 +388,31 @@ FNamingConventionBoardCustomization::MakeInstance()
 FText
 FNamingConventionBoardCustomization::GetTooltipText() const
 {
-    return LOCTEXT( "board-pattern-tooltip",
+    return FText::Format( LOCTEXT( "board-pattern-tooltip",
 R"(Some examples:
 
-- board_{board-index} ->
+- board_{0} ->
     board_10
     board_20
     board_30
     ...
-- {studio-acronym}_board_{board-index}_{initials} ->
+- {2}_board_{0}_{10} ->
     MS_board_0010_xy
     MS_board_0020_xy
     MS_board_0030_xy
-    ...)" );
+    ...)" )
+                          , FText::FromString( mSettings->mPatternKeywords.mKeywordList[ENamingConventionBoardPatternKeyword::BoardIndex].mKeywordWithBraces )
+                          , FText::FromString( mSettings->mPatternKeywords.mKeywordList[ENamingConventionBoardPatternKeyword::StudioName].mKeywordWithBraces )
+                          , FText::FromString( mSettings->mPatternKeywords.mKeywordList[ENamingConventionBoardPatternKeyword::StudioAcronym].mKeywordWithBraces )
+                          , FText::FromString( mSettings->mPatternKeywords.mKeywordList[ENamingConventionBoardPatternKeyword::LicenseName].mKeywordWithBraces )
+                          , FText::FromString( mSettings->mPatternKeywords.mKeywordList[ENamingConventionBoardPatternKeyword::LicenseAcronym].mKeywordWithBraces )
+                          , FText::FromString( mSettings->mPatternKeywords.mKeywordList[ENamingConventionBoardPatternKeyword::ProductionName].mKeywordWithBraces )
+                          , FText::FromString( mSettings->mPatternKeywords.mKeywordList[ENamingConventionBoardPatternKeyword::ProductionAcronym].mKeywordWithBraces )
+                          , FText::FromString( mSettings->mPatternKeywords.mKeywordList[ENamingConventionBoardPatternKeyword::Season].mKeywordWithBraces )
+                          , FText::FromString( mSettings->mPatternKeywords.mKeywordList[ENamingConventionBoardPatternKeyword::Episode].mKeywordWithBraces )
+                          , FText::FromString( mSettings->mPatternKeywords.mKeywordList[ENamingConventionBoardPatternKeyword::Part].mKeywordWithBraces )
+                          , FText::FromString( mSettings->mPatternKeywords.mKeywordList[ENamingConventionBoardPatternKeyword::Initials].mKeywordWithBraces )
+    );
 }
 
 void
@@ -386,6 +430,9 @@ FNamingConventionBoardCustomization::CustomizeHeader( TSharedRef<IPropertyHandle
 void
 FNamingConventionBoardCustomization::CustomizeChildren( TSharedRef<IPropertyHandle> iStructPropertyHandle, IDetailChildrenBuilder& ioChildBuilder, IPropertyTypeCustomizationUtils& ioStructCustomizationUtils ) //override
 {
+    mSettings = GetEditStruct( iStructPropertyHandle );
+    check( mSettings );
+
     uint32 num_children;
     FPropertyAccess::Result result = iStructPropertyHandle->GetNumChildren( num_children );
 
@@ -404,7 +451,12 @@ FNamingConventionBoardCustomization::CustomizeChildren( TSharedRef<IPropertyHand
             TArray<FString> keywords;
             TArray<FText> keyword_labels;
             TArray<FText> keyword_helps;
-            GetPatternKeywordsMap( iStructPropertyHandle, keywords, keyword_labels, keyword_helps );
+            for( auto pair : mSettings->mPatternKeywords.mKeywordList )
+            {
+                keywords.Add( pair.Value.mKeywordWithBraces );
+                keyword_labels.Add( FText::FromString( pair.Value.mKeywordWithBraces ) );
+                keyword_helps.Add( pair.Value.mHelp );
+            }
 
             ioChildBuilder.AddCustomRow( LOCTEXT( "Pattern", "Pattern" ) )
             .NameContent()
@@ -419,11 +471,8 @@ FNamingConventionBoardCustomization::CustomizeChildren( TSharedRef<IPropertyHand
                 .Keywords( keywords )
                 .KeywordLabels( keyword_labels )
                 .KeywordHelps( keyword_helps )
+                .OnVerifyPattern_Raw( &mSettings->mPatternKeywords, &TPatternKeywordList<ENamingConventionBoardPatternKeyword>::IsValidPattern )
             ];
-        }
-        else if( handle->GetProperty() && handle->GetProperty()->GetFName() == GET_MEMBER_NAME_CHECKED( FNamingConventionBoard, PatternKeywords ) )
-        {
-            handle->MarkHiddenByCustomization();
         }
         else
         {
@@ -439,6 +488,20 @@ FNamingConventionBoardCustomization::CustomizeChildren( TSharedRef<IPropertyHand
                 .IsEnabled( MakeAttributeLambda( IsIndexPropertyEnabled ) ); // For the moment, every other properties (except Pattern) concern the index key
         }
     }
+}
+
+FNamingConventionBoard*
+FNamingConventionBoardCustomization::GetEditStruct( TSharedRef<IPropertyHandle> iStructPropertyHandle ) const
+{
+    TArray<FNamingConventionBoard*> settings;
+
+    if( iStructPropertyHandle->IsValidHandle() )
+        iStructPropertyHandle->AccessRawData( reinterpret_cast<TArray<void*>&>( settings ) );
+
+    if( settings.Num() == 1 )
+        return settings[0];
+
+    return nullptr;
 }
 
 #undef LOCTEXT_NAMESPACE

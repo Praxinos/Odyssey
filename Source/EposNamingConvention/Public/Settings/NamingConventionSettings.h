@@ -6,6 +6,8 @@
 #include "CoreMinimal.h"
 #include "Engine/DeveloperSettings.h"
 
+#include "PatternKeywordList.h"
+
 #include "NamingConventionSettings.generated.h"
 
 //---
@@ -29,17 +31,13 @@ public:
     uint32 NumDigits { 4 };
 };
 
-USTRUCT()
-struct FNamingConventionPatternKeyword
-{
-    GENERATED_BODY()
-
-public:
-    FString mKeywordWithBraces;
-    FText mHelp;
-};
-
 //---
+
+UENUM()
+enum class ENamingConventionPlanePatternKeyword : uint8
+{
+    PlaneIndex,
+};
 
 USTRUCT()
 struct FNamingConventionPlane
@@ -52,18 +50,19 @@ public:
 public:
     /** The plane pattern. */
     UPROPERTY(config, EditAnywhere, Category="Plane")
-    FString Pattern { TEXT("plane_{plane-index}") };
+    FString Pattern;
 
-    /** List of all keywords.
-        This list is hidden in customization.
-        If UPROPERTY is empty, there is no access through IPropertyHandle in customization
-    */
-    UPROPERTY(VisibleAnywhere, Category="Plane", Transient)
-    TMap<FString, FNamingConventionPatternKeyword> PatternKeywords;
+    TPatternKeywordList<ENamingConventionPlanePatternKeyword> mPatternKeywords;
 
     /** The plane number format. */
     UPROPERTY(config, EditAnywhere, Category="Plane", meta=(ShowOnlyInnerProperties))
     FNamingConventionNumberFormat IndexFormat { 10, 10, 4 };
+};
+
+UENUM()
+enum class ENamingConventionCameraPatternKeyword : uint8
+{
+    CameraIndex,
 };
 
 USTRUCT()
@@ -77,18 +76,33 @@ public:
 public:
     /** The camera pattern. */
     UPROPERTY( config, EditAnywhere, Category="Camera" )
-    FString Pattern { TEXT( "camera_{camera-index}" ) };
+    FString Pattern;
 
-    /** List of all keywords.
-        This list is hidden in customization.
-        If UPROPERTY is empty, there is no access through IPropertyHandle in customization
-    */
-    UPROPERTY( VisibleAnywhere, Category="Camera", Transient )
-    TMap<FString, FNamingConventionPatternKeyword> PatternKeywords;
+    TPatternKeywordList<ENamingConventionCameraPatternKeyword> mPatternKeywords;
 
     /** The camera number format. */
     UPROPERTY(config, EditAnywhere, Category="Camera", meta=(ShowOnlyInnerProperties))
     FNamingConventionNumberFormat IndexFormat { 10, 10, 4 };
+};
+
+UENUM()
+enum class ENamingConventionShotPatternKeyword : uint8
+{
+    ShotIndex,
+    TakeIndex,
+
+    StudioName,
+    StudioAcronym,
+    LicenseName,
+    LicenseAcronym,
+    ProductionName,
+    ProductionAcronym,
+    Season,
+    Episode,
+    Part,
+    //DepartmentName,
+    //DepartmentAcronym,
+    Initials,
 };
 
 USTRUCT()
@@ -102,14 +116,9 @@ public:
 public:
     /** The shot pattern. */
     UPROPERTY( config, EditAnywhere, Category="Shot" )
-    FString Pattern { TEXT( "shot_{shot-index}_{take-index}" ) };
+    FString Pattern;
 
-    /** List of all keywords.
-        This list is hidden in customization.
-        If UPROPERTY is empty, there is no access through IPropertyHandle in customization
-    */
-    UPROPERTY( VisibleAnywhere, Category="Shot", Transient )
-    TMap<FString, FNamingConventionPatternKeyword> PatternKeywords;
+    TPatternKeywordList<ENamingConventionShotPatternKeyword> mPatternKeywords;
 
     /** The shot number format. */
     UPROPERTY(config, EditAnywhere, Category="Shot", meta=(ShowOnlyInnerProperties))
@@ -118,6 +127,25 @@ public:
     /** The take number format. */
     UPROPERTY(config, EditAnywhere, Category="Shot", meta=(ShowOnlyInnerProperties))
     FNamingConventionNumberFormat TakeFormat { 1, 1, 2 };
+};
+
+UENUM()
+enum class ENamingConventionBoardPatternKeyword : uint8
+{
+    BoardIndex,
+
+    StudioName,
+    StudioAcronym,
+    LicenseName,
+    LicenseAcronym,
+    ProductionName,
+    ProductionAcronym,
+    Season,
+    Episode,
+    Part,
+    //DepartmentName,
+    //DepartmentAcronym,
+    Initials,
 };
 
 USTRUCT()
@@ -131,14 +159,9 @@ public:
 public:
     /** The camera pattern. */
     UPROPERTY( config, EditAnywhere, Category="Board" )
-    FString Pattern { TEXT( "board_{board-index}" ) };
+    FString Pattern;
 
-    /** List of all keywords.
-        This list is hidden in customization.
-        If UPROPERTY is empty, there is no access through IPropertyHandle in customization
-    */
-    UPROPERTY( VisibleAnywhere, Category="Board", Transient )
-    TMap<FString, FNamingConventionPatternKeyword> PatternKeywords;
+    TPatternKeywordList<ENamingConventionBoardPatternKeyword> mPatternKeywords;
 
     /** The shot number format. */
     UPROPERTY(config, EditAnywhere, Category="Board", meta=(ShowOnlyInnerProperties))
