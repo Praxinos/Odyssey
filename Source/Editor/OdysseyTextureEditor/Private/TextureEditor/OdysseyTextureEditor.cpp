@@ -139,6 +139,13 @@ FOdysseyTextureEditor::OnPreTextureChange()
     layerstack->OnCurrentLayerChanged().RemoveAll(this);
     layerstack->OnStructureChanged().RemoveAll(this);
     layerstack->OnImageResultChanged().RemoveAll(this);
+
+    TSharedPtr<IOdysseyLayer> layer = layerstack->GetCurrentLayer();
+    if ( !layer )
+        return;
+
+    layer->LockChangedDelegate().RemoveAll( this );
+    layer->VisibilityChangedDelegate().RemoveAll( this );
 }
 
 void
