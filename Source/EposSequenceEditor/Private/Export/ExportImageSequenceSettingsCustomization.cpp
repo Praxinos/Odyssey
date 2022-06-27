@@ -48,11 +48,11 @@ R"(Each keywords will be replaced by its corresponding value.
 
 The extension will be automatically set according to the file format.
 )" )
-                          , FText::FromString( mOptions->mPatternKeywords.mKeywordList[EExportImageSequencePatternKeyword::PanelIndex].mKeywordWithBraces )
-                          , FText::FromString( mOptions->mPatternKeywords.mKeywordList[EExportImageSequencePatternKeyword::StoryboardName].mKeywordWithBraces )
-                          , FText::FromString( mOptions->mPatternKeywords.mKeywordList[EExportImageSequencePatternKeyword::BoardIndex].mKeywordWithBraces )
-                          , FText::FromString( mOptions->mPatternKeywords.mKeywordList[EExportImageSequencePatternKeyword::ShotIndex].mKeywordWithBraces )
-                          , FText::FromString( mOptions->mPatternKeywords.mKeywordList[EExportImageSequencePatternKeyword::PanelFrame].mKeywordWithBraces )
+                          , FText::FromString( mOptions->mPatternKeywordLists.GetKeyword( EExportImageSequencePatternKeyword::PanelIndex ).mKeywordWithBraces )
+                          , FText::FromString( mOptions->mPatternKeywordLists.GetKeyword( EExportImageSequencePatternKeyword::StoryboardName ).mKeywordWithBraces )
+                          , FText::FromString( mOptions->mPatternKeywordLists.GetKeyword( EExportImageSequencePatternKeyword::BoardIndex ).mKeywordWithBraces )
+                          , FText::FromString( mOptions->mPatternKeywordLists.GetKeyword( EExportImageSequencePatternKeyword::ShotIndex ).mKeywordWithBraces )
+                          , FText::FromString( mOptions->mPatternKeywordLists.GetKeyword( EExportImageSequencePatternKeyword::PanelFrame ).mKeywordWithBraces )
 );
 }
 
@@ -100,11 +100,14 @@ FExportImageSequenceOptionsCustomization::CustomizeChildren( TSharedRef<IPropert
             TArray<FString> keywords;
             TArray<FText> keyword_labels;
             TArray<FText> keyword_helps;
-            for( auto pair : mOptions->mPatternKeywords.mKeywordList )
+            for( auto keyword_list : mOptions->mPatternKeywordLists.mKeywordLists )
             {
-                keywords.Add( pair.Value.mKeywordWithBraces );
-                keyword_labels.Add( FText::FromString( pair.Value.mKeywordWithBraces ) );
-                keyword_helps.Add( pair.Value.mHelp );
+                for( auto keyword : keyword_list->GetKeywordList() )
+                {
+                    keywords.Add( keyword.mKeywordWithBraces );
+                    keyword_labels.Add( FText::FromString( keyword.mKeywordWithBraces ) );
+                    keyword_helps.Add( keyword.mHelp );
+                }
             }
 
             mPatternHandle->SetToolTipText( GetTooltipText() );
@@ -122,7 +125,7 @@ FExportImageSequenceOptionsCustomization::CustomizeChildren( TSharedRef<IPropert
                 .Keywords( keywords )
                 .KeywordLabels( keyword_labels )
                 .KeywordHelps( keyword_helps )
-                .OnVerifyPattern_Raw( &mOptions->mPatternKeywords, &TPatternKeywordList<EExportImageSequencePatternKeyword>::IsValidPattern )
+                .OnVerifyPattern_Raw( &mOptions->mPatternKeywordLists, &FPatternKeywordLists::IsValidPattern )
             ];
         }
         else if( handle->GetProperty() && handle->GetProperty()->GetFName() == GET_MEMBER_NAME_CHECKED( FExportImageSequenceOptions, ImageSize ) )

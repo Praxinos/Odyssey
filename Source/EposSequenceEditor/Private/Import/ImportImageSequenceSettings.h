@@ -11,14 +11,15 @@
 
 //---
 
-UENUM()
-enum class EImportImageSequencePatternKeyword : uint8
+enum class EImportImageSequencePatternKeyword : uint32
 {
-    BoardId,
-    ShotId,
-    PanelId,
-    Duration,
+    ENUM_UNIQUE_ID( BoardId ),
+    ENUM_UNIQUE_ID( ShotId ),
+    ENUM_UNIQUE_ID( PanelId ),
+    ENUM_UNIQUE_ID( Duration ),
 };
+
+const FPatternKeywordList& GetImportImageSequencePatternKeywordList();
 
 //---
 
@@ -39,7 +40,7 @@ public:
     UPROPERTY( EditAnywhere, Category=ImportImageSequence )
     FString FilePattern;
 
-    TPatternKeywordList<EImportImageSequencePatternKeyword> mPatternKeywords;
+    FPatternKeywordLists mPatternKeywordLists;
 };
 
 //---

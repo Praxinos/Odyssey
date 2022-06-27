@@ -33,11 +33,12 @@ public:
 
 //---
 
-UENUM()
-enum class ENamingConventionPlanePatternKeyword : uint8
+enum class ENamingConventionPlanePatternKeyword : uint32
 {
-    PlaneIndex,
+    ENUM_UNIQUE_ID( PlaneIndex ),
 };
+
+EPOSNAMINGCONVENTION_API const FPatternKeywordList& GetNamingConventionPlanePatternKeywordList();
 
 USTRUCT()
 struct FNamingConventionPlane
@@ -52,18 +53,19 @@ public:
     UPROPERTY(config, EditAnywhere, Category="Plane")
     FString Pattern;
 
-    TPatternKeywordList<ENamingConventionPlanePatternKeyword> mPatternKeywords;
+    FPatternKeywordLists mPatternKeywordLists;
 
     /** The plane number format. */
     UPROPERTY(config, EditAnywhere, Category="Plane", meta=(ShowOnlyInnerProperties))
     FNamingConventionNumberFormat IndexFormat { 10, 10, 4 };
 };
 
-UENUM()
-enum class ENamingConventionCameraPatternKeyword : uint8
+enum class ENamingConventionCameraPatternKeyword : uint32
 {
-    CameraIndex,
+    ENUM_UNIQUE_ID( CameraIndex ),
 };
+
+EPOSNAMINGCONVENTION_API const FPatternKeywordList& GetNamingConventionCameraPatternKeywordList();
 
 USTRUCT()
 struct FNamingConventionCamera
@@ -78,32 +80,38 @@ public:
     UPROPERTY( config, EditAnywhere, Category="Camera" )
     FString Pattern;
 
-    TPatternKeywordList<ENamingConventionCameraPatternKeyword> mPatternKeywords;
+    FPatternKeywordLists mPatternKeywordLists;
 
     /** The camera number format. */
     UPROPERTY(config, EditAnywhere, Category="Camera", meta=(ShowOnlyInnerProperties))
     FNamingConventionNumberFormat IndexFormat { 10, 10, 4 };
 };
 
-UENUM()
-enum class ENamingConventionShotPatternKeyword : uint8
+enum class ENamingConventionCommonPatternKeyword : uint32
 {
-    ShotIndex,
-    TakeIndex,
-
-    StudioName,
-    StudioAcronym,
-    LicenseName,
-    LicenseAcronym,
-    ProductionName,
-    ProductionAcronym,
-    Season,
-    Episode,
-    Part,
-    //DepartmentName,
-    //DepartmentAcronym,
-    Initials,
+    ENUM_UNIQUE_ID( StudioName ),
+    ENUM_UNIQUE_ID( StudioAcronym ),
+    ENUM_UNIQUE_ID( LicenseName ),
+    ENUM_UNIQUE_ID( LicenseAcronym ),
+    ENUM_UNIQUE_ID( ProductionName ),
+    ENUM_UNIQUE_ID( ProductionAcronym ),
+    ENUM_UNIQUE_ID( Season ),
+    ENUM_UNIQUE_ID( Episode ),
+    ENUM_UNIQUE_ID( Part ),
+    //ENUM_UNIQUE_ID( DepartmentName ),
+    //ENUM_UNIQUE_ID( DepartmentAcronym ),
+    ENUM_UNIQUE_ID( Initials ),
 };
+
+EPOSNAMINGCONVENTION_API const FPatternKeywordList& GetNamingConventionCommonPatternKeywordList();
+
+enum class ENamingConventionShotPatternKeyword : uint32
+{
+    ENUM_UNIQUE_ID( ShotIndex ),
+    ENUM_UNIQUE_ID( TakeIndex ),
+};
+
+EPOSNAMINGCONVENTION_API const FPatternKeywordList& GetNamingConventionShotPatternKeywordList();
 
 USTRUCT()
 struct FNamingConventionShot
@@ -118,7 +126,7 @@ public:
     UPROPERTY( config, EditAnywhere, Category="Shot" )
     FString Pattern;
 
-    TPatternKeywordList<ENamingConventionShotPatternKeyword> mPatternKeywords;
+    FPatternKeywordLists mPatternKeywordLists;
 
     /** The shot number format. */
     UPROPERTY(config, EditAnywhere, Category="Shot", meta=(ShowOnlyInnerProperties))
@@ -129,24 +137,12 @@ public:
     FNamingConventionNumberFormat TakeFormat { 1, 1, 2 };
 };
 
-UENUM()
-enum class ENamingConventionBoardPatternKeyword : uint8
+enum class ENamingConventionBoardPatternKeyword : uint32
 {
-    BoardIndex,
-
-    StudioName,
-    StudioAcronym,
-    LicenseName,
-    LicenseAcronym,
-    ProductionName,
-    ProductionAcronym,
-    Season,
-    Episode,
-    Part,
-    //DepartmentName,
-    //DepartmentAcronym,
-    Initials,
+    ENUM_UNIQUE_ID( BoardIndex ),
 };
+
+EPOSNAMINGCONVENTION_API const FPatternKeywordList& GetNamingConventionBoardPatternKeywordList();
 
 USTRUCT()
 struct FNamingConventionBoard
@@ -161,7 +157,7 @@ public:
     UPROPERTY( config, EditAnywhere, Category="Board" )
     FString Pattern;
 
-    TPatternKeywordList<ENamingConventionBoardPatternKeyword> mPatternKeywords;
+    FPatternKeywordLists mPatternKeywordLists;
 
     /** The shot number format. */
     UPROPERTY(config, EditAnywhere, Category="Board", meta=(ShowOnlyInnerProperties))

@@ -7,12 +7,26 @@
 
 //---
 
+static FPatternKeywordList sgImportImageSequencePatternKeywordList;
+
+const FPatternKeywordList& GetImportImageSequencePatternKeywordList()
+{
+    if( !sgImportImageSequencePatternKeywordList.mKeywordList.Num() )
+    {
+        sgImportImageSequencePatternKeywordList.AddKeyword( EImportImageSequencePatternKeyword::BoardId    , "board"       , LOCTEXT( "image-sequence-pattern-keyword.board", "the id which represents the board" ) );
+        sgImportImageSequencePatternKeywordList.AddKeyword( EImportImageSequencePatternKeyword::ShotId     , "shot"        , LOCTEXT( "image-sequence-pattern-keyword.shot", "the id which represents the board" ) );
+        sgImportImageSequencePatternKeywordList.AddKeyword( EImportImageSequencePatternKeyword::PanelId    , "panel"       , LOCTEXT( "image-sequence-pattern-keyword.panel", "the id which represents the board" ) );
+        sgImportImageSequencePatternKeywordList.AddKeyword( EImportImageSequencePatternKeyword::Duration   , "duration"    , LOCTEXT( "image-sequence-pattern-keyword.duration", "the id which represents the board" ) );
+    }
+
+    return sgImportImageSequencePatternKeywordList;
+}
+
+//---
+
 FImportImageSequenceOptions::FImportImageSequenceOptions()
 {
-    mPatternKeywords.AddKeyword( EImportImageSequencePatternKeyword::BoardId    , "board"       , LOCTEXT( "image-sequence-pattern-keyword.board", "the id which represents the board" ) );
-    mPatternKeywords.AddKeyword( EImportImageSequencePatternKeyword::ShotId     , "shot"        , LOCTEXT( "image-sequence-pattern-keyword.shot", "the id which represents the board" ) );
-    mPatternKeywords.AddKeyword( EImportImageSequencePatternKeyword::PanelId    , "panel"       , LOCTEXT( "image-sequence-pattern-keyword.panel", "the id which represents the board" ) );
-    mPatternKeywords.AddKeyword( EImportImageSequencePatternKeyword::Duration   , "duration"    , LOCTEXT( "image-sequence-pattern-keyword.duration", "the id which represents the board" ) );
+    mPatternKeywordLists.AddKeywordList( &GetImportImageSequencePatternKeywordList() );
 
     // No default pattern value, it's too file dependent
 }

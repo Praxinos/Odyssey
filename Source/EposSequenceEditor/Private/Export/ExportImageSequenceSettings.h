@@ -13,25 +13,26 @@
 
 //---
 
-UENUM()
-enum class EExportImageSequencePatternKeyword : uint8
+enum class EExportImageSequencePatternKeyword : uint32
 {
-    PanelIndex,
-    StoryboardName,
-    BoardIndex, // board only in the first level
-    ShotIndex,
-    PanelFrame,
+    ENUM_UNIQUE_ID( PanelIndex ),
+    ENUM_UNIQUE_ID( StoryboardName ),
+    ENUM_UNIQUE_ID( BoardIndex ), // board only in the first level
+    ENUM_UNIQUE_ID( ShotIndex ),
+    ENUM_UNIQUE_ID( PanelFrame ),
 };
 
+const FPatternKeywordList& GetExportImageSequencePatternKeywordList();
+
 UENUM()
-enum class EExportImageSequenceFileFormat
+enum class EExportImageSequenceFileFormat : int8
 {
-    PNG     = int32( EImageFormat::PNG ),
-    JPEG    = int32( EImageFormat::JPEG ),
-    BMP     = int32( EImageFormat::BMP ),
-    EXR     = int32( EImageFormat::EXR ),
-    //TGA     = int32( EImageFormat::TGA ), // Compress() is not implemented
-    //TIFF    = int32( EImageFormat::TIFF ), // Compress() is not implemented
+    PNG     = int8( EImageFormat::PNG ),
+    JPEG    = int8( EImageFormat::JPEG ),
+    BMP     = int8( EImageFormat::BMP ),
+    EXR     = int8( EImageFormat::EXR ),
+    //TGA     = int8( EImageFormat::TGA ), // Compress() is not implemented
+    //TIFF    = int8( EImageFormat::TIFF ), // Compress() is not implemented
 };
 
 USTRUCT()
@@ -77,7 +78,7 @@ public:
     UPROPERTY( EditAnywhere, Category=ExportImageSequence )
     FString Pattern;
 
-    TPatternKeywordList<EExportImageSequencePatternKeyword> mPatternKeywords;
+    FPatternKeywordLists mPatternKeywordLists;
 
     /** The sequence index format. */
     UPROPERTY(EditAnywhere, Category=ExportImageSequence, AdvancedDisplay, meta=(ShowOnlyInnerProperties))

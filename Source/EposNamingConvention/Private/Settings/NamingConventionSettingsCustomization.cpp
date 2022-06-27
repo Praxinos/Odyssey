@@ -34,7 +34,7 @@ R"(Some examples:
     plane_20
     plane_30
     ...)" )
-                                   , FText::FromString( mSettings->mPatternKeywords.mKeywordList[ENamingConventionPlanePatternKeyword::PlaneIndex].mKeywordWithBraces )
+                                   , FText::FromString( mSettings->mPatternKeywordLists.GetKeyword( ENamingConventionPlanePatternKeyword::PlaneIndex ).mKeywordWithBraces )
     );
 }
 
@@ -74,11 +74,14 @@ FNamingConventionPlaneCustomization::CustomizeChildren( TSharedRef<IPropertyHand
             TArray<FString> keywords;
             TArray<FText> keyword_labels;
             TArray<FText> keyword_helps;
-            for( auto pair : mSettings->mPatternKeywords.mKeywordList )
+            for( auto keyword_list : mSettings->mPatternKeywordLists.mKeywordLists )
             {
-                keywords.Add( pair.Value.mKeywordWithBraces );
-                keyword_labels.Add( FText::FromString( pair.Value.mKeywordWithBraces ) );
-                keyword_helps.Add( pair.Value.mHelp );
+                for( auto keyword : keyword_list->GetKeywordList() )
+                {
+                    keywords.Add( keyword.mKeywordWithBraces );
+                    keyword_labels.Add( FText::FromString( keyword.mKeywordWithBraces ) );
+                    keyword_helps.Add( keyword.mHelp );
+                }
             }
 
             ioChildBuilder.AddCustomRow( LOCTEXT( "Pattern", "Pattern" ) )
@@ -94,7 +97,7 @@ FNamingConventionPlaneCustomization::CustomizeChildren( TSharedRef<IPropertyHand
                 .Keywords( keywords )
                 .KeywordLabels( keyword_labels )
                 .KeywordHelps( keyword_helps )
-                .OnVerifyPattern_Raw( &mSettings->mPatternKeywords, &TPatternKeywordList<ENamingConventionPlanePatternKeyword>::IsValidPattern )
+                .OnVerifyPattern_Raw( &mSettings->mPatternKeywordLists, &FPatternKeywordLists::IsValidPattern )
             ];
         }
         else
@@ -149,7 +152,7 @@ R"(Some examples:
     camera_20
     camera_30
     ...)" )
-                                   , FText::FromString( mSettings->mPatternKeywords.mKeywordList[ENamingConventionCameraPatternKeyword::CameraIndex].mKeywordWithBraces )
+                                   , FText::FromString( mSettings->mPatternKeywordLists.GetKeyword( ENamingConventionCameraPatternKeyword::CameraIndex ).mKeywordWithBraces )
     );
 }
 
@@ -189,11 +192,14 @@ FNamingConventionCameraCustomization::CustomizeChildren( TSharedRef<IPropertyHan
             TArray<FString> keywords;
             TArray<FText> keyword_labels;
             TArray<FText> keyword_helps;
-            for( auto pair : mSettings->mPatternKeywords.mKeywordList )
+            for( auto keyword_list : mSettings->mPatternKeywordLists.mKeywordLists )
             {
-                keywords.Add( pair.Value.mKeywordWithBraces );
-                keyword_labels.Add( FText::FromString( pair.Value.mKeywordWithBraces ) );
-                keyword_helps.Add( pair.Value.mHelp );
+                for( auto keyword : keyword_list->GetKeywordList() )
+                {
+                    keywords.Add( keyword.mKeywordWithBraces );
+                    keyword_labels.Add( FText::FromString( keyword.mKeywordWithBraces ) );
+                    keyword_helps.Add( keyword.mHelp );
+                }
             }
 
             ioChildBuilder.AddCustomRow( LOCTEXT( "Pattern", "Pattern" ) )
@@ -209,7 +215,7 @@ FNamingConventionCameraCustomization::CustomizeChildren( TSharedRef<IPropertyHan
                 .Keywords( keywords )
                 .KeywordLabels( keyword_labels )
                 .KeywordHelps( keyword_helps )
-                .OnVerifyPattern_Raw( &mSettings->mPatternKeywords, &TPatternKeywordList<ENamingConventionCameraPatternKeyword>::IsValidPattern )
+                .OnVerifyPattern_Raw( &mSettings->mPatternKeywordLists, &FPatternKeywordLists::IsValidPattern )
                 //.MoreExplanation( LOCTEXT( "camera-pattern-info", "(both keys are not intended to be used at the same time)" ) )
             ];
         }
@@ -270,18 +276,19 @@ R"(Some examples:
     MS_shot_0020_xy
     MS_shot_0030_xy
     ...)" )
-                          , FText::FromString( mSettings->mPatternKeywords.mKeywordList[ENamingConventionShotPatternKeyword::ShotIndex].mKeywordWithBraces )
-                          , FText::FromString( mSettings->mPatternKeywords.mKeywordList[ENamingConventionShotPatternKeyword::TakeIndex].mKeywordWithBraces )
-                          , FText::FromString( mSettings->mPatternKeywords.mKeywordList[ENamingConventionShotPatternKeyword::StudioName].mKeywordWithBraces )
-                          , FText::FromString( mSettings->mPatternKeywords.mKeywordList[ENamingConventionShotPatternKeyword::StudioAcronym].mKeywordWithBraces )
-                          , FText::FromString( mSettings->mPatternKeywords.mKeywordList[ENamingConventionShotPatternKeyword::LicenseName].mKeywordWithBraces )
-                          , FText::FromString( mSettings->mPatternKeywords.mKeywordList[ENamingConventionShotPatternKeyword::LicenseAcronym].mKeywordWithBraces )
-                          , FText::FromString( mSettings->mPatternKeywords.mKeywordList[ENamingConventionShotPatternKeyword::ProductionName].mKeywordWithBraces )
-                          , FText::FromString( mSettings->mPatternKeywords.mKeywordList[ENamingConventionShotPatternKeyword::ProductionAcronym].mKeywordWithBraces )
-                          , FText::FromString( mSettings->mPatternKeywords.mKeywordList[ENamingConventionShotPatternKeyword::Season].mKeywordWithBraces )
-                          , FText::FromString( mSettings->mPatternKeywords.mKeywordList[ENamingConventionShotPatternKeyword::Episode].mKeywordWithBraces )
-                          , FText::FromString( mSettings->mPatternKeywords.mKeywordList[ENamingConventionShotPatternKeyword::Part].mKeywordWithBraces )
-                          , FText::FromString( mSettings->mPatternKeywords.mKeywordList[ENamingConventionShotPatternKeyword::Initials].mKeywordWithBraces )
+                          , FText::FromString( mSettings->mPatternKeywordLists.GetKeyword( ENamingConventionShotPatternKeyword::ShotIndex ).mKeywordWithBraces )
+                          , FText::FromString( mSettings->mPatternKeywordLists.GetKeyword( ENamingConventionShotPatternKeyword::TakeIndex ).mKeywordWithBraces )
+
+                          , FText::FromString( mSettings->mPatternKeywordLists.GetKeyword( ENamingConventionCommonPatternKeyword::StudioName ).mKeywordWithBraces )
+                          , FText::FromString( mSettings->mPatternKeywordLists.GetKeyword( ENamingConventionCommonPatternKeyword::StudioAcronym ).mKeywordWithBraces )
+                          , FText::FromString( mSettings->mPatternKeywordLists.GetKeyword( ENamingConventionCommonPatternKeyword::LicenseName ).mKeywordWithBraces )
+                          , FText::FromString( mSettings->mPatternKeywordLists.GetKeyword( ENamingConventionCommonPatternKeyword::LicenseAcronym ).mKeywordWithBraces )
+                          , FText::FromString( mSettings->mPatternKeywordLists.GetKeyword( ENamingConventionCommonPatternKeyword::ProductionName ).mKeywordWithBraces )
+                          , FText::FromString( mSettings->mPatternKeywordLists.GetKeyword( ENamingConventionCommonPatternKeyword::ProductionAcronym ).mKeywordWithBraces )
+                          , FText::FromString( mSettings->mPatternKeywordLists.GetKeyword( ENamingConventionCommonPatternKeyword::Season ).mKeywordWithBraces )
+                          , FText::FromString( mSettings->mPatternKeywordLists.GetKeyword( ENamingConventionCommonPatternKeyword::Episode ).mKeywordWithBraces )
+                          , FText::FromString( mSettings->mPatternKeywordLists.GetKeyword( ENamingConventionCommonPatternKeyword::Part ).mKeywordWithBraces )
+                          , FText::FromString( mSettings->mPatternKeywordLists.GetKeyword( ENamingConventionCommonPatternKeyword::Initials ).mKeywordWithBraces )
     );
 }
 
@@ -321,11 +328,14 @@ FNamingConventionShotCustomization::CustomizeChildren( TSharedRef<IPropertyHandl
             TArray<FString> keywords;
             TArray<FText> keyword_labels;
             TArray<FText> keyword_helps;
-            for( auto pair : mSettings->mPatternKeywords.mKeywordList )
+            for( auto keyword_list : mSettings->mPatternKeywordLists.mKeywordLists )
             {
-                keywords.Add( pair.Value.mKeywordWithBraces );
-                keyword_labels.Add( FText::FromString( pair.Value.mKeywordWithBraces ) );
-                keyword_helps.Add( pair.Value.mHelp );
+                for( auto keyword : keyword_list->GetKeywordList() )
+                {
+                    keywords.Add( keyword.mKeywordWithBraces );
+                    keyword_labels.Add( FText::FromString( keyword.mKeywordWithBraces ) );
+                    keyword_helps.Add( keyword.mHelp );
+                }
             }
 
             ioChildBuilder.AddCustomRow( LOCTEXT( "Pattern", "Pattern" ) )
@@ -341,7 +351,7 @@ FNamingConventionShotCustomization::CustomizeChildren( TSharedRef<IPropertyHandl
                 .Keywords( keywords )
                 .KeywordLabels( keyword_labels )
                 .KeywordHelps( keyword_helps )
-                .OnVerifyPattern_Raw( &mSettings->mPatternKeywords, &TPatternKeywordList<ENamingConventionShotPatternKeyword>::IsValidPattern )
+                .OnVerifyPattern_Raw( &mSettings->mPatternKeywordLists, &FPatternKeywordLists::IsValidPattern )
             ];
         }
         else
@@ -401,17 +411,18 @@ R"(Some examples:
     MS_board_0020_xy
     MS_board_0030_xy
     ...)" )
-                          , FText::FromString( mSettings->mPatternKeywords.mKeywordList[ENamingConventionBoardPatternKeyword::BoardIndex].mKeywordWithBraces )
-                          , FText::FromString( mSettings->mPatternKeywords.mKeywordList[ENamingConventionBoardPatternKeyword::StudioName].mKeywordWithBraces )
-                          , FText::FromString( mSettings->mPatternKeywords.mKeywordList[ENamingConventionBoardPatternKeyword::StudioAcronym].mKeywordWithBraces )
-                          , FText::FromString( mSettings->mPatternKeywords.mKeywordList[ENamingConventionBoardPatternKeyword::LicenseName].mKeywordWithBraces )
-                          , FText::FromString( mSettings->mPatternKeywords.mKeywordList[ENamingConventionBoardPatternKeyword::LicenseAcronym].mKeywordWithBraces )
-                          , FText::FromString( mSettings->mPatternKeywords.mKeywordList[ENamingConventionBoardPatternKeyword::ProductionName].mKeywordWithBraces )
-                          , FText::FromString( mSettings->mPatternKeywords.mKeywordList[ENamingConventionBoardPatternKeyword::ProductionAcronym].mKeywordWithBraces )
-                          , FText::FromString( mSettings->mPatternKeywords.mKeywordList[ENamingConventionBoardPatternKeyword::Season].mKeywordWithBraces )
-                          , FText::FromString( mSettings->mPatternKeywords.mKeywordList[ENamingConventionBoardPatternKeyword::Episode].mKeywordWithBraces )
-                          , FText::FromString( mSettings->mPatternKeywords.mKeywordList[ENamingConventionBoardPatternKeyword::Part].mKeywordWithBraces )
-                          , FText::FromString( mSettings->mPatternKeywords.mKeywordList[ENamingConventionBoardPatternKeyword::Initials].mKeywordWithBraces )
+                          , FText::FromString( mSettings->mPatternKeywordLists.GetKeyword( ENamingConventionBoardPatternKeyword::BoardIndex ).mKeywordWithBraces )
+
+                          , FText::FromString( mSettings->mPatternKeywordLists.GetKeyword( ENamingConventionCommonPatternKeyword::StudioName ).mKeywordWithBraces )
+                          , FText::FromString( mSettings->mPatternKeywordLists.GetKeyword( ENamingConventionCommonPatternKeyword::StudioAcronym ).mKeywordWithBraces )
+                          , FText::FromString( mSettings->mPatternKeywordLists.GetKeyword( ENamingConventionCommonPatternKeyword::LicenseName ).mKeywordWithBraces )
+                          , FText::FromString( mSettings->mPatternKeywordLists.GetKeyword( ENamingConventionCommonPatternKeyword::LicenseAcronym ).mKeywordWithBraces )
+                          , FText::FromString( mSettings->mPatternKeywordLists.GetKeyword( ENamingConventionCommonPatternKeyword::ProductionName ).mKeywordWithBraces )
+                          , FText::FromString( mSettings->mPatternKeywordLists.GetKeyword( ENamingConventionCommonPatternKeyword::ProductionAcronym ).mKeywordWithBraces )
+                          , FText::FromString( mSettings->mPatternKeywordLists.GetKeyword( ENamingConventionCommonPatternKeyword::Season ).mKeywordWithBraces )
+                          , FText::FromString( mSettings->mPatternKeywordLists.GetKeyword( ENamingConventionCommonPatternKeyword::Episode ).mKeywordWithBraces )
+                          , FText::FromString( mSettings->mPatternKeywordLists.GetKeyword( ENamingConventionCommonPatternKeyword::Part ).mKeywordWithBraces )
+                          , FText::FromString( mSettings->mPatternKeywordLists.GetKeyword( ENamingConventionCommonPatternKeyword::Initials ).mKeywordWithBraces )
     );
 }
 
@@ -451,11 +462,14 @@ FNamingConventionBoardCustomization::CustomizeChildren( TSharedRef<IPropertyHand
             TArray<FString> keywords;
             TArray<FText> keyword_labels;
             TArray<FText> keyword_helps;
-            for( auto pair : mSettings->mPatternKeywords.mKeywordList )
+            for( auto keyword_list : mSettings->mPatternKeywordLists.mKeywordLists )
             {
-                keywords.Add( pair.Value.mKeywordWithBraces );
-                keyword_labels.Add( FText::FromString( pair.Value.mKeywordWithBraces ) );
-                keyword_helps.Add( pair.Value.mHelp );
+                for( auto keyword : keyword_list->GetKeywordList() )
+                {
+                    keywords.Add( keyword.mKeywordWithBraces );
+                    keyword_labels.Add( FText::FromString( keyword.mKeywordWithBraces ) );
+                    keyword_helps.Add( keyword.mHelp );
+                }
             }
 
             ioChildBuilder.AddCustomRow( LOCTEXT( "Pattern", "Pattern" ) )
@@ -471,7 +485,7 @@ FNamingConventionBoardCustomization::CustomizeChildren( TSharedRef<IPropertyHand
                 .Keywords( keywords )
                 .KeywordLabels( keyword_labels )
                 .KeywordHelps( keyword_helps )
-                .OnVerifyPattern_Raw( &mSettings->mPatternKeywords, &TPatternKeywordList<ENamingConventionBoardPatternKeyword>::IsValidPattern )
+                .OnVerifyPattern_Raw( &mSettings->mPatternKeywordLists, &FPatternKeywordLists::IsValidPattern )
             ];
         }
         else

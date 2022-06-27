@@ -66,11 +66,14 @@ FInfoBarCustomization::CustomizeChildren( TSharedRef<IPropertyHandle> iStructPro
             TArray<FString> keywords;
             TArray<FText> keyword_labels;
             TArray<FText> keyword_helps;
-            for( auto pair : mSettings->mPatternKeywords.mKeywordList )
+            for( auto keyword_list : mSettings->mPatternKeywordLists.mKeywordLists )
             {
-                keywords.Add( pair.Value.mKeywordWithBraces );
-                keyword_labels.Add( FText::FromString( pair.Value.mKeywordWithBraces ) );
-                keyword_helps.Add( pair.Value.mHelp );
+                for( auto keyword : keyword_list->GetKeywordList() )
+                {
+                    keywords.Add( keyword.mKeywordWithBraces );
+                    keyword_labels.Add( FText::FromString( keyword.mKeywordWithBraces ) );
+                    keyword_helps.Add( keyword.mHelp );
+                }
             }
 
             ioChildBuilder.AddCustomRow( LOCTEXT( "Pattern", "Pattern" ) )
@@ -86,7 +89,7 @@ FInfoBarCustomization::CustomizeChildren( TSharedRef<IPropertyHandle> iStructPro
                 .Keywords( keywords )
                 .KeywordLabels( keyword_labels )
                 .KeywordHelps( keyword_helps )
-                .OnVerifyPattern_Raw( &mSettings->mPatternKeywords, &TPatternKeywordList<EInfoBarPatternKeyword>::IsValidPattern )
+                .OnVerifyPattern_Raw( &mSettings->mPatternKeywordLists, &FPatternKeywordLists::IsValidPattern )
             ];
         }
         else

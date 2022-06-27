@@ -56,10 +56,10 @@ If the first character (A or B) corresponds to the board, the next number to the
 the pattern will look like:
 - ful-b{0}-s{1}-{2}.png
 )" )
-                          , FText::FromString( mOptions->mPatternKeywords.mKeywordList[EImportImageSequencePatternKeyword::BoardId].mKeywordWithBraces )
-                          , FText::FromString( mOptions->mPatternKeywords.mKeywordList[EImportImageSequencePatternKeyword::ShotId].mKeywordWithBraces )
-                          , FText::FromString( mOptions->mPatternKeywords.mKeywordList[EImportImageSequencePatternKeyword::PanelId].mKeywordWithBraces )
-                          , FText::FromString( mOptions->mPatternKeywords.mKeywordList[EImportImageSequencePatternKeyword::Duration].mKeywordWithBraces )
+                          , FText::FromString( mOptions->mPatternKeywordLists.GetKeyword( EImportImageSequencePatternKeyword::BoardId ).mKeywordWithBraces )
+                          , FText::FromString( mOptions->mPatternKeywordLists.GetKeyword( EImportImageSequencePatternKeyword::ShotId ).mKeywordWithBraces )
+                          , FText::FromString( mOptions->mPatternKeywordLists.GetKeyword( EImportImageSequencePatternKeyword::PanelId ).mKeywordWithBraces )
+                          , FText::FromString( mOptions->mPatternKeywordLists.GetKeyword( EImportImageSequencePatternKeyword::Duration ).mKeywordWithBraces )
     );
 }
 
@@ -97,11 +97,14 @@ FImportImageSequenceOptionsCustomization::CustomizeChildren( TSharedRef<IPropert
             TArray<FString> keywords;
             TArray<FText> keyword_labels;
             TArray<FText> keyword_helps;
-            for( auto pair : mOptions->mPatternKeywords.mKeywordList )
+            for( auto keyword_list : mOptions->mPatternKeywordLists.mKeywordLists )
             {
-                keywords.Add( pair.Value.mKeywordWithBraces );
-                keyword_labels.Add( FText::FromString( pair.Value.mKeywordWithBraces ) );
-                keyword_helps.Add( pair.Value.mHelp );
+                for( auto keyword : keyword_list->GetKeywordList() )
+                {
+                    keywords.Add( keyword.mKeywordWithBraces );
+                    keyword_labels.Add( FText::FromString( keyword.mKeywordWithBraces ) );
+                    keyword_helps.Add( keyword.mHelp );
+                }
             }
 
             mPatternHandle->SetToolTipText( GetTooltipText() );
@@ -119,7 +122,7 @@ FImportImageSequenceOptionsCustomization::CustomizeChildren( TSharedRef<IPropert
                 .Keywords( keywords )
                 .KeywordLabels( keyword_labels )
                 .KeywordHelps( keyword_helps )
-                .OnVerifyPattern_Raw( &mOptions->mPatternKeywords, &TPatternKeywordList<EImportImageSequencePatternKeyword>::IsValidPattern )
+                .OnVerifyPattern_Raw( &mOptions->mPatternKeywordLists, &FPatternKeywordLists::IsValidPattern )
             ];
         }
         else

@@ -3,24 +3,41 @@
 
 #include "Export/ExportImageSequenceSettings.h"
 
+#include "Settings/NamingConventionSettings.h"
+
 #define LOCTEXT_NAMESPACE "ExportImageSequenceSettings"
+
+//---
+
+static FPatternKeywordList sgExportImageSequencePatternKeywordList;
+
+const FPatternKeywordList& GetExportImageSequencePatternKeywordList()
+{
+    if( !sgExportImageSequencePatternKeywordList.mKeywordList.Num() )
+    {
+        sgExportImageSequencePatternKeywordList.AddKeyword( EExportImageSequencePatternKeyword::PanelIndex     , "panel-index"     , LOCTEXT( "export-image-sequence-pattern-keyword.panel-index", "the index of the panel in the panel list (1, 2, 3, ...)" ) );
+        sgExportImageSequencePatternKeywordList.AddKeyword( EExportImageSequencePatternKeyword::StoryboardName , "root-board-name" , LOCTEXT( "export-image-sequence-pattern-keyword.root-board-name", "the root board name" ) );
+        sgExportImageSequencePatternKeywordList.AddKeyword( EExportImageSequencePatternKeyword::BoardIndex     , "board-index"     , LOCTEXT( "export-image-sequence-pattern-keyword.board-index", "the index which represents the board (only in the first level)" ) );
+        sgExportImageSequencePatternKeywordList.AddKeyword( EExportImageSequencePatternKeyword::ShotIndex      , "shot-index"      , LOCTEXT( "export-image-sequence-pattern-keyword.shot-index", "the index which represents the shot" ) );
+        sgExportImageSequencePatternKeywordList.AddKeyword( EExportImageSequencePatternKeyword::PanelFrame     , "panel-frame"     , LOCTEXT( "export-image-sequence-pattern-keyword.panel-frame", "the frame which represents the panel" ) );
+    }
+
+    return sgExportImageSequencePatternKeywordList;
+}
 
 //---
 
 FExportImageSequenceOptions::FExportImageSequenceOptions()
 {
-    mPatternKeywords.AddKeyword( EExportImageSequencePatternKeyword::PanelIndex     , "panel-index"     , LOCTEXT( "export-image-sequence-pattern-keyword.panel-index", "the index of the panel in the panel list (1, 2, 3, ...)" ) );
-    mPatternKeywords.AddKeyword( EExportImageSequencePatternKeyword::StoryboardName , "root-board-name" , LOCTEXT( "export-image-sequence-pattern-keyword.root-board-name", "the root board name" ) );
-    mPatternKeywords.AddKeyword( EExportImageSequencePatternKeyword::BoardIndex     , "board-index"     , LOCTEXT( "export-image-sequence-pattern-keyword.board-index", "the index which represents the board (only in the first level)" ) );
-    mPatternKeywords.AddKeyword( EExportImageSequencePatternKeyword::ShotIndex      , "shot-index"      , LOCTEXT( "export-image-sequence-pattern-keyword.shot-index", "the index which represents the shot" ) );
-    mPatternKeywords.AddKeyword( EExportImageSequencePatternKeyword::PanelFrame     , "panel-frame"     , LOCTEXT( "export-image-sequence-pattern-keyword.panel-frame", "the frame which represents the panel" ) );
+    mPatternKeywordLists.AddKeywordList( &GetExportImageSequencePatternKeywordList() );
+    //mPatternKeywordLists.AddKeywordList( &GetNamingConventionCommonPatternKeywordList() );
 
     Pattern = FString::Printf( TEXT( "%s-%s-seq%s-sh%s-p%s" )
-                               , *mPatternKeywords.mKeywordList[EExportImageSequencePatternKeyword::PanelIndex].mKeywordWithBraces
-                               , *mPatternKeywords.mKeywordList[EExportImageSequencePatternKeyword::StoryboardName].mKeywordWithBraces
-                               , *mPatternKeywords.mKeywordList[EExportImageSequencePatternKeyword::BoardIndex].mKeywordWithBraces
-                               , *mPatternKeywords.mKeywordList[EExportImageSequencePatternKeyword::ShotIndex].mKeywordWithBraces
-                               , *mPatternKeywords.mKeywordList[EExportImageSequencePatternKeyword::PanelFrame].mKeywordWithBraces
+                               , *mPatternKeywordLists.GetKeyword( EExportImageSequencePatternKeyword::PanelIndex ).mKeywordWithBraces
+                               , *mPatternKeywordLists.GetKeyword( EExportImageSequencePatternKeyword::StoryboardName ).mKeywordWithBraces
+                               , *mPatternKeywordLists.GetKeyword( EExportImageSequencePatternKeyword::BoardIndex ).mKeywordWithBraces
+                               , *mPatternKeywordLists.GetKeyword( EExportImageSequencePatternKeyword::ShotIndex ).mKeywordWithBraces
+                               , *mPatternKeywordLists.GetKeyword( EExportImageSequencePatternKeyword::PanelFrame ).mKeywordWithBraces
                                );
 }
 

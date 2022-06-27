@@ -45,10 +45,10 @@ FExportImageSequenceNamingFormatter::FormatName( FString& oName )
 
     FString parsed_string = mImageSequenceOptions->Pattern;
 
-    auto ReplaceKeywordInt        = [&]( EExportImageSequencePatternKeyword iKeywordId, int iValue, int32 iNumDigits )  -> FString  { return parsed_string.Replace( *mImageSequenceOptions->mPatternKeywords.mKeywordList[iKeywordId].mKeywordWithBraces, *FString::Printf( TEXT( "%0*d" ), iNumDigits, iValue ) ); };
-    //auto ReplaceKeywordIntAsFrame = [&]( EExportImageSequencePatternKeyword iKeywordId, int iValue )                    -> FString  { return parsed_string.Replace( *mImageSequenceOptions->mPatternKeywords.mKeywordList[iKeywordId].mKeywordWithBraces, *type_interface->ToString( iValue ) ); };
-    auto ReplaceKeywordFrame      = [&]( EExportImageSequencePatternKeyword iKeywordId, FFrameNumber iValue )           -> FString  { return parsed_string.Replace( *mImageSequenceOptions->mPatternKeywords.mKeywordList[iKeywordId].mKeywordWithBraces, *type_interface->ToString( iValue.Value ) ); };
-    auto ReplaceKeywordString     = [&]( EExportImageSequencePatternKeyword iKeywordId, FString iValue )                -> FString  { return parsed_string.Replace( *mImageSequenceOptions->mPatternKeywords.mKeywordList[iKeywordId].mKeywordWithBraces, *iValue ); };
+    auto ReplaceKeywordInt        = [&]( EExportImageSequencePatternKeyword iKeywordId, int iValue, int32 iNumDigits )  -> FString  { return parsed_string.Replace( *mImageSequenceOptions->mPatternKeywordLists.GetKeyword( iKeywordId ).mKeywordWithBraces, *FString::Printf( TEXT( "%0*d" ), iNumDigits, iValue ) ); };
+    //auto ReplaceKeywordIntAsFrame = [&]( EExportImageSequencePatternKeyword iKeywordId, int iValue )                    -> FString  { return parsed_string.Replace( *mImageSequenceOptions->mPatternKeywordLists.GetKeyword( iKeywordId ).mKeywordWithBraces, *type_interface->ToString( iValue ) ); };
+    auto ReplaceKeywordFrame      = [&]( EExportImageSequencePatternKeyword iKeywordId, FFrameNumber iValue )           -> FString  { return parsed_string.Replace( *mImageSequenceOptions->mPatternKeywordLists.GetKeyword( iKeywordId ).mKeywordWithBraces, *type_interface->ToString( iValue.Value ) ); };
+    auto ReplaceKeywordString     = [&]( EExportImageSequencePatternKeyword iKeywordId, FString iValue )                -> FString  { return parsed_string.Replace( *mImageSequenceOptions->mPatternKeywordLists.GetKeyword( iKeywordId ).mKeywordWithBraces, *iValue ); };
 
     //---
 
@@ -79,7 +79,15 @@ FExportImageSequenceNamingFormatter::FormatName( FString& oName )
 
         UBoardSequence* board_sequence = Cast<UBoardSequence>( sequence_info.Get<0>() );
         if( board_sequence )
+        {
             board_index = board_sequence->NameElements.Index;
+
+            //FEposSequenceModule& module = FModuleManager::LoadModuleChecked<FEposSequenceModule>( "EposSequence" );
+            //UNamingFormatterBoard* namingFormatter = module.GetNamingFormatter<UNamingFormatterBoard>();
+
+            //parsed_string = namingFormatter->FormatName( board_sequence, parsed_string );
+
+        }
 
         UShotSequence* shot_sequence = Cast<UShotSequence>( sequence_info.Get<0>() );
         if( shot_sequence )
