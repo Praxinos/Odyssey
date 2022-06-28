@@ -17,8 +17,6 @@ enum class EExportImageSequencePatternKeyword : uint32
 {
     ENUM_UNIQUE_ID( PanelIndex ),
     ENUM_UNIQUE_ID( StoryboardName ),
-    ENUM_UNIQUE_ID( BoardIndex ), // board only in the first level
-    ENUM_UNIQUE_ID( ShotIndex ),
     ENUM_UNIQUE_ID( PanelFrame ),
 };
 
@@ -79,14 +77,6 @@ public:
     FString Pattern;
 
     FPatternKeywordLists mPatternKeywordLists;
-
-    /** The sequence index format. */
-    UPROPERTY(EditAnywhere, Category=ExportImageSequence, AdvancedDisplay, meta=(ShowOnlyInnerProperties))
-    FExportImageSequenceNumberFormat BoardIndexFormat { 4 };
-
-    /** The shot index format. */
-    UPROPERTY(EditAnywhere, Category=ExportImageSequence, AdvancedDisplay, meta=(ShowOnlyInnerProperties))
-    FExportImageSequenceNumberFormat ShotIndexFormat { 4 };
 
     /** The panel index format. */
     UPROPERTY(EditAnywhere, Category=ExportImageSequence, AdvancedDisplay, meta=(ShowOnlyInnerProperties))

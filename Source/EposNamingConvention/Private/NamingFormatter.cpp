@@ -9,11 +9,21 @@
 
 //---
 
-FString
-UDefaultNamingFormatterBoard::FormatName( const UObject* iContext )
+bool
+UDefaultNamingFormatterBoard::FormatName( const UObject* iContext, FString& oPatternFormatted )
 {
-    const UBoardSequence* const_board_sequence = Cast<UBoardSequence>( iContext );
-    UBoardSequence* board_sequence = const_cast<UBoardSequence*>( const_board_sequence );
+    const UNamingConventionSettings* settings = GetDefault<UNamingConventionSettings>();
+    FNamingConventionBoard board_settings = settings->BoardNaming;
+
+    return FormatName( iContext, board_settings.Pattern, oPatternFormatted );
+}
+
+bool
+UDefaultNamingFormatterBoard::FormatName( const UObject* iContext, const FString& iPatternToFormat, FString& oPatternFormatted )
+{
+    const UBoardSequence* board_sequence = Cast<UBoardSequence>( iContext );
+    if( !board_sequence )
+        return false;
 
     const UNamingConventionSettings* settings = GetDefault<UNamingConventionSettings>();
     FNamingConventionGlobal global_settings = settings->GlobalNaming;
@@ -21,11 +31,11 @@ UDefaultNamingFormatterBoard::FormatName( const UObject* iContext )
 
     const FBoardNameElements& name_elements = board_sequence->NameElements;
     if( !name_elements.IsValid() )
-        return board_sequence->GetName();
+        return false;
 
     //---
 
-    FString parsed_string = board_settings.Pattern;
+    FString parsed_string = iPatternToFormat;
 
     {
         auto ReplaceKeywordInt        = [&]( ENamingConventionBoardPatternKeyword iKeywordId, int iValue, int32 iNumDigits )    -> FString  { return parsed_string.Replace( *board_settings.mPatternKeywordLists.GetKeyword( iKeywordId ).mKeywordWithBraces, *FString::Printf( TEXT( "%0*d" ), iNumDigits, iValue ) ); };
@@ -58,15 +68,30 @@ UDefaultNamingFormatterBoard::FormatName( const UObject* iContext )
         parsed_string = ReplaceKeywordString( ENamingConventionCommonPatternKeyword::Initials            , name_elements.Initials );
     }
 
-    return parsed_string;
+    // oPatternFormatted MUST only be set before a return
+    // It's to manage the case when iPatternToFormat == oPatternFormatted
+    oPatternFormatted = parsed_string;
+
+    return true;
 }
 
 //---
 
-FString
-UDefaultNamingFormatterShot::FormatName( const UObject* iContext )
+bool
+UDefaultNamingFormatterShot::FormatName( const UObject* iContext, FString& oPatternFormatted )
+{
+    const UNamingConventionSettings* settings = GetDefault<UNamingConventionSettings>();
+    FNamingConventionShot shot_settings = settings->ShotNaming;
+
+    return FormatName( iContext, shot_settings.Pattern, oPatternFormatted );
+}
+
+bool
+UDefaultNamingFormatterShot::FormatName( const UObject* iContext, const FString& iPatternToFormat, FString& oPatternFormatted )
 {
     const UShotSequence* shot_sequence = Cast<UShotSequence>( iContext );
+    if( !shot_sequence )
+        return false;
 
     const UNamingConventionSettings* settings = GetDefault<UNamingConventionSettings>();
     FNamingConventionGlobal global_settings = settings->GlobalNaming;
@@ -74,11 +99,11 @@ UDefaultNamingFormatterShot::FormatName( const UObject* iContext )
 
     const FShotNameElements& name_elements = shot_sequence->NameElements;
     if( !name_elements.IsValid() )
-        return shot_sequence->GetName();
+        return false;
 
     //---
 
-    FString parsed_string = shot_settings.Pattern;
+    FString parsed_string = iPatternToFormat;
 
     {
         auto ReplaceKeywordInt        = [&]( ENamingConventionShotPatternKeyword iKeywordId, int iValue, int32 iNumDigits )     -> FString  { return parsed_string.Replace( *shot_settings.mPatternKeywordLists.GetKeyword( iKeywordId ).mKeywordWithBraces, *FString::Printf( TEXT( "%0*d" ), iNumDigits, iValue ) ); };
@@ -114,5 +139,9 @@ UDefaultNamingFormatterShot::FormatName( const UObject* iContext )
         parsed_string = ReplaceKeywordString( ENamingConventionCommonPatternKeyword::Initials            , name_elements.Initials );
     }
 
-    return parsed_string;
+    // oPatternFormatted MUST only be set before a return
+    // It's to manage the case when iPatternToFormat == oPatternFormatted
+    oPatternFormatted = parsed_string;
+
+    return true;
 }

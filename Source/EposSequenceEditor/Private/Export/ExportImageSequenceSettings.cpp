@@ -15,11 +15,9 @@ const FPatternKeywordList& GetExportImageSequencePatternKeywordList()
 {
     if( !sgExportImageSequencePatternKeywordList.mKeywordList.Num() )
     {
+        sgExportImageSequencePatternKeywordList.AddKeyword( EExportImageSequencePatternKeyword::PanelFrame     , "panel-frame"     , LOCTEXT( "export-image-sequence-pattern-keyword.panel-frame", "the frame which represents the panel" ) );
         sgExportImageSequencePatternKeywordList.AddKeyword( EExportImageSequencePatternKeyword::PanelIndex     , "panel-index"     , LOCTEXT( "export-image-sequence-pattern-keyword.panel-index", "the index of the panel in the panel list (1, 2, 3, ...)" ) );
         sgExportImageSequencePatternKeywordList.AddKeyword( EExportImageSequencePatternKeyword::StoryboardName , "root-board-name" , LOCTEXT( "export-image-sequence-pattern-keyword.root-board-name", "the root board name" ) );
-        sgExportImageSequencePatternKeywordList.AddKeyword( EExportImageSequencePatternKeyword::BoardIndex     , "board-index"     , LOCTEXT( "export-image-sequence-pattern-keyword.board-index", "the index which represents the board (only in the first level)" ) );
-        sgExportImageSequencePatternKeywordList.AddKeyword( EExportImageSequencePatternKeyword::ShotIndex      , "shot-index"      , LOCTEXT( "export-image-sequence-pattern-keyword.shot-index", "the index which represents the shot" ) );
-        sgExportImageSequencePatternKeywordList.AddKeyword( EExportImageSequencePatternKeyword::PanelFrame     , "panel-frame"     , LOCTEXT( "export-image-sequence-pattern-keyword.panel-frame", "the frame which represents the panel" ) );
     }
 
     return sgExportImageSequencePatternKeywordList;
@@ -30,13 +28,13 @@ const FPatternKeywordList& GetExportImageSequencePatternKeywordList()
 FExportImageSequenceOptions::FExportImageSequenceOptions()
 {
     mPatternKeywordLists.AddKeywordList( &GetExportImageSequencePatternKeywordList() );
-    //mPatternKeywordLists.AddKeywordList( &GetNamingConventionCommonPatternKeywordList() );
+    mPatternKeywordLists.AddKeywordList( &GetNamingConventionCommonPatternKeywordList() );
 
     Pattern = FString::Printf( TEXT( "%s-%s-seq%s-sh%s-p%s" )
                                , *mPatternKeywordLists.GetKeyword( EExportImageSequencePatternKeyword::PanelIndex ).mKeywordWithBraces
                                , *mPatternKeywordLists.GetKeyword( EExportImageSequencePatternKeyword::StoryboardName ).mKeywordWithBraces
-                               , *mPatternKeywordLists.GetKeyword( EExportImageSequencePatternKeyword::BoardIndex ).mKeywordWithBraces
-                               , *mPatternKeywordLists.GetKeyword( EExportImageSequencePatternKeyword::ShotIndex ).mKeywordWithBraces
+                               , *mPatternKeywordLists.GetKeyword( ENamingConventionBoardPatternKeyword::BoardIndex ).mKeywordWithBraces
+                               , *mPatternKeywordLists.GetKeyword( ENamingConventionShotPatternKeyword::ShotIndex ).mKeywordWithBraces
                                , *mPatternKeywordLists.GetKeyword( EExportImageSequencePatternKeyword::PanelFrame ).mKeywordWithBraces
                                );
 }

@@ -159,7 +159,10 @@ FText UBoardSequence::GetDisplayName() const
 {
     //return UMovieSceneSequence::GetDisplayName();
 
-    FString name = mNamingFormatter->FormatName( this );
+    FString name;
+    bool is_formatted = mNamingFormatter->FormatName( this, name );
+    if( !is_formatted )
+        name = GetName();
 
     return FText::FromString( name );
 }

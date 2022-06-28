@@ -33,8 +33,8 @@ FExportImageSequenceExporter::Export()
     {
         FExportImageSequenceNamingFormatter name_formatter( mSequencer, &mImageSequenceStruct->Panels[i], i, mImageSequenceOptions );
         FString name;
-        bool formatting = name_formatter.FormatName( name );
-        if( !formatting )
+        bool is_formatted = name_formatter.FormatName( mImageSequenceOptions->Pattern, name );
+        if( !is_formatted )
             continue;
 
         FString pathfile = mImageSequenceOptions->ExportPath.Path / name;

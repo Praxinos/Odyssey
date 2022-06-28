@@ -22,7 +22,18 @@ public:
 
 public:
     template<typename Formatter>
-    UNamingFormatter* GetNamingFormatter();
+    UNamingFormatter* GetNamingFormatter()
+    {
+        for( auto formatter : mNamingFormatters )
+        {
+            if( formatter->IsA<Formatter>() )
+            {
+                return formatter;
+            }
+        }
+
+        return nullptr;
+    }
 
 private:
     TArray<UNamingFormatter*> mNamingFormatters;

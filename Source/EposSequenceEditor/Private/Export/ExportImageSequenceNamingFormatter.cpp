@@ -12,8 +12,11 @@
 #include "Board/BoardSequence.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
+#include "EposSequenceModule.h"
 #include "Export/ExportImageSequenceSettings.h"
 #include "Export/ExportImageSequenceStruct.h"
+#include "INamingFormatter.h"
+#include "Settings/NamingConventionSettings.h"
 #include "Shot/ShotSequence.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutSection.h"
 
@@ -32,7 +35,7 @@ FExportImageSequenceNamingFormatter::FExportImageSequenceNamingFormatter( TWeakP
 //---
 
 bool
-FExportImageSequenceNamingFormatter::FormatName( FString& oName )
+FExportImageSequenceNamingFormatter::FormatName( const FString& iPatternToFormat, FString& oPatternFormatted )
 {
     if( !mCurrentPanel )
         return false;
@@ -43,12 +46,12 @@ FExportImageSequenceNamingFormatter::FormatName( FString& oName )
 
     //---
 
-    FString parsed_string = mImageSequenceOptions->Pattern;
+    FString parsed_string = iPatternToFormat;
 
-    auto ReplaceKeywordInt        = [&]( EExportImageSequencePatternKeyword iKeywordId, int iValue, int32 iNumDigits )  -> FString  { return parsed_string.Replace( *mImageSequenceOptions->mPatternKeywordLists.GetKeyword( iKeywordId ).mKeywordWithBraces, *FString::Printf( TEXT( "%0*d" ), iNumDigits, iValue ) ); };
-    //auto ReplaceKeywordIntAsFrame = [&]( EExportImageSequencePatternKeyword iKeywordId, int iValue )                    -> FString  { return parsed_string.Replace( *mImageSequenceOptions->mPatternKeywordLists.GetKeyword( iKeywordId ).mKeywordWithBraces, *type_interface->ToString( iValue ) ); };
-    auto ReplaceKeywordFrame      = [&]( EExportImageSequencePatternKeyword iKeywordId, FFrameNumber iValue )           -> FString  { return parsed_string.Replace( *mImageSequenceOptions->mPatternKeywordLists.GetKeyword( iKeywordId ).mKeywordWithBraces, *type_interface->ToString( iValue.Value ) ); };
-    auto ReplaceKeywordString     = [&]( EExportImageSequencePatternKeyword iKeywordId, FString iValue )                -> FString  { return parsed_string.Replace( *mImageSequenceOptions->mPatternKeywordLists.GetKeyword( iKeywordId ).mKeywordWithBraces, *iValue ); };
+    auto ReplaceKeywordInt        = [&]( auto iKeywordId, int iValue, int32 iNumDigits )  -> FString  { return parsed_string.Replace( *mImageSequenceOptions->mPatternKeywordLists.GetKeyword( iKeywordId ).mKeywordWithBraces, *FString::Printf( TEXT( "%0*d" ), iNumDigits, iValue ) ); };
+    //auto ReplaceKeywordIntAsFrame = [&]( auto iKeywordId, int iValue )                    -> FString  { return parsed_string.Replace( *mImageSequenceOptions->mPatternKeywordLists.GetKeyword( iKeywordId ).mKeywordWithBraces, *type_interface->ToString( iValue ) ); };
+    auto ReplaceKeywordFrame      = [&]( auto iKeywordId, FFrameNumber iValue )           -> FString  { return parsed_string.Replace( *mImageSequenceOptions->mPatternKeywordLists.GetKeyword( iKeywordId ).mKeywordWithBraces, *type_interface->ToString( iValue.Value ) ); };
+    auto ReplaceKeywordString     = [&]( auto iKeywordId, FString iValue )                -> FString  { return parsed_string.Replace( *mImageSequenceOptions->mPatternKeywordLists.GetKeyword( iKeywordId ).mKeywordWithBraces, *iValue ); };
 
     //---
 
@@ -61,12 +64,15 @@ FExportImageSequenceNamingFormatter::FormatName( FString& oName )
 
     //---
 
+    FEposSequenceModule& module_epos_sequence = FModuleManager::LoadModuleChecked<FEposSequenceModule>( "EposSequence" );
+
     TTuple<UShotSequence*, FMovieSceneSequenceID> shot_info = GetShot();
 
     if( shot_info.Get<0>() )
     {
-        int32 shot_index = shot_info.Get<0>()->NameElements.Index;
-        parsed_string = ReplaceKeywordInt( EExportImageSequencePatternKeyword::ShotIndex, shot_index, mImageSequenceOptions->ShotIndexFormat.NumDigits );
+        UNamingFormatterShot* namingFormatter = Cast<UNamingFormatterShot>( module_epos_sequence.GetNamingFormatter<UNamingFormatterShot>() );
+
+        /*bool is_formatted =*/ namingFormatter->FormatName( shot_info.Get<0>(), parsed_string, parsed_string );
     }
 
     //---
@@ -75,30 +81,16 @@ FExportImageSequenceNamingFormatter::FormatName( FString& oName )
 
     if( sequence_info.Get<0>() )
     {
-        int32 board_index = INDEX_NONE;
+        UNamingFormatterBoard* namingFormatter = Cast<UNamingFormatterBoard>( module_epos_sequence.GetNamingFormatter<UNamingFormatterBoard>() );
 
-        UBoardSequence* board_sequence = Cast<UBoardSequence>( sequence_info.Get<0>() );
-        if( board_sequence )
-        {
-            board_index = board_sequence->NameElements.Index;
-
-            //FEposSequenceModule& module = FModuleManager::LoadModuleChecked<FEposSequenceModule>( "EposSequence" );
-            //UNamingFormatterBoard* namingFormatter = module.GetNamingFormatter<UNamingFormatterBoard>();
-
-            //parsed_string = namingFormatter->FormatName( board_sequence, parsed_string );
-
-        }
-
-        UShotSequence* shot_sequence = Cast<UShotSequence>( sequence_info.Get<0>() );
-        if( shot_sequence )
-            board_index = shot_sequence->NameElements.Index;
-
-        parsed_string = ReplaceKeywordInt( EExportImageSequencePatternKeyword::BoardIndex, board_index, mImageSequenceOptions->BoardIndexFormat.NumDigits );
+        /*bool is_formatted =*/ namingFormatter->FormatName( sequence_info.Get<0>(), parsed_string, parsed_string );
     }
 
     //---
 
-    oName = parsed_string;
+    // oPatternFormatted MUST only be set before a return
+    // It's to manage the case when iPatternToFormat == oPatternFormatted
+    oPatternFormatted = parsed_string;
 
     return true;
 }

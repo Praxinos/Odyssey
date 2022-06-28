@@ -14,7 +14,8 @@ class UNamingFormatter
     GENERATED_BODY()
 
 public:
-    virtual FString FormatName( const UObject* iContext ) PURE_VIRTUAL( UNamingFormatter::FormatName, return TEXT("no-name"); );
+    virtual bool FormatName( const UObject* iContext, FString& oPatternFormatted ) PURE_VIRTUAL( UNamingFormatter::FormatName, return false; );
+    virtual bool FormatName( const UObject* iContext, const FString& iPattern, FString& oPatternFormatted ) PURE_VIRTUAL( UNamingFormatter::FormatName, return false; );
 };
 
 UCLASS(abstract)

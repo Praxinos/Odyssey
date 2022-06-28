@@ -152,8 +152,8 @@ SPanelTileView::GetTooltipText() const
 
     FExportImageSequenceNamingFormatter name_formatter( mPanelItem->mSequencer, &mPanelItem->mPanel, mPanelItem->mIndex, mPanelItem->mOptions );
     FString export_name;
-    bool formatting = name_formatter.FormatName( export_name );
-    if( formatting )
+    bool is_formatted = name_formatter.FormatName( mPanelItem->mOptions->Pattern, export_name );
+    if( is_formatted )
     {
         FText line = FText::Format( LOCTEXT( "item.name.tooltip", "Filename: {0}" ), FText::FromString( export_name ) );
         tooltip_texts.Add( line );

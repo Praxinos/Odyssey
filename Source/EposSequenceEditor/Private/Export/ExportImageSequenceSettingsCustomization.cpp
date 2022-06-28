@@ -10,6 +10,7 @@
 
 #include "Export/ExportImageSequenceSettings.h"
 #include "Export/ExportImageSequenceStruct.h"
+#include "Settings/NamingConventionSettings.h"
 #include "SPatternTextBox.h"
 
 #define LOCTEXT_NAMESPACE "ExportImageSequenceSettingsCustomization"
@@ -50,8 +51,8 @@ The extension will be automatically set according to the file format.
 )" )
                           , FText::FromString( mOptions->mPatternKeywordLists.GetKeyword( EExportImageSequencePatternKeyword::PanelIndex ).mKeywordWithBraces )
                           , FText::FromString( mOptions->mPatternKeywordLists.GetKeyword( EExportImageSequencePatternKeyword::StoryboardName ).mKeywordWithBraces )
-                          , FText::FromString( mOptions->mPatternKeywordLists.GetKeyword( EExportImageSequencePatternKeyword::BoardIndex ).mKeywordWithBraces )
-                          , FText::FromString( mOptions->mPatternKeywordLists.GetKeyword( EExportImageSequencePatternKeyword::ShotIndex ).mKeywordWithBraces )
+                          , FText::FromString( mOptions->mPatternKeywordLists.GetKeyword( ENamingConventionBoardPatternKeyword::BoardIndex ).mKeywordWithBraces )
+                          , FText::FromString( mOptions->mPatternKeywordLists.GetKeyword( ENamingConventionShotPatternKeyword::ShotIndex ).mKeywordWithBraces )
                           , FText::FromString( mOptions->mPatternKeywordLists.GetKeyword( EExportImageSequencePatternKeyword::PanelFrame ).mKeywordWithBraces )
 );
 }
