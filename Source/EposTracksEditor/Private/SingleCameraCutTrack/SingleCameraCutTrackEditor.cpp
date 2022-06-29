@@ -14,6 +14,7 @@
 #include "EditorStyleSet.h"
 #include "GameFramework/WorldSettings.h"
 #include "LevelEditorViewport.h"
+#include "LevelSequence.h"
 #include "SequencerUtilities.h"
 #include "Editor.h"
 #include "ActorEditorUtils.h"
@@ -239,7 +240,7 @@ TSharedRef<ISequencerSection> FSingleCameraCutTrackEditor::MakeSectionInterface(
 bool FSingleCameraCutTrackEditor::SupportsSequence(UMovieSceneSequence* InSequence) const
 {
     ETrackSupport TrackSupported = InSequence ? InSequence->IsTrackSupported(UMovieSceneSingleCameraCutTrack::StaticClass()) : ETrackSupport::NotSupported;
-    return TrackSupported == ETrackSupport::Supported;
+    return ( TrackSupported == ETrackSupport::Supported || InSequence->IsA( ULevelSequence::StaticClass() ) );
 }
 
 

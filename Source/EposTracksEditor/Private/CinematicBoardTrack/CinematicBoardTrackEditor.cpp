@@ -19,6 +19,7 @@
 #include "CommonMovieSceneTools.h"
 #include "MovieSceneToolHelpers.h"
 #include "FCPXML/FCPXMLMovieSceneTranslator.h"
+#include "LevelSequence.h"
 #include "SequencerUtilities.h"
 #include "IContentBrowserSingleton.h"
 #include "ContentBrowserModule.h"
@@ -423,7 +424,7 @@ FCinematicBoardTrackEditor::SupportsSequence( UMovieSceneSequence* iSequence ) c
 
     // This means that the [Add Track] button is pressed
     if( iSequence == focusedSequence )
-        return trackSupported == ETrackSupport::Supported;
+        return trackSupported == ETrackSupport::Supported || focusedSequence->IsA( ULevelSequence::StaticClass() );
 
     if( !iSequence )
         return false;

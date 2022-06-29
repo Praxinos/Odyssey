@@ -254,7 +254,8 @@ FBoardSequenceCustomization::CreateInfoText() const
 {
     TSharedRef<INumericTypeInterface<double>> type_interface = mSequencer->GetNumericTypeInterface();
 
-    const UBoardSequence* root_board = CastChecked<UBoardSequence>( mSequencer->GetRootMovieSceneSequence() );
+    const UMovieSceneSequence* root_board = mSequencer->GetRootMovieSceneSequence();
+    //const UBoardSequence* root_board = CastChecked<UBoardSequence>( mSequencer->GetRootMovieSceneSequence() );
     const UMovieScene* root_moviescene = root_board ? root_board->GetMovieScene() : nullptr;
 
     const UBoardSequence* current_board = CastChecked<UBoardSequence>( mSequencer->GetFocusedMovieSceneSequence() );

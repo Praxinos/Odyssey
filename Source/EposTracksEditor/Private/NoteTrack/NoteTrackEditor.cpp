@@ -11,6 +11,7 @@
 #include "DragAndDrop/AssetDragDropOp.h"
 #include "EditorStyleSet.h"
 #include "ISequencerSection.h"
+#include "LevelSequence.h"
 #include "CommonMovieSceneTools.h"
 #include "MovieSceneTimeHelpers.h"
 #include "SequencerUtilities.h"
@@ -115,7 +116,7 @@ bool
 FNoteTrackEditor::SupportsSequence( UMovieSceneSequence* InSequence ) const //override
 {
     ETrackSupport TrackSupported = InSequence ? InSequence->IsTrackSupported( UMovieSceneNoteTrack::StaticClass() ) : ETrackSupport::NotSupported;
-    return TrackSupported == ETrackSupport::Supported;
+    return ( TrackSupported == ETrackSupport::Supported || InSequence->IsA( ULevelSequence::StaticClass() ) );
 }
 
 void
