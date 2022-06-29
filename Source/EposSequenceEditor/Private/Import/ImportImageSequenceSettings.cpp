@@ -14,9 +14,9 @@ const FPatternKeywordList& GetImportImageSequencePatternKeywordList()
     if( !sgImportImageSequencePatternKeywordList.mKeywordList.Num() )
     {
         sgImportImageSequencePatternKeywordList.AddKeyword( EImportImageSequencePatternKeyword::BoardId    , "board"       , LOCTEXT( "image-sequence-pattern-keyword.board", "the id which represents the board" ) );
-        sgImportImageSequencePatternKeywordList.AddKeyword( EImportImageSequencePatternKeyword::ShotId     , "shot"        , LOCTEXT( "image-sequence-pattern-keyword.shot", "the id which represents the board" ) );
-        sgImportImageSequencePatternKeywordList.AddKeyword( EImportImageSequencePatternKeyword::PanelId    , "panel"       , LOCTEXT( "image-sequence-pattern-keyword.panel", "the id which represents the board" ) );
-        sgImportImageSequencePatternKeywordList.AddKeyword( EImportImageSequencePatternKeyword::Duration   , "duration"    , LOCTEXT( "image-sequence-pattern-keyword.duration", "the id which represents the board" ) );
+        sgImportImageSequencePatternKeywordList.AddKeyword( EImportImageSequencePatternKeyword::ShotId     , "shot"        , LOCTEXT( "image-sequence-pattern-keyword.shot", "the id which represents the shot" ) );
+        sgImportImageSequencePatternKeywordList.AddKeyword( EImportImageSequencePatternKeyword::PanelId    , "panel"       , LOCTEXT( "image-sequence-pattern-keyword.panel", "the id which represents the panel" ) );
+        sgImportImageSequencePatternKeywordList.AddKeyword( EImportImageSequencePatternKeyword::Duration   , "duration"    , LOCTEXT( "image-sequence-pattern-keyword.duration", "the duration of the panel" ) );
     }
 
     return sgImportImageSequencePatternKeywordList;

@@ -55,6 +55,8 @@ For files like:
 If the first character (A or B) corresponds to the board, the next number to the shot, and the last to each panel,
 the pattern will look like:
 - ful-b{0}-s{1}-{2}.png
+
+(Click on a keyword to Copy it)
 )" )
                           , FText::FromString( mOptions->mPatternKeywordLists.GetKeyword( EImportImageSequencePatternKeyword::BoardId ).mKeywordWithBraces )
                           , FText::FromString( mOptions->mPatternKeywordLists.GetKeyword( EImportImageSequencePatternKeyword::ShotId ).mKeywordWithBraces )

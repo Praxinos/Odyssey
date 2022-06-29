@@ -28,6 +28,8 @@ const FPatternKeywordList& GetExportImageSequencePatternKeywordList()
 FExportImageSequenceOptions::FExportImageSequenceOptions()
 {
     mPatternKeywordLists.AddKeywordList( &GetExportImageSequencePatternKeywordList() );
+    mPatternKeywordLists.AddKeywordList( &GetNamingConventionShotPatternKeywordList() );
+    mPatternKeywordLists.AddKeywordList( &GetNamingConventionBoardPatternKeywordList() );
     mPatternKeywordLists.AddKeywordList( &GetNamingConventionCommonPatternKeywordList() );
 
     Pattern = FString::Printf( TEXT( "%s-%s-seq%s-sh%s-p%s" )

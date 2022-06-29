@@ -39,6 +39,7 @@ public class EposPattern : ModuleRules
                 "Slate",
                 "SlateCore",
                 // [RUNTIME] custom engine dependencies
+                "ApplicationCore",
                 // [RUNTIME] custom plugin dependencies
 
                 // [EDITOR]

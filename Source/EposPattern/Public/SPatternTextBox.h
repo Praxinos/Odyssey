@@ -43,14 +43,27 @@ private:
     void OnPatternTextCommited( const FText& iNewText, ETextCommit::Type iCommitInfo );
     void OnPatternTextChanged( const FText& iNewText );
 
-    bool CheckPatternValidity( const FString& iPattern );
+    FReply OnClickExpanderButton();
+    const FSlateBrush* GetExpanderIcon() const;
+    EVisibility GetKeywordsVisibility() const;
+
+    FSlateColor GetKeywordColor( int iKeywordIndex ) const;
+    const FSlateBrush* GetKeywordStrikeBrush( int iKeywordIndex ) const;
+    FReply OnClickKeyword( int iKeywordIndex );
+
+    //void ContextMenuExtender( FMenuBuilder& iMenuBuilder );
+    //void AddKeywordAtCursor( FString iKeyword );
+
+private:
+    bool IsKeywordUsed( int iKeywordIndex ) const;
 
 private:
     TSharedPtr<IPropertyHandle> mPatternHandle;
+    TArray<FString>             mKeywords;
 
     TSharedPtr<SEditableTextBox> mTextBoxWidget;
 
-    TArray<FString> mValidKeywords;
+    bool mIsExpanded { false };
 
     /** Callback to verify pattern. */
     FOnVerifyPattern mOnVerifyPattern;

@@ -3,7 +3,11 @@
 
 #include "SPatternTextBox.h"
 
+#include "Brushes/SlatecolorBrush.h"
+#include "HAL/PlatformApplicationMisc.h"
 #include "PropertyHandle.h"
+#include "Styling/StyleColors.h"
+#include "Widgets/Images/SImage.h"
 #include "Widgets/Layout/SSpacer.h"
 
 #define LOCTEXT_NAMESPACE "SPatternTextBox"
@@ -24,14 +28,20 @@ SPatternTextBox::Construct( const FArguments& iArgs, TSharedPtr<IPropertyHandle>
 
     for( int i = 0; i < iArgs._Keywords.Num(); i++ )
     {
-        mValidKeywords.Add( iArgs._Keywords[i] );
+        mKeywords.Add( iArgs._Keywords[i] );
 
         FText label = iArgs._KeywordLabels[i];
 
         keyword_labels_widget->AddSlot()
             [
-                SNew( STextBlock )
-                .Text( label )
+                SNew( SButton )
+                .OnClicked( this, &SPatternTextBox::OnClickKeyword, i )
+                [
+                    SNew( STextBlock )
+                    .Text( label )
+                    .ColorAndOpacity( this, &SPatternTextBox::GetKeywordColor, i )
+                    .StrikeBrush( this, &SPatternTextBox::GetKeywordStrikeBrush, i )
+                ]
             ];
 
         FText help = FText::Format( LOCTEXT( "keywords-explanation-separator", " : {0}" ), iArgs._KeywordHelps[i] );
@@ -54,11 +64,17 @@ SPatternTextBox::Construct( const FArguments& iArgs, TSharedPtr<IPropertyHandle>
                 SAssignNew( mTextBoxWidget, SEditableTextBox )
                 .Text( this, &SPatternTextBox::GetPatternText )
                 .Font( FAppStyle::Get().GetFontStyle( TEXT( "PropertyWindow.NormalFont" ) ) )
-                .SelectAllTextWhenFocused( true )
+                .SelectAllTextWhenFocused( false )
                 .ClearKeyboardFocusOnCommit( false )
                 .OnTextCommitted( this, &SPatternTextBox::OnPatternTextCommited )
                 .OnTextChanged( this, &SPatternTextBox::OnPatternTextChanged )
                 .SelectAllTextOnCommit( true )
+                //.OnContextMenuOpening_Lambda( [this]() -> TSharedPtr<SWidget>
+                //                       {
+                //                           return SNew( STextBlock )
+                //                               .Text( LOCTEXT( "rrr", "context menu" ) );
+                //                       } )
+                //.ContextMenuExtender( this, &SPatternTextBox::ContextMenuExtender )
             ]
 
             + SHorizontalBox::Slot()
@@ -70,9 +86,25 @@ SPatternTextBox::Construct( const FArguments& iArgs, TSharedPtr<IPropertyHandle>
 
         + SVerticalBox::Slot()
         .AutoHeight()
+        .Padding( 0 )
+        [
+            SNew( SButton )
+            .ButtonStyle( FAppStyle::Get(), "NoBorder" )
+            .HAlign( HAlign_Center )
+            .OnClicked( this, &SPatternTextBox::OnClickExpanderButton )
+            [
+                SNew( SImage )
+                .Image( this, &SPatternTextBox::GetExpanderIcon )
+            ]
+        ]
+
+        + SVerticalBox::Slot()
+        .AutoHeight()
         .Padding( 0, 4, 0, 0 )
         [
             SNew( SHorizontalBox )
+            .Visibility( this, &SPatternTextBox::GetKeywordsVisibility )
+
             + SHorizontalBox::Slot()
             .AutoWidth()
             [
@@ -121,11 +153,6 @@ SPatternTextBox::OnPatternTextCommited( const FText& iNewText, ETextCommit::Type
     if( new_pattern.Equals( current_pattern.ToString() ) )
         return;
 
-    if( mOnVerifyPattern.IsBound() && !mOnVerifyPattern.Execute( new_pattern ) )
-        return;
-
-    //-
-
     mPatternHandle->SetValueFromFormattedString( new_pattern );
 }
 
@@ -134,14 +161,104 @@ SPatternTextBox::OnPatternTextChanged( const FText& iNewText )
 {
     if( !mOnVerifyPattern.IsBound() || mOnVerifyPattern.Execute( iNewText.ToString() ) )
     {
-        TAttribute<FSlateColor> empty;
-        mTextBoxWidget->SetTextBoxBackgroundColor( empty ); // Remove the attribute to use the "real" background style of the widget
+        mTextBoxWidget->SetError( FText::GetEmpty() );
     }
     else
     {
-        mTextBoxWidget->SetTextBoxBackgroundColor( FLinearColor( 1, 0, 0, 0.35f ) );
-        //mTextBoxWidget->SetTextBoxBackgroundColor( FAppStyle::Get().GetColor( TEXT( "ErrorReporting.BackgroundColor" ) ) );
+        mTextBoxWidget->SetError( LOCTEXT( "wrong-pattern", "Syntax error in the pattern" ) );
     }
 }
+
+FReply
+SPatternTextBox::OnClickExpanderButton()
+{
+    mIsExpanded = !mIsExpanded;
+
+    return FReply::Handled();
+}
+
+const FSlateBrush*
+SPatternTextBox::GetExpanderIcon() const
+{
+    return mIsExpanded ? &FAppStyle::Get().GetWidgetStyle<FExpandableAreaStyle>( "ExpandableArea" ).CollapsedImage : &FAppStyle::Get().GetWidgetStyle<FExpandableAreaStyle>( "ExpandableArea" ).ExpandedImage;
+}
+
+EVisibility
+SPatternTextBox::GetKeywordsVisibility() const
+{
+    return mIsExpanded ? EVisibility::Visible : EVisibility::Collapsed;
+}
+
+bool
+SPatternTextBox::IsKeywordUsed( int iKeywordIndex ) const
+{
+    check( mKeywords.IsValidIndex( iKeywordIndex ) );
+
+    FString keyword = mKeywords[iKeywordIndex];
+
+    FString pattern;
+    mPatternHandle->GetValueAsFormattedString( pattern );
+
+    return pattern.Contains( keyword );
+}
+
+FSlateColor
+SPatternTextBox::GetKeywordColor( int iKeywordIndex ) const
+{
+    if( IsKeywordUsed( iKeywordIndex ) )
+        return FStyleColors::Recessed;
+
+    return FSlateColor::UseForeground();
+}
+
+const FSlateBrush*
+SPatternTextBox::GetKeywordStrikeBrush( int iKeywordIndex ) const
+{
+    if( IsKeywordUsed( iKeywordIndex ) )
+    {
+        // It didn't work with only FSlateColorBrush ...
+        //static FSlateColorBrush strike_brush( FStyleColors::Recessed );
+        return FAppStyle::Get().GetBrush( "Header.Pre" );
+    }
+
+    static FSlateNoResource brush_no_resource;
+    return &brush_no_resource;
+}
+
+FReply
+SPatternTextBox::OnClickKeyword( int iKeywordIndex )
+{
+    check( mKeywords.IsValidIndex( iKeywordIndex ) );
+
+    FString keyword_clicked = mKeywords[iKeywordIndex];
+
+    FPlatformApplicationMisc::ClipboardCopy( *keyword_clicked );
+
+    return FReply::Handled();
+}
+
+//void
+//SPatternTextBox::ContextMenuExtender( FMenuBuilder& iMenuBuilder )
+//{
+//    iMenuBuilder.BeginSection( NAME_None, LOCTEXT( "keyword-list", "Keywords" ) );
+//
+//    for( auto keyword : mKeywords )
+//    {
+//        FMenuEntryParams params;
+//        params.LabelOverride = FText::FromString( keyword );
+//        params.DirectActions = FUIAction( FExecuteAction::CreateSP( this, &SPatternTextBox::AddKeywordAtCursor, keyword )
+//                                        );
+//
+//        iMenuBuilder.AddMenuEntry( params );
+//    }
+//
+//    iMenuBuilder.EndSection();
+//}
+//
+//void
+//SPatternTextBox::AddKeywordAtCursor( FString iKeyword )
+//{
+//    // Can't get the cursor position ...
+//}
 
 #undef LOCTEXT_NAMESPACE

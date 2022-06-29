@@ -48,6 +48,8 @@ R"(Each keywords will be replaced by its corresponding value.
     ...
 
 The extension will be automatically set according to the file format.
+
+(Click on a keyword to Copy it)
 )" )
                           , FText::FromString( mOptions->mPatternKeywordLists.GetKeyword( EExportImageSequencePatternKeyword::PanelIndex ).mKeywordWithBraces )
                           , FText::FromString( mOptions->mPatternKeywordLists.GetKeyword( EExportImageSequencePatternKeyword::StoryboardName ).mKeywordWithBraces )

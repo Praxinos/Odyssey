@@ -33,7 +33,9 @@ R"(Some examples:
     plane_10
     plane_20
     plane_30
-    ...)" )
+    ...
+
+(Click on a keyword to Copy it))" )
                                    , FText::FromString( mSettings->mPatternKeywordLists.GetKeyword( ENamingConventionPlanePatternKeyword::PlaneIndex ).mKeywordWithBraces )
     );
 }
@@ -151,7 +153,9 @@ R"(Some examples:
     camera_10
     camera_20
     camera_30
-    ...)" )
+    ...
+
+(Click on a keyword to Copy it))" )
                                    , FText::FromString( mSettings->mPatternKeywordLists.GetKeyword( ENamingConventionCameraPatternKeyword::CameraIndex ).mKeywordWithBraces )
     );
 }
@@ -275,7 +279,9 @@ R"(Some examples:
     MS_shot_0010_xy
     MS_shot_0020_xy
     MS_shot_0030_xy
-    ...)" )
+    ...
+
+(Click on a keyword to Copy it))" )
                           , FText::FromString( mSettings->mPatternKeywordLists.GetKeyword( ENamingConventionShotPatternKeyword::ShotIndex ).mKeywordWithBraces )
                           , FText::FromString( mSettings->mPatternKeywordLists.GetKeyword( ENamingConventionShotPatternKeyword::TakeIndex ).mKeywordWithBraces )
 
@@ -410,7 +416,9 @@ R"(Some examples:
     MS_board_0010_xy
     MS_board_0020_xy
     MS_board_0030_xy
-    ...)" )
+    ...
+
+(Click on a keyword to Copy it))" )
                           , FText::FromString( mSettings->mPatternKeywordLists.GetKeyword( ENamingConventionBoardPatternKeyword::BoardIndex ).mKeywordWithBraces )
 
                           , FText::FromString( mSettings->mPatternKeywordLists.GetKeyword( ENamingConventionCommonPatternKeyword::StudioName ).mKeywordWithBraces )

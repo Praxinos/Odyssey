@@ -27,7 +27,9 @@ FInfoBarCustomization::GetTooltipText() const
 {
     return LOCTEXT( "infobar-pattern-tooltip",
 R"(Each keywords will be replaced by its corresponding value.
-The separator will be used to join each line of the pattern field)" );
+The separator will be used to join each line of the pattern field.
+
+(Click on a keyword to Copy it))" );
 }
 
 void

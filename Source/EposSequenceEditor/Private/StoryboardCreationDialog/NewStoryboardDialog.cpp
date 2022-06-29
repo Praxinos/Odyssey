@@ -667,6 +667,12 @@ SNewStoryboardSettings::GetErrorText() const
     if( mNamingConventionSettings->GlobalNaming.ProductionName.IsEmpty() || mNamingConventionSettings->GlobalNaming.ProductionAcronym.IsEmpty() )
         return LOCTEXT( "StoryboardEmptyProductionName", "Error: Empty Production Name or Acronym" );
 
+    if( mDialogType == EDialogType::kImportImageSequence )
+    {
+        if( !mImportImageSequenceSettings->Options.mPatternKeywordLists.IsValidPattern( mImportImageSequenceSettings->Options.FilePattern ) )
+            return LOCTEXT( "ImageSequenceWrongPattern", "Error: Wrong Pattern" );
+    }
+
     if( !mImageSequenceImportErrorMessage.IsEmpty() )
         return FText::FromString( mImageSequenceImportErrorMessage );
 

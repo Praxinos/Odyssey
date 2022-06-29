@@ -96,8 +96,8 @@ const FPatternKeywordList& GetNamingConventionShotPatternKeywordList()
 
 FNamingConventionShot::FNamingConventionShot()
 {
-    mPatternKeywordLists.AddKeywordList( &GetNamingConventionCommonPatternKeywordList() );
     mPatternKeywordLists.AddKeywordList( &GetNamingConventionShotPatternKeywordList() );
+    mPatternKeywordLists.AddKeywordList( &GetNamingConventionCommonPatternKeywordList() );
 
     Pattern = FString::Printf( TEXT( "shot_%s_%s" )
                                , *mPatternKeywordLists.GetKeyword( ENamingConventionShotPatternKeyword::ShotIndex ).mKeywordWithBraces
@@ -121,8 +121,8 @@ const FPatternKeywordList& GetNamingConventionBoardPatternKeywordList()
 
 FNamingConventionBoard::FNamingConventionBoard()
 {
-    mPatternKeywordLists.AddKeywordList( &GetNamingConventionCommonPatternKeywordList() );
     mPatternKeywordLists.AddKeywordList( &GetNamingConventionBoardPatternKeywordList() );
+    mPatternKeywordLists.AddKeywordList( &GetNamingConventionCommonPatternKeywordList() );
 
     Pattern = FString::Printf( TEXT( "board_%s" )
                                , *mPatternKeywordLists.GetKeyword( ENamingConventionBoardPatternKeyword::BoardIndex ).mKeywordWithBraces
