@@ -8,6 +8,8 @@
 #include "Engine/DeveloperSettings.h"
 #include "UObject/Object.h"
 
+#include "PatternKeywordList.h"
+
 #include "EposSequenceEditorSettings.generated.h"
 
 //---
@@ -58,55 +60,45 @@ public:
 
 //---
 
-UENUM()
-enum class EInfoBarPatternKeyword : uint8
+enum class EInfoBarPatternKeyword : uint32
 {
-    CurrentFrame_InStoryboard,
-    CurrentFrame_InSequence,
-    CurrentFrame_InSubsequence,
+    ENUM_UNIQUE_ID( CurrentFrame_InStoryboard ),
+    ENUM_UNIQUE_ID( CurrentFrame_InSequence ),
+    ENUM_UNIQUE_ID( CurrentFrame_InSubsequence ),
 
-    StartFrameOfStoryboard_InStoryboard,
-    StopFrameOfStoryboard_InStoryboard,
+    ENUM_UNIQUE_ID( StartFrameOfStoryboard_InStoryboard ),
+    ENUM_UNIQUE_ID( StopFrameOfStoryboard_InStoryboard ),
 
-    StartFrameOfSequence_InStoryboard,
-    StartFrameOfSequence_InSequence,
+    ENUM_UNIQUE_ID( StartFrameOfSequence_InStoryboard ),
+    ENUM_UNIQUE_ID( StartFrameOfSequence_InSequence ),
 
-    StopFrameOfSequence_InStoryboard,
-    StopFrameOfSequence_InSequence,
+    ENUM_UNIQUE_ID( StopFrameOfSequence_InStoryboard ),
+    ENUM_UNIQUE_ID( StopFrameOfSequence_InSequence ),
 
-    StartFrameOfSubsequence_InStoryboard,
-    StartFrameOfSubsequence_InSequence,
-    StartFrameOfSubsequence_InSubSequence,
+    ENUM_UNIQUE_ID( StartFrameOfSubsequence_InStoryboard ),
+    ENUM_UNIQUE_ID( StartFrameOfSubsequence_InSequence ),
+    ENUM_UNIQUE_ID( StartFrameOfSubsequence_InSubSequence ),
 
-    StopFrameOfSubsequence_InStoryboard,
-    StopFrameOfSubsequence_InSequence,
-    StopFrameOfSubsequence_InSubSequence,
+    ENUM_UNIQUE_ID( StopFrameOfSubsequence_InStoryboard ),
+    ENUM_UNIQUE_ID( StopFrameOfSubsequence_InSequence ),
+    ENUM_UNIQUE_ID( StopFrameOfSubsequence_InSubSequence ),
 
     //---
 
-    Storyboard_Duration,
-    Storyboard_TotalSequences, // Total: recursive
+    ENUM_UNIQUE_ID( Storyboard_Duration ),
+    ENUM_UNIQUE_ID( Storyboard_TotalSequences ), // Total: recursive
 
-    Sequence_Duration,
-    Sequence_NumberOfSubsequences, // NumberOf: in the same level
-    Sequence_Index,
-    Sequence_Name,
+    ENUM_UNIQUE_ID( Sequence_Duration ),
+    ENUM_UNIQUE_ID( Sequence_NumberOfSubsequences ), // NumberOf: in the same level
+    ENUM_UNIQUE_ID( Sequence_Index ),
+    ENUM_UNIQUE_ID( Sequence_Name ),
 
-    Subsequence_Duration,
-    Subsequence_Index,
-    Subsequence_Name,
+    ENUM_UNIQUE_ID( Subsequence_Duration ),
+    ENUM_UNIQUE_ID( Subsequence_Index ),
+    ENUM_UNIQUE_ID( Subsequence_Name ),
 };
 
-USTRUCT()
-struct FInfoBarPatternKeyword
-{
-    GENERATED_BODY()
-
-public:
-    EInfoBarPatternKeyword mKeywordId;
-    FString mKeywordWithBraces;
-    FText mHelp;
-};
+const FPatternKeywordList& GetInfoBarPatternKeywordList();
 
 USTRUCT()
 struct FInfoBarSettings
@@ -120,12 +112,7 @@ public:
     UPROPERTY(config, EditAnywhere, Category=InfoBar, meta=(MultiLine="true"))
     FString Pattern;
 
-    /** List of all keywords.
-        This list is hidden in customization.
-        If UPROPERTY is empty, there is no access through IPropertyHandle in customization
-    */
-    UPROPERTY(VisibleAnywhere, Category=InfoBar, Transient)
-    TMap<EInfoBarPatternKeyword, FInfoBarPatternKeyword> PatternKeywords;
+    FPatternKeywordLists mPatternKeywordLists;
 
     UPROPERTY(config, EditAnywhere, Category=InfoBar)
     FString Separator { TEXT( " - " ) };

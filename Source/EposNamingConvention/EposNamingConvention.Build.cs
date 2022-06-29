@@ -49,6 +49,7 @@ public class EposNamingConvention : ModuleRules
                 "EposSequence",
                 "EposTracks",
                 "EposNote",
+                "EposPattern",
 
                 // [EDITOR]
                 // [EDITOR] custom engine dependencies

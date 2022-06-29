@@ -7,32 +7,31 @@
 
 #include "IImageWrapper.h"
 
+#include "PatternKeywordList.h"
+
 #include "ExportImageSequenceSettings.generated.h"
 
 //---
 
+enum class EExportImageSequencePatternKeyword : uint32
+{
+    ENUM_UNIQUE_ID( PanelIndex ),
+    ENUM_UNIQUE_ID( StoryboardName ),
+    ENUM_UNIQUE_ID( PanelFrame ),
+};
+
+const FPatternKeywordList& GetExportImageSequencePatternKeywordList();
+
 UENUM()
-enum class EExportImageSequencePatternKeyword : uint8
+enum class EExportImageSequenceFileFormat : int8
 {
-    PanelIndex,
-    StoryboardName,
-    BoardIndex, // board only in the first level
-    ShotIndex,
-    PanelFrame,
+    PNG     = int8( EImageFormat::PNG ),
+    JPEG    = int8( EImageFormat::JPEG ),
+    BMP     = int8( EImageFormat::BMP ),
+    EXR     = int8( EImageFormat::EXR ),
+    //TGA     = int8( EImageFormat::TGA ), // Compress() is not implemented
+    //TIFF    = int8( EImageFormat::TIFF ), // Compress() is not implemented
 };
-
-USTRUCT()
-struct FExportImageSequencePatternKeyword
-{
-    GENERATED_BODY()
-
-public:
-    EExportImageSequencePatternKeyword mKeywordId;
-    FString mKeywordWithBraces;
-    FText mHelp;
-};
-
-//---
 
 USTRUCT()
 struct FExportImageSequenceNumberFormat
@@ -43,17 +42,6 @@ public:
     /** The number of digits. */
     UPROPERTY(config, EditAnywhere, Category="Number Format", meta=(UIMin = "1", UIMax = "10"))
     uint32 NumDigits { 4 };
-};
-
-UENUM()
-enum class EExportImageSequenceFileFormat
-{
-    PNG     = int32( EImageFormat::PNG ),
-    JPEG    = int32( EImageFormat::JPEG ),
-    BMP     = int32( EImageFormat::BMP ),
-    EXR     = int32( EImageFormat::EXR ),
-    //TGA     = int32( EImageFormat::TGA ), // Compress() is not implemented
-    //TIFF    = int32( EImageFormat::TIFF ), // Compress() is not implemented
 };
 
 USTRUCT()
@@ -88,20 +76,7 @@ public:
     UPROPERTY( EditAnywhere, Category=ExportImageSequence )
     FString Pattern;
 
-    /** List of all keywords.
-        This list is hidden in customization.
-        If UPROPERTY is empty, there is no access through IPropertyHandle in customization
-    */
-    UPROPERTY( VisibleAnywhere, Category=ExportImageSequence, Transient )
-    TMap<EExportImageSequencePatternKeyword, FExportImageSequencePatternKeyword> PatternKeywords;
-
-    /** The sequence index format. */
-    UPROPERTY(EditAnywhere, Category=ExportImageSequence, AdvancedDisplay, meta=(ShowOnlyInnerProperties))
-    FExportImageSequenceNumberFormat BoardIndexFormat { 4 };
-
-    /** The shot index format. */
-    UPROPERTY(EditAnywhere, Category=ExportImageSequence, AdvancedDisplay, meta=(ShowOnlyInnerProperties))
-    FExportImageSequenceNumberFormat ShotIndexFormat { 4 };
+    FPatternKeywordLists mPatternKeywordLists;
 
     /** The panel index format. */
     UPROPERTY(EditAnywhere, Category=ExportImageSequence, AdvancedDisplay, meta=(ShowOnlyInnerProperties))

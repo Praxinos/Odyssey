@@ -34,21 +34,6 @@ FEposSequenceModule::UnregisterNamingFormatter( UNamingFormatter* iFormatter )
     mNamingFormatters.Remove( iFormatter );
 }
 
-template<typename Formatter>
-UNamingFormatter*
-FEposSequenceModule::GetNamingFormatter()
-{
-    for( auto formatter : mNamingFormatters )
-    {
-        if( formatter->IsA<Formatter>() )
-        {
-            return formatter;
-        }
-    }
-
-    return nullptr;
-}
-
 #undef LOCTEXT_NAMESPACE
 
 IMPLEMENT_MODULE( FEposSequenceModule, EposSequence )

@@ -9,52 +9,10 @@
 #include "DetailWidgetRow.h"
 
 #include "Settings/EposSequenceEditorSettings.h"
-#include "Settings/SPatternTextBox.h"
+#include "SPatternTextBox.h"
 
 #define LOCTEXT_NAMESPACE "NamingConventionSettingsCustomization"
 
-//---
-
-namespace
-{
-static
-TMap<EInfoBarPatternKeyword, FInfoBarPatternKeyword>
-GetPatternKeywordsMap( TSharedRef<IPropertyHandle> iStructPropertyHandle, TArray<FString>& oValidKeywords, TArray<FText>& oKeywordLabels, TArray<FText>& oKeywordHelps )
-{
-    oValidKeywords.Empty();
-    oKeywordLabels.Empty();
-    oKeywordHelps.Empty();
-
-    TSharedPtr<IPropertyHandle> child_handle = iStructPropertyHandle->GetChildHandle( "PatternKeywords" );
-    if( child_handle.IsValid() )
-    {
-        TSharedPtr<IPropertyHandleMap> map_handle = child_handle->AsMap();
-        if( map_handle.IsValid() )
-        {
-            void* MapDataPtr = nullptr;
-            if( child_handle->GetValueData( MapDataPtr ) == FPropertyAccess::Success )
-            {
-                TMap<EInfoBarPatternKeyword, FInfoBarPatternKeyword>* map = ( TMap<EInfoBarPatternKeyword, FInfoBarPatternKeyword>* )MapDataPtr;
-                if( map )
-                {
-                    for( auto pair : *map )
-                    {
-                        oValidKeywords.Add( pair.Value.mKeywordWithBraces );
-                        oKeywordLabels.Add( FText::FromString( pair.Value.mKeywordWithBraces ) );
-                        oKeywordHelps.Add( pair.Value.mHelp );
-                    }
-                    return *map;
-                }
-            }
-        }
-    }
-
-    return TMap<EInfoBarPatternKeyword, FInfoBarPatternKeyword>();
-}
-}
-
-//---
-//---
 //---
 
 //static
@@ -69,7 +27,9 @@ FInfoBarCustomization::GetTooltipText() const
 {
     return LOCTEXT( "infobar-pattern-tooltip",
 R"(Each keywords will be replaced by its corresponding value.
-The separator will be used to join each line of the pattern field)" );
+The separator will be used to join each line of the pattern field.
+
+(Click on a keyword to Copy it))" );
 }
 
 void
@@ -87,6 +47,9 @@ FInfoBarCustomization::CustomizeHeader( TSharedRef<IPropertyHandle> iStructPrope
 void
 FInfoBarCustomization::CustomizeChildren( TSharedRef<IPropertyHandle> iStructPropertyHandle, IDetailChildrenBuilder& ioChildBuilder, IPropertyTypeCustomizationUtils& ioStructCustomizationUtils ) //override
 {
+    mSettings = GetEditStruct( iStructPropertyHandle );
+    check( mSettings );
+
     uint32 num_children;
     FPropertyAccess::Result result = iStructPropertyHandle->GetNumChildren( num_children );
 
@@ -105,7 +68,15 @@ FInfoBarCustomization::CustomizeChildren( TSharedRef<IPropertyHandle> iStructPro
             TArray<FString> keywords;
             TArray<FText> keyword_labels;
             TArray<FText> keyword_helps;
-            GetPatternKeywordsMap( iStructPropertyHandle, keywords, keyword_labels, keyword_helps );
+            for( auto keyword_list : mSettings->mPatternKeywordLists.mKeywordLists )
+            {
+                for( auto keyword : keyword_list->GetKeywordList() )
+                {
+                    keywords.Add( keyword.mKeywordWithBraces );
+                    keyword_labels.Add( FText::FromString( keyword.mKeywordWithBraces ) );
+                    keyword_helps.Add( keyword.mHelp );
+                }
+            }
 
             ioChildBuilder.AddCustomRow( LOCTEXT( "Pattern", "Pattern" ) )
             .NameContent()
@@ -120,17 +91,28 @@ FInfoBarCustomization::CustomizeChildren( TSharedRef<IPropertyHandle> iStructPro
                 .Keywords( keywords )
                 .KeywordLabels( keyword_labels )
                 .KeywordHelps( keyword_helps )
+                .OnVerifyPattern_Raw( &mSettings->mPatternKeywordLists, &FPatternKeywordLists::IsValidPattern )
             ];
-        }
-        else if( handle->GetProperty() && handle->GetProperty()->GetFName() == GET_MEMBER_NAME_CHECKED( FInfoBarSettings, PatternKeywords ) )
-        {
-            handle->MarkHiddenByCustomization();
         }
         else
         {
             ioChildBuilder.AddProperty( handle.ToSharedRef() );
         }
     }
+}
+
+FInfoBarSettings*
+FInfoBarCustomization::GetEditStruct( TSharedRef<IPropertyHandle> iStructPropertyHandle ) const
+{
+    TArray<FInfoBarSettings*> options;
+
+    if( iStructPropertyHandle->IsValidHandle() )
+        iStructPropertyHandle->AccessRawData( reinterpret_cast<TArray<void*>&>( options ) );
+
+    if( options.Num() == 1 )
+        return options[0];
+
+    return nullptr;
 }
 
 #undef LOCTEXT_NAMESPACE

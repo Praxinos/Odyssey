@@ -11,6 +11,8 @@
 
 class IPropertyHandle;
 
+DECLARE_DELEGATE_RetVal_OneParam( bool, FOnVerifyPattern, const FString& iPattern );
+
 //---
 
 /**
@@ -19,7 +21,7 @@ class IPropertyHandle;
   *
   * (this is maybe not the best place (Naming module) as it is also used by the SequenceEditor module)
   */
-class EPOSNAMINGCONVENTION_API SPatternTextBox
+class EPOSPATTERN_API SPatternTextBox
     : public SCompoundWidget
     //: public SEditableTextBox
 {
@@ -30,6 +32,7 @@ public:
         SLATE_ARGUMENT( TArray<FText>, KeywordLabels )
         SLATE_ARGUMENT( TArray<FText>, KeywordHelps )
         SLATE_ATTRIBUTE( FText, MoreExplanation )
+        SLATE_EVENT( FOnVerifyPattern, OnVerifyPattern )
     SLATE_END_ARGS()
 
     void Construct( const FArguments& iArgs, TSharedPtr<IPropertyHandle> iPatternHandle );
@@ -40,12 +43,28 @@ private:
     void OnPatternTextCommited( const FText& iNewText, ETextCommit::Type iCommitInfo );
     void OnPatternTextChanged( const FText& iNewText );
 
-    bool CheckPatternValidity( const FString& iPattern );
+    FReply OnClickExpanderButton();
+    const FSlateBrush* GetExpanderIcon() const;
+    EVisibility GetKeywordsVisibility() const;
+
+    FSlateColor GetKeywordColor( int iKeywordIndex ) const;
+    const FSlateBrush* GetKeywordStrikeBrush( int iKeywordIndex ) const;
+    FReply OnClickKeyword( int iKeywordIndex );
+
+    //void ContextMenuExtender( FMenuBuilder& iMenuBuilder );
+    //void AddKeywordAtCursor( FString iKeyword );
+
+private:
+    bool IsKeywordUsed( int iKeywordIndex ) const;
 
 private:
     TSharedPtr<IPropertyHandle> mPatternHandle;
+    TArray<FString>             mKeywords;
 
     TSharedPtr<SEditableTextBox> mTextBoxWidget;
 
-    TArray<FString> mValidKeywords;
+    bool mIsExpanded { false };
+
+    /** Callback to verify pattern. */
+    FOnVerifyPattern mOnVerifyPattern;
 };

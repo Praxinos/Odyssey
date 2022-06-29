@@ -12,6 +12,10 @@ class FDetailWidgetRow;
 class IDetailChildrenBuilder;
 class IPropertyHandle;
 class IPropertyTypeCustomizationUtils;
+struct FNamingConventionPlane;
+struct FNamingConventionCamera;
+struct FNamingConventionShot;
+struct FNamingConventionBoard;
 
 //---
 
@@ -28,7 +32,11 @@ public:
 private:
     FText GetTooltipText() const;
 
+    FNamingConventionPlane* GetEditStruct( TSharedRef<IPropertyHandle> iStructPropertyHandle ) const;
+
 private:
+    FNamingConventionPlane* mSettings;
+
     /** Property handles of the properties we're editing */
     TSharedPtr<IPropertyHandle> mPatternHandle;
 };
@@ -48,7 +56,11 @@ public:
 private:
     FText GetTooltipText() const;
 
+    FNamingConventionCamera* GetEditStruct( TSharedRef<IPropertyHandle> iStructPropertyHandle ) const;
+
 private:
+    FNamingConventionCamera* mSettings;
+
     /** Property handles of the properties we're editing */
     TSharedPtr<IPropertyHandle> mPatternHandle;
 };
@@ -68,7 +80,11 @@ public:
 private:
     FText GetTooltipText() const;
 
+    FNamingConventionShot* GetEditStruct( TSharedRef<IPropertyHandle> iStructPropertyHandle ) const;
+
 private:
+    FNamingConventionShot* mSettings;
+
     /** Property handles of the properties we're editing */
     TSharedPtr<IPropertyHandle> mPatternHandle;
 };
@@ -88,7 +104,11 @@ public:
 private:
     FText GetTooltipText() const;
 
+    FNamingConventionBoard* GetEditStruct( TSharedRef<IPropertyHandle> iStructPropertyHandle ) const;
+
 private:
+    FNamingConventionBoard* mSettings;
+
     /** Property handles of the properties we're editing */
     TSharedPtr<IPropertyHandle> mPatternHandle;
 };

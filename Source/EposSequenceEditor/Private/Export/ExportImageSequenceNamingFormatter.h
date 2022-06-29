@@ -19,7 +19,7 @@ class FExportImageSequenceNamingFormatter
 public:
     FExportImageSequenceNamingFormatter( TWeakPtr<ISequencer> iSequencer, const FExportImageSequencePanel* iImageSequencePanel, int32 iIndex, const FExportImageSequenceOptions* iOptions );
 
-    bool FormatName( FString& oName );
+    bool FormatName( const FString& iPatternToFormat, FString& oPatternFormatted );
 
 private:
     TTuple<UShotSequence*, FMovieSceneSequenceID>       GetShot() const;

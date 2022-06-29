@@ -18,7 +18,8 @@ class UDefaultNamingFormatterBoard
     GENERATED_BODY()
 
 public:
-    virtual FString FormatName( const UObject* iContext );
+    virtual bool FormatName( const UObject* iContext, FString& oPatternFormatted );
+    virtual bool FormatName( const UObject* iContext, const FString& iPatternToFormat, FString& oPatternFormatted );
 };
 
 //---
@@ -30,5 +31,6 @@ class UDefaultNamingFormatterShot
     GENERATED_BODY()
 
 public:
-    virtual FString FormatName( const UObject* iContext );
+    virtual bool FormatName( const UObject* iContext, FString& oPatternFormatted );
+    virtual bool FormatName( const UObject* iContext, const FString& iPatternToFormat, FString& oPatternFormatted );
 };

@@ -10,52 +10,11 @@
 
 #include "Export/ExportImageSequenceSettings.h"
 #include "Export/ExportImageSequenceStruct.h"
-#include "Settings/SPatternTextBox.h"
+#include "Settings/NamingConventionSettings.h"
+#include "SPatternTextBox.h"
 
 #define LOCTEXT_NAMESPACE "ExportImageSequenceSettingsCustomization"
 
-//---
-
-namespace
-{
-static
-TMap<EExportImageSequencePatternKeyword, FExportImageSequencePatternKeyword>
-GetExportPatternKeywordsMap( TSharedRef<IPropertyHandle> iStructPropertyHandle, TArray<FString>& oValidKeywords, TArray<FText>& oKeywordLabels, TArray<FText>& oKeywordHelps )
-{
-    oValidKeywords.Empty();
-    oKeywordLabels.Empty();
-    oKeywordHelps.Empty();
-
-    TSharedPtr<IPropertyHandle> child_handle = iStructPropertyHandle->GetChildHandle( "PatternKeywords" );
-    if( child_handle.IsValid() )
-    {
-        TSharedPtr<IPropertyHandleMap> map_handle = child_handle->AsMap();
-        if( map_handle.IsValid() )
-        {
-            void* MapDataPtr = nullptr;
-            if( child_handle->GetValueData( MapDataPtr ) == FPropertyAccess::Success )
-            {
-                TMap<EExportImageSequencePatternKeyword, FExportImageSequencePatternKeyword>* map = ( TMap<EExportImageSequencePatternKeyword, FExportImageSequencePatternKeyword>* )MapDataPtr;
-                if( map )
-                {
-                    for( auto pair : *map )
-                    {
-                        oValidKeywords.Add( pair.Value.mKeywordWithBraces );
-                        oKeywordLabels.Add( FText::FromString( pair.Value.mKeywordWithBraces ) );
-                        oKeywordHelps.Add( pair.Value.mHelp );
-                    }
-                    return *map;
-                }
-            }
-        }
-    }
-
-    return TMap<EExportImageSequencePatternKeyword, FExportImageSequencePatternKeyword>();
-}
-}
-
-//---
-//---
 //---
 
 //static
@@ -66,7 +25,7 @@ FExportImageSequenceOptionsCustomization::MakeInstance()
 }
 
 FText
-FExportImageSequenceOptionsCustomization::GetTooltipText( const TMap<EExportImageSequencePatternKeyword, FExportImageSequencePatternKeyword>& iMapKeywords ) const
+FExportImageSequenceOptionsCustomization::GetTooltipText() const
 {
     return FText::Format( LOCTEXT( "export-image-sequence-file-pattern-tooltip",
 R"(Each keywords will be replaced by its corresponding value.
@@ -89,12 +48,14 @@ R"(Each keywords will be replaced by its corresponding value.
     ...
 
 The extension will be automatically set according to the file format.
+
+(Click on a keyword to Copy it)
 )" )
-                          , FText::FromString( iMapKeywords[EExportImageSequencePatternKeyword::PanelIndex].mKeywordWithBraces )
-                          , FText::FromString( iMapKeywords[EExportImageSequencePatternKeyword::StoryboardName].mKeywordWithBraces )
-                          , FText::FromString( iMapKeywords[EExportImageSequencePatternKeyword::BoardIndex].mKeywordWithBraces )
-                          , FText::FromString( iMapKeywords[EExportImageSequencePatternKeyword::ShotIndex].mKeywordWithBraces )
-                          , FText::FromString( iMapKeywords[EExportImageSequencePatternKeyword::PanelFrame].mKeywordWithBraces )
+                          , FText::FromString( mOptions->mPatternKeywordLists.GetKeyword( EExportImageSequencePatternKeyword::PanelIndex ).mKeywordWithBraces )
+                          , FText::FromString( mOptions->mPatternKeywordLists.GetKeyword( EExportImageSequencePatternKeyword::StoryboardName ).mKeywordWithBraces )
+                          , FText::FromString( mOptions->mPatternKeywordLists.GetKeyword( ENamingConventionBoardPatternKeyword::BoardIndex ).mKeywordWithBraces )
+                          , FText::FromString( mOptions->mPatternKeywordLists.GetKeyword( ENamingConventionShotPatternKeyword::ShotIndex ).mKeywordWithBraces )
+                          , FText::FromString( mOptions->mPatternKeywordLists.GetKeyword( EExportImageSequencePatternKeyword::PanelFrame ).mKeywordWithBraces )
 );
 }
 
@@ -113,6 +74,9 @@ FExportImageSequenceOptionsCustomization::CustomizeHeader( TSharedRef<IPropertyH
 void
 FExportImageSequenceOptionsCustomization::CustomizeChildren( TSharedRef<IPropertyHandle> iStructPropertyHandle, IDetailChildrenBuilder& ioChildBuilder, IPropertyTypeCustomizationUtils& ioStructCustomizationUtils ) //override
 {
+    mOptions = GetEditStruct( iStructPropertyHandle );
+    check( mOptions );
+
     uint32 num_children;
     FPropertyAccess::Result result = iStructPropertyHandle->GetNumChildren( num_children );
 
@@ -139,9 +103,17 @@ FExportImageSequenceOptionsCustomization::CustomizeChildren( TSharedRef<IPropert
             TArray<FString> keywords;
             TArray<FText> keyword_labels;
             TArray<FText> keyword_helps;
-            TMap<EExportImageSequencePatternKeyword, FExportImageSequencePatternKeyword> map_keywords = GetExportPatternKeywordsMap( iStructPropertyHandle, keywords, keyword_labels, keyword_helps );
+            for( auto keyword_list : mOptions->mPatternKeywordLists.mKeywordLists )
+            {
+                for( auto keyword : keyword_list->GetKeywordList() )
+                {
+                    keywords.Add( keyword.mKeywordWithBraces );
+                    keyword_labels.Add( FText::FromString( keyword.mKeywordWithBraces ) );
+                    keyword_helps.Add( keyword.mHelp );
+                }
+            }
 
-            mPatternHandle->SetToolTipText( GetTooltipText( map_keywords ) );
+            mPatternHandle->SetToolTipText( GetTooltipText() );
 
             ioChildBuilder.AddCustomRow( LOCTEXT( "Pattern", "Pattern" ) )
             .NameContent()
@@ -156,11 +128,8 @@ FExportImageSequenceOptionsCustomization::CustomizeChildren( TSharedRef<IPropert
                 .Keywords( keywords )
                 .KeywordLabels( keyword_labels )
                 .KeywordHelps( keyword_helps )
+                .OnVerifyPattern_Raw( &mOptions->mPatternKeywordLists, &FPatternKeywordLists::IsValidPattern )
             ];
-        }
-        else if( handle->GetProperty() && handle->GetProperty()->GetFName() == GET_MEMBER_NAME_CHECKED( FExportImageSequenceOptions, PatternKeywords ) )
-        {
-            handle->MarkHiddenByCustomization();
         }
         else if( handle->GetProperty() && handle->GetProperty()->GetFName() == GET_MEMBER_NAME_CHECKED( FExportImageSequenceOptions, ImageSize ) )
         {
@@ -193,6 +162,20 @@ FExportImageSequenceOptionsCustomization::CustomizeChildren( TSharedRef<IPropert
     {
         advanced_group.AddPropertyRow( handle.ToSharedRef() );
     }
+}
+
+FExportImageSequenceOptions*
+FExportImageSequenceOptionsCustomization::GetEditStruct( TSharedRef<IPropertyHandle> iStructPropertyHandle ) const
+{
+    TArray<FExportImageSequenceOptions*> options;
+
+    if( iStructPropertyHandle->IsValidHandle() )
+        iStructPropertyHandle->AccessRawData( reinterpret_cast<TArray<void*>&>( options ) );
+
+    if( options.Num() == 1 )
+        return options[0];
+
+    return nullptr;
 }
 
 void

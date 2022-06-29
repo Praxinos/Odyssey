@@ -15,7 +15,7 @@ FImportImageSequenceImporter::FImportImageSequenceImporter( const FImportImageSe
     mImageSequencePath = iOptions.ImageSequencePath.Path;
     mImageSequenceFilePattern = iOptions.FilePattern;
 
-    Build( iOptions.PatternKeywords, oErrorMessage );
+    Build( iOptions.mPatternKeywordLists, oErrorMessage );
 }
 
 const FImportImageSequenceStruct&
@@ -35,7 +35,7 @@ struct FPatternStruct
 };
 
 void
-FImportImageSequenceImporter::Build( const TMap<EImportImageSequencePatternKeyword, FImportImageSequencePatternKeyword>& iKeywords, FString& oErrorMessage )
+FImportImageSequenceImporter::Build( const FPatternKeywordLists& iPatternKeywordLists, FString& oErrorMessage )
 {
     if( mImageSequencePath.IsEmpty() )
     {
@@ -58,10 +58,10 @@ FImportImageSequenceImporter::Build( const TMap<EImportImageSequencePatternKeywo
     //---
 
     TMap<EImportImageSequencePatternKeyword, FPatternStruct> pattern_map;
-    pattern_map.Add( EImportImageSequencePatternKeyword::BoardId  , { iKeywords[EImportImageSequencePatternKeyword::BoardId].mKeywordWithBraces , TEXT( "([_0-9a-zA-Z]+)" ) } );
-    pattern_map.Add( EImportImageSequencePatternKeyword::ShotId   , { iKeywords[EImportImageSequencePatternKeyword::ShotId].mKeywordWithBraces  , TEXT( "([_0-9a-zA-Z]+)" ) } );
-    pattern_map.Add( EImportImageSequencePatternKeyword::PanelId  , { iKeywords[EImportImageSequencePatternKeyword::PanelId].mKeywordWithBraces , TEXT( "([_0-9a-zA-Z]+)" ) } );
-    pattern_map.Add( EImportImageSequencePatternKeyword::Duration , { iKeywords[EImportImageSequencePatternKeyword::Duration].mKeywordWithBraces, TEXT( "([0-9]+)" ) } );
+    pattern_map.Add( EImportImageSequencePatternKeyword::BoardId  , { iPatternKeywordLists.GetKeyword( EImportImageSequencePatternKeyword::BoardId ).mKeywordWithBraces , TEXT( "([_0-9a-zA-Z]+)" ) } );
+    pattern_map.Add( EImportImageSequencePatternKeyword::ShotId   , { iPatternKeywordLists.GetKeyword( EImportImageSequencePatternKeyword::ShotId ).mKeywordWithBraces  , TEXT( "([_0-9a-zA-Z]+)" ) } );
+    pattern_map.Add( EImportImageSequencePatternKeyword::PanelId  , { iPatternKeywordLists.GetKeyword( EImportImageSequencePatternKeyword::PanelId ).mKeywordWithBraces , TEXT( "([_0-9a-zA-Z]+)" ) } );
+    pattern_map.Add( EImportImageSequencePatternKeyword::Duration , { iPatternKeywordLists.GetKeyword( EImportImageSequencePatternKeyword::Duration ).mKeywordWithBraces, TEXT( "([0-9]+)" ) } );
 
     FString file_pattern_regex = mImageSequenceFilePattern;
     for( auto& pair : pattern_map )

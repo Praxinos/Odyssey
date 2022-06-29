@@ -7,69 +7,127 @@
 
 //---
 
-#define ADD_PATTERN_KEYWORD( ioMap, iKey, iTextKeyPrefix, iText )       \
-{                                                                       \
-    FString key = TEXT( iKey );                                         \
-                                                                        \
-    FNamingConventionPatternKeyword value;                              \
-    value.mKeywordWithBraces = FString::Printf( TEXT( "{%s}" ), *key ); \
-    value.mHelp = LOCTEXT( iTextKeyPrefix "." iKey, iText );            \
-    ioMap.Add( key, value );                                            \
+static FPatternKeywordList sgPlanePatternKeywordList;
+
+const FPatternKeywordList& GetNamingConventionPlanePatternKeywordList()
+{
+    if( !sgPlanePatternKeywordList.mKeywordList.Num() )
+    {
+        sgPlanePatternKeywordList.AddKeyword( ENamingConventionPlanePatternKeyword::PlaneIndex   , "plane-index" , LOCTEXT( "plane-pattern-keyword.plane-index", "an incremental index" ) );
+        //sgPlanePatternKeywordList.AddKeyword( ENamingConventionPlanePatternKeyword::CameraName   , "camera-name" , LOCTEXT( "plane-pattern-keyword.camera-name", "the name of the camera (won't update if camera name changes)" ) );
+        //sgPlanePatternKeywordList.AddKeyword( ENamingConventionPlanePatternKeyword::ShotName     , "shot-name"   , LOCTEXT( "plane-pattern-keyword.shot-name", "the name of the shot (won't update if shot name changes)" ) );
+    }
+
+    return sgPlanePatternKeywordList;
+}
+
+FNamingConventionPlane::FNamingConventionPlane()
+{
+    mPatternKeywordLists.AddKeywordList( &GetNamingConventionPlanePatternKeywordList() );
+
+    Pattern = FString::Printf( TEXT( "plane_%s" )
+                               , *mPatternKeywordLists.GetKeyword( ENamingConventionPlanePatternKeyword::PlaneIndex ).mKeywordWithBraces
+    );
 }
 
 //---
 
-FNamingConventionPlane::FNamingConventionPlane()
+static FPatternKeywordList sgCameraPatternKeywordList;
+
+const FPatternKeywordList& GetNamingConventionCameraPatternKeywordList()
 {
-    ADD_PATTERN_KEYWORD( PatternKeywords, "plane-index",    "plane-pattern-keyword", "an incremental index" );
-    //ADD_PATTERN_KEYWORD( PatternKeywords, "camera-name",    "plane-pattern-keyword", "the name of the camera (won't update if camera name changes)" );
-    //ADD_PATTERN_KEYWORD( PatternKeywords, "shot-name",      "plane-pattern-keyword", "the name of the shot (won't update if shot name changes)" );
+    if( !sgCameraPatternKeywordList.mKeywordList.Num() )
+    {
+        sgCameraPatternKeywordList.AddKeyword( ENamingConventionCameraPatternKeyword::CameraIndex , "camera-index", LOCTEXT( "camera-pattern-keyword.camera-index", "an incremental index" ) );
+        //sgCameraPatternKeywordList.AddKeyword( ENamingConventionCameraPatternKeyword::ShotName    , "shot-name"   , LOCTEXT( "camera-pattern-keyword.shot-name", "the name of the shot (won't update if shot name changes)" ) );
+    }
+
+    return sgCameraPatternKeywordList;
 }
 
 FNamingConventionCamera::FNamingConventionCamera()
 {
-    ADD_PATTERN_KEYWORD( PatternKeywords, "camera-index",   "camera-pattern-keyword", "an incremental index" );
-    //ADD_PATTERN_KEYWORD( PatternKeywords, "shot-name",      "camera-pattern-keyword", "the name of the shot (won't update if shot name changes)" );
+    mPatternKeywordLists.AddKeywordList( &GetNamingConventionCameraPatternKeywordList() );
+
+    Pattern = FString::Printf( TEXT( "camera_%s" )
+                               , *mPatternKeywordLists.GetKeyword( ENamingConventionCameraPatternKeyword::CameraIndex ).mKeywordWithBraces
+    );
+}
+
+//---
+
+static FPatternKeywordList sgCommonPatternKeywordList;
+
+const FPatternKeywordList& GetNamingConventionCommonPatternKeywordList()
+{
+    if( !sgCommonPatternKeywordList.mKeywordList.Num() )
+    {
+        sgCommonPatternKeywordList.AddKeyword( ENamingConventionCommonPatternKeyword::StudioName        , "studio-name"         , LOCTEXT( "shot-pattern-keyword.studio-name", "the full studio name" ) );
+        sgCommonPatternKeywordList.AddKeyword( ENamingConventionCommonPatternKeyword::StudioAcronym     , "studio-acronym"      , LOCTEXT( "shot-pattern-keyword.studio-acronym", "the studio name acronym" ) );
+        sgCommonPatternKeywordList.AddKeyword( ENamingConventionCommonPatternKeyword::LicenseName       , "license-name"        , LOCTEXT( "shot-pattern-keyword.license-name", "the full license name" ) );
+        sgCommonPatternKeywordList.AddKeyword( ENamingConventionCommonPatternKeyword::LicenseAcronym    , "license-acronym"     , LOCTEXT( "shot-pattern-keyword.license-acronym", "the license name acronym" ) );
+        sgCommonPatternKeywordList.AddKeyword( ENamingConventionCommonPatternKeyword::ProductionName    , "production-name"     , LOCTEXT( "shot-pattern-keyword.production-name", "the full production title" ) );
+        sgCommonPatternKeywordList.AddKeyword( ENamingConventionCommonPatternKeyword::ProductionAcronym , "production-acronym"  , LOCTEXT( "shot-pattern-keyword.production-acronym", "the production title acronym" ) );
+        sgCommonPatternKeywordList.AddKeyword( ENamingConventionCommonPatternKeyword::Season            , "season"              , LOCTEXT( "shot-pattern-keyword.season", "the season number" ) );
+        sgCommonPatternKeywordList.AddKeyword( ENamingConventionCommonPatternKeyword::Episode           , "episode"             , LOCTEXT( "shot-pattern-keyword.episode", "the episode number" ) );
+        sgCommonPatternKeywordList.AddKeyword( ENamingConventionCommonPatternKeyword::Part              , "part"                , LOCTEXT( "shot-pattern-keyword.part", "the part (A, B, C, ...)" ) );
+        //sgCommonPatternKeywordList.AddKeyword( ENamingConventionCommonPatternKeyword::DepartmentName    , "department-name"     , LOCTEXT( "shot-pattern-keyword.department-name", "the full department name" ) );
+        //sgCommonPatternKeywordList.AddKeyword( ENamingConventionCommonPatternKeyword::DepartmentAcronym , "department-acronym"  , LOCTEXT( "shot-pattern-keyword.department-acronym", "the department name acronym" ) );
+        sgCommonPatternKeywordList.AddKeyword( ENamingConventionCommonPatternKeyword::Initials          , "initials"            , LOCTEXT( "shot-pattern-keyword.initials", "some initials" ) );
+    }
+
+    return sgCommonPatternKeywordList;
+}
+
+//---
+
+static FPatternKeywordList sgShotPatternKeywordList;
+
+const FPatternKeywordList& GetNamingConventionShotPatternKeywordList()
+{
+    if( !sgShotPatternKeywordList.mKeywordList.Num() )
+    {
+        sgShotPatternKeywordList.AddKeyword( ENamingConventionShotPatternKeyword::ShotIndex         , "shot-index"          , LOCTEXT( "shot-pattern-keyword.shot-index", "an incremental index" ) );
+        sgShotPatternKeywordList.AddKeyword( ENamingConventionShotPatternKeyword::TakeIndex         , "take-index"          , LOCTEXT( "shot-pattern-keyword.take-index", "an incremental index for take" ) );
+    }
+
+    return sgShotPatternKeywordList;
 }
 
 FNamingConventionShot::FNamingConventionShot()
 {
-    ADD_PATTERN_KEYWORD( PatternKeywords, "shot-index",             "shot-pattern-keyword", "an incremental index" );
-    ADD_PATTERN_KEYWORD( PatternKeywords, "take-index",             "shot-pattern-keyword", "an incremental index for take" );
+    mPatternKeywordLists.AddKeywordList( &GetNamingConventionShotPatternKeywordList() );
+    mPatternKeywordLists.AddKeywordList( &GetNamingConventionCommonPatternKeywordList() );
 
-    ADD_PATTERN_KEYWORD( PatternKeywords, "studio-name",            "shot-pattern-keyword", "the full studio name" );
-    ADD_PATTERN_KEYWORD( PatternKeywords, "studio-acronym",         "shot-pattern-keyword", "the studio name acronym" );
-    ADD_PATTERN_KEYWORD( PatternKeywords, "license-name",           "shot-pattern-keyword", "the full license name" );
-    ADD_PATTERN_KEYWORD( PatternKeywords, "license-acronym",        "shot-pattern-keyword", "the license name acronym" );
-    ADD_PATTERN_KEYWORD( PatternKeywords, "production-name",        "shot-pattern-keyword", "the full production title" );
-    ADD_PATTERN_KEYWORD( PatternKeywords, "production-acronym",     "shot-pattern-keyword", "the production title acronym" );
-    ADD_PATTERN_KEYWORD( PatternKeywords, "season",                 "shot-pattern-keyword", "the season number" );
-    ADD_PATTERN_KEYWORD( PatternKeywords, "episode",                "shot-pattern-keyword", "the episode number" );
-    ADD_PATTERN_KEYWORD( PatternKeywords, "part",                   "shot-pattern-keyword", "the part (A, B, C, ...)" );
-    //ADD_PATTERN_KEYWORD( PatternKeywords, "department-name",        "shot-pattern-keyword", "the full department name" );
-    //ADD_PATTERN_KEYWORD( PatternKeywords, "department-acronym",     "shot-pattern-keyword", "the department name acronym" );
-    ADD_PATTERN_KEYWORD( PatternKeywords, "initials",               "shot-pattern-keyword", "some initials" );
+    Pattern = FString::Printf( TEXT( "shot_%s_%s" )
+                               , *mPatternKeywordLists.GetKeyword( ENamingConventionShotPatternKeyword::ShotIndex ).mKeywordWithBraces
+                               , *mPatternKeywordLists.GetKeyword( ENamingConventionShotPatternKeyword::TakeIndex ).mKeywordWithBraces
+    );
+}
+
+//---
+
+static FPatternKeywordList sgBoardPatternKeywordList;
+
+const FPatternKeywordList& GetNamingConventionBoardPatternKeywordList()
+{
+    if( !sgBoardPatternKeywordList.mKeywordList.Num() )
+    {
+        sgBoardPatternKeywordList.AddKeyword( ENamingConventionBoardPatternKeyword::BoardIndex, "board-index", LOCTEXT( "board-pattern-keyword.board-index", "an incremental index" ) );
+    }
+
+    return sgBoardPatternKeywordList;
 }
 
 FNamingConventionBoard::FNamingConventionBoard()
 {
-    ADD_PATTERN_KEYWORD( PatternKeywords, "board-index",            "board-pattern-keyword", "an incremental index" );
+    mPatternKeywordLists.AddKeywordList( &GetNamingConventionBoardPatternKeywordList() );
+    mPatternKeywordLists.AddKeywordList( &GetNamingConventionCommonPatternKeywordList() );
 
-    ADD_PATTERN_KEYWORD( PatternKeywords, "studio-name",            "board-pattern-keyword", "the full studio name" );
-    ADD_PATTERN_KEYWORD( PatternKeywords, "studio-acronym",         "board-pattern-keyword", "the studio name acronym" );
-    ADD_PATTERN_KEYWORD( PatternKeywords, "license-name",           "board-pattern-keyword", "the full license name" );
-    ADD_PATTERN_KEYWORD( PatternKeywords, "license-acronym",        "board-pattern-keyword", "the license name acronym" );
-    ADD_PATTERN_KEYWORD( PatternKeywords, "production-name",        "board-pattern-keyword", "the full production title" );
-    ADD_PATTERN_KEYWORD( PatternKeywords, "production-acronym",     "board-pattern-keyword", "the production title acronym" );
-    ADD_PATTERN_KEYWORD( PatternKeywords, "season",                 "board-pattern-keyword", "the season number" );
-    ADD_PATTERN_KEYWORD( PatternKeywords, "episode",                "board-pattern-keyword", "the episode number" );
-    ADD_PATTERN_KEYWORD( PatternKeywords, "part",                   "board-pattern-keyword", "the part (A, B, C, ...)" );
-    //ADD_PATTERN_KEYWORD( PatternKeywords, "department-name",        "board-pattern-keyword", "the full department name" );
-    //ADD_PATTERN_KEYWORD( PatternKeywords, "department-acronym",     "board-pattern-keyword", "the department name acronym" );
-    ADD_PATTERN_KEYWORD( PatternKeywords, "initials",               "board-pattern-keyword", "some initials" );
+    Pattern = FString::Printf( TEXT( "board_%s" )
+                               , *mPatternKeywordLists.GetKeyword( ENamingConventionBoardPatternKeyword::BoardIndex ).mKeywordWithBraces
+    );
 }
-
-#undef ADD_PATTERN_KEYWORD
 
 //---
 

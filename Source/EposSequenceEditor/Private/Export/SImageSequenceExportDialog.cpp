@@ -408,6 +408,9 @@ SExportStoryboardSettings::GetErrorText() const
     if( mExportImageSequenceSettings->Options.ExportPath.Path.IsEmpty() )
         return LOCTEXT( "StoryboardEmptyPath", "Error: Empty Storyboard Path" );
 
+    if( !mExportImageSequenceSettings->Options.mPatternKeywordLists.IsValidPattern( mExportImageSequenceSettings->Options.Pattern ) )
+        return LOCTEXT( "WrongPattern", "Error: Wrong Pattern" );
+
     if( !mImageSequenceExportErrorMessage.IsEmpty() )
         return FText::FromString( mImageSequenceExportErrorMessage );
 

@@ -5,29 +5,23 @@
 
 #include "CoreMinimal.h"
 
+#include "PatternKeywordList.h"
+
 #include "ImportImageSequenceSettings.generated.h"
 
 //---
 
-UENUM()
-enum class EImportImageSequencePatternKeyword : uint8
+enum class EImportImageSequencePatternKeyword : uint32
 {
-    BoardId,
-    ShotId,
-    PanelId,
-    Duration,
+    ENUM_UNIQUE_ID( BoardId ),
+    ENUM_UNIQUE_ID( ShotId ),
+    ENUM_UNIQUE_ID( PanelId ),
+    ENUM_UNIQUE_ID( Duration ),
 };
 
-USTRUCT()
-struct FImportImageSequencePatternKeyword
-{
-    GENERATED_BODY()
+const FPatternKeywordList& GetImportImageSequencePatternKeywordList();
 
-public:
-    EImportImageSequencePatternKeyword mKeywordId;
-    FString mKeywordWithBraces;
-    FText mHelp;
-};
+//---
 
 USTRUCT()
 struct FImportImageSequenceOptions
@@ -46,12 +40,7 @@ public:
     UPROPERTY( EditAnywhere, Category=ImportImageSequence )
     FString FilePattern;
 
-    /** List of all keywords.
-        This list is hidden in customization.
-        If UPROPERTY is empty, there is no access through IPropertyHandle in customization
-    */
-    UPROPERTY( VisibleAnywhere, Category=ImportImageSequence, Transient )
-    TMap<EImportImageSequencePatternKeyword, FImportImageSequencePatternKeyword> PatternKeywords;
+    FPatternKeywordLists mPatternKeywordLists;
 };
 
 //---
