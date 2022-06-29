@@ -127,27 +127,27 @@ FPatternKeywordLists::IsValidPattern( const FString& iPattern )
             return false;
     }
 
-    // This loop is to check if a valid pattern appears ONLY 1 time
-    for( auto keyword_list : mKeywordLists )
-    {
-        for( auto pair : keyword_list->mKeywordList )
-        {
-            FString valid_pattern = pair.Value.mKeywordWithBraces;
+    //// This loop is to check if a valid pattern appears ONLY 1 time
+    //for( auto keyword_list : mKeywordLists )
+    //{
+    //    for( auto pair : keyword_list->mKeywordList )
+    //    {
+    //        FString valid_pattern = pair.Value.mKeywordWithBraces;
 
-            int32 start_index = iPattern.Find( valid_pattern );
-            // If the current valid pattern is NOT found, that's ok and let's check the next pattern
-            if( start_index == INDEX_NONE )
-                continue;
+    //        int32 start_index = iPattern.Find( valid_pattern );
+    //        // If the current valid pattern is NOT found, that's ok and let's check the next pattern
+    //        if( start_index == INDEX_NONE )
+    //            continue;
 
-            // Here we find the first occurance of the current valid pattern
+    //        // Here we find the first occurance of the current valid pattern
 
-            // Try to find the same pattern another time
-            start_index = iPattern.Find( valid_pattern, ESearchCase::IgnoreCase, ESearchDir::FromStart, start_index + 1 );
-            // If the current valid pattern is found again, it's wrong because a valid pattern should only appear 1 time, so return false
-            if( start_index != INDEX_NONE )
-                return false;
-        }
-    }
+    //        // Try to find the same pattern another time
+    //        start_index = iPattern.Find( valid_pattern, ESearchCase::IgnoreCase, ESearchDir::FromStart, start_index + 1 );
+    //        // If the current valid pattern is found again, it's wrong because a valid pattern should only appear 1 time, so return false
+    //        if( start_index != INDEX_NONE )
+    //            return false;
+    //    }
+    //}
 
     return true;
 };

@@ -18,12 +18,9 @@ DECLARE_DELEGATE_RetVal_OneParam( bool, FOnVerifyPattern, const FString& iPatter
 /**
   * This manage a pattern text box
   * It will check the validity of keywords and display all the available keywords
-  *
-  * (this is maybe not the best place (Naming module) as it is also used by the SequenceEditor module)
   */
 class EPOSPATTERN_API SPatternTextBox
     : public SCompoundWidget
-    //: public SEditableTextBox
 {
 public:
     SLATE_BEGIN_ARGS( SPatternTextBox )
@@ -47,8 +44,6 @@ private:
     const FSlateBrush* GetExpanderIcon() const;
     EVisibility GetKeywordsVisibility() const;
 
-    FSlateColor GetKeywordColor( int iKeywordIndex ) const;
-    const FSlateBrush* GetKeywordStrikeBrush( int iKeywordIndex ) const;
     FReply OnClickKeyword( int iKeywordIndex );
 
     //void ContextMenuExtender( FMenuBuilder& iMenuBuilder );

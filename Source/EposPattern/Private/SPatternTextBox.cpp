@@ -35,13 +35,9 @@ SPatternTextBox::Construct( const FArguments& iArgs, TSharedPtr<IPropertyHandle>
         keyword_labels_widget->AddSlot()
             [
                 SNew( SButton )
+                .Text( label )
+                .IsEnabled_Lambda( [this, iKeywordIndex = i]() -> bool { return !SPatternTextBox::IsKeywordUsed( iKeywordIndex ); } )
                 .OnClicked( this, &SPatternTextBox::OnClickKeyword, i )
-                [
-                    SNew( STextBlock )
-                    .Text( label )
-                    .ColorAndOpacity( this, &SPatternTextBox::GetKeywordColor, i )
-                    .StrikeBrush( this, &SPatternTextBox::GetKeywordStrikeBrush, i )
-                ]
             ];
 
         FText help = FText::Format( LOCTEXT( "keywords-explanation-separator", " : {0}" ), iArgs._KeywordHelps[i] );
@@ -180,7 +176,7 @@ SPatternTextBox::OnClickExpanderButton()
 const FSlateBrush*
 SPatternTextBox::GetExpanderIcon() const
 {
-    return mIsExpanded ? &FAppStyle::Get().GetWidgetStyle<FExpandableAreaStyle>( "ExpandableArea" ).CollapsedImage : &FAppStyle::Get().GetWidgetStyle<FExpandableAreaStyle>( "ExpandableArea" ).ExpandedImage;
+    return mIsExpanded ? &FAppStyle::Get().GetWidgetStyle<FExpandableAreaStyle>( "ExpandableArea" ).ExpandedImage : &FAppStyle::Get().GetWidgetStyle<FExpandableAreaStyle>( "ExpandableArea" ).CollapsedImage;
 }
 
 EVisibility
@@ -200,29 +196,6 @@ SPatternTextBox::IsKeywordUsed( int iKeywordIndex ) const
     mPatternHandle->GetValueAsFormattedString( pattern );
 
     return pattern.Contains( keyword );
-}
-
-FSlateColor
-SPatternTextBox::GetKeywordColor( int iKeywordIndex ) const
-{
-    if( IsKeywordUsed( iKeywordIndex ) )
-        return FStyleColors::Recessed;
-
-    return FSlateColor::UseForeground();
-}
-
-const FSlateBrush*
-SPatternTextBox::GetKeywordStrikeBrush( int iKeywordIndex ) const
-{
-    if( IsKeywordUsed( iKeywordIndex ) )
-    {
-        // It didn't work with only FSlateColorBrush ...
-        //static FSlateColorBrush strike_brush( FStyleColors::Recessed );
-        return FAppStyle::Get().GetBrush( "Header.Pre" );
-    }
-
-    static FSlateNoResource brush_no_resource;
-    return &brush_no_resource;
 }
 
 FReply
