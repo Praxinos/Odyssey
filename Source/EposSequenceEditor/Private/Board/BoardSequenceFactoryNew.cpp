@@ -30,6 +30,10 @@ UObject* UBoardSequenceFactoryNew::FactoryCreateNew( UClass* iClass, UObject* iP
     const UEposSequenceEditorSettings* SequenceSettings = GetDefault<UEposSequenceEditorSettings>();
     NewBoardSequence->Initialize( SequenceSettings->BoardSettings.DefaultTickFrameRate, SequenceSettings->BoardSettings.DefaultDisplayFrameRate );
 
+    //---
+
+    NewBoardSequence->GetMovieScene()->SetGloballyShowMarkedFrames( true );
+
     const UEposTracksEditorSettings* TrackSettings = GetDefault<UEposTracksEditorSettings>();
 
     FFrameRate TickResolution = NewBoardSequence->GetMovieScene()->GetTickResolution();

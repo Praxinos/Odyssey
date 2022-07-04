@@ -97,8 +97,8 @@ private:
     TSharedPtr<IDetailsView>                        mDetailsViewExportImageSequenceSettings;
     TArray<TSharedPtr<FPanelItem>>                  mPanelItemsList;
     TSharedPtr<STileView<TSharedPtr<FPanelItem>>>   mPanelListView;
-    float                                           mItemDefaultWidth { 128.f };
-    float                                           mItemDefaultHeight { 128.f };
+    float                                           mItemDefaultWidth { 192.f };
+    float                                           mItemDefaultHeight { 192.f };
 
     UExportImageSequenceSettings*                   mExportImageSequenceSettings;
     UExportImageSequenceUISettings*                 mExportImageSequenceUISettings;
@@ -341,13 +341,27 @@ void
 SExportStoryboardSettings::GlobalSettingsChanged( const FPropertyChangedEvent& iEvent )
 {
     mExportImageSequenceSettings->SaveConfig();
+
+    // Update panel list only for relevent options (inside marks for the moment)
+    // Other settings won't change the panel list
+    if( iEvent.Property->GetOwnerStruct()
+        && iEvent.Property->GetOwnerStruct()->GetFName() == FExportImageSequenceMarkSettings::StaticStruct()->GetFName() )
+    {
+        if( mPanelListView )
+        {
+            MakePanelItems();
+            mPanelListView->RequestListRefresh();
+        }
+    }
 }
 
 void
 SExportStoryboardSettings::MakePanelItems()
 {
+    mPanelItemsList.Empty();
+
     FExportImageSequenceStruct image_sequence_struct;
-    FExportImageSequenceConverter converter( mSequencer, mRootSequence, &image_sequence_struct );
+    FExportImageSequenceConverter converter( mSequencer, mRootSequence, &mExportImageSequenceSettings->Options, &image_sequence_struct );
 
     // Build a list of items - one for each panel
     for( int32 i = 0; i < image_sequence_struct.Panels.Num(); i++ )
@@ -478,7 +492,7 @@ ExportStoryboardDialog::OpenExportImageSequenceDialog( const TSharedRef<FTabMana
         .HasCloseButton( true )
         .SupportsMaximize( false )
         .SupportsMinimize( false )
-        .ClientSize( FVector2D( 800, 900 ) );
+        .ClientSize( FVector2D( 1600, 900 ) );
 
     window->SetContent( SNew( SExportStoryboardSettings, sequencer, iSequence )
                         .ParentWindow( window )

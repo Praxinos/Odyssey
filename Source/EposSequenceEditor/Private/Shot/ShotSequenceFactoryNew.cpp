@@ -30,6 +30,10 @@ UObject* UShotSequenceFactoryNew::FactoryCreateNew( UClass* iClass, UObject* iPa
     const UEposSequenceEditorSettings* SequenceSettings = GetDefault<UEposSequenceEditorSettings>();
     NewShotSequence->Initialize( SequenceSettings->ShotSettings.DefaultTickFrameRate, SequenceSettings->ShotSettings.DefaultDisplayFrameRate );
 
+    //---
+
+    NewShotSequence->GetMovieScene()->SetGloballyShowMarkedFrames( true );
+
     const UEposTracksEditorSettings* TrackSettings = GetDefault<UEposTracksEditorSettings>();
 
     FFrameRate TickResolution = NewShotSequence->GetMovieScene()->GetTickResolution();

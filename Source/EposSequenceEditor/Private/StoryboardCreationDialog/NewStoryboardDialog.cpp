@@ -818,7 +818,7 @@ NewStoryboardDialog::OpenImportImageSequenceDialog( const TSharedRef<FTabManager
         .HasCloseButton( true )
         .SupportsMaximize( false )
         .SupportsMinimize( false )
-        .ClientSize( FVector2D( 800, 900 ) );
+        .ClientSize( FVector2D( 1600, 900 ) );
 
     window->SetContent( SNew( SNewStoryboardSettings, EDialogType::kImportImageSequence )
                             .ParentWindow( window )

@@ -13,11 +13,12 @@ class ISequencer;
 class UBoardSequence;
 class UEposMovieSceneSequence;
 class UShotSequence;
+struct FExportImageSequenceOptions;
 
 class FExportImageSequenceConverter
 {
 public:
-    FExportImageSequenceConverter( TWeakPtr<ISequencer> iSequencer, const UMovieSceneSequence* iRootSequence, FExportImageSequenceStruct* oImageSequenceStruct );
+    FExportImageSequenceConverter( TWeakPtr<ISequencer> iSequencer, const UMovieSceneSequence* iRootSequence, const FExportImageSequenceOptions* iOptions, FExportImageSequenceStruct* oImageSequenceStruct );
 
 private:
     void Convert();
@@ -25,7 +26,9 @@ private:
 private:
     TWeakPtr<ISequencer>            mSequencer;
 
-    FExportImageSequenceStruct*     mImageSequenceStruct;
+    const FExportImageSequenceOptions*  mImageSequenceOptions { nullptr };
 
-    const UMovieSceneSequence*      mRootSequence;
+    FExportImageSequenceStruct*     mImageSequenceStruct { nullptr };
+
+    const UMovieSceneSequence*      mRootSequence { nullptr };
 };

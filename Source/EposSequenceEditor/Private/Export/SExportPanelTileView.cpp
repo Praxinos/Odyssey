@@ -5,6 +5,7 @@
 
 #include "Internationalization/BreakIterator.h"
 #include "ISequencer.h"
+#include "MovieSceneSequence.h"
 #include "Slate/SlateTextures.h"
 #include "Styling/StyleColors.h"
 #include "Widgets/Layout/SScaleBox.h"
@@ -55,7 +56,39 @@ SPanelTileView::Construct( const FArguments& InArgs, const TSharedRef<STableView
     check( InArgs._Item.IsValid() );
     mPanelItem = InArgs._Item;
 
-    FString panel_global_frame = mPanelItem->mSequencer.Pin()->GetNumericTypeInterface()->ToString( mPanelItem->mPanel.GlobalFrame.Value );
+    FText panel_global_frame = FText::Format( LOCTEXT( "panel-item.global-frame", "{0}" ), FText::FromString( mPanelItem->mSequencer.Pin()->GetNumericTypeInterface()->ToString( mPanelItem->mPanel.GlobalFrame.Value ) ) );
+
+    FText panel_sequence = mPanelItem->mPanel.mSequence->GetDisplayName();
+
+    FText panel_source;
+    if( mPanelItem->mPanel.mSourceMark.IsSet() )
+    {
+        const FExportImageSequencePanelSourceMark& source_mark = mPanelItem->mPanel.mSourceMark.GetValue();
+
+        panel_source = FText::Format( LOCTEXT( "panel-item.source.mark", "Mark: {0}" ), FText::FromString( source_mark.mMark.Label ) );
+    }
+
+    if( mPanelItem->mPanel.mSourceDrawing.IsSet() )
+    {
+        const FExportImageSequencePanelSourceDrawing& source_drawing = mPanelItem->mPanel.mSourceDrawing.GetValue();
+
+        if( source_drawing.mDrawings.Num() == 1 )
+        {
+            //const FDrawing& drawing = source_drawing.mDrawings[0].mDrawing;
+            FGuid binding = source_drawing.mDrawings[0].mBindingId;
+
+            //FMovieSceneObjectPathChannel* channel = drawing.mChannel;
+            //int32 index = channel->GetData().GetIndex( drawing.mKeyHandle );
+
+            FText track_name = mPanelItem->mPanel.mSequence->GetMovieScene()->GetObjectDisplayName( binding );
+
+            panel_source = FText::Format( LOCTEXT( "panel-item.source.drawing-1", "{0}" ), track_name );
+        }
+        else if( source_drawing.mDrawings.Num() > 1 )
+        {
+            panel_source = LOCTEXT( "panel-item.source.drawing-n", "multiple planes" );
+        }
+    }
 
     //---
 
@@ -77,14 +110,31 @@ SPanelTileView::Construct( const FArguments& InArgs, const TSharedRef<STableView
                 .AutoHeight()
                 [
                     SNew( SBorder )
-                    .HAlign( HAlign_Center )
+                    .HAlign( HAlign_Fill )
                     .Padding( FMargin( 3.0f, 3.0f ) )
                     .BorderImage( this, &SPanelTileView::GetTopAreaBackgroundBrush )
                     [
-                        SNew( STextBlock )
-                        //.Font( FEposSequenceEditorStyle::Get().GetFontStyle( "ExportImageSequence.PanelItem.Font" ) )
-                        .Text( FText::FromString( panel_global_frame ) )
-                        .ColorAndOpacity( this, &SPanelTileView::GetNameAreaTextColor )
+                        SNew( SVerticalBox )
+
+                        + SVerticalBox::Slot()
+                        .AutoHeight()
+                        .HAlign( HAlign_Center )
+                        [
+                            SNew( STextBlock )
+                            //.Font( FEposSequenceEditorStyle::Get().GetFontStyle( "ExportImageSequence.PanelItem.Font" ) )
+                            .Text( panel_global_frame )
+                            .ColorAndOpacity( this, &SPanelTileView::GetNameAreaTextColor )
+                        ]
+
+                        + SVerticalBox::Slot()
+                        .AutoHeight()
+                        .HAlign( HAlign_Center )
+                        [
+                            SNew( STextBlock )
+                            //.Font( FEposSequenceEditorStyle::Get().GetFontStyle( "ExportImageSequence.PanelItem.Font" ) )
+                            .Text( panel_sequence )
+                            .ColorAndOpacity( this, &SPanelTileView::GetNameAreaTextColor )
+                        ]
                     ]
                 ]
 
@@ -116,14 +166,31 @@ SPanelTileView::Construct( const FArguments& InArgs, const TSharedRef<STableView
                 .AutoHeight()
                 [
                     SNew( SBorder )
-                    .HAlign( HAlign_Center )
+                    .HAlign( HAlign_Fill )
                     .Padding( FMargin( 3.0f, 3.0f ) )
                     .BorderImage( this, &SPanelTileView::GetBottomAreaBackgroundBrush )
                     [
-                        SNew( SCheckBox )
-                        .IsChecked( this, &SPanelTileView::GetExportCheckBoxState )
-                        .OnCheckStateChanged( this, &SPanelTileView::HandleExportCheckStateChanged )
-                        .ToolTipText( LOCTEXT( "export-panel.tooltip", "Export this panel" ) )
+                        SNew( SVerticalBox )
+
+                        + SVerticalBox::Slot()
+                        .AutoHeight()
+                        .HAlign( HAlign_Center )
+                        [
+                            SNew( STextBlock )
+                            //.Font( FEposSequenceEditorStyle::Get().GetFontStyle( "ExportImageSequence.PanelItem.Font" ) )
+                            .Text( panel_source )
+                            .ColorAndOpacity( this, &SPanelTileView::GetNameAreaTextColor )
+                        ]
+
+                        + SVerticalBox::Slot()
+                        .AutoHeight()
+                        .HAlign( HAlign_Center )
+                        [
+                            SNew( SCheckBox )
+                            .IsChecked( this, &SPanelTileView::GetExportCheckBoxState )
+                            .OnCheckStateChanged( this, &SPanelTileView::HandleExportCheckStateChanged )
+                            .ToolTipText( LOCTEXT( "export-panel.tooltip", "Export this panel" ) )
+                        ]
                     ]
                 ]
             ]
@@ -162,6 +229,43 @@ SPanelTileView::GetTooltipText() const
     {
         FText line = FText::Format( LOCTEXT( "item.size.tooltip", "Size: {0}x{1}" ), FText::AsNumber( mPanelItem->mOptions->ImageSize.X ), FText::AsNumber( mPanelItem->mOptions->ImageSize.Y ) );
         tooltip_texts.Add( line );
+    }
+
+    tooltip_texts.Add( FText::GetEmpty() );
+
+    {
+        FText line = FText::Format( LOCTEXT( "item.source-sequence.tooltip", "Shot: {0}" ), mPanelItem->mPanel.mSequence->GetDisplayName() );
+        tooltip_texts.Add( line );
+    }
+
+    tooltip_texts.Add( FText::GetEmpty() );
+
+    if( mPanelItem->mPanel.mSourceMark.IsSet() )
+    {
+        const FExportImageSequencePanelSourceMark& source_mark = mPanelItem->mPanel.mSourceMark.GetValue();
+
+        FText line = FText::Format( LOCTEXT( "item.source-mark.tooltip", "Mark: {0}" ), FText::FromString( source_mark.mMark.Label ) );
+        tooltip_texts.Add( line );
+    }
+
+    if( mPanelItem->mPanel.mSourceDrawing.IsSet() && mPanelItem->mPanel.mSourceDrawing.GetValue().mDrawings.Num() )
+    {
+        FText line = FText::Format( LOCTEXT( "item.source-drawing-list.tooltip", "Drawing appearing in {0}|plural(one=plane,other=planes):" ), mPanelItem->mPanel.mSourceDrawing.GetValue().mDrawings.Num() );
+        tooltip_texts.Add( line );
+
+        const FExportImageSequencePanelSourceDrawing& source_drawing = mPanelItem->mPanel.mSourceDrawing.GetValue();
+
+        for( auto drawing_and_binding : source_drawing.mDrawings )
+        {
+            //const FDrawing& drawing = drawing_and_binding.mDrawing;
+            FGuid binding = drawing_and_binding.mBindingId;
+
+            //FMovieSceneObjectPathChannel* channel = drawing.mChannel;
+            //int32 index = channel->GetData().GetIndex( drawing.mKeyHandle );
+
+            line = FText::Format( LOCTEXT( "item.source-drawing-entry.tooltip", "- {0}" ), mPanelItem->mPanel.mSequence->GetMovieScene()->GetObjectDisplayName( binding ) );
+            tooltip_texts.Add( line );
+        }
     }
 
     return FText::Join( FText::FromString( TEXT( "\n" ) ), tooltip_texts );

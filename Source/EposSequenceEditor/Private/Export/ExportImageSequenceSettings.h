@@ -45,6 +45,41 @@ public:
 };
 
 USTRUCT()
+struct FExportImageSequenceMarkSettings
+{
+    GENERATED_BODY()
+
+public:
+    /** Make a panel when a drawing exists. */
+    UPROPERTY(config, EditAnywhere, Category="Mark")
+    bool Drawings { true };
+
+    /** Make a panel when a sequencer mark exists. */
+    UPROPERTY(config, EditAnywhere, Category="Mark")
+    bool Marks { false };
+
+    /** Make a panel always on the first frame of a shot. */
+    UPROPERTY(config, EditAnywhere, Category="Mark")
+    bool FirstFrameOfShot { false };
+
+    ///** Make a panel every N frames (restart at each shot). */
+    //UPROPERTY(config, EditAnywhere, Category="Mark")
+    //bool EveryNFrameForEachShot { false };
+
+    ///** Interval (start of each shot). */
+    //UPROPERTY(config, EditAnywhere, Category="Mark")
+    //int32 IntervalForEachShot;
+
+    ///** Make a panel every N frames (start of root board). */
+    //UPROPERTY(config, EditAnywhere, Category="Mark")
+    //bool EveryNFrameForRootBoard { false };
+
+    ///** Interval (start of root board). */
+    //UPROPERTY(config, EditAnywhere, Category="Mark")
+    //int32 IntervalForRootBoard;
+};
+
+USTRUCT()
 struct FExportImageSequenceOptions
 {
     GENERATED_BODY()
@@ -81,6 +116,9 @@ public:
     /** The panel index format. */
     UPROPERTY(EditAnywhere, Category=ExportImageSequence, AdvancedDisplay, meta=(ShowOnlyInnerProperties))
     FExportImageSequenceNumberFormat PanelIndexFormat { 4 };
+
+    UPROPERTY( EditAnywhere, Category=ExportImageSequence )
+    FExportImageSequenceMarkSettings MarkSettings;
 };
 
 //---
