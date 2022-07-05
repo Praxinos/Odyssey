@@ -603,9 +603,9 @@ ShotSequenceHelpers::FindOrCreateMaterialDrawingTrackAndSections( IMovieScenePla
         UMovieSceneTrack* track = iSequence->GetMovieScene()->AddTrack( UMovieScenePrimitiveMaterialTrack::StaticClass(), result.mPlaneComponentBinding );
         result.mTrack = Cast<UMovieScenePrimitiveMaterialTrack>( track );
 
-        result.mTrack->MaterialIndex = 0; //TODO: iMaterialTrackIndex;
+        result.mTrack->SetMaterialIndex( 0 ); //TODO: iMaterialTrackIndex;
 #if WITH_EDITORONLY_DATA
-        result.mTrack->SetDisplayName( FText::Format( LOCTEXT( "MaterialTrackName_Format", "Material Element {0}" ), FText::AsNumber( result.mTrack->MaterialIndex ) ) );
+        result.mTrack->SetDisplayName( FText::Format( LOCTEXT( "MaterialTrackName_Format", "Material Element {0}" ), FText::AsNumber( result.mTrack->GetMaterialIndex() ) ) );
 #endif
     }
 
