@@ -453,13 +453,30 @@ FCinematicBoardTrackEditor::OnAllowDrop( const FDragDropEvent& iDragDropEvent, F
         return false;
     }
 
+    TSharedPtr<ISequencer> sequencerPtr = GetSequencer();
+    if( !sequencerPtr )
+    {
+        return false;
+    }
+
+    UMovieSceneSequence* focusedSequence = sequencerPtr->GetFocusedMovieSceneSequence();
+    if( !focusedSequence )
+    {
+        return false;
+    }
+
     TSharedPtr<FAssetDragDropOp> dragDropOp = StaticCastSharedPtr<FAssetDragDropOp>( operation );
 
     for( const FAssetData& assetData : dragDropOp->GetAssets() )
     {
+        if( !MovieSceneToolHelpers::IsValidAsset( focusedSequence, assetData ) )
+        {
+            continue;
+        }
+
         if( UMovieSceneSequence* Sequence = Cast<UMovieSceneSequence>( assetData.GetAsset() ) )
         {
-            FFrameRate TickResolution = GetSequencer()->GetFocusedTickResolution();
+            FFrameRate TickResolution = sequencerPtr->GetFocusedTickResolution();
 
             const FQualifiedFrameTime InnerDuration = FQualifiedFrameTime(
                 UE::MovieScene::DiscreteSize( Sequence->GetMovieScene()->GetPlaybackRange() ),
@@ -489,6 +506,18 @@ FCinematicBoardTrackEditor::OnDrop( const FDragDropEvent& iDragDropEvent, const 
         return FReply::Unhandled();
     }
 
+    TSharedPtr<ISequencer> sequencerPtr = GetSequencer();
+    if( !sequencerPtr )
+    {
+        return FReply::Unhandled();
+    }
+
+    UMovieSceneSequence* focusedSequence = sequencerPtr->GetFocusedMovieSceneSequence();
+    if( !focusedSequence )
+    {
+        return FReply::Unhandled();
+    }
+
     const FScopedTransaction Transaction( LOCTEXT( "DropAssets", "Drop Assets" ) );
 
     TSharedPtr<FAssetDragDropOp> dragDropOp = StaticCastSharedPtr<FAssetDragDropOp>( operation );
@@ -498,6 +527,11 @@ FCinematicBoardTrackEditor::OnDrop( const FDragDropEvent& iDragDropEvent, const 
     bool anyDropped = false;
     for( const FAssetData& assetData : dragDropOp->GetAssets() )
     {
+        if( !MovieSceneToolHelpers::IsValidAsset( focusedSequence, assetData ) )
+        {
+            continue;
+        }
+
         UMovieSceneSequence* sequence = Cast<UMovieSceneSequence>( assetData.GetAsset() );
 
         if( sequence )
