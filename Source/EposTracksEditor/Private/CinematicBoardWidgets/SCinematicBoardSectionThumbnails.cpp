@@ -5,6 +5,7 @@
 
 #include "Brushes/SlateColorBrush.h"
 #include "MovieSceneToolsUserSettings.h"
+#include "MVVM/ViewModels/SectionModel.h"
 #include "SequencerSectionPainter.h"
 #include "Widgets/Input/SSpinBox.h"
 
@@ -776,7 +777,7 @@ struct FSequencerSectionPainterImpl
 {
 public:
     /** Constructor */
-    FSequencerSectionPainterImpl( UMovieSceneSection& InSection, FSlateWindowElementList& _OutDrawElements, const FGeometry& InSectionGeometry );
+    FSequencerSectionPainterImpl( UMovieSceneSection& InSection, TSharedPtr<UE::Sequencer::FSectionModel> iSectionModel, FSlateWindowElementList& _OutDrawElements, const FGeometry& InSectionGeometry );
 
     /** Virtual destructor */
     virtual ~FSequencerSectionPainterImpl();
@@ -792,8 +793,8 @@ public:
     FTimeToPixel TimeToPixelConverter;
 };
 
-FSequencerSectionPainterImpl::FSequencerSectionPainterImpl( UMovieSceneSection& InSection, FSlateWindowElementList& _OutDrawElements, const FGeometry& InSectionGeometry )
-    : FSequencerSectionPainter( _OutDrawElements, InSectionGeometry, InSection )
+FSequencerSectionPainterImpl::FSequencerSectionPainterImpl( UMovieSceneSection& InSection, TSharedPtr<UE::Sequencer::FSectionModel> iSectionModel, FSlateWindowElementList& _OutDrawElements, const FGeometry& InSectionGeometry )
+    : FSequencerSectionPainter( _OutDrawElements, InSectionGeometry, iSectionModel )
     , TimeToPixelConverter( ConstructTimeConverterForSection( SectionGeometry, InSection ) )
 {
 }
@@ -826,8 +827,11 @@ SCinematicBoardSectionThumbnails::OnPaint( const FPaintArgs& Args, const FGeomet
 
     FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
     UMovieSceneSubSection*  subsection_object = &board_section->GetSubSectionObject();
+    // Just to be sure
+    check( &board_section->GetRootPainter( Args )->Section == subsection_object );
+    //check( board_section->GetRootPainter( Args )->SectionModel->GetSection() == subsection_object );
 
-    FSequencerSectionPainterImpl painter( *subsection_object, OutDrawElements, AllottedGeometry );
+    FSequencerSectionPainterImpl painter( *subsection_object, board_section->GetRootPainter( Args )->SectionModel, OutDrawElements, AllottedGeometry );
     //painter.KeyAreaElements = ;
     painter.SectionClippingRect = board_section->GetRootPainter( Args )->SectionClippingRect.IntersectionWith( MyCullingRect );
     painter.LayerId = LayerId;

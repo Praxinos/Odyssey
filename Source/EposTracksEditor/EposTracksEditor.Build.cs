@@ -57,6 +57,7 @@ public class EposTracksEditor : ModuleRules
 
                 // [EDITOR]
                 // [EDITOR] custom engine dependencies
+                "SequencerCore",
                 "Sequencer",
                 "MovieSceneTools",
                 "UnrealEd",
