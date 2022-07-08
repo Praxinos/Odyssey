@@ -4,9 +4,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
 #include "Modules/ModuleManager.h"
 
-class UNamingFormatter;
+#include "INamingFormatter.h" // Because if template
 
 class FEposSequenceModule
     : public IModuleInterface
