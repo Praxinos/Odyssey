@@ -3,7 +3,7 @@
 
 #include "NoteTrack/NoteTrackEditor.h"
 
-#include "AssetRegistryModule.h"
+#include "AssetRegistry/AssetRegistryModule.h"
 #include "AssetToolsModule.h"
 #include "ContentBrowserModule.h"
 #include "Rendering/DrawElements.h"

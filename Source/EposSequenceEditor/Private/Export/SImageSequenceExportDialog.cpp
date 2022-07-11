@@ -3,8 +3,8 @@
 
 #include "Export/SImageSequenceExportDialog.h"
 
-#include "AssetData.h"
-#include "AssetRegistryModule.h"
+#include "AssetRegistry/AssetData.h"
+#include "AssetRegistry/AssetRegistryModule.h"
 #include "AssetToolsModule.h"
 #include "EditorStyleSet.h"
 #include "Factories/Factory.h"

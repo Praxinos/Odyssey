@@ -280,7 +280,7 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
     TSharedPtr<SSpinBox<float>> planeDistanceSpinBox;
     TSharedPtr<SSpinBox<float>> cameraFocalLengthSpinBox;
 
-    const UEnum* scalePlaneEnum = FindObject<UEnum>( ANY_PACKAGE, TEXT( "EScalePlane" ) );
+    const UEnum* scalePlaneEnum = FindObject<UEnum>( nullptr, TEXT( "/Script/EposTracksEditor.EScalePlane" ) );
 
     mNoteSplitter = SNew( SSplitter )
         .Orientation( Orient_Vertical )

@@ -383,7 +383,7 @@ FEncoderSettingsDetailsCustomization::CustomizeDetails( IDetailLayoutBuilder& io
 
     //--- Add some presets codecs
 
-    const UEnum* codecPresetsEnum = FindObject<UEnum>( ANY_PACKAGE, TEXT( "ECodecPresets" ) );
+    const UEnum* codecPresetsEnum = FindObject<UEnum>( nullptr, TEXT( "/Script/EposSequenceEditor.ECodecPresets" ) );
 
     encoderCategory.AddCustomRow( LOCTEXT( "CodecPresets", "Codec Presets" ) )
         .NameContent()

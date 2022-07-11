@@ -3,7 +3,7 @@
 
 #include "NoteTrack/NoteSection.h"
 
-#include "AssetRegistryModule.h"
+#include "AssetRegistry/AssetRegistryModule.h"
 #include "SequencerSectionPainter.h"
 #include "EditorStyleSet.h"
 #include "ISequencerSection.h"

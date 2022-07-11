@@ -24,6 +24,7 @@
 #include "Tracks/MovieSceneVisibilityTrack.h"
 
 #include "EposSequenceHelpers.h"
+#include "PlaneActor.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutSection.h"
 #include "Tools/EposSequenceTools.h"

@@ -218,7 +218,14 @@ FEposSequenceEditorModule::RegisterSettings()
     //PATCH: Should be done AUTOMATICALLY via EditorPerProjectUserSettings.ini config file, but doesn't work in 5.0
     TSharedPtr<IPlugin> epos_plugin = IPluginManager::Get().FindPlugin( "Epos" );
     FString PluginConfigDir = epos_plugin->GetBaseDir() / TEXT( "Config/" );
-    mSequencerSettings->LoadConfig( USequencerSettings::StaticClass(), *FPaths::Combine( PluginConfigDir, TEXT( "EditorPerProjectUserSettings.ini" ) ) );
+    // 5.1: With the warning of EditorPerProjectUserSettings.ini file which shouldn't be overrided in the plugin
+    //mSequencerSettings->LoadConfig( USequencerSettings::StaticClass(), *FPaths::Combine( PluginConfigDir, TEXT( "EditorPerProjectUserSettings.ini" ) ) );
+    // Move its content to BaseEpos.ini
+    // This line will override the user config values
+    mSequencerSettings->LoadConfig( USequencerSettings::StaticClass(), *FPaths::Combine( PluginConfigDir, TEXT( "BaseEpos.ini" ) ) );
+    // This line is to load again the user config values
+    // Otherwise, the values will always be the ones inside BaseEpos.ini (like ZeroPaddedFrame which will always be 4)
+    mSequencerSettings->LoadConfig();
     //~
 
     SettingsModule->RegisterSettings( "Editor", "ContentEditors", "EposSequencerEditor" /* Name used inside toolkit UniqueName */,

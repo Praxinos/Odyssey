@@ -3,7 +3,7 @@
 
 #include "Tools/EposSequenceTools.h"
 
-#include "AssetRegistryModule.h"
+#include "AssetRegistry/AssetRegistryModule.h"
 #include "AssetToolsModule.h"
 #include "CineCameraActor.h"
 #include "IAssetTools.h"
