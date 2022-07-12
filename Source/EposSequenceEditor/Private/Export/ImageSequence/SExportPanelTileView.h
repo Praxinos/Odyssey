@@ -7,8 +7,8 @@
 
 #include "Widgets/Views/STableRow.h"
 
+#include "Export/ImageSequence/PanelThumbnail.h"
 #include "Export/ExportStruct.h"
-#include "Export/PanelThumbnail.h"
 
 //---
 

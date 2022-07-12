@@ -12,7 +12,6 @@
 #include "Board/BoardSequence.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "EposSequenceHelpers.h"
-#include "Export/ExportImageSequenceSettings.h"
 #include "NamingConvention.h"
 #include "Tools/EposSequenceTools.h"
 

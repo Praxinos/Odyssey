@@ -1,7 +1,7 @@
 // IDDN.FR.001.220036.001.S.P.2021.000.00000
 // EPOS is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
-#include "Export/SExportPanelTileView.h"
+#include "Export/ImageSequence/SExportPanelTileView.h"
 
 #include "Internationalization/BreakIterator.h"
 #include "ISequencer.h"
@@ -11,9 +11,9 @@
 #include "Widgets/Layout/SScaleBox.h"
 #include "Widgets/SViewport.h"
 
-#include "Export/ExportImageSequenceNamingFormatter.h"
-#include "Export/ExportImageSequenceSettings.h"
-#include "Export/PanelThumbnail.h"
+#include "Export/ImageSequence/ExportImageSequenceNamingFormatter.h"
+#include "Export/ImageSequence/ExportImageSequenceSettings.h"
+#include "Export/ImageSequence/PanelThumbnail.h"
 #include "Export/SceneRenderer.h"
 #include "Styles/EposSequenceEditorStyle.h"
 
