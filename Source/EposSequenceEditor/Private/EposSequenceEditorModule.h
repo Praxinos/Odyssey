@@ -64,5 +64,5 @@ private:
     USequencerSettings*                 mSequencerSettings;
 
     FDelegateHandle                     mMovieRendererDelegate;
-    FDelegateHandle                     mImageSequenceExportRendererDelegate;
+    FDelegateHandle                     mExportSequencerRendererDelegate;
 };

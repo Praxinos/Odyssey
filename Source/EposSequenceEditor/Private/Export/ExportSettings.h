@@ -43,3 +43,10 @@ public:
     //UPROPERTY(config, EditAnywhere, Category="Mark")
     //int32 IntervalForRootBoard;
 };
+
+//---
+
+class ISequencer;
+class UMovieSceneSequence;
+
+float GetMostRelevantCameraAspectRatio( ISequencer* iSequencer, UMovieSceneSequence* iSequence );
