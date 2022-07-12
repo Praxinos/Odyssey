@@ -8,20 +8,20 @@
 //---
 
 struct FExportImageSequenceOptions;
-struct FExportImageSequenceStruct;
+struct FExportStruct;
 class IImageWriteQueue;
 class ISequencer;
 
 class FExportImageSequenceExporter
 {
 public:
-    FExportImageSequenceExporter( TWeakPtr<ISequencer> iSequencer, const FExportImageSequenceStruct* iImageSequenceStruct, const FExportImageSequenceOptions* iOptions );
+    FExportImageSequenceExporter( TWeakPtr<ISequencer> iSequencer, const FExportStruct* iStruct, const FExportImageSequenceOptions* iOptions );
 
     bool Export();
 
 private:
     TWeakPtr<ISequencer>                mSequencer;
-    const FExportImageSequenceStruct*   mImageSequenceStruct { nullptr };
+    const FExportStruct*                mStruct { nullptr };
     const FExportImageSequenceOptions*  mImageSequenceOptions { nullptr };
 
     IImageWriteQueue*                   mImageWriteQueue { nullptr };

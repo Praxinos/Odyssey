@@ -34,10 +34,10 @@
 
 #include "Board/BoardSequence.h"
 #include "IEposSequenceEditorToolkit.h"
-#include "Export/ExportImageSequenceConverter.h"
+#include "Export/ExportConverter.h"
 #include "Export/ExportImageSequenceExporter.h"
 #include "Export/ExportImageSequenceSettings.h"
-#include "Export/ExportImageSequenceStruct.h"
+#include "Export/ExportStruct.h"
 #include "Export/SceneRenderer.h"
 #include "Export/SExportPanelTileView.h"
 #include "Settings/EposSequenceEditorSettings.h"
@@ -345,7 +345,7 @@ SExportStoryboardSettings::GlobalSettingsChanged( const FPropertyChangedEvent& i
     // Update panel list only for relevent options (inside marks for the moment)
     // Other settings won't change the panel list
     if( iEvent.Property->GetOwnerStruct()
-        && iEvent.Property->GetOwnerStruct()->GetFName() == FExportImageSequenceMarkSettings::StaticStruct()->GetFName() )
+        && iEvent.Property->GetOwnerStruct()->GetFName() == FExportMarkSettings::StaticStruct()->GetFName() )
     {
         if( mPanelListView )
         {
@@ -360,8 +360,8 @@ SExportStoryboardSettings::MakePanelItems()
 {
     mPanelItemsList.Empty();
 
-    FExportImageSequenceStruct image_sequence_struct;
-    FExportImageSequenceConverter converter( mSequencer, mRootSequence, &mExportImageSequenceSettings->Options, &image_sequence_struct );
+    FExportStruct image_sequence_struct;
+    FExportConverter converter( mSequencer, mRootSequence, &mExportImageSequenceSettings->Options.MarkSettings, &image_sequence_struct );
 
     // Build a list of items - one for each panel
     for( int32 i = 0; i < image_sequence_struct.Panels.Num(); i++ )
@@ -452,7 +452,7 @@ SExportStoryboardSettings::CanExportStoryboard() const
 FReply
 SExportStoryboardSettings::OnExportStoryboard()
 {
-    FExportImageSequenceStruct image_sequence_struct;
+    FExportStruct image_sequence_struct;
     for( const auto& panel : mPanelItemsList )
     {
         if( !panel->mExport )

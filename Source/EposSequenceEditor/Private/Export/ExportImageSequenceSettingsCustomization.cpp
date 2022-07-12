@@ -9,7 +9,7 @@
 #include "DetailWidgetRow.h"
 
 #include "Export/ExportImageSequenceSettings.h"
-#include "Export/ExportImageSequenceStruct.h"
+#include "Export/ExportStruct.h"
 #include "Settings/NamingConventionSettings.h"
 #include "SPatternTextBox.h"
 

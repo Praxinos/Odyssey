@@ -14,7 +14,7 @@
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "EposSequenceModule.h"
 #include "Export/ExportImageSequenceSettings.h"
-#include "Export/ExportImageSequenceStruct.h"
+#include "Export/ExportStruct.h"
 #include "INamingFormatter.h"
 #include "Settings/NamingConventionSettings.h"
 #include "Shot/ShotSequence.h"
@@ -24,9 +24,9 @@
 
 //---
 
-FExportImageSequenceNamingFormatter::FExportImageSequenceNamingFormatter( TWeakPtr<ISequencer> iSequencer, const FExportImageSequencePanel* iImageSequencePanel, int32 iIndex, const FExportImageSequenceOptions* iOptions )
+FExportImageSequenceNamingFormatter::FExportImageSequenceNamingFormatter( TWeakPtr<ISequencer> iSequencer, const FExportPanel* iPanel, int32 iIndex, const FExportImageSequenceOptions* iOptions )
     : mSequencer( iSequencer )
-    , mCurrentPanel( iImageSequencePanel )
+    , mCurrentPanel( iPanel )
     , mIndex( iIndex )
     , mImageSequenceOptions( iOptions )
 {

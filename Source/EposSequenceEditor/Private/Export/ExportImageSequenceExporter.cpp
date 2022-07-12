@@ -10,15 +10,15 @@
 #include "Export/SceneRenderer.h"
 #include "Export/ExportImageSequenceNamingFormatter.h"
 #include "Export/ExportImageSequenceSettings.h"
-#include "Export/ExportImageSequenceStruct.h"
+#include "Export/ExportStruct.h"
 
 #define LOCTEXT_NAMESPACE "ExportImageSequenceExporter"
 
 //---
 
-FExportImageSequenceExporter::FExportImageSequenceExporter( TWeakPtr<ISequencer> iSequencer, const FExportImageSequenceStruct* iImageSequenceStruct, const FExportImageSequenceOptions* iOptions )
+FExportImageSequenceExporter::FExportImageSequenceExporter( TWeakPtr<ISequencer> iSequencer, const FExportStruct* iStruct, const FExportImageSequenceOptions* iOptions )
     : mSequencer( iSequencer )
-    , mImageSequenceStruct( iImageSequenceStruct )
+    , mStruct( iStruct )
     , mImageSequenceOptions( iOptions )
 {
     mImageWriteQueue = &FModuleManager::LoadModuleChecked<IImageWriteQueueModule>( "ImageWriteQueue" ).GetWriteQueue();
@@ -29,9 +29,9 @@ FExportImageSequenceExporter::Export()
 {
     TArray<FColor> samples;
 
-    for( int32 i = 0; i < mImageSequenceStruct->Panels.Num(); i++ )
+    for( int32 i = 0; i < mStruct->Panels.Num(); i++ )
     {
-        FExportImageSequenceNamingFormatter name_formatter( mSequencer, &mImageSequenceStruct->Panels[i], i, mImageSequenceOptions );
+        FExportImageSequenceNamingFormatter name_formatter( mSequencer, &mStruct->Panels[i], i, mImageSequenceOptions );
         FString name;
         bool is_formatted = name_formatter.FormatName( mImageSequenceOptions->Pattern, name );
         if( !is_formatted )
@@ -39,7 +39,7 @@ FExportImageSequenceExporter::Export()
 
         FString pathfile = mImageSequenceOptions->ExportPath.Path / name;
 
-        FSceneRenderer renderer( mSequencer, &mImageSequenceStruct->Panels[i], mImageSequenceOptions );
+        FSceneRenderer renderer( mSequencer, &mStruct->Panels[i], mImageSequenceOptions );
         bool rendering = renderer.RenderPlane( samples );
         if( !rendering )
             continue;

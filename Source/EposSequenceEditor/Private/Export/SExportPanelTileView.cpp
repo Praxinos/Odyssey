@@ -63,14 +63,14 @@ SPanelTileView::Construct( const FArguments& InArgs, const TSharedRef<STableView
     FText panel_source;
     if( mPanelItem->mPanel.mSourceMark.IsSet() )
     {
-        const FExportImageSequencePanelSourceMark& source_mark = mPanelItem->mPanel.mSourceMark.GetValue();
+        const FExportPanelSourceMark& source_mark = mPanelItem->mPanel.mSourceMark.GetValue();
 
         panel_source = FText::Format( LOCTEXT( "panel-item.source.mark", "Mark: {0}" ), FText::FromString( source_mark.mMark.Label ) );
     }
 
     if( mPanelItem->mPanel.mSourceDrawing.IsSet() )
     {
-        const FExportImageSequencePanelSourceDrawing& source_drawing = mPanelItem->mPanel.mSourceDrawing.GetValue();
+        const FExportPanelSourceDrawing& source_drawing = mPanelItem->mPanel.mSourceDrawing.GetValue();
 
         if( source_drawing.mDrawings.Num() == 1 )
         {
@@ -242,7 +242,7 @@ SPanelTileView::GetTooltipText() const
 
     if( mPanelItem->mPanel.mSourceMark.IsSet() )
     {
-        const FExportImageSequencePanelSourceMark& source_mark = mPanelItem->mPanel.mSourceMark.GetValue();
+        const FExportPanelSourceMark& source_mark = mPanelItem->mPanel.mSourceMark.GetValue();
 
         FText line = FText::Format( LOCTEXT( "item.source-mark.tooltip", "Mark: {0}" ), FText::FromString( source_mark.mMark.Label ) );
         tooltip_texts.Add( line );
@@ -253,7 +253,7 @@ SPanelTileView::GetTooltipText() const
         FText line = FText::Format( LOCTEXT( "item.source-drawing-list.tooltip", "Drawing appearing in {0}|plural(one=plane,other=planes):" ), mPanelItem->mPanel.mSourceDrawing.GetValue().mDrawings.Num() );
         tooltip_texts.Add( line );
 
-        const FExportImageSequencePanelSourceDrawing& source_drawing = mPanelItem->mPanel.mSourceDrawing.GetValue();
+        const FExportPanelSourceDrawing& source_drawing = mPanelItem->mPanel.mSourceDrawing.GetValue();
 
         for( auto drawing_and_binding : source_drawing.mDrawings )
         {

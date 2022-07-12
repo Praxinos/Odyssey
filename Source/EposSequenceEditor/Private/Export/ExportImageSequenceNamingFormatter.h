@@ -7,9 +7,9 @@
 
 //---
 
-struct FExportImageSequencePanel;
+struct FExportPanel;
 struct FExportImageSequenceOptions;
-struct FExportImageSequenceStruct;
+struct FExportStruct;
 class ISequencer;
 class UMovieSceneSequence;
 class UShotSequence;
@@ -17,7 +17,7 @@ class UShotSequence;
 class FExportImageSequenceNamingFormatter
 {
 public:
-    FExportImageSequenceNamingFormatter( TWeakPtr<ISequencer> iSequencer, const FExportImageSequencePanel* iImageSequencePanel, int32 iIndex, const FExportImageSequenceOptions* iOptions );
+    FExportImageSequenceNamingFormatter( TWeakPtr<ISequencer> iSequencer, const FExportPanel* iPanel, int32 iIndex, const FExportImageSequenceOptions* iOptions );
 
     bool FormatName( const FString& iPatternToFormat, FString& oPatternFormatted );
 
@@ -27,7 +27,7 @@ private:
 
 private:
     TWeakPtr<ISequencer>                mSequencer;
-    const FExportImageSequencePanel*    mCurrentPanel { nullptr };
+    const FExportPanel*                 mCurrentPanel { nullptr };
     int32                               mIndex;
     const FExportImageSequenceOptions*  mImageSequenceOptions { nullptr };
 };
