@@ -37,6 +37,7 @@
 #include "Export/ExportConverter.h"
 #include "Export/ExportStruct.h"
 #include "Export/ImageSequence/SImageSequenceExportDialog.h"
+#include "Export/PDF/SPDFExportDialog.h"
 #include "Export/SceneRenderer.h"
 #include "Settings/EposSequenceEditorSettings.h"
 #include "Settings/NamingConventionSettings.h"
@@ -87,7 +88,8 @@ private:
 
     EExportTab                  mActiveTab;
 
-    TSharedPtr<SExportImageSequenceSettings>  mImageSequenceWidget;
+    TSharedPtr<SExportImageSequenceSettings>    mImageSequenceWidget;
+    TSharedPtr<SExportPDFSettings>              mPDFWidget;
 };
 
 void
@@ -97,6 +99,7 @@ SExportStoryboardSettings::Construct( const FArguments& InArgs )
     check( mParentWindow.IsValid() );
 
     mImageSequenceWidget = StaticCastSharedRef<SExportImageSequenceSettings>( InArgs._ImageSequenceSettings.Widget );
+    mPDFWidget = StaticCastSharedRef<SExportPDFSettings>( InArgs._PDFSettings.Widget );
 
     //---
 
@@ -113,53 +116,53 @@ SExportStoryboardSettings::Construct( const FArguments& InArgs )
     [
         SNew(SVerticalBox)
 
-        //// Tabs
-        //+ SVerticalBox::Slot()
-        //.AutoHeight()
-        //.Padding( 4, 4, 4, 4 )
-        //[
-        //    SNew( SHorizontalBox )
-        //    + SHorizontalBox::Slot()
-        //    .FillWidth( .5f )
-        //    [
-        //        SNew( SSpacer )
-        //    ]
-        //    + SHorizontalBox::Slot()
-        //    .HAlign( HAlign_Fill )
-        //    .Padding( FMargin( 0.f, 1.0f, 1.0f, 0.0f ) )
-        //    [
-        //        SNew(SCheckBox)
-        //        .Style( FAppStyle::Get(),  "ToolPalette.DockingTab" )
-        //        .Padding( 7.f )
-        //        .HAlign( HAlign_Center )
-        //        .OnCheckStateChanged_Lambda( [this] (const ECheckBoxState) { mActiveTab = EExportTab::kImageSequence; } )
-        //        .IsChecked_Lambda( [this] () -> ECheckBoxState { return mActiveTab == EExportTab::kImageSequence ? ECheckBoxState::Checked : ECheckBoxState::Unchecked; } )
-        //        [
-        //            SNew( STextBlock )
-        //            .Text( LOCTEXT( "export-storyboard.tabs.export-image-sequence", "Image Sequence" ) )
-        //        ]
-        //    ]
-        //    + SHorizontalBox::Slot()
-        //    .HAlign( HAlign_Fill )
-        //    .Padding( FMargin( 0.f, 1.0f, 1.0f, 0.0f ) )
-        //    [
-        //        SNew(SCheckBox)
-        //        .Style( FAppStyle::Get(),  "ToolPalette.DockingTab" )
-        //        .Padding( 7.f )
-        //        .HAlign( HAlign_Center )
-        //        .OnCheckStateChanged_Lambda( [this] (const ECheckBoxState) { mActiveTab = EExportTab::kPDF; } )
-        //        .IsChecked_Lambda( [this] () -> ECheckBoxState { return mActiveTab == EExportTab::kPDF ? ECheckBoxState::Checked : ECheckBoxState::Unchecked; } )
-        //        [
-        //            SNew( STextBlock )
-        //            .Text( LOCTEXT( "export-storyboard.tabs.export-pdf", "PDF" ) )
-        //        ]
-        //    ]
-        //    + SHorizontalBox::Slot()
-        //    .FillWidth( .5f )
-        //    [
-        //        SNew( SSpacer )
-        //    ]
-        //]
+        // Tabs
+        + SVerticalBox::Slot()
+        .AutoHeight()
+        .Padding( 4, 4, 4, 4 )
+        [
+            SNew( SHorizontalBox )
+            + SHorizontalBox::Slot()
+            .FillWidth( .5f )
+            [
+                SNew( SSpacer )
+            ]
+            + SHorizontalBox::Slot()
+            .HAlign( HAlign_Fill )
+            .Padding( FMargin( 0.f, 1.0f, 1.0f, 0.0f ) )
+            [
+                SNew(SCheckBox)
+                .Style( FAppStyle::Get(),  "ToolPalette.DockingTab" )
+                .Padding( 7.f )
+                .HAlign( HAlign_Center )
+                .OnCheckStateChanged_Lambda( [this] (const ECheckBoxState) { mActiveTab = EExportTab::kImageSequence; } )
+                .IsChecked_Lambda( [this] () -> ECheckBoxState { return mActiveTab == EExportTab::kImageSequence ? ECheckBoxState::Checked : ECheckBoxState::Unchecked; } )
+                [
+                    SNew( STextBlock )
+                    .Text( LOCTEXT( "export-storyboard.tabs.export-image-sequence", "Image Sequence" ) )
+                ]
+            ]
+            + SHorizontalBox::Slot()
+            .HAlign( HAlign_Fill )
+            .Padding( FMargin( 0.f, 1.0f, 1.0f, 0.0f ) )
+            [
+                SNew(SCheckBox)
+                .Style( FAppStyle::Get(),  "ToolPalette.DockingTab" )
+                .Padding( 7.f )
+                .HAlign( HAlign_Center )
+                .OnCheckStateChanged_Lambda( [this] (const ECheckBoxState) { mActiveTab = EExportTab::kPDF; } )
+                .IsChecked_Lambda( [this] () -> ECheckBoxState { return mActiveTab == EExportTab::kPDF ? ECheckBoxState::Checked : ECheckBoxState::Unchecked; } )
+                [
+                    SNew( STextBlock )
+                    .Text( LOCTEXT( "export-storyboard.tabs.export-pdf", "PDF" ) )
+                ]
+            ]
+            + SHorizontalBox::Slot()
+            .FillWidth( .5f )
+            [
+                SNew( SSpacer )
+            ]
+        ]
 
         + SVerticalBox::Slot()
         .FillHeight( 1.0f )
@@ -173,45 +176,48 @@ SExportStoryboardSettings::Construct( const FArguments& InArgs )
                 mImageSequenceWidget.ToSharedRef()
             ]
 
-            //+ SWidgetSwitcher::Slot()
-            //[
-            //    InArgs._PDFSettings.Widget
-            //]
+            + SWidgetSwitcher::Slot()
+            [
+                mPDFWidget.ToSharedRef()
+            ]
         ]
 
         //---
 
         + SVerticalBox::Slot()
         .AutoHeight()
-        .HAlign( HAlign_Right )
+        .HAlign( HAlign_Fill )
         .VAlign( VAlign_Bottom )
         .Padding( 10.f, 4.f )
         [
             SNew(STextBlock)
             .Text( this, &SExportStoryboardSettings::GetFullPath )
             .AutoWrapText( true )
+            .Justification( ETextJustify::Right )
         ]
 
         + SVerticalBox::Slot()
         .AutoHeight()
-        .HAlign( HAlign_Right )
+        .HAlign( HAlign_Fill )
         .Padding( 10.f, 4.f )
         [
             SNew(STextBlock)
             .Text(this, &SExportStoryboardSettings::GetErrorText)
             .TextStyle( FAppStyle::Get(), TEXT("Log.Error") )
             .Visibility_Lambda( [this]() { return GetErrorText().IsEmpty() ? EVisibility::Collapsed : EVisibility::Visible; } )
+            .Justification( ETextJustify::Right )
         ]
 
         + SVerticalBox::Slot()
         .AutoHeight()
-        .HAlign( HAlign_Right )
+        .HAlign( HAlign_Fill )
         .Padding( 10.f, 4.f )
         [
             SNew( STextBlock )
             .Text(this, &SExportStoryboardSettings::GetWarningText)
             .TextStyle( FAppStyle::Get(), TEXT("Log.Warning") )
             .Visibility_Lambda( [this]() { return GetWarningText().IsEmpty() ? EVisibility::Collapsed : EVisibility::Visible; } )
+            .Justification( ETextJustify::Right )
         ]
 
         //---
@@ -257,6 +263,11 @@ SExportStoryboardSettings::GetFullPath() const
         return mImageSequenceWidget->GetFullPath();
     }
 
+    if( mActiveTab == EExportTab::kPDF )
+    {
+        return mPDFWidget->GetFullPath();
+    }
+
     return FText::GetEmpty();
 }
 
@@ -270,6 +281,13 @@ SExportStoryboardSettings::GetErrorText() const
             return text;
     }
 
+    if( mActiveTab == EExportTab::kPDF )
+    {
+        FText text = mPDFWidget->GetErrorText();
+        if( !text.IsEmpty() )
+            return text;
+    }
+
     return FText::GetEmpty();
 }
 
@@ -279,6 +297,13 @@ SExportStoryboardSettings::GetWarningText() const
     if( mActiveTab == EExportTab::kImageSequence )
     {
         FText text = mImageSequenceWidget->GetWarningText();
+        if( !text.IsEmpty() )
+            return text;
+    }
+
+    if( mActiveTab == EExportTab::kPDF )
+    {
+        FText text = mPDFWidget->GetWarningText();
         if( !text.IsEmpty() )
             return text;
     }
@@ -298,6 +323,12 @@ SExportStoryboardSettings::CanExportStoryboard() const
             return false;
     }
 
+    if( mActiveTab == EExportTab::kPDF )
+    {
+        if( !mPDFWidget->CanExportStoryboard() )
+            return false;
+    }
+
     return true;
 }
 
@@ -307,6 +338,11 @@ SExportStoryboardSettings::OnExportStoryboard()
     if( mActiveTab == EExportTab::kImageSequence )
     {
         mImageSequenceWidget->ExportStoryboard();
+    }
+
+    if( mActiveTab == EExportTab::kPDF )
+    {
+        mPDFWidget->ExportStoryboard();
     }
 
     //---
@@ -348,7 +384,7 @@ ExportStoryboardDialog::OpenExportImageSequenceDialog( const TSharedRef<FTabMana
                         ]
                         .PDFSettings()
                         [
-                            SNullWidget::NullWidget
+                            SNew( SExportPDFSettings, sequencer, iSequence )
                         ]
                         );
 
@@ -395,7 +431,7 @@ ExportStoryboardDialog::OpenExportPDFDialog( const TSharedRef<FTabManager>& TabM
                         ]
                         .PDFSettings()
                         [
-                            SNullWidget::NullWidget
+                            SNew( SExportPDFSettings, sequencer, iSequence )
                         ]
                         );
 

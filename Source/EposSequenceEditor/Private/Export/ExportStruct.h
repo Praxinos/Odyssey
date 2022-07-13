@@ -46,7 +46,7 @@ public:
 
 //---
 
-USTRUCT()
+USTRUCT( BlueprintType )
 struct FExportStruct
 {
     GENERATED_BODY()
