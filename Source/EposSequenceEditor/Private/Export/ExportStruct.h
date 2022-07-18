@@ -9,16 +9,16 @@
 
 #include "EposSequenceHelpers.h"
 
-#include "ExportImageSequenceStruct.generated.h"
+#include "ExportStruct.generated.h"
 
 //---
 
-struct FExportImageSequencePanelSourceMark
+struct FExportPanelSourceMark
 {
     FMovieSceneMarkedFrame  mMark;
 };
 
-struct FExportImageSequencePanelSourceDrawing
+struct FExportPanelSourceDrawing
 {
     struct FDrawingAndBindingId
     {
@@ -30,28 +30,28 @@ struct FExportImageSequencePanelSourceDrawing
 };
 
 USTRUCT()
-struct FExportImageSequencePanel
+struct FExportPanel
 {
     GENERATED_BODY()
 
 public:
-    UPROPERTY( EditAnywhere, Category=ExportImageSequenceStruct )
+    UPROPERTY( EditAnywhere, Category=ExportStruct )
     FFrameNumber GlobalFrame;
 
     UMovieSceneSequence* mSequence;
 
-    TOptional<FExportImageSequencePanelSourceMark>      mSourceMark;
-    TOptional<FExportImageSequencePanelSourceDrawing>   mSourceDrawing;
+    TOptional<FExportPanelSourceMark>      mSourceMark;
+    TOptional<FExportPanelSourceDrawing>   mSourceDrawing;
 };
 
 //---
 
 USTRUCT()
-struct FExportImageSequenceStruct
+struct FExportStruct
 {
     GENERATED_BODY()
 
 public:
-    UPROPERTY( EditAnywhere, Category=ExportImageSequenceStruct )
-    TArray<FExportImageSequencePanel> Panels;
+    UPROPERTY( EditAnywhere, Category=ExportStruct )
+    TArray<FExportPanel> Panels;
 };

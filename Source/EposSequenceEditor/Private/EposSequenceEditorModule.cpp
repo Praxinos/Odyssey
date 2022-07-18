@@ -15,9 +15,9 @@
 #include "Board/BoardSequenceActions.h"
 #include "Board/BoardSequenceCustomization.h"
 #include "EposSequenceEditorCommands.h"
-#include "Export/ImageSequenceExportRenderer.h"
-#include "Export/ExportImageSequenceSettings.h"
-#include "Export/ExportImageSequenceSettingsCustomization.h"
+#include "Export/ImageSequence/ExportImageSequenceSettings.h"
+#include "Export/ImageSequence/ExportImageSequenceSettingsCustomization.h"
+#include "Export/ExportSequencerRenderer.h"
 #include "Import/ImportImageSequenceSettings.h"
 #include "Import/ImportImageSequenceSettingsCustomization.h"
 #include "Render/EposSequencePipelineRenderer.h"
@@ -319,7 +319,7 @@ FEposSequenceEditorModule::RegisterMovieRenderer()
     ISequencerModule& SequencerModule = FModuleManager::LoadModuleChecked<ISequencerModule>( "Sequencer" );
 
     mMovieRendererDelegate = SequencerModule.RegisterMovieRenderer( TUniquePtr<IMovieRendererInterface>( new FEposSequencePipelineRenderer ) );
-    mImageSequenceExportRendererDelegate = SequencerModule.RegisterMovieRenderer( TUniquePtr<IMovieRendererInterface>( new FImageSequenceExportRenderer ) );
+    mExportSequencerRendererDelegate = SequencerModule.RegisterMovieRenderer( TUniquePtr<IMovieRendererInterface>( new FExportSequencerRenderer ) );
 }
 
 void
@@ -329,7 +329,7 @@ FEposSequenceEditorModule::UnregisterMovieRenderer()
     if( SequencerModule )
     {
         SequencerModule->UnregisterMovieRenderer( mMovieRendererDelegate );
-        SequencerModule->UnregisterMovieRenderer( mImageSequenceExportRendererDelegate );
+        SequencerModule->UnregisterMovieRenderer( mExportSequencerRendererDelegate );
     }
 }
 

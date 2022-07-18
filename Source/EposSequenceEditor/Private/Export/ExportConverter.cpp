@@ -1,7 +1,7 @@
 // IDDN.FR.001.220036.001.S.P.2021.000.00000
 // EPOS is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
-#include "Export/ExportImageSequenceConverter.h"
+#include "Export/ExportConverter.h"
 
 #include "AssetToolsModule.h"
 #include "Channels/MovieSceneObjectPathChannel.h"
@@ -12,19 +12,18 @@
 #include "Board/BoardSequence.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "EposSequenceHelpers.h"
-#include "Export/ExportImageSequenceSettings.h"
 #include "NamingConvention.h"
 #include "Tools/EposSequenceTools.h"
 
-#define LOCTEXT_NAMESPACE "ExportImageSequenceConverter"
+#define LOCTEXT_NAMESPACE "ExportConverter"
 
 //---
 
-FExportImageSequenceConverter::FExportImageSequenceConverter( TWeakPtr<ISequencer> iSequencer, const UMovieSceneSequence* iRootSequence, const FExportImageSequenceOptions* iOptions, FExportImageSequenceStruct* oImageSequenceStruct )
+FExportConverter::FExportConverter( TWeakPtr<ISequencer> iSequencer, const UMovieSceneSequence* iRootSequence, const FExportMarkSettings* iMarkSettings, FExportStruct* oStruct )
     : mSequencer( iSequencer )
-    , mImageSequenceOptions( iOptions )
-    , mImageSequenceStruct( oImageSequenceStruct )
     , mRootSequence( iRootSequence )
+    , mMarkSettings( iMarkSettings )
+    , mStruct( oStruct )
 {
     check( iSequencer.Pin()->GetFocusedMovieSceneSequence() == mRootSequence );
 
@@ -32,7 +31,7 @@ FExportImageSequenceConverter::FExportImageSequenceConverter( TWeakPtr<ISequence
 }
 
 void
-FExportImageSequenceConverter::Convert()
+FExportConverter::Convert()
 {
     ISequencer* sequencer = mSequencer.Pin().Get();
 
@@ -55,17 +54,17 @@ FExportImageSequenceConverter::Convert()
             {
                 FFrameNumber frame_in_root = ( mark.FrameNumber * iLocalSpace.RootToSequenceTransform.InverseLinearOnly() ).GetFrame();
 
-                FExportImageSequencePanel* existing_panel = mPanels.FindByPredicate( [frame_in_root]( const FExportImageSequencePanel& iElement )
-                                                                                     {
-                                                                                         return iElement.GlobalFrame == frame_in_root;
-                                                                                     } );
+                FExportPanel* existing_panel = mPanels.FindByPredicate( [frame_in_root]( const FExportPanel& iElement )
+                                                                        {
+                                                                            return iElement.GlobalFrame == frame_in_root;
+                                                                        } );
                 if( existing_panel )
                 {
                     existing_panel->mSourceMark = { mark };
                 }
                 else
                 {
-                    FExportImageSequencePanel panel;
+                    FExportPanel panel;
                     panel.GlobalFrame = frame_in_root;
                     panel.mSequence = iSequence;
                     panel.mSourceMark = { mark };
@@ -98,25 +97,25 @@ FExportImageSequenceConverter::Convert()
 
                     FFrameNumber frame_in_root = ( frame * iLocalSpace.RootToSequenceTransform.InverseLinearOnly() ).GetFrame();
 
-                    FExportImageSequencePanel* existing_panel = mPanels.FindByPredicate( [frame_in_root]( const FExportImageSequencePanel& iElement )
-                                                                                         {
-                                                                                             return iElement.GlobalFrame == frame_in_root;
-                                                                                         } );
+                    FExportPanel* existing_panel = mPanels.FindByPredicate( [frame_in_root]( const FExportPanel& iElement )
+                                                                            {
+                                                                                return iElement.GlobalFrame == frame_in_root;
+                                                                            } );
                     if( existing_panel )
                     {
                         check( existing_panel->mSequence == iSequence );
 
                         if( !existing_panel->mSourceDrawing.IsSet() )
-                            existing_panel->mSourceDrawing = FExportImageSequencePanelSourceDrawing();
+                            existing_panel->mSourceDrawing = FExportPanelSourceDrawing();
 
                         existing_panel->mSourceDrawing.GetValue().mDrawings.Add( { drawing, plane_binding } );
                     }
                     else
                     {
-                        FExportImageSequencePanel panel;
+                        FExportPanel panel;
                         panel.GlobalFrame = frame_in_root;
                         panel.mSequence = iSequence;
-                        FExportImageSequencePanelSourceDrawing source_drawing;
+                        FExportPanelSourceDrawing source_drawing;
                         source_drawing.mDrawings.Add( { drawing, plane_binding } );
                         panel.mSourceDrawing = source_drawing;
 
@@ -139,10 +138,10 @@ FExportImageSequenceConverter::Convert()
 
             FFrameNumber frame_in_root = ( playback_range.GetLowerBoundValue() * iLocalSpace.RootToSequenceTransform.InverseLinearOnly() ).GetFrame();
 
-            FExportImageSequencePanel* existing_panel = mPanels.FindByPredicate( [frame_in_root]( const FExportImageSequencePanel& iElement )
-                                                                                 {
-                                                                                     return iElement.GlobalFrame == frame_in_root;
-                                                                                 } );
+            FExportPanel* existing_panel = mPanels.FindByPredicate( [frame_in_root]( const FExportPanel& iElement )
+                                                                    {
+                                                                        return iElement.GlobalFrame == frame_in_root;
+                                                                    } );
             if( existing_panel )
             {
                 check( existing_panel->mSequence == iSequence );
@@ -151,7 +150,7 @@ FExportImageSequenceConverter::Convert()
             }
             else
             {
-                FExportImageSequencePanel panel;
+                FExportPanel panel;
                 panel.GlobalFrame = frame_in_root;
                 panel.mSequence = iSequence;
 
@@ -161,19 +160,19 @@ FExportImageSequenceConverter::Convert()
 
         virtual void VisitSubSequence( UMovieSceneSequence* iSequence, const FGuid& iGuid, const UE::MovieScene::FSubSequenceSpace& iLocalSpace )
         {
-            if( mOptions->MarkSettings.Marks )
+            if( mMarkSettings->Marks )
                 ProcessSequencerMarks( iSequence, iGuid, iLocalSpace );
 
-            if( mOptions->MarkSettings.Drawings )
+            if( mMarkSettings->Drawings )
                 ProcessDrawings( iSequence, iGuid, iLocalSpace );
 
-            if( mOptions->MarkSettings.FirstFrameOfShot )
+            if( mMarkSettings->FirstFrameOfShot )
                 ProcessFirstShotFrame( iSequence, iGuid, iLocalSpace );
         }
 
-        const FExportImageSequenceOptions*  mOptions;
-        ISequencer*                         mSequencer;
-        TArray<FExportImageSequencePanel>   mPanels;
+        const FExportMarkSettings*  mMarkSettings;
+        ISequencer*                 mSequencer;
+        TArray<FExportPanel>        mPanels;
     };
 
     UE::MovieScene::FSequenceVisitParams params;
@@ -183,24 +182,16 @@ FExportImageSequenceConverter::Convert()
 
     FSequenceShotVisitor shot_visitor;
     shot_visitor.mSequencer = sequencer;
-    shot_visitor.mOptions = mImageSequenceOptions;
+    shot_visitor.mMarkSettings = mMarkSettings;
 
     // Visit all shots
     VisitSequence( sequencer->GetRootMovieSceneSequence(), params, shot_visitor );
 
     //---
 
-    shot_visitor.mPanels.StableSort( []( const FExportImageSequencePanel& iA, const FExportImageSequencePanel& iB ) { return iA.GlobalFrame < iB.GlobalFrame; } );
+    shot_visitor.mPanels.StableSort( []( const FExportPanel& iA, const FExportPanel& iB ) { return iA.GlobalFrame < iB.GlobalFrame; } );
 
-    mImageSequenceStruct->Panels = shot_visitor.mPanels;
-
-    //for( auto frame : shot_visitor.mFrames )
-    //{
-    //    FExportImageSequencePanel panel;
-    //    panel.GlobalFrame = frame;
-
-    //    mImageSequenceStruct->Panels.Add( panel );
-    //}
+    mStruct->Panels = shot_visitor.mPanels;
 }
 
 //---

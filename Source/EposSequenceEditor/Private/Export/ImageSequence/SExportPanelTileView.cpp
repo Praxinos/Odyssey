@@ -1,7 +1,7 @@
 // IDDN.FR.001.220036.001.S.P.2021.000.00000
 // EPOS is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
-#include "Export/SExportPanelTileView.h"
+#include "Export/ImageSequence/SExportPanelTileView.h"
 
 #include "Internationalization/BreakIterator.h"
 #include "ISequencer.h"
@@ -11,9 +11,9 @@
 #include "Widgets/Layout/SScaleBox.h"
 #include "Widgets/SViewport.h"
 
-#include "Export/ExportImageSequenceNamingFormatter.h"
-#include "Export/ExportImageSequenceSettings.h"
-#include "Export/PanelThumbnail.h"
+#include "Export/ImageSequence/ExportImageSequenceNamingFormatter.h"
+#include "Export/ImageSequence/ExportImageSequenceSettings.h"
+#include "Export/ImageSequence/PanelThumbnail.h"
 #include "Export/SceneRenderer.h"
 #include "Styles/EposSequenceEditorStyle.h"
 
@@ -31,8 +31,7 @@ FPanelItem::CreateThumbnail()
     mThumbnail = MakeShareable( new FPanelThumbnail() );
     mThumbnail->ResizeRenderTarget( FIntPoint( 256 * ratio, 256 ) );
 
-    FSceneRenderer thumbnail_renderer( mSequencer, &mPanel, mOptions );
-    thumbnail_renderer.OverrideSize( mThumbnail->GetSize() );
+    FSceneRenderer thumbnail_renderer( mSequencer, &mPanel, mThumbnail->GetSize() );
     thumbnail_renderer.RenderPlane( mThumbnail->GetRenderTarget() );
 }
 
@@ -63,14 +62,14 @@ SPanelTileView::Construct( const FArguments& InArgs, const TSharedRef<STableView
     FText panel_source;
     if( mPanelItem->mPanel.mSourceMark.IsSet() )
     {
-        const FExportImageSequencePanelSourceMark& source_mark = mPanelItem->mPanel.mSourceMark.GetValue();
+        const FExportPanelSourceMark& source_mark = mPanelItem->mPanel.mSourceMark.GetValue();
 
         panel_source = FText::Format( LOCTEXT( "panel-item.source.mark", "Mark: {0}" ), FText::FromString( source_mark.mMark.Label ) );
     }
 
     if( mPanelItem->mPanel.mSourceDrawing.IsSet() )
     {
-        const FExportImageSequencePanelSourceDrawing& source_drawing = mPanelItem->mPanel.mSourceDrawing.GetValue();
+        const FExportPanelSourceDrawing& source_drawing = mPanelItem->mPanel.mSourceDrawing.GetValue();
 
         if( source_drawing.mDrawings.Num() == 1 )
         {
@@ -242,7 +241,7 @@ SPanelTileView::GetTooltipText() const
 
     if( mPanelItem->mPanel.mSourceMark.IsSet() )
     {
-        const FExportImageSequencePanelSourceMark& source_mark = mPanelItem->mPanel.mSourceMark.GetValue();
+        const FExportPanelSourceMark& source_mark = mPanelItem->mPanel.mSourceMark.GetValue();
 
         FText line = FText::Format( LOCTEXT( "item.source-mark.tooltip", "Mark: {0}" ), FText::FromString( source_mark.mMark.Label ) );
         tooltip_texts.Add( line );
@@ -253,7 +252,7 @@ SPanelTileView::GetTooltipText() const
         FText line = FText::Format( LOCTEXT( "item.source-drawing-list.tooltip", "Drawing appearing in {0}|plural(one=plane,other=planes):" ), mPanelItem->mPanel.mSourceDrawing.GetValue().mDrawings.Num() );
         tooltip_texts.Add( line );
 
-        const FExportImageSequencePanelSourceDrawing& source_drawing = mPanelItem->mPanel.mSourceDrawing.GetValue();
+        const FExportPanelSourceDrawing& source_drawing = mPanelItem->mPanel.mSourceDrawing.GetValue();
 
         for( auto drawing_and_binding : source_drawing.mDrawings )
         {

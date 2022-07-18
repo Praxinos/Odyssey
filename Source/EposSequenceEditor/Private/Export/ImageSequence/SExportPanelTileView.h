@@ -7,14 +7,14 @@
 
 #include "Widgets/Views/STableRow.h"
 
-#include "Export/ExportImageSequenceStruct.h"
-#include "Export/PanelThumbnail.h"
+#include "Export/ImageSequence/PanelThumbnail.h"
+#include "Export/ExportStruct.h"
 
 //---
 
 struct FPanelItem
 {
-    FExportImageSequencePanel       mPanel;
+    FExportPanel                    mPanel;
     int32                           mIndex;
     bool                            mExport;
     TWeakPtr<ISequencer>            mSequencer;

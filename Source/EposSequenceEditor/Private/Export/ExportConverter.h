@@ -5,7 +5,9 @@
 
 #include "CoreMinimal.h"
 
-#include "Export/ExportImageSequenceStruct.h"
+#include "Export/ExportSettings.h"
+
+#include "Export/ExportStruct.h"
 
 //---
 
@@ -13,22 +15,20 @@ class ISequencer;
 class UBoardSequence;
 class UEposMovieSceneSequence;
 class UShotSequence;
-struct FExportImageSequenceOptions;
+struct FExportMarkSettings;
 
-class FExportImageSequenceConverter
+class FExportConverter
 {
 public:
-    FExportImageSequenceConverter( TWeakPtr<ISequencer> iSequencer, const UMovieSceneSequence* iRootSequence, const FExportImageSequenceOptions* iOptions, FExportImageSequenceStruct* oImageSequenceStruct );
+    FExportConverter( TWeakPtr<ISequencer> iSequencer, const UMovieSceneSequence* iRootSequence, const FExportMarkSettings* iMarkSettings, FExportStruct* oStruct );
 
 private:
     void Convert();
 
 private:
     TWeakPtr<ISequencer>            mSequencer;
-
-    const FExportImageSequenceOptions*  mImageSequenceOptions { nullptr };
-
-    FExportImageSequenceStruct*     mImageSequenceStruct { nullptr };
-
     const UMovieSceneSequence*      mRootSequence { nullptr };
+    const FExportMarkSettings*      mMarkSettings { nullptr };
+
+    FExportStruct*                  mStruct { nullptr };
 };

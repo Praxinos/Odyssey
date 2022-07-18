@@ -7,17 +7,14 @@
 
 //---
 
-struct FExportImageSequenceSettings;
-struct FExportImageSequenceStruct;
 class ISequencer;
 class UCameraComponent;
+struct FExportPanel;
 
 class FSceneRenderer
 {
 public:
-    FSceneRenderer( TWeakPtr<ISequencer> iSequencer, const FExportImageSequencePanel* iImageSequencePanel, const FExportImageSequenceOptions* iOptions );
-
-    void OverrideSize( const FIntPoint& iSize );
+    FSceneRenderer( TWeakPtr<ISequencer> iSequencer, const FExportPanel* iPanel, const FIntPoint& iSize );
 
     bool RenderPlane( TArray<FColor>& oSamples );
     bool RenderPlane( FTextureRenderTargetResource* oRenderTarget );
@@ -31,8 +28,7 @@ private:
 
 private:
     TWeakPtr<ISequencer>                mSequencer;
-    const FExportImageSequencePanel*    mCurrentPanel { nullptr };
-    const FExportImageSequenceOptions*  mImageSequenceOptions { nullptr };
+    const FExportPanel*                 mCurrentPanel { nullptr };
     FIntPoint                           mSize;
 
 private:

@@ -15,4 +15,7 @@ class ExportStoryboardDialog
 public:
     /** Open dialog for exporting a storyboard to a sequence of images */
     static void OpenExportImageSequenceDialog( const TSharedRef<FTabManager>& TabManager, UMovieSceneSequence* iSequence );
+
+    /** Open dialog for exporting a storyboard to a PDF */
+    static void OpenExportPDFDialog( const TSharedRef<FTabManager>& TabManager, UMovieSceneSequence* iSequence );
 };

@@ -9,12 +9,12 @@
 class UMovieSceneCinematicShotSection;
 class UMovieSceneSequence;
 
-class FImageSequenceExportRenderer
+class FExportSequencerRenderer
     : public IMovieRendererInterface
 {
 public:
-    static FName ImageSequenceExportTabName;
-    static FText ImageSequenceExportTabLabel;
+    static FName ExportTabName;
+    static FText ExportTabLabel;
 
 public:
     virtual void RenderMovie( UMovieSceneSequence* InSequence, const TArray<UMovieSceneCinematicShotSection*>& InSections ) override;

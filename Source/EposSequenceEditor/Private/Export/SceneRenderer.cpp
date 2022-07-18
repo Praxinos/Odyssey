@@ -17,8 +17,7 @@
 #include "SceneViewExtension.h"
 #include "SceneViewExtensionContext.h"
 
-#include "Export/ExportImageSequenceSettings.h"
-#include "Export/ExportImageSequenceStruct.h"
+#include "Export/ExportStruct.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutSection.h"
@@ -29,18 +28,11 @@
 
 //---
 
-FSceneRenderer::FSceneRenderer( TWeakPtr<ISequencer> iSequencer, const FExportImageSequencePanel* iImageSequencePanel, const FExportImageSequenceOptions* iOptions )
+FSceneRenderer::FSceneRenderer( TWeakPtr<ISequencer> iSequencer, const FExportPanel* iPanel, const FIntPoint& iSize )
     : mSequencer( iSequencer )
-    , mCurrentPanel( iImageSequencePanel )
-    , mImageSequenceOptions( iOptions )
-    , mSize( iOptions->ImageSize )
+    , mCurrentPanel( iPanel )
+    , mSize( iSize )
 {
-}
-
-void
-FSceneRenderer::OverrideSize( const FIntPoint& iSize )
-{
-    mSize = iSize;
 }
 
 bool
