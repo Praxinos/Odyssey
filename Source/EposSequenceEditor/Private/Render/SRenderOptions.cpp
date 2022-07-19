@@ -187,7 +187,7 @@ FEncoderSettingsDetailsCustomization::OnCodecPresetChanged( int32 iCodecPreset, 
             // libopenh264 is not necessary available, but if it is the case, libx264 has a highly change to be available
             if( !mVideoCodecs.ContainsByPredicate( [video_codec]( TSharedPtr<FString> iEntry ) { return *iEntry.Get() == video_codec; } ) )
                 video_codec = TEXT( "libx264" );
-            audio_codec = TEXT( "flac" );
+            audio_codec = TEXT( "aac" );
             extension = TEXT( "mp4" );
             break;
         case ECodecPresets::kMOV:
