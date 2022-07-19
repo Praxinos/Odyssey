@@ -13,6 +13,8 @@
 
 //---
 
+class ISequencer;
+
 struct FExportPanelSourceMark
 {
     FMovieSceneMarkedFrame  mMark;
@@ -29,13 +31,8 @@ struct FExportPanelSourceDrawing
     TArray<FDrawingAndBindingId>    mDrawings;
 };
 
-USTRUCT()
 struct FExportPanel
 {
-    GENERATED_BODY()
-
-public:
-    UPROPERTY( EditAnywhere, Category=ExportStruct )
     FFrameNumber GlobalFrame;
 
     UMovieSceneSequence* mSequence;
@@ -52,6 +49,7 @@ struct FExportStruct
     GENERATED_BODY()
 
 public:
-    UPROPERTY( EditAnywhere, Category=ExportStruct )
     TArray<FExportPanel> Panels;
+
+    TWeakPtr<ISequencer> mSequencer;
 };

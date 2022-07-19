@@ -25,6 +25,6 @@ public:
     * Called to build the pdf layout from the panel struct.
     * @param    PanelStruct     The structure which contains all the panels to fill the layout.
     */
-    UFUNCTION(BlueprintImplementableEvent)
+    UFUNCTION( BlueprintImplementableEvent )
     void OnConstructPDFLayout( const FExportStruct& PanelStruct );
 };

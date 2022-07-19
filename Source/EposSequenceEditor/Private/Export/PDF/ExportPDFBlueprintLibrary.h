@@ -41,4 +41,17 @@ public:
      */
     UFUNCTION( BlueprintPure, Category="Epos Sequence Editor|Export PDF" )
     static FText GetPanelShotName( const FExportStruct& ExportStruct, int32 PanelIndex );
+
+    /*
+     * Get the shot name of a panel
+     */
+    // I don't know if it's a good idea to give access on the sequence and maybe modifying it during the loop ...
+    //UFUNCTION( BlueprintPure, Category="Epos Sequence Editor|Export PDF" )
+    //static const UMovieSceneSequence* GetPanelSequence( const FExportStruct& ExportStruct, int32 PanelIndex );
+
+    /*
+     * Get the render scene of a panel
+     */
+    UFUNCTION( BlueprintPure, Category="Epos Sequence Editor|Export PDF" )
+    static const UTexture2D* GetPanelTexture2D( const FExportStruct& ExportStruct, int32 PanelIndex );
 };

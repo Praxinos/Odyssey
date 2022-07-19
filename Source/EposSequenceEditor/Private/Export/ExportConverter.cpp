@@ -27,6 +27,8 @@ FExportConverter::FExportConverter( TWeakPtr<ISequencer> iSequencer, const UMovi
 {
     check( iSequencer.Pin()->GetFocusedMovieSceneSequence() == mRootSequence );
 
+    mStruct->mSequencer = mSequencer;
+
     Convert();
 }
 
