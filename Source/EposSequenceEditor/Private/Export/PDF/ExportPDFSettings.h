@@ -34,12 +34,12 @@ public:
     //UPROPERTY( VisibleAnywhere, Category=ExportPDF, Transient )
     float AspectRatio { 1920.f / 1080.f };
 
-    /** Storyboard path. */
-    UPROPERTY( EditAnywhere, Category=ExportPDF )
-    FIntPoint ImageSize { 1920, 1080 };
+    /** Thumbnail size. */
+    UPROPERTY( EditAnywhere, Category=ExportPDF/*, meta=(AllowPreserveRatio=true)*/)
+    FIntPoint ImageSize { 1920 / 2, 1080 / 2 };
 
     UPROPERTY( EditAnywhere, Category=ExportPDF, meta=(MetaClass="ExportPDFSheetWidget") )
-    FSoftClassPath SheetClassPath { TEXT( "/Epos/WBP_PDFSheet_Landscape_2x3.WBP_PDFSheet_Landscape_2x3_C" ) };
+    FSoftClassPath SheetClassPath { TEXT( "/Epos/WBP_PDFSheet_Landscape_3x2.WBP_PDFSheet_Landscape_3x2_C" ) };
 
     UPROPERTY( EditAnywhere, Category=ExportPDF )
     FExportMarkSettings MarkSettings;

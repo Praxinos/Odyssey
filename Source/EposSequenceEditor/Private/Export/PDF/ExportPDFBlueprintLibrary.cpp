@@ -78,7 +78,7 @@ UExportPDFBlueprintLibrary::GetPanelTexture2D( const FExportStruct& iExportStruc
 
     const UExportPDFSettings* settings = GetMutableDefault<UExportPDFSettings>();
 
-    FIntPoint image_size = settings->Options.ImageSize / 4;
+    FIntPoint image_size = settings->Options.ImageSize;
 
     FSceneRenderer thumbnail_renderer( iExportStruct.mSequencer, &iExportStruct.Panels[iPanelIndex], image_size );
     TArray<FColor> samples;
@@ -101,6 +101,23 @@ UExportPDFBlueprintLibrary::GetPanelTexture2D( const FExportStruct& iExportStruc
     ////texture->AddToRoot();
 
     //return texture;
+}
+
+//---
+
+//static
+TArray<UStoryNote*>
+UExportPDFBlueprintLibrary::GetPanelNotes( const FExportStruct& iExportStruct, int32 iPanelIndex )
+{
+    TArray<UStoryNote*> notes;
+
+    if( !iExportStruct.Panels.IsValidIndex( iPanelIndex ) )
+        return notes;
+
+    if( !iExportStruct.mSequencer.IsValid() )
+        return notes;
+
+    return EposSequenceHelpers::GetNotesRecursive( iExportStruct.mSequencer.Pin()->GetRootMovieSceneSequence(), iExportStruct.Panels[iPanelIndex].GlobalFrame );
 }
 
 //---

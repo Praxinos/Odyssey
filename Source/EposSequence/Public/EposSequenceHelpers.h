@@ -59,9 +59,10 @@ typedef TMap<TWeakObjectPtr<UMovieSceneSection>, TSharedPtr<FMovieSceneChannelPr
 class EPOSSEQUENCE_API EposSequenceHelpers
 {
 public:
-    static TArray<TWeakObjectPtr<UMovieSceneNoteSection>> GetNotesRecursive( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber );
+    static TArray<TWeakObjectPtr<UMovieSceneNoteSection>>   GetNotesRecursive( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber );
+    static TArray<UStoryNote*>                              GetNotesRecursive( UMovieSceneSequence* iSequence, FFrameNumber iFrameNumber );
 
-    static TArray<TWeakObjectPtr<UMovieSceneNoteSection>> GetNotes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TOptional<FFrameNumber> iFrameNumber = TOptional<FFrameNumber>() );
+    static TArray<TWeakObjectPtr<UMovieSceneNoteSection>>   GetNotes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TOptional<FFrameNumber> iFrameNumber = TOptional<FFrameNumber>() );
 };
 
 class EPOSSEQUENCE_API BoardSequenceHelpers
@@ -78,15 +79,15 @@ public:
     static FInnerSequenceResult GetInnerSequence( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceId, const FFrameNumber& iFrameNumber );
 
 public:
-    static ACineCameraActor* GetCamera( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceID, FGuid* oCameraBinding = nullptr );
+    static ACineCameraActor*    GetCamera( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceID, FGuid* oCameraBinding = nullptr );
 
-    static TArray<FFrameTime> GetCameraTransformTimesRecursive( const UMovieSceneSubSection& iSubSection );
+    static TArray<FFrameTime>   GetCameraTransformTimesRecursive( const UMovieSceneSubSection& iSubSection );
 
 public:
-    static FChannelProxyBySectionMap BuildCameraTransformChannelProxy( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceID );
-    static TMap<FGuid, FChannelProxyBySectionMap> BuildPlanesTransformChannelProxy( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceID );
-    static TMap<FGuid, FChannelProxyBySectionMap> BuildPlanesMaterialChannelProxy( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceID );
-    static TMap<FGuid, FChannelProxyBySectionMap> BuildPlanesOpacityChannelProxy( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceID );
+    static FChannelProxyBySectionMap                BuildCameraTransformChannelProxy( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceID );
+    static TMap<FGuid, FChannelProxyBySectionMap>   BuildPlanesTransformChannelProxy( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceID );
+    static TMap<FGuid, FChannelProxyBySectionMap>   BuildPlanesMaterialChannelProxy( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceID );
+    static TMap<FGuid, FChannelProxyBySectionMap>   BuildPlanesOpacityChannelProxy( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceID );
 };
 
 enum class EGetPlane
@@ -102,11 +103,11 @@ struct EPOSSEQUENCE_API FDrawing
     TWeakObjectPtr<UMovieSceneSection>  mSection;
     FKeyHandle                          mKeyHandle { FKeyHandle::Invalid() };
 
-    bool Exists();
+    bool                Exists();
 
-    UMaterialInstance* GetMaterial() const;
+    UMaterialInstance*  GetMaterial() const;
 
-    void SetMaterial( UMaterialInstance* iMaterial );
+    void                SetMaterial( UMaterialInstance* iMaterial );
 
     friend EPOSSEQUENCE_API bool operator==( const FDrawing& iLhs, const FDrawing& iRhs );
 };
@@ -127,12 +128,12 @@ struct EPOSSEQUENCE_API FKeyOpacity
 class EPOSSEQUENCE_API ShotSequenceHelpers
 {
 public:
-    static ACineCameraActor* GetCamera( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid* oCameraBinding = nullptr );
+    static ACineCameraActor*    GetCamera( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid* oCameraBinding = nullptr );
 
     static TArray<FFrameNumber> GetCameraTransformTimes( UMovieSceneSequence* iSequence );
 
-    static int32 GetAllPlanes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, EGetPlane iPlaneSelection, TArray<APlaneActor*>* oPlanes, TArray<FGuid>* oPlaneBindings );
-    static int32 GetAttachedPlanes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, EGetPlane iPlaneSelection, TArray<APlaneActor*>* oPlanes, TArray<FGuid>* oPlaneBindings );
+    static int32                GetAllPlanes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, EGetPlane iPlaneSelection, TArray<APlaneActor*>* oPlanes, TArray<FGuid>* oPlaneBindings );
+    static int32                GetAttachedPlanes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, EGetPlane iPlaneSelection, TArray<APlaneActor*>* oPlanes, TArray<FGuid>* oPlaneBindings );
 
 public:
     struct FFindOrCreatePlaneVisibilityResult
@@ -155,14 +156,14 @@ public:
 
         FGuid mPlaneComponentBinding; // The binding of the root component of the plane
     };
-    static FFindOrCreateMaterialDrawingResult         FindMaterialDrawingTrackAndSections( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding, TOptional<FFrameNumber> iFrameNumber = TOptional<FFrameNumber>() );
-    static FFindOrCreateMaterialDrawingResult         FindOrCreateMaterialDrawingTrackAndSections( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding, TOptional<FFrameNumber> iFrameNumber = TOptional<FFrameNumber>() );
+    static FFindOrCreateMaterialDrawingResult           FindMaterialDrawingTrackAndSections( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding, TOptional<FFrameNumber> iFrameNumber = TOptional<FFrameNumber>() );
+    static FFindOrCreateMaterialDrawingResult           FindOrCreateMaterialDrawingTrackAndSections( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding, TOptional<FFrameNumber> iFrameNumber = TOptional<FFrameNumber>() );
 
-    static FDrawing             GetDrawing( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, FGuid iPlaneBinding );
-    static TArray<FDrawing>     GetAllDrawings( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding );
-    static TArray<FFrameNumber> GetAllDrawingTimes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, EGetPlane iPlaneSelection );
+    static FDrawing                                     GetDrawing( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, FGuid iPlaneBinding );
+    static TArray<FDrawing>                             GetAllDrawings( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding );
+    static TArray<FFrameNumber>                         GetAllDrawingTimes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, EGetPlane iPlaneSelection );
 
-    static FDrawing             ConvertToDrawing( TWeakObjectPtr<UMovieSceneSection> iSection, const FMovieSceneChannelHandle& iChannelHandle, FKeyHandle iKeyHandle );
+    static FDrawing                                     ConvertToDrawing( TWeakObjectPtr<UMovieSceneSection> iSection, const FMovieSceneChannelHandle& iChannelHandle, FKeyHandle iKeyHandle );
 
 public:
     struct FFindOrCreateMaterialParameterResult
@@ -196,11 +197,11 @@ public:
     static FKeyOpacity                                  ConvertToOpacityKey( TWeakObjectPtr<UMovieSceneSection> iSection, const FMovieSceneChannelHandle& iChannelHandle, FKeyHandle iKeyHandle );
 
 public:
-    static TArray<UMovieScene3DTransformSection*> GetCameraTransformSections( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FGuid& iCameraBinding );
-    static TArray<UMovieScene3DTransformSection*> GetPlaneTransformSections( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FGuid& iPlaneBinding );
+    static TArray<UMovieScene3DTransformSection*>       GetCameraTransformSections( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FGuid& iCameraBinding );
+    static TArray<UMovieScene3DTransformSection*>       GetPlaneTransformSections( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FGuid& iPlaneBinding );
 
-    static FChannelProxyBySectionMap BuildCameraTransformChannelProxy( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID );
-    static TMap<FGuid, FChannelProxyBySectionMap> BuildPlanesTransformChannelProxy( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID );
-    static TMap<FGuid, FChannelProxyBySectionMap> BuildPlanesMaterialChannelProxy( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID );
-    static TMap<FGuid, FChannelProxyBySectionMap> BuildPlanesOpacityChannelProxy( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID );
+    static FChannelProxyBySectionMap                    BuildCameraTransformChannelProxy( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID );
+    static TMap<FGuid, FChannelProxyBySectionMap>       BuildPlanesTransformChannelProxy( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID );
+    static TMap<FGuid, FChannelProxyBySectionMap>       BuildPlanesMaterialChannelProxy( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID );
+    static TMap<FGuid, FChannelProxyBySectionMap>       BuildPlanesOpacityChannelProxy( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID );
 };

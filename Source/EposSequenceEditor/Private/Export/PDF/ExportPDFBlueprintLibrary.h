@@ -54,4 +54,10 @@ public:
      */
     UFUNCTION( BlueprintPure, Category="Epos Sequence Editor|Export PDF" )
     static const UTexture2D* GetPanelTexture2D( const FExportStruct& ExportStruct, int32 PanelIndex );
+
+    /*
+     * Get the notes of a panel
+     */
+    UFUNCTION( BlueprintPure, Category="Epos Sequence Editor|Export PDF" )
+    static TArray<UStoryNote*> GetPanelNotes( const FExportStruct& ExportStruct, int32 PanelIndex );
 };
