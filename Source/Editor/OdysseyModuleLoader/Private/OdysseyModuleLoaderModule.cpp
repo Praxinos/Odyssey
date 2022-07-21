@@ -21,7 +21,7 @@ FOdysseyModuleLoaderModule::ActivateModules()
 	TMap<FName, ELoadingPhase::Type> inactiveModules;
 
 	FModuleManager& moduleManager = FModuleManager::Get();
-	bool bPaper2DExists = moduleManager.ModuleExists(L"Paper2D");
+	bool bPaper2DExists = moduleManager.ModuleExists(TEXT("Paper2D"));
 	OUT_MODULES( bPaper2DExists ).Add("OdysseyFlipbook", ELoadingPhase::PostDefault);
 	OUT_MODULES( bPaper2DExists ).Add("OdysseyFlipbookEditor", ELoadingPhase::PostDefault);
 
