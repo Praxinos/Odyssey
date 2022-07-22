@@ -14,6 +14,7 @@
 #include "IStructureDetailsView.h"
 #include "LevelEditorSequencerIntegration.h"
 #include "Math/UnitConversion.h"
+#include "ObjectTools.h"
 #include "PropertyEditorModule.h"
 #include "SequencerSettings.h"
 #include "Subsystems/AssetEditorSubsystem.h"
@@ -535,6 +536,12 @@ SNewStoryboardSettings::OnKeyDown( const FGeometry& iMyGeometry, const FKeyEvent
 void
 SNewStoryboardSettings::StoryboardSettingsChanged( const FPropertyChangedEvent& iEvent )
 {
+    // Before SaveConfig()
+    mStoryboardSettings->StoryboardName = FPaths::MakeValidFileName( mStoryboardSettings->StoryboardName );
+    mStoryboardSettings->StoryboardName = ObjectTools::SanitizeObjectName( mStoryboardSettings->StoryboardName );
+
+    mStoryboardSettings->StoryboardPath.Path = ObjectTools::SanitizeObjectPath( mStoryboardSettings->StoryboardPath.Path );
+
     mStoryboardSettings->SaveConfig();
 }
 
@@ -561,6 +568,10 @@ SNewStoryboardSettings::ImportImageSequence()
     mImageSequenceStruct = image_sequence_importer.GetImageSequenceStruct();
 
     mStoryboardSettings->StoryboardName = FPaths::GetBaseFilename( mImportImageSequenceSettings->Options.ImageSequencePath.Path );
+    mStoryboardSettings->StoryboardName = FPaths::MakeValidFileName( mStoryboardSettings->StoryboardName );
+    mStoryboardSettings->StoryboardName = ObjectTools::SanitizeObjectName( mStoryboardSettings->StoryboardName );
+
+    mStoryboardSettings->StoryboardPath.Path = ObjectTools::SanitizeObjectPath( mStoryboardSettings->StoryboardPath.Path );
 
     if( mPanelListView.IsValid() )
     {
