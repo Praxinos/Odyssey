@@ -68,16 +68,15 @@ FindNextFreePlaneLocation( UWorld* iWorld, FVector iPlaneLocation, FVector iCame
 
 //static
 APlaneActor*
-ShotSequenceTools::SpawnPlane( UWorld* iWorld, ACineCameraActor* iCamera )
+ShotSequenceTools::SpawnPlane( UWorld* iWorld, ACineCameraActor* iCamera, float iSafeMargin, FVector2D iRelativeScaling )
 {
     FActorSpawnParameters SpawnParams;
     APlaneActor* plane = iWorld->SpawnActor<APlaneActor>( SpawnParams );
     if( !plane )
         return nullptr;
 
-    const UEposTracksEditorSettings* settings = GetDefault<UEposTracksEditorSettings>();
-    plane->SafeMargin = settings->PlaneSettings.SafeMargin;
-    plane->RelativeScaling = settings->PlaneSettings.RelativeScaling;
+    plane->SafeMargin = iSafeMargin;
+    plane->RelativeScaling = iRelativeScaling;
 
     //---
 
@@ -123,11 +122,17 @@ ShotSequenceTools::SpawnAndBindPlane( ISequencer& iSequencer, UMovieSceneSequenc
 
     GEditor->SelectNone( true, true );
 
-    APlaneActor* plane = ShotSequenceTools::SpawnPlane( world, iCamera );
+    const UEposTracksEditorSettings* settings = GetDefault<UEposTracksEditorSettings>();
+    float margin = settings->PlaneSettings.SafeMargin;
+    FVector2D relative_scaling = settings->PlaneSettings.RelativeScaling;
+
+    if( iPlaneArgs.mMargin.IsSet() )
+        margin = iPlaneArgs.mMargin.GetValue();
+
+    APlaneActor* plane = ShotSequenceTools::SpawnPlane( world, iCamera, margin, relative_scaling );
 
     //---
 
-    const UEposTracksEditorSettings* settings = GetDefault<UEposTracksEditorSettings>();
     FIntPoint texture_size = plane->ComputeTextureSize( iCamera, settings->TextureSettings.Height );
 
     UMaterialInstanceConstant* new_material = iPlaneArgs.mTexture.IsValid()
