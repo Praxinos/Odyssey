@@ -24,6 +24,12 @@ FImportPanelItem::CreateThumbnail()
 {
     mThumbnail = FImageUtils::ImportFileAsTexture2D( mPanel->Pathfile.FilePath );
 
+    if( !mThumbnail )
+    {
+        mBrush = new FSlateNoResource();
+        return;
+    }
+
     float ratio = mThumbnail->GetSizeX() / double( mThumbnail->GetSizeY() );
 
     mBrush = new FSlateImageBrush( mThumbnail, FVector2D( 256 * ratio, 256 ) );

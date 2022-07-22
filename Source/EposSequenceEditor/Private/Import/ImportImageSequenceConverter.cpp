@@ -4,6 +4,7 @@
 #include "Import/ImportImageSequenceConverter.h"
 
 #include "AssetToolsModule.h"
+#include "Factories/TextureFactory.h"
 #include "ISequencer.h"
 #include "Sections/MovieSceneSubSection.h"
 
@@ -167,9 +168,13 @@ FImportImageSequenceConverter::CreateDrawings( const TArray<FImportImageSequence
 
     {
         TArray<FString> pathfiles { iPanels[0].Pathfile.FilePath };
-        TArray<UObject*> assets = AssetToolsModule.Get().ImportAssets( pathfiles, destination_path );
-        UTexture2D* texture = Cast<UTexture2D>( assets[0] );
-        check( texture );
+        TArray<UObject*> assets = AssetToolsModule.Get().ImportAssets( pathfiles, destination_path, UTextureFactory::StaticClass()->GetDefaultObject<UFactory>() ); // Or UTexture2DFactoryNew* Texture2DFactory = NewObject<UTexture2DFactoryNew>(); ?
+        UTexture2D* texture = nullptr;
+        if( assets.Num() )
+        {
+            texture = Cast<UTexture2D>( assets[0] );
+            check( texture );
+        }
 
         FCameraArgs camera_args;
         FPlaneArgs plane_args;
@@ -193,14 +198,19 @@ FImportImageSequenceConverter::CreateDrawings( const TArray<FImportImageSequence
     int32 duration_in_tick = ConvertFromDisplayRateToTickResolution( iPanels[0].Duration );
     FFrameNumber next_frame_number = iSubSection->GetTrueRange().GetLowerBoundValue() + duration_in_tick;
 
+    // Start at 1 because the first texture is already used when creating the camera
     for( int i = 1; i < iPanels.Num(); i++ )
     {
         FImportImageSequencePanel panel = iPanels[i];
 
         TArray<FString> pathfiles { panel.Pathfile.FilePath };
-        TArray<UObject*> assets = AssetToolsModule.Get().ImportAssets( pathfiles, destination_path );
-        UTexture2D* texture = Cast<UTexture2D>( assets[0] );
-        check( texture );
+        TArray<UObject*> assets = AssetToolsModule.Get().ImportAssets( pathfiles, destination_path, UTextureFactory::StaticClass()->GetDefaultObject<UFactory>() ); // Or UTexture2DFactoryNew* Texture2DFactory = NewObject<UTexture2DFactoryNew>(); ?
+        UTexture2D* texture = nullptr;
+        if( assets.Num() )
+        {
+            texture = Cast<UTexture2D>( assets[0] );
+            check( texture );
+        }
 
         //---
 
