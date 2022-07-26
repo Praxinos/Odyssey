@@ -49,6 +49,7 @@ FExportImageSequenceExporter::Export()
         ImageTask->CompressionQuality = 100;
         ImageTask->Filename = pathfile;
         ImageTask->PixelData = MakeUnique<TImagePixelData<FColor>>( mImageSequenceOptions->ImageSize, TArray64<FColor>( MoveTemp( samples ) ) );
+        ImageTask->PixelPreProcessors.Add( TAsyncAlphaWrite<FColor>( 255 ) );
 
         /*TFuture<bool> CompletionFuture =*/ mImageWriteQueue->Enqueue( MoveTemp( ImageTask ) );
     }

@@ -394,7 +394,7 @@ FSceneRenderer::RenderToTexture( TArray<FColor>& oSamples, FTextureRenderTargetR
         oSamples.SetNumUninitialized( TargetSize.X * TargetSize.Y );
         FReadSurfaceDataFlags ReadSurfaceDataFlags;
         ReadSurfaceDataFlags.SetLinearToGamma( false );
-        RenderTargetResource->ReadPixelsPtr( oSamples.GetData(), ReadSurfaceDataFlags, FIntRect( 0, 0, TargetSize.X, TargetSize.Y ) );
+        RenderTargetResource->ReadPixels( oSamples, ReadSurfaceDataFlags, FIntRect( 0, 0, TargetSize.X, TargetSize.Y ) );
     }
 
     if( RenderTargetTexture )

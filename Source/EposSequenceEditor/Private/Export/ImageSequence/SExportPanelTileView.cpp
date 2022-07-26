@@ -155,6 +155,7 @@ SPanelTileView::Construct( const FArguments& InArgs, const TSharedRef<STableView
                             .IgnoreTextureAlpha( false )
                             .EnableBlending( true )
                             .PreMultipliedAlpha( false )
+                            .IgnoreTextureAlpha( true )
                             .ViewportInterface( mPanelItem->mThumbnail )
                         ]
                     ]
