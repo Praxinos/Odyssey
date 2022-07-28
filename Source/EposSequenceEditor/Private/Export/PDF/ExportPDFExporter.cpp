@@ -15,7 +15,26 @@
 #include "Export/PDF/ExportPDFSettings.h"
 #include "Export/PDF/ExportPDFSheetWidget.h"
 
+#include "hpdf.h"
+
 #define LOCTEXT_NAMESPACE "ExportPDFExporter"
+
+// Disable warning "interaction between '_setjmp' and C++ object destruction is non-portable"
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable:4611)
+#endif
+
+jmp_buf sgEnv;
+
+void
+error_handler( HPDF_STATUS error_no, HPDF_STATUS detail_no, void* user_data )
+{
+    printf( "ERROR: error_no=%04X, detail_no=%u\n", (HPDF_UINT)error_no, (HPDF_UINT)detail_no );
+
+    longjmp( sgEnv, 1 );
+}
+
 
 //---
 
@@ -26,9 +45,56 @@ FExportPDFExporter::FExportPDFExporter( TWeakPtr<ISequencer> iSequencer, const F
 {
 }
 
+static
+void
+draw_image( HPDF_Doc     pdf,
+            const HPDF_BYTE* buffer,
+            HPDF_UINT buffer_size,
+            float        x,
+            float        y,
+            float        width,
+            float        height,
+            const char* text )
+{
+    HPDF_Page page = HPDF_GetCurrentPage( pdf );
+    HPDF_Image image;
+
+    image = HPDF_LoadPngImageFromMem( pdf, buffer, buffer_size );
+    //image = HPDF_LoadPngImageFromFile( pdf, filename );
+
+    /* Draw image to the canvas. */
+    HPDF_Page_DrawImage( page, image, x, y, width, height );
+
+    ///* Print the text. */
+    //HPDF_Page_BeginText( page );
+    //HPDF_Page_SetTextLeading( page, 16 );
+    //HPDF_Page_MoveTextPos( page, x, y );
+    ////HPDF_Page_ShowTextNextLine( page, filename );
+    //HPDF_Page_ShowTextNextLine( page, text );
+    //HPDF_Page_EndText( page );
+}
+
 bool
 FExportPDFExporter::Export()
 {
+    HPDF_PageSizes page_size = HPDF_PAGE_SIZE_A4;
+    HPDF_PageDirection page_direction = HPDF_PAGE_PORTRAIT;
+
+    FVector2D window_size( 0, 0 );
+    float page_ratio = 1.f;
+    if( page_size == HPDF_PAGE_SIZE_A4 )
+    {
+        page_ratio = FMath::InvSqrt( 2.f );
+        window_size = FVector2D( 1920, 1920 * page_ratio ); // as landscape
+    }
+
+    if( page_direction == HPDF_PAGE_PORTRAIT )
+    {
+        window_size.Set( window_size.Y, window_size.X );
+    }
+
+    //---
+
     UExportPDFSheetWidget* pdf_widget = nullptr;
     UClass* pdf_sheet_class = mPDFOptions->SheetClassPath.TryLoadClass<UExportPDFSheetWidget>();
     if( !pdf_sheet_class )
@@ -43,7 +109,7 @@ FExportPDFExporter::Export()
     //--- From ...\Editor\UMGEditor\Private\WidgetBlueprintEditorUtils.cpp#2183 : FWidgetBlueprintEditorUtils::DrawSWidgetInRenderTargetInternal(...)
 
     FVector2D Offset( 0.f, 0.f );
-    FVector2D ScaledSize( 1920, 1080 );
+    FVector2D ScaledSize( window_size );
     //FVector2D ScaledSize( 0.f, 0.f );
     TSharedPtr<SWidget> WindowContent = pdf_widget->TakeWidget();
 
@@ -88,21 +154,144 @@ FExportPDFExporter::Export()
 
     //---
 
-    FString pathfile = TEXT( "C:/Users/Mike/Documents/Unreal Projects/dev_50_epos/Plugins/Epos/samples.png" );
-    TUniquePtr<FArchive> Ar( IFileManager::Get().CreateFileWriter( *pathfile ) );
-    if( !Ar )
-        return false;
+    //FString pathfile = TEXT( "C:/Users/Mike/Documents/Unreal Projects/dev_50_epos/Plugins/Epos/samples.png" );
+    //TUniquePtr<FArchive> Ar( IFileManager::Get().CreateFileWriter( *pathfile ) );
+    //if( !Ar )
+    //    return false;
 
     FBufferArchive Buffer;
     bool bSuccess = FImageUtils::ExportRenderTarget2DAsPNG( TextureRenderTarget, Buffer );
     if( !bSuccess )
         return false;
 
-    Ar->Serialize( const_cast<uint8*>( Buffer.GetData() ), Buffer.Num() );
+    //Ar->Serialize( const_cast<uint8*>( Buffer.GetData() ), Buffer.Num() );
+
+    float image_ratio = TextureRenderTarget->SizeX / float(TextureRenderTarget->SizeY);
+
+    //---
+
+    HPDF_Doc  pdf;
+    HPDF_Font font;
+    HPDF_Page page;
+    //char fname[256];
+    HPDF_Destination dst;
+
+    pdf = HPDF_New( error_handler, NULL );
+    if( !pdf )
+    {
+        printf( "ERROR: cannot create pdf object.\n" );
+        return false;
+    }
+    if( setjmp( sgEnv ) )
+    {
+        HPDF_Free( pdf );
+        return 1;
+    }
+
+    HPDF_SetCompressionMode( pdf, HPDF_COMP_ALL );
+
+    /* create default-font */
+    font = HPDF_GetFont( pdf, "Helvetica", NULL );
+
+    /* add a new page object. */
+    page = HPDF_AddPage( pdf );
+
+    //HPDF_Page_SetWidth( page, 550 );
+    //HPDF_Page_SetHeight( page, 650 );
+    HPDF_Page_SetSize( page, page_size, page_direction );
+    //HPDF_Page_SetSize( page, HPDF_PAGE_SIZE_A4, HPDF_PAGE_LANDSCAPE );
+
+    dst = HPDF_Page_CreateDestination( page );
+    HPDF_Destination_SetXYZ( dst, 0, HPDF_Page_GetHeight( page ), 1 );
+    HPDF_SetOpenAction( pdf, dst );
+
+    //HPDF_Page_BeginText( page );
+    //HPDF_Page_SetFontAndSize( page, font, 20 );
+    //HPDF_Page_MoveTextPos( page, 220, HPDF_Page_GetHeight( page ) - 70 );
+    //HPDF_Page_ShowText( page, "PngDemo" );
+    //HPDF_Page_EndText( page );
+
+    HPDF_Page_SetFontAndSize( page, font, 12 );
+
+    HPDF_REAL page_width = HPDF_Page_GetWidth( page );
+    HPDF_REAL page_height = HPDF_Page_GetHeight( page );
+
+    HPDF_Box margin = { 10, 0, 10, 0 };
+    margin.top = margin.bottom = page_height * margin.left / page_width;
+
+    //float page_ratio = page_width / page_height;
+
+    float new_image_x = margin.left;
+    float new_image_y = margin.top;
+    float new_image_width;
+    float new_image_height;
+
+    if( page_ratio < image_ratio )
+    {
+        new_image_width = page_width - margin.left - margin.right;
+        new_image_height = new_image_width / image_ratio;
+    }
+    else
+    {
+        new_image_height = page_height - margin.top - margin.bottom;
+        new_image_width = new_image_height * image_ratio;
+    }
+
+    draw_image( pdf
+                , const_cast<uint8*>( Buffer.GetData() ), Buffer.Num()
+                , new_image_x, new_image_y /* 0, 0 is on bottom left of the page */
+                , new_image_width, new_image_height
+                , "1bit grayscale." );
+    //draw_image( pdf, "basn0g02.png", 200, HPDF_Page_GetHeight( page ) - 150,
+    //            "2bit grayscale." );
+    //draw_image( pdf, "basn0g04.png", 300, HPDF_Page_GetHeight( page ) - 150,
+    //            "4bit grayscale." );
+    //draw_image( pdf, "basn0g08.png", 400, HPDF_Page_GetHeight( page ) - 150,
+    //            "8bit grayscale." );
+
+    //draw_image( pdf, "basn2c08.png", 100, HPDF_Page_GetHeight( page ) - 250,
+    //            "8bit color." );
+    //draw_image( pdf, "basn2c16.png", 200, HPDF_Page_GetHeight( page ) - 250,
+    //            "16bit color." );
+
+    //draw_image( pdf, "basn3p01.png", 100, HPDF_Page_GetHeight( page ) - 350,
+    //            "1bit pallet." );
+    //draw_image( pdf, "basn3p02.png", 200, HPDF_Page_GetHeight( page ) - 350,
+    //            "2bit pallet." );
+    //draw_image( pdf, "basn3p04.png", 300, HPDF_Page_GetHeight( page ) - 350,
+    //            "4bit pallet." );
+    //draw_image( pdf, "basn3p08.png", 400, HPDF_Page_GetHeight( page ) - 350,
+    //            "8bit pallet." );
+
+    //draw_image( pdf, "basn4a08.png", 100, HPDF_Page_GetHeight( page ) - 450,
+    //            "8bit alpha." );
+    //draw_image( pdf, "basn4a16.png", 200, HPDF_Page_GetHeight( page ) - 450,
+    //            "16bit alpha." );
+
+    //draw_image( pdf, "basn6a08.png", 100, HPDF_Page_GetHeight( page ) - 550,
+    //            "8bit alpha." );
+    //draw_image( pdf, "basn6a16.png", 200, HPDF_Page_GetHeight( page ) - 550,
+    //            "16bit alpha." );
+
+    /* save the document to a file */
+    FString pdf_extension( TEXT( ".pdf" ) );
+    FString pathfile = mPDFOptions->ExportPath.Path / mPDFOptions->ExportFile;
+    if( !pathfile.EndsWith( pdf_extension ) )
+        pathfile += pdf_extension;
+
+    HPDF_SaveToFile( pdf, StringCast<ANSICHAR>( *pathfile ).Get() );
+
+    /* clean up */
+    HPDF_Free( pdf );
 
     return true;
 }
 
 //---
+
+// Renable warning "interaction between '_setjmp' and C++ object destruction is non-portable"
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 #undef LOCTEXT_NAMESPACE

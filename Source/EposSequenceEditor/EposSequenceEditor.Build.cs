@@ -84,6 +84,7 @@ public class EposSequenceEditor : ModuleRules
                 // [EDITOR] custom plugin dependencies
                 "EposTracksEditor",
                 "EposNamingConvention",
+                "libharu",
             }
             );
 
