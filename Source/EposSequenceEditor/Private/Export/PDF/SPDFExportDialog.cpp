@@ -103,7 +103,7 @@ SExportPDFSettings::Construct( const FArguments& InArgs, TWeakPtr<ISequencer> iS
         FExportStruct image_sequence_struct;
         FExportConverter converter( mSequencer, mRootSequence, &mExportPDFSettings->Options.MarkSettings, &image_sequence_struct );
 
-        mPDFSheetWidget->OnConstructPDFLayout( image_sequence_struct );
+        mPDFSheetWidget->OnConstructPDFLayout( image_sequence_struct, true );
     }
 
     //---
@@ -169,7 +169,7 @@ SExportPDFSettings::GlobalSettingsChanged( const FPropertyChangedEvent& iEvent )
         FExportStruct image_sequence_struct;
         FExportConverter converter( mSequencer, mRootSequence, &mExportPDFSettings->Options.MarkSettings, &image_sequence_struct );
 
-        mPDFSheetWidget->OnConstructPDFLayout( image_sequence_struct );
+        mPDFSheetWidget->OnConstructPDFLayout( image_sequence_struct, true );
 
         mBorderWhiteBackground->SetContent( mPDFSheetWidget->TakeWidget() );
     }

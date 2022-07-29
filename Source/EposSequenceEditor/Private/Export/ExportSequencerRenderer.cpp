@@ -15,7 +15,7 @@
 //---
 
 FName FExportSequencerRenderer::ExportTabName = "StoryboardExport";
-FText FExportSequencerRenderer::ExportTabLabel = LOCTEXT( "StoryboardExportRenderTab_Label", "Storyboard Export (PNG,JPG,...)" );
+FText FExportSequencerRenderer::ExportTabLabel = LOCTEXT( "StoryboardExportRenderTab_Label", "Storyboard Export (PDF, PNG,JPG,...)" );
 
 void
 FExportSequencerRenderer::RenderMovie( UMovieSceneSequence* iSequence, const TArray<UMovieSceneCinematicShotSection*>& iSections ) //override
