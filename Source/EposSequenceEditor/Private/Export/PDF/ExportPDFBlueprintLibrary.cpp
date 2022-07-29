@@ -84,6 +84,10 @@ UExportPDFBlueprintLibrary::GetPanelTexture2D( const FExportStruct& iExportStruc
     TArray<FColor> samples;
     thumbnail_renderer.RenderPlane( samples );
 
+    //PATCH: sometimes, the pixels have their alpha to 0 ... (see with Elodie)
+    for( int i = 0; i < samples.Num(); i++ )
+        samples[i].A = 255;
+
     //---
 
     TArray64<uint8> samples8;
