@@ -269,6 +269,9 @@ cmake_args = [
 if architecture:
     cmake_args += [ '-A', architecture ]
 
+if gOperatingSystem == 'darwin':
+    cmake_args += [ '-DCMAKE_OSX_DEPLOYMENT_TARGET=10.15' ]
+
 cmake_args += [
     '-DCMAKE_INSTALL_PREFIX=' + str( install_path ),
     '-DLIBHPDF_SHARED=' + 'OFF',
