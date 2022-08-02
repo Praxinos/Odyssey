@@ -23,22 +23,23 @@ public:
 
     /**
     * Called to build the pdf layout from the panel struct.
-    * @param    PanelStruct     The structure which contains all the panels to construct the layout.
+    * @param    PanelList       The structure which contains all the panels to construct the layout.
+    * @param    Preview         To know if it's for the preview in the export panel or the final pdf file.
     */
     UFUNCTION( BlueprintImplementableEvent )
-    void OnConstructPDFLayout( const FExportStruct& PanelStruct, bool Preview );
-    
-    /**
-    * Called to get a list of page to export (first page is 1)
-    * @return The list of page to export
-    */
-    UFUNCTION( BlueprintImplementableEvent )
-    TArray<int32> GetPDFPageList();
+    void OnConstructPDFLayout( const FExportStruct& PanelList, bool Preview );
 
     /**
-    * Set the current page to export (first page is 1)
-    * @param The current page to export
+    * Called to get the number of page in the pdf file
+    * @return The list of page to export
     */
     UFUNCTION( BlueprintImplementableEvent, BlueprintCallable )
-    bool SetCurrentPDFPage( int32 CurrentPage );
+    int32 GetTotalPDFPageNumber();
+
+    /**
+    * Handle the given page in the pdf file (always between 1 and GetTotalPDFPageNumber())
+    * @param The page in the pdf file
+    */
+    UFUNCTION( BlueprintImplementableEvent, BlueprintCallable )
+    void HandlePDFPageNumber( int32 PDFPageNumber );
 };

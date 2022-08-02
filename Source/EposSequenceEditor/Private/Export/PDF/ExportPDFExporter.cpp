@@ -59,7 +59,7 @@ FExportPDFExporter::Export()
 
     pdf_widget->OnConstructPDFLayout( *mStruct, false );
 
-    TArray<int32> pages = pdf_widget->GetPDFPageList();
+    int32 number_of_pages = pdf_widget->GetTotalPDFPageNumber();
 
     //---
 
@@ -82,13 +82,9 @@ FExportPDFExporter::Export()
 
     //---
 
-    for( int32 i = 0; i < pages.Num(); i++ )
+    for( int32 i = 1; i <= number_of_pages; i++ )
     {
-        int32 page_number = pages[i];
-
-        bool ok = pdf_widget->SetCurrentPDFPage( page_number );
-        if( !ok )
-            continue;
+        pdf_widget->HandlePDFPageNumber( i );
 
         //---
 
