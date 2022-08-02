@@ -11,6 +11,20 @@
 
 #include "ExportPDFSheetWidget.generated.h"
 
+UENUM()
+enum class EPDFPageFormat : uint8
+{
+    A4,
+};
+
+UENUM()
+enum class EPDFPageOrientation : uint8
+{
+    Landscape,
+    Portrait,
+};
+
+
 /**
  * Base class for pdf sheets
  */
@@ -30,7 +44,7 @@ public:
     void OnConstructPDFLayout( const FExportStruct& PanelList, bool Preview );
 
     /**
-    * Called to get the number of page in the pdf file
+    * Get the number of page in the pdf file
     * @return The list of page to export
     */
     UFUNCTION( BlueprintImplementableEvent, BlueprintCallable )
@@ -42,4 +56,20 @@ public:
     */
     UFUNCTION( BlueprintImplementableEvent, BlueprintCallable )
     void HandlePDFPageNumber( int32 PDFPageNumber );
+    
+    /**
+    * Get the format of the given page
+    * @param The page in the pdf file
+    * @return The page format
+    */
+    UFUNCTION( BlueprintImplementableEvent, BlueprintCallable )
+    EPDFPageFormat GetPDFPageFormat( int32 PDFPageNumber );
+    
+    /**
+    * Get the orientation of the given page
+    * @param The page in the pdf file
+    * @return The page orientation
+    */
+    UFUNCTION( BlueprintImplementableEvent, BlueprintCallable )
+    EPDFPageOrientation GetPDFPageOrientation( int32 PDFPageNumber );
 };

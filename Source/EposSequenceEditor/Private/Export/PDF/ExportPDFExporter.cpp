@@ -87,9 +87,29 @@ FExportPDFExporter::Export()
         pdf_widget->HandlePDFPageNumber( i );
 
         //---
+        //--- Get page parameters
+        //---
 
-        HPDF_PageSizes page_size = HPDF_PAGE_SIZE_A4;
-        HPDF_PageDirection page_direction = HPDF_PAGE_LANDSCAPE; // HPDF_PAGE_PORTRAIT;
+        HPDF_PageSizes page_size;
+        switch( pdf_widget->GetPDFPageFormat( i ) )
+        {
+            default:
+            case EPDFPageFormat::A4:
+                page_size = HPDF_PAGE_SIZE_A4;
+                break;
+        }
+
+        HPDF_PageDirection page_direction;
+        switch( pdf_widget->GetPDFPageOrientation( i ) )
+        {
+            case EPDFPageOrientation::Portrait:
+                page_direction = HPDF_PAGE_PORTRAIT;
+                break;
+            default:
+            case EPDFPageOrientation::Landscape:
+                page_direction = HPDF_PAGE_LANDSCAPE;
+                break;
+        }
 
         FVector2D window_size( 0, 0 );
         float page_ratio = 1.f;
@@ -104,6 +124,8 @@ FExportPDFExporter::Export()
             window_size.Set( window_size.Y, window_size.X );
         }
 
+        //---
+        //--- Create a virtual window corresponding to the page size and fill it with the widget
         //---
 
         //--- From ...\Editor\UMGEditor\Private\WidgetBlueprintEditorUtils.cpp#2183 : FWidgetBlueprintEditorUtils::DrawSWidgetInRenderTargetInternal(...)
@@ -153,6 +175,8 @@ FExportPDFExporter::Export()
         //TextureRenderTarget = WidgetRenderer.DrawWidget( mPDFSheetWidget->TakeWidget(), ScaledSize );
 
         //---
+        //--- Create and add the pdf page containing the png image
+        //---
 
         //FString pathfile = TEXT( "C:/Users/Mike/Documents/Unreal Projects/dev_50_epos/Plugins/Epos/samples.png" );
         //TUniquePtr<FArchive> Ar( IFileManager::Get().CreateFileWriter( *pathfile ) );
@@ -193,7 +217,7 @@ FExportPDFExporter::Export()
         HPDF_REAL page_width = HPDF_Page_GetWidth( page );
         HPDF_REAL page_height = HPDF_Page_GetHeight( page );
 
-        HPDF_Box margin = { 10, 0, 10, 0 };
+        HPDF_Box margin = { 0, 0, 0, 0 };
         margin.top = margin.bottom = page_height * margin.left / page_width;
 
         //float page_ratio = page_width / page_height;

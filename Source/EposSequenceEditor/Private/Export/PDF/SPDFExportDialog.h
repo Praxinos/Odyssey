@@ -7,7 +7,6 @@
 
 class IDetailsView;
 class ISequencer;
-class SBorder;
 class UExportPDFSettings;
 class UExportPDFSheetWidget;
 class UMovieSceneSequence;
@@ -51,5 +50,5 @@ private:
     UExportPDFSettings*         mExportPDFSettings { nullptr };
 
     UExportPDFSheetWidget*      mPDFSheetWidget { nullptr };
-    TSharedPtr<SBorder>         mBorderWhiteBackground { nullptr };
+    SVerticalBox::FSlot*        mPDFSlot { nullptr };
 };

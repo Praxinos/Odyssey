@@ -122,13 +122,9 @@ SExportPDFSettings::Construct( const FArguments& InArgs, TWeakPtr<ISequencer> iS
         + SVerticalBox::Slot()
         .FillHeight( 1.0f )
         .Padding( 4, 4, 4, 4 )
+        .Expose( mPDFSlot )
         [
-            SAssignNew( mBorderWhiteBackground, SBorder )
-            .BorderImage( FCoreStyle::Get().GetBrush( "WhiteTexture" ) )
-            .Padding( 0 )
-            [
-                mPDFSheetWidget ? mPDFSheetWidget->TakeWidget() : SNullWidget::NullWidget
-            ]
+            mPDFSheetWidget ? mPDFSheetWidget->TakeWidget() : SNullWidget::NullWidget
         ]
     ];
 }
@@ -156,7 +152,7 @@ SExportPDFSettings::GlobalSettingsChanged( const FPropertyChangedEvent& iEvent )
 
     //---
 
-    mBorderWhiteBackground->ClearContent();
+    mPDFSlot->DetachWidget();
     mPDFSheetWidget = nullptr;
 
     UClass* pdf_sheet_class = mExportPDFSettings->Options.SheetClassPath.TryLoadClass<UExportPDFSheetWidget>();
@@ -171,7 +167,7 @@ SExportPDFSettings::GlobalSettingsChanged( const FPropertyChangedEvent& iEvent )
 
         mPDFSheetWidget->OnConstructPDFLayout( image_sequence_struct, true );
 
-        mBorderWhiteBackground->SetContent( mPDFSheetWidget->TakeWidget() );
+        mPDFSlot->AttachWidget( mPDFSheetWidget->TakeWidget() );
     }
 }
 
