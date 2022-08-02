@@ -51,12 +51,19 @@ public:
     int32 GetTotalPDFPageNumber();
 
     /**
+    * Get the current pdf page number
+    * @return The current page number
+    */
+    UFUNCTION( BlueprintImplementableEvent, BlueprintCallable )
+    int32 GetCurrentPDFPageNumber();
+
+    /**
     * Handle the given page in the pdf file (always between 1 and GetTotalPDFPageNumber())
     * @param The page in the pdf file
     */
     UFUNCTION( BlueprintImplementableEvent, BlueprintCallable )
     void HandlePDFPageNumber( int32 PDFPageNumber );
-    
+
     /**
     * Get the format of the given page
     * @param The page in the pdf file
@@ -64,7 +71,7 @@ public:
     */
     UFUNCTION( BlueprintImplementableEvent, BlueprintCallable )
     EPDFPageFormat GetPDFPageFormat( int32 PDFPageNumber );
-    
+
     /**
     * Get the orientation of the given page
     * @param The page in the pdf file

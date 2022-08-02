@@ -124,7 +124,33 @@ SExportPDFSettings::Construct( const FArguments& InArgs, TWeakPtr<ISequencer> iS
         .Padding( 4, 4, 4, 4 )
         .Expose( mPDFSlot )
         [
-            mPDFSheetWidget ? mPDFSheetWidget->TakeWidget() : SNullWidget::NullWidget
+            //SNew( SHorizontalBox )
+
+            //+ SHorizontalBox::Slot()
+            //.FillWidth( 1 )
+            //[
+            //    SNew( SSpacer )
+            //]
+
+            //+ SHorizontalBox::Slot()
+            //.AutoWidth()
+            ////.HAlign( HAlign_Center )
+            ////.VAlign( VAlign_Fill )
+            //.Expose( mPDFSlot )
+            //[
+                SNew( SBox )
+                .MinAspectRatio( this, &SExportPDFSettings::GetPageRatio )
+                .MaxAspectRatio( this, &SExportPDFSettings::GetPageRatio )
+                [
+                    mPDFSheetWidget ? mPDFSheetWidget->TakeWidget() : SNullWidget::NullWidget
+                ]
+            //]
+
+            //+ SHorizontalBox::Slot()
+            //.FillWidth( 1 )
+            //[
+            //    SNew( SSpacer )
+            //]
         ]
     ];
 }
@@ -144,6 +170,20 @@ SExportPDFSettings::GetReferencerName() const //override
 }
 
 //---
+
+FOptionalSize
+SExportPDFSettings::GetPageRatio() const
+{
+    int32 current_page = mPDFSheetWidget->GetCurrentPDFPageNumber();
+    
+    if( mPDFSheetWidget->GetPDFPageFormat( current_page ) == EPDFPageFormat::A4 && mPDFSheetWidget->GetPDFPageOrientation( current_page ) == EPDFPageOrientation::Landscape )
+        return FMath::Sqrt( 2.f );
+
+    if( mPDFSheetWidget->GetPDFPageFormat( current_page ) == EPDFPageFormat::A4 && mPDFSheetWidget->GetPDFPageOrientation( current_page ) == EPDFPageOrientation::Portrait )
+        return FMath::InvSqrt( 2.f );
+
+    return FMath::Sqrt( 1.f );
+}
 
 void
 SExportPDFSettings::GlobalSettingsChanged( const FPropertyChangedEvent& iEvent )
@@ -167,7 +207,14 @@ SExportPDFSettings::GlobalSettingsChanged( const FPropertyChangedEvent& iEvent )
 
         mPDFSheetWidget->OnConstructPDFLayout( image_sequence_struct, true );
 
-        mPDFSlot->AttachWidget( mPDFSheetWidget->TakeWidget() );
+        mPDFSlot->AttachWidget(
+            SNew( SBox )
+            .MinAspectRatio( this, &SExportPDFSettings::GetPageRatio )
+            .MaxAspectRatio( this, &SExportPDFSettings::GetPageRatio )
+            [
+                mPDFSheetWidget->TakeWidget()
+            ]
+        );
     }
 }
 

@@ -40,6 +40,8 @@ public:
 private:
     void GlobalSettingsChanged( const FPropertyChangedEvent& iEvent );
 
+    FOptionalSize GetPageRatio() const;
+
 private:
     TWeakPtr<ISequencer>        mSequencer;
     UMovieSceneSequence*        mRootSequence { nullptr };
@@ -50,5 +52,6 @@ private:
     UExportPDFSettings*         mExportPDFSettings { nullptr };
 
     UExportPDFSheetWidget*      mPDFSheetWidget { nullptr };
+    //SHorizontalBox::FSlot*      mPDFSlot { nullptr };
     SVerticalBox::FSlot*        mPDFSlot { nullptr };
 };
