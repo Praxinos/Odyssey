@@ -103,7 +103,7 @@ FOdysseyPaintEngine::Reset()
 
     //Clear the Paint Block
     ClearPaintBlock();
-    
+
     //Set Invalid Tile Map, so that the EditedBlock can refresh the right tiles on the next call of Update()
     TArray<::ULIS::FRectI> rects = mEditedBlockInvalidTileMap.InvalidRects();
     mResetInvalidTileMap.Invalidate(rects);
@@ -112,6 +112,8 @@ FOdysseyPaintEngine::Reset()
 
     UpdateEditedBlock(FOdysseyBlendParameters());
 
+    //Refresh the Original block to match the EditedBlock
+    CopyEditedBlockToOriginalBlock();
 }
 
 //--------------------------------------------------------------------------------------
