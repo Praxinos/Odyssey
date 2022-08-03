@@ -373,7 +373,7 @@ ExportStoryboardDialog::OpenExportImageSequenceDialog( const TSharedRef<FTabMana
         .HasCloseButton( true )
         .SupportsMaximize( false )
         .SupportsMinimize( false )
-        .ClientSize( FVector2D( 1600, 900 ) );
+        .ClientSize( FVector2D( 1600, 1100 ) );
 
     window->SetContent( SNew( SExportStoryboardSettings )
                         .ParentWindow( window )
@@ -420,7 +420,7 @@ ExportStoryboardDialog::OpenExportPDFDialog( const TSharedRef<FTabManager>& TabM
         .HasCloseButton( true )
         .SupportsMaximize( false )
         .SupportsMinimize( false )
-        .ClientSize( FVector2D( 1600, 900 ) );
+        .ClientSize( FVector2D( 1600, 1100 ) );
 
     window->SetContent( SNew( SExportStoryboardSettings )
                         .ParentWindow( window )

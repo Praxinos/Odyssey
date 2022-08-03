@@ -37,6 +37,7 @@ public:
 
     /**
     * Called to build the pdf layout from the panel struct.
+    * 
     * @param    PanelList       The structure which contains all the panels to construct the layout.
     * @param    Preview         To know if it's for the preview in the export panel or the final pdf file.
     */
@@ -45,6 +46,7 @@ public:
 
     /**
     * Get the number of page in the pdf file
+    * 
     * @return The list of page to export
     */
     UFUNCTION( BlueprintImplementableEvent, BlueprintCallable )
@@ -52,6 +54,7 @@ public:
 
     /**
     * Get the current pdf page number
+    * 
     * @return The current page number
     */
     UFUNCTION( BlueprintImplementableEvent, BlueprintCallable )
@@ -59,6 +62,7 @@ public:
 
     /**
     * Handle the given page in the pdf file (always between 1 and GetTotalPDFPageNumber())
+    * 
     * @param The page in the pdf file
     */
     UFUNCTION( BlueprintImplementableEvent, BlueprintCallable )
@@ -66,6 +70,7 @@ public:
 
     /**
     * Get the format of the given page
+    * 
     * @param The page in the pdf file
     * @return The page format
     */
@@ -74,6 +79,7 @@ public:
 
     /**
     * Get the orientation of the given page
+    * 
     * @param The page in the pdf file
     * @return The page orientation
     */

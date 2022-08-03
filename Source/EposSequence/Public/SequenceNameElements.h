@@ -7,58 +7,58 @@
 
 #include "SequenceNameElements.generated.h"
 
-USTRUCT()
+USTRUCT( BlueprintType )
 struct EPOSSEQUENCE_API FSequenceNameElements
 {
     GENERATED_BODY()
 
 public:
     /** The studio name. */
-    UPROPERTY( EditAnywhere, Category="Name Elements" )
+    UPROPERTY( EditAnywhere, BlueprintReadWrite, Category="Name Elements" )
     FString StudioName;
     /** The studio acronym. */
-    UPROPERTY( EditAnywhere, Category="Name Elements" )
+    UPROPERTY( EditAnywhere, BlueprintReadWrite, Category="Name Elements" )
     FString StudioAcronym;
 
     /** The license name. */
-    UPROPERTY( EditAnywhere, Category="Name Elements" )
+    UPROPERTY( EditAnywhere, BlueprintReadWrite, Category="Name Elements" )
     FString LicenseName;
     /** The license acronym. */
-    UPROPERTY( EditAnywhere, Category="Name Elements" )
+    UPROPERTY( EditAnywhere, BlueprintReadWrite, Category="Name Elements" )
     FString LicenseAcronym;
 
     /** The title of the production. */
-    UPROPERTY( EditAnywhere, Category="Name Elements" )
+    UPROPERTY( EditAnywhere, BlueprintReadWrite, Category="Name Elements" )
     FString ProductionName;
     /** The acronym of the production. */
-    UPROPERTY( EditAnywhere, Category="Name Elements" )
+    UPROPERTY( EditAnywhere, BlueprintReadWrite, Category="Name Elements" )
     FString ProductionAcronym;
 
     /** Is it a serie?. */
-    UPROPERTY( EditAnywhere, Category="Name Elements", meta=(InlineEditConditionToggle) )
+    UPROPERTY( EditAnywhere, BlueprintReadWrite, Category="Name Elements", meta=(InlineEditConditionToggle) )
     bool IsSerie { false };
 
     /** The season number. */
-    UPROPERTY( EditAnywhere, Category="Name Elements", meta=(EditCondition="IsSerie") )
+    UPROPERTY( EditAnywhere, BlueprintReadWrite, Category="Name Elements", meta=(EditCondition="IsSerie") )
     int32 Season { INDEX_NONE };
 
     /** The episode number. */
-    UPROPERTY( EditAnywhere, Category="Name Elements", meta=(EditCondition="IsSerie") )
+    UPROPERTY( EditAnywhere, BlueprintReadWrite, Category="Name Elements", meta=(EditCondition="IsSerie") )
     int32 Episode { INDEX_NONE };
 
     /** The part of the production. */
-    UPROPERTY( EditAnywhere, Category="Name Elements" )
+    UPROPERTY( EditAnywhere, BlueprintReadWrite, Category="Name Elements" )
     FString Part;
 
     ///** The department name. */
-    //UPROPERTY( EditAnywhere, Category="Name Elements" )
+    //UPROPERTY( EditAnywhere, BlueprintReadWrite, Category="Name Elements" )
     //FString DepartmentName;
     ///** The department acronym. */
-    //UPROPERTY( EditAnywhere, Category="Name Elements" )
+    //UPROPERTY( EditAnywhere, BlueprintReadWrite, Category="Name Elements" )
     //FString DepartmentAcronym;
 
     /** The initials of the user. */
-    UPROPERTY( EditAnywhere, Category="Name Elements" )
+    UPROPERTY( EditAnywhere, BlueprintReadWrite, Category="Name Elements" )
     FString Initials;
  };
 

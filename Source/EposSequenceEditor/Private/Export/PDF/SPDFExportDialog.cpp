@@ -20,6 +20,7 @@
 #include "MovieSceneSequenceVisitor.h"
 #include "PropertyEditorModule.h"
 #include "SequencerSettings.h"
+#include "SPrimaryButton.h"
 #include "Subsystems/AssetEditorSubsystem.h"
 #include "Widgets/Docking/SDockTab.h"
 #include "Widgets/Input/SButton.h"
@@ -30,7 +31,6 @@
 #include "Widgets/SWindow.h"
 #include "Widgets/Text/STextBlock.h"
 #include "Widgets/Views/STileView.h"
-#include "SPrimaryButton.h"
 
 #include "Board/BoardSequence.h"
 #include "IEposSequenceEditorToolkit.h"
@@ -63,10 +63,6 @@ SExportPDFSettings::Construct( const FArguments& InArgs, TWeakPtr<ISequencer> iS
     mRootSequence = iSequencer.Pin()->GetRootMovieSceneSequence();
 
     mExportPDFSettings = GetMutableDefault<UExportPDFSettings>();
-
-    // Force initialize the ratio from the more relevant camera
-    mExportPDFSettings->Options.AspectRatio = GetMostRelevantCameraAspectRatio( mSequencer.Pin().Get(), mRootSequence );
-    mExportPDFSettings->Options.ImageSize.X = mExportPDFSettings->Options.ImageSize.Y * mExportPDFSettings->Options.AspectRatio;
 
     FPropertyEditorModule& PropertyEditor = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
 

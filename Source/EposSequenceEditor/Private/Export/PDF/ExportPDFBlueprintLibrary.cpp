@@ -7,10 +7,52 @@
 #include "ISequencer.h"
 #include "MovieSceneSequence.h"
 
+#include "Board/BoardSequence.h"
 #include "Export/PDF/ExportPDFSettings.h"
 #include "Export/SceneRenderer.h"
+#include "Shot/ShotSequence.h"
 
 #define LOCTEXT_NAMESPACE "ExportPDFBlueprintLibrary"
+
+//---
+
+//static
+FText
+UExportPDFBlueprintLibrary::GetRootBoardName( const FExportStruct& iExportStruct )
+{
+    if( !iExportStruct.mSequencer.IsValid() )
+        return FText::GetEmpty();
+
+    if( !iExportStruct.mSequencer.Pin()->GetRootMovieSceneSequence() )
+        return FText::GetEmpty();
+
+    return iExportStruct.mSequencer.Pin()->GetRootMovieSceneSequence()->GetDisplayName();
+}
+
+//static
+TArray<FSequenceNameElements>
+UExportPDFBlueprintLibrary::GetNameElementsOfPanels( const FExportStruct& iExportStruct )
+{
+    TArray<FSequenceNameElements> name_elements_list;
+
+    TArray<UShotSequence*> already_used_shot_sequence;
+
+    for( auto& panel : iExportStruct.Panels )
+    {
+        UShotSequence* shot_sequence = Cast<UShotSequence>( panel.mSequence );
+        if( !shot_sequence )
+            continue;
+
+        if( already_used_shot_sequence.Contains( shot_sequence ) )
+            continue;
+
+        already_used_shot_sequence.Add( shot_sequence );
+
+        name_elements_list.Add( shot_sequence->NameElements );
+    }
+
+    return name_elements_list;
+}
 
 //---
 
@@ -68,7 +110,7 @@ UExportPDFBlueprintLibrary::GetPanelShotName( const FExportStruct& iExportStruct
 
 //static
 const UTexture2D*
-UExportPDFBlueprintLibrary::GetPanelTexture2D( const FExportStruct& iExportStruct, int32 iPanelIndex )
+UExportPDFBlueprintLibrary::GetPanelTexture2D( const FExportStruct& iExportStruct, int32 iPanelIndex, int32 iHeight )
 {
     if( !iExportStruct.Panels.IsValidIndex( iPanelIndex ) )
         return nullptr;
@@ -76,9 +118,10 @@ UExportPDFBlueprintLibrary::GetPanelTexture2D( const FExportStruct& iExportStruc
     if( !iExportStruct.mSequencer.IsValid() )
         return nullptr;
 
-    const UExportPDFSettings* settings = GetMutableDefault<UExportPDFSettings>();
+    float aspect_ratio = GetMostRelevantCameraAspectRatio( iExportStruct.mSequencer.Pin().Get(), iExportStruct.Panels[iPanelIndex].mSequence );
 
-    FIntPoint image_size = settings->Options.ImageSize;
+    iHeight = ( iHeight <= 0 ) ? 512 : iHeight;
+    FIntPoint image_size( iHeight * aspect_ratio, iHeight );
 
     FSceneRenderer thumbnail_renderer( iExportStruct.mSequencer, &iExportStruct.Panels[iPanelIndex], image_size );
     TArray<FColor> samples;

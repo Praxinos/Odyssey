@@ -27,17 +27,6 @@ public:
     UPROPERTY( EditAnywhere, Category=ExportPDF )
     FString ExportFile;
 
-    /** The aspect ratio to respect (should come from the camera).
-        This list is hidden in customization.
-        If UPROPERTY is empty, there is no access through IPropertyHandle in customization
-    */
-    //UPROPERTY( VisibleAnywhere, Category=ExportPDF, Transient )
-    float AspectRatio { 1920.f / 1080.f };
-
-    /** Thumbnail size. */
-    UPROPERTY( EditAnywhere, Category=ExportPDF/*, meta=(AllowPreserveRatio=true)*/)
-    FIntPoint ImageSize { 1920 / 2, 1080 / 2 };
-
     UPROPERTY( EditAnywhere, Category=ExportPDF, meta=(MetaClass="ExportPDFSheetWidget") )
     FSoftClassPath SheetClassPath { TEXT( "/Epos/WBP_PDFSheet_Landscape_3x2.WBP_PDFSheet_Landscape_3x2_C" ) };
 
