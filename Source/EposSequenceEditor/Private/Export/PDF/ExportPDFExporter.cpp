@@ -5,6 +5,7 @@
 
 #include "Engine/TextureRenderTarget2D.h"
 #include "ImageUtils.h"
+#include "IImageWrapperModule.h"
 #include "Input/HittestGrid.h"
 #include "ISequencer.h"
 #include "Serialization/BufferArchive.h"
@@ -111,18 +112,29 @@ FExportPDFExporter::Export()
                 break;
         }
 
-        FVector2D window_size( 0, 0 );
-        float page_ratio = 1.f;
-        if( page_size == HPDF_PAGE_SIZE_A4 )
-        {
-            page_ratio = FMath::InvSqrt( 2.f );
-            window_size = FVector2D( 1920, 1920 * page_ratio ); // as landscape
-        }
+        // Add a new page object
+        HPDF_Page page = HPDF_AddPage( pdf );
 
-        if( page_direction == HPDF_PAGE_PORTRAIT )
-        {
-            window_size.Set( window_size.Y, window_size.X );
-        }
+        // Set the layout of the page
+        HPDF_Page_SetSize( page, page_size, page_direction );
+
+        HPDF_REAL page_width = HPDF_Page_GetWidth( page );
+        HPDF_REAL page_height = HPDF_Page_GetHeight( page );
+
+        // Compute the ratio of the page
+        float page_ratio = page_width / page_height; // >1 -> landscape | <1 -> portrait
+
+        // Compute the size of the window (respecting the ratio of the page)
+        FVector2D window_size;
+        if( page_ratio < 1 )
+            window_size.Set( 1920 * page_ratio, 1920 );
+        else
+            window_size.Set( 1920, 1920 / page_ratio );
+
+        //DEBUG
+        //window_size.Set( page_width, page_height );
+        //window_size *= 2.f;
+        //window_size /= 2.f;
 
         //---
         //--- Create a virtual window corresponding to the page size and fill it with the widget
@@ -172,55 +184,86 @@ FExportPDFExporter::Export()
 
         WidgetRenderer.DrawWindow( TextureRenderTarget, *HitTestGrid, Window, 1.f, ScaledSize, 0.1f );
 
+        float image_ratio = TextureRenderTarget->SizeX / float( TextureRenderTarget->SizeY );
+
         //TextureRenderTarget = WidgetRenderer.DrawWidget( mPDFSheetWidget->TakeWidget(), ScaledSize );
 
         //---
         //--- Create and add the pdf page containing the png image
         //---
 
-        //FString pathfile = TEXT( "C:/Users/Mike/Documents/Unreal Projects/dev_50_epos/Plugins/Epos/samples.png" );
-        //TUniquePtr<FArchive> Ar( IFileManager::Get().CreateFileWriter( *pathfile ) );
-        //if( !Ar )
+        //FRenderTarget* RenderTarget = TextureRenderTarget->GameThread_GetRenderTargetResource();
+        //TArray<FColor> source_colors;
+        //bool bReadSuccess = RenderTarget->ReadPixels( source_colors );
+        //if( !bReadSuccess )
         //    return false;
 
-        FBufferArchive Buffer;
-        bool bSuccess = FImageUtils::ExportRenderTarget2DAsPNG( TextureRenderTarget, Buffer );
-        if( !bSuccess )
-            return false;
+        ////int32 resized_width = int32( page_width ) * 2;
+        ////int32 resized_height = int32( page_height ) * 2;
 
-        //Ar->Serialize( const_cast<uint8*>( Buffer.GetData() ), Buffer.Num() );
+        ////TArray<FColor> thumbnail_colors;
+        ////FImageUtils::ImageResize( TextureRenderTarget->SizeX, TextureRenderTarget->SizeY, source_colors, resized_width, resized_height, thumbnail_colors, true, false );
 
-        float image_ratio = TextureRenderTarget->SizeX / float( TextureRenderTarget->SizeY );
+        //TArray64<uint8> png_data;
+        ////FImageUtils::PNGCompressImageArray( resized_width, resized_height, thumbnail_colors, png_data );
+
+        //FImageUtils::PNGCompressImageArray( TextureRenderTarget->SizeX, TextureRenderTarget->SizeY, source_colors, png_data );
 
         //---
 
-        /* add a new page object. */
-        HPDF_Page page = HPDF_AddPage( pdf );
+        FBufferArchive png_data;
+        bool bSuccess = FImageUtils::ExportRenderTarget2DAsPNG( TextureRenderTarget, png_data );
+        if( !bSuccess )
+            return false;
 
-        //HPDF_Page_SetWidth( page, 550 );
-        //HPDF_Page_SetHeight( page, 650 );
-        HPDF_Page_SetSize( page, page_size, page_direction );
-        //HPDF_Page_SetSize( page, HPDF_PAGE_SIZE_A4, HPDF_PAGE_LANDSCAPE );
+        ////DEBUG
+        //{
+        //    check( TextureRenderTarget->GetFormat() == PF_B8G8R8A8 );
+
+        //    FRenderTarget* RenderTarget = TextureRenderTarget->GameThread_GetRenderTargetResource();
+        //    FIntPoint Size = RenderTarget->GetSizeXY();
+
+        //    TArray64<uint8> RawData;
+        //    bool bSuccess = FImageUtils::GetRawData( TextureRenderTarget, RawData );
+
+        //    IImageWrapperModule& ImageWrapperModule = FModuleManager::Get().LoadModuleChecked<IImageWrapperModule>( TEXT( "ImageWrapper" ) );
+
+        //    //TSharedPtr<IImageWrapper> PNGImageWrapper = ImageWrapperModule.CreateImageWrapper( EImageFormat::JPEG );
+        //    TSharedPtr<IImageWrapper> PNGImageWrapper = ImageWrapperModule.CreateImageWrapper( EImageFormat::PNG );
+
+        //    PNGImageWrapper->SetRaw( RawData.GetData(), RawData.GetAllocatedSize(), Size.X, Size.Y, ERGBFormat::BGRA, 8 );
+
+        //    const TArray64<uint8> PNGData = PNGImageWrapper->GetCompressed( 100 );
+
+        //    Buffer.Serialize( (void*)PNGData.GetData(), PNGData.GetAllocatedSize() );
+        //}
+
+        //---
+
+        ////DEBUG
+        //FString file_name = TEXT( "samples-c3-" ) + FString::FromInt( i ) + TEXT( ".png" );
+        //FString pathfile = TEXT( "C:/Users/Mike/Documents/Unreal Projects/dev_50_epos/Plugins/Epos/samples/export/" ) + file_name;
+        //{
+        //    TUniquePtr<FArchive> PNGFileAr( IFileManager::Get().CreateFileWriter( *pathfile ) );
+        //    if( !PNGFileAr )
+        //        return false;
+
+        //    PNGFileAr->Serialize( const_cast<uint8*>( png_data.GetData() ), png_data.Num() );
+        //    PNGFileAr->Flush();
+        //    PNGFileAr->Close();
+        //    PNGFileAr = nullptr;
+        //}
+
+        //---
 
         HPDF_Destination dst = HPDF_Page_CreateDestination( page );
         HPDF_Destination_SetXYZ( dst, 0, HPDF_Page_GetHeight( page ), 1 );
         HPDF_SetOpenAction( pdf, dst );
 
-        //HPDF_Page_BeginText( page );
-        //HPDF_Page_SetFontAndSize( page, font, 20 );
-        //HPDF_Page_MoveTextPos( page, 220, HPDF_Page_GetHeight( page ) - 70 );
-        //HPDF_Page_ShowText( page, "PngDemo" );
-        //HPDF_Page_EndText( page );
-
         HPDF_Page_SetFontAndSize( page, font, 12 );
-
-        HPDF_REAL page_width = HPDF_Page_GetWidth( page );
-        HPDF_REAL page_height = HPDF_Page_GetHeight( page );
 
         HPDF_Box margin = { 0, 0, 0, 0 };
         margin.top = margin.bottom = page_height * margin.left / page_width;
-
-        //float page_ratio = page_width / page_height;
 
         float new_image_x = margin.left;
         float new_image_y = margin.top;
@@ -238,10 +281,17 @@ FExportPDFExporter::Export()
             new_image_width = new_image_height * image_ratio;
         }
 
-        HPDF_Image image = HPDF_LoadPngImageFromMem( pdf, const_cast<uint8*>( Buffer.GetData() ), Buffer.Num() );
-        //image = HPDF_LoadPngImageFromFile( pdf, filename );
+        //HPDF_Image image = HPDF_LoadJpegImageFromMem( pdf, const_cast<uint8*>( Buffer.GetData() ), Buffer.Num() );
+        HPDF_Image image = HPDF_LoadPngImageFromMem( pdf, const_cast<uint8*>( png_data.GetData() ), png_data.Num() );
+        //HPDF_Image image = HPDF_LoadPngImageFromFile( pdf, StringCast<ANSICHAR>( *pathfile ).Get() );
 
-        /* Draw image to the canvas. */
+        //DEBUG
+        //new_image_x = 10;
+        //new_image_y = 10;
+        //new_image_width = HPDF_Image_GetWidth( image );
+        //new_image_height = HPDF_Image_GetHeight( image );
+
+        // Draw image to the canvas
         HPDF_Page_DrawImage( page
                              , image
                              , new_image_x, new_image_y /* 0, 0 is on bottom left of the page */
@@ -249,7 +299,7 @@ FExportPDFExporter::Export()
         );
     }
 
-    /* save the document to a file */
+    // Save the document to a file
     FString pdf_extension( TEXT( ".pdf" ) );
     FString pathfile = mPDFOptions->ExportPath.Path / mPDFOptions->ExportFile;
     if( !pathfile.EndsWith( pdf_extension ) )
@@ -257,7 +307,7 @@ FExportPDFExporter::Export()
 
     HPDF_SaveToFile( pdf, StringCast<ANSICHAR>( *pathfile ).Get() );
 
-    /* clean up */
+    // Clean up
     HPDF_Free( pdf );
 
     return true;
