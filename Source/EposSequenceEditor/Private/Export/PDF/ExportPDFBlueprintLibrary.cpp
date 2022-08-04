@@ -136,7 +136,11 @@ UExportPDFBlueprintLibrary::GetPanelTexture2D( const FExportStruct& iExportStruc
     TArray64<uint8> samples8;
     FImageUtils::PNGCompressImageArray( image_size.X, image_size.Y, samples, samples8 );
 
-    return FImageUtils::ImportBufferAsTexture2D( samples8 );
+    UTexture2D* texture = FImageUtils::ImportBufferAsTexture2D( samples8 );
+    texture->SRGB = false;
+    texture->UpdateResource();
+
+    return texture;
 
     //--- or
 
