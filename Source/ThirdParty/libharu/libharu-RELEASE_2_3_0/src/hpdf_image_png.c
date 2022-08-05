@@ -380,7 +380,8 @@ HPDF_Image
 HPDF_Image_LoadPngImage  (HPDF_MMgr        mmgr,
                           HPDF_Stream      png_data,
                           HPDF_Xref        xref,
-                          HPDF_BOOL        delayed_loading)
+                          HPDF_BOOL        delayed_loading,
+                          HPDF_BOOL        compression)
 {
     HPDF_STATUS ret;
     HPDF_Dict image;
@@ -400,6 +401,9 @@ HPDF_Image_LoadPngImage  (HPDF_MMgr        mmgr,
     image = HPDF_DictStream_New (mmgr, xref);
     if (!image)
         return NULL;
+
+    if (compression != 0)
+        image->filter = HPDF_STREAM_FILTER_FLATE_DECODE;
 
     image->header.obj_class |= HPDF_OSUBCLASS_XOBJECT;
     ret += HPDF_Dict_AddName (image, "Type", "XObject");
@@ -485,6 +489,8 @@ LoadPngData  (HPDF_Dict     image,
 			goto Exit;
 		}
 
+		smask->filter = image->filter;
+
 		smask->header.obj_class |= HPDF_OSUBCLASS_XOBJECT;
 		ret = HPDF_Dict_AddName (smask, "Type", "XObject");
 		ret += HPDF_Dict_AddName (smask, "Subtype", "Image");
@@ -545,6 +551,8 @@ no_transparent_color_in_palette:
 			ret = HPDF_FAILD_TO_ALLOC_MEM;
 			goto Exit;
 		}
+
+		smask->filter = image->filter;
 
 		smask->header.obj_class |= HPDF_OSUBCLASS_XOBJECT;
 		ret = HPDF_Dict_AddName (smask, "Type", "XObject");
