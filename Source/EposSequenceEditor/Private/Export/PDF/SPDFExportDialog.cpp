@@ -38,7 +38,7 @@
 #include "Export/ExportStruct.h"
 #include "Export/PDF/ExportPDFExporter.h"
 #include "Export/PDF/ExportPDFSettings.h"
-#include "Export/PDF/ExportPDFSheetWidget.h"
+#include "Export/PDF/PDFDocExportWidget.h"
 #include "Export/SceneRenderer.h"
 #include "Settings/EposSequenceEditorSettings.h"
 #include "Settings/NamingConventionSettings.h"
@@ -52,7 +52,7 @@
 
 SExportPDFSettings::~SExportPDFSettings()
 {
-    mPDFSheetWidget = nullptr;
+    mPDFDocWidget = nullptr;
 }
 
 void
@@ -89,17 +89,17 @@ SExportPDFSettings::Construct( const FArguments& InArgs, TWeakPtr<ISequencer> iS
 
     //---
 
-    UClass* pdf_sheet_class = mExportPDFSettings->Options.SheetClassPath.TryLoadClass<UExportPDFSheetWidget>();
-    if( pdf_sheet_class )
+    UClass* pdf_doc_class = mExportPDFSettings->Options.PDFDocWidgetClassPath.TryLoadClass<UPDFDocExportWidget>();
+    if( pdf_doc_class )
     {
         UWorld* world = GEditor->GetEditorWorldContext().World();
-        mPDFSheetWidget = CreateWidget<UExportPDFSheetWidget>( world, pdf_sheet_class );
-        check( mPDFSheetWidget );
+        mPDFDocWidget = CreateWidget<UPDFDocExportWidget>( world, pdf_doc_class );
+        check( mPDFDocWidget );
 
         FExportStruct image_sequence_struct;
         FExportConverter converter( mSequencer, mRootSequence, &mExportPDFSettings->Options.MarkSettings, &image_sequence_struct );
 
-        mPDFSheetWidget->OnConstructPDFLayout( image_sequence_struct, true );
+        mPDFDocWidget->OnConstructPDFLayout( image_sequence_struct, true );
     }
 
     //---
@@ -138,7 +138,7 @@ SExportPDFSettings::Construct( const FArguments& InArgs, TWeakPtr<ISequencer> iS
                 .MinAspectRatio( this, &SExportPDFSettings::GetPageRatio )
                 .MaxAspectRatio( this, &SExportPDFSettings::GetPageRatio )
                 [
-                    mPDFSheetWidget ? mPDFSheetWidget->TakeWidget() : SNullWidget::NullWidget
+                    mPDFDocWidget ? mPDFDocWidget->TakeWidget() : SNullWidget::NullWidget
                 ]
             //]
 
@@ -170,12 +170,15 @@ SExportPDFSettings::GetReferencerName() const //override
 FOptionalSize
 SExportPDFSettings::GetPageRatio() const
 {
-    int32 current_page = mPDFSheetWidget->GetCurrentPDFPageNumber();
+    if( !mPDFDocWidget )
+        return FMath::Sqrt( 1.f );
+
+    int32 current_page = mPDFDocWidget->GetCurrentPDFPageNumber();
     
-    if( mPDFSheetWidget->GetPDFPageFormat( current_page ) == EPDFPageFormat::A4 && mPDFSheetWidget->GetPDFPageOrientation( current_page ) == EPDFPageOrientation::Landscape )
+    if( mPDFDocWidget->GetPDFPageFormat( current_page ) == EPDFPageFormat::A4 && mPDFDocWidget->GetPDFPageOrientation( current_page ) == EPDFPageOrientation::Landscape )
         return FMath::Sqrt( 2.f );
 
-    if( mPDFSheetWidget->GetPDFPageFormat( current_page ) == EPDFPageFormat::A4 && mPDFSheetWidget->GetPDFPageOrientation( current_page ) == EPDFPageOrientation::Portrait )
+    if( mPDFDocWidget->GetPDFPageFormat( current_page ) == EPDFPageFormat::A4 && mPDFDocWidget->GetPDFPageOrientation( current_page ) == EPDFPageOrientation::Portrait )
         return FMath::InvSqrt( 2.f );
 
     return FMath::Sqrt( 1.f );
@@ -189,26 +192,26 @@ SExportPDFSettings::GlobalSettingsChanged( const FPropertyChangedEvent& iEvent )
     //---
 
     mPDFSlot->DetachWidget();
-    mPDFSheetWidget = nullptr;
+    mPDFDocWidget = nullptr;
 
-    UClass* pdf_sheet_class = mExportPDFSettings->Options.SheetClassPath.TryLoadClass<UExportPDFSheetWidget>();
-    if( pdf_sheet_class )
+    UClass* pdf_doc_class = mExportPDFSettings->Options.PDFDocWidgetClassPath.TryLoadClass<UPDFDocExportWidget>();
+    if( pdf_doc_class )
     {
         UWorld* world = GEditor->GetEditorWorldContext().World();
-        mPDFSheetWidget = CreateWidget<UExportPDFSheetWidget>( world, pdf_sheet_class );
-        check( mPDFSheetWidget );
+        mPDFDocWidget = CreateWidget<UPDFDocExportWidget>( world, pdf_doc_class );
+        check( mPDFDocWidget );
 
         FExportStruct image_sequence_struct;
         FExportConverter converter( mSequencer, mRootSequence, &mExportPDFSettings->Options.MarkSettings, &image_sequence_struct );
 
-        mPDFSheetWidget->OnConstructPDFLayout( image_sequence_struct, true );
+        mPDFDocWidget->OnConstructPDFLayout( image_sequence_struct, true );
 
         mPDFSlot->AttachWidget(
             SNew( SBox )
             .MinAspectRatio( this, &SExportPDFSettings::GetPageRatio )
             .MaxAspectRatio( this, &SExportPDFSettings::GetPageRatio )
             [
-                mPDFSheetWidget->TakeWidget()
+                mPDFDocWidget->TakeWidget()
             ]
         );
     }

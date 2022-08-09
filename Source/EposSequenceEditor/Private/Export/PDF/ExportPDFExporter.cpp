@@ -14,7 +14,7 @@
 #include "Export/ExportStruct.h"
 #include "Export/SceneRenderer.h"
 #include "Export/PDF/ExportPDFSettings.h"
-#include "Export/PDF/ExportPDFSheetWidget.h"
+#include "Export/PDF/PDFDocExportWidget.h"
 
 #include "hpdf.h"
 
@@ -49,13 +49,13 @@ FExportPDFExporter::FExportPDFExporter( TWeakPtr<ISequencer> iSequencer, const F
 bool
 FExportPDFExporter::Export()
 {
-    UExportPDFSheetWidget* pdf_widget = nullptr;
-    UClass* pdf_sheet_class = mPDFOptions->SheetClassPath.TryLoadClass<UExportPDFSheetWidget>();
-    if( !pdf_sheet_class )
+    UPDFDocExportWidget* pdf_widget = nullptr;
+    UClass* pdf_doc_class = mPDFOptions->PDFDocWidgetClassPath.TryLoadClass<UPDFDocExportWidget>();
+    if( !pdf_doc_class )
         return false;
 
     UWorld* world = GEditor->GetEditorWorldContext().World();
-    pdf_widget = CreateWidget<UExportPDFSheetWidget>( world, pdf_sheet_class );
+    pdf_widget = CreateWidget<UPDFDocExportWidget>( world, pdf_doc_class );
     check( pdf_widget );
 
     pdf_widget->OnConstructPDFLayout( *mStruct, false );
@@ -186,7 +186,7 @@ FExportPDFExporter::Export()
 
         float image_ratio = TextureRenderTarget->SizeX / float( TextureRenderTarget->SizeY );
 
-        //TextureRenderTarget = WidgetRenderer.DrawWidget( mPDFSheetWidget->TakeWidget(), ScaledSize );
+        //TextureRenderTarget = WidgetRenderer.DrawWidget( mPDFDocWidget->TakeWidget(), ScaledSize );
 
         //---
         //--- Create and add the pdf page containing the png image

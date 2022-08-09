@@ -9,7 +9,7 @@
 
 #include "Export/ExportStruct.h"
 
-#include "ExportPDFSheetWidget.generated.h"
+#include "PDFDocExportWidget.generated.h"
 
 UENUM()
 enum class EPDFPageFormat : uint8
@@ -26,10 +26,10 @@ enum class EPDFPageOrientation : uint8
 
 
 /**
- * Base class for pdf sheets
+ * Base class for pdf doc
  */
 UCLASS(Blueprintable, Abstract)
-class EPOSSEQUENCEEDITOR_API UExportPDFSheetWidget
+class EPOSSEQUENCEEDITOR_API UPDFDocExportWidget
     : public UUserWidget
 {
 public:

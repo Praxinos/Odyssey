@@ -8,7 +8,7 @@
 class IDetailsView;
 class ISequencer;
 class UExportPDFSettings;
-class UExportPDFSheetWidget;
+class UPDFDocExportWidget;
 class UMovieSceneSequence;
 
 //---
@@ -51,7 +51,7 @@ private:
 
     UExportPDFSettings*         mExportPDFSettings { nullptr };
 
-    UExportPDFSheetWidget*      mPDFSheetWidget { nullptr };
+    UPDFDocExportWidget*        mPDFDocWidget { nullptr };
     //SHorizontalBox::FSlot*      mPDFSlot { nullptr };
     SVerticalBox::FSlot*        mPDFSlot { nullptr };
 };

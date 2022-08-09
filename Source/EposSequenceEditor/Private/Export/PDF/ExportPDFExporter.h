@@ -11,7 +11,6 @@ struct FExportPDFOptions;
 struct FExportStruct;
 class IImageWriteQueue;
 class ISequencer;
-class UExportPDFSheetWidget;
 
 class FExportPDFExporter
 {
