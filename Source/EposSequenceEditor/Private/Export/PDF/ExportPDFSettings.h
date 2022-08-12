@@ -28,7 +28,7 @@ public:
     FString ExportFile;
 
     UPROPERTY( EditAnywhere, Category=ExportPDF, meta=(MetaClass="PDFDocExportWidget") )
-    FSoftClassPath PDFDocWidgetClassPath { TEXT( "/Epos/WBP_PDFDoc_Landscape_3x2.WBP_PDFDoc_Landscape_3x2_C" ) };
+    FSoftClassPath PDFDocWidgetClassPath { TEXT( "/Epos/PDF/Thumbnails/WBP_PDFDoc_Thumbnails_Landscape.WBP_PDFDoc_Thumbnails_Landscape_C" ) };
 
     UPROPERTY( EditAnywhere, Category=ExportPDF )
     FExportMarkSettings MarkSettings;
