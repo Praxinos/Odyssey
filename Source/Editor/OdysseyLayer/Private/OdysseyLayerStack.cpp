@@ -381,7 +381,7 @@ void FOdysseyLayerStack::DuplicateLayer(TSharedPtr<IOdysseyLayer> iLayer)
 
     TSharedPtr<IOdysseyLayer> clone = MakeShareable(iLayer->Clone());
     clone->SetName(FName(*(iLayer->GetName().ToString() + FString("_Copy"))));
-    AddLayer(clone, parent, index + 1);
+    AddLayer(clone, parent, index);
 
     //Clone at the end so that every callbacks are called when changing current layer before duplicating
     IOdysseyLayer::CloneChildren(iLayer, clone);

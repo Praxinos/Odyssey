@@ -16,7 +16,7 @@ FOdysseyFolderLayer::~FOdysseyFolderLayer()
 
 FOdysseyFolderLayer::FOdysseyFolderLayer( const FOdysseyFolderLayer& iLayer)
     : IOdysseyLayer(iLayer)
-    , IOdysseyLayerImageBlendingCapability()
+    , IOdysseyLayerImageBlendingCapability( iLayer.GetBlendingMode(), iLayer.GetOpacity() )
     , mIsOpen( iLayer.mIsOpen )
 {
 }

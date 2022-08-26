@@ -21,9 +21,9 @@ FOdysseyImageLayer::~FOdysseyImageLayer()
     delete mBlock;
 }
 
-FOdysseyImageLayer::FOdysseyImageLayer( const FOdysseyImageLayer& iLayer)
-    : IOdysseyLayer(iLayer)
-    , IOdysseyLayerImageBlendingCapability()
+FOdysseyImageLayer::FOdysseyImageLayer( const FOdysseyImageLayer& iLayer )
+    : IOdysseyLayer( iLayer )
+    , IOdysseyLayerImageBlendingCapability( iLayer.GetBlendingMode(), iLayer.GetOpacity() )
     , mBlock( nullptr )
     , mIsAlphaLocked( iLayer.mIsAlphaLocked )
 {
