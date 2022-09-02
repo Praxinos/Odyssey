@@ -280,6 +280,8 @@ SExportImageSequenceSettings::ExportStoryboard()
         image_sequence_struct.Panels.Add( panel->mPanel );
     }
 
+    image_sequence_struct.mSequencer = mSequencer;
+
     FExportImageSequenceExporter exporter( mSequencer, &image_sequence_struct, &mExportImageSequenceSettings->Options );
     exporter.Export();
 }

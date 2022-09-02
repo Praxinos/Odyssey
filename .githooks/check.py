@@ -87,7 +87,7 @@ def CheckEOF( iLines ):
 ## The IDDN checker (= exist and correct format)
 #
 #  @param  iLines   List[str]   The lines to check
-#  @return          bool        Check if first lines are ok (contain iddn and cpoyright) or not
+#  @return          bool        Check if first lines are ok (contain iddn and copyright) or not
 def CheckIDDN( iLines ):
     if len( iLines ) == 0:
         return True
@@ -95,7 +95,10 @@ def CheckIDDN( iLines ):
     if len( iLines ) == 1:
         return False
     
-    return iLines[0].startswith( '// IDDN.FR.' ) and ( iLines[1].startswith( '// ' ) and 'copyright' in iLines[1] and 'Praxinos' in iLines[1] and 'publishing' in iLines[1] )
+    py_file_ok  = iLines[0].startswith( '#!/usr/bin/env py' ) and iLines[1].startswith(  '# IDDN.FR.' ) and ( iLines[2].startswith(  '# ' ) and 'copyright' in iLines[2] and 'Praxinos' in iLines[2] and 'publishing' in iLines[2] )
+    cpp_file_ok =                                                 iLines[0].startswith( '// IDDN.FR.' ) and ( iLines[1].startswith( '// ' ) and 'copyright' in iLines[1] and 'Praxinos' in iLines[1] and 'publishing' in iLines[1] )
+
+    return py_file_ok or cpp_file_ok
 
 #---
 
@@ -193,9 +196,19 @@ def main():
     pathfiles = [ entry for entry in root.glob( '*.uplugin' ) if entry.is_file() ]
     ok.append( Check( pathfiles, options ) )
 
-    # source
+    # *.py
     options = [ eOptions.kUTF8, eOptions.kTabs, eOptions.kTrailingSpaces, eOptions.kOnlySpaces, eOptions.kEOL, eOptions.kEOF, eOptions.kIDDN ]
-    pathfiles = [ entry for entry in source.rglob( '*' ) if entry.is_file() and entry.suffix in ['.h', '.cpp', '.cs'] ]
+    pathfiles = [ entry for entry in root.glob( '*.py' ) if entry.is_file() ]
+    ok.append( Check( pathfiles, options ) )
+
+    # source/Epos*/** (recursive)
+    options = [ eOptions.kUTF8, eOptions.kTabs, eOptions.kTrailingSpaces, eOptions.kOnlySpaces, eOptions.kEOL, eOptions.kEOF, eOptions.kIDDN ]
+    pathfiles = [ entry for entry in source.rglob( 'Epos*' ) if entry.is_file() and entry.suffix in ['.h', '.cpp', '.cs'] ]
+    ok.append( Check( pathfiles, options ) )
+
+    # source/third party/*/* (not recursive)
+    options = [ eOptions.kUTF8, eOptions.kTabs, eOptions.kTrailingSpaces, eOptions.kOnlySpaces, eOptions.kEOL, eOptions.kEOF, eOptions.kIDDN ]
+    pathfiles = [ entry for entry in source.glob( 'ThirdParty/*/*' ) if entry.is_file() and entry.suffix in ['.h', '.cpp', '.cs', '.py'] ]
     ok.append( Check( pathfiles, options ) )
 
     return 0 if all( ok ) else 1 # return 1 if at least one error in one file occurs
