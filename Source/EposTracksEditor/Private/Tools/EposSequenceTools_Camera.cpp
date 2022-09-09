@@ -76,6 +76,24 @@ BoardSequenceTools::CreateCamera( ISequencer* iSequencer, FFrameNumber iFrameNum
 }
 
 //static
+void
+BoardSequenceTools::CreateCamera( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber, const FCameraArgs& iCameraArgs, const FPlaneArgs& iPlaneArgs )
+{
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSubSection, iSequencer->GetFocusedTemplateID() );
+    if( !result.mInnerSequence )
+        return;
+
+    if( !iSubSection.GetTrueRange().Contains( iFrameNumber ) )
+        return;
+
+    if( result.mInnerSequence->IsA<UBoardSequence>() )
+        return;
+
+    FFrameTime inner_frame = iFrameNumber * iSubSection.OuterToInnerTransform();
+    ShotSequenceTools::CreateCamera( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iCameraArgs, iPlaneArgs );
+}
+
+//static
 bool
 BoardSequenceTools::CanCreateCamera( ISequencer* iSequencer, FFrameNumber iFrameNumber )
 {
@@ -151,7 +169,7 @@ ShotSequenceTools::CreateCamera( ISequencer& iSequencer, UMovieSceneSequence* iS
 
     //---
 
-    iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemAdded );
+    iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::RefreshAllImmediately );
 }
 
 

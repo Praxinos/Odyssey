@@ -1,0 +1,42 @@
+// IDDN.FR.001.220036.001.S.P.2021.000.00000
+// EPOS is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
+
+#include "EposNamingConventionBlueprintLibrary.h"
+
+#include "ISequencer.h"
+
+#include "NamingConvention.h"
+
+//---
+
+namespace
+{
+    static TWeakPtr<ISequencer> CurrentSequencer;
+}
+
+//static
+void
+UEposNamingConventionBlueprintLibrary::SetSequencer( TSharedRef<ISequencer> InSequencer )
+{
+    CurrentSequencer = TWeakPtr<ISequencer>( InSequencer );
+}
+
+//---
+
+//static
+FString
+UEposNamingConventionBlueprintLibrary::GenerateNoteAssetPathName( const UMovieSceneSequence* iSequence, FString& oPath, FString& oName )
+{
+    oPath = TEXT( "" );
+    oName = TEXT( "" );
+
+    if( !CurrentSequencer.IsValid() )
+        return TEXT( "" );
+
+    if( !iSequence )
+        return TEXT( "" );
+
+    ISequencer* sequencer = CurrentSequencer.Pin().Get();
+
+    return NamingConvention::GenerateNoteAssetPathName( *sequencer, sequencer->GetRootMovieSceneSequence(), iSequence, oPath, oName );
+}

@@ -253,6 +253,23 @@ BoardSequenceTools::CreatePlane( ISequencer* iSequencer, FFrameNumber iFrameNumb
 }
 
 //static
+void
+BoardSequenceTools::CreatePlane( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber, const FPlaneArgs& iPlaneArgs )
+{
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSubSection, iSequencer->GetFocusedTemplateID() );
+    if( !result.mInnerSequence )
+        return;
+
+    if( !iSubSection.GetTrueRange().Contains( iFrameNumber ) )
+        return;
+
+    if( result.mInnerSequence->IsA<UBoardSequence>() )
+        return;
+
+    ShotSequenceTools::CreatePlane( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, result.mInnerTime.GetFrame(), iPlaneArgs );
+}
+
+//static
 bool
 BoardSequenceTools::CanCreatePlane( ISequencer* iSequencer, FFrameNumber iFrameNumber )
 {

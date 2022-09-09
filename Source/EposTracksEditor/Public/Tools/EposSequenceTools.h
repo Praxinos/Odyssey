@@ -196,6 +196,15 @@ public:
     */
     static void CreateCamera( ISequencer* iSequencer, FFrameNumber iFrameNumber, const FCameraArgs& iCameraArgs = FCameraArgs(), const FPlaneArgs& iPlaneArgs = FPlaneArgs() );
 
+    /**
+    *  Create a new camera (actor & track & cameracut track) in the board section
+    *
+    * @param ISequencer             iSequencer to add a new camera.
+    * @param UMovieSceneSubSection  iSubSection to add a new camera.
+    * @param FFrameNumber           iFrameNumber to get the board section.
+    */
+    static void CreateCamera( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber, const FCameraArgs& iCameraArgs = FCameraArgs(), const FPlaneArgs& iPlaneArgs = FPlaneArgs() );
+
 public:
     /**
     *  Update the camera location from the viewport
@@ -382,6 +391,15 @@ public:
     * @param FFrameNumber   iFrameNumber to get the board section.
     */
     static void CreatePlane( ISequencer* iSequencer, FFrameNumber iFrameNumber, const FPlaneArgs& iPlaneArgs = FPlaneArgs() );
+
+    /**
+    *  Create a new plane (actor & track) in the board section
+    *
+    * @param ISequencer             iSequencer to add a new plane.
+    * @param UMovieSceneSubSection  iSubSection to add a new plane.
+    * @param FFrameNumber           iFrameNumber to get the board section.
+    */
+    static void CreatePlane( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber, const FPlaneArgs& iPlaneArgs = FPlaneArgs() );
 
     /**
     *  Can a plane be created in the board section ?

@@ -81,6 +81,8 @@ public class EposSequenceEditor : ModuleRules
                 "LevelSequenceEditor",
                 "AssetDefinition",
                 "UMG",
+                "SequencerScripting",
+                "CurveEditor",
                 // [EDITOR] custom plugin dependencies
                 "EposTracksEditor",
                 "EposNamingConvention",

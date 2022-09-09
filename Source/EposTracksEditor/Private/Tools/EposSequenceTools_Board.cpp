@@ -610,7 +610,7 @@ CinematicBoardTrackTools::InsertBoard( ISequencer* iSequencer, FFrameNumber iFra
 
     //---
 
-    iSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemAdded );
+    iSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::RefreshAllImmediately );
     BoardSequenceTools::UpdateViewRange( iSequencer, new_section ? new_section->GetTrueRange() : TRange<FFrameNumber>::Empty() );
     iSequencer->EmptySelection();
     iSequencer->SelectSection( new_section );
@@ -643,7 +643,8 @@ CinematicBoardTrackTools::InsertShot( ISequencer* iSequencer, FFrameNumber iFram
 
     //---
 
-    iSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemAdded );
+    iSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::RefreshAllImmediately );
+    //iSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemAdded );
     BoardSequenceTools::UpdateViewRange( iSequencer, new_section ? new_section->GetTrueRange() : TRange<FFrameNumber>::Empty() );
     iSequencer->EmptySelection();
     iSequencer->SelectSection( new_section );
