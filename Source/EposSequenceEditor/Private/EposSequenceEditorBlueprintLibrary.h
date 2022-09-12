@@ -10,6 +10,8 @@
 #include "MovieSceneSequencePlayer.h"
 #include "MovieSceneObjectBindingID.h"
 
+#include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
+
 #include "EposSequenceEditorBlueprintLibrary.generated.h"
 
 class ISequencer;
@@ -93,6 +95,50 @@ public:
      */
     UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor | Board" )
     static void CreateDrawing( UMovieSceneSubSection* SubSection, int32 Frame, const FMovieSceneBindingProxy& Binding );
+
+public:
+
+    /*
+     * Create a new take in the subsection
+     */
+    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor | Board" )
+    static FBoardSectionTake CreateTake( UMovieSceneSubSection* SubSection );
+
+    /*
+     * Switch take to another in the subsection
+     */
+    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor | Board" )
+    static FBoardSectionTake SwitchTake( UMovieSceneSubSection* SubSection, FBoardSectionTake Take );
+
+    /*
+     * Get the list of takes in the subsection
+     */
+    UFUNCTION( BlueprintPure, Category = "Epos Sequence Editor | Board" )
+    static TArray<FBoardSectionTake> GetTakes( UMovieSceneSubSection* SubSection );
+
+    /*
+     * Get the current take in the subsection
+     */
+    UFUNCTION( BlueprintPure, Category = "Epos Sequence Editor | Board" )
+    static FBoardSectionTake GetCurrentTake( UMovieSceneSubSection* SubSection );
+
+    /*
+     * Check the validity of a take
+     */
+    UFUNCTION( BlueprintPure, Category = "Epos Sequence Editor | Board" )
+    static bool IsValid( FBoardSectionTake Take );
+
+    /*
+     * Get the name of a take
+     */
+    UFUNCTION( BlueprintPure, Category = "Epos Sequence Editor | Board" )
+    static FText GetDisplayName( FBoardSectionTake Take );
+
+    /*
+     * Compare 2 takes
+     */
+    UFUNCTION( BlueprintPure, meta = ( DisplayName = "Equal (BoardSectionTake)", CompactNodeTitle = "==" ), Category = "Epos Sequence Editor | Board" )
+    static bool EqualEqual_BoardSectionTakeBoardSectionTake( FBoardSectionTake A, FBoardSectionTake B );
 };
 
 //---

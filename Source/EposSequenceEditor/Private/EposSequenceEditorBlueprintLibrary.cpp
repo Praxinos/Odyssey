@@ -70,6 +70,8 @@ UBoardSequenceEditorBlueprintLibrary::InsertBoardSequence( int32 iStartFrame, in
     return CinematicBoardTrackTools::InsertBoard( sequencer, range.GetLowerBoundValue(), length );
 }
 
+//-
+
 //static
 void
 UBoardSequenceEditorBlueprintLibrary::CreateCamera( UMovieSceneSubSection* iSubSection )
@@ -123,6 +125,92 @@ UBoardSequenceEditorBlueprintLibrary::CreateDrawing( UMovieSceneSubSection* iSub
     BoardSequenceTools::CreateDrawing( sequencer, *iSubSection, frame_in_tick, Binding.BindingID );
 }
 
+//-
+
+//static
+FBoardSectionTake
+UBoardSequenceEditorBlueprintLibrary::CreateTake( UMovieSceneSubSection* iSubSection )
+{
+    UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( iSubSection );
+
+    if( !CurrentSequencer.IsValid() )
+        return FBoardSectionTake();
+
+    if( !board_section )
+        return FBoardSectionTake();
+
+    ISequencer* sequencer = CurrentSequencer.Pin().Get();
+
+    FBoardSectionTake* take = BoardSequenceTools::CreateTake( sequencer, *board_section );
+
+    return take ? *take : FBoardSectionTake();
+}
+
+//static
+FBoardSectionTake
+UBoardSequenceEditorBlueprintLibrary::SwitchTake( UMovieSceneSubSection* iSubSection, FBoardSectionTake iTake )
+{
+    UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( iSubSection );
+
+    if( !CurrentSequencer.IsValid() )
+        return FBoardSectionTake();
+
+    if( !board_section )
+        return FBoardSectionTake();
+
+    ISequencer* sequencer = CurrentSequencer.Pin().Get();
+
+    FBoardSectionTake* take = BoardSequenceTools::SwitchTake( sequencer, *board_section, &iTake );
+
+    return take ? *take : FBoardSectionTake();
+}
+
+//static
+TArray<FBoardSectionTake>
+UBoardSequenceEditorBlueprintLibrary::GetTakes( UMovieSceneSubSection* iSubSection )
+{
+    UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( iSubSection );
+
+    return board_section ? board_section->GetTakes() : TArray<FBoardSectionTake>();
+}
+
+//static
+FBoardSectionTake
+UBoardSequenceEditorBlueprintLibrary::GetCurrentTake( UMovieSceneSubSection* iSubSection )
+{
+    UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( iSubSection );
+
+    if( !board_section )
+        return FBoardSectionTake();
+
+    FBoardSectionTake* take = board_section->FindTake( board_section->GetSequence() );
+
+    return take ? *take : FBoardSectionTake();
+}
+
+//-
+
+//static
+bool
+UBoardSequenceEditorBlueprintLibrary::IsValid( FBoardSectionTake iTake )
+{
+    return iTake.GetSequence().IsValid();
+}
+
+//static
+FText
+UBoardSequenceEditorBlueprintLibrary::GetDisplayName( FBoardSectionTake iTake )
+{
+    return iTake.GetSequence().IsValid() ? iTake.GetSequence()->GetDisplayName() : FText::GetEmpty();
+}
+
+//static
+bool
+UBoardSequenceEditorBlueprintLibrary::EqualEqual_BoardSectionTakeBoardSectionTake( FBoardSectionTake iA, FBoardSectionTake iB )
+{
+    return iA == iB;
+}
+
 //---
 
 //static
@@ -161,6 +249,8 @@ UShotSequenceEditorBlueprintLibrary::InsertShotSequence( int32 iStartFrame, int3
 
     return CinematicBoardTrackTools::InsertShot( sequencer, range.GetLowerBoundValue(), length );
 }
+
+//-
 
 //static
 void

@@ -151,7 +151,7 @@ public:
     static FBoardSectionTake* CreateTake( ISequencer* iSequencer, UMovieSceneSubSection& iSubSection );
 
     /** Switch the current take to the new one for the board section. */
-    static FBoardSectionTake* SwitchTake( ISequencer* iSequencer, UMovieSceneSubSection& iSubSection, FBoardSectionTake* iTake );
+    static FBoardSectionTake* SwitchTake( ISequencer* iSequencer, UMovieSceneSubSection& iSubSection, const FBoardSectionTake* iTake );
 
 // Inside EposSequenceTools
 public:

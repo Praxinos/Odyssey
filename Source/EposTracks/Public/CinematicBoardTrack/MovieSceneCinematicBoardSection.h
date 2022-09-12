@@ -11,7 +11,7 @@
 /**
  * Implements a take.
  */
-USTRUCT()
+USTRUCT( BlueprintType )
 struct EPOSTRACKS_API FBoardSectionTake
 {
     GENERATED_BODY()
@@ -24,14 +24,13 @@ public:
     TWeakObjectPtr<UMovieSceneSequence> GetSequence() const;
 
 public:
-    friend bool operator==( const FBoardSectionTake& iA, const FBoardSectionTake& iB );
+    EPOSTRACKS_API friend bool operator==( const FBoardSectionTake& iA, const FBoardSectionTake& iB );
 
 private:
     UPROPERTY()
     //UPROPERTY( VisibleAnywhere, Category="Take" )
     TWeakObjectPtr<UMovieSceneSequence> Sequence;
 };
-
 
 /**
  * Implements a board section.
