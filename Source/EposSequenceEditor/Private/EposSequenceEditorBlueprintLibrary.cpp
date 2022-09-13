@@ -70,6 +70,23 @@ UBoardSequenceEditorBlueprintLibrary::InsertBoardSequence( int32 iStartFrame, in
     return CinematicBoardTrackTools::InsertBoard( sequencer, range.GetLowerBoundValue(), length );
 }
 
+//static
+UMovieSceneSubSection*
+UBoardSequenceEditorBlueprintLibrary::InsertShotSequence( int32 iStartFrame, int32 iEndFrame )
+{
+    if( !CurrentSequencer.IsValid() )
+        return nullptr;
+
+    ISequencer* sequencer = CurrentSequencer.Pin().Get();
+
+    FFrameRate DisplayRate = sequencer->GetFocusedDisplayRate();
+    FFrameRate TickResolution = sequencer->GetFocusedTickResolution();
+    TRange<FFrameNumber> range( ConvertFrameTime( iStartFrame, DisplayRate, TickResolution ).GetFrame(), ConvertFrameTime( iEndFrame, DisplayRate, TickResolution ).GetFrame() );
+    int32 length = UE::MovieScene::DiscreteSize( range );
+
+    return CinematicBoardTrackTools::InsertShot( sequencer, range.GetLowerBoundValue(), length );
+}
+
 //-
 
 //static
@@ -133,7 +150,7 @@ UBoardSequenceEditorBlueprintLibrary::CreateDrawing( UMovieSceneSubSection* iSub
 
 //static
 void
-UBoardSequenceEditorBlueprintLibrary::RenameBinding( UMovieSceneSubSection* iSubSection, const FSequencerBindingProxy& iBinding, FString iNewLabel )
+UBoardSequenceEditorBlueprintLibrary::RenameBinding( UMovieSceneSubSection* iSubSection, const FMovieSceneBindingProxy& iBinding, FString iNewLabel )
 {
     UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( iSubSection );
 
@@ -257,20 +274,27 @@ UShotSequenceEditorBlueprintLibrary::GetFocusedShotSequence()
 }
 
 //static
-UMovieSceneSubSection*
-UShotSequenceEditorBlueprintLibrary::InsertShotSequence( int32 iStartFrame, int32 iEndFrame )
+void
+UShotSequenceEditorBlueprintLibrary::StepToNextShot()
 {
     if( !CurrentSequencer.IsValid() )
-        return nullptr;
+        return;
 
     ISequencer* sequencer = CurrentSequencer.Pin().Get();
 
-    FFrameRate DisplayRate = sequencer->GetFocusedDisplayRate();
-    FFrameRate TickResolution = sequencer->GetFocusedTickResolution();
-    TRange<FFrameNumber> range( ConvertFrameTime( iStartFrame, DisplayRate, TickResolution ).GetFrame(), ConvertFrameTime( iEndFrame, DisplayRate, TickResolution ).GetFrame() );
-    int32 length = UE::MovieScene::DiscreteSize( range );
+    ShotSequenceTools::StepToNextShot( sequencer );
+}
 
-    return CinematicBoardTrackTools::InsertShot( sequencer, range.GetLowerBoundValue(), length );
+//static
+void
+UShotSequenceEditorBlueprintLibrary::StepToPreviousShot()
+{
+    if( !CurrentSequencer.IsValid() )
+        return;
+
+    ISequencer* sequencer = CurrentSequencer.Pin().Get();
+
+    ShotSequenceTools::StepToPreviousShot( sequencer );
 }
 
 //-
@@ -321,7 +345,7 @@ UShotSequenceEditorBlueprintLibrary::CreateDrawing( const FMovieSceneBindingProx
 
 //static
 void
-UShotSequenceEditorBlueprintLibrary::RenameBinding( const FSequencerBindingProxy& iBinding, FString iNewLabel )
+UShotSequenceEditorBlueprintLibrary::RenameBinding( const FMovieSceneBindingProxy& iBinding, FString iNewLabel )
 {
     if( !CurrentSequencer.IsValid() )
         return;
