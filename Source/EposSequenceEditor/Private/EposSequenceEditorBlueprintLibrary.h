@@ -94,7 +94,14 @@ public:
      * Create a drawing in a plane at the given frame
      */
     UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor | Board" )
-    static void CreateDrawing( UMovieSceneSubSection* SubSection, int32 Frame, const FMovieSceneBindingProxy& Binding );
+    static void CreateDrawing( UMovieSceneSubSection* SubSection, const FMovieSceneBindingProxy& Binding, int32 Frame );
+public:
+
+    /*
+     * Rename a plane/camera binding and its actor
+     */
+    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor | Board" )
+    static void RenameBinding( UMovieSceneSubSection* SubSection, const FMovieSceneBindingProxy& Binding, FString NewLabel );
 
 public:
 
@@ -193,8 +200,15 @@ public:
      * Create a drawing in a plane at the given frame
      */
     UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor | Shot" )
-    static void CreateDrawing( int32 Frame, const FMovieSceneBindingProxy& Binding );
+    static void CreateDrawing( const FMovieSceneBindingProxy& Binding, int32 Frame );
 
+public:
+
+    /*
+     * Rename a plane/camera binding and its actor
+     */
+    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor | Shot" )
+    static void RenameBinding( const FMovieSceneBindingProxy& Binding, FString NewLabel );
 };
 
 //---

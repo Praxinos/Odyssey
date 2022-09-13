@@ -76,43 +76,49 @@ UBoardSequenceEditorBlueprintLibrary::InsertBoardSequence( int32 iStartFrame, in
 void
 UBoardSequenceEditorBlueprintLibrary::CreateCamera( UMovieSceneSubSection* iSubSection )
 {
+    UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( iSubSection );
+
     if( !CurrentSequencer.IsValid() )
         return;
 
-    if( !iSubSection )
+    if( !board_section )
         return;
 
     ISequencer* sequencer = CurrentSequencer.Pin().Get();
 
     FCameraArgs camera_args;
     FPlaneArgs plane_args;
-    BoardSequenceTools::CreateCamera( sequencer, *iSubSection, iSubSection->GetTrueRange().GetLowerBoundValue() );
+    BoardSequenceTools::CreateCamera( sequencer, *board_section, board_section->GetTrueRange().GetLowerBoundValue() );
 }
 
 //static
 void
 UBoardSequenceEditorBlueprintLibrary::CreatePlane( UMovieSceneSubSection* iSubSection )
 {
+    UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( iSubSection );
+
     if( !CurrentSequencer.IsValid() )
         return;
 
-    if( !iSubSection )
+    if( !board_section )
         return;
 
     ISequencer* sequencer = CurrentSequencer.Pin().Get();
 
     FPlaneArgs plane_args;
-    BoardSequenceTools::CreatePlane( sequencer, *iSubSection, iSubSection->GetTrueRange().GetLowerBoundValue() );
+    BoardSequenceTools::CreatePlane( sequencer, *board_section, board_section->GetTrueRange().GetLowerBoundValue() );
 }
 
 //static
 void
-UBoardSequenceEditorBlueprintLibrary::CreateDrawing( UMovieSceneSubSection* iSubSection, int32 iFrame, const FMovieSceneBindingProxy& Binding )
+UBoardSequenceEditorBlueprintLibrary::CreateDrawing( UMovieSceneSubSection* iSubSection, const FMovieSceneBindingProxy& iBinding, int32 iFrame )
 {
+    UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( iSubSection );
+
     if( !CurrentSequencer.IsValid() )
         return;
 
-    if( !iSubSection )
+    if( !board_section )
         return;
 
     ISequencer* sequencer = CurrentSequencer.Pin().Get();
@@ -122,7 +128,24 @@ UBoardSequenceEditorBlueprintLibrary::CreateDrawing( UMovieSceneSubSection* iSub
     FFrameNumber frame_in_tick = ConvertFrameTime( iFrame, DisplayRate, TickResolution ).GetFrame();
 
     FPlaneArgs plane_args;
-    BoardSequenceTools::CreateDrawing( sequencer, *iSubSection, frame_in_tick, Binding.BindingID );
+    BoardSequenceTools::CreateDrawing( sequencer, *board_section, frame_in_tick, iBinding.BindingID );
+}
+
+//static
+void
+UBoardSequenceEditorBlueprintLibrary::RenameBinding( UMovieSceneSubSection* iSubSection, const FSequencerBindingProxy& iBinding, FString iNewLabel )
+{
+    UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( iSubSection );
+
+    if( !CurrentSequencer.IsValid() )
+        return;
+
+    if( !board_section )
+        return;
+
+    ISequencer* sequencer = CurrentSequencer.Pin().Get();
+
+    BoardSequenceTools::RenameBinding( sequencer, *board_section, iBinding.BindingID, iNewLabel );
 }
 
 //-
@@ -281,7 +304,7 @@ UShotSequenceEditorBlueprintLibrary::CreatePlane()
 
 //static
 void
-UShotSequenceEditorBlueprintLibrary::CreateDrawing( int32 iFrame, const FMovieSceneBindingProxy& Binding )
+UShotSequenceEditorBlueprintLibrary::CreateDrawing( const FMovieSceneBindingProxy& Binding, int32 iFrame )
 {
     if( !CurrentSequencer.IsValid() )
         return;
@@ -294,6 +317,18 @@ UShotSequenceEditorBlueprintLibrary::CreateDrawing( int32 iFrame, const FMovieSc
 
     FPlaneArgs plane_args;
     ShotSequenceTools::CreateDrawing( sequencer, frame_in_tick, Binding.BindingID );
+}
+
+//static
+void
+UShotSequenceEditorBlueprintLibrary::RenameBinding( const FSequencerBindingProxy& iBinding, FString iNewLabel )
+{
+    if( !CurrentSequencer.IsValid() )
+        return;
+
+    ISequencer* sequencer = CurrentSequencer.Pin().Get();
+
+    ShotSequenceTools::RenameBinding( sequencer, iBinding.BindingID, iNewLabel );
 }
 
 //---
