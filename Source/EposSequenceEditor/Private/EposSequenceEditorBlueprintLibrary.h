@@ -265,6 +265,20 @@ public:
 
 public:
 
+    /*
+     * Move and scale a plane from the camera
+     */
+    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor" )
+    static void MoveAndScalePlane( APlaneActor* Plane, const ACineCameraActor* Camera, float NewDistance, EScalePlane ScaleType );
+
+    /*
+     * Move and scale a plane from the camera
+     */
+    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor" )
+    static void SetCameraFocalLengthAndScalePlane( TArray<APlaneActor*> Planes, ACineCameraActor* Camera, float NewFocalLength, EScalePlane ScaleType );
+
+public:
+
     /**
      * Play the current level sequence
      */

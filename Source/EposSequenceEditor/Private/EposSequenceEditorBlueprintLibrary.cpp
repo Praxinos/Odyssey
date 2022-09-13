@@ -412,6 +412,30 @@ void UEposSequenceEditorBlueprintLibrary::CloseEposSequence()
 
 //---
 
+//static
+void
+UEposSequenceEditorBlueprintLibrary::MoveAndScalePlane( APlaneActor* ioPlane, const ACineCameraActor* iCamera, float iNewDistance, EScalePlane iScaleType )
+{
+    if( !ioPlane || !iCamera )
+        return;
+
+    ShotSequenceTools::MoveAndScalePlane( ioPlane, iCamera, iNewDistance, iScaleType );
+}
+
+//static
+void
+UEposSequenceEditorBlueprintLibrary::SetCameraFocalLengthAndScalePlane( TArray<APlaneActor*> ioPlanes, ACineCameraActor* ioCamera, float iNewFocalLength, EScalePlane iScaleType )
+{
+    if( !ioCamera )
+        return;
+
+    TArray<TWeakObjectPtr<APlaneActor>> planes( ioPlanes );
+
+    ShotSequenceTools::SetCameraFocalLengthAndScalePlane( planes, ioCamera, iNewFocalLength, iScaleType );
+}
+
+//---
+
 void UEposSequenceEditorBlueprintLibrary::Play()
 {
     const bool bTogglePlay = false;

@@ -663,8 +663,8 @@ public:
 
 //---
 
-UENUM()
-enum class EScalePlane : int32
+UENUM( BlueprintType )
+enum class EScalePlane : uint8
 {
     // The plane won't scale
     kNo                 UMETA( DisplayName = "No Scale" ),
