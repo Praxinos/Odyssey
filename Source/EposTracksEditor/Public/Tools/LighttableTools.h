@@ -29,7 +29,7 @@ public:
 
     static void Update( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding );
 
-    /*
+    /**
      * Create a plane in a subsection at the given frame
      * @return 1 is for 'all drawings on', 0 is for 'all drawings off', -1 is for undetermined (mix of on/off)
      */

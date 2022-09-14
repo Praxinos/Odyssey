@@ -52,13 +52,13 @@ class EPOSSEQUENCEEDITOR_API UBoardSequenceEditorBlueprintLibrary
 
 public:
 
-    /*
+    /**
      * Get the currently opened root/master board sequence asset
      */
     UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor|Board")
     static UBoardSequence* GetRootBoardSequence();
 
-    /*
+    /**
      * Get the currently focused/viewed board sequence asset if there is a hierarchy of sequences.
      */
     UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor|Board")
@@ -66,19 +66,19 @@ public:
 
 public:
 
-    /*
+    /**
      * Insert a new board sequence at the given frame
      */
     UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board" )
     static UMovieSceneSubSection* InsertBoardSequence( int32 StartFrame, int32 EndFrame );
 
-    /*
+    /**
      * Insert a new shot sequence at the given frame
      */
     UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board" )
     static UMovieSceneSubSection* InsertShotSequence( int32 StartFrame, int32 EndFrame );
 
-    /*
+    /**
      * Clone a subsection with its sequence
      */
     UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board" )
@@ -86,7 +86,7 @@ public:
 
 public:
 
-    /*
+    /**
      * Create a camera in a subsection at the given frame
      */
     UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board" )
@@ -94,7 +94,7 @@ public:
 
 public:
 
-    /*
+    /**
      * Create a plane in a subsection at the given frame
      */
     UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board" )
@@ -125,7 +125,7 @@ public:
 
 public:
 
-    /*
+    /**
      * Create a drawing in a plane at the given frame
      */
     UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board" )
@@ -133,7 +133,7 @@ public:
 
 public:
 
-    /*
+    /**
      * Rename a plane/camera binding and its actor
      */
     UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board" )
@@ -141,43 +141,43 @@ public:
 
 public:
 
-    /*
+    /**
      * Create a new take in the subsection
      */
     UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board" )
     static FBoardSectionTake CreateTake( UMovieSceneSubSection* SubSection );
 
-    /*
+    /**
      * Switch take to another in the subsection
      */
     UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board" )
     static FBoardSectionTake SwitchTake( UMovieSceneSubSection* SubSection, FBoardSectionTake Take );
 
-    /*
+    /**
      * Get the list of takes in the subsection
      */
     UFUNCTION( BlueprintPure, Category = "Epos Sequence Editor|Board" )
     static TArray<FBoardSectionTake> GetTakes( UMovieSceneSubSection* SubSection );
 
-    /*
+    /**
      * Get the current take in the subsection
      */
     UFUNCTION( BlueprintPure, Category = "Epos Sequence Editor|Board" )
     static FBoardSectionTake GetCurrentTake( UMovieSceneSubSection* SubSection );
 
-    /*
+    /**
      * Check the validity of a take
      */
     UFUNCTION( BlueprintPure, Category = "Epos Sequence Editor|Board" )
     static bool IsValid( FBoardSectionTake Take );
 
-    /*
+    /**
      * Get the name of a take
      */
     UFUNCTION( BlueprintPure, Category = "Epos Sequence Editor|Board" )
     static FText GetDisplayName( FBoardSectionTake Take );
 
-    /*
+    /**
      * Compare 2 takes
      */
     UFUNCTION( BlueprintPure, Category = "Epos Sequence Editor|Board", meta = ( DisplayName = "Equal (BoardSectionTake)", CompactNodeTitle = "==" ) )
@@ -194,25 +194,25 @@ class EPOSSEQUENCEEDITOR_API UShotSequenceEditorBlueprintLibrary
 
 public:
 
-    /*
+    /**
      * Get the currently opened root/master shot sequence asset
      */
     UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor|Shot")
     static UShotSequence* GetRootShotSequence();
 
-    /*
+    /**
      * Get the currently focused/viewed shot sequence asset if there is a hierarchy of sequences.
      */
     UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor|Shot")
     static UShotSequence* GetFocusedShotSequence();
 
-    /*
+    /**
      * Step to next sibling shot.
      */
     UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor|Shot")
     static void StepToNextShot();
 
-    /*
+    /**
      * Step to previous sibling shot.
      */
     UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor|Shot")
@@ -220,7 +220,7 @@ public:
 
 public:
 
-    /*
+    /**
      * Create a camera in a shot at the given frame
      */
     UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Shot" )
@@ -228,7 +228,7 @@ public:
 
 public:
 
-    /*
+    /**
      * Create a plane in a shot at the given frame
      */
     UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Shot" )
@@ -259,7 +259,7 @@ public:
 
 public:
 
-    /*
+    /**
      * Create a drawing in a plane at the given frame
      */
     UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Shot" )
@@ -267,7 +267,7 @@ public:
 
 public:
 
-    /*
+    /**
      * Rename a plane/camera binding and its actor
      */
     UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Shot" )
@@ -285,43 +285,43 @@ class EPOSSEQUENCEEDITOR_API UEposSequenceEditorBlueprintLibrary
 
 public:
 
-    /*
+    /**
      * Open a board sequence asset
      */
     UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
     static bool OpenEposSequence( UEposMovieSceneSequence* EposSequence );
 
-    /*
+    /**
      * Get the currently opened root/master epos sequence asset
      */
     UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
     static UEposMovieSceneSequence* GetRootEposSequence();
 
-    /*
+    /**
      * Get the currently focused/viewed epos sequence asset if there is a hierarchy of sequences.
      */
     UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
     static UEposMovieSceneSequence* GetFocusedEposSequence();
 
-    /*
+    /**
      * Focus/view the sequence associated to the given sub sequence section.
      */
     UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
     static void FocusEposSequence(UMovieSceneSubSection* SubSection);
 
-    /*
+    /**
      * Focus/view the parent sequence, popping out of the current sub sequence section.
      */
     UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
     static void FocusParentSequence();
 
-    /*
+    /**
      * Get the current sub section hierarchy from the current sequence to the section associated with the focused sequence.
      */
     UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
     static TArray<UMovieSceneSubSection*> GetSubSequenceHierarchy();
 
-    /*
+    /**
      * Close
      */
     UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
@@ -329,13 +329,13 @@ public:
 
 public:
 
-    /*
+    /**
      * Move and scale a plane from the camera
      */
     UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor" )
     static void MoveAndScalePlane( APlaneActor* Plane, const ACineCameraActor* Camera, float NewDistance, EScalePlane ScaleType );
 
-    /*
+    /**
      * Move and scale a plane from the camera
      */
     UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor" )
