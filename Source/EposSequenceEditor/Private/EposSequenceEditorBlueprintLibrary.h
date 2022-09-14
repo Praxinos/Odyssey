@@ -75,8 +75,14 @@ public:
     /*
      * Insert a new shot sequence at the given frame
      */
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Shot" )
+    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board" )
     static UMovieSceneSubSection* InsertShotSequence( int32 StartFrame, int32 EndFrame );
+
+    /*
+     * Clone a subsection with its sequence
+     */
+    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board" )
+    static UMovieSceneSubSection* CloneSection( UMovieSceneSubSection* SubSection, int32 FrameNumber );
 
 public:
 

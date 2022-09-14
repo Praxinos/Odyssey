@@ -92,7 +92,7 @@ public:
      * @param iSequencer The sequencer
      * @param iSection The section to clone
      */
-    static void CloneSection( ISequencer* iSequencer, UMovieSceneCinematicBoardSection* iSection, FFrameNumber iFrameNumber, bool iEmptyDrawings );
+    static UMovieSceneSubSection* CloneSection( ISequencer* iSequencer, UMovieSceneCinematicBoardSection* iSection, FFrameNumber iFrameNumber, bool iEmptyDrawings );
 
 private:
 

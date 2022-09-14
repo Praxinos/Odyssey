@@ -726,14 +726,14 @@ CinematicBoardTrackTools::InsertShot( ISequencer* iSequencer, FFrameNumber iFram
 //---
 
 //static
-void
+UMovieSceneSubSection*
 CinematicBoardTrackTools::CloneSection( ISequencer* iSequencer, UMovieSceneCinematicBoardSection* iSection, FFrameNumber iFrameNumber, bool iEmptyDrawings )
 {
     UMovieSceneSequence* subsequence = iSection->GetSequence();
     if( !subsequence )
-        return;
+        return nullptr;
     if( subsequence->IsA<UBoardSequence>() )
-        return;
+        return nullptr;
 
     const FScopedTransaction transaction( LOCTEXT( "CloneSection_Transaction", "Clone Section" ) );
 
@@ -746,7 +746,7 @@ CinematicBoardTrackTools::CloneSection( ISequencer* iSequencer, UMovieSceneCinem
     UMovieSceneSubSection* new_section = CreateSequenceInternal<UShotSequence>( iSequencer, sequence_path, sequence_name, iFrameNumber, TOptional<int32>(), iSection );
 
     if( !new_section )
-        return;
+        return nullptr;
 
     if( new_section->GetSequence() )
     {
@@ -775,6 +775,8 @@ CinematicBoardTrackTools::CloneSection( ISequencer* iSequencer, UMovieSceneCinem
     BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, *new_section, iSequencer->GetFocusedTemplateID() );
 
     ShotSequenceTools::CloneInnerContent( iSequencer, result.mInnerSequence, result.mInnerSequenceId, iEmptyDrawings );
+
+    return new_section;
 }
 
 //static

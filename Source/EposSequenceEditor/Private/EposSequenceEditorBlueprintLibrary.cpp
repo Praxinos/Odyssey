@@ -87,6 +87,27 @@ UBoardSequenceEditorBlueprintLibrary::InsertShotSequence( int32 iStartFrame, int
     return CinematicBoardTrackTools::InsertShot( sequencer, range.GetLowerBoundValue(), length );
 }
 
+//static
+UMovieSceneSubSection*
+UBoardSequenceEditorBlueprintLibrary::CloneSection( UMovieSceneSubSection* iSubSection, int32 iFrameNumber )
+{
+    UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( iSubSection );
+
+    if( !CurrentSequencer.IsValid() )
+        return nullptr;
+
+    if( !board_section )
+        return nullptr;
+
+    ISequencer* sequencer = CurrentSequencer.Pin().Get();
+
+    FFrameRate DisplayRate = sequencer->GetFocusedDisplayRate();
+    FFrameRate TickResolution = sequencer->GetFocusedTickResolution();
+    FFrameNumber frame_in_tick = ConvertFrameTime( iFrameNumber, DisplayRate, TickResolution ).GetFrame();
+
+    return CinematicBoardTrackTools::CloneSection( sequencer, board_section, frame_in_tick, false );
+}
+
 //-
 
 //static
