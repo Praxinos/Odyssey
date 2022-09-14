@@ -100,6 +100,29 @@ public:
     UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board" )
     static void CreatePlane( UMovieSceneSubSection* SubSection );
 
+    /**
+     * Activate the lighttable on the plane
+     */
+    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board" )
+    static void ActivateLighttable( UMovieSceneSubSection* SubSection, const FMovieSceneBindingProxy& Binding );
+
+    /**
+     * Deactivate the lighttable on the plane
+     */
+    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board" )
+    static void DeactivateLighttable( UMovieSceneSubSection* SubSection, const FMovieSceneBindingProxy& Binding );
+
+    /**
+     * Get the state of the lighttable for the plane
+     * It returns:
+     *   1: lighttable on all drawings is on
+     *   0: lighttable on all drawings is off
+     *   -1: undetermined (mix of on and off, not enough drawings)
+     * @return 1 | 0 | -1 -> on | off | undetermined
+     */
+    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board" )
+    static int32 GetLighttableState( UMovieSceneSubSection* SubSection, const FMovieSceneBindingProxy& Binding );
+
 public:
 
     /*
@@ -210,6 +233,29 @@ public:
      */
     UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Shot" )
     static void CreatePlane();
+
+    /**
+     * Activate the lighttable on the plane
+     */
+    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Shot" )
+    static void ActivateLighttable( const FMovieSceneBindingProxy& Binding );
+
+    /**
+     * Deactivate the lighttable on the plane
+     */
+    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Shot" )
+    static void DeactivateLighttable( const FMovieSceneBindingProxy& Binding );
+
+    /**
+     * Get the state of the lighttable for the plane
+     * It returns:
+     *   1: lighttable on all drawings is on
+     *   0: lighttable on all drawings is off
+     *   -1: undetermined (mix of on and off, not enough drawings)
+     * @return 1 | 0 | -1 -> on | off | undetermined
+     */
+    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Shot" )
+    static int32 GetLighttableState( const FMovieSceneBindingProxy& Binding );
 
 public:
 

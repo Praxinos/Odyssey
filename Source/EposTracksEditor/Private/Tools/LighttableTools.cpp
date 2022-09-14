@@ -22,6 +22,64 @@
 
 //static
 void
+LighttableTools::Activate( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FGuid iPlaneBinding )
+{
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSubSection, iSequencer->GetFocusedTemplateID() );
+    if( !result.mInnerSequence )
+        return;
+
+    Activate( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iPlaneBinding );
+}
+
+//static
+void
+LighttableTools::Deactivate( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FGuid iPlaneBinding )
+{
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSubSection, iSequencer->GetFocusedTemplateID() );
+    if( !result.mInnerSequence )
+        return;
+
+    Deactivate( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iPlaneBinding );
+}
+
+//static
+int8
+LighttableTools::GetState( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FGuid iPlaneBinding )
+{
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSubSection, iSequencer->GetFocusedTemplateID() );
+    if( !result.mInnerSequence )
+        return -1;
+
+    return GetState( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iPlaneBinding );
+}
+
+//---
+
+//static
+void
+LighttableTools::Deactivate( ISequencer* iSequencer, FGuid iPlaneBinding )
+{
+    Deactivate( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iPlaneBinding );
+}
+
+//static
+void
+LighttableTools::Activate( ISequencer* iSequencer, FGuid iPlaneBinding )
+{
+    Activate( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iPlaneBinding );
+}
+
+//static
+int8
+LighttableTools::GetState( ISequencer* iSequencer, FGuid iPlaneBinding )
+{
+    return GetState( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iPlaneBinding );
+}
+
+//---
+
+//static
+void
 LighttableTools::Activate( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding )
 {
     ShotSequenceHelpers::FFindOrCreateMaterialDrawingResult result = ShotSequenceHelpers::FindMaterialDrawingTrackAndSections( iSequencer, iSequence, iSequenceID, iPlaneBinding );
@@ -200,6 +258,55 @@ LighttableTools::Update( ISequencer& iSequencer, UMovieSceneSequence* iSequence,
 }
 
 //---
+
+//static
+int8
+LighttableTools::GetState( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding )
+{
+    ShotSequenceHelpers::FFindOrCreateMaterialDrawingResult result = ShotSequenceHelpers::FindMaterialDrawingTrackAndSections( iSequencer, iSequence, iSequenceID, iPlaneBinding );
+
+    int32 total_drawing = 0;
+    int32 total_drawing_on = 0;
+    int32 total_drawing_off = 0;
+
+    for( auto section : result.mSections )
+    {
+        TArrayView<FMovieSceneObjectPathChannel*> channels = section->GetChannelProxy().GetChannels<FMovieSceneObjectPathChannel>();
+        check( channels.Num() == 1 );
+        FMovieSceneObjectPathChannel* channel = channels[0];
+
+        TArrayView<FMovieSceneObjectPathChannelKeyValue> values = channel->GetData().GetValues();
+        if( values.Num() <= 1 )
+            continue;
+
+        for( int i = 0; i < values.Num(); i++ )
+        {
+            total_drawing++;
+
+            UMaterialInstanceConstant* current_material = Cast<UMaterialInstanceConstant>( values[i].Get() );
+
+            float use_lighttable = 0.f;
+            current_material->GetScalarParameterValue( TEXT( "UseLighttable" ), use_lighttable );
+
+            if( use_lighttable >= .5f )
+                total_drawing_on++;
+            else
+                total_drawing_off++;
+        }
+    }
+
+    if( !total_drawing )
+        return -1;
+
+    if( total_drawing == total_drawing_on )
+        return 1;
+    else if( total_drawing == total_drawing_off )
+        return 0;
+    else
+        return -1;
+}
+
+//TODO: certainly remove IsOn/IsOff and replace them by GetState in the code
 
 //static
 bool

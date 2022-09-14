@@ -20,6 +20,7 @@
 
 #include "Board/BoardSequence.h"
 #include "Tools/EposSequenceTools.h"
+#include "Tools/LighttableTools.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(EposSequenceEditorBlueprintLibrary)
 
@@ -145,6 +146,57 @@ UBoardSequenceEditorBlueprintLibrary::CreatePlane( UMovieSceneSubSection* iSubSe
 
     FPlaneArgs plane_args;
     BoardSequenceTools::CreatePlane( sequencer, *board_section, board_section->GetTrueRange().GetLowerBoundValue() );
+}
+
+//static
+void
+UBoardSequenceEditorBlueprintLibrary::ActivateLighttable( UMovieSceneSubSection* iSubSection, const FMovieSceneBindingProxy& iBinding )
+{
+    UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( iSubSection );
+
+    if( !CurrentSequencer.IsValid() )
+        return;
+
+    if( !board_section )
+        return;
+
+    ISequencer* sequencer = CurrentSequencer.Pin().Get();
+
+    LighttableTools::Activate( sequencer, *board_section, iBinding.BindingID );
+}
+
+//static
+void
+UBoardSequenceEditorBlueprintLibrary::DeactivateLighttable( UMovieSceneSubSection* iSubSection, const FMovieSceneBindingProxy& iBinding )
+{
+    UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( iSubSection );
+
+    if( !CurrentSequencer.IsValid() )
+        return;
+
+    if( !board_section )
+        return;
+
+    ISequencer* sequencer = CurrentSequencer.Pin().Get();
+
+    LighttableTools::Deactivate( sequencer, *board_section, iBinding.BindingID );
+}
+
+//static
+int32
+UBoardSequenceEditorBlueprintLibrary::GetLighttableState( UMovieSceneSubSection* iSubSection, const FMovieSceneBindingProxy& iBinding )
+{
+    UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( iSubSection );
+
+    if( !CurrentSequencer.IsValid() )
+        return -1;
+
+    if( !board_section )
+        return -1;
+
+    ISequencer* sequencer = CurrentSequencer.Pin().Get();
+
+    return LighttableTools::GetState( sequencer, *board_section, iBinding.BindingID );
 }
 
 //static
@@ -349,7 +401,43 @@ UShotSequenceEditorBlueprintLibrary::CreatePlane()
 
 //static
 void
-UShotSequenceEditorBlueprintLibrary::CreateDrawing( const FMovieSceneBindingProxy& Binding, int32 iFrame )
+UShotSequenceEditorBlueprintLibrary::ActivateLighttable( const FMovieSceneBindingProxy& iBinding )
+{
+    if( !CurrentSequencer.IsValid() )
+        return;
+
+    ISequencer* sequencer = CurrentSequencer.Pin().Get();
+
+    LighttableTools::Activate( sequencer, iBinding.BindingID );
+}
+
+//static
+void
+UShotSequenceEditorBlueprintLibrary::DeactivateLighttable( const FMovieSceneBindingProxy& iBinding )
+{
+    if( !CurrentSequencer.IsValid() )
+        return;
+
+    ISequencer* sequencer = CurrentSequencer.Pin().Get();
+
+    LighttableTools::Deactivate( sequencer, iBinding.BindingID );
+}
+
+//static
+int32
+UShotSequenceEditorBlueprintLibrary::GetLighttableState( const FMovieSceneBindingProxy& iBinding )
+{
+    if( !CurrentSequencer.IsValid() )
+        return -1;
+
+    ISequencer* sequencer = CurrentSequencer.Pin().Get();
+
+    return LighttableTools::GetState( sequencer, iBinding.BindingID );
+}
+
+//static
+void
+UShotSequenceEditorBlueprintLibrary::CreateDrawing( const FMovieSceneBindingProxy& iBinding, int32 iFrame )
 {
     if( !CurrentSequencer.IsValid() )
         return;
@@ -361,7 +449,7 @@ UShotSequenceEditorBlueprintLibrary::CreateDrawing( const FMovieSceneBindingProx
     FFrameNumber frame_in_tick = ConvertFrameTime( iFrame, DisplayRate, TickResolution ).GetFrame();
 
     FPlaneArgs plane_args;
-    ShotSequenceTools::CreateDrawing( sequencer, frame_in_tick, Binding.BindingID );
+    ShotSequenceTools::CreateDrawing( sequencer, frame_in_tick, iBinding.BindingID );
 }
 
 //static
