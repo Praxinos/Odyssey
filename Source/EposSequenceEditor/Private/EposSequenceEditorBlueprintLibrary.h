@@ -11,6 +11,8 @@
 #include "MovieSceneObjectBindingID.h"
 
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
+#include "Export/ImageSequence/ExportImageSequenceSettings.h"
+#include "Export/PDF/ExportPDFSettings.h"
 
 #include "EposSequenceEditorBlueprintLibrary.generated.h"
 
@@ -340,6 +342,25 @@ public:
      */
     UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor" )
     static void SetCameraFocalLengthAndScalePlane( TArray<APlaneActor*> Planes, ACineCameraActor* Camera, float NewFocalLength, EScalePlane ScaleType );
+
+public:
+    /**
+     * Export in pdf
+     *
+     * @param The list of panels
+     * @return The number of panels
+     */
+    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Export" )
+    static bool ExportAsPDF( const FExportPDFOptions& Options );
+
+    /**
+     * Export in image sequence
+     *
+     * @param The list of panels
+     * @return The number of panels
+     */
+    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Export" )
+    static bool ExportAsImageSequence( const FExportImageSequenceOptions& Options );
 
 public:
 

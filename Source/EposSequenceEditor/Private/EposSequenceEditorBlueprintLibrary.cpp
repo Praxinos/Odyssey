@@ -19,6 +19,9 @@
 #include "Subsystems/AssetEditorSubsystem.h"
 
 #include "Board/BoardSequence.h"
+#include "Export/ExportConverter.h"
+#include "Export/ImageSequence/ExportImageSequenceExporter.h"
+#include "Export/PDF/ExportPDFExporter.h"
 #include "Tools/EposSequenceTools.h"
 #include "Tools/LighttableTools.h"
 
@@ -565,6 +568,42 @@ UEposSequenceEditorBlueprintLibrary::SetCameraFocalLengthAndScalePlane( TArray<A
     TArray<TWeakObjectPtr<APlaneActor>> planes( ioPlanes );
 
     ShotSequenceTools::SetCameraFocalLengthAndScalePlane( planes, ioCamera, iNewFocalLength, iScaleType );
+}
+
+//---
+
+//static
+bool
+UEposSequenceEditorBlueprintLibrary::ExportAsPDF( const FExportPDFOptions& iOptions )
+{
+    if( !CurrentSequencer.IsValid() )
+        return false;
+
+    ISequencer* sequencer = CurrentSequencer.Pin().Get();
+
+    FExportStruct image_sequence_struct;
+    FExportConverter converter( CurrentSequencer, sequencer->GetRootMovieSceneSequence(), &iOptions.MarkSettings, &image_sequence_struct );
+
+    FExportPDFExporter exporter( CurrentSequencer, &image_sequence_struct, &iOptions );
+    return exporter.Export();
+}
+
+//static
+bool
+UEposSequenceEditorBlueprintLibrary::ExportAsImageSequence( const FExportImageSequenceOptions& iOptions )
+{
+    if( !CurrentSequencer.IsValid() )
+        return false;
+
+    ISequencer* sequencer = CurrentSequencer.Pin().Get();
+
+    FExportStruct image_sequence_struct;
+    FExportConverter converter( CurrentSequencer, sequencer->GetRootMovieSceneSequence(), &iOptions.MarkSettings, &image_sequence_struct );
+
+    image_sequence_struct.mSequencer = CurrentSequencer;
+
+    FExportImageSequenceExporter exporter( CurrentSequencer, &image_sequence_struct, &iOptions );
+    return exporter.Export();
 }
 
 //---

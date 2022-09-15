@@ -13,37 +13,37 @@
 
 //---
 
-USTRUCT()
+USTRUCT( BlueprintType )
 struct FExportPDFOptions
 {
     GENERATED_BODY()
 
 public:
     /** Storyboard path. */
-    UPROPERTY( EditAnywhere, Category=ExportPDF )
+    UPROPERTY( EditAnywhere, BlueprintReadWrite, Category=ExportPDF )
     FDirectoryPath ExportPath;
 
     /** Storyboard name. */
-    UPROPERTY( EditAnywhere, Category=ExportPDF )
+    UPROPERTY( EditAnywhere, BlueprintReadWrite, Category=ExportPDF )
     FString ExportFile;
 
-    UPROPERTY( EditAnywhere, Category=ExportPDF, meta=(MetaClass="PDFDocExportWidget") )
+    UPROPERTY( EditAnywhere, BlueprintReadWrite, Category=ExportPDF, meta=(MetaClass="PDFDocExportWidget") )
     FSoftClassPath PDFDocWidgetClassPath { TEXT( "/Epos/PDF/Thumbnails/WBP_PDFDoc_Thumbnails_Landscape.WBP_PDFDoc_Thumbnails_Landscape_C" ) };
 
-    UPROPERTY( EditAnywhere, Category=ExportPDF )
+    UPROPERTY( EditAnywhere, BlueprintReadWrite, Category=ExportPDF )
     FExportMarkSettings MarkSettings;
 };
 
 //---
 
 // https://udn.unrealengine.com/s/question/0D54z00007eBzPfCAK/makeinstance-of-ipropertytypecustomization-of-my-structure-is-not-called
-UCLASS( config=Epos )
+UCLASS( BlueprintType, config=Epos )
 class UExportPDFSettings
     : public UObject
 {
     GENERATED_BODY()
 
 public:
-    UPROPERTY( config, EditAnywhere, Category=ExportPDF, meta=(ShowOnlyInnerProperties) )
+    UPROPERTY( config, EditAnywhere, BlueprintReadWrite, Category=ExportPDF, meta=(ShowOnlyInnerProperties) )
     FExportPDFOptions Options;
 };

@@ -23,8 +23,8 @@ enum class EExportImageSequencePatternKeyword : uint32
 
 const FPatternKeywordList& GetExportImageSequencePatternKeywordList();
 
-UENUM()
-enum class EExportImageSequenceFileFormat : int8
+UENUM( BlueprintType )
+enum class EExportImageSequenceFileFormat : uint8
 {
     PNG     = int8( EImageFormat::PNG ),
     JPEG    = int8( EImageFormat::JPEG ),
@@ -34,18 +34,18 @@ enum class EExportImageSequenceFileFormat : int8
     //TIFF    = int8( EImageFormat::TIFF ), // Compress() is not implemented
 };
 
-USTRUCT()
+USTRUCT( BlueprintType )
 struct FExportImageSequenceNumberFormat
 {
     GENERATED_BODY()
 
 public:
     /** The number of digits. */
-    UPROPERTY(config, EditAnywhere, Category="Number Format", meta=(UIMin = "1", UIMax = "10"))
-    uint32 NumDigits { 4 };
+    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="Number Format", meta=(UIMin = "1", UIMax = "10"))
+    int32 NumDigits { 4 };
 };
 
-USTRUCT()
+USTRUCT( BlueprintType )
 struct FExportImageSequenceOptions
 {
     GENERATED_BODY()
@@ -55,7 +55,7 @@ public:
 
 public:
     /** Storyboard path. */
-    UPROPERTY( EditAnywhere, Category=ExportImageSequence )
+    UPROPERTY( EditAnywhere, BlueprintReadWrite, Category=ExportImageSequence )
     FDirectoryPath ExportPath;
 
     /** The aspect ratio to respect (should come from the camera).
@@ -66,38 +66,38 @@ public:
     float AspectRatio { 1920.f / 1080.f };
 
     /** Storyboard path. */
-    UPROPERTY( EditAnywhere, Category=ExportImageSequence )
+    UPROPERTY( EditAnywhere, BlueprintReadWrite, Category=ExportImageSequence )
     FIntPoint ImageSize { 1920, 1080 };
 
     /** File format. */
-    UPROPERTY( EditAnywhere, Category=ExportImageSequence )
+    UPROPERTY( EditAnywhere, BlueprintReadWrite, Category=ExportImageSequence )
     EExportImageSequenceFileFormat FileFormat { EExportImageSequenceFileFormat::PNG };
 
     /** Storyboard name. */
-    UPROPERTY( EditAnywhere, Category=ExportImageSequence )
+    UPROPERTY( EditAnywhere, BlueprintReadWrite, Category=ExportImageSequence )
     FString Pattern;
 
     FPatternKeywordLists mPatternKeywordLists;
 
     /** The panel index format. */
-    UPROPERTY( EditAnywhere, Category=ExportImageSequence, AdvancedDisplay, meta=(ShowOnlyInnerProperties) )
+    UPROPERTY( EditAnywhere, BlueprintReadWrite, Category=ExportImageSequence, AdvancedDisplay, meta=(ShowOnlyInnerProperties) )
     FExportImageSequenceNumberFormat PanelIndexFormat { 4 };
 
-    UPROPERTY( EditAnywhere, Category=ExportImageSequence )
+    UPROPERTY( EditAnywhere, BlueprintReadWrite, Category=ExportImageSequence )
     FExportMarkSettings MarkSettings;
 };
 
 //---
 
 // https://udn.unrealengine.com/s/question/0D54z00007eBzPfCAK/makeinstance-of-ipropertytypecustomization-of-my-structure-is-not-called
-UCLASS( config=Epos )
+UCLASS( BlueprintType, config=Epos )
 class UExportImageSequenceSettings
     : public UObject
 {
     GENERATED_BODY()
 
 public:
-    UPROPERTY( config, EditAnywhere, Category=ExportImageSequence )
+    UPROPERTY( config, EditAnywhere, BlueprintReadWrite, Category=ExportImageSequence )
     FExportImageSequenceOptions Options;
 };
 

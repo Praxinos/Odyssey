@@ -19,7 +19,7 @@ class /*EPOSSEQUENCEEDITOR_API*/ UExportPDFBlueprintLibrary
     GENERATED_BODY()
 
 public:
-    /*
+    /**
      * Get the name of the storyboard
      * 
      * @param The list of panels
@@ -28,7 +28,7 @@ public:
     UFUNCTION( BlueprintPure, Category="Epos Sequence Editor|Export PDF" )
     static FText GetRootBoardName( const FExportStruct& ExportStruct );
 
-    /*
+    /**
      * Get the name of the studio
      * 
      * @param The list of panels
@@ -38,7 +38,7 @@ public:
     static TArray<FSequenceNameElements> GetNameElementsOfPanels( const FExportStruct& ExportStruct );
 
 public:
-    /*
+    /**
      * Get the number of panels
      * 
      * @param The list of panels
@@ -47,7 +47,7 @@ public:
     UFUNCTION( BlueprintPure, Category="Epos Sequence Editor|Export PDF" )
     static int32 GetNumberOfPanels( const FExportStruct& ExportStruct );
 
-    /*
+    /**
      * Get the frame number of a panel as formatted string
      * 
      * @param The list of panels
@@ -57,7 +57,7 @@ public:
     UFUNCTION( BlueprintPure, Category="Epos Sequence Editor|Export PDF" )
     static FString GetPanelFrameFormatted( const FExportStruct& ExportStruct, int32 PanelIndex );
 
-    /*
+    /**
      * Get the frame number of a panel
      * 
      * @param The list of panels
@@ -67,7 +67,7 @@ public:
     UFUNCTION( BlueprintPure, Category="Epos Sequence Editor|Export PDF" )
     static FFrameNumber GetPanelFrame( const FExportStruct& ExportStruct, int32 PanelIndex );
     
-    /*
+    /**
      * Get the shot name of a panel
      * 
      * @param The list of panels
@@ -77,14 +77,14 @@ public:
     UFUNCTION( BlueprintPure, Category="Epos Sequence Editor|Export PDF" )
     static FText GetPanelShotName( const FExportStruct& ExportStruct, int32 PanelIndex );
 
-    /*
+    /**
      * Get the shot name of a panel
      */
     // I don't know if it's a good idea to give access on the sequence and maybe modifying it during the loop ...
     //UFUNCTION( BlueprintPure, Category="Epos Sequence Editor|Export PDF" )
     //static const UMovieSceneSequence* GetPanelSequence( const FExportStruct& ExportStruct, int32 PanelIndex );
 
-    /*
+    /**
      * Get the render scene of a panel
      * The width of the texture is computed to match the camera ratio
      * 
@@ -96,7 +96,7 @@ public:
     UFUNCTION( BlueprintPure, Category="Epos Sequence Editor|Export PDF" )
     static const UTexture2D* GetPanelTexture2D( const FExportStruct& ExportStruct, int32 PanelIndex, int32 Height );
 
-    /*
+    /**
      * Get the notes of a panel
      * The notes are taken through the whole hierarchy
      * 
