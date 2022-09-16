@@ -118,13 +118,13 @@ public:
     /**
      * Activate the lighttable on the plane
      */
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board" )
+    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board|Lighttable" )
     static void ActivateLighttable( UMovieSceneSubSection* SubSection, const FMovieSceneBindingProxy& Binding );
 
     /**
      * Deactivate the lighttable on the plane
      */
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board" )
+    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board|Lighttable" )
     static void DeactivateLighttable( UMovieSceneSubSection* SubSection, const FMovieSceneBindingProxy& Binding );
 
     /**
@@ -135,7 +135,7 @@ public:
      *   -1: undetermined (mix of on and off, not enough drawings)
      * @return 1 | 0 | -1 -> on | off | undetermined
      */
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board" )
+    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board|Lighttable" )
     static int32 GetLighttableState( UMovieSceneSubSection* SubSection, const FMovieSceneBindingProxy& Binding );
 
 public:
@@ -159,43 +159,43 @@ public:
     /**
      * Create a new take in the subsection
      */
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board" )
+    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board|Take" )
     static FBoardSectionTake CreateTake( UMovieSceneSubSection* SubSection );
 
     /**
      * Switch take to another in the subsection
      */
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board" )
+    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board|Take" )
     static FBoardSectionTake SwitchTake( UMovieSceneSubSection* SubSection, FBoardSectionTake Take );
 
     /**
      * Get the list of takes in the subsection
      */
-    UFUNCTION( BlueprintPure, Category = "Epos Sequence Editor|Board" )
+    UFUNCTION( BlueprintPure, Category = "Epos Sequence Editor|Board|Take" )
     static TArray<FBoardSectionTake> GetTakes( UMovieSceneSubSection* SubSection );
 
     /**
      * Get the current take in the subsection
      */
-    UFUNCTION( BlueprintPure, Category = "Epos Sequence Editor|Board" )
+    UFUNCTION( BlueprintPure, Category = "Epos Sequence Editor|Board|Take" )
     static FBoardSectionTake GetCurrentTake( UMovieSceneSubSection* SubSection );
 
     /**
      * Check the validity of a take
      */
-    UFUNCTION( BlueprintPure, Category = "Epos Sequence Editor|Board" )
+    UFUNCTION( BlueprintPure, Category = "Epos Sequence Editor|Board|Take" )
     static bool IsValid( FBoardSectionTake Take );
 
     /**
      * Get the name of a take
      */
-    UFUNCTION( BlueprintPure, Category = "Epos Sequence Editor|Board" )
+    UFUNCTION( BlueprintPure, Category = "Epos Sequence Editor|Board|Take" )
     static FText GetDisplayName( FBoardSectionTake Take );
 
     /**
      * Compare 2 takes
      */
-    UFUNCTION( BlueprintPure, Category = "Epos Sequence Editor|Board", meta = ( DisplayName = "Equal (BoardSectionTake)", CompactNodeTitle = "==" ) )
+    UFUNCTION( BlueprintPure, Category = "Epos Sequence Editor|Board|Take", meta = ( DisplayName = "Equal (BoardSectionTake)", CompactNodeTitle = "==" ) )
     static bool EqualEqual_BoardSectionTakeBoardSectionTake( FBoardSectionTake A, FBoardSectionTake B );
 };
 
@@ -252,13 +252,13 @@ public:
     /**
      * Activate the lighttable on the plane
      */
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Shot" )
+    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Shot|Lighttable" )
     static void ActivateLighttable( const FMovieSceneBindingProxy& Binding );
 
     /**
      * Deactivate the lighttable on the plane
      */
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Shot" )
+    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Shot|Lighttable" )
     static void DeactivateLighttable( const FMovieSceneBindingProxy& Binding );
 
     /**
@@ -269,7 +269,7 @@ public:
      *   -1: undetermined (mix of on and off, not enough drawings)
      * @return 1 | 0 | -1 -> on | off | undetermined
      */
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Shot" )
+    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Shot|Lighttable" )
     static int32 GetLighttableState( const FMovieSceneBindingProxy& Binding );
 
 public:
@@ -363,7 +363,7 @@ public:
      * @param The list of panels
      * @return The number of panels
      */
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Export" )
+    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor" )
     static bool ExportAsPDF( const FExportPDFOptions& Options );
 
     /**
@@ -372,7 +372,7 @@ public:
      * @param The list of panels
      * @return The number of panels
      */
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Export" )
+    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor" )
     static bool ExportAsImageSequence( const FExportImageSequenceOptions& Options );
 
 public:
