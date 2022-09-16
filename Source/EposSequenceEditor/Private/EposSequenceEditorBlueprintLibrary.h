@@ -13,6 +13,7 @@
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
 #include "Export/ImageSequence/ExportImageSequenceSettings.h"
 #include "Export/PDF/ExportPDFSettings.h"
+#include "Import/ImportImageSequenceSettings.h"
 
 #include "EposSequenceEditorBlueprintLibrary.generated.h"
 
@@ -69,6 +70,12 @@ public:
 public:
 
     /**
+     * Create a new root board sequence
+     */
+    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board" )
+    static UBoardSequence* CreateRootBoardSequence( const FString& BoardPath, const FString& BoardName );
+
+    /**
      * Insert a new board sequence at the given frame
      */
     UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board" )
@@ -85,6 +92,12 @@ public:
      */
     UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board" )
     static UMovieSceneSubSection* CloneSection( UMovieSceneSubSection* SubSection, int32 FrameNumber );
+
+    /**
+     * Import an image sequence
+     */
+    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board" )
+    static UBoardSequence* ImportImageSequence( const FString& BoardPath, const FString& BoardName, const FImportImageSequenceOptions& Options );
 
 public:
 

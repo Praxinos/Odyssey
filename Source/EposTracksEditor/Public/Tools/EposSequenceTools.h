@@ -15,6 +15,7 @@
 class AActor;
 class ACineCameraActor;
 class APlaneActor;
+class UBoardSequence;
 class UMaterialInstanceConstant;
 class UMaterialInterface;
 class UMovieScene;
@@ -144,6 +145,9 @@ public:
 
     /** Stretch sequencer time range to view make the new range inside the view. */
     static void UpdateViewRange( ISequencer* iSequencer, TRange<FFrameNumber> iNewRange );
+
+    /** Create a new board sequence. */
+    static UBoardSequence* CreateBoard( const FString& iNewBoardPath, const FString& iNewBoardName );
 
 // Inside EposSequenceTools_Take
 public:

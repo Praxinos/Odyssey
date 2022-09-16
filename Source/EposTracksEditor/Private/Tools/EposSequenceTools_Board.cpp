@@ -509,6 +509,78 @@ ShotSequenceTools::FindNextOrPreviousShot( UMovieSceneSequence* iSequence, FFram
 
 //---
 
+//static
+UBoardSequence*
+BoardSequenceTools::CreateBoard( const FString& iNewBoardPath, const FString& iNewBoardName )
+{
+    IAssetTools& AssetTools = FModuleManager::GetModuleChecked<FAssetToolsModule>( "AssetTools" ).Get();
+    FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>( TEXT( "AssetRegistry" ) );
+
+    //---
+
+    UObject* NewAsset = nullptr;
+
+    // Attempt to create a new asset
+    for( auto factory : AssetTools.GetNewAssetFactories() )
+    {
+        if( factory->CanCreateNew() && factory->ImportPriority >= 0 && factory->SupportedClass == UBoardSequence::StaticClass() )
+        {
+            NewAsset = AssetTools.CreateAsset( iNewBoardName, iNewBoardPath, UBoardSequence::StaticClass(), factory );
+            break;
+        }
+    }
+
+    UBoardSequence* board_sequence = Cast<UBoardSequence>( NewAsset );
+
+    if( !board_sequence )
+        return nullptr;
+
+    //---
+
+    UNamingConventionSettings* naming_convention_settings = GetMutableDefault<UNamingConventionSettings>();
+
+    board_sequence->NameElements.Index = INDEX_NONE; // To use the real asset name in display
+
+    // Copy all 'global' members from settings global to board elements
+    for( TFieldIterator<FProperty> settings_global_property_iterator( FNamingConventionGlobal::StaticStruct() ); settings_global_property_iterator; ++settings_global_property_iterator )
+    {
+        FProperty* settings_global_property = *settings_global_property_iterator;
+
+        FProperty* board_property = FindFProperty<FProperty>( FBoardNameElements::StaticStruct(), settings_global_property->GetFName() );
+        if( settings_global_property->GetName().EndsWith( TEXT( "NumDigits" ) ) )
+            continue;
+
+        check( board_property );
+
+        // It doesn't work if the 2 structs are not synchro with the same name of members
+        // and I don't know the difference with the (good) outside ContainerPtrToValuePtr<> form below
+        //settings_global_property->CopyCompleteValue_InContainer( &board_sequence->NameElements, &mNamingConventionSettings->GlobalNaming );
+
+        const uint8* SourceAddr = settings_global_property->ContainerPtrToValuePtr<uint8>( &naming_convention_settings->GlobalNaming );
+        uint8* DestinationAddr = board_property->ContainerPtrToValuePtr<uint8>( &board_sequence->NameElements );
+
+        settings_global_property->CopyCompleteValue( DestinationAddr, SourceAddr );
+    }
+
+    // Copy all 'user' members from settings user to board elements
+    for( TFieldIterator<FProperty> settings_user_property_iterator( FNamingConventionUser::StaticStruct() ); settings_user_property_iterator; ++settings_user_property_iterator )
+    {
+        FProperty* settings_user_property = *settings_user_property_iterator;
+
+        FProperty* board_property = FindFProperty<FProperty>( FBoardNameElements::StaticStruct(), settings_user_property->GetFName() );
+        check( board_property );
+
+        const uint8* SourceAddr = settings_user_property->ContainerPtrToValuePtr<uint8>( &naming_convention_settings->UserNaming );
+        uint8* DestinationAddr = board_property->ContainerPtrToValuePtr<uint8>( &board_sequence->NameElements );
+
+        settings_user_property->CopyCompleteValue( DestinationAddr, SourceAddr );
+    }
+
+    return board_sequence;
+}
+
+//---
+
 template<typename SequenceClass>
 //static
 UMovieSceneSubSection*

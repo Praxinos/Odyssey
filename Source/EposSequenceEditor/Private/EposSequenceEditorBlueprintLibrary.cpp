@@ -22,6 +22,9 @@
 #include "Export/ExportConverter.h"
 #include "Export/ImageSequence/ExportImageSequenceExporter.h"
 #include "Export/PDF/ExportPDFExporter.h"
+#include "Import/ImportImageSequenceConverter.h"
+#include "Import/ImportImageSequenceImporter.h"
+#include "Import/ImportImageSequenceStruct.h"
 #include "Tools/EposSequenceTools.h"
 #include "Tools/LighttableTools.h"
 
@@ -55,6 +58,16 @@ UBoardSequenceEditorBlueprintLibrary::GetFocusedBoardSequence()
         return nullptr;
 
     return Cast<UBoardSequence>(CurrentSequencer.Pin()->GetFocusedMovieSceneSequence());
+}
+
+//static
+UBoardSequence*
+UBoardSequenceEditorBlueprintLibrary::CreateRootBoardSequence( const FString& iBoardPath, const FString& iBoardName )
+{
+    UBoardSequence* board_sequence = BoardSequenceTools::CreateBoard( iBoardPath, iBoardName );
+
+    return board_sequence;
+
 }
 
 //static
@@ -110,6 +123,32 @@ UBoardSequenceEditorBlueprintLibrary::CloneSection( UMovieSceneSubSection* iSubS
     FFrameNumber frame_in_tick = ConvertFrameTime( iFrameNumber, DisplayRate, TickResolution ).GetFrame();
 
     return CinematicBoardTrackTools::CloneSection( sequencer, board_section, frame_in_tick, false );
+}
+
+//static
+UBoardSequence*
+UBoardSequenceEditorBlueprintLibrary::ImportImageSequence( const FString& iBoardPath, const FString& iBoardName, const FImportImageSequenceOptions& iOptions )
+{
+    FString error;
+    FImportImageSequenceImporter image_sequence_importer( iOptions, error );
+    if( !error.IsEmpty() )
+        return nullptr;
+
+    UBoardSequence* board_sequence = CreateRootBoardSequence( iBoardPath, iBoardName );
+    if( !board_sequence )
+        return nullptr;
+
+    UEposSequenceEditorBlueprintLibrary::OpenEposSequence( board_sequence );
+
+    // Must be done after opening the new sequence
+    if( !CurrentSequencer.IsValid() )
+        return nullptr;
+
+    const FImportImageSequenceStruct& image_struct = image_sequence_importer.GetImageSequenceStruct();
+
+    FImportImageSequenceConverter( &image_struct, CurrentSequencer, board_sequence );
+
+    return board_sequence;
 }
 
 //-
