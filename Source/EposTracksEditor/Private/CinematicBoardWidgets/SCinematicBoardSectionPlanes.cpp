@@ -1025,7 +1025,7 @@ SCinematicBoardSectionPlaneMaterialKeys::BuildKeyContextMenu( FMenuBuilder& ioMe
 
     //-
 
-    auto EditKey = [=]( UTexture2D* iTexture )
+    auto EditKeyTexture = [=]( UTexture2D* iTexture )
     {
         if( !iTexture )
             return;
@@ -1036,7 +1036,7 @@ SCinematicBoardSectionPlaneMaterialKeys::BuildKeyContextMenu( FMenuBuilder& ioMe
         AssetEditorSubsystem->OpenEditorForAsset( iTexture );
     };
 
-    auto CanEditKey = [=]( UTexture2D* iTexture ) -> bool
+    auto CanEditKeyTexture = [=]( UTexture2D* iTexture ) -> bool
     {
         UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
 
@@ -1048,7 +1048,31 @@ SCinematicBoardSectionPlaneMaterialKeys::BuildKeyContextMenu( FMenuBuilder& ioMe
 
     //-
 
+    auto EditKeyMaterial = [=]( UMaterialInstance* iMaterialInstance )
+    {
+        if( !iMaterialInstance )
+            return;
+
+        UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
+        check( !AssetEditorSubsystem->FindEditorsForAsset( iMaterialInstance ).Num() );
+
+        AssetEditorSubsystem->OpenEditorForAsset( iMaterialInstance );
+    };
+
+    auto CanEditKeyMaterial = [=]( UMaterialInstance* iMaterialInstance ) -> bool
+    {
+        UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
+
+        TArray<IAssetEditorInstance*> opened_editors = AssetEditorSubsystem->FindEditorsForAsset( iMaterialInstance );
+        //FName name = opened_editors.Num() ? opened_editors[0]->GetEditorName() : NAME_None;
+
+        return !opened_editors.Num();
+    };
+
+    //-
+
     TMap<FString, FString> map; // Maybe use a TMultiMap if we want to display multiple textures inside 1 material
+    TArray<UMaterialInstance*> materials;
     TArray<UTexture2D*> textures;
     for( auto pair : iKeys->GetMetaKeys() )
     {
@@ -1058,6 +1082,9 @@ SCinematicBoardSectionPlaneMaterialKeys::BuildKeyContextMenu( FMenuBuilder& ioMe
 
             UMaterialInstance* material = drawing.GetMaterial();
             UTexture2D* texture = ProjectAssetTools::GetTexture2D( nullptr, material );
+
+            if( material )
+                materials.Add( material );
 
             if( texture )
                 textures.Add( texture );
@@ -1089,8 +1116,8 @@ SCinematicBoardSectionPlaneMaterialKeys::BuildKeyContextMenu( FMenuBuilder& ioMe
             ioMenuBuilder.AddMenuEntry( FText::Format( LOCTEXT( "edit-texture-multi-key-label", "Edit {0}..." ), FText::FromString( texture->GetName() ) ),
                                         LOCTEXT( "edit-texture-multi-key-tooltip", "Edit the texture of the current key with its default editor\n(If it's not possible, the texture is already opened)" ),
                                         FSlateIcon(),
-                                        FUIAction( FExecuteAction::CreateLambda( EditKey, texture ),
-                                                   FCanExecuteAction::CreateLambda( CanEditKey, texture ) ) );
+                                        FUIAction( FExecuteAction::CreateLambda( EditKeyTexture, texture ),
+                                                   FCanExecuteAction::CreateLambda( CanEditKeyTexture, texture ) ) );
         }
 
         ioMenuBuilder.EndSection();
@@ -1103,14 +1130,40 @@ SCinematicBoardSectionPlaneMaterialKeys::BuildKeyContextMenu( FMenuBuilder& ioMe
         ioMenuBuilder.AddMenuEntry( LOCTEXT( "edit-texture-key-label", "Edit..." ),
                                     LOCTEXT( "edit-texture-key-tooltip", "Edit the texture of the current key with its default editor\n(If it's not possible, the texture is already opened)" ),
                                     FSlateIcon(),
-                                    FUIAction( FExecuteAction::CreateLambda( EditKey, textures[0] ),
-                                               FCanExecuteAction::CreateLambda( CanEditKey, textures[0] ) ) );
+                                    FUIAction( FExecuteAction::CreateLambda( EditKeyTexture, textures[0] ),
+                                               FCanExecuteAction::CreateLambda( CanEditKeyTexture, textures[0] ) ) );
 
         ioMenuBuilder.EndSection();
     }
 
     ioMenuBuilder.BeginSection( NAME_None, LOCTEXT( "material-key-section-label", "Material" ) );
     //ioMenuBuilder.BeginSection( NAME_None, FText::Format( LOCTEXT( "material-key-section-label", "Material: {0}" ), FText::FromString( material_name ) ) );
+
+    if( materials.Num() > 1 )
+    {
+        for( auto material : materials )
+        {
+            ioMenuBuilder.AddMenuEntry( FText::Format( LOCTEXT( "edit-material-multi-key-label", "Edit {0}..." ), FText::FromString( material->GetName() ) ),
+                                        LOCTEXT( "edit-material-multi-key-tooltip", "Edit the material of the current key with its default editor\n(If it's not possible, the material is already opened)" ),
+                                        FSlateIcon(),
+                                        FUIAction( FExecuteAction::CreateLambda( EditKeyMaterial, material ),
+                                                   FCanExecuteAction::CreateLambda( CanEditKeyMaterial, material ) ) );
+        }
+    }
+    else if( materials.Num() == 1 )
+    {
+        ioMenuBuilder.AddMenuEntry( LOCTEXT( "edit-material-key-label", "Edit..." ),
+                                    LOCTEXT( "edit-material-key-tooltip", "Edit the material of the current key with its default editor\n(If it's not possible, the material is already opened)" ),
+                                    FSlateIcon(),
+                                    FUIAction( FExecuteAction::CreateLambda( EditKeyMaterial, materials[0] ),
+                                               FCanExecuteAction::CreateLambda( CanEditKeyMaterial, materials[0] ) ) );
+    }
+
+    ioMenuBuilder.AddMenuEntry( LOCTEXT( "edit-material-master-label", "Edit Master..." ),
+                                LOCTEXT( "edit-material-master-tooltip", "Edit the master material of all keys with its default editor\n(If it's not possible, the material is already opened)" ),
+                                FSlateIcon(),
+                                FUIAction( FExecuteAction::CreateLambda( EditKeyMaterial, MasterAssetTools::GetMasterMaterial( *sequencer, sequencer->GetRootMovieSceneSequence() ) ),
+                                           FCanExecuteAction::CreateLambda( CanEditKeyMaterial, MasterAssetTools::GetMasterMaterial( *sequencer, sequencer->GetRootMovieSceneSequence() ) ) ) );
 
     ioMenuBuilder.AddMenuEntry( FText::Format( LOCTEXT( "clone-material-key-label", "Clone at {0}" ), FText::FromString( sequencer->GetNumericTypeInterface()->ToString( sequencer->GetLocalTime().Time.AsDecimal() ) ) ),
                                 LOCTEXT( "clone-material-key-tooltip", "Clone the current key (material and texture) at the current frame" ),
