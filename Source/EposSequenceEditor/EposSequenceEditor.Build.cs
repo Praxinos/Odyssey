@@ -55,6 +55,7 @@ public class EposSequenceEditor : ModuleRules
                 "ImageWriteQueue",
                 "RenderCore",
                 "RHI",
+                "Niagara",
                 // [RUNTIME] custom plugin dependencies
                 "EposMovieScene",
                 "EposSequence",

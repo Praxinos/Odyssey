@@ -14,6 +14,7 @@
 #include "MovieScene.h"
 #include "MovieSceneSequence.h"
 #include "MovieSceneToolHelpers.h"
+#include "NiagaraActor.h"
 #include "Sections/MovieScene3DTransformSection.h"
 #include "Sections/MovieSceneBoolSection.h"
 #include "Sections/MovieScenePrimitiveMaterialSection.h"
@@ -347,6 +348,12 @@ ToolkitHelpers::CreateDefaultTracksForActor( ISequencer* iSequencer, AActor* iAc
     {
         CreateTrack( iSequencer, iActor, iBinding, UMovieScene3DTransformTrack::StaticClass() );
         CreateTrack( iSequencer, iActor, iBinding, UMovieSceneSkeletalAnimationTrack::StaticClass() );
+    }
+    // For niagara actor
+    // - '3DTransform' track
+    else if( iActor->IsA<ANiagaraActor>() )
+    {
+        CreateTrack( iSequencer, iActor, iBinding, UMovieScene3DTransformTrack::StaticClass() );
     }
     // For empty actor
     else if( ExactCast<AActor>( iActor ) )

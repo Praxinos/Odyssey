@@ -10,9 +10,10 @@
 #include "Modules/ModuleInterface.h"
 #include "Modules/ModuleManager.h"
 #include "MovieScene.h"
-#include "Sections/MovieSceneSubSection.h"
 #include "MovieSceneMediaTrack.h"
 #include "MovieSceneTimeHelpers.h"
+#include "NiagaraActor.h"
+#include "Sections/MovieSceneSubSection.h"
 #include "Tracks/MovieSceneFadeTrack.h"
 #include "Tracks/MovieSceneLevelVisibilityTrack.h"
 #include "Tracks/MovieSceneAudioTrack.h"
@@ -65,6 +66,7 @@ bool UBoardSequence::CanPossessObject(UObject& Object, UObject* InPlaybackContex
     return Object.IsA<AStaticMeshActor>()
         || Object.IsA<ASkeletalMeshActor>()
         || Object.IsA<UActorComponent>()
+        || Object.IsA<ANiagaraActor>()
         || ExactCast<AActor>( &Object ); // Empty Actor
 }
 
