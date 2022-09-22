@@ -808,9 +808,27 @@ ShotSequenceTools::CloneInnerContent( ISequencer* iSequencer, UMovieSceneSequenc
 
     cloned_camera_name = NamingConvention::GenerateCameraTrackName( *iSequencer, iSequencer->GetRootMovieSceneSequence(), iSequence, cloned_camera );
 
+    // This part will create a new guid for the possessable, I don't know if it's wanted (just for info)
+    //FMovieScenePossessable new_possessable( cloned_camera_name, cloned_camera->GetClass() );
+    //iSequence->GetMovieScene()->ReplacePossessable( camera_guid, new_possessable );
+    //iSequence->UnbindPossessableObjects( camera_guid );
+    //iSequence->BindPossessableObject( new_possessable.GetGuid(), *cloned_camera, iSequencer->GetPlaybackContext() );
+
+    // This part will keep the same guid for the possessable and only change the name
     iSequence->UnbindPossessableObjects( camera_guid );
     iSequence->BindPossessableObject( camera_guid, *cloned_camera, iSequencer->GetPlaybackContext() );
-    iSequence->GetMovieScene()->FindPossessable( camera_guid )->SetName( cloned_camera_name );
+    // Original code for changing possessable name
+    //iSequence->GetMovieScene()->FindPossessable( camera_guid )->SetName( cloned_camera_name );
+    // This way will call FActorLabelUtilities::RenameExistingActor() again
+    //ShotSequenceTools::RenameBinding( *iSequencer, iSequence, iSequenceID, camera_guid, cloned_camera_name );
+    // So just replace the name in the existing possessable, and its corresponding 'binding' inside ReplacePossessable()
+    FMovieScenePossessable* possessable = iSequence->GetMovieScene()->FindPossessable( camera_guid );
+    if( possessable )
+    {
+        FMovieScenePossessable new_possessable( *possessable );
+        new_possessable.SetName( cloned_camera_name );
+        iSequence->GetMovieScene()->ReplacePossessable( camera_guid, new_possessable );
+    }
 
     iSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemsChanged );
 

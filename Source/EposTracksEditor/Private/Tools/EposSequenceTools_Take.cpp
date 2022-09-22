@@ -71,9 +71,16 @@ BoardSequenceTools::CreateTake( ISequencer* iSequencer, UMovieSceneSubSection& i
 
     //---
 
+    bool was_piloting_camera = BoardSequenceTools::IsPilotingCamera( iSequencer, iSubSection );
+    if( was_piloting_camera )
+        BoardSequenceTools::EjectCamera( iSequencer, iSubSection, iSubSection.GetInclusiveStartFrame() );
+
     BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSubSection, iSequencer->GetFocusedTemplateID() );
 
     ShotSequenceTools::CloneInnerContent( iSequencer, result.mInnerSequence, result.mInnerSequenceId, false );
+
+    if( was_piloting_camera )
+        BoardSequenceTools::PilotCamera( iSequencer, iSubSection, iSubSection.GetInclusiveStartFrame() );
 
     //---
 
@@ -108,6 +115,10 @@ BoardSequenceTools::SwitchTake( ISequencer* iSequencer, UMovieSceneSubSection& i
 
     if( BoardSequenceTools::IsDrawingInEditionMode( iSequencer, iSubSection ) )
         return nullptr;
+
+    bool was_piloting_camera = BoardSequenceTools::IsPilotingCamera( iSequencer, iSubSection );
+    if( was_piloting_camera )
+        BoardSequenceTools::EjectCamera( iSequencer, iSubSection, iSubSection.GetInclusiveStartFrame() );
 
     //---
 
@@ -151,6 +162,9 @@ BoardSequenceTools::SwitchTake( ISequencer* iSequencer, UMovieSceneSubSection& i
     }
 
     iSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::RefreshAllImmediately );
+
+    if( was_piloting_camera )
+        BoardSequenceTools::PilotCamera( iSequencer, iSubSection, iSubSection.GetInclusiveStartFrame() );
 
     return old_take;
 }
