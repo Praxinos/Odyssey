@@ -6,6 +6,7 @@
 #include "ISequencer.h"
 
 #include "NamingConvention.h"
+#include "Settings/NamingConventionSettings.h"
 
 //---
 
@@ -39,4 +40,13 @@ UEposNamingConventionBlueprintLibrary::GenerateNoteAssetPathName( const UMovieSc
     ISequencer* sequencer = CurrentSequencer.Pin().Get();
 
     return NamingConvention::GenerateNoteAssetPathName( *sequencer, sequencer->GetRootMovieSceneSequence(), iSequence, oPath, oName );
+}
+
+//---
+
+//static
+UNamingConventionSettings*
+UEposNamingConventionBlueprintLibrary::GetEposNamingConventionDefaultSettings()
+{
+    return GetMutableDefault<UNamingConventionSettings>();
 }

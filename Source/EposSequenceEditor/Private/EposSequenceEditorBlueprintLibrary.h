@@ -20,6 +20,7 @@
 class ISequencer;
 class UBoardSequence;
 class UEposMovieSceneSequence;
+class UEposSequenceEditorSettings;
 class UMovieSceneFolder;
 class UMovieSceneSection;
 class UMovieSceneSubSection;
@@ -357,11 +358,12 @@ public:
     static void SetCameraFocalLengthAndScalePlane( TArray<APlaneActor*> Planes, ACineCameraActor* Camera, float NewFocalLength, EScalePlane ScaleType );
 
 public:
+
     /**
      * Export in pdf
      *
-     * @param The list of panels
-     * @return The number of panels
+     * @param Options The export options
+     * @return The export state
      */
     UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor" )
     static bool ExportAsPDF( const FExportPDFOptions& Options );
@@ -369,11 +371,19 @@ public:
     /**
      * Export in image sequence
      *
-     * @param The list of panels
-     * @return The number of panels
+     * @param Options The export options
+     * @return The export state
      */
     UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor" )
     static bool ExportAsImageSequence( const FExportImageSequenceOptions& Options );
+
+public:
+
+    /**
+     * Get Settings
+     */
+    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor" )
+    static UEposSequenceEditorSettings* GetEposSequenceEditorDefaultSettings();
 
 public:
 

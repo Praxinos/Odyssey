@@ -25,6 +25,7 @@
 #include "Import/ImportImageSequenceConverter.h"
 #include "Import/ImportImageSequenceImporter.h"
 #include "Import/ImportImageSequenceStruct.h"
+#include "Settings/EposSequenceEditorSettings.h"
 #include "Tools/EposSequenceTools.h"
 #include "Tools/LighttableTools.h"
 
@@ -643,6 +644,15 @@ UEposSequenceEditorBlueprintLibrary::ExportAsImageSequence( const FExportImageSe
 
     FExportImageSequenceExporter exporter( CurrentSequencer, &image_sequence_struct, &iOptions );
     return exporter.Export();
+}
+
+//---
+
+//static
+UEposSequenceEditorSettings*
+UEposSequenceEditorBlueprintLibrary::GetEposSequenceEditorDefaultSettings()
+{
+    return GetMutableDefault<UEposSequenceEditorSettings>();
 }
 
 //---

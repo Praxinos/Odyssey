@@ -9,6 +9,7 @@
 
 class ISequencer;
 class UMovieSceneSequence;
+class UNamingConventionSettings;
 
 UCLASS()
 class EPOSNAMINGCONVENTION_API UEposNamingConventionBlueprintLibrary
@@ -23,6 +24,14 @@ public:
      */
     UFUNCTION(BlueprintCallable, Category = "Epos Naming Convention")
     static FString GenerateNoteAssetPathName( const UMovieSceneSequence* Sequence, FString& Path, FString& Name );
+
+public:
+
+    /**
+     * Get Settings
+     */
+    UFUNCTION( BlueprintCallable, Category = "Epos Naming Convention" )
+    static UNamingConventionSettings* GetEposNamingConventionDefaultSettings();
 
 public:
 
