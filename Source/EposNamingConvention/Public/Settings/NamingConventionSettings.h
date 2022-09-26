@@ -19,16 +19,16 @@ struct FNamingConventionNumberFormat
 
 public:
     /** The first number. */
-    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="Number Format", meta=(UIMin = "1", UIMax = "100"))
-    uint32 StartNumber { 10 };
+    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="Number Format", meta=(ClampMin = "1", ClampMax = "100", UIMin = "1", UIMax = "100"))
+    int32 StartNumber { 10 };
 
     /** The default increment. */
-    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="Number Format", meta=(UIMin = "1", UIMax = "100"))
-    uint32 Increment { 10 };
+    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="Number Format", meta=(ClampMin = "1", ClampMax = "100", UIMin = "1", UIMax = "100"))
+    int32 Increment { 10 };
 
     /** The number of digits. */
-    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="Number Format", meta=(UIMin = "1", UIMax = "10"))
-    uint32 NumDigits { 4 };
+    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="Number Format", meta=(ClampMin = "1", ClampMax = "10", UIMin = "1", UIMax = "10"))
+    int32 NumDigits { 4 };
 };
 
 //---
@@ -199,15 +199,15 @@ public:
     UPROPERTY( config, EditAnywhere, BlueprintReadWrite, Category="Global", meta=(EditCondition="IsSerie") )
     int32 Season { INDEX_NONE };
     /** The number of digits of season. */
-    UPROPERTY( config, EditAnywhere, BlueprintReadWrite, Category="Global", meta=(EditCondition="IsSerie", UIMin = "1", UIMax = "10") )
-    uint32 SeasonNumDigits { 2 };
+    UPROPERTY( config, EditAnywhere, BlueprintReadWrite, Category="Global", meta=(EditCondition="IsSerie", ClampMin = "1", ClampMax = "10", UIMin = "1", UIMax = "10") )
+    int32 SeasonNumDigits { 2 };
 
     /** The episode number. */
     UPROPERTY( config, EditAnywhere, BlueprintReadWrite, Category="Global", meta=(EditCondition="IsSerie") )
     int32 Episode { INDEX_NONE };
     /** The number of digits of episode. */
-    UPROPERTY( config, EditAnywhere, BlueprintReadWrite, Category="Global", meta=(EditCondition="IsSerie", UIMin = "1", UIMax = "10") )
-    uint32 EpisodeNumDigits { 2 };
+    UPROPERTY( config, EditAnywhere, BlueprintReadWrite, Category="Global", meta=(EditCondition="IsSerie", ClampMin = "1", ClampMax = "10", UIMin = "1", UIMax = "10") )
+    int32 EpisodeNumDigits { 2 };
 
     /** The part of the production. */
     UPROPERTY( config, EditAnywhere, BlueprintReadWrite, Category="Global" )

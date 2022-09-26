@@ -37,13 +37,13 @@ public:
 //---
 
 // https://udn.unrealengine.com/s/question/0D54z00007eBzPfCAK/makeinstance-of-ipropertytypecustomization-of-my-structure-is-not-called
-UCLASS( BlueprintType, config=Epos )
+UCLASS( config=Epos )
 class UExportPDFSettings
     : public UObject
 {
     GENERATED_BODY()
 
 public:
-    UPROPERTY( config, EditAnywhere, BlueprintReadWrite, Category=ExportPDF, meta=(ShowOnlyInnerProperties) )
+    UPROPERTY( config, EditAnywhere, Category=ExportPDF, meta=(ShowOnlyInnerProperties) )
     FExportPDFOptions Options;
 };

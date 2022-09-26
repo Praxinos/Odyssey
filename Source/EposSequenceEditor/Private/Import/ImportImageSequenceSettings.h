@@ -46,14 +46,14 @@ public:
 //---
 
 // https://udn.unrealengine.com/s/question/0D54z00007eBzPfCAK/makeinstance-of-ipropertytypecustomization-of-my-structure-is-not-called
-UCLASS( BlueprintType, config=Epos )
+UCLASS( config=Epos )
 class UImportImageSequenceSettings
     : public UObject
 {
     GENERATED_BODY()
 
 public:
-    UPROPERTY( config, EditAnywhere, BlueprintReadWrite, Category=ImportImageSequence )
+    UPROPERTY( config, EditAnywhere, Category=ImportImageSequence )
     FImportImageSequenceOptions Options;
 };
 

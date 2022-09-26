@@ -9,7 +9,7 @@
 
 //---
 
-UCLASS( BlueprintType, config=Epos )
+UCLASS( config=Epos )
 class UStoryboardSettings
     : public UObject
 {
@@ -17,10 +17,10 @@ class UStoryboardSettings
 
 public:
     /** Storyboard name. */
-    UPROPERTY( config, EditAnywhere, BlueprintReadWrite, Category="Root Board", DisplayName="Name" )
+    UPROPERTY( config, EditAnywhere, Category="Root Board", DisplayName="Name" )
     FString StoryboardName { TEXT( "MyStoryboard" ) };
 
     /** Storyboard path. */
-    UPROPERTY( config, EditAnywhere, BlueprintReadWrite, Category="Root Board", DisplayName="Path", meta=(ContentDir) )
+    UPROPERTY( config, EditAnywhere, Category="Root Board", DisplayName="Path", meta=(ContentDir) )
     FDirectoryPath StoryboardPath { TEXT( "/Game" ) };
 };
