@@ -89,7 +89,7 @@ SExportPDFSettings::Construct( const FArguments& InArgs, TWeakPtr<ISequencer> iS
 
     //---
 
-    UClass* pdf_doc_class = mExportPDFSettings->Options.PDFDocWidgetClassPath.TryLoadClass<UPDFDocExportWidget>();
+    UClass* pdf_doc_class = mExportPDFSettings->Options.PDFDocWidgetSoftClass.LoadSynchronous();
     if( pdf_doc_class )
     {
         UWorld* world = GEditor->GetEditorWorldContext().World();
@@ -194,7 +194,7 @@ SExportPDFSettings::GlobalSettingsChanged( const FPropertyChangedEvent& iEvent )
     mPDFSlot->DetachWidget();
     mPDFDocWidget = nullptr;
 
-    UClass* pdf_doc_class = mExportPDFSettings->Options.PDFDocWidgetClassPath.TryLoadClass<UPDFDocExportWidget>();
+    UClass* pdf_doc_class = mExportPDFSettings->Options.PDFDocWidgetSoftClass.LoadSynchronous();
     if( pdf_doc_class )
     {
         UWorld* world = GEditor->GetEditorWorldContext().World();

@@ -13,6 +13,8 @@
 
 //---
 
+class UPDFDocExportWidget;
+
 USTRUCT( BlueprintType )
 struct FExportPDFOptions
 {
@@ -27,8 +29,8 @@ public:
     UPROPERTY( EditAnywhere, BlueprintReadWrite, Category=ExportPDF )
     FString ExportFile;
 
-    UPROPERTY( EditAnywhere, BlueprintReadWrite, Category=ExportPDF, meta=(MetaClass="PDFDocExportWidget") )
-    FSoftClassPath PDFDocWidgetClassPath { TEXT( "/Epos/PDF/Thumbnails/WBP_PDFDoc_Thumbnails_Landscape.WBP_PDFDoc_Thumbnails_Landscape_C" ) };
+    UPROPERTY( EditAnywhere, BlueprintReadWrite, Category=ExportPDF )
+    TSoftClassPtr<UPDFDocExportWidget> PDFDocWidgetSoftClass { FSoftObjectPath( TEXT( "/Epos/PDF/Thumbnails/WBP_PDFDoc_Thumbnails_Landscape.WBP_PDFDoc_Thumbnails_Landscape_C" ) ) };
 
     UPROPERTY( EditAnywhere, BlueprintReadWrite, Category=ExportPDF )
     FExportMarkSettings MarkSettings;

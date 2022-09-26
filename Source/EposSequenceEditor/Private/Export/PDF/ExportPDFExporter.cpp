@@ -50,7 +50,7 @@ bool
 FExportPDFExporter::Export()
 {
     UPDFDocExportWidget* pdf_widget = nullptr;
-    UClass* pdf_doc_class = mPDFOptions->PDFDocWidgetClassPath.TryLoadClass<UPDFDocExportWidget>();
+    UClass* pdf_doc_class = mPDFOptions->PDFDocWidgetSoftClass.LoadSynchronous();
     if( !pdf_doc_class )
         return false;
 
