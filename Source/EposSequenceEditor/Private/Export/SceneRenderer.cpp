@@ -329,12 +329,11 @@ FSceneRenderer::RenderToTexture( TArray<FColor>& oSamples, FTextureRenderTargetR
     );
 
     // To enable visualization mode
-    ViewFamily.EngineShowFlags.SetPostProcessing( true );
-    ViewFamily.EngineShowFlags.SetVisualizeBuffer( true );
-    //ViewFamily.EngineShowFlags.SetTonemapper( false );
+    //ViewFamily.EngineShowFlags.SetPostProcessing( true );
+    //ViewFamily.EngineShowFlags.SetVisualizeBuffer( false );
+    //ViewFamily.EngineShowFlags.SetTonemapper( true );
+    //ViewFamily.EngineShowFlags.SetMotionBlur( false );
     ViewFamily.EngineShowFlags.SetScreenPercentage( false );
-
-    ViewFamily.EngineShowFlags.SetMotionBlur( false );
 
     FSceneViewStateReference viewState;
     viewState.Allocate( World->Scene->GetFeatureLevel() );
@@ -369,6 +368,9 @@ FSceneRenderer::RenderToTexture( TArray<FColor>& oSamples, FTextureRenderTargetR
     //NewView->CurrentBufferVisualizationMode = VisualizationMode;
     ViewFamily.Views.Add( NewView );
 
+    NewView->StartFinalPostprocessSettings( ViewInitOptions.ViewOrigin );
+    NewView->EndFinalPostprocessSettings( ViewInitOptions );
+
     ViewFamily.SetScreenPercentageInterface( new FLegacyScreenPercentageDriver(
         ViewFamily, /* GlobalResolutionFraction = */ 1.0f ) );
     //ViewFamily.SetScreenPercentageInterface( new FLegacyScreenPercentageDriver( ViewFamily, GlobalResolutionFraction ) );
@@ -393,7 +395,7 @@ FSceneRenderer::RenderToTexture( TArray<FColor>& oSamples, FTextureRenderTargetR
         // Copy the contents of the remote texture to system memory
         oSamples.SetNumUninitialized( TargetSize.X * TargetSize.Y );
         FReadSurfaceDataFlags ReadSurfaceDataFlags;
-        ReadSurfaceDataFlags.SetLinearToGamma( false );
+        ReadSurfaceDataFlags.SetLinearToGamma( true );
         RenderTargetResource->ReadPixels( oSamples, ReadSurfaceDataFlags, FIntRect( 0, 0, TargetSize.X, TargetSize.Y ) );
     }
 
