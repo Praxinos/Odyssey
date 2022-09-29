@@ -4,6 +4,7 @@
 #include "Export/PDF/ExportPDFBlueprintLibrary.h"
 
 #include "ImageUtils.h"
+//#include "ImageWriteTask.h"
 #include "ISequencer.h"
 #include "MovieSceneSequence.h"
 
@@ -133,12 +134,26 @@ UExportPDFBlueprintLibrary::GetPanelTexture2D( const FExportStruct& iExportStruc
 
     //---
 
+	// For testing real png image
+    //FString name = FString::FormatAsNumber( iPanelIndex );
+
+    //TUniquePtr<FImageWriteTask> ImageTask = MakeUnique<FImageWriteTask>();
+    //ImageTask->Format = EImageFormat::PNG;
+    //ImageTask->CompressionQuality = 100;
+    //ImageTask->Filename = TEXT( "C:/Users/Mike/Documents/Unreal Projects/dev_50_epos/Plugins/Epos/samples/export-" ) + name;
+    //ImageTask->PixelData = MakeUnique<TImagePixelData<FColor>>( image_size, TArray64<FColor>( samples ) );
+    //ImageTask->PixelPreProcessors.Add( TAsyncAlphaWrite<FColor>( 255 ) );
+
+    //ImageTask->RunTask();
+
+    //---
+
     TArray64<uint8> samples8;
     FImageUtils::PNGCompressImageArray( image_size.X, image_size.Y, samples, samples8 );
 
     UTexture2D* texture = FImageUtils::ImportBufferAsTexture2D( samples8 );
-    texture->SRGB = false;
-    texture->UpdateResource();
+    //texture->SRGB = false;
+    //texture->UpdateResource();
 
     return texture;
 
