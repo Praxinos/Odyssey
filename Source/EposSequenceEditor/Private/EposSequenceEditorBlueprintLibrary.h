@@ -117,6 +117,30 @@ public:
     static void CreatePlane( UMovieSceneSubSection* SubSection );
 
     /**
+     * Collapse plane's keys area
+     */
+    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board" )
+    static void CollapsePlane( UMovieSceneSubSection* SubSection, const FMovieSceneBindingProxy& Binding );
+
+    /**
+     * Expand plane's keys area
+     */
+    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board" )
+    static void ExpandPlane( UMovieSceneSubSection* SubSection, const FMovieSceneBindingProxy& Binding );
+
+    /**
+     * Get plane's keys area state
+     */
+    UFUNCTION( BlueprintPure, Category = "Epos Sequence Editor|Board" )
+    static bool IsPlaneCollapsed( UMovieSceneSubSection* SubSection, const FMovieSceneBindingProxy& Binding );
+
+    /**
+     * Get plane's keys area state
+     */
+    UFUNCTION( BlueprintPure, Category = "Epos Sequence Editor|Board" )
+    static bool IsPlaneExpanded( UMovieSceneSubSection* SubSection, const FMovieSceneBindingProxy& Binding );
+
+    /**
      * Activate the lighttable on the plane
      */
     UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board|Lighttable" )
@@ -136,7 +160,7 @@ public:
      *   -1: undetermined (mix of on and off, not enough drawings)
      * @return 1 | 0 | -1 -> on | off | undetermined
      */
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board|Lighttable" )
+    UFUNCTION( BlueprintPure, Category = "Epos Sequence Editor|Board|Lighttable" )
     static int32 GetLighttableState( UMovieSceneSubSection* SubSection, const FMovieSceneBindingProxy& Binding );
 
 public:
@@ -270,7 +294,7 @@ public:
      *   -1: undetermined (mix of on and off, not enough drawings)
      * @return 1 | 0 | -1 -> on | off | undetermined
      */
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Shot|Lighttable" )
+    UFUNCTION( BlueprintPure, Category = "Epos Sequence Editor|Shot|Lighttable" )
     static int32 GetLighttableState( const FMovieSceneBindingProxy& Binding );
 
 public:

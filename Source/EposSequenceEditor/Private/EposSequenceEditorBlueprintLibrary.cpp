@@ -193,6 +193,64 @@ UBoardSequenceEditorBlueprintLibrary::CreatePlane( UMovieSceneSubSection* iSubSe
 
 //static
 void
+UBoardSequenceEditorBlueprintLibrary::CollapsePlane( UMovieSceneSubSection* iSubSection, const FMovieSceneBindingProxy& iBinding )
+{
+    UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( iSubSection );
+
+    if( !CurrentSequencer.IsValid() )
+        return;
+
+    if( !board_section )
+        return;
+
+    ISequencer* sequencer = CurrentSequencer.Pin().Get();
+
+    board_section->SetPlaneKeysAreaVisibility( iBinding.BindingID, false );
+}
+
+//static
+void
+UBoardSequenceEditorBlueprintLibrary::ExpandPlane( UMovieSceneSubSection* iSubSection, const FMovieSceneBindingProxy& iBinding )
+{
+    UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( iSubSection );
+
+    if( !CurrentSequencer.IsValid() )
+        return;
+
+    if( !board_section )
+        return;
+
+    ISequencer* sequencer = CurrentSequencer.Pin().Get();
+
+    board_section->SetPlaneKeysAreaVisibility( iBinding.BindingID, true );
+}
+
+//static
+bool
+UBoardSequenceEditorBlueprintLibrary::IsPlaneCollapsed( UMovieSceneSubSection* iSubSection, const FMovieSceneBindingProxy& iBinding )
+{
+    return !IsPlaneExpanded( iSubSection, iBinding );
+}
+
+//static
+bool
+UBoardSequenceEditorBlueprintLibrary::IsPlaneExpanded( UMovieSceneSubSection* iSubSection, const FMovieSceneBindingProxy& iBinding )
+{
+    UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( iSubSection );
+
+    if( !CurrentSequencer.IsValid() )
+        return false;
+
+    if( !board_section )
+        return false;
+
+    ISequencer* sequencer = CurrentSequencer.Pin().Get();
+
+    return board_section->IsPlaneKeysAreaVisible( iBinding.BindingID );
+}
+
+//static
+void
 UBoardSequenceEditorBlueprintLibrary::ActivateLighttable( UMovieSceneSubSection* iSubSection, const FMovieSceneBindingProxy& iBinding )
 {
     UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( iSubSection );
