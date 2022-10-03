@@ -12,23 +12,23 @@
 
 //---
 
-USTRUCT()
+USTRUCT( BlueprintType )
 struct FNamingConventionNumberFormat
 {
     GENERATED_BODY()
 
 public:
     /** The first number. */
-    UPROPERTY(config, EditAnywhere, Category="Number Format", meta=(UIMin = "1", UIMax = "100"))
-    uint32 StartNumber { 10 };
+    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="Number Format", meta=(ClampMin = "1", ClampMax = "100", UIMin = "1", UIMax = "100"))
+    int32 StartNumber { 10 };
 
     /** The default increment. */
-    UPROPERTY(config, EditAnywhere, Category="Number Format", meta=(UIMin = "1", UIMax = "100"))
-    uint32 Increment { 10 };
+    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="Number Format", meta=(ClampMin = "1", ClampMax = "100", UIMin = "1", UIMax = "100"))
+    int32 Increment { 10 };
 
     /** The number of digits. */
-    UPROPERTY(config, EditAnywhere, Category="Number Format", meta=(UIMin = "1", UIMax = "10"))
-    uint32 NumDigits { 4 };
+    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="Number Format", meta=(ClampMin = "1", ClampMax = "10", UIMin = "1", UIMax = "10"))
+    int32 NumDigits { 4 };
 };
 
 //---
@@ -40,7 +40,7 @@ enum class ENamingConventionPlanePatternKeyword : uint32
 
 EPOSNAMINGCONVENTION_API const FPatternKeywordList& GetNamingConventionPlanePatternKeywordList();
 
-USTRUCT()
+USTRUCT( BlueprintType )
 struct FNamingConventionPlane
 {
     GENERATED_BODY()
@@ -50,13 +50,13 @@ public:
 
 public:
     /** The plane pattern. */
-    UPROPERTY(config, EditAnywhere, Category="Plane")
+    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="Plane")
     FString Pattern;
 
     FPatternKeywordLists mPatternKeywordLists;
 
     /** The plane number format. */
-    UPROPERTY(config, EditAnywhere, Category="Plane", meta=(ShowOnlyInnerProperties))
+    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="Plane", meta=(ShowOnlyInnerProperties))
     FNamingConventionNumberFormat IndexFormat { 10, 10, 4 };
 };
 
@@ -67,7 +67,7 @@ enum class ENamingConventionCameraPatternKeyword : uint32
 
 EPOSNAMINGCONVENTION_API const FPatternKeywordList& GetNamingConventionCameraPatternKeywordList();
 
-USTRUCT()
+USTRUCT( BlueprintType )
 struct FNamingConventionCamera
 {
     GENERATED_BODY()
@@ -77,13 +77,13 @@ public:
 
 public:
     /** The camera pattern. */
-    UPROPERTY( config, EditAnywhere, Category="Camera" )
+    UPROPERTY( config, EditAnywhere, BlueprintReadWrite, Category="Camera" )
     FString Pattern;
 
     FPatternKeywordLists mPatternKeywordLists;
 
     /** The camera number format. */
-    UPROPERTY(config, EditAnywhere, Category="Camera", meta=(ShowOnlyInnerProperties))
+    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="Camera", meta=(ShowOnlyInnerProperties))
     FNamingConventionNumberFormat IndexFormat { 10, 10, 4 };
 };
 
@@ -113,7 +113,7 @@ enum class ENamingConventionShotPatternKeyword : uint32
 
 EPOSNAMINGCONVENTION_API const FPatternKeywordList& GetNamingConventionShotPatternKeywordList();
 
-USTRUCT()
+USTRUCT( BlueprintType )
 struct FNamingConventionShot
 {
     GENERATED_BODY()
@@ -123,17 +123,17 @@ public:
 
 public:
     /** The shot pattern. */
-    UPROPERTY( config, EditAnywhere, Category="Shot" )
+    UPROPERTY( config, EditAnywhere, BlueprintReadWrite, Category="Shot" )
     FString Pattern;
 
     FPatternKeywordLists mPatternKeywordLists;
 
     /** The shot number format. */
-    UPROPERTY(config, EditAnywhere, Category="Shot", meta=(ShowOnlyInnerProperties))
+    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="Shot", meta=(ShowOnlyInnerProperties))
     FNamingConventionNumberFormat IndexFormat { 10, 10, 4 };
 
     /** The take number format. */
-    UPROPERTY(config, EditAnywhere, Category="Shot", meta=(ShowOnlyInnerProperties))
+    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="Shot", meta=(ShowOnlyInnerProperties))
     FNamingConventionNumberFormat TakeFormat { 1, 1, 2 };
 };
 
@@ -144,7 +144,7 @@ enum class ENamingConventionBoardPatternKeyword : uint32
 
 EPOSNAMINGCONVENTION_API const FPatternKeywordList& GetNamingConventionBoardPatternKeywordList();
 
-USTRUCT()
+USTRUCT( BlueprintType )
 struct FNamingConventionBoard
 {
     GENERATED_BODY()
@@ -154,74 +154,74 @@ public:
 
 public:
     /** The camera pattern. */
-    UPROPERTY( config, EditAnywhere, Category="Board" )
+    UPROPERTY( config, EditAnywhere, BlueprintReadWrite, Category="Board" )
     FString Pattern;
 
     FPatternKeywordLists mPatternKeywordLists;
 
     /** The shot number format. */
-    UPROPERTY(config, EditAnywhere, Category="Board", meta=(ShowOnlyInnerProperties))
+    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="Board", meta=(ShowOnlyInnerProperties))
     FNamingConventionNumberFormat IndexFormat { 10, 10, 4 };
 };
 
-USTRUCT()
+USTRUCT( BlueprintType )
 struct FNamingConventionGlobal
 {
     GENERATED_BODY()
 
 public:
     /** The studio name. */
-    UPROPERTY( config, EditAnywhere, Category="Global" )
+    UPROPERTY( config, EditAnywhere, BlueprintReadWrite, Category="Global" )
     FString StudioName { TEXT( "MyStudio" ) };
     /** The studio acronym. */
-    UPROPERTY( config, EditAnywhere, Category="Global" )
+    UPROPERTY( config, EditAnywhere, BlueprintReadWrite, Category="Global" )
     FString StudioAcronym { TEXT( "MS" ) };
 
     /** The license name. */
-    UPROPERTY( config, EditAnywhere, Category="Global" )
+    UPROPERTY( config, EditAnywhere, BlueprintReadWrite, Category="Global" )
     FString LicenseName;
     /** The license acronym. */
-    UPROPERTY( config, EditAnywhere, Category="Global" )
+    UPROPERTY( config, EditAnywhere, BlueprintReadWrite, Category="Global" )
     FString LicenseAcronym;
 
     /** The production title. */
-    UPROPERTY( config, EditAnywhere, Category="Global" )
+    UPROPERTY( config, EditAnywhere, BlueprintReadWrite, Category="Global" )
     FString ProductionName { TEXT( "MyProductionTitle" ) };
     /** The production acronym. */
-    UPROPERTY( config, EditAnywhere, Category="Global" )
+    UPROPERTY( config, EditAnywhere, BlueprintReadWrite, Category="Global" )
     FString ProductionAcronym { TEXT( "MPT" ) };
 
     /** Is it a serie?. */
-    UPROPERTY( config, EditAnywhere, Category="Global", meta=(InlineEditConditionToggle) )
+    UPROPERTY( config, EditAnywhere, BlueprintReadWrite, Category="Global", meta=(InlineEditConditionToggle) )
     bool IsSerie { false };
 
     /** The season number. */
-    UPROPERTY( config, EditAnywhere, Category="Global", meta=(EditCondition="IsSerie") )
+    UPROPERTY( config, EditAnywhere, BlueprintReadWrite, Category="Global", meta=(EditCondition="IsSerie") )
     int32 Season { INDEX_NONE };
     /** The number of digits of season. */
-    UPROPERTY( config, EditAnywhere, Category="Global", meta=(EditCondition="IsSerie", UIMin = "1", UIMax = "10") )
-    uint32 SeasonNumDigits { 2 };
+    UPROPERTY( config, EditAnywhere, BlueprintReadWrite, Category="Global", meta=(EditCondition="IsSerie", ClampMin = "1", ClampMax = "10", UIMin = "1", UIMax = "10") )
+    int32 SeasonNumDigits { 2 };
 
     /** The episode number. */
-    UPROPERTY( config, EditAnywhere, Category="Global", meta=(EditCondition="IsSerie") )
+    UPROPERTY( config, EditAnywhere, BlueprintReadWrite, Category="Global", meta=(EditCondition="IsSerie") )
     int32 Episode { INDEX_NONE };
     /** The number of digits of episode. */
-    UPROPERTY( config, EditAnywhere, Category="Global", meta=(EditCondition="IsSerie", UIMin = "1", UIMax = "10") )
-    uint32 EpisodeNumDigits { 2 };
+    UPROPERTY( config, EditAnywhere, BlueprintReadWrite, Category="Global", meta=(EditCondition="IsSerie", ClampMin = "1", ClampMax = "10", UIMin = "1", UIMax = "10") )
+    int32 EpisodeNumDigits { 2 };
 
     /** The part of the production. */
-    UPROPERTY( config, EditAnywhere, Category="Global" )
+    UPROPERTY( config, EditAnywhere, BlueprintReadWrite, Category="Global" )
     FString Part;
 
     ///** The department name. */
-    //UPROPERTY( config, EditAnywhere, Category="Global" )
+    //UPROPERTY( config, EditAnywhere, BlueprintReadWrite, Category="Global" )
     //FString DepartmentName;
     ///** The department acronym. */
-    //UPROPERTY( config, EditAnywhere, Category="Global" )
+    //UPROPERTY( config, EditAnywhere, BlueprintReadWrite, Category="Global" )
     //FString DepartmentAcronym;
 };
 
-USTRUCT()
+USTRUCT( BlueprintType )
 struct FNamingConventionUser
 {
     GENERATED_BODY()
@@ -235,14 +235,14 @@ public:
     //FString DepartmentAcronym;
 
     /** The initials of the user. */
-    UPROPERTY( config, EditAnywhere, Category="User" )
+    UPROPERTY( config, EditAnywhere, BlueprintReadWrite, Category="User" )
     FString Initials;
 };
 
 //---
 
 // Settings for the naming convention
-UCLASS(config=Epos, meta=(DisplayName="Epos Naming Convention"))
+UCLASS(BlueprintType, config=Epos, meta=(DisplayName="Epos Naming Convention"))
 class EPOSNAMINGCONVENTION_API UNamingConventionSettings
     : public UDeveloperSettings
 {
@@ -255,26 +255,26 @@ public:
 
 public:
     /** The naming convention for boards. */
-    UPROPERTY(config, EditAnywhere, Category="GlobalNamingConvention", meta=(ShowOnlyInnerProperties) )
+    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="GlobalNamingConvention", meta=(ShowOnlyInnerProperties) )
     FNamingConventionGlobal GlobalNaming;
 
     /** The naming convention for boards. */
-    UPROPERTY(config, EditAnywhere, Category="UserNamingConvention", meta=(ShowOnlyInnerProperties) )
+    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="UserNamingConvention", meta=(ShowOnlyInnerProperties) )
     FNamingConventionUser UserNaming;
 
     /** The naming convention for boards. */
-    UPROPERTY(config, EditAnywhere, Category="BoardNamingConvention", meta=(ShowOnlyInnerProperties) )
+    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="BoardNamingConvention", meta=(ShowOnlyInnerProperties) )
     FNamingConventionBoard BoardNaming;
 
     /** The naming convention for boards. */
-    UPROPERTY(config, EditAnywhere, Category="ShotNamingConvention", meta=(ShowOnlyInnerProperties) )
+    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="ShotNamingConvention", meta=(ShowOnlyInnerProperties) )
     FNamingConventionShot ShotNaming;
 
     /** The naming convention for planes. */
-    UPROPERTY(config, EditAnywhere, Category="PlaneNamingConvention", meta=(ShowOnlyInnerProperties) )
+    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="PlaneNamingConvention", meta=(ShowOnlyInnerProperties) )
     FNamingConventionPlane PlaneNaming;
 
     /** The naming convention for cameras. */
-    UPROPERTY(config, EditAnywhere, Category="CameraNamingConvention", meta=(ShowOnlyInnerProperties) )
+    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="CameraNamingConvention", meta=(ShowOnlyInnerProperties) )
     FNamingConventionCamera CameraNaming;
 };

@@ -50,7 +50,7 @@ bool
 FExportPDFExporter::Export()
 {
     UPDFDocExportWidget* pdf_widget = nullptr;
-    UClass* pdf_doc_class = mPDFOptions->PDFDocWidgetClassPath.TryLoadClass<UPDFDocExportWidget>();
+    UClass* pdf_doc_class = mPDFOptions->PDFDocWidgetSoftClass.LoadSynchronous();
     if( !pdf_doc_class )
         return false;
 
@@ -73,7 +73,7 @@ FExportPDFExporter::Export()
     if( setjmp( sgPDFEnv ) )
     {
         HPDF_Free( pdf );
-        return 1;
+        return false;
     }
 
     HPDF_SetCompressionMode( pdf, HPDF_COMP_ALL );
@@ -298,6 +298,9 @@ FExportPDFExporter::Export()
                              , new_image_width, new_image_height
         );
     }
+
+    if( !IFileManager::Get().DirectoryExists( *mPDFOptions->ExportPath.Path ) )
+        IFileManager::Get().MakeDirectory( *mPDFOptions->ExportPath.Path, true /* bRecursive */ );
 
     // Save the document to a file
     FString pdf_extension( TEXT( ".pdf" ) );

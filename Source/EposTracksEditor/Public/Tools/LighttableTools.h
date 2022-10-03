@@ -14,10 +14,26 @@ class UMovieSceneSequence;
 class EPOSTRACKSEDITOR_API LighttableTools
 {
 public:
+    // Inside board
+    static void Activate( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FGuid iPlaneBinding );
+    static void Deactivate( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FGuid iPlaneBinding );
+    static int8 GetState( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FGuid iPlaneBinding );
+    // Inside shot
+    static void Activate( ISequencer* iSequencer, FGuid iPlaneBinding );
+    static void Deactivate( ISequencer* iSequencer, FGuid iPlaneBinding );
+    static int8 GetState( ISequencer* iSequencer, FGuid iPlaneBinding );
+
+public:
     static void Activate( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding );
     static void Deactivate( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding );
 
     static void Update( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding );
+
+    /**
+     * Create a plane in a subsection at the given frame
+     * @return 1 is for 'all drawings on', 0 is for 'all drawings off', -1 is for undetermined (mix of on/off)
+     */
+    static int8 GetState( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding );
 
     static bool IsOn( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding );
     static bool IsOff( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding );

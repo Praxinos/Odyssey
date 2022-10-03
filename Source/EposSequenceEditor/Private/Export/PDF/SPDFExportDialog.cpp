@@ -17,6 +17,7 @@
 #include "IStructureDetailsView.h"
 #include "LevelEditorSequencerIntegration.h"
 #include "Math/UnitConversion.h"
+#include "Misc/ScopedSlowTask.h"
 #include "MovieSceneSequenceVisitor.h"
 #include "PropertyEditorModule.h"
 #include "SequencerSettings.h"
@@ -42,9 +43,6 @@
 #include "Export/SceneRenderer.h"
 #include "Settings/EposSequenceEditorSettings.h"
 #include "Settings/NamingConventionSettings.h"
-
-/* LevelSequenceEditorHelpers
- *****************************************************************************/
 
 #define LOCTEXT_NAMESPACE "PDFExportDialog"
 
@@ -89,9 +87,13 @@ SExportPDFSettings::Construct( const FArguments& InArgs, TWeakPtr<ISequencer> iS
 
     //---
 
-    UClass* pdf_doc_class = mExportPDFSettings->Options.PDFDocWidgetClassPath.TryLoadClass<UPDFDocExportWidget>();
+    UClass* pdf_doc_class = mExportPDFSettings->Options.PDFDocWidgetSoftClass.LoadSynchronous();
     if( pdf_doc_class )
     {
+        const FText ProgressText = LOCTEXT( "ConstructAndRenderPDFLayout", "Construct and Render PDF Layout..." );
+        FScopedSlowTask Progress( 0, ProgressText );
+        Progress.MakeDialog();
+
         UWorld* world = GEditor->GetEditorWorldContext().World();
         mPDFDocWidget = CreateWidget<UPDFDocExportWidget>( world, pdf_doc_class );
         check( mPDFDocWidget );
@@ -189,14 +191,20 @@ SExportPDFSettings::GlobalSettingsChanged( const FPropertyChangedEvent& iEvent )
 {
     mExportPDFSettings->SaveConfig();
 
+    FSlateApplication::Get().DismissAllMenus();
+
     //---
 
     mPDFSlot->DetachWidget();
     mPDFDocWidget = nullptr;
 
-    UClass* pdf_doc_class = mExportPDFSettings->Options.PDFDocWidgetClassPath.TryLoadClass<UPDFDocExportWidget>();
+    UClass* pdf_doc_class = mExportPDFSettings->Options.PDFDocWidgetSoftClass.LoadSynchronous();
     if( pdf_doc_class )
     {
+        const FText ProgressText = LOCTEXT( "ConstructAndRenderPDFLayout", "Construct and Render PDF Layout..." );
+        FScopedSlowTask Progress( 0, ProgressText );
+        Progress.MakeDialog();
+
         UWorld* world = GEditor->GetEditorWorldContext().World();
         mPDFDocWidget = CreateWidget<UPDFDocExportWidget>( world, pdf_doc_class );
         check( mPDFDocWidget );
