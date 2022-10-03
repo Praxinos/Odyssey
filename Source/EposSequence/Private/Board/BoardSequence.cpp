@@ -13,6 +13,7 @@
 #include "MovieSceneMediaTrack.h"
 #include "MovieSceneTimeHelpers.h"
 #include "NiagaraActor.h"
+#include "PaperFlipbookActor.h"
 #include "Sections/MovieSceneSubSection.h"
 #include "Tracks/MovieSceneFadeTrack.h"
 #include "Tracks/MovieSceneLevelVisibilityTrack.h"
@@ -67,6 +68,7 @@ bool UBoardSequence::CanPossessObject(UObject& Object, UObject* InPlaybackContex
         || Object.IsA<ASkeletalMeshActor>()
         || Object.IsA<UActorComponent>()
         || Object.IsA<ANiagaraActor>()
+        || Object.IsA<APaperFlipbookActor>()
         || ExactCast<AActor>( &Object ); // Empty Actor
 }
 

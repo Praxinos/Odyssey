@@ -46,6 +46,7 @@ public class EposSequence : ModuleRules
                 "MovieRenderPipelineCore",
                 "MediaCompositing",
                 "Niagara",
+                "Paper2D",
                 // [RUNTIME] custom plugin dependencies
                 "EposMovieScene",
                 "EposTracks",

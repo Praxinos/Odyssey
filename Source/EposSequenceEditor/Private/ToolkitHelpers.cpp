@@ -15,6 +15,7 @@
 #include "MovieSceneSequence.h"
 #include "MovieSceneToolHelpers.h"
 #include "NiagaraActor.h"
+#include "PaperFlipbookActor.h"
 #include "Sections/MovieScene3DTransformSection.h"
 #include "Sections/MovieSceneBoolSection.h"
 #include "Sections/MovieScenePrimitiveMaterialSection.h"
@@ -352,6 +353,12 @@ ToolkitHelpers::CreateDefaultTracksForActor( ISequencer* iSequencer, AActor* iAc
     // For niagara actor
     // - '3DTransform' track
     else if( iActor->IsA<ANiagaraActor>() )
+    {
+        CreateTrack( iSequencer, iActor, iBinding, UMovieScene3DTransformTrack::StaticClass() );
+    }
+    // For flipbook actor
+    // - '3DTransform' track
+    else if( iActor->IsA<APaperFlipbookActor>() )
     {
         CreateTrack( iSequencer, iActor, iBinding, UMovieScene3DTransformTrack::StaticClass() );
     }

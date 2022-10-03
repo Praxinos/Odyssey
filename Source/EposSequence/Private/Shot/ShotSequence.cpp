@@ -14,6 +14,7 @@
 #include "MovieSceneMediaTrack.h"
 #include "MovieSceneTimeHelpers.h"
 #include "NiagaraActor.h"
+#include "PaperFlipbookActor.h"
 #include "Sections/MovieSceneSubSection.h"
 #include "Tracks/MovieSceneFadeTrack.h"
 #include "Tracks/MovieSceneLevelVisibilityTrack.h"
@@ -104,6 +105,7 @@ bool UShotSequence::CanPossessObject( UObject& Object, UObject* InPlaybackContex
         || Object.IsA<ACineCameraActor>()
         || Object.IsA<UActorComponent>()
         || Object.IsA<ANiagaraActor>()
+        || Object.IsA<APaperFlipbookActor>()
         || ExactCast<AActor>( &Object ); // Empty Actor
 }
 

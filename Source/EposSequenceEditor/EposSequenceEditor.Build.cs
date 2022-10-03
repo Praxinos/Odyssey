@@ -56,6 +56,7 @@ public class EposSequenceEditor : ModuleRules
                 "RenderCore",
                 "RHI",
                 "Niagara",
+                "Paper2D",
                 // [RUNTIME] custom plugin dependencies
                 "EposMovieScene",
                 "EposSequence",
