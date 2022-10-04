@@ -59,6 +59,10 @@ typedef TMap<TWeakObjectPtr<UMovieSceneSection>, TSharedPtr<FMovieSceneChannelPr
 class EPOSSEQUENCE_API EposSequenceHelpers
 {
 public:
+    static UMovieSceneSequence* GetRootMovieSceneSequence( IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iSequence );
+    static UMovieSceneSequence* GetRootMovieSceneSequence( IMovieScenePlayer& iPlayer, FMovieSceneSequenceIDRef iSequenceID );
+
+public:
     static TArray<TWeakObjectPtr<UMovieSceneNoteSection>>   GetNotesRecursive( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber );
     static TArray<UStoryNote*>                              GetNotesRecursive( UMovieSceneSequence* iSequence, FFrameNumber iFrameNumber );
 

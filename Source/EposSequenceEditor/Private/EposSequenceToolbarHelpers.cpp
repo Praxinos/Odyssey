@@ -206,7 +206,7 @@ EposSequenceToolbarHelpers::MakeSettingsEntries( FMenuBuilder& iMenuBuilder, ISe
     auto OnGetPreviousColor = [iSequencer, root_sequence]() -> FLinearColor
     {
         FLinearColor color = MasterAssetTools::GetPreviousDrawingColor( *iSequencer, root_sequence );
-        color.A = MasterAssetTools::GetPreviousDrawingOpacity( *iSequencer, iSequencer->GetRootMovieSceneSequence() );
+        color.A = MasterAssetTools::GetPreviousDrawingOpacity( *iSequencer, root_sequence );
 
         return color;
     };
@@ -214,7 +214,7 @@ EposSequenceToolbarHelpers::MakeSettingsEntries( FMenuBuilder& iMenuBuilder, ISe
     auto OnPreviousColorCommited = [iSequencer, root_sequence]( FLinearColor iColor )
     {
         MasterAssetTools::SetPreviousDrawingColor( *iSequencer, root_sequence, iColor );
-        MasterAssetTools::SetPreviousDrawingOpacity( *iSequencer, iSequencer->GetRootMovieSceneSequence(), iColor.A );
+        MasterAssetTools::SetPreviousDrawingOpacity( *iSequencer, root_sequence, iColor.A );
     };
 
     iMenuBuilder.AddWidget( SNew( SColorPickerEntry )
@@ -229,7 +229,7 @@ EposSequenceToolbarHelpers::MakeSettingsEntries( FMenuBuilder& iMenuBuilder, ISe
     auto OnGetNextColor = [iSequencer, root_sequence]() -> FLinearColor
     {
         FLinearColor color = MasterAssetTools::GetNextDrawingColor( *iSequencer, root_sequence );
-        color.A = MasterAssetTools::GetNextDrawingOpacity( *iSequencer, iSequencer->GetRootMovieSceneSequence() );
+        color.A = MasterAssetTools::GetNextDrawingOpacity( *iSequencer, root_sequence );
 
         return color;
     };
@@ -237,7 +237,7 @@ EposSequenceToolbarHelpers::MakeSettingsEntries( FMenuBuilder& iMenuBuilder, ISe
     auto OnNextColorCommited = [iSequencer, root_sequence]( FLinearColor iColor )
     {
         MasterAssetTools::SetNextDrawingColor( *iSequencer, root_sequence, iColor );
-        MasterAssetTools::SetNextDrawingOpacity( *iSequencer, iSequencer->GetRootMovieSceneSequence(), iColor.A );
+        MasterAssetTools::SetNextDrawingOpacity( *iSequencer, root_sequence, iColor.A );
     };
 
     iMenuBuilder.AddWidget( SNew( SColorPickerEntry )
