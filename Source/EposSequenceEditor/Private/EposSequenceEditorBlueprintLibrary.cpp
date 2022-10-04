@@ -19,6 +19,7 @@
 #include "Subsystems/AssetEditorSubsystem.h"
 
 #include "Board/BoardSequence.h"
+#include "EposSequenceHelpers.h"
 #include "Export/ExportConverter.h"
 #include "Export/ImageSequence/ExportImageSequenceExporter.h"
 #include "Export/PDF/ExportPDFExporter.h"
@@ -47,7 +48,11 @@ UBoardSequenceEditorBlueprintLibrary::GetRootBoardSequence()
     if( !CurrentSequencer.IsValid() )
         return nullptr;
 
-    return Cast<UBoardSequence>(CurrentSequencer.Pin()->GetRootMovieSceneSequence());
+    ISequencer* sequencer = CurrentSequencer.Pin().Get();
+
+    UMovieSceneSequence* root_sequence = EposSequenceHelpers::GetRootMovieSceneSequence( *sequencer, sequencer->GetFocusedTemplateID() );
+
+    return Cast<UBoardSequence>( root_sequence );
 }
 
 
@@ -434,7 +439,11 @@ UShotSequenceEditorBlueprintLibrary::GetRootShotSequence()
     if( !CurrentSequencer.IsValid() )
         return nullptr;
 
-    return Cast<UShotSequence>(CurrentSequencer.Pin()->GetRootMovieSceneSequence());
+    ISequencer* sequencer = CurrentSequencer.Pin().Get();
+
+    UMovieSceneSequence* root_sequence = EposSequenceHelpers::GetRootMovieSceneSequence( *sequencer, sequencer->GetFocusedTemplateID() );
+
+    return Cast<UShotSequence>( root_sequence );
 }
 
 //static
@@ -579,11 +588,14 @@ bool UEposSequenceEditorBlueprintLibrary::OpenEposSequence( UEposMovieSceneSeque
 
 UEposMovieSceneSequence* UEposSequenceEditorBlueprintLibrary::GetRootEposSequence()
 {
-    if (CurrentSequencer.IsValid())
-    {
-        return Cast<UEposMovieSceneSequence>(CurrentSequencer.Pin()->GetRootMovieSceneSequence());
-    }
-    return nullptr;
+    if( !CurrentSequencer.IsValid() )
+        return nullptr;
+
+    ISequencer* sequencer = CurrentSequencer.Pin().Get();
+
+    UMovieSceneSequence* root_sequence = EposSequenceHelpers::GetRootMovieSceneSequence( *sequencer, sequencer->GetFocusedTemplateID() );
+
+    return Cast<UEposMovieSceneSequence>( root_sequence );
 }
 
 UEposMovieSceneSequence* UEposSequenceEditorBlueprintLibrary::GetFocusedEposSequence()

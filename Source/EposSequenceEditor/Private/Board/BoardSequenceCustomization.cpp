@@ -16,6 +16,7 @@
 #include "Board/BoardSequence.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "EposSequenceEditorCommands.h"
+#include "EposSequenceHelpers.h"
 #include "EposSequenceToolbarHelpers.h"
 #include "EposTracksModule.h"
 #include "PlaneActor.h"
@@ -254,8 +255,9 @@ FBoardSequenceCustomization::CreateInfoText() const
 {
     TSharedRef<INumericTypeInterface<double>> type_interface = mSequencer->GetNumericTypeInterface();
 
-    const UMovieSceneSequence* root_board = mSequencer->GetRootMovieSceneSequence();
-    //const UBoardSequence* root_board = CastChecked<UBoardSequence>( mSequencer->GetRootMovieSceneSequence() );
+    const UMovieSceneSequence* root_board = EposSequenceHelpers::GetRootMovieSceneSequence( *mSequencer, mSequencer->GetFocusedTemplateID() );
+    // This should always be valid as we are inside the board customization
+    check( root_board && root_board->IsA<UBoardSequence>() );
     const UMovieScene* root_moviescene = root_board ? root_board->GetMovieScene() : nullptr;
 
     const UBoardSequence* current_board = CastChecked<UBoardSequence>( mSequencer->GetFocusedMovieSceneSequence() );
