@@ -147,7 +147,9 @@ FCinematicBoardTrackEditor::BuildAddTrackMenu( FMenuBuilder& ioMenuBuilder ) //o
         FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), GetSubTrackBrushName() ),
         FUIAction(
             FExecuteAction::CreateRaw( this, &FCinematicBoardTrackEditor::HandleAddSubTrackMenuEntryExecute ),
-            FCanExecuteAction::CreateRaw( this, &FCinematicBoardTrackEditor::HandleAddSubTrackMenuEntryCanExecute )
+            FCanExecuteAction::CreateRaw( this, &FCinematicBoardTrackEditor::HandleAddSubTrackMenuEntryCanExecute ),
+            FGetActionCheckState(),
+            FIsActionButtonVisible::CreateRaw( this, &FCinematicBoardTrackEditor::HandleAddCinematicBoardTrackMenuEntryIsVisible )
         )
     );
 }
@@ -173,6 +175,14 @@ FCinematicBoardTrackEditor::HandleAddSubTrackMenuEntryExecute()
             GetSequencer()->OnAddTrack( boardTrack, FGuid() );
         }
     }
+}
+
+bool
+FCinematicBoardTrackEditor::HandleAddCinematicBoardTrackMenuEntryIsVisible()
+{
+    UMovieSceneSequence* FocusedSequence = GetSequencer()->GetFocusedMovieSceneSequence();
+
+    return ( ( FocusedSequence != nullptr ) && ( FocusedSequence->IsA<UBoardSequence>() ) );
 }
 
 //---

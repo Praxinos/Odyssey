@@ -102,12 +102,6 @@ public:
         checkNoEntry();
     }
 
-    /** Edit the section's metadata */
-    virtual void EditMetaData( UMovieSceneSubSection* Section )
-    {
-        checkNoEntry();
-    }
-
     /**
      * Check whether the given sequence can be added as a sub-sequence.
      *
@@ -150,6 +144,9 @@ protected:
 
     /** Callback for determining whether the "Add Subsequence" menu entry can execute. */
     virtual bool HandleAddSubTrackMenuEntryCanExecute() const;
+
+    /** Callback for determining whether the "Add Board" menu entry is visible. */
+    bool HandleAddCinematicBoardTrackMenuEntryIsVisible();
 
     /** Whether to handle this asset being dropped onto the sequence as opposed to a specific track. */
     virtual bool CanHandleAssetAdded( UMovieSceneSequence* Sequence ) const;
