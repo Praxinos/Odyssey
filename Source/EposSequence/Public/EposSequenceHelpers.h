@@ -14,6 +14,7 @@
 
 class ACineCameraActor;
 class APlaneActor;
+class UEposMovieSceneSequence;
 class UMaterialInstance;
 class UMaterialInstanceConstant;
 class UMovieScene;
@@ -59,8 +60,8 @@ typedef TMap<TWeakObjectPtr<UMovieSceneSection>, TSharedPtr<FMovieSceneChannelPr
 class EPOSSEQUENCE_API EposSequenceHelpers
 {
 public:
-    static UMovieSceneSequence* GetRootMovieSceneSequence( IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iSequence );
-    static UMovieSceneSequence* GetRootMovieSceneSequence( IMovieScenePlayer& iPlayer, FMovieSceneSequenceIDRef iSequenceID );
+    static UEposMovieSceneSequence* GetRootEposSequence( IMovieScenePlayer& iPlayer, const UEposMovieSceneSequence* iSequence );
+    static UEposMovieSceneSequence* GetRootEposSequence( IMovieScenePlayer& iPlayer, FMovieSceneSequenceIDRef iSequenceID );
 
 public:
     static TArray<TWeakObjectPtr<UMovieSceneNoteSection>>   GetNotesRecursive( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber );

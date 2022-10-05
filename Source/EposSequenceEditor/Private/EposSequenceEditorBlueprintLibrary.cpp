@@ -50,7 +50,7 @@ UBoardSequenceEditorBlueprintLibrary::GetRootBoardSequence()
 
     ISequencer* sequencer = CurrentSequencer.Pin().Get();
 
-    UMovieSceneSequence* root_sequence = EposSequenceHelpers::GetRootMovieSceneSequence( *sequencer, sequencer->GetFocusedTemplateID() );
+    UEposMovieSceneSequence* root_sequence = EposSequenceHelpers::GetRootEposSequence( *sequencer, sequencer->GetFocusedTemplateID() );
 
     return Cast<UBoardSequence>( root_sequence );
 }
@@ -441,7 +441,7 @@ UShotSequenceEditorBlueprintLibrary::GetRootShotSequence()
 
     ISequencer* sequencer = CurrentSequencer.Pin().Get();
 
-    UMovieSceneSequence* root_sequence = EposSequenceHelpers::GetRootMovieSceneSequence( *sequencer, sequencer->GetFocusedTemplateID() );
+    UEposMovieSceneSequence* root_sequence = EposSequenceHelpers::GetRootEposSequence( *sequencer, sequencer->GetFocusedTemplateID() );
 
     return Cast<UShotSequence>( root_sequence );
 }
@@ -593,9 +593,9 @@ UEposMovieSceneSequence* UEposSequenceEditorBlueprintLibrary::GetRootEposSequenc
 
     ISequencer* sequencer = CurrentSequencer.Pin().Get();
 
-    UMovieSceneSequence* root_sequence = EposSequenceHelpers::GetRootMovieSceneSequence( *sequencer, sequencer->GetFocusedTemplateID() );
+    UEposMovieSceneSequence* root_sequence = EposSequenceHelpers::GetRootEposSequence( *sequencer, sequencer->GetFocusedTemplateID() );
 
-    return Cast<UEposMovieSceneSequence>( root_sequence );
+    return root_sequence;
 }
 
 UEposMovieSceneSequence* UEposSequenceEditorBlueprintLibrary::GetFocusedEposSequence()
