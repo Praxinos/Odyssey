@@ -73,6 +73,8 @@ public:
 class EPOSSEQUENCE_API BoardSequenceHelpers
 {
 public:
+    static UMovieSceneSequence* FindSequenceOfSubSection( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceID& oSequenceID );
+
     struct FInnerSequenceResult
     {
         UMovieSceneSequence*    mInnerSequence = nullptr;

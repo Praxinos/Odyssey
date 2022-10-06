@@ -42,6 +42,39 @@
 
 #define LOCTEXT_NAMESPACE "EposSequenceHelpers"
 
+
+//static
+UMovieSceneSequence*
+BoardSequenceHelpers::FindSequenceOfSubSection( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceID& oSequenceID )
+{
+    oSequenceID = MovieSceneSequenceID::Invalid;
+
+    const FMovieSceneSequenceHierarchy* hierarchy = iPlayer.GetEvaluationTemplate().GetHierarchy();
+    if( !hierarchy )
+        return nullptr;
+
+    FMovieSceneSequenceID subsequence_id = MovieSceneSequenceID::Invalid;
+    for( const TTuple<FMovieSceneSequenceID, FMovieSceneSubSequenceData>& Pair : hierarchy->AllSubSequenceData() )
+    {
+        if( Pair.Value.DeterministicSequenceID == iSubSection.GetSequenceID() )
+        {
+            subsequence_id = Pair.Key;
+            break;
+        }
+    }
+
+    const FMovieSceneSequenceHierarchyNode* node = hierarchy->FindNode( subsequence_id );
+    if( !node )
+        return nullptr;
+
+    oSequenceID = node->ParentID;
+
+    UMovieSceneSequence* sequence = hierarchy->FindSubSequence( oSequenceID );
+
+    return sequence;
+
+}
+
 BoardSequenceHelpers::FInnerSequenceResult
 BoardSequenceHelpers::GetInnerSequence( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceId )
 {
