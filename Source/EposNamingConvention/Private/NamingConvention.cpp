@@ -957,16 +957,18 @@ FindNameElements( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* i
 
 //static
 FString
-NamingConvention::GenerateBoardAssetPathName( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence, const UMovieSceneSequence* iParentSequence, FFrameNumber iFrameNumber, FString& oPath, FString& oName, FBoardNameElements& oElements )
+NamingConvention::GenerateBoardAssetPathName( const IMovieScenePlayer& iPlayer, const UEposMovieSceneSequence& iParentSequence, FMovieSceneSequenceIDRef iParentSequenceID, FFrameNumber iFrameNumber, FString& oPath, FString& oName, FBoardNameElements& oElements )
 {
     IMovieScenePlayer* player = const_cast<IMovieScenePlayer*>( &iPlayer ); //PATCH: Because there is no 'const' version of GetEvaluationTemplate() and GetAllPlanes()/GetAllDrawings() will use it to find cache
+
+    const UEposMovieSceneSequence* epos_root_sequence = EposSequenceHelpers::GetRootEposSequence( *player, iParentSequenceID );
 
     //---
 
     FString sequence_path;
 
     // Try to find the better path from existing sibling sequences
-    FRelevantPathMap map_sequence_paths = FindSiblingSequencePaths( iPlayer, iParentSequence );
+    FRelevantPathMap map_sequence_paths = FindSiblingSequencePaths( iPlayer, &iParentSequence );
     if( map_sequence_paths.Num() )
     {
         TArray<FString> keys;
@@ -990,7 +992,7 @@ NamingConvention::GenerateBoardAssetPathName( const IMovieScenePlayer& iPlayer, 
 
     if( sequence_path.IsEmpty() )
     {
-        FString root_path = GetRootPath( iPlayer, iRootSequence ); // ie. /Game/MyStoryboard2
+        FString root_path = GetRootPath( iPlayer, epos_root_sequence ); // ie. /Game/MyStoryboard2
         sequence_path = root_path;
     }
 
@@ -1043,7 +1045,7 @@ NamingConvention::GenerateBoardAssetPathName( const IMovieScenePlayer& iPlayer, 
 
     oElements.Index = max_board_index;
 
-    TOptional<FSequenceNameElements> source_elements = FindNameElements( iPlayer, iRootSequence, iParentSequence, iFrameNumber );
+    TOptional<FSequenceNameElements> source_elements = FindNameElements( iPlayer, epos_root_sequence, &iParentSequence, iFrameNumber );
 
     // Get the source elements values
     if( source_elements )

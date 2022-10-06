@@ -665,12 +665,17 @@ CinematicBoardTrackTools::CreateSequenceInternal( ISequencer* iSequencer, const 
 UMovieSceneSubSection*
 CinematicBoardTrackTools::InsertBoard( ISequencer* iSequencer, FFrameNumber iFrameNumber, TOptional<int32> iDuration )
 {
+    FMovieSceneSequenceID epos_sequence_id = iSequencer->GetFocusedTemplateID();
+    UEposMovieSceneSequence* epos_sequence = Cast<UEposMovieSceneSequence>( iSequencer->GetFocusedMovieSceneSequence() );
+    if( !epos_sequence )
+        return nullptr;
+
     const FScopedTransaction transaction( LOCTEXT( "transaction.insert-board", "Insert Board" ) );
 
     FString sequence_path;
     FString sequence_name;
     FBoardNameElements board_name_elements;
-    FString sequence_pathname = NamingConvention::GenerateBoardAssetPathName( *iSequencer, iSequencer->GetRootMovieSceneSequence(), iSequencer->GetFocusedMovieSceneSequence(), iFrameNumber, sequence_path, sequence_name, board_name_elements );
+    FString sequence_pathname = NamingConvention::GenerateBoardAssetPathName( *iSequencer, *epos_sequence, epos_sequence_id, iFrameNumber, sequence_path, sequence_name, board_name_elements );
 
     UMovieSceneSubSection* new_section = CreateSequenceInternal<UBoardSequence>( iSequencer, sequence_path, sequence_name, iFrameNumber, iDuration );
 
