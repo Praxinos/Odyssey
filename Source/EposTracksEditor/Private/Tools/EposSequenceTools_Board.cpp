@@ -694,12 +694,17 @@ CinematicBoardTrackTools::InsertBoard( ISequencer* iSequencer, FFrameNumber iFra
 UMovieSceneSubSection*
 CinematicBoardTrackTools::InsertShot( ISequencer* iSequencer, FFrameNumber iFrameNumber, TOptional<int32> iDuration )
 {
+    FMovieSceneSequenceID epos_sequence_id = iSequencer->GetFocusedTemplateID();
+    UEposMovieSceneSequence* epos_sequence = Cast<UEposMovieSceneSequence>( iSequencer->GetFocusedMovieSceneSequence() );
+    if( !epos_sequence )
+        return nullptr;
+
     const FScopedTransaction transaction( LOCTEXT( "transaction.insert-shot", "Insert Shot" ) );
 
     FString sequence_path;
     FString sequence_name;
     FShotNameElements shot_name_elements;
-    FString sequence_pathname = NamingConvention::GenerateShotAssetPathName( *iSequencer, iSequencer->GetRootMovieSceneSequence(), iSequencer->GetFocusedMovieSceneSequence(), iFrameNumber, sequence_path, sequence_name, shot_name_elements );
+    FString sequence_pathname = NamingConvention::GenerateShotAssetPathName( *iSequencer, *epos_sequence, epos_sequence_id, iFrameNumber, sequence_path, sequence_name, shot_name_elements );
 
     //---
 
@@ -807,12 +812,19 @@ CinematicBoardTrackTools::CloneSection( ISequencer* iSequencer, UMovieSceneCinem
     if( subsequence->IsA<UBoardSequence>() )
         return nullptr;
 
+    FMovieSceneSequenceID epos_sequence_id;
+    UEposMovieSceneSequence* epos_sequence = Cast<UEposMovieSceneSequence>( BoardSequenceHelpers::FindSequenceOfSubSection( *iSequencer, *iSection, epos_sequence_id ) );
+    if( !epos_sequence )
+        return nullptr;
+
+    //---
+
     const FScopedTransaction transaction( LOCTEXT( "CloneSection_Transaction", "Clone Section" ) );
 
     FString sequence_path;
     FString sequence_name;
     FShotNameElements shot_name_elements;
-    FString sequence_pathname = NamingConvention::GenerateShotAssetPathName( *iSequencer, iSequencer->GetRootMovieSceneSequence(), iSequencer->GetFocusedMovieSceneSequence(), iFrameNumber, sequence_path, sequence_name, shot_name_elements );
+    FString sequence_pathname = NamingConvention::GenerateShotAssetPathName( *iSequencer, *epos_sequence, epos_sequence_id, iFrameNumber, sequence_path, sequence_name, shot_name_elements );
 
     // Duplicate the board and put it on the next available row
     UMovieSceneSubSection* new_section = CreateSequenceInternal<UShotSequence>( iSequencer, sequence_path, sequence_name, iFrameNumber, TOptional<int32>(), iSection );

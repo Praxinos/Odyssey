@@ -1070,16 +1070,18 @@ NamingConvention::GenerateBoardAssetPathName( const IMovieScenePlayer& iPlayer, 
 
 //static
 FString
-NamingConvention::GenerateShotAssetPathName( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence, const UMovieSceneSequence* iParentSequence, FFrameNumber iFrameNumber, FString& oPath, FString& oName, FShotNameElements& oElements )
+NamingConvention::GenerateShotAssetPathName( const IMovieScenePlayer& iPlayer, const UEposMovieSceneSequence& iParentSequence, FMovieSceneSequenceIDRef iParentSequenceID, FFrameNumber iFrameNumber, FString& oPath, FString& oName, FShotNameElements& oElements )
 {
     IMovieScenePlayer* player = const_cast<IMovieScenePlayer*>( &iPlayer ); //PATCH: Because there is no 'const' version of GetEvaluationTemplate() and GetAllPlanes()/GetAllDrawings() will use it to find cache
+
+    const UEposMovieSceneSequence* epos_root_sequence = EposSequenceHelpers::GetRootEposSequence( *player, iParentSequenceID );
 
     //---
 
     FString sequence_path;
 
     // Try to find the better path from existing sibling sequences
-    FRelevantPathMap map_sequence_paths = FindSiblingSequencePaths( iPlayer, iParentSequence );
+    FRelevantPathMap map_sequence_paths = FindSiblingSequencePaths( iPlayer, &iParentSequence );
     if( map_sequence_paths.Num() )
     {
         TArray<FString> keys;
@@ -1103,7 +1105,7 @@ NamingConvention::GenerateShotAssetPathName( const IMovieScenePlayer& iPlayer, c
 
     if( sequence_path.IsEmpty() )
     {
-        FString root_path = GetRootPath( iPlayer, iRootSequence ); // ie. /Game/MyStoryboard2
+        FString root_path = GetRootPath( iPlayer, epos_root_sequence ); // ie. /Game/MyStoryboard2
         sequence_path = root_path;
     }
 
@@ -1111,7 +1113,7 @@ NamingConvention::GenerateShotAssetPathName( const IMovieScenePlayer& iPlayer, c
 
     TArray<UShotSequence*> shot_sequences;
 
-    const FMovieSceneSequenceHierarchy* hierarchy = player->GetEvaluationTemplate().GetCompiledDataManager()->FindHierarchy( player->GetEvaluationTemplate().GetCompiledDataID() );
+    const FMovieSceneSequenceHierarchy* hierarchy = player->GetEvaluationTemplate().GetHierarchy();
     if( hierarchy )
     {
         const TMap<FMovieSceneSequenceID, FMovieSceneSubSequenceData>& map = hierarchy->AllSubSequenceData();
@@ -1157,7 +1159,7 @@ NamingConvention::GenerateShotAssetPathName( const IMovieScenePlayer& iPlayer, c
     oElements.Index = max_shot_index;
     oElements.TakeIndex = shot_settings.TakeFormat.StartNumber;
 
-    TOptional<FSequenceNameElements> source_elements = FindNameElements( iPlayer, iRootSequence, iParentSequence, iFrameNumber );
+    TOptional<FSequenceNameElements> source_elements = FindNameElements( iPlayer, epos_root_sequence, &iParentSequence, iFrameNumber );
 
     // Get the source elements values
     if( source_elements )

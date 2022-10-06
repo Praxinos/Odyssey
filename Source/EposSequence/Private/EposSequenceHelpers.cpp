@@ -69,9 +69,10 @@ BoardSequenceHelpers::FindSequenceOfSubSection( IMovieScenePlayer& iPlayer, cons
 
     oSequenceID = node->ParentID;
 
-    UMovieSceneSequence* sequence = hierarchy->FindSubSequence( oSequenceID );
-
-    return sequence;
+    if( oSequenceID == MovieSceneSequenceID::Root )
+        return iPlayer.GetEvaluationTemplate().GetRootSequence();
+    else
+        return hierarchy->FindSubSequence( oSequenceID );
 
 }
 
