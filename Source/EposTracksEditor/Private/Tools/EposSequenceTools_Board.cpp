@@ -888,9 +888,12 @@ ShotSequenceTools::CloneInnerContent( ISequencer* iSequencer, UMovieSceneSequenc
     if( !cloned_camera )
         return;
 
+    UEposMovieSceneSequence* epos_sequence = Cast<UEposMovieSceneSequence>( iSequence );
+    check( epos_sequence );
+
     FString cloned_camera_path;
     FString cloned_camera_name;
-    NamingConvention::GenerateCameraActorPathName( *iSequencer, iSequencer->GetRootMovieSceneSequence(), iSequence, cloned_camera_path, cloned_camera_name );
+    NamingConvention::GenerateCameraActorPathName( *iSequencer, *epos_sequence, iSequenceID, cloned_camera_path, cloned_camera_name );
     // We don't keep the same name as the original camera (like plane), to be able to increment the (global) index or to use the new shot name
 
     cloned_camera->SetFolderPath( *cloned_camera_path );
@@ -898,7 +901,7 @@ ShotSequenceTools::CloneInnerContent( ISequencer* iSequencer, UMovieSceneSequenc
 
     //-
 
-    cloned_camera_name = NamingConvention::GenerateCameraTrackName( *iSequencer, iSequencer->GetRootMovieSceneSequence(), iSequence, cloned_camera );
+    cloned_camera_name = NamingConvention::GenerateCameraTrackName( *iSequencer, *epos_sequence, iSequenceID, cloned_camera );
 
     // This part will create a new guid for the possessable, I don't know if it's wanted (just for info)
     //FMovieScenePossessable new_possessable( cloned_camera_name, cloned_camera->GetClass() );
@@ -971,9 +974,12 @@ ShotSequenceTools::CloneInnerPlane( ISequencer* iSequencer, UMovieSceneSequence*
     if( !cloned_plane )
         return;
 
+    UEposMovieSceneSequence* epos_sequence = Cast<UEposMovieSceneSequence>( iSequence );
+    check( epos_sequence );
+
     FString cloned_plane_path;
     FString cloned_plane_name;
-    NamingConvention::GeneratePlaneActorPathName( *iSequencer, iSequencer->GetRootMovieSceneSequence(), iSequence, cloned_plane_path, cloned_plane_name );
+    NamingConvention::GeneratePlaneActorPathName( *iSequencer, *epos_sequence, iSequenceID, cloned_plane_path, cloned_plane_name );
     cloned_plane_name = iPlaneToClone->GetActorLabel(); // As the plane actor is cloned, just keep the same name (let see when shot/camera name are a part of the plane name...)
 
     cloned_plane->SetFolderPath( *cloned_plane_path );
@@ -989,7 +995,7 @@ ShotSequenceTools::CloneInnerPlane( ISequencer* iSequencer, UMovieSceneSequence*
 
     //-
 
-    cloned_plane_name = NamingConvention::GeneratePlaneTrackName( *iSequencer, iSequencer->GetRootMovieSceneSequence(), iSequence, cloned_plane );
+    cloned_plane_name = NamingConvention::GeneratePlaneTrackName( *iSequencer, *epos_sequence, iSequenceID, cloned_plane );
 
     iSequence->UnbindPossessableObjects( iPlaneBinding );
     iSequence->BindPossessableObject( iPlaneBinding, *cloned_plane, iSequencer->GetPlaybackContext() );

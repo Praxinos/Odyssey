@@ -403,16 +403,18 @@ NamingConvention::GetMasterPath( const IMovieScenePlayer& iPlayer, const UMovieS
 
 //static
 FString
-NamingConvention::GenerateCameraActorPathName( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence, const UMovieSceneSequence* iSequence, FString& oPath, FString& oName )
+NamingConvention::GenerateCameraActorPathName( const IMovieScenePlayer& iPlayer, const UEposMovieSceneSequence& iSequence, FMovieSceneSequenceIDRef iSequenceID, FString& oPath, FString& oName )
 {
     IMovieScenePlayer* player = const_cast<IMovieScenePlayer*>( &iPlayer ); //PATCH: Because there is no 'const' version of GetEvaluationTemplate() and GetAllPlanes()/GetAllDrawings() will use it to find cache
-    UMovieSceneSequence* current_sequence = const_cast<UMovieSceneSequence*>( iSequence ); //PATCH: Because there is no 'const' parameter version of ShotSequenceHelpers::GetCamera()
 
-    FString root_sequence_name = FPackageName::GetShortName( iRootSequence->GetPackage()->GetName() );
-    FString current_sequence_name = FPackageName::GetShortName( iSequence->GetDisplayName().ToString() );
+    const UEposMovieSceneSequence* epos_root_sequence = EposSequenceHelpers::GetRootEposSequence( *player, iSequenceID );
+    check( epos_root_sequence );
+
+    FString root_sequence_name = FPackageName::GetShortName( epos_root_sequence->GetPackage()->GetName() );
+    FString current_sequence_name = FPackageName::GetShortName( iSequence.GetDisplayName().ToString() );
     //FString current_sequence_name = FPackageName::GetShortName( iSequence->GetPackage()->GetName() );
 
-    FString camera_path = ( iRootSequence != iSequence ) ? root_sequence_name / current_sequence_name : root_sequence_name;
+    FString camera_path = ( epos_root_sequence != &iSequence ) ? root_sequence_name / current_sequence_name : root_sequence_name;
 
     //--- Find all camera track names
 
@@ -500,40 +502,21 @@ NamingConvention::GenerateCameraActorPathName( const IMovieScenePlayer& iPlayer,
 
 //static
 FString
-NamingConvention::GeneratePlaneActorPathName( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence, const UMovieSceneSequence* iSequence, FString& oPath, FString& oName )
+NamingConvention::GeneratePlaneActorPathName( const IMovieScenePlayer& iPlayer, const UEposMovieSceneSequence& iSequence, FMovieSceneSequenceIDRef iSequenceID, FString& oPath, FString& oName )
 {
     IMovieScenePlayer* player = const_cast<IMovieScenePlayer*>( &iPlayer ); //PATCH: Because there is no 'const' version of GetEvaluationTemplate() and GetAllPlanes()/GetAllDrawings() will use it to find cache
-    UMovieSceneSequence* current_sequence = const_cast<UMovieSceneSequence*>( iSequence ); //PATCH: Because there is no 'const' parameter version of ShotSequenceHelpers::GetCamera()
 
-    //--- Find the current sequence id from the sequence
+    const UEposMovieSceneSequence* epos_root_sequence = EposSequenceHelpers::GetRootEposSequence( *player, iSequenceID );
+    check( epos_root_sequence );
 
-    FMovieSceneSequenceID current_sequence_id; // invalid
-
-    const FMovieSceneSequenceHierarchy* hierarchy = player->GetEvaluationTemplate().GetCompiledDataManager()->FindHierarchy( player->GetEvaluationTemplate().GetCompiledDataID() );
-    if( hierarchy )
-    {
-        const TMap<FMovieSceneSequenceID, FMovieSceneSubSequenceData>& map = hierarchy->AllSubSequenceData();
-        for( auto pair : map )
-        {
-            if( pair.Value.GetSequence() == iSequence )
-            {
-                current_sequence_id = pair.Key;
-                break;
-            }
-        }
-    }
-    else
-    {
-        current_sequence_id = MovieSceneSequenceID::Root;
-        check( iRootSequence == iSequence );
-    }
+    UEposMovieSceneSequence* current_sequence = const_cast<UEposMovieSceneSequence*>( &iSequence ); //PATCH: Because there is no 'const' parameter version of ShotSequenceHelpers::GetCamera()
 
     //--- Find the camera actor
 
     FString plane_path;
     FString camera_name;
 
-    ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( *player, current_sequence, current_sequence_id );
+    ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( *player, current_sequence, iSequenceID );
     if( camera )
     {
         plane_path = camera->GetFolderPath().ToString();
@@ -543,17 +526,17 @@ NamingConvention::GeneratePlaneActorPathName( const IMovieScenePlayer& iPlayer, 
     if( plane_path.IsEmpty() )
     {
         FString camera_path;
-        GenerateCameraActorPathName( iPlayer, iRootSequence, iSequence, camera_path, camera_name );
+        GenerateCameraActorPathName( iPlayer, iSequence, iSequenceID, camera_path, camera_name );
 
         plane_path = camera_path;
     }
 
     //--- Find all plane track names
 
-    const TArray<FMovieSceneBinding>& bindings = current_sequence->GetMovieScene()->GetBindings();
+    const TArray<FMovieSceneBinding>& bindings = iSequence.GetMovieScene()->GetBindings();
     TArray<FString> binding_names;
     for( auto binding : bindings )
-        binding_names.AddUnique( current_sequence->GetMovieScene()->GetObjectDisplayName( binding.GetObjectGuid() ).ToString() );
+        binding_names.AddUnique( iSequence.GetMovieScene()->GetObjectDisplayName( binding.GetObjectGuid() ).ToString() );
         // Don't use binding.GetName() because (for example) it is not updated when the name is changed directly in the shot track label (instead of the board section view)
         // binding.GetName() is still keeping the old "track" name
 
@@ -623,7 +606,7 @@ NamingConvention::GeneratePlaneActorPathName( const IMovieScenePlayer& iPlayer, 
 
 //static
 FString
-NamingConvention::GenerateCameraTrackName( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence, const UMovieSceneSequence* iSequence, ACineCameraActor* iCamera )
+NamingConvention::GenerateCameraTrackName( const IMovieScenePlayer& iPlayer, const UEposMovieSceneSequence& iSequence, FMovieSceneSequenceIDRef iSequenceID, ACineCameraActor* iCamera )
 {
     // See comment in GeneratePlaneTrackName()
     return iCamera->GetActorLabel();
@@ -631,7 +614,7 @@ NamingConvention::GenerateCameraTrackName( const IMovieScenePlayer& iPlayer, con
 
 //static
 FString
-NamingConvention::GeneratePlaneTrackName( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence, const UMovieSceneSequence* iSequence, APlaneActor* iPlane )
+NamingConvention::GeneratePlaneTrackName( const IMovieScenePlayer& iPlayer, const UEposMovieSceneSequence& iSequence, FMovieSceneSequenceIDRef iSequenceID, APlaneActor* iPlane )
 {
     // For the moment, it's ok, but it will change, double-check (for example) the clone plane function...
     // Or maybe name this function GeneratePlaneTrackNameFROMACTOR() et add another one which will really compute a new track name from the existing ones ?

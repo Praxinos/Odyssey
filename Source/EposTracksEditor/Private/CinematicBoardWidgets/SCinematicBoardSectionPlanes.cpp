@@ -2012,10 +2012,12 @@ SCinematicBoardSectionPlanes::MakeCreatePlaneMenu()
     UMovieSceneSubSection& subsection = mBoardSection.Pin()->GetSubSectionObject();
 
     BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, subsection, sequencer->GetFocusedTemplateID() );
+    UEposMovieSceneSequence* inner_epos_sequence = Cast<UEposMovieSceneSequence>( result.mInnerSequence );
+    check( inner_epos_sequence );
 
     FString plane_path;
     TSharedRef<FString> plane_name = MakeShared<FString>();
-    NamingConvention::GeneratePlaneActorPathName( *sequencer, sequencer->GetRootMovieSceneSequence(), result.mInnerSequence, plane_path, *plane_name );
+    NamingConvention::GeneratePlaneActorPathName( *sequencer, *inner_epos_sequence, result.mInnerSequenceId, plane_path, *plane_name );
 
     //---
 

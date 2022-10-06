@@ -147,9 +147,12 @@ ShotSequenceTools::SpawnAndBindPlane( ISequencer& iSequencer, UMovieSceneSequenc
 
     GEditor->ParentActors( iCamera, plane, NAME_None );
 
+    UEposMovieSceneSequence* epos_sequence = Cast<UEposMovieSceneSequence>( iSequence );
+    check( epos_sequence );
+
     FString plane_path;
     FString plane_name;
-    NamingConvention::GeneratePlaneActorPathName( iSequencer, iSequencer.GetRootMovieSceneSequence(), iSequence, plane_path, plane_name );
+    NamingConvention::GeneratePlaneActorPathName( iSequencer, *epos_sequence, iSequenceID, plane_path, plane_name );
 
     if( !iPlaneArgs.mName.IsEmpty() )
         plane_name = iPlaneArgs.mName;
@@ -157,7 +160,7 @@ ShotSequenceTools::SpawnAndBindPlane( ISequencer& iSequencer, UMovieSceneSequenc
     plane->SetFolderPath( *plane_path );
     FActorLabelUtilities::RenameExistingActor( plane, plane_name, false ); // The shot name is displayed in another column in the world outliner
 
-    plane_name = NamingConvention::GeneratePlaneTrackName( iSequencer, iSequencer.GetRootMovieSceneSequence(), iSequence, plane );
+    plane_name = NamingConvention::GeneratePlaneTrackName( iSequencer, *epos_sequence, iSequenceID, plane );
 
     FGuid planeGuid = iSequencer.CreateBinding( *plane, plane_name );
 
