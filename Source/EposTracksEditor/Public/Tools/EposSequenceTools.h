@@ -779,8 +779,8 @@ private:
     static void CreateCamera( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FCameraArgs& iCameraArgs, const FPlaneArgs& iPlaneArgs );
 
     static ACineCameraActor* SpawnCamera( UWorld* iWorld, const FTransform& iTransform );
-    static ACineCameraActor* SpawnAndBindCamera( ISequencer& iSequencer, UMovieSceneSequence* iSequence, const FCameraArgs& iCameraArgs, const FPlaneArgs& iPlaneArgs, FGuid* oGuid );
-    static void CameraAdded( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FGuid CameraGuid, ACineCameraActor* iCamera, FFrameNumber FrameNumber, const FPlaneArgs& iPlaneArgs );
+    static ACineCameraActor* SpawnAndBindCamera( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FCameraArgs& iCameraArgs, const FPlaneArgs& iPlaneArgs, FGuid* oGuid );
+    static void CameraAdded( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid CameraGuid, ACineCameraActor* iCamera, FFrameNumber FrameNumber, const FPlaneArgs& iPlaneArgs );
     static void CreateCameraCut( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FGuid iCameraGuid, FFrameNumber iFrameNumber );
 
     static bool SnapCameraToViewport( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, ACineCameraActor* ioCamera, FGuid iCameraGuid, FFrameNumber iFrameNumber, const FTransform& iNewTransform, EMovieSceneKeyInterpolation iInterpolation );
@@ -860,7 +860,7 @@ private:
     static void SelectMultiPlane( ISequencer& iSequencer, UMovieSceneSubSection* iSubSection, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding );
 
     static APlaneActor* SpawnPlane( UWorld* iWorld, ACineCameraActor* iCamera, float iSafeMargin, FVector2D iRelativeScaling );
-    static void SpawnAndBindPlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FGuid iCameraGuid, ACineCameraActor* iCamera, FFrameNumber iFrameNumber, const FPlaneArgs& iPlaneArgs );
+    static void SpawnAndBindPlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iCameraGuid, ACineCameraActor* iCamera, FFrameNumber iFrameNumber, const FPlaneArgs& iPlaneArgs );
 
 // Inside EposSequenceTools_Drawing
 public:

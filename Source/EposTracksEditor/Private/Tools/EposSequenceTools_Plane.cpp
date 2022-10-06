@@ -111,7 +111,7 @@ ShotSequenceTools::SpawnPlane( UWorld* iWorld, ACineCameraActor* iCamera, float 
 
 //static
 void
-ShotSequenceTools::SpawnAndBindPlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FGuid iCameraGuid, ACineCameraActor* iCamera, FFrameNumber iFrameNumber, const FPlaneArgs& iPlaneArgs )
+ShotSequenceTools::SpawnAndBindPlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iCameraGuid, ACineCameraActor* iCamera, FFrameNumber iFrameNumber, const FPlaneArgs& iPlaneArgs )
 {
     if( !GCurrentLevelEditingViewportClient )
         return;
@@ -136,8 +136,8 @@ ShotSequenceTools::SpawnAndBindPlane( ISequencer& iSequencer, UMovieSceneSequenc
     FIntPoint texture_size = plane->ComputeTextureSize( iCamera, settings->TextureSettings.Height );
 
     UMaterialInstanceConstant* new_material = iPlaneArgs.mTexture.IsValid()
-                                              ? ProjectAssetTools::CreateMaterialAndTexture( iSequencer, iSequencer.GetRootMovieSceneSequence(), iSequence, iPlaneArgs.mTexture.Get() )
-                                              : ProjectAssetTools::CreateMaterialAndTexture( iSequencer, iSequencer.GetRootMovieSceneSequence(), iSequence, texture_size );
+                                              ? ProjectAssetTools::CreateMaterialAndTexture( iSequencer, iSequence, iSequenceID, iPlaneArgs.mTexture.Get() )
+                                              : ProjectAssetTools::CreateMaterialAndTexture( iSequencer, iSequence, iSequenceID, texture_size );
     if( !new_material )
         return;
 
@@ -328,7 +328,7 @@ ShotSequenceTools::CreatePlane( ISequencer& iSequencer, UMovieSceneSequence* iSe
 
     //---
 
-    ShotSequenceTools::SpawnAndBindPlane( iSequencer, iSequence, camera_guid, camera, iFrameNumber, iPlaneArgs );
+    ShotSequenceTools::SpawnAndBindPlane( iSequencer, iSequence, iSequenceID, camera_guid, camera, iFrameNumber, iPlaneArgs );
 
     //---
 

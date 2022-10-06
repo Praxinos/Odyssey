@@ -389,6 +389,11 @@ NamingConvention::GetMasterPath( const IMovieScenePlayer& iPlayer, const UMovieS
         master_path = root_path;
     }
 
+    if( master_path.IsEmpty() )
+    {
+        master_path = TEXT( "/Game" );
+    }
+
     return master_path;
 }
 
@@ -639,9 +644,15 @@ NamingConvention::GeneratePlaneTrackName( const IMovieScenePlayer& iPlayer, cons
 
 //static
 FString
-NamingConvention::GetMasterMaterialPathName( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence, FString& oPath, FString& oName )
+NamingConvention::GetMasterMaterialPathName( const IMovieScenePlayer& iPlayer, const UEposMovieSceneSequence& iSequence, FMovieSceneSequenceIDRef iSequenceID, FString& oPath, FString& oName )
 {
-    oPath = GetMasterPath( iPlayer, iRootSequence );
+    IMovieScenePlayer* player = const_cast<IMovieScenePlayer*>( &iPlayer ); //PATCH: Because there is no 'const' version of GetRootEposSequence()
+
+    const UEposMovieSceneSequence* epos_root_sequence = EposSequenceHelpers::GetRootEposSequence( *player, iSequenceID );
+
+    //---
+
+    oPath = GetMasterPath( iPlayer, epos_root_sequence );
     oName = TEXT( "MI_Plane" );
 
     return oPath / oName;
@@ -649,9 +660,15 @@ NamingConvention::GetMasterMaterialPathName( const IMovieScenePlayer& iPlayer, c
 
 //static
 FString
-NamingConvention::GetMasterTexturePathName( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence, FString& oPath, FString& oName )
+NamingConvention::GetMasterTexturePathName( const IMovieScenePlayer& iPlayer, const UEposMovieSceneSequence& iSequence, FMovieSceneSequenceIDRef iSequenceID, FString& oPath, FString& oName )
 {
-    oPath = GetMasterPath( iPlayer, iRootSequence );
+    IMovieScenePlayer* player = const_cast<IMovieScenePlayer*>( &iPlayer ); //PATCH: Because there is no 'const' version of GetRootEposSequence()
+
+    const UEposMovieSceneSequence* epos_root_sequence = EposSequenceHelpers::GetRootEposSequence( *player, iSequenceID );
+
+    //---
+
+    oPath = GetMasterPath( iPlayer, epos_root_sequence );
     oName = TEXT( "T_Transparent" );
 
     return oPath / oName;
@@ -665,9 +682,9 @@ NamingConvention::GenerateNoteAssetPathName( const IMovieScenePlayer& iPlayer, c
 {
     IMovieScenePlayer* player = const_cast<IMovieScenePlayer*>( &iPlayer ); //PATCH: Because there is no 'const' version of GetRootEposSequence()
 
-    //---
-
     const UEposMovieSceneSequence* epos_root_sequence = EposSequenceHelpers::GetRootEposSequence( *player, iSequenceID );
+
+    //---
 
     FString note_path;
 
@@ -717,8 +734,14 @@ NamingConvention::GenerateNoteAssetPathName( const IMovieScenePlayer& iPlayer, c
 
 //static
 FString
-NamingConvention::GenerateMaterialAssetPathName( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence, const UMovieSceneSequence* iSequence, FString& oPath, FString& oName )
+NamingConvention::GenerateMaterialAssetPathName( const IMovieScenePlayer& iPlayer, const UEposMovieSceneSequence& iSequence, FMovieSceneSequenceIDRef iSequenceID, FString& oPath, FString& oName )
 {
+    IMovieScenePlayer* player = const_cast<IMovieScenePlayer*>( &iPlayer ); //PATCH: Because there is no 'const' version of GetEvaluationTemplate() and GetAllPlanes()/GetAllDrawings() will use it to find cache
+
+    const UEposMovieSceneSequence* epos_root_sequence = EposSequenceHelpers::GetRootEposSequence( *player, iSequenceID );
+
+    //---
+
     FString material_path;
 
     // Try to find the better path from all existing materials
@@ -747,7 +770,7 @@ NamingConvention::GenerateMaterialAssetPathName( const IMovieScenePlayer& iPlaye
     if( material_path.IsEmpty() )
     {
         // Default path of the new material
-        FString root_path = GetRootPath( iPlayer, iRootSequence ); // ie. /Game/MyStoryboard2
+        FString root_path = GetRootPath( iPlayer, epos_root_sequence ); // ie. /Game/MyStoryboard2
         material_path = root_path;
 
     }
@@ -766,11 +789,17 @@ NamingConvention::GenerateMaterialAssetPathName( const IMovieScenePlayer& iPlaye
 
 //static
 FString
-NamingConvention::GenerateTextureAssetPathName( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence, const UMovieSceneSequence* iSequence, UMaterialInterface* iMaterial, FString& oPath, FString& oName )
+NamingConvention::GenerateTextureAssetPathName( const IMovieScenePlayer& iPlayer, const UEposMovieSceneSequence& iSequence, FMovieSceneSequenceIDRef iSequenceID, UMaterialInterface* iMaterial, FString& oPath, FString& oName )
 {
+    IMovieScenePlayer* player = const_cast<IMovieScenePlayer*>( &iPlayer ); //PATCH: Because there is no 'const' version of GetEvaluationTemplate() and GetAllPlanes()/GetAllDrawings() will use it to find cache
+
+    const UEposMovieSceneSequence* epos_root_sequence = EposSequenceHelpers::GetRootEposSequence( *player, iSequenceID );
+
+    //---
+
     //FString root_path = GetRootPath( iPlayer, iRootSequence ); // ie. /Game/MyStoryboard2
     //FString texture_path = root_path;
-    FString material_path = iMaterial ? FPackageName::GetLongPackagePath( iMaterial->GetPackage()->GetName() ) : GetRootPath( iPlayer, iRootSequence );
+    FString material_path = iMaterial ? FPackageName::GetLongPackagePath( iMaterial->GetPackage()->GetName() ) : GetRootPath( iPlayer, epos_root_sequence );
     FString texture_path = material_path;
 
     //---
