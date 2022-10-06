@@ -53,7 +53,7 @@ FNoteTrackEditor::OnInitialize() //override
             FEposTracksEditorCommands::Get().NewSectionWithNoteAtCurrentFrame,
             FExecuteAction::CreateLambda( [this]()
                                           {
-                                              UStoryNote* note = ProjectAssetTools::CreateNote( *GetSequencer(), GetSequencer()->GetRootMovieSceneSequence(), GetSequencer()->GetFocusedMovieSceneSequence() );
+                                              UStoryNote* note = ProjectAssetTools::CreateNote( *GetSequencer(), GetSequencer()->GetFocusedMovieSceneSequence(), GetSequencer()->GetFocusedTemplateID() );
                                               if( !note )
                                                   return;
 
@@ -561,7 +561,7 @@ FNoteTrackEditor::OnNoteTextCommited( const FText& iText, ETextCommit::Type iTyp
     auto NoteTrack = Cast<UMovieSceneNoteTrack>( Track );
     NoteTrack->Modify();
 
-    UStoryNote* note = ProjectAssetTools::CreateNote( *GetSequencer(), GetSequencer()->GetRootMovieSceneSequence(), GetSequencer()->GetFocusedMovieSceneSequence() );
+    UStoryNote* note = ProjectAssetTools::CreateNote( *GetSequencer(), GetSequencer()->GetFocusedMovieSceneSequence(), GetSequencer()->GetFocusedTemplateID() );
     if( !note )
         return;
 
@@ -652,7 +652,7 @@ FNoteTrackEditor::OnAttachedNoteTextCommited( const FText& iText, ETextCommit::T
     if( iType != ETextCommit::OnEnter )
         return;
 
-    UStoryNote* note = ProjectAssetTools::CreateNote( *GetSequencer(), GetSequencer()->GetRootMovieSceneSequence(), GetSequencer()->GetFocusedMovieSceneSequence() );
+    UStoryNote* note = ProjectAssetTools::CreateNote( *GetSequencer(), GetSequencer()->GetFocusedMovieSceneSequence(), GetSequencer()->GetFocusedTemplateID() );
     if( !note )
         return;
 

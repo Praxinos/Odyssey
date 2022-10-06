@@ -5,6 +5,7 @@
 
 #include "ISequencer.h"
 
+//#include "EposMovieSceneSequence.h"
 #include "NamingConvention.h"
 #include "Settings/NamingConventionSettings.h"
 
@@ -39,7 +40,12 @@ UEposNamingConventionBlueprintLibrary::GenerateNoteAssetPathName( const UMovieSc
 
     ISequencer* sequencer = CurrentSequencer.Pin().Get();
 
-    return NamingConvention::GenerateNoteAssetPathName( *sequencer, sequencer->GetRootMovieSceneSequence(), iSequence, oPath, oName );
+    //sequencer->GetEvaluationTemplate()->
+
+    checkNoEntry(); //TODO: certainly expose a CreateNote() BP function instead of creating everything with native BP nodes, and then remove this BP function
+
+    return TEXT( "" );
+    //return NamingConvention::GenerateNoteAssetPathName( *sequencer, *iSequence, oPath, oName );
 }
 
 //---

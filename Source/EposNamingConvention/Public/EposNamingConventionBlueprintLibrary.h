@@ -8,6 +8,7 @@
 #include "EposNamingConventionBlueprintLibrary.generated.h"
 
 class ISequencer;
+//class UEposMovieSceneSequence;
 class UMovieSceneSequence;
 class UNamingConventionSettings;
 

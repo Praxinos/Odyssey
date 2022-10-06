@@ -934,7 +934,7 @@ ShotSequenceTools::CloneInnerContent( ISequencer* iSequencer, UMovieSceneSequenc
     {
         UStoryNote* original_note = note_section->GetNote();
 
-        UStoryNote* duplicate_note = ProjectAssetTools::CloneNote( *iSequencer, iSequencer->GetRootMovieSceneSequence(), iSequence, original_note );
+        UStoryNote* duplicate_note = ProjectAssetTools::CloneNote( *iSequencer, iSequence, iSequenceID, original_note );
 
         note_section->SetNote( duplicate_note );
     }

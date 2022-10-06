@@ -11,6 +11,7 @@
 #include "Factories/MaterialInstanceConstantFactoryNew.h"
 #include "Factories/Texture2dFactoryNew.h"
 #include "IMovieScenePlayer.h"
+#include "ISequencer.h"
 #include "MaterialEditingLibrary.h"
 #include "Materials/MaterialInstanceConstant.h"
 #include "MovieSceneSequence.h"
@@ -674,39 +675,53 @@ ProjectAssetTools::CloneMaterialAndTexture( const IMovieScenePlayer& iPlayer, UM
 
 //static
 UStoryNote*
-ProjectAssetTools::CreateNote( ISequencer& iSequencer, UMovieSceneSequence* iRootSequence, UMovieSceneSequence* iSequence )
+ProjectAssetTools::CreateNote( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID )
 {
-    FString note_path;
-    FString note_name;
-    FString note_pathname = NamingConvention::GenerateNoteAssetPathName( iSequencer, iRootSequence, iSequence, note_path, note_name );
+    if( Cast<UEposMovieSceneSequence>( iSequence ) )
+    {
+        FString note_path;
+        FString note_name;
+        FString note_pathname = NamingConvention::GenerateNoteAssetPathName( iSequencer, *CastChecked<UEposMovieSceneSequence>( iSequence ), iSequenceID, note_path, note_name );
 
-    //---
+        //---
 
-    FAssetToolsModule& assetToolsModule = FModuleManager::GetModuleChecked<FAssetToolsModule>( "AssetTools" );
-    UObject* new_object = assetToolsModule.Get().CreateAsset( note_name, note_path, UStoryNote::StaticClass(), nullptr );
-    UStoryNote* new_note = Cast<UStoryNote>( new_object );
-    check( new_note );
+        FAssetToolsModule& assetToolsModule = FModuleManager::GetModuleChecked<FAssetToolsModule>( "AssetTools" );
+        UObject* new_object = assetToolsModule.Get().CreateAsset( note_name, note_path, UStoryNote::StaticClass(), nullptr );
+        UStoryNote* new_note = Cast<UStoryNote>( new_object );
+        check( new_note );
 
-    new_note->Text = TEXT( "Write a note here" ); // default text
+        new_note->Text = TEXT( "Write a note here" ); // default text
 
-    return new_note;
+        return new_note;
+    }
+
+    checkf( false, TEXT( "iSequence is certainly a LevelSequence, manage it" ) );
+
+    return nullptr;
 }
 
 //static
 UStoryNote*
-ProjectAssetTools::CloneNote( ISequencer& iSequencer, UMovieSceneSequence* iRootSequence, UMovieSceneSequence* iSequence, UStoryNote* iNoteToClone )
+ProjectAssetTools::CloneNote( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, UStoryNote* iNoteToClone )
 {
-    FString note_path;
-    FString note_name;
-    FString note_pathname = NamingConvention::GenerateNoteAssetPathName( iSequencer, iRootSequence, iSequence, note_path, note_name );
+    if( Cast<UEposMovieSceneSequence>( iSequence ) )
+    {
+        FString note_path;
+        FString note_name;
+        FString note_pathname = NamingConvention::GenerateNoteAssetPathName( iSequencer, *CastChecked<UEposMovieSceneSequence>( iSequence ), iSequenceID, note_path, note_name );
 
-    //---
+        //---
 
-    UObject* new_object = UEditorAssetLibrary::DuplicateLoadedAsset( iNoteToClone, note_pathname );
+        UObject* new_object = UEditorAssetLibrary::DuplicateLoadedAsset( iNoteToClone, note_pathname );
 
-    UStoryNote* new_note = Cast<UStoryNote>( new_object );
+        UStoryNote* new_note = Cast<UStoryNote>( new_object );
 
-    return new_note;
+        return new_note;
+    }
+
+    checkf( false, TEXT( "iSequence is certainly a LevelSequence, manage it" ) );
+
+    return nullptr;
 }
 
 

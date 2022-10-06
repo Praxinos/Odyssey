@@ -10,6 +10,8 @@
 #include "EditorAssetLibrary.h"
 #include "Evaluation/MovieSceneEvaluationTemplateInstance.h"
 #include "Evaluation/MovieSceneSequenceHierarchy.h"
+#include "IMovieScenePlayer.h"
+#include "MovieSceneSequence.h"
 #include "MovieSceneToolHelpers.h"
 #include "MovieSceneToolsProjectSettings.h"
 
@@ -17,8 +19,6 @@
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
 #include "EposSequenceHelpers.h"
-#include "IMovieScenePlayer.h"
-#include "MovieSceneSequence.h"
 #include "NoteTrack/MovieSceneNoteSection.h"
 #include "NoteTrack/MovieSceneNoteTrack.h"
 #include "PlaneActor.h"
@@ -84,11 +84,18 @@ FindAllSequencePaths( const IMovieScenePlayer& iPlayer )
             map_sequences.Add( pair.Key, pair.Value.GetSequence() );
     }
 
+    TMap<FMovieSceneSequenceID, UMovieSceneSequence*> map_epos_sequences;
+    for( auto pair : map_sequences )
+    {
+        if( pair.Value->IsA<UEposMovieSceneSequence>() )
+            map_epos_sequences.Add( pair );
+    }
+
     //---
 
     FRelevantPathMap map_path_to_count;
 
-    for( auto pair : map_sequences )
+    for( auto pair : map_epos_sequences )
     {
         UMovieSceneSequence* sequence = pair.Value;
         //FMovieSceneSequenceID sequence_id = pair.Key;
@@ -125,11 +132,18 @@ FindAllNotePaths( const IMovieScenePlayer& iPlayer )
             sequences.Add( pair.Value.GetSequence() );
     }
 
+    TArray<UMovieSceneSequence*> epos_sequences;
+    for( auto sequence : sequences )
+    {
+        if( sequence->IsA<UEposMovieSceneSequence>() )
+            epos_sequences.Add( sequence );
+    }
+
     //---
 
     FRelevantPathMap map_path_to_count;
 
-    for( auto sequence : sequences )
+    for( auto sequence : epos_sequences )
     {
         auto tracks = sequence->GetMovieScene()->GetTracks();
         for( auto track : tracks )
@@ -202,12 +216,19 @@ FindAllMaterialPaths( const IMovieScenePlayer& iPlayer, FRelevantPathMap& oParen
             map_sequences.Add( pair.Key, pair.Value.GetSequence() );
     }
 
+    TMap<FMovieSceneSequenceID, UMovieSceneSequence*> map_epos_sequences;
+    for( auto pair : map_sequences )
+    {
+        if( pair.Value->IsA<UEposMovieSceneSequence>() )
+            map_epos_sequences.Add( pair );
+    }
+
     //---
 
     FRelevantPathMap map_path_to_count;
     oParentPaths.Empty();
 
-    for( auto pair : map_sequences )
+    for( auto pair : map_epos_sequences )
     {
         UMovieSceneSequence* sequence = pair.Value;
         FMovieSceneSequenceID sequence_id = pair.Key;
@@ -305,8 +326,27 @@ NamingConvention::GetRootPath( const IMovieScenePlayer& iPlayer, const UMovieSce
 
     if( root_path.IsEmpty() )
     {
-        // Default root path
-        root_path = iRootSequence->GetPackage()->GetName() + TEXT( "_Private" ); // ie. /Game/MyStoryboard2
+        if( iRootSequence )
+        {
+            // Default epos root path
+            root_path = iRootSequence->GetPackage()->GetName() + TEXT( "_Private" ); // ie. /Game/MyStoryboard2_Private
+        }
+    }
+    
+    if( root_path.IsEmpty() )
+    {
+        IMovieScenePlayer* player = const_cast<IMovieScenePlayer*>( &iPlayer ); //PATCH: Because there is no 'const' version of GetEvaluationTemplate()
+        UMovieSceneSequence* root_sequence = player->GetEvaluationTemplate().GetRootSequence();
+        if( root_sequence )
+        {
+            // Default root path
+            root_path = root_sequence->GetPackage()->GetName() + TEXT( "_Private" ); // ie. /Game/MyLevelSequence_Private
+        }
+    }
+
+    if( root_path.IsEmpty() )
+    {
+        root_path = TEXT( "/Game" );
     }
 
     return root_path;
@@ -381,6 +421,9 @@ NamingConvention::GenerateCameraActorPathName( const IMovieScenePlayer& iPlayer,
         {
             UMovieSceneSequence* sequence = pair.Value.GetSequence();
             FMovieSceneSequenceID sequence_id = pair.Key;
+
+            if( !Cast<UEposMovieSceneSequence>( sequence ) )
+                continue;
 
             ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( *player, sequence, sequence_id );
             if( !camera )
@@ -618,8 +661,14 @@ NamingConvention::GetMasterTexturePathName( const IMovieScenePlayer& iPlayer, co
 
 //static
 FString
-NamingConvention::GenerateNoteAssetPathName( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence, const UMovieSceneSequence* iSequence, FString& oPath, FString& oName )
+NamingConvention::GenerateNoteAssetPathName( const IMovieScenePlayer& iPlayer, const UEposMovieSceneSequence& iSequence, FMovieSceneSequenceIDRef iSequenceID, FString& oPath, FString& oName )
 {
+    IMovieScenePlayer* player = const_cast<IMovieScenePlayer*>( &iPlayer ); //PATCH: Because there is no 'const' version of GetRootEposSequence()
+
+    //---
+
+    const UEposMovieSceneSequence* epos_root_sequence = EposSequenceHelpers::GetRootEposSequence( *player, iSequenceID );
+
     FString note_path;
 
     // Try to find the better path from all existing notes
@@ -650,7 +699,7 @@ NamingConvention::GenerateNoteAssetPathName( const IMovieScenePlayer& iPlayer, c
     if( note_path.IsEmpty() )
     {
         // Default path name of the new note
-        FString root_path = GetRootPath( iPlayer, iRootSequence ); // ie. /Game/MyStoryboard2
+        FString root_path = GetRootPath( iPlayer, epos_root_sequence ); // ie. /Game/MyStoryboard2
         note_path = root_path;// / TEXT( "Notes" );
     }
 
@@ -815,6 +864,7 @@ FindSiblingNameElements( const IMovieScenePlayer& iPlayer, const UMovieSceneSequ
 
     return TOptional<FSequenceNameElements>();
 }
+
 static
 TOptional<FSequenceNameElements>
 FindOneNameElements( const IMovieScenePlayer& iPlayer, FFrameNumber iFrameNumber )
@@ -832,9 +882,16 @@ FindOneNameElements( const IMovieScenePlayer& iPlayer, FFrameNumber iFrameNumber
             map_sequences.Add( pair.Key, pair.Value.GetSequence() );
     }
 
+    TMap<FMovieSceneSequenceID, UMovieSceneSequence*> map_epos_sequences;
+    for( auto pair : map_sequences )
+    {
+        if( pair.Value->IsA<UEposMovieSceneSequence>() )
+            map_epos_sequences.Add( pair );
+    }
+
     //---
 
-    for( auto pair : map_sequences )
+    for( auto pair : map_epos_sequences )
     {
         UMovieSceneSequence* sequence = pair.Value;
 
@@ -1127,9 +1184,11 @@ NamingConvention::GenerateShotAssetPathName( const IMovieScenePlayer& iPlayer, c
 
 //static
 FString
-NamingConvention::GenerateTakeAssetPathName( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence, const UMovieSceneSequence* iParentSequence, UMovieSceneSubSection* iSubSection, FString& oPath, FString& oName, FShotNameElements& oElements )
+NamingConvention::GenerateTakeAssetPathName( const IMovieScenePlayer& iPlayer, const UEposMovieSceneSequence& iParentSequence, FMovieSceneSequenceIDRef iParentSequenceID, UMovieSceneSubSection* iSubSection, FString& oPath, FString& oName, FShotNameElements& oElements )
 {
     IMovieScenePlayer* player = const_cast<IMovieScenePlayer*>( &iPlayer ); //PATCH: Because there is no 'const' version of GetEvaluationTemplate() and GetAllPlanes()/GetAllDrawings() will use it to find cache
+
+    const UEposMovieSceneSequence* epos_root_sequence = EposSequenceHelpers::GetRootEposSequence( *player, iParentSequenceID );
 
     //---
 
@@ -1142,7 +1201,7 @@ NamingConvention::GenerateTakeAssetPathName( const IMovieScenePlayer& iPlayer, c
     // Try to find the better path from existing sibling sequences
     if( sequence_path.IsEmpty() )
     {
-        FRelevantPathMap map_sequence_paths = FindSiblingSequencePaths( iPlayer, iParentSequence );
+        FRelevantPathMap map_sequence_paths = FindSiblingSequencePaths( iPlayer, &iParentSequence );
         if( map_sequence_paths.Num() )
         {
             TArray<FString> keys;
@@ -1167,7 +1226,7 @@ NamingConvention::GenerateTakeAssetPathName( const IMovieScenePlayer& iPlayer, c
 
     if( sequence_path.IsEmpty() )
     {
-        FString root_path = GetRootPath( iPlayer, iRootSequence ); // ie. /Game/MyStoryboard2
+        FString root_path = GetRootPath( iPlayer, epos_root_sequence ); // ie. /Game/MyStoryboard2
         sequence_path = root_path;
     }
 
@@ -1214,7 +1273,7 @@ NamingConvention::GenerateTakeAssetPathName( const IMovieScenePlayer& iPlayer, c
     oElements.Index = subsequence ? subsequence->NameElements.Index : shot_settings.IndexFormat.StartNumber;
     oElements.TakeIndex = max_take_index;
 
-    TOptional<FSequenceNameElements> source_elements = subsequence ? subsequence->NameElements : FindNameElements( iPlayer, iRootSequence, iParentSequence, iSubSection->GetRange().GetLowerBoundValue() );
+    TOptional<FSequenceNameElements> source_elements = subsequence ? subsequence->NameElements : FindNameElements( iPlayer, epos_root_sequence, &iParentSequence, iSubSection->GetRange().GetLowerBoundValue() );
 
     // Get the source elements values
     if( source_elements )
