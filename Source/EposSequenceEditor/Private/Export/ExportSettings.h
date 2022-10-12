@@ -5,6 +5,8 @@
 
 #include "CoreMinimal.h"
 
+#include "MovieSceneSequenceID.h"
+
 #include "ExportSettings.generated.h"
 
 //---
@@ -49,4 +51,4 @@ public:
 class ISequencer;
 class UMovieSceneSequence;
 
-float GetMostRelevantCameraAspectRatio( ISequencer* iSequencer, UMovieSceneSequence* iSequence );
+float GetMostRelevantCameraAspectRatio( ISequencer* iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iRootEposSequenceId );

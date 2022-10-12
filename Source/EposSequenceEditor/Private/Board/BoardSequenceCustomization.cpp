@@ -255,7 +255,8 @@ FBoardSequenceCustomization::CreateInfoText() const
 {
     TSharedRef<INumericTypeInterface<double>> type_interface = mSequencer->GetNumericTypeInterface();
 
-    const UMovieSceneSequence* root_board = EposSequenceHelpers::GetRootEposSequence( *mSequencer, mSequencer->GetFocusedTemplateID() );
+    FMovieSceneSequenceID epos_root_sequence_id;
+    const UMovieSceneSequence* root_board = EposSequenceHelpers::GetRootEposSequence( *mSequencer, mSequencer->GetFocusedTemplateID(), epos_root_sequence_id );
     // This should always be valid as we are inside the board customization
     check( root_board && root_board->IsA<UBoardSequence>() );
     const UMovieScene* root_moviescene = root_board ? root_board->GetMovieScene() : nullptr;
@@ -297,7 +298,8 @@ FBoardSequenceCustomization::CreateInfoText() const
     //--- CurrentFrame_InSequence
     //--- CurrentFrame_InSubsequence
     {
-        FFrameNumber current_frame_in_storyboard = mSequencer->GetGlobalTime().Time.GetFrame();
+        FFrameNumber current_frame_in_storyboard = EposSequenceHelpers::GetIntermediateTime( *mSequencer, mSequencer->GetGlobalTime(), epos_root_sequence_id ).Time.GetFrame();
+        //FFrameNumber current_frame_in_storyboard = mSequencer->GetGlobalTime().Time.GetFrame();
         FFrameNumber current_frame_in_sequence = mSequencer->GetLocalTime().Time.GetFrame();
         FFrameNumber current_frame_in_subsequence = board_subsection ? current_frame_in_sequence - board_subsection->GetInclusiveStartFrame() : FFrameNumber();
 

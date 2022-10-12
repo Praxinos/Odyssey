@@ -23,7 +23,7 @@ class SExportPDFSettings
 
     ~SExportPDFSettings();
 
-    void Construct( const FArguments& InArgs, TWeakPtr<ISequencer> iSequencer, UMovieSceneSequence* iCurrentSequence );
+    void Construct( const FArguments& InArgs, TWeakPtr<ISequencer> iSequencer, FMovieSceneSequenceIDRef iSequenceId );
 
 public:
     virtual void AddReferencedObjects( FReferenceCollector& Collector ) override;
@@ -44,8 +44,9 @@ private:
 
 private:
     TWeakPtr<ISequencer>        mSequencer;
-    UMovieSceneSequence*        mRootSequence { nullptr };
-    UMovieSceneSequence*        mCurrentSequence { nullptr };
+    UEposMovieSceneSequence*    mRootEposSequence { nullptr };
+    FMovieSceneSequenceID       mRootEposSequenceId;
+    UEposMovieSceneSequence*    mCurrentSequence { nullptr };
 
     TSharedPtr<IDetailsView>    mDetailsViewExportPDFSettings;
 

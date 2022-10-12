@@ -363,79 +363,87 @@ ShotSequenceHelpers::GetAttachedPlanes( IMovieScenePlayer& iPlayer, UMovieSceneS
     }
 }
 
+
+//static
+FQualifiedFrameTime
+EposSequenceHelpers::GetIntermediateTime( IMovieScenePlayer& iPlayer, FQualifiedFrameTime iGlobalTime, FMovieSceneSequenceIDRef iToSequenceId )
+{
+    const FMovieSceneSequenceHierarchy* hierarchy = iPlayer.GetEvaluationTemplate().GetHierarchy();
+    if( !hierarchy )
+        return FQualifiedFrameTime();
+
+    if( iToSequenceId == MovieSceneSequenceID::Root )
+        return iGlobalTime;
+
+    const FMovieSceneSubSequenceData* subdata = hierarchy->FindSubData( iToSequenceId );
+    if( !subdata )
+        return FQualifiedFrameTime();
+
+    const FFrameTime root_time = ConvertFrameTime( iGlobalTime.Time, iGlobalTime.Rate, subdata->TickResolution );
+
+    return FQualifiedFrameTime( root_time * subdata->RootToSequenceTransform, subdata->TickResolution );
+}
+
 //static
 UEposMovieSceneSequence*
-EposSequenceHelpers::GetRootEposSequence( IMovieScenePlayer& iPlayer, const UEposMovieSceneSequence* iSequence )
+EposSequenceHelpers::GetRootEposSequence( IMovieScenePlayer& iPlayer, FMovieSceneSequenceIDRef iSequenceId )
 {
-    if( !iSequence )
-        return nullptr;
+    FMovieSceneSequenceID root_sequence_id;
+    return GetRootEposSequence( iPlayer, iSequenceId, root_sequence_id );
+}
+
+//static
+UEposMovieSceneSequence*
+EposSequenceHelpers::GetRootEposSequence( IMovieScenePlayer& iPlayer, FMovieSceneSequenceIDRef iSequenceId, FMovieSceneSequenceID& oRootSequenceId )
+{
+    oRootSequenceId = MovieSceneSequenceID::Invalid;
+
+    if( iSequenceId == MovieSceneSequenceID::Root )
+    {
+        oRootSequenceId = MovieSceneSequenceID::Root;
+        return Cast<UEposMovieSceneSequence>( iPlayer.GetEvaluationTemplate().GetRootSequence() );
+    }
 
     const FMovieSceneSequenceHierarchy* hierarchy = iPlayer.GetEvaluationTemplate().GetCompiledDataManager()->FindHierarchy( iPlayer.GetEvaluationTemplate().GetCompiledDataID() );
     if( !hierarchy )
         return nullptr;
 
     TArray<FMovieSceneSequenceID> sequence_ids;
-
-    const TMap<FMovieSceneSequenceID, FMovieSceneSubSequenceData>& datas = hierarchy->AllSubSequenceData();
-    for( auto pair : datas )
-    {
-        FMovieSceneSequenceID sequence_id = pair.Key;
-        FMovieSceneSubSequenceData data = pair.Value;
-
-        if( data.GetSequence() == iSequence )
-            sequence_ids.Add( sequence_id );
-    }
-
-    if( !sequence_ids.Num() )
-        return nullptr;
-
-    // How to manage when the same sequence is appearing multiple times ? (aka >1)
-    check( sequence_ids.Num() == 1 );
-
-    return GetRootEposSequence( iPlayer, sequence_ids[0] );
-}
-
-/*
-#include "EposSequenceHelpers.h"
-*/
-
-//static
-UEposMovieSceneSequence*
-EposSequenceHelpers::GetRootEposSequence( IMovieScenePlayer& iPlayer, FMovieSceneSequenceIDRef iSequenceID )
-{
-    const FMovieSceneSequenceHierarchy* hierarchy = iPlayer.GetEvaluationTemplate().GetCompiledDataManager()->FindHierarchy( iPlayer.GetEvaluationTemplate().GetCompiledDataID() );
-    if( !hierarchy )
-        return nullptr;
-
-    if( iSequenceID == MovieSceneSequenceID::Root )
-        return Cast<UEposMovieSceneSequence>( iPlayer.GetEvaluationTemplate().GetRootSequence() );
-
     TArray<UEposMovieSceneSequence*> sequences;
 
     // If the given sequence is not an UEposMovieSceneSequence, just return
-    UMovieSceneSequence* sequence = iPlayer.GetEvaluationTemplate().GetSequence( iSequenceID );
+    UMovieSceneSequence* sequence = iPlayer.GetEvaluationTemplate().GetSequence( iSequenceId );
     if( !sequence || !sequence->IsA<UEposMovieSceneSequence>() )
         return nullptr;
 
+    sequence_ids.Add( iSequenceId );
     sequences.Add( CastChecked<UEposMovieSceneSequence>( sequence ) );
 
-    const FMovieSceneSequenceHierarchyNode* hierarchyNode = hierarchy->FindNode( iSequenceID );
+    const FMovieSceneSequenceHierarchyNode* hierarchyNode = hierarchy->FindNode( iSequenceId );
     while( hierarchyNode && hierarchyNode->ParentID.IsValid() )
     {
         if( hierarchyNode->ParentID == MovieSceneSequenceID::Root )
         {
             UMovieSceneSequence* player_root_sequence = iPlayer.GetEvaluationTemplate().GetRootSequence();
-            if( player_root_sequence && player_root_sequence->IsA<UEposMovieSceneSequence>() )
+            if( Cast<UEposMovieSceneSequence>( player_root_sequence ) )
+            {
+                sequence_ids.Add( MovieSceneSequenceID::Root );
                 sequences.Add( CastChecked<UEposMovieSceneSequence>( player_root_sequence ) );
+            }
         }
         else
         {
             UMovieSceneSequence* parent_sequence = iPlayer.GetEvaluationTemplate().GetSequence( hierarchyNode->ParentID );
-            if( parent_sequence && parent_sequence->IsA<UEposMovieSceneSequence>() )
+            if( Cast<UEposMovieSceneSequence>( parent_sequence ) )
+            {
+                sequence_ids.Add( hierarchyNode->ParentID );
                 sequences.Add( CastChecked<UEposMovieSceneSequence>( parent_sequence ) );
+            }
         }
         hierarchyNode = hierarchy->FindNode( hierarchyNode->ParentID );
     }
+
+    oRootSequenceId = sequence_ids.Num() ? sequence_ids.Last() : MovieSceneSequenceID::Invalid;
 
     return sequences.Num() ? sequences.Last() : nullptr;
 }

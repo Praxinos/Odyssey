@@ -119,7 +119,7 @@ UExportPDFBlueprintLibrary::GetPanelTexture2D( const FExportStruct& iExportStruc
     if( !iExportStruct.mSequencer.IsValid() )
         return nullptr;
 
-    float aspect_ratio = GetMostRelevantCameraAspectRatio( iExportStruct.mSequencer.Pin().Get(), iExportStruct.Panels[iPanelIndex].mSequence );
+    float aspect_ratio = GetMostRelevantCameraAspectRatio( iExportStruct.mSequencer.Pin().Get(), iExportStruct.Panels[iPanelIndex].mSequence, iExportStruct.Panels[iPanelIndex].mSequenceId );
 
     iHeight = ( iHeight <= 0 ) ? 512 : iHeight;
     FIntPoint image_size( iHeight * aspect_ratio, iHeight );
@@ -134,7 +134,7 @@ UExportPDFBlueprintLibrary::GetPanelTexture2D( const FExportStruct& iExportStruc
 
     //---
 
-	// For testing real png image
+    // For testing real png image
     //FString name = FString::FormatAsNumber( iPanelIndex );
 
     //TUniquePtr<FImageWriteTask> ImageTask = MakeUnique<FImageWriteTask>();
