@@ -77,4 +77,8 @@ public:
     static void GotoUserDocumentation();
     static void GotoProjects();
     static void OpenAboutWindow();
+
+public:
+    static void MapActions( TSharedPtr<FUICommandList> ioCommandList );
+    static void UnmapActions( TSharedPtr<FUICommandList> ioCommandList );
 };

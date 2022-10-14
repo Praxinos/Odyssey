@@ -28,12 +28,7 @@ private:
     TSharedRef<SWidget> MakeSettingsMenu();
     TSharedRef<SWidget> MakeHelpMenu();
 
-    enum EMapping
-    {
-        kMap,
-        kUnmap,
-    };
-    void ProcessCommands( TSharedPtr<FUICommandList> CommandList, EMapping iMap );
+    void BindCommands( TSharedPtr<FUICommandList> CommandList );
 
     FText CreateInfoText() const;
 
@@ -84,6 +79,8 @@ private:
 private:
     ISequencer*     mSequencer;
     UBoardSequence* mBoardSequence;
+
+    TSharedPtr<FUICommandList> mBoardCommandList;
 
     /** Mapping of objects to their existing transform data (for comparing against new transform data) */
     TMap< TWeakObjectPtr<UObject>, FTransformData > mObjectToExistingTransform;

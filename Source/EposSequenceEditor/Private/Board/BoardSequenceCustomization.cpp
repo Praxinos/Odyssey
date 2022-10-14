@@ -9,6 +9,8 @@
 #include "Evaluation/MovieSceneEvaluationTemplateInstance.h"
 #include "Framework/Docking/TabManager.h"
 #include "Framework/Notifications/NotificationManager.h"
+#include "ILevelEditor.h"
+#include "LevelEditor.h"
 #include "MovieSceneTimeHelpers.h"
 #include "Sections/MovieSceneSubSection.h"
 #include "Widgets/Notifications/SNotificationList.h"
@@ -53,7 +55,14 @@ FBoardSequenceCustomization::RegisterSequencerCustomization( FSequencerCustomiza
     FCoreUObjectDelegates::OnPreObjectPropertyChanged.AddRaw( this, &FBoardSequenceCustomization::OnPrePropertyChanged );
     FCoreUObjectDelegates::OnObjectPropertyChanged.AddRaw( this, &FBoardSequenceCustomization::OnPostPropertyChanged );
 
-    ProcessCommands( mSequencer->GetCommandBindings(), kMap );
+    mBoardCommandList = MakeShared<FUICommandList>();
+
+    BindCommands( mBoardCommandList );
+
+    mSequencer->GetCommandBindings()->Append( mBoardCommandList.ToSharedRef() );
+
+    TSharedPtr< ILevelEditor > levelEditor = FModuleManager::GetModuleChecked<FLevelEditorModule>( "LevelEditor" ).GetFirstLevelEditor();
+    levelEditor->AppendCommands( mBoardCommandList.ToSharedRef() );
 
     //---
 
@@ -82,12 +91,7 @@ FBoardSequenceCustomization::UnregisterSequencerCustomization()
     FCoreUObjectDelegates::OnPreObjectPropertyChanged.RemoveAll( this );
     FCoreUObjectDelegates::OnObjectPropertyChanged.RemoveAll( this );
 
-    if( mSequencer )
-    {
-        ProcessCommands( mSequencer->GetCommandBindings(), kUnmap );
-    }
-
-    //---
+    mBoardCommandList = nullptr;
 
     mSequencer = nullptr;
     mBoardSequence = nullptr;
@@ -107,145 +111,124 @@ FBoardSequenceCustomization::OnSequencerClosed( TSharedRef<ISequencer> iSequence
 //---
 
 void
-FBoardSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> CommandList, EMapping iMap )
+FBoardSequenceCustomization::BindCommands( TSharedPtr<FUICommandList> ioCommandList )
 {
-    if( iMap == kMap )
-        CommandList->MapAction(
-            FEposSequenceEditorCommands::Get().CreateCameraAtCurrentTime,
-            FExecuteAction::CreateLambda( [this](){ BoardSequenceTools::CreateCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
-            FCanExecuteAction::CreateLambda( [this](){ return BoardSequenceTools::CanCreateCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
-        );
-    else
-        CommandList->UnmapAction( FEposSequenceEditorCommands::Get().CreateCameraAtCurrentTime );
-
-    if( iMap == kMap )
-        CommandList->MapAction(
-            FEposSequenceEditorCommands::Get().SnapCameraToViewportAtCurrentTime,
-            FExecuteAction::CreateLambda( [this](){ BoardSequenceTools::SnapCameraToViewport( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
-            FCanExecuteAction::CreateLambda( [this](){ return BoardSequenceTools::CanSnapCameraToViewport( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
-        );
-    else
-        CommandList->UnmapAction( FEposSequenceEditorCommands::Get().SnapCameraToViewportAtCurrentTime );
-
-    if( iMap == kMap )
-        CommandList->MapAction(
-            FEposSequenceEditorCommands::Get().PilotCameraAtCurrentTime,
-            FExecuteAction::CreateLambda( [this](){ BoardSequenceTools::PilotCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
-            FCanExecuteAction::CreateLambda( [this](){ return BoardSequenceTools::CanPilotCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
-        );
-    else
-        CommandList->UnmapAction( FEposSequenceEditorCommands::Get().PilotCameraAtCurrentTime );
-
-    if( iMap == kMap )
-        CommandList->MapAction(
-            FEposSequenceEditorCommands::Get().EjectCameraAtCurrentTime,
-            FExecuteAction::CreateLambda( [this](){ BoardSequenceTools::EjectCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
-            FCanExecuteAction::CreateLambda( [this](){ return BoardSequenceTools::CanEjectCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
-        );
-    else
-        CommandList->UnmapAction( FEposSequenceEditorCommands::Get().EjectCameraAtCurrentTime );
-
-    if( iMap == kMap )
-        CommandList->MapAction(
-            FEposSequenceEditorCommands::Get().GotoPreviousCameraPosition,
-            FExecuteAction::CreateLambda( [this](){ BoardSequenceTools::GotoPreviousCameraPosition( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
-            FCanExecuteAction::CreateLambda( [this](){ return BoardSequenceTools::HasPreviousCameraPosition( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
-        );
-    else
-        CommandList->UnmapAction( FEposSequenceEditorCommands::Get().GotoPreviousCameraPosition );
-
-    if( iMap == kMap )
-        CommandList->MapAction(
-            FEposSequenceEditorCommands::Get().GotoNextCameraPosition,
-            FExecuteAction::CreateLambda( [this](){ BoardSequenceTools::GotoNextCameraPosition( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
-            FCanExecuteAction::CreateLambda( [this](){ return BoardSequenceTools::HasNextCameraPosition( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
-        );
-    else
-        CommandList->UnmapAction( FEposSequenceEditorCommands::Get().GotoNextCameraPosition );
+    // To map actions on a newly command list and append it to the parent CommandList, it MUST BE reference as a class member
+    // because the Append() stores the new command list as a weak ptr
+    //
+    // To map actions when a sequencer is opened, try to catch when a sequencer is opened (maybe inside the EposSequenceEditor module ?)
+    //
+    // To map actions on a more global context, the command list may be created in the EposSequenceEditor module and registered to the level editor like:
+    //      TSharedPtr< ILevelEditor > levelEditor = FModuleManager::GetModuleChecked<FLevelEditorModule>( "LevelEditor" ).GetFirstLevelEditor();
+    //      levelEditor->AppendCommands( CommandList.ToSharedRef() );
+    FEposSequenceEditorActionCallbacks::MapActions( ioCommandList );
 
     //---
 
-    if( iMap == kMap )
-        CommandList->MapAction(
-            FEposSequenceEditorCommands::Get().CreatePlaneAtCurrentTime,
-            FExecuteAction::CreateLambda( [this](){ BoardSequenceTools::CreatePlane( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
-            FCanExecuteAction::CreateLambda( [this](){ return BoardSequenceTools::CanCreatePlane( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
-        );
-    else
-        CommandList->UnmapAction( FEposSequenceEditorCommands::Get().CreatePlaneAtCurrentTime );
+    ioCommandList->MapAction(
+        FEposSequenceEditorCommands::Get().CreateCameraAtCurrentTime,
+        FExecuteAction::CreateLambda( [this](){ BoardSequenceTools::CreateCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
+        FCanExecuteAction::CreateLambda( [this](){ return BoardSequenceTools::CanCreateCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+    );
 
-    if( iMap == kMap )
-        CommandList->MapAction(
-            FEposSequenceEditorCommands::Get().DetachPlaneAtCurrentTime,
-            FExecuteAction::CreateLambda( [this]()
-                                          {
-                                              TArray<FGuid> plane_bindings;
-                                              int32 plane_count = BoardSequenceTools::GetAttachedPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, nullptr, &plane_bindings );
-                                              if( plane_count != 1 )
-                                                  return;
-                                              BoardSequenceTools::DetachPlane( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, plane_bindings[0] );
-                                          } ),
-            FCanExecuteAction::CreateLambda( [this]()
-                                             {
-                                                 int32 plane_count = BoardSequenceTools::GetAttachedPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber );
-                                                 if( plane_count > 1 )
-                                                 {
-                                                     FNotificationInfo Info( LOCTEXT( "multiple-planes", "There are multiple planes. Select one of them." ) );
-                                                     Info.ExpireDuration = 5.0f;
-                                                     FSlateNotificationManager::Get().AddNotification( Info )->SetCompletionState( SNotificationItem::CS_Fail );
-                                                 }
-                                                 return plane_count == 1;
-                                             } )
-        );
-    else
-        CommandList->UnmapAction( FEposSequenceEditorCommands::Get().DetachPlaneAtCurrentTime );
+    ioCommandList->MapAction(
+        FEposSequenceEditorCommands::Get().SnapCameraToViewportAtCurrentTime,
+        FExecuteAction::CreateLambda( [this](){ BoardSequenceTools::SnapCameraToViewport( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
+        FCanExecuteAction::CreateLambda( [this](){ return BoardSequenceTools::CanSnapCameraToViewport( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+    );
+
+    ioCommandList->MapAction(
+        FEposSequenceEditorCommands::Get().PilotCameraAtCurrentTime,
+        FExecuteAction::CreateLambda( [this](){ BoardSequenceTools::PilotCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
+        FCanExecuteAction::CreateLambda( [this](){ return BoardSequenceTools::CanPilotCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+    );
+
+    ioCommandList->MapAction(
+        FEposSequenceEditorCommands::Get().EjectCameraAtCurrentTime,
+        FExecuteAction::CreateLambda( [this](){ BoardSequenceTools::EjectCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
+        FCanExecuteAction::CreateLambda( [this](){ return BoardSequenceTools::CanEjectCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+    );
+
+    ioCommandList->MapAction(
+        FEposSequenceEditorCommands::Get().GotoPreviousCameraPosition,
+        FExecuteAction::CreateLambda( [this](){ BoardSequenceTools::GotoPreviousCameraPosition( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
+        FCanExecuteAction::CreateLambda( [this](){ return BoardSequenceTools::HasPreviousCameraPosition( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+    );
+
+    ioCommandList->MapAction(
+        FEposSequenceEditorCommands::Get().GotoNextCameraPosition,
+        FExecuteAction::CreateLambda( [this](){ BoardSequenceTools::GotoNextCameraPosition( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
+        FCanExecuteAction::CreateLambda( [this](){ return BoardSequenceTools::HasNextCameraPosition( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+    );
 
     //---
 
-    if( iMap == kMap )
-        CommandList->MapAction(
-            FEposSequenceEditorCommands::Get().CreateDrawingAtCurrentTime,
-            FExecuteAction::CreateLambda( [this]()
-                                          {
-                                              TArray<FGuid> plane_bindings;
-                                              int32 plane_count = BoardSequenceTools::GetAllPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, nullptr, &plane_bindings );
-                                              if( plane_count != 1 )
-                                                  return;
-                                              BoardSequenceTools::CreateDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, plane_bindings[0] );
-                                          } ),
-            FCanExecuteAction::CreateLambda( [this]()
-                                             {
-                                                 TArray<FGuid> plane_bindings;
-                                                 int32 plane_count = BoardSequenceTools::GetAllPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, nullptr, &plane_bindings );
-                                                 if( plane_count > 1 )
-                                                 {
-                                                     FNotificationInfo Info( LOCTEXT( "multiple-planes", "There are multiple planes. Select one of them." ) );
-                                                     Info.ExpireDuration = 5.0f;
-                                                     FSlateNotificationManager::Get().AddNotification( Info )->SetCompletionState( SNotificationItem::CS_Fail );
-                                                 }
-                                                 return plane_count == 1 && BoardSequenceTools::CanCreateDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, plane_bindings[0] );
-                                             } )
-        );
-    else
-        CommandList->UnmapAction( FEposSequenceEditorCommands::Get().CreateDrawingAtCurrentTime );
+    ioCommandList->MapAction(
+        FEposSequenceEditorCommands::Get().CreatePlaneAtCurrentTime,
+        FExecuteAction::CreateLambda( [this](){ BoardSequenceTools::CreatePlane( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
+        FCanExecuteAction::CreateLambda( [this](){ return BoardSequenceTools::CanCreatePlane( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+    );
 
-    if( iMap == kMap )
-        CommandList->MapAction(
-            FEposSequenceEditorCommands::Get().GotoPreviousDrawing,
-            FExecuteAction::CreateLambda( [this](){ BoardSequenceTools::GotoPreviousDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
-            FCanExecuteAction::CreateLambda( [this](){ return BoardSequenceTools::HasPreviousDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
-        );
-    else
-        CommandList->UnmapAction( FEposSequenceEditorCommands::Get().GotoPreviousDrawing );
+    ioCommandList->MapAction(
+        FEposSequenceEditorCommands::Get().DetachPlaneAtCurrentTime,
+        FExecuteAction::CreateLambda( [this]()
+                                        {
+                                            TArray<FGuid> plane_bindings;
+                                            int32 plane_count = BoardSequenceTools::GetAttachedPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, nullptr, &plane_bindings );
+                                            if( plane_count != 1 )
+                                                return;
+                                            BoardSequenceTools::DetachPlane( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, plane_bindings[0] );
+                                        } ),
+        FCanExecuteAction::CreateLambda( [this]()
+                                            {
+                                                int32 plane_count = BoardSequenceTools::GetAttachedPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber );
+                                                if( plane_count > 1 )
+                                                {
+                                                    FNotificationInfo Info( LOCTEXT( "multiple-planes", "There are multiple planes. Select one of them." ) );
+                                                    Info.ExpireDuration = 5.0f;
+                                                    FSlateNotificationManager::Get().AddNotification( Info )->SetCompletionState( SNotificationItem::CS_Fail );
+                                                }
+                                                return plane_count == 1;
+                                            } )
+    );
 
-    if( iMap == kMap )
-        CommandList->MapAction(
-            FEposSequenceEditorCommands::Get().GotoNextDrawing,
-            FExecuteAction::CreateLambda( [this](){ BoardSequenceTools::GotoNextDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
-            FCanExecuteAction::CreateLambda( [this](){ return BoardSequenceTools::HasNextDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
-        );
-    else
-        CommandList->UnmapAction( FEposSequenceEditorCommands::Get().GotoNextDrawing );
+    //---
+
+    ioCommandList->MapAction(
+        FEposSequenceEditorCommands::Get().CreateDrawingAtCurrentTime,
+        FExecuteAction::CreateLambda( [this]()
+                                        {
+                                            TArray<FGuid> plane_bindings;
+                                            int32 plane_count = BoardSequenceTools::GetAllPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, nullptr, &plane_bindings );
+                                            if( plane_count != 1 )
+                                                return;
+                                            BoardSequenceTools::CreateDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, plane_bindings[0] );
+                                        } ),
+        FCanExecuteAction::CreateLambda( [this]()
+                                            {
+                                                TArray<FGuid> plane_bindings;
+                                                int32 plane_count = BoardSequenceTools::GetAllPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, nullptr, &plane_bindings );
+                                                if( plane_count > 1 )
+                                                {
+                                                    FNotificationInfo Info( LOCTEXT( "multiple-planes", "There are multiple planes. Select one of them." ) );
+                                                    Info.ExpireDuration = 5.0f;
+                                                    FSlateNotificationManager::Get().AddNotification( Info )->SetCompletionState( SNotificationItem::CS_Fail );
+                                                }
+                                                return plane_count == 1 && BoardSequenceTools::CanCreateDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, plane_bindings[0] );
+                                            } )
+    );
+
+    ioCommandList->MapAction(
+        FEposSequenceEditorCommands::Get().GotoPreviousDrawing,
+        FExecuteAction::CreateLambda( [this](){ BoardSequenceTools::GotoPreviousDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
+        FCanExecuteAction::CreateLambda( [this](){ return BoardSequenceTools::HasPreviousDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+    );
+
+    ioCommandList->MapAction(
+        FEposSequenceEditorCommands::Get().GotoNextDrawing,
+        FExecuteAction::CreateLambda( [this](){ BoardSequenceTools::GotoNextDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
+        FCanExecuteAction::CreateLambda( [this](){ return BoardSequenceTools::HasNextDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+    );
 }
 
 //---

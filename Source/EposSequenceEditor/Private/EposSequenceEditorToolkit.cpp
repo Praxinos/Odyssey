@@ -304,67 +304,8 @@ void FEposSequenceEditorToolkit::GoToFocusedSequence( TArray< UEposMovieSceneSeq
 void
 FEposSequenceEditorToolkit::BindCommands( TSharedPtr<FUICommandList> CommandList )
 {
-    CommandList->MapAction(
-        FEposSequenceEditorCommands::Get().StepToNextShot,
-        FExecuteAction::CreateStatic( &ShotSequenceTools::StepToNextShot, mSequencer.Get() )
-    );
-
-    CommandList->MapAction(
-        FEposSequenceEditorCommands::Get().StepToPreviousShot,
-        FExecuteAction::CreateStatic( &ShotSequenceTools::StepToPreviousShot, mSequencer.Get() )
-    );
-
-    //---
-
-    CommandList->MapAction(
-        FEposSequenceEditorCommands::Get().GotoPraxinos,
-        FExecuteAction::CreateStatic( &FEposSequenceEditorActionCallbacks::GotoPraxinos )
-    );
-
-    CommandList->MapAction(
-        FEposSequenceEditorCommands::Get().GotoForum,
-        FExecuteAction::CreateStatic( &FEposSequenceEditorActionCallbacks::GotoForum )
-    );
-
-    CommandList->MapAction(
-        FEposSequenceEditorCommands::Get().GotoDiscord,
-        FExecuteAction::CreateStatic( &FEposSequenceEditorActionCallbacks::GotoDiscord )
-    );
-
-    CommandList->MapAction(
-        FEposSequenceEditorCommands::Get().GotoUserDocumentation,
-        FExecuteAction::CreateStatic( &FEposSequenceEditorActionCallbacks::GotoUserDocumentation )
-    );
-
-    CommandList->MapAction(
-        FEposSequenceEditorCommands::Get().GotoProjects,
-        FExecuteAction::CreateStatic( &FEposSequenceEditorActionCallbacks::GotoProjects )
-    );
-
-    CommandList->MapAction(
-        FEposSequenceEditorCommands::Get().OpenAboutWindow,
-        FExecuteAction::CreateStatic( &FEposSequenceEditorActionCallbacks::OpenAboutWindow )
-    );
-
-    //---
-
-    CommandList->MapAction(
-        FEposSequenceEditorCommands::Get().OpenSequenceEditorSettings,
-        FExecuteAction::CreateStatic( &FEposSequenceEditorActionCallbacks::OpenSequenceEditorSettings )
-    );
-
-    CommandList->MapAction(
-        FEposSequenceEditorCommands::Get().OpenTrackEditorSettings,
-        FExecuteAction::CreateStatic( &FEposSequenceEditorActionCallbacks::OpenTrackEditorSettings )
-    );
-
-    CommandList->MapAction(
-        FEposSequenceEditorCommands::Get().OpenNamingConventionEditorSettings,
-        FExecuteAction::CreateStatic( &FEposSequenceEditorActionCallbacks::OpenNamingConventionEditorSettings )
-    );
-
-    TSharedPtr< ILevelEditor > levelEditor = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor").GetFirstLevelEditor();
-    levelEditor->AppendCommands( CommandList.ToSharedRef() );
+    // Adding commands here is certainly not a good idea, as they won't be created when this toolkit is not called
+    // For example, opening a level sequence (level sequence toolkit will be created) won't create this toolkit at all
 }
 
 //--- FGCObject interface
