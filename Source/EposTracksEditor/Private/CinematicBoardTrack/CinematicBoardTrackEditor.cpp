@@ -70,9 +70,39 @@ void
 FCinematicBoardTrackEditor::OnInitialize() //override
 {
     mOnCameraCutHandle = GetSequencer()->OnCameraCut().AddSP( this, &FCinematicBoardTrackEditor::OnUpdateCameraCut );
+}
 
-    //---
+void
+FCinematicBoardTrackEditor::OnUpdateCameraCut( UObject* iCameraObject, bool iJumpCut )
+{
+    // Keep track of the camera when it switches so that the thumbnail can be drawn with the correct camera
+    mBoardCamera = Cast<AActor>( iCameraObject );
+}
 
+
+void
+FCinematicBoardTrackEditor::OnRelease() //override
+{
+    if( mOnCameraCutHandle.IsValid() && GetSequencer().IsValid() )
+    {
+        GetSequencer()->OnCameraCut().Remove( mOnCameraCutHandle );
+    }
+
+    TSharedPtr<FUICommandList> command_list = GetSequencer().IsValid() ? GetSequencer()->GetCommandBindings() : nullptr;
+    if( command_list )
+    {
+        command_list->UnmapAction( FEposTracksEditorCommands::Get().NewSectionWithBoardAtCurrentFrame );
+        command_list->UnmapAction( FEposTracksEditorCommands::Get().NewSectionWithShotAtCurrentFrame );
+
+        command_list->UnmapAction( FEposTracksEditorCommands::Get().ArrangeShotsManually );
+        command_list->UnmapAction( FEposTracksEditorCommands::Get().ArrangeShotsOnOneRow );
+        command_list->UnmapAction( FEposTracksEditorCommands::Get().ArrangeShotsOnTwoRows );
+    }
+}
+
+void
+FCinematicBoardTrackEditor::BindCommands( TSharedRef<FUICommandList> SequencerCommandBindings ) //override
+{
     TSharedPtr<FUICommandList> command_list = GetSequencer().IsValid() ? GetSequencer()->GetCommandBindings() : nullptr;
     if( command_list )
     {
@@ -105,35 +135,6 @@ FCinematicBoardTrackEditor::OnInitialize() //override
         );
     }
 }
-
-void
-FCinematicBoardTrackEditor::OnUpdateCameraCut( UObject* iCameraObject, bool iJumpCut )
-{
-    // Keep track of the camera when it switches so that the thumbnail can be drawn with the correct camera
-    mBoardCamera = Cast<AActor>( iCameraObject );
-}
-
-
-void
-FCinematicBoardTrackEditor::OnRelease() //override
-{
-    if( mOnCameraCutHandle.IsValid() && GetSequencer().IsValid() )
-    {
-        GetSequencer()->OnCameraCut().Remove( mOnCameraCutHandle );
-    }
-
-    TSharedPtr<FUICommandList> command_list = GetSequencer().IsValid() ? GetSequencer()->GetCommandBindings() : nullptr;
-    if( command_list )
-    {
-        command_list->UnmapAction( FEposTracksEditorCommands::Get().NewSectionWithBoardAtCurrentFrame );
-        command_list->UnmapAction( FEposTracksEditorCommands::Get().NewSectionWithShotAtCurrentFrame );
-
-        command_list->UnmapAction( FEposTracksEditorCommands::Get().ArrangeShotsManually );
-        command_list->UnmapAction( FEposTracksEditorCommands::Get().ArrangeShotsOnOneRow );
-        command_list->UnmapAction( FEposTracksEditorCommands::Get().ArrangeShotsOnTwoRows );
-    }
-}
-
 
 /* ISequencerTrackEditor interface
  *****************************************************************************/

@@ -58,6 +58,7 @@ public:
     // ISequencerTrackEditor interface
     virtual void OnInitialize() override;
     virtual void OnRelease() override;
+    virtual void BindCommands( TSharedRef<FUICommandList> SequencerCommandBindings ) override;
     virtual void BuildAddTrackMenu( FMenuBuilder& ioMenuBuilder ) override;
     virtual TSharedPtr<SWidget> BuildOutlinerEditWidget( const FGuid& iObjectBinding, UMovieSceneTrack* iTrack, const FBuildEditWidgetParams& iParams ) override;
     virtual TSharedRef<ISequencerSection> MakeSectionInterface( UMovieSceneSection& ioSectionObject, UMovieSceneTrack& ioTrack, FGuid iObjectBinding ) override;
