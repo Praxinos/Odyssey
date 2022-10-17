@@ -59,7 +59,7 @@ FBoardSequenceCustomization::RegisterSequencerCustomization( FSequencerCustomiza
     FSequencerCustomizationInfo customization;
 
     TSharedRef<FExtender> ToolbarExtender = MakeShared<FExtender>();
-    ToolbarExtender->AddToolBarExtension( "Curve Editor", EExtensionHook::After, nullptr, FToolBarExtensionDelegate::CreateRaw( this, &FBoardSequenceCustomization::ExtendSequencerToolbar ) );
+    ToolbarExtender->AddToolBarExtension( "CurveEditor", EExtensionHook::After, nullptr, FToolBarExtensionDelegate::CreateRaw( this, &FBoardSequenceCustomization::ExtendSequencerToolbar ) );
     customization.ToolbarExtender = ToolbarExtender;
 
     //customization.OnReceivedDragOver.BindRaw( this, &FBoardSequenceCustomization::OnSequencerReceiveDragOver );
@@ -426,6 +426,10 @@ FBoardSequenceCustomization::CreateInfoText() const
 void
 FBoardSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuilder )
 {
+    static const FName sSequencerToolbarStyleName = "SequencerToolbar";
+
+    ToolbarBuilder.BeginStyleOverride( sSequencerToolbarStyleName );
+
     ToolbarBuilder.AddSeparator();
 
     ToolbarBuilder.AddToolBarButton( FEposSequenceEditorCommands::Get().GotoPreviousCameraPosition );
@@ -462,6 +466,8 @@ FBoardSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBui
                               .ToolTipText( LOCTEXT( "infobar-tooltip", "Double-click on the infobar to open its pattern settings" ) )
                               .OnDoubleClicked( FPointerEventHandler::CreateLambda( []( const FGeometry&, const FPointerEvent& ) { FEposSequenceEditorActionCallbacks::OpenSequenceEditorSettings(); return FReply::Handled(); } ) )
                               );
+
+    ToolbarBuilder.EndStyleOverride();
 }
 
 TSharedRef<SWidget>
