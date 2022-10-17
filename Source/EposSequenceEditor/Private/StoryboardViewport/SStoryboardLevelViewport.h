@@ -16,6 +16,7 @@
 
 class ACineCameraActor;
 class APlaneActor;
+class FAssetEditorViewportLayout;
 class FEposSequenceEditorToolkit;
 class FLevelViewportLayout;
 class FUICommandList;

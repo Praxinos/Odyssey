@@ -662,7 +662,7 @@ SNewStoryboardSettings::GetErrorText() const
     FString FullPath = mStoryboardSettings->StoryboardPath.Path;
     FullPath /= mStoryboardSettings->StoryboardName;
 
-    FAssetData AssetData = AssetRegistryModule.Get().GetAssetByObjectPath( FName(*FullPath) );
+    FAssetData AssetData = AssetRegistryModule.Get().GetAssetByObjectPath( FSoftObjectPath( FullPath ) );
     if (AssetData.IsValid())
         return LOCTEXT("StoryboardExists", "Error: Storyboard Exists");
 

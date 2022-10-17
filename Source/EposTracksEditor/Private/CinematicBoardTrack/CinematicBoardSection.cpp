@@ -451,7 +451,7 @@ FCinematicBoardSection::ConstructConverterForViewRange( FGeometry* oGeometry ) c
 
     TSharedPtr<UE::Sequencer::FEditorViewModel> editor_model = GetSequencer()->GetViewModel();
     TSharedPtr<UE::Sequencer::FTrackAreaViewModel> track_model = editor_model->GetTrackArea();
-    return track_model->GetTimeToPixel( geometry );
+    return track_model->GetTimeToPixel( geometry.GetLocalSize().X );
 }
 
 FTimeToPixel

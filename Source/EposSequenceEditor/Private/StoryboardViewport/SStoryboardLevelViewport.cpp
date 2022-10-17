@@ -25,6 +25,7 @@
 #include "LevelEditorSequencerIntegration.h"
 #include "Fonts/FontMeasure.h"
 #include "Editor.h"
+#include "AssetEditorViewportLayout.h"
 #include "Engine/Selection.h"
 #include "SEnumCombo.h"
 #include "Widgets/Input/NumericUnitTypeInterface.inl"
