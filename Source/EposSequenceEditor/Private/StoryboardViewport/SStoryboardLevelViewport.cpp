@@ -154,7 +154,7 @@ class SStoryboardPreviewViewport : public SLevelViewport
 {
 public:
     virtual const FSlateBrush* OnGetViewportBorderBrush() const override { return nullptr; }
-    virtual EVisibility GetCurrentLevelTextVisibility() const override { return EVisibility::Collapsed; }
+    virtual bool IsActorEditorContextVisible() const { return false; }
     virtual EVisibility GetSelectedActorsCurrentLevelTextVisibility() const override { return EVisibility::Collapsed; }
     virtual EVisibility GetViewportControlsVisibility() const override { return EVisibility::Collapsed; }
 
@@ -1063,7 +1063,7 @@ void SStoryboardLevelViewport::Setup(FEposSequenceEditorToolkit& NewToolkit)
 
         if (TimeRangeContainer.IsValid())
         {
-            const bool bShowWorkingRange = true, bShowViewRange = false, bShowPlaybackRange = true;
+            const bool bShowWorkingRange = false, bShowViewRange = true, bShowPlaybackRange = true;
             TimeRangeContainer->SetContent(Sequencer->MakeTimeRange(DecoratedTransportControls.ToSharedRef(), bShowWorkingRange, bShowViewRange, bShowPlaybackRange));
         }
     }
