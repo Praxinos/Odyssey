@@ -27,7 +27,7 @@ UEposNamingConventionBlueprintLibrary::SetSequencer( TSharedRef<ISequencer> InSe
 
 //static
 FString
-UEposNamingConventionBlueprintLibrary::GenerateNoteAssetPathName( const UMovieSceneSequence* iSequence, FString& oPath, FString& oName )
+UEposNamingConventionBlueprintLibrary::GenerateNoteAssetPathName( FString& oPath, FString& oName )
 {
     oPath = TEXT( "" );
     oName = TEXT( "" );
@@ -35,17 +35,13 @@ UEposNamingConventionBlueprintLibrary::GenerateNoteAssetPathName( const UMovieSc
     if( !CurrentSequencer.IsValid() )
         return TEXT( "" );
 
-    if( !iSequence )
-        return TEXT( "" );
-
     ISequencer* sequencer = CurrentSequencer.Pin().Get();
 
-    //sequencer->GetEvaluationTemplate()->
+    UEposMovieSceneSequence* epos_sequence = Cast<UEposMovieSceneSequence>( sequencer->GetFocusedMovieSceneSequence() );
+    if( !epos_sequence )
+        return TEXT( "" );
 
-    checkNoEntry(); //TODO: certainly expose a CreateNote() BP function instead of creating everything with native BP nodes, and then remove this BP function
-
-    return TEXT( "" );
-    //return NamingConvention::GenerateNoteAssetPathName( *sequencer, *iSequence, oPath, oName );
+    return NamingConvention::GenerateNoteAssetPathName( *sequencer, *epos_sequence, sequencer->GetFocusedTemplateID(), oPath, oName );
 }
 
 //---

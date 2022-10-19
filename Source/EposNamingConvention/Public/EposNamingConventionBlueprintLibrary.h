@@ -24,7 +24,7 @@ public:
      * Open a board sequence asset
      */
     UFUNCTION(BlueprintCallable, Category = "Epos Naming Convention")
-    static FString GenerateNoteAssetPathName( const UMovieSceneSequence* Sequence, FString& Path, FString& Name );
+    static FString GenerateNoteAssetPathName( FString& Path, FString& Name );
 
 public:
 
