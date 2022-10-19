@@ -50,7 +50,9 @@ private:
     TWeakPtr<ISequencer>        mSequencer;
     UEposMovieSceneSequence*    mRootEposSequence;
     FMovieSceneSequenceID       mRootEposSequenceId;
-    UEposMovieSceneSequence*    mCurrentSequence;
+    UEposMovieSceneSequence*    mCurrentEposSequence { nullptr };
+    UMovieSceneSequence*        mCurrentSequence { nullptr };
+    FMovieSceneSequenceID       mCurrentSequenceId;
 
     TSharedPtr<IDetailsView>                        mDetailsViewExportImageSequenceSettings;
     TArray<TSharedPtr<FPanelItem>>                  mPanelItemsList;

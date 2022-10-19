@@ -51,4 +51,4 @@ public:
 class ISequencer;
 class UMovieSceneSequence;
 
-float GetMostRelevantCameraAspectRatio( ISequencer* iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iRootEposSequenceId );
+float GetMostRelevantCameraAspectRatio( ISequencer* iSequencer, FMovieSceneSequenceIDRef iRootEposSequenceId );

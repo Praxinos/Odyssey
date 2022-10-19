@@ -20,9 +20,8 @@
 
 //---
 
-FExportConverter::FExportConverter( TWeakPtr<ISequencer> iSequencer, const UEposMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceId, const FExportMarkSettings* iMarkSettings, FExportStruct* oStruct )
+FExportConverter::FExportConverter( TWeakPtr<ISequencer> iSequencer, FMovieSceneSequenceIDRef iSequenceId, const FExportMarkSettings* iMarkSettings, FExportStruct* oStruct )
     : mSequencer( iSequencer )
-    , mSequence( iSequence )
     , mSequenceId( iSequenceId )
     , mMarkSettings( iMarkSettings )
     , mStruct( oStruct )

@@ -21,7 +21,7 @@ struct FMovieSceneSequenceTransform;
 class FExportConverter
 {
 public:
-    FExportConverter( TWeakPtr<ISequencer> iSequencer, const UEposMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iEposSequenceId, const FExportMarkSettings* iMarkSettings, FExportStruct* oStruct );
+    FExportConverter( TWeakPtr<ISequencer> iSequencer, FMovieSceneSequenceIDRef iEposSequenceId, const FExportMarkSettings* iMarkSettings, FExportStruct* oStruct );
 
 private:
     void Convert();
@@ -32,7 +32,6 @@ private:
 
 private:
     TWeakPtr<ISequencer>            mSequencer;
-    const UEposMovieSceneSequence*  mSequence { nullptr };
     FMovieSceneSequenceID           mSequenceId;
     const FExportMarkSettings*      mMarkSettings { nullptr };
 

@@ -125,7 +125,7 @@ UExportPDFBlueprintLibrary::GetPanelTexture2D( const FExportStruct& iExportStruc
     if( !iExportStruct.mSequencer.IsValid() )
         return nullptr;
 
-    float aspect_ratio = GetMostRelevantCameraAspectRatio( iExportStruct.mSequencer.Pin().Get(), iExportStruct.Panels[iPanelIndex].mSequence, iExportStruct.Panels[iPanelIndex].mSequenceId );
+    float aspect_ratio = GetMostRelevantCameraAspectRatio( iExportStruct.mSequencer.Pin().Get(), iExportStruct.Panels[iPanelIndex].mSequenceId );
 
     iHeight = ( iHeight <= 0 ) ? 512 : iHeight;
     FIntPoint image_size( iHeight * aspect_ratio, iHeight );

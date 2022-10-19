@@ -58,8 +58,10 @@ void
 SExportPDFSettings::Construct( const FArguments& InArgs, TWeakPtr<ISequencer> iSequencer, FMovieSceneSequenceIDRef iSequenceId )
 {
     mSequencer = iSequencer;
-    mCurrentSequence = Cast<UEposMovieSceneSequence>( mSequencer.Pin()->GetEvaluationTemplate().GetSequence( iSequenceId ) );
-    mRootEposSequence = EposSequenceHelpers::GetRootEposSequence( *mSequencer.Pin(), iSequenceId, mRootEposSequenceId );
+    mCurrentSequenceId = iSequenceId;
+    mCurrentSequence = mSequencer.Pin()->GetEvaluationTemplate().GetSequence( mCurrentSequenceId );
+    mCurrentEposSequence = Cast<UEposMovieSceneSequence>( mCurrentSequence );
+    mRootEposSequence = EposSequenceHelpers::GetRootEposSequence( *mSequencer.Pin(), mCurrentSequenceId, mRootEposSequenceId );
 
     mExportPDFSettings = GetMutableDefault<UExportPDFSettings>();
 
@@ -100,7 +102,7 @@ SExportPDFSettings::Construct( const FArguments& InArgs, TWeakPtr<ISequencer> iS
         check( mPDFDocWidget );
 
         FExportStruct image_sequence_struct;
-        FExportConverter converter( mSequencer, mRootEposSequence, mRootEposSequenceId, &mExportPDFSettings->Options.MarkSettings, &image_sequence_struct );
+        FExportConverter converter( mSequencer, mRootEposSequence ? mRootEposSequenceId : mCurrentSequenceId, &mExportPDFSettings->Options.MarkSettings, &image_sequence_struct );
 
         mPDFDocWidget->OnConstructPDFLayout( image_sequence_struct, true );
     }
@@ -211,7 +213,7 @@ SExportPDFSettings::GlobalSettingsChanged( const FPropertyChangedEvent& iEvent )
         check( mPDFDocWidget );
 
         FExportStruct image_sequence_struct;
-        FExportConverter converter( mSequencer, mRootEposSequence, mRootEposSequenceId, &mExportPDFSettings->Options.MarkSettings, &image_sequence_struct );
+        FExportConverter converter( mSequencer, mRootEposSequence ? mRootEposSequenceId : mCurrentSequenceId, &mExportPDFSettings->Options.MarkSettings, &image_sequence_struct );
 
         mPDFDocWidget->OnConstructPDFLayout( image_sequence_struct, true );
 
@@ -275,7 +277,7 @@ void
 SExportPDFSettings::ExportStoryboard()
 {
     FExportStruct image_sequence_struct;
-    FExportConverter converter( mSequencer, mRootEposSequence, mRootEposSequenceId, &mExportPDFSettings->Options.MarkSettings, &image_sequence_struct );
+    FExportConverter converter( mSequencer, mRootEposSequence ? mRootEposSequenceId : mCurrentSequenceId, &mExportPDFSettings->Options.MarkSettings, &image_sequence_struct );
 
     FExportPDFExporter exporter( mSequencer, &image_sequence_struct, &mExportPDFSettings->Options );
     exporter.Export();

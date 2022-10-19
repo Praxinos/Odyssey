@@ -46,7 +46,9 @@ private:
     TWeakPtr<ISequencer>        mSequencer;
     UEposMovieSceneSequence*    mRootEposSequence { nullptr };
     FMovieSceneSequenceID       mRootEposSequenceId;
-    UEposMovieSceneSequence*    mCurrentSequence { nullptr };
+    UEposMovieSceneSequence*    mCurrentEposSequence { nullptr };
+    UMovieSceneSequence*        mCurrentSequence { nullptr };
+    FMovieSceneSequenceID       mCurrentSequenceId;
 
     TSharedPtr<IDetailsView>    mDetailsViewExportPDFSettings;
 

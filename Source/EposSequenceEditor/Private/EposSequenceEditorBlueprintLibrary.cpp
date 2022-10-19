@@ -697,7 +697,7 @@ UEposSequenceEditorBlueprintLibrary::ExportAsPDF( const FExportPDFOptions& iOpti
         return false;
 
     FExportStruct image_sequence_struct;
-    FExportConverter converter( CurrentSequencer, epos_root_sequence, epos_root_sequence_id, &iOptions.MarkSettings, &image_sequence_struct );
+    FExportConverter converter( CurrentSequencer, epos_root_sequence_id, &iOptions.MarkSettings, &image_sequence_struct );
 
     FExportPDFExporter exporter( CurrentSequencer, &image_sequence_struct, &iOptions );
     return exporter.Export();
@@ -718,7 +718,7 @@ UEposSequenceEditorBlueprintLibrary::ExportAsImageSequence( const FExportImageSe
         return false;
 
     FExportStruct image_sequence_struct;
-    FExportConverter converter( CurrentSequencer, epos_root_sequence, epos_root_sequence_id, &iOptions.MarkSettings, &image_sequence_struct );
+    FExportConverter converter( CurrentSequencer, epos_root_sequence_id, &iOptions.MarkSettings, &image_sequence_struct );
 
     image_sequence_struct.mSequencer = CurrentSequencer;
 

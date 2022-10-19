@@ -15,9 +15,9 @@
 //---
 
 float
-GetMostRelevantCameraAspectRatio( ISequencer* iSequencer, UMovieSceneSequence* iRootEposSequence, FMovieSceneSequenceIDRef iRootEposSequenceId )
+GetMostRelevantCameraAspectRatio( ISequencer* iSequencer, FMovieSceneSequenceIDRef iSequenceId )
 {
-    if( !iSequencer || !iRootEposSequence || iRootEposSequenceId == MovieSceneSequenceID::Invalid )
+    if( !iSequencer || iSequenceId == MovieSceneSequenceID::Invalid )
         return 1.77777f;
 
     struct FSequenceCameraVisitor
@@ -27,7 +27,7 @@ GetMostRelevantCameraAspectRatio( ISequencer* iSequencer, UMovieSceneSequence* i
         {
             UE::MovieScene::FSubSequencePath subsequencepath( iLocalSpace.SequenceID, *mSequencer );
 
-            if( !subsequencepath.Contains( mRootEposSequenceId ) )
+            if( !subsequencepath.Contains( mSequenceId ) )
                 return;
 
             UMovieSceneSingleCameraCutSection* cameracut_section = Cast<UMovieSceneSingleCameraCutSection>( iSection );
@@ -49,7 +49,7 @@ GetMostRelevantCameraAspectRatio( ISequencer* iSequencer, UMovieSceneSequence* i
         }
 
         ISequencer* mSequencer;
-        FMovieSceneSequenceID mRootEposSequenceId;
+        FMovieSceneSequenceID mSequenceId;
         TMap<float, int32>  mAspectRatios;
     };
 
@@ -62,7 +62,7 @@ GetMostRelevantCameraAspectRatio( ISequencer* iSequencer, UMovieSceneSequence* i
 
     FSequenceCameraVisitor camera_visitor;
     camera_visitor.mSequencer = iSequencer;
-    camera_visitor.mRootEposSequenceId = iRootEposSequenceId;
+    camera_visitor.mSequenceId = iSequenceId;
 
     // Visit all notes
     VisitSequence( iSequencer->GetRootMovieSceneSequence(), params, camera_visitor );
