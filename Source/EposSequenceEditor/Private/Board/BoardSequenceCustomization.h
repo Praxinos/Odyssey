@@ -78,6 +78,9 @@ private:
 
 private:
     ISequencer*     mSequencer;
+    FDelegateHandle mSequencerActorAddedDelegates;
+    FDelegateHandle mSequencerActivatedDelegates;
+    FDelegateHandle mSequencerSelectionSectionChangedDelegates;
     UBoardSequence* mBoardSequence;
 
     TSharedPtr<FUICommandList> mBoardCommandList;

@@ -93,9 +93,6 @@ private:
 
     //---
 
-    void HandleActorAddedToSequencer( AActor* iActor, const FGuid iBinding );
-    void HandleOnActivateSequence( FMovieSceneSequenceIDRef iSequenceID );
-    void HandleOnSelectionChangedSections( TArray<UMovieSceneSection*> iSections );
     void HandleMapChanged( UWorld* iNewWorld, EMapChangeType iMapChangeType );
 
     void OnSequencerReceivedFocus();

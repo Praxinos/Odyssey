@@ -14,6 +14,7 @@ class AActor;
 class ACineCameraActor;
 class UMaterialInstanceConstant;
 class UMovieScene;
+class UMovieSceneSection;
 class UMovieSceneSequence;
 class UMovieSceneTrack;
 class IMovieScenePlayer;
@@ -51,4 +52,9 @@ private:
 
 public:
     static void SetStoryboardViewport();
+
+public:
+    static void HandleActorAddedToSequencer( AActor* iActor, const FGuid iBinding, ISequencer* iSequencer );
+    static void HandleOnActivateSequence( FMovieSceneSequenceIDRef iSequenceID, ISequencer* iSequencer );
+    static void HandleOnSelectionChangedSections( TArray<UMovieSceneSection*> iSections, ISequencer* iSequencer );
 };

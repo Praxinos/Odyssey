@@ -76,6 +76,9 @@ private:
 
 private:
     ISequencer*     mSequencer;
+    FDelegateHandle mSequencerActorAddedDelegates;
+    FDelegateHandle mSequencerActivatedDelegates;
+    FDelegateHandle mSequencerSelectionSectionChangedDelegates;
     UShotSequence*  mShotSequence;
 
     TSharedPtr<FUICommandList> mShotCommandList;

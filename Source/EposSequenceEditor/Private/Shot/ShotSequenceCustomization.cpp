@@ -15,6 +15,7 @@
 #include "Shot/ShotSequence.h"
 #include "Styles/EposSequenceEditorStyle.h"
 #include "Styles/EposTracksEditorStyle.h"
+#include "ToolkitHelpers.h"
 #include "Tools/EposSequenceTools.h"
 #include "Tools/LighttableTools.h"
 
@@ -75,6 +76,10 @@ FShotSequenceCustomization::RegisterSequencerCustomization( FSequencerCustomizat
 
     UEposSequenceEditorBlueprintLibrary::SetSequencer( mSequencer->AsShared() );
     UEposNamingConventionBlueprintLibrary::SetSequencer( mSequencer->AsShared() );
+
+    mSequencerActorAddedDelegates = mSequencer->OnActorAddedToSequencer().AddStatic( &ToolkitHelpers::HandleActorAddedToSequencer, mSequencer );
+    mSequencerActivatedDelegates = mSequencer->OnActivateSequence().AddStatic( &ToolkitHelpers::HandleOnActivateSequence, mSequencer );
+    mSequencerSelectionSectionChangedDelegates = mSequencer->GetSelectionChangedSections().AddStatic( &ToolkitHelpers::HandleOnSelectionChangedSections, mSequencer );
 }
 
 void
@@ -87,6 +92,13 @@ FShotSequenceCustomization::UnregisterSequencerCustomization()
     FCoreUObjectDelegates::OnObjectPropertyChanged.RemoveAll( this );
 
     mShotCommandList = nullptr;
+
+    if( mSequencer )
+    {
+        mSequencer->OnActorAddedToSequencer().Remove( mSequencerActorAddedDelegates );
+        mSequencer->OnActivateSequence().Remove( mSequencerActivatedDelegates );
+        mSequencer->GetSelectionChangedSections().Remove( mSequencerSelectionSectionChangedDelegates );
+    }
 
     mSequencer = nullptr;
     mShotSequence = nullptr;
