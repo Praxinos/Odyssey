@@ -31,8 +31,6 @@
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "EposMovieSceneSequence.h"
-#include "EposNamingConventionBlueprintLibrary.h"
-#include "EposSequenceEditorBlueprintLibrary.h"
 #include "EposSequenceEditorCommands.h"
 #include "Export/ExportSequencerRenderer.h"
 #include "Misc/EposSequenceEditorPlaybackContext.h"
@@ -194,8 +192,6 @@ void FEposSequenceEditorToolkit::Initialize( const EToolkitMode::Type iMode, con
     options.bRequiresLevelEvents = true;
     options.bRequiresActorEvents = true;
     FLevelEditorSequencerIntegration::Get().AddSequencer( mSequencer.ToSharedRef(), options );
-    UEposSequenceEditorBlueprintLibrary::SetSequencer( mSequencer.ToSharedRef() );
-    UEposNamingConventionBlueprintLibrary::SetSequencer( mSequencer.ToSharedRef() );
 
     // Reopen the scene outliner so that is refreshed with the sequencer columns
     {

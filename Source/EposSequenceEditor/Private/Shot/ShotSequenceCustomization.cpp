@@ -7,6 +7,8 @@
 #include "ILevelEditor.h"
 #include "LevelEditor.h"
 
+#include "EposNamingConventionBlueprintLibrary.h"
+#include "EposSequenceEditorBlueprintLibrary.h"
 #include "EposSequenceEditorCommands.h"
 #include "EposSequenceToolbarHelpers.h"
 #include "PlaneActor.h"
@@ -70,6 +72,9 @@ FShotSequenceCustomization::RegisterSequencerCustomization( FSequencerCustomizat
     customization.OnActorsDrop.BindRaw( this, &FShotSequenceCustomization::OnSequencerActorsDrop );
 
     ioBuilder.AddCustomization( customization );
+
+    UEposSequenceEditorBlueprintLibrary::SetSequencer( mSequencer->AsShared() );
+    UEposNamingConventionBlueprintLibrary::SetSequencer( mSequencer->AsShared() );
 }
 
 void

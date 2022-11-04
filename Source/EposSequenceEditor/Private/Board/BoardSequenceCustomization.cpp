@@ -17,6 +17,8 @@
 
 #include "Board/BoardSequence.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
+#include "EposNamingConventionBlueprintLibrary.h"
+#include "EposSequenceEditorBlueprintLibrary.h"
 #include "EposSequenceEditorCommands.h"
 #include "EposSequenceHelpers.h"
 #include "EposSequenceToolbarHelpers.h"
@@ -80,6 +82,9 @@ FBoardSequenceCustomization::RegisterSequencerCustomization( FSequencerCustomiza
     customization.OnActorsDrop.BindRaw( this, &FBoardSequenceCustomization::OnSequencerActorsDrop );
 
     ioBuilder.AddCustomization( customization );
+
+    UEposSequenceEditorBlueprintLibrary::SetSequencer( mSequencer->AsShared() );
+    UEposNamingConventionBlueprintLibrary::SetSequencer( mSequencer->AsShared() );
 }
 
 void
