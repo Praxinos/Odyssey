@@ -220,48 +220,7 @@ void FEposSequenceEditorToolkit::Initialize( const EToolkitMode::Type iMode, con
 
     //---
 
-    auto GetFirstPerspectiveClient = []() -> SLevelViewport*
-    {
-        FLevelEditorViewportClient* levelVC = nullptr;
-
-        for( FLevelEditorViewportClient* viewportClient : GEditor->GetLevelViewportClients() )
-        {
-            if( viewportClient
-                && viewportClient->GetViewMode() != VMI_Unknown
-                && viewportClient->AllowsCinematicControl()
-                && viewportClient->IsPerspective() )
-                //TODO: improve by getting an already "storyboard viewport" if exists
-            {
-                levelVC = viewportClient;
-                break;
-            }
-        }
-
-        if( !levelVC )
-        {
-            //TODO: improve by setting to perspective if no one find
-            //viewport->GetLevelViewportClient().SetViewportType(ELevelViewportType::LVT_Perspective); // Need to be called first
-
-            FLevelEditorModule& levelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>( "LevelEditor" );
-            return levelEditorModule.GetFirstActiveLevelViewport().Get();
-        }
-
-        TSharedPtr<SEditorViewport> viewport_widget = levelVC->GetEditorViewportWidget();
-        return StaticCastSharedPtr<SLevelViewport>( viewport_widget ).Get();
-    };
-
-    // Do not use a TSharedPtr<> !!!
-    // https://udn.unrealengine.com/s/question/0D54z00007bITs8CAG/changing-the-viewport-layout-type-makes-the-viewport-unfocused-and-gcurrentleveleditingviewportclient-nullptr
-    SLevelViewport* viewport = GetFirstPerspectiveClient();
-    if( viewport )
-    {
-        viewport->GetCommandList()->ExecuteAction( FEposSequenceEditorCommands::Get().ToggleStoryboardViewportCommand.ToSharedRef() );
-        viewport = nullptr; // viewport is no more valid after changing viewport layout type
-
-        // Only for 5.0.1
-        viewport = GetFirstPerspectiveClient();
-        viewport->GetLevelViewportClient().SetCurrentViewport();
-    }
+    ToolkitHelpers::SetStoryboardViewport();
 }
 
 TSharedPtr<ISequencer>

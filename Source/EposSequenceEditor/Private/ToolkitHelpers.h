@@ -48,4 +48,7 @@ private:
     //static FGuid CreateComponentTrack( ISequencer* iSequencer, AActor* iActor, const FString& iComponentName );
     static FGuid CreateComponentTrack( ISequencer* iSequencer, AActor* iActor, UActorComponent* iComponent );
     static void CreatePropertyTrack( ISequencer* iSequencer, AActor* iActor, const FGuid& iBinding, UClass* iClass, const FString& iComponentPath, const FString& iPropertyPath );
+
+public:
+    static void SetStoryboardViewport();
 };
