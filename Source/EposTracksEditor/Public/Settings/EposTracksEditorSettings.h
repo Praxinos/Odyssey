@@ -118,7 +118,7 @@ protected:
     //~
 
 private:
-    UFUNCTION( BlueprintCallable )
+    UFUNCTION( BlueprintCallable, Category=Settings )
     void UpdateValues();
 
 public:
