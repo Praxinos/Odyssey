@@ -390,7 +390,7 @@ InvalidateTextureFromSourceDataUsingSortedRects( const ::ULIS::FBlock* iData, UT
             for( int32 j = 0; j < ioSrcRects[i].Num(); ++j ) {
                 compressedMips[i].Emplace( TArray< FCompressedImage2D >() );
                 // Non MT mode
-                if( !ensure( Compressor->BuildTexture( tileImages[i][j], TArray< FImage >(), buildSettings[i][0], FStringView(), compressedMips[i][j], unusedNumMipsInTail, unusedExtData ) ) )
+                if( !ensure( Compressor->BuildTexture( tileImages[i][j], TArray< FImage >(), buildSettings[i][0], FStringView(), compressedMips[i][j], unusedNumMipsInTail, unusedExtData, nullptr )))
                     return;
             }
         }

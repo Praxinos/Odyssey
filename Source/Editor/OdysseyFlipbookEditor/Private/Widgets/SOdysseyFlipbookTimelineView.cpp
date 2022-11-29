@@ -3,7 +3,7 @@
 
 #include "SOdysseyFlipbookTimelineView.h"
 
-#include "AssetRegistryModule.h"
+#include "AssetRegistry/AssetRegistryModule.h"
 #include "Engine/Texture2D.h"
 #include "GenericPlatform/GenericPlatformMath.h"
 #include "Widgets/Input/SSlider.h"

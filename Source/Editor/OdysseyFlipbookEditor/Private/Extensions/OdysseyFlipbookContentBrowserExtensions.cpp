@@ -3,7 +3,7 @@
 
 #include "OdysseyFlipbookContentBrowserExtensions.h"
 
-#include "AssetData.h"
+#include "AssetRegistry/AssetData.h"
 #include "AssetToolsModule.h"
 #include "ContentBrowserModule.h"
 #include "EditorStyleSet.h"
@@ -202,7 +202,7 @@ FOdysseyFlipbookContentBrowserExtensions_Impl::OnExtendContentBrowserAssetSelect
     for( auto assetIt = iSelectedAssets.CreateConstIterator(); assetIt; ++assetIt )
     {
         const FAssetData& asset = *assetIt;
-        isAnyFlipbooks = isAnyFlipbooks || ( asset.AssetClass == UPaperFlipbook::StaticClass()->GetFName() );
+        isAnyFlipbooks = isAnyFlipbooks || ( asset.GetClass()->GetClassPathName() == UPaperFlipbook::StaticClass()->GetClassPathName() );
     }
 
     if( isAnyFlipbooks )

@@ -3,7 +3,7 @@
 
 #include "OdysseyTextureEditorLayerStackTab.h"
 
-#include "AssetRegistryModule.h"
+#include "AssetRegistry/AssetRegistryModule.h"
 #include "ContentBrowserModule.h"
 #include "DesktopPlatformModule.h"
 #include "IContentBrowserSingleton.h"
@@ -216,7 +216,7 @@ FOdysseyTextureEditorLayerStackTab::ImportTexturesAsLayers()
     openAssetDialogConfig.DialogTitleOverride = LOCTEXT( "ImportTextureDialogTitle", "Import Textures As Layers" );
     openAssetDialogConfig.DefaultPath = FPaths::GetPath(mEditor->Texture()->GetPathName() );
     openAssetDialogConfig.bAllowMultipleSelection = true;
-    openAssetDialogConfig.AssetClassNames.Add( UTexture2D::StaticClass()->GetFName() );
+    openAssetDialogConfig.AssetClassNames.Add( UTexture2D::StaticClass()->GetClassPathName() );
 
     FContentBrowserModule& contentBrowserModule = FModuleManager::LoadModuleChecked<FContentBrowserModule>( "ContentBrowser" );
     TArray < FAssetData > assetsData = contentBrowserModule.Get().CreateModalOpenAssetDialog( openAssetDialogConfig );
@@ -243,7 +243,7 @@ FOdysseyTextureEditorLayerStackTab::ExportLayersAsTextures()
     saveAssetDialogConfig.DialogTitleOverride = LOCTEXT( "ExportLayerDialogTitle", "Export Layers As Texture" );
     saveAssetDialogConfig.DefaultPath = FPaths::GetPath( mEditor->Texture()->GetPathName() );
     saveAssetDialogConfig.DefaultAssetName = mEditor->Texture()->GetName();
-    saveAssetDialogConfig.AssetClassNames.Add( UTexture2D::StaticClass()->GetFName() );
+    saveAssetDialogConfig.AssetClassNames.Add( UTexture2D::StaticClass()->GetClassPathName() );
     saveAssetDialogConfig.ExistingAssetPolicy = ESaveAssetDialogExistingAssetPolicy::AllowButWarn;
 
     FContentBrowserModule& contentBrowserModule = FModuleManager::LoadModuleChecked<FContentBrowserModule>( "ContentBrowser" );

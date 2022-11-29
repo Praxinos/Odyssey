@@ -4,7 +4,7 @@
 #include "SOdysseyTabletAPISwitcher.h"
 
 #include "OdysseyStylusInputSettings.h"
-#include "Dialogs/CustomDialog.h"
+#include "Dialog/SCustomDialog.h"
 
 #define LOCTEXT_NAMESPACE "TabletAPISwitcher"
 

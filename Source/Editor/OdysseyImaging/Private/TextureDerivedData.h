@@ -58,7 +58,7 @@ static void GetTextureBuildSettings(
     OutBuildSettings.ColorAdjustment.AdjustMaxAlpha = Texture.AdjustMaxAlpha;
     OutBuildSettings.bUseLegacyGamma = Texture.bUseLegacyGamma;
     OutBuildSettings.bPreserveBorder = Texture.bPreserveBorder;
-    OutBuildSettings.bDitherMipMapAlpha = Texture.bDitherMipMapAlpha;
+    //OutBuildSettings.bDitherMipMapAlpha = Texture.bDitherMipMapAlpha;
     OutBuildSettings.AlphaCoverageThresholds = (FVector4f)Texture.AlphaCoverageThresholds;
     OutBuildSettings.bComputeBokehAlpha = (Texture.LODGroup == TEXTUREGROUP_Bokeh);
     OutBuildSettings.bReplicateAlpha = false;
@@ -129,7 +129,7 @@ static void GetTextureBuildSettings(
     OutBuildSettings.CompositePower = Texture.CompositePower;
     OutBuildSettings.LODBias = TextureLODSettings.CalculateLODBias(SourceSize.X, SourceSize.Y, Texture.MaxTextureSize, Texture.LODGroup, Texture.LODBias, Texture.NumCinematicMipLevels, Texture.MipGenSettings, bVirtualTextureStreaming);
     OutBuildSettings.LODBiasWithCinematicMips = TextureLODSettings.CalculateLODBias(SourceSize.X, SourceSize.Y, Texture.MaxTextureSize, Texture.LODGroup, Texture.LODBias, 0, Texture.MipGenSettings, bVirtualTextureStreaming);
-    OutBuildSettings.bStreamable = bPlatformSupportsTextureStreaming && !Texture.NeverStream && (Texture.LODGroup != TEXTUREGROUP_UI) && (Cast<const UTexture2D>(&Texture) != NULL);
+    //OutBuildSettings.bStreamable = bPlatformSupportsTextureStreaming && !Texture.NeverStream && (Texture.LODGroup != TEXTUREGROUP_UI) && (Cast<const UTexture2D>(&Texture) != NULL);
     OutBuildSettings.bVirtualStreamable = bVirtualTextureStreaming;
     OutBuildSettings.PowerOfTwoMode = Texture.PowerOfTwoMode;
     OutBuildSettings.PaddingColor = Texture.PaddingColor;
@@ -150,8 +150,8 @@ static void GetTextureBuildSettings(
 
         FVirtualTextureBuildSettings VirtualTextureBuildSettings;
         Texture.GetVirtualTextureBuildSettings(VirtualTextureBuildSettings);
-        OutBuildSettings.bVirtualTextureEnableCompressZlib = VirtualTextureBuildSettings.bEnableCompressZlib;
-        OutBuildSettings.bVirtualTextureEnableCompressCrunch = VirtualTextureBuildSettings.bEnableCompressCrunch;
+        //OutBuildSettings.bVirtualTextureEnableCompressZlib = VirtualTextureBuildSettings.bEnableCompressZlib;
+        //OutBuildSettings.bVirtualTextureEnableCompressCrunch = VirtualTextureBuildSettings.bEnableCompressCrunch;
         OutBuildSettings.VirtualTextureTileSize = FMath::RoundUpToPowerOfTwo(VirtualTextureBuildSettings.TileSize);
 
         // don't all max resolution to be less than VT tile size
@@ -169,8 +169,8 @@ static void GetTextureBuildSettings(
         OutBuildSettings.VirtualAddressingModeY = TA_Wrap;
         OutBuildSettings.VirtualTextureTileSize = 0;
         OutBuildSettings.VirtualTextureBorderSize = 0;
-        OutBuildSettings.bVirtualTextureEnableCompressZlib = false;
-        OutBuildSettings.bVirtualTextureEnableCompressCrunch = false;
+        //OutBuildSettings.bVirtualTextureEnableCompressZlib = false;
+        //OutBuildSettings.bVirtualTextureEnableCompressCrunch = false;
     }
 
     // By default, initialize settings for layer0

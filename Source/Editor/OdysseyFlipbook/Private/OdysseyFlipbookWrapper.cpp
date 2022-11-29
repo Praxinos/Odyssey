@@ -3,7 +3,7 @@
 
 #include "OdysseyFlipbookWrapper.h"
 
-#include "AssetRegistryModule.h"
+#include "AssetRegistry/AssetRegistryModule.h"
 #include "Editor.h"
 #include "PaperFlipbook.h"
 #include "PaperImporterSettings.h"

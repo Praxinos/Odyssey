@@ -3,7 +3,7 @@
 
 #include "OdysseyBrush_ContentBrowserExtensions.h"
 
-#include "AssetData.h"
+#include "AssetRegistry/AssetData.h"
 #include "AssetToolsModule.h"
 #include "ContentBrowserModule.h"
 #include "EditorStyleSet.h"

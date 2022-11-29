@@ -8,7 +8,7 @@
 #include "Interfaces/IMainFrameModule.h" 
 #include "PhysicsEngine/PhysicsSettings.h"
 #include "Toolkits/ToolkitManager.h"
-#include "AssetRegistryModule.h"
+#include "AssetRegistry/AssetRegistryModule.h"
 #include "EditorReimportHandler.h"
 #include "MeshPaintHelpers.h"
 #include "MeshPaintSettings.h"

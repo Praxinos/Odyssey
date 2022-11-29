@@ -214,7 +214,7 @@ SOdysseyColorSelector::GetHexBoxVisibility() const
 FSlateFontInfo
 SOdysseyColorSelector::GetHexFont() const
 {
-    FSlateFontInfo nfo = FCoreStyle::Get().GetWidgetStyle< FEditableTextBoxStyle >("NormalEditableTextBox").Font;
+    FSlateFontInfo nfo = FCoreStyle::Get().GetWidgetStyle< FEditableTextBoxStyle >("NormalEditableTextBox").TextStyle.Font;
     nfo.Size *= adv_color_wheel->GetDrawRatio() * 5;
     return  nfo;
 }

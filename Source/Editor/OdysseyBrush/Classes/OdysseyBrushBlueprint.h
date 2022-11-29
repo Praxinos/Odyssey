@@ -20,6 +20,5 @@ class ODYSSEYBRUSH_API UOdysseyBrush : public UBlueprint
 #if WITH_EDITOR
     // UBlueprint interface
     virtual  bool  SupportedByDefaultBlueprintFactory()  const  override { return  false; }
-    virtual  void  GetAssetRegistryTags( TArray< FAssetRegistryTag >&  OutTags )  const  override { return; }
 #endif // WITH_EDITOR
 };

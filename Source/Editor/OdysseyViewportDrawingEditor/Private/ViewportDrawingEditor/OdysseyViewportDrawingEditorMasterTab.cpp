@@ -8,6 +8,7 @@
 #include "OdysseyPainterEditor.h"
 #include "UnrealEdGlobals.h"
 #include "Widgets/Layout/SSeparator.h"
+#include "EditorStyleSet.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyViewportDrawingEditorMasterTab"
 

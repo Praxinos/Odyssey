@@ -35,7 +35,8 @@ public class OdysseyWidgets : ModuleRules
                 "OdysseyStylusInput",
                 "OdysseyMaths",
                 "RenderCore",
-				"KismetWidgets"
+				"KismetWidgets",
+                "ToolWidgets",
             }
         );
 

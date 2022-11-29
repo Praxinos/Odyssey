@@ -579,8 +579,10 @@ SOdysseySurfaceViewport::Zoom(double ZoomValue, const FVector2D& iZoomPosition)
 
     FVector2D translation = iZoomPosition;
 
+    FTransform2D zoomTransform = FTransform2D(ZoomValue / GetZoom(), FVector2D(0,0));
+
     mTransform = mTransform.Concatenate(FTransform2D(-translation));
-    mTransform = mTransform.Concatenate(FTransform2D(ZoomValue / GetZoom()));
+    mTransform = FTransform2D( Concatenate(mTransform, zoomTransform.GetMatrix()));
     mTransform = mTransform.Concatenate(FTransform2D(translation));
 }
 

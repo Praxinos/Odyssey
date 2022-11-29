@@ -3,7 +3,7 @@
 
 #include "OdysseyTexture2DContentBrowserExtensions.h"
 
-#include "AssetData.h"
+#include "AssetRegistry/AssetData.h"
 #include "AssetToolsModule.h"
 #include "ContentBrowserModule.h"
 #include "DesktopPlatformModule.h"
