@@ -82,7 +82,8 @@ void UBoardSequence::LocateBoundObjects(const FGuid& ObjectId, UObject* Context,
     const FLevelSequenceBindingReference* Reference = ActorsBindingIdToReferences.Find( ObjectId );
     if( Reference )
     {
-        UObject* ResolvedObject = Reference->Resolve( Context, NAME_None );
+        FTopLevelAssetPath streamedLevelAssetPath;
+        UObject* ResolvedObject = Reference->Resolve( Context, streamedLevelAssetPath );
         if( ResolvedObject && ResolvedObject->GetWorld() )
         {
             OutObjects.Add( ResolvedObject );
@@ -115,7 +116,8 @@ void UBoardSequence::UnbindObjects(const FGuid& ObjectId, const TArray<UObject*>
     FLevelSequenceBindingReference* Reference = ActorsBindingIdToReferences.Find( ObjectId );
     if( Reference )
     {
-        UObject* ResolvedObject = Reference->Resolve( Context, NAME_None );
+        FTopLevelAssetPath streamedLevelAssetPath;
+        UObject* ResolvedObject = Reference->Resolve( Context, streamedLevelAssetPath );
         if( InObjects.Contains( ResolvedObject ) )
         {
             *Reference = FLevelSequenceBindingReference();
@@ -130,7 +132,8 @@ void UBoardSequence::UnbindInvalidObjects(const FGuid& ObjectId, UObject* Contex
     FLevelSequenceBindingReference* Reference = ActorsBindingIdToReferences.Find( ObjectId );
     if( Reference )
     {
-        UObject* ResolvedObject = Reference->Resolve( Context, NAME_None );
+        FTopLevelAssetPath streamedLevelAssetPath;
+        UObject* ResolvedObject = Reference->Resolve( Context, streamedLevelAssetPath );
         if( !IsValid( ResolvedObject ) )
         {
             *Reference = FLevelSequenceBindingReference();
@@ -145,6 +148,11 @@ void UBoardSequence::UnbindInvalidObjects(const FGuid& ObjectId, UObject* Contex
 ETrackSupport
 UBoardSequence::IsTrackSupported( TSubclassOf<class UMovieSceneTrack> InTrackClass ) const
 {
+    if( !UMovieScene::IsTrackClassAllowed( InTrackClass ) )
+    {
+        return ETrackSupport::NotSupported;
+    }
+
     if( InTrackClass == UMovieSceneCinematicBoardTrack::StaticClass() ||
         InTrackClass == UMovieSceneSingleCameraCutTrack::StaticClass() || // The board sequence needs to support this track type, otherwise when opening a board sequence, inner shot sequence won't have this track available (even if supported in this class), because during opening the toolkit, all the track editors are not called
         InTrackClass == UMovieSceneNoteTrack::StaticClass() ||

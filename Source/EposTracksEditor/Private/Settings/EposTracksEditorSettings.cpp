@@ -77,6 +77,8 @@ UEposTracksEditorSettings::UpdateValues()
     CameraSettings.Filmback.SensorAspectRatio = ( CameraSettings.Filmback.SensorHeight > 0.f ) ? ( CameraSettings.Filmback.SensorWidth / CameraSettings.Filmback.SensorHeight ) : 0.f;
     //AspectRatio = Filmback.SensorAspectRatio;
 
+    //TODO: maybe manage new LensSettings.SqueezeFactor and CropSettings.AspectRatio ?! in CineCameraComponent
+
 #if WITH_EDITORONLY_DATA
     //CurrentHorizontalFOV = FieldOfView;          // informational variable only, for editor users
     CameraSettings.CurrentHorizontalFOV = 0.f;

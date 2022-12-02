@@ -8,7 +8,7 @@
 #include "Channels/MovieSceneObjectPathChannel.h"
 #include "Sections/ThumbnailSection.h"
 #include "TrackEditors/SubTrackEditorBase.h"
-#include "KeyDrawParams.h"
+#include "MVVM/Views/KeyDrawParams.h"
 
 #include "EposSequenceHelpers.h"
 

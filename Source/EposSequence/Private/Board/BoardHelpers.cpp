@@ -47,7 +47,7 @@ BoardHelpers::FindParent( UEposMovieSceneSequence* iSequence )
     FAssetRegistryModule& assetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>( TEXT( "AssetRegistry" ) );
 
     TArray<FAssetData> objectList;
-    assetRegistryModule.Get().GetAssetsByClass( UBoardSequence::StaticClass()->GetFName(), objectList );
+    assetRegistryModule.Get().GetAssetsByClass( UBoardSequence::StaticClass()->GetClassPathName(), objectList );
 
     for( auto asset_data : objectList )
     {

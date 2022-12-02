@@ -147,7 +147,7 @@ EposSequenceToolbarHelpers::MakeSettingsEntries( FMenuBuilder& iMenuBuilder, ISe
                                    .OnColorCommitted_Lambda( [iSequencer, root_sequence]( FLinearColor iColor ) { MasterAssetTools::SetBackgroundColor( *iSequencer, root_sequence, iColor ); } ),
                                NAME_None,
                                LOCTEXT( "settings.drawing-material.background-tooltip", "Display background and select its color for the drawing materials" ),
-                               EUserInterfaceActionType::Check );
+                               EUserInterfaceActionType::ToggleButton );
 
     //-
 
@@ -163,7 +163,7 @@ EposSequenceToolbarHelpers::MakeSettingsEntries( FMenuBuilder& iMenuBuilder, ISe
                                    .OnColorCommitted_Lambda( [iSequencer, root_sequence]( FLinearColor iColor ) { MasterAssetTools::SetGridColor( *iSequencer, root_sequence, iColor ); } ),
                                NAME_None,
                                LOCTEXT( "settings.drawing-material.grid-tooltip", "Display grid and select its color for the drawing materials" ),
-                               EUserInterfaceActionType::Check );
+                               EUserInterfaceActionType::ToggleButton );
 
     //-
 

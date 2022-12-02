@@ -13,6 +13,8 @@
 #include "ScopedTransaction.h"
 #include "MovieSceneTrack.h"
 #include "MovieScene.h"
+#include "MVVM/ViewModels/EditorViewModel.h"
+#include "MVVM/ViewModels/TrackAreaViewModel.h"
 #include "SequencerSectionPainter.h"
 #include "EditorStyleSet.h"
 #include "MovieSceneToolHelpers.h"
@@ -164,7 +166,14 @@ FCinematicBoardSection::FCinematicBoardSection( TSharedPtr<ISequencer> iSequence
     };
     iSection.OnSequenceChanged().BindLambda( SequenceChanged );
 
-    BuildKeys();
+    // 5.1: BuildKeys() can't be called now, as it relies on ConstructConverterForViewRange(), which calls GetSequencer()->SequencerWidget (inside GetTopTimeSliderWidget())
+    // which is not set when opening a board asset
+    // When the sequencer is created and initialized, the FCinematicBoardSection is created at line FSequencer::InitSequencer#420: ViewModel->SetSequence(InitParams.RootSequence);
+    // But the SequencerWidget is created just below at line FSequencer::InitSequencer#439
+    // And as GetSequencer()->GetSequencerWidget() returns a TSharedRef<>, there is no way to know if the SequencerWidget is valid or not
+    // So let's try with mNeedRebuild if it's ok now (5.1)
+    //BuildKeys();
+    mNeedRebuild = true;
 }
 
 
@@ -440,7 +449,9 @@ FCinematicBoardSection::ConstructConverterForViewRange( FGeometry* oGeometry ) c
     if( oGeometry )
         *oGeometry = geometry;
 
-    return FTimeToPixel( geometry, GetSequencer()->GetViewRange(), GetSequencer()->GetFocusedTickResolution() );
+    TSharedPtr<UE::Sequencer::FEditorViewModel> editor_model = GetSequencer()->GetViewModel();
+    TSharedPtr<UE::Sequencer::FTrackAreaViewModel> track_model = editor_model->GetTrackArea();
+    return track_model->GetTimeToPixel( geometry.GetLocalSize().X );
 }
 
 FTimeToPixel

@@ -119,7 +119,8 @@ void UShotSequence::LocateBoundObjects( const FGuid& ObjectId, UObject* Context,
     const FLevelSequenceBindingReference* Reference = CameraBindingIdToReferences.Find( ObjectId );
     if( Reference )
     {
-        UObject* ResolvedObject = Reference->Resolve( Context, NAME_None );
+        FTopLevelAssetPath streamedLevelAssetPath;
+        UObject* ResolvedObject = Reference->Resolve( Context, streamedLevelAssetPath );
         if( ResolvedObject && ResolvedObject->GetWorld() )
         {
             OutObjects.Add( ResolvedObject );
@@ -130,7 +131,8 @@ void UShotSequence::LocateBoundObjects( const FGuid& ObjectId, UObject* Context,
     Reference = PlanesBindingIdToReferences.Find( ObjectId );
     if( Reference )
     {
-        UObject* ResolvedObject = Reference->Resolve( Context, NAME_None );
+        FTopLevelAssetPath streamedLevelAssetPath;
+        UObject* ResolvedObject = Reference->Resolve( Context, streamedLevelAssetPath );
         if( ResolvedObject && ResolvedObject->GetWorld() )
         {
             OutObjects.Add( ResolvedObject );
@@ -140,7 +142,8 @@ void UShotSequence::LocateBoundObjects( const FGuid& ObjectId, UObject* Context,
     Reference = ActorsBindingIdToReferences.Find( ObjectId );
     if( Reference )
     {
-        UObject* ResolvedObject = Reference->Resolve( Context, NAME_None );
+        FTopLevelAssetPath streamedLevelAssetPath;
+        UObject* ResolvedObject = Reference->Resolve( Context, streamedLevelAssetPath );
         if( ResolvedObject && ResolvedObject->GetWorld() )
         {
             OutObjects.Add( ResolvedObject );
@@ -175,7 +178,8 @@ void UShotSequence::UnbindObjects( const FGuid& ObjectId, const TArray<UObject*>
     FLevelSequenceBindingReference* Reference = CameraBindingIdToReferences.Find( ObjectId );
     if( Reference )
     {
-        UObject* ResolvedObject = Reference->Resolve( Context, NAME_None );
+        FTopLevelAssetPath streamedLevelAssetPath;
+        UObject* ResolvedObject = Reference->Resolve( Context, streamedLevelAssetPath );
         if( InObjects.Contains( ResolvedObject ) )
         {
             *Reference = FLevelSequenceBindingReference();
@@ -187,7 +191,8 @@ void UShotSequence::UnbindObjects( const FGuid& ObjectId, const TArray<UObject*>
     Reference = PlanesBindingIdToReferences.Find( ObjectId );
     if( Reference )
     {
-        UObject* ResolvedObject = Reference->Resolve( Context, NAME_None );
+        FTopLevelAssetPath streamedLevelAssetPath;
+        UObject* ResolvedObject = Reference->Resolve( Context, streamedLevelAssetPath );
         if( InObjects.Contains( ResolvedObject ) )
         {
             *Reference = FLevelSequenceBindingReference();
@@ -199,7 +204,8 @@ void UShotSequence::UnbindObjects( const FGuid& ObjectId, const TArray<UObject*>
     Reference = ActorsBindingIdToReferences.Find( ObjectId );
     if( Reference )
     {
-        UObject* ResolvedObject = Reference->Resolve( Context, NAME_None );
+        FTopLevelAssetPath streamedLevelAssetPath;
+        UObject* ResolvedObject = Reference->Resolve( Context, streamedLevelAssetPath );
         if( InObjects.Contains( ResolvedObject ) )
         {
             *Reference = FLevelSequenceBindingReference();
@@ -214,7 +220,8 @@ void UShotSequence::UnbindInvalidObjects( const FGuid& ObjectId, UObject* Contex
     FLevelSequenceBindingReference* Reference = CameraBindingIdToReferences.Find( ObjectId );
     if( Reference )
     {
-        UObject* ResolvedObject = Reference->Resolve( Context, NAME_None );
+        FTopLevelAssetPath streamedLevelAssetPath;
+        UObject* ResolvedObject = Reference->Resolve( Context, streamedLevelAssetPath );
         if( !IsValid( ResolvedObject ) )
         {
             *Reference = FLevelSequenceBindingReference();
@@ -226,7 +233,8 @@ void UShotSequence::UnbindInvalidObjects( const FGuid& ObjectId, UObject* Contex
     Reference = PlanesBindingIdToReferences.Find( ObjectId );
     if( Reference )
     {
-        UObject* ResolvedObject = Reference->Resolve( Context, NAME_None );
+        FTopLevelAssetPath streamedLevelAssetPath;
+        UObject* ResolvedObject = Reference->Resolve( Context, streamedLevelAssetPath );
         if( !IsValid( ResolvedObject ) )
         {
             *Reference = FLevelSequenceBindingReference();
@@ -238,7 +246,8 @@ void UShotSequence::UnbindInvalidObjects( const FGuid& ObjectId, UObject* Contex
     Reference = ActorsBindingIdToReferences.Find( ObjectId );
     if( Reference )
     {
-        UObject* ResolvedObject = Reference->Resolve( Context, NAME_None );
+        FTopLevelAssetPath streamedLevelAssetPath;
+        UObject* ResolvedObject = Reference->Resolve( Context, streamedLevelAssetPath );
         if( !IsValid( ResolvedObject ) )
         {
             *Reference = FLevelSequenceBindingReference();
@@ -253,6 +262,11 @@ void UShotSequence::UnbindInvalidObjects( const FGuid& ObjectId, UObject* Contex
 ETrackSupport
 UShotSequence::IsTrackSupported( TSubclassOf<class UMovieSceneTrack> InTrackClass ) const
 {
+    if( !UMovieScene::IsTrackClassAllowed( InTrackClass ) )
+    {
+        return ETrackSupport::NotSupported;
+    }
+
     if( InTrackClass == UMovieSceneSingleCameraCutTrack::StaticClass() ||
         InTrackClass == UMovieSceneNoteTrack::StaticClass() ||
         InTrackClass == UMovieSceneAudioTrack::StaticClass() ||

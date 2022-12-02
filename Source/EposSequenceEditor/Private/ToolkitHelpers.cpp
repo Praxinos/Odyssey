@@ -124,8 +124,8 @@ ToolkitHelpers::CreateTrack( ISequencer* iSequencer, AActor* iActor, const FGuid
 
             auto material_section = Cast<UMovieScenePrimitiveMaterialSection>( NewSection );
 
-            material_track->MaterialIndex = iMaterialTrackIndex;
-            material_track->SetDisplayName( FText::Format( LOCTEXT( "MaterialTrackName_Format", "Material Element {0}" ), FText::AsNumber( material_track->MaterialIndex ) ) );
+            material_track->SetMaterialIndex( iMaterialTrackIndex );
+            material_track->SetDisplayName( FText::Format( LOCTEXT( "MaterialTrackName_Format", "Material Element {0}" ), FText::AsNumber( material_track->GetMaterialIndex() ) ) );
 
             //---
 
@@ -133,7 +133,7 @@ ToolkitHelpers::CreateTrack( ISequencer* iSequencer, AActor* iActor, const FGuid
             FMovieSceneObjectPathChannelKeyValue material_objectpath;
             if( actor )
             {
-                UMaterialInterface* material = actor->GetStaticMeshComponent()->GetMaterial( material_track->MaterialIndex );
+                UMaterialInterface* material = actor->GetStaticMeshComponent()->GetMaterial( material_track->GetMaterialIndex() );
                 material_objectpath = material;
             }
 

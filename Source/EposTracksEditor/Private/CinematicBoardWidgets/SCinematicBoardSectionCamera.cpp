@@ -6,7 +6,7 @@
 #include "Brushes/SlateColorBrush.h"
 #include "Channels/MovieSceneChannelProxy.h"
 #include "CineCameraActor.h"
-#include "KeyDrawParams.h"
+#include "MVVM/Views/KeyDrawParams.h"
 #include "Sections/MovieScene3DTransformSection.h"
 #include "SequencerSettings.h"
 #include "Styling/StyleColors.h"

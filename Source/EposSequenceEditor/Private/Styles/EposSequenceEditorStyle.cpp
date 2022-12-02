@@ -19,6 +19,7 @@ namespace
 static const FVector2D Icon8x8( 8.0f, 8.0f );
 static const FVector2D Icon14x14( 14.0f, 14.0f );
 static const FVector2D Icon16x16( 16.0f, 16.0f );
+static const FVector2D Icon20x20( 20.0f, 20.0f );
 static const FVector2D Icon24x24( 24.0f, 24.0f );
 static const FVector2D Icon48x48( 48.0f, 48.0f );
 static const FVector2D Icon64x64( 64.0f, 64.0f );
@@ -80,11 +81,11 @@ FEposSequenceEditorStyle::InitSequencer()
          .SetColorAndOpacity( FLinearColor( 0.4f, 0.4, 0.4f, 1.0f ) )
     );
 
-    Set( "Settings", new IMAGE_BRUSH_SVG( "epos-settings", Icon48x48 ) );
-    Set( "Settings.Small", new IMAGE_BRUSH_SVG( "epos-settings", FVector2D( 20.f, 20.f ) ) );
+    Set( "Settings", new IMAGE_BRUSH_SVG( "epos-settings", Icon20x20 ) );
+    Set( "Settings.Small", new IMAGE_BRUSH_SVG( "epos-settings", Icon20x20 ) );
 
-    Set( "Help", new IMAGE_BRUSH_SVG( "epos-help", Icon48x48 ) );
-    Set( "Help.Small", new IMAGE_BRUSH_SVG( "epos-help", FVector2D( 20.f, 20.f ) ) );
+    Set( "Help", new IMAGE_BRUSH_SVG( "epos-help", Icon20x20 ) );
+    Set( "Help.Small", new IMAGE_BRUSH_SVG( "epos-help", Icon20x20 ) );
 }
 
 void
@@ -94,45 +95,45 @@ FEposSequenceEditorStyle::InitCommands()
 
     //---
 
-    Set( "EposSequenceCommands.NewStoryboardWithSettings", new IMAGE_BRUSH_SVG( "new-storyboard-with-settings", Icon16x16 ) );
-    Set( "EposSequenceCommands.NewStoryboardWithSettings.Small", new IMAGE_BRUSH_SVG( "new-storyboard-with-settings", Icon16x16 ) );
-    Set( "EposSequenceCommands.NewStoryboardImportImageSequence", new IMAGE_BRUSH_SVG( "new-storyboard-import-image-sequence", Icon16x16 ) );
-    Set( "EposSequenceCommands.NewStoryboardImportImageSequence.Small", new IMAGE_BRUSH_SVG( "new-storyboard-import-image-sequence", Icon16x16 ) );
+    Set( "EposSequenceCommands.NewStoryboardWithSettings", new IMAGE_BRUSH_SVG( "new-storyboard-with-settings", Icon20x20 ) );
+    Set( "EposSequenceCommands.NewStoryboardWithSettings.Small", new IMAGE_BRUSH_SVG( "new-storyboard-with-settings", Icon20x20 ) );
+    Set( "EposSequenceCommands.NewStoryboardImportImageSequence", new IMAGE_BRUSH_SVG( "new-storyboard-import-image-sequence", Icon20x20 ) );
+    Set( "EposSequenceCommands.NewStoryboardImportImageSequence.Small", new IMAGE_BRUSH_SVG( "new-storyboard-import-image-sequence", Icon20x20 ) );
 
-    Set( "EposSequenceCommands.CreateCameraAtCurrentTime", new IMAGE_BRUSH_SVG( "camera-create", Icon48x48 ) );
-    Set( "EposSequenceCommands.CreateCameraAtCurrentTime.Small", new IMAGE_BRUSH_SVG( "camera-create", Icon24x24 ) );
-    Set( "EposSequenceCommands.SnapCameraToViewportAtCurrentTime", new IMAGE_BRUSH_SVG( "camera-snap-to-viewport", Icon48x48 ) );         // inside popup (and maybe big toolbar ?) but Icon..x.. is not used ?
-    Set( "EposSequenceCommands.SnapCameraToViewportAtCurrentTime.Small", new IMAGE_BRUSH_SVG( "camera-snap-to-viewport", Icon24x24 ) );   // in the toolbar, stretch to the size Icon..x..
-    //Set( "EposSequenceCommands.PilotCameraAtCurrentTime", new IMAGE_BRUSH_SVG( "camera-pilot", Icon48x48 ) );
-    //Set( "EposSequenceCommands.PilotCameraAtCurrentTime.Small", new IMAGE_BRUSH_SVG( "camera-pilot", Icon24x24 ) );
-    //Set( "EposSequenceCommands.EjectCameraAtCurrentTime", new IMAGE_BRUSH_SVG( "camera-eject", Icon48x48 ) );
-    //Set( "EposSequenceCommands.EjectCameraAtCurrentTime.Small", new IMAGE_BRUSH_SVG( "camera-eject", Icon24x24 ) ); // Not used in a widget, only in shortcuts for the moment
-    Set( "EposSequenceCommands.GotoPreviousCameraPosition", new IMAGE_BRUSH_SVG( "camera-previous", Icon48x48 ) );
-    Set( "EposSequenceCommands.GotoPreviousCameraPosition.Small", new IMAGE_BRUSH_SVG( "camera-previous", Icon24x24 ) );
-    Set( "EposSequenceCommands.GotoNextCameraPosition", new IMAGE_BRUSH_SVG( "camera-next", Icon48x48 ) );
-    Set( "EposSequenceCommands.GotoNextCameraPosition.Small", new IMAGE_BRUSH_SVG( "camera-next", Icon24x24 ) );
+    Set( "EposSequenceCommands.CreateCameraAtCurrentTime", new IMAGE_BRUSH_SVG( "camera-create", Icon20x20 ) );
+    Set( "EposSequenceCommands.CreateCameraAtCurrentTime.Small", new IMAGE_BRUSH_SVG( "camera-create", Icon20x20 ) );
+    Set( "EposSequenceCommands.SnapCameraToViewportAtCurrentTime", new IMAGE_BRUSH_SVG( "camera-snap-to-viewport", Icon20x20 ) );         // inside popup (and maybe big toolbar ?) but Icon..x.. is not used ?
+    Set( "EposSequenceCommands.SnapCameraToViewportAtCurrentTime.Small", new IMAGE_BRUSH_SVG( "camera-snap-to-viewport", Icon20x20 ) );   // in the toolbar, stretch to the size Icon..x..
+    //Set( "EposSequenceCommands.PilotCameraAtCurrentTime", new IMAGE_BRUSH_SVG( "camera-pilot", Icon20x20 ) );
+    //Set( "EposSequenceCommands.PilotCameraAtCurrentTime.Small", new IMAGE_BRUSH_SVG( "camera-pilot", Icon20x20 ) );
+    //Set( "EposSequenceCommands.EjectCameraAtCurrentTime", new IMAGE_BRUSH_SVG( "camera-eject", Icon20x20 ) );
+    //Set( "EposSequenceCommands.EjectCameraAtCurrentTime.Small", new IMAGE_BRUSH_SVG( "camera-eject", Icon20x20 ) ); // Not used in a widget, only in shortcuts for the moment
+    Set( "EposSequenceCommands.GotoPreviousCameraPosition", new IMAGE_BRUSH_SVG( "camera-previous", Icon20x20 ) );
+    Set( "EposSequenceCommands.GotoPreviousCameraPosition.Small", new IMAGE_BRUSH_SVG( "camera-previous", Icon20x20 ) );
+    Set( "EposSequenceCommands.GotoNextCameraPosition", new IMAGE_BRUSH_SVG( "camera-next", Icon20x20 ) );
+    Set( "EposSequenceCommands.GotoNextCameraPosition.Small", new IMAGE_BRUSH_SVG( "camera-next", Icon20x20 ) );
 
-    Set( "EposSequenceCommands.CreatePlaneAtCurrentTime", new IMAGE_BRUSH_SVG( "plane-create", Icon48x48 ) );
-    Set( "EposSequenceCommands.CreatePlaneAtCurrentTime.Small", new IMAGE_BRUSH_SVG( "plane-create", Icon24x24 ) );
-    Set( "EposSequenceCommands.DetachPlaneAtCurrentTime", new IMAGE_BRUSH_SVG( "plane-detach", Icon48x48 ) );
-    Set( "EposSequenceCommands.DetachPlaneAtCurrentTime.Small", new IMAGE_BRUSH_SVG( "plane-detach", Icon24x24 ) );
+    Set( "EposSequenceCommands.CreatePlaneAtCurrentTime", new IMAGE_BRUSH_SVG( "plane-create", Icon20x20 ) );
+    Set( "EposSequenceCommands.CreatePlaneAtCurrentTime.Small", new IMAGE_BRUSH_SVG( "plane-create", Icon20x20 ) );
+    Set( "EposSequenceCommands.DetachPlaneAtCurrentTime", new IMAGE_BRUSH_SVG( "plane-detach", Icon20x20 ) );
+    Set( "EposSequenceCommands.DetachPlaneAtCurrentTime.Small", new IMAGE_BRUSH_SVG( "plane-detach", Icon20x20 ) );
 
-    Set( "EposSequenceCommands.CreateDrawingAtCurrentTime", new IMAGE_BRUSH_SVG( "drawing-create", Icon48x48 ) );
-    Set( "EposSequenceCommands.CreateDrawingAtCurrentTime.Small", new IMAGE_BRUSH_SVG( "drawing-create", Icon24x24 ) );
-    Set( "EposSequenceCommands.GotoPreviousDrawing", new IMAGE_BRUSH_SVG( "drawing-previous", Icon48x48 ) );
-    Set( "EposSequenceCommands.GotoPreviousDrawing.Small", new IMAGE_BRUSH_SVG( "drawing-previous", Icon24x24 ) );
-    Set( "EposSequenceCommands.GotoNextDrawing", new IMAGE_BRUSH_SVG( "drawing-next", Icon48x48 ) );
-    Set( "EposSequenceCommands.GotoNextDrawing.Small", new IMAGE_BRUSH_SVG( "drawing-next", Icon24x24 ) );
+    Set( "EposSequenceCommands.CreateDrawingAtCurrentTime", new IMAGE_BRUSH_SVG( "drawing-create", Icon20x20 ) );
+    Set( "EposSequenceCommands.CreateDrawingAtCurrentTime.Small", new IMAGE_BRUSH_SVG( "drawing-create", Icon20x20 ) );
+    Set( "EposSequenceCommands.GotoPreviousDrawing", new IMAGE_BRUSH_SVG( "drawing-previous", Icon20x20 ) );
+    Set( "EposSequenceCommands.GotoPreviousDrawing.Small", new IMAGE_BRUSH_SVG( "drawing-previous", Icon20x20 ) );
+    Set( "EposSequenceCommands.GotoNextDrawing", new IMAGE_BRUSH_SVG( "drawing-next", Icon20x20 ) );
+    Set( "EposSequenceCommands.GotoNextDrawing.Small", new IMAGE_BRUSH_SVG( "drawing-next", Icon20x20 ) );
 
-    Set( "EposSequenceCommands.OpenSequenceEditorSettings", new IMAGE_BRUSH_SVG( "epos-settings", Icon48x48 ) );
-    Set( "EposSequenceCommands.OpenSequenceEditorSettings.Small", new IMAGE_BRUSH_SVG( "epos-settings", Icon24x24 ) );
-    Set( "EposSequenceCommands.OpenTrackEditorSettings", new IMAGE_BRUSH_SVG( "epos-settings", Icon48x48 ) );
-    Set( "EposSequenceCommands.OpenTrackEditorSettings.Small", new IMAGE_BRUSH_SVG( "epos-settings", Icon24x24 ) );
-    Set( "EposSequenceCommands.OpenNamingConventionEditorSettings", new IMAGE_BRUSH_SVG( "epos-settings", Icon48x48 ) );
-    Set( "EposSequenceCommands.OpenNamingConventionEditorSettings.Small", new IMAGE_BRUSH_SVG( "epos-settings", Icon24x24 ) );
+    Set( "EposSequenceCommands.OpenSequenceEditorSettings", new IMAGE_BRUSH_SVG( "epos-settings", Icon20x20 ) );
+    Set( "EposSequenceCommands.OpenSequenceEditorSettings.Small", new IMAGE_BRUSH_SVG( "epos-settings", Icon20x20 ) );
+    Set( "EposSequenceCommands.OpenTrackEditorSettings", new IMAGE_BRUSH_SVG( "epos-settings", Icon20x20 ) );
+    Set( "EposSequenceCommands.OpenTrackEditorSettings.Small", new IMAGE_BRUSH_SVG( "epos-settings", Icon20x20 ) );
+    Set( "EposSequenceCommands.OpenNamingConventionEditorSettings", new IMAGE_BRUSH_SVG( "epos-settings", Icon20x20 ) );
+    Set( "EposSequenceCommands.OpenNamingConventionEditorSettings.Small", new IMAGE_BRUSH_SVG( "epos-settings", Icon20x20 ) );
 
-    Set( "EposSequenceCommands.OpenAboutWindow", new IMAGE_BRUSH_SVG( "epos-about", Icon48x48 ) );
-    Set( "EposSequenceCommands.OpenAboutWindow.Small", new IMAGE_BRUSH_SVG( "epos-about", Icon24x24 ) );
+    Set( "EposSequenceCommands.OpenAboutWindow", new IMAGE_BRUSH_SVG( "epos-about", Icon20x20 ) );
+    Set( "EposSequenceCommands.OpenAboutWindow.Small", new IMAGE_BRUSH_SVG( "epos-about", Icon20x20 ) );
 }
 
 void

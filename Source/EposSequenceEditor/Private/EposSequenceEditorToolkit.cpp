@@ -118,6 +118,11 @@ FEposSequenceEditorToolkit::~FEposSequenceEditorToolkit()
 
 void FEposSequenceEditorToolkit::Initialize( const EToolkitMode::Type iMode, const TSharedPtr<IToolkitHost>& iInitToolkitHost, TArray< UEposMovieSceneSequence* > iSequences )
 {
+    FLevelEditorModule& levelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>( "LevelEditor" );
+
+    // Clear out the existing sequencer
+    levelEditorModule.AttachSequencer( nullptr, nullptr );
+
     // create tab layout
     const TSharedRef<FTabManager::FLayout> StandaloneDefaultLayout = FTabManager::NewLayout( "Standalone_EposEditor" )
         ->AddArea
@@ -180,12 +185,6 @@ void FEposSequenceEditorToolkit::Initialize( const EToolkitMode::Type iMode, con
         mSequencer->GetSequencerSettings()->SetMovieRendererName( FEposSequencePipelineRenderer::MoviePipelineQueueTabLabel.ToString() );
     }
 
-    //if( ToolkitParams.InitialBindingClass != nullptr )
-    //{
-    //    FTemplateSequenceEditorUtil Util( BoardSequence, *Sequencer.Get() );
-    //    Util.ChangeActorBinding( ToolkitParams.InitialBindingClass );
-    //}
-
     // with ToolkitCommands, it's for shortcuts only
     BindCommands( mSequencer->GetCommandBindings() );
 
@@ -193,8 +192,6 @@ void FEposSequenceEditorToolkit::Initialize( const EToolkitMode::Type iMode, con
     options.bRequiresLevelEvents = true;
     options.bRequiresActorEvents = true;
     FLevelEditorSequencerIntegration::Get().AddSequencer( mSequencer.ToSharedRef(), options );
-
-    FLevelEditorModule& levelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>( "LevelEditor" );
 
     // Reopen the scene outliner so that is refreshed with the sequencer columns
     {
@@ -206,7 +203,13 @@ void FEposSequenceEditorToolkit::Initialize( const EToolkitMode::Type iMode, con
         }
     }
 
-    levelEditorModule.AttachSequencer( mSequencer->GetSequencerWidget(), SharedThis( this ) );
+    TSharedPtr<SDockTab> dockTab = levelEditorModule.AttachSequencer( mSequencer->GetSequencerWidget(), SharedThis( this ) );
+    if( dockTab.IsValid() )
+    {
+        TAttribute<FText> labelSuffix = TAttribute<FText>( this, &FEposSequenceEditorToolkit::GetTabSuffix );
+        dockTab->SetTabLabelSuffix( labelSuffix );
+    }
+
     levelEditorModule.OnMapChanged().AddRaw( this, &FEposSequenceEditorToolkit::HandleMapChanged );
 
     OnOpened().Broadcast( *this );
@@ -411,6 +414,24 @@ FString FEposSequenceEditorToolkit::GetWorldCentricTabPrefix() const
 FLinearColor FEposSequenceEditorToolkit::GetWorldCentricTabColorScale() const
 {
     return FLinearColor( 0.7, 0.0f, 0.2f, 0.5f );
+}
+
+FText FEposSequenceEditorToolkit::GetTabSuffix() const
+{
+    UMovieSceneSequence* sequence = mSequencer->GetFocusedMovieSceneSequence();
+
+    if( sequence == nullptr )
+    {
+        return FText::GetEmpty();
+    }
+
+    const bool bIsDirty = sequence->GetMovieScene()->GetOuter()->GetOutermost()->IsDirty();
+    if( bIsDirty )
+    {
+        return LOCTEXT( "TabSuffixAsterix", "*" );
+    }
+
+    return FText::GetEmpty();
 }
 
 //---

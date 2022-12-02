@@ -50,7 +50,7 @@ FShotSequenceCustomization::RegisterSequencerCustomization( FSequencerCustomizat
     // customization.AddMenuExtender ...
 
     TSharedRef<FExtender> ToolbarExtender = MakeShared<FExtender>();
-    ToolbarExtender->AddToolBarExtension( "Curve Editor", EExtensionHook::After, nullptr, FToolBarExtensionDelegate::CreateRaw( this, &FShotSequenceCustomization::ExtendSequencerToolbar ) );
+    ToolbarExtender->AddToolBarExtension( "CurveEditor", EExtensionHook::After, nullptr, FToolBarExtensionDelegate::CreateRaw( this, &FShotSequenceCustomization::ExtendSequencerToolbar ) );
     customization.ToolbarExtender = ToolbarExtender;
 
     // customization.OnReceivedDragOver ...
@@ -216,6 +216,10 @@ FShotSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> CommandL
 void
 FShotSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuilder )
 {
+    static const FName sSequencerToolbarStyleName = "SequencerToolbar";
+
+    ToolbarBuilder.BeginStyleOverride( sSequencerToolbarStyleName );
+
     ToolbarBuilder.AddSeparator();
 
     ToolbarBuilder.AddToolBarButton( FEposSequenceEditorCommands::Get().CreateCameraAtCurrentTime );
@@ -358,6 +362,8 @@ FShotSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuil
         LOCTEXT( "Help", "Help" ),
         LOCTEXT( "HelpToolTip", "Help" ),
         FSlateIcon( FEposSequenceEditorStyle::Get().GetStyleSetName(), "Help" ) );
+
+    ToolbarBuilder.EndStyleOverride();
 }
 
 TSharedRef<SWidget>
