@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Curves/KeyHandle.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Misc/FrameNumber.h"
 #include "Misc/Guid.h"
