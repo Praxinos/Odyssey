@@ -16,6 +16,11 @@ class FShotSequenceActions
 {
 public:
 
+    /** Creates and initializes a new instance. */
+    FShotSequenceActions( const EAssetTypeCategories::Type iEposCategory, const EAssetTypeCategories::Type iLevelSequenceCategory );
+
+public:
+
     // IAssetTypeActions interface
     virtual uint32 GetCategories() override;
     virtual FText GetName() const override;
@@ -25,5 +30,9 @@ public:
     virtual bool ShouldForceWorldCentric() override;
     virtual bool CanLocalize() const override;
     //virtual bool HasActions( const TArray<UObject*>& iObjects ) const override;
-    //virtual void GetActions(const TArray<UObject*>& InObjects, FMenuBuilder& MenuBuilder) override;
+    //virtual void GetActions( const TArray<UObject*>& InObjects, FMenuBuilder& MenuBuilder ) override;
+
+private:
+    const EAssetTypeCategories::Type mAssetEposCategory;
+    const EAssetTypeCategories::Type mAssetLevelSequenceCategory;
 };

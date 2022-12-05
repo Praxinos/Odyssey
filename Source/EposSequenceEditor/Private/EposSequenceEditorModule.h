@@ -17,9 +17,6 @@ public:
     FEposSequenceEditorModule();
 
 public:
-    static EAssetTypeCategories::Type GetAssetCategory();
-
-public:
     /** IModuleInterface implementation */
     virtual void StartupModule() override;
     virtual void ShutdownModule() override;
@@ -54,7 +51,6 @@ private:
     void UnregisterMovieRenderer();
 
 private:
-    static EAssetTypeCategories::Type   mEposAssetCategory;
     TSharedPtr<FBoardSequenceActions>   mBoardSequenceTypeActions;
     TSharedPtr<FShotSequenceActions>    mShotSequenceTypeActions;
 

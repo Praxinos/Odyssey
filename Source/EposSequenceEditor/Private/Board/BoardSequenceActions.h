@@ -16,6 +16,11 @@ class FBoardSequenceActions
 {
 public:
 
+    /** Creates and initializes a new instance. */
+    FBoardSequenceActions( const EAssetTypeCategories::Type iEposCategory, const EAssetTypeCategories::Type iLevelSequenceCategory );
+
+public:
+
     // IAssetTypeActions interface
     virtual uint32 GetCategories() override;
     virtual FText GetName() const override;
@@ -26,4 +31,8 @@ public:
     virtual bool CanLocalize() const override;
     //virtual bool HasActions( const TArray<UObject*>& iObjects ) const override;
     //virtual void GetActions( const TArray<UObject*>& InObjects, FMenuBuilder& MenuBuilder ) override;
+
+private:
+    const EAssetTypeCategories::Type mAssetEposCategory;
+    const EAssetTypeCategories::Type mAssetLevelSequenceCategory;
 };

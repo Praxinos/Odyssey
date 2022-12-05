@@ -32,8 +32,6 @@
 
 #define LOCTEXT_NAMESPACE "FEposEditorModule"
 
-EAssetTypeCategories::Type FEposSequenceEditorModule::mEposAssetCategory;
-
 //---
 
 FEposSequenceEditorModule::FEposSequenceEditorModule()
@@ -102,24 +100,18 @@ FEposSequenceEditorModule::UnregisterCommands()
 
 //---
 
-//static
-EAssetTypeCategories::Type
-FEposSequenceEditorModule::GetAssetCategory()
-{
-    return mEposAssetCategory;
-}
-
 void
 FEposSequenceEditorModule::RegisterAssetTools()
 {
     IAssetTools& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>( "AssetTools" ).Get();
 
-    mEposAssetCategory = AssetTools.RegisterAdvancedAssetCategory( FName( TEXT( "EPOS" ) ), LOCTEXT( "EposAssetsCategory", "EPOS" ) );
+    EAssetTypeCategories::Type eposAssetCategory = AssetTools.RegisterAdvancedAssetCategory( FName( TEXT( "EPOS" ) ), LOCTEXT( "EposAssetsCategory", "EPOS" ) );
+    EAssetTypeCategories::Type cinematicAssetCategoryBit = AssetTools.RegisterAdvancedAssetCategory( FName( TEXT( "Cinematics" ) ), LOCTEXT( "CinematicsAssetCategory", "Cinematics" ) );
 
-    mBoardSequenceTypeActions = MakeShared<FBoardSequenceActions>();
+    mBoardSequenceTypeActions = MakeShared<FBoardSequenceActions>( eposAssetCategory, cinematicAssetCategoryBit );
     AssetTools.RegisterAssetTypeActions( mBoardSequenceTypeActions.ToSharedRef() );
 
-    mShotSequenceTypeActions = MakeShared<FShotSequenceActions>();
+    mShotSequenceTypeActions = MakeShared<FShotSequenceActions>( eposAssetCategory, cinematicAssetCategoryBit );
     AssetTools.RegisterAssetTypeActions( mShotSequenceTypeActions.ToSharedRef() );
 }
 

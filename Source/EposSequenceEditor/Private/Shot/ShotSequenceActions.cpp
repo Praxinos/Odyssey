@@ -19,10 +19,16 @@
 /* IAssetTypeActions interface
  *****************************************************************************/
 
+FShotSequenceActions::FShotSequenceActions( const EAssetTypeCategories::Type iEposCategory, const EAssetTypeCategories::Type iLevelSequenceCategory )
+    : mAssetEposCategory( iEposCategory )
+    , mAssetLevelSequenceCategory( iLevelSequenceCategory )
+{
+}
+
 uint32
 FShotSequenceActions::GetCategories()
 {
-    return EAssetTypeCategories::Animation | FEposSequenceEditorModule::GetAssetCategory();
+    return mAssetEposCategory | mAssetLevelSequenceCategory;
 }
 
 FText
