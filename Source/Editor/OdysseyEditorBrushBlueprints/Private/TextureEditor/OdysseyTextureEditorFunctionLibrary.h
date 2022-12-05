@@ -23,7 +23,7 @@ class UOdysseyTextureEditorFunctionLibrary
 public:
     //Creates and Odyssey Block Reference with current layer.
     //X | Y input are an offset.
-    UFUNCTION( BlueprintPure, Category = "Odyssey|Block" )
+    /*UFUNCTION(BlueprintPure, Category = "Odyssey|Block")
     static FOdysseyBlockProxy GetBlockOfCurrentLayer( UOdysseyBrushAssetBase* BrushContext, FOdysseyBrushRect Area );
     
     //Creates and Odyssey Block Reference with a layer to be identified with its name (to be entered in a string).
@@ -40,4 +40,5 @@ public:
     UFUNCTION( BlueprintPure, Category = "Odyssey|Block" )
     static FOdysseyBlockProxy GetResultBlock( UOdysseyBrushAssetBase* BrushContext );
 #endif
+	*/
 };

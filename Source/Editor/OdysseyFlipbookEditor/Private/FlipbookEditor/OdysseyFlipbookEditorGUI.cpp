@@ -20,7 +20,7 @@ FOdysseyFlipbookEditorGUI::~FOdysseyFlipbookEditorGUI()
 }
 
 FOdysseyFlipbookEditorGUI::FOdysseyFlipbookEditorGUI(FOdysseyFlipbookEditor* iEditor)
-	: FOdysseyTexture2DEditorGUI(iEditor)
+	: FOdysseyTextureEditorGUI(iEditor)
 	, mEditor(iEditor)
 {
 }
@@ -32,7 +32,7 @@ FOdysseyFlipbookEditorGUI::FOdysseyFlipbookEditorGUI(FOdysseyFlipbookEditor* iEd
 void
 FOdysseyFlipbookEditorGUI::CreateTabs()
 {
-	FOdysseyTexture2DEditorGUI::CreateTabs();
+	FOdysseyTextureEditorGUI::CreateTabs();
 
 	//REPLACE TABS
 	ODYSSEY_SET_TAB(mViewportTab, FOdysseyFlipbookEditorViewportTab, mEditor);
@@ -44,7 +44,7 @@ FOdysseyFlipbookEditorGUI::CreateTabs()
 TSharedRef<FTabManager::FSplitter>
 FOdysseyFlipbookEditorGUI::CreateMainSection()
 {
-	return FOdysseyTexture2DEditorGUI::CreateMainSection()
+	return FOdysseyTextureEditorGUI::CreateMainSection()
 		// Timeline + Notes
 		->Split
 		(

@@ -39,9 +39,8 @@ protected:
     virtual FReply OnClear();
     virtual FReply OnFill();
     virtual FReply OnClearUndo();
-
-    /** Delegate for Tools checkBoxes button */
-    void OnToolCheckBoxClicked(ECheckBoxState iCheckBoxState, eToolType iToolType);
+   
+    void OnToolSelected(UOdysseyTool* iTool);
 
 protected:
     // Methods

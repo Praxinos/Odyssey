@@ -20,5 +20,5 @@ public:
     virtual void Invalidate() = 0;
     //virtual void Invalidate(int iX1,int iY1,int iX2,int iY2) = 0;
     //virtual void Invalidate(const ::ULIS::FRectI& iRect) = 0;
-    virtual void Invalidate( const ::ULIS::FRectI* iRects, const uint32 iNumRects ) = 0;
+    virtual void Invalidate( const TArray<::ULIS::FRectI>& iRects ) = 0;
 };

@@ -31,6 +31,7 @@ UOdysseyDrawingTool::UOdysseyDrawingTool()
 {
     AvailableShapes.Add(EOdysseyShape::kFreehand, CreateShape<UOdysseyFreehandShape>("UOdysseyDrawingTool::FreehandShape"));
     SelectedShapeInstance = AvailableShapes[SelectedShape];
+    Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.DrawingTool64");
 }
 
 template<class T>
@@ -60,7 +61,7 @@ UOdysseyDrawingTool::Initialize(FOdysseyPaintEngine* iPaintEngine)
 
     //Set Default Brush
     UOdysseyPainterEditorSettings* settings = UOdysseyPainterEditorSettings::Get();
-    FObjectEditorUtils::SetPropertyValue(this, "Brush", settings->BrushDefaults.DefaultBrush.LoadSynchronous());
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, "Brush", settings->BrushDefaults.DefaultBrush.LoadSynchronous());
 }
 
 //--------------------------------------------------------------------------------------
@@ -446,7 +447,7 @@ UOdysseyDrawingTool::DestroyBrushInstance()
 	if (!BrushInstance)
 		return;
 
-    FObjectEditorUtils::SetPropertyValue(this, "BrushInstance", nullptr);
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, "BrushInstance", nullptr);
 }
 
 void
@@ -469,7 +470,7 @@ UOdysseyDrawingTool::CreateBrushInstance(bool iApplyOverrides)
     if (iApplyOverrides)
 	    ApplyOverrides(brushInstance);
 
-    FObjectEditorUtils::SetPropertyValue(this, "BrushInstance", brushInstance);
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, "BrushInstance", brushInstance);
     
     brushInstance->ExecuteSelected();
     brushInstance->ExecuteStateChanged();
@@ -493,7 +494,7 @@ UOdysseyDrawingTool::ApplyOverrides(UOdysseyBrushAssetBase* iBrushInstance)
     {
         FOdysseyBlendParameters blendParameters = GetBlendParameters();
         blendParametersOverrides->Override(blendParameters);
-        FObjectEditorUtils::SetPropertyValue(this, "BlendParameters", blendParameters);
+        FOdysseyObjectEditorUtils::SetPropertyValue(this, "BlendParameters", blendParameters);
     }
 
     UOdysseyBrushOptionsOverrides* brushOptionsOverrides = Cast<UOdysseyBrushOptionsOverrides>(iBrushInstance->Overrides["OdysseyBrushOptionsOverrides"]);
@@ -592,5 +593,5 @@ UOdysseyDrawingTool::OnPostBrushChanged()
 void
 UOdysseyDrawingTool::OnPostShapeChanged()
 {
-    FObjectEditorUtils::SetPropertyValue(this, "SelectedShapeInstance", AvailableShapes[SelectedShape]);
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, "SelectedShapeInstance", AvailableShapes[SelectedShape]);
 }

@@ -31,20 +31,6 @@ FOdysseyPainterEditorToolOptionsTab::CreateWidget()
 {
     return SNew(SOdysseyToolOptions)
             .Tool(this, &FOdysseyPainterEditorToolOptionsTab::GetSelectedTool);
-        /* + SVerticalBox::Slot()
-            .AutoHeight()
-            [
-                SNew( SOdysseyBrushSelector )
-                .Brush( this, &FOdysseyPainterEditorToolOptionsTab::Brush )
-                .OnBrushChanged_Raw( this, &FOdysseyPainterEditorToolOptionsTab::OnBrushSelected )
-            ]
-        + SVerticalBox::Slot()
-            .FillHeight(1.0f)
-            [
-                SNew( SOdysseyBrushExposedParameters )
-                .BrushInstance( this, &FOdysseyPainterEditorToolOptionsTab::BrushInstance )
-                .OnParameterChanged_Raw( this, &FOdysseyPainterEditorToolOptionsTab::OnParameterChanged )
-            ];*/
 }
 
 void
@@ -54,8 +40,6 @@ FOdysseyPainterEditorToolOptionsTab::BindShortcuts(FBaseToolkit* iToolkit)
     const FOdysseyPainterEditorCommands& painterEditorCommands = FOdysseyPainterEditorCommands::Get();
 
     #define MAP_ACTION(action, ...) toolkitCommands->MapAction( action, FExecuteAction::CreateSP( this, &FOdysseyPainterEditorToolOptionsTab::__VA_ARGS__ ), FCanExecuteAction() );
-
-	//MAP_ACTION(painterEditorCommands.RefreshBrush, RefreshBrush )
 
     #undef MAP_ACTION
 }

@@ -4,13 +4,11 @@
 #pragma once
 
 #include "OdysseyPainterEditorGUI.h"
+
 #include "OdysseyTextureEditorLayerStackTab.h"
 #include "OdysseyTextureEditorTextureDetailsTab.h"
 
-class STextBlock;
-class SOdysseySurfaceViewport;
 class FOdysseyTextureEditor;
-class FOdysseyTextureEditorController;
 
 /**
  * Implements an Editor toolkit for textures.
@@ -34,7 +32,7 @@ public:
 	TSharedPtr<FOdysseyTextureEditorTextureDetailsTab>& GetTextureDetailsTab();
 
 protected:
-	virtual TSharedRef<FTabManager::FSplitter>	CreateRightSection();
+	virtual TSharedRef<FTabManager::FSplitter>	CreateRightSection() override;
 
 private:
 	FOdysseyTextureEditor* mEditor;
@@ -44,4 +42,3 @@ private:
     TSharedPtr<FOdysseyTextureEditorLayerStackTab>          mLayerStackTab;
 	TSharedPtr<FOdysseyTextureEditorTextureDetailsTab>      mTextureDetailsTab;
 };
-

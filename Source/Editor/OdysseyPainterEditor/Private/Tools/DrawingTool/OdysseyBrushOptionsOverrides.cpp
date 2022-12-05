@@ -15,7 +15,7 @@ void
 UOdysseyBrushOptionsOverrides::Override(UOdysseyBrushOptions* iBlendParameters) const
 {
     if (bOverride_Size)
-        FObjectEditorUtils::SetPropertyValue(iBlendParameters, "Size", Size);
+        FOdysseyObjectEditorUtils::SetPropertyValue(iBlendParameters, "Size", Size);
     if (bOverride_Flow)
-        FObjectEditorUtils::SetPropertyValue(iBlendParameters, "Flow", Flow);
+        FOdysseyObjectEditorUtils::SetPropertyValue(iBlendParameters, "Flow", Flow);
 }

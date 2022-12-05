@@ -29,12 +29,7 @@ public:
 protected:
     // Protected Initialization
     virtual void InitData();
-
-public:
-    // Undo
-    virtual void Undo() override;
-    virtual void Redo() override;
-    virtual void ClearUndo() override;
+    virtual void InitTools();
 
 public:
     // Getters
@@ -42,11 +37,11 @@ public:
 
     virtual FOdysseyPaintEngine&                        PaintEngine();
     virtual FOdysseyHUDSystem*                          HUDSystem() const;
-    //virtual UOdysseyStrokeEngine*		                StrokeEngine();
 	virtual IOdysseySurfaceEditable*                    DisplaySurface() const = 0;
 	virtual FOdysseyUndoHistory*		                UndoHistory() const;
     virtual FOdysseyBrushColor&                         PaintColor();
     virtual UOdysseyTool*                               GetSelectedTool() const;
+    virtual const TArray<UOdysseyTool*>&                  GetTools() const;
 
 public:
     // Setters
@@ -72,10 +67,12 @@ protected:
 protected:
 	FOdysseyUndoHistory*		mUndoHistory;
     FOdysseyPaintEngine         mPaintEngine; //We declare a single PaintEngine which will be used for any brush we use
+    
+    //Tools
     UOdysseyTool*               mSelectedTool;
-    //TMap<EOdysseyTool, UOdysseyTool*> mTools;
+    TArray<UOdysseyTool*>         mTools;
+
     FOdysseyHUDSystem*          mHUDSystem;
-    //UOdysseyStrokeEngine*       mStrokeEngine; //TODO: Should actually be a tool => FreeHandTool
     TArray<FOdysseyBrushContext*> mBrushContexts;
     FOdysseyBrushColor mPaintColor;
 };

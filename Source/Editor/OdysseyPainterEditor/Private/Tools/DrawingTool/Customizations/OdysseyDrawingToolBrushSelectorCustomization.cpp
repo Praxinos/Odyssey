@@ -155,7 +155,7 @@ FOdysseyDrawingToolBrushSelectorCustomization::CustomizeDetails(IDetailLayoutBui
 void
 FOdysseyDrawingToolBrushSelectorCustomization::OnBrushChanged(UOdysseyBrush* iBrush)
 {
-    FObjectEditorUtils::SetPropertyValue(mTool, "Brush", iBrush);
+    FOdysseyObjectEditorUtils::SetPropertyValue(mTool, "Brush", iBrush);
 }
 
 UOdysseyBrush*

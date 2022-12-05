@@ -82,7 +82,6 @@ public:
 private:
     void CreateEmptyKeyFrame(int32 iIndex);
     UTexture2D* CreateTexture(int32 iWidth, int32 iHeight, ETextureSourceFormat iFormat, FString iName, FLinearColor iBackgroundColor);
-    UTexture2D* CreateTexture(FString iName, ::ULIS::FBlock* iBlock, ETextureSourceFormat iFormat);
     void CopyTextureContent(UTexture2D* iSrcTexture, UTexture2D* iDstTexture);
 
     UPaperSprite* CreateSprite(FString iName);

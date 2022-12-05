@@ -4,7 +4,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "InputCoreTypes.h"
 #include "UObject/Object.h"
 #include "UObject/ObjectMacros.h"
 
@@ -18,4 +17,13 @@ class ODYSSEYTEXTUREEDITOR_API UOdysseyTextureEditorSettings
     : public UObject
 {
     GENERATED_UCLASS_BODY()
+
+public:
+    static UOdysseyTextureEditorSettings* Get();
+
+public:
+    /** If true, set Iliad as default editor when double-click on a Texture. */
+    UPROPERTY(config, EditAnywhere, Category = Defaults, DisplayName = "Set Iliad as default editor for textures")
+    bool IliadDefaultEditorEnabled;
 };
+

@@ -77,7 +77,7 @@ TSharedRef<SWidget> FOdysseyFolderLayerNode::GenerateContainerWidgetForPropertyV
 TSharedRef<SWidget> FOdysseyFolderLayerNode::GetCustomIconContent()
 {
     return SNew(SButton)
-           .ButtonStyle( &FOdysseyStyle::GetWidgetStyle<FButtonStyle>("OdysseyLayerStack.Motionless") )
+           .ButtonStyle( &FOdysseyStyle::GetWidgetStyle<FButtonStyle>("Button.TransparentNoPadding") )
            .VAlign(VAlign_Center)
            .HAlign(HAlign_Center)
            .OnClicked(this, &FOdysseyFolderLayerNode::HandleExpand)

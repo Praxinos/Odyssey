@@ -13,6 +13,8 @@
 #include "OdysseyToolFreeHand.h"
 #include "ULISLoaderModule.h"
 #include "OdysseyPainterEditorGUI.h"
+#include "Tools/PaintBucketTool/OdysseyPaintBucketTool.h"
+#include "UObject/OdysseyObjectEditorUtils.h"
 
 /////////////////////////////////////////////////////
 // FOdysseyPainterEditor
@@ -27,7 +29,6 @@ FOdysseyPainterEditor::FOdysseyPainterEditor()
     : mPaintEngine()
 	, mSelectedTool(nullptr)
     , mHUDSystem(new FOdysseyHUDSystem())
-	//, mStrokeEngine(nullptr)
 	, mBrushContexts()
 	, mPaintColor(::ULIS::FColor::Black)
 {
@@ -40,17 +41,25 @@ FOdysseyPainterEditor::FOdysseyPainterEditor()
 void
 FOdysseyPainterEditor::InitData()
 {
-	//Init DrawingTool
+	//Init Tools
+	InitTools();
+	SetSelectedTool(mTools[0]);
+}
+
+void
+FOdysseyPainterEditor::InitTools()
+{
 	UOdysseyDrawingTool* drawingTool = NewObject<UOdysseyDrawingTool>();
 	drawingTool->OnApplyOverridesDelegate().AddRaw(this, &FOdysseyPainterEditor::OnApplyOverrides);
 	drawingTool->SetBrushContexts(mBrushContexts);
 	drawingTool->Initialize(&mPaintEngine);
-	FObjectEditorUtils::SetPropertyValue(drawingTool->GetBrushOptions(), "Color", FOdysseyBrushColor(mPaintColor)); //Set the paint color in the brushOptions at startup for synchronization
+	FOdysseyObjectEditorUtils::SetPropertyValue(drawingTool->GetBrushOptions(), "Color", FOdysseyBrushColor(mPaintColor)); //Set the paint color in the brushOptions at startup for synchronization
 
+	UOdysseyPaintBucketTool* paintBucketTool = NewObject<UOdysseyPaintBucketTool>();
+	paintBucketTool->Initialize(&mPaintEngine);
 
-	mSelectedTool = drawingTool;
-	mSelectedTool->Activate();
-    //---
+	mTools.Add(drawingTool);
+	mTools.Add(paintBucketTool);
 }
 
 void
@@ -61,7 +70,8 @@ FOdysseyPainterEditor::BindShortcuts(FBaseToolkit* iToolkit)
 	//---
 
 	//TODO: BindShortcuts from mTools instead of mSelectedTool
-	mSelectedTool->BindShortcuts(iToolkit);
+	for (UOdysseyTool* tool : mTools)
+		tool->BindShortcuts(iToolkit);
 
 	//---
 
@@ -69,10 +79,6 @@ FOdysseyPainterEditor::BindShortcuts(FBaseToolkit* iToolkit)
     const FOdysseyPainterEditorCommands& painterEditorCommands = FOdysseyPainterEditorCommands::Get();
 
 	#define MAP_ACTION(action, ...) toolkitCommands->MapAction( action, FExecuteAction::CreateRaw( this, &FOdysseyPainterEditor::__VA_ARGS__ ), FCanExecuteAction() );
-
-	MAP_ACTION(painterEditorCommands.Undo, Undo )
-	MAP_ACTION(painterEditorCommands.Redo, Redo )
-    MAP_ACTION(painterEditorCommands.ClearUndo, ClearUndo )
 
 	#undef MAP_ACTION
 }
@@ -83,36 +89,9 @@ FOdysseyPainterEditor::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
 	FOdysseyEditor::ExtendMenu(iOwner, iMenuName);
 
 	//---
-
-	//TODO: ExtendMenu from mTools instead of mSelectedTool
-	mSelectedTool->ExtendMenu(iOwner, iMenuName);
-}
-
-//--------------------------------------------------------------------------------------
-//--------------------------------------------------------------------------------- Undo
-
-void
-FOdysseyPainterEditor::Undo()
-{
-	//End stroke before undoing, allows to manage PaintEngine->OnTick Undo
-	mSelectedTool->Flush();
-	mSelectedTool->Commit();
-}
-
-void
-FOdysseyPainterEditor::Redo()
-{
-	//End stroke before redoing, allows to manage PaintEngine->OnTick Redo
-	mSelectedTool->Flush();
-	mSelectedTool->Commit();
-}
-
-void
-FOdysseyPainterEditor::ClearUndo()
-{
-	//End stroke before clearing undo
-	mSelectedTool->Flush();
-	mSelectedTool->Commit();
+	
+	for (UOdysseyTool* tool : mTools)
+		tool->ExtendMenu(iOwner, iMenuName);
 }
 
 //--------------------------------------------------------------------------------------
@@ -123,12 +102,6 @@ FOdysseyPainterEditor::PaintEngine()
 {
 	return mPaintEngine;
 }
-
-/* UOdysseyStrokeEngine*
-FOdysseyPainterEditor::StrokeEngine()
-{
-    return mStrokeEngine;
-} */
 
 FOdysseyHUDSystem* 
 FOdysseyPainterEditor::HUDSystem() const
@@ -154,6 +127,12 @@ FOdysseyPainterEditor::GetSelectedTool() const
     return mSelectedTool;
 }
 
+const TArray<UOdysseyTool*>&
+FOdysseyPainterEditor::GetTools() const
+{
+    return mTools;
+}
+
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Setters
 
@@ -164,9 +143,18 @@ FOdysseyPainterEditor::PaintColor(const FOdysseyBrushColor& iColor)
 }
 
 void
-FOdysseyPainterEditor::SetSelectedTool(UOdysseyTool* iSelectedTool)
+FOdysseyPainterEditor::SetSelectedTool(UOdysseyTool* iTool)
 {
-    mSelectedTool = iSelectedTool;
+	if (!mTools.Contains(iTool))
+		return;
+
+	if (mSelectedTool)
+		mSelectedTool->Inactivate();
+		
+    mSelectedTool = iTool;
+
+	if (mSelectedTool)
+		mSelectedTool->Activate();
 }
 
 //--------------------------------------------------------------------------------------
@@ -186,12 +174,7 @@ void
 FOdysseyPainterEditor::AddReferencedObjects(FReferenceCollector& Collector)
 {
 	FOdysseyEditor::AddReferencedObjects(Collector);
-
-	if (mSelectedTool)
-		Collector.AddReferencedObject(mSelectedTool);
-
-	/* if (mStrokeEngine)
-        Collector.AddReferencedObject(mStrokeEngine); */
+	Collector.AddReferencedObjects(mTools);
 }
 
 //--------------------------------------------------------------------------------------
@@ -204,7 +187,4 @@ FOdysseyPainterEditor::Tick(float iDeltaTime)
 
 	if (mSelectedTool)
 		mSelectedTool->Tick(iDeltaTime);
-		
-	/* if (mStrokeEngine)
-		mStrokeEngine->Tick(iDeltaTime); */
 }

@@ -49,7 +49,7 @@ UObject* UOdysseyTextureImportFactory::FactoryCreateBinary(UClass* Class,UObject
         InitTextureWithBlockData(srcblock,object,TextureSourceFormatForULISFormat(srcblock->Format()));
 
         UOdysseyTextureAssetUserData* userData = NewObject< UOdysseyTextureAssetUserData >( object, NAME_None, RF_Public );
-        userData->SetLayerStack( psdReader.GetLayerStack() );
+        userData->SetOldLayerStack( psdReader.GetLayerStack() );
         object->AddAssetUserData( userData );
     }
 

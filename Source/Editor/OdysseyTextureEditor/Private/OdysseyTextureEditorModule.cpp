@@ -10,9 +10,14 @@
 #include "Modules/ModuleManager.h"
 #include "PropertyEditorModule.h"
 #include "Settings/ContentBrowserSettings.h"
+#include "Toolkits/AssetEditorToolkit.h"
 
-#include "OdysseyTextureEditor.h"
+#include "TextureEditor/OdysseyTextureEditor.h"
 #include "OdysseyTextureEditorSettings.h"
+#include "OdysseyTextureEditorToolkit.h"
+#include "OdysseyTextureAssetTypeActions.h"
+#include "OdysseyTextureAssetTypeActions.h"
+#include "TextureEditor/OdysseyTextureEditorCommands.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyTextureEditorModule"
 
@@ -20,24 +25,78 @@
    FOdysseyTextureEditorModule
 -----------------------------------------------------------------------------*/
 
+TSharedRef<FOdysseyTextureEditorToolkit>
+FOdysseyTextureEditorModule::CreateOdysseyTextureEditor( UTexture2D* iTexture )
+{
+	TSharedPtr<FOdysseyTextureEditor> editor = MakeShareable(new FOdysseyTextureEditor(iTexture));
+    TSharedPtr<FOdysseyTextureEditorToolkit> toolkit = MakeShareable( new FOdysseyTextureEditorToolkit(editor) );
+	editor->Initialize(iTexture);
+    toolkit->Initialize();
+    return toolkit.ToSharedRef();
+}
+
 void
 FOdysseyTextureEditorModule::StartupModule()
 {
+    // Register Assets Types Actions once the main loop is initialized
+    // see here : https://udn.unrealengine.com/s/question/0D54z00007DVU5KCAX/two-assettypeactions-for-the-same-type-force-priority-
+    FCoreDelegates::OnFEngineLoopInitComplete.AddRaw(this, &FOdysseyTextureEditorModule::RegisterAssetTypeActions);
+
 	// Register Commands
 	RegisterCommands();
 
 	// Register Settings
     RegisterSettings();
+
+	// Install Content Browser Extionsion Hooks
+	if (!IsRunningCommandlet())
+	{
+		FOdysseyTextureContentBrowserExtensions::InstallHooks();
+	}
 }
 
 void
 FOdysseyTextureEditorModule::ShutdownModule()
 {
+    // Unregister Assets Types Actions
+    FCoreDelegates::OnFEngineLoopInitComplete.RemoveAll(this);
+
+	// Uninstall Content Browser Extionsion Hooks
+	FOdysseyTextureContentBrowserExtensions::RemoveHooks();
+
 	// Unregister Settings
     UnregisterSettings();
 
 	// Unregister Commands
 	UnregisterCommands();
+
+	// Unregister Assets Type Actions
+	UnregisterAssetTypeActions();
+}
+
+void
+FOdysseyTextureEditorModule::RegisterAssetTypeActions()
+{
+	IAssetTools& assetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
+
+	// Create Asset Categories
+	EAssetTypeCategories::Type category = assetTools.RegisterAdvancedAssetCategory(FName(TEXT("ILIAD")), LOCTEXT("IliadPainterAssetCategory", "ILIAD"));
+
+	//Create Asset Types Actions
+	mIliadTypeActions = MakeShareable(new FOdysseyTextureAssetTypeActions(category));
+
+	//Register created Asset Type Actions
+	assetTools.RegisterAssetTypeActions(mIliadTypeActions.ToSharedRef());
+}
+
+void
+FOdysseyTextureEditorModule::UnregisterAssetTypeActions()
+{
+	if (!FModuleManager::Get().IsModuleLoaded("AssetTools"))
+		return;
+	
+	IAssetTools& assetTools = FModuleManager::GetModuleChecked<FAssetToolsModule>("AssetTools").Get();
+    assetTools.UnregisterAssetTypeActions(mIliadTypeActions.ToSharedRef());
 }
 
 void
@@ -47,8 +106,8 @@ FOdysseyTextureEditorModule::RegisterSettings()
     if( !settingsModule )
 		return;
 
-	settingsModule->RegisterSettings( "Editor", "Plugins", "ILIADTextureEditor"
-										, LOCTEXT( "OdysseyTextureEditorSettingsName", "ILIAD Texture Editor" )
+	settingsModule->RegisterSettings( "Editor", "Plugins", "ILIADTexture2DEditor"
+										, LOCTEXT( "OdysseyTextureEditorSettingsName", "ILIAD Texture2D Editor" )
 										, LOCTEXT( "OdysseyTextureEditorSettingsDescription", "Configure the look and feel of the ILIAD Editor." )
 										, GetMutableDefault<UOdysseyTextureEditorSettings>() );
 }
@@ -61,7 +120,7 @@ FOdysseyTextureEditorModule::UnregisterSettings()
     if( !settingsModule )
 		return;
     
-	settingsModule->UnregisterSettings( "Editor", "Plugins", "OdysseyTextureEditor" );
+	settingsModule->UnregisterSettings( "Editor", "Plugins", "ILIADTexture2DEditor" );
 }
 
 void

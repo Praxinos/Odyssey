@@ -2,6 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "FreehandShape/OdysseyFreehandShapeOverrides.h"
+#include "UObject/OdysseyObjectEditorUtils.h"
 
 #include "ObjectEditorUtils.h"
 
@@ -37,14 +38,14 @@ UOdysseyFreehandShapeOverrides::Override(UOdysseyFreehandShape* iFreehandShape) 
     if(bOverride_SmoothingCatchUp)
         smoothingOptions.SmoothingCatchUp = SmoothingCatchUp;
     
-    FObjectEditorUtils::SetPropertyValue(iFreehandShape, "SmoothingOptions", smoothingOptions);
+    FOdysseyObjectEditorUtils::SetPropertyValue(iFreehandShape, "SmoothingOptions", smoothingOptions);
 
     if(bOverride_SmoothingEnabled)
-        FObjectEditorUtils::SetPropertyValue(iFreehandShape, "SmoothingEnabled", SmoothingEnabled);
+        FOdysseyObjectEditorUtils::SetPropertyValue(iFreehandShape, "SmoothingEnabled", SmoothingEnabled);
     if (bOverride_Step)
-        FObjectEditorUtils::SetPropertyValue(iFreehandShape, "Step", Step);
+        FOdysseyObjectEditorUtils::SetPropertyValue(iFreehandShape, "Step", Step);
     if (bOverride_AdaptativeStep)
-        FObjectEditorUtils::SetPropertyValue(iFreehandShape, "AdaptativeStep", AdaptativeStep);
+        FOdysseyObjectEditorUtils::SetPropertyValue(iFreehandShape, "AdaptativeStep", AdaptativeStep);
     if (bOverride_InterpolationType)
-        FObjectEditorUtils::SetPropertyValue(iFreehandShape, "InterpolationType", InterpolationType);
+        FOdysseyObjectEditorUtils::SetPropertyValue(iFreehandShape, "InterpolationType", InterpolationType);
 }

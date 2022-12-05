@@ -4,11 +4,9 @@
 #pragma once
 
 #include "OdysseyEditorTab.h"
-#include <ULIS>
 
 class FOdysseyTextureEditor;
-class FOdysseyLayerStack;
-class SOdysseyLayerStackView;
+class UOdysseyLayerStack;
 
 class ODYSSEYTEXTUREEDITOR_API FOdysseyTextureEditorLayerStackTab :
 	public FOdysseyEditorTab
@@ -26,7 +24,7 @@ protected:
 
 protected:
     // Widget Getters
-    virtual FOdysseyLayerStack* LayerStack() const;
+    virtual UOdysseyLayerStack* LayerStack() const;
 
 protected:
     // Event Listeners
@@ -39,12 +37,11 @@ private:
     virtual void ExportLayersAsTextures();
     virtual void ExportCurrentLayerAsTexture();
     virtual void CreateNewLayer();
-    virtual void DuplicateCurrentLayer();
-    virtual void DeleteCurrentLayer();
+    //virtual void DuplicateCurrentLayer();
+    //virtual void DeleteCurrentLayer();
     virtual void ChangeLayerOpacity(float iOpacity);
 
 private:
     FOdysseyTextureEditor* mEditor;
-    TSharedPtr<SOdysseyLayerStackView> mLayerStackView;
 };
 

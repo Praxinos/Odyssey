@@ -3,7 +3,7 @@
 
 #include "Models/OdysseyFlipbookEditorCommands.h"
 #include "OdysseyStyleSet.h"
-#include "OdysseyEditorCommandsMacro.h"
+#include "Command/OdysseyCommandMacros.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyFlipbookEditorCommands"
 

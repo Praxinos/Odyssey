@@ -12,7 +12,7 @@
 
 #include "FileHelpers.h"
 #include "ObjectEditorUtils.h"
-#include "UObject/OdysseyObjectEditorUtilis.h"
+#include "UObject/OdysseyObjectEditorUtils.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorTopTab"
 
@@ -199,7 +199,7 @@ FOdysseyPainterEditorTopTab::OnSizeChanged( int32 iValue, EPropertyChangeType::T
 
     //TODO: Remove when the top will use singlePropertyview
     UOdysseyBrushOptions* brushOptions = drawingTool->GetBrushInstance()->GetBrushOptions();
-    FObjectEditorUtils::SetPropertyValue(brushOptions, "Size", float(iValue), iChangeType);
+    FOdysseyObjectEditorUtils::SetPropertyValue(brushOptions, "Size", float(iValue), iChangeType);
 }
 
 void
@@ -212,7 +212,7 @@ FOdysseyPainterEditorTopTab::OnOpacityChanged( int32 iValue, EPropertyChangeType
     //TODO: Remove when the top will use singlePropertyview
     FOdysseyBlendParameters blendParameters = drawingTool->GetBlendParameters();
     blendParameters.Opacity = float(iValue);
-    FObjectEditorUtils::SetPropertyValue(drawingTool, "BlendParameters", blendParameters, iChangeType);
+    FOdysseyObjectEditorUtils::SetPropertyValue(drawingTool, "BlendParameters", blendParameters, iChangeType);
 }
 
 void
@@ -224,7 +224,7 @@ FOdysseyPainterEditorTopTab::OnFlowChanged( int32 iValue, EPropertyChangeType::T
 
     //TODO: Remove when the top will use singlePropertyview
     UOdysseyBrushOptions* brushOptions = drawingTool->GetBrushInstance()->GetBrushOptions();
-    FObjectEditorUtils::SetPropertyValue(brushOptions, "Flow", float(iValue), iChangeType);
+    FOdysseyObjectEditorUtils::SetPropertyValue(brushOptions, "Flow", float(iValue), iChangeType);
 }
 
 void
@@ -237,7 +237,7 @@ FOdysseyPainterEditorTopTab::OnBlendingModeChanged( int32 iValue )
     //TODO: Remove when the top will use singlePropertyview
     FOdysseyBlendParameters blendParameters = drawingTool->GetBlendParameters();
     blendParameters.BlendingMode = static_cast<EOdysseyBlendingMode>(iValue);
-    FObjectEditorUtils::SetPropertyValue(drawingTool, "BlendParameters", blendParameters);
+    FOdysseyObjectEditorUtils::SetPropertyValue(drawingTool, "BlendParameters", blendParameters);
 }
 
 void
@@ -250,7 +250,7 @@ FOdysseyPainterEditorTopTab::OnAlphaModeChanged( int32 iValue )
     //TODO: Remove when the top will use singlePropertyview
     FOdysseyBlendParameters blendParameters = drawingTool->GetBlendParameters();
     blendParameters.AlphaMode = static_cast<EOdysseyAlphaMode>(iValue);
-    FObjectEditorUtils::SetPropertyValue(drawingTool, "BlendParameters", blendParameters);
+    FOdysseyObjectEditorUtils::SetPropertyValue(drawingTool, "BlendParameters", blendParameters);
 }
 
 int
@@ -319,7 +319,7 @@ FOdysseyPainterEditorTopTab::ToggleEraserButton()
 
     FOdysseyBlendParameters blendParameters = drawingTool->GetBlendParameters();
     blendParameters.bEraserMode = !blendParameters.bEraserMode;
-    FObjectEditorUtils::SetPropertyValue(drawingTool, "BlendParameters", blendParameters);
+    FOdysseyObjectEditorUtils::SetPropertyValue(drawingTool, "BlendParameters", blendParameters);
 }
 
 FReply
@@ -341,7 +341,7 @@ FOdysseyPainterEditorTopTab::SetAlphaMode(::ULIS::eAlphaMode iAlphaMode)
 
     FOdysseyBlendParameters blendParameters = drawingTool->GetBlendParameters();
     blendParameters.AlphaMode = static_cast<EOdysseyAlphaMode>(iAlphaMode);
-    FObjectEditorUtils::SetPropertyValue(drawingTool, "BlendParameters", blendParameters);
+    FOdysseyObjectEditorUtils::SetPropertyValue(drawingTool, "BlendParameters", blendParameters);
 }
 
 void
@@ -353,7 +353,7 @@ FOdysseyPainterEditorTopTab::SetBlendingMode(::ULIS::eBlendMode iBlendingMode)
 
     FOdysseyBlendParameters blendParameters = drawingTool->GetBlendParameters();
     blendParameters.BlendingMode = static_cast<EOdysseyBlendingMode>(iBlendingMode);
-    FObjectEditorUtils::SetPropertyValue(drawingTool, "BlendParameters", blendParameters);
+    FOdysseyObjectEditorUtils::SetPropertyValue(drawingTool, "BlendParameters", blendParameters);
 }
 
 void
@@ -364,7 +364,7 @@ FOdysseyPainterEditorTopTab::AddSize(int32 iValue)
         return;
 
     UOdysseyBrushOptions* brushOptions = drawingTool->GetBrushInstance()->GetBrushOptions();
-    FObjectEditorUtils::SetPropertyValue(brushOptions, "Size", brushOptions->Size + iValue);
+    FOdysseyObjectEditorUtils::SetPropertyValue(brushOptions, "Size", brushOptions->Size + iValue);
 }
 
 #undef LOCTEXT_NAMESPACE

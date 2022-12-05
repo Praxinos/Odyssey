@@ -18,7 +18,7 @@ FOdysseyViewportDrawingEditor::~FOdysseyViewportDrawingEditor()
 }
 
 FOdysseyViewportDrawingEditor::FOdysseyViewportDrawingEditor() :
-    FOdysseyTexture2DEditor(),
+    FOdysseyTextureEditor(),
     mGUI(nullptr),
     mToolbar(nullptr),
     mActor(nullptr),
@@ -34,12 +34,10 @@ FOdysseyViewportDrawingEditor::FOdysseyViewportDrawingEditor() :
 void
 FOdysseyViewportDrawingEditor::InitData()
 {
-	FOdysseyTexture2DEditor::InitData();
+	FOdysseyTextureEditor::InitData();
 
 	//Handle Object Property Changed Callback to refresh when actors's visibility changes for example
     FCoreUObjectDelegates::OnObjectPropertyChanged.AddRaw(this,&FOdysseyViewportDrawingEditor::OnObjectPropertyChanged);
-
-	//--- Init Data
 }
 
 //--------------------------------------------------------------------------------------
@@ -162,14 +160,6 @@ FOdysseyViewportDrawingEditor::SetMaterial(UMaterialInterface* iMaterial)
         SelectDefaultTexture();
 }
 
-void
-FOdysseyViewportDrawingEditor::SetTexture(UTexture2D* iTexture)
-{
-    mTargetToPaintWillChangeDelegate.Broadcast();
-	TextureWrapper()->SetTexture(iTexture);
-    mTargetToPaintChangedDelegate.Broadcast();
-}
-
 void FOdysseyViewportDrawingEditor::SetPaintingAdapterMethod(EOdysseyViewportDrawingPaintingAdapterMethod iNewMethod)
 {
 	mPaintingAdapterMethod = iNewMethod;
@@ -188,28 +178,20 @@ FOdysseyViewportDrawingEditor::GetGUI()
 }
 
 void
-FOdysseyViewportDrawingEditor::OnPreTextureChange()
+FOdysseyViewportDrawingEditor::SetTexture(UTexture2D* iTexture)
 {
+	mTargetToPaintWillChangeDelegate.Broadcast();
 	UTexture2D* texture = Texture();
-    if (texture)
-	{
+	if ( texture )
 		RemoveEditedObject(texture);
-	}
 
-	FOdysseyTexture2DEditor::OnPreTextureChange();
-}
+	FOdysseyTextureEditor::SetTexture(iTexture);
 
-void
-FOdysseyViewportDrawingEditor::OnPostTextureChange()
-{
-	UTexture2D* texture = Texture();
-
-    if (texture)
-	{
+	texture = Texture();
+	if ( texture )
 		AddEditedObject(texture);
-	}
 
-    FOdysseyTexture2DEditor::OnPostTextureChange();
+	mTargetToPaintChangedDelegate.Broadcast();
 }
 
 TSharedPtr<FWorkspaceItem>
@@ -229,7 +211,7 @@ void FOdysseyViewportDrawingEditor::UnregisterTabSpawners(const TSharedRef<class
         mToolbar->SaveOpenedTabs();
 
     mToolbar = nullptr;
-    FOdysseyTexture2DEditor::UnregisterTabSpawners( iTabManager );
+    FOdysseyTextureEditor::UnregisterTabSpawners( iTabManager );
 }
 
 //--------------------------------------------------------------------------------------

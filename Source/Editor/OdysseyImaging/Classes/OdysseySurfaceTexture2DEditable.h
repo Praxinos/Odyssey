@@ -64,7 +64,7 @@ public:
     void Invalidate() override;
     //void Invalidate(int iX1,int iY1,int iX2,int iY2);
     //void Invalidate(const ::ULIS::FRectI& iRect);
-    void Invalidate( const ::ULIS::FRectI* iRects, const uint32 iNumRects ) override;
+    void Invalidate( const TArray<::ULIS::FRectI>& iRects ) override;
 
 private:
     // Private Data

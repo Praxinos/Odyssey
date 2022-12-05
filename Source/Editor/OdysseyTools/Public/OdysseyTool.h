@@ -23,11 +23,14 @@ public:
 
 public:
     //Activates the tool
+    UFUNCTION(BlueprintCallable, Category="Tools")
     virtual void Activate();
 
     //Inactivates the tool
+    UFUNCTION(BlueprintCallable, Category="Tools")
     virtual void Inactivate();
 
+public:
     //Mouse events
     virtual bool OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey);
     virtual bool OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey);
@@ -46,13 +49,12 @@ public:
     virtual void Commit();
 
 public:
-    //Drawing the HUD associated to the tool
-    //virtual void Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D());
+    virtual void PropertyChanged(const FName& iPropertyName);
 
-    /* virtual void MouseMove(FViewport* iViewport, int32 iX, int32 iY);
-    virtual FReply InputKey(FViewport* iViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed, bool iGamepad, FReply& ioReply);
-    virtual void CapturedMouseMove(FViewport* iViewport, int32 iX, int32 iY);
-    virtual ::ULIS::TArray<::ULIS::FVec2I> GenerateToolPoints() { return ::ULIS::TArray<::ULIS::FVec2I>(); }; */
+public:
+    // UObject overrides
+    virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent) override;
+    virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;    
 
 public:
     //Sets the transform in which the tool is working (transform of the 2D viewport)
@@ -65,6 +67,9 @@ public:
     virtual TSharedPtr<SWidget> GetWidget();
 
 protected:
-    // bool mIsReadyToBeApplied;
     FTransform2D mTransform;
+
+public:
+    UPROPERTY(EditDefaultsOnly, Category="Tool")
+    FSlateBrush Icon;
 };

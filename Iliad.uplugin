@@ -62,6 +62,16 @@
 			"LoadingPhase": "Default"
 		},
 		{
+			"Name": "OdysseyLayerStack",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "OdysseyLayerStackEditor",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		},
+		{
 			"Name": "OdysseyPsdOperations",
 			"Type": "Editor",
 			"LoadingPhase": "Default"
@@ -140,11 +150,6 @@
 		},
 		{
 			"Name": "OdysseyTextureEditor",
-			"Type": "Editor",
-			"LoadingPhase": "Default"
-		},
-		{
-			"Name": "OdysseyTexture2DEditor",
 			"Type": "Editor",
 			"LoadingPhase": "Default"
 		},

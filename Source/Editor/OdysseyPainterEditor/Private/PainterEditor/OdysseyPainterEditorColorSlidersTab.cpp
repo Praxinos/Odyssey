@@ -6,6 +6,7 @@
 #include "Color/SOdysseyColorSliders.h"
 #include "OdysseyPainterEditor.h"
 #include "ObjectEditorUtils.h"
+#include "UObject/OdysseyObjectEditorUtils.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorColorSlidersTab"
 
@@ -62,7 +63,7 @@ FOdysseyPainterEditorColorSlidersTab::OnColorChange( eOdysseyEventState::Type iE
         if (!drawingTool)
             return;
         
-        FObjectEditorUtils::SetPropertyValue(drawingTool->GetBrushOptions(), "Color", FOdysseyBrushColor(mEditor->PaintColor()));
+        FOdysseyObjectEditorUtils::SetPropertyValue(drawingTool->GetBrushOptions(), "Color", FOdysseyBrushColor(mEditor->PaintColor()));
     }
 }
 

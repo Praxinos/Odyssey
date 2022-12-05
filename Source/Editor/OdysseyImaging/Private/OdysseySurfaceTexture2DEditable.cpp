@@ -678,8 +678,8 @@ FOdysseySurfaceTexture2DEditable::Invalidate(const ::ULIS::FRectI& iRect)
 */
 
 void
-FOdysseySurfaceTexture2DEditable::Invalidate( const ::ULIS::FRectI* iRects, const uint32 iNumRects )
+FOdysseySurfaceTexture2DEditable::Invalidate(const TArray<::ULIS::FRectI>& iRects)
 {
-    mBlock->Dirty( iRects, iNumRects );
+    mBlock->Dirty( iRects.GetData(), iRects.Num());
 }
 

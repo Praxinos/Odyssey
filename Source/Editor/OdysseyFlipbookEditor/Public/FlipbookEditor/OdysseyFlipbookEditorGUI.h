@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "OdysseyTexture2DEditorGUI.h"
+#include "TextureEditor/OdysseyTextureEditorGUI.h"
 
 class FOdysseyFlipbookEditor;
 class FOdysseyFlipbookEditorTimelineTab;
@@ -12,7 +12,7 @@ class FOdysseyFlipbookEditorTimelineTab;
  * Implements an Editor toolkit for Flipbooks.
  */
 class ODYSSEYFLIPBOOKEDITOR_API FOdysseyFlipbookEditorGUI :
-	public FOdysseyTexture2DEditorGUI
+	public FOdysseyTextureEditorGUI
 {
 public:
     // Construction / Destruction

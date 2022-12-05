@@ -30,6 +30,7 @@ public class OdysseyWidgets : ModuleRules
                 "OdysseyBrush",
                 "OdysseyImaging",
                 "OdysseyLayer",
+                "OdysseyLayerStack",
                 "OdysseyPaintEngine",
                 "OdysseyStyle",
                 "OdysseyStylusInput",

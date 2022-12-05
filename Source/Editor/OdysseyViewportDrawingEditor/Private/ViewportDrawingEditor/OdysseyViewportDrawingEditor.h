@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "OdysseyTexture2DEditor.h"
+#include "TextureEditor/OdysseyTextureEditor.h"
 #include "OdysseyViewportDrawingEditorGUI.h"
 
 struct FPaintableTexture;
@@ -45,7 +45,7 @@ enum EOdysseyViewportDrawingPaintingAdapterMethod
  * Implements an Editor for textures.
  */
 class ODYSSEYVIEWPORTDRAWINGEDITOR_API FOdysseyViewportDrawingEditor
-    : public FOdysseyTexture2DEditor
+    : public FOdysseyTextureEditor
 {
 public:
     DECLARE_MULTICAST_DELEGATE(FOdysseyPaintingTargetToPaintWillChange);
@@ -79,14 +79,12 @@ public:
     void SetActor(AActor* iActor);
     void SetComponent(UMeshComponent* iComponent);
     void SetMaterial(UMaterialInterface* iMaterial);
-    void SetTexture(UTexture2D* iTexture);
+    void SetTexture(UTexture2D* iTexture) override;
     void SetPaintingAdapterMethod(EOdysseyViewportDrawingPaintingAdapterMethod iNewMethod);
 
 public:
     // Overrides
     virtual FOdysseyViewportDrawingEditorGUI* GetGUI() override;
-    virtual void OnPreTextureChange() override;
-    virtual void OnPostTextureChange() override;
     TSharedPtr<FWorkspaceItem> RegisterTabSpawners(const TSharedRef<class FTabManager>& iTabManager) override;
     void UnregisterTabSpawners(const TSharedRef<class FTabManager>& iTabManager) override;
 

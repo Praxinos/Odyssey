@@ -53,7 +53,6 @@ UOdysseyTextureFactory::FactoryCreateNew( UClass* iClass, UObject* iParent, FNam
 
     // Init internal data
     ::ULIS::FBlock block( mTextureWidth, mTextureHeight, ULISFormatForTextureSourceFormat(mTextureFormat) );
-
     ::ULIS::FColor color( ::ULIS::FColor::RGBAF( mBackgroundColor.R, mBackgroundColor.G, mBackgroundColor.B, mBackgroundColor.A ) );
 
     //TODO: should fill the default native texture for the thumbnail
@@ -64,15 +63,20 @@ UOdysseyTextureFactory::FactoryCreateNew( UClass* iClass, UObject* iParent, FNam
     
     UTexture2D* texture = NewObject<UTexture2D>( iParent, iName, iFlags | RF_Transactional );
     InitTextureWithBlockData(&block, texture, mTextureFormat);
-    UOdysseyTextureAssetUserData* userData = NewObject< UOdysseyTextureAssetUserData >(texture, NAME_None, RF_Public);
-	::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
-    userData->GetLayerStack()->Init(mTextureWidth, mTextureHeight, format);
 
-	FName layerName = userData->GetLayerStack()->GetLayerRoot()->GetNextLayerName();
-	TSharedPtr<FOdysseyImageLayer> imageLayer = MakeShareable(new FOdysseyImageLayer(layerName, FVector2D(mTextureWidth, mTextureHeight), userData->GetLayerStack()->Format()));
-	userData->GetLayerStack()->AddLayer(imageLayer);
-    userData->GetLayerStack()->FillCurrentLayerWithColor( color );
-    texture->AddAssetUserData( userData );
+    /**
+     * ES: No need to create the userdata, it will be created when ILIAD will open the texture for the first time
+     * 
+     */
+    //UOdysseyTextureAssetUserData* userData = NewObject< UOdysseyTextureAssetUserData >(texture, NAME_None, RF_Public);
+	//::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
+    //userData->GetLayerStack()->Init(mTextureWidth, mTextureHeight, format);
+
+	//FName layerName = userData->GetLayerStack()->GetLayerRoot()->GetNextLayerName();
+	//TSharedPtr<FOdysseyImageLayer> imageLayer = MakeShareable(new FOdysseyImageLayer(layerName, FVector2D(mTextureWidth, mTextureHeight), userData->GetLayerStack()->Format()));
+	//userData->GetLayerStack()->AddLayer(imageLayer);
+    //userData->GetLayerStack()->FillCurrentLayerWithColor( color );
+    //texture->AddAssetUserData( userData );
     texture->PostEditChange();
 
     return texture;

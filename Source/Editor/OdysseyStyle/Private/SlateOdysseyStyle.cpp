@@ -6,6 +6,7 @@
 #include "Misc/CommandLine.h"
 #include "Styling/CoreStyle.h"
 #include "Styling/SlateStyle.h"
+#include "Styling/StyleColors.h"
 #include "Styling/SlateTypes.h"
 #include "Interfaces/IPluginManager.h"
 
@@ -18,6 +19,9 @@
 #define BORDER_BRUSH( RelativePath, ... )   FSlateBorderBrush( RootToContentDir( RelativePath, TEXT(".png") ), __VA_ARGS__ )
 #define DEFAULT_FONT( ... )                 FCoreStyle::GetDefaultFontStyle( __VA_ARGS__ )
 #define ICON_FONT( ... )                    FSlateFontInfo( RootToContentDir( "Fonts/FontAwesome", TEXT(".ttf") ), __VA_ARGS__ )
+
+#define EXTERN_IMAGE_BRUSH( Style, RelativePath, ... )    FSlateImageBrush( Style.RootToContentDir( RelativePath, TEXT(".png") ), __VA_ARGS__ )
+
 
 
 /* FOdysseyStyleDefault interface
@@ -74,7 +78,7 @@ public:
 
     FButtonStyle mButton;
 
-    FTableRowStyle mNormalTableRowStyle;
+    FTableRowStyle mCoreTableRowStyle;
 };
 
 //---
@@ -110,7 +114,7 @@ FOdysseyStyleDefault::FOdysseyStyleDefault()
 
     , mButton()
 
-    , mNormalTableRowStyle()
+    , mCoreTableRowStyle()
 {
 }
 
@@ -133,13 +137,32 @@ FOdysseyStyleDefault::Initialize()
 void
 FOdysseyStyleDefault::SetupGeneralStyles()
 {
-    mNormalTableRowStyle = FTableRowStyle();
+    mCoreTableRowStyle = FCoreStyle::Get().GetWidgetStyle<FTableRowStyle>("TableView.Row");
 }
 
 void
 FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
 {
 #if WITH_EDITOR
+    // Generic Button styles
+    Set( "Button.NoPadding", FButtonStyle()
+        .SetNormal ( FSlateNoResource() )
+        .SetPressed( FSlateNoResource() )
+        .SetHovered( FSlateNoResource() )
+    );
+    Set( "Button.Transparent", FButtonStyle()
+        .SetNormal ( FSlateNoResource() )
+        .SetPressed( FSlateNoResource() )
+        .SetHovered( FSlateNoResource() )
+    );
+    Set( "Button.TransparentNoPadding", FButtonStyle()
+        .SetNormal ( FSlateNoResource() )
+        .SetPressed( FSlateNoResource() )
+        .SetHovered( FSlateNoResource() )
+        .SetNormalPadding( FMargin(0,0) )
+        .SetPressedPadding( FMargin(0,0) )
+    );
+
     // OdysseyTexture
     Set( "ClassThumbnail.OdysseyTexture", new IMAGE_BRUSH( "OdysseyTexture/OdysseyTextureDefaultThumbnail_64", mIcon64x64 ) );
     Set( "ClassIcon.OdysseyFlipbook", new IMAGE_BRUSH("OdysseyFlipbook/OdysseyFlipbook_16x", mIcon16x16));
@@ -314,6 +337,8 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "PainterEditor.TopBar.Eraser32", new IMAGE_BRUSH( "PainterEditor/eraser_32", mIcon32x32 ) );
 
     //PainterEditor - ToolsTab
+    Set( "PainterEditor.ToolsTab.DrawingTool64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/drawing_tool_64", mIcon64x64 ) );
+    Set( "PainterEditor.ToolsTab.DrawingTool16", new IMAGE_BRUSH( "PainterEditor/ToolsTab/drawing_tool_16", mIcon16x16 ) );
     Set( "PainterEditor.ToolsTab.ClearLayer64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/clear_layer_64", mIcon64x64 ) );
     Set( "PainterEditor.ToolsTab.ClearLayer32", new IMAGE_BRUSH( "PainterEditor/ToolsTab/clear_layer_32", mIcon32x32 ) );
     Set( "PainterEditor.ToolsTab.ClearLayer16", new IMAGE_BRUSH( "PainterEditor/ToolsTab/clear_layer_16", mIcon16x16 ) );
@@ -347,6 +372,11 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "PainterEditor.ToolsTab.Polygon32", new IMAGE_BRUSH( "PainterEditor/ToolsTab/polygon_32", mIcon32x32 ) );
     Set( "PainterEditor.ToolsTab.FreeHand32", new IMAGE_BRUSH( "PainterEditor/ToolsTab/freehand_32", mIcon32x32 ) );
 
+    //OdysseyTools
+    Set( "OdysseyTools.Tile", mCoreTableRowStyle
+            
+    );
+
     //OdysseyLayerStack
     Set( "OdysseyLayerStack.ImageLayer64", new IMAGE_BRUSH( "OdysseyLayerStack/image_layer_64", mIcon64x64 ) );
     Set( "OdysseyLayerStack.ImageLayer16", new IMAGE_BRUSH( "OdysseyLayerStack/image_layer_16", mIcon16x16 ) );
@@ -358,6 +388,12 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "OdysseyLayerStack.Locked16", new IMAGE_BRUSH( "OdysseyLayerStack/locked_16", mIcon16x16 ) );
     Set( "OdysseyLayerStack.Unlocked64", new IMAGE_BRUSH( "OdysseyLayerStack/unlocked_64", mIcon64x64 ) );
     Set( "OdysseyLayerStack.Unlocked16", new IMAGE_BRUSH( "OdysseyLayerStack/unlocked_16", mIcon16x16 ) );
+    Set( "OdysseyLayerStack.OptionsHeader64", new IMAGE_BRUSH( "OdysseyLayerStack/options_header_64", mIcon64x64 ) );
+    Set( "OdysseyLayerStack.OptionsHeader16", new IMAGE_BRUSH( "OdysseyLayerStack/options_header_16", mIcon16x16 ) );
+    Set( "OdysseyLayerStack.OptionsDisplayed64", new IMAGE_BRUSH( "OdysseyLayerStack/options_displayed_64", mIcon64x64 ) );
+    Set( "OdysseyLayerStack.OptionsDisplayed16", new IMAGE_BRUSH( "OdysseyLayerStack/options_displayed_16", mIcon16x16 ) );
+    Set( "OdysseyLayerStack.OptionsHidden64", new IMAGE_BRUSH( "OdysseyLayerStack/options_hidden_64", mIcon64x64 ) );
+    Set( "OdysseyLayerStack.OptionsHidden16", new IMAGE_BRUSH( "OdysseyLayerStack/options_hidden_16", mIcon16x16 ) );
     Set( "OdysseyLayerStack.Blend64", new IMAGE_BRUSH( "OdysseyLayerStack/blend_64", mIcon64x64 ) );
     Set( "OdysseyLayerStack.Blend16", new IMAGE_BRUSH( "OdysseyLayerStack/blend_16", mIcon16x16 ) );
     Set( "OdysseyLayerStack.Blend_2_64", new IMAGE_BRUSH( "OdysseyLayerStack/blend_2_64", mIcon64x64 ) );
@@ -376,38 +412,26 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set("OdysseyViewportDrawingEditMode.OdysseyViewportDrawingIcon16",new IMAGE_BRUSH("OdysseyViewportDrawing/viewport_drawing_icon_16",mIcon16x16));
     Set("OdysseyViewportDrawingEditMode.OdysseyViewportDrawingIcon40",new IMAGE_BRUSH("OdysseyViewportDrawing/viewport_drawing_icon_40",mIcon40x40));
 
-    //TableRow
-    Set( "TableRow.BaseColorRowHovered16", new IMAGE_BRUSH( "TableRow/base_color_row_hovered_16", mIcon16x16 ) );
-    Set( "TableRow.BaseColorRow16", new IMAGE_BRUSH( "TableRow/base_color_row_16", mIcon16x16 ) );
-    Set( "TableRow.Selection8", new IMAGE_BRUSH( "TableRow/selection_8", mIcon8x8 ) );
-    Set( "TableRow.DropZoneIndicatorBelow16", new IMAGE_BRUSH( "TableRow/drop_zone_indicator_below_16", mIcon16x16 ) );
-    Set( "TableRow.DropZoneIndicatorAbove16", new IMAGE_BRUSH( "TableRow/drop_zone_indicator_above_16", mIcon16x16 ) );
-    Set( "TableRow.DropZoneIndicatorOnto16", new IMAGE_BRUSH( "TableRow/drop_zone_indicator_onto_16", mIcon16x16 ) );
-
-    Set( "OdysseyLayerStack.AlternatedRows", FTableRowStyle( mNormalTableRowStyle )
-            .SetEvenRowBackgroundBrush( IMAGE_BRUSH( "TableRow/base_color_row_hovered_16", mIcon16x16, FLinearColor( 0.5f, 0.5f, 0.5f ) ) )
-            .SetEvenRowBackgroundHoveredBrush( IMAGE_BRUSH( "TableRow/base_color_row_16", mIcon16x16, FLinearColor( 0.5f, 0.5f, 0.5f ) ) )
-            .SetOddRowBackgroundBrush( IMAGE_BRUSH( "TableRow/base_color_row_hovered_16", mIcon16x16, FLinearColor( 0.2f, 0.2f, 0.2f ) ) )
-            .SetOddRowBackgroundHoveredBrush( IMAGE_BRUSH( "TableRow/base_color_row_16", mIcon16x16, FLinearColor( 0.2f, 0.2f, 0.2f ) ) )
-            .SetSelectorFocusedBrush( BORDER_BRUSH( "Common/Selection", FMargin( 4.f / 16.f ), FLinearColor( 0.701f, 0.225f, 0.003f ) ) )
-            .SetActiveBrush( IMAGE_BRUSH( "Common/Selection", FVector2D( 8, 8 ), FLinearColor( 0.701f, 0.225f, 0.003f ) ) )
-            .SetActiveHoveredBrush( IMAGE_BRUSH( "Common/Selection", FVector2D( 8, 8 ), FLinearColor( 0.701f, 0.225f, 0.003f ) ) )
-            .SetInactiveBrush( IMAGE_BRUSH( "Common/Selection", FVector2D( 8, 8 ), FLinearColor( 0.701f, 0.225f, 0.003f ) ) )
-            .SetInactiveHoveredBrush( IMAGE_BRUSH( "Common/Selection", FVector2D( 8, 8 ), FLinearColor( 0.701f, 0.225f, 0.003f ) ) )
-            .SetTextColor( mDefaultForeground )
-            .SetSelectedTextColor( mDefaultForeground )
-            .SetDropIndicator_Above( BOX_BRUSH( "TableRow/drop_zone_indicator_above_16", FMargin( 10.0f / 16.0f, 10.0f / 16.0f, 0, 0 ), FLinearColor( 0.701f, 0.225f, 0.003f ) ) )
-            .SetDropIndicator_Onto( BOX_BRUSH( "TableRow/drop_zone_indicator_onto_16", FMargin( 4.0f / 16.0f ), FLinearColor( 0.701f, 0.225f, 0.003f ) ) )
-            .SetDropIndicator_Below( BOX_BRUSH( "TableRow/drop_zone_indicator_below_16", FMargin( 10.0f / 16.0f, 0, 0, 10.0f / 16.0f ), FLinearColor( 0.701f, 0.225f, 0.003f ) ) )
-    );
-    
-    Set( "OdysseyLayerStack.Motionless", FButtonStyle()
-        .SetNormal ( FSlateNoResource() )
-        .SetPressed( FSlateNoResource() )
-        .SetHovered( FSlateNoResource() )
-        .SetNormalPadding( FMargin(0,0) )
-        .SetPressedPadding( FMargin(0,0) )
+    //LayerStack
+    {
+        FSlateColor selectedRow(FStyleColors::Select.GetSpecifiedColor().CopyWithNewOpacity(0.3f));
+        FSlateColor selectedInactiveRow(FStyleColors::SelectInactive.GetSpecifiedColor().CopyWithNewOpacity(0.3f));
+        FSlateColor selectedParentRow(FStyleColors::SelectParent.GetSpecifiedColor().CopyWithNewOpacity(0.3f));
+        Set ("OdysseyLayerStack.CurrentLayerBackgroundBrush", new FSlateColorBrush(FStyleColors::Select));
+        Set ("OdysseyLayerStack.CurrentLayerInactiveBackgroundBrush", new FSlateColorBrush(FStyleColors::SelectInactive));
+        Set( "OdysseyLayerStack.AlternatedRows", mCoreTableRowStyle
+                .SetOddRowBackgroundBrush(FSlateColorBrush(FStyleColors::Header))
+                .SetSelectorFocusedBrush(FSlateNoResource())
+                .SetActiveBrush(FSlateColorBrush(selectedRow))
+                .SetActiveHoveredBrush(FSlateColorBrush(selectedRow))
+                .SetInactiveBrush(FSlateColorBrush(selectedInactiveRow))
+                .SetInactiveHoveredBrush(FSlateColorBrush(selectedInactiveRow))
+                .SetActiveHighlightedBrush(FSlateColorBrush(selectedParentRow)) // This is the parent hightlight
+                .SetInactiveHighlightedBrush(FSlateColorBrush(selectedParentRow))// This is the parent highlight
         );
+    }
+    
+    
 
     Set("OdysseySpinBoxStyle.DarkSpinBox",FSpinBoxStyle()
         .SetBackgroundBrush(BOX_BRUSH("SpinBox/Spinbox",FMargin(4.0f/16.0f), FLinearColor( 0.05f, 0.05f, 0.05f )))

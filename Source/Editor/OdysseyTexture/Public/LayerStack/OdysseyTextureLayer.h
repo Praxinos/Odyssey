@@ -1,0 +1,59 @@
+// IDDN FR.001.250001.005.S.P.2019.000.00000
+// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
+
+#pragma once
+
+#include "OdysseyLayer.h"
+
+#include <ULIS>
+
+#include "OdysseyTextureLayer.generated.h"
+
+UCLASS(BlueprintType)
+class ODYSSEYTEXTURE_API UOdysseyTextureLayer
+    : public UOdysseyLayer
+{
+    GENERATED_BODY()
+
+public:
+    /**
+     * @brief Delegate called when something changed the result of RenderImage()
+     * 
+     */
+    DECLARE_MULTICAST_DELEGATE_TwoParams(FOnRenderImageChanged, UOdysseyTextureLayer*, const TArray<::ULIS::FRectI>&)
+
+public:
+    static FOnRenderImageChanged& OnRenderImageChanged(); //Delegate
+
+protected:
+    void IsActivatedChanged();
+    void ChildrenChanged();
+
+public:
+    /**
+     * @brief Renders an image over the given Block
+     * Takes into account the size / format of the given block
+     */
+    virtual TArray<::ULIS::FEvent> RenderImage(::ULIS::FBlock* ioBlock, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList);
+
+    /**
+     * @brief Copies an image in the given Block
+     * Takes into account the size / format of the given block
+     */
+    virtual TArray<::ULIS::FEvent> CopyImage(::ULIS::FBlock* ioBlock, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList);
+
+    /**
+     * @brief Calls the RenderImageChanged delegate and informs the parent layers directly
+     * If there's no parent, informs the layerstack
+     * 
+     * @param iRects 
+     */
+    virtual void RenderImageChanged(const TArray<::ULIS::FRectI>& iRects);
+
+    /**
+     * @brief Called when one of the direct children layer render image changed
+     * 
+     * Called by the child layer RenderImageChanged() function
+     */
+    virtual void ChildRenderImageChanged(UOdysseyTextureLayer* iLayer, const TArray<::ULIS::FRectI>& iRects);
+};

@@ -2,6 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "OdysseyTool.h"
+#include "Misc/TransactionObjectEvent.h"
 
 UOdysseyTool::UOdysseyTool()
 {
@@ -119,4 +120,33 @@ TSharedPtr<SWidget>
 UOdysseyTool::GetWidget()
 {
     return SNullWidget::NullWidget;
+}
+
+void
+UOdysseyTool::PropertyChanged(const FName& iPropertyName)
+{
+}
+
+void
+UOdysseyTool::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent)
+{
+    Super::PostEditChangeProperty(PropertyChangedEvent);
+
+    if (PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive)
+        return;
+
+    PropertyChanged(PropertyChangedEvent.GetPropertyName());
+}
+
+void
+UOdysseyTool::PostTransacted(const FTransactionObjectEvent& iTransactionEvent)
+{
+    if ( iTransactionEvent.GetEventType() != ETransactionObjectEventType::UndoRedo )
+        return;
+
+    const TArray<FName>& changedPropertyNames = iTransactionEvent.GetChangedProperties();
+    for ( const FName& propertyName : changedPropertyNames )
+    {
+        PropertyChanged(propertyName);
+    }
 }

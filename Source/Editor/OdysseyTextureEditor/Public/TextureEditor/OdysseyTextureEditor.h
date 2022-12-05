@@ -4,11 +4,10 @@
 #pragma once
 
 #include "OdysseyPainterEditor.h"
-#include "Engine/Texture.h"
+#include "Engine/Texture2D.h"
 #include "OdysseyTextureEditorGUI.h"
-#include "OdysseyTextureWrapper.h"
-
-class IOdysseyLayer;
+#include "OdysseyTextureAssetUserData.h"
+#include "LayerStack/OdysseyTextureLayerStack.h"
 
 /**
  * Implements an Editor for textures.
@@ -20,43 +19,36 @@ public:
     // Construction / Destruction
     virtual ~FOdysseyTextureEditor();
     FOdysseyTextureEditor(); //Non Initialized constructor
-
-public:
-    // Initialization
-    virtual void InitData() override;
-
-public:
-    // Undo
-    virtual void Undo() override;
-    virtual void Redo() override;
-    virtual void ClearUndo() override;
+    FOdysseyTextureEditor(UTexture2D* iTexture);
 
 public:
     // Getters
-	virtual UTexture*							Texture() const = 0;
-    virtual FOdysseyTextureWrapper*             TextureWrapper() const = 0;
+	virtual UTexture2D*				    Texture() const;
+    virtual UOdysseyTextureLayerStack*	LayerStack() const;
+	virtual FOdysseySurfaceTexture2DEditable* DisplaySurface() const override;
     
-	virtual IOdysseySurfaceEditable*            DisplaySurface() const override;
-
-    virtual FOdysseyLayerStack*					LayerStack() const;
+    virtual void				        SetTexture(UTexture2D* iTexture);
+    UOdysseyTextureAssetUserData*       TextureUserData() const;
 
 public:
     // Overrides
     virtual bool OnCloseRequested() override;
 
+public:
+    // Overrides
+    virtual FOdysseyTextureEditorGUI* GetGUI() override;
+    virtual TSharedPtr<FWorkspaceItem> RegisterTabSpawners( const TSharedRef<class FTabManager>& iTabManager ) override;
+
 protected:
     // Listeners
 
-    //Texture
-    virtual void OnPreTextureChange();
-    virtual void OnPostTextureChange();
-
     //LayerStack
-    virtual void OnLayerStackCurrentLayerChanged(TSharedPtr<IOdysseyLayer> iOldValue);
-    virtual void OnLayerStackStructureChanged();
-    virtual void OnLayerStackImageResultChanged( const ::ULIS::FRectI* iRects, const uint32 iNumRects );
-    virtual void OnCurrentLayerLockChanged(bool iOldValue);
-    virtual void OnCurrentLayerVisibilityChanged(bool iOldValue);
+    virtual void OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStack);
+    virtual void OnLayerRenderImageChanged(UOdysseyTextureLayer* iLayer, const TArray<::ULIS::FRectI>& iRects);
+    virtual void OnLayerIsLockedChanged(UOdysseyLayer* iLayer);
+    virtual void OnLayerIsActivatedChanged(UOdysseyLayer* iLayer);
+
+    static void OnEditedBlockInvalidated(const ::ULIS::FBlock* iBlock, const ::ULIS::FRectI* iRects, const uint32 iNumRects, void* iInfo);
 
     //Tool
     virtual void SetSelectedToolDrawingLocked();
@@ -64,4 +56,11 @@ protected:
     //Paint Engine
     virtual void OnPaintEngineCommit(const TArray<::ULIS::FRectI>& iChangedTiles);
     virtual FOdysseyBlendParameters OnPaintEnginePreUpdate(const FOdysseyBlendParameters& iBlendParameters);
+    
+private:
+    UTexture2D* mTexture;
+	TSharedPtr<FOdysseyTextureEditorGUI> mGUI;
+
+    //TODO: should be in the paintTool
+    ::ULIS::FBlock* mEditedBlock;
 };

@@ -17,6 +17,7 @@ public class OdysseyPsdOperations : ModuleRules
                 "OdysseyCore",
                 "OdysseyMaths",
                 "OdysseyLayer",
+                "OdysseyLayerStack",
                 "OdysseyImaging",
                 "ULIS",
                 "ULISLoader",

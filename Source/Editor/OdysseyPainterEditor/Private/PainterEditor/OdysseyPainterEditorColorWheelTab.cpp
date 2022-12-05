@@ -5,6 +5,7 @@
 
 #include "Color/SOdysseyColorSelector.h"
 #include "OdysseyPainterEditor.h"
+#include "UObject/OdysseyObjectEditorUtils.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorColorWheelTab"
 
@@ -61,7 +62,7 @@ FOdysseyPainterEditorColorWheelTab::OnColorChange( eOdysseyEventState::Type iEve
         if (!drawingTool)
             return;
 
-        FObjectEditorUtils::SetPropertyValue(drawingTool->GetBrushOptions(), "Color", FOdysseyBrushColor(mEditor->PaintColor()));
+        FOdysseyObjectEditorUtils::SetPropertyValue(drawingTool->GetBrushOptions(), "Color", FOdysseyBrushColor(mEditor->PaintColor()));
     }
 }
 

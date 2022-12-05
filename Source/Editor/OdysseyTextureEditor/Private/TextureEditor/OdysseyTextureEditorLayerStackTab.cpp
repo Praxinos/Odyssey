@@ -1,23 +1,21 @@
 // IDDN.FR.001.250001.006.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
-#include "OdysseyTextureEditorLayerStackTab.h"
+#include "TextureEditor/OdysseyTextureEditorLayerStackTab.h"
 
-#include "AssetRegistry/AssetRegistryModule.h"
-#include "ContentBrowserModule.h"
-#include "DesktopPlatformModule.h"
-#include "IContentBrowserSingleton.h"
-#include "IDesktopPlatform.h"
-#include "LayerStack/SOdysseyLayerStackView.h"
+#include "Widgets/Layout/SWidgetSwitcher.h"
+#include "Widgets/LayerStack/SOdysseyTextureLayerStack.h"
 #include "ToolMenus.h"
-#include "OdysseyTextureEditor.h"
-#include "ULISLoaderModule.h"
-#include "Factories/Texture2dFactoryNew.h"
-#include "IOdysseyLayerImageBlendingCapability.h"
+#include "DesktopPlatformModule.h"
 #include "OdysseyPixelFormat.h"
+#include "IContentBrowserSingleton.h"
+#include "ContentBrowserModule.h"
 #include "TextureCompiler.h"
+#include "AssetRegistry/AssetRegistryModule.h"
 #include "UObject/SavePackage.h"
-#include <ULIS>
+#include "Factories/Texture2dFactoryNew.h"
+#include "UObject/OdysseyObjectEditorUtils.h"
+#include "OdysseySurfaceTexture2DEditable.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyTextureEditorLayerStackTab"
 
@@ -43,9 +41,8 @@ FOdysseyTextureEditorLayerStackTab::FOdysseyTextureEditorLayerStackTab(FOdysseyT
 TSharedPtr<SWidget>
 FOdysseyTextureEditorLayerStackTab::CreateWidget()
 {
-    mLayerStackView = SNew( SOdysseyLayerStackView )
-        .LayerStackData_Raw( this, &FOdysseyTextureEditorLayerStackTab::LayerStack );
-    return mLayerStackView;
+    return SNew(SOdysseyTextureLayerStack)
+            .LayerStack(this, &FOdysseyTextureEditorLayerStackTab::LayerStack);
 }
 
 void
@@ -53,6 +50,7 @@ FOdysseyTextureEditorLayerStackTab::BindShortcuts(FBaseToolkit* iToolkit)
 {
     const TSharedRef<FUICommandList>& toolkitCommands = iToolkit->GetToolkitCommands();
     const FOdysseyTextureEditorCommands& textureEditorCommands = FOdysseyTextureEditorCommands::Get();
+    //const FOdysseyLayerStackEditorCommands& layerStackEditorCommands = FOdysseyLayerStackEditorCommands::Get();
 
     #define MAP_ACTION(action, ...) toolkitCommands->MapAction( action, FExecuteAction::CreateSP( this, &FOdysseyTextureEditorLayerStackTab::__VA_ARGS__ ), FCanExecuteAction() );
 
@@ -61,8 +59,6 @@ FOdysseyTextureEditorLayerStackTab::BindShortcuts(FBaseToolkit* iToolkit)
     MAP_ACTION(textureEditorCommands.ExportCurrentLayerAsTexture, ExportCurrentLayerAsTexture )
     MAP_ACTION(textureEditorCommands.ExportTextureToOperatingSystem, ExportTextureToOperatingSystem )
     MAP_ACTION(textureEditorCommands.CreateNewLayer, CreateNewLayer )
-    MAP_ACTION(textureEditorCommands.DuplicateCurrentLayer, DuplicateCurrentLayer )
-    MAP_ACTION(textureEditorCommands.DeleteCurrentLayer, DeleteCurrentLayer )
     MAP_ACTION(textureEditorCommands.ChangeLayerOpacity10, ChangeLayerOpacity, 0.1f )
     MAP_ACTION(textureEditorCommands.ChangeLayerOpacity20, ChangeLayerOpacity, 0.2f )
     MAP_ACTION(textureEditorCommands.ChangeLayerOpacity30, ChangeLayerOpacity, 0.3f )
@@ -73,6 +69,8 @@ FOdysseyTextureEditorLayerStackTab::BindShortcuts(FBaseToolkit* iToolkit)
     MAP_ACTION(textureEditorCommands.ChangeLayerOpacity80, ChangeLayerOpacity, 0.8f )
     MAP_ACTION(textureEditorCommands.ChangeLayerOpacity90, ChangeLayerOpacity, 0.9f )
     MAP_ACTION(textureEditorCommands.ChangeLayerOpacity100, ChangeLayerOpacity, 1.0f )
+    //MAP_ACTION(layerStackEditorCommands.DuplicateCurrentLayer, DuplicateCurrentLayer )
+    //MAP_ACTION(layerStackEditorCommands.DeleteCurrentLayer, DeleteCurrentLayer )
 
     #undef MAP_ACTION
 }
@@ -86,7 +84,7 @@ FOdysseyTextureEditorLayerStackTab::ExtendMenu( FToolMenuOwner iOwner, FName iMe
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------------------- Widget Getters
 
-FOdysseyLayerStack*
+UOdysseyLayerStack*
 FOdysseyTextureEditorLayerStackTab::LayerStack() const
 {
     return mEditor->LayerStack();
@@ -212,6 +210,10 @@ FOdysseyTextureEditorLayerStackTab::ExportTextureToOperatingSystem()
 void           
 FOdysseyTextureEditorLayerStackTab::ImportTexturesAsLayers()
 {
+    UOdysseyLayerStack* layerStack = mEditor->LayerStack();
+    if ( !layerStack )
+        return;
+
     FOpenAssetDialogConfig openAssetDialogConfig;
     openAssetDialogConfig.DialogTitleOverride = LOCTEXT( "ImportTextureDialogTitle", "Import Textures As Layers" );
     openAssetDialogConfig.DefaultPath = FPaths::GetPath(mEditor->Texture()->GetPathName() );
@@ -221,77 +223,108 @@ FOdysseyTextureEditorLayerStackTab::ImportTexturesAsLayers()
     FContentBrowserModule& contentBrowserModule = FModuleManager::LoadModuleChecked<FContentBrowserModule>( "ContentBrowser" );
     TArray < FAssetData > assetsData = contentBrowserModule.Get().CreateModalOpenAssetDialog( openAssetDialogConfig );
 
+    UTexture* currentTexture = mEditor->Texture();
+    ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(currentTexture->Source.GetFormat());
+
     for( int i = 0; i < assetsData.Num(); i++ )
     {
-        UTexture2D* openedTexture = static_cast<UTexture2D*>( assetsData[i].GetAsset() );
-        ::ULIS::FBlock* textureBlock = NewBlockFromUTextureData( openedTexture, mEditor->LayerStack()->Format() );
+        UOdysseyLayer* layer = layerStack->AddLayer(UOdysseyTextureLayerImageRaster::StaticClass());
+        UOdysseyTextureLayerImageRaster* layerImageRaster = Cast<UOdysseyTextureLayerImageRaster>(layer);
+        if ( !layerImageRaster )
+            continue;
 
-		FName layerName = mEditor->LayerStack()->GetLayerRoot()->GetNextLayerName();
-		TSharedPtr<FOdysseyImageLayer> imageLayer = MakeShareable(new FOdysseyImageLayer(FName(*(openedTexture->GetName())), textureBlock));
-		mEditor->LayerStack()->AddLayer(imageLayer);
+        UTexture2D* openedTexture = static_cast<UTexture2D*>(assetsData[i].GetAsset());
+        ::ULIS::FBlock* textureBlock = NewBlockFromUTextureData(openedTexture, format);
+
+        ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(textureBlock->Format());
+
+        layerImageRaster->UpdateBlock(*textureBlock, { textureBlock->Rect() }, ::ULIS::FVec2F(0), TArray<::ULIS::FEvent>());
+        ctx.Finish();
+
+        delete textureBlock;
     }
-
-    mLayerStackView->RefreshView();
-    mEditor->LayerStack()->ComputeResultInBlock(mEditor->DisplaySurface()->Block());
-    mEditor->DisplaySurface()->Invalidate();
 }
 
 void           
 FOdysseyTextureEditorLayerStackTab::ExportLayersAsTextures()
 {
+    UOdysseyLayerStack* layerStack = mEditor->LayerStack();
+    if ( !layerStack )
+        return;
+
+    UTexture* texture = mEditor->Texture();
+
     FSaveAssetDialogConfig saveAssetDialogConfig;
     saveAssetDialogConfig.DialogTitleOverride = LOCTEXT( "ExportLayerDialogTitle", "Export Layers As Texture" );
-    saveAssetDialogConfig.DefaultPath = FPaths::GetPath( mEditor->Texture()->GetPathName() );
-    saveAssetDialogConfig.DefaultAssetName = mEditor->Texture()->GetName();
+    saveAssetDialogConfig.DefaultPath = FPaths::GetPath(texture->GetPathName() );
+    saveAssetDialogConfig.DefaultAssetName = texture->GetName();
     saveAssetDialogConfig.AssetClassNames.Add( UTexture2D::StaticClass()->GetClassPathName() );
     saveAssetDialogConfig.ExistingAssetPolicy = ESaveAssetDialogExistingAssetPolicy::AllowButWarn;
 
     FContentBrowserModule& contentBrowserModule = FModuleManager::LoadModuleChecked<FContentBrowserModule>( "ContentBrowser" );
     FString saveObjectPath = contentBrowserModule.Get().CreateModalSaveAssetDialog( saveAssetDialogConfig );
 
-    if( saveObjectPath != "" )
+    if ( saveObjectPath == "" )
+        return;
+
+    TArray<UOdysseyLayer*> layers = layerStack->GetLayers();
+    ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat()); 
+    ::ULIS::FBlock block(texture->Source.GetSizeX(), texture->Source.GetSizeY(), format);
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
+
+    for( UOdysseyLayer* layer : layers )
     {
-		TArray< TSharedPtr<IOdysseyLayer> > layers;
-		mEditor->LayerStack()->GetLayerRoot()->DepthFirstSearchTree(&layers, false);
+        if ( layer->CanHaveChildren ) //avoid exporting folders
+            continue;
 
-        for( int i = 0; i < layers.Num(); i++ )
-        {
-            if( !( layers[i]->GetType() == IOdysseyLayer::eType::kImage ) )
-                continue;
+        UOdysseyTextureLayer* textureLayer = Cast<UOdysseyTextureLayer>(layer);
+        if ( !textureLayer )
+            continue;
 
-            TSharedPtr<FOdysseyImageLayer> imageLayer = StaticCastSharedPtr<FOdysseyImageLayer> ( layers[i] );
+        textureLayer->CopyImage(&block, ::ULIS::FRectI::Auto, ::ULIS::FVec2I(0, 0), TArray<::ULIS::FEvent>());
+        ctx.Finish();
 
-            FString assetPath = FPaths::GetPath( saveObjectPath ) + "/";
-            FString packagePath = ( assetPath + imageLayer->GetName().ToString().Replace( TEXT( " " ), TEXT( "_" ) ) );
-            UPackage* package = CreatePackage( *packagePath );
+        // Create texture asset
+        FString assetPath = FPaths::GetPath(saveObjectPath) + "/";
+        FString packagePath = (assetPath + layer->Name.ToString().Replace(TEXT(" "), TEXT("_")));
+        UPackage* package = CreatePackage(*packagePath);
 
-            UTexture2D* object = NewObject<UTexture2D>( package, UTexture2D::StaticClass(), FName( *( FPaths::GetBaseFilename( saveObjectPath ) + TEXT( "_" ) + imageLayer->GetName().ToString().Replace( TEXT( " " ), TEXT( "_" ) ) ) ), EObjectFlags::RF_Public | EObjectFlags::RF_Standalone );
-            object->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
-            object->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
-            object->LODGroup = TextureGroup::TEXTUREGROUP_Pixels2D;
-            InitTextureWithBlockData(imageLayer->GetBlock(), object, mEditor->Texture()->Source.GetFormat());
+        FName textureName(*(FPaths::GetBaseFilename(saveObjectPath) + TEXT("_") + layer->Name.ToString().Replace(TEXT(" "), TEXT("_"))));
+        UTexture2D* outTexture = NewObject<UTexture2D>(package, UTexture2D::StaticClass(), textureName, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone);
+        outTexture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
+        outTexture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
+        outTexture->LODGroup = TextureGroup::TEXTUREGROUP_Pixels2D;
 
-            object->PostEditChange();
-            object->UpdateResource();
-            FTextureCompilingManager::Get().FinishCompilation({object});
+        //can be false on a FX Layer for example
+        InitTextureWithBlockData(&block, outTexture, texture->Source.GetFormat());
 
-            FAssetRegistryModule::AssetCreated( object );
+        outTexture->PostEditChange();
+        outTexture->UpdateResource();
+        FTextureCompilingManager::Get().FinishCompilation({ outTexture });
 
-            FSavePackageArgs packageArgs;
-            packageArgs.SaveFlags = EObjectFlags::RF_Public | EObjectFlags::RF_Standalone;
-            UPackage::SavePackage( package, object, *( imageLayer->GetName().ToString() ), packageArgs );
+        FAssetRegistryModule::AssetCreated(outTexture);
+
+        FSavePackageArgs packageArgs;
+        packageArgs.SaveFlags = EObjectFlags::RF_Public | EObjectFlags::RF_Standalone;
+        UPackage::SavePackage( package, outTexture, *( layer->Name.ToString() ), packageArgs );
             
-            package->MarkAsFullyLoaded();
-            object->MarkPackageDirty();
-        }
+        package->MarkAsFullyLoaded();
+        outTexture->MarkPackageDirty();
     }
 }
 
 void           
 FOdysseyTextureEditorLayerStackTab::ExportCurrentLayerAsTexture()
 {
-    TSharedPtr<IOdysseyLayer> layer = mEditor->LayerStack()->GetCurrentLayer();
-    if (!layer->ImplementsCapability(IOdysseyLayerImageRenderingCapability::GetGuid()))
+    UOdysseyLayerStack* layerStack = mEditor->LayerStack();
+    if ( !layerStack )
+        return;
+
+    if ( !layerStack->CurrentLayer )
+        return;
+
+    UOdysseyTextureLayer* textureLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
+    if ( !textureLayer )
         return;
 
     IAssetTools& AssetTools = FModuleManager::LoadModuleChecked< FAssetToolsModule >("AssetTools").Get();
@@ -300,48 +333,39 @@ FOdysseyTextureEditorLayerStackTab::ExportCurrentLayerAsTexture()
     if (!object)
         return;
 
-    UTexture2D* texture2D = Cast<UTexture2D>(object);
-    texture2D->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
-    texture2D->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
-    texture2D->LODGroup = TextureGroup::TEXTUREGROUP_Pixels2D;
+    UTexture* texture = mEditor->Texture();
+    TArray<UOdysseyLayer*> layers = layerStack->GetLayers();
+    ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
+    ::ULIS::FBlock block(texture->Source.GetSizeX(), texture->Source.GetSizeY(), format);
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
 
-    IOdysseyLayerImageRenderingCapability* renderCap = layer->GetCapability<IOdysseyLayerImageRenderingCapability>();
-    ::ULIS::FBlock block(mEditor->LayerStack()->Width(), mEditor->LayerStack()->Height(), mEditor->LayerStack()->Format());
+    UTexture2D* outTexture = Cast<UTexture2D>(object);
+    outTexture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
+    outTexture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
+    outTexture->LODGroup = TextureGroup::TEXTUREGROUP_Pixels2D;
 
-    TArray< ::ULIS::FBlock* > blocks;
-    TArray< ::ULIS::FRectI > rects;
-    TArray< ::ULIS::FVec2I > pos;
-    blocks.Add(&block);
-    rects.Add(block.Rect());
-    pos.Add(::ULIS::FVec2F(0.f, 0.f));
-    renderCap->RenderImage(blocks.GetData(), rects.GetData(), pos.GetData(), 1);
-
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(block.Format());
+    textureLayer->CopyImage(&block, ::ULIS::FRectI::Auto, ::ULIS::FVec2I(0, 0), TArray<::ULIS::FEvent>());
     ctx.Finish();
 
-    InitTextureWithBlockData(&block, texture2D, mEditor->Texture()->Source.GetFormat());
+    InitTextureWithBlockData(&block, outTexture, texture->Source.GetFormat());
 
-    texture2D->PostEditChange();
-    texture2D->UpdateResource();
-    FTextureCompilingManager::Get().FinishCompilation({texture2D});
-    texture2D->MarkPackageDirty();
+    outTexture->PostEditChange();
+    outTexture->UpdateResource();
+    FTextureCompilingManager::Get().FinishCompilation({ outTexture });
+    outTexture->MarkPackageDirty();
 }
 
 void
 FOdysseyTextureEditorLayerStackTab::CreateNewLayer()
 {
-    FName layerName = mEditor->LayerStack()->GetLayerRoot()->GetNextLayerName();
-    int w = mEditor->LayerStack()->Width();
-    int h = mEditor->LayerStack()->Height();
-    ::ULIS::eFormat format = mEditor->LayerStack()->Format();
-	TSharedPtr<FOdysseyImageLayer> imageLayer = MakeShareable(new FOdysseyImageLayer(layerName, FVector2D(w, h), format));
-    mEditor->LayerStack()->AddLayer(imageLayer);
-    mEditor->LayerStack()->ComputeResultInBlock(mEditor->DisplaySurface()->Block());
-    mEditor->DisplaySurface()->Invalidate();
-    mLayerStackView->RefreshView();
+    UOdysseyLayerStack* layerStack = mEditor->LayerStack();
+    if ( !layerStack )
+        return;
+
+    layerStack->AddLayer(UOdysseyTextureLayerImageRaster::StaticClass());
 }
 
-void
+/* void
 FOdysseyTextureEditorLayerStackTab::DuplicateCurrentLayer()
 {
     if( mEditor->LayerStack()->GetCurrentLayer() )
@@ -351,8 +375,9 @@ FOdysseyTextureEditorLayerStackTab::DuplicateCurrentLayer()
         mEditor->DisplaySurface()->Invalidate();
         mLayerStackView->RefreshView();
     }
-}
+} */
 
+/*
 void
 FOdysseyTextureEditorLayerStackTab::DeleteCurrentLayer()
 {
@@ -368,20 +393,22 @@ FOdysseyTextureEditorLayerStackTab::DeleteCurrentLayer()
         }
     }
 }
+*/
 
 void
 FOdysseyTextureEditorLayerStackTab::ChangeLayerOpacity( float iOpacity )
 {
-    TSharedPtr<IOdysseyLayer> currentLayer = mEditor->LayerStack()->GetCurrentLayer(); 
-    if( currentLayer )
-    {
-        if( currentLayer->ImplementsCapability( IOdysseyLayerImageBlendingCapability::GetGuid() ) )
-        {
-            IOdysseyLayerImageBlendingCapability* blendingCapability = currentLayer->GetCapability<IOdysseyLayerImageBlendingCapability>();
-            blendingCapability->SetOpacity( FMath::Clamp( iOpacity, 0.f , 1.f ) );
-            mLayerStackView->RefreshView();
-        }
-    }
+    UOdysseyLayerStack* layerStack = mEditor->LayerStack();
+    if ( !layerStack )
+        return;
+
+    if ( !layerStack->CurrentLayer )
+        return;
+
+    if ( !FOdysseyObjectEditorUtils::HasProperty(layerStack->CurrentLayer.Get(), "Opacity") )
+        return;
+
+    FOdysseyObjectEditorUtils::SetPropertyValue(layerStack->CurrentLayer.Get(), "Opacity", FMath::Clamp(iOpacity, 0.f, 1.f));
 }
 
 #undef LOCTEXT_NAMESPACE

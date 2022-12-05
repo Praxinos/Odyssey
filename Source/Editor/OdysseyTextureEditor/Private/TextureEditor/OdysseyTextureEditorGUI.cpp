@@ -1,15 +1,9 @@
 // IDDN.FR.001.250001.006.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
-#include "OdysseyTextureEditorGUI.h"
+#include "TextureEditor/OdysseyTextureEditorGUI.h"
 
-#include "Widgets/Text/SMultiLineEditableText.h"
-
-#include "Widgets/Input/SButton.h"
-#include "Widgets/Layout/SExpandableArea.h"
-#include "Widgets/Layout/SWrapBox.h"
-#include "OdysseyStyleSet.h"
-#include "OdysseyTextureEditor.h"
+#include "TextureEditor/OdysseyTextureEditor.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyTextureEditorGUI"
 
@@ -75,7 +69,6 @@ FOdysseyTextureEditorGUI::GetLayerStackTab()
 {
 	return mLayerStackTab;
 }
-
 
 TSharedPtr<FOdysseyTextureEditorTextureDetailsTab>&
 FOdysseyTextureEditorGUI::GetTextureDetailsTab()

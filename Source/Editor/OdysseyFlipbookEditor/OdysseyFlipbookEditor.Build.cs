@@ -40,6 +40,7 @@ public class OdysseyFlipbookEditor : ModuleRules
                 "OdysseyWidgets",
                 "OdysseyImaging",
                 "OdysseyLayer",
+                "OdysseyLayerStack",
                 "OdysseyEditor",
                 "OdysseyPainterEditor",
                 "OdysseyPaintEngine",
@@ -47,7 +48,6 @@ public class OdysseyFlipbookEditor : ModuleRules
                 "OdysseyFlipbook",
                 "OdysseyTexture",
                 "OdysseyTextureEditor",
-                "OdysseyTexture2DEditor",
                 "Paper2D",
                 "Paper2DEditor",
             }

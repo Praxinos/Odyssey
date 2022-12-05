@@ -5,8 +5,17 @@
 
 #include "Editor.h"
 #include "Editor/EditorEngine.h"
+#include "OdysseyTextureEditorModule.h"
 
 UOdysseyTextureEditorSettings::UOdysseyTextureEditorSettings( const FObjectInitializer& iObjectInitializer )
     : Super( iObjectInitializer )
+    , IliadDefaultEditorEnabled( true )
 {
 }
+
+//Static
+UOdysseyTextureEditorSettings* UOdysseyTextureEditorSettings::Get()
+{
+    return CastChecked<UOdysseyTextureEditorSettings>(UOdysseyTextureEditorSettings::StaticClass()->GetDefaultObject());
+}
+

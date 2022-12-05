@@ -27,7 +27,7 @@ FOdysseyFlipbookEditor::~FOdysseyFlipbookEditor()
 }
 
 FOdysseyFlipbookEditor::FOdysseyFlipbookEditor() :
-	FOdysseyTexture2DEditor(),
+	FOdysseyTextureEditor(),
 	mFlipbookWrapper(nullptr),
 	mPreviewSurface(new FOdysseySurfaceTexture2D(nullptr)),
 	mGUI(nullptr)
@@ -35,7 +35,7 @@ FOdysseyFlipbookEditor::FOdysseyFlipbookEditor() :
 }
 
 FOdysseyFlipbookEditor::FOdysseyFlipbookEditor(UPaperFlipbook* iFlipbook) :
-	FOdysseyTexture2DEditor(),
+	FOdysseyTextureEditor(),
 	mFlipbookWrapper(MakeShareable(new FOdysseyFlipbookWrapper(iFlipbook))),
 	mPreviewSurface(new FOdysseySurfaceTexture2D(nullptr)),
 	mGUI(nullptr)
@@ -48,7 +48,7 @@ FOdysseyFlipbookEditor::FOdysseyFlipbookEditor(UPaperFlipbook* iFlipbook) :
 void
 FOdysseyFlipbookEditor::InitData()
 {
-	FOdysseyTexture2DEditor::InitData();
+	FOdysseyTextureEditor::InitData();
 
 	//--- Add Edited Objects
 
@@ -97,15 +97,6 @@ FOdysseySurfaceTexture2D*
 FOdysseyFlipbookEditor::PreviewSurface()
 {
 	return mPreviewSurface;
-}
-
-//--------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------ Setters
-
-void
-FOdysseyFlipbookEditor::SetTexture(UTexture2D* iTexture)
-{
-	TextureWrapper()->SetTexture(iTexture);
 }
 
 //--------------------------------------------------------------------------------------

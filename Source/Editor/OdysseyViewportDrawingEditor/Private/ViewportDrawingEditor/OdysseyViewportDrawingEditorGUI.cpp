@@ -18,7 +18,7 @@ FOdysseyViewportDrawingEditorGUI::~FOdysseyViewportDrawingEditorGUI()
 }
 
 FOdysseyViewportDrawingEditorGUI::FOdysseyViewportDrawingEditorGUI(FOdysseyViewportDrawingEditor* iEditor) :
-	FOdysseyTexture2DEditorGUI(iEditor),
+	FOdysseyTextureEditorGUI(iEditor),
 	mEditor( iEditor ),
     mCommandList(MakeShareable(new FUICommandList()))
 {
@@ -30,7 +30,7 @@ FOdysseyViewportDrawingEditorGUI::FOdysseyViewportDrawingEditorGUI(FOdysseyViewp
 void
 FOdysseyViewportDrawingEditorGUI::CreateTabs()
 {
-	FOdysseyTexture2DEditorGUI::CreateTabs();
+	FOdysseyTextureEditorGUI::CreateTabs();
 
     mMasterTab = MakeShareable(new FOdysseyViewportDrawingEditorMasterTab(mEditor));
     mMasterTab->Init();
@@ -39,13 +39,13 @@ FOdysseyViewportDrawingEditorGUI::CreateTabs()
 TSharedRef<FTabManager::FSplitter>
 FOdysseyViewportDrawingEditorGUI::CreateMainSection()
 {
-	return FOdysseyTexture2DEditorGUI::CreateMainSection();
+	return FOdysseyTextureEditorGUI::CreateMainSection();
 }
 
 void
 FOdysseyViewportDrawingEditorGUI::BindShortcuts(FBaseToolkit* iToolkit)
 {
-	FOdysseyTexture2DEditorGUI::BindShortcuts(iToolkit);
+	FOdysseyTextureEditorGUI::BindShortcuts(iToolkit);
     iToolkit->GetToolkitCommands()->Append(mCommandList.ToSharedRef());
 }
 

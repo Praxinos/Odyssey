@@ -13,12 +13,14 @@ namespace UnrealBuildTool.Rules
 
             PublicIncludePaths.AddRange(
 				new string[] {
+					Path.Combine(ModuleDirectory, "Private", "LayerStack")
 					// ... add public include paths required here ...
 				}
 				);
 
 			PrivateIncludePaths.AddRange(
 				new string[] {
+					Path.Combine(ModuleDirectory, "Public", "LayerStack")
 					// ... add other private include paths required here ...
 				}
 				);
@@ -39,11 +41,15 @@ namespace UnrealBuildTool.Rules
                     "Core",
                     "CoreUObject",
                     "EditorStyle",
+					"EditorWidgets",
                     "Engine",
                     "InputCore",
+					"OdysseyCore",
                     "OdysseyImaging",
                     "OdysseyLayer",
+                    "OdysseyLayerStack",
                     "OdysseyPsdOperations",
+					"OdysseyStyle",
                     "Slate",
                     "SlateCore",
                     "UnrealEd",

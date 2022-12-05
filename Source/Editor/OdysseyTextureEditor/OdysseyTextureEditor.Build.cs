@@ -2,88 +2,77 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 using System.IO;
-using UnrealBuildTool;
 
-public class OdysseyTextureEditor : ModuleRules
+namespace UnrealBuildTool.Rules
 {
-    public OdysseyTextureEditor(ReadOnlyTargetRules Target) : base(Target)
+	public class OdysseyTextureEditor : ModuleRules
     {
-        PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+		public OdysseyTextureEditor(ReadOnlyTargetRules Target) : base(Target)
+        {
+            PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
-        PrivateIncludePathModuleNames.AddRange(
-            new string[] {
-                "Settings",
-                "PropertyEditor",
-                "AssetTools",
-            }
-        );
+            PublicIncludePaths.AddRange(
+				new string[] {
+					Path.Combine(ModuleDirectory, "Public"),
+					Path.Combine(ModuleDirectory, "Public", "Settings"),
+					Path.Combine(ModuleDirectory, "Public", "TextureEditor"),
+				}
+				);
 
-        PrivateDependencyModuleNames.AddRange(
-            new string[] {
-                "AppFramework",
-                "Core",
-                "CoreUObject",
-                "DesktopPlatform",
-                "Slate",
-                "SlateCore",
-                "UnrealEd",
-                "InputCore",
-                "Engine",
-                "RHI",
-                "RenderCore",
-                "ToolMenus",
-                "RawMesh",
-                "EditorStyle",
-                "PropertyEditor",
-                "Projects",
-                "OdysseyBrush",
-                "OdysseyWidgets",
-                "OdysseyEditor",
-                "OdysseyImaging",
-                "OdysseyPaintEngine",
-                "OdysseyPainterEditor",
-                "OdysseyLayer",
-                "OdysseyStyle",
-                "OdysseyStylusInput",
-                "OdysseyTexture",
-                "OdysseyTools",
-            }
-        );
+			PrivateIncludePaths.AddRange(
+				new string[] {
+					Path.Combine(ModuleDirectory, "Private", "Settings"),
+					Path.Combine(ModuleDirectory, "Private", "TextureEditor"),
+				}
+				);
 
-        PrivateIncludePaths.AddRange(
-            new string[] {
-                Path.Combine(ModuleDirectory, "Private", "Models"),
-                Path.Combine(ModuleDirectory, "Private", "TextureEditor"),
-                Path.Combine(ModuleDirectory, "Private", "Settings"),
-            }
-        );
+			PublicDependencyModuleNames.AddRange(
+				new string[]
+				{
+                    "ULIS",
+                    "ULISLoader",
+					// ... add other public dependencies that you statically link with here ...
+				}
+				);
+                
+			PrivateDependencyModuleNames.AddRange(
+				new string[]
+                {
+					"AssetTools",
+					"Core",
+                	"CoreUObject",
+                    "DesktopPlatform",
+                	"EditorStyle",
+					"EditorWidgets",
+					"Engine",
+					"InputCore",
+					"TextureEditor",
+					"ToolMenus",
+					"OdysseyBrush",
+					"OdysseyCore",
+					"OdysseyPaintEngine",
+					"OdysseyImaging",
+					"OdysseyLayer",
+					"OdysseyLayerStack",
+					"OdysseyLayerStackEditor",
+					"OdysseyEditor",
+					"OdysseyPainterEditor",
+					"OdysseyStyle",
+					"OdysseyTexture",
+					"OdysseyTools",
+					"OdysseyWidgets",
+                	"Slate",
+					"SlateCore",
+					"UnrealEd",
+				}
+				);
 
-        PublicIncludePaths.AddRange(
-            new string[] {
-                Path.Combine(ModuleDirectory, "Public"),
-                Path.Combine(ModuleDirectory, "Public", "Settings"),
-                Path.Combine(ModuleDirectory, "Public", "TextureEditor"),
-            }
-        );
-
-        PublicDependencyModuleNames.AddRange(
-             new string[] {
-                "OdysseyPainterEditor",
-                "OdysseyStyle",
-                "OdysseyTexture",
-                "ULIS",
-                "ULISLoader"
-             }
-        );
-
-        DynamicallyLoadedModuleNames.AddRange(
-             new string[] {
-                "MainFrame",
-                "WorkspaceMenuStructure",
-                "AssetTools",
-                "PackagesDialog"
-             }
-        );
-
-    }
+			DynamicallyLoadedModuleNames.AddRange(
+				new string[]
+				{
+					// ... add any modules that your module loads dynamically here ...
+				}
+				);
+		}
+	}
 }

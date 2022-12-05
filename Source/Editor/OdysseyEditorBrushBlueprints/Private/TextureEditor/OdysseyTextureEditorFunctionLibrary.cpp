@@ -5,12 +5,12 @@
 
 #include "OdysseyBrushAssetBase.h"
 #include "OdysseyLayerStack.h"
-#include "BrushContext/OdysseyTextureEditorBrushContext.h"
+#include "OdysseyLayer.h"
 #include <ULIS>
 #include "ULISLoaderModule.h"
 
 //---
-
+/*
 namespace
 {
 static
@@ -30,8 +30,8 @@ GetStack( UOdysseyBrushAssetBase* BrushInstance )
 }
 
 static
-TSharedPtr<FOdysseyImageLayer>
-GetCurrentLayer( FOdysseyLayerStack* iStack )
+UOdysseyLayer*
+GetCurrentLayer( UOdysseyLayerStack* iStack )
 {
     if( !iStack )
         return nullptr;
@@ -245,3 +245,4 @@ UOdysseyTextureEditorFunctionLibrary::GetResultBlock( UOdysseyBrushAssetBase* Br
     return FOdysseyBlockProxy(block);
 }
 #endif
+*/

@@ -1,0 +1,123 @@
+// IDDN FR.001.250001.005.S.P.2019.000.00000
+// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "ObjectEditorUtils.h"
+	
+namespace FOdysseyObjectEditorUtils
+{
+	void PreChangePropertyValue(UObject* Object, FName PropertyName)
+	{
+		// Get the property addresses for the source and destination objects.
+		FProperty* Property = FindFieldChecked<FProperty>(Object->GetClass(), PropertyName);
+
+		if ( !Object->HasAnyFlags(RF_ClassDefaultObject) )
+		{
+			FEditPropertyChain PropertyChain;
+			PropertyChain.AddHead(Property);
+
+        	Object->Modify();
+			Object->PreEditChange(PropertyChain);
+		}
+	}
+
+
+	void PostChangePropertyValue(UObject* Object, FName PropertyName, EPropertyChangeType::Type iChangeType = EPropertyChangeType::Unspecified)
+	{
+		// Get the property addresses for the source and destination objects.
+		FProperty* Property = FindFieldChecked<FProperty>(Object->GetClass(), PropertyName);
+
+		if ( !Object->HasAnyFlags(RF_ClassDefaultObject) )
+		{
+			FPropertyChangedEvent PropertyEvent(Property, iChangeType);
+			Object->PostEditChangeProperty(PropertyEvent);
+		}
+	}
+
+	/**
+	 * Set the value on an UObject using reflection.
+	 * @param	Object			The object to copy the value into.
+	 * @param	PropertyName	The name of the property to set.
+	 * @param	Value			The value to assign to the property.
+	 *
+	 * @return true if the value was set correctly
+	 */
+	template <typename ValueType>
+	bool SetPropertyValue(UObject* Object, FName PropertyName, ValueType Value, EPropertyChangeType::Type iChangeType = EPropertyChangeType::Unspecified)
+	{
+		// Get the property addresses for the source and destination objects.
+		FProperty* Property = FindFieldChecked<FProperty>(Object->GetClass(), PropertyName);
+
+		// Get the property addresses for the object
+		ValueType* SourceAddr = Property->ContainerPtrToValuePtr<ValueType>(Object);
+
+		if ( SourceAddr == NULL )
+		{
+			return false;
+		}
+
+		if ( !Object->HasAnyFlags(RF_ClassDefaultObject) )
+		{
+			FEditPropertyChain PropertyChain;
+			PropertyChain.AddHead(Property);
+			
+			Object->Modify();
+			Object->PreEditChange(PropertyChain);
+		}
+
+		// Set the value on the destination object.
+		*SourceAddr = Value;
+
+		if ( !Object->HasAnyFlags(RF_ClassDefaultObject) )
+		{
+			FPropertyChangedEvent PropertyEvent(Property, iChangeType);
+			Object->PostEditChangeProperty(PropertyEvent);
+		}
+
+		return true;
+	}
+
+	/**
+	 * Get the value on an UObject using reflection.
+	 * @param	Object			The object to copy the value into.
+	 * @param	PropertyName	The name of the property to set.
+	 * @param	Value			The value to assign to the property.
+	 *
+	 * @return true if the value was set correctly
+	 */
+	template <typename ValueType>
+	bool GetPropertyValue(UObject* Object, FName PropertyName, ValueType& oValue)
+	{
+		// Get the property addresses for the source and destination objects.
+		FProperty* Property = FindFieldChecked<FProperty>(Object->GetClass(), PropertyName);
+
+		// Get the property addresses for the object
+		ValueType* SourceAddr = Property->ContainerPtrToValuePtr<ValueType>(Object);
+
+		if ( SourceAddr == nullptr )
+			return false;
+
+		// Set the value on the destination object.
+		oValue = *SourceAddr;
+
+		return true;
+	}
+
+	/**
+	 * Returns wether the given object contains the given property
+	 *
+	 * @return true if the poroperty exists within the given object
+	 */
+	bool HasProperty(UObject* Object, FName PropertyName)
+	{
+		// Get the property addresses for the source and destination objects.
+		FProperty* Property = FindFieldChecked<FProperty>(Object->GetClass(), PropertyName);
+
+		if ( !Property )
+			return false;
+
+		return true;
+	}
+};

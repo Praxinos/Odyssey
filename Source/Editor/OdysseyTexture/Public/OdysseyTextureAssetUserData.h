@@ -7,14 +7,22 @@
 #include "UObject/ObjectMacros.h"
 #include "UObject/ScriptMacros.h"
 #include "OdysseyLayerStack.h"
+#include "LayerStack/OdysseyTextureLayerStack.h"
 #include "Engine/AssetUserData.h"
+#include "OdysseySurfaceTexture2DEditable.h"
+#include "UObject/ObjectSaveContext.h"
 
 #include "OdysseyTextureAssetUserData.generated.h"
 
 UCLASS()
 class ODYSSEYTEXTURE_API UOdysseyTextureAssetUserData : public UAssetUserData
 {
-    GENERATED_UCLASS_BODY()
+    GENERATED_BODY()
+
+public:
+	static UOdysseyTextureAssetUserData* MakeFromTexture(UTexture2D* iTexture);
+
+	UOdysseyTextureAssetUserData();
 
 public:
     //~ Begin UObject Interface.
@@ -22,10 +30,17 @@ public:
     //~ End UObject Interface.
 
 public:
-    FOdysseyLayerStack* GetLayerStack();
-    void SetLayerStack( FOdysseyLayerStack* iLayerStack );
+    FOdysseyLayerStack* GetOldLayerStack();
+    void SetOldLayerStack( FOdysseyLayerStack* iLayerStack );
+
+    UOdysseyTextureLayerStack* GetLayerStack();
+    UTexture2D* GetTexture();
 
 private:
     FOdysseyLayerStack* mLayerStack;
+    
+private:
+	UPROPERTY()
+    TObjectPtr<UOdysseyTextureLayerStack> LayerStack;
 };
 

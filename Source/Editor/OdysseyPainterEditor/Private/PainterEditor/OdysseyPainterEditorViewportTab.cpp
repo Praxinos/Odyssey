@@ -129,7 +129,7 @@ FOdysseyPainterEditorViewportTab::HandleViewportColorPicked(eOdysseyEventState::
         if (!drawingTool)
             return;
 
-        FObjectEditorUtils::SetPropertyValue(drawingTool->GetBrushOptions(), "Color", FOdysseyBrushColor(mEditor->PaintColor()));
+        FOdysseyObjectEditorUtils::SetPropertyValue(drawingTool->GetBrushOptions(), "Color", FOdysseyBrushColor(mEditor->PaintColor()));
     }
 }
 
