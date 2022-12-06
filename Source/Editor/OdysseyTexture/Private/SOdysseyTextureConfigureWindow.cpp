@@ -58,7 +58,7 @@ SOdysseyTextureConfigureWindow::Construct( const FArguments& iArgs)
         .SupportsMaximize( false )
         [
             SNew( SBorder )
-            .BorderImage( FEditorStyle::GetBrush( "Menu.Background" ) )
+            .BorderImage( FAppStyle::GetBrush( "Menu.Background" ) )
             [
                 SNew( SVerticalBox )
 
@@ -173,7 +173,7 @@ SOdysseyTextureConfigureWindow::Construct( const FArguments& iArgs)
                         .AutoHeight()
                         [
                             SNew( SCheckBox )
-                            .Style( FEditorStyle::Get(), "RadioButton" )
+                            .Style( FAppStyle::Get(), "RadioButton" )
                             .IsChecked( this, &SOdysseyTextureConfigureWindow::IsBackgroundColorRadioChecked, EBackgroundColor::kTransparent )
                             .OnCheckStateChanged( this, &SOdysseyTextureConfigureWindow::OnBackgroundColorRadioChanged, EBackgroundColor::kTransparent )
                             [
@@ -186,7 +186,7 @@ SOdysseyTextureConfigureWindow::Construct( const FArguments& iArgs)
                         .AutoHeight()
                         [
                             SNew( SCheckBox )
-                            .Style( FEditorStyle::Get(), "RadioButton" )
+                            .Style( FAppStyle::Get(), "RadioButton" )
                             .IsChecked( this, &SOdysseyTextureConfigureWindow::IsBackgroundColorRadioChecked, EBackgroundColor::kWhite )
                             .OnCheckStateChanged( this, &SOdysseyTextureConfigureWindow::OnBackgroundColorRadioChanged, EBackgroundColor::kWhite )
                             [
@@ -199,7 +199,7 @@ SOdysseyTextureConfigureWindow::Construct( const FArguments& iArgs)
                         .AutoHeight()
                         [
                             SNew( SCheckBox )
-                            .Style( FEditorStyle::Get(), "RadioButton" )
+                            .Style( FAppStyle::Get(), "RadioButton" )
                             .IsChecked( this, &SOdysseyTextureConfigureWindow::IsBackgroundColorRadioChecked, EBackgroundColor::kNormal )
                             .OnCheckStateChanged( this, &SOdysseyTextureConfigureWindow::OnBackgroundColorRadioChanged, EBackgroundColor::kNormal )
                             [

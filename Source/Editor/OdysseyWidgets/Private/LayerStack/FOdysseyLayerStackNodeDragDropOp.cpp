@@ -36,7 +36,7 @@ void FOdysseyLayerStackNodeDragDropOp::Construct()
 
     SetFeedbackMessage(
         SNew(SBorder)
-        .BorderImage(FEditorStyle::GetBrush("Graph.ConnectorFeedback.Border"))
+        .BorderImage(FAppStyle::GetBrush("Graph.ConnectorFeedback.Border"))
         .Content()
         [
             SNew(SHorizontalBox)

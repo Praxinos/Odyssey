@@ -73,7 +73,7 @@ SOdysseyThumbnailSelectWindow::Construct( const FArguments& iArgs )
         .SupportsMaximize( false )
         [
             SNew( SBorder )
-            .BorderImage( FEditorStyle::GetBrush( "Menu.Background" ) )
+            .BorderImage( FAppStyle::GetBrush( "Menu.Background" ) )
             [
                 SNew( SVerticalBox )
                 +SVerticalBox::Slot()

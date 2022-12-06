@@ -111,7 +111,7 @@ TSharedRef<SWidget> FOdysseyImageLayerNode::GetCustomOutlinerContent()
         .AutoWidth()
         [
             SNew(SButton)
-                .ButtonStyle( FEditorStyle::Get(), "NoBorder" )
+                .ButtonStyle( FAppStyle::Get(), "NoBorder" )
                 .OnClicked( this, &FOdysseyImageLayerNode::OnToggleVisibility )
                 .ToolTipText( LOCTEXT("OdysseyLayerVisibilityButtonToolTip", "Toggle Layer Visibility") )
                 .ForegroundColor( FSlateColor::UseForeground() )
@@ -127,7 +127,7 @@ TSharedRef<SWidget> FOdysseyImageLayerNode::GetCustomOutlinerContent()
         .AutoWidth()
         [
             SNew(SButton)
-                .ButtonStyle( FEditorStyle::Get(), "NoBorder" )
+                .ButtonStyle( FAppStyle::Get(), "NoBorder" )
                 .OnClicked( this, &FOdysseyImageLayerNode::OnToggleLocked )
                 .ToolTipText( LOCTEXT("OdysseyLayerLockedButtonToolTip", "Toggle Layer Locked State") )
                 .ForegroundColor( FSlateColor::UseForeground() )
@@ -143,7 +143,7 @@ TSharedRef<SWidget> FOdysseyImageLayerNode::GetCustomOutlinerContent()
         .AutoWidth()
         [
             SNew(SButton)
-                .ButtonStyle( FEditorStyle::Get(), "NoBorder" )
+                .ButtonStyle( FAppStyle::Get(), "NoBorder" )
                 .OnClicked( this, &FOdysseyImageLayerNode::OnToggleAlphaLocked )
                 .ToolTipText( LOCTEXT("OdysseyLayerAlphaLockedButtonToolTip", "Toggle Layer Alpha Locked State") )
                 .ForegroundColor( FSlateColor::UseForeground() )
@@ -165,21 +165,21 @@ void FOdysseyImageLayerNode::BuildContextMenu(FMenuBuilder& iMenuBuilder)
             iMenuBuilder.AddMenuEntry(
             LOCTEXT("DeleteLayer", "Delete"),
             LOCTEXT("DeleteLayerTooltip", "Delete this Layer"),
-            FSlateIcon(FEditorStyle::GetStyleSetName(), "ContentBrowser.AssetActions.Delete"),
+            FSlateIcon(FAppStyle::GetAppStyleSetName(), "ContentBrowser.AssetActions.Delete"),
                                      FUIAction(FExecuteAction::CreateSP(&(mParentTree.GetLayerStack()), &FOdysseyLayerStackModel::OnDeleteLayer, mLayerDataPtr),
                                      FCanExecuteAction::CreateSP(this, &FOdysseyImageLayerNode::HandleDeleteLayerCanExecute)));
 
             iMenuBuilder.AddMenuEntry(
             LOCTEXT("MergeDownLayer", "Merge Down"),
             LOCTEXT("MergeDownLayerTooltip", "Merge this Layer Down"),
-            FSlateIcon(FEditorStyle::GetStyleSetName(), "MergeDownIcon"),
+            FSlateIcon(FAppStyle::GetAppStyleSetName(), "MergeDownIcon"),
                                      FUIAction(FExecuteAction::CreateSP(&(mParentTree.GetLayerStack()), &FOdysseyLayerStackModel::OnMergeLayerDown, mLayerDataPtr),
                                      FCanExecuteAction::CreateSP(this, &FOdysseyImageLayerNode::HandleMergeLayerDownCanExecute)));
         
             iMenuBuilder.AddMenuEntry(
             LOCTEXT("DuplicateLayer", "Duplicate Layer"),
             LOCTEXT("DuplicateLayerTooltip", "Duplicate this Layer"),
-            FSlateIcon(FEditorStyle::GetStyleSetName(), "DuplicateLayerIcon"),
+            FSlateIcon(FAppStyle::GetAppStyleSetName(), "DuplicateLayerIcon"),
                                      FUIAction(FExecuteAction::CreateSP(&(mParentTree.GetLayerStack()), &FOdysseyLayerStackModel::OnDuplicateLayer, mLayerDataPtr),
                                      FCanExecuteAction::CreateSP(this, &FOdysseyImageLayerNode::HandleDuplicateLayerCanExecute)));
     }

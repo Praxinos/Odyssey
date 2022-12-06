@@ -139,16 +139,16 @@ FOdysseyViewportDrawingEditorMasterTab::CreateWidget()
                         .AutoHeight()
                         [
                             SNew(SComboBox<TSharedPtr<EOdysseyViewportDrawingPaintingAdapterMethod>>)
-                            .ButtonStyle(FEditorStyle::Get(), "PropertyEditor.AssetComboStyle")
-                            .ForegroundColor(FEditorStyle::GetColor("PropertyEditor.AssetName.ColorAndOpacity"))
+                            .ButtonStyle(FAppStyle::Get(), "PropertyEditor.AssetComboStyle")
+                            .ForegroundColor(FAppStyle::GetColor("PropertyEditor.AssetName.ColorAndOpacity"))
                             .ContentPadding(2.0f)
                             .OptionsSource(&mOptions)
                             .OnGenerateWidget(this, &FOdysseyViewportDrawingEditorMasterTab::GeneratePaintingMethodComboBoxItem)
                             .OnSelectionChanged(this, &FOdysseyViewportDrawingEditorMasterTab::ChangeSelectionPaintingMethodComboBoxItem)
                             [
                                 SNew(STextBlock)
-                                .TextStyle(FEditorStyle::Get(), "PropertyEditor.AssetClass")
-                                .Font(FEditorStyle::GetFontStyle("PropertyWindow.NormalFont"))
+                                .TextStyle(FAppStyle::Get(), "PropertyEditor.AssetClass")
+                                .Font(FAppStyle::GetFontStyle("PropertyWindow.NormalFont"))
                                 .Text_Lambda([=] { return FOdysseyViewportDrawingEditorMasterTab::GetMethodAsText(mEditor->PaintingAdapterMethod());})
                             ]
                         ]*/
@@ -168,8 +168,8 @@ FOdysseyViewportDrawingEditorMasterTab::OnGetMenuContent()
             .AutoHeight()
             [
                 SNew( SButton )
-                    .ButtonStyle( FEditorStyle::Get(), "HoverHintOnly" )
-                    .ForegroundColor(FEditorStyle::GetColor("PropertyEditor.AssetName.ColorAndOpacity"))
+                    .ButtonStyle( FAppStyle::Get(), "HoverHintOnly" )
+                    .ForegroundColor( FAppStyle::GetColor("PropertyEditor.AssetName.ColorAndOpacity"))
                     .Text( FText::FromString( mEditor->SelectableComponents()[i]->GetName() ) )
                     .OnClicked( this, &FOdysseyViewportDrawingEditorMasterTab::OnMeshComponentChanged, mEditor->SelectableComponents()[i]->GetName() )
             ];
@@ -191,8 +191,8 @@ FOdysseyViewportDrawingEditorMasterTab::GenerateMeshSelectorComboButtonItem( TSh
 {
     return SNew( STextBlock )
                 .Text( FText::FromString( *( iItem.Get() ) ) )
-                .TextStyle( FEditorStyle::Get(), "PropertyEditor.AssetClass" )
-                .Font( FEditorStyle::GetFontStyle( "PropertyWindow.NormalFont" ) );
+                .TextStyle( FAppStyle::Get(), "PropertyEditor.AssetClass" )
+                .Font( FAppStyle::GetFontStyle( "PropertyWindow.NormalFont" ) );
 }
 
 FText
@@ -209,8 +209,8 @@ TSharedRef<SWidget>
 FOdysseyViewportDrawingEditorMasterTab::CreateMeshComponentMenuWidget()
 {
     mMeshSelectComboButton = SNew(SComboButton)
-        .ButtonStyle( FEditorStyle::Get(), "PropertyEditor.AssetComboStyle" )
-        .ForegroundColor(FEditorStyle::GetColor("PropertyEditor.AssetName.ColorAndOpacity"))
+        .ButtonStyle( FAppStyle::Get(), "PropertyEditor.AssetComboStyle" )
+        .ForegroundColor( FAppStyle::GetColor("PropertyEditor.AssetName.ColorAndOpacity") )
         .OnGetMenuContent( this, &FOdysseyViewportDrawingEditorMasterTab::OnGetMenuContent )
         .OnMenuOpenChanged( this, &FOdysseyViewportDrawingEditorMasterTab::OnMenuClosed )
         .ContentPadding(2.0f)
@@ -223,8 +223,8 @@ FOdysseyViewportDrawingEditorMasterTab::CreateMeshComponentMenuWidget()
                 [
                     SNew( STextBlock )
                        .Text( this, &FOdysseyViewportDrawingEditorMasterTab::CreateTextMeshSelector )
-                       .TextStyle( FEditorStyle::Get(), "PropertyEditor.AssetClass" )
-                       .Font( FEditorStyle::GetFontStyle( "PropertyWindow.NormalFont" ) )
+                       .TextStyle( FAppStyle::Get(), "PropertyEditor.AssetClass" )
+                       .Font( FAppStyle::GetFontStyle( "PropertyWindow.NormalFont" ) )
                 ]
         ];
 

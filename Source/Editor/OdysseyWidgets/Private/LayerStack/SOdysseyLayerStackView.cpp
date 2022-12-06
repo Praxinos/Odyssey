@@ -133,7 +133,7 @@ TSharedRef<SWidget> SOdysseyLayerStackView::MakeAddButton()
 {
     return SNew(SComboButton)
     .OnGetMenuContent(this, &SOdysseyLayerStackView::MakeAddMenu)
-    .ButtonStyle(FEditorStyle::Get(), "FlatButton.Success")
+    .ButtonStyle(FAppStyle::Get(), "FlatButton.Success")
     .ContentPadding(FMargin(2.0f, 5.0f))
     .HasDownArrow(false)
     .ButtonContent()
@@ -144,8 +144,8 @@ TSharedRef<SWidget> SOdysseyLayerStackView::MakeAddButton()
         .AutoWidth()
         [
             SNew(STextBlock)
-            .TextStyle(FEditorStyle::Get(), "NormalText.Important")
-            .Font(FEditorStyle::Get().GetFontStyle("FontAwesome.10"))
+            .TextStyle(FAppStyle::Get(), "NormalText.Important")
+            .Font(FAppStyle::Get().GetFontStyle("FontAwesome.10"))
             .Text(FEditorFontGlyphs::Plus)
         ]
 
@@ -154,7 +154,7 @@ TSharedRef<SWidget> SOdysseyLayerStackView::MakeAddButton()
         .Padding(4, 0, 0, 0)
         [
             SNew(STextBlock)
-            .TextStyle(FEditorStyle::Get(), "NormalText.Important")
+            .TextStyle(FAppStyle::Get(), "NormalText.Important")
             .Text(LOCTEXT("Layer", "Layer"))
         ]
 
@@ -164,8 +164,8 @@ TSharedRef<SWidget> SOdysseyLayerStackView::MakeAddButton()
         .Padding(4, 0, 0, 0)
         [
             SNew(STextBlock)
-            .TextStyle(FEditorStyle::Get(), "NormalText.Important")
-            .Font(FEditorStyle::Get().GetFontStyle("FontAwesome.10"))
+            .TextStyle(FAppStyle::Get(), "NormalText.Important")
+            .Font(FAppStyle::Get().GetFontStyle("FontAwesome.10"))
             .Text(FEditorFontGlyphs::Caret_Down)
         ]
      ];

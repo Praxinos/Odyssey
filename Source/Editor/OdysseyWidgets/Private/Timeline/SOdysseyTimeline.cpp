@@ -106,13 +106,13 @@ int32 SOdysseyTimeline::OnPaint(const FPaintArgs& Args, const FGeometry& Allotte
 	const FLinearColor& backgroundColorEven = FOdysseyStyle::GetColor("ScrubWidget.backgroundColorEven");
 	const FLinearColor& backgroundColorOdd = FOdysseyStyle::GetColor("ScrubWidget.backgroundColorOdd");
 
-	FEditorStyle::GetBrush( TEXT( "ProgressBar.Background" ) );
+	FAppStyle::GetBrush( TEXT( "ProgressBar.Background" ) );
 
 	const int32 backgroundLayer = LayerId;
 	const int32 textLayer = backgroundLayer + 1;
 
 	const FSlateFontInfo textFontInfo = FCoreStyle::GetDefaultFontStyle("Regular", 10);
-	const FSlateBrush* backgroundBrush = FEditorStyle::GetBrush( TEXT( "ProgressBar.Background" ) );
+	const FSlateBrush* backgroundBrush = FAppStyle::GetBrush( TEXT( "ProgressBar.Background" ) );
 
 	// const bool bEnabled = ShouldBeEnabled( bParentEnabled );
 	// const ESlateDrawEffect DrawEffects = bEnabled ? ESlateDrawEffect::None : ESlateDrawEffect::DisabledEffect;

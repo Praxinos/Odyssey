@@ -30,7 +30,7 @@ void FOdysseyLayerAddMenu::BuildAddLayerMenu(FMenuBuilder& iMenuBuilder)
     iMenuBuilder.AddMenuEntry(
         LOCTEXT("AddImageLayer", "Add Image Layer"),
         LOCTEXT("AddImageLayerTooltip", "Adds a new image layer"),
-        FSlateIcon(FEditorStyle::GetStyleSetName(), ""),
+        FSlateIcon(FAppStyle::GetAppStyleSetName(), ""),
         FUIAction(
             FExecuteAction::CreateRaw(this, &FOdysseyLayerAddMenu::HandleAddImageLayerMenuEntryExecute)
         )
@@ -39,7 +39,7 @@ void FOdysseyLayerAddMenu::BuildAddLayerMenu(FMenuBuilder& iMenuBuilder)
     iMenuBuilder.AddMenuEntry(
         LOCTEXT("AddFolder", "Add Folder Layer"),
         LOCTEXT("AddFolderTooltip", "Adds a new folder layer"),
-        FSlateIcon(FEditorStyle::GetStyleSetName(), ""),
+        FSlateIcon(FAppStyle::GetAppStyleSetName(), ""),
         FUIAction(
             FExecuteAction::CreateRaw(this, &FOdysseyLayerAddMenu::HandleAddFolderLayerMenuEntryExecute)
         )

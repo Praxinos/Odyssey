@@ -69,7 +69,7 @@ TSharedRef<SWidget> SOdysseyImageLayerNodePropertyView::ConstructPropertyViewFor
             .VAlign( VAlign_Center )
             [
                 SNew(SSpinBox<int>)
-                //.Style( FEditorStyle::Get(), "NoBorder" )
+                //.Style( FAppStyle::Get(), "NoBorder" )
                 .Value(this, &SOdysseyImageLayerNodePropertyView::GetLayerOpacityValue, iImageLayer)
                 .Delta(1)
                 .LinearDeltaSensitivity( 15 )

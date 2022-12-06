@@ -14,8 +14,8 @@
 FOdysseyFolderLayerNode::FOdysseyFolderLayerNode( TSharedPtr<FOdysseyFolderLayer> iFolderLayer, FOdysseyLayerStackTree& iParentTree )
     : IOdysseyBaseLayerNode( iFolderLayer->GetName(), iParentTree, iFolderLayer )
 {
-    mFolderOpenBrush = FEditorStyle::GetBrush( "ContentBrowser.AssetTreeFolderOpen" );
-    mFolderClosedBrush = FEditorStyle::GetBrush( "ContentBrowser.AssetTreeFolderClosed" );
+    mFolderOpenBrush = FAppStyle::GetBrush( "ContentBrowser.AssetTreeFolderOpen" );
+    mFolderClosedBrush = FAppStyle::GetBrush( "ContentBrowser.AssetTreeFolderClosed" );
 }
 
 // IOdysseyBaseLayerNode IMPLEMENTATION---------------------------
@@ -121,7 +121,7 @@ TSharedRef<SWidget> FOdysseyFolderLayerNode::GetCustomOutlinerContent()
         .AutoWidth()
         [
             SNew(SButton)
-                .ButtonStyle( FEditorStyle::Get(), "NoBorder" )
+                .ButtonStyle( FAppStyle::Get(), "NoBorder" )
                 .OnClicked( this, &FOdysseyFolderLayerNode::OnToggleVisibility )
                 .ToolTipText( LOCTEXT("OdysseyLayerVisibilityButtonToolTip", "Toggle Layer Visibility") )
                 .ForegroundColor( FSlateColor::UseForeground() )
@@ -137,7 +137,7 @@ TSharedRef<SWidget> FOdysseyFolderLayerNode::GetCustomOutlinerContent()
         .AutoWidth()
         [
             SNew(SButton)
-                .ButtonStyle( FEditorStyle::Get(), "NoBorder" )
+                .ButtonStyle( FAppStyle::Get(), "NoBorder" )
                 .OnClicked( this, &FOdysseyFolderLayerNode::OnToggleLocked )
                 .ToolTipText( LOCTEXT("OdysseyLayerLockedButtonToolTip", "Toggle Layer Locked State") )
                 .ForegroundColor( FSlateColor::UseForeground() )
@@ -158,21 +158,21 @@ void FOdysseyFolderLayerNode::BuildContextMenu(FMenuBuilder& iMenuBuilder)
             iMenuBuilder.AddMenuEntry(
             LOCTEXT("DeleteLayer", "Delete"),
             LOCTEXT("DeleteLayerTooltip", "Delete this Layer"),
-            FSlateIcon(FEditorStyle::GetStyleSetName(), "ContentBrowser.AssetActions.Delete"),
+            FSlateIcon(FAppStyle::GetAppStyleSetName(), "ContentBrowser.AssetActions.Delete"),
                                      FUIAction(FExecuteAction::CreateSP(&(mParentTree.GetLayerStack()), &FOdysseyLayerStackModel::OnDeleteLayer, mLayerDataPtr),
                                      FCanExecuteAction::CreateSP(this, &FOdysseyFolderLayerNode::HandleDeleteLayerCanExecute)));
 
             iMenuBuilder.AddMenuEntry(
             LOCTEXT("FlattenLayer", "Flatten Layer"),
             LOCTEXT("FlattenTooltip", "Flatten the folder in one image layer"),
-            FSlateIcon(FEditorStyle::GetStyleSetName(), "Flatten"),
+            FSlateIcon(FAppStyle::GetAppStyleSetName(), "Flatten"),
                                      FUIAction(FExecuteAction::CreateSP(&(mParentTree.GetLayerStack()), &FOdysseyLayerStackModel::OnFlattenLayer, mLayerDataPtr),
                                      FCanExecuteAction::CreateSP(this, &FOdysseyFolderLayerNode::HandleFlattenLayerCanExecute)));
         
             iMenuBuilder.AddMenuEntry(
             LOCTEXT("DuplicateLayer", "Duplicate Layer"),
             LOCTEXT("DuplicateLayerTooltip", "Duplicate this Layer"),
-            FSlateIcon(FEditorStyle::GetStyleSetName(), "DuplicateLayerIcon"),
+            FSlateIcon(FAppStyle::GetAppStyleSetName(), "DuplicateLayerIcon"),
                                      FUIAction(FExecuteAction::CreateSP(&(mParentTree.GetLayerStack()), &FOdysseyLayerStackModel::OnDuplicateLayer, mLayerDataPtr),
                                      FCanExecuteAction::CreateSP(this, &FOdysseyFolderLayerNode::HandleDuplicateLayerCanExecute)));
     }

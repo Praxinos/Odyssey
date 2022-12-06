@@ -272,7 +272,7 @@ TOptional<EItemDropZone> SOdysseyLayerStackViewRow::OnCanAcceptDrop( const FDrag
         TOptional<EItemDropZone> allowedDropZone = iDisplayNode->CanDrop( *dragDropOp, iItemDropZone );
         if ( allowedDropZone.IsSet() == false )
         {
-            dragDropOp->SetCurrentIconBrush( FEditorStyle::GetBrush( TEXT( "Graph.ConnectorFeedback.Error" ) ) );
+            dragDropOp->SetCurrentIconBrush( FAppStyle::GetBrush( TEXT( "Graph.ConnectorFeedback.Error" ) ) );
         }
         return allowedDropZone;
     }

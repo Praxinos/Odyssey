@@ -41,7 +41,7 @@ void SOdysseyLayerStackOutlinerTreeNode::Construct( const FArguments& InArgs, TS
 
     auto nodeHeight = [=]() -> FOptionalSize { return iNode->GetNodeHeight(); };
 
-    FSlateFontInfo NodeFont = FEditorStyle::GetFontStyle("Sequencer.AnimationOutliner.RegularFont");
+    FSlateFontInfo NodeFont = FAppStyle::GetFontStyle("Sequencer.AnimationOutliner.RegularFont");
 
     mEditableLabel = SNew( SInlineEditableTextBlock )
     .IsReadOnly(this, &SOdysseyLayerStackOutlinerTreeNode::HandleNodeLabelIsReadOnly )
@@ -74,7 +74,7 @@ void SOdysseyLayerStackOutlinerTreeNode::Construct( const FArguments& InArgs, TS
                      + SHorizontalBox::Slot()
                         [
                             SNew( SBorder )
-                            .BorderImage( FEditorStyle::GetBrush( "LayerStack.NodeOutliner.TopLevelBorder_Collapsed" ) )
+                            .BorderImage( FAppStyle::GetBrush( "LayerStack.NodeOutliner.TopLevelBorder_Collapsed" ) )
                             .BorderBackgroundColor( this, &SOdysseyLayerStackOutlinerTreeNode::GetNodeInnerBackgroundTint )
                             .Padding( FMargin(0) )
                             [

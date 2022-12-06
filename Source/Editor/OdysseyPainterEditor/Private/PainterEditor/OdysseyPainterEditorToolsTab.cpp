@@ -50,7 +50,7 @@ FOdysseyPainterEditorToolsTab::CreateWidget()
             [
                 SNew( STextBlock )
                 .Text( LOCTEXT( "Tools", "Tools" ) )
-                .Font( FEditorStyle::GetFontStyle( "DetailsView.CategoryFontStyle" ) )
+                .Font( FAppStyle::GetFontStyle( "DetailsView.CategoryFontStyle" ) )
                 .ShadowOffset( FVector2D( 1.0f, 1.0f ) )
             ]
             .BodyContent()
@@ -164,7 +164,7 @@ FOdysseyPainterEditorToolsTab::CreateWidget()
             [
                 SNew( STextBlock )
                 .Text( LOCTEXT( "Utils", "Utils" ) )
-                .Font( FEditorStyle::GetFontStyle( "DetailsView.CategoryFontStyle" ) )
+                .Font( FAppStyle::GetFontStyle( "DetailsView.CategoryFontStyle" ) )
                 .ShadowOffset( FVector2D( 1.0f, 1.0f ) )
             ]
             .BodyContent()
@@ -200,7 +200,7 @@ FOdysseyPainterEditorToolsTab::CreateWidget()
             [
                 SNew( STextBlock )
                 .Text( LOCTEXT( "UndoRedo", "UndoRedo" ) )
-                .Font( FEditorStyle::GetFontStyle( "DetailsView.CategoryFontStyle" ) )
+                .Font( FAppStyle::GetFontStyle( "DetailsView.CategoryFontStyle" ) )
                 .ShadowOffset( FVector2D( 1.0f, 1.0f ) )
             ]
             .BodyContent()

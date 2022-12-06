@@ -70,7 +70,7 @@ TSharedRef<SWidget> SOdysseyFolderLayerNodePropertyView::ConstructPropertyViewFo
             .VAlign( VAlign_Center )
             [
                 SNew(SSpinBox<int>)
-                //.Style( FEditorStyle::Get(), "NoBorder" )
+                //.Style( FAppStyle::Get(), "NoBorder" )
                 .Value(this, &SOdysseyFolderLayerNodePropertyView::GetLayerOpacityValue, iFolderLayer)
                 .Delta(1)
                 .LinearDeltaSensitivity( 15 )
