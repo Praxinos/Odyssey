@@ -138,7 +138,7 @@ SOdysseyLeafWidget::SetMaxDesiredHeight( TAttribute< FOptionalSize > InMaxDesire
 void
 SOdysseyLeafWidget::CheckResize( const FVector2D& iNewSize ) const
 {
-    if( ExternalSize != iNewSize && iNewSize > FVector2D::ZeroVector )
+    if( ExternalSize != iNewSize && iNewSize.ComponentwiseAllGreaterThan( FVector2D::ZeroVector ) )
     {
         ExternalSize = iNewSize;
         FVector2D previous_internal_size = InternalSize;

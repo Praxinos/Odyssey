@@ -325,7 +325,7 @@ FOdysseyBrushContentBrowserExtensions_Impl::OnExtendContentBrowserAssetSelection
     for( auto assetIt = iSelectedAssets.CreateConstIterator(); assetIt; ++assetIt )
     {
         const FAssetData& asset = *assetIt;
-        isAnyBrushs = isAnyBrushs || ( asset.AssetClass == UOdysseyBrush::StaticClass()->GetFName() );
+        isAnyBrushs = isAnyBrushs || ( asset.AssetClassPath == UOdysseyBrush::StaticClass()->GetClassPathName() );
     }
 
     if( isAnyBrushs )

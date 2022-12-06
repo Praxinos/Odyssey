@@ -48,7 +48,7 @@ FOdysseyFlipbookAssetTypeActions::GetCategories()
 void 
 FOdysseyFlipbookAssetTypeActions::BuildBackendFilter( FARFilter & InFilter )
 {
-    InFilter.ClassNames.Add( UPaperFlipbook::StaticClass()->GetFName());
+    InFilter.ClassPaths.Add( UPaperFlipbook::StaticClass()->GetClassPathName() );
 }
 
 
