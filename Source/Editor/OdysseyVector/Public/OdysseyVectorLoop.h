@@ -4,25 +4,17 @@
 #include <Core/Core.h>
 #include <Image/Block.h>
 
-#include "CoreMinimal.h"
-
 #include "OdysseyVectorObject.h"
 #include "OdysseyVectorPoint.h"
 #include "OdysseyVectorSection.h"
 #include "OdysseyVectorSegmentCubic.h"
 #include "OdysseyVectorPath.h"
 
-#include "OdysseyVectorLoop.generated.h"
-
-UCLASS()
-class ODYSSEYVECTOR_API UOdysseyVectorLoop : public UOdysseyVectorObject
+class FOdysseyVectorLoop : public FOdysseyVectorObject
 {
-    public:
-        GENERATED_BODY()
-
     private:
         void UpdateShape();
-        UOdysseyVectorObject* CopyShape();
+        FOdysseyVectorObject* CopyShape();
 
         void BuildSegmentCubic( std::vector<BLPoint>& iPointArray
                               , FOdysseyVectorSegmentCubic& iSegment
@@ -31,7 +23,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorLoop : public UOdysseyVectorObject
 
     protected :
         uint64 mID;
-        FOdysseyVectorPoint* mLoopPoint;
+        FOdysseyVectorPoint& mLoopPoint;
         std::list<FOdysseyVectorPoint*> mPointList;
         std::list<FOdysseyVectorSection*> mSectionList;
 
@@ -39,15 +31,15 @@ class ODYSSEYVECTOR_API UOdysseyVectorLoop : public UOdysseyVectorObject
         BLPath mPath;
 
     public:
-        ~UOdysseyVectorLoop();
-        void Init( UOdysseyVectorPath* iParent
-                 , uint64 iID
-                 , FOdysseyVectorPoint* iLoopPoint
-                 , std::list<FOdysseyVectorPoint*>& iPointList
-                 , std::list<FOdysseyVectorSection*>& iSectionList );
+        ~FOdysseyVectorLoop();
+        FOdysseyVectorLoop::FOdysseyVectorLoop( FOdysseyVectorPath& iParent
+                                              , uint64 iID
+                                              , FOdysseyVectorPoint& iLoopPoint
+                                              , std::list<FOdysseyVectorPoint*>& iPointList
+                                              , std::list<FOdysseyVectorSection*>& iSectionList );
 
         void DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags );
-        UOdysseyVectorObject* PickShape( double iX, double iY, double iRadius );
+        FOdysseyVectorObject* PickShape( double iX, double iY, double iRadius );
         void DrawPoints( ::ULIS::FRectD& iRoi );
 
         void Unselect( FOdysseyVectorPoint* iPoint ) { };

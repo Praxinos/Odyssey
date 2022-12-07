@@ -1,43 +1,43 @@
 #include "OdysseyVectorPathCubic.h"
 
-UOdysseyVectorPathCubic::UOdysseyVectorPathCubic()
-    : UOdysseyVectorPath()
+FOdysseyVectorPathCubic::FOdysseyVectorPathCubic()
+    : FOdysseyVectorPath()
 {
     setJointMiter();
 }
 
-void
-UOdysseyVectorPathCubic::Init( std::string iName )
+FOdysseyVectorPathCubic::FOdysseyVectorPathCubic( std::string iName )
+    : FOdysseyVectorPath( iName )
 {
-    SetName( iName );
+
 }
 
 void
-UOdysseyVectorPathCubic::setJointRadial()
+FOdysseyVectorPathCubic::setJointRadial()
 {
     mJointType = JOINT_TYPE_RADIAL;
 }
 
 void
-UOdysseyVectorPathCubic::setJointMiter()
+FOdysseyVectorPathCubic::setJointMiter()
 {
     mJointType = JOINT_TYPE_MITER;
 }
 
 void
-UOdysseyVectorPathCubic::setJointLinear()
+FOdysseyVectorPathCubic::setJointLinear()
 {
     mJointType = JOINT_TYPE_LINEAR;
 }
 
 void
-UOdysseyVectorPathCubic::setJointNone()
+FOdysseyVectorPathCubic::setJointNone()
 {
     mJointType = JOINT_TYPE_NONE;
 }
 
 FOdysseyVectorSegmentCubic*
-UOdysseyVectorPathCubic::AppendPoint( FOdysseyVectorPointCubic* iPoint
+FOdysseyVectorPathCubic::AppendPoint( FOdysseyVectorPointCubic* iPoint
                              , bool iConnect
                              , bool iBuildSegments )
 {
@@ -66,8 +66,8 @@ UOdysseyVectorPathCubic::AppendPoint( FOdysseyVectorPointCubic* iPoint
     return nullptr;
 }
 
-UOdysseyVectorObject*
-UOdysseyVectorPathCubic::PickShape( double iX
+FOdysseyVectorObject*
+FOdysseyVectorPathCubic::PickShape( double iX
                                   , double iY
                                   , double iRadius )
 {
@@ -112,7 +112,7 @@ UOdysseyVectorPathCubic::PickShape( double iX
 }
 
 bool
-UOdysseyVectorPathCubic::PickPoint( double iX
+FOdysseyVectorPathCubic::PickPoint( double iX
                            , double iY
                            , double iSelectionRadius
                            , uint64 iSelectionFlags )
@@ -183,7 +183,7 @@ UOdysseyVectorPathCubic::PickPoint( double iX
 }
 
 void
-UOdysseyVectorPathCubic::Unselect( FOdysseyVectorPoint *iPoint )
+FOdysseyVectorPathCubic::Unselect( FOdysseyVectorPoint *iPoint )
 {
     if ( iPoint == NULL )
     {
@@ -196,7 +196,7 @@ UOdysseyVectorPathCubic::Unselect( FOdysseyVectorPoint *iPoint )
 }
 
 void
-UOdysseyVectorPathCubic::Cut( ::ULIS::FVec2D& linePoint0
+FOdysseyVectorPathCubic::Cut( ::ULIS::FVec2D& linePoint0
                      , ::ULIS::FVec2D& linePoint1 )
 {
     // let's work on a copy as we are going to remove items in the original list
@@ -218,7 +218,7 @@ UOdysseyVectorPathCubic::Cut( ::ULIS::FVec2D& linePoint0
 }
 
 void
-UOdysseyVectorPathCubic::Fill( ::ULIS::FRectD& iRoi )
+FOdysseyVectorPathCubic::Fill( ::ULIS::FRectD& iRoi )
 {
     FOdysseyVectorPointCubic *firstPoint = static_cast<FOdysseyVectorPointCubic*>( GetFirstPoint() );
     BLContext& blctx = FOdysseyVectorEngine::GetBLContext();
@@ -254,7 +254,7 @@ UOdysseyVectorPathCubic::Fill( ::ULIS::FRectD& iRoi )
 }
 
 void
-UOdysseyVectorPathCubic::DrawStructure( ::ULIS::FRectD& iRoi )
+FOdysseyVectorPathCubic::DrawStructure( ::ULIS::FRectD& iRoi )
 {
     BLContext& blctx = FOdysseyVectorEngine::GetBLContext();
     BLPath path;
@@ -341,7 +341,7 @@ UOdysseyVectorPathCubic::DrawStructure( ::ULIS::FRectD& iRoi )
 }
 
 void
-UOdysseyVectorPathCubic::DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags )
+FOdysseyVectorPathCubic::DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags )
 {
 /*
     BLPath path;
@@ -585,7 +585,7 @@ _drawLinearJoint( ::ULIS::FVec2D& iOrigin
 }
 
 void
-UOdysseyVectorPathCubic::DrawJoint( FOdysseyVectorSegmentCubic* iPrevSegment
+FOdysseyVectorPathCubic::DrawJoint( FOdysseyVectorSegmentCubic* iPrevSegment
                            , FOdysseyVectorSegmentCubic& iSegment
                            , double iRadius )
 {
@@ -626,7 +626,7 @@ UOdysseyVectorPathCubic::DrawJoint( FOdysseyVectorSegmentCubic* iPrevSegment
 }
 
 void
-UOdysseyVectorPathCubic::DrawShapeVariable( ::ULIS::FRectD &iRoi, uint64 iFlags )
+FOdysseyVectorPathCubic::DrawShapeVariable( ::ULIS::FRectD &iRoi, uint64 iFlags )
 {
     BLContext& blctx = FOdysseyVectorEngine::GetBLContext();
     blctx.setCompOp( BL_COMP_OP_SRC_OVER );
@@ -660,7 +660,7 @@ UOdysseyVectorPathCubic::DrawShapeVariable( ::ULIS::FRectD &iRoi, uint64 iFlags 
 }
 
 void
-UOdysseyVectorPathCubic::Mirror( bool iMirrorX, bool iMirrorY )
+FOdysseyVectorPathCubic::Mirror( bool iMirrorX, bool iMirrorY )
 {
     double factorX = ( iMirrorX ) ? -1.0f : 1.0f;
     double factorY = ( iMirrorY ) ? -1.0f : 1.0f;
@@ -685,10 +685,10 @@ UOdysseyVectorPathCubic::Mirror( bool iMirrorX, bool iMirrorY )
     /*Update();*/
 }
 
-UOdysseyVectorObject*
-UOdysseyVectorPathCubic::CopyShape()
+FOdysseyVectorObject*
+FOdysseyVectorPathCubic::CopyShape()
 {
-    UOdysseyVectorPathCubic* cubicPathCopy = NewObject<UOdysseyVectorPathCubic>();
+    FOdysseyVectorPathCubic* cubicPathCopy = new FOdysseyVectorPathCubic ( );
     std::map<FOdysseyVectorPointCubic*, FOdysseyVectorPointCubic*> lookupTable;
 
     for( std::list<FOdysseyVectorPoint*>::iterator it = mPointList.begin(); it != mPointList.end(); ++it )
@@ -721,11 +721,11 @@ UOdysseyVectorPathCubic::CopyShape()
         newSegment->BuildVariable();
     }
 
-    return static_cast<UOdysseyVectorObject*>( cubicPathCopy );
+    return static_cast<FOdysseyVectorObject*>( cubicPathCopy );
 }
 
 void
-UOdysseyVectorPathCubic::Merge( UOdysseyVectorPathCubic& iCubicPath )
+FOdysseyVectorPathCubic::Merge( FOdysseyVectorPathCubic& iCubicPath )
 {
     std::list<FOdysseyVectorSegment*>& segmentList = iCubicPath.mSegmentList;
     std::list<FOdysseyVectorPoint*>& pointList = iCubicPath.mPointList;
@@ -757,7 +757,7 @@ UOdysseyVectorPathCubic::Merge( UOdysseyVectorPathCubic& iCubicPath )
                                                                  , originalSegment->GetControlPoint(1).GetY()
                                                                  , lookupTable[point1] );
 
-        UOdysseyVectorPath::AddSegment( newSegment );
+        FOdysseyVectorPath::AddSegment( newSegment );
 
         newSegment->BuildVariable();
     }

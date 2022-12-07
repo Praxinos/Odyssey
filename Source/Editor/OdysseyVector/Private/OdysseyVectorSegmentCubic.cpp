@@ -1,8 +1,8 @@
 #include "OdysseyVectorSegmentCubic.h"
 
-FOdysseyVectorSegmentCubic::FOdysseyVectorSegmentCubic( UOdysseyVectorPathCubic& iPath
-                                                      , FOdysseyVectorPointCubic* iPoint0
-                                                      , FOdysseyVectorPointCubic* iPoint1 )
+FOdysseyVectorSegmentCubic::FOdysseyVectorSegmentCubic( FOdysseyVectorPathCubic& iPath
+                                        , FOdysseyVectorPointCubic* iPoint0
+                                        , FOdysseyVectorPointCubic* iPoint1 )
    : FOdysseyVectorSegment( iPath, iPoint0, iPoint1 )
    , mCtrlPoint { FOdysseyVectorHandleSegment( *this, iPoint0->GetX(), iPoint0->GetY() )
                 , FOdysseyVectorHandleSegment( *this, iPoint1->GetX(), iPoint1->GetY() ) }
@@ -10,13 +10,13 @@ FOdysseyVectorSegmentCubic::FOdysseyVectorSegmentCubic( UOdysseyVectorPathCubic&
     Update();
 }
 
-FOdysseyVectorSegmentCubic::FOdysseyVectorSegmentCubic( UOdysseyVectorPathCubic& iPath
-                                                      , FOdysseyVectorPointCubic* iPoint0
-                                                      , double iCtrlPoint0x
-                                                      , double iCtrlPoint0y
-                                                      , double iCtrlPoint1x
-                                                      , double iCtrlPoint1y
-                                                      , FOdysseyVectorPointCubic* iPoint1 )
+FOdysseyVectorSegmentCubic::FOdysseyVectorSegmentCubic( FOdysseyVectorPathCubic& iPath
+                                        , FOdysseyVectorPointCubic* iPoint0
+                                        , double iCtrlPoint0x
+                                        , double iCtrlPoint0y
+                                        , double iCtrlPoint1x
+                                        , double iCtrlPoint1y
+                                        , FOdysseyVectorPointCubic* iPoint1 )
     : FOdysseyVectorSegment( iPath, iPoint0, iPoint1 )
     , mCtrlPoint { FOdysseyVectorHandleSegment( *this, iCtrlPoint0x, iCtrlPoint0y )
                 ,  FOdysseyVectorHandleSegment( *this, iCtrlPoint1x, iCtrlPoint1y ) }
@@ -50,8 +50,8 @@ FOdysseyVectorSegmentCubic::ResetPolygonCache( )
 
 bool
 FOdysseyVectorSegmentCubic::Pick( double iX
-                                , double iY
-                                , double iRadius )
+                         , double iY
+                         , double iRadius )
 {
     for ( int i = 0; i < mPolygonCache.size(); i++ )
     {
@@ -197,7 +197,7 @@ bool intersection( ::ULIS::FVec2D& line0p0
 }
 
 void
-FOdysseyVectorSegmentCubic::IntersectPath( UOdysseyVectorPathCubic& iPath )
+FOdysseyVectorSegmentCubic::IntersectPath( FOdysseyVectorPathCubic& iPath )
 {
     std::list<FOdysseyVectorSegment*>& segmentList = iPath.GetSegmentList();
 
@@ -291,7 +291,7 @@ FOdysseyVectorSegmentCubic::Cut( ::ULIS::FVec2D& linePoint0
         for( uint32 i = 0; i < pointCount; i++ )
         {
             uint32 n = i + 1;
-            FOdysseyVectorSegmentCubic* segment = new FOdysseyVectorSegmentCubic ( static_cast<UOdysseyVectorPathCubic&>(mPath)
+            FOdysseyVectorSegmentCubic* segment = new FOdysseyVectorSegmentCubic ( static_cast<FOdysseyVectorPathCubic&>(mPath)
                                                                    , static_cast<FOdysseyVectorPointCubic*>(pointChain[i])
                                                                    , static_cast<FOdysseyVectorPointCubic*>(pointChain[n]) );
             double distance = segment->GetStraightDistance();

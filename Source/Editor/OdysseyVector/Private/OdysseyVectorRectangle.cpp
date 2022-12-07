@@ -1,27 +1,33 @@
 #include "OdysseyVectorRectangle.h"
 
-UOdysseyVectorRectangle::~UOdysseyVectorRectangle()
+FOdysseyVectorRectangle::~FOdysseyVectorRectangle()
 {
 }
 
-void UOdysseyVectorRectangle::Init( std::string iName, double iWidth, double iHeight )
+FOdysseyVectorRectangle::FOdysseyVectorRectangle( std::string iName )
+    : FOdysseyVectorObject( iName )
+    , mWidth( 0 )
+    , mHeight( 0 )
 {
-    SetName( iName );
-    SetSize( iWidth, iHeight );
 }
 
-UOdysseyVectorObject*
-UOdysseyVectorRectangle::CopyShape()
+FOdysseyVectorRectangle::FOdysseyVectorRectangle( std::string iName, double iWidth, double iHeight )
+    : FOdysseyVectorObject( iName )
+    , mWidth( iWidth )
+    , mHeight( iHeight )
 {
-    UOdysseyVectorRectangle* rectangleCopy = NewObject<UOdysseyVectorRectangle>();
+}
 
-    rectangleCopy->Init( mName, mWidth, mHeight );
+FOdysseyVectorObject*
+FOdysseyVectorRectangle::CopyShape()
+{
+    FOdysseyVectorRectangle* rectangleCopy = new FOdysseyVectorRectangle ( mName, mWidth, mHeight );
 
-    return Cast<UOdysseyVectorObject>( rectangleCopy );
+    return Cast<FOdysseyVectorObject*>( rectangleCopy );
 }
 
 void
-UOdysseyVectorRectangle::DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags )
+FOdysseyVectorRectangle::DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags )
 {
     BLContext& blctx = FOdysseyVectorEngine::GetBLContext();
 
@@ -38,8 +44,8 @@ UOdysseyVectorRectangle::DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags )
     blctx.strokeRoundRect( -mWidth * 0.5f, -mHeight * 0.5f, mWidth, mHeight, 0.0f, 0.0f );
 }
 
-UOdysseyVectorObject*
-UOdysseyVectorRectangle::PickShape( double iX, double iY, double iRadius )
+FOdysseyVectorObject*
+FOdysseyVectorRectangle::PickShape( double iX, double iY, double iRadius )
 {
     double x1 = - mWidth  * 0.5f;
     double y1 = - mHeight * 0.5f;
@@ -56,7 +62,7 @@ UOdysseyVectorRectangle::PickShape( double iX, double iY, double iRadius )
 }
 
 void
-UOdysseyVectorRectangle::SetSize( double iWidth, double iHeight )
+FOdysseyVectorRectangle::SetSize( double iWidth, double iHeight )
 {
     mWidth  = iWidth;
     mHeight = iHeight;
@@ -67,12 +73,12 @@ UOdysseyVectorRectangle::SetSize( double iWidth, double iHeight )
     mBBox.h =  ( ( mHeight * 0.5f ) +  mStrokeWidth ) * 2;
 }
 
-double UOdysseyVectorRectangle::GetWidth()
+double FOdysseyVectorRectangle::GetWidth()
 {
     return mWidth;
 }
 
-double UOdysseyVectorRectangle::GetHeight()
+double FOdysseyVectorRectangle::GetHeight()
 {
     return mHeight;
 }

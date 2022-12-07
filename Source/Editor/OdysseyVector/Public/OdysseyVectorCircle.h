@@ -1,24 +1,15 @@
 #pragma once
 
-#include "CoreMinimal.h"
-
 #include <blend2d.h>
 #include <ULIS>
 #include "OdysseyVectorPointCubic.h"
-#include "OdysseyVectorSegmentCubic.h"
 #include "OdysseyVectorPathCubic.h"
 
-#include "OdysseyVectorCircle.generated.h"
-
-UCLASS()
-class ODYSSEYVECTOR_API UOdysseyVectorCircle : public UOdysseyVectorPathCubic
+class FOdysseyVectorCircle : public FOdysseyVectorPathCubic
 {
-    public:
-        GENERATED_BODY()
-
     private:
         void DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags );
-        UOdysseyVectorObject* PickShape( double iX, double iY, double iRadius );
+        FOdysseyVectorObject* PickShape( double iX, double iY, double iRadius );
         void UpdateShape();
  
         FOdysseyVectorPointCubic* mCubicPoint[4];
@@ -29,15 +20,14 @@ class ODYSSEYVECTOR_API UOdysseyVectorCircle : public UOdysseyVectorPathCubic
         double mRadiusY; 
 
     public:
-        ~UOdysseyVectorCircle();
-         UOdysseyVectorCircle();
-        void Init( std::string iName );
-        void Init( std::string iName, double iRadius );
-        void Init( std::string iName, double iRadiusX, double iRadiusY );
+        ~FOdysseyVectorCircle();
+        FOdysseyVectorCircle( std::string iName );
+        FOdysseyVectorCircle( std::string iName, double iRadius );
+        FOdysseyVectorCircle( std::string iName, double iRadiusX, double iRadiusY );
         void SetRadius( double iRadius );
         void SetRadius( double iRadiusX, double iRadiusY );
         double GetRadiusX();
         double GetRadiusY();
-        UOdysseyVectorObject* CopyShape();
-        UOdysseyVectorPathCubic* Convert();
+        FOdysseyVectorObject* CopyShape();
+        FOdysseyVectorPathCubic* Convert();
 };

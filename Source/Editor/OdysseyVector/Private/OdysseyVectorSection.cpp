@@ -5,8 +5,8 @@ FOdysseyVectorSection::~FOdysseyVectorSection()
 }
 
 FOdysseyVectorSection::FOdysseyVectorSection( FOdysseyVectorSegment& iSegment
-                                            , FOdysseyVectorPoint* iPoint0
-                                            , FOdysseyVectorPoint* iPoint1 )
+                              , FOdysseyVectorPoint* iPoint0
+                              , FOdysseyVectorPoint* iPoint1 )
     : mSegment ( iSegment )
     , mPoint { iPoint0, iPoint1 }
 {
@@ -26,18 +26,18 @@ FOdysseyVectorSection::GetPoint( int iNum )
 }
 
 void
-FOdysseyVectorSection::AddLoop( UOdysseyVectorLoop* iLoop )
+FOdysseyVectorSection::AddLoop( FOdysseyVectorLoop* iLoop )
 {
     mLoopList.push_back( iLoop );
 }
 
 void
-FOdysseyVectorSection::RemoveLoop( UOdysseyVectorLoop* iLoop )
+FOdysseyVectorSection::RemoveLoop( FOdysseyVectorLoop* iLoop )
 {
     mLoopList.remove( iLoop );
 }
 
-std::list<UOdysseyVectorLoop*>&
+std::list<FOdysseyVectorLoop*>&
 FOdysseyVectorSection::GetLoopList()
 {
     return mLoopList;

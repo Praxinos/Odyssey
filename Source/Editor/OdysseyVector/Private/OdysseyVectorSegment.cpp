@@ -4,16 +4,16 @@ FOdysseyVectorSegment::~FOdysseyVectorSegment()
 {
 }
 
-FOdysseyVectorSegment::FOdysseyVectorSegment( UOdysseyVectorPath& iPath
-                                            , FOdysseyVectorPoint* iPoint0
-                                            , FOdysseyVectorPoint* iPoint1 )
+FOdysseyVectorSegment::FOdysseyVectorSegment( FOdysseyVectorPath& iPath
+                              , FOdysseyVectorPoint* iPoint0
+                              , FOdysseyVectorPoint* iPoint1 )
     : FOdysseyVectorLink ( iPoint0, iPoint1 )
     , mPath ( iPath )
 {
     /*AddSection ( new FOdysseyVectorSection ( *this, mPoint[0], mPoint[1] ) );*/
 }
 
-UOdysseyVectorPath&
+FOdysseyVectorPath&
 FOdysseyVectorSegment::GetPath()
 {
     return mPath;
@@ -51,16 +51,16 @@ FOdysseyVectorSegment::AddSection ( FOdysseyVectorSection* iSection )
 void
 FOdysseyVectorSegment::RemoveSection ( FOdysseyVectorSection* iSection )
 {
-    std::list<UOdysseyVectorLoop*> loopList = iSection->GetLoopList();
+    std::list<FOdysseyVectorLoop*> loopList = iSection->GetLoopList();
 
     iSection->GetPoint(0)->RemoveSection( iSection );
     iSection->GetPoint(1)->RemoveSection( iSection );
 
     mSectionList.remove( iSection );
 
-    for( std::list<UOdysseyVectorLoop*>::iterator it = loopList.begin(); it != loopList.end(); ++it )
+    for( std::list<FOdysseyVectorLoop*>::iterator it = loopList.begin(); it != loopList.end(); ++it )
     {
-        UOdysseyVectorLoop* loop = static_cast<UOdysseyVectorLoop*>(*it);
+        FOdysseyVectorLoop* loop = static_cast<FOdysseyVectorLoop*>(*it);
 
         mPath.RemoveLoop( loop );
     }

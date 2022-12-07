@@ -6,10 +6,10 @@
 #include <Image/Block.h>
 #include "OdysseyVectorRoot.h"
 
-class DLLEXPORT FOdysseyVectorEngine
+class FOdysseyVectorEngine
 {
     private:
-        UOdysseyVectorRoot *mScene;
+        FOdysseyVectorRoot mScene;
         ::ULIS::FRectD mRoi;
         BLImage* mBLImage;
         BLImage* mBLMask;
@@ -19,8 +19,8 @@ class DLLEXPORT FOdysseyVectorEngine
         BLImage& GetBLImage();
         ~FOdysseyVectorEngine();
         FOdysseyVectorEngine( double iWidth, double iHeight );
-        void Render();
-        UOdysseyVectorRoot* GetScene();
+        void Render( ::ULIS::FBlock& iBlock );
+        FOdysseyVectorRoot& GetScene();
         /*void Init( double iWidth, double iHeight );*/
         void InvalidateRegion( double x, double y, double w, double h );
         void InvalidateRegion( ::ULIS::FRectD& iRegion );
