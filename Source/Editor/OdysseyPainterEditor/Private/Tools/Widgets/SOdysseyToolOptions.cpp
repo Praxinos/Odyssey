@@ -40,7 +40,7 @@ SOdysseyToolOptions::Tick(const FGeometry& AllottedGeometry, const double InCurr
     {
         mCurrentTool = tool;
         mToolSlot->DetachWidget();
-        mToolSlot->AttachWidget( tool->GetWidget().ToSharedRef() );
+        //mToolSlot->AttachWidget( tool->GetWidget().ToSharedRef() );
     }
 }
 

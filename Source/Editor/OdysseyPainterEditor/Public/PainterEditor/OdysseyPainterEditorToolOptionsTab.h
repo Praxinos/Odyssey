@@ -6,6 +6,7 @@
 #include "OdysseyEditorTab.h"
 #include "OdysseyBrushBlueprint.h"
 #include "OdysseyBrushAssetBase.h"
+#include "Widgets/Layout/SWidgetSwitcher.h"
 #include <ULIS>
 
 class FOdysseyPainterEditor;
@@ -18,6 +19,10 @@ public:
     virtual ~FOdysseyPainterEditorToolOptionsTab();
     FOdysseyPainterEditorToolOptionsTab(FOdysseyPainterEditor* iEditor);
 
+public:
+    /** Sets a widget to display when the given Tool is displayed */
+    void SetWidgetForTool(UOdysseyTool* iTool, TSharedPtr<SWidget> iWidget);
+
 protected:
     // FOdysseyEditorTab interface
     virtual TSharedPtr<SWidget> CreateWidget() override;
@@ -25,7 +30,7 @@ protected:
 
 protected:
     // Widget Getters
-    UOdysseyTool* GetSelectedTool() const;
+    int WidgetIndex() const;
 
 protected:
     // Event Listeners
@@ -35,5 +40,13 @@ protected:
 
 private:
     FOdysseyPainterEditor* mEditor;
+
+    struct FWidgetSlotForTool
+    {
+        UOdysseyTool* mTool;
+        SWidgetSwitcher::FSlot* mSlot;
+    };
+    TArray<FWidgetSlotForTool> mWidgetSlotForTool;
+    TSharedPtr<SWidgetSwitcher> mWidgetSwitcher;
 };
 

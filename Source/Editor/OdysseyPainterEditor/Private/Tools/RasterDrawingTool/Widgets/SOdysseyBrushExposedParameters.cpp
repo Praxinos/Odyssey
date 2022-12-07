@@ -1,14 +1,14 @@
 // IDDN.FR.001.250001.006.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
-#include "Tools/DrawingTool/Widgets/SOdysseyBrushExposedParameters.h"
+#include "Tools/RasterDrawingTool/Widgets/SOdysseyBrushExposedParameters.h"
 
 #include "OdysseyBrushBlueprint.h"
 #include "OdysseyBrushAssetBase.h"
-#include "Tools/DrawingTool/OdysseyDrawingTool.h"
 #include "Modules/ModuleManager.h"
 #include "PropertyEditorModule.h"
 #include "IDetailsView.h"
+#include "Tools/RasterDrawingTool/OdysseyRasterDrawingTool.h"
 
 
 #define LOCTEXT_NAMESPACE "OdysseyBrushExposedParameters"

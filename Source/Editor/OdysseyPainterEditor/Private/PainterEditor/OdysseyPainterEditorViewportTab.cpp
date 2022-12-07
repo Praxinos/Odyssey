@@ -116,63 +116,79 @@ FOdysseyPainterEditorViewportTab::HandleViewportColorPicked(eOdysseyEventState::
         iPositionInTexture.Y >= 0 && iPositionInTexture.Y < block->Height())
     {
         const ::ULIS::FColor& color = block->Color(iPositionInTexture.X, iPositionInTexture.Y);
-        mEditor->PaintColor( color );
-        //TriggerStateChanged
+        mEditor->PaintColor( color, false ); //interactively change paintColor
     }
         
     if (iEventState == eOdysseyEventState::kSet)
     {
-        //TriggerStateChanged
-        //PATCH: should be automatic in the new drawing Tool, fix it asap
-
-        UOdysseyDrawingTool* drawingTool = Cast<UOdysseyDrawingTool>(mEditor->GetSelectedTool());
-        if (!drawingTool)
-            return;
-
-        FOdysseyObjectEditorUtils::SetPropertyValue(drawingTool->GetBrushOptions(), "Color", FOdysseyBrushColor(mEditor->PaintColor()));
+        mEditor->PaintColor(mEditor->PaintColor(), true); //Commit paintColor
     }
 }
 
 bool
 FOdysseyPainterEditorViewportTab::OnViewportMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
-    mEditor->GetSelectedTool()->SetTransform(mViewport->GetTransformToSourceTexture());
-    return mEditor->GetSelectedTool()->OnMouseDown(iPointInTexture, iKey);
+    //mEditor->GetSelectedTool()->SetTransform(mViewport->GetTransformToSourceTexture());
+    UOdysseyTool* tool = mEditor->GetSelectedTool();
+    if (!tool)
+        return false;
+
+    return tool->OnMouseDown(iPointInTexture, iKey);
 }
 
 bool
 FOdysseyPainterEditorViewportTab::OnViewportMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
-    mEditor->GetSelectedTool()->SetTransform(mViewport->GetTransformToSourceTexture());
-    return mEditor->GetSelectedTool()->OnMouseUp(iPointInTexture, iKey);
+    //mEditor->GetSelectedTool()->SetTransform(mViewport->GetTransformToSourceTexture());
+    UOdysseyTool* tool = mEditor->GetSelectedTool();
+    if (!tool)
+        return false;
+
+    return tool->OnMouseUp(iPointInTexture, iKey);
 }
 
 void
 FOdysseyPainterEditorViewportTab::OnViewportMouseHover(const FOdysseyPoint& iPointInTexture)
 {
-    mEditor->GetSelectedTool()->SetTransform(mViewport->GetTransformToSourceTexture());
-    mEditor->GetSelectedTool()->OnMouseHover(iPointInTexture);
+    //mEditor->GetSelectedTool()->SetTransform(mViewport->GetTransformToSourceTexture());
+    UOdysseyTool* tool = mEditor->GetSelectedTool();
+    if (!tool)
+        return;
+
+    tool->OnMouseHover(iPointInTexture);
 }
 
 void
 FOdysseyPainterEditorViewportTab::OnViewportMouseDrag(const FOdysseyPoint& iPointInTexture)
 {
-    mEditor->GetSelectedTool()->SetTransform(mViewport->GetTransformToSourceTexture());
-    mEditor->GetSelectedTool()->OnMouseDrag(iPointInTexture);
+    //mEditor->GetSelectedTool()->SetTransform(mViewport->GetTransformToSourceTexture());
+    UOdysseyTool* tool = mEditor->GetSelectedTool();
+    if (!tool)
+        return;
+
+    tool->OnMouseDrag(iPointInTexture);
 }
 
 bool
 FOdysseyPainterEditorViewportTab::OnViewportKeyDown(const FKey& iKey)
 {
-    mEditor->GetSelectedTool()->SetTransform(mViewport->GetTransformToSourceTexture());
-    return mEditor->GetSelectedTool()->OnKeyDown(iKey);
+    //mEditor->GetSelectedTool()->SetTransform(mViewport->GetTransformToSourceTexture());
+    UOdysseyTool* tool = mEditor->GetSelectedTool();
+    if ( !tool )
+        return false;
+    
+    return tool->OnKeyDown(iKey);
 }
 
 bool
 FOdysseyPainterEditorViewportTab::OnViewportKeyUp(const FKey& iKey)
 {
-    mEditor->GetSelectedTool()->SetTransform(mViewport->GetTransformToSourceTexture());
-    return mEditor->GetSelectedTool()->OnKeyUp(iKey);
+    //mEditor->GetSelectedTool()->SetTransform(mViewport->GetTransformToSourceTexture());
+    UOdysseyTool* tool = mEditor->GetSelectedTool();
+    if ( !tool )
+        return false;
+
+    return tool->OnKeyUp(iKey);
 }
 
 //--------------------------------------------------------------------------------------

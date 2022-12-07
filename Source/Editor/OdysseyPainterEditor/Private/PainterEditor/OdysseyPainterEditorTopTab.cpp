@@ -6,7 +6,7 @@
 #include "SOdysseyPaintModifiers.h"
 #include "OdysseyPainterEditorCommands.h"
 #include "OdysseyPainterEditor.h"
-#include "Tools/DrawingTool/OdysseyDrawingTool.h"
+#include "Tools/RasterDrawingTool/OdysseyRasterDrawingTool.h"
 #include "OdysseyBrushOptions.h"
 #include "OdysseyBlendParameters.h"
 
@@ -56,7 +56,7 @@ FOdysseyPainterEditorTopTab::SpawnTab( const FSpawnTabArgs& iArgs )
 bool
 FOdysseyPainterEditorTopTab::IsEraserButtonActive() const
 {
-    UOdysseyDrawingTool* drawingTool = Cast<UOdysseyDrawingTool>(mEditor->GetSelectedTool());
+    UOdysseyRasterDrawingTool* drawingTool = Cast<UOdysseyRasterDrawingTool>(mEditor->GetSelectedTool());
     if (!drawingTool)
         return false;
 
@@ -170,7 +170,7 @@ FOdysseyPainterEditorTopTab::BindShortcuts(FBaseToolkit* iToolkit)
 ::ULIS::eBlendMode
 FOdysseyPainterEditorTopTab::BlendingMode() const
 {
-    UOdysseyDrawingTool* drawingTool = Cast<UOdysseyDrawingTool>(mEditor->GetSelectedTool());
+    UOdysseyRasterDrawingTool* drawingTool = Cast<UOdysseyRasterDrawingTool>(mEditor->GetSelectedTool());
     if (!drawingTool)
         return ::ULIS::Blend_Normal;
 
@@ -180,7 +180,7 @@ FOdysseyPainterEditorTopTab::BlendingMode() const
 ::ULIS::eAlphaMode
 FOdysseyPainterEditorTopTab::AlphaMode() const
 {
-    UOdysseyDrawingTool* drawingTool = Cast<UOdysseyDrawingTool>(mEditor->GetSelectedTool());
+    UOdysseyRasterDrawingTool* drawingTool = Cast<UOdysseyRasterDrawingTool>(mEditor->GetSelectedTool());
     if (!drawingTool)
         return ::ULIS::Alpha_Normal;
 
@@ -193,7 +193,7 @@ FOdysseyPainterEditorTopTab::AlphaMode() const
 void
 FOdysseyPainterEditorTopTab::OnSizeChanged( int32 iValue, EPropertyChangeType::Type iChangeType )
 {
-    UOdysseyDrawingTool* drawingTool = Cast<UOdysseyDrawingTool>(mEditor->GetSelectedTool());
+    UOdysseyRasterDrawingTool* drawingTool = Cast<UOdysseyRasterDrawingTool>(mEditor->GetSelectedTool());
     if (!drawingTool)
         return;
 
@@ -205,7 +205,7 @@ FOdysseyPainterEditorTopTab::OnSizeChanged( int32 iValue, EPropertyChangeType::T
 void
 FOdysseyPainterEditorTopTab::OnOpacityChanged( int32 iValue, EPropertyChangeType::Type iChangeType )
 {
-    UOdysseyDrawingTool* drawingTool = Cast<UOdysseyDrawingTool>(mEditor->GetSelectedTool());
+    UOdysseyRasterDrawingTool* drawingTool = Cast<UOdysseyRasterDrawingTool>(mEditor->GetSelectedTool());
     if (!drawingTool)
         return;
 
@@ -218,7 +218,7 @@ FOdysseyPainterEditorTopTab::OnOpacityChanged( int32 iValue, EPropertyChangeType
 void
 FOdysseyPainterEditorTopTab::OnFlowChanged( int32 iValue, EPropertyChangeType::Type iChangeType )
 {
-    UOdysseyDrawingTool* drawingTool = Cast<UOdysseyDrawingTool>(mEditor->GetSelectedTool());
+    UOdysseyRasterDrawingTool* drawingTool = Cast<UOdysseyRasterDrawingTool>(mEditor->GetSelectedTool());
     if (!drawingTool)
         return;
 
@@ -230,7 +230,7 @@ FOdysseyPainterEditorTopTab::OnFlowChanged( int32 iValue, EPropertyChangeType::T
 void
 FOdysseyPainterEditorTopTab::OnBlendingModeChanged( int32 iValue )
 {
-    UOdysseyDrawingTool* drawingTool = Cast<UOdysseyDrawingTool>(mEditor->GetSelectedTool());
+    UOdysseyRasterDrawingTool* drawingTool = Cast<UOdysseyRasterDrawingTool>(mEditor->GetSelectedTool());
     if (!drawingTool)
         return;
 
@@ -243,7 +243,7 @@ FOdysseyPainterEditorTopTab::OnBlendingModeChanged( int32 iValue )
 void
 FOdysseyPainterEditorTopTab::OnAlphaModeChanged( int32 iValue )
 {
-    UOdysseyDrawingTool* drawingTool = Cast<UOdysseyDrawingTool>(mEditor->GetSelectedTool());
+    UOdysseyRasterDrawingTool* drawingTool = Cast<UOdysseyRasterDrawingTool>(mEditor->GetSelectedTool());
     if (!drawingTool)
         return;
 
@@ -256,7 +256,7 @@ FOdysseyPainterEditorTopTab::OnAlphaModeChanged( int32 iValue )
 int
 FOdysseyPainterEditorTopTab::OnGetSize() const
 {
-    UOdysseyDrawingTool* drawingTool = Cast<UOdysseyDrawingTool>(mEditor->GetSelectedTool());
+    UOdysseyRasterDrawingTool* drawingTool = Cast<UOdysseyRasterDrawingTool>(mEditor->GetSelectedTool());
     if (!drawingTool)
         return 0;
 
@@ -266,7 +266,7 @@ FOdysseyPainterEditorTopTab::OnGetSize() const
 float
 FOdysseyPainterEditorTopTab::OnGetOpacity() const
 {
-    UOdysseyDrawingTool* drawingTool = Cast<UOdysseyDrawingTool>(mEditor->GetSelectedTool());
+    UOdysseyRasterDrawingTool* drawingTool = Cast<UOdysseyRasterDrawingTool>(mEditor->GetSelectedTool());
     if (!drawingTool)
         return 0.f;
 
@@ -276,7 +276,7 @@ FOdysseyPainterEditorTopTab::OnGetOpacity() const
 float
 FOdysseyPainterEditorTopTab::OnGetFlow() const
 {
-    UOdysseyDrawingTool* drawingTool = Cast<UOdysseyDrawingTool>(mEditor->GetSelectedTool());
+    UOdysseyRasterDrawingTool* drawingTool = Cast<UOdysseyRasterDrawingTool>(mEditor->GetSelectedTool());
     if (!drawingTool)
         return 0.f;
 
@@ -313,7 +313,7 @@ FOdysseyPainterEditorTopTab::OnRedoButtonClicked()
 void
 FOdysseyPainterEditorTopTab::ToggleEraserButton()
 {
-    UOdysseyDrawingTool* drawingTool = Cast<UOdysseyDrawingTool>(mEditor->GetSelectedTool());
+    UOdysseyRasterDrawingTool* drawingTool = Cast<UOdysseyRasterDrawingTool>(mEditor->GetSelectedTool());
     if (!drawingTool)
         return;
 
@@ -335,7 +335,7 @@ FOdysseyPainterEditorTopTab::OnEraserButtonClicked()
 void
 FOdysseyPainterEditorTopTab::SetAlphaMode(::ULIS::eAlphaMode iAlphaMode)
 {
-    UOdysseyDrawingTool* drawingTool = Cast<UOdysseyDrawingTool>(mEditor->GetSelectedTool());
+    UOdysseyRasterDrawingTool* drawingTool = Cast<UOdysseyRasterDrawingTool>(mEditor->GetSelectedTool());
     if (!drawingTool)
         return;
 
@@ -347,7 +347,7 @@ FOdysseyPainterEditorTopTab::SetAlphaMode(::ULIS::eAlphaMode iAlphaMode)
 void
 FOdysseyPainterEditorTopTab::SetBlendingMode(::ULIS::eBlendMode iBlendingMode)
 {
-    UOdysseyDrawingTool* drawingTool = Cast<UOdysseyDrawingTool>(mEditor->GetSelectedTool());
+    UOdysseyRasterDrawingTool* drawingTool = Cast<UOdysseyRasterDrawingTool>(mEditor->GetSelectedTool());
     if (!drawingTool)
         return;
 
@@ -359,7 +359,7 @@ FOdysseyPainterEditorTopTab::SetBlendingMode(::ULIS::eBlendMode iBlendingMode)
 void
 FOdysseyPainterEditorTopTab::AddSize(int32 iValue)
 {
-    UOdysseyDrawingTool* drawingTool = Cast<UOdysseyDrawingTool>(mEditor->GetSelectedTool());
+    UOdysseyRasterDrawingTool* drawingTool = Cast<UOdysseyRasterDrawingTool>(mEditor->GetSelectedTool());
     if (!drawingTool)
         return;
 

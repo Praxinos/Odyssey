@@ -9,6 +9,13 @@ UOdysseyTool::UOdysseyTool()
 
 }
 
+UOdysseyTool::FOnIsActivableChanged&
+UOdysseyTool::OnIsActivableChanged()
+{
+    static FOnIsActivableChanged onIsActivableChanged;
+    return onIsActivableChanged;
+}
+
 void
 UOdysseyTool::Activate()
 {
@@ -78,32 +85,6 @@ UOdysseyTool::Commit()
 
 }
 
-/* void UOdysseyTool::MouseMove(FViewport* iViewport, int32 iX, int32 iY)
-{
-
-}
-
-FReply UOdysseyTool::InputKey(FViewport* iViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed, bool iGamepad, FReply& ioReply)
-{
-    return FReply::Unhandled();
-}
-
-void UOdysseyTool::CapturedMouseMove(FViewport* iViewport, int32 iX, int32 iY)
-{
-
-}
-
-bool UOdysseyTool::IsReadyToBeApplied() const
-{
-    return mIsReadyToBeApplied;
-} */
-
-void
-UOdysseyTool::SetTransform(const FTransform2D& iTransform)
-{
-    mTransform = iTransform;
-}
-
 void
 UOdysseyTool::BindShortcuts(FBaseToolkit* iToolkit)
 {
@@ -116,15 +97,11 @@ UOdysseyTool::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
 
 }
 
-TSharedPtr<SWidget>
-UOdysseyTool::GetWidget()
-{
-    return SNullWidget::NullWidget;
-}
-
 void
 UOdysseyTool::PropertyChanged(const FName& iPropertyName)
 {
+    if (iPropertyName == "IsActivable")
+        OnIsActivableChanged().Broadcast(this);
 }
 
 void

@@ -1,26 +1,26 @@
 // IDDN.FR.001.250001.006.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
-#include "Tools/DrawingTool/OdysseyDrawingTool.h"
+#include "Tools/RasterDrawingTool/OdysseyRasterDrawingTool.h"
 
-#include "Tools/DrawingTool/OdysseyBlendParametersOverrides.h"
-#include "Tools/DrawingTool/OdysseyBrushOptionsOverrides.h"
+#include "Tools/RasterDrawingTool/OdysseyBlendParametersOverrides.h"
+#include "Tools/RasterDrawingTool/OdysseyBrushOptionsOverrides.h"
 #include "FreehandShape/OdysseyFreehandShape.h"
-#include "Tools/DrawingTool/Widgets/SOdysseyDrawingToolOptions.h"
+#include "Tools/RasterDrawingTool/Widgets/SOdysseyRasterDrawingToolOptions.h"
 #include "ObjectEditorUtils.h"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
-UOdysseyDrawingTool::~UOdysseyDrawingTool()
+UOdysseyRasterDrawingTool::~UOdysseyRasterDrawingTool()
 {
 }
 
-UOdysseyDrawingTool::UOdysseyDrawingTool()
+UOdysseyRasterDrawingTool::UOdysseyRasterDrawingTool()
     : Super()
     //Properties
     , Brush(nullptr)
     , BrushInstance(nullptr)
-    , BrushOptions(CreateDefaultSubobject<UOdysseyBrushOptions>("UOdysseyDrawingTool::BrushOptions", true))
+    , BrushOptions(CreateDefaultSubobject<UOdysseyBrushOptions>("UOdysseyRasterDrawingTool::BrushOptions", true))
     , BlendParameters()
     , SelectedShape(EOdysseyShape::kFreehand)
     , SelectedShapeInstance(nullptr)
@@ -29,24 +29,24 @@ UOdysseyDrawingTool::UOdysseyDrawingTool()
     , mPaintEngine(nullptr)
     , mIsDrawingLocked(false)
 {
-    AvailableShapes.Add(EOdysseyShape::kFreehand, CreateShape<UOdysseyFreehandShape>("UOdysseyDrawingTool::FreehandShape"));
+    AvailableShapes.Add(EOdysseyShape::kFreehand, CreateShape<UOdysseyFreehandShape>("UOdysseyRasterDrawingTool::FreehandShape"));
     SelectedShapeInstance = AvailableShapes[SelectedShape];
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.DrawingTool64");
 }
 
 template<class T>
 T*
-UOdysseyDrawingTool::CreateShape(FName iName)
+UOdysseyRasterDrawingTool::CreateShape(FName iName)
 {
     T* shape = CreateDefaultSubobject<T>(iName, true);
 
-    shape->OnPathBeginDelegate().AddUObject(this, &UOdysseyDrawingTool::OnShapePathBegin);
-    shape->OnPathToDelegate().AddUObject(this, &UOdysseyDrawingTool::OnShapePathTo);
-    shape->OnPathEndDelegate().AddUObject(this, &UOdysseyDrawingTool::OnShapePathEnd);
-    shape->OnPathAbortDelegate().AddUObject(this, &UOdysseyDrawingTool::OnShapePathAbort);
-    shape->OnPathResetDelegate().AddUObject(this, &UOdysseyDrawingTool::OnShapePathReset);
+    shape->OnPathBeginDelegate().AddUObject(this, &UOdysseyRasterDrawingTool::OnShapePathBegin);
+    shape->OnPathToDelegate().AddUObject(this, &UOdysseyRasterDrawingTool::OnShapePathTo);
+    shape->OnPathEndDelegate().AddUObject(this, &UOdysseyRasterDrawingTool::OnShapePathEnd);
+    shape->OnPathAbortDelegate().AddUObject(this, &UOdysseyRasterDrawingTool::OnShapePathAbort);
+    shape->OnPathResetDelegate().AddUObject(this, &UOdysseyRasterDrawingTool::OnShapePathReset);
 
-    shape->AdaptStepDelegate().BindUObject(this, &UOdysseyDrawingTool::AdaptShapeStep);
+    shape->AdaptStepDelegate().BindUObject(this, &UOdysseyRasterDrawingTool::AdaptShapeStep);
 
     return shape;
 }
@@ -55,7 +55,7 @@ UOdysseyDrawingTool::CreateShape(FName iName)
 //--------------------------------------------------------------------------------- Tool
 
 void
-UOdysseyDrawingTool::Initialize(FOdysseyPaintEngine* iPaintEngine)
+UOdysseyRasterDrawingTool::Initialize(FOdysseyPaintEngine* iPaintEngine)
 {
     SetPaintEngine(iPaintEngine);
 
@@ -68,20 +68,20 @@ UOdysseyDrawingTool::Initialize(FOdysseyPaintEngine* iPaintEngine)
 //---------------------------------------------------------------- OdysseyTool overrides
 
 void
-UOdysseyDrawingTool::Activate()
+UOdysseyRasterDrawingTool::Activate()
 {
 
 }
 
 void
-UOdysseyDrawingTool::Inactivate()
+UOdysseyRasterDrawingTool::Inactivate()
 {
     Flush(); //Finish everything
     Commit(); //Commit the jobs that has been done
 }
 
 bool
-UOdysseyDrawingTool::CanDraw()
+UOdysseyRasterDrawingTool::CanDraw()
 {
     // Check if everything is alright
     if (!BrushInstance && BrushInstance->GetBlock())
@@ -91,7 +91,7 @@ UOdysseyDrawingTool::CanDraw()
 }
 
 bool
-UOdysseyDrawingTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
+UOdysseyRasterDrawingTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
     if (!CanDraw())
         return false;
@@ -100,7 +100,7 @@ UOdysseyDrawingTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKe
 }
 
 bool
-UOdysseyDrawingTool::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
+UOdysseyRasterDrawingTool::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
     if (!CanDraw())
         return false;
@@ -109,7 +109,7 @@ UOdysseyDrawingTool::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey&
 }
 
 void
-UOdysseyDrawingTool::OnMouseHover(const FOdysseyPoint& iPointInTexture)
+UOdysseyRasterDrawingTool::OnMouseHover(const FOdysseyPoint& iPointInTexture)
 {
     if (!CanDraw())
         return;
@@ -121,7 +121,7 @@ UOdysseyDrawingTool::OnMouseHover(const FOdysseyPoint& iPointInTexture)
 }
 
 void
-UOdysseyDrawingTool::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
+UOdysseyRasterDrawingTool::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 {
     if (!CanDraw())
         return;
@@ -130,7 +130,7 @@ UOdysseyDrawingTool::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 }
 
 bool
-UOdysseyDrawingTool::OnKeyDown(const FKey& iKey)
+UOdysseyRasterDrawingTool::OnKeyDown(const FKey& iKey)
 {
     if (!CanDraw())
         return false;
@@ -139,7 +139,7 @@ UOdysseyDrawingTool::OnKeyDown(const FKey& iKey)
 }
 
 bool
-UOdysseyDrawingTool::OnKeyUp(const FKey& iKey)
+UOdysseyRasterDrawingTool::OnKeyUp(const FKey& iKey)
 {
     if (!CanDraw())
         return false;
@@ -148,7 +148,7 @@ UOdysseyDrawingTool::OnKeyUp(const FKey& iKey)
 }
 
 void
-UOdysseyDrawingTool::Tick(float iDeltaTime)
+UOdysseyRasterDrawingTool::Tick(float iDeltaTime)
 {
     if (!CanDraw())
         return;
@@ -172,43 +172,45 @@ UOdysseyDrawingTool::Tick(float iDeltaTime)
 }
 
 void
-UOdysseyDrawingTool::Flush()
+UOdysseyRasterDrawingTool::Flush()
 {
     mWorker.Finish();
     BrushInstance->StrokeFlush();
 }
 
 void
-UOdysseyDrawingTool::Commit()
+UOdysseyRasterDrawingTool::Commit()
 {
     if (mPaintEngine)
         mPaintEngine->Commit(BlendParameters);
 }
 
 void
-UOdysseyDrawingTool::BindShortcuts(FBaseToolkit* iToolkit)
+UOdysseyRasterDrawingTool::BindShortcuts(FBaseToolkit* iToolkit)
 {
     Super::BindShortcuts(iToolkit);
+
+    const TSharedRef<FUICommandList>& toolkitCommands = iToolkit->GetToolkitCommands();
+    const FOdysseyPainterEditorCommands& painterEditorToolCommands = FOdysseyPainterEditorCommands::Get();
+
+    #define MAP_ACTION(action, ...) toolkitCommands->MapAction( action, FExecuteAction::CreateUObject( this, &UOdysseyRasterDrawingTool::__VA_ARGS__ ), FCanExecuteAction() );
+
+	MAP_ACTION(painterEditorToolCommands.RefreshBrush, RefreshBrushInstance )
+
+    #undef MAP_ACTION
 }
 
 void
-UOdysseyDrawingTool::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
+UOdysseyRasterDrawingTool::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
 {
     Super::ExtendMenu(iOwner, iMenuName);
 }
-
-TSharedPtr<SWidget>
-UOdysseyDrawingTool::GetWidget()
-{
-    return SNew(SOdysseyDrawingToolOptions).Tool(this);
-}
-
 
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------- PaintEngine Callbacks
 
 void
-UOdysseyDrawingTool::OnPaintEngineBlockChanged()
+UOdysseyRasterDrawingTool::OnPaintEngineBlockChanged()
 {
     if (BrushInstance)
         BrushInstance->SetBlock(mPaintEngine->PaintBlock());
@@ -218,7 +220,7 @@ UOdysseyDrawingTool::OnPaintEngineBlockChanged()
 //---------------------------------------------------------------------- Shape Callbacks
 
 void
-UOdysseyDrawingTool::OnShapePathBegin( const FOdysseyPoint& iPoint )
+UOdysseyRasterDrawingTool::OnShapePathBegin( const FOdysseyPoint& iPoint )
 {
     if (!BrushInstance)
     {
@@ -249,7 +251,7 @@ UOdysseyDrawingTool::OnShapePathBegin( const FOdysseyPoint& iPoint )
 }
 
 void
-UOdysseyDrawingTool::OnShapePathTo( const TArray<FOdysseyPoint>& iPoints )
+UOdysseyRasterDrawingTool::OnShapePathTo( const TArray<FOdysseyPoint>& iPoints )
 {
     if (!BrushInstance)
     {
@@ -271,7 +273,7 @@ UOdysseyDrawingTool::OnShapePathTo( const TArray<FOdysseyPoint>& iPoints )
 }
 
 void
-UOdysseyDrawingTool::OnShapePathEnd( const FOdysseyPoint& iPoint )
+UOdysseyRasterDrawingTool::OnShapePathEnd( const FOdysseyPoint& iPoint )
 {
     if (!BrushInstance)
     {
@@ -290,7 +292,7 @@ UOdysseyDrawingTool::OnShapePathEnd( const FOdysseyPoint& iPoint )
 }
 
 void
-UOdysseyDrawingTool::OnShapePathAbort()
+UOdysseyRasterDrawingTool::OnShapePathAbort()
 {
     if (!BrushInstance)
     {
@@ -305,7 +307,7 @@ UOdysseyDrawingTool::OnShapePathAbort()
 }
 
 void
-UOdysseyDrawingTool::OnShapePathReset()
+UOdysseyRasterDrawingTool::OnShapePathReset()
 {
     if (!BrushInstance)
     {
@@ -323,7 +325,7 @@ UOdysseyDrawingTool::OnShapePathReset()
 }
 
 float
-UOdysseyDrawingTool::AdaptShapeStep(float iStep)
+UOdysseyRasterDrawingTool::AdaptShapeStep(float iStep)
 {
     return (iStep / 100.f) * BrushOptions->Size;
 }
@@ -332,7 +334,7 @@ UOdysseyDrawingTool::AdaptShapeStep(float iStep)
 //------------------------------------------------------------------------------ Setters
 
 void
-UOdysseyDrawingTool::SetPaintEngine(FOdysseyPaintEngine* iPaintEngine)
+UOdysseyRasterDrawingTool::SetPaintEngine(FOdysseyPaintEngine* iPaintEngine)
 {
     if (mPaintEngine)
         mPaintEngine->OnBlockChangedDelegate().RemoveAll(this);
@@ -342,21 +344,21 @@ UOdysseyDrawingTool::SetPaintEngine(FOdysseyPaintEngine* iPaintEngine)
     if (!mPaintEngine)
         return;
         
-    mPaintEngine->OnBlockChangedDelegate().AddUObject(this, &UOdysseyDrawingTool::OnPaintEngineBlockChanged);
+    mPaintEngine->OnBlockChangedDelegate().AddUObject(this, &UOdysseyRasterDrawingTool::OnPaintEngineBlockChanged);
 
     if (BrushInstance)
         BrushInstance->SetBlock(mPaintEngine->PaintBlock());
 }
 
 void
-UOdysseyDrawingTool::SetBrushContexts(TArray<FOdysseyBrushContext*> iContexts)
+UOdysseyRasterDrawingTool::SetBrushContexts(TArray<FOdysseyBrushContext*> iContexts)
 {
     mBrushContexts = iContexts;
 }
 
 // Set wether the tool can draw or not
 void
-UOdysseyDrawingTool::IsDrawingLocked(bool iValue)
+UOdysseyRasterDrawingTool::IsDrawingLocked(bool iValue)
 {
     if( mIsDrawingLocked == iValue )
         return;
@@ -372,7 +374,7 @@ UOdysseyDrawingTool::IsDrawingLocked(bool iValue)
 }
 
 void
-UOdysseyDrawingTool::RefreshBrushInstance()
+UOdysseyRasterDrawingTool::RefreshBrushInstance()
 {
     DestroyBrushInstance();
     CreateBrushInstance(true);
@@ -382,58 +384,58 @@ UOdysseyDrawingTool::RefreshBrushInstance()
 //------------------------------------------------------------------------------ Getters
 
 UOdysseyBrush*
-UOdysseyDrawingTool::GetBrush()
+UOdysseyRasterDrawingTool::GetBrush()
 {
 	return Brush;
 }
 
 UOdysseyBrushAssetBase*
-UOdysseyDrawingTool::GetBrushInstance()
+UOdysseyRasterDrawingTool::GetBrushInstance()
 {
     return BrushInstance; 
 }
 
 // Returns the BlendParameters
 FOdysseyBlendParameters
-UOdysseyDrawingTool::GetBlendParameters() const
+UOdysseyRasterDrawingTool::GetBlendParameters() const
 {
     return BlendParameters;
 }
 
 // Returns the BrushOptions
 UOdysseyBrushOptions*
-UOdysseyDrawingTool::GetBrushOptions()
+UOdysseyRasterDrawingTool::GetBrushOptions()
 {
     return BrushOptions;
 }
 
 EOdysseyShape
-UOdysseyDrawingTool::GetSelectedShape() const
+UOdysseyRasterDrawingTool::GetSelectedShape() const
 {
     return SelectedShape;
 }
 
 UOdysseyShape*
-UOdysseyDrawingTool::GetSelectedShapeInstance()
+UOdysseyRasterDrawingTool::GetSelectedShapeInstance()
 {
     return SelectedShapeInstance;
 }
 
-UOdysseyDrawingTool::FOnApplyOverrides&
-UOdysseyDrawingTool::OnApplyOverridesDelegate()
+UOdysseyRasterDrawingTool::FOnApplyOverrides&
+UOdysseyRasterDrawingTool::OnApplyOverridesDelegate()
 {
     return mOnApplyOverridesDelegate;
 }
 
 
-UOdysseyDrawingTool::FAdaptShapePoints&
-UOdysseyDrawingTool::AdaptShapePointsDelegate()
+UOdysseyRasterDrawingTool::FAdaptShapePoints&
+UOdysseyRasterDrawingTool::AdaptShapePointsDelegate()
 {
     return mAdaptShapePointsDelegate;
 }
 
 bool
-UOdysseyDrawingTool::IsDrawingLocked()
+UOdysseyRasterDrawingTool::IsDrawingLocked()
 {
     return mIsDrawingLocked;
 }
@@ -442,7 +444,7 @@ UOdysseyDrawingTool::IsDrawingLocked()
 //------------------------------------------------------------- Internal - BrushInstance
 
 void
-UOdysseyDrawingTool::DestroyBrushInstance()
+UOdysseyRasterDrawingTool::DestroyBrushInstance()
 {
 	if (!BrushInstance)
 		return;
@@ -451,7 +453,7 @@ UOdysseyDrawingTool::DestroyBrushInstance()
 }
 
 void
-UOdysseyDrawingTool::CreateBrushInstance(bool iApplyOverrides)
+UOdysseyRasterDrawingTool::CreateBrushInstance(bool iApplyOverrides)
 {
 	if (!Brush)
 		return;
@@ -477,14 +479,14 @@ UOdysseyDrawingTool::CreateBrushInstance(bool iApplyOverrides)
 }
 
 void
-UOdysseyDrawingTool::OnBrushCompiled(UBlueprint* iBlueprint)
+UOdysseyRasterDrawingTool::OnBrushCompiled(UBlueprint* iBlueprint)
 {
 	DestroyBrushInstance();
 	CreateBrushInstance(false);
 }
 
 void
-UOdysseyDrawingTool::ApplyOverrides(UOdysseyBrushAssetBase* iBrushInstance)
+UOdysseyRasterDrawingTool::ApplyOverrides(UOdysseyBrushAssetBase* iBrushInstance)
 {
     if (BrushInstance)
         UE_LOG(LogTemp, Warning, TEXT("ApplyOverrides whould only called when no BrushInstance is active, to avoid calling ExecuteStateChanged at each value change") );
@@ -510,14 +512,14 @@ UOdysseyDrawingTool::ApplyOverrides(UOdysseyBrushAssetBase* iBrushInstance)
 //-------------------------------------------------------------------- UObject Overrides
 
 void
-UOdysseyDrawingTool::PreEditChange(FEditPropertyChain& PropertyAboutToChange)
+UOdysseyRasterDrawingTool::PreEditChange(FEditPropertyChain& PropertyAboutToChange)
 {
     Super::PreEditChange(PropertyAboutToChange);
     //Nothing to do
 }
 
 void
-UOdysseyDrawingTool::PreEditChange(FProperty* PropertyAboutToChange)
+UOdysseyRasterDrawingTool::PreEditChange(FProperty* PropertyAboutToChange)
 {
     Super::PreEditChange(PropertyAboutToChange);
 
@@ -527,7 +529,7 @@ UOdysseyDrawingTool::PreEditChange(FProperty* PropertyAboutToChange)
 }
 
 void
-UOdysseyDrawingTool::PostEditChangeChainProperty( struct FPropertyChangedChainEvent & PropertyChangedEvent)
+UOdysseyRasterDrawingTool::PostEditChangeChainProperty( struct FPropertyChangedChainEvent & PropertyChangedEvent)
 {
     Super::PostEditChangeChainProperty(PropertyChangedEvent);
 
@@ -541,7 +543,7 @@ UOdysseyDrawingTool::PostEditChangeChainProperty( struct FPropertyChangedChainEv
 }
 
 void
-UOdysseyDrawingTool::PostEditChangeProperty(struct FPropertyChangedEvent & PropertyChangedEvent)
+UOdysseyRasterDrawingTool::PostEditChangeProperty(struct FPropertyChangedEvent & PropertyChangedEvent)
 {
     Super::PostEditChangeProperty(PropertyChangedEvent);
 
@@ -567,7 +569,7 @@ UOdysseyDrawingTool::PostEditChangeProperty(struct FPropertyChangedEvent & Prope
 }
 
 void
-UOdysseyDrawingTool::OnPreBrushChanged()
+UOdysseyRasterDrawingTool::OnPreBrushChanged()
 {
     //Destroy the brushInstance
     DestroyBrushInstance();
@@ -578,20 +580,20 @@ UOdysseyDrawingTool::OnPreBrushChanged()
 }
 
 void
-UOdysseyDrawingTool::OnPostBrushChanged()
+UOdysseyRasterDrawingTool::OnPostBrushChanged()
 {
     if (!Brush)
         return;
 
     //Bind OnCompiled delegate
-    Brush->OnCompiled().AddUObject(this, &UOdysseyDrawingTool::OnBrushCompiled);
+    Brush->OnCompiled().AddUObject(this, &UOdysseyRasterDrawingTool::OnBrushCompiled);
 
     //Create the BrushInstance to use for drawing
     CreateBrushInstance(true);
 }
 
 void
-UOdysseyDrawingTool::OnPostShapeChanged()
+UOdysseyRasterDrawingTool::OnPostShapeChanged()
 {
     FOdysseyObjectEditorUtils::SetPropertyValue(this, "SelectedShapeInstance", AvailableShapes[SelectedShape]);
 }

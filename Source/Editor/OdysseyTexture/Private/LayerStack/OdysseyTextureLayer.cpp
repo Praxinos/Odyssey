@@ -18,7 +18,7 @@ UOdysseyTextureLayer::OnRenderImageChanged()
 TArray<::ULIS::FEvent>
 UOdysseyTextureLayer::RenderImage(::ULIS::FBlock* ioBlock, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList)
 {
-    return iWaitList;    
+    return iWaitList;
 }
 
 TArray<::ULIS::FEvent>

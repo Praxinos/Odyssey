@@ -13,8 +13,8 @@
 #include "OdysseyPainterEditorSettings.h"
 #include "Models/OdysseyPainterEditorCommands.h"
 #include "OdysseyBrushAssetBase.h"
-#include "Tools/DrawingTool/OdysseyBrushOptionsOverrides.h"
-#include "Tools/DrawingTool/OdysseyBlendParametersOverrides.h"
+#include "Tools/RasterDrawingTool/OdysseyBrushOptionsOverrides.h"
+#include "Tools/RasterDrawingTool/OdysseyBlendParametersOverrides.h"
 #include "FreehandShape/OdysseyFreehandShapeOverrides.h"
 #include <ULIS>
 

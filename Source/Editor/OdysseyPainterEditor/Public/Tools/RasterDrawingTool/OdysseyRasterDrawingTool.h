@@ -10,16 +10,16 @@
 #include "OdysseyBrushOptions.h"
 #include "OdysseyBlendParameters.h"
 #include "OdysseyShape.h"
-#include "Tools/DrawingTool/OdysseyDrawingToolWorker.h"
+#include "Tools/RasterDrawingTool/OdysseyRasterDrawingToolWorker.h"
 
-#include "OdysseyDrawingTool.generated.h"
+#include "OdysseyRasterDrawingTool.generated.h"
 
 class UOdysseyBrushAssetBase;
 class FOdysseyPaintEngine;
 class FOdysseyStrokeEngineBrushOptions;
 
 UCLASS()
-class ODYSSEYPAINTEREDITOR_API UOdysseyDrawingTool : public UOdysseyTool
+class ODYSSEYPAINTEREDITOR_API UOdysseyRasterDrawingTool : public UOdysseyTool
 {
     GENERATED_BODY()
 
@@ -31,10 +31,10 @@ public:
 
 public:
     // Destructor
-    virtual ~UOdysseyDrawingTool();
+    virtual ~UOdysseyRasterDrawingTool();
 
     //Constructor
-    UOdysseyDrawingTool();
+    UOdysseyRasterDrawingTool();
     
 public:
     //TOOL
@@ -60,7 +60,6 @@ public:
 
     virtual void BindShortcuts(class FBaseToolkit* iToolkit) override;
     virtual void ExtendMenu( FToolMenuOwner iOwner, FName iMenuName ) override;
-    virtual TSharedPtr<SWidget> GetWidget() override;
 
 public:
     // Setters
@@ -184,7 +183,7 @@ private:
     float AdaptShapeStep(float iStep);
 
 private:
-    friend class SOdysseyDrawingToolBrushSelector;
+    friend class SOdysseyRasterDrawingToolBrushSelector;
 
     //Visible properties
 
@@ -217,7 +216,7 @@ protected:
     //Resources
     FOdysseyPaintEngine*                mPaintEngine;
     TArray<FOdysseyBrushContext*>       mBrushContexts;
-    FOdysseyDrawingToolWorker           mWorker;
+    FOdysseyRasterDrawingToolWorker           mWorker;
 
     //---
 

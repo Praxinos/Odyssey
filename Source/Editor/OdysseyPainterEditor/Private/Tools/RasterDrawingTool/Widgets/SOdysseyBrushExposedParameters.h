@@ -10,7 +10,7 @@
 
 class IDetailsView;
 class UOdysseyBrushAssetBase;
-class UOdysseyDrawingTool;
+class UOdysseyRasterDrawingTool;
 
 /** Delegate used to set a generic object */
 DECLARE_DELEGATE( FOnParameterChanged );
@@ -24,7 +24,7 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyBrushExposedParameters
     SLATE_BEGIN_ARGS( SOdysseyBrushExposedParameters )
         {}
         SLATE_ATTRIBUTE(UOdysseyBrushAssetBase*, BrushInstance)
-        SLATE_ARGUMENT(UOdysseyDrawingTool*, Tool)
+        SLATE_ARGUMENT(UOdysseyRasterDrawingTool*, Tool)
         SLATE_EVENT( FOnParameterChanged, OnParameterChanged )
     SLATE_END_ARGS()
 
@@ -45,7 +45,7 @@ private:
     // Private data members
     TAttribute<UOdysseyBrushAssetBase*>     mBrushInstance;
     UOdysseyBrushAssetBase*                 mCurrentBrushInstance;
-    UOdysseyDrawingTool*                    mTool;
+    UOdysseyRasterDrawingTool*                    mTool;
 
     FOnParameterChanged                     OnParameterChangedCallback;
     TSharedPtr< IDetailsView >              details_view;

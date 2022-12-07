@@ -5,7 +5,6 @@
 
 #include "ObjectEditorUtils.h"
 
-#include "OdysseyBrushAssetBase.h"
 #include "OdysseyPainterEditorTopTab.h"
 #include "SOdysseyPaintModifiers.h"
 #include "OdysseyHUDSystem.h"
@@ -43,23 +42,20 @@ FOdysseyPainterEditor::InitData()
 {
 	//Init Tools
 	InitTools();
-	SetSelectedTool(mTools[0]);
+	//SetSelectedTool(mTools[0]);
 }
 
 void
 FOdysseyPainterEditor::InitTools()
 {
-	UOdysseyDrawingTool* drawingTool = NewObject<UOdysseyDrawingTool>();
-	drawingTool->OnApplyOverridesDelegate().AddRaw(this, &FOdysseyPainterEditor::OnApplyOverrides);
-	drawingTool->SetBrushContexts(mBrushContexts);
-	drawingTool->Initialize(&mPaintEngine);
-	FOdysseyObjectEditorUtils::SetPropertyValue(drawingTool->GetBrushOptions(), "Color", FOdysseyBrushColor(mPaintColor)); //Set the paint color in the brushOptions at startup for synchronization
+	mRasterDrawingTool = NewObject<UOdysseyRasterDrawingTool>();
+	mRasterDrawingTool->OnApplyOverridesDelegate().AddRaw(this, &FOdysseyPainterEditor::OnApplyOverrides);
+	mRasterDrawingTool->SetBrushContexts(mBrushContexts);
+	mRasterDrawingTool->Initialize(&mPaintEngine);
+	FOdysseyObjectEditorUtils::SetPropertyValue(mRasterDrawingTool->GetBrushOptions(), "Color", FOdysseyBrushColor(mPaintColor)); //Set the paint color in the brushOptions at startup for synchronization
 
-	UOdysseyPaintBucketTool* paintBucketTool = NewObject<UOdysseyPaintBucketTool>();
-	paintBucketTool->Initialize(&mPaintEngine);
-
-	mTools.Add(drawingTool);
-	mTools.Add(paintBucketTool);
+	mPaintBucketTool = NewObject<UOdysseyPaintBucketTool>();
+	mPaintBucketTool->Initialize(&mPaintEngine);
 }
 
 void
@@ -70,8 +66,10 @@ FOdysseyPainterEditor::BindShortcuts(FBaseToolkit* iToolkit)
 	//---
 
 	//TODO: BindShortcuts from mTools instead of mSelectedTool
-	for (UOdysseyTool* tool : mTools)
-		tool->BindShortcuts(iToolkit);
+	//for (UOdysseyTool* tool : mTools)
+		//tool->BindShortcuts(iToolkit);
+	mRasterDrawingTool->BindShortcuts(iToolkit);
+	mPaintBucketTool->BindShortcuts(iToolkit);
 
 	//---
 
@@ -89,9 +87,11 @@ FOdysseyPainterEditor::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
 	FOdysseyEditor::ExtendMenu(iOwner, iMenuName);
 
 	//---
+	mRasterDrawingTool->ExtendMenu(iOwner, iMenuName);
+	mPaintBucketTool->ExtendMenu(iOwner, iMenuName);
 	
-	for (UOdysseyTool* tool : mTools)
-		tool->ExtendMenu(iOwner, iMenuName);
+	/* for ( UOdysseyTool* tool : mTools )
+		tool->ExtendMenu(iOwner, iMenuName); */
 }
 
 //--------------------------------------------------------------------------------------
@@ -109,12 +109,6 @@ FOdysseyPainterEditor::HUDSystem() const
 	return mHUDSystem;
 }
 
-FOdysseyUndoHistory*
-FOdysseyPainterEditor::UndoHistory() const
-{
-	return mUndoHistory;
-}
-
 FOdysseyBrushColor&
 FOdysseyPainterEditor::PaintColor()
 {
@@ -127,27 +121,33 @@ FOdysseyPainterEditor::GetSelectedTool() const
     return mSelectedTool;
 }
 
-const TArray<UOdysseyTool*>&
-FOdysseyPainterEditor::GetTools() const
+UOdysseyRasterDrawingTool*
+FOdysseyPainterEditor::GetRasterDrawingTool() const
 {
-    return mTools;
+    return mRasterDrawingTool;
+}
+
+UOdysseyPaintBucketTool*
+FOdysseyPainterEditor::GetPaintBucketTool() const
+{
+    return mPaintBucketTool;
 }
 
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Setters
 
 void
-FOdysseyPainterEditor::PaintColor(const FOdysseyBrushColor& iColor)
+FOdysseyPainterEditor::PaintColor(const FOdysseyBrushColor& iColor, bool iIsCommit)
 {
 	mPaintColor = iColor;
+
+	//PATCH: should be automatic in the new drawing Tool, fix it asap
+	FOdysseyObjectEditorUtils::SetPropertyValue(mRasterDrawingTool->GetBrushOptions(), "Color", iColor);
 }
 
 void
 FOdysseyPainterEditor::SetSelectedTool(UOdysseyTool* iTool)
 {
-	if (!mTools.Contains(iTool))
-		return;
-
 	if (mSelectedTool)
 		mSelectedTool->Inactivate();
 		
@@ -174,7 +174,8 @@ void
 FOdysseyPainterEditor::AddReferencedObjects(FReferenceCollector& Collector)
 {
 	FOdysseyEditor::AddReferencedObjects(Collector);
-	Collector.AddReferencedObjects(mTools);
+	Collector.AddReferencedObject(mRasterDrawingTool);
+	Collector.AddReferencedObject(mPaintBucketTool);
 }
 
 //--------------------------------------------------------------------------------------

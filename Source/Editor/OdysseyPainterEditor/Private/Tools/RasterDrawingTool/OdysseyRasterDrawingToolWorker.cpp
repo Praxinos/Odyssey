@@ -3,30 +3,30 @@
 
 #pragma once
 
-#include "Tools/DrawingTool/OdysseyDrawingToolWorker.h"
+#include "Tools/RasterDrawingTool/OdysseyRasterDrawingToolWorker.h"
 
 #include "CoreMinimal.h"
 
 #include <functional>
 
-FOdysseyDrawingToolWorker::~FOdysseyDrawingToolWorker()
+FOdysseyRasterDrawingToolWorker::~FOdysseyRasterDrawingToolWorker()
 {
 }
 
-FOdysseyDrawingToolWorker::FOdysseyDrawingToolWorker()
+FOdysseyRasterDrawingToolWorker::FOdysseyRasterDrawingToolWorker()
     : mQueue()
 {
 }
 
 void
-FOdysseyDrawingToolWorker::Push(tFunction iFunction)
+FOdysseyRasterDrawingToolWorker::Push(tFunction iFunction)
 {
     //mQueue is ThreadSafe
     mQueue.Enqueue(iFunction);
 }
 
 void
-FOdysseyDrawingToolWorker::Execute(int iNum)
+FOdysseyRasterDrawingToolWorker::Execute(int iNum)
 {    
     tFunction func;
     for( int i = 0; !mQueue.IsEmpty() && (i < iNum || iNum <= 0); i++)
@@ -38,7 +38,7 @@ FOdysseyDrawingToolWorker::Execute(int iNum)
 }
 
 void
-FOdysseyDrawingToolWorker::ExecuteFor(long long iMaxTimeMs)
+FOdysseyRasterDrawingToolWorker::ExecuteFor(long long iMaxTimeMs)
 {
     auto start_time = std::chrono::steady_clock::now();
     long long delta = 0;
@@ -56,13 +56,13 @@ FOdysseyDrawingToolWorker::ExecuteFor(long long iMaxTimeMs)
 }
 
 void
-FOdysseyDrawingToolWorker::Finish()
+FOdysseyRasterDrawingToolWorker::Finish()
 {
     Execute(0);
 }
 
 void
-FOdysseyDrawingToolWorker::Clear()
+FOdysseyRasterDrawingToolWorker::Clear()
 {
     mQueue.Empty();
 }

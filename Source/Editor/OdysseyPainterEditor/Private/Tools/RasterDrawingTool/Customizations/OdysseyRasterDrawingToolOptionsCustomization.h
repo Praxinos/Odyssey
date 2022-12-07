@@ -6,17 +6,17 @@
 #include "CoreMinimal.h"
 #include "IDetailCustomization.h"
 
-class FOdysseyDrawingToolOptionsCustomization : public IDetailCustomization
+class FOdysseyRasterDrawingToolOptionsCustomization : public IDetailCustomization
 {
 public:
-    ~FOdysseyDrawingToolOptionsCustomization();
-    FOdysseyDrawingToolOptionsCustomization();
+    ~FOdysseyRasterDrawingToolOptionsCustomization();
+    FOdysseyRasterDrawingToolOptionsCustomization();
 
 public:
     /** Makes a new instance of this detail layout class for a specific detail view requesting it */
     static TSharedRef<IDetailCustomization> MakeInstance()
     {
-        return MakeShared<FOdysseyDrawingToolOptionsCustomization>();
+        return MakeShared<FOdysseyRasterDrawingToolOptionsCustomization>();
     }
 
     // IDetailCustomization interface
@@ -24,7 +24,7 @@ public:
     // End of IDetailCustomization interface
 
 private:
-    UOdysseyDrawingTool* GetDrawingTool();
+    UOdysseyRasterDrawingTool* GetRasterDrawingTool();
     void HideAllProperties();
     void AddObjectPropertyToCategory(IDetailCategoryBuilder& iCategory, UObject* iObject, FName iPropertyName);
     void AddObjectToCategoryInline(IDetailCategoryBuilder& iCategory, UObject* iObject);
@@ -35,7 +35,7 @@ private:
     void OnObjectPostEditChange(UObject* iObject, FPropertyChangedEvent& iPropertyChangedEvent);
 
 private:
-    class UOdysseyDrawingTool* mTool;
+    class UOdysseyRasterDrawingTool* mTool;
     IDetailLayoutBuilder* mBuilder;
     FDelegateHandle       mPropertyChangedHandle;
 };

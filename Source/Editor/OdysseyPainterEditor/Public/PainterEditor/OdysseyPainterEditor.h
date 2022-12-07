@@ -10,7 +10,6 @@
 
 class FOdysseyPaintEngine;
 class FOdysseyHUDSystem;
-class FOdysseyUndoHistory;
 class IOdysseySurfaceEditable;
 class UOdysseyTool;
 class FOdysseyBrushContext;
@@ -38,14 +37,15 @@ public:
     virtual FOdysseyPaintEngine&                        PaintEngine();
     virtual FOdysseyHUDSystem*                          HUDSystem() const;
 	virtual IOdysseySurfaceEditable*                    DisplaySurface() const = 0;
-	virtual FOdysseyUndoHistory*		                UndoHistory() const;
     virtual FOdysseyBrushColor&                         PaintColor();
     virtual UOdysseyTool*                               GetSelectedTool() const;
-    virtual const TArray<UOdysseyTool*>&                  GetTools() const;
+
+    virtual class UOdysseyRasterDrawingTool*                  GetRasterDrawingTool() const;
+    virtual class UOdysseyPaintBucketTool*                    GetPaintBucketTool() const;
 
 public:
     // Setters
-    void                         PaintColor(const FOdysseyBrushColor& iColor);
+    void                         PaintColor(const FOdysseyBrushColor& iColor, bool iIsCommit);
     void                         SetSelectedTool( UOdysseyTool* iSelectedTool );
 
 public:
@@ -65,14 +65,15 @@ protected:
 	virtual void Tick(float DeltaTime) override;
 
 protected:
-	FOdysseyUndoHistory*		mUndoHistory;
     FOdysseyPaintEngine         mPaintEngine; //We declare a single PaintEngine which will be used for any brush we use
     
     //Tools
     UOdysseyTool*               mSelectedTool;
-    TArray<UOdysseyTool*>         mTools;
 
-    FOdysseyHUDSystem*          mHUDSystem;
-    TArray<FOdysseyBrushContext*> mBrushContexts;
-    FOdysseyBrushColor mPaintColor;
+    FOdysseyHUDSystem*              mHUDSystem;
+    TArray<FOdysseyBrushContext*>   mBrushContexts;
+    FOdysseyBrushColor              mPaintColor;
+
+    UOdysseyRasterDrawingTool*      mRasterDrawingTool;
+    UOdysseyPaintBucketTool*        mPaintBucketTool;
 };

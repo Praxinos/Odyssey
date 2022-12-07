@@ -3,7 +3,6 @@
 
 #include "TextureEditor/OdysseyTextureEditorLayerStackTab.h"
 
-#include "Widgets/Layout/SWidgetSwitcher.h"
 #include "Widgets/LayerStack/SOdysseyTextureLayerStack.h"
 #include "ToolMenus.h"
 #include "DesktopPlatformModule.h"

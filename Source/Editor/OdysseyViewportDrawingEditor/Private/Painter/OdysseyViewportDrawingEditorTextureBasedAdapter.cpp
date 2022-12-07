@@ -2,7 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "OdysseyViewportDrawingEditorTextureBasedAdapter.h"
-#include "Tools/DrawingTool/OdysseyDrawingTool.h"
+#include "OdysseyTool.h"
 #include "MeshPaintHelpers.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyViewportDrawingEditorTextureBasedAdapter"
@@ -108,8 +108,10 @@ void FOdysseyViewportDrawingEditorTextureBasedAdapter::StartPainting()
 
         currentStrokePoint.ComputeRelativeParameters(lastStrokePoint);
 
-        mEditor->GetSelectedTool()->SetTransform(FTransform2D()); //Reset the transform as there is actually no transform to use
-        mEditor->GetSelectedTool()->OnMouseDown(currentStrokePoint, EKeys::LeftMouseButton);
+        //mEditor->GetSelectedTool()->SetTransform(FTransform2D()); //Reset the transform as there is actually no transform to use
+        UOdysseyTool* tool = mEditor->GetSelectedTool();
+        if (tool)
+            tool->OnMouseDown(currentStrokePoint, EKeys::LeftMouseButton);
     }
 
     //A simple copy is all we need for the texture based algorithm
@@ -139,8 +141,10 @@ void FOdysseyViewportDrawingEditorTextureBasedAdapter::Paint()
         mCurrentStrokeRay.mStrokePoint.x = coord.X * mEditor->Texture()->GetSurfaceWidth();
         mCurrentStrokeRay.mStrokePoint.y = coord.Y * mEditor->Texture()->GetSurfaceHeight();
         //ES: That feels weird, as we don't have the "PointInViewport", we only have the "PointInTexture", and we don't know what mouse button is being pressed.
-        mEditor->GetSelectedTool()->SetTransform(FTransform2D()); //Reset the transform as there is actually no transform to use
-        mEditor->GetSelectedTool()->OnMouseDrag(mCurrentStrokeRay.mStrokePoint);
+        //mEditor->GetSelectedTool()->SetTransform(FTransform2D()); //Reset the transform as there is actually no transform to use
+        UOdysseyTool* tool = mEditor->GetSelectedTool();
+        if (tool)
+            tool->OnMouseDrag(mCurrentStrokeRay.mStrokePoint);
         //mEditor->StrokeEngine()->To(mCurrentStrokeRay.mStrokePoint);
     }
 
@@ -151,8 +155,10 @@ void FOdysseyViewportDrawingEditorTextureBasedAdapter::Paint()
 
 void FOdysseyViewportDrawingEditorTextureBasedAdapter::FinishPainting()
 {
-    mEditor->GetSelectedTool()->SetTransform(FTransform2D()); //Reset the transform as there is actually no transform to use
-    mEditor->GetSelectedTool()->OnMouseUp(mCurrentStrokeRay.mStrokePoint, EKeys::LeftMouseButton);
+    //mEditor->GetSelectedTool()->SetTransform(FTransform2D()); //Reset the transform as there is actually no transform to use
+    UOdysseyTool* tool = mEditor->GetSelectedTool();
+    if (tool)
+        tool->OnMouseUp(mCurrentStrokeRay.mStrokePoint, EKeys::LeftMouseButton);
     //mEditor->StrokeEngine()->End();
 
     //A simple copy is all we need for the texture based algorithm

@@ -9,7 +9,7 @@
 #include "LayerStack/OdysseyTextureLayerImageRaster.h"
 #include "OdysseyPaintEngine.h"
 #include "OdysseyBlendParameters.h"
-#include "Tools/DrawingTool/OdysseyDrawingTool.h"
+#include "Tools/RasterDrawingTool/OdysseyRasterDrawingTool.h"
 
 
 #define LOCTEXT_NAMESPACE "OdysseyTextureEditor"
@@ -299,7 +299,7 @@ FOdysseyTextureEditor::SetSelectedToolDrawingLocked()
 	if ( !layerstack->CurrentLayer )
 		return;
 
-	UOdysseyDrawingTool* drawingTool = Cast<UOdysseyDrawingTool>(mSelectedTool);
+	UOdysseyRasterDrawingTool* drawingTool = Cast<UOdysseyRasterDrawingTool>(mSelectedTool);
 	if ( !drawingTool )
 		return;
 

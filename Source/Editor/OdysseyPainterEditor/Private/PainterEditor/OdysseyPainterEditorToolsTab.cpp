@@ -42,8 +42,13 @@ FOdysseyPainterEditorToolsTab::FOdysseyPainterEditorToolsTab(FOdysseyPainterEdit
 TSharedPtr<SWidget>
 FOdysseyPainterEditorToolsTab::CreateWidget()
 {
+    TArray<UOdysseyTool*> tools = {
+        mEditor->GetRasterDrawingTool(),
+        mEditor->GetPaintBucketTool()
+    };
+
     return SNew( SOdysseyToolsTileView )
-        .Tools(mEditor->GetTools())
+        .Tools(tools)
         .OnToolSelected(this, &FOdysseyPainterEditorToolsTab::OnToolSelected);
         
     

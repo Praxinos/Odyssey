@@ -4,7 +4,7 @@
 #include "OdysseyPainterEditorFunctionLibrary.h"
 
 #include "OdysseyBrushAssetBase.h"
-#include "Tools/DrawingTool/OdysseyDrawingTool.h"
+#include "Tools/RasterDrawingTool/OdysseyRasterDrawingTool.h"
 #include "BrushContext/OdysseyPainterEditorBrushContext.h"
 
 //---

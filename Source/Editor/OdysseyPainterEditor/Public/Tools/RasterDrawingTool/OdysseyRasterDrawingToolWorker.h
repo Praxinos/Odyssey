@@ -8,17 +8,17 @@
 #include <functional>
 
 // A Drawing Queue
-class FOdysseyDrawingToolWorker
+class FOdysseyRasterDrawingToolWorker
 { 
 public:
     typedef ::std::function<void()> tFunction;
  
 public:
     //Destructor
-    virtual ~FOdysseyDrawingToolWorker();
+    virtual ~FOdysseyRasterDrawingToolWorker();
 
     //Constructor
-    FOdysseyDrawingToolWorker();
+    FOdysseyRasterDrawingToolWorker();
 
 public:
     // API

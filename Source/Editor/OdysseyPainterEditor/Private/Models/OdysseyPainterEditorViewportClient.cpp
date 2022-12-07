@@ -28,7 +28,6 @@
 #include "OdysseyHUDSystem.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorSettings.h"
-#include "Tools/DrawingTool/OdysseyDrawingTool.h"
 #include "OdysseyStylusInputSettings.h"
 #include "Mesh/FOdysseyMeshSelector.h"
 #include "OdysseySurface.h"

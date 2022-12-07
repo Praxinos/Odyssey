@@ -1,35 +1,35 @@
 // IDDN.FR.001.250001.006.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
-#include "OdysseyDrawingToolOptionsCustomization.h"
+#include "OdysseyRasterDrawingToolOptionsCustomization.h"
 
 #include "DetailLayoutBuilder.h"
 #include "DetailCategoryBuilder.h"
 #include "IDetailGroup.h"
-#include "Tools/DrawingTool/OdysseyDrawingTool.h"
+#include "Tools/RasterDrawingTool/OdysseyRasterDrawingTool.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyDrawingToolOptionsCustomization"
+#define LOCTEXT_NAMESPACE "OdysseyRasterDrawingToolOptionsCustomization"
 
-FOdysseyDrawingToolOptionsCustomization::FOdysseyDrawingToolOptionsCustomization()
+FOdysseyRasterDrawingToolOptionsCustomization::FOdysseyRasterDrawingToolOptionsCustomization()
 {
-	mPropertyChangedHandle = FCoreUObjectDelegates::OnObjectPropertyChanged.AddRaw(this, &FOdysseyDrawingToolOptionsCustomization::OnObjectPostEditChange);
+	mPropertyChangedHandle = FCoreUObjectDelegates::OnObjectPropertyChanged.AddRaw(this, &FOdysseyRasterDrawingToolOptionsCustomization::OnObjectPostEditChange);
 }
 
-FOdysseyDrawingToolOptionsCustomization::~FOdysseyDrawingToolOptionsCustomization()
+FOdysseyRasterDrawingToolOptionsCustomization::~FOdysseyRasterDrawingToolOptionsCustomization()
 {
 	FCoreUObjectDelegates::OnObjectPropertyChanged.Remove(mPropertyChangedHandle);
 }
 
-UOdysseyDrawingTool*
-FOdysseyDrawingToolOptionsCustomization::GetDrawingTool()
+UOdysseyRasterDrawingTool*
+FOdysseyRasterDrawingToolOptionsCustomization::GetRasterDrawingTool()
 {
     TArray< TWeakObjectPtr<UObject> > objects;
     mBuilder->GetObjectsBeingCustomized(objects);
-    return Cast<UOdysseyDrawingTool>(objects[0]);
+    return Cast<UOdysseyRasterDrawingTool>(objects[0]);
 }
 
 void
-FOdysseyDrawingToolOptionsCustomization::HideAllProperties()
+FOdysseyRasterDrawingToolOptionsCustomization::HideAllProperties()
 {
     TArray< TWeakObjectPtr<UObject> > objects;
     mBuilder->GetObjectsBeingCustomized(objects);
@@ -40,7 +40,7 @@ FOdysseyDrawingToolOptionsCustomization::HideAllProperties()
 }
 
 void
-FOdysseyDrawingToolOptionsCustomization::AddObjectPropertyToCategory(IDetailCategoryBuilder& iCategory, UObject* iObject, FName iPropertyName)
+FOdysseyRasterDrawingToolOptionsCustomization::AddObjectPropertyToCategory(IDetailCategoryBuilder& iCategory, UObject* iObject, FName iPropertyName)
 {
     TArray<UObject*> objects; //contains only one object
     objects.Add(iObject);
@@ -51,7 +51,7 @@ FOdysseyDrawingToolOptionsCustomization::AddObjectPropertyToCategory(IDetailCate
 }
 
 void
-FOdysseyDrawingToolOptionsCustomization::AddObjectToCategoryInline(IDetailCategoryBuilder& iCategory, UObject* iObject)
+FOdysseyRasterDrawingToolOptionsCustomization::AddObjectToCategoryInline(IDetailCategoryBuilder& iCategory, UObject* iObject)
 {
     TArray<UObject*> objects; //contains only one object
     objects.Add(iObject);
@@ -67,7 +67,7 @@ FOdysseyDrawingToolOptionsCustomization::AddObjectToCategoryInline(IDetailCatego
 }
 
 void
-FOdysseyDrawingToolOptionsCustomization::AddSelectedShapeInstance(IDetailCategoryBuilder& iCategory)
+FOdysseyRasterDrawingToolOptionsCustomization::AddSelectedShapeInstance(IDetailCategoryBuilder& iCategory)
 {
     UObject* shapeInstance = mTool->GetSelectedShapeInstance();
     if (!shapeInstance)
@@ -97,7 +97,7 @@ FOdysseyDrawingToolOptionsCustomization::AddSelectedShapeInstance(IDetailCategor
 }
 
 void
-FOdysseyDrawingToolOptionsCustomization::AddBlendParameters()
+FOdysseyRasterDrawingToolOptionsCustomization::AddBlendParameters()
 {
     IDetailCategoryBuilder& blendingCategory = mBuilder->EditCategory("BlendingCategory", LOCTEXT("ShapeCategory", "Blending"), ECategoryPriority::Default);
     TSharedPtr<IPropertyHandle> blendingParametersHandle = mBuilder->GetProperty("BlendParameters");
@@ -113,10 +113,10 @@ FOdysseyDrawingToolOptionsCustomization::AddBlendParameters()
 }
 
 void
-FOdysseyDrawingToolOptionsCustomization::CustomizeDetails(IDetailLayoutBuilder& iBuilder)
+FOdysseyRasterDrawingToolOptionsCustomization::CustomizeDetails(IDetailLayoutBuilder& iBuilder)
 {
     mBuilder = &iBuilder;
-    mTool = GetDrawingTool();
+    mTool = GetRasterDrawingTool();
 
     HideAllProperties();
 
@@ -129,7 +129,7 @@ FOdysseyDrawingToolOptionsCustomization::CustomizeDetails(IDetailLayoutBuilder& 
 }
 
 void 
-FOdysseyDrawingToolOptionsCustomization::OnObjectPostEditChange( UObject* iObject, FPropertyChangedEvent& iPropertyChangedEvent )
+FOdysseyRasterDrawingToolOptionsCustomization::OnObjectPostEditChange( UObject* iObject, FPropertyChangedEvent& iPropertyChangedEvent )
 {
 	if (mTool != iObject)
         return;

@@ -4,6 +4,8 @@
 #include "OdysseyPainterEditorToolOptionsTab.h"
 
 #include "Tools/Widgets/SOdysseyToolOptions.h"
+#include "Tools/RasterDrawingTool/Widgets/SOdysseyRasterDrawingToolOptions.h"
+#include "Widgets/Layout/SWidgetSwitcher.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorToolOptionsTab"
 
@@ -29,8 +31,17 @@ FOdysseyPainterEditorToolOptionsTab::FOdysseyPainterEditorToolOptionsTab(FOdysse
 TSharedPtr<SWidget>
 FOdysseyPainterEditorToolOptionsTab::CreateWidget()
 {
-    return SNew(SOdysseyToolOptions)
-            .Tool(this, &FOdysseyPainterEditorToolOptionsTab::GetSelectedTool);
+    mWidgetSwitcher = SNew(SWidgetSwitcher)
+        .WidgetIndex(this, &FOdysseyPainterEditorToolOptionsTab::WidgetIndex)
+        +SWidgetSwitcher::Slot()
+        [
+            SNullWidget::NullWidget
+        ];
+
+    SetWidgetForTool(mEditor->GetRasterDrawingTool(), SNew(SOdysseyRasterDrawingToolOptions).Tool(mEditor->GetRasterDrawingTool()));
+    //mToolsTab->GetToolsTab()->SetWidgetForTool(mEditor->GetVectorDrawingTool(), SNew(SOdysseyPainterVectorDrawingTool, mEditor->GetVectorDrawingTool()));
+
+    return mWidgetSwitcher;
 }
 
 void
@@ -47,20 +58,46 @@ FOdysseyPainterEditorToolOptionsTab::BindShortcuts(FBaseToolkit* iToolkit)
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------------------- Widget Getters
 
-UOdysseyTool*
-FOdysseyPainterEditorToolOptionsTab::GetSelectedTool() const
-{
-    return mEditor->GetSelectedTool();
-}
-
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------- Event Listeners
 
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Methods
 
+void
+FOdysseyPainterEditorToolOptionsTab::SetWidgetForTool(UOdysseyTool* iTool, TSharedPtr<SWidget> iWidget)
+{
+    FWidgetSlotForTool* widgetSlotForTool = mWidgetSlotForTool.FindByPredicate(
+        [this](const FWidgetSlotForTool& iWidgetSlotForTool)
+        {
+            return mEditor->GetSelectedTool() == iWidgetSlotForTool.mTool;
+        }
+    );
+
+    if (!widgetSlotForTool)
+    {
+        mWidgetSlotForTool.Add({ iTool, nullptr });
+        widgetSlotForTool = &mWidgetSlotForTool.Last();
+        mWidgetSwitcher->AddSlot().Expose(widgetSlotForTool->mSlot);
+    }
+    
+    widgetSlotForTool->mSlot->DetachWidget();
+    widgetSlotForTool->mSlot->AttachWidget(iWidget.ToSharedRef());
+}
+
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------------------- Widget Getters
 
+int
+FOdysseyPainterEditorToolOptionsTab::WidgetIndex() const
+{
+    //Add +1 because the widget 0 is a NullWidget in case of tool having no widget defined
+    return 1 + mWidgetSlotForTool.IndexOfByPredicate(
+        [this](const FWidgetSlotForTool& iWidgetSlotForTool)
+        {
+            return mEditor->GetSelectedTool() == iWidgetSlotForTool.mTool;
+        }
+    );
+}
 
 #undef LOCTEXT_NAMESPACE
