@@ -47,6 +47,7 @@ UOdysseyTextureLayerStack::UOdysseyTextureLayerStack()
 {
     CompatibleLayers.Add(UOdysseyTextureLayerFolder::StaticClass());
     CompatibleLayers.Add(UOdysseyTextureLayerImageRaster::StaticClass());
+    CompatibleLayers.Add(UOdysseyTextureLayerImageVector::StaticClass());
 
     LayerRootClass = UOdysseyTextureLayerRoot::StaticClass();
 }
