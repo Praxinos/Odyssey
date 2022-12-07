@@ -1,0 +1,23 @@
+#pragma once
+
+#include <ULIS>
+#include "OdysseyVectorObject.h"
+#include "OdysseyVectorRoot.h"
+#include "OdysseyVectorPoint.h"
+#include "OdysseyVectorHandle.h"
+#include "OdysseyVectorHandlePoint.h"
+#include "OdysseyVectorHandleSegment.h"
+#include "OdysseyVectorPointCubic.h"
+#include "OdysseyVectorPointIntersection.h"
+#include "OdysseyVectorSection.h"
+#include "OdysseyVectorLink.h"
+#include "OdysseyVectorSegment.h"
+#include "OdysseyVectorSegmentCubic.h"
+#include "OdysseyVectorRectangle.h"
+#include "OdysseyVectorGroup.h"
+#include "OdysseyVectorLoop.h"
+#include "OdysseyVectorPath.h"
+#include "OdysseyVectorPathBuilder.h"
+#include "OdysseyVectorPathCubic.h"
+#include "OdysseyVectorCircle.h"
+#include "OdysseyVectorEngine.h"
