@@ -8,7 +8,7 @@
 #include "OdysseyVectorPath.h"
 #include "OdysseyVectorPathCubic.h"
 
-class FOdysseyVectorPathBuilder : public FOdysseyVectorObject
+class FOdysseyVectorPathBuilder : public UOdysseyVectorObject
 {
     private:
         double mCumulAngle;
@@ -20,9 +20,9 @@ class FOdysseyVectorPathBuilder : public FOdysseyVectorObject
         std::list<FOdysseyVectorLink*> mLinkList;
         FOdysseyVectorSegmentCubic* Sample( FOdysseyVectorPoint* iPoint, double iRadius, bool iEnforce );
 
-        FOdysseyVectorObject* CopyShape();
+        UOdysseyVectorObject* CopyShape();
         void DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags );
-        FOdysseyVectorObject* PickShape( double iX, double iY, double iRadius ) { return nullptr; };
+        UOdysseyVectorObject* PickShape( double iX, double iY, double iRadius ) { return nullptr; };
         void UpdateShape() {};
         void FitSegment( FOdysseyVectorSegmentCubic& iSegment, std::list<FOdysseyVectorLink*>& iLinkList );
         void ClearUntil( FOdysseyVectorPoint* iPoint );
@@ -32,7 +32,7 @@ class FOdysseyVectorPathBuilder : public FOdysseyVectorObject
 
     protected :
         /*std::list<FOdysseyVectorPoint*> mSmoothedPointList;*/
-        FOdysseyVectorPathCubic* mCubicPath;
+        UOdysseyVectorPathCubic* mCubicPath;
         FOdysseyVectorSegmentCubic* AppendPoint( double iX, double iY, double iRadius, bool iEnforce );
         void Round( FOdysseyVectorSegmentCubic& iCubicSegment );
         void Sharp( FOdysseyVectorSegmentCubic& iCubicSegment, ::ULIS::FVec2D iEntryVector, ::ULIS::FVec2D iExitVector );
@@ -40,13 +40,13 @@ class FOdysseyVectorPathBuilder : public FOdysseyVectorObject
     public:
        ~FOdysseyVectorPathBuilder();
         //FOdysseyVectorPathBuilder();
-        FOdysseyVectorPathBuilder( FOdysseyVectorPathCubic* iCubicPath );
+        FOdysseyVectorPathBuilder( UOdysseyVectorPathCubic* iCubicPath );
         FOdysseyVectorSegment* AppendPoint( double iX, double iY, double iRadius );
 
         bool PickPoint( double iX, double iY, double iRadius, uint64 iSelectionFlags );
         void Unselect(FOdysseyVectorPoint* iPoint);
         FOdysseyVectorSegment* End( double iX, double iY, double iRadius, bool iClose );
-        FOdysseyVectorPathCubic* GetCubicPath( );
+        UOdysseyVectorPathCubic* GetCubicPath( );
         FOdysseyVectorLink* GetLastSampleLink();
         FOdysseyVectorPoint* GetLastSamplePoint();
 

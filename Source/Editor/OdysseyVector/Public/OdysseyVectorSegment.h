@@ -6,7 +6,7 @@
 #include "OdysseyVectorPoint.h"
 #include "OdysseyVectorLink.h"
 
-class FOdysseyVectorPath;
+class UOdysseyVectorPath;
 class FOdysseyVectorPointIntersection;
 class FOdysseyVectorSection;
 
@@ -15,12 +15,12 @@ class FOdysseyVectorSegment : public FOdysseyVectorLink
     protected:
         std::list<FOdysseyVectorPointIntersection*> mIntersectionPointList;
         std::list<FOdysseyVectorSection*> mSectionList;
-        FOdysseyVectorPath& mPath;
+        UOdysseyVectorPath& mPath;
         ::ULIS::FRectD mBBox;
 
     public:
         ~FOdysseyVectorSegment();
-        FOdysseyVectorSegment( FOdysseyVectorPath& iPath, FOdysseyVectorPoint* iPoint0, FOdysseyVectorPoint* iPoint1 );
+        FOdysseyVectorSegment( UOdysseyVectorPath& iPath, FOdysseyVectorPoint* iPoint0, FOdysseyVectorPoint* iPoint1 );
         virtual void Draw( ::ULIS::FRectD &iRoi );
         virtual void DrawStructure( ::ULIS::FRectD &iRoi );
 
@@ -30,7 +30,7 @@ class FOdysseyVectorSegment : public FOdysseyVectorLink
         bool HasIntersectionPoint( FOdysseyVectorPointIntersection& mIntersectionPoint );
         FOdysseyVectorPoint* GetNextPoint( double iT );
         FOdysseyVectorPoint* GetPreviousPoint( double iT ); 
-        FOdysseyVectorPath& GetPath();
+        UOdysseyVectorPath& GetPath();
         virtual void Update() {};
         void Invalidate();
 

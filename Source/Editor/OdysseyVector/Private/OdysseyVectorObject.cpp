@@ -1,10 +1,10 @@
 #include "OdysseyVectorObject.h"
 
-FOdysseyVectorObject::~FOdysseyVectorObject()
+UOdysseyVectorObject::~UOdysseyVectorObject()
 {
 }
 
-FOdysseyVectorObject::FOdysseyVectorObject()
+UOdysseyVectorObject::UOdysseyVectorObject()
     : mTranslation( 0.0f, 0.0f )
     , mRotation( 0.0f )
     , mScaling ( 1.0f, 1.0f )
@@ -19,14 +19,14 @@ FOdysseyVectorObject::FOdysseyVectorObject()
     UpdateMatrix();
 }
 
-FOdysseyVectorObject::FOdysseyVectorObject( std::string iName )
-    : FOdysseyVectorObject()
+void
+UOdysseyVectorObject::SetName( std::string iName )
 {
     mName.assign( iName );
 }
 
 void
-FOdysseyVectorObject::Update()
+UOdysseyVectorObject::Update()
 {
     UpdateShape();
 
@@ -34,52 +34,52 @@ FOdysseyVectorObject::Update()
 }
 
 void
-FOdysseyVectorObject::SetIsSelected( bool iIsSelected )
+UOdysseyVectorObject::SetIsSelected( bool iIsSelected )
 {
     mIsSelected = iIsSelected;
 }
 
 void
-FOdysseyVectorObject::Translate( double iX, double iY )
+UOdysseyVectorObject::Translate( double iX, double iY )
 {
     mTranslation.x = iX;
     mTranslation.y = iY;
 }
 
 void
-FOdysseyVectorObject::Rotate( double iAngle )
+UOdysseyVectorObject::Rotate( double iAngle )
 {
     mRotation = iAngle;
 }
 
 void
-FOdysseyVectorObject::Scale( double iX, double iY )
+UOdysseyVectorObject::Scale( double iX, double iY )
 {
     mScaling.x = iX;
     mScaling.y = iY;
 }
 
 double
-FOdysseyVectorObject::GetScalingX()
+UOdysseyVectorObject::GetScalingX()
 {
     return mScaling.x;
 }
 
 double
-FOdysseyVectorObject::GetScalingY()
+UOdysseyVectorObject::GetScalingY()
 {
     return mScaling.y;
 }
 
 double
-FOdysseyVectorObject::GetRotation()
+UOdysseyVectorObject::GetRotation()
 {
     return mRotation;
 }
 
-FOdysseyVectorObject*
-FOdysseyVectorObject::Copy() {
-    FOdysseyVectorObject* objectCopy = CopyShape();
+UOdysseyVectorObject*
+UOdysseyVectorObject::Copy() {
+    UOdysseyVectorObject* objectCopy = CopyShape();
 
    // TODO, update matrices once we get a BLContext object
 
@@ -88,9 +88,9 @@ FOdysseyVectorObject::Copy() {
         CopySettings( *objectCopy ); // we need the matrices to properly import the child
 
         // recurse
-        for( std::list<FOdysseyVectorObject*>::iterator it = mChildrenList.begin(); it != mChildrenList.end(); ++it )
+        for( std::list<UOdysseyVectorObject*>::iterator it = mChildrenList.begin(); it != mChildrenList.end(); ++it )
         {
-            FOdysseyVectorObject *child = (*it);
+            UOdysseyVectorObject *child = (*it);
 
             objectCopy->AppendChild( child->Copy() );
         }
@@ -102,7 +102,7 @@ FOdysseyVectorObject::Copy() {
 }
 
 void
-FOdysseyVectorObject::CopySettings( FOdysseyVectorObject& iDestinationObject )
+UOdysseyVectorObject::CopySettings( UOdysseyVectorObject& iDestinationObject )
 {
     iDestinationObject.mTranslation = mTranslation;
     iDestinationObject.mRotation = mRotation;
@@ -125,19 +125,19 @@ FOdysseyVectorObject::CopySettings( FOdysseyVectorObject& iDestinationObject )
 }
 
 double
-FOdysseyVectorObject::GetTranslationX()
+UOdysseyVectorObject::GetTranslationX()
 {
     return mTranslation.x;
 }
 
 double
-FOdysseyVectorObject::GetTranslationY()
+UOdysseyVectorObject::GetTranslationY()
 {
     return mTranslation.y;
 }
 
 void
-FOdysseyVectorObject::UpdateMatrix( )
+UOdysseyVectorObject::UpdateMatrix( )
 {
     BLContext& blctx = FOdysseyVectorEngine::GetBLContext();
 
@@ -166,9 +166,9 @@ FOdysseyVectorObject::UpdateMatrix( )
     }
 
     // recurse
-    for( std::list<FOdysseyVectorObject*>::iterator it = mChildrenList.begin(); it != mChildrenList.end(); ++it )
+    for( std::list<UOdysseyVectorObject*>::iterator it = mChildrenList.begin(); it != mChildrenList.end(); ++it )
     {
-        FOdysseyVectorObject *child = (*it);
+        UOdysseyVectorObject *child = (*it);
 
         child->UpdateMatrix( );
     }
@@ -177,7 +177,7 @@ FOdysseyVectorObject::UpdateMatrix( )
 }
 
 ::ULIS::FRectD
-FOdysseyVectorObject::GetBBox( bool iWorld )
+UOdysseyVectorObject::GetBBox( bool iWorld )
 {
     if ( iWorld == true )
     {
@@ -192,18 +192,18 @@ FOdysseyVectorObject::GetBBox( bool iWorld )
 }
 
 void
-FOdysseyVectorObject::DrawChildren( ::ULIS::FRectD& iRoi, uint64 iFlags )
+UOdysseyVectorObject::DrawChildren( ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
-    for( std::list<FOdysseyVectorObject*>::iterator it = mChildrenList.begin(); it != mChildrenList.end(); ++it )
+    for( std::list<UOdysseyVectorObject*>::iterator it = mChildrenList.begin(); it != mChildrenList.end(); ++it )
     {
-        FOdysseyVectorObject *child = (*it);
+        UOdysseyVectorObject *child = (*it);
 
         child->Draw( iRoi, iFlags );
     }
 }
 
 void
-FOdysseyVectorObject::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
+UOdysseyVectorObject::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
     BLContext& blctx = FOdysseyVectorEngine::GetBLContext();
     ::ULIS::FRectD localRoi = { 0.0f, 0.0f, 0.0f, 0.0f };
@@ -233,47 +233,36 @@ FOdysseyVectorObject::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
     blctx.restore();
 }
 
-void
-FOdysseyVectorObject::DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags )
-{
-}
-
-FOdysseyVectorObject*
-FOdysseyVectorObject::PickShape( double iX, double iY, double iRadius )
-{
-    return nullptr;
-}
-
 bool
-FOdysseyVectorObject::IsFilled()
+UOdysseyVectorObject::IsFilled()
 {
     return mIsFilled;
 }
 
 bool
-FOdysseyVectorObject::IsInvalidated()
+UOdysseyVectorObject::IsInvalidated()
 {
     return mIsInvalidated;
 }
 
 bool
-FOdysseyVectorObject::IsSelected()
+UOdysseyVectorObject::IsSelected()
 {
     return mIsSelected;
 }
 
 void
-FOdysseyVectorObject::Invalidate()
+UOdysseyVectorObject::Invalidate()
 {
     if ( mIsInvalidated == false )
     {
-        FOdysseyVectorObject* obj = GetRoot();
+        UOdysseyVectorObject* obj = GetRoot();
 
         if ( obj && ( obj != this ) )
         {
-            if ( typeid ( *obj ) == typeid ( FOdysseyVectorRoot ) )
+            if ( obj->GetClass() == UOdysseyVectorRoot::StaticClass() )
             {
-                FOdysseyVectorRoot* root = static_cast<FOdysseyVectorRoot*>(obj);
+                UOdysseyVectorRoot* root = Cast<UOdysseyVectorRoot>(obj);
 
                 root->InvalidateObject( this );
 
@@ -283,11 +272,11 @@ FOdysseyVectorObject::Invalidate()
     }
 }
 
-FOdysseyVectorRoot*
-FOdysseyVectorObject::GetRoot()
+UOdysseyVectorRoot*
+UOdysseyVectorObject::GetRoot()
 {
-    FOdysseyVectorObject* parent = mParent;
-    FOdysseyVectorObject* root = nullptr;
+    UOdysseyVectorObject* parent = mParent;
+    UOdysseyVectorObject* root = nullptr;
 
     while ( parent )
     {
@@ -296,17 +285,17 @@ FOdysseyVectorObject::GetRoot()
         parent = parent->GetParent();
     }
 
-    return static_cast<FOdysseyVectorRoot*>(root);
+    return Cast<UOdysseyVectorRoot>(root);
 }
 
 void
-FOdysseyVectorObject::SetParent( FOdysseyVectorObject* iObject )
+UOdysseyVectorObject::SetParent( UOdysseyVectorObject* iObject )
 {
     mParent = iObject;
 }
 
 ::ULIS::FVec2D
-FOdysseyVectorObject::WorldCoordinatesToLocal( double iX, double iY )
+UOdysseyVectorObject::WorldCoordinatesToLocal( double iX, double iY )
 {
     BLPoint localCoords;
     ::ULIS::FVec2D localPoint;
@@ -319,25 +308,25 @@ FOdysseyVectorObject::WorldCoordinatesToLocal( double iX, double iY )
     return localPoint;
 }
 
-FOdysseyVectorObject*
-FOdysseyVectorObject::GetParent()
+UOdysseyVectorObject*
+UOdysseyVectorObject::GetParent()
 {
     return mParent;
 }
 
 void
-FOdysseyVectorObject::MoveBack()
+UOdysseyVectorObject::MoveBack()
 {
     if ( mParent )
     {
-        std::list<FOdysseyVectorObject*>::iterator it1 = mParent->mChildrenList.begin();
-        std::list<FOdysseyVectorObject*>::iterator it2 = it1++;
+        std::list<UOdysseyVectorObject*>::iterator it1 = mParent->mChildrenList.begin();
+        std::list<UOdysseyVectorObject*>::iterator it2 = it1++;
 
         if ( mParent->mChildrenList.size() )
         {
             for( ; it1 != mParent->mChildrenList.end(); it1++, it2++ )
             {
-                FOdysseyVectorObject *child = static_cast<FOdysseyVectorObject*>(*it1);
+                UOdysseyVectorObject *child = static_cast<UOdysseyVectorObject*>(*it1);
 
                 if ( this == child )
                 {
@@ -351,18 +340,18 @@ FOdysseyVectorObject::MoveBack()
 }
 
 void
-FOdysseyVectorObject::MoveFront()
+UOdysseyVectorObject::MoveFront()
 {
     if ( mParent )
     {
-        std::list<FOdysseyVectorObject*>::iterator it2 = mParent->mChildrenList.begin();
-        std::list<FOdysseyVectorObject*>::iterator it1 = it2++;
+        std::list<UOdysseyVectorObject*>::iterator it2 = mParent->mChildrenList.begin();
+        std::list<UOdysseyVectorObject*>::iterator it1 = it2++;
 
         if ( mParent->mChildrenList.size() )
         {
             for( ; it2 != mParent->mChildrenList.end(); it1++, it2++ )
             {
-                FOdysseyVectorObject *child = static_cast<FOdysseyVectorObject*>(*it1);
+                UOdysseyVectorObject *child = static_cast<UOdysseyVectorObject*>(*it1);
 
                 if ( this == child )
                 {
@@ -375,12 +364,12 @@ FOdysseyVectorObject::MoveFront()
     } 
 }
 
-FOdysseyVectorObject*
-FOdysseyVectorObject::Pick( double iX, double iY, double iRadius )
+UOdysseyVectorObject*
+UOdysseyVectorObject::Pick( double iX, double iY, double iRadius )
 {
     if ( this->mParent )
     {
-        if ( typeid ( *this->mParent ) == typeid ( FOdysseyVectorGroup ) )
+        if ( this->mParent->GetClass() == UOdysseyVectorGroup::StaticClass() )
         {
             return this->mParent;
         }
@@ -390,7 +379,7 @@ FOdysseyVectorObject::Pick( double iX, double iY, double iRadius )
 }
 
 void
-FOdysseyVectorObject::ExtractTransformations( BLMatrix2D &iMatrix
+UOdysseyVectorObject::ExtractTransformations( BLMatrix2D &iMatrix
                                      , ::ULIS::FVec2D* iTranslation
                                      , double* iRotation
                                      , ::ULIS::FVec2D* iScaling )
@@ -414,19 +403,19 @@ FOdysseyVectorObject::ExtractTransformations( BLMatrix2D &iMatrix
 }
 
 void
-FOdysseyVectorObject::AppendChild( FOdysseyVectorObject* iChild )
+UOdysseyVectorObject::AppendChild( UOdysseyVectorObject* iChild )
 {
     AddChild ( iChild, false );
 }
 
 void
-FOdysseyVectorObject::PrependChild( FOdysseyVectorObject* iChild )
+UOdysseyVectorObject::PrependChild( UOdysseyVectorObject* iChild )
 {
     AddChild ( iChild, true );
 }
 
 void
-FOdysseyVectorObject::AddChild( FOdysseyVectorObject* iChild, bool iPrepend )
+UOdysseyVectorObject::AddChild( UOdysseyVectorObject* iChild, bool iPrepend )
 {
     BLContext& blctx = FOdysseyVectorEngine::GetBLContext();
     BLMatrix2D localMatrix = this->GetInverseWorldMatrix();
@@ -450,7 +439,7 @@ FOdysseyVectorObject::AddChild( FOdysseyVectorObject* iChild, bool iPrepend )
 }
 
 void
-FOdysseyVectorObject::RemoveChild( FOdysseyVectorObject* iChild )
+UOdysseyVectorObject::RemoveChild( UOdysseyVectorObject* iChild )
 {
     iChild->mParent = nullptr;
 
@@ -458,63 +447,63 @@ FOdysseyVectorObject::RemoveChild( FOdysseyVectorObject* iChild )
 }
 
 void
-FOdysseyVectorObject::SetStrokeColor( uint32 iColor )
+UOdysseyVectorObject::SetStrokeColor( uint32 iColor )
 {
     mStrokeColor = iColor;
 }
 
 void
-FOdysseyVectorObject::SetFillColor( uint32 iColor )
+UOdysseyVectorObject::SetFillColor( uint32 iColor )
 {
     mFillColor = iColor;
 }
 
 void
-FOdysseyVectorObject::SetFilled( bool iIsFilled)
+UOdysseyVectorObject::SetFilled( bool iIsFilled)
 {
     mIsFilled = iIsFilled;
 }
 
 void
-FOdysseyVectorObject::SetStrokeWidth( double iWidth )
+UOdysseyVectorObject::SetStrokeWidth( double iWidth )
 {
     mStrokeWidth = iWidth;
 }
 
 double
-FOdysseyVectorObject::GetStrokeWidth()
+UOdysseyVectorObject::GetStrokeWidth()
 {
     return mStrokeWidth;
 }
 
 void 
-FOdysseyVectorObject::CopyTransformation( FOdysseyVectorObject& iObject )
+UOdysseyVectorObject::CopyTransformation( UOdysseyVectorObject& iObject )
 {
     iObject.mRotation    = mRotation;
     iObject.mScaling     = mScaling;
     iObject.mTranslation = mTranslation;
 }
 
-std::list<FOdysseyVectorObject*>&
-FOdysseyVectorObject::GetChildrenList()
+std::list<UOdysseyVectorObject*>&
+UOdysseyVectorObject::GetChildrenList()
 {
     return mChildrenList;
 }
 
 BLMatrix2D&
-FOdysseyVectorObject::GetLocalMatrix()
+UOdysseyVectorObject::GetLocalMatrix()
 {
     return mLocalMatrix;
 }
 
 BLMatrix2D&
-FOdysseyVectorObject::GetWorldMatrix()
+UOdysseyVectorObject::GetWorldMatrix()
 {
     return mWorldMatrix;
 }
 
 BLMatrix2D&
-FOdysseyVectorObject::GetInverseWorldMatrix()
+UOdysseyVectorObject::GetInverseWorldMatrix()
 {
     return mInverseWorldMatrix;
 }

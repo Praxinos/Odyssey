@@ -5,7 +5,7 @@ FOdysseyVectorPathBuilder::~FOdysseyVectorPathBuilder()
 
 }
 
-FOdysseyVectorPathBuilder::FOdysseyVectorPathBuilder( FOdysseyVectorPathCubic* iCubicPath )
+FOdysseyVectorPathBuilder::FOdysseyVectorPathBuilder( UOdysseyVectorPathCubic* iCubicPath )
     : mCubicPath ( iCubicPath )
     , mCumulAngle ( 0.0f )
     , mCumulAngleLimit ( 1.5708f ) // 90 degrees
@@ -31,7 +31,7 @@ FOdysseyVectorPathBuilder::GetLastSamplePoint()
     return mSamplePointList.back();
 }
 
-FOdysseyVectorObject*
+UOdysseyVectorObject*
 FOdysseyVectorPathBuilder::CopyShape()
 {
     return nullptr;
@@ -315,7 +315,7 @@ FOdysseyVectorPathBuilder::AppendPoint( double iX
     return AppendPoint ( iX, iY, iRadius, false );
 }
 
-FOdysseyVectorPathCubic* 
+UOdysseyVectorPathCubic* 
 FOdysseyVectorPathBuilder::GetCubicPath()
 {
     return mCubicPath;

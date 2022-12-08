@@ -1,17 +1,23 @@
 #pragma once
 
+#include "CoreMinimal.h"
+
 #include <blend2d.h>
-#include <Core/Core.h>
-#include <Image/Block.h>
 #include "OdysseyVectorObject.h"
 #include "OdysseyVectorSegment.h"
 
-class FOdysseyVectorRectangle : public FOdysseyVectorObject
+#include "OdysseyVectorRectangle.generated.h"
+
+UCLASS()
+class UOdysseyVectorRectangle : public UOdysseyVectorObject
 {
+    public:
+        GENERATED_BODY()
+
     private:
         void DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags );
-        FOdysseyVectorObject* PickShape( double iX, double iY, double iRadius );
-        FOdysseyVectorObject* CopyShape();
+        UOdysseyVectorObject* PickShape( double iX, double iY, double iRadius );
+        UOdysseyVectorObject* CopyShape();
         void UpdateShape() {};
 
     protected :
@@ -19,11 +25,10 @@ class FOdysseyVectorRectangle : public FOdysseyVectorObject
         double mHeight; 
 
     public:
-        ~FOdysseyVectorRectangle();
-        FOdysseyVectorRectangle( std::string iName );
-        FOdysseyVectorRectangle( std::string iName, double iWidth, double iHeight );
+        ~UOdysseyVectorRectangle();
+        UOdysseyVectorRectangle() {};
+        void Init( std::string iName, double iWidth, double iHeight );
         void SetSize( double iWidth, double iHeight );
         double GetWidth();
         double GetHeight();
-
 };

@@ -1,23 +1,29 @@
 #pragma once
 
+#include "CoreMinimal.h"
+
 #include <ULIS>
 #include <blend2d.h>
 #include <Core/Core.h>
 #include <Image/Block.h>
 #include "OdysseyVectorObject.h"
 
-class FOdysseyVectorGroup : public FOdysseyVectorObject
-{
-    private:
-        void DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags ) { };
-        FOdysseyVectorObject* PickShape( double iX, double iY, double iRadius );
-        FOdysseyVectorObject* CopyShape();
-        void UpdateShape();
+#include "OdysseyVectorGroup.generated.h"
 
-    protected:
+UCLASS()
+class UOdysseyVectorGroup : public UOdysseyVectorObject
+{
+    public:
+        GENERATED_BODY()
 
     public:
-        ~FOdysseyVectorGroup();
-        FOdysseyVectorGroup();
-        FOdysseyVectorGroup( std::string iName );
+        ~UOdysseyVectorGroup(){};
+        UOdysseyVectorGroup(){};
+        void Init( std::string iName );
+
+    private:
+        void DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags ) { };
+        UOdysseyVectorObject* PickShape( double iX, double iY, double iRadius );
+        UOdysseyVectorObject* CopyShape();
+        void UpdateShape();
 };

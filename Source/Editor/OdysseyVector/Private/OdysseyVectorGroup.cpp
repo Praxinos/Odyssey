@@ -1,16 +1,13 @@
 #include "OdysseyVectorGroup.h"
 
-FOdysseyVectorGroup::~FOdysseyVectorGroup()
+void
+UOdysseyVectorGroup::Init( std::string iName )
 {
+    SetName( iName );
 }
 
-FOdysseyVectorGroup::FOdysseyVectorGroup()
-    : FOdysseyVectorObject()
-{
-}
-
-FOdysseyVectorObject*
-FOdysseyVectorGroup::PickShape( double iX, double iY, double iRadius )
+UOdysseyVectorObject*
+UOdysseyVectorGroup::PickShape( double iX, double iY, double iRadius )
 {
     if ( ( iX > mBBox.x ) && ( iX < ( mBBox.x + mBBox.w ) )
       && ( iY > mBBox.y ) && ( iY < ( mBBox.y + mBBox.h ) ) )
@@ -21,21 +18,21 @@ FOdysseyVectorGroup::PickShape( double iX, double iY, double iRadius )
     return nullptr;
 }
 
-FOdysseyVectorObject*
-FOdysseyVectorGroup::CopyShape()
+UOdysseyVectorObject*
+UOdysseyVectorGroup::CopyShape()
 {
-    return new FOdysseyVectorGroup();
+    return NewObject<UOdysseyVectorGroup>();
 }
 
 void
-FOdysseyVectorGroup::UpdateShape()
+UOdysseyVectorGroup::UpdateShape()
 {
     ::ULIS::FRectD bbox;
     int init = 0;
 
-    for( std::list<FOdysseyVectorObject*>::iterator it = mChildrenList.begin(); it != mChildrenList.end(); ++it )
+    for( std::list<UOdysseyVectorObject*>::iterator it = mChildrenList.begin(); it != mChildrenList.end(); ++it )
     {
-        FOdysseyVectorObject *child = (*it);
+        UOdysseyVectorObject *child = (*it);
         ::ULIS::FRectD childBBox = child->GetBBox( true );
 
         bbox = ( init == 0 ) ? childBBox : bbox | childBBox;
