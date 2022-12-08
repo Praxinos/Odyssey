@@ -1,12 +1,20 @@
 #pragma once
 
+#include "CoreMinimal.h"
+
 #include <blend2d.h>
 #include <ULIS>
 
-class FOdysseyVectorRoot;
+#include "OdysseyVectorObject.generated.h"
 
-class FOdysseyVectorObject : public UObject
+class UOdysseyVectorRoot;
+
+UCLASS()
+class UOdysseyVectorObject : public UObject
 {
+    public:
+        GENERATED_BODY()
+
     protected:
         ::ULIS::FVec2D mTranslation;
         double mRotation;
@@ -15,11 +23,11 @@ class FOdysseyVectorObject : public UObject
         BLMatrix2D mInverseLocalMatrix;
         BLMatrix2D mWorldMatrix;
         BLMatrix2D mInverseWorldMatrix;
-        std::list<FOdysseyVectorObject*> mChildrenList;
+        std::list<UOdysseyVectorObject*> mChildrenList;
         uint32 mStrokeColor;
         double mStrokeWidth;
         uint32 mFillColor;
-        FOdysseyVectorObject* mParent;
+        UOdysseyVectorObject* mParent;
         bool mIsFilled;
         bool mIsSelected;
         bool mIsInvalidated;
@@ -27,42 +35,42 @@ class FOdysseyVectorObject : public UObject
         std::string mName;
 
     public:
-        ~FOdysseyVectorObject();
-        FOdysseyVectorObject();
-        FOdysseyVectorObject( std::string iName );
-        void CopySettings( FOdysseyVectorObject& iDestinationObject );
+        ~UOdysseyVectorObject();
+        UOdysseyVectorObject();
+        void SetName( std::string iName );
+        void CopySettings( UOdysseyVectorObject& iDestinationObject );
         virtual void Update() final ; // cannot be overridden
-        virtual void UpdateShape() = 0;
-        virtual FOdysseyVectorObject* Copy() final ; // cannot be overridden
-        virtual FOdysseyVectorObject* CopyShape() = 0;
+        virtual void UpdateShape() PURE_VIRTUAL(UOdysseyVectorObject::UpdateShape;);
+        virtual UOdysseyVectorObject* Copy() final ; // cannot be overridden
+        virtual UOdysseyVectorObject* CopyShape() PURE_VIRTUAL(__func__,return nullptr;);
         virtual void Draw( ::ULIS::FRectD& iRoi, uint64 iFlags ) final; // cannot be overridden
-        virtual void DrawShape( ::ULIS::FRectD &roi, uint64 iFlags ) = 0;
-        virtual FOdysseyVectorObject* Pick( double iX, double iY, double iRadius ) final; // cannot be overridden
-        virtual FOdysseyVectorObject* PickShape( double iX, double iY, double iRadius ) = 0;
+        virtual void DrawShape ( ::ULIS::FRectD &roi, uint64 iFlags ) PURE_VIRTUAL(__func__,);
+        virtual UOdysseyVectorObject* Pick( double iX, double iY, double iRadius ) final; // cannot be overridden
+        virtual UOdysseyVectorObject* PickShape( double iX, double iY, double iRadius ) PURE_VIRTUAL(__func__,return nullptr;);
         /*virtual void UpdateBoundingBox() = 0;*/
         void DrawChildren( ::ULIS::FRectD& iRoi, uint64 iFlags );
         void UpdateMatrix( );
         void Translate( double iX, double iY );
         void Rotate( double iAngle );
         void Scale( double iX, double iY );
-        void PrependChild( FOdysseyVectorObject* iChild );
-        void AppendChild( FOdysseyVectorObject* iChild );
-        void AddChild( FOdysseyVectorObject* iChild, bool iPrepend );
-        void RemoveChild( FOdysseyVectorObject* iChild );
-        void ImportChild( FOdysseyVectorObject* iChild, BLMatrix2D& iInverseWorldMatrix );
+        void PrependChild( UOdysseyVectorObject* iChild );
+        void AppendChild( UOdysseyVectorObject* iChild );
+        void AddChild( UOdysseyVectorObject* iChild, bool iPrepend );
+        void RemoveChild( UOdysseyVectorObject* iChild );
+        void ImportChild( UOdysseyVectorObject* iChild, BLMatrix2D& iInverseWorldMatrix );
         static void ExtractTransformations( BLMatrix2D &iMatrix, ::ULIS::FVec2D* iTranslation, double* iRotation, ::ULIS::FVec2D* iScaling );
         double GetScalingX();
         double GetScalingY();
         double GetTranslationX();
         double GetTranslationY();
         double GetRotation();
-        FOdysseyVectorObject* GetParent();
-        void SetParent( FOdysseyVectorObject* iObject );
-        void CopyTransformation( FOdysseyVectorObject& iObject );
+        UOdysseyVectorObject* GetParent();
+        void SetParent( UOdysseyVectorObject* iObject );
+        void CopyTransformation( UOdysseyVectorObject& iObject );
         BLMatrix2D& GetLocalMatrix();
         BLMatrix2D& GetWorldMatrix();
         BLMatrix2D& GetInverseWorldMatrix();
-        std::list<FOdysseyVectorObject*>& GetChildrenList();
+        std::list<UOdysseyVectorObject*>& GetChildrenList();
         void SetStrokeColor( uint32 iColor );
         void SetFillColor( uint32 iColor );
         void SetFilled(bool iIsFilled);
@@ -75,7 +83,7 @@ class FOdysseyVectorObject : public UObject
         void MoveBack();
         void MoveFront();
         void Invalidate();
-        FOdysseyVectorRoot* GetRoot();
+        UOdysseyVectorRoot* GetRoot();
         bool IsInvalidated();
         bool IsSelected();
 };

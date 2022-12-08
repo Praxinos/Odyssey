@@ -1,50 +1,53 @@
 #include "OdysseyVectorLoop.h"
 
-FOdysseyVectorLoop::~FOdysseyVectorLoop()
+UOdysseyVectorLoop::~UOdysseyVectorLoop()
 {
 }
 
-FOdysseyVectorLoop::FOdysseyVectorLoop( FOdysseyVectorPath& iParent
+void
+UOdysseyVectorLoop::Init( UOdysseyVectorPath* iParent
                         , uint64 iID
-                        , FOdysseyVectorPoint& iLoopPoint
+                        , FOdysseyVectorPoint* iLoopPoint
                         , std::list<FOdysseyVectorPoint*>& iLoopPointList
                         , std::list<FOdysseyVectorSection*>& iLoopSectionList )
-    : mID ( iID )
-    , mLoopPoint ( iLoopPoint )
-    , mPointList ( iLoopPointList )
-    , mSectionList ( iLoopSectionList )
+
 {
-    mParent = static_cast<FOdysseyVectorObject*>(&iParent);
+    mParent = Cast<UOdysseyVectorObject>(iParent);
+
+    mID = iID;
+    mLoopPoint = iLoopPoint;
+    mPointList = iLoopPointList;
+    mSectionList = iLoopSectionList;
 
     Build();
 }
 
 uint64
-FOdysseyVectorLoop::GetID()
+UOdysseyVectorLoop::GetID()
 {
     return mID;
 }
 
 void
-FOdysseyVectorLoop::Invalidate()
+UOdysseyVectorLoop::Invalidate()
 {
-    static_cast<FOdysseyVectorPath*>(mParent)->InvalidateLoop( this );
+    static_cast<UOdysseyVectorPath*>(mParent)->InvalidateLoop( this );
 }
 
 void
-FOdysseyVectorLoop::UpdateShape()
+UOdysseyVectorLoop::UpdateShape()
 {
     Build();
 }
 
-FOdysseyVectorObject*
-FOdysseyVectorLoop::CopyShape()
+UOdysseyVectorObject*
+UOdysseyVectorLoop::CopyShape()
 {
     return nullptr;
 }
 
-FOdysseyVectorObject*
-FOdysseyVectorLoop::PickShape( double iX, double iY, double iRadius )
+UOdysseyVectorObject*
+UOdysseyVectorLoop::PickShape( double iX, double iY, double iRadius )
 {
     /*BLPath path;*/
     BLPoint p = { iX, iY };
@@ -81,7 +84,7 @@ printf("%d\n", mID );
 };
 
 uint64
-FOdysseyVectorLoop::GenerateID( std::list<FOdysseyVectorSection*> iSectionList )
+UOdysseyVectorLoop::GenerateID( std::list<FOdysseyVectorSection*> iSectionList )
 {
     uint64 loopID = 0;
 
@@ -96,7 +99,7 @@ FOdysseyVectorLoop::GenerateID( std::list<FOdysseyVectorSection*> iSectionList )
 }
 
 void
-FOdysseyVectorLoop::Detach()
+UOdysseyVectorLoop::Detach()
 {
     for( std::list<FOdysseyVectorPoint*>::iterator it = mPointList.begin(); it != mPointList.end(); ++it )
     {
@@ -114,7 +117,7 @@ FOdysseyVectorLoop::Detach()
 }
 
 void
-FOdysseyVectorLoop::Attach()
+UOdysseyVectorLoop::Attach()
 {
     for( std::list<FOdysseyVectorPoint*>::iterator it = mPointList.begin(); it != mPointList.end(); ++it )
     {
@@ -132,7 +135,7 @@ FOdysseyVectorLoop::Attach()
 }
 
 void
-FOdysseyVectorLoop::BuildSegmentCubic( std::vector<BLPoint>& iPointArray
+UOdysseyVectorLoop::BuildSegmentCubic( std::vector<BLPoint>& iPointArray
                                      , FOdysseyVectorSegmentCubic& iSegment
                                      , double iFromT
                                      , double iToT )
@@ -200,7 +203,7 @@ FOdysseyVectorLoop::BuildSegmentCubic( std::vector<BLPoint>& iPointArray
 }
 
 void
-FOdysseyVectorLoop::DrawPoints( ::ULIS::FRectD& iRoi )
+UOdysseyVectorLoop::DrawPoints( ::ULIS::FRectD& iRoi )
 {
     BLContext& blctx = FOdysseyVectorEngine::GetBLContext();
 
@@ -220,7 +223,7 @@ FOdysseyVectorLoop::DrawPoints( ::ULIS::FRectD& iRoi )
 }
 
 void
-FOdysseyVectorLoop::Build()
+UOdysseyVectorLoop::Build()
 {
     int seg = 0;
 
@@ -233,8 +236,8 @@ FOdysseyVectorLoop::Build()
     {
         FOdysseyVectorSection* firstSection = mSectionList.front();
         FOdysseyVectorSegment& firstSegment = firstSection->GetSegment();
-        ::ULIS::FVec2D originAt = mLoopPoint.GetPosition( firstSegment );
-        FOdysseyVectorPoint* currentPoint = &mLoopPoint;
+        ::ULIS::FVec2D originAt = mLoopPoint->GetPosition( firstSegment );
+        FOdysseyVectorPoint* currentPoint = mLoopPoint;
 
         mPath.moveTo( originAt.x, originAt.y );
 
@@ -257,7 +260,7 @@ FOdysseyVectorLoop::Build()
 
 
 void
-FOdysseyVectorLoop::DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags )
+UOdysseyVectorLoop::DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
     BLContext& blctx = FOdysseyVectorEngine::GetBLContext();
 

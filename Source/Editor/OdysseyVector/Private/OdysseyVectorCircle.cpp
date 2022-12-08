@@ -5,13 +5,15 @@
 
 #define MAGICRATIO 0.55191502449 // = 4*(sqrt(2)-1)/3
 
-FOdysseyVectorCircle::~FOdysseyVectorCircle()
+UOdysseyVectorCircle::~UOdysseyVectorCircle()
 {
 }
 
-FOdysseyVectorCircle::FOdysseyVectorCircle( std::string iName )
-    : FOdysseyVectorPathCubic(iName)
+void
+UOdysseyVectorCircle::Init( std::string iName )
 {
+    SetName( iName );
+
     mRadiusX = mRadiusY = 0.0f;
 
     mCubicPoint[0] = new FOdysseyVectorPointCubic( 0.0f, 0.0f );
@@ -19,10 +21,10 @@ FOdysseyVectorCircle::FOdysseyVectorCircle( std::string iName )
     mCubicPoint[2] = new FOdysseyVectorPointCubic( 0.0f, 0.0f );
     mCubicPoint[3] = new FOdysseyVectorPointCubic( 0.0f, 0.0f );
 
-    mCubicSegment[0] = new FOdysseyVectorSegmentCubic( static_cast<FOdysseyVectorPathCubic&>(*this), mCubicPoint[0], mCubicPoint[1] );
-    mCubicSegment[1] = new FOdysseyVectorSegmentCubic( static_cast<FOdysseyVectorPathCubic&>(*this), mCubicPoint[1], mCubicPoint[2] );
-    mCubicSegment[2] = new FOdysseyVectorSegmentCubic( static_cast<FOdysseyVectorPathCubic&>(*this), mCubicPoint[2], mCubicPoint[3] );
-    mCubicSegment[3] = new FOdysseyVectorSegmentCubic( static_cast<FOdysseyVectorPathCubic&>(*this), mCubicPoint[3], mCubicPoint[0] );
+    mCubicSegment[0] = new FOdysseyVectorSegmentCubic( static_cast<UOdysseyVectorPathCubic&>(*this), mCubicPoint[0], mCubicPoint[1] );
+    mCubicSegment[1] = new FOdysseyVectorSegmentCubic( static_cast<UOdysseyVectorPathCubic&>(*this), mCubicPoint[1], mCubicPoint[2] );
+    mCubicSegment[2] = new FOdysseyVectorSegmentCubic( static_cast<UOdysseyVectorPathCubic&>(*this), mCubicPoint[2], mCubicPoint[3] );
+    mCubicSegment[3] = new FOdysseyVectorSegmentCubic( static_cast<UOdysseyVectorPathCubic&>(*this), mCubicPoint[3], mCubicPoint[0] );
 
     AddPoint ( mCubicPoint[0] );
     AddPoint ( mCubicPoint[1] );
@@ -35,20 +37,22 @@ FOdysseyVectorCircle::FOdysseyVectorCircle( std::string iName )
     AddSegment ( mCubicSegment[3] );
 }
 
-FOdysseyVectorCircle::FOdysseyVectorCircle( std::string iName, double iRadius )
-    : FOdysseyVectorCircle(iName)
+void
+UOdysseyVectorCircle::Init( std::string iName, double iRadius )
 {
-    SetRadius ( iRadius, iRadius );
-}
-
-FOdysseyVectorCircle::FOdysseyVectorCircle( std::string iName, double iRadiusX, double iRadiusY )
-    : FOdysseyVectorCircle(iName)
-{
-    SetRadius ( iRadiusX, iRadiusY );
+    SetName( iName );
+    SetRadius( iRadius, iRadius );
 }
 
 void
-FOdysseyVectorCircle::UpdateShape()
+UOdysseyVectorCircle::Init( std::string iName, double iRadiusX, double iRadiusY )
+{
+    SetName( iName );
+    SetRadius( iRadiusX, iRadiusY );
+}
+
+void
+UOdysseyVectorCircle::UpdateShape()
 {
     double ctlDistX = mRadiusX * MAGICRATIO;
     double ctlDistY = mRadiusY * MAGICRATIO;
@@ -76,18 +80,20 @@ FOdysseyVectorCircle::UpdateShape()
     mCubicSegment[3]->Update();
 }
 
-FOdysseyVectorObject*
-FOdysseyVectorCircle::CopyShape()
+UOdysseyVectorObject*
+UOdysseyVectorCircle::CopyShape()
 {
-    FOdysseyVectorCircle* circleCopy = new FOdysseyVectorCircle ( mName, mRadiusX, mRadiusY );
+    UOdysseyVectorCircle* circleCopy = NewObject<UOdysseyVectorCircle>();
 
-    return static_cast<FOdysseyVectorObject*>( circleCopy );
+    circleCopy->Init ( mName, mRadiusX, mRadiusY );
+
+    return Cast<UOdysseyVectorObject>( circleCopy );
 }
 
-FOdysseyVectorPathCubic*
-FOdysseyVectorCircle::Convert()
+UOdysseyVectorPathCubic*
+UOdysseyVectorCircle::Convert()
 {
-    FOdysseyVectorPathCubic* path = static_cast<FOdysseyVectorPathCubic*>(this->FOdysseyVectorPathCubic::CopyShape());
+    UOdysseyVectorPathCubic* path = static_cast<UOdysseyVectorPathCubic*>(this->UOdysseyVectorPathCubic::CopyShape());
 
     this->CopySettings( *path );
 
@@ -95,16 +101,16 @@ FOdysseyVectorCircle::Convert()
 }
 
 void
-FOdysseyVectorCircle::DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags )
+UOdysseyVectorCircle::DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags )
 {
     if ( mRadiusX && mRadiusY )
     {
-        FOdysseyVectorPathCubic::DrawShape ( iRoi, iFlags );
+        UOdysseyVectorPathCubic::DrawShape ( iRoi, iFlags );
     }
 }
 
-FOdysseyVectorObject*
-FOdysseyVectorCircle::PickShape( double iX, double iY, double iRadius )
+UOdysseyVectorObject*
+UOdysseyVectorCircle::PickShape( double iX, double iY, double iRadius )
 {
     if( FMath::Sqrt((iX*iX) + (iY*iY)) <= mRadiusX )
     {
@@ -115,13 +121,13 @@ FOdysseyVectorCircle::PickShape( double iX, double iY, double iRadius )
 }
 
 void
-FOdysseyVectorCircle::SetRadius( double iRadius )
+UOdysseyVectorCircle::SetRadius( double iRadius )
 {
     SetRadius( iRadius, iRadius );
 }
 
 void
-FOdysseyVectorCircle::SetRadius( double iRadiusX, double iRadiusY )
+UOdysseyVectorCircle::SetRadius( double iRadiusX, double iRadiusY )
 {
     mRadiusX = iRadiusX;
     mRadiusY = iRadiusY;
@@ -135,13 +141,13 @@ FOdysseyVectorCircle::SetRadius( double iRadiusX, double iRadiusY )
 }
 
 double
-FOdysseyVectorCircle::GetRadiusX()
+UOdysseyVectorCircle::GetRadiusX()
 {
     return mRadiusX;
 }
 
 double
-FOdysseyVectorCircle::GetRadiusY()
+UOdysseyVectorCircle::GetRadiusY()
 {
     return mRadiusY;
 }

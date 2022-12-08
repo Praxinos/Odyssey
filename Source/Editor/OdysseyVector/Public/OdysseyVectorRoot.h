@@ -1,5 +1,7 @@
 #pragma once
 
+#include "CoreMinimal.h"
+
 #include <ULIS>
 #include <blend2d.h>
 #include <Core/Core.h>
@@ -7,29 +9,36 @@
 #include "OdysseyVectorObject.h"
 #include "OdysseyVectorGroup.h"
 
-class FOdysseyVectorRoot : public FOdysseyVectorObject
+#include "OdysseyVectorRoot.generated.h"
+
+UCLASS()
+class UOdysseyVectorRoot : public UOdysseyVectorObject
 {
+    public:
+        GENERATED_BODY()
+
     private:
-        FOdysseyVectorObject* RecursiveSelect( FOdysseyVectorObject& iObj, double x, double y, double iRadius );
+        UOdysseyVectorObject* RecursiveSelect( UOdysseyVectorObject& iObj, double x, double y, double iRadius );
         void UpdateShape();
-        FOdysseyVectorObject* CopyShape();
+        UOdysseyVectorObject* CopyShape();
 
     protected:
-        std::list<FOdysseyVectorObject*> mSelectedObjectList;
-        std::list<FOdysseyVectorObject*> mInvalidatedObjectList;
+        std::list<UOdysseyVectorObject*> mSelectedObjectList;
+        std::list<UOdysseyVectorObject*> mInvalidatedObjectList;
 
     public:
-        ~FOdysseyVectorRoot();
-        FOdysseyVectorRoot( std::string iName );
+        ~UOdysseyVectorRoot(){};
+        UOdysseyVectorRoot(){};
+        void Init( std::string iName );
         void Select( double x, double y, double iRadius );
-        void Select( FOdysseyVectorObject& iVecObj );
+        void Select( UOdysseyVectorObject& iVecObj );
         void ClearSelection();
-        FOdysseyVectorObject* GetLastSelected();
+        UOdysseyVectorObject* GetLastSelected();
         void DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags );
-        FOdysseyVectorObject* PickShape( double iX, double iY, double iRadius ) { return nullptr; };
+        UOdysseyVectorObject* PickShape( double iX, double iY, double iRadius ) { return nullptr; };
 
         void Bucket( double iX, double iY, uint32 iFillColor );
-        void InvalidateObject( FOdysseyVectorObject* iObject );
+        void InvalidateObject( UOdysseyVectorObject* iObject );
 
-        FOdysseyVectorGroup* GroupSelectdObjects();
+        UOdysseyVectorGroup* GroupSelectdObjects();
 };

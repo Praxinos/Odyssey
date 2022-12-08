@@ -6,9 +6,9 @@ FOdysseyVectorEngine::~FOdysseyVectorEngine()
 }
 
 FOdysseyVectorEngine::FOdysseyVectorEngine( double iWidth, double iHeight )
-    : mScene ( "Vector Scene" )
 {
     mBLImage = new BLImage( iWidth, iHeight, BL_FORMAT_PRGB32 );
+    mScene.Init( "Vector Scene" );
 
     GetBLContext().begin( *mBLImage );
 }
@@ -73,7 +73,7 @@ FOdysseyVectorEngine::Render( ::ULIS::FBlock& iBlock )
     blctx.flush( BL_CONTEXT_FLUSH_SYNC );
 }
 
-FOdysseyVectorRoot&
+UOdysseyVectorRoot&
 FOdysseyVectorEngine::GetScene()
 {
     return mScene;

@@ -9,7 +9,7 @@
 class FOdysseyVectorEngine
 {
     private:
-        FOdysseyVectorRoot mScene;
+        UOdysseyVectorRoot mScene;
         ::ULIS::FRectD mRoi;
         BLImage* mBLImage;
         BLImage* mBLMask;
@@ -20,7 +20,7 @@ class FOdysseyVectorEngine
         ~FOdysseyVectorEngine();
         FOdysseyVectorEngine( double iWidth, double iHeight );
         void Render( ::ULIS::FBlock& iBlock );
-        FOdysseyVectorRoot& GetScene();
+        UOdysseyVectorRoot& GetScene();
         /*void Init( double iWidth, double iHeight );*/
         void InvalidateRegion( double x, double y, double w, double h );
         void InvalidateRegion( ::ULIS::FRectD& iRegion );

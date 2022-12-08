@@ -8,7 +8,7 @@
 #include "OdysseyVectorHandleSegment.h"
 #include "OdysseyVectorSegment.h"
 
-class FOdysseyVectorPathCubic;
+class UOdysseyVectorPathCubic;
 
 typedef struct _FPolygon {
     ::ULIS::FVec2D quadVertex[4];
@@ -47,8 +47,8 @@ class FOdysseyVectorSegmentCubic : public FOdysseyVectorSegment
 
     public:
         ~FOdysseyVectorSegmentCubic(){};
-        FOdysseyVectorSegmentCubic( FOdysseyVectorPathCubic& iPath, FOdysseyVectorPointCubic* iPoint0, FOdysseyVectorPointCubic* iPoint1 );
-        FOdysseyVectorSegmentCubic( FOdysseyVectorPathCubic& iPath, FOdysseyVectorPointCubic* iPoint0, double iCtrlPoint0x, double iCtrlPoint0y, double iCtrlPoint1x, double iCtrlPoint1y, FOdysseyVectorPointCubic* iPoint1 );
+        FOdysseyVectorSegmentCubic( UOdysseyVectorPathCubic& iPath, FOdysseyVectorPointCubic* iPoint0, FOdysseyVectorPointCubic* iPoint1 );
+        FOdysseyVectorSegmentCubic( UOdysseyVectorPathCubic& iPath, FOdysseyVectorPointCubic* iPoint0, double iCtrlPoint0x, double iCtrlPoint0y, double iCtrlPoint1x, double iCtrlPoint1y, FOdysseyVectorPointCubic* iPoint1 );
         FOdysseyVectorHandleSegment& GetControlPoint( int iCtrlPointNum );
         void Draw( ::ULIS::FRectD &iRoi );
         void DrawStructure( ::ULIS::FRectD &iRoi, double iZoomFactor );
@@ -64,7 +64,7 @@ class FOdysseyVectorSegmentCubic : public FOdysseyVectorSegment
         void ResetPolygonCache();
         uint32 GetPolygonCount(); // TODO: use vector size() method.
         std::vector<FPolygon>& GetPolygonCache();
-        void IntersectPath( FOdysseyVectorPathCubic& iPath );
+        void IntersectPath( UOdysseyVectorPathCubic& iPath );
         void Intersect( FOdysseyVectorSegmentCubic& iOther );
         void Update();
         void BuildVariable();

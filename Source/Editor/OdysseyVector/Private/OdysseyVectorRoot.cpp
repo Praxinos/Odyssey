@@ -1,21 +1,16 @@
 #include "OdysseyVectorRoot.h"
 
-FOdysseyVectorRoot::~FOdysseyVectorRoot()
+void UOdysseyVectorRoot::Init( std::string iName )
 {
-}
-
-FOdysseyVectorRoot::FOdysseyVectorRoot( std::string iName )
-    : FOdysseyVectorObject( iName )
-{
-
+    SetName( iName );
 }
 
 void
-FOdysseyVectorRoot::ClearSelection()
+UOdysseyVectorRoot::ClearSelection()
 {
-    for( std::list<FOdysseyVectorObject*>::iterator it = mSelectedObjectList.begin(); it != mSelectedObjectList.end(); ++it )
+    for( std::list<UOdysseyVectorObject*>::iterator it = mSelectedObjectList.begin(); it != mSelectedObjectList.end(); ++it )
     {
-        FOdysseyVectorObject *obj = (*it);
+        UOdysseyVectorObject *obj = (*it);
 
         obj->SetIsSelected ( false );
     }
@@ -24,7 +19,7 @@ FOdysseyVectorRoot::ClearSelection()
 }
 
 void
-FOdysseyVectorRoot::Select( FOdysseyVectorObject& iVecObj )
+UOdysseyVectorRoot::Select( UOdysseyVectorObject& iVecObj )
 {
     if( std::find( mSelectedObjectList.begin(), mSelectedObjectList.end(), &iVecObj ) == mSelectedObjectList.end() )
     {
@@ -34,20 +29,24 @@ FOdysseyVectorRoot::Select( FOdysseyVectorObject& iVecObj )
     }
 }
 
-FOdysseyVectorObject*
-FOdysseyVectorRoot::CopyShape()
+UOdysseyVectorObject*
+UOdysseyVectorRoot::CopyShape()
 {
-    return new FOdysseyVectorRoot( mName );
+    UOdysseyVectorRoot* rootCopy = NewObject<UOdysseyVectorRoot>();
+
+    rootCopy->Init( mName );
+
+    return Cast<UOdysseyVectorObject>(rootCopy);
 }
 
 void
-FOdysseyVectorRoot::Select( double iX, double iY, double iRadius )
+UOdysseyVectorRoot::Select( double iX, double iY, double iRadius )
 {
-    FOdysseyVectorObject* pickedObject = RecursiveSelect( *this, iX, iY, iRadius );
+    UOdysseyVectorObject* pickedObject = RecursiveSelect( *this, iX, iY, iRadius );
 
     if ( pickedObject )
     {
-        if( typeid ( *pickedObject ) == typeid ( FOdysseyVectorLoop ) )
+        if( pickedObject->GetClass() == UOdysseyVectorLoop::StaticClass() )
         {
             pickedObject = pickedObject->GetParent();
         }
@@ -56,21 +55,21 @@ FOdysseyVectorRoot::Select( double iX, double iY, double iRadius )
     }
 }
 
-FOdysseyVectorGroup*
-FOdysseyVectorRoot::GroupSelectdObjects( )
+UOdysseyVectorGroup*
+UOdysseyVectorRoot::GroupSelectdObjects( )
 {
-    FOdysseyVectorGroup* group = new FOdysseyVectorGroup();
+    UOdysseyVectorGroup* group = NewObject<UOdysseyVectorGroup>();
     BLPoint averageTranslation = { 0.0f, 0.0f };
     BLContext& blctx = FOdysseyVectorEngine::GetBLContext();
     // We don't use the mSelectedObjectList because we want to keep the same order
     // and we work on a copy to be able to delete the objects while iterating
-    std::list<FOdysseyVectorObject*> objectList = mChildrenList;
+    std::list<UOdysseyVectorObject*> objectList = mChildrenList;
 
     if ( mSelectedObjectList.size() )
     {
-        for( std::list<FOdysseyVectorObject*>::iterator it = mSelectedObjectList.begin(); it != mSelectedObjectList.end(); ++it )
+        for( std::list<UOdysseyVectorObject*>::iterator it = mSelectedObjectList.begin(); it != mSelectedObjectList.end(); ++it )
         {
-            FOdysseyVectorObject *obj = (*it);
+            UOdysseyVectorObject *obj = (*it);
             BLPoint origin = obj->GetWorldMatrix().mapPoint( 0.0f, 0.0f );
 
             averageTranslation.x += origin.x;
@@ -90,7 +89,7 @@ FOdysseyVectorRoot::GroupSelectdObjects( )
 
     while( objectList.size () )
     {
-        FOdysseyVectorObject *obj = objectList.back();
+        UOdysseyVectorObject *obj = objectList.back();
 
         if ( obj->IsSelected() == true )
         {
@@ -109,13 +108,13 @@ FOdysseyVectorRoot::GroupSelectdObjects( )
 }
 
 void
-FOdysseyVectorRoot::DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags )
+UOdysseyVectorRoot::DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
     BLContext& blctx = FOdysseyVectorEngine::GetBLContext();
 
-    for( std::list<FOdysseyVectorObject*>::iterator it = mSelectedObjectList.begin(); it != mSelectedObjectList.end(); ++it )
+    for( std::list<UOdysseyVectorObject*>::iterator it = mSelectedObjectList.begin(); it != mSelectedObjectList.end(); ++it )
     {
-        FOdysseyVectorObject *obj = (*it);
+        UOdysseyVectorObject *obj = (*it);
         ::ULIS::FRectD bbox = obj->GetBBox( false );
 
         blctx.save();
@@ -126,17 +125,17 @@ FOdysseyVectorRoot::DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags )
 }
 
 void
-FOdysseyVectorRoot::InvalidateObject( FOdysseyVectorObject* iObject )
+UOdysseyVectorRoot::InvalidateObject( UOdysseyVectorObject* iObject )
 {
     mInvalidatedObjectList.push_back( iObject );
 }
 
 void
-FOdysseyVectorRoot::UpdateShape()
+UOdysseyVectorRoot::UpdateShape()
 {
-    for( std::list<FOdysseyVectorObject*>::iterator it = mInvalidatedObjectList.begin(); it != mInvalidatedObjectList.end(); ++it )
+    for( std::list<UOdysseyVectorObject*>::iterator it = mInvalidatedObjectList.begin(); it != mInvalidatedObjectList.end(); ++it )
     {
-        FOdysseyVectorObject *obj = (*it);
+        UOdysseyVectorObject *obj = (*it);
 
         obj->Update();
     }
@@ -145,9 +144,9 @@ FOdysseyVectorRoot::UpdateShape()
 }
 
 void
-FOdysseyVectorRoot::Bucket( double iX, double iY, uint32 iFillColor )
+UOdysseyVectorRoot::Bucket( double iX, double iY, uint32 iFillColor )
 {
-    FOdysseyVectorObject* pickedObject = RecursiveSelect( *this, iX, iY, 1.0f );
+    UOdysseyVectorObject* pickedObject = RecursiveSelect( *this, iX, iY, 1.0f );
 
     if ( pickedObject )
     {
@@ -156,8 +155,8 @@ FOdysseyVectorRoot::Bucket( double iX, double iY, uint32 iFillColor )
     }
 }
 
-FOdysseyVectorObject*
-FOdysseyVectorRoot::GetLastSelected()
+UOdysseyVectorObject*
+UOdysseyVectorRoot::GetLastSelected()
 {
     if ( mSelectedObjectList.empty() == true )
     {
@@ -167,14 +166,14 @@ FOdysseyVectorRoot::GetLastSelected()
     return mSelectedObjectList.back();
 }
 
-FOdysseyVectorObject*
-FOdysseyVectorRoot::RecursiveSelect( FOdysseyVectorObject& iObj, double iX, double iY, double iRadius )
+UOdysseyVectorObject*
+UOdysseyVectorRoot::RecursiveSelect( UOdysseyVectorObject& iObj, double iX, double iY, double iRadius )
 {
     BLMatrix2D inverseLocalMatrix;
     BLPoint localCoords;
     BLPoint localSize;
     double localRadius;
-    FOdysseyVectorObject* pickedObject = nullptr;
+    UOdysseyVectorObject* pickedObject = nullptr;
 
     BLMatrix2D::invert( inverseLocalMatrix, iObj.GetLocalMatrix() );
 
@@ -183,10 +182,10 @@ FOdysseyVectorRoot::RecursiveSelect( FOdysseyVectorObject& iObj, double iX, doub
 
     localRadius = localSize.x - localCoords.x;
 
-    for( std::list<FOdysseyVectorObject*>::iterator it = iObj.GetChildrenList().begin(); it != iObj.GetChildrenList().end(); ++it )
+    for( std::list<UOdysseyVectorObject*>::iterator it = iObj.GetChildrenList().begin(); it != iObj.GetChildrenList().end(); ++it )
     {
-        FOdysseyVectorObject *child = (*it);
-        FOdysseyVectorObject* pickedChild = nullptr;
+        UOdysseyVectorObject *child = (*it);
+        UOdysseyVectorObject* pickedChild = nullptr;
 
         pickedChild = RecursiveSelect( *child, localCoords.x, localCoords.y, localRadius );
 

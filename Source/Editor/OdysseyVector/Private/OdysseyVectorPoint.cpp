@@ -194,13 +194,13 @@ FOdysseyVectorPoint::HasSegment( FOdysseyVectorSegment& iSegment )
 }
 
 void
-FOdysseyVectorPoint::AddLoop( FOdysseyVectorLoop* iLoop )
+FOdysseyVectorPoint::AddLoop( UOdysseyVectorLoop* iLoop )
 {
     mLoopList.push_back( iLoop );
 }
 
 void
-FOdysseyVectorPoint::RemoveLoop( FOdysseyVectorLoop* iLoop )
+FOdysseyVectorPoint::RemoveLoop( UOdysseyVectorLoop* iLoop )
 {
     mLoopList.remove( iLoop );
 }
@@ -208,9 +208,9 @@ FOdysseyVectorPoint::RemoveLoop( FOdysseyVectorLoop* iLoop )
 void
 FOdysseyVectorPoint::InvalidateLoops()
 {
-    for( std::list<FOdysseyVectorLoop*>::iterator it = mLoopList.begin(); it != mLoopList.end(); ++it )
+    for( std::list<UOdysseyVectorLoop*>::iterator it = mLoopList.begin(); it != mLoopList.end(); ++it )
     {
-        FOdysseyVectorLoop* loop = static_cast<FOdysseyVectorLoop*>(*it);
+        UOdysseyVectorLoop* loop = static_cast<UOdysseyVectorLoop*>(*it);
 
         loop->Invalidate();
     }
@@ -321,7 +321,9 @@ bool TREENODESEEKSECTION( TREENODE* node, FOdysseyVectorSection* section )
         {
             return true;
         }
-    } while ( node = node->mParent );
+
+        node = node->mParent;
+    } while ( node );
 
     return false;
 }
@@ -356,20 +358,22 @@ FOdysseyVectorPoint::March()
 
                 if ( nextPoint == this )
                 {
-                    FOdysseyVectorPath& path = nextNode->mSection->GetSegment().GetPath();
+                    UOdysseyVectorPath& path = nextNode->mSection->GetSegment().GetPath();
                     std::list<FOdysseyVectorPoint*> loopPointList;
                     std::list<FOdysseyVectorSection*> loopSectionList;
                     uint64 loopID;
 
                     TREENODETOLIST ( nextNode, loopPointList, loopSectionList );
 printf("loop detected\n");
-                    loopID = FOdysseyVectorLoop::GenerateID( loopSectionList );
+                    loopID = UOdysseyVectorLoop::GenerateID( loopSectionList );
 
                     if ( path.GetLoopByID( loopID ) == nullptr )
                     {
                         if ( IsClosestSection ( *loopSectionList.front(), *loopSectionList.back() ) == true )
                         {
-                            FOdysseyVectorLoop *loop = new FOdysseyVectorLoop ( path, loopID, *nextNode->mPoint, loopPointList, loopSectionList );
+                            UOdysseyVectorLoop *loop = NewObject<UOdysseyVectorLoop>();
+
+                            loop->Init( &path, loopID, nextNode->mPoint, loopPointList, loopSectionList );
 
                             path.AddLoop( loop );
                         }

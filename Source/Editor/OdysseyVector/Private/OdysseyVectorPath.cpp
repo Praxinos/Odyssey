@@ -1,29 +1,18 @@
 #include "OdysseyVectorPath.h"
 
-FOdysseyVectorPath::~FOdysseyVectorPath()
+void UOdysseyVectorPath::Init( std::string iName )
 {
-}
-
-FOdysseyVectorPath::FOdysseyVectorPath()
-    : FOdysseyVectorObject()
-{
-
-}
-
-FOdysseyVectorPath::FOdysseyVectorPath( std::string iName )
-    : FOdysseyVectorObject( iName )
-{
-
+    SetName( iName );
 }
 
 std::list<FOdysseyVectorPoint*>&
-FOdysseyVectorPath::GetSelectedPointList()
+UOdysseyVectorPath::GetSelectedPointList()
 {
     return mSelectedPointList;
 }
 
 FOdysseyVectorSegment*
-FOdysseyVectorPath::AppendPoint( FOdysseyVectorPoint* iPoint, FOdysseyVectorPoint* iPreviousPoint )
+UOdysseyVectorPath::AppendPoint( FOdysseyVectorPoint* iPoint, FOdysseyVectorPoint* iPreviousPoint )
 {
     mPointList.push_back( iPoint );
 
@@ -39,7 +28,7 @@ FOdysseyVectorPath::AppendPoint( FOdysseyVectorPoint* iPoint, FOdysseyVectorPoin
 }
 
 void
-FOdysseyVectorPath::AddLoop( FOdysseyVectorLoop* iLoop )
+UOdysseyVectorPath::AddLoop( UOdysseyVectorLoop* iLoop )
 {
     mLoopList.push_back( iLoop );
 
@@ -51,7 +40,7 @@ FOdysseyVectorPath::AddLoop( FOdysseyVectorLoop* iLoop )
 }
 
 void
-FOdysseyVectorPath::RemoveLoop( FOdysseyVectorLoop* iLoop )
+UOdysseyVectorPath::RemoveLoop( UOdysseyVectorLoop* iLoop )
 {
     mLoopList.remove( iLoop );
 
@@ -62,14 +51,14 @@ FOdysseyVectorPath::RemoveLoop( FOdysseyVectorLoop* iLoop )
     printf("%s: Removing loop\n", __func__ );
 }
 
-FOdysseyVectorObject*
-FOdysseyVectorPath::CopyShape()
+UOdysseyVectorObject*
+UOdysseyVectorPath::CopyShape()
 {
     return nullptr;
 }
 
 void
-FOdysseyVectorPath::UpdateBBox()
+UOdysseyVectorPath::UpdateBBox()
 {
     double x1 = DBL_MAX, y1 = DBL_MAX, x2 = -DBL_MAX, y2 = -DBL_MAX;
 
@@ -89,7 +78,7 @@ FOdysseyVectorPath::UpdateBBox()
 }
 
 void
-FOdysseyVectorPath::UpdateShape()
+UOdysseyVectorPath::UpdateShape()
 {
     // update segments
     for ( std::list<FOdysseyVectorSegment*>::iterator it = mInvalidatedSegmentList.begin(); it != mInvalidatedSegmentList.end(); ++it )
@@ -103,9 +92,9 @@ FOdysseyVectorPath::UpdateShape()
 
     // then update Loops
 
-    for ( std::list<FOdysseyVectorLoop*>::iterator it = mInvalidatedLoopList.begin(); it != mInvalidatedLoopList.end(); ++it )
+    for ( std::list<UOdysseyVectorLoop*>::iterator it = mInvalidatedLoopList.begin(); it != mInvalidatedLoopList.end(); ++it )
     {
-        FOdysseyVectorLoop* loop = static_cast<FOdysseyVectorLoop*>(*it);
+        UOdysseyVectorLoop* loop = static_cast<UOdysseyVectorLoop*>(*it);
 
         loop->Update();
     }
@@ -116,7 +105,7 @@ FOdysseyVectorPath::UpdateShape()
 }
 
 void
-FOdysseyVectorPath::InvalidateSegment( FOdysseyVectorSegment* iSegment )
+UOdysseyVectorPath::InvalidateSegment( FOdysseyVectorSegment* iSegment )
 {
     mInvalidatedSegmentList.push_back( iSegment );
 
@@ -124,7 +113,7 @@ FOdysseyVectorPath::InvalidateSegment( FOdysseyVectorSegment* iSegment )
 }
 
 void
-FOdysseyVectorPath::InvalidateLoop( FOdysseyVectorLoop* iLoop )
+UOdysseyVectorPath::InvalidateLoop( UOdysseyVectorLoop* iLoop )
 {
     mInvalidatedLoopList.push_back ( iLoop );
 
@@ -132,11 +121,11 @@ FOdysseyVectorPath::InvalidateLoop( FOdysseyVectorLoop* iLoop )
 }
 
 void
-FOdysseyVectorPath::DrawLoops( ::ULIS::FRectD &iRoi, uint64 iFlags )
+UOdysseyVectorPath::DrawLoops( ::ULIS::FRectD &iRoi, uint64 iFlags )
 {
-    for( std::list<FOdysseyVectorLoop*>::iterator it = mLoopList.begin(); it != mLoopList.end(); ++it )
+    for( std::list<UOdysseyVectorLoop*>::iterator it = mLoopList.begin(); it != mLoopList.end(); ++it )
     {
-        FOdysseyVectorLoop* loop = static_cast<FOdysseyVectorLoop*>(*it);
+        UOdysseyVectorLoop* loop = static_cast<UOdysseyVectorLoop*>(*it);
 
         /*if ( loop->IsFilled() == true )
         {*/
@@ -145,12 +134,12 @@ FOdysseyVectorPath::DrawLoops( ::ULIS::FRectD &iRoi, uint64 iFlags )
     }
 }
 
-FOdysseyVectorObject*
-FOdysseyVectorPath::PickLoops( double iX, double iY, double iRadius )
+UOdysseyVectorObject*
+UOdysseyVectorPath::PickLoops( double iX, double iY, double iRadius )
 {
-    for( std::list<FOdysseyVectorLoop*>::iterator it = mLoopList.begin(); it != mLoopList.end(); ++it )
+    for( std::list<UOdysseyVectorLoop*>::iterator it = mLoopList.begin(); it != mLoopList.end(); ++it )
     {
-        FOdysseyVectorLoop* loop = static_cast<FOdysseyVectorLoop*>(*it);
+        UOdysseyVectorLoop* loop = static_cast<UOdysseyVectorLoop*>(*it);
 
         if ( loop->PickShape( iX, iY, iRadius ) )
         {
@@ -161,12 +150,12 @@ FOdysseyVectorPath::PickLoops( double iX, double iY, double iRadius )
     return nullptr;
 }
 
-FOdysseyVectorLoop*
-FOdysseyVectorPath::GetLoopByID( uint64 iID )
+UOdysseyVectorLoop*
+UOdysseyVectorPath::GetLoopByID( uint64 iID )
 {
-    for( std::list<FOdysseyVectorLoop*>::iterator it = mLoopList.begin(); it != mLoopList.end(); ++it )
+    for( std::list<UOdysseyVectorLoop*>::iterator it = mLoopList.begin(); it != mLoopList.end(); ++it )
     {
-        FOdysseyVectorLoop* loop = static_cast<FOdysseyVectorLoop*>(*it);
+        UOdysseyVectorLoop* loop = static_cast<UOdysseyVectorLoop*>(*it);
 
         if ( iID == loop->GetID() )
         {
@@ -178,13 +167,13 @@ FOdysseyVectorPath::GetLoopByID( uint64 iID )
 }
 
 void
-FOdysseyVectorPath::AddPoint( FOdysseyVectorPoint* iPoint )
+UOdysseyVectorPath::AddPoint( FOdysseyVectorPoint* iPoint )
 {
     mPointList.push_back( iPoint );
 }
 
 void
-FOdysseyVectorPath::AddSegment( FOdysseyVectorSegment* iSegment )
+UOdysseyVectorPath::AddSegment( FOdysseyVectorSegment* iSegment )
 {
     mSegmentList.push_back( iSegment );
 
@@ -193,7 +182,7 @@ FOdysseyVectorPath::AddSegment( FOdysseyVectorSegment* iSegment )
 }
 
 void
-FOdysseyVectorPath::Clear()
+UOdysseyVectorPath::Clear()
 {
     for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != --mSegmentList.end(); ++it )
     {
@@ -208,7 +197,7 @@ FOdysseyVectorPath::Clear()
 }
 
 void
-FOdysseyVectorPath::RemoveSegment( FOdysseyVectorSegment* iSegment )
+UOdysseyVectorPath::RemoveSegment( FOdysseyVectorSegment* iSegment )
 {
     mSegmentList.remove( iSegment );
 
@@ -217,13 +206,13 @@ FOdysseyVectorPath::RemoveSegment( FOdysseyVectorSegment* iSegment )
 }
 
 std::list<FOdysseyVectorSegment*>&
-FOdysseyVectorPath::GetSegmentList()
+UOdysseyVectorPath::GetSegmentList()
 {
     return mSegmentList;
 }
 
 FOdysseyVectorSegment*
-FOdysseyVectorPath::GetLastSegment()
+UOdysseyVectorPath::GetLastSegment()
 {
     if( mSegmentList.size() == 0 ) return nullptr;
 
@@ -231,7 +220,7 @@ FOdysseyVectorPath::GetLastSegment()
 }
 
 FOdysseyVectorSegment*
-FOdysseyVectorPath::GetFirstSegment()
+UOdysseyVectorPath::GetFirstSegment()
 {
     if( mSegmentList.size() == 0 ) return nullptr;
 
@@ -239,7 +228,7 @@ FOdysseyVectorPath::GetFirstSegment()
 }
 
 FOdysseyVectorPoint*
-FOdysseyVectorPath::GetLastPoint()
+UOdysseyVectorPath::GetLastPoint()
 {
     if( mPointList.size() == 0 ) return nullptr;
 
@@ -247,7 +236,7 @@ FOdysseyVectorPath::GetLastPoint()
 }
 
 bool
-FOdysseyVectorPath::IsLoop()
+UOdysseyVectorPath::IsLoop()
 {
     if ( mPointList.size() )
     {
@@ -261,7 +250,7 @@ FOdysseyVectorPath::IsLoop()
 }
 
 FOdysseyVectorPoint*
-FOdysseyVectorPath::GetFirstPoint()
+UOdysseyVectorPath::GetFirstPoint()
 {
     if( mPointList.size() == 0 ) return nullptr;
 
@@ -269,7 +258,7 @@ FOdysseyVectorPath::GetFirstPoint()
 }
 
 void
-FOdysseyVectorPath::DrawStructure( ::ULIS::FRectD& iRoi )
+UOdysseyVectorPath::DrawStructure( ::ULIS::FRectD& iRoi )
 {
     BLContext& blctx = FOdysseyVectorEngine::GetBLContext();
 
@@ -285,7 +274,7 @@ FOdysseyVectorPath::DrawStructure( ::ULIS::FRectD& iRoi )
 }
 
 void
-FOdysseyVectorPath::DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags )
+UOdysseyVectorPath::DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
     for(std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it)
     {

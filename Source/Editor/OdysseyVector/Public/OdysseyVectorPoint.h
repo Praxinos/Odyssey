@@ -5,7 +5,7 @@
 #include <Image/Block.h>
 
 class FOdysseyVectorSegment;
-class FOdysseyVectorLoop;
+class UOdysseyVectorLoop;
 class FOdysseyVectorSection;
 
 class FOdysseyVectorPoint
@@ -16,7 +16,7 @@ class FOdysseyVectorPoint
         ::ULIS::FVec2D mCoords;
         std::list<FOdysseyVectorSegment*> mSegmentList;
         std::list<FOdysseyVectorSection*> mSectionList;
-        std::list<FOdysseyVectorLoop*> mLoopList;
+        std::list<UOdysseyVectorLoop*> mLoopList;
         double mRadius;
 
     public:
@@ -52,8 +52,8 @@ class FOdysseyVectorPoint
         void InvalidateSegments();
         void March();
         bool HasSegment( FOdysseyVectorSegment& iSegment );
-        void AddLoop( FOdysseyVectorLoop* iLoop );
-        void RemoveLoop( FOdysseyVectorLoop* iLoop );
+        void AddLoop( UOdysseyVectorLoop* iLoop );
+        void RemoveLoop( UOdysseyVectorLoop* iLoop );
         void InvalidateLoops();
         std::list<FOdysseyVectorSection*>& GetSectionList();
         bool IsClosestSection( FOdysseyVectorSection& iStartSection

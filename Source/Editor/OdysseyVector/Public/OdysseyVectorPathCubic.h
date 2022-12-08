@@ -1,5 +1,7 @@
 #pragma once
 
+#include "CoreMinimal.h"
+
 #include <blend2d.h>
 #include <Core/Core.h>
 #include <Image/Block.h>
@@ -7,8 +9,14 @@
 #include "OdysseyVectorSegment.h"
 #include "OdysseyVectorPath.h"
 
-class FOdysseyVectorPathCubic: public FOdysseyVectorPath
+#include "OdysseyVectorPathCubic.generated.h"
+
+UCLASS()
+class UOdysseyVectorPathCubic: public UOdysseyVectorPath
 {
+    public:
+        GENERATED_BODY()
+
     private:
         static const uint32 JOINT_TYPE_NONE   = 0;
         static const uint32 JOINT_TYPE_RADIAL = 1;
@@ -22,13 +30,13 @@ class FOdysseyVectorPathCubic: public FOdysseyVectorPath
         uint32 mJointType;
 
     protected:
-        FOdysseyVectorObject* CopyShape();
+        UOdysseyVectorObject* CopyShape();
         void DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags );
-        FOdysseyVectorObject* PickShape( double iX, double iY, double iRadius );
+        UOdysseyVectorObject* PickShape( double iX, double iY, double iRadius );
 
     public:
-        FOdysseyVectorPathCubic();
-        FOdysseyVectorPathCubic( std::string iName );
+        UOdysseyVectorPathCubic();
+        void Init( std::string iName );
         FOdysseyVectorSegmentCubic* AppendPoint( FOdysseyVectorPointCubic* iPoint, bool iConnect, bool iBuildSegments );
 
         bool PickPoint ( double iX, double iY, double iRadius, uint64 iSelectionFlags );
@@ -40,7 +48,7 @@ class FOdysseyVectorPathCubic: public FOdysseyVectorPath
         void setJointMiter();
         void setJointNone();
         void Fill( ::ULIS::FRectD& iRoi );
-        void Merge( FOdysseyVectorPathCubic& iCubicPath );
+        void Merge( UOdysseyVectorPathCubic& iCubicPath );
         void DrawShapeVariable( ::ULIS::FRectD& iRoi, uint64 iFlags );
 
         void Mirror( bool iMirrorX, bool iMirrorY );
