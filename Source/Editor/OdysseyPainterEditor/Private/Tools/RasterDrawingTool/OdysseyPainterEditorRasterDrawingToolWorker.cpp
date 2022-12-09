@@ -3,30 +3,30 @@
 
 #pragma once
 
-#include "Tools/RasterDrawingTool/OdysseyRasterDrawingToolWorker.h"
+#include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingToolWorker.h"
 
 #include "CoreMinimal.h"
 
 #include <functional>
 
-FOdysseyRasterDrawingToolWorker::~FOdysseyRasterDrawingToolWorker()
+FOdysseyPainterEditorRasterDrawingToolWorker::~FOdysseyPainterEditorRasterDrawingToolWorker()
 {
 }
 
-FOdysseyRasterDrawingToolWorker::FOdysseyRasterDrawingToolWorker()
+FOdysseyPainterEditorRasterDrawingToolWorker::FOdysseyPainterEditorRasterDrawingToolWorker()
     : mQueue()
 {
 }
 
 void
-FOdysseyRasterDrawingToolWorker::Push(tFunction iFunction)
+FOdysseyPainterEditorRasterDrawingToolWorker::Push(tFunction iFunction)
 {
     //mQueue is ThreadSafe
     mQueue.Enqueue(iFunction);
 }
 
 void
-FOdysseyRasterDrawingToolWorker::Execute(int iNum)
+FOdysseyPainterEditorRasterDrawingToolWorker::Execute(int iNum)
 {    
     tFunction func;
     for( int i = 0; !mQueue.IsEmpty() && (i < iNum || iNum <= 0); i++)
@@ -38,7 +38,7 @@ FOdysseyRasterDrawingToolWorker::Execute(int iNum)
 }
 
 void
-FOdysseyRasterDrawingToolWorker::ExecuteFor(long long iMaxTimeMs)
+FOdysseyPainterEditorRasterDrawingToolWorker::ExecuteFor(long long iMaxTimeMs)
 {
     auto start_time = std::chrono::steady_clock::now();
     long long delta = 0;
@@ -56,13 +56,13 @@ FOdysseyRasterDrawingToolWorker::ExecuteFor(long long iMaxTimeMs)
 }
 
 void
-FOdysseyRasterDrawingToolWorker::Finish()
+FOdysseyPainterEditorRasterDrawingToolWorker::Finish()
 {
     Execute(0);
 }
 
 void
-FOdysseyRasterDrawingToolWorker::Clear()
+FOdysseyPainterEditorRasterDrawingToolWorker::Clear()
 {
     mQueue.Empty();
 }

@@ -50,6 +50,7 @@ UOdysseyBrushAssetBase::UOdysseyBrushAssetBase()
 
     //Internal
     , mIsDrawing(false)
+    , mEditedBlock(nullptr)
 {
     ::ULIS::FContext::MarkEventFinished(&mEvent);
 }

@@ -7,7 +7,7 @@
 #include "OdysseyPainterEditorViewportTab.h"
 #include "SOdysseySurfaceViewport.h"
 
-#include "Tools/RasterDrawingTool/OdysseyRasterDrawingTool.h"
+#include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
 #include "FreehandShape/OdysseyFreehandShape.h"
 
 //---
@@ -56,7 +56,7 @@ FOdysseyPainterEditorBrushContext::Pan()
 float
 FOdysseyPainterEditorBrushContext::GetStep()
 {
-    UOdysseyRasterDrawingTool* drawingTool = Cast<UOdysseyRasterDrawingTool>(mEditor->GetSelectedTool());
+    UOdysseyPainterEditorRasterDrawingTool* drawingTool = Cast<UOdysseyPainterEditorRasterDrawingTool>(mEditor->GetSelectedTool());
     if (!drawingTool)
         return 0.f;
 

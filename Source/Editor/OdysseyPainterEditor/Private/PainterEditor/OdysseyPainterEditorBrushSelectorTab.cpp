@@ -6,7 +6,7 @@
 #include "OdysseyPainterEditor.h"
 #include "SOdysseyPaintModifiers.h"
 #include "Models/OdysseyPainterEditorCommands.h"
-#include "Tools/RasterDrawingTool/Widgets/SOdysseyRasterDrawingToolBrushSelector.h"
+#include "Tools/RasterDrawingTool/Widgets/SOdysseyPainterEditorRasterDrawingToolBrushSelector.h"
 #include "ObjectEditorUtils.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorBrushSelectorTab"
@@ -40,7 +40,7 @@ FOdysseyPainterEditorBrushSelectorTab::CreateWidget()
             SNullWidget::NullWidget
         ];
 
-    SetWidgetForTool(mEditor->GetRasterDrawingTool(), SNew(SOdysseyRasterDrawingToolBrushSelector).Tool(mEditor->GetRasterDrawingTool()));
+    SetWidgetForTool(mEditor->GetRasterDrawingTool(), SNew(SOdysseyPainterEditorRasterDrawingToolBrushSelector).Tool(mEditor->GetRasterDrawingTool()));
 
     return mWidgetSwitcher;
 }

@@ -8,6 +8,8 @@
 #include "OdysseyTextureEditorGUI.h"
 #include "OdysseyTextureAssetUserData.h"
 #include "LayerStack/OdysseyTextureLayerStack.h"
+#include "Tools/RasterDrawingTool/OdysseyTextureEditorRasterDrawingTool.h"
+#include "Tools/PaintBucketTool/OdysseyTextureEditorPaintBucketTool.h"
 
 /**
  * Implements an Editor for textures.
@@ -22,6 +24,11 @@ public:
     FOdysseyTextureEditor(UTexture2D* iTexture);
 
 public:
+    virtual void InitTools() override;
+    virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
+    virtual void ExtendMenu(FToolMenuOwner iOwner, FName iMenuName) override;
+
+public:
     // Getters
 	virtual UTexture2D*				    Texture() const;
     virtual UOdysseyTextureLayerStack*	LayerStack() const;
@@ -29,6 +36,9 @@ public:
     
     virtual void				        SetTexture(UTexture2D* iTexture);
     UOdysseyTextureAssetUserData*       TextureUserData() const;
+
+    virtual UOdysseyTextureEditorRasterDrawingTool* GetRasterDrawingTool() const override;
+    virtual UOdysseyTextureEditorPaintBucketTool* GetPaintBucketTool() const override;
 
 public:
     // Overrides
@@ -40,27 +50,13 @@ public:
     virtual TSharedPtr<FWorkspaceItem> RegisterTabSpawners( const TSharedRef<class FTabManager>& iTabManager ) override;
 
 protected:
-    // Listeners
+    // FGCObject implementation
+    virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
 
-    //LayerStack
-    virtual void OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStack);
-    virtual void OnLayerRenderImageChanged(UOdysseyTextureLayer* iLayer, const TArray<::ULIS::FRectI>& iRects);
-    virtual void OnLayerIsLockedChanged(UOdysseyLayer* iLayer);
-    virtual void OnLayerIsActivatedChanged(UOdysseyLayer* iLayer);
-
-    static void OnEditedBlockInvalidated(const ::ULIS::FBlock* iBlock, const ::ULIS::FRectI* iRects, const uint32 iNumRects, void* iInfo);
-
-    //Tool
-    virtual void SetSelectedToolDrawingLocked();
-
-    //Paint Engine
-    virtual void OnPaintEngineCommit(const TArray<::ULIS::FRectI>& iChangedTiles);
-    virtual FOdysseyBlendParameters OnPaintEnginePreUpdate(const FOdysseyBlendParameters& iBlendParameters);
-    
 private:
     UTexture2D* mTexture;
 	TSharedPtr<FOdysseyTextureEditorGUI> mGUI;
-
-    //TODO: should be in the paintTool
-    ::ULIS::FBlock* mEditedBlock;
+    
+    UOdysseyTextureEditorRasterDrawingTool* mRasterDrawingTool;
+    UOdysseyTextureEditorPaintBucketTool* mPaintBucketTool;
 };

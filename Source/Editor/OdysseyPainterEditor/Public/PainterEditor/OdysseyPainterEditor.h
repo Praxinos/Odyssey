@@ -5,10 +5,10 @@
 
 #include "OdysseyEditor.h"
 #include "OdysseyPainterEditorGUI.h"
-#include "OdysseyPaintEngine.h"
+#include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
+#include "Tools/PaintBucketTool/OdysseyPainterEditorPaintBucketTool.h"
 #include <ULIS>
 
-class FOdysseyPaintEngine;
 class FOdysseyHUDSystem;
 class IOdysseySurfaceEditable;
 class UOdysseyTool;
@@ -34,19 +34,20 @@ public:
     // Getters
     virtual FOdysseyPainterEditorGUI*                   GetGUI() = 0;
 
-    virtual FOdysseyPaintEngine&                        PaintEngine();
     virtual FOdysseyHUDSystem*                          HUDSystem() const;
 	virtual IOdysseySurfaceEditable*                    DisplaySurface() const = 0;
     virtual FOdysseyBrushColor&                         PaintColor();
     virtual UOdysseyTool*                               GetSelectedTool() const;
 
-    virtual class UOdysseyRasterDrawingTool*                  GetRasterDrawingTool() const;
-    virtual class UOdysseyPaintBucketTool*                    GetPaintBucketTool() const;
+    virtual UOdysseyPainterEditorRasterDrawingTool*                  GetRasterDrawingTool() const = 0;
+    virtual UOdysseyPainterEditorPaintBucketTool*                    GetPaintBucketTool() const = 0;
+
+    void ActivateDefaultTool();
 
 public:
     // Setters
-    void                         PaintColor(const FOdysseyBrushColor& iColor, bool iIsCommit);
-    void                         SetSelectedTool( UOdysseyTool* iSelectedTool );
+    void  PaintColor(const FOdysseyBrushColor& iColor, bool iIsCommit);
+    void  SetSelectedTool( UOdysseyTool* iSelectedTool );
 
 public:
     // Interface
@@ -56,24 +57,16 @@ public:
 protected:
     //Callbacks
     virtual void OnApplyOverrides(const TMap<FName, UObject*>& iOverrides);
-
-protected:
-    // FGCObject implementation
-    virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
     
     // FTickableEditorObject implementation
 	virtual void Tick(float DeltaTime) override;
 
 protected:
-    FOdysseyPaintEngine         mPaintEngine; //We declare a single PaintEngine which will be used for any brush we use
-    
     //Tools
     UOdysseyTool*               mSelectedTool;
+    TArray<UOdysseyTool*>       mTools;
 
     FOdysseyHUDSystem*              mHUDSystem;
     TArray<FOdysseyBrushContext*>   mBrushContexts;
     FOdysseyBrushColor              mPaintColor;
-
-    UOdysseyRasterDrawingTool*      mRasterDrawingTool;
-    UOdysseyPaintBucketTool*        mPaintBucketTool;
 };

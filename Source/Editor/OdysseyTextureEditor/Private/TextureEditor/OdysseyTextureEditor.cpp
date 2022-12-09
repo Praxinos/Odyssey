@@ -9,7 +9,6 @@
 #include "LayerStack/OdysseyTextureLayerImageRaster.h"
 #include "OdysseyPaintEngine.h"
 #include "OdysseyBlendParameters.h"
-#include "Tools/RasterDrawingTool/OdysseyRasterDrawingTool.h"
 
 
 #define LOCTEXT_NAMESPACE "OdysseyTextureEditor"
@@ -21,17 +20,12 @@
 FOdysseyTextureEditor::~FOdysseyTextureEditor()
 {
 	SetTexture(nullptr);
-	/*UOdysseyTextureAssetUserData* userData = TextureUserData();
-	if (userData)
-		userData->StopEdit();
-	mTexture = nullptr;*/
 }
 
 FOdysseyTextureEditor::FOdysseyTextureEditor() :
 	FOdysseyPainterEditor(),
 	mTexture(nullptr),
-	mGUI(nullptr),
-	mEditedBlock(nullptr)
+	mGUI(nullptr)
 {
 }
 
@@ -39,9 +33,44 @@ FOdysseyTextureEditor::FOdysseyTextureEditor(UTexture2D* iTexture) :
 	FOdysseyPainterEditor(),
 	mTexture(nullptr),
 	mGUI(nullptr),
-	mEditedBlock(nullptr)
+	mRasterDrawingTool(nullptr),
+	mPaintBucketTool(nullptr)
 {
 	SetTexture(iTexture);
+}
+
+//--------------------------------------------------------------------------------------
+//----------------------------------------------------------------------- Initialization
+
+void
+FOdysseyTextureEditor::InitTools()
+{
+	mRasterDrawingTool = NewObject<UOdysseyTextureEditorRasterDrawingTool>();
+	mPaintBucketTool = NewObject<UOdysseyTextureEditorPaintBucketTool>();
+
+	mRasterDrawingTool->SetEditor(this);
+	mPaintBucketTool->SetEditor(this);
+	mRasterDrawingTool->SetBrushContexts(mBrushContexts);
+
+	mTools.Add(mRasterDrawingTool);
+	mTools.Add(mPaintBucketTool);
+	//mTextureRasterDrawingTool->OnApplyOverridesDelegate().AddRaw(this, &FOdysseyPainterEditor::OnApplyOverrides);
+}
+
+void
+FOdysseyTextureEditor::BindShortcuts(FBaseToolkit* iToolkit)
+{
+	FOdysseyPainterEditor::BindShortcuts(iToolkit);
+	mRasterDrawingTool->BindShortcuts(iToolkit);
+	mPaintBucketTool->BindShortcuts(iToolkit);
+}
+
+void
+FOdysseyTextureEditor::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
+{
+	FOdysseyPainterEditor::ExtendMenu(iOwner, iMenuName);
+	mRasterDrawingTool->ExtendMenu(iOwner, iMenuName);
+	mPaintBucketTool->ExtendMenu(iOwner, iMenuName);
 }
 
 //--------------------------------------------------------------------------------------
@@ -50,23 +79,13 @@ FOdysseyTextureEditor::FOdysseyTextureEditor(UTexture2D* iTexture) :
 void
 FOdysseyTextureEditor::SetTexture(UTexture2D* iTexture)
 {
-	PaintEngine().Block(nullptr);
-	delete mEditedBlock;
-	mEditedBlock = nullptr;
-
-	//Should be managed by the tool
-	UOdysseyTextureLayerStack::OnCurrentLayerChanged().RemoveAll(this);
-	UOdysseyTextureLayer::OnRenderImageChanged().RemoveAll(this);
-	UOdysseyLayer::OnIsLockedChanged().RemoveAll(this);
-	UOdysseyLayer::OnIsActivatedChanged().RemoveAll(this);
-	PaintEngine().OnCommitDelegate().RemoveAll(this);
-	PaintEngine().OnPreUpdateDelegate().Unbind();
+	if (mSelectedTool)
+		mSelectedTool->Inactivate();
 
     //close userdata
 	UOdysseyTextureLayerStack* layerStack = LayerStack();
 	if ( layerStack )
 		layerStack->StopEdit();
-
 
 	//Set the texture
     mTexture = iTexture;
@@ -77,17 +96,10 @@ FOdysseyTextureEditor::SetTexture(UTexture2D* iTexture)
 	if ( layerStack )
 		layerStack->StartEdit();
 
-	
-	UOdysseyTextureLayerStack::OnCurrentLayerChanged().AddRaw(this, &FOdysseyTextureEditor::OnCurrentLayerChanged);
-	UOdysseyTextureLayer::OnRenderImageChanged().AddRaw(this, &FOdysseyTextureEditor::OnLayerRenderImageChanged);
-	UOdysseyLayer::OnIsLockedChanged().AddRaw(this, &FOdysseyTextureEditor::OnLayerIsLockedChanged);
-	UOdysseyLayer::OnIsActivatedChanged().AddRaw(this, &FOdysseyTextureEditor::OnLayerIsActivatedChanged);
-	PaintEngine().OnCommitDelegate().AddRaw(this, &FOdysseyTextureEditor::OnPaintEngineCommit);
-	PaintEngine().OnPreUpdateDelegate().BindRaw(this, &FOdysseyTextureEditor::OnPaintEnginePreUpdate);
-
-	OnCurrentLayerChanged(LayerStack());
-    //open userdata
-    //TextureChanged(); 
+	if ( mSelectedTool && mSelectedTool->IsActivable())
+		mSelectedTool->Activate();
+	else
+		ActivateDefaultTool();
 }
 
 UTexture2D*
@@ -135,6 +147,18 @@ FOdysseyTextureEditor::TextureUserData() const
     return userData;
 }
 
+UOdysseyTextureEditorRasterDrawingTool*
+FOdysseyTextureEditor::GetRasterDrawingTool() const
+{
+	return mRasterDrawingTool;
+}
+
+UOdysseyTextureEditorPaintBucketTool*
+FOdysseyTextureEditor::GetPaintBucketTool() const
+{
+	return mPaintBucketTool;
+}
+
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------- Overrides
 
@@ -162,196 +186,14 @@ FOdysseyTextureEditor::RegisterTabSpawners(const TSharedRef<class FTabManager>& 
 	return workspaceMenuCategory;
 }
 
-void
-FOdysseyTextureEditor::OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStack)
-{
-	if ( !iLayerStack )
-		return;
-
-	UOdysseyTextureLayerStack* layerstack = LayerStack();
-	if ( !layerstack || layerstack != iLayerStack )
-		return;
-
-	//Finalize the current Tool
-	PaintEngine().Block(nullptr);
-	delete mEditedBlock;
-	mEditedBlock = nullptr;
-
-	if ( !layerstack->CurrentLayer )
-		return;
-
-	//Define the new active tool based on the layer type
-	UOdysseyTextureLayerImageRaster* layerImageRaster = Cast<UOdysseyTextureLayerImageRaster>(layerstack->CurrentLayer.Get());
-	if ( !layerImageRaster )
-		return;
-
-	const ::ULIS::FBlock* block = layerImageRaster->GetBlock();
-	::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(block->Format());
-	mEditedBlock = new ::ULIS::FBlock(block->Width(), block->Height(), block->Format(), nullptr, ::ULIS::FOnInvalidBlock(&OnEditedBlockInvalidated, static_cast<void*>(this)));
-	ctx.Copy(
-		*block,
-		*mEditedBlock
-	);
-	ctx.Finish();
-
-	PaintEngine().Block(mEditedBlock);
-
-	SetSelectedToolDrawingLocked();
-}
+//--------------------------------------------------------------------------------------
+//------------------------------------------------------------- FGCObject implementation
 
 void
-FOdysseyTextureEditor::OnEditedBlockInvalidated(const ::ULIS::FBlock* iBlock, const ::ULIS::FRectI* iRects, const uint32 iNumRects, void* iInfo)
+FOdysseyTextureEditor::AddReferencedObjects(FReferenceCollector& Collector)
 {
-	//Indicate UObject system that we will change LayersHierarchy property
-	//(actually the block has already changed, but there no where else to call it before here and being sure that PostChangePropertyValue will be called after)
-
-	TArray<::ULIS::FRectI> rects(iRects, iNumRects);
-	FOdysseyTextureEditor* self = static_cast<FOdysseyTextureEditor*>(iInfo);
-
-	UOdysseyTextureLayerStack* layerstack = self->LayerStack();
-	if ( !layerstack )
-		return;
-
-	UOdysseyTextureLayerImageRaster* layerImageRaster = Cast<UOdysseyTextureLayerImageRaster>(layerstack->CurrentLayer.Get());
-	if ( layerImageRaster )
-		layerImageRaster->SetRenderBlockOverride(self->mEditedBlock);
-
-	for ( int i = 0; i < rects.Num(); i++ )
-		layerstack->RenderImage(self->DisplaySurface()->Block(), rects[i], rects[i].Position(), TArray<::ULIS::FEvent>());
-
-	if ( layerImageRaster )
-		layerImageRaster->SetRenderBlockOverride(nullptr);
-
-	::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(self->DisplaySurface()->Block()->Format());
-	ctx.Finish();
-
-	self->DisplaySurface()->Invalidate(rects);
+	FOdysseyPainterEditor::AddReferencedObjects(Collector);
+	Collector.AddReferencedObject(mRasterDrawingTool);
+	Collector.AddReferencedObject(mPaintBucketTool);
 }
-
-void
-FOdysseyTextureEditor::OnLayerRenderImageChanged(UOdysseyTextureLayer* iLayer, const TArray<::ULIS::FRectI>& iRects)
-{
-	UOdysseyTextureLayerStack* layerstack = LayerStack();
-	if ( !layerstack )
-		return;
-
-	//What comes under this line should be in directly in the raster painting tool
-	//Reset the editedBloock and PaintEngine (usefull when undoing)
-	if ( !layerstack->CurrentLayer || iLayer != layerstack->CurrentLayer )
-		return;
-
-	//Define the new active tool based on the layer type
-	UOdysseyTextureLayerImageRaster* layerImageRaster = Cast<UOdysseyTextureLayerImageRaster>(iLayer);
-	if ( !layerImageRaster )
-		return;
-
-	const ::ULIS::FBlock* block = layerImageRaster->GetBlock();
-	::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(block->Format());
-	for ( int i = 0; i < iRects.Num(); i++ )
-	{
-		ctx.Copy(
-			*block,
-			*mEditedBlock,
-			iRects[i],
-			iRects[i].Position()
-		);
-
-		//TODO: put this Finish() outside of this loop when we can be sure all the rects don't overlap
-		ctx.Finish();
-	}
-
-	PaintEngine().Reset();
-}
-
-void
-FOdysseyTextureEditor::OnLayerIsLockedChanged(UOdysseyLayer* iLayer)
-{
-	UOdysseyLayerStack* layerStack = LayerStack();
-	if ( !iLayer || !layerStack )
-		return;
-
-	if ( iLayer->GetLayerStack() != layerStack )
-		return;
-
-	SetSelectedToolDrawingLocked();
-}
-
-void
-FOdysseyTextureEditor::OnLayerIsActivatedChanged(UOdysseyLayer* iLayer)
-{
-	UOdysseyLayerStack* layerStack = LayerStack();
-	if ( !iLayer || !layerStack )
-		return;
-
-	if ( iLayer->GetLayerStack() != layerStack )
-		return;
-
-	SetSelectedToolDrawingLocked();
-}
-
-void
-FOdysseyTextureEditor::SetSelectedToolDrawingLocked()
-{
-	UOdysseyTextureLayerStack* layerstack = LayerStack();
-	if ( !layerstack )
-		return;
-
-	if ( !layerstack->CurrentLayer )
-		return;
-
-	UOdysseyRasterDrawingTool* drawingTool = Cast<UOdysseyRasterDrawingTool>(mSelectedTool);
-	if ( !drawingTool )
-		return;
-
-	bool isActive = UOdysseyLayerFunctionLibrary::IsLayerActivatedInStack(layerstack->CurrentLayer.Get());
-	bool isLocked = UOdysseyLayerFunctionLibrary::IsLayerLockedInStack(layerstack->CurrentLayer.Get());
-	drawingTool->IsDrawingLocked(!isActive || isLocked);
-}
-
-void
-FOdysseyTextureEditor::OnPaintEngineCommit(const TArray<::ULIS::FRectI>& iChangedTiles)
-{
-	UOdysseyTextureLayerStack* layerstack = LayerStack();
-	if ( !layerstack )
-		return;
-
-	if ( iChangedTiles.Num() <= 0 )
-		return;
-
-	UOdysseyTextureLayerImageRaster* layer = Cast<UOdysseyTextureLayerImageRaster>(layerstack->CurrentLayer.Get());
-	if ( !layer )
-		return;
-
-	GEditor->BeginTransaction(TEXT("PaintEngine"), LOCTEXT("OnPaintStroke", "Paint Stroke"), nullptr);
-
-	layer->UpdateBlock(*mEditedBlock, iChangedTiles, ::ULIS::FVec2F(0), TArray<::ULIS::FEvent>());
-
-	GEditor->EndTransaction();
-}
-
-FOdysseyBlendParameters
-FOdysseyTextureEditor::OnPaintEnginePreUpdate(const FOdysseyBlendParameters& iBlendParameters)
-{
-	FOdysseyBlendParameters blendParameters = iBlendParameters;
-
-	//Make sure we set the right value in the Paint Engine according to the editor state
-	UOdysseyTextureLayerStack* layerstack = LayerStack();
-	if ( !layerstack )
-		return blendParameters;
-
-	if ( !layerstack->CurrentLayer )
-		return blendParameters;
-
-	//Define the new active tool based on the layer capabilities
-
-	UOdysseyTextureLayerImageRaster* layerImageRaster = Cast<UOdysseyTextureLayerImageRaster>(layerstack->CurrentLayer.Get());
-	if ( !layerImageRaster )
-		return blendParameters;
-
-	if ( layerImageRaster->IsAlphaLocked )
-		blendParameters.AlphaMode = EOdysseyAlphaMode(::ULIS::Alpha_Back);
-
-	return blendParameters;
-}
-
 #undef LOCTEXT_NAMESPACE

@@ -1,37 +1,37 @@
 // IDDN.FR.001.250001.006.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
-#include "OdysseyRasterDrawingToolBrushSelectorCustomization.h"
+#include "OdysseyPainterEditorRasterDrawingToolBrushSelectorCustomization.h"
 
 #include "DetailLayoutBuilder.h"
 #include "DetailCategoryBuilder.h"
 #include "IDetailGroup.h"
-#include "Tools/RasterDrawingTool/OdysseyRasterDrawingTool.h"
+#include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
 #include "ObjectEditorUtils.h"
 #include "Brush/SOdysseyBrushSelector.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyRasterDrawingToolBrushSelectorCustomization"
+#define LOCTEXT_NAMESPACE "OdysseyPainterEditorRasterDrawingToolBrushSelectorCustomization"
 
-FOdysseyRasterDrawingToolBrushSelectorCustomization::FOdysseyRasterDrawingToolBrushSelectorCustomization()
+FOdysseyPainterEditorRasterDrawingToolBrushSelectorCustomization::FOdysseyPainterEditorRasterDrawingToolBrushSelectorCustomization()
 {
-	mPropertyChangedHandle = FCoreUObjectDelegates::OnObjectPropertyChanged.AddRaw(this, &FOdysseyRasterDrawingToolBrushSelectorCustomization::OnObjectPostEditChange);
+	mPropertyChangedHandle = FCoreUObjectDelegates::OnObjectPropertyChanged.AddRaw(this, &FOdysseyPainterEditorRasterDrawingToolBrushSelectorCustomization::OnObjectPostEditChange);
 }
 
-FOdysseyRasterDrawingToolBrushSelectorCustomization::~FOdysseyRasterDrawingToolBrushSelectorCustomization()
+FOdysseyPainterEditorRasterDrawingToolBrushSelectorCustomization::~FOdysseyPainterEditorRasterDrawingToolBrushSelectorCustomization()
 {
 	FCoreUObjectDelegates::OnObjectPropertyChanged.Remove(mPropertyChangedHandle);
 }
 
-UOdysseyRasterDrawingTool*
-FOdysseyRasterDrawingToolBrushSelectorCustomization::GetRasterDrawingTool()
+UOdysseyPainterEditorRasterDrawingTool*
+FOdysseyPainterEditorRasterDrawingToolBrushSelectorCustomization::GetPainterEditorRasterDrawingTool()
 {
     TArray< TWeakObjectPtr<UObject> > objects;
     mBuilder->GetObjectsBeingCustomized(objects);
-    return Cast<UOdysseyRasterDrawingTool>(objects[0]);
+    return Cast<UOdysseyPainterEditorRasterDrawingTool>(objects[0]);
 }
 
 void
-FOdysseyRasterDrawingToolBrushSelectorCustomization::HideAllProperties()
+FOdysseyPainterEditorRasterDrawingToolBrushSelectorCustomization::HideAllProperties()
 {
     TArray< TWeakObjectPtr<UObject> > objects;
     mBuilder->GetObjectsBeingCustomized(objects);
@@ -42,7 +42,7 @@ FOdysseyRasterDrawingToolBrushSelectorCustomization::HideAllProperties()
 }
 
 void
-FOdysseyRasterDrawingToolBrushSelectorCustomization::AddObjectPropertyToCategory(IDetailCategoryBuilder& iCategory, UObject* iObject, FName iPropertyName)
+FOdysseyPainterEditorRasterDrawingToolBrushSelectorCustomization::AddObjectPropertyToCategory(IDetailCategoryBuilder& iCategory, UObject* iObject, FName iPropertyName)
 {
     TArray<UObject*> objects; //contains only one object
     objects.Add(iObject);
@@ -53,7 +53,7 @@ FOdysseyRasterDrawingToolBrushSelectorCustomization::AddObjectPropertyToCategory
 }
 
 void
-FOdysseyRasterDrawingToolBrushSelectorCustomization::AddObjectToCategoryInline(IDetailCategoryBuilder& iCategory, UObject* iObject)
+FOdysseyPainterEditorRasterDrawingToolBrushSelectorCustomization::AddObjectToCategoryInline(IDetailCategoryBuilder& iCategory, UObject* iObject)
 {
     TArray<UObject*> objects; //contains only one object
     objects.Add(iObject);
@@ -69,7 +69,7 @@ FOdysseyRasterDrawingToolBrushSelectorCustomization::AddObjectToCategoryInline(I
 }
 
 void
-FOdysseyRasterDrawingToolBrushSelectorCustomization::AddBrushInstance(IDetailCategoryBuilder& iCategory)
+FOdysseyPainterEditorRasterDrawingToolBrushSelectorCustomization::AddBrushInstance(IDetailCategoryBuilder& iCategory)
 {
     UObject* brushInstance = mTool->GetBrushInstance();
     if (!brushInstance)
@@ -123,21 +123,21 @@ FOdysseyRasterDrawingToolBrushSelectorCustomization::AddBrushInstance(IDetailCat
 }
 
 void
-FOdysseyRasterDrawingToolBrushSelectorCustomization::AddBrushSelector(IDetailCategoryBuilder& iCategory)
+FOdysseyPainterEditorRasterDrawingToolBrushSelectorCustomization::AddBrushSelector(IDetailCategoryBuilder& iCategory)
 {
     iCategory.AddCustomRow(LOCTEXT("BrushSelector", "Brush"), false)
     [
         SNew(SOdysseyBrushSelector)
-        .Brush_Raw(this, &FOdysseyRasterDrawingToolBrushSelectorCustomization::GetBrush)
-        .OnBrushChanged(this, &FOdysseyRasterDrawingToolBrushSelectorCustomization::OnBrushChanged)
+        .Brush_Raw(this, &FOdysseyPainterEditorRasterDrawingToolBrushSelectorCustomization::GetBrush)
+        .OnBrushChanged(this, &FOdysseyPainterEditorRasterDrawingToolBrushSelectorCustomization::OnBrushChanged)
     ];
 }
 
 void
-FOdysseyRasterDrawingToolBrushSelectorCustomization::CustomizeDetails(IDetailLayoutBuilder& iBuilder)
+FOdysseyPainterEditorRasterDrawingToolBrushSelectorCustomization::CustomizeDetails(IDetailLayoutBuilder& iBuilder)
 {
     mBuilder = &iBuilder;
-    mTool = GetRasterDrawingTool();
+    mTool = GetPainterEditorRasterDrawingTool();
 
     HideAllProperties();
 
@@ -153,19 +153,19 @@ FOdysseyRasterDrawingToolBrushSelectorCustomization::CustomizeDetails(IDetailLay
 }
 
 void
-FOdysseyRasterDrawingToolBrushSelectorCustomization::OnBrushChanged(UOdysseyBrush* iBrush)
+FOdysseyPainterEditorRasterDrawingToolBrushSelectorCustomization::OnBrushChanged(UOdysseyBrush* iBrush)
 {
     FOdysseyObjectEditorUtils::SetPropertyValue(mTool, "Brush", iBrush);
 }
 
 UOdysseyBrush*
-FOdysseyRasterDrawingToolBrushSelectorCustomization::GetBrush() const
+FOdysseyPainterEditorRasterDrawingToolBrushSelectorCustomization::GetBrush() const
 {
     return mTool->GetBrush();
 }
 
 void 
-FOdysseyRasterDrawingToolBrushSelectorCustomization::OnObjectPostEditChange( UObject* iObject, FPropertyChangedEvent& iPropertyChangedEvent )
+FOdysseyPainterEditorRasterDrawingToolBrushSelectorCustomization::OnObjectPostEditChange( UObject* iObject, FPropertyChangedEvent& iPropertyChangedEvent )
 {
 	if (mTool != iObject)
         return;

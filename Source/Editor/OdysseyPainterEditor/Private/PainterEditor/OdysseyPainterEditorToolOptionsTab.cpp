@@ -4,7 +4,7 @@
 #include "OdysseyPainterEditorToolOptionsTab.h"
 
 #include "Tools/Widgets/SOdysseyToolOptions.h"
-#include "Tools/RasterDrawingTool/Widgets/SOdysseyRasterDrawingToolOptions.h"
+#include "Tools/RasterDrawingTool/Widgets/SOdysseyPainterEditorRasterDrawingToolOptions.h"
 #include "Widgets/Layout/SWidgetSwitcher.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorToolOptionsTab"
@@ -38,7 +38,7 @@ FOdysseyPainterEditorToolOptionsTab::CreateWidget()
             SNullWidget::NullWidget
         ];
 
-    SetWidgetForTool(mEditor->GetRasterDrawingTool(), SNew(SOdysseyRasterDrawingToolOptions).Tool(mEditor->GetRasterDrawingTool()));
+    SetWidgetForTool(mEditor->GetRasterDrawingTool(), SNew(SOdysseyPainterEditorRasterDrawingToolOptions).Tool(mEditor->GetRasterDrawingTool()));
     //mToolsTab->GetToolsTab()->SetWidgetForTool(mEditor->GetVectorDrawingTool(), SNew(SOdysseyPainterVectorDrawingTool, mEditor->GetVectorDrawingTool()));
 
     return mWidgetSwitcher;

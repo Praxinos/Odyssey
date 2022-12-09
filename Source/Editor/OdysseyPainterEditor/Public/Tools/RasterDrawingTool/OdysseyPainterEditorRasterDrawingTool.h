@@ -5,21 +5,23 @@
 
 #include "CoreMinimal.h"
 #include "InputCoreTypes.h"
-#include "OdysseyTool.h"
+#include "Tools/OdysseyPainterEditorTool.h"
 #include "OdysseyBrushBlueprint.h"
 #include "OdysseyBrushOptions.h"
 #include "OdysseyBlendParameters.h"
 #include "OdysseyShape.h"
-#include "Tools/RasterDrawingTool/OdysseyRasterDrawingToolWorker.h"
+#include "OdysseyPaintEngine.h"
+#include "OdysseyBrushContext.h"
+#include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingToolWorker.h"
 
-#include "OdysseyRasterDrawingTool.generated.h"
+#include "OdysseyPainterEditorRasterDrawingTool.generated.h"
 
 class UOdysseyBrushAssetBase;
 class FOdysseyPaintEngine;
 class FOdysseyStrokeEngineBrushOptions;
 
 UCLASS()
-class ODYSSEYPAINTEREDITOR_API UOdysseyRasterDrawingTool : public UOdysseyTool
+class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterDrawingTool : public UOdysseyPainterEditorTool
 {
     GENERATED_BODY()
 
@@ -31,20 +33,18 @@ public:
 
 public:
     // Destructor
-    virtual ~UOdysseyRasterDrawingTool();
+    virtual ~UOdysseyPainterEditorRasterDrawingTool();
 
     //Constructor
-    UOdysseyRasterDrawingTool();
+    UOdysseyPainterEditorRasterDrawingTool();
     
 public:
     //TOOL
-    void Initialize(FOdysseyPaintEngine* iPaintEngine);
     template<class T> T* CreateShape(FName iName);
 
 public:
     //OdysseyTool overrides
     virtual void Activate() override;
-    virtual void Inactivate() override;
 
     virtual bool OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
     virtual bool OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
@@ -63,10 +63,6 @@ public:
 
 public:
     // Setters
-
-    // Sets the PaintEngine used to draw
-    void SetPaintEngine(FOdysseyPaintEngine* iPaintEngine);
-
     // Sets the BrushContexts to apply to brushInstance
     void SetBrushContexts(TArray<FOdysseyBrushContext*> iContexts);
 
@@ -105,21 +101,13 @@ public:
     bool IsDrawingLocked();
 
 public:
-    //UObject overrides
+    //Properties changes
+    void BrushChanged();
+    void SelectedShapeChanged();
 
-    //Called when properties inside structs are about to be modified
-    virtual void PreEditChange(FEditPropertyChain& PropertyAboutToChange);
+    virtual void PropertyChanged(const FName& iPropertyName) override;
 
-    //Called when a property is about to be modified externally
-    virtual void PreEditChange(FProperty* PropertyAboutToChange);
-    
-    //Called when a property inside a struct property changes
-    virtual void PostEditChangeChainProperty( struct FPropertyChangedChainEvent& PropertyChangedEvent);
-
-    //Called when a simple property changes
-    virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent);
-
-private:
+public:
     // Paint Engine Stroke API
 
     //Begins a stroke at iPoint
@@ -136,7 +124,7 @@ private:
     bool Abort();
 
     //Wether the tool can draw or not
-    bool CanDraw();
+    virtual bool CanDraw();
 
 private:
     // Internal - BrushInstance
@@ -148,7 +136,7 @@ private:
     void CreateBrushInstance(bool iApplyOverrides);
 
     // Fired when the Brush is compiled
-    void OnBrushCompiled(UBlueprint* iBlueprint);
+    //void OnBlueprintCompiled(UBlueprint* iBlueprint);
 
     //Apply brush Overrides
     void ApplyOverrides(UOdysseyBrushAssetBase* iBrushInstance);
@@ -157,13 +145,13 @@ private:
     // Internal - Property Changed
 
     // Fired when the Brush is compiled
-    void OnPreBrushChanged();
+    /* void OnPreBrushChanged();
 
     // Fired when the Brush is compiled
     void OnPostBrushChanged();
 
     // Fired when a Shape is selected
-    void OnPostShapeChanged();
+    void OnPostShapeChanged(); */
 
 private:
     // Internal - Callbacks
@@ -182,8 +170,8 @@ private:
 
     float AdaptShapeStep(float iStep);
 
-private:
-    friend class SOdysseyRasterDrawingToolBrushSelector;
+protected:
+    friend class SOdysseyPainterEditorRasterDrawingToolBrushSelector;
 
     //Visible properties
 
@@ -214,15 +202,13 @@ protected:
     // protected Data Members
 
     //Resources
-    FOdysseyPaintEngine*                mPaintEngine;
+    FOdysseyPaintEngine                 mPaintEngine;
     TArray<FOdysseyBrushContext*>       mBrushContexts;
-    FOdysseyRasterDrawingToolWorker           mWorker;
+    FOdysseyPainterEditorRasterDrawingToolWorker     mWorker;
 
     //---
 
     //Internal
-    bool                                mIsDrawingLocked;
     FOnApplyOverrides                   mOnApplyOverridesDelegate;
     FAdaptShapePoints                   mAdaptShapePointsDelegate;
-    TSharedPtr<SWidget>                 mOptionsWidget;
 };

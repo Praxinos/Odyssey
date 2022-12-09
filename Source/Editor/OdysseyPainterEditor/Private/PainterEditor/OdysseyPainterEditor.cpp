@@ -12,7 +12,6 @@
 #include "OdysseyToolFreeHand.h"
 #include "ULISLoaderModule.h"
 #include "OdysseyPainterEditorGUI.h"
-#include "Tools/PaintBucketTool/OdysseyPaintBucketTool.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 
 /////////////////////////////////////////////////////
@@ -25,8 +24,7 @@ FOdysseyPainterEditor::~FOdysseyPainterEditor()
 }
 
 FOdysseyPainterEditor::FOdysseyPainterEditor()
-    : mPaintEngine()
-	, mSelectedTool(nullptr)
+    : mSelectedTool(nullptr)
     , mHUDSystem(new FOdysseyHUDSystem())
 	, mBrushContexts()
 	, mPaintColor(::ULIS::FColor::Black)
@@ -48,28 +46,12 @@ FOdysseyPainterEditor::InitData()
 void
 FOdysseyPainterEditor::InitTools()
 {
-	mRasterDrawingTool = NewObject<UOdysseyRasterDrawingTool>();
-	mRasterDrawingTool->OnApplyOverridesDelegate().AddRaw(this, &FOdysseyPainterEditor::OnApplyOverrides);
-	mRasterDrawingTool->SetBrushContexts(mBrushContexts);
-	mRasterDrawingTool->Initialize(&mPaintEngine);
-	FOdysseyObjectEditorUtils::SetPropertyValue(mRasterDrawingTool->GetBrushOptions(), "Color", FOdysseyBrushColor(mPaintColor)); //Set the paint color in the brushOptions at startup for synchronization
-
-	mPaintBucketTool = NewObject<UOdysseyPaintBucketTool>();
-	mPaintBucketTool->Initialize(&mPaintEngine);
 }
 
 void
 FOdysseyPainterEditor::BindShortcuts(FBaseToolkit* iToolkit)
 {
 	FOdysseyEditor::BindShortcuts(iToolkit);
-
-	//---
-
-	//TODO: BindShortcuts from mTools instead of mSelectedTool
-	//for (UOdysseyTool* tool : mTools)
-		//tool->BindShortcuts(iToolkit);
-	mRasterDrawingTool->BindShortcuts(iToolkit);
-	mPaintBucketTool->BindShortcuts(iToolkit);
 
 	//---
 
@@ -85,23 +67,10 @@ void
 FOdysseyPainterEditor::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
 {
 	FOdysseyEditor::ExtendMenu(iOwner, iMenuName);
-
-	//---
-	mRasterDrawingTool->ExtendMenu(iOwner, iMenuName);
-	mPaintBucketTool->ExtendMenu(iOwner, iMenuName);
-	
-	/* for ( UOdysseyTool* tool : mTools )
-		tool->ExtendMenu(iOwner, iMenuName); */
 }
 
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Getters
-
-FOdysseyPaintEngine&
-FOdysseyPainterEditor::PaintEngine()
-{
-	return mPaintEngine;
-}
 
 FOdysseyHUDSystem* 
 FOdysseyPainterEditor::HUDSystem() const
@@ -121,18 +90,6 @@ FOdysseyPainterEditor::GetSelectedTool() const
     return mSelectedTool;
 }
 
-UOdysseyRasterDrawingTool*
-FOdysseyPainterEditor::GetRasterDrawingTool() const
-{
-    return mRasterDrawingTool;
-}
-
-UOdysseyPaintBucketTool*
-FOdysseyPainterEditor::GetPaintBucketTool() const
-{
-    return mPaintBucketTool;
-}
-
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Setters
 
@@ -142,7 +99,7 @@ FOdysseyPainterEditor::PaintColor(const FOdysseyBrushColor& iColor, bool iIsComm
 	mPaintColor = iColor;
 
 	//PATCH: should be automatic in the new drawing Tool, fix it asap
-	FOdysseyObjectEditorUtils::SetPropertyValue(mRasterDrawingTool->GetBrushOptions(), "Color", iColor);
+	FOdysseyObjectEditorUtils::SetPropertyValue(GetRasterDrawingTool()->GetBrushOptions(), "Color", iColor);
 }
 
 void
@@ -157,6 +114,19 @@ FOdysseyPainterEditor::SetSelectedTool(UOdysseyTool* iTool)
 		mSelectedTool->Activate();
 }
 
+void
+FOdysseyPainterEditor::ActivateDefaultTool()
+{
+	for ( UOdysseyTool* tool : mTools )
+	{
+		if ( tool->IsActivable() )
+		{
+			tool->Activate();
+			return;
+		}
+	}
+}
+
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------- Callbacks
 
@@ -165,17 +135,6 @@ FOdysseyPainterEditor::OnApplyOverrides(const TMap<FName, UObject*>& iOverrides)
 {
 	//TODO: Apply Overrides for Paint Color
 	//TODO: Apply Overrides for Other things like HUDs, Mesh Selector, or anything else
-}
-
-//--------------------------------------------------------------------------------------
-//------------------------------------------------------------- FGCObject implementation
-
-void
-FOdysseyPainterEditor::AddReferencedObjects(FReferenceCollector& Collector)
-{
-	FOdysseyEditor::AddReferencedObjects(Collector);
-	Collector.AddReferencedObject(mRasterDrawingTool);
-	Collector.AddReferencedObject(mPaintBucketTool);
 }
 
 //--------------------------------------------------------------------------------------

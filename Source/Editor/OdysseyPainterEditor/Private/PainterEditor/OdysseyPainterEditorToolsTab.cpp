@@ -166,7 +166,7 @@ void
 FOdysseyPainterEditorToolsTab::Clear()
 {
     //TODO: FLush and commit courrent tool before clearing
-    if (!mEditor->PaintEngine().PaintBlock())
+    /* if ( !mEditor->PaintEngine().PaintBlock() )
         return;
 
 	//Do the fill
@@ -181,13 +181,14 @@ FOdysseyPainterEditorToolsTab::Clear()
 
 	paintBlock->Dirty();
 	mEditor->PaintEngine().Commit(FOdysseyBlendParameters(true, EOdysseyBlendingMode::kNormal, EOdysseyAlphaMode::kNormal, 100.0f));
+    */
 }
 
 void
 FOdysseyPainterEditorToolsTab::Fill()
 {
     //TODO: FLush and commit courrent tool before filling
-    if (!mEditor->PaintEngine().PaintBlock())
+    /*if ( !mEditor->PaintEngine().PaintBlock() )
         return;
 
 	//Do the fill
@@ -201,7 +202,7 @@ FOdysseyPainterEditorToolsTab::Fill()
 	ctx.Finish();
 
 	paintBlock->Dirty();
-	mEditor->PaintEngine().Commit(FOdysseyBlendParameters());
+	mEditor->PaintEngine().Commit(FOdysseyBlendParameters());*/
 }
 
 #undef LOCTEXT_NAMESPACE

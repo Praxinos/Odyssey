@@ -8,7 +8,7 @@
 #include "Modules/ModuleManager.h"
 #include "PropertyEditorModule.h"
 #include "IDetailsView.h"
-#include "Tools/RasterDrawingTool/OdysseyRasterDrawingTool.h"
+#include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
 
 
 #define LOCTEXT_NAMESPACE "OdysseyBrushExposedParameters"

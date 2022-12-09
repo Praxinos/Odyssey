@@ -38,6 +38,10 @@ public:
     virtual void Activate();
 
     //Inactivates the tool
+    UFUNCTION(BlueprintPure, Category="Tools")
+    virtual bool IsActivable() const;
+
+    //Inactivates the tool
     UFUNCTION(BlueprintCallable, Category="Tools")
     virtual void Inactivate();
 
@@ -59,9 +63,6 @@ public:
     //Validates any action that finished. (example, any drawing in queue is finished and validated so that it creates an undoable state)
     virtual void Commit();
 
-protected:
-    virtual class FOdysseyEditor* GetEditor() { check(false); return nullptr; }; //please override this method
-
 public:
     // Interface
     virtual void BindShortcuts(class FBaseToolkit* iToolkit);
@@ -78,8 +79,4 @@ protected:
 public:
     UPROPERTY(EditDefaultsOnly, Category="Tool")
     FSlateBrush Icon;
-
-public:
-    UPROPERTY(BlueprintReadOnly, Category="Tool")
-    bool IsActivable; //non editable externally
 };

@@ -6,17 +6,17 @@
 #include "CoreMinimal.h"
 #include "IDetailCustomization.h"
 
-class FOdysseyRasterDrawingToolOptionsCustomization : public IDetailCustomization
+class FOdysseyPainterEditorRasterDrawingToolBrushSelectorCustomization : public IDetailCustomization
 {
 public:
-    ~FOdysseyRasterDrawingToolOptionsCustomization();
-    FOdysseyRasterDrawingToolOptionsCustomization();
+    ~FOdysseyPainterEditorRasterDrawingToolBrushSelectorCustomization();
+    FOdysseyPainterEditorRasterDrawingToolBrushSelectorCustomization();
 
 public:
     /** Makes a new instance of this detail layout class for a specific detail view requesting it */
     static TSharedRef<IDetailCustomization> MakeInstance()
     {
-        return MakeShared<FOdysseyRasterDrawingToolOptionsCustomization>();
+        return MakeShared<FOdysseyPainterEditorRasterDrawingToolBrushSelectorCustomization>();
     }
 
     // IDetailCustomization interface
@@ -24,18 +24,21 @@ public:
     // End of IDetailCustomization interface
 
 private:
-    UOdysseyRasterDrawingTool* GetRasterDrawingTool();
+    UOdysseyPainterEditorRasterDrawingTool* GetPainterEditorRasterDrawingTool();
     void HideAllProperties();
     void AddObjectPropertyToCategory(IDetailCategoryBuilder& iCategory, UObject* iObject, FName iPropertyName);
     void AddObjectToCategoryInline(IDetailCategoryBuilder& iCategory, UObject* iObject);
-    void AddSelectedShapeInstance(IDetailCategoryBuilder& iCategory);
-    void AddBlendParameters();
+    void AddBrushInstance(IDetailCategoryBuilder& iCategory);
+    void AddBrushSelector(IDetailCategoryBuilder& iCategory);
 
 private:
-    void OnObjectPostEditChange(UObject* iObject, FPropertyChangedEvent& iPropertyChangedEvent);
+    UOdysseyBrush* GetBrush() const;
+
+    void OnBrushChanged(UOdysseyBrush* iBrush);
+    void OnObjectPostEditChange( UObject* iObject, FPropertyChangedEvent& iPropertyChangedEvent );
 
 private:
-    class UOdysseyRasterDrawingTool* mTool;
-    IDetailLayoutBuilder* mBuilder;
+    class UOdysseyPainterEditorRasterDrawingTool* mTool;
+	IDetailLayoutBuilder* mBuilder;
     FDelegateHandle       mPropertyChangedHandle;
 };

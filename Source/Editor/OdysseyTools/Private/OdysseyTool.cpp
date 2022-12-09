@@ -25,7 +25,14 @@ UOdysseyTool::Activate()
 void
 UOdysseyTool::Inactivate()
 {
+    Flush(); //Finish everything
+    Commit(); //Commit the jobs that has been done
+}
 
+bool
+UOdysseyTool::IsActivable() const
+{
+    return true;
 }
 
 //--------------------------------------------------------------------------------------
