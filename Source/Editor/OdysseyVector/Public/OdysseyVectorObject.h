@@ -10,7 +10,7 @@
 class UOdysseyVectorRoot;
 
 UCLASS()
-class UOdysseyVectorObject : public UObject
+class ODYSSEYVECTOR_API UOdysseyVectorObject : public UObject
 {
     public:
         GENERATED_BODY()

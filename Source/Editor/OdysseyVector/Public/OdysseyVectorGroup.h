@@ -11,7 +11,7 @@
 #include "OdysseyVectorGroup.generated.h"
 
 UCLASS()
-class UOdysseyVectorGroup : public UOdysseyVectorObject
+class ODYSSEYVECTOR_API UOdysseyVectorGroup : public UOdysseyVectorObject
 {
     public:
         GENERATED_BODY()

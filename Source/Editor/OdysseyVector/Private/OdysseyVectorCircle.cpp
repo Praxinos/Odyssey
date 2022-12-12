@@ -9,10 +9,9 @@ UOdysseyVectorCircle::~UOdysseyVectorCircle()
 {
 }
 
-void
-UOdysseyVectorCircle::Init( std::string iName )
+UOdysseyVectorCircle::UOdysseyVectorCircle()
 {
-    SetName( iName );
+    SetName( "Circle" );
 
     mRadiusX = mRadiusY = 0.0f;
 
