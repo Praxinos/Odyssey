@@ -3,19 +3,9 @@
 
 #include "OdysseyPainterEditorToolsTab.h"
 #include "Widgets/Input/SButton.h"
-//#include "Widgets/Layout/SScrollBox.h"
-//#include "Widgets/Layout/SExpandableArea.h"
-//#include "Widgets/Layout/SWrapBox.h"
 #include "OdysseyPainterEditor.h"
-#include "OdysseyTool.h"
-/*#include "OdysseyToolFreeHand.h"
-#include "OdysseyToolPolygon.h"
-#include "OdysseyToolCircle.h"
-#include "OdysseyToolEllipse.h"
-#include "OdysseyToolBezier.h"
-#include "OdysseyToolRectangle.h"
-#include "OdysseyToolLine.h" */
-#include "Widgets/Tools/SOdysseyToolsTileView.h"
+#include "Tools/OdysseyPainterEditorTool.h"
+#include "Widgets/Tools/SOdysseyPainterEditorToolsTileView.h"
 #include "Widgets/Views/STileView.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorToolsTab"
@@ -42,12 +32,12 @@ FOdysseyPainterEditorToolsTab::FOdysseyPainterEditorToolsTab(FOdysseyPainterEdit
 TSharedPtr<SWidget>
 FOdysseyPainterEditorToolsTab::CreateWidget()
 {
-    TArray<UOdysseyTool*> tools = {
+    TArray<UOdysseyPainterEditorTool*> tools = {
         mEditor->GetRasterDrawingTool(),
         mEditor->GetPaintBucketTool()
     };
 
-    return SNew( SOdysseyToolsTileView )
+    return SNew( SOdysseyPainterEditorToolsTileView )
         .Tools(tools)
         .OnToolSelected(this, &FOdysseyPainterEditorToolsTab::OnToolSelected);
         
@@ -154,7 +144,7 @@ FOdysseyPainterEditorToolsTab::OnClearUndo()
 }
 
 void
-FOdysseyPainterEditorToolsTab::OnToolSelected(UOdysseyTool* iTool)
+FOdysseyPainterEditorToolsTab::OnToolSelected(UOdysseyPainterEditorTool* iTool)
 {
     mEditor->SetSelectedTool(iTool);
 }

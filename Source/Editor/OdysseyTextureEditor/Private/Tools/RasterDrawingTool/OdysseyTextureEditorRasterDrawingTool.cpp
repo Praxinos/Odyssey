@@ -19,7 +19,7 @@ UOdysseyTextureEditorRasterDrawingTool::UOdysseyTextureEditorRasterDrawingTool()
 }
 
 //--------------------------------------------------------------------------------------
-//---------------------------------------------------------------- OdysseyTool overrides
+//---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
 void
 UOdysseyTextureEditorRasterDrawingTool::Activate()

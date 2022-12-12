@@ -1,32 +1,32 @@
 // IDDN FR.001.250001.005.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
-#include "Widgets/Tools/SOdysseyToolTile.h"
+#include "Widgets/Tools/SOdysseyPainterEditorToolTile.h"
 
-#define LOCTEXT_NAMESPACE "SOdysseyToolTile"
+#define LOCTEXT_NAMESPACE "SOdysseyPainterEditorToolTile"
 
-SOdysseyToolTile::~SOdysseyToolTile()
+SOdysseyPainterEditorToolTile::~SOdysseyPainterEditorToolTile()
 {
 }
 
-SOdysseyToolTile::SOdysseyToolTile()
+SOdysseyPainterEditorToolTile::SOdysseyPainterEditorToolTile()
 {
 }
 
 //CONSTRUCTION/DESTRUCTION-----------------------------------------------
 void
-SOdysseyToolTile::Construct(const FArguments& InArgs, const TSharedRef<STableViewBase>& InOwnerTableView)
+SOdysseyPainterEditorToolTile::Construct(const FArguments& InArgs, const TSharedRef<STableViewBase>& InOwnerTableView)
 {
-    UOdysseyTool* tool = InArgs._Tool;
+    UOdysseyPainterEditorTool* tool = InArgs._Tool;
     mOnSelected = InArgs._OnSelected;
 
-    STableRow<UOdysseyTool*>::Construct(
-        STableRow<UOdysseyTool*>::FArguments()
+    STableRow<UOdysseyPainterEditorTool*>::Construct(
+        STableRow<UOdysseyPainterEditorTool*>::FArguments()
         .Content()
         [
             SNew(SButton)
 		    .ButtonStyle(&FOdysseyStyle::GetWidgetStyle<FButtonStyle>("Button.TransparentNoPadding"))
-            .OnClicked(this, &SOdysseyToolTile::OnClicked)
+            .OnClicked(this, &SOdysseyPainterEditorToolTile::OnClicked)
             [
                 SNew(SImage)
                 .Image(&tool->Icon)
@@ -37,7 +37,7 @@ SOdysseyToolTile::Construct(const FArguments& InArgs, const TSharedRef<STableVie
 }
 
 FReply
-SOdysseyToolTile::OnClicked()
+SOdysseyPainterEditorToolTile::OnClicked()
 {
     mOnSelected.ExecuteIfBound();
     return FReply::Handled();

@@ -372,8 +372,8 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "PainterEditor.ToolsTab.Polygon32", new IMAGE_BRUSH( "PainterEditor/ToolsTab/polygon_32", mIcon32x32 ) );
     Set( "PainterEditor.ToolsTab.FreeHand32", new IMAGE_BRUSH( "PainterEditor/ToolsTab/freehand_32", mIcon32x32 ) );
 
-    //OdysseyTools
-    Set( "OdysseyTools.Tile", mCoreTableRowStyle
+    //OdysseyPainterEditorTools
+    Set( "OdysseyPainterEditorTools.Tile", mCoreTableRowStyle
             
     );
 
@@ -406,8 +406,8 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     //OdysseyViewportDrawingEditor
     Set("OdysseyViewportDrawingEditMode.SetOdysseyBrushSettingsView", new IMAGE_BRUSH("PainterEditor/brush_selector_16", mIcon16x16 ));
 	Set("OdysseyViewportDrawingEditMode.SetOdysseyLayerStackView", new IMAGE_BRUSH("PainterEditor/layers_16", mIcon16x16 ));
-	Set("OdysseyViewportDrawingEditMode.SetOdysseyToolOptionsView", new IMAGE_BRUSH("PainterEditor/tool_options_16", mIcon16x16 ));
-	Set("OdysseyViewportDrawingEditMode.SetOdysseyToolsView", new IMAGE_BRUSH("PainterEditor/tools_16", mIcon16x16 ));
+	Set("OdysseyViewportDrawingEditMode.SetOdysseyPainterEditorToolOptionsView", new IMAGE_BRUSH("PainterEditor/tool_options_16", mIcon16x16 ));
+	Set("OdysseyViewportDrawingEditMode.SetOdysseyPainterEditorToolsView", new IMAGE_BRUSH("PainterEditor/tools_16", mIcon16x16 ));
 
     Set("OdysseyViewportDrawingEditMode.OdysseyViewportDrawingIcon16",new IMAGE_BRUSH("OdysseyViewportDrawing/viewport_drawing_icon_16",mIcon16x16));
     Set("OdysseyViewportDrawingEditMode.OdysseyViewportDrawingIcon40",new IMAGE_BRUSH("OdysseyViewportDrawing/viewport_drawing_icon_40",mIcon40x40));

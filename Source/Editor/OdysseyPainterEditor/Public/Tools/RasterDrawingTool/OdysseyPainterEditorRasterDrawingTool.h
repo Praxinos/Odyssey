@@ -43,7 +43,7 @@ public:
     template<class T> T* CreateShape(FName iName);
 
 public:
-    //OdysseyTool overrides
+    //OdysseyPainterEditorTool overrides
     virtual void Activate() override;
 
     virtual bool OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;

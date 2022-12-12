@@ -6,25 +6,25 @@
 #include "CoreMinimal.h"
 #include "Widgets/Views/STableRow.h"
 
-class UOdysseyTool;
+class UOdysseyPainterEditorTool;
 
-class ODYSSEYPAINTEREDITOR_API SOdysseyToolTile
-    : public STableRow<UOdysseyTool*>
+class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorToolTile
+    : public STableRow<UOdysseyPainterEditorTool*>
 {
 public:
-    DECLARE_DELEGATE_OneParam( FOnToolSelected, UOdysseyTool* );
+    DECLARE_DELEGATE_OneParam( FOnToolSelected, UOdysseyPainterEditorTool* );
 
 public:
-    SLATE_BEGIN_ARGS(SOdysseyToolTile)
+    SLATE_BEGIN_ARGS(SOdysseyPainterEditorToolTile)
         {}
-        SLATE_ARGUMENT( UOdysseyTool*, Tool )
+        SLATE_ARGUMENT( UOdysseyPainterEditorTool*, Tool )
         SLATE_EVENT( FSimpleDelegate, OnSelected )
     SLATE_END_ARGS()
 
 public:
     // Construction / Destruction
-    ~SOdysseyToolTile();
-    SOdysseyToolTile();
+    ~SOdysseyPainterEditorToolTile();
+    SOdysseyPainterEditorToolTile();
     
     void Construct(const FArguments& InArgs, const TSharedRef<STableViewBase>& InOwnerTableView);
 

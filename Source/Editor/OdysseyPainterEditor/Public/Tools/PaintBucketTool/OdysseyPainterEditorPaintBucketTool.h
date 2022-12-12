@@ -25,7 +25,7 @@ public:
     
     void Initialize(FOdysseyPaintEngine* iPaintEngine);
 
-    //OdysseyTool overrides
+    //OdysseyPainterEditorTool overrides
     virtual void Activate() override;
 
     virtual bool OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;

@@ -82,11 +82,6 @@
 			"LoadingPhase": "Default"
 		},
 		{
-			"Name": "OdysseyTools",
-			"Type": "Editor",
-			"LoadingPhase": "Default"
-		},
-		{
 			"Name": "ULISLoader",
 			"Type": "Editor",
 			"LoadingPhase": "Default"

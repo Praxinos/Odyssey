@@ -23,7 +23,7 @@ public:
     UOdysseyTextureEditorRasterDrawingTool();
 
 public:
-    //OdysseyTool overrides
+    //OdysseyPainterEditorTool overrides
     virtual void Activate() override;
     virtual void Inactivate() override;
     virtual bool IsActivable() const override;

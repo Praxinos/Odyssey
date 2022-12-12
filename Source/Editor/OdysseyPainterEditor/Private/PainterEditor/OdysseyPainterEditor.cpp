@@ -8,8 +8,6 @@
 #include "OdysseyPainterEditorTopTab.h"
 #include "SOdysseyPaintModifiers.h"
 #include "OdysseyHUDSystem.h"
-#include "OdysseyTool.h"
-#include "OdysseyToolFreeHand.h"
 #include "ULISLoaderModule.h"
 #include "OdysseyPainterEditorGUI.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
@@ -84,7 +82,7 @@ FOdysseyPainterEditor::PaintColor()
 	return mPaintColor;
 }
 
-UOdysseyTool*
+UOdysseyPainterEditorTool*
 FOdysseyPainterEditor::GetSelectedTool() const
 {
     return mSelectedTool;
@@ -103,7 +101,7 @@ FOdysseyPainterEditor::PaintColor(const FOdysseyBrushColor& iColor, bool iIsComm
 }
 
 void
-FOdysseyPainterEditor::SetSelectedTool(UOdysseyTool* iTool)
+FOdysseyPainterEditor::SetSelectedTool(UOdysseyPainterEditorTool* iTool)
 {
 	if (mSelectedTool)
 		mSelectedTool->Inactivate();
@@ -117,7 +115,7 @@ FOdysseyPainterEditor::SetSelectedTool(UOdysseyTool* iTool)
 void
 FOdysseyPainterEditor::ActivateDefaultTool()
 {
-	for ( UOdysseyTool* tool : mTools )
+	for ( UOdysseyPainterEditorTool* tool : mTools )
 	{
 		if ( tool->IsActivable() )
 		{

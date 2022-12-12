@@ -129,7 +129,7 @@ bool
 FOdysseyPainterEditorViewportTab::OnViewportMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
     //mEditor->GetSelectedTool()->SetTransform(mViewport->GetTransformToSourceTexture());
-    UOdysseyTool* tool = mEditor->GetSelectedTool();
+    UOdysseyPainterEditorTool* tool = mEditor->GetSelectedTool();
     if (!tool)
         return false;
 
@@ -140,7 +140,7 @@ bool
 FOdysseyPainterEditorViewportTab::OnViewportMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
     //mEditor->GetSelectedTool()->SetTransform(mViewport->GetTransformToSourceTexture());
-    UOdysseyTool* tool = mEditor->GetSelectedTool();
+    UOdysseyPainterEditorTool* tool = mEditor->GetSelectedTool();
     if (!tool)
         return false;
 
@@ -151,7 +151,7 @@ void
 FOdysseyPainterEditorViewportTab::OnViewportMouseHover(const FOdysseyPoint& iPointInTexture)
 {
     //mEditor->GetSelectedTool()->SetTransform(mViewport->GetTransformToSourceTexture());
-    UOdysseyTool* tool = mEditor->GetSelectedTool();
+    UOdysseyPainterEditorTool* tool = mEditor->GetSelectedTool();
     if (!tool)
         return;
 
@@ -162,7 +162,7 @@ void
 FOdysseyPainterEditorViewportTab::OnViewportMouseDrag(const FOdysseyPoint& iPointInTexture)
 {
     //mEditor->GetSelectedTool()->SetTransform(mViewport->GetTransformToSourceTexture());
-    UOdysseyTool* tool = mEditor->GetSelectedTool();
+    UOdysseyPainterEditorTool* tool = mEditor->GetSelectedTool();
     if (!tool)
         return;
 
@@ -173,7 +173,7 @@ bool
 FOdysseyPainterEditorViewportTab::OnViewportKeyDown(const FKey& iKey)
 {
     //mEditor->GetSelectedTool()->SetTransform(mViewport->GetTransformToSourceTexture());
-    UOdysseyTool* tool = mEditor->GetSelectedTool();
+    UOdysseyPainterEditorTool* tool = mEditor->GetSelectedTool();
     if ( !tool )
         return false;
     
@@ -184,7 +184,7 @@ bool
 FOdysseyPainterEditorViewportTab::OnViewportKeyUp(const FKey& iKey)
 {
     //mEditor->GetSelectedTool()->SetTransform(mViewport->GetTransformToSourceTexture());
-    UOdysseyTool* tool = mEditor->GetSelectedTool();
+    UOdysseyPainterEditorTool* tool = mEditor->GetSelectedTool();
     if ( !tool )
         return false;
 

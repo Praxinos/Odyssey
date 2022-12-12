@@ -11,7 +11,7 @@
 
 class FOdysseyHUDSystem;
 class IOdysseySurfaceEditable;
-class UOdysseyTool;
+class UOdysseyPainterEditorTool;
 class FOdysseyBrushContext;
 
 /**
@@ -37,7 +37,7 @@ public:
     virtual FOdysseyHUDSystem*                          HUDSystem() const;
 	virtual IOdysseySurfaceEditable*                    DisplaySurface() const = 0;
     virtual FOdysseyBrushColor&                         PaintColor();
-    virtual UOdysseyTool*                               GetSelectedTool() const;
+    virtual UOdysseyPainterEditorTool*                               GetSelectedTool() const;
 
     virtual UOdysseyPainterEditorRasterDrawingTool*                  GetRasterDrawingTool() const = 0;
     virtual UOdysseyPainterEditorPaintBucketTool*                    GetPaintBucketTool() const = 0;
@@ -47,7 +47,7 @@ public:
 public:
     // Setters
     void  PaintColor(const FOdysseyBrushColor& iColor, bool iIsCommit);
-    void  SetSelectedTool( UOdysseyTool* iSelectedTool );
+    void  SetSelectedTool( UOdysseyPainterEditorTool* iSelectedTool );
 
 public:
     // Interface
@@ -63,8 +63,8 @@ protected:
 
 protected:
     //Tools
-    UOdysseyTool*               mSelectedTool;
-    TArray<UOdysseyTool*>       mTools;
+    UOdysseyPainterEditorTool*               mSelectedTool;
+    TArray<UOdysseyPainterEditorTool*>       mTools;
 
     FOdysseyHUDSystem*              mHUDSystem;
     TArray<FOdysseyBrushContext*>   mBrushContexts;

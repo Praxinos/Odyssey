@@ -21,7 +21,7 @@ public:
 
 public:
     /** Sets a widget to display when the given Tool is displayed */
-    void SetWidgetForTool(class UOdysseyTool* iTool, TSharedPtr<SWidget> iWidget);
+    void SetWidgetForTool(class UOdysseyPainterEditorTool* iTool, TSharedPtr<SWidget> iWidget);
 
 protected:
     // FOdysseyEditorTab interface
@@ -37,7 +37,7 @@ private:
 
     struct FWidgetSlotForTool
     {
-        class UOdysseyTool* mTool;
+        class UOdysseyPainterEditorTool* mTool;
         SWidgetSwitcher::FSlot* mSlot;
     };
     TArray<FWidgetSlotForTool> mWidgetSlotForTool;

@@ -3,7 +3,6 @@
 
 #include "OdysseyPainterEditorToolOptionsTab.h"
 
-#include "Tools/Widgets/SOdysseyToolOptions.h"
 #include "Tools/RasterDrawingTool/Widgets/SOdysseyPainterEditorRasterDrawingToolOptions.h"
 #include "Widgets/Layout/SWidgetSwitcher.h"
 
@@ -65,7 +64,7 @@ FOdysseyPainterEditorToolOptionsTab::BindShortcuts(FBaseToolkit* iToolkit)
 //------------------------------------------------------------------------------ Methods
 
 void
-FOdysseyPainterEditorToolOptionsTab::SetWidgetForTool(UOdysseyTool* iTool, TSharedPtr<SWidget> iWidget)
+FOdysseyPainterEditorToolOptionsTab::SetWidgetForTool(UOdysseyPainterEditorTool* iTool, TSharedPtr<SWidget> iWidget)
 {
     FWidgetSlotForTool* widgetSlotForTool = mWidgetSlotForTool.FindByPredicate(
         [this](const FWidgetSlotForTool& iWidgetSlotForTool)

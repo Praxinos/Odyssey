@@ -60,7 +60,7 @@ FOdysseyPainterEditorBrushSelectorTab::BindShortcuts(FBaseToolkit* iToolkit)
 //------------------------------------------------------------------------------ Methods
 
 void
-FOdysseyPainterEditorBrushSelectorTab::SetWidgetForTool(UOdysseyTool* iTool, TSharedPtr<SWidget> iWidget)
+FOdysseyPainterEditorBrushSelectorTab::SetWidgetForTool(UOdysseyPainterEditorTool* iTool, TSharedPtr<SWidget> iWidget)
 {
     FWidgetSlotForTool* widgetSlotForTool = mWidgetSlotForTool.FindByPredicate(
         [this](const FWidgetSlotForTool& iWidgetSlotForTool)

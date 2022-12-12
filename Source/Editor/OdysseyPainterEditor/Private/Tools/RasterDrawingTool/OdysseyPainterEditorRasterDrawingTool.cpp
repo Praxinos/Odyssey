@@ -54,7 +54,7 @@ UOdysseyPainterEditorRasterDrawingTool::CreateShape(FName iName)
 }
 
 //--------------------------------------------------------------------------------------
-//---------------------------------------------------------------- OdysseyTool overrides
+//---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
 void
 UOdysseyPainterEditorRasterDrawingTool::Activate()

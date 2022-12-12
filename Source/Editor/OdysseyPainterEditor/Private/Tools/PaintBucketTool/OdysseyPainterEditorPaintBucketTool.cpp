@@ -15,7 +15,7 @@ UOdysseyPainterEditorPaintBucketTool::UOdysseyPainterEditorPaintBucketTool()
 }
 
 //--------------------------------------------------------------------------------------
-//---------------------------------------------------------------- OdysseyTool overrides
+//---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
 void
 UOdysseyPainterEditorPaintBucketTool::Activate()

@@ -7,7 +7,7 @@
 #include <ULIS>
 
 class FOdysseyPainterEditor;
-class UOdysseyTool;
+class UOdysseyPainterEditorTool;
 
 
 enum eToolType
@@ -40,7 +40,7 @@ protected:
     virtual FReply OnFill();
     virtual FReply OnClearUndo();
    
-    void OnToolSelected(UOdysseyTool* iTool);
+    void OnToolSelected(UOdysseyPainterEditorTool* iTool);
 
 protected:
     // Methods

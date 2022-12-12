@@ -23,7 +23,7 @@ public:
     //Constructor
     UOdysseyTextureEditorPaintBucketTool();
 
-    //OdysseyTool overrides
+    //OdysseyPainterEditorTool overrides
     virtual void Activate() override;
     virtual void Inactivate() override;
     virtual bool IsActivable() const override;
