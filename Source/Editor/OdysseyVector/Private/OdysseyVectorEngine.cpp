@@ -1,5 +1,7 @@
 #include "OdysseyVectorEngine.h"
 
+static BLContext* _currentBLContext;
+
 FOdysseyVectorEngine::~FOdysseyVectorEngine()
 {
     GetBLContext().end();
@@ -8,7 +10,9 @@ FOdysseyVectorEngine::~FOdysseyVectorEngine()
 FOdysseyVectorEngine::FOdysseyVectorEngine( double iWidth, double iHeight )
 {
     mBLImage = new BLImage( iWidth, iHeight, BL_FORMAT_PRGB32 );
-    mScene.Init( "Vector Scene" );
+
+    mScene = NewObject<UOdysseyVectorRoot>();
+    mScene->Init( "Vector Scene" );
 
     GetBLContext().begin( *mBLImage );
 }
@@ -19,17 +23,16 @@ FOdysseyVectorEngine::GetBLImage()
     return *mBLImage;
 }
 
-BLContext&
+void
+FOdysseyVectorEngine::BLContextMakeCurrent( BLContext* iContext )
+{
+    _currentBLContext = iContext;
+}
+
+BLContext*
 FOdysseyVectorEngine::GetBLContext()
 {
-    static BLContext* blctx;
-
-    if ( blctx == nullptr )
-    {
-        blctx = new BLContext();
-    }
-
-    return *blctx;
+    return _currentBLContext;
 }
 
 ::ULIS::FRectD&
@@ -39,7 +42,7 @@ FOdysseyVectorEngine::GetInvalidateRegion()
 }
 
 void
-FOdysseyVectorEngine::Render( ::ULIS::FBlock& iBlock )
+FOdysseyVectorEngine::Render()
 {
     BLContext& blctx = FOdysseyVectorEngine::GetBLContext();
     static ::ULIS::FRectD zeroRectangle;
@@ -65,7 +68,7 @@ FOdysseyVectorEngine::Render( ::ULIS::FBlock& iBlock )
         blctx.fillAll();
     }
 
-    mScene.Draw( mRoi, 0 );
+    mScene->Draw( mRoi, 0 );
 
     // Reset region of interest after each draw
     memset ( &mRoi, 0, sizeof ( mRoi ) );
@@ -73,7 +76,7 @@ FOdysseyVectorEngine::Render( ::ULIS::FBlock& iBlock )
     blctx.flush( BL_CONTEXT_FLUSH_SYNC );
 }
 
-UOdysseyVectorRoot&
+UOdysseyVectorRoot*
 FOdysseyVectorEngine::GetScene()
 {
     return mScene;

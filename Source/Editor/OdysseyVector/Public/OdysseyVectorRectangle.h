@@ -9,7 +9,7 @@
 #include "OdysseyVectorRectangle.generated.h"
 
 UCLASS()
-class UOdysseyVectorRectangle : public UOdysseyVectorObject
+class ODYSSEYVECTOR_API UOdysseyVectorRectangle : public UOdysseyVectorObject
 {
     public:
         GENERATED_BODY()

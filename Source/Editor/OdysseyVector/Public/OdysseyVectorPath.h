@@ -13,7 +13,7 @@
 class UOdysseyVectorLoop;
 
 UCLASS()
-class UOdysseyVectorPath : public UOdysseyVectorObject
+class ODYSSEYVECTOR_API UOdysseyVectorPath : public UOdysseyVectorObject
 {
     public:
         GENERATED_BODY()

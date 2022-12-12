@@ -15,7 +15,7 @@
 #include "OdysseyVectorLoop.generated.h"
 
 UCLASS()
-class UOdysseyVectorLoop : public UOdysseyVectorObject
+class ODYSSEYVECTOR_API UOdysseyVectorLoop : public UOdysseyVectorObject
 {
     public:
         GENERATED_BODY()

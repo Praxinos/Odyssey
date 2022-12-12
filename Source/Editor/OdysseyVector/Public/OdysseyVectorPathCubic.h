@@ -12,7 +12,7 @@
 #include "OdysseyVectorPathCubic.generated.h"
 
 UCLASS()
-class UOdysseyVectorPathCubic: public UOdysseyVectorPath
+class ODYSSEYVECTOR_API UOdysseyVectorPathCubic: public UOdysseyVectorPath
 {
     public:
         GENERATED_BODY()

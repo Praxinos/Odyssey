@@ -12,7 +12,7 @@
 #include "OdysseyVectorRoot.generated.h"
 
 UCLASS()
-class UOdysseyVectorRoot : public UOdysseyVectorObject
+class ODYSSEYVECTOR_API UOdysseyVectorRoot : public UOdysseyVectorObject
 {
     public:
         GENERATED_BODY()

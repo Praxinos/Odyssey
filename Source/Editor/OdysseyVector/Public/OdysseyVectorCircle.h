@@ -11,7 +11,7 @@
 #include "OdysseyVectorCircle.generated.h"
 
 UCLASS()
-class UOdysseyVectorCircle : public UOdysseyVectorPathCubic
+class ODYSSEYVECTOR_API UOdysseyVectorCircle : public UOdysseyVectorPathCubic
 {
     public:
         GENERATED_BODY()
@@ -30,7 +30,7 @@ class UOdysseyVectorCircle : public UOdysseyVectorPathCubic
 
     public:
         ~UOdysseyVectorCircle();
-         UOdysseyVectorCircle(){};
+         UOdysseyVectorCircle();
         void Init( std::string iName );
         void Init( std::string iName, double iRadius );
         void Init( std::string iName, double iRadiusX, double iRadiusY );
