@@ -1,20 +1,18 @@
 #include "OdysseyVectorEngine.h"
 
-static BLContext* _currentBLContext;
-
 FOdysseyVectorEngine::~FOdysseyVectorEngine()
 {
     GetBLContext().end();
 }
 
-FOdysseyVectorEngine::FOdysseyVectorEngine( double iWidth, double iHeight )
+FOdysseyVectorEngine::FOdysseyVectorEngine(double iWidth,double iHeight)
 {
-    mBLImage = new BLImage( iWidth, iHeight, BL_FORMAT_PRGB32 );
+    mBLImage = new BLImage(iWidth,iHeight,BL_FORMAT_PRGB32);
 
     mScene = NewObject<UOdysseyVectorRoot>();
-    mScene->Init( "Vector Scene" );
+    mScene->Init("Vector Scene");
 
-    GetBLContext().begin( *mBLImage );
+    GetBLContext().begin(*mBLImage);
 }
 
 BLImage&
@@ -23,16 +21,17 @@ FOdysseyVectorEngine::GetBLImage()
     return *mBLImage;
 }
 
-void
-FOdysseyVectorEngine::BLContextMakeCurrent( BLContext* iContext )
-{
-    _currentBLContext = iContext;
-}
-
-BLContext*
+BLContext&
 FOdysseyVectorEngine::GetBLContext()
 {
-    return _currentBLContext;
+    static BLContext* blctx;
+
+    if(blctx == nullptr)
+    {
+        blctx = new BLContext();
+    }
+
+    return *blctx;
 }
 
 ::ULIS::FRectD&
@@ -54,26 +53,25 @@ FOdysseyVectorEngine::Render()
 
     blctx.setFillStyle(BLRgba32(0xFFFFFFFF));
 
-    if ( mRoi != zeroRectangle )
+    if(mRoi != zeroRectangle)
     {
-        blctx.fillRect( mRoi.x, mRoi.y, mRoi.w, mRoi.h );
+        blctx.fillRect(mRoi.x,mRoi.y,mRoi.w,mRoi.h);
 
         blctx.setStrokeStyle(BLRgba32(0xFFFF0000));
         blctx.setStrokeWidth(1.0f);
-        blctx.strokeRect( mRoi.x, mRoi.y, mRoi.w, mRoi.h );
+        blctx.strokeRect(mRoi.x,mRoi.y,mRoi.w,mRoi.h);
 
-    }
-    else
+    } else
     {
         blctx.fillAll();
     }
 
-    mScene->Draw( mRoi, 0 );
+    mScene->Draw(mRoi,0);
 
     // Reset region of interest after each draw
-    memset ( &mRoi, 0, sizeof ( mRoi ) );
+    memset (&mRoi,0,sizeof (mRoi));
 
-    blctx.flush( BL_CONTEXT_FLUSH_SYNC );
+    blctx.flush(BL_CONTEXT_FLUSH_SYNC);
 }
 
 UOdysseyVectorRoot*
@@ -83,7 +81,7 @@ FOdysseyVectorEngine::GetScene()
 }
 
 void
-FOdysseyVectorEngine::InvalidateRegion( double x, double y, double w, double h )
+FOdysseyVectorEngine::InvalidateRegion(double x,double y,double w,double h)
 {
     mRoi.x = x;
     mRoi.y = y;
@@ -92,7 +90,7 @@ FOdysseyVectorEngine::InvalidateRegion( double x, double y, double w, double h )
 }
 
 void
-FOdysseyVectorEngine::InvalidateRegion( ::ULIS::FRectD& iRegion )
+FOdysseyVectorEngine::InvalidateRegion(::ULIS::FRectD& iRegion)
 {
     mRoi.x = iRegion.x;
     mRoi.y = iRegion.y;

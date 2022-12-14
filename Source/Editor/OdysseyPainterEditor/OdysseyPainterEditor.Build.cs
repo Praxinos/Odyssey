@@ -40,16 +40,26 @@ public class OdysseyPainterEditor : ModuleRules
                 "OdysseyEditor",
                 "OdysseyImaging",
                 "OdysseyHUDSystem",
+                "OdysseyLayer",
+                "OdysseyLayerStack",
                 "OdysseyStyle",
                 "OdysseyStylusInput",
+                "OdysseyTexture",
+                "OdysseyTextureEditor",
+                "OdysseyVector",
                 "OdysseyWidgets"
             }
         );
 
         PublicDependencyModuleNames.AddRange(
              new string[] {
+                "OdysseyLayer",
+                "OdysseyLayerStack",
                 "OdysseyPaintEngine",
                 "OdysseyShapes",
+                "OdysseyTexture",
+                "OdysseyTextureEditor",
+                "OdysseyVector",
                 "ULIS",
                 "ULISLoader"
              }

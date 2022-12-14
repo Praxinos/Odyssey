@@ -52,13 +52,16 @@ void
 FOdysseyTextureEditor::InitTools()
 {
 	mRasterDrawingTool = NewObject<UOdysseyTextureEditorRasterDrawingTool>();
+	mVectorDrawingTool = NewObject<UOdysseyTextureEditorVectorDrawingTool>();
 	mPaintBucketTool = NewObject<UOdysseyTextureEditorPaintBucketTool>();
-
+    
 	mRasterDrawingTool->SetEditor(this);
+    mVectorDrawingTool->SetEditor(this);
 	mPaintBucketTool->SetEditor(this);
 	mRasterDrawingTool->SetBrushContexts(mBrushContexts);
 
 	mTools.Add(mRasterDrawingTool);
+	mTools.Add(mVectorDrawingTool);
 	mTools.Add(mPaintBucketTool);
 	//mTextureRasterDrawingTool->OnApplyOverridesDelegate().AddRaw(this, &FOdysseyPainterEditor::OnApplyOverrides);
 }
@@ -68,6 +71,7 @@ FOdysseyTextureEditor::BindShortcuts(FBaseToolkit* iToolkit)
 {
 	FOdysseyPainterEditor::BindShortcuts(iToolkit);
 	mRasterDrawingTool->BindShortcuts(iToolkit);
+	mVectorDrawingTool->BindShortcuts(iToolkit);
 	mPaintBucketTool->BindShortcuts(iToolkit);
 }
 
@@ -76,6 +80,7 @@ FOdysseyTextureEditor::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
 {
 	FOdysseyPainterEditor::ExtendMenu(iOwner, iMenuName);
 	mRasterDrawingTool->ExtendMenu(iOwner, iMenuName);
+	mVectorDrawingTool->ExtendMenu(iOwner, iMenuName);
 	mPaintBucketTool->ExtendMenu(iOwner, iMenuName);
 }
 
@@ -181,6 +186,12 @@ FOdysseyTextureEditor::GetRasterDrawingTool() const
 	return mRasterDrawingTool;
 }
 
+UOdysseyTextureEditorVectorDrawingTool*
+FOdysseyTextureEditor::GetVectorDrawingTool() const
+{
+	return mVectorDrawingTool;
+}
+
 UOdysseyTextureEditorPaintBucketTool*
 FOdysseyTextureEditor::GetPaintBucketTool() const
 {
@@ -233,6 +244,7 @@ FOdysseyTextureEditor::AddReferencedObjects(FReferenceCollector& Collector)
 {
 	FOdysseyPainterEditor::AddReferencedObjects(Collector);
 	Collector.AddReferencedObject(mRasterDrawingTool);
+	Collector.AddReferencedObject(mVectorDrawingTool);
 	Collector.AddReferencedObject(mPaintBucketTool);
 }
 #undef LOCTEXT_NAMESPACE

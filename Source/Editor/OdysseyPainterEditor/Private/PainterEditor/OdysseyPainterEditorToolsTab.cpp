@@ -34,6 +34,7 @@ FOdysseyPainterEditorToolsTab::CreateWidget()
 {
     TArray<UOdysseyPainterEditorTool*> tools = {
         mEditor->GetRasterDrawingTool(),
+        mEditor->GetVectorDrawingTool(),
         mEditor->GetPaintBucketTool()
     };
 

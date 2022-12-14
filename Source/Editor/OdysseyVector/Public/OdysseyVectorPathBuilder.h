@@ -1,5 +1,7 @@
 #pragma once
 
+#include "CoreMinimal.h"
+
 #include <blend2d.h>
 #include <Core/Core.h>
 #include <Image/Block.h>
@@ -8,8 +10,14 @@
 #include "OdysseyVectorPath.h"
 #include "OdysseyVectorPathCubic.h"
 
-class FOdysseyVectorPathBuilder : public UOdysseyVectorObject
+#include "OdysseyVectorPathBuilder.generated.h"
+
+UCLASS()
+class ODYSSEYVECTOR_API UOdysseyVectorPathBuilder : public UOdysseyVectorObject
 {
+    public:
+        GENERATED_BODY()
+
     private:
         double mCumulAngle;
         double mCumulAngleLimit;
@@ -38,9 +46,10 @@ class FOdysseyVectorPathBuilder : public UOdysseyVectorObject
         void Sharp( FOdysseyVectorSegmentCubic& iCubicSegment, ::ULIS::FVec2D iEntryVector, ::ULIS::FVec2D iExitVector );
 
     public:
-       ~FOdysseyVectorPathBuilder();
-        //FOdysseyVectorPathBuilder();
-        FOdysseyVectorPathBuilder( UOdysseyVectorPathCubic* iCubicPath );
+       ~UOdysseyVectorPathBuilder();
+        //UOdysseyVectorPathBuilder();
+        UOdysseyVectorPathBuilder();
+        void Attach( UOdysseyVectorPathCubic* iCubicPath );
         FOdysseyVectorSegment* AppendPoint( double iX, double iY, double iRadius );
 
         bool PickPoint( double iX, double iY, double iRadius, uint64 iSelectionFlags );

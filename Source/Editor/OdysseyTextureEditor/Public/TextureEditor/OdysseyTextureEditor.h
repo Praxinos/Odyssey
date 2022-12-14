@@ -9,6 +9,7 @@
 #include "OdysseyTextureLayerStackUserData.h"
 #include "LayerStack/OdysseyTextureLayerStack.h"
 #include "Tools/RasterDrawingTool/OdysseyTextureEditorRasterDrawingTool.h"
+#include "Tools/VectorDrawingTool/OdysseyTextureEditorVectorDrawingTool.h"
 #include "Tools/PaintBucketTool/OdysseyTextureEditorPaintBucketTool.h"
 #include "Misc/OdysseyHandle.h"
 
@@ -40,6 +41,7 @@ public:
     UOdysseyTextureLayerStackUserData*       TextureUserData() const;
 
     virtual UOdysseyTextureEditorRasterDrawingTool* GetRasterDrawingTool() const override;
+    virtual UOdysseyTextureEditorVectorDrawingTool* GetVectorDrawingTool() const override;
     virtual UOdysseyTextureEditorPaintBucketTool* GetPaintBucketTool() const override;
 
 public:
@@ -64,6 +66,7 @@ private:
 	TSharedPtr<FOdysseyTextureEditorGUI> mGUI;
     
     UOdysseyTextureEditorRasterDrawingTool* mRasterDrawingTool;
+    UOdysseyTextureEditorVectorDrawingTool* mVectorDrawingTool;
     UOdysseyTextureEditorPaintBucketTool* mPaintBucketTool;
 
     TSharedPtr<IOdysseyHandle> mLayerStackPreloadHandle;
