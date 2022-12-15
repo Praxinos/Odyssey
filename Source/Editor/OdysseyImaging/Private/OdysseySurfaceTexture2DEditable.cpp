@@ -349,7 +349,7 @@ InvalidateTextureFromSourceDataUsingSortedRects( const ::ULIS::FBlock* iData, UT
                                 , ioSrcRects[i][j].h
                                 , 1
                                 , fmt
-                                , buildSettings[i][0].GetGammaSpace()
+                                , buildSettings[i][0].GetDestGammaSpace()
                             )
                         }
                     )
