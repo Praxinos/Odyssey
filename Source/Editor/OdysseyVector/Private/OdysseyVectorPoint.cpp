@@ -9,6 +9,12 @@ FOdysseyVectorPoint::FOdysseyVectorPoint()
     Set( 0.0f, 0.0f );
 }
 
+FOdysseyVectorPoint::FOdysseyVectorPoint( double iX, double iY, double iRadius )
+{
+    Set( iX, iY );
+    SetRadius( iRadius );
+}
+
 FOdysseyVectorPoint::FOdysseyVectorPoint( double iX, double iY )
 {
     Set( iX, iY );
@@ -105,8 +111,7 @@ FOdysseyVectorPoint::GetRadius()
 }
 
 void
-FOdysseyVectorPoint::SetRadius( double iRadius
-                       , bool iBuildSegments )
+FOdysseyVectorPoint::SetRadius( double iRadius )
 {
     mRadius = iRadius;
 }
@@ -275,6 +280,25 @@ FOdysseyVectorPoint::IsClosestSection( FOdysseyVectorSection& iStartSection
     }
 
     return true;
+}
+
+::ULIS::FRectD
+FOdysseyVectorPoint::GetRectangle()
+{
+    ::ULIS::FRectD bbox = { 0, 0, 0, 0 };
+    bool inited = false;
+
+    for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
+    {
+        FOdysseyVectorSegment* segment = static_cast<FOdysseyVectorSegment*>(*it);
+        ::ULIS::FRectD rect = segment->GetBoundingBox();
+
+        bbox = ( inited == false ) ? rect : bbox | rect;
+
+        inited = true;
+    }
+
+    return bbox;
 }
 
 ::ULIS::FVec2D

@@ -1,20 +1,18 @@
 #include "OdysseyVectorEngine.h"
 
-static BLContext* _currentBLContext;
-
 FOdysseyVectorEngine::~FOdysseyVectorEngine()
 {
     GetBLContext().end();
 }
 
-FOdysseyVectorEngine::FOdysseyVectorEngine( double iWidth, double iHeight )
+FOdysseyVectorEngine::FOdysseyVectorEngine(double iWidth,double iHeight)
 {
-    mBLImage = new BLImage( iWidth, iHeight, BL_FORMAT_PRGB32 );
+    mBLImage = new BLImage(iWidth,iHeight,BL_FORMAT_PRGB32);
 
     mScene = NewObject<UOdysseyVectorRoot>();
-    mScene->Init( "Vector Scene" );
+    mScene->Init("Vector Scene");
 
-    GetBLContext().begin( *mBLImage );
+    GetBLContext().begin(*mBLImage);
 }
 
 BLImage&
@@ -23,22 +21,44 @@ FOdysseyVectorEngine::GetBLImage()
     return *mBLImage;
 }
 
-void
-FOdysseyVectorEngine::BLContextMakeCurrent( BLContext* iContext )
-{
-    _currentBLContext = iContext;
-}
-
-BLContext*
+BLContext&
 FOdysseyVectorEngine::GetBLContext()
 {
-    return _currentBLContext;
+    static BLContext* blctx;
+
+    if(blctx == nullptr)
+    {
+        blctx = new BLContext();
+    }
+
+    return *blctx;
 }
 
 ::ULIS::FRectD&
 FOdysseyVectorEngine::GetInvalidateRegion()
 {
     return mRoi;
+}
+
+void
+FOdysseyVectorEngine::RenderSelected()
+{
+    BLContext& blctx = FOdysseyVectorEngine::GetBLContext();
+    std::list<UOdysseyVectorObject*> selectObjectList = mScene->GetSelectedObjectList();
+
+    blctx.setStrokeStyle(BLRgba32(0xFFFF0000));
+    blctx.setStrokeWidth(1.0f);
+
+    for( std::list<UOdysseyVectorObject*>::iterator it = selectObjectList.begin(); it != selectObjectList.end(); ++it )
+    {
+        UOdysseyVectorObject *obj = (*it);
+        ::ULIS::FRectD bbox = obj->GetBBox( false );
+
+        blctx.save();
+        blctx.setMatrix( obj->GetWorldMatrix() );
+        blctx.strokeRect( bbox.x, bbox.y, bbox.w, bbox.h );
+        blctx.restore();
+    }
 }
 
 void
@@ -58,22 +78,24 @@ FOdysseyVectorEngine::Render()
     {
         blctx.fillRect( mRoi.x, mRoi.y, mRoi.w, mRoi.h );
 
+        // view the updated zone ( testing purpose only )
         blctx.setStrokeStyle(BLRgba32(0xFFFF0000));
         blctx.setStrokeWidth(1.0f);
         blctx.strokeRect( mRoi.x, mRoi.y, mRoi.w, mRoi.h );
-
     }
     else
     {
         blctx.fillAll();
     }
 
-    mScene->Draw( mRoi, 0 );
+    mScene->Draw(mRoi,0);
+
+    RenderSelected();
 
     // Reset region of interest after each draw
-    memset ( &mRoi, 0, sizeof ( mRoi ) );
+    memset (&mRoi,0,sizeof (mRoi));
 
-    blctx.flush( BL_CONTEXT_FLUSH_SYNC );
+    blctx.flush(BL_CONTEXT_FLUSH_SYNC);
 }
 
 UOdysseyVectorRoot*

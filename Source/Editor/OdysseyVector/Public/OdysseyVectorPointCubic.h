@@ -7,7 +7,7 @@
 #include "OdysseyVectorPoint.h"
 #include "OdysseyVectorHandlePoint.h"
 
-class FOdysseyVectorPointCubic : public FOdysseyVectorPoint
+class ODYSSEYVECTOR_API FOdysseyVectorPointCubic : public FOdysseyVectorPoint
 {
     private:
         FOdysseyVectorHandlePoint mCtrlPoint;

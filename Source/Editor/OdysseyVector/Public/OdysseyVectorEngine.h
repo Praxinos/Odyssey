@@ -19,6 +19,7 @@ class DLLEXPORT FOdysseyVectorEngine
         BLImage& GetBLImage();
         ~FOdysseyVectorEngine();
         FOdysseyVectorEngine( double iWidth, double iHeight );
+        void RenderSelected();
         void Render();
         UOdysseyVectorRoot* GetScene();
         /*void Init( double iWidth, double iHeight );*/

@@ -32,8 +32,10 @@ class ODYSSEYVECTOR_API UOdysseyVectorRoot : public UOdysseyVectorObject
         void Init( std::string iName );
         void Select( double x, double y, double iRadius );
         void Select( UOdysseyVectorObject& iVecObj );
+        void Unselect( UOdysseyVectorObject& iVecObj );
         void ClearSelection();
         UOdysseyVectorObject* GetLastSelected();
+        std::list<UOdysseyVectorObject*> GetSelectedObjectList();
         void DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags );
         UOdysseyVectorObject* PickShape( double iX, double iY, double iRadius ) { return nullptr; };
 

@@ -19,12 +19,18 @@ UOdysseyVectorRoot::ClearSelection()
 }
 
 void
+UOdysseyVectorRoot::Unselect( UOdysseyVectorObject& iVecObj )
+{
+    iVecObj.SetIsSelected( false );
+    mSelectedObjectList.remove( &iVecObj );
+}
+
+void
 UOdysseyVectorRoot::Select( UOdysseyVectorObject& iVecObj )
 {
     if( std::find( mSelectedObjectList.begin(), mSelectedObjectList.end(), &iVecObj ) == mSelectedObjectList.end() )
     {
         iVecObj.SetIsSelected( true );
-
         mSelectedObjectList.push_back( &iVecObj );
     }
 }
@@ -105,6 +111,12 @@ UOdysseyVectorRoot::GroupSelectdObjects( )
 
 
     return group;
+}
+
+std::list<UOdysseyVectorObject*>
+UOdysseyVectorRoot::GetSelectedObjectList()
+{
+    return mSelectedObjectList;
 }
 
 void

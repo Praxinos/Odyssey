@@ -2,6 +2,8 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Tools/OdysseyPainterEditorTool.h"
+#include "LayerStack/OdysseyTextureLayerStack.h"
+#include "TextureEditor/OdysseyTextureEditor.h"
 
 #include "Misc/TransactionObjectEvent.h"
 
@@ -14,6 +16,59 @@ UOdysseyPainterEditorTool::~UOdysseyPainterEditorTool()
 UOdysseyPainterEditorTool::UOdysseyPainterEditorTool()
     : mEditor (nullptr)
 {
+}
+
+UOdysseyTextureLayerImageVector*
+UOdysseyPainterEditorTool::GetCurrentVectorImageLayer()
+{
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
+
+    if( layerStack )
+    {
+        UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
+
+        if( currentLayer )
+        {
+            if( currentLayer->GetClass() == UOdysseyTextureLayerImageVector::StaticClass() )
+            {
+                return Cast<UOdysseyTextureLayerImageVector>(currentLayer);
+            }
+        }
+    }
+
+    return nullptr;
+}
+
+void
+UOdysseyPainterEditorTool::RedrawCurrentLayer( const TArray<::ULIS::FRectI>& iRects )
+{
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
+    UOdysseyTextureLayer* currentLayer;
+
+    currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
+
+    for ( ::ULIS::FRectI rect : iRects )
+    {
+        // Redraw the whole screen if the rect is explicitly empty
+        if ( rect.Area() == 0 )
+        {
+            currentLayer->RenderImage( layerStack->GetSurface()->Block()
+                                     , layerStack->GetSurface()->Block()->Rect()
+                                     , layerStack->GetSurface()->Block()->Rect().Position()
+                                     , TArray<::ULIS::FEvent>() );
+
+            layerStack->GetSurface()->Invalidate( { layerStack->GetSurface()->Block()->Rect() } );
+        }
+        else
+        {
+            currentLayer->RenderImage( layerStack->GetSurface()->Block()
+                                     , rect
+                                     , rect.Position()
+                                     , TArray<::ULIS::FEvent>() );
+
+            layerStack->GetSurface()->Invalidate( { rect } );
+        }
+    }
 }
 
 void

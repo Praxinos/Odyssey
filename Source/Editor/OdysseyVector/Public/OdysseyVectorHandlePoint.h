@@ -5,7 +5,7 @@
 #include <Image/Block.h>
 #include "OdysseyVectorHandle.h"
 
-class FOdysseyVectorHandlePoint : public FOdysseyVectorHandle
+class ODYSSEYVECTOR_API FOdysseyVectorHandlePoint : public FOdysseyVectorHandle
 {
     private:
         FOdysseyVectorPoint& mParentPoint;

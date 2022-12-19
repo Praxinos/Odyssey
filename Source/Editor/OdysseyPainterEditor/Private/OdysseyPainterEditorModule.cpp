@@ -16,6 +16,7 @@
 #include "Tools/RasterDrawingTool/OdysseyBrushOptionsOverrides.h"
 #include "Tools/RasterDrawingTool/OdysseyBlendParametersOverrides.h"
 #include "FreehandShape/OdysseyFreehandShapeOverrides.h"
+#include "Tools/RasterDrawingTool/Customizations/OdysseyPainterEditorRasterDrawingToolOptionsCustomization.h"
 #include <ULIS>
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorModule"
@@ -64,6 +65,13 @@ FOdysseyPainterEditorModule::UnregisterSettings()
         return;
         
     settingsModule->UnregisterSettings( "Editor", "Plugins", "OdysseyPainterEditor" );
+}
+
+void
+FOdysseyPainterEditorModule::RegisterDetailCustomizations()
+{
+    FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
+    PropertyModule.RegisterCustomClassLayout(UOdysseyPainterEditorRasterDrawingTool::StaticClass()->GetFName(),FOnGetDetailCustomizationInstance::CreateStatic(&FOdysseyPainterEditorRasterDrawingToolOptionsCustomization::MakeInstance));
 }
 
 void

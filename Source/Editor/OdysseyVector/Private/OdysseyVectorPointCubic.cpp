@@ -124,7 +124,7 @@ FOdysseyVectorPointCubic::Set( double iX
 void
 FOdysseyVectorPointCubic::SetRadius( double iRadius, bool iBuildSegments )
 {
-    FOdysseyVectorPoint::SetRadius ( iRadius, iBuildSegments );
+    FOdysseyVectorPoint::SetRadius ( iRadius );
 
     if ( iBuildSegments == true )
     {

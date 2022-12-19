@@ -16,6 +16,9 @@ private:
 	void RegisterSettings();
 	void UnregisterSettings();
 
+    void RegisterDetailCustomizations();
+    void UnregisterDetailCustomizations();
+
     //Commands
 	void RegisterCommands();
 	void UnregisterCommands();

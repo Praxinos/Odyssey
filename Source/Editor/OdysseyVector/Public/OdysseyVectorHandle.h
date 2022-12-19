@@ -5,7 +5,7 @@
 #include <Image/Block.h>
 #include "OdysseyVectorPoint.h"
 
-class FOdysseyVectorHandle : public FOdysseyVectorPoint
+class ODYSSEYVECTOR_API FOdysseyVectorHandle : public FOdysseyVectorPoint
 {
     private:
 

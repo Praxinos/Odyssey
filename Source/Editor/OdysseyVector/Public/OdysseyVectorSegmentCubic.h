@@ -17,7 +17,7 @@ typedef struct _FPolygon {
     double toT;
 } FPolygon;
 
-class FOdysseyVectorSegmentCubic : public FOdysseyVectorSegment
+class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegment
 {
     protected:
         FOdysseyVectorHandleSegment mCtrlPoint[2];

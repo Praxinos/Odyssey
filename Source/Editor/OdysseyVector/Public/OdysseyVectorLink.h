@@ -5,7 +5,7 @@
 #include <Image/Block.h>
 #include "OdysseyVectorPoint.h"
 
-class FOdysseyVectorLink
+class ODYSSEYVECTOR_API FOdysseyVectorLink
 {
     protected:
         FOdysseyVectorPoint* mPoint[2];

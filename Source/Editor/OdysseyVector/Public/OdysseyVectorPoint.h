@@ -8,7 +8,7 @@ class FOdysseyVectorSegment;
 class UOdysseyVectorLoop;
 class FOdysseyVectorSection;
 
-class FOdysseyVectorPoint
+class ODYSSEYVECTOR_API FOdysseyVectorPoint
 {
     private:
 
@@ -28,9 +28,11 @@ class FOdysseyVectorPoint
         ~FOdysseyVectorPoint();
         FOdysseyVectorPoint();
         FOdysseyVectorPoint( double iX, double iY );
+        FOdysseyVectorPoint( double iX, double iY, double iRadius );
         virtual void AddSegment( FOdysseyVectorSegment* iSegment );
         void AddSection( FOdysseyVectorSection* iSection );
         void RemoveSection( FOdysseyVectorSection* iSection );
+        ::ULIS::FRectD GetRectangle();
         FOdysseyVectorSegment* GetLastSegment();
         FOdysseyVectorSegment* GetFirstSegment();
         virtual FOdysseyVectorSegment* GetSegment( FOdysseyVectorPoint& iOtherPoint );
@@ -48,7 +50,7 @@ class FOdysseyVectorPoint
         virtual uint32 GetType();
         virtual double GetT( FOdysseyVectorSegment& );
         double GetRadius();
-        virtual void SetRadius( double iRadius, bool iBuildSegments );
+        virtual void SetRadius( double iRadius );
         void InvalidateSegments();
         void March();
         bool HasSegment( FOdysseyVectorSegment& iSegment );
