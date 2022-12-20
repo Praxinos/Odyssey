@@ -28,6 +28,11 @@ FOdysseyTextureEditor::FOdysseyTextureEditor() :
 	mTexture(nullptr),
 	mGUI(nullptr),
 	mRasterDrawingTool(nullptr),
+	mVectorDrawingTool(nullptr),
+	mVectorEditPathTool(nullptr),
+	mVectorMoveObjectTool(nullptr),
+	mVectorRotateObjectTool(nullptr),
+	mVectorScaleObjectTool(nullptr),
 	mPaintBucketTool(nullptr)
 {
 	UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw(this, &FOdysseyTextureEditor::OnCurrentLayerChanged);
@@ -54,17 +59,26 @@ FOdysseyTextureEditor::InitTools()
 	mRasterDrawingTool = NewObject<UOdysseyTextureEditorRasterDrawingTool>();
 	mVectorDrawingTool = NewObject<UOdysseyTextureEditorVectorDrawingTool>();
 	mVectorEditPathTool = NewObject<UOdysseyTextureEditorVectorEditPathTool>();
+	mVectorMoveObjectTool = NewObject<UOdysseyTextureEditorVectorMoveObjectTool>();
+	mVectorRotateObjectTool = NewObject<UOdysseyTextureEditorVectorRotateObjectTool>();
+	mVectorScaleObjectTool = NewObject<UOdysseyTextureEditorVectorScaleObjectTool>();
 	mPaintBucketTool = NewObject<UOdysseyTextureEditorPaintBucketTool>();
 
 	mRasterDrawingTool->SetEditor(this);
     mVectorDrawingTool->SetEditor(this);
     mVectorEditPathTool->SetEditor(this);
+    mVectorMoveObjectTool->SetEditor(this);
+    mVectorRotateObjectTool->SetEditor(this);
+    mVectorScaleObjectTool->SetEditor(this);
 	mPaintBucketTool->SetEditor(this);
 	mRasterDrawingTool->SetBrushContexts(mBrushContexts);
 
 	mTools.Add(mRasterDrawingTool);
     mTools.Add(mVectorDrawingTool);
     mTools.Add(mVectorEditPathTool);
+    mTools.Add(mVectorMoveObjectTool);
+    mTools.Add(mVectorRotateObjectTool);
+    mTools.Add(mVectorScaleObjectTool);
 	mTools.Add(mPaintBucketTool);
 	//mTextureRasterDrawingTool->OnApplyOverridesDelegate().AddRaw(this, &FOdysseyPainterEditor::OnApplyOverrides);
 }
@@ -76,6 +90,9 @@ FOdysseyTextureEditor::BindShortcuts(FBaseToolkit* iToolkit)
 	mRasterDrawingTool->BindShortcuts(iToolkit);
 	mVectorDrawingTool->BindShortcuts(iToolkit);
 	mVectorEditPathTool->BindShortcuts(iToolkit);
+	mVectorMoveObjectTool->BindShortcuts(iToolkit);
+	mVectorRotateObjectTool->BindShortcuts(iToolkit);
+	mVectorScaleObjectTool->BindShortcuts(iToolkit);
 	mPaintBucketTool->BindShortcuts(iToolkit);
 }
 
@@ -86,6 +103,9 @@ FOdysseyTextureEditor::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
 	mRasterDrawingTool->ExtendMenu(iOwner, iMenuName);
 	mVectorDrawingTool->ExtendMenu(iOwner, iMenuName);
 	mVectorEditPathTool->ExtendMenu(iOwner, iMenuName);
+	mVectorMoveObjectTool->ExtendMenu(iOwner, iMenuName);
+	mVectorRotateObjectTool->ExtendMenu(iOwner, iMenuName);
+	mVectorScaleObjectTool->ExtendMenu(iOwner, iMenuName);
 	mPaintBucketTool->ExtendMenu(iOwner, iMenuName);
 }
 
@@ -203,6 +223,24 @@ FOdysseyTextureEditor::GetVectorEditPathTool() const
     return mVectorEditPathTool;
 }
 
+UOdysseyTextureEditorVectorMoveObjectTool*
+FOdysseyTextureEditor::GetVectorMoveObjectTool() const
+{
+    return mVectorMoveObjectTool;
+}
+
+UOdysseyTextureEditorVectorRotateObjectTool*
+FOdysseyTextureEditor::GetVectorRotateObjectTool() const
+{
+    return mVectorRotateObjectTool;
+}
+
+UOdysseyTextureEditorVectorScaleObjectTool*
+FOdysseyTextureEditor::GetVectorScaleObjectTool() const
+{
+    return mVectorScaleObjectTool;
+}
+
 UOdysseyTextureEditorPaintBucketTool*
 FOdysseyTextureEditor::GetPaintBucketTool() const
 {
@@ -257,6 +295,9 @@ FOdysseyTextureEditor::AddReferencedObjects(FReferenceCollector& Collector)
 	Collector.AddReferencedObject(mRasterDrawingTool);
 	Collector.AddReferencedObject(mVectorDrawingTool);
 	Collector.AddReferencedObject(mVectorEditPathTool);
+	Collector.AddReferencedObject(mVectorMoveObjectTool);
+	Collector.AddReferencedObject(mVectorRotateObjectTool);
+	Collector.AddReferencedObject(mVectorScaleObjectTool);
 	Collector.AddReferencedObject(mPaintBucketTool);
 }
 #undef LOCTEXT_NAMESPACE

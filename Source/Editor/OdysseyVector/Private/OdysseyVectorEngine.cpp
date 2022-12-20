@@ -121,3 +121,12 @@ FOdysseyVectorEngine::InvalidateRegion( ::ULIS::FRectD& iRegion )
     mRoi.w = iRegion.w;
     mRoi.h = iRegion.h;
 }
+
+void
+FOdysseyVectorEngine::InvalidateRegion( ::ULIS::FRectI& iRegion )
+{
+    mRoi.x = iRegion.x;
+    mRoi.y = iRegion.y;
+    mRoi.w = iRegion.w;
+    mRoi.h = iRegion.h;
+}

@@ -25,5 +25,6 @@ class DLLEXPORT FOdysseyVectorEngine
         /*void Init( double iWidth, double iHeight );*/
         void InvalidateRegion( double x, double y, double w, double h );
         void InvalidateRegion( ::ULIS::FRectD& iRegion );
+        void InvalidateRegion( ::ULIS::FRectI& iRegion );
         ::ULIS::FRectD& GetInvalidateRegion();
 };

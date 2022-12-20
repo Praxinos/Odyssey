@@ -24,14 +24,14 @@ class ODYSSEYVECTOR_API UOdysseyVectorObject : public UObject
         BLMatrix2D mWorldMatrix;
         BLMatrix2D mInverseWorldMatrix;
         std::list<UOdysseyVectorObject*> mChildrenList;
-        uint32 mStrokeColor;
-        double mStrokeWidth;
-        uint32 mFillColor;
         UOdysseyVectorObject* mParent;
         bool mIsFilled;
         bool mIsSelected;
         bool mIsInvalidated;
         ::ULIS::FRectD mBBox;
+        uint32 mStrokeColor;
+        double mStrokeWidth;
+        uint32 mFillColor;
         std::string mName;
 
     public:

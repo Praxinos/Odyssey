@@ -337,6 +337,9 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "PainterEditor.TopBar.Eraser32", new IMAGE_BRUSH( "PainterEditor/eraser_32", mIcon32x32 ) );
 
     //PainterEditor - ToolsTab
+    Set( "PainterEditor.ToolsTab.MoveObjectTool64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/move_object_tool_64", mIcon64x64 ) );
+    Set( "PainterEditor.ToolsTab.RotateObjectTool64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/rotate_object_tool_64", mIcon64x64 ) );
+    Set( "PainterEditor.ToolsTab.ScaleObjectTool64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/scale_object_tool_64", mIcon64x64 ) );
     Set( "PainterEditor.ToolsTab.DrawingTool64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/drawing_tool_64", mIcon64x64 ) );
     Set( "PainterEditor.ToolsTab.DrawingTool16", new IMAGE_BRUSH( "PainterEditor/ToolsTab/drawing_tool_16", mIcon16x16 ) );
     Set( "PainterEditor.ToolsTab.ClearLayer64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/clear_layer_64", mIcon64x64 ) );

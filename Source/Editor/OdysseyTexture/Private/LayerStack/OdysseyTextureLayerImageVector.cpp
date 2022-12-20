@@ -86,6 +86,8 @@ UOdysseyTextureLayerImageVector::RenderImage(::ULIS::FBlock* ioBlock, const ::UL
     if (!ioBlock)
         return iWaitList;
 
+    // TODO: set region of interest as parameter ?
+    mVEngine->Render();
 
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(mBlock->Format());
 
@@ -93,9 +95,6 @@ UOdysseyTextureLayerImageVector::RenderImage(::ULIS::FBlock* ioBlock, const ::UL
         [this, &ctx](::ULIS::FBlock* ioDest, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList) -> TArray<::ULIS::FEvent>
         {
             ::ULIS::FEvent eventBlend;
-
-            // TODO: set region of interest as parameter ?
-            mVEngine->Render();
 
             ctx.Blend(
                 *mBlock,
@@ -111,13 +110,12 @@ UOdysseyTextureLayerImageVector::RenderImage(::ULIS::FBlock* ioBlock, const ::UL
                 &eventBlend
             );
 
-            ctx.Finish();
-
             return { eventBlend };
         }
     );
 
     ctx.Flush();
+    ctx.Finish();
 
     return eventConvertAndExecute;
 }

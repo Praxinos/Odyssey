@@ -182,6 +182,7 @@ UOdysseyPainterEditorVectorEditPathTool::OnMouseDrag(const FOdysseyPoint& iPoint
                 std::list<FOdysseyVectorPoint*> selectedPointList = cubicPath->GetSelectedPointList();
                 ::ULIS::FRectD localInvalidatedArea = { 0, 0, 0, 0 };
                 ::ULIS::FRectI invalidatedArea;
+                ::ULIS::FRectI totalInvalidatedArea;
                 BLPoint worldAreaP1;
                 BLPoint worldAreaP2;
                 bool inited = false;
@@ -208,10 +209,14 @@ UOdysseyPainterEditorVectorEditPathTool::OnMouseDrag(const FOdysseyPoint& iPoint
                                                             , ::ULIS::FMath::Max(worldAreaP1.x,worldAreaP2.x)
                                                             , ::ULIS::FMath::Max(worldAreaP1.y,worldAreaP2.y) );
 
+                totalInvalidatedArea = invalidatedArea | oldInvalidatedArea;
+
 //UE_LOG(LogTemp, Warning, TEXT("%d %d %d %d"), invalidatedArea.x, invalidatedArea.y, invalidatedArea.w, invalidatedArea.h );
                 currentVectorLayer->GetVectorEngine()->GetScene()->Update();
 
-                RedrawCurrentLayer( { /*{ 0, 0, 0, 0 }*/ invalidatedArea | oldInvalidatedArea } );
+                currentVectorLayer->GetVectorEngine()->InvalidateRegion( totalInvalidatedArea );
+
+                RedrawCurrentLayer( { /*{ 0, 0, 0, 0 }*/ totalInvalidatedArea } );
 
                 mOldLocalMouseX = localCoords.x;
                 mOldLocalMouseY = localCoords.y;

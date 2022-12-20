@@ -8,6 +8,9 @@
 #include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
 #include "Tools/VectorDrawingTool/OdysseyPainterEditorVectorDrawingTool.h"
 #include "Tools/VectorEditPathTool/OdysseyPainterEditorVectorEditPathTool.h"
+#include "Tools/VectorMoveObjectTool/OdysseyPainterEditorVectorMoveObjectTool.h"
+#include "Tools/VectorRotateObjectTool/OdysseyPainterEditorVectorRotateObjectTool.h"
+#include "Tools/VectorScaleObjectTool/OdysseyPainterEditorVectorScaleObjectTool.h"
 #include "Tools/PaintBucketTool/OdysseyPainterEditorPaintBucketTool.h"
 #include <ULIS>
 
@@ -49,6 +52,9 @@ public:
     virtual UOdysseyPainterEditorRasterDrawingTool*                  GetRasterDrawingTool() const = 0;
     virtual UOdysseyPainterEditorVectorDrawingTool*                  GetVectorDrawingTool() const = 0;
     virtual UOdysseyPainterEditorVectorEditPathTool*                 GetVectorEditPathTool() const = 0;
+    virtual UOdysseyPainterEditorVectorMoveObjectTool*               GetVectorMoveObjectTool() const = 0;
+    virtual UOdysseyPainterEditorVectorRotateObjectTool*             GetVectorRotateObjectTool() const = 0;
+    virtual UOdysseyPainterEditorVectorScaleObjectTool*              GetVectorScaleObjectTool() const = 0;
     virtual UOdysseyPainterEditorPaintBucketTool*                    GetPaintBucketTool() const = 0;
 
     void SelectDefaultTool();

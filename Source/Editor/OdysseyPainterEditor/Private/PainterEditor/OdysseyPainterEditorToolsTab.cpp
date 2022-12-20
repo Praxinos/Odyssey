@@ -36,6 +36,9 @@ FOdysseyPainterEditorToolsTab::CreateWidget()
         mEditor->GetRasterDrawingTool(),
         mEditor->GetVectorDrawingTool(),
         mEditor->GetVectorEditPathTool(),
+        mEditor->GetVectorMoveObjectTool(),
+        mEditor->GetVectorRotateObjectTool(),
+        mEditor->GetVectorScaleObjectTool(),
         mEditor->GetPaintBucketTool()
     };
 

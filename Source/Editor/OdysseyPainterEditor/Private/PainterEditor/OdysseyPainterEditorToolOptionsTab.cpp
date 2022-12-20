@@ -40,6 +40,9 @@ FOdysseyPainterEditorToolOptionsTab::CreateWidget()
     SetWidgetForTool(mEditor->GetRasterDrawingTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetRasterDrawingTool()));
     SetWidgetForTool(mEditor->GetVectorDrawingTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorDrawingTool()));
     SetWidgetForTool(mEditor->GetVectorEditPathTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorEditPathTool()));
+    SetWidgetForTool(mEditor->GetVectorMoveObjectTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorMoveObjectTool()));
+    SetWidgetForTool(mEditor->GetVectorRotateObjectTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorRotateObjectTool()));
+    SetWidgetForTool(mEditor->GetVectorScaleObjectTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorScaleObjectTool()));
     //mToolsTab->GetToolsTab()->SetWidgetForTool(mEditor->GetVectorDrawingTool(), SNew(SOdysseyPainterVectorDrawingTool, mEditor->GetVectorDrawingTool()));
 
     return mWidgetSwitcher;
