@@ -1,5 +1,7 @@
 #pragma once
 
+#include "CoreMinimal.h"
+
 #include <blend2d.h>
 #include <Core/Core.h>
 #include <Image/Block.h>
@@ -7,6 +9,8 @@
 #include "OdysseyVectorPoint.h"
 #include "OdysseyVectorHandleSegment.h"
 #include "OdysseyVectorSegment.h"
+
+#include "OdysseyVectorSegmentCubic.generated.h"
 
 class UOdysseyVectorPathCubic;
 
@@ -17,10 +21,39 @@ typedef struct _FPolygon {
     double toT;
 } FPolygon;
 
-class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegment
+UCLASS()
+class ODYSSEYVECTOR_API UOdysseyVectorSegmentCubic : public UOdysseyVectorSegment
 {
+    public:
+        GENERATED_BODY()
+
+    public:
+        void Init( UOdysseyVectorPathCubic* iPath
+                 , UOdysseyVectorVertexCubic* iPoint0
+                 , UOdysseyVectorVertexCubic* iPoint1 );
+
+        static UOdysseyVectorSegmentCubic* New( UOdysseyVectorPathCubic* iPath
+                                              , UOdysseyVectorVertexCubic* iPoint0
+                                              , UOdysseyVectorVertexCubic* iPoint1 );
+
+        void Init( UOdysseyVectorPathCubic* iPath
+                 , UOdysseyVectorVertexCubic* iPoint0
+                 , double iCtrlPoint0x
+                 , double iCtrlPoint0y
+                 , double iCtrlPoint1x
+                 , double iCtrlPoint1y
+                 , UOdysseyVectorVertexCubic* iPoint1 );
+
+        static UOdysseyVectorSegmentCubic* New( UOdysseyVectorPathCubic* iPath
+                                              , UOdysseyVectorVertexCubic* iPoint0
+                                              , double iCtrlPoint0x
+                                              , double iCtrlPoint0y
+                                              , double iCtrlPoint1x
+                                              , double iCtrlPoint1y
+                                              , UOdysseyVectorVertexCubic* iPoint1 );
+
     protected:
-        FOdysseyVectorHandleSegment mCtrlPoint[2];
+        UOdysseyVectorHandleSegment mCtrlPoint[2];
         std::vector<FPolygon> mPolygonCache;
         double mDistanceSquared;
         BLPath mBLPath;
@@ -46,10 +79,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
                                    , int    iPolygonID );
 
     public:
-        ~FOdysseyVectorSegmentCubic(){};
-        FOdysseyVectorSegmentCubic( UOdysseyVectorPathCubic& iPath, FOdysseyVectorPointCubic* iPoint0, FOdysseyVectorPointCubic* iPoint1 );
-        FOdysseyVectorSegmentCubic( UOdysseyVectorPathCubic& iPath, FOdysseyVectorPointCubic* iPoint0, double iCtrlPoint0x, double iCtrlPoint0y, double iCtrlPoint1x, double iCtrlPoint1y, FOdysseyVectorPointCubic* iPoint1 );
-        FOdysseyVectorHandleSegment& GetControlPoint( int iCtrlPointNum );
+        ~UOdysseyVectorSegmentCubic();
+         UOdysseyVectorSegmentCubic();
+
+        UOdysseyVectorHandleSegment& GetControlPoint( int iCtrlPointNum );
         void Draw( ::ULIS::FRectD &iRoi );
         void DrawStructure( ::ULIS::FRectD &iRoi, double iZoomFactor );
         void DrawIntersections ( ::ULIS::FRectD &iRoi, double iZoomFactor );
@@ -65,7 +98,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
         uint32 GetPolygonCount(); // TODO: use vector size() method.
         std::vector<FPolygon>& GetPolygonCache();
         void IntersectPath( UOdysseyVectorPathCubic& iPath );
-        void Intersect( FOdysseyVectorSegmentCubic& iOther );
+        void Intersect( UOdysseyVectorSegmentCubic& iOther );
         void Update();
         void BuildVariable();
         double GetDistanceSquared();

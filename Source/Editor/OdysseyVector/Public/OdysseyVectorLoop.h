@@ -20,19 +20,31 @@ class ODYSSEYVECTOR_API UOdysseyVectorLoop : public UOdysseyVectorObject
     public:
         GENERATED_BODY()
 
+    public:
+        static UOdysseyVectorLoop* New( UOdysseyVectorPath* iParent
+                                      , uint64 iID
+                                      , UOdysseyVectorVertex* iLoopVertex
+                                      , std::list<UOdysseyVectorVertex*>& iVertexList
+                                      , std::list<FOdysseyVectorSection*>& iSectionList );
+        void Init( UOdysseyVectorPath* iParent
+                 , uint64 iID
+                 , UOdysseyVectorVertex* iLoopVertex
+                 , std::list<UOdysseyVectorVertex*>& iVertexList
+                 , std::list<FOdysseyVectorSection*>& iSectionList );
+
     private:
         void UpdateShape();
         UOdysseyVectorObject* CopyShape();
 
         void BuildSegmentCubic( std::vector<BLPoint>& iPointArray
-                              , FOdysseyVectorSegmentCubic& iSegment
+                              , UOdysseyVectorSegmentCubic& iSegment
                               , double iFromT
                               , double iToT );
 
     protected :
         uint64 mID;
-        FOdysseyVectorPoint* mLoopPoint;
-        std::list<FOdysseyVectorPoint*> mPointList;
+        UOdysseyVectorVertex* mLoopVertex;
+        std::list<UOdysseyVectorVertex*> mVertexList;
         std::list<FOdysseyVectorSection*> mSectionList;
 
         std::vector<BLPoint> mPointArray;
@@ -40,17 +52,11 @@ class ODYSSEYVECTOR_API UOdysseyVectorLoop : public UOdysseyVectorObject
 
     public:
         ~UOdysseyVectorLoop();
-        void Init( UOdysseyVectorPath* iParent
-                 , uint64 iID
-                 , FOdysseyVectorPoint* iLoopPoint
-                 , std::list<FOdysseyVectorPoint*>& iPointList
-                 , std::list<FOdysseyVectorSection*>& iSectionList );
-
         void DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags );
         UOdysseyVectorObject* PickShape( double iX, double iY, double iRadius );
         void DrawPoints( ::ULIS::FRectD& iRoi );
 
-        void Unselect( FOdysseyVectorPoint* iPoint ) { };
+        void Unselect( UOdysseyVectorVertex* iPoint ) { };
         bool PickPoint( double iX, double iY, double iRadius ) { return false; };
         uint64 GetID();
         static uint64 GenerateID( std::list<FOdysseyVectorSection*> iSectionList );

@@ -7,19 +7,35 @@ UOdysseyVectorLoop::~UOdysseyVectorLoop()
 void
 UOdysseyVectorLoop::Init( UOdysseyVectorPath* iParent
                         , uint64 iID
-                        , FOdysseyVectorPoint* iLoopPoint
-                        , std::list<FOdysseyVectorPoint*>& iLoopPointList
+                        , UOdysseyVectorVertex* iLoopVertex
+                        , std::list<UOdysseyVectorVertex*>& iLoopVertexList
                         , std::list<FOdysseyVectorSection*>& iLoopSectionList )
 
 {
     mParent = Cast<UOdysseyVectorObject>(iParent);
 
     mID = iID;
-    mLoopPoint = iLoopPoint;
-    mPointList = iLoopPointList;
+    mLoopVertex = iLoopVertex;
+    mVertexList = iLoopVertexList;
     mSectionList = iLoopSectionList;
 
     Build();
+}
+
+//static
+UOdysseyVectorLoop*
+UOdysseyVectorLoop::New( UOdysseyVectorPath* iParent
+                       , uint64 iID
+                       , UOdysseyVectorVertex* iLoopVertex
+                       , std::list<UOdysseyVectorVertex*>& iLoopVertexList
+                       , std::list<FOdysseyVectorSection*>& iLoopSectionList )
+
+{
+    UOdysseyVectorLoop* loop = NewObject<UOdysseyVectorLoop>();
+
+    loop->Init ( iParent, iID, iLoopVertex, iLoopVertexList, iLoopSectionList );
+
+    return loop;
 }
 
 uint64
@@ -101,11 +117,11 @@ UOdysseyVectorLoop::GenerateID( std::list<FOdysseyVectorSection*> iSectionList )
 void
 UOdysseyVectorLoop::Detach()
 {
-    for( std::list<FOdysseyVectorPoint*>::iterator it = mPointList.begin(); it != mPointList.end(); ++it )
+    for( std::list<UOdysseyVectorVertex*>::iterator it = mVertexList.begin(); it != mVertexList.end(); ++it )
     {
-        FOdysseyVectorPoint* point = static_cast<FOdysseyVectorPoint*>(*it);
+        UOdysseyVectorVertex* vertex = static_cast<UOdysseyVectorVertex*>(*it);
 
-        point->RemoveLoop( this );
+        vertex->RemoveLoop( this );
     }
 
     for( std::list<FOdysseyVectorSection*>::iterator it = mSectionList.begin(); it != mSectionList.end(); ++it )
@@ -119,11 +135,11 @@ UOdysseyVectorLoop::Detach()
 void
 UOdysseyVectorLoop::Attach()
 {
-    for( std::list<FOdysseyVectorPoint*>::iterator it = mPointList.begin(); it != mPointList.end(); ++it )
+    for( std::list<UOdysseyVectorVertex*>::iterator it = mVertexList.begin(); it != mVertexList.end(); ++it )
     {
-        FOdysseyVectorPoint* point = static_cast<FOdysseyVectorPoint*>(*it);
+        UOdysseyVectorVertex* vertex = static_cast<UOdysseyVectorVertex*>(*it);
 
-        point->AddLoop( this );
+        vertex->AddLoop( this );
     }
 
     for( std::list<FOdysseyVectorSection*>::iterator it = mSectionList.begin(); it != mSectionList.end(); ++it )
@@ -136,7 +152,7 @@ UOdysseyVectorLoop::Attach()
 
 void
 UOdysseyVectorLoop::BuildSegmentCubic( std::vector<BLPoint>& iPointArray
-                                     , FOdysseyVectorSegmentCubic& iSegment
+                                     , UOdysseyVectorSegmentCubic& iSegment
                                      , double iFromT
                                      , double iToT )
 {
@@ -210,14 +226,14 @@ UOdysseyVectorLoop::DrawPoints( ::ULIS::FRectD& iRoi )
     blctx.setStrokeStyle( BLRgba32( 0xFFFF8000 ) );
     blctx.setFillStyle( BLRgba32( 0xFFFF8000 ) );
 
-    if ( mPointList.size() ) 
+    if ( mVertexList.size() ) 
     {
-        for( std::list<FOdysseyVectorPoint*>::iterator it = mPointList.begin(); it != mPointList.end(); ++it )
+        for( std::list<UOdysseyVectorVertex*>::iterator it = mVertexList.begin(); it != mVertexList.end(); ++it )
         {
-            FOdysseyVectorPoint* point = static_cast<FOdysseyVectorPoint*>(*it);
-            ::ULIS::FVec2D& pointAt = point->GetCoords();
+            UOdysseyVectorVertex* vertex = static_cast<UOdysseyVectorVertex*>(*it);
+            ::ULIS::FVec2D& vertexAt = vertex->GetCoords();
 
-            blctx.fillRect ( pointAt.x - 5, pointAt.y - 5, 10, 10 );
+            blctx.fillRect ( vertexAt.x - 5, vertexAt.y - 5, 10, 10 );
         }
     }
 }
@@ -235,29 +251,28 @@ UOdysseyVectorLoop::Build()
     if ( mSectionList.size() ) 
     {
         FOdysseyVectorSection* firstSection = mSectionList.front();
-        FOdysseyVectorSegment& firstSegment = firstSection->GetSegment();
-        ::ULIS::FVec2D originAt = mLoopPoint->GetPosition( firstSegment );
-        FOdysseyVectorPoint* currentPoint = mLoopPoint;
+        UOdysseyVectorSegment& firstSegment = firstSection->GetSegment();
+        ::ULIS::FVec2D originAt = mLoopVertex->GetPosition( firstSegment );
+        UOdysseyVectorVertex* currentVertex = mLoopVertex;
 
         mPath.moveTo( originAt.x, originAt.y );
 
         for( std::list<FOdysseyVectorSection*>::iterator it = mSectionList.begin(); it != mSectionList.end(); ++it )
         {
             FOdysseyVectorSection* section = static_cast<FOdysseyVectorSection*>(*it);
-            FOdysseyVectorSegment& segment = section->GetSegment();
-            FOdysseyVectorPoint* nextPoint = ( currentPoint == section->GetPoint(0) ) ? section->GetPoint(1) : section->GetPoint(0);
-            double currentPointT = currentPoint->GetT( segment );
-            double    nextPointT =    nextPoint->GetT( segment );
+            UOdysseyVectorSegment& segment = section->GetSegment();
+            UOdysseyVectorVertex* nextVertex = ( currentVertex == section->GetVertex(0) ) ? section->GetVertex(1) : section->GetVertex(0);
+            double currentVertexT = currentVertex->GetT( segment );
+            double    nextVertexT =    nextVertex->GetT( segment );
 
-            BuildSegmentCubic ( mPointArray, static_cast<FOdysseyVectorSegmentCubic&>(segment), currentPointT, nextPointT );
+            BuildSegmentCubic ( mPointArray, static_cast<UOdysseyVectorSegmentCubic&>(segment), currentVertexT, nextVertexT );
 
-            currentPoint = nextPoint;
+            currentVertex = nextVertex;
         }
 
         mPath.close();
     }
 }
-
 
 void
 UOdysseyVectorLoop::DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags )
@@ -266,7 +281,7 @@ UOdysseyVectorLoop::DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags )
 
     if ( IsFilled() )
     {
-    /*if ( mPointList.size() ) 
+    /*if ( mVertexList.size() ) 
     {*/
        blctx.setFillStyle( BLRgba32( mFillColor ) );
 

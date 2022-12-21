@@ -1,34 +1,55 @@
 #include "OdysseyVectorSegment.h"
 
-FOdysseyVectorSegment::~FOdysseyVectorSegment()
+UOdysseyVectorSegment::~UOdysseyVectorSegment()
 {
 }
 
-FOdysseyVectorSegment::FOdysseyVectorSegment( UOdysseyVectorPath& iPath
-                                            , FOdysseyVectorPoint* iPoint0
-                                            , FOdysseyVectorPoint* iPoint1 )
-    : FOdysseyVectorLink ( iPoint0, iPoint1 )
-    , mPath ( iPath )
+UOdysseyVectorSegment::UOdysseyVectorSegment()
+    : UOdysseyVectorLink ()
+    , mPath ( nullptr )
 {
-    /*AddSection ( new FOdysseyVectorSection ( *this, mPoint[0], mPoint[1] ) );*/
+    /*AddSection ( new FOdysseyVectorSection ( *this, mVertex[0], mVertex[1] ) );*/
 }
 
-UOdysseyVectorPath&
-FOdysseyVectorSegment::GetPath()
+void
+UOdysseyVectorSegment::Init( UOdysseyVectorPath* iPath
+                           , UOdysseyVectorVertex* iVertex0
+                           , UOdysseyVectorVertex* iVertex1 )
+{
+    UOdysseyVectorLink::Init ( iVertex0, iVertex1 );
+
+    mPath = iPath;
+}
+
+// static
+UOdysseyVectorSegment*
+UOdysseyVectorSegment::New( UOdysseyVectorPath* iPath
+                          , UOdysseyVectorVertex* iVertex0
+                          , UOdysseyVectorVertex* iVertex1 )
+{
+    UOdysseyVectorSegment* segment = NewObject<UOdysseyVectorSegment>();
+
+    segment->Init ( iPath, iVertex0, iVertex1 );
+
+    return segment;
+}
+
+UOdysseyVectorPath*
+UOdysseyVectorSegment::GetPath()
 {
     return mPath;
 }
 
 FOdysseyVectorSection*
-FOdysseyVectorSegment::GetSection ( double t )
+UOdysseyVectorSegment::GetSection ( double t )
 {
     for( std::list<FOdysseyVectorSection*>::iterator it = mSectionList.begin(); it != mSectionList.end(); ++it )
     {
         FOdysseyVectorSection* section = static_cast<FOdysseyVectorSection*>(*it);
-        FOdysseyVectorPoint* point0 = section->GetPoint(0);
-        FOdysseyVectorPoint* point1 = section->GetPoint(1);
-        double fromT = point0->GetT( *this );
-        double   toT = point1->GetT( *this );
+        UOdysseyVectorVertex* vertex0 = section->GetVertex(0);
+        UOdysseyVectorVertex* vertex1 = section->GetVertex(1);
+        double fromT = vertex0->GetT( *this );
+        double   toT = vertex1->GetT( *this );
 
         if ( ( t >= fromT ) && ( t <= toT ) )
         {
@@ -40,21 +61,21 @@ FOdysseyVectorSegment::GetSection ( double t )
 }
 
 void
-FOdysseyVectorSegment::AddSection ( FOdysseyVectorSection* iSection )
+UOdysseyVectorSegment::AddSection ( FOdysseyVectorSection* iSection )
 {
-    iSection->GetPoint(0)->AddSection( iSection );
-    iSection->GetPoint(1)->AddSection( iSection );
+    iSection->GetVertex(0)->AddSection( iSection );
+    iSection->GetVertex(1)->AddSection( iSection );
 
     mSectionList.push_back( iSection );
 }
 
 void
-FOdysseyVectorSegment::RemoveSection ( FOdysseyVectorSection* iSection )
+UOdysseyVectorSegment::RemoveSection ( FOdysseyVectorSection* iSection )
 {
     std::list<UOdysseyVectorLoop*> loopList = iSection->GetLoopList();
 
-    iSection->GetPoint(0)->RemoveSection( iSection );
-    iSection->GetPoint(1)->RemoveSection( iSection );
+    iSection->GetVertex(0)->RemoveSection( iSection );
+    iSection->GetVertex(1)->RemoveSection( iSection );
 
     mSectionList.remove( iSection );
 
@@ -62,84 +83,84 @@ FOdysseyVectorSegment::RemoveSection ( FOdysseyVectorSection* iSection )
     {
         UOdysseyVectorLoop* loop = static_cast<UOdysseyVectorLoop*>(*it);
 
-        mPath.RemoveLoop( loop );
+        mPath->RemoveLoop( loop );
     }
 }
 
 void
-FOdysseyVectorSegment::AddIntersection ( FOdysseyVectorPointIntersection* iIntersectionPoint )
+UOdysseyVectorSegment::AddIntersection ( UOdysseyVectorVertexIntersection* iIntersectionVertex )
 {
-    double t = iIntersectionPoint->GetT( *this );
+    double t = iIntersectionVertex->GetT( *this );
     FOdysseyVectorSection* section = GetSection ( t );
-    FOdysseyVectorPoint* point[3] = { section->GetPoint(0), iIntersectionPoint, section->GetPoint(1) };
-    FOdysseyVectorSection* subSection[2] = { new FOdysseyVectorSection ( *this, point[0], point[1] )
-                                    , new FOdysseyVectorSection ( *this, point[1], point[2] ) };
+    UOdysseyVectorVertex* vertex[3] = { section->GetVertex(0), iIntersectionVertex, section->GetVertex(1) };
+    FOdysseyVectorSection* subSection[2] = { new FOdysseyVectorSection ( *this, vertex[0], vertex[1] )
+                                           , new FOdysseyVectorSection ( *this, vertex[1], vertex[2] ) };
 
     // this does not release memory so that we can undo that later
     RemoveSection( section );
 
-    mIntersectionPointList.push_back( iIntersectionPoint );
+    mIntersectionVertexList.push_back( iIntersectionVertex );
 
     AddSection ( subSection[0] );
     AddSection ( subSection[1] );
 }
 
 void
-FOdysseyVectorSegment::ClearIntersections ( )
+UOdysseyVectorSegment::ClearIntersections ( )
 {
     for( std::list<FOdysseyVectorSection*>::iterator it = mSectionList.begin(); it != mSectionList.end(); ++it )
     {
         FOdysseyVectorSection* section = static_cast<FOdysseyVectorSection*>(*it);
-        FOdysseyVectorPoint* point0 = section->GetPoint(0);
-        FOdysseyVectorPoint* point1 = section->GetPoint(1);
+        UOdysseyVectorVertex* vertex0 = section->GetVertex(0);
+        UOdysseyVectorVertex* vertex1 = section->GetVertex(1);
 
-        point0->RemoveSection( section );
-        point1->RemoveSection( section );
+        vertex0->RemoveSection( section );
+        vertex1->RemoveSection( section );
     }
 
     // We do not release memory so that we can undo that later
     mSectionList.clear();
 
     // We do not release memory so that we can undo that later
-    mIntersectionPointList.clear();
+    mIntersectionVertexList.clear();
 
     // Add default section
-    AddSection ( new FOdysseyVectorSection ( *this, mPoint[0], mPoint[1] ) );
+    AddSection ( new FOdysseyVectorSection ( *this, Cast<UOdysseyVectorVertex>(mPoint[0]), Cast<UOdysseyVectorVertex>(mPoint[1]) ) );
 }
 
 void
-FOdysseyVectorSegment::Invalidate()
+UOdysseyVectorSegment::Invalidate()
 {
-    for( std::list<FOdysseyVectorPointIntersection*>::iterator it = mIntersectionPointList.begin(); it != mIntersectionPointList.end(); ++it )
+    for( std::list<UOdysseyVectorVertexIntersection*>::iterator it = mIntersectionVertexList.begin(); it != mIntersectionVertexList.end(); ++it )
     {
-        FOdysseyVectorPointIntersection* intersectionPoint = static_cast<FOdysseyVectorPointIntersection*>(*it);
+        UOdysseyVectorVertexIntersection* intersectionVertex = static_cast<UOdysseyVectorVertexIntersection*>(*it);
 
-        intersectionPoint->InvalidateLoops();
+        intersectionVertex->InvalidateLoops();
     }
 
-    mPath.InvalidateSegment( this );
+    mPath->InvalidateSegment( this );
 }
 
 void
-FOdysseyVectorSegment::DrawStructure( ::ULIS::FRectD &iRoi )
+UOdysseyVectorSegment::DrawStructure( ::ULIS::FRectD &iRoi )
 {
 
 }
 
-std::list<FOdysseyVectorPointIntersection*>&
-FOdysseyVectorSegment::GetIntersectionPointList()
+std::list<UOdysseyVectorVertexIntersection*>&
+UOdysseyVectorSegment::GetIntersectionVertexList()
 {
-    return mIntersectionPointList;
+    return mIntersectionVertexList;
 }
 
 bool
-FOdysseyVectorSegment::HasIntersectionPoint( FOdysseyVectorPointIntersection& mIntersectionPoint )
+UOdysseyVectorSegment::HasIntersectionVertex( UOdysseyVectorVertexIntersection& mIntersectionVertex )
 {
-    for( std::list<FOdysseyVectorPointIntersection*>::iterator it = mIntersectionPointList.begin(); it != mIntersectionPointList.end(); ++it )
+    for( std::list<UOdysseyVectorVertexIntersection*>::iterator it = mIntersectionVertexList.begin(); it != mIntersectionVertexList.end(); ++it )
     {
-        FOdysseyVectorPointIntersection* intersectionPoint = static_cast<FOdysseyVectorPointIntersection*>(*it);
+        UOdysseyVectorVertexIntersection* intersectionVertex = static_cast<UOdysseyVectorVertexIntersection*>(*it);
 
-        if ( intersectionPoint == &mIntersectionPoint ) 
+        if ( intersectionVertex == &mIntersectionVertex ) 
         {
             return true;
         }
@@ -148,66 +169,66 @@ FOdysseyVectorSegment::HasIntersectionPoint( FOdysseyVectorPointIntersection& mI
     return false;
 }
 
-FOdysseyVectorPoint*
-FOdysseyVectorSegment::GetNextPoint( double iT )
+UOdysseyVectorVertex*
+UOdysseyVectorSegment::GetNextVertex( double iT )
 {
-    FOdysseyVectorPoint* closestPoint = nullptr;
+    UOdysseyVectorVertex* closestVertex = nullptr;
     double closestT = 1.0f;
 
     // Search intersection point between this intersection point and the next segment point
-    for(std::list<FOdysseyVectorPointIntersection*>::iterator it = mIntersectionPointList.begin(); it != mIntersectionPointList.end(); ++it)
+    for(std::list<UOdysseyVectorVertexIntersection*>::iterator it = mIntersectionVertexList.begin(); it != mIntersectionVertexList.end(); ++it)
     {
-        FOdysseyVectorPointIntersection* intersectionPoint = static_cast<FOdysseyVectorPointIntersection*>(*it);
-        double pointT = intersectionPoint->GetT(*this);
+        UOdysseyVectorVertexIntersection* intersectionVertex = static_cast<UOdysseyVectorVertexIntersection*>(*it);
+        double vertexT = intersectionVertex->GetT(*this);
 
-        if( pointT > iT )
+        if( vertexT > iT )
         {
-            if ( pointT <= closestT )
+            if ( vertexT <= closestT )
             {
-                closestPoint = intersectionPoint;
+                closestVertex = intersectionVertex;
 
-                closestT = pointT;
+                closestT = vertexT;
             }
         }
     }
 
-    return ( closestPoint ) ? closestPoint : mPoint[1];
+    return ( closestVertex ) ? closestVertex : Cast<UOdysseyVectorVertex>(mPoint[1]);
 }
 
-FOdysseyVectorPoint*
-FOdysseyVectorSegment::GetPreviousPoint( double iT )
+UOdysseyVectorVertex*
+UOdysseyVectorSegment::GetPreviousVertex( double iT )
 {
-    FOdysseyVectorPoint* closestPoint = nullptr;
+    UOdysseyVectorVertex* closestVertex = nullptr;
     double closestT = 0.0f;
 
     // Search intersection point between this intersection point and the next segment point
-    for(std::list<FOdysseyVectorPointIntersection*>::iterator iter = mIntersectionPointList.begin(); iter != mIntersectionPointList.end(); ++iter)
+    for(std::list<UOdysseyVectorVertexIntersection*>::iterator iter = mIntersectionVertexList.begin(); iter != mIntersectionVertexList.end(); ++iter)
     {
-        FOdysseyVectorPointIntersection* intersectionPoint = static_cast<FOdysseyVectorPointIntersection*>(*iter);
-        double pointT = intersectionPoint->GetT(*this);
+        UOdysseyVectorVertexIntersection* intersectionVertex = static_cast<UOdysseyVectorVertexIntersection*>(*iter);
+        double vertexT = intersectionVertex->GetT(*this);
 
-        if( pointT < iT )
+        if( vertexT < iT )
         {
-            if ( pointT >= closestT )
+            if ( vertexT >= closestT )
             {
-                closestPoint = intersectionPoint;
+                closestVertex = intersectionVertex;
 
-                closestT = pointT;
+                closestT = vertexT;
             }
         }
     }
 
-    return ( closestPoint ) ? closestPoint : mPoint[0];
+    return ( closestVertex ) ? closestVertex : Cast<UOdysseyVectorVertex>(mPoint[0]);
 }
 
-FOdysseyVectorSegment*
-FOdysseyVectorSegment::GetNextSegment( )
+UOdysseyVectorSegment*
+UOdysseyVectorSegment::GetNextSegment( )
 {
-    std::list<FOdysseyVectorSegment*>& segmentList = mPoint[1]->GetSegmentList();
+    std::list<UOdysseyVectorSegment*>& segmentList = Cast<UOdysseyVectorVertex>(mPoint[1])->GetSegmentList();
 
-    for( std::list<FOdysseyVectorSegment*>::iterator it = segmentList.begin(); it != segmentList.end(); ++it )
+    for( std::list<UOdysseyVectorSegment*>::iterator it = segmentList.begin(); it != segmentList.end(); ++it )
     {
-        FOdysseyVectorSegment* segment = static_cast<FOdysseyVectorSegment*>(*it);
+        UOdysseyVectorSegment* segment = static_cast<UOdysseyVectorSegment*>(*it);
 
         if ( segment != this ) 
         {
@@ -218,13 +239,13 @@ FOdysseyVectorSegment::GetNextSegment( )
     return nullptr;
 }
 
-FOdysseyVectorSegment* FOdysseyVectorSegment::GetPreviousSegment( )
+UOdysseyVectorSegment* UOdysseyVectorSegment::GetPreviousSegment( )
 {
-    std::list<FOdysseyVectorSegment*>& segmentList = mPoint[0]->GetSegmentList();
+    std::list<UOdysseyVectorSegment*>& segmentList = Cast<UOdysseyVectorVertex>(mPoint[0])->GetSegmentList();
 
-    for( std::list<FOdysseyVectorSegment*>::iterator it = segmentList.begin(); it != segmentList.end(); ++it )
+    for( std::list<UOdysseyVectorSegment*>::iterator it = segmentList.begin(); it != segmentList.end(); ++it )
     {
-        FOdysseyVectorSegment* segment = static_cast<FOdysseyVectorSegment*>(*it);
+        UOdysseyVectorSegment* segment = static_cast<UOdysseyVectorSegment*>(*it);
 
         if ( segment != this ) 
         {
@@ -236,7 +257,7 @@ FOdysseyVectorSegment* FOdysseyVectorSegment::GetPreviousSegment( )
 }
 
 void
-FOdysseyVectorSegment::Draw( ::ULIS::FRectD &iRoi )
+UOdysseyVectorSegment::Draw( ::ULIS::FRectD &iRoi )
 {
 
 }

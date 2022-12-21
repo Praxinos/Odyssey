@@ -1,49 +1,51 @@
 #include "OdysseyVectorHandleSegment.h"
 
-FOdysseyVectorHandleSegment::~FOdysseyVectorHandleSegment()
+UOdysseyVectorHandleSegment::~UOdysseyVectorHandleSegment()
 {
 }
 
-FOdysseyVectorHandleSegment::FOdysseyVectorHandleSegment( FOdysseyVectorSegment& iParentSegment, double iX, double iY )
-    : FOdysseyVectorHandle( iX, iY )
-   , mParentSegment ( iParentSegment )
+UOdysseyVectorHandleSegment::UOdysseyVectorHandleSegment()
+    : UOdysseyVectorHandle()
+    , mParentSegment ( nullptr )
 {
-
+    
 }
 
-uint32
-FOdysseyVectorHandleSegment::GetType()
+void
+UOdysseyVectorHandleSegment::Init( UOdysseyVectorSegment* iParentSegment, double iX, double iY )
 {
-    return FOdysseyVectorPoint::POINT_TYPE_HANDLE_SEGMENT;
+    mParentSegment = iParentSegment;
+
+    Set ( iX, iY );
 }
 
-FOdysseyVectorSegment&
-FOdysseyVectorHandleSegment::GetParent()
+UOdysseyVectorSegment*
+UOdysseyVectorHandleSegment::GetParent()
 {
     return mParentSegment;
 }
 
 void 
-FOdysseyVectorHandleSegment::SetX( double iX )
+UOdysseyVectorHandleSegment::SetX( double iX )
 {
     mCoords.x  = iX;
 
-    mParentSegment.Invalidate();
+    mParentSegment->Invalidate();
 }
 
 void 
-FOdysseyVectorHandleSegment::SetY( double iY )
+UOdysseyVectorHandleSegment::SetY( double iY )
 {
     mCoords.y = iY;
 
-    mParentSegment.Invalidate();
+    mParentSegment->Invalidate();
 }
 
 void 
-FOdysseyVectorHandleSegment::Set( double iX, double iY )
+UOdysseyVectorHandleSegment::Set( double iX, double iY )
 {
     mCoords.x = iX;
     mCoords.y = iY;
 
-    mParentSegment.Invalidate();
+    mParentSegment->Invalidate();
 }

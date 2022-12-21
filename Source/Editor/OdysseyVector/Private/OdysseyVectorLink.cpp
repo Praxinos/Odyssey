@@ -1,34 +1,53 @@
 #include "OdysseyVectorLink.h"
 
-FOdysseyVectorLink::~FOdysseyVectorLink()
+UOdysseyVectorLink::~UOdysseyVectorLink()
 {
 
 }
 
-FOdysseyVectorLink::FOdysseyVectorLink( FOdysseyVectorPoint* iPoint0
-                        , FOdysseyVectorPoint* iPoint1 )
-    : mPoint { iPoint0, iPoint1 }
+UOdysseyVectorLink::UOdysseyVectorLink()
+    : mPoint { nullptr, nullptr }
 {
 
 }
 
-FOdysseyVectorPoint*
-FOdysseyVectorLink::GetPoint( int iPointNum )
+void
+UOdysseyVectorLink::Init( UOdysseyVectorPoint* iPoint0
+                        , UOdysseyVectorPoint* iPoint1 )
+{
+    mPoint[0] = iPoint0;
+    mPoint[1] = iPoint1;
+}
+
+// static
+UOdysseyVectorLink*
+UOdysseyVectorLink::New(  UOdysseyVectorPoint* iPoint0
+                        , UOdysseyVectorPoint* iPoint1 )
+{
+    UOdysseyVectorLink* link = NewObject<UOdysseyVectorLink>();
+
+    link->Init ( iPoint0, iPoint1 );
+
+    return link;
+}
+
+UOdysseyVectorPoint*
+UOdysseyVectorLink::GetPoint( int iPointNum )
 {
     return mPoint[iPointNum];
 }
 
 double
-FOdysseyVectorLink::GetStraightDistance()
+UOdysseyVectorLink::GetStraightDistance()
 {
     ::ULIS::FVec2D vec = { mPoint[1]->GetX() - mPoint[0]->GetX(),
-                   mPoint[1]->GetY() - mPoint[0]->GetY() };
+                           mPoint[1]->GetY() - mPoint[0]->GetY() };
 
     return vec.Distance();
 }
 
 ::ULIS::FVec2D
-FOdysseyVectorLink::GetVector( bool iNormalize )
+UOdysseyVectorLink::GetVector( bool iNormalize )
 {
     ::ULIS::FVec2D vec = mPoint[1]->GetCoords() - mPoint[0]->GetCoords();
 
@@ -44,7 +63,7 @@ FOdysseyVectorLink::GetVector( bool iNormalize )
 }
 
 double
-FOdysseyVectorLink::GetDistanceSquared()
+UOdysseyVectorLink::GetDistanceSquared()
 {
     ::ULIS::FVec2D dist = mPoint[1]->GetCoords() - mPoint[0]->GetCoords();
 
@@ -52,7 +71,7 @@ FOdysseyVectorLink::GetDistanceSquared()
 }
 
 ::ULIS::FVec2D
-FOdysseyVectorLink::GetPointAt ( double t )
+UOdysseyVectorLink::GetPointAt ( double t )
 {
     ::ULIS::FVec2D& p0 =  mPoint[0]->GetCoords();
     ::ULIS::FVec2D& p1 =  mPoint[0]->GetCoords();

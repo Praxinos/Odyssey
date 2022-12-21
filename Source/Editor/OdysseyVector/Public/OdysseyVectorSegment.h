@@ -1,47 +1,64 @@
 #pragma once
 
+#include "CoreMinimal.h"
+
 #include <blend2d.h>
 #include <Core/Core.h>
 #include <Image/Block.h>
-#include "OdysseyVectorPoint.h"
+#include "OdysseyVectorVertex.h"
 #include "OdysseyVectorLink.h"
 
+#include "OdysseyVectorSegment.generated.h"
+
 class UOdysseyVectorPath;
-class FOdysseyVectorPointIntersection;
+class UOdysseyVectorVertexIntersection;
 class FOdysseyVectorSection;
 
-class FOdysseyVectorSegment : public FOdysseyVectorLink
+UCLASS()
+class UOdysseyVectorSegment : public UOdysseyVectorLink
 {
+    public:
+        GENERATED_BODY()
+
+    public:
+        static UOdysseyVectorSegment* New( UOdysseyVectorPath* iPath
+                                         , UOdysseyVectorVertex* iVertex0
+                                         , UOdysseyVectorVertex* iVertex1 );
+        void Init( UOdysseyVectorPath* iPath
+                 , UOdysseyVectorVertex* iVertex0
+                 , UOdysseyVectorVertex* iVertex1 );
+
     protected:
-        std::list<FOdysseyVectorPointIntersection*> mIntersectionPointList;
+        std::list<UOdysseyVectorVertexIntersection*> mIntersectionVertexList;
         std::list<FOdysseyVectorSection*> mSectionList;
-        UOdysseyVectorPath& mPath;
+        UOdysseyVectorPath* mPath;
         ::ULIS::FRectD mBBox;
 
     public:
-        ~FOdysseyVectorSegment();
-        FOdysseyVectorSegment( UOdysseyVectorPath& iPath, FOdysseyVectorPoint* iPoint0, FOdysseyVectorPoint* iPoint1 );
+        ~UOdysseyVectorSegment();
+        UOdysseyVectorSegment();
+
         virtual void Draw( ::ULIS::FRectD &iRoi );
         virtual void DrawStructure( ::ULIS::FRectD &iRoi );
 
-        FOdysseyVectorSegment* GetPreviousSegment();
-        FOdysseyVectorSegment* GetNextSegment();
-        std::list<FOdysseyVectorPointIntersection*>& GetIntersectionPointList();
-        bool HasIntersectionPoint( FOdysseyVectorPointIntersection& mIntersectionPoint );
-        FOdysseyVectorPoint* GetNextPoint( double iT );
-        FOdysseyVectorPoint* GetPreviousPoint( double iT ); 
-        UOdysseyVectorPath& GetPath();
+        UOdysseyVectorSegment* GetPreviousSegment();
+        UOdysseyVectorSegment* GetNextSegment();
+        std::list<UOdysseyVectorVertexIntersection*>& GetIntersectionVertexList();
+        bool HasIntersectionVertex( UOdysseyVectorVertexIntersection& mIntersectionVertex );
+        UOdysseyVectorVertex* GetNextVertex( double iT );
+        UOdysseyVectorVertex* GetPreviousVertex( double iT ); 
+        UOdysseyVectorPath* GetPath();
         virtual void Update() {};
         void Invalidate();
 
         void ClearIntersections();
         FOdysseyVectorSection* GetSection (double t);
 
-        void AddIntersection ( FOdysseyVectorPointIntersection* iIntersectionPoint );
+        void AddIntersection ( UOdysseyVectorVertexIntersection* iIntersectionVertex );
         void RemoveSection ( FOdysseyVectorSection* iSection );
         void AddSection ( FOdysseyVectorSection* iSection );
 
         virtual ::ULIS::FRectD& GetBoundingBox() { return mBBox; };
 
-        FOdysseyVectorSegment* GetOtherSegment( FOdysseyVectorSegment& iCurrentSegment );
+        UOdysseyVectorSegment* GetOtherSegment( UOdysseyVectorSegment& iCurrentSegment );
 };

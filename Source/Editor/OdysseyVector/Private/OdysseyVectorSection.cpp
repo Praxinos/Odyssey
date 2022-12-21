@@ -4,25 +4,25 @@ FOdysseyVectorSection::~FOdysseyVectorSection()
 {
 }
 
-FOdysseyVectorSection::FOdysseyVectorSection( FOdysseyVectorSegment& iSegment
-                                            , FOdysseyVectorPoint* iPoint0
-                                            , FOdysseyVectorPoint* iPoint1 )
+FOdysseyVectorSection::FOdysseyVectorSection( UOdysseyVectorSegment& iSegment
+                                            , UOdysseyVectorVertex* iVertex0
+                                            , UOdysseyVectorVertex* iVertex1 )
     : mSegment ( iSegment )
-    , mPoint { iPoint0, iPoint1 }
+    , mVertex { iVertex0, iVertex1 }
 {
 
 }
 
-FOdysseyVectorSegment&
+UOdysseyVectorSegment&
 FOdysseyVectorSection::GetSegment()
 {
     return mSegment;
 }
 
-FOdysseyVectorPoint*
-FOdysseyVectorSection::GetPoint( int iNum )
+UOdysseyVectorVertex*
+FOdysseyVectorSection::GetVertex( int iNum )
 {
-    return mPoint[iNum];
+    return mVertex[iNum];
 }
 
 void

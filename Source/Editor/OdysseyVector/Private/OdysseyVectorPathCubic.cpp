@@ -36,27 +36,27 @@ UOdysseyVectorPathCubic::setJointNone()
     mJointType = JOINT_TYPE_NONE;
 }
 
-FOdysseyVectorSegmentCubic*
-UOdysseyVectorPathCubic::AppendPoint( FOdysseyVectorPointCubic* iPoint
-                             , bool iConnect
-                             , bool iBuildSegments )
+UOdysseyVectorSegmentCubic*
+UOdysseyVectorPathCubic::AppendVertex( UOdysseyVectorVertexCubic* iVertex
+                                     , bool iConnect
+                                     , bool iBuildSegments )
 {
-    FOdysseyVectorPointCubic* lastPoint = static_cast<FOdysseyVectorPointCubic*>( GetLastPoint() );
+    UOdysseyVectorVertexCubic* lastVertex = static_cast<UOdysseyVectorVertexCubic*>( GetLastVertex() );
 
-    mPointList.push_back ( iPoint );
+    mVertexList.push_back ( iVertex );
 
     if ( iConnect == true )
     {
         // lastPoint is NULL if this is the first point added
-        if( lastPoint )
+        if( lastVertex )
         {
-            FOdysseyVectorSegmentCubic* segment = new FOdysseyVectorSegmentCubic( *this, lastPoint, iPoint );
+            UOdysseyVectorSegmentCubic* segment = UOdysseyVectorSegmentCubic::New( this, lastVertex, iVertex );
 
             AddSegment( segment );
 
             if( iBuildSegments == true )
             {
-                iPoint->BuildSegments();
+                iVertex->BuildSegments();
             }
 
             return segment;
@@ -75,9 +75,9 @@ UOdysseyVectorPathCubic::PickShape( double iX
     BLPoint testPoint = { iX, iY };
 
 /*
-    for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
+    for( std::list<UOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
     {
-        FOdysseyVectorSegmentCubic* segment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
+        UOdysseyVectorSegmentCubic* segment = static_cast<UOdysseyVectorSegmentCubic*>(*it);
         ::ULIS::FVec2D& point0 = segment->GetPoint(0).GetCoords();
         ::ULIS::FVec2D& point1 = segment->GetPoint(1).GetCoords();
         ::ULIS::FVec2D& ctrlPoint0 = segment->GetControlPoint(0).GetCoords();
@@ -98,9 +98,9 @@ UOdysseyVectorPathCubic::PickShape( double iX
     }
 */
     // Pick inside the polygons that makes the segment
-    for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
+    for( std::list<UOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
     {
-        FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
+        UOdysseyVectorSegmentCubic* cubicSegment = static_cast<UOdysseyVectorSegmentCubic*>(*it);
 
         if ( cubicSegment->Pick ( iX, iY, iRadius ) == true )
         {
@@ -113,40 +113,40 @@ UOdysseyVectorPathCubic::PickShape( double iX
 
 bool
 UOdysseyVectorPathCubic::PickPoint( double iX
-                           , double iY
-                           , double iSelectionRadius
-                           , uint64 iSelectionFlags )
+                                  , double iY
+                                  , double iSelectionRadius
+                                  , uint64 iSelectionFlags )
 {
-    for(std::list<FOdysseyVectorPoint*>::iterator it = mPointList.begin(); it != mPointList.end(); ++it)
+    for(std::list<UOdysseyVectorVertex*>::iterator it = mVertexList.begin(); it != mVertexList.end(); ++it)
     {
-        FOdysseyVectorPointCubic* point = static_cast<FOdysseyVectorPointCubic*>(*it);
-        ::ULIS::FVec2D perpendicularVector = point->GetPerpendicularVector( true );
+        UOdysseyVectorVertexCubic* vertex = static_cast<UOdysseyVectorVertexCubic*>(*it);
+        ::ULIS::FVec2D perpendicularVector = vertex->GetPerpendicularVector( true );
 
         if ( iSelectionFlags & PICK_POINT )
         {
-            if( ( fabs( point->GetX() - iX ) <= iSelectionRadius ) &&
-                ( fabs( point->GetY() - iY ) <= iSelectionRadius ) )
+            if( ( fabs( vertex->GetX() - iX ) <= iSelectionRadius ) &&
+                ( fabs( vertex->GetY() - iY ) <= iSelectionRadius ) )
             {
-                mSelectedPointList.push_back( point );
+                mSelectedPointList.push_back( vertex );
             }
         }
 
         if( iSelectionFlags & PICK_HANDLE_POINT )
         {
             // Pick point handle
-            if( ( fabs( point->GetX() + ( perpendicularVector.x * point->GetRadius() ) - iX ) <= iSelectionRadius ) &&
-                ( fabs( point->GetY() + ( perpendicularVector.y * point->GetRadius() ) - iY ) <= iSelectionRadius ) )
+            if( ( fabs( vertex->GetX() + ( perpendicularVector.x * vertex->GetRadius() ) - iX ) <= iSelectionRadius ) &&
+                ( fabs( vertex->GetY() + ( perpendicularVector.y * vertex->GetRadius() ) - iY ) <= iSelectionRadius ) )
             {
-                mSelectedPointList.push_back( &point->GetControlPoint() );
+                mSelectedPointList.push_back( &vertex->GetControlPoint() );
 
                 return true;
             }
 
             // Pick point handle on the other side
-            if( ( fabs( point->GetX() - ( perpendicularVector.x * point->GetRadius() ) - iX ) <= iSelectionRadius ) &&
-                ( fabs( point->GetY() - ( perpendicularVector.y * point->GetRadius() ) - iY ) <= iSelectionRadius ) )
+            if( ( fabs( vertex->GetX() - ( perpendicularVector.x * vertex->GetRadius() ) - iX ) <= iSelectionRadius ) &&
+                ( fabs( vertex->GetY() - ( perpendicularVector.y * vertex->GetRadius() ) - iY ) <= iSelectionRadius ) )
             {
-                mSelectedPointList.push_back( &point->GetControlPoint() );
+                mSelectedPointList.push_back( &vertex->GetControlPoint() );
 
                 return true;
             }
@@ -155,11 +155,11 @@ UOdysseyVectorPathCubic::PickPoint( double iX
 
     if( iSelectionFlags & PICK_HANDLE_SEGMENT )
     {
-        for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
+        for( std::list<UOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
         {
-            FOdysseyVectorSegmentCubic* segment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
-            FOdysseyVectorPoint& ctrlPoint0 = segment->GetControlPoint( 0 );
-            FOdysseyVectorPoint& ctrlPoint1 = segment->GetControlPoint( 1 );
+            UOdysseyVectorSegmentCubic* segment = static_cast<UOdysseyVectorSegmentCubic*>(*it);
+            UOdysseyVectorPoint& ctrlPoint0 = segment->GetControlPoint( 0 );
+            UOdysseyVectorPoint& ctrlPoint1 = segment->GetControlPoint( 1 );
 
             if( ( fabs( ctrlPoint0.GetX() - iX ) <= iSelectionRadius ) &&
                 ( fabs( ctrlPoint0.GetY() - iY ) <= iSelectionRadius ) )
@@ -183,28 +183,28 @@ UOdysseyVectorPathCubic::PickPoint( double iX
 }
 
 void
-UOdysseyVectorPathCubic::Unselect( FOdysseyVectorPoint *iPoint )
+UOdysseyVectorPathCubic::Unselect( UOdysseyVectorVertex *iVertex )
 {
-    if ( iPoint == NULL )
+    if ( iVertex == NULL )
     {
         mSelectedPointList.clear();
     }
     else
     {
-        mSelectedPointList.remove( iPoint );
+        mSelectedPointList.remove( iVertex );
     }
 }
 
 void
 UOdysseyVectorPathCubic::Cut( ::ULIS::FVec2D& linePoint0
-                     , ::ULIS::FVec2D& linePoint1 )
+                            , ::ULIS::FVec2D& linePoint1 )
 {
     // let's work on a copy as we are going to remove items in the original list
-    std::list<FOdysseyVectorSegment*> tmpSegmentList = mSegmentList;
+    std::list<UOdysseyVectorSegment*> tmpSegmentList = mSegmentList;
 
     while( tmpSegmentList.size () )
     {
-        FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(tmpSegmentList.back());
+        UOdysseyVectorSegmentCubic* cubicSegment = static_cast<UOdysseyVectorSegmentCubic*>(tmpSegmentList.back());
 
         if ( cubicSegment->Cut ( linePoint0, linePoint1 ) )
         {
@@ -220,21 +220,21 @@ UOdysseyVectorPathCubic::Cut( ::ULIS::FVec2D& linePoint0
 void
 UOdysseyVectorPathCubic::Fill( ::ULIS::FRectD& iRoi )
 {
-    FOdysseyVectorPointCubic *firstPoint = static_cast<FOdysseyVectorPointCubic*>( GetFirstPoint() );
+    UOdysseyVectorVertexCubic *firstVertex = static_cast<UOdysseyVectorVertexCubic*>( GetFirstVertex() );
     BLContext& blctx = FOdysseyVectorEngine::GetBLContext();
     BLPath path;
 
-    if ( IsLoop() && firstPoint )
+    if ( IsLoop() && firstVertex )
     {
         blctx.setCompOp( BL_COMP_OP_SRC_COPY );
         /*iBLContext.setFillStyle(BLRgba32(0xFFFFFFFF));
         iBLContext.setStrokeStyle(BLRgba32(0xFF000000));*/
 
-        path.moveTo( firstPoint->GetX(), firstPoint->GetY() );
+        path.moveTo( firstVertex->GetX(), firstVertex->GetY() );
 
-        for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
+        for( std::list<UOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
         {
-            FOdysseyVectorSegmentCubic *segment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
+            UOdysseyVectorSegmentCubic *segment = static_cast<UOdysseyVectorSegmentCubic*>(*it);
             ::ULIS::FVec2D& point0 = segment->GetPoint(0)->GetCoords();
             ::ULIS::FVec2D& point1 = segment->GetPoint(1)->GetCoords();
             ::ULIS::FVec2D& ctrlPoint0 = segment->GetControlPoint(0).GetCoords();
@@ -258,22 +258,22 @@ UOdysseyVectorPathCubic::DrawStructure( ::ULIS::FRectD& iRoi )
 {
     BLContext& blctx = FOdysseyVectorEngine::GetBLContext();
     BLPath path;
-    FOdysseyVectorPointCubic *firstPoint = static_cast<FOdysseyVectorPointCubic*>( GetFirstPoint() );
+    UOdysseyVectorVertexCubic *firstVertex = static_cast<UOdysseyVectorVertexCubic*>( GetFirstVertex() );
     BLPoint localVector = mInverseWorldMatrix.mapVector ( 1.0f, 0.0f );
     ::ULIS::FVec2D ulisVector = { localVector.x, localVector.y };
     double zoomFactor = ulisVector.Distance();
     double handleSize = 6 * zoomFactor;
     double handleHalfSize = handleSize * 0.5f;
 
-    if ( firstPoint )
+    if ( firstVertex )
     {
         blctx.setCompOp( BL_COMP_OP_SRC_COPY );
         /*iBLContext.setFillStyle(BLRgba32(0xFFFFFFFF));
         iBLContext.setStrokeStyle(BLRgba32(0xFF000000));*/
 
-        for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
+        for( std::list<UOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
         {
-            FOdysseyVectorSegmentCubic *segment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
+            UOdysseyVectorSegmentCubic *segment = static_cast<UOdysseyVectorSegmentCubic*>(*it);
             ::ULIS::FVec2D& point0 = segment->GetPoint( 0 )->GetCoords();
             ::ULIS::FVec2D& point1 = segment->GetPoint( 1 )->GetCoords();
             ::ULIS::FVec2D& ctrlPoint0 = segment->GetControlPoint( 0 ).GetCoords();
@@ -303,19 +303,19 @@ UOdysseyVectorPathCubic::DrawStructure( ::ULIS::FRectD& iRoi )
         blctx.setStrokeWidth( zoomFactor );
         blctx.strokePath( path );
 
-        for(std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it)
+        for(std::list<UOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it)
         {
-            FOdysseyVectorSegmentCubic *segment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
+            UOdysseyVectorSegmentCubic *segment = static_cast<UOdysseyVectorSegmentCubic*>(*it);
 
             segment->DrawStructure( iRoi, zoomFactor );
         }
     }
 
     // Points and Point size handles
-    for(std::list<FOdysseyVectorPoint*>::iterator it = mPointList.begin(); it != mPointList.end(); ++it)
+    for(std::list<UOdysseyVectorVertex*>::iterator it = mVertexList.begin(); it != mVertexList.end(); ++it)
     {
 
-        FOdysseyVectorPointCubic *point = static_cast<FOdysseyVectorPointCubic*>(*it);
+        UOdysseyVectorVertexCubic *point = static_cast<UOdysseyVectorVertexCubic*>(*it);
         ::ULIS::FVec2D perpendicular = point->GetPerpendicularVector( true );
         double pointRadius = point->GetRadius();
         double ctrlX = ( perpendicular.x * pointRadius );
@@ -353,9 +353,9 @@ UOdysseyVectorPathCubic::DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags )
 
     path.clear();
 
-    for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
+    for( std::list<UOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
     {
-        FOdysseyVectorSegmentCubic *segment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
+        UOdysseyVectorSegmentCubic *segment = static_cast<UOdysseyVectorSegmentCubic*>(*it);
         bool isStandalone = ( segment->GetPoint(0).GetSegmentCount() == 1 );
 
         DrawSegment( path, *segment, isStandalone );
@@ -585,9 +585,9 @@ _drawLinearJoint( ::ULIS::FVec2D& iOrigin
 }
 
 void
-UOdysseyVectorPathCubic::DrawJoint( FOdysseyVectorSegmentCubic* iPrevSegment
-                           , FOdysseyVectorSegmentCubic& iSegment
-                           , double iRadius )
+UOdysseyVectorPathCubic::DrawJoint( UOdysseyVectorSegmentCubic* iPrevSegment
+                                  , UOdysseyVectorSegmentCubic& iSegment
+                                  , double iRadius )
 {
     if ( iPrevSegment )
     {
@@ -637,10 +637,10 @@ UOdysseyVectorPathCubic::DrawShapeVariable( ::ULIS::FRectD &iRoi, uint64 iFlags 
 
     if( mSegmentList.size() )
     {
-        for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
+        for( std::list<UOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
         {
-            FOdysseyVectorSegmentCubic* segment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
-            FOdysseyVectorSegmentCubic* prevSegment = static_cast<FOdysseyVectorSegmentCubic*>( segment->GetPreviousSegment() );
+            UOdysseyVectorSegmentCubic* segment = static_cast<UOdysseyVectorSegmentCubic*>(*it);
+            UOdysseyVectorSegmentCubic* prevSegment = static_cast<UOdysseyVectorSegmentCubic*>( segment->GetPreviousSegment() );
             double segmentStartRadius = segment->GetPoint(0)->GetRadius();
             ::ULIS::FRectD clip = iRoi & segment->GetBoundingBox();
 
@@ -665,18 +665,18 @@ UOdysseyVectorPathCubic::Mirror( bool iMirrorX, bool iMirrorY )
     double factorX = ( iMirrorX ) ? -1.0f : 1.0f;
     double factorY = ( iMirrorY ) ? -1.0f : 1.0f;
 
-    for( std::list<FOdysseyVectorPoint*>::iterator it = mPointList.begin(); it != mPointList.end(); ++it )
+    for( std::list<UOdysseyVectorVertex*>::iterator it = mVertexList.begin(); it != mVertexList.end(); ++it )
     {
-        FOdysseyVectorPointCubic* cubicPoint = static_cast<FOdysseyVectorPointCubic*>(*it);
+        UOdysseyVectorVertexCubic* cubicPoint = static_cast<UOdysseyVectorVertexCubic*>(*it);
 
         cubicPoint->Set( cubicPoint->GetX() * factorX, cubicPoint->GetY() * factorY );
     }
 
-    for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
+    for( std::list<UOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
     {
-        FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
-        FOdysseyVectorHandleSegment& ctrlPoint0 = static_cast<FOdysseyVectorHandleSegment&>(cubicSegment->GetControlPoint(0));
-        FOdysseyVectorHandleSegment& ctrlPoint1 = static_cast<FOdysseyVectorHandleSegment&>(cubicSegment->GetControlPoint(1));
+        UOdysseyVectorSegmentCubic* cubicSegment = static_cast<UOdysseyVectorSegmentCubic*>(*it);
+        UOdysseyVectorHandleSegment& ctrlPoint0 = static_cast<UOdysseyVectorHandleSegment&>(cubicSegment->GetControlPoint(0));
+        UOdysseyVectorHandleSegment& ctrlPoint1 = static_cast<UOdysseyVectorHandleSegment&>(cubicSegment->GetControlPoint(1));
 
         ctrlPoint0.Set( ctrlPoint0.GetX() * factorX, ctrlPoint0.GetY() * factorY );
         ctrlPoint1.Set( ctrlPoint1.GetX() * factorX, ctrlPoint1.GetY() * factorY );
@@ -689,32 +689,32 @@ UOdysseyVectorObject*
 UOdysseyVectorPathCubic::CopyShape()
 {
     UOdysseyVectorPathCubic* cubicPathCopy = NewObject<UOdysseyVectorPathCubic>();
-    std::map<FOdysseyVectorPointCubic*, FOdysseyVectorPointCubic*> lookupTable;
+    std::map<UOdysseyVectorVertexCubic*, UOdysseyVectorVertexCubic*> lookupTable;
 
-    for( std::list<FOdysseyVectorPoint*>::iterator it = mPointList.begin(); it != mPointList.end(); ++it )
+    for( std::list<UOdysseyVectorVertex*>::iterator it = mVertexList.begin(); it != mVertexList.end(); ++it )
     {
-        FOdysseyVectorPointCubic* originalPoint = static_cast<FOdysseyVectorPointCubic*>(*it);
-        FOdysseyVectorPointCubic* newPoint = new FOdysseyVectorPointCubic( originalPoint->GetX()
-                                                           , originalPoint->GetY()
-                                                           , originalPoint->GetRadius() );
+        UOdysseyVectorVertexCubic* originalVertex = static_cast<UOdysseyVectorVertexCubic*>(*it);
+        UOdysseyVectorVertexCubic* newVertex = UOdysseyVectorVertexCubic::New( originalVertex->GetX()
+                                                                             , originalVertex->GetY()
+                                                                             , originalVertex->GetRadius() );
 
-        lookupTable.insert( std::make_pair( originalPoint, newPoint ) );
+        lookupTable.insert( std::make_pair( originalVertex, newVertex ) );
 
-        cubicPathCopy->AddPoint( newPoint );
+        cubicPathCopy->AddVertex( newVertex );
     }
 
-    for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
+    for( std::list<UOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
     {
-        FOdysseyVectorSegmentCubic* originalSegment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
-        FOdysseyVectorPointCubic* point0 = static_cast<FOdysseyVectorPointCubic*>( originalSegment->GetPoint(0) );
-        FOdysseyVectorPointCubic* point1 = static_cast<FOdysseyVectorPointCubic*>( originalSegment->GetPoint(1) );
-        FOdysseyVectorSegmentCubic* newSegment = new FOdysseyVectorSegmentCubic( *cubicPathCopy
-                                                                 , lookupTable[point0]
-                                                                 , originalSegment->GetControlPoint(0).GetX()
-                                                                 , originalSegment->GetControlPoint(0).GetY()
-                                                                 , originalSegment->GetControlPoint(1).GetX()
-                                                                 , originalSegment->GetControlPoint(1).GetY()
-                                                                 , lookupTable[point1] );
+        UOdysseyVectorSegmentCubic* originalSegment = static_cast<UOdysseyVectorSegmentCubic*>(*it);
+        UOdysseyVectorVertexCubic* vertex0 = static_cast<UOdysseyVectorVertexCubic*>( originalSegment->GetPoint(0) );
+        UOdysseyVectorVertexCubic* vertex1 = static_cast<UOdysseyVectorVertexCubic*>( originalSegment->GetPoint(1) );
+        UOdysseyVectorSegmentCubic* newSegment = UOdysseyVectorSegmentCubic::New( cubicPathCopy
+                                                                                , lookupTable[vertex0]
+                                                                                , originalSegment->GetControlPoint(0).GetX()
+                                                                                , originalSegment->GetControlPoint(0).GetY()
+                                                                                , originalSegment->GetControlPoint(1).GetX()
+                                                                                , originalSegment->GetControlPoint(1).GetY()
+                                                                                , lookupTable[vertex1] );
 
         cubicPathCopy->AddSegment( newSegment );
 
@@ -727,35 +727,35 @@ UOdysseyVectorPathCubic::CopyShape()
 void
 UOdysseyVectorPathCubic::Merge( UOdysseyVectorPathCubic& iCubicPath )
 {
-    std::list<FOdysseyVectorSegment*>& segmentList = iCubicPath.mSegmentList;
-    std::list<FOdysseyVectorPoint*>& pointList = iCubicPath.mPointList;
+    std::list<UOdysseyVectorSegment*>& segmentList = iCubicPath.mSegmentList;
+    std::list<UOdysseyVectorVertex*>& vertexList = iCubicPath.mVertexList;
 
-    std::map<FOdysseyVectorPointCubic*, FOdysseyVectorPointCubic*> lookupTable;
+    std::map<UOdysseyVectorVertexCubic*, UOdysseyVectorVertexCubic*> lookupTable;
 
-    for( std::list<FOdysseyVectorPoint*>::iterator it = pointList.begin(); it != pointList.end(); ++it )
+    for( std::list<UOdysseyVectorVertex*>::iterator it = vertexList.begin(); it != vertexList.end(); ++it )
     {
-        FOdysseyVectorPointCubic* originalPoint = static_cast<FOdysseyVectorPointCubic*>(*it);
-        FOdysseyVectorPointCubic* newPoint = new FOdysseyVectorPointCubic( originalPoint->GetX()
-                                                           , originalPoint->GetY()
-                                                           , originalPoint->GetRadius() );
+        UOdysseyVectorVertexCubic* originalVertex = static_cast<UOdysseyVectorVertexCubic*>(*it);
+        UOdysseyVectorVertexCubic* newVertex = UOdysseyVectorVertexCubic::New( originalVertex->GetX()
+                                                                             , originalVertex->GetY()
+                                                                             , originalVertex->GetRadius() );
 
-        lookupTable.insert( std::make_pair( originalPoint, newPoint ) );
+        lookupTable.insert( std::make_pair( originalVertex, newVertex ) );
 
-        mPointList.push_back ( newPoint );
+        mVertexList.push_back ( newVertex );
     }
 
-    for( std::list<FOdysseyVectorSegment*>::iterator it = segmentList.begin(); it != segmentList.end(); ++it )
+    for( std::list<UOdysseyVectorSegment*>::iterator it = segmentList.begin(); it != segmentList.end(); ++it )
     {
-        FOdysseyVectorSegmentCubic* originalSegment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
-        FOdysseyVectorPointCubic* point0 = static_cast<FOdysseyVectorPointCubic*>( originalSegment->GetPoint(0) );
-        FOdysseyVectorPointCubic* point1 = static_cast<FOdysseyVectorPointCubic*>( originalSegment->GetPoint(1) );
-        FOdysseyVectorSegmentCubic* newSegment = new FOdysseyVectorSegmentCubic( *this
-                                                                 , lookupTable[point0]
-                                                                 , originalSegment->GetControlPoint(0).GetX()
-                                                                 , originalSegment->GetControlPoint(0).GetY()
-                                                                 , originalSegment->GetControlPoint(1).GetX()
-                                                                 , originalSegment->GetControlPoint(1).GetY()
-                                                                 , lookupTable[point1] );
+        UOdysseyVectorSegmentCubic* originalSegment = static_cast<UOdysseyVectorSegmentCubic*>(*it);
+        UOdysseyVectorVertexCubic* vertex0 = static_cast<UOdysseyVectorVertexCubic*>( originalSegment->GetPoint(0) );
+        UOdysseyVectorVertexCubic* vertex1 = static_cast<UOdysseyVectorVertexCubic*>( originalSegment->GetPoint(1) );
+        UOdysseyVectorSegmentCubic* newSegment = UOdysseyVectorSegmentCubic::New( this
+                                                                                , lookupTable[vertex0]
+                                                                                , originalSegment->GetControlPoint(0).GetX()
+                                                                                , originalSegment->GetControlPoint(0).GetY()
+                                                                                , originalSegment->GetControlPoint(1).GetX()
+                                                                                , originalSegment->GetControlPoint(1).GetY()
+                                                                                , lookupTable[vertex1] );
 
         UOdysseyVectorPath::AddSegment( newSegment );
 

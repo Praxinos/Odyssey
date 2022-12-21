@@ -26,11 +26,11 @@ class ODYSSEYVECTOR_API UOdysseyVectorPath : public UOdysseyVectorObject
 
     protected :
         std::list<UOdysseyVectorLoop*> mLoopList; // list of loops
-        std::list<FOdysseyVectorPoint*> mPointList;
-        std::list<FOdysseyVectorSegment*> mSegmentList;
-        std::list<FOdysseyVectorSegment*> mInvalidatedSegmentList;
+        std::list<UOdysseyVectorVertex*> mVertexList;
+        std::list<UOdysseyVectorSegment*> mSegmentList;
+        std::list<UOdysseyVectorSegment*> mInvalidatedSegmentList;
         std::list<UOdysseyVectorLoop*> mInvalidatedLoopList;
-        std::list<FOdysseyVectorPoint*> mSelectedPointList;
+        std::list<UOdysseyVectorPoint*> mSelectedPointList;
         BLPath mPath;
 
     public:
@@ -41,31 +41,31 @@ class ODYSSEYVECTOR_API UOdysseyVectorPath : public UOdysseyVectorObject
         ~UOdysseyVectorPath(){};
         UOdysseyVectorPath(){};
         void Init( std::string iName );
-        void AddSegment(FOdysseyVectorSegment* iSegment);
-        void RemoveSegment(FOdysseyVectorSegment* iSegment);
-        void AddPoint( FOdysseyVectorPoint* iPoint );
-        virtual FOdysseyVectorSegment* AppendPoint( FOdysseyVectorPoint* iPoint, FOdysseyVectorPoint* iPreviousPoint );
+        void AddSegment(UOdysseyVectorSegment* iSegment);
+        void RemoveSegment(UOdysseyVectorSegment* iSegment);
+        void AddVertex( UOdysseyVectorVertex* iVertex );
+        virtual UOdysseyVectorSegment* AppendVertex( UOdysseyVectorVertex* iVertex, UOdysseyVectorVertex* iPreviousVertex );
         UOdysseyVectorObject* PickLoops( double iX, double iY, double iRadius );
         void DrawLoops( ::ULIS::FRectD &iRoi, uint64 iFlags );
 
         virtual void DrawStructure( ::ULIS::FRectD &iRoi );
 
-        /*virtual void InsertPoint( FOdysseyVectorSegment* iSegment, FOdysseyVectorPoint* iPoint );*/
-        std::list<FOdysseyVectorSegment*>& GetSegmentList();
-        FOdysseyVectorPoint* GetFirstPoint();
-        FOdysseyVectorPoint* GetLastPoint();
-        FOdysseyVectorSegment* GetFirstSegment();
-        FOdysseyVectorSegment* GetLastSegment();
-        std::list<FOdysseyVectorPoint*>& GetSelectedPointList();
+        /*virtual void InsertPoint( UOdysseyVectorSegment* iSegment, UOdysseyVectorVertex* iPoint );*/
+        std::list<UOdysseyVectorSegment*>& GetSegmentList();
+        UOdysseyVectorVertex* GetFirstVertex();
+        UOdysseyVectorVertex* GetLastVertex();
+        UOdysseyVectorSegment* GetFirstSegment();
+        UOdysseyVectorSegment* GetLastSegment();
+        std::list<UOdysseyVectorPoint*>& GetSelectedPointList();
         virtual bool PickPoint( double iX, double iY, double iRadius, uint64 iSelectionFlags ) PURE_VIRTUAL(__func__,return false;);
-        virtual void Unselect( FOdysseyVectorPoint* iPoint ) PURE_VIRTUAL(__func__,);
+        virtual void Unselect( UOdysseyVectorVertex* iVertex ) PURE_VIRTUAL(__func__,);
         void Clear();
         bool IsLoop();
         UOdysseyVectorLoop* GetLoopByID( uint64 iID );
         void AddLoop( UOdysseyVectorLoop* iLoop );
         void RemoveLoop( UOdysseyVectorLoop* iLoop );
 
-        void InvalidateSegment(FOdysseyVectorSegment* iSegment);
+        void InvalidateSegment( UOdysseyVectorSegment* iSegment );
         void InvalidateLoop( UOdysseyVectorLoop* iLoop );
         void UpdateBBox();
 

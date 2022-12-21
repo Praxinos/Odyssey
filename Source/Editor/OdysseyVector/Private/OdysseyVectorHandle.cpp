@@ -1,16 +1,16 @@
 #include "OdysseyVectorHandle.h"
 
-FOdysseyVectorHandle::~FOdysseyVectorHandle()
+UOdysseyVectorHandle::~UOdysseyVectorHandle()
 {
 }
 
-FOdysseyVectorHandle::FOdysseyVectorHandle()
-    : FOdysseyVectorPoint()
+UOdysseyVectorHandle::UOdysseyVectorHandle()
+    : UOdysseyVectorPoint()
 {
 }
 
-FOdysseyVectorHandle::FOdysseyVectorHandle( double iX, double iY )
-    : FOdysseyVectorPoint( iX, iY )
+void
+UOdysseyVectorHandle::Init( double iX, double iY )
 {
-
+    UOdysseyVectorPoint::Init( iX, iY, 0.0f );
 }

@@ -15,20 +15,20 @@ UOdysseyVectorCircle::UOdysseyVectorCircle()
 
     mRadiusX = mRadiusY = 0.0f;
 
-    mCubicPoint[0] = new FOdysseyVectorPointCubic( 0.0f, 0.0f );
-    mCubicPoint[1] = new FOdysseyVectorPointCubic( 0.0f, 0.0f );
-    mCubicPoint[2] = new FOdysseyVectorPointCubic( 0.0f, 0.0f );
-    mCubicPoint[3] = new FOdysseyVectorPointCubic( 0.0f, 0.0f );
+    mCubicPoint[0] = UOdysseyVectorVertexCubic::New( 0.0f, 0.0f, 1.0f );
+    mCubicPoint[1] = UOdysseyVectorVertexCubic::New( 0.0f, 0.0f, 1.0f );
+    mCubicPoint[2] = UOdysseyVectorVertexCubic::New( 0.0f, 0.0f, 1.0f );
+    mCubicPoint[3] = UOdysseyVectorVertexCubic::New( 0.0f, 0.0f, 1.0f );
 
-    mCubicSegment[0] = new FOdysseyVectorSegmentCubic( static_cast<UOdysseyVectorPathCubic&>(*this), mCubicPoint[0], mCubicPoint[1] );
-    mCubicSegment[1] = new FOdysseyVectorSegmentCubic( static_cast<UOdysseyVectorPathCubic&>(*this), mCubicPoint[1], mCubicPoint[2] );
-    mCubicSegment[2] = new FOdysseyVectorSegmentCubic( static_cast<UOdysseyVectorPathCubic&>(*this), mCubicPoint[2], mCubicPoint[3] );
-    mCubicSegment[3] = new FOdysseyVectorSegmentCubic( static_cast<UOdysseyVectorPathCubic&>(*this), mCubicPoint[3], mCubicPoint[0] );
+    mCubicSegment[0] = UOdysseyVectorSegmentCubic::New( static_cast<UOdysseyVectorPathCubic*>(this), mCubicPoint[0], mCubicPoint[1] );
+    mCubicSegment[1] = UOdysseyVectorSegmentCubic::New( static_cast<UOdysseyVectorPathCubic*>(this), mCubicPoint[1], mCubicPoint[2] );
+    mCubicSegment[2] = UOdysseyVectorSegmentCubic::New( static_cast<UOdysseyVectorPathCubic*>(this), mCubicPoint[2], mCubicPoint[3] );
+    mCubicSegment[3] = UOdysseyVectorSegmentCubic::New( static_cast<UOdysseyVectorPathCubic*>(this), mCubicPoint[3], mCubicPoint[0] );
 
-    AddPoint ( mCubicPoint[0] );
-    AddPoint ( mCubicPoint[1] );
-    AddPoint ( mCubicPoint[2] );
-    AddPoint ( mCubicPoint[3] );
+    AddVertex ( mCubicPoint[0] );
+    AddVertex ( mCubicPoint[1] );
+    AddVertex ( mCubicPoint[2] );
+    AddVertex ( mCubicPoint[3] );
 
     AddSegment ( mCubicSegment[0] );
     AddSegment ( mCubicSegment[1] );

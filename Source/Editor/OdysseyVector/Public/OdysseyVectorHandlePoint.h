@@ -1,20 +1,31 @@
 #pragma once
 
+#include "CoreMinimal.h"
+
 #include <blend2d.h>
 #include <Core/Core.h>
 #include <Image/Block.h>
 #include "OdysseyVectorHandle.h"
 
-class ODYSSEYVECTOR_API FOdysseyVectorHandlePoint : public FOdysseyVectorHandle
+#include "OdysseyVectorHandlePoint.generated.h"
+
+UCLASS()
+class ODYSSEYVECTOR_API UOdysseyVectorHandlePoint : public UOdysseyVectorHandle
 {
+    public:
+        GENERATED_BODY()
+
+    public:
+        void Init( UOdysseyVectorPoint* iParentPoint );
+
     private:
-        FOdysseyVectorPoint& mParentPoint;
+        UOdysseyVectorPoint* mParentPoint;
 
     protected:
 
     public:
-        ~FOdysseyVectorHandlePoint();
-        FOdysseyVectorHandlePoint( FOdysseyVectorPoint& iParentPoint );
+        ~UOdysseyVectorHandlePoint();
+        UOdysseyVectorHandlePoint();
         uint32 GetType();
-        FOdysseyVectorPoint& GetParent();
+        UOdysseyVectorPoint* GetParent();
 };

@@ -22,10 +22,10 @@ class ODYSSEYVECTOR_API UOdysseyVectorPathBuilder : public UOdysseyVectorObject
         double mCumulAngle;
         double mCumulAngleLimit;
         double mLastCubicAngleLimit;
-        std::list<FOdysseyVectorPoint*> mSamplePointList;
-        std::list<FOdysseyVectorLink*> mSampleLinkList;
-        std::list<FOdysseyVectorPoint*> mPointList;
-        std::list<FOdysseyVectorLink*> mLinkList;
+        std::list<UOdysseyVectorPoint*> mSamplePointList;
+        std::list<UOdysseyVectorLink*> mSampleLinkList;
+        std::list<UOdysseyVectorPoint*> mPointList;
+        std::list<UOdysseyVectorLink*> mLinkList;
 
         /**
          * @brief Record a sample point located at the same position as the point passed as parameter
@@ -35,7 +35,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorPathBuilder : public UOdysseyVectorObject
          * @param iEnforce forces the creation of a cubic segment ending at this point's location.
          * @return the cubic segment created from the sample point and the previous sample point.
          */
-        FOdysseyVectorSegmentCubic* Sample( FOdysseyVectorPoint* iPoint, double iRadius, bool iEnforce );
+        UOdysseyVectorSegmentCubic* Sample( UOdysseyVectorPoint* iPoint, double iRadius, bool iEnforce );
 
         // Unimplemented. Cubic Path builder cannot be copied. It should be destroyed as soon as the curve is built
         UOdysseyVectorObject* CopyShape();
@@ -51,13 +51,13 @@ class ODYSSEYVECTOR_API UOdysseyVectorPathBuilder : public UOdysseyVectorObject
         /**
          * @brief Try to fit the cubic curve as close as possible to the sample links passed as parameter. EXPERIMENTAL
          */
-        void FitSegment( FOdysseyVectorSegmentCubic& iSegment, std::list<FOdysseyVectorLink*>& iLinkList );
+        void FitSegment( UOdysseyVectorSegmentCubic& iSegment, std::list<UOdysseyVectorLink*>& iLinkList );
 
         /**
          * @brief Clear all sample points until the point passed as parameter
          * The sample points are the one used to fit the cubic curve
          */
-        void ClearUntil( FOdysseyVectorPoint* iPoint );
+        void ClearUntil( UOdysseyVectorPoint* iPoint );
 
         /**
          * @brief Clear all sample points until the point passed as parameter
@@ -76,11 +76,11 @@ class ODYSSEYVECTOR_API UOdysseyVectorPathBuilder : public UOdysseyVectorObject
         /**
          * @brief Try to fit the cubic curve as close as possible.
          */
-        void Adjust( FOdysseyVectorSegmentCubic& iCubicSegment );
+        void Adjust( UOdysseyVectorSegmentCubic& iCubicSegment );
 
-        FOdysseyVectorLink* GetLastSampleLink();
+        UOdysseyVectorLink* GetLastSampleLink();
 
-        FOdysseyVectorPoint* GetLastSamplePoint();
+        UOdysseyVectorPoint* GetLastSamplePoint();
 
     protected :
         UOdysseyVectorPathCubic* mCubicPath;
@@ -95,7 +95,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorPathBuilder : public UOdysseyVectorObject
          *
          * @return a cubic segment (if any)
          */
-        FOdysseyVectorSegmentCubic* AppendPoint( double iX, double iY, double iRadius, bool iEnforce );
+        UOdysseyVectorSegmentCubic* AppendPoint( double iX, double iY, double iRadius, bool iEnforce );
 
         /**
          * @brief shape the segment according to an entry vector and an exit vector
@@ -103,7 +103,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorPathBuilder : public UOdysseyVectorObject
          * @param iEntryVector entry vector (at point 0)
          * @param iExitVector exit vector (at point 1)
          */
-        void Sharp( FOdysseyVectorSegmentCubic& iCubicSegment, ::ULIS::FVec2D iEntryVector, ::ULIS::FVec2D iExitVector );
+        void Sharp( UOdysseyVectorSegmentCubic& iCubicSegment, ::ULIS::FVec2D iEntryVector, ::ULIS::FVec2D iExitVector );
 
     public:
        ~UOdysseyVectorPathBuilder();
@@ -119,7 +119,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorPathBuilder : public UOdysseyVectorObject
         /**
          * @brief convenience function for AppendPoint( double iX, double iY, double iRadius, bool iEnforce );
          */
-        FOdysseyVectorSegment* AppendPoint( double iX, double iY, double iRadius );
+        UOdysseyVectorSegment* AppendPoint( double iX, double iY, double iRadius );
 
         /**
          * @brief record the last sample point and close the cubic path if needed
@@ -129,7 +129,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorPathBuilder : public UOdysseyVectorObject
          * @param iRadius point radius
          * @param iClose close the path (link to the first point)
          */
-        FOdysseyVectorSegment* End( double iX, double iY, double iRadius, bool iClose );
+        UOdysseyVectorSegment* End( double iX, double iY, double iRadius, bool iClose );
 
         /**
          * @brief Get the attached cubic path

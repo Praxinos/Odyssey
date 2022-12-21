@@ -1,25 +1,36 @@
 #pragma once
 
+#include "CoreMinimal.h"
+
 #include <blend2d.h>
 #include <Core/Core.h>
 #include <Image/Block.h>
 
-#include "OdysseyVectorPoint.h"
+#include "OdysseyVectorVertex.h"
 #include "OdysseyVectorHandlePoint.h"
 
-class ODYSSEYVECTOR_API FOdysseyVectorPointCubic : public FOdysseyVectorPoint
+#include "OdysseyVectorVertexCubic.generated.h"
+
+UCLASS()
+class ODYSSEYVECTOR_API UOdysseyVectorVertexCubic : public UOdysseyVectorVertex
 {
+    public:
+        GENERATED_BODY()
+
+    public:
+        static UOdysseyVectorVertexCubic* New( double iX, double iY, double iRadius );
+        void Init( double iX, double iY, double iRadius );
+
     private:
-        FOdysseyVectorHandlePoint mCtrlPoint;
+        UOdysseyVectorHandlePoint mCtrlPoint;
 
     protected:
 
     public:
-        ~FOdysseyVectorPointCubic();
-        FOdysseyVectorPointCubic();
-        FOdysseyVectorPointCubic( double iX, double iY );
-        FOdysseyVectorPointCubic( double iX, double iY, double iRadius );
-        FOdysseyVectorHandlePoint& GetControlPoint();
+        ~UOdysseyVectorVertexCubic();
+        UOdysseyVectorVertexCubic();
+
+        UOdysseyVectorHandlePoint& GetControlPoint();
         void Set( double iX, double iY );
         void Set( double iX, double iY, bool iBuildSegments );
         void Set( double iX, double iY, double iRadius, bool iBuildSegments );

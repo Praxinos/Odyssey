@@ -6,7 +6,7 @@
 #include <Core/Core.h>
 #include <Image/Block.h>
 #include "OdysseyVectorObject.h"
-#include "OdysseyVectorPointCubic.h"
+#include "OdysseyVectorVertexCubic.h"
 #include "OdysseyVectorSegmentCubic.h"
 #include "OdysseyVectorPath.h"
 
@@ -24,8 +24,8 @@ class ODYSSEYVECTOR_API UOdysseyVectorPathCubic: public UOdysseyVectorPath
         static const uint32 JOINT_TYPE_LINEAR = 2;
         static const uint32 JOINT_TYPE_MITER  = 3;
 
-        void DrawJoint( FOdysseyVectorSegmentCubic* iPrevSegment
-                      , FOdysseyVectorSegmentCubic& iSegment
+        void DrawJoint( UOdysseyVectorSegmentCubic* iPrevSegment
+                      , UOdysseyVectorSegmentCubic& iSegment
                       , double iRadius );
 
         uint32 mJointType;
@@ -38,10 +38,10 @@ class ODYSSEYVECTOR_API UOdysseyVectorPathCubic: public UOdysseyVectorPath
     public:
         UOdysseyVectorPathCubic();
         void Init( std::string iName );
-        FOdysseyVectorSegmentCubic* AppendPoint( FOdysseyVectorPointCubic* iPoint, bool iConnect, bool iBuildSegments );
+        UOdysseyVectorSegmentCubic* AppendVertex( UOdysseyVectorVertexCubic* iPoint, bool iConnect, bool iBuildSegments );
 
         bool PickPoint ( double iX, double iY, double iRadius, uint64 iSelectionFlags );
-        void Unselect( FOdysseyVectorPoint* iPoint );
+        void Unselect( UOdysseyVectorVertex* iPoint );
 
         void DrawStructure( ::ULIS::FRectD& iRoi );
         void setJointRadial();

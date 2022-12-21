@@ -4,7 +4,7 @@
 
 #include <blend2d.h>
 #include <ULIS>
-#include "OdysseyVectorPointCubic.h"
+#include "OdysseyVectorVertexCubic.h"
 #include "OdysseyVectorSegmentCubic.h"
 #include "OdysseyVectorPathCubic.h"
 
@@ -21,8 +21,8 @@ class ODYSSEYVECTOR_API UOdysseyVectorCircle : public UOdysseyVectorPathCubic
         UOdysseyVectorObject* PickShape( double iX, double iY, double iRadius );
         void UpdateShape();
  
-        FOdysseyVectorPointCubic* mCubicPoint[4];
-        FOdysseyVectorSegmentCubic* mCubicSegment[4];
+        UOdysseyVectorVertexCubic* mCubicPoint[4];
+        UOdysseyVectorSegmentCubic* mCubicSegment[4];
 
     protected :
         double mRadiusX; 

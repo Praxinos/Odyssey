@@ -101,7 +101,7 @@ UOdysseyPainterEditorVectorDrawingTool::OnMouseDrag(const FOdysseyPoint& iPointI
 
         currentPathBuilder->AppendPoint( localCoords.x, localCoords.y, roundedUpRadius );
 
-        FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(cubicPath->GetLastSegment());
+        UOdysseyVectorSegmentCubic* cubicSegment = static_cast<UOdysseyVectorSegmentCubic*>(cubicPath->GetLastSegment());
 
         if ( cubicSegment )
         {
