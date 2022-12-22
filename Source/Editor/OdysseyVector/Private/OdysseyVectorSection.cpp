@@ -4,7 +4,7 @@ FOdysseyVectorSection::~FOdysseyVectorSection()
 {
 }
 
-FOdysseyVectorSection::FOdysseyVectorSection( UOdysseyVectorSegment& iSegment
+FOdysseyVectorSection::FOdysseyVectorSection( UOdysseyVectorSegment* iSegment
                                             , UOdysseyVectorVertex* iVertex0
                                             , UOdysseyVectorVertex* iVertex1 )
     : mSegment ( iSegment )
@@ -13,7 +13,7 @@ FOdysseyVectorSection::FOdysseyVectorSection( UOdysseyVectorSegment& iSegment
 
 }
 
-UOdysseyVectorSegment&
+UOdysseyVectorSegment*
 FOdysseyVectorSection::GetSegment()
 {
     return mSegment;

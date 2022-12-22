@@ -5,10 +5,8 @@ UOdysseyVectorHandleSegment::~UOdysseyVectorHandleSegment()
 }
 
 UOdysseyVectorHandleSegment::UOdysseyVectorHandleSegment()
-    : UOdysseyVectorHandle()
-    , mParentSegment ( nullptr )
+    : mParentSegment ( nullptr )
 {
-    
 }
 
 void
@@ -16,7 +14,18 @@ UOdysseyVectorHandleSegment::Init( UOdysseyVectorSegment* iParentSegment, double
 {
     mParentSegment = iParentSegment;
 
-    Set ( iX, iY );
+    UOdysseyVectorHandle::Init( iX, iY );
+}
+
+//static
+UOdysseyVectorHandleSegment*
+UOdysseyVectorHandleSegment::New( UOdysseyVectorSegment* iParentSegment, double iX, double iY )
+{
+    UOdysseyVectorHandleSegment* handleSegment = NewObject<UOdysseyVectorHandleSegment>();
+
+    handleSegment->Init( iParentSegment, iX, iY );
+
+    return handleSegment;
 }
 
 UOdysseyVectorSegment*

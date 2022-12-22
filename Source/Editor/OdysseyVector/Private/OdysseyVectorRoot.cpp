@@ -123,17 +123,6 @@ void
 UOdysseyVectorRoot::DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
     BLContext& blctx = FOdysseyVectorEngine::GetBLContext();
-
-    for( std::list<UOdysseyVectorObject*>::iterator it = mSelectedObjectList.begin(); it != mSelectedObjectList.end(); ++it )
-    {
-        UOdysseyVectorObject *obj = (*it);
-        ::ULIS::FRectD bbox = obj->GetBBox( false );
-
-        blctx.save();
-        blctx.setMatrix( obj->GetWorldMatrix() );
-        blctx.strokeRect( bbox.x, bbox.y, bbox.w, bbox.h );
-        blctx.restore();
-    }
 }
 
 void

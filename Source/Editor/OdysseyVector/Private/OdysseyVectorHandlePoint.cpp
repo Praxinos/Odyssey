@@ -17,6 +17,17 @@ UOdysseyVectorHandlePoint::Init( UOdysseyVectorPoint* iParentPoint )
     mParentPoint = iParentPoint;
 }
 
+//static
+UOdysseyVectorHandlePoint*
+UOdysseyVectorHandlePoint::New( UOdysseyVectorPoint* iParentPoint )
+{
+    UOdysseyVectorHandlePoint* handlePoint = NewObject<UOdysseyVectorHandlePoint>();
+
+    handlePoint->Init( iParentPoint );
+
+    return handlePoint;
+}
+
 UOdysseyVectorPoint*
 UOdysseyVectorHandlePoint::GetParent()
 {

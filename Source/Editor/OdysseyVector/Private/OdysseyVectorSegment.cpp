@@ -93,8 +93,8 @@ UOdysseyVectorSegment::AddIntersection ( UOdysseyVectorVertexIntersection* iInte
     double t = iIntersectionVertex->GetT( *this );
     FOdysseyVectorSection* section = GetSection ( t );
     UOdysseyVectorVertex* vertex[3] = { section->GetVertex(0), iIntersectionVertex, section->GetVertex(1) };
-    FOdysseyVectorSection* subSection[2] = { new FOdysseyVectorSection ( *this, vertex[0], vertex[1] )
-                                           , new FOdysseyVectorSection ( *this, vertex[1], vertex[2] ) };
+    FOdysseyVectorSection* subSection[2] = { new FOdysseyVectorSection ( this, vertex[0], vertex[1] )
+                                           , new FOdysseyVectorSection ( this, vertex[1], vertex[2] ) };
 
     // this does not release memory so that we can undo that later
     RemoveSection( section );
@@ -125,7 +125,7 @@ UOdysseyVectorSegment::ClearIntersections ( )
     mIntersectionVertexList.clear();
 
     // Add default section
-    AddSection ( new FOdysseyVectorSection ( *this, Cast<UOdysseyVectorVertex>(mPoint[0]), Cast<UOdysseyVectorVertex>(mPoint[1]) ) );
+    AddSection ( new FOdysseyVectorSection ( this, Cast<UOdysseyVectorVertex>(mPoint[0]), Cast<UOdysseyVectorVertex>(mPoint[1]) ) );
 }
 
 void

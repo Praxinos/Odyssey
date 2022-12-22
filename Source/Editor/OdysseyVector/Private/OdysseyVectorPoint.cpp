@@ -62,7 +62,7 @@ void
 UOdysseyVectorPoint::Set( double iX, double iY )
 {
     SetX( iX );
-    SetX( iY );
+    SetY( iY );
 }
 
 double

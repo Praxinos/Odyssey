@@ -14,33 +14,6 @@ UOdysseyVectorCircle::UOdysseyVectorCircle()
     SetName( "Circle" );
 
     mRadiusX = mRadiusY = 0.0f;
-
-    mCubicPoint[0] = UOdysseyVectorVertexCubic::New( 0.0f, 0.0f, 1.0f );
-    mCubicPoint[1] = UOdysseyVectorVertexCubic::New( 0.0f, 0.0f, 1.0f );
-    mCubicPoint[2] = UOdysseyVectorVertexCubic::New( 0.0f, 0.0f, 1.0f );
-    mCubicPoint[3] = UOdysseyVectorVertexCubic::New( 0.0f, 0.0f, 1.0f );
-
-    mCubicSegment[0] = UOdysseyVectorSegmentCubic::New( static_cast<UOdysseyVectorPathCubic*>(this), mCubicPoint[0], mCubicPoint[1] );
-    mCubicSegment[1] = UOdysseyVectorSegmentCubic::New( static_cast<UOdysseyVectorPathCubic*>(this), mCubicPoint[1], mCubicPoint[2] );
-    mCubicSegment[2] = UOdysseyVectorSegmentCubic::New( static_cast<UOdysseyVectorPathCubic*>(this), mCubicPoint[2], mCubicPoint[3] );
-    mCubicSegment[3] = UOdysseyVectorSegmentCubic::New( static_cast<UOdysseyVectorPathCubic*>(this), mCubicPoint[3], mCubicPoint[0] );
-
-    AddVertex ( mCubicPoint[0] );
-    AddVertex ( mCubicPoint[1] );
-    AddVertex ( mCubicPoint[2] );
-    AddVertex ( mCubicPoint[3] );
-
-    AddSegment ( mCubicSegment[0] );
-    AddSegment ( mCubicSegment[1] );
-    AddSegment ( mCubicSegment[2] );
-    AddSegment ( mCubicSegment[3] );
-}
-
-void
-UOdysseyVectorCircle::Init( std::string iName, double iRadius )
-{
-    SetName( iName );
-    SetRadius( iRadius, iRadius );
 }
 
 void
@@ -48,6 +21,37 @@ UOdysseyVectorCircle::Init( std::string iName, double iRadiusX, double iRadiusY 
 {
     SetName( iName );
     SetRadius( iRadiusX, iRadiusY );
+
+    mCubicVertex[0] = UOdysseyVectorVertexCubic::New( 0.0f, 0.0f, 1.0f );
+    mCubicVertex[1] = UOdysseyVectorVertexCubic::New( 0.0f, 0.0f, 1.0f );
+    mCubicVertex[2] = UOdysseyVectorVertexCubic::New( 0.0f, 0.0f, 1.0f );
+    mCubicVertex[3] = UOdysseyVectorVertexCubic::New( 0.0f, 0.0f, 1.0f );
+
+    mCubicSegment[0] = UOdysseyVectorSegmentCubic::New( static_cast<UOdysseyVectorPathCubic*>(this), mCubicVertex[0], mCubicVertex[1] );
+    mCubicSegment[1] = UOdysseyVectorSegmentCubic::New( static_cast<UOdysseyVectorPathCubic*>(this), mCubicVertex[1], mCubicVertex[2] );
+    mCubicSegment[2] = UOdysseyVectorSegmentCubic::New( static_cast<UOdysseyVectorPathCubic*>(this), mCubicVertex[2], mCubicVertex[3] );
+    mCubicSegment[3] = UOdysseyVectorSegmentCubic::New( static_cast<UOdysseyVectorPathCubic*>(this), mCubicVertex[3], mCubicVertex[0] );
+
+    AddVertex ( mCubicVertex[0] );
+    AddVertex ( mCubicVertex[1] );
+    AddVertex ( mCubicVertex[2] );
+    AddVertex ( mCubicVertex[3] );
+
+    AddSegment ( mCubicSegment[0] );
+    AddSegment ( mCubicSegment[1] );
+    AddSegment ( mCubicSegment[2] );
+    AddSegment ( mCubicSegment[3] );
+}
+
+//static
+UOdysseyVectorCircle*
+UOdysseyVectorCircle::New( std::string iName, double iRadiusX, double iRadiusY )
+{
+    UOdysseyVectorCircle* circle = NewObject<UOdysseyVectorCircle>();
+
+    circle->Init( iName, iRadiusX, iRadiusY );
+
+    return circle;
 }
 
 void
@@ -56,22 +60,22 @@ UOdysseyVectorCircle::UpdateShape()
     double ctlDistX = mRadiusX * MAGICRATIO;
     double ctlDistY = mRadiusY * MAGICRATIO;
 
-    mCubicPoint[0]->Set(  0.0f    ,  mRadiusY );
-    mCubicPoint[1]->Set(  mRadiusX,  0.0f     );
-    mCubicPoint[2]->Set(  0.0f    , -mRadiusY );
-    mCubicPoint[3]->Set( -mRadiusX,  0.0f     );
+    mCubicVertex[0]->Set(  0.0f    ,  mRadiusY );
+    mCubicVertex[1]->Set(  mRadiusX,  0.0f     );
+    mCubicVertex[2]->Set(  0.0f    , -mRadiusY );
+    mCubicVertex[3]->Set( -mRadiusX,  0.0f     );
 
-    mCubicSegment[0]->GetControlPoint(0).Set(  ctlDistX,  mRadiusY );
-    mCubicSegment[0]->GetControlPoint(1).Set(  mRadiusX,  ctlDistY );
+    mCubicSegment[0]->GetControlPoint(0)->Set(  ctlDistX,  mRadiusY );
+    mCubicSegment[0]->GetControlPoint(1)->Set(  mRadiusX,  ctlDistY );
 
-    mCubicSegment[1]->GetControlPoint(0).Set(  mRadiusX, -ctlDistY );
-    mCubicSegment[1]->GetControlPoint(1).Set(  ctlDistX, -mRadiusY );
+    mCubicSegment[1]->GetControlPoint(0)->Set(  mRadiusX, -ctlDistY );
+    mCubicSegment[1]->GetControlPoint(1)->Set(  ctlDistX, -mRadiusY );
 
-    mCubicSegment[2]->GetControlPoint(0).Set( -ctlDistX, -mRadiusY );
-    mCubicSegment[2]->GetControlPoint(1).Set( -mRadiusX, -ctlDistY );
+    mCubicSegment[2]->GetControlPoint(0)->Set( -ctlDistX, -mRadiusY );
+    mCubicSegment[2]->GetControlPoint(1)->Set( -mRadiusX, -ctlDistY );
 
-    mCubicSegment[3]->GetControlPoint(0).Set( -mRadiusX,  ctlDistY );
-    mCubicSegment[3]->GetControlPoint(1).Set( -ctlDistX,  mRadiusY );
+    mCubicSegment[3]->GetControlPoint(0)->Set( -mRadiusX,  ctlDistY );
+    mCubicSegment[3]->GetControlPoint(1)->Set( -ctlDistX,  mRadiusY );
 
     mCubicSegment[0]->Update();
     mCubicSegment[1]->Update();

@@ -49,8 +49,8 @@ UOdysseyVectorVertexIntersection::AddSegment( UOdysseyVectorSegmentCubic* iSegme
 {
     ::ULIS::FVec2D& point0 = iSegment->GetPoint(0)->GetCoords();
     ::ULIS::FVec2D& point1 = iSegment->GetPoint(1)->GetCoords();
-    ::ULIS::FVec2D& ctrlPoint0 = iSegment->GetControlPoint(0).GetCoords();
-    ::ULIS::FVec2D& ctrlPoint1 = iSegment->GetControlPoint(1).GetCoords();
+    ::ULIS::FVec2D& ctrlPoint0 = iSegment->GetControlPoint(0)->GetCoords();
+    ::ULIS::FVec2D& ctrlPoint1 = iSegment->GetControlPoint(1)->GetCoords();
     ::ULIS::FVec2D intersectAt = ::ULIS::CubicBezierPointAtParameter<::ULIS::FVec2D>( point0
                                                                                     , ctrlPoint0
                                                                                     , ctrlPoint1
@@ -70,15 +70,15 @@ UOdysseyVectorVertexIntersection::GetSegment( UOdysseyVectorVertex& iOtherVertex
     {
         UOdysseyVectorSegment* segment = static_cast<UOdysseyVectorSegment*>(*it);
 
-        if ( typeid ( iOtherVertex ) == typeid ( UOdysseyVectorVertex ) )
+        if ( iOtherVertex.GetClass() == UOdysseyVectorVertex::StaticClass() )
         {
-            if ( ( segment->GetVertex(0) == &iOtherVertex )
-              || ( segment->GetVertex(1) == &iOtherVertex ) ) {
+            if ( ( segment->GetPoint(0) == &iOtherVertex )
+              || ( segment->GetPoint(1) == &iOtherVertex ) ) {
                 return segment;
             }
         }
 
-        if ( typeid ( iOtherVertex ) == typeid ( UOdysseyVectorVertexIntersection ) )
+        if ( iOtherVertex.GetClass() == UOdysseyVectorVertexIntersection::StaticClass() )
         {
             if ( segment->HasIntersectionVertex ( static_cast<UOdysseyVectorVertexIntersection&>(iOtherVertex) ) )
             {

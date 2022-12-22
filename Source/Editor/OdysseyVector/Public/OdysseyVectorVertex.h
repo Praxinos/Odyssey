@@ -21,7 +21,6 @@ class ODYSSEYVECTOR_API UOdysseyVectorVertex : public UOdysseyVectorPoint
 
     public:
         static UOdysseyVectorVertex* New( double iX, double iY, double iRadius );
-        void Init( double iX, double iY, double iRadius );
 
     private:
 
@@ -42,14 +41,12 @@ class ODYSSEYVECTOR_API UOdysseyVectorVertex : public UOdysseyVectorPoint
         virtual UOdysseyVectorSegment* GetSegment( UOdysseyVectorVertex& iOtherVertex );
         UOdysseyVectorSegment* GetOtherSegment( UOdysseyVectorSegment& iCurrentSegment );
         void RemoveSegment( UOdysseyVectorSegment* iSegment );
-        virtual ::ULIS::FVec2D& GetCoords();
         virtual ::ULIS::FVec2D GetPosition( UOdysseyVectorSegment& iSegment );
         virtual void SetX( double iX );
         virtual void SetY( double iY );
         virtual void Set( double iX, double iY );
         uint32 GetSegmentCount();
         std::list<UOdysseyVectorSegment*>& GetSegmentList();
-        virtual uint32 GetType();
         virtual double GetT( UOdysseyVectorSegment& );
         virtual void SetRadius( double iRadius );
         void InvalidateSegments();

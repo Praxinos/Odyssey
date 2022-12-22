@@ -15,7 +15,7 @@ UOdysseyVectorVertex::New( double iX, double iY, double iRadius )
 {
     UOdysseyVectorVertex* vertex = NewObject<UOdysseyVectorVertex>();
 
-    vertex->Init ( iX, iY, iRadius );
+    vertex->Init( iX, iY, iRadius );
 
     return vertex;
 }
@@ -29,6 +29,14 @@ UOdysseyVectorVertex::InvalidateSegments()
 
         segment->Invalidate();
     }
+}
+
+void
+UOdysseyVectorVertex::SetRadius( double iRadius )
+{
+    UOdysseyVectorPoint::SetRadius( iRadius );
+
+    InvalidateSegments();
 }
 
 void 
@@ -187,17 +195,17 @@ UOdysseyVectorVertex::InvalidateLoops()
 
 bool
 UOdysseyVectorVertex::IsClosestSection( FOdysseyVectorSection& iStartSection
-                              , FOdysseyVectorSection& iEndSection )
+                                      , FOdysseyVectorSection& iEndSection )
 {
-    double startSectionP0T   = iStartSection.GetVertex( 0 )->GetT( iStartSection.GetSegment() );
-    double startSectionP1T   = iStartSection.GetVertex( 1 )->GetT( iStartSection.GetSegment() );
+    double startSectionP0T   = iStartSection.GetVertex( 0 )->GetT( *iStartSection.GetSegment() );
+    double startSectionP1T   = iStartSection.GetVertex( 1 )->GetT( *iStartSection.GetSegment() );
     double startSectionT     = ( startSectionP0T + startSectionP1T ) * 0.5f;
-    ::ULIS::FVec2D startSectionMidAt = iStartSection.GetSegment().GetPointAt( startSectionT );
+    ::ULIS::FVec2D startSectionMidAt = iStartSection.GetSegment()->GetPointAt( startSectionT );
 
-    double endSectionP0T     = iEndSection.GetVertex( 0 )->GetT( iEndSection.GetSegment() );
-    double endSectionP1T     = iEndSection.GetVertex( 1 )->GetT( iEndSection.GetSegment() );
+    double endSectionP0T     = iEndSection.GetVertex( 0 )->GetT( *iEndSection.GetSegment() );
+    double endSectionP1T     = iEndSection.GetVertex( 1 )->GetT( *iEndSection.GetSegment() );
     double endSectionT       = ( endSectionP0T + endSectionP1T ) * 0.5f;
-    ::ULIS::FVec2D endSectionMidAt   = iEndSection.GetSegment().GetPointAt( endSectionT );
+    ::ULIS::FVec2D endSectionMidAt   = iEndSection.GetSegment()->GetPointAt( endSectionT );
 
     ::ULIS::FVec3F originToStartMid = { startSectionMidAt.x - this->GetCoords().x
                                       , startSectionMidAt.y - this->GetCoords().y, 0.0f };
@@ -217,12 +225,12 @@ UOdysseyVectorVertex::IsClosestSection( FOdysseyVectorSection& iStartSection
 
             if ( ( section != &iStartSection ) && ( section != &iEndSection ) )
             {
-                double p0T = section->GetVertex(0)->GetT(section->GetSegment());
-                double p1T = section->GetVertex(1)->GetT(section->GetSegment());
+                double p0T = section->GetVertex(0)->GetT( *section->GetSegment());
+                double p1T = section->GetVertex(1)->GetT( *section->GetSegment());
                 double t = ( p0T + p1T ) * 0.5f;
-                ::ULIS::FVec2D pointAt = section->GetSegment().GetPointAt( t );
+                ::ULIS::FVec2D pointAt = section->GetSegment()->GetPointAt( t );
                 ::ULIS::FVec3F originToVertex = { pointAt.x - this->GetCoords().x
-                                               , pointAt.y - this->GetCoords().y, 0.0f };
+                                                , pointAt.y - this->GetCoords().y, 0.0f };
 
                if ( originToVertex.DistanceSquared() )
                {
@@ -346,7 +354,7 @@ UOdysseyVectorVertex::March()
 
                 if ( nextVertex == this )
                 {
-                    UOdysseyVectorPath* path = nextNode->mSection->GetSegment().GetPath();
+                    UOdysseyVectorPath* path = nextNode->mSection->GetSegment()->GetPath();
                     std::list<UOdysseyVectorVertex*> loopVertexList;
                     std::list<FOdysseyVectorSection*> loopSectionList;
                     uint64 loopID;

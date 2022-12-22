@@ -22,7 +22,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorVertexCubic : public UOdysseyVectorVertex
         void Init( double iX, double iY, double iRadius );
 
     private:
-        UOdysseyVectorHandlePoint mCtrlPoint;
+        UOdysseyVectorHandlePoint* mCtrlPoint;
 
     protected:
 
@@ -30,7 +30,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorVertexCubic : public UOdysseyVectorVertex
         ~UOdysseyVectorVertexCubic();
         UOdysseyVectorVertexCubic();
 
-        UOdysseyVectorHandlePoint& GetControlPoint();
+        UOdysseyVectorHandlePoint* GetControlPoint();
         void Set( double iX, double iY );
         void Set( double iX, double iY, bool iBuildSegments );
         void Set( double iX, double iY, double iRadius, bool iBuildSegments );

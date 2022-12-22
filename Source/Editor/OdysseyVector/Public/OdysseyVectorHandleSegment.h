@@ -16,6 +16,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorHandleSegment : public UOdysseyVectorHandl
         GENERATED_BODY()
 
     public:
+        static UOdysseyVectorHandleSegment* New( UOdysseyVectorSegment* iParentSegment, double iX, double iY );
         void Init( UOdysseyVectorSegment* iParentSegment, double iX, double iY );
 
     private:

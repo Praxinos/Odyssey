@@ -53,7 +53,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorSegmentCubic : public UOdysseyVectorSegmen
                                               , UOdysseyVectorVertexCubic* iPoint1 );
 
     protected:
-        UOdysseyVectorHandleSegment mCtrlPoint[2];
+        UOdysseyVectorHandleSegment* mCtrlPoint[2];
         std::vector<FPolygon> mPolygonCache;
         double mDistanceSquared;
         BLPath mBLPath;
@@ -82,7 +82,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorSegmentCubic : public UOdysseyVectorSegmen
         ~UOdysseyVectorSegmentCubic();
          UOdysseyVectorSegmentCubic();
 
-        UOdysseyVectorHandleSegment& GetControlPoint( int iCtrlPointNum );
+        UOdysseyVectorHandleSegment* GetControlPoint( int iCtrlPointNum );
         void Draw( ::ULIS::FRectD &iRoi );
         void DrawStructure( ::ULIS::FRectD &iRoi, double iZoomFactor );
         void DrawIntersections ( ::ULIS::FRectD &iRoi, double iZoomFactor );

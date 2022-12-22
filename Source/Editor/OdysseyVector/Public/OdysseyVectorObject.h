@@ -15,6 +15,8 @@ class ODYSSEYVECTOR_API UOdysseyVectorObject : public UObject
     public:
         GENERATED_BODY()
 
+        static constexpr float BBOX_POINT_RADIUS = 4.0f;
+
     protected:
         ::ULIS::FVec2D mTranslation;
         double mRotation;
@@ -86,4 +88,5 @@ class ODYSSEYVECTOR_API UOdysseyVectorObject : public UObject
         UOdysseyVectorRoot* GetRoot();
         bool IsInvalidated();
         bool IsSelected();
+        void DrawBBox( ::ULIS::FRectD& iRoi,uint64 iFlags );
 };

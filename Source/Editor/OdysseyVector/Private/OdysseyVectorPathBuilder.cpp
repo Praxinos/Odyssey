@@ -49,11 +49,11 @@ UOdysseyVectorPathBuilder::Sharp( UOdysseyVectorSegmentCubic& iCubicSegment
 {
     double length = iCubicSegment.GetVector( false ).Distance();
 
-    iCubicSegment.GetControlPoint(0).Set( iCubicSegment.GetPoint(0)->GetX() + iEntryVector.x * length * 0.35f
-                                        , iCubicSegment.GetPoint(0)->GetY() + iEntryVector.y * length * 0.35f );
+    iCubicSegment.GetControlPoint(0)->Set( iCubicSegment.GetPoint(0)->GetX() + iEntryVector.x * length * 0.35f
+                                         , iCubicSegment.GetPoint(0)->GetY() + iEntryVector.y * length * 0.35f );
 
-    iCubicSegment.GetControlPoint(1).Set( iCubicSegment.GetPoint(1)->GetX() - iExitVector.x * length * 0.35f
-                                        , iCubicSegment.GetPoint(1)->GetY() - iExitVector.y * length * 0.35f );
+    iCubicSegment.GetControlPoint(1)->Set( iCubicSegment.GetPoint(1)->GetX() - iExitVector.x * length * 0.35f
+                                         , iCubicSegment.GetPoint(1)->GetY() - iExitVector.y * length * 0.35f );
 
     iCubicSegment.Update();
 }
@@ -140,8 +140,8 @@ UOdysseyVectorPathBuilder::Adjust( UOdysseyVectorSegmentCubic& iCubicSegment )
     double totalLinkLength = GetTotalSampleLinkLength();
     ::ULIS::FVec2D& point0 = iCubicSegment.GetPoint(0)->GetCoords();
     ::ULIS::FVec2D& point1 = iCubicSegment.GetPoint(1)->GetCoords();
-    ::ULIS::FVec2D& ctrlPoint0 = iCubicSegment.GetControlPoint(0).GetCoords();
-    ::ULIS::FVec2D& ctrlPoint1 = iCubicSegment.GetControlPoint(1).GetCoords();
+    ::ULIS::FVec2D& ctrlPoint0 = iCubicSegment.GetControlPoint(0)->GetCoords();
+    ::ULIS::FVec2D& ctrlPoint1 = iCubicSegment.GetControlPoint(1)->GetCoords();
     ::ULIS::FVec2D expectedPoint0 = CubicBezierPointAtParameter( point0, ctrlPoint0, ctrlPoint1, point1, 0.33f );
     ::ULIS::FVec2D sampledPoint0 = GetSamplePointAtParameter( totalLinkLength, 0.33f );
     ::ULIS::FVec2D p0ToExpectedPoint0 = expectedPoint0 - point0;
@@ -232,7 +232,7 @@ UOdysseyVectorPathBuilder::Sample( UOdysseyVectorPoint* iSamplePoint, double iRa
                 if ( ( angle > mLastCubicAngleLimit ) || ( mCumulAngle >= mCumulAngleLimit ) || iEnforce )
                 {
                     UOdysseyVectorVertexCubic* cubicVertex = UOdysseyVectorVertexCubic::New( lastSamplePoint->GetX()
-                                                                                          , lastSamplePoint->GetY()
+                                                                                           , lastSamplePoint->GetY()
                                                                                           , iRadius );
                     ::ULIS::FVec2D entryVector = mSampleLinkList.front()->GetVector( true );
                     ::ULIS::FVec2D exitVector =  lastSampleSegmentVector;
@@ -253,8 +253,8 @@ UOdysseyVectorPathBuilder::Sample( UOdysseyVectorPoint* iSamplePoint, double iRa
                         {
                             double length = cubicSegment->GetStraightDistance();
 
-                            cubicSegment->GetControlPoint(0).Set ( cubicSegment->GetPoint(0)->GetX() + ( lastCubicSegmentVector.x * length * 0.35f )
-                                                                 , cubicSegment->GetPoint(0)->GetY() + ( lastCubicSegmentVector.y * length * 0.35f ) );
+                            cubicSegment->GetControlPoint(0)->Set ( cubicSegment->GetPoint(0)->GetX() + ( lastCubicSegmentVector.x * length * 0.35f )
+                                                                  , cubicSegment->GetPoint(0)->GetY() + ( lastCubicSegmentVector.y * length * 0.35f ) );
                         }
                     }
 
@@ -410,8 +410,8 @@ UOdysseyVectorPathBuilder::FitSegment( UOdysseyVectorSegmentCubic& iSegment
 {
     ::ULIS::FVec2D& point0 = iSegment.GetPoint(0)->GetCoords();
     ::ULIS::FVec2D& point1 = iSegment.GetPoint(1)->GetCoords();
-    ::ULIS::FVec2D& ctrlPoint0 = iSegment.GetControlPoint(0).GetCoords();
-    ::ULIS::FVec2D& ctrlPoint1 = iSegment.GetControlPoint(1).GetCoords();
+    ::ULIS::FVec2D& ctrlPoint0 = iSegment.GetControlPoint(0)->GetCoords();
+    ::ULIS::FVec2D& ctrlPoint1 = iSegment.GetControlPoint(1)->GetCoords();
     double sampleLength = 0.0f;
     double currentT = 0.0f;
 

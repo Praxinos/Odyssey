@@ -5,7 +5,6 @@ UOdysseyVectorHandle::~UOdysseyVectorHandle()
 }
 
 UOdysseyVectorHandle::UOdysseyVectorHandle()
-    : UOdysseyVectorPoint()
 {
 }
 

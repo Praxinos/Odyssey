@@ -12,7 +12,7 @@ UOdysseyVectorVertexCubic::UOdysseyVectorVertexCubic()
 void
 UOdysseyVectorVertexCubic::Init( double iX, double iY, double iRadius )
 {
-    mCtrlPoint.Init( this );
+    mCtrlPoint = UOdysseyVectorHandlePoint::New( this );
     Set( iX, iY );
     SetRadius( iRadius, false );
 }
@@ -28,7 +28,7 @@ UOdysseyVectorVertexCubic::New( double iX, double iY, double iRadius )
     return cubicVertex;
 }
 
-UOdysseyVectorHandlePoint&
+UOdysseyVectorHandlePoint*
 UOdysseyVectorVertexCubic::GetControlPoint()
 {
     return mCtrlPoint;
@@ -68,8 +68,8 @@ UOdysseyVectorVertexCubic::SmoothSegments( bool iBuildSegments )
                     smoothVector = - smoothVector;
                 }
 
-                cubicSegment->GetControlPoint(0).Set( this->GetX() + ( smoothVector.x * distance * 0.35f ),
-                                                      this->GetY() + ( smoothVector.y * distance * 0.35f ) );
+                cubicSegment->GetControlPoint(0)->Set( this->GetX() + ( smoothVector.x * distance * 0.35f ),
+                                                       this->GetY() + ( smoothVector.y * distance * 0.35f ) );
             }
 
             if ( this == cubicSegment->GetPoint(1) )
@@ -81,8 +81,8 @@ UOdysseyVectorVertexCubic::SmoothSegments( bool iBuildSegments )
                     smoothVector = - smoothVector;
                 }
 
-                cubicSegment->GetControlPoint(1).Set( this->GetX() + ( smoothVector.x * distance * 0.35f ),
-                                                      this->GetY() + ( smoothVector.y * distance * 0.35f ) );
+                cubicSegment->GetControlPoint(1)->Set( this->GetX() + ( smoothVector.x * distance * 0.35f ),
+                                                       this->GetY() + ( smoothVector.y * distance * 0.35f ) );
             }
 
             if ( iBuildSegments == true )
@@ -166,8 +166,8 @@ UOdysseyVectorVertexCubic::GetPerpendicularVector( bool iNormalize )
             UOdysseyVectorPoint* p1 = segment->GetPoint(1);
             ::ULIS::FVec2D& point0 = segment->GetPoint(0)->GetCoords();
             ::ULIS::FVec2D& point1 = segment->GetPoint(1)->GetCoords();
-            ::ULIS::FVec2D& ctrlPoint0 = segment->GetControlPoint(0).GetCoords();
-            ::ULIS::FVec2D& ctrlPoint1 = segment->GetControlPoint(1).GetCoords();
+            ::ULIS::FVec2D& ctrlPoint0 = segment->GetControlPoint(0)->GetCoords();
+            ::ULIS::FVec2D& ctrlPoint1 = segment->GetControlPoint(1)->GetCoords();
 
             if( this == p0 )
             {

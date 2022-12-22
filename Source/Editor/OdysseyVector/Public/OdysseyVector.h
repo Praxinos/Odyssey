@@ -9,7 +9,7 @@
 #include "OdysseyVectorHandleSegment.h"
 #include "OdysseyVectorVertex.h"
 #include "OdysseyVectorVertexCubic.h"
-#include "OdysseyVectorPointIntersection.h"
+#include "OdysseyVectorVertexIntersection.h"
 #include "OdysseyVectorSection.h"
 #include "OdysseyVectorLink.h"
 #include "OdysseyVectorSegment.h"

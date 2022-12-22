@@ -143,8 +143,8 @@ DragPoint( double iLocalX
         for( std::list<UOdysseyVectorSegment*>::iterator segit = segmentList.begin(); segit != segmentList.end(); ++segit )
         {
             UOdysseyVectorSegmentCubic* cubicSegment = static_cast<UOdysseyVectorSegmentCubic*>(*segit);
-            UOdysseyVectorHandleSegment* ctrlPoint = ( cubicSegment->GetPoint(0) == iPoint ) ? static_cast<UOdysseyVectorHandleSegment*>( &cubicSegment->GetControlPoint( 0 ) ) :
-                                                                                               static_cast<UOdysseyVectorHandleSegment*>( &cubicSegment->GetControlPoint( 1 ) );
+            UOdysseyVectorHandleSegment* ctrlPoint = ( cubicSegment->GetPoint(0) == iPoint ) ? static_cast<UOdysseyVectorHandleSegment*>( cubicSegment->GetControlPoint( 0 ) ) :
+                                                                                               static_cast<UOdysseyVectorHandleSegment*>( cubicSegment->GetControlPoint( 1 ) );
 
             ctrlPoint->Set( ctrlPoint->GetX() + difx
                           , ctrlPoint->GetY() + dify );

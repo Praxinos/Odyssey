@@ -9,14 +9,14 @@
 class FOdysseyVectorSection
 {
     protected:
-        UOdysseyVectorSegment& mSegment;
+        UOdysseyVectorSegment* mSegment;
         UOdysseyVectorVertex* mVertex[2];
         std::list<UOdysseyVectorLoop*> mLoopList;
 
     public:
         ~FOdysseyVectorSection();
-        FOdysseyVectorSection( UOdysseyVectorSegment& iSegment, UOdysseyVectorVertex* iVertex0, UOdysseyVectorVertex* iVertex1 );
-        UOdysseyVectorSegment& GetSegment();
+        FOdysseyVectorSection( UOdysseyVectorSegment* iSegment, UOdysseyVectorVertex* iVertex0, UOdysseyVectorVertex* iVertex1 );
+        UOdysseyVectorSegment* GetSegment();
         UOdysseyVectorVertex* GetVertex( int iNum );
         void AddLoop( UOdysseyVectorLoop* iLoop );
         void RemoveLoop( UOdysseyVectorLoop* iLoop );

@@ -8,7 +8,7 @@
 
 #include "OdysseyVectorPoint.generated.h"
 
-class FOdysseyVectorSegment;
+class UOdysseyVectorSegment;
 class UOdysseyVectorLoop;
 class FOdysseyVectorSection;
 
@@ -35,15 +35,6 @@ class ODYSSEYVECTOR_API UOdysseyVectorPoint : public UObject
         static  const uint32 POINT_TYPE_INTERSECTION   = 2;
         static  const uint32 POINT_TYPE_HANDLE_POINT   = 3;
         static  const uint32 POINT_TYPE_HANDLE_SEGMENT = 4;*/
-
-        static  const uint32 BBOX_TOP_LEFT      = 0;
-        static  const uint32 BBOX_TOP_RIGHT     = 1;
-        static  const uint32 BBOX_BOTTOM_LEFT   = 2;
-        static  const uint32 BBOX_BOTTOM_RIGHT  = 3;
-        static  const uint32 BBOX_TOP_MIDDLE    = 4;
-        static  const uint32 BBOX_RIGHT_MIDDLE  = 5;
-        static  const uint32 BBOX_BOTTOM_MIDDLE = 6;
-        static  const uint32 BBOX_LEFT_MIDDLE   = 7;
 
         ~UOdysseyVectorPoint();
         UOdysseyVectorPoint();

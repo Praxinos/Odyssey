@@ -56,7 +56,7 @@ FOdysseyVectorEngine::RenderSelected()
 
         blctx.save();
         blctx.setMatrix( obj->GetWorldMatrix() );
-        blctx.strokeRect( bbox.x, bbox.y, bbox.w, bbox.h );
+        obj->DrawBBox( mRoi, 0 );
         blctx.restore();
     }
 }
@@ -76,12 +76,12 @@ FOdysseyVectorEngine::Render()
 
     if ( mRoi != zeroRectangle )
     {
-        blctx.fillRect( mRoi.x, mRoi.y, mRoi.w, mRoi.h );
+        /*blctx.fillRect( mRoi.x, mRoi.y, mRoi.w, mRoi.h );
 
         // view the updated zone ( testing purpose only )
         blctx.setStrokeStyle(BLRgba32(0xFFFF0000));
         blctx.setStrokeWidth(1.0f);
-        blctx.strokeRect( mRoi.x, mRoi.y, mRoi.w, mRoi.h );
+        blctx.strokeRect( mRoi.x, mRoi.y, mRoi.w, mRoi.h );*/
     }
     else
     {

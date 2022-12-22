@@ -16,12 +16,16 @@ class ODYSSEYVECTOR_API UOdysseyVectorCircle : public UOdysseyVectorPathCubic
     public:
         GENERATED_BODY()
 
+    public:
+        static UOdysseyVectorCircle* New( std::string iName, double iRadiusX, double iRadiusY );
+        void Init( std::string iName, double iRadiusX, double iRadiusY );
+
     private:
         void DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags );
         UOdysseyVectorObject* PickShape( double iX, double iY, double iRadius );
         void UpdateShape();
  
-        UOdysseyVectorVertexCubic* mCubicPoint[4];
+        UOdysseyVectorVertexCubic* mCubicVertex[4];
         UOdysseyVectorSegmentCubic* mCubicSegment[4];
 
     protected :
@@ -31,9 +35,6 @@ class ODYSSEYVECTOR_API UOdysseyVectorCircle : public UOdysseyVectorPathCubic
     public:
         ~UOdysseyVectorCircle();
          UOdysseyVectorCircle();
-        void Init( std::string iName );
-        void Init( std::string iName, double iRadius );
-        void Init( std::string iName, double iRadiusX, double iRadiusY );
         void SetRadius( double iRadius );
         void SetRadius( double iRadiusX, double iRadiusY );
         double GetRadiusX();

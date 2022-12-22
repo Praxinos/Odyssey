@@ -251,8 +251,8 @@ UOdysseyVectorLoop::Build()
     if ( mSectionList.size() ) 
     {
         FOdysseyVectorSection* firstSection = mSectionList.front();
-        UOdysseyVectorSegment& firstSegment = firstSection->GetSegment();
-        ::ULIS::FVec2D originAt = mLoopVertex->GetPosition( firstSegment );
+        UOdysseyVectorSegment* firstSegment = firstSection->GetSegment();
+        ::ULIS::FVec2D originAt = mLoopVertex->GetPosition( *firstSegment );
         UOdysseyVectorVertex* currentVertex = mLoopVertex;
 
         mPath.moveTo( originAt.x, originAt.y );
@@ -260,12 +260,12 @@ UOdysseyVectorLoop::Build()
         for( std::list<FOdysseyVectorSection*>::iterator it = mSectionList.begin(); it != mSectionList.end(); ++it )
         {
             FOdysseyVectorSection* section = static_cast<FOdysseyVectorSection*>(*it);
-            UOdysseyVectorSegment& segment = section->GetSegment();
+            UOdysseyVectorSegment* segment = section->GetSegment();
             UOdysseyVectorVertex* nextVertex = ( currentVertex == section->GetVertex(0) ) ? section->GetVertex(1) : section->GetVertex(0);
-            double currentVertexT = currentVertex->GetT( segment );
-            double    nextVertexT =    nextVertex->GetT( segment );
+            double currentVertexT = currentVertex->GetT( *segment );
+            double    nextVertexT =    nextVertex->GetT( *segment );
 
-            BuildSegmentCubic ( mPointArray, static_cast<UOdysseyVectorSegmentCubic&>(segment), currentVertexT, nextVertexT );
+            BuildSegmentCubic ( mPointArray, static_cast<UOdysseyVectorSegmentCubic&>(*segment), currentVertexT, nextVertexT );
 
             currentVertex = nextVertex;
         }

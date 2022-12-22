@@ -6,7 +6,6 @@ UOdysseyVectorSegmentCubic::~UOdysseyVectorSegmentCubic()
 }
 
 UOdysseyVectorSegmentCubic::UOdysseyVectorSegmentCubic()
-   : UOdysseyVectorSegment()
 {
 
 }
@@ -22,8 +21,8 @@ UOdysseyVectorSegmentCubic::Init( UOdysseyVectorPathCubic* iPath
 {
     UOdysseyVectorSegment::Init( iPath, iPoint0, iPoint1 );
 
-    mCtrlPoint[0].Init( this, iCtrlPoint0x, iCtrlPoint0y );
-    mCtrlPoint[1].Init( this, iCtrlPoint1x, iCtrlPoint1y );
+    mCtrlPoint[0] = UOdysseyVectorHandleSegment::New( this, iCtrlPoint0x, iCtrlPoint0y );
+    mCtrlPoint[1] = UOdysseyVectorHandleSegment::New( this, iCtrlPoint1x, iCtrlPoint1y );
 
     Update();
 }
@@ -71,8 +70,8 @@ UOdysseyVectorSegmentCubic::GetPointAt( double t )
 {
     ::ULIS::FVec2D& point0 = mPoint[0]->GetCoords();
     ::ULIS::FVec2D& point1 = mPoint[1]->GetCoords();
-    ::ULIS::FVec2D& ctrlPoint0 = mCtrlPoint[0].GetCoords();
-    ::ULIS::FVec2D& ctrlPoint1 = mCtrlPoint[1].GetCoords();
+    ::ULIS::FVec2D& ctrlPoint0 = mCtrlPoint[0]->GetCoords();
+    ::ULIS::FVec2D& ctrlPoint1 = mCtrlPoint[1]->GetCoords();
     ::ULIS::FVec2D pointAt = ::ULIS::CubicBezierPointAtParameter<::ULIS::FVec2D>( point0
                                                                                 , ctrlPoint0
                                                                                 , ctrlPoint1
@@ -138,8 +137,8 @@ UOdysseyVectorSegmentCubic::Pick( double iX
 {
     ::ULIS::FVec2D& point0 = mPoint[0]->GetCoords();
     ::ULIS::FVec2D& point1 = mPoint[1]->GetCoords();
-    ::ULIS::FVec2D& ctrlPoint0 = mCtrlPoint[0].GetCoords();
-    ::ULIS::FVec2D& ctrlPoint1 = mCtrlPoint[1].GetCoords();
+    ::ULIS::FVec2D& ctrlPoint0 = mCtrlPoint[0]->GetCoords();
+    ::ULIS::FVec2D& ctrlPoint1 = mCtrlPoint[1]->GetCoords();
     ::ULIS::FVec2D vec = ::ULIS::CubicBezierTangentAtParameter<::ULIS::FVec2D>( point0
                                                                               , ctrlPoint0
                                                                               , ctrlPoint1
@@ -161,8 +160,8 @@ UOdysseyVectorSegmentCubic::Pick( double iX
 {
     ::ULIS::FVec2D& point0 = mPoint[0]->GetCoords();
     ::ULIS::FVec2D& point1 = mPoint[1]->GetCoords();
-    ::ULIS::FVec2D& ctrlPoint0 = mCtrlPoint[0].GetCoords();
-    ::ULIS::FVec2D& ctrlPoint1 = mCtrlPoint[1].GetCoords();
+    ::ULIS::FVec2D& ctrlPoint0 = mCtrlPoint[0]->GetCoords();
+    ::ULIS::FVec2D& ctrlPoint1 = mCtrlPoint[1]->GetCoords();
     ::ULIS::FVec2D vec = ::ULIS::CubicBezierTangentAtParameter<::ULIS::FVec2D>( point0
                                                                               , ctrlPoint0
                                                                               , ctrlPoint1
@@ -184,27 +183,27 @@ void
 UOdysseyVectorSegmentCubic::UpdateBoundingBox ()
 {
    mBBox.x = ULIS::FMath::Min4<double>( mPoint[0]->GetX() - mPoint[0]->GetRadius()
-                                      , mCtrlPoint[0].GetX()
+                                      , mCtrlPoint[0]->GetX()
                                       , mPoint[1]->GetX() - mPoint[1]->GetRadius()
-                                      , mCtrlPoint[1].GetX() );
+                                      , mCtrlPoint[1]->GetX() );
 
    mBBox.y = ULIS::FMath::Min4<double>( mPoint[0]->GetY() - mPoint[0]->GetRadius()
-                                      , mCtrlPoint[0].GetY()
+                                      , mCtrlPoint[0]->GetY()
                                       , mPoint[1]->GetY() - mPoint[1]->GetRadius()
-                                      , mCtrlPoint[1].GetY() );
+                                      , mCtrlPoint[1]->GetY() );
 
    mBBox.w = ULIS::FMath::Max4<double>( mPoint[0]->GetX() + mPoint[0]->GetRadius()
-                                      , mCtrlPoint[0].GetX()
+                                      , mCtrlPoint[0]->GetX()
                                       , mPoint[1]->GetX() + mPoint[1]->GetRadius()
-                                      , mCtrlPoint[1].GetX() ) - mBBox.x;
+                                      , mCtrlPoint[1]->GetX() ) - mBBox.x;
 
    mBBox.h = ULIS::FMath::Max4<double>( mPoint[0]->GetY() + mPoint[0]->GetRadius()
-                                      , mCtrlPoint[0].GetY()
+                                      , mCtrlPoint[0]->GetY()
                                       , mPoint[1]->GetY() + mPoint[1]->GetRadius()
-                                      , mCtrlPoint[1].GetY() ) - mBBox.y;
+                                      , mCtrlPoint[1]->GetY() ) - mBBox.y;
 }
 
-UOdysseyVectorHandleSegment&
+UOdysseyVectorHandleSegment*
 UOdysseyVectorSegmentCubic::GetControlPoint( int iCtrlPointNum )
 {
     return mCtrlPoint[iCtrlPointNum];
@@ -274,8 +273,8 @@ UOdysseyVectorSegmentCubic::Cut( ::ULIS::FVec2D& linePoint0
 {
     ::ULIS::FVec2D& point0 = mPoint[0]->GetCoords();
     ::ULIS::FVec2D& point1 = mPoint[1]->GetCoords();
-    ::ULIS::FVec2D& ctrlPoint0 = mCtrlPoint[0].GetCoords();
-    ::ULIS::FVec2D& ctrlPoint1 = mCtrlPoint[1].GetCoords();
+    ::ULIS::FVec2D& ctrlPoint0 = mCtrlPoint[0]->GetCoords();
+    ::ULIS::FVec2D& ctrlPoint1 = mCtrlPoint[1]->GetCoords();
     // we'll have 3 intersections at most and 2 points at tips.
     UOdysseyVectorVertexCubic* pointChain[5] = { static_cast<UOdysseyVectorVertexCubic*>(mPoint[0]), nullptr, nullptr, nullptr, nullptr };
     ::ULIS::FVec2D tangentChain[5] = { GetVectorAtStart( true ), { 0.0f, 0.0f }, { 0.0f, 0.0f }, { 0.0f, 0.0f }, { 0.0f, 0.0f } };
@@ -342,11 +341,11 @@ UOdysseyVectorSegmentCubic::Cut( ::ULIS::FVec2D& linePoint0
                                                                                  , static_cast<UOdysseyVectorVertexCubic*>(pointChain[n]) );
             double distance = segment->GetStraightDistance();
 
-            segment->GetControlPoint(0).Set( segment->GetPoint(0)->GetX() + ( tangentChain[i].x * distance * 0.35f )
-                                           , segment->GetPoint(0)->GetY() + ( tangentChain[i].y * distance * 0.35f ) );
+            segment->GetControlPoint(0)->Set( segment->GetPoint(0)->GetX() + ( tangentChain[i].x * distance * 0.35f )
+                                            , segment->GetPoint(0)->GetY() + ( tangentChain[i].y * distance * 0.35f ) );
 
-            segment->GetControlPoint(1).Set( segment->GetPoint(1)->GetX() - ( tangentChain[n].x * distance * 0.35f )
-                                           , segment->GetPoint(1)->GetY() - ( tangentChain[n].y * distance * 0.35f ) );
+            segment->GetControlPoint(1)->Set( segment->GetPoint(1)->GetX() - ( tangentChain[n].x * distance * 0.35f )
+                                            , segment->GetPoint(1)->GetY() - ( tangentChain[n].y * distance * 0.35f ) );
 
             mPath->AddSegment( segment );
         }
@@ -362,8 +361,8 @@ UOdysseyVectorSegmentCubic::Intersect( UOdysseyVectorSegmentCubic& iOther )
 {
     ::ULIS::FVec2D point0 = { mPoint[0]->GetX(), mPoint[0]->GetY() };
     ::ULIS::FVec2D point1 = { mPoint[1]->GetX(), mPoint[1]->GetY() };
-    ::ULIS::FVec2D ctrlPoint0 = { mCtrlPoint[0].GetX(), mCtrlPoint[0].GetY() };
-    ::ULIS::FVec2D ctrlPoint1 = { mCtrlPoint[1].GetX(), mCtrlPoint[1].GetY() };
+    ::ULIS::FVec2D ctrlPoint0 = { mCtrlPoint[0]->GetX(), mCtrlPoint[0]->GetY() };
+    ::ULIS::FVec2D ctrlPoint1 = { mCtrlPoint[1]->GetX(), mCtrlPoint[1]->GetY() };
 
     std::list<UOdysseyVectorVertexIntersection*> intersectionVertexList;
 
@@ -433,8 +432,8 @@ UOdysseyVectorSegmentCubic::DrawIntersections ( ::ULIS::FRectD &iRoi
     double intersectionHalfSize = intersectionSize * 0.5f;
     ::ULIS::FVec2D& point0 = mPoint[0]->GetCoords();
     ::ULIS::FVec2D& point1 = mPoint[1]->GetCoords();
-    ::ULIS::FVec2D& ctrlPoint0 = mCtrlPoint[0].GetCoords();
-    ::ULIS::FVec2D& ctrlPoint1 = mCtrlPoint[1].GetCoords();
+    ::ULIS::FVec2D& ctrlPoint0 = mCtrlPoint[0]->GetCoords();
+    ::ULIS::FVec2D& ctrlPoint1 = mCtrlPoint[1]->GetCoords();
 
     for( std::list<UOdysseyVectorVertexIntersection*>::iterator it = mIntersectionVertexList.begin(); it != mIntersectionVertexList.end(); ++it )
     {
@@ -456,8 +455,8 @@ UOdysseyVectorSegmentCubic::DrawStructure( ::ULIS::FRectD &iRoi
     BLPath ctrlPath1;
     BLPoint point0 = { mPoint[0]->GetX(), mPoint[0]->GetY() };
     BLPoint point1 = { mPoint[1]->GetX(), mPoint[1]->GetY() };
-    BLPoint ctrlPoint0 = { mCtrlPoint[0].GetX(), mCtrlPoint[0].GetY() };
-    BLPoint ctrlPoint1 = { mCtrlPoint[1].GetX(), mCtrlPoint[1].GetY() };
+    BLPoint ctrlPoint0 = { mCtrlPoint[0]->GetX(), mCtrlPoint[0]->GetY() };
+    BLPoint ctrlPoint1 = { mCtrlPoint[1]->GetX(), mCtrlPoint[1]->GetY() };
     double handleSize = 4 * iZoomFactor;
     double handleHalfSize = handleSize * 0.5f;
 
@@ -543,8 +542,8 @@ UOdysseyVectorSegmentCubic::BuildVariableThickness( double iFromT
     // TODO: use references for speed
     ::ULIS::FVec2D& point0 = mPoint[0]->GetCoords();
     ::ULIS::FVec2D& point1 = mPoint[1]->GetCoords();
-    ::ULIS::FVec2D& ctrlPoint0 = mCtrlPoint[0].GetCoords();
-    ::ULIS::FVec2D& ctrlPoint1 = mCtrlPoint[1].GetCoords();
+    ::ULIS::FVec2D& ctrlPoint0 = mCtrlPoint[0]->GetCoords();
+    ::ULIS::FVec2D& ctrlPoint1 = mCtrlPoint[1]->GetCoords();
     ::ULIS::FVec2D sampleTangent[2] = { ::ULIS::CubicBezierTangentAtParameter<::ULIS::FVec2D>( point0
                                                                                              , ctrlPoint0
                                                                                              , ctrlPoint1
@@ -623,8 +622,8 @@ UOdysseyVectorSegmentCubic::BuildVariableAdaptive( double  iFromT
 {
     ::ULIS::FVec2D& point0 = mPoint[0]->GetCoords();
     ::ULIS::FVec2D& point1 = mPoint[1]->GetCoords();
-    ::ULIS::FVec2D& ctrlPoint0 = mCtrlPoint[0].GetCoords();
-    ::ULIS::FVec2D& ctrlPoint1 = mCtrlPoint[1].GetCoords();
+    ::ULIS::FVec2D& ctrlPoint0 = mCtrlPoint[0]->GetCoords();
+    ::ULIS::FVec2D& ctrlPoint1 = mCtrlPoint[1]->GetCoords();
     double radiusDiff = iEndRadius - iStartRadius;
     double radiusStep = radiusDiff / 3;
     double rangeDiff = iToT - iFromT;
