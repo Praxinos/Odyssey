@@ -254,16 +254,17 @@ UOdysseyVectorPathCubic::Fill( ::ULIS::FRectD& iRoi )
 }
 
 void
-UOdysseyVectorPathCubic::DrawStructure( ::ULIS::FRectD& iRoi )
+UOdysseyVectorPathCubic::DrawStructure( ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
     BLContext& blctx = FOdysseyVectorEngine::GetBLContext();
     BLPath path;
     UOdysseyVectorVertexCubic *firstVertex = static_cast<UOdysseyVectorVertexCubic*>( GetFirstVertex() );
-    BLPoint localVector = mInverseWorldMatrix.mapVector ( 1.0f, 0.0f );
-    ::ULIS::FVec2D ulisVector = { localVector.x, localVector.y };
-    double zoomFactor = ulisVector.Distance();
-    double handleSize = 6 * zoomFactor;
-    double handleHalfSize = handleSize * 0.5f;
+    BLPoint localVector = mInverseWorldMatrix.mapVector ( 1.0f, 1.0f );
+    ::ULIS::FVec2D factor = { localVector.x, localVector.y };
+    double handleRadiusX = 6.0f * factor.x;
+    double handleRadiusY = 6.0f * factor.y;
+    double handleWidth = handleRadiusX * 2.0f;
+    double handleHeight = handleRadiusY * 2.0f;
 
     if ( firstVertex )
     {
@@ -300,21 +301,20 @@ UOdysseyVectorPathCubic::DrawStructure( ::ULIS::FRectD& iRoi )
         }
 
         blctx.setStrokeStyle( BLRgba32( 0xFF00FF00 ) );
-        blctx.setStrokeWidth( zoomFactor );
+        blctx.setStrokeWidth( factor.Distance() );
         blctx.strokePath( path );
 
         for(std::list<UOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it)
         {
             UOdysseyVectorSegmentCubic *segment = static_cast<UOdysseyVectorSegmentCubic*>(*it);
 
-            segment->DrawStructure( iRoi, zoomFactor );
+            segment->DrawStructure( iRoi, factor.x, factor.y );
         }
     }
 
     // Points and Point size handles
     for(std::list<UOdysseyVectorVertex*>::iterator it = mVertexList.begin(); it != mVertexList.end(); ++it)
     {
-
         UOdysseyVectorVertexCubic *point = static_cast<UOdysseyVectorVertexCubic*>(*it);
         ::ULIS::FVec2D perpendicular = point->GetPerpendicularVector( true );
         double pointRadius = point->GetRadius();
@@ -322,21 +322,21 @@ UOdysseyVectorPathCubic::DrawStructure( ::ULIS::FRectD& iRoi )
         double ctrlY = ( perpendicular.y * pointRadius );
 
         blctx.setFillStyle( BLRgba32( 0xFFFF00FF ) );
-        blctx.fillRect( point->GetX() - handleHalfSize
-                      , point->GetY() - handleHalfSize
-                      , handleSize
-                      , handleSize );
+        blctx.fillRect( point->GetX() - handleRadiusX
+                      , point->GetY() - handleRadiusY
+                      , handleWidth
+                      , handleHeight );
 
         blctx.setFillStyle( BLRgba32( 0xFF808080 ) );
-        blctx.fillRect( point->GetX() + ctrlX - handleHalfSize
-                      , point->GetY() + ctrlY - handleHalfSize
-                      , handleSize
-                      , handleSize );
+        blctx.fillRect( point->GetX() + ctrlX - handleRadiusX
+                      , point->GetY() + ctrlY - handleRadiusY
+                      , handleWidth
+                      , handleHeight );
 
-        blctx.fillRect( point->GetX() - ctrlX - handleHalfSize
-                      , point->GetY() - ctrlY - handleHalfSize
-                      , handleSize
-                      , handleSize );
+        blctx.fillRect( point->GetX() - ctrlX - handleRadiusX
+                      , point->GetY() - ctrlY - handleRadiusY
+                      , handleWidth
+                      , handleHeight );
     }
 }
 
@@ -372,15 +372,6 @@ UOdysseyVectorPathCubic::DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags )
     DrawLoops( iRoi, iFlags  );
 
     DrawShapeVariable( iRoi, iFlags );
-
-    if( mIsSelected )
-    {
-        DrawStructure( iRoi );
-    }
-/*
-        iBLContext.setStrokeWidth( 6 );
-    DrawLoops( iRoi  );
-*/
 }
 
 // https://gamedev.net/forums/topic/647810-intersection-point-of-two-vectors/5094071/

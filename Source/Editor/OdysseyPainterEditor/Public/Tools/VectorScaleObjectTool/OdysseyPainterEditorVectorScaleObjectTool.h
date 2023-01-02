@@ -36,6 +36,7 @@ private:
 private:
     double mOldLocalMouseX;
     double mOldLocalMouseY;
+    int32 mPickedHandle;
 
 public:
     // Setters

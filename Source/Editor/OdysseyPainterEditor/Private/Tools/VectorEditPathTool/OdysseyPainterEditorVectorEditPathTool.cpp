@@ -28,6 +28,12 @@ void
 UOdysseyPainterEditorVectorEditPathTool::Activate()
 {
 	//FOdysseyObjectEditorUtils::SetPropertyValue(BrushOptions, "Color", FOdysseyBrushColor(GetEditorAs<FOdysseyPainterEditor>()->PaintColor()));
+    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentVectorImageLayer();
+    FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetVectorEngine();
+
+    vectorEngine->SetDrawingFlags( FOdysseyVectorEngine::RENDER_OBJECT_STRUCTURE );
+
+    RedrawCurrentLayer( { { 0, 0, 0, 0 } } );
 }
 
 bool
@@ -131,7 +137,7 @@ DragPoint( double iLocalX
         return cubicSegment->GetBoundingBox();
     }
 
-    if( iPoint->GetClass() == UOdysseyVectorVertex::StaticClass() )
+    if( iPoint->GetClass() == UOdysseyVectorVertexCubic::StaticClass() )
     {
         UOdysseyVectorVertexCubic* cubicVertex = static_cast<UOdysseyVectorVertexCubic*>( iPoint );
         std::list<UOdysseyVectorSegment*> segmentList = cubicVertex->GetSegmentList();

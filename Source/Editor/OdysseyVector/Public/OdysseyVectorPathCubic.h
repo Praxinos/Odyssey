@@ -43,7 +43,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorPathCubic: public UOdysseyVectorPath
         bool PickPoint ( double iX, double iY, double iRadius, uint64 iSelectionFlags );
         void Unselect( UOdysseyVectorVertex* iPoint );
 
-        void DrawStructure( ::ULIS::FRectD& iRoi );
+        void DrawStructure( ::ULIS::FRectD& iRoi, uint64 iFlags );
         void setJointRadial();
         void setJointLinear();
         void setJointMiter();

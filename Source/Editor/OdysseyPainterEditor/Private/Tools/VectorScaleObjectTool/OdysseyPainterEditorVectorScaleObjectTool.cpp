@@ -27,6 +27,12 @@ void
 UOdysseyPainterEditorVectorScaleObjectTool::Activate()
 {
 	//FOdysseyObjectEditorUtils::SetPropertyValue(BrushOptions, "Color", FOdysseyBrushColor(GetEditorAs<FOdysseyPainterEditor>()->PaintColor()));
+    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentVectorImageLayer();
+    FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetVectorEngine();
+
+    vectorEngine->SetDrawingFlags( FOdysseyVectorEngine::RENDER_OBJECT_BBOX );
+
+    RedrawCurrentLayer( { { 0, 0, 0, 0 } } );
 }
 
 bool
@@ -48,8 +54,12 @@ UOdysseyPainterEditorVectorScaleObjectTool::OnMouseDown(const FOdysseyPoint& iPo
 
         if ( selectedObject )
         {
-            mOldLocalMouseX = iPointInTexture.x;
-            mOldLocalMouseY = iPointInTexture.y;
+            BLPoint localCoords = selectedObject->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
+
+            mPickedHandle = selectedObject->PickBBox( localCoords.x, localCoords.y );
+
+            mOldLocalMouseX = localCoords.x;
+            mOldLocalMouseY = localCoords.y;
         }
     }
 
@@ -67,21 +77,89 @@ UOdysseyPainterEditorVectorScaleObjectTool::OnMouseDrag(const FOdysseyPoint& iPo
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetVectorEngine();
         UOdysseyVectorObject* selectedObject = vectorEngine->GetScene()->GetLastSelected();
 
-        if ( selectedObject )
+        if ( selectedObject && ( mPickedHandle > -1 ) )
         {
-            double difx = iPointInTexture.x - mOldLocalMouseX;
-            double dify = iPointInTexture.y - mOldLocalMouseX;
+            BLPoint localCoords = selectedObject->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
+            double difx = localCoords.x - mOldLocalMouseX;
+            double dify = localCoords.y - mOldLocalMouseY;
             ::ULIS::FRectD beforeBBox = selectedObject->GetBBox( true );
+            ::ULIS::FRectD localBBox = selectedObject->GetBBox( false );
+            double oldX1 = localBBox.x
+                 , oldY1 = localBBox.y
+                 , oldX2 = localBBox.x + localBBox.w
+                 , oldY2 = localBBox.y + localBBox.h;
+            double x1, y1, x2, y2;
+            ::ULIS::FVec2D pivot;
+            BLPoint oldWorldPivot;
+            BLPoint oldRelativePivot;
+            BLPoint newWorldPivot;
+            BLPoint newRelativePivot;
 
-            selectedObject->Scale( selectedObject->GetScalingX() + difx * 0.01f
-                                 , selectedObject->GetScalingY() + dify * 0.01f );
+            if ( mPickedHandle == 0 )
+            {
+                x1 = localCoords.x;
+                y1 = localCoords.y;
+                x2 = oldX2;
+                y2 = oldY2;
+
+                pivot.x = oldX2;
+                pivot.y = oldY2;
+            }
+
+            if ( mPickedHandle == 1 )
+            {
+                x1 = oldX1;
+                y1 = localCoords.y;
+                x2 = localCoords.x;
+                y2 = oldY2;
+
+                pivot.x = oldX1;
+                pivot.y = oldY2;
+            }
+
+            if ( mPickedHandle == 2 )
+            {
+                x1 = oldX1;
+                y1 = oldY1;
+                x2 = localCoords.x;
+                y2 = localCoords.y;
+
+                pivot.x = oldX1;
+                pivot.y = oldY1;
+            }
+
+            if ( mPickedHandle == 3 )
+            {
+                x1 = localCoords.x;
+                y1 = oldY1;
+                x2 = oldX2;
+                y2 = localCoords.y;
+
+                pivot.x = oldX2;
+                pivot.y = oldY1;
+            }
+
+            oldWorldPivot = selectedObject->GetWorldMatrix().mapPoint( pivot.x, pivot.y );
+            oldRelativePivot = selectedObject->GetParent()->GetInverseWorldMatrix().mapPoint( oldWorldPivot.x, oldWorldPivot.y );
+
+            selectedObject->Scale( selectedObject->GetScalingX() * ((( x2 - x1 ) / fabs ( localBBox.w )))
+                                 , selectedObject->GetScalingY() * ((( y2 - y1 ) / fabs ( localBBox.h ))) );
+            selectedObject->UpdateMatrix();
+
+            newWorldPivot = selectedObject->GetWorldMatrix().mapPoint( pivot.x, pivot.y );
+            newRelativePivot = selectedObject->GetParent()->GetInverseWorldMatrix().mapPoint( newWorldPivot.x, newWorldPivot.y );
+/*
+UE_LOG(LogTemp, Warning, TEXT("Your message %f %f"), newWorldPivot.x, newWorldPivot.y );
+*/
+            selectedObject->Translate( selectedObject->GetTranslationX() + ( oldRelativePivot.x - newRelativePivot.x )
+                                     , selectedObject->GetTranslationY() + ( oldRelativePivot.y - newRelativePivot.y ) );
 
             selectedObject->UpdateMatrix();
 
-            mOldLocalMouseX = iPointInTexture.x;
-            mOldLocalMouseY = iPointInTexture.y;
+            mOldLocalMouseX = localCoords.x;
+            mOldLocalMouseY = localCoords.y;
 
-            RedrawCurrentLayer( { beforeBBox | selectedObject->GetBBox( true ) } );
+            RedrawCurrentLayer( { /*beforeBBox | selectedObject->GetBBox( true )*/{ 0, 0, 0, 0 } } );
         }
     }
 }

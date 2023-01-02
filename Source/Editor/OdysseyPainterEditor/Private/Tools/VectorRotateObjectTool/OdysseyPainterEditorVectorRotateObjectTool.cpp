@@ -27,6 +27,12 @@ void
 UOdysseyPainterEditorVectorRotateObjectTool::Activate()
 {
 	//FOdysseyObjectEditorUtils::SetPropertyValue(BrushOptions, "Color", FOdysseyBrushColor(GetEditorAs<FOdysseyPainterEditor>()->PaintColor()));
+    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentVectorImageLayer();
+    FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetVectorEngine();
+
+    vectorEngine->SetDrawingFlags( 0 );
+
+    RedrawCurrentLayer( { { 0, 0, 0, 0 } } );
 }
 
 bool

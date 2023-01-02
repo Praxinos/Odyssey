@@ -177,38 +177,39 @@ UOdysseyVectorObject::UpdateMatrix( )
 }
 
 static void
-MakeBBoxHandles( ::ULIS::FRectD& iBBox, ::ULIS::FRectD iHandles[4], double iRadius )
+MakeBBoxHandles( ::ULIS::FRectD& iBBox, ::ULIS::FRectD iHandles[4], double iRadius, double iXFactor, double iYFactor )
 {
-    double pointRadius = iRadius;
-    double pointWidth = iRadius * 2.0f;
+    double pointRadiusX = iRadius * iXFactor;
+    double pointRadiusY = iRadius * iYFactor;
+    double pointWidth = pointRadiusX * 2.0f;
+    double pointHeight = pointRadiusY * 2.0f;
     double x1 = iBBox.x
          , y1 = iBBox.y;
     double x2 = iBBox.x + iBBox.w
          , y2 = iBBox.y + iBBox.h;
 
-    iHandles[0] = ::ULIS::FRectD::FromXYWH( x1 - pointRadius, y1 - pointRadius, pointWidth, pointWidth );
-    iHandles[1] = ::ULIS::FRectD::FromXYWH( x2 - pointRadius, y1 - pointRadius, pointWidth, pointWidth );
-    iHandles[2] = ::ULIS::FRectD::FromXYWH( x2 - pointRadius, y2 - pointRadius, pointWidth, pointWidth );
-    iHandles[3] = ::ULIS::FRectD::FromXYWH( x1 - pointRadius, y2 - pointRadius, pointWidth, pointWidth );
+    iHandles[0] = ::ULIS::FRectD::FromXYWH( x1 - pointRadiusX, y1 - pointRadiusY, pointWidth, pointHeight );
+    iHandles[1] = ::ULIS::FRectD::FromXYWH( x2 - pointRadiusX, y1 - pointRadiusY, pointWidth, pointHeight );
+    iHandles[2] = ::ULIS::FRectD::FromXYWH( x2 - pointRadiusX, y2 - pointRadiusY, pointWidth, pointHeight );
+    iHandles[3] = ::ULIS::FRectD::FromXYWH( x1 - pointRadiusX, y2 - pointRadiusY, pointWidth, pointHeight );
 }
 
-
 int32
-UOdysseyVectorObject::PickBBox( double iX, double iY )
+UOdysseyVectorObject::PickBBox( double iLocalX, double iLocalY )
 {
     BLContext& blctx = FOdysseyVectorEngine::GetBLContext();
-    BLPoint vec = mWorldMatrix.mapVector( 1.0f, 0.0f );
+    BLPoint vec = mInverseWorldMatrix.mapVector( 1.0f, 1.0f );
     ::ULIS::FVec2D size = { vec.x, vec.y };
-    float strokeWidth = size.Distance();
-    float pointRadius = strokeWidth * BBOX_POINT_RADIUS;
     ::ULIS::FRectD handles[4];
 
-    MakeBBoxHandles ( mBBox, handles, pointRadius );
+    MakeBBoxHandles ( mBBox, handles, BBOX_POINT_RADIUS, size.x, size.y );
 
     // draw the handles
     for ( int i = 0; i < 4; i++ )
     {
-        if ( handles[i].HitTest( iX, iY ) == true )
+        ::ULIS::FVec2D pt = { iLocalX, iLocalY };
+ 
+        if ( handles[i].HitTest( pt ) == true )
         {
             return i;
         }
@@ -221,18 +222,21 @@ void
 UOdysseyVectorObject::DrawBBox( ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
     BLContext& blctx = FOdysseyVectorEngine::GetBLContext();
-    BLPoint vec = mWorldMatrix.mapVector( 1.0f, 0.0f );
+    BLPoint vec = mInverseWorldMatrix.mapVector( 1.0f, 1.0f );
     ::ULIS::FVec2D size = { vec.x, vec.y };
-    float strokeWidth = size.Distance();
-    float pointRadius = strokeWidth * BBOX_POINT_RADIUS;
     ::ULIS::FRectD handles[4];
 
-    MakeBBoxHandles ( mBBox, handles, pointRadius );
+    MakeBBoxHandles ( mBBox, handles, BBOX_POINT_RADIUS, size.x, size.y );
 
     blctx.setStrokeStyle( BLRgba32(0xFF8B0000) );
-    blctx.setStrokeWidth( strokeWidth );
 
-    blctx.strokeRect( mBBox.x, mBBox.y, mBBox.w, mBBox.h );
+    blctx.setStrokeWidth( vec.y );
+    blctx.strokeLine( mBBox.x, mBBox.y          , mBBox.x + mBBox.w, mBBox.y           );
+    blctx.strokeLine( mBBox.x, mBBox.y + mBBox.h, mBBox.x + mBBox.w, mBBox.y + mBBox.h );
+
+    blctx.setStrokeWidth( vec.x );
+    blctx.strokeLine( mBBox.x          , mBBox.y, mBBox.x          , mBBox.y + mBBox.h );
+    blctx.strokeLine( mBBox.x + mBBox.w, mBBox.y, mBBox.x + mBBox.w, mBBox.y + mBBox.h );
 
     blctx.setFillStyle( BLRgba32(0xFF8B0000) );
 

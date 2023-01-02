@@ -6,6 +6,7 @@ FOdysseyVectorEngine::~FOdysseyVectorEngine()
 }
 
 FOdysseyVectorEngine::FOdysseyVectorEngine(double iWidth,double iHeight)
+    : mDrawingFlags( 0 )
 {
     mBLImage = new BLImage(iWidth,iHeight,BL_FORMAT_PRGB32);
 
@@ -44,21 +45,43 @@ void
 FOdysseyVectorEngine::RenderSelected()
 {
     BLContext& blctx = FOdysseyVectorEngine::GetBLContext();
-    std::list<UOdysseyVectorObject*> selectObjectList = mScene->GetSelectedObjectList();
+    std::list<UOdysseyVectorObject*> selectedObjectList = mScene->GetSelectedObjectList();
 
     blctx.setStrokeStyle(BLRgba32(0xFFFF0000));
     blctx.setStrokeWidth(1.0f);
 
-    for( std::list<UOdysseyVectorObject*>::iterator it = selectObjectList.begin(); it != selectObjectList.end(); ++it )
+    if( mDrawingFlags & RENDER_OBJECT_BBOX )
     {
-        UOdysseyVectorObject *obj = (*it);
-        ::ULIS::FRectD bbox = obj->GetBBox( false );
+        for( std::list<UOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
+        {
+            UOdysseyVectorObject *obj = (*it);
+            ::ULIS::FRectD bbox = obj->GetBBox( false );
 
-        blctx.save();
-        blctx.setMatrix( obj->GetWorldMatrix() );
-        obj->DrawBBox( mRoi, 0 );
-        blctx.restore();
+            blctx.save();
+            blctx.setMatrix( obj->GetWorldMatrix() );
+            obj->DrawBBox( mRoi, 0 );
+            blctx.restore();
+        }
     }
+
+    if( mDrawingFlags & RENDER_OBJECT_STRUCTURE )
+    {
+        for( std::list<UOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
+        {
+            UOdysseyVectorObject *obj = (*it);
+            ::ULIS::FRectD bbox = obj->GetBBox( false );
+
+            blctx.save();
+            blctx.setMatrix( obj->GetWorldMatrix() );
+            obj->DrawStructure( mRoi, 0 );
+            blctx.restore();
+        }
+    }
+}
+
+void FOdysseyVectorEngine::SetDrawingFlags( uint64 iDrawingFlags )
+{
+    mDrawingFlags = iDrawingFlags;
 }
 
 void
@@ -72,14 +95,14 @@ FOdysseyVectorEngine::Render()
     // Configure the number of threads to use.
     /*createInfo.threadCount = 1;*/
 
-    blctx.setFillStyle(BLRgba32(0xFFFFFFFF));
+    blctx.setFillStyle( BLRgba32(0xFFFFFFFF) );
 
     if ( mRoi != zeroRectangle )
     {
-        /*blctx.fillRect( mRoi.x, mRoi.y, mRoi.w, mRoi.h );
+        blctx.fillRect( mRoi.x, mRoi.y, mRoi.w, mRoi.h );
 
         // view the updated zone ( testing purpose only )
-        blctx.setStrokeStyle(BLRgba32(0xFFFF0000));
+        /*blctx.setStrokeStyle(BLRgba32(0xFFFF0000));
         blctx.setStrokeWidth(1.0f);
         blctx.strokeRect( mRoi.x, mRoi.y, mRoi.w, mRoi.h );*/
     }
@@ -88,12 +111,12 @@ FOdysseyVectorEngine::Render()
         blctx.fillAll();
     }
 
-    mScene->Draw(mRoi,0);
+    mScene->Draw( mRoi, mDrawingFlags );
 
     RenderSelected();
 
     // Reset region of interest after each draw
-    memset (&mRoi,0,sizeof (mRoi));
+    memset ( &mRoi, 0, sizeof ( mRoi ) );
 
     blctx.flush(BL_CONTEXT_FLUSH_SYNC);
 }

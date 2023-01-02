@@ -84,7 +84,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorSegmentCubic : public UOdysseyVectorSegmen
 
         UOdysseyVectorHandleSegment* GetControlPoint( int iCtrlPointNum );
         void Draw( ::ULIS::FRectD &iRoi );
-        void DrawStructure( ::ULIS::FRectD &iRoi, double iZoomFactor );
+        void DrawStructure( ::ULIS::FRectD &iRoi, double iFactorX, double iFactorY );
         void DrawIntersections ( ::ULIS::FRectD &iRoi, double iZoomFactor );
         ::ULIS::FVec2D GetPreviousVector( bool iNormalize );
         ::ULIS::FVec2D GetNextVector( bool iNormalize );

@@ -41,12 +41,14 @@ class ODYSSEYVECTOR_API UOdysseyVectorObject : public UObject
         UOdysseyVectorObject();
         void SetName( std::string iName );
         void CopySettings( UOdysseyVectorObject& iDestinationObject );
+
         virtual void Update() final ; // cannot be overridden
-        virtual void UpdateShape() PURE_VIRTUAL(UOdysseyVectorObject::UpdateShape;);
+        virtual void UpdateShape() PURE_VIRTUAL(UOdysseyVectorObject::UpdateShape);
         virtual UOdysseyVectorObject* Copy() final ; // cannot be overridden
-        virtual UOdysseyVectorObject* CopyShape() PURE_VIRTUAL(__func__,return nullptr;);
+        virtual UOdysseyVectorObject* CopyShape() PURE_VIRTUAL(UOdysseyVectorObject::CopyShape, return nullptr;);
         virtual void Draw( ::ULIS::FRectD& iRoi, uint64 iFlags ) final; // cannot be overridden
-        virtual void DrawShape ( ::ULIS::FRectD &roi, uint64 iFlags ) PURE_VIRTUAL(__func__,);
+        virtual void DrawShape ( ::ULIS::FRectD &roi, uint64 iFlags ) PURE_VIRTUAL(UOdysseyVectorObject::DrawShape);
+        virtual void DrawStructure ( ::ULIS::FRectD &roi, uint64 iFlags ){};
         virtual UOdysseyVectorObject* Pick( double iX, double iY, double iRadius ) final; // cannot be overridden
         virtual UOdysseyVectorObject* PickShape( double iX, double iY, double iRadius ) PURE_VIRTUAL(__func__,return nullptr;);
         /*virtual void UpdateBoundingBox() = 0;*/
@@ -89,4 +91,5 @@ class ODYSSEYVECTOR_API UOdysseyVectorObject : public UObject
         bool IsInvalidated();
         bool IsSelected();
         void DrawBBox( ::ULIS::FRectD& iRoi,uint64 iFlags );
+        int32 PickBBox( double iX, double iY );
 };

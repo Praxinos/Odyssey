@@ -448,7 +448,8 @@ UOdysseyVectorSegmentCubic::DrawIntersections ( ::ULIS::FRectD &iRoi
 
 void
 UOdysseyVectorSegmentCubic::DrawStructure( ::ULIS::FRectD &iRoi
-                                         , double iZoomFactor )
+                                         , double iFactorX
+                                         , double iFactorY )
 {
     BLContext& blctx = FOdysseyVectorEngine::GetBLContext();
     BLPath ctrlPath0;
@@ -457,8 +458,10 @@ UOdysseyVectorSegmentCubic::DrawStructure( ::ULIS::FRectD &iRoi
     BLPoint point1 = { mPoint[1]->GetX(), mPoint[1]->GetY() };
     BLPoint ctrlPoint0 = { mCtrlPoint[0]->GetX(), mCtrlPoint[0]->GetY() };
     BLPoint ctrlPoint1 = { mCtrlPoint[1]->GetX(), mCtrlPoint[1]->GetY() };
-    double handleSize = 4 * iZoomFactor;
-    double handleHalfSize = handleSize * 0.5f;
+    double handleRadiusX = 4.0f * iFactorX;
+    double handleRadiusY = 4.0f * iFactorY;
+    double handleWidth = handleRadiusX * 2.0f;
+    double handleHeight = handleRadiusY * 2.0f;
 
     ctrlPath0.moveTo( point0.x, point0.y );
     ctrlPath0.lineTo( ctrlPoint0.x, ctrlPoint0.y );
@@ -473,10 +476,10 @@ UOdysseyVectorSegmentCubic::DrawStructure( ::ULIS::FRectD &iRoi
     blctx.strokePath( ctrlPath1 );
 
     blctx.setFillStyle( BLRgba32( 0xFFFF0000 ) );
-    blctx.fillRect( ctrlPoint0.x - handleHalfSize, ctrlPoint0.y - handleHalfSize, handleSize, handleSize );
-    blctx.fillRect( ctrlPoint1.x - handleHalfSize, ctrlPoint1.y - handleHalfSize, handleSize, handleSize );
+    blctx.fillRect( ctrlPoint0.x - handleRadiusX, ctrlPoint0.y - handleRadiusY, handleWidth, handleHeight );
+    blctx.fillRect( ctrlPoint1.x - handleRadiusX, ctrlPoint1.y - handleRadiusY, handleWidth, handleHeight );
 
-    DrawIntersections (  iRoi, iZoomFactor );
+    /*DrawIntersections (  iRoi, iZoomFactor );*/
 }
 
 uint32
