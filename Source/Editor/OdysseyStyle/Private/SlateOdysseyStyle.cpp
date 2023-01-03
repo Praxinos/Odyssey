@@ -337,9 +337,13 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "PainterEditor.TopBar.Eraser32", new IMAGE_BRUSH( "PainterEditor/eraser_32", mIcon32x32 ) );
 
     //PainterEditor - ToolsTab
-    Set( "PainterEditor.ToolsTab.MoveObjectTool64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/move_object_tool_64", mIcon64x64 ) );
-    Set( "PainterEditor.ToolsTab.RotateObjectTool64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/rotate_object_tool_64", mIcon64x64 ) );
-    Set( "PainterEditor.ToolsTab.ScaleObjectTool64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/scale_object_tool_64", mIcon64x64 ) );
+    Set( "PainterEditor.ToolsTab.ObjectMoveTool64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/object_move_tool_64", mIcon64x64 ) );
+    Set( "PainterEditor.ToolsTab.ObjectRotateTool64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/object_rotate_tool_64", mIcon64x64 ) );
+    Set( "PainterEditor.ToolsTab.ObjectScaleTool64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/object_scale_tool_64", mIcon64x64 ) );
+    Set( "PainterEditor.ToolsTab.SceneScaleTool64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/scene_scale_tool_64", mIcon64x64 ) );
+    Set( "PainterEditor.ToolsTab.ScenePanTool64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/scene_pan_tool_64", mIcon64x64 ) );
+    Set( "PainterEditor.ToolsTab.SceneScaleTool64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/scene_scale_tool_64", mIcon64x64 ) );
+    Set( "PainterEditor.ToolsTab.PathCutTool64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/path_cut_tool_64", mIcon64x64 ) );
     Set( "PainterEditor.ToolsTab.DrawingTool64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/drawing_tool_64", mIcon64x64 ) );
     Set( "PainterEditor.ToolsTab.DrawingTool16", new IMAGE_BRUSH( "PainterEditor/ToolsTab/drawing_tool_16", mIcon16x16 ) );
     Set( "PainterEditor.ToolsTab.ClearLayer64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/clear_layer_64", mIcon64x64 ) );

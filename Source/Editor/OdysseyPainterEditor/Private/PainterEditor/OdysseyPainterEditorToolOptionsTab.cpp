@@ -38,11 +38,14 @@ FOdysseyPainterEditorToolOptionsTab::CreateWidget()
         ];
 
     SetWidgetForTool(mEditor->GetRasterDrawingTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetRasterDrawingTool()));
-    SetWidgetForTool(mEditor->GetVectorDrawingTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorDrawingTool()));
-    SetWidgetForTool(mEditor->GetVectorEditPathTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorEditPathTool()));
-    SetWidgetForTool(mEditor->GetVectorMoveObjectTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorMoveObjectTool()));
-    SetWidgetForTool(mEditor->GetVectorRotateObjectTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorRotateObjectTool()));
-    SetWidgetForTool(mEditor->GetVectorScaleObjectTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorScaleObjectTool()));
+    SetWidgetForTool(mEditor->GetVectorPathDrawingTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorPathDrawingTool()));
+    SetWidgetForTool(mEditor->GetVectorPathEditTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorPathEditTool()));
+    SetWidgetForTool(mEditor->GetVectorPathCutTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorPathCutTool()));
+    SetWidgetForTool(mEditor->GetVectorObjectMoveTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorObjectMoveTool()));
+    SetWidgetForTool(mEditor->GetVectorObjectRotateTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorObjectRotateTool()));
+    SetWidgetForTool(mEditor->GetVectorObjectScaleTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorObjectScaleTool()));
+    SetWidgetForTool(mEditor->GetVectorSceneScaleTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorSceneScaleTool()));
+    SetWidgetForTool(mEditor->GetVectorScenePanTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorScenePanTool()));
     //mToolsTab->GetToolsTab()->SetWidgetForTool(mEditor->GetVectorDrawingTool(), SNew(SOdysseyPainterVectorDrawingTool, mEditor->GetVectorDrawingTool()));
 
     return mWidgetSwitcher;

@@ -6,11 +6,14 @@
 #include "OdysseyEditor.h"
 #include "OdysseyPainterEditorGUI.h"
 #include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
-#include "Tools/VectorDrawingTool/OdysseyPainterEditorVectorDrawingTool.h"
-#include "Tools/VectorEditPathTool/OdysseyPainterEditorVectorEditPathTool.h"
-#include "Tools/VectorMoveObjectTool/OdysseyPainterEditorVectorMoveObjectTool.h"
-#include "Tools/VectorRotateObjectTool/OdysseyPainterEditorVectorRotateObjectTool.h"
-#include "Tools/VectorScaleObjectTool/OdysseyPainterEditorVectorScaleObjectTool.h"
+#include "Tools/VectorPathDrawingTool/OdysseyPainterEditorVectorPathDrawingTool.h"
+#include "Tools/VectorPathEditTool/OdysseyPainterEditorVectorPathEditTool.h"
+#include "Tools/VectorPathCutTool/OdysseyPainterEditorVectorPathCutTool.h"
+#include "Tools/VectorObjectMoveTool/OdysseyPainterEditorVectorObjectMoveTool.h"
+#include "Tools/VectorObjectRotateTool/OdysseyPainterEditorVectorObjectRotateTool.h"
+#include "Tools/VectorObjectScaleTool/OdysseyPainterEditorVectorObjectScaleTool.h"
+#include "Tools/VectorSceneScaleTool/OdysseyPainterEditorVectorSceneScaleTool.h"
+#include "Tools/VectorScenePanTool/OdysseyPainterEditorVectorScenePanTool.h"
 #include "Tools/PaintBucketTool/OdysseyPainterEditorPaintBucketTool.h"
 #include <ULIS>
 
@@ -50,11 +53,14 @@ public:
     virtual TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> GetDisplayBlock() = 0;
 
     virtual UOdysseyPainterEditorRasterDrawingTool*                  GetRasterDrawingTool() const = 0;
-    virtual UOdysseyPainterEditorVectorDrawingTool*                  GetVectorDrawingTool() const = 0;
-    virtual UOdysseyPainterEditorVectorEditPathTool*                 GetVectorEditPathTool() const = 0;
-    virtual UOdysseyPainterEditorVectorMoveObjectTool*               GetVectorMoveObjectTool() const = 0;
-    virtual UOdysseyPainterEditorVectorRotateObjectTool*             GetVectorRotateObjectTool() const = 0;
-    virtual UOdysseyPainterEditorVectorScaleObjectTool*              GetVectorScaleObjectTool() const = 0;
+    virtual UOdysseyPainterEditorVectorPathDrawingTool*              GetVectorPathDrawingTool() const = 0;
+    virtual UOdysseyPainterEditorVectorPathEditTool*                 GetVectorPathEditTool() const = 0;
+    virtual UOdysseyPainterEditorVectorPathCutTool*                  GetVectorPathCutTool() const = 0;
+    virtual UOdysseyPainterEditorVectorObjectMoveTool*               GetVectorObjectMoveTool() const = 0;
+    virtual UOdysseyPainterEditorVectorObjectRotateTool*             GetVectorObjectRotateTool() const = 0;
+    virtual UOdysseyPainterEditorVectorObjectScaleTool*              GetVectorObjectScaleTool() const = 0;
+    virtual UOdysseyPainterEditorVectorSceneScaleTool*               GetVectorSceneScaleTool() const = 0;
+    virtual UOdysseyPainterEditorVectorScenePanTool*                 GetVectorScenePanTool() const = 0;
     virtual UOdysseyPainterEditorPaintBucketTool*                    GetPaintBucketTool() const = 0;
 
     void SelectDefaultTool();

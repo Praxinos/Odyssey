@@ -9,11 +9,14 @@
 #include "OdysseyTextureLayerStackUserData.h"
 #include "LayerStack/OdysseyTextureLayerStack.h"
 #include "Tools/RasterDrawingTool/OdysseyTextureEditorRasterDrawingTool.h"
-#include "Tools/VectorDrawingTool/OdysseyTextureEditorVectorDrawingTool.h"
-#include "Tools/VectorEditPathTool/OdysseyTextureEditorVectorEditPathTool.h"
-#include "Tools/VectorMoveObjectTool/OdysseyTextureEditorVectorMoveObjectTool.h"
-#include "Tools/VectorRotateObjectTool/OdysseyTextureEditorVectorRotateObjectTool.h"
-#include "Tools/VectorScaleObjectTool/OdysseyTextureEditorVectorScaleObjectTool.h"
+#include "Tools/VectorPathDrawingTool/OdysseyTextureEditorVectorPathDrawingTool.h"
+#include "Tools/VectorPathEditTool/OdysseyTextureEditorVectorPathEditTool.h"
+#include "Tools/VectorPathCutTool/OdysseyTextureEditorVectorPathCutTool.h"
+#include "Tools/VectorObjectMoveTool/OdysseyTextureEditorVectorObjectMoveTool.h"
+#include "Tools/VectorObjectRotateTool/OdysseyTextureEditorVectorObjectRotateTool.h"
+#include "Tools/VectorObjectScaleTool/OdysseyTextureEditorVectorObjectScaleTool.h"
+#include "Tools/VectorSceneScaleTool/OdysseyTextureEditorVectorSceneScaleTool.h"
+#include "Tools/VectorScenePanTool/OdysseyTextureEditorVectorScenePanTool.h"
 #include "Tools/PaintBucketTool/OdysseyTextureEditorPaintBucketTool.h"
 #include "Misc/OdysseyHandle.h"
 
@@ -45,11 +48,14 @@ public:
     UOdysseyTextureLayerStackUserData*       TextureUserData() const;
 
     virtual UOdysseyTextureEditorRasterDrawingTool* GetRasterDrawingTool() const override;
-    virtual UOdysseyTextureEditorVectorDrawingTool* GetVectorDrawingTool() const override;
-    virtual UOdysseyTextureEditorVectorEditPathTool* GetVectorEditPathTool() const override;
-    virtual UOdysseyTextureEditorVectorMoveObjectTool* GetVectorMoveObjectTool() const override;
-    virtual UOdysseyTextureEditorVectorRotateObjectTool* GetVectorRotateObjectTool() const override;
-    virtual UOdysseyTextureEditorVectorScaleObjectTool* GetVectorScaleObjectTool() const override;
+    virtual UOdysseyTextureEditorVectorPathDrawingTool* GetVectorPathDrawingTool() const override;
+    virtual UOdysseyTextureEditorVectorPathEditTool* GetVectorPathEditTool() const override;
+    virtual UOdysseyTextureEditorVectorPathCutTool* GetVectorPathCutTool() const override;
+    virtual UOdysseyTextureEditorVectorObjectMoveTool* GetVectorObjectMoveTool() const override;
+    virtual UOdysseyTextureEditorVectorObjectRotateTool* GetVectorObjectRotateTool() const override;
+    virtual UOdysseyTextureEditorVectorObjectScaleTool* GetVectorObjectScaleTool() const override;
+    virtual UOdysseyTextureEditorVectorSceneScaleTool* GetVectorSceneScaleTool() const override;
+    virtual UOdysseyTextureEditorVectorScenePanTool* GetVectorScenePanTool() const override;
     virtual UOdysseyTextureEditorPaintBucketTool* GetPaintBucketTool() const override;
 
 public:
@@ -74,11 +80,14 @@ private:
 	TSharedPtr<FOdysseyTextureEditorGUI> mGUI;
     
     UOdysseyTextureEditorRasterDrawingTool* mRasterDrawingTool;
-    UOdysseyTextureEditorVectorDrawingTool* mVectorDrawingTool;
-    UOdysseyTextureEditorVectorEditPathTool* mVectorEditPathTool;
-    UOdysseyTextureEditorVectorMoveObjectTool* mVectorMoveObjectTool;
-    UOdysseyTextureEditorVectorRotateObjectTool* mVectorRotateObjectTool;
-    UOdysseyTextureEditorVectorScaleObjectTool* mVectorScaleObjectTool;
+    UOdysseyTextureEditorVectorPathDrawingTool* mVectorPathDrawingTool;
+    UOdysseyTextureEditorVectorPathEditTool* mVectorPathEditTool;
+    UOdysseyTextureEditorVectorPathCutTool* mVectorPathCutTool;
+    UOdysseyTextureEditorVectorObjectMoveTool* mVectorObjectMoveTool;
+    UOdysseyTextureEditorVectorObjectRotateTool* mVectorObjectRotateTool;
+    UOdysseyTextureEditorVectorObjectScaleTool* mVectorObjectScaleTool;
+    UOdysseyTextureEditorVectorSceneScaleTool* mVectorSceneScaleTool;
+    UOdysseyTextureEditorVectorScenePanTool* mVectorScenePanTool;
     UOdysseyTextureEditorPaintBucketTool* mPaintBucketTool;
 
     TSharedPtr<IOdysseyHandle> mLayerStackPreloadHandle;

@@ -28,11 +28,14 @@ FOdysseyTextureEditor::FOdysseyTextureEditor() :
 	mTexture(nullptr),
 	mGUI(nullptr),
 	mRasterDrawingTool(nullptr),
-	mVectorDrawingTool(nullptr),
-	mVectorEditPathTool(nullptr),
-	mVectorMoveObjectTool(nullptr),
-	mVectorRotateObjectTool(nullptr),
-	mVectorScaleObjectTool(nullptr),
+	mVectorPathDrawingTool(nullptr),
+	mVectorPathEditTool(nullptr),
+	mVectorPathCutTool(nullptr),
+	mVectorObjectMoveTool(nullptr),
+	mVectorObjectRotateTool(nullptr),
+	mVectorObjectScaleTool(nullptr),
+	mVectorSceneScaleTool(nullptr),
+	mVectorScenePanTool(nullptr),
 	mPaintBucketTool(nullptr)
 {
 	UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw(this, &FOdysseyTextureEditor::OnCurrentLayerChanged);
@@ -57,28 +60,37 @@ void
 FOdysseyTextureEditor::InitTools()
 {
 	mRasterDrawingTool = NewObject<UOdysseyTextureEditorRasterDrawingTool>();
-	mVectorDrawingTool = NewObject<UOdysseyTextureEditorVectorDrawingTool>();
-	mVectorEditPathTool = NewObject<UOdysseyTextureEditorVectorEditPathTool>();
-	mVectorMoveObjectTool = NewObject<UOdysseyTextureEditorVectorMoveObjectTool>();
-	mVectorRotateObjectTool = NewObject<UOdysseyTextureEditorVectorRotateObjectTool>();
-	mVectorScaleObjectTool = NewObject<UOdysseyTextureEditorVectorScaleObjectTool>();
+	mVectorPathDrawingTool = NewObject<UOdysseyTextureEditorVectorPathDrawingTool>();
+	mVectorPathEditTool = NewObject<UOdysseyTextureEditorVectorPathEditTool>();
+	mVectorPathCutTool = NewObject<UOdysseyTextureEditorVectorPathCutTool>();
+	mVectorObjectMoveTool = NewObject<UOdysseyTextureEditorVectorObjectMoveTool>();
+	mVectorObjectRotateTool = NewObject<UOdysseyTextureEditorVectorObjectRotateTool>();
+	mVectorObjectScaleTool = NewObject<UOdysseyTextureEditorVectorObjectScaleTool>();
+    mVectorSceneScaleTool = NewObject<UOdysseyTextureEditorVectorSceneScaleTool>();
+    mVectorScenePanTool = NewObject<UOdysseyTextureEditorVectorScenePanTool>();
 	mPaintBucketTool = NewObject<UOdysseyTextureEditorPaintBucketTool>();
 
 	mRasterDrawingTool->SetEditor(this);
-    mVectorDrawingTool->SetEditor(this);
-    mVectorEditPathTool->SetEditor(this);
-    mVectorMoveObjectTool->SetEditor(this);
-    mVectorRotateObjectTool->SetEditor(this);
-    mVectorScaleObjectTool->SetEditor(this);
+    mVectorPathDrawingTool->SetEditor(this);
+    mVectorPathEditTool->SetEditor(this);
+    mVectorPathCutTool->SetEditor(this);
+    mVectorObjectMoveTool->SetEditor(this);
+    mVectorObjectRotateTool->SetEditor(this);
+    mVectorObjectScaleTool->SetEditor(this);
+    mVectorSceneScaleTool->SetEditor(this);
+    mVectorScenePanTool->SetEditor(this);
 	mPaintBucketTool->SetEditor(this);
 	mRasterDrawingTool->SetBrushContexts(mBrushContexts);
 
 	mTools.Add(mRasterDrawingTool);
-    mTools.Add(mVectorDrawingTool);
-    mTools.Add(mVectorEditPathTool);
-    mTools.Add(mVectorMoveObjectTool);
-    mTools.Add(mVectorRotateObjectTool);
-    mTools.Add(mVectorScaleObjectTool);
+    mTools.Add(mVectorPathDrawingTool);
+    mTools.Add(mVectorPathEditTool);
+    mTools.Add(mVectorPathCutTool);
+    mTools.Add(mVectorObjectMoveTool);
+    mTools.Add(mVectorObjectRotateTool);
+    mTools.Add(mVectorObjectScaleTool);
+    mTools.Add(mVectorSceneScaleTool);
+    mTools.Add(mVectorScenePanTool);
 	mTools.Add(mPaintBucketTool);
 	//mTextureRasterDrawingTool->OnApplyOverridesDelegate().AddRaw(this, &FOdysseyPainterEditor::OnApplyOverrides);
 }
@@ -88,11 +100,14 @@ FOdysseyTextureEditor::BindShortcuts(FBaseToolkit* iToolkit)
 {
 	FOdysseyPainterEditor::BindShortcuts(iToolkit);
 	mRasterDrawingTool->BindShortcuts(iToolkit);
-	mVectorDrawingTool->BindShortcuts(iToolkit);
-	mVectorEditPathTool->BindShortcuts(iToolkit);
-	mVectorMoveObjectTool->BindShortcuts(iToolkit);
-	mVectorRotateObjectTool->BindShortcuts(iToolkit);
-	mVectorScaleObjectTool->BindShortcuts(iToolkit);
+	mVectorPathDrawingTool->BindShortcuts(iToolkit);
+	mVectorPathEditTool->BindShortcuts(iToolkit);
+	mVectorPathCutTool->BindShortcuts(iToolkit);
+	mVectorObjectMoveTool->BindShortcuts(iToolkit);
+	mVectorObjectRotateTool->BindShortcuts(iToolkit);
+	mVectorObjectScaleTool->BindShortcuts(iToolkit);
+	mVectorSceneScaleTool->BindShortcuts(iToolkit);
+	mVectorScenePanTool->BindShortcuts(iToolkit);
 	mPaintBucketTool->BindShortcuts(iToolkit);
 }
 
@@ -101,11 +116,14 @@ FOdysseyTextureEditor::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
 {
 	FOdysseyPainterEditor::ExtendMenu(iOwner, iMenuName);
 	mRasterDrawingTool->ExtendMenu(iOwner, iMenuName);
-	mVectorDrawingTool->ExtendMenu(iOwner, iMenuName);
-	mVectorEditPathTool->ExtendMenu(iOwner, iMenuName);
-	mVectorMoveObjectTool->ExtendMenu(iOwner, iMenuName);
-	mVectorRotateObjectTool->ExtendMenu(iOwner, iMenuName);
-	mVectorScaleObjectTool->ExtendMenu(iOwner, iMenuName);
+	mVectorPathDrawingTool->ExtendMenu(iOwner, iMenuName);
+	mVectorPathEditTool->ExtendMenu(iOwner, iMenuName);
+	mVectorPathCutTool->ExtendMenu(iOwner, iMenuName);
+	mVectorObjectMoveTool->ExtendMenu(iOwner, iMenuName);
+	mVectorObjectRotateTool->ExtendMenu(iOwner, iMenuName);
+	mVectorObjectScaleTool->ExtendMenu(iOwner, iMenuName);
+	mVectorSceneScaleTool->ExtendMenu(iOwner, iMenuName);
+	mVectorScenePanTool->ExtendMenu(iOwner, iMenuName);
 	mPaintBucketTool->ExtendMenu(iOwner, iMenuName);
 }
 
@@ -211,34 +229,52 @@ FOdysseyTextureEditor::GetRasterDrawingTool() const
 	return mRasterDrawingTool;
 }
 
-UOdysseyTextureEditorVectorDrawingTool*
-FOdysseyTextureEditor::GetVectorDrawingTool() const
+UOdysseyTextureEditorVectorPathDrawingTool*
+FOdysseyTextureEditor::GetVectorPathDrawingTool() const
 {
-	return mVectorDrawingTool;
+	return mVectorPathDrawingTool;
 }
 
-UOdysseyTextureEditorVectorEditPathTool*
-FOdysseyTextureEditor::GetVectorEditPathTool() const
+UOdysseyTextureEditorVectorPathEditTool*
+FOdysseyTextureEditor::GetVectorPathEditTool() const
 {
-    return mVectorEditPathTool;
+    return mVectorPathEditTool;
 }
 
-UOdysseyTextureEditorVectorMoveObjectTool*
-FOdysseyTextureEditor::GetVectorMoveObjectTool() const
+UOdysseyTextureEditorVectorPathCutTool*
+FOdysseyTextureEditor::GetVectorPathCutTool() const
 {
-    return mVectorMoveObjectTool;
+    return mVectorPathCutTool;
 }
 
-UOdysseyTextureEditorVectorRotateObjectTool*
-FOdysseyTextureEditor::GetVectorRotateObjectTool() const
+UOdysseyTextureEditorVectorObjectMoveTool*
+FOdysseyTextureEditor::GetVectorObjectMoveTool() const
 {
-    return mVectorRotateObjectTool;
+    return mVectorObjectMoveTool;
 }
 
-UOdysseyTextureEditorVectorScaleObjectTool*
-FOdysseyTextureEditor::GetVectorScaleObjectTool() const
+UOdysseyTextureEditorVectorObjectRotateTool*
+FOdysseyTextureEditor::GetVectorObjectRotateTool() const
 {
-    return mVectorScaleObjectTool;
+    return mVectorObjectRotateTool;
+}
+
+UOdysseyTextureEditorVectorObjectScaleTool*
+FOdysseyTextureEditor::GetVectorObjectScaleTool() const
+{
+    return mVectorObjectScaleTool;
+}
+
+UOdysseyTextureEditorVectorSceneScaleTool*
+FOdysseyTextureEditor::GetVectorSceneScaleTool() const
+{
+    return mVectorSceneScaleTool;
+}
+
+UOdysseyTextureEditorVectorScenePanTool*
+FOdysseyTextureEditor::GetVectorScenePanTool() const
+{
+    return mVectorScenePanTool;
 }
 
 UOdysseyTextureEditorPaintBucketTool*
@@ -293,11 +329,14 @@ FOdysseyTextureEditor::AddReferencedObjects(FReferenceCollector& Collector)
 {
 	FOdysseyPainterEditor::AddReferencedObjects(Collector);
 	Collector.AddReferencedObject(mRasterDrawingTool);
-	Collector.AddReferencedObject(mVectorDrawingTool);
-	Collector.AddReferencedObject(mVectorEditPathTool);
-	Collector.AddReferencedObject(mVectorMoveObjectTool);
-	Collector.AddReferencedObject(mVectorRotateObjectTool);
-	Collector.AddReferencedObject(mVectorScaleObjectTool);
+	Collector.AddReferencedObject(mVectorPathDrawingTool);
+	Collector.AddReferencedObject(mVectorPathEditTool);
+	Collector.AddReferencedObject(mVectorPathCutTool);
+	Collector.AddReferencedObject(mVectorObjectMoveTool);
+	Collector.AddReferencedObject(mVectorObjectRotateTool);
+	Collector.AddReferencedObject(mVectorObjectScaleTool);
+    Collector.AddReferencedObject(mVectorSceneScaleTool);
+    Collector.AddReferencedObject(mVectorScenePanTool);
 	Collector.AddReferencedObject(mPaintBucketTool);
 }
 #undef LOCTEXT_NAMESPACE
