@@ -19,7 +19,7 @@ UOdysseyPainterEditorTool::UOdysseyPainterEditorTool()
 }
 
 UOdysseyTextureLayerImageVector*
-UOdysseyPainterEditorTool::GetCurrentVectorImageLayer()
+UOdysseyPainterEditorTool::GetCurrentLayerImageVector()
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
 
@@ -32,6 +32,27 @@ UOdysseyPainterEditorTool::GetCurrentVectorImageLayer()
             if( currentLayer->GetClass() == UOdysseyTextureLayerImageVector::StaticClass() )
             {
                 return Cast<UOdysseyTextureLayerImageVector>(currentLayer);
+            }
+        }
+    }
+
+    return nullptr;
+}
+
+UOdysseyTextureLayerImageRaster*
+UOdysseyPainterEditorTool::GetCurrentLayerImageRaster()
+{
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
+
+    if( layerStack )
+    {
+        UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
+
+        if( currentLayer )
+        {
+            if( currentLayer->GetClass() == UOdysseyTextureLayerImageRaster::StaticClass() )
+            {
+                return Cast<UOdysseyTextureLayerImageRaster>(currentLayer);
             }
         }
     }

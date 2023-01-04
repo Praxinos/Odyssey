@@ -28,7 +28,7 @@ void
 UOdysseyPainterEditorVectorPathCutTool::Activate()
 {
 	//FOdysseyObjectEditorUtils::SetPropertyValue(BrushOptions, "Color", FOdysseyBrushColor(GetEditorAs<FOdysseyPainterEditor>()->PaintColor()));
-    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentVectorImageLayer();
+    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
     FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetVectorEngine();
 
     vectorEngine->SetDrawingFlags( FOdysseyVectorEngine::RENDER_OBJECT_STRUCTURE );
@@ -46,7 +46,7 @@ bool
 UOdysseyPainterEditorVectorPathCutTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentVectorImageLayer();
+    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
 
     if( currentVectorLayer )
     {
@@ -75,7 +75,7 @@ bool
 UOdysseyPainterEditorVectorPathCutTool::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentVectorImageLayer();
+    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
     ::ULIS::FVec2D endCutAt;
 
     if( currentVectorLayer )

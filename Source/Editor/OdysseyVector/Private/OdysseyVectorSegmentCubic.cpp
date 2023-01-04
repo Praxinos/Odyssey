@@ -452,6 +452,7 @@ UOdysseyVectorSegmentCubic::DrawStructure( ::ULIS::FRectD &iRoi
                                          , double iFactorY )
 {
     BLContext& blctx = FOdysseyVectorEngine::GetBLContext();
+    BLPath path;
     BLPath ctrlPath0;
     BLPath ctrlPath1;
     BLPoint point0 = { mPoint[0]->GetX(), mPoint[0]->GetY() };
@@ -462,7 +463,23 @@ UOdysseyVectorSegmentCubic::DrawStructure( ::ULIS::FRectD &iRoi
     double handleRadiusY = 4.0f * iFactorY;
     double handleWidth = handleRadiusX * 2.0f;
     double handleHeight = handleRadiusY * 2.0f;
+    ::ULIS::FVec2D factor = { iFactorX, iFactorY };
 
+    blctx.setStrokeStyle(BLRgba32(0xFF00FF00));
+    blctx.setStrokeWidth( factor.Distance() );
+
+    // cubic path
+    path.moveTo( point0.x, point0.y );
+    path.cubicTo( ctrlPoint0.x
+                , ctrlPoint0.y
+                , ctrlPoint1.x
+                , ctrlPoint1.y
+                , point1.x
+                , point1.y );
+
+    blctx.strokePath( path );
+
+    // line to control handle 0
     ctrlPath0.moveTo( point0.x, point0.y );
     ctrlPath0.lineTo( ctrlPoint0.x, ctrlPoint0.y );
 
@@ -470,11 +487,13 @@ UOdysseyVectorSegmentCubic::DrawStructure( ::ULIS::FRectD &iRoi
 
     blctx.strokePath( ctrlPath0 );
 
+    // line to control handle 1
     ctrlPath1.moveTo( point1.x, point1.y );
     ctrlPath1.lineTo( ctrlPoint1.x, ctrlPoint1.y );
 
     blctx.strokePath( ctrlPath1 );
 
+    // control handles
     blctx.setFillStyle( BLRgba32( 0xFFFF0000 ) );
     blctx.fillRect( ctrlPoint0.x - handleRadiusX, ctrlPoint0.y - handleRadiusY, handleWidth, handleHeight );
     blctx.fillRect( ctrlPoint1.x - handleRadiusX, ctrlPoint1.y - handleRadiusY, handleWidth, handleHeight );

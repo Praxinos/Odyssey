@@ -27,7 +27,7 @@ void
 UOdysseyPainterEditorVectorSceneScaleTool::Activate()
 {
 	//FOdysseyObjectEditorUtils::SetPropertyValue(BrushOptions, "Color", FOdysseyBrushColor(GetEditorAs<FOdysseyPainterEditor>()->PaintColor()));
-    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentVectorImageLayer();
+    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
     FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetVectorEngine();
 
     vectorEngine->SetDrawingFlags( 0 );
@@ -45,7 +45,7 @@ bool
 UOdysseyPainterEditorVectorSceneScaleTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentVectorImageLayer();
+    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
 
     if( currentVectorLayer )
     {
@@ -70,7 +70,7 @@ void
 UOdysseyPainterEditorVectorSceneScaleTool::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentVectorImageLayer();
+    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
 
     if( currentVectorLayer )
     {
@@ -105,7 +105,7 @@ bool
 UOdysseyPainterEditorVectorSceneScaleTool::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentVectorImageLayer();
+    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
 
     if( currentVectorLayer )
     {

@@ -26,8 +26,8 @@ UOdysseyPainterEditorVectorObjectRotateTool::UOdysseyPainterEditorVectorObjectRo
 void
 UOdysseyPainterEditorVectorObjectRotateTool::Activate()
 {
-	//FOdysseyObjectEditorUtils::SetPropertyValue(BrushOptions, "Color", FOdysseyBrushColor(GetEditorAs<FOdysseyPainterEditor>()->PaintColor()));
-    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentVectorImageLayer();
+    //FOdysseyObjectEditorUtils::SetPropertyValue(BrushOptions, "Color", FOdysseyBrushColor(GetEditorAs<FOdysseyPainterEditor>()->PaintColor()));
+    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
     FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetVectorEngine();
 
     vectorEngine->SetDrawingFlags( 0 );
@@ -45,7 +45,7 @@ bool
 UOdysseyPainterEditorVectorObjectRotateTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentVectorImageLayer();
+    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
 
     if( currentVectorLayer )
     {
@@ -66,7 +66,7 @@ void
 UOdysseyPainterEditorVectorObjectRotateTool::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentVectorImageLayer();
+    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
 
     if( currentVectorLayer )
     {
@@ -95,7 +95,7 @@ bool
 UOdysseyPainterEditorVectorObjectRotateTool::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentVectorImageLayer();
+    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
 
     if( currentVectorLayer )
     {

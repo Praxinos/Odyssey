@@ -28,7 +28,7 @@ void
 UOdysseyPainterEditorVectorPathEditTool::Activate()
 {
 	//FOdysseyObjectEditorUtils::SetPropertyValue(BrushOptions, "Color", FOdysseyBrushColor(GetEditorAs<FOdysseyPainterEditor>()->PaintColor()));
-    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentVectorImageLayer();
+    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
     FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetVectorEngine();
 
     vectorEngine->SetDrawingFlags( FOdysseyVectorEngine::RENDER_OBJECT_STRUCTURE );
@@ -46,7 +46,7 @@ bool
 UOdysseyPainterEditorVectorPathEditTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentVectorImageLayer();
+    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
 
     if( currentVectorLayer )
     {
@@ -166,7 +166,7 @@ void
 UOdysseyPainterEditorVectorPathEditTool::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentVectorImageLayer();
+    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
     static ::ULIS::FRectI oldInvalidatedArea = { 0, 0, 0, 0 };
 
     if( currentVectorLayer )
@@ -230,7 +230,7 @@ bool
 UOdysseyPainterEditorVectorPathEditTool::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentVectorImageLayer();
+    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
 
     if( currentVectorLayer )
     {

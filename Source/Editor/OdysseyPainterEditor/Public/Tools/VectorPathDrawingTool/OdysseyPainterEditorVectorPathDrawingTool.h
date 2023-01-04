@@ -36,6 +36,11 @@ public:
 
     UPROPERTY(EditAnywhere, Category="Odyssey PathDrawing Tool")
     double Size;
+    // computed based upon whether or not the pencil size is relative to the object's transformation matrix
+    double mRealSize;
+
+    UPROPERTY(EditAnywhere, Category="Odyssey PathDrawing Tool")
+    bool Absolute;
 
 protected:
 

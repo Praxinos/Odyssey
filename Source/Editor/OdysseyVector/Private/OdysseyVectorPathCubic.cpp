@@ -259,7 +259,7 @@ UOdysseyVectorPathCubic::DrawStructure( ::ULIS::FRectD& iRoi, uint64 iFlags )
     BLContext& blctx = FOdysseyVectorEngine::GetBLContext();
     BLPath path;
     UOdysseyVectorVertexCubic *firstVertex = static_cast<UOdysseyVectorVertexCubic*>( GetFirstVertex() );
-    BLPoint localVector = mInverseWorldMatrix.mapVector ( 1.0f, 1.0f );
+    BLPoint localVector = mInverseWorldMatrix.mapVector ( 0.7071f, 0.7071f );
     ::ULIS::FVec2D factor = { localVector.x, localVector.y };
     double handleRadiusX = 6.0f * factor.x;
     double handleRadiusY = 6.0f * factor.y;
@@ -269,40 +269,6 @@ UOdysseyVectorPathCubic::DrawStructure( ::ULIS::FRectD& iRoi, uint64 iFlags )
     if ( firstVertex )
     {
         blctx.setCompOp( BL_COMP_OP_SRC_COPY );
-        /*iBLContext.setFillStyle(BLRgba32(0xFFFFFFFF));
-        iBLContext.setStrokeStyle(BLRgba32(0xFF000000));*/
-
-        for( std::list<UOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
-        {
-            UOdysseyVectorSegmentCubic *segment = static_cast<UOdysseyVectorSegmentCubic*>(*it);
-            ::ULIS::FVec2D& point0 = segment->GetPoint( 0 )->GetCoords();
-            ::ULIS::FVec2D& point1 = segment->GetPoint( 1 )->GetCoords();
-            ::ULIS::FVec2D& ctrlPoint0 = segment->GetControlPoint( 0 )->GetCoords();
-            ::ULIS::FVec2D& ctrlPoint1 = segment->GetControlPoint( 1 )->GetCoords();
-/*
-            printf("%f %f - %f %f - %f %f - %f %f\n", point0.x
-                                                    , point0.y
-                                                    , ctrlPoint0.x
-                                                    , ctrlPoint0.y
-                                                    , ctrlPoint1.x
-                                                    , ctrlPoint1.y
-                                                    , point1.x
-                                                    , point1.y );
-*/
-/*
-            path.moveTo( point0.x, point0.y );
-            path.cubicTo( ctrlPoint0.x
-                        , ctrlPoint0.y
-                        , ctrlPoint1.x
-                        , ctrlPoint1.y
-                        , point1.x
-                        , point1.y );
-*/
-        }
-
-        blctx.setStrokeStyle( BLRgba32( 0xFF00FF00 ) );
-        blctx.setStrokeWidth( factor.Distance() );
-        blctx.strokePath( path );
 
         for(std::list<UOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it)
         {

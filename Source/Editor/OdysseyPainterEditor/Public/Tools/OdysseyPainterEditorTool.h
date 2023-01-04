@@ -7,7 +7,7 @@
 #include "ToolMenuOwner.h"
 #include "Input/OdysseyPoint.h"
 #include "LayerStack/OdysseyTextureLayerImageVector.h"
-
+#include "LayerStack/OdysseyTextureLayerImageRaster.h"
 #include "OdysseyPainterEditorTool.generated.h"
 
 UCLASS()
@@ -68,7 +68,8 @@ protected:
 
 public:
     void RedrawCurrentLayer(const TArray<::ULIS::FRectI>& iRects);
-    UOdysseyTextureLayerImageVector* GetCurrentVectorImageLayer();
+    UOdysseyTextureLayerImageVector* GetCurrentLayerImageVector();
+    UOdysseyTextureLayerImageRaster* GetCurrentLayerImageRaster();
 
     void SetEditor(class FOdysseyPainterEditor* iEditor);
     template<class T> T* GetEditorAs() const { return static_cast<T*>(mEditor); };
