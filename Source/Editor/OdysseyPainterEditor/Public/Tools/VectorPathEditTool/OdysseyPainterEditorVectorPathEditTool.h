@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 #include "Tools/OdysseyPainterEditorTool.h"
 #include "OdysseyVectorPathBuilder.h"
+#include "HUD/OdysseyVectorHUDPathCubic.h"
 
 #include "OdysseyPainterEditorVectorPathEditTool.generated.h"
 
@@ -36,6 +37,7 @@ private:
 private:
     double mOldLocalMouseX;
     double mOldLocalMouseY;
+    FOdysseyVectorHUDPathCubic mCubicPathHUD;
 
 public:
     // Setters

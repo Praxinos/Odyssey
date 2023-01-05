@@ -42,8 +42,29 @@ FOdysseyVectorEngine::GetInvalidateRegion()
 }
 
 void
-FOdysseyVectorEngine::RenderSelected()
+FOdysseyVectorEngine::RenderHUD()
 {
+    BLContext& blctx = FOdysseyVectorEngine::GetBLContext();
+    std::list<UOdysseyVectorObject*> selectedObjectList = mScene->GetSelectedObjectList();
+
+    blctx.save();
+    blctx.resetMatrix();
+
+    for( std::list<FOdysseyVectorHUD*>::iterator hit = mHUDList.begin(); hit != mHUDList.end(); ++hit )
+    {
+        FOdysseyVectorHUD *hud = (*hit);
+
+        for( std::list<UOdysseyVectorObject*>::iterator oit = selectedObjectList.begin(); oit != selectedObjectList.end(); ++oit )
+        {
+            UOdysseyVectorObject *obj = (*oit);
+
+            hud->Draw( obj, mRoi, 0 );
+        }
+    }
+
+    blctx.restore();
+
+/*
     BLContext& blctx = FOdysseyVectorEngine::GetBLContext();
     std::list<UOdysseyVectorObject*> selectedObjectList = mScene->GetSelectedObjectList();
 
@@ -77,6 +98,7 @@ FOdysseyVectorEngine::RenderSelected()
             blctx.restore();
         }
     }
+*/
 }
 
 void FOdysseyVectorEngine::SetDrawingFlags( uint64 iDrawingFlags )
@@ -113,7 +135,7 @@ FOdysseyVectorEngine::Render()
 
     mScene->Draw( mRoi, mDrawingFlags );
 
-    RenderSelected();
+    RenderHUD();
 
     // Reset region of interest after each draw
     memset ( &mRoi, 0, sizeof ( mRoi ) );
@@ -152,4 +174,19 @@ FOdysseyVectorEngine::InvalidateRegion( ::ULIS::FRectI& iRegion )
     mRoi.y = iRegion.y;
     mRoi.w = iRegion.w;
     mRoi.h = iRegion.h;
+}
+
+void FOdysseyVectorEngine::AddHUD( FOdysseyVectorHUD* iHUDObject )
+{
+    mHUDList.push_back( iHUDObject );
+}
+
+void FOdysseyVectorEngine::RemoveHUD( FOdysseyVectorHUD* iHUDObject )
+{
+    mHUDList.remove( iHUDObject );
+}
+
+void FOdysseyVectorEngine::ClearHUD()
+{
+    mHUDList.clear();
 }

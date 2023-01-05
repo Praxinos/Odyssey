@@ -5,6 +5,7 @@
 #include <Core/Core.h>
 #include <Image/Block.h>
 #include "OdysseyVectorRoot.h"
+#include "HUD/OdysseyVectorHUD.h"
 
 class DLLEXPORT FOdysseyVectorEngine
 {
@@ -14,6 +15,7 @@ class DLLEXPORT FOdysseyVectorEngine
         BLImage* mBLImage;
         BLImage* mBLMask;
         uint64 mDrawingFlags;
+        std::list<FOdysseyVectorHUD*> mHUDList;
 
     public:
         static const uint64 RENDER_OBJECT_STRUCTURE = ( 1 << 0 );
@@ -24,6 +26,7 @@ class DLLEXPORT FOdysseyVectorEngine
         ~FOdysseyVectorEngine();
         FOdysseyVectorEngine( double iWidth, double iHeight );
         void RenderSelected();
+        void RenderHUD();
         void Render();
         UOdysseyVectorRoot* GetScene();
         /*void Init( double iWidth, double iHeight );*/
@@ -32,4 +35,7 @@ class DLLEXPORT FOdysseyVectorEngine
         void InvalidateRegion( ::ULIS::FRectI& iRegion );
         ::ULIS::FRectD& GetInvalidateRegion();
         void SetDrawingFlags( uint64 iDrawingFlags );
+        void AddHUD( FOdysseyVectorHUD* iHUDObject );
+        void RemoveHUD( FOdysseyVectorHUD* iHUDObject );
+        void ClearHUD();
 };

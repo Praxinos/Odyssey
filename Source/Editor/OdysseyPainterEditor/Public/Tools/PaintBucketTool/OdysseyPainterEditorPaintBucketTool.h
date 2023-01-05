@@ -32,6 +32,10 @@ public:
     virtual void Commit() override;
 
 public:
+    UPROPERTY(EditAnywhere,Category="Odyssey BucketFill Tool")
+    uint8 Tolerance;
+
+public:
     // Setters
     virtual bool CanDraw();
 

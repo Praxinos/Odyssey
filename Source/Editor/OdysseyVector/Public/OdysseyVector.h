@@ -22,3 +22,5 @@
 #include "OdysseyVectorPathCubic.h"
 #include "OdysseyVectorCircle.h"
 #include "OdysseyVectorEngine.h"
+#include "HUD/OdysseyVectorHUD.h"
+#include "HUD/OdysseyVectorHUDLine.h"

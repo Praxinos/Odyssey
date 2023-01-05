@@ -52,6 +52,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorPath : public UOdysseyVectorObject
 
         /*virtual void InsertPoint( UOdysseyVectorSegment* iSegment, UOdysseyVectorVertex* iPoint );*/
         std::list<UOdysseyVectorSegment*>& GetSegmentList();
+        std::list<UOdysseyVectorVertex*>& GetVertexList();
         UOdysseyVectorVertex* GetFirstVertex();
         UOdysseyVectorVertex* GetLastVertex();
         UOdysseyVectorSegment* GetFirstSegment();

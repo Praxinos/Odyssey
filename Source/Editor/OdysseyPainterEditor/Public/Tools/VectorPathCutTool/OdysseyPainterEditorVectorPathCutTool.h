@@ -6,6 +6,8 @@
 #include "CoreMinimal.h"
 #include "Tools/OdysseyPainterEditorTool.h"
 #include "OdysseyVectorPathBuilder.h"
+#include "HUD/OdysseyVectorHUDLine.h"
+#include "HUD/OdysseyVectorHUDPathCubic.h"
 
 #include "OdysseyPainterEditorVectorPathCutTool.generated.h"
 
@@ -35,6 +37,8 @@ private:
 
 private:
     ::ULIS::FVec2D mStartCutAt;
+    FOdysseyVectorHUDLine mLineHUD;
+    FOdysseyVectorHUDPathCubic mCubicPathHUD;
 
 public:
     // Setters

@@ -211,6 +211,12 @@ UOdysseyVectorPath::GetSegmentList()
     return mSegmentList;
 }
 
+std::list<UOdysseyVectorVertex*>&
+UOdysseyVectorPath::GetVertexList()
+{
+    return mVertexList;
+}
+
 UOdysseyVectorSegment*
 UOdysseyVectorPath::GetLastSegment()
 {

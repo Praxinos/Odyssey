@@ -17,6 +17,10 @@ UOdysseyPainterEditorVectorPathEditTool::~UOdysseyPainterEditorVectorPathEditToo
 
 UOdysseyPainterEditorVectorPathEditTool::UOdysseyPainterEditorVectorPathEditTool()
     : Size(1.0f)
+    , mCubicPathHUD( FOdysseyVectorHUDPathCubic::VIEW_PATH
+                   | FOdysseyVectorHUDPathCubic::VIEW_POINT
+                   | FOdysseyVectorHUDPathCubic::VIEW_HANDLE_POINT
+                   | FOdysseyVectorHUDPathCubic::VIEW_HANDLE_SEGMENT )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.DrawingTool64");
 }
@@ -27,11 +31,13 @@ UOdysseyPainterEditorVectorPathEditTool::UOdysseyPainterEditorVectorPathEditTool
 void
 UOdysseyPainterEditorVectorPathEditTool::Activate()
 {
-	//FOdysseyObjectEditorUtils::SetPropertyValue(BrushOptions, "Color", FOdysseyBrushColor(GetEditorAs<FOdysseyPainterEditor>()->PaintColor()));
     UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
     FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetVectorEngine();
-
+/*
     vectorEngine->SetDrawingFlags( FOdysseyVectorEngine::RENDER_OBJECT_STRUCTURE );
+*/
+    vectorEngine->ClearHUD();
+    vectorEngine->AddHUD( &mCubicPathHUD );
 
     RedrawCurrentLayer( { { 0, 0, 0, 0 } } );
 }

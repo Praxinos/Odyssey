@@ -17,6 +17,7 @@ UOdysseyPainterEditorVectorPathCutTool::~UOdysseyPainterEditorVectorPathCutTool(
 
 UOdysseyPainterEditorVectorPathCutTool::UOdysseyPainterEditorVectorPathCutTool()
     : Size(1.0f)
+    , mCubicPathHUD( FOdysseyVectorHUDPathCubic::VIEW_PATH | FOdysseyVectorHUDPathCubic::VIEW_POINT )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathCutTool64");
 }
@@ -27,11 +28,13 @@ UOdysseyPainterEditorVectorPathCutTool::UOdysseyPainterEditorVectorPathCutTool()
 void
 UOdysseyPainterEditorVectorPathCutTool::Activate()
 {
-	//FOdysseyObjectEditorUtils::SetPropertyValue(BrushOptions, "Color", FOdysseyBrushColor(GetEditorAs<FOdysseyPainterEditor>()->PaintColor()));
     UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
     FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetVectorEngine();
-
+/*
     vectorEngine->SetDrawingFlags( FOdysseyVectorEngine::RENDER_OBJECT_STRUCTURE );
+*/
+    vectorEngine->ClearHUD();
+    vectorEngine->AddHUD( &mCubicPathHUD );
 
     RedrawCurrentLayer( { { 0, 0, 0, 0 } } );
 }
@@ -48,10 +51,14 @@ UOdysseyPainterEditorVectorPathCutTool::OnMouseDown(const FOdysseyPoint& iPointI
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
 
+    mLineHUD.SetP0( iPointInTexture.x, iPointInTexture.y );
+
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetVectorEngine();
         UOdysseyVectorObject* selectedObject = vectorEngine->GetScene()->GetLastSelected();
+
+        vectorEngine->AddHUD( &mLineHUD );
 
         if ( selectedObject )
         {
@@ -68,7 +75,16 @@ UOdysseyPainterEditorVectorPathCutTool::OnMouseDown(const FOdysseyPoint& iPointI
 void
 UOdysseyPainterEditorVectorPathCutTool::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 {
+    ::ULIS::FVec2D& p0 = mLineHUD.GetP0();
+    ::ULIS::FVec2D& p1 = mLineHUD.GetP1();
+    ::ULIS::FRectI rect = ::ULIS::FRectI::FromMinMax( ::ULIS::FMath::Min( p0.x, p1.x )
+                                                    , ::ULIS::FMath::Min( p0.y, p1.y )
+                                                    , ::ULIS::FMath::Max( p0.x, p1.x )
+                                                    , ::ULIS::FMath::Max( p0.y, p1.y ) );
 
+    mLineHUD.SetP1( iPointInTexture.x, iPointInTexture.y );
+
+    RedrawCurrentLayer( { rect } );
 }
 
 bool
@@ -80,7 +96,11 @@ UOdysseyPainterEditorVectorPathCutTool::OnMouseUp(const FOdysseyPoint& iPointInT
 
     if( currentVectorLayer )
     {
-        UOdysseyVectorObject* selectedObject = currentVectorLayer->GetVectorEngine()->GetScene()->GetLastSelected();
+        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetVectorEngine();
+        UOdysseyVectorObject* selectedObject = vectorEngine->GetScene()->GetLastSelected();
+
+        vectorEngine->RemoveHUD( &mLineHUD );
+        vectorEngine->RemoveHUD( &mLineHUD );
 
         if ( selectedObject )
         {
@@ -94,7 +114,6 @@ UOdysseyPainterEditorVectorPathCutTool::OnMouseUp(const FOdysseyPoint& iPointInT
                 UOdysseyVectorPathCubic *cubicPath = static_cast<UOdysseyVectorPathCubic*>(selectedObject);
 
                 cubicPath->Cut( mStartCutAt, endCutAt );
-
                 cubicPath->Update();
             }
 
