@@ -23,9 +23,30 @@ UOdysseyTextureLayerImageVector::UOdysseyTextureLayerImageVector()
 {
 	LayerTypeName = LOCTEXT("LayerTypeName", "Vector Image Layer");
     Icon = *FOdysseyStyle::GetBrush( "OdysseyLayerStack.ImageLayer16");
+}
 
+void
+UOdysseyTextureLayerImageVector::Init( uint32 iWidth, uint32 iHeight )
+{
+    BLImageData imgData;
 
+    UE_LOG(LogTemp,Warning,TEXT("UOdysseyTextureLayerImageVector::Init %d %d"), iWidth, iHeight );
 
+    Width  = iWidth;
+    Height = iHeight;
+
+    mVEngine = new FOdysseyVectorEngine( (double)iWidth
+                                       , (double)iHeight );
+
+    mVEngine->GetBLImage().getData( &imgData );
+
+    mBlock = new ::ULIS::FBlock( static_cast<uint8*>(imgData.pixelData)
+                               , iWidth
+                               , iHeight
+                               , ::ULIS::eFormat::Format_RGBA8
+                               , nullptr
+                               , ::ULIS::FOnInvalidBlock(&OnInvalidBlock, static_cast<void*>(this))
+                               , ::ULIS::FOnCleanupData(&OnCleanupData, static_cast<void*>(this)) );
 }
 
 void
@@ -52,29 +73,13 @@ UOdysseyTextureLayerImageVector::GetVectorEngine()
 void
 UOdysseyTextureLayerImageVector::OnCreated_Implementation()
 {
-    BLImageData imgData;
-
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetLayerStack());
     if(!layerStack)
         return;
 
     UTexture2D* texture = layerStack->GetTexture();
-    ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
-    //let's ensure the format has alpha, so add alpha channel of needed
-    format = static_cast< ::ULIS::eFormat >(format | ULIS_W_ALPHA( 1 ) );
 
-    mVEngine = new FOdysseyVectorEngine( (double)texture->Source.GetSizeX()
-                                       , (double)texture->Source.GetSizeY() );
-
-    mVEngine->GetBLImage().getData( &imgData );
-
-    mBlock = new ::ULIS::FBlock( static_cast<uint8*>(imgData.pixelData)
-                               , texture->Source.GetSizeX()
-                               , texture->Source.GetSizeY()
-                               , ::ULIS::eFormat::Format_RGBA8
-                               , nullptr
-                               , ::ULIS::FOnInvalidBlock(&OnInvalidBlock, static_cast<void*>(this))
-                               , ::ULIS::FOnCleanupData(&OnCleanupData, static_cast<void*>(this)) );
+    Init( texture->Source.GetSizeX(), texture->Source.GetSizeY() );
 }
 
 TArray<::ULIS::FEvent>
@@ -118,6 +123,21 @@ UOdysseyTextureLayerImageVector::RenderImage(::ULIS::FBlock* ioBlock, const ::UL
     ctx.Finish();
 
     return eventConvertAndExecute;
+}
+
+void
+UOdysseyTextureLayerImageVector::Serialize(FArchive& Ar)
+{
+    Super::Serialize( Ar );
+
+    UE_LOG(LogTemp,Warning,TEXT("UOdysseyTextureLayerImageVector::Serialize"));
+
+    if ( Ar.IsLoading() )
+    {
+        Init( Width, Height );
+    }
+
+    Ar << mVEngine;
 }
 
 #undef LOCTEXT_NAMESPACE

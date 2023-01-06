@@ -54,4 +54,6 @@ class ODYSSEYVECTOR_API UOdysseyVectorPathCubic: public UOdysseyVectorPath
 
         void Mirror( bool iMirrorX, bool iMirrorY );
         void Cut( ::ULIS::FVec2D& linePoint0, ::ULIS::FVec2D& linePoint1 );
+
+        void Serialize(FArchive& Ar);
 };

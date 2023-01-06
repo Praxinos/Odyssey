@@ -190,3 +190,16 @@ void FOdysseyVectorEngine::ClearHUD()
 {
     mHUDList.clear();
 }
+
+FArchive&
+operator<<(FArchive &Ar, FOdysseyVectorEngine* iVectorEngine )
+{
+    UE_LOG(LogTemp,Warning,TEXT("Saving engine"));
+
+    /*iVectorEngine->GetScene()->Serialize(Ar);*/
+/*
+    Ar << Cast<UOdysseyVectorObject>(iVectorEngine->GetScene());
+*/
+
+    return Ar;
+}

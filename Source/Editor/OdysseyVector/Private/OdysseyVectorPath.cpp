@@ -291,3 +291,9 @@ UOdysseyVectorPath::DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags )
 
     DrawLoops( iRoi, iFlags );
 }
+
+void
+UOdysseyVectorPath::Serialize(FArchive& Ar)
+{
+UE_LOG(LogTemp, Warning, TEXT("UOdysseyVectorPath::Serialize"));
+}

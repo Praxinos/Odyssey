@@ -15,7 +15,7 @@ UOdysseyVectorRectangle::CopyShape()
 {
     UOdysseyVectorRectangle* rectangleCopy = NewObject<UOdysseyVectorRectangle>();
 
-    rectangleCopy->Init( mName, mWidth, mHeight );
+    rectangleCopy->Init( Name, mWidth, mHeight );
 
     return Cast<UOdysseyVectorObject>( rectangleCopy );
 }

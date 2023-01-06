@@ -719,3 +719,9 @@ UOdysseyVectorPathCubic::Merge( UOdysseyVectorPathCubic& iCubicPath )
         newSegment->BuildVariable();
     }
 }
+
+void
+UOdysseyVectorPathCubic::Serialize(FArchive& Ar)
+{
+    UE_LOG(LogTemp,Warning,TEXT("UOdysseyVectorPathCubic::Serialize"));
+}

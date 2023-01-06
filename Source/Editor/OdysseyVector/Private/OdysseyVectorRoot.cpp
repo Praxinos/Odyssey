@@ -40,7 +40,7 @@ UOdysseyVectorRoot::CopyShape()
 {
     UOdysseyVectorRoot* rootCopy = NewObject<UOdysseyVectorRoot>();
 
-    rootCopy->Init( mName );
+    rootCopy->Init( Name );
 
     return Cast<UOdysseyVectorObject>(rootCopy);
 }

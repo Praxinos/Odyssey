@@ -69,5 +69,5 @@ class ODYSSEYVECTOR_API UOdysseyVectorPath : public UOdysseyVectorObject
         void InvalidateSegment( UOdysseyVectorSegment* iSegment );
         void InvalidateLoop( UOdysseyVectorLoop* iLoop );
         void UpdateBBox();
-
+        virtual void Serialize(FArchive& Ar);
 };

@@ -18,9 +18,24 @@ class ODYSSEYVECTOR_API UOdysseyVectorObject : public UObject
         static constexpr float BBOX_POINT_RADIUS = 4.0f;
 
     protected:
-        ::ULIS::FVec2D mTranslation;
-        double mRotation;
-        ::ULIS::FVec2D mScaling;
+        std::string Name;
+
+        UPROPERTY()
+        double TranslationX;
+
+        UPROPERTY()
+        double TranslationY;
+
+        UPROPERTY()
+        double Rotation;
+
+        UPROPERTY()
+        double ScalingX;
+
+        UPROPERTY()
+        double ScalingY;
+
+    protected:
         BLMatrix2D mLocalMatrix;
         BLMatrix2D mInverseLocalMatrix;
         BLMatrix2D mWorldMatrix;
@@ -34,7 +49,6 @@ class ODYSSEYVECTOR_API UOdysseyVectorObject : public UObject
         uint32 mStrokeColor;
         double mStrokeWidth;
         uint32 mFillColor;
-        std::string mName;
 
     public:
         ~UOdysseyVectorObject();
@@ -42,15 +56,23 @@ class ODYSSEYVECTOR_API UOdysseyVectorObject : public UObject
         void SetName( std::string iName );
         void CopySettings( UOdysseyVectorObject& iDestinationObject );
 
-        virtual void Update() final ; // cannot be overridden
-        virtual void UpdateShape() PURE_VIRTUAL(UOdysseyVectorObject::UpdateShape);
-        virtual UOdysseyVectorObject* Copy() final ; // cannot be overridden
-        virtual UOdysseyVectorObject* CopyShape() PURE_VIRTUAL(UOdysseyVectorObject::CopyShape, return nullptr;);
-        virtual void Draw( ::ULIS::FRectD& iRoi, uint64 iFlags ) final; // cannot be overridden
-        virtual void DrawShape ( ::ULIS::FRectD &roi, uint64 iFlags ) PURE_VIRTUAL(UOdysseyVectorObject::DrawShape);
+        void Update();
+        virtual void UpdateShape() {};
+
+        UOdysseyVectorObject* Copy();
+        virtual UOdysseyVectorObject* CopyShape(){ return nullptr; };
+
+        void Serialize(FArchive& Ar);
+        virtual void SerializeShape(FArchive& Ar);
+
+        void Draw( ::ULIS::FRectD& iRoi, uint64 iFlags );
+        virtual void DrawShape ( ::ULIS::FRectD &roi, uint64 iFlags ){};
+
         virtual void DrawStructure ( ::ULIS::FRectD &roi, uint64 iFlags ){};
-        virtual UOdysseyVectorObject* Pick( double iX, double iY, double iRadius ) final; // cannot be overridden
-        virtual UOdysseyVectorObject* PickShape( double iX, double iY, double iRadius ) PURE_VIRTUAL(__func__,return nullptr;);
+
+        UOdysseyVectorObject* Pick( double iX, double iY, double iRadius );
+        virtual UOdysseyVectorObject* PickShape( double iX, double iY, double iRadius ){ return nullptr; };
+
         /*virtual void UpdateBoundingBox() = 0;*/
         void DrawChildren( ::ULIS::FRectD& iRoi, uint64 iFlags );
         void UpdateMatrix( );
@@ -62,7 +84,6 @@ class ODYSSEYVECTOR_API UOdysseyVectorObject : public UObject
         void AddChild( UOdysseyVectorObject* iChild, bool iPrepend );
         void RemoveChild( UOdysseyVectorObject* iChild );
         void ImportChild( UOdysseyVectorObject* iChild, BLMatrix2D& iInverseWorldMatrix );
-        static void ExtractTransformations( BLMatrix2D &iMatrix, ::ULIS::FVec2D* iTranslation, double* iRotation, ::ULIS::FVec2D* iScaling );
         double GetScalingX();
         double GetScalingY();
         double GetTranslationX();

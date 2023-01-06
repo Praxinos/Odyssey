@@ -7,7 +7,7 @@
 #include "OdysseyVectorRoot.h"
 #include "HUD/OdysseyVectorHUD.h"
 
-class DLLEXPORT FOdysseyVectorEngine
+class ODYSSEYVECTOR_API FOdysseyVectorEngine
 {
     private:
         UOdysseyVectorRoot *mScene;
@@ -39,3 +39,5 @@ class DLLEXPORT FOdysseyVectorEngine
         void RemoveHUD( FOdysseyVectorHUD* iHUDObject );
         void ClearHUD();
 };
+
+ODYSSEYVECTOR_API FArchive& operator<<(FArchive &Ar, FOdysseyVectorEngine* iVectorEngine );

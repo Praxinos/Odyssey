@@ -5,9 +5,11 @@ UOdysseyVectorObject::~UOdysseyVectorObject()
 }
 
 UOdysseyVectorObject::UOdysseyVectorObject()
-    : mTranslation( 0.0f, 0.0f )
-    , mRotation( 0.0f )
-    , mScaling ( 1.0f, 1.0f )
+    : TranslationX( 0.0f )
+    , TranslationY( 0.0f )
+    , Rotation( 0.0f )
+    , ScalingX ( 1.0f )
+    , ScalingY ( 1.0f )
     , mStrokeColor ( 0xFF000000 )
     , mFillColor ( 0xFF000000 )
     , mStrokeWidth ( 4.0f )
@@ -22,7 +24,7 @@ UOdysseyVectorObject::UOdysseyVectorObject()
 void
 UOdysseyVectorObject::SetName( std::string iName )
 {
-    mName.assign( iName );
+    Name.assign( iName );
 }
 
 void
@@ -42,39 +44,39 @@ UOdysseyVectorObject::SetIsSelected( bool iIsSelected )
 void
 UOdysseyVectorObject::Translate( double iX, double iY )
 {
-    mTranslation.x = iX;
-    mTranslation.y = iY;
+    TranslationX = iX;
+    TranslationY = iY;
 }
 
 void
 UOdysseyVectorObject::Rotate( double iAngle )
 {
-    mRotation = iAngle;
+    Rotation = iAngle;
 }
 
 void
 UOdysseyVectorObject::Scale( double iX, double iY )
 {
-    mScaling.x = iX;
-    mScaling.y = iY;
+    ScalingX = iX;
+    ScalingY = iY;
 }
 
 double
 UOdysseyVectorObject::GetScalingX()
 {
-    return mScaling.x;
+    return ScalingX;
 }
 
 double
 UOdysseyVectorObject::GetScalingY()
 {
-    return mScaling.y;
+    return ScalingY;
 }
 
 double
 UOdysseyVectorObject::GetRotation()
 {
-    return mRotation;
+    return Rotation;
 }
 
 UOdysseyVectorObject*
@@ -104,9 +106,9 @@ UOdysseyVectorObject::Copy() {
 void
 UOdysseyVectorObject::CopySettings( UOdysseyVectorObject& iDestinationObject )
 {
-    iDestinationObject.mTranslation = mTranslation;
-    iDestinationObject.mRotation = mRotation;
-    iDestinationObject.mScaling = mScaling;
+    CopyTransformation( iDestinationObject );
+
+    iDestinationObject.UpdateMatrix();
 
     iDestinationObject.mStrokeColor = mStrokeColor;
     iDestinationObject.mStrokeWidth = mStrokeWidth;
@@ -115,25 +117,20 @@ UOdysseyVectorObject::CopySettings( UOdysseyVectorObject& iDestinationObject )
 
     iDestinationObject.mBBox = mBBox;
 
-    iDestinationObject.mName = mName;
-    iDestinationObject.mName.append("_Copy");
-
-    iDestinationObject.mLocalMatrix = mLocalMatrix;
-    iDestinationObject.mInverseLocalMatrix = mInverseLocalMatrix;
-    iDestinationObject.mWorldMatrix = mWorldMatrix;
-    iDestinationObject.mInverseWorldMatrix = mInverseWorldMatrix;
+    iDestinationObject.Name = Name;
+    iDestinationObject.Name.append("_Copy");
 }
 
 double
 UOdysseyVectorObject::GetTranslationX()
 {
-    return mTranslation.x;
+    return TranslationX;
 }
 
 double
 UOdysseyVectorObject::GetTranslationY()
 {
-    return mTranslation.y;
+    return TranslationY;
 }
 
 void
@@ -144,9 +141,9 @@ UOdysseyVectorObject::UpdateMatrix( )
     blctx.save();
 
     blctx.resetMatrix();
-    blctx.translate( mTranslation.x, mTranslation.y );
-    blctx.rotate( mRotation );
-    blctx.scale( mScaling.x, mScaling.y );
+    blctx.translate( TranslationX, TranslationY );
+    blctx.rotate( Rotation );
+    blctx.scale( ScalingX, ScalingY );
     mLocalMatrix = blctx.userMatrix();
 
     BLMatrix2D::invert( mInverseLocalMatrix, mLocalMatrix );
@@ -293,7 +290,7 @@ UOdysseyVectorObject::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
         localRoi.h = localRoiCornerSize.y;
     }
 
-            /*printf("%s : %f %f %f %f\n",mName.c_str(), iRoi.x,iRoi.y,iRoi.w,iRoi.h);*/
+            /*printf("%s : %f %f %f %f\n",Name.c_str(), iRoi.x,iRoi.y,iRoi.w,iRoi.h);*/
 
     blctx.save();
     blctx.transform( mLocalMatrix );
@@ -449,16 +446,22 @@ UOdysseyVectorObject::Pick( double iX, double iY, double iRadius )
     return PickShape( iX, iY, iRadius );
 }
 
-void
-UOdysseyVectorObject::ExtractTransformations( BLMatrix2D &iMatrix
-                                     , ::ULIS::FVec2D* iTranslation
-                                     , double* iRotation
-                                     , ::ULIS::FVec2D* iScaling )
+static void
+ExtractTransformations( BLMatrix2D &iMatrix
+                      , double* iTranslationX
+                      , double* iTranslationY
+                      , double* iRotation
+                      , double* iScalingX
+                      , double* iScalingY )
 {
-    if( iTranslation )
+    if( iTranslationX )
     {
-        iTranslation->x = iMatrix.m20;
-        iTranslation->y = iMatrix.m21;
+        *iTranslationX = iMatrix.m20;
+    }
+
+    if( iTranslationY )
+    {
+        *iTranslationY = iMatrix.m21;
     }
 
     if( iRotation )
@@ -466,10 +469,14 @@ UOdysseyVectorObject::ExtractTransformations( BLMatrix2D &iMatrix
         *iRotation = atan( iMatrix.m01  / iMatrix.m11 );
     }
 
-    if( iScaling )
+    if( iScalingX )
     {
-        iScaling->x = sqrt( ( iMatrix.m00 * iMatrix.m00 ) + ( iMatrix.m01 * iMatrix.m01 ) );
-        iScaling->y = sqrt( ( iMatrix.m10 * iMatrix.m10 ) + ( iMatrix.m11 * iMatrix.m11 ) );
+        *iScalingX = sqrt( ( iMatrix.m00 * iMatrix.m00 ) + ( iMatrix.m01 * iMatrix.m01 ) );
+    }
+
+    if( iScalingY )
+    {
+        *iScalingY = sqrt( ( iMatrix.m10 * iMatrix.m10 ) + ( iMatrix.m11 * iMatrix.m11 ) );
     }
 }
 
@@ -495,7 +502,12 @@ UOdysseyVectorObject::AddChild( UOdysseyVectorObject* iChild, bool iPrepend )
 
     localMatrix.transform( iChild->GetWorldMatrix() );
 
-    ExtractTransformations ( localMatrix, &iChild->mTranslation, &iChild->mRotation, &iChild->mScaling );
+    ExtractTransformations ( localMatrix
+                           , &iChild->TranslationX
+                           , &iChild->TranslationY
+                           , &iChild->Rotation
+                           , &iChild->ScalingX
+                           , &iChild->ScalingY );
 
     iChild->UpdateMatrix();
 
@@ -550,9 +562,11 @@ UOdysseyVectorObject::GetStrokeWidth()
 void 
 UOdysseyVectorObject::CopyTransformation( UOdysseyVectorObject& iObject )
 {
-    iObject.mRotation    = mRotation;
-    iObject.mScaling     = mScaling;
-    iObject.mTranslation = mTranslation;
+    iObject.Rotation     = Rotation;
+    iObject.ScalingX     = ScalingX;
+    iObject.ScalingY     = ScalingY;
+    iObject.TranslationX = TranslationX;
+    iObject.TranslationY = TranslationY;
 }
 
 std::list<UOdysseyVectorObject*>&
@@ -577,4 +591,28 @@ BLMatrix2D&
 UOdysseyVectorObject::GetInverseWorldMatrix()
 {
     return mInverseWorldMatrix;
+}
+
+void
+UOdysseyVectorObject::SerializeShape( FArchive& Ar )
+{
+    UE_LOG(LogTemp,Warning,TEXT("UOdysseyVectorObject::SerializeShape"));
+}
+
+void
+UOdysseyVectorObject::Serialize( FArchive& Ar )
+{
+    Super::Serialize( Ar );
+
+    UE_LOG(LogTemp,Warning,TEXT("UOdysseyVectorObject::Serialize"));
+
+/*
+    uint32 mStrokeColor;
+    double mStrokeWidth;
+    uint32 mFillColor;
+
+    std::list<UOdysseyVectorObject*> mChildrenList;
+*/
+
+    /*SerializeShape ( Ar );*/
 }

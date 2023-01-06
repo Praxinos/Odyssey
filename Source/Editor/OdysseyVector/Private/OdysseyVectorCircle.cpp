@@ -88,7 +88,7 @@ UOdysseyVectorCircle::CopyShape()
 {
     UOdysseyVectorCircle* circleCopy = NewObject<UOdysseyVectorCircle>();
 
-    circleCopy->Init ( mName, mRadiusX, mRadiusY );
+    circleCopy->Init ( Name, mRadiusX, mRadiusY );
 
     return Cast<UOdysseyVectorObject>( circleCopy );
 }
