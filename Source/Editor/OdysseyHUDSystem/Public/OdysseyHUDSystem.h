@@ -17,11 +17,11 @@ public:
 
 private:
     // Setters (private)
-    void SetHUDBlock(::ULIS::FBlock* iBlock);
+    void SetHUDBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock);
 
 public:
     // Getters
-    ::ULIS::FBlock* GetHUDBlock() const;
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> GetHUDBlock() const;
     FOdysseySurfaceTexture2DEditable* GetHUDSurface() const;
 
 public:
@@ -29,6 +29,6 @@ public:
     void RefreshHUDSurface(FVector2D iSize);
 
 private:
-    ::ULIS::FBlock*                      mHUDBlock; // Holds the block in which we draw the HUD
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mHUDBlock; // Holds the block in which we draw the HUD
     FOdysseySurfaceTexture2DEditable*    mHUDSurface;
 };

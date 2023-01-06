@@ -9,12 +9,12 @@ UOdysseyTextureLayerRoot::UOdysseyTextureLayerRoot()
 }
 
 void
-UOdysseyTextureLayerRoot::RenderImageChanged(const TArray<::ULIS::FRectI>& iRects)
+UOdysseyTextureLayerRoot::RenderImageChanged(const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive)
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetLayerStack());
     if (!layerStack)
         return;
 
-    layerStack->OnRootLayerRenderImageChanged(this, iRects);
-    OnRenderImageChanged().Broadcast(this, iRects);
+    layerStack->OnRootLayerRenderImageChanged(this, iRects, iIsInteractive);
+    OnRenderImageChanged().Broadcast(this, iRects, iIsInteractive);
 }

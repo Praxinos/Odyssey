@@ -8,12 +8,10 @@
 FOdysseyHUDSystem::~FOdysseyHUDSystem()
 {
     delete mHUDSurface;
-    delete mHUDBlock;
 }
 
 FOdysseyHUDSystem::FOdysseyHUDSystem()
-    : mHUDBlock( nullptr ),
-      mHUDSurface(nullptr)
+    : mHUDSurface(nullptr)
 {
 }
 
@@ -21,22 +19,15 @@ FOdysseyHUDSystem::FOdysseyHUDSystem()
 //------------------------------------------------------------------------------ Setters
 
 void
-FOdysseyHUDSystem::SetHUDBlock(::ULIS::FBlock* iBlock)
+FOdysseyHUDSystem::SetHUDBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock)
 {
-    if (mHUDBlock == iBlock)
-        return;
-
-    delete mHUDBlock;
-
     mHUDBlock = iBlock;
-    if (!mHUDBlock) 
-        return;
 }
 
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Getters
 
-::ULIS::FBlock*
+TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>
 FOdysseyHUDSystem::GetHUDBlock() const
 {
     return mHUDBlock;
@@ -53,11 +44,9 @@ FOdysseySurfaceTexture2DEditable* FOdysseyHUDSystem::GetHUDSurface() const
 void FOdysseyHUDSystem::RefreshHUDSurface(FVector2D iSize)
 {
     if( mHUDSurface )
-    {
         delete mHUDSurface;
-    }
 
-    SetHUDBlock( new ::ULIS::FBlock(iSize.X, iSize.Y, ::ULIS::Format_BGRA8) );
+    SetHUDBlock( MakeShared<::ULIS::FBlock>(iSize.X, iSize.Y, ::ULIS::Format_BGRA8) );
 
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_BGRA8);
     ctx.Clear(*mHUDBlock);

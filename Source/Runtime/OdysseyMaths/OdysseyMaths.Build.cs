@@ -13,7 +13,8 @@ public class OdysseyMaths : ModuleRules
         PublicDependencyModuleNames.AddRange(
             new string[] {
                 "Core",
-                "Engine"
+                "Engine",
+                "ULIS"
             }
         );
 

@@ -6,6 +6,7 @@
 #include "OdysseyTextureLayerImageRaster.h"
 #include "OdysseyPixelFormat.h"
 #include "EditorStyleSet.h"
+#include "ULISEventBuilder.h"
 #include "ULISLoaderModule.h"
 #include "ULISUtils.h"
 
@@ -35,7 +36,7 @@ UOdysseyTextureLayerFolder::UOdysseyTextureLayerFolder()
 }
 
 TArray<::ULIS::FEvent>
-UOdysseyTextureLayerFolder::RenderImage(::ULIS::FBlock* ioBlock, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList)
+UOdysseyTextureLayerFolder::RenderImage(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ioBlock, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList)
 {
     if (!IsActivated)
         return iWaitList;
@@ -54,7 +55,7 @@ UOdysseyTextureLayerFolder::RenderImage(::ULIS::FBlock* ioBlock, const ::ULIS::F
     ::ULIS::eFormat format = static_cast< ::ULIS::eFormat >( ioBlock->Format() | ULIS_W_ALPHA( 1 ) );
 
     //Generate the folder block, which is all children layers blended together
-    ::ULIS::FBlock* folderBlock = new ::ULIS::FBlock(iRect.w, iRect.h, format);
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> folderBlock = MakeShared<::ULIS::FBlock>(iRect.w, iRect.h, format);
 
     //Render children Image
     TArray<::ULIS::FEvent> eventRenderChildrenImage = layerStack->RenderLayersImage(Children, folderBlock, iRect, ::ULIS::FVec2I(0), TArray<::ULIS::FEvent>());
@@ -64,17 +65,10 @@ UOdysseyTextureLayerFolder::RenderImage(::ULIS::FBlock* ioBlock, const ::ULIS::F
 
     //Convert the destination if needed and Blend the folderBlock
     TArray<::ULIS::FEvent> eventConvertAndExecute = ULISUtils::ConvertAndExecute(ioBlock, folderBlock->Format(), iRect, iPos, eventRenderChildrenImage,
-        [this, folderBlock, &ctx](::ULIS::FBlock* ioDest, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList) -> TArray<::ULIS::FEvent>
+        [this, &folderBlock, &ctx](TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ioDest, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList) -> TArray<::ULIS::FEvent>
         {
             //if ioBlock and mBlock use same format, Blend directly in ioBlock
-            ::ULIS::FEvent eventBlend(
-                ::ULIS::FOnEventComplete(
-                    [ folderBlock ]( const ::ULIS::FRectI& )
-                    {
-                        delete  folderBlock;
-                    }
-                )
-            );
+            ::ULIS::FEvent eventBlend = FULISEventBuilder().RetainBlock(folderBlock).Build();
 
             ctx.Blend(
                 *folderBlock,
@@ -100,7 +94,7 @@ UOdysseyTextureLayerFolder::RenderImage(::ULIS::FBlock* ioBlock, const ::ULIS::F
 }
 
 TArray<::ULIS::FEvent>
-UOdysseyTextureLayerFolder::CopyImage(::ULIS::FBlock* ioBlock, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList)
+UOdysseyTextureLayerFolder::CopyImage(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ioBlock, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList)
 {
     if (!IsActivated)
         return iWaitList;
@@ -119,7 +113,7 @@ UOdysseyTextureLayerFolder::CopyImage(::ULIS::FBlock* ioBlock, const ::ULIS::FRe
     ::ULIS::eFormat format = static_cast< ::ULIS::eFormat >( ioBlock->Format() | ULIS_W_ALPHA( 1 ) );
 
     //Generate the folder block, which is all children layers blended together
-    ::ULIS::FBlock* folderBlock = new ::ULIS::FBlock(iRect.w, iRect.h, format);
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> folderBlock = MakeShared<::ULIS::FBlock>(iRect.w, iRect.h, format);
 
     //Render children Image
     TArray<::ULIS::FEvent> eventRenderChildrenImage = layerStack->RenderLayersImage(Children, folderBlock, iRect, ::ULIS::FVec2I(0), TArray<::ULIS::FEvent>());
@@ -129,17 +123,10 @@ UOdysseyTextureLayerFolder::CopyImage(::ULIS::FBlock* ioBlock, const ::ULIS::FRe
 
     //Convert the destination if needed and copy the folderBlock
     TArray<::ULIS::FEvent> eventConvertAndExecute = ULISUtils::ConvertAndExecute(ioBlock, folderBlock->Format(), iRect, iPos, eventRenderChildrenImage,
-        [this, &ctx, &folderBlock](::ULIS::FBlock* ioDest, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList) -> TArray<::ULIS::FEvent>
+        [this, &ctx, &folderBlock](TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ioDest, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList) -> TArray<::ULIS::FEvent>
         {
             //if ioBlock and mBlock use same format, Copy directly in ioBlock
-            ::ULIS::FEvent eventCopy(
-                ::ULIS::FOnEventComplete(
-                    [ folderBlock ]( const ::ULIS::FRectI& )
-                    {
-                        delete  folderBlock;
-                    }
-                )
-            );
+            ::ULIS::FEvent eventCopy = FULISEventBuilder().RetainBlock(folderBlock).Build();
 
             ctx.Copy(
                 *folderBlock,
@@ -201,7 +188,7 @@ UOdysseyTextureLayerFolder::OpacityChanged()
         return;
 
     OnOpacityChanged().Broadcast(this);
-    RenderImageChanged({ ::ULIS::FRectI::FromXYWH(0, 0, texture->Source.GetSizeX(), texture->Source.GetSizeY() ) });
+    RenderImageChanged({ ::ULIS::FRectI::FromXYWH(0, 0, texture->Source.GetSizeX(), texture->Source.GetSizeY() ) }, false);
 }
 
 void
@@ -216,7 +203,7 @@ UOdysseyTextureLayerFolder::BlendModeChanged()
         return;
 
     OnBlendModeChanged().Broadcast(this);
-    RenderImageChanged({ ::ULIS::FRectI::FromXYWH(0, 0, texture->Source.GetSizeX(), texture->Source.GetSizeY() ) });
+    RenderImageChanged({ ::ULIS::FRectI::FromXYWH(0, 0, texture->Source.GetSizeX(), texture->Source.GetSizeY()) }, false);
 }
 
 void

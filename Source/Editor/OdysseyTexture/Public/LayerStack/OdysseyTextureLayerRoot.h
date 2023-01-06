@@ -17,5 +17,5 @@ public:
     UOdysseyTextureLayerRoot();
 
 protected:
-    virtual void RenderImageChanged(const TArray<::ULIS::FRectI>& iRects) override;
+    virtual void RenderImageChanged(const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive) override;
 };

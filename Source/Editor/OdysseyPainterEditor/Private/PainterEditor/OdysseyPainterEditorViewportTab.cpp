@@ -111,7 +111,7 @@ FOdysseyPainterEditorViewportTab::HandleViewportColorPicked(eOdysseyEventState::
 	if (!mEditor->DisplaySurface())
 		return;
 
-    ::ULIS::FBlock* block = mEditor->DisplaySurface()->Block();
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = mEditor->DisplaySurface()->Block();
     if (iPositionInTexture.X >= 0 && iPositionInTexture.X < block->Width() &&
         iPositionInTexture.Y >= 0 && iPositionInTexture.Y < block->Height())
     {

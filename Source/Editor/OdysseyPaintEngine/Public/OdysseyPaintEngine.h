@@ -10,17 +10,15 @@
 
 #include <ULIS>
 
+class UOdysseyRasterBlock;
+
 class ODYSSEYPAINTENGINE_API FOdysseyPaintEngine
 {
 public:
     // Delegates
 
     // Any type of painting delegates (stroke, clear, fill, etc...)
-    DECLARE_MULTICAST_DELEGATE(FOnBlockChanged);
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOnCommit, const TArray<::ULIS::FRectI>& iChangedTiles);
     DECLARE_DELEGATE_RetVal_OneParam(FOdysseyBlendParameters, FOnPreUpdate, const FOdysseyBlendParameters& iBlendParameters);
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOnUpdate, const TArray<::ULIS::FRectI>& iChangedTiles);
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOnReset, const TArray<::ULIS::FRectI>& iChangedTiles);
 
 public:
     // Destructor
@@ -33,36 +31,30 @@ public:
     // Setters
 
     // Sets the Block on which the Paint Engine will draw
-    void Block(::ULIS::FBlock* iBlock);
+    void RasterBlock(UOdysseyRasterBlock* iRasterBlock);
 
 public:
     // Getters
 
     //Returns the PaintBlock (Stroke Block), use with caution as it is mostly used by the brush in an asynchronous way
-    ::ULIS::FBlock* PaintBlock();
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> PaintBlock();
 
     //Returns the OriginalBlock
-    ::ULIS::FBlock* OriginalBlock();
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> OriginalBlock();
 
     // Delegates
-    FOnBlockChanged& OnBlockChangedDelegate() { return mOnBlockChangedDelegate; }
-    FOnCommit& OnCommitDelegate() { return mOnCommitDelegate; }
     FOnPreUpdate& OnPreUpdateDelegate() { return mOnPreUpdateDelegate; }
-    FOnUpdate& OnUpdateDelegate() { return mOnUpdateDelegate; }
-    FOnReset& OnResetDelegate() { return mOnResetDelegate; }
-    
 
 public:
-    // Update Edited block according to PaintBlokc content without commiting
-    // And resets the PaintBlock
+    // Update Edited block according to PaintBlock content without commiting
     void Update(const FOdysseyBlendParameters& iBlendParameters);
 
-    // Commit the changes by blending the paintblock over the editedblock
+    // Commit the changes by blending the paintblock over the original editedblock
     // And resets the PaintBlock
     void Commit(const FOdysseyBlendParameters& iBlendParameters);
     
     // Resets the PaintBlock
-    void Reset();
+    void Abort();
 
 private:
     // Internal Blocks Management
@@ -74,27 +66,34 @@ private:
     // Copies EditedBlock Rects to Original Block
     void CopyEditedBlockToOriginalBlock();
 
+    // Restore the editedblock to its original state before edition
+    bool RestoreEditedBlock();
+
     // Blends PaintBlock on OriginalBlock and stores the result in EditedBlock
     bool UpdateEditedBlock(const FOdysseyBlendParameters& iBlendParameters);
 
+    void OnPixelsChanged(const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive);
+
+    void OnBlockChanged();
+    
+    FOdysseyBlendParameters AdjustBlendParameters(const FOdysseyBlendParameters& iBlendParameters);
+
 private:
     //Blocks
-    ::ULIS::FBlock*                     mEditedBlock; // The Block to edit (mPaintBlock over mOriginalBlock)
-    ::ULIS::FBlock*                     mPaintBlock; // The Block containing only the modified tiles
-    ::ULIS::FBlock*                     mOriginalBlock; // The Block containing the edited block before being edited
+    UOdysseyRasterBlock* mRasterBlock;
+
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mEditedBlock; // The Block to edit (mPaintBlock over mOriginalBlock)
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mPaintBlock; // The Block containing only the modified tiles
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mOriginalBlock; // The Block containing the edited block before being edited
     
     //Options
     FOdysseyBlendParameters             mPreviousBlendParameters;
 
     // Delegates
-    FOnBlockChanged                     mOnBlockChangedDelegate;
     FOnPreUpdate                        mOnPreUpdateDelegate;
-    FOnUpdate                           mOnUpdateDelegate;
-    FOnCommit                           mOnCommitDelegate;
-    FOnReset                            mOnResetDelegate;
-
+    
     //Internal
-    FOdysseyInvalidTileMap              mPaintBlockInvalidTileMap;
-    FOdysseyInvalidTileMap              mEditedBlockInvalidTileMap;
-    FOdysseyInvalidTileMap              mResetInvalidTileMap;
+    TArray<::ULIS::FRectI>              mInvalidRects;
+    TArray<::ULIS::FRectI>              mUpdatedRects;
+    bool mExpectsOnPixelsChanged;
 };

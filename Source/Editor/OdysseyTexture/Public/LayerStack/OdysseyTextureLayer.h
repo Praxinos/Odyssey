@@ -20,7 +20,7 @@ public:
      * @brief Delegate called when something changed the result of RenderImage()
      * 
      */
-    DECLARE_MULTICAST_DELEGATE_TwoParams(FOnRenderImageChanged, UOdysseyTextureLayer*, const TArray<::ULIS::FRectI>&)
+    DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnRenderImageChanged, UOdysseyTextureLayer*, const TArray<::ULIS::FRectI>&, bool)
 
 public:
     static FOnRenderImageChanged& OnRenderImageChanged(); //Delegate
@@ -34,13 +34,13 @@ public:
      * @brief Renders an image over the given Block
      * Takes into account the size / format of the given block
      */
-    virtual TArray<::ULIS::FEvent> RenderImage(::ULIS::FBlock* ioBlock, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList);
+    virtual TArray<::ULIS::FEvent> RenderImage(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>  ioBlock, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList);
 
     /**
      * @brief Copies an image in the given Block
      * Takes into account the size / format of the given block
      */
-    virtual TArray<::ULIS::FEvent> CopyImage(::ULIS::FBlock* ioBlock, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList);
+    virtual TArray<::ULIS::FEvent> CopyImage(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ioBlock, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList);
 
     /**
      * @brief Calls the RenderImageChanged delegate and informs the parent layers directly
@@ -48,12 +48,12 @@ public:
      * 
      * @param iRects 
      */
-    virtual void RenderImageChanged(const TArray<::ULIS::FRectI>& iRects);
+    virtual void RenderImageChanged(const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive);
 
     /**
      * @brief Called when one of the direct children layer render image changed
      * 
      * Called by the child layer RenderImageChanged() function
      */
-    virtual void ChildRenderImageChanged(UOdysseyTextureLayer* iLayer, const TArray<::ULIS::FRectI>& iRects);
+    virtual void ChildRenderImageChanged(UOdysseyTextureLayer* iLayer, const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive);
 };

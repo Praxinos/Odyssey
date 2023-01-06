@@ -160,8 +160,9 @@ struct TRectangle
     void Exclusion( const TRectangle< T >& iOther, TArray< TRectangle< T > >* oResult ) const {
         oResult->Clear();
 
-        TRectangle< T > inter = *this & iOther;
-        if( inter.Area() == 0 ) {
+        TRectangle< T > inter = (*this & iOther);
+        inter.Sanitize();
+        if( inter.Area() <= 0 ) {
             oResult->PushBack( *this );
             return;
         }
@@ -173,21 +174,46 @@ struct TRectangle
 
         T x1  = x;
         T y1  = y;
-        T x2  = x + w;
-        T y2  = y + h;
-        T ux1 = inter.x;
-        T uy1 = inter.y;
-        T ux2 = inter.x + inter.w;
-        T uy2 = inter.y + inter.h;
+        T w1 = w;
+        T h1 = h;
 
-        TRectangle< T > top     = FromMinMax( ux1, y1, ux2, uy1 ); // top
-        TRectangle< T > left    = FromMinMax( x1, uy1, ux1, uy2 ); // left
-        TRectangle< T > right   = FromMinMax( ux2, uy1, x2, uy2 ); // right
-        TRectangle< T > bot     = FromMinMax( ux1, uy2, ux2, y2 ); // bot
-        if( top.Area() )    oResult->PushBack( top );
-        if( left.Area() )   oResult->PushBack( left );
-        if( right.Area() )  oResult->PushBack( right );
-        if( bot.Area() )    oResult->PushBack( bot );
+        T x2  = iOther.x;
+        T y2  = iOther.y;
+        T w2 = iOther.w;
+        T h2 = iOther.h;
+
+        TRectangle< T > top = FromXYWH( x1, y1, w1, y2 - y1 ); // top
+        top.Sanitize();
+        if ( top.Area() > 0 )
+        {
+            oResult->PushBack(top);
+            h1 -= (y2 - y1); 
+            y1 += (y2 - y1);
+        }
+
+        TRectangle< T > right = FromXYWH( x2 + w2, y1, (x1 + w1) - (x2 + w2), h1); // right
+        right.Sanitize();
+        if ( right.Area() > 0 )
+        {
+            oResult->PushBack(right);
+            w1 -= ((x1 + w1) - (x2 + w2));
+        }
+
+        TRectangle< T > bot = FromXYWH( x1, y2 + h2, w1, (y1 + h1) - (y2 + h2)); // bot
+        bot.Sanitize();
+        if ( bot.Area() > 0 )    
+        {   
+            oResult->PushBack(bot);
+            h1 -= ((y1 + h1) - (y2 + h2));
+        }
+
+
+        TRectangle< T > left = FromXYWH( x1, y1, x2 - x1, h1 ); // left
+        left.Sanitize();
+        if( left.Area() > 0 )
+        {
+            oResult->PushBack( left );
+        }
         return;
     }
 
@@ -213,7 +239,8 @@ struct TRectangle
     }
 
     /*! Return the area of the rect. */
-    T Area() const {
+    T Area() const 
+    {
         return  w * h;
     }
 

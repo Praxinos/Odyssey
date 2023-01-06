@@ -13,12 +13,15 @@ public class OdysseyImaging : ModuleRules
              new string[] {
                 "Core",
                 "CoreUObject",
+                "DerivedDataCache",
                 "Engine",
                 "ImageCore",
                 "RenderCore",
                 "RHI",
                 "TargetPlatform",
-                "TextureCompressor"
+                "TextureCompressor",
+
+                "OdysseyMaths",
              }
         );
 

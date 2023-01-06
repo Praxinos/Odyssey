@@ -42,14 +42,13 @@ private:
 private:
     //Listeners
     void OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStack);
-    void OnLayerRenderImageChanged(UOdysseyTextureLayer* iLayer, const TArray<::ULIS::FRectI>& iRects);
-    void OnPaintEngineCommit(const TArray<::ULIS::FRectI>& iChangedTiles);
+    // void OnLayerRenderImageChanged(UOdysseyTextureLayer* iLayer, const TArray<::ULIS::FRectI>& iRects);
+    // void OnPaintEngineCommit(const TArray<::ULIS::FRectI>& iChangedTiles);
     FOdysseyBlendParameters OnPaintEnginePreUpdate(const FOdysseyBlendParameters& iBlendParameters);
 
-    static void OnEditedBlockInvalidated(const ::ULIS::FBlock* iBlock, const ::ULIS::FRectI* iRects, const uint32 iNumRects, void* iInfo);
+    //static void OnEditedBlockInvalidated(const ::ULIS::FBlock* iBlock, const ::ULIS::FRectI* iRects, const uint32 iNumRects, void* iInfo);
 
 protected:
     // protected Data Members
-    ::ULIS::FBlock* mEditedBlock;
     FOdysseyTextureEditor* mEditor;
 };

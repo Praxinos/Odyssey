@@ -88,7 +88,7 @@ void
 IOdysseyChannelSlider::PaintInternalBuffer( int iReason ) const
 {   
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_BGRA8);
-    ::ULIS::FBlock* paintBuffer = surface->Block();
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> paintBuffer = surface->Block();
     ctx.Fill( *paintBuffer, ::ULIS::FColor( ::ULIS::Format_RGB8, { 50, 50, 50 } ) );
     ctx.Finish();
 

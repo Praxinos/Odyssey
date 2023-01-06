@@ -3,19 +3,20 @@
 
 #include "ULISUtils.h"
 
+#include "ULISEventBuilder.h"
 #include "ULISLoaderModule.h"
 
 namespace ULISUtils
 {
 
 TArray<::ULIS::FEvent>
-ConvertAndExecute(::ULIS::FBlock* ioDest, ::ULIS::eFormat iFormat, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList, tConvertAndExecuteFunction iFunction)
+ConvertAndExecute(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ioDest, ::ULIS::eFormat iFormat, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList, tConvertAndExecuteFunction iFunction)
 {
     if (iFormat == ioDest->Format())
         return iFunction(ioDest, iRect, iPos, iWaitList);
 
     //Convert source block to layer format
-    ::ULIS::FBlock* destBlock = new ::ULIS::FBlock( iRect.w, iRect.h, iFormat );
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> destBlock = MakeShared<::ULIS::FBlock>( iRect.w, iRect.h, iFormat );
     ::ULIS::FRectI destRect = ::ULIS::FRectI::FromXYWH(iPos.x, iPos.y, iRect.w, iRect.h);
     ::ULIS::FEvent eventConvert;
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iFormat);
@@ -33,14 +34,7 @@ ConvertAndExecute(::ULIS::FBlock* ioDest, ::ULIS::eFormat iFormat, const ::ULIS:
     TArray<::ULIS::FEvent> eventFunction = iFunction(destBlock, iRect, ::ULIS::FVec2I( 0 ), {eventConvert});
 
     //Manage sourceBlock destruction on last conversion event completed
-    ::ULIS::FEvent eventConvertToDestinationFormat(
-        ::ULIS::FOnEventComplete(
-            [ destBlock ]( const ::ULIS::FRectI& )
-            {
-                delete  destBlock;
-            }
-        )
-    );
+    ::ULIS::FEvent eventConvertToDestinationFormat = FULISEventBuilder().RetainBlock(destBlock).Build();
 
     //Convert back to source format, and copy at the right blace in ioBlock
     ctx.ConvertFormat(

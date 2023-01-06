@@ -15,8 +15,7 @@ public:
     virtual ~IOdysseySurfaceEditable() {};
 public:
     // Public API
-    virtual ::ULIS::FBlock*          Block() = 0;
-    virtual const ::ULIS::FBlock*    Block() const = 0;
+    virtual TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>    Block() const = 0;
     virtual void Invalidate() = 0;
     //virtual void Invalidate(int iX1,int iY1,int iX2,int iY2) = 0;
     //virtual void Invalidate(const ::ULIS::FRectI& iRect) = 0;

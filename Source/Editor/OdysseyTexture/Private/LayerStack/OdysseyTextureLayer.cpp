@@ -16,19 +16,19 @@ UOdysseyTextureLayer::OnRenderImageChanged()
 }
 
 TArray<::ULIS::FEvent>
-UOdysseyTextureLayer::RenderImage(::ULIS::FBlock* ioBlock, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList)
+UOdysseyTextureLayer::RenderImage(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ioBlock, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList)
 {
     return iWaitList;
 }
 
 TArray<::ULIS::FEvent>
-UOdysseyTextureLayer::CopyImage(::ULIS::FBlock* ioBlock, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList)
+UOdysseyTextureLayer::CopyImage(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ioBlock, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList)
 {
     return iWaitList;
 }
 
 void
-UOdysseyTextureLayer::RenderImageChanged(const TArray<::ULIS::FRectI>& iRects)
+UOdysseyTextureLayer::RenderImageChanged(const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive)
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetLayerStack());
     if (!layerStack)
@@ -40,15 +40,17 @@ UOdysseyTextureLayer::RenderImageChanged(const TArray<::ULIS::FRectI>& iRects)
     //If parent is not a textureLayer, it is probably the RootLayer, so inform the layerStack directly
     UOdysseyTextureLayer* parent = Cast<UOdysseyTextureLayer>(Parent);
     if (parent)
-        parent->ChildRenderImageChanged(this, iRects);
-        
-    OnRenderImageChanged().Broadcast(this, iRects);
+        parent->ChildRenderImageChanged(this, iRects, iIsInteractive);
+    
+    OnRenderImageChanged().Broadcast(this, iRects, true); //always send at least 1 interactive event
+    if (!iIsInteractive )
+        OnRenderImageChanged().Broadcast(this, iRects, false);
 }
 
 void
-UOdysseyTextureLayer::ChildRenderImageChanged(UOdysseyTextureLayer* iLayer, const TArray<::ULIS::FRectI>& iRects)
+UOdysseyTextureLayer::ChildRenderImageChanged(UOdysseyTextureLayer* iLayer, const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive)
 {
-    RenderImageChanged(iRects);
+    RenderImageChanged(iRects, iIsInteractive);
 }
 
 void
@@ -64,7 +66,7 @@ UOdysseyTextureLayer::IsActivatedChanged()
     if (!texture)
         return;
 
-    RenderImageChanged({ ::ULIS::FRectI::FromXYWH(0, 0, texture->Source.GetSizeX(), texture->Source.GetSizeY() ) });
+    RenderImageChanged({ ::ULIS::FRectI::FromXYWH(0, 0, texture->Source.GetSizeX(), texture->Source.GetSizeY() ) }, false);
 }
 
 void
@@ -80,7 +82,7 @@ UOdysseyTextureLayer::ChildrenChanged()
     if (!texture)
         return;
 
-    RenderImageChanged({ ::ULIS::FRectI::FromXYWH(0, 0, texture->Source.GetSizeX(), texture->Source.GetSizeY() ) });
+    RenderImageChanged({ ::ULIS::FRectI::FromXYWH(0, 0, texture->Source.GetSizeX(), texture->Source.GetSizeY() ) }, false);
 }
 
 #undef LOCTEXT_NAMESPACE

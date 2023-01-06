@@ -31,7 +31,7 @@ void
 UOdysseyTextureEditorPaintBucketTool::Load()
 {
 	//Define the new active tool based on the layer type
-	UOdysseyTextureLayerImageRaster* layer = GetLayer();
+	/* UOdysseyTextureLayerImageRaster* layer = GetLayer();
 	if (!layer)
 		return;
 
@@ -49,7 +49,7 @@ UOdysseyTextureEditorPaintBucketTool::Load()
 	//Should be managed by the tool
 	UOdysseyTextureLayer::OnRenderImageChanged().AddUObject(this, &UOdysseyTextureEditorPaintBucketTool::OnLayerRenderImageChanged);
 	mPaintEngine.OnCommitDelegate().AddUObject(this, &UOdysseyTextureEditorPaintBucketTool::OnPaintEngineCommit);
-	mPaintEngine.OnPreUpdateDelegate().BindUObject(this, &UOdysseyTextureEditorPaintBucketTool::OnPaintEnginePreUpdate);
+	mPaintEngine.OnPreUpdateDelegate().BindUObject(this, &UOdysseyTextureEditorPaintBucketTool::OnPaintEnginePreUpdate); */
 }
 
 void
@@ -64,11 +64,11 @@ void
 UOdysseyTextureEditorPaintBucketTool::Unload()
 {
 	UOdysseyTextureLayer::OnRenderImageChanged().RemoveAll(this);
-	mPaintEngine.OnCommitDelegate().RemoveAll(this);
+	//mPaintEngine.OnCommitDelegate().RemoveAll(this);
 	mPaintEngine.OnPreUpdateDelegate().Unbind();
 
     //Cleanup
-	mPaintEngine.Block(nullptr);
+	mPaintEngine.RasterBlock(nullptr);
 	delete mEditedBlock;
 	mEditedBlock = nullptr;
 }
@@ -151,12 +151,12 @@ UOdysseyTextureEditorPaintBucketTool::OnEditedBlockInvalidated(const ::ULIS::FBl
 	if (!layer)
 		return;
 	
-	layer->SetRenderBlockOverride(self->mEditedBlock);
+	//layer->SetRenderBlockOverride(self->mEditedBlock);
 
-	for ( int i = 0; i < rects.Num(); i++ )
-		layerstack->RenderImage(layerstack->GetSurface()->Block(), rects[i], rects[i].Position(), TArray<::ULIS::FEvent>());
+	/* for ( int i = 0; i < rects.Num(); i++ )
+		layerstack->RenderImage(layerstack->GetSurface()->Block(), rects[i], rects[i].Position(), TArray<::ULIS::FEvent>()); */
 
-	layer->SetRenderBlockOverride(nullptr);
+	//layer->SetRenderBlockOverride(nullptr);
 
 	::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(layerstack->GetSurface()->Block()->Format());
 	ctx.Finish();
@@ -167,7 +167,7 @@ UOdysseyTextureEditorPaintBucketTool::OnEditedBlockInvalidated(const ::ULIS::FBl
 void
 UOdysseyTextureEditorPaintBucketTool::OnLayerRenderImageChanged(UOdysseyTextureLayer* iLayer, const TArray<::ULIS::FRectI>& iRects)
 {
-	UOdysseyTextureLayerImageRaster* layer = GetLayer();
+	/* UOdysseyTextureLayerImageRaster* layer = GetLayer();
 	if (!iLayer || !layer || iLayer != layer)
 		return;
 
@@ -186,13 +186,13 @@ UOdysseyTextureEditorPaintBucketTool::OnLayerRenderImageChanged(UOdysseyTextureL
 		ctx.Finish();
 	}
 
-	mPaintEngine.Reset();
+	mPaintEngine.Reset(); */
 }
 
 void
 UOdysseyTextureEditorPaintBucketTool::OnPaintEngineCommit(const TArray<::ULIS::FRectI>& iChangedTiles)
 {
-	if ( iChangedTiles.Num() <= 0 )
+	/* if ( iChangedTiles.Num() <= 0 )
 		return;
 
 	UOdysseyTextureLayerImageRaster* layer = GetLayer();
@@ -203,7 +203,7 @@ UOdysseyTextureEditorPaintBucketTool::OnPaintEngineCommit(const TArray<::ULIS::F
 
 	layer->UpdateBlock(*mEditedBlock, iChangedTiles, ::ULIS::FVec2F(0), TArray<::ULIS::FEvent>());
 
-	GEditor->EndTransaction();
+	GEditor->EndTransaction(); */
 }
 
 FOdysseyBlendParameters

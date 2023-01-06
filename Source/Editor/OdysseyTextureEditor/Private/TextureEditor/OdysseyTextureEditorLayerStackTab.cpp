@@ -14,6 +14,7 @@
 #include "UObject/SavePackage.h"
 #include "Factories/Texture2dFactoryNew.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
+#include "OdysseyRasterBlock.h"
 #include "OdysseySurfaceTexture2DEditable.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyTextureEditorLayerStackTab"
@@ -213,6 +214,8 @@ FOdysseyTextureEditorLayerStackTab::ImportTexturesAsLayers()
     if ( !layerStack )
         return;
 
+    FScopedTransaction ScopedTransaction(LOCTEXT("LayerStack", "Import Textures As Layers"));
+
     FOpenAssetDialogConfig openAssetDialogConfig;
     openAssetDialogConfig.DialogTitleOverride = LOCTEXT( "ImportTextureDialogTitle", "Import Textures As Layers" );
     openAssetDialogConfig.DefaultPath = FPaths::GetPath(mEditor->Texture()->GetPathName() );
@@ -225,6 +228,9 @@ FOdysseyTextureEditorLayerStackTab::ImportTexturesAsLayers()
     UTexture* currentTexture = mEditor->Texture();
     ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(currentTexture->Source.GetFormat());
 
+    if ( assetsData.Num() > 0 )
+        layerStack->Modify();
+
     for( int i = 0; i < assetsData.Num(); i++ )
     {
         UOdysseyLayer* layer = layerStack->AddLayer(UOdysseyTextureLayerImageRaster::StaticClass());
@@ -234,13 +240,7 @@ FOdysseyTextureEditorLayerStackTab::ImportTexturesAsLayers()
 
         UTexture2D* openedTexture = static_cast<UTexture2D*>(assetsData[i].GetAsset());
         ::ULIS::FBlock* textureBlock = NewBlockFromUTextureData(openedTexture, format);
-
-        ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(textureBlock->Format());
-
-        layerImageRaster->UpdateBlock(*textureBlock, { textureBlock->Rect() }, ::ULIS::FVec2F(0), TArray<::ULIS::FEvent>());
-        ctx.Finish();
-
-        delete textureBlock;
+        layerImageRaster->GetRasterBlock()->SetBlock(MakeShareable(textureBlock));
     }
 }
 
@@ -268,7 +268,7 @@ FOdysseyTextureEditorLayerStackTab::ExportLayersAsTextures()
 
     TArray<UOdysseyLayer*> layers = layerStack->GetLayers();
     ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat()); 
-    ::ULIS::FBlock block(texture->Source.GetSizeX(), texture->Source.GetSizeY(), format);
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = MakeShared<::ULIS::FBlock>(texture->Source.GetSizeX(), texture->Source.GetSizeY(), format);
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
 
     for( UOdysseyLayer* layer : layers )
@@ -280,7 +280,7 @@ FOdysseyTextureEditorLayerStackTab::ExportLayersAsTextures()
         if ( !textureLayer )
             continue;
 
-        textureLayer->CopyImage(&block, ::ULIS::FRectI::Auto, ::ULIS::FVec2I(0, 0), TArray<::ULIS::FEvent>());
+        textureLayer->CopyImage(block, ::ULIS::FRectI::Auto, ::ULIS::FVec2I(0, 0), TArray<::ULIS::FEvent>());
         ctx.Finish();
 
         // Create texture asset
@@ -295,7 +295,7 @@ FOdysseyTextureEditorLayerStackTab::ExportLayersAsTextures()
         outTexture->LODGroup = TextureGroup::TEXTUREGROUP_Pixels2D;
 
         //can be false on a FX Layer for example
-        InitTextureWithBlockData(&block, outTexture, texture->Source.GetFormat());
+        InitTextureWithBlockData(block.Get(), outTexture, texture->Source.GetFormat());
 
         outTexture->PostEditChange();
         outTexture->UpdateResource();
@@ -335,7 +335,7 @@ FOdysseyTextureEditorLayerStackTab::ExportCurrentLayerAsTexture()
     UTexture* texture = mEditor->Texture();
     TArray<UOdysseyLayer*> layers = layerStack->GetLayers();
     ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
-    ::ULIS::FBlock block(texture->Source.GetSizeX(), texture->Source.GetSizeY(), format);
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = MakeShared<::ULIS::FBlock>(texture->Source.GetSizeX(), texture->Source.GetSizeY(), format);
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
 
     UTexture2D* outTexture = Cast<UTexture2D>(object);
@@ -343,10 +343,10 @@ FOdysseyTextureEditorLayerStackTab::ExportCurrentLayerAsTexture()
     outTexture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
     outTexture->LODGroup = TextureGroup::TEXTUREGROUP_Pixels2D;
 
-    textureLayer->CopyImage(&block, ::ULIS::FRectI::Auto, ::ULIS::FVec2I(0, 0), TArray<::ULIS::FEvent>());
+    textureLayer->CopyImage(block, ::ULIS::FRectI::Auto, ::ULIS::FVec2I(0, 0), TArray<::ULIS::FEvent>());
     ctx.Finish();
 
-    InitTextureWithBlockData(&block, outTexture, texture->Source.GetFormat());
+    InitTextureWithBlockData(block.Get(), outTexture, texture->Source.GetFormat());
 
     outTexture->PostEditChange();
     outTexture->UpdateResource();

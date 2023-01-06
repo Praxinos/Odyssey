@@ -14,7 +14,6 @@ UOdysseyTextureEditorRasterDrawingTool::~UOdysseyTextureEditorRasterDrawingTool(
 }
 
 UOdysseyTextureEditorRasterDrawingTool::UOdysseyTextureEditorRasterDrawingTool()
-	: mEditedBlock(nullptr)
 {
 }
 
@@ -37,23 +36,15 @@ UOdysseyTextureEditorRasterDrawingTool::Load()
 	if (!layer)
 		return;
 
-	const ::ULIS::FBlock* block = layer->GetBlock();
-	::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(block->Format());
-	mEditedBlock = new ::ULIS::FBlock(block->Width(), block->Height(), block->Format(), nullptr, ::ULIS::FOnInvalidBlock(&UOdysseyTextureEditorRasterDrawingTool::OnEditedBlockInvalidated, static_cast<void*>(this)));
-	ctx.Copy(
-		*block,
-		*mEditedBlock
-	);
-	ctx.Finish();
-
-	mPaintEngine.Block(mEditedBlock);
+	UOdysseyRasterBlock* rasterBlock = layer->GetRasterBlock();
+	mPaintEngine.RasterBlock(rasterBlock);
 
 	if ( BrushInstance )
-		BrushInstance->SetBlock(mPaintEngine.PaintBlock());
+		BrushInstance->SetBlock(mPaintEngine.PaintBlock().Get());
 
 	//Should be managed by the tool
-	UOdysseyTextureLayer::OnRenderImageChanged().AddUObject(this, &UOdysseyTextureEditorRasterDrawingTool::OnLayerRenderImageChanged);
-	mPaintEngine.OnCommitDelegate().AddUObject(this, &UOdysseyTextureEditorRasterDrawingTool::OnPaintEngineCommit);
+	//UOdysseyTextureLayer::OnRenderImageChanged().AddUObject(this, &UOdysseyTextureEditorRasterDrawingTool::OnLayerRenderImageChanged);
+	//mPaintEngine.OnCommitDelegate().AddUObject(this, &UOdysseyTextureEditorRasterDrawingTool::OnPaintEngineCommit);
 	mPaintEngine.OnPreUpdateDelegate().BindUObject(this, &UOdysseyTextureEditorRasterDrawingTool::OnPaintEnginePreUpdate);
 }
 
@@ -70,18 +61,15 @@ UOdysseyTextureEditorRasterDrawingTool::Inactivate()
 void
 UOdysseyTextureEditorRasterDrawingTool::Unload()
 {
-	UOdysseyTextureLayer::OnRenderImageChanged().RemoveAll(this);
-	mPaintEngine.OnCommitDelegate().RemoveAll(this);
+	//UOdysseyTextureLayer::OnRenderImageChanged().RemoveAll(this);
+	//mPaintEngine.OnCommitDelegate().RemoveAll(this);
 	mPaintEngine.OnPreUpdateDelegate().Unbind();
 
     //Cleanup
-	mPaintEngine.Block(nullptr);
+	mPaintEngine.RasterBlock(nullptr);
 
 	if ( BrushInstance )
 		BrushInstance->SetBlock(nullptr);
-
-	delete mEditedBlock;
-	mEditedBlock = nullptr;
 }
 
 bool
@@ -142,7 +130,7 @@ UOdysseyTextureEditorRasterDrawingTool::GetLayer() const
 	return Cast<UOdysseyTextureLayerImageRaster>(layerstack->CurrentLayer.Get());
 }
 
-void
+/* void
 UOdysseyTextureEditorRasterDrawingTool::OnEditedBlockInvalidated(const ::ULIS::FBlock* iBlock, const ::ULIS::FRectI* iRects, const uint32 iNumRects, void* iInfo)
 {
 	//Indicate UObject system that we will change LayersHierarchy property
@@ -171,8 +159,9 @@ UOdysseyTextureEditorRasterDrawingTool::OnEditedBlockInvalidated(const ::ULIS::F
 	ctx.Finish();
 
 	layerstack->GetSurface()->Invalidate(rects);
-}
+} */
 
+/*
 void
 UOdysseyTextureEditorRasterDrawingTool::OnLayerRenderImageChanged(UOdysseyTextureLayer* iLayer, const TArray<::ULIS::FRectI>& iRects)
 {
@@ -196,8 +185,9 @@ UOdysseyTextureEditorRasterDrawingTool::OnLayerRenderImageChanged(UOdysseyTextur
 	}
 
 	mPaintEngine.Reset();
-}
+} */
 
+/*
 void
 UOdysseyTextureEditorRasterDrawingTool::OnPaintEngineCommit(const TArray<::ULIS::FRectI>& iChangedTiles)
 {
@@ -214,6 +204,7 @@ UOdysseyTextureEditorRasterDrawingTool::OnPaintEngineCommit(const TArray<::ULIS:
 
 	GEditor->EndTransaction();
 }
+*/
 
 FOdysseyBlendParameters
 UOdysseyTextureEditorRasterDrawingTool::OnPaintEnginePreUpdate(const FOdysseyBlendParameters& iBlendParameters)

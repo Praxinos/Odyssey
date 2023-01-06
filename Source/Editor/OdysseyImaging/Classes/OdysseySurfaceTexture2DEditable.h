@@ -36,7 +36,7 @@ public:
     FOdysseySurfaceTexture2DEditable( int iWidth, int iHeight, ::ULIS::eFormat iFormat = ::ULIS::Format_BGRA8 );
 
     // Responsible for nothing
-    FOdysseySurfaceTexture2DEditable(UTexture2D* iTexture, ::ULIS::FBlock* iBlock);
+    FOdysseySurfaceTexture2DEditable(UTexture2D* iTexture, TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock);
 
     // Responsible for its underlying ::ULIS::FBlock & TArray allocation
     // With borrowed UTexture, not responsible for its Allocation / Deallocation
@@ -44,17 +44,16 @@ public:
 
     // Responsible for its underlying UTexture2D
     // With borrowed ::ULIS::FBlock, not responsible for its Allocation / Deallocation
-    FOdysseySurfaceTexture2DEditable(::ULIS::FBlock* iBlock);
+    FOdysseySurfaceTexture2DEditable(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock);
 
 private:
     // Forbid Copy Constructor and Copy Assignement Operator
-    FOdysseySurfaceTexture2DEditable( const ::ULIS::FBlock& ) = delete;
-    FOdysseySurfaceTexture2DEditable& operator=( const ::ULIS::FBlock& ) = delete;
+    FOdysseySurfaceTexture2DEditable( const FOdysseySurfaceTexture2DEditable& ) = delete;
+    FOdysseySurfaceTexture2DEditable& operator=( const FOdysseySurfaceTexture2DEditable& ) = delete;
 
 public:
     // Public API
-    ::ULIS::FBlock* Block() override;
-    const ::ULIS::FBlock* Block() const override;
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> Block() const override;
     virtual UTexture2D* Texture();
     virtual const UTexture2D* Texture() const;
 
@@ -69,7 +68,6 @@ public:
 private:
     // Private Data
     const bool mIsBorrowedTexture;
-    const bool mIsBorrowedBlock;
-    ::ULIS::FBlock* mBlock;
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mBlock;
     UTexture2D* mTexture;
 };

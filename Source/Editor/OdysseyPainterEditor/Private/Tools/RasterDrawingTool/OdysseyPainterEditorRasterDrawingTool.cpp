@@ -157,11 +157,11 @@ UOdysseyPainterEditorRasterDrawingTool::Tick(float iDeltaTime)
     //Ticke the shape
     SelectedShapeInstance->Tick(iDeltaTime);
 
-    //Update the paintEngine
     mWorker.ExecuteFor(1000/60); //60fps
 
     BrushInstance->StrokeFlush();
 
+    //Update the paintEngine
     mPaintEngine.Update(BlendParameters);
 }
 
@@ -303,7 +303,7 @@ UOdysseyPainterEditorRasterDrawingTool::OnShapePathReset()
     BrushInstance->StrokeReset();
     
     //Reset the PaintEngine as if didn't draw on it
-    mPaintEngine.Reset();
+    mPaintEngine.Abort();
 }
 
 float
@@ -408,7 +408,7 @@ UOdysseyPainterEditorRasterDrawingTool::CreateBrushInstance(bool iApplyOverrides
     {
         brushInstance->AddContext(mBrushContexts[i]); //Set the brush context so that context nodes can be used
     }
-    brushInstance->SetBlock(mPaintEngine.PaintBlock());
+    brushInstance->SetBlock(mPaintEngine.PaintBlock().Get());
 
 	//Apply Overrides before setting the brushInstance in the strokeEngine properties
     if (iApplyOverrides)

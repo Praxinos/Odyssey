@@ -8,7 +8,7 @@
 
 namespace ULISUtils
 {
-    typedef TFunction<TArray<::ULIS::FEvent>(::ULIS::FBlock*, const ::ULIS::FRectI&, const ::ULIS::FVec2I&, const TArray<::ULIS::FEvent>&)> tConvertAndExecuteFunction;
+    typedef TFunction<TArray<::ULIS::FEvent>(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>, const ::ULIS::FRectI&, const ::ULIS::FVec2I&, const TArray<::ULIS::FEvent>&)> tConvertAndExecuteFunction;
 
     /**
      * @brief Converts the destination block to the given format if needed, keeing only the given rect and execute the goven function on it
@@ -22,5 +22,5 @@ namespace ULISUtils
      * @param iFunction 
      * @return ::ULIS::FEvent 
      */
-    ULISLOADER_API TArray<::ULIS::FEvent> ConvertAndExecute(::ULIS::FBlock* ioDest, ::ULIS::eFormat iFormat, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList, tConvertAndExecuteFunction iFunction);
+    ULISLOADER_API TArray<::ULIS::FEvent> ConvertAndExecute(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ioDest, ::ULIS::eFormat iFormat, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList, tConvertAndExecuteFunction iFunction);
 }

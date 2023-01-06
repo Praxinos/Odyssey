@@ -510,20 +510,10 @@ FOdysseySurfaceTexture2DEditable::~FOdysseySurfaceTexture2DEditable()
             mTexture->ConditionalBeginDestroy();
         mTexture = nullptr;
     }
-
-    if(!mIsBorrowedBlock)
-    {
-        if(mBlock)
-        {
-            delete mBlock;
-            mBlock = nullptr;
-        }
-    }
 }
 
 FOdysseySurfaceTexture2DEditable::FOdysseySurfaceTexture2DEditable(int iWidth,int iHeight, ::ULIS::eFormat iFormat)
     : mIsBorrowedTexture(false)
-    , mIsBorrowedBlock(false)
 {
     mTexture = UTexture2D::CreateTransient(iWidth, iHeight, PixelFormatForULISFormat(iFormat));
     #if WITH_EDITORONLY_DATA
@@ -538,7 +528,7 @@ FOdysseySurfaceTexture2DEditable::FOdysseySurfaceTexture2DEditable(int iWidth,in
     mTexture->AddToRoot();
 
     // Warning: the texture data source / bulk is allocated, then the block is allocated, then we copy the block content into bulk.
-    mBlock = new ::ULIS::FBlock(iWidth,iHeight, iFormat, nullptr, ::ULIS::FOnInvalidBlock( &InvalidateSurfaceCallback, static_cast<void*>(this) ));
+    mBlock = MakeShared<::ULIS::FBlock>(iWidth,iHeight, iFormat, nullptr, ::ULIS::FOnInvalidBlock( &InvalidateSurfaceCallback, static_cast<void*>(this) ));
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iFormat);
     ctx.Clear(*mBlock);
     ctx.Finish();
@@ -547,9 +537,8 @@ FOdysseySurfaceTexture2DEditable::FOdysseySurfaceTexture2DEditable(int iWidth,in
     //CopyBlockDataIntoUTexture(mBlock,mTexture);
 }
 
-FOdysseySurfaceTexture2DEditable::FOdysseySurfaceTexture2DEditable(UTexture2D* iTexture, ::ULIS::FBlock* iBlock)
+FOdysseySurfaceTexture2DEditable::FOdysseySurfaceTexture2DEditable(UTexture2D* iTexture, TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock)
     : mIsBorrowedTexture(true)
-    , mIsBorrowedBlock(true)
 {
     checkf(iTexture,TEXT("iTexture == NULL"));
     checkf(iBlock,TEXT("iBlock == NULL"));
@@ -566,7 +555,6 @@ FOdysseySurfaceTexture2DEditable::FOdysseySurfaceTexture2DEditable(UTexture2D* i
 
 FOdysseySurfaceTexture2DEditable::FOdysseySurfaceTexture2DEditable(UTexture2D* iTexture)
     : mIsBorrowedTexture(true)
-    ,mIsBorrowedBlock(false)
 {
     checkf(iTexture,TEXT("Cannot Initialize with Null borrowed texture"));
     mTexture = iTexture;
@@ -574,7 +562,7 @@ FOdysseySurfaceTexture2DEditable::FOdysseySurfaceTexture2DEditable(UTexture2D* i
 
     // Warning: the block is allocated, then the texture data is copied into it.
     ::ULIS::eFormat sourceFormat = ULISFormatForTextureSourceFormat(iTexture->Source.GetFormat());
-    mBlock = new ::ULIS::FBlock(
+    mBlock = MakeShared<::ULIS::FBlock>(
           mTexture->Source.GetSizeX()
         , mTexture->Source.GetSizeY()
         , sourceFormat
@@ -582,12 +570,11 @@ FOdysseySurfaceTexture2DEditable::FOdysseySurfaceTexture2DEditable(UTexture2D* i
         , ::ULIS::FOnInvalidBlock( &InvalidateSurfaceCallback, static_cast< void* >( this ) )
     );
 
-    CopyUTextureSourceDataIntoBlock( mBlock, mTexture );
+    CopyUTextureSourceDataIntoBlock( mBlock.Get(), mTexture);
 }
 
-FOdysseySurfaceTexture2DEditable::FOdysseySurfaceTexture2DEditable(::ULIS::FBlock* iBlock)
+FOdysseySurfaceTexture2DEditable::FOdysseySurfaceTexture2DEditable(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock)
     : mIsBorrowedTexture(false)
-    ,mIsBorrowedBlock(true)
 {
     checkf(iBlock,TEXT("Cannot Initialize with Null borrowed block"));
     mBlock = iBlock;
@@ -613,13 +600,7 @@ FOdysseySurfaceTexture2DEditable::FOdysseySurfaceTexture2DEditable(::ULIS::FBloc
 //--------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------- Public API
 
-::ULIS::FBlock*
-FOdysseySurfaceTexture2DEditable::Block()
-{
-    return mBlock;
-}
-
-const ::ULIS::FBlock*
+TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>
 FOdysseySurfaceTexture2DEditable::Block() const
 {
     return mBlock;

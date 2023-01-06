@@ -13,6 +13,8 @@
 
 #include "OdysseyTextureLayerImageRaster.generated.h"
 
+class UOdysseyRasterBlock;
+
 UCLASS(BlueprintType)
 class ODYSSEYTEXTURE_API UOdysseyTextureLayerImageRaster
     : public UOdysseyTextureLayer
@@ -53,15 +55,16 @@ public:
 
 public:
     // Public API
-    const ::ULIS::FBlock* GetBlock() const;
-    void  UpdateBlock(const ::ULIS::FBlock& iSourceBlock, const TArray<::ULIS::FRectI>& iRects, const ::ULIS::FVec2I& iSourceOffset, const TArray<::ULIS::FEvent>& iWaitList, bool iTransaction = true);
+    UOdysseyRasterBlock* GetRasterBlock() const;
+    //const ::ULIS::FBlock* GetBlock() const;
+    //void  UpdateBlock(const ::ULIS::FBlock& iSourceBlock, const TArray<::ULIS::FRectI>& iRects, const ::ULIS::FVec2I& iSourceOffset, const TArray<::ULIS::FEvent>& iWaitList, bool iTransaction = true);
 
     /**
      * @brief Sets a block to be used as a replacement the internal block when rendering an image
      * Useful to display the editedBlock while drawing instead of the internal block which will only change when UpdateBlock is called (when the stroke ends)
      * 
      */
-    void SetRenderBlockOverride(::ULIS::FBlock* iBlock);
+    //void SetRenderBlockOverride(::ULIS::FBlock* iBlock);
 
 public:
     //IOdysseyTextureLayerImageRenderer implementation
@@ -71,13 +74,13 @@ public:
      * Takes into account the size / format of the given block
      * 
      */
-    virtual TArray<::ULIS::FEvent> RenderImage(::ULIS::FBlock* ioBlock, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList) override;
+    virtual TArray<::ULIS::FEvent> RenderImage(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>  ioBlock, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList) override;
 
     /**
      * @brief Copies an image in the given Block
      * Takes into account the size / format of the given block
      */
-    virtual TArray<::ULIS::FEvent> CopyImage(::ULIS::FBlock* ioBlock, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList) override;
+    virtual TArray<::ULIS::FEvent> CopyImage(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>  ioBlock, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList) override;
 
 public:
     // UOdysseyLayer Overrides
@@ -90,6 +93,9 @@ public:
     virtual void Merge(const TArray<UOdysseyLayer*>& Layers) override;
 
 protected:
+    void OnPixelsChanged(const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive);
+    void OnBlockChanged();
+
     void IsAlphaLockedChanged();
     void OpacityChanged();
     void BlendModeChanged();
@@ -99,7 +105,7 @@ public:
     // UObject overrides
 #if WITH_EDITOR
 	/** Internal struct to track currently active transactions */
-    friend class FBlockTransactionAnnotation;
+    /* friend class FBlockTransactionAnnotation;
 	class FBlockTransactionAnnotation : public ITransactionObjectAnnotation
 	{
 	public:
@@ -125,7 +131,7 @@ public:
 	};
 
 	virtual TSharedPtr<ITransactionObjectAnnotation> FactoryTransactionAnnotation(const ETransactionAnnotationCreationMode InCreationMode) const override;
-	virtual void PostEditUndo(TSharedPtr<ITransactionObjectAnnotation> TransactionAnnotation) override;
+	virtual void PostEditUndo(TSharedPtr<ITransactionObjectAnnotation> TransactionAnnotation) override; */
 #endif
 
     virtual void PostDuplicate(bool bDuplicateForPIE) override;
@@ -135,23 +141,26 @@ public:
      * 
      * @param Ar 
      */
-    virtual void Serialize(FArchive& Ar);
+    //virtual void Serialize(FArchive& Ar);
 
 private:
     // PRIVATE API
 
     /**Called when mBlock is dirtied */
-    static void OnBlockInvalidated(const ::ULIS::FBlock* iBlock, const ::ULIS::FRectI* iRects, const uint32 iNumRects, void* iInfo);
-    void OnTransactionStateChanged(const FTransactionContext& TransactionContext, ETransactionStateEventType TransactionState);
+    // static void OnBlockInvalidated(const ::ULIS::FBlock* iBlock, const ::ULIS::FRectI* iRects, const uint32 iNumRects, void* iInfo);
+    // void OnTransactionStateChanged(const FTransactionContext& TransactionContext, ETransactionStateEventType TransactionState);
 
 private:
-    //UPROPERTY()
-    ::ULIS::FBlock* mBlock = nullptr;
+    UPROPERTY()
+    TObjectPtr<UOdysseyRasterBlock> RasterBlock;
+
+    /* ::ULIS::FBlock* mBlock = nullptr;
     ::ULIS::FBlock* mRenderBlockOverride = nullptr;
     TArray<::ULIS::FRectI> mPrevDirtyRects;
-    TArray<::ULIS::FRectI> mNextDirtyRects;
+    TArray<::ULIS::FRectI> mNextDirtyRects; */
 
 public:
+
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Texture | LayerStack")
     bool IsAlphaLocked = false;
 

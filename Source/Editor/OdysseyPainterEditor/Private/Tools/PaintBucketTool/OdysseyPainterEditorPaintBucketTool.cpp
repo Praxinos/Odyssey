@@ -39,7 +39,7 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseDown(const FOdysseyPoint& iPointInT
         return false;
 
 	//Do the fill
-	::ULIS::FBlock* paintBlock = mPaintEngine.PaintBlock();
+	/* ::ULIS::FBlock* paintBlock = mPaintEngine.PaintBlock();
 	::ULIS::FColor color = GetEditorAs<FOdysseyPainterEditor>()->PaintColor().GetValue();
 	::ULIS::FRectI rect = paintBlock->Rect();
 	::ULIS::eFormat format = paintBlock->Format();
@@ -49,7 +49,7 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseDown(const FOdysseyPoint& iPointInT
 	ctx.Finish();
 	paintBlock->Dirty();
 
-    Commit();
+    Commit(); */
 
     return true;
 }
