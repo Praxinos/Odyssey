@@ -9,6 +9,8 @@
 #include "Tools/RasterDrawingTool/Widgets/SOdysseyPainterEditorRasterDrawingToolOptions.h"
 #include "ObjectEditorUtils.h"
 
+#define LOCTEXT_NAMESPACE "OdysseyPainterEditorRasterDrawingTool"
+
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
 UOdysseyPainterEditorRasterDrawingTool::~UOdysseyPainterEditorRasterDrawingTool()
@@ -218,6 +220,8 @@ UOdysseyPainterEditorRasterDrawingTool::OnShapePathBegin( const FOdysseyPoint& i
         return;
     }
 
+    GEditor->BeginTransaction(TEXT("PaintEngine"), LOCTEXT("OnPaintStroke", "Paint Stroke"), nullptr);
+
     TArray<FOdysseyPoint> points = { iPoint };
     if (mAdaptShapePointsDelegate.IsBound())
         points = mAdaptShapePointsDelegate.Execute({iPoint});
@@ -272,6 +276,8 @@ UOdysseyPainterEditorRasterDrawingTool::OnShapePathEnd( const FOdysseyPoint& iPo
 
     Flush();
     Commit();
+
+    GEditor->EndTransaction();
 }
 
 void
@@ -572,3 +578,5 @@ UOdysseyPainterEditorRasterDrawingTool::OnPostShapeChanged()
     FOdysseyObjectEditorUtils::SetPropertyValue(this, "SelectedShapeInstance", AvailableShapes[SelectedShape]);
 }
 */
+
+#undef LOCTEXT_NAMESPACE

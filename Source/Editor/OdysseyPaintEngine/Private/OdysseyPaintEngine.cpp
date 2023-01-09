@@ -273,6 +273,8 @@ FOdysseyPaintEngine::UpdateEditedBlock(const FOdysseyBlendParameters& iBlendPara
     if (mInvalidRects.Num() <= 0)
         return false;
 
+    mRasterBlock->Modify();
+
     ::ULIS::FBlock& original = *mOriginalBlock;
     ::ULIS::FBlock& edited = *mEditedBlock;
     ::ULIS::FBlock& paint = *mPaintBlock;
