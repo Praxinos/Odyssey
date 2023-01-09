@@ -31,6 +31,7 @@ struct FOdysseyRasterBlockTile
 
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mBlock; //Loaded on demand from DDC or BulkData
     UE::Serialization::FEditorBulkData mBulkData; //Allows serializing the tile on disk when saving
+    bool mCacheFromBulkData = true;
 };
 
 UCLASS()
@@ -125,7 +126,7 @@ private:
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> LoadTileBlockFromBulkData(int iTileIndex);
 
     //Saves the block corresponding to the tile at iTileIndex into the cache and removes the block from memory
-    void SaveTileBlockToCache(int iTileIndex);
+    void SaveTileBlocksToCache();
 
     //Called when tiles have changed
     void TilesChanged(const TSet<int>& iTileIndexes, bool iIsInteractive);

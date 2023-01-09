@@ -121,6 +121,9 @@ UOdysseyTextureLayerStack::OnRootLayerRenderImageChanged(UOdysseyTextureLayer* i
 {
     OnRenderImageChanged().Broadcast(this, iRects, iIsInteractive);
 
+    if (!iIsInteractive)
+        return;
+
     //PATCH BEGIN: because Unreal Undo does not make package dirty correctly
     MarkPackageDirty();
     //PATCH END:

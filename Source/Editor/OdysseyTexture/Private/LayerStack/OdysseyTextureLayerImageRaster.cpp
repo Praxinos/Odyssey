@@ -4,6 +4,7 @@
 #include "OdysseyTextureLayerImageRaster.h"
 
 #include "OdysseyPixelFormat.h"
+#include "ULISEventBuilder.h"
 #include "ULISLoaderModule.h"
 #include "OdysseyStyleSet.h"
 #include "OdysseyRasterBlock.h"
@@ -39,8 +40,6 @@ UOdysseyTextureLayerImageRaster::OnOpacityChanged()
 
 UOdysseyTextureLayerImageRaster::~UOdysseyTextureLayerImageRaster()
 {
-    RasterBlock->OnPixelsChanged().RemoveAll(this);
-    RasterBlock->OnBlockChanged().RemoveAll(this);
 }
 
 UOdysseyTextureLayerImageRaster::UOdysseyTextureLayerImageRaster()
@@ -164,9 +163,9 @@ UOdysseyTextureLayerImageRaster::RenderImage(TSharedPtr<::ULIS::FBlock, ESPMode:
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(ULISRasterBlock->Format());
 
     TArray<::ULIS::FEvent> eventConvertAndExecute = ULISUtils::ConvertAndExecute(ioBlock, ULISRasterBlock->Format(), iRect, iPos, iWaitList,
-        [this, ULISRasterBlock, &ctx](TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ioDest, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList) -> TArray<::ULIS::FEvent>
+        [this, &ULISRasterBlock, &ctx](TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ioDest, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList) -> TArray<::ULIS::FEvent>
         {
-            ::ULIS::FEvent eventBlend;
+            ::ULIS::FEvent eventBlend = FULISEventBuilder().RetainBlock(ULISRasterBlock).Build();
             ctx.Blend(
                 /* mRenderBlockOverride ? *mRenderBlockOverride : */*ULISRasterBlock,
                 *ioDest,

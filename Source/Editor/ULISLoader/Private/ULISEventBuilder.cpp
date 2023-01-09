@@ -15,7 +15,8 @@ FULISEventBuilder::Build()
         ::ULIS::FOnEventComplete(
             [params](const ::ULIS::FRectI& iRect)
             {
-                params->mOnComplete(iRect);
+                if ( params->mOnComplete )
+                    params->mOnComplete(iRect);
                 delete params; //will release all retained blocks
             }
         )

@@ -128,7 +128,9 @@ FOdysseyPaintEngine::Commit(const FOdysseyBlendParameters& iBlendParameters)
     ClearPaintBlock();
 
     //Validate all the interactive modifications that has been done
+    mExpectsOnPixelsChanged = true;
     mRasterBlock->Commit();
+    mExpectsOnPixelsChanged = false;
 
     //Inform the paintEngine has commited
     //mOnCommitDelegate.Broadcast(mUpdatedRects);

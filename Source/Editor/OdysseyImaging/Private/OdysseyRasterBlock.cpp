@@ -10,7 +10,10 @@
 #include "DerivedDataRequestTypes.h"
 #include "Misc/TransactionObjectEvent.h"
 #include "OdysseyRectUtils.h"
+#include "ULISEventBuilder.h"
 #include "ULISLoaderModule.h"
+
+#include <chrono>
 
 #define FOdysseyRasterBlockTile_CACHE_NAME TEXT("OdysseyRasterBlockTile")
 #define FOdysseyRasterBlockTile_CACHE_VERSION TEXT("A6ED84107BAD11EDA1EB0242AC120002")
@@ -58,9 +61,9 @@ UOdysseyRasterBlock::SetBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iB
                 continue;
 
             Tiles.Add({x * baseTileWidth, y * baseTileHeight, tileWidth, tileHeight, "", nullptr });
-            SaveTileBlockToCache(Tiles.Num() - 1);
         }
     }
+    SaveTileBlocksToCache();
 
     OnBlockChanged().Broadcast();
 }
@@ -145,14 +148,14 @@ UOdysseyRasterBlock::RenderTile(int iTileIndex, TSharedPtr<::ULIS::FBlock, ESPMo
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext((::ULIS::eFormat)Format);
     if (!block)
     {
-        ::ULIS::FEvent clearEvent;
-        ctx.Clear(*iBlock.Get(), ::ULIS::FRectI::FromXYWH(tile.X, tile.Y, tile.Width, tile.Height), ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &clearEvent);
+        ::ULIS::FEvent clearEvent = FULISEventBuilder().RetainBlock(block).Build();
+        ctx.Clear(*iBlock, ::ULIS::FRectI::FromXYWH(tile.X, tile.Y, tile.Width, tile.Height), ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &clearEvent);
         renderTileEvents.Add(clearEvent);
         return renderTileEvents;
     }
 
-    ::ULIS::FEvent copyEvent;
-    ctx.Copy(*block.Get(), *iBlock.Get(), ::ULIS::FRectI::Auto, ::ULIS::FVec2I(tile.X, tile.Y), ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &copyEvent);
+    ::ULIS::FEvent copyEvent = FULISEventBuilder().RetainBlock(block).Build();
+    ctx.Copy(*block, *iBlock, ::ULIS::FRectI::Auto, ::ULIS::FVec2I(tile.X, tile.Y), ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &copyEvent);
     renderTileEvents.Add(copyEvent);
     return renderTileEvents;
 }
@@ -207,7 +210,7 @@ UOdysseyRasterBlock::LoadTileBlockFromCache(int iTileIndex)
             }
         },
 		AsyncOwner,
-		[this, tile, &block](UE::DerivedData::FCacheGetValueResponse&& iResponse)
+		[&, this](UE::DerivedData::FCacheGetValueResponse&& iResponse)
         {
             FSharedBuffer rawData = iResponse.Value.GetData().Decompress();
             if (iResponse.Status != UE::DerivedData::EStatus::Ok)
@@ -243,73 +246,84 @@ UOdysseyRasterBlock::LoadTileBlockFromBulkData(int iTileIndex)
 }
 
 void
-UOdysseyRasterBlock::SaveTileBlockToCache(int iTileIndex)
+UOdysseyRasterBlock::SaveTileBlocksToCache()
 {
-    if (iTileIndex < 0 || iTileIndex >= Tiles.Num())
-        return;
-
-    FOdysseyRasterBlockTile& tile = Tiles[iTileIndex];
-    if (tile.Hash == "")
+    //Build the list of keys we need to save, so that we check and save them only once
+    TSet<FString> hashes;
+    for ( int i = 0; i < Tiles.Num(); i++ )
     {
-        tile.mBlock = nullptr; //ensure tile mblock is released
-        return;
-    }
-
-    FString CacheKey = FDerivedDataCacheInterface::BuildCacheKey(
-		FOdysseyRasterBlockTile_CACHE_NAME,
-        FOdysseyRasterBlockTile_CACHE_VERSION, //a GUID identifying the version of the key
-		tile.Hash
-	);
-
-    //look if the tile is already in cache
-    bool isAlreadyInCache = false;
-    UE::DerivedData::FRequestOwner blockingOwner(UE::DerivedData::EPriority::Blocking);
-	UE::DerivedData::GetCache().GetValue(
+        FOdysseyRasterBlockTile& tile = Tiles[i];
+        if ( tile.Hash == "" )
         {
-            {
-                GetPathName(),
-                UE::DerivedData::ConvertLegacyCacheKey(CacheKey),
-                UE::DerivedData::ECachePolicy::Query | UE::DerivedData::ECachePolicy::SkipData //that's the policy to use when asking if a data is in cache or not
-            }
-        },
-        blockingOwner,
-		[&isAlreadyInCache](UE::DerivedData::FCacheGetValueResponse&& iResponse)
-        {
-            isAlreadyInCache = (iResponse.Status == UE::DerivedData::EStatus::Ok);
+            tile.mBlock = nullptr; //ensure tile mblock is released
+            continue;
         }
-    );
-	blockingOwner.Wait();
 
-    if (isAlreadyInCache)
-    {
-        tile.mBlock = nullptr; //ensure tile mblock is released
-        return;
-    }
-
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = GetTileBlock(iTileIndex);
-    if ( !block )
-        return;
-
-    FSharedBuffer sharedBuffer = FSharedBuffer::MakeView(tile.mBlock->Bits(), tile.mBlock->BytesTotal());
-    UE::DerivedData::FValue derivedDataValue = UE::DerivedData::FValue::Compress(sharedBuffer);
-
-    //Store the tile in cache
-    UE::DerivedData::FRequestOwner AsyncOwner(UE::DerivedData::EPriority::Normal);
-    UE::DerivedData::GetCache().PutValue(
+        if ( hashes.Contains(tile.Hash) )
         {
-            {
-                GetPathName(),
-                UE::DerivedData::ConvertLegacyCacheKey(CacheKey),
-                MoveTemp(derivedDataValue),
-                UE::DerivedData::ECachePolicy::Local
-            }
-        },
-        AsyncOwner
-    );
-    AsyncOwner.KeepAlive();
+            tile.mBlock = nullptr; //ensure tile mblock is released
+            continue;
+        }
 
-    //No need to keep the tile block in memory, so remove it from the tile structure
-    tile.mBlock = nullptr;
+        hashes.Add(tile.Hash);
+
+        FString CacheKey = FDerivedDataCacheInterface::BuildCacheKey(
+            FOdysseyRasterBlockTile_CACHE_NAME,
+            FOdysseyRasterBlockTile_CACHE_VERSION, //a GUID identifying the version of the key
+            tile.Hash
+        );
+
+        TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> blockToSave = tile.mBlock;
+        if ( !blockToSave && tile.mCacheFromBulkData )
+            blockToSave = LoadTileBlockFromBulkData(i);
+
+        tile.mCacheFromBulkData = false;
+
+        //look if the tile is already in cache
+        //bool isAlreadyInCache = false;
+        UE::DerivedData::FRequestOwner getOwner(UE::DerivedData::EPriority::Lowest);
+        UE::DerivedData::GetCache().GetValue(
+            {
+                {
+                    GetPathName(),
+                    UE::DerivedData::ConvertLegacyCacheKey(CacheKey),
+                    UE::DerivedData::ECachePolicy::Query | UE::DerivedData::ECachePolicy::SkipData| UE::DerivedData::ECachePolicy::SkipMeta, //that's the policy to use when asking if a data is in cache or not
+                }
+            },
+            getOwner,
+            [&, this, blockToSave](UE::DerivedData::FCacheGetValueResponse&& iResponse)
+            {
+                //Save block only if it is not found in cache
+                bool isAlreadyInCache = (iResponse.Status == UE::DerivedData::EStatus::Ok);
+                if (isAlreadyInCache)
+                    return;
+
+                if ( !blockToSave )
+                    return;
+
+                FSharedBuffer sharedBuffer = FSharedBuffer::MakeView(blockToSave->Bits(), blockToSave->BytesTotal());
+                UE::DerivedData::FValue derivedDataValue = UE::DerivedData::FValue::Compress(sharedBuffer);
+
+                //Store the tile in cache
+                UE::DerivedData::FRequestOwner putOwner(UE::DerivedData::EPriority::Lowest);
+                UE::DerivedData::GetCache().PutValue(
+                    {
+                        {
+                            iResponse.Name,
+                            iResponse.Key,
+                            MoveTemp(derivedDataValue),
+                            UE::DerivedData::ECachePolicy::Local
+                        }
+                    },
+                    putOwner
+                );
+                putOwner.KeepAlive();
+            }
+        );
+        getOwner.KeepAlive();
+
+        tile.mBlock = nullptr;
+    }
 }
 
 void
@@ -329,39 +343,59 @@ UOdysseyRasterBlock::Update(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlo
     //Render rects to tiles
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext((::ULIS::eFormat)Format);
     TArray<::ULIS::FRectI> rects = ::OdysseyRectUtils::ToNonOverlappingRects(iRects);
-    for (const ::ULIS::FRectI& rect : rects)
+
+    //Find affected tiles
+    for ( const ::ULIS::FRectI& rect : rects )
     {
         ::ULIS::FRectI safeRect = blockRect & rect;
         safeRect.Sanitize();
-        if (safeRect.Area() <= 0)
+        if ( safeRect.Area() <= 0 )
             continue;
 
         int startX = safeRect.x / baseTileWidth;
         int startY = safeRect.y / baseTileHeight;
         int endX = (safeRect.x + safeRect.w - 1) / baseTileWidth;
-        int endY = (safeRect.y + safeRect.h - 1)  / baseTileHeight;
+        int endY = (safeRect.y + safeRect.h - 1) / baseTileHeight;
 
-        for (int y = startY; y <= endY; y++)
+        for ( int y = startY; y <= endY; y++ )
         {
-            for (int x = startX; x <= endX; x++)
+            for ( int x = startX; x <= endX; x++ )
             {
                 int tileIndex = y * numTilesX + x;
-                FOdysseyRasterBlockTile& tile = Tiles[tileIndex];
-                ::ULIS::FRectI tileRect = ::ULIS::FRectI::FromXYWH(tile.X, tile.Y, tile.Width, tile.Height);
-
-                ::ULIS::FRectI safeTileRect = tileRect & rect;
-                safeTileRect.Sanitize();
-                if (safeTileRect.Area() <= 0)
-                    continue;
-
                 tileIndexes.Add(tileIndex);
-                if (!tile.mBlock)
-                    tile.mBlock = MakeShared<::ULIS::FBlock>(tile.Width, tile.Height, (::ULIS::eFormat)Format);
-
-                ctx.Copy(*iBlock, *tile.mBlock, safeTileRect, ::ULIS::FVec2I(0), ::ULIS::FSchedulePolicy::AsyncCacheEfficient);
             }
         }
     }
+
+    //Prepare affected tile blocks and copy rects
+    for ( const int& i : tileIndexes )
+    {
+        FOdysseyRasterBlockTile& tile = Tiles[i];
+        tile.mBlock = GetTileBlock(i); //load block in memory
+
+        ::ULIS::FEvent eventClear;
+        if ( !tile.mBlock )
+        {
+            tile.mBlock = MakeShared<::ULIS::FBlock>(tile.Width, tile.Height, (::ULIS::eFormat)Format);
+            ctx.Clear(*tile.mBlock, ::ULIS::FRectI::Auto, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventClear);
+        }
+        else
+        {
+            eventClear = ::ULIS::FEvent::NoOP();
+        }
+
+        ::ULIS::FRectI tileRect = ::ULIS::FRectI::FromXYWH(tile.X, tile.Y, tile.Width, tile.Height);
+        for ( const ::ULIS::FRectI& rect : rects )
+        {
+            ::ULIS::FRectI safeRect = tileRect & rect;
+            safeRect.Sanitize();
+            if ( safeRect.Area() <= 0 )
+                continue;
+
+            ctx.Copy(*iBlock, *tile.mBlock, safeRect, safeRect.Position() - tileRect.Position(), ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 1, &eventClear);
+        }
+    }
+
     ctx.Finish();
 
     //refresh tiles hashes
@@ -373,12 +407,13 @@ UOdysseyRasterBlock::Update(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlo
 
     //refresh cached block if needed
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> cachedBlock = mBlock.Pin();
-    if (cachedBlock && iBlock != cachedBlock) //if the given block is already the cached block, we don't have to refresh it
-    {       
+    if (cachedBlock /*  && iBlock != cachedBlock */ ) //if the given block is already the cached block, we don't have to refresh it
+    {
         for (const int& i : tileIndexes)
         {
             RenderTile(i, cachedBlock);
         }
+        ctx.Finish();
     }
 
     TilesChanged(tileIndexes, iIsInteractive);
@@ -397,6 +432,7 @@ UOdysseyRasterBlock::Commit()
         rects.Add(::ULIS::FRectI::FromXYWH(tile.X, tile.Y, tile.Width, tile.Height));
     }
     OnPixelsChanged().Broadcast(rects, false);
+    mInteractivelyChangedTiles.Empty();
 }
 
 void
@@ -446,14 +482,11 @@ UOdysseyRasterBlock::Serialize(FArchive& Ar)
     //Load/Save all UPROPERTIES
 	Super::Serialize(Ar);
 
-    if ( Ar.IsTransacting() )
+    if ( Ar.IsTransacting() || !Ar.IsPersistent() )
     {
         if ( Ar.IsSaving() )
         {
-            for (int i = 0; i < Tiles.Num(); i++)
-            {
-                SaveTileBlockToCache(i);
-            }
+            SaveTileBlocksToCache();
         }
         else if ( Ar.IsLoading() )
         {
