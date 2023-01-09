@@ -15,6 +15,12 @@ UOdysseyTextureLayerRoot::RenderImageChanged(const TArray<::ULIS::FRectI>& iRect
     if (!layerStack)
         return;
 
-    layerStack->OnRootLayerRenderImageChanged(this, iRects, iIsInteractive);
-    OnRenderImageChanged().Broadcast(this, iRects, iIsInteractive);
+    layerStack->OnRootLayerRenderImageChanged(this, iRects, true);
+    OnRenderImageChanged().Broadcast(this, iRects, true);
+
+    if (!iIsInteractive)
+    {
+        layerStack->OnRootLayerRenderImageChanged(this, iRects, false);
+        OnRenderImageChanged().Broadcast(this, iRects, false);
+    }
 }

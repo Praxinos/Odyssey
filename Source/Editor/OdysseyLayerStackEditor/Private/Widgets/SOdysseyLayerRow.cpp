@@ -295,7 +295,6 @@ SOdysseyLayerRow::ComputeItemDropZoneForLeaf(FVector2D iLocalPointerPos, FVector
 	else
 	{
 		const float middle = FMath::Max(size * 0.5f, 3.0f);
-		UE_LOG(LogTemp, Warning, TEXT("middle : %.1f, pos = %.1f"), middle, pointerPos );
 		if ( pointerPos < middle )
 		{
 			return EItemDropZone::AboveItem;
