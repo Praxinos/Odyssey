@@ -539,6 +539,19 @@ UOdysseyTextureLayerImageRaster::PropertyChanged(const FName& iPropertyName)
 }
 
 void
+UOdysseyTextureLayerImageRaster::PostLoad()
+{
+    Super::PostLoad();
+    if ( RasterBlock )
+    {
+        RasterBlock->OnPixelsChanged().RemoveAll(this);
+        RasterBlock->OnBlockChanged().RemoveAll(this);
+        RasterBlock->OnPixelsChanged().AddUObject(this, &::UOdysseyTextureLayerImageRaster::OnPixelsChanged);
+        RasterBlock->OnBlockChanged().AddUObject(this, &::UOdysseyTextureLayerImageRaster::OnBlockChanged);
+    }
+}
+
+void
 UOdysseyTextureLayerImageRaster::PostDuplicate(bool bDuplicateForPIE)
 {
     //TODO: call mRaster Block Init() again if needed

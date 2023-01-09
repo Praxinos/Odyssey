@@ -135,6 +135,8 @@ public:
 #endif
 
     virtual void PostDuplicate(bool bDuplicateForPIE) override;
+
+    virtual void PostLoad() override;
     
     /**
      * @brief Handles Saving / Loading
