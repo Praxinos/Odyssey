@@ -285,4 +285,11 @@ UOdysseyTextureLayerImageRaster::PostDuplicate(bool bDuplicateForPIE)
     RasterBlock->SetBlock(block);
 }
 
+void
+UOdysseyTextureLayerImageRaster::ApplyPerformanceMode(eOdysseyPerformanceMode iPerformanceMode)
+{
+    if ( RasterBlock )
+        RasterBlock->SetPerformanceMode(iPerformanceMode);
+}
+
 #undef LOCTEXT_NAMESPACE

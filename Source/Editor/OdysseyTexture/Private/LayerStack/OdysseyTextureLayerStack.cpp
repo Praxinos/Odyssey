@@ -128,7 +128,7 @@ UOdysseyTextureLayerStack::OnRootLayerRenderImageChanged(UOdysseyTextureLayer* i
     MarkPackageDirty();
     //PATCH END:
 
-    if ( mIsEditing )
+    if ( GetPerformanceMode() == eOdysseyPerformanceMode::Speed )
     {
         FastUpdateTexture(iRects);
     }
@@ -162,31 +162,37 @@ UOdysseyTextureLayerStack::GetSurface() const
 }
 
 void
-UOdysseyTextureLayerStack::StartEdit()
+UOdysseyTextureLayerStack::ApplyPerformanceMode(eOdysseyPerformanceMode iPerformanceMode)
 {
-    UTexture2D* texture = GetTexture();
-    if ( !texture )
-        return;
+    switch(iPerformanceMode)
+    {
+        case eOdysseyPerformanceMode::Speed:
+        {
+            UTexture2D* texture = GetTexture();
+            if ( !texture )
+                return;
 
-    mIsEditing = true;
-    mTextureFastUpdateSurface = MakeShared<FOdysseySurfaceTexture2DEditable>(texture);
-    ActivateTextureFastUpdate();
+            mTextureFastUpdateSurface = MakeShared<FOdysseySurfaceTexture2DEditable>(texture);
+            ActivateTextureFastUpdate();
 
-    FCoreUObjectDelegates::OnPreObjectPropertyChanged.AddUObject(this, &UOdysseyTextureLayerStack::OnPreGlobalObjectPropertyChanged);
-    UPackage::PreSavePackageWithContextEvent.AddUObject(this, &UOdysseyTextureLayerStack::OnPackagePreSave);
-    UPackage::PackageSavedWithContextEvent.AddUObject(this, &UOdysseyTextureLayerStack::OnPackageSaved);
-}
+            FCoreUObjectDelegates::OnPreObjectPropertyChanged.AddUObject(this, &UOdysseyTextureLayerStack::OnPreGlobalObjectPropertyChanged);
+            UPackage::PreSavePackageWithContextEvent.AddUObject(this, &UOdysseyTextureLayerStack::OnPackagePreSave);
+            UPackage::PackageSavedWithContextEvent.AddUObject(this, &UOdysseyTextureLayerStack::OnPackageSaved);
+        }
+        break;
 
-void
-UOdysseyTextureLayerStack::StopEdit()
-{
-    FCoreUObjectDelegates::OnPreObjectPropertyChanged.RemoveAll(this);
-    UPackage::PreSavePackageWithContextEvent.RemoveAll(this);
-    UPackage::PackageSavedWithContextEvent.RemoveAll(this);
-    InactivateTextureFastUpdate();
-    UpdateTextureSource();
-    mIsEditing = false;
-    mTextureFastUpdateSurface = nullptr;
+        case eOdysseyPerformanceMode::Memory:
+        case eOdysseyPerformanceMode::Shutdown:
+        {
+            FCoreUObjectDelegates::OnPreObjectPropertyChanged.RemoveAll(this);
+            UPackage::PreSavePackageWithContextEvent.RemoveAll(this);
+            UPackage::PackageSavedWithContextEvent.RemoveAll(this);
+            InactivateTextureFastUpdate();
+            UpdateTextureSource();
+            mTextureFastUpdateSurface = nullptr;
+        }
+        break;
+    }
 }
 
 void

@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "OdysseyPerformanceMode.h"
 #include "OdysseyLayer.generated.h"
 
 class UOdysseyLayerStack;
@@ -169,17 +170,24 @@ public:
     UFUNCTION(BlueprintPure, Category="LayerStack")
     UOdysseyLayerStack* GetLayerStack() const;
 
-private:
-    /*
-    * Asks the Layer to stop all its logic
-    * Also asks the layer's children to StandBy
-    */
-    virtual void StandBy();
+public:
+    /**
+     * @brief Will try to set the performance mode to the given mode
+     * Can fail in some conditions
+     * 
+     * @param iPerformanceMode 
+     */
+    void SetPerformanceMode(eOdysseyPerformanceMode iPerformanceMode);
 
-    /*
-    * Asks the Layer start all its logic
-    */
-    virtual void Resume();
+protected:
+    /**
+     * @brief Applies the given Performance Mode
+     * Never fails, be careful not to apply an undesired performance state
+     * could cause excessive memory consumptions, or unwanted layer activity
+     * 
+     * @param iPerformanceMode 
+     */
+    virtual void ApplyPerformanceMode(eOdysseyPerformanceMode iPerformanceMode);
 
 protected:
     //Property changed methods

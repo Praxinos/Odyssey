@@ -97,6 +97,9 @@ public:
     virtual void PostDuplicate(bool bDuplicateForPIE) override;
     virtual void PostLoad() override;
 
+protected:
+    virtual void ApplyPerformanceMode(eOdysseyPerformanceMode iPerformanceMode) override;
+
 private:
     UPROPERTY()
     TObjectPtr<UOdysseyRasterBlock> RasterBlock;

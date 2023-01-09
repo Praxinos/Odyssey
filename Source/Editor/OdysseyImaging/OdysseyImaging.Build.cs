@@ -21,6 +21,7 @@ public class OdysseyImaging : ModuleRules
                 "TargetPlatform",
                 "TextureCompressor",
 
+                "OdysseyCore",
                 "OdysseyMaths",
              }
         );

@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 
+#include "OdysseyPerformanceMode.h"
 #include <ULIS>
 
 #include "OdysseyRasterBlock.generated.h"
@@ -79,6 +80,30 @@ public:
      * @return TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> 
      */
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> GetBlock();
+
+    /**
+     * @brief Get the Performance Mode of the RasterBlock
+     * Usually performance mode is set to "Speed" when we start editing the block
+     * and it is set to Memory when we stop editing the block
+     * 
+     * Speed = better reactivity when drawing, but more memory consuming
+     * Memory = less memory consumption, but slower
+     * 
+     * @return ePerformanceMode 
+     */
+    eOdysseyPerformanceMode GetPerformanceMode();
+
+    /**
+     * @brief Set the Global Performance Mode of the block
+     * Usually performance mode is set to "Speed" when we start editing the block
+     * and it is set to Memory when we stop editing the block
+     * 
+     * Speed = better reactivity when drawing, but more memory consuming
+     * Memory = less memory consumption, but slower
+     * 
+     * @param iPerformanceMode 
+     */
+    void SetPerformanceMode(eOdysseyPerformanceMode iPerformanceMode);
 
     /**
      * @brief Get the block Width
@@ -172,5 +197,7 @@ private:
     //OnBlockChanged will be called to inform that the block is no longer valid
     //(because width/height/format changed) and must be retrieved again by that "someone"
     FSimpleMulticastDelegate mOnBlockChanged;
+
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mBlockRetainerForSpeed;
 };
 

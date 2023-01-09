@@ -10,6 +10,7 @@
 #include "DerivedDataRequestTypes.h"
 #include "Misc/TransactionObjectEvent.h"
 #include "OdysseyRectUtils.h"
+#include "OdysseyPerformanceMode.h"
 #include "ULISEventBuilder.h"
 #include "ULISLoaderModule.h"
 
@@ -591,4 +592,27 @@ UOdysseyRasterBlock::PostTransacted(const FTransactionObjectEvent& iTransactionE
 
     TilesChanged(mUndoneTiles, false); //inform that the block changed
     mUndoneTiles.Empty();
+}
+
+void
+UOdysseyRasterBlock::SetPerformanceMode(eOdysseyPerformanceMode iPerformanceMode)
+{
+    /**
+     * When performance is set to Speed, we load the block in memory to avoid
+     * unwanted loading times.
+     * 
+     * When performance is set to Memory, we stop retaining the block in memory
+     */
+
+    switch(iPerformanceMode)
+    {
+        case eOdysseyPerformanceMode::Speed:
+            mBlockRetainerForSpeed = GetBlock();
+        break;
+
+        case eOdysseyPerformanceMode::Memory:
+        case eOdysseyPerformanceMode::Shutdown:
+            mBlockRetainerForSpeed = nullptr;
+        break;
+    }
 }

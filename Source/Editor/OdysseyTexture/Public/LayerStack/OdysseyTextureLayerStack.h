@@ -56,12 +56,7 @@ public:
 
 public:
     //Texture Update / Edition
-
-    //Starts edition of the layerstack (prepares texture for edition and activates fast update)
-    void StartEdit();
-
-    //Stop edition of the layerstack (unprepares texture for edition and inactivates fast update)
-    void StopEdit();
+    virtual void ApplyPerformanceMode(eOdysseyPerformanceMode iPerformanceMode) override;
 
 private:
     void ActivateTextureFastUpdate();

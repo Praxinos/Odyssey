@@ -85,7 +85,7 @@ FOdysseyTextureEditor::SetTexture(UTexture2D* iTexture)
     //close userdata
 	UOdysseyTextureLayerStack* layerStack = LayerStack();
 	if ( layerStack )
-		layerStack->StopEdit();
+		layerStack->SetPerformanceMode(eOdysseyPerformanceMode::Memory);
 
 	//Set the texture
     mTexture = iTexture;
@@ -94,7 +94,7 @@ FOdysseyTextureEditor::SetTexture(UTexture2D* iTexture)
 
 	layerStack = LayerStack();
 	if ( layerStack )
-		layerStack->StartEdit();
+		layerStack->SetPerformanceMode(eOdysseyPerformanceMode::Speed);
 
 	if ( mSelectedTool && mSelectedTool->IsActivable())
 		mSelectedTool->Activate();
