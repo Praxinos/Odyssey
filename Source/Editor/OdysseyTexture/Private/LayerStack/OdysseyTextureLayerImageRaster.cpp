@@ -11,10 +11,6 @@
 #include "OdysseyTextureLayerImageRaster.h"
 #include "OdysseySurfaceTexture2DEditable.h"
 
-#ifdef WITH_EDITOR
-//#include "Editor/TransBuffer.h"
-#endif
-
 #define LOCTEXT_NAMESPACE "UOdysseyTextureLayerImageRaster"
 
 UOdysseyTextureLayerImageRaster::FOnIsAlphaLockedChanged&
@@ -92,64 +88,6 @@ UOdysseyTextureLayerImageRaster::OnBlockChanged()
     RenderImageChanged({ ::ULIS::FRectI::FromXYWH(0, 0, RasterBlock->GetWidth(), RasterBlock->GetHeight()) }, false);
 }
 
-/* void
-UOdysseyTextureLayerImageRaster::UpdateBlock(const ::ULIS::FBlock& iSourceBlock, const TArray<::ULIS::FRectI>& iRects, const ::ULIS::FVec2I& iSourceOffset, const TArray<::ULIS::FEvent>& iWaitList, bool iTransaction)
-{
-
-    //Set dirtyRects to save only the changed rects into the undo system
-    mNextDirtyRects = iRects; //Append in case UpdateBlock is called several times in the same root transaction
-
-    //Mark package dirty and inform the undo system that something will change
-    //It will serialize() this layer into the undo buffer
-    Modify(); 
-
-    mPrevDirtyRects = mNextDirtyRects;
-
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(mBlock->Format());
-
-    for ( const ::ULIS::FRectI& rect : iRects )
-    {
-        ctx.ConvertFormat(
-            iSourceBlock,
-            *mBlock,
-            rect,
-            rect.Position() + iSourceOffset,
-            ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
-            iWaitList.Num(),
-            iWaitList.GetData()
-        );
-    }
-
-    ctx.Finish();
-
-    mBlock->Dirty(iRects.GetData(), iRects.Num());
-
-#ifdef WITH_EDITOR
-    if (iTransaction)
-        GEditor->EndTransaction();
-#endif
-}
-
-#ifdef WITH_EDITOR
-void
-UOdysseyTextureLayerImageRaster::OnTransactionStateChanged(const FTransactionContext& TransactionContext, ETransactionStateEventType TransactionState)
-{
-    //if ( TransactionState == ETransactionStateEventType::TransactionFinalized )
-    //{
-        //Undo saving has been done, we can empty dirtyrects now
-        //UTransBuffer* TransBuffer = CastChecked<UTransBuffer>(GEditor->Trans);
-        //TransBuffer->OnTransactionStateChanged().RemoveAll(this);
-    //}
-}
-#endif
-
-void
-UOdysseyTextureLayerImageRaster::SetRenderBlockOverride(::ULIS::FBlock* iBlock)
-{
-    check( !iBlock || (iBlock->Width() == mBlock->Width() && iBlock->Height() == mBlock->Height() && iBlock->Format() == mBlock->Format()) );
-    mRenderBlockOverride = iBlock;
-} */
-
 TArray<::ULIS::FEvent>
 UOdysseyTextureLayerImageRaster::RenderImage(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ioBlock, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList)
 {
@@ -167,7 +105,7 @@ UOdysseyTextureLayerImageRaster::RenderImage(TSharedPtr<::ULIS::FBlock, ESPMode:
         {
             ::ULIS::FEvent eventBlend = FULISEventBuilder().RetainBlock(ULISRasterBlock).Build();
             ctx.Blend(
-                /* mRenderBlockOverride ? *mRenderBlockOverride : */*ULISRasterBlock,
+                *ULISRasterBlock,
                 *ioDest,
                 iRect,
                 iPos,
@@ -250,243 +188,6 @@ UOdysseyTextureLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
 
     RasterBlock->Update(ULISRasterBlock, { ULISRasterBlock->Rect() }, false);
 }
-/*
-void
-UOdysseyTextureLayerImageRaster::Serialize(FArchive& Ar)
-{
-	//TODO: Move this to ULIS, once ULIS has been moved to ILIAD.
-	//TODO: Or create a intermediate URasterBlock class to manage this and all operations on blocks.
-	Super::Serialize(Ar);
-
-    if ( Ar.IsTransacting() ) //don't save the whole block when transacting, let the transaction annotation do the job
-        return;
-
-	uint32 serializeVersion = 0;
-	Ar << serializeVersion;
-
-	//Load/Save Size & Format
-    int width = mBlock ? mBlock->Width() : 0;
-    int height = mBlock ? mBlock->Height() : 0;
-    ::ULIS::eFormat format = ::ULIS::Format_BGRA8;
-
-	if ( Ar.IsSaving() )
-	{
-		if ( mBlock )
-		{
-            format = mBlock->Format();
-		}
-	}
-			
-    uint32 formatInt = static_cast<uint32>(format);
-    Ar << width;
-    Ar << height;
-	Ar << formatInt;
-    format = static_cast<ULIS::eFormat>(formatInt);
-
-    //Create mBlock if we are loading
-    if (Ar.IsLoading())
-    {
-		if ( !mBlock && width > 0 && height > 0 )
-		{
-			mBlock = new ::ULIS::FBlock(width, height, format);
-            mBlock->OnInvalid( ::ULIS::FOnInvalidBlock( &OnBlockInvalidated, static_cast< void* >( this ) ) );
-		}
-    }
-
-	//Serialize mBlock using Zlib
-    if ( mBlock )
-    {
-        Ar.SerializeCompressed(mBlock->Bits(), mBlock->BytesTotal(), NAME_Zlib);
-        //mBlock->Dirty();
-    }
-} */
-/*
-#if WITH_EDITOR
-UOdysseyTextureLayerImageRaster::FBlockTransactionAnnotation::FBlockTransactionAnnotation()
-    : mPrevBlocks()
-    , mNextBlocks()
-{
-}
-
-UOdysseyTextureLayerImageRaster::FBlockTransactionAnnotation::FBlockTransactionAnnotation(const UOdysseyTextureLayerImageRaster* iLayer, const TArray<::ULIS::FRectI>& iPrevRects, const TArray<::ULIS::FRectI>& iNextRects)
-    : mLayer(const_cast<UOdysseyTextureLayerImageRaster*>(iLayer))
-    , mPrevBlocks()
-    , mNextBlocks()
-    , mPrevRects(iPrevRects)
-    , mNextRects(iNextRects)
-{
-    if ( !mLayer->mBlock )
-        return;
-
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(mLayer->mBlock->Format());
-    for ( const ::ULIS::FRectI& rect : mPrevRects )
-    {
-        ::ULIS::FBlock& block = mPrevBlocks.Emplace_GetRef(rect.w, rect.h, mLayer->mBlock->Format());
-        ctx.Copy(
-            *mLayer->mBlock,
-            block,
-            rect,
-            ::ULIS::FVec2F(0)
-        );
-        ctx.Finish();
-    }
-
-    for (const ::ULIS::FRectI& rect : mNextRects)
-    {
-        ::ULIS::FBlock& block = mNextBlocks.Emplace_GetRef(rect.w, rect.h, mLayer->mBlock->Format());
-        ctx.Copy(
-            *mLayer->mBlock,
-            block,
-            rect,
-            ::ULIS::FVec2F(0)
-        );
-        ctx.Finish();
-    }
-}
-
-void
-UOdysseyTextureLayerImageRaster::FBlockTransactionAnnotation::CopyToBlock()
-{   
-    if ( !mLayer->mBlock )
-        return;
-
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(mLayer->mBlock->Format());
-    for ( int i = 0; i < mPrevRects.Num(); i++ )
-    {
-        //Load rect Block
-        ctx.Copy(
-            mPrevBlocks[i],
-            *mLayer->mBlock,
-            ::ULIS::FRectI::Auto,
-            mPrevRects[i].Position()
-        );
-        ctx.Finish();
-    }
-
-    for ( int i = 0; i < mNextRects.Num(); i++ )
-    {
-        //Load rect Block
-        ctx.Copy(
-            mNextBlocks[i],
-            *mLayer->mBlock,
-            ::ULIS::FRectI::Auto,
-            mNextRects[i].Position()
-        );
-        ctx.Finish();
-    }
-
-    mLayer->mPrevDirtyRects = mPrevRects;
-    mLayer->mNextDirtyRects = mNextRects;
-
-    TArray<::ULIS::FRectI> rects = mPrevRects;
-    rects.Append(mNextRects);
-    mLayer->mBlock->Dirty(rects.GetData(), rects.Num());
-}
-
-void
-UOdysseyTextureLayerImageRaster::FBlockTransactionAnnotation::Serialize(FArchive& Ar)
-{
-    if ( !mLayer->mBlock )
-        return;
-
-    ::ULIS::eFormat format = Ar.IsSaving() ? mLayer->mBlock->Format() : ::ULIS::Format_BGRA8;
-    uint32 formatInt = static_cast<uint32>(format);
-	Ar << formatInt;
-    format = static_cast<ULIS::eFormat>(formatInt);
-
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
-
-    int32 numPrevRects = mPrevRects.Num();
-    Ar << numPrevRects;
-    int32 numNextRects = mNextRects.Num();
-    Ar << numNextRects;
-    if ( Ar.IsSaving() )
-    {
-        for ( int i = 0; i < numPrevRects; i++ )
-        {
-            ::ULIS::FRectI& rect = mPrevRects[i];
-            //Save Rect
-            Ar << rect.x;
-            Ar << rect.y;
-            Ar << rect.w;
-            Ar << rect.h;
-
-            //Save rect Block
-            Ar.SerializeCompressed(mPrevBlocks[i].Bits(), mPrevBlocks[i].BytesTotal(), NAME_Zlib);
-        }
-
-        for ( int i = 0; i < numNextRects; i++ )
-        {
-            ::ULIS::FRectI& rect = mNextRects[i];
-
-            //Save Rect
-            Ar << rect.x;
-            Ar << rect.y;
-            Ar << rect.w;
-            Ar << rect.h;
-
-            //Save rect Block
-            Ar.SerializeCompressed(mNextBlocks[i].Bits(), mNextBlocks[i].BytesTotal(), NAME_Zlib);
-        }
-    }
-    else if ( Ar.IsLoading() )
-    {
-        for ( int i = 0; i < numPrevRects; i++ )
-        {
-            //Load Rect
-            ::ULIS::FRectI rect;
-            Ar << rect.x;
-            Ar << rect.y;
-            Ar << rect.w;
-            Ar << rect.h;
-
-            mPrevRects.Add(rect);
-
-            //Load rect Block
-            ::ULIS::FBlock& block = mPrevBlocks.Emplace_GetRef(rect.w, rect.h, format);
-            Ar.SerializeCompressed(block.Bits(), block.BytesTotal(), NAME_Zlib);
-        }
-
-        for ( int i = 0; i < numNextRects; i++ )
-        {
-            //Load Rect
-            ::ULIS::FRectI rect;
-            Ar << rect.x;
-            Ar << rect.y;
-            Ar << rect.w;
-            Ar << rect.h;
-
-            mNextRects.Add(rect);
-
-            //Load rect Block
-            ::ULIS::FBlock& block = mNextBlocks.Emplace_GetRef(rect.w, rect.h, format);
-            Ar.SerializeCompressed(block.Bits(), block.BytesTotal(), NAME_Zlib);
-        }
-    }
-}
-
-TSharedPtr<ITransactionObjectAnnotation>
-UOdysseyTextureLayerImageRaster::FactoryTransactionAnnotation(const ETransactionAnnotationCreationMode InCreationMode) const
-{
-    if (InCreationMode == ETransactionAnnotationCreationMode::DefaultInstance)
-	{
-		return MakeShared<FBlockTransactionAnnotation>();
-	}
-
-	return MakeShared<FBlockTransactionAnnotation>(this, mPrevDirtyRects, mNextDirtyRects);
-}
-
-void
-UOdysseyTextureLayerImageRaster::PostEditUndo(TSharedPtr<ITransactionObjectAnnotation> TransactionAnnotation)
-{
-    TSharedPtr<FBlockTransactionAnnotation> blockAnnotation = StaticCastSharedPtr<FBlockTransactionAnnotation>(TransactionAnnotation);
-    if (!blockAnnotation)
-        return;
-
-    blockAnnotation->CopyToBlock();
-
-    Super::PostEditUndo(TransactionAnnotation);    
-}*/
 
 void
 UOdysseyTextureLayerImageRaster::IsAlphaLockedChanged()
@@ -553,8 +254,6 @@ UOdysseyTextureLayerImageRaster::PostLoad()
 void
 UOdysseyTextureLayerImageRaster::PostDuplicate(bool bDuplicateForPIE)
 {
-    //TODO: call mRaster Block Init() again if needed
-
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetLayerStack());
     if (!layerStack)
         return;
@@ -585,17 +284,5 @@ UOdysseyTextureLayerImageRaster::PostDuplicate(bool bDuplicateForPIE)
 
     RasterBlock->SetBlock(block);
 }
-/* 
-void
-UOdysseyTextureLayerImageRaster::OnBlockInvalidated(const ::ULIS::FBlock* iBlock, const ::ULIS::FRectI* iRects, const uint32 iNumRects, void* iInfo)
-{
-    //Indicate UObject system that we will change LayersHierarchy property
-    //(actually the block has already changed, but there no where else to call it before here and being sure that PostChangePropertyValue will be called after)
-    
-
-    TArray<::ULIS::FRectI> rects(iRects, iNumRects);
-    UOdysseyTextureLayerImageRaster* self = static_cast<UOdysseyTextureLayerImageRaster*>(iInfo);
-    self->RenderImageChanged(rects);
-} */
 
 #undef LOCTEXT_NAMESPACE

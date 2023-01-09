@@ -56,15 +56,6 @@ public:
 public:
     // Public API
     UOdysseyRasterBlock* GetRasterBlock() const;
-    //const ::ULIS::FBlock* GetBlock() const;
-    //void  UpdateBlock(const ::ULIS::FBlock& iSourceBlock, const TArray<::ULIS::FRectI>& iRects, const ::ULIS::FVec2I& iSourceOffset, const TArray<::ULIS::FEvent>& iWaitList, bool iTransaction = true);
-
-    /**
-     * @brief Sets a block to be used as a replacement the internal block when rendering an image
-     * Useful to display the editedBlock while drawing instead of the internal block which will only change when UpdateBlock is called (when the stroke ends)
-     * 
-     */
-    //void SetRenderBlockOverride(::ULIS::FBlock* iBlock);
 
 public:
     //IOdysseyTextureLayerImageRenderer implementation
@@ -103,63 +94,12 @@ protected:
 
 public:
     // UObject overrides
-#if WITH_EDITOR
-	/** Internal struct to track currently active transactions */
-    /* friend class FBlockTransactionAnnotation;
-	class FBlockTransactionAnnotation : public ITransactionObjectAnnotation
-	{
-	public:
-        virtual ~FBlockTransactionAnnotation() {};
-
-        FBlockTransactionAnnotation();
-        FBlockTransactionAnnotation(const UOdysseyTextureLayerImageRaster* iLayer, const TArray<::ULIS::FRectI>& iPrevRects, const TArray<::ULIS::FRectI>& iNextRects);
-
-    public:
-        void CopyToBlock();
-
-	public:
-		//~ ITransactionObjectAnnotation interface
-		virtual void Serialize(FArchive& Ar) override;
-        virtual void AddReferencedObjects(class FReferenceCollector& Collector) override {};
-
-    private:
-        UOdysseyTextureLayerImageRaster* mLayer;
-        TArray<::ULIS::FBlock> mPrevBlocks;
-        TArray<::ULIS::FBlock> mNextBlocks;
-        TArray<::ULIS::FRectI> mPrevRects;
-        TArray<::ULIS::FRectI> mNextRects;
-	};
-
-	virtual TSharedPtr<ITransactionObjectAnnotation> FactoryTransactionAnnotation(const ETransactionAnnotationCreationMode InCreationMode) const override;
-	virtual void PostEditUndo(TSharedPtr<ITransactionObjectAnnotation> TransactionAnnotation) override; */
-#endif
-
     virtual void PostDuplicate(bool bDuplicateForPIE) override;
-
     virtual void PostLoad() override;
-    
-    /**
-     * @brief Handles Saving / Loading
-     * 
-     * @param Ar 
-     */
-    //virtual void Serialize(FArchive& Ar);
-
-private:
-    // PRIVATE API
-
-    /**Called when mBlock is dirtied */
-    // static void OnBlockInvalidated(const ::ULIS::FBlock* iBlock, const ::ULIS::FRectI* iRects, const uint32 iNumRects, void* iInfo);
-    // void OnTransactionStateChanged(const FTransactionContext& TransactionContext, ETransactionStateEventType TransactionState);
 
 private:
     UPROPERTY()
     TObjectPtr<UOdysseyRasterBlock> RasterBlock;
-
-    /* ::ULIS::FBlock* mBlock = nullptr;
-    ::ULIS::FBlock* mRenderBlockOverride = nullptr;
-    TArray<::ULIS::FRectI> mPrevDirtyRects;
-    TArray<::ULIS::FRectI> mNextDirtyRects; */
 
 public:
 

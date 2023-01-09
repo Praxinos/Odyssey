@@ -105,11 +105,6 @@ FOdysseyPaintEngine::Update(const FOdysseyBlendParameters& iBlendParameters)
     //Update the EditedBlock content
     if (!UpdateEditedBlock(blendParameters))
         return;
-
-    //Clear the PaintBlock
-    /* mUpdatedRects.Append(mInvalidRects);
-    mOnUpdateDelegate.Broadcast(mInvalidRects);
-    mInvalidRects.Empty(); */
 }
 
 void
@@ -131,9 +126,6 @@ FOdysseyPaintEngine::Commit(const FOdysseyBlendParameters& iBlendParameters)
     mExpectsOnPixelsChanged = true;
     mRasterBlock->Commit();
     mExpectsOnPixelsChanged = false;
-
-    //Inform the paintEngine has commited
-    //mOnCommitDelegate.Broadcast(mUpdatedRects);
 }
 
 void
@@ -147,17 +139,6 @@ FOdysseyPaintEngine::Abort()
 
     //Restore the editedblock to its original state before edition
     RestoreEditedBlock();
-
-    //Set Invalid Tile Map, so that the EditedBlock can refresh the right tiles on the next call of Update()
-    //TArray<::ULIS::FRectI> rects = mEditedBlockInvalidTileMap.InvalidRects();
-    //mResetInvalidTileMap.Invalidate(rects);
-    //mEditedBlockInvalidTileMap.Clear();
-    //mPaintBlockInvalidTileMap.Clear();
-
-    //UpdateEditedBlock(FOdysseyBlendParameters());
-
-    //Refresh the Original block to match the EditedBlock
-    //CopyEditedBlockToOriginalBlock();
 }
 
 //--------------------------------------------------------------------------------------

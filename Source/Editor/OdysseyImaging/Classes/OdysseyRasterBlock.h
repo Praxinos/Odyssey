@@ -131,20 +131,6 @@ private:
     //Called when tiles have changed
     void TilesChanged(const TSet<int>& iTileIndexes, bool iIsInteractive);
 
-private:
-    /**
-     * @brief Called when mBlock is invalidate
-     * 
-     * Calls Modify(), which will save the state of the cached block in undo stack
-     * Updates the cached block
-     * 
-     * @param iBlock 
-     * @param iRects 
-     * @param iNumRects 
-     * @param iInfo 
-     */
-    //static void OnBlockInvalidated(const ::ULIS::FBlock* iBlock, const ::ULIS::FRectI* iRects, const uint32 iNumRects, void* iInfo);
-
 public:
     //UObject overrides
 

@@ -34,7 +34,6 @@ UOdysseyRasterBlock::SetBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iB
     if (iBlock == mBlock)
         return;
 
-    //iBlock->OnInvalid(::ULIS::FOnInvalidBlock(&UOdysseyRasterBlock::OnBlockInvalidated, static_cast<void*>(this)));
     mBlock = iBlock;
 
     Width = iBlock->Width();
@@ -76,7 +75,6 @@ UOdysseyRasterBlock::GetBlock()
     {
         //Load Block from DDC
         block = MakeShared<::ULIS::FBlock>(Width, Height, (::ULIS::eFormat)Format);
-        //block->OnInvalid(::ULIS::FOnInvalidBlock(&UOdysseyRasterBlock::OnBlockInvalidated, static_cast<void*>(this)));
 
         //Render to block
         ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext((::ULIS::eFormat)Format);
@@ -280,7 +278,6 @@ UOdysseyRasterBlock::SaveTileBlocksToCache()
         tile.mCacheFromBulkData = false;
 
         //look if the tile is already in cache
-        //bool isAlreadyInCache = false;
         UE::DerivedData::FRequestOwner getOwner(UE::DerivedData::EPriority::Lowest);
         UE::DerivedData::GetCache().GetValue(
             {
@@ -336,8 +333,6 @@ UOdysseyRasterBlock::Update(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlo
 
     int numTilesX = ((Width - 1) / baseTileWidth) + 1;
     int numTilesY = ((Height - 1) / baseTileHeight) + 1;
-    //int numTilesX = Width / baseTileWidth + (Width % baseTileWidth == 0 ? 0 : 1) ;
-    //int numTilesY = Height / baseTileHeight + (Height % baseTileHeight == 0 ? 0 : 1) ;
     ::ULIS::FRectI blockRect = ::ULIS::FRectI::FromXYWH(0, 0, Width, Height);
 
     //Render rects to tiles
@@ -407,7 +402,7 @@ UOdysseyRasterBlock::Update(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlo
 
     //refresh cached block if needed
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> cachedBlock = mBlock.Pin();
-    if (cachedBlock /*  && iBlock != cachedBlock */ ) //if the given block is already the cached block, we don't have to refresh it
+    if (cachedBlock && iBlock != cachedBlock) //if the given block is already the cached block, we don't have to refresh it
     {
         for (const int& i : tileIndexes)
         {
@@ -450,20 +445,6 @@ UOdysseyRasterBlock::TilesChanged(const TSet<int>& iTileIndexes, bool iIsInterac
     if ( !iIsInteractive )
         Commit();
 }
-
-/* void
-UOdysseyRasterBlock::OnBlockInvalidated(const ::ULIS::FBlock* iBlock, const ::ULIS::FRectI* iRects, const uint32 iNumRects, void* iInfo)
-{
-    UOdysseyRasterBlock* self = static_cast<UOdysseyRasterBlock*>(iInfo);
-    if (iBlock != self->mBlock.Pin().Get())
-        return;
-
-    self->Modify();
-
-    TArray<::ULIS::FRectI> rects(iRects, iNumRects);
-    TSet<int> tileIndexes = self->UpdateTiles(rects);
-    self->TilesChanged(tileIndexes);
-} */
 
 void
 UOdysseyRasterBlock::Serialize(FArchive& Ar)
