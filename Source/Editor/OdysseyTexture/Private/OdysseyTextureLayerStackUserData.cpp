@@ -31,7 +31,7 @@ UOdysseyTextureLayerStackUserData::InitWithDuplicateLayerStack(UOdysseyTextureLa
     if ( LayerStack )
         return;
 
-    if ( iLayerStack )
+    if ( !iLayerStack )
         return;
 
     LayerStack = UOdysseyTextureLayerStack::CreateEmptyFromTexture(GetTexture(), this);
