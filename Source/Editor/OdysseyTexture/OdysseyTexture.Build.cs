@@ -48,13 +48,13 @@ namespace UnrealBuildTool.Rules
                     "OdysseyImaging",
                     "OdysseyLayer",
                     "OdysseyLayerStack",
-                    "OdysseyPsdOperations",
 					"OdysseyStyle",
                     "Slate",
                     "SlateCore",
                     "UnrealEd",
 					"TextureEditor", //To use TextureEditorSettings in SOdysseyTextureDetails //we could also copy TextureEditorSettings content
-					"RHI" //To have access to GPixelFormats
+					"RHI", //To have access to GPixelFormats
+					"zlib"
                     //"AppFramework", // For SColorPicker inside OdysseyTextureFactory.cpp
 					// "Core",
 					// "MainFrame",

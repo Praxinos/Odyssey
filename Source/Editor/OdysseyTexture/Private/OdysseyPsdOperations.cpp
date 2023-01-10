@@ -4,6 +4,11 @@
 #include "OdysseyPsdOperations.h"
 #include "Math/OdysseyMathUtils.h"
 #include "OdysseyPixelFormat.h"
+#include "LayerStack/OdysseyTextureLayerStack.h"
+#include "LayerStack/OdysseyTextureLayerImageRaster.h"
+#include "LayerStack/OdysseyTextureLayerFolder.h"
+#include "OdysseyTextureAssetUserData.h"
+#include "OdysseyRasterBlock.h"
 #include "ULISLoaderModule.h"
 
 #include <ULIS>
@@ -40,8 +45,9 @@ FOdysseyPsdOperations::~FOdysseyPsdOperations()
     }
 }
 
-FOdysseyPsdOperations::FOdysseyPsdOperations(const TCHAR* iFilename)
-    : mFileHandle( nullptr )
+FOdysseyPsdOperations::FOdysseyPsdOperations(const TCHAR* iFilename, UTexture2D* iTexture)
+    : mFileHandle( nullptr ),
+    mTexture(iTexture)
 {
     IPlatformFile& platformFile = FPlatformFileManager::Get().GetPlatformFile();
     mFileHandle = platformFile.OpenRead(iFilename);
@@ -776,19 +782,43 @@ bool FOdysseyPsdOperations::ReadLayerStackData32()
     return true;
 }
 
+void
+FOdysseyPsdOperations::CreateLayerStack()
+{
+    ETextureSourceFormat textureFormat = ETextureSourceFormat::TSF_BGRA8;
+
+    if ( mBitDepth > 8 )
+        textureFormat = ETextureSourceFormat::TSF_RGBA16;
+
+    ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(textureFormat);
+
+    UOdysseyTextureAssetUserData* userData = Cast<UOdysseyTextureAssetUserData>(mTexture->GetAssetUserDataOfClass(UOdysseyTextureAssetUserData::StaticClass()));
+    if (userData)
+    {
+        mLayerStack = userData->GetLayerStack();
+    }
+    else
+    {
+        mTexture->Source.Init(mImageWidth, mImageHeight, 1, 1, textureFormat);
+
+        //Init user data
+        userData = NewObject<UOdysseyTextureAssetUserData>(mTexture, NAME_None, RF_Public);
+
+        userData->InitWithEmptyLayerStack();
+
+        // Notify for changes
+        mTexture->AddAssetUserData( userData );
+        mTexture->PostEditChange();
+
+        mLayerStack = userData->GetLayerStack();
+    }
+}
+
 void FOdysseyPsdOperations::GenerateLayerStackFromLayerStackData()
 {
-    ::ULIS::eFormat format;
-
-    if(mBitDepth > 8)
-        format = ULISFormatForTextureSourceFormat(ETextureSourceFormat::TSF_RGBA16);
-    else
-        format = ULISFormatForTextureSourceFormat(ETextureSourceFormat::TSF_BGRA8);
-
     if( mLayersInfo.Num() != 0 )
     {
-        mLayerStack = new FOdysseyLayerStack();
-        mLayerStack->Init(mImageWidth,mImageHeight,format);
+        CreateLayerStack();
     }
 
     //Special case: bitmap --------------------------------------
@@ -803,8 +833,7 @@ void FOdysseyPsdOperations::GenerateLayerStackFromLayerStackData()
             mImageDst = nullptr;
         }
 
-        mLayerStack = new FOdysseyLayerStack();
-        mLayerStack->Init(mImageWidth,mImageHeight,format);
+        CreateLayerStack();
 
         mFileHandle->Seek(mImageStart);
 
@@ -831,21 +860,21 @@ void FOdysseyPsdOperations::GenerateLayerStackFromLayerStackData()
             PlanarByteConvertBitMapToBGRA8(planar,mImageDst,sizeBitmap);
             delete[] planar;
         }
-        ::ULIS::FBlock* srcblock = new ::ULIS::FBlock((::ULIS::tByte*)mImageDst,mImageWidth,mImageHeight,::ULIS::Format_BGRA8);;
-        ::ULIS::FBlock* layerBlock = new ::ULIS::FBlock(mImageWidth,mImageHeight,::ULIS::Format_BGRA8);
+        ::ULIS::FBlock* srcblock = new ::ULIS::FBlock((::ULIS::tByte*)mImageDst,mImageWidth,mImageHeight,::ULIS::Format_BGRA8);
+        TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> layerBlock = MakeShared<::ULIS::FBlock>(mImageWidth,mImageHeight,::ULIS::Format_BGRA8);
 
         ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( ::ULIS::Format_BGRA8 );
         ctx.Copy( *srcblock, *layerBlock );
         ctx.Finish();
 
-        TSharedPtr<FOdysseyImageLayer> imageLayer = MakeShareable(new FOdysseyImageLayer(TEXT("Layer1"),layerBlock));
-        mLayerStack->AddLayer( imageLayer );
+        UOdysseyTextureLayerImageRaster* layer = Cast<UOdysseyTextureLayerImageRaster>(mLayerStack->AddLayer(UOdysseyTextureLayerImageRaster::StaticClass()));
+        layer->GetRasterBlock()->SetBlock(layerBlock);
 
         delete srcblock;
     }
     //-----------------------------------------------------------
 
-    TSharedPtr<IOdysseyLayer> currentRoot = mLayerStack->GetCurrentLayer();
+    UOdysseyLayer* currentRoot = mLayerStack->LayerRoot;
 
     for( int i = mLayersInfo.Num() - 1; i >= 0; i-- )
     {
@@ -857,7 +886,7 @@ void FOdysseyPsdOperations::GenerateLayerStackFromLayerStackData()
 
             ::ULIS::FBlock* srcblock;
             ::ULIS::FBlock* convBlock;
-            ::ULIS::FBlock* layerBlock;
+            TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> layerBlock;
 
             if( mBitDepth == 32 )
             {
@@ -901,7 +930,7 @@ void FOdysseyPsdOperations::GenerateLayerStackFromLayerStackData()
 
                 //We don't handle drawing on 32 bits, so we convert to 16 bits
                 convBlock =  new ::ULIS::FBlock(w,h,::ULIS::Format_RGBA16);
-                layerBlock = new ::ULIS::FBlock(mImageWidth,mImageHeight,::ULIS::Format_RGBA16);
+                layerBlock = MakeShared<::ULIS::FBlock>(mImageWidth,mImageHeight,::ULIS::Format_RGBA16);
             }
             else if( mBitDepth == 16 )
             {
@@ -944,7 +973,7 @@ void FOdysseyPsdOperations::GenerateLayerStackFromLayerStackData()
                 }
 
                 convBlock =  new ::ULIS::FBlock(w,h,::ULIS::Format_RGBA16);
-                layerBlock = new ::ULIS::FBlock(mImageWidth,mImageHeight,::ULIS::Format_RGBA16);
+                layerBlock = MakeShared<::ULIS::FBlock>(mImageWidth,mImageHeight,::ULIS::Format_RGBA16);
             }
             else if( mBitDepth == 8 )
             {
@@ -987,7 +1016,7 @@ void FOdysseyPsdOperations::GenerateLayerStackFromLayerStackData()
                 }
 
                 convBlock =  new ::ULIS::FBlock(w,h,::ULIS::Format_BGRA8);
-                layerBlock = new ::ULIS::FBlock(mImageWidth,mImageHeight,::ULIS::Format_BGRA8);
+                layerBlock = MakeShared<::ULIS::FBlock>(mImageWidth,mImageHeight,::ULIS::Format_BGRA8);
             }
             else
             {
@@ -1010,40 +1039,32 @@ void FOdysseyPsdOperations::GenerateLayerStackFromLayerStackData()
                 ctx.Finish();
             }
 
-            TSharedPtr<FOdysseyImageLayer> imageLayer = MakeShareable(new FOdysseyImageLayer(layerName,layerBlock));
-            if( currentRoot->GetType() == IOdysseyLayer::eType::kFolder )
-                mLayerStack->AddLayer( imageLayer, currentRoot );
-            else
-                mLayerStack->AddLayer( imageLayer );
-
-            imageLayer->SetOpacity( (float)mLayersInfo[i].mOpacity / 255.0 );
-            imageLayer->SetIsAlphaLocked(mLayersInfo[i].mFlags & 0x01);
-            imageLayer->SetIsVisible(!(mLayersInfo[i].mFlags & 0x02));
-            imageLayer->SetBlendingMode( GetBlendingModeFromPSD(mLayersInfo[i].mBlendModeKey) );
+            UOdysseyTextureLayerImageRaster* imageLayer = Cast<UOdysseyTextureLayerImageRaster>(mLayerStack->AddLayer(UOdysseyTextureLayerImageRaster::StaticClass(), currentRoot, currentRoot->GetChildren().Num()));
+            imageLayer->Name = FText::FromName(layerName);
+            imageLayer->Opacity = (float)mLayersInfo[i].mOpacity / 255.0;
+            imageLayer->IsAlphaLocked = mLayersInfo[i].mFlags & 0x01;
+            imageLayer->IsActivated = !(mLayersInfo[i].mFlags & 0x02);
+            imageLayer->BlendMode = (EOdysseyBlendingMode)GetBlendingModeFromPSD(mLayersInfo[i].mBlendModeKey);
+            imageLayer->GetRasterBlock()->SetBlock(layerBlock);
             
             //UE_LOG(LogTemp,Display,TEXT("flags: %d"),mLayersInfo[i].mFlags)
             //Todo: Locked
 
             delete srcblock;
             delete convBlock;
-            //delete layerBlock;
 
         }
         else if( mLayersInfo[i].mDividerType == 1 || mLayersInfo[i].mDividerType == 2 ) //Open folder / Closed Folder
         {
             FName layerName = FName(mLayersInfo[i].mName);
-            TSharedPtr<FOdysseyFolderLayer> folderLayer = MakeShareable(new FOdysseyFolderLayer( layerName ));
 
-            if(currentRoot->GetType() == IOdysseyLayer::eType::kFolder )
-                mLayerStack->AddLayer(folderLayer,currentRoot);
-            else
-                mLayerStack->AddLayer(folderLayer);
+            UOdysseyTextureLayerFolder* folderLayer = Cast<UOdysseyTextureLayerFolder>(mLayerStack->AddLayer(UOdysseyTextureLayerFolder::StaticClass(), currentRoot, currentRoot->GetChildren().Num()));
+            folderLayer->Name = FText::FromName(layerName);
+            folderLayer->Opacity = (float)mLayersInfo[i].mOpacity / 255.0;
+            folderLayer->IsActivated = !(mLayersInfo[i].mFlags & 0x02);
+            folderLayer->BlendMode = (EOdysseyBlendingMode)GetBlendingModeFromPSD(mLayersInfo[i].mBlendModeKey);
 
             currentRoot = folderLayer;
-
-            folderLayer->SetOpacity((float)mLayersInfo[i].mOpacity / 255.0);
-            folderLayer->SetIsVisible(!(mLayersInfo[i].mFlags & 0x02));
-            folderLayer->SetBlendingMode( GetBlendingModeFromPSD(mLayersInfo[i].mBlendModeKey) );
 
             //UE_LOG(LogTemp, Display, TEXT("flags: %d"), mLayersInfo[i].mFlags)
 
@@ -1415,11 +1436,6 @@ uint8_t* FOdysseyPsdOperations::GetImageDst()
 uint16_t* FOdysseyPsdOperations::GetImageDst16()
 {
     return mImageDst16;
-}
-
-FOdysseyLayerStack* FOdysseyPsdOperations::GetLayerStack()
-{
-    return mLayerStack;
 }
 
 bool FOdysseyPsdOperations::Import()

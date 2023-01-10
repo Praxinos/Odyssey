@@ -17,6 +17,12 @@ UOdysseyTextureLayerStack::OnRenderImageChanged()
 }
 
 UOdysseyTextureLayerStack*
+UOdysseyTextureLayerStack::CreateEmptyFromTexture(UTexture2D* iTexture, UObject* iOuter)
+{
+    return NewObject<UOdysseyTextureLayerStack>(iOuter, "LayerStack", RF_Public | RF_Transactional);
+}
+
+UOdysseyTextureLayerStack*
 UOdysseyTextureLayerStack::CreateFromTexture(UTexture2D* iTexture, UObject* iOuter)
 {
     UOdysseyTextureLayerStack* layerStack = NewObject<UOdysseyTextureLayerStack>(iOuter, "LayerStack", RF_Public | RF_Transactional);

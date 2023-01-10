@@ -135,6 +135,9 @@ public:
     FSimpleMulticastDelegate& OnBlockChanged();
 
 private:
+    //Update the tiles with the given rects
+    TSet<int> UpdateTiles(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock, const TArray<::ULIS::FRectI>& iRects);
+
     //Renders all tiles into the given block
     TArray<::ULIS::FEvent> RenderTiles(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock);
 

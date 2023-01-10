@@ -72,11 +72,6 @@
 			"LoadingPhase": "Default"
 		},
 		{
-			"Name": "OdysseyPsdOperations",
-			"Type": "Editor",
-			"LoadingPhase": "Default"
-		},
-		{
 			"Name": "OdysseyPaintEngine",
 			"Type": "Editor",
 			"LoadingPhase": "Default"

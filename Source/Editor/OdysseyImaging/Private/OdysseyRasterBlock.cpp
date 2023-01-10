@@ -63,6 +63,7 @@ UOdysseyRasterBlock::SetBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iB
             Tiles.Add({x * baseTileWidth, y * baseTileHeight, tileWidth, tileHeight, "", nullptr });
         }
     }
+    UpdateTiles(iBlock, {iBlock->Rect()});
     SaveTileBlocksToCache();
 
     OnBlockChanged().Broadcast();
@@ -324,13 +325,13 @@ UOdysseyRasterBlock::SaveTileBlocksToCache()
     }
 }
 
-void
-UOdysseyRasterBlock::Update(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock, const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive)
+TSet<int>
+UOdysseyRasterBlock::UpdateTiles(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock, const TArray<::ULIS::FRectI>& iRects)
 {
-    if (!iBlock)
-        return;
-
     TSet<int> tileIndexes;
+
+    if (!iBlock)
+        return tileIndexes;
 
     int numTilesX = ((Width - 1) / baseTileWidth) + 1;
     int numTilesY = ((Height - 1) / baseTileHeight) + 1;
@@ -411,6 +412,16 @@ UOdysseyRasterBlock::Update(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlo
         }
         ctx.Finish();
     }
+
+    return tileIndexes;
+}
+
+void
+UOdysseyRasterBlock::Update(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock, const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive)
+{
+    TSet<int> tileIndexes = UpdateTiles(iBlock, iRects);
+    if (tileIndexes.Num() <= 0)
+        return;
 
     TilesChanged(tileIndexes, iIsInteractive);
 }

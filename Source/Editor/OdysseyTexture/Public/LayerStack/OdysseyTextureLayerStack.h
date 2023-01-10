@@ -16,6 +16,7 @@ class ODYSSEYTEXTURE_API UOdysseyTextureLayerStack
     GENERATED_BODY()
 
 public:
+    static UOdysseyTextureLayerStack* CreateEmptyFromTexture(UTexture2D* iTexture, UObject* iOuter);
     static UOdysseyTextureLayerStack* CreateFromTexture(UTexture2D* iTexture, UObject* iOuter);
     UOdysseyTextureLayerStack();
 

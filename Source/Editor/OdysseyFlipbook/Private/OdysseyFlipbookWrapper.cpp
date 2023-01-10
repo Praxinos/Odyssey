@@ -112,7 +112,19 @@ FOdysseyFlipbookWrapper::DuplicateKeyFrame(int32 iIndex, UTexture2D** oTexture, 
             if (!texture)
                 return false;
 
-            CopyTextureContent(srcTexture, texture);
+            UOdysseyTextureAssetUserData* userData = NewObject<UOdysseyTextureAssetUserData>(texture, NAME_None, RF_Public);
+
+            UOdysseyTextureAssetUserData* srcTextureUserData = Cast<UOdysseyTextureAssetUserData>(srcTexture->GetAssetUserDataOfClass(UOdysseyTextureAssetUserData::StaticClass()));
+            if ( srcTextureUserData )
+            {
+                userData->InitWithDuplicateLayerStack(srcTextureUserData->GetLayerStack());
+            }
+            else
+            {
+                userData->InitWithDefaultLayerStack();
+            }
+            
+            //CopyTextureContent(srcTexture, texture);
 
             SetSpriteTexture(sprite, texture);  //Finishes the sprite initialization before giving it to the flipbook, otherwise it calls some unwanted callbacks in the GUI
         }
@@ -244,21 +256,22 @@ FOdysseyFlipbookWrapper::CreateTexture(int32 iWidth, int32 iHeight, ETextureSour
     InitTextureWithBlockData(blockPtr, texture2D, iFormat);
 
     //Create Layer Stack
-	UOdysseyTextureAssetUserData* userData = NewObject<UOdysseyTextureAssetUserData>(texture2D, NAME_None, RF_Public);;
+	//UOdysseyTextureAssetUserData* userData = NewObject<UOdysseyTextureAssetUserData>(texture2D, NAME_None, RF_Public);;
 
 	/*
 	 * Old LayerStack
 	 */
-    userData->GetOldLayerStack()->Init(blockPtr->Width(), blockPtr->Height(), ULISFormatForTextureSourceFormat(iFormat));
-    delete blockPtr;
+    //userData->GetOldLayerStack()->Init(blockPtr->Width(), blockPtr->Height(), ULISFormatForTextureSourceFormat(iFormat));
+    //delete blockPtr;
 
     // Create Layer
-	FName layerName = userData->GetOldLayerStack()->GetLayerRoot()->GetNextLayerName();
+	/*
+    FName layerName = userData->GetOldLayerStack()->GetLayerRoot()->GetNextLayerName();
     ::ULIS::FBlock* layerBlock = NewBlockFromUTextureData(texture2D, userData->GetOldLayerStack()->Format());
 	TSharedPtr<FOdysseyImageLayer> imageLayer = MakeShareable(new FOdysseyImageLayer(layerName, layerBlock));
 	userData->GetOldLayerStack()->AddLayer(imageLayer);
 
-    texture2D->AddAssetUserData( userData );
+    texture2D->AddAssetUserData( userData );*/
 
     //Init is done
     texture2D->PostEditChange(); //This make sure that every properties are compatible with each other and with the size of our texture
@@ -278,7 +291,7 @@ FOdysseyFlipbookWrapper::CreateTexture(int32 iWidth, int32 iHeight, ETextureSour
 }
 
 //Duplicate the given texture
-void
+/* void
 FOdysseyFlipbookWrapper::CopyTextureContent(UTexture2D* iSrcTexture, UTexture2D* iDstTexture)
 {
     ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(iSrcTexture->Source.GetFormat());
@@ -326,7 +339,7 @@ FOdysseyFlipbookWrapper::CopyTextureContent(UTexture2D* iSrcTexture, UTexture2D*
 
     iDstTexture->UpdateResource();
     FTextureCompilingManager::Get().FinishCompilation({iDstTexture});
-}
+} */
 
 UPaperSprite*
 FOdysseyFlipbookWrapper::CreateSprite(FString iName)

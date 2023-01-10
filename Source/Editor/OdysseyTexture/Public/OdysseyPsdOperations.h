@@ -5,7 +5,11 @@
 
 #include "CoreMinimal.h"
 #include "Serialization/BufferArchive.h"
-#include "OdysseyLayerStack.h"
+
+#include <ULIS>
+
+class UTexture2D;
+class UOdysseyTextureLayerStack;
 
 struct FPsdLayerInfo
 {
@@ -42,12 +46,12 @@ struct FPsdLayerInfo
     uint32_t mDividerType;
 };
 
-class ODYSSEYPSDOPERATIONS_API FOdysseyPsdOperations
+class FOdysseyPsdOperations
 {
 public:
     // Construction / Destruction
     ~FOdysseyPsdOperations();
-    FOdysseyPsdOperations(const TCHAR* iFilename);
+    FOdysseyPsdOperations(const TCHAR* iFilename, UTexture2D* ioTexture);
 
 private:
     /** The header of the file, with basic info about the image and verification that it's indeed a psd file */
@@ -107,6 +111,7 @@ private:
     void lerp24BitsInto32Bits( uint32_t* ioSrc,uint32_t length );
 
     ::ULIS::eBlendMode GetBlendingModeFromPSD( char iBlendModeKey[5] );
+    void CreateLayerStack();
 
 public:
 
@@ -119,8 +124,6 @@ public:
 
     uint8_t* GetImageDst();
     uint16_t* GetImageDst16();
-
-    FOdysseyLayerStack* GetLayerStack();
 
     //-- Import / Export
     /** Tries to import the file passed in the constructor, return true if succeeded */
@@ -141,7 +144,8 @@ private:
     uint16_t* mImageDst16;
     uint32_t* mImageDst32;
 
-    FOdysseyLayerStack* mLayerStack;
+    UTexture2D* mTexture;
+    UOdysseyTextureLayerStack* mLayerStack;
 
     TArray<FPsdLayerInfo> mLayersInfo;
 };

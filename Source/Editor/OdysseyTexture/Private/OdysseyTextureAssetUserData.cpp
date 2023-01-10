@@ -6,42 +6,43 @@
 
 #include "EngineUtils.h"
 
-UOdysseyTextureAssetUserData::UOdysseyTextureAssetUserData()
-{
-    mLayerStack = new FOdysseyLayerStack();
-}
-
-//-------------------------
-//UObject Interface--------
-void UOdysseyTextureAssetUserData::Serialize(FArchive& Ar)
-{
-    Super::Serialize(Ar);
-    Ar << mLayerStack;
-}
 //-------------------------
 //End UObject Interface----
 
-FOdysseyLayerStack* UOdysseyTextureAssetUserData::GetOldLayerStack()
+void
+UOdysseyTextureAssetUserData::InitWithEmptyLayerStack()
 {
-    return mLayerStack;
+    if (LayerStack)
+        return;
+    LayerStack = UOdysseyTextureLayerStack::CreateEmptyFromTexture(GetTexture(), this);
 }
 
-void UOdysseyTextureAssetUserData::SetOldLayerStack(FOdysseyLayerStack* iLayerStack)
+void
+UOdysseyTextureAssetUserData::InitWithDefaultLayerStack()
 {
-    if( !iLayerStack )
+    if (LayerStack)
+        return;
+    LayerStack = UOdysseyTextureLayerStack::CreateFromTexture(GetTexture(), this);
+}
+
+void
+UOdysseyTextureAssetUserData::InitWithDuplicateLayerStack(UOdysseyTextureLayerStack* iLayerStack)
+{
+    if ( LayerStack )
         return;
 
-    if( mLayerStack )
-        delete mLayerStack;
+    if ( iLayerStack )
+        return;
 
-    mLayerStack = iLayerStack;
+    LayerStack = UOdysseyTextureLayerStack::CreateEmptyFromTexture(GetTexture(), this);
+    LayerStack->CopyLayers(iLayerStack->GetRootLayers(), LayerStack->LayerRoot);
 }
 
 UOdysseyTextureLayerStack*
 UOdysseyTextureAssetUserData::GetLayerStack()
 {
     if (!LayerStack)
-        LayerStack = UOdysseyTextureLayerStack::CreateFromTexture(GetTexture(), this);
+        InitWithDefaultLayerStack();
     return LayerStack;
 }
 

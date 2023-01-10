@@ -23,7 +23,7 @@ UOdysseyTextureImportFactory::UOdysseyTextureImportFactory( const FObjectInitial
     ImportPriority = 101; //Default other factories importing textures are at 100
     SupportedClass = UTexture2D::StaticClass();
 
-    Formats.Add(TEXT("psd;Texture"));
+    Formats.Add(TEXT("psdfix;Texture"));
 }
 
 bool UOdysseyTextureImportFactory::ConfigureProperties()
@@ -34,12 +34,13 @@ bool UOdysseyTextureImportFactory::ConfigureProperties()
 UObject* UOdysseyTextureImportFactory::FactoryCreateBinary(UClass* Class,UObject* InParent,FName Name,EObjectFlags Flags,UObject* Context,const TCHAR* Type,const uint8*& Buffer,const uint8* BufferEnd,FFeedbackContext* Warn)
 {
     //Load PSD as texture
-    FOdysseyPsdOperations psdReader = FOdysseyPsdOperations(*CurrentFilename);
+    UTexture2D* texture = NewObject<UTexture2D>(InParent,Name,Flags | RF_Transactional);
+    FOdysseyPsdOperations psdReader = FOdysseyPsdOperations(*CurrentFilename, texture);
 
     if( !psdReader.Import() )
         return nullptr;
     
-    UTexture2D* object = NewObject<UTexture2D>(InParent,Name,Flags | RF_Transactional);
+    /* UTexture2D* object = NewObject<UTexture2D>(InParent,Name,Flags | RF_Transactional);
     
     if(psdReader.GetLayerStack())
     {
@@ -51,7 +52,7 @@ UObject* UOdysseyTextureImportFactory::FactoryCreateBinary(UClass* Class,UObject
         UOdysseyTextureAssetUserData* userData = NewObject< UOdysseyTextureAssetUserData >( object, NAME_None, RF_Public );
         userData->SetOldLayerStack( psdReader.GetLayerStack() );
         object->AddAssetUserData( userData );
-    }
+    } */
 
 
     /*
@@ -96,10 +97,9 @@ UObject* UOdysseyTextureImportFactory::FactoryCreateBinary(UClass* Class,UObject
     }
     */
 
-
-    object->PostEditChange();
+    texture->PostEditChange();
         
-    return object;
+    return texture;
 }
 
 bool UOdysseyTextureImportFactory::FactoryCanImport(const FString& Filename)

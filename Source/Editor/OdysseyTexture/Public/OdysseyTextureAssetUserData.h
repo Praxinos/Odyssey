@@ -6,7 +6,6 @@
 #include "CoreMinimal.h"
 #include "UObject/ObjectMacros.h"
 #include "UObject/ScriptMacros.h"
-#include "OdysseyLayerStack.h"
 #include "LayerStack/OdysseyTextureLayerStack.h"
 #include "Engine/AssetUserData.h"
 #include "OdysseySurfaceTexture2DEditable.h"
@@ -20,24 +19,18 @@ class ODYSSEYTEXTURE_API UOdysseyTextureAssetUserData : public UAssetUserData
     GENERATED_BODY()
 
 public:
-	static UOdysseyTextureAssetUserData* MakeFromTexture(UTexture2D* iTexture);
+    void InitWithEmptyLayerStack();
+    void InitWithDefaultLayerStack();
+    void InitWithDuplicateLayerStack(UOdysseyTextureLayerStack* iLayerStack);
 
-	UOdysseyTextureAssetUserData();
-
-public:
-    //~ Begin UObject Interface.
-    virtual void Serialize(FArchive& Ar) override;
-    //~ End UObject Interface.
-
-public:
-    FOdysseyLayerStack* GetOldLayerStack();
-    void SetOldLayerStack( FOdysseyLayerStack* iLayerStack );
-
+    /**
+     * @brief Get the Layer Stack object
+     * If there is no layerStack, creates it from the texture, with a single raster layer
+     * 
+     * @return UOdysseyTextureLayerStack* 
+     */
     UOdysseyTextureLayerStack* GetLayerStack();
     UTexture2D* GetTexture();
-
-private:
-    FOdysseyLayerStack* mLayerStack;
     
 private:
 	UPROPERTY()
