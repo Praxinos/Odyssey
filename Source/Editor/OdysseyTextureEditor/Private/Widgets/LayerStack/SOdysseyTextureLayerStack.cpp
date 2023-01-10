@@ -57,7 +57,7 @@ SOdysseyTextureLayerStack::RebuildWidgets()
             + SVerticalBox::Slot()
             .FillHeight(1.0)
             [
-                SAssignNew(mTreeView, SOdysseyLayerStackNewTreeView)
+                SAssignNew(mTreeView, SOdysseyLayerStackTreeView)
                 .LayerStack(layerstack)
                 .OnGenerateRow(this, &SOdysseyTextureLayerStack::OnGenerateRow)
             ];

@@ -13,14 +13,14 @@ class UOdysseyLayerStack;
 /**
  * Implements the Layer stack widget
  */
-class ODYSSEYLAYERSTACKEDITOR_API SOdysseyLayerStackNewTreeView
+class ODYSSEYLAYERSTACKEDITOR_API SOdysseyLayerStackTreeView
     : public STreeView<UOdysseyLayer*>
 {
 
-//SLATE_DECLARE_WIDGET(SOdysseyLayerStackNewTreeView, STreeView<UOdysseyLayer*>)
+//SLATE_DECLARE_WIDGET(SOdysseyLayerStackTreeView, STreeView<UOdysseyLayer*>)
 
 public:
-    SLATE_BEGIN_ARGS(SOdysseyLayerStackNewTreeView)
+    SLATE_BEGIN_ARGS(SOdysseyLayerStackTreeView)
         {}
         SLATE_ARGUMENT( UOdysseyLayerStack*, LayerStack )
         SLATE_ARGUMENT( TArray<SHeaderRow::FColumn>, AdditionalColumns )
@@ -29,8 +29,8 @@ public:
 
 public:
     // Construction / Destruction
-    ~SOdysseyLayerStackNewTreeView();
-    SOdysseyLayerStackNewTreeView();
+    ~SOdysseyLayerStackTreeView();
+    SOdysseyLayerStackTreeView();
     
     void Construct(const FArguments& InArgs);
     

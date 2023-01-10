@@ -5,7 +5,7 @@
 
 #include "EditorFontGlyphs.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
-#include "OdysseyLayerStackNew.h"
+#include "OdysseyLayerStack.h"
 
 #define LOCTEXT_NAMESPACE "SOdysseyLayerStackAddLayerButton"
 

@@ -4,7 +4,7 @@
 #include "DragDropOperations/OdysseyLayerStackDragDropOperation.h"
 
 #include "OdysseyLayer.h"
-#include "OdysseyLayerStackNew.h"
+#include "OdysseyLayerStack.h"
 #include "OdysseyStyleSet.h"
 
 FOdysseyLayerStackDragDropOperation::FOdysseyLayerStackDragDropOperation(UOdysseyLayerStack* iLayerStack, TArray<UOdysseyLayer*> iLayers)

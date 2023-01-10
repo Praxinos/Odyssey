@@ -19,7 +19,7 @@ public:
 
 public:
     // Construction / Destruction
-    void Construct(const FArguments& iArgs, const TSharedRef<SOdysseyLayerStackNewTreeView>& iOwnerTableView, class UOdysseyTextureLayerImageRaster* iTextureLayerImageRaster);
+    void Construct(const FArguments& iArgs, const TSharedRef<SOdysseyLayerStackTreeView>& iOwnerTableView, class UOdysseyTextureLayerImageRaster* iTextureLayerImageRaster);
     
 private:
     virtual TSharedRef<SWidget> GenerateHeaderWidget() override;

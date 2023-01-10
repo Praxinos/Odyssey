@@ -1,7 +1,7 @@
 // IDDN FR.001.250001.005.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
-#include "Widgets/SOdysseyLayerStackNewTreeView.h"
+#include "Widgets/SOdysseyLayerStackTreeView.h"
 #include "OdysseyStyleSet.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "ToolMenus.h"
@@ -9,43 +9,43 @@
 #include "Commands/OdysseyLayerStackEditorCommands.h"
 #include "OdysseyLayerStackFunctionLibrary.h"
 
-#define LOCTEXT_NAMESPACE "SOdysseyLayerStackNewTreeView"
+#define LOCTEXT_NAMESPACE "SOdysseyLayerStackTreeView"
 
 static FName contextMenuName = "OdysseyLayerStackContextMenu";
 
-/*SLATE_IMPLEMENT_WIDGET(SOdysseyLayerStackNewTreeView)
+/*SLATE_IMPLEMENT_WIDGET(SOdysseyLayerStackTreeView)
 void
-SOdysseyLayerStackNewTreeView::PrivateRegisterAttributes(FSlateAttributeInitializer& AttributeInitializer)
+SOdysseyLayerStackTreeView::PrivateRegisterAttributes(FSlateAttributeInitializer& AttributeInitializer)
 {
 	SLATE_ADD_MEMBER_ATTRIBUTE_DEFINITION(AttributeInitializer, mLayerStack, EInvalidateWidgetReason::Layout)
     .OnValueChanged(FSlateAttributeDescriptor::FAttributeValueChangedDelegate::CreateLambda(
         [](SWidget& Widget)
         {
-            static_cast<SOdysseyLayerStackNewTreeView&>(Widget).LoadLayerStack();
+            static_cast<SOdysseyLayerStackTreeView&>(Widget).LoadLayerStack();
         }
     ));
 } */
 
-SOdysseyLayerStackNewTreeView::~SOdysseyLayerStackNewTreeView()
+SOdysseyLayerStackTreeView::~SOdysseyLayerStackTreeView()
 {
     UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll(this);
     UOdysseyLayerStack::OnHierarchyChanged().RemoveAll(this);
 	UOdysseyLayer::OnIsExpandedChanged().RemoveAll(this);
 }
 
-SOdysseyLayerStackNewTreeView::SOdysseyLayerStackNewTreeView()
+SOdysseyLayerStackTreeView::SOdysseyLayerStackTreeView()
     //: mLayerStack(*this, nullptr)
     : mLayerStack(nullptr)
     , mCommandList(MakeShared<FUICommandList>())
 {
     MapActionsToCommandList();
-    UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw(this, &SOdysseyLayerStackNewTreeView::OnCurrentLayerChanged);
-    UOdysseyLayerStack::OnHierarchyChanged().AddRaw(this, &SOdysseyLayerStackNewTreeView::OnLayerStackHierarchyChanged);
-	UOdysseyLayer::OnIsExpandedChanged().AddRaw(this, &SOdysseyLayerStackNewTreeView::OnLayerIsExpandedChanged);
+    UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw(this, &SOdysseyLayerStackTreeView::OnCurrentLayerChanged);
+    UOdysseyLayerStack::OnHierarchyChanged().AddRaw(this, &SOdysseyLayerStackTreeView::OnLayerStackHierarchyChanged);
+	UOdysseyLayer::OnIsExpandedChanged().AddRaw(this, &SOdysseyLayerStackTreeView::OnLayerIsExpandedChanged);
 }
 
 //CONSTRUCTION/DESTRUCTION-----------------------------------------------
-void SOdysseyLayerStackNewTreeView::Construct(const FArguments& InArgs)
+void SOdysseyLayerStackTreeView::Construct(const FArguments& InArgs)
 {
     //mLayerStack.Assign(*this, InArgs._LayerStack);
     mLayerStack = InArgs._LayerStack;
@@ -109,11 +109,11 @@ void SOdysseyLayerStackNewTreeView::Construct(const FArguments& InArgs)
         STreeView<UOdysseyLayer*>::FArguments()
         .TreeItemsSource(rootLayers)
         .OnGenerateRow( InArgs._OnGenerateRow )
-        .OnGetChildren( this, &SOdysseyLayerStackNewTreeView::OnGetChildren )
-        .OnExpansionChanged( this, &SOdysseyLayerStackNewTreeView::OnExpansionChanged )
-        //.OnSelectionChanged( this, &SOdysseyLayerStackNewTreeView::OnSelectionChanged )
-        .OnItemScrolledIntoView(this, &SOdysseyLayerStackNewTreeView::OnItemScrolledIntoView)
-        .OnContextMenuOpening( this, &SOdysseyLayerStackNewTreeView::OnContextMenuOpening )
+        .OnGetChildren( this, &SOdysseyLayerStackTreeView::OnGetChildren )
+        .OnExpansionChanged( this, &SOdysseyLayerStackTreeView::OnExpansionChanged )
+        //.OnSelectionChanged( this, &SOdysseyLayerStackTreeView::OnSelectionChanged )
+        .OnItemScrolledIntoView(this, &SOdysseyLayerStackTreeView::OnItemScrolledIntoView)
+        .OnContextMenuOpening( this, &SOdysseyLayerStackTreeView::OnContextMenuOpening )
         .SelectionMode( ESelectionMode::Multi )
         .HeaderRow(headerRow)
     );
@@ -126,7 +126,7 @@ void SOdysseyLayerStackNewTreeView::Construct(const FArguments& InArgs)
 //-------------------------------------------------------------------- SWidget overrides
 
 int32
-SOdysseyLayerStackNewTreeView::OnPaint( const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled ) const
+SOdysseyLayerStackTreeView::OnPaint( const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled ) const
 {
     int32 layerId = STreeView<UOdysseyLayer*>::OnPaint( Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled );
 
@@ -186,7 +186,7 @@ SOdysseyLayerStackNewTreeView::OnPaint( const FPaintArgs& Args, const FGeometry&
 }
 
 FReply
-SOdysseyLayerStackNewTreeView::OnKeyDown( const FGeometry& iGeometry, const FKeyEvent& iKeyEvent )
+SOdysseyLayerStackTreeView::OnKeyDown( const FGeometry& iGeometry, const FKeyEvent& iKeyEvent )
 {
 	if (mCommandList->ProcessCommandBindings(iKeyEvent))
         return FReply::Handled();
@@ -195,7 +195,7 @@ SOdysseyLayerStackNewTreeView::OnKeyDown( const FGeometry& iGeometry, const FKey
 }
 
 FReply
-SOdysseyLayerStackNewTreeView::OnDragOver(const FGeometry& MyGeometry, const FDragDropEvent& DragDropEvent)
+SOdysseyLayerStackTreeView::OnDragOver(const FGeometry& MyGeometry, const FDragDropEvent& DragDropEvent)
 {
     if ( !mLayerStack )
         return FReply::Unhandled();
@@ -232,13 +232,13 @@ SOdysseyLayerStackNewTreeView::OnDragOver(const FGeometry& MyGeometry, const FDr
 }
 
 void
-SOdysseyLayerStackNewTreeView::OnDragLeave(const FDragDropEvent& DragDropEvent)
+SOdysseyLayerStackTreeView::OnDragLeave(const FDragDropEvent& DragDropEvent)
 {
     mDisplayDropZone = false;
 }
 
 FReply
-SOdysseyLayerStackNewTreeView::OnDrop(const FGeometry& MyGeometry, const FDragDropEvent& DragDropEvent)
+SOdysseyLayerStackTreeView::OnDrop(const FGeometry& MyGeometry, const FDragDropEvent& DragDropEvent)
 {
     mDisplayDropZone = false;
 
@@ -279,7 +279,7 @@ SOdysseyLayerStackNewTreeView::OnDrop(const FGeometry& MyGeometry, const FDragDr
 }
 
 void
-SOdysseyLayerStackNewTreeView::ResetDropZone()
+SOdysseyLayerStackTreeView::ResetDropZone()
 {
     mDisplayDropZone = false;
 }
@@ -287,7 +287,7 @@ SOdysseyLayerStackNewTreeView::ResetDropZone()
 //PRIVATE API-----------------------------------------------------------
 
 void
-SOdysseyLayerStackNewTreeView::OnGetChildren(UOdysseyLayer* iParent, TArray<UOdysseyLayer*>& oChildren) const
+SOdysseyLayerStackTreeView::OnGetChildren(UOdysseyLayer* iParent, TArray<UOdysseyLayer*>& oChildren) const
 {
     if ( !mLayerStack )
         return;
@@ -296,7 +296,7 @@ SOdysseyLayerStackNewTreeView::OnGetChildren(UOdysseyLayer* iParent, TArray<UOdy
 }
 
 void
-SOdysseyLayerStackNewTreeView::RefreshRootLayersArray()
+SOdysseyLayerStackTreeView::RefreshRootLayersArray()
 {
     /* mRootLayers.Empty();
 
@@ -309,7 +309,7 @@ SOdysseyLayerStackNewTreeView::RefreshRootLayersArray()
 }
 
 void
-SOdysseyLayerStackNewTreeView::RefreshAllExpansionStates()
+SOdysseyLayerStackTreeView::RefreshAllExpansionStates()
 {
     if ( !mLayerStack )
         return;
@@ -325,7 +325,7 @@ SOdysseyLayerStackNewTreeView::RefreshAllExpansionStates()
 }
 
 void
-SOdysseyLayerStackNewTreeView::OnLayerStackHierarchyChanged(UOdysseyLayerStack* iLayerStack)
+SOdysseyLayerStackTreeView::OnLayerStackHierarchyChanged(UOdysseyLayerStack* iLayerStack)
 {
     if ( !mLayerStack )
         return;
@@ -338,7 +338,7 @@ SOdysseyLayerStackNewTreeView::OnLayerStackHierarchyChanged(UOdysseyLayerStack* 
 }
 
 void
-SOdysseyLayerStackNewTreeView::SetCurrentLayerFromSelectorItem()
+SOdysseyLayerStackTreeView::SetCurrentLayerFromSelectorItem()
 {
     if ( !mLayerStack )
         return;
@@ -363,7 +363,7 @@ SOdysseyLayerStackNewTreeView::SetCurrentLayerFromSelectorItem()
 }
 
 void
-SOdysseyLayerStackNewTreeView::Private_SignalSelectionChanged(ESelectInfo::Type SelectInfo)
+SOdysseyLayerStackTreeView::Private_SignalSelectionChanged(ESelectInfo::Type SelectInfo)
 {
     if ( !mLayerStack )
     {
@@ -389,7 +389,7 @@ SOdysseyLayerStackNewTreeView::Private_SignalSelectionChanged(ESelectInfo::Type 
 }
 
 void
-SOdysseyLayerStackNewTreeView::OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStack)
+SOdysseyLayerStackTreeView::OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStack)
 {
     if ( !mLayerStack )
         return;
@@ -410,15 +410,15 @@ SOdysseyLayerStackNewTreeView::OnCurrentLayerChanged(UOdysseyLayerStack* iLayerS
 // ContextMenu
 
 /*
-TArray<SOdysseyLayerStackNewTreeView::FOnExtendContextMenu>&
-SOdysseyLayerStackNewTreeView::GetOnExtendContextMenuDelegates()
+TArray<SOdysseyLayerStackTreeView::FOnExtendContextMenu>&
+SOdysseyLayerStackTreeView::GetOnExtendContextMenuDelegates()
 {
     static TArray<FOnExtendContextMenu> onExtendContextMenuDelegates;
     return onExtendContextMenuDelegates;
 }*/
 
 TSharedPtr<SWidget>
-SOdysseyLayerStackNewTreeView::OnContextMenuOpening()
+SOdysseyLayerStackTreeView::OnContextMenuOpening()
 {
     //Create a new command, so that we can add context menu specific entries 
     TSharedRef<FUICommandList> commandList = MakeShared<FUICommandList>();
@@ -434,7 +434,7 @@ SOdysseyLayerStackNewTreeView::OnContextMenuOpening()
     return UToolMenus::Get()->GenerateWidget(contextMenuName, menuContext);
 }
 
-void SOdysseyLayerStackNewTreeView::CreateContextMenu()
+void SOdysseyLayerStackTreeView::CreateContextMenu()
 {
     UToolMenus* ToolMenus = UToolMenus::Get();
     if (!ensure(ToolMenus))
@@ -465,52 +465,52 @@ void SOdysseyLayerStackNewTreeView::CreateContextMenu()
 }
 
 TArray<TSharedPtr<FExtender>>
-SOdysseyLayerStackNewTreeView::ExtendContextMenu()
+SOdysseyLayerStackTreeView::ExtendContextMenu()
 {
 	return TArray< TSharedPtr<FExtender> >();
 }
 
 void
-SOdysseyLayerStackNewTreeView::MapActionsToCommandList()
+SOdysseyLayerStackTreeView::MapActionsToCommandList()
 {
     mCommandList->MapAction(
         FGenericCommands::Get().SelectAll,
-        FExecuteAction::CreateRaw(this, &SOdysseyLayerStackNewTreeView::SelectAllLayers)
+        FExecuteAction::CreateRaw(this, &SOdysseyLayerStackTreeView::SelectAllLayers)
     );
 
     mCommandList->MapAction(
         FGenericCommands::Get().Delete,
-        FExecuteAction::CreateRaw(this, &SOdysseyLayerStackNewTreeView::DeleteSelectedLayers),
-        FCanExecuteAction::CreateRaw(this, &SOdysseyLayerStackNewTreeView::CanDeleteSelectedLayers)
+        FExecuteAction::CreateRaw(this, &SOdysseyLayerStackTreeView::DeleteSelectedLayers),
+        FCanExecuteAction::CreateRaw(this, &SOdysseyLayerStackTreeView::CanDeleteSelectedLayers)
     );
 
     mCommandList->MapAction(
         FGenericCommands::Get().Duplicate,
-        FExecuteAction::CreateRaw(this, &SOdysseyLayerStackNewTreeView::DuplicateSelectedLayers)
+        FExecuteAction::CreateRaw(this, &SOdysseyLayerStackTreeView::DuplicateSelectedLayers)
     );
 
     mCommandList->MapAction(
         FGenericCommands::Get().Rename,
-        FExecuteAction::CreateRaw(this, &SOdysseyLayerStackNewTreeView::RenameCurrentLayer)
+        FExecuteAction::CreateRaw(this, &SOdysseyLayerStackTreeView::RenameCurrentLayer)
     );
 
     mCommandList->MapAction(
         FOdysseyLayerStackEditorCommands::Get().MergeSelectedLayers,
-        FExecuteAction::CreateRaw(this, &SOdysseyLayerStackNewTreeView::MergeSelectedLayers),
-        FCanExecuteAction::CreateRaw(this, &SOdysseyLayerStackNewTreeView::CanMergeSelectedLayers)
+        FExecuteAction::CreateRaw(this, &SOdysseyLayerStackTreeView::MergeSelectedLayers),
+        FCanExecuteAction::CreateRaw(this, &SOdysseyLayerStackTreeView::CanMergeSelectedLayers)
     );
 
     mCommandList->MapAction(
         FOdysseyLayerStackEditorCommands::Get().FlattenSelectedLayers,
-        FExecuteAction::CreateRaw(this, &SOdysseyLayerStackNewTreeView::FlattenSelectedLayers),
-        FCanExecuteAction::CreateRaw(this, &SOdysseyLayerStackNewTreeView::CanFlattenSelectedLayers)
+        FExecuteAction::CreateRaw(this, &SOdysseyLayerStackTreeView::FlattenSelectedLayers),
+        FCanExecuteAction::CreateRaw(this, &SOdysseyLayerStackTreeView::CanFlattenSelectedLayers)
     );
 }
 
 // Commands
 
 void
-SOdysseyLayerStackNewTreeView::SelectAllLayers()
+SOdysseyLayerStackTreeView::SelectAllLayers()
 {
     if ( !mLayerStack )
         return;
@@ -521,7 +521,7 @@ SOdysseyLayerStackNewTreeView::SelectAllLayers()
 }
 
 void
-SOdysseyLayerStackNewTreeView::DeleteSelectedLayers()
+SOdysseyLayerStackTreeView::DeleteSelectedLayers()
 {
     if ( !mLayerStack )
         return;
@@ -531,7 +531,7 @@ SOdysseyLayerStackNewTreeView::DeleteSelectedLayers()
 }
 
 bool
-SOdysseyLayerStackNewTreeView::CanDeleteSelectedLayers()
+SOdysseyLayerStackTreeView::CanDeleteSelectedLayers()
 {
     if ( !mLayerStack )
         return false;
@@ -552,7 +552,7 @@ SOdysseyLayerStackNewTreeView::CanDeleteSelectedLayers()
 }
 
 void
-SOdysseyLayerStackNewTreeView::DuplicateSelectedLayers()
+SOdysseyLayerStackTreeView::DuplicateSelectedLayers()
 {
     if ( !mLayerStack )
         return;
@@ -567,7 +567,7 @@ SOdysseyLayerStackNewTreeView::DuplicateSelectedLayers()
 }
 
 void
-SOdysseyLayerStackNewTreeView::RenameCurrentLayer()
+SOdysseyLayerStackTreeView::RenameCurrentLayer()
 {
     if ( !mLayerStack )
         return;
@@ -580,7 +580,7 @@ SOdysseyLayerStackNewTreeView::RenameCurrentLayer()
 }
 
 void
-SOdysseyLayerStackNewTreeView::MergeSelectedLayers()
+SOdysseyLayerStackTreeView::MergeSelectedLayers()
 {
     if ( !mLayerStack )
         return;
@@ -593,7 +593,7 @@ SOdysseyLayerStackNewTreeView::MergeSelectedLayers()
 }
 
 bool
-SOdysseyLayerStackNewTreeView::CanMergeSelectedLayers()
+SOdysseyLayerStackTreeView::CanMergeSelectedLayers()
 {
     if ( !mLayerStack )
         return false;
@@ -606,7 +606,7 @@ SOdysseyLayerStackNewTreeView::CanMergeSelectedLayers()
 }
 
 void
-SOdysseyLayerStackNewTreeView::FlattenSelectedLayers()
+SOdysseyLayerStackTreeView::FlattenSelectedLayers()
 {
     if ( !mLayerStack )
         return;
@@ -619,7 +619,7 @@ SOdysseyLayerStackNewTreeView::FlattenSelectedLayers()
 }
 
 bool
-SOdysseyLayerStackNewTreeView::CanFlattenSelectedLayers()
+SOdysseyLayerStackTreeView::CanFlattenSelectedLayers()
 {
     if ( !mLayerStack )
         return false;
@@ -632,7 +632,7 @@ SOdysseyLayerStackNewTreeView::CanFlattenSelectedLayers()
 }
     
 void
-SOdysseyLayerStackNewTreeView::OnLayerIsExpandedChanged(UOdysseyLayer* iLayerNode)
+SOdysseyLayerStackTreeView::OnLayerIsExpandedChanged(UOdysseyLayer* iLayerNode)
 {
     if ( !mLayerStack )
         return;
@@ -647,13 +647,13 @@ SOdysseyLayerStackNewTreeView::OnLayerIsExpandedChanged(UOdysseyLayer* iLayerNod
 }
 
 void
-SOdysseyLayerStackNewTreeView::OnExpansionChanged( UOdysseyLayer* iLayerNode, bool iIsExpanded )
+SOdysseyLayerStackTreeView::OnExpansionChanged( UOdysseyLayer* iLayerNode, bool iIsExpanded )
 {
     FOdysseyObjectEditorUtils::SetPropertyValue(iLayerNode, "IsExpanded", iIsExpanded);
 }
 
 void
-SOdysseyLayerStackNewTreeView::OnItemScrolledIntoView(UOdysseyLayer* iLayer, const TSharedPtr<ITableRow>& iRow)
+SOdysseyLayerStackTreeView::OnItemScrolledIntoView(UOdysseyLayer* iLayer, const TSharedPtr<ITableRow>& iRow)
 {
     if ( !mLayerStack )
         return;
@@ -670,7 +670,7 @@ SOdysseyLayerStackNewTreeView::OnItemScrolledIntoView(UOdysseyLayer* iLayer, con
 }
     
 TSharedPtr<FOdysseyLayerStackDragDropOperation>
-SOdysseyLayerStackNewTreeView::CreateDragDropOperation() const
+SOdysseyLayerStackTreeView::CreateDragDropOperation() const
 {
     if ( !mLayerStack )
         return nullptr;

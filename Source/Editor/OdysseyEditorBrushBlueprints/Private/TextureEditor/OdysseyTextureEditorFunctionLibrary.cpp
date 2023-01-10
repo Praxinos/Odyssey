@@ -4,8 +4,6 @@
 #include "OdysseyTextureEditorFunctionLibrary.h"
 
 #include "OdysseyBrushAssetBase.h"
-#include "OdysseyLayerStack.h"
-#include "OdysseyLayer.h"
 #include <ULIS>
 #include "ULISLoaderModule.h"
 

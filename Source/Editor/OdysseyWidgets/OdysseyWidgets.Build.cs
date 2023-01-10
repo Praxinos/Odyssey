@@ -29,7 +29,6 @@ public class OdysseyWidgets : ModuleRules
                 "PropertyEditor",
                 "OdysseyBrush",
                 "OdysseyImaging",
-                "OdysseyLayer",
                 "OdysseyLayerStack",
                 "OdysseyPaintEngine",
                 "OdysseyStyle",

@@ -11,7 +11,7 @@
 #define LOCTEXT_NAMESPACE "SOdysseyTextureLayerFolderRow"
 
 //CONSTRUCTION/DESTRUCTION----------------------------------------------- SMultiColumnTableRow
-void SOdysseyTextureLayerFolderRow::Construct(const FArguments& InArgs, const TSharedRef<SOdysseyLayerStackNewTreeView>& iOwnerTableView, UOdysseyTextureLayerFolder* iTextureLayerFolder)
+void SOdysseyTextureLayerFolderRow::Construct(const FArguments& InArgs, const TSharedRef<SOdysseyLayerStackTreeView>& iOwnerTableView, UOdysseyTextureLayerFolder* iTextureLayerFolder)
 {
     ensure(iTextureLayerFolder);
     mTextureLayerFolder = iTextureLayerFolder;

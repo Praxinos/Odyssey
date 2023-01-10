@@ -17,7 +17,6 @@ public class OdysseyPaintEngine : ModuleRules
                 "Engine",
                 "OdysseyCore",
                 "OdysseyImaging",
-                "OdysseyLayer",
                 "OdysseyLayerStack",
                 "OdysseyMaths",
                 "MeshPaint"

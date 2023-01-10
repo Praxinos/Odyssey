@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "OdysseyLayerStackNew.h"
+#include "OdysseyLayerStack.h"
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "OdysseyTextureLayerStack.generated.h"
 

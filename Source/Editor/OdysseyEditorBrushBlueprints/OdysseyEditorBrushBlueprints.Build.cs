@@ -17,7 +17,6 @@ public class OdysseyEditorBrushBlueprints : ModuleRules
                 "Engine",
 
                 "OdysseyBrush",
-                "OdysseyLayer",
                 "OdysseyLayerStack",
                 "OdysseyPainterEditor",
 

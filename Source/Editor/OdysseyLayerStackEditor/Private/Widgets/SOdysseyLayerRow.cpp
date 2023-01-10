@@ -6,14 +6,14 @@
 #include "OdysseyStyleSet.h"
 #include "Widgets/Text/SInlineEditableTextBlock.h"
 #include "Framework/Commands/GenericCommands.h"
-#include "Widgets/SOdysseyLayerStackNewTreeView.h"
+#include "Widgets/SOdysseyLayerStackTreeView.h"
 #include "Widgets/Layout/SWidgetSwitcher.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 
 #define LOCTEXT_NAMESPACE "SOdysseyLayerRow"
 
 //CONSTRUCTION/DESTRUCTION----------------------------------------------- SMultiColumnTableRow
-void SOdysseyLayerRow::Construct(const FArguments& InArgs, const TSharedRef<SOdysseyLayerStackNewTreeView>& iOwnerTableView, UOdysseyLayer* iLayer)
+void SOdysseyLayerRow::Construct(const FArguments& InArgs, const TSharedRef<SOdysseyLayerStackTreeView>& iOwnerTableView, UOdysseyLayer* iLayer)
 {
     ensure(iLayer);
     mLayer = iLayer;
@@ -22,7 +22,7 @@ void SOdysseyLayerRow::Construct(const FArguments& InArgs, const TSharedRef<SOdy
     args.Style(&FOdysseyStyle::GetWidgetStyle<FTableRowStyle>("OdysseyLayerStack.AlternatedRows"))
         .OnCanAcceptDrop(this, &SOdysseyLayerRow::OnRowCanAcceptDrop)
         .OnAcceptDrop(this, &SOdysseyLayerRow::OnRowAcceptDrop)
-        .OnDragDetected(this, &SOdysseyLayerRow::OnRowDragDetected, TWeakPtr<SOdysseyLayerStackNewTreeView>(iOwnerTableView));
+        .OnDragDetected(this, &SOdysseyLayerRow::OnRowDragDetected, TWeakPtr<SOdysseyLayerStackTreeView>(iOwnerTableView));
 
     SMultiColumnTableRow<UOdysseyLayer*>::Construct(
         args,
@@ -311,7 +311,7 @@ SOdysseyLayerRow::ComputeItemDropZoneForLeaf(FVector2D iLocalPointerPos, FVector
 TOptional<EItemDropZone>
 SOdysseyLayerRow::OnRowCanAcceptDrop(const FDragDropEvent& iEvent, EItemDropZone iDropZone, UOdysseyLayer* iLayer)
 {
-    StaticCastSharedPtr<SOdysseyLayerStackNewTreeView>(OwnerTablePtr.Pin())->ResetDropZone();
+    StaticCastSharedPtr<SOdysseyLayerStackTreeView>(OwnerTablePtr.Pin())->ResetDropZone();
 
     EItemDropZone emptyDropZone;
 	if ( !mLayer )
@@ -364,7 +364,7 @@ SOdysseyLayerRow::OnRowCanAcceptDrop(const FDragDropEvent& iEvent, EItemDropZone
 FReply
 SOdysseyLayerRow::OnRowAcceptDrop(const FDragDropEvent& iEvent, EItemDropZone iDropZone, UOdysseyLayer* iLayer)
 {
-    StaticCastSharedPtr<SOdysseyLayerStackNewTreeView>(OwnerTablePtr.Pin())->ResetDropZone();
+    StaticCastSharedPtr<SOdysseyLayerStackTreeView>(OwnerTablePtr.Pin())->ResetDropZone();
 
 	TOptional<EItemDropZone> dropZone = OnRowCanAcceptDrop(iEvent, iDropZone, iLayer);
     if (!dropZone.IsSet())
@@ -447,9 +447,9 @@ SOdysseyLayerRow::OnRowAcceptDrop(const FDragDropEvent& iEvent, EItemDropZone iD
 }
 
 FReply
-SOdysseyLayerRow::OnRowDragDetected(const FGeometry& iGeometry, const FPointerEvent& iEvent, TWeakPtr<SOdysseyLayerStackNewTreeView> iTreeView)
+SOdysseyLayerRow::OnRowDragDetected(const FGeometry& iGeometry, const FPointerEvent& iEvent, TWeakPtr<SOdysseyLayerStackTreeView> iTreeView)
 {
-    TSharedPtr<SOdysseyLayerStackNewTreeView> treeView = iTreeView.Pin();
+    TSharedPtr<SOdysseyLayerStackTreeView> treeView = iTreeView.Pin();
 	if (treeView.IsValid() && iEvent.IsMouseButtonDown( EKeys::LeftMouseButton ))
 	{
 		TSharedPtr<FOdysseyLayerStackDragDropOperation> operation = treeView->CreateDragDropOperation();

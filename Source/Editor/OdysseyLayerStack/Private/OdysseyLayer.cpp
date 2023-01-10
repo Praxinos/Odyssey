@@ -3,7 +3,7 @@
 
 #include "OdysseyLayer.h"
 
-#include "OdysseyLayerStackNew.h"
+#include "OdysseyLayerStack.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "Misc/TransactionObjectEvent.h"
 

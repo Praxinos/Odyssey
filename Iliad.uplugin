@@ -57,11 +57,6 @@
 			"LoadingPhase": "Default"
 		},
 		{
-			"Name": "OdysseyLayer",
-			"Type": "Editor",
-			"LoadingPhase": "Default"
-		},
-		{
 			"Name": "OdysseyLayerStack",
 			"Type": "Editor",
 			"LoadingPhase": "Default"

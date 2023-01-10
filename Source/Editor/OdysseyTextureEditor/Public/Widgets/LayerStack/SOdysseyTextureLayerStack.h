@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Widgets/SOdysseyLayerStackNewTreeView.h"
+#include "Widgets/SOdysseyLayerStackTreeView.h"
 
 /**
  * Implements the Texture Layer stack widget
@@ -33,5 +33,5 @@ private:
 
 private:
     TSlateAttribute<UOdysseyLayerStack*> mLayerStack;
-    TSharedPtr<SOdysseyLayerStackNewTreeView> mTreeView;
+    TSharedPtr<SOdysseyLayerStackTreeView> mTreeView;
 };

@@ -5,7 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "OdysseyPerformanceMode.h"
-#include "OdysseyLayerStackNew.generated.h"
+#include "OdysseyLayerStack.generated.h"
 
 UCLASS(Abstract, BlueprintType, config=EditorPerProjectUserSettings, PerObjectConfig)
 class ODYSSEYLAYERSTACK_API UOdysseyLayerStack

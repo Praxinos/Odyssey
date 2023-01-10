@@ -2,7 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "OdysseyLayerFunctionLibrary.h"
-#include "OdysseyLayerStackNew.h"
+#include "OdysseyLayerStack.h"
 
 bool
 UOdysseyLayerFunctionLibrary::IsLayerActivatedInStack(UOdysseyLayer* iLayer)

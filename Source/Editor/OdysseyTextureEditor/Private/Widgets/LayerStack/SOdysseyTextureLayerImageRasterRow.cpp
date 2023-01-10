@@ -9,7 +9,7 @@
 #define LOCTEXT_NAMESPACE "SOdysseyTextureLayerImageRasterRow"
 
 //CONSTRUCTION/DESTRUCTION----------------------------------------------- SMultiColumnTableRow
-void SOdysseyTextureLayerImageRasterRow::Construct(const FArguments& InArgs, const TSharedRef<SOdysseyLayerStackNewTreeView>& iOwnerTableView, UOdysseyTextureLayerImageRaster* iTextureLayerImageRaster)
+void SOdysseyTextureLayerImageRasterRow::Construct(const FArguments& InArgs, const TSharedRef<SOdysseyLayerStackTreeView>& iOwnerTableView, UOdysseyTextureLayerImageRaster* iTextureLayerImageRaster)
 {
     ensure(iTextureLayerImageRaster);
     mTextureLayerImageRaster = iTextureLayerImageRaster;

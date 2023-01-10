@@ -8,7 +8,7 @@
 #include "CoreMinimal.h"
 #include "Widgets/Views/STableRow.h"
 
-class SOdysseyLayerStackNewTreeView;
+class SOdysseyLayerStackTreeView;
 
 /**
  * Implements a layer row widget
@@ -23,7 +23,7 @@ public:
     
 public:
     // Construction / Destruction
-    void Construct(const FArguments& iArgs, const TSharedRef<SOdysseyLayerStackNewTreeView>& iOwnerTableView, UOdysseyLayer* iLayer);
+    void Construct(const FArguments& iArgs, const TSharedRef<SOdysseyLayerStackTreeView>& iOwnerTableView, UOdysseyLayer* iLayer);
 
 public:
     //Getters
@@ -84,7 +84,7 @@ protected:
      * @param iEvent 
      * @return FReply 
      */
-    FReply OnRowDragDetected(const FGeometry& iGeometry, const FPointerEvent& iEvent, TWeakPtr<SOdysseyLayerStackNewTreeView> iTreeView);
+    FReply OnRowDragDetected(const FGeometry& iGeometry, const FPointerEvent& iEvent, TWeakPtr<SOdysseyLayerStackTreeView> iTreeView);
 
 
 private:
