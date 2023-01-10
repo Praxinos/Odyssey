@@ -7,7 +7,7 @@
 #include "LayerStack/OdysseyTextureLayerStack.h"
 #include "LayerStack/OdysseyTextureLayerImageRaster.h"
 #include "LayerStack/OdysseyTextureLayerFolder.h"
-#include "OdysseyTextureAssetUserData.h"
+#include "OdysseyTextureLayerStackUserData.h"
 #include "OdysseyRasterBlock.h"
 #include "ULISLoaderModule.h"
 
@@ -792,7 +792,7 @@ FOdysseyPsdOperations::CreateLayerStack()
 
     ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(textureFormat);
 
-    UOdysseyTextureAssetUserData* userData = Cast<UOdysseyTextureAssetUserData>(mTexture->GetAssetUserDataOfClass(UOdysseyTextureAssetUserData::StaticClass()));
+    UOdysseyTextureLayerStackUserData* userData = Cast<UOdysseyTextureLayerStackUserData>(mTexture->GetAssetUserDataOfClass(UOdysseyTextureLayerStackUserData::StaticClass()));
     if (userData)
     {
         mLayerStack = userData->GetLayerStack();
@@ -802,7 +802,7 @@ FOdysseyPsdOperations::CreateLayerStack()
         mTexture->Source.Init(mImageWidth, mImageHeight, 1, 1, textureFormat);
 
         //Init user data
-        userData = NewObject<UOdysseyTextureAssetUserData>(mTexture, NAME_None, RF_Public);
+        userData = NewObject<UOdysseyTextureLayerStackUserData>(mTexture, NAME_None, RF_Public);
 
         userData->InitWithEmptyLayerStack();
 

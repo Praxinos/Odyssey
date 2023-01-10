@@ -6,7 +6,7 @@
 #include "OdysseyPainterEditor.h"
 #include "Engine/Texture2D.h"
 #include "OdysseyTextureEditorGUI.h"
-#include "OdysseyTextureAssetUserData.h"
+#include "OdysseyTextureLayerStackUserData.h"
 #include "LayerStack/OdysseyTextureLayerStack.h"
 #include "Tools/RasterDrawingTool/OdysseyTextureEditorRasterDrawingTool.h"
 #include "Tools/PaintBucketTool/OdysseyTextureEditorPaintBucketTool.h"
@@ -35,7 +35,7 @@ public:
 	virtual FOdysseySurfaceTexture2DEditable* DisplaySurface() const override;
     
     virtual void				        SetTexture(UTexture2D* iTexture);
-    UOdysseyTextureAssetUserData*       TextureUserData() const;
+    UOdysseyTextureLayerStackUserData*       TextureUserData() const;
 
     virtual UOdysseyTextureEditorRasterDrawingTool* GetRasterDrawingTool() const override;
     virtual UOdysseyTextureEditorPaintBucketTool* GetPaintBucketTool() const override;

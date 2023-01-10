@@ -68,7 +68,7 @@ UOdysseyTextureFactory::FactoryCreateNew( UClass* iClass, UObject* iParent, FNam
      * ES: No need to create the userdata, it will be created when ILIAD will open the texture for the first time
      * 
      */
-    //UOdysseyTextureAssetUserData* userData = NewObject< UOdysseyTextureAssetUserData >(texture, NAME_None, RF_Public);
+    //UOdysseyTextureLayerStackUserData* userData = NewObject< UOdysseyTextureLayerStackUserData >(texture, NAME_None, RF_Public);
 	//::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
     //userData->GetLayerStack()->Init(mTextureWidth, mTextureHeight, format);
 

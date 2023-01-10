@@ -10,7 +10,7 @@
 #include "PaperSprite.h"
 #include "Subsystems/AssetEditorSubsystem.h"
 #include "LayerStack/OdysseyTextureLayerImageRaster.h"
-#include "OdysseyTextureAssetUserData.h"
+#include "OdysseyTextureLayerStackUserData.h"
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "OdysseyPixelFormat.h"
 #include "ULISLoaderModule.h"
@@ -112,9 +112,9 @@ FOdysseyFlipbookWrapper::DuplicateKeyFrame(int32 iIndex, UTexture2D** oTexture, 
             if (!texture)
                 return false;
 
-            UOdysseyTextureAssetUserData* userData = NewObject<UOdysseyTextureAssetUserData>(texture, NAME_None, RF_Public);
+            UOdysseyTextureLayerStackUserData* userData = NewObject<UOdysseyTextureLayerStackUserData>(texture, NAME_None, RF_Public);
 
-            UOdysseyTextureAssetUserData* srcTextureUserData = Cast<UOdysseyTextureAssetUserData>(srcTexture->GetAssetUserDataOfClass(UOdysseyTextureAssetUserData::StaticClass()));
+            UOdysseyTextureLayerStackUserData* srcTextureUserData = Cast<UOdysseyTextureLayerStackUserData>(srcTexture->GetAssetUserDataOfClass(UOdysseyTextureLayerStackUserData::StaticClass()));
             if ( srcTextureUserData )
             {
                 userData->InitWithDuplicateLayerStack(srcTextureUserData->GetLayerStack());
@@ -256,7 +256,7 @@ FOdysseyFlipbookWrapper::CreateTexture(int32 iWidth, int32 iHeight, ETextureSour
     InitTextureWithBlockData(blockPtr, texture2D, iFormat);
 
     //Create Layer Stack
-	//UOdysseyTextureAssetUserData* userData = NewObject<UOdysseyTextureAssetUserData>(texture2D, NAME_None, RF_Public);;
+	//UOdysseyTextureLayerStackUserData* userData = NewObject<UOdysseyTextureLayerStackUserData>(texture2D, NAME_None, RF_Public);;
 
 	/*
 	 * Old LayerStack
@@ -295,8 +295,8 @@ FOdysseyFlipbookWrapper::CreateTexture(int32 iWidth, int32 iHeight, ETextureSour
 FOdysseyFlipbookWrapper::CopyTextureContent(UTexture2D* iSrcTexture, UTexture2D* iDstTexture)
 {
     ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(iSrcTexture->Source.GetFormat());
-    UOdysseyTextureAssetUserData* textureUserData = Cast<UOdysseyTextureAssetUserData>(iDstTexture->GetAssetUserDataOfClass(UOdysseyTextureAssetUserData::StaticClass()));
-    UOdysseyTextureAssetUserData* srcTextureUserData = Cast<UOdysseyTextureAssetUserData>(iSrcTexture->GetAssetUserDataOfClass(UOdysseyTextureAssetUserData::StaticClass()));
+    UOdysseyTextureLayerStackUserData* textureUserData = Cast<UOdysseyTextureLayerStackUserData>(iDstTexture->GetAssetUserDataOfClass(UOdysseyTextureLayerStackUserData::StaticClass()));
+    UOdysseyTextureLayerStackUserData* srcTextureUserData = Cast<UOdysseyTextureLayerStackUserData>(iSrcTexture->GetAssetUserDataOfClass(UOdysseyTextureLayerStackUserData::StaticClass()));
 
     if( srcTextureUserData )
     {

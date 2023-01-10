@@ -6,7 +6,7 @@
 #include "ContentBrowserModule.h"
 #include "IContentBrowserSingleton.h"
 #include "Interfaces/ITextureEditorModule.h"
-#include "OdysseyTextureAssetUserData.h"
+#include "OdysseyTextureLayerStackUserData.h"
 #include "OdysseyTextureEditorModule.h"
 #include "OdysseyTextureEditorSettings.h"
 #include "OdysseyTexture.h"

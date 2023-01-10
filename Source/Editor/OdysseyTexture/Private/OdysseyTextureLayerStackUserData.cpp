@@ -1,7 +1,7 @@
 // IDDN.FR.001.250001.006.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
-#include "OdysseyTextureAssetUserData.h"
+#include "OdysseyTextureLayerStackUserData.h"
 #include "UObject/ObjectSaveContext.h"
 
 #include "EngineUtils.h"
@@ -10,7 +10,7 @@
 //End UObject Interface----
 
 void
-UOdysseyTextureAssetUserData::InitWithEmptyLayerStack()
+UOdysseyTextureLayerStackUserData::InitWithEmptyLayerStack()
 {
     if (LayerStack)
         return;
@@ -18,7 +18,7 @@ UOdysseyTextureAssetUserData::InitWithEmptyLayerStack()
 }
 
 void
-UOdysseyTextureAssetUserData::InitWithDefaultLayerStack()
+UOdysseyTextureLayerStackUserData::InitWithDefaultLayerStack()
 {
     if (LayerStack)
         return;
@@ -26,7 +26,7 @@ UOdysseyTextureAssetUserData::InitWithDefaultLayerStack()
 }
 
 void
-UOdysseyTextureAssetUserData::InitWithDuplicateLayerStack(UOdysseyTextureLayerStack* iLayerStack)
+UOdysseyTextureLayerStackUserData::InitWithDuplicateLayerStack(UOdysseyTextureLayerStack* iLayerStack)
 {
     if ( LayerStack )
         return;
@@ -39,7 +39,7 @@ UOdysseyTextureAssetUserData::InitWithDuplicateLayerStack(UOdysseyTextureLayerSt
 }
 
 UOdysseyTextureLayerStack*
-UOdysseyTextureAssetUserData::GetLayerStack()
+UOdysseyTextureLayerStackUserData::GetLayerStack()
 {
     if (!LayerStack)
         InitWithDefaultLayerStack();
@@ -47,7 +47,7 @@ UOdysseyTextureAssetUserData::GetLayerStack()
 }
 
 UTexture2D*
-UOdysseyTextureAssetUserData::GetTexture()
+UOdysseyTextureLayerStackUserData::GetTexture()
 {
     return Cast<UTexture2D>(GetOuter());
 }

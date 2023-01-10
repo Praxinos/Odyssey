@@ -11,10 +11,10 @@
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "UObject/ObjectSaveContext.h"
 
-#include "OdysseyTextureAssetUserData.generated.h"
+#include "OdysseyTextureLayerStackUserData.generated.h"
 
 UCLASS()
-class ODYSSEYTEXTURE_API UOdysseyTextureAssetUserData : public UAssetUserData
+class ODYSSEYTEXTURE_API UOdysseyTextureLayerStackUserData : public UAssetUserData
 {
     GENERATED_BODY()
 

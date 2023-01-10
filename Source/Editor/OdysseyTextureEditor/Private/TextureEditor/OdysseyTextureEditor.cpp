@@ -111,7 +111,7 @@ FOdysseyTextureEditor::Texture() const
 UOdysseyTextureLayerStack*
 FOdysseyTextureEditor::LayerStack() const
 {
-	UOdysseyTextureAssetUserData* userData = TextureUserData();
+	UOdysseyTextureLayerStackUserData* userData = TextureUserData();
 	if (!userData)
 		return nullptr;
 	
@@ -128,18 +128,18 @@ FOdysseyTextureEditor::DisplaySurface() const
 	return layerStack->GetSurface().Get();
 }
 
-UOdysseyTextureAssetUserData*
+UOdysseyTextureLayerStackUserData*
 FOdysseyTextureEditor::TextureUserData() const
 {
 	if ( !mTexture )
 		return nullptr;
 
-    UOdysseyTextureAssetUserData* userData = Cast<UOdysseyTextureAssetUserData>(mTexture->GetAssetUserDataOfClass(UOdysseyTextureAssetUserData::StaticClass()));
+    UOdysseyTextureLayerStackUserData* userData = Cast<UOdysseyTextureLayerStackUserData>(mTexture->GetAssetUserDataOfClass(UOdysseyTextureLayerStackUserData::StaticClass()));
     if (userData)
         return userData;
 
     //Init user data
-	userData = NewObject<UOdysseyTextureAssetUserData>(mTexture, NAME_None, RF_Public);
+	userData = NewObject<UOdysseyTextureLayerStackUserData>(mTexture, NAME_None, RF_Public);
 
     // Notify for changes
     mTexture->AddAssetUserData( userData );
