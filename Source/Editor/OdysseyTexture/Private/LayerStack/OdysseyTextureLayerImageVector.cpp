@@ -9,6 +9,8 @@
 #include "ULISLoaderModule.h"
 #include "ULISUtils.h"
 #include "OdysseyVectorCircle.h"
+#include "Export/OdysseyVectorExport.h"
+#include "Import/OdysseyVectorImport.h"
 
 #include "blend2d.h"
 
@@ -23,20 +25,22 @@ UOdysseyTextureLayerImageVector::UOdysseyTextureLayerImageVector()
 {
 	LayerTypeName = LOCTEXT("LayerTypeName", "Vector Image Layer");
     Icon = *FOdysseyStyle::GetBrush( "OdysseyLayerStack.ImageLayer16");
-}
+} 
 
 void
 UOdysseyTextureLayerImageVector::Init( uint32 iWidth, uint32 iHeight )
 {
     BLImageData imgData;
 
-    UE_LOG(LogTemp,Warning,TEXT("UOdysseyTextureLayerImageVector::Init %d %d"), iWidth, iHeight );
+
 
     Width  = iWidth;
     Height = iHeight;
 
     mVEngine = new FOdysseyVectorEngine( (double)iWidth
                                        , (double)iHeight );
+
+    UE_LOG(LogTemp,Warning,TEXT("UOdysseyTextureLayerImageVector::Init %d %d %d"), iWidth, iHeight, mVEngine );
 
     mVEngine->GetBLImage().getData( &imgData );
 
@@ -130,14 +134,41 @@ UOdysseyTextureLayerImageVector::Serialize(FArchive& Ar)
 {
     Super::Serialize( Ar );
 
-    UE_LOG(LogTemp,Warning,TEXT("UOdysseyTextureLayerImageVector::Serialize"));
-
-    if ( Ar.IsLoading() )
+    if( Ar.IsSaving() )
     {
-        Init( Width, Height );
+        FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::EXPORT_VECTOR_MAGIC
+                                        , Ar
+                                        , [this](FArchive &Ar) -> void
+        {
+            if( mVEngine )
+            {
+                FOdysseyVectorExport::Write( *mVEngine->GetScene(), Ar );
+            }
+        } );
     }
 
-    Ar << mVEngine;
+    if( Ar.IsLoading() )
+    {
+        uint32 chunkID;
+        uint64 chunkLen;
+        uint64 currentAddress;
+
+        Ar << chunkID;
+        Ar << chunkLen;
+
+        currentAddress = Ar.Tell();
+
+        Init( Width, Height );
+
+        UE_LOG(LogTemp,Warning,TEXT("chunkID %X %d %d"), chunkID, chunkLen, mVEngine );
+
+        if( mVEngine )
+        {
+            FOdysseyVectorImport::Read( *mVEngine->GetScene(), currentAddress + chunkLen, Ar );
+        }
+
+        Ar.Seek( currentAddress + chunkLen );
+    }
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -43,4 +43,5 @@ class ODYSSEYVECTOR_API UOdysseyVectorRoot : public UOdysseyVectorObject
         void InvalidateObject( UOdysseyVectorObject* iObject );
 
         UOdysseyVectorGroup* GroupSelectdObjects();
+        uint32 GetType();
 };

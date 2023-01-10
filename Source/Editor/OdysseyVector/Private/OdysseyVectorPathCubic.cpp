@@ -725,3 +725,9 @@ UOdysseyVectorPathCubic::Serialize(FArchive& Ar)
 {
     UE_LOG(LogTemp,Warning,TEXT("UOdysseyVectorPathCubic::Serialize"));
 }
+
+uint32
+UOdysseyVectorPathCubic::GetType()
+{
+    return UOdysseyVectorObject::VECTORPATHCUBICTYPE;
+}

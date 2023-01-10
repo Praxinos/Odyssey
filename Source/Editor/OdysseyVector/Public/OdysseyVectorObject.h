@@ -15,10 +15,25 @@ class ODYSSEYVECTOR_API UOdysseyVectorObject : public UObject
     public:
         GENERATED_BODY()
 
+        // DO NOT CHANGE !
+        static const uint32 VECTORROOTTYPE      = 0;
+        static const uint32 VECTOROBJECTTYPE    = 1;
+        static const uint32 VECTORGROUPETYPE    = 2;
+        static const uint32 VECTORCIRCLETYPE    = 3;
+        static const uint32 VECTORRECTANGLETYPE = 4;
+        static const uint32 VECTORPATHCUBICTYPE = 5;
+
+
         static constexpr float BBOX_POINT_RADIUS = 4.0f;
 
     protected:
         std::string Name;
+
+        UPROPERTY()
+        uint32 ParentID;
+
+        UPROPERTY()
+        uint32 ObjectID;
 
         UPROPERTY()
         double TranslationX;
@@ -51,6 +66,9 @@ class ODYSSEYVECTOR_API UOdysseyVectorObject : public UObject
         uint32 mFillColor;
 
     public:
+        static uint32 TreeToList( UOdysseyVectorObject* iObject, uint32& iObjectID, std::list<UOdysseyVectorObject*>& iOutList );
+        static uint32 TreeToArray( UOdysseyVectorObject* iObject, uint32& iObjectID, std::vector<UOdysseyVectorObject*>& iOutArray );
+
         ~UOdysseyVectorObject();
         UOdysseyVectorObject();
         void SetName( std::string iName );
@@ -69,6 +87,8 @@ class ODYSSEYVECTOR_API UOdysseyVectorObject : public UObject
         virtual void DrawShape ( ::ULIS::FRectD &roi, uint64 iFlags ){};
 
         virtual void DrawStructure ( ::ULIS::FRectD &roi, uint64 iFlags ){};
+
+        virtual uint32 GetType();
 
         UOdysseyVectorObject* Pick( double iX, double iY, double iRadius );
         virtual UOdysseyVectorObject* PickShape( double iX, double iY, double iRadius ){ return nullptr; };

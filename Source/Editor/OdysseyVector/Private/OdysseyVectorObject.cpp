@@ -593,6 +593,42 @@ UOdysseyVectorObject::GetInverseWorldMatrix()
     return mInverseWorldMatrix;
 }
 
+uint32
+UOdysseyVectorObject::TreeToList( UOdysseyVectorObject* iObject, uint32& iObjectID, std::list<UOdysseyVectorObject*>& iOutList )
+{
+    iOutList.push_back( iObject );
+
+    for( std::list<UOdysseyVectorObject*>::iterator it = iObject->mChildrenList.begin(); it != iObject->mChildrenList.end(); ++it )
+    {
+        UOdysseyVectorObject* childObject = (*it);
+
+        childObject->ParentID = iObjectID;
+        childObject->ObjectID = iObjectID++;
+
+        TreeToList( childObject, iObjectID, iOutList );
+    }
+
+    return iOutList.size();
+}
+
+uint32
+UOdysseyVectorObject::TreeToArray( UOdysseyVectorObject* iObject, uint32& iObjectID, std::vector<UOdysseyVectorObject*>& iOutArray )
+{
+    iOutArray.push_back( iObject );
+
+    for( std::list<UOdysseyVectorObject*>::iterator it = iObject->mChildrenList.begin(); it != iObject->mChildrenList.end(); ++it )
+    {
+        UOdysseyVectorObject* childObject = (*it);
+
+        childObject->ParentID = iObjectID;
+        childObject->ObjectID = iObjectID++;
+
+        TreeToArray( childObject, iObjectID, iOutArray );
+    }
+
+    return iOutArray.size();
+}
+
 void
 UOdysseyVectorObject::SerializeShape( FArchive& Ar )
 {
@@ -615,4 +651,10 @@ UOdysseyVectorObject::Serialize( FArchive& Ar )
 */
 
     /*SerializeShape ( Ar );*/
+}
+
+uint32
+UOdysseyVectorObject::GetType()
+{
+    return UOdysseyVectorObject::VECTOROBJECTTYPE;
 }

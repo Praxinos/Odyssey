@@ -198,3 +198,9 @@ UOdysseyVectorRoot::RecursiveSelect( UOdysseyVectorObject& iObj, double iX, doub
 
     return ( pickedObject ) ? pickedObject : iObj.Pick( localCoords.x, localCoords.y, localRadius );
 }
+
+uint32
+UOdysseyVectorRoot::GetType()
+{
+    return UOdysseyVectorObject::VECTORROOTTYPE;
+}
