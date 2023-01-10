@@ -70,7 +70,6 @@ private:
     void OnPackageSaved(const FString& iPackageFilename, UPackage* iPackage, FObjectPostSaveContext ObjectSaveContext);
 
 private:
-    bool mIsEditing = false;
     TSharedPtr<FOdysseySurfaceTexture2DEditable> mTextureFastUpdateSurface;
     int mTextureCompressionNone;
 };
