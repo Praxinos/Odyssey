@@ -1,5 +1,4 @@
 #include "Import/OdysseyVectorImport.h"
-#include "Export/OdysseyVectorExport.h"
 
 void FOdysseyVectorImport::ReadChunks( uint64 iChunkEnd, FArchive &Ar, std::function<void(uint32, uint64, FArchive&)> iCallback )
 {
@@ -7,51 +6,71 @@ void FOdysseyVectorImport::ReadChunks( uint64 iChunkEnd, FArchive &Ar, std::func
 
     while( Ar.Tell() != iChunkEnd )
     {
-        uint64 currentAddress;
         uint64 chunkLen;
         uint32 chunkID;
 
         Ar << chunkID;
         Ar << chunkLen;
 
-        currentAddress = Ar.Tell();
+        UE_LOG( LogTemp, Warning, TEXT("Reading Chunk %X %d"), chunkID, chunkLen );
 
-        if ( chunkLen )
-        {
+        /*if ( chunkLen )
+        {*/
             iCallback( chunkID, chunkLen, Ar );
-        }
-
-        Ar.Seek( currentAddress + chunkLen );
+        /*}*/
     }
 }
 
 void
-FOdysseyVectorImport::Read( UOdysseyVectorRoot& iScene, uint64 iChunkEnd, FArchive &Ar )
+FOdysseyVectorImport::Read( FOdysseyVectorEngine* iVEngine, FArchive &Ar )
 {
-    FOdysseyVectorImport::ReadChunks( iChunkEnd
-                                    , Ar
-                                    , [&iScene](uint32 iChunkID, uint64 iChunkLen, FArchive &Ar) -> void
-        {
-            UE_LOG( LogTemp, Warning, TEXT("ReadChunks %X %d"), iChunkID, iChunkLen );
+    uint32 chunkID;
+    uint64 chunkLen;
+    uint64 currentAddress;
+    uint64 chunkEnd;
 
-            switch ( iChunkID )
+
+    // Reads the first chunk (CHUNK_VECTOR_MAGIC)
+    Ar << chunkID;
+    Ar << chunkLen;
+
+    currentAddress = Ar.Tell();
+
+    chunkEnd = currentAddress + chunkLen;
+
+    UE_LOG(LogTemp,Warning,TEXT("chunkID %X %d %d"), chunkID, chunkLen, iVEngine );
+
+    if( iVEngine )
+    {
+        std::vector<UOdysseyVectorObject*> vectorObjectArray;
+
+        // first record must be the scene
+        vectorObjectArray.push_back( iVEngine->GetScene() );
+
+        FOdysseyVectorImport::ReadChunks( chunkEnd
+                                        , Ar
+                                        , [iVEngine,&vectorObjectArray](uint32 iChunkID, uint64 iChunkLen, FArchive &Ar) -> void
             {
-                case FOdysseyVectorExport::EXPORT_OBJECTS_DECLARE :
-                    UE_LOG( LogTemp, Warning, TEXT("EXPORT_OBJECTS_DECLARE") );
-                break;
-
-                case FOdysseyVectorExport::EXPORT_OBJECTS_DECLARE_OBJECT :
+                switch ( iChunkID )
                 {
-                    uint32 objectType;
+                    case FOdysseyVectorExport::CHUNK_OBJECTS_DECLARE :
+                         // this call populates vectorObjectArray
+                         FOdysseyVectorImport::ReadObjectsDeclare( vectorObjectArray, Ar.Tell() + iChunkLen, Ar );
+                    break;
 
-                    Ar << objectType;
+                    case FOdysseyVectorExport::CHUNK_OBJECTS_DEFINE :
+                         FOdysseyVectorImport::ReadObjectsDefine( vectorObjectArray, Ar.Tell() + iChunkLen, Ar );
+                    break;
 
-                    UE_LOG( LogTemp, Warning, TEXT("EXPORT_OBJECTS_DECLARE_OBJECT %d"), objectType );
+                    default:
+                    // Mandatory
+                        Ar.Seek( Ar.Tell() + iChunkLen );
+                    break;
                 }
-                break;
+            } );
+    }
 
-                default :
-                break;
-            }    
-        } );
+    // Jump to the end of the junk, regardless of the fact that we've read nested chunks or not.
+    // if we have read them, we'll just jump to the location where we already are.
+    Ar.Seek( chunkEnd );
 }

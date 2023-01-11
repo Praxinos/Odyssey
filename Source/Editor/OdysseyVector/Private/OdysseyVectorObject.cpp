@@ -594,7 +594,7 @@ UOdysseyVectorObject::GetInverseWorldMatrix()
 }
 
 uint32
-UOdysseyVectorObject::TreeToList( UOdysseyVectorObject* iObject, uint32& iObjectID, std::list<UOdysseyVectorObject*>& iOutList )
+UOdysseyVectorObject::TreeToList( UOdysseyVectorObject* iObject, std::list<UOdysseyVectorObject*>& iOutList )
 {
     iOutList.push_back( iObject );
 
@@ -602,17 +602,14 @@ UOdysseyVectorObject::TreeToList( UOdysseyVectorObject* iObject, uint32& iObject
     {
         UOdysseyVectorObject* childObject = (*it);
 
-        childObject->ParentID = iObjectID;
-        childObject->ObjectID = iObjectID++;
-
-        TreeToList( childObject, iObjectID, iOutList );
+        TreeToList( childObject, iOutList );
     }
 
     return iOutList.size();
 }
 
 uint32
-UOdysseyVectorObject::TreeToArray( UOdysseyVectorObject* iObject, uint32& iObjectID, std::vector<UOdysseyVectorObject*>& iOutArray )
+UOdysseyVectorObject::TreeToArray( UOdysseyVectorObject* iObject, std::vector<UOdysseyVectorObject*>& iOutArray )
 {
     iOutArray.push_back( iObject );
 
@@ -620,10 +617,7 @@ UOdysseyVectorObject::TreeToArray( UOdysseyVectorObject* iObject, uint32& iObjec
     {
         UOdysseyVectorObject* childObject = (*it);
 
-        childObject->ParentID = iObjectID;
-        childObject->ObjectID = iObjectID++;
-
-        TreeToArray( childObject, iObjectID, iOutArray );
+        TreeToArray( childObject, iOutArray );
     }
 
     return iOutArray.size();
@@ -651,6 +645,18 @@ UOdysseyVectorObject::Serialize( FArchive& Ar )
 */
 
     /*SerializeShape ( Ar );*/
+}
+
+uint32
+UOdysseyVectorObject::GetID()
+{
+    return mID;
+}
+
+void
+UOdysseyVectorObject::SetID( uint32 iID )
+{
+    mID = iID;
 }
 
 uint32

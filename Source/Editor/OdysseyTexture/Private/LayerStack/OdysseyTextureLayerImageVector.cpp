@@ -32,8 +32,6 @@ UOdysseyTextureLayerImageVector::Init( uint32 iWidth, uint32 iHeight )
 {
     BLImageData imgData;
 
-
-
     Width  = iWidth;
     Height = iHeight;
 
@@ -136,38 +134,17 @@ UOdysseyTextureLayerImageVector::Serialize(FArchive& Ar)
 
     if( Ar.IsSaving() )
     {
-        FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::EXPORT_VECTOR_MAGIC
-                                        , Ar
-                                        , [this](FArchive &Ar) -> void
-        {
-            if( mVEngine )
-            {
-                FOdysseyVectorExport::Write( *mVEngine->GetScene(), Ar );
-            }
-        } );
+        FOdysseyVectorExport::Write( mVEngine, Ar );
     }
 
     if( Ar.IsLoading() )
     {
-        uint32 chunkID;
-        uint64 chunkLen;
-        uint64 currentAddress;
-
-        Ar << chunkID;
-        Ar << chunkLen;
-
-        currentAddress = Ar.Tell();
-
-        Init( Width, Height );
-
-        UE_LOG(LogTemp,Warning,TEXT("chunkID %X %d %d"), chunkID, chunkLen, mVEngine );
-
-        if( mVEngine )
+        if ( mVEngine == nullptr )
         {
-            FOdysseyVectorImport::Read( *mVEngine->GetScene(), currentAddress + chunkLen, Ar );
+            Init( Width, Height );
         }
 
-        Ar.Seek( currentAddress + chunkLen );
+        FOdysseyVectorImport::Read( mVEngine, Ar );
     }
 }
 

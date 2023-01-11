@@ -30,12 +30,6 @@ class ODYSSEYVECTOR_API UOdysseyVectorObject : public UObject
         std::string Name;
 
         UPROPERTY()
-        uint32 ParentID;
-
-        UPROPERTY()
-        uint32 ObjectID;
-
-        UPROPERTY()
         double TranslationX;
 
         UPROPERTY()
@@ -64,10 +58,12 @@ class ODYSSEYVECTOR_API UOdysseyVectorObject : public UObject
         uint32 mStrokeColor;
         double mStrokeWidth;
         uint32 mFillColor;
+        // used when saving
+        uint32 mID;
 
     public:
-        static uint32 TreeToList( UOdysseyVectorObject* iObject, uint32& iObjectID, std::list<UOdysseyVectorObject*>& iOutList );
-        static uint32 TreeToArray( UOdysseyVectorObject* iObject, uint32& iObjectID, std::vector<UOdysseyVectorObject*>& iOutArray );
+        static uint32 TreeToList( UOdysseyVectorObject* iObject, std::list<UOdysseyVectorObject*>& iOutList );
+        static uint32 TreeToArray( UOdysseyVectorObject* iObject, std::vector<UOdysseyVectorObject*>& iOutArray );
 
         ~UOdysseyVectorObject();
         UOdysseyVectorObject();
@@ -109,6 +105,8 @@ class ODYSSEYVECTOR_API UOdysseyVectorObject : public UObject
         double GetTranslationX();
         double GetTranslationY();
         double GetRotation();
+        void SetID( uint32 iID );
+        uint32 GetID();
         UOdysseyVectorObject* GetParent();
         void SetParent( UOdysseyVectorObject* iObject );
         void CopyTransformation( UOdysseyVectorObject& iObject );
