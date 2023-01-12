@@ -53,12 +53,12 @@ FOdysseyVectorImport::Read( FOdysseyVectorEngine* iVEngine, FArchive &Ar )
             {
                 switch ( iChunkID )
                 {
-                    case FOdysseyVectorExport::CHUNK_OBJECTS_DECLARE :
+                    case FOdysseyVectorExport::CHUNK_DECLARE_OBJECTS :
                          // this call populates vectorObjectArray
                          FOdysseyVectorImport::ReadObjectsDeclare( vectorObjectArray, Ar.Tell() + iChunkLen, Ar );
                     break;
 
-                    case FOdysseyVectorExport::CHUNK_OBJECTS_DEFINE :
+                    case FOdysseyVectorExport::CHUNK_DEFINE_OBJECTS :
                          FOdysseyVectorImport::ReadObjectsDefine( vectorObjectArray, Ar.Tell() + iChunkLen, Ar );
                     break;
 

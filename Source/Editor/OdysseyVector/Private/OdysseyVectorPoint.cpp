@@ -76,3 +76,16 @@ UOdysseyVectorPoint::SetRadius( double iRadius )
 {
     mRadius = iRadius;
 }
+
+void
+UOdysseyVectorPoint::SetID( uint32 iID )
+{
+    mID = iID;
+}
+
+uint32
+UOdysseyVectorPoint::GetID()
+{
+    return mID;
+}
+

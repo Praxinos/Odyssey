@@ -42,8 +42,8 @@ FOdysseyVectorExport::Write( FOdysseyVectorEngine* iVEngine, FArchive &Ar )
 
             UOdysseyVectorObject::TreeToArray ( iVEngine->GetScene(), vectorObjectArray );
 
-            FOdysseyVectorExport::WriteObjectsDeclare( vectorObjectArray, Ar );
-            FOdysseyVectorExport::WriteObjectsDefine( vectorObjectArray, Ar );
+            FOdysseyVectorExport::WriteDeclareObjects( vectorObjectArray, Ar );
+            FOdysseyVectorExport::WriteDefineObjects( vectorObjectArray, Ar );
         }
     } );
 }

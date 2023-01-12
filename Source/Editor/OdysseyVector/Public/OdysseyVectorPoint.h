@@ -46,4 +46,6 @@ class ODYSSEYVECTOR_API UOdysseyVectorPoint : public UObject
         virtual void Set( double iX, double iY );
         virtual void SetRadius( double iRadius );
         double GetRadius();
+        void SetID( uint32 iID );
+        uint32 GetID();
 };

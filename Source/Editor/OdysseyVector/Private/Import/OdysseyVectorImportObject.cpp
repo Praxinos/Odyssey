@@ -33,7 +33,7 @@ FOdysseyVectorImport::ReadObjectsDeclare( std::vector<UOdysseyVectorObject*>& ve
         {
             switch ( iChunkID )
             {
-                case FOdysseyVectorExport::CHUNK_OBJECTS_DECLARE_OBJECT :
+                case FOdysseyVectorExport::CHUNK_DECLARE_OBJECT_ENTRY :
                 {
                     UOdysseyVectorObject* newObject;
                     uint32 objectType;
@@ -57,6 +57,57 @@ FOdysseyVectorImport::ReadObjectsDeclare( std::vector<UOdysseyVectorObject*>& ve
         } );
 }
 
+static void
+ReadObjectsDefineObjectTransform( UOdysseyVectorObject& iObject, uint64 iChunkEnd, FArchive &Ar )
+{
+    FOdysseyVectorImport::ReadChunks( iChunkEnd
+                                    , Ar
+                                    , [&iObject](uint32 iChunkID, uint64 iChunkLen, FArchive &Ar) -> void
+        {
+            switch ( iChunkID )
+            {
+                case FOdysseyVectorExport::CHUNK_OBJECT_TRANSFORM_TRANSLATION:
+                {
+                    double translationX;
+                    double translationY;
+
+                    Ar << translationX;
+                    Ar << translationY;
+
+                    iObject.Translate( translationX, translationY );
+                }
+                break;
+
+                case FOdysseyVectorExport::CHUNK_OBJECT_TRANSFORM_ROTATION:
+                {
+                    double rotation;
+
+                    Ar << rotation;
+
+                    iObject.Rotate( rotation );
+                }
+                break;
+
+                case FOdysseyVectorExport::CHUNK_OBJECT_TRANSFORM_SCALING:
+                {
+                    double scalingX;
+                    double scalingY;
+
+                    Ar << scalingX;
+                    Ar << scalingY;
+
+                    iObject.Scale( scalingX, scalingY );
+                }
+                break;
+
+                default:
+                // Mandatory
+                    Ar.Seek( Ar.Tell() + iChunkLen );
+                break;
+            }    
+        } );
+}
+
 void
 FOdysseyVectorImport::ReadObjectsDefine( std::vector<UOdysseyVectorObject*>& vectorObjectArray, uint64 iChunkEnd, FArchive &Ar )
 {
@@ -66,37 +117,42 @@ FOdysseyVectorImport::ReadObjectsDefine( std::vector<UOdysseyVectorObject*>& vec
         {
             static uint32 objectID;
 
-            switch ( iChunkID )
+            switch( iChunkID )
             {
-                case FOdysseyVectorExport::CHUNK_OBJECTS_DEFINE_OBJECT :
+                case FOdysseyVectorExport::CHUNK_DEFINE_OBJECT_ENTRY :
                 break;
 
-                case FOdysseyVectorExport::CHUNK_OBJECTS_DEFINE_OBJECT_ID:
+                case FOdysseyVectorExport::CHUNK_OBJECT_ID:
                     Ar << objectID;
                 break;
 
-                case FOdysseyVectorExport::CHUNK_OBJECTS_DEFINE_OBJECT_PARENTID:
+                case FOdysseyVectorExport::CHUNK_OBJECT_PARENTID:
                 {
                     uint32 parentID;
 
                     Ar << parentID;
 
-                    vectorObjectArray[parentID]->AppendChild( vectorObjectArray[objectID] );
+                    // objectID = 0 if we are on the root node. Ignore it.
+                    if( objectID )
+                    {
+                        vectorObjectArray[parentID]->AppendChild( vectorObjectArray[objectID] );
+                    }
                 }
                 break;
-/*
-                case FOdysseyVectorExport::CHUNK_OBJECTS_DEFINE_OBJECT_TRANSFORM:
+
+                case FOdysseyVectorExport::CHUNK_OBJECT_TRANSFORM:
+                    ReadObjectsDefineObjectTransform( *vectorObjectArray[objectID], Ar.Tell() + iChunkLen, Ar );
                 break;
 
-                case FOdysseyVectorExport::CHUNK_OBJECTS_DEFINE_OBJECT_TRANSFORM_TRANSLATION:
+                case FOdysseyVectorExport::CHUNK_OBJECT_PATHCUBIC:
+                {
+                    UOdysseyVectorPathCubic* cubicPath = Cast<UOdysseyVectorPathCubic>( vectorObjectArray[objectID] );
+
+                    FOdysseyVectorImport::ReadObjectPathCubic( *cubicPath, Ar.Tell() + iChunkLen, Ar );
+
+                }
                 break;
 
-                case FOdysseyVectorExport::CHUNK_OBJECTS_DEFINE_OBJECT_TRANSFORM_ROTATION:
-                break;
-
-                case FOdysseyVectorExport::CHUNK_OBJECTS_DEFINE_OBJECT_TRANSFORM_SCALING:
-                break;
-*/
                 default:
                 // Mandatory
                     Ar.Seek( Ar.Tell() + iChunkLen );

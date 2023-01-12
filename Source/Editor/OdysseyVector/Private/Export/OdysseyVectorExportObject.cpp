@@ -1,9 +1,9 @@
 #include "Export/OdysseyVectorExport.h"
 
 static void
-WriteObjectsDeclareObject( UOdysseyVectorObject& iObject, FArchive &Ar )
+WriteDeclareObjectEntry( UOdysseyVectorObject& iObject, FArchive &Ar )
 {
-    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_OBJECTS_DECLARE_OBJECT
+    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_DECLARE_OBJECT_ENTRY
                                     , Ar
                                     , [&iObject](FArchive &Ar) -> void
     {
@@ -14,9 +14,9 @@ WriteObjectsDeclareObject( UOdysseyVectorObject& iObject, FArchive &Ar )
 }
 
 void
-FOdysseyVectorExport::WriteObjectsDeclare( std::vector<UOdysseyVectorObject*>& vectorObjectArray, FArchive &Ar )
+FOdysseyVectorExport::WriteDeclareObjects( std::vector<UOdysseyVectorObject*>& vectorObjectArray, FArchive &Ar )
 {
-    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_OBJECTS_DECLARE
+    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_DECLARE_OBJECTS
                                     , Ar
                                     , [&vectorObjectArray](FArchive &Ar) -> void
     {
@@ -27,56 +27,71 @@ FOdysseyVectorExport::WriteObjectsDeclare( std::vector<UOdysseyVectorObject*>& v
             // Indexation used by other parts of the loading process
             vectorObject->SetID( i );
 
-            WriteObjectsDeclareObject( *vectorObject, Ar );
+            WriteDeclareObjectEntry( *vectorObject, Ar );
         }
     } );
 }
 
 static void
-WriteObjectsDefineObjectTransformScaling( UOdysseyVectorObject& iObject, FArchive &Ar )
+WriteObjectTransformScaling( UOdysseyVectorObject& iObject, FArchive &Ar )
 {
-    double scalingX = iObject.GetScalingX(),
-           scalingY = iObject.GetScalingY();
-
-    Ar << scalingX;
-    Ar << scalingY;
-}
-
-static void
-WriteObjectsDefineObjectTransformRotation( UOdysseyVectorObject& iObject, FArchive &Ar )
-{
-    double rotation = iObject.GetRotation();
-
-    Ar << rotation;
-}
-
-static void
-WriteObjectsDefineObjectTransformTranslation( UOdysseyVectorObject& iObject, FArchive &Ar )
-{
-    double translationX = iObject.GetTranslationX(),
-           translationY = iObject.GetTranslationY();
-
-    Ar << translationX;
-    Ar << translationY;
-}
-
-static void
-WriteObjectsDefineObjectTransform( UOdysseyVectorObject& iObject, FArchive &Ar )
-{
-    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_OBJECTS_DEFINE_OBJECT_TRANSFORM
+    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_OBJECT_TRANSFORM_SCALING
                                     , Ar
                                     , [&iObject](FArchive &Ar) -> void
     {
-        WriteObjectsDefineObjectTransformTranslation( iObject, Ar );
-        WriteObjectsDefineObjectTransformRotation( iObject, Ar );
-        WriteObjectsDefineObjectTransformScaling( iObject, Ar );
+        double scalingX = iObject.GetScalingX(),
+               scalingY = iObject.GetScalingY();
+
+        Ar << scalingX;
+        Ar << scalingY;
     } );
 }
 
 static void
-WriteObjectsDefineObjectParentID( UOdysseyVectorObject& iObject, FArchive &Ar )
+WriteObjectTransformRotation( UOdysseyVectorObject& iObject, FArchive &Ar )
 {
-    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_OBJECTS_DEFINE_OBJECT_PARENTID
+    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_OBJECT_TRANSFORM_ROTATION
+                                    , Ar
+                                    , [&iObject](FArchive &Ar) -> void
+    {
+        double rotation = iObject.GetRotation();
+
+        Ar << rotation;
+    } );
+}
+
+static void
+WriteObjectTransformTranslation( UOdysseyVectorObject& iObject, FArchive &Ar )
+{
+    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_OBJECT_TRANSFORM_TRANSLATION
+                                    , Ar
+                                    , [&iObject](FArchive &Ar) -> void
+    {
+        double translationX = iObject.GetTranslationX(),
+               translationY = iObject.GetTranslationY();
+
+        Ar << translationX;
+        Ar << translationY;
+    } );
+}
+
+static void
+WriteObjectTransform( UOdysseyVectorObject& iObject, FArchive &Ar )
+{
+    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_OBJECT_TRANSFORM
+                                    , Ar
+                                    , [&iObject](FArchive &Ar) -> void
+    {
+        WriteObjectTransformTranslation( iObject, Ar );
+        WriteObjectTransformRotation( iObject, Ar );
+        WriteObjectTransformScaling( iObject, Ar );
+    } );
+}
+
+static void
+WriteObjectParentID( UOdysseyVectorObject& iObject, FArchive &Ar )
+{
+    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_OBJECT_PARENTID
                                     , Ar
                                     , [&iObject](FArchive &Ar) -> void
     {
@@ -87,9 +102,9 @@ WriteObjectsDefineObjectParentID( UOdysseyVectorObject& iObject, FArchive &Ar )
 }
 
 static void
-WriteObjectsDefineObjectID( UOdysseyVectorObject& iObject, FArchive &Ar )
+WriteObjectID( UOdysseyVectorObject& iObject, FArchive &Ar )
 {
-    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_OBJECTS_DEFINE_OBJECT_ID
+    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_OBJECT_ID
                                     , Ar
                                     , [&iObject](FArchive &Ar) -> void
     {
@@ -100,22 +115,36 @@ WriteObjectsDefineObjectID( UOdysseyVectorObject& iObject, FArchive &Ar )
 }
 
 static void
-WriteObjectsDefineObject( UOdysseyVectorObject& iObject, FArchive &Ar )
+WriteDefineObjectEntry( UOdysseyVectorObject& iObject, FArchive &Ar )
 {
-    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_OBJECTS_DEFINE_OBJECT
+    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_DEFINE_OBJECT_ENTRY
                                     , Ar
                                     , [&iObject](FArchive &Ar) -> void
     {
-        WriteObjectsDefineObjectID( iObject, Ar );
-        WriteObjectsDefineObjectParentID( iObject, Ar );
-        WriteObjectsDefineObjectTransform( iObject, Ar );
+        WriteObjectID( iObject, Ar );
+        WriteObjectParentID( iObject, Ar );
+        WriteObjectTransform( iObject, Ar );
+
+        switch( iObject.GetType() )
+        {
+            case UOdysseyVectorObject::VECTORPATHCUBICTYPE:
+            {
+                UOdysseyVectorPathCubic* cubicPath = Cast<UOdysseyVectorPathCubic>(&iObject);
+
+                FOdysseyVectorExport::WriteObjectPathCubic( *cubicPath, Ar );
+            }
+            break;
+
+            default:
+            break;
+        }
     } );
 }
 
 void
-FOdysseyVectorExport::WriteObjectsDefine( std::vector<UOdysseyVectorObject*>& vectorObjectArray, FArchive &Ar )
+FOdysseyVectorExport::WriteDefineObjects( std::vector<UOdysseyVectorObject*>& vectorObjectArray, FArchive &Ar )
 {
-    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_OBJECTS_DEFINE
+    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_DEFINE_OBJECTS
                                     , Ar
                                     , [&vectorObjectArray](FArchive &Ar) -> void
     {
@@ -123,7 +152,7 @@ FOdysseyVectorExport::WriteObjectsDefine( std::vector<UOdysseyVectorObject*>& ve
         {
             UOdysseyVectorObject* vectorObject = vectorObjectArray[i];
 
-            WriteObjectsDefineObject( *vectorObject, Ar );
+            WriteDefineObjectEntry( *vectorObject, Ar );
         }
     } );
 }
