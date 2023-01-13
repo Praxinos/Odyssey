@@ -16,7 +16,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorRectangle : public UOdysseyVectorObject
 
     private:
         void DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags );
-        UOdysseyVectorObject* PickShape( double iX, double iY, double iRadius );
+        UOdysseyVectorObject* PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags );
         UOdysseyVectorObject* CopyShape();
         void UpdateShape() {};
 

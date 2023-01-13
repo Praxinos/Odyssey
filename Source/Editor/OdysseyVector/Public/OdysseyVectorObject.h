@@ -15,6 +15,11 @@ class ODYSSEYVECTOR_API UOdysseyVectorObject : public UObject
     public:
         GENERATED_BODY()
 
+        static const uint32 PICK_POINT     = ( 1 << 0 );
+        static const uint32 PICK_RECTANGLE = ( 1 << 1 );
+        static const uint32 PICK_CIRCLE    = ( 1 << 2 );
+        static const uint32 PICK_FREEHAND  = ( 1 << 3 );
+
         // DO NOT CHANGE !
         static const uint32 VECTORROOTTYPE      = 0;
         static const uint32 VECTOROBJECTTYPE    = 1;
@@ -86,8 +91,8 @@ class ODYSSEYVECTOR_API UOdysseyVectorObject : public UObject
 
         virtual uint32 GetType();
 
-        UOdysseyVectorObject* Pick( double iX, double iY, double iRadius );
-        virtual UOdysseyVectorObject* PickShape( double iX, double iY, double iRadius ){ return nullptr; };
+        UOdysseyVectorObject* Pick( ::ULIS::FRectD& iRoi, uint32 iSelectionFlags );
+        virtual UOdysseyVectorObject* PickShape( ::ULIS::FRectD& iRoi, uint32 iSelectionFlags ){ return nullptr; };
 
         /*virtual void UpdateBoundingBox() = 0;*/
         void DrawChildren( ::ULIS::FRectD& iRoi, uint64 iFlags );

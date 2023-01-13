@@ -39,9 +39,9 @@ UOdysseyVectorRectangle::DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags )
 }
 
 UOdysseyVectorObject*
-UOdysseyVectorRectangle::PickShape( double iX, double iY, double iRadius )
+UOdysseyVectorRectangle::PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags )
 {
-    double x1 = - mWidth  * 0.5f;
+    /*double x1 = - mWidth  * 0.5f;
     double y1 = - mHeight * 0.5f;
     double x2 = x1 + mWidth;
     double y2 = y1 + mHeight;
@@ -50,7 +50,7 @@ UOdysseyVectorRectangle::PickShape( double iX, double iY, double iRadius )
         ( iY >= y1 ) && ( iY <= y2 ) )
     {
         return this;
-    }
+    }*/
 
     return nullptr;
 }

@@ -33,7 +33,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorPathCubic: public UOdysseyVectorPath
     protected:
         UOdysseyVectorObject* CopyShape();
         void DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags );
-        UOdysseyVectorObject* PickShape( double iX, double iY, double iRadius );
+        UOdysseyVectorObject* PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags );
 
     public:
         UOdysseyVectorPathCubic();
@@ -54,8 +54,6 @@ class ODYSSEYVECTOR_API UOdysseyVectorPathCubic: public UOdysseyVectorPath
 
         void Mirror( bool iMirrorX, bool iMirrorY );
         void Cut( ::ULIS::FVec2D& linePoint0, ::ULIS::FVec2D& linePoint1 );
-
-        void Serialize(FArchive& Ar);
 
         uint32 GetType();
 };

@@ -31,6 +31,7 @@ FOdysseyTextureEditor::FOdysseyTextureEditor() :
 	mVectorPathDrawingTool(nullptr),
 	mVectorPathEditTool(nullptr),
 	mVectorPathCutTool(nullptr),
+	mVectorObjectPickTool(nullptr),
 	mVectorObjectMoveTool(nullptr),
 	mVectorObjectRotateTool(nullptr),
 	mVectorObjectScaleTool(nullptr),
@@ -63,6 +64,7 @@ FOdysseyTextureEditor::InitTools()
 	mVectorPathDrawingTool = NewObject<UOdysseyTextureEditorVectorPathDrawingTool>();
 	mVectorPathEditTool = NewObject<UOdysseyTextureEditorVectorPathEditTool>();
 	mVectorPathCutTool = NewObject<UOdysseyTextureEditorVectorPathCutTool>();
+	mVectorObjectPickTool = NewObject<UOdysseyTextureEditorVectorObjectPickTool>();
 	mVectorObjectMoveTool = NewObject<UOdysseyTextureEditorVectorObjectMoveTool>();
 	mVectorObjectRotateTool = NewObject<UOdysseyTextureEditorVectorObjectRotateTool>();
 	mVectorObjectScaleTool = NewObject<UOdysseyTextureEditorVectorObjectScaleTool>();
@@ -74,6 +76,7 @@ FOdysseyTextureEditor::InitTools()
     mVectorPathDrawingTool->SetEditor(this);
     mVectorPathEditTool->SetEditor(this);
     mVectorPathCutTool->SetEditor(this);
+    mVectorObjectPickTool->SetEditor(this);
     mVectorObjectMoveTool->SetEditor(this);
     mVectorObjectRotateTool->SetEditor(this);
     mVectorObjectScaleTool->SetEditor(this);
@@ -86,6 +89,7 @@ FOdysseyTextureEditor::InitTools()
     mTools.Add(mVectorPathDrawingTool);
     mTools.Add(mVectorPathEditTool);
     mTools.Add(mVectorPathCutTool);
+    mTools.Add(mVectorObjectPickTool);
     mTools.Add(mVectorObjectMoveTool);
     mTools.Add(mVectorObjectRotateTool);
     mTools.Add(mVectorObjectScaleTool);
@@ -103,6 +107,7 @@ FOdysseyTextureEditor::BindShortcuts(FBaseToolkit* iToolkit)
 	mVectorPathDrawingTool->BindShortcuts(iToolkit);
 	mVectorPathEditTool->BindShortcuts(iToolkit);
 	mVectorPathCutTool->BindShortcuts(iToolkit);
+	mVectorObjectPickTool->BindShortcuts(iToolkit);
 	mVectorObjectMoveTool->BindShortcuts(iToolkit);
 	mVectorObjectRotateTool->BindShortcuts(iToolkit);
 	mVectorObjectScaleTool->BindShortcuts(iToolkit);
@@ -119,6 +124,7 @@ FOdysseyTextureEditor::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
 	mVectorPathDrawingTool->ExtendMenu(iOwner, iMenuName);
 	mVectorPathEditTool->ExtendMenu(iOwner, iMenuName);
 	mVectorPathCutTool->ExtendMenu(iOwner, iMenuName);
+	mVectorObjectPickTool->ExtendMenu(iOwner, iMenuName);
 	mVectorObjectMoveTool->ExtendMenu(iOwner, iMenuName);
 	mVectorObjectRotateTool->ExtendMenu(iOwner, iMenuName);
 	mVectorObjectScaleTool->ExtendMenu(iOwner, iMenuName);
@@ -247,6 +253,12 @@ FOdysseyTextureEditor::GetVectorPathCutTool() const
     return mVectorPathCutTool;
 }
 
+UOdysseyTextureEditorVectorObjectPickTool*
+FOdysseyTextureEditor::GetVectorObjectPickTool() const
+{
+    return mVectorObjectPickTool;
+}
+
 UOdysseyTextureEditorVectorObjectMoveTool*
 FOdysseyTextureEditor::GetVectorObjectMoveTool() const
 {
@@ -332,6 +344,7 @@ FOdysseyTextureEditor::AddReferencedObjects(FReferenceCollector& Collector)
 	Collector.AddReferencedObject(mVectorPathDrawingTool);
 	Collector.AddReferencedObject(mVectorPathEditTool);
 	Collector.AddReferencedObject(mVectorPathCutTool);
+	Collector.AddReferencedObject(mVectorObjectPickTool);
 	Collector.AddReferencedObject(mVectorObjectMoveTool);
 	Collector.AddReferencedObject(mVectorObjectRotateTool);
 	Collector.AddReferencedObject(mVectorObjectScaleTool);

@@ -66,15 +66,104 @@ UOdysseyVectorPathCubic::AppendVertex( UOdysseyVectorVertexCubic* iVertex
     return nullptr;
 }
 
-UOdysseyVectorObject*
-UOdysseyVectorPathCubic::PickShape( double iX
-                                  , double iY
-                                  , double iRadius )
+static uint8
+PointQueryMask( int32 iX, int32 iY, BLImageData* iImageData )
 {
+    uint8 *pixel = static_cast<uint8*>(iImageData->pixelData);
+
+    return pixel[(iY * iImageData->stride) + iX];
+}
+
+static bool
+LineQueryMask( int32 iX0, int32 iY0, int32 iX1, int32 iY1, BLImageData* iImageData )
+{
+    int32  dx  = ( iX1 - iX0 );
+    uint32 ddx = abs ( dx );
+    int32  dy  = ( iY1 - iY0 );
+    uint32 ddy = abs ( dy );
+    int32 dd  = ( ddx > ddy ) ? ddx : ddy;
+    int32 px = ( dx > 0 ) ? 1 : -1;
+    int32 py = ( dy > 0 ) ? 1 : -1;
+    int32 x = iX0;
+    int32 y = iY0;
+    uint32 cumul = 0;
+
+    if ( ddx > ddy )
+    {
+        for ( uint32 i = 0; i <= ddx; i++ )
+        {
+            // return as soon as a point is detected inside the mask
+            if ( PointQueryMask ( x, y, iImageData ) ) {
+                return true;
+            }
+
+            cumul += ddy;
+            x     += px;
+
+            if ( cumul >= ddx )
+            {
+                cumul -= ddx;
+                y     += py;
+            }
+        }
+    }
+    else
+    {
+        for ( uint32 i = 0; i <= ddy; i++ )
+        {
+            // return as soon as a point is detected inside the mask
+            if ( PointQueryMask ( x, y, iImageData ) ) {
+                return true;
+            }
+
+            cumul += ddx;
+            y     += py;
+
+            if ( cumul >= ddy )
+            {
+                cumul -= ddy;
+                x     += px;
+            }
+        }
+    }
+
+    return false;
+}
+
+UOdysseyVectorObject*
+UOdysseyVectorPathCubic::PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags )
+{
+    BLContext& blctx = FOdysseyVectorEngine::GetBLContext();
     BLPath path;
-    BLPoint testPoint = { iX, iY };
+
+    if ( iSelectionFlags & PICK_FREEHAND )
+    {
+        BLImage* blimg = blctx.targetImage();
+        BLImageData imageData;
+
+        blimg->getData( &imageData );
+
+        for( std::list<UOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
+        {
+            UOdysseyVectorSegmentCubic* cubicSegment = static_cast<UOdysseyVectorSegmentCubic*>(*it);
+            std::vector<FPolygon>& polygonCache = cubicSegment->GetPolygonCache();
+
+            for( uint32 i = 0; i < polygonCache.size(); i++ )
+            {
+                BLPoint p0 = mWorldMatrix.mapPoint( polygonCache[i].lineVertex[0].x, polygonCache[i].lineVertex[0].y );
+                BLPoint p1 = mWorldMatrix.mapPoint( polygonCache[i].lineVertex[1].x, polygonCache[i].lineVertex[1].y );
+
+                if ( LineQueryMask( p0.x, p0.y, p1.x, p1.y, &imageData ) )
+                {
+                    return this;
+                }
+            }
+        }
+    }
 
 /*
+    BLPoint testPoint = { iX, iY };
+
     for( std::list<UOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
     {
         UOdysseyVectorSegmentCubic* segment = static_cast<UOdysseyVectorSegmentCubic*>(*it);
@@ -92,12 +181,12 @@ UOdysseyVectorPathCubic::PickShape( double iX
                     , point1.y );
     }
 
-    if ( path.hitTest( testPoint, BL_FILL_RULE_NON_ZERO ) == BL_HIT_TEST_IN )
-    {
-        return true;
-    }
 */
+
+
+
     // Pick inside the polygons that makes the segment
+/*
     for( std::list<UOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
     {
         UOdysseyVectorSegmentCubic* cubicSegment = static_cast<UOdysseyVectorSegmentCubic*>(*it);
@@ -109,6 +198,8 @@ UOdysseyVectorPathCubic::PickShape( double iX
     }
 
     return PickLoops( iX, iY, iRadius );
+*/
+    return nullptr;
 }
 
 bool
@@ -718,12 +809,6 @@ UOdysseyVectorPathCubic::Merge( UOdysseyVectorPathCubic& iCubicPath )
 
         newSegment->BuildVariable();
     }
-}
-
-void
-UOdysseyVectorPathCubic::Serialize(FArchive& Ar)
-{
-    UE_LOG(LogTemp,Warning,TEXT("UOdysseyVectorPathCubic::Serialize"));
 }
 
 uint32

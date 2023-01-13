@@ -433,7 +433,7 @@ UOdysseyVectorObject::MoveFront()
 }
 
 UOdysseyVectorObject*
-UOdysseyVectorObject::Pick( double iX, double iY, double iRadius )
+UOdysseyVectorObject::Pick( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags )
 {
     if ( this->mParent )
     {
@@ -443,7 +443,7 @@ UOdysseyVectorObject::Pick( double iX, double iY, double iRadius )
         }
     }
 
-    return PickShape( iX, iY, iRadius );
+    return PickShape( iRoi, iSelectionFlags );
 }
 
 static void

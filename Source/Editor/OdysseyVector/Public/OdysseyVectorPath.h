@@ -21,7 +21,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorPath : public UOdysseyVectorObject
     private:
         void UpdateShape();
         virtual void DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags );
-        UOdysseyVectorObject* PickShape( double iX, double iY, double iRadius ) { return nullptr; };
+        UOdysseyVectorObject* PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags ) { return nullptr; };
         UOdysseyVectorObject* CopyShape();
 
     protected :
@@ -58,8 +58,8 @@ class ODYSSEYVECTOR_API UOdysseyVectorPath : public UOdysseyVectorObject
         UOdysseyVectorSegment* GetFirstSegment();
         UOdysseyVectorSegment* GetLastSegment();
         std::list<UOdysseyVectorPoint*>& GetSelectedPointList();
-        virtual bool PickPoint( double iX, double iY, double iRadius, uint64 iSelectionFlags ) PURE_VIRTUAL(__func__,return false;);
-        virtual void Unselect( UOdysseyVectorVertex* iVertex ) PURE_VIRTUAL(__func__,);
+        virtual bool PickPoint( double iX, double iY, double iRadius, uint64 iSelectionFlags ){ return false; };
+        virtual void Unselect( UOdysseyVectorVertex* iVertex ){};
         void Clear();
         bool IsLoop();
         UOdysseyVectorLoop* GetLoopByID( uint64 iID );
@@ -69,5 +69,4 @@ class ODYSSEYVECTOR_API UOdysseyVectorPath : public UOdysseyVectorObject
         void InvalidateSegment( UOdysseyVectorSegment* iSegment );
         void InvalidateLoop( UOdysseyVectorLoop* iLoop );
         void UpdateBBox();
-        virtual void Serialize(FArchive& Ar);
 };

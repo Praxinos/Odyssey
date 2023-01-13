@@ -28,6 +28,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
         void RenderSelected();
         void RenderHUD();
         void Render();
+        void Pick( std::vector<::ULIS::FVec2D>& iPointArray, uint32 iSelectionFlags );
         UOdysseyVectorRoot* GetScene();
         /*void Init( double iWidth, double iHeight );*/
         void InvalidateRegion( double x, double y, double w, double h );
@@ -38,6 +39,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
         void AddHUD( FOdysseyVectorHUD* iHUDObject );
         void RemoveHUD( FOdysseyVectorHUD* iHUDObject );
         void ClearHUD();
+        ::ULIS::FRectD GenerateMask( std::vector<::ULIS::FVec2D>& iPointArray );
 };
 
 ODYSSEYVECTOR_API FArchive& operator<<(FArchive &Ar, FOdysseyVectorEngine* iVectorEngine );

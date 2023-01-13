@@ -7,14 +7,15 @@ UOdysseyVectorGroup::Init( std::string iName )
 }
 
 UOdysseyVectorObject*
-UOdysseyVectorGroup::PickShape( double iX, double iY, double iRadius )
+UOdysseyVectorGroup::PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags )
 {
+/*
     if ( ( iX > mBBox.x ) && ( iX < ( mBBox.x + mBBox.w ) )
       && ( iY > mBBox.y ) && ( iY < ( mBBox.y + mBBox.h ) ) )
     {
         return this;
     }
-
+*/
     return nullptr;
 }
 

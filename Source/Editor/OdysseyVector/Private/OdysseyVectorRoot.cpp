@@ -45,22 +45,6 @@ UOdysseyVectorRoot::CopyShape()
     return Cast<UOdysseyVectorObject>(rootCopy);
 }
 
-void
-UOdysseyVectorRoot::Select( double iX, double iY, double iRadius )
-{
-    UOdysseyVectorObject* pickedObject = RecursiveSelect( *this, iX, iY, iRadius );
-
-    if ( pickedObject )
-    {
-        if( pickedObject->GetClass() == UOdysseyVectorLoop::StaticClass() )
-        {
-            pickedObject = pickedObject->GetParent();
-        }
-
-        Select ( *pickedObject );
-    }
-}
-
 UOdysseyVectorGroup*
 UOdysseyVectorRoot::GroupSelectdObjects( )
 {
@@ -147,7 +131,9 @@ UOdysseyVectorRoot::UpdateShape()
 void
 UOdysseyVectorRoot::Bucket( double iX, double iY, uint32 iFillColor )
 {
-    UOdysseyVectorObject* pickedObject = RecursiveSelect( *this, iX, iY, 1.0f );
+    ::ULIS::FRectD roi = { iX, iY, 0, 0 };
+
+    UOdysseyVectorObject* pickedObject = RecursivePick( *this, roi, UOdysseyVectorObject::PICK_POINT );
 
     if ( pickedObject )
     {
@@ -168,27 +154,16 @@ UOdysseyVectorRoot::GetLastSelected()
 }
 
 UOdysseyVectorObject*
-UOdysseyVectorRoot::RecursiveSelect( UOdysseyVectorObject& iObj, double iX, double iY, double iRadius )
+UOdysseyVectorRoot::RecursivePick( UOdysseyVectorObject& iObj, ::ULIS::FRectD& iRoi, uint32 iSelectionFlags )
 {
-    BLMatrix2D inverseLocalMatrix;
-    BLPoint localCoords;
-    BLPoint localSize;
-    double localRadius;
     UOdysseyVectorObject* pickedObject = nullptr;
-
-    BLMatrix2D::invert( inverseLocalMatrix, iObj.GetLocalMatrix() );
-
-    localCoords = inverseLocalMatrix.mapPoint( iX, iY );
-    localSize   = inverseLocalMatrix.mapPoint( iX + iRadius, 0.0f );
-
-    localRadius = localSize.x - localCoords.x;
 
     for( std::list<UOdysseyVectorObject*>::iterator it = iObj.GetChildrenList().begin(); it != iObj.GetChildrenList().end(); ++it )
     {
         UOdysseyVectorObject *child = (*it);
         UOdysseyVectorObject* pickedChild = nullptr;
 
-        pickedChild = RecursiveSelect( *child, localCoords.x, localCoords.y, localRadius );
+        pickedChild = RecursivePick( *child, iRoi, iSelectionFlags );
 
         if ( pickedChild )
         {
@@ -196,7 +171,7 @@ UOdysseyVectorRoot::RecursiveSelect( UOdysseyVectorObject& iObj, double iX, doub
         }
     }
 
-    return ( pickedObject ) ? pickedObject : iObj.Pick( localCoords.x, localCoords.y, localRadius );
+    return ( pickedObject ) ? pickedObject : iObj.Pick( iRoi, iSelectionFlags );
 }
 
 uint32

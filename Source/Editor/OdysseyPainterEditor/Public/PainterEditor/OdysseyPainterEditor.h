@@ -9,6 +9,7 @@
 #include "Tools/VectorPathDrawingTool/OdysseyPainterEditorVectorPathDrawingTool.h"
 #include "Tools/VectorPathEditTool/OdysseyPainterEditorVectorPathEditTool.h"
 #include "Tools/VectorPathCutTool/OdysseyPainterEditorVectorPathCutTool.h"
+#include "Tools/VectorObjectPickTool/OdysseyPainterEditorVectorObjectPickTool.h"
 #include "Tools/VectorObjectMoveTool/OdysseyPainterEditorVectorObjectMoveTool.h"
 #include "Tools/VectorObjectRotateTool/OdysseyPainterEditorVectorObjectRotateTool.h"
 #include "Tools/VectorObjectScaleTool/OdysseyPainterEditorVectorObjectScaleTool.h"
@@ -56,6 +57,7 @@ public:
     virtual UOdysseyPainterEditorVectorPathDrawingTool*              GetVectorPathDrawingTool() const = 0;
     virtual UOdysseyPainterEditorVectorPathEditTool*                 GetVectorPathEditTool() const = 0;
     virtual UOdysseyPainterEditorVectorPathCutTool*                  GetVectorPathCutTool() const = 0;
+    virtual UOdysseyPainterEditorVectorObjectPickTool*               GetVectorObjectPickTool() const = 0;
     virtual UOdysseyPainterEditorVectorObjectMoveTool*               GetVectorObjectMoveTool() const = 0;
     virtual UOdysseyPainterEditorVectorObjectRotateTool*             GetVectorObjectRotateTool() const = 0;
     virtual UOdysseyPainterEditorVectorObjectScaleTool*              GetVectorObjectScaleTool() const = 0;

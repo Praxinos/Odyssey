@@ -12,6 +12,7 @@
 #include "Tools/VectorPathDrawingTool/OdysseyTextureEditorVectorPathDrawingTool.h"
 #include "Tools/VectorPathEditTool/OdysseyTextureEditorVectorPathEditTool.h"
 #include "Tools/VectorPathCutTool/OdysseyTextureEditorVectorPathCutTool.h"
+#include "Tools/VectorObjectPickTool/OdysseyTextureEditorVectorObjectPickTool.h"
 #include "Tools/VectorObjectMoveTool/OdysseyTextureEditorVectorObjectMoveTool.h"
 #include "Tools/VectorObjectRotateTool/OdysseyTextureEditorVectorObjectRotateTool.h"
 #include "Tools/VectorObjectScaleTool/OdysseyTextureEditorVectorObjectScaleTool.h"
@@ -51,6 +52,7 @@ public:
     virtual UOdysseyTextureEditorVectorPathDrawingTool* GetVectorPathDrawingTool() const override;
     virtual UOdysseyTextureEditorVectorPathEditTool* GetVectorPathEditTool() const override;
     virtual UOdysseyTextureEditorVectorPathCutTool* GetVectorPathCutTool() const override;
+    virtual UOdysseyTextureEditorVectorObjectPickTool* GetVectorObjectPickTool() const override;
     virtual UOdysseyTextureEditorVectorObjectMoveTool* GetVectorObjectMoveTool() const override;
     virtual UOdysseyTextureEditorVectorObjectRotateTool* GetVectorObjectRotateTool() const override;
     virtual UOdysseyTextureEditorVectorObjectScaleTool* GetVectorObjectScaleTool() const override;
@@ -83,6 +85,7 @@ private:
     UOdysseyTextureEditorVectorPathDrawingTool* mVectorPathDrawingTool;
     UOdysseyTextureEditorVectorPathEditTool* mVectorPathEditTool;
     UOdysseyTextureEditorVectorPathCutTool* mVectorPathCutTool;
+    UOdysseyTextureEditorVectorObjectPickTool* mVectorObjectPickTool;
     UOdysseyTextureEditorVectorObjectMoveTool* mVectorObjectMoveTool;
     UOdysseyTextureEditorVectorObjectRotateTool* mVectorObjectRotateTool;
     UOdysseyTextureEditorVectorObjectScaleTool* mVectorObjectScaleTool;

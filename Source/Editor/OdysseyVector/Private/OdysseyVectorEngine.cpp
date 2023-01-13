@@ -5,15 +5,16 @@ FOdysseyVectorEngine::~FOdysseyVectorEngine()
     GetBLContext().end();
 }
 
-FOdysseyVectorEngine::FOdysseyVectorEngine(double iWidth,double iHeight)
+FOdysseyVectorEngine::FOdysseyVectorEngine( double iWidth, double iHeight )
     : mDrawingFlags( 0 )
 {
-    mBLImage = new BLImage(iWidth,iHeight,BL_FORMAT_PRGB32);
+    mBLImage = new BLImage( iWidth, iHeight, BL_FORMAT_PRGB32 );
+    mBLMask  = new BLImage( iWidth, iHeight, BL_FORMAT_A8 );
 
     mScene = NewObject<UOdysseyVectorRoot>();
     mScene->Init("Vector Scene");
 
-    GetBLContext().begin(*mBLImage);
+    GetBLContext().begin( *mBLImage );
 }
 
 BLImage&
@@ -142,6 +143,86 @@ FOdysseyVectorEngine::Render()
 
     blctx.flush(BL_CONTEXT_FLUSH_SYNC);
 }
+
+::ULIS::FRectD
+FOdysseyVectorEngine::GenerateMask( std::vector<::ULIS::FVec2D>& iPointArray )
+{
+    BLContext& blctx = FOdysseyVectorEngine::GetBLContext();
+    BLPath path;
+    ::ULIS::FRectD rect = { 0, 0, 0, 0 };
+
+    blctx.setFillStyle( BLRgba32(0x00000000) );
+    blctx.fillAll();
+
+    if( iPointArray.size() )
+    {
+        double x1 = iPointArray[0].x, y1 = iPointArray[0].y
+             , x2 = iPointArray[0].x, y2 = iPointArray[0].y;
+
+        path.moveTo( iPointArray[0].x, iPointArray[0].y );
+
+        for( uint32 i = 1; i < iPointArray.size(); i++ )
+        {
+            path.lineTo( iPointArray[i].x, iPointArray[i].y );
+
+            if( iPointArray[i].x < x1 )
+            {
+                x1 = iPointArray[i].x;
+            }
+
+            if( iPointArray[i].y < y1 )
+            {
+                y1 = iPointArray[i].y;
+            }
+
+            if( iPointArray[i].x > x2 )
+            {
+                x2 = iPointArray[i].x;
+            }
+
+            if( iPointArray[i].y > y2 )
+            {
+                y2 = iPointArray[i].y;
+            }
+        }
+
+        rect = ::ULIS::FRectD::FromMinMax( x1, y1, x2, y2 );
+    }
+
+    blctx.setFillStyle( BLRgba32(0xFFFFFFFF) );
+    blctx.fillPath( path );
+
+    return rect;
+}
+
+void
+FOdysseyVectorEngine::Pick( std::vector<::ULIS::FVec2D>& iPointArray, uint32 iSelectionFlags )
+{
+    UOdysseyVectorObject* pickedObject;
+    ::ULIS::FRectD roi;
+
+    GetBLContext().begin( *mBLMask );
+
+    roi = GenerateMask( iPointArray );
+
+    pickedObject = UOdysseyVectorRoot::RecursivePick( *mScene, roi, iSelectionFlags );
+
+    // deselect all
+    mScene->ClearSelection();
+
+    if ( pickedObject )
+    {
+        if( pickedObject->GetClass() == UOdysseyVectorLoop::StaticClass() )
+        {
+            pickedObject = pickedObject->GetParent();
+        }
+
+        mScene->Select ( *pickedObject );
+    }
+
+    GetBLContext().begin(*mBLImage);
+}
+
 
 UOdysseyVectorRoot*
 FOdysseyVectorEngine::GetScene()

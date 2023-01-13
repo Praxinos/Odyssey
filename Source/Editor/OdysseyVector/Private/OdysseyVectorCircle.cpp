@@ -113,12 +113,12 @@ UOdysseyVectorCircle::DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags )
 }
 
 UOdysseyVectorObject*
-UOdysseyVectorCircle::PickShape( double iX, double iY, double iRadius )
+UOdysseyVectorCircle::PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags )
 {
-    if( FMath::Sqrt((iX*iX) + (iY*iY)) <= mRadiusX )
+    /*if( FMath::Sqrt((iX*iX) + (iY*iY)) <= mRadiusX )
     {
         return this;
-    }
+    }*/
 
     return nullptr;
 }

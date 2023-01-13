@@ -44,7 +44,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorPathBuilder : public UOdysseyVectorObject
         void DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags );
 
         // Unimplemented. Cubic Path builder cannot be picked. It should be destroyed as soon as the curve is built
-        UOdysseyVectorObject* PickShape( double iX, double iY, double iRadius ) { return nullptr; };
+        UOdysseyVectorObject* PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags ) { return nullptr; };
 
         void UpdateShape() {};
 
