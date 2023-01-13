@@ -71,7 +71,7 @@ PointQueryMask( int32 iX, int32 iY, BLImageData* iImageData )
 {
     uint8 *pixel = static_cast<uint8*>(iImageData->pixelData);
 
-    return pixel[(iY * iImageData->stride) + iX];
+    return pixel[(iY * iImageData->size.w) + iX];
 }
 
 static bool
@@ -138,7 +138,7 @@ UOdysseyVectorPathCubic::PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags
 
     if ( iSelectionFlags & PICK_FREEHAND )
     {
-        BLImage* blimg = blctx.targetImage();
+        BLImage* blimg = blctx.targetImage(); // the mask image must be selected by the vector engine at this point
         BLImageData imageData;
 
         blimg->getData( &imageData );

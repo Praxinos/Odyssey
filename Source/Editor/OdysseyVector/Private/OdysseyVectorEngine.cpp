@@ -132,11 +132,30 @@ FOdysseyVectorEngine::Render()
     else
     {
         blctx.fillAll();
+        //blctx.clearAll();
     }
 
     mScene->Draw( mRoi, mDrawingFlags );
 
     RenderHUD();
+
+/*
+    BLImageData imgData;
+    BLImageData mskData;
+
+    mBLMask->getData( &mskData );
+    mBLImage->getData( &imgData );
+
+    for ( int i = 0; i < imgData.size.h; i++ ) {
+        for ( int j = 0; j < imgData.size.w; j++ ) {
+            uint32 offset = (i*imgData.size.w)+j;
+
+            if( ((uint8*)mskData.pixelData)[offset] )
+                ((uint32*)imgData.pixelData)[offset] = 0xFFFF0000;
+
+        }
+    }
+*/
 
     // Reset region of interest after each draw
     memset ( &mRoi, 0, sizeof ( mRoi ) );
@@ -151,8 +170,9 @@ FOdysseyVectorEngine::GenerateMask( std::vector<::ULIS::FVec2D>& iPointArray )
     BLPath path;
     ::ULIS::FRectD rect = { 0, 0, 0, 0 };
 
-    blctx.setFillStyle( BLRgba32(0x00000000) );
-    blctx.fillAll();
+    /*blctx.setFillStyle( BLRgba32(0x00000000) );*/
+    blctx.setFillAlpha(0.0f);
+    blctx.clearAll();
 
     if( iPointArray.size() )
     {
@@ -189,7 +209,8 @@ FOdysseyVectorEngine::GenerateMask( std::vector<::ULIS::FVec2D>& iPointArray )
         rect = ::ULIS::FRectD::FromMinMax( x1, y1, x2, y2 );
     }
 
-    blctx.setFillStyle( BLRgba32(0xFFFFFFFF) );
+    /*blctx.setFillStyle( BLRgba32(0xFFFFFFFF) );*/
+    blctx.setFillAlpha(1.0f);
     blctx.fillPath( path );
 
     return rect;
@@ -201,9 +222,12 @@ FOdysseyVectorEngine::Pick( std::vector<::ULIS::FVec2D>& iPointArray, uint32 iSe
     UOdysseyVectorObject* pickedObject;
     ::ULIS::FRectD roi;
 
+    GetBLContext().end();
     GetBLContext().begin( *mBLMask );
 
     roi = GenerateMask( iPointArray );
+
+    GetBLContext().flush(BL_CONTEXT_FLUSH_SYNC);
 
     pickedObject = UOdysseyVectorRoot::RecursivePick( *mScene, roi, iSelectionFlags );
 
@@ -220,6 +244,7 @@ FOdysseyVectorEngine::Pick( std::vector<::ULIS::FVec2D>& iPointArray, uint32 iSe
         mScene->Select ( *pickedObject );
     }
 
+    GetBLContext().end();
     GetBLContext().begin(*mBLImage);
 }
 
