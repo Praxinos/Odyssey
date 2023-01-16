@@ -28,7 +28,7 @@ UOdysseyPainterEditorVectorScenePanTool::Activate()
 {
 	//FOdysseyObjectEditorUtils::SetPropertyValue(BrushOptions, "Color", FOdysseyBrushColor(GetEditorAs<FOdysseyPainterEditor>()->PaintColor()));
     UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
-    FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetVectorEngine();
+    FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
 
     vectorEngine->SetDrawingFlags( 0 );
 
@@ -64,8 +64,8 @@ UOdysseyPainterEditorVectorScenePanTool::OnMouseDrag(const FOdysseyPoint& iPoint
 
     if( currentVectorLayer )
     {
-        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetVectorEngine();
-        UOdysseyVectorRoot *scene = vectorEngine->GetScene();
+        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+        UOdysseyVectorRoot *scene = currentVectorLayer->GetScene();
         double difx = iPointInTexture.x - mOldWorldMouseX;
         double dify = iPointInTexture.y - mOldWorldMouseY;
 

@@ -132,6 +132,9 @@ bool
 UOdysseyPainterEditorPaintBucketTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
+ /*
+    UOdysseyTextureLayer* layer = GetCurrentLayer();
+    */
     UOdysseyTextureLayerImageRaster* currentRasterLayer = GetCurrentLayerImageRaster();
 	::ULIS::FBlock* paintBlock = mPaintEngine.PaintBlock();
     ::ULIS::FColor color = GetEditorAs<FOdysseyPainterEditor>()->PaintColor().GetValue();

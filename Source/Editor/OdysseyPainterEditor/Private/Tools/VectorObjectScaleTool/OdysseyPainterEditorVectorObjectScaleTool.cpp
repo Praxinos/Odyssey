@@ -28,7 +28,7 @@ UOdysseyPainterEditorVectorObjectScaleTool::Activate()
 {
 	//FOdysseyObjectEditorUtils::SetPropertyValue(BrushOptions, "Color", FOdysseyBrushColor(GetEditorAs<FOdysseyPainterEditor>()->PaintColor()));
     UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
-    FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetVectorEngine();
+    FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
 
     vectorEngine->SetDrawingFlags( FOdysseyVectorEngine::RENDER_OBJECT_BBOX );
 
@@ -49,8 +49,8 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDown(const FOdysseyPoint& iPo
 
     if( currentVectorLayer )
     {
-        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetVectorEngine();
-        UOdysseyVectorObject* selectedObject = vectorEngine->GetScene()->GetLastSelected();
+        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+        UOdysseyVectorObject* selectedObject = currentVectorLayer->GetScene()->GetLastSelected();
 
         if ( selectedObject )
         {
@@ -74,8 +74,8 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDrag(const FOdysseyPoint& iPo
 
     if( currentVectorLayer )
     {
-        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetVectorEngine();
-        UOdysseyVectorObject* selectedObject = vectorEngine->GetScene()->GetLastSelected();
+        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+        UOdysseyVectorObject* selectedObject = currentVectorLayer->GetScene()->GetLastSelected();
 
         if ( selectedObject && ( mPickedHandle > -1 ) )
         {

@@ -28,7 +28,7 @@ UOdysseyPainterEditorVectorSceneScaleTool::Activate()
 {
 	//FOdysseyObjectEditorUtils::SetPropertyValue(BrushOptions, "Color", FOdysseyBrushColor(GetEditorAs<FOdysseyPainterEditor>()->PaintColor()));
     UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
-    FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetVectorEngine();
+    FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
 
     vectorEngine->SetDrawingFlags( 0 );
 
@@ -49,8 +49,8 @@ UOdysseyPainterEditorVectorSceneScaleTool::OnMouseDown(const FOdysseyPoint& iPoi
 
     if( currentVectorLayer )
     {
-        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetVectorEngine();
-        UOdysseyVectorRoot* scene = vectorEngine->GetScene();
+        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+        UOdysseyVectorRoot* scene = currentVectorLayer->GetScene();
         BLPoint localCoords = scene->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
 
         mDownWorldMouseX = iPointInTexture.x;
@@ -74,8 +74,8 @@ UOdysseyPainterEditorVectorSceneScaleTool::OnMouseDrag(const FOdysseyPoint& iPoi
 
     if( currentVectorLayer )
     {
-        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetVectorEngine();
-        UOdysseyVectorRoot* scene = vectorEngine->GetScene();
+        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+        UOdysseyVectorRoot* scene = currentVectorLayer->GetScene();
         BLPoint localCoords = scene->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
         ::ULIS::FVec2D dif = { localCoords.x - mOldLocalMouseX
                              , localCoords.y - mOldLocalMouseY };

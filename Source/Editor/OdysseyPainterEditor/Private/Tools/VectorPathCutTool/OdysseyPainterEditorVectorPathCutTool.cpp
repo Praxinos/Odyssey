@@ -29,7 +29,7 @@ void
 UOdysseyPainterEditorVectorPathCutTool::Activate()
 {
     UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
-    FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetVectorEngine();
+    FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
 /*
     vectorEngine->SetDrawingFlags( FOdysseyVectorEngine::RENDER_OBJECT_STRUCTURE );
 */
@@ -55,8 +55,8 @@ UOdysseyPainterEditorVectorPathCutTool::OnMouseDown(const FOdysseyPoint& iPointI
 
     if( currentVectorLayer )
     {
-        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetVectorEngine();
-        UOdysseyVectorObject* selectedObject = vectorEngine->GetScene()->GetLastSelected();
+        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+        UOdysseyVectorObject* selectedObject = currentVectorLayer->GetScene()->GetLastSelected();
 
         vectorEngine->AddHUD( &mLineHUD );
 
@@ -96,8 +96,8 @@ UOdysseyPainterEditorVectorPathCutTool::OnMouseUp(const FOdysseyPoint& iPointInT
 
     if( currentVectorLayer )
     {
-        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetVectorEngine();
-        UOdysseyVectorObject* selectedObject = vectorEngine->GetScene()->GetLastSelected();
+        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+        UOdysseyVectorObject* selectedObject = currentVectorLayer->GetScene()->GetLastSelected();
 
         vectorEngine->RemoveHUD( &mLineHUD );
         vectorEngine->RemoveHUD( &mLineHUD );

@@ -38,9 +38,13 @@ UOdysseyTextureLayerImageVector::Init( uint32 iWidth, uint32 iHeight )
     mVEngine = new FOdysseyVectorEngine( (double)iWidth
                                        , (double)iHeight );
 
+    mScene = NewObject<UOdysseyVectorRoot>();
+    mScene->SetEngine( mVEngine );
+    mScene->Init( "Vector Scene" );
+
     UE_LOG(LogTemp,Warning,TEXT("UOdysseyTextureLayerImageVector::Init %d %d %d"), iWidth, iHeight, mVEngine );
 
-    mVEngine->GetBLImage().getData( &imgData );
+    mVEngine->GetBLImage()->getData( &imgData );
 
     mBlock = new ::ULIS::FBlock( static_cast<uint8*>(imgData.pixelData)
                                , iWidth
@@ -67,9 +71,15 @@ UOdysseyTextureLayerImageVector::OnCleanupData( uint8* iData, void* iInfo )
 }
 
 FOdysseyVectorEngine*
-UOdysseyTextureLayerImageVector::GetVectorEngine()
+UOdysseyTextureLayerImageVector::GetEngine()
 {
     return mVEngine;
+}
+
+UOdysseyVectorRoot*
+UOdysseyTextureLayerImageVector::GetScene()
+{
+    return mScene;
 }
 
 void
@@ -94,7 +104,7 @@ UOdysseyTextureLayerImageVector::RenderImage(::ULIS::FBlock* ioBlock, const ::UL
         return iWaitList;
 
     // TODO: set region of interest as parameter ?
-    mVEngine->Render();
+    mVEngine->Render( *mScene );
 
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(mBlock->Format());
 
@@ -134,7 +144,7 @@ UOdysseyTextureLayerImageVector::Serialize(FArchive& Ar)
 
     if( Ar.IsSaving() )
     {
-        FOdysseyVectorExport::Write( mVEngine, Ar );
+        FOdysseyVectorExport::Write( mScene, Ar );
     }
 
     if( Ar.IsLoading() )
@@ -144,7 +154,7 @@ UOdysseyTextureLayerImageVector::Serialize(FArchive& Ar)
             Init( Width, Height );
         }
 
-        FOdysseyVectorImport::Read( mVEngine, Ar );
+        FOdysseyVectorImport::Read( mScene, Ar );
     }
 }
 

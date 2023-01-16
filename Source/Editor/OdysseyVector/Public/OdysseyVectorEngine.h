@@ -10,8 +10,8 @@
 class ODYSSEYVECTOR_API FOdysseyVectorEngine
 {
     private:
-        UOdysseyVectorRoot *mScene;
         ::ULIS::FRectD mRoi;
+        BLContext* mBLContext;
         BLImage* mBLImage;
         BLImage* mBLMask;
         uint64 mDrawingFlags;
@@ -21,15 +21,18 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
         static const uint64 RENDER_OBJECT_STRUCTURE = ( 1 << 0 );
         static const uint64 RENDER_OBJECT_BBOX      = ( 1 << 1 );
 
-        static BLContext& GetBLContext();
-        BLImage& GetBLImage();
+        BLContext* GetBLContext();
+        BLImage* GetBLImage();
+        BLImage* GetBLMask();
         ~FOdysseyVectorEngine();
         FOdysseyVectorEngine( double iWidth, double iHeight );
-        void RenderSelected();
-        void RenderHUD();
-        void Render();
-        void Pick( std::vector<::ULIS::FVec2D>& iPointArray, uint32 iSelectionFlags );
-        UOdysseyVectorRoot* GetScene();
+        void RenderSelected( UOdysseyVectorRoot& iScene );
+        void RenderHUD( UOdysseyVectorRoot& iScene );
+        void Render( UOdysseyVectorRoot& iScene );
+        void Pick( UOdysseyVectorRoot& iScene, std::vector<::ULIS::FVec2D>& iPointArray, uint32 iSelectionFlags );
+
+        static void RecursivePick( UOdysseyVectorObject& iObj, std::vector<UOdysseyVectorObject*>& iSelectedObjectArray, ::ULIS::FRectD& iRoi, uint32 iSelectionFlags );
+
         /*void Init( double iWidth, double iHeight );*/
         void InvalidateRegion( double x, double y, double w, double h );
         void InvalidateRegion( ::ULIS::FRectD& iRegion );

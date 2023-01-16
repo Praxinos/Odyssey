@@ -133,12 +133,12 @@ LineQueryMask( int32 iX0, int32 iY0, int32 iX1, int32 iY1, BLImageData* iImageDa
 UOdysseyVectorObject*
 UOdysseyVectorPathCubic::PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags )
 {
-    BLContext& blctx = FOdysseyVectorEngine::GetBLContext();
+    BLContext* blctx = GetRoot()->GetEngine()->GetBLContext();
     BLPath path;
 
     if ( iSelectionFlags & PICK_FREEHAND )
     {
-        BLImage* blimg = blctx.targetImage(); // the mask image must be selected by the vector engine at this point
+        BLImage* blimg = blctx->targetImage(); // the mask image must be selected by the vector engine at this point
         BLImageData imageData;
 
         blimg->getData( &imageData );
@@ -312,12 +312,12 @@ void
 UOdysseyVectorPathCubic::Fill( ::ULIS::FRectD& iRoi )
 {
     UOdysseyVectorVertexCubic *firstVertex = static_cast<UOdysseyVectorVertexCubic*>( GetFirstVertex() );
-    BLContext& blctx = FOdysseyVectorEngine::GetBLContext();
+    BLContext* blctx = GetRoot()->GetEngine()->GetBLContext();
     BLPath path;
 
     if ( IsLoop() && firstVertex )
     {
-        blctx.setCompOp( BL_COMP_OP_SRC_COPY );
+        blctx->setCompOp( BL_COMP_OP_SRC_COPY );
         /*iBLContext.setFillStyle(BLRgba32(0xFFFFFFFF));
         iBLContext.setStrokeStyle(BLRgba32(0xFF000000));*/
 
@@ -339,15 +339,15 @@ UOdysseyVectorPathCubic::Fill( ::ULIS::FRectD& iRoi )
                         , point1.y );
         }
 
-        blctx.setFillStyle( BLRgba32( mFillColor ) );
-        blctx.fillPath( path );
+        blctx->setFillStyle( BLRgba32( mFillColor ) );
+        blctx->fillPath( path );
     }
 }
 
 void
 UOdysseyVectorPathCubic::DrawStructure( ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
-    BLContext& blctx = FOdysseyVectorEngine::GetBLContext();
+    BLContext* blctx = GetRoot()->GetEngine()->GetBLContext();
     BLPath path;
     UOdysseyVectorVertexCubic *firstVertex = static_cast<UOdysseyVectorVertexCubic*>( GetFirstVertex() );
     BLPoint localVector = mInverseWorldMatrix.mapVector ( 0.7071f, 0.7071f );
@@ -359,13 +359,13 @@ UOdysseyVectorPathCubic::DrawStructure( ::ULIS::FRectD& iRoi, uint64 iFlags )
 
     if ( firstVertex )
     {
-        blctx.setCompOp( BL_COMP_OP_SRC_COPY );
+        blctx->setCompOp( BL_COMP_OP_SRC_COPY );
 
         for(std::list<UOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it)
         {
             UOdysseyVectorSegmentCubic *segment = static_cast<UOdysseyVectorSegmentCubic*>(*it);
 
-            segment->DrawStructure( iRoi, factor.x, factor.y );
+            segment->DrawStructure( this, iRoi, factor.x, factor.y );
         }
     }
 
@@ -378,22 +378,22 @@ UOdysseyVectorPathCubic::DrawStructure( ::ULIS::FRectD& iRoi, uint64 iFlags )
         double ctrlX = ( perpendicular.x * pointRadius );
         double ctrlY = ( perpendicular.y * pointRadius );
 
-        blctx.setFillStyle( BLRgba32( 0xFFFF00FF ) );
-        blctx.fillRect( point->GetX() - handleRadiusX
-                      , point->GetY() - handleRadiusY
-                      , handleWidth
-                      , handleHeight );
+        blctx->setFillStyle( BLRgba32( 0xFFFF00FF ) );
+        blctx->fillRect( point->GetX() - handleRadiusX
+                       , point->GetY() - handleRadiusY
+                       , handleWidth
+                       , handleHeight );
 
-        blctx.setFillStyle( BLRgba32( 0xFF808080 ) );
-        blctx.fillRect( point->GetX() + ctrlX - handleRadiusX
-                      , point->GetY() + ctrlY - handleRadiusY
-                      , handleWidth
-                      , handleHeight );
+        blctx->setFillStyle( BLRgba32( 0xFF808080 ) );
+        blctx->fillRect( point->GetX() + ctrlX - handleRadiusX
+                       , point->GetY() + ctrlY - handleRadiusY
+                       , handleWidth
+                       , handleHeight );
 
-        blctx.fillRect( point->GetX() - ctrlX - handleRadiusX
-                      , point->GetY() - ctrlY - handleRadiusY
-                      , handleWidth
-                      , handleHeight );
+        blctx->fillRect( point->GetX() - ctrlX - handleRadiusX
+                       , point->GetY() - ctrlY - handleRadiusY
+                       , handleWidth
+                       , handleHeight );
     }
 }
 
@@ -453,7 +453,8 @@ static bool intersectLine( ::ULIS::FVec2D& iOrigin0
 }
 
 static void
-_drawMiterJoint( ::ULIS::FVec2D& iOrigin
+_drawMiterJoint( UOdysseyVectorPathCubic* iPath
+               , ::ULIS::FVec2D& iOrigin
                , ::ULIS::FVec2D& iPrevSegmentVector
                , ::ULIS::FVec2D& iSegmentVector
                , double iRadius
@@ -468,7 +469,7 @@ _drawMiterJoint( ::ULIS::FVec2D& iOrigin
     ::ULIS::FVec2D shortestTest = edgePoint - edgePrevPoint;
     // have to clamp due to imprecision of the dot product
     double dot = std::clamp<double>( currPerpendicularVec.DotProduct( prevPerpendicularVec ), -1.0f, 1.0f );
-    BLContext& blctx = FOdysseyVectorEngine::GetBLContext();
+    BLContext* blctx = iPath->GetRoot()->GetEngine()->GetBLContext();
 
     ::ULIS::FVec2D intersectionPoint;
 
@@ -512,8 +513,8 @@ _drawMiterJoint( ::ULIS::FVec2D& iOrigin
                 vertex[3].x = edgePrevPoint.x;
                 vertex[3].y = edgePrevPoint.y;
 
-                blctx.strokePolygon( vertex, 4 );
-                blctx.fillPolygon( vertex, 4 );
+                blctx->strokePolygon( vertex, 4 );
+                blctx->fillPolygon( vertex, 4 );
             }
             else
             {
@@ -533,15 +534,16 @@ _drawMiterJoint( ::ULIS::FVec2D& iOrigin
                 vertex[4].x = edgePrevPoint.x;
                 vertex[4].y = edgePrevPoint.y;
 
-                blctx.strokePolygon( vertex, 5 );
-                blctx.fillPolygon( vertex, 5 );
+                blctx->strokePolygon( vertex, 5 );
+                blctx->fillPolygon( vertex, 5 );
             }
         }
     }
 }
 
 static void
-_drawRadialJoint( ::ULIS::FVec2D& iOrigin
+_drawRadialJoint( UOdysseyVectorPathCubic* iPath
+                , ::ULIS::FVec2D& iOrigin
                 , ::ULIS::FVec2D& iPrevSegmentVector
                 , ::ULIS::FVec2D& iSegmentVector
                 , double iRadius
@@ -557,7 +559,7 @@ _drawRadialJoint( ::ULIS::FVec2D& iOrigin
     double angle = acos( dot );
     double a = ( iSteps ) ? angle / iSteps : 0.0f;
     BLPoint vertex[3];
-    BLContext& blctx = FOdysseyVectorEngine::GetBLContext();
+    BLContext* blctx = iPath->GetRoot()->GetEngine()->GetBLContext();
 
     // Find on which side should the joint be drawn by comparing the directions of our vectors
     if ( shortestTest.DotProduct( iPrevSegmentVector ) < 0 )
@@ -588,15 +590,16 @@ _drawRadialJoint( ::ULIS::FVec2D& iOrigin
         vertex[2].x = vertex[0].x + ( interpolatedVector.x * iRadius );
         vertex[2].y = vertex[0].y + ( interpolatedVector.y * iRadius );
 
-        blctx.strokePolygon( vertex , 3 );
-        blctx.fillPolygon( vertex, 3 );
+        blctx->strokePolygon( vertex , 3 );
+        blctx->fillPolygon( vertex, 3 );
 
         currPerpendicularVec = interpolatedVector;
     }
 }
 
 static void
-_drawLinearJoint( ::ULIS::FVec2D& iOrigin
+_drawLinearJoint( UOdysseyVectorPathCubic* iPath
+                , ::ULIS::FVec2D& iOrigin
                 , ::ULIS::FVec2D& iPrevSegmentVector
                 , ::ULIS::FVec2D& iSegmentVector
                 , double iRadius )
@@ -606,7 +609,7 @@ _drawLinearJoint( ::ULIS::FVec2D& iOrigin
     ::ULIS::FVec2D edgePrevPoint = iOrigin + ( prevPerpendicularVec * iRadius );
     ::ULIS::FVec2D edgePoint = iOrigin + ( currPerpendicularVec * iRadius );
     ::ULIS::FVec2D shortestTest = edgePoint - edgePrevPoint;
-    BLContext& blctx = FOdysseyVectorEngine::GetBLContext();
+    BLContext* blctx = iPath->GetRoot()->GetEngine()->GetBLContext();
     BLPoint vertex[3];
 
     if ( shortestTest.DotProduct( iPrevSegmentVector ) < 0 )
@@ -628,8 +631,8 @@ _drawLinearJoint( ::ULIS::FVec2D& iOrigin
     vertex[2].x = vertex[0].x + ( prevPerpendicularVec.x * iRadius );
     vertex[2].y = vertex[0].y + ( prevPerpendicularVec.y * iRadius );
 
-    blctx.strokePolygon( vertex, 3 );
-    blctx.fillPolygon( vertex, 3 );
+    blctx->strokePolygon( vertex, 3 );
+    blctx->fillPolygon( vertex, 3 );
 }
 
 void
@@ -654,15 +657,15 @@ UOdysseyVectorPathCubic::DrawJoint( UOdysseyVectorSegmentCubic* iPrevSegment
                 switch ( mJointType )
                 {
                     case JOINT_TYPE_LINEAR :
-                        _drawLinearJoint ( origin, prevSegmentVector, segmentVector, iRadius );
+                        _drawLinearJoint ( this, origin, prevSegmentVector, segmentVector, iRadius );
                     break;
 
                     case JOINT_TYPE_MITER :
-                        _drawMiterJoint ( origin, prevSegmentVector, segmentVector, iRadius, 4.0f );
+                        _drawMiterJoint ( this, origin, prevSegmentVector, segmentVector, iRadius, 4.0f );
                     break;
 
                     case JOINT_TYPE_RADIAL :
-                        _drawRadialJoint ( origin, prevSegmentVector, segmentVector, iRadius, 24 );
+                        _drawRadialJoint ( this, origin, prevSegmentVector, segmentVector, iRadius, 24 );
                     break;
 
                     default:
@@ -676,12 +679,12 @@ UOdysseyVectorPathCubic::DrawJoint( UOdysseyVectorSegmentCubic* iPrevSegment
 void
 UOdysseyVectorPathCubic::DrawShapeVariable( ::ULIS::FRectD &iRoi, uint64 iFlags )
 {
-    BLContext& blctx = FOdysseyVectorEngine::GetBLContext();
-    blctx.setCompOp( BL_COMP_OP_SRC_OVER );
+    BLContext* blctx = GetRoot()->GetEngine()->GetBLContext();
+    blctx->setCompOp( BL_COMP_OP_SRC_OVER );
 
     // We fill with stroke color because our curve is made of filled shapes.
-    blctx.setFillStyle(BLRgba32(mStrokeColor));
-    blctx.setStrokeStyle(BLRgba32(mStrokeColor));
+    blctx->setFillStyle( BLRgba32( mStrokeColor ) );
+    blctx->setStrokeStyle( BLRgba32( mStrokeColor ) );
 
     if( mSegmentList.size() )
     {
@@ -694,7 +697,7 @@ UOdysseyVectorPathCubic::DrawShapeVariable( ::ULIS::FRectD &iRoi, uint64 iFlags 
 
             if( ( iRoi.Area() == 0.0f ) || clip.Area() )
             {
-                segment->Draw( iRoi );
+                segment->Draw( this, iRoi );
             }
 
             if ( prevSegment )

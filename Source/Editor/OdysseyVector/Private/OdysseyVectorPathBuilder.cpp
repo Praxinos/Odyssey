@@ -466,14 +466,14 @@ UOdysseyVectorPathBuilder::FitSegment( UOdysseyVectorSegmentCubic& iSegment
 void
 UOdysseyVectorPathBuilder::DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
-    BLContext& blctx = FOdysseyVectorEngine::GetBLContext();
+    BLContext* blctx = GetRoot()->GetEngine()->GetBLContext();
     BLPath path;
 
-    blctx.setCompOp(BL_COMP_OP_SRC_COPY);
+    blctx->setCompOp(BL_COMP_OP_SRC_COPY);
     /*iBLContext.setFillStyle(BLRgba32(0xFFFFFFFF));
     iBLContext.setStrokeStyle(BLRgba32(0xFF000000));*/
 
-    blctx.setStrokeStyle( BLRgba32( mStrokeColor ) );
+    blctx->setStrokeStyle( BLRgba32( mStrokeColor ) );
 
     for( std::list<UOdysseyVectorLink*>::iterator it = mLinkList.begin(); it != mLinkList.end(); ++it )
     {
@@ -489,21 +489,21 @@ UOdysseyVectorPathBuilder::DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags )
 
         if ( it == mLinkList.begin() )
         {
-            blctx.setStrokeWidth( link->GetPoint(0)->GetRadius() * 2.0f );
+            blctx->setStrokeWidth( link->GetPoint(0)->GetRadius() * 2.0f );
             path.moveTo( point0.x,point0.y );
         }
 
         path.lineTo( point1.x,point1.y );
     }
 
-    blctx.strokePath( path );
+    blctx->strokePath( path );
 
-    blctx.setFillStyle(BLRgba32(0xFFFF00FF));
+    blctx->setFillStyle(BLRgba32(0xFFFF00FF));
 
     for( std::list<UOdysseyVectorPoint*>::iterator it = mSamplePointList.begin(); it != mSamplePointList.end(); ++it )
     {
         UOdysseyVectorPoint *samplePoint = (*it);
 
-        blctx.fillRect( samplePoint->GetX() - 3, samplePoint->GetY() - 3, 6, 6  );
+        blctx->fillRect( samplePoint->GetX() - 3, samplePoint->GetY() - 3, 6, 6  );
     }
 }

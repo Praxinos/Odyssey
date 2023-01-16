@@ -38,9 +38,9 @@ FOdysseyVectorHUDLine::GetP1()
 void
 FOdysseyVectorHUDLine::Draw( UOdysseyVectorObject* iObject, ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
-    BLContext& blctx = FOdysseyVectorEngine::GetBLContext();
+    BLContext* blctx = iObject->GetRoot()->GetEngine()->GetBLContext();
 
-    blctx.setStrokeStyle( BLRgba32(0xFF0000FF) );
-    blctx.setStrokeWidth( 1.0f );
-    blctx.strokeLine( mP0.x, mP0.y, mP1.x, mP1.y );
+    blctx->setStrokeStyle( BLRgba32(0xFF0000FF) );
+    blctx->setStrokeWidth( 1.0f );
+    blctx->strokeLine( mP0.x, mP0.y, mP1.x, mP1.y );
 }

@@ -28,7 +28,7 @@ UOdysseyPainterEditorVectorObjectRotateTool::Activate()
 {
     //FOdysseyObjectEditorUtils::SetPropertyValue(BrushOptions, "Color", FOdysseyBrushColor(GetEditorAs<FOdysseyPainterEditor>()->PaintColor()));
     UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
-    FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetVectorEngine();
+    FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
 
     vectorEngine->SetDrawingFlags( 0 );
 
@@ -49,8 +49,8 @@ UOdysseyPainterEditorVectorObjectRotateTool::OnMouseDown(const FOdysseyPoint& iP
 
     if( currentVectorLayer )
     {
-        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetVectorEngine();
-        UOdysseyVectorObject* selectedObject = vectorEngine->GetScene()->GetLastSelected();
+        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+        UOdysseyVectorObject* selectedObject = currentVectorLayer->GetScene()->GetLastSelected();
 
         if ( selectedObject )
         {
@@ -70,8 +70,8 @@ UOdysseyPainterEditorVectorObjectRotateTool::OnMouseDrag(const FOdysseyPoint& iP
 
     if( currentVectorLayer )
     {
-        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetVectorEngine();
-        UOdysseyVectorObject* selectedObject = vectorEngine->GetScene()->GetLastSelected();
+        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+        UOdysseyVectorObject* selectedObject = currentVectorLayer->GetScene()->GetLastSelected();
 
         if ( selectedObject )
         {

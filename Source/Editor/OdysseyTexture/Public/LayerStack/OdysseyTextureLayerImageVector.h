@@ -29,6 +29,7 @@ class ODYSSEYTEXTURE_API UOdysseyTextureLayerImageVector
         static const uint32 VECTOROBJECTTYPE = 0;
         static const uint32 VECTORPATHTYPE = 1;
 
+        UOdysseyVectorRoot* mScene;
         FOdysseyVectorEngine* mVEngine;
         ::ULIS::FBlock* mBlock;
 
@@ -55,7 +56,8 @@ class ODYSSEYTEXTURE_API UOdysseyTextureLayerImageVector
         //UOdysseyLayer overrides
         virtual void OnCreated_Implementation() override;
 
-        FOdysseyVectorEngine* GetVectorEngine();
+        FOdysseyVectorEngine* GetEngine();
+        UOdysseyVectorRoot* GetScene();
 
         /**
          * @brief Renders an image in the given Block

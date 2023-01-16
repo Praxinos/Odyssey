@@ -81,9 +81,6 @@ class ODYSSEYVECTOR_API UOdysseyVectorObject : public UObject
         UOdysseyVectorObject* Copy();
         virtual UOdysseyVectorObject* CopyShape(){ return nullptr; };
 
-        void Serialize(FArchive& Ar);
-        virtual void SerializeShape(FArchive& Ar);
-
         void Draw( ::ULIS::FRectD& iRoi, uint64 iFlags );
         virtual void DrawShape ( ::ULIS::FRectD &roi, uint64 iFlags ){};
 

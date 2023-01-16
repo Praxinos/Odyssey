@@ -32,7 +32,7 @@ void
 UOdysseyPainterEditorVectorPathEditTool::Activate()
 {
     UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
-    FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetVectorEngine();
+    FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
 /*
     vectorEngine->SetDrawingFlags( FOdysseyVectorEngine::RENDER_OBJECT_STRUCTURE );
 */
@@ -56,8 +56,8 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDown(const FOdysseyPoint& iPoint
 
     if( currentVectorLayer )
     {
-        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetVectorEngine();
-        UOdysseyVectorObject* selectedObject = vectorEngine->GetScene()->GetLastSelected();
+        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+        UOdysseyVectorObject* selectedObject = currentVectorLayer->GetScene()->GetLastSelected();
 
         if ( selectedObject )
         {
@@ -177,7 +177,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDrag(const FOdysseyPoint& iPoint
 
     if( currentVectorLayer )
     {
-        UOdysseyVectorObject* selectedObject = currentVectorLayer->GetVectorEngine()->GetScene()->GetLastSelected();
+        UOdysseyVectorObject* selectedObject = currentVectorLayer->GetScene()->GetLastSelected();
 
         if ( selectedObject )
         {
@@ -217,9 +217,9 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDrag(const FOdysseyPoint& iPoint
                 totalInvalidatedArea = invalidatedArea | oldInvalidatedArea;
 
 //UE_LOG(LogTemp, Warning, TEXT("%d %d %d %d"), invalidatedArea.x, invalidatedArea.y, invalidatedArea.w, invalidatedArea.h );
-                currentVectorLayer->GetVectorEngine()->GetScene()->Update();
+                currentVectorLayer->GetScene()->Update();
 
-                currentVectorLayer->GetVectorEngine()->InvalidateRegion( totalInvalidatedArea );
+                currentVectorLayer->GetEngine()->InvalidateRegion( totalInvalidatedArea );
 
                 RedrawCurrentLayer( { /*{ 0, 0, 0, 0 }*/ totalInvalidatedArea } );
 

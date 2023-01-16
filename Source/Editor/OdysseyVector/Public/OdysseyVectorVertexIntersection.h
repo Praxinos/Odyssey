@@ -35,7 +35,7 @@ class UOdysseyVectorVertexIntersection : public UOdysseyVectorVertex
         ::ULIS::FVec2D GetPosition( UOdysseyVectorSegment& );
         ::ULIS::FVec2D& GetCoords();
         double GetT( UOdysseyVectorSegment& );
-        void Draw( ::ULIS::FRectD &iRoi );
+        void Draw( UOdysseyVectorPath* iPath, ::ULIS::FRectD &iRoi );
         void AddSegment( UOdysseyVectorSegmentCubic* iSegment, double t );
         // overloaded
         UOdysseyVectorSegment* GetSegment( UOdysseyVectorVertex& iOtherVertex );

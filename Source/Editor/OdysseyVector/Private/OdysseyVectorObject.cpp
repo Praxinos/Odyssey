@@ -18,7 +18,7 @@ UOdysseyVectorObject::UOdysseyVectorObject()
     , mIsSelected ( false )
     , mIsInvalidated ( false )
 {
-    UpdateMatrix();
+
 }
 
 void
@@ -136,23 +136,23 @@ UOdysseyVectorObject::GetTranslationY()
 void
 UOdysseyVectorObject::UpdateMatrix( )
 {
-    BLContext& blctx = FOdysseyVectorEngine::GetBLContext();
+    BLContext* blctx = GetRoot()->GetEngine()->GetBLContext();
 
-    blctx.save();
+    blctx->save();
 
-    blctx.resetMatrix();
-    blctx.translate( TranslationX, TranslationY );
-    blctx.rotate( Rotation );
-    blctx.scale( ScalingX, ScalingY );
-    mLocalMatrix = blctx.userMatrix();
+    blctx->resetMatrix();
+    blctx->translate( TranslationX, TranslationY );
+    blctx->rotate( Rotation );
+    blctx->scale( ScalingX, ScalingY );
+    mLocalMatrix = blctx->userMatrix();
 
     BLMatrix2D::invert( mInverseLocalMatrix, mLocalMatrix );
 
     if( mParent)
     {
-        blctx.setMatrix( mParent->mWorldMatrix );
-        blctx.transform( mLocalMatrix );
-        mWorldMatrix = blctx.userMatrix();
+        blctx->setMatrix( mParent->mWorldMatrix );
+        blctx->transform( mLocalMatrix );
+        mWorldMatrix = blctx->userMatrix();
 
         BLMatrix2D::invert( mInverseWorldMatrix, mWorldMatrix );
     }
@@ -170,7 +170,7 @@ UOdysseyVectorObject::UpdateMatrix( )
         child->UpdateMatrix( );
     }
 
-    blctx.restore();
+    blctx->restore();
 }
 
 static void
@@ -194,7 +194,6 @@ MakeBBoxHandles( ::ULIS::FRectD& iBBox, ::ULIS::FRectD iHandles[4], double iRadi
 int32
 UOdysseyVectorObject::PickBBox( double iLocalX, double iLocalY )
 {
-    BLContext& blctx = FOdysseyVectorEngine::GetBLContext();
     BLPoint vec = mInverseWorldMatrix.mapVector( 1.0f, 1.0f );
     ::ULIS::FVec2D size = { vec.x, vec.y };
     ::ULIS::FRectD handles[4];
@@ -218,29 +217,29 @@ UOdysseyVectorObject::PickBBox( double iLocalX, double iLocalY )
 void
 UOdysseyVectorObject::DrawBBox( ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
-    BLContext& blctx = FOdysseyVectorEngine::GetBLContext();
+    BLContext* blctx = GetRoot()->GetEngine()->GetBLContext();
     BLPoint vec = mInverseWorldMatrix.mapVector( 1.0f, 1.0f );
     ::ULIS::FVec2D size = { vec.x, vec.y };
     ::ULIS::FRectD handles[4];
 
     MakeBBoxHandles ( mBBox, handles, BBOX_POINT_RADIUS, size.x, size.y );
 
-    blctx.setStrokeStyle( BLRgba32(0xFF8B0000) );
+    blctx->setStrokeStyle( BLRgba32(0xFF8B0000) );
 
-    blctx.setStrokeWidth( vec.y );
-    blctx.strokeLine( mBBox.x, mBBox.y          , mBBox.x + mBBox.w, mBBox.y           );
-    blctx.strokeLine( mBBox.x, mBBox.y + mBBox.h, mBBox.x + mBBox.w, mBBox.y + mBBox.h );
+    blctx->setStrokeWidth( vec.y );
+    blctx->strokeLine( mBBox.x, mBBox.y          , mBBox.x + mBBox.w, mBBox.y           );
+    blctx->strokeLine( mBBox.x, mBBox.y + mBBox.h, mBBox.x + mBBox.w, mBBox.y + mBBox.h );
 
-    blctx.setStrokeWidth( vec.x );
-    blctx.strokeLine( mBBox.x          , mBBox.y, mBBox.x          , mBBox.y + mBBox.h );
-    blctx.strokeLine( mBBox.x + mBBox.w, mBBox.y, mBBox.x + mBBox.w, mBBox.y + mBBox.h );
+    blctx->setStrokeWidth( vec.x );
+    blctx->strokeLine( mBBox.x          , mBBox.y, mBBox.x          , mBBox.y + mBBox.h );
+    blctx->strokeLine( mBBox.x + mBBox.w, mBBox.y, mBBox.x + mBBox.w, mBBox.y + mBBox.h );
 
-    blctx.setFillStyle( BLRgba32(0xFF8B0000) );
+    blctx->setFillStyle( BLRgba32(0xFF8B0000) );
 
     // draw the handles (squares at rectangle corners)
     for ( int i = 0; i < 4; i++ )
     {
-        blctx.fillRect( handles[i].x, handles[i].y, handles[i].w, handles[i].h );
+        blctx->fillRect( handles[i].x, handles[i].y, handles[i].w, handles[i].h );
     }
 }
 
@@ -273,7 +272,7 @@ UOdysseyVectorObject::DrawChildren( ::ULIS::FRectD& iRoi, uint64 iFlags )
 void
 UOdysseyVectorObject::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
-    BLContext& blctx = FOdysseyVectorEngine::GetBLContext();
+    BLContext* blctx = GetRoot()->GetEngine()->GetBLContext();
     ::ULIS::FRectD localRoi = { 0.0f, 0.0f, 0.0f, 0.0f };
 
     // Adapt the Region-Of-Interest to the local coordinates
@@ -292,13 +291,13 @@ UOdysseyVectorObject::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
 
             /*printf("%s : %f %f %f %f\n",Name.c_str(), iRoi.x,iRoi.y,iRoi.w,iRoi.h);*/
 
-    blctx.save();
-    blctx.transform( mLocalMatrix );
+    blctx->save();
+    blctx->transform( mLocalMatrix );
     DrawShape( localRoi, iFlags );
 
     DrawChildren( localRoi, iFlags );
 
-    blctx.restore();
+    blctx->restore();
 }
 
 bool
@@ -344,7 +343,7 @@ UOdysseyVectorRoot*
 UOdysseyVectorObject::GetRoot()
 {
     UOdysseyVectorObject* parent = mParent;
-    UOdysseyVectorObject* root = nullptr;
+    UOdysseyVectorObject* root = this;
 
     while ( parent )
     {
@@ -495,7 +494,6 @@ UOdysseyVectorObject::PrependChild( UOdysseyVectorObject* iChild )
 void
 UOdysseyVectorObject::AddChild( UOdysseyVectorObject* iChild, bool iPrepend )
 {
-    BLContext& blctx = FOdysseyVectorEngine::GetBLContext();
     BLMatrix2D localMatrix = this->GetInverseWorldMatrix();
 
     iChild->mParent = this;
@@ -621,30 +619,6 @@ UOdysseyVectorObject::TreeToArray( UOdysseyVectorObject* iObject, std::vector<UO
     }
 
     return iOutArray.size();
-}
-
-void
-UOdysseyVectorObject::SerializeShape( FArchive& Ar )
-{
-    UE_LOG(LogTemp,Warning,TEXT("UOdysseyVectorObject::SerializeShape"));
-}
-
-void
-UOdysseyVectorObject::Serialize( FArchive& Ar )
-{
-    Super::Serialize( Ar );
-
-    UE_LOG(LogTemp,Warning,TEXT("UOdysseyVectorObject::Serialize"));
-
-/*
-    uint32 mStrokeColor;
-    double mStrokeWidth;
-    uint32 mFillColor;
-
-    std::list<UOdysseyVectorObject*> mChildrenList;
-*/
-
-    /*SerializeShape ( Ar );*/
 }
 
 uint32

@@ -6,6 +6,18 @@ void UOdysseyVectorRoot::Init( std::string iName )
 }
 
 void
+UOdysseyVectorRoot::SetEngine( FOdysseyVectorEngine* iEngine )
+{
+    mEngine = iEngine;
+}
+
+FOdysseyVectorEngine*
+UOdysseyVectorRoot::GetEngine()
+{
+    return mEngine;
+}
+
+void
 UOdysseyVectorRoot::ClearSelection()
 {
     for( std::list<UOdysseyVectorObject*>::iterator it = mSelectedObjectList.begin(); it != mSelectedObjectList.end(); ++it )
@@ -19,19 +31,21 @@ UOdysseyVectorRoot::ClearSelection()
 }
 
 void
-UOdysseyVectorRoot::Unselect( UOdysseyVectorObject& iVecObj )
+UOdysseyVectorRoot::Unselect( UOdysseyVectorObject* iVecObj )
 {
-    iVecObj.SetIsSelected( false );
-    mSelectedObjectList.remove( &iVecObj );
+    iVecObj->SetIsSelected( false );
+
+    mSelectedObjectList.remove( iVecObj );
 }
 
 void
-UOdysseyVectorRoot::Select( UOdysseyVectorObject& iVecObj )
+UOdysseyVectorRoot::Select( UOdysseyVectorObject* iVecObj )
 {
-    if( std::find( mSelectedObjectList.begin(), mSelectedObjectList.end(), &iVecObj ) == mSelectedObjectList.end() )
+    if( std::find( mSelectedObjectList.begin(), mSelectedObjectList.end(), iVecObj ) == mSelectedObjectList.end() )
     {
-        iVecObj.SetIsSelected( true );
-        mSelectedObjectList.push_back( &iVecObj );
+        iVecObj->SetIsSelected( true );
+
+        mSelectedObjectList.push_back( iVecObj );
     }
 }
 
@@ -50,7 +64,6 @@ UOdysseyVectorRoot::GroupSelectdObjects( )
 {
     UOdysseyVectorGroup* group = NewObject<UOdysseyVectorGroup>();
     BLPoint averageTranslation = { 0.0f, 0.0f };
-    BLContext& blctx = FOdysseyVectorEngine::GetBLContext();
     // We don't use the mSelectedObjectList because we want to keep the same order
     // and we work on a copy to be able to delete the objects while iterating
     std::list<UOdysseyVectorObject*> objectList = mChildrenList;
@@ -97,7 +110,7 @@ UOdysseyVectorRoot::GroupSelectdObjects( )
     return group;
 }
 
-std::list<UOdysseyVectorObject*>
+std::list<UOdysseyVectorObject*>&
 UOdysseyVectorRoot::GetSelectedObjectList()
 {
     return mSelectedObjectList;
@@ -106,7 +119,7 @@ UOdysseyVectorRoot::GetSelectedObjectList()
 void
 UOdysseyVectorRoot::DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
-    BLContext& blctx = FOdysseyVectorEngine::GetBLContext();
+
 }
 
 void
@@ -132,13 +145,14 @@ void
 UOdysseyVectorRoot::Bucket( double iX, double iY, uint32 iFillColor )
 {
     ::ULIS::FRectD roi = { iX, iY, 0, 0 };
+    std::vector<UOdysseyVectorObject*> pickedObjectArray;
 
-    UOdysseyVectorObject* pickedObject = RecursivePick( *this, roi, UOdysseyVectorObject::PICK_POINT );
+    FOdysseyVectorEngine::RecursivePick( *this, pickedObjectArray, roi, UOdysseyVectorObject::PICK_POINT );
 
-    if ( pickedObject )
+    if ( pickedObjectArray.size() > 1 )
     {
-        pickedObject->SetFilled(true);
-        pickedObject->SetFillColor( iFillColor );
+        pickedObjectArray[0]->SetFilled(true);
+        pickedObjectArray[0]->SetFillColor( iFillColor );
     }
 }
 
@@ -151,27 +165,6 @@ UOdysseyVectorRoot::GetLastSelected()
     }
 
     return mSelectedObjectList.back();
-}
-
-UOdysseyVectorObject*
-UOdysseyVectorRoot::RecursivePick( UOdysseyVectorObject& iObj, ::ULIS::FRectD& iRoi, uint32 iSelectionFlags )
-{
-    UOdysseyVectorObject* pickedObject = nullptr;
-
-    for( std::list<UOdysseyVectorObject*>::iterator it = iObj.GetChildrenList().begin(); it != iObj.GetChildrenList().end(); ++it )
-    {
-        UOdysseyVectorObject *child = (*it);
-        UOdysseyVectorObject* pickedChild = nullptr;
-
-        pickedChild = RecursivePick( *child, iRoi, iSelectionFlags );
-
-        if ( pickedChild )
-        {
-            pickedObject = pickedChild;
-        }
-    }
-
-    return ( pickedObject ) ? pickedObject : iObj.Pick( iRoi, iSelectionFlags );
 }
 
 uint32

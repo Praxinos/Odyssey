@@ -22,7 +22,7 @@ void FOdysseyVectorImport::ReadChunks( uint64 iChunkEnd, FArchive &Ar, std::func
 }
 
 void
-FOdysseyVectorImport::Read( FOdysseyVectorEngine* iVEngine, FArchive &Ar )
+FOdysseyVectorImport::Read( UOdysseyVectorRoot* iScene, FArchive &Ar )
 {
     uint32 chunkID;
     uint64 chunkLen;
@@ -38,18 +38,18 @@ FOdysseyVectorImport::Read( FOdysseyVectorEngine* iVEngine, FArchive &Ar )
 
     chunkEnd = currentAddress + chunkLen;
 
-    UE_LOG(LogTemp,Warning,TEXT("chunkID %X %d %d"), chunkID, chunkLen, iVEngine );
+    UE_LOG(LogTemp,Warning,TEXT("chunkID %X %d"), chunkID, chunkLen );
 
-    if( iVEngine )
+    if( iScene )
     {
         std::vector<UOdysseyVectorObject*> vectorObjectArray;
 
         // first record must be the scene
-        vectorObjectArray.push_back( iVEngine->GetScene() );
+        vectorObjectArray.push_back( iScene );
 
         FOdysseyVectorImport::ReadChunks( chunkEnd
                                         , Ar
-                                        , [iVEngine,&vectorObjectArray](uint32 iChunkID, uint64 iChunkLen, FArchive &Ar) -> void
+                                        , [&vectorObjectArray](uint32 iChunkID, uint64 iChunkLen, FArchive &Ar) -> void
             {
                 switch ( iChunkID )
                 {
@@ -68,6 +68,8 @@ FOdysseyVectorImport::Read( FOdysseyVectorEngine* iVEngine, FArchive &Ar )
                     break;
                 }
             } );
+
+        iScene->UpdateMatrix();
     }
 
     // Jump to the end of the junk, regardless of the fact that we've read nested chunks or not.

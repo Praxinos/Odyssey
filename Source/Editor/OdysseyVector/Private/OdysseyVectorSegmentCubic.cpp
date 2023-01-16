@@ -1,4 +1,5 @@
 #include "OdysseyVectorSegmentCubic.h"
+#include "OdysseyVectorPathCubic.h"
 
 UOdysseyVectorSegmentCubic::~UOdysseyVectorSegmentCubic()
 {
@@ -424,10 +425,12 @@ UOdysseyVectorSegmentCubic::Intersect( UOdysseyVectorSegmentCubic& iOther )
 }
 
 void
-UOdysseyVectorSegmentCubic::DrawIntersections ( ::ULIS::FRectD &iRoi
+UOdysseyVectorSegmentCubic::DrawIntersections ( UOdysseyVectorPathCubic* iPath
+                                              , ::ULIS::FRectD &iRoi
                                               , double iZoomFactor )
 {
-    BLContext& blctx = FOdysseyVectorEngine::GetBLContext();
+    // NOTE: Might not be super fast to call this for each segment
+    BLContext* blctx = iPath->GetRoot()->GetEngine()->GetBLContext();
     double intersectionSize = 4 * iZoomFactor;
     double intersectionHalfSize = intersectionSize * 0.5f;
     ::ULIS::FVec2D& point0 = mPoint[0]->GetCoords();
@@ -440,18 +443,20 @@ UOdysseyVectorSegmentCubic::DrawIntersections ( ::ULIS::FRectD &iRoi
         UOdysseyVectorVertexIntersection* intersectionVertex = static_cast<UOdysseyVectorVertexIntersection*>(*it);
         ::ULIS::FVec2D pt = intersectionVertex->GetPosition(*this);
 
-        blctx.setFillStyle( BLRgba32( 0xFFFF8000 ) );
-        blctx.fillRect( pt.x - intersectionHalfSize
+        blctx->setFillStyle( BLRgba32( 0xFFFF8000 ) );
+        blctx->fillRect( pt.x - intersectionHalfSize
                       , pt.y - intersectionHalfSize, intersectionSize, intersectionSize );
     }
 }
 
 void
-UOdysseyVectorSegmentCubic::DrawStructure( ::ULIS::FRectD &iRoi
+UOdysseyVectorSegmentCubic::DrawStructure( UOdysseyVectorPathCubic* iPath
+                                         , ::ULIS::FRectD &iRoi
                                          , double iFactorX
                                          , double iFactorY )
 {
-    BLContext& blctx = FOdysseyVectorEngine::GetBLContext();
+    // NOTE: Might not be super fast to call this for each segment
+    BLContext* blctx = iPath->GetRoot()->GetEngine()->GetBLContext();
     BLPath path;
     BLPath ctrlPath0;
     BLPath ctrlPath1;
@@ -465,8 +470,8 @@ UOdysseyVectorSegmentCubic::DrawStructure( ::ULIS::FRectD &iRoi
     double handleHeight = handleRadiusY * 2.0f;
     ::ULIS::FVec2D factor = { iFactorX, iFactorY };
 
-    blctx.setStrokeStyle(BLRgba32(0xFF00FF00));
-    blctx.setStrokeWidth( factor.Distance() );
+    blctx->setStrokeStyle(BLRgba32(0xFF00FF00));
+    blctx->setStrokeWidth( factor.Distance() );
 
     // cubic path
     path.moveTo( point0.x, point0.y );
@@ -477,26 +482,26 @@ UOdysseyVectorSegmentCubic::DrawStructure( ::ULIS::FRectD &iRoi
                 , point1.x
                 , point1.y );
 
-    blctx.strokePath( path );
+    blctx->strokePath( path );
 
     // line to control handle 0
     ctrlPath0.moveTo( point0.x, point0.y );
     ctrlPath0.lineTo( ctrlPoint0.x, ctrlPoint0.y );
 
-    blctx.setStrokeStyle( BLRgba32( 0xFFFF0000 ) );
+    blctx->setStrokeStyle( BLRgba32( 0xFFFF0000 ) );
 
-    blctx.strokePath( ctrlPath0 );
+    blctx->strokePath( ctrlPath0 );
 
     // line to control handle 1
     ctrlPath1.moveTo( point1.x, point1.y );
     ctrlPath1.lineTo( ctrlPoint1.x, ctrlPoint1.y );
 
-    blctx.strokePath( ctrlPath1 );
+    blctx->strokePath( ctrlPath1 );
 
     // control handles
-    blctx.setFillStyle( BLRgba32( 0xFFFF0000 ) );
-    blctx.fillRect( ctrlPoint0.x - handleRadiusX, ctrlPoint0.y - handleRadiusY, handleWidth, handleHeight );
-    blctx.fillRect( ctrlPoint1.x - handleRadiusX, ctrlPoint1.y - handleRadiusY, handleWidth, handleHeight );
+    blctx->setFillStyle( BLRgba32( 0xFFFF0000 ) );
+    blctx->fillRect( ctrlPoint0.x - handleRadiusX, ctrlPoint0.y - handleRadiusY, handleWidth, handleHeight );
+    blctx->fillRect( ctrlPoint1.x - handleRadiusX, ctrlPoint1.y - handleRadiusY, handleWidth, handleHeight );
 
     /*DrawIntersections (  iRoi, iZoomFactor );*/
 }
@@ -514,11 +519,12 @@ std::vector<FPolygon>&
 }
 
 void
-UOdysseyVectorSegmentCubic::Draw( ::ULIS::FRectD &iRoi )
+UOdysseyVectorSegmentCubic::Draw( UOdysseyVectorPathCubic* iPath, ::ULIS::FRectD &iRoi )
 {
-    BLContext& blctx = FOdysseyVectorEngine::GetBLContext();
+    // NOTE: Might not be super fast to call this for each segment
+    BLContext* blctx = iPath->GetRoot()->GetEngine()->GetBLContext();
 
-    blctx.setStrokeWidth( 1.0f );
+    blctx->setStrokeWidth( 1.0f );
 
 #ifdef UNUSED
     for ( int i = 0; i < mPolygonCache.size(); i++ )
@@ -537,14 +543,14 @@ UOdysseyVectorSegmentCubic::Draw( ::ULIS::FRectD &iRoi )
                              , pt[2].x
                              , pt[2].y );*/
 
-        blctx.fillPolygon( pt, 4 );
+        blctx->fillPolygon( pt, 4 );
     }
 #endif
 /*
 #ifdef UNUSED
 */
-    blctx.strokePath ( mBLPath );
-    blctx.fillPath ( mBLPath );
+    blctx->strokePath ( mBLPath );
+    blctx->fillPath ( mBLPath );
 /*
 #endif
 */

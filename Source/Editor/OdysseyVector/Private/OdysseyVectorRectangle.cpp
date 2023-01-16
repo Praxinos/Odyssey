@@ -23,19 +23,19 @@ UOdysseyVectorRectangle::CopyShape()
 void
 UOdysseyVectorRectangle::DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags )
 {
-    BLContext& blctx = FOdysseyVectorEngine::GetBLContext();
+    BLContext* blctx = GetRoot()->GetEngine()->GetBLContext();
 
-    blctx.setCompOp(BL_COMP_OP_SRC_COPY);
+    blctx->setCompOp(BL_COMP_OP_SRC_COPY);
 
     if( mIsFilled )
     {
-        blctx.setFillStyle( BLRgba32( mFillColor ) );
-        blctx.fillRoundRect( -mWidth * 0.5f, -mHeight * 0.5f, mWidth, mHeight, 0.0f, 0.0f );
+        blctx->setFillStyle( BLRgba32( mFillColor ) );
+        blctx->fillRoundRect( -mWidth * 0.5f, -mHeight * 0.5f, mWidth, mHeight, 0.0f, 0.0f );
     }
 
-    blctx.setStrokeStyle ( BLRgba32( mStrokeColor ) );
-    blctx.setStrokeWidth ( mStrokeWidth );
-    blctx.strokeRoundRect( -mWidth * 0.5f, -mHeight * 0.5f, mWidth, mHeight, 0.0f, 0.0f );
+    blctx->setStrokeStyle ( BLRgba32( mStrokeColor ) );
+    blctx->setStrokeWidth ( mStrokeWidth );
+    blctx->strokeRoundRect( -mWidth * 0.5f, -mHeight * 0.5f, mWidth, mHeight, 0.0f, 0.0f );
 }
 
 UOdysseyVectorObject*

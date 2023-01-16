@@ -266,10 +266,10 @@ UOdysseyVectorPath::GetFirstVertex()
 void
 UOdysseyVectorPath::DrawStructure( ::ULIS::FRectD& iRoi )
 {
-    BLContext& blctx = FOdysseyVectorEngine::GetBLContext();
+    BLContext* blctx = GetRoot()->GetEngine()->GetBLContext();
 
-    blctx.setStrokeStyle( BLRgba32( 0xFF00FF00 ) );
-    blctx.setStrokeWidth(1.0f);
+    blctx->setStrokeStyle( BLRgba32( 0xFF00FF00 ) );
+    blctx->setStrokeWidth(1.0f);
 
     for(std::list<UOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it)
     {

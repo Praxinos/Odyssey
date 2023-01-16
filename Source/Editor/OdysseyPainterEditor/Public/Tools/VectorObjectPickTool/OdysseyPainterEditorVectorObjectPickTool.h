@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 #include "Tools/OdysseyPainterEditorTool.h"
 #include "OdysseyVectorPathBuilder.h"
+#include "HUD/OdysseyVectorHUDSelection.h"
 
 #include "OdysseyPainterEditorVectorObjectPickTool.generated.h"
 
@@ -34,6 +35,7 @@ private:
     void Redraw(const TArray<::ULIS::FRectI>& iRects);
 
 private:
+    FOdysseyVectorHUDSelection *mSelectionHUD;
     std::vector<::ULIS::FVec2D> mPointArray;
 
 public:

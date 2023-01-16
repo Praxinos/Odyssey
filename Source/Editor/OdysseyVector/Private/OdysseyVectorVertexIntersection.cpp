@@ -1,4 +1,5 @@
 #include "OdysseyVectorVertexIntersection.h"
+#include "OdysseyVectorPath.h"
 
 UOdysseyVectorVertexIntersection::~UOdysseyVectorVertexIntersection()
 {
@@ -29,9 +30,10 @@ UOdysseyVectorVertexIntersection::GetCoords()
 }
 
 void
-UOdysseyVectorVertexIntersection::Draw( ::ULIS::FRectD &iRoi )
+UOdysseyVectorVertexIntersection::Draw( UOdysseyVectorPath* iPath, ::ULIS::FRectD &iRoi )
 {
-    BLContext& blctx = FOdysseyVectorEngine::GetBLContext();
+    // NOTE: Might not be super fast to call this for each segment
+    BLContext* blctx = iPath->GetRoot()->GetEngine()->GetBLContext();
 
     for( std::list<UOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
     {
@@ -39,8 +41,8 @@ UOdysseyVectorVertexIntersection::Draw( ::ULIS::FRectD &iRoi )
 
         ::ULIS::FVec2D position = GetPosition(*segment);
 
-        blctx.setFillStyle( BLRgba32( 0xFFFF80FF) );
-        blctx.fillRect( position.x - 5, position.y - 5, 10, 10 );
+        blctx->setFillStyle( BLRgba32( 0xFFFF80FF) );
+        blctx->fillRect( position.x - 5, position.y - 5, 10, 10 );
     }
 }
 

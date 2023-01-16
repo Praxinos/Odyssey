@@ -221,10 +221,10 @@ UOdysseyVectorLoop::BuildSegmentCubic( std::vector<BLPoint>& iPointArray
 void
 UOdysseyVectorLoop::DrawPoints( ::ULIS::FRectD& iRoi )
 {
-    BLContext& blctx = FOdysseyVectorEngine::GetBLContext();
+    BLContext* blctx = GetRoot()->GetEngine()->GetBLContext();
 
-    blctx.setStrokeStyle( BLRgba32( 0xFFFF8000 ) );
-    blctx.setFillStyle( BLRgba32( 0xFFFF8000 ) );
+    blctx->setStrokeStyle( BLRgba32( 0xFFFF8000 ) );
+    blctx->setFillStyle( BLRgba32( 0xFFFF8000 ) );
 
     if ( mVertexList.size() ) 
     {
@@ -233,7 +233,7 @@ UOdysseyVectorLoop::DrawPoints( ::ULIS::FRectD& iRoi )
             UOdysseyVectorVertex* vertex = static_cast<UOdysseyVectorVertex*>(*it);
             ::ULIS::FVec2D& vertexAt = vertex->GetCoords();
 
-            blctx.fillRect ( vertexAt.x - 5, vertexAt.y - 5, 10, 10 );
+            blctx->fillRect ( vertexAt.x - 5, vertexAt.y - 5, 10, 10 );
         }
     }
 }
@@ -277,16 +277,16 @@ UOdysseyVectorLoop::Build()
 void
 UOdysseyVectorLoop::DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
-    BLContext& blctx = FOdysseyVectorEngine::GetBLContext();
+    BLContext* blctx = GetRoot()->GetEngine()->GetBLContext();
 
     if ( IsFilled() )
     {
     /*if ( mVertexList.size() ) 
     {*/
-       blctx.setFillStyle( BLRgba32( mFillColor ) );
+       blctx->setFillStyle( BLRgba32( mFillColor ) );
 
        /*iBLContext.fillPolygon( &mPointArray[0], mPointArray.size() );*/
-       blctx.fillPath( mPath );
+       blctx->fillPath( mPath );
     /*}*/
     }
 }
