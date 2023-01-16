@@ -36,6 +36,7 @@ UOdysseyRasterBlock::SetBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iB
         return;
 
     mBlock = iBlock;
+    //DEBUG: mBlockRetainerForSpeed = iBlock;
 
     Width = iBlock->Width();
     Height = iBlock->Height();
@@ -56,7 +57,7 @@ UOdysseyRasterBlock::SetBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iB
 
         for ( int x = 0; x <= lastTileX; x++ )
         {
-            int tileWidth = FMath::Min(Width - (y * baseTileWidth), baseTileWidth);
+            int tileWidth = FMath::Min(Width - (x * baseTileWidth), baseTileWidth);
             if (tileWidth <= 0)
                 continue;
 
@@ -200,7 +201,7 @@ UOdysseyRasterBlock::LoadTileBlockFromCache(int iTileIndex)
 		tile.Hash
 	);
 
-    UE::DerivedData::FRequestOwner AsyncOwner(UE::DerivedData::EPriority::Blocking);
+    UE::DerivedData::FRequestOwner getOwner(UE::DerivedData::EPriority::Blocking);
     UE::DerivedData::GetCache().GetValue(
 		{
             {
@@ -209,7 +210,7 @@ UOdysseyRasterBlock::LoadTileBlockFromCache(int iTileIndex)
                 UE::DerivedData::ECachePolicy::Local
             }
         },
-		AsyncOwner,
+		getOwner,
 		[&, this](UE::DerivedData::FCacheGetValueResponse&& iResponse)
         {
             FSharedBuffer rawData = iResponse.Value.GetData().Decompress();
@@ -218,10 +219,11 @@ UOdysseyRasterBlock::LoadTileBlockFromCache(int iTileIndex)
 
             block = MakeShared<::ULIS::FBlock>(tile.Width, tile.Height, (::ULIS::eFormat)Format);
             FUniqueBuffer uniqueBuffer = FUniqueBuffer::MakeView(block->Bits(), block->BytesTotal());
+            //OPTIMIZE: Find a way to avoid this copy, by using shared buffer directly
             uniqueBuffer.GetView().CopyFrom(rawData);
         }
     );
-    AsyncOwner.Wait();
+    getOwner.Wait();
     return block;
 }
 
@@ -339,7 +341,7 @@ UOdysseyRasterBlock::UpdateTiles(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>
 
     //Render rects to tiles
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext((::ULIS::eFormat)Format);
-    TArray<::ULIS::FRectI> rects = ::OdysseyRectUtils::ToNonOverlappingRects(iRects);
+    TArray<::ULIS::FRectI> rects = ::OdysseyRectUtils::MergeRects(iRects);
 
     //Find affected tiles
     for ( const ::ULIS::FRectI& rect : rects )
@@ -429,31 +431,66 @@ UOdysseyRasterBlock::Update(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlo
 void
 UOdysseyRasterBlock::Commit()
 {
-    if ( mInteractivelyChangedTiles.Num() < 0 )
+    if ( mInteractivelyChangedTiles.Num() <= 0 )
         return;
 
-    TArray<::ULIS::FRectI> rects;
-    for ( const int& i : mInteractivelyChangedTiles )
-    {
-        const FOdysseyRasterBlockTile& tile = Tiles[i];
-        rects.Add(::ULIS::FRectI::FromXYWH(tile.X, tile.Y, tile.Width, tile.Height));
-    }
+    TArray<::ULIS::FRectI> rects = GetRectsFromTileIndexes(mInteractivelyChangedTiles);
     OnPixelsChanged().Broadcast(rects, false);
     mInteractivelyChangedTiles.Empty();
+}
+
+TArray<::ULIS::FRectI>
+UOdysseyRasterBlock::GetRectsFromTileIndexes(const TSet<int>& iTileIndexes)
+{
+    //Get rects from Tiles
+    //but do it with intelligence
+    //and merge rects when possible to avoid gigantic arrays of rects (4096x4096 = 4096 rects)
+
+    TArray<::ULIS::FRectI> xRects;
+    TArray<int> sortedIndexes = iTileIndexes.Array();
+    sortedIndexes.Sort();
+
+    for ( int i = 0; i < sortedIndexes.Num(); i++ )
+    {
+        const FOdysseyRasterBlockTile& tile = Tiles[sortedIndexes[i]];
+        if ( i > 0 ) 
+        {
+            const ::ULIS::FRectI& prevRect = xRects.Last();
+            if ( tile.Y == prevRect.y && tile.X == prevRect.x + prevRect.w )
+            {
+                xRects.Last().w += tile.Width;
+                continue;
+            }
+        }
+        xRects.Add(::ULIS::FRectI::FromXYWH(tile.X, tile.Y, tile.Width, tile.Height));
+    }
+
+    TArray<::ULIS::FRectI> rects;
+    for ( int i = 0; i < xRects.Num(); i++ )
+    {
+        const ::ULIS::FRectI& rect = xRects[i];
+        if ( i > 0 )
+        {
+            const ::ULIS::FRectI& prevRect = rects.Last();
+            if ( rect.x == prevRect.x && rect.w == prevRect.w && rect.y == prevRect.y + prevRect.h )
+            {
+                rects.Last().h += rect.h;
+                continue;
+            }
+        }
+        rects.Add(rect);
+    }
+
+    return rects;
 }
 
 void
 UOdysseyRasterBlock::TilesChanged(const TSet<int>& iTileIndexes, bool iIsInteractive)
 {
-    TArray<::ULIS::FRectI> rects;
-    for (const int& i : iTileIndexes)
-    {
-        const FOdysseyRasterBlockTile& tile = Tiles[i];
-        rects.Add(::ULIS::FRectI::FromXYWH(tile.X, tile.Y, tile.Width, tile.Height));   
-    }
+    TArray<::ULIS::FRectI> rects = GetRectsFromTileIndexes(iTileIndexes);
     OnPixelsChanged().Broadcast(rects, true); //always send at least one interactive event
     mInteractivelyChangedTiles.Append(iTileIndexes);
-    
+
     if ( !iIsInteractive )
         Commit();
 }
@@ -503,6 +540,9 @@ UOdysseyRasterBlock::Serialize(FArchive& Ar)
     {
         if ( Ar.IsSaving() )
         {
+            //OPTIMIZE: Save directly the full block
+            //No need to save all tiles here
+
             // Force to load block from cache, as this can be called when mBlock is unsynchronized with cache
             // Everything we save/transact must be the cached version
             for (int i = 0; i < Tiles.Num(); i++)
@@ -550,6 +590,9 @@ UOdysseyRasterBlock::Serialize(FArchive& Ar)
         }
         else if ( Ar.IsLoading() )
         {
+            //OPTIMIZE: load directly the full block
+            //No need to load all tiles here
+
             for (int i = 0; i < Tiles.Num(); i++)
             {
                 FOdysseyRasterBlockTile& tile = Tiles[i];
@@ -596,7 +639,7 @@ UOdysseyRasterBlock::PostTransacted(const FTransactionObjectEvent& iTransactionE
         ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext((::ULIS::eFormat)Format);
         for (const int& i : mUndoneTiles)
         {
-            RenderTile(i, block);
+            RenderTile(i, block); //can be slow if we refresh all tiles, because renderTile calls GetTileBlock, which is slow when not in memory
         }
         ctx.Finish();
     }
@@ -624,6 +667,7 @@ UOdysseyRasterBlock::SetPerformanceMode(eOdysseyPerformanceMode iPerformanceMode
         case eOdysseyPerformanceMode::Memory:
         case eOdysseyPerformanceMode::Shutdown:
             mBlockRetainerForSpeed = nullptr;
+            //DEBUG: mBlockRetainerForSpeed = GetBlock();
         break;
     }
 }
