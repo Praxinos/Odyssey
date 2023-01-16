@@ -448,64 +448,64 @@ ULIS_API Pio_t operator "" _Pio( long double i );
 ULIS_API Eio_t operator "" _Eio( long double i );
 ULIS_API Zio_t operator "" _Zio( long double i );
 ULIS_API Yio_t operator "" _Yio( long double i );
-// uint64
-// User defined literals - SI - bit - uint64
-ULIS_API bit_t operator "" _bit( uint64 i );
-ULIS_API kbit_t operator "" _kbit( uint64 i );
-ULIS_API Mbit_t operator "" _Mbit( uint64 i );
-ULIS_API Gbit_t operator "" _Gbit( uint64 i );
-ULIS_API Tbit_t operator "" _Tbit( uint64 i );
-ULIS_API Pbit_t operator "" _Pbit( uint64 i );
-ULIS_API Ebit_t operator "" _Ebit( uint64 i );
-ULIS_API Zbit_t operator "" _Zbit( uint64 i );
-ULIS_API Ybit_t operator "" _Ybit( uint64 i );
-// User defined literals - SI - byte - uint64
-ULIS_API B_t operator "" _B( uint64 i );
-ULIS_API kB_t operator "" _kB( uint64 i );
-ULIS_API MB_t operator "" _MB( uint64 i );
-ULIS_API GB_t operator "" _GB( uint64 i );
-ULIS_API TB_t operator "" _TB( uint64 i );
-ULIS_API PB_t operator "" _PB( uint64 i );
-ULIS_API EB_t operator "" _EB( uint64 i );
-ULIS_API ZB_t operator "" _ZB( uint64 i );
-ULIS_API YB_t operator "" _YB( uint64 i );
-// User defined literals - SI - octet - uint64
-ULIS_API o_t operator "" _o( uint64 i );
-ULIS_API ko_t operator "" _ko( uint64 i );
-ULIS_API Mo_t operator "" _Mo( uint64 i );
-ULIS_API Go_t operator "" _Go( uint64 i );
-ULIS_API To_t operator "" _To( uint64 i );
-ULIS_API Po_t operator "" _Po( uint64 i );
-ULIS_API Eo_t operator "" _Eo( uint64 i );
-ULIS_API Zo_t operator "" _Zo( uint64 i );
-ULIS_API Yo_t operator "" _Yo( uint64 i );
-// User defined literals - IEC - bit - uint64
-ULIS_API Kibit_t operator "" _Kibit( uint64 i );
-ULIS_API Mibit_t operator "" _Mibit( uint64 i );
-ULIS_API Gibit_t operator "" _Gibit( uint64 i );
-ULIS_API Tibit_t operator "" _Tibit( uint64 i );
-ULIS_API Pibit_t operator "" _Pibit( uint64 i );
-ULIS_API Eibit_t operator "" _Eibit( uint64 i );
-ULIS_API Zibit_t operator "" _Zibit( uint64 i );
-ULIS_API Yibit_t operator "" _Yibit( uint64 i );
-// User defined literals - IEC - byte - uint64
-ULIS_API KiB_t operator "" _KiB( uint64 i );
-ULIS_API MiB_t operator "" _MiB( uint64 i );
-ULIS_API GiB_t operator "" _GiB( uint64 i );
-ULIS_API TiB_t operator "" _TiB( uint64 i );
-ULIS_API PiB_t operator "" _PiB( uint64 i );
-ULIS_API EiB_t operator "" _EiB( uint64 i );
-ULIS_API ZiB_t operator "" _ZiB( uint64 i );
-ULIS_API YiB_t operator "" _YiB( uint64 i );
-// User defined literals - IEC - octet - uint64
-ULIS_API Kio_t operator "" _Kio( uint64 i );
-ULIS_API Mio_t operator "" _Mio( uint64 i );
-ULIS_API Gio_t operator "" _Gio( uint64 i );
-ULIS_API Tio_t operator "" _Tio( uint64 i );
-ULIS_API Pio_t operator "" _Pio( uint64 i );
-ULIS_API Eio_t operator "" _Eio( uint64 i );
-ULIS_API Zio_t operator "" _Zio( uint64 i );
-ULIS_API Yio_t operator "" _Yio( uint64 i );
+// uint64_literal
+// User defined literals - SI - bit - uint64_literal
+ULIS_API bit_t operator "" _bit( uint64_literal i );
+ULIS_API kbit_t operator "" _kbit( uint64_literal i );
+ULIS_API Mbit_t operator "" _Mbit( uint64_literal i );
+ULIS_API Gbit_t operator "" _Gbit( uint64_literal i );
+ULIS_API Tbit_t operator "" _Tbit( uint64_literal i );
+ULIS_API Pbit_t operator "" _Pbit( uint64_literal i );
+ULIS_API Ebit_t operator "" _Ebit( uint64_literal i );
+ULIS_API Zbit_t operator "" _Zbit( uint64_literal i );
+ULIS_API Ybit_t operator "" _Ybit( uint64_literal i );
+// User defined literals - SI - byte - uint64_literal
+ULIS_API B_t operator "" _B( uint64_literal i );
+ULIS_API kB_t operator "" _kB( uint64_literal i );
+ULIS_API MB_t operator "" _MB( uint64_literal i );
+ULIS_API GB_t operator "" _GB( uint64_literal i );
+ULIS_API TB_t operator "" _TB( uint64_literal i );
+ULIS_API PB_t operator "" _PB( uint64_literal i );
+ULIS_API EB_t operator "" _EB( uint64_literal i );
+ULIS_API ZB_t operator "" _ZB( uint64_literal i );
+ULIS_API YB_t operator "" _YB( uint64_literal i );
+// User defined literals - SI - octet - uint64_literal
+ULIS_API o_t operator "" _o( uint64_literal i );
+ULIS_API ko_t operator "" _ko( uint64_literal i );
+ULIS_API Mo_t operator "" _Mo( uint64_literal i );
+ULIS_API Go_t operator "" _Go( uint64_literal i );
+ULIS_API To_t operator "" _To( uint64_literal i );
+ULIS_API Po_t operator "" _Po( uint64_literal i );
+ULIS_API Eo_t operator "" _Eo( uint64_literal i );
+ULIS_API Zo_t operator "" _Zo( uint64_literal i );
+ULIS_API Yo_t operator "" _Yo( uint64_literal i );
+// User defined literals - IEC - bit - uint64_literal
+ULIS_API Kibit_t operator "" _Kibit( uint64_literal i );
+ULIS_API Mibit_t operator "" _Mibit( uint64_literal i );
+ULIS_API Gibit_t operator "" _Gibit( uint64_literal i );
+ULIS_API Tibit_t operator "" _Tibit( uint64_literal i );
+ULIS_API Pibit_t operator "" _Pibit( uint64_literal i );
+ULIS_API Eibit_t operator "" _Eibit( uint64_literal i );
+ULIS_API Zibit_t operator "" _Zibit( uint64_literal i );
+ULIS_API Yibit_t operator "" _Yibit( uint64_literal i );
+// User defined literals - IEC - byte - uint64_literal
+ULIS_API KiB_t operator "" _KiB( uint64_literal i );
+ULIS_API MiB_t operator "" _MiB( uint64_literal i );
+ULIS_API GiB_t operator "" _GiB( uint64_literal i );
+ULIS_API TiB_t operator "" _TiB( uint64_literal i );
+ULIS_API PiB_t operator "" _PiB( uint64_literal i );
+ULIS_API EiB_t operator "" _EiB( uint64_literal i );
+ULIS_API ZiB_t operator "" _ZiB( uint64_literal i );
+ULIS_API YiB_t operator "" _YiB( uint64_literal i );
+// User defined literals - IEC - octet - uint64_literal
+ULIS_API Kio_t operator "" _Kio( uint64_literal i );
+ULIS_API Mio_t operator "" _Mio( uint64_literal i );
+ULIS_API Gio_t operator "" _Gio( uint64_literal i );
+ULIS_API Tio_t operator "" _Tio( uint64_literal i );
+ULIS_API Pio_t operator "" _Pio( uint64_literal i );
+ULIS_API Eio_t operator "" _Eio( uint64_literal i );
+ULIS_API Zio_t operator "" _Zio( uint64_literal i );
+ULIS_API Yio_t operator "" _Yio( uint64_literal i );
 
 } // namespace units
 

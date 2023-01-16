@@ -20,7 +20,7 @@ ULIS_NAMESPACE_BEGIN
 typedef  uint8_t    uint8;      ///< Used for the smallest adressable type, unsigned 8bit images domain range values and main type for image bits memory storage.
 typedef  uint16_t   uint16;     ///< Used for unsigned 16bit images domain range values.
 typedef  uint32_t   uint32;     ///< Used for unsigned 32bit images domain range values and sizes such as width and height.
-typedef  uint64_t   uint64;     ///< Used for unsigned 64bit images domain range values and whole buffer sizes that might overflow 32bit range.
+typedef  unsigned long long   uint64;     ///< Used for unsigned 64bit images domain range values and whole buffer sizes that might overflow 32bit range.
 typedef  int8_t     int8;       ///< Used for signed 8bit images domain range values.
 typedef  int16_t    int16;      ///< Used for signed 16bit images domain range values.
 typedef  int32_t    int32;      ///< Used for signed 32bit images domain range values.
@@ -28,6 +28,7 @@ typedef  int64_t    int64;      ///< Used for signed 64bit images domain range v
 typedef  float      ufloat;     ///< Used for float images domain range values, indicates normalized range [0;1]
 typedef  double     udouble;    ///< Used for double images domain range values, indicates normalized range [0;1]
 typedef  int64      ulError;    ///< Used for errors reports defined below in this file
+typedef  unsigned long long int uint64_literal; ///< Used for user defined literals mandated by C++14 standard.
 
 /////////////////////////////////////////////////////
 // MAX

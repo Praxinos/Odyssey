@@ -22,7 +22,7 @@ class TAnimatedProperty : public THasKeys<T>
 public:
     TAnimatedProperty( T iDefaultValue );
     TAnimatedProperty( std::function< T( ufloat ) > iDefaultExpression );
-    ~TAnimatedProperty();
+    virtual ~TAnimatedProperty();
 
 public:
     virtual T GetValueAtFrame( ufloat iFrame ) const;

@@ -304,11 +304,6 @@ namespace ULIS_NAMESPACE_NAME {}
 #define CMS_NO_REGISTER_KEYWORD
 
 /////////////////////////////////////////////////////
-// Define BL_STATIC for use of blend2d compiled as static library
-// Not necessary per say since it is inherited from blend2d target
-#define BL_STATIC 1
-
-/////////////////////////////////////////////////////
 // For python binding, fake factory create
 #define ULIS_FAKE_FACTORY_NAME __do_not_call__
 #define ULIS_DECLARE_FAKE_FACTORY( iType ) static iType __do_not_call__();
