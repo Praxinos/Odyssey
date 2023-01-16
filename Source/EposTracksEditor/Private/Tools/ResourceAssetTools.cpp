@@ -534,6 +534,16 @@ ProjectAssetTools::CreateTexture2D( const IMovieScenePlayer& iPlayer, UMovieScen
         FMemory::Memset( DestData, 0, TexturePixels.Num() * sizeof( uint8 ) );
         new_texture->Source.UnlockMip( 0 );
 
+        // With 5.1, the PostEditChange() won't set texture mip settings to TMGS_NoMipmaps if it is not a power of 2 texture
+        // Thus, hardcode it here
+        // This this done after all previous stuff like in other files in ue
+        new_texture->MipGenSettings = TMGS_NoMipmaps;
+        // This function should be callable (instead of the above affectation) but it sets to TMGS_NoMipmaps only if
+        // - LODGroup == TEXTUREGROUP_ColorLookupTable
+        // - MipGenSettings != TMGS_NoMipmaps || SRGB != false
+        // So, I don't know if I need to change LODGroup before
+        // new_texture->ValidateSettingsAfterImportOrEdit();
+
         new_texture->PostEditChange();
     }
 
