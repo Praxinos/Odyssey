@@ -7,11 +7,22 @@
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "OdysseyTextureLayerStack.generated.h"
 
+#include <ULIS>
+
 class UOdysseyTextureLayer;
+
+UENUM()
+enum class EOdysseyTextureLayerStackTextureUpdateMode
+{
+    Manually,
+    OnTick,
+    Instantaneous
+};
 
 UCLASS(BlueprintType)
 class ODYSSEYTEXTURE_API UOdysseyTextureLayerStack
     : public UOdysseyLayerStack
+    , public FTickableGameObject
 {
     GENERATED_BODY()
 
@@ -59,6 +70,40 @@ public:
     //Texture Update / Edition
     virtual void ApplyPerformanceMode(eOdysseyPerformanceMode iPerformanceMode) override;
 
+public:
+    /**
+     * @brief Set the Texture Update Mode
+     * Manually = does not update the text automatically
+     * OnTick = refreshed the texture at each engine tick if needed
+     * Instantaneous = refreshes the texture as soon as anything has changed in the layerstack
+     * 
+     * Default is OnTick
+     * 
+     * This is a transient setter, it goes back to OnTick at each new Unreal session
+     */
+    void SetTextureUpdateMode(EOdysseyTextureLayerStackTextureUpdateMode iMode);
+
+    /**
+     * @brief Set the Texture Update Mode
+     * Manually = does not update the text automatically
+     * OnTick = refreshed the texture at each engine tick if needed
+     * Instantaneous = refreshes the texture as soon as anything has changed in the layerstack
+     * 
+     * Default is OnTick
+     */
+    EOdysseyTextureLayerStackTextureUpdateMode GetTextureUpdateMode();
+
+    /**
+     * @brief Set the Texture Update Mode
+     * Forces the texture to be updated now
+     */
+    void UpdateTexture();
+
+private:
+    virtual bool IsTickableInEditor() const override { return true; }
+    virtual TStatId GetStatId() const override { RETURN_QUICK_DECLARE_CYCLE_STAT( UOdysseyTextureLayerStack, STATGROUP_Tickables); }
+    virtual void Tick(float DeltaTime) override;
+
 private:
     void ActivateTextureFastUpdate();
     void InactivateTextureFastUpdate();
@@ -73,4 +118,7 @@ private:
 private:
     TSharedPtr<FOdysseySurfaceTexture2DEditable> mTextureFastUpdateSurface;
     int mTextureCompressionNone;
+
+    EOdysseyTextureLayerStackTextureUpdateMode mTextureUpdateMode = EOdysseyTextureLayerStackTextureUpdateMode::OnTick;
+    TArray<::ULIS::FRectI> mInvalidRects;
 };

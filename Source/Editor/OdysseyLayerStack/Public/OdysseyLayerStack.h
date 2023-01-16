@@ -275,10 +275,10 @@ public:
     //Called by layers when there Parent or Children changed
     virtual void HierarchyChanged();
 
-private:
+protected:
     //Property changed methods
     void CurrentLayerChanged();
-    void PropertyChanged(const FName& iPropertyName);
+    virtual void PropertyChanged(const FName& iPropertyName);
 
 public:
     // UObject overrides

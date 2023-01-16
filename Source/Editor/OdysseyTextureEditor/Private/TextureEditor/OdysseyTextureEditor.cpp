@@ -90,16 +90,26 @@ FOdysseyTextureEditor::SetTexture(UTexture2D* iTexture)
 	//Set the texture
     mTexture = iTexture;
 	if ( !mTexture )
+	{
+		SetSelectedTool(nullptr);
 		return;
+	}
 
 	layerStack = LayerStack();
 	if ( layerStack )
 		layerStack->SetPerformanceMode(eOdysseyPerformanceMode::Speed);
 
-	if ( mSelectedTool && mSelectedTool->IsActivable())
+	if ( mSelectedTool && mSelectedTool->IsActivable() )
+	{
+		//just reload the tool
+		mSelectedTool->Inactivate();
 		mSelectedTool->Activate();
+	}
 	else
-		ActivateDefaultTool();
+	{
+		//select the best tool
+		SelectDefaultTool();
+	}
 }
 
 UTexture2D*

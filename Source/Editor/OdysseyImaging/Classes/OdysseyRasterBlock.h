@@ -158,6 +158,9 @@ private:
 
     //Called when tiles have changed
     void TilesChanged(const TSet<int>& iTileIndexes, bool iIsInteractive);
+    
+    
+    TArray<::ULIS::FRectI> GetRectsFromTileIndexes(const TSet<int>& iTileIndexes);
 
 public:
     //UObject overrides

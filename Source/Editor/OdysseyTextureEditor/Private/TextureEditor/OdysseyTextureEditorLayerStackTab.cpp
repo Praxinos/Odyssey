@@ -299,7 +299,6 @@ FOdysseyTextureEditorLayerStackTab::ExportLayersAsTextures()
 
         outTexture->PostEditChange();
         outTexture->UpdateResource();
-        FTextureCompilingManager::Get().FinishCompilation({ outTexture });
 
         FAssetRegistryModule::AssetCreated(outTexture);
 
@@ -350,7 +349,6 @@ FOdysseyTextureEditorLayerStackTab::ExportCurrentLayerAsTexture()
 
     outTexture->PostEditChange();
     outTexture->UpdateResource();
-    FTextureCompilingManager::Get().FinishCompilation({ outTexture });
     outTexture->MarkPackageDirty();
 }
 

@@ -93,7 +93,7 @@ private:
     FOnPreUpdate                        mOnPreUpdateDelegate;
     
     //Internal
-    TArray<::ULIS::FRectI>              mInvalidRects;
-    TArray<::ULIS::FRectI>              mUpdatedRects;
+    FOdysseyInvalidTileMap              mInvalidMap;
+    FOdysseyInvalidTileMap              mUpdatedMap;
     bool mExpectsOnPixelsChanged;
 };

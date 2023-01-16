@@ -255,28 +255,9 @@ FOdysseyFlipbookWrapper::CreateTexture(int32 iWidth, int32 iHeight, ETextureSour
     UTexture2D* texture2D = NewObject<UTexture2D>(package, FName(AssetName), RF_Public | RF_Standalone | RF_Transactional );
     InitTextureWithBlockData(blockPtr, texture2D, iFormat);
 
-    //Create Layer Stack
-	//UOdysseyTextureLayerStackUserData* userData = NewObject<UOdysseyTextureLayerStackUserData>(texture2D, NAME_None, RF_Public);;
-
-	/*
-	 * Old LayerStack
-	 */
-    //userData->GetOldLayerStack()->Init(blockPtr->Width(), blockPtr->Height(), ULISFormatForTextureSourceFormat(iFormat));
-    //delete blockPtr;
-
-    // Create Layer
-	/*
-    FName layerName = userData->GetOldLayerStack()->GetLayerRoot()->GetNextLayerName();
-    ::ULIS::FBlock* layerBlock = NewBlockFromUTextureData(texture2D, userData->GetOldLayerStack()->Format());
-	TSharedPtr<FOdysseyImageLayer> imageLayer = MakeShareable(new FOdysseyImageLayer(layerName, layerBlock));
-	userData->GetOldLayerStack()->AddLayer(imageLayer);
-
-    texture2D->AddAssetUserData( userData );*/
-
     //Init is done
     texture2D->PostEditChange(); //This make sure that every properties are compatible with each other and with the size of our texture
     texture2D->UpdateResource();
-    FTextureCompilingManager::Get().FinishCompilation({ texture2D });
 
 	FAssetRegistryModule::AssetCreated(texture2D);
     
@@ -289,57 +270,6 @@ FOdysseyFlipbookWrapper::CreateTexture(int32 iWidth, int32 iHeight, ETextureSour
 
     return texture2D;
 }
-
-//Duplicate the given texture
-/* void
-FOdysseyFlipbookWrapper::CopyTextureContent(UTexture2D* iSrcTexture, UTexture2D* iDstTexture)
-{
-    ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(iSrcTexture->Source.GetFormat());
-    UOdysseyTextureLayerStackUserData* textureUserData = Cast<UOdysseyTextureLayerStackUserData>(iDstTexture->GetAssetUserDataOfClass(UOdysseyTextureLayerStackUserData::StaticClass()));
-    UOdysseyTextureLayerStackUserData* srcTextureUserData = Cast<UOdysseyTextureLayerStackUserData>(iSrcTexture->GetAssetUserDataOfClass(UOdysseyTextureLayerStackUserData::StaticClass()));
-
-    if( srcTextureUserData )
-    {
-		::ULIS::FBlock* block = NewBlockFromUTextureData(iSrcTexture, format);
-        srcTextureUserData->GetOldLayerStack()->ComputeResultInBlock(block);
-        CopyBlockDataIntoUTexture(block, iDstTexture);
-        delete block;
-
-        TSharedPtr<FOdysseyRootLayer> layerRoot = MakeShareable(srcTextureUserData->GetOldLayerStack()->GetLayerRoot()->Clone());
-		IOdysseyLayer::CloneChildren(srcTextureUserData->GetOldLayerStack()->GetLayerRoot(), layerRoot);
-        textureUserData->GetOldLayerStack()->SetLayerRoot(layerRoot);
-
-        //Set the current layer
-        TArray< TSharedPtr<IOdysseyLayer> > layers;
-        textureUserData->GetOldLayerStack()->GetLayerRoot()->DepthFirstSearchTree( &layers, false );
-        for (int i = 0; i < layers.Num(); i++)
-        {
-            if (layers[i]->GetType() == IOdysseyLayer::eType::kImage)
-            {
-                textureUserData->GetOldLayerStack()->SetCurrentLayer(layers[i]);
-                break;
-            }
-        }
-    }
-    else
-    {
-        ::ULIS::FBlock* block = NewBlockFromUTextureData(iSrcTexture, format);
-        CopyBlockDataIntoUTexture(block, iDstTexture);
-        delete block;
-        block = nullptr;
-
-        TArray< TSharedPtr<IOdysseyLayer> > layers;
-        textureUserData->GetOldLayerStack()->GetLayerRoot()->DepthFirstSearchTree( &layers, false );
-        
-        TSharedPtr<FOdysseyImageLayer> imageLayer = StaticCastSharedPtr<FOdysseyImageLayer>( layers[0] );
-
-        block = NewBlockFromUTextureData(iSrcTexture, textureUserData->GetOldLayerStack()->Format());
-        imageLayer->SetBlock(block, false, true);
-    }
-
-    iDstTexture->UpdateResource();
-    FTextureCompilingManager::Get().FinishCompilation({iDstTexture});
-} */
 
 UPaperSprite*
 FOdysseyFlipbookWrapper::CreateSprite(FString iName)

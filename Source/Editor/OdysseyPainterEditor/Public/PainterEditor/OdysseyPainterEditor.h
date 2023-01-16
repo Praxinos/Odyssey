@@ -42,7 +42,7 @@ public:
     virtual UOdysseyPainterEditorRasterDrawingTool*                  GetRasterDrawingTool() const = 0;
     virtual UOdysseyPainterEditorPaintBucketTool*                    GetPaintBucketTool() const = 0;
 
-    void ActivateDefaultTool();
+    void SelectDefaultTool();
 
 public:
     // Setters
@@ -53,6 +53,7 @@ public:
     // Interface
     virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
     virtual void ExtendMenu( FToolMenuOwner iOwner, FName iMenuName ) override;
+    virtual bool OnCloseRequested() override;
 
 protected:
     //Callbacks

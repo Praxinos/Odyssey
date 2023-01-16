@@ -202,10 +202,6 @@ UOdysseyTextureLayerImageRaster::OpacityChanged()
     if (!layerStack)
         return;
 
-    UTexture2D* texture = layerStack->GetTexture();
-    if (!texture)
-        return;
-
     OnOpacityChanged().Broadcast(this);
     RenderImageChanged({ ::ULIS::FRectI::FromXYWH(0, 0, RasterBlock->GetWidth(), RasterBlock->GetHeight()) }, false);
 }
@@ -215,10 +211,6 @@ UOdysseyTextureLayerImageRaster::BlendModeChanged()
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetLayerStack());
     if (!layerStack)
-        return;
-
-    UTexture2D* texture = layerStack->GetTexture();
-    if (!texture)
         return;
 
     OnBlendModeChanged().Broadcast(this);

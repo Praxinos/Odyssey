@@ -19,6 +19,7 @@
 
 FOdysseyPainterEditor::~FOdysseyPainterEditor()
 {
+	delete mHUDSystem;
 }
 
 FOdysseyPainterEditor::FOdysseyPainterEditor()
@@ -67,6 +68,16 @@ FOdysseyPainterEditor::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
 	FOdysseyEditor::ExtendMenu(iOwner, iMenuName);
 }
 
+bool
+FOdysseyPainterEditor::OnCloseRequested()
+{
+	//Cleanup
+	if ( mSelectedTool )
+		mSelectedTool->Inactivate();
+
+	return FOdysseyEditor::OnCloseRequested();
+}
+
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Getters
 
@@ -113,13 +124,21 @@ FOdysseyPainterEditor::SetSelectedTool(UOdysseyPainterEditorTool* iTool)
 }
 
 void
-FOdysseyPainterEditor::ActivateDefaultTool()
+FOdysseyPainterEditor::SelectDefaultTool()
 {
+	if ( mSelectedTool )
+	{
+		if ( mSelectedTool->IsActivable() )
+			return;
+		
+		mSelectedTool->Inactivate();
+	}
+
 	for ( UOdysseyPainterEditorTool* tool : mTools )
 	{
 		if ( tool->IsActivable() )
 		{
-			tool->Activate();
+			SetSelectedTool(tool);
 			return;
 		}
 	}

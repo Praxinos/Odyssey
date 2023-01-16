@@ -8,6 +8,7 @@
 #include "TextureCompiler.h"
 #include "UObject/ObjectSaveContext.h"
 #include "OdysseyTextureLayerImageRaster.h"
+#include "OdysseyRectUtils.h"
 
 UOdysseyTextureLayerStack::FOnRenderImageChanged&
 UOdysseyTextureLayerStack::OnRenderImageChanged()
@@ -125,40 +126,17 @@ UOdysseyTextureLayerStack::RenderLayersImage(TArray<UOdysseyLayer*> iLayers, TSh
 void
 UOdysseyTextureLayerStack::OnRootLayerRenderImageChanged(UOdysseyTextureLayer* iLayer, const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive)
 {
-    OnRenderImageChanged().Broadcast(this, iRects, iIsInteractive);
-
-    if (!iIsInteractive)
-        return;
-
     //PATCH BEGIN: because Unreal Undo does not make package dirty correctly
     MarkPackageDirty();
     //PATCH END:
 
-    if ( GetPerformanceMode() == eOdysseyPerformanceMode::Speed )
-    {
-        FastUpdateTexture(iRects);
-    }
-    else
-    {
-        UTexture2D* texture = GetTexture();
-        if ( !texture )
-            return;
+    OnRenderImageChanged().Broadcast(this, iRects, iIsInteractive);
 
-        FTextureCompilingManager::Get().FinishCompilation({ texture });
+    mInvalidRects.Append(iRects);
+    mInvalidRects = OdysseyRectUtils::MergeRects(mInvalidRects);
 
-        ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
-        TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = MakeShareable(NewBlockFromUTextureData(texture, format));
-
-        for ( int i = 0; i < iRects.Num(); i++ )
-            RenderImage(block, iRects[i], iRects[i].Position(), TArray<::ULIS::FEvent>());
-
-        ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(block->Format());
-        ctx.Finish();
-
-        CopyBlockDataIntoUTexture(block.Get(), texture);
-
-        texture->UpdateResource();
-    }
+    if (mTextureUpdateMode == EOdysseyTextureLayerStackTextureUpdateMode::Instantaneous)
+        UpdateTexture();
 }
 
 TSharedPtr<FOdysseySurfaceTexture2DEditable>
@@ -170,13 +148,14 @@ UOdysseyTextureLayerStack::GetSurface() const
 void
 UOdysseyTextureLayerStack::ApplyPerformanceMode(eOdysseyPerformanceMode iPerformanceMode)
 {
+    UTexture2D* texture = GetTexture();
+    if ( !texture )
+        return;
+
     switch(iPerformanceMode)
     {
         case eOdysseyPerformanceMode::Speed:
         {
-            UTexture2D* texture = GetTexture();
-            if ( !texture )
-                return;
 
             mTextureFastUpdateSurface = MakeShared<FOdysseySurfaceTexture2DEditable>(texture);
             ActivateTextureFastUpdate();
@@ -194,7 +173,7 @@ UOdysseyTextureLayerStack::ApplyPerformanceMode(eOdysseyPerformanceMode iPerform
             UPackage::PreSavePackageWithContextEvent.RemoveAll(this);
             UPackage::PackageSavedWithContextEvent.RemoveAll(this);
             InactivateTextureFastUpdate();
-            UpdateTextureSource();
+            texture->UpdateResource();
             mTextureFastUpdateSurface = nullptr;
         }
         break;
@@ -218,6 +197,7 @@ UOdysseyTextureLayerStack::ActivateTextureFastUpdate()
     textureFormatSettings.CompressionNone = 1;
     texture->SetLayerFormatSettings(0, textureFormatSettings);
 
+    //needed because we need the texture resource to be uncompressed and ready for edition
     texture->UpdateResource();
     FTextureCompilingManager::Get().FinishCompilation({ texture });
     texture->TemporarilyDisableStreaming(); //needed to be able to draw on previously streamed textures, avoids using NoMipMaps
@@ -235,8 +215,8 @@ UOdysseyTextureLayerStack::InactivateTextureFastUpdate()
     textureFormatSettings.CompressionNone = mTextureCompressionNone;
     texture->SetLayerFormatSettings(0, textureFormatSettings);
     UpdateTextureSource();
-    texture->UpdateResource();
-    FTextureCompilingManager::Get().FinishCompilation({ texture });
+    //texture->UpdateResource();
+    //FTextureCompilingManager::Get().FinishCompilation({ texture });
 }
 
 void
@@ -308,4 +288,62 @@ UOdysseyTextureLayerStack::OnPackageSaved(const FString& iPackageFilename, UPack
         return;
 
     ActivateTextureFastUpdate();
+}
+
+void
+UOdysseyTextureLayerStack::SetTextureUpdateMode(EOdysseyTextureLayerStackTextureUpdateMode iMode)
+{
+    mTextureUpdateMode = iMode;
+    if (mTextureUpdateMode == EOdysseyTextureLayerStackTextureUpdateMode::Instantaneous)
+        UpdateTexture();
+}
+
+EOdysseyTextureLayerStackTextureUpdateMode
+UOdysseyTextureLayerStack::GetTextureUpdateMode()
+{
+    return mTextureUpdateMode;
+}
+
+void
+UOdysseyTextureLayerStack::UpdateTexture()
+{
+    if (mInvalidRects.Num() <= 0)
+        return;
+
+    UTexture2D* texture = GetTexture();
+    if ( !texture )
+        return;
+
+    if ( GetPerformanceMode() == eOdysseyPerformanceMode::Speed )
+    {
+        FastUpdateTexture(mInvalidRects);
+    }
+    else
+    {
+        FTextureCompilingManager::Get().FinishCompilation({ texture });
+
+        ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
+        TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = MakeShareable(NewBlockFromUTextureData(texture, format));
+
+        for ( ::ULIS::FRectI& rect : mInvalidRects )
+            RenderImage(block, rect, rect.Position(), TArray<::ULIS::FEvent>());
+
+        ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(block->Format());
+        ctx.Finish();
+
+        CopyBlockDataIntoUTexture(block.Get(), texture);
+
+        texture->UpdateResource();
+    }
+
+    mInvalidRects.Empty();
+}
+
+void
+UOdysseyTextureLayerStack::Tick(float DeltaTime)
+{
+    if (mTextureUpdateMode != EOdysseyTextureLayerStackTextureUpdateMode::OnTick)
+        return;
+
+    UpdateTexture();
 }
