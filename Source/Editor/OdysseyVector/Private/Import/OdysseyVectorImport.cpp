@@ -70,6 +70,7 @@ FOdysseyVectorImport::Read( UOdysseyVectorRoot* iScene, FArchive &Ar )
             } );
 
         iScene->UpdateMatrix();
+        iScene->Update();
     }
 
     // Jump to the end of the junk, regardless of the fact that we've read nested chunks or not.

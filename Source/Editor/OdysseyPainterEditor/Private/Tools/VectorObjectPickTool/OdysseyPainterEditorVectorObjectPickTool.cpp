@@ -61,7 +61,9 @@ UOdysseyPainterEditorVectorObjectPickTool::OnMouseDown(const FOdysseyPoint& iPoi
         ::ULIS::FVec2D point = { iPointInTexture.x, iPointInTexture.y };
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
 
-        vectorEngine->AddHUD(mSelectionHUD);
+        mSelectionHUD->SetSelecting( true );
+
+        vectorEngine->AddHUD( mSelectionHUD );
 
         mPointArray.push_back( point );
     }
@@ -106,7 +108,7 @@ UOdysseyPainterEditorVectorObjectPickTool::OnMouseUp(const FOdysseyPoint& iPoint
             vectorEngine->Pick( *currentVectorLayer->GetScene(), mPointArray, UOdysseyVectorObject::PICK_FREEHAND );
         }
 
-        vectorEngine->ClearHUD();
+        mSelectionHUD->SetSelecting( false );
 
         RedrawCurrentLayer( { { 0, 0, 0, 0 } } );
 

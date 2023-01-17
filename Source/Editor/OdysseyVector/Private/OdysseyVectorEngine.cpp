@@ -54,12 +54,7 @@ FOdysseyVectorEngine::RenderHUD( UOdysseyVectorRoot& iScene )
     {
         FOdysseyVectorHUD *hud = (*hit);
 
-        for( std::list<UOdysseyVectorObject*>::iterator oit = selectedObjectList.begin(); oit != selectedObjectList.end(); ++oit )
-        {
-            UOdysseyVectorObject *obj = (*oit);
-
-            hud->Draw( obj, mRoi, 0 );
-        }
+            hud->Draw( iScene, mRoi, 0 );
     }
 
     mBLContext->restore();

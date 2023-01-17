@@ -7,25 +7,72 @@ FOdysseyVectorHUDSelection::~FOdysseyVectorHUDSelection()
 
 FOdysseyVectorHUDSelection::FOdysseyVectorHUDSelection( std::vector<::ULIS::FVec2D>& iPointArray )
     : mPointArray(iPointArray)
+    , mSelecting(true)
 {
 }
 
 void
-FOdysseyVectorHUDSelection::Draw( UOdysseyVectorObject* iObject, ::ULIS::FRectD& iRoi, uint64 iFlags )
+FOdysseyVectorHUDSelection::SetSelecting( bool iSelecting )
 {
-    BLContext* blctx = iObject->GetRoot()->GetEngine()->GetBLContext();
+    mSelecting = iSelecting;
+}
+
+void
+FOdysseyVectorHUDSelection::Draw( UOdysseyVectorRoot& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags )
+{
+    BLContext* blctx = iScene.GetEngine()->GetBLContext();
+    ::ULIS::FRectD bbox = { 0, 0, 0, 0 };
     BLPath path;
 
+    // matrix might get altered for displaying the selection rectangle of a single object. Save it.
+    blctx->save();
     blctx->setStrokeStyle( BLRgba32( 0xFF0000FF ) );
     blctx->setStrokeWidth( 1.0f );
 
-    for( int i = 0; i < mPointArray.size(); i++ )
+    if( mSelecting )
     {
-        int n = ( i + 1 ) % mPointArray.size();
 
-        path.moveTo( mPointArray[i].x, mPointArray[i].y );
-        path.lineTo( mPointArray[n].x, mPointArray[n].y );
+        for( int i = 0; i < mPointArray.size(); i++ )
+        {
+            int n = ( i + 1 ) % mPointArray.size();
+
+            path.moveTo( mPointArray[i].x, mPointArray[i].y );
+            path.lineTo( mPointArray[n].x, mPointArray[n].y );
+        }
+    }
+    else
+    {
+        std::list<UOdysseyVectorObject*>& selectedObjectList = iScene.GetSelectedObjectList();
+
+        if( selectedObjectList.size() )
+        {
+            if( selectedObjectList.size() == 1 )
+            {
+                UOdysseyVectorObject* selectedObject = iScene.GetLastSelected();
+                BLMatrix2D& worldMatrix = selectedObject->GetWorldMatrix();
+
+                bbox = selectedObject->GetBBox( false );
+
+                path.moveTo( worldMatrix.mapPoint( bbox.x         , bbox.y          ) );
+                path.lineTo( worldMatrix.mapPoint( bbox.x + bbox.w, bbox.y          ) );
+                path.lineTo( worldMatrix.mapPoint( bbox.x + bbox.w, bbox.y + bbox.h ) );
+                path.lineTo( worldMatrix.mapPoint( bbox.x         , bbox.y + bbox.h ) );
+                path.lineTo( worldMatrix.mapPoint( bbox.x         , bbox.y          ) );
+            }
+
+            if( selectedObjectList.size() > 1 )
+            {
+                bbox = UOdysseyVectorObject::GetBoundingBoxFromList( selectedObjectList );
+
+                path.moveTo( bbox.x         , bbox.y          );
+                path.lineTo( bbox.x + bbox.w, bbox.y          );
+                path.lineTo( bbox.x + bbox.w, bbox.y + bbox.h );
+                path.lineTo( bbox.x         , bbox.y + bbox.h );
+                path.lineTo( bbox.x         , bbox.y          );
+            }
+        }
     }
 
     blctx->strokePath( path );
+    blctx->restore();
 }

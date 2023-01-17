@@ -173,6 +173,44 @@ UOdysseyVectorObject::UpdateMatrix( )
     blctx->restore();
 }
 
+//static
+::ULIS::FRectD
+UOdysseyVectorObject::GetBoundingBoxFromList( std::list<UOdysseyVectorObject*>& iObjectList )
+{
+    ::ULIS::FRectD bbox;
+    int init = 0;
+
+    for( std::list<UOdysseyVectorObject*>::iterator it = iObjectList.begin(); it != iObjectList.end(); ++it )
+    {
+        UOdysseyVectorObject *obj = (*it);
+        ::ULIS::FRectD objBBox = obj->GetBBox( true );
+
+        bbox = ( init == 0 ) ? objBBox : bbox | objBBox;
+
+        init = 1;
+    }
+
+    return bbox;
+}
+
+bool
+UOdysseyVectorObject::HasSelectedParent()
+{
+    UOdysseyVectorObject* parent = mParent;
+
+    while ( parent )
+    {
+        if( parent->IsSelected() == true )
+        {
+            return true;
+        }
+
+        parent = parent->GetParent();
+    }
+
+    return false;
+}
+
 static void
 MakeBBoxHandles( ::ULIS::FRectD& iBBox, ::ULIS::FRectD iHandles[4], double iRadius, double iXFactor, double iYFactor )
 {
@@ -248,10 +286,13 @@ UOdysseyVectorObject::GetBBox( bool iWorld )
 {
     if ( iWorld == true )
     {
-        BLPoint origin = mWorldMatrix.mapPoint( mBBox.x, mBBox.y );
-        BLPoint size = mWorldMatrix.mapVector( mBBox.w, mBBox.h );
-        ::ULIS::FRectD worldBBox = { origin.x, origin.y, size.x, size.y };
-        
+        BLPoint p0 = mWorldMatrix.mapPoint( mBBox.x, mBBox.y );
+        BLPoint p1 = mWorldMatrix.mapPoint( mBBox.x + mBBox.w,  mBBox.y + mBBox.h );
+        ::ULIS::FRectD worldBBox = ::ULIS::FRectD::FromMinMax( ::ULIS::FMath::Min( p0.x, p1.x )
+                                                             , ::ULIS::FMath::Min( p0.y, p1.y )
+                                                             , ::ULIS::FMath::Max( p0.x, p1.x )
+                                                             , ::ULIS::FMath::Max( p0.y, p1.y ) );
+
         return worldBBox;
     }
 

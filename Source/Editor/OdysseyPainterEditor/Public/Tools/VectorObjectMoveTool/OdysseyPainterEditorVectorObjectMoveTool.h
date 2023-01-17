@@ -34,8 +34,8 @@ private:
     void Redraw(const TArray<::ULIS::FRectI>& iRects);
 
 private:
-    double mOldLocalMouseX;
-    double mOldLocalMouseY;
+    double mOldWorldMouseX;
+    double mOldWorldMouseY;
 
 public:
     // Setters

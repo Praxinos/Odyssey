@@ -36,9 +36,9 @@ FOdysseyVectorHUDLine::GetP1()
 }
 
 void
-FOdysseyVectorHUDLine::Draw( UOdysseyVectorObject* iObject, ::ULIS::FRectD& iRoi, uint64 iFlags )
+FOdysseyVectorHUDLine::Draw( UOdysseyVectorRoot& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
-    BLContext* blctx = iObject->GetRoot()->GetEngine()->GetBLContext();
+    BLContext* blctx = iScene.GetEngine()->GetBLContext();
 
     blctx->setStrokeStyle( BLRgba32(0xFF0000FF) );
     blctx->setStrokeWidth( 1.0f );

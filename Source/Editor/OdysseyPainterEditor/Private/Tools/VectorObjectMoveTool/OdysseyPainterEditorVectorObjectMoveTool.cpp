@@ -49,24 +49,15 @@ UOdysseyPainterEditorVectorObjectMoveTool::OnMouseDown(const FOdysseyPoint& iPoi
 
     if( currentVectorLayer )
     {
-        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        UOdysseyVectorObject* selectedObject = currentVectorLayer->GetScene()->GetLastSelected();
-
-        if ( selectedObject )
-        {
-            UOdysseyVectorObject* parentObject = selectedObject->GetParent();
-            BLPoint localCoords = parentObject->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
-
-            mOldLocalMouseX = localCoords.x;
-            mOldLocalMouseY = localCoords.y;
-        }
+        mOldWorldMouseX = iPointInTexture.x;
+        mOldWorldMouseY = iPointInTexture.y;
     }
 
     return true;
 }
 
 void
-UOdysseyPainterEditorVectorObjectMoveTool::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
+UOdysseyPainterEditorVectorObjectMoveTool::OnMouseDrag( const FOdysseyPoint& iPointInTexture )
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
@@ -75,26 +66,31 @@ UOdysseyPainterEditorVectorObjectMoveTool::OnMouseDrag(const FOdysseyPoint& iPoi
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        UOdysseyVectorObject* selectedObject = currentVectorLayer->GetScene()->GetLastSelected();
+        std::list<UOdysseyVectorObject*>& selectObjectList = currentVectorLayer->GetScene()->GetSelectedObjectList();
+        double difx = iPointInTexture.x - mOldWorldMouseX;
+        double dify = iPointInTexture.y - mOldWorldMouseY;
+        ::ULIS::FRectD beforeBBox = UOdysseyVectorObject::GetBoundingBoxFromList( selectObjectList );
 
-        if ( selectedObject )
+        for( std::list<UOdysseyVectorObject*>::iterator it = selectObjectList.begin(); it != selectObjectList.end(); ++it )
         {
-            UOdysseyVectorObject* parentObject = selectedObject->GetParent();
-            BLPoint localCoords = parentObject->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
-            double difx = localCoords.x - mOldLocalMouseX;
-            double dify = localCoords.y - mOldLocalMouseY;
-            ::ULIS::FRectD beforeBBox = selectedObject->GetBBox( true );
+            UOdysseyVectorObject* selectedObject = (*it);
 
-            selectedObject->Translate( selectedObject->GetTranslationX() + difx
-                                     , selectedObject->GetTranslationY() + dify );
+            if ( selectedObject->HasSelectedParent() == false )
+            {
+                UOdysseyVectorObject* parentObject = selectedObject->GetParent();
+                BLPoint localDif = parentObject->GetInverseWorldMatrix().mapVector( difx, dify );
 
-            selectedObject->UpdateMatrix();
+                selectedObject->Translate( selectedObject->GetTranslationX() + localDif.x
+                                         , selectedObject->GetTranslationY() + localDif.y );
 
-            mOldLocalMouseX = localCoords.x;
-            mOldLocalMouseY = localCoords.y;
-
-            RedrawCurrentLayer( { beforeBBox | selectedObject->GetBBox( true ) } );
+                selectedObject->UpdateMatrix();
+            }
         }
+
+        mOldWorldMouseX = iPointInTexture.x;
+        mOldWorldMouseY = iPointInTexture.y;
+
+        RedrawCurrentLayer( { { 0, 0, 0, 0 } } /*{ beforeBBox | UOdysseyVectorObject::GetBoundingBoxFromList( selectObjectList ) }*/ );
     }
 }
 

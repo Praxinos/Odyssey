@@ -29,5 +29,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUDPathCubic : public FOdysseyVectorHUD
         FOdysseyVectorHUDPathCubic();
         FOdysseyVectorHUDPathCubic( uint32 iDisplayMode );
 
-        void Draw( UOdysseyVectorObject* iObject, ::ULIS::FRectD& iRoi, uint64 iFlags );
+        void Draw( UOdysseyVectorRoot& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags );
 };

@@ -69,6 +69,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorObject : public UObject
     public:
         static uint32 TreeToList( UOdysseyVectorObject* iObject, std::list<UOdysseyVectorObject*>& iOutList );
         static uint32 TreeToArray( UOdysseyVectorObject* iObject, std::vector<UOdysseyVectorObject*>& iOutArray );
+        static ::ULIS::FRectD GetBoundingBoxFromList( std::list<UOdysseyVectorObject*>& iObjectList );
 
         ~UOdysseyVectorObject();
         UOdysseyVectorObject();
@@ -133,4 +134,5 @@ class ODYSSEYVECTOR_API UOdysseyVectorObject : public UObject
         bool IsSelected();
         void DrawBBox( ::ULIS::FRectD& iRoi,uint64 iFlags );
         int32 PickBBox( double iX, double iY );
+        bool HasSelectedParent();
 };
