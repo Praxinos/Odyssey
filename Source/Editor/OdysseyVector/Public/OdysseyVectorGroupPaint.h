@@ -31,8 +31,10 @@ class ODYSSEYVECTOR_API UOdysseyVectorGroupPaint : public UOdysseyVectorGroup
         UOdysseyVectorGroupPaint(){};
         void Init( std::string iName );
 
-    private:
         void DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags );
         UOdysseyVectorObject* PickShape( ::ULIS::FRectD& iRoi, uint32 iSelectionFlags );
         UOdysseyVectorObject* CopyShape();
+
+        void IntersectSegment( UOdysseyVectorSegmentCubic& iCubicSegment, std::list<UOdysseyVectorSegment*>& cubicSegmenList );
+        void BuildGraph();
 };

@@ -71,6 +71,7 @@ protected:
     virtual void GetBrushPack();
     virtual void Discord();
     virtual void SwitchTabletAPI();
+    virtual void GroupPaint();
 
 private:
     FOdysseyPainterEditor*                          mEditor;

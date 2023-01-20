@@ -8,6 +8,10 @@
 #include "SOdysseyAboutScreen.h"
 #include "SOdysseyTabletAPISwitcher.h"
 #include "Models/OdysseyPainterEditorCommands.h"
+#include "LayerStack/OdysseyTextureLayerStack.h"
+#include "LayerStack/OdysseyTextureLayerImageVector.h"
+#include "OdysseyTextureEditor.h"
+#include "OdysseyVectorGroupPaint.h"
 
 #include "ToolMenus.h"
 
@@ -64,6 +68,7 @@ FOdysseyPainterEditorGUI::BindShortcuts(FBaseToolkit* iToolkit)
     MAP_ACTION(painterEditorCommands.GetBrushPack, GetBrushPack )
     MAP_ACTION(painterEditorCommands.Discord, Discord )
     MAP_ACTION(painterEditorCommands.SwitchTabletAPI, SwitchTabletAPI )
+    MAP_ACTION(painterEditorCommands.GroupPaint, GroupPaint )
 
     #undef MAP_ACTION
 }
@@ -129,6 +134,12 @@ FOdysseyPainterEditorGUI::ExtendMenuAbout( FToolMenuOwner iOwner, FName iMenuNam
             , LOCTEXT("TalkWithTheDeveloppers", "Talk with the developpers ...")
             , LOCTEXT("ReleaseNotes_Tooltip", "For those who want to discuss with us about the next improvements")
             , FSlateIcon("OdysseyStyle", "About.Discord2_16")
+            , NAME_None );
+        aboutSection.AddMenuEntry(
+            FOdysseyPainterEditorCommands::Get().GroupPaint
+            , LOCTEXT("GroupPaint", "GroupPaint")
+            , LOCTEXT("GroupPaint", "GroupPaint")
+            , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
             , NAME_None );
     }
 }
@@ -376,6 +387,45 @@ FOdysseyPainterEditorGUI::Discord()
 {
     FString URL = "https://discord.gg/gEd6pj7";
     FPlatformProcess::LaunchURL( *URL, NULL, NULL );
+}
+
+void
+FOdysseyPainterEditorGUI::GroupPaint()
+{
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(static_cast<FOdysseyTextureEditor*>(mEditor)->LayerStack());
+    UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
+
+    if( currentLayer )
+    {
+        if( currentLayer->GetClass() == UOdysseyTextureLayerImageVector::StaticClass() )
+        {
+            UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
+
+            if( currentVectorLayer )
+            {
+                FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+                std::list<UOdysseyVectorObject*>& selectObjectList = currentVectorLayer->GetScene()->GetSelectedObjectList();
+
+                if( selectObjectList.size() )
+                {
+                    UOdysseyVectorGroupPaint* paintGroup = NewObject<UOdysseyVectorGroupPaint>();
+
+                    currentVectorLayer->GetScene()->AppendChild( paintGroup );
+
+                    for( std::list<UOdysseyVectorObject*>::iterator it = selectObjectList.begin(); it != selectObjectList.end(); ++it )
+                    {
+                        UOdysseyVectorObject* selectedObject = (*it);
+
+                        selectedObject->GetParent()->RemoveChild( selectedObject );
+                        paintGroup->AppendChild( selectedObject );
+                    }
+
+                    paintGroup->UpdateMatrix();
+                    paintGroup->BuildGraph();
+                }
+            }
+        }
+    }
 }
 
 void

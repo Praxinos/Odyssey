@@ -70,6 +70,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDown(const FOdysseyPoint& iPo
         currentVectorLayer->GetScene()->AppendChild( cubicPath );
         currentVectorLayer->GetScene()->AppendChild( currentPathBuilder );
 
+        cubicPath->UpdateMatrix();
         currentPathBuilder->UpdateMatrix();
 
         currentPathBuilder->AppendPoint( localCoords.x, localCoords.y, roundedUpRadius );
@@ -101,9 +102,9 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDrag(const FOdysseyPoint& iPo
         float roundedUpRadius = ceil (radius);
         float roundedUpDiameter = roundedUpRadius * 2.0f;
         ::ULIS::FRectI invalidateRegion = { (int) iPointInTexture.x - (int) roundedUpRadius
-                                            , (int) iPointInTexture.y - (int) roundedUpRadius
-                                            , (int) roundedUpDiameter
-                                            , (int) roundedUpDiameter };
+                                          , (int) iPointInTexture.y - (int) roundedUpRadius
+                                          , (int) roundedUpDiameter
+                                          , (int) roundedUpDiameter };
         ::ULIS::FRectI finalRegion = invalidateRegion;
 
         currentPathBuilder->AppendPoint( localCoords.x, localCoords.y, roundedUpRadius );

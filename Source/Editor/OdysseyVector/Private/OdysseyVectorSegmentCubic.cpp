@@ -357,29 +357,31 @@ UOdysseyVectorSegmentCubic::Cut( ::ULIS::FVec2D& linePoint0
     return false;
 }
 
-void
+uint32
 UOdysseyVectorSegmentCubic::Intersect( UOdysseyVectorSegmentCubic& iOther )
 {
     ::ULIS::FVec2D point0 = { mPoint[0]->GetX(), mPoint[0]->GetY() };
     ::ULIS::FVec2D point1 = { mPoint[1]->GetX(), mPoint[1]->GetY() };
     ::ULIS::FVec2D ctrlPoint0 = { mCtrlPoint[0]->GetX(), mCtrlPoint[0]->GetY() };
     ::ULIS::FVec2D ctrlPoint1 = { mCtrlPoint[1]->GetX(), mCtrlPoint[1]->GetY() };
+    uint32 intersectionCount = 0;
 
-    std::list<UOdysseyVectorVertexIntersection*> intersectionVertexList;
-
-    // the other segment must not belong to this segment's points or we would get an intersection no matter what
-    if ( ( Cast<UOdysseyVectorVertex>(mPoint[0])->HasSegment( iOther ) == false ) && 
-         ( Cast<UOdysseyVectorVertex>(mPoint[1])->HasSegment( iOther ) == false ) )
+    for ( int i = 0; i < mPolygonCache.size(); i++ )
     {
-        for ( int i = 0; i < mPolygonCache.size(); i++ )
+        FPolygon* poly = &mPolygonCache[i];
+
+        for( int j = 0; j < iOther.mPolygonCache.size(); j++ )
         {
-            FPolygon* poly = &mPolygonCache[i];
+            FPolygon* interPoly = &iOther.mPolygonCache[j];
+            double polySubT, interPolySubT;
+            int p = j - 1;
+            int n = j + 1;
 
-            for( int j = 0; j < iOther.mPolygonCache.size(); j++ )
+            // could be the same segment
+            if( (  interPoly    != poly )
+             && ( &interPoly[p] != poly )
+             && ( &interPoly[n] != poly ) )
             {
-                FPolygon* interPoly = &iOther.mPolygonCache[j];
-                double polySubT, interPolySubT;
-
                 if ( intersection ( poly->lineVertex[0]
                                   , poly->lineVertex[1]
                                   , interPoly->lineVertex[0]
@@ -390,12 +392,14 @@ UOdysseyVectorSegmentCubic::Intersect( UOdysseyVectorSegmentCubic& iOther )
                     ::ULIS::FVec2D polyVector = ( poly->lineVertex[1] - poly->lineVertex[0] );
                     ::ULIS::FVec2D coords = { poly->lineVertex[0].x + ( polyVector.x * polySubT )
                                             , poly->lineVertex[0].y + ( polyVector.y * polySubT ) };
-                    UOdysseyVectorVertexIntersection* intersectionVertex = NewObject<UOdysseyVectorVertexIntersection>();
-
-                    intersectionVertexList.push_back( intersectionVertex );
-
                     double segmentT =      poly->fromT + (      polySubT * (      poly->toT -      poly->fromT ) );
                     double iOtherT  = interPoly->fromT + ( interPolySubT * ( interPoly->toT - interPoly->fromT ) );
+                    UOdysseyVectorVertexIntersection* intersectionVertex = NewObject<UOdysseyVectorVertexIntersection>();
+
+                    this->AddIntersection ( intersectionVertex );
+                    iOther.AddIntersection ( intersectionVertex );
+
+                    intersectionCount++;
 /*
     printf("new intersection Point: %d - %f %f\n", intersectionPoint, segmentT, iOtherT );
 */
@@ -404,24 +408,9 @@ UOdysseyVectorSegmentCubic::Intersect( UOdysseyVectorSegmentCubic& iOther )
                 }
             }
         }
-
-        if ( intersectionVertexList.size() )
-        {
-/*
-            this->ClearIntersections();
-            iOther.ClearIntersections();
-*/
-            for( std::list<UOdysseyVectorVertexIntersection*>::iterator it = intersectionVertexList.begin(); it != intersectionVertexList.end(); ++it )
-            {
-                UOdysseyVectorVertexIntersection* intersectionVertex = static_cast<UOdysseyVectorVertexIntersection*>(*it);
-
-                this->AddIntersection ( intersectionVertex );
-                iOther.AddIntersection ( intersectionVertex );
-
-                intersectionVertex->March();
-            }
-        }
     }
+
+    return intersectionCount;
 }
 
 void

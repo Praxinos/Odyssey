@@ -18,7 +18,10 @@ UOdysseyVectorObject::UOdysseyVectorObject()
     , mIsSelected ( false )
     , mIsInvalidated ( false )
 {
-
+    mLocalMatrix.reset();
+    mWorldMatrix.reset();
+    mInverseLocalMatrix.reset();
+    mInverseWorldMatrix.reset();
 }
 
 void

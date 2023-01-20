@@ -41,6 +41,9 @@ public:
     /** Action to go to praxinos' Discord server*/
     TSharedPtr<FUICommandInfo> Discord;
 
+    /** Action to go to praxinos' Discord server*/
+    TSharedPtr<FUICommandInfo> GroupPaint;
+
     //Undo Redo
 
     /** Action for undoing a stroke in ILIAD*/

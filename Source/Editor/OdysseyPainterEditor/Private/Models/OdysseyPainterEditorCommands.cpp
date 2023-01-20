@@ -37,6 +37,8 @@ FOdysseyPainterEditorCommands::RegisterCommands()
     UI_CMD( ManualAndReleaseNotes, HelpShortcuts, "Manual and Release Notes ...", "Manual and Release Notes ...",                                EUserInterfaceActionType::Button, FInputChord() );
     UI_CMD( Discord, HelpShortcuts, "Talk with the developpers ...", "Talk with the developpers ...",                                            EUserInterfaceActionType::Button, FInputChord() );
     UI_CMD( SwitchTabletAPI, HelpShortcuts, "Change Tablet API", "Switch between Ink and Wintab on Windows, use NSevent on Mac",                 EUserInterfaceActionType::Button, FInputChord( EKeys::F8 ) );
+    UI_CMD( GroupPaint, HelpShortcuts, "GroupPaint", "GroupPaint",                                                                               EUserInterfaceActionType::Button, FInputChord( EKeys::G ) );
+
 
 // Uncategorized Yet Shortcuts
     UI_CMD( FillCurrentLayer, UncategorizedYetShortcuts, "Fill Current Layer", "Fill current layer",                                             EUserInterfaceActionType::Button, FInputChord( EKeys::F ) );
