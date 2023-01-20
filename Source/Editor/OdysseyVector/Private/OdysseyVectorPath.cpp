@@ -27,7 +27,7 @@ UOdysseyVectorPath::AppendVertex( UOdysseyVectorVertex* iPoint, UOdysseyVectorVe
     return NULL;
 }
 
-void
+/*void
 UOdysseyVectorPath::AddLoop( UOdysseyVectorLoop* iLoop )
 {
     mLoopList.push_back( iLoop );
@@ -37,9 +37,9 @@ UOdysseyVectorPath::AddLoop( UOdysseyVectorLoop* iLoop )
     iLoop->SetParent ( this );
 
     printf("%s: Adding loop\n", __func__ );
-}
+}*/
 
-void
+/*void
 UOdysseyVectorPath::RemoveLoop( UOdysseyVectorLoop* iLoop )
 {
     mLoopList.remove( iLoop );
@@ -49,7 +49,7 @@ UOdysseyVectorPath::RemoveLoop( UOdysseyVectorLoop* iLoop )
     iLoop->SetParent ( nullptr );
 
     printf("%s: Removing loop\n", __func__ );
-}
+}*/
 
 UOdysseyVectorObject*
 UOdysseyVectorPath::CopyShape()
@@ -91,7 +91,7 @@ UOdysseyVectorPath::UpdateShape()
     mInvalidatedSegmentList.clear();
 
     // then update Loops
-
+/*
     for ( std::list<UOdysseyVectorLoop*>::iterator it = mInvalidatedLoopList.begin(); it != mInvalidatedLoopList.end(); ++it )
     {
         UOdysseyVectorLoop* loop = static_cast<UOdysseyVectorLoop*>(*it);
@@ -100,7 +100,7 @@ UOdysseyVectorPath::UpdateShape()
     }
 
     mInvalidatedLoopList.clear();
-
+*/
     UpdateBBox();
 }
 
@@ -112,14 +112,15 @@ UOdysseyVectorPath::InvalidateSegment( UOdysseyVectorSegment* iSegment )
     Invalidate();
 }
 
-void
+/*void
 UOdysseyVectorPath::InvalidateLoop( UOdysseyVectorLoop* iLoop )
 {
     mInvalidatedLoopList.push_back ( iLoop );
 
     Invalidate();
-}
+}*/
 
+/*
 void
 UOdysseyVectorPath::DrawLoops( ::ULIS::FRectD &iRoi, uint64 iFlags )
 {
@@ -127,13 +128,15 @@ UOdysseyVectorPath::DrawLoops( ::ULIS::FRectD &iRoi, uint64 iFlags )
     {
         UOdysseyVectorLoop* loop = static_cast<UOdysseyVectorLoop*>(*it);
 
-        /*if ( loop->IsFilled() == true )
-        {*/
+        //if ( loop->IsFilled() == true )
+        //{
             loop->DrawShape( iRoi, iFlags );
-        /*}*/
+        //}
     }
 }
+*/
 
+/*
 UOdysseyVectorObject*
 UOdysseyVectorPath::PickLoops( double iX, double iY, double iRadius )
 {
@@ -149,7 +152,9 @@ UOdysseyVectorPath::PickLoops( double iX, double iY, double iRadius )
 
     return nullptr;
 }
+*/
 
+/*
 UOdysseyVectorLoop*
 UOdysseyVectorPath::GetLoopByID( uint64 iID )
 {
@@ -165,6 +170,7 @@ UOdysseyVectorPath::GetLoopByID( uint64 iID )
 
     return nullptr;
 }
+*/
 
 void
 UOdysseyVectorPath::AddVertex( UOdysseyVectorVertex* iVertex )
@@ -241,6 +247,7 @@ UOdysseyVectorPath::GetLastVertex()
     return mVertexList.back();
 }
 
+/*
 bool
 UOdysseyVectorPath::IsLoop()
 {
@@ -254,6 +261,7 @@ UOdysseyVectorPath::IsLoop()
 
     return false;
 }
+*/
 
 UOdysseyVectorVertex*
 UOdysseyVectorPath::GetFirstVertex()
@@ -289,5 +297,5 @@ UOdysseyVectorPath::DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags )
         segment->Draw( iRoi );
     }
 
-    DrawLoops( iRoi, iFlags );
+    /*DrawLoops( iRoi, iFlags );*/
 }

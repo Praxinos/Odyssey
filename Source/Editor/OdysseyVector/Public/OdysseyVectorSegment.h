@@ -53,6 +53,7 @@ class UOdysseyVectorSegment : public UOdysseyVectorLink
 
         void ClearIntersections();
         FOdysseyVectorSection* GetSection (double t);
+        std::list<FOdysseyVectorSection*>& GetSectionList();
 
         void AddIntersection ( UOdysseyVectorVertexIntersection* iIntersectionVertex );
         void RemoveSection ( FOdysseyVectorSection* iSection );

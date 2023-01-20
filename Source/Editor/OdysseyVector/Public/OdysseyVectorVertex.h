@@ -46,6 +46,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorVertex : public UOdysseyVectorPoint
         virtual void SetY( double iY );
         virtual void Set( double iX, double iY );
         uint32 GetSegmentCount();
+        uint32 GetSectionCount();
         std::list<UOdysseyVectorSegment*>& GetSegmentList();
         virtual double GetT( UOdysseyVectorSegment& );
         virtual void SetRadius( double iRadius );

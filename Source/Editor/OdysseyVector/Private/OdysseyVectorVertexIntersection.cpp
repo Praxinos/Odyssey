@@ -65,6 +65,18 @@ UOdysseyVectorVertexIntersection::AddSegment( UOdysseyVectorSegmentCubic* iSegme
     mTMap.insert(std::make_pair(iSegment, intersect));
 }
 
+bool
+UOdysseyVectorVertexIntersection::IsVisited()
+{
+    return mVisited;
+}
+
+void
+UOdysseyVectorVertexIntersection::SetVisited( bool iVisited )
+{
+    mVisited = iVisited;
+}
+
 UOdysseyVectorSegment*
 UOdysseyVectorVertexIntersection::GetSegment( UOdysseyVectorVertex& iOtherVertex )
 {

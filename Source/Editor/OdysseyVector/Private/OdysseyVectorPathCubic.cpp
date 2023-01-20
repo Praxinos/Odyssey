@@ -315,7 +315,7 @@ UOdysseyVectorPathCubic::Fill( ::ULIS::FRectD& iRoi )
     BLContext* blctx = GetRoot()->GetEngine()->GetBLContext();
     BLPath path;
 
-    if ( IsLoop() && firstVertex )
+    if ( /*IsLoop() &&*/ firstVertex )
     {
         blctx->setCompOp( BL_COMP_OP_SRC_COPY );
         /*iBLContext.setFillStyle(BLRgba32(0xFFFFFFFF));
@@ -426,7 +426,7 @@ UOdysseyVectorPathCubic::DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags )
         Fill( iRoi );
     }
 
-    DrawLoops( iRoi, iFlags  );
+    /*DrawLoops( iRoi, iFlags  );*/
 
     DrawShapeVariable( iRoi, iFlags );
 }

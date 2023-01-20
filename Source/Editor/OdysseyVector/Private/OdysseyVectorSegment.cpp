@@ -8,7 +8,7 @@ UOdysseyVectorSegment::UOdysseyVectorSegment()
     : UOdysseyVectorLink ()
     , mPath ( nullptr )
 {
-    /*AddSection ( new FOdysseyVectorSection ( *this, mVertex[0], mVertex[1] ) );*/
+
 }
 
 void
@@ -17,6 +17,8 @@ UOdysseyVectorSegment::Init( UOdysseyVectorPath* iPath
                            , UOdysseyVectorVertex* iVertex1 )
 {
     UOdysseyVectorLink::Init ( iVertex0, iVertex1 );
+
+    AddSection ( new FOdysseyVectorSection ( this, iVertex0, iVertex1 ) );
 
     mPath = iPath;
 }
@@ -78,13 +80,20 @@ UOdysseyVectorSegment::RemoveSection ( FOdysseyVectorSection* iSection )
     iSection->GetVertex(1)->RemoveSection( iSection );
 
     mSectionList.remove( iSection );
-
+/*
     for( std::list<UOdysseyVectorLoop*>::iterator it = loopList.begin(); it != loopList.end(); ++it )
     {
         UOdysseyVectorLoop* loop = static_cast<UOdysseyVectorLoop*>(*it);
 
         mPath->RemoveLoop( loop );
     }
+*/
+}
+
+std::list<FOdysseyVectorSection*>&
+UOdysseyVectorSegment::GetSectionList()
+{
+    return mSectionList;
 }
 
 void

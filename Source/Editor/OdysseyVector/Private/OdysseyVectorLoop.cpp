@@ -47,7 +47,7 @@ UOdysseyVectorLoop::GetID()
 void
 UOdysseyVectorLoop::Invalidate()
 {
-    static_cast<UOdysseyVectorPath*>(mParent)->InvalidateLoop( this );
+    /*static_cast<UOdysseyVectorPath*>(mParent)->InvalidateLoop( this );*/
 }
 
 void

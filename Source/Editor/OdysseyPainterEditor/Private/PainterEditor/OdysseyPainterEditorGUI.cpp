@@ -421,7 +421,7 @@ FOdysseyPainterEditorGUI::GroupPaint()
                     }
 
                     paintGroup->UpdateMatrix();
-                    paintGroup->BuildGraph();
+                    paintGroup->FindCycles();
                 }
             }
         }

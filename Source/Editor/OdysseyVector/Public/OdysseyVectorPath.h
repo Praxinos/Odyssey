@@ -25,11 +25,10 @@ class ODYSSEYVECTOR_API UOdysseyVectorPath : public UOdysseyVectorObject
         UOdysseyVectorObject* CopyShape();
 
     protected :
-        std::list<UOdysseyVectorLoop*> mLoopList; // list of loops
         std::list<UOdysseyVectorVertex*> mVertexList;
         std::list<UOdysseyVectorSegment*> mSegmentList;
         std::list<UOdysseyVectorSegment*> mInvalidatedSegmentList;
-        std::list<UOdysseyVectorLoop*> mInvalidatedLoopList;
+        /*std::list<UOdysseyVectorLoop*> mInvalidatedLoopList;*/
         std::list<UOdysseyVectorPoint*> mSelectedPointList;
         BLPath mPath;
 
@@ -45,8 +44,8 @@ class ODYSSEYVECTOR_API UOdysseyVectorPath : public UOdysseyVectorObject
         void RemoveSegment(UOdysseyVectorSegment* iSegment);
         void AddVertex( UOdysseyVectorVertex* iVertex );
         virtual UOdysseyVectorSegment* AppendVertex( UOdysseyVectorVertex* iVertex, UOdysseyVectorVertex* iPreviousVertex );
-        UOdysseyVectorObject* PickLoops( double iX, double iY, double iRadius );
-        void DrawLoops( ::ULIS::FRectD &iRoi, uint64 iFlags );
+        /*UOdysseyVectorObject* PickLoops( double iX, double iY, double iRadius );
+        void DrawLoops( ::ULIS::FRectD &iRoi, uint64 iFlags );*/
 
         virtual void DrawStructure( ::ULIS::FRectD &iRoi );
 
@@ -61,12 +60,12 @@ class ODYSSEYVECTOR_API UOdysseyVectorPath : public UOdysseyVectorObject
         virtual bool PickPoint( double iX, double iY, double iRadius, uint64 iSelectionFlags ){ return false; };
         virtual void Unselect( UOdysseyVectorVertex* iVertex ){};
         void Clear();
-        bool IsLoop();
+        /*bool IsLoop();
         UOdysseyVectorLoop* GetLoopByID( uint64 iID );
         void AddLoop( UOdysseyVectorLoop* iLoop );
-        void RemoveLoop( UOdysseyVectorLoop* iLoop );
+        void RemoveLoop( UOdysseyVectorLoop* iLoop );*/
 
         void InvalidateSegment( UOdysseyVectorSegment* iSegment );
-        void InvalidateLoop( UOdysseyVectorLoop* iLoop );
+        /*void InvalidateLoop( UOdysseyVectorLoop* iLoop );*/
         void UpdateBBox();
 };

@@ -13,6 +13,19 @@ FOdysseyVectorSection::FOdysseyVectorSection( UOdysseyVectorSegment* iSegment
 
 }
 
+void 
+FOdysseyVectorSection::SetBlocked( bool iBlocked )
+{
+    mBlocked = iBlocked;
+}
+
+bool 
+FOdysseyVectorSection::IsBlocked()
+{
+    return mBlocked;
+}
+
+
 UOdysseyVectorSegment*
 FOdysseyVectorSection::GetSegment()
 {

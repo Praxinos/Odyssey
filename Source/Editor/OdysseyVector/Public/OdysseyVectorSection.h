@@ -12,6 +12,7 @@ class FOdysseyVectorSection
         UOdysseyVectorSegment* mSegment;
         UOdysseyVectorVertex* mVertex[2];
         std::list<UOdysseyVectorLoop*> mLoopList;
+        bool mBlocked;
 
     public:
         ~FOdysseyVectorSection();
@@ -21,4 +22,6 @@ class FOdysseyVectorSection
         void AddLoop( UOdysseyVectorLoop* iLoop );
         void RemoveLoop( UOdysseyVectorLoop* iLoop );
         std::list<UOdysseyVectorLoop*>& GetLoopList();
+        void SetBlocked( bool iBlocked );
+        bool IsBlocked();
 };

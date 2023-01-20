@@ -256,7 +256,7 @@ UOdysseyVectorSegmentCubic::IntersectPath( UOdysseyVectorPathCubic& iPath )
         {*/
            /* if ( cubicSegment != this )  // commented out: a bezier can intersect itself
             {*/
-                Intersect( *cubicSegment ); 
+              /*  Intersect( *cubicSegment ); */
            /* }*/
         /*}*/
     }
@@ -358,7 +358,8 @@ UOdysseyVectorSegmentCubic::Cut( ::ULIS::FVec2D& linePoint0
 }
 
 uint32
-UOdysseyVectorSegmentCubic::Intersect( UOdysseyVectorSegmentCubic& iOther )
+UOdysseyVectorSegmentCubic::Intersect( UOdysseyVectorSegmentCubic& iOther
+                                     , std::list<UOdysseyVectorVertexIntersection*>& intersectionVertexList )
 {
     ::ULIS::FVec2D point0 = { mPoint[0]->GetX(), mPoint[0]->GetY() };
     ::ULIS::FVec2D point1 = { mPoint[1]->GetX(), mPoint[1]->GetY() };
@@ -369,18 +370,17 @@ UOdysseyVectorSegmentCubic::Intersect( UOdysseyVectorSegmentCubic& iOther )
     for ( int i = 0; i < mPolygonCache.size(); i++ )
     {
         FPolygon* poly = &mPolygonCache[i];
+        int p = i - 1;
+        int n = i + 1;
 
         for( int j = 0; j < iOther.mPolygonCache.size(); j++ )
         {
             FPolygon* interPoly = &iOther.mPolygonCache[j];
             double polySubT, interPolySubT;
-            int p = j - 1;
-            int n = j + 1;
 
-            // could be the same segment
-            if( (  interPoly    != poly )
-             && ( &interPoly[p] != poly )
-             && ( &interPoly[n] != poly ) )
+            if(   ( this != &iOther )
+            // check this is not the same sub-segment or adjacent sub-segment, or else they would always intersect
+             || ( ( this == &iOther ) && ( ( i - j ) > 1 ) ) )
             {
                 if ( intersection ( poly->lineVertex[0]
                                   , poly->lineVertex[1]
@@ -394,17 +394,22 @@ UOdysseyVectorSegmentCubic::Intersect( UOdysseyVectorSegmentCubic& iOther )
                                             , poly->lineVertex[0].y + ( polyVector.y * polySubT ) };
                     double segmentT =      poly->fromT + (      polySubT * (      poly->toT -      poly->fromT ) );
                     double iOtherT  = interPoly->fromT + ( interPolySubT * ( interPoly->toT - interPoly->fromT ) );
-                    UOdysseyVectorVertexIntersection* intersectionVertex = NewObject<UOdysseyVectorVertexIntersection>();
 
-                    this->AddIntersection ( intersectionVertex );
-                    iOther.AddIntersection ( intersectionVertex );
+                    if( ( segmentT != 0.0f && iOtherT != 1.0f )
+                     && ( segmentT != 1.0f && iOtherT != 0.0f ) )
+                    {
+                        UOdysseyVectorVertexIntersection* intersectionVertex = NewObject<UOdysseyVectorVertexIntersection>();
 
-                    intersectionCount++;
-/*
-    printf("new intersection Point: %d - %f %f\n", intersectionPoint, segmentT, iOtherT );
-*/
-                    intersectionVertex->AddSegment (    this, segmentT );
-                    intersectionVertex->AddSegment ( &iOther,  iOtherT );
+                        intersectionVertexList.push_back( intersectionVertex );
+
+                        this->AddIntersection ( intersectionVertex );
+                        iOther.AddIntersection ( intersectionVertex );
+
+                        intersectionCount++;
+
+                        intersectionVertex->AddSegment (    this, segmentT );
+                        intersectionVertex->AddSegment ( &iOther,  iOtherT );
+                    }
                 }
             }
         }
