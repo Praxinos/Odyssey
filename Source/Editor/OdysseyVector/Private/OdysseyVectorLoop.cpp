@@ -1,104 +1,19 @@
 #include "OdysseyVectorLoop.h"
 
-UOdysseyVectorLoop::~UOdysseyVectorLoop()
+FOdysseyVectorLoop::~FOdysseyVectorLoop()
 {
-}
-
-void
-UOdysseyVectorLoop::Init( UOdysseyVectorPath* iParent
-                        , uint64 iID
-                        , UOdysseyVectorVertex* iLoopVertex
-                        , std::list<UOdysseyVectorVertex*>& iLoopVertexList
-                        , std::list<FOdysseyVectorSection*>& iLoopSectionList )
-
-{
-    mParent = Cast<UOdysseyVectorObject>(iParent);
-
-    mID = iID;
-    mLoopVertex = iLoopVertex;
-    mVertexList = iLoopVertexList;
-    mSectionList = iLoopSectionList;
-
-    Build();
 }
 
 //static
-UOdysseyVectorLoop*
-UOdysseyVectorLoop::New( UOdysseyVectorPath* iParent
-                       , uint64 iID
-                       , UOdysseyVectorVertex* iLoopVertex
-                       , std::list<UOdysseyVectorVertex*>& iLoopVertexList
-                       , std::list<FOdysseyVectorSection*>& iLoopSectionList )
-
+FOdysseyVectorLoop::FOdysseyVectorLoop( UOdysseyVectorObject& iParent
+                                      , std::vector<UOdysseyVectorVertex*>& iVertexArray
+                                      , std::vector<FOdysseyVectorSection*>& iSectionArray )
+    : mParent( iParent )
 {
-    UOdysseyVectorLoop* loop = NewObject<UOdysseyVectorLoop>();
-
-    loop->Init ( iParent, iID, iLoopVertex, iLoopVertexList, iLoopSectionList );
-
-    return loop;
+    Build( iVertexArray, iSectionArray );
 }
-
-uint64
-UOdysseyVectorLoop::GetID()
-{
-    return mID;
-}
-
-void
-UOdysseyVectorLoop::Invalidate()
-{
-    /*static_cast<UOdysseyVectorPath*>(mParent)->InvalidateLoop( this );*/
-}
-
-void
-UOdysseyVectorLoop::UpdateShape()
-{
-    Build();
-}
-
-UOdysseyVectorObject*
-UOdysseyVectorLoop::CopyShape()
-{
-    return nullptr;
-}
-
-UOdysseyVectorObject*
-UOdysseyVectorLoop::PickShape( double iX, double iY, double iRadius )
-{
-    /*BLPath path;*/
-    BLPoint p = { iX, iY };
-    BLBox bbox;
 
 /*
-    if ( mPointArray.size() )
-    {
-        path.moveTo ( mPointArray[0].x, mPointArray[0].y );
-
-        for ( int i = 1; i < mPointArray.size(); i++ )
-        {
-            path.lineTo ( mPointArray[i].x, mPointArray[i].y );
-        }
-
-        path.lineTo ( mPointArray[0].x, mPointArray[0].y );
-    }
-*/
-    mPath.getBoundingBox( &bbox );
-
-    if ( ( iX > bbox.x0 ) && ( iX < bbox.x1 ) && ( iY > bbox.y0 ) && ( iY < bbox.y1 ) )
-    {
-        return this;
-    }
-
-/*
-    if ( mPath.hitTest( p, BL_FILL_RULE_NON_ZERO ) == BL_HIT_TEST_IN  )
-    {
-printf("%d\n", mID );
-        return this;
-    }
-*/
-    return nullptr;
-};
-
 uint64
 UOdysseyVectorLoop::GenerateID( std::list<FOdysseyVectorSection*> iSectionList )
 {
@@ -113,46 +28,11 @@ UOdysseyVectorLoop::GenerateID( std::list<FOdysseyVectorSection*> iSectionList )
 
     return loopID;
 }
+*/
+
 
 void
-UOdysseyVectorLoop::Detach()
-{
-    for( std::list<UOdysseyVectorVertex*>::iterator it = mVertexList.begin(); it != mVertexList.end(); ++it )
-    {
-        UOdysseyVectorVertex* vertex = static_cast<UOdysseyVectorVertex*>(*it);
-
-        vertex->RemoveLoop( this );
-    }
-
-    for( std::list<FOdysseyVectorSection*>::iterator it = mSectionList.begin(); it != mSectionList.end(); ++it )
-    {
-        FOdysseyVectorSection* section = static_cast<FOdysseyVectorSection*>(*it);
-
-        section->RemoveLoop( this );
-    }
-}
-
-void
-UOdysseyVectorLoop::Attach()
-{
-    for( std::list<UOdysseyVectorVertex*>::iterator it = mVertexList.begin(); it != mVertexList.end(); ++it )
-    {
-        UOdysseyVectorVertex* vertex = static_cast<UOdysseyVectorVertex*>(*it);
-
-        vertex->AddLoop( this );
-    }
-
-    for( std::list<FOdysseyVectorSection*>::iterator it = mSectionList.begin(); it != mSectionList.end(); ++it )
-    {
-        FOdysseyVectorSection* section = static_cast<FOdysseyVectorSection*>(*it);
-
-        section->AddLoop( this );
-    }
-}
-
-void
-UOdysseyVectorLoop::BuildSegmentCubic( std::vector<BLPoint>& iPointArray
-                                     , UOdysseyVectorSegmentCubic& iSegment
+FOdysseyVectorLoop::BuildSegmentCubic( UOdysseyVectorSegmentCubic& iSegment
                                      , double iFromT
                                      , double iToT )
 {
@@ -178,11 +58,7 @@ UOdysseyVectorLoop::BuildSegmentCubic( std::vector<BLPoint>& iPointArray
                     to.y = polygonCache[i].lineVertex[0].y + dir.y * ( ( iToT - polygonCache[i].fromT ) / ( polygonCache[i].toT - polygonCache[i].fromT ) );
                 }
 
-                BLPoint p = { to.x, to.y };
-
-                /*iPointArray.push_back(p);*/
-
-                mPath.lineTo( p );
+                mPath.lineTo( to.x, to.y );
             }
         }
     }
@@ -208,85 +84,75 @@ UOdysseyVectorLoop::BuildSegmentCubic( std::vector<BLPoint>& iPointArray
                     from.y = polygonCache[i].lineVertex[0].y + dir.y * ( ( iFromT - polygonCache[i].fromT ) / ( polygonCache[i].toT - polygonCache[i].fromT ) );
                 }
 
-                BLPoint p = { from.x, from.y };
-
-                /*iPointArray.push_back(p);*/
-
-                mPath.lineTo( p );
+                mPath.lineTo( from.x, from.y );
             }
         }
     }
 }
 
 void
-UOdysseyVectorLoop::DrawPoints( ::ULIS::FRectD& iRoi )
-{
-    BLContext* blctx = GetRoot()->GetEngine()->GetBLContext();
-
-    blctx->setStrokeStyle( BLRgba32( 0xFFFF8000 ) );
-    blctx->setFillStyle( BLRgba32( 0xFFFF8000 ) );
-
-    if ( mVertexList.size() ) 
-    {
-        for( std::list<UOdysseyVectorVertex*>::iterator it = mVertexList.begin(); it != mVertexList.end(); ++it )
-        {
-            UOdysseyVectorVertex* vertex = static_cast<UOdysseyVectorVertex*>(*it);
-            ::ULIS::FVec2D& vertexAt = vertex->GetCoords();
-
-            blctx->fillRect ( vertexAt.x - 5, vertexAt.y - 5, 10, 10 );
-        }
-    }
-}
-
-void
-UOdysseyVectorLoop::Build()
+FOdysseyVectorLoop::Build( std::vector<UOdysseyVectorVertex*>& iVertexArray
+                         , std::vector<FOdysseyVectorSection*>& iSectionArray )
 {
     int seg = 0;
 
-    mPath.clear();
 /*
-     mPointArray.clear();
-     mPointArray.reserve(200);
-*/
-    if ( mSectionList.size() ) 
+    mPath.clear();
+
+     //mPointArray.clear();
+     //mPointArray.reserve(200);
+
+    if ( iVertexArray.size() ) 
     {
-        FOdysseyVectorSection* firstSection = mSectionList.front();
+        FOdysseyVectorSection* firstSection = iSectionArray.front();
         UOdysseyVectorSegment* firstSegment = firstSection->GetSegment();
-        ::ULIS::FVec2D originAt = mLoopVertex->GetPosition( *firstSegment );
-        UOdysseyVectorVertex* currentVertex = mLoopVertex;
+        ::ULIS::FVec2D originAt = iVertexArray[0]->GetPosition( *firstSegment );
+        UOdysseyVectorVertex* currentVertex = iVertexArray[0];
 
         mPath.moveTo( originAt.x, originAt.y );
 
-        for( std::list<FOdysseyVectorSection*>::iterator it = mSectionList.begin(); it != mSectionList.end(); ++it )
+        for( int i = 0; i < iSectionArray.size(); i++ )
         {
-            FOdysseyVectorSection* section = static_cast<FOdysseyVectorSection*>(*it);
+            FOdysseyVectorSection* section = iSectionArray[i];
             UOdysseyVectorSegment* segment = section->GetSegment();
             UOdysseyVectorVertex* nextVertex = ( currentVertex == section->GetVertex(0) ) ? section->GetVertex(1) : section->GetVertex(0);
             double currentVertexT = currentVertex->GetT( *segment );
             double    nextVertexT =    nextVertex->GetT( *segment );
 
-            BuildSegmentCubic ( mPointArray, static_cast<UOdysseyVectorSegmentCubic&>(*segment), currentVertexT, nextVertexT );
+            BuildSegmentCubic ( static_cast<UOdysseyVectorSegmentCubic&>(*segment), currentVertexT, nextVertexT );
 
             currentVertex = nextVertex;
         }
 
         mPath.close();
     }
+*/
+
+    mPath.clear();
+
+    for( int i = 0; i < iSectionArray.size(); i++ )
+    {
+        FOdysseyVectorSection* section = iSectionArray[i];
+        UOdysseyVectorSegment* segment = section->GetSegment();
+        ::ULIS::FVec2D originAt = iVertexArray[i]->GetPosition( *segment );
+UE_LOG(LogTemp, Warning, TEXT("pointAt %d %f %f"), segment, originAt.x, originAt.y );
+        if( i == 0 ) mPath.moveTo( originAt.x, originAt.y );
+        else         mPath.lineTo( originAt.x, originAt.y );
+    }
+
+    mPath.close();
 }
 
 void
-UOdysseyVectorLoop::DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags )
+FOdysseyVectorLoop::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
-    BLContext* blctx = GetRoot()->GetEngine()->GetBLContext();
+    BLContext* blctx = mParent.GetRoot()->GetEngine()->GetBLContext();
 
-    if ( IsFilled() )
-    {
     /*if ( mVertexList.size() ) 
     {*/
-       blctx->setFillStyle( BLRgba32( mFillColor ) );
+       blctx->setFillStyle( BLRgba32( /*mFillColor*/0xFF0080FF ) );
 
        /*iBLContext.fillPolygon( &mPointArray[0], mPointArray.size() );*/
        blctx->fillPath( mPath );
     /*}*/
-    }
 }

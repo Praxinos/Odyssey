@@ -8,25 +8,33 @@ UOdysseyVectorVertexIntersection::~UOdysseyVectorVertexIntersection()
 UOdysseyVectorVertexIntersection::UOdysseyVectorVertexIntersection()
     : UOdysseyVectorVertex ()
 {
-
 }
 
 double
 UOdysseyVectorVertexIntersection::GetT( UOdysseyVectorSegment& iSegment )
 {
-    return mTMap[&iSegment].t;
+    if ( auto search = mTMap.find(&iSegment); search != mTMap.end())
+        return search->second.t;
+    else
+        return 0.0f;
 }
 
 ::ULIS::FVec2D
 UOdysseyVectorVertexIntersection::GetPosition( UOdysseyVectorSegment& iSegment )
 {
-    return mTMap[&iSegment].position;
+    if ( auto search = mTMap.find(&iSegment); search != mTMap.end())
+        return search->second.position;
+    else
+        return { 0.0f, 0.0f };
 }
 
 ::ULIS::FVec2D&
 UOdysseyVectorVertexIntersection::GetCoords()
 {
-    return mTMap[GetFirstSegment()].position;
+    if ( auto search = mTMap.find(GetFirstSegment()); search != mTMap.end())
+        return search->second.position;
+    else
+        return mCoords;
 }
 
 void
@@ -58,11 +66,15 @@ UOdysseyVectorVertexIntersection::AddSegment( UOdysseyVectorSegmentCubic* iSegme
                                                                                     , ctrlPoint1
                                                                                     , point1
                                                                                     , t );
-    FIntersection intersect = { intersectAt, t };
-/*printf("%f %f %f\n", intersectAt.x, intersectAt.y, t);*/
-    UOdysseyVectorVertex::AddSegment(iSegment);
 
-    mTMap.insert(std::make_pair(iSegment, intersect));
+    FIntersection intersect;
+
+    intersect.position = intersectAt;
+    intersect.t        = t;
+/*printf("%f %f %f\n", intersectAt.x, intersectAt.y, t);*/
+    //UOdysseyVectorVertex::AddSegment( iSegment );
+UE_LOG(LogTemp, Warning, TEXT("UOdysseyVectorVertexIntersection::AddSegment %d - size:%d"), iSegment, mTMap.size() );
+    mTMap.insert( std::make_pair( iSegment, intersect ) );
 }
 
 bool

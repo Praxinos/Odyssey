@@ -216,32 +216,6 @@ UOdysseyVectorSegmentCubic::GetBoundingBox( )
     return mBBox;
 }
 
-
-// https://stackoverflow.com/questions/35473936/find-whether-two-line-segments-intersect-or-not-in-c
-bool intersection( ::ULIS::FVec2D& line0p0
-                 , ::ULIS::FVec2D& line0p1
-                 , ::ULIS::FVec2D& line1p0
-                 , ::ULIS::FVec2D& line1p1
-                 , double* line0t
-                 , double* line1t )
-{
-    ::ULIS::FVec2D L0Vec   = { line0p1.x - line0p0.x, line0p1.y - line0p0.y };
-    ::ULIS::FVec2D L1Vec   = { line1p0.x - line1p1.x, line1p0.y - line1p1.y }; // reverted order is normal
-    ::ULIS::FVec2D L0L1Vec = { line1p0.x - line0p0.x, line1p0.y - line0p0.y };
-
-    double det = L0Vec.x * L1Vec.y - L0Vec.y * L1Vec.x;
-
-    if ( fabs(det) == 0.0f ) return false;
-
-    double r = ( L0L1Vec.x * L1Vec.y   - L0L1Vec.y * L1Vec.x   ) / det;
-    double s = (   L0Vec.x * L0L1Vec.y -   L0Vec.y * L0L1Vec.x ) / det;
-
-    *line0t = r;
-    *line1t = s;
-
-    return !(r < 0 || r > 1 || s < 0 || s > 1);
-}
-
 void
 UOdysseyVectorSegmentCubic::IntersectPath( UOdysseyVectorPathCubic& iPath )
 {
@@ -288,12 +262,12 @@ UOdysseyVectorSegmentCubic::Cut( ::ULIS::FVec2D& linePoint0
         FPolygon* poly = &mPolygonCache[i];
         double polySubT, interPolySubT;
 
-        if ( intersection ( poly->lineVertex[0]
-                          , poly->lineVertex[1]
-                          , linePoint0
-                          , linePoint1
-                          , &polySubT
-                          , &interPolySubT ) )
+        if ( FOdysseyVector::IntersectSegment( poly->lineVertex[0]
+                                             , poly->lineVertex[1]
+                                             , linePoint0
+                                             , linePoint1
+                                             , &polySubT
+                                             , &interPolySubT ) )
         {
             double segmentT = poly->fromT + ( polySubT * ( poly->toT - poly->fromT ) );
             ::ULIS::FVec2D pointAt = ::ULIS::CubicBezierPointAtParameter<::ULIS::FVec2D>( point0
@@ -382,12 +356,12 @@ UOdysseyVectorSegmentCubic::Intersect( UOdysseyVectorSegmentCubic& iOther
             // check this is not the same sub-segment or adjacent sub-segment, or else they would always intersect
              || ( ( this == &iOther ) && ( ( i - j ) > 1 ) ) )
             {
-                if ( intersection ( poly->lineVertex[0]
-                                  , poly->lineVertex[1]
-                                  , interPoly->lineVertex[0]
-                                  , interPoly->lineVertex[1]
-                                  , &polySubT
-                                  , &interPolySubT ) )
+                if ( FOdysseyVector::IntersectSegment ( poly->lineVertex[0]
+                                                      , poly->lineVertex[1]
+                                                      , interPoly->lineVertex[0]
+                                                      , interPoly->lineVertex[1]
+                                                      , &polySubT
+                                                      , &interPolySubT ) )
                 {
                     ::ULIS::FVec2D polyVector = ( poly->lineVertex[1] - poly->lineVertex[0] );
                     ::ULIS::FVec2D coords = { poly->lineVertex[0].x + ( polyVector.x * polySubT )

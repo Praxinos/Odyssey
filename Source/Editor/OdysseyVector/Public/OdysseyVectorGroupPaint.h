@@ -7,7 +7,10 @@
 #include <Core/Core.h>
 #include <Image/Block.h>
 #include "OdysseyVectorObject.h"
+#include "OdysseyVectorVertex.h"
+#include "OdysseyVectorSection.h"
 #include "OdysseyVectorGroup.h"
+#include "OdysseyVectorLoop.h"
 
 #include "OdysseyVectorGroupPaint.generated.h"
 
@@ -25,12 +28,15 @@ class ODYSSEYVECTOR_API UOdysseyVectorGroupPaint : public UOdysseyVectorGroup
         GENERATED_BODY()
 
         std::list<FOdysseyVectorBucket*> mBucketList;
+        std::list<FOdysseyVectorLoop*> mLoopList;
 
     public:
         ~UOdysseyVectorGroupPaint(){};
         UOdysseyVectorGroupPaint(){};
         void Init( std::string iName );
 
+        void CreateCycle( std::vector<UOdysseyVectorVertex*>& iNodeArray
+                        , std::vector<FOdysseyVectorSection*>& iEdgeArray );
         void DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags );
         UOdysseyVectorObject* PickShape( ::ULIS::FRectD& iRoi, uint32 iSelectionFlags );
         UOdysseyVectorObject* CopyShape();
@@ -38,7 +44,15 @@ class ODYSSEYVECTOR_API UOdysseyVectorGroupPaint : public UOdysseyVectorGroup
         uint32 IntersectSegment( UOdysseyVectorSegmentCubic& iCubicSegment
                                , std::list<UOdysseyVectorSegment*>& cubicSegmenList
                               , std::list<UOdysseyVectorVertexIntersection*>& intersectionVertexList );
-        void BuildGraph( std::list<UOdysseyVectorVertexIntersection*>& intersectionVertexList );
+
+        void BuildGraph( std::list<UOdysseyVectorVertexIntersection*>& intersectionVertexList
+                       , std::list<FOdysseyVectorSection*>& iSectionList );
+
+        void March( UOdysseyVectorVertex* iNode
+                  , std::vector<UOdysseyVectorVertex*>& iNodeArray
+                  , std::vector<FOdysseyVectorSection*>& iEdgeArray
+                  , std::list<FOdysseyVectorSection*>& iSectionList );
+
         void FindCycles();
         void SimplifyGraph( std::list<FOdysseyVectorSection*>& sectionList );
 };

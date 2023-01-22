@@ -13,14 +13,14 @@ class FOdysseyVectorLoop;
 class UOdysseyVectorSegment;
 class UOdysseyVectorSegmentCubic;
 
+struct FIntersection {
+    ::ULIS::FVec2D position;
+    double t;
+};
+
 UCLASS()
 class UOdysseyVectorVertexIntersection : public UOdysseyVectorVertex
 {
-    struct FIntersection {
-        ::ULIS::FVec2D position;
-        double t;
-    };
-
     public:
         GENERATED_BODY()
 
@@ -33,7 +33,7 @@ class UOdysseyVectorVertexIntersection : public UOdysseyVectorVertex
     public:
         ~UOdysseyVectorVertexIntersection();
         UOdysseyVectorVertexIntersection();
-        ::ULIS::FVec2D GetPosition( UOdysseyVectorSegment& );
+        ::ULIS::FVec2D GetPosition( UOdysseyVectorSegment& iSegment );
         ::ULIS::FVec2D& GetCoords();
         double GetT( UOdysseyVectorSegment& );
         void Draw( UOdysseyVectorPath* iPath, ::ULIS::FRectD &iRoi );

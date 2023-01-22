@@ -74,20 +74,10 @@ UOdysseyVectorSegment::AddSection ( FOdysseyVectorSection* iSection )
 void
 UOdysseyVectorSegment::RemoveSection ( FOdysseyVectorSection* iSection )
 {
-    std::list<UOdysseyVectorLoop*> loopList = iSection->GetLoopList();
-
     iSection->GetVertex(0)->RemoveSection( iSection );
     iSection->GetVertex(1)->RemoveSection( iSection );
 
     mSectionList.remove( iSection );
-/*
-    for( std::list<UOdysseyVectorLoop*>::iterator it = loopList.begin(); it != loopList.end(); ++it )
-    {
-        UOdysseyVectorLoop* loop = static_cast<UOdysseyVectorLoop*>(*it);
-
-        mPath->RemoveLoop( loop );
-    }
-*/
 }
 
 std::list<FOdysseyVectorSection*>&
@@ -143,8 +133,6 @@ UOdysseyVectorSegment::Invalidate()
     for( std::list<UOdysseyVectorVertexIntersection*>::iterator it = mIntersectionVertexList.begin(); it != mIntersectionVertexList.end(); ++it )
     {
         UOdysseyVectorVertexIntersection* intersectionVertex = static_cast<UOdysseyVectorVertexIntersection*>(*it);
-
-        intersectionVertex->InvalidateLoops();
     }
 
     mPath->InvalidateSegment( this );

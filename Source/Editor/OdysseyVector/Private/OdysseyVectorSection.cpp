@@ -9,22 +9,28 @@ FOdysseyVectorSection::FOdysseyVectorSection( UOdysseyVectorSegment* iSegment
                                             , UOdysseyVectorVertex* iVertex1 )
     : mSegment ( iSegment )
     , mVertex { iVertex0, iVertex1 }
+    , mFlags( 0 )
 {
 
 }
 
 void 
-FOdysseyVectorSection::SetBlocked( bool iBlocked )
+FOdysseyVectorSection::Block( UOdysseyVectorVertex* iVertex )
 {
-    mBlocked = iBlocked;
+    uint32 blocked = ( iVertex == mVertex[0] ) ? FOdysseyVectorSection::BLOCKVERTEX0
+                                               : FOdysseyVectorSection::BLOCKVERTEX1;
+
+    mFlags |= blocked;
 }
 
 bool 
-FOdysseyVectorSection::IsBlocked()
+FOdysseyVectorSection::IsBlocked( UOdysseyVectorVertex* iVertex )
 {
-    return mBlocked;
-}
+    uint32 blocked = ( iVertex == mVertex[0] ) ? FOdysseyVectorSection::BLOCKVERTEX0
+                                               : FOdysseyVectorSection::BLOCKVERTEX1;
 
+    return ( mFlags & blocked ) ? true : false;
+}
 
 UOdysseyVectorSegment*
 FOdysseyVectorSection::GetSegment()

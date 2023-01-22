@@ -176,29 +176,6 @@ UOdysseyVectorVertex::HasSegment( UOdysseyVectorSegment& iSegment )
     return false;
 }
 
-void
-UOdysseyVectorVertex::AddLoop( UOdysseyVectorLoop* iLoop )
-{
-    mLoopList.push_back( iLoop );
-}
-
-void
-UOdysseyVectorVertex::RemoveLoop( UOdysseyVectorLoop* iLoop )
-{
-    mLoopList.remove( iLoop );
-}
-
-void
-UOdysseyVectorVertex::InvalidateLoops()
-{
-    for( std::list<UOdysseyVectorLoop*>::iterator it = mLoopList.begin(); it != mLoopList.end(); ++it )
-    {
-        UOdysseyVectorLoop* loop = static_cast<UOdysseyVectorLoop*>(*it);
-
-        loop->Invalidate();
-    }
-}
-
 bool
 UOdysseyVectorVertex::IsClosestSection( FOdysseyVectorSection& iStartSection
                                       , FOdysseyVectorSection& iEndSection )

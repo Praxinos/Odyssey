@@ -1,6 +1,17 @@
 #pragma once
 
 #include <ULIS>
+
+namespace FOdysseyVector
+{
+    bool IntersectSegment( ::ULIS::FVec2D& line0p0
+                         , ::ULIS::FVec2D& line0p1
+                         , ::ULIS::FVec2D& line1p0
+                         , ::ULIS::FVec2D& line1p1
+                         , double* line0t
+                         , double* line1t );
+}
+
 #include "OdysseyVectorObject.h"
 #include "OdysseyVectorRoot.h"
 #include "OdysseyVectorPoint.h"
