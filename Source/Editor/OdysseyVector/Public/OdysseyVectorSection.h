@@ -16,6 +16,7 @@ class FOdysseyVectorSection
 
         static const uint32 BLOCKVERTEX0 = ( 1 << 0 );
         static const uint32 BLOCKVERTEX1 = ( 1 << 1 );
+        static const uint32 VISITED      = ( 1 << 2 );
 
     public:
         ~FOdysseyVectorSection();
@@ -27,4 +28,6 @@ class FOdysseyVectorSection
         std::list<UOdysseyVectorLoop*>& GetLoopList();
         void Block( UOdysseyVectorVertex* iVertex );
         bool IsBlocked( UOdysseyVectorVertex* iVertex );
+        void SetVisited( bool iVisited );
+        bool IsVisited();
 };

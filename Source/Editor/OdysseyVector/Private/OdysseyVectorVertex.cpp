@@ -7,6 +7,19 @@ UOdysseyVectorVertex::~UOdysseyVectorVertex()
 UOdysseyVectorVertex::UOdysseyVectorVertex()
     : UOdysseyVectorPoint()
 {
+    SetVisited( false );
+}
+
+void
+UOdysseyVectorVertex::SetVisited( bool iVisited )
+{
+    mVisited = iVisited;
+}
+
+bool
+UOdysseyVectorVertex::IsVisited()
+{
+    return mVisited;
 }
 
 //static

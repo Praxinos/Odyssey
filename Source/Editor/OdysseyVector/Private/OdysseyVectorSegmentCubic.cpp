@@ -376,13 +376,14 @@ UOdysseyVectorSegmentCubic::Intersect( UOdysseyVectorSegmentCubic& iOther
 
                         intersectionVertexList.push_back( intersectionVertex );
 
+                        // AddSegment() MUST be called before AddIntersection because AddIntersection uses the value of t that is stored by AddSegment()
+                        intersectionVertex->AddSegment (    this, segmentT );
+                        intersectionVertex->AddSegment ( &iOther,  iOtherT );
+
                         this->AddIntersection ( intersectionVertex );
                         iOther.AddIntersection ( intersectionVertex );
 
                         intersectionCount++;
-
-                        intersectionVertex->AddSegment (    this, segmentT );
-                        intersectionVertex->AddSegment ( &iOther,  iOtherT );
                     }
                 }
             }

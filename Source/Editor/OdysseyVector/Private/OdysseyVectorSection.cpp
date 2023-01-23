@@ -14,6 +14,25 @@ FOdysseyVectorSection::FOdysseyVectorSection( UOdysseyVectorSegment* iSegment
 
 }
 
+void
+FOdysseyVectorSection::SetVisited( bool iVisited )
+{
+    if( iVisited == true )
+    {
+        mFlags |= VISITED;
+    }
+    else
+    {
+        mFlags &= (~VISITED);
+    }
+}
+
+bool
+FOdysseyVectorSection::IsVisited()
+{
+    return ( mFlags & VISITED ) ? true : false;
+}
+
 void 
 FOdysseyVectorSection::Block( UOdysseyVectorVertex* iVertex )
 {
