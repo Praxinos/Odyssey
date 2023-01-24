@@ -34,6 +34,18 @@ UOdysseyVectorVertex::New( double iX, double iY, double iRadius )
 }
 
 void
+UOdysseyVectorVertex::SetNode( FCycleNode* iNode )
+{
+    mNode = iNode;
+}
+
+FCycleNode*
+UOdysseyVectorVertex::GetNode()
+{
+    return mNode;
+}
+
+void
 UOdysseyVectorVertex::InvalidateSegments()
 {
     for( std::list<UOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )

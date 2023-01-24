@@ -129,13 +129,13 @@ FOdysseyVectorLoop::Build( std::vector<UOdysseyVectorVertex*>& iVertexArray
 */
 
     mPath.clear();
-
+UE_LOG(LogTemp, Warning, TEXT("FOdysseyVectorLoop::Build: Array size %d"), iSectionArray.size() );
     for( int i = 0; i < iSectionArray.size(); i++ )
     {
         FOdysseyVectorSection* section = iSectionArray[i];
         UOdysseyVectorSegment* segment = section->GetSegment();
         ::ULIS::FVec2D originAt = iVertexArray[i]->GetPosition( *segment );
-UE_LOG(LogTemp, Warning, TEXT("pointAt %d %f %f"), segment, originAt.x, originAt.y );
+//UE_LOG(LogTemp, Warning, TEXT("pointAt %d %f %f"), segment, originAt.x, originAt.y );
         if( i == 0 ) mPath.moveTo( originAt.x, originAt.y );
         else         mPath.lineTo( originAt.x, originAt.y );
     }

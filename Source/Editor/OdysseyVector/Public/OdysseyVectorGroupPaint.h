@@ -35,8 +35,6 @@ class ODYSSEYVECTOR_API UOdysseyVectorGroupPaint : public UOdysseyVectorGroup
         UOdysseyVectorGroupPaint(){};
         void Init( std::string iName );
 
-        void CreateCycle( std::vector<UOdysseyVectorVertex*>& iNodeArray
-                        , std::vector<FOdysseyVectorSection*>& iEdgeArray );
         void DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags );
         UOdysseyVectorObject* PickShape( ::ULIS::FRectD& iRoi, uint32 iSelectionFlags );
         UOdysseyVectorObject* CopyShape();
@@ -48,9 +46,11 @@ class ODYSSEYVECTOR_API UOdysseyVectorGroupPaint : public UOdysseyVectorGroup
         void BuildGraph( std::list<UOdysseyVectorVertexIntersection*>& intersectionVertexList
                        , std::list<FOdysseyVectorSection*>& iSectionList );
 
+        bool MakeCycle( ::ULIS::FVec2D& minCoord
+                       , std::vector<UOdysseyVectorVertex*>& iVertexArray
+                       , std::vector<FOdysseyVectorSection*>& iSectionArray );
         void March( UOdysseyVectorVertex* iNode
-                  , std::vector<UOdysseyVectorVertex*>& iNodeArray
-                  , std::vector<FOdysseyVectorSection*>& iEdgeArray
+                  , uint32 maxVertex
                   , std::list<FOdysseyVectorSection*>& iSectionList );
 
         void FindCycles();
