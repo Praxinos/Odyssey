@@ -21,12 +21,47 @@
 #define FOdysseyRasterBlock_CACHE_NAME TEXT("OdysseyRasterBlock")
 #define FOdysseyRasterBlock_CACHE_VERSION TEXT("A6ED84107BAD11EDA1EB0242AC120002")
 
+void
+RemoveValueFromCache(const FString& iId)
+{
+    FString CacheKey = FDerivedDataCacheInterface::BuildCacheKey(
+        FOdysseyRasterBlock_CACHE_NAME,
+        FOdysseyRasterBlock_CACHE_VERSION, //a GUID identifying the version of the key
+        iId
+    );
+
+    uint8 dummy = 0;
+    FSharedBuffer sharedBuffer = FSharedBuffer::MakeView(&dummy, 1);
+    UE::DerivedData::FValue derivedDataValue = UE::DerivedData::FValue::Compress(sharedBuffer);
+
+    //Store the tile in cache
+    UE::DerivedData::FRequestOwner putOwner(UE::DerivedData::EPriority::Lowest);
+    UE::DerivedData::GetCache().PutValue(
+        {
+            {
+                UE::DerivedData::FSharedString(), //Not needed
+                UE::DerivedData::ConvertLegacyCacheKey(CacheKey),
+                MoveTemp(derivedDataValue),
+                UE::DerivedData::ECachePolicy::StoreLocal //Use "StoreLocal" instead of "Local" to store and override existing value
+            }
+        },
+        putOwner
+    );
+    putOwner.KeepAlive();
+}
+
 class FOdysseyRasterBlockChange : public FCommandChange
 {
 public:
-    FOdysseyRasterBlockChange(const FGuid& iOldVersion, const FGuid& iVersion) :
-        mOldVersion(iOldVersion),
-        mVersion(iVersion)
+    ~FOdysseyRasterBlockChange()
+    {
+        RemoveValueFromCache(mUndoId.ToString());
+        RemoveValueFromCache(mRedoId.ToString());
+    }
+
+    FOdysseyRasterBlockChange(const FGuid& iUndoId, const FGuid& iRedoId) :
+        mUndoId(iUndoId),
+        mRedoId(iRedoId)
     {
     }
 
@@ -36,7 +71,7 @@ public:
     {
         UOdysseyRasterBlock* rasterBlock = Cast<UOdysseyRasterBlock>(Object);
         rasterBlock->ResetEditableBlock();
-        rasterBlock->LoadUndoFromCache(mVersion.ToString());
+        rasterBlock->LoadUndoFromCache(mRedoId.ToString());
     }
 
 	/** Reverts change to the object */
@@ -45,18 +80,18 @@ public:
     {
         UOdysseyRasterBlock* rasterBlock = Cast<UOdysseyRasterBlock>(Object);
         rasterBlock->ResetEditableBlock();
-        rasterBlock->LoadUndoFromCache(mOldVersion.ToString());
+        rasterBlock->LoadUndoFromCache(mUndoId.ToString());
     }
 
 	/** Describes this change (for debugging) */
 	virtual FString ToString() const override
     {
-        return TEXT("Odyssey Raster Block Undo");
+        return TEXT("Odyssey Raster Block Undo/Redo");
     }
 
-private:
-    FGuid mOldVersion;
-    FGuid mVersion;
+public:
+    FGuid mUndoId;
+    FGuid mRedoId;
 };
 
 
@@ -67,7 +102,6 @@ UOdysseyRasterBlock::~UOdysseyRasterBlock()
 UOdysseyRasterBlock::UOdysseyRasterBlock()
 {
     Id = FGuid::NewGuid();
-    Version = FGuid::NewGuid();
 }
 
 int
@@ -133,7 +167,6 @@ UOdysseyRasterBlock::SetBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iB
         mBlock = nullptr;
         Width = -1;
         Height = -1;
-        Version = FGuid::NewGuid();
         mInvalidTileMap.Clear();
     }
 
@@ -143,7 +176,6 @@ UOdysseyRasterBlock::SetBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iB
         Width = iBlock->Width();
         Height = iBlock->Height();
         Format = iBlock->Format();
-        Version = FGuid::NewGuid();
         iBlock->OnCleanup(::ULIS::FOnCleanupData(&UOdysseyRasterBlock::CleanupBlock, this));
 
         //if (mPerformanceMode == eOdysseyPerformanceMode::Speed)
@@ -234,10 +266,6 @@ UOdysseyRasterBlock::Invalidate(const TArray<::ULIS::FRectI>& iRects, bool iIsIn
     if ( !editableBlock )
         return;
 
-    //Generate new block version
-    FGuid oldVersion = Version;
-    Version = FGuid::NewGuid();
-
     //Interactive update
     {
         FULISInvalidTileMap tempInvalidTileMap(64, Width, Height);
@@ -257,9 +285,11 @@ UOdysseyRasterBlock::Invalidate(const TArray<::ULIS::FRectI>& iRects, bool iIsIn
             return;
 
         //Store Undo if needed
+        FGuid undoId = FGuid::NewGuid();
+        FGuid redoId = FGuid::NewGuid();
         bool storeUndo = GUndo && GUndo->ContainsObject(this);
         if (storeUndo)
-            SaveUndoToCache(oldVersion.ToString());
+            SaveUndoToCache(undoId.ToString());
 
         //Copy editableBlock to block
         ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext((::ULIS::eFormat)Format);
@@ -269,12 +299,12 @@ UOdysseyRasterBlock::Invalidate(const TArray<::ULIS::FRectI>& iRects, bool iIsIn
             ctx.Copy(*editableBlock, *block, rect, rect.Position(), ::ULIS::FSchedulePolicy::AsyncCacheEfficient);
         }
         ctx.Finish();
-
+        
         //Store Undo if needed
         if (storeUndo)
         {
-            SaveUndoToCache(Version.ToString());
-            GUndo->StoreUndo(this, MakeUnique<FOdysseyRasterBlockChange>(oldVersion, Version));
+            SaveUndoToCache(redoId.ToString());
+            GUndo->StoreUndo(this, MakeUnique<FOdysseyRasterBlockChange>(undoId, redoId));
         }
 
         OnBlockChanged().Broadcast(mInvalidTileMap.InvalidRects(), false);
@@ -378,10 +408,13 @@ UOdysseyRasterBlock::LoadBlockFromCache(TSharedRef<::ULIS::FBlock, ESPMode::Thre
 		getOwner,
 		[&, this](UE::DerivedData::FCacheGetValueResponse&& iResponse)
         {
-            FSharedBuffer rawData = iResponse.Value.GetData().Decompress();
             if (iResponse.Status != UE::DerivedData::EStatus::Ok)
                 return;
+    
+            if ( !iResponse.Value.HasData() || iResponse.Value.GetRawSize() == 1) //assume the block is empty, see RemoveValueFromCache()
+                return;
 
+            FSharedBuffer rawData = iResponse.Value.GetData().Decompress();
             FUniqueBuffer uniqueBuffer = FUniqueBuffer::MakeView(oBlock->Bits(), oBlock->BytesTotal());
             uniqueBuffer.GetView().CopyFrom(rawData);
             success = true;
@@ -516,10 +549,13 @@ UOdysseyRasterBlock::LoadUndoFromCache(const FString& iId)
 		getOwner,
 		[&, this](UE::DerivedData::FCacheGetValueResponse&& iResponse)
         {
-            FSharedBuffer rawData = iResponse.Value.GetData().Decompress();
             if (iResponse.Status != UE::DerivedData::EStatus::Ok)
                 return;
 
+            if ( !iResponse.Value.HasData() || iResponse.Value.GetRawSize() == 1 ) //assume the block is empty, see RemoveValueFromCache()
+                return;
+
+            FSharedBuffer rawData = iResponse.Value.GetData().Decompress();
             void* dataPtr = const_cast<void*>(rawData.GetData());
 
             FBufferReader reader(dataPtr, rawData.GetSize(), false, false);
@@ -621,6 +657,7 @@ UOdysseyRasterBlock::Serialize(FArchive& Ar)
     {       
         mBulkData.Serialize(Ar, this);
         mInvalidTileMap = FULISInvalidTileMap(64, Width, Height);
+        RemoveValueFromCache(Id.ToString());
     }
 }
 

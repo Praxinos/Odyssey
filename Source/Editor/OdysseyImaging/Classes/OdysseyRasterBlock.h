@@ -189,9 +189,6 @@ private:
     FGuid Id; //unique ID identifying the block
 
     UPROPERTY()
-    FGuid Version; //unique ID identifying the content of the block (changes at each Update / SetBlock)
-
-    UPROPERTY()
     int Width;
 
     UPROPERTY()
