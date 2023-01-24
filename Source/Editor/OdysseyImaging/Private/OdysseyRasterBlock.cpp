@@ -8,6 +8,8 @@
 #include "DerivedDataCacheInterface.h"
 #include "DerivedDataRequestOwner.h"
 #include "DerivedDataRequestTypes.h"
+#include "Misc/Change.h"
+#include "Misc/ITransaction.h"
 #include "Misc/TransactionObjectEvent.h"
 #include "OdysseyRectUtils.h"
 #include "OdysseyPerformanceMode.h"
@@ -16,10 +18,47 @@
 
 #include <chrono>
 
-#define FOdysseyRasterBlockTile_CACHE_NAME TEXT("OdysseyRasterBlockTile")
-#define FOdysseyRasterBlockTile_CACHE_VERSION TEXT("A6ED84107BAD11EDA1EB0242AC120002")
-static int baseTileWidth = 64;
-static int baseTileHeight = 64;
+#define FOdysseyRasterBlock_CACHE_NAME TEXT("OdysseyRasterBlock")
+#define FOdysseyRasterBlock_CACHE_VERSION TEXT("A6ED84107BAD11EDA1EB0242AC120002")
+
+class FOdysseyRasterBlockChange : public FCommandChange
+{
+public:
+    FOdysseyRasterBlockChange(const FGuid& iOldVersion, const FGuid& iVersion) :
+        mOldVersion(iOldVersion),
+        mVersion(iVersion)
+    {
+    }
+
+	/** Makes the change to the object */
+    //REDO
+	virtual void Apply( UObject* Object ) override
+    {
+        UOdysseyRasterBlock* rasterBlock = Cast<UOdysseyRasterBlock>(Object);
+        rasterBlock->ResetEditableBlock();
+        rasterBlock->LoadUndoFromCache(mVersion.ToString());
+    }
+
+	/** Reverts change to the object */
+    //UNDO
+	virtual void Revert( UObject* Object ) override
+    {
+        UOdysseyRasterBlock* rasterBlock = Cast<UOdysseyRasterBlock>(Object);
+        rasterBlock->ResetEditableBlock();
+        rasterBlock->LoadUndoFromCache(mOldVersion.ToString());
+    }
+
+	/** Describes this change (for debugging) */
+	virtual FString ToString() const override
+    {
+        return TEXT("Odyssey Raster Block Undo");
+    }
+
+private:
+    FGuid mOldVersion;
+    FGuid mVersion;
+};
+
 
 UOdysseyRasterBlock::~UOdysseyRasterBlock()
 {
@@ -27,66 +66,8 @@ UOdysseyRasterBlock::~UOdysseyRasterBlock()
 
 UOdysseyRasterBlock::UOdysseyRasterBlock()
 {
-}
-
-void
-UOdysseyRasterBlock::SetBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock)
-{
-    if (iBlock == mBlock)
-        return;
-
-    mBlock = iBlock;
-    //DEBUG: mBlockRetainerForSpeed = iBlock;
-
-    Width = iBlock->Width();
-    Height = iBlock->Height();
-    Format = iBlock->Format();
-
-    //clear tiles
-    Tiles.Empty();
-    mInteractivelyChangedTiles.Empty();
-
-    int lastTileX = (Width - 1) / baseTileWidth;
-    int lastTileY = (Height - 1) / baseTileHeight;
-
-    for (int y = 0; y <= lastTileY; y++)
-    {
-        int tileHeight = FMath::Min(Height - (y * baseTileHeight), baseTileHeight);
-        if (tileHeight <= 0)
-            continue;
-
-        for ( int x = 0; x <= lastTileX; x++ )
-        {
-            int tileWidth = FMath::Min(Width - (x * baseTileWidth), baseTileWidth);
-            if (tileWidth <= 0)
-                continue;
-
-            Tiles.Add({x * baseTileWidth, y * baseTileHeight, tileWidth, tileHeight, "", nullptr });
-        }
-    }
-    UpdateTiles(iBlock, {iBlock->Rect()});
-    SaveTileBlocksToCache();
-
-    OnBlockChanged().Broadcast();
-}
-
-TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>
-UOdysseyRasterBlock::GetBlock()
-{
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = mBlock.Pin();
-    if (!block)
-    {
-        //Load Block from DDC
-        block = MakeShared<::ULIS::FBlock>(Width, Height, (::ULIS::eFormat)Format);
-
-        //Render to block
-        ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext((::ULIS::eFormat)Format);
-        RenderTiles(block);
-        ctx.Finish();
-        mBlock = block; //watch the loaded block
-    }
-
-    return block; //return the currently loaded block, the reveiver can release it whenever he wants
+    Id = FGuid::NewGuid();
+    Version = FGuid::NewGuid();
 }
 
 int
@@ -107,98 +88,282 @@ UOdysseyRasterBlock::GetFormat() const
     return (::ULIS::eFormat)Format;
 }
 
-UOdysseyRasterBlock::FOnPixelsChanged&
-UOdysseyRasterBlock::OnPixelsChanged()
+void
+UOdysseyRasterBlock::CleanupBlock(uint8* iData, void* iInfo)
 {
-    return mOnPixelsChanged;
+    UOdysseyRasterBlock* rasterBlock = static_cast<UOdysseyRasterBlock*>(iInfo);
+    if ( !rasterBlock )
+        return;
+
+    ::ULIS::FBlock block(iData, rasterBlock->Width, rasterBlock->Height, rasterBlock->GetFormat());
+
+    //if ( rasterBlock->mPerformanceMode == eOdysseyPerformanceMode::Speed )
+        //return;
+
+    rasterBlock->SaveBlockToCache(block, rasterBlock->Id.ToString()); //TODO: maybe save only if version changed ?
 }
 
-FSimpleMulticastDelegate&
+/* void
+UOdysseyRasterBlock::CleanupEditableBlock(uint8* iData, void* iInfo)
+{
+    UOdysseyRasterBlock* rasterBlock = static_cast<UOdysseyRasterBlock*>(iInfo);
+    if ( !rasterBlock )
+        return;
+
+    rasterBlock->mBlockRetainerForEdition = nullptr;
+} */
+
+void
+UOdysseyRasterBlock::SetBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock)
+{
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> currentBlock = mBlock.Pin();
+    if (iBlock == currentBlock)
+        return;
+    
+    if (currentBlock)
+    {
+        //remove OnCleanup Callback
+        currentBlock->OnCleanup(::ULIS::FOnCleanupData());
+
+        //Remove any retainers on this block
+        //mBlockRetainerForSpeed = nullptr;
+        //mBlockRetainerForEdition = nullptr;
+
+        //Cleanup everything else
+        mBlock = nullptr;
+        Width = -1;
+        Height = -1;
+        Version = FGuid::NewGuid();
+        mInvalidTileMap.Clear();
+    }
+
+    if (iBlock)
+    {
+        mBlock = iBlock;
+        Width = iBlock->Width();
+        Height = iBlock->Height();
+        Format = iBlock->Format();
+        Version = FGuid::NewGuid();
+        iBlock->OnCleanup(::ULIS::FOnCleanupData(&UOdysseyRasterBlock::CleanupBlock, this));
+
+        //if (mPerformanceMode == eOdysseyPerformanceMode::Speed)
+            //mBlockRetainerForSpeed = iBlock;
+
+        mInvalidTileMap = FULISInvalidTileMap(64, Width, Height);
+    }
+
+    //If an editableBlock was set, don't consider it as the editableBlock anymore
+    //Let the user reload the block
+    mEditableBlock = nullptr;
+
+    /* TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> editableBlock = mEditableBlock.Pin();
+    if (editableBlock)
+    {
+        //remove OnCleanup Callback
+        editableBlock->OnCleanup(::ULIS::FOnCleanupData());
+        mEditableBlock = nullptr;
+    } */
+    
+
+     mOnBlockPtrChanged.Broadcast();
+}
+
+bool
+UOdysseyRasterBlock::IsBeingEdited()
+{
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> editableBlock = mEditableBlock.Pin();
+    return !!editableBlock; //returns true if editableblock is valid (don't use IsValid() as it can be wrong sometimes)
+}
+
+TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>
+UOdysseyRasterBlock::GetEditableBlock()
+{
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> editableBlock = mEditableBlock.Pin();
+    if ( editableBlock )
+        return editableBlock;
+
+    //Create a copy of the internal block
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = GetBlock();
+    if (!block)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("No block available. Did you forget to call SetBlock() ?") );
+        return nullptr;
+    }
+
+    editableBlock = MakeShared<::ULIS::FBlock>(Width, Height, (::ULIS::eFormat)Format);
+    //editableBlock->OnCleanup(::ULIS::FOnCleanupData(&UOdysseyRasterBlock::CleanupEditableBlock));
+
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext((::ULIS::eFormat)Format);
+    ctx.Copy(*block, *editableBlock, ::ULIS::FRectI::Auto, ::ULIS::FVec2I(0), ::ULIS::FSchedulePolicy::AsyncCacheEfficient);
+    ctx.Finish();
+
+    mEditableBlock = editableBlock; //Keep Weak Reference
+    //mBlockRetainerForEdition = block; 
+
+    return editableBlock;
+}
+
+const TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>
+UOdysseyRasterBlock::GetBlock()
+{
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = mBlock.Pin();
+    if ( block )
+        return block;
+
+    if ( Width <= 0 || Height <= 0 )
+        return nullptr;
+
+    //Load Block from DDC
+    block = MakeShared<::ULIS::FBlock>(Width, Height, (::ULIS::eFormat)Format);
+    block->OnCleanup(::ULIS::FOnCleanupData(&UOdysseyRasterBlock::CleanupBlock, this));
+    mBlock = block; //watch the loaded block
+
+    if ( LoadBlockFromCache(block.ToSharedRef(), Id.ToString()) )
+        return block;
+
+    if ( LoadBlockFromBulkData(block.ToSharedRef()) )
+        return block;
+
+    return block; //return the currently loaded block, the reveiver can release it whenever he wants
+}
+
+void
+UOdysseyRasterBlock::Invalidate(const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive)
+{
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> editableBlock = mEditableBlock.Pin();
+    if ( !editableBlock )
+        return;
+
+    //Generate new block version
+    FGuid oldVersion = Version;
+    Version = FGuid::NewGuid();
+
+    //Interactive update
+    {
+        FULISInvalidTileMap tempInvalidTileMap(64, Width, Height);
+        tempInvalidTileMap.Invalidate(iRects);
+        const TArray<::ULIS::FRectI>& invalidRects = tempInvalidTileMap.InvalidRects();
+        if (invalidRects.Num() > 0)
+            OnBlockChanged().Broadcast(invalidRects, true); //always send at least one interactive event
+    }
+
+    //Non-Interactive update
+    mInvalidTileMap.Invalidate(iRects);
+    if (!iIsInteractive && mInvalidTileMap.InvalidTiles().Num() > 0 )
+    {
+        //Create a copy of the internal block
+        TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = GetBlock();
+        if ( !block )
+            return;
+
+        //Store Undo if needed
+        bool storeUndo = GUndo && GUndo->ContainsObject(this);
+        if (storeUndo)
+            SaveUndoToCache(oldVersion.ToString());
+
+        //Copy editableBlock to block
+        ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext((::ULIS::eFormat)Format);
+        const TArray<::ULIS::FRectI>& invalidRects = mInvalidTileMap.InvalidRects();
+        for (const ::ULIS::FRectI& rect : invalidRects)
+        {
+            ctx.Copy(*editableBlock, *block, rect, rect.Position(), ::ULIS::FSchedulePolicy::AsyncCacheEfficient);
+        }
+        ctx.Finish();
+
+        //Store Undo if needed
+        if (storeUndo)
+        {
+            SaveUndoToCache(Version.ToString());
+            GUndo->StoreUndo(this, MakeUnique<FOdysseyRasterBlockChange>(oldVersion, Version));
+        }
+
+        OnBlockChanged().Broadcast(mInvalidTileMap.InvalidRects(), false);
+        mInvalidTileMap.Clear();
+    }
+}
+
+/*
+void
+UOdysseyRasterBlock::SetPerformanceMode(eOdysseyPerformanceMode iPerformanceMode)
+{
+    mPerformanceMode = iPerformanceMode;
+    switch(iPerformanceMode)
+    {
+        case eOdysseyPerformanceMode::Speed:
+            mBlockRetainerForSpeed = GetBlock();
+        break;
+
+        case eOdysseyPerformanceMode::Memory:
+        case eOdysseyPerformanceMode::Shutdown:
+            mBlockRetainerForSpeed = nullptr;
+            //DEBUG: mBlockRetainerForSpeed = GetBlock();
+        break;
+    }
+}
+
+eOdysseyPerformanceMode
+UOdysseyRasterBlock::GetPerformanceMode()
+{
+    return mPerformanceMode;
+}
+*/
+
+UOdysseyRasterBlock::FOnBlockChanged&
 UOdysseyRasterBlock::OnBlockChanged()
 {
     return mOnBlockChanged;
 }
 
-TArray<::ULIS::FEvent> 
-UOdysseyRasterBlock::RenderTiles(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock)
+UOdysseyRasterBlock::FOnEditableBlockChanged&
+UOdysseyRasterBlock::OnEditableBlockChanged()
 {
-    TArray<::ULIS::FEvent> renderTilesEvents;
-    
-    //Get all tile blocks
-    for (int i = 0; i < Tiles.Num(); i++)
-    {
-        TArray<::ULIS::FEvent> renderTileEvents = RenderTile(i, iBlock);
-        renderTilesEvents.Append(renderTileEvents);
-    }
-
-    return renderTilesEvents;
+    return mOnEditableBlockChanged;
 }
 
-TArray<::ULIS::FEvent> 
-UOdysseyRasterBlock::RenderTile(int iTileIndex, TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock)
+FSimpleMulticastDelegate&
+UOdysseyRasterBlock::OnBlockPtrChanged()
 {
-    TArray<::ULIS::FEvent> renderTileEvents;
-
-    if (iTileIndex < 0 || iTileIndex >= Tiles.Num())
-        return renderTileEvents;
-
-    const FOdysseyRasterBlockTile& tile = Tiles[iTileIndex];
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = GetTileBlock(iTileIndex);
-    
-    //If tile is considered empty, don't bother looking for a block and clear the tile section directly
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext((::ULIS::eFormat)Format);
-    if (!block)
-    {
-        ::ULIS::FEvent clearEvent = FULISEventBuilder().RetainBlock(block).Build();
-        ctx.Clear(*iBlock, ::ULIS::FRectI::FromXYWH(tile.X, tile.Y, tile.Width, tile.Height), ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &clearEvent);
-        renderTileEvents.Add(clearEvent);
-        return renderTileEvents;
-    }
-
-    ::ULIS::FEvent copyEvent = FULISEventBuilder().RetainBlock(block).Build();
-    ctx.Copy(*block, *iBlock, ::ULIS::FRectI::Auto, ::ULIS::FVec2I(tile.X, tile.Y), ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &copyEvent);
-    renderTileEvents.Add(copyEvent);
-    return renderTileEvents;
+    return mOnBlockPtrChanged;
 }
 
-TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>
-UOdysseyRasterBlock::GetTileBlock(int iTileIndex)
+void
+UOdysseyRasterBlock::SaveBlockToCache(const ::ULIS::FBlock& iBlock, const FString& iId)
 {
-    if (iTileIndex < 0 || iTileIndex >= Tiles.Num())
-        return nullptr;
+    FString CacheKey = FDerivedDataCacheInterface::BuildCacheKey(
+        FOdysseyRasterBlock_CACHE_NAME,
+        FOdysseyRasterBlock_CACHE_VERSION, //a GUID identifying the version of the key
+        iId
+    );
 
-    const FOdysseyRasterBlockTile& tile = Tiles[iTileIndex];
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = tile.mBlock;
-    if (!block && tile.Hash == "")
-        return nullptr;
+    FSharedBuffer sharedBuffer = FSharedBuffer::MakeView(iBlock.Bits(), iBlock.BytesTotal());
+    UE::DerivedData::FValue derivedDataValue = UE::DerivedData::FValue::Compress(sharedBuffer);
 
-    if (!block)
-        block = LoadTileBlockFromCache(iTileIndex);
-
-    if (!block)
-        block = LoadTileBlockFromBulkData(iTileIndex);
-
-    return block; //return the currently loaded block, the reveiver can release it whenever he wants
+    //Store the tile in cache
+    UE::DerivedData::FRequestOwner putOwner(UE::DerivedData::EPriority::Lowest);
+    UE::DerivedData::GetCache().PutValue(
+        {
+            {
+                GetPathName(),
+                UE::DerivedData::ConvertLegacyCacheKey(CacheKey),
+                MoveTemp(derivedDataValue),
+                UE::DerivedData::ECachePolicy::StoreLocal //Use "StoreLocal" instead of "Local" to store and override existing value
+            }
+        },
+        putOwner
+    );
+    putOwner.KeepAlive();
 }
 
-TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>
-UOdysseyRasterBlock::LoadTileBlockFromCache(int iTileIndex)
+bool
+UOdysseyRasterBlock::LoadBlockFromCache(TSharedRef<::ULIS::FBlock, ESPMode::ThreadSafe> oBlock, const FString& iId)
 {
-    if (iTileIndex < 0 || iTileIndex >= Tiles.Num())
-        return nullptr;
-
-    const FOdysseyRasterBlockTile& tile = Tiles[iTileIndex];
-
-    if (tile.Hash == "")
-        return nullptr;
+    bool success = false;
 
     //Load Block from DDC
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = nullptr;
-
     FString CacheKey = FDerivedDataCacheInterface::BuildCacheKey(
-		FOdysseyRasterBlockTile_CACHE_NAME,
-        FOdysseyRasterBlockTile_CACHE_VERSION, //a GUID identifying the version of the key
-		tile.Hash
+		FOdysseyRasterBlock_CACHE_NAME,
+        FOdysseyRasterBlock_CACHE_VERSION, //a GUID identifying the version of the key
+		iId
 	);
 
     UE::DerivedData::FRequestOwner getOwner(UE::DerivedData::EPriority::Blocking);
@@ -217,400 +382,255 @@ UOdysseyRasterBlock::LoadTileBlockFromCache(int iTileIndex)
             if (iResponse.Status != UE::DerivedData::EStatus::Ok)
                 return;
 
-            block = MakeShared<::ULIS::FBlock>(tile.Width, tile.Height, (::ULIS::eFormat)Format);
-            FUniqueBuffer uniqueBuffer = FUniqueBuffer::MakeView(block->Bits(), block->BytesTotal());
-            //OPTIMIZE: Find a way to avoid this copy, by using shared buffer directly
+            FUniqueBuffer uniqueBuffer = FUniqueBuffer::MakeView(oBlock->Bits(), oBlock->BytesTotal());
             uniqueBuffer.GetView().CopyFrom(rawData);
+            success = true;
         }
     );
     getOwner.Wait();
-    return block;
+    return success;
 }
 
-TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>
-UOdysseyRasterBlock::LoadTileBlockFromBulkData(int iTileIndex)
+bool
+UOdysseyRasterBlock::LoadBlockFromBulkData(TSharedRef<::ULIS::FBlock, ESPMode::ThreadSafe> oBlock)
 {
-    if (iTileIndex < 0 || iTileIndex >= Tiles.Num())
-        return nullptr;
-
-    const FOdysseyRasterBlockTile& tile = Tiles[iTileIndex];
-
-    if (tile.Hash == "")
-        return nullptr;
-
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = MakeShared<::ULIS::FBlock>(tile.Width, tile.Height, (::ULIS::eFormat)Format);
-
-    FSharedBuffer buffer = tile.mBulkData.GetPayload().Get();
-    FUniqueBuffer uniqueBuffer = FUniqueBuffer::MakeView(block->Bits(), block->BytesTotal());
+    FSharedBuffer buffer = mBulkData.GetPayload().Get();
+    FUniqueBuffer uniqueBuffer = FUniqueBuffer::MakeView(oBlock->Bits(), oBlock->BytesTotal());
     uniqueBuffer.GetView().CopyFrom(buffer);
 
-    return block;
+    return true;
 }
 
 void
-UOdysseyRasterBlock::SaveTileBlocksToCache()
+UOdysseyRasterBlock::SaveUndoToCache(const FString& iId)
 {
-    //Build the list of keys we need to save, so that we check and save them only once
-    TSet<FString> hashes;
-    for ( int i = 0; i < Tiles.Num(); i++ )
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = GetBlock();
+    if (!block)
+        return;
+
+    const TArray<::ULIS::FRectI>& rectsToSave = mInvalidTileMap.InvalidRects();
+
+    TArray<uint8> TempData;
+    FMemoryWriter writer(TempData); //allows us to save rectangles alongside the block
+
+    int numTiles = rectsToSave.Num();
+    writer << numTiles;
+    for (int i = 0; i < numTiles; i++)
     {
-        FOdysseyRasterBlockTile& tile = Tiles[i];
-        if ( tile.Hash == "" )
-        {
-            tile.mBlock = nullptr; //ensure tile mblock is released
-            continue;
-        }
-
-        if ( hashes.Contains(tile.Hash) )
-        {
-            tile.mBlock = nullptr; //ensure tile mblock is released
-            continue;
-        }
-
-        hashes.Add(tile.Hash);
-
-        FString CacheKey = FDerivedDataCacheInterface::BuildCacheKey(
-            FOdysseyRasterBlockTile_CACHE_NAME,
-            FOdysseyRasterBlockTile_CACHE_VERSION, //a GUID identifying the version of the key
-            tile.Hash
-        );
-
-        TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> blockToSave = tile.mBlock;
-        if ( !blockToSave && tile.mCacheFromBulkData )
-            blockToSave = LoadTileBlockFromBulkData(i);
-
-        tile.mCacheFromBulkData = false;
-
-        //look if the tile is already in cache
-        UE::DerivedData::FRequestOwner getOwner(UE::DerivedData::EPriority::Lowest);
-        UE::DerivedData::GetCache().GetValue(
-            {
-                {
-                    GetPathName(),
-                    UE::DerivedData::ConvertLegacyCacheKey(CacheKey),
-                    UE::DerivedData::ECachePolicy::Query | UE::DerivedData::ECachePolicy::SkipData| UE::DerivedData::ECachePolicy::SkipMeta, //that's the policy to use when asking if a data is in cache or not
-                }
-            },
-            getOwner,
-            [&, this, blockToSave](UE::DerivedData::FCacheGetValueResponse&& iResponse)
-            {
-                //Save block only if it is not found in cache
-                bool isAlreadyInCache = (iResponse.Status == UE::DerivedData::EStatus::Ok);
-                if (isAlreadyInCache)
-                    return;
-
-                if ( !blockToSave )
-                    return;
-
-                FSharedBuffer sharedBuffer = FSharedBuffer::MakeView(blockToSave->Bits(), blockToSave->BytesTotal());
-                UE::DerivedData::FValue derivedDataValue = UE::DerivedData::FValue::Compress(sharedBuffer);
-
-                //Store the tile in cache
-                UE::DerivedData::FRequestOwner putOwner(UE::DerivedData::EPriority::Lowest);
-                UE::DerivedData::GetCache().PutValue(
-                    {
-                        {
-                            iResponse.Name,
-                            iResponse.Key,
-                            MoveTemp(derivedDataValue),
-                            UE::DerivedData::ECachePolicy::Local
-                        }
-                    },
-                    putOwner
-                );
-                putOwner.KeepAlive();
-            }
-        );
-        getOwner.KeepAlive();
-
-        tile.mBlock = nullptr;
+        ::ULIS::FRectI rect = rectsToSave[i];
+        writer << rect.x;
+        writer << rect.y;
+        writer << rect.w;
+        writer << rect.h;
     }
-}
-
-TSet<int>
-UOdysseyRasterBlock::UpdateTiles(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock, const TArray<::ULIS::FRectI>& iRects)
-{
-    TSet<int> tileIndexes;
-
-    if (!iBlock)
-        return tileIndexes;
-
-    int numTilesX = ((Width - 1) / baseTileWidth) + 1;
-    int numTilesY = ((Height - 1) / baseTileHeight) + 1;
-    ::ULIS::FRectI blockRect = ::ULIS::FRectI::FromXYWH(0, 0, Width, Height);
-
-    //Render rects to tiles
+    
+    //copy the rectangle in the block
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext((::ULIS::eFormat)Format);
-    TArray<::ULIS::FRectI> rects = ::OdysseyRectUtils::MergeRects(iRects);
-
-    //Find affected tiles
-    for ( const ::ULIS::FRectI& rect : rects )
+    int tileSize = mInvalidTileMap.TileSize();
+    int dataStart = TempData.Num();//Do this before AddUninitialized() to keep track of where to write the block in memory
+    TempData.AddUninitialized(tileSize * tileSize * numTiles * block->BytesPerPixel());
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> blockToSave = MakeShared<::ULIS::FBlock>(TempData.GetData() + dataStart, tileSize, tileSize * numTiles, (::ULIS::eFormat)Format);
+    for (int i = 0; i < rectsToSave.Num(); i++)
     {
-        ::ULIS::FRectI safeRect = blockRect & rect;
-        safeRect.Sanitize();
-        if ( safeRect.Area() <= 0 )
-            continue;
-
-        int startX = safeRect.x / baseTileWidth;
-        int startY = safeRect.y / baseTileHeight;
-        int endX = (safeRect.x + safeRect.w - 1) / baseTileWidth;
-        int endY = (safeRect.y + safeRect.h - 1) / baseTileHeight;
-
-        for ( int y = startY; y <= endY; y++ )
-        {
-            for ( int x = startX; x <= endX; x++ )
-            {
-                int tileIndex = y * numTilesX + x;
-                tileIndexes.Add(tileIndex);
-            }
-        }
+        const ::ULIS::FRectI& rect = rectsToSave[i];
+        ctx.Copy(*block, *blockToSave, rect, ::ULIS::FVec2I(0, tileSize * i), ::ULIS::FSchedulePolicy::AsyncCacheEfficient);
     }
-
-    //Prepare affected tile blocks and copy rects
-    for ( const int& i : tileIndexes )
-    {
-        FOdysseyRasterBlockTile& tile = Tiles[i];
-        tile.mBlock = GetTileBlock(i); //load block in memory
-
-        ::ULIS::FEvent eventClear;
-        if ( !tile.mBlock )
-        {
-            tile.mBlock = MakeShared<::ULIS::FBlock>(tile.Width, tile.Height, (::ULIS::eFormat)Format);
-            ctx.Clear(*tile.mBlock, ::ULIS::FRectI::Auto, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventClear);
-        }
-        else
-        {
-            eventClear = ::ULIS::FEvent::NoOP();
-        }
-
-        ::ULIS::FRectI tileRect = ::ULIS::FRectI::FromXYWH(tile.X, tile.Y, tile.Width, tile.Height);
-        for ( const ::ULIS::FRectI& rect : rects )
-        {
-            ::ULIS::FRectI safeRect = tileRect & rect;
-            safeRect.Sanitize();
-            if ( safeRect.Area() <= 0 )
-                continue;
-
-            ctx.Copy(*iBlock, *tile.mBlock, safeRect, safeRect.Position() - tileRect.Position(), ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 1, &eventClear);
-        }
-    }
-
     ctx.Finish();
 
-    //refresh tiles hashes
-    for (const int& i : tileIndexes)
-    {
-        FOdysseyRasterBlockTile& tile = Tiles[i];
-        tile.Hash = LexToString(FIoHash::HashBuffer(tile.mBlock->Bits(), tile.mBlock->BytesTotal()));
-    }
+    FString CacheKey = FDerivedDataCacheInterface::BuildCacheKey(
+        FOdysseyRasterBlock_CACHE_NAME,
+        FOdysseyRasterBlock_CACHE_VERSION, //a GUID identifying the version of the key
+        iId
+    );
 
-    //refresh cached block if needed
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> cachedBlock = mBlock.Pin();
-    if (cachedBlock && iBlock != cachedBlock) //if the given block is already the cached block, we don't have to refresh it
-    {
-        for (const int& i : tileIndexes)
+    FSharedBuffer sharedBuffer = FSharedBuffer::MakeView(TempData.GetData(), TempData.Num());
+    UE::DerivedData::FValue derivedDataValue = UE::DerivedData::FValue::Compress(sharedBuffer);
+
+    //Store the tile in cache
+    UE::DerivedData::FRequestOwner putOwner(UE::DerivedData::EPriority::Lowest);
+    UE::DerivedData::GetCache().PutValue(
         {
-            RenderTile(i, cachedBlock);
-        }
-        ctx.Finish();
-    }
-
-    return tileIndexes;
-}
-
-void
-UOdysseyRasterBlock::Update(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock, const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive)
-{
-    TSet<int> tileIndexes = UpdateTiles(iBlock, iRects);
-    if (tileIndexes.Num() <= 0)
-        return;
-
-    TilesChanged(tileIndexes, iIsInteractive);
-}
-
-void
-UOdysseyRasterBlock::Commit()
-{
-    if ( mInteractivelyChangedTiles.Num() <= 0 )
-        return;
-
-    TArray<::ULIS::FRectI> rects = GetRectsFromTileIndexes(mInteractivelyChangedTiles);
-    OnPixelsChanged().Broadcast(rects, false);
-    mInteractivelyChangedTiles.Empty();
-}
-
-TArray<::ULIS::FRectI>
-UOdysseyRasterBlock::GetRectsFromTileIndexes(const TSet<int>& iTileIndexes)
-{
-    //Get rects from Tiles
-    //but do it with intelligence
-    //and merge rects when possible to avoid gigantic arrays of rects (4096x4096 = 4096 rects)
-
-    TArray<::ULIS::FRectI> xRects;
-    TArray<int> sortedIndexes = iTileIndexes.Array();
-    sortedIndexes.Sort();
-
-    for ( int i = 0; i < sortedIndexes.Num(); i++ )
-    {
-        const FOdysseyRasterBlockTile& tile = Tiles[sortedIndexes[i]];
-        if ( i > 0 ) 
-        {
-            const ::ULIS::FRectI& prevRect = xRects.Last();
-            if ( tile.Y == prevRect.y && tile.X == prevRect.x + prevRect.w )
             {
-                xRects.Last().w += tile.Width;
-                continue;
+                GetPathName(),
+                UE::DerivedData::ConvertLegacyCacheKey(CacheKey),
+                MoveTemp(derivedDataValue),
+                UE::DerivedData::ECachePolicy::StoreLocal
             }
-        }
-        xRects.Add(::ULIS::FRectI::FromXYWH(tile.X, tile.Y, tile.Width, tile.Height));
-    }
+        },
+        putOwner
+    );
+    putOwner.KeepAlive();
+}
 
+void
+UOdysseyRasterBlock::ResetEditableBlock()
+{
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> editableBlock = mEditableBlock.Pin();
+    if ( !editableBlock )
+        return;
+
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = GetBlock();
+    if ( !block )
+        return;
+
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext((::ULIS::eFormat)Format);
+    const TArray<::ULIS::FRectI>& invalidRects = mInvalidTileMap.InvalidRects();
+    for (const ::ULIS::FRectI& rect : invalidRects)
+    {
+        ctx.Copy(*block, *editableBlock, rect, rect.Position(), ::ULIS::FSchedulePolicy::AsyncCacheEfficient);
+    }
+    ctx.Finish();
+
+    mOnEditableBlockChanged.Broadcast(invalidRects);
+    mInvalidTileMap.Clear();
+}
+
+bool
+UOdysseyRasterBlock::LoadUndoFromCache(const FString& iId)
+{
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = GetBlock();
+    if ( !block )
+        return false;
+
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> editableBlock = mEditableBlock.Pin();
+
+    bool success = false;
     TArray<::ULIS::FRectI> rects;
-    for ( int i = 0; i < xRects.Num(); i++ )
-    {
-        const ::ULIS::FRectI& rect = xRects[i];
-        if ( i > 0 )
-        {
-            const ::ULIS::FRectI& prevRect = rects.Last();
-            if ( rect.x == prevRect.x && rect.w == prevRect.w && rect.y == prevRect.y + prevRect.h )
+
+    //Load Block from DDC
+    FString CacheKey = FDerivedDataCacheInterface::BuildCacheKey(
+		FOdysseyRasterBlock_CACHE_NAME,
+        FOdysseyRasterBlock_CACHE_VERSION, //a GUID identifying the version of the key
+		iId
+	);
+
+    UE::DerivedData::FRequestOwner getOwner(UE::DerivedData::EPriority::Blocking);
+    UE::DerivedData::GetCache().GetValue(
+		{
             {
-                rects.Last().h += rect.h;
-                continue;
+                GetPathName(),
+                UE::DerivedData::ConvertLegacyCacheKey(CacheKey),
+                UE::DerivedData::ECachePolicy::Local
             }
+        },
+		getOwner,
+		[&, this](UE::DerivedData::FCacheGetValueResponse&& iResponse)
+        {
+            FSharedBuffer rawData = iResponse.Value.GetData().Decompress();
+            if (iResponse.Status != UE::DerivedData::EStatus::Ok)
+                return;
+
+            void* dataPtr = const_cast<void*>(rawData.GetData());
+
+            FBufferReader reader(dataPtr, rawData.GetSize(), false, false);
+            int numTiles = 0;
+            reader << numTiles;
+
+            rects.SetNumUninitialized(numTiles);
+            for (int i = 0; i < numTiles; i++)
+            {
+                ::ULIS::FRectI& rect = rects[i];
+                reader << rect.x;
+                reader << rect.y;
+                reader << rect.w;
+                reader << rect.h;
+            }
+
+            int tileSize = mInvalidTileMap.TileSize();
+            TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> blockToLoad = MakeShared<::ULIS::FBlock>(static_cast<uint8*>(dataPtr) + reader.Tell(), tileSize, tileSize * numTiles, (::ULIS::eFormat)Format);
+            ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext((::ULIS::eFormat)Format);
+            for (int i = 0; i < numTiles; i++)
+            {   
+                const ::ULIS::FRectI& rect = rects[i];
+                ctx.Copy(*blockToLoad, *block, ::ULIS::FRectI::FromXYWH(0, i * tileSize, tileSize, tileSize), ::ULIS::FVec2I(rect.x, rect.y), ::ULIS::FSchedulePolicy::AsyncCacheEfficient);
+            }
+
+            if ( editableBlock )
+            {
+                for ( int i = 0; i < numTiles; i++ )
+                {
+                    const ::ULIS::FRectI& rect = rects[i];
+                    ctx.Copy(*blockToLoad, *editableBlock, ::ULIS::FRectI::FromXYWH(0, i * tileSize, tileSize, tileSize), ::ULIS::FVec2I(rect.x, rect.y), ::ULIS::FSchedulePolicy::AsyncCacheEfficient);
+                }
+            }
+
+            ctx.Finish();
+            success = true;
         }
-        rects.Add(rect);
-    }
+    );
+    getOwner.Wait();
 
-    return rects;
-}
+    mOnBlockChanged.Broadcast(rects, false);
+    if (editableBlock)
+        mOnEditableBlockChanged.Broadcast(rects);
 
-void
-UOdysseyRasterBlock::TilesChanged(const TSet<int>& iTileIndexes, bool iIsInteractive)
-{
-    TArray<::ULIS::FRectI> rects = GetRectsFromTileIndexes(iTileIndexes);
-    OnPixelsChanged().Broadcast(rects, true); //always send at least one interactive event
-    mInteractivelyChangedTiles.Append(iTileIndexes);
-
-    if ( !iIsInteractive )
-        Commit();
+    return success;
 }
 
 void
 UOdysseyRasterBlock::Serialize(FArchive& Ar)
 {
-    //When undoing, before loading anything keep current block hashes in memory to be able to detect which tiles changes
-    TArray<FString> prevHashes;
-    if ( Ar.IsTransacting() && Ar.IsLoading() )
-    {
-        for (int i = 0; i < Tiles.Num(); i++)
-        {
-            const FOdysseyRasterBlockTile& tile = Tiles[i];
-            prevHashes.Add(tile.Hash);
-        }
-    }
-
     //Load/Save all UPROPERTIES
 	Super::Serialize(Ar);
 
     if ( Ar.IsTransacting() || !Ar.IsPersistent() )
-    {
-        if ( Ar.IsSaving() )
-        {
-            SaveTileBlocksToCache();
-        }
-        else if ( Ar.IsLoading() )
-        {
-            if (prevHashes.Num() == Tiles.Num())
-            {
-                for (int i = 0; i < Tiles.Num(); i++)
-                {
-                    const FString& prevHash = prevHashes[i];
-                    FOdysseyRasterBlockTile& tile = Tiles[i];
+        return;
 
-                    if (tile.Hash != prevHash )
-                    {
-                        mUndoneTiles.Add(i);
-                        tile.mBlock = nullptr;
-                    }
-                }
-            }
-        }
+    //DEBUG
+    // 
+        //Id = FGuid::NewGuid();
+    // 
+    //DEBUG
+
+    if ( Ar.IsSaving() )
+    {
+        TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = GetBlock();
+        if ( !block )
+            return;
+
+        FSharedBuffer sharedBuffer = FSharedBuffer::MakeView(block->Bits(), block->BytesTotal());
+
+        //Updates the payload
+        //The payload stored in mBulkData will then be removed from memory once mBulkData.Serialize() is called
+        mBulkData.UpdatePayload(sharedBuffer, this);
+    
+        /**
+         * @brief Here is a simple explanation of ECompressedBufferCompressor values
+         * see http://www.radgametools.com/oodlecompressors.htm
+         * 
+         * NotSet = 0, //No Compression
+         * Selkie = 1, //Ultra-fast decompression, compression ratio > zlib but < lzma
+         * Mermaid = 2, //Slower than selkie, faster than zlib/lzma, slightly better compression ratio than selkie but < lzma
+         * Kraken  = 3, //Slower than Mermaid, faster than zlib/lzma, slightly better compression ratio than Mermaid but < lzma
+         * Leviathan = 4 //Slower than Kraken, faster than zlib/lzma, slightly better compression ratio than Kraken and slightly > lzma
+        */
+
+        //Zlib ration compression is enough, but speed is ultra important, so Selkie compressor is what we need here
+        //Unreal defaults for FCompressedBuffer is ECompressedBufferCompressor::Mermaid, ECompressedBufferCompressionLevel::VeryFast
+        //But we will use custom values to balance performance at its best between compression tim, decompression time and size
+        
+        //Needs to be called everytime UpdatePayload is called to ensure the correct compression is selected
+        mBulkData.SetCompressionOptions(ECompressedBufferCompressor::Selkie, FOodleDataCompression::ECompressionLevel::Normal);
+        
+        //Eric: I don't understand what bAllowRegister is
+        //but it seems UTexture sets it to false on saving and on true on loading
+        //so I'll do the same, but correct me if I'm wrong
+        mBulkData.Serialize(Ar, this, false /* bAllowRegister */);
     }
-    else
-    {
-        if ( Ar.IsSaving() )
-        {
-            //OPTIMIZE: Save directly the full block
-            //No need to save all tiles here
-
-            // Force to load block from cache, as this can be called when mBlock is unsynchronized with cache
-            // Everything we save/transact must be the cached version
-            for (int i = 0; i < Tiles.Num(); i++)
-            {
-                FOdysseyRasterBlockTile& tile = Tiles[i];
-                if (tile.Hash == "")
-                    continue;
-
-                TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = GetTileBlock(i);
-                if (!block)
-                    continue;
-
-                FSharedBuffer sharedBuffer = FSharedBuffer::MakeView(block->Bits(), block->BytesTotal());
-
-                //Updates the payload
-                //The payload stored in mBulkData will then be removed from memory once mBulkData.Serialize() is called
-                tile.mBulkData.UpdatePayload(sharedBuffer, this);
-            
-                /**
-                 * @brief Here is a simple explanation of ECompressedBufferCompressor values
-                 * see http://www.radgametools.com/oodlecompressors.htm
-                 * 
-                 * NotSet = 0, //No Compression
-                 * Selkie = 1, //Ultra-fast decompression, compression ratio > zlib but < lzma
-                 * Mermaid = 2, //Slower than selkie, faster than zlib/lzma, slightly better compression ratio than selkie but < lzma
-                 * Kraken  = 3, //Slower than Mermaid, faster than zlib/lzma, slightly better compression ratio than Mermaid but < lzma
-                 * Leviathan = 4 //Slower than Kraken, faster than zlib/lzma, slightly better compression ratio than Kraken and slightly > lzma
-                */
-
-                //Zlib ration compression is enough, but speed is ultra important, so Selkie compressor is what we need here
-                //Unreal defaults for FCompressedBuffer is ECompressedBufferCompressor::Mermaid, ECompressedBufferCompressionLevel::VeryFast
-                //But we will use custom values to balance performance at its best between compression tim, decompression time and size
-                
-                //Needs to be called everytime UpdatePayload is called to ensure the correct compression is selected
-                tile.mBulkData.SetCompressionOptions(ECompressedBufferCompressor::Selkie, FOodleDataCompression::ECompressionLevel::Normal);
-                
-                //Eric: I don't understand what bAllowRegister is
-                //but it seems UTexture sets it to false on saving and on true on loading
-                //so I'll do the same, but correct me if I'm wrong
-                tile.mBulkData.Serialize(Ar, this, false /* bAllowRegister */);
-
-                //No need to keep a tile block after that as it is saved, I guess
-                tile.mBlock = nullptr;
-            }
-        }
-        else if ( Ar.IsLoading() )
-        {
-            //OPTIMIZE: load directly the full block
-            //No need to load all tiles here
-
-            for (int i = 0; i < Tiles.Num(); i++)
-            {
-                FOdysseyRasterBlockTile& tile = Tiles[i];
-                if (tile.Hash == "")
-                    continue;
-                
-                tile.mBulkData.Serialize(Ar, this);
-            }
-        }
+    else if ( Ar.IsLoading() )
+    {       
+        mBulkData.Serialize(Ar, this);
+        mInvalidTileMap = FULISInvalidTileMap(64, Width, Height);
     }
 }
 
 void
 UOdysseyRasterBlock::PostTransacted(const FTransactionObjectEvent& iTransactionEvent)
 {
+    /*
     if ( iTransactionEvent.GetEventType() != ETransactionObjectEventType::UndoRedo )
         return;
-
+       
     const TArray<FName>& changedPropertyNames = iTransactionEvent.GetChangedProperties();
     bool blockChanged = false;
     for ( const FName& propertyName : changedPropertyNames )
@@ -625,49 +645,11 @@ UOdysseyRasterBlock::PostTransacted(const FTransactionObjectEvent& iTransactionE
 
     if (blockChanged)
     {
-        mUndoneTiles.Empty();
-        mInteractivelyChangedTiles.Empty();
-        mBlock = nullptr; //release the block, the user will be responsible to retrieve the block again via GetBlock()
-        OnBlockChanged().Broadcast();
+        mInvalidTileMap = FULISInvalidTileMap(64, Width, Height);
+        OnBlockPtrChanged().Broadcast();
         return;
     }
-
-    //If their is a block, now is the time to refresh the tiles that has been changed
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = mBlock.Pin();
-    if (block)
-    {
-        ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext((::ULIS::eFormat)Format);
-        for (const int& i : mUndoneTiles)
-        {
-            RenderTile(i, block); //can be slow if we refresh all tiles, because renderTile calls GetTileBlock, which is slow when not in memory
-        }
-        ctx.Finish();
-    }
-
-    TilesChanged(mUndoneTiles, false); //inform that the block changed
-    mUndoneTiles.Empty();
-}
-
-void
-UOdysseyRasterBlock::SetPerformanceMode(eOdysseyPerformanceMode iPerformanceMode)
-{
-    /**
-     * When performance is set to Speed, we load the block in memory to avoid
-     * unwanted loading times.
-     * 
-     * When performance is set to Memory, we stop retaining the block in memory
-     */
-
-    switch(iPerformanceMode)
-    {
-        case eOdysseyPerformanceMode::Speed:
-            mBlockRetainerForSpeed = GetBlock();
-        break;
-
-        case eOdysseyPerformanceMode::Memory:
-        case eOdysseyPerformanceMode::Shutdown:
-            mBlockRetainerForSpeed = nullptr;
-            //DEBUG: mBlockRetainerForSpeed = GetBlock();
-        break;
-    }
+    OnBlockChanged().Broadcast({ ::ULIS::FRectI::FromXYWH(0, 0, Width, Height) }, true); //always send at least one interactive event
+    OnBlockChanged().Broadcast({ ::ULIS::FRectI::FromXYWH(0, 0, Width, Height) }, false);
+    */
 }

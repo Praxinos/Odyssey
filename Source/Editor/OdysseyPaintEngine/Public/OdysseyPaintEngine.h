@@ -5,7 +5,7 @@
 
 #include "CoreMinimal.h"
 
-#include "OdysseyInvalidTileMap.h"
+#include "ULISInvalidTileMap.h"
 #include "OdysseyBlendParameters.h"
 
 #include <ULIS>
@@ -40,7 +40,7 @@ public:
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> PaintBlock();
 
     //Returns the OriginalBlock
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> OriginalBlock();
+    //TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> OriginalBlock();
 
     // Delegates
     FOnPreUpdate& OnPreUpdateDelegate() { return mOnPreUpdateDelegate; }
@@ -64,17 +64,17 @@ private:
     void ClearPaintBlock();
 
     // Copies EditedBlock Rects to Original Block
-    void CopyEditedBlockToOriginalBlock();
+    //void CopyEditedBlockToOriginalBlock();
 
     // Restore the editedblock to its original state before edition
-    bool RestoreEditedBlock();
+    //bool RestoreEditedBlock();
 
     // Blends PaintBlock on OriginalBlock and stores the result in EditedBlock
     bool UpdateEditedBlock(const FOdysseyBlendParameters& iBlendParameters);
 
-    void OnPixelsChanged(const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive);
+    void OnEditedBlockChanged(const TArray<::ULIS::FRectI>& iRects);
 
-    void OnBlockChanged();
+    void OnBlockPtrChanged();
     
     FOdysseyBlendParameters AdjustBlendParameters(const FOdysseyBlendParameters& iBlendParameters);
 
@@ -84,7 +84,7 @@ private:
 
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mEditedBlock; // The Block to edit (mPaintBlock over mOriginalBlock)
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mPaintBlock; // The Block containing only the modified tiles
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mOriginalBlock; // The Block containing the edited block before being edited
+    //TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mOriginalBlock; // The Block containing the edited block before being edited
     
     //Options
     FOdysseyBlendParameters             mPreviousBlendParameters;
@@ -93,7 +93,7 @@ private:
     FOnPreUpdate                        mOnPreUpdateDelegate;
     
     //Internal
-    FOdysseyInvalidTileMap              mInvalidMap;
-    FOdysseyInvalidTileMap              mUpdatedMap;
-    bool mExpectsOnPixelsChanged;
+    FULISInvalidTileMap                 mInvalidMap;
+    FULISInvalidTileMap                 mUpdatedMap;
+    //FULISInvalidTileMap              mUpdatedMap;
 };

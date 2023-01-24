@@ -1,9 +1,9 @@
 // IDDN.FR.001.250001.006.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
-#include "OdysseyInvalidTileMap.h"
+#include "ULISInvalidTileMap.h"
 
-FOdysseyInvalidTileMap::FOdysseyInvalidTileMap()
+FULISInvalidTileMap::FULISInvalidTileMap()
     : mTileMap()
     , mTileSize(0)
     , mWidth(0)
@@ -11,7 +11,7 @@ FOdysseyInvalidTileMap::FOdysseyInvalidTileMap()
 {
 }
 
-FOdysseyInvalidTileMap::FOdysseyInvalidTileMap(int iTileSize, int iWidth, int iHeight)
+FULISInvalidTileMap::FULISInvalidTileMap(int iTileSize, int iWidth, int iHeight)
     : mTileMap()
     , mTileSize(iTileSize)
     , mWidth(0)
@@ -22,7 +22,7 @@ FOdysseyInvalidTileMap::FOdysseyInvalidTileMap(int iTileSize, int iWidth, int iH
 }
 
 void
-FOdysseyInvalidTileMap::Resize(int iWidth, int iHeight)
+FULISInvalidTileMap::Resize(int iWidth, int iHeight)
 {
     mTileMap.Resize(ceil( (float)iWidth / mTileSize ), ceil( (float)iHeight / mTileSize ));
     
@@ -31,7 +31,7 @@ FOdysseyInvalidTileMap::Resize(int iWidth, int iHeight)
 }
 
 void
-FOdysseyInvalidTileMap::Invalidate(const FIntPoint& iTileIndex)
+FULISInvalidTileMap::Invalidate(const FIntPoint& iTileIndex)
 {
     FIntPoint tileCount = mTileMap.Size();
 
@@ -42,7 +42,7 @@ FOdysseyInvalidTileMap::Invalidate(const FIntPoint& iTileIndex)
 }
 
 void
-FOdysseyInvalidTileMap::Invalidate(const TArray<FIntPoint>& iTileIndexes)
+FULISInvalidTileMap::Invalidate(const TArray<FIntPoint>& iTileIndexes)
 {
     FIntPoint tileCount = mTileMap.Size();
 
@@ -61,7 +61,7 @@ FOdysseyInvalidTileMap::Invalidate(const TArray<FIntPoint>& iTileIndexes)
 }
 
 void
-FOdysseyInvalidTileMap::Invalidate(const ::ULIS::FRectI& iRect)
+FULISInvalidTileMap::Invalidate(const ::ULIS::FRectI& iRect)
 {
     if (iRect.x >= mWidth || iRect.x + iRect.w < 0 || iRect.y >= mWidth || iRect.y + iRect.y < 0)
         return;
@@ -88,7 +88,7 @@ FOdysseyInvalidTileMap::Invalidate(const ::ULIS::FRectI& iRect)
 }
 
 void
-FOdysseyInvalidTileMap::Invalidate(const TArray<::ULIS::FRectI>& iRects)
+FULISInvalidTileMap::Invalidate(const TArray<::ULIS::FRectI>& iRects)
 {
     for (int i = 0; i < iRects.Num(); i++)
     {
@@ -97,7 +97,7 @@ FOdysseyInvalidTileMap::Invalidate(const TArray<::ULIS::FRectI>& iRects)
 }
 
 void
-FOdysseyInvalidTileMap::Clear()
+FULISInvalidTileMap::Clear()
 {
     FIntPoint tileCount = mTileMap.Size();
 
@@ -111,7 +111,7 @@ FOdysseyInvalidTileMap::Clear()
 }
 
 ::ULIS::FRectI
-FOdysseyInvalidTileMap::GetTileRect(const FIntPoint& iTileIndex) const
+FULISInvalidTileMap::GetTileRect(const FIntPoint& iTileIndex) const
 {
     return ::ULIS::FRectI(
         iTileIndex.X * mTileSize,
@@ -122,13 +122,13 @@ FOdysseyInvalidTileMap::GetTileRect(const FIntPoint& iTileIndex) const
 }
 
 bool
-FOdysseyInvalidTileMap::IsValidTile(const FIntPoint& iTileIndex) const
+FULISInvalidTileMap::IsValidTile(const FIntPoint& iTileIndex) const
 {
     return mTileMap.Get(iTileIndex.X, iTileIndex.Y);
 }
 
 TArray<FIntPoint>
-FOdysseyInvalidTileMap::InvalidTiles() const
+FULISInvalidTileMap::InvalidTiles() const
 {
     TArray<FIntPoint> invalidTiles;
     FIntPoint tileCount = mTileMap.Size();
@@ -148,7 +148,7 @@ FOdysseyInvalidTileMap::InvalidTiles() const
 }
 
 TArray<::ULIS::FRectI>
-FOdysseyInvalidTileMap::InvalidRects() const
+FULISInvalidTileMap::InvalidRects() const
 {
     TArray<::ULIS::FRectI> invalidRects;
     FIntPoint tileCount = mTileMap.Size();
@@ -170,19 +170,19 @@ FOdysseyInvalidTileMap::InvalidRects() const
 }
 
 int
-FOdysseyInvalidTileMap::Width() const
+FULISInvalidTileMap::Width() const
 {
     return mWidth;
 }
 
 int
-FOdysseyInvalidTileMap::Height() const
+FULISInvalidTileMap::Height() const
 {
     return mHeight;
 }
 
 int
-FOdysseyInvalidTileMap::TileSize() const
+FULISInvalidTileMap::TileSize() const
 {
     return mTileSize;
 }

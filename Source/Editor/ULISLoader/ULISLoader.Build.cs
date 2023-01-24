@@ -11,6 +11,7 @@ public class ULISLoader : ModuleRules
         PublicDependencyModuleNames.AddRange(
              new string[] {
                 "Core",
+                "OdysseyCore",
                 "ULIS"
              }
         );

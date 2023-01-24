@@ -6,7 +6,7 @@
 #include "Containers/OdysseyArray2D.h"
 #include <ULIS>
 
-class ODYSSEYPAINTENGINE_API FOdysseyInvalidTileMap
+class ULISLOADER_API FULISInvalidTileMap
 {
 public:
     /** Constructor
@@ -17,7 +17,7 @@ public:
      * @param iWidth Image Width
      * @param iHeight Image Height
     */
-    FOdysseyInvalidTileMap();
+    FULISInvalidTileMap();
 
     /** Constructor
      * 
@@ -27,7 +27,7 @@ public:
      * @param iWidth Image Width
      * @param iHeight Image Height
     */
-    FOdysseyInvalidTileMap(int iTileSize, int iWidth, int iHeight);
+    FULISInvalidTileMap(int iTileSize, int iWidth, int iHeight);
 
 public:
     /** Resize the underlying image size

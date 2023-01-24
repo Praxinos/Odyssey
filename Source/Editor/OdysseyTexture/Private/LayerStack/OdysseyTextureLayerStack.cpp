@@ -39,7 +39,7 @@ UOdysseyTextureLayerStack::CreateFromTexture(UTexture2D* iTexture, UObject* iOut
     //Set the layer as Current Layer
     layerStack->AddLayersToHierarchy({ layer }, layerStack->LayerRoot, 0);
     layerStack->CurrentLayer = TSoftObjectPtr<UOdysseyLayer>(layer);
-    rasterBlock->Update(block, { block->Rect() }, false);
+    rasterBlock->Invalidate({ block->Rect() }, false);
 
     return layerStack;
 }

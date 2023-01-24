@@ -84,8 +84,8 @@ public:
     virtual void Merge(const TArray<UOdysseyLayer*>& Layers) override;
 
 protected:
-    void OnPixelsChanged(const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive);
-    void OnBlockChanged();
+    void OnBlockChanged(const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive);
+    void OnBlockPtrChanged();
 
     void IsAlphaLockedChanged();
     void OpacityChanged();

@@ -66,8 +66,8 @@ UOdysseyTextureLayerImageRaster::OnCreated_Implementation()
     RasterBlock = NewObject<UOdysseyRasterBlock>(this, "RasterBlock", RF_Public | RF_Transactional);
     RasterBlock->SetBlock(block);
 
-    RasterBlock->OnPixelsChanged().AddUObject(this, &::UOdysseyTextureLayerImageRaster::OnPixelsChanged);
     RasterBlock->OnBlockChanged().AddUObject(this, &::UOdysseyTextureLayerImageRaster::OnBlockChanged);
+    RasterBlock->OnBlockPtrChanged().AddUObject(this, &::UOdysseyTextureLayerImageRaster::OnBlockPtrChanged);
 }
 
 UOdysseyRasterBlock*
@@ -77,13 +77,13 @@ UOdysseyTextureLayerImageRaster::GetRasterBlock() const
 }
 
 void
-UOdysseyTextureLayerImageRaster::OnPixelsChanged(const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive)
+UOdysseyTextureLayerImageRaster::OnBlockChanged(const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive)
 {
     RenderImageChanged(iRects, iIsInteractive);
 }
 
 void
-UOdysseyTextureLayerImageRaster::OnBlockChanged()
+UOdysseyTextureLayerImageRaster::OnBlockPtrChanged()
 {
     RenderImageChanged({ ::ULIS::FRectI::FromXYWH(0, 0, RasterBlock->GetWidth(), RasterBlock->GetHeight()) }, false);
 }
@@ -97,7 +97,7 @@ UOdysseyTextureLayerImageRaster::RenderImage(TSharedPtr<::ULIS::FBlock, ESPMode:
     if (!ioBlock)
         return iWaitList;
 
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ULISRasterBlock = RasterBlock->GetBlock();
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ULISRasterBlock = RasterBlock->IsBeingEdited() ? RasterBlock->GetEditableBlock() : RasterBlock->GetBlock();
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(ULISRasterBlock->Format());
 
     TArray<::ULIS::FEvent> eventConvertAndExecute = ULISUtils::ConvertAndExecute(ioBlock, ULISRasterBlock->Format(), iRect, iPos, iWaitList,
@@ -186,7 +186,7 @@ UOdysseyTextureLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
     }
     ctx.Finish();
 
-    RasterBlock->Update(ULISRasterBlock, { ULISRasterBlock->Rect() }, false);
+    RasterBlock->Invalidate({ ULISRasterBlock->Rect() }, false);
 }
 
 void
@@ -236,10 +236,10 @@ UOdysseyTextureLayerImageRaster::PostLoad()
     Super::PostLoad();
     if ( RasterBlock )
     {
-        RasterBlock->OnPixelsChanged().RemoveAll(this);
         RasterBlock->OnBlockChanged().RemoveAll(this);
-        RasterBlock->OnPixelsChanged().AddUObject(this, &::UOdysseyTextureLayerImageRaster::OnPixelsChanged);
+        RasterBlock->OnBlockPtrChanged().RemoveAll(this);
         RasterBlock->OnBlockChanged().AddUObject(this, &::UOdysseyTextureLayerImageRaster::OnBlockChanged);
+        RasterBlock->OnBlockPtrChanged().AddUObject(this, &::UOdysseyTextureLayerImageRaster::OnBlockPtrChanged);
     }
 }
 
@@ -254,34 +254,44 @@ UOdysseyTextureLayerImageRaster::PostDuplicate(bool bDuplicateForPIE)
     if (!texture)
         return;
 
+    //At the start of this method, RasterBlock is a pointer to the original object
+    //We have to create a new owned RasterBlock to avoid blocks to be shared between several layers
+
     ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
     //let's ensure the format has alpha, so add alpha channel of needed
     format = static_cast< ::ULIS::eFormat >(format | ULIS_W_ALPHA( 1 ) );
-
-    if (RasterBlock->GetWidth() == texture->Source.GetSizeX() && RasterBlock->GetHeight() == texture->Source.GetSizeY() && RasterBlock->GetFormat() == format)
-        return;
     
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ULISRasterBlock = RasterBlock->GetBlock();
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = MakeShared<::ULIS::FBlock>( texture->Source.GetSizeX(), texture->Source.GetSizeY(), format);
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> originalBlock = RasterBlock->GetBlock();
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> duplicatedBlock = MakeShared<::ULIS::FBlock>( texture->Source.GetSizeX(), texture->Source.GetSizeY(), format);
 
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
     ctx.ConvertFormat(
-        *ULISRasterBlock.Get(),
-        *block.Get(),
+        *originalBlock.Get(),
+        *duplicatedBlock.Get(),
         ::ULIS::FRectI::Auto,
         ::ULIS::FVec2I( 0 ),
         ::ULIS::FSchedulePolicy::AsyncCacheEfficient
     );
     ctx.Finish();
 
-    RasterBlock->SetBlock(block);
+    //ensure we remove any callbacks registered on the wrong Rasterblock
+    RasterBlock->OnBlockChanged().RemoveAll(this);
+    RasterBlock->OnBlockPtrChanged().RemoveAll(this);
+
+    //Replace old rasterblock with an owned one
+    RasterBlock = NewObject<UOdysseyRasterBlock>(this, "RasterBlock", RF_Public | RF_Transactional);
+    RasterBlock->SetBlock(duplicatedBlock);
+
+    //Set the right callbacks
+    RasterBlock->OnBlockChanged().AddUObject(this, &::UOdysseyTextureLayerImageRaster::OnBlockChanged);
+    RasterBlock->OnBlockPtrChanged().AddUObject(this, &::UOdysseyTextureLayerImageRaster::OnBlockPtrChanged);
 }
 
 void
 UOdysseyTextureLayerImageRaster::ApplyPerformanceMode(eOdysseyPerformanceMode iPerformanceMode)
 {
-    if ( RasterBlock )
-        RasterBlock->SetPerformanceMode(iPerformanceMode);
+    //if ( RasterBlock )
+        //RasterBlock->SetPerformanceMode(iPerformanceMode);
 }
 
 #undef LOCTEXT_NAMESPACE
