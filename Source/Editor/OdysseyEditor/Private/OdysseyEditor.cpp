@@ -29,12 +29,12 @@ FOdysseyEditor::Initialize(UObject* iEditedObject)
     if (iEditedObject)
         mEditedObjects.Add(iEditedObject);
 
-    InitData();
+    InitData(iEditedObject);
     InitGUI();
 }
 
 void
-FOdysseyEditor::InitData()
+FOdysseyEditor::InitData(UObject* iEditedObject)
 {
 }
 

@@ -46,9 +46,9 @@ FOdysseyFlipbookEditor::FOdysseyFlipbookEditor(UPaperFlipbook* iFlipbook) :
 //----------------------------------------------------------------------- Initialization
 
 void
-FOdysseyFlipbookEditor::InitData()
+FOdysseyFlipbookEditor::InitData(UObject* iEditedObject)
 {
-	FOdysseyTextureEditor::InitData();
+	FOdysseyTextureEditor::InitData(iEditedObject);
 
 	//--- Add Edited Objects
 

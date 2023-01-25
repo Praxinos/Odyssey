@@ -25,22 +25,24 @@ FOdysseyTextureEditor::~FOdysseyTextureEditor()
 FOdysseyTextureEditor::FOdysseyTextureEditor() :
 	FOdysseyPainterEditor(),
 	mTexture(nullptr),
-	mGUI(nullptr)
-{
-}
-
-FOdysseyTextureEditor::FOdysseyTextureEditor(UTexture2D* iTexture) :
-	FOdysseyPainterEditor(),
-	mTexture(nullptr),
 	mGUI(nullptr),
 	mRasterDrawingTool(nullptr),
 	mPaintBucketTool(nullptr)
 {
-	SetTexture(iTexture);
 }
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------------------- Initialization
+
+void
+FOdysseyTextureEditor::InitData(UObject* iEditedObject)
+{
+	FOdysseyPainterEditor::InitData(iEditedObject);
+	
+	UTexture2D* texture = Cast<UTexture2D>(iEditedObject);
+	if (texture)
+		SetTexture(texture);
+}
 
 void
 FOdysseyTextureEditor::InitTools()

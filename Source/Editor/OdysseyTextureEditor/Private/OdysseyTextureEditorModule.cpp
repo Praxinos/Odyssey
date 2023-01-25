@@ -28,7 +28,7 @@
 TSharedRef<FOdysseyTextureEditorToolkit>
 FOdysseyTextureEditorModule::CreateOdysseyTextureEditor( UTexture2D* iTexture )
 {
-	TSharedPtr<FOdysseyTextureEditor> editor = MakeShareable(new FOdysseyTextureEditor(iTexture));
+	TSharedPtr<FOdysseyTextureEditor> editor = MakeShareable(new FOdysseyTextureEditor());
     TSharedPtr<FOdysseyTextureEditorToolkit> toolkit = MakeShareable( new FOdysseyTextureEditorToolkit(editor) );
 	editor->Initialize(iTexture);
     toolkit->Initialize();

@@ -59,7 +59,7 @@ public:
 
 public:
     // Initialization
-    virtual void InitData() override;
+    virtual void InitData(UObject* iEditedObject) override;
 
 public:
     // Getters

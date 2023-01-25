@@ -31,7 +31,7 @@ protected:
     // Protected Initialization
 
     // Seperating Init from InitGUI allows us to seperate Data and GUI initialization also in derived classes
-    virtual void InitData();
+    virtual void InitData(UObject* iEditedObject);
     virtual void InitGUI();
 
 public:

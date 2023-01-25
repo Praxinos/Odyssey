@@ -22,9 +22,9 @@ public:
     // Construction / Destruction
     virtual ~FOdysseyTextureEditor();
     FOdysseyTextureEditor(); //Non Initialized constructor
-    FOdysseyTextureEditor(UTexture2D* iTexture);
 
 public:
+    virtual void InitData(UObject* iEditedObject) override;
     virtual void InitTools() override;
     virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
     virtual void ExtendMenu(FToolMenuOwner iOwner, FName iMenuName) override;

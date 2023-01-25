@@ -35,7 +35,7 @@ FOdysseyPainterEditor::FOdysseyPainterEditor()
 //----------------------------------------------------------------------- Initialization
 
 void
-FOdysseyPainterEditor::InitData()
+FOdysseyPainterEditor::InitData(UObject* iEditedObject)
 {
 	//Init Tools
 	InitTools();

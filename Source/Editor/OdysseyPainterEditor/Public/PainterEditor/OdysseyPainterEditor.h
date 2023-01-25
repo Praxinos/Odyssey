@@ -27,7 +27,7 @@ public:
 
 protected:
     // Protected Initialization
-    virtual void InitData();
+    virtual void InitData(UObject* iEditedObject);
     virtual void InitTools();
 
 public:

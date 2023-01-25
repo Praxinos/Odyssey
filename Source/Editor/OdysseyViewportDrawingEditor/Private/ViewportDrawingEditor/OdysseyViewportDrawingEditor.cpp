@@ -32,9 +32,9 @@ FOdysseyViewportDrawingEditor::FOdysseyViewportDrawingEditor() :
 //----------------------------------------------------------------------- Initialization
 
 void
-FOdysseyViewportDrawingEditor::InitData()
+FOdysseyViewportDrawingEditor::InitData(UObject* iEditedObject)
 {
-	FOdysseyTextureEditor::InitData();
+	FOdysseyTextureEditor::InitData(iEditedObject);
 
 	//Handle Object Property Changed Callback to refresh when actors's visibility changes for example
     FCoreUObjectDelegates::OnObjectPropertyChanged.AddRaw(this,&FOdysseyViewportDrawingEditor::OnObjectPropertyChanged);
