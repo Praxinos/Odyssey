@@ -293,6 +293,23 @@ UOdysseyVectorVertex::GetSectionList()
     return mSectionList;
 }
 
+FOdysseyVectorSection*
+UOdysseyVectorVertex::GetSection( UOdysseyVectorVertex& iOtherVertex )
+{
+    for( std::list<FOdysseyVectorSection*>::iterator it = mSectionList.begin(); it != mSectionList.end(); ++it )
+    {
+        FOdysseyVectorSection* section = static_cast<FOdysseyVectorSection*>(*it);
+
+        if ( ( ( section->GetVertex(0) == this ) && ( section->GetVertex(1) == &iOtherVertex ) ) 
+          || ( ( section->GetVertex(1) == this ) && ( section->GetVertex(0) == &iOtherVertex ) ) )
+        {
+            return section;
+        }
+    }
+
+    return nullptr;
+}
+
 UOdysseyVectorSegment*
 UOdysseyVectorVertex::GetSegment( UOdysseyVectorVertex& iOtherVertex )
 {

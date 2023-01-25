@@ -31,4 +31,6 @@ class FOdysseyVectorSection
         bool IsBlocked( UOdysseyVectorVertex* iVertex );
         void SetVisited( bool iVisited );
         bool IsVisited();
+        void SetInCycle( bool iInCycle );
+        bool IsInCycle();
 };

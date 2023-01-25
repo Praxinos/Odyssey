@@ -15,6 +15,25 @@ FOdysseyVectorSection::FOdysseyVectorSection( UOdysseyVectorSegment* iSegment
 }
 
 void
+FOdysseyVectorSection::SetInCycle( bool iInCycle )
+{
+    if( iInCycle == true )
+    {
+        mFlags |= INCYCLE;
+    }
+    else
+    {
+        mFlags &= (~INCYCLE);
+    }
+}
+
+bool
+FOdysseyVectorSection::IsInCycle()
+{
+    return ( mFlags & INCYCLE ) ? true : false;
+}
+
+void
 FOdysseyVectorSection::SetVisited( bool iVisited )
 {
     if( iVisited == true )

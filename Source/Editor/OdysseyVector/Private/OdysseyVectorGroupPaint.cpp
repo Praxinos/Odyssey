@@ -75,6 +75,24 @@ InsideCycle( ::ULIS::FVec2D& iFromCoord, UOdysseyVectorVertex& iNode, std::vecto
     return ( hitCount % 2 ) ? true : false;
 }
 
+static void
+MarkCycle( std::vector<FOdysseyVectorSection*>& iEdgeArray )
+{
+    for( int i = 0; i < iEdgeArray.size(); i++ )
+    {
+        iEdgeArray[i]->SetInCycle( true );
+    }
+}
+
+static void
+UnmarkCycle( std::vector<FOdysseyVectorSection*>& iEdgeArray )
+{
+    for( int i = 0; i < iEdgeArray.size(); i++ )
+    {
+        iEdgeArray[i]->SetInCycle( false );
+    }
+}
+
 // a cycle is ChordLess if there is a point lying inside the cycle hasn't been visited.
 // or if there is an edge connecting to points lying inside the circle that has not been visited.
 static bool
@@ -93,7 +111,7 @@ IsChordless( ::ULIS::FVec2D& iFromCoord
             FOdysseyVectorSection *edge = (*sit);
             UOdysseyVectorVertex* neighbour = ( edge->GetVertex(0) == node ) ? edge->GetVertex(1) : edge->GetVertex(0);
 
-            if( edge->IsVisited() == false )
+            if( edge->IsInCycle() == false )
             {
                 if( ( neighbour->IsVisited() == true ) )
                 {
@@ -115,7 +133,7 @@ IsChordless( ::ULIS::FVec2D& iFromCoord
 
 void
 PrintNode( std::vector<UOdysseyVectorVertex*>& vertexArray
-         , std::vector<FOdysseyVectorSection*>& sectionArray )
+         ,std::vector<FOdysseyVectorSection*>& sectionArray)
 {
     UE_LOG(LogTemp,Warning,TEXT("Array size: %d"), vertexArray.size() );
 
@@ -123,6 +141,20 @@ PrintNode( std::vector<UOdysseyVectorVertex*>& vertexArray
     {
         UE_LOG(LogTemp,Warning,TEXT("Node: vertex:%d section:%d (%d -- %d)"), vertexArray[i], sectionArray[i], sectionArray[i]->GetVertex(0), sectionArray[i]->GetVertex(1) );
     }
+}
+
+FOdysseyVectorSection* GetStartSection( FCycleNode* iNode )
+{
+    FOdysseyVectorSection* section = nullptr;
+
+    while ( iNode->parent )
+    {
+        section = iNode->section;
+
+        iNode = iNode->parent;
+    }
+
+    return section;
 }
 
 static ::ULIS::FVec2D
@@ -139,7 +171,7 @@ MergeNode( FCycleNode* iNode0
     uint32 node0Count = ( ( iNode0 ) ? iNode0->depth + 1 : 0 );
     uint32 node1Count = ( ( iNode1 ) ? iNode1->depth     : 0 ); // note: we don't add the last node
     uint32 nodeCount = node0Count + node1Count;
-    ::ULIS::FVec2D minCoord;
+    ::ULIS::FVec2D minCoord = ::ULIS::FVec2D(0,0);
 
     if( nodeCount )
     {
@@ -154,7 +186,7 @@ MergeNode( FCycleNode* iNode0
             uint32 rank = node0Count + node1Count - iNode1->depth;
 
              vertexArray[rank] = iNode1->vertex;
-            sectionArray[rank] = iEdge;
+            /*sectionArray[rank] = iEdge;*/
 
             iEdge = iNode1->section;
 
@@ -173,7 +205,7 @@ MergeNode( FCycleNode* iNode0
             uint32 rank = iNode0->depth;
 
              vertexArray[rank] = iNode0->vertex;
-            sectionArray[rank] = ( rank == 0 ) ? iEdge : iNode0->section;
+            /*sectionArray[rank] = ( rank == 0 ) ? iEdge : iNode0->section;*/
 
             // find minimum point, we'll need it for the ray casting algorithm in the InsideCycle() function.
             // Note: we need it to be outside the cycle, so we arbitrarily substract 0.1f
@@ -183,7 +215,12 @@ MergeNode( FCycleNode* iNode0
             iNode0 = iNode0->parent;
         }
 
+        for( uint32 i = 0; i < nodeCount; i++ )
+        {
+            uint32 n = ( i + 1 ) % nodeCount;
 
+            sectionArray[i] = vertexArray[i]->GetSection( *vertexArray[n] );
+        }
     }
 /*
     // concatenate iNode1 and iNode0 except for the root node.
@@ -216,8 +253,13 @@ UOdysseyVectorGroupPaint::MakeCycle( ::ULIS::FVec2D& minCoord
                                    , std::vector<UOdysseyVectorVertex*>& iVertexArray
                                    , std::vector<FOdysseyVectorSection*>& iSectionArray )
 {
+    bool ret = false;
+
+    MarkCycle( iSectionArray );
+        UE_LOG(LogTemp, Warning, TEXT("TEST CHORDLESS"));
     if( IsChordless( minCoord, iVertexArray, iSectionArray ) == true )
     {
+
         int cycleSize = iSectionArray.size();
 
         //UE_LOG(LogTemp, Warning, TEXT("cycle size %d"), cycleSize );
@@ -225,6 +267,8 @@ UOdysseyVectorGroupPaint::MakeCycle( ::ULIS::FVec2D& minCoord
         // Block leaving edge. The vertex wont be able to exit from it anymore.
         for( int i = 0; i < cycleSize; i++ )
         {
+            /*int p = ( i - 1 + cycleSize ) % cycleSize;*/
+
             iSectionArray[i]->Block( iVertexArray[i] );
 
             // clean flags
@@ -235,10 +279,12 @@ UOdysseyVectorGroupPaint::MakeCycle( ::ULIS::FVec2D& minCoord
         mLoopList.push_back( new FOdysseyVectorLoop( *this, iVertexArray, iSectionArray ) );
 
         UE_LOG(LogTemp, Warning, TEXT("new cycle"));
-        return true;
+        ret = true;
     }
+        UE_LOG(LogTemp, Warning, TEXT("NOT CHORDLESS"));
+    UnmarkCycle( iSectionArray );
 
-    return false;
+    return ret;
 }
 
 // Gary's Third Idea.
@@ -276,7 +322,7 @@ UE_LOG(LogTemp, Warning, TEXT("vertexCount %d ------------------ ITERATION -----
                 FCycleNode* currentNode = &nodeArray[i];
                 UOdysseyVectorVertex* currentVertex = currentNode->vertex;
                 std::list<FOdysseyVectorSection*>& sectionList = currentVertex->GetSectionList();
-UE_LOG(LogTemp, Warning, TEXT("checking %d"), currentVertex );
+UE_LOG(LogTemp, Warning, TEXT("checking %d: at %f %f"), currentVertex, currentVertex->GetCoords().x, currentVertex->GetCoords().y );
                 keepProcessing = false;
 /*
                 if( currentVertex->IsVisited() == false )
@@ -289,38 +335,42 @@ UE_LOG(LogTemp, Warning, TEXT("checking %d"), currentVertex );
 
                         if( currentEdge->IsVisited() == false )
                         {
-                            currentEdge->SetVisited( true );
-
                             if( currentEdge->IsBlocked( currentNode->vertex ) == false )
                             {
                                 UOdysseyVectorVertex* nextVertex = ( currentEdge->GetVertex(0) == currentNode->vertex ) ? currentEdge->GetVertex(1) : 
                                                                                                                           currentEdge->GetVertex(0);
-
+        UE_LOG(LogTemp, Warning, TEXT("probing next vertex:%d at x:%f y:%f"), nextVertex, nextVertex->GetCoords().x, nextVertex->GetCoords().y );
                                 /*if( ( currentNode->parent == nullptr ) || ( nextVertex != currentNode->parent->vertex ) )
                                 {*/
         UE_LOG(LogTemp, Warning, TEXT("non-blocked edge:%d"), currentEdge );
                                     if( nextVertex->IsVisited() == true )
                                     {
-                                        std::vector<UOdysseyVectorVertex*> vertexArray(0);
-                                        std::vector<FOdysseyVectorSection*> sectionArray(0);
-                                        ::ULIS::FVec2D minCoord;
-        UE_LOG(LogTemp, Warning, TEXT("candidate cycle"));
-                                        minCoord = MergeNode( currentNode
-                                                            , currentEdge
-                                                            , nullptr
-                                                            , nextVertex->GetNode()
-                                                            , vertexArray
-                                                            , sectionArray );
-
-                                        if( MakeCycle( minCoord, vertexArray, sectionArray ) )
+                                        if( GetStartSection( nextVertex->GetNode() ) != GetStartSection( currentNode ) )
                                         {
-                                            keepProcessing = false;
+                                            std::vector<UOdysseyVectorVertex*> vertexArray(0);
+                                            std::vector<FOdysseyVectorSection*> sectionArray(0);
+                                            ::ULIS::FVec2D minCoord;
+            UE_LOG(LogTemp, Warning, TEXT("candidate cycle"));
+                                            minCoord = MergeNode( currentNode
+                                                                , currentEdge
+                                                                , nullptr
+                                                                , nextVertex->GetNode()
+                                                                , vertexArray
+                                                                , sectionArray );
 
-                                            break;
+                                            if( MakeCycle( minCoord, vertexArray, sectionArray ) )
+                                            {
+                                                keepProcessing = false;
+
+                                                break;
+                                            }
                                         }
                                     }
                                     else
                                     {
+        UE_LOG(LogTemp, Warning, TEXT("setting %d as visited"), nextVertex );
+                                        currentEdge->SetVisited( true );
+
                                         nextVertex->SetVisited( true );
                                         nextVertex->SetNode( &nodeArray[vertexCount] );
 
@@ -333,8 +383,9 @@ UE_LOG(LogTemp, Warning, TEXT("checking %d"), currentVertex );
                                         keepProcessing = true;
                                     }
                                /* }*/
-                            }
-                        }
+                            } else UE_LOG(LogTemp, Warning, TEXT("BLOCKED edge:%d"), currentEdge );
+
+                        } else UE_LOG(LogTemp, Warning, TEXT("VISITED edge:%d"), currentEdge );
                     }
                /* }*/
             }
@@ -352,6 +403,7 @@ UE_LOG(LogTemp, Warning, TEXT("checking %d"), currentVertex );
             if( nodeArray[i].section )
             {
                 nodeArray[i].section->SetVisited( false );
+                /*nodeArray[i].section->SetInCycle( false );*/
             }
         }
 
@@ -666,7 +718,7 @@ UOdysseyVectorGroupPaint::FindCycles()
     {
         UOdysseyVectorVertexIntersection* intersectionVertex = intersectionVertexList.back();
 
-        UE_LOG(LogTemp,Warning,TEXT("Vertex:%d - sections:%d"),intersectionVertex,intersectionVertex->GetSectionCount());
+        UE_LOG(LogTemp,Warning,TEXT("Vertex:%d - x:%f y:%f"),intersectionVertex, intersectionVertex->GetCoords().x, intersectionVertex->GetCoords().y );
 
         std::vector<UOdysseyVectorVertex*> nodeArray;
         std::vector<FOdysseyVectorSection*> edgeArray;
