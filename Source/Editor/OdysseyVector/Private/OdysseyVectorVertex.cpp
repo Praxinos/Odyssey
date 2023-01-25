@@ -10,18 +10,6 @@ UOdysseyVectorVertex::UOdysseyVectorVertex()
     SetVisited( false );
 }
 
-void
-UOdysseyVectorVertex::SetVisited( bool iVisited )
-{
-    mVisited = iVisited;
-}
-
-bool
-UOdysseyVectorVertex::IsVisited()
-{
-    return mVisited;
-}
-
 //static
 UOdysseyVectorVertex*
 UOdysseyVectorVertex::New( double iX, double iY, double iRadius )
@@ -171,6 +159,44 @@ static bool seekSection( std::list<FOdysseyVectorSection*>& iSectionList
     }
 
     return false;
+}
+
+void
+UOdysseyVectorVertex::SetVisited( bool iVisited )
+{
+    if( iVisited == true )
+    {
+        mFlags |= VISITED;
+    }
+    else
+    {
+        mFlags &= (~VISITED);
+    }
+}
+
+bool
+UOdysseyVectorVertex::IsVisited()
+{
+    return ( mFlags & VISITED ) ? true : false;
+}
+
+void
+UOdysseyVectorVertex::SetInCycle( bool iInCycle )
+{
+    if( iInCycle == true )
+    {
+        mFlags |= INCYCLE;
+    }
+    else
+    {
+        mFlags &= (~INCYCLE);
+    }
+}
+
+bool
+UOdysseyVectorVertex::IsInCycle()
+{
+    return ( mFlags & INCYCLE ) ? true : false;
 }
 
 void

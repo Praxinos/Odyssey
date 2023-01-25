@@ -73,7 +73,7 @@ UOdysseyVectorVertexIntersection::AddSegment( UOdysseyVectorSegmentCubic* iSegme
     intersect.t        = t;
 /*printf("%f %f %f\n", intersectAt.x, intersectAt.y, t);*/
     UOdysseyVectorVertex::AddSegment( iSegment );
-UE_LOG(LogTemp, Warning, TEXT("UOdysseyVectorVertexIntersection::AddSegment %d - size:%d"), iSegment, mTMap.size() );
+//UE_LOG(LogTemp, Warning, TEXT("UOdysseyVectorVertexIntersection::AddSegment %d - size:%d"), iSegment, mTMap.size() );
     mTMap.insert( std::make_pair( iSegment, intersect ) );
 }
 

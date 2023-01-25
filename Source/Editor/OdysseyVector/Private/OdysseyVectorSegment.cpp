@@ -18,7 +18,7 @@ UOdysseyVectorSegment::Init( UOdysseyVectorPath* iPath
 {
     UOdysseyVectorLink::Init ( iVertex0, iVertex1 );
 
-    AddSection ( new FOdysseyVectorSection ( this, iVertex0, iVertex1 ) );
+    //AddSection ( new FOdysseyVectorSection ( this, iVertex0, iVertex1 ) );
 
     mPath = iPath;
 }
@@ -91,11 +91,11 @@ UOdysseyVectorSegment::AddIntersection ( UOdysseyVectorVertexIntersection* iInte
 {
     double t = iIntersectionVertex->GetT( *this );
     FOdysseyVectorSection* section = GetSection ( t );
-    UOdysseyVectorVertex* vertex[3] = { section->GetVertex(0), iIntersectionVertex, section->GetVertex(1) };
-    FOdysseyVectorSection* subSection[2] = { new FOdysseyVectorSection ( this, vertex[0], vertex[1] )
-                                           , new FOdysseyVectorSection ( this, vertex[1], vertex[2] ) };
+    UOdysseyVectorVertex* vertex0 = section->GetVertex(0);
+    UOdysseyVectorVertex* vertex1 = section->GetVertex(1);
+    FOdysseyVectorSection* subSection[2] = { new FOdysseyVectorSection ( this, vertex0            , iIntersectionVertex )
+                                           , new FOdysseyVectorSection ( this, iIntersectionVertex, vertex1             ) };
 
-    // this does not release memory so that we can undo that later
     RemoveSection( section );
 
     mIntersectionVertexList.push_back( iIntersectionVertex );

@@ -29,7 +29,12 @@ class ODYSSEYVECTOR_API UOdysseyVectorVertex : public UOdysseyVectorPoint
         GENERATED_BODY()
 
     public:
+        static const uint32 VISITED      = ( 1 << 2 );
+        static const uint32 INCYCLE      = ( 1 << 3 );
+
+    public:
         static UOdysseyVectorVertex* New( double iX, double iY, double iRadius );
+
 
     private:
 
@@ -37,7 +42,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorVertex : public UOdysseyVectorPoint
         std::list<UOdysseyVectorSegment*> mSegmentList;
         std::list<FOdysseyVectorSection*> mSectionList;
         std::list<UOdysseyVectorLoop*> mLoopList;
-        bool mVisited;
+        uint32 mFlags;
         FCycleNode* mNode; // used for finding painting areas only;
 
     public:
@@ -75,4 +80,6 @@ class ODYSSEYVECTOR_API UOdysseyVectorVertex : public UOdysseyVectorPoint
                              , FOdysseyVectorSection& iEndSection );
         void SetNode( FCycleNode* iNode );
         FCycleNode* GetNode();
+        void SetInCycle( bool iInCycle );
+        bool IsInCycle();
 };
