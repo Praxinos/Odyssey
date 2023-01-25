@@ -82,22 +82,30 @@ FOdysseyTextureEditor::SetTexture(UTexture2D* iTexture)
 	if (mSelectedTool)
 		mSelectedTool->Inactivate();
 
-    //close userdata
+    //Inactivate Fast Update
 	UOdysseyTextureLayerStack* layerStack = LayerStack();
 	if ( layerStack )
-		layerStack->SetPerformanceMode(eOdysseyPerformanceMode::Memory);
+		layerStack->InactivateTextureFastUpdate();
 
 	//Set the texture
     mTexture = iTexture;
 	if ( !mTexture )
 	{
 		SetSelectedTool(nullptr);
+		mLayerStackPreloadHandles.Empty();
 		return;
 	}
 
 	layerStack = LayerStack();
 	if ( layerStack )
-		layerStack->SetPerformanceMode(eOdysseyPerformanceMode::Speed);
+	{
+		//Do it in 3 lines to avoid unexpected handles destruction in the process
+		TArray<TSharedPtr<IOdysseyHandle>> handles;
+		layerStack->Preload(handles);
+		mLayerStackPreloadHandles = handles;
+		
+		layerStack->ActivateTextureFastUpdate();
+	}
 
 	if ( mSelectedTool && mSelectedTool->IsActivable() )
 	{

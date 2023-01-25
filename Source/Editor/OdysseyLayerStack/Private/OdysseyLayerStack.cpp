@@ -797,33 +797,6 @@ UOdysseyLayerStack::CopyLayerInternal(UOdysseyLayer* iLayer, UOdysseyLayer* iPar
     return duplicatedLayer;
 }
 
-//--- C++ only setters Getters
-
-eOdysseyPerformanceMode
-UOdysseyLayerStack::GetPerformanceMode()
-{
-    return mPerformanceMode;
-}
-
-void
-UOdysseyLayerStack::SetPerformanceMode(eOdysseyPerformanceMode iPerformanceMode)
-{
-    if (iPerformanceMode == mPerformanceMode)
-        return;
-
-    mPerformanceMode = iPerformanceMode;
-    for (UOdysseyLayer* layer : GetRootLayers())
-    {
-        layer->SetPerformanceMode(iPerformanceMode);
-    }
-    ApplyPerformanceMode(iPerformanceMode);
-}
-
-void
-UOdysseyLayerStack::ApplyPerformanceMode(eOdysseyPerformanceMode iPerformanceMode)
-{
-}
-
 //--- UObject overrides
 
 void

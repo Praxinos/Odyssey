@@ -10,6 +10,7 @@
 #include "LayerStack/OdysseyTextureLayerStack.h"
 #include "Tools/RasterDrawingTool/OdysseyTextureEditorRasterDrawingTool.h"
 #include "Tools/PaintBucketTool/OdysseyTextureEditorPaintBucketTool.h"
+#include "Misc/OdysseyHandle.h"
 
 /**
  * Implements an Editor for textures.
@@ -59,4 +60,6 @@ private:
     
     UOdysseyTextureEditorRasterDrawingTool* mRasterDrawingTool;
     UOdysseyTextureEditorPaintBucketTool* mPaintBucketTool;
+
+    TArray<TSharedPtr<IOdysseyHandle>> mLayerStackPreloadHandles;
 };

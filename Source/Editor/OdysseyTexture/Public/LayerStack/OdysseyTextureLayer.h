@@ -5,6 +5,7 @@
 
 #include "OdysseyLayer.h"
 
+#include "Misc/OdysseyHandle.h"
 #include <ULIS>
 
 #include "OdysseyTextureLayer.generated.h"
@@ -56,4 +57,10 @@ public:
      * Called by the child layer RenderImageChanged() function
      */
     virtual void ChildRenderImageChanged(UOdysseyTextureLayer* iLayer, const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive);
+
+    /**
+     * @brief Preloads the layers and keeps them preloaded untile the hiven handles are destroyed
+     * One handle corresponds to something being held in memory
+     */
+    virtual void Preload(TArray<TSharedPtr<IOdysseyHandle>>& oHandles);
 };

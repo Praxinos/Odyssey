@@ -288,10 +288,11 @@ UOdysseyTextureLayerImageRaster::PostDuplicate(bool bDuplicateForPIE)
 }
 
 void
-UOdysseyTextureLayerImageRaster::ApplyPerformanceMode(eOdysseyPerformanceMode iPerformanceMode)
+UOdysseyTextureLayerImageRaster::Preload(TArray<TSharedPtr<IOdysseyHandle>>& oHandles)
 {
-    //if ( RasterBlock )
-        //RasterBlock->SetPerformanceMode(iPerformanceMode);
+    if ( RasterBlock )
+        oHandles.Add(RasterBlock->Preload());
 }
+
 
 #undef LOCTEXT_NAMESPACE

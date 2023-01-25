@@ -242,36 +242,6 @@ public:
 	void MoveLayers(TArray<UOdysseyLayer*> Layers, UOdysseyLayer* ParentLayer = nullptr, int IndexInParent = 0);
 
 public:
-    //C++ only Setters / Getters
-
-    /**
-     * @brief Get the Global Performance Mode of the layerstack
-     * Usually performance mode is set to "Speed" when we start editing a layerstack
-     * and it is set to Memory when we stop editing a layerstack
-     * 
-     * Speed = better reactivity when drawing, but more memory consuming
-     * Memory = less memory consumption, but slower
-     * 
-     * @return ePerformanceMode 
-     */
-    eOdysseyPerformanceMode GetPerformanceMode();
-
-    /**
-     * @brief Set the Global Performance Mode of the layerstack
-     * Usually performance mode is set to "Speed" when we start editing a layerstack
-     * and it is set to Memory when we stop editing a layerstack
-     * 
-     * Speed = better reactivity when drawing, but more memory consuming
-     * Memory = less memory consumption, but slower
-     * 
-     * @param iPerformanceMode 
-     */
-    void SetPerformanceMode(eOdysseyPerformanceMode iPerformanceMode);
-
-protected:
-    virtual void ApplyPerformanceMode(eOdysseyPerformanceMode iPerformanceMode);
-
-public:
     //Called by layers when there Parent or Children changed
     virtual void HierarchyChanged();
 
@@ -330,7 +300,4 @@ public:
 
     UPROPERTY(Transient)
     TObjectPtr<UClass> LayerRootClass;
-
-private:
-    eOdysseyPerformanceMode mPerformanceMode = eOdysseyPerformanceMode::Memory;
 };

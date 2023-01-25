@@ -170,25 +170,6 @@ public:
     UFUNCTION(BlueprintPure, Category="LayerStack")
     UOdysseyLayerStack* GetLayerStack() const;
 
-public:
-    /**
-     * @brief Will try to set the performance mode to the given mode
-     * Can fail in some conditions
-     * 
-     * @param iPerformanceMode 
-     */
-    void SetPerformanceMode(eOdysseyPerformanceMode iPerformanceMode);
-
-protected:
-    /**
-     * @brief Applies the given Performance Mode
-     * Never fails, be careful not to apply an undesired performance state
-     * could cause excessive memory consumptions, or unwanted layer activity
-     * 
-     * @param iPerformanceMode 
-     */
-    virtual void ApplyPerformanceMode(eOdysseyPerformanceMode iPerformanceMode);
-
 protected:
     //Property changed methods
     virtual void NameChanged();

@@ -11,6 +11,7 @@
 #include "Misc/Change.h"
 #include "Misc/ITransaction.h"
 #include "Misc/TransactionObjectEvent.h"
+#include "Misc/OdysseyHandle.h"
 #include "OdysseyRectUtils.h"
 #include "OdysseyPerformanceMode.h"
 #include "ULISEventBuilder.h"
@@ -20,6 +21,17 @@
 
 #define FOdysseyRasterBlock_CACHE_NAME TEXT("OdysseyRasterBlock")
 #define FOdysseyRasterBlock_CACHE_VERSION TEXT("A6ED84107BAD11EDA1EB0242AC120002")
+
+class FOdysseyRasterBlockPreloadHandle : public IOdysseyHandle
+{
+public:
+    FOdysseyRasterBlockPreloadHandle(UOdysseyRasterBlock* iBlock)
+        : mBlock(iBlock->GetBlock())
+    {}
+
+private:
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mBlock;
+};
 
 void
 RemoveValueFromCache(const FString& iId)
@@ -127,25 +139,16 @@ UOdysseyRasterBlock::CleanupBlock(uint8* iData, void* iInfo)
 {
     UOdysseyRasterBlock* rasterBlock = static_cast<UOdysseyRasterBlock*>(iInfo);
     if ( !rasterBlock )
+    {
+        ::ULIS::OnCleanup_FreeMemory(iData, iInfo); //we have the responsability to delete the block data
         return;
+    }
 
     ::ULIS::FBlock block(iData, rasterBlock->Width, rasterBlock->Height, rasterBlock->GetFormat());
 
-    //if ( rasterBlock->mPerformanceMode == eOdysseyPerformanceMode::Speed )
-        //return;
-
     rasterBlock->SaveBlockToCache(block, rasterBlock->Id.ToString()); //TODO: maybe save only if version changed ?
+    ::ULIS::OnCleanup_FreeMemory(iData, iInfo); //we have the responsability to delete the block data
 }
-
-/* void
-UOdysseyRasterBlock::CleanupEditableBlock(uint8* iData, void* iInfo)
-{
-    UOdysseyRasterBlock* rasterBlock = static_cast<UOdysseyRasterBlock*>(iInfo);
-    if ( !rasterBlock )
-        return;
-
-    rasterBlock->mBlockRetainerForEdition = nullptr;
-} */
 
 void
 UOdysseyRasterBlock::SetBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock)
@@ -157,11 +160,7 @@ UOdysseyRasterBlock::SetBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iB
     if (currentBlock)
     {
         //remove OnCleanup Callback
-        currentBlock->OnCleanup(::ULIS::FOnCleanupData());
-
-        //Remove any retainers on this block
-        //mBlockRetainerForSpeed = nullptr;
-        //mBlockRetainerForEdition = nullptr;
+        currentBlock->OnCleanup(::ULIS::FOnCleanupData(&::ULIS::OnCleanup_FreeMemory));
 
         //Cleanup everything else
         mBlock = nullptr;
@@ -178,25 +177,13 @@ UOdysseyRasterBlock::SetBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iB
         Format = iBlock->Format();
         iBlock->OnCleanup(::ULIS::FOnCleanupData(&UOdysseyRasterBlock::CleanupBlock, this));
 
-        //if (mPerformanceMode == eOdysseyPerformanceMode::Speed)
-            //mBlockRetainerForSpeed = iBlock;
-
         mInvalidTileMap = FULISInvalidTileMap(64, Width, Height);
     }
 
     //If an editableBlock was set, don't consider it as the editableBlock anymore
     //Let the user reload the block
     mEditableBlock = nullptr;
-
-    /* TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> editableBlock = mEditableBlock.Pin();
-    if (editableBlock)
-    {
-        //remove OnCleanup Callback
-        editableBlock->OnCleanup(::ULIS::FOnCleanupData());
-        mEditableBlock = nullptr;
-    } */
     
-
      mOnBlockPtrChanged.Broadcast();
 }
 
@@ -223,14 +210,12 @@ UOdysseyRasterBlock::GetEditableBlock()
     }
 
     editableBlock = MakeShared<::ULIS::FBlock>(Width, Height, (::ULIS::eFormat)Format);
-    //editableBlock->OnCleanup(::ULIS::FOnCleanupData(&UOdysseyRasterBlock::CleanupEditableBlock));
 
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext((::ULIS::eFormat)Format);
     ctx.Copy(*block, *editableBlock, ::ULIS::FRectI::Auto, ::ULIS::FVec2I(0), ::ULIS::FSchedulePolicy::AsyncCacheEfficient);
     ctx.Finish();
 
     mEditableBlock = editableBlock; //Keep Weak Reference
-    //mBlockRetainerForEdition = block; 
 
     return editableBlock;
 }
@@ -312,31 +297,15 @@ UOdysseyRasterBlock::Invalidate(const TArray<::ULIS::FRectI>& iRects, bool iIsIn
     }
 }
 
-/*
-void
-UOdysseyRasterBlock::SetPerformanceMode(eOdysseyPerformanceMode iPerformanceMode)
+TSharedPtr<IOdysseyHandle>
+UOdysseyRasterBlock::Preload()
 {
-    mPerformanceMode = iPerformanceMode;
-    switch(iPerformanceMode)
-    {
-        case eOdysseyPerformanceMode::Speed:
-            mBlockRetainerForSpeed = GetBlock();
-        break;
+    TSharedPtr<IOdysseyHandle> handle = mPreloadHandle.Pin();
+    if (handle)
+        return handle;
 
-        case eOdysseyPerformanceMode::Memory:
-        case eOdysseyPerformanceMode::Shutdown:
-            mBlockRetainerForSpeed = nullptr;
-            //DEBUG: mBlockRetainerForSpeed = GetBlock();
-        break;
-    }
+    return MakeShared<FOdysseyRasterBlockPreloadHandle>(this);
 }
-
-eOdysseyPerformanceMode
-UOdysseyRasterBlock::GetPerformanceMode()
-{
-    return mPerformanceMode;
-}
-*/
 
 UOdysseyRasterBlock::FOnBlockChanged&
 UOdysseyRasterBlock::OnBlockChanged()
@@ -612,12 +581,6 @@ UOdysseyRasterBlock::Serialize(FArchive& Ar)
     if ( Ar.IsTransacting() || !Ar.IsPersistent() )
         return;
 
-    //DEBUG
-    // 
-        //Id = FGuid::NewGuid();
-    // 
-    //DEBUG
-
     if ( Ar.IsSaving() )
     {
         TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = GetBlock();
@@ -659,34 +622,4 @@ UOdysseyRasterBlock::Serialize(FArchive& Ar)
         mInvalidTileMap = FULISInvalidTileMap(64, Width, Height);
         RemoveValueFromCache(Id.ToString());
     }
-}
-
-void
-UOdysseyRasterBlock::PostTransacted(const FTransactionObjectEvent& iTransactionEvent)
-{
-    /*
-    if ( iTransactionEvent.GetEventType() != ETransactionObjectEventType::UndoRedo )
-        return;
-       
-    const TArray<FName>& changedPropertyNames = iTransactionEvent.GetChangedProperties();
-    bool blockChanged = false;
-    for ( const FName& propertyName : changedPropertyNames )
-    {
-        if ( propertyName == "Width")
-            blockChanged = true;
-        if ( propertyName == "Height")
-            blockChanged = true;
-        if ( propertyName == "Format")
-            blockChanged = true;
-    }
-
-    if (blockChanged)
-    {
-        mInvalidTileMap = FULISInvalidTileMap(64, Width, Height);
-        OnBlockPtrChanged().Broadcast();
-        return;
-    }
-    OnBlockChanged().Broadcast({ ::ULIS::FRectI::FromXYWH(0, 0, Width, Height) }, true); //always send at least one interactive event
-    OnBlockChanged().Broadcast({ ::ULIS::FRectI::FromXYWH(0, 0, Width, Height) }, false);
-    */
 }

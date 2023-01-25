@@ -85,4 +85,18 @@ UOdysseyTextureLayer::ChildrenChanged()
     RenderImageChanged({ ::ULIS::FRectI::FromXYWH(0, 0, texture->Source.GetSizeX(), texture->Source.GetSizeY() ) }, false);
 }
 
+void
+UOdysseyTextureLayer::Preload(TArray<TSharedPtr<IOdysseyHandle>>& oHandles)
+{
+    const TArray<UOdysseyLayer*>& layers = Children;
+    for (UOdysseyLayer* layer : layers)
+    {
+        UOdysseyTextureLayer* textureLayer = Cast<UOdysseyTextureLayer>(layer);
+        if (!textureLayer)
+            continue;
+
+        textureLayer->Preload(oHandles);
+    }
+}
+
 #undef LOCTEXT_NAMESPACE

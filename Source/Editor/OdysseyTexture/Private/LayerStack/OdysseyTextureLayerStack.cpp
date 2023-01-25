@@ -146,42 +146,51 @@ UOdysseyTextureLayerStack::GetSurface() const
 }
 
 void
-UOdysseyTextureLayerStack::ApplyPerformanceMode(eOdysseyPerformanceMode iPerformanceMode)
+UOdysseyTextureLayerStack::Preload(TArray<TSharedPtr<IOdysseyHandle>>& oHandles)
+{
+    const TArray<UOdysseyLayer*>& layers = GetLayers();
+    for (UOdysseyLayer* layer : layers)
+    {
+        UOdysseyTextureLayer* textureLayer = Cast<UOdysseyTextureLayer>(layer);
+        if (!textureLayer)
+            continue;
+
+        textureLayer->Preload(oHandles);
+    }
+}
+
+void
+UOdysseyTextureLayerStack::InactivateTextureFastUpdate()
 {
     UTexture2D* texture = GetTexture();
     if ( !texture )
         return;
 
-    switch(iPerformanceMode)
-    {
-        case eOdysseyPerformanceMode::Speed:
-        {
-
-            mTextureFastUpdateSurface = MakeShared<FOdysseySurfaceTexture2DEditable>(texture);
-            ActivateTextureFastUpdate();
-
-            FCoreUObjectDelegates::OnPreObjectPropertyChanged.AddUObject(this, &UOdysseyTextureLayerStack::OnPreGlobalObjectPropertyChanged);
-            UPackage::PreSavePackageWithContextEvent.AddUObject(this, &UOdysseyTextureLayerStack::OnPackagePreSave);
-            UPackage::PackageSavedWithContextEvent.AddUObject(this, &UOdysseyTextureLayerStack::OnPackageSaved);
-        }
-        break;
-
-        case eOdysseyPerformanceMode::Memory:
-        case eOdysseyPerformanceMode::Shutdown:
-        {
-            FCoreUObjectDelegates::OnPreObjectPropertyChanged.RemoveAll(this);
-            UPackage::PreSavePackageWithContextEvent.RemoveAll(this);
-            UPackage::PackageSavedWithContextEvent.RemoveAll(this);
-            InactivateTextureFastUpdate();
-            texture->UpdateResource();
-            mTextureFastUpdateSurface = nullptr;
-        }
-        break;
-    }
+    FCoreUObjectDelegates::OnPreObjectPropertyChanged.RemoveAll(this);
+    UPackage::PreSavePackageWithContextEvent.RemoveAll(this);
+    UPackage::PackageSavedWithContextEvent.RemoveAll(this);
+    CompressTexture();
+    texture->UpdateResource();
+    mTextureFastUpdateSurface = nullptr;
 }
 
 void
 UOdysseyTextureLayerStack::ActivateTextureFastUpdate()
+{
+    UTexture2D* texture = GetTexture();
+    if ( !texture )
+        return;
+
+    mTextureFastUpdateSurface = MakeShared<FOdysseySurfaceTexture2DEditable>(texture);
+    UncompressTexture();
+
+    FCoreUObjectDelegates::OnPreObjectPropertyChanged.AddUObject(this, &UOdysseyTextureLayerStack::OnPreGlobalObjectPropertyChanged);
+    UPackage::PreSavePackageWithContextEvent.AddUObject(this, &UOdysseyTextureLayerStack::OnPackagePreSave);
+    UPackage::PackageSavedWithContextEvent.AddUObject(this, &UOdysseyTextureLayerStack::OnPackageSaved);
+}
+
+void
+UOdysseyTextureLayerStack::UncompressTexture()
 {
     UTexture2D* texture = GetTexture();
     if ( !texture )
@@ -204,7 +213,7 @@ UOdysseyTextureLayerStack::ActivateTextureFastUpdate()
 }
 
 void
-UOdysseyTextureLayerStack::InactivateTextureFastUpdate()
+UOdysseyTextureLayerStack::CompressTexture()
 {
     UTexture2D* texture = GetTexture();
     if ( !texture )
@@ -273,7 +282,7 @@ UOdysseyTextureLayerStack::OnPackagePreSave(UPackage* iPackage, FObjectPreSaveCo
     if ( package != iPackage )
         return;
 
-    InactivateTextureFastUpdate();
+    CompressTexture();
 }
 
 void
@@ -287,7 +296,7 @@ UOdysseyTextureLayerStack::OnPackageSaved(const FString& iPackageFilename, UPack
     if ( package != iPackage )
         return;
 
-    ActivateTextureFastUpdate();
+    UncompressTexture();
 }
 
 void
@@ -314,7 +323,7 @@ UOdysseyTextureLayerStack::UpdateTexture()
     if ( !texture )
         return;
 
-    if ( GetPerformanceMode() == eOdysseyPerformanceMode::Speed )
+    if ( mTextureFastUpdateSurface.IsValid() )
     {
         FastUpdateTexture(mInvalidRects);
     }

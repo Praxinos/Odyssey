@@ -168,13 +168,6 @@ UOdysseyLayer::ParentChanged()
     if ( !layerStack )
         return;
 
-    //ensure the right performance mode is applied in presence or absence of a parent
-    if ( layerStack->ContainsLayer(this) )
-        SetPerformanceMode(layerStack->GetPerformanceMode());
-    else
-        SetPerformanceMode(eOdysseyPerformanceMode::Shutdown);
-        
-
     OnParentChanged().Broadcast(this);
     layerStack->HierarchyChanged();
 }
@@ -230,27 +223,4 @@ UOdysseyLayer::PostTransacted(const FTransactionObjectEvent& iTransactionEvent)
     {
         PropertyChanged(propertyName);
     }
-}
-
-void
-UOdysseyLayer::SetPerformanceMode(eOdysseyPerformanceMode iPerformanceMode)
-{
-    UOdysseyLayerStack* layerStack = GetLayerStack();
-    if ( !layerStack )
-        return;
-
-    if ( !layerStack->ContainsLayer(this) && iPerformanceMode != eOdysseyPerformanceMode::Shutdown)
-        return;
-
-    for ( UOdysseyLayer* child : Children )
-    {
-        child->SetPerformanceMode(iPerformanceMode);
-    }
-    
-    ApplyPerformanceMode(iPerformanceMode);
-}
-
-void
-UOdysseyLayer::ApplyPerformanceMode(eOdysseyPerformanceMode iPerformanceMode)
-{
 }

@@ -5,6 +5,8 @@
 
 #include "OdysseyLayerStack.h"
 #include "OdysseySurfaceTexture2DEditable.h"
+#include "Misc/OdysseyHandle.h"
+
 #include "OdysseyTextureLayerStack.generated.h"
 
 #include <ULIS>
@@ -37,8 +39,6 @@ public:
      * 
      */
     DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnRenderImageChanged, UOdysseyTextureLayerStack*, const TArray<::ULIS::FRectI>&, bool)
-
-public:
     static FOnRenderImageChanged& OnRenderImageChanged(); //Delegate
 
 public:
@@ -60,22 +60,47 @@ public:
      */
     void OnRootLayerRenderImageChanged(UOdysseyTextureLayer* iLayer, const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive);
 
-public:
+    /**
+     * @brief Reders the given layer's image
+     * 
+     * @param iLayers 
+     * @param ioBlock 
+     * @param iRect 
+     * @param iPos 
+     * @param iWaitList 
+     * @return TArray<::ULIS::FEvent> 
+     */
     TArray<::ULIS::FEvent> RenderLayersImage(TArray<UOdysseyLayer*> iLayers, TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ioBlock, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList);
 
 public:
+    /**
+     * @brief Preloads the layers and keeps them preloaded untile the hiven handles are destroyed
+     * One handle corresponds to something being held in memory
+     */
+    void Preload(TArray<TSharedPtr<IOdysseyHandle>>& oHandles);
+
+    /**
+     * @brief Returns the surface used for fast update (see ActivateTextureFastUpdate)
+     * 
+     * @return TSharedPtr<FOdysseySurfaceTexture2DEditable> 
+     */
     TSharedPtr<FOdysseySurfaceTexture2DEditable> GetSurface() const;
 
-public:
-    //Texture Update / Edition
-    virtual void ApplyPerformanceMode(eOdysseyPerformanceMode iPerformanceMode) override;
-
-public:
     /**
-     * @brief Set the Texture Update Mode
-     * Manually = does not update the text automatically
-     * OnTick = refreshed the texture at each engine tick if needed
-     * Instantaneous = refreshes the texture as soon as anything has changed in the layerstack
+     * @brief Uncompresses the texture to allow realtime update
+     */
+    void ActivateTextureFastUpdate();
+
+    /**
+     * @brief Uncompresses the texture to disallow realtime editing
+     */
+    void InactivateTextureFastUpdate();
+
+    /**
+     * @brief Defines when the texture should be updated, and how frequently
+     * Manually = does not update the texture automatically
+     * OnTick = refresh the texture at each engine tick if needed
+     * Instantaneous = refresh the texture as soon as anything has changed in the layerstack
      * 
      * Default is OnTick
      * 
@@ -105,8 +130,8 @@ private:
     virtual void Tick(float DeltaTime) override;
 
 private:
-    void ActivateTextureFastUpdate();
-    void InactivateTextureFastUpdate();
+    void CompressTexture();
+    void UncompressTexture();
     void FastUpdateTexture(const TArray<::ULIS::FRectI>& iRects);
     void UpdateTextureSource();
 

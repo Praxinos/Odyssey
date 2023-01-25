@@ -83,6 +83,12 @@ public:
      */
     virtual void Merge(const TArray<UOdysseyLayer*>& Layers) override;
 
+    /**
+     * @brief Preloads the layers and keeps them preloaded untile the hiven handles are destroyed
+     * One handle corresponds to something being held in memory
+     */
+    virtual void Preload(TArray<TSharedPtr<IOdysseyHandle>>& oHandles) override;
+
 protected:
     void OnBlockChanged(const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive);
     void OnBlockPtrChanged();
@@ -97,15 +103,18 @@ public:
     virtual void PostDuplicate(bool bDuplicateForPIE) override;
     virtual void PostLoad() override;
 
-protected:
-    virtual void ApplyPerformanceMode(eOdysseyPerformanceMode iPerformanceMode) override;
+public:
+    /**
+     * @brief Preloads the layers and keeps them preloaded untile the hiven handles are destroyed
+     * One handle corresponds to something being held in memory
+     */
+    TArray<TSharedPtr<IOdysseyHandle>> Preload();
 
 private:
     UPROPERTY()
     TObjectPtr<UOdysseyRasterBlock> RasterBlock;
 
 public:
-
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Texture | LayerStack")
     bool IsAlphaLocked = false;
 

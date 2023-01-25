@@ -5,7 +5,7 @@
 
 #include "CoreMinimal.h"
 
-//#include "OdysseyPerformanceMode.h"
+#include "Misc/OdysseyHandle.h"
 #include "ULISInvalidTileMap.h"
 #include <ULIS>
 
@@ -16,8 +16,9 @@
  * 
  * The internal ULIS::Block cannot be directly accessed and modified.
  * The reason is linked to undo/redo system, for which we need to be able to know what was the content before Update().
+ * Use GetEditableBlock to get an editable version (copy) of the block.
  * 
- * Once you did all the modifications in your external block, call Update().
+ * Once you did all the modifications call Update().
  * 
  * Update can be Interactive or Non-Interactive
  * Interactive means that the content of the block changed, but it is probably not the final content of the block
@@ -112,29 +113,10 @@ public:
      */
     void Invalidate(const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive);
 
-    /**
-     * @brief Get the Performance Mode of the RasterBlock
-     * Usually performance mode is set to "Speed" when we start editing the block
-     * and it is set to Memory when we stop editing the block
-     * 
-     * Speed = better reactivity when drawing, but more memory consuming
-     * Memory = less memory consumption, but slower
-     * 
-     * @return ePerformanceMode 
+    /** 
+     * @brief Preloads the block in memory, and keeps it in memory until the returned handle is destroyed
      */
-    //eOdysseyPerformanceMode GetPerformanceMode();
-
-    /**
-     * @brief Set the Global Performance Mode of the block
-     * Usually performance mode is set to "Speed" when we start editing the block
-     * and it is set to Memory when we stop editing the block
-     * 
-     * Speed = better reactivity when drawing, but more memory consuming
-     * Memory = less memory consumption, but slower
-     * 
-     * @param iPerformanceMode 
-     */
-    //void SetPerformanceMode(eOdysseyPerformanceMode iPerformanceMode);
+    TSharedPtr<IOdysseyHandle> Preload();
 
     //Called when the block tiles content changed
     FOnBlockChanged& OnBlockChanged();
@@ -164,7 +146,6 @@ private:
     bool LoadUndoFromCache(const FString& iId);
 
     static void CleanupBlock(uint8* iData, void* iInfo);
-    //static void CleanupEditableBlock(uint8* iData, void* iInfo);
 
     void ResetEditableBlock();
 public:
@@ -176,13 +157,6 @@ public:
      * @param Ar 
      */
     virtual void Serialize(FArchive& Ar) override;
-
-    /**
-     * @brief Called after an undo affected this object
-     * 
-     * @param Ar 
-     */
-    virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;
 
 private:
     UPROPERTY()
@@ -202,9 +176,6 @@ private:
 
     //The unstable block which is currently being edited
     TWeakPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mEditableBlock; //Loaded on demand from cache, can be destroyed at any time if noone keeps a sharedptr on it
-
-    //A mean to retain mBlock in memory until mEditableBlock dies. Needed for undo registration
-    //TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mBlockRetainerForEdition;
 
     UE::Serialization::FEditorBulkData mBulkData; //Allows serializing the block on disk when saving
     FULISInvalidTileMap mInvalidTileMap;
@@ -227,9 +198,7 @@ private:
     // 
     // OPTIMIZATIONS
     //
-
-    //eOdysseyPerformanceMode mPerformanceMode;
-    //TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mBlockRetainerForSpeed;
+    TWeakPtr<IOdysseyHandle> mPreloadHandle;
 
 private:
     friend class FOdysseyRasterBlockChange;
