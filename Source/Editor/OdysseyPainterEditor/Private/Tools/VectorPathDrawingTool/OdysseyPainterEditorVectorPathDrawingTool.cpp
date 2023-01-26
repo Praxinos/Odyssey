@@ -34,7 +34,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::Activate()
 
     vectorEngine->SetDrawingFlags( 0 );
 
-    RedrawCurrentLayer( { { 0, 0, 0, 0 } } );
+    currentVectorLayer->RenderImageChanged(false);
 }
 
 bool
@@ -78,7 +78,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDown(const FOdysseyPoint& iPo
         currentVectorLayer->GetScene()->ClearSelection();
         currentVectorLayer->GetScene()->Select( currentPathBuilder );
 
-        RedrawCurrentLayer( { layerStack->GetSurface()->Block()->Rect() } );
+        currentVectorLayer->RenderImageChanged(false);
 
         return true;
     }
@@ -132,7 +132,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDrag(const FOdysseyPoint& iPo
 
         currentVectorLayer->GetScene()->Update();
 
-        RedrawCurrentLayer( { finalRegion } );
+        currentVectorLayer->RenderImageChanged({ finalRegion }, true);
     }
 }
 
@@ -168,7 +168,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUp(const FOdysseyPoint& iPoin
         // Update objects marked as invalidated
         currentVectorLayer->GetScene()->Update();
 
-        RedrawCurrentLayer( { layerStack->GetSurface()->Block()->Rect() } );
+        currentVectorLayer->RenderImageChanged(false);
 
         return true;
     }

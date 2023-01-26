@@ -46,28 +46,11 @@ UOdysseyTextureLayerImageVector::Init( uint32 iWidth, uint32 iHeight )
 
     mVEngine->GetBLImage()->getData( &imgData );
 
-    mBlock = new ::ULIS::FBlock( static_cast<uint8*>(imgData.pixelData)
+    mBlock = MakeShared<::ULIS::FBlock>(static_cast<uint8*>(imgData.pixelData)
                                , iWidth
                                , iHeight
                                , ::ULIS::eFormat::Format_RGBA8
-                               , nullptr
-                               , ::ULIS::FOnInvalidBlock(&OnInvalidBlock, static_cast<void*>(this))
-                               , ::ULIS::FOnCleanupData(&OnCleanupData, static_cast<void*>(this)) );
-}
-
-void
-UOdysseyTextureLayerImageVector::OnInvalidBlock( const ::ULIS::FBlock* iBlock
-                                               , const ::ULIS::FRectI* iRects
-                                               , const uint32 iNumRects
-                                               , void* iInfo )
-{
-
-}
-
-void
-UOdysseyTextureLayerImageVector::OnCleanupData( uint8* iData, void* iInfo )
-{
-
+                               , nullptr);
 }
 
 FOdysseyVectorEngine*
@@ -95,7 +78,7 @@ UOdysseyTextureLayerImageVector::OnCreated_Implementation()
 }
 
 TArray<::ULIS::FEvent>
-UOdysseyTextureLayerImageVector::RenderImage(::ULIS::FBlock* ioBlock, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList)
+UOdysseyTextureLayerImageVector::RenderImage(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ioBlock, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList)
 {
     if (!IsActivated)
         return iWaitList;
@@ -109,9 +92,9 @@ UOdysseyTextureLayerImageVector::RenderImage(::ULIS::FBlock* ioBlock, const ::UL
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(mBlock->Format());
 
     TArray<::ULIS::FEvent> eventConvertAndExecute = ULISUtils::ConvertAndExecute(ioBlock, mBlock->Format(), iRect, iPos, iWaitList,
-        [this, &ctx](::ULIS::FBlock* ioDest, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList) -> TArray<::ULIS::FEvent>
+        [this, &ctx](TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ioDest, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList) -> TArray<::ULIS::FEvent>
         {
-            ::ULIS::FEvent eventBlend;
+            ::ULIS::FEvent eventBlend = FULISEventBuilder().RetainBlock(mBlock).Build();
 
             ctx.Blend(
                 *mBlock,

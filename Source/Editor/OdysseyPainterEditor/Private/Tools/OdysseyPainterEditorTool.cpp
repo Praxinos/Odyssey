@@ -61,38 +61,6 @@ UOdysseyPainterEditorTool::GetCurrentLayerImageRaster()
 }
 
 void
-UOdysseyPainterEditorTool::RedrawCurrentLayer( const TArray<::ULIS::FRectI>& iRects )
-{
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayer* currentLayer;
-
-    currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
-
-    for ( ::ULIS::FRectI rect : iRects )
-    {
-        // Redraw the whole screen if the rect is explicitly empty
-        if ( rect.Area() == 0 )
-        {
-            currentLayer->RenderImage( layerStack->GetSurface()->Block()
-                                     , layerStack->GetSurface()->Block()->Rect()
-                                     , layerStack->GetSurface()->Block()->Rect().Position()
-                                     , TArray<::ULIS::FEvent>() );
-
-            layerStack->GetSurface()->Invalidate( { layerStack->GetSurface()->Block()->Rect() } );
-        }
-        else
-        {
-            currentLayer->RenderImage( layerStack->GetSurface()->Block()
-                                     , rect
-                                     , rect.Position()
-                                     , TArray<::ULIS::FEvent>() );
-
-            layerStack->GetSurface()->Invalidate( { rect } );
-        }
-    }
-}
-
-void
 UOdysseyPainterEditorTool::SetEditor(FOdysseyPainterEditor* iEditor)
 {
     mEditor = iEditor;

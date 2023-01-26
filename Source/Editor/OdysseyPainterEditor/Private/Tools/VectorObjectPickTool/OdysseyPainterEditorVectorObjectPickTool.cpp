@@ -39,7 +39,7 @@ UOdysseyPainterEditorVectorObjectPickTool::Activate()
 
     vectorEngine->ClearHUD( );
 
-    RedrawCurrentLayer( { { 0, 0, 0, 0 } } );
+    currentVectorLayer->RenderImageChanged(false);
 }
 
 bool
@@ -84,7 +84,7 @@ UOdysseyPainterEditorVectorObjectPickTool::OnMouseDrag(const FOdysseyPoint& iPoi
 
         mPointArray.push_back( point );
 
-        RedrawCurrentLayer( { { 0, 0, 0, 0 } } );
+        currentVectorLayer->RenderImageChanged(true);
     }
 }
 
@@ -110,7 +110,7 @@ UOdysseyPainterEditorVectorObjectPickTool::OnMouseUp(const FOdysseyPoint& iPoint
 
         mSelectionHUD->SetSelecting( false );
 
-        RedrawCurrentLayer( { { 0, 0, 0, 0 } } );
+        currentVectorLayer->RenderImageChanged(false);
 
         return true;
     }

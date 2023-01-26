@@ -32,7 +32,7 @@ UOdysseyPainterEditorVectorObjectRotateTool::Activate()
 
     vectorEngine->SetDrawingFlags( 0 );
 
-    RedrawCurrentLayer( { { 0, 0, 0, 0 } } );
+    currentVectorLayer->RenderImageChanged(false);
 }
 
 bool
@@ -86,7 +86,7 @@ UOdysseyPainterEditorVectorObjectRotateTool::OnMouseDrag(const FOdysseyPoint& iP
             mOldLocalMouseX = iPointInTexture.x;
             mOldLocalMouseY = iPointInTexture.y;
 
-            RedrawCurrentLayer( { beforeBBox | selectedObject->GetBBox( true ) } );
+            currentVectorLayer->RenderImageChanged({ beforeBBox | selectedObject->GetBBox(true) }, false);
         }
     }
 }

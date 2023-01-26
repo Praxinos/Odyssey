@@ -39,7 +39,7 @@ UOdysseyPainterEditorVectorPathEditTool::Activate()
     vectorEngine->ClearHUD();
     vectorEngine->AddHUD( &mCubicPathHUD );
 
-    RedrawCurrentLayer( { { 0, 0, 0, 0 } } );
+    currentVectorLayer->RenderImageChanged(false);
 }
 
 bool
@@ -228,7 +228,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDrag(const FOdysseyPoint& iPoint
                     paintGroup->FindCycles();
                 }
 
-                RedrawCurrentLayer( { { 0, 0, 0, 0 } /*totalInvalidatedArea*/ } );
+                currentVectorLayer->RenderImageChanged(true);
 
                 mOldLocalMouseX = localCoords.x;
                 mOldLocalMouseY = localCoords.y;
@@ -247,7 +247,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseUp(const FOdysseyPoint& iPointIn
 
     if( currentVectorLayer )
     {
-
+        currentVectorLayer->RenderImageChanged(false);
         return true;
     }
 

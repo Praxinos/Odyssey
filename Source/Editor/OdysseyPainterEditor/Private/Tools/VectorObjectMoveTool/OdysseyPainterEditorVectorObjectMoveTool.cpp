@@ -32,7 +32,7 @@ UOdysseyPainterEditorVectorObjectMoveTool::Activate()
 
     vectorEngine->SetDrawingFlags( 0 );
 
-    RedrawCurrentLayer( { { 0, 0, 0, 0 } } );
+    currentVectorLayer->RenderImageChanged(false);
 }
 
 bool
@@ -90,7 +90,8 @@ UOdysseyPainterEditorVectorObjectMoveTool::OnMouseDrag( const FOdysseyPoint& iPo
         mOldWorldMouseX = iPointInTexture.x;
         mOldWorldMouseY = iPointInTexture.y;
 
-        RedrawCurrentLayer( { { 0, 0, 0, 0 } } /*{ beforeBBox | UOdysseyVectorObject::GetBoundingBoxFromList( selectObjectList ) }*/ );
+        currentVectorLayer->RenderImageChanged(true);
+        //RedrawCurrentLayer( { { 0, 0, 0, 0 } } /*{ beforeBBox | UOdysseyVectorObject::GetBoundingBoxFromList( selectObjectList ) }*/, true );
     }
 }
 
@@ -102,7 +103,7 @@ UOdysseyPainterEditorVectorObjectMoveTool::OnMouseUp(const FOdysseyPoint& iPoint
 
     if( currentVectorLayer )
     {
-
+        currentVectorLayer->RenderImageChanged(false);
         return true;
     }
 

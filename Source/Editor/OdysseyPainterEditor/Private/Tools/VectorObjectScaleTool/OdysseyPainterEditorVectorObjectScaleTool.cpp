@@ -32,7 +32,7 @@ UOdysseyPainterEditorVectorObjectScaleTool::Activate()
 
     vectorEngine->SetDrawingFlags( FOdysseyVectorEngine::RENDER_OBJECT_BBOX );
 
-    RedrawCurrentLayer( { { 0, 0, 0, 0 } } );
+    currentVectorLayer->RenderImageChanged(false);
 }
 
 bool
@@ -159,7 +159,8 @@ UE_LOG(LogTemp, Warning, TEXT("Your message %f %f"), newWorldPivot.x, newWorldPi
             mOldLocalMouseX = localCoords.x;
             mOldLocalMouseY = localCoords.y;
 
-            RedrawCurrentLayer( { /*beforeBBox | selectedObject->GetBBox( true )*/{ 0, 0, 0, 0 } } );
+            currentVectorLayer->RenderImageChanged(true);
+            //RedrawCurrentLayer( { /*beforeBBox | selectedObject->GetBBox( true )*/{ 0, 0, 0, 0 } } );
         }
     }
 }
@@ -172,7 +173,7 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseUp(const FOdysseyPoint& iPoin
 
     if( currentVectorLayer )
     {
-
+        currentVectorLayer->RenderImageChanged(false);
         return true;
     }
 

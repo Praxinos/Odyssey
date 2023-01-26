@@ -31,14 +31,8 @@ class ODYSSEYTEXTURE_API UOdysseyTextureLayerImageVector
 
         UOdysseyVectorRoot* mScene;
         FOdysseyVectorEngine* mVEngine;
-        ::ULIS::FBlock* mBlock;
+        TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mBlock;
 
-        static void OnInvalidBlock( const ::ULIS::FBlock* iBlock
-                                  , const ::ULIS::FRectI* iRects
-                                  , const uint32 iNumRects
-                                  , void* iInfo );
-
-        static void OnCleanupData( uint8* iData, void* iInfo );
         void Init( uint32 iWidth, uint32 iHeight );
 
     public:
@@ -64,7 +58,7 @@ class ODYSSEYTEXTURE_API UOdysseyTextureLayerImageVector
          * Takes into account the size / format of the given block
          * 
          */
-        virtual TArray<::ULIS::FEvent> RenderImage(::ULIS::FBlock* ioBlock, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList) override;
+        virtual TArray<::ULIS::FEvent> RenderImage(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ioBlock, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList) override;
  
         void Serialize(FArchive& Ar);
 };

@@ -67,7 +67,6 @@ protected:
     virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;
 
 public:
-    void RedrawCurrentLayer(const TArray<::ULIS::FRectI>& iRects);
     UOdysseyTextureLayerImageVector* GetCurrentLayerImageVector();
     UOdysseyTextureLayerImageRaster* GetCurrentLayerImageRaster();
 

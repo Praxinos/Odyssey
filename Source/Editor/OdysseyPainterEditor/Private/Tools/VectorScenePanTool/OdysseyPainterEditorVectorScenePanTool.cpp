@@ -32,7 +32,7 @@ UOdysseyPainterEditorVectorScenePanTool::Activate()
 
     vectorEngine->SetDrawingFlags( 0 );
 
-    RedrawCurrentLayer( { { 0, 0, 0, 0 } } );
+    currentVectorLayer->RenderImageChanged(false);
 }
 
 bool
@@ -78,7 +78,7 @@ UOdysseyPainterEditorVectorScenePanTool::OnMouseDrag(const FOdysseyPoint& iPoint
         mOldWorldMouseY = iPointInTexture.y;
 
         // redraw the whole layer
-        RedrawCurrentLayer( { { 0, 0, 0, 0 } } );
+        currentVectorLayer->RenderImageChanged(true);
     }
 }
 
@@ -90,7 +90,7 @@ UOdysseyPainterEditorVectorScenePanTool::OnMouseUp(const FOdysseyPoint& iPointIn
 
     if( currentVectorLayer )
     {
-
+        currentVectorLayer->RenderImageChanged(false);
         return true;
     }
 

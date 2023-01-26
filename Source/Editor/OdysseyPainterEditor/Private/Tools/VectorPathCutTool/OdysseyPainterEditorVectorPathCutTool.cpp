@@ -36,7 +36,7 @@ UOdysseyPainterEditorVectorPathCutTool::Activate()
     vectorEngine->ClearHUD();
     vectorEngine->AddHUD( &mCubicPathHUD );
 
-    RedrawCurrentLayer( { { 0, 0, 0, 0 } } );
+    currentVectorLayer->RenderImageChanged(false);
 }
 
 bool
@@ -75,16 +75,23 @@ UOdysseyPainterEditorVectorPathCutTool::OnMouseDown(const FOdysseyPoint& iPointI
 void
 UOdysseyPainterEditorVectorPathCutTool::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 {
-    ::ULIS::FVec2D& p0 = mLineHUD.GetP0();
-    ::ULIS::FVec2D& p1 = mLineHUD.GetP1();
-    ::ULIS::FRectI rect = ::ULIS::FRectI::FromMinMax( ::ULIS::FMath::Min( p0.x, p1.x )
-                                                    , ::ULIS::FMath::Min( p0.y, p1.y )
-                                                    , ::ULIS::FMath::Max( p0.x, p1.x )
-                                                    , ::ULIS::FMath::Max( p0.y, p1.y ) );
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
+    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
 
-    mLineHUD.SetP1( iPointInTexture.x, iPointInTexture.y );
 
-    RedrawCurrentLayer( { rect } );
+    if ( currentVectorLayer )
+    {
+        ::ULIS::FVec2D& p0 = mLineHUD.GetP0();
+        ::ULIS::FVec2D& p1 = mLineHUD.GetP1();
+        ::ULIS::FRectI rect = ::ULIS::FRectI::FromMinMax(::ULIS::FMath::Min(p0.x, p1.x)
+                                                         , ::ULIS::FMath::Min(p0.y, p1.y)
+                                                         , ::ULIS::FMath::Max(p0.x, p1.x)
+                                                         , ::ULIS::FMath::Max(p0.y, p1.y));
+
+        mLineHUD.SetP1(iPointInTexture.x, iPointInTexture.y);
+
+        currentVectorLayer->RenderImageChanged({ rect }, true);
+    }
 }
 
 bool
@@ -118,10 +125,13 @@ UOdysseyPainterEditorVectorPathCutTool::OnMouseUp(const FOdysseyPoint& iPointInT
             }
 
             // redraw the whole layer
-            RedrawCurrentLayer( { { 0, 0, 0, 0 } } );
+            currentVectorLayer->RenderImageChanged(false);
 
             return true;
         }
+
+        // redraw the whole layer
+        currentVectorLayer->RenderImageChanged(false);
     }
 
     return false;

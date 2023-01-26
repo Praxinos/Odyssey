@@ -94,6 +94,20 @@ UOdysseyTextureLayer::CopyImage(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> 
 }
 
 void
+UOdysseyTextureLayer::RenderImageChanged(bool iIsInteractive)
+{
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetLayerStack());
+    if ( !layerStack )
+        return;
+
+    UTexture2D* texture = layerStack->GetTexture();
+    if ( !texture )
+        return;
+
+    RenderImageChanged({ ::ULIS::FRectI::FromXYWH(0, 0, texture->Source.GetSizeX(), texture->Source.GetSizeY()) }, iIsInteractive);
+}
+
+void
 UOdysseyTextureLayer::RenderImageChanged(const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive)
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetLayerStack());

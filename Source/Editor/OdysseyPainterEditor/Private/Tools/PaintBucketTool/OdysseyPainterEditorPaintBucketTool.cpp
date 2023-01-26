@@ -3,6 +3,8 @@
 
 #include "Tools/PaintBucketTool/OdysseyPainterEditorPaintBucketTool.h"
 
+#include "OdysseyRasterBlock.h"
+
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
 UOdysseyPainterEditorPaintBucketTool::~UOdysseyPainterEditorPaintBucketTool()
@@ -31,9 +33,9 @@ UOdysseyPainterEditorPaintBucketTool::CanDraw()
 
 static void floodFill ( int32 x
                       , int32 y
-                      , ::ULIS::FBlock* iSrcImage
-                      , ::ULIS::FBlock* iDstImage
-                      , ::ULIS::FBlock* iMask
+                      , TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iSrcImage
+                      , TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iDstImage
+                      , TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iMask
                       , ::ULIS::ISample& iColor
                       , uint8 iTolerance ) {
     if ( ( x >= 0 ) && ( x < iSrcImage->Width()  ) &&
@@ -133,7 +135,7 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseDownRaster( UOdysseyTextureLayerIma
                                                        , const FOdysseyPoint& iPointInTexture
                                                        , const FKey& iKey )
 {
-	::ULIS::FBlock* paintBlock = mPaintEngine.PaintBlock();
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> paintBlock = mPaintEngine.PaintBlock();
     ::ULIS::FColor color = GetEditorAs<FOdysseyPainterEditor>()->PaintColor().GetValue();
     /*::ULIS::FRectI rect = paintBlock->Rect();*/
     ::ULIS::eFormat format = paintBlock->Format();
@@ -150,17 +152,19 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseDownRaster( UOdysseyTextureLayerIma
 
     floodFill ( iPointInTexture.x
               , iPointInTexture.y
-              , (::ULIS::FBlock*)currentRasterLayer.GetBlock()
+              , currentRasterLayer.GetRasterBlock()->GetBlock()
               , paintBlock
               , nullptr
               , color
               , Tolerance );
 
+    
+
 	/*ctx.Finish();*/
 
 	paintBlock->Dirty();
 
-    Commit(); */
+    Commit();
 
     return true;
 }
@@ -212,7 +216,7 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseDown(const FOdysseyPoint& iPointInT
         OnMouseDownVector( *currentVectorLayer, iPointInTexture, iKey );
     }
 
-    RedrawCurrentLayer( { { 0, 0, 0, 0 } } );
+    currentLayer->RenderImageChanged(false);
 
     return true;
 }
