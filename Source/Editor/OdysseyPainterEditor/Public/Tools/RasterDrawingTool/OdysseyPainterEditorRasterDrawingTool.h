@@ -29,8 +29,9 @@ public:
     typedef TMap< TObjectPtr<UClass>, TObjectPtr<UObject>> tOverride;
 
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnApplyOverrides, const tOverride&);
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnDestroyBrushInstance, UOdysseyBrushAssetBase*);
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnCreatedBrushInstance, UOdysseyBrushAssetBase*);
     DECLARE_DELEGATE_RetVal_OneParam(TArray<FOdysseyPoint>, FAdaptShapePoints, const TArray<FOdysseyPoint>&);
-
 public:
     // Destructor
     virtual ~UOdysseyPainterEditorRasterDrawingTool();
@@ -89,6 +90,12 @@ public:
 
     // Retuns the instance of the selected Shape
     UOdysseyShape* GetSelectedShapeInstance() const;
+
+    // Returns the OnDestroyBrushInstance delegate
+    FOnDestroyBrushInstance& OnDestroyBrushInstance();
+
+    // Returns the OnCreatedBrushInstance delegate
+    FOnCreatedBrushInstance& OnCreatedBrushInstance();
 
     // Returns the OnApplyOverrides delegate
     FOnApplyOverrides& OnApplyOverridesDelegate();
@@ -207,6 +214,8 @@ protected:
 
     //Internal
     FOnApplyOverrides                   mOnApplyOverridesDelegate;
+    FOnDestroyBrushInstance             mOnDestroyBrushInstance;
+    FOnCreatedBrushInstance             mOnCreatedBrushInstance;
     FAdaptShapePoints                   mAdaptShapePointsDelegate;
     FSimpleMulticastDelegate            mOnBrushChanged;
     FSimpleMulticastDelegate            mOnShapeChanged;

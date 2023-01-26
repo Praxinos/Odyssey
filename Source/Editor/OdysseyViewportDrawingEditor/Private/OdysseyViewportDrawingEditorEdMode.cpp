@@ -108,7 +108,7 @@ bool FOdysseyViewportDrawingEditorEdMode::CapturedMouseMove(FEditorViewportClien
 void FOdysseyViewportDrawingEditorEdMode::Tick(FEditorViewportClient* ViewportClient, float DeltaTime)
 {
     FEdMode::Tick(ViewportClient, DeltaTime);
-    mViewportDrawingEditorPainter->Tick(ViewportClient, DeltaTime);
+    mViewportDrawingEditorPainter->Tick(DeltaTime);
 }
 
 bool FOdysseyViewportDrawingEditorEdMode::IsEditingEnabled() const
@@ -206,16 +206,6 @@ void FOdysseyViewportDrawingEditorEdMode::Exit()
         FToolkitManager::Get().CloseToolkit(Toolkit.ToSharedRef());
         Toolkit.Reset();
     }
-
-    // Unbind delegates
-    /*FAssetRegistryModule& assetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>(TEXT("AssetRegistry"));
-    assetRegistryModule.Get().OnAssetRemoved().RemoveAll(this);
-    FReimportManager::Instance()->OnPostReimport().RemoveAll(this);
-    GEditor->GetEditorSubsystem<UImportSubsystem>()->OnAssetPostImport.RemoveAll(this);
-    FEditorDelegates::PreSaveWorld.RemoveAll(this);
-    FEditorDelegates::PostSaveWorld.RemoveAll(this);
-    GEditor->OnObjectsReplaced().RemoveAll(this);*/
-    //USelection::SelectionChangedEvent.Remove(SelectionChangedHandle);
 
     mViewportDrawingEditorPainter->Finalize();
 

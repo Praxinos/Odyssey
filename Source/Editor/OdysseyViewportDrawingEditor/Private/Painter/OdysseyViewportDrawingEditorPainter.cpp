@@ -248,11 +248,11 @@ void FOdysseyViewportDrawingEditorPainter::ClearAllDelegatesSequencers()
 // ---
 
 
-void FOdysseyViewportDrawingEditorPainter::Tick(FEditorViewportClient* iViewportClient, float iDeltaTime)
+void FOdysseyViewportDrawingEditorPainter::Tick(float iDeltaTime)
 {
-    if( mPaintingAdapter )
+    if (mPaintingAdapter)
     {
-        mPaintingAdapter->Tick();
+        mPaintingAdapter->Tick(iDeltaTime);
     }
 }
 

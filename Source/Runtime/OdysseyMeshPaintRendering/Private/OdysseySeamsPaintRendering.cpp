@@ -1,4 +1,4 @@
-#include "OdysseyMeshPaintRendering.h"
+#include "OdysseySeamsPaintRendering.h"
 #include "ShaderParameters.h"
 #include "RenderResource.h"
 #include "Shader.h"
@@ -11,13 +11,13 @@
 #include "Engine/TextureRenderTarget2D.h"
 #include "PipelineStateCache.h"
 
-namespace OdysseyMeshPaintRendering
+namespace OdysseySeamsPaintRendering
 {
 
-    /** Mesh paint vertex shader */
-    class TOdysseyMeshPaintVertexShader : public FGlobalShader
+    /** Seams paint vertex shader */
+    class TOdysseySeamsPaintVertexShader : public FGlobalShader
     {
-        DECLARE_SHADER_TYPE(TOdysseyMeshPaintVertexShader, Global);
+        DECLARE_SHADER_TYPE(TOdysseySeamsPaintVertexShader, Global);
 
     public:
 
@@ -27,10 +27,10 @@ namespace OdysseyMeshPaintRendering
         }
 
         /** Default constructor. */
-        TOdysseyMeshPaintVertexShader() {}
+        TOdysseySeamsPaintVertexShader() {}
 
         /** Initialization constructor. */
-        TOdysseyMeshPaintVertexShader(const ShaderMetaType::CompiledShaderInitializerType& Initializer)
+        TOdysseySeamsPaintVertexShader(const ShaderMetaType::CompiledShaderInitializerType& Initializer)
             : FGlobalShader(Initializer)
         {
             TransformParameter.Bind(Initializer.ParameterMap, TEXT("c_Transform"));
@@ -46,13 +46,13 @@ namespace OdysseyMeshPaintRendering
     };
 
 
-    IMPLEMENT_SHADER_TYPE(, TOdysseyMeshPaintVertexShader, TEXT("/Plugins/Iliad/Private/OdysseyMeshPaintShader.usf"), TEXT("MainVS"), SF_Vertex);
+    IMPLEMENT_SHADER_TYPE(, TOdysseySeamsPaintVertexShader, TEXT("/Plugins/Iliad/Private/OdysseySeamsPaintShader.usf"), TEXT("MainVS"), SF_Vertex);
 
 
     /** Mesh paint pixel shader */
-    class TOdysseyMeshPaintPixelShader : public FGlobalShader
+    class TOdysseySeamsPaintPixelShader : public FGlobalShader
     {
-        DECLARE_SHADER_TYPE(TOdysseyMeshPaintPixelShader, Global);
+        DECLARE_SHADER_TYPE(TOdysseySeamsPaintPixelShader, Global);
     public:
 
         static bool ShouldCompilePermutation(const FGlobalShaderPermutationParameters& Parameters)
@@ -61,19 +61,21 @@ namespace OdysseyMeshPaintRendering
         }
 
         /** Default constructor. */
-        TOdysseyMeshPaintPixelShader() {}
+        TOdysseySeamsPaintPixelShader() {}
 
         /** Initialization constructor. */
-        TOdysseyMeshPaintPixelShader(const ShaderMetaType::CompiledShaderInitializerType& Initializer)
+        TOdysseySeamsPaintPixelShader(const ShaderMetaType::CompiledShaderInitializerType& Initializer)
             : FGlobalShader(Initializer)
         {
-            WorldToBrushMatrixParameter.Bind(Initializer.ParameterMap, TEXT("c_WorldToBrushMatrix"));
             Stroke2DParameter.Bind(Initializer.ParameterMap, TEXT("s_Stroke2D"));
-            TextureHitPointParameter.Bind(Initializer.ParameterMap, TEXT("c_TextureHitPoint"));
-            StampQualityParameter.Bind(Initializer.ParameterMap, TEXT("c_StampQuality"));
+            SeamMaskParameter.Bind(Initializer.ParameterMap, TEXT("s_SeamMask"));
+            Stroke2DParameterSampler.Bind(Initializer.ParameterMap, TEXT("s_Stroke2DSampler"));
+            SeamMaskParameterSampler.Bind(Initializer.ParameterMap, TEXT("s_SeamMaskSampler"));
+            WidthPixelOffsetParameter.Bind(Initializer.ParameterMap, TEXT("c_WidthPixelOffset"));
+            HeightPixelOffsetParameter.Bind(Initializer.ParameterMap, TEXT("c_HeightPixelOffset"));
         }
 
-        void SetParameters(FRHICommandList& RHICmdList, const float InGamma, const FOdysseyMeshPaintShaderParameters& InShaderParams)
+        void SetParameters(FRHICommandList& RHICmdList, const float InGamma, const FOdysseySeamsPaintShaderParameters& InShaderParams)
         {
             FRHIPixelShader* ShaderRHI = RHICmdList.GetBoundPixelShader();
 
@@ -81,47 +83,52 @@ namespace OdysseyMeshPaintRendering
                 RHICmdList,
                 ShaderRHI,
                 Stroke2DParameter,
-                TextureParameterSampler,
+                Stroke2DParameterSampler,
                 TStaticSamplerState< SF_Trilinear, AM_Clamp, AM_Clamp, AM_Clamp >::GetRHI(),
-                InShaderParams.Stroke2D->Resource->TextureRHI);
-            //InShaderParams.Stroke2D->GetRenderTargetResource()->TextureRHI);
+                //InShaderParams.Stroke2D->Resource->TextureRHI);
+                InShaderParams.Stroke2D->GetRenderTargetResource()->TextureRHI);
 
-            SetShaderValue(RHICmdList, ShaderRHI, WorldToBrushMatrixParameter, (FMatrix44f)InShaderParams.WorldToBrushMatrix);
+            SetTextureParameter(
+                RHICmdList,
+                ShaderRHI,
+                SeamMaskParameter,
+                SeamMaskParameterSampler,
+                TStaticSamplerState< SF_Trilinear, AM_Clamp, AM_Clamp, AM_Clamp >::GetRHI(),
+                InShaderParams.SeamMaskRenderTarget->GetRenderTargetResource()->TextureRHI);
 
-            SetShaderValue(RHICmdList, ShaderRHI, TextureHitPointParameter, (FVector2f)InShaderParams.TextureHitPoint);
+            SetShaderValue(RHICmdList, ShaderRHI, WidthPixelOffsetParameter, InShaderParams.WidthPixelOffset);
 
-            SetShaderValue(RHICmdList, ShaderRHI, StampQualityParameter, InShaderParams.StampQuality);
+            SetShaderValue(RHICmdList, ShaderRHI, HeightPixelOffsetParameter, InShaderParams.HeightPixelOffset);
         }
 
     private:
-        /** Sampler Texture that is a clone of the destination render target before we start drawing */
-        LAYOUT_FIELD(FShaderResourceParameter, TextureParameterSampler);
+        LAYOUT_FIELD(FShaderResourceParameter, Stroke2DParameterSampler);
 
-        /** Reference colors for the application in 3D */
+        LAYOUT_FIELD(FShaderResourceParameter, SeamMaskParameterSampler);
+
         LAYOUT_FIELD(FShaderResourceParameter, Stroke2DParameter);
 
-        /** Brush -> World matrix */
-        LAYOUT_FIELD(FShaderParameter, WorldToBrushMatrixParameter);
+        LAYOUT_FIELD(FShaderResourceParameter, SeamMaskParameter);
 
-        LAYOUT_FIELD(FShaderParameter, TextureHitPointParameter);
+        LAYOUT_FIELD(FShaderParameter, WidthPixelOffsetParameter);
 
-        LAYOUT_FIELD(FShaderParameter, StampQualityParameter);
+        LAYOUT_FIELD(FShaderParameter, HeightPixelOffsetParameter);
     };
 
-    IMPLEMENT_SHADER_TYPE(, TOdysseyMeshPaintPixelShader, TEXT("/Plugins/Iliad/Private/OdysseyMeshPaintShader.usf"), TEXT("MainPS"), SF_Pixel);
+    IMPLEMENT_SHADER_TYPE(, TOdysseySeamsPaintPixelShader, TEXT("/Plugins/Iliad/Private/OdysseySeamsPaintShader.usf"), TEXT("MainPS"), SF_Pixel);
 
     typedef FSimpleElementVertexDeclaration FMeshPaintDilateVertexDeclaration;
     TGlobalResource< FMeshPaintDilateVertexDeclaration > GMeshPaintDilateVertexDeclaration;
 
     /** Binds the mesh paint vertex and pixel shaders to the graphics device */
-    void SetMeshPaintShaders(FRHICommandList& iRHICmdList, FGraphicsPipelineStateInitializer& iGraphicsPSOInit,
+    void SetSeamsPaintShaders(FRHICommandList& iRHICmdList, FGraphicsPipelineStateInitializer& iGraphicsPSOInit,
         ERHIFeatureLevel::Type iFeatureLevel,
         const FMatrix& iTransform,
         const float iGamma,
-        const FOdysseyMeshPaintShaderParameters& iShaderParams)
+        const FOdysseySeamsPaintShaderParameters& iShaderParams)
     {
-        TShaderMapRef< TOdysseyMeshPaintVertexShader > VertexShader(GetGlobalShaderMap(iFeatureLevel));
-        TShaderMapRef< TOdysseyMeshPaintPixelShader > PixelShader(GetGlobalShaderMap(iFeatureLevel));
+        TShaderMapRef< TOdysseySeamsPaintVertexShader > VertexShader(GetGlobalShaderMap(iFeatureLevel));
+        TShaderMapRef< TOdysseySeamsPaintPixelShader > PixelShader(GetGlobalShaderMap(iFeatureLevel));
 
         iGraphicsPSOInit.BoundShaderState.VertexDeclarationRHI = GMeshPaintDilateVertexDeclaration.VertexDeclarationRHI;
         iGraphicsPSOInit.BoundShaderState.VertexShaderRHI = VertexShader.GetVertexShader();

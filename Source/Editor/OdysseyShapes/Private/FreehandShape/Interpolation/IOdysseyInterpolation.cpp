@@ -16,9 +16,9 @@ IOdysseyInterpolation::~IOdysseyInterpolation()
 IOdysseyInterpolation::IOdysseyInterpolation()
     : mInputPoints()
     , mResultPoints()
-    , mStep( 1.f )
-    , mLastDrawnLength( 0.f )
-    , mTotalStrokeLength( 0.f )
+    , mStep(1.f)
+    , mLastDrawnLength(0.f)
+    , mTotalStrokeLength(0.f)
 {
 }
 
@@ -34,13 +34,12 @@ IOdysseyInterpolation::Reset()
 }
 
 void
-IOdysseyInterpolation::AddPoint( const FOdysseyPoint& iPoint )
+IOdysseyInterpolation::AddPoint(const FOdysseyPoint& iPoint)
 {
     do
     {
-        mInputPoints.Add( iPoint );
-    } 
-    while (mInputPoints.Num() < MinimumRequiredPoints());
+        mInputPoints.Add(iPoint);
+    } while (mInputPoints.Num() < MinimumRequiredPoints());
 }
 
 float
@@ -50,7 +49,7 @@ IOdysseyInterpolation::GetStep() const
 }
 
 void
-IOdysseyInterpolation::SetStep( float iValue )
+IOdysseyInterpolation::SetStep(float iValue)
 {
     mStep = iValue;
 }

@@ -5,6 +5,8 @@
 
 #include "OdysseyViewportDrawingEditorGUI.h"
 #include "FOdysseyViewportDrawingEditorModeToolbar.h"
+#include "Materials/MaterialExpressionTextureCoordinate.h"
+#include "OdysseyViewportDrawingEditorUtils.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyViewportDrawingEditor"
 
@@ -24,6 +26,7 @@ FOdysseyViewportDrawingEditor::FOdysseyViewportDrawingEditor() :
     mActor(nullptr),
     mComponent(nullptr),
     mMaterial(nullptr),
+	mStampQuality( 10.f ),
 	mPaintingAdapterMethod(EOdysseyViewportDrawingPaintingAdapterMethod::OdysseyTextureBased)
 {
 }
@@ -99,6 +102,42 @@ EOdysseyViewportDrawingPaintingAdapterMethod FOdysseyViewportDrawingEditor::Pain
 	return mPaintingAdapterMethod;
 }
 
+
+int32 FOdysseyViewportDrawingEditor::GetUVIndexUsedByCurrentTexture()
+{
+	if (mMaterial != NULL)
+	{
+        for (UMaterialExpression* expression : mMaterial->GetMaterial()->GetExpressions())
+        {
+			UMaterialExpressionTextureBase* TextureBase = Cast<UMaterialExpressionTextureBase>(expression);
+			if (TextureBase != NULL &&
+				TextureBase->Texture != NULL &&
+				TextureBase->Texture == Texture() )
+			{
+				UMaterialExpressionTextureSample* TextureSample = Cast<UMaterialExpressionTextureSample>(expression);
+				if (TextureSample != NULL)
+				{
+					UMaterialExpressionTextureCoordinate* TextureCoords = Cast<UMaterialExpressionTextureCoordinate>(TextureSample->Coordinates.Expression);
+					if (TextureCoords != NULL)
+					{
+						return TextureCoords->CoordinateIndex;
+					}
+					else
+					{
+						return TextureSample->ConstCoordinate;
+					}
+				}
+			}
+		}
+	}
+	return 0;
+}
+
+float FOdysseyViewportDrawingEditor::GetStampQuality() const
+{
+	return mStampQuality;
+}
+
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Setters
 
@@ -164,6 +203,11 @@ void FOdysseyViewportDrawingEditor::SetPaintingAdapterMethod(EOdysseyViewportDra
 {
 	mPaintingAdapterMethod = iNewMethod;
 	mAdapterChangedDelegate.Broadcast();
+}
+
+void FOdysseyViewportDrawingEditor::SetStampQuality(float iStampQuality)
+{
+	mStampQuality = iStampQuality;
 }
 
 //--------------------------------------------------------------------------------------
@@ -334,7 +378,7 @@ FOdysseyViewportDrawingEditor::UpdateSelectableTextures()
 		return;
 
 	TSharedPtr<IMeshPaintGeometryAdapter> adapter = mComponentToAdapterMap.FindChecked(mComponent);
-	TexturePaintHelpers::RetrieveTexturesForComponent(mComponent, adapter.Get(), mSelectableTextures);
+	FOdysseyViewportDrawingEditorUtils::RetrieveTexturesForComponent(mComponent, mSelectableTextures);
 }
 
 void

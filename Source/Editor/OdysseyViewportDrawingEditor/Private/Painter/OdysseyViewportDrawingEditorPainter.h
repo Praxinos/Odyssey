@@ -44,7 +44,7 @@ private:
 public:
 	void AddReferencedObjects(FReferenceCollector& iCollector);
 	TSharedPtr<IMeshPaintGeometryAdapter> GetMeshAdapterForComponent(const UMeshComponent* iComponent);
-	void Tick(FEditorViewportClient* iViewportClient, float iDeltaTime);
+    void Tick(float iDeltaTime);
 	void SelectActor(AActor* iActor);
 	void ActorDeselected(AActor* iActor);
 	IOdysseyViewportDrawingEditorAdapter* GetOdysseyViewportDrawingEditorAdapter();

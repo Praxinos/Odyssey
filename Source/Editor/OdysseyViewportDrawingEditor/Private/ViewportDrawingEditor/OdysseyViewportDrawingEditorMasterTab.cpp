@@ -120,7 +120,7 @@ FOdysseyViewportDrawingEditorMasterTab::CreateWidget()
                                 .ThumbnailSizeOverride(FIntPoint(70, 70))
                                 .ThumbnailPool( mThumbnailPool )
                         ]
-                    /* + SVerticalBox::Slot()
+                     + SVerticalBox::Slot()
                         .Padding(2)
                         .AutoHeight()
                         [
@@ -151,7 +151,20 @@ FOdysseyViewportDrawingEditorMasterTab::CreateWidget()
                                 .Font(FAppStyle::GetFontStyle("PropertyWindow.NormalFont"))
                                 .Text_Lambda([=] { return FOdysseyViewportDrawingEditorMasterTab::GetMethodAsText(mEditor->PaintingAdapterMethod());})
                             ]
-                        ]*/
+                        ]
+                    + SVerticalBox::Slot()
+                        .Padding(2)
+                        .AutoHeight()
+                        [
+                            SNew(SSpinBox<float>)
+                            .MinDesiredWidth(50.f)
+                            .Value(this, &FOdysseyViewportDrawingEditorMasterTab::GetStampQuality)
+                            .MinValue(1.f)
+                            .MaxValue(100.f)
+                            //.OnValueCommitted(this, &SOdysseyTextureConfigureWindow::OnSetWidth)
+                            .OnValueChanged(this, &FOdysseyViewportDrawingEditorMasterTab::OnStampQualityChanged)
+                            .IsEnabled_Lambda([this]() {return (mEditor->PaintingAdapterMethod() == OdysseyMeshBased); } )
+                        ]
                     //---
             ];
 }
@@ -185,15 +198,6 @@ FOdysseyViewportDrawingEditorMasterTab::OnMenuClosed( bool iOpen)
         mMeshSelectComboButton->SetMenuContent(SNullWidget::NullWidget);
 }
 
-
-TSharedRef<SWidget>
-FOdysseyViewportDrawingEditorMasterTab::GenerateMeshSelectorComboButtonItem( TSharedPtr<FString> iItem )
-{
-    return SNew( STextBlock )
-                .Text( FText::FromString( *( iItem.Get() ) ) )
-                .TextStyle( FAppStyle::Get(), "PropertyEditor.AssetClass" )
-                .Font( FAppStyle::GetFontStyle( "PropertyWindow.NormalFont" ) );
-}
 
 FText
 FOdysseyViewportDrawingEditorMasterTab::CreateTextMeshSelector() const
@@ -315,6 +319,12 @@ FOdysseyViewportDrawingEditorMasterTab::ShouldFilterTextureAsset(const FAssetDat
     return !(mEditor->SelectableTextures().ContainsByPredicate([=](const FPaintableTexture& iTexture) { return iTexture.Texture->GetFullName() == iAssetData.GetFullName(); }));
 }
 
+float
+FOdysseyViewportDrawingEditorMasterTab::GetStampQuality() const
+{
+    return mEditor->GetStampQuality();
+}
+
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------- Event Listeners
 
@@ -377,6 +387,13 @@ FOdysseyViewportDrawingEditorMasterTab::OnTextureChanged(const FAssetData& iAsse
         mEditor->SetTexture( texture );
     }
 }
+
+void
+FOdysseyViewportDrawingEditorMasterTab::OnStampQualityChanged(float iNewQualityValue)
+{
+    mEditor->SetStampQuality( iNewQualityValue );
+}
+
 
 #undef LOCTEXT_NAMESPACE
 
