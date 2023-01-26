@@ -129,13 +129,10 @@ static void floodFill ( int32 x
 }
 
 bool
-UOdysseyPainterEditorPaintBucketTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
+UOdysseyPainterEditorPaintBucketTool::OnMouseDownRaster( UOdysseyTextureLayerImageRaster& currentRasterLayer
+                                                       , const FOdysseyPoint& iPointInTexture
+                                                       , const FKey& iKey )
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
- /*
-    UOdysseyTextureLayer* layer = GetCurrentLayer();
-    */
-    UOdysseyTextureLayerImageRaster* currentRasterLayer = GetCurrentLayerImageRaster();
 	::ULIS::FBlock* paintBlock = mPaintEngine.PaintBlock();
     ::ULIS::FColor color = GetEditorAs<FOdysseyPainterEditor>()->PaintColor().GetValue();
     /*::ULIS::FRectI rect = paintBlock->Rect();*/
@@ -153,7 +150,7 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseDown(const FOdysseyPoint& iPointInT
 
     floodFill ( iPointInTexture.x
               , iPointInTexture.y
-              , (::ULIS::FBlock*)currentRasterLayer->GetBlock()
+              , (::ULIS::FBlock*)currentRasterLayer.GetBlock()
               , paintBlock
               , nullptr
               , color
@@ -164,6 +161,58 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseDown(const FOdysseyPoint& iPointInT
 	paintBlock->Dirty();
 
     Commit(); */
+
+    return true;
+}
+
+bool
+UOdysseyPainterEditorPaintBucketTool::OnMouseDownVector( UOdysseyTextureLayerImageVector& currentVectorLayer
+                                                       , const FOdysseyPoint& iPointInTexture
+                                                       , const FKey& iKey )
+{
+    ::ULIS::FColor color = GetEditorAs<FOdysseyPainterEditor>()->PaintColor().GetValue();
+    UOdysseyVectorObject* selectedObject = currentVectorLayer.GetScene()->GetLastSelected();
+
+    if( selectedObject )
+    {
+        if( selectedObject->GetClass() == UOdysseyVectorGroupPaint::StaticClass() )
+        {
+            UOdysseyVectorGroupPaint* paintGroup = Cast<UOdysseyVectorGroupPaint>(selectedObject);
+            BLPoint localCoords = paintGroup->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
+            uint32 rgba8 = ( ( uint32 ) color.A8() << 24 ) 
+                        |  ( ( uint32 ) color.B8() << 16 )
+                        |  ( ( uint32 ) color.G8() <<  8 )
+                        |               color.R8();
+
+            paintGroup->NewBucket( rgba8, localCoords.x, localCoords.y );
+        }
+    }
+
+    return true;
+}
+
+bool
+UOdysseyPainterEditorPaintBucketTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
+{
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
+
+    UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
+
+    if( currentLayer->GetClass() == UOdysseyTextureLayerImageRaster::StaticClass() )
+    {
+        UOdysseyTextureLayerImageRaster* currentRasterLayer = Cast<UOdysseyTextureLayerImageRaster>(currentLayer);
+
+        OnMouseDownRaster( *currentRasterLayer, iPointInTexture, iKey );
+    }
+
+    if( currentLayer->GetClass() == UOdysseyTextureLayerImageVector::StaticClass() )
+    {
+        UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
+
+        OnMouseDownVector( *currentVectorLayer, iPointInTexture, iKey );
+    }
+
+    RedrawCurrentLayer( { { 0, 0, 0, 0 } } );
 
     return true;
 }

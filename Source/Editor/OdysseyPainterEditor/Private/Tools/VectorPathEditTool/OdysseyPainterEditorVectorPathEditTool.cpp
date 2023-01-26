@@ -221,7 +221,14 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDrag(const FOdysseyPoint& iPoint
 
                 currentVectorLayer->GetEngine()->InvalidateRegion( totalInvalidatedArea );
 
-                RedrawCurrentLayer( { /*{ 0, 0, 0, 0 }*/ totalInvalidatedArea } );
+                if( selectedObject->GetParent()->GetClass() == UOdysseyVectorGroupPaint::StaticClass() )
+                {
+                    UOdysseyVectorGroupPaint* paintGroup = Cast<UOdysseyVectorGroupPaint>(selectedObject->GetParent());
+
+                    paintGroup->FindCycles();
+                }
+
+                RedrawCurrentLayer( { { 0, 0, 0, 0 } /*totalInvalidatedArea*/ } );
 
                 mOldLocalMouseX = localCoords.x;
                 mOldLocalMouseY = localCoords.y;

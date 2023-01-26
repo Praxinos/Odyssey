@@ -6,30 +6,57 @@ FOdysseyVectorLoop::~FOdysseyVectorLoop()
 
 //static
 FOdysseyVectorLoop::FOdysseyVectorLoop( UOdysseyVectorObject& iParent
+                                      , uint64 iID
                                       , std::vector<UOdysseyVectorVertex*>& iVertexArray
                                       , std::vector<FOdysseyVectorSection*>& iSectionArray )
     : mParent( iParent )
+    , mID( iID )
+    , mColor( 0xFF808080 )
 {
+    Cast<UOdysseyVectorVertexIntersection>(iVertexArray[0])->AttachLoop( this );
+
     Build( iVertexArray, iSectionArray );
 }
 
-/*
+// static
 uint64
-UOdysseyVectorLoop::GenerateID( std::list<FOdysseyVectorSection*> iSectionList )
+FOdysseyVectorLoop::GenerateID( std::vector<FOdysseyVectorSection*>& iSectionArray )
 {
     uint64 loopID = 0;
 
-    for( std::list<FOdysseyVectorSection*>::iterator it = iSectionList.begin(); it != iSectionList.end(); ++it )
+    for( int i = 0; i < iSectionArray.size(); i++ )
     {
-        FOdysseyVectorSection* section = static_cast<FOdysseyVectorSection*>(*it);
-
-        loopID = loopID ^ ( uint64 ) section;
+        loopID = loopID ^ ( uint64 ) iSectionArray[i];
     }
 
     return loopID;
 }
-*/
 
+// static
+bool
+FOdysseyVectorLoop::Exists( uint64 iID
+                          , std::vector<UOdysseyVectorVertex*>& iVertexArray
+                          , std::vector<FOdysseyVectorSection*>& iSectionArray )
+{
+    for( int i = 0; i < iVertexArray.size(); i++ )
+    {
+        if( iVertexArray[i]->GetClass() == UOdysseyVectorVertexIntersection::StaticClass() )
+        {
+            UOdysseyVectorVertexIntersection* intersectionVertex = Cast<UOdysseyVectorVertexIntersection>( iVertexArray[i] );
+            FOdysseyVectorLoop* cycle = intersectionVertex->GetLoop();
+
+            if( cycle )
+            {
+                if( cycle->mID == iID )
+                {
+                    return true;
+                }
+            }
+        }
+    }
+
+    return false;
+}
 
 void
 FOdysseyVectorLoop::BuildSegmentCubic( UOdysseyVectorSegmentCubic& iSegment
@@ -96,7 +123,6 @@ FOdysseyVectorLoop::Build( std::vector<UOdysseyVectorVertex*>& iVertexArray
 {
     int seg = 0;
 
-/*
     mPath.clear();
 
      //mPointArray.clear();
@@ -126,8 +152,8 @@ FOdysseyVectorLoop::Build( std::vector<UOdysseyVectorVertex*>& iVertexArray
 
         mPath.close();
     }
-*/
 
+/*
     mPath.clear();
 UE_LOG(LogTemp, Warning, TEXT("FOdysseyVectorLoop::Build: Array size %d"), iSectionArray.size() );
     for( int i = 0; i < iSectionArray.size(); i++ )
@@ -139,8 +165,50 @@ UE_LOG(LogTemp, Warning, TEXT("FOdysseyVectorLoop::Build: Array size %d"), iSect
         if( i == 0 ) mPath.moveTo( originAt.x, originAt.y );
         else         mPath.lineTo( originAt.x, originAt.y );
     }
-
+*/
     mPath.close();
+}
+
+void
+FOdysseyVectorLoop::SetColor( uint32 iColor )
+{
+    mColor = iColor;
+}
+
+uint32
+FOdysseyVectorLoop::GetColor()
+{
+    return mColor;
+}
+
+bool
+FOdysseyVectorLoop::HitTest( double iX, double iY )
+{
+/*
+    mPath.clear();
+    mPath.moveTo(0,0);
+    mPath.lineTo(0,0);
+*/
+    BLContext* blctx = mParent.GetRoot()->GetEngine()->GetBLContext();
+    BLPoint pt = { iX, iY };
+    BLPoint* vertex = ( BLPoint*) mPath.vertexData();
+
+    blctx->save();
+    blctx->setMatrix( mParent.GetWorldMatrix() );
+    blctx->setStrokeWidth(1.0f);
+
+    UE_LOG(LogTemp, Warning, TEXT("Pt: %f %f"), iX, iY );
+
+    for( int i = 0; i < mPath.size(); i++ ) {
+        UE_LOG(LogTemp, Warning, TEXT("%f %f"), vertex[i].x, vertex[i].y );
+    }
+
+    // WARNING: looks like in this version the return value is a bool (in the shape of an int) but in later version is a enum value. We will have to fix that.
+    uint32 ret = mPath.hitTest( pt, BL_FILL_RULE_EVEN_ODD );
+
+    blctx->restore();
+
+    return ( ret ) ? true : false;
 }
 
 void
@@ -150,7 +218,7 @@ FOdysseyVectorLoop::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
 
     /*if ( mVertexList.size() ) 
     {*/
-       blctx->setFillStyle( BLRgba32( /*mFillColor*/0xFF0080FF ) );
+       blctx->setFillStyle( BLRgba32( /*mFillColor*/mColor ) );
 
        /*iBLContext.fillPolygon( &mPointArray[0], mPointArray.size() );*/
        blctx->fillPath( mPath );

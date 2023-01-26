@@ -28,7 +28,7 @@ class UOdysseyVectorVertexIntersection : public UOdysseyVectorVertex
         uint64 mIntersectionID;
         // map for intersection positions
         std::map<UOdysseyVectorSegment*, FIntersection> mTMap;
-        bool mVisited;
+        FOdysseyVectorLoop* mLoop;
 
     public:
         ~UOdysseyVectorVertexIntersection();
@@ -40,6 +40,6 @@ class UOdysseyVectorVertexIntersection : public UOdysseyVectorVertex
         void AddSegment( UOdysseyVectorSegmentCubic* iSegment, double t );
         // overloaded
         UOdysseyVectorSegment* GetSegment( UOdysseyVectorVertex& iOtherVertex );
-        void SetVisited( bool iVisited );
-        bool IsVisited();
+        void AttachLoop( FOdysseyVectorLoop* iLoop );
+        FOdysseyVectorLoop* GetLoop();
 };

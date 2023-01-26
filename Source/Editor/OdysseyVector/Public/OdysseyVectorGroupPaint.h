@@ -11,15 +11,9 @@
 #include "OdysseyVectorSection.h"
 #include "OdysseyVectorGroup.h"
 #include "OdysseyVectorLoop.h"
+#include "OdysseyVectorBucket.h"
 
 #include "OdysseyVectorGroupPaint.generated.h"
-
-class FOdysseyVectorBucket
-{
-    public:
-        ::ULIS::FVec2D mPosition;
-        uint32_t mColor;
-};
 
 UCLASS()
 class ODYSSEYVECTOR_API UOdysseyVectorGroupPaint : public UOdysseyVectorGroup
@@ -55,4 +49,6 @@ class ODYSSEYVECTOR_API UOdysseyVectorGroupPaint : public UOdysseyVectorGroup
 
         void FindCycles();
         void SimplifyGraph( std::list<FOdysseyVectorSection*>& sectionList );
+        FOdysseyVectorBucket* NewBucket( uint32 iColor, double iX, double iY );
+        void ApplyBucket( FOdysseyVectorBucket& iBucket );
 };

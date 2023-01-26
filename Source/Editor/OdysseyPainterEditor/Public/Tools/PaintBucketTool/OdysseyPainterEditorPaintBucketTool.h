@@ -28,6 +28,12 @@ public:
     //OdysseyPainterEditorTool overrides
     virtual void Activate() override;
 
+    bool OnMouseDownVector( UOdysseyTextureLayerImageVector& currentRasterLayer
+                          , const FOdysseyPoint& iPointInTexture
+                          , const FKey& iKey );
+    bool OnMouseDownRaster( UOdysseyTextureLayerImageRaster& currentRasterLayer
+                          , const FOdysseyPoint& iPointInTexture
+                          , const FKey& iKey );
     virtual bool OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
     virtual void Commit() override;
 

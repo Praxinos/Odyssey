@@ -422,6 +422,9 @@ FOdysseyPainterEditorGUI::GroupPaint()
 
                     paintGroup->UpdateMatrix();
                     paintGroup->FindCycles();
+
+                    currentVectorLayer->GetScene()->ClearSelection();
+                    currentVectorLayer->GetScene()->Select( paintGroup );
                 }
             }
         }
