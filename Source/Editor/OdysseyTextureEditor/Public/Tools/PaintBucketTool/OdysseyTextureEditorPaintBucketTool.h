@@ -3,9 +3,7 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "Tools/PaintBucketTool/OdysseyPainterEditorPaintBucketTool.h"
-#include "OdysseyBlendParameters.h"
 
 #include "OdysseyTextureEditorPaintBucketTool.generated.h"
 
@@ -29,25 +27,18 @@ public:
     virtual bool IsActivable() const override;
 
 public:
-    // Setters
     //Wether the tool can draw or not
     virtual bool CanDraw() override;
 
 private:
     class UOdysseyTextureLayerImageRaster* GetLayer() const;
-
-private:
     void Load();
     void Unload();
 
 private:
     //Listeners
     void OnCurrentLayerChanged(class UOdysseyLayerStack* iLayerStack);
-    void OnLayerRenderImageChanged(class UOdysseyTextureLayer* iLayer, const TArray<::ULIS::FRectI>& iRects);
-    void OnPaintEngineCommit(const TArray<::ULIS::FRectI>& iChangedTiles);
     FOdysseyBlendParameters OnPaintEnginePreUpdate(const FOdysseyBlendParameters& iBlendParameters);
-
-    static void OnEditedBlockInvalidated(const ::ULIS::FBlock* iBlock, const ::ULIS::FRectI* iRects, const uint32 iNumRects, void* iInfo);
 
 protected:
     // protected Data Members
