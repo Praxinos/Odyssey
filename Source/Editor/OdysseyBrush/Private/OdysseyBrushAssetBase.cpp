@@ -336,7 +336,7 @@ UOdysseyBrushAssetBase::SetBrushOptions(UOdysseyBrushOptions* iBrushOptions )
 }
 
 void
-UOdysseyBrushAssetBase::SetBlock(::ULIS::FBlock* iBlock)
+UOdysseyBrushAssetBase::SetBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock)
 {
     mEditedBlock = iBlock;
 }
@@ -350,7 +350,7 @@ UOdysseyBrushAssetBase::GetBrushOptions()
     return BrushOptions;
 }
 
-::ULIS::FBlock*
+TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>
 UOdysseyBrushAssetBase::GetBlock() const
 {
     return mEditedBlock;
@@ -682,7 +682,7 @@ UOdysseyBrushAssetBase::GetStrokeBlock( FOdysseyBrushRect Area )
         return FOdysseyBlockProxy::MakeNullProxy();
     }
 
-    ::ULIS::FBlock* src = mEditedBlock;
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> src = mEditedBlock;
     ::ULIS::eFormat format = src->Format();
 
     ::ULIS::FRectI rect = Area.IsInitialized() ? Area.GetValue() : src->Rect();

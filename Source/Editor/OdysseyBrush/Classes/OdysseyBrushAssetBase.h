@@ -114,7 +114,7 @@ public:
     void SetBrushOptions( UOdysseyBrushOptions* iBrushOptions );
 
     // Sets the block on which the brush is drawing
-    void SetBlock(::ULIS::FBlock* mEditedBlock);
+    void SetBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mEditedBlock);
 
 public:
     // Getters
@@ -123,7 +123,7 @@ public:
     UOdysseyBrushOptions* GetBrushOptions();
 
     // Sets the block on which the brush is drawing
-    ::ULIS::FBlock* GetBlock() const;
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> GetBlock() const;
 
 public:
     //Context Management
@@ -425,7 +425,7 @@ private:
     TArray<FOdysseyBrushContext*>           mContexts;
 
     // External
-    ::ULIS::FBlock*                         mEditedBlock;
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mEditedBlock;
 
     //Internal
     TArray< FOdysseyPoint >                 mStroke;

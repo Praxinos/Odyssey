@@ -414,7 +414,7 @@ UOdysseyPainterEditorRasterDrawingTool::CreateBrushInstance(bool iApplyOverrides
     {
         brushInstance->AddContext(mBrushContexts[i]); //Set the brush context so that context nodes can be used
     }
-    brushInstance->SetBlock(mPaintEngine.PaintBlock().Get());
+    brushInstance->SetBlock(mPaintEngine.PaintBlock());
 
 	//Apply Overrides before setting the brushInstance in the strokeEngine properties
     if (iApplyOverrides)

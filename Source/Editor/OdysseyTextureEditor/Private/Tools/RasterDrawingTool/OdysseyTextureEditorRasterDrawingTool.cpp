@@ -40,7 +40,7 @@ UOdysseyTextureEditorRasterDrawingTool::Load()
 	mPaintEngine.RasterBlock(rasterBlock);
 
 	if ( BrushInstance )
-		BrushInstance->SetBlock(mPaintEngine.PaintBlock().Get());
+		BrushInstance->SetBlock(mPaintEngine.PaintBlock());
 
 	//Should be managed by the tool
 	//UOdysseyTextureLayer::OnRenderImageChanged().AddUObject(this, &UOdysseyTextureEditorRasterDrawingTool::OnLayerRenderImageChanged);
