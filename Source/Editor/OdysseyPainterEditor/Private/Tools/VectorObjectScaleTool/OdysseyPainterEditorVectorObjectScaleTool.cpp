@@ -28,11 +28,15 @@ UOdysseyPainterEditorVectorObjectScaleTool::Activate()
 {
 	//FOdysseyObjectEditorUtils::SetPropertyValue(BrushOptions, "Color", FOdysseyBrushColor(GetEditorAs<FOdysseyPainterEditor>()->PaintColor()));
     UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
-    FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
 
-    vectorEngine->SetDrawingFlags( FOdysseyVectorEngine::RENDER_OBJECT_BBOX );
+    if(currentVectorLayer)
+    {
+        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
 
-    currentVectorLayer->RenderImageChanged(false);
+        vectorEngine->SetDrawingFlags( FOdysseyVectorEngine::RENDER_OBJECT_BBOX );
+
+        currentVectorLayer->RenderImageChanged(false);
+    }
 }
 
 bool

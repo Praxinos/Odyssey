@@ -33,4 +33,5 @@ class FOdysseyVectorSection
         bool IsVisited();
         void SetInCycle( bool iInCycle );
         bool IsInCycle();
+        void SetAverage( double iX, double iY );
 };

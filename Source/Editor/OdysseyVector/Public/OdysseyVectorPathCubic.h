@@ -9,6 +9,8 @@
 #include "OdysseyVectorVertexCubic.h"
 #include "OdysseyVectorSegmentCubic.h"
 #include "OdysseyVectorPath.h"
+#include "OdysseyVectorBucket.h"
+#include "OdysseyVectorLoop.h"
 
 #include "OdysseyVectorPathCubic.generated.h"
 

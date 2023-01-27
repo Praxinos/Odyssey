@@ -20,7 +20,7 @@ UOdysseyVectorVertex::New( double iX, double iY, double iRadius )
 
     return vertex;
 }
-
+/*
 void
 UOdysseyVectorVertex::SetNode( FCycleNode* iNode )
 {
@@ -32,7 +32,7 @@ UOdysseyVectorVertex::GetNode()
 {
     return mNode;
 }
-
+*/
 void
 UOdysseyVectorVertex::InvalidateSegments()
 {
@@ -197,6 +197,25 @@ bool
 UOdysseyVectorVertex::IsInCycle()
 {
     return ( mFlags & INCYCLE ) ? true : false;
+}
+
+void
+UOdysseyVectorVertex::SetMarched( bool iMarched )
+{
+    if( iMarched == true )
+    {
+        mFlags |= MARCHED;
+    }
+    else
+    {
+        mFlags &= (~MARCHED);
+    }
+}
+
+bool
+UOdysseyVectorVertex::IsMarched()
+{
+    return ( mFlags & MARCHED ) ? true : false;
 }
 
 void

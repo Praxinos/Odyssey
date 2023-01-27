@@ -12,6 +12,7 @@ FOdysseyVectorLoop::FOdysseyVectorLoop( UOdysseyVectorObject& iParent
     : mParent( iParent )
     , mID( iID )
     , mColor( 0xFF808080 )
+    , mBucket( nullptr )
 {
     Cast<UOdysseyVectorVertexIntersection>(iVertexArray[0])->AttachLoop( this );
 
@@ -169,16 +170,22 @@ UE_LOG(LogTemp, Warning, TEXT("FOdysseyVectorLoop::Build: Array size %d"), iSect
     mPath.close();
 }
 
-void
-FOdysseyVectorLoop::SetColor( uint32 iColor )
-{
-    mColor = iColor;
-}
-
 uint32
 FOdysseyVectorLoop::GetColor()
 {
-    return mColor;
+    return ( mBucket ) ? mBucket->GetColor() : 0xFF808080;
+}
+
+void
+FOdysseyVectorLoop::SetBucket( FOdysseyVectorBucket* iBucket )
+{
+    mBucket = iBucket;
+}
+
+FOdysseyVectorBucket*
+FOdysseyVectorLoop::GetBucket()
+{
+    return mBucket;
 }
 
 bool
@@ -193,20 +200,8 @@ FOdysseyVectorLoop::HitTest( double iX, double iY )
     BLPoint pt = { iX, iY };
     BLPoint* vertex = ( BLPoint*) mPath.vertexData();
 
-    blctx->save();
-    blctx->setMatrix( mParent.GetWorldMatrix() );
-    blctx->setStrokeWidth(1.0f);
-
-    UE_LOG(LogTemp, Warning, TEXT("Pt: %f %f"), iX, iY );
-
-    for( int i = 0; i < mPath.size(); i++ ) {
-        UE_LOG(LogTemp, Warning, TEXT("%f %f"), vertex[i].x, vertex[i].y );
-    }
-
     // WARNING: looks like in this version the return value is a bool (in the shape of an int) but in later version is a enum value. We will have to fix that.
     uint32 ret = mPath.hitTest( pt, BL_FILL_RULE_EVEN_ODD );
-
-    blctx->restore();
 
     return ( ret ) ? true : false;
 }
@@ -218,7 +213,7 @@ FOdysseyVectorLoop::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
 
     /*if ( mVertexList.size() ) 
     {*/
-       blctx->setFillStyle( BLRgba32( /*mFillColor*/mColor ) );
+       blctx->setFillStyle( BLRgba32( /*mFillColor*/GetColor() ) );
 
        /*iBLContext.fillPolygon( &mPointArray[0], mPointArray.size() );*/
        blctx->fillPath( mPath );

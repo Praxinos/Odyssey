@@ -30,11 +30,15 @@ UOdysseyPainterEditorVectorPathDrawingTool::Activate()
 {
 	//FOdysseyObjectEditorUtils::SetPropertyValue(BrushOptions, "Color", FOdysseyBrushColor(GetEditorAs<FOdysseyPainterEditor>()->PaintColor()));
     UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
-    FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
 
-    vectorEngine->SetDrawingFlags( 0 );
+    if(currentVectorLayer)
+    {
+        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
 
-    currentVectorLayer->RenderImageChanged(false);
+        vectorEngine->SetDrawingFlags(0);
+
+        currentVectorLayer->RenderImageChanged(false);
+    }
 }
 
 bool
@@ -52,6 +56,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDown(const FOdysseyPoint& iPo
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+        UOdysseyVectorObject* selectedObject = currentVectorLayer->GetScene()->GetLastSelected();
         UOdysseyVectorPathCubic* cubicPath = NewObject<UOdysseyVectorPathCubic>();
         UOdysseyVectorPathBuilder* currentPathBuilder = NewObject<UOdysseyVectorPathBuilder>();
         BLPoint localCoords = cubicPath->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
@@ -146,29 +151,33 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUp(const FOdysseyPoint& iPoin
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         UOdysseyVectorPathBuilder* currentPathBuilder = static_cast<UOdysseyVectorPathBuilder*>( currentVectorLayer->GetScene()->GetLastSelected() );
-        UOdysseyVectorPathCubic* cubicPath = currentPathBuilder->GetCubicPath();
-        BLPoint localCoords = cubicPath->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
-        float radius =  iPointInTexture.pressure * ( Size * 0.5f );
-        float roundedUpRadius = ceil (radius);
-        float roundedUpDiameter = roundedUpRadius * 2.0f;
 
-        if( ( iKey == EKeys::LeftControl ) || ( iKey == EKeys::RightControl ) )
+        if( currentPathBuilder )
         {
-            currentPathBuilder->End( localCoords.x, localCoords.y, roundedUpRadius, true );
+            UOdysseyVectorPathCubic* cubicPath = currentPathBuilder->GetCubicPath();
+            BLPoint localCoords = cubicPath->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
+            float radius =  iPointInTexture.pressure * ( Size * 0.5f );
+            float roundedUpRadius = ceil (radius);
+            float roundedUpDiameter = roundedUpRadius * 2.0f;
+
+            if( ( iKey == EKeys::LeftControl ) || ( iKey == EKeys::RightControl ) )
+            {
+                currentPathBuilder->End( localCoords.x, localCoords.y, roundedUpRadius, true );
+            }
+            else
+            {
+                currentPathBuilder->End( localCoords.x, localCoords.y, roundedUpRadius, false );
+            }
+
+            currentVectorLayer->GetScene()->Unselect( currentPathBuilder );
+            currentVectorLayer->GetScene()->RemoveChild( currentPathBuilder );
+            currentVectorLayer->GetScene()->Select( currentPathBuilder->GetCubicPath() );
+
+            // Update objects marked as invalidated
+            currentVectorLayer->GetScene()->Update();
+
+            currentVectorLayer->RenderImageChanged(false);
         }
-        else
-        {
-            currentPathBuilder->End( localCoords.x, localCoords.y, roundedUpRadius, false );
-        }
-
-        currentVectorLayer->GetScene()->Unselect( currentPathBuilder );
-        currentVectorLayer->GetScene()->RemoveChild( currentPathBuilder );
-        currentVectorLayer->GetScene()->Select( currentPathBuilder->GetCubicPath() );
-
-        // Update objects marked as invalidated
-        currentVectorLayer->GetScene()->Update();
-
-        currentVectorLayer->RenderImageChanged(false);
 
         return true;
     }

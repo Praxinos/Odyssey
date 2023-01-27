@@ -10,10 +10,20 @@
 #include "OdysseyVectorVertex.h"
 #include "OdysseyVectorSection.h"
 #include "OdysseyVectorGroup.h"
-#include "OdysseyVectorLoop.h"
 #include "OdysseyVectorBucket.h"
+#include "OdysseyVectorLoop.h"
 
 #include "OdysseyVectorGroupPaint.generated.h"
+
+typedef struct _FCycleNode
+{
+    int32 parentID;
+    int32 ID;
+    std::list<FOdysseyVectorSection*>* bypassEdgeList;
+    UOdysseyVectorVertex* vertex;
+    FOdysseyVectorSection* section;
+    uint32 depth;
+} FCycleNode;
 
 UCLASS()
 class ODYSSEYVECTOR_API UOdysseyVectorGroupPaint : public UOdysseyVectorGroup
@@ -21,8 +31,13 @@ class ODYSSEYVECTOR_API UOdysseyVectorGroupPaint : public UOdysseyVectorGroup
     public:
         GENERATED_BODY()
 
+    public:
+        void ApplyBucket( FOdysseyVectorBucket* iBucket );
+        void Colorize();
+
         std::list<FOdysseyVectorBucket*> mBucketList;
         std::list<FOdysseyVectorLoop*> mLoopList;
+
 
     public:
         ~UOdysseyVectorGroupPaint(){};
@@ -40,15 +55,15 @@ class ODYSSEYVECTOR_API UOdysseyVectorGroupPaint : public UOdysseyVectorGroup
         void BuildGraph( std::list<UOdysseyVectorVertexIntersection*>& intersectionVertexList
                        , std::list<FOdysseyVectorSection*>& iSectionList );
 
-        bool MakeCycle( ::ULIS::FVec2D& minCoord
-                       , std::vector<UOdysseyVectorVertex*>& iVertexArray
-                       , std::vector<FOdysseyVectorSection*>& iSectionArray );
-        void March( UOdysseyVectorVertex* iNode
-                  , uint32 maxVertex
+        uint32 MakeCycle( ::ULIS::FVec2D& minCoord
+                      , std::vector<UOdysseyVectorVertex*>& iVertexArray
+                      , std::vector<FOdysseyVectorSection*>& iSectionArray );
+        void March( UOdysseyVectorVertexIntersection* iNode
                   , std::list<FOdysseyVectorSection*>& iSectionList );
 
         void FindCycles();
         void SimplifyGraph( std::list<FOdysseyVectorSection*>& sectionList );
-        FOdysseyVectorBucket* NewBucket( uint32 iColor, double iX, double iY );
-        void ApplyBucket( FOdysseyVectorBucket& iBucket );
+        FOdysseyVectorBucket* Bucket( uint32 iColor, double iX, double iY );
+        FOdysseyVectorBucket* GetBucket( double iX, double iY );
+
 };

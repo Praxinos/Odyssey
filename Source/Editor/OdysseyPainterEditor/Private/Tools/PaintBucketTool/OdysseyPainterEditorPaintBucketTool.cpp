@@ -175,6 +175,7 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseDownVector( UOdysseyTextureLayerIma
                                                        , const FKey& iKey )
 {
     ::ULIS::FColor color = GetEditorAs<FOdysseyPainterEditor>()->PaintColor().GetValue();
+    ::ULIS::FColor rgba8 = color.ToFormat( ::ULIS::eFormat::Format_RGBA8 );
     UOdysseyVectorObject* selectedObject = currentVectorLayer.GetScene()->GetLastSelected();
 
     if( selectedObject )
@@ -183,12 +184,14 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseDownVector( UOdysseyTextureLayerIma
         {
             UOdysseyVectorGroupPaint* paintGroup = Cast<UOdysseyVectorGroupPaint>(selectedObject);
             BLPoint localCoords = paintGroup->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
-            uint32 rgba8 = ( ( uint32 ) color.A8() << 24 ) 
-                        |  ( ( uint32 ) color.B8() << 16 )
-                        |  ( ( uint32 ) color.G8() <<  8 )
-                        |               color.R8();
+            uint32 R = ( uint32 ) rgba8.R8();
+            uint32 G = ( uint32 ) rgba8.G8();
+            uint32 B = ( uint32 ) rgba8.B8();
+            uint32 A = ( uint32 ) rgba8.A8();
+            uint32 col32 = ( (A << 24) | (B << 16) | (G << 8) | R );
 
-            paintGroup->NewBucket( rgba8, localCoords.x, localCoords.y );
+            paintGroup->FindCycles();
+            paintGroup->Bucket( col32, localCoords.x, localCoords.y );
         }
     }
 

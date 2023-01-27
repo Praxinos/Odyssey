@@ -7,15 +7,29 @@ UOdysseyVectorGroupPaint::Init( std::string iName )
 }
 
 void
-UOdysseyVectorGroupPaint::ApplyBucket( FOdysseyVectorBucket& iBucket )
+UOdysseyVectorGroupPaint::Colorize()
+{
+    for( std::list<FOdysseyVectorBucket*>::iterator lit = mBucketList.begin(); lit != mBucketList.end(); ++lit )
+    {
+        FOdysseyVectorBucket *bucket = static_cast<FOdysseyVectorBucket*>(*lit);
+
+        ApplyBucket( bucket );
+    }
+}
+
+void
+UOdysseyVectorGroupPaint::ApplyBucket( FOdysseyVectorBucket* iBucket )
 {
     for( std::list<FOdysseyVectorLoop*>::iterator lit = mLoopList.begin(); lit != mLoopList.end(); ++lit )
     {
         FOdysseyVectorLoop *loop = static_cast<FOdysseyVectorLoop*>(*lit);
 
-        if( loop->HitTest( iBucket.GetCoords().x, iBucket.GetCoords().y ) )
+        if( loop->HitTest( iBucket->GetCoords().x, iBucket->GetCoords().y ) )
         {
-            loop->SetColor( iBucket.GetColor() );
+            loop->SetBucket( iBucket );
+
+            // a single bucket per loop;
+            return;
         }
     }
 
@@ -23,13 +37,37 @@ UOdysseyVectorGroupPaint::ApplyBucket( FOdysseyVectorBucket& iBucket )
 }
 
 FOdysseyVectorBucket*
-UOdysseyVectorGroupPaint::NewBucket( uint32 iColor, double iX, double iY )
+UOdysseyVectorGroupPaint::GetBucket( double iX, double iY )
 {
-    FOdysseyVectorBucket* bucket = new FOdysseyVectorBucket( *this, iColor, iX, iY );
+    for( std::list<FOdysseyVectorLoop*>::iterator lit = mLoopList.begin(); lit != mLoopList.end(); ++lit )
+    {
+        FOdysseyVectorLoop *loop = static_cast<FOdysseyVectorLoop*>(*lit);
 
-    mBucketList.push_back( bucket );
+        // TODO: Bounding volume for cycles for faster search
+        if( loop->HitTest( iX, iY ) == true )
+        {
+            return loop->GetBucket();
+        }
+    }
 
-    ApplyBucket( *bucket );
+    return nullptr;
+}
+
+FOdysseyVectorBucket*
+UOdysseyVectorGroupPaint::Bucket( uint32 iColor, double iX, double iY )
+{
+    FOdysseyVectorBucket* bucket = GetBucket( iX, iY );
+
+    if( bucket == nullptr )
+    {
+        bucket = new FOdysseyVectorBucket( *this, iColor, iX, iY );
+
+        mBucketList.push_back( bucket );
+    }
+
+    bucket->SetColor( iColor );
+
+    ApplyBucket( bucket );
 
     return bucket;
 }
@@ -37,18 +75,21 @@ UOdysseyVectorGroupPaint::NewBucket( uint32 iColor, double iX, double iY )
 void
 UOdysseyVectorGroupPaint::DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
-    for( std::list<FOdysseyVectorLoop*>::iterator lit = mLoopList.begin(); lit != mLoopList.end(); ++lit )
+    if( mChildrenList.size() )
     {
-        FOdysseyVectorLoop *loop = static_cast<FOdysseyVectorLoop*>(*lit);
+        for( std::list<FOdysseyVectorLoop*>::iterator lit = mLoopList.begin(); lit != mLoopList.end(); ++lit )
+        {
+            FOdysseyVectorLoop *loop = static_cast<FOdysseyVectorLoop*>(*lit);
 
-        loop->Draw( iRoi, iFlags );
-    }
+            loop->Draw( iRoi, iFlags );
+        }
 
-    for( std::list<FOdysseyVectorBucket*>::iterator lit = mBucketList.begin(); lit != mBucketList.end(); ++lit )
-    {
-        FOdysseyVectorBucket *bucket = static_cast<FOdysseyVectorBucket*>(*lit);
+        for( std::list<FOdysseyVectorBucket*>::iterator lit = mBucketList.begin(); lit != mBucketList.end(); ++lit )
+        {
+            FOdysseyVectorBucket *bucket = static_cast<FOdysseyVectorBucket*>(*lit);
 
-        bucket->Draw( iRoi, iFlags );
+            bucket->Draw( iRoi, iFlags );
+        }
     }
 }
 
@@ -87,9 +128,8 @@ UOdysseyVectorGroupPaint::IntersectSegment( UOdysseyVectorSegmentCubic& iCubicSe
 // otherwise it's outside.
 // https://stackoverflow.com/questions/217578/how-can-i-determine-whether-a-2d-point-is-within-a-polygon
 static bool
-InsideCycle( ::ULIS::FVec2D& iFromCoord, UOdysseyVectorVertex& iNode, std::vector<FOdysseyVectorSection*>& iEdgeArray )
+InsideCycle( ::ULIS::FVec2D& iFromCoord, ::ULIS::FVec2D& testCoord, std::vector<FOdysseyVectorSection*>& iEdgeArray )
 {
-   ::ULIS::FVec2D& nodeCoord = iNode.GetCoords();
     uint32 hitCount = 0;
 
     for( int i = 0; i < iEdgeArray.size(); i++ )
@@ -97,7 +137,7 @@ InsideCycle( ::ULIS::FVec2D& iFromCoord, UOdysseyVectorVertex& iNode, std::vecto
         FOdysseyVectorSection *edge = iEdgeArray[i];
 
         if( FOdysseyVector::IntersectSegment( iFromCoord
-                                            , nodeCoord
+                                            , testCoord
                                             , edge->GetVertex(0)->GetCoords()
                                             , edge->GetVertex(1)->GetCoords()
                                             , nullptr
@@ -140,6 +180,30 @@ UnmarkCycle( std::vector<UOdysseyVectorVertex*>& iVertexArray
     }
 }
 
+static ::ULIS::FVec2D
+GetSectionAverage( FOdysseyVectorSection &iSection )
+{
+    ::ULIS::FVec2D& point0 = iSection.GetVertex(0)->GetCoords();
+    ::ULIS::FVec2D& point1 = iSection.GetVertex(1)->GetCoords();
+     ::ULIS::FVec2D average = ( point0 + point1 ) * 0.5f;
+    /*
+    UOdysseyVectorSegmentCubic& segment = *Cast<UOdysseyVectorSegmentCubic>(iSection.GetSegment());
+    ::ULIS::FVec2D& point0 = segment.GetPoint(0)->GetCoords();
+    ::ULIS::FVec2D& point1 = segment.GetPoint(1)->GetCoords();
+    ::ULIS::FVec2D& ctrlPoint0 = segment.GetControlPoint(0)->GetCoords();
+    ::ULIS::FVec2D& ctrlPoint1 = segment.GetControlPoint(1)->GetCoords();
+    double t0 = iSection.GetVertex(0)->GetT( segment );
+    double t1 = iSection.GetVertex(1)->GetT( segment );
+    ::ULIS::FVec2D average = ::ULIS::CubicBezierPointAtParameter<::ULIS::FVec2D>( point0
+                                                                                , ctrlPoint0
+                                                                                , ctrlPoint1
+                                                                                , point1
+                                                                                , ( t0 + t1 ) * 0.5f );
+*/
+    
+    return average;
+}
+
 // a cycle is ChordLess if there is a point lying inside the cycle hasn't been visited.
 // or if there is an edge connecting to points lying inside the circle that has not been visited.
 static bool
@@ -166,18 +230,14 @@ IsChordless( ::ULIS::FVec2D& iFromCoord
 
             if( edge->IsInCycle() == false )
             {
-                if( ( neighbour->IsInCycle() == true ) )
+                ::ULIS::FVec2D sectionAverageCoord = GetSectionAverage( *edge );
+
+                if( InsideCycle( iFromCoord, sectionAverageCoord, iEdgeArray ) == true )
                 {
+//UE_LOG(LogTemp, Warning, TEXT("InsideCycle") );
                     return false;
                 }
-                else
-                {
-                    if( InsideCycle( iFromCoord, *neighbour, iEdgeArray ) == true )
-                    {
-                        return false;
-                    }
-                }
-            }
+            } //UE_LOG(LogTemp, Warning, TEXT("edge->IsInCycle()") );
         }
     }
 //UE_LOG(LogTemp, Warning, TEXT("no hit %d") );
@@ -192,38 +252,20 @@ PrintNode( std::vector<UOdysseyVectorVertex*>& vertexArray
 
     for( int i = 0; i < vertexArray.size(); i++ )
     {
-        UE_LOG(LogTemp,Warning,TEXT("Node: vertex:%d section:%d (%d -- %d)"), vertexArray[i], sectionArray[i], sectionArray[i]->GetVertex(0), sectionArray[i]->GetVertex(1) );
+        UE_LOG(LogTemp,Warning,TEXT("Node: vertex:%d section:%d (%d[x:%f y:%f] -- %d[x:%f y:%f])"), vertexArray[i], sectionArray[i], sectionArray[i]->GetVertex(0), sectionArray[i]->GetVertex(0)->GetCoords().x, sectionArray[i]->GetVertex(0)->GetCoords().y, sectionArray[i]->GetVertex(1), sectionArray[i]->GetVertex(1)->GetCoords().x, sectionArray[i]->GetVertex(1)->GetCoords().y );
     }
-}
-
-FOdysseyVectorSection* GetStartSection( FCycleNode* iNode )
-{
-    FOdysseyVectorSection* section = nullptr;
-
-    while ( iNode->parent )
-    {
-        section = iNode->section;
-
-        iNode = iNode->parent;
-    }
-
-    return section;
 }
 
 static ::ULIS::FVec2D
-MergeNode( FCycleNode* iNode0
+MergeNode( FCycleNode* iNodeArray
+         , uint32 iTargetID
          , FOdysseyVectorSection* iEdge
          , std::list<FOdysseyVectorSection*>* iBypassEdgeList
-         , FCycleNode* iNode1
          , std::vector<UOdysseyVectorVertex*>& vertexArray
          , std::vector<FOdysseyVectorSection*>& sectionArray )
 {
-    FCycleNode* mergeNode = iNode0;
-    FOdysseyVectorSection* mergeSection = iEdge;
-    std::list<FOdysseyVectorSection*>* mergeBypassEdgeList = iBypassEdgeList;
-    uint32 node0Count = ( ( iNode0 ) ? iNode0->depth + 1 : 0 );
-    uint32 node1Count = ( ( iNode1 ) ? iNode1->depth     : 0 ); // note: we don't add the last node
-    uint32 nodeCount = node0Count + node1Count;
+    FCycleNode* node = &iNodeArray[iTargetID];
+    uint32 nodeCount = node->depth + 1;
     ::ULIS::FVec2D minCoord = ::ULIS::FVec2D(0,0);
 
     if( nodeCount )
@@ -231,70 +273,58 @@ MergeNode( FCycleNode* iNode0
         int vrank = 0;
         int srank = 0;
 
-        minCoord = iNode0->vertex->GetCoords();
+        minCoord = node->vertex->GetCoords();
 
         vertexArray.resize( nodeCount );
         sectionArray.resize( nodeCount );
 
+        vertexArray[0] = iNodeArray[0].vertex;
+
         // concatenate iNode1 and iNode0 except for the root node.
-        while( iNode0 )
+        while( node->parentID != -1 )
         {
-            ::ULIS::FVec2D& nodeCoord = iNode0->vertex->GetCoords();
-            int i = iNode0->depth;
+            ::ULIS::FVec2D& nodeCoord = node->vertex->GetCoords();
+            int i = node->depth;
             int p = ( i - 1 + nodeCount ) % nodeCount;
 
-            vertexArray[i]  = iNode0->vertex;
-            sectionArray[p] = iNode0->section;
+            vertexArray[i]  = node->vertex;
+            sectionArray[p] = node->section;
 
             // find minimum point, we'll need it for the ray casting algorithm in the InsideCycle() function.
             // Note: we need it to be outside the cycle, so we arbitrarily substract 0.1f
             if( nodeCoord.x < minCoord.x ) minCoord.x = nodeCoord.x - 0.1f;
             if( nodeCoord.y < minCoord.y ) minCoord.y = nodeCoord.y - 0.1f;
 
-            iNode0 = iNode0->parent;
+            node = &iNodeArray[node->parentID];
         }
 
-        while( iNode1->parent )
-        {
-            ::ULIS::FVec2D& nodeCoord = iNode1->vertex->GetCoords();
-            int i = node0Count + node1Count - iNode1->depth;
-            int n = ( i + 1 + nodeCount ) % nodeCount;
-
-            vertexArray[i] = iNode1->vertex;
-            sectionArray[i] = iNode1->section;
-
-            //iEdge = iNode1->section;
-
-            // find minimum point, we'll need it for the ray casting algorithm in the InsideCycle() function.
-            // Note: we need it to be outside the cycle, so we arbitrarily substract 0.1f
-            if( nodeCoord.x < minCoord.x ) minCoord.x = nodeCoord.x - 0.1f;
-            if( nodeCoord.y < minCoord.y ) minCoord.y = nodeCoord.y - 0.1f;
-
-            iNode1 = iNode1->parent;
-        }
-
-        sectionArray[mergeNode->depth] = iEdge;
+        sectionArray[nodeCount-1] = iEdge;
     }
 
-    PrintNode( vertexArray, sectionArray );
+    //PrintNode( vertexArray, sectionArray );
 
     return minCoord;
 }
 
 // 2 Nodes met at collision point.
-bool
+// returns 0 = no cycle
+// returns 1 = cycle already exists
+// returns 2 = new cycle created
+uint32
 UOdysseyVectorGroupPaint::MakeCycle( ::ULIS::FVec2D& minCoord
                                    , std::vector<UOdysseyVectorVertex*>& iVertexArray
                                    , std::vector<FOdysseyVectorSection*>& iSectionArray )
 {
     uint64 cycleID = FOdysseyVectorLoop::GenerateID( iSectionArray );
-    bool ret = false;
+    uint32 ret = 0;
+
+//UE_LOG(LogTemp, Warning, TEXT("CycleID potentiel : %X"), cycleID );
 
     if( FOdysseyVectorLoop::Exists( cycleID, iVertexArray, iSectionArray ) == false )
     {
 
         MarkCycle( iVertexArray, iSectionArray );
-            UE_LOG(LogTemp, Warning, TEXT("TEST CHORDLESS"));
+            //UE_LOG(LogTemp, Warning, TEXT("TEST CHORDLESS"));
 
         if( IsChordless( minCoord, iVertexArray, iSectionArray ) == true )
         {
@@ -316,144 +346,181 @@ UOdysseyVectorGroupPaint::MakeCycle( ::ULIS::FVec2D& minCoord
             }
 
             cycle = new FOdysseyVectorLoop( *this, cycleID, iVertexArray, iSectionArray );
-
+//PrintNode( iVertexArray, iSectionArray );
             mLoopList.push_back( cycle );
 
-            UE_LOG(LogTemp, Warning, TEXT("new cycle"));
-            ret = true;
+            //UE_LOG(LogTemp, Warning, TEXT("new cycle"));
+            ret = 2;
         }
-            if ( ret == false ) UE_LOG(LogTemp, Warning, TEXT("NOT CHORDLESS"));
-            if ( ret == true  ) UE_LOG(LogTemp, Warning, TEXT("CHORDLESS"));
+            //if ( ret == 0 ) UE_LOG(LogTemp, Warning, TEXT("NOT CHORDLESS"));
+            //if ( ret      ) UE_LOG(LogTemp, Warning, TEXT("CHORDLESS"));
 
         UnmarkCycle( iVertexArray, iSectionArray );
+    }
+    else
+    {
+        ret = 1;
     }
 
     return ret;
 }
 
+static FOdysseyVectorSection*
+GetStartSection( FCycleNode* iNodeArray, int32 iEndNodeID )
+{
+    FCycleNode* node = &iNodeArray[iEndNodeID];
+    FOdysseyVectorSection* section = nullptr;
+
+    while( node->parentID != -1 )
+    {
+        section = node->section;
+
+        node = &iNodeArray[node->parentID];
+    }
+
+    return section;
+}
+
 // Gary's Third Idea.
 void
-UOdysseyVectorGroupPaint::March( UOdysseyVectorVertex* iVertex
-                               , uint32 maxVertex
+UOdysseyVectorGroupPaint::March( UOdysseyVectorVertexIntersection* iVertex
                                , std::list<FOdysseyVectorSection*>& iSectionList )
 {
-    if( /*maxVertex*/1 )
+    FCycleNode* nodeMemArea = ( FCycleNode* ) malloc( /*maxVertex*/5000 * sizeof( FCycleNode ) );
+    FCycleNode* nodeArray = nodeMemArea;
+    uint32 vertexCount = 0, vertexFrom;
+    bool keepProcessing;
+    uint32 depth = 0;
+    int32 cycleCount = 0;
+    int32 maxCycleCount = ( iVertex->GetSectionCount() - 1 ) * 2;
+
+    /*iVertex->SetVisited( true );
+    iVertex->SetNode( &nodeArray[0] );*/
+
+    nodeArray[0].depth    = depth++;
+    nodeArray[0].parentID = -1;
+    nodeArray[0].ID       = vertexCount;
+    nodeArray[0].vertex   = iVertex;
+    nodeArray[0].section  = nullptr;
+
+    vertexCount = 1;
+    vertexFrom  = 0;
+
+    keepProcessing = true;
+
+    while( keepProcessing == true )
     {
-        FCycleNode* nodeMemArea = ( FCycleNode* ) calloc( /*maxVertex*/500, sizeof( FCycleNode ) );
-        FCycleNode* nodeArray = nodeMemArea;
-        uint32 vertexCount, vertexFrom;
-        bool keepProcessing;
-        uint32 depth = 0;
-
-        iVertex->SetVisited( true );
-        iVertex->SetNode( &nodeArray[0] );
-
-        nodeArray[0].depth   = depth++;
-        nodeArray[0].parent  = nullptr;
-        nodeArray[0].vertex  = iVertex;
-        nodeArray[0].section = nullptr;
-        vertexCount = 1;
-        vertexFrom = 0;
-        keepProcessing = true;
-
-        while( keepProcessing == true )
-        {
-            uint32 currentCount = vertexCount;
+        uint32 currentCount = vertexCount;
 //UE_LOG(LogTemp, Warning, TEXT("vertexCount %d ------------------ ITERATION ----------------------- "), vertexCount );
 
-            for( uint32 i = vertexFrom; i < currentCount && keepProcessing == true; i++ )
-            {
-                FCycleNode* currentNode = &nodeArray[i];
-                UOdysseyVectorVertex* currentVertex = currentNode->vertex;
-                std::list<FOdysseyVectorSection*>& sectionList = currentVertex->GetSectionList();
+        for( uint32 i = vertexFrom; i < currentCount && ( keepProcessing == true ); i++ )
+        {
+            FCycleNode* currentNode = &nodeArray[i];
+            FCycleNode* parentNode = ( currentNode->parentID != -1 ) ? &nodeArray[currentNode->parentID] : nullptr;
+            UOdysseyVectorVertex* currentVertex = currentNode->vertex;
+            std::list<FOdysseyVectorSection*>& sectionList = currentVertex->GetSectionList();
 //UE_LOG(LogTemp, Warning, TEXT("checking %d: at %f %f - sectioncount:%d"), currentVertex, currentVertex->GetCoords().x, currentVertex->GetCoords().y, sectionList.size() );
-                keepProcessing = false;
+            keepProcessing = false;
 /*
-                if( currentVertex->IsVisited() == false )
-                {
-                    currentVertex->SetVisited( true );
+            if( currentVertex->IsVisited() == false )
+            {
+                currentVertex->SetVisited( true );
 */
-                    for( std::list<FOdysseyVectorSection*>::iterator sit = sectionList.begin(); sit != sectionList.end(); ++sit )
-                    {
-                        FOdysseyVectorSection *currentEdge = (*sit);
-//UE_LOG(LogTemp, Warning, TEXT("checking edge %d (%d <----> %d)"), currentEdge, currentEdge->GetVertex(1), currentEdge->GetVertex(0) );
-                        /*if( currentEdge->IsVisited() == false )
-                        {*/
-                            if( currentEdge->IsBlocked( currentNode->vertex ) == false )
-                            {
-                                UOdysseyVectorVertex* nextVertex = ( currentEdge->GetVertex(0) == currentNode->vertex ) ? currentEdge->GetVertex(1) : 
-                                                                                                                          currentEdge->GetVertex(0);
-        //UE_LOG(LogTemp, Warning, TEXT("probing next vertex:%d at x:%f y:%f"), nextVertex, nextVertex->GetCoords().x, nextVertex->GetCoords().y );
-                                if( ( currentNode->parent == nullptr ) || ( nextVertex != currentNode->parent->vertex ) )
-                                {
-        //UE_LOG(LogTemp, Warning, TEXT("non-blocked edge:%d"), currentEdge );
-                                        if( nextVertex->IsVisited() == true )
-                                        {
-                                            if( GetStartSection( nextVertex->GetNode() ) != GetStartSection( currentNode ) )
-                                            {
-                                                std::vector<UOdysseyVectorVertex*> vertexArray(0);
-                                                std::vector<FOdysseyVectorSection*> sectionArray(0);
-                                                ::ULIS::FVec2D minCoord;
-                //UE_LOG(LogTemp, Warning, TEXT("candidate cycle"));
-                                                minCoord = MergeNode( currentNode
-                                                                    , currentEdge
-                                                                    , nullptr
-                                                                    , nextVertex->GetNode()
-                                                                    , vertexArray
-                                                                    , sectionArray );
+                for( std::list<FOdysseyVectorSection*>::iterator sit = sectionList.begin(); sit != sectionList.end(); ++sit )
+                {
+                    FOdysseyVectorSection *currentEdge = (*sit);
 
-                                                if( MakeCycle( minCoord, vertexArray, sectionArray ) )
+                    /*if( currentEdge->IsVisited() == false )
+                    {*/
+                        /*if( currentEdge->IsBlocked( currentNode->vertex ) == false )
+                        {*/
+                            UOdysseyVectorVertex* nextVertex = ( currentEdge->GetVertex(0) == currentNode->vertex ) ? currentEdge->GetVertex(1) : 
+                                                                                                                        currentEdge->GetVertex(0);
+
+//UE_LOG(LogTemp,Warning,TEXT("Travelling from %f %f --- to ---> %f %f)"),currentNode->vertex->GetCoords().x,currentNode->vertex->GetCoords().y,nextVertex->GetCoords().x,nextVertex->GetCoords().y);
+
+                            if( /*( currentNode->parentID == -1 ) ||*/ ( currentEdge != currentNode->section ) )
+                            {
+    //UE_LOG(LogTemp, Warning, TEXT("probing next vertex:%d at x:%f y:%f"), nextVertex, nextVertex->GetCoords().x, nextVertex->GetCoords().y );
+
+    //UE_LOG(LogTemp, Warning, TEXT("non-blocked edge:%d"), currentEdge );
+                                    if( nextVertex == nodeArray[0].vertex )
+                                    {
+            //UE_LOG(LogTemp, Warning, TEXT("cycle detected :%d"), currentNode->depth + 1 );
+                                        if(   ( depth == 1 ) // segment loops on itself
+                                         || ( ( depth >  1 ) && ( GetStartSection( nodeArray, currentNode->ID ) != currentEdge ) ) ) // exit and entry sections are different
+                                        {
+                                            std::vector<UOdysseyVectorVertex*> vertexArray(0);
+                                            std::vector<FOdysseyVectorSection*> sectionArray(0);
+                                            ::ULIS::FVec2D minCoord;
+            //UE_LOG(LogTemp, Warning, TEXT("candidate cycle of size:%d"), currentNode->depth + 1 );
+                                            minCoord = MergeNode( nodeArray
+                                                                , currentNode->ID
+                                                                , currentEdge
+                                                                , nullptr
+                                                                , vertexArray
+                                                                , sectionArray );
+
+                                            if( MakeCycle( minCoord, vertexArray, sectionArray ) )
+                                            {
+                                                cycleCount++;
+            //UE_LOG(LogTemp, Warning, TEXT("cycleCount:%d/%d"), cycleCount, maxCycleCount );
+                                                if( cycleCount == maxCycleCount )
                                                 {
                                                     keepProcessing = false;
+
+                                                    /*marchNext = GetFirstIntersectionVertex( vertexArray );*/
 
                                                     break;
                                                 }
                                             }
                                         }
-                                        else
-                                        {
-            //UE_LOG(LogTemp, Warning, TEXT("setting %d as visited"), nextVertex );
-                                            currentEdge->SetVisited( true );
+                                    }
+                                    else
+                                    {
+        //UE_LOG(LogTemp, Warning, TEXT("setting %d as visited"), nextVertex );
+                                        /*currentEdge->SetVisited( true );*/
 
-                                            nextVertex->SetVisited( true );
-                                            nextVertex->SetNode( &nodeArray[vertexCount] );
+                                        /*nextVertex->SetVisited( true );*/
+                                        /*nextVertex->SetNode( &nodeArray[vertexCount] );*/
 
-                                            nodeArray[vertexCount].depth   = depth;
-                                            nodeArray[vertexCount].parent  = &nodeArray[i];
-                                            nodeArray[vertexCount].vertex  = nextVertex;
-                                            nodeArray[vertexCount].section = currentEdge; // the edge that led to here
-                                            vertexCount++;
+                                        nodeArray[vertexCount].depth    = currentNode->depth + 1;
+                                        nodeArray[vertexCount].parentID = currentNode->ID;
+                                        nodeArray[vertexCount].ID       = vertexCount;
+                                        nodeArray[vertexCount].vertex   = nextVertex;
+                                        nodeArray[vertexCount].section  = currentEdge; // the edge that led to here
+                                        vertexCount++;
 
-                                            keepProcessing = true;
-                                        }
-                                  } //else UE_LOG(LogTemp, Warning, TEXT("VISITED edge:%d"), currentEdge );
-                            } //else UE_LOG(LogTemp, Warning, TEXT("BLOCKED edge:%d"), currentEdge );
+                                        keepProcessing = true;
+                                    }
+                                } //else UE_LOG(LogTemp, Warning, TEXT("VISITED edge:%d"), currentEdge );
+                        /*}*/ //else UE_LOG(LogTemp, Warning, TEXT("BLOCKED edge:%d"), currentEdge );
 
-                        /*} else UE_LOG(LogTemp, Warning, TEXT("VISITED edge:%d"), currentEdge );*/
-                    }
-               /* }*/
-            }
-
-            depth++;
-
-            vertexFrom = currentCount;
+                    /*} else UE_LOG(LogTemp, Warning, TEXT("VISITED edge:%d"), currentEdge );*/
+                }
+            /* }*/
         }
 
-        // cleaning part
-        for( uint32 i = 0; i < vertexCount; i++ )
-        {
-            nodeArray[i].vertex->SetVisited( false );
+        /*depth++;*/
 
-            if( nodeArray[i].section )
-            {
-                /*nodeArray[i].section->SetVisited( false );*/
-                /*nodeArray[i].section->SetInCycle( false );*/
-            }
-        }
-
-        // TODO: free bypass as well
-        free( nodeMemArea );
+        vertexFrom = currentCount;
     }
+
+    // cleaning part
+/*
+    for( uint32 i = 0; i < vertexCount; i++ )
+    {
+        nodeArray[i].vertex->SetVisited( false );
+
+        if( nodeArray[i].section )
+        {
+            //nodeArray[i].section->SetVisited( false );
+            //nodeArray[i].section->SetInCycle( false );
+        }
+    }
+*/
+    // TODO: free bypass as well
+    free( nodeMemArea );
 }
 
 void
@@ -572,19 +639,24 @@ UOdysseyVectorGroupPaint::FindCycles()
 
     BuildGraph( intersectionVertexList, sectionList );
 
+    //UE_LOG( LogTemp, Warning, TEXT("Detection -----------------------------------------------------------") );
+    //UE_LOG( LogTemp, Warning, TEXT("Intersection vertices:%d"), intersectionVertexList.size() );
+
     while( intersectionVertexList.size() )
     {
         UOdysseyVectorVertexIntersection* intersectionVertex = intersectionVertexList.back();
 
-        UE_LOG(LogTemp,Warning,TEXT("Vertex:%d - x:%f y:%f"),intersectionVertex, intersectionVertex->GetCoords().x, intersectionVertex->GetCoords().y );
+//UE_LOG(LogTemp,Warning,TEXT("Vertex:%d - x:%f y:%f - valence:%d"),intersectionVertex, intersectionVertex->GetCoords().x, intersectionVertex->GetCoords().y, intersectionVertex->GetSectionCount() );
 
         std::vector<UOdysseyVectorVertex*> nodeArray;
         std::vector<FOdysseyVectorSection*> edgeArray;
 
-        March( intersectionVertex, 0, sectionList );
+        March( intersectionVertex, sectionList );
 
         intersectionVertexList.pop_back();
     }
+
+    Colorize();
 }
 
 UOdysseyVectorObject*

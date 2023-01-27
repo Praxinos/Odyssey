@@ -29,14 +29,16 @@ void
 UOdysseyPainterEditorVectorPathCutTool::Activate()
 {
     UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
-    FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-/*
-    vectorEngine->SetDrawingFlags( FOdysseyVectorEngine::RENDER_OBJECT_STRUCTURE );
-*/
-    vectorEngine->ClearHUD();
-    vectorEngine->AddHUD( &mCubicPathHUD );
 
-    currentVectorLayer->RenderImageChanged(false);
+    if(currentVectorLayer)
+    {
+        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+
+        vectorEngine->ClearHUD();
+        vectorEngine->AddHUD(&mCubicPathHUD);
+
+        currentVectorLayer->RenderImageChanged(false);
+    }
 }
 
 bool

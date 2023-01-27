@@ -408,13 +408,14 @@ FOdysseyPainterEditorGUI::GroupPaint()
 
                 if( selectObjectList.size() )
                 {
+                    UOdysseyVectorObject* selectedObject = currentVectorLayer->GetScene()->GetLastSelected();
                     UOdysseyVectorGroupPaint* paintGroup = NewObject<UOdysseyVectorGroupPaint>();
 
                     currentVectorLayer->GetScene()->AppendChild( paintGroup );
 
                     for( std::list<UOdysseyVectorObject*>::iterator it = selectObjectList.begin(); it != selectObjectList.end(); ++it )
                     {
-                        UOdysseyVectorObject* selectedObject = (*it);
+                        selectedObject = (*it);
 
                         selectedObject->GetParent()->RemoveChild( selectedObject );
                         paintGroup->AppendChild( selectedObject );
@@ -425,6 +426,8 @@ FOdysseyPainterEditorGUI::GroupPaint()
 
                     currentVectorLayer->GetScene()->ClearSelection();
                     currentVectorLayer->GetScene()->Select( paintGroup );
+
+                    currentVectorLayer->RenderImageChanged(false);
                 }
             }
         }

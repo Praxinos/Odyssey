@@ -32,14 +32,16 @@ void
 UOdysseyPainterEditorVectorPathEditTool::Activate()
 {
     UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
-    FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-/*
-    vectorEngine->SetDrawingFlags( FOdysseyVectorEngine::RENDER_OBJECT_STRUCTURE );
-*/
-    vectorEngine->ClearHUD();
-    vectorEngine->AddHUD( &mCubicPathHUD );
 
-    currentVectorLayer->RenderImageChanged(false);
+    if(currentVectorLayer)
+    {
+        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+
+        vectorEngine->ClearHUD();
+        vectorEngine->AddHUD(&mCubicPathHUD);
+
+        currentVectorLayer->RenderImageChanged(false);
+    }
 }
 
 bool
@@ -219,7 +221,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDrag(const FOdysseyPoint& iPoint
 //UE_LOG(LogTemp, Warning, TEXT("%d %d %d %d"), invalidatedArea.x, invalidatedArea.y, invalidatedArea.w, invalidatedArea.h );
                 currentVectorLayer->GetScene()->Update();
 
-                currentVectorLayer->GetEngine()->InvalidateRegion( totalInvalidatedArea );
+                /*currentVectorLayer->GetEngine()->InvalidateRegion( totalInvalidatedArea );*/
 
                 if( selectedObject->GetParent()->GetClass() == UOdysseyVectorGroupPaint::StaticClass() )
                 {

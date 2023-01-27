@@ -31,15 +31,15 @@ UOdysseyPainterEditorVectorObjectPickTool::Activate()
 {
 	//FOdysseyObjectEditorUtils::SetPropertyValue(BrushOptions, "Color", FOdysseyBrushColor(GetEditorAs<FOdysseyPainterEditor>()->PaintColor()));
     UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
-    FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
 
-/*
-    vectorEngine->SetDrawingFlags( 0 );
-*/
+    if(currentVectorLayer)
+    {
+        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
 
-    vectorEngine->ClearHUD( );
+        vectorEngine->ClearHUD( );
 
-    currentVectorLayer->RenderImageChanged(false);
+        currentVectorLayer->RenderImageChanged(false);
+    }
 }
 
 bool

@@ -9,6 +9,7 @@
 #include "OdysseyVectorSection.h"
 #include "OdysseyVectorSegmentCubic.h"
 #include "OdysseyVectorPath.h"
+#include "OdysseyVectorBucket.h"
 
 class ODYSSEYVECTOR_API FOdysseyVectorLoop
 {
@@ -22,6 +23,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorLoop
         UOdysseyVectorObject& mParent;
         uint64 mID;
         uint32 mColor;
+        FOdysseyVectorBucket* mBucket;
 
     public:
         static bool Exists( uint64 iID
@@ -40,4 +42,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorLoop
         bool HitTest( double iX, double iY );
         void SetColor( uint32 iColor );
         uint32 GetColor();
+
+        FOdysseyVectorBucket* GetBucket();
+        void SetBucket( FOdysseyVectorBucket* iBucket );
 };

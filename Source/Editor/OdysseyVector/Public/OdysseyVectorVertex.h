@@ -13,15 +13,6 @@ class UOdysseyVectorSegment;
 class UOdysseyVectorLoop;
 class FOdysseyVectorSection;
 
-typedef struct _FCycleNode
-{
-    struct _FCycleNode *parent;
-    std::list<FOdysseyVectorSection*>* bypassEdgeList;
-    UOdysseyVectorVertex* vertex;
-    FOdysseyVectorSection* section;
-    uint32 depth;
-} FCycleNode;
-
 UCLASS()
 class ODYSSEYVECTOR_API UOdysseyVectorVertex : public UOdysseyVectorPoint
 {
@@ -31,6 +22,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorVertex : public UOdysseyVectorPoint
     public:
         static const uint32 VISITED      = ( 1 << 2 );
         static const uint32 INCYCLE      = ( 1 << 3 );
+        static const uint32 MARCHED      = ( 1 << 4 );
 
     public:
         static UOdysseyVectorVertex* New( double iX, double iY, double iRadius );
@@ -43,7 +35,6 @@ class ODYSSEYVECTOR_API UOdysseyVectorVertex : public UOdysseyVectorPoint
         std::list<FOdysseyVectorSection*> mSectionList;
         std::list<UOdysseyVectorLoop*> mLoopList;
         uint32 mFlags;
-        FCycleNode* mNode; // used for finding painting areas only;
 
     public:
         ~UOdysseyVectorVertex();
@@ -78,8 +69,10 @@ class ODYSSEYVECTOR_API UOdysseyVectorVertex : public UOdysseyVectorPoint
         std::list<FOdysseyVectorSection*>& GetSectionList();
         bool IsClosestSection( FOdysseyVectorSection& iStartSection
                              , FOdysseyVectorSection& iEndSection );
-        void SetNode( FCycleNode* iNode );
-        FCycleNode* GetNode();
+        /*void SetNode( FCycleNode* iNode );
+        FCycleNode* GetNode();*/
         void SetInCycle( bool iInCycle );
         bool IsInCycle();
+        void SetMarched( bool iMarched );
+        bool IsMarched();
 };
