@@ -77,7 +77,7 @@ public:
      * @brief Preloads the layers and keeps them preloaded untile the hiven handles are destroyed
      * One handle corresponds to something being held in memory
      */
-    void Preload(TArray<TSharedPtr<IOdysseyHandle>>& oHandles);
+    TSharedPtr<IOdysseyHandle> Preload();
 
     /**
      * @brief Returns the surface used for fast update (see ActivateTextureFastUpdate)

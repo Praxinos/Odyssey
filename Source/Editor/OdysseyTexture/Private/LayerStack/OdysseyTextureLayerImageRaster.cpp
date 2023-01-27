@@ -287,12 +287,10 @@ UOdysseyTextureLayerImageRaster::PostDuplicate(bool bDuplicateForPIE)
     RasterBlock->OnBlockPtrChanged().AddUObject(this, &::UOdysseyTextureLayerImageRaster::OnBlockPtrChanged);
 }
 
-void
-UOdysseyTextureLayerImageRaster::Preload(TArray<TSharedPtr<IOdysseyHandle>>& oHandles)
+TSharedPtr<IOdysseyHandle>
+UOdysseyTextureLayerImageRaster::Preload()
 {
-    if ( RasterBlock )
-        oHandles.Add(RasterBlock->Preload());
+    return RasterBlock->Preload();
 }
-
 
 #undef LOCTEXT_NAMESPACE

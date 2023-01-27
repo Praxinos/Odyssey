@@ -7,5 +7,4 @@
 
 class ODYSSEYCORE_API IOdysseyHandle
 {
-    //Empty because the handle uses constructor and destructors to perform what they need to
 };

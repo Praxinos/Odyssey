@@ -9,15 +9,18 @@
 class ULISLOADER_API FULISEventBuilder
 {
 public:
+	DECLARE_DELEGATE_OneParam( FOnComplete, const ::ULIS::FRectI& );
+
+public:
     ::ULIS::FEvent Build();
 
-    FULISEventBuilder& OnComplete( TFunction<void(const ::ULIS::FRectI&)> iFunction );
+    FULISEventBuilder& OnComplete( const FOnComplete& iFunction );
     FULISEventBuilder& RetainBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>& iBlock);
 
 private:
     struct FParams
     {
         TArray<TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>> mRetainedBlocks;
-        TFunction<void(const ::ULIS::FRectI&)> mOnComplete;
+        FOnComplete mOnComplete;
     } mParams;
 };

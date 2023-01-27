@@ -13,6 +13,7 @@ public class OdysseyCore : ModuleRules
              new string[] {
                 "Core",
                 "CoreUObject",
+                "Engine",
                 "InputCore"
              }
         );

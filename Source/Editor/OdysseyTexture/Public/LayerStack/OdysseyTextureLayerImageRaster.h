@@ -87,7 +87,7 @@ public:
      * @brief Preloads the layers and keeps them preloaded untile the hiven handles are destroyed
      * One handle corresponds to something being held in memory
      */
-    virtual void Preload(TArray<TSharedPtr<IOdysseyHandle>>& oHandles) override;
+    virtual TSharedPtr<IOdysseyHandle> Preload() override;
 
 protected:
     void OnBlockChanged(const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive);
@@ -102,13 +102,6 @@ public:
     // UObject overrides
     virtual void PostDuplicate(bool bDuplicateForPIE) override;
     virtual void PostLoad() override;
-
-public:
-    /**
-     * @brief Preloads the layers and keeps them preloaded untile the hiven handles are destroyed
-     * One handle corresponds to something being held in memory
-     */
-    TArray<TSharedPtr<IOdysseyHandle>> Preload();
 
 private:
     UPROPERTY()

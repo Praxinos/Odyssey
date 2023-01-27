@@ -145,18 +145,10 @@ UOdysseyTextureLayerStack::GetSurface() const
     return mTextureFastUpdateSurface;
 }
 
-void
-UOdysseyTextureLayerStack::Preload(TArray<TSharedPtr<IOdysseyHandle>>& oHandles)
+TSharedPtr<IOdysseyHandle>
+UOdysseyTextureLayerStack::Preload()
 {
-    const TArray<UOdysseyLayer*>& layers = GetLayers();
-    for (UOdysseyLayer* layer : layers)
-    {
-        UOdysseyTextureLayer* textureLayer = Cast<UOdysseyTextureLayer>(layer);
-        if (!textureLayer)
-            continue;
-
-        textureLayer->Preload(oHandles);
-    }
+    return Cast<UOdysseyTextureLayerRoot>(LayerRoot)->Preload();
 }
 
 void

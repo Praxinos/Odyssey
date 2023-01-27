@@ -830,6 +830,8 @@ UOdysseyLayerStack::PostEditChangeProperty( FPropertyChangedEvent& PropertyChang
 void
 UOdysseyLayerStack::PostTransacted(const FTransactionObjectEvent& iTransactionEvent)
 {
+    Super::PostTransacted(iTransactionEvent);
+    
     if (iTransactionEvent.GetEventType() != ETransactionObjectEventType::UndoRedo)
         return;
 

@@ -5,6 +5,7 @@
 
 #include "OdysseyLayer.h"
 
+#include "UObject/OdysseyObjectPropertyTracker.h"
 #include "Misc/OdysseyHandle.h"
 #include <ULIS>
 
@@ -26,9 +27,16 @@ public:
 public:
     static FOnRenderImageChanged& OnRenderImageChanged(); //Delegate
 
+public:
+    UOdysseyTextureLayer();
+
 protected:
     void IsActivatedChanged();
-    void ChildrenChanged();
+    //void ChildrenChanged();
+
+public:
+    virtual void PostInitProperties();
+    virtual void PostLoad();
 
 public:
     /**
@@ -62,5 +70,16 @@ public:
      * @brief Preloads the layers and keeps them preloaded untile the hiven handles are destroyed
      * One handle corresponds to something being held in memory
      */
-    virtual void Preload(TArray<TSharedPtr<IOdysseyHandle>>& oHandles);
+    virtual TSharedPtr<IOdysseyHandle> Preload();
+
+private:
+    void OnTrackerChildrenChanged(const TArray<UOdysseyLayer*>& iOldChildren);
+
+private:
+    FOdysseyObjectPropertyTracker mPropertyTracker;
+
+    // 
+    // OPTIMIZATIONS
+    //
+    TWeakPtr<IOdysseyHandle> mPreloadHandle;
 };

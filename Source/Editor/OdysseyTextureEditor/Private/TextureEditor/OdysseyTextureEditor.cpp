@@ -94,7 +94,7 @@ FOdysseyTextureEditor::SetTexture(UTexture2D* iTexture)
 	if ( !mTexture )
 	{
 		SetSelectedTool(nullptr);
-		mLayerStackPreloadHandles.Empty();
+		mLayerStackPreloadHandle = nullptr;
 		return;
 	}
 
@@ -102,9 +102,7 @@ FOdysseyTextureEditor::SetTexture(UTexture2D* iTexture)
 	if ( layerStack )
 	{
 		//Do it in 3 lines to avoid unexpected handles destruction in the process
-		TArray<TSharedPtr<IOdysseyHandle>> handles;
-		layerStack->Preload(handles);
-		mLayerStackPreloadHandles = handles;
+		mLayerStackPreloadHandle = layerStack->Preload();
 		
 		layerStack->ActivateTextureFastUpdate();
 	}

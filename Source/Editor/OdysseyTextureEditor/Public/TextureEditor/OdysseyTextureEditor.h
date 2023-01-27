@@ -61,5 +61,5 @@ private:
     UOdysseyTextureEditorRasterDrawingTool* mRasterDrawingTool;
     UOdysseyTextureEditorPaintBucketTool* mPaintBucketTool;
 
-    TArray<TSharedPtr<IOdysseyHandle>> mLayerStackPreloadHandles;
+    TSharedPtr<IOdysseyHandle> mLayerStackPreloadHandle;
 };

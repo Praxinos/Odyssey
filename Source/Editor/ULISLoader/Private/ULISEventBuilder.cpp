@@ -15,8 +15,7 @@ FULISEventBuilder::Build()
         ::ULIS::FOnEventComplete(
             [params](const ::ULIS::FRectI& iRect)
             {
-                if ( params->mOnComplete )
-                    params->mOnComplete(iRect);
+                params->mOnComplete.ExecuteIfBound(iRect);
                 delete params; //will release all retained blocks
             }
         )
@@ -24,7 +23,7 @@ FULISEventBuilder::Build()
 }
 
 FULISEventBuilder&
-FULISEventBuilder::OnComplete( TFunction<void(const ::ULIS::FRectI&)> iFunction )
+FULISEventBuilder::OnComplete( const FOnComplete& iFunction )
 {
     mParams.mOnComplete = iFunction;
     return *this;
