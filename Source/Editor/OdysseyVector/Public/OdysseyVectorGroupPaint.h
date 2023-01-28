@@ -58,8 +58,9 @@ class ODYSSEYVECTOR_API UOdysseyVectorGroupPaint : public UOdysseyVectorGroup
         uint32 MakeCycle( ::ULIS::FVec2D& minCoord
                       , std::vector<UOdysseyVectorVertex*>& iVertexArray
                       , std::vector<FOdysseyVectorSection*>& iSectionArray );
-        void March( UOdysseyVectorVertexIntersection* iNode
-                  , std::list<FOdysseyVectorSection*>& iSectionList );
+        bool March( UOdysseyVectorVertexIntersection* iNode
+                  , std::list<FOdysseyVectorSection*>& iSectionList
+                  , double iNormalVector );
 
         void FindCycles();
         void SimplifyGraph( std::list<FOdysseyVectorSection*>& sectionList );
