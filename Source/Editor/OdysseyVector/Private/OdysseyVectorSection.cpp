@@ -67,6 +67,8 @@ FOdysseyVectorSection::IsBlocked( UOdysseyVectorVertex* iVertex )
     uint32 blocked = ( iVertex == mVertex[0] ) ? FOdysseyVectorSection::BLOCKVERTEX0
                                                : FOdysseyVectorSection::BLOCKVERTEX1;
 
+//UE_LOG(LogTemp, Warning, TEXT("FOdysseyVectorSection::IsBlocked edge:%d vertex:%d"), this, iVertex );
+
     return ( mFlags & blocked ) ? true : false;
 }
 

@@ -332,12 +332,10 @@ UOdysseyVectorGroupPaint::MakeCycle( ::ULIS::FVec2D& minCoord
             FOdysseyVectorLoop* cycle;
 
             //UE_LOG(LogTemp, Warning, TEXT("cycle size %d"), cycleSize );
-
             // Block leaving edge. The vertex wont be able to exit from it anymore.
             for( int i = 0; i < cycleSize; i++ )
             {
                 /*int p = ( i - 1 + cycleSize ) % cycleSize;*/
-
                 iSectionArray[i]->Block( iVertexArray[i] );
 
                 // clean flags
@@ -470,7 +468,7 @@ UOdysseyVectorGroupPaint::March( UOdysseyVectorVertexIntersection* iVertex
                 if( currentEdge->IsBlocked( currentNode->vertex ) == false )
                 {
                     UOdysseyVectorVertex* nextVertex = ( currentEdge->GetVertex(0) == currentNode->vertex ) ? currentEdge->GetVertex(1) : 
-                                                                                                                currentEdge->GetVertex(0);
+                                                                                                              currentEdge->GetVertex(0);
 
                     if( /*( currentNode->parentID == -1 ) ||*/ ( currentEdge != currentNode->section ) )
                     {
@@ -495,11 +493,14 @@ UOdysseyVectorGroupPaint::March( UOdysseyVectorVertexIntersection* iVertex
 
                                     if( iNormalVector * GetNormalVector( vertexArray ) > 0.0f )
                                     {
-                                        if( MakeCycle( minCoord, vertexArray, sectionArray ) )
+                                        uint32 ret = MakeCycle( minCoord, vertexArray, sectionArray );
+
+                                        // TODO: make proper codes
+                                        if(  ret == 2 )
                                         {
                                             keepProcessing = false;
-UE_LOG( LogTemp, Warning, TEXT("Cycle -----------------------------------------------------------") );
-PrintNode( vertexArray, sectionArray );
+
+//PrintNode( vertexArray, sectionArray );
                                             free( nodeMemArea );
                                             // return now, don't let it find another cycle;
                                             return true;
@@ -647,7 +648,7 @@ UOdysseyVectorGroupPaint::FindCycles()
     std::list<UOdysseyVectorVertexIntersection*> intersectionVertexList;
     std::list<FOdysseyVectorSection*> sectionList;
     uint32 cycleCount = 0;
-    static int stop = 0;
+
     // clear mLoopList
     while( mLoopList.size() )
     {
@@ -663,7 +664,6 @@ UOdysseyVectorGroupPaint::FindCycles()
     //UE_LOG( LogTemp, Warning, TEXT("Detection -----------------------------------------------------------") );
     //UE_LOG( LogTemp, Warning, TEXT("Intersection vertices:%d"), intersectionVertexList.size() );
 
-  if( stop == 0 )
     while( intersectionVertexList.size() )
     {
         UOdysseyVectorVertexIntersection* intersectionVertex = intersectionVertexList.back();
@@ -676,13 +676,6 @@ UE_LOG(LogTemp,Warning,TEXT("Vertex:%d - x:%f y:%f - valence:%d"),intersectionVe
         while ( March( intersectionVertex, sectionList, 1.0f ) == true )
         {
             cycleCount++;
-
-             if( cycleCount > 10 ) { 
-                 stop = 1; 
-UE_LOG( LogTemp, Warning, TEXT("Dafuq" ));
-
-                return;
-            }
         }
 
         intersectionVertexList.pop_back();
