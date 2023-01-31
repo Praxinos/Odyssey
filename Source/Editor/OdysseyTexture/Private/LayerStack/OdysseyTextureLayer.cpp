@@ -141,7 +141,9 @@ UOdysseyTextureLayer::Preload()
     if (handle)
         return handle;
 
-    return MakeShared<FOdysseyTextureLayerPreloadHandle>(this);
+    handle = MakeShared<FOdysseyTextureLayerPreloadHandle>(this);
+    mPreloadHandle = handle;
+    return handle;
 }
 
 void

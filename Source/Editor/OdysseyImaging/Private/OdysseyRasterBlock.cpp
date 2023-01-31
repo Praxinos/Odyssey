@@ -304,7 +304,9 @@ UOdysseyRasterBlock::Preload()
     if (handle)
         return handle;
 
-    return MakeShared<FOdysseyRasterBlockPreloadHandle>(this);
+    handle = MakeShared<FOdysseyRasterBlockPreloadHandle>(this);
+    mPreloadHandle = handle;
+    return handle;
 }
 
 UOdysseyRasterBlock::FOnBlockChanged&
