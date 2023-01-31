@@ -82,7 +82,7 @@ FOdysseyExportFolderExtension::ExecuteExportFolder( TArray<FString> iSelectedPat
         // Creating a filter to get only the UTextures2D, recursively
         FARFilter filter;
         filter.bRecursivePaths = true;
-        filter.ClassNames.Add( UTexture2D::StaticClass()->GetFName() );
+        filter.ClassPaths.Add( UTexture2D::StaticClass()->GetClassPathName() );
 
         for (int32 pathIdx = 0; pathIdx < iSelectedPaths.Num(); ++pathIdx)
         {

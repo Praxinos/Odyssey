@@ -23,11 +23,14 @@ SOdysseyTabletAPISwitcher::Open()
 	FText oKText = LOCTEXT("OkSwitchAPI", "OK" );
 	FText cancelText = LOCTEXT("CancelSwitchAPI", "Cancel");
 
-	customDialog = SNew(SCustomDialog)
-		.Title(dialogTitle)
-		.DialogContent(apiSwitcher)
-		.Buttons( { SCustomDialog::FButton(oKText), SCustomDialog::FButton(cancelText) } );
-    
+    customDialog = SNew( SCustomDialog )
+        .Title( dialogTitle )
+        .Buttons( { SCustomDialog::FButton( oKText ), SCustomDialog::FButton( cancelText ) } )
+        .Content()
+        [
+            apiSwitcher.ToSharedRef()
+        ];
+
     if( customDialog->ShowModal() == 0/*OK*/ )
     {
         settings->StylusInputDriver = *(apiSwitcher->TabletAPISelected().Get());

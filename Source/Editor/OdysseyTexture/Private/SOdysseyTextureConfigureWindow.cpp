@@ -38,6 +38,7 @@ void
 SOdysseyTextureConfigureWindow::Construct( const FArguments& iArgs)
 {
     mAllFormats.Add( MakeShared< ETextureSourceFormat >( TSF_G8 ) );
+    mAllFormats.Add( MakeShared< ETextureSourceFormat >( TSF_G16 ) );
     mAllFormats.Add( MakeShared< ETextureSourceFormat >( TSF_BGRA8 ) );
     mAllFormats.Add( MakeShared< ETextureSourceFormat >( TSF_BGRE8 ) );
     mAllFormats.Add( MakeShared< ETextureSourceFormat >( TSF_RGBA16 ) );
@@ -58,7 +59,7 @@ SOdysseyTextureConfigureWindow::Construct( const FArguments& iArgs)
         .SupportsMaximize( false )
         [
             SNew( SBorder )
-            .BorderImage( FEditorStyle::GetBrush( "Menu.Background" ) )
+            .BorderImage( FAppStyle::GetBrush( "Menu.Background" ) )
             [
                 SNew( SVerticalBox )
 
@@ -173,7 +174,7 @@ SOdysseyTextureConfigureWindow::Construct( const FArguments& iArgs)
                         .AutoHeight()
                         [
                             SNew( SCheckBox )
-                            .Style( FEditorStyle::Get(), "RadioButton" )
+                            .Style( FAppStyle::Get(), "RadioButton" )
                             .IsChecked( this, &SOdysseyTextureConfigureWindow::IsBackgroundColorRadioChecked, EBackgroundColor::kTransparent )
                             .OnCheckStateChanged( this, &SOdysseyTextureConfigureWindow::OnBackgroundColorRadioChanged, EBackgroundColor::kTransparent )
                             [
@@ -186,7 +187,7 @@ SOdysseyTextureConfigureWindow::Construct( const FArguments& iArgs)
                         .AutoHeight()
                         [
                             SNew( SCheckBox )
-                            .Style( FEditorStyle::Get(), "RadioButton" )
+                            .Style( FAppStyle::Get(), "RadioButton" )
                             .IsChecked( this, &SOdysseyTextureConfigureWindow::IsBackgroundColorRadioChecked, EBackgroundColor::kWhite )
                             .OnCheckStateChanged( this, &SOdysseyTextureConfigureWindow::OnBackgroundColorRadioChanged, EBackgroundColor::kWhite )
                             [
@@ -199,7 +200,7 @@ SOdysseyTextureConfigureWindow::Construct( const FArguments& iArgs)
                         .AutoHeight()
                         [
                             SNew( SCheckBox )
-                            .Style( FEditorStyle::Get(), "RadioButton" )
+                            .Style( FAppStyle::Get(), "RadioButton" )
                             .IsChecked( this, &SOdysseyTextureConfigureWindow::IsBackgroundColorRadioChecked, EBackgroundColor::kNormal )
                             .OnCheckStateChanged( this, &SOdysseyTextureConfigureWindow::OnBackgroundColorRadioChanged, EBackgroundColor::kNormal )
                             [
@@ -393,6 +394,7 @@ SOdysseyTextureConfigureWindow::GetFormatText( TSharedPtr<ETextureSourceFormat> 
     switch( *iFormat )
     {
         case TSF_G8:        return LOCTEXT( "g8", "Grey 8" );
+        case TSF_G16:       return LOCTEXT( "g16", "Grey 16" );
         default:
         case TSF_BGRA8:     return LOCTEXT( "bgra8", "BGRA 8" );
         case TSF_BGRE8:     return LOCTEXT( "bgre8", "BGRE 8" );

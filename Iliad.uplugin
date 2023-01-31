@@ -1,7 +1,7 @@
 {
 	"FileVersion": 3,
-	"Version": 12,
-	"VersionName": "0.12.50",
+	"Version": 13,
+	"VersionName": "0.13.51",
 	"FriendlyName": "Iliad",
 	"Description": "Painting plugin with Blueprint brushes for Unreal Engine",
 	"Category": "2D",

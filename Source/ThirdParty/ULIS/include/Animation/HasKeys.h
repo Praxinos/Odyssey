@@ -113,7 +113,7 @@ class THasKeys:
 {
 public:
     THasKeys();
-    ~THasKeys();
+    virtual ~THasKeys();
 
 public:
 

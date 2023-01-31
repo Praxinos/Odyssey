@@ -104,16 +104,16 @@ BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void SOdysseyPackageReportDialog::Construct( const FArguments& iInArgs, const FText& iInReportMessage, TArray<ReportPackageData>& iInPackageNames, const FOnReportConfirmed& iInOnReportConfirmed )
 {
     mOnReportConfirmed = iInOnReportConfirmed;
-    mFolderOpenBrush = FEditorStyle::GetBrush("ContentBrowser.AssetTreeFolderOpen");
-    mFolderClosedBrush = FEditorStyle::GetBrush("ContentBrowser.AssetTreeFolderClosed");
-    mPackageBrush = FEditorStyle::GetBrush("ContentBrowser.ColumnViewAssetIcon");
+    mFolderOpenBrush = FAppStyle::GetBrush("ContentBrowser.AssetTreeFolderOpen");
+    mFolderClosedBrush = FAppStyle::GetBrush("ContentBrowser.AssetTreeFolderClosed");
+    mPackageBrush = FAppStyle::GetBrush("ContentBrowser.ColumnViewAssetIcon");
 
     ConstructNodeTree(iInPackageNames);
     
     ChildSlot
     [
         SNew(SBorder)
-        .BorderImage( FEditorStyle::GetBrush("Docking.Tab.ContentAreaBrush") )
+        .BorderImage( FAppStyle::GetBrush("Docking.Tab.ContentAreaBrush") )
         .Padding(FMargin(4, 8, 4, 4))
         [
             SNew(SVerticalBox)
@@ -125,7 +125,7 @@ void SOdysseyPackageReportDialog::Construct( const FArguments& iInArgs, const FT
             [
                 SNew(STextBlock)
                 .Text(iInReportMessage)
-                .TextStyle( FEditorStyle::Get(), "PackageMigration.DialogTitle" )
+                .TextStyle( FAppStyle::Get(), "PackageMigration.DialogTitle" )
             ]
 
             // Tree of packages in the report
@@ -133,7 +133,7 @@ void SOdysseyPackageReportDialog::Construct( const FArguments& iInArgs, const FT
             .FillHeight(1.f)
             [
                 SNew(SBorder)
-                .BorderImage( FEditorStyle::GetBrush("ToolPanel.GroupBorder") )
+                .BorderImage( FAppStyle::GetBrush("ToolPanel.GroupBorder") )
                 [
                     SAssignNew( mReportTreeView, PackageReportTree )
                     .TreeItemsSource(&mPackageReportRootNode.Children)
@@ -171,14 +171,14 @@ void SOdysseyPackageReportDialog::Construct( const FArguments& iInArgs, const FT
             .Padding(0,4,0,0)
             [
                 SNew(SUniformGridPanel)
-                .SlotPadding(FEditorStyle::GetMargin("StandardDialog.SlotPadding"))
-                .MinDesiredSlotWidth(FEditorStyle::GetFloat("StandardDialog.MinDesiredSlotWidth"))
-                .MinDesiredSlotHeight(FEditorStyle::GetFloat("StandardDialog.MinDesiredSlotHeight"))
+                .SlotPadding(FAppStyle::GetMargin("StandardDialog.SlotPadding"))
+                .MinDesiredSlotWidth(FAppStyle::GetFloat("StandardDialog.MinDesiredSlotWidth"))
+                .MinDesiredSlotHeight(FAppStyle::GetFloat("StandardDialog.MinDesiredSlotHeight"))
                 +SUniformGridPanel::Slot(0,0)
                 [
                     SNew(SButton)
                     .HAlign(HAlign_Center)
-                    .ContentPadding( FEditorStyle::GetMargin("StandardDialog.ContentPadding") )
+                    .ContentPadding( FAppStyle::GetMargin("StandardDialog.ContentPadding") )
                     .OnClicked(this, &SOdysseyPackageReportDialog::OkClicked)
                     .Text(LOCTEXT("OkButton", "OK"))
                 ]
@@ -186,7 +186,7 @@ void SOdysseyPackageReportDialog::Construct( const FArguments& iInArgs, const FT
                 [
                     SNew(SButton)
                     .HAlign(HAlign_Center)
-                    .ContentPadding( FEditorStyle::GetMargin("StandardDialog.ContentPadding") )
+                    .ContentPadding( FAppStyle::GetMargin("StandardDialog.ContentPadding") )
                     .OnClicked(this, &SOdysseyPackageReportDialog::CancelClicked)
                     .Text(LOCTEXT("CancelButton", "Cancel"))
                 ]

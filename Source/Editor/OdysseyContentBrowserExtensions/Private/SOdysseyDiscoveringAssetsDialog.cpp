@@ -38,7 +38,7 @@ void SOdysseyDiscoveringAssetsDialog::Construct( const FArguments& iInArgs )
     ChildSlot
     [
         SNew(SBorder)
-        .BorderImage( FEditorStyle::GetBrush("ToolPanel.GroupBorder") )
+        .BorderImage( FAppStyle::GetBrush("ToolPanel.GroupBorder") )
         .Padding(FMargin(4, 8, 4, 4))
         [
             SNew(SVerticalBox)

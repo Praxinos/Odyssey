@@ -309,7 +309,7 @@ FOdysseyTextureContentBrowserExtensions_Impl::OnExtendContentBrowserAssetSelecti
     for( auto assetIt = iSelectedAssets.CreateConstIterator(); assetIt; ++assetIt )
     {
         const FAssetData& asset = *assetIt;
-        isAnyTextures = isAnyTextures || ( asset.AssetClass == UTexture2D::StaticClass()->GetFName() );
+        isAnyTextures = isAnyTextures || ( asset.AssetClassPath == UTexture2D::StaticClass()->GetClassPathName() );
     }
 
     if( isAnyTextures )

@@ -47,7 +47,7 @@ FOdysseyTextureAssetTypeActions::GetCategories()
 void 
 FOdysseyTextureAssetTypeActions::BuildBackendFilter( FARFilter & InFilter )
 {
-    InFilter.ClassNames.Add( UTexture2D::StaticClass()->GetFName());
+    InFilter.ClassPaths.Add( UTexture2D::StaticClass()->GetClassPathName() );
 }
 
 
