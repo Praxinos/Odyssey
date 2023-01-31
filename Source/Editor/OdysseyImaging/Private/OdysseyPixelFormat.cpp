@@ -10,6 +10,7 @@ int TextureSourceFormatBytesPerPixel(ETextureSourceFormat iFormat)
 {
     switch (iFormat) {
         case TSF_G8:        return 1;
+        case TSF_G16:       return 2;
         case TSF_BGRA8:     return 4;
         case TSF_BGRE8:     return 4;
         case TSF_RGBA16:    return 8;
@@ -169,6 +170,7 @@ ConvertULISFormatToTextureSourceFormat( const uint8* iSrc, uint8* oDst, int iWid
     switch( iFormat ) {
         case TSF_Invalid:   ret = 0;                        break;
         case TSF_G8:        ret = ::ULIS::Format_G8;        break;
+        case TSF_G16:       ret = ::ULIS::Format_G16;       break;
         case TSF_BGRA8:     ret = ::ULIS::Format_BGRA8;     break;
         case TSF_BGRE8:     ret = ::ULIS::Format_RGBF;      break;
         case TSF_RGBA16:    ret = ::ULIS::Format_RGBA16;    break;

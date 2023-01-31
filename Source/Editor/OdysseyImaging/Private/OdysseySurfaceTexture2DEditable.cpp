@@ -233,7 +233,7 @@ InvalidateTextureFromSourceDataUsingSortedRects( const ::ULIS::FBlock* iData, UT
     buildSettings.Reserve( ioSrcRects.Num() );
     {
         TArray< FTextureBuildSettings > refBuildSettings;
-        GetBuildSettingsForRunningPlatform( *iTexture, refBuildSettings );
+        GetBuildSettingsForRunningPlatform( *iTexture, ETextureEncodeSpeed::Fast, refBuildSettings, nullptr );
         for( int32 i = 0; i < ioSrcRects.Num(); ++i )
             buildSettings.Add( refBuildSettings );
     }
