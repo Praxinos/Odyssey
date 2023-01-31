@@ -24,15 +24,14 @@ FOdysseyFlipbookEditorViewportTab::FOdysseyFlipbookEditorViewportTab(FOdysseyFli
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------- Getters
 
-IOdysseySurface*
-FOdysseyFlipbookEditorViewportTab::Surface() const
+UTexture*
+FOdysseyFlipbookEditorViewportTab::Texture() const
 {
     //TODO: Instead of going through the GUI, make a Player class in the data and get the condition from there
     if (!mEditor->GetGUI()->GetTimelineTab()->Timeline())
         return nullptr;
 
-    return mEditor->GetGUI()->GetTimelineTab()->Timeline()->IsScrubbing() ? (IOdysseySurface*)mEditor->PreviewSurface() : (IOdysseySurface*)mEditor->DisplaySurface();
-    // return (IOdysseySurface*)mEditor->DisplaySurface();
+    return mEditor->GetGUI()->GetTimelineTab()->Timeline()->IsScrubbing() ? mEditor->PreviewTexture() : mEditor->DisplayTexture();
 }
 
 //--------------------------------------------------------------------------------------

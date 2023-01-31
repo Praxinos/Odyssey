@@ -136,14 +136,20 @@ FOdysseyTextureEditor::LayerStack() const
 	return userData->GetLayerStack();
 }
 
-FOdysseySurfaceTexture2DEditable*
-FOdysseyTextureEditor::DisplaySurface() const
+UTexture*
+FOdysseyTextureEditor::DisplayTexture() const
+{
+	return mTexture;
+}
+
+TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>
+FOdysseyTextureEditor::GetDisplayBlock()
 {
 	UOdysseyTextureLayerStack* layerStack = LayerStack();
-	if (!layerStack )
+	if (!layerStack)
 		return nullptr;
-	
-	return layerStack->GetSurface().Get();
+
+	return layerStack->GetSurface()->Block();
 }
 
 UOdysseyTextureLayerStackUserData*

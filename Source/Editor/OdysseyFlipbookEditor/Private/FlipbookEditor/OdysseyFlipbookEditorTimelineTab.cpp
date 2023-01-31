@@ -104,7 +104,7 @@ FOdysseyFlipbookEditorTimelineTab::OnTimelineScrubStopped()
 	SetTextureAtKeyframeIndex(mTimeline->GetCurrentKeyframeIndex());
 
 	//Cleanup Preview Surface
-	mEditor->PreviewSurface()->Texture(NULL);
+	mEditor->PreviewTexture(NULL);
 }
 
 void
@@ -151,7 +151,7 @@ FOdysseyFlipbookEditorTimelineTab::SetTextureAtKeyframeIndex(int32 iKeyframeInde
     //TODO: Instead of going through the GUI, make a Player class in the data and get the condition from there
 	if (mTimeline->IsScrubbing())
 	{
-		mEditor->PreviewSurface()->Texture(texture);
+		mEditor->PreviewTexture(texture);
 		return;
 	}
 

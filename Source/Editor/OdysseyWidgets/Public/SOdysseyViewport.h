@@ -11,18 +11,17 @@
 class FOdysseySceneViewport;
 class SScrollBar;
 class SViewport;
-class IOdysseySurface;
 class UTexture2D;
 
 
 /////////////////////////////////////////////////////
-// SOdysseySurfaceViewport
-class ODYSSEYWIDGETS_API SOdysseySurfaceViewport : public SCompoundWidget
+// SOdysseyViewport
+class ODYSSEYWIDGETS_API SOdysseyViewport : public SCompoundWidget
 {
 public:
-    SLATE_BEGIN_ARGS(SOdysseySurfaceViewport)
+    SLATE_BEGIN_ARGS(SOdysseyViewport)
         {}
-        SLATE_ATTRIBUTE(IOdysseySurface*, Surface)
+        SLATE_ATTRIBUTE(UTexture*, Texture)
     SLATE_END_ARGS()
 
 public:
@@ -32,8 +31,8 @@ public:
 public:
     // Public API
 
-    /* Ge the Surface the viewport is displaying */
-    IOdysseySurface* GetSurface() const;
+    /* Ge the texture the viewport is displaying */
+    UTexture* GetTexture() const;
 
     /* Get the scene viewport object */
     TSharedPtr<FOdysseySceneViewport>   GetViewport()              const;
@@ -145,7 +144,7 @@ private:
     /* Returns the expected translation from the given scrollbars offsets */
     FVector2D                   GetTranslationFromSlidersOffsets(float InScrollOffsetFractionX, float InScrollOffsetFractionY);
 
-    /* Update the scrollbars according to the surface transform */
+    /* Update the scrollbars according to the texture transform */
     void                        UpdateScrollBars();
 
 private:
@@ -161,8 +160,8 @@ private:
     /* Return the zoom menu Fit To Viewport option state */
     bool            IsZoomMenuFitChecked() const;
 
-    /* Return the Surface Infos to display */
-    FText           GetSurfaceInfosValue() const;
+    /* Return the Texture Infos to display */
+    FText           GetTextureInfosValue() const;
 
     /* Handles the horizontal scrollbar scroll event */
     void            HandleHorizontalScrollBarScrolled( float InScrollOffsetFraction );
@@ -193,7 +192,7 @@ private:
 
 private:
     // Private Member Data
-    TAttribute<IOdysseySurface*>        mSurface;
+    TAttribute<UTexture*>               mTexture;
     TSharedPtr<FViewportClient>         mViewportClient;
     TSharedPtr<FOdysseySceneViewport>   mViewport;
     TSharedPtr<SViewport>               mViewportWidget;

@@ -362,36 +362,6 @@ FOdysseyTextureEditorLayerStackTab::CreateNewLayer()
     layerStack->AddLayer(UOdysseyTextureLayerImageRaster::StaticClass());
 }
 
-/* void
-FOdysseyTextureEditorLayerStackTab::DuplicateCurrentLayer()
-{
-    if( mEditor->LayerStack()->GetCurrentLayer() )
-    {
-        mEditor->LayerStack()->DuplicateLayer( mEditor->LayerStack()->GetCurrentLayer() );
-        mEditor->LayerStack()->ComputeResultInBlock(mEditor->DisplaySurface()->Block());
-        mEditor->DisplaySurface()->Invalidate();
-        mLayerStackView->RefreshView();
-    }
-} */
-
-/*
-void
-FOdysseyTextureEditorLayerStackTab::DeleteCurrentLayer()
-{
-    if( mEditor->LayerStack()->GetCurrentLayer() )
-    {
-        FText Title = LOCTEXT("TitleDeletingCurrentLayer", "Deleting current layer");
-        if (FMessageDialog::Open(EAppMsgType::OkCancel, LOCTEXT("DeletingCurrentLayer", "Are you sure you want to delete this layer ?"), &Title) == EAppReturnType::Ok)
-        {
-            mEditor->LayerStack()->DeleteLayer(mEditor->LayerStack()->GetCurrentLayer());
-            mEditor->LayerStack()->ComputeResultInBlock(mEditor->DisplaySurface()->Block());
-            mEditor->DisplaySurface()->Invalidate();
-            mLayerStackView->RefreshView();
-        }
-    }
-}
-*/
-
 void
 FOdysseyTextureEditorLayerStackTab::ChangeLayerOpacity( float iOpacity )
 {

@@ -34,8 +34,8 @@ FOdysseyPainterEditorViewportTab::FOdysseyPainterEditorViewportTab(FOdysseyPaint
 TSharedPtr<SWidget>
 FOdysseyPainterEditorViewportTab::CreateWidget()
 {
-    SAssignNew(mViewport, SOdysseySurfaceViewport)
-        .Surface_Raw(this, &FOdysseyPainterEditorViewportTab::Surface);
+    SAssignNew(mViewport, SOdysseyViewport)
+        .Texture_Raw(this, &FOdysseyPainterEditorViewportTab::Texture);
 
     //TODO: not cool to have to go through the whole GUI for an info, move that in the painterEditor Data
 	mViewportClient = MakeShareable(new FOdysseyPainterEditorViewportClient(mEditor, mViewport, mEditor->GetGUI()->GetMeshSelectorTab()->MeshSelector()->GetMeshSelectorPtr()));
@@ -87,7 +87,7 @@ FOdysseyPainterEditorViewportTab::BindShortcuts(FBaseToolkit* iToolkit)
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------------------- Public Getters
 
-TSharedPtr<SOdysseySurfaceViewport>
+TSharedPtr<SOdysseyViewport>
 FOdysseyPainterEditorViewportTab::GetViewport()
 {
     return mViewport;
@@ -96,10 +96,10 @@ FOdysseyPainterEditorViewportTab::GetViewport()
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------------------- Widget Getters
 
-IOdysseySurface*
-FOdysseyPainterEditorViewportTab::Surface() const
+UTexture*
+FOdysseyPainterEditorViewportTab::Texture() const
 {
-    return mEditor->DisplaySurface();
+    return mEditor->DisplayTexture();
 }
 
 //--------------------------------------------------------------------------------------
@@ -108,10 +108,10 @@ FOdysseyPainterEditorViewportTab::Surface() const
 void
 FOdysseyPainterEditorViewportTab::HandleViewportColorPicked(eOdysseyEventState::Type iEventState, const FVector2D& iPositionInTexture)
 {
-	if (!mEditor->DisplaySurface())
-		return;
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = mEditor->GetDisplayBlock();
+    if ( !block )
+        return;
 
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = mEditor->DisplaySurface()->Block();
     if (iPositionInTexture.X >= 0 && iPositionInTexture.X < block->Width() &&
         iPositionInTexture.Y >= 0 && iPositionInTexture.Y < block->Height())
     {

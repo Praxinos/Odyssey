@@ -19,17 +19,12 @@
 FOdysseyFlipbookEditor::~FOdysseyFlipbookEditor()
 {
 	mFlipbookWrapper->OnSpriteTextureChanged().RemoveAll(this);
-
-	if (mPreviewSurface) {
-		delete mPreviewSurface;
-		mPreviewSurface = nullptr;
-	}
 }
 
 FOdysseyFlipbookEditor::FOdysseyFlipbookEditor() :
 	FOdysseyTextureEditor(),
 	mFlipbookWrapper(nullptr),
-	mPreviewSurface(new FOdysseySurfaceTexture2D(nullptr)),
+	mPreviewSurface(nullptr),
 	mGUI(nullptr)
 {
 }
@@ -37,7 +32,7 @@ FOdysseyFlipbookEditor::FOdysseyFlipbookEditor() :
 FOdysseyFlipbookEditor::FOdysseyFlipbookEditor(UPaperFlipbook* iFlipbook) :
 	FOdysseyTextureEditor(),
 	mFlipbookWrapper(MakeShareable(new FOdysseyFlipbookWrapper(iFlipbook))),
-	mPreviewSurface(new FOdysseySurfaceTexture2D(nullptr)),
+	mPreviewSurface(nullptr),
 	mGUI(nullptr)
 {
 }
@@ -93,10 +88,16 @@ FOdysseyFlipbookEditor::FlipbookWrapper()
 	return mFlipbookWrapper;
 }
 
-FOdysseySurfaceTexture2D*
-FOdysseyFlipbookEditor::PreviewSurface()
+UTexture*
+FOdysseyFlipbookEditor::PreviewTexture()
 {
-	return mPreviewSurface;
+	return mPreviewSurface.Texture();
+}
+
+void
+FOdysseyFlipbookEditor::PreviewTexture(UTexture2D* iTexture)
+{
+	return mPreviewSurface.Texture(iTexture);
 }
 
 //--------------------------------------------------------------------------------------
@@ -128,7 +129,7 @@ FOdysseyFlipbookEditor::SetTextureAtKeyframeIndex(int32 iKeyframeIndex)
 	UTexture2D* texture = mFlipbookWrapper->GetKeyframeTexture(iKeyframeIndex);
 	if (GetGUI()->GetTimelineTab()->Timeline()->IsScrubbing())
 	{
-		PreviewSurface()->Texture(texture);
+		mPreviewSurface.Texture(texture);
 		return;
 	}
 

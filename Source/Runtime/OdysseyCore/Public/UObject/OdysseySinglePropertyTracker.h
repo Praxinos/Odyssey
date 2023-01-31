@@ -13,7 +13,7 @@ public:
     using TOnChanged = TDelegate<void(const T&)>;
 
 public:
-    ~IOdysseySinglePropertyTracker() {}
+    virtual ~IOdysseySinglePropertyTracker() {}
 
     virtual void OnChanged() = 0;
     virtual void UpdateValue(UObject* iObject, const FName& iPropertyName) = 0;

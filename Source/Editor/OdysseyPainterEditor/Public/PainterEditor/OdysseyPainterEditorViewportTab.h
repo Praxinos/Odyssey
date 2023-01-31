@@ -7,8 +7,7 @@
 #include "OdysseyEventState.h"
 
 class FOdysseyPainterEditor;
-class SOdysseySurfaceViewport;
-class IOdysseySurface;
+class SOdysseyViewport;
 class FOdysseyPainterEditorViewportClient;
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorViewportTab :
@@ -26,11 +25,11 @@ protected:
 
 public:
     // Public Getters
-    TSharedPtr<SOdysseySurfaceViewport> GetViewport();
+    TSharedPtr<SOdysseyViewport> GetViewport();
 
 protected:
     // Widget Getters
-    virtual IOdysseySurface* Surface() const;
+    virtual UTexture* Texture() const;
 
 protected:
     // Event Listeners
@@ -60,7 +59,7 @@ protected:
 private:
     FOdysseyPainterEditor* mEditor;
 
-    TSharedPtr<SOdysseySurfaceViewport> mViewport;
+    TSharedPtr<SOdysseyViewport> mViewport;
     TSharedPtr<FOdysseyPainterEditorViewportClient> mViewportClient;
 };
 

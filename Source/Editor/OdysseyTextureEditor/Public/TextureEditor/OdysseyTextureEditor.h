@@ -33,7 +33,8 @@ public:
     // Getters
 	virtual UTexture2D*				    Texture() const;
     virtual UOdysseyTextureLayerStack*	LayerStack() const;
-	virtual FOdysseySurfaceTexture2DEditable* DisplaySurface() const override;
+	virtual UTexture*                   DisplayTexture() const override;
+    virtual TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> GetDisplayBlock() override;
     
     virtual void				        SetTexture(UTexture2D* iTexture);
     UOdysseyTextureLayerStackUserData*       TextureUserData() const;

@@ -17,7 +17,7 @@ public:
 
 protected:
     // Getters
-    virtual IOdysseySurface* Surface() const override;
+    virtual UTexture* Texture() const override;
 
 private:
     FOdysseyFlipbookEditor* mEditor;
