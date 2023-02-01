@@ -118,6 +118,45 @@ void FOdysseyViewportDrawingEditorTextureBasedAdapter::Tick(float iDelta)
         TexturePaintHelpers::CopyTextureToRenderTargetTexture(mEditor->Texture(), mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
 }
 
+void FOdysseyViewportDrawingEditorTextureBasedAdapter::RenderInteractorWidget(const FVector& iCameraOrigin, const FVector& iRayOrigin, const FVector& iRayDirection, FPrimitiveDrawInterface* iPDI)
+{
+    UOdysseyPainterEditorRasterDrawingTool* drawingTool = nullptr;
+    if (mEditor->GetSelectedTool() && mEditor->GetSelectedTool()->IsA(UOdysseyPainterEditorRasterDrawingTool::StaticClass()))
+        drawingTool = Cast<UOdysseyPainterEditorRasterDrawingTool>(mEditor->GetSelectedTool());
+    else
+        return;
+
+    const TSharedPtr<IMeshPaintGeometryAdapter>* meshAdapterPtr = mEditor->ComponentToAdapterMap().Find(mEditor->Component());
+    if (!meshAdapterPtr)
+        return;
+
+    TSharedPtr<IMeshPaintGeometryAdapter> meshAdapter = *meshAdapterPtr;
+
+    FHitResult traceHitResult(1.0f);
+    const FVector rayEnd(iRayOrigin + iRayDirection * HALF_WORLD_MAX);
+
+    meshAdapter->LineTraceComponent(traceHitResult, iRayOrigin, rayEnd, FCollisionQueryParams(SCENE_QUERY_STAT(Paint), true));
+
+    // Display settings
+    const float visualBiasDistance = 0.15f;
+    const FLinearColor normalLineColor(0.3f, 1.0f, 0.3f);
+    const FLinearColor brushCueColor = FLinearColor(1.0f, 1.0f, 0.3f);
+
+    FVector brushXAxis, brushYAxis;
+    traceHitResult.Normal.FindBestAxisVectors(brushXAxis, brushYAxis);
+    const FVector brushVisualPosition = traceHitResult.Location + traceHitResult.Normal * visualBiasDistance;
+
+    if (iPDI != NULL)
+    {
+        int numCircleSides = 128;
+        // Draw brush circle
+        DrawCircle(iPDI, brushVisualPosition, brushXAxis, brushYAxis, brushCueColor, drawingTool->GetBrushInstance()->GetSizeModifier(), numCircleSides, SDPG_World, 0.1f);
+
+        const FVector normalLineEnd(brushVisualPosition + traceHitResult.Normal * drawingTool->GetBrushInstance()->GetSizeModifier() * 0.2f);
+        iPDI->DrawLine(brushVisualPosition, normalLineEnd, normalLineColor, SDPG_World, 0.1f);
+    }
+}
+
 ::ULIS::FEvent FOdysseyViewportDrawingEditorTextureBasedAdapter::StampOverride(UOdysseyBrushAssetBase::FStampParams iStampParams)
 {
     UOdysseyPainterEditorRasterDrawingTool* drawingTool = nullptr;

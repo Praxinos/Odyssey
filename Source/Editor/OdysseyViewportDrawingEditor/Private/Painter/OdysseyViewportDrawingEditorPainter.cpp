@@ -6,6 +6,7 @@
 #include "OdysseyViewportDrawingEditorCommands.h"
 #include "OdysseyViewportDrawingEditorSettings.h"
 #include "OdysseyViewportDrawingEditorTextureBasedAdapter.h"
+#include "OdysseyViewportDrawingEditorScreenBasedAdapter.h"
 
 #include "MeshPaintModule.h"
 #include "MeshPaintAdapterFactory.h"
@@ -77,9 +78,9 @@ void FOdysseyViewportDrawingEditorPainter::CreatePaintingAdapter()
         case EOdysseyViewportDrawingPaintingAdapterMethod::OdysseyTextureBased :
             mPaintingAdapter = MakeShared<FOdysseyViewportDrawingEditorTextureBasedAdapter>(mEditor);
         break;
-        /*case EOdysseyViewportDrawingPaintingAdapterMethod::OdysseyScreenBased:
-            mPaintingAdapter = MakeShared<FOdysseyViewportDrawingEditor>(mEditor);
-        break;*/
+        case EOdysseyViewportDrawingPaintingAdapterMethod::OdysseyScreenBased:
+            mPaintingAdapter = MakeShared<FOdysseyViewportDrawingEditorScreenBasedAdapter>(mEditor);
+        break;
         case EOdysseyViewportDrawingPaintingAdapterMethod::OdysseyMeshBased:
             mPaintingAdapter = MakeShared<FOdysseyViewportDrawingEditorMeshBasedAdapter>(mEditor);
         break;

@@ -47,10 +47,13 @@ IOdysseyViewportDrawingEditorAdapter::IOdysseyViewportDrawingEditorAdapter(TShar
 void IOdysseyViewportDrawingEditorAdapter::PrepareAdapterForPainting()
 {
     mEditor->OnSelectedToolChangedDelegate().AddRaw(this, &IOdysseyViewportDrawingEditorAdapter::OnToolChange);
-    if (mEditor->GetSelectedTool()->IsA(UOdysseyPainterEditorTool::StaticClass()))
+    if (mEditor->GetSelectedTool())
     {
-        UOdysseyPainterEditorTool* drawingTool = Cast<UOdysseyPainterEditorTool>(mEditor->GetSelectedTool());
-        OnToolChange(drawingTool);
+        if (mEditor->GetSelectedTool()->IsA(UOdysseyPainterEditorTool::StaticClass()))
+        {
+            UOdysseyPainterEditorTool* drawingTool = Cast<UOdysseyPainterEditorTool>(mEditor->GetSelectedTool());
+            OnToolChange(drawingTool);
+        }
     }
 }
 

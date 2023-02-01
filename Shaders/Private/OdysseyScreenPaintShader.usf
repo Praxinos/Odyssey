@@ -1,0 +1,36 @@
+#include "/Engine/Private/common.ush"
+
+Texture2D s_Stroke2D;
+SamplerState s_TextureSampler;
+
+float4x4 c_WorldToBrushMatrix;
+float2 c_TextureHitPoint;
+float c_StampQuality;
+
+void MainPS( float4 InPosition : SV_POSITION,
+		   float2 InCloneTextureCoordinates : TEXCOORD0,
+		   float3 InWorldSpaceVertexPosition : TEXCOORD1,
+		   out float4 OutColor : SV_Target0)
+{
+	OutColor = float4( 1.f, 0.f, 0.f, 1.f);
+}
+
+
+float4x4 c_Transform;
+
+void MainVS( float4 InPosition : ATTRIBUTE0,
+		   float2 InCloneTextureCoordinates : ATTRIBUTE2,
+		   float3 InWorldSpaceVertexPosition : ATTRIBUTE3,
+		   out float4 OutPosition : SV_POSITION,
+		   out float2 OutCloneTextureCoordinates: TEXCOORD0,
+		   out float3 OutWorldSpaceVertexPosition : TEXCOORD1 )
+{
+	// Position (on texture map, derived from the UVs of the original mesh)
+	OutPosition = mul( InPosition, c_Transform );
+
+	// Pass clone texture coordinates through to the pixel shader
+	OutCloneTextureCoordinates = InCloneTextureCoordinates;
+
+	// Position of this vertex in world space (original mesh)
+	OutWorldSpaceVertexPosition = InWorldSpaceVertexPosition;
+}

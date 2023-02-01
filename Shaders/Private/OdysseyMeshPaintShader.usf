@@ -32,14 +32,19 @@ void MainPS( float4 InPosition : SV_POSITION,
     
     float dist3D = length( BrushSpaceVertexPosition );
     	
-    float testEllipseX = ((BrushSpaceVertexPosition.x * BrushSpaceVertexPosition.x) / (widthStroke * widthStroke));
-    float testEllipseY = ((BrushSpaceVertexPosition.y * BrushSpaceVertexPosition.y) / (heightStroke * heightStroke));
+	float distX = BrushSpaceVertexPosition.x / (2*widthStroke);
+	float distY = BrushSpaceVertexPosition.y / (2*heightStroke);
+	float distZ = BrushSpaceVertexPosition.z / (2*heightStroke);
+	//if( distZ < 0 )
+	//	distZ = -distZ;
+		
+	float xPos = 0.5 + distX - distZ;// + sin(distY * 2 * 3.14)*distZ;
+	float yPos = 0.5 + distY;// - cos(distX * 2 * 3.14)*distZ;
 
     OutColor = float4(0.f,0.f,0.f,0.f);
-    if( testEllipseX + testEllipseY < 1.0 && dist3D <= widthStroke )
+    if( dist3D <= widthStroke || dist3D <= heightStroke )
     {
-        float4 StrokeColor = Texture2DSample(s_Stroke2D, s_TextureSampler, float2(BrushSpaceVertexPosition.x / (2*widthStroke) + 0.5, BrushSpaceVertexPosition.y / (2*heightStroke) + 0.5));
-		OutColor = StrokeColor;
+		OutColor = Texture2DSample(s_Stroke2D, s_TextureSampler, float2(xPos, yPos));
 	}
 }
 

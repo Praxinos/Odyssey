@@ -5,36 +5,36 @@
 
 #include "IOdysseyViewportDrawingEditorAdapter.h"
 
-#include "OdysseyMeshPaintRendering.h"
+#include "OdysseyScreenPaintRendering.h"
 #include "OdysseySeamsPaintRendering.h"
 #include "MeshPaintTypes.h"
 #include "TexturePaintHelpers.h"
 
 /* -------------------------------------------------------------------  */
 
-/** Mesh Based Painting
+/** Screen Based Painting
 * Batched element parameters for texture paint shaders used for paint blending and paint mask generation
 */
-class FOdysseyMeshPaintBatchedElementParameters: public FBatchedElementParameters
+class FOdysseyScreenPaintBatchedElementParameters: public FBatchedElementParameters
 {
 public:
     /** Binds vertex and pixel shaders for this element */
     virtual void BindShaders(FRHICommandList& RHICmdList,FGraphicsPipelineStateInitializer& GraphicsPSOInit,ERHIFeatureLevel::Type InFeatureLevel,const FMatrix& InTransform,const float InGamma,const FMatrix& ColorWeights,const FTexture* Texture) override
     {
-        OdysseyMeshPaintRendering::SetMeshPaintShaders(RHICmdList,GraphicsPSOInit,InFeatureLevel,InTransform,InGamma,ShaderParams);
+        OdysseyScreenPaintRendering::SetMeshPaintShaders(RHICmdList,GraphicsPSOInit,InFeatureLevel,InTransform,InGamma,ShaderParams);
     }
 
 public:
 
     /** Shader parameters */
-    OdysseyMeshPaintRendering::FOdysseyMeshPaintShaderParameters ShaderParams;
+    OdysseyScreenPaintRendering::FOdysseyScreenPaintShaderParameters ShaderParams;
 };
 
 
 /** Mesh Based Painting, seams
 * Batched element parameters for texture paint on the seams of the mesh
 */
-class FOdysseySeamsPaintBatchedElementParameters : public FBatchedElementParameters
+class FOdysseyScreenSeamsPaintBatchedElementParameters : public FBatchedElementParameters
 {
 public:
     /** Binds vertex and pixel shaders for this element */
@@ -50,14 +50,14 @@ public:
 };
 
 /** Painting adapter for the painter. Describes the method of mesh based painting in the viewport*/
-class FOdysseyViewportDrawingEditorMeshBasedAdapter : public IOdysseyViewportDrawingEditorAdapter
+class FOdysseyViewportDrawingEditorScreenBasedAdapter : public IOdysseyViewportDrawingEditorAdapter
 {
 public:
 	/** destructor */
-	~FOdysseyViewportDrawingEditorMeshBasedAdapter();
+	~FOdysseyViewportDrawingEditorScreenBasedAdapter();
 
 	/** constructor */
-	FOdysseyViewportDrawingEditorMeshBasedAdapter(TSharedPtr<FOdysseyViewportDrawingEditor> iEditor);
+	FOdysseyViewportDrawingEditorScreenBasedAdapter(TSharedPtr<FOdysseyViewportDrawingEditor> iEditor);
 
 public:      
     virtual void PrepareAdapterForPainting() override;
