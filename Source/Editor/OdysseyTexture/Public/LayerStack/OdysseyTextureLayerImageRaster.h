@@ -8,6 +8,7 @@
 #include "Misc/TransactionObjectEvent.h"
 #include "Misc/ITransaction.h"
 #include "Misc/ITransactionObjectAnnotation.h"
+#include "OdysseyRasterBlock.h"
 
 #include <ULIS>
 
@@ -55,7 +56,7 @@ public:
 
 public:
     // Public API
-    UOdysseyRasterBlock* GetRasterBlock() const;
+    TSharedPtr<FOdysseyRasterBlock> GetRasterBlock() const;
 
 public:
     //IOdysseyTextureLayerImageRenderer implementation
@@ -103,9 +104,18 @@ public:
     virtual void PostDuplicate(bool bDuplicateForPIE) override;
     virtual void PostLoad() override;
 
+public:
+    //UObject overrides
+
+    /**
+     * @brief Serialize this object
+     *
+     * @param Ar
+     */
+    virtual void Serialize(FArchive& Ar) override;
+
 private:
-    UPROPERTY()
-    TObjectPtr<UOdysseyRasterBlock> RasterBlock;
+    TSharedPtr<FOdysseyRasterBlock> RasterBlock;
 
 public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Texture | LayerStack")

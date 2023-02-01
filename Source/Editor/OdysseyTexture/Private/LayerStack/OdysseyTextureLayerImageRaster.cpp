@@ -8,6 +8,7 @@
 #include "ULISLoaderModule.h"
 #include "OdysseyStyleSet.h"
 #include "OdysseyRasterBlock.h"
+#include "OdysseyRasterBlockUndo.h"
 #include "OdysseyTextureLayerImageRaster.h"
 #include "OdysseySurfaceTexture2DEditable.h"
 
@@ -39,6 +40,7 @@ UOdysseyTextureLayerImageRaster::~UOdysseyTextureLayerImageRaster()
 }
 
 UOdysseyTextureLayerImageRaster::UOdysseyTextureLayerImageRaster()
+    : RasterBlock(MakeShared<FOdysseyRasterBlock>(this))
 {
 	LayerTypeName = LOCTEXT("LayerTypeName", "Raster Image Layer");
     Icon = *FOdysseyStyle::GetBrush( "OdysseyLayerStack.ImageLayer16");
@@ -63,14 +65,12 @@ UOdysseyTextureLayerImageRaster::OnCreated_Implementation()
     ctx.Finish();
 
     //Caches the tiles on disk, we do this
-    RasterBlock = NewObject<UOdysseyRasterBlock>(this, "RasterBlock", RF_Public | RF_Transactional);
     RasterBlock->SetBlock(block);
-
     RasterBlock->OnBlockChanged().AddUObject(this, &::UOdysseyTextureLayerImageRaster::OnBlockChanged);
     RasterBlock->OnBlockPtrChanged().AddUObject(this, &::UOdysseyTextureLayerImageRaster::OnBlockPtrChanged);
 }
 
-UOdysseyRasterBlock*
+TSharedPtr<FOdysseyRasterBlock>
 UOdysseyTextureLayerImageRaster::GetRasterBlock() const
 {
 	return RasterBlock;
@@ -167,8 +167,6 @@ UOdysseyTextureLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("Layer Image Raster", "Merge Layers"));
 #endif
-
-    RasterBlock->Modify();
     
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ULISRasterBlock = RasterBlock->GetBlock();
 
@@ -274,17 +272,8 @@ UOdysseyTextureLayerImageRaster::PostDuplicate(bool bDuplicateForPIE)
     );
     ctx.Finish();
 
-    //ensure we remove any callbacks registered on the wrong Rasterblock
-    RasterBlock->OnBlockChanged().RemoveAll(this);
-    RasterBlock->OnBlockPtrChanged().RemoveAll(this);
-
     //Replace old rasterblock with an owned one
-    RasterBlock = NewObject<UOdysseyRasterBlock>(this, "RasterBlock", RF_Public | RF_Transactional);
     RasterBlock->SetBlock(duplicatedBlock);
-
-    //Set the right callbacks
-    RasterBlock->OnBlockChanged().AddUObject(this, &::UOdysseyTextureLayerImageRaster::OnBlockChanged);
-    RasterBlock->OnBlockPtrChanged().AddUObject(this, &::UOdysseyTextureLayerImageRaster::OnBlockPtrChanged);
 }
 
 TSharedPtr<IOdysseyHandle>
@@ -292,5 +281,14 @@ UOdysseyTextureLayerImageRaster::Preload()
 {
     return RasterBlock->Preload();
 }
+
+void
+UOdysseyTextureLayerImageRaster::Serialize(FArchive& Ar)
+{
+    Super::Serialize(Ar);
+    
+    RasterBlock->Serialize(Ar);
+}
+
 
 #undef LOCTEXT_NAMESPACE

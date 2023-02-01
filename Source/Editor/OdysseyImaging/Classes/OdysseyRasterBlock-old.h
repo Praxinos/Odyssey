@@ -3,14 +3,15 @@
 
 #pragma once
 
+#if 0
+
 #include "CoreMinimal.h"
 
 #include "Misc/OdysseyHandle.h"
 #include "ULISInvalidTileMap.h"
-#include "OdysseyRasterBlockUndo.h"
 #include <ULIS>
 
-//#include "OdysseyRasterBlock.generated.h"
+#include "OdysseyRasterBlock.generated.h"
 
 /**
  * @brief Represents a raster block
@@ -32,8 +33,11 @@
  * because it will only cache its data when a Non-Interactive Update() or Commit() is called.
  */
 
-class ODYSSEYIMAGING_API FOdysseyRasterBlock : public TSharedFromThis<FOdysseyRasterBlock>
+UCLASS()
+class ODYSSEYIMAGING_API UOdysseyRasterBlock : public UObject
 {
+    GENERATED_BODY()
+
 public:
     /**
      * @brief Delegate called when the block pixels content changed
@@ -47,18 +51,10 @@ public:
 
 public:
     // Construction / Destruction
-    ~FOdysseyRasterBlock();
-    FOdysseyRasterBlock();
-    FOdysseyRasterBlock(UObject* iOwner);
+    ~UOdysseyRasterBlock();
+    UOdysseyRasterBlock();
 
 public:
-    /**
-     * @brief Get the owner object
-     * 
-     * @return int 
-     */
-    UObject* GetOwner() const;
-
     /**
      * @brief Get the block Width
      * 
@@ -110,19 +106,6 @@ public:
     const TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> GetBlock();
 
     /**
-     * @brief Retrieves the original tile blocks containing the pixels before any call to Invalidate()
-     * 
-     */
-    const TMap<FIntPoint, TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>>& GetOriginalTileBlocks() const;
-
-    /**
-     * @brief Get the map of currently invalid tiles
-     * 
-     * @return const FULISInvalidTileMap& 
-     */
-    const FULISInvalidTileMap& GetInvalidTileMap() const;
-
-    /**
      * @brief Called to copy rects directly into the block tiles
      * Also needs to be called when working on the result of GetBlock() to validate any modification
      *  
@@ -131,12 +114,6 @@ public:
      * @param iIsInteractive
      */
     void Invalidate(const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive);
-
-    /**
-     * @brief Resets the editable block to its state before Invalidate()
-     * 
-     */
-    void ResetEditableBlock();
 
     /** 
      * @brief Preloads the block in memory, and keeps it in memory until the returned handle is destroyed
@@ -166,29 +143,34 @@ private:
     //Loads and return a block from bulkdata
     bool LoadBlockFromBulkData(TSharedRef<::ULIS::FBlock, ESPMode::ThreadSafe> oBlock);
 
+    void SaveUndoToCache(const FString& iId);
+
+    bool LoadUndoFromCache(const FString& iId);
+
     static void CleanupBlock(uint8* iData, void* iInfo);
 
-private:
-    //Used by FOdysseyRasterBlockUndo to save load the block tiles to an undo cache
-    friend class FOdysseyRasterBlockUndo;
-    void SaveUndoToCache(const FString& iId);
-    bool LoadUndoFromCache(const FString& iId);
-    void RemoveUndoFromCache(const FString& iId);
-
+    void ResetEditableBlock();
 public:
+    //UObject overrides
+
     /**
      * @brief Serialize this object
      * 
      * @param Ar 
      */
-    void Serialize(FArchive& Ar);
+    virtual void Serialize(FArchive& Ar) override;
 
 private:
-    UObject* mOwner;
-
+    UPROPERTY()
     FGuid Id; //unique ID identifying the block
+
+    UPROPERTY()
     int Width;
+
+    UPROPERTY()
     int Height;
+
+    UPROPERTY()
     int Format;
 
     //The stable block for which edition is finished
@@ -196,8 +178,6 @@ private:
 
     //The unstable block which is currently being edited
     TWeakPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mEditableBlock; //Loaded on demand from cache, can be destroyed at any time if noone keeps a sharedptr on it
-
-    TMap<FIntPoint, TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>> mOriginalTileBlocks;
 
     UE::Serialization::FEditorBulkData mBulkData; //Allows serializing the block on disk when saving
     FULISInvalidTileMap mInvalidTileMap;
@@ -222,6 +202,8 @@ private:
     //
     TWeakPtr<IOdysseyHandle> mPreloadHandle;
 
-    FOdysseyRasterBlockUndoBuilder mRasterBlockUndoBuilder;
+private:
+    friend class FOdysseyRasterBlockChange;
 };
 
+#endif

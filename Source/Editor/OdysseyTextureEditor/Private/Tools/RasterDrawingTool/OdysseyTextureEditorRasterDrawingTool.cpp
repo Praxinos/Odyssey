@@ -36,7 +36,7 @@ UOdysseyTextureEditorRasterDrawingTool::Load()
 	if (!layer)
 		return;
 
-	UOdysseyRasterBlock* rasterBlock = layer->GetRasterBlock();
+	TSharedPtr<FOdysseyRasterBlock> rasterBlock = layer->GetRasterBlock();
 	mPaintEngine.RasterBlock(rasterBlock);
 
 	if ( BrushInstance )

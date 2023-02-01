@@ -10,7 +10,7 @@
 
 #include <ULIS>
 
-class UOdysseyRasterBlock;
+class FOdysseyRasterBlock;
 
 class ODYSSEYPAINTENGINE_API FOdysseyPaintEngine
 {
@@ -31,7 +31,7 @@ public:
     // Setters
 
     // Sets the Block on which the Paint Engine will draw
-    void RasterBlock(UOdysseyRasterBlock* iRasterBlock);
+    void RasterBlock(TSharedPtr<FOdysseyRasterBlock> iRasterBlock);
 
 public:
     // Getters
@@ -80,7 +80,7 @@ private:
 
 private:
     //Blocks
-    UOdysseyRasterBlock* mRasterBlock;
+    TSharedPtr<FOdysseyRasterBlock> mRasterBlock;
 
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mEditedBlock; // The Block to edit (mPaintBlock over mOriginalBlock)
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mPaintBlock; // The Block containing only the modified tiles

@@ -32,7 +32,7 @@ UOdysseyTextureLayerStack::CreateFromTexture(UTexture2D* iTexture, UObject* iOut
     UOdysseyTextureLayerImageRaster* layer = Cast<UOdysseyTextureLayerImageRaster>(layerStack->CreateLayer(UOdysseyTextureLayerImageRaster::StaticClass()));
 
     //Fill LayerImage with content of Texture
-    UOdysseyRasterBlock* rasterBlock = layer->GetRasterBlock();
+    TSharedPtr<FOdysseyRasterBlock> rasterBlock = layer->GetRasterBlock();
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = rasterBlock->GetBlock();
     FillOdysseyBlockFromUTextureData(block.Get(), iTexture, block->Format());
 
