@@ -384,6 +384,13 @@ FOdysseyRasterBlock::LoadBlockFromBulkData(TSharedRef<::ULIS::FBlock, ESPMode::T
     return true;
 }
 
+FArchive&
+operator<<(FArchive& Ar, TSharedPtr<FOdysseyRasterBlock>& iRasterBlock)
+{
+    iRasterBlock->Serialize(Ar);
+    return Ar;
+}
+
 void
 FOdysseyRasterBlock::Serialize(FArchive& Ar)
 {

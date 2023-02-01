@@ -225,3 +225,5 @@ private:
     FOdysseyRasterBlockUndoBuilder mRasterBlockUndoBuilder;
 };
 
+
+ODYSSEYIMAGING_API FArchive& operator<<(FArchive& Ar, TSharedPtr<FOdysseyRasterBlock>& iRasterBlock);
