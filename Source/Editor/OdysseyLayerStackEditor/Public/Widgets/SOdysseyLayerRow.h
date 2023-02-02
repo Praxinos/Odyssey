@@ -32,7 +32,7 @@ public:
 	//Commands
 	void Rename();
 
-private:
+protected:
     //SMultiColumnTableRow overrides
     virtual TSharedRef<SWidget> GenerateWidgetForColumn( const FName& InColumnName ) override;
 	virtual const FSlateBrush* GetBorder() const override;
