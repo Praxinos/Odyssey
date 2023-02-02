@@ -37,11 +37,13 @@ FOdysseyTextureEditor::FOdysseyTextureEditor() :
 void
 FOdysseyTextureEditor::InitData(UObject* iEditedObject)
 {
-	FOdysseyPainterEditor::InitData(iEditedObject);
 	
 	UTexture2D* texture = Cast<UTexture2D>(iEditedObject);
 	if (texture)
 		SetTexture(texture);
+
+	//Call it there so that tools are initialized after basic data
+	FOdysseyPainterEditor::InitData(iEditedObject);
 }
 
 void

@@ -43,8 +43,6 @@ FOdysseyFlipbookEditor::FOdysseyFlipbookEditor(UPaperFlipbook* iFlipbook) :
 void
 FOdysseyFlipbookEditor::InitData(UObject* iEditedObject)
 {
-	FOdysseyTextureEditor::InitData(iEditedObject);
-
 	//--- Add Edited Objects
 
 	UPaperFlipbook* flipbook = mFlipbookWrapper->Flipbook();
@@ -76,6 +74,8 @@ FOdysseyFlipbookEditor::InitData(UObject* iEditedObject)
 	{
     	SetTexture(mFlipbookWrapper->GetKeyframeTexture(0));
 	}
+	
+	FOdysseyTextureEditor::InitData(iEditedObject);
 }
 
 //--------------------------------------------------------------------------------------

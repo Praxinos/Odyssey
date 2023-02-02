@@ -39,7 +39,7 @@ FOdysseyPainterEditor::InitData(UObject* iEditedObject)
 {
 	//Init Tools
 	InitTools();
-	//SetSelectedTool(mTools[0]);
+	SelectDefaultTool();
 }
 
 void
