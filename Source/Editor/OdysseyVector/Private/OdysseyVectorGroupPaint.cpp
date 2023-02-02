@@ -295,163 +295,126 @@ MergeNode( FCycleNode* iNode
     return minCoord;
 }
 
-typedef struct _FBetterChord
-{
-    FOdysseyVectorSection* section;
-    UOdysseyVectorVertex* vertex;
-}FBetterChord;
-
-static FBetterChord
-IsChordless( ::ULIS::FVec2D& iFromCoord
+static bool
+ReduceCycle( ::ULIS::FVec2D& iFromCoord
            , std::vector<UOdysseyVectorVertex*>& iVertexArray
-           , std::vector<FOdysseyVectorSection*>& iSectionArray )
+           , std::vector<FOdysseyVectorSection*>& iSectionArray
+           , std::vector<UOdysseyVectorVertex*>& oVertexArray
+           , std::vector<FOdysseyVectorSection*>& oSectionArray )
 {
-    for( i < iVertexArray.size() - 1; i++ )
+    UOdysseyVectorVertex* firstVertex = iVertexArray.front();
+    FOdysseyVectorSection* firstSection = iSectionArray.front();
+    FOdysseyVectorSection* lastSection = iSectionArray.back();
+    bool isChordless = true;
+    int i = 0;
+
+    oVertexArray.push_back( firstVertex );
+
+    while( i < iVertexArray.size() - 1 )
     {
-        int n = i + 1 % iVertexArray.size();
+        int n = ( i + 1 ) % iVertexArray.size();
         UOdysseyVectorVertex* vertex = iVertexArray[i];
         FOdysseyVectorSection* section = iSectionArray[i];
         UOdysseyVectorVertex* nextVertex = iVertexArray[n];
         std::list<FOdysseyVectorSection*>& vertexSectionList = vertex->GetSectionList();
-        FOdysseyVectorSection* betterSection = nullptr;
-        UOdysseyVectorVertex* betterNextVertex = nullptr;
+        FOdysseyVectorSection* betterForwardSection = section;
+        UOdysseyVectorVertex* betterInsideVertex = nextVertex;
 
-        // check point inside
-        for( std::list<FOdysseyVectorSection*>::iterator sit = vertexSectionList.begin(); sit != vertexSectionList.end(); ++sit )
+        // stop checking after the first detection
+        if( isChordless == true )
         {
-            FOdysseyVectorSection *edge = (*sit);
-
-            if( edge->IsInCycle() == false )
-            {
-                if ( InsideCycle( iFromCoord, *edge, iSectionList ) == true )
-                {
-                    FBetterChord betterChord = { nullptr, nullptr };
-                    nextVertex = ( edge->GetVertex(0) == vertex ) ? edge->GetVertex(1) : edge->GetVertex(0);
-
-                    betterChord.section = edge;
-                    betterChord.vertex = nextVertex;
-
-                    return betterChord;
-                }
-            }
-        }
-    }
-}
-
-
-static void
-MakeChordless( ::ULIS::FVec2D& iFromCoord
-             , std::vector<UOdysseyVectorVertex*>& iVertexArray
-             , std::vector<FOdysseyVectorSection*>& iSectionArray )
-{
-    bool IsChordless = false;
-    std::vector<UOdysseyVectorVertex*> refinedVertexArray;
-    std::vector<FOdysseyVectorSection*> refinedSectionArray;
-    int loopProtection = 0;
-
-    while( IsChordless == false )
-    {
-        UOdysseyVectorVertex* firstVertex = iVertexArray.front();
-        FOdysseyVectorSection* lastSection = iSectionArray.back();
-
-UE_LOG(LogTemp,Warning,TEXT("Before filtering"));
-PrintNode(iVertexArray,iSectionArray);
-
-        IsChordless = true;
-
-    if( iVertexArray.size() <= 3 ) break;
-
-        refinedVertexArray.clear();
-        refinedSectionArray.clear();
-
-        MarkCycle( iVertexArray, iSectionArray );
-
-        refinedVertexArray.push_back(  firstVertex );
-
-        int i = 0;
-
-        while( i < iVertexArray.size() - 1 )
-        {
-            int n = i + 1 % iVertexArray.size();
-            UOdysseyVectorVertex* vertex = iVertexArray[i];
-            FOdysseyVectorSection* section = iSectionArray[i];
-            UOdysseyVectorVertex* nextVertex = iVertexArray[n];
-            std::list<FOdysseyVectorSection*>& vertexSectionList = vertex->GetSectionList();
-            FOdysseyVectorSection* betterSection = nullptr;
-            UOdysseyVectorVertex* betterNextVertex = nullptr;
-
-            // check point inside
+            // check better point inside
             for( std::list<FOdysseyVectorSection*>::iterator sit = vertexSectionList.begin(); sit != vertexSectionList.end(); ++sit )
             {
                 FOdysseyVectorSection *edge = (*sit);
 
                 if( edge->IsInCycle() == false )
                 {
-                    if ( InsideCycle( iFromCoord, *edge, iSectionList ) == true )
+                    if ( InsideCycle( iFromCoord, *edge, iSectionArray ) == true )
                     {
-                        nextVertex = ( edge->GetVertex(0) == vertex ) ? edge->GetVertex(1) : edge->GetVertex(0);
+                        FOdysseyVectorSection* insideForwardSection = edge;
+                        UOdysseyVectorVertex* insideNextVertex = ( insideForwardSection->GetVertex(0) == vertex ) ? insideForwardSection->GetVertex(1)
+                                                                                                                  : insideForwardSection->GetVertex(0);
 
-                        betterSection = edge;
-                        betterNextVertex = nextVertex;
-UE_LOG(LogTemp,Warning,TEXT("Needs refinment"));
-                        IsChordless = false;
+                        isChordless = false;
+
+                        betterForwardSection = insideForwardSection;
+                        betterInsideVertex = insideNextVertex;
+
+                        while( insideNextVertex->IsInCycle() == false )
+                        {
+                            std::list<FOdysseyVectorSection*>& insideVertexSectionList = insideNextVertex->GetSectionList();
+
+                            oSectionArray.push_back( insideForwardSection );
+                            oVertexArray.push_back( insideNextVertex );
+
+                            for( std::list<FOdysseyVectorSection*>::iterator bsit = insideVertexSectionList.begin(); bsit != insideVertexSectionList.end(); ++bsit)
+                            {
+                                insideForwardSection = (*bsit);
+                                insideNextVertex = ( insideForwardSection->GetVertex(0) == insideNextVertex ) ? insideForwardSection->GetVertex(1)
+                                                                                                              : insideForwardSection->GetVertex(0);
+
+                                betterForwardSection = insideForwardSection;
+                                betterInsideVertex = insideNextVertex;
+
+                                break;
+                            }
+                        }
+
+                        i = insideNextVertex->GetCycleID();
 
                         break;
+            UE_LOG(LogTemp,Warning,TEXT("Skipping to x:%f y:%f"), betterInsideVertex->GetCoords().x, betterInsideVertex->GetCoords().y );
                     }
                 }
             }
-
-            if( betterNextVertex == nullptr )
-            {
-                refinedSectionArray.push_back( section );
-                refinedVertexArray.push_back( nextVertex );
-            }
-            else
-            {
-                refinedSectionArray.push_back( betterSection );
-                refinedVertexArray.push_back( betterNextVertex );
-
-                while( betterNextVertex->IsInCycle() == false )
-                {
-                    std::list<FOdysseyVectorSection*>& betterVertexSectionList = betterNextVertex->GetSectionList();
-
-                    for( std::list<FOdysseyVectorSection*>::iterator sit = betterVertexSectionList.begin(); sit != betterVertexSectionList.end(); ++sit)
-                    {
-                        FOdysseyVectorSection *inCycleEdge = (*sit);
-
-                        if( inCycleEdge->IsInCycle() == false )
-                        {
-                            UOdysseyVectorVertex* inCycleVertex = ( inCycleEdge->GetVertex(0) == betterNextVertex ) ? inCycleEdge->GetVertex(1) : inCycleEdge->GetVertex(0);
-
-                            betterSection = inCycleEdge;
-                            betterNextVertex = inCycleVertex;
-
-                            break;
-                        }
-                    }
-
-                    refinedSectionArray.push_back( betterSection );
-                    refinedVertexArray.push_back( betterNextVertex );
-                }
-
-                i = betterNextVertex->GetCycleID();
-            }
-
-            i++;
-
-            if( loopProtection++ > 10 ) break;
         }
 
-        refinedSectionArray.push_back( lastSection );
+        oSectionArray.push_back( betterForwardSection );
+        oVertexArray.push_back( betterInsideVertex );
+
+        i++;
+    }
+
+    oSectionArray.push_back( lastSection );
+
+    return isChordless;
+}
+
+static void
+MakeChordless( ::ULIS::FVec2D& iFromCoord
+             , std::vector<UOdysseyVectorVertex*>& iVertexArray
+             , std::vector<FOdysseyVectorSection*>& iSectionArray )
+{
+    bool isChordless = false;
+    std::vector<UOdysseyVectorVertex*> refinedVertexArray;
+    std::vector<FOdysseyVectorSection*> refinedSectionArray;
+
+    while( isChordless == false )
+    {
+        refinedVertexArray.clear();
+        refinedSectionArray.clear();
+
+        if( iVertexArray.size() <= 3 ) break;
+
+        UE_LOG(LogTemp,Warning,TEXT("before filtering"));
+        PrintNode(iVertexArray,iSectionArray);
+
+        MarkCycle( iVertexArray, iSectionArray );
+
+        isChordless = ReduceCycle( iFromCoord
+                                 , iVertexArray
+                                 , iSectionArray
+                                 , refinedVertexArray
+                                 , refinedSectionArray );
 
         UnmarkCycle( iVertexArray, iSectionArray );
 
         iVertexArray = refinedVertexArray;
         iSectionArray = refinedSectionArray;
 
-UE_LOG(LogTemp,Warning,TEXT("After filtering") );
-PrintNode( iVertexArray, iSectionArray );
-
+        UE_LOG(LogTemp,Warning,TEXT("After filtering"));
+        PrintNode( iVertexArray, iSectionArray );
     }
 }
 
