@@ -23,7 +23,7 @@ public:
     SLATE_BEGIN_ARGS(SOdysseyLayerStackTreeView)
         {}
         SLATE_ARGUMENT( UOdysseyLayerStack*, LayerStack )
-        SLATE_ARGUMENT( TArray<SHeaderRow::FColumn>, AdditionalColumns )
+        SLATE_ARGUMENT( TArray<SHeaderRow::FColumn::FArguments>, AdditionalColumns )
         SLATE_EVENT( FOnGenerateRow, OnGenerateRow )
     SLATE_END_ARGS()
 

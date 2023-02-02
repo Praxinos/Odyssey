@@ -98,9 +98,9 @@ void SOdysseyLayerStackTreeView::Construct(const FArguments& InArgs)
             .DefaultLabel(LOCTEXT("", ""))
             .VAlignCell(VAlign_Top);
 
-    for( SHeaderRow::FColumn column : InArgs._AdditionalColumns)
+    for( SHeaderRow::FColumn::FArguments columnArguments : InArgs._AdditionalColumns)
     {
-        headerRow->AddColumn(column);
+        headerRow->AddColumn(columnArguments);
     }
 
     const TArray<UOdysseyLayer*>* rootLayers = mLayerStack ? &mLayerStack->GetRootLayers() : nullptr;
