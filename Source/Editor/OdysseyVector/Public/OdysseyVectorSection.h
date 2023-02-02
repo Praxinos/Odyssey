@@ -14,10 +14,10 @@ class FOdysseyVectorSection
         std::list<UOdysseyVectorLoop*> mLoopList;
         uint32 mFlags;
 
-        static const uint32 BLOCKVERTEX0 = ( 1 << 0 );
-        static const uint32 BLOCKVERTEX1 = ( 1 << 1 );
-        static const uint32 VISITED      = ( 1 << 2 );
-        static const uint32 INCYCLE      = ( 1 << 3 );
+        static const uint32 BLOCKED = ( 1 << 0 );
+        static const uint32 VISITED = ( 1 << 2 );
+        static const uint32 INCYCLE = ( 1 << 3 );
+        static const uint32 MARCHED = ( 1 << 4 );
 
     public:
         ~FOdysseyVectorSection();
@@ -27,10 +27,15 @@ class FOdysseyVectorSection
         void AddLoop( UOdysseyVectorLoop* iLoop );
         void RemoveLoop( UOdysseyVectorLoop* iLoop );
         std::list<UOdysseyVectorLoop*>& GetLoopList();
-        void Block( UOdysseyVectorVertex* iVertex );
-        bool IsBlocked( UOdysseyVectorVertex* iVertex );
+
+        void Block();
+        void UnBlock();
+        bool IsBlocked();
+
         void SetVisited( bool iVisited );
         bool IsVisited();
+        void SetMarched(bool iVisited);
+        bool IsMarched();
         void SetInCycle( bool iInCycle );
         bool IsInCycle();
         void SetAverage( double iX, double iY );

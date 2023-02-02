@@ -515,14 +515,13 @@ UOdysseyVectorSegmentCubic::Draw( UOdysseyVectorPathCubic* iPath, ::ULIS::FRectD
         blctx->fillPolygon( pt, 4 );
     }
 #endif
-/*
-#ifdef UNUSED
-*/
+
+/*#ifdef UNUSED*/
     blctx->strokePath ( mBLPath );
     blctx->fillPath ( mBLPath );
-/*
-#endif
-*/
+
+/*#endif*/
+
 }
 
 void

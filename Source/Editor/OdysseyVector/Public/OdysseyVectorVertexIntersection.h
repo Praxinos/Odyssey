@@ -42,4 +42,6 @@ class UOdysseyVectorVertexIntersection : public UOdysseyVectorVertex
         UOdysseyVectorSegment* GetSegment( UOdysseyVectorVertex& iOtherVertex );
         void AttachLoop( FOdysseyVectorLoop* iLoop );
         FOdysseyVectorLoop* GetLoop();
+
+        FOdysseyVectorSection* GetNonBlockedCrossedSection( FOdysseyVectorSection& iCurrentSection );
 };

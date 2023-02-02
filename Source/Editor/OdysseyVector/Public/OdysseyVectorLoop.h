@@ -18,17 +18,24 @@ class ODYSSEYVECTOR_API FOdysseyVectorLoop
                               , double iFromT
                               , double iToT );
 
+    public:
+        static const uint32 MARCHED      = ( 1 << 4 );
+
     protected :
         BLPath mPath;
         UOdysseyVectorObject& mParent;
         uint64 mID;
         uint32 mColor;
         FOdysseyVectorBucket* mBucket;
+        std::vector<UOdysseyVectorVertex*> mVertexArray;
+        std::vector<FOdysseyVectorSection*> mSectionArray;
+        uint32 mFlags;
+        uint32 mValence;
 
     public:
-        static bool Exists( uint64 iID
-                          , std::vector<UOdysseyVectorVertex*>& iVertexArray
-                          , std::vector<FOdysseyVectorSection*>& iSectionArray );
+        static FOdysseyVectorLoop* Exists( uint64 iID
+                                         , std::vector<UOdysseyVectorVertex*>& iVertexArray
+                                         , std::vector<FOdysseyVectorSection*>& iSectionArray );
         static uint64 GenerateID( std::vector<FOdysseyVectorSection*>& iSectionArray );
 
         ~FOdysseyVectorLoop();
@@ -45,4 +52,13 @@ class ODYSSEYVECTOR_API FOdysseyVectorLoop
 
         FOdysseyVectorBucket* GetBucket();
         void SetBucket( FOdysseyVectorBucket* iBucket );
+        std::vector<UOdysseyVectorVertex*>& GetVertexArray();
+        std::vector<FOdysseyVectorSection*>& GetSectionArray();
+        void SetMarched( bool iMarched );
+        bool IsMarched();
+
+        void Block();
+        void UnBlock();
+
+        uint32 GetValence();
 };

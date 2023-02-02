@@ -230,7 +230,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDrag(const FOdysseyPoint& iPoint
                     paintGroup->FindCycles();
                 }
 
-                currentVectorLayer->RenderImageChanged(true);
+                currentVectorLayer->RenderImageChanged( /*{ totalInvalidatedArea },*/ true );
 
                 mOldLocalMouseX = localCoords.x;
                 mOldLocalMouseY = localCoords.y;

@@ -13,6 +13,15 @@ class UOdysseyVectorSegment;
 class UOdysseyVectorLoop;
 class FOdysseyVectorSection;
 
+typedef struct _FCycleNode
+{
+    struct _FCycleNode* parent;
+    std::list<FOdysseyVectorSection*>* bypassEdgeList;
+    UOdysseyVectorVertex* vertex;
+    FOdysseyVectorSection* section;
+    uint32 depth;
+} FCycleNode;
+
 UCLASS()
 class ODYSSEYVECTOR_API UOdysseyVectorVertex : public UOdysseyVectorPoint
 {
@@ -34,7 +43,9 @@ class ODYSSEYVECTOR_API UOdysseyVectorVertex : public UOdysseyVectorPoint
         std::list<UOdysseyVectorSegment*> mSegmentList;
         std::list<FOdysseyVectorSection*> mSectionList;
         std::list<UOdysseyVectorLoop*> mLoopList;
+        FCycleNode* mNode;
         uint32 mFlags;
+        uint32 mCycleID;
 
     public:
         ~UOdysseyVectorVertex();
@@ -43,6 +54,9 @@ class ODYSSEYVECTOR_API UOdysseyVectorVertex : public UOdysseyVectorPoint
         void AddSection( FOdysseyVectorSection* iSection );
         void RemoveSection( FOdysseyVectorSection* iSection );
         ::ULIS::FRectD GetRectangle();
+        FOdysseyVectorSection* GetMarchedSection( bool iStatus );
+        FOdysseyVectorSection* GetFirstSection();
+        FOdysseyVectorSection* GetLastSection();
         UOdysseyVectorSegment* GetLastSegment();
         UOdysseyVectorSegment* GetFirstSegment();
         virtual UOdysseyVectorSegment* GetSegment( UOdysseyVectorVertex& iOtherVertex );
@@ -69,10 +83,11 @@ class ODYSSEYVECTOR_API UOdysseyVectorVertex : public UOdysseyVectorPoint
         std::list<FOdysseyVectorSection*>& GetSectionList();
         bool IsClosestSection( FOdysseyVectorSection& iStartSection
                              , FOdysseyVectorSection& iEndSection );
-        /*void SetNode( FCycleNode* iNode );
-        FCycleNode* GetNode();*/
-        void SetInCycle( bool iInCycle );
+        void SetNode( FCycleNode* iNode );
+        FCycleNode* GetNode();
+        void SetInCycle( bool iInCycle, uint32 iCycleID );
         bool IsInCycle();
+        uint32 GetCycleID();
         void SetMarched( bool iMarched );
         bool IsMarched();
 };

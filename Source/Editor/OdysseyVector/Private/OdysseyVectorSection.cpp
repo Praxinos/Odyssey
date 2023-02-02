@@ -52,24 +52,41 @@ FOdysseyVectorSection::IsVisited()
     return ( mFlags & VISITED ) ? true : false;
 }
 
-void 
-FOdysseyVectorSection::Block( UOdysseyVectorVertex* iVertex )
+void
+FOdysseyVectorSection::SetMarched( bool iMarched )
 {
-    uint32 blocked = ( iVertex == mVertex[0] ) ? FOdysseyVectorSection::BLOCKVERTEX0
-                                               : FOdysseyVectorSection::BLOCKVERTEX1;
+    if( iMarched == true )
+    {
+        mFlags |= MARCHED;
+    }
+    else
+    {
+        mFlags &= (~MARCHED);
+    }
+}
 
-    mFlags |= blocked;
+bool
+FOdysseyVectorSection::IsMarched()
+{
+    return ( mFlags & MARCHED ) ? true : false;
+}
+
+void 
+FOdysseyVectorSection::Block()
+{
+    mFlags |= BLOCKED;
+}
+
+void
+FOdysseyVectorSection::UnBlock()
+{
+    mFlags &= (~BLOCKED);
 }
 
 bool 
-FOdysseyVectorSection::IsBlocked( UOdysseyVectorVertex* iVertex )
+FOdysseyVectorSection::IsBlocked()
 {
-    uint32 blocked = ( iVertex == mVertex[0] ) ? FOdysseyVectorSection::BLOCKVERTEX0
-                                               : FOdysseyVectorSection::BLOCKVERTEX1;
-
-//UE_LOG(LogTemp, Warning, TEXT("FOdysseyVectorSection::IsBlocked edge:%d vertex:%d"), this, iVertex );
-
-    return ( mFlags & blocked ) ? true : false;
+    return ( mFlags & BLOCKED ) ? true : false;
 }
 
 UOdysseyVectorSegment*

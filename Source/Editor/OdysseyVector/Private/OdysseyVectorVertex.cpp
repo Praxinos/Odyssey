@@ -6,6 +6,7 @@ UOdysseyVectorVertex::~UOdysseyVectorVertex()
 
 UOdysseyVectorVertex::UOdysseyVectorVertex()
     : UOdysseyVectorPoint()
+    , mNode(nullptr)
 {
     SetVisited( false );
 }
@@ -20,7 +21,7 @@ UOdysseyVectorVertex::New( double iX, double iY, double iRadius )
 
     return vertex;
 }
-/*
+
 void
 UOdysseyVectorVertex::SetNode( FCycleNode* iNode )
 {
@@ -32,7 +33,7 @@ UOdysseyVectorVertex::GetNode()
 {
     return mNode;
 }
-*/
+
 void
 UOdysseyVectorVertex::InvalidateSegments()
 {
@@ -119,6 +120,28 @@ UOdysseyVectorVertex::GetFirstSegment()
     return mSegmentList.front();
 }
 
+FOdysseyVectorSection*
+UOdysseyVectorVertex::GetLastSection()
+{
+    return mSectionList.back();
+}
+
+FOdysseyVectorSection*
+UOdysseyVectorVertex::GetMarchedSection( bool iStatus )
+{
+    for( std::list<FOdysseyVectorSection*>::iterator it = mSectionList.begin(); it != mSectionList.end(); ++it )
+    {
+        FOdysseyVectorSection* section = static_cast<FOdysseyVectorSection*>(*it);
+
+        if( section->IsMarched() == iStatus )
+        {
+            return section;
+        }
+    }
+
+    return NULL;
+}
+
 static uintptr_t
 GenerateSegmentID( UOdysseyVectorSegment* iSegment, UOdysseyVectorVertex* iP0, UOdysseyVectorVertex* iP1 )
 {
@@ -181,7 +204,7 @@ UOdysseyVectorVertex::IsVisited()
 }
 
 void
-UOdysseyVectorVertex::SetInCycle( bool iInCycle )
+UOdysseyVectorVertex::SetInCycle( bool iInCycle, uint32 iCycleID )
 {
     if( iInCycle == true )
     {
@@ -191,12 +214,20 @@ UOdysseyVectorVertex::SetInCycle( bool iInCycle )
     {
         mFlags &= (~INCYCLE);
     }
+
+    mCycleID = iCycleID;
 }
 
 bool
 UOdysseyVectorVertex::IsInCycle()
 {
     return ( mFlags & INCYCLE ) ? true : false;
+}
+
+uint32
+UOdysseyVectorVertex::GetCycleID()
+{
+    return mCycleID;
 }
 
 void

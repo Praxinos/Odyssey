@@ -92,7 +92,7 @@ UOdysseyPainterEditorVectorPathCutTool::OnMouseDrag(const FOdysseyPoint& iPointI
 
         mLineHUD.SetP1(iPointInTexture.x, iPointInTexture.y);
 
-        currentVectorLayer->RenderImageChanged({ rect }, true);
+        currentVectorLayer->RenderImageChanged(/* { rect }, */true);
     }
 }
 

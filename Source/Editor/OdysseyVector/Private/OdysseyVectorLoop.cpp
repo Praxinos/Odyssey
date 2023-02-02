@@ -13,10 +13,51 @@ FOdysseyVectorLoop::FOdysseyVectorLoop( UOdysseyVectorObject& iParent
     , mID( iID )
     , mColor( 0xFF808080 )
     , mBucket( nullptr )
+    , mVertexArray (iVertexArray)
+    , mSectionArray (iSectionArray)
+    , mFlags (0)
+    , mValence (0)
 {
     Cast<UOdysseyVectorVertexIntersection>(iVertexArray[0])->AttachLoop( this );
 
-    Build( iVertexArray, iSectionArray );
+    Build( mVertexArray, mSectionArray );
+}
+
+std::vector<UOdysseyVectorVertex*>& 
+FOdysseyVectorLoop::GetVertexArray()
+{
+    return mVertexArray;
+}
+
+std::vector<FOdysseyVectorSection*>&
+FOdysseyVectorLoop::GetSectionArray()
+{
+    return mSectionArray;
+}
+
+void
+FOdysseyVectorLoop::Block()
+{
+    for( int i = 0; i < mSectionArray.size(); i++ )
+    {
+        FOdysseyVectorSection* section = mSectionArray[i];
+
+        if( ( section->GetVertex(0)->GetSectionCount() > 2 ) && ( section->GetVertex(1)->GetSectionCount() > 2 ) )
+        {
+            mSectionArray[i]->Block();
+        }
+    }
+}
+
+void
+FOdysseyVectorLoop::UnBlock()
+{
+    for( int i = 0; i < mSectionArray.size(); i++ )
+    {
+        FOdysseyVectorSection* section = mSectionArray[i];
+
+        mSectionArray[i]->UnBlock();
+    }
 }
 
 // static
@@ -34,7 +75,7 @@ FOdysseyVectorLoop::GenerateID( std::vector<FOdysseyVectorSection*>& iSectionArr
 }
 
 // static
-bool
+FOdysseyVectorLoop*
 FOdysseyVectorLoop::Exists( uint64 iID
                           , std::vector<UOdysseyVectorVertex*>& iVertexArray
                           , std::vector<FOdysseyVectorSection*>& iSectionArray )
@@ -50,13 +91,13 @@ FOdysseyVectorLoop::Exists( uint64 iID
             {
                 if( cycle->mID == iID )
                 {
-                    return true;
+                    return cycle;
                 }
             }
         }
     }
 
-    return false;
+    return nullptr;
 }
 
 void
@@ -118,12 +159,19 @@ FOdysseyVectorLoop::BuildSegmentCubic( UOdysseyVectorSegmentCubic& iSegment
     }
 }
 
+uint32
+FOdysseyVectorLoop::GetValence()
+{
+    return mValence;
+}
+
 void
 FOdysseyVectorLoop::Build( std::vector<UOdysseyVectorVertex*>& iVertexArray
                          , std::vector<FOdysseyVectorSection*>& iSectionArray )
 {
     int seg = 0;
 
+    mValence = 0;
     mPath.clear();
 
      //mPointArray.clear();
@@ -149,6 +197,11 @@ FOdysseyVectorLoop::Build( std::vector<UOdysseyVectorVertex*>& iVertexArray
             BuildSegmentCubic ( static_cast<UOdysseyVectorSegmentCubic&>(*segment), currentVertexT, nextVertexT );
 
             currentVertex = nextVertex;
+
+            if( iVertexArray[i]->GetClass() == UOdysseyVectorVertexIntersection::StaticClass() )
+            {
+                mValence++;
+            } 
         }
 
         mPath.close();
@@ -166,8 +219,9 @@ UE_LOG(LogTemp, Warning, TEXT("FOdysseyVectorLoop::Build: Array size %d"), iSect
         if( i == 0 ) mPath.moveTo( originAt.x, originAt.y );
         else         mPath.lineTo( originAt.x, originAt.y );
     }
-*/
+
     mPath.close();
+*/
 }
 
 uint32
@@ -218,4 +272,23 @@ FOdysseyVectorLoop::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
        /*iBLContext.fillPolygon( &mPointArray[0], mPointArray.size() );*/
        blctx->fillPath( mPath );
     /*}*/
+}
+
+void 
+FOdysseyVectorLoop::SetMarched( bool iMarched )
+{
+    if( iMarched == true )
+    {
+        mFlags |= MARCHED;
+    }
+    else
+    {
+        mFlags &= (~MARCHED);
+    }
+}
+
+bool
+FOdysseyVectorLoop::IsMarched()
+{
+    return ( mFlags & MARCHED ) ? true : false;
 }
