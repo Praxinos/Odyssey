@@ -42,10 +42,7 @@ FOdysseyVectorLoop::Block()
     {
         FOdysseyVectorSection* section = mSectionArray[i];
 
-        if( ( section->GetVertex(0)->GetSectionCount() > 2 ) && ( section->GetVertex(1)->GetSectionCount() > 2 ) )
-        {
-            mSectionArray[i]->Block();
-        }
+        mSectionArray[i]->Block();
     }
 }
 

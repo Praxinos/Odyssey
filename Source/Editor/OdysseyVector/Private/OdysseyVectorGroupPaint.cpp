@@ -320,6 +320,9 @@ ReduceCycle( ::ULIS::FVec2D& iFromCoord
         FOdysseyVectorSection* betterForwardSection = section;
         UOdysseyVectorVertex* betterInsideVertex = nextVertex;
 
+        // increment must be done here, before the skipping process that could override it.
+        i++;
+
         // stop checking after the first detection
         if( isChordless == true )
         {
@@ -357,14 +360,14 @@ ReduceCycle( ::ULIS::FVec2D& iFromCoord
                                 betterForwardSection = insideForwardSection;
                                 betterInsideVertex = insideNextVertex;
 
-                                break;
+                                break; // break for
                             }
                         }
 
-                        i = insideNextVertex->GetCycleID();
+                        i = betterInsideVertex->GetCycleID();
 
-                        break;
             UE_LOG(LogTemp,Warning,TEXT("Skipping to x:%f y:%f"), betterInsideVertex->GetCoords().x, betterInsideVertex->GetCoords().y );
+                        break; // break for
                     }
                 }
             }
@@ -372,8 +375,6 @@ ReduceCycle( ::ULIS::FVec2D& iFromCoord
 
         oSectionArray.push_back( betterForwardSection );
         oVertexArray.push_back( betterInsideVertex );
-
-        i++;
     }
 
     oSectionArray.push_back( lastSection );
@@ -694,7 +695,7 @@ UOdysseyVectorGroupPaint::MarchCycle( FOdysseyVectorLoop& iCycle, std::list<FOdy
 
     iCycle.SetMarched( true );
 
-    iCycle.Block();
+
 
     for( int i = 0; i < vertexArray.size(); i++ )
     {
@@ -705,27 +706,28 @@ UOdysseyVectorGroupPaint::MarchCycle( FOdysseyVectorLoop& iCycle, std::list<FOdy
             if( sectionArray[i]->IsMarched() == false )
             {
                 FOdysseyVectorSection*   endSection = sectionArray[i];
-                FOdysseyVectorSection* startSection = intersectionVertex->GetNonBlockedCrossedSection( *sectionArray[i] );
+    iCycle.Block();
+                FOdysseyVectorSection* startSection = intersectionVertex->GetNonBlockedCrossedSection( *endSection );
+    iCycle.UnBlock();
+                if( startSection ) {
+    UE_LOG( LogTemp, Warning, TEXT("Marching Child at vertex:%d x:%f y:%f"), intersectionVertex, intersectionVertex->GetCoords().x, intersectionVertex->GetCoords().y );
+    UE_LOG(LogTemp,Warning,TEXT("Allowed end section %d x:%f y:%f ---- x:%f y:%f"),endSection,endSection->GetVertex(0)->GetCoords().x, endSection->GetVertex(0)->GetCoords().y, endSection->GetVertex(1)->GetCoords().x, endSection->GetVertex(1)->GetCoords().y );
+    UE_LOG(LogTemp,Warning,TEXT("Allowed start section %d x:%f y:%f ---- x:%f y:%f"),startSection, startSection->GetVertex(0)->GetCoords().x,startSection->GetVertex(0)->GetCoords().y,startSection->GetVertex(1)->GetCoords().x,startSection->GetVertex(1)->GetCoords().y);
 
-              if( startSection ) {
-UE_LOG( LogTemp, Warning, TEXT("Marching Child at vertex:%d x:%f y:%f"), intersectionVertex, intersectionVertex->GetCoords().x, intersectionVertex->GetCoords().y );
-UE_LOG(LogTemp,Warning,TEXT("Allowed end section %d x:%f y:%f ---- x:%f y:%f"),endSection,endSection->GetVertex(0)->GetCoords().x, endSection->GetVertex(0)->GetCoords().y, endSection->GetVertex(1)->GetCoords().x, endSection->GetVertex(1)->GetCoords().y );
-UE_LOG(LogTemp,Warning,TEXT("Allowed start section %d x:%f y:%f ---- x:%f y:%f"),startSection, startSection->GetVertex(0)->GetCoords().x,startSection->GetVertex(0)->GetCoords().y,startSection->GetVertex(1)->GetCoords().x,startSection->GetVertex(1)->GetCoords().y);
+                    FOdysseyVectorLoop* childCycle = March( intersectionVertex, startSection, endSection, iSectionList );
 
-                FOdysseyVectorLoop* childCycle = March( intersectionVertex, startSection, endSection, iSectionList );
-
-                if( childCycle )
-                {
-                    childCycleArray.push_back( childCycle );
+                    if( childCycle )
+                    {
+                        childCycleArray.push_back( childCycle );
+                    }
                 }
-              }
 
-                sectionArray[i]->SetMarched( true );
+                endSection->SetMarched( true );
             }
         }
     }
 
-    iCycle.UnBlock();
+
 
     for( int i = 0; i < childCycleArray.size(); i++ )
     {
