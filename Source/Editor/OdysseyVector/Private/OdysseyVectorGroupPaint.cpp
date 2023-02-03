@@ -138,9 +138,13 @@ InsideCycle( ::ULIS::FVec2D& iFromCoord, FOdysseyVectorSection& iTestedSection, 
     double testedVertexT = ( iTestedSection.GetVertex(0)->GetT(*testedSegment)
                            + iTestedSection.GetVertex(1)->GetT(*testedSegment) ) * 0.5f;
     ::ULIS::FVec2D vertexPosition = testedSegment->GetPointAt( testedVertexT );
-    uint32 hitCount = 0;
+    uint32 hitCount[3] = { 0, 0, 0 };
+    ::ULIS::FVec2D fromCoord[3] = { { iFromCoord.x       , iFromCoord.y        }
+                                  , { iFromCoord.x - 10.0f, iFromCoord.y        }
+                                  , { iFromCoord.x       , iFromCoord.y - 10.0f } };
+    uint32 oddCount = 0;
 
-UE_LOG(LogTemp, Warning, TEXT("testing Vertex position %f %f away from %f %f"), vertexPosition.x, vertexPosition.y, iFromCoord.x, iFromCoord.y  );
+//UE_LOG(LogTemp, Warning, TEXT("testing Vertex position %f %f away from %f %f"), vertexPosition.x, vertexPosition.y, iFromCoord.x, iFromCoord.y  );
 
     for( int i = 0; i < iEdgeArray.size(); i++ )
     {
@@ -158,28 +162,37 @@ UE_LOG(LogTemp, Warning, TEXT("testing Vertex position %f %f away from %f %f"), 
         {
             endT = startT + stepT;
 
-            ::ULIS::FVec2D startPoint = cubicSegment->GetPointAt( startT );
-            ::ULIS::FVec2D endPoint   = cubicSegment->GetPointAt( endT   );
+            ::ULIS::FVec2D startPoint = ( j == 0 ) ? edge->GetVertex(0)->GetCoords() : cubicSegment->GetPointAt( startT );
+            ::ULIS::FVec2D endPoint   = ( j == stepCount - 1 ) ? edge->GetVertex(1)->GetCoords() : cubicSegment->GetPointAt( endT   );
 /*
 UE_LOG(LogTemp, Warning, TEXT("testing sub-segment x:%f y:%f --- x:%f y:%f"), startPoint.x, startPoint.y, endPoint.x, endPoint.y );
 */
-            if( FOdysseyVector::IntersectSegment( iFromCoord
-                                                , vertexPosition
-                                                , startPoint/*edge->GetVertex(0)->GetCoords()*/
-                                                , endPoint/*edge->GetVertex(1)->GetCoords()*/
-                                                , nullptr
-                                                , nullptr ) == true )
+            for( int k = 0; k < 3; k++ )
             {
-                hitCount++;
+                if( FOdysseyVector::IntersectSegment( fromCoord[k]
+                                                    , vertexPosition
+                                                    , startPoint/*edge->GetVertex(0)->GetCoords()*/
+                                                    , endPoint/*edge->GetVertex(1)->GetCoords()*/
+                                                    , nullptr
+                                                    , nullptr ) == true )
+                {
+                    hitCount[k]++;
 
-/*UE_LOG(LogTemp, Warning, TEXT("Collides with edge %d"), edge );*/
+    /*UE_LOG(LogTemp, Warning, TEXT("Collides with edge %d"), edge );*/
+                }
             }
 
             startT = endT;
         }
     }
-UE_LOG(LogTemp, Warning, TEXT("hitCount %d"), hitCount );
-    return ( hitCount % 2 ) ? true : false;
+
+    if( hitCount[0] % 2 ) oddCount++;
+    if( hitCount[1] % 2 ) oddCount++;
+    if( hitCount[2] % 2 ) oddCount++;
+
+//UE_LOG(LogTemp, Warning, TEXT("hitCount %d"), hitCount );
+
+    return ( oddCount >= 2 ) ? true : false;
 }
 
 static void
@@ -351,6 +364,8 @@ ReduceCycle( ::ULIS::FVec2D& iFromCoord
                             oSectionArray.push_back( insideForwardSection );
                             oVertexArray.push_back( insideNextVertex );
 
+            //UE_LOG(LogTemp,Warning,TEXT("Skipping to x:%f y:%f"), insideNextVertex->GetCoords().x, insideNextVertex->GetCoords().y );
+
                             for( std::list<FOdysseyVectorSection*>::iterator bsit = insideVertexSectionList.begin(); bsit != insideVertexSectionList.end(); ++bsit)
                             {
                                 insideForwardSection = (*bsit);
@@ -366,7 +381,7 @@ ReduceCycle( ::ULIS::FVec2D& iFromCoord
 
                         i = betterInsideVertex->GetCycleID();
 
-            UE_LOG(LogTemp,Warning,TEXT("Skipping to x:%f y:%f"), betterInsideVertex->GetCoords().x, betterInsideVertex->GetCoords().y );
+
                         break; // break for
                     }
                 }
@@ -390,6 +405,7 @@ MakeChordless( ::ULIS::FVec2D& iFromCoord
     bool isChordless = false;
     std::vector<UOdysseyVectorVertex*> refinedVertexArray;
     std::vector<FOdysseyVectorSection*> refinedSectionArray;
+    int loopDetection = 0;
 
     while( isChordless == false )
     {
@@ -398,8 +414,8 @@ MakeChordless( ::ULIS::FVec2D& iFromCoord
 
         if( iVertexArray.size() <= 3 ) break;
 
-        UE_LOG(LogTemp,Warning,TEXT("before filtering"));
-        PrintNode(iVertexArray,iSectionArray);
+        //UE_LOG(LogTemp,Warning,TEXT("before filtering"));
+        //PrintNode(iVertexArray,iSectionArray);
 
         MarkCycle( iVertexArray, iSectionArray );
 
@@ -414,8 +430,10 @@ MakeChordless( ::ULIS::FVec2D& iFromCoord
         iVertexArray = refinedVertexArray;
         iSectionArray = refinedSectionArray;
 
-        UE_LOG(LogTemp,Warning,TEXT("After filtering"));
-        PrintNode( iVertexArray, iSectionArray );
+        //UE_LOG(LogTemp,Warning,TEXT("After filtering"));
+        //PrintNode( iVertexArray, iSectionArray );
+
+        /*if( loopDetection++ > 10 ) break;*/
     }
 }
 
@@ -454,7 +472,7 @@ UOdysseyVectorGroupPaint::MakeCycle( ::ULIS::FVec2D& minCoord
         /*}*/
 
 
-    } else UE_LOG(LogTemp,Warning,TEXT("cycle exists !!!!!!!!!!!!!!!!!!!!!!!!!!!!") );
+    } //else UE_LOG(LogTemp,Warning,TEXT("cycle exists !!!!!!!!!!!!!!!!!!!!!!!!!!!!") );
 
     return cycle;
 }
@@ -523,12 +541,12 @@ UOdysseyVectorGroupPaint::March( UOdysseyVectorVertexIntersection* iVertex
                     if( ( currentEdge == iEndSection )
                      || ( currentEdge->IsMarched() == false && currentEdge->IsBlocked() == false ) )
                     {
-UE_LOG(LogTemp,Warning,TEXT("Exploring edge %d (x:%f y:%f --- x:%f y:%f"), currentEdge, currentNode->vertex->GetCoords().x, currentNode->vertex->GetCoords().y, nextVertex->GetCoords().x, nextVertex->GetCoords().y );
+//UE_LOG(LogTemp,Warning,TEXT("Exploring edge %d (x:%f y:%f --- x:%f y:%f"), currentEdge, currentNode->vertex->GetCoords().x, currentNode->vertex->GetCoords().y, nextVertex->GetCoords().x, nextVertex->GetCoords().y );
                         if( nextVertex == nodeArray[0].vertex )
                         {
                             if( currentEdge == iEndSection )
                             {
-UE_LOG(LogTemp,Warning,TEXT("candidate cycle") );
+//UE_LOG(LogTemp,Warning,TEXT("candidate cycle") );
                                 std::vector<UOdysseyVectorVertex*> vertexArray(0);
                                 std::vector<FOdysseyVectorSection*> sectionArray(0);
                                 ::ULIS::FVec2D minCoord;
@@ -538,7 +556,7 @@ UE_LOG(LogTemp,Warning,TEXT("candidate cycle") );
                                                     , vertexArray
                                                     , sectionArray );
 
-UE_LOG(LogTemp,Warning,TEXT("candidate cycle of size:%d"), vertexArray.size() );
+//UE_LOG(LogTemp,Warning,TEXT("candidate cycle of size:%d"), vertexArray.size() );
 
 //PrintNode( vertexArray, sectionArray );
 // TODO : check it does not exists here or move GetNormalVector in MakeCycle
@@ -547,7 +565,7 @@ UE_LOG(LogTemp,Warning,TEXT("candidate cycle of size:%d"), vertexArray.size() );
 
                                 if( cycle )
                                 {
-UE_LOG(LogTemp,Warning,TEXT("cycle created: --------------------------- ") );
+//UE_LOG(LogTemp,Warning,TEXT("cycle created: --------------------------- ") );
                                     CleanNodeArray( nodeArray, vertexCount );
 
                                     free( nodeMemArea );
@@ -710,9 +728,9 @@ UOdysseyVectorGroupPaint::MarchCycle( FOdysseyVectorLoop& iCycle, std::list<FOdy
                 FOdysseyVectorSection* startSection = intersectionVertex->GetNonBlockedCrossedSection( *endSection );
     iCycle.UnBlock();
                 if( startSection ) {
-    UE_LOG( LogTemp, Warning, TEXT("Marching Child at vertex:%d x:%f y:%f"), intersectionVertex, intersectionVertex->GetCoords().x, intersectionVertex->GetCoords().y );
-    UE_LOG(LogTemp,Warning,TEXT("Allowed end section %d x:%f y:%f ---- x:%f y:%f"),endSection,endSection->GetVertex(0)->GetCoords().x, endSection->GetVertex(0)->GetCoords().y, endSection->GetVertex(1)->GetCoords().x, endSection->GetVertex(1)->GetCoords().y );
-    UE_LOG(LogTemp,Warning,TEXT("Allowed start section %d x:%f y:%f ---- x:%f y:%f"),startSection, startSection->GetVertex(0)->GetCoords().x,startSection->GetVertex(0)->GetCoords().y,startSection->GetVertex(1)->GetCoords().x,startSection->GetVertex(1)->GetCoords().y);
+    //UE_LOG( LogTemp, Warning, TEXT("Marching Child at vertex:%d x:%f y:%f"), intersectionVertex, intersectionVertex->GetCoords().x, intersectionVertex->GetCoords().y );
+    //UE_LOG(LogTemp,Warning,TEXT("Allowed end section %d x:%f y:%f ---- x:%f y:%f"),endSection,endSection->GetVertex(0)->GetCoords().x, endSection->GetVertex(0)->GetCoords().y, endSection->GetVertex(1)->GetCoords().x, endSection->GetVertex(1)->GetCoords().y );
+    //UE_LOG(LogTemp,Warning,TEXT("Allowed start section %d x:%f y:%f ---- x:%f y:%f"),startSection, startSection->GetVertex(0)->GetCoords().x,startSection->GetVertex(0)->GetCoords().y,startSection->GetVertex(1)->GetCoords().x,startSection->GetVertex(1)->GetCoords().y);
 
                     FOdysseyVectorLoop* childCycle = March( intersectionVertex, startSection, endSection, iSectionList );
 
@@ -770,7 +788,7 @@ UOdysseyVectorGroupPaint::FindCycles()
             FOdysseyVectorSection *startSection = intersectionVertex->GetNonBlockedCrossedSection( *endSection );
             FOdysseyVectorLoop* cycle;
 
-    UE_LOG(LogTemp,Warning,TEXT("Vertex:%d - x:%f y:%f - valence:%d"),intersectionVertex, intersectionVertex->GetCoords().x, intersectionVertex->GetCoords().y, intersectionVertex->GetSectionCount() );
+    //UE_LOG(LogTemp,Warning,TEXT("Vertex:%d - x:%f y:%f - valence:%d"),intersectionVertex, intersectionVertex->GetCoords().x, intersectionVertex->GetCoords().y, intersectionVertex->GetSectionCount() );
 
             if( startSection )
             {
