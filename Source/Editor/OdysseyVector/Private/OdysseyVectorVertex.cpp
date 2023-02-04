@@ -6,7 +6,6 @@ UOdysseyVectorVertex::~UOdysseyVectorVertex()
 
 UOdysseyVectorVertex::UOdysseyVectorVertex()
     : UOdysseyVectorPoint()
-    , mNode(nullptr)
 {
     SetVisited( false );
 }
@@ -20,18 +19,6 @@ UOdysseyVectorVertex::New( double iX, double iY, double iRadius )
     vertex->Init( iX, iY, iRadius );
 
     return vertex;
-}
-
-void
-UOdysseyVectorVertex::SetNode( FCycleNode* iNode )
-{
-    mNode = iNode;
-}
-
-FCycleNode*
-UOdysseyVectorVertex::GetNode()
-{
-    return mNode;
 }
 
 void

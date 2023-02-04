@@ -117,15 +117,16 @@ UOdysseyVectorVertexIntersection::GetLoop()
 }
 
 FOdysseyVectorSection*
-UOdysseyVectorVertexIntersection::GetNonBlockedCrossedSection( FOdysseyVectorSection& iCurrentSection )
+UOdysseyVectorVertexIntersection::GetCrossingSection( UOdysseyVectorSegment* iDiscardSegment
+                                                    , FOdysseyVectorSection* iDiscardSection )
 {
     for( std::list<FOdysseyVectorSection*>::iterator it = mSectionList.begin(); it != mSectionList.end(); ++it )
     {
         FOdysseyVectorSection* section = static_cast<FOdysseyVectorSection*>(*it);
 
-        if ( section->GetSegment() != iCurrentSection.GetSegment() )
+        if ( section->GetSegment() != iDiscardSegment )
         {
-            if( section->IsBlocked() == false )
+            if( section != iDiscardSection )
             {
                 return section;
             }

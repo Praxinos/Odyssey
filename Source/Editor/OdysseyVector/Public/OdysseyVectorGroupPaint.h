@@ -14,22 +14,25 @@
 #include "OdysseyVectorLoop.h"
 
 #include "OdysseyVectorGroupPaint.generated.h"
-/*
+
 typedef struct _FCycleNode
 {
-    int32 parentID;
-    int32 ID;
+    struct _FCycleNode* parent;
     std::list<FOdysseyVectorSection*>* bypassEdgeList;
     UOdysseyVectorVertex* vertex;
     FOdysseyVectorSection* section;
     uint32 depth;
 } FCycleNode;
-*/
+
 UCLASS()
 class ODYSSEYVECTOR_API UOdysseyVectorGroupPaint : public UOdysseyVectorGroup
 {
     public:
         GENERATED_BODY()
+
+    private:
+        FCycleNode* mNodeMemoryPool;
+        void ClearCycles();
 
     public:
         void ApplyBucket( FOdysseyVectorBucket* iBucket );
@@ -40,7 +43,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorGroupPaint : public UOdysseyVectorGroup
 
 
     public:
-        ~UOdysseyVectorGroupPaint(){};
+        ~UOdysseyVectorGroupPaint();
         UOdysseyVectorGroupPaint(){};
         void Init( std::string iName );
 
@@ -52,8 +55,8 @@ class ODYSSEYVECTOR_API UOdysseyVectorGroupPaint : public UOdysseyVectorGroup
                                , std::list<UOdysseyVectorSegment*>& cubicSegmenList
                               , std::list<UOdysseyVectorVertexIntersection*>& intersectionVertexList );
 
-        void BuildGraph( std::list<UOdysseyVectorVertexIntersection*>& intersectionVertexList
-                       , std::list<FOdysseyVectorSection*>& iSectionList );
+        uint32 BuildGraph( std::list<UOdysseyVectorVertexIntersection*>& intersectionVertexList
+                         , std::list<FOdysseyVectorSection*>& iSectionList );
 
         FOdysseyVectorLoop* MakeCycle( ::ULIS::FVec2D& minCoord
                                      , uint64 iCycleID

@@ -190,7 +190,7 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseDownVector( UOdysseyTextureLayerIma
             uint32 A = ( uint32 ) rgba8.A8();
             uint32 col32 = ( (A << 24) | (B << 16) | (G << 8) | R );
 
-            paintGroup->FindCycles();
+            /*paintGroup->FindCycles();*/
             paintGroup->Bucket( col32, localCoords.x, localCoords.y );
         }
     }
