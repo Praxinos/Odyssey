@@ -33,7 +33,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorGroupPaint : public UOdysseyVectorGroup
     private:
         FCycleNode* mNodeMemoryPool;
         void ClearCycles();
-        void MarchVertex( UOdysseyVectorVertexIntersection& iVertex,std::list<FOdysseyVectorSection*>& iSectionList );
+        void MarchVertex( UOdysseyVectorVertexIntersection& iVertex );
 
     public:
         void ApplyBucket( FOdysseyVectorBucket* iBucket );
@@ -41,6 +41,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorGroupPaint : public UOdysseyVectorGroup
 
         std::list<FOdysseyVectorBucket*> mBucketList;
         std::list<FOdysseyVectorLoop*> mLoopList;
+
 
 
     public:
@@ -54,23 +55,20 @@ class ODYSSEYVECTOR_API UOdysseyVectorGroupPaint : public UOdysseyVectorGroup
 
         uint32 IntersectSegment( UOdysseyVectorSegmentCubic& iCubicSegment
                                , std::list<UOdysseyVectorSegment*>& cubicSegmenList
-                              , std::list<UOdysseyVectorVertexIntersection*>& intersectionVertexList );
+                               , std::vector<UOdysseyVectorVertexIntersection*>& iIntersectionVertexList );
 
-        uint32 BuildGraph( std::list<UOdysseyVectorVertexIntersection*>& intersectionVertexList
-                         , std::list<FOdysseyVectorSection*>& iSectionList );
+        uint32 BuildGraph( std::vector<UOdysseyVectorVertexIntersection*>& iIntersectionVertexArray );
 
-        FOdysseyVectorLoop* MakeCycle( ::ULIS::FVec2D& minCoord
-                                     , uint64 iCycleID
+        FOdysseyVectorLoop* MakeCycle( uint64 iCycleID
                                      , std::vector<UOdysseyVectorVertex*>& iVertexArray
                                      , std::vector<FOdysseyVectorSection*>& iSectionArray );
         FOdysseyVectorLoop* March( UOdysseyVectorVertexIntersection* iNode
                                  , FOdysseyVectorSection* iStartSection
-                                 , FOdysseyVectorSection* iEndSection
-                                 , std::list<FOdysseyVectorSection*>& iSectionList );
-        void MarchCycle( FOdysseyVectorLoop& iCycle, std::list<FOdysseyVectorSection*>& iSectionList );
+                                 , FOdysseyVectorSection* iEndSection );
+        void MarchCycle( FOdysseyVectorLoop& iCycle );
 
         void FindCycles();
-        void SimplifyGraph( std::list<FOdysseyVectorSection*>& sectionList );
+        void SimplifyGraph();
         FOdysseyVectorBucket* Bucket( uint32 iColor, double iX, double iY );
         FOdysseyVectorBucket* GetBucket( double iX, double iY );
 

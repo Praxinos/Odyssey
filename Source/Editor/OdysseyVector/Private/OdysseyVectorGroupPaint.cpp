@@ -122,7 +122,7 @@ UOdysseyVectorGroupPaint::PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlag
 uint32
 UOdysseyVectorGroupPaint::IntersectSegment( UOdysseyVectorSegmentCubic& iCubicSegment
                                           , std::list<UOdysseyVectorSegment*>& cubicSegmenList
-                                          , std::list<UOdysseyVectorVertexIntersection*>& intersectionVertexList )
+                                          , std::vector<UOdysseyVectorVertexIntersection*>& iIntersectionVertexArray )
 {
     uint32 intersectionCount = 0;
 
@@ -133,7 +133,7 @@ UOdysseyVectorGroupPaint::IntersectSegment( UOdysseyVectorSegmentCubic& iCubicSe
 
         if( intersectRect.Area() )
         {
-            intersectionCount += iCubicSegment.Intersect( *intersectSegment, intersectionVertexList );
+            intersectionCount += iCubicSegment.Intersect( *intersectSegment, iIntersectionVertexArray );
         }
     }
 
@@ -293,19 +293,25 @@ MarkCycle( std::vector<UOdysseyVectorVertex*>& iVertexArray
     }
 }
 
-static void
+static uint64
 UnmarkCycle( std::vector<UOdysseyVectorVertex*>& iVertexArray
            , std::vector<FOdysseyVectorSection*>& iEdgeArray )
 {
+    uint64 cycleID = 0;
+
     for( int i = 0; i < iEdgeArray.size(); i++ )
     {
         iEdgeArray[i]->SetInCycle( false );
+
+        cycleID = cycleID ^ ( uint64 ) iEdgeArray[i];
     }
 
     for( int i = 0; i < iVertexArray.size(); i++ )
     {
         iVertexArray[i]->SetInCycle( false, 0 );
     }
+
+    return cycleID;
 }
 
 static ::ULIS::FVec2D
@@ -345,26 +351,23 @@ PrintNode( std::vector<UOdysseyVectorVertex*>& vertexArray
     }
 }
 
-static ::ULIS::FVec2D
+static uint64
 MergeNode( FCycleNode* iNode
          , std::vector<UOdysseyVectorVertex*>& vertexArray
          , std::vector<FOdysseyVectorSection*>& sectionArray )
 {
     FCycleNode* node = iNode;
     uint32 nodeCount = node->depth + 1;
-    ::ULIS::FVec2D minCoord = ::ULIS::FVec2D(0,0);
+    uint64 cycleID = 0;
 
     if( nodeCount )
     {
         int vrank = 0;
         int srank = 0;
 
-        minCoord = node->vertex->GetCoords();
-
         vertexArray.resize( nodeCount );
         sectionArray.resize( nodeCount );
 
-        // concatenate iNode1 and iNode0 except for the root node.
         while( node )
         {
             ::ULIS::FVec2D& nodeCoord = node->vertex->GetCoords();
@@ -374,21 +377,15 @@ MergeNode( FCycleNode* iNode
             vertexArray[i]  = node->vertex;
             sectionArray[p] = node->section;
 
-            // find minimum point, we'll need it for the ray casting algorithm in the InsideCycle() function.
-            // Note: we need it to be outside the cycle, so we arbitrarily substract 0.5f
-            if( nodeCoord.x < minCoord.x ) minCoord.x = nodeCoord.x;
-            if( nodeCoord.y < minCoord.y ) minCoord.y = nodeCoord.y;
+            cycleID = cycleID ^ (uint64) node->section;
 
             node = node->parent;
         }
     }
 
-    minCoord.x -= 10;
-    minCoord.y -= 10;
-
     //PrintNode( vertexArray, sectionArray );
 
-    return minCoord;
+    return cycleID;
 }
 
 static bool
@@ -488,7 +485,7 @@ ReduceCycle( ::ULIS::FVec2D& iFromCoord
     return reduced;
 }
 
-static void
+static uint64
 MakeChordless( ::ULIS::FVec2D& iFromCoord
              , std::vector<UOdysseyVectorVertex*>& iVertexArray
              , std::vector<FOdysseyVectorSection*>& iSectionArray )
@@ -497,13 +494,12 @@ MakeChordless( ::ULIS::FVec2D& iFromCoord
     std::vector<UOdysseyVectorVertex*> refinedVertexArray;
     std::vector<FOdysseyVectorSection*> refinedSectionArray;
     int loopDetection = 0;
+    uint64 cycleID = 0;
 
     do
     {
         refinedVertexArray.clear();
         refinedSectionArray.clear();
-
-        if( iVertexArray.size() <= 3 ) break;
 
         //UE_LOG(LogTemp,Warning,TEXT("before filtering"));
         //PrintNode(iVertexArray,iSectionArray);
@@ -516,7 +512,7 @@ MakeChordless( ::ULIS::FVec2D& iFromCoord
                              , refinedVertexArray
                              , refinedSectionArray );
 
-        UnmarkCycle( iVertexArray, iSectionArray );
+        cycleID = UnmarkCycle( iVertexArray, iSectionArray );
 
         iVertexArray = refinedVertexArray;
         iSectionArray = refinedSectionArray;
@@ -527,29 +523,31 @@ MakeChordless( ::ULIS::FVec2D& iFromCoord
         /*if( loopDetection++ > 10 ) break;*/
     }
     while ( reduced == true );
+
+    return cycleID;
 }
 
 FOdysseyVectorLoop*
-UOdysseyVectorGroupPaint::MakeCycle( ::ULIS::FVec2D& minCoord
-                                   , uint64 iCycleID
+UOdysseyVectorGroupPaint::MakeCycle( uint64 iCycleID
                                    , std::vector<UOdysseyVectorVertex*>& iVertexArray
                                    , std::vector<FOdysseyVectorSection*>& iSectionArray )
 {
     /*uint64 iCycleID = FOdysseyVectorLoop::GenerateID( iSectionArray );
     FOdysseyVectorLoop* cycle = FOdysseyVectorLoop::Exists( iCycleID, iVertexArray, iSectionArray );*/
     FOdysseyVectorLoop* cycle = nullptr;
+    ::ULIS::FVec2D minCoord( mBBox.x, mBBox.y );
 
 //UE_LOG(LogTemp,Warning,TEXT("candidate cycle") );
 //PrintNode( iVertexArray, iSectionArray );
 // TESTING //
 
-    minCoord.x = mBBox.x;
-    minCoord.y = mBBox.y;
-
 //UE_LOG( LogTemp, Warning, TEXT("Bounding: %f %f %f %f"), mBBox.x, mBBox.y, mBBox.w, mBBox.h );
-    MakeChordless( minCoord, iVertexArray, iSectionArray );
+    if( iVertexArray.size() > 3 )
+    {
+        iCycleID = MakeChordless( minCoord, iVertexArray, iSectionArray );
+    }
 
-    iCycleID = FOdysseyVectorLoop::GenerateID( iSectionArray );
+    /*iCycleID = FOdysseyVectorLoop::GenerateID( iSectionArray );*/
 
     cycle = FOdysseyVectorLoop::Exists( iCycleID, iVertexArray, iSectionArray );
 
@@ -581,8 +579,7 @@ CleanNodeArray( FCycleNode* iNodeArray, int size )
 FOdysseyVectorLoop*
 UOdysseyVectorGroupPaint::March( UOdysseyVectorVertexIntersection* iVertex
                                , FOdysseyVectorSection* iStartSection
-                               , FOdysseyVectorSection* iEndSection
-                               , std::list<FOdysseyVectorSection*>& iSectionList )
+                               , FOdysseyVectorSection* iEndSection )
 {
     FCycleNode* nodeArray = mNodeMemoryPool;
     uint32 vertexCount, vertexFrom;
@@ -593,7 +590,6 @@ UOdysseyVectorGroupPaint::March( UOdysseyVectorVertexIntersection* iVertex
     nodeArray[0].section  = iEndSection;
     nodeArray[0].vertex   = iVertex;
     nodeArray[0].vertex->SetVisited( true );
-
 
     nodeArray[1].depth    = 1;
     nodeArray[1].parent   = &nodeArray[0];
@@ -638,19 +634,16 @@ UOdysseyVectorGroupPaint::March( UOdysseyVectorVertexIntersection* iVertex
 //UE_LOG(LogTemp,Warning,TEXT("candidate cycle") );
                                 std::vector<UOdysseyVectorVertex*> vertexArray(0);
                                 std::vector<FOdysseyVectorSection*> sectionArray(0);
-                                ::ULIS::FVec2D minCoord;
-                                /*uint64 cycleID;*/
-
-                                minCoord = MergeNode( currentNode
-                                                    , vertexArray
-                                                    , sectionArray );
+                                uint64 cycleID = MergeNode( currentNode
+                                                          , vertexArray
+                                                          , sectionArray );
 
 //UE_LOG(LogTemp,Warning,TEXT("candidate cycle of size:%d"), vertexArray.size() );
 
 //PrintNode( vertexArray, sectionArray );
 // TODO : check it does not exists here or move GetNormalVector in MakeCycle
 
-                                FOdysseyVectorLoop* cycle = MakeCycle( minCoord, /*cycleID*/0, vertexArray, sectionArray );
+                                FOdysseyVectorLoop* cycle = MakeCycle( cycleID, vertexArray, sectionArray );
 
                                 if( cycle )
                                 {
@@ -691,8 +684,9 @@ UOdysseyVectorGroupPaint::March( UOdysseyVectorVertexIntersection* iVertex
 }
 
 void
-UOdysseyVectorGroupPaint::SimplifyGraph( std::list<FOdysseyVectorSection*>& iSectionList )
+UOdysseyVectorGroupPaint::SimplifyGraph()
 {
+    std::list<FOdysseyVectorSection*> sectionList;
     bool keepSimplifying;
 
     for( std::list<UOdysseyVectorObject*>::iterator oit = mChildrenList.begin(); oit != mChildrenList.end(); ++oit )
@@ -709,7 +703,7 @@ UOdysseyVectorGroupPaint::SimplifyGraph( std::list<FOdysseyVectorSection*>& iSec
                 UOdysseyVectorSegmentCubic *cubicSegment = Cast<UOdysseyVectorSegmentCubic>(*it);
                 std::list<FOdysseyVectorSection*>& segmentSectionList = cubicSegment->GetSectionList();
 
-                iSectionList.insert( iSectionList.end(), segmentSectionList.begin(), segmentSectionList.end() );
+                sectionList.insert( sectionList.end(), segmentSectionList.begin(), segmentSectionList.end() );
             }
         }
     }
@@ -719,7 +713,7 @@ UOdysseyVectorGroupPaint::SimplifyGraph( std::list<FOdysseyVectorSection*>& iSec
         keepSimplifying = false;
     //UE_LOG( LogTemp, Warning, TEXT("Simplify") );
     //UE_LOG( LogTemp, Warning, TEXT("Sections:%d"), sectionList.size() );
-        iSectionList.remove_if( [&keepSimplifying]( FOdysseyVectorSection *section )
+        sectionList.remove_if( [&keepSimplifying]( FOdysseyVectorSection *section )
             {
                 if( ( section->GetVertex(0)->GetSectionCount() == 1 )
                 ||  ( section->GetVertex(1)->GetSectionCount() == 1 ) )
@@ -740,10 +734,8 @@ UOdysseyVectorGroupPaint::SimplifyGraph( std::list<FOdysseyVectorSection*>& iSec
     //UE_LOG( LogTemp, Warning, TEXT("End Sections:%d"), sectionList.size() );
 }
 
-// returns number of vertices ( original vertices + intersection vertices )
 uint32
-UOdysseyVectorGroupPaint::BuildGraph( std::list<UOdysseyVectorVertexIntersection*>& iIntersectionVertexList
-                                    , std::list<FOdysseyVectorSection*>& iSectionList )
+UOdysseyVectorGroupPaint::BuildGraph( std::vector<UOdysseyVectorVertexIntersection*>& iIntersectionVertexArray )
 {
     std::list<UOdysseyVectorSegment*> cubicSegmenList;
     UOdysseyVectorSegmentCubic *cubicSegment;
@@ -778,7 +770,7 @@ UOdysseyVectorGroupPaint::BuildGraph( std::list<UOdysseyVectorVertexIntersection
 
     while( cubicSegment )
     {
-        intersectionCount += IntersectSegment ( *cubicSegment, cubicSegmenList, iIntersectionVertexList );
+        intersectionCount += IntersectSegment ( *cubicSegment, cubicSegmenList, iIntersectionVertexArray );
 
         // remove segment from list as they are tested
         cubicSegmenList.pop_back();
@@ -789,7 +781,7 @@ UOdysseyVectorGroupPaint::BuildGraph( std::list<UOdysseyVectorVertexIntersection
     // Step Two - simply the graph by removing sections that are not part of a cycle. to do that we proceed with several passes
     // by removing the sections that are at a dead-end and go-on until no section is a dead-end.
 
-    SimplifyGraph( iSectionList );
+    SimplifyGraph();
 
     //UE_LOG( LogTemp, Warning, TEXT("Intersections:%d"), iIntersectionVertexList.size() );
 
@@ -797,7 +789,7 @@ UOdysseyVectorGroupPaint::BuildGraph( std::list<UOdysseyVectorVertexIntersection
 }
 
 void
-UOdysseyVectorGroupPaint::MarchVertex( UOdysseyVectorVertexIntersection& iVertex, std::list<FOdysseyVectorSection*>& iSectionList )
+UOdysseyVectorGroupPaint::MarchVertex( UOdysseyVectorVertexIntersection& iVertex )
 {
     UOdysseyVectorSegment* primarySegment = iVertex.GetFirstSegment();
     std::list<FOdysseyVectorSection*>& vertexSectionList = iVertex.GetSectionList();
@@ -819,11 +811,11 @@ UOdysseyVectorGroupPaint::MarchVertex( UOdysseyVectorVertexIntersection& iVertex
                     {
                         if( startSection->IsMarched() == false )
                         {
-                            FOdysseyVectorLoop* cycle = March( &iVertex, startSection, endSection, iSectionList );
+                            FOdysseyVectorLoop* cycle = March( &iVertex, startSection, endSection );
 
                             if( cycle )
                             {
-                                MarchCycle( *cycle, iSectionList );
+                                MarchCycle( *cycle );
                             }
                         }
                     }
@@ -834,7 +826,7 @@ UOdysseyVectorGroupPaint::MarchVertex( UOdysseyVectorVertexIntersection& iVertex
 }
 
 void
-UOdysseyVectorGroupPaint::MarchCycle( FOdysseyVectorLoop& iCycle, std::list<FOdysseyVectorSection*>& iSectionList )
+UOdysseyVectorGroupPaint::MarchCycle( FOdysseyVectorLoop& iCycle )
 {
     std::vector<UOdysseyVectorVertex*>& vertexArray = iCycle.GetVertexArray();
     std::vector<FOdysseyVectorSection*>& sectionArray = iCycle.GetSectionArray();
@@ -865,7 +857,7 @@ UOdysseyVectorGroupPaint::MarchCycle( FOdysseyVectorLoop& iCycle, std::list<FOdy
     //UE_LOG(LogTemp,Warning,TEXT("Allowed end section %d x:%f y:%f ---- x:%f y:%f"),endSection,endSection->GetVertex(0)->GetCoords().x, endSection->GetVertex(0)->GetCoords().y, endSection->GetVertex(1)->GetCoords().x, endSection->GetVertex(1)->GetCoords().y );
     //UE_LOG(LogTemp,Warning,TEXT("Allowed start section %d x:%f y:%f ---- x:%f y:%f"),startSection, startSection->GetVertex(0)->GetCoords().x,startSection->GetVertex(0)->GetCoords().y,startSection->GetVertex(1)->GetCoords().x,startSection->GetVertex(1)->GetCoords().y);
 
-                    FOdysseyVectorLoop* childCycle = March( intersectionVertex, startSection, endSection, iSectionList );
+                    FOdysseyVectorLoop* childCycle = March( intersectionVertex, startSection, endSection );
 
                     if( childCycle )
                     {
@@ -884,7 +876,7 @@ UOdysseyVectorGroupPaint::MarchCycle( FOdysseyVectorLoop& iCycle, std::list<FOdy
     {
         if( childCycleArray[i]->IsMarched() == false )
         {
-            MarchCycle( *childCycleArray[i], iSectionList );
+            MarchCycle( *childCycleArray[i] );
         }
     }
 }
@@ -905,28 +897,24 @@ UOdysseyVectorGroupPaint::ClearCycles()
 void
 UOdysseyVectorGroupPaint::FindCycles()
 {
-    std::list<UOdysseyVectorVertexIntersection*> intersectionVertexList;
-    std::list<FOdysseyVectorSection*> sectionList;
-    uint32 cycleCount = 0;
+    std::vector<UOdysseyVectorVertexIntersection*> intersectionVertexArray;
     uint32 totalVertexCount = 0;
 
     // clear mLoopList
     ClearCycles();
 
-    totalVertexCount = BuildGraph( intersectionVertexList, sectionList );
+    intersectionVertexArray.reserve( 500 );
+
+    totalVertexCount = BuildGraph( intersectionVertexArray );
 
     mNodeMemoryPool = ( FCycleNode* ) realloc ( mNodeMemoryPool, totalVertexCount * sizeof( FCycleNode ) );
 
     //UE_LOG( LogTemp, Warning, TEXT("Detection -----------------------------------------------------------") );
     //UE_LOG( LogTemp, Warning, TEXT("Intersection vertices:%d"), intersectionVertexList.size() );
 
-    while( intersectionVertexList.size() )
+    for( int i = 0; i < intersectionVertexArray.size(); i++ )
     {
-        UOdysseyVectorVertexIntersection* intersectionVertex = intersectionVertexList.back();
-
-        MarchVertex( *intersectionVertex, sectionList );
-
-        intersectionVertexList.pop_back();
+        MarchVertex( *intersectionVertexArray[i] );
     }
 
     //UE_LOG( LogTemp, Warning, TEXT("total cycles:%d"), cycleCount );

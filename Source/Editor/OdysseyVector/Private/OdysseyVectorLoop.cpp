@@ -11,7 +11,7 @@ FOdysseyVectorLoop::FOdysseyVectorLoop( UOdysseyVectorObject& iParent
                                       , std::vector<FOdysseyVectorSection*>& iSectionArray )
     : mParent( iParent )
     , mID( iID )
-    , mColor( 0xFF808080 )
+    , mColor( 0xFFA0A0A0 )
     , mBucket( nullptr )
     , mVertexArray (iVertexArray)
     , mSectionArray (iSectionArray)
@@ -166,6 +166,7 @@ void
 FOdysseyVectorLoop::Build( std::vector<UOdysseyVectorVertex*>& iVertexArray
                          , std::vector<FOdysseyVectorSection*>& iSectionArray )
 {
+
     int seg = 0;
 
     mValence = 0;
@@ -206,7 +207,7 @@ FOdysseyVectorLoop::Build( std::vector<UOdysseyVectorVertex*>& iVertexArray
 
 /*
     mPath.clear();
-UE_LOG(LogTemp, Warning, TEXT("FOdysseyVectorLoop::Build: Array size %d"), iSectionArray.size() );
+//UE_LOG(LogTemp, Warning, TEXT("FOdysseyVectorLoop::Build: Array size %d"), iSectionArray.size() );
     for( int i = 0; i < iSectionArray.size(); i++ )
     {
         FOdysseyVectorSection* section = iSectionArray[i];
@@ -224,7 +225,7 @@ UE_LOG(LogTemp, Warning, TEXT("FOdysseyVectorLoop::Build: Array size %d"), iSect
 uint32
 FOdysseyVectorLoop::GetColor()
 {
-    return ( mBucket ) ? mBucket->GetColor() : 0xFF808080;
+    return ( mBucket ) ? mBucket->GetColor() : mColor;
 }
 
 void

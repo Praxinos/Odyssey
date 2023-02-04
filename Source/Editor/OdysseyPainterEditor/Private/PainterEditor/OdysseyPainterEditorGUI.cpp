@@ -401,37 +401,43 @@ FOdysseyPainterEditorGUI::GroupPaint()
         {
             UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
 
-            if( currentVectorLayer )
+            FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+            std::list<UOdysseyVectorObject*>& selectObjectList = currentVectorLayer->GetScene()->GetSelectedObjectList();
+
+            if( selectObjectList.size() )
             {
-                FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-                std::list<UOdysseyVectorObject*>& selectObjectList = currentVectorLayer->GetScene()->GetSelectedObjectList();
+                UOdysseyVectorObject* selectedObject = currentVectorLayer->GetScene()->GetLastSelected();
+                UOdysseyVectorGroupPaint* paintGroup = NewObject<UOdysseyVectorGroupPaint>();
 
-                if( selectObjectList.size() )
+                currentVectorLayer->GetScene()->AppendChild( paintGroup );
+
+                paintGroup->UpdateMatrix();
+
+                for( std::list<UOdysseyVectorObject*>::iterator it = selectObjectList.begin(); it != selectObjectList.end(); ++it )
                 {
-                    UOdysseyVectorObject* selectedObject = currentVectorLayer->GetScene()->GetLastSelected();
-                    UOdysseyVectorGroupPaint* paintGroup = NewObject<UOdysseyVectorGroupPaint>();
+                    selectedObject = (*it);
 
-                    currentVectorLayer->GetScene()->AppendChild( paintGroup );
-
-                    for( std::list<UOdysseyVectorObject*>::iterator it = selectObjectList.begin(); it != selectObjectList.end(); ++it )
+                    if( selectedObject->GetClass() == UOdysseyVectorPathCubic::StaticClass() )
                     {
-                        selectedObject = (*it);
+                        UOdysseyVectorPathCubic* cubicPath = Cast<UOdysseyVectorPathCubic>( selectedObject );
 
-                        selectedObject->ResetTransform();
-                        selectedObject->UpdateMatrix();
+                        cubicPath->SwitchSpace( *paintGroup );
+                        cubicPath->Update(); // update shape
+
+                        cubicPath->ResetTransform();
+                        cubicPath->UpdateMatrix();
 
                         selectedObject->GetParent()->RemoveChild( selectedObject );
                         paintGroup->AppendChild( selectedObject );
                     }
-
-                    paintGroup->UpdateMatrix();
-                    paintGroup->FindCycles();
-
-                    currentVectorLayer->GetScene()->ClearSelection();
-                    currentVectorLayer->GetScene()->Select( paintGroup );
-
-                    currentVectorLayer->RenderImageChanged(false);
                 }
+
+                paintGroup->FindCycles();
+
+                currentVectorLayer->GetScene()->ClearSelection();
+                currentVectorLayer->GetScene()->Select( paintGroup );
+
+                currentVectorLayer->RenderImageChanged( false );
             }
         }
     }

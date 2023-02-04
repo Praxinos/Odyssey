@@ -333,12 +333,12 @@ UOdysseyVectorSegmentCubic::Cut( ::ULIS::FVec2D& linePoint0
 
 uint32
 UOdysseyVectorSegmentCubic::Intersect( UOdysseyVectorSegmentCubic& iOther
-                                     , std::list<UOdysseyVectorVertexIntersection*>& intersectionVertexList )
+                                     , std::vector<UOdysseyVectorVertexIntersection*>& iIntersectionVertexArray )
 {
-    ::ULIS::FVec2D point0 = { mPoint[0]->GetX(), mPoint[0]->GetY() };
+    /*::ULIS::FVec2D point0 = { mPoint[0]->GetX(), mPoint[0]->GetY() };
     ::ULIS::FVec2D point1 = { mPoint[1]->GetX(), mPoint[1]->GetY() };
     ::ULIS::FVec2D ctrlPoint0 = { mCtrlPoint[0]->GetX(), mCtrlPoint[0]->GetY() };
-    ::ULIS::FVec2D ctrlPoint1 = { mCtrlPoint[1]->GetX(), mCtrlPoint[1]->GetY() };
+    ::ULIS::FVec2D ctrlPoint1 = { mCtrlPoint[1]->GetX(), mCtrlPoint[1]->GetY() };*/
     uint32 intersectionCount = 0;
 
     for ( int i = 0; i < mPolygonCache.size(); i++ )
@@ -374,7 +374,7 @@ UOdysseyVectorSegmentCubic::Intersect( UOdysseyVectorSegmentCubic& iOther
                     {
                         UOdysseyVectorVertexIntersection* intersectionVertex = NewObject<UOdysseyVectorVertexIntersection>();
 
-                        intersectionVertexList.push_back( intersectionVertex );
+                        iIntersectionVertexArray.push_back( intersectionVertex );
 
                         // AddSegment() MUST be called before AddIntersection because AddIntersection uses the value of t that is stored by AddSegment()
                         intersectionVertex->AddSegment (    this, segmentT );

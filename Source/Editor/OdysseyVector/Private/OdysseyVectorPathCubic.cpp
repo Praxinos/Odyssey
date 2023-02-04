@@ -819,3 +819,41 @@ UOdysseyVectorPathCubic::GetType()
 {
     return UOdysseyVectorObject::VECTORPATHCUBICTYPE;
 }
+
+void
+UOdysseyVectorPathCubic::SwitchSpace( UOdysseyVectorObject& iNewSpace )
+{
+    BLMatrix2D& newSpaceInverseWorldMatrix = iNewSpace.GetInverseWorldMatrix();
+
+    for( std::list<UOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
+    {
+        UOdysseyVectorSegmentCubic* cubicSegment = static_cast<UOdysseyVectorSegmentCubic*>(*it);
+        ::ULIS::FVec2D& point0 = cubicSegment->GetPoint(0)->GetCoords();
+        ::ULIS::FVec2D& point1 = cubicSegment->GetPoint(1)->GetCoords();
+        ::ULIS::FVec2D& ctrlPoint0 = cubicSegment->GetControlPoint(0)->GetCoords();
+        ::ULIS::FVec2D& ctrlPoint1 = cubicSegment->GetControlPoint(1)->GetCoords();
+        BLPoint pt;
+
+        pt = newSpaceInverseWorldMatrix.mapPoint( mWorldMatrix.mapPoint( point0.x, point0.y ) );
+
+        point0.x = pt.x;
+        point0.y = pt.y;
+
+        pt = newSpaceInverseWorldMatrix.mapPoint( mWorldMatrix.mapPoint( point1.x, point1.y ) );
+
+        point1.x = pt.x;
+        point1.y = pt.y;
+
+        pt = newSpaceInverseWorldMatrix.mapPoint( mWorldMatrix.mapPoint( ctrlPoint0.x, ctrlPoint0.y ) );
+
+        ctrlPoint0.x = pt.x;
+        ctrlPoint0.y = pt.y;
+
+        pt = newSpaceInverseWorldMatrix.mapPoint( mWorldMatrix.mapPoint( ctrlPoint1.x, ctrlPoint1.y ) );
+
+        ctrlPoint1.x = pt.x;
+        ctrlPoint1.y = pt.y;
+
+        InvalidateSegment( cubicSegment );
+    }
+}
