@@ -802,6 +802,7 @@ UOdysseyVectorGroupPaint::MarchVertex( UOdysseyVectorVertexIntersection& iVertex
     UOdysseyVectorSegment* primarySegment = iVertex.GetFirstSegment();
     std::list<FOdysseyVectorSection*>& vertexSectionList = iVertex.GetSectionList();
 
+
     for( std::list<FOdysseyVectorSection*>::iterator pit = vertexSectionList.begin(); pit != vertexSectionList.end(); ++pit )
     {
         FOdysseyVectorSection *endSection = (*pit);
