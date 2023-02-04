@@ -417,6 +417,9 @@ FOdysseyPainterEditorGUI::GroupPaint()
                     {
                         selectedObject = (*it);
 
+                        selectedObject->ResetTransform();
+                        selectedObject->UpdateMatrix();
+
                         selectedObject->GetParent()->RemoveChild( selectedObject );
                         paintGroup->AppendChild( selectedObject );
                     }

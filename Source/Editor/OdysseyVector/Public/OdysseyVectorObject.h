@@ -108,6 +108,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorObject : public UObject
         double GetTranslationX();
         double GetTranslationY();
         double GetRotation();
+        void ResetTransform();
         void SetID( uint32 iID );
         uint32 GetID();
         UOdysseyVectorObject* GetParent();

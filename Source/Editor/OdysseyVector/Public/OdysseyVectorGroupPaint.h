@@ -33,6 +33,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorGroupPaint : public UOdysseyVectorGroup
     private:
         FCycleNode* mNodeMemoryPool;
         void ClearCycles();
+        void MarchVertex( UOdysseyVectorVertexIntersection& iVertex,std::list<FOdysseyVectorSection*>& iSectionList );
 
     public:
         void ApplyBucket( FOdysseyVectorBucket* iBucket );

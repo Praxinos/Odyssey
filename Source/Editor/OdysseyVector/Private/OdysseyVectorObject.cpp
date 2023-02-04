@@ -82,6 +82,14 @@ UOdysseyVectorObject::GetRotation()
     return Rotation;
 }
 
+void
+UOdysseyVectorObject::ResetTransform()
+{
+    Translate( 0.0f, 0.0f );
+    Scale( 1.0f, 1.0f );
+    Rotate( 0.0f );
+}
+
 UOdysseyVectorObject*
 UOdysseyVectorObject::Copy() {
     UOdysseyVectorObject* objectCopy = CopyShape();
