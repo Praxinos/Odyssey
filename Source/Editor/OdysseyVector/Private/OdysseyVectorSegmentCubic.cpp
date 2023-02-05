@@ -352,38 +352,43 @@ UOdysseyVectorSegmentCubic::Intersect( UOdysseyVectorSegmentCubic& iOther
             FPolygon* interPoly = &iOther.mPolygonCache[j];
             double polySubT, interPolySubT;
 
-            if(   ( this != &iOther )
-            // check this is not the same sub-segment or adjacent sub-segment, or else they would always intersect
-             || ( ( this == &iOther ) && ( ( i - j ) > 1 ) ) )
+            // to speed things up a bit
+            if( ( poly->xmax > interPoly->xmin ) && ( poly->xmin < interPoly->xmax )
+             && ( poly->ymax > interPoly->ymin ) && ( poly->ymin < interPoly->ymax ) )
             {
-                if ( FOdysseyVector::IntersectSegment ( poly->lineVertex[0]
-                                                      , poly->lineVertex[1]
-                                                      , interPoly->lineVertex[0]
-                                                      , interPoly->lineVertex[1]
-                                                      , &polySubT
-                                                      , &interPolySubT ) )
+                if(   ( this != &iOther )
+                // check this is not the same sub-segment or adjacent sub-segment, or else they would always intersect
+                 || ( ( this == &iOther ) && ( ( i - j ) > 1 ) ) )
                 {
-                    ::ULIS::FVec2D polyVector = ( poly->lineVertex[1] - poly->lineVertex[0] );
-                    ::ULIS::FVec2D coords = { poly->lineVertex[0].x + ( polyVector.x * polySubT )
-                                            , poly->lineVertex[0].y + ( polyVector.y * polySubT ) };
-                    double segmentT =      poly->fromT + (      polySubT * (      poly->toT -      poly->fromT ) );
-                    double iOtherT  = interPoly->fromT + ( interPolySubT * ( interPoly->toT - interPoly->fromT ) );
-
-                    if( ( segmentT != 0.0f && iOtherT != 1.0f )
-                     && ( segmentT != 1.0f && iOtherT != 0.0f ) )
+                    if ( FOdysseyVector::IntersectSegment ( poly->lineVertex[0]
+                                                          , poly->lineVertex[1]
+                                                          , interPoly->lineVertex[0]
+                                                          , interPoly->lineVertex[1]
+                                                          , &polySubT
+                                                          , &interPolySubT ) )
                     {
-                        UOdysseyVectorVertexIntersection* intersectionVertex = NewObject<UOdysseyVectorVertexIntersection>();
+                        ::ULIS::FVec2D polyVector = ( poly->lineVertex[1] - poly->lineVertex[0] );
+                        ::ULIS::FVec2D coords = { poly->lineVertex[0].x + ( polyVector.x * polySubT )
+                                                , poly->lineVertex[0].y + ( polyVector.y * polySubT ) };
+                        double segmentT =      poly->fromT + (      polySubT * (      poly->toT -      poly->fromT ) );
+                        double iOtherT  = interPoly->fromT + ( interPolySubT * ( interPoly->toT - interPoly->fromT ) );
 
-                        iIntersectionVertexArray.push_back( intersectionVertex );
+                        if( ( segmentT != 0.0f && iOtherT != 1.0f )
+                         && ( segmentT != 1.0f && iOtherT != 0.0f ) )
+                        {
+                            UOdysseyVectorVertexIntersection* intersectionVertex = NewObject<UOdysseyVectorVertexIntersection>();
 
-                        // AddSegment() MUST be called before AddIntersection because AddIntersection uses the value of t that is stored by AddSegment()
-                        intersectionVertex->AddSegment (    this, segmentT );
-                        intersectionVertex->AddSegment ( &iOther,  iOtherT );
+                            iIntersectionVertexArray.push_back( intersectionVertex );
 
-                        this->AddIntersection ( intersectionVertex );
-                        iOther.AddIntersection ( intersectionVertex );
+                            // AddSegment() MUST be called before AddIntersection because AddIntersection uses the value of t that is stored by AddSegment()
+                            intersectionVertex->AddSegment (    this, segmentT );
+                            intersectionVertex->AddSegment ( &iOther,  iOtherT );
 
-                        intersectionCount++;
+                            this->AddIntersection ( intersectionVertex );
+                            iOther.AddIntersection ( intersectionVertex );
+
+                            intersectionCount++;
+                        }
                     }
                 }
             }
@@ -588,6 +593,15 @@ UOdysseyVectorSegmentCubic::BuildVariableThickness( double iFromT
 
     cachedPolygon->lineVertex[1].x = iToPoint.x;
     cachedPolygon->lineVertex[1].y = iToPoint.y;
+
+    cachedPolygon->xmax = ( cachedPolygon->lineVertex[0].x > cachedPolygon->lineVertex[1].x ) ? cachedPolygon->lineVertex[0].x
+                                                                                              : cachedPolygon->lineVertex[1].x;
+    cachedPolygon->ymax = ( cachedPolygon->lineVertex[0].y > cachedPolygon->lineVertex[1].y ) ? cachedPolygon->lineVertex[0].y
+                                                                                              : cachedPolygon->lineVertex[1].y;
+    cachedPolygon->xmin = ( cachedPolygon->lineVertex[0].x < cachedPolygon->lineVertex[1].x ) ? cachedPolygon->lineVertex[0].x
+                                                                                              : cachedPolygon->lineVertex[1].x;
+    cachedPolygon->ymin = ( cachedPolygon->lineVertex[0].y < cachedPolygon->lineVertex[1].y ) ? cachedPolygon->lineVertex[0].y
+                                                                                              : cachedPolygon->lineVertex[1].y;
 
     cachedPolygon->fromT = iFromT;
     cachedPolygon->toT = iToT;

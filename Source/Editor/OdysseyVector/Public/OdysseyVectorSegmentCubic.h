@@ -17,6 +17,7 @@ class UOdysseyVectorPathCubic;
 typedef struct _FPolygon {
     ::ULIS::FVec2D quadVertex[4];
     ::ULIS::FVec2D lineVertex[2];
+    double xmin, xmax, ymin, ymax;
     double fromT;
     double toT;
 } FPolygon;

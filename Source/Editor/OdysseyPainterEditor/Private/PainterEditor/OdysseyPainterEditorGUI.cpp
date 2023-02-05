@@ -421,14 +421,15 @@ FOdysseyPainterEditorGUI::GroupPaint()
                     {
                         UOdysseyVectorPathCubic* cubicPath = Cast<UOdysseyVectorPathCubic>( selectedObject );
 
+                        cubicPath->GetParent()->RemoveChild( cubicPath );
+
                         cubicPath->SwitchSpace( *paintGroup );
                         cubicPath->Update(); // update shape
 
+                        paintGroup->AppendChild( cubicPath );
+
                         cubicPath->ResetTransform();
                         cubicPath->UpdateMatrix();
-
-                        selectedObject->GetParent()->RemoveChild( selectedObject );
-                        paintGroup->AppendChild( selectedObject );
                     }
                 }
 

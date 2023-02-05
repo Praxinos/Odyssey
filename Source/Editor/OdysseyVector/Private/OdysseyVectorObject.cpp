@@ -161,8 +161,8 @@ UOdysseyVectorObject::UpdateMatrix( )
 
     if( mParent)
     {
-        /*blctx->setMatrix( mLocalMatrix );*/
-        blctx->transform( mParent->mWorldMatrix );
+        blctx->setMatrix( mParent->mWorldMatrix );
+        blctx->transform( mLocalMatrix );
         mWorldMatrix = blctx->userMatrix();
 
         BLMatrix2D::invert( mInverseWorldMatrix, mWorldMatrix );

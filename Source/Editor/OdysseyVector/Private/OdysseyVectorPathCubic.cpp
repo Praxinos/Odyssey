@@ -69,9 +69,15 @@ UOdysseyVectorPathCubic::AppendVertex( UOdysseyVectorVertexCubic* iVertex
 static uint8
 PointQueryMask( int32 iX, int32 iY, BLImageData* iImageData )
 {
-    uint8 *pixel = static_cast<uint8*>(iImageData->pixelData);
+    if( ( iX >= 0 && iX < iImageData->size.w )
+     && ( iY >= 0 && iX < iImageData->size.h ) )
+    {
+        uint8 *pixel = static_cast<uint8*>(iImageData->pixelData);
 
-    return pixel[(iY * iImageData->size.w) + iX];
+        return pixel[(iY * iImageData->size.w) + iX];
+    }
+
+    return 0;
 }
 
 static bool
@@ -825,24 +831,24 @@ UOdysseyVectorPathCubic::SwitchSpace( UOdysseyVectorObject& iNewSpace )
 {
     BLMatrix2D& newSpaceInverseWorldMatrix = iNewSpace.GetInverseWorldMatrix();
 
+    for( std::list<UOdysseyVectorVertex*>::iterator it = mVertexList.begin(); it != mVertexList.end(); ++it )
+    {
+        UOdysseyVectorVertexCubic* cubicVertex = static_cast<UOdysseyVectorVertexCubic*>(*it);
+        ::ULIS::FVec2D& point = cubicVertex->GetCoords();
+        BLPoint pt;
+
+        pt = newSpaceInverseWorldMatrix.mapPoint( mWorldMatrix.mapPoint( point.x, point.y ) );
+
+        point.x = pt.x;
+        point.y = pt.y;
+    }
+
     for( std::list<UOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
     {
         UOdysseyVectorSegmentCubic* cubicSegment = static_cast<UOdysseyVectorSegmentCubic*>(*it);
-        ::ULIS::FVec2D& point0 = cubicSegment->GetPoint(0)->GetCoords();
-        ::ULIS::FVec2D& point1 = cubicSegment->GetPoint(1)->GetCoords();
         ::ULIS::FVec2D& ctrlPoint0 = cubicSegment->GetControlPoint(0)->GetCoords();
         ::ULIS::FVec2D& ctrlPoint1 = cubicSegment->GetControlPoint(1)->GetCoords();
         BLPoint pt;
-
-        pt = newSpaceInverseWorldMatrix.mapPoint( mWorldMatrix.mapPoint( point0.x, point0.y ) );
-
-        point0.x = pt.x;
-        point0.y = pt.y;
-
-        pt = newSpaceInverseWorldMatrix.mapPoint( mWorldMatrix.mapPoint( point1.x, point1.y ) );
-
-        point1.x = pt.x;
-        point1.y = pt.y;
 
         pt = newSpaceInverseWorldMatrix.mapPoint( mWorldMatrix.mapPoint( ctrlPoint0.x, ctrlPoint0.y ) );
 
