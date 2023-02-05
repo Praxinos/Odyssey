@@ -166,6 +166,8 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseDownRaster( UOdysseyTextureLayerIma
 
     Commit();
 
+    currentRasterLayer.RenderImageChanged( false );
+
     return true;
 }
 
@@ -182,18 +184,29 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseDownVector( UOdysseyTextureLayerIma
     {
         if( selectedObject->GetClass() == UOdysseyVectorGroupPaint::StaticClass() )
         {
-            UOdysseyVectorGroupPaint* paintGroup = Cast<UOdysseyVectorGroupPaint>(selectedObject);
+            UOdysseyVectorGroupPaint* paintGroup = Cast<UOdysseyVectorGroupPaint>( selectedObject );
             BLPoint localCoords = paintGroup->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
-            uint32 R = ( uint32 ) rgba8.R8();
-            uint32 G = ( uint32 ) rgba8.G8();
-            uint32 B = ( uint32 ) rgba8.B8();
-            uint32 A = ( uint32 ) rgba8.A8();
-            uint32 col32 = ( (A << 24) | (B << 16) | (G << 8) | R );
 
-            /*paintGroup->FindCycles();*/
-            paintGroup->Bucket( col32, localCoords.x, localCoords.y );
+            mPickedBucketHandle = paintGroup->PickBucketHandle( localCoords.x, localCoords.y );
+
+            if( mPickedBucketHandle == nullptr )
+            {
+                uint32 R = ( uint32 ) rgba8.R8();
+                uint32 G = ( uint32 ) rgba8.G8();
+                uint32 B = ( uint32 ) rgba8.B8();
+                uint32 A = ( uint32 ) rgba8.A8();
+                uint32 col32 = ( (A << 24) | (B << 16) | (G << 8) | R );
+
+                /*paintGroup->FindCycles();*/
+                paintGroup->Bucket( col32, localCoords.x, localCoords.y );
+            }
+
+            mOldLocalMouseX = localCoords.x;
+            mOldLocalMouseY = localCoords.y;
         }
     }
+
+    currentVectorLayer.RenderImageChanged( false );
 
     return true;
 }
@@ -202,26 +215,98 @@ bool
 UOdysseyPainterEditorPaintBucketTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-
     UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
 
     if( currentLayer->GetClass() == UOdysseyTextureLayerImageRaster::StaticClass() )
     {
         UOdysseyTextureLayerImageRaster* currentRasterLayer = Cast<UOdysseyTextureLayerImageRaster>(currentLayer);
 
-        OnMouseDownRaster( *currentRasterLayer, iPointInTexture, iKey );
+        return OnMouseDownRaster( *currentRasterLayer, iPointInTexture, iKey );
     }
 
     if( currentLayer->GetClass() == UOdysseyTextureLayerImageVector::StaticClass() )
     {
         UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
 
-        OnMouseDownVector( *currentVectorLayer, iPointInTexture, iKey );
+        return OnMouseDownVector( *currentVectorLayer, iPointInTexture, iKey );
     }
 
-    currentLayer->RenderImageChanged(false);
-
     return true;
+}
+
+void
+UOdysseyPainterEditorPaintBucketTool::OnMouseDragVector( UOdysseyTextureLayerImageVector& currentVectorLayer
+                                                       , const FOdysseyPoint& iPointInTexture )
+{
+    if( mPickedBucketHandle )
+    {
+        FOdysseyVectorBucket* bucket = mPickedBucketHandle->GetParent();
+        UOdysseyVectorObject& object = bucket->GetParent();
+
+        if( object.GetClass() == UOdysseyVectorGroupPaint::StaticClass() )
+        {
+            UOdysseyVectorGroupPaint* paintGroup = Cast<UOdysseyVectorGroupPaint>(&object);
+            BLPoint localCoords = paintGroup->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
+            double difX = localCoords.x - mOldLocalMouseX
+                 , difY = localCoords.y - mOldLocalMouseY;
+
+            mPickedBucketHandle->Set( mPickedBucketHandle->GetX() + difX, mPickedBucketHandle->GetY() + difY );
+
+            mOldLocalMouseX = localCoords.x;
+            mOldLocalMouseY = localCoords.y;
+
+            currentVectorLayer.RenderImageChanged( true );
+        }
+    }
+}
+
+void
+UOdysseyPainterEditorPaintBucketTool::OnMouseDrag( const FOdysseyPoint& iPointInTexture )
+{
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
+    UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
+
+    if( currentLayer->GetClass() == UOdysseyTextureLayerImageRaster::StaticClass() )
+    {
+        UOdysseyTextureLayerImageRaster* currentRasterLayer = Cast<UOdysseyTextureLayerImageRaster>(currentLayer);
+
+        // no action
+    }
+
+    if( currentLayer->GetClass() == UOdysseyTextureLayerImageVector::StaticClass() )
+    {
+        UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
+
+        OnMouseDragVector( *currentVectorLayer, iPointInTexture );
+    }
+}
+
+bool
+UOdysseyPainterEditorPaintBucketTool::OnMouseUpVector( UOdysseyTextureLayerImageVector& currentVectorLayer
+                                                     , const FOdysseyPoint& iPointInTexture
+                                                     , const FKey& iKey )
+{
+    mPickedBucketHandle = nullptr;
+
+    currentVectorLayer.RenderImageChanged( false );
+
+    return false;
+}
+
+bool
+UOdysseyPainterEditorPaintBucketTool::OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
+{
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
+    UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
+
+    if( currentLayer->GetClass() == UOdysseyTextureLayerImageVector::StaticClass() )
+    {
+        UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
+
+        return OnMouseUpVector( *currentVectorLayer, iPointInTexture, iKey );
+    }
+
+    return false;
 }
 
 void

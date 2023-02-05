@@ -70,7 +70,7 @@ static uint8
 PointQueryMask( int32 iX, int32 iY, BLImageData* iImageData )
 {
     if( ( iX >= 0 && iX < iImageData->size.w )
-     && ( iY >= 0 && iX < iImageData->size.h ) )
+     && ( iY >= 0 && iY < iImageData->size.h ) )
     {
         uint8 *pixel = static_cast<uint8*>(iImageData->pixelData);
 

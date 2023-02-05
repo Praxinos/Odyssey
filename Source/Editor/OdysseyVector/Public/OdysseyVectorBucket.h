@@ -4,13 +4,15 @@
 #include <Core/Core.h>
 #include <Image/Block.h>
 #include "OdysseyVectorObject.h"
+#include "OdysseyVectorHandleBucket.h"
 
-class FOdysseyVectorBucket
+class ODYSSEYVECTOR_API FOdysseyVectorBucket
 {
     private:
         UOdysseyVectorObject& mParent;
         ::ULIS::FVec2D mCoords;
         uint32_t mColor;
+        UOdysseyVectorHandleBucket* mCtrlPoint;
 
     public:
         ~FOdysseyVectorBucket();
@@ -20,4 +22,8 @@ class FOdysseyVectorBucket
         ::ULIS::FVec2D& GetCoords();
         void SetColor( uint32 iColor );
         uint32 GetColor();
+        bool PickHandle( double iX, double iY );
+        UOdysseyVectorHandleBucket* GetHandle();
+        UOdysseyVectorObject& GetParent();
+        double GetHandleDotProduct();
 };

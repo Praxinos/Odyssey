@@ -31,6 +31,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorLoop
         std::vector<FOdysseyVectorSection*> mSectionArray;
         uint32 mFlags;
         uint32 mValence;
+        ::ULIS::FVec2D mMin;
+        ::ULIS::FVec2D mMax;
 
     public:
         static FOdysseyVectorLoop* Exists( uint64 iID

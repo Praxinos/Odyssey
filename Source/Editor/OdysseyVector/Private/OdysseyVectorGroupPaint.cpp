@@ -934,7 +934,18 @@ UOdysseyVectorGroupPaint::CopyShape()
 // check number of cycles / valence
 
 
+UOdysseyVectorHandleBucket*
+UOdysseyVectorGroupPaint::PickBucketHandle( double iX, double iY )
+{
+    for( std::list<FOdysseyVectorBucket*>::iterator lit = mBucketList.begin(); lit != mBucketList.end(); ++lit )
+    {
+        FOdysseyVectorBucket *bucket = static_cast<FOdysseyVectorBucket*>(*lit);
 
+        if( bucket->PickHandle( iX, iY ) )
+        {
+            return bucket->GetHandle();
+        }
+    }
 
-
-
+    return nullptr;
+}

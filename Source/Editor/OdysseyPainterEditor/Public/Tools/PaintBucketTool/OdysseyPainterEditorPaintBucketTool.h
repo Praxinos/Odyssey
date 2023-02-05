@@ -7,6 +7,8 @@
 #include "Tools/OdysseyPainterEditorTool.h"
 #include "OdysseyPaintEngine.h"
 
+#include "OdysseyVectorGroupPaint.h"
+
 #include "OdysseyPainterEditorPaintBucketTool.generated.h"
 
 class FOdysseyPaintEngine;
@@ -35,6 +37,17 @@ public:
                           , const FOdysseyPoint& iPointInTexture
                           , const FKey& iKey );
     virtual bool OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
+
+    void OnMouseDragVector( UOdysseyTextureLayerImageVector& currentVectorLayer
+                          , const FOdysseyPoint& iPointInTexture );
+    virtual void OnMouseDrag(const FOdysseyPoint& iPointInTexture) override;
+
+    bool OnMouseUpVector( UOdysseyTextureLayerImageVector& currentVectorLayer
+                        , const FOdysseyPoint& iPointInTexture
+                        , const FKey& iKey );
+    virtual bool OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
+
+
     virtual void Commit() override;
 
 public:
@@ -49,5 +62,8 @@ protected:
     // protected Data Members
 
     //Resources
-    FOdysseyPaintEngine                mPaintEngine;
+    FOdysseyPaintEngine mPaintEngine;
+    UOdysseyVectorHandleBucket* mPickedBucketHandle;
+    double mOldLocalMouseX;
+    double mOldLocalMouseY;
 };

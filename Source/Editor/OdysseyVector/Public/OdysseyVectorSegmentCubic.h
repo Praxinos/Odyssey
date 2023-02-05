@@ -7,6 +7,8 @@
 #include <Image/Block.h>
 
 #include "OdysseyVectorPoint.h"
+#include "OdysseyVectorVertex.h"
+#include "OdysseyVectorVertexCubic.h"
 #include "OdysseyVectorHandleSegment.h"
 #include "OdysseyVectorSegment.h"
 

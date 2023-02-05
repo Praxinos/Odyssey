@@ -125,6 +125,12 @@ FOdysseyVectorLoop::BuildSegmentCubic( UOdysseyVectorSegmentCubic& iSegment
                 }
 
                 mPath.lineTo( to.x, to.y );
+
+                // take advantage of this func to set the bouding limits.
+                if ( to.x < mMin.x ) mMin.x = to.x;
+                if ( to.y < mMin.y ) mMin.y = to.y;
+                if ( to.x > mMax.x ) mMax.x = to.x;
+                if ( to.y > mMax.y ) mMax.y = to.y;
             }
         }
     }
@@ -151,6 +157,12 @@ FOdysseyVectorLoop::BuildSegmentCubic( UOdysseyVectorSegmentCubic& iSegment
                 }
 
                 mPath.lineTo( from.x, from.y );
+
+                // take advantage of this func to set the bouding limits.
+                if ( to.x < mMin.x ) mMin.x = to.x;
+                if ( to.y < mMin.y ) mMin.y = to.y;
+                if ( to.x > mMax.x ) mMax.x = to.x;
+                if ( to.y > mMax.y ) mMax.y = to.y;
             }
         }
     }
@@ -166,7 +178,7 @@ void
 FOdysseyVectorLoop::Build( std::vector<UOdysseyVectorVertex*>& iVertexArray
                          , std::vector<FOdysseyVectorSection*>& iSectionArray )
 {
-
+    /*double xmin, ymin, xmax, ymax;*/
     int seg = 0;
 
     mValence = 0;
@@ -182,6 +194,9 @@ FOdysseyVectorLoop::Build( std::vector<UOdysseyVectorVertex*>& iVertexArray
         ::ULIS::FVec2D originAt = iVertexArray[0]->GetPosition( *firstSegment );
         UOdysseyVectorVertex* currentVertex = iVertexArray[0];
 
+        mMin.x = mMax.x = originAt.x;
+        mMin.y = mMax.y = originAt.y;
+
         mPath.moveTo( originAt.x, originAt.y );
 
         for( int i = 0; i < iSectionArray.size(); i++ )
@@ -191,15 +206,18 @@ FOdysseyVectorLoop::Build( std::vector<UOdysseyVectorVertex*>& iVertexArray
             UOdysseyVectorVertex* nextVertex = ( currentVertex == section->GetVertex(0) ) ? section->GetVertex(1) : section->GetVertex(0);
             double currentVertexT = currentVertex->GetT( *segment );
             double    nextVertexT =    nextVertex->GetT( *segment );
+            ::ULIS::FVec2D& currentVertexCoords = currentVertex->GetCoords();
 
             BuildSegmentCubic ( static_cast<UOdysseyVectorSegmentCubic&>(*segment), currentVertexT, nextVertexT );
+
+            /*if( currentVertexCoords.x < xmin ) xmin*/
 
             currentVertex = nextVertex;
 
             if( iVertexArray[i]->GetClass() == UOdysseyVectorVertexIntersection::StaticClass() )
             {
                 mValence++;
-            } 
+            }
         }
 
         mPath.close();
@@ -263,9 +281,30 @@ FOdysseyVectorLoop::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
     BLContext* blctx = mParent.GetRoot()->GetEngine()->GetBLContext();
 
-    /*if ( mVertexList.size() ) 
-    {*/
-       blctx->setFillStyle( BLRgba32( /*mFillColor*/GetColor() ) );
+    if( mBucket )
+    {
+        double difX = mMax.x - mMin.x;
+        double difY = mMax.y - mMin.y;
+        double linearMinX = mMin.x;
+        double linearMinY = mMin.y;
+        double angle = acos( fabs( mBucket->GetHandleDotProduct() ) );
+        double linearMaxX = mMin.x + ( difX * cos( angle ) );
+        double linearMaxY = mMin.y + ( difY * sin( angle ) );
+        BLGradient linear( BLLinearGradientValues( mMin.x, mMin.y, linearMaxX, linearMaxY ) );
+
+        linear.addStop( 0.0, BLRgba32( 0xFFFFFFFF ) );
+        linear.addStop( 1.0, BLRgba32( GetColor() ) );
+
+        blctx->setFillStyle( linear );
+    }
+    else
+    {
+        blctx->setFillStyle( BLRgba32( GetColor() ) );
+    }
+
+/*
+       blctx->setFillStyle( BLRgba32( GetColor() ) );
+*/
 
        /*iBLContext.fillPolygon( &mPointArray[0], mPointArray.size() );*/
        blctx->fillPath( mPath );

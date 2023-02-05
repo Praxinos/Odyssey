@@ -7,30 +7,27 @@
 #include <Image/Block.h>
 #include "OdysseyVectorHandle.h"
 
-#include "OdysseyVectorHandleSegment.generated.h"
+#include "OdysseyVectorHandleBucket.generated.h"
+
+class FOdysseyVectorBucket;
 
 UCLASS()
-class ODYSSEYVECTOR_API UOdysseyVectorHandleSegment : public UOdysseyVectorHandle
+class ODYSSEYVECTOR_API UOdysseyVectorHandleBucket : public UOdysseyVectorHandle
 {
     public:
         GENERATED_BODY()
 
     public:
-        static UOdysseyVectorHandleSegment* New( UOdysseyVectorSegment* iParentSegment, double iX, double iY );
-        void Init( UOdysseyVectorSegment* iParentSegment, double iX, double iY );
+        static UOdysseyVectorHandleBucket* New( FOdysseyVectorBucket* iParentBucket );
+        void Init( FOdysseyVectorBucket* iParentBucket );
 
     private:
-        UOdysseyVectorSegment* mParentSegment;
+        FOdysseyVectorBucket* mParentBucket;
 
     protected:
 
     public:
-        ~UOdysseyVectorHandleSegment();
-        UOdysseyVectorHandleSegment( );
-
-        UOdysseyVectorSegment* GetParent();
-        void SetX( double iX );
-        void SetY( double iY );
-        void Set( double iX,double iY );
+        ~UOdysseyVectorHandleBucket();
+        UOdysseyVectorHandleBucket();
+        FOdysseyVectorBucket* GetParent();
 };
- 

@@ -9,6 +9,8 @@
 #include "OdysseyVectorObject.h"
 #include "OdysseyVectorVertex.h"
 #include "OdysseyVectorSection.h"
+#include "OdysseyVectorSegment.h"
+#include "OdysseyVectorSegmentCubic.h"
 #include "OdysseyVectorGroup.h"
 #include "OdysseyVectorBucket.h"
 #include "OdysseyVectorLoop.h"
@@ -71,5 +73,6 @@ class ODYSSEYVECTOR_API UOdysseyVectorGroupPaint : public UOdysseyVectorGroup
         void SimplifyGraph();
         FOdysseyVectorBucket* Bucket( uint32 iColor, double iX, double iY );
         FOdysseyVectorBucket* GetBucket( double iX, double iY );
+        UOdysseyVectorHandleBucket* PickBucketHandle( double iX, double iY );
 
 };

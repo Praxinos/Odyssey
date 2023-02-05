@@ -1,36 +1,35 @@
-#include "OdysseyVectorHandlePoint.h"
+#include "OdysseyVectorHandleBucket.h"
 
-UOdysseyVectorHandlePoint::~UOdysseyVectorHandlePoint()
+UOdysseyVectorHandleBucket::~UOdysseyVectorHandleBucket()
 {
 }
 
-UOdysseyVectorHandlePoint::UOdysseyVectorHandlePoint()
+UOdysseyVectorHandleBucket::UOdysseyVectorHandleBucket()
     : UOdysseyVectorHandle()
-    , mParentPoint ( nullptr )
+    , mParentBucket ( nullptr )
 {
 
 }
 
 void
-UOdysseyVectorHandlePoint::Init( UOdysseyVectorPoint* iParentPoint )
+UOdysseyVectorHandleBucket::Init( FOdysseyVectorBucket* iParentBucket )
 {
-    mParentPoint = iParentPoint;
+    mParentBucket = iParentBucket;
 }
 
 //static
-UOdysseyVectorHandlePoint*
-UOdysseyVectorHandlePoint::New( UOdysseyVectorPoint* iParentPoint )
+UOdysseyVectorHandleBucket*
+UOdysseyVectorHandleBucket::New( FOdysseyVectorBucket* iParentBucket )
 {
-    UOdysseyVectorHandlePoint* handlePoint = NewObject<UOdysseyVectorHandlePoint>();
+    UOdysseyVectorHandleBucket* bucketHandle = NewObject<UOdysseyVectorHandleBucket>();
 
-    handlePoint->Init( iParentPoint );
+    bucketHandle->Init( iParentBucket );
 
-    return handlePoint;
+    return bucketHandle;
 }
 
-UOdysseyVectorPoint*
-UOdysseyVectorHandlePoint::GetParent()
+FOdysseyVectorBucket*
+UOdysseyVectorHandleBucket::GetParent()
 {
-    return mParentPoint;
+    return mParentBucket;
 }
- 
