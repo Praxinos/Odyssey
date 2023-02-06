@@ -37,14 +37,18 @@ LighttableTools::Activate( ISequencer& iSequencer, UMovieSceneSequence* iSequenc
         TArrayView<FMovieSceneObjectPathChannelKeyValue> values = channel->GetData().GetValues();
         for( int i = 0; i < values.Num(); i++ )
         {
+            UMaterialInstanceConstant* current_material = Cast<UMaterialInstanceConstant>( values[i].Get() );
+            if( !current_material )
+                continue;
+
             UTexture* previous_material_texture = nullptr;
             if( i > 0 )
             {
                 UMaterialInstanceConstant* previous_material = Cast<UMaterialInstanceConstant>( values[i - 1].Get() );
-                previous_material->GetTextureParameterValue( TEXT( "DrawingTexture" ), previous_material_texture );
+                if( previous_material )
+                    previous_material->GetTextureParameterValue( TEXT( "DrawingTexture" ), previous_material_texture );
             }
 
-            UMaterialInstanceConstant* current_material = Cast<UMaterialInstanceConstant>( values[i].Get() );
             UTexture* current_material_previous_texture = nullptr;
             current_material->GetTextureParameterValue( TEXT( "PreviousDrawingTexture" ), current_material_previous_texture );
             UTexture* current_material_next_texture = nullptr;
@@ -54,7 +58,8 @@ LighttableTools::Activate( ISequencer& iSequencer, UMovieSceneSequence* iSequenc
             if( i < values.Num() - 1 )
             {
                 UMaterialInstanceConstant* next_material = Cast<UMaterialInstanceConstant>( values[i + 1].Get() );
-                next_material->GetTextureParameterValue( TEXT( "DrawingTexture" ), next_material_texture );
+                if( next_material )
+                    next_material->GetTextureParameterValue( TEXT( "DrawingTexture" ), next_material_texture );
             }
 
             float use_lighttable = 0.f;
@@ -128,6 +133,8 @@ LighttableTools::Deactivate( ISequencer& iSequencer, UMovieSceneSequence* iSeque
         for( int i = 0; i < values.Num(); i++ )
         {
             UMaterialInstanceConstant* current_material = Cast<UMaterialInstanceConstant>( values[i].Get() );
+            if( !current_material )
+                continue;
 
             UTexture* current_material_previous_texture = nullptr;
             current_material->GetTextureParameterValue( TEXT( "PreviousDrawingTexture" ), current_material_previous_texture );
@@ -213,6 +220,8 @@ LighttableTools::IsOn( ISequencer& iSequencer, UMovieSceneSequence* iSequence, F
         for( int i = 0; i < values.Num(); i++ )
         {
             UMaterialInstanceConstant* current_material = Cast<UMaterialInstanceConstant>( values[i].Get() );
+            if( !current_material )
+                continue;
 
             float use_lighttable = 0.f;
             current_material->GetScalarParameterValue( TEXT( "UseLighttable" ), use_lighttable );
