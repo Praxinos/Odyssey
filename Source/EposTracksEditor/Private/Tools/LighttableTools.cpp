@@ -281,9 +281,11 @@ LighttableTools::GetState( ISequencer& iSequencer, UMovieSceneSequence* iSequenc
 
         for( int i = 0; i < values.Num(); i++ )
         {
-            total_drawing++;
-
             UMaterialInstanceConstant* current_material = Cast<UMaterialInstanceConstant>( values[i].Get() );
+            if( !current_material )
+                continue;
+
+            total_drawing++;
 
             float use_lighttable = 0.f;
             current_material->GetScalarParameterValue( TEXT( "UseLighttable" ), use_lighttable );
