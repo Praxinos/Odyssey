@@ -63,4 +63,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorLoop
         void UnBlock();
 
         uint32 GetValence();
+        uint64 GetID();
 };

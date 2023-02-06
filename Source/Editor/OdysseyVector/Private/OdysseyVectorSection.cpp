@@ -10,6 +10,7 @@ FOdysseyVectorSection::FOdysseyVectorSection( UOdysseyVectorSegment* iSegment
     : mSegment ( iSegment )
     , mVertex { iVertex0, iVertex1 }
     , mFlags( 0 )
+    , mCycleCount( 0 )
 {
 
 }
@@ -53,41 +54,48 @@ FOdysseyVectorSection::IsVisited()
 }
 
 void
-FOdysseyVectorSection::SetMarched( bool iMarched )
+FOdysseyVectorSection::IncrementCycleCount()
 {
-    if( iMarched == true )
-    {
-        mFlags |= MARCHED;
-    }
-    else
-    {
-        mFlags &= (~MARCHED);
-    }
-}
-
-bool
-FOdysseyVectorSection::IsMarched()
-{
-    return ( mFlags & MARCHED ) ? true : false;
+    mCycleCount++;
 }
 
 void 
-FOdysseyVectorSection::Block()
+FOdysseyVectorSection::Block( UOdysseyVectorVertex* iVertex )
 {
-    mFlags |= BLOCKED;
+    uint32 blocked = ( iVertex == mVertex[0] ) ? FOdysseyVectorSection::BLOCKVERTEX0
+                                               : FOdysseyVectorSection::BLOCKVERTEX1;
+
+    mFlags |= blocked;
 }
 
 void
-FOdysseyVectorSection::UnBlock()
+FOdysseyVectorSection::BlockAll()
 {
-    mFlags &= (~BLOCKED);
+    mFlags |=  ( FOdysseyVectorSection::BLOCKVERTEX0 |  FOdysseyVectorSection::BLOCKVERTEX1 );
 }
 
 bool 
+FOdysseyVectorSection::IsBlocked( UOdysseyVectorVertex* iVertex )
+{
+    uint32 blocked = ( iVertex == mVertex[0] ) ? FOdysseyVectorSection::BLOCKVERTEX0
+                                               : FOdysseyVectorSection::BLOCKVERTEX1;
+
+    return ( mFlags & blocked ) ? true : false;
+}
+
+UOdysseyVectorVertex*
+FOdysseyVectorSection::GetOtherVertex( UOdysseyVectorVertex* iVertex )
+{
+    return ( iVertex == mVertex[0] ) ? mVertex[1] : mVertex[0];
+}
+
+/*
+bool
 FOdysseyVectorSection::IsBlocked()
 {
-    return ( mFlags & BLOCKED ) ? true : false;
+    return ( mCycleCount == 2 ) ? true : false;
 }
+*/
 
 UOdysseyVectorSegment*
 FOdysseyVectorSection::GetSegment()

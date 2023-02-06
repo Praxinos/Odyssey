@@ -36,13 +36,14 @@ class ODYSSEYVECTOR_API UOdysseyVectorGroupPaint : public UOdysseyVectorGroup
         FCycleNode* mNodeMemoryPool;
         void ClearCycles();
         void MarchVertex( UOdysseyVectorVertexIntersection& iVertex );
+        FOdysseyVectorLoop* HasCycle( uint64 iID );
 
     public:
         void ApplyBucket( FOdysseyVectorBucket* iBucket );
         void Colorize();
 
         std::list<FOdysseyVectorBucket*> mBucketList;
-        std::list<FOdysseyVectorLoop*> mLoopList;
+        std::vector<FOdysseyVectorLoop*> mLoopArray;
 
 
 

@@ -113,22 +113,6 @@ UOdysseyVectorVertex::GetLastSection()
     return mSectionList.back();
 }
 
-FOdysseyVectorSection*
-UOdysseyVectorVertex::GetMarchedSection( bool iStatus )
-{
-    for( std::list<FOdysseyVectorSection*>::iterator it = mSectionList.begin(); it != mSectionList.end(); ++it )
-    {
-        FOdysseyVectorSection* section = static_cast<FOdysseyVectorSection*>(*it);
-
-        if( section->IsMarched() == iStatus )
-        {
-            return section;
-        }
-    }
-
-    return NULL;
-}
-
 static uintptr_t
 GenerateSegmentID( UOdysseyVectorSegment* iSegment, UOdysseyVectorVertex* iP0, UOdysseyVectorVertex* iP1 )
 {

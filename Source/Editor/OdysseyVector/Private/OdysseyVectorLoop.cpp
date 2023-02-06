@@ -18,7 +18,9 @@ FOdysseyVectorLoop::FOdysseyVectorLoop( UOdysseyVectorObject& iParent
     , mFlags (0)
     , mValence (0)
 {
+/*
     Cast<UOdysseyVectorVertexIntersection>(iVertexArray[0])->AttachLoop( this );
+*/
 
     Build( mVertexArray, mSectionArray );
 }
@@ -33,28 +35,6 @@ std::vector<FOdysseyVectorSection*>&
 FOdysseyVectorLoop::GetSectionArray()
 {
     return mSectionArray;
-}
-
-void
-FOdysseyVectorLoop::Block()
-{
-    for( int i = 0; i < mSectionArray.size(); i++ )
-    {
-        FOdysseyVectorSection* section = mSectionArray[i];
-
-        mSectionArray[i]->Block();
-    }
-}
-
-void
-FOdysseyVectorLoop::UnBlock()
-{
-    for( int i = 0; i < mSectionArray.size(); i++ )
-    {
-        FOdysseyVectorSection* section = mSectionArray[i];
-
-        mSectionArray[i]->UnBlock();
-    }
 }
 
 // static
@@ -72,6 +52,7 @@ FOdysseyVectorLoop::GenerateID( std::vector<FOdysseyVectorSection*>& iSectionArr
 }
 
 // static
+/*
 FOdysseyVectorLoop*
 FOdysseyVectorLoop::Exists( uint64 iID
                           , std::vector<UOdysseyVectorVertex*>& iVertexArray
@@ -96,6 +77,7 @@ FOdysseyVectorLoop::Exists( uint64 iID
 
     return nullptr;
 }
+*/
 
 void
 FOdysseyVectorLoop::BuildSegmentCubic( UOdysseyVectorSegmentCubic& iSegment
@@ -207,6 +189,8 @@ FOdysseyVectorLoop::Build( std::vector<UOdysseyVectorVertex*>& iVertexArray
             double currentVertexT = currentVertex->GetT( *segment );
             double    nextVertexT =    nextVertex->GetT( *segment );
             ::ULIS::FVec2D& currentVertexCoords = currentVertex->GetCoords();
+
+            section->Block( iVertexArray[i] );
 
             BuildSegmentCubic ( static_cast<UOdysseyVectorSegmentCubic&>(*segment), currentVertexT, nextVertexT );
 
@@ -328,4 +312,11 @@ bool
 FOdysseyVectorLoop::IsMarched()
 {
     return ( mFlags & MARCHED ) ? true : false;
+}
+
+
+uint64
+FOdysseyVectorLoop::GetID()
+{
+    return mID;
 }
