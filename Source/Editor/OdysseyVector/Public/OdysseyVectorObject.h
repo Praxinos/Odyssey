@@ -34,19 +34,19 @@ class ODYSSEYVECTOR_API UOdysseyVectorObject : public UObject
     protected:
         std::string Name;
 
-        UPROPERTY()
+        UPROPERTY(EditAnywhere, Category="Transform")
         double TranslationX;
 
-        UPROPERTY()
+        UPROPERTY(EditAnywhere, Category="Transform")
         double TranslationY;
 
-        UPROPERTY()
+        UPROPERTY(EditAnywhere, Category="Transform")
         double Rotation;
 
-        UPROPERTY()
+        UPROPERTY(EditAnywhere, Category="Transform")
         double ScalingX;
 
-        UPROPERTY()
+        UPROPERTY(EditAnywhere, Category="Transform")
         double ScalingY;
 
     protected:

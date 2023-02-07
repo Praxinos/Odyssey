@@ -41,6 +41,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorRoot : public UOdysseyVectorObject
         UOdysseyVectorObject* PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags ) { return nullptr; };
         void Bucket( double iX, double iY, uint32 iFillColor );
         void InvalidateObject( UOdysseyVectorObject* iObject );
+        void RemoveSelectedObjects();
 
         UOdysseyVectorGroup* GroupSelectdObjects();
         uint32 GetType();

@@ -265,6 +265,7 @@ FOdysseyVectorLoop::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
     BLContext* blctx = mParent.GetRoot()->GetEngine()->GetBLContext();
 
+/*
     if( mBucket )
     {
         double difX = mMax.x - mMin.x;
@@ -285,10 +286,10 @@ FOdysseyVectorLoop::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
     {
         blctx->setFillStyle( BLRgba32( GetColor() ) );
     }
-
-/*
-       blctx->setFillStyle( BLRgba32( GetColor() ) );
 */
+
+       blctx->setFillStyle( BLRgba32( GetColor() ) );
+
 
        /*iBLContext.fillPolygon( &mPointArray[0], mPointArray.size() );*/
        blctx->fillPath( mPath );

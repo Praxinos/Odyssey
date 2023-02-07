@@ -110,12 +110,12 @@ UOdysseyPainterEditorVectorObjectPickTool::OnMouseUp(const FOdysseyPoint& iPoint
 
         mSelectionHUD->SetSelecting( false );
 
+        mSelectionChanged.Broadcast();
+
         currentVectorLayer->RenderImageChanged(false);
 
         return true;
     }
-
-
 
     return false;
 }

@@ -172,3 +172,20 @@ UOdysseyVectorRoot::GetType()
 {
     return UOdysseyVectorObject::VECTORROOTTYPE;
 }
+
+void
+UOdysseyVectorRoot::RemoveSelectedObjects()
+{
+    for(std::list<UOdysseyVectorObject*>::iterator it = mSelectedObjectList.begin(); it != mSelectedObjectList.end(); ++it)
+    {
+        UOdysseyVectorObject* selectedObject = (*it);
+
+        // prevent nested removal
+        if( selectedObject->HasSelectedParent() == false )
+        {
+            selectedObject->GetParent()->RemoveChild( selectedObject );
+        }
+    }
+
+    ClearSelection(); // will unset set selection flag as well
+}

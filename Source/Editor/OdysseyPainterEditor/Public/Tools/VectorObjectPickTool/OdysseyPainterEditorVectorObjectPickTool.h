@@ -16,6 +16,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectPickTool : publi
 public:
     GENERATED_BODY()
 
+    DECLARE_MULTICAST_DELEGATE(FSelectionChanged)
+    FSelectionChanged mSelectionChanged;
+
 public:
     // Destructor
     virtual ~UOdysseyPainterEditorVectorObjectPickTool();

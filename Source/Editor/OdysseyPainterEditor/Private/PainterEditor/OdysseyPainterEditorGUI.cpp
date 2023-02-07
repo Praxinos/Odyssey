@@ -46,6 +46,7 @@ FOdysseyPainterEditorGUI::CreateTabs()
     ODYSSEY_ADD_TAB(mColorWheelTab, FOdysseyPainterEditorColorWheelTab, mEditor);
     ODYSSEY_ADD_TAB(mColorSlidersTab, FOdysseyPainterEditorColorSlidersTab, mEditor);
     ODYSSEY_ADD_TAB(mToolsTab, FOdysseyPainterEditorToolsTab, mEditor);
+    ODYSSEY_ADD_TAB(mSelectedVectorObjectTab, FOdysseyPainterEditorSelectedVectorObjectTab, mEditor);
     ODYSSEY_ADD_TAB(mTopTab, FOdysseyPainterEditorTopTab, mEditor);
     ODYSSEY_ADD_TAB(mToolOptionsTab, FOdysseyPainterEditorToolOptionsTab, mEditor);
 }
@@ -69,6 +70,7 @@ FOdysseyPainterEditorGUI::BindShortcuts(FBaseToolkit* iToolkit)
     MAP_ACTION(painterEditorCommands.Discord, Discord )
     MAP_ACTION(painterEditorCommands.SwitchTabletAPI, SwitchTabletAPI )
     MAP_ACTION(painterEditorCommands.GroupPaint, GroupPaint )
+    MAP_ACTION(painterEditorCommands.RemoveSelectedObjects, RemoveSelectedObjects )
 
     #undef MAP_ACTION
 }
@@ -141,6 +143,12 @@ FOdysseyPainterEditorGUI::ExtendMenuAbout( FToolMenuOwner iOwner, FName iMenuNam
             , LOCTEXT("GroupPaint", "GroupPaint")
             , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
             , NAME_None );
+        aboutSection.AddMenuEntry(
+            FOdysseyPainterEditorCommands::Get().RemoveSelectedObjects
+            ,LOCTEXT("RemoveSelectedObjects","RemoveSelectedObjects")
+            ,LOCTEXT("RemoveSelectedObjects","RemoveSelectedObjects")
+            ,FSlateIcon("OdysseyStyle","OdysseyLogo.Iliad16")
+            ,NAME_None);
     }
 }
 
@@ -185,6 +193,10 @@ FOdysseyPainterEditorGUI::CreateLeftSection()
             ->SetSizeCoefficient(0.33f)
             // Tool Options
             ->AddTab(mToolOptionsTab->ID(), ETabState::OpenedTab)
+            ->SetHideTabWell(false)
+            ->SetSizeCoefficient(0.33f)
+            // Selected vector object properties
+            ->AddTab(mSelectedVectorObjectTab->ID(),ETabState::OpenedTab)
             ->SetHideTabWell(false)
             ->SetSizeCoefficient(0.33f)
         )
@@ -351,6 +363,12 @@ FOdysseyPainterEditorGUI::GetToolOptionsTab()
     return mToolOptionsTab;
 }
 
+TSharedPtr<FOdysseyPainterEditorSelectedVectorObjectTab>&
+FOdysseyPainterEditorGUI::GetSelectedVectorObjectTab()
+{
+    return mSelectedVectorObjectTab;
+}
+
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------- Shortcuts
 
@@ -387,6 +405,25 @@ FOdysseyPainterEditorGUI::Discord()
 {
     FString URL = "https://discord.gg/gEd6pj7";
     FPlatformProcess::LaunchURL( *URL, NULL, NULL );
+}
+
+void
+FOdysseyPainterEditorGUI::RemoveSelectedObjects()
+{
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(static_cast<FOdysseyTextureEditor*>(mEditor)->LayerStack());
+    UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
+
+    if( currentLayer )
+    {
+        if( currentLayer->GetClass() == UOdysseyTextureLayerImageVector::StaticClass() )
+        {
+            UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
+
+            currentVectorLayer->GetScene()->RemoveSelectedObjects();
+
+            currentVectorLayer->RenderImageChanged( false );
+        }
+    }
 }
 
 void

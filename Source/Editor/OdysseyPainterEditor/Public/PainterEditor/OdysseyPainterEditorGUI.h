@@ -13,6 +13,7 @@
 #include "OdysseyPainterEditorTopTab.h"
 #include "OdysseyPainterEditorToolsTab.h"
 #include "OdysseyPainterEditorToolOptionsTab.h"
+#include "OdysseyPainterEditorSelectedVectorObjectTab.h"
 #include "OdysseyPainterEditorViewportTab.h"
 
 class FOdysseyPainterEditor;
@@ -62,6 +63,7 @@ public:
     TSharedPtr<FOdysseyPainterEditorTopTab>& GetTopTab();
     TSharedPtr<FOdysseyPainterEditorToolsTab>& GetToolsTab();
     TSharedPtr<FOdysseyPainterEditorToolOptionsTab>& GetToolOptionsTab();
+    TSharedPtr<FOdysseyPainterEditorSelectedVectorObjectTab>& GetSelectedVectorObjectTab();
 
 protected:
     // Shortcuts
@@ -72,6 +74,7 @@ protected:
     virtual void Discord();
     virtual void SwitchTabletAPI();
     virtual void GroupPaint();
+    virtual void RemoveSelectedObjects();
 
 private:
     FOdysseyPainterEditor*                          mEditor;
@@ -86,5 +89,6 @@ protected:
     TSharedPtr<FOdysseyPainterEditorTopTab>                     mTopTab;
     TSharedPtr<FOdysseyPainterEditorToolsTab>                   mToolsTab;
     TSharedPtr<FOdysseyPainterEditorToolOptionsTab>             mToolOptionsTab;
+    TSharedPtr<FOdysseyPainterEditorSelectedVectorObjectTab>    mSelectedVectorObjectTab;
 };
 

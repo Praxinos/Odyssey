@@ -41,8 +41,11 @@ public:
     /** Action to go to praxinos' Discord server*/
     TSharedPtr<FUICommandInfo> Discord;
 
-    /** Action to go to praxinos' Discord server*/
+    /** Action to make a paintable shape from a set of cubic bezier*/
     TSharedPtr<FUICommandInfo> GroupPaint;
+
+    /** Action to remove selected vector objects */
+    TSharedPtr<FUICommandInfo> RemoveSelectedObjects;
 
     //Undo Redo
 
