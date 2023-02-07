@@ -444,25 +444,29 @@ ReduceCycle( ::ULIS::FVec2D& iFromCoord
                         betterForwardSection = insideForwardSection;
                         betterInsideVertex = insideNextVertex;
 
-                        while( insideNextVertex->IsInCycle() == false )
+                        while( betterInsideVertex->IsInCycle() == false )
                         {
-                            std::list<FOdysseyVectorSection*>& insideVertexSectionList = insideNextVertex->GetSectionList();
+                            std::list<FOdysseyVectorSection*>& insideVertexSectionList = betterInsideVertex->GetSectionList();
 //if( infiniteLoopDetector++ > 1000 ) { oSectionArray.clear(); oVertexArray.clear(); return false; }
-                            oSectionArray.push_back( insideForwardSection );
-                            oVertexArray.push_back( insideNextVertex );
+                            oSectionArray.push_back( betterForwardSection );
+                            oVertexArray.push_back( betterInsideVertex );
 
-            //UE_LOG(LogTemp,Warning,TEXT("Skipping to x:%f y:%f"), insideNextVertex->GetCoords().x, insideNextVertex->GetCoords().y );
+            //UE_LOG(LogTemp,Warning,TEXT("Skipping to x:%f y:%f"), betterInsideVertex->GetCoords().x, betterInsideVertex->GetCoords().y );
 
                             for( std::list<FOdysseyVectorSection*>::iterator bsit = insideVertexSectionList.begin(); bsit != insideVertexSectionList.end(); ++bsit)
                             {
-                                insideForwardSection = (*bsit);
-                                insideNextVertex = ( insideForwardSection->GetVertex(0) == insideNextVertex ) ? insideForwardSection->GetVertex(1)
-                                                                                                              : insideForwardSection->GetVertex(0);
+                                FOdysseyVectorSection* nextInsideForwardSection = (*bsit);
 
-                                betterForwardSection = insideForwardSection;
-                                betterInsideVertex = insideNextVertex;
+                                if( nextInsideForwardSection != betterForwardSection )
+                                {
+                                    UOdysseyVectorVertex* nextInsideNextVertex = ( nextInsideForwardSection->GetVertex(0) == betterInsideVertex ) ? nextInsideForwardSection->GetVertex(1)
+                                                                                                                                                  : nextInsideForwardSection->GetVertex(0);
 
-                                break; // break for
+                                    betterForwardSection = nextInsideForwardSection;
+                                    betterInsideVertex = nextInsideNextVertex;
+
+                                    break; // break for
+                                }
                             }
                         }
 
@@ -812,7 +816,7 @@ UOdysseyVectorGroupPaint::MarchVertex( UOdysseyVectorVertexIntersection& iVertex
     UOdysseyVectorSegment* primarySegment = iVertex.GetFirstSegment();
     std::list<FOdysseyVectorSection*>& vertexSectionList = iVertex.GetSectionList();
 
-    UE_LOG( LogTemp, Warning, TEXT("Intersection vertices:%d x:%f y:%f"), &iVertex, iVertex.GetCoords().x, iVertex.GetCoords().y );
+    //UE_LOG( LogTemp, Warning, TEXT("Intersection vertices:%d x:%f y:%f"), &iVertex, iVertex.GetCoords().x, iVertex.GetCoords().y );
 
     for( std::list<FOdysseyVectorSection*>::iterator pit = vertexSectionList.begin(); pit != vertexSectionList.end(); ++pit )
     {
