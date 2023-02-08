@@ -232,6 +232,12 @@ FOdysseyVectorEngine::RecursivePick( UOdysseyVectorObject& iObj
 }
 
 void
+FOdysseyVectorEngine::Erase( std::vector<::ULIS::FVec2D>& iPointArray, double radius )
+{
+
+}
+
+void
 FOdysseyVectorEngine::Pick( UOdysseyVectorRoot& iScene, std::vector<::ULIS::FVec2D>& iPointArray, uint32 iSelectionFlags )
 {
     ::ULIS::FRectD roi;

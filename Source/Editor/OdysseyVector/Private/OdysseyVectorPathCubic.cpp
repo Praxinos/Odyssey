@@ -66,32 +66,25 @@ UOdysseyVectorPathCubic::AppendVertex( UOdysseyVectorVertexCubic* iVertex
     return nullptr;
 }
 
-static uint8
-PointQueryMask( int32 iX, int32 iY, BLImageData* iImageData )
-{
-    if( ( iX >= 0 && iX < iImageData->size.w )
-     && ( iY >= 0 && iY < iImageData->size.h ) )
-    {
-        uint8 *pixel = static_cast<uint8*>(iImageData->pixelData);
-
-        return pixel[(iY * iImageData->size.w) + iX];
-    }
-
-    return 0;
-}
-
+// Note: callbak returns true to end immediately, false to keep tracing
 static bool
-LineQueryMask( int32 iX0, int32 iY0, int32 iX1, int32 iY1, BLImageData* iImageData )
+TraceLine( int32 iX0, int32 iY0, double iT0
+         , int32 iX1, int32 iY1, double iT1
+         , std::function<bool(int32 iX, int32 iY, double iT)> iCallback )
 {
     int32  dx  = ( iX1 - iX0 );
     uint32 ddx = abs ( dx );
     int32  dy  = ( iY1 - iY0 );
     uint32 ddy = abs ( dy );
-    int32 dd  = ( ddx > ddy ) ? ddx : ddy;
-    int32 px = ( dx > 0 ) ? 1 : -1;
-    int32 py = ( dy > 0 ) ? 1 : -1;
-    int32 x = iX0;
-    int32 y = iY0;
+    double dt  = ( iT1 - iT0 );
+    uint32 ddt = fabs ( dt );
+    int32  dd  = ( ddx > ddy ) ? ddx : ddy;
+    int32  px  = ( dx > 0 ) ? 1 : -1;
+    int32  py  = ( dy > 0 ) ? 1 : -1;
+    double pt  = ( dd ) ? ddt / dd : 0.0f;
+    int32  x   = iX0;
+    int32  y   = iY0;
+    double t   = iT0;
     uint32 cumul = 0;
 
     if ( ddx > ddy )
@@ -99,12 +92,13 @@ LineQueryMask( int32 iX0, int32 iY0, int32 iX1, int32 iY1, BLImageData* iImageDa
         for ( uint32 i = 0; i <= ddx; i++ )
         {
             // return as soon as a point is detected inside the mask
-            if ( PointQueryMask ( x, y, iImageData ) ) {
+            if ( iCallback( x, y, t ) == true ) {
                 return true;
             }
 
             cumul += ddy;
             x     += px;
+            t     += pt;
 
             if ( cumul >= ddx )
             {
@@ -118,12 +112,13 @@ LineQueryMask( int32 iX0, int32 iY0, int32 iX1, int32 iY1, BLImageData* iImageDa
         for ( uint32 i = 0; i <= ddy; i++ )
         {
             // return as soon as a point is detected inside the mask
-            if ( PointQueryMask ( x, y, iImageData ) ) {
+            if ( iCallback( x, y, t ) == true ) {
                 return true;
             }
 
             cumul += ddx;
             y     += py;
+            t     += pt;
 
             if ( cumul >= ddy )
             {
@@ -136,11 +131,105 @@ LineQueryMask( int32 iX0, int32 iY0, int32 iX1, int32 iY1, BLImageData* iImageDa
     return false;
 }
 
+void
+UOdysseyVectorPathCubic::Erase( ::ULIS::FRectD &iRoi )
+{
+    BLContext* blctx = GetRoot()->GetEngine()->GetBLContext();
+    BLImage* blimg = blctx->targetImage(); // the mask image must be selected by the vector engine at this point
+    BLImageData imageData;
+    std::vector<UOdysseyVectorSegmentCubic*> newSegmentArray;
+    std::vector<UOdysseyVectorSegmentCubic*> oldSegmentArray;
+
+    blimg->getData( &imageData );
+
+    for( std::list<UOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
+    {
+        UOdysseyVectorSegmentCubic* cubicSegment = static_cast<UOdysseyVectorSegmentCubic*>(*it);
+        std::vector<FPolygon>& polygonCache = cubicSegment->GetPolygonCache();
+        ::ULIS::FVec2D& firstCoords = cubicSegment->GetPoint(0)->GetCoords();
+        BLPoint firstAt = mWorldMatrix.mapPoint( firstCoords.x, firstCoords.y );
+        double subVertexT[2] = { 0.0f, 0.0f };
+        uint32 subVertexCount = 0;
+        int32 currentPixelValue;
+        std::vector<UOdysseyVectorSegmentCubic*> subSegmentArray;
+
+        for( uint32 i = 0; i < polygonCache.size(); i++ )
+        {
+            BLPoint p0 = mWorldMatrix.mapPoint( polygonCache[i].lineVertex[0].x, polygonCache[i].lineVertex[0].y );
+            BLPoint p1 = mWorldMatrix.mapPoint( polygonCache[i].lineVertex[1].x, polygonCache[i].lineVertex[1].y );
+
+            TraceLine( p0.x, p0.y, polygonCache[i].fromT
+                     , p1.x, p1.y, polygonCache[i].toT
+                     , [cubicSegment
+                     , &imageData
+                     , &currentPixelValue
+                     , &subVertexT
+                     , &subVertexCount
+                     , &subSegmentArray]( int32 iX, int32 iY, double iT)
+                       {
+                           if( ( iX >= 0 && iX < imageData.size.w )
+                           && ( iY >= 0 && iY < imageData.size.h ) )
+                           {
+                               uint8 *pixel = static_cast<uint8*>(imageData.pixelData);
+                               uint32 offset = ( iY * imageData.size.w ) + iX;
+                               int32 pixelValue = pixel[offset];
+  
+                               if( iT == 0.0f )
+                               {
+                                   if( pixelValue == 0 )
+                                   {
+                                       subVertexT[subVertexCount++] = 0.0f;
+                                   }
+
+                                   currentPixelValue = pixelValue;
+                               }
+
+                               if( iT > 0.0f )
+                               {
+                                   if( (int32) abs(currentPixelValue - pixelValue) == (int32) 255 )
+                                   {
+                                       subVertexT[subVertexCount++] = iT;
+
+                                       currentPixelValue = pixelValue;
+                                   }
+                               }
+
+                               if( subVertexCount == 2 )
+                               {
+                                   subSegmentArray.push_back( cubicSegment->Sample( subVertexT[0], 1.0f
+                                                                                  , subVertexT[1], 1.0f ) );
+ 
+                                   subVertexCount = 0;
+                               }
+                           }
+
+                           // keep tracing
+                           return false;
+                       });
+        }
+
+        if( subSegmentArray.size() )
+        {
+            newSegmentArray.insert( newSegmentArray.end(), subSegmentArray.begin(), subSegmentArray.end() );
+            oldSegmentArray.push_back( cubicSegment );
+        }
+    }
+
+    for( int i = 0; i < oldSegmentArray.size(); i++ )
+    {
+        this->RemoveSegment( oldSegmentArray[i] );
+    }
+
+    for( int i = 0; i < newSegmentArray.size(); i++ )
+    {
+        this->AddSegment( newSegmentArray[i] );
+    }
+}
+
 UOdysseyVectorObject*
 UOdysseyVectorPathCubic::PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags )
 {
     BLContext* blctx = GetRoot()->GetEngine()->GetBLContext();
-    BLPath path;
 
     if ( iSelectionFlags & PICK_FREEHAND )
     {
@@ -158,8 +247,23 @@ UOdysseyVectorPathCubic::PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags
             {
                 BLPoint p0 = mWorldMatrix.mapPoint( polygonCache[i].lineVertex[0].x, polygonCache[i].lineVertex[0].y );
                 BLPoint p1 = mWorldMatrix.mapPoint( polygonCache[i].lineVertex[1].x, polygonCache[i].lineVertex[1].y );
+                bool pointHitMask = TraceLine( p0.x, p0.y, 0.0f
+                                             , p1.x, p1.y, 0.0f
+                                             , [&imageData]( int32 iX, int32 iY, double iT)
+                                               {
+                                                    if( ( iX >= 0 && iX < imageData.size.w )
+                                                     && ( iY >= 0 && iY < imageData.size.h ) )
+                                                    {
+                                                        uint8 *pixel = static_cast<uint8*>(imageData.pixelData);
+                                                        uint32 offset = ( iY * imageData.size.w ) + iX;
 
-                if ( LineQueryMask( p0.x, p0.y, p1.x, p1.y, &imageData ) )
+                                                        return ( pixel[offset] ) ? true : false;
+                                                    }
+
+                                                    return false;
+                                               });
+
+                if( pointHitMask )
                 {
                     return this;
                 }
@@ -167,44 +271,6 @@ UOdysseyVectorPathCubic::PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags
         }
     }
 
-/*
-    BLPoint testPoint = { iX, iY };
-
-    for( std::list<UOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
-    {
-        UOdysseyVectorSegmentCubic* segment = static_cast<UOdysseyVectorSegmentCubic*>(*it);
-        ::ULIS::FVec2D& point0 = segment->GetPoint(0).GetCoords();
-        ::ULIS::FVec2D& point1 = segment->GetPoint(1).GetCoords();
-        ::ULIS::FVec2D& ctrlPoint0 = segment->GetControlPoint(0).GetCoords();
-        ::ULIS::FVec2D& ctrlPoint1 = segment->GetControlPoint(1).GetCoords();
-
-        path.moveTo( point0.x, point0.y );
-        path.cubicTo( ctrlPoint0.x
-                    , ctrlPoint0.y
-                    , ctrlPoint1.x
-                    , ctrlPoint1.y
-                    , point1.x
-                    , point1.y );
-    }
-
-*/
-
-
-
-    // Pick inside the polygons that makes the segment
-/*
-    for( std::list<UOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
-    {
-        UOdysseyVectorSegmentCubic* cubicSegment = static_cast<UOdysseyVectorSegmentCubic*>(*it);
-
-        if ( cubicSegment->Pick ( iX, iY, iRadius ) == true )
-        {
-            return this;
-        }
-    }
-
-    return PickLoops( iX, iY, iRadius );
-*/
     return nullptr;
 }
 

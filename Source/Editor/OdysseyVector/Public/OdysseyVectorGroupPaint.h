@@ -75,5 +75,6 @@ class ODYSSEYVECTOR_API UOdysseyVectorGroupPaint : public UOdysseyVectorGroup
         FOdysseyVectorBucket* Bucket( uint32 iColor, double iX, double iY );
         FOdysseyVectorBucket* GetBucket( double iX, double iY );
         UOdysseyVectorHandleBucket* PickBucketHandle( double iX, double iY );
+        void DrawBuckets( ::ULIS::FRectD& iRoi, uint64 iFlags );
 
 };

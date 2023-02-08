@@ -86,23 +86,24 @@ UOdysseyVectorGroupPaint::Bucket( uint32 iColor, double iX, double iY )
 }
 
 void
+UOdysseyVectorGroupPaint::DrawBuckets( ::ULIS::FRectD& iRoi,uint64 iFlags )
+{
+    for( std::list<FOdysseyVectorBucket*>::iterator lit = mBucketList.begin(); lit != mBucketList.end(); ++lit )
+    {
+        FOdysseyVectorBucket *bucket = static_cast<FOdysseyVectorBucket*>(*lit);
+
+        bucket->Draw( iRoi, iFlags );
+    }
+}
+
+void
 UOdysseyVectorGroupPaint::DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
-    if( mChildrenList.size() )
+    for( int i = 0; i < mLoopArray.size(); i++ )
     {
-        for( int i = 0; i < mLoopArray.size(); i++ )
-        {
-            FOdysseyVectorLoop *cycle = mLoopArray[i];
+        FOdysseyVectorLoop *cycle = mLoopArray[i];
 
-            cycle->Draw( iRoi, iFlags );
-        }
-
-        for( std::list<FOdysseyVectorBucket*>::iterator lit = mBucketList.begin(); lit != mBucketList.end(); ++lit )
-        {
-            FOdysseyVectorBucket *bucket = static_cast<FOdysseyVectorBucket*>(*lit);
-
-            bucket->Draw( iRoi, iFlags );
-        }
+        cycle->Draw( iRoi, iFlags );
     }
 }
 

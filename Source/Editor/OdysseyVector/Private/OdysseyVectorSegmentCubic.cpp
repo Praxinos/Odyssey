@@ -180,6 +180,28 @@ UOdysseyVectorSegmentCubic::Pick( double iX
     return vec;
 }
 
+UOdysseyVectorSegmentCubic*
+UOdysseyVectorSegmentCubic::Sample( double iFromT, double iFromRadius, double iToT, double itoRadius )
+{
+    ::ULIS::FVec2D& ctrlPoint0 = mCtrlPoint[0]->GetCoords();
+    ::ULIS::FVec2D& ctrlPoint1 = mCtrlPoint[1]->GetCoords();
+    ::ULIS::FVec2D pointAt0 = GetPointAt( iFromT );
+    ::ULIS::FVec2D pointAt1 = GetPointAt( iToT );
+
+    UOdysseyVectorVertexCubic* vertex0 = ( iFromT == 0.0f ) ? static_cast<UOdysseyVectorVertexCubic*>(mPoint[0]) : UOdysseyVectorVertexCubic::New( pointAt0.x, pointAt0.y, iFromRadius );
+    UOdysseyVectorVertexCubic* vertex1 = ( iToT   == 1.0f ) ? static_cast<UOdysseyVectorVertexCubic*>(mPoint[1]) : UOdysseyVectorVertexCubic::New( pointAt1.x, pointAt1.y, itoRadius   );
+    UOdysseyVectorSegmentCubic* sampleSegment = UOdysseyVectorSegmentCubic::New( static_cast<UOdysseyVectorPathCubic*>(mPath), vertex0, ctrlPoint0.x, ctrlPoint0.y, ctrlPoint1.x, ctrlPoint1.y, vertex1 );
+    ::ULIS::FVec2D& sampleCtrlPoint0 = sampleSegment->GetControlPoint(0)->GetCoords();
+    ::ULIS::FVec2D& sampleCtrlPoint1 = sampleSegment->GetControlPoint(1)->GetCoords();
+    ::ULIS::FVec2D& samplePoint0 = sampleSegment->GetPoint(0)->GetCoords();
+    ::ULIS::FVec2D& samplePoint1 = sampleSegment->GetPoint(1)->GetCoords();
+
+    ::ULIS::CubicBezierInverseSplitAtParameter<::ULIS::FVec2D>( &samplePoint0, &sampleCtrlPoint0, &sampleCtrlPoint1, &samplePoint1, iFromT );
+    ::ULIS::CubicBezierSplitAtParameter       <::ULIS::FVec2D>( &samplePoint0, &sampleCtrlPoint0, &sampleCtrlPoint1, &samplePoint1, iToT   );
+
+    return sampleSegment;
+}
+
 void
 UOdysseyVectorSegmentCubic::UpdateBoundingBox ()
 {

@@ -4,6 +4,7 @@
 #include "Tools/PaintBucketTool/OdysseyPainterEditorPaintBucketTool.h"
 
 #include "OdysseyRasterBlock.h"
+#include "HUD/OdysseyVectorHUDBucket.h"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
@@ -12,6 +13,7 @@ UOdysseyPainterEditorPaintBucketTool::~UOdysseyPainterEditorPaintBucketTool()
 }
 
 UOdysseyPainterEditorPaintBucketTool::UOdysseyPainterEditorPaintBucketTool()
+    : mBucketHUD()
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PaintBucket64");
 }
@@ -22,7 +24,19 @@ UOdysseyPainterEditorPaintBucketTool::UOdysseyPainterEditorPaintBucketTool()
 void
 UOdysseyPainterEditorPaintBucketTool::Activate()
 {
-	//FOdysseyObjectEditorUtils::SetPropertyValue(BrushOptions, "Color", FOdysseyBrushColor(GetEditorAs<FOdysseyPainterEditor>()->PaintColor()));
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
+    UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
+
+    if( currentLayer->GetClass() == UOdysseyTextureLayerImageVector::StaticClass() )
+    {
+        UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
+        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+
+        vectorEngine->ClearHUD();
+        vectorEngine->AddHUD(&mBucketHUD);
+
+        currentVectorLayer->RenderImageChanged(false);
+    }
 }
 
 bool

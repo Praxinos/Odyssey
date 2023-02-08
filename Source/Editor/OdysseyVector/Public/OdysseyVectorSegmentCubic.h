@@ -107,4 +107,5 @@ class ODYSSEYVECTOR_API UOdysseyVectorSegmentCubic : public UOdysseyVectorSegmen
         double GetDistanceSquared();
         ::ULIS::FVec2D GetPointAt(double t);
         bool Cut( ::ULIS::FVec2D& linePoint0, ::ULIS::FVec2D& linePoint1 );
+        UOdysseyVectorSegmentCubic* Sample( double iFromT, double iFromRadius, double iToT, double itoRadius );
 };
