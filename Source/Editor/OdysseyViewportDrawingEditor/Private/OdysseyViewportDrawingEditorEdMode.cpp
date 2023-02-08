@@ -61,21 +61,8 @@ void FOdysseyViewportDrawingEditorEdMode::Render(const FSceneView* View,FViewpor
 {
     if (mViewportDrawingEditorPainter && mViewportDrawingEditorPainter->GetOdysseyViewportDrawingEditorAdapter())
     {
-        TArray<MeshPaintHelpers::FPaintRay> paintRays;
-        MeshPaintHelpers::RetrieveViewportPaintRays(View, Viewport, PDI, paintRays);
-
-        for (const MeshPaintHelpers::FPaintRay& paintRay : paintRays)
-        {
-            mViewportDrawingEditorPainter->GetOdysseyViewportDrawingEditorAdapter()->RenderInteractorWidget(paintRay.CameraLocation, paintRay.RayStart, paintRay.RayDirection, PDI);
-        }
+        mViewportDrawingEditorPainter->GetOdysseyViewportDrawingEditorAdapter()->RenderInteractorWidget(View, Viewport, PDI);
     }
-
-    //mViewportDrawingEditorPainter->GetOdysseyViewportDrawingEditorAdapter()
-
-    /** Call parent implementation */
-    //FEdMode::Render( View, Viewport, PDI );
-    //const FPlane Proj = View->Project(WorldWidgetTransform.GetTranslation());
-
 }
 
 bool FOdysseyViewportDrawingEditorEdMode::Select(AActor* InActor, bool bInSelected)

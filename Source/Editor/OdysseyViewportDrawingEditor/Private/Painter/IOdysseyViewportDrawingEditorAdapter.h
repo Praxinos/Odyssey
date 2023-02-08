@@ -35,7 +35,7 @@ public:
 
     virtual void Tick(float iDeltaTime) = 0;
 
-    virtual void RenderInteractorWidget(const FVector& iCameraOrigin, const FVector& iRayOrigin, const FVector& iRayDirection, FPrimitiveDrawInterface* iPDI) = 0;
+    virtual void RenderInteractorWidget(const FSceneView* iView, FViewport* iViewport, FPrimitiveDrawInterface* iPDI) = 0;
 
 
 public:

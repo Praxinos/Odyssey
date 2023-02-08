@@ -76,7 +76,7 @@ void FOdysseyViewportDrawingEditorMeshBasedAdapter::Tick(float iDelta)
 }
 
 
-void FOdysseyViewportDrawingEditorMeshBasedAdapter::RenderInteractorWidget(const FVector& iCameraOrigin, const FVector& iRayOrigin, const FVector& iRayDirection, FPrimitiveDrawInterface* iPDI)
+void FOdysseyViewportDrawingEditorMeshBasedAdapter::RenderInteractorWidget(const FSceneView* iView, FViewport* iViewport, FPrimitiveDrawInterface* iPDI)
 {
     UOdysseyPainterEditorRasterDrawingTool* drawingTool = nullptr;
     if (mEditor->GetSelectedTool() && mEditor->GetSelectedTool()->IsA(UOdysseyPainterEditorRasterDrawingTool::StaticClass()))
@@ -90,28 +90,34 @@ void FOdysseyViewportDrawingEditorMeshBasedAdapter::RenderInteractorWidget(const
 
     TSharedPtr<IMeshPaintGeometryAdapter> meshAdapter = *meshAdapterPtr;
 
-    FHitResult traceHitResult(1.0f);
-    const FVector rayEnd(iRayOrigin + iRayDirection * HALF_WORLD_MAX);
+    TArray<MeshPaintHelpers::FPaintRay> paintRays;
+    MeshPaintHelpers::RetrieveViewportPaintRays(iView, iViewport, iPDI, paintRays);
 
-    meshAdapter->LineTraceComponent(traceHitResult, iRayOrigin, rayEnd, FCollisionQueryParams(SCENE_QUERY_STAT(Paint), true));
-
-    // Display settings
-    const float visualBiasDistance = 0.15f;
-    const FLinearColor normalLineColor(0.3f, 1.0f, 0.3f);
-    const FLinearColor brushCueColor = FLinearColor(1.0f, 1.0f, 0.3f);
-
-    FVector brushXAxis, brushYAxis;
-    traceHitResult.Normal.FindBestAxisVectors(brushXAxis, brushYAxis);
-    const FVector brushVisualPosition = traceHitResult.Location + traceHitResult.Normal * visualBiasDistance;
-
-    if (iPDI != NULL)
+    for (const MeshPaintHelpers::FPaintRay& paintRay : paintRays)
     {
-        int numCircleSides = 128;
-        // Draw brush circle
-        DrawCircle(iPDI, brushVisualPosition, brushXAxis, brushYAxis, brushCueColor, drawingTool->GetBrushInstance()->GetSizeModifier(), numCircleSides, SDPG_World, 0.1f);
+        FHitResult traceHitResult(1.0f);
+        const FVector rayEnd(paintRay.CameraLocation + paintRay.RayDirection * HALF_WORLD_MAX);
 
-        const FVector normalLineEnd(brushVisualPosition + traceHitResult.Normal * drawingTool->GetBrushInstance()->GetSizeModifier() * 0.2f);
-        iPDI->DrawLine(brushVisualPosition, normalLineEnd, normalLineColor, SDPG_World, 0.1f);
+        meshAdapter->LineTraceComponent(traceHitResult, paintRay.CameraLocation, rayEnd, FCollisionQueryParams(SCENE_QUERY_STAT(Paint), true));
+
+        // Display settings
+        const float visualBiasDistance = 0.15f;
+        const FLinearColor normalLineColor(0.3f, 1.0f, 0.3f);
+        const FLinearColor brushCueColor = FLinearColor(1.0f, 1.0f, 0.3f);
+
+        FVector brushXAxis, brushYAxis;
+        traceHitResult.Normal.FindBestAxisVectors(brushXAxis, brushYAxis);
+        const FVector brushVisualPosition = traceHitResult.Location + traceHitResult.Normal * visualBiasDistance;
+
+        if (iPDI != NULL)
+        {
+            int numCircleSides = 128;
+            // Draw brush circle
+            DrawCircle(iPDI, brushVisualPosition, brushXAxis, brushYAxis, brushCueColor, drawingTool->GetBrushInstance()->GetSizeModifier() / mEditor->GetStampQuality(), numCircleSides, SDPG_World, 0.1f);
+
+            const FVector normalLineEnd(brushVisualPosition + traceHitResult.Normal * drawingTool->GetBrushInstance()->GetSizeModifier() / mEditor->GetStampQuality() * 0.2f);
+            iPDI->DrawLine(brushVisualPosition, normalLineEnd, normalLineColor, SDPG_World, 0.1f);
+        }
     }
 }
 

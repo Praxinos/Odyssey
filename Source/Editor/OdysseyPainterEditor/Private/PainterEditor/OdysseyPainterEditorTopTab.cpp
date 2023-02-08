@@ -3,7 +3,6 @@
 
 #include "OdysseyPainterEditorTopTab.h"
 
-#include "SOdysseyPaintModifiers.h"
 #include "OdysseyPainterEditorCommands.h"
 #include "OdysseyPainterEditor.h"
 #include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
@@ -81,23 +80,24 @@ FOdysseyPainterEditorTopTab::IsPackageEdited() const
 TSharedPtr<SWidget>
 FOdysseyPainterEditorTopTab::CreateWidget()
 {
-	return SNew( SOdysseyPaintModifiers )
-        .OnGetSize( this, &FOdysseyPainterEditorTopTab::OnGetSize )
-        .OnGetOpacity( this, &FOdysseyPainterEditorTopTab::OnGetOpacity )
-        .OnGetFlow( this, &FOdysseyPainterEditorTopTab::OnGetFlow )
-        .BlendingMode( this, &FOdysseyPainterEditorTopTab::BlendingMode )
-        .AlphaMode( this, &FOdysseyPainterEditorTopTab::AlphaMode )
-        .OnSizeChanged_Raw( this, &FOdysseyPainterEditorTopTab::OnSizeChanged )
-        .OnOpacityChanged_Raw( this, &FOdysseyPainterEditorTopTab::OnOpacityChanged )
-        .OnFlowChanged_Raw( this, &FOdysseyPainterEditorTopTab::OnFlowChanged )
-        .OnBlendingModeChanged_Raw( this, &FOdysseyPainterEditorTopTab::OnBlendingModeChanged )
-        .OnAlphaModeChanged_Raw( this, &FOdysseyPainterEditorTopTab::OnAlphaModeChanged )
-        .OnSaveButtonClicked_Raw( this, &FOdysseyPainterEditorTopTab::OnSaveButtonClicked )
-        .OnUndoButtonClicked_Raw( this, &FOdysseyPainterEditorTopTab::OnUndoButtonClicked )
-        .OnRedoButtonClicked_Raw( this, &FOdysseyPainterEditorTopTab::OnRedoButtonClicked )
-        .OnEraserButtonClicked_Raw( this, &FOdysseyPainterEditorTopTab::OnEraserButtonClicked )
-        .IsPackageEdited_Raw( this, &FOdysseyPainterEditorTopTab::IsPackageEdited )
-        .IsEraserButtonActive_Raw( this, &FOdysseyPainterEditorTopTab::IsEraserButtonActive );
+    return SNew(SOdysseyPaintModifiers)
+        .OnGetSize(this, &FOdysseyPainterEditorTopTab::OnGetSize)
+        .MeshMaxSize( 1000 )
+        .OnGetOpacity(this, &FOdysseyPainterEditorTopTab::OnGetOpacity)
+        .OnGetFlow(this, &FOdysseyPainterEditorTopTab::OnGetFlow)
+        .BlendingMode(this, &FOdysseyPainterEditorTopTab::BlendingMode)
+        .AlphaMode(this, &FOdysseyPainterEditorTopTab::AlphaMode)
+        .OnSizeChanged_Raw(this, &FOdysseyPainterEditorTopTab::OnSizeChanged)
+        .OnOpacityChanged_Raw(this, &FOdysseyPainterEditorTopTab::OnOpacityChanged)
+        .OnFlowChanged_Raw(this, &FOdysseyPainterEditorTopTab::OnFlowChanged)
+        .OnBlendingModeChanged_Raw(this, &FOdysseyPainterEditorTopTab::OnBlendingModeChanged)
+        .OnAlphaModeChanged_Raw(this, &FOdysseyPainterEditorTopTab::OnAlphaModeChanged)
+        .OnSaveButtonClicked_Raw(this, &FOdysseyPainterEditorTopTab::OnSaveButtonClicked)
+        .OnUndoButtonClicked_Raw(this, &FOdysseyPainterEditorTopTab::OnUndoButtonClicked)
+        .OnRedoButtonClicked_Raw(this, &FOdysseyPainterEditorTopTab::OnRedoButtonClicked)
+        .OnEraserButtonClicked_Raw(this, &FOdysseyPainterEditorTopTab::OnEraserButtonClicked)
+        .IsPackageEdited_Raw(this, &FOdysseyPainterEditorTopTab::IsPackageEdited)
+        .IsEraserButtonActive_Raw(this, &FOdysseyPainterEditorTopTab::IsEraserButtonActive);
 }
 
 void

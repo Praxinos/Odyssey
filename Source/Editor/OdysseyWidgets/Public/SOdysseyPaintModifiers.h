@@ -39,6 +39,7 @@ public:
         SLATE_ATTRIBUTE( ::ULIS::eAlphaMode, AlphaMode )
         SLATE_ATTRIBUTE( bool, IsEraserButtonActive )
         SLATE_ATTRIBUTE( bool, IsPackageEdited )
+        SLATE_ATTRIBUTE( int, MeshMaxSize )
         SLATE_EVENT( FOnGetIntProperty, OnGetSize )
         SLATE_EVENT( FOnGetFloatProperty, OnGetOpacity )
         SLATE_EVENT( FOnGetFloatProperty, OnGetFlow )
@@ -96,8 +97,13 @@ private:
     void HandleOnAlphaModeChanged(TSharedPtr<FText> NewSelection, ESelectInfo::Type SelectInfo );
     TArray< TSharedPtr< FText > > GetAlphaModesAsText();
     FText GetAlphaModeAsText() const;
+    TSharedRef<SWidget> CreateSizeWidget();
 
 private:
+
+    // If it is set, then the spin box for the size will be in percentage (1 - 100) 
+    // this value here will be the multiplied by the percentage to get the true size of the brush
+    TAttribute< int > mMeshMaxSize;
 
     FOnGetIntProperty mOnGetSize;
     FOnGetFloatProperty mOnGetOpacity;
@@ -111,7 +117,7 @@ private:
     ::ULIS::eBlendMode    mCurrentBlendingMode;   //cache value
     ::ULIS::eAlphaMode       mCurrentAlphaMode;      //cache value
 
-    TSharedPtr< SSpinBox< int > >   mSizeSpinBox;
+    SHorizontalBox::FSlot*          mSizeSpinBoxSlot;
     TSharedPtr< SSpinBox< int > >   mOpacitySpinBox;
     TSharedPtr< SSpinBox< int > >   mFlowSpinBox;
 

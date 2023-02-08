@@ -26,6 +26,8 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
     mOnGetFlow = InArgs._OnGetFlow;
     mBlendingMode = InArgs._BlendingMode;
     mAlphaMode = InArgs._AlphaMode;
+    if( InArgs._MeshMaxSize.IsSet() )
+        mMeshMaxSize = InArgs._MeshMaxSize.Get();
     mCurrentBlendingMode = mBlendingMode.Get();
     mCurrentAlphaMode = mAlphaMode.Get();
     mOnSizeChangedCallback      = InArgs._OnSizeChanged;
@@ -120,18 +122,10 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
             +SHorizontalBox::Slot()
             .VAlign( VAlign_Center )
             .Padding( 3.f, 3.f, 13.f, 3.f )
+            .Expose(mSizeSpinBoxSlot)
             [
-                SAssignNew( mSizeSpinBox, SSpinBox< int >)
-                .Value( this, &SOdysseyPaintModifiers::OnGetSize )
-                .OnValueCommitted( this, &SOdysseyPaintModifiers::HandleSizeSpinBoxChanged )
-                .OnValueChanged( this, &SOdysseyPaintModifiers::SetSize )
-                .ShiftMouseMovePixelPerDelta( 15 )
-                .Delta( 1 )
-                .SliderExponent( 0.8f ) // Can't work properly if the following options are in use :  LinearDeltaSensitivity MinValue MaxValue
-                .SliderExponentNeutralValue( 100 )
-                .MinDesiredWidth( 100.0f ) // Depends on the size of the text in the previous slot
+                SNullWidget::NullWidget
             ]
-
         ]
         +SWrapBox::Slot()
         [
@@ -263,6 +257,8 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
             ]
         ]
     ];
+
+    mSizeSpinBoxSlot->AttachWidget(CreateSizeWidget());
 }
 
 //--------------------------------------------------------------------------------------
@@ -271,7 +267,7 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
 void
 SOdysseyPaintModifiers::SetSize( int iValue )
 {
-    int value = FMath::Clamp(iValue, MinSize, MaxSize);
+    int value = FMath::Clamp( mMeshMaxSize.IsSet() ? (iValue * mMeshMaxSize.Get()) / 100 : iValue, MinSize, mMeshMaxSize.IsSet() ? mMeshMaxSize.Get() : MaxSize);
     if (value == OnGetSize())
         return;
 
@@ -331,7 +327,14 @@ SOdysseyPaintModifiers::OnGetSize() const
 {
     if( mOnGetSize.IsBound() )
     {
-        return mOnGetSize.Execute();
+        if (mMeshMaxSize.IsSet())
+        {
+            return FMath::Clamp( (mOnGetSize.Execute() * 100) / mMeshMaxSize.Get(), MinSize, 100 );
+        }
+        else
+        {
+            return mOnGetSize.Execute();
+        }
     }
     else 
     {
@@ -368,7 +371,7 @@ SOdysseyPaintModifiers::OnGetFlow() const
 void
 SOdysseyPaintModifiers::HandleSizeSpinBoxChanged( int iValue, ETextCommit::Type iType )
 {
-    mOnSizeChangedCallback.ExecuteIfBound( FMath::Clamp( iValue, MinSize, MaxSize ), EPropertyChangeType::ValueSet );
+    mOnSizeChangedCallback.ExecuteIfBound( FMath::Clamp( mMeshMaxSize.IsSet() ? (iValue * mMeshMaxSize.Get()) / 100 : iValue, MinSize, mMeshMaxSize.IsSet() ? mMeshMaxSize.Get() : MaxSize), EPropertyChangeType::ValueSet );
 }
 
 void
@@ -497,6 +500,36 @@ FText
 SOdysseyPaintModifiers::GetAlphaModeAsText() const
 {
     return  FText::FromString( ANSI_TO_TCHAR( ::ULIS::kwAlphaMode[ static_cast< int >( mAlphaMode.Get() ) ] ) );
+}
+
+TSharedRef<SWidget> SOdysseyPaintModifiers::CreateSizeWidget()
+{
+    if (mMeshMaxSize.IsSet())
+    {
+        return SNew(SSpinBox< int >)
+            .Value(this, &SOdysseyPaintModifiers::OnGetSize)
+            .OnValueCommitted(this, &SOdysseyPaintModifiers::HandleSizeSpinBoxChanged)
+            .OnValueChanged(this, &SOdysseyPaintModifiers::SetSize)
+            .ShiftMouseMovePixelPerDelta(15)
+            .Delta(1)
+            .SliderExponent(0.8f) // Can't work properly if the following options are in use :  LinearDeltaSensitivity MinValue MaxValue
+            .SliderExponentNeutralValue(100)
+            .MinDesiredWidth(100.0f); // Depends on the size of the text in the previous slot
+    }
+    else
+    {
+        return SNew(SSpinBox< int >)
+            .Value(this, &SOdysseyPaintModifiers::OnGetSize)
+            .OnValueCommitted(this, &SOdysseyPaintModifiers::HandleSizeSpinBoxChanged)
+            .OnValueChanged(this, &SOdysseyPaintModifiers::SetSize)
+            .ShiftMouseMovePixelPerDelta(15)
+            .Delta(1)
+            .SliderExponent(0.8f) // Can't work properly if the following options are in use :  LinearDeltaSensitivity MinValue MaxValue
+            .SliderExponentNeutralValue(100)
+            .MinDesiredWidth(100.0f); // Depends on the size of the text in the previous slot
+    }
+
+    return SNullWidget::NullWidget;
 }
 
 #undef LOCTEXT_NAMESPACE

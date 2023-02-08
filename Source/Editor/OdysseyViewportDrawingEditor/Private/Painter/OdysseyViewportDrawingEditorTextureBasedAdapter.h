@@ -23,7 +23,7 @@ public:
 
     virtual void Tick(float iDelta) override;
 
-    virtual void RenderInteractorWidget(const FVector& iCameraOrigin, const FVector& iRayOrigin, const FVector& iRayDirection, FPrimitiveDrawInterface* iPDI) override;
+    virtual void RenderInteractorWidget(const FSceneView* iView, FViewport* iViewport, FPrimitiveDrawInterface* iPDI) override;
 
 private:
     void OnToolChange(UOdysseyPainterEditorTool* iNewTool);

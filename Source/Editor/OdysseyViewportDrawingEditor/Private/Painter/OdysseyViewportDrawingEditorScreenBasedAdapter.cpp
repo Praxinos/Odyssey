@@ -76,9 +76,57 @@ void FOdysseyViewportDrawingEditorScreenBasedAdapter::Tick(float iDelta)
 }
 
 
-void FOdysseyViewportDrawingEditorScreenBasedAdapter::RenderInteractorWidget(const FVector& iCameraOrigin, const FVector& iRayOrigin, const FVector& iRayDirection, FPrimitiveDrawInterface* iPDI)
+void FOdysseyViewportDrawingEditorScreenBasedAdapter::RenderInteractorWidget(const FSceneView* iView, FViewport* iViewport, FPrimitiveDrawInterface* iPDI)
 {
-    UE_LOG(LogTemp, Display, TEXT("Render"));
+    UOdysseyPainterEditorRasterDrawingTool* drawingTool = nullptr;
+    if (mEditor->GetSelectedTool() && mEditor->GetSelectedTool()->IsA(UOdysseyPainterEditorRasterDrawingTool::StaticClass()))
+        drawingTool = Cast<UOdysseyPainterEditorRasterDrawingTool>(mEditor->GetSelectedTool());
+    else
+        return;
+
+    const TSharedPtr<IMeshPaintGeometryAdapter>* meshAdapterPtr = mEditor->ComponentToAdapterMap().Find(mEditor->Component());
+    if (!meshAdapterPtr)
+        return;
+
+    TSharedPtr<IMeshPaintGeometryAdapter> meshAdapter = *meshAdapterPtr;
+
+    TArray<MeshPaintHelpers::FPaintRay> paintRays;
+    MeshPaintHelpers::RetrieveViewportPaintRays(iView, iViewport, iPDI, paintRays);
+
+    for (const MeshPaintHelpers::FPaintRay& paintRay : paintRays)
+    {
+        FHitResult traceHitResult(1.0f);
+        const FVector rayEnd(paintRay.CameraLocation + paintRay.RayDirection * HALF_WORLD_MAX);
+
+        meshAdapter->LineTraceComponent(traceHitResult, paintRay.CameraLocation, rayEnd, FCollisionQueryParams(SCENE_QUERY_STAT(Paint), true));
+
+        const FPlane proj = iView->Project(paintRay.CameraLocation);
+
+        //Proj x between -1 and 1, 0 is center of viewport
+        //Proj y between -1 and 1
+        //Proj z ???
+        //Proj w = shortest distance from cursor to hit location
+
+        //float distZ = 1.f / proj.Z;
+        UE_LOG(LogTemp, Display, TEXT("%lf, %lf, %lf, %lf"), proj.X, proj.Y, proj.Z, proj.W );
+        UE_LOG(LogTemp, Display, TEXT("Location, %lf, %lf, %lf"), traceHitResult.Location.X, traceHitResult.Location.Y, traceHitResult.Location.Z );
+        UE_LOG(LogTemp, Display, TEXT("PaintRayStart, %lf, %lf, %lf"), paintRay.RayStart.X, paintRay.RayStart.Y, paintRay.RayStart.Z);
+        FVector locationInverse = meshAdapter->GetComponentToWorldMatrix().InverseTransformPosition(traceHitResult.Location);
+        UE_LOG(LogTemp, Display, TEXT("CM, %lf, %lf, %lf"), locationInverse.X, locationInverse.Y, locationInverse.Z);
+        FVector location = meshAdapter->GetComponentToWorldMatrix().TransformPosition(traceHitResult.Location);
+        UE_LOG(LogTemp, Display, TEXT("PM, %lf, %lf, %lf"), traceHitResult.Location.X - paintRay.RayStart.X, traceHitResult.Location.Y - paintRay.RayStart.Y, traceHitResult.Location.Z - paintRay.RayStart.Z);
+
+        FVector differenceBetweenRayStartAndHitResult = FVector(traceHitResult.Location.X - paintRay.RayStart.X, traceHitResult.Location.Y - paintRay.RayStart.Y, traceHitResult.Location.Z - paintRay.RayStart.Z);
+
+        TArray<uint32> triangles;
+        float brushSize = 10; //ToCheck after optimization for non scaled objects FMath::Min3(mEditor->Actor()->GetActorScale().X, mEditor->Actor()->GetActorScale().Y, mEditor->Actor()->GetActorScale().Z);
+        //triangles = meshAdapter->SphereIntersectTriangles(brushSize, meshAdapter->GetComponentToWorldMatrix().InverseTransformPosition(traceHitResult.Location), mouseViewportRay.GetOrigin(), false);
+        triangles = meshAdapter->SphereIntersectTriangles(brushSize, differenceBetweenRayStartAndHitResult, FVector(0,0,0), true);
+        UE_LOG(LogTemp, Display, TEXT("%d"), triangles.Num());
+
+        //UE_LOG(LogTemp, Display, TEXT("%lf, %lf, %lf, %lf"), proj.X * distZ, proj.Y * distZ, 1.f / proj.Z, proj.W);
+    }
+
 }
 
 void FOdysseyViewportDrawingEditorScreenBasedAdapter::BuildPaintingTexture2DRenderTarget()
