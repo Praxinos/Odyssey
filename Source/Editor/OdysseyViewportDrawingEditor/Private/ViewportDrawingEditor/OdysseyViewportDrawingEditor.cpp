@@ -26,7 +26,6 @@ FOdysseyViewportDrawingEditor::FOdysseyViewportDrawingEditor() :
     mActor(nullptr),
     mComponent(nullptr),
     mMaterial(nullptr),
-	mStampQuality( 10.f ),
 	mPaintingAdapterMethod(EOdysseyViewportDrawingPaintingAdapterMethod::OdysseyTextureBased)
 {
 }
@@ -133,9 +132,14 @@ int32 FOdysseyViewportDrawingEditor::GetUVIndexUsedByCurrentTexture()
 	return 0;
 }
 
-float FOdysseyViewportDrawingEditor::GetStampQuality() const
+float FOdysseyViewportDrawingEditor::GetMeshComponentMaxSize() const
 {
-	return mStampQuality;
+    if (mComponent)
+    {
+        FVector extent = mComponent->GetLocalBounds().BoxExtent;
+        return FMath::Max3(extent.X, extent.Y, extent.Z);
+    }
+    return 0;
 }
 
 //--------------------------------------------------------------------------------------
@@ -203,11 +207,6 @@ void FOdysseyViewportDrawingEditor::SetPaintingAdapterMethod(EOdysseyViewportDra
 {
 	mPaintingAdapterMethod = iNewMethod;
 	mAdapterChangedDelegate.Broadcast();
-}
-
-void FOdysseyViewportDrawingEditor::SetStampQuality(float iStampQuality)
-{
-	mStampQuality = iStampQuality;
 }
 
 //--------------------------------------------------------------------------------------

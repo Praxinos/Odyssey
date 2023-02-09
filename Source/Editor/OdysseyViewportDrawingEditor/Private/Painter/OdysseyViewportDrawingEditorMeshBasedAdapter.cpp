@@ -43,6 +43,9 @@ void FOdysseyViewportDrawingEditorMeshBasedAdapter::PrepareAdapterForPainting()
         TexturePaintHelpers::GenerateSeamMask(mEditor->Component(), mEditor->GetUVIndexUsedByCurrentTexture(), mSeamRenderTarget2D, mEditor->Texture(), mPaintingTexture2DRenderTarget);
     }
 
+    //We're using percentage size for this adapter, so we put the true maximum mesh size
+    mEditor->GetGUI()->GetTopTab()->SetMeshMaxSize(mEditor->GetMeshComponentMaxSize() * GetStampQuality());
+
     mState = eState::kIdleReady;
 }
 
@@ -113,9 +116,9 @@ void FOdysseyViewportDrawingEditorMeshBasedAdapter::RenderInteractorWidget(const
         {
             int numCircleSides = 128;
             // Draw brush circle
-            DrawCircle(iPDI, brushVisualPosition, brushXAxis, brushYAxis, brushCueColor, drawingTool->GetBrushInstance()->GetSizeModifier() / mEditor->GetStampQuality(), numCircleSides, SDPG_World, 0.1f);
+            DrawCircle(iPDI, brushVisualPosition, brushXAxis, brushYAxis, brushCueColor, drawingTool->GetBrushInstance()->GetSizeModifier() / GetStampQuality(), numCircleSides, SDPG_World, 0.1f);
 
-            const FVector normalLineEnd(brushVisualPosition + traceHitResult.Normal * drawingTool->GetBrushInstance()->GetSizeModifier() / mEditor->GetStampQuality() * 0.2f);
+            const FVector normalLineEnd(brushVisualPosition + traceHitResult.Normal * drawingTool->GetBrushInstance()->GetSizeModifier() / GetStampQuality() * 0.2f);
             iPDI->DrawLine(brushVisualPosition, normalLineEnd, normalLineColor, SDPG_World, 0.1f);
         }
     }
@@ -265,6 +268,16 @@ TArray<::ULIS::FRectI> FOdysseyViewportDrawingEditorMeshBasedAdapter::GetMinimal
     return finalRects;
 }
 
+float FOdysseyViewportDrawingEditorMeshBasedAdapter::GetStampQuality()
+{
+    /*if (mEditor->Texture() && mEditor->Component())
+    {
+        return ((FMath::Max( mEditor->Texture()->GetSizeX(), mEditor->Texture()->GetSizeY() ) / mEditor->GetMeshComponentMaxSize()) + 1);
+    }*/
+
+    return 1.f;
+}
+
 ::ULIS::FEvent FOdysseyViewportDrawingEditorMeshBasedAdapter::StampOverride(UOdysseyBrushAssetBase::FStampParams iStampParams)
 {
     UOdysseyPainterEditorRasterDrawingTool* drawingTool = nullptr;
@@ -330,7 +343,7 @@ TArray<::ULIS::FRectI> FOdysseyViewportDrawingEditorMeshBasedAdapter::GetMinimal
         meshPaintBatchedElementParameters->ShaderParams.Stroke2D = mStrokeBufferTexture2D;
         meshPaintBatchedElementParameters->ShaderParams.WorldToBrushMatrix = worldToBrushMatrix;
         meshPaintBatchedElementParameters->ShaderParams.TextureHitPoint = FVector2D( iStampParams.mPosition.x, iStampParams.mPosition.y );
-        meshPaintBatchedElementParameters->ShaderParams.StampQuality = mEditor->GetStampQuality();
+        meshPaintBatchedElementParameters->ShaderParams.StampQuality = GetStampQuality();
     }
 
     const ERHIFeatureLevel::Type featureLevel = mEditor->Component()->GetWorld()->FeatureLevel;
@@ -344,7 +357,7 @@ TArray<::ULIS::FRectI> FOdysseyViewportDrawingEditorMeshBasedAdapter::GetMinimal
     TArray<uint32> triangles;
     float brushSize = FMath::Max(iStampParams.mBlock->Width(), iStampParams.mBlock->Height()); //ToCheck after optimization for non scaled objects FMath::Min3(mEditor->Actor()->GetActorScale().X, mEditor->Actor()->GetActorScale().Y, mEditor->Actor()->GetActorScale().Z);
     brushSize *= brushSize;
-    brushSize /= mEditor->GetStampQuality();
+    brushSize /= GetStampQuality();
     triangles = meshAdapter->SphereIntersectTriangles(brushSize, meshAdapter->GetComponentToWorldMatrix().InverseTransformPosition(traceHitResult.Location), mouseViewportRay.GetOrigin(), false);
 
     const TArray<uint32> vertexIndices = meshAdapter->GetMeshIndices();

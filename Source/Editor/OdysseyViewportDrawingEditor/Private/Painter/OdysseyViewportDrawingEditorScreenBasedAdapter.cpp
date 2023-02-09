@@ -43,6 +43,9 @@ void FOdysseyViewportDrawingEditorScreenBasedAdapter::PrepareAdapterForPainting(
         TexturePaintHelpers::GenerateSeamMask(mEditor->Component(), mEditor->GetUVIndexUsedByCurrentTexture(), mSeamRenderTarget2D, mEditor->Texture(), mPaintingTexture2DRenderTarget);
     }
 
+    //We're using true pixel value for this adapter, so we put 0 in meshMaxSize
+    mEditor->GetGUI()->GetTopTab()->SetMeshMaxSize(0);
+
     mState = eState::kIdleReady;
 }
 
@@ -338,7 +341,7 @@ TArray<::ULIS::FRectI> FOdysseyViewportDrawingEditorScreenBasedAdapter::GetMinim
         screenPaintBatchedElementParameters->ShaderParams.Stroke2D = mStrokeBufferTexture2D;
         screenPaintBatchedElementParameters->ShaderParams.WorldToBrushMatrix = worldToBrushMatrix;
         screenPaintBatchedElementParameters->ShaderParams.TextureHitPoint = FVector2D( iStampParams.mPosition.x, iStampParams.mPosition.y );
-        screenPaintBatchedElementParameters->ShaderParams.StampQuality = mEditor->GetStampQuality();
+        screenPaintBatchedElementParameters->ShaderParams.StampQuality = 10;
     }
 
     const ERHIFeatureLevel::Type featureLevel = mEditor->Component()->GetWorld()->FeatureLevel;
@@ -352,7 +355,7 @@ TArray<::ULIS::FRectI> FOdysseyViewportDrawingEditorScreenBasedAdapter::GetMinim
     TArray<uint32> triangles;
     float brushSize = FMath::Max(iStampParams.mBlock->Width(), iStampParams.mBlock->Height()); //ToCheck after optimization for non scaled objects FMath::Min3(mEditor->Actor()->GetActorScale().X, mEditor->Actor()->GetActorScale().Y, mEditor->Actor()->GetActorScale().Z);
     brushSize *= brushSize;
-    brushSize /= mEditor->GetStampQuality();
+    brushSize /= 10;
     triangles = meshAdapter->SphereIntersectTriangles(brushSize, meshAdapter->GetComponentToWorldMatrix().InverseTransformPosition(traceHitResult.Location), mouseViewportRay.GetOrigin(), false);
 
     const TArray<uint32> vertexIndices = meshAdapter->GetMeshIndices();

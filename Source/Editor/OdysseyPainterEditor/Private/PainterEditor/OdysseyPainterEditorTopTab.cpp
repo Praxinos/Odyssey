@@ -49,6 +49,11 @@ FOdysseyPainterEditorTopTab::SpawnTab( const FSpawnTabArgs& iArgs )
         ];
 }
 
+void FOdysseyPainterEditorTopTab::SetMeshMaxSize(float iValue /*= -1*/)
+{
+    mWidget->SetMeshMaxSize( iValue );
+}
+
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------ Public Getter
 
@@ -80,9 +85,8 @@ FOdysseyPainterEditorTopTab::IsPackageEdited() const
 TSharedPtr<SWidget>
 FOdysseyPainterEditorTopTab::CreateWidget()
 {
-    return SNew(SOdysseyPaintModifiers)
+    mWidget = SNew(SOdysseyPaintModifiers)
         .OnGetSize(this, &FOdysseyPainterEditorTopTab::OnGetSize)
-        .MeshMaxSize( 1000 )
         .OnGetOpacity(this, &FOdysseyPainterEditorTopTab::OnGetOpacity)
         .OnGetFlow(this, &FOdysseyPainterEditorTopTab::OnGetFlow)
         .BlendingMode(this, &FOdysseyPainterEditorTopTab::BlendingMode)
@@ -98,6 +102,8 @@ FOdysseyPainterEditorTopTab::CreateWidget()
         .OnEraserButtonClicked_Raw(this, &FOdysseyPainterEditorTopTab::OnEraserButtonClicked)
         .IsPackageEdited_Raw(this, &FOdysseyPainterEditorTopTab::IsPackageEdited)
         .IsEraserButtonActive_Raw(this, &FOdysseyPainterEditorTopTab::IsEraserButtonActive);
+
+    return mWidget;
 }
 
 void
@@ -191,7 +197,7 @@ FOdysseyPainterEditorTopTab::AlphaMode() const
 //---------------------------------------------------------------------- Event Listeners
 
 void
-FOdysseyPainterEditorTopTab::OnSizeChanged( int32 iValue, EPropertyChangeType::Type iChangeType )
+FOdysseyPainterEditorTopTab::OnSizeChanged( float iValue, EPropertyChangeType::Type iChangeType )
 {
     UOdysseyPainterEditorRasterDrawingTool* drawingTool = Cast<UOdysseyPainterEditorRasterDrawingTool>(mEditor->GetSelectedTool());
     if (!drawingTool)
@@ -199,7 +205,7 @@ FOdysseyPainterEditorTopTab::OnSizeChanged( int32 iValue, EPropertyChangeType::T
 
     //TODO: Remove when the top will use singlePropertyview
     UOdysseyBrushOptions* brushOptions = drawingTool->GetBrushInstance()->GetBrushOptions();
-    FOdysseyObjectEditorUtils::SetPropertyValue(brushOptions, "Size", float(iValue), iChangeType);
+    FOdysseyObjectEditorUtils::SetPropertyValue(brushOptions, "Size", iValue, iChangeType);
 }
 
 void
@@ -253,14 +259,14 @@ FOdysseyPainterEditorTopTab::OnAlphaModeChanged( int32 iValue )
     FOdysseyObjectEditorUtils::SetPropertyValue(drawingTool, "BlendParameters", blendParameters);
 }
 
-int
+float
 FOdysseyPainterEditorTopTab::OnGetSize() const
 {
     UOdysseyPainterEditorRasterDrawingTool* drawingTool = Cast<UOdysseyPainterEditorRasterDrawingTool>(mEditor->GetSelectedTool());
     if (!drawingTool)
         return 0;
 
-    return static_cast<int>(drawingTool->GetBrushInstance()->GetBrushOptions()->Size);
+    return drawingTool->GetBrushInstance()->GetBrushOptions()->Size;
 }
 
 float

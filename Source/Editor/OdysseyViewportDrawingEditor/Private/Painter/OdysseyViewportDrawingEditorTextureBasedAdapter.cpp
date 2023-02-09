@@ -68,6 +68,9 @@ void FOdysseyViewportDrawingEditorTextureBasedAdapter::PrepareAdapterForPainting
         mState = eState::kIdleReady;
     }    
     
+    //We're using true pixel value for this adapter, so we put 0 in meshMaxSize
+    mEditor->GetGUI()->GetTopTab()->SetMeshMaxSize(0);
+
     /*
     if (mEditor->Material())
     {

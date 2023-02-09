@@ -73,7 +73,7 @@ public:
     FOdysseyViewportDrawingEditorModeToolbar* GetToolbar() const;
     EOdysseyViewportDrawingPaintingAdapterMethod PaintingAdapterMethod() const;
     int32 GetUVIndexUsedByCurrentTexture();
-    float GetStampQuality() const;
+    float  GetMeshComponentMaxSize() const;
 
 public:
     // Setters
@@ -82,7 +82,6 @@ public:
     void SetMaterial(UMaterialInterface* iMaterial);
     void SetTexture(UTexture2D* iTexture) override;
     void SetPaintingAdapterMethod(EOdysseyViewportDrawingPaintingAdapterMethod iNewMethod);
-    void SetStampQuality( float iStampQuality );
 
 public:
     // Overrides
@@ -120,9 +119,6 @@ private:
     UMaterialInterface* mMaterial; //Storage purposes only for the GUI -> Get path for it
     TArray<UMeshComponent*> mSelectableComponents;
     TArray<FPaintableTexture> mSelectableTextures;
-
-    /** A multiplier for the Mesh Paint based Algorithm, which multiplies the size of the stamp before we draw. Doesn't affect the size of what we draw, only the size of the stamp */
-    float mStampQuality; 
 
 	/** Map of geometry adapters for each selectable mesh component, so that we don't recreate a GeometryAdapter each time we select a mesh to paint */
 	TMap<UMeshComponent*, TSharedPtr<IMeshPaintGeometryAdapter>> mComponentToAdapterMap;

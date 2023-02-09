@@ -37,7 +37,6 @@ protected:
     FString PaintTexturePath() const;
     bool ShouldFilterMaterialAsset(const FAssetData& iAssetData) const;
     bool ShouldFilterTextureAsset(const FAssetData& iAssetData) const;
-    float GetStampQuality() const;
 
 protected:
     // Event Listeners
@@ -45,7 +44,6 @@ protected:
     FReply OnMeshComponentChanged(const FString iName);
     void OnMaterialChanged(const FAssetData& iAssetData);
     void OnTextureChanged(const FAssetData& iAssetData);
-    void OnStampQualityChanged(float iNewQualityValue);
 
 private:
     FOdysseyViewportDrawingEditor* mEditor;

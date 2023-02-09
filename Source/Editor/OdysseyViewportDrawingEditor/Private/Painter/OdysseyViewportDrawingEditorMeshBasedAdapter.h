@@ -74,6 +74,8 @@ public:
     TArray<::ULIS::FRectI> GetMinimalRectanglesForTriangleSet( TArray<FTexturePaintTriangleInfo>& iTriangles, int iMaxWidth, int iMaxHeight );
 
 private:
+    //A multiplier to the size of the brush so that we keep a good resolution for the stamp in cases where the size of the texture and the size of the mesh are pretty different
+    float GetStampQuality();
     virtual ::ULIS::FEvent StampOverride( UOdysseyBrushAssetBase::FStampParams iStampParams ) override;
 
 protected:

@@ -152,19 +152,6 @@ FOdysseyViewportDrawingEditorMasterTab::CreateWidget()
                                 .Text_Lambda([=] { return FOdysseyViewportDrawingEditorMasterTab::GetMethodAsText(mEditor->PaintingAdapterMethod());})
                             ]
                         ]
-                    + SVerticalBox::Slot()
-                        .Padding(2)
-                        .AutoHeight()
-                        [
-                            SNew(SSpinBox<float>)
-                            .MinDesiredWidth(50.f)
-                            .Value(this, &FOdysseyViewportDrawingEditorMasterTab::GetStampQuality)
-                            .MinValue(1.f)
-                            .MaxValue(100.f)
-                            //.OnValueCommitted(this, &SOdysseyTextureConfigureWindow::OnSetWidth)
-                            .OnValueChanged(this, &FOdysseyViewportDrawingEditorMasterTab::OnStampQualityChanged)
-                            .IsEnabled_Lambda([this]() {return (mEditor->PaintingAdapterMethod() == OdysseyMeshBased); } )
-                        ]
                     //---
             ];
 }
@@ -319,12 +306,6 @@ FOdysseyViewportDrawingEditorMasterTab::ShouldFilterTextureAsset(const FAssetDat
     return !(mEditor->SelectableTextures().ContainsByPredicate([=](const FPaintableTexture& iTexture) { return iTexture.Texture->GetFullName() == iAssetData.GetFullName(); }));
 }
 
-float
-FOdysseyViewportDrawingEditorMasterTab::GetStampQuality() const
-{
-    return mEditor->GetStampQuality();
-}
-
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------- Event Listeners
 
@@ -353,6 +334,8 @@ FOdysseyViewportDrawingEditorMasterTab::OnMeshComponentChanged(const FString iNa
             mEditor->SetComponent( mEditor->SelectableComponents()[i] );
         }
     }
+
+    mEditor->GetGUI()->GetTopTab()->SetMeshMaxSize( mEditor->GetMeshComponentMaxSize() );
     return FReply::Handled();
 }
 
@@ -386,12 +369,6 @@ FOdysseyViewportDrawingEditorMasterTab::OnTextureChanged(const FAssetData& iAsse
 
         mEditor->SetTexture( texture );
     }
-}
-
-void
-FOdysseyViewportDrawingEditorMasterTab::OnStampQualityChanged(float iNewQualityValue)
-{
-    mEditor->SetStampQuality( iNewQualityValue );
 }
 
 
