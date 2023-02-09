@@ -209,6 +209,57 @@ FOdysseyVectorEngine::GenerateMask( std::vector<::ULIS::FVec2D>& iPointArray )
     return rect;
 }
 
+void
+FOdysseyVectorEngine::RecursiveErase( UOdysseyVectorObject& iObj
+                                    , std::vector<UOdysseyVectorObject*>& iErasedObjectArray
+                                    , ::ULIS::FRectD &iRoi
+                                    , bool iSelectedOnly )
+{
+    for( std::list<UOdysseyVectorObject*>::iterator it = iObj.GetChildrenList().begin(); it != iObj.GetChildrenList().end(); ++it )
+    {
+        UOdysseyVectorObject *child = (*it);
+
+        RecursiveErase( *child, iErasedObjectArray, iRoi, iSelectedOnly );
+    }
+
+    if( iSelectedOnly == true )
+    {
+        if( iObj.IsSelected() == true )
+        {
+            if( iObj.Erase( iRoi ) )
+            {
+                iErasedObjectArray.push_back( &iObj );
+            }
+        }
+    }
+    else
+    {
+        if( iObj.Erase( iRoi ) )
+        {
+            iErasedObjectArray.push_back( &iObj );
+        }
+    }
+}
+
+void
+FOdysseyVectorEngine::Erase( UOdysseyVectorRoot& iScene
+                           , ::ULIS::FRectD &iRoi
+                           , bool iSelectedOnly )
+{
+    std::vector<UOdysseyVectorObject*> erasedObjectArray;
+
+    RecursiveErase( iScene, erasedObjectArray, iRoi, iSelectedOnly  );
+
+    // Note: this will be refactored in case a child is erased and a parent should as well be erased. We'll see.
+    for( int i = 0; i < erasedObjectArray.size(); i++ )
+    {
+        if( erasedObjectArray[i]->GetChildrenList().size() == 0 )
+        {
+            erasedObjectArray[i]->GetParent()->RemoveChild( erasedObjectArray[i] );
+        }
+    }
+}
+
 // static
 void
 FOdysseyVectorEngine::RecursivePick( UOdysseyVectorObject& iObj
@@ -232,9 +283,17 @@ FOdysseyVectorEngine::RecursivePick( UOdysseyVectorObject& iObj
 }
 
 void
-FOdysseyVectorEngine::Erase( std::vector<::ULIS::FVec2D>& iPointArray, double radius )
+FOdysseyVectorEngine::UseMaskImage()
 {
+    mBLContext->end();
+    mBLContext->begin( *mBLMask );
+}
 
+void
+FOdysseyVectorEngine::UseColorImage()
+{
+    mBLContext->end();
+    mBLContext->begin( *mBLImage );
 }
 
 void
@@ -243,8 +302,7 @@ FOdysseyVectorEngine::Pick( UOdysseyVectorRoot& iScene, std::vector<::ULIS::FVec
     ::ULIS::FRectD roi;
     std::vector<UOdysseyVectorObject*> pickedObjectArray;
 
-    mBLContext->end();
-    mBLContext->begin( *mBLMask );
+    UseMaskImage();
 
     roi = GenerateMask( iPointArray );
 
@@ -259,19 +317,8 @@ FOdysseyVectorEngine::Pick( UOdysseyVectorRoot& iScene, std::vector<::ULIS::FVec
     {
         iScene.Select( pickedObjectArray[i] );
     }
-/*
-    if ( pickedObject )
-    {
-        if( pickedObject->GetClass() == UOdysseyVectorLoop::StaticClass() )
-        {
-            pickedObject = pickedObject->GetParent();
-        }
 
-        iScene.Select ( *pickedObject );
-    }
-*/
-    mBLContext->end();
-    mBLContext->begin( *mBLImage );
+    UseColorImage();
 }
 
 void

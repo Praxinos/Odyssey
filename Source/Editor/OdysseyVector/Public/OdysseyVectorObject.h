@@ -76,6 +76,8 @@ class ODYSSEYVECTOR_API UOdysseyVectorObject : public UObject
         void SetName( std::string iName );
         void CopySettings( UOdysseyVectorObject& iDestinationObject );
 
+        virtual bool Erase( ::ULIS::FRectD &iRoi ){ return false; };
+
         void Update();
         virtual void UpdateShape() {};
 

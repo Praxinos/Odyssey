@@ -77,11 +77,10 @@ TraceLine( int32 iX0, int32 iY0, double iT0
     int32  dy  = ( iY1 - iY0 );
     uint32 ddy = abs ( dy );
     double dt  = ( iT1 - iT0 );
-    uint32 ddt = fabs ( dt );
     int32  dd  = ( ddx > ddy ) ? ddx : ddy;
     int32  px  = ( dx > 0 ) ? 1 : -1;
     int32  py  = ( dy > 0 ) ? 1 : -1;
-    double pt  = ( dd ) ? ddt / dd : 0.0f;
+    double pt  = ( dd ) ? dt / dd : 0.0f;
     int32  x   = iX0;
     int32  y   = iY0;
     double t   = iT0;
@@ -91,6 +90,8 @@ TraceLine( int32 iX0, int32 iY0, double iT0
     {
         for ( uint32 i = 0; i <= ddx; i++ )
         {
+            if( i == ddx ) t = iT1; // to address imprecision, we set the exact value on the last loop
+
             // return as soon as a point is detected inside the mask
             if ( iCallback( x, y, t ) == true ) {
                 return true;
@@ -111,6 +112,8 @@ TraceLine( int32 iX0, int32 iY0, double iT0
     {
         for ( uint32 i = 0; i <= ddy; i++ )
         {
+            if( i == ddy ) t = iT1; // to address imprecision, we set the exact value on the last loop
+
             // return as soon as a point is detected inside the mask
             if ( iCallback( x, y, t ) == true ) {
                 return true;
@@ -131,7 +134,7 @@ TraceLine( int32 iX0, int32 iY0, double iT0
     return false;
 }
 
-void
+bool
 UOdysseyVectorPathCubic::Erase( ::ULIS::FRectD &iRoi )
 {
     BLContext* blctx = GetRoot()->GetEngine()->GetBLContext();
@@ -152,6 +155,7 @@ UOdysseyVectorPathCubic::Erase( ::ULIS::FRectD &iRoi )
         uint32 subVertexCount = 0;
         int32 currentPixelValue;
         std::vector<UOdysseyVectorSegmentCubic*> subSegmentArray;
+        bool hasHit = false;
 
         for( uint32 i = 0; i < polygonCache.size(); i++ )
         {
@@ -165,40 +169,55 @@ UOdysseyVectorPathCubic::Erase( ::ULIS::FRectD &iRoi )
                      , &currentPixelValue
                      , &subVertexT
                      , &subVertexCount
-                     , &subSegmentArray]( int32 iX, int32 iY, double iT)
+                     , &subSegmentArray
+                     , &hasHit]( int32 iX, int32 iY, double iT) -> bool
                        {
                            if( ( iX >= 0 && iX < imageData.size.w )
-                           && ( iY >= 0 && iY < imageData.size.h ) )
+                            && ( iY >= 0 && iY < imageData.size.h ) )
                            {
                                uint8 *pixel = static_cast<uint8*>(imageData.pixelData);
                                uint32 offset = ( iY * imageData.size.w ) + iX;
                                int32 pixelValue = pixel[offset];
-  
+
+                               if( pixelValue == 255 ) hasHit = true;
+
                                if( iT == 0.0f )
                                {
                                    if( pixelValue == 0 )
                                    {
-                                       subVertexT[subVertexCount++] = 0.0f;
+                                       subVertexT[subVertexCount++] = iT;
                                    }
 
                                    currentPixelValue = pixelValue;
                                }
-
-                               if( iT > 0.0f )
+/*
+  UE_LOG(LogTemp, Warning, TEXT("EraseShape: %d %d %f"), currentPixelValue, pixelValue, iT );
+*/
+                               if( ( iT > 0.0f ) && ( iT < 1.0f ) )
                                {
                                    if( (int32) abs(currentPixelValue - pixelValue) == (int32) 255 )
                                    {
                                        subVertexT[subVertexCount++] = iT;
-
+ /* UE_LOG(LogTemp, Warning, TEXT("EraseShape: %d %d %f subVertexCount:%d"), currentPixelValue, pixelValue, iT, subVertexCount );*/
                                        currentPixelValue = pixelValue;
                                    }
+                               }
+   //UE_LOG(LogTemp, Warning, TEXT("EraseShape:%f"), iT );
+                               if( iT == 1.0f )
+                               {
+                                   if( pixelValue == 0 )
+                                   {
+                                       subVertexT[subVertexCount++] = iT;
+                                   }
+   //UE_LOG(LogTemp, Warning, TEXT("EraseShape:youpi"), iT );
+                                   currentPixelValue = pixelValue;
                                }
 
                                if( subVertexCount == 2 )
                                {
                                    subSegmentArray.push_back( cubicSegment->Sample( subVertexT[0], 1.0f
                                                                                   , subVertexT[1], 1.0f ) );
- 
+   /*UE_LOG(LogTemp, Warning, TEXT("EraseShape: subVertexCount:%d"), subVertexCount );*/
                                    subVertexCount = 0;
                                }
                            }
@@ -208,12 +227,15 @@ UOdysseyVectorPathCubic::Erase( ::ULIS::FRectD &iRoi )
                        });
         }
 
-        if( subSegmentArray.size() )
+        if( hasHit == true )
         {
+            // won't insert anything if no subsegment were created
             newSegmentArray.insert( newSegmentArray.end(), subSegmentArray.begin(), subSegmentArray.end() );
             oldSegmentArray.push_back( cubicSegment );
         }
     }
+
+  UE_LOG(LogTemp, Warning, TEXT("EraseShape: %d %d"), oldSegmentArray.size(), newSegmentArray.size() );
 
     for( int i = 0; i < oldSegmentArray.size(); i++ )
     {
@@ -223,7 +245,11 @@ UOdysseyVectorPathCubic::Erase( ::ULIS::FRectD &iRoi )
     for( int i = 0; i < newSegmentArray.size(); i++ )
     {
         this->AddSegment( newSegmentArray[i] );
+
+        newSegmentArray[i]->Update();
     }
+
+    return ( mSegmentList.size() == 0 ) ? true : false;
 }
 
 UOdysseyVectorObject*

@@ -32,6 +32,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
         void Pick( UOdysseyVectorRoot& iScene, std::vector<::ULIS::FVec2D>& iPointArray, uint32 iSelectionFlags );
 
         static void RecursivePick( UOdysseyVectorObject& iObj, std::vector<UOdysseyVectorObject*>& iSelectedObjectArray, ::ULIS::FRectD& iRoi, uint32 iSelectionFlags );
+        static void RecursiveErase( UOdysseyVectorObject& iObj
+                                  , std::vector<UOdysseyVectorObject*>& iErasedObjectArray
+                                  ,::ULIS::FRectD &iRoi
+                                  , bool iSelectedOnly );
+        void Erase( UOdysseyVectorRoot& iScene, ::ULIS::FRectD &iRoi, bool iSelectedOnly );
 
         /*void Init( double iWidth, double iHeight );*/
         void InvalidateRegion( double x, double y, double w, double h );
@@ -43,6 +48,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
         void RemoveHUD( FOdysseyVectorHUD* iHUDObject );
         void ClearHUD();
         ::ULIS::FRectD GenerateMask( std::vector<::ULIS::FVec2D>& iPointArray );
+        void UseMaskImage();
+        void UseColorImage();
 };
 
 ODYSSEYVECTOR_API FArchive& operator<<(FArchive &Ar, FOdysseyVectorEngine* iVectorEngine );

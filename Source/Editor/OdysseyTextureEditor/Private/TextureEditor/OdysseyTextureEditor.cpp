@@ -37,6 +37,7 @@ FOdysseyTextureEditor::FOdysseyTextureEditor() :
 	mVectorObjectScaleTool(nullptr),
 	mVectorSceneScaleTool(nullptr),
 	mVectorScenePanTool(nullptr),
+	mVectorEraserTool(nullptr),
 	mPaintBucketTool(nullptr)
 {
 	UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw(this, &FOdysseyTextureEditor::OnCurrentLayerChanged);
@@ -70,6 +71,7 @@ FOdysseyTextureEditor::InitTools()
 	mVectorObjectScaleTool = NewObject<UOdysseyTextureEditorVectorObjectScaleTool>();
     mVectorSceneScaleTool = NewObject<UOdysseyTextureEditorVectorSceneScaleTool>();
     mVectorScenePanTool = NewObject<UOdysseyTextureEditorVectorScenePanTool>();
+    mVectorEraserTool = NewObject<UOdysseyTextureEditorVectorEraserTool>();
 	mPaintBucketTool = NewObject<UOdysseyTextureEditorPaintBucketTool>();
 
 	mRasterDrawingTool->SetEditor(this);
@@ -82,6 +84,7 @@ FOdysseyTextureEditor::InitTools()
     mVectorObjectScaleTool->SetEditor(this);
     mVectorSceneScaleTool->SetEditor(this);
     mVectorScenePanTool->SetEditor(this);
+    mVectorEraserTool->SetEditor(this);
 	mPaintBucketTool->SetEditor(this);
 	mRasterDrawingTool->SetBrushContexts(mBrushContexts);
 
@@ -95,6 +98,7 @@ FOdysseyTextureEditor::InitTools()
     mTools.Add(mVectorObjectScaleTool);
     mTools.Add(mVectorSceneScaleTool);
     mTools.Add(mVectorScenePanTool);
+    mTools.Add(mVectorEraserTool);
 	mTools.Add(mPaintBucketTool);
 	//mTextureRasterDrawingTool->OnApplyOverridesDelegate().AddRaw(this, &FOdysseyPainterEditor::OnApplyOverrides);
 }
@@ -113,6 +117,7 @@ FOdysseyTextureEditor::BindShortcuts(FBaseToolkit* iToolkit)
 	mVectorObjectScaleTool->BindShortcuts(iToolkit);
 	mVectorSceneScaleTool->BindShortcuts(iToolkit);
 	mVectorScenePanTool->BindShortcuts(iToolkit);
+	mVectorEraserTool->BindShortcuts(iToolkit);
 	mPaintBucketTool->BindShortcuts(iToolkit);
 }
 
@@ -130,6 +135,7 @@ FOdysseyTextureEditor::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
 	mVectorObjectScaleTool->ExtendMenu(iOwner, iMenuName);
 	mVectorSceneScaleTool->ExtendMenu(iOwner, iMenuName);
 	mVectorScenePanTool->ExtendMenu(iOwner, iMenuName);
+	mVectorEraserTool->ExtendMenu(iOwner, iMenuName);
 	mPaintBucketTool->ExtendMenu(iOwner, iMenuName);
 }
 
@@ -289,6 +295,12 @@ FOdysseyTextureEditor::GetVectorScenePanTool() const
     return mVectorScenePanTool;
 }
 
+UOdysseyTextureEditorVectorEraserTool*
+FOdysseyTextureEditor::GetVectorEraserTool() const
+{
+    return mVectorEraserTool;
+}
+
 UOdysseyTextureEditorPaintBucketTool*
 FOdysseyTextureEditor::GetPaintBucketTool() const
 {
@@ -350,6 +362,7 @@ FOdysseyTextureEditor::AddReferencedObjects(FReferenceCollector& Collector)
 	Collector.AddReferencedObject(mVectorObjectScaleTool);
     Collector.AddReferencedObject(mVectorSceneScaleTool);
     Collector.AddReferencedObject(mVectorScenePanTool);
+    Collector.AddReferencedObject(mVectorEraserTool);
 	Collector.AddReferencedObject(mPaintBucketTool);
 }
 #undef LOCTEXT_NAMESPACE

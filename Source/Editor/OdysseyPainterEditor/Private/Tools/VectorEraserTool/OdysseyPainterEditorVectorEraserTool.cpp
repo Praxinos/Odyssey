@@ -13,12 +13,12 @@
 //----------------------------------------------------------- Construction / Destruction
 UOdysseyPainterEditorVectorEraserTool::~UOdysseyPainterEditorVectorEraserTool()
 {
-    delete mSelectionHUD;
+
 }
 
 UOdysseyPainterEditorVectorEraserTool::UOdysseyPainterEditorVectorEraserTool()
 {
-    Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.EraserTool64");
+    Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Eraser64");
 }
 
 //--------------------------------------------------------------------------------------
@@ -56,6 +56,10 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseDown(const FOdysseyPoint& iPointIn
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
 
+        vectorEngine->UseMaskImage();
+        vectorEngine->GetBLContext()->setFillAlpha( 0.0f );
+        vectorEngine->GetBLContext()->clearAll();
+        vectorEngine->UseColorImage();
     }
 
     return true;
@@ -71,7 +75,10 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseDrag(const FOdysseyPoint& iPointIn
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
 
-
+        vectorEngine->UseMaskImage();
+        vectorEngine->GetBLContext()->setFillAlpha( 1.0f );
+        vectorEngine->GetBLContext()->fillCircle( iPointInTexture.x, iPointInTexture.y, 20.0f );
+        vectorEngine->UseColorImage();
 
         currentVectorLayer->RenderImageChanged(true);
     }
@@ -86,6 +93,11 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseUp(const FOdysseyPoint& iPointInTe
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+        ::ULIS::FRectD Roi;
+
+        vectorEngine->UseMaskImage();
+        vectorEngine->Erase( *currentVectorLayer->GetScene(), Roi, false );
+        vectorEngine->UseColorImage();
 
         currentVectorLayer->RenderImageChanged(false);
 

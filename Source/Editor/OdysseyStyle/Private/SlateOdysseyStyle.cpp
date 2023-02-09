@@ -356,6 +356,7 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "PainterEditor.ToolsTab.Shredder64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/shredder_64", mIcon64x64 ) );
     Set( "PainterEditor.ToolsTab.Shredder32", new IMAGE_BRUSH( "PainterEditor/ToolsTab/shredder_32", mIcon32x32 ) );
     Set( "PainterEditor.ToolsTab.Shredder16", new IMAGE_BRUSH( "PainterEditor/ToolsTab/shredder_16", mIcon16x16 ) );
+    Set( "PainterEditor.ToolsTab.Eraser64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/eraser_64", mIcon64x64 ) );
     Set( "PainterEditor.ToolsTab.Ellipse64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/ellipse_64", mIcon64x64 ) );
     Set( "PainterEditor.ToolsTab.Ellipse32", new IMAGE_BRUSH( "PainterEditor/ToolsTab/ellipse_32", mIcon32x32 ) );
     Set( "PainterEditor.ToolsTab.Ellipse16", new IMAGE_BRUSH( "PainterEditor/ToolsTab/ellipse_16", mIcon16x16 ) );

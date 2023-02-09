@@ -18,6 +18,7 @@
 #include "Tools/VectorObjectScaleTool/OdysseyTextureEditorVectorObjectScaleTool.h"
 #include "Tools/VectorSceneScaleTool/OdysseyTextureEditorVectorSceneScaleTool.h"
 #include "Tools/VectorScenePanTool/OdysseyTextureEditorVectorScenePanTool.h"
+#include "Tools/VectorEraserTool/OdysseyTextureEditorVectorEraserTool.h"
 #include "Tools/PaintBucketTool/OdysseyTextureEditorPaintBucketTool.h"
 #include "Misc/OdysseyHandle.h"
 
@@ -58,6 +59,7 @@ public:
     virtual UOdysseyTextureEditorVectorObjectScaleTool* GetVectorObjectScaleTool() const override;
     virtual UOdysseyTextureEditorVectorSceneScaleTool* GetVectorSceneScaleTool() const override;
     virtual UOdysseyTextureEditorVectorScenePanTool* GetVectorScenePanTool() const override;
+    virtual UOdysseyTextureEditorVectorEraserTool* GetVectorEraserTool() const override;
     virtual UOdysseyTextureEditorPaintBucketTool* GetPaintBucketTool() const override;
 
 public:
@@ -91,6 +93,7 @@ private:
     UOdysseyTextureEditorVectorObjectScaleTool* mVectorObjectScaleTool;
     UOdysseyTextureEditorVectorSceneScaleTool* mVectorSceneScaleTool;
     UOdysseyTextureEditorVectorScenePanTool* mVectorScenePanTool;
+    UOdysseyTextureEditorVectorEraserTool* mVectorEraserTool;
     UOdysseyTextureEditorPaintBucketTool* mPaintBucketTool;
 
     TSharedPtr<IOdysseyHandle> mLayerStackPreloadHandle;
