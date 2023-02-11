@@ -33,7 +33,7 @@ UOdysseyPainterEditorVectorObjectScaleTool::Activate()
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
 
-        vectorEngine->SetDrawingFlags( FOdysseyVectorEngine::RENDER_OBJECT_BBOX );
+        vectorEngine->ClearHUD( );
 
         currentVectorLayer->RenderImageChanged(false);
     }

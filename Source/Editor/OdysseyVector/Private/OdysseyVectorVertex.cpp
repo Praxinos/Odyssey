@@ -155,6 +155,30 @@ static bool seekSection( std::list<FOdysseyVectorSection*>& iSectionList
     return false;
 }
 
+FOdysseyVectorSection*
+UOdysseyVectorVertex::GetCycleNextSection( FOdysseyVectorSection* iLastSection, double iOrientation )
+{
+    ::ULIS::FVec2D lastSectionVector = -iLastSection->GetVectorFromVertex( this );
+
+    for( std::list<FOdysseyVectorSection*>::iterator it = mSectionList.begin(); it != mSectionList.end(); ++it )
+    {
+        FOdysseyVectorSection* section = static_cast<FOdysseyVectorSection*>(*it);
+
+        if( section->GetSegment() != iLastSection->GetSegment() )
+        {
+            ::ULIS::FVec2D sectionVector = section->GetVectorFromVertex( this );
+
+            if( FOdysseyVector::Cross2D( sectionVector, lastSectionVector ) * iOrientation > 0.0f ) // same side
+            {
+                return section;
+            }
+        }
+    }
+
+    // there are only 2 sections from the same segment then. Easy to tell which is which.
+    return ( mSectionList.back() == iLastSection ) ? mSectionList.front() : mSectionList.back();
+}
+
 void
 UOdysseyVectorVertex::SetVisited( bool iVisited )
 {

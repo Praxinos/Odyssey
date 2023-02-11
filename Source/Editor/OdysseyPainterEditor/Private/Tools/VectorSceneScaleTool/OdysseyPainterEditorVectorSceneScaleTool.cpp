@@ -30,7 +30,7 @@ UOdysseyPainterEditorVectorSceneScaleTool::Activate()
     UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
     FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
 
-    vectorEngine->SetDrawingFlags( 0 );
+    vectorEngine->ClearHUD( );
 
     currentVectorLayer->RenderImageChanged(false);
 }

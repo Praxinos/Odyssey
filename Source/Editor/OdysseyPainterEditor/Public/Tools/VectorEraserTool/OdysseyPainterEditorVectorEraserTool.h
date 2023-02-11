@@ -6,7 +6,7 @@
 #include "CoreMinimal.h"
 #include "Tools/OdysseyPainterEditorTool.h"
 #include "OdysseyVectorPathBuilder.h"
-#include "HUD/OdysseyVectorHUDSelection.h"
+#include "HUD/OdysseyVectorHUDEraser.h"
 
 #include "OdysseyPainterEditorVectorEraserTool.generated.h"
 
@@ -15,6 +15,10 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorEraserTool : public UO
 {
 public:
     GENERATED_BODY()
+
+public:
+    UPROPERTY(EditAnywhere, Category="Eraser Tool")
+    double Radius;
 
 public:
     // Destructor
@@ -27,11 +31,13 @@ public:
     virtual void Activate() override;
 
     virtual bool OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
+    virtual void OnMouseHover(const FOdysseyPoint& iPointInTexture) override;
     virtual void OnMouseDrag(const FOdysseyPoint& iPointInTexture) override;
     virtual bool OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
     virtual void Commit() override;
 
 private:
+    FOdysseyVectorHUDEraser mEraserHUD;
 
 public:
     // Setters

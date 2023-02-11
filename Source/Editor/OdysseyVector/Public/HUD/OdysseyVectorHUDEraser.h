@@ -8,10 +8,18 @@
 class ODYSSEYVECTOR_API FOdysseyVectorHUDEraser : public FOdysseyVectorHUD
 {
     private:
+        double mX;
+        double mY;
+        double mRadius;
+        bool mBlending;
 
     public:
         ~FOdysseyVectorHUDEraser();
-        FOdysseyVectorHUDEraser( std::vector<::ULIS::FVec2D>& iPointArray );
+        FOdysseyVectorHUDEraser();
 
         void Draw( UOdysseyVectorRoot& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags );
+
+        void SetRadius( double iRadius );
+        void SetPosition( double iX, double iY );
+        void BlendMask( bool iBlending );
 };

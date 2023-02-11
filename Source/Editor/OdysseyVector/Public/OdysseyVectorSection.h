@@ -29,6 +29,7 @@ class FOdysseyVectorSection
         void AddLoop( UOdysseyVectorLoop* iLoop );
         void RemoveLoop( UOdysseyVectorLoop* iLoop );
         std::list<UOdysseyVectorLoop*>& GetLoopList();
+        ::ULIS::FVec2D GetVectorFromVertex( UOdysseyVectorVertex* iVertex );
 
         void IncrementCycleCount();
 

@@ -106,6 +106,11 @@ class ODYSSEYVECTOR_API UOdysseyVectorSegmentCubic : public UOdysseyVectorSegmen
         void BuildVariable();
         double GetDistanceSquared();
         ::ULIS::FVec2D GetPointAt(double t);
+        ::ULIS::FVec2D GetTangentAt( double t );
         bool Cut( ::ULIS::FVec2D& linePoint0, ::ULIS::FVec2D& linePoint1 );
-        UOdysseyVectorSegmentCubic* Sample( double iFromT, double iFromRadius, double iToT, double itoRadius );
+        UOdysseyVectorSegmentCubic* Sample( double iFromT
+                                          , double iFromRadius
+                                          , double iToT
+                                          , double itoRadius
+                                          , std::vector<UOdysseyVectorVertexCubic*>& newVertexArray );
 };

@@ -142,6 +142,7 @@ UOdysseyVectorPathCubic::Erase( ::ULIS::FRectD &iRoi )
     BLImageData imageData;
     std::vector<UOdysseyVectorSegmentCubic*> newSegmentArray;
     std::vector<UOdysseyVectorSegmentCubic*> oldSegmentArray;
+    std::vector<UOdysseyVectorVertexCubic*> newVertexArray;
 
     blimg->getData( &imageData );
 
@@ -170,6 +171,7 @@ UOdysseyVectorPathCubic::Erase( ::ULIS::FRectD &iRoi )
                      , &subVertexT
                      , &subVertexCount
                      , &subSegmentArray
+                     , &newVertexArray
                      , &hasHit]( int32 iX, int32 iY, double iT) -> bool
                        {
                            if( ( iX >= 0 && iX < imageData.size.w )
@@ -190,39 +192,36 @@ UOdysseyVectorPathCubic::Erase( ::ULIS::FRectD &iRoi )
 
                                    currentPixelValue = pixelValue;
                                }
-/*
-  UE_LOG(LogTemp, Warning, TEXT("EraseShape: %d %d %f"), currentPixelValue, pixelValue, iT );
-*/
+
                                if( ( iT > 0.0f ) && ( iT < 1.0f ) )
                                {
                                    if( (int32) abs(currentPixelValue - pixelValue) == (int32) 255 )
                                    {
                                        subVertexT[subVertexCount++] = iT;
- /* UE_LOG(LogTemp, Warning, TEXT("EraseShape: %d %d %f subVertexCount:%d"), currentPixelValue, pixelValue, iT, subVertexCount );*/
+
                                        currentPixelValue = pixelValue;
                                    }
                                }
-   //UE_LOG(LogTemp, Warning, TEXT("EraseShape:%f"), iT );
+
                                if( iT == 1.0f )
                                {
                                    if( pixelValue == 0 )
                                    {
                                        subVertexT[subVertexCount++] = iT;
                                    }
-   //UE_LOG(LogTemp, Warning, TEXT("EraseShape:youpi"), iT );
+
                                    currentPixelValue = pixelValue;
                                }
 
                                if( subVertexCount == 2 )
                                {
                                    subSegmentArray.push_back( cubicSegment->Sample( subVertexT[0], 1.0f
-                                                                                  , subVertexT[1], 1.0f ) );
-   /*UE_LOG(LogTemp, Warning, TEXT("EraseShape: subVertexCount:%d"), subVertexCount );*/
+                                                                                  , subVertexT[1], 1.0f, newVertexArray ) );
                                    subVertexCount = 0;
                                }
                            }
 
-                           // keep tracing
+                           // keep tracing the line
                            return false;
                        });
         }
@@ -235,15 +234,20 @@ UOdysseyVectorPathCubic::Erase( ::ULIS::FRectD &iRoi )
         }
     }
 
-  UE_LOG(LogTemp, Warning, TEXT("EraseShape: %d %d"), oldSegmentArray.size(), newSegmentArray.size() );
-
     for( int i = 0; i < oldSegmentArray.size(); i++ )
     {
         this->RemoveSegment( oldSegmentArray[i] );
     }
 
+    for( int i = 0; i < newVertexArray.size(); i++ )
+    {
+
+        this->AddVertex( newVertexArray[i] );
+    }
+
     for( int i = 0; i < newSegmentArray.size(); i++ )
     {
+
         this->AddSegment( newSegmentArray[i] );
 
         newSegmentArray[i]->Update();
@@ -523,8 +527,6 @@ UOdysseyVectorPathCubic::DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags )
     {
         Fill( iRoi );
     }
-
-    /*DrawLoops( iRoi, iFlags  );*/
 
     DrawShapeVariable( iRoi, iFlags );
 }

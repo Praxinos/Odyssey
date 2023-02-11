@@ -60,6 +60,8 @@ class UOdysseyVectorSegment : public UOdysseyVectorLink
         void AddSection ( FOdysseyVectorSection* iSection );
 
         virtual ::ULIS::FRectD& GetBoundingBox() { return mBBox; };
+        virtual ::ULIS::FVec2D GetPointAt(double t);
+        virtual ::ULIS::FVec2D GetTangentAt(double t);
 
         UOdysseyVectorSegment* GetOtherSegment( UOdysseyVectorSegment& iCurrentSegment );
 };

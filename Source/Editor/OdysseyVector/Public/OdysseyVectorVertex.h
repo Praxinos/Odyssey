@@ -78,4 +78,5 @@ class ODYSSEYVECTOR_API UOdysseyVectorVertex : public UOdysseyVectorPoint
         uint32 GetCycleID();
         void SetMarched( bool iMarched );
         bool IsMarched();
+        FOdysseyVectorSection* GetCycleNextSection( FOdysseyVectorSection* iLastSection, double iOrientation );
 };

@@ -28,6 +28,29 @@ FOdysseyVectorSection::SetInCycle( bool iInCycle )
     }
 }
 
+::ULIS::FVec2D
+FOdysseyVectorSection::GetVectorFromVertex( UOdysseyVectorVertex* iVertex )
+{
+    ::ULIS::FVec2D tangent = { 0.0f, 0.0f };
+
+    if( mSegment->GetClass() == UOdysseyVectorSegment::StaticClass() )
+    {
+        double T0 = mVertex[0]->GetT( *mSegment );
+        double T1 = mVertex[1]->GetT( *mSegment );
+        double deltaT = ( T1 - T0 ) * 0.01f;
+        double sampleT = ( iVertex == mVertex[0] ) ? T0 + deltaT : T1 - deltaT;
+        ::ULIS::FVec2D sample = mSegment->GetPointAt( sampleT );
+
+        tangent.x = sample.x - iVertex->GetCoords().x;
+        tangent.y = sample.y - iVertex->GetCoords().y;
+/*
+cubicSegment->GetTangentAt( iVertex->GetT( *cubicSegment ) );
+*/
+    }
+
+    return tangent;
+}
+
 bool
 FOdysseyVectorSection::IsInCycle()
 {

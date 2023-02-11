@@ -10,6 +10,8 @@ namespace FOdysseyVector
                          , ::ULIS::FVec2D& line1p1
                          , double* line0t
                          , double* line1t );
+
+    double Cross2D( ::ULIS::FVec2D& iA, ::ULIS::FVec2D &iB );
 }
 
 #include "OdysseyVectorObject.h"

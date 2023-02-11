@@ -82,6 +82,22 @@ UOdysseyVectorSegmentCubic::GetPointAt( double t )
     return pointAt;
 }
 
+::ULIS::FVec2D
+UOdysseyVectorSegmentCubic::GetTangentAt( double t )
+{
+    ::ULIS::FVec2D& point0 = mPoint[0]->GetCoords();
+    ::ULIS::FVec2D& point1 = mPoint[1]->GetCoords();
+    ::ULIS::FVec2D& ctrlPoint0 = mCtrlPoint[0]->GetCoords();
+    ::ULIS::FVec2D& ctrlPoint1 = mCtrlPoint[1]->GetCoords();
+    ::ULIS::FVec2D tangentAt = ::ULIS::CubicBezierTangentAtParameter<::ULIS::FVec2D>( point0
+                                                                                    , ctrlPoint0
+                                                                                    , ctrlPoint1
+                                                                                    , point1
+                                                                                    , t );
+
+    return tangentAt;
+}
+
 void
 UOdysseyVectorSegmentCubic::IncreasePolygonCache( uint32 iSize )
 {
@@ -181,7 +197,11 @@ UOdysseyVectorSegmentCubic::Pick( double iX
 }
 
 UOdysseyVectorSegmentCubic*
-UOdysseyVectorSegmentCubic::Sample( double iFromT, double iFromRadius, double iToT, double itoRadius )
+UOdysseyVectorSegmentCubic::Sample( double iFromT
+                                  , double iFromRadius
+                                  , double iToT
+                                  , double itoRadius
+                                  , std::vector<UOdysseyVectorVertexCubic*>& newVertexArray )
 {
     ::ULIS::FVec2D& ctrlPoint0 = mCtrlPoint[0]->GetCoords();
     ::ULIS::FVec2D& ctrlPoint1 = mCtrlPoint[1]->GetCoords();
@@ -195,6 +215,16 @@ UOdysseyVectorSegmentCubic::Sample( double iFromT, double iFromRadius, double iT
     ::ULIS::FVec2D& sampleCtrlPoint1 = sampleSegment->GetControlPoint(1)->GetCoords();
     ::ULIS::FVec2D& samplePoint0 = sampleSegment->GetPoint(0)->GetCoords();
     ::ULIS::FVec2D& samplePoint1 = sampleSegment->GetPoint(1)->GetCoords();
+
+    if( vertex0 != static_cast<UOdysseyVectorVertexCubic*>(mPoint[0]) )
+    {
+        newVertexArray.push_back( vertex0 );
+    }
+
+    if( vertex1 != static_cast<UOdysseyVectorVertexCubic*>(mPoint[1]) )
+    {
+        newVertexArray.push_back( vertex1 );
+    }
 
     ::ULIS::CubicBezierInverseSplitAtParameter<::ULIS::FVec2D>( &samplePoint0, &sampleCtrlPoint0, &sampleCtrlPoint1, &samplePoint1, iFromT );
     ::ULIS::CubicBezierSplitAtParameter       <::ULIS::FVec2D>( &samplePoint0, &sampleCtrlPoint0, &sampleCtrlPoint1, &samplePoint1, iToT   );

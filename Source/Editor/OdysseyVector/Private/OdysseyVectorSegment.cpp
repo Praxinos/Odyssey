@@ -11,6 +11,23 @@ UOdysseyVectorSegment::UOdysseyVectorSegment()
 
 }
 
+::ULIS::FVec2D
+UOdysseyVectorSegment::GetPointAt( double t )
+{
+    ::ULIS::FVec2D unimplemented;
+
+    return unimplemented;
+}
+
+::ULIS::FVec2D
+UOdysseyVectorSegment::GetTangentAt( double t )
+{
+    ::ULIS::FVec2D unimplemented;
+
+    return unimplemented;
+}
+
+
 void
 UOdysseyVectorSegment::Init( UOdysseyVectorPath* iPath
                            , UOdysseyVectorVertex* iVertex0

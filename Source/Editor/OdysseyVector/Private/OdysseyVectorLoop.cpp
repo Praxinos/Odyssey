@@ -22,6 +22,7 @@ FOdysseyVectorLoop::FOdysseyVectorLoop( UOdysseyVectorObject& iParent
     Cast<UOdysseyVectorVertexIntersection>(iVertexArray[0])->AttachLoop( this );
 */
 
+
     Build( mVertexArray, mSectionArray );
 }
 
