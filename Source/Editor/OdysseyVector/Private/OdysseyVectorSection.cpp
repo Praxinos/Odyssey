@@ -33,18 +33,19 @@ FOdysseyVectorSection::GetVectorFromVertex( UOdysseyVectorVertex* iVertex )
 {
     ::ULIS::FVec2D tangent = { 0.0f, 0.0f };
 
-    if( mSegment->GetClass() == UOdysseyVectorSegment::StaticClass() )
+    if( mSegment->GetClass() == UOdysseyVectorSegmentCubic::StaticClass() )
     {
+
         double T0 = mVertex[0]->GetT( *mSegment );
         double T1 = mVertex[1]->GetT( *mSegment );
-        double deltaT = ( T1 - T0 ) * 0.01f;
+        double deltaT = fabs( T1 - T0 ) * 0.1f;
         double sampleT = ( iVertex == mVertex[0] ) ? T0 + deltaT : T1 - deltaT;
         ::ULIS::FVec2D sample = mSegment->GetPointAt( sampleT );
 
-        tangent.x = sample.x - iVertex->GetCoords().x;
-        tangent.y = sample.y - iVertex->GetCoords().y;
+        tangent.x = sample.x - iVertex->GetPosition(*mSegment).x;
+        tangent.y = sample.y - iVertex->GetPosition(*mSegment).y;
 /*
-cubicSegment->GetTangentAt( iVertex->GetT( *cubicSegment ) );
+return mSegment->GetTangentAt( iVertex->GetT( *mSegment ) );
 */
     }
 

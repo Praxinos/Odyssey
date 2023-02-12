@@ -51,6 +51,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorVertex : public UOdysseyVectorPoint
         UOdysseyVectorSegment* GetFirstSegment();
         virtual UOdysseyVectorSegment* GetSegment( UOdysseyVectorVertex& iOtherVertex );
         FOdysseyVectorSection* GetSection( UOdysseyVectorVertex& iOtherVertex );
+        FOdysseyVectorSection* GetOtherSection( FOdysseyVectorSection* iSection );
         UOdysseyVectorSegment* GetOtherSegment( UOdysseyVectorSegment& iCurrentSegment );
         void RemoveSegment( UOdysseyVectorSegment* iSegment );
         virtual ::ULIS::FVec2D GetPosition( UOdysseyVectorSegment& iSegment );

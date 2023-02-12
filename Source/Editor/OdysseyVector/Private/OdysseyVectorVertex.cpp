@@ -168,15 +168,15 @@ UOdysseyVectorVertex::GetCycleNextSection( FOdysseyVectorSection* iLastSection, 
         {
             ::ULIS::FVec2D sectionVector = section->GetVectorFromVertex( this );
 
-            if( FOdysseyVector::Cross2D( sectionVector, lastSectionVector ) * iOrientation > 0.0f ) // same side
+            if( ( FOdysseyVector::Cross2D( sectionVector, lastSectionVector ) * iOrientation > 0.0f ) // same side
+              || ( mSectionList.size() == 2 ) ) // no other choice
             {
                 return section;
             }
         }
     }
 
-    // there are only 2 sections from the same segment then. Easy to tell which is which.
-    return ( mSectionList.back() == iLastSection ) ? mSectionList.front() : mSectionList.back();
+    return GetOtherSection( iLastSection );
 }
 
 void
@@ -397,6 +397,26 @@ UOdysseyVectorVertex::GetSegment( UOdysseyVectorVertex& iOtherVertex )
 
     return nullptr;
 }
+
+FOdysseyVectorSection*
+UOdysseyVectorVertex::GetOtherSection( FOdysseyVectorSection* iSection )
+{
+    for( std::list<FOdysseyVectorSection*>::iterator it = mSectionList.begin(); it != mSectionList.end(); ++it )
+    {
+        FOdysseyVectorSection* otherSection = static_cast<FOdysseyVectorSection*>(*it);
+
+        if( otherSection != iSection )
+        {
+            if ( otherSection->GetSegment() == iSection->GetSegment() )
+            {
+                return otherSection;
+            }
+        }
+    }
+
+    return nullptr;
+}
+
 
 UOdysseyVectorSegment*
 UOdysseyVectorVertex::GetOtherSegment( UOdysseyVectorSegment& iCurrentSegment )

@@ -3,7 +3,7 @@
 double
 FOdysseyVector::Cross2D( ::ULIS::FVec2D& iA, ::ULIS::FVec2D &iB )
 {
-    return iA.x * iB.y - iA.y * iB.x;
+    return ( iA.x * iB.y ) - ( iA.y * iB.x );
 }
 
 // https://stackoverflow.com/questions/35473936/find-whether-two-line-segments-intersect-or-not-in-c
