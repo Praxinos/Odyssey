@@ -445,9 +445,35 @@ FOdysseyPainterEditorGUI::GroupPaint()
             {
                 UOdysseyVectorObject* selectedObject = currentVectorLayer->GetScene()->GetLastSelected();
                 UOdysseyVectorGroupPaint* paintGroup = NewObject<UOdysseyVectorGroupPaint>();
+                UOdysseyVectorGroupPaint* formerPaintGroup = nullptr;
 
-                currentVectorLayer->GetScene()->AppendChild( paintGroup );
+                for( std::list<UOdysseyVectorObject*>::iterator it = selectObjectList.begin(); it != selectObjectList.end(); ++it )
+                {
+                    selectedObject = (*it);
 
+                    if( selectedObject->GetClass() == UOdysseyVectorPathCubic::StaticClass() )
+                    {
+                        UOdysseyVectorPathCubic* cubicPath = Cast<UOdysseyVectorPathCubic>( selectedObject );
+
+                        // for testing purpose
+                        if( cubicPath->GetParent()->GetClass() == UOdysseyVectorGroupPaint::StaticClass() )
+                        {
+                            formerPaintGroup = Cast<UOdysseyVectorGroupPaint>(cubicPath->GetParent());
+                        }
+                    }
+                }
+
+                if( formerPaintGroup )
+                {
+                    paintGroup = formerPaintGroup;
+                }
+                else
+                {
+                    paintGroup = NewObject<UOdysseyVectorGroupPaint>();
+                    currentVectorLayer->GetScene()->AppendChild( paintGroup );
+                }
+
+                paintGroup->ClearCycles();
                 paintGroup->UpdateMatrix();
 
                 for( std::list<UOdysseyVectorObject*>::iterator it = selectObjectList.begin(); it != selectObjectList.end(); ++it )

@@ -17,6 +17,7 @@ FOdysseyVectorLoop::FOdysseyVectorLoop( UOdysseyVectorObject& iParent
     , mSectionArray (iSectionArray)
     , mFlags (0)
     , mValence (0)
+    , mParentCycle( nullptr )
 {
 /*
     Cast<UOdysseyVectorVertexIntersection>(iVertexArray[0])->AttachLoop( this );
@@ -24,6 +25,41 @@ FOdysseyVectorLoop::FOdysseyVectorLoop( UOdysseyVectorObject& iParent
 
 
     Build( mVertexArray, mSectionArray );
+}
+
+FOdysseyVectorLoop*
+FOdysseyVectorLoop::GetParentCycle()
+{
+    return mParentCycle;
+}
+
+void
+FOdysseyVectorLoop::AppendChild( FOdysseyVectorLoop *iChild )
+{
+    mChildrenList.push_back( iChild );
+
+    iChild->mParentCycle = this;
+}
+
+void
+FOdysseyVectorLoop::RemoveChild( FOdysseyVectorLoop *iChild )
+{
+    mChildrenList.remove( iChild );
+}
+
+bool
+FOdysseyVectorLoop::FitsIn( FOdysseyVectorLoop* iParentCandidate )
+{
+    for( int i = 0; i < mVertexArray.size(); i++ )
+    {
+        ::ULIS::FVec2D& vCoords = mVertexArray[i]->GetCoords();
+        BLPoint pt = { vCoords.x, vCoords.y };
+        uint32 ret =  iParentCandidate->mPath.hitTest( pt, BL_FILL_RULE_NON_ZERO );
+
+        if( ret == 0 ) return false;
+    }
+
+    return true;
 }
 
 std::vector<UOdysseyVectorVertex*>& 
@@ -254,9 +290,17 @@ FOdysseyVectorLoop::HitTest( double iX, double iY )
     BLContext* blctx = mParent.GetRoot()->GetEngine()->GetBLContext();
     BLPoint pt = { iX, iY };
     BLPoint* vertex = ( BLPoint*) mPath.vertexData();
+    BLPath combinedPath = mPath;
+
+    for( std::list<FOdysseyVectorLoop*>::iterator oit = mChildrenList.begin(); oit != mChildrenList.end(); ++oit )
+    {
+        FOdysseyVectorLoop *child = (*oit);
+
+        combinedPath.addPath( child->mPath );
+    }
 
     // WARNING: looks like in this version the return value is a bool (in the shape of an int) but in later version is a enum value. We will have to fix that.
-    uint32 ret = mPath.hitTest( pt, BL_FILL_RULE_EVEN_ODD );
+    uint32 ret = combinedPath.hitTest( pt, BL_FILL_RULE_EVEN_ODD );
 
     return ( ret ) ? true : false;
 }
@@ -265,6 +309,14 @@ void
 FOdysseyVectorLoop::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
     BLContext* blctx = mParent.GetRoot()->GetEngine()->GetBLContext();
+    BLPath combinedPath = mPath;
+
+    for( std::list<FOdysseyVectorLoop*>::iterator oit = mChildrenList.begin(); oit != mChildrenList.end(); ++oit )
+    {
+        FOdysseyVectorLoop *child = (*oit);
+
+        combinedPath.addPath( child->mPath );
+    }
 
 /*
     if( mBucket )
@@ -290,10 +342,10 @@ FOdysseyVectorLoop::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
 */
 
        blctx->setFillStyle( BLRgba32( GetColor() ) );
-
+       blctx->setFillRule( BL_FILL_RULE_EVEN_ODD );
 
        /*iBLContext.fillPolygon( &mPointArray[0], mPointArray.size() );*/
-       blctx->fillPath( mPath );
+       blctx->fillPath( combinedPath );
     /*}*/
 }
 

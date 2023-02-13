@@ -169,6 +169,11 @@ UOdysseyVectorGroupPaint::FindPath( UOdysseyVectorVertex* iVertex
 
     iSection->SetVisited( true );
 
+    /*UE_LOG(LogTemp,Warning,TEXT("Exploring section: x:%f y:%f ---- x:%f y:%f"), iSection->GetVertex(0)->GetCoords().x,
+                                                                                iSection->GetVertex(0)->GetCoords().y,
+                                                                                iSection->GetVertex(1)->GetCoords().x,
+                                                                                iSection->GetVertex(1)->GetCoords().y );*/
+
     if( nextVertex == iVertexArray.front() ) // cycle detected
     {
 /*
@@ -178,21 +183,40 @@ UOdysseyVectorGroupPaint::FindPath( UOdysseyVectorVertex* iVertex
     }
     else
     {
-        FOdysseyVectorSection* nextSection = nextVertex->GetCycleNextSection( iSection, iOrientation );
+        FOdysseyVectorSection* primaryNextSection = nextVertex->GetCycleNextSection( iSection, iOrientation );
 
-        if( nextSection )
+        if( primaryNextSection )
         {
-            if( nextSection->IsBlocked( nextVertex ) == false )
+            if( primaryNextSection->IsBlocked( nextVertex ) == false )
             {
-                if( 1/*( nextSection->IsVisited() == false )*/ /*&& ( nextSection->IsBlocked( iVertex ) == false )*/ )
+                if( ( primaryNextSection->IsVisited() == false ) /*&& ( nextSection->IsBlocked( iVertex ) == false )*/ )
                 {
-                    if( FindPath( nextVertex, nextSection, iVertexArray, iSectionArray, iOrientation ) )
+                    if( FindPath( nextVertex, primaryNextSection, iVertexArray, iSectionArray, iOrientation ) )
                     {
                         ret = true;
                     }
                 }
-            } //else  UE_LOG(LogTemp,Warning,TEXT("blocked"));
-        } //else  UE_LOG(LogTemp,Warning,TEXT("no section"));
+            }
+        }
+
+        if( ( ret == false ) || ( primaryNextSection == NULL ) )
+        {
+            FOdysseyVectorSection* secondaryNextSection = nextVertex->GetOtherSection( iSection );
+
+            if( secondaryNextSection )
+            {
+                if( secondaryNextSection->IsBlocked( nextVertex ) == false )
+                {
+                    if( ( secondaryNextSection->IsVisited() == false ) /*&& ( nextSection->IsBlocked( iVertex ) == false )*/ )
+                    {
+                        if( FindPath( nextVertex, secondaryNextSection, iVertexArray, iSectionArray, iOrientation ) )
+                        {
+                            ret = true;
+                        }
+                    }
+                }
+            }
+        }
     }
 
     iSection->SetVisited( false );
@@ -201,28 +225,46 @@ UOdysseyVectorGroupPaint::FindPath( UOdysseyVectorVertex* iVertex
 }
 
 static double
-GetNormalVector( std::vector<UOdysseyVectorVertex*>& iVertexArray )
+GetNormalVector( std::vector<UOdysseyVectorVertex*>& iVertexArray
+               , std::vector<FOdysseyVectorSection*>& iSectionArray )
 {
     double z = 0;
     int32 arraySize = iVertexArray.size();
 
-    for( int i = 0; i < arraySize; i++ )
+    if( iVertexArray.size() == 1 )
     {
-        int p = ( i - 1 + arraySize ) % arraySize;
-        int n = ( i + 1             ) % arraySize;
+        // unimplemented
+    }
 
-        if( iVertexArray[i]->GetClass() == UOdysseyVectorVertexIntersection::StaticClass() )
+    if( iVertexArray.size() == 2 )
+    {
+        ::ULIS::FVec2D startVector =   iSectionArray[0]->GetVectorFromVertex( iVertexArray[0] );
+        ::ULIS::FVec2D endVector   = - iSectionArray[1]->GetVectorFromVertex( iVertexArray[0] );
+
+        z = FOdysseyVector::Cross2D( startVector, endVector );
+    }
+
+    if( iVertexArray.size() >= 3 )
+    {
+        for( int i = 0; i < arraySize; i++ )
         {
+            int p = ( i - 1 + arraySize ) % arraySize;
+            int n = ( i + 1             ) % arraySize;
+
             ::ULIS::FVec2D& vpCoords = iVertexArray[p]->GetCoords();
             ::ULIS::FVec2D& viCoords = iVertexArray[i]->GetCoords();
             ::ULIS::FVec2D& vnCoords = iVertexArray[n]->GetCoords();
             ::ULIS::FVec2D vpvi = viCoords - vpCoords;
             ::ULIS::FVec2D vivn = vnCoords - viCoords;
 
-            z += ( ( vpvi.y * vivn.x ) - ( vpvi.x * vivn.y ) );
-            /*z += ( ( viCoords.x - vnCoords.x ) * ( viCoords.y + vnCoords.y ) );*/
+            /*z += ( ( vpvi.y * vivn.x ) - ( vpvi.x * vivn.y ) );*/
+    // https://www.khronos.org/opengl/wiki/Calculating_a_Surface_Normal
+    // Newell's method
+            z += ( ( vnCoords.x - viCoords.x ) * ( vnCoords.y + viCoords.y ) );
         }
     }
+
+    //UE_LOG(LogTemp,Warning,TEXT("Normal Z:%f"), z);
 
     return z;
 }
@@ -244,9 +286,12 @@ UOdysseyVectorGroupPaint::MarchVertex( UOdysseyVectorVertexIntersection* iInters
 
         // there are situations were the algorithm takes the outer ring, in that case it would find a cycle that must be discarded.
 
+
         if( hasCycle )
         {
-            if( /*CheckPath( vertexArray, sectionArray ) == true*/ GetNormalVector( vertexArray ) > 0.0f )
+            //UE_LOG(LogTemp,Warning,TEXT("candidate cycle of size:%d (sections :%d)"),vertexArray.size(),sectionArray.size());
+
+            if( /*CheckPath( vertexArray, sectionArray ) == true*/ GetNormalVector( vertexArray, sectionArray ) > 0.0f )
             {
                 //PrintCycle( vertexArray, sectionArray );
 
@@ -265,12 +310,12 @@ UOdysseyVectorGroupPaint::FindCycles()
     // clear mLoopList
     ClearCycles();
 
-    intersectionVertexArray.reserve( 500 );
+    intersectionVertexArray.reserve( 60 );
 
     totalVertexCount = BuildGraph( intersectionVertexArray );
-
+/*
     mNodeMemoryPool = ( FCycleNode* ) realloc ( mNodeMemoryPool, totalVertexCount * sizeof( FCycleNode ) );
-
+*/
     //UE_LOG( LogTemp, Warning, TEXT("Detection -----------------------------------------------------------") );
     //UE_LOG( LogTemp, Warning, TEXT("Intersection vertices:%d"), intersectionVertexList.size() );
 
@@ -280,6 +325,8 @@ UOdysseyVectorGroupPaint::FindCycles()
     }
 
     //UE_LOG( LogTemp, Warning, TEXT("total cycles:%d"), cycleCount );
+
+    OrderCycles();
 
     Colorize();
 }
@@ -387,6 +434,41 @@ UOdysseyVectorGroupPaint::BuildGraph( std::vector<UOdysseyVectorVertexIntersecti
     //UE_LOG( LogTemp, Warning, TEXT("Intersections:%d"), iIntersectionVertexList.size() );
 
     return intersectionCount + vertexCount;
+}
+
+void
+UOdysseyVectorGroupPaint::OrderCycles()
+{
+    for( int i = 0; i < mLoopArray.size(); i++ )
+    {
+        FOdysseyVectorLoop* cycle = mLoopArray[i];
+
+        for( int j = 0; j < mLoopArray.size(); j++ )
+        {
+           FOdysseyVectorLoop* innerCycle = mLoopArray[j];
+
+           if( cycle != innerCycle )
+           {
+               if( innerCycle->FitsIn( cycle ) )
+               {
+                   FOdysseyVectorLoop* parentCycle = innerCycle->GetParentCycle();
+
+                   if( parentCycle )
+                   {
+                       if( parentCycle->FitsIn( cycle ) == false )
+                       {
+                           parentCycle->RemoveChild( innerCycle );
+                           cycle->AppendChild( innerCycle );
+                       }
+                   }
+                   else
+                   {
+                       cycle->AppendChild( innerCycle );
+                   }
+               }
+           }
+        }
+    }
 }
 
 void

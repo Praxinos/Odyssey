@@ -176,7 +176,7 @@ UOdysseyVectorVertex::GetCycleNextSection( FOdysseyVectorSection* iLastSection, 
         }
     }
 
-    return GetOtherSection( iLastSection );
+    return /*GetOtherSection( iLastSection )*/nullptr;
 }
 
 void

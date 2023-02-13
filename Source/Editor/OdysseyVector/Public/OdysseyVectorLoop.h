@@ -33,6 +33,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorLoop
         uint32 mValence;
         ::ULIS::FVec2D mMin;
         ::ULIS::FVec2D mMax;
+        std::list<FOdysseyVectorLoop*> mChildrenList;
+        FOdysseyVectorLoop* mParentCycle;
 
     public:
         static FOdysseyVectorLoop* Exists( uint64 iID
@@ -52,12 +54,17 @@ class ODYSSEYVECTOR_API FOdysseyVectorLoop
         void SetColor( uint32 iColor );
         uint32 GetColor();
 
+        void AppendChild( FOdysseyVectorLoop *iChild );
+        void RemoveChild( FOdysseyVectorLoop *iChild );
+        FOdysseyVectorLoop* GetParentCycle();
+
         FOdysseyVectorBucket* GetBucket();
         void SetBucket( FOdysseyVectorBucket* iBucket );
         std::vector<UOdysseyVectorVertex*>& GetVertexArray();
         std::vector<FOdysseyVectorSection*>& GetSectionArray();
         void SetMarched( bool iMarched );
         bool IsMarched();
+        bool FitsIn( FOdysseyVectorLoop* iParentCandidate );
 
         void Block();
         void UnBlock();

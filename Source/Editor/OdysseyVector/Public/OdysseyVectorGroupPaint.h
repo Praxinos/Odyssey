@@ -40,7 +40,6 @@ class ODYSSEYVECTOR_API UOdysseyVectorGroupPaint : public UOdysseyVectorGroup
 
     private:
         FCycleNode* mNodeMemoryPool;
-        void ClearCycles();
         void MarchVertex( UOdysseyVectorVertexIntersection* iVertex );
         FOdysseyVectorLoop* HasCycle( uint64 iID );
 
@@ -96,6 +95,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorGroupPaint : public UOdysseyVectorGroup
         FOdysseyVectorBucket* GetBucket( double iX, double iY );
         UOdysseyVectorHandleBucket* PickBucketHandle( double iX, double iY );
         void DrawBuckets( ::ULIS::FRectD& iRoi, uint64 iFlags );
-
+        void OrderCycles();
+        void ClearCycles();
 
 };
