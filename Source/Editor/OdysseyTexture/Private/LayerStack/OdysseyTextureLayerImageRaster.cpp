@@ -287,7 +287,7 @@ UOdysseyTextureLayerImageRaster::Serialize(FArchive& Ar)
 {
     Super::Serialize(Ar);
     
-    Ar << RasterBlock;
+    Ar << *RasterBlock;
 }
 
 

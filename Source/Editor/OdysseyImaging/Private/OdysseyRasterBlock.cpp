@@ -385,9 +385,12 @@ FOdysseyRasterBlock::LoadBlockFromBulkData(TSharedRef<::ULIS::FBlock, ESPMode::T
 }
 
 FArchive&
-operator<<(FArchive& Ar, TSharedPtr<FOdysseyRasterBlock>& iRasterBlock)
+operator<<(FArchive& Ar, FOdysseyRasterBlock& iRasterBlock)
 {
-    iRasterBlock->Serialize(Ar);
+    //The editorbulkdata serialization system needs an owner
+    //as in the future, the version that serializes without an owner will be removed
+    check(iRasterBlock.GetOwner() != nullptr);
+    iRasterBlock.Serialize(Ar);
     return Ar;
 }
 

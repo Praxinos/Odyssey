@@ -226,4 +226,4 @@ private:
 };
 
 
-ODYSSEYIMAGING_API FArchive& operator<<(FArchive& Ar, TSharedPtr<FOdysseyRasterBlock>& iRasterBlock);
+ODYSSEYIMAGING_API FArchive& operator<<(FArchive& Ar, FOdysseyRasterBlock& iRasterBlock);
