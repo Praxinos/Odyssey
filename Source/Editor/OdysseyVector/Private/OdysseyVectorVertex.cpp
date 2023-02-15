@@ -168,8 +168,7 @@ UOdysseyVectorVertex::GetCycleNextSection( FOdysseyVectorSection* iLastSection, 
         {
             ::ULIS::FVec2D sectionVector = section->GetVectorFromVertex( this );
 
-            if( ( FOdysseyVector::Cross2D( sectionVector, lastSectionVector ) * iOrientation > 0.0f ) // same side
-              || ( mSectionList.size() == 2 ) ) // no other choice
+            if( ( FOdysseyVector::Cross2D( sectionVector, lastSectionVector ) * iOrientation > 0.0f ) )
             {
                 return section;
             }

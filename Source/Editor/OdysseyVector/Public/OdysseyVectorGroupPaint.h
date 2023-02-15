@@ -42,6 +42,9 @@ class ODYSSEYVECTOR_API UOdysseyVectorGroupPaint : public UOdysseyVectorGroup
         FCycleNode* mNodeMemoryPool;
         void MarchVertex( UOdysseyVectorVertexIntersection* iVertex );
         FOdysseyVectorLoop* HasCycle( uint64 iID );
+        static const uint32 NOCYCLE = 0;
+        static const uint32 BLOCKED = 1;
+        static const uint32 HASCYCLE = 2;
 
     public:
         void ApplyBucket( FOdysseyVectorBucket* iBucket );
@@ -80,7 +83,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorGroupPaint : public UOdysseyVectorGroup
                                     , std::vector<UOdysseyVectorVertex*>& oVertexArray
                                     , std::vector<UOdysseyVectorVertex*>& oSectionArray );
 */
-        bool FindPath( UOdysseyVectorVertex* iVertex
+        uint32 FindPath( UOdysseyVectorVertex* iVertex
                                   , FOdysseyVectorSection* iSection
                                   , std::vector<UOdysseyVectorVertex*>& iVertexArray
                                   , std::vector<FOdysseyVectorSection*>& iSectionArray

@@ -153,7 +153,7 @@ PrintCycle( std::vector<UOdysseyVectorVertex*>& vertexArray
     }
 }
 
-bool
+uint32
 UOdysseyVectorGroupPaint::FindPath( UOdysseyVectorVertex* iVertex
                                   , FOdysseyVectorSection* iSection
                                   , std::vector<UOdysseyVectorVertex*>& iVertexArray
@@ -162,7 +162,10 @@ UOdysseyVectorGroupPaint::FindPath( UOdysseyVectorVertex* iVertex
 {
     UOdysseyVectorVertex* nextVertex = ( iSection->GetVertex(0) == iVertex ) ? iSection->GetVertex(1)
                                                                              : iSection->GetVertex(0);
-    bool ret = false;
+    bool hasPrimary = false;
+    bool hasSecondary = false;
+    bool hasTertiary = false;
+    uint32 ret = UOdysseyVectorGroupPaint::NOCYCLE;
 
     iVertexArray.push_back( iVertex );
     iSectionArray.push_back( iSection );
@@ -179,49 +182,96 @@ UOdysseyVectorGroupPaint::FindPath( UOdysseyVectorVertex* iVertex
 /*
         UE_LOG(LogTemp,Warning,TEXT("FOdysseyVectorLoop::Build: Array size %d %d"),iVertexArray.size(),iSectionArray.size());
 */
-        ret = true;
+        iSection->SetVisited( false );
+
+        ret = UOdysseyVectorGroupPaint::HASCYCLE;
     }
     else
     {
-        FOdysseyVectorSection* primaryNextSection = nextVertex->GetCycleNextSection( iSection, iOrientation );
+        FOdysseyVectorSection* primaryNextSection = nextVertex->GetCycleNextSection( iSection, 1.0f );
+        FOdysseyVectorSection* secondaryNextSection = nextVertex->GetOtherSection( iSection );
+        FOdysseyVectorSection* tertiaryNextSection = nextVertex->GetCycleNextSection( iSection, -1.0f );
 
         if( primaryNextSection )
         {
             if( primaryNextSection->IsBlocked( nextVertex ) == false )
             {
-                if( ( primaryNextSection->IsVisited() == false ) /*&& ( nextSection->IsBlocked( iVertex ) == false )*/ )
+                if( ( primaryNextSection->IsVisited() == false ) )
                 {
-                    if( FindPath( nextVertex, primaryNextSection, iVertexArray, iSectionArray, iOrientation ) )
-                    {
-                        ret = true;
-                    }
+                    ret = FindPath( nextVertex, primaryNextSection, iVertexArray, iSectionArray, iOrientation );
                 }
+                else
+                {
+                    ret = UOdysseyVectorGroupPaint::NOCYCLE;
+                }
+            }
+            else
+            {
+                ret = UOdysseyVectorGroupPaint::BLOCKED;
             }
         }
 
-        if( ( ret == false ) || ( primaryNextSection == NULL ) )
+        if( ( ret == UOdysseyVectorGroupPaint::NOCYCLE ) && secondaryNextSection )
         {
-            FOdysseyVectorSection* secondaryNextSection = nextVertex->GetOtherSection( iSection );
-
-            if( secondaryNextSection )
+            if( secondaryNextSection->IsBlocked( nextVertex ) == false )
             {
-                if( secondaryNextSection->IsBlocked( nextVertex ) == false )
+                if( ( secondaryNextSection->IsVisited() == false ) )
                 {
-                    if( ( secondaryNextSection->IsVisited() == false ) /*&& ( nextSection->IsBlocked( iVertex ) == false )*/ )
-                    {
-                        if( FindPath( nextVertex, secondaryNextSection, iVertexArray, iSectionArray, iOrientation ) )
-                        {
-                            ret = true;
-                        }
-                    }
+                    ret = FindPath( nextVertex, secondaryNextSection, iVertexArray, iSectionArray, iOrientation );
                 }
+                else
+                {
+                    ret = UOdysseyVectorGroupPaint::NOCYCLE;
+                }
+            }
+            else
+            {
+                ret = UOdysseyVectorGroupPaint::BLOCKED;
+            }
+        }
+
+        if( ( ret == UOdysseyVectorGroupPaint::NOCYCLE ) && tertiaryNextSection )
+        {
+            if( tertiaryNextSection->IsBlocked( nextVertex ) == false )
+            {
+                if( ( tertiaryNextSection->IsVisited() == false ) )
+                {
+                    ret = FindPath( nextVertex, tertiaryNextSection, iVertexArray, iSectionArray, iOrientation );
+                }
+                else
+                {
+                    ret = UOdysseyVectorGroupPaint::NOCYCLE;
+                }
+            }
+            else
+            {
+                ret = UOdysseyVectorGroupPaint::BLOCKED;
             }
         }
     }
 
+    iSection->Block( iVertex );
     iSection->SetVisited( false );
 
+    if( ret != UOdysseyVectorGroupPaint::HASCYCLE )
+    {
+        iVertexArray.pop_back();
+        iSectionArray.pop_back();
+    }
+
     return ret;
+}
+
+static void
+BlockPath( std::vector<UOdysseyVectorVertex*>& iVertexArray
+          , std::vector<FOdysseyVectorSection*>& iSectionArray
+          , bool iIsContour )
+{
+    for( int i = 0; i < iSectionArray.size(); i++ )
+    {
+
+        iSectionArray[i]->Block( iVertexArray[i] );
+    }
 }
 
 static double
@@ -282,20 +332,23 @@ UOdysseyVectorGroupPaint::MarchVertex( UOdysseyVectorVertexIntersection* iInters
         std::vector<UOdysseyVectorVertex*> vertexArray;
         std::vector<FOdysseyVectorSection*> sectionArray;
 
-        bool hasCycle = FindPath( iIntersectionVertex, section, vertexArray, sectionArray, 1.0f );
+        if( section->IsBlocked(iIntersectionVertex) == false ) {
+            uint32 ret = FindPath( iIntersectionVertex, section, vertexArray, sectionArray, 1.0f );
+/*
+            BlockPath( vertexArray, sectionArray, false );
+*/
+            // there are situations were the algorithm takes the outer ring, in that case it would find a cycle that must be discarded.
 
-        // there are situations were the algorithm takes the outer ring, in that case it would find a cycle that must be discarded.
-
-
-        if( hasCycle )
-        {
-            //UE_LOG(LogTemp,Warning,TEXT("candidate cycle of size:%d (sections :%d)"),vertexArray.size(),sectionArray.size());
-
-            if( /*CheckPath( vertexArray, sectionArray ) == true*/ GetNormalVector( vertexArray, sectionArray ) > 0.0f )
+            if( ret == UOdysseyVectorGroupPaint::HASCYCLE )
             {
-                //PrintCycle( vertexArray, sectionArray );
+                //UE_LOG(LogTemp,Warning,TEXT("candidate cycle of size:%d (sections :%d)"),vertexArray.size(),sectionArray.size());
 
-                mLoopArray.push_back( new FOdysseyVectorLoop( *this, /*iCycleID*/0, vertexArray, sectionArray ) );
+                if( /*CheckPath( vertexArray, sectionArray ) == true*/ GetNormalVector( vertexArray, sectionArray ) > 0.0f )
+                {
+                    //PrintCycle( vertexArray, sectionArray );
+
+                    mLoopArray.push_back( new FOdysseyVectorLoop( *this, /*iCycleID*/0, vertexArray, sectionArray ) );
+                }
             }
         }
     }
@@ -329,57 +382,6 @@ UOdysseyVectorGroupPaint::FindCycles()
     OrderCycles();
 
     Colorize();
-}
-
-void
-UOdysseyVectorGroupPaint::SimplifyGraph()
-{
-    std::list<FOdysseyVectorSection*> sectionList;
-    bool keepSimplifying;
-
-    for( std::list<UOdysseyVectorObject*>::iterator oit = mChildrenList.begin(); oit != mChildrenList.end(); ++oit )
-    {
-        UOdysseyVectorObject *child = (*oit);
-
-        if( child->GetClass() == UOdysseyVectorPathCubic::StaticClass() )
-        {
-            UOdysseyVectorPathCubic* cubicPath = Cast<UOdysseyVectorPathCubic>(child);
-            std::list<UOdysseyVectorSegment*>& segmentList = cubicPath->GetSegmentList();
-
-            for( std::list<UOdysseyVectorSegment*>::iterator it = segmentList.begin(); it != segmentList.end(); ++it )
-            {
-                UOdysseyVectorSegmentCubic *cubicSegment = Cast<UOdysseyVectorSegmentCubic>(*it);
-                std::list<FOdysseyVectorSection*>& segmentSectionList = cubicSegment->GetSectionList();
-
-                sectionList.insert( sectionList.end(), segmentSectionList.begin(), segmentSectionList.end() );
-            }
-        }
-    }
-
-    do
-    {
-        keepSimplifying = false;
-    //UE_LOG( LogTemp, Warning, TEXT("Simplify") );
-    //UE_LOG( LogTemp, Warning, TEXT("Sections:%d"), sectionList.size() );
-        sectionList.remove_if( [&keepSimplifying]( FOdysseyVectorSection *section )
-            {
-                if( ( section->GetVertex(0)->GetSectionCount() == 1 )
-                ||  ( section->GetVertex(1)->GetSectionCount() == 1 ) )
-                {
-                    keepSimplifying = true;
-/*
-                    section->GetVertex(0)->RemoveSection( section );
-                    section->GetVertex(1)->RemoveSection( section );
-*/
-                    section->GetSegment()->RemoveSection( section );
-
-                    return true;
-                }
-
-                return false;
-            } );
-    } while ( keepSimplifying );
-    //UE_LOG( LogTemp, Warning, TEXT("End Sections:%d"), sectionList.size() );
 }
 
 uint32
@@ -425,11 +427,6 @@ UOdysseyVectorGroupPaint::BuildGraph( std::vector<UOdysseyVectorVertexIntersecti
 
         cubicSegment = cubicSegmenList.size() ? Cast<UOdysseyVectorSegmentCubic>( cubicSegmenList.back() ) : nullptr;
     }
-
-    // Step Two - simply the graph by removing sections that are not part of a cycle. to do that we proceed with several passes
-    // by removing the sections that are at a dead-end and go-on until no section is a dead-end.
-
-    SimplifyGraph();
 
     //UE_LOG( LogTemp, Warning, TEXT("Intersections:%d"), iIntersectionVertexList.size() );
 

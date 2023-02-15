@@ -227,7 +227,7 @@ FOdysseyVectorLoop::Build( std::vector<UOdysseyVectorVertex*>& iVertexArray
             double    nextVertexT =    nextVertex->GetT( *segment );
             ::ULIS::FVec2D& currentVertexCoords = currentVertex->GetCoords();
 
-            section->Block( iVertexArray[i] );
+            /*section->Block( iVertexArray[i] );*/
 
             BuildSegmentCubic ( static_cast<UOdysseyVectorSegmentCubic&>(*segment), currentVertexT, nextVertexT );
 
