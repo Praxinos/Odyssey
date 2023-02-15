@@ -50,6 +50,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
         ::ULIS::FRectD GenerateMask( std::vector<::ULIS::FVec2D>& iPointArray );
         void UseMaskImage();
         void UseColorImage();
+        void GetColorImagePixelValue( uint32 iX, uint32 iY, uint8 *oR, uint8* oG, uint8 *oB, uint8 *oA );
+        ::ULIS::FColor GetColorImagePixelValue( uint32 iX, uint32 iY );
 };
 
 ODYSSEYVECTOR_API FArchive& operator<<(FArchive &Ar, FOdysseyVectorEngine* iVectorEngine );

@@ -44,7 +44,8 @@ FOdysseyPainterEditorToolsTab::CreateWidget()
         mEditor->GetVectorSceneScaleTool(),
         mEditor->GetVectorScenePanTool(),
         mEditor->GetVectorEraserTool(),
-        mEditor->GetPaintBucketTool()
+        mEditor->GetPaintBucketTool(),
+        mEditor->GetColorPickerTool()
     };
 
     return SNew( SOdysseyPainterEditorToolsTileView )

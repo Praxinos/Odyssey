@@ -16,7 +16,13 @@ FOdysseyVectorHUDSelection::SetSelecting( bool iSelecting )
 {
     mSelecting = iSelecting;
 }
+/*
+void
+FOdysseyVectorHUDSelection::SetMode( )
+{
 
+}
+*/
 void
 FOdysseyVectorHUDSelection::Draw( UOdysseyVectorRoot& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
@@ -53,11 +59,12 @@ FOdysseyVectorHUDSelection::Draw( UOdysseyVectorRoot& iScene, ::ULIS::FRectD& iR
 
                 bbox = selectedObject->GetBBox( false );
 
-                path.moveTo( worldMatrix.mapPoint( bbox.x         , bbox.y          ) );
-                path.lineTo( worldMatrix.mapPoint( bbox.x + bbox.w, bbox.y          ) );
-                path.lineTo( worldMatrix.mapPoint( bbox.x + bbox.w, bbox.y + bbox.h ) );
-                path.lineTo( worldMatrix.mapPoint( bbox.x         , bbox.y + bbox.h ) );
-                path.lineTo( worldMatrix.mapPoint( bbox.x         , bbox.y          ) );
+                blctx->setMatrix( worldMatrix );
+                path.moveTo( bbox.x         , bbox.y          );
+                path.lineTo( bbox.x + bbox.w, bbox.y          );
+                path.lineTo( bbox.x + bbox.w, bbox.y + bbox.h );
+                path.lineTo( bbox.x         , bbox.y + bbox.h );
+                path.lineTo( bbox.x         , bbox.y          );
             }
 
             if( selectedObjectList.size() > 1 )

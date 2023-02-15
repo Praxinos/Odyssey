@@ -269,7 +269,6 @@ BlockPath( std::vector<UOdysseyVectorVertex*>& iVertexArray
 {
     for( int i = 0; i < iSectionArray.size(); i++ )
     {
-
         iSectionArray[i]->Block( iVertexArray[i] );
     }
 }
@@ -288,8 +287,8 @@ GetNormalVector( std::vector<UOdysseyVectorVertex*>& iVertexArray
 
     if( iVertexArray.size() == 2 )
     {
-        ::ULIS::FVec2D startVector =   iSectionArray[0]->GetVectorFromVertex( iVertexArray[0] );
-        ::ULIS::FVec2D endVector   = - iSectionArray[1]->GetVectorFromVertex( iVertexArray[0] );
+        ::ULIS::FVec2D startVector =  -iSectionArray[0]->GetVectorFromVertex( iVertexArray[1] );
+        ::ULIS::FVec2D endVector   =   iSectionArray[1]->GetVectorFromVertex( iVertexArray[1] );
 
         z = FOdysseyVector::Cross2D( startVector, endVector );
     }
@@ -298,19 +297,31 @@ GetNormalVector( std::vector<UOdysseyVectorVertex*>& iVertexArray
     {
         for( int i = 0; i < arraySize; i++ )
         {
-            int p = ( i - 1 + arraySize ) % arraySize;
-            int n = ( i + 1             ) % arraySize;
-
-            ::ULIS::FVec2D& vpCoords = iVertexArray[p]->GetCoords();
+            int n = ( i + 1 ) % arraySize;
+            UOdysseyVectorSegment* segment = iSectionArray[i]->GetSegment();
             ::ULIS::FVec2D& viCoords = iVertexArray[i]->GetCoords();
             ::ULIS::FVec2D& vnCoords = iVertexArray[n]->GetCoords();
-            ::ULIS::FVec2D vpvi = viCoords - vpCoords;
-            ::ULIS::FVec2D vivn = vnCoords - viCoords;
+            double ti = iVertexArray[i]->GetT( *segment );
+            double tn = iVertexArray[n]->GetT( *segment );
+            double deltaT = tn - ti;
+            int subdiv = 8;
+            double stepT = deltaT / subdiv;
+            double t0 = ti;
 
-            /*z += ( ( vpvi.y * vivn.x ) - ( vpvi.x * vivn.y ) );*/
+            for( int j = 0; j < subdiv; j++ )
+            {
+                double t1 = t0 + stepT;
+                ::ULIS::FVec2D v0Coords = segment->GetPointAt( t0 );
+                ::ULIS::FVec2D v1Coords = segment->GetPointAt( t1 );
+
+                z += ( ( v0Coords.x - v1Coords.x ) * ( v0Coords.y + v1Coords.y ) );
+
+                t0 += stepT;
+            }
+
     // https://www.khronos.org/opengl/wiki/Calculating_a_Surface_Normal
     // Newell's method
-            z += ( ( vnCoords.x - viCoords.x ) * ( vnCoords.y + viCoords.y ) );
+            //z += ( ( viCoords.x - vnCoords.x ) * ( viCoords.y + vnCoords.y ) );
         }
     }
 
@@ -341,11 +352,11 @@ UOdysseyVectorGroupPaint::MarchVertex( UOdysseyVectorVertexIntersection* iInters
 
             if( ret == UOdysseyVectorGroupPaint::HASCYCLE )
             {
-                //UE_LOG(LogTemp,Warning,TEXT("candidate cycle of size:%d (sections :%d)"),vertexArray.size(),sectionArray.size());
+                UE_LOG(LogTemp,Warning,TEXT("candidate cycle of size:%d (sections :%d)"),vertexArray.size(),sectionArray.size());
 
                 if( /*CheckPath( vertexArray, sectionArray ) == true*/ GetNormalVector( vertexArray, sectionArray ) > 0.0f )
                 {
-                    //PrintCycle( vertexArray, sectionArray );
+                    PrintCycle( vertexArray, sectionArray );
 
                     mLoopArray.push_back( new FOdysseyVectorLoop( *this, /*iCycleID*/0, vertexArray, sectionArray ) );
                 }

@@ -43,6 +43,47 @@ FOdysseyVectorEngine::GetInvalidateRegion()
 }
 
 void
+FOdysseyVectorEngine::GetColorImagePixelValue( uint32 iX, uint32 iY, uint8 *oR, uint8* oG, uint8 *oB, uint8 *oA )
+{
+    BLImageData imageData;
+
+    mBLImage->getData( &imageData );
+
+    if( ( iX >= 0 ) && ( iX < static_cast<uint32>(imageData.size.w) )
+     && ( iY >= 0 ) && ( iY < static_cast<uint32>(imageData.size.h) ) ) 
+    {
+        switch( imageData.format )
+        {
+            case BL_FORMAT_PRGB32:
+            {
+                uint32 offset = ( iY * imageData.stride ) + ( iX * sizeof( uint32 ) );
+
+                uint8 *imgBuffer =  &((uint8*)imageData.pixelData)[offset];
+
+                *oR = imgBuffer[0];
+                *oG = imgBuffer[1];
+                *oB = imgBuffer[2];
+                *oA = imgBuffer[3];
+            }
+            break;
+
+            default:
+            break;
+        }
+    }
+}
+
+::ULIS::FColor
+FOdysseyVectorEngine::GetColorImagePixelValue( uint32 iX, uint32 iY )
+{
+    uint8 R, G, B, A;
+
+    GetColorImagePixelValue( iX, iY, &R, &G, &B, &A );
+
+    return ::ULIS::FColor::RGBA8( R, G, B, A );
+}
+
+void
 FOdysseyVectorEngine::RenderHUD( UOdysseyVectorRoot& iScene )
 {
     std::list<UOdysseyVectorObject*> selectedObjectList = iScene.GetSelectedObjectList();

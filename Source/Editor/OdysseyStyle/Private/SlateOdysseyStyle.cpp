@@ -350,6 +350,7 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "PainterEditor.ToolsTab.ClearLayer64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/clear_layer_64", mIcon64x64 ) );
     Set( "PainterEditor.ToolsTab.ClearLayer32", new IMAGE_BRUSH( "PainterEditor/ToolsTab/clear_layer_32", mIcon32x32 ) );
     Set( "PainterEditor.ToolsTab.ClearLayer16", new IMAGE_BRUSH( "PainterEditor/ToolsTab/clear_layer_16", mIcon16x16 ) );
+    Set( "PainterEditor.ToolsTab.ColorPickerTool64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/color_picker_tool_64", mIcon64x64 ) );
     Set( "PainterEditor.ToolsTab.PaintBucket64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/paint_bucket_64", mIcon64x64 ) );
     Set( "PainterEditor.ToolsTab.PaintBucket32", new IMAGE_BRUSH( "PainterEditor/ToolsTab/paint_bucket_32", mIcon32x32 ) );
     Set( "PainterEditor.ToolsTab.PaintBucket16", new IMAGE_BRUSH( "PainterEditor/ToolsTab/paint_bucket_16", mIcon16x16 ) );

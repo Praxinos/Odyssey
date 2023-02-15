@@ -17,6 +17,7 @@
 #include "Tools/VectorScenePanTool/OdysseyPainterEditorVectorScenePanTool.h"
 #include "Tools/VectorEraserTool/OdysseyPainterEditorVectorEraserTool.h"
 #include "Tools/PaintBucketTool/OdysseyPainterEditorPaintBucketTool.h"
+#include "Tools/ColorPickerTool/OdysseyPainterEditorColorPickerTool.h"
 #include <ULIS>
 
 class FOdysseyHUDSystem;
@@ -66,6 +67,7 @@ public:
     virtual UOdysseyPainterEditorVectorScenePanTool*                 GetVectorScenePanTool() const = 0;
     virtual UOdysseyPainterEditorVectorEraserTool*                   GetVectorEraserTool() const = 0;
     virtual UOdysseyPainterEditorPaintBucketTool*                    GetPaintBucketTool() const = 0;
+    virtual UOdysseyPainterEditorColorPickerTool*                    GetColorPickerTool() const = 0;
 
     void SelectDefaultTool();
 
