@@ -21,13 +21,13 @@ class ODYSSEYVECTOR_API UOdysseyVectorObject : public UObject
         static const uint32 PICK_FREEHAND  = ( 1 << 3 );
 
         // DO NOT CHANGE !
-        static const uint32 VECTORROOTTYPE      = 0;
-        static const uint32 VECTOROBJECTTYPE    = 1;
-        static const uint32 VECTORGROUPETYPE    = 2;
-        static const uint32 VECTORCIRCLETYPE    = 3;
-        static const uint32 VECTORRECTANGLETYPE = 4;
-        static const uint32 VECTORPATHCUBICTYPE = 5;
-
+        static const uint32 VECTORROOTTYPE       = 0;
+        static const uint32 VECTOROBJECTTYPE     = 1;
+        static const uint32 VECTORGROUPTYPE      = 2;
+        static const uint32 VECTORCIRCLETYPE     = 3;
+        static const uint32 VECTORRECTANGLETYPE  = 4;
+        static const uint32 VECTORPATHCUBICTYPE  = 5;
+        static const uint32 VECTORGROUPPAINTTYPE = 6;
 
         static constexpr float BBOX_POINT_RADIUS = 4.0f;
 
@@ -127,8 +127,8 @@ class ODYSSEYVECTOR_API UOdysseyVectorObject : public UObject
         BLMatrix2D& GetWorldMatrix();
         BLMatrix2D& GetInverseWorldMatrix();
         std::list<UOdysseyVectorObject*>& GetChildrenList();
-        void SetStrokeColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA );
-        void SetFillColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA );
+        void SetForegroundColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA );
+        void SetBackgroundColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA );
         void SetFilled(bool iIsFilled);
         void SetStrokeWidth( double iWidth );
         double GetStrokeWidth( );
@@ -145,4 +145,6 @@ class ODYSSEYVECTOR_API UOdysseyVectorObject : public UObject
         void DrawBBox( ::ULIS::FRectD& iRoi,uint64 iFlags );
         int32 PickBBox( double iX, double iY );
         bool HasSelectedParent();
+        FColor GetForegroundColor();
+        FColor GetBackgroundColor();
 };

@@ -7,15 +7,15 @@ FOdysseyVectorBucket::~FOdysseyVectorBucket()
 {
 }
 
-FOdysseyVectorBucket::FOdysseyVectorBucket( UOdysseyVectorObject& iParent, uint32 iColor, double iX, double iY )
+FOdysseyVectorBucket::FOdysseyVectorBucket( UOdysseyVectorObject& iParent, double iX, double iY, uint8 iR, uint8 iG, uint8 iB, uint8 iA )
     : mParent ( iParent )
 {
     mCtrlPoint = UOdysseyVectorHandleBucket::New( this );
 
     mCtrlPoint->Set( HANDLEDISTANCE, 0.0f );
 
-    SetColor( iColor );
     SetCoords( iX, iY );
+    SetColor( iR, iG, iB, iA );
 }
 
 ::ULIS::FVec2D&
@@ -32,12 +32,15 @@ FOdysseyVectorBucket::SetCoords( double iX, double iY )
 }
 
 void
-FOdysseyVectorBucket::SetColor( uint32 iColor )
+FOdysseyVectorBucket::SetColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA )
 {
-    mColor = iColor;
+    mColor.R = iR;
+    mColor.G = iG;
+    mColor.B = iB;
+    mColor.A = iA;
 }
 
-uint32
+FColor
 FOdysseyVectorBucket::GetColor()
 {
     return mColor;
@@ -48,18 +51,23 @@ FOdysseyVectorBucket::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
     BLContext* blctx = mParent.GetRoot()->GetEngine()->GetBLContext();
     BLPoint origin = mParent.GetWorldMatrix().mapPoint( mCoords.x, mCoords.y );
+    BLRgba32 fillColor;
+
+    // Note: Blend2D color format is 0xAARRGGBB
+    fillColor.r = mColor.B;
+    fillColor.g = mColor.G;
+    fillColor.b = mColor.R;
+    fillColor.a = mColor.A;
 
     blctx->save();
 
     blctx->resetMatrix();
-    blctx->setFillStyle(BLRgba32(mColor));
+    blctx->setFillStyle( fillColor );
     blctx->fillRect( origin.x - 10, origin.y - 10, 20, 20 );
 
-
     blctx->setStrokeWidth( 1.0f );
-    blctx->setStrokeStyle(BLRgba32(0xFF000000));
+    blctx->setStrokeStyle( BLRgba32(0xFF000000) );
     blctx->strokeRect( origin.x - 10, origin.y - 10, 20, 20 );
-
 
     blctx->strokeLine( origin.x, origin.y, origin.x + mCtrlPoint->GetX(), origin.y + mCtrlPoint->GetY() );
     blctx->fillCircle( origin.x + mCtrlPoint->GetX(), origin.y + mCtrlPoint->GetY(), HANDLERADIUS );

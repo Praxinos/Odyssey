@@ -16,6 +16,10 @@ CreateObject( uint32 iObjectType )
             newObject = NewObject<UOdysseyVectorPathCubic>();
         break;
 
+        case UOdysseyVectorObject::VECTORGROUPPAINTTYPE :
+            newObject = NewObject<UOdysseyVectorGroupPaint>();
+        break;
+
         default :
             newObject = NewObject<UOdysseyVectorObject>();
         break;
@@ -144,12 +148,45 @@ FOdysseyVectorImport::ReadObjectsDefine( std::vector<UOdysseyVectorObject*>& vec
                     ReadObjectsDefineObjectTransform( *vectorObjectArray[objectID], Ar.Tell() + iChunkLen, Ar );
                 break;
 
+                case FOdysseyVectorExport::CHUNK_OBJECT_FOREGROUNDCOLOR:
+                {
+                    uint8 R, G, B, A;
+
+                    Ar << R;
+                    Ar << G;
+                    Ar << B;
+                    Ar << A;
+
+                    vectorObjectArray[objectID]->SetForegroundColor( R, G, B, A );
+                }
+                break;
+
+                case FOdysseyVectorExport::CHUNK_OBJECT_BACKGROUNDCOLOR:
+                {
+                    uint8 R, G, B, A;
+
+                    Ar << R;
+                    Ar << G;
+                    Ar << B;
+                    Ar << A;
+
+                    vectorObjectArray[objectID]->SetBackgroundColor( R, G, B, A );
+                }
+                break;
+
                 case FOdysseyVectorExport::CHUNK_OBJECT_PATHCUBIC:
                 {
                     UOdysseyVectorPathCubic* cubicPath = Cast<UOdysseyVectorPathCubic>( vectorObjectArray[objectID] );
 
                     FOdysseyVectorImport::ReadObjectPathCubic( *cubicPath, Ar.Tell() + iChunkLen, Ar );
+                }
+                break;
 
+                case FOdysseyVectorExport::CHUNK_OBJECT_GROUPPAINT:
+                {
+                    UOdysseyVectorGroupPaint* paintGroup = Cast<UOdysseyVectorGroupPaint>( vectorObjectArray[objectID] );
+
+                    FOdysseyVectorImport::ReadObjectGroupPaint( *paintGroup, Ar.Tell() + iChunkLen, Ar );
                 }
                 break;
 

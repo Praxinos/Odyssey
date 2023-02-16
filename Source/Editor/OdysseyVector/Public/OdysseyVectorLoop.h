@@ -25,7 +25,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorLoop
         BLPath mPath;
         UOdysseyVectorObject& mParent;
         uint64 mID;
-        uint32 mColor;
+        FColor mColor;
         FOdysseyVectorBucket* mBucket;
         std::vector<UOdysseyVectorVertex*> mVertexArray;
         std::vector<FOdysseyVectorSection*> mSectionArray;
@@ -52,7 +52,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorLoop
                   , std::vector<FOdysseyVectorSection*>& iSectionArray );
         bool HitTest( double iX, double iY );
         void SetColor( uint32 iColor );
-        uint32 GetColor();
+        FColor GetColor();
 
         void AppendChild( FOdysseyVectorLoop *iChild );
         void RemoveChild( FOdysseyVectorLoop *iChild );

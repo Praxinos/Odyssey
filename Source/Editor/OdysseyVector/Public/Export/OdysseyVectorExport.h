@@ -9,6 +9,7 @@
 #include "OdysseyVectorObject.h"
 #include "OdysseyVectorPathCubic.h"
 #include "OdysseyVectorGroup.h"
+#include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
 
 namespace FOdysseyVectorExport
@@ -27,12 +28,17 @@ namespace FOdysseyVectorExport
                     static const uint32 CHUNK_OBJECT_TRANSFORM_TRANSLATION = 0x621d21c; // double(X)-double(Y)
                     static const uint32 CHUNK_OBJECT_TRANSFORM_ROTATION = 0xbf4d725c; // double(A)
                     static const uint32 CHUNK_OBJECT_TRANSFORM_SCALING = 0x4cc21f6d; // double(X)-double(Y)
-                static const uint32 CHUNK_OBJECT_STROKECOLOR = 0xd490269b; // uint8(R)-uint8(G)-uint8(B)-uint8(A)
-                static const uint32 CHUNK_OBJECT_FILLCOLOR = 0xd9c2a698; // uint8(R)-uint8(G)-uint8(B)-uint8(A)
+                static const uint32 CHUNK_OBJECT_FOREGROUNDCOLOR = 0xd490269b; // uint8(R)-uint8(G)-uint8(B)-uint8(A)
+                static const uint32 CHUNK_OBJECT_BACKGROUNDCOLOR = 0xd9c2a698; // uint8(R)-uint8(G)-uint8(B)-uint8(A)
                 static const uint32 CHUNK_OBJECT_PATHCUBIC = 0x138d0bec; // container
                     static const uint32 CHUNK_PATHCUBIC_GEOMETRY = 0x904a4229; // container
                         static const uint32 CHUNK_PATHCUBIC_GEOMETRY_VERTICES = 0x1116a85d; // uint32(count), array[double(X)-double(Y)-double(Radius)]
                         static const uint32 CHUNK_PATHCUBIC_GEOMETRY_SEGMENTS = 0x76cacf19; // uint32(count), array[uint32(P0ID)-uint32(P1ID)-double(CX0)-double(CY0)-double(CX1)-double(CY1)]
+                static const uint32 CHUNK_OBJECT_GROUPPAINT = 0xac92b85d; // container
+                    static const uint32 CHUNK_GROUPPAINT_BUCKETS = 0x5791cb88; // container
+                        static const uint32 CHUNK_BUCKET_ENTRY = 0x94267aa5; // container
+                            static const uint32 CHUNK_BUCKET_POSITION = 0xd492a193; // uint8(R)-uint8(G)-uint8(B)-uint8(A)
+                            static const uint32 CHUNK_BUCKET_COLOR = 0xd951af3c; // uint8(R)-uint8(G)-uint8(B)-uint8(A)
 
     void ODYSSEYVECTOR_API WriteChunk( uint32 iChunkID, FArchive &Ar, std::function<void(FArchive &Ar)> iCallback );
 
@@ -40,4 +46,5 @@ namespace FOdysseyVectorExport
     void ODYSSEYVECTOR_API WriteDeclareObjects( std::vector<UOdysseyVectorObject*>& vectorObjectArray, FArchive &Ar );
     void ODYSSEYVECTOR_API WriteDefineObjects( std::vector<UOdysseyVectorObject*>& vectorObjectArray, FArchive &Ar );
     void ODYSSEYVECTOR_API WriteObjectPathCubic( UOdysseyVectorPathCubic& iCubicPath, FArchive &Ar );
+    void ODYSSEYVECTOR_API WriteObjectGroupPaint( UOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar );
 };

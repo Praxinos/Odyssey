@@ -38,22 +38,17 @@ class ODYSSEYVECTOR_API UOdysseyVectorGroupPaint : public UOdysseyVectorGroup
     public:
         GENERATED_BODY()
 
-    private:
-        FCycleNode* mNodeMemoryPool;
+    protected:
         void MarchVertex( UOdysseyVectorVertexIntersection* iVertex );
-        FOdysseyVectorLoop* HasCycle( uint64 iID );
-        static const uint32 NOCYCLE = 0;
-        static const uint32 BLOCKED = 1;
+        static const uint32 NOCYCLE  = 0;
+        static const uint32 BLOCKED  = 1;
         static const uint32 HASCYCLE = 2;
+        std::list<FOdysseyVectorBucket*> mBucketList;
+        std::vector<FOdysseyVectorLoop*> mLoopArray;
 
     public:
         void ApplyBucket( FOdysseyVectorBucket* iBucket );
         void Colorize();
-
-        std::list<FOdysseyVectorBucket*> mBucketList;
-        std::vector<FOdysseyVectorLoop*> mLoopArray;
-
-
 
     public:
         ~UOdysseyVectorGroupPaint();
@@ -90,16 +85,18 @@ class ODYSSEYVECTOR_API UOdysseyVectorGroupPaint : public UOdysseyVectorGroup
                                   , double iOrientation
                                   , uint32 );
 
+        std::list<FOdysseyVectorBucket*>& GetBucketList();
         void MarchCycle( FOdysseyVectorLoop& iCycle );
 
         void FindCycles();
-
+        virtual uint32 GetType();
         void SimplifyGraph();
-        FOdysseyVectorBucket* Bucket( uint32 iColor, double iX, double iY );
+        FOdysseyVectorBucket* Bucket( double iX, double iY, uint8 iR, uint8 iG, uint8 iB, uint8 iA );
         FOdysseyVectorBucket* GetBucket( double iX, double iY );
         UOdysseyVectorHandleBucket* PickBucketHandle( double iX, double iY );
         void DrawBuckets( ::ULIS::FRectD& iRoi, uint64 iFlags );
         void OrderCycles();
         void ClearCycles();
+        void AddBucket( FOdysseyVectorBucket* iBucket );
 
 };

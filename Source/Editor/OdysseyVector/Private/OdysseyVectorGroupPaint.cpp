@@ -5,18 +5,25 @@
 
 UOdysseyVectorGroupPaint::~UOdysseyVectorGroupPaint()
 {
-    if( mNodeMemoryPool )
-    {
-        free ( mNodeMemoryPool );
-    }
-
     ClearCycles();
+}
+
+uint32
+UOdysseyVectorGroupPaint::GetType()
+{
+    return UOdysseyVectorObject::VECTORGROUPPAINTTYPE;
 }
 
 void
 UOdysseyVectorGroupPaint::Init( std::string iName )
 {
     SetName( iName );
+}
+
+std::list<FOdysseyVectorBucket*>&
+UOdysseyVectorGroupPaint::GetBucketList()
+{
+    return mBucketList;
 }
 
 void
@@ -67,22 +74,28 @@ UOdysseyVectorGroupPaint::GetBucket( double iX, double iY )
 }
 
 FOdysseyVectorBucket*
-UOdysseyVectorGroupPaint::Bucket( uint32 iColor, double iX, double iY )
+UOdysseyVectorGroupPaint::Bucket( double iX, double iY, uint8 iR, uint8 iG, uint8 iB, uint8 iA )
 {
     FOdysseyVectorBucket* bucket = GetBucket( iX, iY );
 
     if( bucket == nullptr )
     {
-        bucket = new FOdysseyVectorBucket( *this, iColor, iX, iY );
+        bucket = new FOdysseyVectorBucket( *this, iX, iY, iR, iG, iB, iA );
 
-        mBucketList.push_back( bucket );
+        AddBucket( bucket );
     }
 
-    bucket->SetColor( iColor );
+    bucket->SetColor( iR, iG, iB, iA );
 
     ApplyBucket( bucket );
 
     return bucket;
+}
+
+void
+UOdysseyVectorGroupPaint::AddBucket( FOdysseyVectorBucket* iBucket )
+{
+    mBucketList.push_back( iBucket );
 }
 
 void

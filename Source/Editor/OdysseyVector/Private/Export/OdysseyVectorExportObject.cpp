@@ -115,6 +115,38 @@ WriteObjectID( UOdysseyVectorObject& iObject, FArchive &Ar )
 }
 
 static void
+WriteObjectForegroundColor( UOdysseyVectorObject& iObject, FArchive &Ar )
+{
+    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_OBJECT_FOREGROUNDCOLOR
+                                    , Ar
+                                    , [&iObject](FArchive &Ar) -> void
+    {
+        FColor foreground = iObject.GetForegroundColor();
+
+        Ar << foreground.R;
+        Ar << foreground.G;
+        Ar << foreground.B;
+        Ar << foreground.A;
+    } );
+}
+
+static void
+WriteObjectBackgroundColor( UOdysseyVectorObject& iObject, FArchive &Ar )
+{
+    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_OBJECT_BACKGROUNDCOLOR
+                                    , Ar
+                                    , [&iObject](FArchive &Ar) -> void
+    {
+        FColor background = iObject.GetBackgroundColor();
+
+        Ar << background.R;
+        Ar << background.G;
+        Ar << background.B;
+        Ar << background.A;
+    } );
+}
+
+static void
 WriteDefineObjectEntry( UOdysseyVectorObject& iObject, FArchive &Ar )
 {
     FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_DEFINE_OBJECT_ENTRY
@@ -124,6 +156,8 @@ WriteDefineObjectEntry( UOdysseyVectorObject& iObject, FArchive &Ar )
         WriteObjectID( iObject, Ar );
         WriteObjectParentID( iObject, Ar );
         WriteObjectTransform( iObject, Ar );
+        WriteObjectForegroundColor( iObject, Ar );
+        WriteObjectBackgroundColor( iObject, Ar );
 
         switch( iObject.GetType() )
         {
@@ -132,6 +166,14 @@ WriteDefineObjectEntry( UOdysseyVectorObject& iObject, FArchive &Ar )
                 UOdysseyVectorPathCubic* cubicPath = Cast<UOdysseyVectorPathCubic>(&iObject);
 
                 FOdysseyVectorExport::WriteObjectPathCubic( *cubicPath, Ar );
+            }
+            break;
+
+            case UOdysseyVectorObject::VECTORGROUPPAINTTYPE:
+            {
+                UOdysseyVectorGroupPaint* paintGroup = Cast<UOdysseyVectorGroupPaint>(&iObject);
+
+                FOdysseyVectorExport::WriteObjectGroupPaint( *paintGroup, Ar );
             }
             break;
 

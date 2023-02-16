@@ -578,7 +578,7 @@ UOdysseyVectorObject::RemoveChild( UOdysseyVectorObject* iChild )
 }
 
 void
-UOdysseyVectorObject::SetStrokeColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA )
+UOdysseyVectorObject::SetForegroundColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA )
 {
     Foreground.R = iR;
     Foreground.G = iG;
@@ -587,7 +587,7 @@ UOdysseyVectorObject::SetStrokeColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA )
 }
 
 void
-UOdysseyVectorObject::SetFillColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA )
+UOdysseyVectorObject::SetBackgroundColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA )
 {
     Background.R = iR;
     Background.G = iG;
@@ -663,6 +663,18 @@ UOdysseyVectorObject::TreeToArray( UOdysseyVectorObject* iObject, std::vector<UO
     }
 
     return iOutArray.size();
+}
+
+FColor
+UOdysseyVectorObject::GetForegroundColor()
+{
+    return Foreground;
+}
+
+FColor
+UOdysseyVectorObject::GetBackgroundColor()
+{
+    return Background;
 }
 
 uint32

@@ -11,17 +11,17 @@ class ODYSSEYVECTOR_API FOdysseyVectorBucket
     private:
         UOdysseyVectorObject& mParent;
         ::ULIS::FVec2D mCoords;
-        uint32_t mColor;
+        FColor mColor;
         UOdysseyVectorHandleBucket* mCtrlPoint;
 
     public:
         ~FOdysseyVectorBucket();
-        FOdysseyVectorBucket( UOdysseyVectorObject& iParent, uint32 iColor, double iX, double iY );
+        FOdysseyVectorBucket( UOdysseyVectorObject& iParent, double iX, double iY, uint8 iR, uint8 iG, uint8 iB, uint8 iA );
         void Draw( ::ULIS::FRectD& iRoi, uint64 iFlags );
         void SetCoords( double iX, double iY );
         ::ULIS::FVec2D& GetCoords();
-        void SetColor( uint32 iColor );
-        uint32 GetColor();
+        void SetColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA );
+        FColor GetColor();
         bool PickHandle( double iX, double iY );
         UOdysseyVectorHandleBucket* GetHandle();
         UOdysseyVectorObject& GetParent();

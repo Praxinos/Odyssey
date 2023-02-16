@@ -205,14 +205,13 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseDownVector( UOdysseyTextureLayerIma
 
             if( mPickedBucketHandle == nullptr )
             {
-                uint32 R = ( uint32 ) rgba8.R8();
-                uint32 G = ( uint32 ) rgba8.G8();
-                uint32 B = ( uint32 ) rgba8.B8();
-                uint32 A = ( uint32 ) rgba8.A8();
-                uint32 col32 = ( (A << 24) | (B << 16) | (G << 8) | R );
+                uint8 R = rgba8.R8();
+                uint8 G = rgba8.G8();
+                uint8 B = rgba8.B8();
+                uint8 A = rgba8.A8();
 
                 /*paintGroup->FindCycles();*/
-                paintGroup->Bucket( col32, localCoords.x, localCoords.y );
+                paintGroup->Bucket( localCoords.x, localCoords.y, R, G, B, A );
             }
 
             mOldLocalMouseX = localCoords.x;

@@ -11,7 +11,7 @@ FOdysseyVectorLoop::FOdysseyVectorLoop( UOdysseyVectorObject& iParent
                                       , std::vector<FOdysseyVectorSection*>& iSectionArray )
     : mParent( iParent )
     , mID( iID )
-    , mColor( 0xFFA0A0A0 )
+    , mColor( 0xA0, 0xA0, 0xA0, 0xFF )
     , mBucket( nullptr )
     , mVertexArray (iVertexArray)
     , mSectionArray (iSectionArray)
@@ -261,7 +261,7 @@ FOdysseyVectorLoop::Build( std::vector<UOdysseyVectorVertex*>& iVertexArray
 */
 }
 
-uint32
+FColor
 FOdysseyVectorLoop::GetColor()
 {
     return ( mBucket ) ? mBucket->GetColor() : mColor;
@@ -310,6 +310,14 @@ FOdysseyVectorLoop::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
     BLContext* blctx = mParent.GetRoot()->GetEngine()->GetBLContext();
     BLPath combinedPath = mPath;
+    FColor color = GetColor();
+    BLRgba32 fillColor;
+
+    // Note: Blend2D color format is 0xAARRGGBB
+    fillColor.r = color.B;
+    fillColor.g = color.G;
+    fillColor.b = color.R;
+    fillColor.a = color.A;
 
     for( std::list<FOdysseyVectorLoop*>::iterator oit = mChildrenList.begin(); oit != mChildrenList.end(); ++oit )
     {
@@ -341,7 +349,7 @@ FOdysseyVectorLoop::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
     }
 */
 
-       blctx->setFillStyle( BLRgba32( GetColor() ) );
+       blctx->setFillStyle( fillColor );
        blctx->setFillRule( BL_FILL_RULE_EVEN_ODD );
 
        /*iBLContext.fillPolygon( &mPointArray[0], mPointArray.size() );*/

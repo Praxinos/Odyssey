@@ -790,9 +790,10 @@ UOdysseyVectorPathCubic::DrawShapeVariable( ::ULIS::FRectD &iRoi, uint64 iFlags 
     BLContext* blctx = GetRoot()->GetEngine()->GetBLContext();
     BLRgba32 strokeColor;
 
-    strokeColor.r = Foreground.R;
+    // Note: Blend2D color format is 0xAARRGGBB
+    strokeColor.r = Foreground.B;
     strokeColor.g = Foreground.G;
-    strokeColor.b = Foreground.B;
+    strokeColor.b = Foreground.R;
     strokeColor.a = Foreground.A;
 
     blctx->setCompOp( BL_COMP_OP_SRC_OVER );

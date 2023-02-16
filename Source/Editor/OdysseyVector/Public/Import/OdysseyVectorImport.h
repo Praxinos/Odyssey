@@ -20,4 +20,5 @@ namespace FOdysseyVectorImport
     void ODYSSEYVECTOR_API ReadObjectsDeclare( std::vector<UOdysseyVectorObject*>& vectorObjectArray, uint64 iChunkEnd, FArchive &Ar );
     void ODYSSEYVECTOR_API ReadObjectsDefine( std::vector<UOdysseyVectorObject*>& vectorObjectArray, uint64 iChunkEnd, FArchive &Ar );
     void ODYSSEYVECTOR_API ReadObjectPathCubic( UOdysseyVectorPathCubic& iCubicPath, uint64 iChunkEnd, FArchive &Ar );
+    void ODYSSEYVECTOR_API ReadObjectGroupPaint( UOdysseyVectorGroupPaint& iPaintGroup, uint64 iChunkEnd, FArchive &Ar );
 }
