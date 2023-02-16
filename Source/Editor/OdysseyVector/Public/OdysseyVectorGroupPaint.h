@@ -87,7 +87,8 @@ class ODYSSEYVECTOR_API UOdysseyVectorGroupPaint : public UOdysseyVectorGroup
                                   , FOdysseyVectorSection* iSection
                                   , std::vector<UOdysseyVectorVertex*>& iVertexArray
                                   , std::vector<FOdysseyVectorSection*>& iSectionArray
-                                  , double iOrientation );
+                                  , double iOrientation
+                                  , uint32 );
 
         void MarchCycle( FOdysseyVectorLoop& iCycle );
 

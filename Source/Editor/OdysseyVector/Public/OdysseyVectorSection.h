@@ -33,6 +33,8 @@ class FOdysseyVectorSection
 
         void IncrementCycleCount();
 
+        void UnBlockAll();
+        void UnBlock(UOdysseyVectorVertex* iVertex);
         void BlockAll();
         void Block( UOdysseyVectorVertex* iVertex );
         bool IsBlocked( UOdysseyVectorVertex* iVertex );

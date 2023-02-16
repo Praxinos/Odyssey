@@ -84,12 +84,27 @@ FOdysseyVectorSection::IncrementCycleCount()
 }
 
 void 
+FOdysseyVectorSection::UnBlock( UOdysseyVectorVertex* iVertex )
+{
+    uint32 blocked = ( iVertex == mVertex[0] ) ? FOdysseyVectorSection::BLOCKVERTEX0
+                                               : FOdysseyVectorSection::BLOCKVERTEX1;
+
+    mFlags &= (~blocked);
+}
+
+void 
 FOdysseyVectorSection::Block( UOdysseyVectorVertex* iVertex )
 {
     uint32 blocked = ( iVertex == mVertex[0] ) ? FOdysseyVectorSection::BLOCKVERTEX0
                                                : FOdysseyVectorSection::BLOCKVERTEX1;
 
     mFlags |= blocked;
+}
+
+void
+FOdysseyVectorSection::UnBlockAll()
+{
+    mFlags &= ~(FOdysseyVectorSection::BLOCKVERTEX0 |  FOdysseyVectorSection::BLOCKVERTEX1);
 }
 
 void

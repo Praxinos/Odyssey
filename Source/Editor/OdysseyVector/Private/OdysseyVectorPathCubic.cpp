@@ -783,6 +783,7 @@ UOdysseyVectorPathCubic::DrawShapeVariable( ::ULIS::FRectD &iRoi, uint64 iFlags 
     blctx->setCompOp( BL_COMP_OP_SRC_OVER );
 
     // We fill with stroke color because our curve is made of filled shapes.
+    blctx->setFillRule( BL_FILL_RULE_NON_ZERO );
     blctx->setFillStyle( BLRgba32( mStrokeColor ) );
     blctx->setStrokeStyle( BLRgba32( mStrokeColor ) );
 
