@@ -10,6 +10,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUDSelection : public FOdysseyVectorHUD
     private:
         std::vector<::ULIS::FVec2D>& mPointArray;
         bool mSelecting;
+        bool mShowHandles;
 
     public:
         ~FOdysseyVectorHUDSelection();
@@ -17,4 +18,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUDSelection : public FOdysseyVectorHUD
 
         void Draw( UOdysseyVectorRoot& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags );
         void SetSelecting( bool iSelecting );
+        void ShowHandles( bool iShowHandles );
 };

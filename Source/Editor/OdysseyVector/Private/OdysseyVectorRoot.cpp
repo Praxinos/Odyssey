@@ -141,21 +141,6 @@ UOdysseyVectorRoot::UpdateShape()
     mInvalidatedObjectList.clear();
 }
 
-void
-UOdysseyVectorRoot::Bucket( double iX, double iY, uint32 iFillColor )
-{
-    ::ULIS::FRectD roi = { iX, iY, 0, 0 };
-    std::vector<UOdysseyVectorObject*> pickedObjectArray;
-
-    FOdysseyVectorEngine::RecursivePick( *this, pickedObjectArray, roi, UOdysseyVectorObject::PICK_POINT );
-
-    if ( pickedObjectArray.size() > 1 )
-    {
-        pickedObjectArray[0]->SetFilled(true);
-        pickedObjectArray[0]->SetFillColor( iFillColor );
-    }
-}
-
 UOdysseyVectorObject*
 UOdysseyVectorRoot::GetLastSelected()
 {

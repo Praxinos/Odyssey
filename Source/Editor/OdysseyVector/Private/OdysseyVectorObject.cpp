@@ -10,9 +10,8 @@ UOdysseyVectorObject::UOdysseyVectorObject()
     , Rotation( 0.0f )
     , ScalingX ( 1.0f )
     , ScalingY ( 1.0f )
-    , mStrokeColor ( 0xFF000000 )
-    , mFillColor ( 0xFF000000 )
-    , mStrokeWidth ( 4.0f )
+    , Foreground(   0,   0,   0, 255 )
+    , Background( 255, 255, 255, 255 )
     , mParent ( nullptr )
     , mIsFilled ( false )
     , mIsSelected ( false )
@@ -121,9 +120,8 @@ UOdysseyVectorObject::CopySettings( UOdysseyVectorObject& iDestinationObject )
 
     iDestinationObject.UpdateMatrix();
 
-    iDestinationObject.mStrokeColor = mStrokeColor;
-    iDestinationObject.mStrokeWidth = mStrokeWidth;
-    iDestinationObject.mFillColor = mFillColor;
+    iDestinationObject.Foreground = Foreground;
+    iDestinationObject.Background = Background;
     iDestinationObject.mIsFilled = mIsFilled;
 
     iDestinationObject.mBBox = mBBox;
@@ -580,33 +578,27 @@ UOdysseyVectorObject::RemoveChild( UOdysseyVectorObject* iChild )
 }
 
 void
-UOdysseyVectorObject::SetStrokeColor( uint32 iColor )
+UOdysseyVectorObject::SetStrokeColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA )
 {
-    mStrokeColor = iColor;
+    Foreground.R = iR;
+    Foreground.G = iG;
+    Foreground.B = iB;
+    Foreground.A = iA;
 }
 
 void
-UOdysseyVectorObject::SetFillColor( uint32 iColor )
+UOdysseyVectorObject::SetFillColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA )
 {
-    mFillColor = iColor;
+    Background.R = iR;
+    Background.G = iG;
+    Background.B = iB;
+    Background.A = iA;
 }
 
 void
 UOdysseyVectorObject::SetFilled( bool iIsFilled)
 {
     mIsFilled = iIsFilled;
-}
-
-void
-UOdysseyVectorObject::SetStrokeWidth( double iWidth )
-{
-    mStrokeWidth = iWidth;
-}
-
-double
-UOdysseyVectorObject::GetStrokeWidth()
-{
-    return mStrokeWidth;
 }
 
 void 

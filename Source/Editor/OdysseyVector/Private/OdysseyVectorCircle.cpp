@@ -10,6 +10,7 @@ UOdysseyVectorCircle::~UOdysseyVectorCircle()
 }
 
 UOdysseyVectorCircle::UOdysseyVectorCircle()
+    : mStrokeWidth ( 4.0f )
 {
     SetName( "Circle" );
 

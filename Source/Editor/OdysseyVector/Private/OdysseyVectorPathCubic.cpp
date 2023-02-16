@@ -414,11 +414,19 @@ void
 UOdysseyVectorPathCubic::Fill( ::ULIS::FRectD& iRoi )
 {
     UOdysseyVectorVertexCubic *firstVertex = static_cast<UOdysseyVectorVertexCubic*>( GetFirstVertex() );
-    BLContext* blctx = GetRoot()->GetEngine()->GetBLContext();
-    BLPath path;
+
 
     if ( /*IsLoop() &&*/ firstVertex )
     {
+        BLContext* blctx = GetRoot()->GetEngine()->GetBLContext();
+        BLPath path;
+        BLRgba32 fillColor;
+
+        fillColor.r = Background.R;
+        fillColor.g = Background.G;
+        fillColor.b = Background.B;
+        fillColor.a = Background.A;
+
         blctx->setCompOp( BL_COMP_OP_SRC_COPY );
         /*iBLContext.setFillStyle(BLRgba32(0xFFFFFFFF));
         iBLContext.setStrokeStyle(BLRgba32(0xFF000000));*/
@@ -441,7 +449,7 @@ UOdysseyVectorPathCubic::Fill( ::ULIS::FRectD& iRoi )
                         , point1.y );
         }
 
-        blctx->setFillStyle( BLRgba32( mFillColor ) );
+        blctx->setFillStyle( fillColor );
         blctx->fillPath( path );
     }
 }
@@ -780,12 +788,19 @@ void
 UOdysseyVectorPathCubic::DrawShapeVariable( ::ULIS::FRectD &iRoi, uint64 iFlags )
 {
     BLContext* blctx = GetRoot()->GetEngine()->GetBLContext();
+    BLRgba32 strokeColor;
+
+    strokeColor.r = Foreground.R;
+    strokeColor.g = Foreground.G;
+    strokeColor.b = Foreground.B;
+    strokeColor.a = Foreground.A;
+
     blctx->setCompOp( BL_COMP_OP_SRC_OVER );
 
     // We fill with stroke color because our curve is made of filled shapes.
     blctx->setFillRule( BL_FILL_RULE_NON_ZERO );
-    blctx->setFillStyle( BLRgba32( mStrokeColor ) );
-    blctx->setStrokeStyle( BLRgba32( mStrokeColor ) );
+    blctx->setFillStyle( BLRgba32( strokeColor ) );
+    blctx->setStrokeStyle( BLRgba32( strokeColor ) );
 
     if( mSegmentList.size() )
     {

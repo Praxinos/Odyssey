@@ -8,6 +8,7 @@ FOdysseyVectorHUDSelection::~FOdysseyVectorHUDSelection()
 FOdysseyVectorHUDSelection::FOdysseyVectorHUDSelection( std::vector<::ULIS::FVec2D>& iPointArray )
     : mPointArray(iPointArray)
     , mSelecting(true)
+    , mShowHandles(true)
 {
 }
 
@@ -16,13 +17,13 @@ FOdysseyVectorHUDSelection::SetSelecting( bool iSelecting )
 {
     mSelecting = iSelecting;
 }
-/*
-void
-FOdysseyVectorHUDSelection::SetMode( )
-{
 
+void
+FOdysseyVectorHUDSelection::ShowHandles( bool iShowHandles )
+{
+    mShowHandles = iShowHandles;
 }
-*/
+
 void
 FOdysseyVectorHUDSelection::Draw( UOdysseyVectorRoot& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags )
 {

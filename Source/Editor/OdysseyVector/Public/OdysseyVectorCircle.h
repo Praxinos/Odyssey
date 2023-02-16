@@ -31,6 +31,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorCircle : public UOdysseyVectorPathCubic
     protected :
         double mRadiusX; 
         double mRadiusY; 
+        double mStrokeWidth;
 
     public:
         ~UOdysseyVectorCircle();

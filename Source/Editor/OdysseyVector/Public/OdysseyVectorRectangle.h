@@ -23,10 +23,11 @@ class ODYSSEYVECTOR_API UOdysseyVectorRectangle : public UOdysseyVectorObject
     protected :
         double mWidth;
         double mHeight; 
+        double mStrokeWidth;
 
     public:
         ~UOdysseyVectorRectangle();
-        UOdysseyVectorRectangle() {};
+        UOdysseyVectorRectangle();
         void Init( std::string iName, double iWidth, double iHeight );
         void SetSize( double iWidth, double iHeight );
         double GetWidth();

@@ -334,6 +334,8 @@ GetNormalVector( std::vector<UOdysseyVectorVertex*>& iVertexArray
             double stepT = deltaT / subdiv;
             double t0 = ti;
 
+            // By relying only on start and end points of a section, we lack precision. 
+            // Here we rely on more acurate computation by getting intermediate points.
             for( int j = 0; j < subdiv; j++ )
             {
                 double t1 = t0 + stepT;

@@ -67,8 +67,8 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDown(const FOdysseyPoint& iPo
         ::ULIS::FColor rgba8 = color.ToFormat( ::ULIS::eFormat::Format_RGBA8 );
         uint32 strokeColor = *((uint32*)rgba8.Bits());
 
-        cubicPath->SetStrokeColor( strokeColor );
-        currentPathBuilder->SetStrokeColor( strokeColor );
+        cubicPath->SetStrokeColor( rgba8.R8(), rgba8.G8(), rgba8.B8(), rgba8.A8() );
+        currentPathBuilder->SetStrokeColor( rgba8.R8(), rgba8.G8(), rgba8.B8(), rgba8.A8() );
 
         currentPathBuilder->Attach( cubicPath );
 

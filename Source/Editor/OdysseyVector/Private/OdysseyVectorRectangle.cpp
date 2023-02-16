@@ -4,6 +4,11 @@ UOdysseyVectorRectangle::~UOdysseyVectorRectangle()
 {
 }
 
+UOdysseyVectorRectangle::UOdysseyVectorRectangle()
+    : mStrokeWidth ( 4.0f )
+{
+}
+
 void UOdysseyVectorRectangle::Init( std::string iName, double iWidth, double iHeight )
 {
     SetName( iName );
@@ -24,16 +29,29 @@ void
 UOdysseyVectorRectangle::DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags )
 {
     BLContext* blctx = GetRoot()->GetEngine()->GetBLContext();
+    BLRgba32 strokeColor;
+
+    strokeColor.r = Foreground.R;
+    strokeColor.g = Foreground.G;
+    strokeColor.b = Foreground.B;
+    strokeColor.a = Foreground.A;
 
     blctx->setCompOp(BL_COMP_OP_SRC_COPY);
 
     if( mIsFilled )
     {
-        blctx->setFillStyle( BLRgba32( mFillColor ) );
+        BLRgba32 fillColor;
+
+        fillColor.r = Background.R;
+        fillColor.g = Background.G;
+        fillColor.b = Background.B;
+        fillColor.a = Background.A;
+
+        blctx->setFillStyle( fillColor );
         blctx->fillRoundRect( -mWidth * 0.5f, -mHeight * 0.5f, mWidth, mHeight, 0.0f, 0.0f );
     }
 
-    blctx->setStrokeStyle ( BLRgba32( mStrokeColor ) );
+    blctx->setStrokeStyle ( strokeColor );
     blctx->setStrokeWidth ( mStrokeWidth );
     blctx->strokeRoundRect( -mWidth * 0.5f, -mHeight * 0.5f, mWidth, mHeight, 0.0f, 0.0f );
 }

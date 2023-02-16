@@ -9,9 +9,12 @@ UOdysseyVectorPathBuilder::UOdysseyVectorPathBuilder()
     : mCubicPath ( nullptr )
     , mCumulAngle ( 0.0f )
     , mCumulAngleLimit ( 1.5708f ) // 90 degrees
-    , mLastCubicAngleLimit ( 1.0472f ) // 60 deg 
+    , mLastCubicAngleLimit ( 1.0472f ) // 60 deg
 {
-    mStrokeColor = 0xFF808080;
+    Foreground.R = 128;
+    Foreground.G = 128;
+    Foreground.B = 128;
+    Foreground.A = 255;
 }
 
 void 
@@ -468,12 +471,18 @@ UOdysseyVectorPathBuilder::DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
     BLContext* blctx = GetRoot()->GetEngine()->GetBLContext();
     BLPath path;
+    BLRgba32 strokeColor;
+
+    strokeColor.r = Foreground.R;
+    strokeColor.g = Foreground.G;
+    strokeColor.b = Foreground.B;
+    strokeColor.a = Foreground.A;
 
     blctx->setCompOp(BL_COMP_OP_SRC_COPY);
     /*iBLContext.setFillStyle(BLRgba32(0xFFFFFFFF));
     iBLContext.setStrokeStyle(BLRgba32(0xFF000000));*/
 
-    blctx->setStrokeStyle( BLRgba32( mStrokeColor ) );
+    blctx->setStrokeStyle( strokeColor );
 
     for( std::list<UOdysseyVectorLink*>::iterator it = mLinkList.begin(); it != mLinkList.end(); ++it )
     {

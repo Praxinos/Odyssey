@@ -49,6 +49,12 @@ class ODYSSEYVECTOR_API UOdysseyVectorObject : public UObject
         UPROPERTY(EditAnywhere, Category="Transform")
         double ScalingY;
 
+        UPROPERTY(EditAnywhere, Category="Coloring")
+        FColor Foreground;
+
+        UPROPERTY(EditAnywhere,Category="Coloring")
+        FColor Background;
+
     protected:
         BLMatrix2D mLocalMatrix;
         BLMatrix2D mInverseLocalMatrix;
@@ -60,9 +66,10 @@ class ODYSSEYVECTOR_API UOdysseyVectorObject : public UObject
         bool mIsSelected;
         bool mIsInvalidated;
         ::ULIS::FRectD mBBox;
-        uint32 mStrokeColor;
-        double mStrokeWidth;
-        uint32 mFillColor;
+
+        /*uint32 mStrokeColor;*/
+        /*uint32 mFillColor;*/
+
         // used when saving
         uint32 mID;
 
@@ -120,8 +127,8 @@ class ODYSSEYVECTOR_API UOdysseyVectorObject : public UObject
         BLMatrix2D& GetWorldMatrix();
         BLMatrix2D& GetInverseWorldMatrix();
         std::list<UOdysseyVectorObject*>& GetChildrenList();
-        void SetStrokeColor( uint32 iColor );
-        void SetFillColor( uint32 iColor );
+        void SetStrokeColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA );
+        void SetFillColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA );
         void SetFilled(bool iIsFilled);
         void SetStrokeWidth( double iWidth );
         double GetStrokeWidth( );
