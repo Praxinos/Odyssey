@@ -7,6 +7,7 @@ FOdysseyVectorEngine::~FOdysseyVectorEngine()
 
 FOdysseyVectorEngine::FOdysseyVectorEngine( double iWidth, double iHeight )
     : mDrawingFlags( 0 )
+    , mSelectionSpace( nullptr )
 {
     mBLContext = new BLContext();
     mBLImage = new BLImage( iWidth, iHeight, BL_FORMAT_PRGB32 );
@@ -16,6 +17,12 @@ FOdysseyVectorEngine::FOdysseyVectorEngine( double iWidth, double iHeight )
     mScene->Init("Vector Scene");*/
 
     mBLContext->begin( *mBLImage );
+}
+
+void
+FOdysseyVectorEngine::SetSelectionSpace( UOdysseyVectorGroup* iSelectionSpace )
+{
+   mSelectionSpace = iSelectionSpace;
 }
 
 BLContext*
@@ -303,18 +310,19 @@ FOdysseyVectorEngine::Erase( UOdysseyVectorRoot& iScene
 
 // static
 void
-FOdysseyVectorEngine::RecursivePick( UOdysseyVectorObject& iObj
+FOdysseyVectorEngine::RecursivePick( UOdysseyVectorGroup* iSelectionSpace
+                                   , UOdysseyVectorObject& iObj
                                    , std::vector<UOdysseyVectorObject*>& iSelectedObjectArray
                                    , ::ULIS::FRectD& iRoi
                                    , uint32 iSelectionFlags )
 {
-    UOdysseyVectorObject* pickedObject = iObj.Pick( iRoi, iSelectionFlags );
+    UOdysseyVectorObject* pickedObject = iObj.Pick( iSelectionSpace, iRoi, iSelectionFlags );
 
     for( std::list<UOdysseyVectorObject*>::iterator it = iObj.GetChildrenList().begin(); it != iObj.GetChildrenList().end(); ++it )
     {
         UOdysseyVectorObject* child = (*it);
 
-        RecursivePick( *child, iSelectedObjectArray, iRoi, iSelectionFlags );
+        RecursivePick( iSelectionSpace, *child, iSelectedObjectArray, iRoi, iSelectionFlags );
     }
 
     if( pickedObject )
@@ -352,7 +360,7 @@ FOdysseyVectorEngine::Pick( UOdysseyVectorRoot& iScene, std::vector<::ULIS::FVec
     // deselect all
     iScene.ClearSelection();
 
-    RecursivePick( iScene, pickedObjectArray, roi, iSelectionFlags );
+    RecursivePick( mSelectionSpace, iScene, pickedObjectArray, roi, iSelectionFlags );
 
     for ( int i = 0; i < pickedObjectArray.size(); i++ )
     {

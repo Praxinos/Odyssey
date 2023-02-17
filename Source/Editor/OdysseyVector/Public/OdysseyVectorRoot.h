@@ -38,7 +38,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorRoot : public UOdysseyVectorObject
         UOdysseyVectorObject* GetLastSelected();
         std::list<UOdysseyVectorObject*>& GetSelectedObjectList();
         void DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags );
-        UOdysseyVectorObject* PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags ) { return nullptr; };
+        bool PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags ) { return false; };
 
         void InvalidateObject( UOdysseyVectorObject* iObject );
         void RemoveSelectedObjects();

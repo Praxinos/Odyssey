@@ -256,7 +256,7 @@ UOdysseyVectorPathCubic::Erase( ::ULIS::FRectD &iRoi )
     return ( mSegmentList.size() == 0 ) ? true : false;
 }
 
-UOdysseyVectorObject*
+bool
 UOdysseyVectorPathCubic::PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags )
 {
     BLContext* blctx = GetRoot()->GetEngine()->GetBLContext();
@@ -295,13 +295,13 @@ UOdysseyVectorPathCubic::PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags
 
                 if( pointHitMask )
                 {
-                    return this;
+                    return true;
                 }
             }
         }
     }
 
-    return nullptr;
+    return false;
 }
 
 bool

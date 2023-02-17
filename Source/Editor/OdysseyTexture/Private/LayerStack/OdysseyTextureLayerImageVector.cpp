@@ -22,6 +22,8 @@ UOdysseyTextureLayerImageVector::~UOdysseyTextureLayerImageVector()
 }
 
 UOdysseyTextureLayerImageVector::UOdysseyTextureLayerImageVector()
+    : mVEngine(nullptr)
+    , mScene(nullptr)
 {
 	LayerTypeName = LOCTEXT("LayerTypeName", "Vector Image Layer");
     Icon = *FOdysseyStyle::GetBrush( "OdysseyLayerStack.ImageLayer16");
@@ -127,6 +129,7 @@ UOdysseyTextureLayerImageVector::Serialize(FArchive& Ar)
 
     if( Ar.IsSaving() )
     {
+
         FOdysseyVectorExport::Write( mScene, Ar );
     }
 
@@ -139,6 +142,7 @@ UOdysseyTextureLayerImageVector::Serialize(FArchive& Ar)
 
         FOdysseyVectorImport::Read( mScene, Ar );
     }
+
 }
 
 #undef LOCTEXT_NAMESPACE

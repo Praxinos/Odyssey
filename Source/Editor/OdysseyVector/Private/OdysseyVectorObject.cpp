@@ -482,17 +482,25 @@ UOdysseyVectorObject::MoveFront()
 }
 
 UOdysseyVectorObject*
-UOdysseyVectorObject::Pick( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags )
+UOdysseyVectorObject::Pick( UOdysseyVectorGroup* iSelectionSpace, ::ULIS::FRectD &iRoi, uint32 iSelectionFlags )
 {
-    if ( this->mParent )
+    bool picked = PickShape( iRoi, iSelectionFlags );
+
+    // returns parent only if the parent is of Group type and is different from the selection space
+    if( picked )
     {
-        if ( this->mParent->GetClass() == UOdysseyVectorGroup::StaticClass() )
+        if( dynamic_cast<UOdysseyVectorGroup*>(this->mParent) )
         {
-            return this->mParent;
+            if( this->mParent != iSelectionSpace )
+            {
+                return this->mParent;
+            }
         }
+
+        return this;
     }
 
-    return PickShape( iRoi, iSelectionFlags );
+    return nullptr;
 }
 
 static void
@@ -650,9 +658,12 @@ UOdysseyVectorObject::TreeToList( UOdysseyVectorObject* iObject, std::list<UOdys
     return iOutList.size();
 }
 
+//static
 uint32
 UOdysseyVectorObject::TreeToArray( UOdysseyVectorObject* iObject, std::vector<UOdysseyVectorObject*>& iOutArray )
 {
+    uint32 size = iObject->mChildrenList.size();
+
     iOutArray.push_back( iObject );
 
     for( std::list<UOdysseyVectorObject*>::iterator it = iObject->mChildrenList.begin(); it != iObject->mChildrenList.end(); ++it )

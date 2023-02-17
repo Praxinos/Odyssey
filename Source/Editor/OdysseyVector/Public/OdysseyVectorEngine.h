@@ -16,6 +16,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
         BLImage* mBLMask;
         uint64 mDrawingFlags;
         std::list<FOdysseyVectorHUD*> mHUDList;
+        UOdysseyVectorGroup* mSelectionSpace;
 
     public:
         static const uint64 RENDER_OBJECT_STRUCTURE = ( 1 << 0 );
@@ -31,7 +32,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
         void Render( UOdysseyVectorRoot& iScene );
         void Pick( UOdysseyVectorRoot& iScene, std::vector<::ULIS::FVec2D>& iPointArray, uint32 iSelectionFlags );
 
-        static void RecursivePick( UOdysseyVectorObject& iObj, std::vector<UOdysseyVectorObject*>& iSelectedObjectArray, ::ULIS::FRectD& iRoi, uint32 iSelectionFlags );
+        static void RecursivePick( UOdysseyVectorGroup* iSelectionSpace, UOdysseyVectorObject& iObj, std::vector<UOdysseyVectorObject*>& iSelectedObjectArray, ::ULIS::FRectD& iRoi, uint32 iSelectionFlags );
         static void RecursiveErase( UOdysseyVectorObject& iObj
                                   , std::vector<UOdysseyVectorObject*>& iErasedObjectArray
                                   ,::ULIS::FRectD &iRoi
@@ -52,6 +53,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
         void UseColorImage();
         void GetColorImagePixelValue( uint32 iX, uint32 iY, uint8 *oR, uint8* oG, uint8 *oB, uint8 *oA );
         ::ULIS::FColor GetColorImagePixelValue( uint32 iX, uint32 iY );
+        void SetSelectionSpace( UOdysseyVectorGroup* iSelectionSpace );
 };
 
 ODYSSEYVECTOR_API FArchive& operator<<(FArchive &Ar, FOdysseyVectorEngine* iVectorEngine );

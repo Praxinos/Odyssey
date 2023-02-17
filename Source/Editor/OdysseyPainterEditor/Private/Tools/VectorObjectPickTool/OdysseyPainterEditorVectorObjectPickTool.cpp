@@ -93,6 +93,12 @@ UOdysseyPainterEditorVectorObjectPickTool::OnMouseUp(const FOdysseyPoint& iPoint
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
+    static unsigned long clickTime = 0;
+    bool doubleClick = ( ( iPointInTexture.time - clickTime ) < 200 ) ? true : false;
+
+    clickTime = iPointInTexture.time;
+
+    //UE_LOG(LogTemp, Warning, TEXT("Some warning message:%lu"), iPointInTexture.time - clickTime );
 
     if( currentVectorLayer )
     {
@@ -106,6 +112,13 @@ UOdysseyPainterEditorVectorObjectPickTool::OnMouseUp(const FOdysseyPoint& iPoint
         if ( mPointArray.size() > 1 )
         {
             vectorEngine->Pick( *currentVectorLayer->GetScene(), mPointArray, UOdysseyVectorObject::PICK_FREEHAND );
+        }
+
+        if( doubleClick == true )
+        {
+            UOdysseyVectorObject* selected = currentVectorLayer->GetScene()->GetLastSelected();
+
+            vectorEngine->SetSelectionSpace( dynamic_cast<UOdysseyVectorGroup*>(selected) );
         }
 
         mSelectionHUD->SetSelecting( false );

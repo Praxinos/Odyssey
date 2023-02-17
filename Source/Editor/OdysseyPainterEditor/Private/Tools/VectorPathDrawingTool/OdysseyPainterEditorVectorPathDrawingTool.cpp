@@ -56,7 +56,8 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDown(const FOdysseyPoint& iPo
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        UOdysseyVectorObject* selectedObject = currentVectorLayer->GetScene()->GetLastSelected();
+        UOdysseyVectorRoot* scene = currentVectorLayer->GetScene();
+        UOdysseyVectorObject* selectedObject = scene->GetLastSelected();
         UOdysseyVectorPathCubic* cubicPath = NewObject<UOdysseyVectorPathCubic>();
         UOdysseyVectorPathBuilder* currentPathBuilder = NewObject<UOdysseyVectorPathBuilder>();
         BLPoint localCoords = cubicPath->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
@@ -71,16 +72,16 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDown(const FOdysseyPoint& iPo
 
         currentPathBuilder->Attach( cubicPath );
 
-        currentVectorLayer->GetScene()->AppendChild( cubicPath );
-        currentVectorLayer->GetScene()->AppendChild( currentPathBuilder );
+        scene->AppendChild( cubicPath );
+        scene->AppendChild( currentPathBuilder );
 
         cubicPath->UpdateMatrix();
         currentPathBuilder->UpdateMatrix();
 
         currentPathBuilder->AppendPoint( localCoords.x, localCoords.y, roundedUpRadius );
 
-        currentVectorLayer->GetScene()->ClearSelection();
-        currentVectorLayer->GetScene()->Select( currentPathBuilder );
+        scene->ClearSelection();
+        scene->Select( currentPathBuilder );
 
         currentVectorLayer->RenderImageChanged(false);
 

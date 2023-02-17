@@ -35,7 +35,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorPathCubic: public UOdysseyVectorPath
     protected:
         UOdysseyVectorObject* CopyShape();
         void DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags );
-        UOdysseyVectorObject* PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags );
+        bool PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags );
 
     public:
         UOdysseyVectorPathCubic();

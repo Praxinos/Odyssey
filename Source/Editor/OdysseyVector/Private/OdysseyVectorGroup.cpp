@@ -6,7 +6,7 @@ UOdysseyVectorGroup::Init( std::string iName )
     SetName( iName );
 }
 
-UOdysseyVectorObject*
+bool
 UOdysseyVectorGroup::PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags )
 {
 /*
@@ -16,7 +16,7 @@ UOdysseyVectorGroup::PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags )
         return this;
     }
 */
-    return nullptr;
+    return false;
 }
 
 UOdysseyVectorObject*

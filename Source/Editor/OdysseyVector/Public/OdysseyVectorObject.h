@@ -8,6 +8,7 @@
 #include "OdysseyVectorObject.generated.h"
 
 class UOdysseyVectorRoot;
+class UOdysseyVectorGroup;
 
 UCLASS()
 class ODYSSEYVECTOR_API UOdysseyVectorObject : public UObject
@@ -98,8 +99,8 @@ class ODYSSEYVECTOR_API UOdysseyVectorObject : public UObject
 
         virtual uint32 GetType();
 
-        UOdysseyVectorObject* Pick( ::ULIS::FRectD& iRoi, uint32 iSelectionFlags );
-        virtual UOdysseyVectorObject* PickShape( ::ULIS::FRectD& iRoi, uint32 iSelectionFlags ){ return nullptr; };
+        UOdysseyVectorObject* Pick( UOdysseyVectorGroup* iSelectionSpace, ::ULIS::FRectD& iRoi, uint32 iSelectionFlags );
+        virtual bool PickShape( ::ULIS::FRectD& iRoi, uint32 iSelectionFlags ){ return false; };
 
         /*virtual void UpdateBoundingBox() = 0;*/
         void DrawChildren( ::ULIS::FRectD& iRoi, uint64 iFlags );

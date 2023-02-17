@@ -56,7 +56,7 @@ UOdysseyVectorRectangle::DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags )
     blctx->strokeRoundRect( -mWidth * 0.5f, -mHeight * 0.5f, mWidth, mHeight, 0.0f, 0.0f );
 }
 
-UOdysseyVectorObject*
+bool
 UOdysseyVectorRectangle::PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags )
 {
     /*double x1 = - mWidth  * 0.5f;
@@ -70,7 +70,7 @@ UOdysseyVectorRectangle::PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags
         return this;
     }*/
 
-    return nullptr;
+    return false;
 }
 
 void

@@ -32,6 +32,7 @@ FOdysseyVectorExport::Write( UOdysseyVectorRoot* iScene, FArchive &Ar )
     // write the chunk even if iVEngine is nullptr to prevent "expected size mismatch" when unreal reads the data.
     // iVEngine is nullptr when unreal preloads the file.
     // The reading process can then just skip the chunk no matter its size.
+
     FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_VECTOR_MAGIC
                                     , Ar
                                     , [iScene](FArchive &Ar) -> void

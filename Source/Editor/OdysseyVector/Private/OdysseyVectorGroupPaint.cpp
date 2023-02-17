@@ -120,17 +120,25 @@ UOdysseyVectorGroupPaint::DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags )
     }
 }
 
-UOdysseyVectorObject*
+bool
 UOdysseyVectorGroupPaint::PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags )
 {
-/*
-    if ( ( iX > mBBox.x ) && ( iX < ( mBBox.x + mBBox.w ) )
-      && ( iY > mBBox.y ) && ( iY < ( mBBox.y + mBBox.h ) ) )
+    if( iSelectionFlags & PICK_POINT )
     {
-        return this;
+        BLPoint pt = mInverseWorldMatrix.mapPoint( iRoi.x, iRoi.y );
+
+        for( int i = 0; i < mLoopArray.size(); i++ )
+        {
+            FOdysseyVectorLoop *cycle = mLoopArray[i];
+
+            if( cycle->HitTest( pt.x, pt.y ) )
+            {
+                return true;
+            }
+        }
     }
-*/
-    return nullptr;
+
+    return false;
 }
 
 uint32
