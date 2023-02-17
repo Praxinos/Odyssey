@@ -17,7 +17,9 @@ namespace OdysseyScreenPaintRendering
 
 		FMatrix WorldToBrushMatrix;
         FVector2D TextureHitPoint;
-		float StampQuality;
+        float StampQuality;
+		FVector xScreenAxis;
+		FVector yScreenAxis;
 	};
 
 

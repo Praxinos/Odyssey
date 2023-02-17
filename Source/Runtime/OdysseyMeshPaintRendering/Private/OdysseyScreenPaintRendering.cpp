@@ -50,9 +50,9 @@ namespace OdysseyScreenPaintRendering
 
 
     /** Mesh paint pixel shader */
-    class TOdysseyMeshPaintPixelShader : public FGlobalShader
+    class TOdysseyScreenPaintPixelShader : public FGlobalShader
     {
-        DECLARE_SHADER_TYPE(TOdysseyMeshPaintPixelShader, Global);
+        DECLARE_SHADER_TYPE(TOdysseyScreenPaintPixelShader, Global);
     public:
 
         static bool ShouldCompilePermutation(const FGlobalShaderPermutationParameters& Parameters)
@@ -61,16 +61,18 @@ namespace OdysseyScreenPaintRendering
         }
 
         /** Default constructor. */
-        TOdysseyMeshPaintPixelShader() {}
+        TOdysseyScreenPaintPixelShader() {}
 
         /** Initialization constructor. */
-        TOdysseyMeshPaintPixelShader(const ShaderMetaType::CompiledShaderInitializerType& Initializer)
+        TOdysseyScreenPaintPixelShader(const ShaderMetaType::CompiledShaderInitializerType& Initializer)
             : FGlobalShader(Initializer)
         {
             WorldToBrushMatrixParameter.Bind(Initializer.ParameterMap, TEXT("c_WorldToBrushMatrix"));
             Stroke2DParameter.Bind(Initializer.ParameterMap, TEXT("s_Stroke2D"));
             TextureHitPointParameter.Bind(Initializer.ParameterMap, TEXT("c_TextureHitPoint"));
             StampQualityParameter.Bind(Initializer.ParameterMap, TEXT("c_StampQuality"));
+            xScreenAxisParameter.Bind(Initializer.ParameterMap, TEXT("c_xScreenAxis"));
+            yScreenAxisParameter.Bind(Initializer.ParameterMap, TEXT("c_yScreenAxis"));
         }
 
         void SetParameters(FRHICommandList& RHICmdList, const float InGamma, const FOdysseyScreenPaintShaderParameters& InShaderParams)
@@ -91,6 +93,10 @@ namespace OdysseyScreenPaintRendering
             SetShaderValue(RHICmdList, ShaderRHI, TextureHitPointParameter, (FVector2f)InShaderParams.TextureHitPoint);
 
             SetShaderValue(RHICmdList, ShaderRHI, StampQualityParameter, InShaderParams.StampQuality);
+
+            SetShaderValue(RHICmdList, ShaderRHI, xScreenAxisParameter, (FVector3f)InShaderParams.xScreenAxis);
+
+            SetShaderValue(RHICmdList, ShaderRHI, yScreenAxisParameter, (FVector3f)InShaderParams.yScreenAxis);
         }
 
     private:
@@ -106,9 +112,13 @@ namespace OdysseyScreenPaintRendering
         LAYOUT_FIELD(FShaderParameter, TextureHitPointParameter);
 
         LAYOUT_FIELD(FShaderParameter, StampQualityParameter);
+
+        LAYOUT_FIELD(FShaderParameter, xScreenAxisParameter);
+
+        LAYOUT_FIELD(FShaderParameter, yScreenAxisParameter);
     };
 
-    IMPLEMENT_SHADER_TYPE(, TOdysseyMeshPaintPixelShader, TEXT("/Plugins/Iliad/Private/OdysseyScreenPaintShader.usf"), TEXT("MainPS"), SF_Pixel);
+    IMPLEMENT_SHADER_TYPE(, TOdysseyScreenPaintPixelShader, TEXT("/Plugins/Iliad/Private/OdysseyScreenPaintShader.usf"), TEXT("MainPS"), SF_Pixel);
 
     typedef FSimpleElementVertexDeclaration FMeshPaintDilateVertexDeclaration;
     TGlobalResource< FMeshPaintDilateVertexDeclaration > GMeshPaintDilateVertexDeclaration;
@@ -121,7 +131,7 @@ namespace OdysseyScreenPaintRendering
         const FOdysseyScreenPaintShaderParameters& iShaderParams)
     {
         TShaderMapRef< TOdysseyScreenPaintVertexShader > VertexShader(GetGlobalShaderMap(iFeatureLevel));
-        TShaderMapRef< TOdysseyMeshPaintPixelShader > PixelShader(GetGlobalShaderMap(iFeatureLevel));
+        TShaderMapRef< TOdysseyScreenPaintPixelShader > PixelShader(GetGlobalShaderMap(iFeatureLevel));
 
         iGraphicsPSOInit.BoundShaderState.VertexDeclarationRHI = GMeshPaintDilateVertexDeclaration.VertexDeclarationRHI;
         iGraphicsPSOInit.BoundShaderState.VertexShaderRHI = VertexShader.GetVertexShader();

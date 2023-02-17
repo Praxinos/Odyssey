@@ -270,10 +270,10 @@ TArray<::ULIS::FRectI> FOdysseyViewportDrawingEditorMeshBasedAdapter::GetMinimal
 
 float FOdysseyViewportDrawingEditorMeshBasedAdapter::GetStampQuality()
 {
-    /*if (mEditor->Texture() && mEditor->Component())
+    if (mEditor->Texture() && mEditor->Component())
     {
         return ((FMath::Max( mEditor->Texture()->GetSizeX(), mEditor->Texture()->GetSizeY() ) / mEditor->GetMeshComponentMaxSize()) + 1);
-    }*/
+    }
 
     return 1.f;
 }
@@ -318,13 +318,9 @@ float FOdysseyViewportDrawingEditorMeshBasedAdapter::GetStampQuality()
     meshAdapter->LineTraceComponent(traceHitResult, mouseViewportRay.GetOrigin(), rayEnd, FCollisionQueryParams(SCENE_QUERY_STAT(Paint), true));
 
 
-       FVector brushXAxis, brushYAxis;
-//     FVector brushXAxis = FVector( 1, 0, 0 );
-//     FVector brushYAxis = FVector( 0, -1, 0 );
-//     FVector brushZAxis = FVector(0, 0, 1);
+    FVector brushXAxis, brushYAxis;
     traceHitResult.Normal.FindBestAxisVectors(brushXAxis,brushYAxis);
     const FMatrix worldToBrushMatrix = FMatrix(brushXAxis, brushYAxis, traceHitResult.Normal, traceHitResult.Location).Inverse();
-    //const FMatrix worldToBrushMatrix = FMatrix(brushXAxis, brushYAxis, brushZAxis, traceHitResult.Location).Inverse();
 
 
     // Convert trace to UV position
@@ -419,65 +415,61 @@ float FOdysseyViewportDrawingEditorMeshBasedAdapter::GetStampQuality()
             });
     }
 
-    //Todo: if is seam drawing enabled
-    if (true)
+    //Seams painting ---------------------------------------------------------------
+    const float MinU = 0.0f;
+    const float MinV = 0.0f;
+    const float MaxU = 1.0f;
+    const float MaxV = 1.0f;
+    const float MinX = 0.0f;
+    const float MinY = 0.0f;
+    const float MaxX = mStrokeBufferRenderTarget2D->GetSurfaceWidth();
+    const float MaxY = mStrokeBufferRenderTarget2D->GetSurfaceHeight();
+
+    // Create a canvas for the render target.
+
+    TRefCountPtr< FOdysseySeamsPaintBatchedElementParameters > seamsPaintBatchedElementParameters(new FOdysseySeamsPaintBatchedElementParameters());
     {
-        const float MinU = 0.0f;
-        const float MinV = 0.0f;
-        const float MaxU = 1.0f;
-        const float MaxV = 1.0f;
-        const float MinX = 0.0f;
-        const float MinY = 0.0f;
-        const float MaxX = mStrokeBufferRenderTarget2D->GetSurfaceWidth();
-        const float MaxY = mStrokeBufferRenderTarget2D->GetSurfaceHeight();
+        seamsPaintBatchedElementParameters->ShaderParams.Stroke2D = mStrokeBufferRenderTarget2D;
+        seamsPaintBatchedElementParameters->ShaderParams.SeamMaskRenderTarget = mSeamRenderTarget2D;
+        seamsPaintBatchedElementParameters->ShaderParams.WidthPixelOffset = (float)(1.0f / mStrokeBufferRenderTarget2D->GetSurfaceWidth());
+        seamsPaintBatchedElementParameters->ShaderParams.HeightPixelOffset = (float)(1.0f / mStrokeBufferRenderTarget2D->GetSurfaceHeight());
+    }
 
-        // Create a canvas for the render target.
+    // Draw a quad to copy the texture over to the render target
+    TArray< FCanvasUVTri >	TriangleList;
+    FCanvasUVTri SingleTri;
+    SingleTri.V0_Pos = FVector2D(MinX, MinY);
+    SingleTri.V0_UV = FVector2D(MinU, MinV);
+    SingleTri.V0_Color = FLinearColor::White;
 
-        TRefCountPtr< FOdysseySeamsPaintBatchedElementParameters > seamsPaintBatchedElementParameters(new FOdysseySeamsPaintBatchedElementParameters());
-        {
-            seamsPaintBatchedElementParameters->ShaderParams.Stroke2D = mStrokeBufferRenderTarget2D;
-            seamsPaintBatchedElementParameters->ShaderParams.SeamMaskRenderTarget = mSeamRenderTarget2D;
-            seamsPaintBatchedElementParameters->ShaderParams.WidthPixelOffset = (float)(1.0f / mStrokeBufferRenderTarget2D->GetSurfaceWidth());
-            seamsPaintBatchedElementParameters->ShaderParams.HeightPixelOffset = (float)(1.0f / mStrokeBufferRenderTarget2D->GetSurfaceHeight());
-        }
+    SingleTri.V1_Pos = FVector2D(MaxX, MinY);
+    SingleTri.V1_UV = FVector2D(MaxU, MinV);
+    SingleTri.V1_Color = FLinearColor::White;
 
-        // Draw a quad to copy the texture over to the render target
-        TArray< FCanvasUVTri >	TriangleList;
-        FCanvasUVTri SingleTri;
-        SingleTri.V0_Pos = FVector2D(MinX, MinY);
-        SingleTri.V0_UV = FVector2D(MinU, MinV);
-        SingleTri.V0_Color = FLinearColor::White;
+    SingleTri.V2_Pos = FVector2D(MaxX, MaxY);
+    SingleTri.V2_UV = FVector2D(MaxU, MaxV);
+    SingleTri.V2_Color = FLinearColor::White;
+    TriangleList.Add(SingleTri);
 
-        SingleTri.V1_Pos = FVector2D(MaxX, MinY);
-        SingleTri.V1_UV = FVector2D(MaxU, MinV);
-        SingleTri.V1_Color = FLinearColor::White;
+    SingleTri.V0_Pos = FVector2D(MaxX, MaxY);
+    SingleTri.V0_UV = FVector2D(MaxU, MaxV);
+    SingleTri.V0_Color = FLinearColor::White;
 
-        SingleTri.V2_Pos = FVector2D(MaxX, MaxY);
-        SingleTri.V2_UV = FVector2D(MaxU, MaxV);
-        SingleTri.V2_Color = FLinearColor::White;
-        TriangleList.Add(SingleTri);
+    SingleTri.V1_Pos = FVector2D(MinX, MaxY);
+    SingleTri.V1_UV = FVector2D(MinU, MaxV);
+    SingleTri.V1_Color = FLinearColor::White;
 
-        SingleTri.V0_Pos = FVector2D(MaxX, MaxY);
-        SingleTri.V0_UV = FVector2D(MaxU, MaxV);
-        SingleTri.V0_Color = FLinearColor::White;
+    SingleTri.V2_Pos = FVector2D(MinX, MinY);
+    SingleTri.V2_UV = FVector2D(MinU, MinV);
+    SingleTri.V2_Color = FLinearColor::White;
+    TriangleList.Add(SingleTri);
 
-        SingleTri.V1_Pos = FVector2D(MinX, MaxY);
-        SingleTri.V1_UV = FVector2D(MinU, MaxV);
-        SingleTri.V1_Color = FLinearColor::White;
-
-        SingleTri.V2_Pos = FVector2D(MinX, MinY);
-        SingleTri.V2_UV = FVector2D(MinU, MinV);
-        SingleTri.V2_Color = FLinearColor::White;
-        TriangleList.Add(SingleTri);
-
-        FCanvasTriangleItem TriItemList(TriangleList, nullptr);
-        TriItemList.BatchedElementParameters = seamsPaintBatchedElementParameters;
-        TriItemList.BlendMode = SE_BLEND_Opaque;
-        strokePaintCanvas.DrawItem(TriItemList);
-
-        {
-            strokePaintCanvas.Flush_GameThread(true);
-        }
+    FCanvasTriangleItem TriItemList(TriangleList, nullptr);
+    TriItemList.BatchedElementParameters = seamsPaintBatchedElementParameters;
+    TriItemList.BlendMode = SE_BLEND_Opaque;
+    strokePaintCanvas.DrawItem(TriItemList);
+    {
+        strokePaintCanvas.Flush_GameThread(true);
     }
 
 

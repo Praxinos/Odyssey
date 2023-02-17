@@ -103,7 +103,31 @@ void FOdysseyViewportDrawingEditorScreenBasedAdapter::RenderInteractorWidget(con
 
         meshAdapter->LineTraceComponent(traceHitResult, paintRay.CameraLocation, rayEnd, FCollisionQueryParams(SCENE_QUERY_STAT(Paint), true));
 
-        const FPlane proj = iView->Project(paintRay.CameraLocation);
+        const FPlane proj = iView->Project(traceHitResult.Location);
+        FVector originDeproj, xDeproj, yDeproj;
+        iView->DeprojectFVector2D(FVector2D(0, 0), originDeproj, mZScreenAxis);
+        iView->DeprojectFVector2D(FVector2D(1, 0), xDeproj, mZScreenAxis);
+        iView->DeprojectFVector2D(FVector2D(0, 1), yDeproj, mZScreenAxis);
+        iView->DeprojectFVector2D(FVector2D(iViewport->GetMouseX(), iViewport->GetMouseY()), mMousePosInWorld, mZScreenAxis);
+
+        UE_LOG(LogTemp, Display, TEXT("deproj: %lf, %lf, %lf"), mMousePosInWorld.X, mMousePosInWorld.Y, mMousePosInWorld.Z);
+
+        FVector mousePosInWorldWithZ = mMousePosInWorld + mZScreenAxis * 0.01;
+
+        const FLinearColor brushCueColor = FLinearColor(1.0f, 1.0f, 0.3f);
+
+        mXScreenAxis = xDeproj - originDeproj;
+        mYScreenAxis = yDeproj - originDeproj;
+
+        if (iPDI != NULL)
+        {
+            int numCircleSides = 128;
+            // Draw brush circle
+            DrawCircle(iPDI, mousePosInWorldWithZ, mXScreenAxis, mYScreenAxis, brushCueColor, drawingTool->GetBrushInstance()->GetSizeModifier(), numCircleSides, SDPG_World, 0.01f);
+        }
+
+        mXScreenAxis *= iView->FOV;
+        mYScreenAxis *= iView->FOV;
 
         //Proj x between -1 and 1, 0 is center of viewport
         //Proj y between -1 and 1
@@ -111,7 +135,11 @@ void FOdysseyViewportDrawingEditorScreenBasedAdapter::RenderInteractorWidget(con
         //Proj w = shortest distance from cursor to hit location
 
         //float distZ = 1.f / proj.Z;
-        UE_LOG(LogTemp, Display, TEXT("%lf, %lf, %lf, %lf"), proj.X, proj.Y, proj.Z, proj.W );
+        UE_LOG(LogTemp, Display, TEXT("mXScreenAxis: %lf, %lf, %lf"), mXScreenAxis.X, mXScreenAxis.Y, mXScreenAxis.Z);
+        UE_LOG(LogTemp, Display, TEXT("mYScreenAxis: %lf, %lf, %lf"), mYScreenAxis.X, mYScreenAxis.Y, mYScreenAxis.Z);
+
+        UE_LOG(LogTemp, Display, TEXT("ViewportMouse: %ld, %ld"), iViewport->GetMouseX(), iViewport->GetMouseY());
+        UE_LOG(LogTemp, Display, TEXT("proj, %lf, %lf, %lf, %lf"), proj.X, proj.Y, proj.Z, proj.W );
         UE_LOG(LogTemp, Display, TEXT("Location, %lf, %lf, %lf"), traceHitResult.Location.X, traceHitResult.Location.Y, traceHitResult.Location.Z );
         UE_LOG(LogTemp, Display, TEXT("PaintRayStart, %lf, %lf, %lf"), paintRay.RayStart.X, paintRay.RayStart.Y, paintRay.RayStart.Z);
         FVector locationInverse = meshAdapter->GetComponentToWorldMatrix().InverseTransformPosition(traceHitResult.Location);
@@ -120,12 +148,6 @@ void FOdysseyViewportDrawingEditorScreenBasedAdapter::RenderInteractorWidget(con
         UE_LOG(LogTemp, Display, TEXT("PM, %lf, %lf, %lf"), traceHitResult.Location.X - paintRay.RayStart.X, traceHitResult.Location.Y - paintRay.RayStart.Y, traceHitResult.Location.Z - paintRay.RayStart.Z);
 
         FVector differenceBetweenRayStartAndHitResult = FVector(traceHitResult.Location.X - paintRay.RayStart.X, traceHitResult.Location.Y - paintRay.RayStart.Y, traceHitResult.Location.Z - paintRay.RayStart.Z);
-
-        TArray<uint32> triangles;
-        float brushSize = 10; //ToCheck after optimization for non scaled objects FMath::Min3(mEditor->Actor()->GetActorScale().X, mEditor->Actor()->GetActorScale().Y, mEditor->Actor()->GetActorScale().Z);
-        //triangles = meshAdapter->SphereIntersectTriangles(brushSize, meshAdapter->GetComponentToWorldMatrix().InverseTransformPosition(traceHitResult.Location), mouseViewportRay.GetOrigin(), false);
-        triangles = meshAdapter->SphereIntersectTriangles(brushSize, differenceBetweenRayStartAndHitResult, FVector(0,0,0), true);
-        UE_LOG(LogTemp, Display, TEXT("%d"), triangles.Num());
 
         //UE_LOG(LogTemp, Display, TEXT("%lf, %lf, %lf, %lf"), proj.X * distZ, proj.Y * distZ, 1.f / proj.Z, proj.W);
     }
@@ -206,7 +228,7 @@ TArray<::ULIS::FRectI> FOdysseyViewportDrawingEditorScreenBasedAdapter::GetMinim
     TArray<::ULIS::FRectI> rects;
 
     //Get Biggest rectangle
-    /*int minX = 100000000;
+    int minX = 100000000;
     int minY = 100000000;
     int maxX = 0;
     int maxY = 0;
@@ -219,7 +241,7 @@ TArray<::ULIS::FRectI> FOdysseyViewportDrawingEditorScreenBasedAdapter::GetMinim
         maxY = ::ULIS::FMath::Max4(double(maxY), iTriangles[i].TrianglePoints[0].Y, iTriangles[i].TrianglePoints[1].Y, iTriangles[i].TrianglePoints[2].Y);
     }
     rects.Add( ::ULIS::FRectI::FromMinMax(minX, minY, maxX, maxY) );
-    return rects;*/
+    return rects;
 
     //First step, we get all bounding rectangles from the triangles
     for (int i = 0; i < iTriangles.Num(); i++)
@@ -311,18 +333,21 @@ TArray<::ULIS::FRectI> FOdysseyViewportDrawingEditorScreenBasedAdapter::GetMinim
     const FViewportCursorLocation mouseViewportRay(view, viewportClient, iStampParams.mPosition.x, iStampParams.mPosition.y);
 
     FHitResult traceHitResult(1.0f);
+    //const FVector rayEnd( mMousePosInWorld + mZScreenAxis * HALF_WORLD_MAX);
+
+    //meshAdapter->LineTraceComponent(traceHitResult, mMousePosInWorld, rayEnd, FCollisionQueryParams(SCENE_QUERY_STAT(Paint), true));
+
     const FVector rayEnd(mouseViewportRay.GetOrigin() + mouseViewportRay.GetDirection() * HALF_WORLD_MAX);
 
     meshAdapter->LineTraceComponent(traceHitResult, mouseViewportRay.GetOrigin(), rayEnd, FCollisionQueryParams(SCENE_QUERY_STAT(Paint), true));
 
-
-       FVector brushXAxis, brushYAxis;
-//     FVector brushXAxis = FVector( 1, 0, 0 );
-//     FVector brushYAxis = FVector( 0, -1, 0 );
-//     FVector brushZAxis = FVector(0, 0, 1);
-    traceHitResult.Normal.FindBestAxisVectors(brushXAxis,brushYAxis);
-    const FMatrix worldToBrushMatrix = FMatrix(brushXAxis, brushYAxis, traceHitResult.Normal, traceHitResult.Location).Inverse();
-    //const FMatrix worldToBrushMatrix = FMatrix(brushXAxis, brushYAxis, brushZAxis, traceHitResult.Location).Inverse();
+       //FVector brushXAxis, brushYAxis;
+    FVector brushXAxis = FVector( 1, 0, 0 );
+    FVector brushYAxis = FVector( 0, 1, 0 );
+    FVector brushZAxis = FVector( 0, 0, 1 );
+    //traceHitResult.Normal.FindBestAxisVectors(brushXAxis,brushYAxis);
+    //const FMatrix worldToBrushMatrix = FMatrix(brushXAxis, brushYAxis, traceHitResult.Normal, traceHitResult.Location).Inverse();
+    const FMatrix worldToBrushMatrix = FMatrix(brushXAxis, brushYAxis, brushZAxis, traceHitResult.Location).Inverse();
 
 
     // Convert trace to UV position
@@ -341,7 +366,9 @@ TArray<::ULIS::FRectI> FOdysseyViewportDrawingEditorScreenBasedAdapter::GetMinim
         screenPaintBatchedElementParameters->ShaderParams.Stroke2D = mStrokeBufferTexture2D;
         screenPaintBatchedElementParameters->ShaderParams.WorldToBrushMatrix = worldToBrushMatrix;
         screenPaintBatchedElementParameters->ShaderParams.TextureHitPoint = FVector2D( iStampParams.mPosition.x, iStampParams.mPosition.y );
-        screenPaintBatchedElementParameters->ShaderParams.StampQuality = 10;
+        screenPaintBatchedElementParameters->ShaderParams.StampQuality = 1;
+        screenPaintBatchedElementParameters->ShaderParams.xScreenAxis = mXScreenAxis;
+        screenPaintBatchedElementParameters->ShaderParams.yScreenAxis = mYScreenAxis;
     }
 
     const ERHIFeatureLevel::Type featureLevel = mEditor->Component()->GetWorld()->FeatureLevel;
@@ -352,20 +379,14 @@ TArray<::ULIS::FRectI> FOdysseyViewportDrawingEditorScreenBasedAdapter::GetMinim
     FBatchedElements* strokePaintBatchedElements = strokePaintCanvas.GetBatchedElements(FCanvas::ET_Triangle, screenPaintBatchedElementParameters, nullptr, SE_BLEND_Opaque);
 
     //Todo: make ellipseIntersectTriangles ?
-    TArray<uint32> triangles;
-    float brushSize = FMath::Max(iStampParams.mBlock->Width(), iStampParams.mBlock->Height()); //ToCheck after optimization for non scaled objects FMath::Min3(mEditor->Actor()->GetActorScale().X, mEditor->Actor()->GetActorScale().Y, mEditor->Actor()->GetActorScale().Z);
-    brushSize *= brushSize;
-    brushSize /= 10;
-    triangles = meshAdapter->SphereIntersectTriangles(brushSize, meshAdapter->GetComponentToWorldMatrix().InverseTransformPosition(traceHitResult.Location), mouseViewportRay.GetOrigin(), false);
-
     const TArray<uint32> vertexIndices = meshAdapter->GetMeshIndices();
     uint32 triIndices = vertexIndices.Num() / 3;
     TArray<FTexturePaintTriangleInfo> triangleInfo;
     TArray<FTexturePaintMeshSectionInfo> sectionInfo;
-    for (int i = 0; i < triangles.Num(); i++)
+    for (uint32 i = 0; i < triIndices; i++)
     {
-        const int32 indices[3] = { int32(vertexIndices[triangles[i] * 3]), int32(vertexIndices[triangles[i] * 3 + 1]), int32(vertexIndices[triangles[i] * 3 + 2]) };
-        GatherTextureTriangles(meshAdapter.Get(), triangles[i], indices, &triangleInfo, &sectionInfo, mEditor->GetUVIndexUsedByCurrentTexture());
+        const int32 indices[3] = { int32(vertexIndices[i * 3]), int32(vertexIndices[i * 3 + 1]), int32(vertexIndices[i * 3 + 2]) };
+        GatherTextureTriangles(meshAdapter.Get(), i, indices, &triangleInfo, &sectionInfo, mEditor->GetUVIndexUsedByCurrentTexture());
     }
 
     // Process the influenced triangles - storing off a large list is much slower than processing in a single loop
