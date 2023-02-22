@@ -39,7 +39,7 @@ void FOdysseyViewportDrawingEditorTextureBasedAdapter::PrepareAdapterForPainting
         UE_LOG(LogTemp, Warning, TEXT("BeforeOverride: GetUsedTextures:"));
         TArray<UTexture*> Textures;
         mEditor->Material()->GetUsedTextures(Textures, EMaterialQualityLevel::Num, true, GMaxRHIFeatureLevel, true);
-        UE_LOG(LogTemp, Warning, TEXT("%d"), DoesMaterialUseTexture(mEditor->Material(), mEditor->Texture()));
+        UE_LOG(LogTemp, Warning, TEXT("Does material Use Texture %d"), DoesMaterialUseTexture(mEditor->Material(), mEditor->Texture()));
         for (int i = 0; i < Textures.Num(); i++)
         {
             UE_LOG(LogTemp, Warning, TEXT("%s"), *(Textures[i]->GetFName()).ToString())
@@ -77,7 +77,7 @@ void FOdysseyViewportDrawingEditorTextureBasedAdapter::PrepareAdapterForPainting
         UE_LOG(LogTemp, Warning, TEXT("AfterOverride: GetUsedTextures:"));
         TArray<UTexture*> Textures;
         mEditor->Material()->GetUsedTextures(Textures, EMaterialQualityLevel::Num, true, GMaxRHIFeatureLevel, true);
-        UE_LOG(LogTemp, Warning, TEXT("%d"), DoesMaterialUseTexture(mEditor->Material(), mEditor->Texture()));
+        UE_LOG(LogTemp, Warning, TEXT("Does material Use Texture %d"), DoesMaterialUseTexture(mEditor->Material(), mEditor->Texture()));
         for (int i = 0; i < Textures.Num(); i++)
         {
             UE_LOG(LogTemp, Warning, TEXT("%s"), *(Textures[i]->GetFName()).ToString())

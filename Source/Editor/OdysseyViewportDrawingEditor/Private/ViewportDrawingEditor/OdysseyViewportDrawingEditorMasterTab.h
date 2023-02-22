@@ -28,6 +28,7 @@ protected:
     TSharedRef<SWidget> GeneratePaintingMethodComboBoxItem(TSharedPtr<EOdysseyViewportDrawingPaintingAdapterMethod> iItem);
     void ChangeSelectionPaintingMethodComboBoxItem(TSharedPtr<EOdysseyViewportDrawingPaintingAdapterMethod> iNewSelection, ESelectInfo::Type iSelectInfo);
     static FText GetMethodAsText(EOdysseyViewportDrawingPaintingAdapterMethod iMethod);
+    static FText GetTooltipAsText(EOdysseyViewportDrawingPaintingAdapterMethod iMethod);
 
 
 protected:

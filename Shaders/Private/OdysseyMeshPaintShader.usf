@@ -34,11 +34,11 @@ void MainPS( float4 InPosition : SV_POSITION,
     	
 	float distX = BrushSpaceVertexPosition.x / (2*widthStroke);
 	float distY = BrushSpaceVertexPosition.y / (2*heightStroke);
-	float distZ = BrushSpaceVertexPosition.z / (2*heightStroke);
+	//float distZ = BrushSpaceVertexPosition.z / (2*heightStroke);
 	//if( distZ < 0 )
 	//	distZ = -distZ;
 		
-	float xPos = 0.5 + distX - distZ;// + sin(distY * 2 * 3.14)*distZ;
+	float xPos = 0.5 + distX;// + sin(distY * 2 * 3.14)*distZ;
 	float yPos = 0.5 + distY;// - cos(distX * 2 * 3.14)*distZ;
 
     OutColor = float4(0.f,0.f,0.f,0.f);

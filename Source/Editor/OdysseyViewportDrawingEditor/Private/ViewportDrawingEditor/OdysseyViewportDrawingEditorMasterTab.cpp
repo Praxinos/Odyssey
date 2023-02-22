@@ -36,7 +36,8 @@ FOdysseyViewportDrawingEditorMasterTab::CreateWidget()
 {
     mOptions.Empty();
     mOptions.Add(MakeShared< EOdysseyViewportDrawingPaintingAdapterMethod >(EOdysseyViewportDrawingPaintingAdapterMethod::OdysseyTextureBased));
-    mOptions.Add(MakeShared< EOdysseyViewportDrawingPaintingAdapterMethod >(EOdysseyViewportDrawingPaintingAdapterMethod::OdysseyMeshBased));
+    mOptions.Add(MakeShared< EOdysseyViewportDrawingPaintingAdapterMethod >(EOdysseyViewportDrawingPaintingAdapterMethod::OdysseyMeshBasedPlanar));
+    //mOptions.Add(MakeShared< EOdysseyViewportDrawingPaintingAdapterMethod >(EOdysseyViewportDrawingPaintingAdapterMethod::OdysseyMeshBasedSphere));
     mOptions.Add(MakeShared< EOdysseyViewportDrawingPaintingAdapterMethod >(EOdysseyViewportDrawingPaintingAdapterMethod::OdysseyScreenBased));
 
     mThumbnailPool = MakeShareable( new FAssetThumbnailPool( 50 ) );
@@ -132,7 +133,7 @@ FOdysseyViewportDrawingEditorMasterTab::CreateWidget()
                         .AutoHeight()
                         [
                             SNew(STextBlock)
-                            .Text(FText::FromString("Select painting method"))
+                            .Text(FText::FromString("Stamp alignment"))
                         ]
                     + SVerticalBox::Slot()
                         .Padding(2)
@@ -242,7 +243,8 @@ FOdysseyViewportDrawingEditorMasterTab::CreateMeshComponentMenuWidget()
 TSharedRef<SWidget> FOdysseyViewportDrawingEditorMasterTab::GeneratePaintingMethodComboBoxItem(TSharedPtr<EOdysseyViewportDrawingPaintingAdapterMethod> iItem)
 {
     return  SNew(STextBlock)
-        .Text(FOdysseyViewportDrawingEditorMasterTab::GetMethodAsText(*(iItem.Get())));
+        .Text(FOdysseyViewportDrawingEditorMasterTab::GetMethodAsText(*(iItem.Get())))
+        .ToolTipText(FOdysseyViewportDrawingEditorMasterTab::GetTooltipAsText(*(iItem.Get())));
 }
 
 void FOdysseyViewportDrawingEditorMasterTab::ChangeSelectionPaintingMethodComboBoxItem(TSharedPtr<EOdysseyViewportDrawingPaintingAdapterMethod> iNewSelection, ESelectInfo::Type iSelectInfo)
@@ -254,12 +256,24 @@ FText FOdysseyViewportDrawingEditorMasterTab::GetMethodAsText(EOdysseyViewportDr
 {
     switch (iMethod)
     {
-        case OdysseyTextureBased:        return LOCTEXT("OdysseyTextureBased", "Texture Based");
-        case OdysseyMeshBased:           return LOCTEXT("OdysseyMeshBased", "Mesh Based");
-        case OdysseyScreenBased:         return LOCTEXT("OdysseyScreenBased", "Screen Based");
+        case OdysseyTextureBased:        return LOCTEXT("OdysseyTextureBased", "Texture UV");
+        case OdysseyMeshBasedPlanar:     return LOCTEXT("OdysseyMeshBasedPlanar", "Mesh (planar drawing)");
+        case OdysseyMeshBasedSphere:     return LOCTEXT("OdysseyMeshBasedSphere", "Mesh (sphere drawing)");
+        case OdysseyScreenBased:         return LOCTEXT("OdysseyScreenBased", "Screen");
     }
-
     return LOCTEXT("OdysseyInvalid", "Invalid");
+}
+
+FText FOdysseyViewportDrawingEditorMasterTab::GetTooltipAsText(EOdysseyViewportDrawingPaintingAdapterMethod iMethod)
+{
+    switch (iMethod)
+    {
+        case OdysseyTextureBased:        return LOCTEXT("OdysseyTextureBasedToolTip", "Stamp will be based on texture (2D) UVs size and orientation");
+        case OdysseyMeshBasedPlanar:     return LOCTEXT("OdysseyMeshBasedPlanarToolTip", "Stamp will be based on mesh (3D) size and orientation. The Z axis is normal to hit plane on the mesh and will follow each edge");
+        case OdysseyMeshBasedSphere:     return LOCTEXT("OdysseyMeshBasedSphereToolTip", "Stamp will be based on mesh (3D) size and orientation. The stamp will be interpreted as a sphere and applied to the mesh");
+        case OdysseyScreenBased:         return LOCTEXT("OdysseyScreenBasedToolTip", "Stamp will be based on viewport screen view. Its size and orientation depend on the position of the view.");
+    }
+    return LOCTEXT("OdysseyInvalidToolTip", "Invalid");
 }
 
 //--------------------------------------------------------------------------------------

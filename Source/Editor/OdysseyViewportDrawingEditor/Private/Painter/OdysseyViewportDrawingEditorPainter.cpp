@@ -81,7 +81,7 @@ void FOdysseyViewportDrawingEditorPainter::CreatePaintingAdapter()
         case EOdysseyViewportDrawingPaintingAdapterMethod::OdysseyScreenBased:
             mPaintingAdapter = MakeShared<FOdysseyViewportDrawingEditorScreenBasedAdapter>(mEditor);
         break;
-        case EOdysseyViewportDrawingPaintingAdapterMethod::OdysseyMeshBased:
+        case EOdysseyViewportDrawingPaintingAdapterMethod::OdysseyMeshBasedPlanar:
             mPaintingAdapter = MakeShared<FOdysseyViewportDrawingEditorMeshBasedAdapter>(mEditor);
         break;
         default :

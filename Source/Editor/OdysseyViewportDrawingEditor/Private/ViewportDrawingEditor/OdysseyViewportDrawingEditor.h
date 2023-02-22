@@ -36,9 +36,10 @@ struct FInstanceTexturePaintSettings
 UENUM()
 enum EOdysseyViewportDrawingPaintingAdapterMethod
 {
-    OdysseyTextureBased     UMETA(DisplayName = "Texture Based"),
-    OdysseyMeshBased        UMETA(DisplayName = "Mesh Based"),
-    OdysseyScreenBased      UMETA(DisplayName = "Screen Based"),
+    OdysseyTextureBased           UMETA(DisplayName = "Texture Based"),
+    OdysseyMeshBasedPlanar        UMETA(DisplayName = "Mesh Based (Planar)"),
+    OdysseyMeshBasedSphere        UMETA(DisplayName = "Mesh Based (Sphere)"),
+    OdysseyScreenBased            UMETA(DisplayName = "Screen Based"),
 };
 
 /**
