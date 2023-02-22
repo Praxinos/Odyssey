@@ -8,10 +8,14 @@
 class ODYSSEYVECTOR_API FOdysseyVectorHUDTransform : public FOdysseyVectorHUD
 {
     private:
+        static const uint32 HANDLE_RADIUS = 3;
+
+    protected:
+        ::ULIS::FRectD mRect;
 
     public:
         ~FOdysseyVectorHUDTransform();
-        FOdysseyVectorHUDTransform( std::vector<::ULIS::FVec2D>& iPointArray );
+        FOdysseyVectorHUDTransform();
 
         void Draw( UOdysseyVectorRoot& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags );
 };

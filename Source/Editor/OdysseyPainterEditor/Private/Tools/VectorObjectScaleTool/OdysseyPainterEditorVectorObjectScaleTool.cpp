@@ -59,9 +59,9 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDown(const FOdysseyPoint& iPo
         if ( selectedObject )
         {
             BLPoint localCoords = selectedObject->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
-
+/*
             mPickedHandle = selectedObject->PickBBox( localCoords.x, localCoords.y );
-
+*/
             mOldLocalMouseX = localCoords.x;
             mOldLocalMouseY = localCoords.y;
         }

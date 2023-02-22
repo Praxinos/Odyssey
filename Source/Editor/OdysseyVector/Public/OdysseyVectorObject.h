@@ -16,10 +16,8 @@ class ODYSSEYVECTOR_API UOdysseyVectorObject : public UObject
     public:
         GENERATED_BODY()
 
-        static const uint32 PICK_POINT     = ( 1 << 0 );
-        static const uint32 PICK_RECTANGLE = ( 1 << 1 );
-        static const uint32 PICK_CIRCLE    = ( 1 << 2 );
-        static const uint32 PICK_FREEHAND  = ( 1 << 3 );
+        static const uint32 PICK_MATH_BASED = ( 1 << 0 );
+        static const uint32 PICK_MASK_BASED = ( 1 << 3 );
 
         // DO NOT CHANGE !
         static const uint32 VECTORROOTTYPE       = 0;
@@ -127,6 +125,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorObject : public UObject
         BLMatrix2D& GetLocalMatrix();
         BLMatrix2D& GetWorldMatrix();
         BLMatrix2D& GetInverseWorldMatrix();
+        BLMatrix2D& GetInverseLocalMatrix();
         std::list<UOdysseyVectorObject*>& GetChildrenList();
         void SetForegroundColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA );
         void SetBackgroundColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA );

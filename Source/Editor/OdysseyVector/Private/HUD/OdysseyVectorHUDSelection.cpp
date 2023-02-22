@@ -8,7 +8,6 @@ FOdysseyVectorHUDSelection::~FOdysseyVectorHUDSelection()
 FOdysseyVectorHUDSelection::FOdysseyVectorHUDSelection( std::vector<::ULIS::FVec2D>& iPointArray )
     : mPointArray(iPointArray)
     , mSelecting(true)
-    , mShowHandles(true)
 {
 }
 
@@ -19,17 +18,11 @@ FOdysseyVectorHUDSelection::SetSelecting( bool iSelecting )
 }
 
 void
-FOdysseyVectorHUDSelection::ShowHandles( bool iShowHandles )
-{
-    mShowHandles = iShowHandles;
-}
-
-void
 FOdysseyVectorHUDSelection::Draw( UOdysseyVectorRoot& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
     BLContext* blctx = iScene.GetEngine()->GetBLContext();
     ::ULIS::FRectD bbox = { 0, 0, 0, 0 };
-    BLPath path;
+
 
     // matrix might get altered for displaying the selection rectangle of a single object. Save it.
     blctx->save();
@@ -38,6 +31,7 @@ FOdysseyVectorHUDSelection::Draw( UOdysseyVectorRoot& iScene, ::ULIS::FRectD& iR
 
     if( mSelecting )
     {
+        BLPath path;
 
         for( int i = 0; i < mPointArray.size(); i++ )
         {
@@ -46,6 +40,8 @@ FOdysseyVectorHUDSelection::Draw( UOdysseyVectorRoot& iScene, ::ULIS::FRectD& iR
             path.moveTo( mPointArray[i].x, mPointArray[i].y );
             path.lineTo( mPointArray[n].x, mPointArray[n].y );
         }
+
+        blctx->strokePath( path );
     }
     else
     {
@@ -53,6 +49,8 @@ FOdysseyVectorHUDSelection::Draw( UOdysseyVectorRoot& iScene, ::ULIS::FRectD& iR
 
         if( selectedObjectList.size() )
         {
+            BLPath path;
+
             if( selectedObjectList.size() == 1 )
             {
                 UOdysseyVectorObject* selectedObject = iScene.GetLastSelected();
@@ -78,9 +76,23 @@ FOdysseyVectorHUDSelection::Draw( UOdysseyVectorRoot& iScene, ::ULIS::FRectD& iR
                 path.lineTo( bbox.x         , bbox.y + bbox.h );
                 path.lineTo( bbox.x         , bbox.y          );
             }
+
+            blctx->strokePath( path );
         }
     }
 
-    blctx->strokePath( path );
+    if( iScene.GetEngine()->GetSelectionSpace() )
+    {
+        UOdysseyVectorGroup* selectionSpace = iScene.GetEngine()->GetSelectionSpace();
+        ::ULIS::FRectD selectionSpaceBBox = selectionSpace->GetBBox( false );
+        BLRgba32 strokeColor = { 0x80, 0x80, 0x80, 0xFF };
+        BLMatrix2D& worldMatrix = selectionSpace->GetWorldMatrix();
+
+        blctx->setMatrix( worldMatrix );
+        blctx->setStrokeStyle( BLRgba32( strokeColor ) );
+        blctx->setStrokeWidth( 1.0f );
+        blctx->strokeRect( selectionSpaceBBox.x, selectionSpaceBBox.y, selectionSpaceBBox.w, selectionSpaceBBox.h );
+    }
+
     blctx->restore();
 }

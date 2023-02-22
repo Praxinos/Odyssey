@@ -15,7 +15,7 @@ class UOdysseyVectorVertexIntersection;
 class FOdysseyVectorSection;
 
 UCLASS()
-class UOdysseyVectorSegment : public UOdysseyVectorLink
+class ODYSSEYVECTOR_API UOdysseyVectorSegment : public UOdysseyVectorLink
 {
     public:
         GENERATED_BODY()
@@ -41,6 +41,7 @@ class UOdysseyVectorSegment : public UOdysseyVectorLink
         virtual void Draw( ::ULIS::FRectD &iRoi );
         virtual void DrawStructure( ::ULIS::FRectD &iRoi );
 
+        virtual bool ProximityTest( double iLocalX, double iLocalY, double iDistanceTolerance, double &oSmallestDistance ){ return false; };
         UOdysseyVectorSegment* GetPreviousSegment();
         UOdysseyVectorSegment* GetNextSegment();
         std::list<UOdysseyVectorVertexIntersection*>& GetIntersectionVertexList();

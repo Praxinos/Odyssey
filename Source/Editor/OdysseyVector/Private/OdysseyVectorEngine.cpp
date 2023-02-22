@@ -25,6 +25,12 @@ FOdysseyVectorEngine::SetSelectionSpace( UOdysseyVectorGroup* iSelectionSpace )
    mSelectionSpace = iSelectionSpace;
 }
 
+UOdysseyVectorGroup*
+FOdysseyVectorEngine::GetSelectionSpace()
+{
+    return mSelectionSpace;
+}
+
 BLContext*
 FOdysseyVectorEngine::GetBLContext()
 {
@@ -308,6 +314,76 @@ FOdysseyVectorEngine::Erase( UOdysseyVectorRoot& iScene
     }
 }
 
+static void
+RecursivePickSegments( UOdysseyVectorObject* iObject
+                     , double iX
+                     , double iY
+                     , double iRadius
+                     , std::vector<UOdysseyVectorSegment*>& oPickedSegmentArray
+                     , std::vector<double>& oDistanceArray )
+{
+    UOdysseyVectorPath* path = Cast<UOdysseyVectorPath>(iObject);
+
+    if( path )
+    {
+        BLPoint localVector = iObject->GetInverseWorldMatrix().mapVector( 0.7071f, 0.7071f );
+        ::ULIS::FVec2D factor = { localVector.x * iRadius, localVector.y * iRadius };
+        double localRadius = /*factor.DistanceSquared() ? factor.Distance() : 0.0f*/iRadius;
+        BLPoint localPoint = iObject->GetInverseWorldMatrix().mapPoint( iX, iY );
+        ::ULIS::FRectD pathBBox = path->GetBBox( false );
+
+        pathBBox.x -=   localRadius;
+        pathBBox.y -=   localRadius;
+        pathBBox.w += ( localRadius * 2 );
+        pathBBox.h += ( localRadius * 2 );
+
+        if( pathBBox.HitTest( ::ULIS::FVec2D( localPoint.x, localPoint.y ) ) == true )
+        {
+            std::list<UOdysseyVectorSegment*>& segmentList = path->GetSegmentList();
+
+            for( std::list<UOdysseyVectorSegment*>::iterator it = segmentList.begin(); it != segmentList.end(); ++it )
+            {
+                UOdysseyVectorSegment* segment = (*it);
+                ::ULIS::FRectD segmentBBox = segment->GetBoundingBox();
+
+                segmentBBox.x -=   localRadius;
+                segmentBBox.y -=   localRadius;
+                segmentBBox.w += ( localRadius * 2 );
+                segmentBBox.h += ( localRadius * 2 );
+
+                if( segmentBBox.HitTest( ::ULIS::FVec2D( localPoint.x, localPoint.y ) ) == true )
+                {
+                    double smallestDistance;
+
+                    if( segment->ProximityTest( localPoint.x, localPoint.y, localRadius, smallestDistance ) )
+                    {
+                        oPickedSegmentArray.push_back( segment );
+                        oDistanceArray.push_back( smallestDistance );
+                    } 
+                }
+            }
+        }
+    }
+
+    for( std::list<UOdysseyVectorObject*>::iterator it = iObject->GetChildrenList().begin(); it != iObject->GetChildrenList().end(); ++it )
+    {
+        UOdysseyVectorObject* child = (*it);
+
+        RecursivePickSegments( child, iX, iY, iRadius, oPickedSegmentArray, oDistanceArray );
+    }
+}
+
+void
+FOdysseyVectorEngine::PickSegments( UOdysseyVectorRoot* iScene
+                                  , double iX
+                                  , double iY
+                                  , double iRadius
+                                  , std::vector<UOdysseyVectorSegment*>& oPickedSegmentArray
+                                  , std::vector<double>& oDistance )
+{
+    RecursivePickSegments( iScene, iX, iY, iRadius, oPickedSegmentArray, oDistance );
+}
+
 // static
 void
 FOdysseyVectorEngine::RecursivePick( UOdysseyVectorGroup* iSelectionSpace
@@ -316,7 +392,7 @@ FOdysseyVectorEngine::RecursivePick( UOdysseyVectorGroup* iSelectionSpace
                                    , ::ULIS::FRectD& iRoi
                                    , uint32 iSelectionFlags )
 {
-    UOdysseyVectorObject* pickedObject = iObj.Pick( iSelectionSpace, iRoi, iSelectionFlags );
+    UOdysseyVectorObject* pickedObject = ( &iObj != iSelectionSpace ) ? iObj.Pick( iSelectionSpace, iRoi, iSelectionFlags ) : nullptr;
 
     for( std::list<UOdysseyVectorObject*>::iterator it = iObj.GetChildrenList().begin(); it != iObj.GetChildrenList().end(); ++it )
     {

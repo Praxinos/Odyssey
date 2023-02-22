@@ -4,6 +4,7 @@
 #include <blend2d.h>
 #include <Core/Core.h>
 #include <Image/Block.h>
+#include "OdysseyVectorSegment.h"
 #include "OdysseyVectorRoot.h"
 #include "HUD/OdysseyVectorHUD.h"
 
@@ -31,6 +32,12 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
         void RenderHUD( UOdysseyVectorRoot& iScene );
         void Render( UOdysseyVectorRoot& iScene );
         void Pick( UOdysseyVectorRoot& iScene, std::vector<::ULIS::FVec2D>& iPointArray, uint32 iSelectionFlags );
+        void PickSegments( UOdysseyVectorRoot* iScene
+                         , double iX
+                         , double iY
+                         , double iRadius
+                         , std::vector<UOdysseyVectorSegment*>& oPickedSegmentArray
+                         , std::vector<double>& oDistance );
 
         static void RecursivePick( UOdysseyVectorGroup* iSelectionSpace, UOdysseyVectorObject& iObj, std::vector<UOdysseyVectorObject*>& iSelectedObjectArray, ::ULIS::FRectD& iRoi, uint32 iSelectionFlags );
         static void RecursiveErase( UOdysseyVectorObject& iObj
@@ -54,6 +61,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
         void GetColorImagePixelValue( uint32 iX, uint32 iY, uint8 *oR, uint8* oG, uint8 *oB, uint8 *oA );
         ::ULIS::FColor GetColorImagePixelValue( uint32 iX, uint32 iY );
         void SetSelectionSpace( UOdysseyVectorGroup* iSelectionSpace );
+        UOdysseyVectorGroup* GetSelectionSpace();
 };
 
 ODYSSEYVECTOR_API FArchive& operator<<(FArchive &Ar, FOdysseyVectorEngine* iVectorEngine );

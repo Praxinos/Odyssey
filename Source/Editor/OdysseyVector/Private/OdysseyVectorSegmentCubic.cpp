@@ -173,7 +173,61 @@ UOdysseyVectorSegmentCubic::Pick( double iX
     return vec;
 }
 
-::ULIS::FVec2D UOdysseyVectorSegmentCubic::GetVectorAtStart( bool iNormalize )
+bool
+UOdysseyVectorSegmentCubic::ProximityTest( double iLocalX, double iLocalY, double iDistanceTolerance, double &oSmallestDistance )
+{
+    ::ULIS::FVec2D& point0 = mPoint[0]->GetCoords();
+    ::ULIS::FVec2D& point1 = mPoint[1]->GetCoords();
+    ::ULIS::FVec2D pt = { iLocalX, iLocalY };
+    double smallestDistance = DBL_MAX;
+    double dist;
+    double dx;
+    double dy;
+
+    for( uint32 i = 0; i < mPolygonCache.size(); i++ )
+    {
+        ::ULIS::FVec2D p0 = { mPolygonCache[i].lineVertex[0].x, mPolygonCache[i].lineVertex[0].y };
+        ::ULIS::FVec2D p1 = { mPolygonCache[i].lineVertex[1].x, mPolygonCache[i].lineVertex[1].y };
+
+        if( FOdysseyVector::DistanceToSegment( pt, p0, p1, dist ) )
+        {
+            if( dist < smallestDistance )
+            {
+                smallestDistance = dist;
+            }
+        }
+    }
+
+    // test first end-point of the segment
+    dx = ( iLocalX - point0.x );
+    dy = ( iLocalY - point0.y );
+    dist = sqrt( ( dx * dx ) + ( dy * dy ) );
+
+    if( dist < smallestDistance )
+    {
+        smallestDistance = dist;
+    }
+
+    // test second end-point of the segment
+    dx = ( iLocalX - point1.x );
+    dy = ( iLocalY - point1.y );
+    dist = sqrt( ( dx * dx ) + ( dy * dy ) );
+
+    if( dist < smallestDistance )
+    {
+        smallestDistance = dist;
+    }
+
+    if( smallestDistance < iDistanceTolerance )
+    {
+        return true;
+    }
+
+    return false;
+}
+
+::ULIS::FVec2D
+UOdysseyVectorSegmentCubic::GetVectorAtStart( bool iNormalize )
 {
     ::ULIS::FVec2D& point0 = mPoint[0]->GetCoords();
     ::ULIS::FVec2D& point1 = mPoint[1]->GetCoords();

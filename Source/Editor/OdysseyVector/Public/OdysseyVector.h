@@ -12,6 +12,11 @@ namespace FOdysseyVector
                          , double* line1t );
 
     double Cross2D( ::ULIS::FVec2D& iA, ::ULIS::FVec2D &iB );
+
+    bool DistanceToSegment( ::ULIS::FVec2D& iPt
+                          , ::ULIS::FVec2D& iSegmentP0
+                          , ::ULIS::FVec2D& iSegmentP1
+                          , double&         oDistance );
 }
 
 #include "OdysseyVectorObject.h"

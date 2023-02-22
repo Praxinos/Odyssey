@@ -85,7 +85,7 @@ struct TRectangle
     bool HitTest( const TVector2< T >& iV ) const {
         return  iV.x >= x
             &&  iV.y >= y
-            &&  iV.x <  (x + h )
+            &&  iV.x <  ( x + w )
             &&  iV.y <  ( y + h );
     }
 

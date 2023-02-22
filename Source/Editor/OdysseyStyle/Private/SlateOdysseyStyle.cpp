@@ -345,6 +345,7 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "PainterEditor.ToolsTab.ScenePanTool64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/scene_pan_tool_64", mIcon64x64 ) );
     Set( "PainterEditor.ToolsTab.SceneScaleTool64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/scene_scale_tool_64", mIcon64x64 ) );
     Set( "PainterEditor.ToolsTab.PathCutTool64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/path_cut_tool_64", mIcon64x64 ) );
+    Set( "PainterEditor.ToolsTab.PathPushTool64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/path_push_tool_64", mIcon64x64 ) );
     Set( "PainterEditor.ToolsTab.DrawingTool64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/drawing_tool_64", mIcon64x64 ) );
     Set( "PainterEditor.ToolsTab.DrawingTool16", new IMAGE_BRUSH( "PainterEditor/ToolsTab/drawing_tool_16", mIcon16x16 ) );
     Set( "PainterEditor.ToolsTab.ClearLayer64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/clear_layer_64", mIcon64x64 ) );

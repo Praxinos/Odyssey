@@ -98,6 +98,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorSegmentCubic : public UOdysseyVectorSegmen
         bool Pick( double iX, double iY, double iRadius );
         void IncreasePolygonCache(uint32 iSize);
         void ResetPolygonCache();
+        bool ProximityTest( double iLocalX, double iLocalY, double iDistanceTolerance, double& oDistance );
         uint32 GetPolygonCount(); // TODO: use vector size() method.
         std::vector<FPolygon>& GetPolygonCache();
         void IntersectPath( UOdysseyVectorPathCubic& iPath );

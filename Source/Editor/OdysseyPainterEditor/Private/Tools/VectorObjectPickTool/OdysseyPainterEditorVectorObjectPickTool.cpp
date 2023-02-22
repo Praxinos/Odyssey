@@ -2,6 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Tools/VectorObjectPickTool/OdysseyPainterEditorVectorObjectPickTool.h"
+#include <chrono>
 #include "LayerStack/OdysseyTextureLayer.h"
 #include "LayerStack/OdysseyTextureLayerStack.h"
 #include "LayerStack/OdysseyTextureLayerImageVector.h"
@@ -88,17 +89,34 @@ UOdysseyPainterEditorVectorObjectPickTool::OnMouseDrag(const FOdysseyPoint& iPoi
     }
 }
 
+static bool
+DoubleClicked()
+{
+    uint64 clickTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    static uint64 previousClickTime = 0;
+    bool doubleClicked = ( ( clickTime - previousClickTime ) < 200 ) ? true : false;
+
+    previousClickTime = clickTime;
+
+    return doubleClicked;
+}
+
+static void
+SetSelectionSpace( FOdysseyVectorEngine* iVectorEngine, UOdysseyVectorObject* iSelectedObject )
+{
+    if( DoubleClicked() == true )
+    {
+        // Note: due to the dynamic_cast, the argument will be NULL if the object
+            // does not inherits of base class UOdysseyVectorGroup. That's on purpose.
+        iVectorEngine->SetSelectionSpace(dynamic_cast<UOdysseyVectorGroup*>(iSelectedObject));
+    }
+}
+
 bool
 UOdysseyPainterEditorVectorObjectPickTool::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
-    static unsigned long clickTime = 0;
-    bool doubleClick = ( ( iPointInTexture.time - clickTime ) < 200 ) ? true : false;
-
-    clickTime = iPointInTexture.time;
-
-    //UE_LOG(LogTemp, Warning, TEXT("Some warning message:%lu"), iPointInTexture.time - clickTime );
 
     if( currentVectorLayer )
     {
@@ -114,12 +132,7 @@ UOdysseyPainterEditorVectorObjectPickTool::OnMouseUp(const FOdysseyPoint& iPoint
             vectorEngine->Pick( *currentVectorLayer->GetScene(), mPointArray, UOdysseyVectorObject::PICK_FREEHAND );
         }
 
-        if( doubleClick == true )
-        {
-            UOdysseyVectorObject* selected = currentVectorLayer->GetScene()->GetLastSelected();
-
-            vectorEngine->SetSelectionSpace( dynamic_cast<UOdysseyVectorGroup*>(selected) );
-        }
+        SetSelectionSpace( vectorEngine, currentVectorLayer->GetScene()->GetLastSelected() );
 
         mSelectionHUD->SetSelecting( false );
 
