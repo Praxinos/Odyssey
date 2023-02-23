@@ -6,6 +6,7 @@ UOdysseyVectorVertex::~UOdysseyVectorVertex()
 
 UOdysseyVectorVertex::UOdysseyVectorVertex()
     : UOdysseyVectorPoint()
+   , mPath ( nullptr )
 {
     SetVisited( false );
 }
@@ -19,6 +20,12 @@ UOdysseyVectorVertex::New( double iX, double iY, double iRadius )
     vertex->Init( iX, iY, iRadius );
 
     return vertex;
+}
+
+UOdysseyVectorPath* 
+UOdysseyVectorVertex::GetPath()
+{
+    return mPath;
 }
 
 void
@@ -63,6 +70,12 @@ UOdysseyVectorVertex::Set( double iX, double iY )
     mCoords.y = iY;
 
     InvalidateSegments();
+}
+
+void
+UOdysseyVectorVertex::SetPath( UOdysseyVectorPath* iPath )
+{
+    mPath = iPath;
 }
 
 void

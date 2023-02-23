@@ -38,7 +38,16 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
                          , double iRadius
                          , std::vector<UOdysseyVectorSegment*>& oPickedSegmentArray
                          , std::vector<double>& oDistance );
-
+        void PickPoints( UOdysseyVectorRoot* iScene
+                       , double iX
+                       , double iY
+                       , double iRadius
+                       , std::vector<UOdysseyVectorPoint*>& oPickedPointArray );
+        bool Knot( UOdysseyVectorVertex* iVertexA
+                 , UOdysseyVectorVertex* iVertexB
+                 , UOdysseyVectorSegment** oCreatedSegment
+                 , UOdysseyVectorSegment** oRemovedSegment
+                 , bool iSmooth );
         static void RecursivePick( UOdysseyVectorGroup* iSelectionSpace, UOdysseyVectorObject& iObj, std::vector<UOdysseyVectorObject*>& iSelectedObjectArray, ::ULIS::FRectD& iRoi, uint32 iSelectionFlags );
         static void RecursiveErase( UOdysseyVectorObject& iObj
                                   , std::vector<UOdysseyVectorObject*>& iErasedObjectArray

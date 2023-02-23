@@ -315,6 +315,122 @@ FOdysseyVectorEngine::Erase( UOdysseyVectorRoot& iScene
 }
 
 static void
+RecursivePickPoints( UOdysseyVectorObject* iObject
+                   , double iX
+                   , double iY
+                   , double iRadius
+                   , std::vector<UOdysseyVectorPoint*>& oPickedPointArray )
+{
+    UOdysseyVectorPath* path = Cast<UOdysseyVectorPath>(iObject);
+
+    if( path )
+    {
+        BLPoint localVector = iObject->GetInverseWorldMatrix().mapVector( 0.7071f, 0.7071f );
+        ::ULIS::FVec2D factor = { localVector.x * iRadius, localVector.y * iRadius };
+        double localRadius = factor.Distance();
+        BLPoint localPoint = iObject->GetInverseWorldMatrix().mapPoint( iX, iY );
+        ::ULIS::FRectD pathBBox = path->GetBBox( false );
+
+        pathBBox.x -=   localRadius;
+        pathBBox.y -=   localRadius;
+        pathBBox.w += ( localRadius * 2 );
+        pathBBox.h += ( localRadius * 2 );
+
+        if( pathBBox.HitTest( ::ULIS::FVec2D( localPoint.x, localPoint.y ) ) == true )
+        {
+            path->PickPoint( localPoint.x, localPoint.y, localRadius, oPickedPointArray, UOdysseyVectorPath::PICK_POINT );
+        }
+    }
+
+    for( std::list<UOdysseyVectorObject*>::iterator it = iObject->GetChildrenList().begin(); it != iObject->GetChildrenList().end(); ++it )
+    {
+        UOdysseyVectorObject* child = (*it);
+
+        RecursivePickPoints( child, iX, iY, iRadius, oPickedPointArray );
+    }
+}
+
+void
+FOdysseyVectorEngine::PickPoints( UOdysseyVectorRoot* iScene
+                                , double iX
+                                , double iY
+                                , double iRadius
+                                , std::vector<UOdysseyVectorPoint*>& oPickedPointArray )
+{
+    RecursivePickPoints( iScene, iX, iY, iRadius, oPickedPointArray );
+}
+
+bool
+FOdysseyVectorEngine::Knot( UOdysseyVectorVertex* iVertexA
+                          , UOdysseyVectorVertex* iVertexB
+                          , UOdysseyVectorSegment** oCreatedSegment
+                          , UOdysseyVectorSegment** oRemovedSegment
+                          , bool iSmooth )
+{
+    if( ( iVertexA->GetSegmentCount() == 1 )
+     && ( iVertexB->GetSegmentCount() == 1 )
+     && ( iVertexA->GetPath() == iVertexB->GetPath() ) )
+    {
+        ::ULIS::FVec2D& vertexACoords = iVertexA->GetCoords();
+        ::ULIS::FVec2D& vertexBCoords = iVertexB->GetCoords();
+        ::ULIS::FVec2D averageCoords = ( vertexACoords + vertexBCoords ) * 0.5f;
+        double vertexARadius = iVertexA->GetRadius();
+        double vertexBRadius = iVertexB->GetRadius();
+        double averageRadius = ( vertexARadius + vertexBRadius ) * 0.5f;
+        UOdysseyVectorPath* path = iVertexA->GetPath();
+
+        if( path->GetClass() == UOdysseyVectorPathCubic::StaticClass() )
+        {
+            UOdysseyVectorPathCubic* cubicPath = Cast<UOdysseyVectorPathCubic>(path);
+            UOdysseyVectorSegmentCubic* firstCubicSegment = Cast<UOdysseyVectorSegmentCubic>(iVertexB->GetFirstSegment());
+
+            if( firstCubicSegment )
+            {
+                UOdysseyVectorVertexCubic* cubicVertex0 = Cast<UOdysseyVectorVertexCubic>(firstCubicSegment->GetPoint(0));
+                uint32 knotVertexIndex = ( cubicVertex0 == iVertexB ) ? 0 : 1;
+                uint32 nextVertexIndex = ( cubicVertex0 == iVertexB ) ? 1 : 0;
+                ::ULIS::FVec2D& knotCtrlPointCoords = firstCubicSegment->GetControlPoint(knotVertexIndex)->GetCoords();
+                ::ULIS::FVec2D& nextCtrlPointCoords = firstCubicSegment->GetControlPoint(nextVertexIndex)->GetCoords();
+                UOdysseyVectorVertexCubic* knotVertex = Cast<UOdysseyVectorVertexCubic>(iVertexA);
+                UOdysseyVectorVertexCubic* nextVertex =  Cast<UOdysseyVectorVertexCubic>(firstCubicSegment->GetPoint(nextVertexIndex));
+                UOdysseyVectorSegmentCubic* newCubicSegment;
+
+                path->RemoveSegment( firstCubicSegment );
+                path->RemoveVertex( iVertexB );
+
+                knotVertex->SetX( averageCoords.x );
+                knotVertex->SetY( averageCoords.y );
+                knotVertex->SetRadius( averageRadius, false );
+
+                newCubicSegment = UOdysseyVectorSegmentCubic::New( cubicPath
+                                                                ,  knotVertex
+                                                                ,  knotCtrlPointCoords.x
+                                                                ,  knotCtrlPointCoords.y
+                                                                ,  nextCtrlPointCoords.x
+                                                                ,  nextCtrlPointCoords.y
+                                                                ,  nextVertex );
+
+                path->AddSegment( newCubicSegment );
+
+                /*if( iSmooth )
+                {
+                    knotVertex->SmoothSegments( false );
+                }*/
+
+                *oCreatedSegment = newCubicSegment;
+                *oRemovedSegment = firstCubicSegment;
+
+                path->Update();
+
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+static void
 RecursivePickSegments( UOdysseyVectorObject* iObject
                      , double iX
                      , double iY
@@ -328,7 +444,7 @@ RecursivePickSegments( UOdysseyVectorObject* iObject
     {
         BLPoint localVector = iObject->GetInverseWorldMatrix().mapVector( 0.7071f, 0.7071f );
         ::ULIS::FVec2D factor = { localVector.x * iRadius, localVector.y * iRadius };
-        double localRadius = /*factor.DistanceSquared() ? factor.Distance() : 0.0f*/iRadius;
+        double localRadius = factor.Distance();
         BLPoint localPoint = iObject->GetInverseWorldMatrix().mapPoint( iX, iY );
         ::ULIS::FRectD pathBBox = path->GetBBox( false );
 

@@ -44,6 +44,7 @@ FOdysseyPainterEditorToolsTab::CreateWidget()
         mEditor->GetVectorSceneScaleTool(),
         mEditor->GetVectorScenePanTool(),
         mEditor->GetVectorPathPushTool(),
+        mEditor->GetVectorPathKnotTool(),
         mEditor->GetVectorEraserTool(),
         mEditor->GetPaintBucketTool(),
         mEditor->GetColorPickerTool(),

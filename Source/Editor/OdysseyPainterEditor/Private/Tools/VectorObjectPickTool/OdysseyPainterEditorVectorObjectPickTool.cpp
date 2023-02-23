@@ -124,12 +124,12 @@ UOdysseyPainterEditorVectorObjectPickTool::OnMouseUp(const FOdysseyPoint& iPoint
 
         if ( mPointArray.size() == 1 )
         {
-            vectorEngine->Pick( *currentVectorLayer->GetScene(), mPointArray, UOdysseyVectorObject::PICK_POINT );
+            vectorEngine->Pick( *currentVectorLayer->GetScene(), mPointArray, UOdysseyVectorObject::PICK_MATH_BASED );
         }
 
         if ( mPointArray.size() > 1 )
         {
-            vectorEngine->Pick( *currentVectorLayer->GetScene(), mPointArray, UOdysseyVectorObject::PICK_FREEHAND );
+            vectorEngine->Pick( *currentVectorLayer->GetScene(), mPointArray, UOdysseyVectorObject::PICK_MASK_BASED );
         }
 
         SetSelectionSpace( vectorEngine, currentVectorLayer->GetScene()->GetLastSelected() );

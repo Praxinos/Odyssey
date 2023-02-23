@@ -143,43 +143,46 @@ UOdysseyVectorObject::GetTranslationY()
 }
 
 void
-UOdysseyVectorObject::UpdateMatrix( )
+UOdysseyVectorObject::UpdateMatrix()
 {
-    BLContext* blctx = GetRoot()->GetEngine()->GetBLContext();
-
-    blctx->save();
-
-    blctx->resetMatrix();
-    blctx->translate( TranslationX, TranslationY );
-    blctx->rotate( Rotation );
-    blctx->scale( ScalingX, ScalingY );
-    mLocalMatrix = blctx->userMatrix();
-
-    BLMatrix2D::invert( mInverseLocalMatrix, mLocalMatrix );
-
-    if( mParent)
+    if( GetRoot() )
     {
-        blctx->setMatrix( mParent->mWorldMatrix );
-        blctx->transform( mLocalMatrix );
-        mWorldMatrix = blctx->userMatrix();
+        BLContext* blctx = GetRoot()->GetEngine()->GetBLContext();
 
-        BLMatrix2D::invert( mInverseWorldMatrix, mWorldMatrix );
+        blctx->save();
+
+        blctx->resetMatrix();
+        blctx->translate( TranslationX, TranslationY );
+        blctx->rotate( Rotation );
+        blctx->scale( ScalingX, ScalingY );
+        mLocalMatrix = blctx->userMatrix();
+
+        BLMatrix2D::invert( mInverseLocalMatrix, mLocalMatrix );
+
+        if( mParent)
+        {
+            blctx->setMatrix( mParent->mWorldMatrix );
+            blctx->transform( mLocalMatrix );
+            mWorldMatrix = blctx->userMatrix();
+
+            BLMatrix2D::invert( mInverseWorldMatrix, mWorldMatrix );
+        }
+         else
+        {
+            memcpy( &mWorldMatrix       , &mLocalMatrix       , sizeof ( mLocalMatrix        ) );
+            memcpy( &mInverseWorldMatrix, &mInverseLocalMatrix, sizeof ( mInverseLocalMatrix ) );
+        }
+
+        // recurse
+        for( std::list<UOdysseyVectorObject*>::iterator it = mChildrenList.begin(); it != mChildrenList.end(); ++it )
+        {
+            UOdysseyVectorObject *child = (*it);
+
+            child->UpdateMatrix( );
+        }
+
+        blctx->restore();
     }
-     else
-    {
-        memcpy( &mWorldMatrix       , &mLocalMatrix       , sizeof ( mLocalMatrix        ) );
-        memcpy( &mInverseWorldMatrix, &mInverseLocalMatrix, sizeof ( mInverseLocalMatrix ) );
-    }
-
-    // recurse
-    for( std::list<UOdysseyVectorObject*>::iterator it = mChildrenList.begin(); it != mChildrenList.end(); ++it )
-    {
-        UOdysseyVectorObject *child = (*it);
-
-        child->UpdateMatrix( );
-    }
-
-    blctx->restore();
 }
 
 //static

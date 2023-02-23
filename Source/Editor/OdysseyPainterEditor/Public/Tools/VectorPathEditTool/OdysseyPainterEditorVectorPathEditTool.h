@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "Tools/OdysseyPainterEditorTool.h"
+#include "OdysseyVectorPoint.h"
 #include "OdysseyVectorPathBuilder.h"
 #include "HUD/OdysseyVectorHUDPathCubic.h"
 
@@ -38,6 +39,7 @@ private:
     double mOldLocalMouseX;
     double mOldLocalMouseY;
     FOdysseyVectorHUDPathCubic mCubicPathHUD;
+    std::vector<UOdysseyVectorPoint*> mPickedPointArray;
 
 public:
     // Setters

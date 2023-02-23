@@ -13,6 +13,8 @@ void
 UOdysseyVectorVertexCubic::Init( double iX, double iY, double iRadius )
 {
     mCtrlPoint = UOdysseyVectorHandlePoint::New( this );
+
+    //TODO: use an Init function of the UOdysseyVectorVertex class (does not exist yet ) ?
     Set( iX, iY );
     SetRadius( iRadius, false );
 }

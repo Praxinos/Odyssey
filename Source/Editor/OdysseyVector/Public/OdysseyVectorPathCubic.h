@@ -41,8 +41,11 @@ class ODYSSEYVECTOR_API UOdysseyVectorPathCubic: public UOdysseyVectorPath
         UOdysseyVectorPathCubic();
         void Init( std::string iName );
         UOdysseyVectorSegmentCubic* AppendVertex( UOdysseyVectorVertexCubic* iPoint, bool iConnect, bool iBuildSegments );
-
-        bool PickPoint ( double iX, double iY, double iRadius, uint64 iSelectionFlags );
+        bool PickPoint( double iX
+                      , double iY
+                      , double iSelectionRadius
+                      , std::vector<UOdysseyVectorPoint*>& oPickedPointArray
+                      , uint64 iSelectionFlags );
         void Unselect( UOdysseyVectorVertex* iPoint );
 
         void DrawStructure( ::ULIS::FRectD& iRoi, uint64 iFlags );
@@ -51,7 +54,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorPathCubic: public UOdysseyVectorPath
         void setJointMiter();
         void setJointNone();
         void Fill( ::ULIS::FRectD& iRoi );
-        void Merge( UOdysseyVectorPathCubic& iCubicPath );
+        void Merge( UOdysseyVectorPath* iPath );
         void DrawShapeVariable( ::ULIS::FRectD& iRoi, uint64 iFlags );
 
         void Mirror( bool iMirrorX, bool iMirrorY );

@@ -14,7 +14,7 @@ UOdysseyVectorPath::GetSelectedPointList()
 UOdysseyVectorSegment*
 UOdysseyVectorPath::AppendVertex( UOdysseyVectorVertex* iPoint, UOdysseyVectorVertex* iPreviousPoint )
 {
-    mVertexList.push_back( iPoint );
+    AddVertex( iPoint );
 
     if ( iPreviousPoint )
     {
@@ -176,6 +176,14 @@ void
 UOdysseyVectorPath::AddVertex( UOdysseyVectorVertex* iVertex )
 {
     mVertexList.push_back( iVertex );
+
+    iVertex->SetPath( this );
+}
+
+void
+UOdysseyVectorPath::RemoveVertex( UOdysseyVectorVertex* iVertex )
+{
+    mVertexList.remove( iVertex );
 }
 
 void

@@ -12,6 +12,7 @@
 class UOdysseyVectorSegment;
 class UOdysseyVectorLoop;
 class FOdysseyVectorSection;
+class UOdysseyVectorPath;
 
 UCLASS()
 class ODYSSEYVECTOR_API UOdysseyVectorVertex : public UOdysseyVectorPoint
@@ -27,7 +28,6 @@ class ODYSSEYVECTOR_API UOdysseyVectorVertex : public UOdysseyVectorPoint
     public:
         static UOdysseyVectorVertex* New( double iX, double iY, double iRadius );
 
-
     private:
 
     protected:
@@ -36,6 +36,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorVertex : public UOdysseyVectorPoint
         std::list<UOdysseyVectorLoop*> mLoopList;
         uint32 mFlags;
         uint32 mCycleID;
+        UOdysseyVectorPath* mPath;
 
     public:
         ~UOdysseyVectorVertex();
@@ -74,6 +75,8 @@ class ODYSSEYVECTOR_API UOdysseyVectorVertex : public UOdysseyVectorPoint
         std::list<FOdysseyVectorSection*>& GetSectionList();
         bool IsClosestSection( FOdysseyVectorSection& iStartSection
                              , FOdysseyVectorSection& iEndSection );
+        UOdysseyVectorPath* GetPath();
+        void SetPath( UOdysseyVectorPath* iPath );
         void SetInCycle( bool iInCycle, uint32 iCycleID );
         bool IsInCycle();
         uint32 GetCycleID();

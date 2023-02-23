@@ -236,7 +236,7 @@ UOdysseyVectorPathBuilder::Sample( UOdysseyVectorPoint* iSamplePoint, double iRa
                 {
                     UOdysseyVectorVertexCubic* cubicVertex = UOdysseyVectorVertexCubic::New( lastSamplePoint->GetX()
                                                                                            , lastSamplePoint->GetY()
-                                                                                          , iRadius );
+                                                                                           , iRadius );
                     ::ULIS::FVec2D entryVector = mSampleLinkList.front()->GetVector( true );
                     ::ULIS::FVec2D exitVector =  lastSampleSegmentVector;
 

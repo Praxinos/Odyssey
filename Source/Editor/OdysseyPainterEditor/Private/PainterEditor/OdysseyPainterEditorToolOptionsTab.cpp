@@ -77,9 +77,9 @@ void
 FOdysseyPainterEditorToolOptionsTab::SetWidgetForTool(UOdysseyPainterEditorTool* iTool, TSharedPtr<SWidget> iWidget)
 {
     FWidgetSlotForTool* widgetSlotForTool = mWidgetSlotForTool.FindByPredicate(
-        [this](const FWidgetSlotForTool& iWidgetSlotForTool)
+        [this, iTool](const FWidgetSlotForTool& iWidgetSlotForTool)
         {
-            return mEditor->GetSelectedTool() == iWidgetSlotForTool.mTool;
+            return iTool == iWidgetSlotForTool.mTool;
         }
     );
 

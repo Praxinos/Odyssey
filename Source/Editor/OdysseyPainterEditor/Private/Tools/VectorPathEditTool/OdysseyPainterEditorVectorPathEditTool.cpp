@@ -56,6 +56,8 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDown(const FOdysseyPoint& iPoint
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
 
+    mPickedPointArray.clear();
+
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
@@ -93,7 +95,8 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDown(const FOdysseyPoint& iPoint
 /*
                 }
 */
-                picked = cubicPath->PickPoint( localCoords.x, localCoords.y, localRadius, selectionFlags );
+                cubicPath->PickPoint( localCoords.x, localCoords.y, localRadius, mPickedPointArray, selectionFlags );
+
 /*
                 if ( picked == false )
                 {
@@ -187,7 +190,6 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDrag(const FOdysseyPoint& iPoint
             {
                 UOdysseyVectorPathCubic *cubicPath = Cast<UOdysseyVectorPathCubic>( selectedObject );
                 BLPoint localCoords = cubicPath->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
-                std::list<UOdysseyVectorPoint*> selectedPointList = cubicPath->GetSelectedPointList();
                 ::ULIS::FRectD localInvalidatedArea = { 0, 0, 0, 0 };
                 ::ULIS::FRectI invalidatedArea;
                 ::ULIS::FRectI totalInvalidatedArea;
@@ -195,9 +197,9 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDrag(const FOdysseyPoint& iPoint
                 BLPoint worldAreaP2;
                 bool inited = false;
 
-                for( std::list<UOdysseyVectorPoint*>::iterator it = selectedPointList.begin(); it != selectedPointList.end(); ++it )
+                for( int i = 0; i < mPickedPointArray.size(); i++ )
                 {
-                    UOdysseyVectorPoint *selectedPoint = *it;
+                    UOdysseyVectorPoint *selectedPoint = mPickedPointArray[i];
                     ::ULIS::FRectD rect;
 
                     rect = DragPoint( localCoords.x, localCoords.y, mOldLocalMouseX, mOldLocalMouseY, selectedPoint );
