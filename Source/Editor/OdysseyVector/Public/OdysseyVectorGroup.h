@@ -21,9 +21,9 @@ class ODYSSEYVECTOR_API UOdysseyVectorGroup : public UOdysseyVectorObject
         UOdysseyVectorGroup(){};
         void Init( std::string iName );
 
-    private:
+    protected:
         void DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags ) { };
         bool PickShape( ::ULIS::FRectD& iRoi, uint32 iSelectionFlags );
         UOdysseyVectorObject* CopyShape();
-        void UpdateShape();
+        virtual void UpdateShape( uint32 iUpdateFlags );
 };

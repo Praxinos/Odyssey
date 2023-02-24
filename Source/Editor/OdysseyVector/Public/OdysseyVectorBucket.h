@@ -13,6 +13,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorBucket
         ::ULIS::FVec2D mCoords;
         FColor mColor;
         UOdysseyVectorHandleBucket* mCtrlPoint;
+        bool mIsGradient;
 
     public:
         ~FOdysseyVectorBucket();
@@ -21,6 +22,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorBucket
         void SetCoords( double iX, double iY );
         ::ULIS::FVec2D& GetCoords();
         void SetColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA );
+        void SetGradient( bool mGradient );
+        void SetColor2( uint8 iR, uint8 iG, uint8 iB, uint8 iA );
         FColor GetColor();
         bool PickHandle( double iX, double iY );
         UOdysseyVectorHandleBucket* GetHandle();

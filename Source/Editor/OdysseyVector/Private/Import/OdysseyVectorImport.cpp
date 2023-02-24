@@ -1,19 +1,5 @@
 #include "Import/OdysseyVectorImport.h"
 
-static void
-FindCycles( std::vector<UOdysseyVectorObject*>& vectorObjectArray )
-{
-    for( int i = 0; i < vectorObjectArray.size(); i++ )
-    {
-        if( vectorObjectArray[i]->GetClass() == UOdysseyVectorGroupPaint::StaticClass() )
-        {
-            UOdysseyVectorGroupPaint* paintGroup = Cast<UOdysseyVectorGroupPaint>(vectorObjectArray[i]);
-
-            paintGroup->FindCycles();
-        }
-    }
-}
-
 void
 FOdysseyVectorImport::ReadChunks( uint64 iChunkEnd, FArchive &Ar, std::function<void(uint32, uint64, FArchive&)> iCallback )
 {
@@ -84,10 +70,8 @@ FOdysseyVectorImport::Read( UOdysseyVectorRoot* iScene, FArchive &Ar )
                 }
             } );
 
-        FindCycles( vectorObjectArray );
-
         iScene->UpdateMatrix();
-        iScene->Update();
+        iScene->Update( 0 );
     }
 
     // Jump to the end of the junk, regardless of the fact that we've read nested chunks or not.

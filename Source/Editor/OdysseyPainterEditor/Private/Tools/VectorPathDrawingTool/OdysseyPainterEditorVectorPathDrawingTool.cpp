@@ -135,7 +135,8 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDrag(const FOdysseyPoint& iPo
 
         finalRegion = invalidateRegion & layerStack->GetSurface()->Block()->Rect();
 
-        currentVectorLayer->GetScene()->Update();
+        currentVectorLayer->GetScene()->Update( UOdysseyVectorObject::FREQUENTUPDATES
+                                              | UOdysseyVectorObject::KEEPINVALIDATED );
 
         currentVectorLayer->RenderImageChanged({ finalRegion }, true);
     }
@@ -174,7 +175,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUp(const FOdysseyPoint& iPoin
             currentVectorLayer->GetScene()->Select( currentPathBuilder->GetCubicPath() );
 
             // Update objects marked as invalidated
-            currentVectorLayer->GetScene()->Update();
+            currentVectorLayer->GetScene()->Update( 0 );
 
             currentVectorLayer->RenderImageChanged(false);
         }

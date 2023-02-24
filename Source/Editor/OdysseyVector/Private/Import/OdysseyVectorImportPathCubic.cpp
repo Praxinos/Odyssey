@@ -35,6 +35,9 @@ ReadPathCubicGeometrySegments( UOdysseyVectorPathCubic& iCubicPath
                                                       , vertexArray[p1ID] );
 
         iCubicPath.AddSegment( cubicSegment );
+
+        // update bounding box
+        /*cubicSegment->Update();*/
     }
 }
 

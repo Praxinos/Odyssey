@@ -26,7 +26,7 @@ UOdysseyVectorGroup::CopyShape()
 }
 
 void
-UOdysseyVectorGroup::UpdateShape()
+UOdysseyVectorGroup::UpdateShape( uint32 iUpdateFlags )
 {
     ::ULIS::FRectD bbox;
     int init = 0;

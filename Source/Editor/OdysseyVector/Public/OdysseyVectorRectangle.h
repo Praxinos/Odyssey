@@ -18,7 +18,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorRectangle : public UOdysseyVectorObject
         void DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags );
         bool PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags );
         UOdysseyVectorObject* CopyShape();
-        void UpdateShape() {};
+        void UpdateShape( uint32 iUpdateFlags ) {};
 
     protected :
         double mWidth;

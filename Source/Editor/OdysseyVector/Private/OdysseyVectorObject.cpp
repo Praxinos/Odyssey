@@ -16,6 +16,7 @@ UOdysseyVectorObject::UOdysseyVectorObject()
     , mIsFilled ( false )
     , mIsSelected ( false )
     , mIsInvalidated ( false )
+    , mDependsOnChildren ( false )
 {
     mLocalMatrix.reset();
     mWorldMatrix.reset();
@@ -30,11 +31,14 @@ UOdysseyVectorObject::SetName( std::string iName )
 }
 
 void
-UOdysseyVectorObject::Update()
+UOdysseyVectorObject::Update( uint32 iUpdateFlags )
 {
-    UpdateShape();
+    UpdateShape( iUpdateFlags );
 
-    mIsInvalidated = false;
+    if( ( iUpdateFlags & UOdysseyVectorObject::KEEPINVALIDATED ) == 0 )
+    {
+        mIsInvalidated = false;
+    }
 }
 
 void
@@ -107,7 +111,7 @@ UOdysseyVectorObject::Copy() {
             objectCopy->AppendChild( child->Copy() );
         }
 
-        objectCopy->UpdateShape();
+        objectCopy->Invalidate();
     }
 
     return objectCopy;
@@ -318,6 +322,14 @@ UOdysseyVectorObject::Invalidate()
 
                 mIsInvalidated = true;
             }
+        }
+    }
+
+    if( mParent )
+    {
+        if( mParent->mDependsOnChildren == true )
+        {
+            mParent->Invalidate();
         }
     }
 }

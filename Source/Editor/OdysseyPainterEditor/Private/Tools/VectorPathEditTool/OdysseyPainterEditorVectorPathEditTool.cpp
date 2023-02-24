@@ -18,9 +18,9 @@ UOdysseyPainterEditorVectorPathEditTool::~UOdysseyPainterEditorVectorPathEditToo
 UOdysseyPainterEditorVectorPathEditTool::UOdysseyPainterEditorVectorPathEditTool()
     : Size(1.0f)
     , mCubicPathHUD( FOdysseyVectorHUDPathCubic::VIEW_PATH
-                   | FOdysseyVectorHUDPathCubic::VIEW_POINT
+                   | FOdysseyVectorHUDPathCubic::VIEW_POINT/*
                    | FOdysseyVectorHUDPathCubic::VIEW_HANDLE_POINT
-                   | FOdysseyVectorHUDPathCubic::VIEW_HANDLE_SEGMENT )
+                   | FOdysseyVectorHUDPathCubic::VIEW_HANDLE_SEGMENT*/ )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.DrawingTool64");
 }
@@ -48,6 +48,64 @@ bool
 UOdysseyPainterEditorVectorPathEditTool::CanDraw()
 {
     return IsActivable();
+}
+
+bool
+UOdysseyPainterEditorVectorPathEditTool::OnKeyDown(const FKey& iKey)
+{
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
+    UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
+
+    /*
+        if (!CanDraw())
+            return false;
+    */
+
+    if( currentLayer->GetClass() == UOdysseyTextureLayerImageVector::StaticClass() )
+    {
+        UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
+
+        if ( iKey == EKeys::LeftControl )
+        {
+            mCubicPathHUD.SetDisplayMode( FOdysseyVectorHUDPathCubic::VIEW_PATH
+                                        | FOdysseyVectorHUDPathCubic::VIEW_HANDLE_SEGMENT );
+        }
+
+        if ( iKey == EKeys::LeftShift )
+        {
+            mCubicPathHUD.SetDisplayMode( FOdysseyVectorHUDPathCubic::VIEW_PATH
+                                        | FOdysseyVectorHUDPathCubic::VIEW_HANDLE_POINT );
+        }
+
+        currentVectorLayer->RenderImageChanged( true );
+    }
+
+    // TODO: find out the diference between returning true or false
+    return false;
+}
+
+bool
+UOdysseyPainterEditorVectorPathEditTool::OnKeyUp(const FKey& iKey)
+{
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
+    UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
+
+/*
+    if (!CanDraw())
+        return false;
+*/
+
+    if( currentLayer->GetClass() == UOdysseyTextureLayerImageVector::StaticClass() )
+    {
+        UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
+
+        mCubicPathHUD.SetDisplayMode( FOdysseyVectorHUDPathCubic::VIEW_PATH
+                                    | FOdysseyVectorHUDPathCubic::VIEW_POINT );
+
+        currentVectorLayer->RenderImageChanged( true );
+    }
+
+    return false;
 }
 
 bool
@@ -91,11 +149,26 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDown(const FOdysseyPoint& iPoint
                 else
                 {
 */
-                    selectionFlags = UOdysseyVectorPath::PICK_HANDLE_SEGMENT | UOdysseyVectorPath::PICK_POINT;
+                 if( mCubicPathHUD.GetDisplayMode() & FOdysseyVectorHUDPathCubic::VIEW_HANDLE_SEGMENT )
+                 {
+                    selectionFlags = UOdysseyVectorPath::PICK_HANDLE_SEGMENT;
+                 }
+
+                 if( mCubicPathHUD.GetDisplayMode() & FOdysseyVectorHUDPathCubic::VIEW_HANDLE_POINT )
+                 {
+                    selectionFlags = UOdysseyVectorPath::PICK_HANDLE_POINT;
+                 }
+
+                 if( mCubicPathHUD.GetDisplayMode() & FOdysseyVectorHUDPathCubic::VIEW_POINT )
+                 {
+                    selectionFlags = UOdysseyVectorPath::PICK_POINT;
+                 }
 /*
                 }
 */
                 cubicPath->PickPoint( localCoords.x, localCoords.y, localRadius, mPickedPointArray, selectionFlags );
+
+                cubicPath->Invalidate();
 
 /*
                 if ( picked == false )
@@ -221,16 +294,8 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDrag(const FOdysseyPoint& iPoint
                 totalInvalidatedArea = invalidatedArea | oldInvalidatedArea;
 
 //UE_LOG(LogTemp, Warning, TEXT("%d %d %d %d"), invalidatedArea.x, invalidatedArea.y, invalidatedArea.w, invalidatedArea.h );
-                currentVectorLayer->GetScene()->Update();
-
-                /*currentVectorLayer->GetEngine()->InvalidateRegion( totalInvalidatedArea );*/
-
-                if( selectedObject->GetParent()->GetClass() == UOdysseyVectorGroupPaint::StaticClass() )
-                {
-                    UOdysseyVectorGroupPaint* paintGroup = Cast<UOdysseyVectorGroupPaint>(selectedObject->GetParent());
-
-                    paintGroup->FindCycles();
-                }
+                currentVectorLayer->GetScene()->Update( UOdysseyVectorObject::FREQUENTUPDATES
+                                                      | UOdysseyVectorObject::KEEPINVALIDATED );
 
                 currentVectorLayer->RenderImageChanged( /*{ totalInvalidatedArea },*/ true );
 
@@ -251,7 +316,10 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseUp(const FOdysseyPoint& iPointIn
 
     if( currentVectorLayer )
     {
+        currentVectorLayer->GetScene()->Update( 0 );
+
         currentVectorLayer->RenderImageChanged(false);
+
         return true;
     }
 

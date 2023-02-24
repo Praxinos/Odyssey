@@ -8,6 +8,11 @@ UOdysseyVectorGroupPaint::~UOdysseyVectorGroupPaint()
     ClearCycles();
 }
 
+UOdysseyVectorGroupPaint::UOdysseyVectorGroupPaint()
+{
+    mDependsOnChildren = true;
+}
+
 uint32
 UOdysseyVectorGroupPaint::GetType()
 {
@@ -90,6 +95,18 @@ UOdysseyVectorGroupPaint::Bucket( double iX, double iY, uint8 iR, uint8 iG, uint
     ApplyBucket( bucket );
 
     return bucket;
+}
+
+void
+UOdysseyVectorGroupPaint::UpdateShape( uint32 iUpdateFlags )
+{
+    UOdysseyVectorGroup::UpdateShape( iUpdateFlags ); // updates BBox
+
+    if(   ( Realtime == true  )
+     || ( ( Realtime == false ) && ( ( iUpdateFlags & UOdysseyVectorObject::FREQUENTUPDATES ) == 0 ) ) )
+    {
+        FindCycles();
+    }
 }
 
 void

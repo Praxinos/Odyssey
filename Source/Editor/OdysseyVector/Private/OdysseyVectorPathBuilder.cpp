@@ -342,7 +342,7 @@ UOdysseyVectorPathBuilder::AppendPoint( double iX
         mLinkList.push_back ( link );
     }
 
-    mCubicPath->Update();
+    mCubicPath->Invalidate();
 
     return cubicSegment;
 }

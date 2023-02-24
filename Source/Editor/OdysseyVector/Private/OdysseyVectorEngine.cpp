@@ -420,7 +420,7 @@ FOdysseyVectorEngine::Knot( UOdysseyVectorVertex* iVertexA
                 *oCreatedSegment = newCubicSegment;
                 *oRemovedSegment = firstCubicSegment;
 
-                path->Update();
+                path->Invalidate();
 
                 return true;
             }
@@ -528,6 +528,13 @@ FOdysseyVectorEngine::UseMaskImage()
 {
     mBLContext->end();
     mBLContext->begin( *mBLMask );
+}
+
+void
+FOdysseyVectorEngine::UseImage( BLImage* iImage )
+{
+    mBLContext->end();
+    mBLContext->begin(*iImage);
 }
 
 void

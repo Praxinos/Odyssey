@@ -55,6 +55,15 @@ public:
     UPROPERTY(EditAnywhere,Category="Odyssey BucketFill Tool")
     uint8 Tolerance;
 
+    UPROPERTY(EditAnywhere,Category="Odyssey BucketFill Tool")
+    FColor Color1;
+
+    UPROPERTY(EditAnywhere,Category="Odyssey BucketFill Tool")
+    bool Gradient;
+
+    UPROPERTY(EditAnywhere,Category="Odyssey BucketFill Tool")
+    FColor Color2;
+
 public:
     // Setters
     virtual bool CanDraw();

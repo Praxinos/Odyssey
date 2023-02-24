@@ -118,8 +118,6 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDown(const FOdysseyPoint& iPoint
                 }
             }
         }
-
-//        UE_LOG(LogTemp, Warning, TEXT("%d %d"), pickedSegmentArray.size(), pickedSegmentDistanceArray.size() ); 
     }
 
     return true;
@@ -148,7 +146,8 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDrag( const FOdysseyPoint& iPoin
             mSegmentArray[i]->Invalidate();
         }
 
-        currentVectorLayer->GetScene()->Update();
+        currentVectorLayer->GetScene()->Update( UOdysseyVectorObject::FREQUENTUPDATES
+                                              | UOdysseyVectorObject::KEEPINVALIDATED );
 
         currentVectorLayer->RenderImageChanged(/* { rect }, */true);
     }
@@ -163,6 +162,8 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseUp(const FOdysseyPoint& iPointIn
     if( currentLayer->GetClass() == UOdysseyTextureLayerImageVector::StaticClass() )
     {
         UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
+
+        currentVectorLayer->GetScene()->Update( 0 );
 
         // redraw the whole layer
         currentVectorLayer->RenderImageChanged(false);

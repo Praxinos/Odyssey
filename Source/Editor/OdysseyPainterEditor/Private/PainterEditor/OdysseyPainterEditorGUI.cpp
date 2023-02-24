@@ -487,7 +487,7 @@ FOdysseyPainterEditorGUI::GroupPaint()
                         cubicPath->GetParent()->RemoveChild( cubicPath );
 
                         cubicPath->SwitchSpace( *paintGroup );
-                        cubicPath->Update(); // update shape
+                        cubicPath->Invalidate();
 
                         paintGroup->AppendChild( cubicPath );
 
@@ -496,10 +496,10 @@ FOdysseyPainterEditorGUI::GroupPaint()
                     }
                 }
 
-                paintGroup->FindCycles();
-
                 currentVectorLayer->GetScene()->ClearSelection();
                 currentVectorLayer->GetScene()->Select( paintGroup );
+
+                currentVectorLayer->GetScene()->Update( 0 );
 
                 currentVectorLayer->RenderImageChanged( false );
             }

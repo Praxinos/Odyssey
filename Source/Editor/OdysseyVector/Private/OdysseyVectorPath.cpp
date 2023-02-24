@@ -78,7 +78,7 @@ UOdysseyVectorPath::UpdateBBox()
 }
 
 void
-UOdysseyVectorPath::UpdateShape()
+UOdysseyVectorPath::UpdateShape( uint32 iUpdateFlags )
 {
     // update segments
     for ( std::list<UOdysseyVectorSegment*>::iterator it = mInvalidatedSegmentList.begin(); it != mInvalidatedSegmentList.end(); ++it )

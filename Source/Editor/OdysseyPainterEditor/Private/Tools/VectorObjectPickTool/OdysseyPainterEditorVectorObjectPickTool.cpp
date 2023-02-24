@@ -30,14 +30,20 @@ UOdysseyPainterEditorVectorObjectPickTool::UOdysseyPainterEditorVectorObjectPick
 void
 UOdysseyPainterEditorVectorObjectPickTool::Activate()
 {
-	//FOdysseyObjectEditorUtils::SetPropertyValue(BrushOptions, "Color", FOdysseyBrushColor(GetEditorAs<FOdysseyPainterEditor>()->PaintColor()));
-    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
+    UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
 
-    if(currentVectorLayer)
+    if( currentLayer->GetClass() == UOdysseyTextureLayerImageVector::StaticClass() )
     {
+        UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
+        UTexture2D* texture = layerStack->GetTexture();
+
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
 
+        mSelectionHUD->Init( texture->Source.GetSizeX(), texture->Source.GetSizeY() );
+
         vectorEngine->ClearHUD( );
+        vectorEngine->AddHUD( mSelectionHUD );
 
         currentVectorLayer->RenderImageChanged(false);
     }
@@ -63,8 +69,6 @@ UOdysseyPainterEditorVectorObjectPickTool::OnMouseDown(const FOdysseyPoint& iPoi
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
 
         mSelectionHUD->SetSelecting( true );
-
-        vectorEngine->AddHUD( mSelectionHUD );
 
         mPointArray.push_back( point );
     }

@@ -19,7 +19,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorPath : public UOdysseyVectorObject
         GENERATED_BODY()
 
     protected:
-        virtual void UpdateShape();
+        virtual void UpdateShape( uint32 iUpdateFlags );
         virtual void DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags );
         bool PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags ) { return nullptr; };
         UOdysseyVectorObject* CopyShape();

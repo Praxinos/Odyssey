@@ -104,7 +104,7 @@ UOdysseyVectorRoot::GroupSelectdObjects( )
         objectList.pop_back();
     }
 
-    group->Update();
+    group->Invalidate();
 
 
     return group;
@@ -129,16 +129,19 @@ UOdysseyVectorRoot::InvalidateObject( UOdysseyVectorObject* iObject )
 }
 
 void
-UOdysseyVectorRoot::UpdateShape()
+UOdysseyVectorRoot::UpdateShape( uint32 iUpdateFlags )
 {
     for( std::list<UOdysseyVectorObject*>::iterator it = mInvalidatedObjectList.begin(); it != mInvalidatedObjectList.end(); ++it )
     {
         UOdysseyVectorObject *obj = (*it);
 
-        obj->Update();
+        obj->Update( iUpdateFlags );
     }
 
-    mInvalidatedObjectList.clear();
+    if( ( iUpdateFlags & UOdysseyVectorObject::KEEPINVALIDATED ) == 0 )
+    {
+        mInvalidatedObjectList.clear();
+    }
 }
 
 UOdysseyVectorObject*

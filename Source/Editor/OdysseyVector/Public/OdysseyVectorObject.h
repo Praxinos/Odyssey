@@ -28,6 +28,10 @@ class ODYSSEYVECTOR_API UOdysseyVectorObject : public UObject
         static const uint32 VECTORPATHCUBICTYPE  = 5;
         static const uint32 VECTORGROUPPAINTTYPE = 6;
 
+        // update mask
+        static const uint32 FREQUENTUPDATES = ( 1 << 0 );
+        static const uint32 KEEPINVALIDATED = ( 1 << 1 );
+
         static constexpr float BBOX_POINT_RADIUS = 4.0f;
 
     protected:
@@ -64,6 +68,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorObject : public UObject
         bool mIsFilled;
         bool mIsSelected;
         bool mIsInvalidated;
+        bool mDependsOnChildren;
         ::ULIS::FRectD mBBox;
 
         /*uint32 mStrokeColor;*/
@@ -84,8 +89,8 @@ class ODYSSEYVECTOR_API UOdysseyVectorObject : public UObject
 
         virtual bool Erase( ::ULIS::FRectD &iRoi ){ return false; };
 
-        void Update();
-        virtual void UpdateShape() {};
+        void Update( uint32 iUpdateFlags );
+        virtual void UpdateShape( uint32 iUpdateFlags ) {};
 
         UOdysseyVectorObject* Copy();
         virtual UOdysseyVectorObject* CopyShape(){ return nullptr; };

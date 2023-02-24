@@ -22,13 +22,6 @@ class ODYSSEYTEXTURE_API UOdysseyTextureLayerImageVector
     GENERATED_BODY()
 
     private:
-        static const uint32 CHUNK_OBJECTS_DECLARE = 0;
-        static const uint32 CHUNK_OBJECTS_DEFINE = 0;
-        static const uint32 CHUNK_END = 0xFFFFFFFF;
-
-        static const uint32 VECTOROBJECTTYPE = 0;
-        static const uint32 VECTORPATHTYPE = 1;
-
         UOdysseyVectorRoot* mScene;
         FOdysseyVectorEngine* mVEngine;
         TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mBlock;

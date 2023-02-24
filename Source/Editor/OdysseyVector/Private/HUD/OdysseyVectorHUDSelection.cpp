@@ -8,7 +8,19 @@ FOdysseyVectorHUDSelection::~FOdysseyVectorHUDSelection()
 FOdysseyVectorHUDSelection::FOdysseyVectorHUDSelection( std::vector<::ULIS::FVec2D>& iPointArray )
     : mPointArray(iPointArray)
     , mSelecting(true)
+    , mSelectionMask ( nullptr )
 {
+}
+
+void
+FOdysseyVectorHUDSelection::Init( uint32 iWidth, uint32 iHeight )
+{
+    if( mSelectionMask )
+    {
+        delete mSelectionMask;
+    }
+
+    mSelectionMask = new BLImage( iWidth, iHeight, BL_FORMAT_A8 );
 }
 
 void
@@ -18,14 +30,53 @@ FOdysseyVectorHUDSelection::SetSelecting( bool iSelecting )
 }
 
 void
+FOdysseyVectorHUDSelection::DrawSelectionSpace( UOdysseyVectorRoot& iScene,::ULIS::FRectD& iRoi,uint64 iFlags )
+{
+    BLContext* blctx = iScene.GetEngine()->GetBLContext();
+    ::ULIS::FRectD bbox = { 0, 0, 0, 0 };
+    BLPoint topLeft = { 0, 0 };
+
+    blctx->save();
+    blctx->resetMatrix();
+
+    if( iScene.GetEngine()->GetSelectionSpace() )
+    {
+        UOdysseyVectorGroup* selectionSpace = iScene.GetEngine()->GetSelectionSpace();
+        ::ULIS::FRectD selectionSpaceBBox = selectionSpace->GetBBox( false );
+        BLRgba32 strokeColor = { 0x80, 0x80, 0x80, 0xFF };
+        BLMatrix2D& worldMatrix = selectionSpace->GetWorldMatrix();
+
+        iScene.GetEngine()->UseImage( mSelectionMask );
+
+        blctx->clearAll();
+        blctx->setFillStyle( BLRgba32( 0x80808080 ) );
+        blctx->fillRect( 0, 0, mSelectionMask->width(), mSelectionMask->height() );
+
+        blctx->setMatrix( worldMatrix );
+        blctx->setCompOp( BL_COMP_OP_SRC_COPY );
+        blctx->setFillStyle( BLRgba32( 0x800000FF ) );
+        blctx->fillRect( selectionSpaceBBox.x, selectionSpaceBBox.y, selectionSpaceBBox.w, selectionSpaceBBox.h );
+
+        iScene.GetEngine()->UseColorImage();
+
+        blctx->blitImage( topLeft, *mSelectionMask );
+    }
+
+    blctx->restore();
+}
+
+void
 FOdysseyVectorHUDSelection::Draw( UOdysseyVectorRoot& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
     BLContext* blctx = iScene.GetEngine()->GetBLContext();
     ::ULIS::FRectD bbox = { 0, 0, 0, 0 };
 
+    DrawSelectionSpace( iScene, iRoi, iFlags );
 
     // matrix might get altered for displaying the selection rectangle of a single object. Save it.
     blctx->save();
+    blctx->resetMatrix();
+
     blctx->setStrokeStyle( BLRgba32( 0xFF0000FF ) );
     blctx->setStrokeWidth( 1.0f );
 
@@ -79,19 +130,6 @@ FOdysseyVectorHUDSelection::Draw( UOdysseyVectorRoot& iScene, ::ULIS::FRectD& iR
 
             blctx->strokePath( path );
         }
-    }
-
-    if( iScene.GetEngine()->GetSelectionSpace() )
-    {
-        UOdysseyVectorGroup* selectionSpace = iScene.GetEngine()->GetSelectionSpace();
-        ::ULIS::FRectD selectionSpaceBBox = selectionSpace->GetBBox( false );
-        BLRgba32 strokeColor = { 0x80, 0x80, 0x80, 0xFF };
-        BLMatrix2D& worldMatrix = selectionSpace->GetWorldMatrix();
-
-        blctx->setMatrix( worldMatrix );
-        blctx->setStrokeStyle( BLRgba32( strokeColor ) );
-        blctx->setStrokeWidth( 1.0f );
-        blctx->strokeRect( selectionSpaceBBox.x, selectionSpaceBBox.y, selectionSpaceBBox.w, selectionSpaceBBox.h );
     }
 
     blctx->restore();

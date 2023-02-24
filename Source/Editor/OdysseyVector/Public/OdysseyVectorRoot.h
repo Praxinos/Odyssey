@@ -20,7 +20,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorRoot : public UOdysseyVectorObject
         GENERATED_BODY()
 
     private:
-        void UpdateShape();
+        void UpdateShape( uint32 iUpdateFlags );
         UOdysseyVectorObject* CopyShape();
         FOdysseyVectorEngine* mEngine;
 

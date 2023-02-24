@@ -56,7 +56,7 @@ UOdysseyVectorCircle::New( std::string iName, double iRadiusX, double iRadiusY )
 }
 
 void
-UOdysseyVectorCircle::UpdateShape()
+UOdysseyVectorCircle::UpdateShape( uint32 iUpdateFlags )
 {
     double ctlDistX = mRadiusX * MAGICRATIO;
     double ctlDistY = mRadiusY * MAGICRATIO;
@@ -141,7 +141,7 @@ UOdysseyVectorCircle::SetRadius( double iRadiusX, double iRadiusY )
     mBBox.w =  ( mRadiusX +  mStrokeWidth ) * 2;
     mBBox.h =  ( mRadiusY +  mStrokeWidth ) * 2;
 
-    UpdateShape();
+    UpdateShape( 0 );
 }
 
 double

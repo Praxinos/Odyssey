@@ -11,8 +11,20 @@ FOdysseyVectorHUDPathCubic::FOdysseyVectorHUDPathCubic()
 }
 
 FOdysseyVectorHUDPathCubic::FOdysseyVectorHUDPathCubic( uint32 iDisplayMode )
-    : mDisplayMode(iDisplayMode)
 {
+    SetDisplayMode( iDisplayMode );
+}
+
+void
+FOdysseyVectorHUDPathCubic::SetDisplayMode( uint32 iDisplayMode )
+{
+    mDisplayMode = iDisplayMode;
+}
+
+uint32
+FOdysseyVectorHUDPathCubic::GetDisplayMode()
+{
+    return mDisplayMode;
 }
 
 void

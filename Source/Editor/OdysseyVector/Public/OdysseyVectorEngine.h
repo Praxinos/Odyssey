@@ -48,6 +48,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
                  , UOdysseyVectorSegment** oCreatedSegment
                  , UOdysseyVectorSegment** oRemovedSegment
                  , bool iSmooth );
+        void UseImage( BLImage* iImage );
         static void RecursivePick( UOdysseyVectorGroup* iSelectionSpace, UOdysseyVectorObject& iObj, std::vector<UOdysseyVectorObject*>& iSelectedObjectArray, ::ULIS::FRectD& iRoi, uint32 iSelectionFlags );
         static void RecursiveErase( UOdysseyVectorObject& iObj
                                   , std::vector<UOdysseyVectorObject*>& iErasedObjectArray
@@ -66,7 +67,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
         void ClearHUD();
         ::ULIS::FRectD GenerateMask( std::vector<::ULIS::FVec2D>& iPointArray );
         void UseMaskImage();
-        void UseColorImage();
+        void UseColorImage(); // TODO : rename UseDefaultImage
         void GetColorImagePixelValue( uint32 iX, uint32 iY, uint8 *oR, uint8* oG, uint8 *oB, uint8 *oA );
         ::ULIS::FColor GetColorImagePixelValue( uint32 iX, uint32 iY );
         void SetSelectionSpace( UOdysseyVectorGroup* iSelectionSpace );

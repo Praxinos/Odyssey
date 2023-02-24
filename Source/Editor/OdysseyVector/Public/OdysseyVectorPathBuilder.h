@@ -46,7 +46,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorPathBuilder : public UOdysseyVectorObject
         // Unimplemented. Cubic Path builder cannot be picked. It should be destroyed as soon as the curve is built
         bool PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags ) { return false; };
 
-        void UpdateShape() {};
+        void UpdateShape( uint32 iUpdateFlags ) {};
 
         /**
          * @brief Try to fit the cubic curve as close as possible to the sample links passed as parameter. EXPERIMENTAL

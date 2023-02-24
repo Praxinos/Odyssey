@@ -123,8 +123,10 @@ UOdysseyPainterEditorVectorPathCutTool::OnMouseUp(const FOdysseyPoint& iPointInT
                 UOdysseyVectorPathCubic *cubicPath = static_cast<UOdysseyVectorPathCubic*>(selectedObject);
 
                 cubicPath->Cut( mStartCutAt, endCutAt );
-                cubicPath->Update();
+                cubicPath->Invalidate();
             }
+
+            currentVectorLayer->GetScene()->Update( 0 );
 
             // redraw the whole layer
             currentVectorLayer->RenderImageChanged(false);

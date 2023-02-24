@@ -179,6 +179,8 @@ FOdysseyVectorImport::ReadObjectsDefine( std::vector<UOdysseyVectorObject*>& vec
                     UOdysseyVectorPathCubic* cubicPath = Cast<UOdysseyVectorPathCubic>( vectorObjectArray[objectID] );
 
                     FOdysseyVectorImport::ReadObjectPathCubic( *cubicPath, Ar.Tell() + iChunkLen, Ar );
+                    // immediately update invalidated segments and updates the path's BBox
+                    cubicPath->Update( 0 );
                 }
                 break;
 
@@ -187,6 +189,8 @@ FOdysseyVectorImport::ReadObjectsDefine( std::vector<UOdysseyVectorObject*>& vec
                     UOdysseyVectorGroupPaint* paintGroup = Cast<UOdysseyVectorGroupPaint>( vectorObjectArray[objectID] );
 
                     FOdysseyVectorImport::ReadObjectGroupPaint( *paintGroup, Ar.Tell() + iChunkLen, Ar );
+
+                    paintGroup->Invalidate();
                 }
                 break;
 

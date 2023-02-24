@@ -47,14 +47,19 @@ class ODYSSEYVECTOR_API UOdysseyVectorGroupPaint : public UOdysseyVectorGroup
         std::vector<FOdysseyVectorLoop*> mLoopArray;
 
     public:
+        UPROPERTY(EditAnywhere, Category="General")
+        bool Realtime; // relatime updates
+
+    public:
         void ApplyBucket( FOdysseyVectorBucket* iBucket );
         void Colorize();
 
     public:
         ~UOdysseyVectorGroupPaint();
-        UOdysseyVectorGroupPaint(){};
+        UOdysseyVectorGroupPaint();
         void Init( std::string iName );
 
+        void UpdateShape( uint32 iUpdateFlags );
         void DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags );
         bool PickShape( ::ULIS::FRectD& iRoi, uint32 iSelectionFlags );
         UOdysseyVectorObject* CopyShape();
