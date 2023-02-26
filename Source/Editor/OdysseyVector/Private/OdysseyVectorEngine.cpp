@@ -552,7 +552,18 @@ FOdysseyVectorEngine::Pick( UOdysseyVectorRoot& iScene, std::vector<::ULIS::FVec
 
     UseMaskImage();
 
-    roi = GenerateMask( iPointArray );
+    if( iSelectionFlags & UOdysseyVectorObject::PICK_MASK_BASED )
+    {
+        roi = GenerateMask( iPointArray );
+    }
+    else
+    {
+        if( iPointArray.size() )
+        {
+            roi.x = iPointArray[0].x;
+            roi.y = iPointArray[0].y;
+        } 
+    }
 
     mBLContext->flush(BL_CONTEXT_FLUSH_SYNC);
 

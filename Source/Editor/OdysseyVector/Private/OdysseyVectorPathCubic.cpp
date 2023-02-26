@@ -261,6 +261,19 @@ UOdysseyVectorPathCubic::PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags
 {
     BLContext* blctx = GetRoot()->GetEngine()->GetBLContext();
 
+    if( iSelectionFlags & PICK_MATH_BASED )
+    {
+        for( std::list<UOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
+        {
+            UOdysseyVectorSegmentCubic* cubicSegment = static_cast<UOdysseyVectorSegmentCubic*>(*it);
+ 
+            if( cubicSegment->Pick( iRoi.x, iRoi.y, 0.0f ) )
+            {
+                return true;
+            }
+        }
+    }
+
     if ( iSelectionFlags & PICK_MASK_BASED )
     {
         BLImage* blimg = blctx->targetImage(); // the mask image must be selected by the vector engine at this point

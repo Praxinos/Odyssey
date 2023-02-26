@@ -7,6 +7,7 @@
 #include "Tools/OdysseyPainterEditorTool.h"
 #include "OdysseyPaintEngine.h"
 
+#include "OdysseyVectorBucket.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "HUD/OdysseyVectorHUDBucket.h"
 
@@ -74,6 +75,7 @@ protected:
     //Resources
     FOdysseyPaintEngine mPaintEngine;
     UOdysseyVectorHandleBucket* mPickedBucketHandle;
+    FOdysseyVectorBucket* mPickedBucket;
     double mOldLocalMouseX;
     double mOldLocalMouseY;
     FOdysseyVectorHUDBucket mBucketHUD;

@@ -76,7 +76,7 @@ FOdysseyVectorBucket::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
     blctx->restore();
 }
 
-bool
+UOdysseyVectorHandleBucket*
 FOdysseyVectorBucket::PickHandle( double iX, double iY )
 {
     double handleX = mCoords.x + mCtrlPoint->GetX();
@@ -87,10 +87,10 @@ FOdysseyVectorBucket::PickHandle( double iX, double iY )
 
     if( distance < HANDLERADIUS )
     {
-        return true;
+        return mCtrlPoint;
     }
 
-    return false;
+    return nullptr;
 }
 
 UOdysseyVectorHandleBucket*

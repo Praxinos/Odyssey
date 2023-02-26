@@ -496,6 +496,8 @@ FOdysseyPainterEditorGUI::GroupPaint()
                     }
                 }
 
+                paintGroup->Invalidate();
+
                 currentVectorLayer->GetScene()->ClearSelection();
                 currentVectorLayer->GetScene()->Select( paintGroup );
 

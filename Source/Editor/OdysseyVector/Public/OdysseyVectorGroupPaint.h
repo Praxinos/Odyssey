@@ -39,10 +39,13 @@ class ODYSSEYVECTOR_API UOdysseyVectorGroupPaint : public UOdysseyVectorGroup
         GENERATED_BODY()
 
     protected:
-        void MarchVertex( UOdysseyVectorVertexIntersection* iVertex );
+        uint32 MarchVertex( UOdysseyVectorVertexIntersection* iVertex );
+
         static const uint32 NOCYCLE  = 0;
         static const uint32 BLOCKED  = 1;
         static const uint32 HASCYCLE = 2;
+
+
         std::list<FOdysseyVectorBucket*> mBucketList;
         std::vector<FOdysseyVectorLoop*> mLoopArray;
 

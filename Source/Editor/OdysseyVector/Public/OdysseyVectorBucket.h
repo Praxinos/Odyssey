@@ -25,7 +25,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorBucket
         void SetGradient( bool mGradient );
         void SetColor2( uint8 iR, uint8 iG, uint8 iB, uint8 iA );
         FColor GetColor();
-        bool PickHandle( double iX, double iY );
+        UOdysseyVectorHandleBucket* PickHandle( double iX, double iY );
         UOdysseyVectorHandleBucket* GetHandle();
         UOdysseyVectorObject& GetParent();
         double GetHandleDotProduct();

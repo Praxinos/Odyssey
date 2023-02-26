@@ -14,6 +14,8 @@ UOdysseyPainterEditorPaintBucketTool::~UOdysseyPainterEditorPaintBucketTool()
 
 UOdysseyPainterEditorPaintBucketTool::UOdysseyPainterEditorPaintBucketTool()
     : mBucketHUD()
+    , mPickedBucket( nullptr )
+    , mPickedBucketHandle( nullptr )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PaintBucket64");
 }
@@ -190,8 +192,6 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseDownVector( UOdysseyTextureLayerIma
                                                        , const FOdysseyPoint& iPointInTexture
                                                        , const FKey& iKey )
 {
-    ::ULIS::FColor color = GetEditorAs<FOdysseyPainterEditor>()->PaintColor().GetValue();
-    ::ULIS::FColor rgba8 = color.ToFormat( ::ULIS::eFormat::Format_RGBA8 );
     UOdysseyVectorObject* selectedObject = currentVectorLayer.GetScene()->GetLastSelected();
 
     if( selectedObject )
@@ -205,13 +205,12 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseDownVector( UOdysseyTextureLayerIma
 
             if( mPickedBucketHandle == nullptr )
             {
-                uint8 R = rgba8.R8();
-                uint8 G = rgba8.G8();
-                uint8 B = rgba8.B8();
-                uint8 A = rgba8.A8();
+                FOdysseyVectorBucket* bucket = paintGroup->GetBucket( localCoords.x, localCoords.y );
 
-                /*paintGroup->FindCycles();*/
-                paintGroup->Bucket( localCoords.x, localCoords.y, R, G, B, A );
+                mPickedBucket = ( bucket ) ? bucket : new FOdysseyVectorBucket( *paintGroup
+                                                                               , localCoords.x
+                                                                               , localCoords.y
+                                                                               , 0, 0, 0, 0 );
             }
 
             mOldLocalMouseX = localCoords.x;
@@ -271,6 +270,27 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseDragVector( UOdysseyTextureLayerIma
             currentVectorLayer.RenderImageChanged( true );
         }
     }
+
+    if( mPickedBucket )
+    {
+        UOdysseyVectorObject& object = mPickedBucket->GetParent();
+
+        if( object.GetClass() == UOdysseyVectorGroupPaint::StaticClass() )
+        {
+            UOdysseyVectorGroupPaint* paintGroup = Cast<UOdysseyVectorGroupPaint>(&object);
+            BLPoint localCoords = paintGroup->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
+            double difX = localCoords.x - mOldLocalMouseX
+                 , difY = localCoords.y - mOldLocalMouseY;
+            ::ULIS::FVec2D& bucketCoords = mPickedBucket->GetCoords();
+
+            mPickedBucket->SetCoords( bucketCoords.x + difX, bucketCoords.y + difY );
+
+            mOldLocalMouseX = localCoords.x;
+            mOldLocalMouseY = localCoords.y;
+
+            currentVectorLayer.RenderImageChanged( true );
+        }
+    }
 }
 
 void
@@ -299,7 +319,38 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseUpVector( UOdysseyTextureLayerImage
                                                      , const FOdysseyPoint& iPointInTexture
                                                      , const FKey& iKey )
 {
+    UOdysseyVectorObject* selectedObject = currentVectorLayer.GetScene()->GetLastSelected();
+    ::ULIS::FColor color = GetEditorAs<FOdysseyPainterEditor>()->PaintColor().GetValue();
+    ::ULIS::FColor rgba8 = color.ToFormat( ::ULIS::eFormat::Format_RGBA8 );
+
+    if( selectedObject )
+    {
+        if( selectedObject->GetClass() == UOdysseyVectorGroupPaint::StaticClass() )
+        {
+            UOdysseyVectorGroupPaint* paintGroup = Cast<UOdysseyVectorGroupPaint>( selectedObject );
+
+            if( mPickedBucket )
+            {
+                if( mPickedBucketHandle == nullptr )
+                {
+                    uint8 R = rgba8.R8();
+                    uint8 G = rgba8.G8();
+                    uint8 B = rgba8.B8();
+                    uint8 A = rgba8.A8();
+
+                    mPickedBucket->SetColor( R, G, B, A );
+
+                    /*paintGroup->FindCycles();*/
+                    paintGroup->AddBucket( mPickedBucket );
+                }
+            }
+
+            paintGroup->Colorize();
+        }
+    }
+
     mPickedBucketHandle = nullptr;
+    mPickedBucket = nullptr;
 
     currentVectorLayer.RenderImageChanged( false );
 

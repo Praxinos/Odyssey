@@ -56,7 +56,22 @@ FOdysseyVectorLoop::FitsIn( FOdysseyVectorLoop* iParentCandidate )
         BLPoint pt = { vCoords.x, vCoords.y };
         uint32 ret =  iParentCandidate->mPath.hitTest( pt, BL_FILL_RULE_NON_ZERO );
 
-        if( ret == 0 ) return false;
+        // we also need to test if the point lies on the loop boundaries
+        /*if( ret == 0 )
+        {
+            for ( int j = 0; j < iParentCandidate->mVertexArray.size(); j++ )
+            {
+                if( mVertexArray[i] == iParentCandidate->mVertexArray[j] )
+                {
+                    ret = 1;
+                }
+            }
+        }*/
+
+        if( ret == 0 )
+        {
+            return false;
+        }
     }
 
     return true;
