@@ -57,10 +57,10 @@ public:
     uint8 Tolerance;
 
     UPROPERTY(EditAnywhere,Category="Odyssey BucketFill Tool")
-    FColor Color1;
+    bool Gradient;
 
     UPROPERTY(EditAnywhere,Category="Odyssey BucketFill Tool")
-    bool Gradient;
+    FColor Color1;
 
     UPROPERTY(EditAnywhere,Category="Odyssey BucketFill Tool")
     FColor Color2;
@@ -78,5 +78,7 @@ protected:
     FOdysseyVectorBucket* mPickedBucket;
     double mOldLocalMouseX;
     double mOldLocalMouseY;
+    double mDownMouseX;
+    double mDownMouseY;
     FOdysseyVectorHUDBucket mBucketHUD;
 };

@@ -34,6 +34,14 @@ UOdysseyVectorGroupPaint::GetBucketList()
 void
 UOdysseyVectorGroupPaint::Colorize()
 {
+    // reset color for all cycles first
+    for( int i = 0; i < mLoopArray.size(); i++ )
+    {
+        FOdysseyVectorLoop *cycle = mLoopArray[i];
+
+        cycle->SetBucket( nullptr );
+    }
+
     for( std::list<FOdysseyVectorBucket*>::iterator lit = mBucketList.begin(); lit != mBucketList.end(); ++lit )
     {
         FOdysseyVectorBucket *bucket = static_cast<FOdysseyVectorBucket*>(*lit);
@@ -62,7 +70,23 @@ UOdysseyVectorGroupPaint::ApplyBucket( FOdysseyVectorBucket* iBucket )
 }
 
 FOdysseyVectorBucket*
-UOdysseyVectorGroupPaint::GetBucket( double iX, double iY )
+UOdysseyVectorGroupPaint::PickBucket( double iX, double iY )
+{
+    for( std::list<FOdysseyVectorBucket*>::iterator lit = mBucketList.begin(); lit != mBucketList.end(); ++lit )
+    {
+        FOdysseyVectorBucket *bucket = static_cast<FOdysseyVectorBucket*>(*lit);
+
+        if ( bucket->Pick( iX, iY ) )
+        {
+            return bucket;
+        }
+    }
+
+    return nullptr;
+}
+
+FOdysseyVectorLoop*
+UOdysseyVectorGroupPaint::PickCycle( double iX, double iY )
 {
     for( int i = 0; i < mLoopArray.size(); i++ )
     {
@@ -71,7 +95,7 @@ UOdysseyVectorGroupPaint::GetBucket( double iX, double iY )
         // TODO: Bounding volume for cycles for faster search
         if( cycle->HitTest( iX, iY ) == true )
         {
-            return cycle->GetBucket();
+            return cycle;
         }
     }
 
@@ -81,11 +105,11 @@ UOdysseyVectorGroupPaint::GetBucket( double iX, double iY )
 FOdysseyVectorBucket*
 UOdysseyVectorGroupPaint::Bucket( double iX, double iY, uint8 iR, uint8 iG, uint8 iB, uint8 iA )
 {
-    FOdysseyVectorBucket* bucket = GetBucket( iX, iY );
+    FOdysseyVectorBucket* bucket = PickBucket( iX, iY );
 
     if( bucket == nullptr )
     {
-        bucket = new FOdysseyVectorBucket( *this, iX, iY, iR, iG, iB, iA );
+        bucket = new FOdysseyVectorBucket( *this, iX, iY );
 
         AddBucket( bucket );
     }
@@ -113,6 +137,12 @@ void
 UOdysseyVectorGroupPaint::AddBucket( FOdysseyVectorBucket* iBucket )
 {
     mBucketList.push_back( iBucket );
+}
+
+void
+UOdysseyVectorGroupPaint::RemoveBucket( FOdysseyVectorBucket* iBucket )
+{
+    mBucketList.remove( iBucket );
 }
 
 void
@@ -376,11 +406,11 @@ UOdysseyVectorGroupPaint::MarchVertex( UOdysseyVectorVertexIntersection* iInters
 
             if( ret == UOdysseyVectorGroupPaint::HASCYCLE )
             {
-                UE_LOG(LogTemp,Warning,TEXT("candidate cycle of size:%d (sections :%d)"),vertexArray.size(),sectionArray.size());
+                //UE_LOG(LogTemp,Warning,TEXT("candidate cycle of size:%d (sections :%d)"),vertexArray.size(),sectionArray.size());
 
                 if( /*CheckPath( vertexArray, sectionArray ) == true*/ GetNormalVector( vertexArray, sectionArray ) > 0.0f )
                 {
-                    PrintCycle( vertexArray, sectionArray );
+                    //PrintCycle( vertexArray, sectionArray );
                     BlockPath( vertexArray, sectionArray, false );
 
                     mLoopArray.push_back( new FOdysseyVectorLoop( *this, /*iCycleID*/0, vertexArray, sectionArray ) );

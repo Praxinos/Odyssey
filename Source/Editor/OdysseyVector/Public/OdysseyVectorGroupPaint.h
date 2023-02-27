@@ -100,11 +100,12 @@ class ODYSSEYVECTOR_API UOdysseyVectorGroupPaint : public UOdysseyVectorGroup
         virtual uint32 GetType();
         void SimplifyGraph();
         FOdysseyVectorBucket* Bucket( double iX, double iY, uint8 iR, uint8 iG, uint8 iB, uint8 iA );
-        FOdysseyVectorBucket* GetBucket( double iX, double iY );
+        FOdysseyVectorBucket* PickBucket( double iX, double iY );
+        FOdysseyVectorLoop* PickCycle( double iX, double iY );
         UOdysseyVectorHandleBucket* PickBucketHandle( double iX, double iY );
         void DrawBuckets( ::ULIS::FRectD& iRoi, uint64 iFlags );
         void OrderCycles();
         void ClearCycles();
         void AddBucket( FOdysseyVectorBucket* iBucket );
-
+        void RemoveBucket( FOdysseyVectorBucket* iBucket );
 };

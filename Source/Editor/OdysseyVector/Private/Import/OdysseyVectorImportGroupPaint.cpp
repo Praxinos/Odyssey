@@ -60,7 +60,7 @@ FOdysseyVectorImport::ReadObjectGroupPaint( UOdysseyVectorGroupPaint& iPaintGrou
 
                 case FOdysseyVectorExport::CHUNK_BUCKET_ENTRY:
                 {
-                    FOdysseyVectorBucket* bucket = new FOdysseyVectorBucket( iPaintGroup, 0.0f, 0.0f, 0, 0, 0, 0 );
+                    FOdysseyVectorBucket* bucket = new FOdysseyVectorBucket( iPaintGroup, 0.0f, 0.0f );
 
                     iPaintGroup.AddBucket( bucket );
 

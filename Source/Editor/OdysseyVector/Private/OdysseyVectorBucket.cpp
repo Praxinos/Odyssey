@@ -7,15 +7,69 @@ FOdysseyVectorBucket::~FOdysseyVectorBucket()
 {
 }
 
-FOdysseyVectorBucket::FOdysseyVectorBucket( UOdysseyVectorObject& iParent, double iX, double iY, uint8 iR, uint8 iG, uint8 iB, uint8 iA )
+void
+FOdysseyVectorBucket::Reshape()
+{
+    bucketRect.x = mCoords.x - 10;
+    bucketRect.y = mCoords.y - 10;
+    bucketRect.w = 20;
+    bucketRect.h = 20;
+
+    crossRect.x = mCoords.x + 10;
+    crossRect.y = mCoords.y + 10;
+    crossRect.w = 10;
+    crossRect.h = 10;
+}
+
+FOdysseyVectorBucket::FOdysseyVectorBucket( UOdysseyVectorObject& iParent, double iX, double iY )
     : mParent ( iParent )
+    , mIsGradient ( false )
 {
     mCtrlPoint = UOdysseyVectorHandleBucket::New( this );
 
     mCtrlPoint->Set( HANDLEDISTANCE, 0.0f );
 
     SetCoords( iX, iY );
-    SetColor( iR, iG, iB, iA );
+    SetColor( 128, 128, 128, 255 );
+}
+
+bool
+FOdysseyVectorBucket::IsGradient()
+{
+    return mIsGradient;
+}
+
+FColor&
+FOdysseyVectorBucket::GetGradientColor0()
+{
+    return mGradientColor0;
+}
+
+FColor&
+FOdysseyVectorBucket::GetGradientColor1()
+{
+    return mGradientColor1;
+}
+
+void
+FOdysseyVectorBucket::SetGradient( bool iIsGradient )
+{
+    mIsGradient = iIsGradient;
+}
+
+void
+FOdysseyVectorBucket::SetGradientColors( uint8 iR0, uint8 iG0, uint8 iB0, uint8 iA0
+                                       , uint8 iR1, uint8 iG1, uint8 iB1, uint8 iA1 )
+{
+    mGradientColor0.R = iR0;
+    mGradientColor0.G = iG0;
+    mGradientColor0.B = iB0;
+    mGradientColor0.A = iA0;
+
+    mGradientColor1.R = iR1;
+    mGradientColor1.G = iG1;
+    mGradientColor1.B = iB1;
+    mGradientColor1.A = iA1;
 }
 
 ::ULIS::FVec2D&
@@ -29,6 +83,8 @@ FOdysseyVectorBucket::SetCoords( double iX, double iY )
 {
     mCoords.x = iX;
     mCoords.y = iY;
+
+    Reshape();
 }
 
 void
@@ -40,10 +96,28 @@ FOdysseyVectorBucket::SetColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA )
     mColor.A = iA;
 }
 
-FColor
+FColor&
 FOdysseyVectorBucket::GetColor()
 {
     return mColor;
+}
+
+void
+FOdysseyVectorBucket::DrawCross( double iX, double iY, double iSize )
+{
+    BLContext* blctx = mParent.GetRoot()->GetEngine()->GetBLContext();
+
+    blctx->setFillStyle( BLRgba32( 0xFF808080 ) );
+    blctx->fillRect( iX, iY, 10, 10 );
+
+    blctx->setStrokeWidth( 1.0f );
+    blctx->setStrokeStyle( BLRgba32( 0xFF000000 ) );
+    blctx->strokeRect( iX, iY, 10, 10 );
+
+    blctx->setStrokeWidth( 1.0f );
+    blctx->setStrokeStyle( BLRgba32( 0xFF000000 ) );
+    blctx->strokeLine( iX        , iY, iX + iSize, iY + iSize );
+    blctx->strokeLine( iX + iSize, iY, iX        , iY + iSize );
 }
 
 void
@@ -73,7 +147,33 @@ FOdysseyVectorBucket::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
     blctx->fillCircle( origin.x + mCtrlPoint->GetX(), origin.y + mCtrlPoint->GetY(), HANDLERADIUS );
     blctx->strokeCircle( origin.x + mCtrlPoint->GetX(), origin.y + mCtrlPoint->GetY(), HANDLERADIUS );
 
+    DrawCross( origin.x + 10.0f, origin.y + 10.0f, 10.0f );
+
     blctx->restore();
+}
+
+uint32
+FOdysseyVectorBucket::Pick( double iX, double iY )
+{
+    ::ULIS::FVec2D pt = ::ULIS::FVec2D( iX, iY );
+
+    if( bucketRect.HitTest( pt ) )
+    {
+        return FOdysseyVectorBucket::PICKBUCKET;
+    }
+
+    if( crossRect.HitTest( pt ) )
+    {
+        return FOdysseyVectorBucket::PICKCROSS;
+    }
+
+    if ( PickHandle( iX, iY ) )
+    {
+        return FOdysseyVectorBucket::PICKHANDLE;
+    }
+
+    return FOdysseyVectorBucket::PICKNONE;
+
 }
 
 UOdysseyVectorHandleBucket*

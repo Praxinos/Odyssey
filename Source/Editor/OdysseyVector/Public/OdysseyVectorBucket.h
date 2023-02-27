@@ -11,22 +11,37 @@ class ODYSSEYVECTOR_API FOdysseyVectorBucket
     private:
         UOdysseyVectorObject& mParent;
         ::ULIS::FVec2D mCoords;
+        ::ULIS::FRectD bucketRect;
+        ::ULIS::FRectD crossRect;
         FColor mColor;
         UOdysseyVectorHandleBucket* mCtrlPoint;
         bool mIsGradient;
+        FColor mGradientColor0;
+        FColor mGradientColor1;
+        void Reshape();
 
     public:
+        static const uint32 PICKNONE = 0;
+        static const uint32 PICKBUCKET = 1;
+        static const uint32 PICKCROSS = 2;
+        static const uint32 PICKHANDLE = 3;
+
         ~FOdysseyVectorBucket();
-        FOdysseyVectorBucket( UOdysseyVectorObject& iParent, double iX, double iY, uint8 iR, uint8 iG, uint8 iB, uint8 iA );
+        FOdysseyVectorBucket( UOdysseyVectorObject& iParent, double iX, double iY );
+        void SetColor(uint8 iR, uint8 iG, uint8 iB, uint8 iA );
         void Draw( ::ULIS::FRectD& iRoi, uint64 iFlags );
         void SetCoords( double iX, double iY );
         ::ULIS::FVec2D& GetCoords();
-        void SetColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA );
-        void SetGradient( bool mGradient );
-        void SetColor2( uint8 iR, uint8 iG, uint8 iB, uint8 iA );
-        FColor GetColor();
+        bool IsGradient();
+        FColor& GetGradientColor0();
+        FColor& GetGradientColor1();
+        void SetGradient( bool iIsGradient );
+        void SetGradientColors( uint8 iR0, uint8 iG0, uint8 iB0, uint8 iA0, uint8 iR1, uint8 iG1, uint8 iB1, uint8 iA1 );
+        FColor& GetColor();
+        uint32 Pick( double iX, double iY );
         UOdysseyVectorHandleBucket* PickHandle( double iX, double iY );
         UOdysseyVectorHandleBucket* GetHandle();
         UOdysseyVectorObject& GetParent();
         double GetHandleDotProduct();
+        void DrawCross( double iX, double iY, double iSize );
 };

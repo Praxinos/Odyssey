@@ -16,6 +16,9 @@ UOdysseyPainterEditorPaintBucketTool::UOdysseyPainterEditorPaintBucketTool()
     : mBucketHUD()
     , mPickedBucket( nullptr )
     , mPickedBucketHandle( nullptr )
+    , Gradient( false )
+    , Color1( 255, 255, 255, 255 )
+    , Color2( 255, 255, 255, 255 )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PaintBucket64");
 }
@@ -200,17 +203,28 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseDownVector( UOdysseyTextureLayerIma
         {
             UOdysseyVectorGroupPaint* paintGroup = Cast<UOdysseyVectorGroupPaint>( selectedObject );
             BLPoint localCoords = paintGroup->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
+            FOdysseyVectorBucket* bucket = paintGroup->PickBucket( localCoords.x, localCoords.y ); 
+            uint32 pickedArea = bucket ? bucket->Pick( localCoords.x, localCoords.y ) : 0;
 
-            mPickedBucketHandle = paintGroup->PickBucketHandle( localCoords.x, localCoords.y );
-
-            if( mPickedBucketHandle == nullptr )
+            switch( pickedArea )
             {
-                FOdysseyVectorBucket* bucket = paintGroup->GetBucket( localCoords.x, localCoords.y );
+                case FOdysseyVectorBucket::PICKBUCKET :
+                    mPickedBucket = bucket;
+                break;
 
-                mPickedBucket = ( bucket ) ? bucket : new FOdysseyVectorBucket( *paintGroup
-                                                                               , localCoords.x
-                                                                               , localCoords.y
-                                                                               , 0, 0, 0, 0 );
+                case FOdysseyVectorBucket::PICKHANDLE :
+                    mPickedBucketHandle = bucket->GetHandle();
+                break;
+
+                case FOdysseyVectorBucket::PICKCROSS:
+                    paintGroup->RemoveBucket( bucket );
+                break;
+
+                default :
+                    mPickedBucket = new FOdysseyVectorBucket( *paintGroup, localCoords.x, localCoords.y );
+
+                    paintGroup->AddBucket( mPickedBucket );
+                break;
             }
 
             mOldLocalMouseX = localCoords.x;
@@ -228,6 +242,9 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseDown(const FOdysseyPoint& iPointInT
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
     UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
+
+    mDownMouseX = iPointInTexture.x;
+    mDownMouseY = iPointInTexture.y;
 
     if( currentLayer->GetClass() == UOdysseyTextureLayerImageRaster::StaticClass() )
     {
@@ -320,28 +337,37 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseUpVector( UOdysseyTextureLayerImage
                                                      , const FKey& iKey )
 {
     UOdysseyVectorObject* selectedObject = currentVectorLayer.GetScene()->GetLastSelected();
-    ::ULIS::FColor color = GetEditorAs<FOdysseyPainterEditor>()->PaintColor().GetValue();
-    ::ULIS::FColor rgba8 = color.ToFormat( ::ULIS::eFormat::Format_RGBA8 );
 
     if( selectedObject )
     {
         if( selectedObject->GetClass() == UOdysseyVectorGroupPaint::StaticClass() )
         {
             UOdysseyVectorGroupPaint* paintGroup = Cast<UOdysseyVectorGroupPaint>( selectedObject );
+            BLPoint localCoords = paintGroup->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
 
             if( mPickedBucket )
             {
-                if( mPickedBucketHandle == nullptr )
+                if( ( static_cast<int>(iPointInTexture.x) == static_cast<int>(mDownMouseX) ) 
+                 && ( static_cast<int>(iPointInTexture.y) == static_cast<int>(mDownMouseY) ) )
                 {
-                    uint8 R = rgba8.R8();
-                    uint8 G = rgba8.G8();
-                    uint8 B = rgba8.B8();
-                    uint8 A = rgba8.A8();
+                    if( Gradient )
+                    {
+                        mPickedBucket->SetGradient( true );
+                        mPickedBucket->SetGradientColors( Color1.R, Color1.G, Color1.B, Color1.A
+                                                        , Color2.R, Color2.G, Color2.B, Color2.A );
+                    }
+                    else
+                    {
+                        ::ULIS::FColor color = GetEditorAs<FOdysseyPainterEditor>()->PaintColor().GetValue();
+                        ::ULIS::FColor rgba8 = color.ToFormat(::ULIS::eFormat::Format_RGBA8);
+                        uint8 R = rgba8.R8();
+                        uint8 G = rgba8.G8();
+                        uint8 B = rgba8.B8();
+                        uint8 A = rgba8.A8();
 
-                    mPickedBucket->SetColor( R, G, B, A );
-
-                    /*paintGroup->FindCycles();*/
-                    paintGroup->AddBucket( mPickedBucket );
+                        mPickedBucket->SetGradient( false );
+                        mPickedBucket->SetColor( R, G, B, A );
+                    }
                 }
             }
 

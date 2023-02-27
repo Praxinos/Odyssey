@@ -325,14 +325,6 @@ FOdysseyVectorLoop::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
     BLContext* blctx = mParent.GetRoot()->GetEngine()->GetBLContext();
     BLPath combinedPath = mPath;
-    FColor color = GetColor();
-    BLRgba32 fillColor;
-
-    // Note: Blend2D color format is 0xAARRGGBB
-    fillColor.r = color.B;
-    fillColor.g = color.G;
-    fillColor.b = color.R;
-    fillColor.a = color.A;
 
     for( std::list<FOdysseyVectorLoop*>::iterator oit = mChildrenList.begin(); oit != mChildrenList.end(); ++oit )
     {
@@ -341,34 +333,63 @@ FOdysseyVectorLoop::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
         combinedPath.addPath( child->mPath );
     }
 
-/*
     if( mBucket )
     {
-        double difX = mMax.x - mMin.x;
-        double difY = mMax.y - mMin.y;
-        double linearMinX = mMin.x;
-        double linearMinY = mMin.y;
-        double angle = acos( fabs( mBucket->GetHandleDotProduct() ) );
-        double linearMaxX = mMin.x + ( difX * cos( angle ) );
-        double linearMaxY = mMin.y + ( difY * sin( angle ) );
-        BLGradient linear( BLLinearGradientValues( mMin.x, mMin.y, linearMaxX, linearMaxY ) );
+        if( mBucket->IsGradient() )
+        {
+            double difX = mMax.x - mMin.x;
+            double difY = mMax.y - mMin.y;
+            double linearMinX = mMin.x;
+            double linearMinY = mMin.y;
+            double angle = acos( fabs( mBucket->GetHandleDotProduct() ) );
+            double linearMaxX = mMin.x + ( difX * cos( angle ) );
+            double linearMaxY = mMin.y + ( difY * sin( angle ) );
+            BLGradient linear( BLLinearGradientValues( mMin.x, mMin.y, linearMaxX, linearMaxY ) );
+            FColor& gradientColor0 = mBucket->GetGradientColor0();
+            FColor& gradientColor1 = mBucket->GetGradientColor1();
+            BLRgba32 BLColor0;
+            BLRgba32 BLColor1;
 
-        linear.addStop( 0.0, BLRgba32( 0xFFFFFFFF ) );
-        linear.addStop( 1.0, BLRgba32( GetColor() ) );
+            // Note: Blend2D color format is 0xAARRGGBB
+            BLColor0.r = gradientColor0.B;
+            BLColor0.g = gradientColor0.G;
+            BLColor0.b = gradientColor0.R;
+            BLColor0.a = gradientColor0.A;
 
-        blctx->setFillStyle( linear );
+            // Note: Blend2D color format is 0xAARRGGBB
+            BLColor1.r = gradientColor1.B;
+            BLColor1.g = gradientColor1.G;
+            BLColor1.b = gradientColor1.R;
+            BLColor1.a = gradientColor1.A;
+
+            linear.addStop( 0.0, BLColor0 );
+            linear.addStop( 1.0, BLColor1 );
+
+            blctx->setFillStyle( linear );
+        }
+        else
+        {
+            FColor& gradientColor = mBucket->GetColor();
+            BLRgba32 BLColor;
+
+            // Note: Blend2D color format is 0xAARRGGBB
+            BLColor.r = gradientColor.B;
+            BLColor.g = gradientColor.G;
+            BLColor.b = gradientColor.R;
+            BLColor.a = gradientColor.A;
+
+            blctx->setFillStyle( BLColor );
+        }
     }
     else
     {
-        blctx->setFillStyle( BLRgba32( GetColor() ) );
+       blctx->setFillStyle( BLRgba32( 0xFF808080 ) );
     }
-*/
 
-       blctx->setFillStyle( fillColor );
-       blctx->setFillRule( BL_FILL_RULE_EVEN_ODD );
+    blctx->setFillRule( BL_FILL_RULE_EVEN_ODD );
 
        /*iBLContext.fillPolygon( &mPointArray[0], mPointArray.size() );*/
-       blctx->fillPath( combinedPath );
+    blctx->fillPath( combinedPath );
     /*}*/
 }
 
