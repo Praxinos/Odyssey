@@ -44,6 +44,9 @@ public:
     /** Action to make a paintable shape from a set of cubic bezier*/
     TSharedPtr<FUICommandInfo> GroupPaint;
 
+    /** Action to make a paintable shape from a set of cubic bezier*/
+    TSharedPtr<FUICommandInfo> Ungroup;
+
     /** Action to remove selected vector objects */
     TSharedPtr<FUICommandInfo> RemoveSelectedObjects;
 

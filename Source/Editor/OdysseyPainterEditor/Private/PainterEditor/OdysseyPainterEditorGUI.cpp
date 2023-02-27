@@ -70,6 +70,7 @@ FOdysseyPainterEditorGUI::BindShortcuts(FBaseToolkit* iToolkit)
     MAP_ACTION(painterEditorCommands.Discord, Discord )
     MAP_ACTION(painterEditorCommands.SwitchTabletAPI, SwitchTabletAPI )
     MAP_ACTION(painterEditorCommands.GroupPaint, GroupPaint )
+    MAP_ACTION(painterEditorCommands.Ungroup, Ungroup )
     MAP_ACTION(painterEditorCommands.RemoveSelectedObjects, RemoveSelectedObjects )
 
     #undef MAP_ACTION
@@ -141,6 +142,12 @@ FOdysseyPainterEditorGUI::ExtendMenuAbout( FToolMenuOwner iOwner, FName iMenuNam
             FOdysseyPainterEditorCommands::Get().GroupPaint
             , LOCTEXT("GroupPaint", "GroupPaint")
             , LOCTEXT("GroupPaint", "GroupPaint")
+            , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
+            , NAME_None );
+        aboutSection.AddMenuEntry(
+            FOdysseyPainterEditorCommands::Get().Ungroup
+            , LOCTEXT("Ungroup", "Ungroup")
+            , LOCTEXT("Ungroup", "Ungroup")
             , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
             , NAME_None );
         aboutSection.AddMenuEntry(
@@ -422,6 +429,46 @@ FOdysseyPainterEditorGUI::RemoveSelectedObjects()
             currentVectorLayer->GetScene()->RemoveSelectedObjects();
 
             currentVectorLayer->RenderImageChanged( false );
+        }
+    }
+}
+
+void
+FOdysseyPainterEditorGUI::Ungroup()
+{
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(static_cast<FOdysseyTextureEditor*>(mEditor)->LayerStack());
+    UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
+
+    if( currentLayer )
+    {
+        if( currentLayer->GetClass() == UOdysseyTextureLayerImageVector::StaticClass() )
+        {
+            UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
+            FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+            UOdysseyVectorObject* selectedObject = currentVectorLayer->GetScene()->GetLastSelected();
+            UOdysseyVectorGroup* group = Cast<UOdysseyVectorGroup>(selectedObject);
+
+            if( group )
+            {
+                // we work on a copy of the list to be able to delete children while iterating
+                std::list<UOdysseyVectorObject*> childrenList = group->GetChildrenList();
+
+                for( std::list<UOdysseyVectorObject*>::iterator it = childrenList.begin(); it != childrenList.end(); ++it )
+                {
+                    UOdysseyVectorObject* child = (*it);
+
+                    group->RemoveChild( child );
+                    child->SwitchSpace( *group->GetParent() );
+                    group->GetParent()->AppendChild( child );
+                }
+
+                group->GetParent()->RemoveChild( group );
+
+                currentVectorLayer->GetScene()->ClearSelection();
+                currentVectorLayer->GetScene()->UpdateMatrix();
+                currentVectorLayer->GetScene()->Update( 0 );
+                currentVectorLayer->RenderImageChanged( false );
+            }
         }
     }
 }

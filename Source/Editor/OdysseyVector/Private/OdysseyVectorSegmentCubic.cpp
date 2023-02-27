@@ -441,11 +441,17 @@ uint32
 UOdysseyVectorSegmentCubic::Intersect( UOdysseyVectorSegmentCubic& iOther
                                      , std::vector<UOdysseyVectorVertexIntersection*>& iIntersectionVertexArray )
 {
-    /*::ULIS::FVec2D point0 = { mPoint[0]->GetX(), mPoint[0]->GetY() };
-    ::ULIS::FVec2D point1 = { mPoint[1]->GetX(), mPoint[1]->GetY() };
-    ::ULIS::FVec2D ctrlPoint0 = { mCtrlPoint[0]->GetX(), mCtrlPoint[0]->GetY() };
+    ::ULIS::FVec2D& point0 = mPoint[0]->GetCoords();
+    ::ULIS::FVec2D& point1 = mPoint[1]->GetCoords();
+    /*::ULIS::FVec2D ctrlPoint0 = { mCtrlPoint[0]->GetX(), mCtrlPoint[0]->GetY() };
     ::ULIS::FVec2D ctrlPoint1 = { mCtrlPoint[1]->GetX(), mCtrlPoint[1]->GetY() };*/
     uint32 intersectionCount = 0;
+/*
+    double shortestP0Distance = DBL_MAX;
+    int shortP0SegmentIndex = -1;
+    double shortestP1Distance = DBL_MAX;
+    int shortP1SegmentIndex = -1;
+*/
 
     for ( int i = 0; i < mPolygonCache.size(); i++ )
     {
@@ -496,10 +502,55 @@ UOdysseyVectorSegmentCubic::Intersect( UOdysseyVectorSegmentCubic& iOther
                             intersectionCount++;
                         }
                     }
+/*
+                    else
+                    {
+                        if( i == 0 )
+                        {
+                            double distance;
+
+                            if( DistanceToSegment( point0
+                                                 , interPoly->lineVertex[0]
+                                                 , interPoly->lineVertex[1]
+                                                 , distance ) )
+                            {
+                                if( distance < shortestP0Distance )
+                                {
+                                    shortestP0Distance = distance;
+                                    shortP0SegmentIndex = j;
+                                }
+                            }
+                        }
+
+                        if( i == ( mPolygonCache.size() - 1 ) )
+                        {
+                            double distance;
+
+                            if( DistanceToSegment( point1
+                                                 , interPoly->lineVertex[0]
+                                                 , interPoly->lineVertex[1]
+                                                 , distance ) )
+                            {
+                                if( distance < shortestP1Distance )
+                                {
+                                    shortestP1Distance = distance;
+                                    shortP1SegmentIndex = j;
+                                }
+                            }
+                        }
+                    }
+*/
                 }
             }
         }
     }
+
+/*
+    if( shortestP0Distance < 3.0f )
+    {
+
+    }
+*/
 
     return intersectionCount;
 }

@@ -74,6 +74,7 @@ protected:
     virtual void Discord();
     virtual void SwitchTabletAPI();
     virtual void GroupPaint();
+    virtual void Ungroup();
     virtual void RemoveSelectedObjects();
 
 private:

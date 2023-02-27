@@ -152,4 +152,5 @@ class ODYSSEYVECTOR_API UOdysseyVectorObject : public UObject
         bool HasSelectedParent();
         FColor GetForegroundColor();
         FColor GetBackgroundColor();
+        virtual void SwitchSpace( UOdysseyVectorObject& iNewSpace ){};
 };

@@ -69,7 +69,6 @@ class ODYSSEYVECTOR_API UOdysseyVectorPath : public UOdysseyVectorObject
         UOdysseyVectorLoop* GetLoopByID( uint64 iID );
         void AddLoop( UOdysseyVectorLoop* iLoop );
         void RemoveLoop( UOdysseyVectorLoop* iLoop );*/
-        virtual void SwitchSpace( UOdysseyVectorObject& iNewSpace ){};
         void InvalidateSegment( UOdysseyVectorSegment* iSegment );
         /*void InvalidateLoop( UOdysseyVectorLoop* iLoop );*/
         void UpdateBBox();
