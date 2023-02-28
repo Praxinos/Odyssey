@@ -5,6 +5,7 @@
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "OdysseyStyleSet.h"
 #include "LayerStack/OdysseyAnimationLayerImageRaster.h"
+#include "Widgets/LayerStack/LayerImageRaster/SOdysseyAnimationLayerImageRasterTimeline.h"
 
 #define LOCTEXT_NAMESPACE "SOdysseyAnimationLayerImageRasterRow"
 
@@ -83,6 +84,31 @@ SOdysseyAnimationLayerImageRasterRow::GenerateHeaderWidget()
         ];
 }
 
+TSharedRef<SWidget>
+SOdysseyAnimationLayerImageRasterRow::GenerateOptionsWidget()
+{
+	return SNew(SHorizontalBox)
+        +SHorizontalBox::Slot()
+        .VAlign(VAlign_Center)
+        [
+            SNew(STextBlock)
+            .Text(LOCTEXT("OdysseyLayerImageRasterBlendingMode", "Blending Mode"))
+        ]
+        +SHorizontalBox::Slot()
+        .VAlign(VAlign_Center)
+        [
+            SNew(SEnumComboBox, StaticEnum<EOdysseyBlendingMode>())
+            .CurrentValue_Lambda([this](){ return (int32)mAnimationLayerImageRaster->BlendMode;})
+            .OnEnumSelectionChanged(this, &SOdysseyAnimationLayerImageRasterRow::OnBlendModeComboBoxChanged)
+        ];
+}
+
+TSharedRef<SWidget>
+SOdysseyAnimationLayerImageRasterRow::GenerateTimelineWidget()
+{
+    return SNew(SOdysseyAnimationLayerImageRasterTimeline, mAnimationLayerImageRaster);
+}
+
 void
 SOdysseyAnimationLayerImageRasterRow::OnIsAlphaLockedCheckStateChanged(ECheckBoxState iState)
 {
@@ -121,25 +147,6 @@ ECheckBoxState
 SOdysseyAnimationLayerImageRasterRow::GetIsAlphaLockedIsChecked() const
 {
 	return mAnimationLayerImageRaster->IsAlphaLocked ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
-}
-
-TSharedRef<SWidget>
-SOdysseyAnimationLayerImageRasterRow::GenerateOptionsWidget()
-{
-	return SNew(SHorizontalBox)
-        +SHorizontalBox::Slot()
-        .VAlign(VAlign_Center)
-        [
-            SNew(STextBlock)
-            .Text(LOCTEXT("OdysseyLayerImageRasterBlendingMode", "Blending Mode"))
-        ]
-        +SHorizontalBox::Slot()
-        .VAlign(VAlign_Center)
-        [
-            SNew(SEnumComboBox, StaticEnum<EOdysseyBlendingMode>())
-            .CurrentValue_Lambda([this](){ return (int32)mAnimationLayerImageRaster->BlendMode;})
-            .OnEnumSelectionChanged(this, &SOdysseyAnimationLayerImageRasterRow::OnBlendModeComboBoxChanged)
-        ];
 }
 
 void

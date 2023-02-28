@@ -4,13 +4,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Widgets/SOdysseyLayerRow.h"
+#include "Widgets/LayerStack/SOdysseyAnimationLayerRow.h"
 
 /**
  * Implements a layer row widget
  */
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerImageRasterRow
-    : public SOdysseyLayerRow
+    : public SOdysseyAnimationLayerRow
 {
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationLayerImageRasterRow)
@@ -20,10 +20,11 @@ public:
 public:
     // Construction / Destruction
     void Construct(const FArguments& iArgs, const TSharedRef<SOdysseyLayerStackTreeView>& iOwnerTableView, class UOdysseyAnimationLayerImageRaster* iAnimationLayerImageRaster);
-    
+
 private:
     virtual TSharedRef<SWidget> GenerateHeaderWidget() override;
     virtual TSharedRef<SWidget> GenerateOptionsWidget() override;
+    virtual TSharedRef<SWidget> GenerateTimelineWidget() override;
     void OnIsAlphaLockedCheckStateChanged(ECheckBoxState iState);
     ECheckBoxState GetIsAlphaLockedIsChecked() const;
 

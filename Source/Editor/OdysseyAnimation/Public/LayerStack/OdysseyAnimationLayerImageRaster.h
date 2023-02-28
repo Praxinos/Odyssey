@@ -56,6 +56,8 @@ public:
     // Public API
     TSharedPtr<FOdysseyRasterBlock> GetRasterBlock(int iFrame) const;
 
+    const TArray<TSharedPtr<FOdysseyRasterBlock>>& GetRasterBlocks() const;
+
     UFUNCTION(BlueprintCallable, Category="Animation | LayerStack")
     void AddFrame(/* uint32 iLength */);
 

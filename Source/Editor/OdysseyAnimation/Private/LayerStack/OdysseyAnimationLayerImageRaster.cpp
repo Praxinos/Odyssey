@@ -63,6 +63,12 @@ UOdysseyAnimationLayerImageRaster::GetRasterBlock(int iFrame) const
 	return mRasterBlocks[iFrame];
 }
 
+const TArray<TSharedPtr<FOdysseyRasterBlock>>&
+UOdysseyAnimationLayerImageRaster::GetRasterBlocks() const
+{
+    return mRasterBlocks;
+}
+
 void
 UOdysseyAnimationLayerImageRaster::AddFrame(/* uint32 iLength */)
 {

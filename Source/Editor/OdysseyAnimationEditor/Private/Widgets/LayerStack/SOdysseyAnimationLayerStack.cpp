@@ -51,8 +51,24 @@ SOdysseyAnimationLayerStack::RebuildWidgets()
             + SVerticalBox::Slot()
             .AutoHeight()
             [
-                SNew(SOdysseyLayerStackAddLayerButton)
-                .LayerStack(layerstack)
+                SNew(SHorizontalBox)
+                + SHorizontalBox::Slot()
+                .AutoWidth()
+                [
+                    SNew(SOdysseyLayerStackAddLayerButton)
+                    .LayerStack(layerstack)
+                ]
+                //DEBUG:
+                + SHorizontalBox::Slot()
+                .AutoWidth()
+                [
+                    SNew(SButton)
+                    .ButtonStyle(FEditorStyle::Get(), "FlatButton.Success")
+                    .HAlign( HAlign_Center )
+                    .Text( LOCTEXT( "create-asset", "Add Frame" ) )
+                    .OnClicked( this, &SOdysseyAnimationLayerStack::OnAddFrameClicked )
+                ]
+                //DEBUG:
             ]
             + SVerticalBox::Slot()
             .FillHeight(1.0)
@@ -60,6 +76,17 @@ SOdysseyAnimationLayerStack::RebuildWidgets()
                 SAssignNew(mTreeView, SOdysseyLayerStackTreeView)
                 .LayerStack(layerstack)
                 .OnGenerateRow(this, &SOdysseyAnimationLayerStack::OnGenerateRow)
+                .AdditionalColumns(
+                    {
+                        SHeaderRow::Column("Timeline")
+                        .DefaultLabel(LOCTEXT("", ""))
+                        .VAlignCell(VAlign_Top)
+                        [
+                            SNullWidget::NullWidget
+                            //TODO: Add Timeline Header Widget
+                        ]
+                    }
+                )
             ];
     }
     else
@@ -74,6 +101,21 @@ SOdysseyAnimationLayerStack::RebuildWidgets()
 
     this->ChildSlot.AttachWidget(widget.ToSharedRef());
 }
+
+//DEBUG:
+FReply
+SOdysseyAnimationLayerStack::OnAddFrameClicked()
+{
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(mLayerStack.Get());
+    if (!layerStack)
+        return FReply::Unhandled();
+    
+    UOdysseyAnimationLayerImageRaster* layerRaster = Cast<UOdysseyAnimationLayerImageRaster>(layerStack->CurrentLayer.Get());
+    layerRaster->AddFrame();
+
+    return FReply::Handled();
+}
+//DEBUG:
 
 TSharedRef<ITableRow>
 SOdysseyAnimationLayerStack::OnGenerateRow(UOdysseyLayer* iLayer, const TSharedRef<STableViewBase>& iOwnerTable)

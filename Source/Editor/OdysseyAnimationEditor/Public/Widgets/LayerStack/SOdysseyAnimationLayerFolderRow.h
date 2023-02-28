@@ -4,13 +4,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Widgets/SOdysseyLayerRow.h"
+#include "Widgets/LayerStack/SOdysseyAnimationLayerRow.h"
 
 /**
  * Implements a layer row widget
  */
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerFolderRow
-    : public SOdysseyLayerRow
+    : public SOdysseyAnimationLayerRow
 {
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationLayerFolderRow)

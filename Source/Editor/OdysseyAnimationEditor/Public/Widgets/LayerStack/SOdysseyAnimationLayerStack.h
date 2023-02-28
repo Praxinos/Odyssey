@@ -30,6 +30,7 @@ public:
 private:
     TSharedRef<ITableRow> OnGenerateRow(UOdysseyLayer* iLayer, const TSharedRef<STableViewBase>& iOwnerTable);
     void RebuildWidgets();
+    FReply OnAddFrameClicked();
 
 private:
     TSlateAttribute<UOdysseyLayerStack*> mLayerStack;
