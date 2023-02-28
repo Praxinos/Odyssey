@@ -85,7 +85,7 @@ FOdysseyAnimationMediaSamples::SanitizeTimeRange(TRange<FMediaTimeStamp>* oTimeR
 		isLowerOutOfBound = false;
 	}
 	
-	bool isUpperOutOfBound = timeRange.HasUpperBound() && timeRange.GetUpperBoundValue().Time >= mAnimation->GetDuration();
+	bool isUpperOutOfBound = timeRange.HasUpperBound() && timeRange.GetUpperBoundValue().Time > mAnimation->GetDuration();
 	if (isUpperOutOfBound && controls->IsLooping())
 	{
 		FMediaTimeStamp timestamp = timeRange.GetUpperBoundValue();
@@ -113,10 +113,9 @@ FOdysseyAnimationMediaSamples::SanitizeTimeRange(TRange<FMediaTimeStamp>* oTimeR
 IMediaSamples::EFetchBestSampleResult
 FOdysseyAnimationMediaSamples::FetchBestVideoSampleForTimeRange(const TRange<FMediaTimeStamp>& iTimeRange, TSharedPtr<IMediaTextureSample, ESPMode::ThreadSafe>& OutSample, bool bReverse)
 {
-	/*
-	 *	iTimeRange is always goes forward, never backward
-	 *  which means LowerBoundValue is always <= UpperBoundValue
-	 */
+	
+	//	iTimeRange is always goes forward, never backward
+	//  which means LowerBoundValue is always <= UpperBoundValue
 
 	TSharedPtr<FOdysseyAnimationMediaPlayer> player = mPlayer.Pin();
 	if ( !player )
@@ -131,7 +130,7 @@ FOdysseyAnimationMediaSamples::FetchBestVideoSampleForTimeRange(const TRange<FMe
 
 	//Sanitize the timeRange, to ensure looping and clamp it to animation duration
 	//also detects if we reached the end of the animation
-	TRange<FMediaTimeStamp> timeRange = iTimeRange;
+	TRange<FMediaTimeStamp> timeRange = controls->GetState() == EMediaState::Paused ? TRange<FMediaTimeStamp>(iTimeRange.GetLowerBoundValue(), iTimeRange.GetLowerBoundValue()) : iTimeRange;
 	bool isAtEnd = SanitizeTimeRange(&timeRange);
 
 	//Once time range is sanitized

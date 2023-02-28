@@ -67,7 +67,8 @@ FOdysseyAnimationEditorLayerStackTab::CreateWidget()
             .FillHeight(1.0)
             [
                 SNew(SOdysseyAnimationLayerStack)
-                .LayerStack(LayerStack())
+                .Animation(Animation())
+                .MediaPlayer(MediaPlayer())
             ];
 }
 

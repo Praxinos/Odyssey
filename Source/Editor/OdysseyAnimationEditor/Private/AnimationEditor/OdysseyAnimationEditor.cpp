@@ -231,7 +231,7 @@ FOdysseyAnimationEditor::OnCurrentFrameChanged(UOdysseyAnimation* iAnimation)
 	mLayerStackPreloadHandle = mAnimation->Preload(mAnimation->CurrentFrame);
 
 	//Display the new current frame
-	FTimespan time = FTimespan::FromSeconds(mAnimation->CurrentFrame / mAnimation->GetFramesPerSecond());
+	FTimespan time = FTimespan::FromSeconds((mAnimation->CurrentFrame+0.5f) / mAnimation->GetFramesPerSecond());
 	mMediaPlayer->Seek(time);
 	mMediaPlayer->Pause();
 

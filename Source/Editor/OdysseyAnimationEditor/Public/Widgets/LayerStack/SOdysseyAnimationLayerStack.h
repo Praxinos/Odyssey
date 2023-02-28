@@ -8,13 +8,17 @@
 /**
  * Implements the Animation Layer stack widget
  */
+
+class UOdysseyAnimation;
+class UMediaPlayer;
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerStack
     : public SCompoundWidget
 {
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationLayerStack)
         {}
-        SLATE_ARGUMENT( UOdysseyLayerStack*, LayerStack )
+        SLATE_ARGUMENT( UOdysseyAnimation*, Animation )
+        SLATE_ARGUMENT( UMediaPlayer*, MediaPlayer )
     SLATE_END_ARGS()
 
 public:
@@ -28,6 +32,13 @@ private:
     TSharedRef<ITableRow> OnGenerateRow(UOdysseyLayer* iLayer, const TSharedRef<STableViewBase>& iOwnerTable);
 
 private:
-    UOdysseyLayerStack* mLayerStack;
+    float GetZoom() const;
+    float GetOffset() const;
+
+private:
+    UOdysseyAnimation* mAnimation;
+    UMediaPlayer* mMediaPlayer;
     TSharedPtr<SOdysseyLayerStackTreeView> mTreeView;
+    float mZoom;
+    float mOffset;
 };

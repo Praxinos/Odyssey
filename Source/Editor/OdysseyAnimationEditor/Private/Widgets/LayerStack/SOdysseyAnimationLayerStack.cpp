@@ -2,7 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Widgets/LayerStack/SOdysseyAnimationLayerStack.h"
-
+#include "Widgets/LayerStack/SOdysseyAnimationTimelineHeader.h"
 
 #define LOCTEXT_NAMESPACE "SOdysseyAnimationLayerStack"
 
@@ -12,6 +12,11 @@ SOdysseyAnimationLayerStack::~SOdysseyAnimationLayerStack()
 }
 
 SOdysseyAnimationLayerStack::SOdysseyAnimationLayerStack()
+    : mAnimation(nullptr)
+    , mMediaPlayer(nullptr)
+    , mTreeView()
+    , mZoom(1.0f)
+    , mOffset(0.0f)
 {
 }
 
@@ -19,21 +24,27 @@ SOdysseyAnimationLayerStack::SOdysseyAnimationLayerStack()
 void
 SOdysseyAnimationLayerStack::Construct(const FArguments& InArgs)
 {
-    mLayerStack = InArgs._LayerStack;
+    mAnimation = InArgs._Animation;
+    mMediaPlayer = InArgs._MediaPlayer;
     ChildSlot
     [
         SAssignNew(mTreeView, SOdysseyLayerStackTreeView)
-        .LayerStack(mLayerStack)
+        .LayerStack(mAnimation->GetLayerStack())
         .OnGenerateRow(this, &SOdysseyAnimationLayerStack::OnGenerateRow)
         .HeaderManualWidth(200.f)
         .AdditionalColumns(
             {
                 SHeaderRow::Column("Timeline")
                 .DefaultLabel(LOCTEXT("", ""))
-                .VAlignCell(VAlign_Top)
+                .VAlignCell(VAlign_Fill)
+                .HAlignCell(HAlign_Fill)
                 [
-                    SNullWidget::NullWidget
-                    //TODO: Add Timeline Header Widget
+                    SNew(SOdysseyAnimationTimelineHeader)
+                    .Animation(mAnimation)
+                    .MediaPlayer(mMediaPlayer)
+                    .FrameWidth(50.f)
+                    .Zoom(this, &SOdysseyAnimationLayerStack::GetZoom)
+                    .Offset(this, &SOdysseyAnimationLayerStack::GetOffset)
                 ]
             }
         )
@@ -56,6 +67,18 @@ SOdysseyAnimationLayerStack::OnGenerateRow(UOdysseyLayer* iLayer, const TSharedR
     }
 
     return SNew(SOdysseyLayerRow, mTreeView.ToSharedRef(), Cast<UOdysseyLayer>(iLayer)); //Default widget
+}
+
+float
+SOdysseyAnimationLayerStack::GetZoom() const
+{
+    return mZoom;
+}
+
+float
+SOdysseyAnimationLayerStack::GetOffset() const
+{
+    return mOffset;
 }
 
 #undef LOCTEXT_NAMESPACE
