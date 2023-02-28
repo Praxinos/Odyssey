@@ -43,6 +43,13 @@ public:
     UOdysseyAnimation* GetAnimation();
     virtual TRange<int> GetFrameRange() const;
 
+    /**
+     * @brief Returns a string identifying the frame composition (which layers)
+     * 
+     * @return FString 
+     */
+    virtual FString GetFrameId(int iFrameIndex) const;
+
 public:
     //Frame Range System
     /*

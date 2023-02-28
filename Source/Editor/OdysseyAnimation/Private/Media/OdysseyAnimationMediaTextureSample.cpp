@@ -34,7 +34,7 @@ FOdysseyAnimationMediaTextureSample::Update(int iFrameIndex, uint32 iSequenceInd
 
     TRange<FTimespan> timeRange = mAnimation->GetFrameTimeRange(iFrameIndex);
     mTime = FMediaTimeStamp(timeRange.GetLowerBoundValue(), iSequenceIndex);
-    mDuration = timeRange.GetUpperBoundValue() - timeRange.GetLowerBoundValue();
+    mDuration = timeRange.Size<FTimespan>();
 
     if ( mFrameIndex < 0 )
         return;

@@ -43,6 +43,12 @@ UOdysseyAnimationLayerStack::GetFrameRange() const
     return Cast<UOdysseyAnimationLayerRoot>(LayerRoot)->GetFrameRange();
 }
 
+FString
+UOdysseyAnimationLayerStack::GetFrameId(int iFrameIndex) const
+{
+    return Cast<UOdysseyAnimationLayerRoot>(LayerRoot)->GetFrameId(iFrameIndex);
+}
+
 TArray<::ULIS::FEvent>
 UOdysseyAnimationLayerStack::RenderImage(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ioBlock, int iFrame, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList)
 {

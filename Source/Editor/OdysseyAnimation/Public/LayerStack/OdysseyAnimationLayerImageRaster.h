@@ -57,6 +57,7 @@ public:
 public:
     //UOdysseyAnimationLayer overrides
     virtual TRange<int> GetFrameRange() const override;
+    virtual FString GetFrameId(int iFrameIndex) const override;
 
 public:
     // Public API

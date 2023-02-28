@@ -145,8 +145,8 @@ FOdysseyAnimationMediaSamples::FetchBestVideoSampleForTimeRange(const TRange<FMe
 	//Find which frame overlaps the timerange the most
 	FTimespan startTime = timeRange.GetLowerBoundValue().Time;
 	FTimespan endTime = timeRange.GetUpperBoundValue().Time;
-	int startFrameIndex = mAnimation->GetFrameIndexAtTime(startTime);
-	int endFrameIndex = mAnimation->GetFrameIndexAtTime(endTime);
+	int startFrameIndex = FMath::Clamp(mAnimation->GetFrameIndexAtTime(startTime), 0, mAnimation->GetFrameCount());
+	int endFrameIndex = FMath::Clamp(mAnimation->GetFrameIndexAtTime(endTime), 0, mAnimation->GetFrameCount());
 	uint32 startSequenceIndex = timeRange.GetLowerBoundValue().SequenceIndex;
 	uint32 endSequenceIndex = timeRange.GetUpperBoundValue().SequenceIndex;
 

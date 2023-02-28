@@ -14,7 +14,9 @@
 #include "OdysseyAnimation.generated.h"
 
 UCLASS(config=EditorPerProjectUserSettings, PerObjectConfig)
-class ODYSSEYANIMATION_API UOdysseyAnimation : public UBaseMediaSource
+class ODYSSEYANIMATION_API UOdysseyAnimation
+	: public UBaseMediaSource
+	, public FTickableEditorObject //Allows us to react to Tick events
 {
 	GENERATED_BODY()
 
@@ -93,9 +95,19 @@ public:
     virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;
 	virtual void PostInitProperties() override;
 
+protected:
+	// FTickableEditorObject implementation
+	virtual void Tick(float DeltaTime) override;
+	virtual TStatId GetStatId() const override { RETURN_QUICK_DECLARE_CYCLE_STAT(UOdysseyAnimation, STATGROUP_Tickables); }
+
+private:
+	void UpdateFrameBlocks();
+	void GenerateFrameBlock(const FString& iId);
+
 private:
 	//Events
 	void OnLayerStackRenderImageChanged(UOdysseyAnimationLayerStack* iLayerStack, const TRange<int>& iRange, const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive);
+	
 
 protected:
     //Property changed methods
@@ -126,5 +138,16 @@ private:
 	UPROPERTY(meta=(LoadBehavior = "LazyOnDemand"))
 	TObjectPtr<UOdysseyAnimationLayerStack> mLayerStack;
 
-	//TArray<TSharedPtr<FOdysseyRasterBlock>> mRasterBlocks;
+	UPROPERTY()
+	TArray<FString> mFrameIds;
+
+	struct FFrameBlock
+	{
+		TSharedPtr<FOdysseyRasterBlock> mRasterBlock;
+		TArray<::ULIS::FRectI> mInvalidRects;
+		TArray<int> mFrameIndexes;
+	};
+
+	//Not UPROPERTY because of FOdysseyRasterBlock needing an owner on load (causes crash)
+	TMap<FString, FFrameBlock> mFrameBlocks;
 };

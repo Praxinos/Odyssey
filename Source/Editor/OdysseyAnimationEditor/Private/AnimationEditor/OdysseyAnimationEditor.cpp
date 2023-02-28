@@ -58,7 +58,7 @@ FOdysseyAnimationEditor::InitData(UObject* iEditedObject)
 	mMediaTexture->UpdateResource();
 
 	//Seek at current frame 
-	FTimespan time = FTimespan::FromSeconds(mAnimation->CurrentFrame / mAnimation->GetFramesPerSecond());
+	FTimespan time = FTimespan::FromSeconds((mAnimation->CurrentFrame+0.5f) / mAnimation->GetFramesPerSecond());
     mMediaPlayer->Seek(time);
 
 	//Set Media player and Animation callbacks
@@ -210,7 +210,7 @@ FOdysseyAnimationEditor::OnMediaEvent(EMediaEvent iEvent)
 				return;
 
 			//ensure to display the currentframe once, the playback has stopped
-			FTimespan time = FTimespan::FromSeconds(mAnimation->CurrentFrame / mAnimation->GetFramesPerSecond());	
+			FTimespan time = FTimespan::FromSeconds((mAnimation->CurrentFrame+0.5f) / mAnimation->GetFramesPerSecond());
 			mMediaPlayer->Seek(time);
 			mMediaPlayer->Pause();
 		}

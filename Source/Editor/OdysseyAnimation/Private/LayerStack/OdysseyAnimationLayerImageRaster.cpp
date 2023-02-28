@@ -58,7 +58,16 @@ UOdysseyAnimationLayerImageRaster::OnCreated_Implementation()
 TRange<int>
 UOdysseyAnimationLayerImageRaster::GetFrameRange() const
 {
-    return TRange<int>(0, mRasterBlocks.Num() - 1);
+    return TRange<int>::Inclusive(0, mRasterBlocks.Num() - 1);
+}
+
+FString
+UOdysseyAnimationLayerImageRaster::GetFrameId(int iFrameIndex) const
+{
+    if (iFrameIndex < 0 || iFrameIndex >= mRasterBlocks.Num())
+        return "";
+
+	return mRasterBlocks[iFrameIndex]->GetId().ToString();
 }
 
 TSharedPtr<FOdysseyRasterBlock>
@@ -96,6 +105,7 @@ UOdysseyAnimationLayerImageRaster::AddFrame(/* uint32 iLength */)
 
     mRasterBlocks.Add(rasterBlock);
     OnCellsChanged().Broadcast(this);
+    RenderImageChanged(TRange<int>::Inclusive(mRasterBlocks.Num() - 1, mRasterBlocks.Num() - 1), false);
 }
 
 void
@@ -118,6 +128,7 @@ UOdysseyAnimationLayerImageRaster::InsertFrame(int iIndex /*, uint32 iLength */)
 
     mRasterBlocks.Insert(rasterBlock, iIndex);
     OnCellsChanged().Broadcast(this);
+    RenderImageChanged(TRange<int>::Inclusive(iIndex, iIndex), false);
 }
 
 void
@@ -127,7 +138,7 @@ UOdysseyAnimationLayerImageRaster::OnBlockChanged(const TArray<::ULIS::FRectI>& 
     if (frameIndex == INDEX_NONE)
         return;
 
-    RenderImageChanged(TRange<int>(frameIndex), iRects, iIsInteractive);
+    RenderImageChanged(TRange<int>::Inclusive(frameIndex, frameIndex), iRects, iIsInteractive);
 }
 
 void
@@ -137,7 +148,7 @@ UOdysseyAnimationLayerImageRaster::OnBlockPtrChanged(TSharedPtr<FOdysseyRasterBl
     if (frameIndex == INDEX_NONE)
         return;
 
-    RenderImageChanged(TRange<int>(frameIndex), false);
+    RenderImageChanged(TRange<int>::Inclusive(frameIndex, frameIndex), false);
 }
 
 TArray<::ULIS::FEvent>
@@ -154,7 +165,7 @@ UOdysseyAnimationLayerImageRaster::RenderImage(TSharedPtr<::ULIS::FBlock, ESPMod
 
     TSharedPtr<FOdysseyRasterBlock> rasterBlock = mRasterBlocks[iFrame];
 
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ULISRasterBlock = rasterBlock->IsBeingEdited() ? rasterBlock->GetEditableBlock() : rasterBlock->GetBlock();
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ULISRasterBlock = rasterBlock->IsBeingEdited() ? rasterBlock->GetUndoableBlock() : rasterBlock->GetBlock();
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(ULISRasterBlock->Format());
 
     TArray<::ULIS::FEvent> eventConvertAndExecute = ULISUtils::ConvertAndExecute(ioBlock, ULISRasterBlock->Format(), iRect, iPos, iWaitList,

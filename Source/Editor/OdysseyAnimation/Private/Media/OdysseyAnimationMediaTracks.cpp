@@ -199,7 +199,7 @@ FOdysseyAnimationMediaTracks::GetVideoTrackFormat(int32 TrackIndex, int32 Format
 
 	OutFormat.Dim = FIntPoint(animation->Width(), animation->Height());
 	OutFormat.FrameRate = animation->GetFramesPerSecond();
-	OutFormat.FrameRates = TRange<float>(OutFormat.FrameRate);
+	OutFormat.FrameRates = TRange<float>::Inclusive(OutFormat.FrameRate, OutFormat.FrameRate);
 	OutFormat.TypeName = TEXT("Animation");
 
 	return true;

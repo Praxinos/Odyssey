@@ -110,6 +110,23 @@ UOdysseyAnimationLayer::GetFrameRange() const
     return TRange<int>::Hull(ranges);
 }
 
+FString
+UOdysseyAnimationLayer::GetFrameId(int iFrameIndex) const
+{
+    FString id = "";
+    const TArray<UOdysseyLayer*> layers = Children;
+    for (UOdysseyLayer* layer : layers)
+    {
+        UOdysseyAnimationLayer* animationLayer = Cast<UOdysseyAnimationLayer>(layer);
+        if (!animationLayer)
+            continue;
+
+        id += animationLayer->GetFrameId(iFrameIndex);
+    }
+
+    return id;
+}
+
 UOdysseyAnimationLayer::FOnRenderImageChanged&
 UOdysseyAnimationLayer::OnRenderImageChanged()
 {
