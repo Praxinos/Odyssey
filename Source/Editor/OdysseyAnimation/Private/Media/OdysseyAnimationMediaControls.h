@@ -38,6 +38,7 @@ public:
 
 public:
 	void SetState(EMediaState iState);
+	void SetTime(FTimespan iTime);
 
 private:
 	UOdysseyAnimation* mAnimation; //held by the player

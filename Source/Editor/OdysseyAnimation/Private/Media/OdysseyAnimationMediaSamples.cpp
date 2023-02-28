@@ -126,7 +126,7 @@ FOdysseyAnimationMediaSamples::FetchBestVideoSampleForTimeRange(const TRange<FMe
 	if (!controls)
 		return EFetchBestSampleResult::NoSample;
 
-	if (controls->GetState() == EMediaState::Stopped)
+	if ( controls->GetState() == EMediaState::Stopped )
 		return EFetchBestSampleResult::NoSample;
 
 	//Sanitize the timeRange, to ensure looping and clamp it to animation duration
@@ -190,6 +190,7 @@ FOdysseyAnimationMediaSamples::FetchBestVideoSampleForTimeRange(const TRange<FMe
 	//OutSample = MakeShared<FOdysseyAnimationMediaTextureSample>(mAnimation, frameIndex, resultingSequenceIndex);
 	mSample->Update(frameIndex, resultingSequenceIndex);
 	OutSample = mSample;
+	controls->SetTime(mAnimation->GetFrameTimeRange(frameIndex).GetLowerBoundValue());
 
 	//It can sound weird, but this is also the place where we detect that the play needs to stop
 	if (isAtEnd)
@@ -198,9 +199,9 @@ FOdysseyAnimationMediaSamples::FetchBestVideoSampleForTimeRange(const TRange<FMe
 		//TODO:This should not happen here ? Check this, it is so weird !
 		//ES: I checked, I have no other place to do this...
 		//So in the future, translate all this system in our own system with tracks, animated textures, players and everything
-		controls->Pause();
-		player->GetEventSink().ReceiveMediaEvent(EMediaEvent::PlaybackSuspended);
 		player->GetEventSink().ReceiveMediaEvent(EMediaEvent::PlaybackEndReached);
+		controls->Pause();
+		controls->SetState(EMediaState::Stopped);
 	}
 			
 	return EFetchBestSampleResult::Ok;

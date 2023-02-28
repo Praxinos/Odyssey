@@ -118,6 +118,12 @@ FOdysseyAnimationMediaControls::SetLooping(bool iLooping)
 	return true;
 }
 
+void
+FOdysseyAnimationMediaControls::SetTime(FTimespan iTime)
+{
+	mTime = iTime;
+}
+
 bool
 FOdysseyAnimationMediaControls::SetRate(float iRate)
 {
@@ -128,12 +134,12 @@ FOdysseyAnimationMediaControls::SetRate(float iRate)
 	if (GetDuration() == FTimespan::Zero())
 		return false; // nothing to play
 
-	if (mRate == 0.0f) // handle restarting
+	if (mRate == 0.0f  && iRate != 0.0f) // handle restarting
 	{
 		mState = EMediaState::Playing;
 		player->GetEventSink().ReceiveMediaEvent(EMediaEvent::PlaybackResumed);
 	}
-	else if (iRate == 0.0f) // handle pausing
+	else if ( mRate != 0.0f && iRate == 0.0f) // handle pausing
 	{
 		mState = EMediaState::Paused;
 		player->GetEventSink().ReceiveMediaEvent(EMediaEvent::PlaybackSuspended);

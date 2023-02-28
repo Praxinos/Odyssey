@@ -212,6 +212,7 @@ FOdysseyAnimationEditor::OnMediaEvent(EMediaEvent iEvent)
 			//ensure to display the currentframe once, the playback has stopped
 			FTimespan time = FTimespan::FromSeconds(mAnimation->CurrentFrame / mAnimation->GetFramesPerSecond());	
 			mMediaPlayer->Seek(time);
+			mMediaPlayer->Pause();
 		}
 		break;
 
@@ -231,6 +232,7 @@ FOdysseyAnimationEditor::OnCurrentFrameChanged(UOdysseyAnimation* iAnimation)
 
 	//Display the new current frame
 	FTimespan time = FTimespan::FromSeconds(mAnimation->CurrentFrame / mAnimation->GetFramesPerSecond());	
+	mMediaPlayer->Pause();
 	mMediaPlayer->Seek(time);
 
 	//Reload the tool
