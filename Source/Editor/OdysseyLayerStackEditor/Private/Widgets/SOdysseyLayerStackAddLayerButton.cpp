@@ -22,7 +22,7 @@ void SOdysseyLayerStackAddLayerButton::Construct(const FArguments& InArgs)
 
     SComboButton::FArguments args;
     args.OnGetMenuContent(this, &SOdysseyLayerStackAddLayerButton::MakeMenu)
-        .ButtonStyle(FEditorStyle::Get(), "FlatButton.Success")
+        .ButtonStyle(FAppStyle::Get(), "FlatButton.Success")
         .ContentPadding(FMargin(0.0f, 5.0f))
         .HasDownArrow(true)
         .ButtonContent()
@@ -33,8 +33,8 @@ void SOdysseyLayerStackAddLayerButton::Construct(const FArguments& InArgs)
             .AutoWidth()
             [
                 SNew(STextBlock)
-                .TextStyle(FEditorStyle::Get(), "NormalText.Important")
-                .Font(FEditorStyle::Get().GetFontStyle("FontAwesome.10"))
+                .TextStyle(FAppStyle::Get(), "NormalText.Important")
+                .Font(FAppStyle::Get().GetFontStyle("FontAwesome.10"))
                 .Text(FEditorFontGlyphs::Plus)
             ]
 
@@ -43,7 +43,7 @@ void SOdysseyLayerStackAddLayerButton::Construct(const FArguments& InArgs)
             .Padding(4, 0, 0, 0)
             [
                 SNew(STextBlock)
-                .TextStyle(FEditorStyle::Get(), "NormalText.Important")
+                .TextStyle(FAppStyle::Get(), "NormalText.Important")
                 .Text(LOCTEXT("AddLayer", "Add Layer"))
             ]
         ];

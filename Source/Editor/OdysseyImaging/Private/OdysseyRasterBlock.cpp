@@ -82,6 +82,18 @@ FOdysseyRasterBlock::GetOwner() const
     return mOwner;
 }
 
+void
+FOdysseyRasterBlock::PostDuplicate()
+{
+    Id = FGuid::NewGuid();
+}
+
+const FGuid&
+FOdysseyRasterBlock::GetId() const
+{
+    return Id;
+}
+
 int
 FOdysseyRasterBlock::GetWidth() const
 {
@@ -147,26 +159,26 @@ FOdysseyRasterBlock::SetBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iB
         mInvalidTileMap = FULISInvalidTileMap(64, Width, Height);
     }
 
-    //If an editableBlock was set, don't consider it as the editableBlock anymore
+    //If an undoableBlock was set, don't consider it as the undoableBlock anymore
     //Let the user reload the block
-    mEditableBlock = nullptr;
+    mUndoableBlock = nullptr;
     
-     mOnBlockPtrChanged.Broadcast();
+    mOnBlockPtrChanged.Broadcast();
 }
 
 bool
 FOdysseyRasterBlock::IsBeingEdited()
 {
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> editableBlock = mEditableBlock.Pin();
-    return !!editableBlock; //returns true if editableblock is valid (don't use IsValid() as it can be wrong sometimes)
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> undoableBlock = mUndoableBlock.Pin();
+    return !!undoableBlock; //returns true if undoableblock is valid (don't use IsValid() as it can be wrong sometimes)
 }
 
 TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>
-FOdysseyRasterBlock::GetEditableBlock()
+FOdysseyRasterBlock::GetUndoableBlock()
 {
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> editableBlock = mEditableBlock.Pin();
-    if ( editableBlock )
-        return editableBlock;
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> undoableBlock = mUndoableBlock.Pin();
+    if ( undoableBlock )
+        return undoableBlock;
 
     //Create a copy of the internal block
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = GetBlock();
@@ -176,18 +188,18 @@ FOdysseyRasterBlock::GetEditableBlock()
         return nullptr;
     }
 
-    editableBlock = MakeShared<::ULIS::FBlock>(Width, Height, (::ULIS::eFormat)Format);
+    undoableBlock = MakeShared<::ULIS::FBlock>(Width, Height, (::ULIS::eFormat)Format);
 
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext((::ULIS::eFormat)Format);
-    ctx.Copy(*block, *editableBlock, ::ULIS::FRectI::Auto, ::ULIS::FVec2I(0), ::ULIS::FSchedulePolicy::AsyncCacheEfficient);
+    ctx.Copy(*block, *undoableBlock, ::ULIS::FRectI::Auto, ::ULIS::FVec2I(0), ::ULIS::FSchedulePolicy::AsyncCacheEfficient);
     ctx.Finish();
 
-    mEditableBlock = editableBlock; //Keep Weak Reference
+    mUndoableBlock = undoableBlock; //Keep Weak Reference
 
-    return editableBlock;
+    return undoableBlock;
 }
 
-const TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>
+TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>
 FOdysseyRasterBlock::GetBlock()
 {
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = mBlock.Pin();
@@ -224,14 +236,14 @@ FOdysseyRasterBlock::GetInvalidTileMap() const
 }
 
 void
-FOdysseyRasterBlock::Invalidate(const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive)
+FOdysseyRasterBlock::UpdateFromUndoableBlock(const TArray<::ULIS::FRectI>& iRects)
 {
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = GetBlock();
     if ( !block )
         return;
 
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> editableBlock = mEditableBlock.Pin();
-    if ( !editableBlock )
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> undoableBlock = mUndoableBlock.Pin();
+    if ( !undoableBlock )
         return;
     
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext((::ULIS::eFormat)Format);
@@ -255,25 +267,69 @@ FOdysseyRasterBlock::Invalidate(const TArray<::ULIS::FRectI>& iRects, bool iIsIn
     }
     ctx.Finish();
 
-    //Copy editableBlock to block
+    //Copy undoableBlock to block
     for (const ::ULIS::FRectI& rect : iRects)
     {
-        ctx.Copy(*editableBlock, *block, rect, rect.Position(), ::ULIS::FSchedulePolicy::AsyncCacheEfficient);
+        ctx.Copy(*undoableBlock, *block, rect, rect.Position(), ::ULIS::FSchedulePolicy::AsyncCacheEfficient);
     }
     ctx.Finish();
 
     //Send Interactive Update event
     if (iRects.Num() > 0)
         OnBlockChanged().Broadcast(iRects, true); //always send at least one interactive event
+}
 
-    //Non-Interactive Event
-    if (!iIsInteractive)
+void
+FOdysseyRasterBlock::CommitUndoableBlock(const TArray<::ULIS::FRectI>& iRects)
+{
+    UpdateFromUndoableBlock(iRects);
+    CommitUndoableBlock();
+}
+
+void
+FOdysseyRasterBlock::CommitUndoableBlock()
+{
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = GetBlock();
+    if ( !block )
+        return;
+
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> undoableBlock = mUndoableBlock.Pin();
+    if ( !undoableBlock )
+        return;
+
+    if (mInvalidTileMap.InvalidRects().Num() <= 0)
+        return;
+
+    OnBlockChanged().Broadcast(mInvalidTileMap.InvalidRects(), false);
+    mRasterBlockUndoBuilder.StoreUndo(AsShared());
+    mInvalidTileMap.Clear();
+    mOriginalTileBlocks.Empty();
+}
+
+void
+FOdysseyRasterBlock::ResetUndoableBlock()
+{
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> undoableBlock = mUndoableBlock.Pin();
+    if ( !undoableBlock )
+        return;
+
+    if (mOriginalTileBlocks.IsEmpty())
+        return;
+
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext((::ULIS::eFormat)Format);
+    TArray<FIntPoint> tileIndexes;
+    TArray<::ULIS::FRectI> rects;
+    mOriginalTileBlocks.GetKeys(tileIndexes);
+    for (const FIntPoint& tileIndex : tileIndexes)
     {
-        OnBlockChanged().Broadcast(mInvalidTileMap.InvalidRects(), false);
-        mRasterBlockUndoBuilder.StoreUndo(AsShared());
-        mInvalidTileMap.Clear();
-        mOriginalTileBlocks.Empty();
+        ::ULIS::FRectI rect = mInvalidTileMap.GetTileRect(tileIndex);
+        rects.Add(rect);
+        ctx.Copy(*mOriginalTileBlocks[tileIndex], *undoableBlock, mInvalidTileMap.GetTileRect(tileIndex), rect.Position(), ::ULIS::FSchedulePolicy::AsyncCacheEfficient);
     }
+    ctx.Finish();
+
+    mInvalidTileMap.Clear();
+    mOnUndoableBlockChanged.Broadcast(rects);
 }
 
 TSharedPtr<IOdysseyHandle>
@@ -294,10 +350,10 @@ FOdysseyRasterBlock::OnBlockChanged()
     return mOnBlockChanged;
 }
 
-FOdysseyRasterBlock::FOnEditableBlockChanged&
-FOdysseyRasterBlock::OnEditableBlockChanged()
+FOdysseyRasterBlock::FOnUndoableBlockChanged&
+FOdysseyRasterBlock::OnUndoableBlockChanged()
 {
-    return mOnEditableBlockChanged;
+    return mOnUndoableBlockChanged;
 }
 
 FSimpleMulticastDelegate&
@@ -387,9 +443,6 @@ FOdysseyRasterBlock::LoadBlockFromBulkData(TSharedRef<::ULIS::FBlock, ESPMode::T
 FArchive&
 operator<<(FArchive& Ar, FOdysseyRasterBlock& iRasterBlock)
 {
-    //The editorbulkdata serialization system needs an owner
-    //as in the future, the version that serializes without an owner will be removed
-    check(iRasterBlock.GetOwner() != nullptr);
     iRasterBlock.Serialize(Ar);
     return Ar;
 }
@@ -449,31 +502,4 @@ FOdysseyRasterBlock::Serialize(FArchive& Ar)
         mInvalidTileMap = FULISInvalidTileMap(64, Width, Height);
         RemoveValueFromCache(Id.ToString());
     }
-}
-
-void
-FOdysseyRasterBlock::ResetEditableBlock()
-{
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> editableBlock = mEditableBlock.Pin();
-    if ( !editableBlock )
-        return;
-
-    if (mOriginalTileBlocks.IsEmpty())
-        return;
-
-    mInvalidTileMap.Clear();
-
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext((::ULIS::eFormat)Format);
-    TArray<FIntPoint> tileIndexes;
-    TArray<::ULIS::FRectI> rects;
-    mOriginalTileBlocks.GetKeys(tileIndexes);
-    for (const FIntPoint& tileIndex : tileIndexes)
-    {
-        ::ULIS::FRectI rect = mInvalidTileMap.GetTileRect(tileIndex);
-        rects.Add(rect);
-        ctx.Copy(*mOriginalTileBlocks[tileIndex], *editableBlock, mInvalidTileMap.GetTileRect(tileIndex), rect.Position(), ::ULIS::FSchedulePolicy::AsyncCacheEfficient);
-    }
-    ctx.Finish();
-
-    mOnEditableBlockChanged.Broadcast(rects);
 }

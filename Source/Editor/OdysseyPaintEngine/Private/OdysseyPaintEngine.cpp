@@ -32,7 +32,7 @@ FOdysseyPaintEngine::RasterBlock(TSharedPtr<FOdysseyRasterBlock> iRasterBlock)
     Commit(mPreviousBlendParameters);
     if (!iRasterBlock)
     {
-        mRasterBlock->OnEditableBlockChanged().RemoveAll(this);
+        mRasterBlock->OnUndoableBlockChanged().RemoveAll(this);
         mRasterBlock->OnBlockPtrChanged().RemoveAll(this);
 
         mRasterBlock = nullptr;
@@ -46,11 +46,11 @@ FOdysseyPaintEngine::RasterBlock(TSharedPtr<FOdysseyRasterBlock> iRasterBlock)
     }
 
     mRasterBlock = iRasterBlock;
-    mRasterBlock->OnEditableBlockChanged().AddRaw(this, &::FOdysseyPaintEngine::OnEditedBlockChanged);
+    mRasterBlock->OnUndoableBlockChanged().AddRaw(this, &::FOdysseyPaintEngine::OnEditedBlockChanged);
     mRasterBlock->OnBlockPtrChanged().AddRaw(this, &::FOdysseyPaintEngine::OnBlockPtrChanged);
 
     //Realloc to match RasterBlock size and format
-    mEditedBlock = mRasterBlock->GetEditableBlock();
+    mEditedBlock = mRasterBlock->GetUndoableBlock();
     
     if ( !mPaintBlock || mPaintBlock->Size() != mEditedBlock->Size() || mPaintBlock->Format() != mEditedBlock->Format())// ||
          //!mOriginalBlock || mOriginalBlock->Size() != mEditedBlock->Size() || mOriginalBlock->Format() != mEditedBlock->Format() )
@@ -62,7 +62,6 @@ FOdysseyPaintEngine::RasterBlock(TSharedPtr<FOdysseyRasterBlock> iRasterBlock)
         //Create InvalidMaps
         int tileSize = 64; //Could be a config variable one day, or retrieved from mRasterBlock
         mInvalidMap = FULISInvalidTileMap(tileSize, mEditedBlock->Width(), mEditedBlock->Height());
-        mUpdatedMap = FULISInvalidTileMap(tileSize, mEditedBlock->Width(), mEditedBlock->Height());
     }
 
     //Clear the paintblock before anything
@@ -104,7 +103,7 @@ FOdysseyPaintEngine::Update(const FOdysseyBlendParameters& iBlendParameters)
     //If blend parameters are different from the previous one used
     //Force refreshing all edited tiles, instead of just newly edited tiles
     if ( blendParameters != mPreviousBlendParameters )
-        mInvalidMap.Invalidate(mUpdatedMap.InvalidTiles());
+        mInvalidMap.Invalidate(mRasterBlock->GetInvalidTileMap().InvalidTiles());
 
     //Update the EditedBlock content
     if (!UpdateEditedBlock(blendParameters))
@@ -120,14 +119,11 @@ FOdysseyPaintEngine::Commit(const FOdysseyBlendParameters& iBlendParameters)
     //Update the EditedBlock content
     Update(iBlendParameters);
 
-    //Refresh the Original block to match the EditedBlock
-    //CopyEditedBlockToOriginalBlock();
-
     //Clear the Paint Block
     ClearPaintBlock();
 
     //Validate all the interactive modifications that has been done
-    mRasterBlock->Invalidate({}, false);
+    mRasterBlock->CommitUndoableBlock();
 }
 
 void
@@ -139,8 +135,7 @@ FOdysseyPaintEngine::Abort()
     //Clear the Paint Block
     ClearPaintBlock();
 
-    //Restore the editedblock to its original state before edition
-    //RestoreEditedBlock();
+    mRasterBlock->ResetUndoableBlock();
 }
 
 //--------------------------------------------------------------------------------------
@@ -212,8 +207,7 @@ FOdysseyPaintEngine::UpdateEditedBlock(const FOdysseyBlendParameters& iBlendPara
     }    
     ctx.Finish();
 
-    mRasterBlock->Invalidate(invalidRects, true);
-    mUpdatedMap.Invalidate(mInvalidMap.InvalidTiles());
+    mRasterBlock->UpdateFromUndoableBlock(invalidRects);
     mInvalidMap.Clear();
     return true;
 }

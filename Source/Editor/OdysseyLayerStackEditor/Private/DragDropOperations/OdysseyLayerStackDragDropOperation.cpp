@@ -17,7 +17,7 @@ TSharedPtr<SWidget>
 FOdysseyLayerStackDragDropOperation::GetDefaultDecorator() const
 {
 	return SNew(SBorder)
-		.BorderImage(FEditorStyle::GetBrush("Graph.ConnectorFeedback.Border")) //weird, but everyone does this 
+		.BorderImage(FAppStyle::GetBrush("Graph.ConnectorFeedback.Border")) //weird, but everyone does this 
 		.Content()
 		[
 			SNew(SHorizontalBox)

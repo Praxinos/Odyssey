@@ -19,6 +19,7 @@ public:
         : mTextureLayer(iTextureLayer)
     {
         UOdysseyLayer::OnChildrenChanged().AddRaw(this, &FOdysseyTextureLayerPreloadHandle::OnChildrenChanged);
+        OnChildrenChanged(iTextureLayer);
     }
 
     void OnChildrenChanged(UOdysseyLayer* iLayer)

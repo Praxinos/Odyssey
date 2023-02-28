@@ -49,6 +49,7 @@ protected:
 	virtual TSharedRef<FTabManager::FSplitter>	CreateLeftSection();
 	virtual TSharedRef<FTabManager::FSplitter>	CreateRightSection();
 	virtual TSharedRef<FTabManager::FSplitter>	CreateMiddleSection();
+    virtual TSharedRef<FTabManager::FSplitter>	CreateBottomSection();
 
 public:
     // Getters

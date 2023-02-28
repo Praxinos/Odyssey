@@ -873,9 +873,12 @@ FOdysseyPainterEditorViewportClient::CapturedMouseMoveWithStrokePoint( const FOd
     {
         FOdysseyPoint strokePoint_in_texture = GetLocalMousePosition(iPointInViewport);
         FVector2D position_in_texture(strokePoint_in_texture.x, strokePoint_in_texture.y);
+    
+        uint32 textureFullWidth = texture->Source.IsValid() ? texture->Source.GetSizeX() : texture->GetSurfaceWidth();
+        uint32 textureFullHeight = texture->Source.IsValid() ? texture->Source.GetSizeY() : texture->GetSurfaceHeight();
 
-        if( position_in_texture.X >= 0 && position_in_texture.X < texture->Source.GetSizeX() &&
-            position_in_texture.Y >= 0 && position_in_texture.Y < texture->Source.GetSizeY())
+        if( position_in_texture.X >= 0 && position_in_texture.X < textureFullWidth &&
+            position_in_texture.Y >= 0 && position_in_texture.Y < textureFullHeight)
         {
 			mOnPickColor.ExecuteIfBound(eOdysseyEventState::kAdjust, position_in_texture);
         }

@@ -155,7 +155,7 @@ FOdysseyRasterBlockUndo::Apply( UObject* Object )
     if (!rasterBlock)
         return;
 
-    rasterBlock->ResetEditableBlock();
+    rasterBlock->ResetUndoableBlock();
     LoadUndoFromCache(mRedoId.ToString());
 }
 
@@ -168,7 +168,7 @@ FOdysseyRasterBlockUndo::Revert( UObject* Object )
     if (!rasterBlock)
         return;
 
-    rasterBlock->ResetEditableBlock(); //TODO: move to LoadUndoFromCache
+    rasterBlock->ResetUndoableBlock(); //TODO: move to LoadUndoFromCache
     LoadUndoFromCache(mUndoId.ToString());
 }
 
@@ -190,7 +190,7 @@ FOdysseyRasterBlockUndo::LoadUndoFromCache(const FString& iId)
     if ( !block )
         return;
 
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> editableBlock = rasterBlock->mEditableBlock.Pin();
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> undoableBlock = rasterBlock->mUndoableBlock.Pin();
 
     TArray<::ULIS::FRectI> rects;
 
@@ -245,12 +245,12 @@ FOdysseyRasterBlockUndo::LoadUndoFromCache(const FString& iId)
                 ctx.Copy(*blockToLoad, *block, ::ULIS::FRectI::FromXYWH(0, i * tileSize, tileSize, tileSize), ::ULIS::FVec2I(rect.x, rect.y), ::ULIS::FSchedulePolicy::AsyncCacheEfficient);
             }
 
-            if ( editableBlock )
+            if ( undoableBlock )
             {
                 for ( int i = 0; i < numTiles; i++ )
                 {
                     const ::ULIS::FRectI& rect = rects[i];
-                    ctx.Copy(*blockToLoad, *editableBlock, ::ULIS::FRectI::FromXYWH(0, i * tileSize, tileSize, tileSize), ::ULIS::FVec2I(rect.x, rect.y), ::ULIS::FSchedulePolicy::AsyncCacheEfficient);
+                    ctx.Copy(*blockToLoad, *undoableBlock, ::ULIS::FRectI::FromXYWH(0, i * tileSize, tileSize, tileSize), ::ULIS::FVec2I(rect.x, rect.y), ::ULIS::FSchedulePolicy::AsyncCacheEfficient);
                 }
             }
 
@@ -260,8 +260,8 @@ FOdysseyRasterBlockUndo::LoadUndoFromCache(const FString& iId)
     getOwner.Wait();
 
     rasterBlock->mOnBlockChanged.Broadcast(rects, false);
-    if (editableBlock)
-        rasterBlock->mOnEditableBlockChanged.Broadcast(rects);
+    if (undoableBlock)
+        rasterBlock->mOnUndoableBlockChanged.Broadcast(rects);
 }
 
 void

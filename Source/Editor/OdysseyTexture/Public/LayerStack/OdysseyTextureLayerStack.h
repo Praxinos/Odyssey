@@ -7,9 +7,9 @@
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "Misc/OdysseyHandle.h"
 
-#include "OdysseyTextureLayerStack.generated.h"
-
 #include <ULIS>
+
+#include "OdysseyTextureLayerStack.generated.h"
 
 class UOdysseyTextureLayer;
 

@@ -39,9 +39,6 @@ public:
     //Returns the PaintBlock (Stroke Block), use with caution as it is mostly used by the brush in an asynchronous way
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> PaintBlock();
 
-    //Returns the OriginalBlock
-    //TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> OriginalBlock();
-
     // Delegates
     FOnPreUpdate& OnPreUpdateDelegate() { return mOnPreUpdateDelegate; }
 
@@ -62,12 +59,6 @@ private:
 
     // Internal Methods
     void ClearPaintBlock();
-
-    // Copies EditedBlock Rects to Original Block
-    //void CopyEditedBlockToOriginalBlock();
-
-    // Restore the editedblock to its original state before edition
-    //bool RestoreEditedBlock();
 
     // Blends PaintBlock on OriginalBlock and stores the result in EditedBlock
     bool UpdateEditedBlock(const FOdysseyBlendParameters& iBlendParameters);
@@ -94,6 +85,4 @@ private:
     
     //Internal
     FULISInvalidTileMap                 mInvalidMap;
-    FULISInvalidTileMap                 mUpdatedMap;
-    //FULISInvalidTileMap              mUpdatedMap;
 };

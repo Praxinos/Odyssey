@@ -17,7 +17,7 @@
  * 
  * The internal ULIS::Block cannot be directly accessed and modified.
  * The reason is linked to undo/redo system, for which we need to be able to know what was the content before Update().
- * Use GetEditableBlock to get an editable version (copy) of the block.
+ * Use GetUndoableBlock to get an undoable version (copy) of the block.
  * 
  * Once you did all the modifications call Update().
  * 
@@ -43,7 +43,7 @@ public:
     /**
      * @brief Delegate called when the edited block pixels content changed
      */
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOnEditableBlockChanged, const TArray<::ULIS::FRectI>&)
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnUndoableBlockChanged, const TArray<::ULIS::FRectI>&)
 
 public:
     // Construction / Destruction
@@ -59,6 +59,18 @@ public:
      */
     UObject* GetOwner() const;
 
+    /**
+    * Needs to be called in owner PostDuplicate()
+    */
+    void PostDuplicate();
+
+    /**
+     * @brief Returns the block unique ID
+     * 
+     * @return const FGuid& 
+     */
+    const FGuid& GetId() const;
+    
     /**
      * @brief Get the block Width
      * 
@@ -87,27 +99,26 @@ public:
 
     /**
      * @brief Returns wether the raster block is being edited
-     * It is considered being edited if a EditableBlock is held by someone
+     * It is considered being edited if a UndoableBlock is held by someone
      * 
      * @return bool
      */
     bool IsBeingEdited();
 
     /**
-     * @brief Retrieves the internal block, only for reading
-     * Call CopyBlock() to get an editable block
+     * @brief Retrieves an undoable version of the internal block
      * 
      * @return TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> 
      */
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> GetEditableBlock();
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> GetUndoableBlock();
 
     /**
      * @brief Retrieves the internal block, only for reading
-     * Call CopyBlock() to get an editable block
+     * Call GetUndoableBlock() to get an undoable block
      * 
      * @return TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> 
      */
-    const TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> GetBlock();
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> GetBlock();
 
     /**
      * @brief Retrieves the original tile blocks containing the pixels before any call to Invalidate()
@@ -130,13 +141,28 @@ public:
      * @param iRects
      * @param iIsInteractive
      */
-    void Invalidate(const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive);
+    void UpdateFromUndoableBlock(const TArray<::ULIS::FRectI>& iRects);
 
     /**
-     * @brief Resets the editable block to its state before Invalidate()
+     * @brief Commits any changes done through UpdateFromUndoableBlock()
+     * Creating an undo and resetting the invalidmap
+     * 
+     * @param iRects 
+     */
+    void CommitUndoableBlock();
+    
+    /**
+     * @brief Calls UpdateFromUndoableBlock() followed by CommitUndoableBlock()
+     * 
+     * @param iRects 
+     */
+    void CommitUndoableBlock(const TArray<::ULIS::FRectI>& iRects);
+
+    /**
+     * @brief Resets the Undoable block to its state before Invalidate()
      * 
      */
-    void ResetEditableBlock();
+    void ResetUndoableBlock();
 
     /** 
      * @brief Preloads the block in memory, and keeps it in memory until the returned handle is destroyed
@@ -147,7 +173,7 @@ public:
     FOnBlockChanged& OnBlockChanged();
 
     //Called when the block tiles content changed
-    FOnEditableBlockChanged& OnEditableBlockChanged();
+    FOnUndoableBlockChanged& OnUndoableBlockChanged();
 
     //If the result of GetBlock() is kept in memory by someone
     //OnBlockPtrChanged will be called to inform that the block is no longer valid
@@ -187,15 +213,15 @@ private:
     UObject* mOwner;
 
     FGuid Id; //unique ID identifying the block
-    int Width;
-    int Height;
+    int Width = -1;
+    int Height = -1;
     int Format;
 
     //The stable block for which edition is finished
     TWeakPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mBlock; //Loaded on demand from cache, can be destroyed at any time if noone keeps a sharedptr on it
 
     //The unstable block which is currently being edited
-    TWeakPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mEditableBlock; //Loaded on demand from cache, can be destroyed at any time if noone keeps a sharedptr on it
+    TWeakPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mUndoableBlock; //Loaded on demand from cache, can be destroyed at any time if noone keeps a sharedptr on it
 
     TMap<FIntPoint, TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>> mOriginalTileBlocks;
 
@@ -209,8 +235,8 @@ private:
     //Called when the block tiles content changed
     FOnBlockChanged mOnBlockChanged;
 
-    //Called when the editable block pixels changed by an internal action (like undo)
-    FOnEditableBlockChanged mOnEditableBlockChanged;
+    //Called when the undoable block pixels changed by an internal action (like undo)
+    FOnUndoableBlockChanged mOnUndoableBlockChanged;
 
     //If the result of GetBlock() is kept in memory by someone
     //mOnBlockPtrChanged will be called to inform that the block is no longer valid

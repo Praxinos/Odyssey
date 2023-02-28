@@ -240,7 +240,13 @@ FOdysseyPainterEditorGUI::CreateMiddleSection()
         );
 }
 
-
+TSharedRef<FTabManager::FSplitter>
+FOdysseyPainterEditorGUI::CreateBottomSection()
+{
+    return FTabManager::NewSplitter()
+        ->SetSizeCoefficient(0.15f)
+        ->SetOrientation(Orient_Horizontal);
+}
 
 TSharedRef<FTabManager::FSplitter>
 FOdysseyPainterEditorGUI::CreateMainSection()
@@ -269,6 +275,11 @@ FOdysseyPainterEditorGUI::CreateMainSection()
             (
                 CreateRightSection()
             )
+        )
+        // Bottom Part
+        ->Split
+        (
+            CreateBottomSection()
         );
 }
 

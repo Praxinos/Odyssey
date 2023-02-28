@@ -746,8 +746,9 @@ SOdysseyViewport::GetTransformToSourceTexture()
         return FTransform2D();
 
     //Convert the position from the displayed texture size to the the position in the texture source size
-    uint32 textureFullWidth = texture->Source.GetSizeX();
-    uint32 textureFullHeight = texture->Source.GetSizeY();
+    uint32 textureFullWidth = texture->Source.IsValid() ? texture->Source.GetSizeX() : texture->GetSurfaceWidth();
+    uint32 textureFullHeight = texture->Source.IsValid() ? texture->Source.GetSizeY() : texture->GetSurfaceHeight();
+
     switch (texture->PowerOfTwoMode)
     {
     case ETexturePowerOfTwoSetting::None:

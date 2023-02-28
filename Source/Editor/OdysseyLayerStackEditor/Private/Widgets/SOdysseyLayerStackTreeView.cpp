@@ -96,7 +96,11 @@ void SOdysseyLayerStackTreeView::Construct(const FArguments& InArgs)
             ]
         + SHeaderRow::Column("Header")
             .DefaultLabel(LOCTEXT("", ""))
-            .VAlignCell(VAlign_Top);
+            .VAlignCell(VAlign_Top)
+            .FillWidth(InArgs._HeaderFillWidth)
+            .FixedWidth(InArgs._HeaderFixedWidth)
+            .ManualWidth(InArgs._HeaderManualWidth)
+            .FillSized(InArgs._HeaderFillSized);
 
     for( SHeaderRow::FColumn::FArguments columnArguments : InArgs._AdditionalColumns)
     {
