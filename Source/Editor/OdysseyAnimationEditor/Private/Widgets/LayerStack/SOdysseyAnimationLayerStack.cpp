@@ -22,10 +22,11 @@ SOdysseyAnimationLayerStack::Construct(const FArguments& InArgs)
     mLayerStack = InArgs._LayerStack;
     ChildSlot
     [
-            SAssignNew(mTreeView, SOdysseyLayerStackTreeView)
-            .LayerStack(mLayerStack)
-            .OnGenerateRow(this, &SOdysseyAnimationLayerStack::OnGenerateRow)
-            .AdditionalColumns(
+        SAssignNew(mTreeView, SOdysseyLayerStackTreeView)
+        .LayerStack(mLayerStack)
+        .OnGenerateRow(this, &SOdysseyAnimationLayerStack::OnGenerateRow)
+        .HeaderManualWidth(200.f)
+        .AdditionalColumns(
             {
                 SHeaderRow::Column("Timeline")
                 .DefaultLabel(LOCTEXT("", ""))
