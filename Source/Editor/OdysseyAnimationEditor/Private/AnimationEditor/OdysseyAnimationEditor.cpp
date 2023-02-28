@@ -231,9 +231,9 @@ FOdysseyAnimationEditor::OnCurrentFrameChanged(UOdysseyAnimation* iAnimation)
 	mLayerStackPreloadHandle = mAnimation->Preload(mAnimation->CurrentFrame);
 
 	//Display the new current frame
-	FTimespan time = FTimespan::FromSeconds(mAnimation->CurrentFrame / mAnimation->GetFramesPerSecond());	
-	mMediaPlayer->Pause();
+	FTimespan time = FTimespan::FromSeconds(mAnimation->CurrentFrame / mAnimation->GetFramesPerSecond());
 	mMediaPlayer->Seek(time);
+	mMediaPlayer->Pause();
 
 	//Reload the tool
 	//TODO: we should maybe do this in a different way, it feels a bit weird to unselect and reselect the whole tool

@@ -34,11 +34,17 @@ public:
      * 
      */
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnOpacityChanged, UOdysseyAnimationLayerImageRaster*)
+    /**
+     * @brief Delegate called when adding / removing cells
+     * 
+     */
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnCellsChanged, UOdysseyAnimationLayerImageRaster*)
 
 public:
     static FOnIsAlphaLockedChanged& OnIsAlphaLockedChanged();
     static FOnBlendModeChanged& OnBlendModeChanged();
     static FOnOpacityChanged& OnOpacityChanged();
+    static FOnCellsChanged& OnCellsChanged();
 
 public:
     ~UOdysseyAnimationLayerImageRaster();

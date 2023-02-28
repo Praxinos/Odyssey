@@ -32,6 +32,13 @@ UOdysseyAnimationLayerImageRaster::OnOpacityChanged()
     return onOpacityChanged;
 }
 
+UOdysseyAnimationLayerImageRaster::FOnCellsChanged&
+UOdysseyAnimationLayerImageRaster::OnCellsChanged()
+{
+    static FOnCellsChanged onCellsChanged;
+    return onCellsChanged;
+}
+
 UOdysseyAnimationLayerImageRaster::~UOdysseyAnimationLayerImageRaster()
 {
 }
@@ -88,6 +95,7 @@ UOdysseyAnimationLayerImageRaster::AddFrame(/* uint32 iLength */)
     rasterBlock->OnBlockPtrChanged().AddUObject(this, &::UOdysseyAnimationLayerImageRaster::OnBlockPtrChanged, rasterBlock);
 
     mRasterBlocks.Add(rasterBlock);
+    OnCellsChanged().Broadcast(this);
 }
 
 void
@@ -109,6 +117,7 @@ UOdysseyAnimationLayerImageRaster::InsertFrame(int iIndex /*, uint32 iLength */)
     rasterBlock->OnBlockPtrChanged().AddUObject(this, &::UOdysseyAnimationLayerImageRaster::OnBlockPtrChanged, rasterBlock);
 
     mRasterBlocks.Insert(rasterBlock, iIndex);
+    OnCellsChanged().Broadcast(this);
 }
 
 void
@@ -320,7 +329,21 @@ UOdysseyAnimationLayerImageRaster::Serialize(FArchive& Ar)
 {
     Super::Serialize(Ar);
 
-    Ar << mRasterBlocks;
+    if ( Ar.IsLoading() )
+    {
+        mRasterBlocks.Empty();
+    }
+
+    int32 numBlocks = mRasterBlocks.Num();
+    Ar << numBlocks;
+    for ( int i = 0; i < numBlocks; i++ )
+    {
+        if ( Ar.IsLoading() )
+        {
+            mRasterBlocks.Add(MakeShared<FOdysseyRasterBlock>(this));
+        }
+        Ar << *mRasterBlocks[i];
+    }
 }
 
 

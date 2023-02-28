@@ -8,14 +8,20 @@
 #define LOCTEXT_NAMESPACE "SOdysseyAnimationLayerImageRasterTimeline"
 
 //CONSTRUCTION/DESTRUCTION----------------------------------------------- SMultiColumnTableRow
+SOdysseyAnimationLayerImageRasterTimeline::~SOdysseyAnimationLayerImageRasterTimeline()
+{
+    UOdysseyAnimationLayerImageRaster::OnCellsChanged().RemoveAll(this);
+}
+
 void SOdysseyAnimationLayerImageRasterTimeline::Construct(const FArguments& InArgs, UOdysseyAnimationLayerImageRaster* iAnimationLayerImageRaster)
 {
     ensure(iAnimationLayerImageRaster);
     mAnimationLayerImageRaster = iAnimationLayerImageRaster;
+    UOdysseyAnimationLayerImageRaster::OnCellsChanged().AddRaw(this, &SOdysseyAnimationLayerImageRasterTimeline::OnCellsChanged);
 
     ChildSlot
     [
-        SNew(SListView<TSharedPtr<FOdysseyRasterBlock>>)
+        SAssignNew(mListView, SListView<TSharedPtr<FOdysseyRasterBlock>>)
         .ListItemsSource(&mAnimationLayerImageRaster->GetRasterBlocks())
         .OnGenerateRow(this, &SOdysseyAnimationLayerImageRasterTimeline::OnGenerateRow)
         //.ExternalScrollbar() //Should I use this
@@ -42,6 +48,15 @@ SOdysseyAnimationLayerImageRasterTimeline::OnGenerateRow(TSharedPtr<FOdysseyRast
 			    .VAlign(VAlign_Fill)
             ]
         ];
+}
+
+void
+SOdysseyAnimationLayerImageRasterTimeline::OnCellsChanged(UOdysseyAnimationLayerImageRaster* iLayer)
+{
+    if (iLayer != mAnimationLayerImageRaster)
+        return;
+
+    mListView->RebuildList();
 }
 
 #undef LOCTEXT_NAMESPACE

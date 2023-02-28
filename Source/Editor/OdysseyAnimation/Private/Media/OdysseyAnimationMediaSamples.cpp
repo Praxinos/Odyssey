@@ -221,13 +221,7 @@ FOdysseyAnimationMediaSamples::PeekVideoSampleTime(FMediaTimeStamp & TimeStamp)
 
 	TSharedPtr<FOdysseyAnimationMediaControls> controls = mControls.Pin();
 
-	//GetTime() is marked as deprecated somewhere, but we need the time anyway, so let's use it
-	int frameIndex = mAnimation->GetFrameIndexAtTime(controls->GetTime());
-	if ( controls->GetRate() >= 0 )
-		TimeStamp.Time = mAnimation->GetFrameTimeRange(frameIndex).GetLowerBoundValue();
-	else 
-		TimeStamp.Time = mAnimation->GetFrameTimeRange(frameIndex).GetUpperBoundValue();
-
+	TimeStamp.Time = controls->GetTime();
 	TimeStamp.SequenceIndex = 0;
 	return true;
 }

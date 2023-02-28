@@ -18,11 +18,14 @@ public:
 
 public:
     // Construction / Destruction
+    ~SOdysseyAnimationLayerImageRasterTimeline();
     void Construct(const FArguments& iArgs, class UOdysseyAnimationLayerImageRaster* iAnimationLayerImageRaster);
 
 private:
     TSharedRef<ITableRow> OnGenerateRow(TSharedPtr<FOdysseyRasterBlock> iRasterBlock, const TSharedRef<STableViewBase>& iOwnerTable);
+    void OnCellsChanged(class UOdysseyAnimationLayerImageRaster* iLayer);
 
 private:
     class UOdysseyAnimationLayerImageRaster* mAnimationLayerImageRaster;
+    TSharedPtr<SListView<TSharedPtr<FOdysseyRasterBlock>>> mListView;
 };
