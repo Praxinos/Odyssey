@@ -15,9 +15,9 @@ FOdysseyAnimationMediaTextureSample::FOdysseyAnimationMediaTextureSample(UOdysse
     , mSequenceIndex(0)
     , mTime(0)
     , mDuration(0)
-    , mCurrentTexture(false)
     , mTexture1(UTexture2DDynamic::Create(iAnimation->Width(), iAnimation->Height(), FTexture2DDynamicCreateInfo(PF_B8G8R8A8)))
     , mTexture2(UTexture2DDynamic::Create(iAnimation->Width(), iAnimation->Height(), FTexture2DDynamicCreateInfo(PF_B8G8R8A8)))
+    , mCurrentTexture(false)
 {
     mAnimation->OnRenderImageChanged().AddRaw(this, &FOdysseyAnimationMediaTextureSample::OnRenderImageChanged);
 }

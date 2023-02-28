@@ -19,8 +19,8 @@ public:
 		: _Animation(nullptr)
 		, _MediaPlayer(nullptr)
 		, _FrameWidth(50.f)
-		, _Offset(0.0f)
 		, _Zoom(1.0f)
+		, _Offset(0.0f)
 	{}
 		SLATE_ARGUMENT(UOdysseyAnimation*, Animation)
 		SLATE_ARGUMENT(UMediaPlayer*, MediaPlayer)
