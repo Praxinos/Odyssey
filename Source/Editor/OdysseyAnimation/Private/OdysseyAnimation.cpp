@@ -315,8 +315,6 @@ UOdysseyAnimation::GenerateFrameBlock(const FString& iId)
 void
 UOdysseyAnimation::OnLayerStackRenderImageChanged(UOdysseyAnimationLayerStack* iLayerStack, const TRange<int>& iRange, const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive)
 {
-	//TODO: whould we do all this if iIsInteractive is true ?
-
 	if (iLayerStack != mLayerStack)
 		return;
 
