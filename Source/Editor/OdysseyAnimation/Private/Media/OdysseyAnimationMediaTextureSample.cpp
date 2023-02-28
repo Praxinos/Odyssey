@@ -2,6 +2,7 @@
 
 #include "Media/OdysseyAnimationMediaTextureSample.h"
 #include "Engine/Texture2DDynamic.h"
+#include "OdysseyRectUtils.h"
 
 FOdysseyAnimationMediaTextureSample::~FOdysseyAnimationMediaTextureSample()
 {
@@ -220,5 +221,19 @@ FOdysseyAnimationMediaTextureSample::OnRenderImageChanged(UOdysseyAnimation* iAn
 	if (iAnimation != mAnimation || !iRange.Contains(mFrameIndex))
 		return;
 
-	CopyRects(iRects);
+    //delay rects update to tick
+    mInvalidRects.Append(iRects);
+    mInvalidRects = OdysseyRectUtils::MergeRects(mInvalidRects);
+
+	//CopyRects(iRects);
+}
+
+void
+FOdysseyAnimationMediaTextureSample::Tick(float DeltaTime)
+{
+    if ( mInvalidRects.IsEmpty() )
+        return;
+
+    CopyRects(mInvalidRects);
+    mInvalidRects.Empty();
 }

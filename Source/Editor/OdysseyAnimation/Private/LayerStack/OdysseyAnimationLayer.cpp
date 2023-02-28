@@ -21,6 +21,7 @@ public:
         : mAnimationLayer(iAnimationLayer)
         , mFrame( iFrame )
     {
+        UpdateChildrenHandles();
         UOdysseyLayer::OnChildrenChanged().AddRaw(this, &FOdysseyAnimationLayerPreloadHandle::OnChildrenChanged);
     }
 
@@ -29,12 +30,17 @@ public:
         if ( iLayer != mAnimationLayer )
             return;
 
+        UpdateChildrenHandles();
+    }
+
+    void UpdateChildrenHandles()
+    {
         TArray<TSharedPtr<IOdysseyHandle>> handles;
         TArray<UOdysseyLayer*> layers = mAnimationLayer->GetChildren();
-        for (UOdysseyLayer* layer : layers)
+        for ( UOdysseyLayer* layer : layers )
         {
             UOdysseyAnimationLayer* animationLayer = Cast<UOdysseyAnimationLayer>(layer);
-            if (!animationLayer)
+            if ( !animationLayer )
                 continue;
 
             handles.Add(animationLayer->Preload(mFrame));

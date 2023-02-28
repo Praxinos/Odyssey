@@ -48,6 +48,7 @@ namespace UnrealBuildTool.Rules
 					"OdysseyImaging",
                     "OdysseyLayerStack",
 					"OdysseyStyle",
+					"OdysseyMaths",
 					"RenderCore",
                     "Slate",
                     "SlateCore",

@@ -6,6 +6,7 @@
 
 class FOdysseyAnimationMediaTextureSample
 	: public IMediaTextureSample
+	, public FTickableEditorObject //Allows us to react to Tick events
 {
 public:
 	//Constructor / Destructor
@@ -121,6 +122,11 @@ public:
 	 */
 	virtual bool IsOutputSrgb() const;
 
+protected:
+	// FTickableEditorObject implementation
+	virtual void Tick(float DeltaTime) override;
+	virtual TStatId GetStatId() const override { RETURN_QUICK_DECLARE_CYCLE_STAT(FOdysseyAnimationMediaTextureSample, STATGROUP_Tickables); }
+
 private:
 	//Events
 	void OnRenderImageChanged(UOdysseyAnimation* iAnimation, const TRange<int>& iRange, const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive);
@@ -135,4 +141,5 @@ private:
 	TStrongObjectPtr<UTexture2DDynamic> mTexture1; 
 	TStrongObjectPtr<UTexture2DDynamic> mTexture2; //PATCH: Media Framework is shit when using a single texture that refreshes it self, I need 2 Textures....
 	mutable bool mCurrentTexture; //PATCH:
+	TArray<::ULIS::FRectI> mInvalidRects;
 };

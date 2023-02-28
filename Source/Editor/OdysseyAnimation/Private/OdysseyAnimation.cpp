@@ -94,7 +94,7 @@ UOdysseyAnimation::GetFramesPerSecond() const
 uint32
 UOdysseyAnimation::GetFrameIndexAtTime(FTimespan iTime) const
 {
-	if (iTime < 0 || iTime > GetDuration())
+	if (iTime < 0 || iTime >= GetDuration())
 		return INDEX_NONE;
 	
 	return uint32(iTime.GetTotalSeconds() * GetFramesPerSecond());
