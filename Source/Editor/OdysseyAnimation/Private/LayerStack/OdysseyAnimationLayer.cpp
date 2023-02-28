@@ -90,7 +90,18 @@ UOdysseyAnimationLayer::GetAnimation()
 TRange<int>
 UOdysseyAnimationLayer::GetFrameRange() const
 {
-    return TRange<int>();
+    TArray<TRange<int>> ranges;
+    const TArray<UOdysseyLayer*> layers = Children;
+    for (UOdysseyLayer* layer : layers)
+    {
+        UOdysseyAnimationLayer* animationLayer = Cast<UOdysseyAnimationLayer>(layer);
+        if (!animationLayer)
+            continue;
+
+        ranges.Add(animationLayer->GetFrameRange());
+    }
+
+    return TRange<int>::Hull(ranges);
 }
 
 UOdysseyAnimationLayer::FOnRenderImageChanged&

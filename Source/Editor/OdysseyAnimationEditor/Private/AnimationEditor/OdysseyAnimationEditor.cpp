@@ -41,8 +41,6 @@ FOdysseyAnimationEditor::FOdysseyAnimationEditor() :
 void
 FOdysseyAnimationEditor::InitData(UObject* iEditedObject)
 {
-	FOdysseyPainterEditor::InitData(iEditedObject);
-	
 	mAnimation = Cast<UOdysseyAnimation>(iEditedObject);
 	mLayerStackPreloadHandle = mAnimation->Preload(mAnimation->CurrentFrame);
 
@@ -55,6 +53,8 @@ FOdysseyAnimationEditor::InitData(UObject* iEditedObject)
 
 	mMediaTexture->SetMediaPlayer(mMediaPlayer);
 	mMediaTexture->UpdateResource();
+
+	FOdysseyPainterEditor::InitData(iEditedObject);
 }
 
 void

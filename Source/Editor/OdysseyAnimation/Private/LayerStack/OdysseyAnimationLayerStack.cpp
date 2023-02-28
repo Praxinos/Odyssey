@@ -37,6 +37,12 @@ UOdysseyAnimationLayerStack::GetAnimation() const
     return nullptr;    
 }
 
+TRange<int>
+UOdysseyAnimationLayerStack::GetFrameRange() const
+{
+    return Cast<UOdysseyAnimationLayerRoot>(LayerRoot)->GetFrameRange();
+}
+
 TArray<::ULIS::FEvent>
 UOdysseyAnimationLayerStack::RenderImage(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ioBlock, int iFrame, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList)
 {

@@ -86,5 +86,5 @@ private:
 	UPROPERTY(meta=(LoadBehavior = "LazyOnDemand"))
 	TObjectPtr<UOdysseyAnimationLayerStack> mLayerStack;
 
-	TArray<TSharedPtr<FOdysseyRasterBlock>> mRasterBlocks;
+	//TArray<TSharedPtr<FOdysseyRasterBlock>> mRasterBlocks;
 };

@@ -45,24 +45,13 @@ UOdysseyAnimationLayerImageRaster::UOdysseyAnimationLayerImageRaster()
 void
 UOdysseyAnimationLayerImageRaster::OnCreated_Implementation()
 {
-    UOdysseyAnimation* animation = GetAnimation();
-    if (!animation)
-        return;
+    AddFrame();
+}
 
-    //TODO: Create a first cell with empty rasterblock
-
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = MakeShared<::ULIS::FBlock>( animation->Width(), animation->Height(), animation->Format());
-
-	::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(animation->Format());
-    ctx.Clear(*block.Get());
-    ctx.Finish();
-
-    TSharedPtr<FOdysseyRasterBlock> rasterBlock = MakeShared<FOdysseyRasterBlock>();
-    rasterBlock->SetBlock(block);
-    rasterBlock->OnBlockChanged().AddUObject(this, &::UOdysseyAnimationLayerImageRaster::OnBlockChanged, rasterBlock);
-    rasterBlock->OnBlockPtrChanged().AddUObject(this, &::UOdysseyAnimationLayerImageRaster::OnBlockPtrChanged, rasterBlock);
-
-    mRasterBlocks.Add(rasterBlock);
+TRange<int>
+UOdysseyAnimationLayerImageRaster::GetFrameRange() const
+{
+    return TRange<int>(0, mRasterBlocks.Num() - 1);
 }
 
 TSharedPtr<FOdysseyRasterBlock>
@@ -72,6 +61,48 @@ UOdysseyAnimationLayerImageRaster::GetRasterBlock(int iFrame) const
         return nullptr;
 
 	return mRasterBlocks[iFrame];
+}
+
+void
+UOdysseyAnimationLayerImageRaster::AddFrame(/* uint32 iLength */)
+{
+    UOdysseyAnimation* animation = GetAnimation();
+    if ( !animation )
+        return;
+
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = MakeShared<::ULIS::FBlock>(animation->Width(), animation->Height(), animation->Format());
+
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(animation->Format());
+    ctx.Clear(*block.Get());
+    ctx.Finish();
+
+    TSharedPtr<FOdysseyRasterBlock> rasterBlock = MakeShared<FOdysseyRasterBlock>(this);
+    rasterBlock->SetBlock(block);
+    rasterBlock->OnBlockChanged().AddUObject(this, &::UOdysseyAnimationLayerImageRaster::OnBlockChanged, rasterBlock);
+    rasterBlock->OnBlockPtrChanged().AddUObject(this, &::UOdysseyAnimationLayerImageRaster::OnBlockPtrChanged, rasterBlock);
+
+    mRasterBlocks.Add(rasterBlock);
+}
+
+void
+UOdysseyAnimationLayerImageRaster::InsertFrame(int iIndex /*, uint32 iLength */)
+{
+    UOdysseyAnimation* animation = GetAnimation();
+    if ( !animation )
+        return;
+
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = MakeShared<::ULIS::FBlock>(animation->Width(), animation->Height(), animation->Format());
+
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(animation->Format());
+    ctx.Clear(*block.Get());
+    ctx.Finish();
+
+    TSharedPtr<FOdysseyRasterBlock> rasterBlock = MakeShared<FOdysseyRasterBlock>(this);
+    rasterBlock->SetBlock(block);
+    rasterBlock->OnBlockChanged().AddUObject(this, &::UOdysseyAnimationLayerImageRaster::OnBlockChanged, rasterBlock);
+    rasterBlock->OnBlockPtrChanged().AddUObject(this, &::UOdysseyAnimationLayerImageRaster::OnBlockPtrChanged, rasterBlock);
+
+    mRasterBlocks.Insert(rasterBlock, iIndex);
 }
 
 void

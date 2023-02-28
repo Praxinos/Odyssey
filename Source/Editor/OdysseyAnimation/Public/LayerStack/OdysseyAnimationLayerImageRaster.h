@@ -49,8 +49,18 @@ public:
     virtual void OnCreated_Implementation() override;
 
 public:
+    //UOdysseyAnimationLayer overrides
+    virtual TRange<int> GetFrameRange() const override;
+
+public:
     // Public API
     TSharedPtr<FOdysseyRasterBlock> GetRasterBlock(int iFrame) const;
+
+    UFUNCTION(BlueprintCallable, Category="Animation | LayerStack")
+    void AddFrame(/* uint32 iLength */);
+
+    UFUNCTION(BlueprintCallable, Category = "Animation | LayerStack")
+    void InsertFrame(int iIndex /*, uint32 iLength */);
 
 public:
     /**

@@ -3,6 +3,9 @@
 
 #include "OdysseyAnimation.h"
 
+#include "LayerStack/OdysseyAnimationLayerImageRaster.h"
+#include "LayerStack/OdysseyAnimationLayerStack.h"
+
 #include <ULIS>
 #include "ULISLoaderModule.h"
 
@@ -13,7 +16,7 @@ void UOdysseyAnimation::Init(const FOdysseyAnimationConfiguration& iConfiguratio
 	mFormat = iConfiguration.ULISFormat();
 	mFramesPerSecond = iConfiguration.FramesPerSecond;
 
-	::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iConfiguration.ULISFormat());
+	/* ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iConfiguration.ULISFormat());
 	for(int i = 0; i < 10; i++)
 	{
 		TSharedPtr<FOdysseyRasterBlock> rasterBlock = MakeShared<FOdysseyRasterBlock>();
@@ -28,9 +31,13 @@ void UOdysseyAnimation::Init(const FOdysseyAnimationConfiguration& iConfiguratio
 
     	rasterBlock->SetBlock(block);
 		mRasterBlocks.Add(rasterBlock);
-	}
+	} */
 
 	mLayerStack = NewObject<UOdysseyAnimationLayerStack>(this, "LayerStack", RF_Public | RF_Transactional);
+	UOdysseyLayer* layer = mLayerStack->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass()); //Move in OdysseyAnimationFactor
+    mLayerStack->CurrentLayer = TSoftObjectPtr<UOdysseyLayer>(layer);
+	//UOdysseyAnimationLayerImageRaster* rasterLayer = Cast<UOdysseyAnimationLayerImageRaster>(layer);
+	//rasterLayer->AddFrame();
 }
 
 uint32
@@ -60,7 +67,12 @@ UOdysseyAnimation::GetDuration() const
 uint32
 UOdysseyAnimation::GetFrameCount() const
 {
-	return mRasterBlocks.Num();
+	TRange<int> frameRange = mLayerStack->GetFrameRange();
+
+	//TODO: deduce frame count from :
+	// - startPoint / endPoint
+
+	return frameRange.GetUpperBoundValue() + 1;
 }
 
 double
@@ -88,10 +100,21 @@ UOdysseyAnimation::GetFrameTimeRange(uint32 iFrameIndex) const
 TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>
 UOdysseyAnimation::GetBlockAtIndex(uint32 iIndex)
 {
-	if (iIndex < 0 || iIndex >= uint32(mRasterBlocks.Num()))
+	if (iIndex < 0 || iIndex > GetFrameCount())
 		return nullptr;
 
-	return mRasterBlocks[iIndex]->GetBlock();
+	//TODO: if block is cached or in memory, return the block directly
+
+	TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = MakeShared<::ULIS::FBlock>(mWidth, mHeight, (ULIS::eFormat)mFormat);
+	::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext((ULIS::eFormat)mFormat);
+	::ULIS::FEvent clearEvent;
+	ctx.Clear(*block, ::ULIS::FRectI::Auto, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &clearEvent);
+	mLayerStack->RenderImage(block, iIndex, block->Rect(), ::ULIS::FVec2I(0), {clearEvent});
+	ctx.Finish();
+
+	return block;
+
+	//return mRasterBlocks[iIndex]->GetBlock();
 }
 
 UOdysseyAnimationLayerStack*
@@ -111,7 +134,7 @@ UOdysseyAnimation::Serialize(FArchive& Ar)
 {
 	Super::Serialize(Ar);
 
-	Ar << mRasterBlocks;
+	// Ar << mRasterBlocks;
 }
 
 /* IMediaSource overrides

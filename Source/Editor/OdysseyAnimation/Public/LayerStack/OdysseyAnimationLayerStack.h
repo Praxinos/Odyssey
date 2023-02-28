@@ -38,6 +38,15 @@ public:
     UOdysseyAnimation* GetAnimation() const;
 
 public:
+    //Animation Specific
+    /**
+     * @brief Will return the actual frame range 
+     * 
+     * @return TRange<int> 
+     */
+    TRange<int> GetFrameRange() const;
+
+public:
     /**
      * @brief Renders an image in the given Block
      * Takes into account the size / format of the given block

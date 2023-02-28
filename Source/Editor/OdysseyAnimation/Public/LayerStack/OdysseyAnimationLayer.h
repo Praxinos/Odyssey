@@ -41,7 +41,7 @@ public:
 public:
     //Getters
     UOdysseyAnimation* GetAnimation();
-    TRange<int> GetFrameRange() const;
+    virtual TRange<int> GetFrameRange() const;
 
 public:
     //Frame Range System
