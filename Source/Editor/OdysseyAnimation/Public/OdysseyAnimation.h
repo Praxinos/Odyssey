@@ -13,7 +13,7 @@
 
 #include "OdysseyAnimation.generated.h"
 
-UCLASS()
+UCLASS(config=EditorPerProjectUserSettings, PerObjectConfig)
 class ODYSSEYANIMATION_API UOdysseyAnimation : public UBaseMediaSource
 {
 	GENERATED_BODY()
@@ -45,6 +45,20 @@ public:
 	TRange<FTimespan> GetFrameTimeRange(uint32 iFrameIndex) const;
 
 	TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> GetBlockAtIndex(uint32 iIndex);
+
+	UOdysseyAnimationLayerStack* GetLayerStack() const;
+
+public:
+    /**
+     * @brief Preloads the given frame and keeps it preloaded until the handle is destroyed
+     */
+    TSharedPtr<IOdysseyHandle> Preload(int iFrame);
+
+public:
+	//CurrentFrame is specific to the user, not to the animation itself
+    //So we save it in user's config, instead of the animation
+	UPROPERTY(config, DuplicateTransient)
+	int CurrentFrame = 0;
 
 private:
 	UPROPERTY()

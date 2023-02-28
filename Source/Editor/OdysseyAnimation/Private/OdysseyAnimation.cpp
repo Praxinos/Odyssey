@@ -10,7 +10,7 @@ void UOdysseyAnimation::Init(const FOdysseyAnimationConfiguration& iConfiguratio
 {
 	mWidth = iConfiguration.Width;
 	mHeight = iConfiguration.Height;
-	mFormat = iConfiguration.Format;
+	mFormat = iConfiguration.ULISFormat();
 	mFramesPerSecond = iConfiguration.FramesPerSecond;
 
 	::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iConfiguration.ULISFormat());
@@ -29,6 +29,8 @@ void UOdysseyAnimation::Init(const FOdysseyAnimationConfiguration& iConfiguratio
     	rasterBlock->SetBlock(block);
 		mRasterBlocks.Add(rasterBlock);
 	}
+
+	mLayerStack = NewObject<UOdysseyAnimationLayerStack>(this, "LayerStack", RF_Public | RF_Transactional);
 }
 
 uint32
@@ -90,6 +92,18 @@ UOdysseyAnimation::GetBlockAtIndex(uint32 iIndex)
 		return nullptr;
 
 	return mRasterBlocks[iIndex]->GetBlock();
+}
+
+UOdysseyAnimationLayerStack*
+UOdysseyAnimation::GetLayerStack() const
+{
+	return mLayerStack;
+}
+
+TSharedPtr<IOdysseyHandle>
+UOdysseyAnimation::Preload(int iFrame)
+{
+    return mLayerStack->Preload(iFrame);
 }
 
 /* IMediaSource overrides

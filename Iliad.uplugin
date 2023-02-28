@@ -35,6 +35,11 @@
 			"LoadingPhase": "Default"
 		},
 		{
+			"Name": "OdysseyAnimationEditor",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		},
+		{
 			"Name": "OdysseyCore",
 			"Type": "UncookedOnly",
 			"LoadingPhase": "Default"
