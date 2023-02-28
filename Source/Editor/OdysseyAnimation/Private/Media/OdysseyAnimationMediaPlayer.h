@@ -66,19 +66,14 @@ public:
 	virtual bool FlushOnSeekCompleted() const override;
 	virtual bool GetPlayerFeatureFlag(EFeatureFlag flag) const override;
 
-public:
-	//PATCH: needed, because GetControls() only returns a IMediaControls& which does not provide a SetState() method
-	FOdysseyAnimationMediaControls& GetOdysseyControls();
-	FOdysseyAnimationMediaSamples& GetOdysseySamples();
-
 private:
 	TStrongObjectPtr<UOdysseyAnimation> mAnimation;
 	FString mUrl;
 	IMediaEventSink& mEventSink;
 
-	FOdysseyAnimationMediaCache mCache;
-	FOdysseyAnimationMediaControls mControls;
-	FOdysseyAnimationMediaSamples mSamples;
-	FOdysseyAnimationMediaTracks mTracks;
-	FOdysseyAnimationMediaView mView;
+	TSharedPtr<FOdysseyAnimationMediaCache> mCache;
+	TSharedPtr<FOdysseyAnimationMediaControls> mControls;
+	TSharedPtr<FOdysseyAnimationMediaSamples> mSamples;
+	TSharedPtr<FOdysseyAnimationMediaTracks> mTracks;
+	TSharedPtr<FOdysseyAnimationMediaView> mView;
 };

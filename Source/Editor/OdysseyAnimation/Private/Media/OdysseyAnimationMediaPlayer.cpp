@@ -15,18 +15,22 @@ FOdysseyAnimationMediaPlayer::~FOdysseyAnimationMediaPlayer()
 
 FOdysseyAnimationMediaPlayer::FOdysseyAnimationMediaPlayer(IMediaEventSink& iEventSink)
 	: mEventSink(iEventSink)
+	, mCache(MakeShared<FOdysseyAnimationMediaCache>())
+	, mControls(MakeShared<FOdysseyAnimationMediaControls>())
+	, mSamples(MakeShared<FOdysseyAnimationMediaSamples>())
+	, mTracks(MakeShared<FOdysseyAnimationMediaTracks>())
+	, mView(MakeShared<FOdysseyAnimationMediaView>())
 {
 }
 
 void
 FOdysseyAnimationMediaPlayer::Init()
 {
-	TWeakPtr<FOdysseyAnimationMediaPlayer> weakSelf = AsShared();
-	mCache.Init(weakSelf);
-	mControls.Init(weakSelf);
-	mSamples.Init(weakSelf);
-	mTracks.Init(weakSelf);
-	mView.Init(weakSelf);
+	mCache->Init();
+	mControls->Init(AsShared());
+	mSamples->Init(AsShared(), mControls);
+	mTracks->Init(AsShared());
+	mView->Init(AsShared());
 }
 
 UOdysseyAnimation*
@@ -60,17 +64,17 @@ FOdysseyAnimationMediaPlayer::Open(const FString& iUrl, const IMediaOptions* iOp
 	mAnimation = TStrongObjectPtr<UOdysseyAnimation>(LoadObject< UOdysseyAnimation >( nullptr, *assetPath ));
 	if (!mAnimation)
 	{
-		mControls.SetState(EMediaState::Error);
+		mControls->SetState(EMediaState::Error);
 		mEventSink.ReceiveMediaEvent(EMediaEvent::MediaOpenFailed);
 		return false;
 	}
 	
 	//succeeded
-	mCache.OnOpen();
-	mControls.OnOpen(); 
-	mSamples.OnOpen();
-	mTracks.OnOpen();
-	mView.OnOpen();
+	mCache->OnOpen(mAnimation.Get());
+	mControls->OnOpen(mAnimation.Get());
+	mSamples->OnOpen(mAnimation.Get());
+	mTracks->OnOpen();
+	mView->OnOpen();
 	
 	mEventSink.ReceiveMediaEvent(EMediaEvent::MediaOpened);
 
@@ -80,18 +84,18 @@ FOdysseyAnimationMediaPlayer::Open(const FString& iUrl, const IMediaOptions* iOp
 bool
 FOdysseyAnimationMediaPlayer::Open(const TSharedRef<FArchive, ESPMode::ThreadSafe>& iArchive, const FString& iOriginalUrl, const IMediaOptions* iOptions)
 {
-	mControls.SetState(EMediaState::Error);
+	mControls->SetState(EMediaState::Error);
 	return false;
 }
 
 void
 FOdysseyAnimationMediaPlayer::Close()
 {
-	mCache.OnClose();
-	mControls.OnClose();
-	mSamples.OnClose();
-	mTracks.OnClose();
-	mView.OnClose();
+	mCache->OnClose();
+	mControls->OnClose();
+	mSamples->OnClose();
+	mTracks->OnClose();
+	mView->OnClose();
 
 	mAnimation = nullptr;
 	mUrl.Empty();
@@ -102,43 +106,31 @@ FOdysseyAnimationMediaPlayer::Close()
 IMediaCache&
 FOdysseyAnimationMediaPlayer::GetCache()
 {
-	return mCache;
+	return *mCache;
 }
 
 IMediaControls&
 FOdysseyAnimationMediaPlayer::GetControls()
 {
-	return mControls;
-}
-
-FOdysseyAnimationMediaControls&
-FOdysseyAnimationMediaPlayer::GetOdysseyControls()
-{
-	return mControls;
-}
-
-FOdysseyAnimationMediaSamples&
-FOdysseyAnimationMediaPlayer::GetOdysseySamples()
-{
-	return mSamples;
+	return *mControls;
 }
 
 IMediaSamples&
 FOdysseyAnimationMediaPlayer::GetSamples()
 {
-	return mSamples;
+	return *mSamples;
 }
 
 IMediaTracks&
 FOdysseyAnimationMediaPlayer::GetTracks()
 {
-	return mTracks;
+	return *mTracks;
 }
 
 IMediaView&
 FOdysseyAnimationMediaPlayer::GetView()
 {
-	return mView;
+	return *mView;
 }
 
 FString

@@ -11,13 +11,10 @@
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerStack
     : public SCompoundWidget
 {
-
-SLATE_DECLARE_WIDGET(SOdysseyAnimationLayerStack, STreeView<UOdysseyLayer*>)
-
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationLayerStack)
         {}
-        SLATE_ATTRIBUTE( UOdysseyLayerStack*, LayerStack )
+        SLATE_ARGUMENT( UOdysseyLayerStack*, LayerStack )
     SLATE_END_ARGS()
 
 public:
@@ -29,10 +26,8 @@ public:
 
 private:
     TSharedRef<ITableRow> OnGenerateRow(UOdysseyLayer* iLayer, const TSharedRef<STableViewBase>& iOwnerTable);
-    void RebuildWidgets();
-    FReply OnAddFrameClicked();
 
 private:
-    TSlateAttribute<UOdysseyLayerStack*> mLayerStack;
+    UOdysseyLayerStack* mLayerStack;
     TSharedPtr<SOdysseyLayerStackTreeView> mTreeView;
 };

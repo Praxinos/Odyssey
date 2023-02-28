@@ -13,12 +13,9 @@ public:
     FOdysseyAnimationMediaSamples();
 
 public:
-	void Init(TWeakPtr<class FOdysseyAnimationMediaPlayer> iPlayer);
-	void OnOpen();
+	void Init(TSharedPtr<FOdysseyAnimationMediaPlayer> iPlayer, TSharedPtr<FOdysseyAnimationMediaControls> iControls);
+	void OnOpen(UOdysseyAnimation* iAnimation);
 	void OnClose();
-
-	//PATCH: Needed to keep track of the time for PeekVideoSampleTime()
-	void SetTime(FTimespan iTime);
 	
 protected:
 	//~ IMediaSamples interface
@@ -32,6 +29,8 @@ private:
 	bool SanitizeTimeRange(TRange<FMediaTimeStamp>* oTimeRange);
 
 private:
-	TWeakPtr<class FOdysseyAnimationMediaPlayer> mPlayer;
-	uint32 mCurrentFrameIndex;
+	UOdysseyAnimation* mAnimation;
+	TWeakPtr<FOdysseyAnimationMediaPlayer> mPlayer;
+	TWeakPtr<FOdysseyAnimationMediaControls> mControls;
+	TSharedPtr<class FOdysseyAnimationMediaTextureSample> mSample;
 };

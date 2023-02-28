@@ -6,7 +6,9 @@
 #include "OdysseyEditorTab.h"
 
 class FOdysseyAnimationEditor;
-class UOdysseyLayerStack;
+class UOdysseyAnimationLayerStack;
+class UAnimation;
+class UMediaPlayer;
 
 class ODYSSEYANIMATIONEDITOR_API FOdysseyAnimationEditorLayerStackTab :
 	public FOdysseyEditorTab
@@ -23,10 +25,16 @@ protected:
 
 protected:
     // Widget Getters
-    virtual UOdysseyLayerStack* LayerStack() const;
+    virtual UOdysseyAnimationLayerStack* LayerStack() const;
+    virtual UOdysseyAnimation* Animation() const;
+    virtual UMediaPlayer* MediaPlayer() const;
+    virtual float PlaybackFramesPerSecond() const;
 
 protected:
-    // Event Listeners
+    // Event 
+    //DEBUG:
+    FReply OnAddFrameClicked();
+    //DEBUG:
 
 private:
     //Methods

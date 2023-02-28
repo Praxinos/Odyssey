@@ -4,6 +4,8 @@
 #include "AnimationEditor/OdysseyAnimationEditorLayerStackTab.h"
 
 #include "Widgets/LayerStack/SOdysseyAnimationLayerStack.h"
+#include "Widgets/SOdysseyAnimationPlaybackControls.h"
+#include "Widgets/SOdysseyLayerStackAddLayerButton.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyAnimationEditorLayerStackTab"
@@ -30,8 +32,43 @@ FOdysseyAnimationEditorLayerStackTab::FOdysseyAnimationEditorLayerStackTab(FOdys
 TSharedPtr<SWidget>
 FOdysseyAnimationEditorLayerStackTab::CreateWidget()
 {
-    return SNew(SOdysseyAnimationLayerStack)
-            .LayerStack(this, &FOdysseyAnimationEditorLayerStackTab::LayerStack);
+    return SNew(SVerticalBox)
+            + SVerticalBox::Slot()
+            .AutoHeight()
+            [
+                SNew(SHorizontalBox)
+                + SHorizontalBox::Slot()
+                .AutoWidth()
+                [
+                    SNew(SOdysseyLayerStackAddLayerButton)
+                    .LayerStack(LayerStack())
+                ]
+                //DEBUG:
+                + SHorizontalBox::Slot()
+                .AutoWidth()
+                [
+                    SNew(SButton)
+                    .ButtonStyle(FEditorStyle::Get(), "FlatButton.Success")
+                    .HAlign( HAlign_Center )
+                    .Text( LOCTEXT( "create-asset", "Add Frame" ) )
+                    .OnClicked( this, &FOdysseyAnimationEditorLayerStackTab::OnAddFrameClicked )
+                ]
+                //DEBUG:
+                + SHorizontalBox::Slot()
+                .AutoWidth()
+                [
+                    SNew(SOdysseyAnimationPlaybackControls)
+                    .Animation(Animation())
+                    .MediaPlayer(MediaPlayer())
+                    .PlaybackFramesPerSecond(this, &FOdysseyAnimationEditorLayerStackTab::PlaybackFramesPerSecond)
+                ]
+            ]
+            + SVerticalBox::Slot()
+            .FillHeight(1.0)
+            [
+                SNew(SOdysseyAnimationLayerStack)
+                .LayerStack(LayerStack())
+            ];
 }
 
 void
@@ -60,10 +97,28 @@ FOdysseyAnimationEditorLayerStackTab::BindShortcuts(FBaseToolkit* iToolkit)
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------------------- Widget Getters
 
-UOdysseyLayerStack*
+UOdysseyAnimationLayerStack*
 FOdysseyAnimationEditorLayerStackTab::LayerStack() const
 {
     return mEditor->LayerStack();
+}
+
+UOdysseyAnimation*
+FOdysseyAnimationEditorLayerStackTab::Animation() const
+{
+    return mEditor->Animation();
+}
+
+UMediaPlayer*
+FOdysseyAnimationEditorLayerStackTab::MediaPlayer() const
+{
+    return mEditor->MediaPlayer();
+}
+
+float
+FOdysseyAnimationEditorLayerStackTab::PlaybackFramesPerSecond() const
+{
+    return mEditor->PlaybackFramesPerSecond();
 }
 
 //--------------------------------------------------------------------------------------
@@ -97,5 +152,20 @@ FOdysseyAnimationEditorLayerStackTab::ChangeLayerOpacity( float iOpacity )
 
     FOdysseyObjectEditorUtils::SetPropertyValue(layerStack->CurrentLayer.Get(), "Opacity", FMath::Clamp(iOpacity, 0.f, 1.f));
 }
+
+//DEBUG:
+FReply
+FOdysseyAnimationEditorLayerStackTab::OnAddFrameClicked()
+{
+    UOdysseyAnimationLayerStack* layerStack = LayerStack();
+    if (!layerStack)
+        return FReply::Unhandled();
+    
+    UOdysseyAnimationLayerImageRaster* layerRaster = Cast<UOdysseyAnimationLayerImageRaster>(layerStack->CurrentLayer.Get());
+    layerRaster->AddFrame();
+
+    return FReply::Handled();
+}
+//DEBUG:
 
 #undef LOCTEXT_NAMESPACE

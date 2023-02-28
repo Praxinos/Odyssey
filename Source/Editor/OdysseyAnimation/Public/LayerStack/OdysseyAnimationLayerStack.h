@@ -6,9 +6,9 @@
 #include "OdysseyLayerStack.h"
 #include "Misc/OdysseyHandle.h"
 
-#include "OdysseyAnimationLayerStack.generated.h"
-
 #include <ULIS>
+
+#include "OdysseyAnimationLayerStack.generated.h"
 
 class UOdysseyAnimationLayer;
 

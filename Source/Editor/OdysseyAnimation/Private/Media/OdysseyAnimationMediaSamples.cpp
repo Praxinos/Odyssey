@@ -8,71 +8,49 @@
 
 #define LOCTEXT_NAMESPACE "OdysseyAnimationMediaSamples"
 
-FOdysseyAnimationMediaSamples::FOdysseyAnimationMediaSamples() :
-	mCurrentFrameIndex(-1)
+FOdysseyAnimationMediaSamples::FOdysseyAnimationMediaSamples()
+	: mAnimation(nullptr)
 {
 }
 
 void
-FOdysseyAnimationMediaSamples::Init(TWeakPtr<FOdysseyAnimationMediaPlayer> iPlayer)
+FOdysseyAnimationMediaSamples::Init(TSharedPtr<FOdysseyAnimationMediaPlayer> iPlayer, TSharedPtr<FOdysseyAnimationMediaControls> iControls)
 {
-    mPlayer = iPlayer;
+	mPlayer = iPlayer;
+	mControls = iControls;
 }
 
 void
-FOdysseyAnimationMediaSamples::OnOpen()
+FOdysseyAnimationMediaSamples::OnOpen(UOdysseyAnimation* iAnimation)
 {
-	mCurrentFrameIndex = -1;
+	mAnimation = iAnimation;
+	mSample = MakeShared<FOdysseyAnimationMediaTextureSample>(mAnimation);
 }
 
 void
 FOdysseyAnimationMediaSamples::OnClose()
 {
-	mCurrentFrameIndex = -1;
-}
-
-void
-FOdysseyAnimationMediaSamples::SetTime(FTimespan iTime)
-{
-	TSharedPtr<FOdysseyAnimationMediaPlayer> player = mPlayer.Pin();
-	if ( !player )
-		return;
-
-	UOdysseyAnimation* animation = player->GetAnimation();
-	if ( !animation )
-		return;
-
-	mCurrentFrameIndex = animation->GetFrameIndexAtTime(iTime);
+	mAnimation = nullptr;
 }
 
 void
 FOdysseyAnimationMediaSamples::FlushSamples()
 {
-	//No idea what to do here
+	//ES:we should remove all the samples from the sample queue here
+	//But we don't have a sample queue, so we do nothing
 }
 
 FTimespan
 FOdysseyAnimationMediaSamples::FindMaxOverlapingFrame(FTimespan iStartTime, FTimespan iEndTime, uint32* oIndex)
 {
-	TSharedPtr<FOdysseyAnimationMediaPlayer> player = mPlayer.Pin();
-	if ( !player )
-	{
-		*oIndex = INDEX_NONE;
-		return FTimespan(0);
-	}
-
-	UOdysseyAnimation* animation = player->GetAnimation();
-	if ( !animation )
-		return FTimespan(0);
-
-	uint32 startFrameIndex = animation->GetFrameIndexAtTime(iStartTime);
-	uint32 endFrameIndex = animation->GetFrameIndexAtTime(iEndTime);
+	uint32 startFrameIndex = mAnimation->GetFrameIndexAtTime(iStartTime);
+	uint32 endFrameIndex = mAnimation->GetFrameIndexAtTime(iEndTime);
 	FTimespan bestOverlap(-1);
 	uint32 bestFrameIndex = INDEX_NONE;
 	for (uint32 frameIndex = startFrameIndex; frameIndex <= endFrameIndex; frameIndex++)
 	{
 		//Compute Overlap for frameIndex
-		TRange<FTimespan> range = animation->GetFrameTimeRange(frameIndex);
+		TRange<FTimespan> range = mAnimation->GetFrameTimeRange(frameIndex);
 		FTimespan frameStartTime = range.GetLowerBoundValue();
 		FTimespan frameEndTime = range.GetUpperBoundValue();
 		FTimespan overlap = FMath::Min(frameEndTime, iEndTime) - FMath::Max(frameStartTime, iStartTime);
@@ -91,32 +69,27 @@ FOdysseyAnimationMediaSamples::FindMaxOverlapingFrame(FTimespan iStartTime, FTim
 bool
 FOdysseyAnimationMediaSamples::SanitizeTimeRange(TRange<FMediaTimeStamp>* oTimeRange)
 {
-	TSharedPtr<FOdysseyAnimationMediaPlayer> player = mPlayer.Pin();
-	if ( !player )
-		return false;
-
 	TRange<FMediaTimeStamp>& timeRange = *oTimeRange;
-	IMediaControls& controls = player->GetControls();
-	UOdysseyAnimation* animation = player->GetAnimation();
-	if ( !animation )
+	TSharedPtr<FOdysseyAnimationMediaControls> controls = mControls.Pin();
+	if ( !controls )
 		return false;
 
 	//Even if the media player does some kind of looping, we need to ensure the timerange bounds are looping correctly and are valid
 	bool isLowerOutOfBound = timeRange.HasLowerBound() && timeRange.GetLowerBoundValue().Time < 0.0f;
-	if (isLowerOutOfBound && controls.IsLooping())
+	if (isLowerOutOfBound && controls->IsLooping())
 	{
 		FMediaTimeStamp timestamp = timeRange.GetLowerBoundValue();
-		timestamp.Time += animation->GetDuration();
+		timestamp.Time += mAnimation->GetDuration();
 		timestamp.SequenceIndex--;
 		timeRange.SetLowerBoundValue(timestamp);
 		isLowerOutOfBound = false;
 	}
 	
-	bool isUpperOutOfBound = timeRange.HasUpperBound() && timeRange.GetUpperBoundValue().Time >= animation->GetDuration();
-	if (isUpperOutOfBound && controls.IsLooping())
+	bool isUpperOutOfBound = timeRange.HasUpperBound() && timeRange.GetUpperBoundValue().Time >= mAnimation->GetDuration();
+	if (isUpperOutOfBound && controls->IsLooping())
 	{
 		FMediaTimeStamp timestamp = timeRange.GetUpperBoundValue();
-		timestamp.Time -= animation->GetDuration();
+		timestamp.Time -= mAnimation->GetDuration();
 		timestamp.SequenceIndex++;
 		timeRange.SetUpperBoundValue(timestamp);
 		isUpperOutOfBound = false;
@@ -127,12 +100,12 @@ FOdysseyAnimationMediaSamples::SanitizeTimeRange(TRange<FMediaTimeStamp>* oTimeR
 	FMediaTimeStamp lowerBoundTimestamp = timeRange.GetLowerBoundValue();
 	FMediaTimeStamp upperBoundTimestamp = timeRange.GetUpperBoundValue();
 	lowerBoundTimestamp.Time = FMath::Max(FTimespan(0), lowerBoundTimestamp.Time);
-	upperBoundTimestamp.Time = FMath::Min(animation->GetDuration(), upperBoundTimestamp.Time);
+	upperBoundTimestamp.Time = FMath::Min(mAnimation->GetDuration(), upperBoundTimestamp.Time);
 	timeRange.SetLowerBoundValue(lowerBoundTimestamp);
 	timeRange.SetUpperBoundValue(upperBoundTimestamp);
 
 	//End is different if we are playing forward or backward
-	bool isAtEnd = controls.GetRate() >= 0 ? isUpperOutOfBound : isLowerOutOfBound;
+	bool isAtEnd = controls->GetRate() >= 0 ? isUpperOutOfBound : isLowerOutOfBound;
 
 	return isAtEnd;
 }
@@ -149,12 +122,11 @@ FOdysseyAnimationMediaSamples::FetchBestVideoSampleForTimeRange(const TRange<FMe
 	if ( !player )
 		return EFetchBestSampleResult::NoSample;
 
-	FOdysseyAnimationMediaControls& controls = player->GetOdysseyControls();
-	UOdysseyAnimation* animation = player->GetAnimation();
-	if ( !animation )
+	TSharedPtr<FOdysseyAnimationMediaControls> controls = mControls.Pin();
+	if (!controls)
 		return EFetchBestSampleResult::NoSample;
 
-	if (controls.GetState() == EMediaState::Stopped)
+	if (controls->GetState() == EMediaState::Stopped)
 		return EFetchBestSampleResult::NoSample;
 
 	//Sanitize the timeRange, to ensure looping and clamp it to animation duration
@@ -166,8 +138,8 @@ FOdysseyAnimationMediaSamples::FetchBestVideoSampleForTimeRange(const TRange<FMe
 	//Find which frame overlaps the timerange the most
 	FTimespan startTime = timeRange.GetLowerBoundValue().Time;
 	FTimespan endTime = timeRange.GetUpperBoundValue().Time;
-	uint32 startFrameIndex = animation->GetFrameIndexAtTime(startTime);
-	uint32 endFrameIndex = animation->GetFrameIndexAtTime(endTime);
+	uint32 startFrameIndex = mAnimation->GetFrameIndexAtTime(startTime);
+	uint32 endFrameIndex = mAnimation->GetFrameIndexAtTime(endTime);
 	uint32 startSequenceIndex = timeRange.GetLowerBoundValue().SequenceIndex;
 	uint32 endSequenceIndex = timeRange.GetUpperBoundValue().SequenceIndex;
 
@@ -179,27 +151,26 @@ FOdysseyAnimationMediaSamples::FetchBestVideoSampleForTimeRange(const TRange<FMe
 	//check overlap of each frame with the time range
 	
 	uint32 resultingSequenceIndex = startSequenceIndex;
+	uint32 frameIndex = 0;
 	//Only a single frame overlaps the range
 	if (startSequenceIndex == endSequenceIndex && startFrameIndex == endFrameIndex)
 	{
-		mCurrentFrameIndex = startFrameIndex;
+		frameIndex = startFrameIndex;
 	}
 	//The time range is not looping, so we have a single range to check
 	else if (startSequenceIndex == endSequenceIndex)
 	{
 		//search in [startFrame, endFrame]
-		uint32 frameIndex = INDEX_NONE;
+		frameIndex = INDEX_NONE;
 		FindMaxOverlapingFrame(startTime, endTime, &frameIndex);
-		mCurrentFrameIndex = frameIndex;
 	}
 	//The time range is looping enough to cover the whole animation duration,
 	//so check a single time range covering the whole animation duration.
 	else if (  (startSequenceIndex < endSequenceIndex && startTime <= endTime)
 			|| (endSequenceIndex - startSequenceIndex >= 2) )
 	{
-		uint32 frameIndex = INDEX_NONE;
-		FindMaxOverlapingFrame(FTimespan(0), animation->GetDuration(), &frameIndex);
-		mCurrentFrameIndex = frameIndex;
+		frameIndex = INDEX_NONE;
+		FindMaxOverlapingFrame(FTimespan(0), mAnimation->GetDuration(), &frameIndex);
 	}
 	else
 	{
@@ -210,22 +181,26 @@ FOdysseyAnimationMediaSamples::FetchBestVideoSampleForTimeRange(const TRange<FMe
 		uint32 frameIndex1 = INDEX_NONE;
 		uint32 frameIndex2 = INDEX_NONE;
 		FTimespan overlap1 = FindMaxOverlapingFrame(0, endTime, &frameIndex1);
-		FTimespan overlap2 = FindMaxOverlapingFrame(startTime, animation->GetDuration(), &frameIndex2);
-		mCurrentFrameIndex = overlap1 > overlap2 ? frameIndex1 : frameIndex2;
+		FTimespan overlap2 = FindMaxOverlapingFrame(startTime, mAnimation->GetDuration(), &frameIndex2);
+		frameIndex = overlap1 > overlap2 ? frameIndex1 : frameIndex2;
 		resultingSequenceIndex = overlap1 > overlap2 ? endSequenceIndex : startSequenceIndex;
 	}
 
 	//TODO: Use Cache to retrieve the sample
-	OutSample = MakeShared<FOdysseyAnimationMediaTextureSample>(animation, mCurrentFrameIndex, resultingSequenceIndex);
+	//OutSample = MakeShared<FOdysseyAnimationMediaTextureSample>(mAnimation, frameIndex, resultingSequenceIndex);
+	mSample->Update(frameIndex, resultingSequenceIndex);
+	OutSample = mSample;
 
 	//It can sound weird, but this is also the place where we detect that the play needs to stop
 	if (isAtEnd)
 	{
 		// Stop the player.
-		player->GetEventSink().ReceiveMediaEvent(EMediaEvent::PlaybackEndReached);
-		controls.SetState( EMediaState::Stopped );
-		controls.SetRate( 0.0f );
+		//TODO:This should not happen here ? Check this, it is so weird !
+		//ES: I checked, I have no other place to do this...
+		//So in the future, translate all this system in our own system with tracks, animated textures, players and everything
+		controls->Pause();
 		player->GetEventSink().ReceiveMediaEvent(EMediaEvent::PlaybackSuspended);
+		player->GetEventSink().ReceiveMediaEvent(EMediaEvent::PlaybackEndReached);
 	}
 			
 	return EFetchBestSampleResult::Ok;
@@ -234,49 +209,25 @@ FOdysseyAnimationMediaSamples::FetchBestVideoSampleForTimeRange(const TRange<FMe
 bool
 FOdysseyAnimationMediaSamples::PeekVideoSampleTime(FMediaTimeStamp & TimeStamp)
 {
-	//ES: I don't know what is the actual purpose of this method
-	// I just followed what FImgMediaLoader did
-	// If someone knows better, please update this comment
+	//ES: The purpose of this function is to provide a time to the playerfacade.
+	//That time will be used as the start time when playing (i know it's weird)
+	//It is called on the first play and after a seek.
+	//It must represent the start time of a sample
+	//The way it is usually done is by giving the start time of the first sample in the queue.
+	//But we don't have a queue.
+	//So we should just return the first frame which overlaps CurrentTime.
+	//It does not need to be as precise as FetchBestVideoSampleForTimeRange.
 
-	TSharedPtr<FOdysseyAnimationMediaPlayer> player = mPlayer.Pin();
-	if ( !player )
-		return false;
+	TSharedPtr<FOdysseyAnimationMediaControls> controls = mControls.Pin();
 
-	UOdysseyAnimation* animation = player->GetAnimation();
-	if ( !animation )
-		return false;
+	//GetTime() is marked as deprecated somewhere, but we need the time anyway, so let's use it
+	int frameIndex = mAnimation->GetFrameIndexAtTime(controls->GetTime());
+	if ( controls->GetRate() >= 0 )
+		TimeStamp.Time = mAnimation->GetFrameTimeRange(frameIndex).GetLowerBoundValue();
+	else 
+		TimeStamp.Time = mAnimation->GetFrameTimeRange(frameIndex).GetUpperBoundValue();
 
-	FOdysseyAnimationMediaControls& controls = player->GetOdysseyControls();
-	uint32 frameIndex = INDEX_NONE;
-	bool isNewSequence = false;
-
-	if ( controls.GetRate() >= 0 )
-	{
-		frameIndex = mCurrentFrameIndex + 1;
-		if (frameIndex >= animation->GetFrameCount())
-		{
-			if (!controls.IsLooping())
-				return false;
-
-			frameIndex = 0;
-			isNewSequence = true;
-		}
-	}
-	else
-	{
-		frameIndex = mCurrentFrameIndex - 1;
-		if (frameIndex < 0)
-		{
-			if (!controls.IsLooping())
-				return false;
-
-			frameIndex = animation->GetFrameCount() - 1;
-			isNewSequence = true;
-		}
-	}
-
-	TimeStamp.Time = animation->GetFrameTimeRange(frameIndex).GetLowerBoundValue();
-	TimeStamp.SequenceIndex = isNewSequence ? 1 : 0;
+	TimeStamp.SequenceIndex = 0;
 	return true;
 }
 

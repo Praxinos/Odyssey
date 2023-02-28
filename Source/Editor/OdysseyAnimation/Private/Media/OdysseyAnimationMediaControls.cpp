@@ -8,7 +8,8 @@
 #define LOCTEXT_NAMESPACE "OdysseyAnimationMediaControls"
 
 FOdysseyAnimationMediaControls::FOdysseyAnimationMediaControls()
-	: mState(EMediaState::Closed)
+	: mAnimation(nullptr)
+	, mState(EMediaState::Closed)
 	, mPlaybackIsBlocking(false)
 	, mIsLooping(false)
 	, mRate(0.0f)
@@ -16,20 +17,25 @@ FOdysseyAnimationMediaControls::FOdysseyAnimationMediaControls()
 }
 
 void
-FOdysseyAnimationMediaControls::Init(TWeakPtr<FOdysseyAnimationMediaPlayer> iPlayer)
+FOdysseyAnimationMediaControls::Init(TSharedPtr<FOdysseyAnimationMediaPlayer> iPlayer)
 {
-    mPlayer = iPlayer;
+	mPlayer = iPlayer;
 }
 
 void
-FOdysseyAnimationMediaControls::OnOpen()
+FOdysseyAnimationMediaControls::OnOpen( UOdysseyAnimation* iAnimation )
 {
+	mAnimation = iAnimation;
     mState = EMediaState::Stopped;
+	mPlaybackIsBlocking = false;
+	mIsLooping = false;
+	mRate = 0.f;
 }
 
 void
 FOdysseyAnimationMediaControls::OnClose()
 {
+	mAnimation = nullptr;
 	mState = EMediaState::Closed;
 	mPlaybackIsBlocking = false;
 	mIsLooping = false;
@@ -45,21 +51,13 @@ FOdysseyAnimationMediaControls::CanControl(EMediaControl iControl) const
 FTimespan
 FOdysseyAnimationMediaControls::GetDuration() const
 {
-	TSharedPtr<FOdysseyAnimationMediaPlayer> player = mPlayer.Pin();
-	if ( !player )
-		return FTimespan(0);
-
-	UOdysseyAnimation* animation = player->GetAnimation();
-	if ( !animation )
-		return FTimespan(0);
-
-    return animation->GetDuration();
+    return mAnimation->GetDuration();
 }
 
 float
 FOdysseyAnimationMediaControls::GetRate() const
 {
-	return 1.0;
+	return mRate;
 }
 
 EMediaState
@@ -85,7 +83,8 @@ FOdysseyAnimationMediaControls::GetSupportedRates(EMediaRateThinning iThinning) 
 FTimespan
 FOdysseyAnimationMediaControls::GetTime() const
 {
-	return FTimespan(0);
+	//deprecated: but needed to compile
+	return mTime;
 }
 
 bool
@@ -101,7 +100,7 @@ FOdysseyAnimationMediaControls::Seek(const FTimespan& iTime)
 	if ( !player )
 		return false;
 
-	player->GetOdysseySamples().SetTime(iTime);
+	mTime = iTime;
 
 	// scrub to desired time if needed
 	if (mState == EMediaState::Stopped)

@@ -14,8 +14,8 @@ public:
     FOdysseyAnimationMediaCache();
 
 public:
-	void Init(TWeakPtr<class FOdysseyAnimationMediaPlayer> iPlayer);
-	void OnOpen();
+	void Init();
+	void OnOpen(UOdysseyAnimation* iAnimation);
 	void OnClose();
 
 public:
@@ -44,5 +44,5 @@ public:
 	virtual int32 GetSampleCount(EMediaCacheState State) const override;
 
 private:
-	TWeakPtr<class FOdysseyAnimationMediaPlayer> mPlayer;
+	UOdysseyAnimation* mAnimation;
 };

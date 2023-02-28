@@ -19,6 +19,32 @@ class ODYSSEYANIMATION_API UOdysseyAnimation : public UBaseMediaSource
 	GENERATED_BODY()
 
 public:
+    /**
+     * @brief Delegate called when CurrentFrame changes
+     * 
+     */
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnCurrentFrameChanged, UOdysseyAnimation*)
+    static FOnCurrentFrameChanged& OnCurrentFrameChanged();
+
+    /**
+     * @brief Delegate called when FramesPerSecond changes
+     * 
+     */
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnFramesPerSecondChanged, UOdysseyAnimation*)
+    static FOnFramesPerSecondChanged& OnFramesPerSecondChanged();
+
+    /**
+     * @brief Delegate called when pixels of a frame changed
+     * 
+     * @param UOdysseyAnimation* Animation
+     * @param const TRange<int>& FrameRange
+     * @param const TArray<::ULIS::FRectI>& Rects
+     * @param bool IsInteractive
+     */
+    DECLARE_MULTICAST_DELEGATE_FourParams(FOnRenderImageChanged, UOdysseyAnimation*, const TRange<int>&, const TArray<::ULIS::FRectI>&, bool)
+    static FOnRenderImageChanged& OnRenderImageChanged(); //Delegate
+
+public:
 	void Init(const FOdysseyAnimationConfiguration& iConfiguration);
 
 public:
@@ -37,8 +63,8 @@ public:
 	uint32 Width() const;
 	uint32 Height() const;
 	::ULIS::eFormat Format() const;
-
 	FTimespan GetDuration() const;
+	TRange<int> GetFrameRange() const;
 	uint32 GetFrameCount() const;
 	double GetFramesPerSecond() const;
 	uint32 GetFrameIndexAtTime(FTimespan iTime) const;
@@ -63,12 +89,29 @@ public:
 	 * @param Ar
 	 */
 	virtual void Serialize(FArchive& Ar) override;
+    virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent) override;
+    virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;
+	virtual void PostInitProperties() override;
+
+private:
+	//Events
+	void OnLayerStackRenderImageChanged(UOdysseyAnimationLayerStack* iLayerStack, const TRange<int>& iRange, const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive);
+
+protected:
+    //Property changed methods
+    virtual void PropertyChanged(const FName& iPropertyName);
+	
+    virtual void CurrentFrameChanged();
+	virtual void FramesPerSecondChanged();
 
 public:
 	//CurrentFrame is specific to the user, not to the animation itself
     //So we save it in user's config, instead of the animation
 	UPROPERTY(config, DuplicateTransient)
 	int CurrentFrame = 0;
+
+	UPROPERTY()
+	float FramesPerSecond = 24.0f;
 
 private:
 	UPROPERTY()
@@ -79,9 +122,6 @@ private:
 
 	UPROPERTY()
 	uint32 mFormat = ::ULIS::Format_RGBA8;
-
-	UPROPERTY()
-	float mFramesPerSecond = 24.0f;
 
 	UPROPERTY(meta=(LoadBehavior = "LazyOnDemand"))
 	TObjectPtr<UOdysseyAnimationLayerStack> mLayerStack;

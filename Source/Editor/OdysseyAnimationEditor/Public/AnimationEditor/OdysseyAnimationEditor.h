@@ -9,6 +9,10 @@
 #include "Tools/RasterDrawingTool/OdysseyAnimationEditorRasterDrawingTool.h"
 #include "Tools/PaintBucketTool/OdysseyAnimationEditorPaintBucketTool.h"
 #include "Misc/OdysseyHandle.h"
+#include "IMediaEventSink.h"
+
+class UMediaPlayer;
+class UMediaTexture;
 
 /**
  * Implements an Editor for animations.
@@ -31,6 +35,9 @@ public:
     // Getters
 	virtual UOdysseyAnimation*				    Animation() const;
     virtual UOdysseyAnimationLayerStack*	    LayerStack() const;
+    virtual UMediaPlayer*                       MediaPlayer() const;
+    virtual float                               PlaybackFramesPerSecond() const;
+
 	virtual UTexture*                           DisplayTexture() const override;
     virtual TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> GetDisplayBlock() override;
 
@@ -47,6 +54,11 @@ protected:
     virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
 
 private:
+    //Called when the media player has seeked successfully
+    void OnMediaEvent(EMediaEvent iEvent);
+    void OnCurrentFrameChanged(UOdysseyAnimation* iAnimation);
+
+private:
     UOdysseyAnimation* mAnimation;
 	TSharedPtr<FOdysseyAnimationEditorGUI> mGUI;
     
@@ -55,6 +67,8 @@ private:
 
     TSharedPtr<IOdysseyHandle> mLayerStackPreloadHandle;
 
-    class UMediaPlayer* mMediaPlayer;
-    class UMediaTexture* mMediaTexture;
+    UMediaPlayer* mMediaPlayer;
+    UMediaTexture* mMediaTexture;
+
+    float mPlaybackFramesPerSecond;
 };

@@ -8,45 +8,38 @@
 #define LOCTEXT_NAMESPACE "OdysseyAnimationMediaCache"
 
 FOdysseyAnimationMediaCache::FOdysseyAnimationMediaCache()
+    : mAnimation(nullptr)
 {
 }
 
 void
-FOdysseyAnimationMediaCache::Init(TWeakPtr<FOdysseyAnimationMediaPlayer> iPlayer)
+FOdysseyAnimationMediaCache::Init()
 {
-    mPlayer = iPlayer;
 }
 
 void
-FOdysseyAnimationMediaCache::OnOpen()
+FOdysseyAnimationMediaCache::OnOpen(UOdysseyAnimation* iAnimation)
 {
+    mAnimation = iAnimation;
 
 }
 
 void
 FOdysseyAnimationMediaCache::OnClose()
 {
-
+    mAnimation = nullptr;
 }
 
 bool
 FOdysseyAnimationMediaCache::QueryCacheState(EMediaCacheState iState, TRangeSet<FTimespan>& oTimeRanges) const
 {
     //TODO:
-	TSharedPtr<FOdysseyAnimationMediaPlayer> player = mPlayer.Pin();
-	if ( !player )
-		return false;
-
-	UOdysseyAnimation* animation = player->GetAnimation();
-	if ( !animation )
-		return false;
-
     if (iState == EMediaCacheState::Loaded)
     {
-        uint32 frameCount = animation->GetFrameCount();
+        uint32 frameCount = mAnimation->GetFrameCount();
         for (uint32 i = 0; i < frameCount; i++)
         {
-			oTimeRanges.Add(animation->GetFrameTimeRange(i));
+			oTimeRanges.Add(mAnimation->GetFrameTimeRange(i));
         }
         return true;
     }

@@ -194,7 +194,7 @@ UOdysseyAnimationLayerImageRaster::CopyImage(TSharedPtr<::ULIS::FBlock, ESPMode:
     TArray<::ULIS::FEvent> eventConvertAndExecute = ULISUtils::ConvertAndExecute(ioBlock, ULISRasterBlock->Format(), iRect, iPos, iWaitList,
         [this, &ULISRasterBlock, &ctx](TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ioDest, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList) -> TArray<::ULIS::FEvent>
         {
-            ::ULIS::FEvent eventCopy;
+            ::ULIS::FEvent eventCopy = FULISEventBuilder().RetainBlock(ULISRasterBlock).Build();
             ctx.Copy(
                 *ULISRasterBlock,
                 *ioDest,

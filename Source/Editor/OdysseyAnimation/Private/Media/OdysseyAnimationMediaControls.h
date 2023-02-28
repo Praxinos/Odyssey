@@ -13,8 +13,8 @@ public:
     FOdysseyAnimationMediaControls();
 
 public:
-	void Init(TWeakPtr<class FOdysseyAnimationMediaPlayer> iPlayer);
-	void OnOpen();
+	void Init(TSharedPtr<class FOdysseyAnimationMediaPlayer> iPlayer);
+	void OnOpen(UOdysseyAnimation* iAnimation);
 	void OnClose();
 
 public:
@@ -33,16 +33,18 @@ public:
 	virtual bool SetRate(float Rate) override;
 	virtual void SetBlockingPlaybackHint(bool bFacadeWillUseBlockingPlayback) override;
 	
-	//deprecated: but needed to compile
+	//deprecated: but needed to compile and used in FOdysseyAnimationMediaSamples
 	virtual FTimespan GetTime() const override;
 
 public:
 	void SetState(EMediaState iState);
 
 private:
+	UOdysseyAnimation* mAnimation; //held by the player
 	TWeakPtr<class FOdysseyAnimationMediaPlayer> mPlayer;
 	EMediaState mState;
 	bool mPlaybackIsBlocking;
 	bool mIsLooping;
 	float mRate;
+	FTimespan mTime;
 };

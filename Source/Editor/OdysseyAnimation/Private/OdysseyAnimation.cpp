@@ -6,38 +6,42 @@
 #include "LayerStack/OdysseyAnimationLayerImageRaster.h"
 #include "LayerStack/OdysseyAnimationLayerStack.h"
 
+#include "Misc/TransactionObjectEvent.h"
+
 #include <ULIS>
 #include "ULISLoaderModule.h"
+
+UOdysseyAnimation::FOnCurrentFrameChanged&
+UOdysseyAnimation::OnCurrentFrameChanged()
+{
+    static FOnCurrentFrameChanged onCurrentFrameChanged;
+    return onCurrentFrameChanged;
+}
+
+UOdysseyAnimation::FOnFramesPerSecondChanged&
+UOdysseyAnimation::OnFramesPerSecondChanged()
+{
+    static FOnFramesPerSecondChanged onFramesPerSecondChanged;
+    return onFramesPerSecondChanged;
+}
+
+UOdysseyAnimation::FOnRenderImageChanged&
+UOdysseyAnimation::OnRenderImageChanged()
+{
+    static FOnRenderImageChanged onRenderImageChanged;
+    return onRenderImageChanged;
+}
 
 void UOdysseyAnimation::Init(const FOdysseyAnimationConfiguration& iConfiguration)
 {
 	mWidth = iConfiguration.Width;
 	mHeight = iConfiguration.Height;
 	mFormat = iConfiguration.ULISFormat();
-	mFramesPerSecond = iConfiguration.FramesPerSecond;
-
-	/* ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iConfiguration.ULISFormat());
-	for(int i = 0; i < 10; i++)
-	{
-		TSharedPtr<FOdysseyRasterBlock> rasterBlock = MakeShared<FOdysseyRasterBlock>();
-		TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = MakeShared<::ULIS::FBlock>(iConfiguration.Width, iConfiguration.Height, iConfiguration.ULISFormat());
-
-        ctx.Fill(
-			*block
-			, ::ULIS::FColor::HSVA8(i*20, 255, 255)
-		);
-
-		ctx.Finish();
-
-    	rasterBlock->SetBlock(block);
-		mRasterBlocks.Add(rasterBlock);
-	} */
+	FramesPerSecond = iConfiguration.FramesPerSecond;
 
 	mLayerStack = NewObject<UOdysseyAnimationLayerStack>(this, "LayerStack", RF_Public | RF_Transactional);
 	UOdysseyLayer* layer = mLayerStack->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass()); //Move in OdysseyAnimationFactor
     mLayerStack->CurrentLayer = TSoftObjectPtr<UOdysseyLayer>(layer);
-	//UOdysseyAnimationLayerImageRaster* rasterLayer = Cast<UOdysseyAnimationLayerImageRaster>(layer);
-	//rasterLayer->AddFrame();
 }
 
 uint32
@@ -64,6 +68,12 @@ UOdysseyAnimation::GetDuration() const
 	return FTimespan::FromSeconds(GetFrameCount() / GetFramesPerSecond());
 }
 
+TRange<int>
+UOdysseyAnimation::GetFrameRange() const
+{
+	return mLayerStack->GetFrameRange();
+}
+
 uint32
 UOdysseyAnimation::GetFrameCount() const
 {
@@ -78,7 +88,7 @@ UOdysseyAnimation::GetFrameCount() const
 double
 UOdysseyAnimation::GetFramesPerSecond() const
 {
-	return mFramesPerSecond;
+	return FramesPerSecond;
 }
 
 uint32
@@ -136,6 +146,73 @@ UOdysseyAnimation::Serialize(FArchive& Ar)
 
 	// Ar << mRasterBlocks;
 }
+
+
+void
+UOdysseyAnimation::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent)
+{
+    Super::PostEditChangeProperty(PropertyChangedEvent);
+
+    if (PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive)
+        return;
+
+    PropertyChanged(PropertyChangedEvent.GetPropertyName());
+}
+
+void
+UOdysseyAnimation::PostTransacted(const FTransactionObjectEvent& iTransactionEvent)
+{
+    Super::PostTransacted(iTransactionEvent);
+
+    if ( iTransactionEvent.GetEventType() != ETransactionObjectEventType::UndoRedo )
+        return;
+
+    const TArray<FName>& changedPropertyNames = iTransactionEvent.GetChangedProperties();
+    for ( const FName& propertyName : changedPropertyNames )
+    {
+        PropertyChanged(propertyName);
+    }
+}
+
+void
+UOdysseyAnimation::PostInitProperties()
+{
+	Super::PostInitProperties();
+	UOdysseyAnimationLayerStack::OnRenderImageChanged().AddUObject(this, &UOdysseyAnimation::OnLayerStackRenderImageChanged);
+}
+
+void
+UOdysseyAnimation::PropertyChanged(const FName& iPropertyName)
+{
+	if ( iPropertyName == "CurrentFrame" )
+        CurrentFrameChanged();
+    if ( iPropertyName == "FramesPerSecond" )
+        FramesPerSecondChanged();
+}
+
+void
+UOdysseyAnimation::CurrentFrameChanged()
+{
+	OnCurrentFrameChanged().Broadcast(this);
+}
+
+void
+UOdysseyAnimation::FramesPerSecondChanged()
+{
+	OnFramesPerSecondChanged().Broadcast(this);
+}
+
+/* Events
+ *****************************************************************************/
+void
+UOdysseyAnimation::OnLayerStackRenderImageChanged(UOdysseyAnimationLayerStack* iLayerStack, const TRange<int>& iRange, const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive)
+{
+	if (iLayerStack != mLayerStack)
+		return;
+
+	OnRenderImageChanged().Broadcast(this, iRange, iRects, iIsInteractive);
+}
+
 
 /* IMediaSource overrides
  *****************************************************************************/

@@ -8,9 +8,16 @@ class FOdysseyAnimationMediaTextureSample
 	: public IMediaTextureSample
 {
 public:
-	//Constructor
-	FOdysseyAnimationMediaTextureSample(UOdysseyAnimation* iAnimation, uint32 iFrameIndex, uint32 iSequenceIndex);
+	//Constructor / Destructor
+	virtual ~FOdysseyAnimationMediaTextureSample();
+	FOdysseyAnimationMediaTextureSample(UOdysseyAnimation* iAnimation);
 	
+public:
+	void Update(uint32 iFrameIndex, uint32 iSequenceIndex);
+	
+	void CopyRects(const TArray<::ULIS::FRectI>& iRects);
+	void CopyRects_RenderThread(TSharedPtr<::ULIS::FBlock> iSrc, const TArray<::ULIS::FRectI>& iRects);
+
 public:
 	// Mandatrory IMediaTextureSample interface overrides
 
@@ -115,7 +122,15 @@ public:
 	virtual bool IsOutputSrgb() const;
 
 private:
+	//Events
+	void OnRenderImageChanged(UOdysseyAnimation* iAnimation, const TRange<int>& iRange, const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive);
+
+private:
+	UOdysseyAnimation* mAnimation;
+	bool mIsValid;
+	uint32 mFrameIndex;
+	uint32 mSequenceIndex;
 	FMediaTimeStamp mTime;
 	FTimespan mDuration;
-	TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mBlock;
+	TStrongObjectPtr<UTexture2DDynamic> mTexture; 
 };
