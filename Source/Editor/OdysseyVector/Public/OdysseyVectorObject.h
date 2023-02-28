@@ -67,6 +67,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorObject : public UObject
         BLMatrix2D mInverseWorldMatrix;
         std::list<UOdysseyVectorObject*> mChildrenList;
         UOdysseyVectorObject* mParent;
+        // TODO: delete mIsFilled. no sense to put that here.
         bool mIsFilled;
         bool mIsSelected;
         bool mIsInvalidated;

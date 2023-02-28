@@ -546,7 +546,7 @@ UOdysseyVectorPathCubic::DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags )
     iBLContext.strokePath( path );
 */
 
-    if ( IsFilled() )
+    if ( Filled )
     {
         Fill( iRoi );
     }

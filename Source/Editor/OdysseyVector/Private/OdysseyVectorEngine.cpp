@@ -550,10 +550,10 @@ FOdysseyVectorEngine::Pick( UOdysseyVectorRoot& iScene, std::vector<::ULIS::FVec
     ::ULIS::FRectD roi;
     std::vector<UOdysseyVectorObject*> pickedObjectArray;
 
-    UseMaskImage();
-
     if( iSelectionFlags & UOdysseyVectorObject::PICK_MASK_BASED )
     {
+        UseMaskImage();
+
         roi = GenerateMask( iPointArray );
     }
     else
@@ -577,7 +577,10 @@ FOdysseyVectorEngine::Pick( UOdysseyVectorRoot& iScene, std::vector<::ULIS::FVec
         iScene.Select( pickedObjectArray[i] );
     }
 
-    UseColorImage();
+    if( iSelectionFlags & UOdysseyVectorObject::PICK_MASK_BASED )
+    {
+        UseColorImage();
+    }
 }
 
 void
