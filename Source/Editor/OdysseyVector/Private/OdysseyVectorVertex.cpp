@@ -268,6 +268,12 @@ UOdysseyVectorVertex::RemoveSection( FOdysseyVectorSection* iSection )
     mSectionList.remove( iSection );
 }
 
+::ULIS::FVec2D&
+UOdysseyVectorVertex::GetCoordsOnSegment( UOdysseyVectorSegment* iSegment )
+{
+    return GetCoords();
+}
+
 bool
 UOdysseyVectorVertex::HasSegment( UOdysseyVectorSegment& iSegment )
 {
@@ -282,67 +288,6 @@ UOdysseyVectorVertex::HasSegment( UOdysseyVectorSegment& iSegment )
     }
 
     return false;
-}
-
-bool
-UOdysseyVectorVertex::IsClosestSection( FOdysseyVectorSection& iStartSection
-                                      , FOdysseyVectorSection& iEndSection )
-{
-    double startSectionP0T   = iStartSection.GetVertex( 0 )->GetT( *iStartSection.GetSegment() );
-    double startSectionP1T   = iStartSection.GetVertex( 1 )->GetT( *iStartSection.GetSegment() );
-    double startSectionT     = ( startSectionP0T + startSectionP1T ) * 0.5f;
-    ::ULIS::FVec2D startSectionMidAt = iStartSection.GetSegment()->GetPointAt( startSectionT );
-
-    double endSectionP0T     = iEndSection.GetVertex( 0 )->GetT( *iEndSection.GetSegment() );
-    double endSectionP1T     = iEndSection.GetVertex( 1 )->GetT( *iEndSection.GetSegment() );
-    double endSectionT       = ( endSectionP0T + endSectionP1T ) * 0.5f;
-    ::ULIS::FVec2D endSectionMidAt   = iEndSection.GetSegment()->GetPointAt( endSectionT );
-
-    ::ULIS::FVec3F originToStartMid = { startSectionMidAt.x - this->GetCoords().x
-                                      , startSectionMidAt.y - this->GetCoords().y, 0.0f };
-    ::ULIS::FVec3F originToEndMid   = { endSectionMidAt.x - this->GetCoords().x
-                                      , endSectionMidAt.y - this->GetCoords().y, 0.0f };
-
-    if ( originToStartMid.DistanceSquared() && originToEndMid.DistanceSquared() )
-    {
-        originToStartMid.Normalize();
-        originToEndMid.Normalize();
-
-        ::ULIS::FVec3F referenceCross = originToStartMid.CrossProduct( originToEndMid );
-
-        for( std::list<FOdysseyVectorSection*>::iterator it = mSectionList.begin(); it != mSectionList.end(); ++it )
-        {
-            FOdysseyVectorSection* section = static_cast<FOdysseyVectorSection*>(*it);
-
-            if ( ( section != &iStartSection ) && ( section != &iEndSection ) )
-            {
-                double p0T = section->GetVertex(0)->GetT( *section->GetSegment());
-                double p1T = section->GetVertex(1)->GetT( *section->GetSegment());
-                double t = ( p0T + p1T ) * 0.5f;
-                ::ULIS::FVec2D pointAt = section->GetSegment()->GetPointAt( t );
-                ::ULIS::FVec3F originToVertex = { pointAt.x - this->GetCoords().x
-                                                , pointAt.y - this->GetCoords().y, 0.0f };
-
-               if ( originToVertex.DistanceSquared() )
-               {
-                    originToVertex.Normalize();
-
-                    ::ULIS::FVec3F sectionCross = originToStartMid.CrossProduct( originToVertex );
-
-                    // same side
-                    if ( sectionCross.DotProduct( referenceCross ) > 0.0f )
-                    {
-                        if ( originToStartMid.DotProduct( originToVertex ) > originToStartMid.DotProduct( originToEndMid ) )
-                        {
-                            return false;
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    return true;
 }
 
 ::ULIS::FRectD

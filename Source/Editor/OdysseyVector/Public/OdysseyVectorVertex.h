@@ -76,6 +76,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorVertex : public UOdysseyVectorPoint
         bool IsClosestSection( FOdysseyVectorSection& iStartSection
                              , FOdysseyVectorSection& iEndSection );
         UOdysseyVectorPath* GetPath();
+        virtual ::ULIS::FVec2D& GetCoordsOnSegment( UOdysseyVectorSegment* iSegment );
         void SetPath( UOdysseyVectorPath* iPath );
         void SetInCycle( bool iInCycle, uint32 iCycleID );
         bool IsInCycle();

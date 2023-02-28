@@ -347,6 +347,15 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "PainterEditor.ToolsTab.PathCutTool64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/path_cut_tool_64", mIcon64x64 ) );
     Set( "PainterEditor.ToolsTab.PathPushTool64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/path_push_tool_64", mIcon64x64 ) );
     Set( "PainterEditor.ToolsTab.PathKnotTool64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/path_knot_tool_64", mIcon64x64 ) );
+    Set( "PainterEditor.ToolsTab.Lasso64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/lasso_64", mIcon64x64 ) );
+    Set( "PainterEditor.ToolsTab.Lasso32", new IMAGE_BRUSH( "PainterEditor/ToolsTab/lasso_32", mIcon32x32 ) );
+    Set( "PainterEditor.ToolsTab.Lasso16", new IMAGE_BRUSH( "PainterEditor/ToolsTab/lasso_16", mIcon16x16 ) );
+    Set( "PainterEditor.ToolsTab.VectoEdit64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/vecto_edit_64", mIcon64x64 ) );
+    Set( "PainterEditor.ToolsTab.VectoEdit32", new IMAGE_BRUSH( "PainterEditor/ToolsTab/vecto_edit_32", mIcon32x32 ) );
+    Set( "PainterEditor.ToolsTab.VectoEdit16", new IMAGE_BRUSH( "PainterEditor/ToolsTab/vecto_edit_16", mIcon16x16 ) );
+    Set( "PainterEditor.ToolsTab.VectoPen64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/vecto_pen_64", mIcon64x64 ) );
+    Set( "PainterEditor.ToolsTab.VectoPen32", new IMAGE_BRUSH( "PainterEditor/ToolsTab/vecto_pen_32", mIcon32x32 ) );
+    Set( "PainterEditor.ToolsTab.VectoPen16", new IMAGE_BRUSH( "PainterEditor/ToolsTab/vecto_pen_16", mIcon16x16 ) );
     Set( "PainterEditor.ToolsTab.DrawingTool64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/drawing_tool_64", mIcon64x64 ) );
     Set( "PainterEditor.ToolsTab.DrawingTool16", new IMAGE_BRUSH( "PainterEditor/ToolsTab/drawing_tool_16", mIcon16x16 ) );
     Set( "PainterEditor.ToolsTab.ClearLayer64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/clear_layer_64", mIcon64x64 ) );

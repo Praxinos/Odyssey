@@ -53,6 +53,9 @@ class ODYSSEYVECTOR_API UOdysseyVectorGroupPaint : public UOdysseyVectorGroup
         UPROPERTY(EditAnywhere, Category="General")
         bool Realtime; // relatime updates
 
+        UPROPERTY(EditAnywhere, Category="General")
+        double Tolerance;
+
     public:
         void ApplyBucket( FOdysseyVectorBucket* iBucket );
         void Colorize();
@@ -108,4 +111,5 @@ class ODYSSEYVECTOR_API UOdysseyVectorGroupPaint : public UOdysseyVectorGroup
         void ClearCycles();
         void AddBucket( FOdysseyVectorBucket* iBucket );
         void RemoveBucket( FOdysseyVectorBucket* iBucket );
+        void PropertyChanged(const FName& iPropertyName);
 };

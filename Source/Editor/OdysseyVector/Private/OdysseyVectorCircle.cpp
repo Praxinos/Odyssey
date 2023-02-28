@@ -10,7 +10,8 @@ UOdysseyVectorCircle::~UOdysseyVectorCircle()
 }
 
 UOdysseyVectorCircle::UOdysseyVectorCircle()
-    : mStrokeWidth ( 4.0f )
+    : UOdysseyVectorPathCubic()
+    , mStrokeWidth ( 4.0f )
 {
     SetName( "Circle" );
 
@@ -116,10 +117,30 @@ UOdysseyVectorCircle::DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags )
 bool
 UOdysseyVectorCircle::PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags )
 {
-    /*if( FMath::Sqrt((iX*iX) + (iY*iY)) <= mRadiusX )
+    if( Filled )
     {
-        return this;
-    }*/
+        BLPath path;
+        BLPoint pt = { iRoi.x, iRoi.y };
+
+        for( int i = 0; i < 4; i++ )
+        {
+            ::ULIS::FVec2D &point0 = mCubicSegment[i]->GetPoint(0)->GetCoords();
+            ::ULIS::FVec2D &point1 = mCubicSegment[i]->GetPoint(1)->GetCoords();
+            ::ULIS::FVec2D &ctrlPoint0 = mCubicSegment[i]->GetControlPoint(0)->GetCoords();
+            ::ULIS::FVec2D &ctrlPoint1 = mCubicSegment[i]->GetControlPoint(1)->GetCoords();
+
+            path.moveTo( point0.x, point0.y );
+            path.cubicTo( ctrlPoint0.x, ctrlPoint0.y, ctrlPoint1.x, ctrlPoint1.y, point1.x, point1.y );
+        }
+
+        path.close();
+
+        return path.hitTest( pt, BL_FILL_RULE_EVEN_ODD ) ? true : false;
+    }
+    else
+    {
+        return UOdysseyVectorPathCubic::PickShape( iRoi, iSelectionFlags );
+    }
 
     return false;
 }
@@ -141,7 +162,7 @@ UOdysseyVectorCircle::SetRadius( double iRadiusX, double iRadiusY )
     mBBox.w =  ( mRadiusX +  mStrokeWidth ) * 2;
     mBBox.h =  ( mRadiusY +  mStrokeWidth ) * 2;
 
-    UpdateShape( 0 );
+    //Invalidate();
 }
 
 double

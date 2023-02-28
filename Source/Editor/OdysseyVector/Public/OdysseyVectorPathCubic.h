@@ -32,10 +32,16 @@ class ODYSSEYVECTOR_API UOdysseyVectorPathCubic: public UOdysseyVectorPath
 
         uint32 mJointType;
 
+
+
     protected:
         UOdysseyVectorObject* CopyShape();
         void DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags );
         bool PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags );
+
+    public:
+        UPROPERTY(EditAnywhere,Category="General")
+        bool Filled;
 
     public:
         UOdysseyVectorPathCubic();

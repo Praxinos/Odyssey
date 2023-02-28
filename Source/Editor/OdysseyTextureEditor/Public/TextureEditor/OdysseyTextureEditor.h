@@ -9,6 +9,7 @@
 #include "OdysseyTextureLayerStackUserData.h"
 #include "LayerStack/OdysseyTextureLayerStack.h"
 #include "Tools/RasterDrawingTool/OdysseyTextureEditorRasterDrawingTool.h"
+#include "Tools/VectorPrimitiveDrawingTool/OdysseyTextureEditorVectorPrimitiveDrawingTool.h"
 #include "Tools/VectorPathDrawingTool/OdysseyTextureEditorVectorPathDrawingTool.h"
 #include "Tools/VectorPathEditTool/OdysseyTextureEditorVectorPathEditTool.h"
 #include "Tools/VectorPathCutTool/OdysseyTextureEditorVectorPathCutTool.h"
@@ -53,6 +54,7 @@ public:
     UOdysseyTextureLayerStackUserData*       TextureUserData() const;
 
     virtual UOdysseyTextureEditorRasterDrawingTool* GetRasterDrawingTool() const override;
+    virtual UOdysseyTextureEditorVectorPrimitiveDrawingTool* GetVectorPrimitiveDrawingTool() const override;
     virtual UOdysseyTextureEditorVectorPathDrawingTool* GetVectorPathDrawingTool() const override;
     virtual UOdysseyTextureEditorVectorPathEditTool* GetVectorPathEditTool() const override;
     virtual UOdysseyTextureEditorVectorPathCutTool* GetVectorPathCutTool() const override;
@@ -90,6 +92,7 @@ private:
 	TSharedPtr<FOdysseyTextureEditorGUI> mGUI;
     
     UOdysseyTextureEditorRasterDrawingTool* mRasterDrawingTool;
+    UOdysseyTextureEditorVectorPrimitiveDrawingTool* mVectorPrimitiveDrawingTool;
     UOdysseyTextureEditorVectorPathDrawingTool* mVectorPathDrawingTool;
     UOdysseyTextureEditorVectorPathEditTool* mVectorPathEditTool;
     UOdysseyTextureEditorVectorPathCutTool* mVectorPathCutTool;

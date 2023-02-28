@@ -28,6 +28,7 @@ FOdysseyTextureEditor::FOdysseyTextureEditor() :
 	mTexture(nullptr),
 	mGUI(nullptr),
 	mRasterDrawingTool(nullptr),
+	mVectorPrimitiveDrawingTool(nullptr),
 	mVectorPathDrawingTool(nullptr),
 	mVectorPathEditTool(nullptr),
 	mVectorPathCutTool(nullptr),
@@ -65,6 +66,7 @@ void
 FOdysseyTextureEditor::InitTools()
 {
 	mRasterDrawingTool = NewObject<UOdysseyTextureEditorRasterDrawingTool>();
+	mVectorPrimitiveDrawingTool = NewObject<UOdysseyTextureEditorVectorPrimitiveDrawingTool>();
 	mVectorPathDrawingTool = NewObject<UOdysseyTextureEditorVectorPathDrawingTool>();
 	mVectorPathEditTool = NewObject<UOdysseyTextureEditorVectorPathEditTool>();
 	mVectorPathCutTool = NewObject<UOdysseyTextureEditorVectorPathCutTool>();
@@ -81,6 +83,7 @@ FOdysseyTextureEditor::InitTools()
 	mColorPickerTool = NewObject<UOdysseyTextureEditorColorPickerTool>();
 
 	mRasterDrawingTool->SetEditor(this);
+    mVectorPrimitiveDrawingTool->SetEditor(this);
     mVectorPathDrawingTool->SetEditor(this);
     mVectorPathEditTool->SetEditor(this);
     mVectorPathCutTool->SetEditor(this);
@@ -98,6 +101,7 @@ FOdysseyTextureEditor::InitTools()
 	mRasterDrawingTool->SetBrushContexts(mBrushContexts);
 
 	mTools.Add(mRasterDrawingTool);
+    mTools.Add(mVectorPrimitiveDrawingTool);
     mTools.Add(mVectorPathDrawingTool);
     mTools.Add(mVectorPathEditTool);
     mTools.Add(mVectorPathCutTool);
@@ -120,6 +124,7 @@ FOdysseyTextureEditor::BindShortcuts(FBaseToolkit* iToolkit)
 {
 	FOdysseyPainterEditor::BindShortcuts(iToolkit);
 	mRasterDrawingTool->BindShortcuts(iToolkit);
+	mVectorPrimitiveDrawingTool->BindShortcuts(iToolkit);
 	mVectorPathDrawingTool->BindShortcuts(iToolkit);
 	mVectorPathEditTool->BindShortcuts(iToolkit);
 	mVectorPathCutTool->BindShortcuts(iToolkit);
@@ -141,6 +146,7 @@ FOdysseyTextureEditor::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
 {
 	FOdysseyPainterEditor::ExtendMenu(iOwner, iMenuName);
 	mRasterDrawingTool->ExtendMenu(iOwner, iMenuName);
+	mVectorPrimitiveDrawingTool->ExtendMenu(iOwner, iMenuName);
 	mVectorPathDrawingTool->ExtendMenu(iOwner, iMenuName);
 	mVectorPathEditTool->ExtendMenu(iOwner, iMenuName);
 	mVectorPathCutTool->ExtendMenu(iOwner, iMenuName);
@@ -257,6 +263,12 @@ UOdysseyTextureEditorRasterDrawingTool*
 FOdysseyTextureEditor::GetRasterDrawingTool() const
 {
 	return mRasterDrawingTool;
+}
+
+UOdysseyTextureEditorVectorPrimitiveDrawingTool*
+FOdysseyTextureEditor::GetVectorPrimitiveDrawingTool() const
+{
+	return mVectorPrimitiveDrawingTool;
 }
 
 UOdysseyTextureEditorVectorPathDrawingTool*
@@ -389,6 +401,7 @@ FOdysseyTextureEditor::AddReferencedObjects(FReferenceCollector& Collector)
 {
 	FOdysseyPainterEditor::AddReferencedObjects(Collector);
 	Collector.AddReferencedObject(mRasterDrawingTool);
+	Collector.AddReferencedObject(mVectorPrimitiveDrawingTool);
 	Collector.AddReferencedObject(mVectorPathDrawingTool);
 	Collector.AddReferencedObject(mVectorPathEditTool);
 	Collector.AddReferencedObject(mVectorPathCutTool);

@@ -9,6 +9,7 @@ UOdysseyVectorGroupPaint::~UOdysseyVectorGroupPaint()
 }
 
 UOdysseyVectorGroupPaint::UOdysseyVectorGroupPaint()
+    : Tolerance( 0.0f )
 {
     mDependsOnChildren = true;
 }
@@ -202,7 +203,7 @@ UOdysseyVectorGroupPaint::IntersectSegment( UOdysseyVectorSegmentCubic& iCubicSe
 
         if( intersectRect.Area() )
         {
-            intersectionCount += iCubicSegment.Intersect( *intersectSegment, iIntersectionVertexArray );
+            intersectionCount += iCubicSegment.Intersect( *intersectSegment, Tolerance, iIntersectionVertexArray );
         }
     }
 
@@ -217,8 +218,9 @@ PrintCycle( std::vector<UOdysseyVectorVertex*>& vertexArray
 
     for( int i = 0; i < vertexArray.size(); i++ )
     {
-        BLPoint pt0 = sectionArray[i]->GetSegment()->GetPath()->GetWorldMatrix().mapPoint( sectionArray[i]->GetVertex(0)->GetCoords().x, sectionArray[i]->GetVertex(0)->GetCoords().y );
-        BLPoint pt1 = sectionArray[i]->GetSegment()->GetPath()->GetWorldMatrix().mapPoint( sectionArray[i]->GetVertex(1)->GetCoords().x, sectionArray[i]->GetVertex(1)->GetCoords().y );
+        UOdysseyVectorSegment* segment = sectionArray[i]->GetSegment();
+        BLPoint pt0 = segment->GetPath()->GetWorldMatrix().mapPoint( sectionArray[i]->GetVertex(0)->GetCoordsOnSegment(segment).x, sectionArray[i]->GetVertex(0)->GetCoordsOnSegment(segment).y );
+        BLPoint pt1 = segment->GetPath()->GetWorldMatrix().mapPoint( sectionArray[i]->GetVertex(1)->GetCoordsOnSegment(segment).x, sectionArray[i]->GetVertex(1)->GetCoordsOnSegment(segment).y );
 
         UE_LOG(LogTemp,Warning,TEXT("Node: vertex:%d section:%d (%d[x:%f y:%f] -- %d[x:%f y:%f])"), vertexArray[i], sectionArray[i], sectionArray[i]->GetVertex(0), pt0.x, pt0.y, sectionArray[i]->GetVertex(1), pt1.x, pt1.y );
     }
@@ -351,8 +353,8 @@ GetNormalVector( std::vector<UOdysseyVectorVertex*>& iVertexArray
         {
             int n = ( i + 1 ) % arraySize;
             UOdysseyVectorSegment* segment = iSectionArray[i]->GetSegment();
-            ::ULIS::FVec2D& viCoords = iVertexArray[i]->GetCoords();
-            ::ULIS::FVec2D& vnCoords = iVertexArray[n]->GetCoords();
+            ::ULIS::FVec2D& viCoords = iVertexArray[i]->GetCoordsOnSegment( segment );
+            ::ULIS::FVec2D& vnCoords = iVertexArray[n]->GetCoordsOnSegment( segment );
             double ti = iVertexArray[i]->GetT( *segment );
             double tn = iVertexArray[n]->GetT( *segment );
             double deltaT = tn - ti;
@@ -575,4 +577,25 @@ UOdysseyVectorGroupPaint::PickBucketHandle( double iX, double iY )
     }
 
     return nullptr;
+}
+
+void
+UOdysseyVectorGroupPaint::PropertyChanged(const FName& iPropertyName)
+{
+    if ( iPropertyName == "Tolerance" )
+    {
+        FindCycles();
+    }
+/*
+    if ( iPropertyName == "IsActivated" )
+        IsActivatedChanged();
+    if ( iPropertyName == "IsLocked" )
+        IsLockedChanged();
+    if ( iPropertyName == "IsExpanded" )
+        IsExpandedChanged();
+    if ( iPropertyName == "Parent" )
+        ParentChanged();
+    if ( iPropertyName == "Children" )
+        ChildrenChanged();
+*/
 }

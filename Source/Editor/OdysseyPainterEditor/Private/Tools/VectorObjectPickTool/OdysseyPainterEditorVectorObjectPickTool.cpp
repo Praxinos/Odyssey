@@ -19,7 +19,7 @@ UOdysseyPainterEditorVectorObjectPickTool::~UOdysseyPainterEditorVectorObjectPic
 
 UOdysseyPainterEditorVectorObjectPickTool::UOdysseyPainterEditorVectorObjectPickTool()
 {
-    Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.ObjectPickTool64");
+    Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Lasso64");
 
     mSelectionHUD = new FOdysseyVectorHUDSelection( mPointArray );
 }

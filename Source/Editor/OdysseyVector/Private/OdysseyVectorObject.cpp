@@ -650,3 +650,50 @@ UOdysseyVectorObject::GetType()
 {
     return UOdysseyVectorObject::VECTOROBJECTTYPE;
 }
+
+
+void
+UOdysseyVectorObject::PropertyChanged(const FName& iPropertyName)
+{
+/*
+    if ( iPropertyName == "Name" )
+        NameChanged();
+    if ( iPropertyName == "IsActivated" )
+        IsActivatedChanged();
+    if ( iPropertyName == "IsLocked" )
+        IsLockedChanged();
+    if ( iPropertyName == "IsExpanded" )
+        IsExpandedChanged();
+    if ( iPropertyName == "Parent" )
+        ParentChanged();
+    if ( iPropertyName == "Children" )
+        ChildrenChanged();
+*/
+}
+
+void
+UOdysseyVectorObject::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent)
+{
+    Super::PostEditChangeProperty(PropertyChangedEvent);
+
+    if (PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive)
+        return;
+
+    PropertyChanged(PropertyChangedEvent.GetPropertyName());
+}
+/*
+void
+UOdysseyVectorObject::PostTransacted(const FTransactionObjectEvent& iTransactionEvent)
+{
+    Super::PostTransacted(iTransactionEvent);
+
+    if ( iTransactionEvent.GetEventType() != ETransactionObjectEventType::UndoRedo )
+        return;
+
+    const TArray<FName>& changedPropertyNames = iTransactionEvent.GetChangedProperties();
+    for ( const FName& propertyName : changedPropertyNames )
+    {
+        PropertyChanged(propertyName);
+    }
+}
+*/

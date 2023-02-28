@@ -16,6 +16,8 @@ class ODYSSEYVECTOR_API UOdysseyVectorObject : public UObject
     public:
         GENERATED_BODY()
 
+        DECLARE_MULTICAST_DELEGATE(FOnPropertyChanged);
+
         static const uint32 PICK_MATH_BASED = ( 1 << 0 );
         static const uint32 PICK_MASK_BASED = ( 1 << 3 );
 
@@ -153,4 +155,8 @@ class ODYSSEYVECTOR_API UOdysseyVectorObject : public UObject
         FColor GetForegroundColor();
         FColor GetBackgroundColor();
         virtual void SwitchSpace( UOdysseyVectorObject& iNewSpace ){};
+        // UObject overrides
+        virtual void PropertyChanged(const FName& iPropertyName);
+        virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent) override;
+        //virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;
 };

@@ -479,6 +479,7 @@ CreateAlmostIntersection( FAlmostIntersect aisx[4]
 
 uint32
 UOdysseyVectorSegmentCubic::Intersect( UOdysseyVectorSegmentCubic& iOther
+                                     , double iTolerance
                                      , std::vector<UOdysseyVectorVertexIntersection*>& iIntersectionVertexArray )
 {
     ::ULIS::FVec2D& point0 = mPoint[0]->GetCoords();
@@ -513,9 +514,9 @@ UOdysseyVectorSegmentCubic::Intersect( UOdysseyVectorSegmentCubic& iOther
             double polySubT, interPolySubT;
 
             // to speed things up a bit
-            /*if( ( poly->xmax > interPoly->xmin ) && ( poly->xmin < interPoly->xmax )
-             && ( poly->ymax > interPoly->ymin ) && ( poly->ymin < interPoly->ymax ) )
-            {*/
+            if( ( ( poly->xmax + iTolerance ) > ( interPoly->xmin - iTolerance ) ) && ( ( poly->xmin - iTolerance ) < ( interPoly->xmax + iTolerance ) )
+             && ( ( poly->ymax + iTolerance ) > ( interPoly->ymin - iTolerance ) ) && ( ( poly->ymin - iTolerance ) < ( interPoly->ymax + iTolerance ) ) )
+            {
                 if(   ( this != &iOther )
                 // check this is not the same sub-segment or adjacent sub-segment, or else they would always intersect
                  || ( ( this == &iOther ) && ( ( i - j ) > 1 ) ) )
@@ -623,7 +624,7 @@ UOdysseyVectorSegmentCubic::Intersect( UOdysseyVectorSegmentCubic& iOther
                     }
 ///////////////////////////////////
                 }
-           /* }*/
+            }
         }
     }
 
@@ -634,7 +635,7 @@ UOdysseyVectorSegmentCubic::Intersect( UOdysseyVectorSegmentCubic& iOther
     }
 */
 
-    intersectionCount += CreateAlmostIntersection( aisx, 20.0f, this, &iOther, iIntersectionVertexArray );
+    //intersectionCount += CreateAlmostIntersection( aisx, iTolerance, this, &iOther, iIntersectionVertexArray );
 
     return intersectionCount;
 }

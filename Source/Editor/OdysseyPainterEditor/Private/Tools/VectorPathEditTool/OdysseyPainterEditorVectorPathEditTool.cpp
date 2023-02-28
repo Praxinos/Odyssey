@@ -22,7 +22,7 @@ UOdysseyPainterEditorVectorPathEditTool::UOdysseyPainterEditorVectorPathEditTool
                    | FOdysseyVectorHUDPathCubic::VIEW_HANDLE_POINT
                    | FOdysseyVectorHUDPathCubic::VIEW_HANDLE_SEGMENT*/ )
 {
-    Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.DrawingTool64");
+    Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.VectoEdit64");
 }
 
 //--------------------------------------------------------------------------------------

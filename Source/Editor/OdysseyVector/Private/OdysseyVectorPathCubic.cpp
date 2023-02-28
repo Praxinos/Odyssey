@@ -2,6 +2,7 @@
 
 UOdysseyVectorPathCubic::UOdysseyVectorPathCubic()
     : UOdysseyVectorPath()
+    , Filled( false )
 {
     setJointMiter();
 }
