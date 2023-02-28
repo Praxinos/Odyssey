@@ -87,4 +87,6 @@ protected:
     /** Patch (kinda): Stylus state and time of last event, so that we can have a little control for differentiating mouse and stylus events */
     std::chrono::steady_clock::time_point   mStylusLastEventTime;
     bool mIsCapturedByStylus;
+
+    TextureMipGenSettings mTextureMipGenSettings;
 };

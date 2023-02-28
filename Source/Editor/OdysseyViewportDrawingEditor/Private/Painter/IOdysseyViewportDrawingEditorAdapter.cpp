@@ -4,6 +4,7 @@
 #include "IOdysseyViewportDrawingEditorAdapter.h"
 #include "IMeshPaintGeometryAdapter.h"
 #include "Tools/OdysseyPainterEditorTool.h"
+#include "UObject/SavePackage.h"
 
 #define LOCTEXT_NAMESPACE "IOdysseyViewportDrawingEditorAdapter"
 
@@ -321,18 +322,30 @@ void IOdysseyViewportDrawingEditorAdapter::OnStylusStateChanged(const TWeakPtr<S
 
 void IOdysseyViewportDrawingEditorAdapter::RemoveTextureOverride()
 {
-    if( !mPaintingTexture2DRenderTarget || !mPaintingTexture2DRenderTarget->IsValidLowLevel() )
-        return;
+    //if( !mPaintingTexture2DRenderTarget || !mPaintingTexture2DRenderTarget->IsValidLowLevel() )
+    //    return;
 
     if (mEditor->Component() != nullptr && mEditor->Texture() != nullptr)
     {
-        const ERHIFeatureLevel::Type FeatureLevel = mEditor->Component()->GetWorld()->FeatureLevel;
-        mEditor->Material()->OverrideTexture(mEditor->Texture(), nullptr, FeatureLevel);
+        FSavePackageArgs packageArgs;
+        packageArgs.SaveFlags = mEditor->Texture()->GetFlags();
+        UPackage::Save(mEditor->Texture()->GetOutermost(), mEditor->Texture(), *(mEditor->Texture()->GetName()), packageArgs);
+        mEditor->Texture()->MipGenSettings = mTextureMipGenSettings;
+        mEditor->Texture()->UpdateResource();
+
+        //const ERHIFeatureLevel::Type FeatureLevel = mEditor->Component()->GetWorld()->FeatureLevel;
+        //mEditor->Material()->OverrideTexture(mEditor->Texture(), nullptr, FeatureLevel);
         //IMeshPaintGeometryAdapter::DefaultApplyOrRemoveTextureOverride(mEditor->Component(), mEditor->Texture(), nullptr);
 
+        //mPaintingTexture2DRenderTarget->ConditionalBeginDestroy();
+        //mPaintingTexture2DRenderTarget = nullptr;
+        mState = eState::kIdle;
+    }
+
+    if (mPaintingTexture2DRenderTarget && mPaintingTexture2DRenderTarget->IsValidLowLevel())
+    {
         mPaintingTexture2DRenderTarget->ConditionalBeginDestroy();
         mPaintingTexture2DRenderTarget = nullptr;
-        mState = eState::kIdle;
     }
 }
 
