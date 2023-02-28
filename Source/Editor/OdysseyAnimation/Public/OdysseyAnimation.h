@@ -68,4 +68,7 @@ private:
 	//TMap<FGuid, UE::Serialization::FEditorBulkData> mBulkDatas;
 
 	TArray<::ULIS::FBlock*> mBlocks;
+
+	UPROPERTY()
+	TObjectPtr<UOdysseyAnimationLayerStack> mLayerStack;
 };
