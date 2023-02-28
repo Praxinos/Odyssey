@@ -41,13 +41,16 @@ FOdysseyAnimationMediaSamples::FlushSamples()
 }
 
 FTimespan
-FOdysseyAnimationMediaSamples::FindMaxOverlapingFrame(FTimespan iStartTime, FTimespan iEndTime, uint32* oIndex)
+FOdysseyAnimationMediaSamples::FindMaxOverlapingFrame(FTimespan iStartTime, FTimespan iEndTime, int* oIndex)
 {
-	uint32 startFrameIndex = mAnimation->GetFrameIndexAtTime(iStartTime);
-	uint32 endFrameIndex = mAnimation->GetFrameIndexAtTime(iEndTime);
+    if (!mAnimation)
+        return FTimespan();
+
+	int startFrameIndex = mAnimation->GetFrameIndexAtTime(iStartTime);
+	int endFrameIndex = mAnimation->GetFrameIndexAtTime(iEndTime);
 	FTimespan bestOverlap(-1);
-	uint32 bestFrameIndex = INDEX_NONE;
-	for (uint32 frameIndex = startFrameIndex; frameIndex <= endFrameIndex; frameIndex++)
+	int bestFrameIndex = INDEX_NONE;
+	for (int frameIndex = startFrameIndex; frameIndex <= endFrameIndex; frameIndex++)
 	{
 		//Compute Overlap for frameIndex
 		TRange<FTimespan> range = mAnimation->GetFrameTimeRange(frameIndex);
@@ -69,6 +72,9 @@ FOdysseyAnimationMediaSamples::FindMaxOverlapingFrame(FTimespan iStartTime, FTim
 bool
 FOdysseyAnimationMediaSamples::SanitizeTimeRange(TRange<FMediaTimeStamp>* oTimeRange)
 {
+    if (!mAnimation)
+        return false;
+
 	TRange<FMediaTimeStamp>& timeRange = *oTimeRange;
 	TSharedPtr<FOdysseyAnimationMediaControls> controls = mControls.Pin();
 	if ( !controls )
@@ -85,7 +91,7 @@ FOdysseyAnimationMediaSamples::SanitizeTimeRange(TRange<FMediaTimeStamp>* oTimeR
 		isLowerOutOfBound = false;
 	}
 	
-	bool isUpperOutOfBound = timeRange.HasUpperBound() && timeRange.GetUpperBoundValue().Time > mAnimation->GetDuration();
+	bool isUpperOutOfBound = timeRange.HasUpperBound() && timeRange.GetUpperBoundValue().Time >= mAnimation->GetDuration();
 	if (isUpperOutOfBound && controls->IsLooping())
 	{
 		FMediaTimeStamp timestamp = timeRange.GetUpperBoundValue();
@@ -113,7 +119,9 @@ FOdysseyAnimationMediaSamples::SanitizeTimeRange(TRange<FMediaTimeStamp>* oTimeR
 IMediaSamples::EFetchBestSampleResult
 FOdysseyAnimationMediaSamples::FetchBestVideoSampleForTimeRange(const TRange<FMediaTimeStamp>& iTimeRange, TSharedPtr<IMediaTextureSample, ESPMode::ThreadSafe>& OutSample, bool bReverse)
 {
-	
+    if (!mAnimation)
+		return EFetchBestSampleResult::NoSample;
+
 	//	iTimeRange is always goes forward, never backward
 	//  which means LowerBoundValue is always <= UpperBoundValue
 
@@ -137,8 +145,8 @@ FOdysseyAnimationMediaSamples::FetchBestVideoSampleForTimeRange(const TRange<FMe
 	//Find which frame overlaps the timerange the most
 	FTimespan startTime = timeRange.GetLowerBoundValue().Time;
 	FTimespan endTime = timeRange.GetUpperBoundValue().Time;
-	uint32 startFrameIndex = mAnimation->GetFrameIndexAtTime(startTime);
-	uint32 endFrameIndex = mAnimation->GetFrameIndexAtTime(endTime);
+	int startFrameIndex = mAnimation->GetFrameIndexAtTime(startTime);
+	int endFrameIndex = mAnimation->GetFrameIndexAtTime(endTime);
 	uint32 startSequenceIndex = timeRange.GetLowerBoundValue().SequenceIndex;
 	uint32 endSequenceIndex = timeRange.GetUpperBoundValue().SequenceIndex;
 
@@ -150,7 +158,7 @@ FOdysseyAnimationMediaSamples::FetchBestVideoSampleForTimeRange(const TRange<FMe
 	//check overlap of each frame with the time range
 	
 	uint32 resultingSequenceIndex = startSequenceIndex;
-	uint32 frameIndex = 0;
+	int frameIndex = 0;
 	//Only a single frame overlaps the range
 	if (startSequenceIndex == endSequenceIndex && startFrameIndex == endFrameIndex)
 	{
@@ -177,8 +185,8 @@ FOdysseyAnimationMediaSamples::FetchBestVideoSampleForTimeRange(const TRange<FMe
 		//so we have to check two ranges
 		//search in [0, endFrame]
 		//search in [startFrame, animation->lastFrame]
-		uint32 frameIndex1 = INDEX_NONE;
-		uint32 frameIndex2 = INDEX_NONE;
+		int frameIndex1 = INDEX_NONE;
+		int frameIndex2 = INDEX_NONE;
 		FTimespan overlap1 = FindMaxOverlapingFrame(0, endTime, &frameIndex1);
 		FTimespan overlap2 = FindMaxOverlapingFrame(startTime, mAnimation->GetDuration(), &frameIndex2);
 		frameIndex = overlap1 > overlap2 ? frameIndex1 : frameIndex2;

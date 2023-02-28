@@ -25,7 +25,7 @@ protected:
 	virtual bool PeekVideoSampleTime(FMediaTimeStamp & TimeStamp) override;
 
 private:
-	FTimespan FindMaxOverlapingFrame(FTimespan iStartTime, FTimespan iEndTime, uint32* oIndex);
+	FTimespan FindMaxOverlapingFrame(FTimespan iStartTime, FTimespan iEndTime, int* oIndex);
 	bool SanitizeTimeRange(TRange<FMediaTimeStamp>* oTimeRange);
 
 private:

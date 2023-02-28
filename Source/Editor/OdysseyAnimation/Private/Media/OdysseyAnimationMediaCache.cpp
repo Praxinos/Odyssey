@@ -33,6 +33,9 @@ FOdysseyAnimationMediaCache::OnClose()
 bool
 FOdysseyAnimationMediaCache::QueryCacheState(EMediaCacheState iState, TRangeSet<FTimespan>& oTimeRanges) const
 {
+    if (!mAnimation)
+        return false;
+
     //TODO:
     if (iState == EMediaCacheState::Loaded)
     {
@@ -50,6 +53,8 @@ FOdysseyAnimationMediaCache::QueryCacheState(EMediaCacheState iState, TRangeSet<
 int32
 FOdysseyAnimationMediaCache::GetSampleCount(EMediaCacheState State) const
 {
+    if (!mAnimation)
+        return 0;
     //TODO:
     return 0;
 }

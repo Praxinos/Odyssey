@@ -51,6 +51,9 @@ FOdysseyAnimationMediaControls::CanControl(EMediaControl iControl) const
 FTimespan
 FOdysseyAnimationMediaControls::GetDuration() const
 {
+    if (!mAnimation)
+        return FTimespan();
+
     return mAnimation->GetDuration();
 }
 

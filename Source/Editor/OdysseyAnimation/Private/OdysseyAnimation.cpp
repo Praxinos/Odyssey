@@ -82,7 +82,7 @@ UOdysseyAnimation::GetFrameCount() const
 	//TODO: deduce frame count from :
 	// - startPoint / endPoint
 
-	return frameRange.GetUpperBoundValue() + 1;
+	return frameRange.GetUpperBoundValue();
 }
 
 double
@@ -91,13 +91,13 @@ UOdysseyAnimation::GetFramesPerSecond() const
 	return FramesPerSecond;
 }
 
-uint32
+int
 UOdysseyAnimation::GetFrameIndexAtTime(FTimespan iTime) const
 {
 	if (iTime < 0 || iTime >= GetDuration())
 		return INDEX_NONE;
 	
-	return uint32(iTime.GetTotalSeconds() * GetFramesPerSecond());
+	return int(iTime.GetTotalSeconds() * GetFramesPerSecond());
 }
 
 TRange<FTimespan>

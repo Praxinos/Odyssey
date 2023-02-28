@@ -14,7 +14,7 @@ public:
 	FOdysseyAnimationMediaTextureSample(UOdysseyAnimation* iAnimation);
 	
 public:
-	void Update(uint32 iFrameIndex, uint32 iSequenceIndex);
+	void Update(int iFrameIndex, uint32 iSequenceIndex);
 	
 	void CopyRects(const TArray<::ULIS::FRectI>& iRects);
 	void CopyRects_RenderThread(FTexture2DDynamicResource* iResource, TSharedPtr<::ULIS::FBlock> iSrc, const TArray<::ULIS::FRectI>& iRects);
@@ -133,8 +133,7 @@ private:
 
 private:
 	UOdysseyAnimation* mAnimation;
-	bool mIsValid;
-	uint32 mFrameIndex;
+	int mFrameIndex;
 	uint32 mSequenceIndex;
 	FMediaTimeStamp mTime;
 	FTimespan mDuration;

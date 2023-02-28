@@ -67,7 +67,7 @@ public:
 	TRange<int> GetFrameRange() const;
 	uint32 GetFrameCount() const;
 	double GetFramesPerSecond() const;
-	uint32 GetFrameIndexAtTime(FTimespan iTime) const;
+	int GetFrameIndexAtTime(FTimespan iTime) const;
 	TRange<FTimespan> GetFrameTimeRange(uint32 iFrameIndex) const;
 
 	TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> GetBlockAtIndex(uint32 iIndex);

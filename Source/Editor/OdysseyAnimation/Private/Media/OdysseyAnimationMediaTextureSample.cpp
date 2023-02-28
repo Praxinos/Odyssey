@@ -11,8 +11,7 @@ FOdysseyAnimationMediaTextureSample::~FOdysseyAnimationMediaTextureSample()
 
 FOdysseyAnimationMediaTextureSample::FOdysseyAnimationMediaTextureSample(UOdysseyAnimation* iAnimation)
     : mAnimation(iAnimation)
-    , mIsValid(false)
-    , mFrameIndex(0)
+    , mFrameIndex(INDEX_NONE)
     , mSequenceIndex(0)
     , mTime(0)
     , mDuration(0)
@@ -24,23 +23,31 @@ FOdysseyAnimationMediaTextureSample::FOdysseyAnimationMediaTextureSample(UOdysse
 }
 
 void
-FOdysseyAnimationMediaTextureSample::Update(uint32 iFrameIndex, uint32 iSequenceIndex)
+FOdysseyAnimationMediaTextureSample::Update(int iFrameIndex, uint32 iSequenceIndex)
 {
-    if ( mIsValid && mFrameIndex == iFrameIndex && mSequenceIndex == iSequenceIndex )
+    if ( mFrameIndex == iFrameIndex && mSequenceIndex == iSequenceIndex )
         return;
 
     mFrameIndex = iFrameIndex;
     mSequenceIndex = iSequenceIndex;
+
+
     TRange<FTimespan> timeRange = mAnimation->GetFrameTimeRange(iFrameIndex);
     mTime = FMediaTimeStamp(timeRange.GetLowerBoundValue(), iSequenceIndex);
     mDuration = timeRange.GetUpperBoundValue() - timeRange.GetLowerBoundValue();
+
+    if ( mFrameIndex < 0 )
+        return;
+
     CopyRects({ ::ULIS::FRectI::FromXYWH(0, 0, mAnimation->Width(), mAnimation->Height())});
-    mIsValid = true;
 }
 
 void
 FOdysseyAnimationMediaTextureSample::CopyRects(const TArray<::ULIS::FRectI>& iRects)
 {
+    if ( mFrameIndex < 0 )
+        return;
+
     TSharedPtr<::ULIS::FBlock> srcBlock = mAnimation->GetBlockAtIndex(mFrameIndex);
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(srcBlock->Format());
     ENQUEUE_RENDER_COMMAND(FWriteRawDataToTexture)(
