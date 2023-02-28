@@ -231,8 +231,6 @@ FOdysseyVectorLoop::Build( std::vector<UOdysseyVectorVertex*>& iVertexArray
         mMin.x = mMax.x = originAt.x;
         mMin.y = mMax.y = originAt.y;
 
-        mPath.moveTo( originAt.x, originAt.y );
-
         for( int i = 0; i < iSectionArray.size(); i++ )
         {
             FOdysseyVectorSection* section = iSectionArray[i];
@@ -240,13 +238,18 @@ FOdysseyVectorLoop::Build( std::vector<UOdysseyVectorVertex*>& iVertexArray
             UOdysseyVectorVertex* nextVertex = ( currentVertex == section->GetVertex(0) ) ? section->GetVertex(1) : section->GetVertex(0);
             double currentVertexT = currentVertex->GetT( *segment );
             double    nextVertexT =    nextVertex->GetT( *segment );
-            ::ULIS::FVec2D& currentVertexCoords = currentVertex->GetCoords();
+            ::ULIS::FVec2D currentAt = currentVertex->GetPosition( *segment );
 
-            /*section->Block( iVertexArray[i] );*/
+            if( i == 0 )
+            {
+                mPath.moveTo( currentAt.x, currentAt.y );
+            }
+            else
+            {
+                mPath.lineTo( currentAt.x, currentAt.y );
+            }
 
             BuildSegmentCubic ( static_cast<UOdysseyVectorSegmentCubic&>(*segment), currentVertexT, nextVertexT );
-
-            /*if( currentVertexCoords.x < xmin ) xmin*/
 
             currentVertex = nextVertex;
 

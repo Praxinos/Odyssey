@@ -33,7 +33,7 @@ FOdysseyVector::IntersectSegment( ::ULIS::FVec2D& line0p0
 }
 
 // https://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
-bool
+double
 FOdysseyVector::DistanceToSegment( ::ULIS::FVec2D& iPt
                                  , ::ULIS::FVec2D& iSegmentP0
                                  , ::ULIS::FVec2D& iSegmentP1
@@ -50,15 +50,15 @@ FOdysseyVector::DistanceToSegment( ::ULIS::FVec2D& iPt
     ::ULIS::FVec2D p0pt = ( iPt - iSegmentP0 );
     double t = p0pt.DotProduct( p0p1 ) / sqLength;
 
+    oDistance = DBL_MAX;
+
     if( ( t >= 0.0f ) && ( t <= 1.0f ) )
     {
         ::ULIS::FVec2D projected = iSegmentP0 + ( t * p0p1 );  // Projection falls on the segment
         ::ULIS::FVec2D projp = projected - iPt;
 
         oDistance = projp.Distance();
-
-        return true;
     }
 
-    return false;
+    return t;
 }

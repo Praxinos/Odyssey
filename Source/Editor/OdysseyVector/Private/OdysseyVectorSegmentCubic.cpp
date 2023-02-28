@@ -188,8 +188,9 @@ UOdysseyVectorSegmentCubic::ProximityTest( double iLocalX, double iLocalY, doubl
     {
         ::ULIS::FVec2D p0 = { mPolygonCache[i].lineVertex[0].x, mPolygonCache[i].lineVertex[0].y };
         ::ULIS::FVec2D p1 = { mPolygonCache[i].lineVertex[1].x, mPolygonCache[i].lineVertex[1].y };
+        double t = FOdysseyVector::DistanceToSegment( pt, p0, p1, dist );
 
-        if( FOdysseyVector::DistanceToSegment( pt, p0, p1, dist ) )
+        if( ( t >= 0.0f ) && ( t <= 1.0f ) )
         {
             if( dist < smallestDistance )
             {
@@ -437,12 +438,53 @@ UOdysseyVectorSegmentCubic::Cut( ::ULIS::FVec2D& linePoint0
     return false;
 }
 
+typedef struct _FAlmostIntersect
+{
+    double distance;
+    double t;
+    double otherT;
+} FAlmostIntersect;
+
+static uint32
+CreateAlmostIntersection( FAlmostIntersect aisx[4]
+                        , double iTolerance
+                        , UOdysseyVectorSegmentCubic* segment
+                        , UOdysseyVectorSegmentCubic* otherSegment
+                        , std::vector<UOdysseyVectorVertexIntersection*>& iIntersectionVertexArray )
+{
+    uint32 intersectionCount = 0;
+
+    for( int i = 0; i < 4; i++ )
+    {
+
+        if( aisx[i].distance <= iTolerance )
+        {
+            UOdysseyVectorVertexIntersection* intersectionVertex = NewObject<UOdysseyVectorVertexIntersection>();
+
+            iIntersectionVertexArray.push_back( intersectionVertex );
+
+            // AddSegment() MUST be called before AddIntersection because AddIntersection uses the value of t that is stored by AddSegment()
+            intersectionVertex->AddSegment (      segment, aisx[i].t      );
+            intersectionVertex->AddSegment ( otherSegment, aisx[i].otherT );
+
+            segment->AddIntersection ( intersectionVertex );
+            otherSegment->AddIntersection ( intersectionVertex );
+
+            intersectionCount++;
+        }
+    }
+
+    return intersectionCount;
+}
+
 uint32
 UOdysseyVectorSegmentCubic::Intersect( UOdysseyVectorSegmentCubic& iOther
                                      , std::vector<UOdysseyVectorVertexIntersection*>& iIntersectionVertexArray )
 {
     ::ULIS::FVec2D& point0 = mPoint[0]->GetCoords();
     ::ULIS::FVec2D& point1 = mPoint[1]->GetCoords();
+    ::ULIS::FVec2D& otherPoint0 = iOther.mPoint[0]->GetCoords();
+    ::ULIS::FVec2D& otherPoint1 = iOther.mPoint[1]->GetCoords();
     /*::ULIS::FVec2D ctrlPoint0 = { mCtrlPoint[0]->GetX(), mCtrlPoint[0]->GetY() };
     ::ULIS::FVec2D ctrlPoint1 = { mCtrlPoint[1]->GetX(), mCtrlPoint[1]->GetY() };*/
     uint32 intersectionCount = 0;
@@ -452,6 +494,12 @@ UOdysseyVectorSegmentCubic::Intersect( UOdysseyVectorSegmentCubic& iOther
     double shortestP1Distance = DBL_MAX;
     int shortP1SegmentIndex = -1;
 */
+    FAlmostIntersect aisx[4];
+
+    aisx[0].distance = DBL_MAX;
+    aisx[1].distance = DBL_MAX;
+    aisx[2].distance = DBL_MAX;
+    aisx[3].distance = DBL_MAX;
 
     for ( int i = 0; i < mPolygonCache.size(); i++ )
     {
@@ -465,9 +513,9 @@ UOdysseyVectorSegmentCubic::Intersect( UOdysseyVectorSegmentCubic& iOther
             double polySubT, interPolySubT;
 
             // to speed things up a bit
-            if( ( poly->xmax > interPoly->xmin ) && ( poly->xmin < interPoly->xmax )
+            /*if( ( poly->xmax > interPoly->xmin ) && ( poly->xmin < interPoly->xmax )
              && ( poly->ymax > interPoly->ymin ) && ( poly->ymin < interPoly->ymax ) )
-            {
+            {*/
                 if(   ( this != &iOther )
                 // check this is not the same sub-segment or adjacent sub-segment, or else they would always intersect
                  || ( ( this == &iOther ) && ( ( i - j ) > 1 ) ) )
@@ -502,46 +550,80 @@ UOdysseyVectorSegmentCubic::Intersect( UOdysseyVectorSegmentCubic& iOther
                             intersectionCount++;
                         }
                     }
-/*
+/////////////////////////////////////////////////
                     else
                     {
+                        if( j == 0 )
+                        {
+                            double distance;
+                            double t = FOdysseyVector::DistanceToSegment( otherPoint0
+                                                        , poly->lineVertex[0]
+                                                        , poly->lineVertex[1]
+                                                        , distance );
+
+                            if( ( t >= 0.0f ) && ( t <= 1.0f ) )
+                                if( distance < aisx[0].distance )
+                                {
+                                    aisx[0].distance = distance;
+                                    aisx[0].t        = poly->fromT + ( ( poly->toT - poly->fromT ) * t );
+                                    aisx[0].otherT   = 0.0f;
+                                }
+                        }
+
+                        if( j == ( iOther.mPolygonCache.size() - 1 ) )
+                        {
+                            double distance;
+                            double t = FOdysseyVector::DistanceToSegment( otherPoint1
+                                                        , poly->lineVertex[0]
+                                                        , poly->lineVertex[1]
+                                                        , distance );
+
+                            if( ( t >= 0.0f ) && ( t <= 1.0f ) )
+                                if( distance < aisx[1].distance )
+                                {
+                                    aisx[1].distance = distance;
+                                    aisx[1].t        = poly->fromT + ( ( poly->toT - poly->fromT ) * t );
+                                    aisx[1].otherT   = 1.0f;
+                                }
+                        }
+
                         if( i == 0 )
                         {
                             double distance;
+                            double t = FOdysseyVector::DistanceToSegment( point0
+                                                        , interPoly->lineVertex[0]
+                                                        , interPoly->lineVertex[1]
+                                                        , distance );
 
-                            if( DistanceToSegment( point0
-                                                 , interPoly->lineVertex[0]
-                                                 , interPoly->lineVertex[1]
-                                                 , distance ) )
-                            {
-                                if( distance < shortestP0Distance )
+                            if( ( t >= 0.0f ) && ( t <= 1.0f ) )
+                                if( distance < aisx[2].distance )
                                 {
-                                    shortestP0Distance = distance;
-                                    shortP0SegmentIndex = j;
+                                    aisx[2].distance = distance;
+                                    aisx[2].t        = 0.0f;
+                                    aisx[2].otherT   = interPoly->fromT + ( ( interPoly->toT - interPoly->fromT ) * t );
                                 }
-                            }
                         }
 
                         if( i == ( mPolygonCache.size() - 1 ) )
                         {
                             double distance;
+                            double t = FOdysseyVector::DistanceToSegment( point1
+                                                        , interPoly->lineVertex[0]
+                                                        , interPoly->lineVertex[1]
+                                                        , distance );
 
-                            if( DistanceToSegment( point1
-                                                 , interPoly->lineVertex[0]
-                                                 , interPoly->lineVertex[1]
-                                                 , distance ) )
-                            {
-                                if( distance < shortestP1Distance )
+                            if( ( t >= 0.0f ) && ( t <= 1.0f ) )
+                                if( distance < aisx[3].distance )
                                 {
-                                    shortestP1Distance = distance;
-                                    shortP1SegmentIndex = j;
+                                    aisx[3].distance = distance;
+                                    aisx[3].t        = 1.0f;
+                                    aisx[3].otherT   = interPoly->fromT + ( ( interPoly->toT - interPoly->fromT ) * t );
                                 }
-                            }
                         }
                     }
-*/
+///////////////////////////////////
                 }
-            }
+           /* }*/
         }
     }
 
@@ -551,6 +633,8 @@ UOdysseyVectorSegmentCubic::Intersect( UOdysseyVectorSegmentCubic& iOther
 
     }
 */
+
+    intersectionCount += CreateAlmostIntersection( aisx, 20.0f, this, &iOther, iIntersectionVertexArray );
 
     return intersectionCount;
 }

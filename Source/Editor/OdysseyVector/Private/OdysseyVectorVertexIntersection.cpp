@@ -29,7 +29,7 @@ UOdysseyVectorVertexIntersection::GetPosition( UOdysseyVectorSegment& iSegment )
 }
 
 ::ULIS::FVec2D&
-UOdysseyVectorVertexIntersection::GetCoords()
+UOdysseyVectorVertexIntersection::GetCoords( )
 {
     if ( auto search = mTMap.find(GetFirstSegment()); search != mTMap.end())
         return search->second.position;
