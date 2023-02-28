@@ -40,7 +40,7 @@ UOdysseyAnimationEditorRasterDrawingTool::Load()
 	if (!layer)
 		return;
 
-	UOdysseyRasterBlock* rasterBlock = layer->GetRasterBlock(animation->CurrentFrame);
+	TSharedPtr<FOdysseyRasterBlock> rasterBlock = layer->GetRasterBlock(animation->CurrentFrame);
 	mPaintEngine.RasterBlock(rasterBlock);
 
 	if ( BrushInstance )

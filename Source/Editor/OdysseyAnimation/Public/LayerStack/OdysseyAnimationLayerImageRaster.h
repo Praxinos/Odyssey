@@ -10,8 +10,6 @@
 
 #include "OdysseyAnimationLayerImageRaster.generated.h"
 
-class UOdysseyRasterBlock;
-
 UCLASS(BlueprintType)
 class ODYSSEYANIMATION_API UOdysseyAnimationLayerImageRaster
     : public UOdysseyAnimationLayer
@@ -52,7 +50,7 @@ public:
 
 public:
     // Public API
-    UOdysseyRasterBlock* GetRasterBlock(int iFrame) const;
+    TSharedPtr<FOdysseyRasterBlock> GetRasterBlock(int iFrame) const;
 
 public:
     /**
@@ -85,8 +83,8 @@ public:
     virtual TSharedPtr<IOdysseyHandle> Preload(int iFrame) override;
 
 protected:
-    void OnBlockChanged(const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive, UOdysseyRasterBlock* iRasterBlock);
-    void OnBlockPtrChanged(UOdysseyRasterBlock* iRasterBlock);
+    void OnBlockChanged(const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive, TSharedPtr<FOdysseyRasterBlock> iRasterBlock);
+    void OnBlockPtrChanged(TSharedPtr<FOdysseyRasterBlock> iRasterBlock);
 
     void IsAlphaLockedChanged();
     void OpacityChanged();
@@ -98,20 +96,12 @@ public:
     virtual void PostDuplicate(bool bDuplicateForPIE) override;
     virtual void PostLoad() override;
 
-private:
-    /*
-        struct cell
-        {
-            URasterBlock
-            int length;
-            cellbehaviour;
-        }
-
-        TArray<cell>
-    */
-
-    UPROPERTY()
-    TArray<TObjectPtr<UOdysseyRasterBlock>> RasterBlocks;
+    /**
+     * @brief Serialize this object
+     *
+     * @param Ar
+     */
+    virtual void Serialize(FArchive& Ar) override;
 
 public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Animation | LayerStack")
@@ -122,4 +112,7 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation | LayerStack")
     float Opacity = 1.0f;
+
+private:
+    TArray<TSharedPtr<FOdysseyRasterBlock>> mRasterBlocks;
 };

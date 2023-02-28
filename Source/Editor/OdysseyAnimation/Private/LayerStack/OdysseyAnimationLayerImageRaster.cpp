@@ -57,27 +57,27 @@ UOdysseyAnimationLayerImageRaster::OnCreated_Implementation()
     ctx.Clear(*block.Get());
     ctx.Finish();
 
-    UOdysseyRasterBlock* rasterBlock = NewObject<UOdysseyRasterBlock>(this, "RasterBlock", RF_Public | RF_Transactional);
+    TSharedPtr<FOdysseyRasterBlock> rasterBlock = MakeShared<FOdysseyRasterBlock>();
     rasterBlock->SetBlock(block);
     rasterBlock->OnBlockChanged().AddUObject(this, &::UOdysseyAnimationLayerImageRaster::OnBlockChanged, rasterBlock);
     rasterBlock->OnBlockPtrChanged().AddUObject(this, &::UOdysseyAnimationLayerImageRaster::OnBlockPtrChanged, rasterBlock);
 
-    RasterBlocks.Add(rasterBlock);
+    mRasterBlocks.Add(rasterBlock);
 }
 
-UOdysseyRasterBlock*
+TSharedPtr<FOdysseyRasterBlock>
 UOdysseyAnimationLayerImageRaster::GetRasterBlock(int iFrame) const
 {
-    if (iFrame < 0 || iFrame >= RasterBlocks.Num())
+    if (iFrame < 0 || iFrame >= mRasterBlocks.Num())
         return nullptr;
 
-	return RasterBlocks[iFrame];
+	return mRasterBlocks[iFrame];
 }
 
 void
-UOdysseyAnimationLayerImageRaster::OnBlockChanged(const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive, UOdysseyRasterBlock* iBlock)
+UOdysseyAnimationLayerImageRaster::OnBlockChanged(const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive, TSharedPtr<FOdysseyRasterBlock> iBlock)
 {
-    int frameIndex = RasterBlocks.Find(iBlock);
+    int frameIndex = mRasterBlocks.Find(iBlock);
     if (frameIndex == INDEX_NONE)
         return;
 
@@ -85,9 +85,9 @@ UOdysseyAnimationLayerImageRaster::OnBlockChanged(const TArray<::ULIS::FRectI>& 
 }
 
 void
-UOdysseyAnimationLayerImageRaster::OnBlockPtrChanged(UOdysseyRasterBlock* iBlock)
+UOdysseyAnimationLayerImageRaster::OnBlockPtrChanged(TSharedPtr<FOdysseyRasterBlock> iBlock)
 {
-    int frameIndex = RasterBlocks.Find(iBlock);
+    int frameIndex = mRasterBlocks.Find(iBlock);
     if (frameIndex == INDEX_NONE)
         return;
 
@@ -103,10 +103,10 @@ UOdysseyAnimationLayerImageRaster::RenderImage(TSharedPtr<::ULIS::FBlock, ESPMod
     if (!ioBlock)
         return iWaitList;
 
-    if (iFrame < 0 || iFrame >= RasterBlocks.Num())
+    if (iFrame < 0 || iFrame >= mRasterBlocks.Num())
         return iWaitList;
 
-    UOdysseyRasterBlock* rasterBlock = RasterBlocks[iFrame];
+    TSharedPtr<FOdysseyRasterBlock> rasterBlock = mRasterBlocks[iFrame];
 
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ULISRasterBlock = rasterBlock->IsBeingEdited() ? rasterBlock->GetEditableBlock() : rasterBlock->GetBlock();
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(ULISRasterBlock->Format());
@@ -146,10 +146,10 @@ UOdysseyAnimationLayerImageRaster::CopyImage(TSharedPtr<::ULIS::FBlock, ESPMode:
     if (!ioBlock)
         return iWaitList;
 
-    if (iFrame < 0 || iFrame >= RasterBlocks.Num())
+    if (iFrame < 0 || iFrame >= mRasterBlocks.Num())
         return iWaitList;
 
-    UOdysseyRasterBlock* rasterBlock = RasterBlocks[iFrame];
+    TSharedPtr<FOdysseyRasterBlock> rasterBlock = mRasterBlocks[iFrame];
 
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ULISRasterBlock = rasterBlock->GetBlock();
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(ULISRasterBlock->Format());
@@ -249,7 +249,7 @@ UOdysseyAnimationLayerImageRaster::PostLoad()
 
     //TODO: bind callbacks for all cells
 
-    for ( UOdysseyRasterBlock* rasterBlock : RasterBlocks )
+    for ( TSharedPtr<FOdysseyRasterBlock> rasterBlock : mRasterBlocks )
     {
         rasterBlock->OnBlockChanged().RemoveAll(this);
         rasterBlock->OnBlockPtrChanged().RemoveAll(this);
@@ -261,45 +261,10 @@ UOdysseyAnimationLayerImageRaster::PostLoad()
 void
 UOdysseyAnimationLayerImageRaster::PostDuplicate(bool bDuplicateForPIE)
 {
-    UOdysseyAnimation* animation = GetAnimation();
-    if (!animation)
+    for (TSharedPtr<FOdysseyRasterBlock> rasterBlock : mRasterBlocks)
     {
-        Super::PostDuplicate(bDuplicateForPIE);
-        return;
+        rasterBlock->PostDuplicate();
     }
-
-    TArray<UOdysseyRasterBlock*> duplicatedRasterBlocks;
-
-    for (UOdysseyRasterBlock* rasterBlock : RasterBlocks)
-    {
-        TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> originalBlock = rasterBlock->GetBlock();
-        TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> duplicatedBlock = MakeShared<::ULIS::FBlock>( animation->Width(), animation->Height(), animation->Format());
-
-        ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(animation->Format());
-        ctx.ConvertFormat(
-            *originalBlock.Get(),
-            *duplicatedBlock.Get(),
-            ::ULIS::FRectI::Auto,
-            ::ULIS::FVec2I( 0 ),
-            ::ULIS::FSchedulePolicy::AsyncCacheEfficient
-        );
-        ctx.Finish();
-
-        //ensure we remove any callbacks registered on the wrong Rasterblock
-        rasterBlock->OnBlockChanged().RemoveAll(this);
-        rasterBlock->OnBlockPtrChanged().RemoveAll(this);
-
-        //Replace old rasterblock with an owned one
-        UOdysseyRasterBlock* duplicatedRasterBlock = NewObject<UOdysseyRasterBlock>(this, "RasterBlock", RF_Public | RF_Transactional);
-        duplicatedRasterBlock->SetBlock(duplicatedBlock);
-
-        //Set the right callbacks
-        duplicatedRasterBlock->OnBlockChanged().AddUObject(this, &::UOdysseyAnimationLayerImageRaster::OnBlockChanged, duplicatedRasterBlock);
-        duplicatedRasterBlock->OnBlockPtrChanged().AddUObject(this, &::UOdysseyAnimationLayerImageRaster::OnBlockPtrChanged, duplicatedRasterBlock);
-
-        duplicatedRasterBlocks.Add(duplicatedRasterBlock);
-    }
-    RasterBlocks = duplicatedRasterBlocks;
 
     Super::PostDuplicate(bDuplicateForPIE);
 }
@@ -307,10 +272,18 @@ UOdysseyAnimationLayerImageRaster::PostDuplicate(bool bDuplicateForPIE)
 TSharedPtr<IOdysseyHandle>
 UOdysseyAnimationLayerImageRaster::Preload(int iFrame)
 {
-    if (iFrame < 0 || iFrame >= RasterBlocks.Num() )
+    if (iFrame < 0 || iFrame >= mRasterBlocks.Num() )
         return nullptr;
 
-    return RasterBlocks[iFrame]->Preload();
+    return mRasterBlocks[iFrame]->Preload();
+}
+
+void
+UOdysseyAnimationLayerImageRaster::Serialize(FArchive& Ar)
+{
+    Super::Serialize(Ar);
+
+    Ar << mRasterBlocks;
 }
 
 

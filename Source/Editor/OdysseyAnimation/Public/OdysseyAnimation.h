@@ -55,6 +55,16 @@ public:
     TSharedPtr<IOdysseyHandle> Preload(int iFrame);
 
 public:
+	//UObject overrides
+
+	/**
+	 * @brief Serialize this object
+	 *
+	 * @param Ar
+	 */
+	virtual void Serialize(FArchive& Ar) override;
+
+public:
 	//CurrentFrame is specific to the user, not to the animation itself
     //So we save it in user's config, instead of the animation
 	UPROPERTY(config, DuplicateTransient)
@@ -73,10 +83,8 @@ private:
 	UPROPERTY()
 	float mFramesPerSecond = 24.0f;
 
-	//Maybe add a length to each block to avoid loading those blocks a lot
-	UPROPERTY()
-	TArray<TObjectPtr<UOdysseyRasterBlock>> mRasterBlocks;
-
 	UPROPERTY(meta=(LoadBehavior = "LazyOnDemand"))
 	TObjectPtr<UOdysseyAnimationLayerStack> mLayerStack;
+
+	TArray<TSharedPtr<FOdysseyRasterBlock>> mRasterBlocks;
 };

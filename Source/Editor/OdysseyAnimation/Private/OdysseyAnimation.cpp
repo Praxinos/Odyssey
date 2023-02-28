@@ -16,7 +16,7 @@ void UOdysseyAnimation::Init(const FOdysseyAnimationConfiguration& iConfiguratio
 	::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iConfiguration.ULISFormat());
 	for(int i = 0; i < 10; i++)
 	{
-		UOdysseyRasterBlock* rasterBlock = NewObject<UOdysseyRasterBlock>(this, *FString::Printf(TEXT("RasterBlock%d"), i), RF_Public | RF_Transactional);
+		TSharedPtr<FOdysseyRasterBlock> rasterBlock = MakeShared<FOdysseyRasterBlock>();
 		TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = MakeShared<::ULIS::FBlock>(iConfiguration.Width, iConfiguration.Height, iConfiguration.ULISFormat());
 
         ctx.Fill(
@@ -104,6 +104,14 @@ TSharedPtr<IOdysseyHandle>
 UOdysseyAnimation::Preload(int iFrame)
 {
     return mLayerStack->Preload(iFrame);
+}
+
+void
+UOdysseyAnimation::Serialize(FArchive& Ar)
+{
+	Super::Serialize(Ar);
+
+	Ar << mRasterBlocks;
 }
 
 /* IMediaSource overrides
