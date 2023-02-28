@@ -30,6 +30,11 @@
 			"Comment": "OdysseyBrush is UncookedOnly so that its nodes can be used in FunctionLibraries. And having this module avoids switching main editor modules to UncookedOnly"
 		},
 		{
+			"Name": "OdysseyAnimation",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		},
+		{
 			"Name": "OdysseyCore",
 			"Type": "UncookedOnly",
 			"LoadingPhase": "Default"
