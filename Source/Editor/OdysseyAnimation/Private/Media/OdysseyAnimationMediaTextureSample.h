@@ -16,7 +16,7 @@ public:
 	void Update(uint32 iFrameIndex, uint32 iSequenceIndex);
 	
 	void CopyRects(const TArray<::ULIS::FRectI>& iRects);
-	void CopyRects_RenderThread(TSharedPtr<::ULIS::FBlock> iSrc, const TArray<::ULIS::FRectI>& iRects);
+	void CopyRects_RenderThread(FTexture2DDynamicResource* iResource, TSharedPtr<::ULIS::FBlock> iSrc, const TArray<::ULIS::FRectI>& iRects);
 
 public:
 	// Mandatrory IMediaTextureSample interface overrides
@@ -132,5 +132,7 @@ private:
 	uint32 mSequenceIndex;
 	FMediaTimeStamp mTime;
 	FTimespan mDuration;
-	TStrongObjectPtr<UTexture2DDynamic> mTexture; 
+	TStrongObjectPtr<UTexture2DDynamic> mTexture1; 
+	TStrongObjectPtr<UTexture2DDynamic> mTexture2; //PATCH: Media Framework is shit when using a single texture that refreshes it self, I need 2 Textures....
+	mutable bool mCurrentTexture; //PATCH:
 };

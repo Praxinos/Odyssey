@@ -15,7 +15,9 @@ FOdysseyAnimationMediaTextureSample::FOdysseyAnimationMediaTextureSample(UOdysse
     , mSequenceIndex(0)
     , mTime(0)
     , mDuration(0)
-    , mTexture(UTexture2DDynamic::Create(iAnimation->Width(), iAnimation->Height(), FTexture2DDynamicCreateInfo(PF_B8G8R8A8)))
+    , mCurrentTexture(false)
+    , mTexture1(UTexture2DDynamic::Create(iAnimation->Width(), iAnimation->Height(), FTexture2DDynamicCreateInfo(PF_B8G8R8A8)))
+    , mTexture2(UTexture2DDynamic::Create(iAnimation->Width(), iAnimation->Height(), FTexture2DDynamicCreateInfo(PF_B8G8R8A8)))
 {
     mAnimation->OnRenderImageChanged().AddRaw(this, &FOdysseyAnimationMediaTextureSample::OnRenderImageChanged);
 }
@@ -43,7 +45,16 @@ FOdysseyAnimationMediaTextureSample::CopyRects(const TArray<::ULIS::FRectI>& iRe
     ENQUEUE_RENDER_COMMAND(FWriteRawDataToTexture)(
         [this, srcBlock, iRects](FRHICommandListImmediate& RHICmdList)
         {
-            CopyRects_RenderThread(srcBlock, iRects);
+            FTexture2DDynamicResource* resource1 = static_cast<FTexture2DDynamicResource*>(mTexture1->GetResource());
+            if ( !resource1 )
+                return;
+
+            FTexture2DDynamicResource* resource2 = static_cast<FTexture2DDynamicResource*>(mTexture2->GetResource());
+            if ( !resource2 )
+                return;
+
+            CopyRects_RenderThread(resource1, srcBlock, iRects);
+            CopyRects_RenderThread(resource2, srcBlock, iRects);
         }
     );
 
@@ -56,12 +67,18 @@ FOdysseyAnimationMediaTextureSample::CopyRects(const TArray<::ULIS::FRectI>& iRe
     ENQUEUE_RENDER_COMMAND(FWriteRawDataToTexture2)(
         [this](FRHICommandListImmediate& RHICmdList)
         {
-            FTexture2DDynamicResource* resource = static_cast<FTexture2DDynamicResource*>(mTexture->GetResource());
-            if ( !resource )
+            FTexture2DDynamicResource* resource1 = static_cast<FTexture2DDynamicResource*>(mTexture1->GetResource());
+            if ( !resource1 )
                 return;
 
-            FTexture2DRHIRef rhi = resource->GetTexture2DRHI();
-            RHIUnlockTexture2D(rhi, 0, false, false);
+            FTexture2DDynamicResource* resource2 = static_cast<FTexture2DDynamicResource*>(mTexture2->GetResource());
+            if ( !resource2 )
+                return;
+
+            FTexture2DRHIRef rhi1 = resource1->GetTexture2DRHI();
+            FTexture2DRHIRef rhi2 = resource2->GetTexture2DRHI();
+            RHIUnlockTexture2D(rhi1, 0, false, false);
+            RHIUnlockTexture2D(rhi2, 0, false, false);
         }
     );
     
@@ -71,14 +88,11 @@ FOdysseyAnimationMediaTextureSample::CopyRects(const TArray<::ULIS::FRectI>& iRe
 }
 
 void
-FOdysseyAnimationMediaTextureSample::CopyRects_RenderThread(TSharedPtr<::ULIS::FBlock> iSrc, const TArray<::ULIS::FRectI>& iRects)
+FOdysseyAnimationMediaTextureSample::CopyRects_RenderThread(FTexture2DDynamicResource* iResource, TSharedPtr<::ULIS::FBlock> iSrc, const TArray<::ULIS::FRectI>& iRects)
 {
     check(IsInRenderingThread());
-    FTexture2DDynamicResource* resource = static_cast<FTexture2DDynamicResource*>(mTexture->GetResource());
-    if (!resource)
-        return;
 
-    FTexture2DRHIRef rhi = resource->GetTexture2DRHI();
+    FTexture2DRHIRef rhi = iResource->GetTexture2DRHI();
 
 	const int32 w = rhi->GetSizeX();
 	const int32 h = rhi->GetSizeY();
@@ -167,11 +181,16 @@ FOdysseyAnimationMediaTextureSample::GetStride() const
 FRHITexture*
 FOdysseyAnimationMediaTextureSample::GetTexture() const
 {
-    FTexture2DDynamicResource* resource = static_cast<FTexture2DDynamicResource*>(mTexture->GetResource());
-    if (!resource)
+    FTexture2DDynamicResource* resource1 = static_cast<FTexture2DDynamicResource*>(mTexture1->GetResource());
+    if (!resource1)
         return nullptr;
 
-    return resource->GetTexture2DRHI();
+    FTexture2DDynamicResource* resource2 = static_cast<FTexture2DDynamicResource*>(mTexture2->GetResource());
+    if (!resource2)
+        return nullptr;
+
+    mCurrentTexture = !mCurrentTexture;
+    return mCurrentTexture ? resource1->GetTexture2DRHI() : resource2->GetTexture2DRHI();
 }
 
 #endif //WITH_ENGINE
