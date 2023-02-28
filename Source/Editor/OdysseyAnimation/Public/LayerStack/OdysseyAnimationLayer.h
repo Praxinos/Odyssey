@@ -5,6 +5,7 @@
 
 #include "OdysseyLayer.h"
 
+#include "UObject/OdysseyObjectPropertyTracker.h"
 #include "Misc/OdysseyHandle.h"
 #include <ULIS>
 
@@ -31,6 +32,18 @@ public:
     static FOnRenderImageChanged& OnRenderImageChanged();
 
 public:
+    UOdysseyAnimationLayer();
+
+    virtual void PostInitProperties();
+
+    virtual void PostLoad();
+
+public:
+    //Getters
+    UOdysseyAnimation* GetAnimation();
+    TRange<int> GetFrameRange() const;
+
+public:
     //Frame Range System
     /*
      * Each Layer has a range of frames on which it can render an image or sound
@@ -38,9 +51,9 @@ public:
      * The range can be closed or open
      * 
      */
-    TRange<int> GetRenderImageFrameRange() const;
+    //TRange<int> GetRenderImageFrameRange() const;
 
-    TRange<float> GetRenderSoundFrameRange() const;
+    //TRange<float> GetRenderSoundFrameRange() const;
 
 public:
     //Image Rendering
@@ -55,7 +68,7 @@ public:
      * @param iWaitList 
      * @return TArray<::ULIS::FEvent> 
      */
-    static TArray<::ULIS::FEvent> RenderLayersImage(TArray<UOdysseyAnimationLayer*> iLayers, TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ioBlock, int iFrame, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList);
+    static TArray<::ULIS::FEvent> RenderLayersImage(TArray<UOdysseyLayer*> iLayers, TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ioBlock, int iFrame, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList);
 
     /**
      * @brief Renders an image over the given Block
@@ -89,13 +102,20 @@ public:
 
     /**
      * @brief Preloads the layers and keeps them preloaded untile the hiven handles are destroyed
-     * One handle corresponds to something being held in memory
      */
-    virtual void Preload(int iFrame, TArray<TSharedPtr<IOdysseyHandle>>& oHandles);
+    virtual TSharedPtr<IOdysseyHandle> Preload(int iFrame);
 
 protected:
     //Property changes
     virtual void IsActivatedChanged() override;
-    virtual void ChildrenChanged() override;
+    virtual void OnTrackerChildrenChanged(const TArray<UOdysseyLayer*>& iOldChildren);
+
+private:
+    FOdysseyObjectPropertyTracker mPropertyTracker;
+
+    // 
+    // OPTIMIZATIONS
+    //
+    TMap<int, TWeakPtr<IOdysseyHandle>> mPreloadHandles;
 
 };

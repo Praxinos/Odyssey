@@ -16,18 +16,19 @@ void UOdysseyAnimation::Init(const FOdysseyAnimationConfiguration& iConfiguratio
 	::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iConfiguration.ULISFormat());
 	for(int i = 0; i < 10; i++)
 	{
-		::ULIS::FBlock* block = new ::ULIS::FBlock(iConfiguration.Width, iConfiguration.Height, iConfiguration.ULISFormat());
+		UOdysseyRasterBlock* rasterBlock = NewObject<UOdysseyRasterBlock>(this, *FString::Printf(TEXT("RasterBlock%d"), i), RF_Public | RF_Transactional);
+		TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = MakeShared<::ULIS::FBlock>(iConfiguration.Width, iConfiguration.Height, iConfiguration.ULISFormat());
 
-		::ULIS::FWString text = ::ULIS::FWString::FromInt(i);
         ctx.Fill(
 			*block
 			, ::ULIS::FColor::HSVA8(i*20, 255, 255)
 		);
 
-		mBlocks.Add(block);
+		ctx.Finish();
+
+    	rasterBlock->SetBlock(block);
+		mRasterBlocks.Add(rasterBlock);
 	}
-	
-    ctx.Finish();
 }
 
 uint32
@@ -57,7 +58,7 @@ UOdysseyAnimation::GetDuration() const
 uint32
 UOdysseyAnimation::GetFrameCount() const
 {
-	return mBlocks.Num();
+	return mRasterBlocks.Num();
 }
 
 double
@@ -82,13 +83,13 @@ UOdysseyAnimation::GetFrameTimeRange(uint32 iFrameIndex) const
 	return TRange<FTimespan>(FTimespan::FromSeconds(iFrameIndex / GetFramesPerSecond()), FTimespan::FromSeconds((iFrameIndex + 1) / GetFramesPerSecond()));
 }
 
-::ULIS::FBlock*
+TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>
 UOdysseyAnimation::GetBlockAtIndex(uint32 iIndex)
 {
-	if (iIndex < 0 || iIndex >= uint32(mBlocks.Num()))
+	if (iIndex < 0 || iIndex >= uint32(mRasterBlocks.Num()))
 		return nullptr;
 
-	return mBlocks[iIndex];
+	return mRasterBlocks[iIndex]->GetBlock();
 }
 
 /* IMediaSource overrides
@@ -114,41 +115,6 @@ bool UOdysseyAnimation::HasMediaOption(const FName& Key) const
 
 	return Super::HasMediaOption(Key);
 }
-
-
-/* UObject overrides
-******************************************************************************/
-
-/* void
-UOdysseyAnimation::Serialize(FArchive& Ar)
-{
-	Super::Serialize(Ar);
-
-	if (Ar.IsSaving())
-	{
-		int32 numBulk = mBulkDatas.Num();
-		Ar << numBulk;
-		for (auto& Elem : mBulkDatas)
-		{
-			Ar << Elem.Key;
-			Elem.Value.Serialize(Ar);
-		}
-	}
-	else if (Ar.IsLoading())
-	{
-		int32 numBulk = 0;
-		Ar << numBulk;
-		for (int32 = 0; i < numBulk; i++)
-		{
-			FGuid guid;
-			UE::Serialization::FEditorBulkData;
-
-			Ar << guid;
-			bulkData.Emplace(guid);
-			bulkData[guid].Serialize(Ar);
-		}
-	}
-} */
 
 /* UMediaSource overrides
  *****************************************************************************/

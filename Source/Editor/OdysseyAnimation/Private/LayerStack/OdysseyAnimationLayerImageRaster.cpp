@@ -1,14 +1,13 @@
 // IDDN FR.001.250001.005.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
-#include "OdysseyAnimationLayerImageRaster.h"
+#include "LayerStack/OdysseyAnimationLayerImageRaster.h"
 
 #include "OdysseyPixelFormat.h"
 #include "ULISEventBuilder.h"
 #include "ULISLoaderModule.h"
 #include "OdysseyStyleSet.h"
 #include "OdysseyRasterBlock.h"
-#include "OdysseyAnimationLayerImageRaster.h"
 
 #define LOCTEXT_NAMESPACE "UOdysseyAnimationLayerImageRaster"
 
@@ -46,46 +45,53 @@ UOdysseyAnimationLayerImageRaster::UOdysseyAnimationLayerImageRaster()
 void
 UOdysseyAnimationLayerImageRaster::OnCreated_Implementation()
 {
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(GetLayerStack());
-    if(!layerStack)
+    UOdysseyAnimation* animation = GetAnimation();
+    if (!animation)
         return;
-
-    UOdysseyAnimation* animation = layerStack->GetAnimation();
 
     //TODO: Create a first cell with empty rasterblock
 
-    /* TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = MakeShared<::ULIS::FBlock>( animation->Width, animation->Height, format);
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = MakeShared<::ULIS::FBlock>( animation->Width(), animation->Height(), animation->Format());
 
-	::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
+	::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(animation->Format());
     ctx.Clear(*block.Get());
     ctx.Finish();
 
-    //Caches the tiles on disk, we do this
-    RasterBlock = NewObject<UOdysseyRasterBlock>(this, "RasterBlock", RF_Public | RF_Transactional);
-    RasterBlock->SetBlock(block);
+    UOdysseyRasterBlock* rasterBlock = NewObject<UOdysseyRasterBlock>(this, "RasterBlock", RF_Public | RF_Transactional);
+    rasterBlock->SetBlock(block);
+    rasterBlock->OnBlockChanged().AddUObject(this, &::UOdysseyAnimationLayerImageRaster::OnBlockChanged, rasterBlock);
+    rasterBlock->OnBlockPtrChanged().AddUObject(this, &::UOdysseyAnimationLayerImageRaster::OnBlockPtrChanged, rasterBlock);
 
-    RasterBlock->OnBlockChanged().AddUObject(this, &::UOdysseyAnimationLayerImageRaster::OnBlockChanged);
-    RasterBlock->OnBlockPtrChanged().AddUObject(this, &::UOdysseyAnimationLayerImageRaster::OnBlockPtrChanged); */
+    RasterBlocks.Add(rasterBlock);
 }
 
 UOdysseyRasterBlock*
 UOdysseyAnimationLayerImageRaster::GetRasterBlock(int iFrame) const
 {
-	return RasterBlock;
+    if (iFrame < 0 || iFrame >= RasterBlocks.Num())
+        return nullptr;
+
+	return RasterBlocks[iFrame];
 }
 
 void
 UOdysseyAnimationLayerImageRaster::OnBlockChanged(const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive, UOdysseyRasterBlock* iBlock)
 {
-    //TODO: find frameIndex (Or should we send ranges of frames)
-    //RenderImageChanged(frameIndex, iRects, iIsInteractive);
+    int frameIndex = RasterBlocks.Find(iBlock);
+    if (frameIndex == INDEX_NONE)
+        return;
+
+    RenderImageChanged(TRange<int>(frameIndex), iRects, iIsInteractive);
 }
 
 void
-UOdysseyAnimationLayerImageRaster::OnBlockPtrChanged()
+UOdysseyAnimationLayerImageRaster::OnBlockPtrChanged(UOdysseyRasterBlock* iBlock)
 {
-    //TODO: find frameIndex (Or should we send ranges of frames)
-    //RenderImageChanged(frameIndex, { ::ULIS::FRectI::FromXYWH(0, 0, RasterBlock->GetWidth(), RasterBlock->GetHeight()) }, false);
+    int frameIndex = RasterBlocks.Find(iBlock);
+    if (frameIndex == INDEX_NONE)
+        return;
+
+    RenderImageChanged(TRange<int>(frameIndex), false);
 }
 
 TArray<::ULIS::FEvent>
@@ -97,9 +103,12 @@ UOdysseyAnimationLayerImageRaster::RenderImage(TSharedPtr<::ULIS::FBlock, ESPMod
     if (!ioBlock)
         return iWaitList;
 
-    //TODO: Find RasterBlock from FrameIndex
+    if (iFrame < 0 || iFrame >= RasterBlocks.Num())
+        return iWaitList;
 
-    /* TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ULISRasterBlock = RasterBlock->IsBeingEdited() ? RasterBlock->GetEditableBlock() : RasterBlock->GetBlock();
+    UOdysseyRasterBlock* rasterBlock = RasterBlocks[iFrame];
+
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ULISRasterBlock = rasterBlock->IsBeingEdited() ? rasterBlock->GetEditableBlock() : rasterBlock->GetBlock();
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(ULISRasterBlock->Format());
 
     TArray<::ULIS::FEvent> eventConvertAndExecute = ULISUtils::ConvertAndExecute(ioBlock, ULISRasterBlock->Format(), iRect, iPos, iWaitList,
@@ -125,11 +134,11 @@ UOdysseyAnimationLayerImageRaster::RenderImage(TSharedPtr<::ULIS::FBlock, ESPMod
 
     ctx.Flush();
 
-    return eventConvertAndExecute; */
+    return eventConvertAndExecute;
 }
 
 TArray<::ULIS::FEvent>
-UOdysseyAnimationLayerImageRaster::CopyImage(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ioBlock, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList)
+UOdysseyAnimationLayerImageRaster::CopyImage(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ioBlock, int iFrame, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList)
 {
     if (!IsActivated)
         return iWaitList;
@@ -137,9 +146,12 @@ UOdysseyAnimationLayerImageRaster::CopyImage(TSharedPtr<::ULIS::FBlock, ESPMode:
     if (!ioBlock)
         return iWaitList;
 
-    //TODO: Find RasterBlock from FrameIndex
+    if (iFrame < 0 || iFrame >= RasterBlocks.Num())
+        return iWaitList;
 
-    /* TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ULISRasterBlock = RasterBlock->GetBlock();
+    UOdysseyRasterBlock* rasterBlock = RasterBlocks[iFrame];
+
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ULISRasterBlock = rasterBlock->GetBlock();
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(ULISRasterBlock->Format());
 
     TArray<::ULIS::FEvent> eventConvertAndExecute = ULISUtils::ConvertAndExecute(ioBlock, ULISRasterBlock->Format(), iRect, iPos, iWaitList,
@@ -162,7 +174,7 @@ UOdysseyAnimationLayerImageRaster::CopyImage(TSharedPtr<::ULIS::FBlock, ESPMode:
 
     ctx.Flush();
 
-    return eventConvertAndExecute; */
+    return eventConvertAndExecute;
 }
 
 void
@@ -207,14 +219,14 @@ void
 UOdysseyAnimationLayerImageRaster::OpacityChanged()
 {
     OnOpacityChanged().Broadcast(this);
-    RenderImageChanged({ ::ULIS::FRectI::FromXYWH(0, 0, RasterBlock->GetWidth(), RasterBlock->GetHeight()) }, false);
+    RenderImageChanged(false);
 }
 
 void
 UOdysseyAnimationLayerImageRaster::BlendModeChanged()
 {
     OnBlendModeChanged().Broadcast(this);
-    RenderImageChanged({ ::ULIS::FRectI::FromXYWH(0, 0, RasterBlock->GetWidth(), RasterBlock->GetHeight()) }, false);
+    RenderImageChanged(false);
 }
 
 void
@@ -237,60 +249,68 @@ UOdysseyAnimationLayerImageRaster::PostLoad()
 
     //TODO: bind callbacks for all cells
 
-    /* if ( RasterBlock )
+    for ( UOdysseyRasterBlock* rasterBlock : RasterBlocks )
     {
-        RasterBlock->OnBlockChanged().RemoveAll(this);
-        RasterBlock->OnBlockPtrChanged().RemoveAll(this);
-        RasterBlock->OnBlockChanged().AddUObject(this, &::UOdysseyAnimationLayerImageRaster::OnBlockChanged);
-        RasterBlock->OnBlockPtrChanged().AddUObject(this, &::UOdysseyAnimationLayerImageRaster::OnBlockPtrChanged);
-    } */
+        rasterBlock->OnBlockChanged().RemoveAll(this);
+        rasterBlock->OnBlockPtrChanged().RemoveAll(this);
+        rasterBlock->OnBlockChanged().AddUObject(this, &::UOdysseyAnimationLayerImageRaster::OnBlockChanged, rasterBlock);
+        rasterBlock->OnBlockPtrChanged().AddUObject(this, &::UOdysseyAnimationLayerImageRaster::OnBlockPtrChanged, rasterBlock);
+    }
 }
 
 void
 UOdysseyAnimationLayerImageRaster::PostDuplicate(bool bDuplicateForPIE)
 {
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(GetLayerStack());
-    if (!layerStack)
-        return;
-
-    UOdysseyAnimation* animation = layerStack->GetAnimation();
+    UOdysseyAnimation* animation = GetAnimation();
     if (!animation)
+    {
+        Super::PostDuplicate(bDuplicateForPIE);
         return;
+    }
 
-    //TODO: Duplicate RasterBlocks and adjust Size for each cell
+    TArray<UOdysseyRasterBlock*> duplicatedRasterBlocks;
 
-    /* TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> originalBlock = RasterBlock->GetBlock();
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> duplicatedBlock = MakeShared<::ULIS::FBlock>( animation->Width, animation->Height, format);
+    for (UOdysseyRasterBlock* rasterBlock : RasterBlocks)
+    {
+        TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> originalBlock = rasterBlock->GetBlock();
+        TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> duplicatedBlock = MakeShared<::ULIS::FBlock>( animation->Width(), animation->Height(), animation->Format());
 
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
-    ctx.ConvertFormat(
-        *originalBlock.Get(),
-        *duplicatedBlock.Get(),
-        ::ULIS::FRectI::Auto,
-        ::ULIS::FVec2I( 0 ),
-        ::ULIS::FSchedulePolicy::AsyncCacheEfficient
-    );
-    ctx.Finish();
+        ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(animation->Format());
+        ctx.ConvertFormat(
+            *originalBlock.Get(),
+            *duplicatedBlock.Get(),
+            ::ULIS::FRectI::Auto,
+            ::ULIS::FVec2I( 0 ),
+            ::ULIS::FSchedulePolicy::AsyncCacheEfficient
+        );
+        ctx.Finish();
 
-    //ensure we remove any callbacks registered on the wrong Rasterblock
-    RasterBlock->OnBlockChanged().RemoveAll(this);
-    RasterBlock->OnBlockPtrChanged().RemoveAll(this);
+        //ensure we remove any callbacks registered on the wrong Rasterblock
+        rasterBlock->OnBlockChanged().RemoveAll(this);
+        rasterBlock->OnBlockPtrChanged().RemoveAll(this);
 
-    //Replace old rasterblock with an owned one
-    RasterBlock = NewObject<UOdysseyRasterBlock>(this, "RasterBlock", RF_Public | RF_Transactional);
-    RasterBlock->SetBlock(duplicatedBlock);
+        //Replace old rasterblock with an owned one
+        UOdysseyRasterBlock* duplicatedRasterBlock = NewObject<UOdysseyRasterBlock>(this, "RasterBlock", RF_Public | RF_Transactional);
+        duplicatedRasterBlock->SetBlock(duplicatedBlock);
 
-    //Set the right callbacks
-    RasterBlock->OnBlockChanged().AddUObject(this, &::UOdysseyAnimationLayerImageRaster::OnBlockChanged);
-    RasterBlock->OnBlockPtrChanged().AddUObject(this, &::UOdysseyAnimationLayerImageRaster::OnBlockPtrChanged);*/
+        //Set the right callbacks
+        duplicatedRasterBlock->OnBlockChanged().AddUObject(this, &::UOdysseyAnimationLayerImageRaster::OnBlockChanged, duplicatedRasterBlock);
+        duplicatedRasterBlock->OnBlockPtrChanged().AddUObject(this, &::UOdysseyAnimationLayerImageRaster::OnBlockPtrChanged, duplicatedRasterBlock);
+
+        duplicatedRasterBlocks.Add(duplicatedRasterBlock);
+    }
+    RasterBlocks = duplicatedRasterBlocks;
+
+    Super::PostDuplicate(bDuplicateForPIE);
 }
 
-void
-UOdysseyAnimationLayerImageRaster::Preload(int iFrame, TArray<TSharedPtr<IOdysseyHandle>>& oHandles)
+TSharedPtr<IOdysseyHandle>
+UOdysseyAnimationLayerImageRaster::Preload(int iFrame)
 {
-    //TODO: Find Raster Block for frameIndex
-    /* if ( RasterBlock )
-        oHandles.Add(RasterBlock->Preload()); */
+    if (iFrame < 0 || iFrame >= RasterBlocks.Num() )
+        return nullptr;
+
+    return RasterBlocks[iFrame]->Preload();
 }
 
 

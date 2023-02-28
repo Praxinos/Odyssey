@@ -1,8 +1,8 @@
 // IDDN FR.001.250001.005.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
-#include "OdysseyAnimationLayerFolder.h"
-#include "OdysseyAnimationLayerStack.h"
+#include "LayerStack/OdysseyAnimationLayerFolder.h"
+#include "LayerStack/OdysseyAnimationLayerStack.h"
 #include "OdysseyPixelFormat.h"
 #include "EditorStyleSet.h"
 #include "ULISEventBuilder.h"
@@ -42,10 +42,6 @@ UOdysseyAnimationLayerFolder::RenderImage(TSharedPtr<::ULIS::FBlock, ESPMode::Th
 
     if (!ioBlock)
         return iWaitList;
-        
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(GetLayerStack());
-    if (!layerStack)
-        return iWaitList;
 
     if (Children.Num() <= 0)
         return iWaitList;
@@ -56,7 +52,7 @@ UOdysseyAnimationLayerFolder::RenderImage(TSharedPtr<::ULIS::FBlock, ESPMode::Th
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> folderBlock = MakeShared<::ULIS::FBlock>(iRect.w, iRect.h, format);
 
     //Render children Image
-    TArray<::ULIS::FEvent> eventRenderChildrenImage = layerStack->RenderLayersImage(Children, folderBlock, iFrame, iRect, ::ULIS::FVec2I(0), TArray<::ULIS::FEvent>());
+    TArray<::ULIS::FEvent> eventRenderChildrenImage = RenderLayersImage(Children, folderBlock, iFrame, iRect, ::ULIS::FVec2I(0), TArray<::ULIS::FEvent>());
     eventRenderChildrenImage.Append(iWaitList);
 
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(folderBlock->Format());
@@ -99,10 +95,6 @@ UOdysseyAnimationLayerFolder::CopyImage(TSharedPtr<::ULIS::FBlock, ESPMode::Thre
 
     if (!ioBlock)
         return iWaitList;
-        
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(GetLayerStack());
-    if (!layerStack)
-        return iWaitList;
 
     if (Children.Num() <= 0)
         return iWaitList;
@@ -114,7 +106,7 @@ UOdysseyAnimationLayerFolder::CopyImage(TSharedPtr<::ULIS::FBlock, ESPMode::Thre
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> folderBlock = MakeShared<::ULIS::FBlock>(iRect.w, iRect.h, format);
 
     //Render children Image
-    TArray<::ULIS::FEvent> eventRenderChildrenImage = layerStack->RenderLayersImage(Children, folderBlock, iFrame, iRect, ::ULIS::FVec2I(0), TArray<::ULIS::FEvent>());
+    TArray<::ULIS::FEvent> eventRenderChildrenImage = RenderLayersImage(Children, folderBlock, iFrame, iRect, ::ULIS::FVec2I(0), TArray<::ULIS::FEvent>());
     eventRenderChildrenImage.Append(iWaitList);
     
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(folderBlock->Format());

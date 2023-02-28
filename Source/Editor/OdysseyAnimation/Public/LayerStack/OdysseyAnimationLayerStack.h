@@ -48,9 +48,8 @@ public:
 public:
     /**
      * @brief Preloads the layers and keeps them preloaded untile the hiven handles are destroyed
-     * One handle corresponds to something being held in memory
      */
-    void Preload(int iFrame, TArray<TSharedPtr<IOdysseyHandle>>& oHandles);
+    TSharedPtr<IOdysseyHandle> Preload(int iFrame);
 
 private:
     friend class UOdysseyAnimationLayerRoot;

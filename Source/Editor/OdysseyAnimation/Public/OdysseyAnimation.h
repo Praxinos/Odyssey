@@ -6,6 +6,8 @@
 #include "CoreMinimal.h"
 
 #include "OdysseyAnimationConfiguration.h"
+#include "OdysseyRasterBlock.h"
+#include "LayerStack/OdysseyAnimationLayerStack.h"
 #include "BaseMediaSource.h"
 #include <ULIS>
 
@@ -22,20 +24,14 @@ public:
 public:
 
 	//~ IMediaOptions interface
-
 	virtual bool GetMediaOption(const FName& Key, bool DefaultValue) const override;
 	virtual bool HasMediaOption(const FName& Key) const override;
 
 public:
 
 	//~ UMediaSource interface
-
 	virtual FString GetUrl() const override;
 	virtual bool Validate() const override;
-
-public:
-	//~ UObject overrides
-	//virtual void Serialize(FArchive& Ar) override;
 
 public:
 	uint32 Width() const;
@@ -48,8 +44,7 @@ public:
 	uint32 GetFrameIndexAtTime(FTimespan iTime) const;
 	TRange<FTimespan> GetFrameTimeRange(uint32 iFrameIndex) const;
 
-	//Will certainly be removed 
-	::ULIS::FBlock* GetBlockAtIndex(uint32 iIndex);
+	TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> GetBlockAtIndex(uint32 iIndex);
 
 private:
 	UPROPERTY()
@@ -63,12 +58,11 @@ private:
 
 	UPROPERTY()
 	float mFramesPerSecond = 24.0f;
-	
-	//Manages saving + caching of heavy parts of the animation asset (pixel blocks)
-	//TMap<FGuid, UE::Serialization::FEditorBulkData> mBulkDatas;
 
-	TArray<::ULIS::FBlock*> mBlocks;
-
+	//Maybe add a length to each block to avoid loading those blocks a lot
 	UPROPERTY()
+	TArray<TObjectPtr<UOdysseyRasterBlock>> mRasterBlocks;
+
+	UPROPERTY(meta=(LoadBehavior = "LazyOnDemand"))
 	TObjectPtr<UOdysseyAnimationLayerStack> mLayerStack;
 };

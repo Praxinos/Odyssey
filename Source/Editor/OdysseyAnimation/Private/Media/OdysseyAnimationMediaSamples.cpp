@@ -178,6 +178,7 @@ FOdysseyAnimationMediaSamples::FetchBestVideoSampleForTimeRange(const TRange<FMe
 	//range is valid
 	//check overlap of each frame with the time range
 	
+	uint32 resultingSequenceIndex = startSequenceIndex;
 	//Only a single frame overlaps the range
 	if (startSequenceIndex == endSequenceIndex && startFrameIndex == endFrameIndex)
 	{
@@ -211,10 +212,11 @@ FOdysseyAnimationMediaSamples::FetchBestVideoSampleForTimeRange(const TRange<FMe
 		FTimespan overlap1 = FindMaxOverlapingFrame(0, endTime, &frameIndex1);
 		FTimespan overlap2 = FindMaxOverlapingFrame(startTime, animation->GetDuration(), &frameIndex2);
 		mCurrentFrameIndex = overlap1 > overlap2 ? frameIndex1 : frameIndex2;
+		resultingSequenceIndex = overlap1 > overlap2 ? endSequenceIndex : startSequenceIndex;
 	}
 
 	//TODO: Use Cache to retrieve the sample
-	OutSample = MakeShared<FOdysseyAnimationMediaTextureSample>(animation, mCurrentFrameIndex);
+	OutSample = MakeShared<FOdysseyAnimationMediaTextureSample>(animation, mCurrentFrameIndex, resultingSequenceIndex);
 
 	//It can sound weird, but this is also the place where we detect that the play needs to stop
 	if (isAtEnd)

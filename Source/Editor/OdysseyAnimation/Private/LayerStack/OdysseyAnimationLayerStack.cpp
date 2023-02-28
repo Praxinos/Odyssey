@@ -1,10 +1,10 @@
 // IDDN FR.001.250001.005.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
-#include "OdysseyAnimationLayerStack.h"
-#include "OdysseyAnimationLayerRoot.h"
-#include "OdysseyAnimationLayerFolder.h"
-#include "OdysseyAnimationLayerImageRaster.h"
+#include "LayerStack/OdysseyAnimationLayerStack.h"
+#include "LayerStack/OdysseyAnimationLayerRoot.h"
+#include "LayerStack/OdysseyAnimationLayerFolder.h"
+#include "LayerStack/OdysseyAnimationLayerImageRaster.h"
 #include "OdysseyRectUtils.h"
 
 UOdysseyAnimationLayerStack::FOnRenderImageChanged&
@@ -58,7 +58,7 @@ UOdysseyAnimationLayerStack::RenderImage(TSharedPtr<::ULIS::FBlock, ESPMode::Thr
     TArray<::ULIS::FEvent> eventConvertAndExecute = ULISUtils::ConvertAndExecute(ioBlock, format, iRect, iPos, iWaitList,
         [this, &children, &iFrame](TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ioDest, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList) -> TArray<::ULIS::FEvent>
         {
-            return RenderLayersImage(children, ioDest, iFrame, iRect, iPos, iWaitList);
+            return UOdysseyAnimationLayer::RenderLayersImage(children, ioDest, iFrame, iRect, iPos, iWaitList);
         }
     );
     ctx.Flush();
@@ -72,16 +72,8 @@ UOdysseyAnimationLayerStack::OnRootLayerRenderImageChanged(UOdysseyAnimationLaye
     OnRenderImageChanged().Broadcast(this, iFrameRange, iRects, iIsInteractive);
 }
 
-void
-UOdysseyAnimationLayerStack::Preload(int iFrame, TArray<TSharedPtr<IOdysseyHandle>>& oHandles)
+TSharedPtr<IOdysseyHandle>
+UOdysseyAnimationLayerStack::Preload(int iFrame)
 {
-    const TArray<UOdysseyLayer*>& layers = GetLayers();
-    for (UOdysseyLayer* layer : layers)
-    {
-        UOdysseyAnimationLayer* animationLayer = Cast<UOdysseyAnimationLayer>(layer);
-        if (!animationLayer)
-            continue;
-
-        animationLayer->Preload(iFrame, oHandles);
-    }
+    return Cast<UOdysseyAnimationLayerRoot>(LayerRoot)->Preload(iFrame);
 }

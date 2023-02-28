@@ -2,13 +2,13 @@
 
 #include "Media/OdysseyAnimationMediaTextureSample.h"
 
-FOdysseyAnimationMediaTextureSample::FOdysseyAnimationMediaTextureSample(UOdysseyAnimation* iAnimation, uint32 iFrameIndex)
+FOdysseyAnimationMediaTextureSample::FOdysseyAnimationMediaTextureSample(UOdysseyAnimation* iAnimation, uint32 iFrameIndex, uint32 iSequenceIndex)
     : mTime(0)
     , mDuration(0)
     , mBlock(iAnimation->GetBlockAtIndex(iFrameIndex))
 {
     TRange<FTimespan> timeRange = iAnimation->GetFrameTimeRange(iFrameIndex);
-    mTime = FMediaTimeStamp(timeRange.GetLowerBoundValue());
+    mTime = FMediaTimeStamp(timeRange.GetLowerBoundValue(), iSequenceIndex);
     mDuration = timeRange.GetUpperBoundValue() - timeRange.GetLowerBoundValue();
 }
 

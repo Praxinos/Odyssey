@@ -9,7 +9,7 @@ class FOdysseyAnimationMediaTextureSample
 {
 public:
 	//Constructor
-	FOdysseyAnimationMediaTextureSample(UOdysseyAnimation* iAnimation, uint32 iFrameIndex);
+	FOdysseyAnimationMediaTextureSample(UOdysseyAnimation* iAnimation, uint32 iFrameIndex, uint32 iSequenceIndex);
 	
 public:
 	// Mandatrory IMediaTextureSample interface overrides
@@ -117,5 +117,5 @@ public:
 private:
 	FMediaTimeStamp mTime;
 	FTimespan mDuration;
-	::ULIS::FBlock* mBlock;//WARNING: please retain the block or do it differently to not rely on the animation asset
+	TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mBlock;
 };

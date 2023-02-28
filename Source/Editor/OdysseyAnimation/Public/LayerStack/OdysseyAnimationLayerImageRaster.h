@@ -82,7 +82,7 @@ public:
      * @brief Preloads the layers and keeps them preloaded untile the hiven handles are destroyed
      * One handle corresponds to something being held in memory
      */
-    virtual void Preload(int iFrame, TArray<TSharedPtr<IOdysseyHandle>>& oHandles) override;
+    virtual TSharedPtr<IOdysseyHandle> Preload(int iFrame) override;
 
 protected:
     void OnBlockChanged(const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive, UOdysseyRasterBlock* iRasterBlock);
@@ -98,13 +98,6 @@ public:
     virtual void PostDuplicate(bool bDuplicateForPIE) override;
     virtual void PostLoad() override;
 
-public:
-    /**
-     * @brief Preloads the layers and keeps them preloaded untile the hiven handles are destroyed
-     * One handle corresponds to something being held in memory
-     */
-    TArray<TSharedPtr<IOdysseyHandle>> Preload(int iFrame);
-
 private:
     /*
         struct cell
@@ -118,7 +111,7 @@ private:
     */
 
     UPROPERTY()
-    TObjectPtr<UOdysseyRasterBlock> RasterBlock;
+    TArray<TObjectPtr<UOdysseyRasterBlock>> RasterBlocks;
 
 public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Animation | LayerStack")
