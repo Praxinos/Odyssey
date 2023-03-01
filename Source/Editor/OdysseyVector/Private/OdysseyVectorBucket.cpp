@@ -152,6 +152,18 @@ FOdysseyVectorBucket::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
     blctx->restore();
 }
 
+void
+FOdysseyVectorBucket::Copy( FOdysseyVectorBucket* iDestinationBucket )
+{
+    iDestinationBucket->mCoords = mCoords;
+    iDestinationBucket->mColor = mColor;
+    iDestinationBucket->mIsGradient = mIsGradient;
+    iDestinationBucket->mGradientColor0 = mGradientColor0;
+    iDestinationBucket->mGradientColor1 = mGradientColor1;
+
+    Reshape();
+}
+
 uint32
 FOdysseyVectorBucket::Pick( double iX, double iY )
 {

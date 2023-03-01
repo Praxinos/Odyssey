@@ -15,6 +15,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPrimitiveDrawingTool :
 public:
     GENERATED_BODY()
 
+    DECLARE_MULTICAST_DELEGATE(FSelectionChanged)
+    FSelectionChanged mSelectionChanged;
+
 public:
     // Destructor
     virtual ~UOdysseyPainterEditorVectorPrimitiveDrawingTool();

@@ -60,7 +60,6 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDown(const FOdysseyPoint& iPo
         UOdysseyVectorObject* selectedObject = scene->GetLastSelected();
         UOdysseyVectorPathCubic* cubicPath = NewObject<UOdysseyVectorPathCubic>();
         UOdysseyVectorPathBuilder* currentPathBuilder = NewObject<UOdysseyVectorPathBuilder>();
-        BLPoint localCoords = cubicPath->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
         float radius =  iPointInTexture.pressure * ( Size * 0.5f );
         float roundedUpRadius = ceil (radius);
         float roundedUpDiameter = roundedUpRadius * 2.0f;
@@ -78,10 +77,14 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDown(const FOdysseyPoint& iPo
         cubicPath->UpdateMatrix();
         currentPathBuilder->UpdateMatrix();
 
+        BLPoint localCoords = cubicPath->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
+
         currentPathBuilder->AppendPoint( localCoords.x, localCoords.y, roundedUpRadius );
 
         scene->ClearSelection();
         scene->Select( currentPathBuilder );
+
+        mSelectionChanged.Broadcast();
 
         currentVectorLayer->RenderImageChanged(false);
 

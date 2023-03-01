@@ -12,7 +12,7 @@
 #include "LayerStack/OdysseyTextureLayerImageVector.h"
 #include "OdysseyTextureEditor.h"
 #include "OdysseyVectorGroupPaint.h"
-
+#include "OdysseyVectorCircle.h"
 #include "ToolMenus.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorGUI"
@@ -71,6 +71,9 @@ FOdysseyPainterEditorGUI::BindShortcuts(FBaseToolkit* iToolkit)
     MAP_ACTION(painterEditorCommands.SwitchTabletAPI, SwitchTabletAPI )
     MAP_ACTION(painterEditorCommands.GroupPaint, GroupPaint )
     MAP_ACTION(painterEditorCommands.Ungroup, Ungroup )
+    MAP_ACTION(painterEditorCommands.BringForward, BringForward )
+    MAP_ACTION(painterEditorCommands.SendBackward, SendBackward )
+    MAP_ACTION(painterEditorCommands.ConvertToPath, ConvertToPath )
     MAP_ACTION(painterEditorCommands.RemoveSelectedObjects, RemoveSelectedObjects )
 
     #undef MAP_ACTION
@@ -148,6 +151,24 @@ FOdysseyPainterEditorGUI::ExtendMenuAbout( FToolMenuOwner iOwner, FName iMenuNam
             FOdysseyPainterEditorCommands::Get().Ungroup
             , LOCTEXT("Ungroup", "Ungroup")
             , LOCTEXT("Ungroup", "Ungroup")
+            , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
+            , NAME_None );
+        aboutSection.AddMenuEntry(
+            FOdysseyPainterEditorCommands::Get().BringForward
+            , LOCTEXT("BringForward", "Bring forward")
+            , LOCTEXT("BringForward", "Bring forward")
+            , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
+            , NAME_None );
+        aboutSection.AddMenuEntry(
+            FOdysseyPainterEditorCommands::Get().SendBackward
+            , LOCTEXT("SendBackward", "Send backward")
+            , LOCTEXT("SendBackward", "Send backward")
+            , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
+            , NAME_None );
+        aboutSection.AddMenuEntry(
+            FOdysseyPainterEditorCommands::Get().ConvertToPath
+            , LOCTEXT("ConvertToPath", "Convert to path")
+            , LOCTEXT("ConvertToPath", "Convert to path")
             , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
             , NAME_None );
         aboutSection.AddMenuEntry(
@@ -434,6 +455,97 @@ FOdysseyPainterEditorGUI::RemoveSelectedObjects()
 }
 
 void
+FOdysseyPainterEditorGUI::ConvertToPath()
+{
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(static_cast<FOdysseyTextureEditor*>(mEditor)->LayerStack());
+    UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
+
+    if( currentLayer )
+    {
+        if( currentLayer->GetClass() == UOdysseyTextureLayerImageVector::StaticClass() )
+        {
+            UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
+            FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+            // work on a copy to be able to remove the object from selection while iterating
+            std::list<UOdysseyVectorObject*> selectedObjectList = currentVectorLayer->GetScene()->GetSelectedObjectList();
+
+            for( std::list<UOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
+            {
+                UOdysseyVectorObject* object = (*it);
+                UOdysseyVectorCircle* circle = Cast<UOdysseyVectorCircle>(object);
+
+                if( circle )
+                {
+                    UOdysseyVectorPathCubic* cubicPath = circle->Convert();
+
+                    currentVectorLayer->GetScene()->Unselect( circle );
+                    currentVectorLayer->GetScene()->RemoveChild( circle );
+                    currentVectorLayer->GetScene()->AppendChild( cubicPath );
+                    currentVectorLayer->GetScene()->Select( cubicPath );
+
+                    cubicPath->UpdateMatrix();
+                    cubicPath->Invalidate();
+                }
+            }
+
+            currentVectorLayer->GetScene()->Update( 0 );
+        }
+    }
+}
+
+void
+FOdysseyPainterEditorGUI::BringForward()
+{
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(static_cast<FOdysseyTextureEditor*>(mEditor)->LayerStack());
+    UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
+
+    if( currentLayer )
+    {
+        if( currentLayer->GetClass() == UOdysseyTextureLayerImageVector::StaticClass() )
+        {
+            UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
+            FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+            std::list<UOdysseyVectorObject*>& selectedObjectList = currentVectorLayer->GetScene()->GetSelectedObjectList();
+
+            for( std::list<UOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
+            {
+                UOdysseyVectorObject* object = (*it);
+
+                object->MoveFront();
+            }
+
+            currentVectorLayer->RenderImageChanged( false );
+        }
+    }
+}
+
+void
+FOdysseyPainterEditorGUI::SendBackward()
+{
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(static_cast<FOdysseyTextureEditor*>(mEditor)->LayerStack());
+    UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
+
+    if( currentLayer )
+    {
+        if( currentLayer->GetClass() == UOdysseyTextureLayerImageVector::StaticClass() )
+        {
+            UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
+            FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+            std::list<UOdysseyVectorObject*>& selectedObjectList = currentVectorLayer->GetScene()->GetSelectedObjectList();
+
+            for( std::list<UOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
+            {
+                UOdysseyVectorObject* object = (*it);
+
+                object->MoveBack();
+            }
+
+            currentVectorLayer->RenderImageChanged( false );
+        }
+    }
+}
+
+void
 FOdysseyPainterEditorGUI::Ungroup()
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(static_cast<FOdysseyTextureEditor*>(mEditor)->LayerStack());
@@ -467,6 +579,7 @@ FOdysseyPainterEditorGUI::Ungroup()
                 currentVectorLayer->GetScene()->ClearSelection();
                 currentVectorLayer->GetScene()->UpdateMatrix();
                 currentVectorLayer->GetScene()->Update( 0 );
+
                 currentVectorLayer->RenderImageChanged( false );
             }
         }
@@ -490,64 +603,61 @@ FOdysseyPainterEditorGUI::GroupPaint()
 
             if( selectObjectList.size() )
             {
-                UOdysseyVectorObject* selectedObject = currentVectorLayer->GetScene()->GetLastSelected();
                 UOdysseyVectorGroupPaint* paintGroup = NewObject<UOdysseyVectorGroupPaint>();
-                UOdysseyVectorGroupPaint* formerPaintGroup = nullptr;
+                std::vector<UOdysseyVectorObject*> cubicPathArray;
 
-                for( std::list<UOdysseyVectorObject*>::iterator it = selectObjectList.begin(); it != selectObjectList.end(); ++it )
-                {
-                    selectedObject = (*it);
-
-                    if( selectedObject->GetClass() == UOdysseyVectorPathCubic::StaticClass() )
-                    {
-                        UOdysseyVectorPathCubic* cubicPath = Cast<UOdysseyVectorPathCubic>( selectedObject );
-
-                        // for testing purpose
-                        if( cubicPath->GetParent()->GetClass() == UOdysseyVectorGroupPaint::StaticClass() )
-                        {
-                            formerPaintGroup = Cast<UOdysseyVectorGroupPaint>(cubicPath->GetParent());
-                        }
-                    }
-                }
-
-                if( formerPaintGroup )
-                {
-                    paintGroup = formerPaintGroup;
-                }
-                else
-                {
-                    paintGroup = NewObject<UOdysseyVectorGroupPaint>();
-                    currentVectorLayer->GetScene()->AppendChild( paintGroup );
-                }
-
-                paintGroup->ClearCycles();
+                paintGroup = NewObject<UOdysseyVectorGroupPaint>();
+                currentVectorLayer->GetScene()->AppendChild( paintGroup );
                 paintGroup->UpdateMatrix();
 
                 for( std::list<UOdysseyVectorObject*>::iterator it = selectObjectList.begin(); it != selectObjectList.end(); ++it )
                 {
-                    selectedObject = (*it);
+                    UOdysseyVectorObject* selectedObject = (*it);
+
+                    if( selectedObject->GetClass() == UOdysseyVectorGroupPaint::StaticClass() )
+                    {
+                        UOdysseyVectorGroupPaint* selectedPaintGroup = Cast<UOdysseyVectorGroupPaint>(selectedObject);
+                        
+                        for( std::list<UOdysseyVectorObject*>::iterator cit = selectedPaintGroup->GetChildrenList().begin(); cit != selectedPaintGroup->GetChildrenList().end(); ++cit )
+                        {
+                            UOdysseyVectorObject* childObject = (*cit);
+                            UOdysseyVectorPathCubic* cubicPath = Cast<UOdysseyVectorPathCubic>(childObject);
+
+                            if( cubicPath )
+                            {
+                                cubicPathArray.push_back( cubicPath );
+                            }
+                        }
+
+                        selectedPaintGroup->GetParent()->RemoveChild( selectedPaintGroup );
+
+                        selectedPaintGroup->CopyBuckets( paintGroup );
+                    }
 
                     if( selectedObject->GetClass() == UOdysseyVectorPathCubic::StaticClass() )
                     {
-                        UOdysseyVectorPathCubic* cubicPath = Cast<UOdysseyVectorPathCubic>( selectedObject );
+                        UOdysseyVectorPathCubic* selectedCubicPath = Cast<UOdysseyVectorPathCubic>( selectedObject );
 
-                        cubicPath->GetParent()->RemoveChild( cubicPath );
-
-                        cubicPath->SwitchSpace( *paintGroup );
-                        cubicPath->Invalidate();
-
-                        paintGroup->AppendChild( cubicPath );
-
-                        cubicPath->ResetTransform();
-                        cubicPath->UpdateMatrix();
+                        cubicPathArray.push_back( selectedCubicPath );
                     }
+                }
+
+                for( int i = 0; i < cubicPathArray.size(); i++ )
+                {
+                    cubicPathArray[i]->GetParent()->RemoveChild( cubicPathArray[i] );
+                    cubicPathArray[i]->SwitchSpace( *paintGroup );
+                    cubicPathArray[i]->Invalidate();
+
+                    paintGroup->AppendChild( cubicPathArray[i] );
+
+                    cubicPathArray[i]->ResetTransform();
+                    cubicPathArray[i]->UpdateMatrix();
                 }
 
                 paintGroup->Invalidate();
 
                 currentVectorLayer->GetScene()->ClearSelection();
                 currentVectorLayer->GetScene()->Select( paintGroup );
-
                 currentVectorLayer->GetScene()->Update( 0 );
 
                 currentVectorLayer->RenderImageChanged( false );

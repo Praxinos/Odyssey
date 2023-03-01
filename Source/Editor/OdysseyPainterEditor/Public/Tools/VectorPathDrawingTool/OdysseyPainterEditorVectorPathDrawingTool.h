@@ -15,6 +15,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
 public:
     GENERATED_BODY()
 
+    DECLARE_MULTICAST_DELEGATE(FSelectionChanged)
+    FSelectionChanged mSelectionChanged;
+
 public:
     // Destructor
     virtual ~UOdysseyPainterEditorVectorPathDrawingTool();

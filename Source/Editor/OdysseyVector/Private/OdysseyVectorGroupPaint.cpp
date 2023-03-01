@@ -551,6 +551,25 @@ UOdysseyVectorGroupPaint::ClearCycles()
     mLoopArray.clear();
 }
 
+void
+UOdysseyVectorGroupPaint::CopyBuckets( UOdysseyVectorGroupPaint* iDestination )
+{
+     for( std::list<FOdysseyVectorBucket*>::iterator lit = mBucketList.begin(); lit != mBucketList.end(); ++lit )
+     {
+        FOdysseyVectorBucket *bucket = static_cast<FOdysseyVectorBucket*>(*lit);
+        ::ULIS::FVec2D& bucketCoords = bucket->GetCoords();
+        BLPoint bucketWorldPosition = mWorldMatrix.mapPoint( bucketCoords.x, bucketCoords.y );
+        BLPoint destinationBucketPosition = iDestination->mInverseWorldMatrix.mapPoint( bucketWorldPosition );
+        FOdysseyVectorBucket *bucketCopy = new FOdysseyVectorBucket( *iDestination, 0.0f, 0.0f );
+
+        bucket->Copy( bucketCopy );
+
+        bucketCopy->SetCoords( destinationBucketPosition.x, destinationBucketPosition.y );
+
+        iDestination->AddBucket( bucketCopy );
+     }   
+}
+
 UOdysseyVectorObject*
 UOdysseyVectorGroupPaint::CopyShape()
 {

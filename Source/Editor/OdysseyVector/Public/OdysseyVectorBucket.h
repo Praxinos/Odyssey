@@ -38,6 +38,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorBucket
         void SetGradient( bool iIsGradient );
         void SetGradientColors( uint8 iR0, uint8 iG0, uint8 iB0, uint8 iA0, uint8 iR1, uint8 iG1, uint8 iB1, uint8 iA1 );
         FColor& GetColor();
+        void Copy( FOdysseyVectorBucket* iDestinationBucket );
         uint32 Pick( double iX, double iY );
         UOdysseyVectorHandleBucket* PickHandle( double iX, double iY );
         UOdysseyVectorHandleBucket* GetHandle();

@@ -69,6 +69,8 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDown(const FOdysseyPoint
         scene->ClearSelection();
         scene->Select( circle );
 
+        mSelectionChanged.Broadcast();
+
         currentVectorLayer->RenderImageChanged(false);
 
         return true;

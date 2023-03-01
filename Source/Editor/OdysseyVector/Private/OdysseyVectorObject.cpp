@@ -497,9 +497,8 @@ UOdysseyVectorObject::PrependChild( UOdysseyVectorObject* iChild )
 void
 UOdysseyVectorObject::AddChild( UOdysseyVectorObject* iChild, bool iPrepend )
 {
+/*
     BLMatrix2D localMatrix = this->GetInverseWorldMatrix();
-
-    iChild->mParent = this;
 
     localMatrix.transform( iChild->GetWorldMatrix() );
 
@@ -511,6 +510,8 @@ UOdysseyVectorObject::AddChild( UOdysseyVectorObject* iChild, bool iPrepend )
                            , &iChild->ScalingY );
 
     iChild->UpdateMatrix();
+*/
+    iChild->mParent = this;
 
     if ( iPrepend == true )
     {

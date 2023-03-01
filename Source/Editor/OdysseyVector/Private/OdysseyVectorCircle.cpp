@@ -98,7 +98,7 @@ UOdysseyVectorCircle::CopyShape()
 UOdysseyVectorPathCubic*
 UOdysseyVectorCircle::Convert()
 {
-    UOdysseyVectorPathCubic* path = static_cast<UOdysseyVectorPathCubic*>(this->UOdysseyVectorPathCubic::CopyShape());
+    UOdysseyVectorPathCubic* path = Cast<UOdysseyVectorPathCubic>(this->UOdysseyVectorPathCubic::CopyShape());
 
     this->CopySettings( *path );
 

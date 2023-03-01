@@ -73,7 +73,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorGroupPaint : public UOdysseyVectorGroup
         uint32 IntersectSegment( UOdysseyVectorSegmentCubic& iCubicSegment
                                , std::list<UOdysseyVectorSegment*>& cubicSegmenList
                                , std::vector<UOdysseyVectorVertexIntersection*>& iIntersectionVertexList );
-
+        void CopyBuckets( UOdysseyVectorGroupPaint* iDestination );
         uint32 BuildGraph( std::vector<UOdysseyVectorVertexIntersection*>& iIntersectionVertexArray );
 
         /*FOdysseyVectorLoop* MakeCycle( uint64 iCycleID
