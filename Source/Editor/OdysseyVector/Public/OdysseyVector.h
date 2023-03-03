@@ -4,19 +4,26 @@
 
 namespace FOdysseyVector
 {
-    bool IntersectSegment( ::ULIS::FVec2D& line0p0
-                         , ::ULIS::FVec2D& line0p1
-                         , ::ULIS::FVec2D& line1p0
-                         , ::ULIS::FVec2D& line1p1
-                         , double* line0t
-                         , double* line1t );
+    void ODYSSEYVECTOR_API ExtractTransformations( BLMatrix2D &iMatrix
+                                                 , double* iTranslationX
+                                                 , double* iTranslationY
+                                                 , double* iRotation
+                                                 , double* iScalingX
+                                                 , double* iScalingY );
 
-    double Cross2D( ::ULIS::FVec2D& iA, ::ULIS::FVec2D &iB );
+    bool ODYSSEYVECTOR_API IntersectSegment( ::ULIS::FVec2D& line0p0
+                                           , ::ULIS::FVec2D& line0p1
+                                           , ::ULIS::FVec2D& line1p0
+                                           , ::ULIS::FVec2D& line1p1
+                                           , double* line0t
+                                           , double* line1t );
 
-    double DistanceToSegment( ::ULIS::FVec2D& iPt
-                            , ::ULIS::FVec2D& iSegmentP0
-                            , ::ULIS::FVec2D& iSegmentP1
-                            , double&         oDistance );
+    double ODYSSEYVECTOR_API Cross2D( ::ULIS::FVec2D& iA, ::ULIS::FVec2D &iB );
+
+    double ODYSSEYVECTOR_API DistanceToSegment( ::ULIS::FVec2D& iPt
+                                              , ::ULIS::FVec2D& iSegmentP0
+                                              , ::ULIS::FVec2D& iSegmentP1
+                                              , double&         oDistance );
 }
 
 #include "OdysseyVectorObject.h"

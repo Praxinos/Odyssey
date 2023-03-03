@@ -13,30 +13,6 @@ UOdysseyVectorPathCubic::Init( std::string iName )
     SetName( iName );
 }
 
-void
-UOdysseyVectorPathCubic::setJointRadial()
-{
-    mJointType = JOINT_TYPE_RADIAL;
-}
-
-void
-UOdysseyVectorPathCubic::setJointMiter()
-{
-    mJointType = JOINT_TYPE_MITER;
-}
-
-void
-UOdysseyVectorPathCubic::setJointLinear()
-{
-    mJointType = JOINT_TYPE_LINEAR;
-}
-
-void
-UOdysseyVectorPathCubic::setJointNone()
-{
-    mJointType = JOINT_TYPE_NONE;
-}
-
 UOdysseyVectorSegmentCubic*
 UOdysseyVectorPathCubic::AppendVertex( UOdysseyVectorVertexCubic* iVertex
                                      , bool iConnect
@@ -554,251 +530,6 @@ UOdysseyVectorPathCubic::DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags )
     DrawShapeVariable( iRoi, iFlags );
 }
 
-// https://gamedev.net/forums/topic/647810-intersection-point-of-two-vectors/5094071/
-static bool intersectLine( ::ULIS::FVec2D& iOrigin0
-                         , ::ULIS::FVec2D& iDirection0
-                         , ::ULIS::FVec2D& iOrigin1
-                         , ::ULIS::FVec2D& iDirection1
-                         , ::ULIS::FVec2D& iOut ) {
-    ::ULIS::FVec2D c = iOrigin0 - iOrigin1;
-    double cross = ( iDirection0.y * iDirection1.x ) - ( iDirection0.x * iDirection1.y );
-
-    if ( cross )
-    {
-        double t = ( ( c.x * iDirection1.y ) - ( c.y * iDirection1.x ) ) / cross;
-
-        iOut = iOrigin0 + ( iDirection0 * t );
-
-        return true;
-    }
-
-    return false;
-}
-
-static void
-_drawMiterJoint( UOdysseyVectorPathCubic* iPath
-               , ::ULIS::FVec2D& iOrigin
-               , ::ULIS::FVec2D& iPrevSegmentVector
-               , ::ULIS::FVec2D& iSegmentVector
-               , double iRadius
-               , double iMiterLimit )
-{
-    ::ULIS::FVec2D currParallelVec = - iSegmentVector;
-    ::ULIS::FVec2D prevParallelVec = iPrevSegmentVector;
-    ::ULIS::FVec2D currPerpendicularVec = { iSegmentVector.y    , - iSegmentVector.x     };
-    ::ULIS::FVec2D prevPerpendicularVec = { iPrevSegmentVector.y, - iPrevSegmentVector.x };
-    ::ULIS::FVec2D edgePrevPoint = iOrigin + ( prevPerpendicularVec * iRadius );
-    ::ULIS::FVec2D edgePoint = iOrigin + ( currPerpendicularVec * iRadius );
-    ::ULIS::FVec2D shortestTest = edgePoint - edgePrevPoint;
-    // have to clamp due to imprecision of the dot product
-    double dot = std::clamp<double>( currPerpendicularVec.DotProduct( prevPerpendicularVec ), -1.0f, 1.0f );
-    BLContext* blctx = iPath->GetRoot()->GetEngine()->GetBLContext();
-
-    ::ULIS::FVec2D intersectionPoint;
-
-    // Find on which side should the joint be drawn by comparing the directions of our vectors
-    if ( shortestTest.DotProduct( iPrevSegmentVector ) < 0 )
-    {
-        ::ULIS::FVec2D tmp = currPerpendicularVec;
-        currPerpendicularVec = -tmp;
-
-               tmp = prevPerpendicularVec;
-        prevPerpendicularVec = -tmp;
-
-        edgePrevPoint = iOrigin + ( prevPerpendicularVec * iRadius );
-        edgePoint = iOrigin + ( currPerpendicularVec * iRadius );
-    }
-
-    if( iRadius )
-    {
-        if ( intersectLine( edgePoint
-                          , currParallelVec
-                          , edgePrevPoint
-                          , prevParallelVec
-                          , intersectionPoint ) == true )
-        {
-            ::ULIS::FVec2D originToIntersection = intersectionPoint - iOrigin;
-
-            double miterRatio = originToIntersection.Distance() / iRadius;
-
-            if ( miterRatio < iMiterLimit )
-            {
-                BLPoint vertex[4];
-                vertex[0].x = iOrigin.x;
-                vertex[0].y = iOrigin.y;
-
-                vertex[1].x = edgePoint.x;
-                vertex[1].y = edgePoint.y;
-
-                vertex[2].x = intersectionPoint.x;
-                vertex[2].y = intersectionPoint.y;
-
-                vertex[3].x = edgePrevPoint.x;
-                vertex[3].y = edgePrevPoint.y;
-
-                blctx->strokePolygon( vertex, 4 );
-                blctx->fillPolygon( vertex, 4 );
-            }
-            else
-            {
-                BLPoint vertex[5];
-                vertex[0].x = iOrigin.x;
-                vertex[0].y = iOrigin.y;
-
-                vertex[1].x = edgePoint.x;
-                vertex[1].y = edgePoint.y;
-
-                vertex[2].x = edgePoint.x + ( currParallelVec.x * iMiterLimit * iRadius );
-                vertex[2].y = edgePoint.y + ( currParallelVec.y * iMiterLimit * iRadius );
-
-                vertex[3].x = edgePrevPoint.x + ( prevParallelVec.x * iMiterLimit * iRadius );
-                vertex[3].y = edgePrevPoint.y + ( prevParallelVec.y * iMiterLimit * iRadius );
-
-                vertex[4].x = edgePrevPoint.x;
-                vertex[4].y = edgePrevPoint.y;
-
-                blctx->strokePolygon( vertex, 5 );
-                blctx->fillPolygon( vertex, 5 );
-            }
-        }
-    }
-}
-
-static void
-_drawRadialJoint( UOdysseyVectorPathCubic* iPath
-                , ::ULIS::FVec2D& iOrigin
-                , ::ULIS::FVec2D& iPrevSegmentVector
-                , ::ULIS::FVec2D& iSegmentVector
-                , double iRadius
-                , uint32 iSteps )
-{
-    ::ULIS::FVec2D currPerpendicularVec = { iSegmentVector.y    , - iSegmentVector.x     };
-    ::ULIS::FVec2D prevPerpendicularVec = { iPrevSegmentVector.y, - iPrevSegmentVector.x };
-    ::ULIS::FVec2D edgePrevPoint = iOrigin + ( prevPerpendicularVec * iRadius );
-    ::ULIS::FVec2D edgePoint = iOrigin + ( currPerpendicularVec * iRadius );
-    ::ULIS::FVec2D shortestTest = edgePoint - edgePrevPoint;
-    // have to clamp due to imprecision of the dot product
-    double dot = std::clamp<double>( currPerpendicularVec.DotProduct( prevPerpendicularVec ), -1.0f, 1.0f );
-    double angle = acos( dot );
-    double a = ( iSteps ) ? angle / iSteps : 0.0f;
-    BLPoint vertex[3];
-    BLContext* blctx = iPath->GetRoot()->GetEngine()->GetBLContext();
-
-    // Find on which side should the joint be drawn by comparing the directions of our vectors
-    if ( shortestTest.DotProduct( iPrevSegmentVector ) < 0 )
-    {
-        ::ULIS::FVec2D tmp = currPerpendicularVec;
-        currPerpendicularVec = -tmp;
-
-               tmp = prevPerpendicularVec;
-        prevPerpendicularVec = -tmp;
-
-        a = -a;
-    }
-
-    // start drawing triangles at origin
-    vertex[0].x = ( iOrigin.x );
-    vertex[0].y = ( iOrigin.y );
-
-    for ( uint32 i = 0; i < iSteps; i++ )
-    {
-        double cosa = cos(a);
-        double sina = sin(a);
-        ::ULIS::FVec2D interpolatedVector = { currPerpendicularVec.x * cosa + currPerpendicularVec.y * sina,
-                                     -currPerpendicularVec.x * sina + currPerpendicularVec.y * cosa };
-
-        vertex[1].x = vertex[0].x + ( currPerpendicularVec.x * iRadius );
-        vertex[1].y = vertex[0].y + ( currPerpendicularVec.y * iRadius );
-
-        vertex[2].x = vertex[0].x + ( interpolatedVector.x * iRadius );
-        vertex[2].y = vertex[0].y + ( interpolatedVector.y * iRadius );
-
-        blctx->strokePolygon( vertex , 3 );
-        blctx->fillPolygon( vertex, 3 );
-
-        currPerpendicularVec = interpolatedVector;
-    }
-}
-
-static void
-_drawLinearJoint( UOdysseyVectorPathCubic* iPath
-                , ::ULIS::FVec2D& iOrigin
-                , ::ULIS::FVec2D& iPrevSegmentVector
-                , ::ULIS::FVec2D& iSegmentVector
-                , double iRadius )
-{
-    ::ULIS::FVec2D currPerpendicularVec = { iSegmentVector.y    , - iSegmentVector.x     };
-    ::ULIS::FVec2D prevPerpendicularVec = { iPrevSegmentVector.y, - iPrevSegmentVector.x };
-    ::ULIS::FVec2D edgePrevPoint = iOrigin + ( prevPerpendicularVec * iRadius );
-    ::ULIS::FVec2D edgePoint = iOrigin + ( currPerpendicularVec * iRadius );
-    ::ULIS::FVec2D shortestTest = edgePoint - edgePrevPoint;
-    BLContext* blctx = iPath->GetRoot()->GetEngine()->GetBLContext();
-    BLPoint vertex[3];
-
-    if ( shortestTest.DotProduct( iPrevSegmentVector ) < 0 )
-    {
-        ::ULIS::FVec2D tmp = currPerpendicularVec;
-
-        currPerpendicularVec = -tmp;
-
-                tmp = prevPerpendicularVec;
-        prevPerpendicularVec = -tmp;
-    }
-
-    vertex[0].x = ( iOrigin.x );
-    vertex[0].y = ( iOrigin.y );
-
-    vertex[1].x = vertex[0].x + ( currPerpendicularVec.x * iRadius );
-    vertex[1].y = vertex[0].y + ( currPerpendicularVec.y * iRadius );
-
-    vertex[2].x = vertex[0].x + ( prevPerpendicularVec.x * iRadius );
-    vertex[2].y = vertex[0].y + ( prevPerpendicularVec.y * iRadius );
-
-    blctx->strokePolygon( vertex, 3 );
-    blctx->fillPolygon( vertex, 3 );
-}
-
-void
-UOdysseyVectorPathCubic::DrawJoint( UOdysseyVectorSegmentCubic* iPrevSegment
-                                  , UOdysseyVectorSegmentCubic& iSegment
-                                  , double iRadius )
-{
-    if ( iPrevSegment )
-    {
-        ::ULIS::FVec2D prevSegmentVector = iPrevSegment->GetVectorAtEnd( false );
-        ::ULIS::FVec2D segmentVector = iSegment.GetVectorAtStart( false );
-        ::ULIS::FVec2D& origin = iSegment.GetPoint(0)->GetCoords();
-
-        if ( prevSegmentVector.DistanceSquared() && segmentVector.DistanceSquared() )
-        {
-            prevSegmentVector.Normalize();
-            segmentVector.Normalize();
-
-            // if the dot product equals to 1.0f, then the point is perfectly smooth, hence there is no need for joints.
-            if ( prevSegmentVector.DotProduct(segmentVector) < 1.0f )
-            {
-                switch ( mJointType )
-                {
-                    case JOINT_TYPE_LINEAR :
-                        _drawLinearJoint ( this, origin, prevSegmentVector, segmentVector, iRadius );
-                    break;
-
-                    case JOINT_TYPE_MITER :
-                        _drawMiterJoint ( this, origin, prevSegmentVector, segmentVector, iRadius, 4.0f );
-                    break;
-
-                    case JOINT_TYPE_RADIAL :
-                        _drawRadialJoint ( this, origin, prevSegmentVector, segmentVector, iRadius, 24 );
-                    break;
-
-                    default:
-                    break;
-                }
-            }
-        }
-    }
-}
-
 void
 UOdysseyVectorPathCubic::DrawShapeVariable( ::ULIS::FRectD &iRoi, uint64 iFlags )
 {
@@ -823,21 +554,21 @@ UOdysseyVectorPathCubic::DrawShapeVariable( ::ULIS::FRectD &iRoi, uint64 iFlags 
         for( std::list<UOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
         {
             UOdysseyVectorSegmentCubic* segment = static_cast<UOdysseyVectorSegmentCubic*>(*it);
-            UOdysseyVectorSegmentCubic* prevSegment = static_cast<UOdysseyVectorSegmentCubic*>( segment->GetPreviousSegment() );
-            double segmentStartRadius = segment->GetPoint(0)->GetRadius();
+            UOdysseyVectorVertex* vertex0 = Cast<UOdysseyVectorVertex>(segment->GetPoint(0));
+
             ::ULIS::FRectD clip = iRoi & segment->GetBoundingBox();
 
             if( ( iRoi.Area() == 0.0f ) || clip.Area() )
             {
                 segment->Draw( this, iRoi );
             }
+        }
 
-            if ( prevSegment )
-            {
-                DrawJoint( prevSegment
-                         , *segment
-                         , segmentStartRadius );
-            }
+        for( std::list<UOdysseyVectorVertex*>::iterator it = mVertexList.begin(); it != mVertexList.end(); ++it )
+        {
+            UOdysseyVectorVertexCubic* cubicVertex = static_cast<UOdysseyVectorVertexCubic*>(*it);
+
+            DrawJoint( cubicVertex, iRoi, iFlags );
         }
     }
 }
@@ -913,6 +644,8 @@ UOdysseyVectorPathCubic::Merge( UOdysseyVectorPath* iPath )
     UOdysseyVectorPathCubic* cubicPath = Cast<UOdysseyVectorPathCubic>(iPath);
     std::list<UOdysseyVectorSegment*> segmentList = cubicPath->mSegmentList; // work on a copy because of removal during iteration
     std::list<UOdysseyVectorVertex*> vertexList = cubicPath->mVertexList; // work on a copy because of removal during iteration
+
+    iPath->SwitchSpace( *this );
 
     for( std::list<UOdysseyVectorSegment*>::iterator it = segmentList.begin(); it != segmentList.end(); ++it )
     {

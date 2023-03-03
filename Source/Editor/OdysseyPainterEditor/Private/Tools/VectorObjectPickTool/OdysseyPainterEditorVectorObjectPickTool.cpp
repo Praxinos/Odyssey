@@ -21,7 +21,7 @@ UOdysseyPainterEditorVectorObjectPickTool::UOdysseyPainterEditorVectorObjectPick
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Lasso64");
 
-    mSelectionHUD = new FOdysseyVectorHUDSelection( mPointArray );
+    mSelectionHUD = new FOdysseyVectorHUDSelection( );
 }
 
 //--------------------------------------------------------------------------------------
@@ -41,6 +41,7 @@ UOdysseyPainterEditorVectorObjectPickTool::Activate()
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
 
         mSelectionHUD->Init( texture->Source.GetSizeX(), texture->Source.GetSizeY() );
+        mSelectionHUD->UpdateSelectionBox( *currentVectorLayer->GetScene() );
 
         vectorEngine->ClearHUD( );
         vectorEngine->AddHUD( mSelectionHUD );
@@ -68,7 +69,7 @@ UOdysseyPainterEditorVectorObjectPickTool::OnMouseDown(const FOdysseyPoint& iPoi
         ::ULIS::FVec2D point = { iPointInTexture.x, iPointInTexture.y };
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
 
-        mSelectionHUD->SetSelecting( true );
+        mSelectionHUD->SetSelecting( true, &mPointArray );
 
         mPointArray.push_back( point );
     }
@@ -138,7 +139,8 @@ UOdysseyPainterEditorVectorObjectPickTool::OnMouseUp(const FOdysseyPoint& iPoint
 
         SetSelectionSpace( vectorEngine, currentVectorLayer->GetScene()->GetLastSelected() );
 
-        mSelectionHUD->SetSelecting( false );
+        mSelectionHUD->SetSelecting( false, nullptr );
+        mSelectionHUD->UpdateSelectionBox( *currentVectorLayer->GetScene() );
 
         mSelectionChanged.Broadcast();
 

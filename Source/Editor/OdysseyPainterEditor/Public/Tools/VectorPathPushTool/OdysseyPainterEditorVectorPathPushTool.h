@@ -56,6 +56,9 @@ public:
     UPROPERTY(EditAnywhere, Category="Odyssey PathPush Tool")
     double Radius;
 
+    UPROPERTY(EditAnywhere,Category="Odyssey PathPush Tool")
+    bool PreserveSmoothness;
+
 protected:
 
 };

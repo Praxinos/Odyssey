@@ -6,6 +6,7 @@
 #include "LayerStack/OdysseyTextureLayerStack.h"
 #include "LayerStack/OdysseyTextureLayerImageVector.h"
 #include "TextureEditor/OdysseyTextureEditor.h"
+#include "OdysseyVector.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorPathBuilder.h"
 
@@ -13,11 +14,14 @@
 //----------------------------------------------------------- Construction / Destruction
 UOdysseyPainterEditorVectorObjectScaleTool::~UOdysseyPainterEditorVectorObjectScaleTool()
 {
+    delete mTransformHUD;
 }
 
 UOdysseyPainterEditorVectorObjectScaleTool::UOdysseyPainterEditorVectorObjectScaleTool()
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.ObjectScaleTool64");
+
+    mTransformHUD = new FOdysseyVectorHUDTransform( );
 }
 
 //--------------------------------------------------------------------------------------
@@ -33,7 +37,10 @@ UOdysseyPainterEditorVectorObjectScaleTool::Activate()
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
 
+        mTransformHUD->UpdateSelectionBox( *currentVectorLayer->GetScene() );
+
         vectorEngine->ClearHUD( );
+        vectorEngine->AddHUD( mTransformHUD );
 
         currentVectorLayer->RenderImageChanged(false);
     }
@@ -54,14 +61,14 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDown(const FOdysseyPoint& iPo
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        UOdysseyVectorObject* selectedObject = currentVectorLayer->GetScene()->GetLastSelected();
+        FSelectionBox& selectionBox = mTransformHUD->GetSelectionBox();
 
-        if ( selectedObject )
+        if( selectionBox.space )
         {
-            BLPoint localCoords = selectedObject->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
-/*
-            mPickedHandle = selectedObject->PickBBox( localCoords.x, localCoords.y );
-*/
+            BLPoint localCoords = selectionBox.space->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
+
+            mPickedHandle = mTransformHUD->Pick( iPointInTexture.x, iPointInTexture.y );
+
             mOldLocalMouseX = localCoords.x;
             mOldLocalMouseY = localCoords.y;
         }
@@ -79,25 +86,26 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDrag(const FOdysseyPoint& iPo
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        UOdysseyVectorObject* selectedObject = currentVectorLayer->GetScene()->GetLastSelected();
+        FSelectionBox& selectionBox = mTransformHUD->GetSelectionBox();
 
-        if ( selectedObject && ( mPickedHandle > -1 ) )
+        if ( selectionBox.space )
         {
-            BLPoint localCoords = selectedObject->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
+            BLPoint localCoords = selectionBox.space->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
+            std::list<UOdysseyVectorObject*>& selectedObjectList = currentVectorLayer->GetScene()->GetSelectedObjectList();
             double difx = localCoords.x - mOldLocalMouseX;
             double dify = localCoords.y - mOldLocalMouseY;
-            ::ULIS::FRectD beforeBBox = selectedObject->GetBBox( true );
-            ::ULIS::FRectD localBBox = selectedObject->GetBBox( false );
-            double oldX1 = localBBox.x
-                 , oldY1 = localBBox.y
-                 , oldX2 = localBBox.x + localBBox.w
-                 , oldY2 = localBBox.y + localBBox.h;
+            //::ULIS::FRectD beforeBBox = selectedObject->GetBBox( true );
+            //::ULIS::FRectD localBBox = selectedObject->GetBBox( false );
+            double oldX1 = selectionBox.rect.x
+                 , oldY1 = selectionBox.rect.y
+                 , oldX2 = selectionBox.rect.x + selectionBox.rect.w
+                 , oldY2 = selectionBox.rect.y + selectionBox.rect.h;
             double x1, y1, x2, y2;
             ::ULIS::FVec2D pivot;
-            BLPoint oldWorldPivot;
-            BLPoint oldRelativePivot;
-            BLPoint newWorldPivot;
-            BLPoint newRelativePivot;
+            ///BLPoint oldWorldPivot;
+            //BLPoint oldRelativePivot;
+            //BLPoint newWorldPivot;
+            //BLPoint newRelativePivot;
 
             if ( mPickedHandle == 0 )
             {
@@ -143,6 +151,43 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDrag(const FOdysseyPoint& iPo
                 pivot.y = oldY1;
             }
 
+            BLMatrix2D matrix;
+
+            matrix.reset();
+            matrix.scale( ( x2 - x1 ) / selectionBox.rect.w, ( y2 - y1 ) / selectionBox.rect.h );
+
+            for( std::list<UOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
+            {
+                UOdysseyVectorObject* object = (*it);
+                //double translationX;
+                //double translationY;
+               // double rotation;
+                double scalingX;
+                double scalingY;
+                BLMatrix2D objectWorldMatrix = object->GetWorldMatrix();
+
+                //objectWorldMatrix.transform( selectionBox.space->GetInverseWorldMatrix() );
+                //objectWorldMatrix.transform( matrix );
+                objectWorldMatrix.scale( ( x2 - x1 ) / selectionBox.rect.w, ( y2 - y1 ) / selectionBox.rect.h );
+                objectWorldMatrix.transform( object->GetParent()->GetInverseWorldMatrix() );
+
+                FOdysseyVector::ExtractTransformations( objectWorldMatrix
+                                                      , nullptr//&translationX
+                                                      , nullptr//&translationY
+                                                      , nullptr//&rotation
+                                                      , &scalingX
+                                                      , &scalingY );
+UE_LOG(LogTemp, Warning, TEXT("Some warning message x:%f =? %f - y:%f =? %f"), scalingX, ( x2 - x1 ) / selectionBox.rect.w,
+                                                                               scalingY, ( y2 - y1 ) / selectionBox.rect.h ); 
+                //object->Translate( translationX, translationY );
+                //object->Rotate( rotation );
+                object->Scale( scalingX, scalingY );
+            }
+
+            currentVectorLayer->GetScene()->UpdateMatrix();
+
+            mTransformHUD->UpdateSelectionBox( *currentVectorLayer->GetScene() );
+/*
             oldWorldPivot = selectedObject->GetWorldMatrix().mapPoint( pivot.x, pivot.y );
             oldRelativePivot = selectedObject->GetParent()->GetInverseWorldMatrix().mapPoint( oldWorldPivot.x, oldWorldPivot.y );
 
@@ -152,13 +197,13 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDrag(const FOdysseyPoint& iPo
 
             newWorldPivot = selectedObject->GetWorldMatrix().mapPoint( pivot.x, pivot.y );
             newRelativePivot = selectedObject->GetParent()->GetInverseWorldMatrix().mapPoint( newWorldPivot.x, newWorldPivot.y );
-/*
-UE_LOG(LogTemp, Warning, TEXT("Your message %f %f"), newWorldPivot.x, newWorldPivot.y );
-*/
+
             selectedObject->Translate( selectedObject->GetTranslationX() + ( oldRelativePivot.x - newRelativePivot.x )
                                      , selectedObject->GetTranslationY() + ( oldRelativePivot.y - newRelativePivot.y ) );
 
             selectedObject->UpdateMatrix();
+*/
+
 
             mOldLocalMouseX = localCoords.x;
             mOldLocalMouseY = localCoords.y;

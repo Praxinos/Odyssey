@@ -91,12 +91,12 @@ UOdysseyPainterEditorVectorPathKnotTool::OnMouseDown(const FOdysseyPoint& iPoint
                     // TODO: remove vertexB->GetPath() from selected objects.
                     vertexB->GetPath()->GetParent()->RemoveChild( vertexB->GetPath() );
 
-                    vertexB->GetPath()->SwitchSpace( *vertexA->GetPath() );
-
                     vertexA->GetPath()->Merge( vertexB->GetPath() );
                 }
 
                 vectorEngine->Knot( vertexA, vertexB, &createdSegment, &removedSegment, true );
+
+                currentVectorLayer->GetScene()->Update(0);
             }
         }
 

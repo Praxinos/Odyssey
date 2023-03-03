@@ -21,18 +21,6 @@ class ODYSSEYVECTOR_API UOdysseyVectorPathCubic: public UOdysseyVectorPath
         GENERATED_BODY()
 
     private:
-        static const uint32 JOINT_TYPE_NONE   = 0;
-        static const uint32 JOINT_TYPE_RADIAL = 1;
-        static const uint32 JOINT_TYPE_LINEAR = 2;
-        static const uint32 JOINT_TYPE_MITER  = 3;
-
-        void DrawJoint( UOdysseyVectorSegmentCubic* iPrevSegment
-                      , UOdysseyVectorSegmentCubic& iSegment
-                      , double iRadius );
-
-        uint32 mJointType;
-
-
 
     protected:
         UOdysseyVectorObject* CopyShape();
@@ -55,10 +43,6 @@ class ODYSSEYVECTOR_API UOdysseyVectorPathCubic: public UOdysseyVectorPath
         void Unselect( UOdysseyVectorVertex* iPoint );
 
         void DrawStructure( ::ULIS::FRectD& iRoi, uint64 iFlags );
-        void setJointRadial();
-        void setJointLinear();
-        void setJointMiter();
-        void setJointNone();
         void Fill( ::ULIS::FRectD& iRoi );
         void Merge( UOdysseyVectorPath* iPath );
         void DrawShapeVariable( ::ULIS::FRectD& iRoi, uint64 iFlags );

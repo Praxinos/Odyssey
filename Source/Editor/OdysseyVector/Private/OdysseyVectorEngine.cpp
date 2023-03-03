@@ -420,6 +420,8 @@ FOdysseyVectorEngine::Knot( UOdysseyVectorVertex* iVertexA
                 *oCreatedSegment = newCubicSegment;
                 *oRemovedSegment = firstCubicSegment;
 
+                iVertexA->GetFirstSegment()->Invalidate();
+
                 path->Invalidate();
 
                 return true;

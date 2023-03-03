@@ -203,8 +203,8 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseDownVector( UOdysseyTextureLayerIma
         {
             UOdysseyVectorGroupPaint* paintGroup = Cast<UOdysseyVectorGroupPaint>( selectedObject );
             BLPoint localCoords = paintGroup->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
-            FOdysseyVectorBucket* bucket = paintGroup->PickBucket( localCoords.x, localCoords.y ); 
-            uint32 pickedArea = bucket ? bucket->Pick( localCoords.x, localCoords.y ) : 0;
+            FOdysseyVectorBucket* bucket = paintGroup->PickBucket( iPointInTexture.x, iPointInTexture.y ); 
+            uint32 pickedArea = bucket ? bucket->Pick( iPointInTexture.x, iPointInTexture.y ) : 0;
 
             switch( pickedArea )
             {
@@ -298,7 +298,7 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseDragVector( UOdysseyTextureLayerIma
             BLPoint localCoords = paintGroup->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
             double difX = localCoords.x - mOldLocalMouseX
                  , difY = localCoords.y - mOldLocalMouseY;
-            ::ULIS::FVec2D& bucketCoords = mPickedBucket->GetCoords();
+            ::ULIS::FVec2D bucketCoords = mPickedBucket->GetCoords();
 
             mPickedBucket->SetCoords( bucketCoords.x + difX, bucketCoords.y + difY );
 

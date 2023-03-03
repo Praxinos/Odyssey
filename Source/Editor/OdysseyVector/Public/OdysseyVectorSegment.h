@@ -47,11 +47,14 @@ class ODYSSEYVECTOR_API UOdysseyVectorSegment : public UOdysseyVectorLink
         std::list<UOdysseyVectorVertexIntersection*>& GetIntersectionVertexList();
         bool HasIntersectionVertex( UOdysseyVectorVertexIntersection& mIntersectionVertex );
         UOdysseyVectorVertex* GetNextVertex( double iT );
-        UOdysseyVectorVertex* GetPreviousVertex( double iT ); 
+        UOdysseyVectorVertex* GetPreviousVertex( double iT );
         UOdysseyVectorPath* GetPath();
+        void SetPath( UOdysseyVectorPath* iPath );
         virtual void Update() {};
         void Invalidate();
-
+        virtual ::ULIS::FVec2D GetVectorAtEnd(bool iNormalize);
+        virtual ::ULIS::FVec2D GetVectorAtStart(bool iNormalize);
+        UOdysseyVectorVertex* GetVertex( uint32 iVertexID );
         void ClearIntersections();
         FOdysseyVectorSection* GetSection (double t);
         std::list<FOdysseyVectorSection*>& GetSectionList();

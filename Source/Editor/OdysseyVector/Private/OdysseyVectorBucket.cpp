@@ -1,24 +1,26 @@
 #include "OdysseyVectorBucket.h"
 
-#define HANDLERADIUS 8
+#define BUCKETRADIUS   10
+#define CROSSRADIUS     5
+#define HANDLERADIUS    8
 #define HANDLEDISTANCE 40.0f
 
 FOdysseyVectorBucket::~FOdysseyVectorBucket()
 {
 }
 
-void
-FOdysseyVectorBucket::Reshape()
+static void
+MakeRects( double iWorldX, double iWorldY, ::ULIS::FRectD& oBucketRect, ::ULIS::FRectD& oCrossRect )
 {
-    bucketRect.x = mCoords.x - 10;
-    bucketRect.y = mCoords.y - 10;
-    bucketRect.w = 20;
-    bucketRect.h = 20;
+    oBucketRect.x = iWorldX - BUCKETRADIUS;
+    oBucketRect.y = iWorldY - BUCKETRADIUS;
+    oBucketRect.w = BUCKETRADIUS * 2;
+    oBucketRect.h = BUCKETRADIUS * 2;
 
-    crossRect.x = mCoords.x + 10;
-    crossRect.y = mCoords.y + 10;
-    crossRect.w = 10;
-    crossRect.h = 10;
+    oCrossRect.x = oBucketRect.x + oBucketRect.w;
+    oCrossRect.y = oBucketRect.y + oBucketRect.h;
+    oCrossRect.w = CROSSRADIUS * 2;
+    oCrossRect.h = CROSSRADIUS * 2;
 }
 
 FOdysseyVectorBucket::FOdysseyVectorBucket( UOdysseyVectorObject& iParent, double iX, double iY )
@@ -72,7 +74,7 @@ FOdysseyVectorBucket::SetGradientColors( uint8 iR0, uint8 iG0, uint8 iB0, uint8 
     mGradientColor1.A = iA1;
 }
 
-::ULIS::FVec2D&
+::ULIS::FVec2D
 FOdysseyVectorBucket::GetCoords()
 {
     return mCoords;
@@ -83,8 +85,6 @@ FOdysseyVectorBucket::SetCoords( double iX, double iY )
 {
     mCoords.x = iX;
     mCoords.y = iY;
-
-    Reshape();
 }
 
 void
@@ -103,29 +103,17 @@ FOdysseyVectorBucket::GetColor()
 }
 
 void
-FOdysseyVectorBucket::DrawCross( double iX, double iY, double iSize )
-{
-    BLContext* blctx = mParent.GetRoot()->GetEngine()->GetBLContext();
-
-    blctx->setFillStyle( BLRgba32( 0xFF808080 ) );
-    blctx->fillRect( iX, iY, 10, 10 );
-
-    blctx->setStrokeWidth( 1.0f );
-    blctx->setStrokeStyle( BLRgba32( 0xFF000000 ) );
-    blctx->strokeRect( iX, iY, 10, 10 );
-
-    blctx->setStrokeWidth( 1.0f );
-    blctx->setStrokeStyle( BLRgba32( 0xFF000000 ) );
-    blctx->strokeLine( iX        , iY, iX + iSize, iY + iSize );
-    blctx->strokeLine( iX + iSize, iY, iX        , iY + iSize );
-}
-
-void
 FOdysseyVectorBucket::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
     BLContext* blctx = mParent.GetRoot()->GetEngine()->GetBLContext();
-    BLPoint origin = mParent.GetWorldMatrix().mapPoint( mCoords.x, mCoords.y );
+    BLPoint bucketWorldCoord = mParent.GetWorldMatrix().mapPoint( mCoords.x, mCoords.y );
+    BLPoint handleWorldCoord = mParent.GetWorldMatrix().mapPoint( mCoords.x + mCtrlPoint->GetX()
+                                                                , mCoords.y + mCtrlPoint->GetY() );
+    ::ULIS::FRectD bucketRect;
+    ::ULIS::FRectD crossRect;
     BLRgba32 fillColor;
+
+    MakeRects( bucketWorldCoord.x, bucketWorldCoord.y, bucketRect, crossRect );
 
     // Note: Blend2D color format is 0xAARRGGBB
     fillColor.r = mColor.B;
@@ -136,18 +124,32 @@ FOdysseyVectorBucket::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
     blctx->save();
 
     blctx->resetMatrix();
+
+    // Bucket
     blctx->setFillStyle( fillColor );
-    blctx->fillRect( origin.x - 10, origin.y - 10, 20, 20 );
+    blctx->fillRect( bucketRect.x, bucketRect.y, bucketRect.w, bucketRect.h );
 
     blctx->setStrokeWidth( 1.0f );
     blctx->setStrokeStyle( BLRgba32(0xFF000000) );
-    blctx->strokeRect( origin.x - 10, origin.y - 10, 20, 20 );
+    blctx->strokeRect( bucketRect.x, bucketRect.y, bucketRect.w, bucketRect.h );
 
-    blctx->strokeLine( origin.x, origin.y, origin.x + mCtrlPoint->GetX(), origin.y + mCtrlPoint->GetY() );
-    blctx->fillCircle( origin.x + mCtrlPoint->GetX(), origin.y + mCtrlPoint->GetY(), HANDLERADIUS );
-    blctx->strokeCircle( origin.x + mCtrlPoint->GetX(), origin.y + mCtrlPoint->GetY(), HANDLERADIUS );
+    //Cross
+    blctx->setFillStyle( BLRgba32( 0xFF808080 ) );
+    blctx->fillRect( crossRect.x, crossRect.y, crossRect.w, crossRect.h );
 
-    DrawCross( origin.x + 10.0f, origin.y + 10.0f, 10.0f );
+    blctx->setStrokeWidth( 1.0f );
+    blctx->setStrokeStyle( BLRgba32( 0xFF000000 ) );
+    blctx->strokeRect( crossRect.x, crossRect.y, crossRect.w, crossRect.h );
+
+    blctx->setStrokeWidth( 1.0f );
+    blctx->setStrokeStyle( BLRgba32( 0xFF000000 ) );
+    blctx->strokeLine( crossRect.x              , crossRect.y, crossRect.x + crossRect.h, crossRect.y + crossRect.h );
+    blctx->strokeLine( crossRect.x + crossRect.w, crossRect.y, crossRect.x              , crossRect.y + crossRect.h );
+
+    // Handle
+    blctx->strokeLine( bucketWorldCoord.x, bucketWorldCoord.y, handleWorldCoord.x, handleWorldCoord.y );
+    blctx->fillCircle( handleWorldCoord.x, handleWorldCoord.y, HANDLERADIUS );
+    blctx->strokeCircle( handleWorldCoord.x, handleWorldCoord.y, HANDLERADIUS );
 
     blctx->restore();
 }
@@ -156,18 +158,22 @@ void
 FOdysseyVectorBucket::Copy( FOdysseyVectorBucket* iDestinationBucket )
 {
     iDestinationBucket->mCoords = mCoords;
-    iDestinationBucket->mColor = mColor;
-    iDestinationBucket->mIsGradient = mIsGradient;
-    iDestinationBucket->mGradientColor0 = mGradientColor0;
-    iDestinationBucket->mGradientColor1 = mGradientColor1;
+    iDestinationBucket->mColor;
 
-    Reshape();
+    iDestinationBucket->mIsGradient;
+    iDestinationBucket->mGradientColor0;
+    iDestinationBucket->mGradientColor1;
 }
 
 uint32
-FOdysseyVectorBucket::Pick( double iX, double iY )
+FOdysseyVectorBucket::Pick( double iWorldX, double iWorldY )
 {
-    ::ULIS::FVec2D pt = ::ULIS::FVec2D( iX, iY );
+    BLPoint bucketWorldCoord = mParent.GetWorldMatrix().mapPoint( mCoords.x, mCoords.y );
+    ::ULIS::FVec2D pt = ::ULIS::FVec2D( iWorldX, iWorldY );
+    ::ULIS::FRectD bucketRect;
+    ::ULIS::FRectD crossRect;
+
+    MakeRects( bucketWorldCoord.x, bucketWorldCoord.y, bucketRect, crossRect );
 
     if( bucketRect.HitTest( pt ) )
     {
@@ -179,7 +185,7 @@ FOdysseyVectorBucket::Pick( double iX, double iY )
         return FOdysseyVectorBucket::PICKCROSS;
     }
 
-    if ( PickHandle( iX, iY ) )
+    if ( PickHandle( iWorldX, iWorldY ) )
     {
         return FOdysseyVectorBucket::PICKHANDLE;
     }
@@ -189,12 +195,13 @@ FOdysseyVectorBucket::Pick( double iX, double iY )
 }
 
 UOdysseyVectorHandleBucket*
-FOdysseyVectorBucket::PickHandle( double iX, double iY )
+FOdysseyVectorBucket::PickHandle( double iWorldX, double iWorldY )
 {
-    double handleX = mCoords.x + mCtrlPoint->GetX();
-    double handleY = mCoords.y + mCtrlPoint->GetY();
-    double difX = iX - handleX;
-    double difY = iY - handleY;
+    BLPoint bucketWorldCoord = mParent.GetWorldMatrix().mapPoint( mCoords.x, mCoords.y );
+    BLPoint handleWorldCoord = mParent.GetWorldMatrix().mapPoint( mCoords.x + mCtrlPoint->GetX()
+                                                                , mCoords.y + mCtrlPoint->GetY() );
+    double difX = iWorldX - handleWorldCoord.x;
+    double difY = iWorldY - handleWorldCoord.y;
     double distance = sqrt( ( difX * difX ) + ( difY * difY ) );
 
     if( distance < HANDLERADIUS )

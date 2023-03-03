@@ -739,10 +739,10 @@ UOdysseyVectorSegmentCubic::Draw( UOdysseyVectorPathCubic* iPath, ::ULIS::FRectD
 {
     // NOTE: Might not be super fast to call this for each segment
     BLContext* blctx = iPath->GetRoot()->GetEngine()->GetBLContext();
+    uint32 segmentCount = GetVertex(0)->GetSegmentCount();
 
     blctx->setStrokeWidth( 1.0f );
 
-#ifdef UNUSED
     for ( int i = 0; i < mPolygonCache.size(); i++ )
     {
        /* int n = i + 1;*/
@@ -754,20 +754,18 @@ UOdysseyVectorSegmentCubic::Draw( UOdysseyVectorPathCubic* iPath, ::ULIS::FRectD
                         , { mPolygonCache[i].quadVertex[2].x, mPolygonCache[i].quadVertex[2].y }
                         , { mPolygonCache[i].quadVertex[3].x, mPolygonCache[i].quadVertex[3].y } };
 
-        /*iBLContext.strokeLine( pt[1].x
-                             , pt[1].y
-                             , pt[2].x
-                             , pt[2].y );*/
-
+        if( ( i != 0 ) || ( segmentCount == 2 )  )
+        {
+            blctx->strokeLine( pt[0].x, pt[0].y, pt[3].x, pt[3].y );
+        }
+        /*blctx->strokePolygon( pt, 4 );*/ // commented-out: makes the path too thick and creates artefacts
         blctx->fillPolygon( pt, 4 );
     }
-#endif
 
-/*#ifdef UNUSED*/
+#ifdef UNUSED // commented-out : it makes path too thick and creates artefacts
     blctx->strokePath ( mBLPath );
     blctx->fillPath ( mBLPath );
-
-/*#endif*/
+#endif
 
 }
 

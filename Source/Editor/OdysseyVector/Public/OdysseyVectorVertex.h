@@ -72,6 +72,8 @@ class ODYSSEYVECTOR_API UOdysseyVectorVertex : public UOdysseyVectorPoint
         void InvalidateLoops();
         void SetVisited( bool iVisited );
         bool IsVisited();
+        virtual bool IsSmooth() { return false; };
+        virtual ::ULIS::FVec2D GetVectorOnSegment( UOdysseyVectorSegment* iSegment, bool iNormalize );
         std::list<FOdysseyVectorSection*>& GetSectionList();
         bool IsClosestSection( FOdysseyVectorSection& iStartSection
                              , FOdysseyVectorSection& iEndSection );

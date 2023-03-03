@@ -71,13 +71,13 @@ UOdysseyVectorGroupPaint::ApplyBucket( FOdysseyVectorBucket* iBucket )
 }
 
 FOdysseyVectorBucket*
-UOdysseyVectorGroupPaint::PickBucket( double iX, double iY )
+UOdysseyVectorGroupPaint::PickBucket( double iWorldX, double iWorldY )
 {
     for( std::list<FOdysseyVectorBucket*>::iterator lit = mBucketList.begin(); lit != mBucketList.end(); ++lit )
     {
         FOdysseyVectorBucket *bucket = static_cast<FOdysseyVectorBucket*>(*lit);
 
-        if ( bucket->Pick( iX, iY ) )
+        if ( bucket->Pick( iWorldX, iWorldY ) )
         {
             return bucket;
         }
@@ -557,7 +557,7 @@ UOdysseyVectorGroupPaint::CopyBuckets( UOdysseyVectorGroupPaint* iDestination )
      for( std::list<FOdysseyVectorBucket*>::iterator lit = mBucketList.begin(); lit != mBucketList.end(); ++lit )
      {
         FOdysseyVectorBucket *bucket = static_cast<FOdysseyVectorBucket*>(*lit);
-        ::ULIS::FVec2D& bucketCoords = bucket->GetCoords();
+        ::ULIS::FVec2D bucketCoords = bucket->GetCoords();
         BLPoint bucketWorldPosition = mWorldMatrix.mapPoint( bucketCoords.x, bucketCoords.y );
         BLPoint destinationBucketPosition = iDestination->mInverseWorldMatrix.mapPoint( bucketWorldPosition );
         FOdysseyVectorBucket *bucketCopy = new FOdysseyVectorBucket( *iDestination, 0.0f, 0.0f );

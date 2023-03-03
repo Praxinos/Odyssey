@@ -448,40 +448,6 @@ UOdysseyVectorObject::Pick( UOdysseyVectorGroup* iSelectionSpace, ::ULIS::FRectD
     return nullptr;
 }
 
-static void
-ExtractTransformations( BLMatrix2D &iMatrix
-                      , double* iTranslationX
-                      , double* iTranslationY
-                      , double* iRotation
-                      , double* iScalingX
-                      , double* iScalingY )
-{
-    if( iTranslationX )
-    {
-        *iTranslationX = iMatrix.m20;
-    }
-
-    if( iTranslationY )
-    {
-        *iTranslationY = iMatrix.m21;
-    }
-
-    if( iRotation )
-    {
-        *iRotation = atan( iMatrix.m01  / iMatrix.m11 );
-    }
-
-    if( iScalingX )
-    {
-        *iScalingX = sqrt( ( iMatrix.m00 * iMatrix.m00 ) + ( iMatrix.m01 * iMatrix.m01 ) );
-    }
-
-    if( iScalingY )
-    {
-        *iScalingY = sqrt( ( iMatrix.m10 * iMatrix.m10 ) + ( iMatrix.m11 * iMatrix.m11 ) );
-    }
-}
-
 void
 UOdysseyVectorObject::AppendChild( UOdysseyVectorObject* iChild )
 {

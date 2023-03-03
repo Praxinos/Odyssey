@@ -19,6 +19,14 @@ class ODYSSEYVECTOR_API UOdysseyVectorPath : public UOdysseyVectorObject
         GENERATED_BODY()
 
     protected:
+        static const uint32 JOINT_TYPE_NONE   = 0;
+        static const uint32 JOINT_TYPE_RADIAL = 1;
+        static const uint32 JOINT_TYPE_LINEAR = 2;
+        static const uint32 JOINT_TYPE_MITER  = 3;
+        uint32 mJointType;
+        void DrawJoint( UOdysseyVectorVertex* iVertex, ::ULIS::FRectD &iRoi, uint64 iFlags );
+
+    protected:
         virtual void UpdateShape( uint32 iUpdateFlags );
         virtual void DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags );
         bool PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags ) { return nullptr; };
@@ -49,6 +57,10 @@ class ODYSSEYVECTOR_API UOdysseyVectorPath : public UOdysseyVectorObject
         void DrawLoops( ::ULIS::FRectD &iRoi, uint64 iFlags );*/
         virtual void Merge( UOdysseyVectorPath* iPath ){};
         virtual void DrawStructure( ::ULIS::FRectD &iRoi );
+        void setJointRadial();
+        void setJointLinear();
+        void setJointMiter();
+        void setJointNone();
 
         /*virtual void InsertPoint( UOdysseyVectorSegment* iSegment, UOdysseyVectorVertex* iPoint );*/
         std::list<UOdysseyVectorSegment*>& GetSegmentList();

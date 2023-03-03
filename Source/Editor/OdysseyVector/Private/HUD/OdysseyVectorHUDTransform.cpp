@@ -6,12 +6,14 @@ FOdysseyVectorHUDTransform::~FOdysseyVectorHUDTransform()
 }
 
 FOdysseyVectorHUDTransform::FOdysseyVectorHUDTransform()
+    : FOdysseyVectorHUDSelection()
 {
 
 }
+
 /*
 void
-FOdysseyVectorHUDTransform::SetSize( ::ULIS::FRectD mRect )
+FOdysseyVectorHUDTransform::Init( double iX, double iX, double )
 {
     mHandle[0].x = mRect.x;
     mHandle[0].y = mRect.y;
@@ -41,64 +43,72 @@ MakeHandlesRect( ::ULIS::FRectD iRect[4], ::ULIS::FVec2D iHandle[4], double iRad
     iRect[3] = ::ULIS::FRectD::FromXYWH( iHandle[3].x - radiusX, iHandle[3].y - radiusY, width, height );
 }
 */
-/*
+
 int32
 FOdysseyVectorHUDTransform::Pick( double iWorldX, double iWorldY )
 {
-    BLPoint localCoords = mTransformationSpace.GetInverseWorldMatrix().mapPoint( iWorldX, iWorldY );
-    BLPoint vec = mTransformationSpace.GetInverseWorldMatrix().mapVector( 1.0f, 1.0f );
-    ::ULIS::FVec2D size = { vec.x, vec.y };
-    ::ULIS::FRectD handleRect[4];
-
-    MakeHandlesRect ( handleRect, mHandle, mHandleRadius, size.x, size.y );
-
-    // pick the handles
-    for ( int i = 0; i < 4; i++ )
+    if( mSelectionBox.space )
     {
-        ::ULIS::FVec2D pt = { localCoords.x, localCoords.y };
- 
-        if ( handleRect[i].HitTest( pt ) == true )
+        BLPoint localCoords = mSelectionBox.space->GetInverseWorldMatrix().mapPoint( iWorldX, iWorldY );
+
+        // pick the handles
+        for ( int i = 0; i < 4; i++ )
         {
-            return i;
+            ::ULIS::FVec2D pt = { localCoords.x, localCoords.y };
+ 
+            if ( mHandle[i].HitTest( pt ) == true )
+            {
+                return i;
+            }
         }
     }
 
     return -1;
 }
-*/
+
+static void
+MakeHandle( double iLocalX, double iLocalY, ::ULIS::FRectD& oRect )
+{
+    oRect.x = iLocalX - FOdysseyVectorHUDTransform::HANDLE_RADIUS;
+    oRect.y = iLocalY - FOdysseyVectorHUDTransform::HANDLE_RADIUS;
+    oRect.w = FOdysseyVectorHUDTransform::HANDLE_RADIUS * 2;
+    oRect.h = FOdysseyVectorHUDTransform::HANDLE_RADIUS * 2;
+}
+
+void
+FOdysseyVectorHUDTransform::UpdateSelectionBox( UOdysseyVectorRoot& iScene )
+{
+    FOdysseyVectorHUDSelection::UpdateSelectionBox( iScene );
+
+    // handles are built in realtime. Easier.
+    MakeHandle( mSelectionBox.rect.x                       , mSelectionBox.rect.y                       , mHandle[0] );
+    MakeHandle( mSelectionBox.rect.x + mSelectionBox.rect.w, mSelectionBox.rect.y                       , mHandle[1] );
+    MakeHandle( mSelectionBox.rect.x + mSelectionBox.rect.w, mSelectionBox.rect.y + mSelectionBox.rect.h, mHandle[2] );
+    MakeHandle( mSelectionBox.rect.x                       , mSelectionBox.rect.y + mSelectionBox.rect.h, mHandle[3] );
+}
+
 void
 FOdysseyVectorHUDTransform::Draw( UOdysseyVectorRoot& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
-/*
+    std::list<UOdysseyVectorObject*>& selectedObjectList = iScene.GetSelectedObjectList();
     BLContext* blctx = iScene.GetEngine()->GetBLContext();
-    BLPoint vec = mTransformationSpace.GetInverseWorldMatrix().mapVector( 1.0f, 1.0f );
-    ::ULIS::FVec2D size = { vec.x, vec.y };
-    ::ULIS::FRectD handleRect[4];
+    ::ULIS::FRectD bbox = { 0, 0, 0, 0 };
 
-    MakeHandlesRect ( handleRect, mHandle, mHandleRadius, size.x, size.y );
+    DrawSelectionBox( iScene, iRoi, iFlags );
 
-    // matrix might get altered for displaying the selection rectangle of a single object. Save it.
-    blctx->save();
-    blctx->setMatrix( mTransformationSpace.GetWorldMatrix() );
-
-    blctx->setStrokeStyle( BLRgba32( 0xFF8B0000 ) );
-
-    blctx->setStrokeWidth( vec.y );
-    blctx->strokeLine( mHandle[0].x, mHandle[0].y, mHandle[1].x, mHandle[1].y );
-    blctx->strokeLine( mHandle[3].x, mHandle[3].y, mHandle[2].x, mHandle[2].y );
-
-    blctx->setStrokeWidth( vec.x );
-    blctx->strokeLine( mHandle[1].x, mHandle[1].y, mHandle[2].x, mHandle[2].y );
-    blctx->strokeLine( mHandle[3].x, mHandle[3].y, mHandle[0].x, mHandle[0].y );
-
-    blctx->setFillStyle( BLRgba32( 0xFF8B0000 ) );
-
-    // draw the handles (squares at rectangle corners)
-    for ( int i = 0; i < 4; i++ )
+    if( mSelectionBox.space )
     {
-        blctx->fillRect( handleRect[i].x, handleRect[i].y, handleRect[i].w, handleRect[i].h );
-    }
+        // matrix might get altered for displaying the selection rectangle of a single object. Save it.
+        blctx->save();
+        blctx->setMatrix( mSelectionBox.space->GetWorldMatrix() );
 
-    blctx->restore();
-*/
+        blctx->setFillStyle( BLRgba32( 0xFF0000FF ) );
+
+        blctx->fillRect( mHandle[0].x, mHandle[0].y, mHandle[0].w, mHandle[0].h );
+        blctx->fillRect( mHandle[1].x, mHandle[1].y, mHandle[1].w, mHandle[1].h );
+        blctx->fillRect( mHandle[2].x, mHandle[2].y, mHandle[2].w, mHandle[2].h );
+        blctx->fillRect( mHandle[3].x, mHandle[3].y, mHandle[3].w, mHandle[3].h );
+
+        blctx->restore();
+    }
 }

@@ -9,6 +9,41 @@ UOdysseyVectorVertexCubic::UOdysseyVectorVertexCubic()
 {
 }
 
+bool
+UOdysseyVectorVertexCubic::IsSmooth()
+{
+    if( mSegmentList.size() == 2 )
+    {
+        ::ULIS::FVec2D firstSegmentVector = GetVectorOnSegment( GetFirstSegment(), true );
+        ::ULIS::FVec2D lastSegmentVector = GetVectorOnSegment( GetLastSegment(), true );
+        double dot = firstSegmentVector.DotProduct( lastSegmentVector );
+
+        if( fabs(dot) > 0.99f )
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+::ULIS::FVec2D
+UOdysseyVectorVertexCubic::GetVectorOnSegment( UOdysseyVectorSegment* iSegment, bool iNormalize )
+{
+    UOdysseyVectorSegmentCubic* cubicSegment = Cast<UOdysseyVectorSegmentCubic>(iSegment);
+    ::ULIS::FVec2D vec;
+
+    vec = ( iSegment->GetVertex(0) == this ) ? cubicSegment->GetPointAt(0.01f) - cubicSegment->GetPointAt(0.0f)
+                                             : cubicSegment->GetPointAt(0.99f) - cubicSegment->GetPointAt(1.0f);
+
+    if( iNormalize && vec.DistanceSquared() )
+    {
+        vec.Normalize();
+    }
+
+    return vec;
+}
+
 void
 UOdysseyVectorVertexCubic::Init( double iX, double iY, double iRadius )
 {

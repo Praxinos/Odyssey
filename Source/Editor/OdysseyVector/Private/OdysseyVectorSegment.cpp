@@ -53,6 +53,37 @@ UOdysseyVectorSegment::New( UOdysseyVectorPath* iPath
     return segment;
 }
 
+::ULIS::FVec2D
+UOdysseyVectorSegment::GetVectorAtStart( bool iNormalize )
+{
+    ::ULIS::FVec2D vec = mPoint[1]->GetCoords() - mPoint[0]->GetCoords();
+
+    if( iNormalize && vec.DistanceSquared() )
+    {
+        vec.Normalize();
+    }
+
+    return vec;
+}
+
+::ULIS::FVec2D
+UOdysseyVectorSegment::GetVectorAtEnd( bool iNormalize )
+{
+    return - GetVectorAtStart( iNormalize );
+}
+
+UOdysseyVectorVertex*
+UOdysseyVectorSegment::GetVertex( uint32 iVertexID )
+{
+    return Cast<UOdysseyVectorVertex>(GetPoint( iVertexID ));
+}
+
+void
+UOdysseyVectorSegment::SetPath( UOdysseyVectorPath* iPath )
+{
+    mPath = iPath;
+}
+
 UOdysseyVectorPath*
 UOdysseyVectorSegment::GetPath()
 {

@@ -17,6 +17,7 @@ UOdysseyPainterEditorVectorPathPushTool::~UOdysseyPainterEditorVectorPathPushToo
 
 UOdysseyPainterEditorVectorPathPushTool::UOdysseyPainterEditorVectorPathPushTool()
     : Radius(20.0f)
+    , PreserveSmoothness(true)
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathPushTool64");
 }
@@ -136,9 +137,27 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDrag( const FOdysseyPoint& iPoin
         for( int i = 0; i < mPushedPointArray.size(); i++ )
         {
             UOdysseyVectorPoint* point = mPushedPointArray[i].point;
+            UOdysseyVectorHandleSegment* handleSegment = Cast<UOdysseyVectorHandleSegment>(point);
+            UOdysseyVectorVertex* vertex = Cast<UOdysseyVectorVertex>(point);
+            UOdysseyVectorPath* path = ( handleSegment ) ? handleSegment->GetParent()->GetPath() : vertex->GetPath();
+            BLPoint delta = path->GetInverseWorldMatrix().mapVector( iPointInTexture.deltaPosition.X
+                                                                   , iPointInTexture.deltaPosition.Y );
 
-            point->SetX( point->GetX() + ( iPointInTexture.deltaPosition.X * mPushedPointArray[i].ratio ) );
-            point->SetY( point->GetY() + ( iPointInTexture.deltaPosition.Y * mPushedPointArray[i].ratio ) );
+            point->SetX( point->GetX() + ( delta.x * mPushedPointArray[i].ratio ) );
+            point->SetY( point->GetY() + ( delta.y * mPushedPointArray[i].ratio ) );
+
+            /*if( vertex )
+            {
+                if( vertex->IsSmooth() && PreserveSmoothness )
+                {
+                    UOdysseyVectorVertexCubic* cubicVertex = Cast<UOdysseyVectorVertexCubic>(vertex);
+
+                    if( cubicVertex )
+                    {
+                        cubicVertex->SmoothSegments( false );
+                    }
+                }
+            }*/
         }
 
         for( int i = 0; i < mSegmentArray.size(); i++ )

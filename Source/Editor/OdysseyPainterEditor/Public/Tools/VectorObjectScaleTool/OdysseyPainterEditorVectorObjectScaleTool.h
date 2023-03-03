@@ -6,7 +6,7 @@
 #include "CoreMinimal.h"
 #include "Tools/OdysseyPainterEditorTool.h"
 #include "OdysseyVectorPathBuilder.h"
-
+#include "HUD/OdysseyVectorHUDTransform.h"
 #include "OdysseyPainterEditorVectorObjectScaleTool.generated.h"
 
 UCLASS()
@@ -31,6 +31,7 @@ public:
     virtual void Commit() override;
 
 private:
+    FOdysseyVectorHUDTransform *mTransformHUD;
     void Redraw(const TArray<::ULIS::FRectI>& iRects);
 
 private:

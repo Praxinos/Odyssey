@@ -6,7 +6,6 @@
 #include "CoreMinimal.h"
 #include "Tools/OdysseyPainterEditorTool.h"
 #include "OdysseyVectorPathBuilder.h"
-
 #include "OdysseyPainterEditorVectorSceneScaleTool.generated.h"
 
 UCLASS()

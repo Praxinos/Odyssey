@@ -386,7 +386,7 @@ FOdysseyVectorLoop::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
     }
     else
     {
-       blctx->setFillStyle( BLRgba32( 0xFF808080 ) );
+       blctx->setFillStyle( BLRgba32( 0xFFA0A0A0 ) );
     }
 
     blctx->setFillRule( BL_FILL_RULE_EVEN_ODD );

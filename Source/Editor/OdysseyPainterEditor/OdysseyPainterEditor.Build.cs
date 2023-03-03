@@ -20,6 +20,7 @@ public class OdysseyPainterEditor : ModuleRules
 
         PrivateDependencyModuleNames.AddRange(
             new string[] {
+                "blend2d",
                 "AppFramework",
                 "Core",
                 "CoreUObject",

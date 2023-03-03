@@ -11,8 +11,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorBucket
     private:
         UOdysseyVectorObject& mParent;
         ::ULIS::FVec2D mCoords;
-        ::ULIS::FRectD bucketRect;
-        ::ULIS::FRectD crossRect;
         FColor mColor;
         UOdysseyVectorHandleBucket* mCtrlPoint;
         bool mIsGradient;
@@ -31,7 +29,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorBucket
         void SetColor(uint8 iR, uint8 iG, uint8 iB, uint8 iA );
         void Draw( ::ULIS::FRectD& iRoi, uint64 iFlags );
         void SetCoords( double iX, double iY );
-        ::ULIS::FVec2D& GetCoords();
+        ::ULIS::FVec2D GetCoords();
         bool IsGradient();
         FColor& GetGradientColor0();
         FColor& GetGradientColor1();
@@ -44,5 +42,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorBucket
         UOdysseyVectorHandleBucket* GetHandle();
         UOdysseyVectorObject& GetParent();
         double GetHandleDotProduct();
-        void DrawCross( double iX, double iY, double iSize );
+        void DrawCross();
 };

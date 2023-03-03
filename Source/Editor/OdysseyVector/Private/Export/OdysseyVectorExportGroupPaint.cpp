@@ -8,7 +8,7 @@ WriteBucketPosition( FOdysseyVectorBucket& iBucket, FArchive &Ar )
                                     , Ar
                                     , [&iBucket](FArchive &Ar) -> void
     {
-        ::ULIS::FVec2D& position = iBucket.GetCoords();
+        ::ULIS::FVec2D position = iBucket.GetCoords();
 
         Ar << position.x;
         Ar << position.y;

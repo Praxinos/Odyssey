@@ -38,4 +38,6 @@ class ODYSSEYVECTOR_API UOdysseyVectorVertexCubic : public UOdysseyVectorVertex
         void BuildSegments();
         virtual void SetRadius( double iRadius, bool iBuildSegments );
         void SmoothSegments( bool iBuildSegments );
+        bool IsSmooth();
+        ::ULIS::FVec2D GetVectorOnSegment( UOdysseyVectorSegment* iSegment, bool iNormalize );
 };

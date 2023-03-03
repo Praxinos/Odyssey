@@ -126,6 +126,24 @@ UOdysseyVectorVertex::GetLastSection()
     return mSectionList.back();
 }
 
+::ULIS::FVec2D
+UOdysseyVectorVertex::GetVectorOnSegment( UOdysseyVectorSegment* iSegment, bool iNormalize )
+{
+    ::ULIS::FVec2D vec;
+
+    vec = ( iSegment->GetVertex(0) == this ) ? iSegment->GetVertex(1)->GetCoordsOnSegment(iSegment) -
+                                                                       GetCoordsOnSegment(iSegment)
+                                              :                        GetCoordsOnSegment(iSegment) -
+                                               iSegment->GetVertex(0)->GetCoordsOnSegment(iSegment);
+
+    if( iNormalize && vec.DistanceSquared() )
+    {
+        vec.Normalize();
+    }
+
+    return vec;
+}
+
 static uintptr_t
 GenerateSegmentID( UOdysseyVectorSegment* iSegment, UOdysseyVectorVertex* iP0, UOdysseyVectorVertex* iP1 )
 {
