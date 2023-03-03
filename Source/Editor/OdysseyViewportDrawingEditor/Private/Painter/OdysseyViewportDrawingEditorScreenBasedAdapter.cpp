@@ -43,9 +43,6 @@ void FOdysseyViewportDrawingEditorScreenBasedAdapter::PrepareAdapterForPainting(
         TexturePaintHelpers::GenerateSeamMask(mEditor->Component(), mEditor->GetUVIndexUsedByCurrentTexture(), mSeamRenderTarget2D, mEditor->Texture(), mPaintingTexture2DRenderTarget);
     }
 
-    //We're using true pixel value for this adapter, so we put 0 in meshMaxSize
-    mEditor->GetGUI()->GetTopTab()->SetMeshMaxSize(0);
-
     mState = eState::kIdleReady;
 }
 
@@ -75,6 +72,9 @@ void FOdysseyViewportDrawingEditorScreenBasedAdapter::Tick(float iDelta)
     if (mEditor->Texture() && mPaintingTexture2DRenderTarget)
         TexturePaintHelpers::CopyTextureToRenderTargetTexture(mEditor->Texture(), mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
 
+    if( mLastKnownViewport )
+        mEditor->GetGUI()->GetTopTab()->SetMeshMaxSize(FMath::Max(mLastKnownViewport->GetSizeXY().X, mLastKnownViewport->GetSizeXY().Y) / 2);
+
     mEditor->GetSelectedTool()->Tick(iDelta);
 }
 
@@ -103,7 +103,6 @@ void FOdysseyViewportDrawingEditorScreenBasedAdapter::RenderInteractorWidget(con
 
         meshAdapter->LineTraceComponent(traceHitResult, paintRay.CameraLocation, rayEnd, FCollisionQueryParams(SCENE_QUERY_STAT(Paint), true));
 
-        const FPlane proj = iView->Project(traceHitResult.Location);
         FVector originDeproj, xDeproj, yDeproj, middleViewport;
 
         iView->DeprojectFVector2D(FVector2D(0, 0), originDeproj, mZScreenAxis);
@@ -112,38 +111,38 @@ void FOdysseyViewportDrawingEditorScreenBasedAdapter::RenderInteractorWidget(con
         iView->DeprojectFVector2D(FVector2D(iViewport->GetSizeXY().X / 2, iViewport->GetSizeXY().Y / 2), middleViewport, mZScreenAxis);
         iView->DeprojectFVector2D(FVector2D(iViewport->GetMouseX(), iViewport->GetMouseY()), mMousePosInWorld, mZScreenAxis);
         //FPlane plan = iView->Project( traceHitResult.Location );
-        //UE_LOG(LogTemp, Display, TEXT("plan: %lf, %lf, %lf, %lf"), plan.X, plan.Y, plan.Z, plan.W);
 
-
-        FVector projOnSphere = traceHitResult.Location - paintRay.CameraLocation;
-        projOnSphere = ( 10.f / projOnSphere.Size() ) * projOnSphere;
-        float projOnSpherelongitude = FMath::Atan2(projOnSphere.Y, projOnSphere.X);
-        float projOnSpherelatitude = FMath::Acos(projOnSphere.Z / 10.f);
+        //mMultiplier = FMath::Log2(plan.W);
 
         mXScreenAxis = xDeproj - originDeproj;
         mYScreenAxis = yDeproj - originDeproj;
         
         FVector mousePosInWorldWithZ = mMousePosInWorld + mZScreenAxis;
-        FVector positionOnSphere = middleViewport - paintRay.CameraLocation;
 
-        float longitude = FMath::Atan2(positionOnSphere.Y, positionOnSphere.X);
-        float latitude = FMath::Acos(positionOnSphere.Z / 10.f);
+        const FLinearColor brushCueColor = FLinearColor(1.0f, 1.0f, 0.3f);
+
+        if (iPDI != NULL)
+        {
+            int numCircleSides = 128;
+            DrawCircle(iPDI, mousePosInWorldWithZ, mXScreenAxis, mYScreenAxis, brushCueColor, drawingTool->GetBrushInstance()->GetSizeModifier(), numCircleSides, SDPG_World, 0.01f);
+        }
+
+        //The position of the projection of the hit result on the sphere view
+        FVector projectionOnSphere = traceHitResult.Location - paintRay.CameraLocation;
+        projectionOnSphere = (iView->NearClippingDistance / projectionOnSphere.Size()) * projectionOnSphere;
+        double projOnSpherelongitude = FMath::Atan2(projectionOnSphere.Y, projectionOnSphere.X);
+        double projOnSpherelatitude = FMath::Acos(projectionOnSphere.Z / iView->NearClippingDistance);
+
+        //The position of the center of the plane used to see the scene through. Is tangent to the sphere view
+        FVector positionOnSphere = middleViewport - paintRay.CameraLocation;
+        double longitude = FMath::Atan2(positionOnSphere.Y, positionOnSphere.X);
+        double latitude = FMath::Acos(positionOnSphere.Z / iView->NearClippingDistance);
 
         double angleX = projOnSpherelongitude - longitude;
         double angleY = projOnSpherelatitude - latitude;
 
-
-        //FVector2f decalPixels = FVector2f(iViewport->GetMouseX() - iViewport->GetSizeXY().X / 2.f, iViewport->GetMouseY() - iViewport->GetSizeXY().Y / 2.f);
-        //double angleX = FMath::DegreesToRadians( ( decalPixels.X / iViewport->GetSizeXY().X ) * iView->FOV);
-        //double angleY = FMath::DegreesToRadians( ( decalPixels.Y / iViewport->GetSizeXY().X ) * iView->FOV);
-
-        //FVector fakeScreenX = FVector( FMath::Sin(latitude + angleY)*FMath::Cos(longitude + angleX), FMath::Sin(angleX + longitude)* FMath::Sin(angleY + latitude), FMath::Cos(latitude+angleY));
-
         FVector rotationVector = (angleY / mXScreenAxis.Size()) * mXScreenAxis;
         FQuat quaternionRotation = FQuat::MakeFromRotationVector(rotationVector);
-
-        FVector newPos = quaternionRotation.RotateVector(positionOnSphere);
-        newPos = FVector(newPos.X * FMath::Cos(angleX) - newPos.Y * FMath::Sin(angleX), newPos.X * FMath::Sin(angleX) + newPos.Y * FMath::Cos(angleX), newPos.Z);
 
         mXScreenAxis = quaternionRotation.RotateVector(mXScreenAxis);
         mXScreenAxis = FVector(mXScreenAxis.X * FMath::Cos(angleX) - mXScreenAxis.Y * FMath::Sin(angleX), mXScreenAxis.X * FMath::Sin(angleX) + mXScreenAxis.Y * FMath::Cos(angleX), mXScreenAxis.Z);
@@ -151,144 +150,9 @@ void FOdysseyViewportDrawingEditorScreenBasedAdapter::RenderInteractorWidget(con
         mYScreenAxis = quaternionRotation.RotateVector(mYScreenAxis);
         mYScreenAxis = FVector(mYScreenAxis.X * FMath::Cos(angleX) - mYScreenAxis.Y * FMath::Sin(angleX), mYScreenAxis.X * FMath::Sin(angleX) + mYScreenAxis.Y * FMath::Cos(angleX), mYScreenAxis.Z);
 
-        UE_LOG(LogTemp, Display, TEXT("positionOnSphere: %lf, %lf, %lf"), positionOnSphere.X, positionOnSphere.Y, positionOnSphere.Z);
-        UE_LOG(LogTemp, Display, TEXT("projOnSphere: %lf, %lf, %lf"), projOnSphere.X, projOnSphere.Y, projOnSphere.Z);
-
-        UE_LOG(LogTemp, Display, TEXT("---Should rotate on X by: %lf---"), FMath::RadiansToDegrees(angleX));
-        UE_LOG(LogTemp, Display, TEXT("---Should rotate on Y by: %lf---"), FMath::RadiansToDegrees(angleY));
-
-        UE_LOG(LogTemp, Display, TEXT("NewPosition %lf, %lf, %lf"), newPos.X, newPos.Y, newPos.Z);
-        UE_LOG(LogTemp, Display, TEXT("-----------------"));
-
-        const FLinearColor brushCueColor = FLinearColor(1.0f, 1.0f, 0.3f);
-
-        if (iPDI != NULL)
-        {
-            int numCircleSides = 128;
-            // Draw brush circle
-            DrawCircle(iPDI, mousePosInWorldWithZ, mXScreenAxis, mYScreenAxis, brushCueColor, drawingTool->GetBrushInstance()->GetSizeModifier(), numCircleSides, SDPG_World, 0.01f);
-        }
-
-        mousePosInWorldWithZ = mMousePosInWorld + mZScreenAxis * 10;
-
-        if (iPDI != NULL)
-        {
-            int numCircleSides = 128;
-            // Draw brush circle
-            DrawCircle(iPDI, mousePosInWorldWithZ, mXScreenAxis, mYScreenAxis, brushCueColor, drawingTool->GetBrushInstance()->GetSizeModifier(), numCircleSides, SDPG_World, 0.01f);
-        }
-
         mXScreenAxis /= mXScreenAxis.Size();
         mYScreenAxis /= mYScreenAxis.Size();
         mZScreenAxis /= mZScreenAxis.Size();
-        //mZScreenAxis = mYScreenAxis.Cross(mXScreenAxis);
-
-        //UE_LOG(LogTemp, Display, TEXT("mXScreenAxis: %lf, %lf, %lf"), mXScreenAxis.X, mXScreenAxis.Y, mXScreenAxis.Z);
-        //UE_LOG(LogTemp, Display, TEXT("mYScreenAxis: %lf, %lf, %lf"), mYScreenAxis.X, mYScreenAxis.Y, mYScreenAxis.Z);
-        //UE_LOG(LogTemp, Display, TEXT("mZScreenAxis: %lf, %lf, %lf, %lf"), mZScreenAxis.X, mZScreenAxis.Y, mZScreenAxis.Z, mZScreenAxis.Size());
-
-
-        //FVector2f decalPixels = FVector2f(iViewport->GetMouseX() - iViewport->GetSizeXY().X / 2.f, iViewport->GetMouseY() - iViewport->GetSizeXY().Y / 2.f);
-        //double angleX = FMath::DegreesToRadians((FMath::Sin((decalPixels.X / iViewport->GetSizeXY().X)*PI) * iView->FOV) / 2);
-        //double angleY = FMath::DegreesToRadians((FMath::Sin((decalPixels.Y / iViewport->GetSizeXY().X)*PI) * iView->FOV) / 2);
-        //double angleX = FMath::DegreesToRadians((decalPixels.X / iViewport->GetSizeXY().X) * iView->FOV);
-        //double angleY = FMath::DegreesToRadians((decalPixels.Y / iViewport->GetSizeXY().X) * iView->FOV);
-        //UE_LOG(LogTemp, Display, TEXT("angleX: %lf"), (FMath::Sin((decalPixels.X / iViewport->GetSizeXY().X) * PI) * iView->FOV) / 2);
-
-
-        mFakeXScreenAxis = FVector( mXScreenAxis.X * FMath::Cos(angleX) - mXScreenAxis.Y * FMath::Sin(angleX), mXScreenAxis.X * FMath::Sin(angleX) - mXScreenAxis.Y * FMath::Cos(angleX), mXScreenAxis.Z );
-        mFakeXScreenAxis /= mFakeXScreenAxis.Size();
-        //mFakeXScreenAxis = mXScreenAxis - mFakeXScreenAxis;
-        //FVector fakeYScreenAxis = FMath::Sin(angleX) - FMath::Cos(angleX);
-
-        //UE_LOG(LogTemp, Display, TEXT("fakeScreenX: %lf, %lf, %lf, %lf"), fakeScreenX.X, fakeScreenX.Y, fakeScreenX.Z, fakeScreenX.Size());
-        //UE_LOG(LogTemp, Display, TEXT("mFakeXScreenAxis: %lf, %lf, %lf, %lf"), mFakeXScreenAxis.X, mFakeXScreenAxis.Y, mFakeXScreenAxis.Z, mFakeXScreenAxis.Size());
-        //UE_LOG(LogTemp, Display, TEXT("fakeYScreenAxis: %lf, %lf, %lf"), fakeYScreenAxis.X, fakeYScreenAxis.Y, fakeYScreenAxis.Z);
-
-
-        //UE_LOG(LogTemp, Display, TEXT("mZScreenAxis: %lf, %lf, %lf"), mZScreenAxis.X, mZScreenAxis.Y, mZScreenAxis.Z);
-        //UE_LOG(LogTemp, Display, TEXT("mMousePosInWorld: %lf, %lf, %lf"), mMousePosInWorld.X, mMousePosInWorld.Y, mMousePosInWorld.Z);
-
-        //float t = (mZScreenAxis.X * originDeproj.X - mZScreenAxis.X * traceHitResult.Location.X + mZScreenAxis.Y * originDeproj.Y - mZScreenAxis.Y * traceHitResult.Location.Y + mZScreenAxis.Z * originDeproj.Z - mZScreenAxis.Z * traceHitResult.Location.Z) / (mZScreenAxis.X * mZScreenAxis.X + mZScreenAxis.Y * mZScreenAxis.Y + mZScreenAxis.Z * mZScreenAxis.Z);
-
-        //mPointOnPlane = FVector(traceHitResult.Location.X + t * mZScreenAxis.X, traceHitResult.Location.Y + t * mZScreenAxis.Y, traceHitResult.Location.Z + t * mZScreenAxis.Z);
-        //UE_LOG(LogTemp, Display, TEXT("t: %lf"), t);
-        //UE_LOG(LogTemp, Display, TEXT("pointOnPlane: %lf, %lf, %lf"), mPointOnPlane.X, mPointOnPlane.Y, mPointOnPlane.Z);
-
-        /*FVector2f decalPixels = FVector2f(iViewport->GetMouseX() - iViewport->GetSizeXY().X / 2.f, iViewport->GetMouseY() - iViewport->GetSizeXY().Y / 2.f);
-        double angleX = FMath::DegreesToRadians(( decalPixels.X / iViewport->GetSizeXY().X ) * iView->FOV);
-        double angleY = FMath::DegreesToRadians(( decalPixels.Y / iViewport->GetSizeXY().X ) * iView->FOV);
-
-        UE_LOG(LogTemp, Display, TEXT("X: %lf"), (decalPixels.X / iViewport->GetSizeXY().X) * iView->FOV);
-        UE_LOG(LogTemp, Display, TEXT("Y: %lf"), (decalPixels.Y / iViewport->GetSizeXY().X) * iView->FOV);
-
-        mXScreenAxis.X = mXScreenAxis.X - (1 - FMath::Cos(angleX));
-        mXScreenAxis.Y = mXScreenAxis.Y - FMath::Sin(angleX);
-        mYScreenAxis.X = mYScreenAxis.X - (1 - FMath::Cos(angleY));
-        mYScreenAxis.Y = mYScreenAxis.Y - FMath::Sin(angleY);
-        mYScreenAxis.Z = mYScreenAxis.Z - FMath::Tan(angleY);
-
-        if( mXScreenAxis.X > 1.f )
-            mXScreenAxis.X-=2.f;
-
-        if (mXScreenAxis.Y > 1.f)
-            mXScreenAxis.Y-= 2.f;
-
-        if (mXScreenAxis.X < -1.f)
-            mXScreenAxis.X += 2.f;
-
-        if (mXScreenAxis.Y < -1.f)
-            mXScreenAxis.Y += 2.f;
-
-
-        if (mYScreenAxis.X > 1.f)
-            mYScreenAxis.X -= 2.f;
-
-        if (mYScreenAxis.Y > 1.f)
-            mYScreenAxis.Y -= 2.f;
-
-        if (mYScreenAxis.X < -1.f)
-            mYScreenAxis.X += 2.f;
-
-        if (mYScreenAxis.Y < -1.f)
-            mYScreenAxis.Y += 2.f;
-
-        UE_LOG(LogTemp, Display, TEXT("mXScreenAxis: %lf, %lf, %lf"), mXScreenAxis.X, mXScreenAxis.Y, mXScreenAxis.Z);
-        UE_LOG(LogTemp, Display, TEXT("mYScreenAxis: %lf, %lf, %lf"), mYScreenAxis.X, mYScreenAxis.Y, mYScreenAxis.Z);
-
-        mXScreenAxis /= mXScreenAxis.Size();
-        mYScreenAxis /= mYScreenAxis.Size();
-
-        UE_LOG(LogTemp, Display, TEXT("SizeAxis: %lf, %lf"), mXScreenAxis.Size(), mYScreenAxis.Size());*/
-        
-        //mZScreenAxis = mYScreenAxis.Cross(mXScreenAxis);
-
-        //UE_LOG(LogTemp, Display, TEXT("mZScreenAxis AFTER: %lf, %lf, %lf"), mZScreenAxis.X, mZScreenAxis.Y, mZScreenAxis.Z);
-
-        //UE_LOG(LogTemp, Display, TEXT("SizeAxis: %lf, %lf"), mXScreenAxis.Size(), mYScreenAxis.Size());
-
-
-        //Proj x between -1 and 1, 0 is center of viewport
-        //Proj y between -1 and 1
-        //Proj z ???
-        //Proj w = shortest distance from cursor to hit location
-
-        //float distZ = 1.f / proj.Z;
-        //UE_LOG(LogTemp, Display, TEXT("mXScreenAxis: %lf, %lf, %lf"), mXScreenAxis.X, mXScreenAxis.Y, mXScreenAxis.Z);
-        //UE_LOG(LogTemp, Display, TEXT("mYScreenAxis: %lf, %lf, %lf"), mYScreenAxis.X, mYScreenAxis.Y, mYScreenAxis.Z);
-        //
-        //UE_LOG(LogTemp, Display, TEXT("ViewportMouse: %ld, %ld"), iViewport->GetMouseX(), iViewport->GetMouseY());
-        //UE_LOG(LogTemp, Display, TEXT("proj, %lf, %lf, %lf, %lf"), proj.X, proj.Y, proj.Z, proj.W );
-        //UE_LOG(LogTemp, Display, TEXT("Location, %lf, %lf, %lf"), traceHitResult.Location.X, traceHitResult.Location.Y, traceHitResult.Location.Z );
-        //UE_LOG(LogTemp, Display, TEXT("PaintRayStart, %lf, %lf, %lf"), paintRay.RayStart.X, paintRay.RayStart.Y, paintRay.RayStart.Z);
-        //FVector locationInverse = meshAdapter->GetComponentToWorldMatrix().InverseTransformPosition(traceHitResult.Location);
-        //UE_LOG(LogTemp, Display, TEXT("CM, %lf, %lf, %lf"), locationInverse.X, locationInverse.Y, locationInverse.Z);
-        //FVector location = meshAdapter->GetComponentToWorldMatrix().TransformPosition(traceHitResult.Location);
-        //UE_LOG(LogTemp, Display, TEXT("PM, %lf, %lf, %lf"), traceHitResult.Location.X - paintRay.RayStart.X, traceHitResult.Location.Y - paintRay.RayStart.Y, traceHitResult.Location.Z - paintRay.RayStart.Z);
-        //
-        //FVector differenceBetweenRayStartAndHitResult = FVector(traceHitResult.Location.X - paintRay.RayStart.X, traceHitResult.Location.Y - paintRay.RayStart.Y, traceHitResult.Location.Z - paintRay.RayStart.Z);
-
-        //UE_LOG(LogTemp, Display, TEXT("%lf, %lf, %lf, %lf"), proj.X * distZ, proj.Y * distZ, 1.f / proj.Z, proj.W);
     }
 
 }
@@ -478,9 +342,7 @@ TArray<::ULIS::FRectI> FOdysseyViewportDrawingEditorScreenBasedAdapter::GetMinim
     FVector brushXAxis = FVector( 1, 0, 0 );
     FVector brushYAxis = FVector( 0, 1, 0 );
     FVector brushZAxis = FVector( 0, 0, 1 );
-    //traceHitResult.Normal.FindBestAxisVectors(brushXAxis,brushYAxis);
     const FMatrix worldToBrushMatrix = FMatrix(brushXAxis, brushYAxis, brushZAxis, traceHitResult.Location).Inverse();
-    //UE_LOG(LogTemp, Display, TEXT("traceResult: %lf, %lf, %lf, %lf"), traceHitResult.Location.X, traceHitResult.Location.Y, traceHitResult.Location.Z, traceHitResult.Distance)
 
     // Convert trace to UV position
     FVector2D coord;
@@ -638,9 +500,9 @@ TArray<::ULIS::FRectI> FOdysseyViewportDrawingEditorScreenBasedAdapter::GetMinim
     TArray<::ULIS::FRectI> rects;
     rects = GetMinimalRectanglesForTriangleSet(triangleInfo, mStrokeBufferRenderTarget2D->GetSurfaceWidth(), mStrokeBufferRenderTarget2D->GetSurfaceHeight());
 
+
     mPixelFence.BeginFence();
     mPixelFence.Wait();
-
 
     for (int i = 0; i < rects.Num(); i++)
     {

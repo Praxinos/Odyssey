@@ -52,24 +52,18 @@ void FOdysseyViewportDrawingEditorTextureBasedAdapter::PrepareAdapterForPainting
         const int32 textureWidth = mEditor->Texture()->Source.GetSizeX();
         const int32 textureHeight = mEditor->Texture()->Source.GetSizeY();
         
-        /*
         mPaintingTexture2DRenderTarget = NewObject<UTextureRenderTarget2D>(GetTransientPackage(), NAME_None, RF_Transient);
         mPaintingTexture2DRenderTarget->ClearColor = FLinearColor(0, 0, 0, 0);
         mPaintingTexture2DRenderTarget->bNeedsTwoCopies = true;
         mPaintingTexture2DRenderTarget->InitCustomFormat(textureWidth, textureHeight, mEditor->Texture()->GetPixelFormat(), true);
         mPaintingTexture2DRenderTarget->UpdateResourceImmediate();
         mPaintingTexture2DRenderTarget->AddToRoot();
-        */
-
-        //IMeshPaintGeometryAdapter::DefaultApplyOrRemoveTextureOverride(mEditor->Component(), mEditor->Texture(), mPaintingTexture2DRenderTarget);
+    
         const ERHIFeatureLevel::Type featureLevel = mEditor->Component()->GetWorld()->FeatureLevel;
-        //mEditor->Material()->OverrideTexture(mEditor->Texture(), mPaintingTexture2DRenderTarget, FeatureLevel);
+        mEditor->Material()->OverrideTexture(mEditor->Texture(), mPaintingTexture2DRenderTarget, featureLevel);
         
-        mTextureMipGenSettings = mEditor->Texture()->MipGenSettings;
-        mEditor->Texture()->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
-        mEditor->Texture()->UpdateResource();
         //A simple copy is all we need for the texture based algorithm
-        //TexturePaintHelpers::CopyTextureToRenderTargetTexture(mEditor->Texture(), mPaintingTexture2DRenderTarget, featureLevel);
+        TexturePaintHelpers::CopyTextureToRenderTargetTexture(mEditor->Texture(), mPaintingTexture2DRenderTarget, featureLevel);
         mState = eState::kIdleReady;
     }    
     
@@ -96,8 +90,8 @@ void FOdysseyViewportDrawingEditorTextureBasedAdapter::StartPainting()
     mEditor->GetSelectedTool()->OnMouseDown(mCurrentStrokeRay.mPoint, EKeys::LeftMouseButton);
 
     //A simple copy is all we need for the texture based algorithm
-    //if( mPaintingTexture2DRenderTarget)
-    //    TexturePaintHelpers::CopyTextureToRenderTargetTexture(mEditor->Texture(), mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
+    if( mPaintingTexture2DRenderTarget)
+        TexturePaintHelpers::CopyTextureToRenderTargetTexture(mEditor->Texture(), mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
 }
 
 void FOdysseyViewportDrawingEditorTextureBasedAdapter::Paint()
@@ -105,8 +99,8 @@ void FOdysseyViewportDrawingEditorTextureBasedAdapter::Paint()
     mEditor->GetSelectedTool()->OnMouseDrag(mCurrentStrokeRay.mPoint);
 
     //A simple copy is all we need for the texture based algorithm
-    //if (mPaintingTexture2DRenderTarget)
-    //    TexturePaintHelpers::CopyTextureToRenderTargetTexture(mEditor->Texture(), mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
+    if (mPaintingTexture2DRenderTarget)
+        TexturePaintHelpers::CopyTextureToRenderTargetTexture(mEditor->Texture(), mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
 }
 
 void FOdysseyViewportDrawingEditorTextureBasedAdapter::FinishPainting()
@@ -114,14 +108,14 @@ void FOdysseyViewportDrawingEditorTextureBasedAdapter::FinishPainting()
     mEditor->GetSelectedTool()->OnMouseUp(mCurrentStrokeRay.mPoint, EKeys::LeftMouseButton);
 
     //A simple copy is all we need for the texture based algorithm
-    //if ( mPaintingTexture2DRenderTarget )
-    //    TexturePaintHelpers::CopyTextureToRenderTargetTexture(mEditor->Texture(), mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
+    if ( mPaintingTexture2DRenderTarget )
+        TexturePaintHelpers::CopyTextureToRenderTargetTexture(mEditor->Texture(), mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
 }
 
 void FOdysseyViewportDrawingEditorTextureBasedAdapter::Tick(float iDelta)
 {
-    //if( mEditor->Texture() && mPaintingTexture2DRenderTarget )
-    //    TexturePaintHelpers::CopyTextureToRenderTargetTexture(mEditor->Texture(), mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
+    if( mEditor->Texture() && mPaintingTexture2DRenderTarget )
+        TexturePaintHelpers::CopyTextureToRenderTargetTexture(mEditor->Texture(), mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
 }
 
 void FOdysseyViewportDrawingEditorTextureBasedAdapter::RenderInteractorWidget(const FSceneView* iView, FViewport* iViewport, FPrimitiveDrawInterface* iPDI)

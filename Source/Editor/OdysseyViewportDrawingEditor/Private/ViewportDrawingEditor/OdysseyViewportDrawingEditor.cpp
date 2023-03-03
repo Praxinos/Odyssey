@@ -137,9 +137,10 @@ float FOdysseyViewportDrawingEditor::GetMeshComponentMaxSize() const
     if (mComponent)
     {
         FVector extent = mComponent->GetLocalBounds().BoxExtent;
-        return FMath::Max3(extent.X, extent.Y, extent.Z);
+		FVector scale = mActor->GetActorScale();
+        return FMath::Max3(extent.X, extent.Y, extent.Z) * FMath::Max3(scale.X, scale.Y, scale.Z);
     }
-    return 0;
+    return 1;
 }
 
 //--------------------------------------------------------------------------------------

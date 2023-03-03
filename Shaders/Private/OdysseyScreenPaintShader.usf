@@ -33,7 +33,7 @@ void MainPS( float4 InPosition : SV_POSITION,
 	float stampPosX = 0.5 + (c_xScreenAxis.x * BrushSpaceVertexPosition.x + c_xScreenAxis.y * BrushSpaceVertexPosition.y + c_xScreenAxis.z * BrushSpaceVertexPosition.z) / widthStroke;
 	float stampPosY = 0.5 + (c_yScreenAxis.x * BrushSpaceVertexPosition.x + c_yScreenAxis.y * BrushSpaceVertexPosition.y + c_yScreenAxis.z * BrushSpaceVertexPosition.z) / heightStroke;
 
-	OutColor = float4( 1.f, 0.f, 0.f, 1.f);
+	OutColor = float4( 0.f, 0.f, 0.f, 0.f);
 	if( stampPosX >= 0 && stampPosX <= 1 && stampPosY >= 0 && stampPosY <= 1 )
 	{
 		OutColor = Texture2DSample(s_Stroke2D, s_TextureSampler, float2(stampPosX, stampPosY));
