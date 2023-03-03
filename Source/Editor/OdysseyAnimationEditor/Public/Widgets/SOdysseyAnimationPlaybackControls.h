@@ -6,7 +6,7 @@
 #include "CoreMinimal.h"
 #include "Widgets/Input/SButton.h"
 
-class UMediaPlayer;
+class UOdysseyAnimationPlayer;
 class UOdysseyAnimation;
 
 //////////////////////////////////////////////////////////////////////////
@@ -18,7 +18,7 @@ public:
 	SLATE_BEGIN_ARGS(SOdysseyAnimationPlaybackControls)
 		{}
         SLATE_ARGUMENT(UOdysseyAnimation*, Animation)
-        SLATE_ARGUMENT(UMediaPlayer*, MediaPlayer)
+        SLATE_ARGUMENT(UOdysseyAnimationPlayer*, Player)
         SLATE_ATTRIBUTE(float, PlaybackFramesPerSecond)
 
 	SLATE_END_ARGS()
@@ -51,6 +51,6 @@ private:
 
 private:
     UOdysseyAnimation* mAnimation;
-    UMediaPlayer* mMediaPlayer;
+    UOdysseyAnimationPlayer* mPlayer;
     TAttribute<float> mPlaybackFramesPerSecond;
 };

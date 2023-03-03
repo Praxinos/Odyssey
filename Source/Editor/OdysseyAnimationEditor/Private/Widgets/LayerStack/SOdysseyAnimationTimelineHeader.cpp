@@ -5,7 +5,7 @@
 #include "Fonts/FontMeasure.h"
 
 #include "OdysseyAnimation.h"
-#include "MediaPlayer.h"
+#include "OdysseyAnimationPlayer.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyTimeline"
 
@@ -16,7 +16,7 @@ void
 SOdysseyAnimationTimelineHeader::Construct(const FArguments& InArgs)
 {
 	mAnimation = InArgs._Animation;
-	mMediaPlayer = InArgs._MediaPlayer;
+	mPlayer = InArgs._Player;
 	mZoom = InArgs._Zoom;
     mOffset = InArgs._Offset;
 	mFrameWidth = InArgs._FrameWidth;
@@ -132,7 +132,7 @@ int32 SOdysseyAnimationTimelineHeader::OnPaint(const FPaintArgs& Args, const FGe
 
 	//Draw Current Time
 
-	float currentTime = mMediaPlayer->GetTime().GetTotalSeconds() * mAnimation->GetFramesPerSecond();
+	float currentTime = mPlayer->GetCurrentTime().GetTotalSeconds() * mAnimation->GetFramesPerSecond();
 	float currentTimePos = currentTime * frameSize;
 
 	FSlateDrawElement::MakeBox(
@@ -209,8 +209,8 @@ FReply SOdysseyAnimationTimelineHeader::OnMouseButtonDown(const FGeometry& MyGeo
 			const float minScrub = 0.0f;
 			float frame = (MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition()).X / mFrameWidth.Get() + mOffset.Get());
 			FTimespan time = FTimespan::FromSeconds(frame / mAnimation->GetFramesPerSecond());
-			mMediaPlayer->Pause();
-			mMediaPlayer->Seek(time);
+			mPlayer->Stop();
+			mPlayer->SeekToTime(time);
 
 			// This has prevent throttling on so that viewports continue to run whilst dragging the slider
 			return FReply::Handled().CaptureMouse( SharedThis(this) ).PreventThrottling();
@@ -237,7 +237,7 @@ FReply SOdysseyAnimationTimelineHeader::OnMouseMove(const FGeometry& MyGeometry,
 		const float minScrub = 0.0f;
 		float frame = MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition()).X / mFrameWidth.Get() + mOffset.Get();
 		FTimespan time = FTimespan::FromSeconds(frame / mAnimation->GetFramesPerSecond());
-		mMediaPlayer->Seek(time);
+		mPlayer->SeekToTime(time);
 		return FReply::Handled();
 	}
 	else
@@ -257,8 +257,6 @@ FReply SOdysseyAnimationTimelineHeader::OnMouseButtonUp(const FGeometry& MyGeome
 	{
 		const float minScrub = 0.0f;
 		float frame = MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition()).X / mFrameWidth.Get() + mOffset.Get();
-		FTimespan time = FTimespan::FromSeconds(frame / mAnimation->GetFramesPerSecond());
-		mMediaPlayer->Seek(time);
 		FOdysseyObjectEditorUtils::SetPropertyValue(mAnimation, "CurrentFrame", (int)frame);
 		
 		mIsScrubbing = false;

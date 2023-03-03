@@ -10,8 +10,8 @@
 #include "OdysseyPaintEngine.h"
 #include "OdysseyBlendParameters.h"
 #include "OdysseyAnimation.h"
-#include "MediaPlayer.h"
-#include "MediaTexture.h"
+#include "OdysseyAnimationPlayer.h"
+#include "OdysseyAnimationTexture.h"
 
 
 #define LOCTEXT_NAMESPACE "OdysseyAnimationEditor"
@@ -22,8 +22,9 @@
 //----------------------------------------------------------- Construction / Destruction
 FOdysseyAnimationEditor::~FOdysseyAnimationEditor()
 {
-	mMediaPlayer->OnMediaEvent().RemoveAll(this);
+	//mPlayer->OnMediaEvent().RemoveAll(this);
 	mAnimation->OnCurrentFrameChanged().RemoveAll(this);
+	mAnimation->OnRenderImageChanged().RemoveAll(this);
 }
 
 FOdysseyAnimationEditor::FOdysseyAnimationEditor() :
@@ -32,8 +33,8 @@ FOdysseyAnimationEditor::FOdysseyAnimationEditor() :
 	mGUI(nullptr),
 	mRasterDrawingTool(nullptr),
 	mPaintBucketTool(nullptr),
-	mMediaPlayer(nullptr),
-    mMediaTexture(),
+	mPlayer(nullptr),
+    mTexture(),
 	mPlaybackFramesPerSecond(0)
 {
 }
@@ -49,21 +50,20 @@ FOdysseyAnimationEditor::InitData(UObject* iEditedObject)
 	mPlaybackFramesPerSecond = mAnimation->GetFramesPerSecond();
 
 	//Configure a Media player and media texture to be able to display and play the animation
-	mMediaPlayer = NewObject<UMediaPlayer>();
-    mMediaTexture = NewObject<UMediaTexture>();
+	mPlayer = NewObject<UOdysseyAnimationPlayer>();
+    mTexture = NewObject<UOdysseyAnimationTexture>();
 
-	mMediaPlayer->PlayOnOpen = false;
-	mMediaPlayer->OpenSource(mAnimation);
-	mMediaTexture->SetMediaPlayer(mMediaPlayer);
-	mMediaTexture->UpdateResource();
+	mPlayer->SetAnimation(mAnimation);
+	mTexture->SetPlayer(mPlayer);
+	mTexture->UpdateResource();
 
 	//Seek at current frame 
-	FTimespan time = FTimespan::FromSeconds((mAnimation->CurrentFrame+0.5f) / mAnimation->GetFramesPerSecond());
-    mMediaPlayer->Seek(time);
+    mPlayer->SeekToFrame(mAnimation->CurrentFrame);
 
 	//Set Media player and Animation callbacks
-	mMediaPlayer->OnMediaEvent().AddRaw(this, &FOdysseyAnimationEditor::OnMediaEvent);
+	//mMediaPlayer->OnMediaEvent().AddRaw(this, &FOdysseyAnimationEditor::OnMediaEvent);
 	mAnimation->OnCurrentFrameChanged().AddRaw(this, &FOdysseyAnimationEditor::OnCurrentFrameChanged);
+	mAnimation->OnRenderImageChanged().AddRaw(this, &FOdysseyAnimationEditor::OnRenderImageChanged);
 
 	FOdysseyPainterEditor::InitData(iEditedObject);
 }
@@ -114,10 +114,10 @@ FOdysseyAnimationEditor::LayerStack() const
 	return mAnimation->GetLayerStack();
 }
 
-UMediaPlayer*
-FOdysseyAnimationEditor::MediaPlayer() const
+UOdysseyAnimationPlayer*
+FOdysseyAnimationEditor::Player() const
 {
-	return mMediaPlayer;
+	return mPlayer;
 }
 
 float
@@ -129,10 +129,7 @@ FOdysseyAnimationEditor::PlaybackFramesPerSecond() const
 UTexture*
 FOdysseyAnimationEditor::DisplayTexture() const
 {
-	//TODO: return the media texture used for reading the animation
-
-	//return mDisplaySurface->Texture();
-	return mMediaTexture;
+	return mTexture;
 }
 
 TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>
@@ -186,14 +183,14 @@ FOdysseyAnimationEditor::AddReferencedObjects(FReferenceCollector& Collector)
 	Collector.AddReferencedObject(mRasterDrawingTool);
 	Collector.AddReferencedObject(mPaintBucketTool);
 
-	Collector.AddReferencedObject(mMediaPlayer);
-	Collector.AddReferencedObject(mMediaTexture);
+	Collector.AddReferencedObject(mPlayer);
+	Collector.AddReferencedObject(mTexture);
 }
 
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------- Events
 
-void
+/* void
 FOdysseyAnimationEditor::OnMediaEvent(EMediaEvent iEvent)
 {
 	switch(iEvent)
@@ -219,6 +216,27 @@ FOdysseyAnimationEditor::OnMediaEvent(EMediaEvent iEvent)
 		default:
 			break;
 	}
+} */
+
+void
+FOdysseyAnimationEditor::OnRenderImageChanged(UOdysseyAnimation* iAnimation, const TRange<int>& iRange, const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive)
+{
+	if ( iAnimation != mAnimation )
+		return;
+
+	FString frameId = mAnimation->GetFrameId(mAnimation->CurrentFrame);
+	if ( frameId != mCurrentFrameId )
+	{
+		mCurrentFrameId = frameId;
+		//Preload the new current frame for edition
+		mLayerStackPreloadHandle = mAnimation->Preload(mAnimation->CurrentFrame);
+
+		//Reload the tool
+		//TODO: we should maybe do this in a different way, it feels a bit weird to unselect and reselect the whole tool
+		UOdysseyPainterEditorTool* tool = GetSelectedTool();
+		SetSelectedTool(nullptr);
+		SetSelectedTool(tool);
+	}
 }
 
 void
@@ -231,9 +249,8 @@ FOdysseyAnimationEditor::OnCurrentFrameChanged(UOdysseyAnimation* iAnimation)
 	mLayerStackPreloadHandle = mAnimation->Preload(mAnimation->CurrentFrame);
 
 	//Display the new current frame
-	FTimespan time = FTimespan::FromSeconds((mAnimation->CurrentFrame+0.5f) / mAnimation->GetFramesPerSecond());
-	mMediaPlayer->Seek(time);
-	mMediaPlayer->Pause();
+	mPlayer->SeekToFrame(mAnimation->CurrentFrame);
+	mPlayer->Stop();
 
 	//Reload the tool
 	//TODO: we should maybe do this in a different way, it feels a bit weird to unselect and reselect the whole tool

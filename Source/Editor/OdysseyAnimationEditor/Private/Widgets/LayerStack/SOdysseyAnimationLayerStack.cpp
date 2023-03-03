@@ -13,7 +13,7 @@ SOdysseyAnimationLayerStack::~SOdysseyAnimationLayerStack()
 
 SOdysseyAnimationLayerStack::SOdysseyAnimationLayerStack()
     : mAnimation(nullptr)
-    , mMediaPlayer(nullptr)
+    , mPlayer(nullptr)
     , mTreeView()
     , mZoom(1.0f)
     , mOffset(0.0f)
@@ -25,7 +25,7 @@ void
 SOdysseyAnimationLayerStack::Construct(const FArguments& InArgs)
 {
     mAnimation = InArgs._Animation;
-    mMediaPlayer = InArgs._MediaPlayer;
+    mPlayer = InArgs._Player;
     ChildSlot
     [
         SAssignNew(mTreeView, SOdysseyLayerStackTreeView)
@@ -41,7 +41,7 @@ SOdysseyAnimationLayerStack::Construct(const FArguments& InArgs)
                 [
                     SNew(SOdysseyAnimationTimelineHeader)
                     .Animation(mAnimation)
-                    .MediaPlayer(mMediaPlayer)
+                    .Player(mPlayer)
                     .FrameWidth(50.f)
                     .Zoom(this, &SOdysseyAnimationLayerStack::GetZoom)
                     .Offset(this, &SOdysseyAnimationLayerStack::GetOffset)

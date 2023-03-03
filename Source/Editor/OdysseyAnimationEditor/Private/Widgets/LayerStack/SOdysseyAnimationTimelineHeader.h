@@ -6,7 +6,7 @@
 #include "CoreMinimal.h"
 
 class UOdysseyAnimation;
-class UMediaPlayer;
+class UOdysseyAnimationPlayer;
 
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineHeader : public SCompoundWidget
 {
@@ -17,13 +17,13 @@ public:
 public:
 	SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineHeader)
 		: _Animation(nullptr)
-		, _MediaPlayer(nullptr)
+		, _Player(nullptr)
 		, _FrameWidth(50.f)
 		, _Zoom(1.0f)
 		, _Offset(0.0f)
 	{}
 		SLATE_ARGUMENT(UOdysseyAnimation*, Animation)
-		SLATE_ARGUMENT(UMediaPlayer*, MediaPlayer)
+		SLATE_ARGUMENT(UOdysseyAnimationPlayer*, Player)
 		SLATE_ATTRIBUTE(float, FrameWidth)
 		SLATE_ATTRIBUTE(float, Zoom)
 		SLATE_ATTRIBUTE(float, Offset)
@@ -48,7 +48,7 @@ private:
 
 	//Attributes
 	UOdysseyAnimation*			mAnimation;
-	UMediaPlayer*				mMediaPlayer;
+	UOdysseyAnimationPlayer*	mPlayer;
 	TAttribute<float> 			mFrameWidth;
 	TAttribute<float> 			mZoom;
 	TAttribute<float> 			mOffset;

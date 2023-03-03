@@ -10,7 +10,7 @@
  */
 
 class UOdysseyAnimation;
-class UMediaPlayer;
+class UOdysseyAnimationPlayer;
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerStack
     : public SCompoundWidget
 {
@@ -18,7 +18,7 @@ public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationLayerStack)
         {}
         SLATE_ARGUMENT( UOdysseyAnimation*, Animation )
-        SLATE_ARGUMENT( UMediaPlayer*, MediaPlayer )
+        SLATE_ARGUMENT( UOdysseyAnimationPlayer*, Player )
     SLATE_END_ARGS()
 
 public:
@@ -37,7 +37,7 @@ private:
 
 private:
     UOdysseyAnimation* mAnimation;
-    UMediaPlayer* mMediaPlayer;
+    UOdysseyAnimationPlayer* mPlayer;
     TSharedPtr<SOdysseyLayerStackTreeView> mTreeView;
     float mZoom;
     float mOffset;

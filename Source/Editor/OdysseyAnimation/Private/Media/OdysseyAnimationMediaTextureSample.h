@@ -133,12 +133,12 @@ private:
 
 private:
 	UOdysseyAnimation* mAnimation;
-	int mFrameIndex;
-	uint32 mSequenceIndex;
+	int mCurrentFrameIndex;
+	FString mFrameId;
 	FMediaTimeStamp mTime;
 	FTimespan mDuration;
 	TStrongObjectPtr<UTexture2DDynamic> mTexture1; 
 	TStrongObjectPtr<UTexture2DDynamic> mTexture2; //PATCH: Media Framework is shit when using a single texture that refreshes it self, I need 2 Textures....
-	mutable bool mCurrentTexture; //PATCH:
+	mutable bool mCurrentTexture; //PATCH: true => use mTexture1, false => use mTexture2
 	TArray<::ULIS::FRectI> mInvalidRects;
 };

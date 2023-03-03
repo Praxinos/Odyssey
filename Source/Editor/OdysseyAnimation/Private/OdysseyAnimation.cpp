@@ -65,12 +65,14 @@ UOdysseyAnimation::Format() const
 FTimespan
 UOdysseyAnimation::GetDuration() const
 {
-	return FTimespan::FromSeconds(GetFrameCount() / GetFramesPerSecond());
+	return GetFrameTimeRange(GetFrameCount() - 1).GetUpperBoundValue();
 }
 
 TRange<int>
 UOdysseyAnimation::GetFrameRange() const
 {
+	//TODO: deduce frame count from :
+	// - startPoint / endPoint
 	return mLayerStack->GetFrameRange();
 }
 
@@ -96,35 +98,87 @@ UOdysseyAnimation::GetFramesPerSecond() const
 int
 UOdysseyAnimation::GetFrameIndexAtTime(FTimespan iTime) const
 {
-	if (iTime < 0 || iTime >= GetDuration())
+	if ( iTime < 0 || iTime > GetDuration() )
 		return INDEX_NONE;
-	
-	return int(iTime.GetTotalSeconds() * GetFramesPerSecond());
+
+	//Add 1 tick to be sure to retrieve the right frame in case the frame starts between iTime and iTime + 1 tick
+	FTimespan time = iTime + FTimespan(1); 
+	return int(time.GetTotalSeconds() * GetFramesPerSecond());
 }
 
 TRange<FTimespan>
-UOdysseyAnimation::GetFrameTimeRange(uint32 iFrameIndex) const
+UOdysseyAnimation::GetFrameTimeRange(int iFrameIndex) const
 {
-	//TODO:
-	return TRange<FTimespan>(FTimespan::FromSeconds(iFrameIndex / GetFramesPerSecond()), FTimespan::FromSeconds((iFrameIndex + 1) / GetFramesPerSecond()));
+	FTimespan start = FTimespan::FromSeconds(iFrameIndex / GetFramesPerSecond());
+
+	//Remove one tick because end timespan is included in the range
+	//That way we never have two frame with overlapping timeranges
+	FTimespan end = FTimespan::FromSeconds((iFrameIndex + 1) / GetFramesPerSecond()) - FTimespan(1);
+	return TRange<FTimespan>(start, end);
 }
 
 TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>
-UOdysseyAnimation::GetBlockAtIndex(uint32 iIndex)
+UOdysseyAnimation::GetBlockAtIndex(int iIndex)
 {
-	if (iIndex < 0 || iIndex >= GetFrameCount())
+	if (iIndex < 0 || iIndex >= (int)GetFrameCount())
+	{
+		::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext((ULIS::eFormat)mFormat);
+		TSharedPtr< ::ULIS::FBlock > block = MakeShared<::ULIS::FBlock>(mWidth, mHeight, (ULIS::eFormat)mFormat);
+		ctx.Finish();
+
+		return block;
+	}
+
+	return GetBlockFromId(mFrameIds[iIndex]);
+}
+
+TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>
+UOdysseyAnimation::GetBlockAtTime(FTimespan iTime)
+{
+	int frameIndex = GetFrameIndexAtTime(iTime);
+	return GetBlockAtIndex(frameIndex);
+}
+
+TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>
+UOdysseyAnimation::GetBlockFromId(const FString& iId)
+{
+	if (!mFrameBlocks.Contains(iId))
 		return nullptr;
 
-	//TODO: GenerateFrame() if the rasterblock does not exist (will by done when asynchronous is being done)
+	if ( mFrameBlocks[iId].mInvalidRects.Num() > 0 )
+		GenerateFrameBlock(iId);
 
-	const FString& id = mFrameIds[iIndex];
-	return mFrameBlocks[id].mRasterBlock->GetBlock();
+	return mFrameBlocks[iId].mRasterBlock->GetBlock();
 }
+
+void
+UOdysseyAnimation::WaitForBlockUpdate(const FString& iFrameId)
+{
+	if ( !mFrameBlocks.Contains(iFrameId) )
+		return;
+
+	if ( mFrameBlocks[iFrameId].mInvalidRects.Num() > 0 )
+		GenerateFrameBlock(iFrameId);
+}
+
 
 UOdysseyAnimationLayerStack*
 UOdysseyAnimation::GetLayerStack() const
 {
 	return mLayerStack;
+}
+
+FString
+UOdysseyAnimation::GetFrameId(int iFrameIndex) const
+{
+	return mLayerStack->GetFrameId(iFrameIndex);
+}
+
+FString
+UOdysseyAnimation::GetFrameIdAtTime(FTimespan iTime) const
+{
+	int frameIndex = GetFrameIndexAtTime(iTime);
+	return mLayerStack->GetFrameId(frameIndex);
 }
 
 TSharedPtr<IOdysseyHandle>

@@ -67,6 +67,10 @@ public:
 	virtual bool GetPlayerFeatureFlag(EFeatureFlag flag) const override;
 
 private:
+	//Events
+	void OnRenderImageChanged(UOdysseyAnimation* iAnimation, const TRange<int>& iRange, const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive);
+
+private:
 	TStrongObjectPtr<UOdysseyAnimation> mAnimation;
 	FString mUrl;
 	IMediaEventSink& mEventSink;
@@ -76,4 +80,6 @@ private:
 	TSharedPtr<FOdysseyAnimationMediaSamples> mSamples;
 	TSharedPtr<FOdysseyAnimationMediaTracks> mTracks;
 	TSharedPtr<FOdysseyAnimationMediaView> mView;
+
+	FTimespan mCurrentDuration;
 };

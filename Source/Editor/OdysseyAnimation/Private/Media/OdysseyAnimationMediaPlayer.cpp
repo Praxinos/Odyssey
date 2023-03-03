@@ -68,6 +68,9 @@ FOdysseyAnimationMediaPlayer::Open(const FString& iUrl, const IMediaOptions* iOp
 		mEventSink.ReceiveMediaEvent(EMediaEvent::MediaOpenFailed);
 		return false;
 	}
+
+	mCurrentDuration = mAnimation->GetDuration();
+	mAnimation->OnRenderImageChanged().AddRaw(this, &FOdysseyAnimationMediaPlayer::OnRenderImageChanged);
 	
 	//succeeded
 	mCache->OnOpen(mAnimation.Get());
@@ -91,6 +94,9 @@ FOdysseyAnimationMediaPlayer::Open(const TSharedRef<FArchive, ESPMode::ThreadSaf
 void
 FOdysseyAnimationMediaPlayer::Close()
 {
+	if (mAnimation)
+		mAnimation->OnRenderImageChanged().RemoveAll(this);
+
 	mCache->OnClose();
 	mControls->OnClose();
 	mSamples->OnClose();
@@ -206,6 +212,26 @@ FOdysseyAnimationMediaPlayer::GetPlayerFeatureFlag(EFeatureFlag iFlag) const
 	}
 
 	return IMediaPlayer::GetPlayerFeatureFlag(iFlag);
+}
+
+void
+FOdysseyAnimationMediaPlayer::OnRenderImageChanged(UOdysseyAnimation* iAnimation, const TRange<int>& iRange, const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive)
+{
+	if ( iAnimation != mAnimation.Get() )
+		return;
+
+	FTimespan duration = iAnimation->GetDuration();
+	if ( duration != mCurrentDuration )
+	{
+		mCurrentDuration = duration;
+		//send event
+
+		//TODO:
+
+		//mEventSink.ReceiveMediaEvent(EMediaEvent::TracksChanged);
+		//mEventSink.ReceiveMediaEvent(EMediaEvent::MediaClosed);
+		//mEventSink.ReceiveMediaEvent(EMediaEvent::MediaOpened);
+	}
 }
 
 #undef LOCTEXT_NAMESPACE

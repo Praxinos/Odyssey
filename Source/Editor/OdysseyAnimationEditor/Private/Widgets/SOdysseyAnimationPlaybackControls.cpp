@@ -7,7 +7,7 @@ void
 SOdysseyAnimationPlaybackControls::Construct(const FArguments& InArgs)
 {
     mAnimation = InArgs._Animation;
-	mMediaPlayer = InArgs._MediaPlayer;
+	mPlayer = InArgs._Player;
     mPlaybackFramesPerSecond = InArgs._PlaybackFramesPerSecond;
 
 	ChildSlot
@@ -116,23 +116,19 @@ SOdysseyAnimationPlaybackControls::Construct(const FArguments& InArgs)
 			.VAlign(VAlign_Center)
 			.OnClicked(this, &SOdysseyAnimationPlaybackControls::OnLoopClicked)
 		]
-		
-		//SAssignNew(MainBoxPtr, SHorizontalBox)
 	];
-
-	// Rebuild();
 }
 
 bool
 SOdysseyAnimationPlaybackControls::IsPlayingForward() const
 {
-    return mMediaPlayer->GetRate() > 0;
+    return mPlayer->GetStatus() == EOdysseyAnimationPlayerStatus::Playing && !mPlayer->IsBackward();
 }
 
 bool
 SOdysseyAnimationPlaybackControls::IsPlayingBackward() const
 {
-    return mMediaPlayer->GetRate() < 0;
+	return mPlayer->GetStatus() == EOdysseyAnimationPlayerStatus::Playing && mPlayer->IsBackward();
 }
 
 
@@ -151,35 +147,33 @@ SOdysseyAnimationPlaybackControls::GetPlayBackwardButtonVisibility() const
 EVisibility
 SOdysseyAnimationPlaybackControls::GetLoopingButtonVisibility() const
 {
-	return mMediaPlayer->IsLooping() ? EVisibility::Visible : EVisibility::Collapsed;
+	return mPlayer->GetIsLooping() ? EVisibility::Visible : EVisibility::Collapsed;
 }
 
 EVisibility
 SOdysseyAnimationPlaybackControls::GetNotLoopingButtonVisibility() const
 {
-	return mMediaPlayer->IsLooping() ? EVisibility::Collapsed : EVisibility::Visible;
+	return mPlayer->GetIsLooping() ? EVisibility::Collapsed : EVisibility::Visible;
 }
 
 FReply
 SOdysseyAnimationPlaybackControls::OnPlayClicked()
 {
-    mMediaPlayer->SetRate(mPlaybackFramesPerSecond.Get() / mAnimation->GetFramesPerSecond()); //plays at a specific percentage of the animation frame rate
+	mPlayer->Play(false);
     return FReply::Handled();
 }
 
 FReply
 SOdysseyAnimationPlaybackControls::OnPlayBackwardClicked()
 {
-    mMediaPlayer->SetRate(-mPlaybackFramesPerSecond.Get() / mAnimation->GetFramesPerSecond()); //plays at a specific percentage of the animation frame rate
+	mPlayer->Play(true);
     return FReply::Handled();
 }
 
 FReply
 SOdysseyAnimationPlaybackControls::OnStopClicked()
 {
-    FTimespan time = FTimespan::FromSeconds(mAnimation->CurrentFrame / mAnimation->GetFramesPerSecond());
-    mMediaPlayer->Pause();
-    mMediaPlayer->Seek(time); //TODO: How to seek outside ?
+    mPlayer->Stop();
     return FReply::Handled();
 }
 
@@ -230,6 +224,6 @@ SOdysseyAnimationPlaybackControls::OnNextKeyClicked()
 FReply
 SOdysseyAnimationPlaybackControls::OnLoopClicked()
 {
-    mMediaPlayer->SetLooping(!mMediaPlayer->IsLooping());
+    mPlayer->SetIsLooping(!mPlayer->GetIsLooping());
     return FReply::Handled();
 }

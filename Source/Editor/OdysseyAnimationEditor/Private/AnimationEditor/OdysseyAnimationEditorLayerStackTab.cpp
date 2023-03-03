@@ -59,7 +59,7 @@ FOdysseyAnimationEditorLayerStackTab::CreateWidget()
                 [
                     SNew(SOdysseyAnimationPlaybackControls)
                     .Animation(Animation())
-                    .MediaPlayer(MediaPlayer())
+                    .Player(Player())
                     .PlaybackFramesPerSecond(this, &FOdysseyAnimationEditorLayerStackTab::PlaybackFramesPerSecond)
                 ]
             ]
@@ -68,7 +68,7 @@ FOdysseyAnimationEditorLayerStackTab::CreateWidget()
             [
                 SNew(SOdysseyAnimationLayerStack)
                 .Animation(Animation())
-                .MediaPlayer(MediaPlayer())
+                .Player(Player())
             ];
 }
 
@@ -110,10 +110,10 @@ FOdysseyAnimationEditorLayerStackTab::Animation() const
     return mEditor->Animation();
 }
 
-UMediaPlayer*
-FOdysseyAnimationEditorLayerStackTab::MediaPlayer() const
+UOdysseyAnimationPlayer*
+FOdysseyAnimationEditorLayerStackTab::Player() const
 {
-    return mEditor->MediaPlayer();
+    return mEditor->Player();
 }
 
 float

@@ -8,7 +8,7 @@
 class FOdysseyAnimationEditor;
 class UOdysseyAnimationLayerStack;
 class UAnimation;
-class UMediaPlayer;
+class UOdysseyAnimationPlayer;
 
 class ODYSSEYANIMATIONEDITOR_API FOdysseyAnimationEditorLayerStackTab :
 	public FOdysseyEditorTab
@@ -27,7 +27,7 @@ protected:
     // Widget Getters
     virtual UOdysseyAnimationLayerStack* LayerStack() const;
     virtual UOdysseyAnimation* Animation() const;
-    virtual UMediaPlayer* MediaPlayer() const;
+    virtual UOdysseyAnimationPlayer* Player() const;
     virtual float PlaybackFramesPerSecond() const;
 
 protected:
