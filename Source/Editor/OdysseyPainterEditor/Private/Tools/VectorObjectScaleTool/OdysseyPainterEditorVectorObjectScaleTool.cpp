@@ -30,11 +30,12 @@ UOdysseyPainterEditorVectorObjectScaleTool::UOdysseyPainterEditorVectorObjectSca
 void
 UOdysseyPainterEditorVectorObjectScaleTool::Activate()
 {
-	//FOdysseyObjectEditorUtils::SetPropertyValue(BrushOptions, "Color", FOdysseyBrushColor(GetEditorAs<FOdysseyPainterEditor>()->PaintColor()));
-    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
+    UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
 
-    if(currentVectorLayer)
+    if( currentLayer->GetClass() == UOdysseyTextureLayerImageVector::StaticClass() )
     {
+        UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
 
         mTransformHUD->UpdateSelectionBox( *currentVectorLayer->GetScene() );
@@ -56,10 +57,11 @@ bool
 UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
+    UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
 
-    if( currentVectorLayer )
+    if( currentLayer->GetClass() == UOdysseyTextureLayerImageVector::StaticClass() )
     {
+        UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FSelectionBox& selectionBox = mTransformHUD->GetSelectionBox();
 
@@ -81,10 +83,11 @@ void
 UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
+    UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
 
-    if( currentVectorLayer )
+    if( currentLayer->GetClass() == UOdysseyTextureLayerImageVector::StaticClass() )
     {
+        UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FSelectionBox& selectionBox = mTransformHUD->GetSelectionBox();
 
@@ -151,59 +154,62 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDrag(const FOdysseyPoint& iPo
                 pivot.y = oldY1;
             }
 
-            BLMatrix2D matrix;
+            BLMatrix2D spaceMatrix = selectionBox.space->GetWorldMatrix();
+            BLMatrix2D invertSpaceMatrix;
 
-            matrix.reset();
-            matrix.scale( ( x2 - x1 ) / selectionBox.rect.w, ( y2 - y1 ) / selectionBox.rect.h );
+            spaceMatrix.translate( pivot.x, pivot.y );
+
+            BLMatrix2D::invert( invertSpaceMatrix, spaceMatrix );
 
             for( std::list<UOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
             {
                 UOdysseyVectorObject* object = (*it);
-                //double translationX;
-                //double translationY;
-               // double rotation;
+                double translationX;
+                double translationY;
+                double rotation;
                 double scalingX;
                 double scalingY;
+                BLMatrix2D objectSpaceMatrix;
+                BLMatrix2D objectScaledMatrix;
+                BLMatrix2D objectLocalMatrix;
                 BLMatrix2D objectWorldMatrix = object->GetWorldMatrix();
+                BLMatrix2D parentInverseWorldMatrix = object->GetParent()->GetInverseWorldMatrix();
+                BLMatrix2D scaleMatrix;
 
-                //objectWorldMatrix.transform( selectionBox.space->GetInverseWorldMatrix() );
-                //objectWorldMatrix.transform( matrix );
-                objectWorldMatrix.scale( ( x2 - x1 ) / selectionBox.rect.w, ( y2 - y1 ) / selectionBox.rect.h );
-                objectWorldMatrix.transform( object->GetParent()->GetInverseWorldMatrix() );
+                // transfer object in "Scaling Space" coordinates system
+                FOdysseyVector::MatrixMultiply( invertSpaceMatrix, objectWorldMatrix, objectSpaceMatrix );
 
-                FOdysseyVector::ExtractTransformations( objectWorldMatrix
-                                                      , nullptr//&translationX
-                                                      , nullptr//&translationY
-                                                      , nullptr//&rotation
+                scaleMatrix.reset();
+                scaleMatrix.scale( ( x2 - x1 ) / selectionBox.rect.w, ( y2 - y1 ) / selectionBox.rect.h );
+
+                // scale the object (local to the "Scaling Space" coordinates system)
+                FOdysseyVector::MatrixMultiply( scaleMatrix, objectSpaceMatrix, objectScaledMatrix );
+
+                // transfer the object back to world coordinates system
+                FOdysseyVector::MatrixMultiply( spaceMatrix, objectScaledMatrix, objectWorldMatrix );
+
+                // Convert the object to its parent coordinate system, i.e its local coordinates system.
+                FOdysseyVector::MatrixMultiply( parentInverseWorldMatrix, objectWorldMatrix, objectLocalMatrix );
+
+                // Extract the local transformations
+                FOdysseyVector::ExtractTransformations( objectLocalMatrix
+                                                      , &translationX
+                                                      , &translationY
+                                                      , &rotation
                                                       , &scalingX
                                                       , &scalingY );
-UE_LOG(LogTemp, Warning, TEXT("Some warning message x:%f =? %f - y:%f =? %f"), scalingX, ( x2 - x1 ) / selectionBox.rect.w,
-                                                                               scalingY, ( y2 - y1 ) / selectionBox.rect.h ); 
-                //object->Translate( translationX, translationY );
-                //object->Rotate( rotation );
+
+                // Apply the local transformations
+                object->Translate( translationX, translationY );
+                object->Rotate( rotation );
                 object->Scale( scalingX, scalingY );
             }
 
+            // Update the matrix for all objects
             currentVectorLayer->GetScene()->UpdateMatrix();
 
+            // update the selection box with the newly modified matrices
             mTransformHUD->UpdateSelectionBox( *currentVectorLayer->GetScene() );
-/*
-            oldWorldPivot = selectedObject->GetWorldMatrix().mapPoint( pivot.x, pivot.y );
-            oldRelativePivot = selectedObject->GetParent()->GetInverseWorldMatrix().mapPoint( oldWorldPivot.x, oldWorldPivot.y );
-
-            selectedObject->Scale( selectedObject->GetScalingX() * ((( x2 - x1 ) / fabs ( localBBox.w )))
-                                 , selectedObject->GetScalingY() * ((( y2 - y1 ) / fabs ( localBBox.h ))) );
-            selectedObject->UpdateMatrix();
-
-            newWorldPivot = selectedObject->GetWorldMatrix().mapPoint( pivot.x, pivot.y );
-            newRelativePivot = selectedObject->GetParent()->GetInverseWorldMatrix().mapPoint( newWorldPivot.x, newWorldPivot.y );
-
-            selectedObject->Translate( selectedObject->GetTranslationX() + ( oldRelativePivot.x - newRelativePivot.x )
-                                     , selectedObject->GetTranslationY() + ( oldRelativePivot.y - newRelativePivot.y ) );
-
-            selectedObject->UpdateMatrix();
-*/
-
 
             mOldLocalMouseX = localCoords.x;
             mOldLocalMouseY = localCoords.y;
@@ -218,11 +224,14 @@ bool
 UOdysseyPainterEditorVectorObjectScaleTool::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
+    UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
 
-    if( currentVectorLayer )
+    if( currentLayer->GetClass() == UOdysseyTextureLayerImageVector::StaticClass() )
     {
+        UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
+
         currentVectorLayer->RenderImageChanged(false);
+
         return true;
     }
 

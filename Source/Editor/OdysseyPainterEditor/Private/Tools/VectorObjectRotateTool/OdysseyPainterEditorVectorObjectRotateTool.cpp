@@ -6,18 +6,24 @@
 #include "LayerStack/OdysseyTextureLayerStack.h"
 #include "LayerStack/OdysseyTextureLayerImageVector.h"
 #include "TextureEditor/OdysseyTextureEditor.h"
+#include "OdysseyVector.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorPathBuilder.h"
+
+# define M_PI           3.14159265358979323846
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
 UOdysseyPainterEditorVectorObjectRotateTool::~UOdysseyPainterEditorVectorObjectRotateTool()
 {
+    delete mTransformHUD;
 }
 
 UOdysseyPainterEditorVectorObjectRotateTool::UOdysseyPainterEditorVectorObjectRotateTool()
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.ObjectRotateTool64");
+
+    mTransformHUD = new FOdysseyVectorHUDTransform( );
 }
 
 //--------------------------------------------------------------------------------------
@@ -26,16 +32,24 @@ UOdysseyPainterEditorVectorObjectRotateTool::UOdysseyPainterEditorVectorObjectRo
 void
 UOdysseyPainterEditorVectorObjectRotateTool::Activate()
 {
-    //FOdysseyObjectEditorUtils::SetPropertyValue(BrushOptions, "Color", FOdysseyBrushColor(GetEditorAs<FOdysseyPainterEditor>()->PaintColor()));
-    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
+    UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
 
-    if( currentVectorLayer )
+    if( currentLayer->GetClass() == UOdysseyTextureLayerImageVector::StaticClass() )
     {
+        UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+        FSelectionBox& selectionBox = mTransformHUD->GetSelectionBox(); // this is a reference, it does not matter it we get it before the call to UpdateSelectionBox 
 
-        vectorEngine->ClearHUD();
+        mTransformHUD->UpdateSelectionBox( *currentVectorLayer->GetScene() );
 
-        currentVectorLayer->RenderImageChanged( false );
+        mPivot.x = selectionBox.rect.x + ( selectionBox.rect.w * 0.5f );
+        mPivot.y = selectionBox.rect.y + ( selectionBox.rect.h * 0.5f );
+
+        vectorEngine->ClearHUD( );
+        vectorEngine->AddHUD( mTransformHUD );
+
+        currentVectorLayer->RenderImageChanged(false);
     }
 }
 
@@ -49,17 +63,20 @@ bool
 UOdysseyPainterEditorVectorObjectRotateTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
+    UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
 
-    if( currentVectorLayer )
+    if( currentLayer->GetClass() == UOdysseyTextureLayerImageVector::StaticClass() )
     {
+        UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        UOdysseyVectorObject* selectedObject = currentVectorLayer->GetScene()->GetLastSelected();
+        FSelectionBox& selectionBox = mTransformHUD->GetSelectionBox();
 
-        if ( selectedObject )
+        if( selectionBox.space )
         {
-            mOldLocalMouseX = iPointInTexture.x;
-            mOldLocalMouseY = iPointInTexture.y;
+            BLPoint localCoords = selectionBox.space->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
+
+            mOldLocalMouseX = localCoords.x;
+            mOldLocalMouseY = localCoords.y;
         }
     }
 
@@ -70,27 +87,85 @@ void
 UOdysseyPainterEditorVectorObjectRotateTool::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
+    UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
 
-    if( currentVectorLayer )
+    if( currentLayer->GetClass() == UOdysseyTextureLayerImageVector::StaticClass() )
     {
+        UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        UOdysseyVectorObject* selectedObject = currentVectorLayer->GetScene()->GetLastSelected();
+        FSelectionBox& selectionBox = mTransformHUD->GetSelectionBox();
 
-        if ( selectedObject )
+        if ( selectionBox.space )
         {
-            double difx = iPointInTexture.x - mOldLocalMouseX;
-            double dify = iPointInTexture.y - mOldLocalMouseY;
-            ::ULIS::FRectD beforeBBox = selectedObject->GetBBox( true );
+            BLPoint localCoords = selectionBox.space->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
+            std::list<UOdysseyVectorObject*>& selectedObjectList = currentVectorLayer->GetScene()->GetSelectedObjectList();
+            double difx = localCoords.x - mOldLocalMouseX;
+            double dify = localCoords.y - mOldLocalMouseY;
+            //::ULIS::FRectD beforeBBox = selectedObject->GetBBox( true );
+            //::ULIS::FRectD localBBox = selectedObject->GetBBox( false );
 
-            selectedObject->Rotate(selectedObject->GetRotation() + ( difx + dify ) * 0.01f);
+            BLMatrix2D spaceMatrix = selectionBox.space->GetWorldMatrix();
+            BLMatrix2D invertSpaceMatrix;
 
-            selectedObject->UpdateMatrix();
+            spaceMatrix.translate( mPivot.x, mPivot.y );
 
-            mOldLocalMouseX = iPointInTexture.x;
-            mOldLocalMouseY = iPointInTexture.y;
+            BLMatrix2D::invert( invertSpaceMatrix, spaceMatrix );
 
-            currentVectorLayer->RenderImageChanged({ beforeBBox | selectedObject->GetBBox(true) }, false);
+            for( std::list<UOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
+            {
+                UOdysseyVectorObject* object = (*it);
+                double translationX;
+                double translationY;
+                double rotation;
+                double scalingX;
+                double scalingY;
+                BLMatrix2D objectSpaceMatrix;
+                BLMatrix2D objectScaledMatrix;
+                BLMatrix2D objectLocalMatrix;
+                BLMatrix2D objectWorldMatrix = object->GetWorldMatrix();
+                BLMatrix2D parentInverseWorldMatrix = object->GetParent()->GetInverseWorldMatrix();
+                BLMatrix2D rotateMatrix;
+
+                // transfer object in "Rotation Space" coordinates system
+                FOdysseyVector::MatrixMultiply( invertSpaceMatrix, objectWorldMatrix, objectSpaceMatrix );
+
+                rotateMatrix.reset();
+                rotateMatrix.rotate( iPointInTexture.deltaPosition.X * 0.01f );
+
+                // rotate the object (local to the "Rotation Space" coordinates system)
+                FOdysseyVector::MatrixMultiply( rotateMatrix, objectSpaceMatrix, objectScaledMatrix );
+
+                // transfer the object back to world coordinates system
+                FOdysseyVector::MatrixMultiply( spaceMatrix, objectScaledMatrix, objectWorldMatrix );
+
+                // Convert the object to its parent coordinate system, i.e its local coordinates system.
+                FOdysseyVector::MatrixMultiply( parentInverseWorldMatrix, objectWorldMatrix, objectLocalMatrix );
+
+                // Extract the local transformations
+                FOdysseyVector::ExtractTransformations( objectLocalMatrix
+                                                      , &translationX
+                                                      , &translationY
+                                                      , &rotation
+                                                      , &scalingX
+                                                      , &scalingY );
+
+                // Apply the local transformations
+                object->Translate( translationX, translationY );
+                object->Rotate( rotation );
+                object->Scale( scalingX, scalingY );
+            }
+
+            // Update the matrix for all objects
+            currentVectorLayer->GetScene()->UpdateMatrix();
+
+            // update the selection box with the newly modified matrices
+            mTransformHUD->UpdateSelectionBox( *currentVectorLayer->GetScene() );
+
+            mOldLocalMouseX = localCoords.x;
+            mOldLocalMouseY = localCoords.y;
+
+            currentVectorLayer->RenderImageChanged(true);
+            //RedrawCurrentLayer( { /*beforeBBox | selectedObject->GetBBox( true )*/{ 0, 0, 0, 0 } } );
         }
     }
 }

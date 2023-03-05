@@ -21,7 +21,7 @@ FOdysseyVector::ExtractTransformations( BLMatrix2D &iMatrix
 
     if( iRotation )
     {
-        *iRotation = atan( iMatrix.m01  / iMatrix.m11 );
+        *iRotation = atan2( iMatrix.m01, iMatrix.m00 );
     }
 
     if( iScalingX )
@@ -96,4 +96,19 @@ FOdysseyVector::DistanceToSegment( ::ULIS::FVec2D& iPt
     }
 
     return t;
+}
+
+// convenience function that does not alter arguments
+void
+FOdysseyVector::MatrixMultiply( BLMatrix2D& iA, BLMatrix2D& iB, BLMatrix2D& oOut )
+{
+    oOut = iA;
+
+    oOut.transform( iB );
+}
+
+void
+FOdysseyVector::PrintMatrix( char* name, BLMatrix2D& matrix )
+{
+    UE_LOG(LogTemp,Warning,TEXT("%s -- M00:%f M01:%f // M10:%f  M11:%f // M20:%f M21:%f"), name, matrix.m00, matrix.m01, matrix.m10, matrix.m11, matrix.m20, matrix.m21 );
 }

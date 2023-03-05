@@ -4,6 +4,8 @@
 
 namespace FOdysseyVector
 {
+    void ODYSSEYVECTOR_API PrintMatrix( char* name, BLMatrix2D& matrix );
+    void ODYSSEYVECTOR_API MatrixMultiply( BLMatrix2D& iA, BLMatrix2D& iB, BLMatrix2D& oOut );
     void ODYSSEYVECTOR_API ExtractTransformations( BLMatrix2D &iMatrix
                                                  , double* iTranslationX
                                                  , double* iTranslationY

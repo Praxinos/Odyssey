@@ -623,8 +623,22 @@ void
 UOdysseyVectorObject::PropertyChanged(const FName& iPropertyName)
 {
 /*
-    if ( iPropertyName == "Name" )
-        NameChanged();
+    if ( iPropertyName == "TranslationX" )
+        UpdateMatrix();
+
+    if ( iPropertyName == "TranslationY" )
+        UpdateMatrix();
+
+    if( iPropertyName == "Rotation" )
+        UpdateMatrix();
+
+    if( iPropertyName == "ScalingX" )
+        UpdateMatrix();
+
+    if( iPropertyName == "ScalingY" )
+        UpdateMatrix();
+*/
+/*
     if ( iPropertyName == "IsActivated" )
         IsActivatedChanged();
     if ( iPropertyName == "IsLocked" )

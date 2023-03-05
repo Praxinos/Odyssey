@@ -41,11 +41,11 @@ UOdysseyVectorGroup::UpdateShape( uint32 iUpdateFlags )
         init = 1;
     }
 
-    BLPoint localOrigin = mInverseWorldMatrix.mapPoint( bbox.x, bbox.y );
-    BLPoint LocalSize = mInverseWorldMatrix.mapVector( bbox.w, bbox.h );
+    BLPoint localP0 = mInverseWorldMatrix.mapPoint( bbox.x, bbox.y );
+    BLPoint localP1 = mInverseWorldMatrix.mapVector( bbox.x + bbox.w, bbox.y + bbox.h );
 
-    mBBox.x = localOrigin.x;
-    mBBox.y = localOrigin.y;
-    mBBox.w = LocalSize.x;
-    mBBox.h = LocalSize.y;
+    mBBox = ::ULIS::FRectD::FromMinMax( ::ULIS::FMath::Min( localP0.x, localP1.x )
+                                      , ::ULIS::FMath::Min( localP0.y, localP1.y )
+                                      , ::ULIS::FMath::Max( localP0.x, localP1.x )
+                                      , ::ULIS::FMath::Max( localP0.y, localP1.y ) );
 }

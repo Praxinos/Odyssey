@@ -67,24 +67,29 @@ FOdysseyVectorHUDTransform::Pick( double iWorldX, double iWorldY )
 }
 
 static void
-MakeHandle( double iLocalX, double iLocalY, ::ULIS::FRectD& oRect )
+MakeHandle( double iLocalX, double iLocalY, double iFactorX, double iFactorY, ::ULIS::FRectD& oRect )
 {
-    oRect.x = iLocalX - FOdysseyVectorHUDTransform::HANDLE_RADIUS;
-    oRect.y = iLocalY - FOdysseyVectorHUDTransform::HANDLE_RADIUS;
-    oRect.w = FOdysseyVectorHUDTransform::HANDLE_RADIUS * 2;
-    oRect.h = FOdysseyVectorHUDTransform::HANDLE_RADIUS * 2;
+    oRect.x = iLocalX - ( FOdysseyVectorHUDTransform::HANDLE_RADIUS * iFactorX );
+    oRect.y = iLocalY - ( FOdysseyVectorHUDTransform::HANDLE_RADIUS * iFactorY );
+    oRect.w = ( FOdysseyVectorHUDTransform::HANDLE_RADIUS * 2 * iFactorX );
+    oRect.h = ( FOdysseyVectorHUDTransform::HANDLE_RADIUS * 2 * iFactorY );
 }
 
 void
 FOdysseyVectorHUDTransform::UpdateSelectionBox( UOdysseyVectorRoot& iScene )
 {
+
     FOdysseyVectorHUDSelection::UpdateSelectionBox( iScene );
 
-    // handles are built in realtime. Easier.
-    MakeHandle( mSelectionBox.rect.x                       , mSelectionBox.rect.y                       , mHandle[0] );
-    MakeHandle( mSelectionBox.rect.x + mSelectionBox.rect.w, mSelectionBox.rect.y                       , mHandle[1] );
-    MakeHandle( mSelectionBox.rect.x + mSelectionBox.rect.w, mSelectionBox.rect.y + mSelectionBox.rect.h, mHandle[2] );
-    MakeHandle( mSelectionBox.rect.x                       , mSelectionBox.rect.y + mSelectionBox.rect.h, mHandle[3] );
+    if( mSelectionBox.space )
+    {
+        BLPoint size = mSelectionBox.space->GetInverseWorldMatrix().mapVector( HANDLE_RADIUS, HANDLE_RADIUS );
+
+        MakeHandle( mSelectionBox.rect.x                       , mSelectionBox.rect.y                       , size.x, size.y, mHandle[0] );
+        MakeHandle( mSelectionBox.rect.x + mSelectionBox.rect.w, mSelectionBox.rect.y                       , size.x, size.y, mHandle[1] );
+        MakeHandle( mSelectionBox.rect.x + mSelectionBox.rect.w, mSelectionBox.rect.y + mSelectionBox.rect.h, size.x, size.y, mHandle[2] );
+        MakeHandle( mSelectionBox.rect.x                       , mSelectionBox.rect.y + mSelectionBox.rect.h, size.x, size.y, mHandle[3] );
+    }
 }
 
 void
