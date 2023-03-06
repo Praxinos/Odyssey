@@ -96,5 +96,4 @@ private:
     FVector mYScreenAxis;
     FVector mZScreenAxis;
     FVector mMousePosInWorld;
-    //float mMultiplier;
 };

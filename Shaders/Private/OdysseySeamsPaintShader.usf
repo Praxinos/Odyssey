@@ -28,7 +28,7 @@ void MainPS( float4 InPosition : SV_POSITION,
 	float2 OffsetIdx;
 
 	// Arbitrary large number that we will compare to against the squared sample distance.
-	//   The largest we will hit in 25 samples should be 8 (distance squared = x*x+y*y)
+	// The largest we will hit in 25 samples should be 8 (distance squared = x*x+y*y)
 	int LastValidDistance = 10;
 
 	// Sample pixel data from a 5x5 grid around our current pixel
@@ -45,7 +45,6 @@ void MainPS( float4 InPosition : SV_POSITION,
 			// Calculate the squared sample distance from the center
 			int SampleDist = OffsetIdx.x * OffsetIdx.x + OffsetIdx.y * OffsetIdx.y;
 
-			// @todo MeshPaint:If needed, we can improve this by averaging the pixel colors at the same distance
 			if( IsValid && SampleDist < LastValidDistance)
 			{
 				CenterColor = SampleColor;
@@ -54,7 +53,6 @@ void MainPS( float4 InPosition : SV_POSITION,
 		}
 	} 
 	OutColor = CenterColor;
-	//OutColor = OldColor0;
 }
 
 float4x4 c_Transform;

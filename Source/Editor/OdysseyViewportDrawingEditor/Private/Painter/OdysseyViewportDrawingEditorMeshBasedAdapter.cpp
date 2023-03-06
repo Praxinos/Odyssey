@@ -40,7 +40,7 @@ void FOdysseyViewportDrawingEditorMeshBasedAdapter::PrepareAdapterForPainting()
     if( mState == eState::kIdle )
     {
         BuildPaintingTexture2DRenderTarget();
-        TexturePaintHelpers::GenerateSeamMask(mEditor->Component(), mEditor->GetUVIndexUsedByCurrentTexture(), mSeamRenderTarget2D, mEditor->Texture(), mStrokeBufferRenderTarget2D);
+        TexturePaintHelpers::GenerateSeamMask(mEditor->Component(), mEditor->GetUVIndexUsedByCurrentTexture(), mSeamRenderTarget2D, mEditor->Texture(), mPaintingTexture2DRenderTarget);
     }
 
     //We're using percentage size for this adapter, so we put the true maximum mesh size
@@ -118,7 +118,7 @@ void FOdysseyViewportDrawingEditorMeshBasedAdapter::RenderInteractorWidget(const
         {
             int numCircleSides = 128;
             // Draw brush circle
-            DrawCircle(iPDI, brushVisualPosition, brushXAxis, brushYAxis, brushCueColor, drawingTool->GetBrushInstance()->GetSizeModifier() / GetStampQuality(), numCircleSides, SDPG_World, 1.f);
+            DrawCircle(iPDI, brushVisualPosition, brushXAxis, brushYAxis, brushCueColor, drawingTool->GetBrushInstance()->GetSizeModifier() / GetStampQuality(), numCircleSides, SDPG_World, 0.2f);
 
             const FVector normalLineEnd(brushVisualPosition + traceHitResult.Normal * drawingTool->GetBrushInstance()->GetSizeModifier() / GetStampQuality() * 0.2f);
             iPDI->DrawLine(brushVisualPosition, normalLineEnd, normalLineColor, SDPG_World, 0.1f);
@@ -138,24 +138,28 @@ void FOdysseyViewportDrawingEditorMeshBasedAdapter::BuildPaintingTexture2DRender
     mPaintingTexture2DRenderTarget = NewObject<UTextureRenderTarget2D>(GetTransientPackage(), NAME_None, RF_Transient);
     mPaintingTexture2DRenderTarget->ClearColor = FLinearColor(0, 0, 0, 0);
     mPaintingTexture2DRenderTarget->bNeedsTwoCopies = false;
-    mPaintingTexture2DRenderTarget->InitCustomFormat(textureWidth, textureHeight, mEditor->Texture()->GetPixelFormat(), false);
+    mPaintingTexture2DRenderTarget->InitAutoFormat(textureWidth, textureHeight);
     mPaintingTexture2DRenderTarget->UpdateResourceImmediate();
     mPaintingTexture2DRenderTarget->AddToRoot();
     
     mStrokeBufferRenderTarget2D = NewObject<UTextureRenderTarget2D>(GetTransientPackage(), NAME_None, RF_Transient);
     mStrokeBufferRenderTarget2D->ClearColor = FLinearColor(0, 0, 0, 0);
     mStrokeBufferRenderTarget2D->bNeedsTwoCopies = false;
-    mStrokeBufferRenderTarget2D->InitCustomFormat(textureWidth, textureHeight, mEditor->Texture()->GetPixelFormat(), false);
+    mStrokeBufferRenderTarget2D->InitAutoFormat(textureWidth, textureHeight);
     mStrokeBufferRenderTarget2D->UpdateResourceImmediate();
     mStrokeBufferRenderTarget2D->AddToRoot();
 
     mSeamRenderTarget2D = NewObject<UTextureRenderTarget2D>(GetTransientPackage(), NAME_None, RF_Transient);
     mSeamRenderTarget2D->ClearColor = FLinearColor(0, 0, 0, 0);
     mSeamRenderTarget2D->bNeedsTwoCopies = false;
-    mSeamRenderTarget2D->InitCustomFormat(textureWidth, textureHeight, mEditor->Texture()->GetPixelFormat(), false);
+    mSeamRenderTarget2D->InitAutoFormat(textureWidth, textureHeight);
     mSeamRenderTarget2D->UpdateResourceImmediate();
     mSeamRenderTarget2D->AddToRoot();
 
+    if (mEditor->Texture()->MipGenSettings == TextureMipGenSettings::TMGS_NoMipmaps)
+    {
+        return;
+    }
 
     const ERHIFeatureLevel::Type FeatureLevel = mEditor->Component()->GetWorld()->FeatureLevel;
     mEditor->Material()->OverrideTexture(mEditor->Texture(), mPaintingTexture2DRenderTarget, FeatureLevel);
@@ -355,7 +359,7 @@ float FOdysseyViewportDrawingEditorMeshBasedAdapter::GetStampQuality()
     float brushSize = FMath::Max(iStampParams.mBlock->Width(), iStampParams.mBlock->Height());// * FMath::Max3(mEditor->Actor()->GetActorScale().X, mEditor->Actor()->GetActorScale().Y, mEditor->Actor()->GetActorScale().Z);
     brushSize *= brushSize;
     brushSize /= GetStampQuality();
-    triangles = meshAdapter->SphereIntersectTriangles(brushSize, meshAdapter->GetComponentToWorldMatrix().InverseTransformPosition(traceHitResult.Location), mouseViewportRay.GetOrigin(), false);
+    triangles = meshAdapter->SphereIntersectTriangles(brushSize, meshAdapter->GetComponentToWorldMatrix().InverseTransformPosition(traceHitResult.Location), mouseViewportRay.GetOrigin(), true);
 
     const TArray<uint32> vertexIndices = meshAdapter->GetMeshIndices();
     uint32 triIndices = vertexIndices.Num() / 3;

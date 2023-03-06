@@ -54,8 +54,8 @@ void FOdysseyViewportDrawingEditorTextureBasedAdapter::PrepareAdapterForPainting
         
         mPaintingTexture2DRenderTarget = NewObject<UTextureRenderTarget2D>(GetTransientPackage(), NAME_None, RF_Transient);
         mPaintingTexture2DRenderTarget->ClearColor = FLinearColor(0, 0, 0, 0);
-        mPaintingTexture2DRenderTarget->bNeedsTwoCopies = true;
-        mPaintingTexture2DRenderTarget->InitCustomFormat(textureWidth, textureHeight, mEditor->Texture()->GetPixelFormat(), true);
+        mPaintingTexture2DRenderTarget->bNeedsTwoCopies = false;
+        mPaintingTexture2DRenderTarget->InitAutoFormat(textureWidth, textureHeight);
         mPaintingTexture2DRenderTarget->UpdateResourceImmediate();
         mPaintingTexture2DRenderTarget->AddToRoot();
     
