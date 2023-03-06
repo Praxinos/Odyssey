@@ -181,3 +181,9 @@ UOdysseyVectorCircle::GetRadiusY()
 {
     return mRadiusY;
 }
+
+uint32
+UOdysseyVectorCircle::GetType()
+{
+    return UOdysseyVectorObject::VECTORELLIPSETYPE;
+}

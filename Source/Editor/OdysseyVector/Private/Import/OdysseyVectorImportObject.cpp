@@ -20,6 +20,10 @@ CreateObject( uint32 iObjectType )
             newObject = NewObject<UOdysseyVectorGroupPaint>();
         break;
 
+        case UOdysseyVectorObject::VECTORELLIPSETYPE :
+            newObject = UOdysseyVectorCircle::New( "", 0.0f, 0.0f );
+        break;
+
         default :
             newObject = NewObject<UOdysseyVectorObject>();
         break;
@@ -191,6 +195,16 @@ FOdysseyVectorImport::ReadObjectsDefine( std::vector<UOdysseyVectorObject*>& vec
                     FOdysseyVectorImport::ReadObjectGroupPaint( *paintGroup, Ar.Tell() + iChunkLen, Ar );
 
                     paintGroup->Invalidate();
+                }
+                break;
+
+                case FOdysseyVectorExport::CHUNK_OBJECT_ELLIPSE:
+                {
+                    UOdysseyVectorCircle* circle = Cast<UOdysseyVectorCircle>( vectorObjectArray[objectID] );
+
+                    FOdysseyVectorImport::ReadObjectEllipse( *circle, Ar.Tell() + iChunkLen, Ar );
+
+                    circle->Invalidate();
                 }
                 break;
 

@@ -22,7 +22,7 @@ UOdysseyPainterEditorVectorObjectScaleTool::UOdysseyPainterEditorVectorObjectSca
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.ObjectScaleTool64");
 
-    mTransformHUD = new FOdysseyVectorHUDTransform( );
+    mTransformHUD = new FOdysseyVectorHUDScale( );
 }
 
 //--------------------------------------------------------------------------------------
@@ -92,7 +92,7 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDrag(const FOdysseyPoint& iPo
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FSelectionBox& selectionBox = mTransformHUD->GetSelectionBox();
 
-        if ( selectionBox.space && ( mPickedHandle != -1 ) )
+        if ( selectionBox.space )
         {
             BLPoint localCoords = selectionBox.space->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
             std::list<UOdysseyVectorObject*>& selectedObjectList = currentVectorLayer->GetScene()->GetSelectedObjectList();
@@ -104,12 +104,10 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDrag(const FOdysseyPoint& iPo
                  , oldY1 = selectionBox.rect.y
                  , oldX2 = selectionBox.rect.x + selectionBox.rect.w
                  , oldY2 = selectionBox.rect.y + selectionBox.rect.h;
+            double oldDiagonal = sqrt( ( selectionBox.rect.w * selectionBox.rect.w )
+                                     + ( selectionBox.rect.h * selectionBox.rect.h ) );
             double x1, y1, x2, y2;
             ::ULIS::FVec2D pivot;
-            ///BLPoint oldWorldPivot;
-            //BLPoint oldRelativePivot;
-            //BLPoint newWorldPivot;
-            //BLPoint newRelativePivot;
 
             if ( mPickedHandle == 0 )
             {
@@ -155,73 +153,71 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDrag(const FOdysseyPoint& iPo
                 pivot.y = oldY1;
             }
 
-            BLMatrix2D spaceMatrix = selectionBox.space->GetWorldMatrix();
-            BLMatrix2D invertSpaceMatrix;
-
-            spaceMatrix.translate( pivot.x, pivot.y );
-
-            BLMatrix2D::invert( invertSpaceMatrix, spaceMatrix );
-
-            for( std::list<UOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
+            if( mPickedHandle != -1 )
             {
-                UOdysseyVectorObject* object = (*it);
-                double translationX;
-                double translationY;
-                double rotation;
-                double scalingX;
-                double scalingY;
-                BLMatrix2D objectSpaceMatrix;
-                BLMatrix2D objectScaledMatrix;
-                BLMatrix2D objectLocalMatrix;
-                BLMatrix2D objectWorldMatrix = object->GetWorldMatrix();
-                BLMatrix2D parentInverseWorldMatrix = object->GetParent()->GetInverseWorldMatrix();
-                BLMatrix2D scaleMatrix;
+                BLMatrix2D spaceMatrix = selectionBox.space->GetWorldMatrix();
+                BLMatrix2D invertSpaceMatrix;
+                double x2mx1 = ( x2 - x1 );
+                double y2my1 = ( y2 - y1 );
+                BLMatrix2D scalingMatrix;
 
-                // transfer object in "Scaling Space" coordinates system
-                FOdysseyVector::MatrixMultiply( invertSpaceMatrix, objectWorldMatrix, objectSpaceMatrix );
+                spaceMatrix.translate( pivot.x, pivot.y );
 
-                scaleMatrix.reset();
+                BLMatrix2D::invert( invertSpaceMatrix, spaceMatrix );
+
+                scalingMatrix.reset();
 
                 if( Uniform )
                 {
-                    double x2mx1 = ( x2 - x1 );
-                    double y2my1 = ( y2 - y1 );
-                    double oldDiagonal = sqrt( ( selectionBox.rect.w * selectionBox.rect.w )
-                                             + ( selectionBox.rect.h * selectionBox.rect.h ) );
                     double newDiagonal = sqrt( ( x2mx1 * x2mx1 ) + ( y2my1 * y2my1 ) );
                     double ratio = newDiagonal / oldDiagonal;
 
-                    scaleMatrix.scale( ratio, ratio );
+                    scalingMatrix.scale( ratio, ratio );
                 }
                 else
                 {
-                    double x2mx1 = ( x2 - x1 );
-                    double y2my1 = ( y2 - y1 );
-
-                    scaleMatrix.scale( x2mx1 / selectionBox.rect.w, y2my1 / selectionBox.rect.h );
+                    scalingMatrix.scale( x2mx1 / selectionBox.rect.w, y2my1 / selectionBox.rect.h );
                 }
 
-                // scale the object (local to the "Scaling Space" coordinates system)
-                FOdysseyVector::MatrixMultiply( scaleMatrix, objectSpaceMatrix, objectScaledMatrix );
+                for( std::list<UOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
+                {
+                    UOdysseyVectorObject* object = (*it);
+                    double translationX;
+                    double translationY;
+                    double rotation;
+                    double scalingX;
+                    double scalingY;
+                    BLMatrix2D objectSpaceMatrix;
+                    BLMatrix2D objectScaledMatrix;
+                    BLMatrix2D objectLocalMatrix;
+                    BLMatrix2D objectWorldMatrix = object->GetWorldMatrix();
+                    BLMatrix2D parentInverseWorldMatrix = object->GetParent()->GetInverseWorldMatrix();
 
-                // transfer the object back to world coordinates system
-                FOdysseyVector::MatrixMultiply( spaceMatrix, objectScaledMatrix, objectWorldMatrix );
+                    // transfer object in "Scaling Space" coordinates system
+                    FOdysseyVector::MatrixMultiply( invertSpaceMatrix, objectWorldMatrix, objectSpaceMatrix );
 
-                // Convert the object to its parent coordinate system, i.e its local coordinates system.
-                FOdysseyVector::MatrixMultiply( parentInverseWorldMatrix, objectWorldMatrix, objectLocalMatrix );
+                    // scale the object (local to the "Scaling Space" coordinates system)
+                    FOdysseyVector::MatrixMultiply( scalingMatrix, objectSpaceMatrix, objectScaledMatrix );
 
-                // Extract the local transformations
-                FOdysseyVector::ExtractTransformations( objectLocalMatrix
-                                                      , &translationX
-                                                      , &translationY
-                                                      , &rotation
-                                                      , &scalingX
-                                                      , &scalingY );
+                    // transfer the object back to world coordinates system
+                    FOdysseyVector::MatrixMultiply( spaceMatrix, objectScaledMatrix, objectWorldMatrix );
 
-                // Apply the local transformations
-                object->Translate( translationX, translationY );
-                object->Rotate( rotation );
-                object->Scale( scalingX, scalingY );
+                    // Convert the object to its parent coordinate system, i.e its local coordinates system.
+                    FOdysseyVector::MatrixMultiply( parentInverseWorldMatrix, objectWorldMatrix, objectLocalMatrix );
+
+                    // Extract the local transformations
+                    FOdysseyVector::ExtractTransformations( objectLocalMatrix
+                                                          , &translationX
+                                                          , &translationY
+                                                          , &rotation
+                                                          , &scalingX
+                                                          , &scalingY );
+
+                    // Apply the local transformations
+                    object->Translate( translationX, translationY );
+                    object->Rotate( rotation );
+                    object->Scale( scalingX, scalingY );
+                }
             }
 
             // Update the matrix for all objects

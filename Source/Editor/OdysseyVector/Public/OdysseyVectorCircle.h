@@ -42,4 +42,5 @@ class ODYSSEYVECTOR_API UOdysseyVectorCircle : public UOdysseyVectorPathCubic
         double GetRadiusY();
         UOdysseyVectorObject* CopyShape();
         UOdysseyVectorPathCubic* Convert();
+        uint32 GetType();
 };

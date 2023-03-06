@@ -7,6 +7,18 @@ UOdysseyVectorPathCubic::UOdysseyVectorPathCubic()
     setJointMiter();
 }
 
+bool
+UOdysseyVectorPathCubic::IsFilled()
+{
+    return Filled;
+}
+
+void
+UOdysseyVectorPathCubic::SetFilled( bool iIsFilled )
+{
+    Filled = iIsFilled;
+}
+
 void
 UOdysseyVectorPathCubic::Init( std::string iName )
 {

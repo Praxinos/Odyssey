@@ -13,7 +13,6 @@ UOdysseyVectorObject::UOdysseyVectorObject()
     , Foreground(   0,   0,   0, 255 )
     , Background( 255, 255, 255, 255 )
     , mParent ( nullptr )
-    , mIsFilled ( false )
     , mIsSelected ( false )
     , mIsInvalidated ( false )
     , mDependsOnChildren ( false )
@@ -126,7 +125,6 @@ UOdysseyVectorObject::CopySettings( UOdysseyVectorObject& iDestinationObject )
 
     iDestinationObject.Foreground = Foreground;
     iDestinationObject.Background = Background;
-    iDestinationObject.mIsFilled = mIsFilled;
 
     iDestinationObject.mBBox = mBBox;
 
@@ -232,12 +230,14 @@ UOdysseyVectorObject::GetBBox( bool iWorld )
 {
     if ( iWorld == true )
     {
-        BLPoint p0 = mWorldMatrix.mapPoint( mBBox.x, mBBox.y );
-        BLPoint p1 = mWorldMatrix.mapPoint( mBBox.x + mBBox.w,  mBBox.y + mBBox.h );
-        ::ULIS::FRectD worldBBox = ::ULIS::FRectD::FromMinMax( ::ULIS::FMath::Min( p0.x, p1.x )
-                                                             , ::ULIS::FMath::Min( p0.y, p1.y )
-                                                             , ::ULIS::FMath::Max( p0.x, p1.x )
-                                                             , ::ULIS::FMath::Max( p0.y, p1.y ) );
+        BLPoint p0 = mWorldMatrix.mapPoint( mBBox.x          , mBBox.y           );
+        BLPoint p1 = mWorldMatrix.mapPoint( mBBox.x + mBBox.w, mBBox.y           );
+        BLPoint p2 = mWorldMatrix.mapPoint( mBBox.x + mBBox.w, mBBox.y + mBBox.h );
+        BLPoint p3 = mWorldMatrix.mapPoint( mBBox.x          , mBBox.y + mBBox.h );
+        ::ULIS::FRectD worldBBox = ::ULIS::FRectD::FromMinMax( ::ULIS::FMath::Min4( p0.x, p1.x, p2.x, p3.x )
+                                                             , ::ULIS::FMath::Min4( p0.y, p1.y, p2.y, p3.y )
+                                                             , ::ULIS::FMath::Max4( p0.x, p1.x, p2.x, p3.x )
+                                                             , ::ULIS::FMath::Max4( p0.y, p1.y, p2.y, p3.y ) );
 
         return worldBBox;
     }
@@ -285,12 +285,6 @@ UOdysseyVectorObject::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
     DrawChildren( localRoi, iFlags );
 
     blctx->restore();
-}
-
-bool
-UOdysseyVectorObject::IsFilled()
-{
-    return mIsFilled;
 }
 
 bool
@@ -513,12 +507,6 @@ UOdysseyVectorObject::SetBackgroundColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA
     Background.G = iG;
     Background.B = iB;
     Background.A = iA;
-}
-
-void
-UOdysseyVectorObject::SetFilled( bool iIsFilled)
-{
-    mIsFilled = iIsFilled;
 }
 
 void 

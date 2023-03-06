@@ -41,7 +41,8 @@ class ODYSSEYVECTOR_API UOdysseyVectorPathCubic: public UOdysseyVectorPath
                       , std::vector<UOdysseyVectorPoint*>& oPickedPointArray
                       , uint64 iSelectionFlags );
         void Unselect( UOdysseyVectorVertex* iPoint );
-
+        bool IsFilled();
+        void SetFilled( bool iIsFilled );
         void DrawStructure( ::ULIS::FRectD& iRoi, uint64 iFlags );
         void Fill( ::ULIS::FRectD& iRoi );
         void Merge( UOdysseyVectorPath* iPath );

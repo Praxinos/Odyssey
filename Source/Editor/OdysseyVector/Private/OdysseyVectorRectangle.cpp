@@ -37,8 +37,8 @@ UOdysseyVectorRectangle::DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags )
     strokeColor.a = Foreground.A;
 
     blctx->setCompOp(BL_COMP_OP_SRC_COPY);
-
-    if( mIsFilled )
+/*
+    if( Filled )
     {
         BLRgba32 fillColor;
 
@@ -50,7 +50,7 @@ UOdysseyVectorRectangle::DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags )
         blctx->setFillStyle( fillColor );
         blctx->fillRoundRect( -mWidth * 0.5f, -mHeight * 0.5f, mWidth, mHeight, 0.0f, 0.0f );
     }
-
+*/
     blctx->setStrokeStyle ( strokeColor );
     blctx->setStrokeWidth ( mStrokeWidth );
     blctx->strokeRoundRect( -mWidth * 0.5f, -mHeight * 0.5f, mWidth, mHeight, 0.0f, 0.0f );

@@ -6,7 +6,7 @@
 #include "CoreMinimal.h"
 #include "Tools/OdysseyPainterEditorTool.h"
 #include "OdysseyVectorPathBuilder.h"
-#include "HUD/OdysseyVectorHUDTransform.h"
+#include "HUD/OdysseyVectorHUDRotate.h"
 #include "OdysseyPainterEditorVectorObjectRotateTool.generated.h"
 
 UCLASS()
@@ -34,10 +34,8 @@ private:
     void Redraw(const TArray<::ULIS::FRectI>& iRects);
 
 private:
-    FOdysseyVectorHUDTransform *mTransformHUD;
-    ::ULIS::FVec2D mPivot;
-    double mOldLocalMouseX;
-    double mOldLocalMouseY;
+    FOdysseyVectorHUDRotate *mTransformHUD;
+    ::ULIS::FVec2D* mPickedPivot;
 
 public:
     // Setters

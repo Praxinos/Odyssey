@@ -86,11 +86,11 @@ UOdysseyPainterEditorVectorPathCutTool::OnMouseDrag(const FOdysseyPoint& iPointI
         ::ULIS::FVec2D& p0 = mLineHUD.GetP0();
         ::ULIS::FVec2D& p1 = mLineHUD.GetP1();
         ::ULIS::FRectI rect = ::ULIS::FRectI::FromMinMax(::ULIS::FMath::Min(p0.x, p1.x)
-                                                         , ::ULIS::FMath::Min(p0.y, p1.y)
-                                                         , ::ULIS::FMath::Max(p0.x, p1.x)
-                                                         , ::ULIS::FMath::Max(p0.y, p1.y));
+                                                        , ::ULIS::FMath::Min(p0.y, p1.y)
+                                                        , ::ULIS::FMath::Max(p0.x, p1.x)
+                                                        , ::ULIS::FMath::Max(p0.y, p1.y));
 
-        mLineHUD.SetP1(iPointInTexture.x, iPointInTexture.y);
+        mLineHUD.SetP1( iPointInTexture.x, iPointInTexture.y );
 
         currentVectorLayer->RenderImageChanged(/* { rect }, */true);
     }

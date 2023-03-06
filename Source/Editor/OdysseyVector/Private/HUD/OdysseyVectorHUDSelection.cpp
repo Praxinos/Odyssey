@@ -92,19 +92,19 @@ FOdysseyVectorHUDSelection::UpdateSelectionBox( UOdysseyVectorRoot& iScene )
 
         if( selectedObjectList.size() > 1 )
         {
-            BLPoint p0;
-            BLPoint p1;
+            BLPoint p0, p1, p2, p3;
 
             mSelectionBox.space = &iScene;
             mSelectionBox.rect = UOdysseyVectorObject::GetBoundingBoxFromList( selectedObjectList );
-            p0 = mSelectionBox.space->GetInverseWorldMatrix().mapPoint( mSelectionBox.rect.x, mSelectionBox.rect.y );
-            p1 = mSelectionBox.space->GetInverseWorldMatrix().mapPoint( mSelectionBox.rect.x + mSelectionBox.rect.w
-                                                                      , mSelectionBox.rect.y + mSelectionBox.rect.h );
+            p0 = mSelectionBox.space->GetInverseWorldMatrix().mapPoint( mSelectionBox.rect.x                       , mSelectionBox.rect.y                        );
+            p1 = mSelectionBox.space->GetInverseWorldMatrix().mapPoint( mSelectionBox.rect.x + mSelectionBox.rect.w, mSelectionBox.rect.y                        );
+            p2 = mSelectionBox.space->GetInverseWorldMatrix().mapPoint( mSelectionBox.rect.x + mSelectionBox.rect.w, mSelectionBox.rect.y + mSelectionBox.rect.h );
+            p3 = mSelectionBox.space->GetInverseWorldMatrix().mapPoint( mSelectionBox.rect.x                       , mSelectionBox.rect.y + mSelectionBox.rect.h );
 
-            mSelectionBox.rect = ::ULIS::FRectD::FromMinMax( ::ULIS::FMath::Min( p0.x, p1.x )
-                                                           , ::ULIS::FMath::Min( p0.y, p1.y )
-                                                           , ::ULIS::FMath::Max( p0.x, p1.x )
-                                                           , ::ULIS::FMath::Max( p0.y, p1.y ) );
+            mSelectionBox.rect = ::ULIS::FRectD::FromMinMax( ::ULIS::FMath::Min4( p0.x, p1.x, p2.x, p3.x )
+                                                           , ::ULIS::FMath::Min4( p0.y, p1.y, p2.y, p3.y )
+                                                           , ::ULIS::FMath::Max4( p0.x, p1.x, p2.x, p3.x )
+                                                           , ::ULIS::FMath::Max4( p0.y, p1.y, p2.y, p3.y ) );
         }
     }
 }

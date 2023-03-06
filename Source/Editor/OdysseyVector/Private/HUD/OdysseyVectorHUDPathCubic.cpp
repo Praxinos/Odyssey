@@ -137,6 +137,9 @@ FOdysseyVectorHUDPathCubic::Draw( UOdysseyVectorRoot& iScene, ::ULIS::FRectD& iR
     BLContext* blctx = iScene.GetEngine()->GetBLContext();
     UOdysseyVectorObject* selectedObject = iScene.GetLastSelected();
 
+    // matrix might get altered for displaying the selection rectangle of a single object. Save it.
+    blctx->save();
+
     if( selectedObject )
     {
         if( selectedObject->GetClass() == UOdysseyVectorPathCubic::StaticClass() )
@@ -169,4 +172,6 @@ FOdysseyVectorHUDPathCubic::Draw( UOdysseyVectorRoot& iScene, ::ULIS::FRectD& iR
             }
         }
     }
+
+    blctx->restore();
 }

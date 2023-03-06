@@ -25,7 +25,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorObject : public UObject
         static const uint32 VECTORROOTTYPE       = 0;
         static const uint32 VECTOROBJECTTYPE     = 1;
         static const uint32 VECTORGROUPTYPE      = 2;
-        static const uint32 VECTORCIRCLETYPE     = 3;
+        static const uint32 VECTORELLIPSETYPE    = 3;
         static const uint32 VECTORRECTANGLETYPE  = 4;
         static const uint32 VECTORPATHCUBICTYPE  = 5;
         static const uint32 VECTORGROUPPAINTTYPE = 6;
@@ -67,8 +67,6 @@ class ODYSSEYVECTOR_API UOdysseyVectorObject : public UObject
         BLMatrix2D mInverseWorldMatrix;
         std::list<UOdysseyVectorObject*> mChildrenList;
         UOdysseyVectorObject* mParent;
-        // TODO: delete mIsFilled. no sense to put that here.
-        bool mIsFilled;
         bool mIsSelected;
         bool mIsInvalidated;
         bool mDependsOnChildren;
@@ -143,7 +141,6 @@ class ODYSSEYVECTOR_API UOdysseyVectorObject : public UObject
         ::ULIS::FVec2D WorldCoordinatesToLocal( double iX, double iY );
         void SetIsSelected( bool iIsSelected );
         ::ULIS::FRectD GetBBox( bool iWorld );
-        bool IsFilled();
         void MoveBack();
         void MoveFront();
         void Invalidate();

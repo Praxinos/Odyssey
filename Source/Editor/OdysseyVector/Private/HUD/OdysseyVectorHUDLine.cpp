@@ -40,7 +40,13 @@ FOdysseyVectorHUDLine::Draw( UOdysseyVectorRoot& iScene, ::ULIS::FRectD& iRoi, u
 {
     BLContext* blctx = iScene.GetEngine()->GetBLContext();
 
+    // matrix might get altered for displaying the selection rectangle of a single object. Save it.
+    blctx->save();
+    blctx->resetMatrix();
+
     blctx->setStrokeStyle( BLRgba32(0xFF0000FF) );
     blctx->setStrokeWidth( 1.0f );
     blctx->strokeLine( mP0.x, mP0.y, mP1.x, mP1.y );
+
+    blctx->restore();
 }
