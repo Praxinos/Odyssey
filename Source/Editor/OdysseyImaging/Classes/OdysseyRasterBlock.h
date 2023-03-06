@@ -183,9 +183,6 @@ public:
 private:
     //--- Block Caching / Loading
     
-    //Saves the block corresponding to the tile at iTileIndex into the cache and removes the block from memory
-    void SaveBlockToCache(const ::ULIS::FBlock& iBlock, const FString& iId);
-    
     //Loads and returns a block from cache
     bool LoadBlockFromCache(TSharedRef<::ULIS::FBlock, ESPMode::ThreadSafe> oBlock, const FString& iId);
 
@@ -193,6 +190,8 @@ private:
     bool LoadBlockFromBulkData(TSharedRef<::ULIS::FBlock, ESPMode::ThreadSafe> oBlock);
 
     static void CleanupBlock(uint8* iData, void* iInfo);
+    //Saves the block corresponding to the tile at iTileIndex into the cache and removes the block from memory
+    static void SaveBlockToCache(const ::ULIS::FBlock& iBlock, const FString& iId);
 
 private:
     //Used by FOdysseyRasterBlockUndo to save load the block tiles to an undo cache

@@ -20,6 +20,14 @@
 #define FOdysseyRasterBlock_CACHE_NAME TEXT("OdysseyRasterBlock")
 #define FOdysseyRasterBlock_CACHE_VERSION TEXT("A6ED84107BAD11EDA1EB0242AC120002")
 
+struct FBlockCleanupInfo
+{
+    FGuid Id;
+    int Width;
+    int Height;
+    int Format;
+};
+
 class FOdysseyRasterBlockPreloadHandle : public IOdysseyHandle
 {
 public:
@@ -115,18 +123,14 @@ FOdysseyRasterBlock::GetFormat() const
 void
 FOdysseyRasterBlock::CleanupBlock(uint8* iData, void* iInfo)
 {
-    //WARNING: The original FOdysseyRasterBlock could not exist anymore
-    FOdysseyRasterBlock* rasterBlock = static_cast<FOdysseyRasterBlock*>(iInfo);
-    if ( !rasterBlock )
-    {
-        ::ULIS::OnCleanup_FreeMemory(iData, iInfo); //we have the responsability to delete the block data
-        return;
-    }
+    FBlockCleanupInfo* infos = static_cast<FBlockCleanupInfo*>(iInfo);
 
-    ::ULIS::FBlock block(iData, rasterBlock->Width, rasterBlock->Height, rasterBlock->GetFormat());
-    rasterBlock->SaveBlockToCache(block, rasterBlock->Id.ToString()); //TODO: maybe save only if version changed ?
+    ::ULIS::FBlock block(iData, infos->Width, infos->Height, (::ULIS::eFormat)infos->Format);
+    SaveBlockToCache(block, infos->Id.ToString()); //TODO: maybe save only if version changed ?
 
     ::ULIS::OnCleanup_FreeMemory(iData, iInfo); //we have the responsability to delete the block data
+
+    delete iInfo;
 }
 
 void
@@ -154,7 +158,13 @@ FOdysseyRasterBlock::SetBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iB
         Width = iBlock->Width();
         Height = iBlock->Height();
         Format = iBlock->Format();
-        iBlock->OnCleanup(::ULIS::FOnCleanupData(&FOdysseyRasterBlock::CleanupBlock, this));
+
+        FBlockCleanupInfo* infos = new FBlockCleanupInfo();
+        infos->Id = Id;
+        infos->Width = Width;
+        infos->Height = Height;
+        infos->Format = Format;
+        iBlock->OnCleanup(::ULIS::FOnCleanupData(&FOdysseyRasterBlock::CleanupBlock, infos));
 
         mInvalidTileMap = FULISInvalidTileMap(64, Width, Height);
     }
@@ -211,7 +221,13 @@ FOdysseyRasterBlock::GetBlock()
 
     //Load Block from DDC
     block = MakeShared<::ULIS::FBlock>(Width, Height, (::ULIS::eFormat)Format);
-    block->OnCleanup(::ULIS::FOnCleanupData(&FOdysseyRasterBlock::CleanupBlock, this));
+
+    FBlockCleanupInfo* infos = new FBlockCleanupInfo();
+    infos->Id = Id;
+    infos->Width = Width;
+    infos->Height = Height;
+    infos->Format = Format;
+    block->OnCleanup(::ULIS::FOnCleanupData(&FOdysseyRasterBlock::CleanupBlock, infos));
     mBlock = block; //watch the loaded block
 
     if ( LoadBlockFromCache(block.ToSharedRef(), Id.ToString()) )
