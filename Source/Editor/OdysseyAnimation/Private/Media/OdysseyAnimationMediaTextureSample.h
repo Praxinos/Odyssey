@@ -6,18 +6,15 @@
 
 class FOdysseyAnimationMediaTextureSample
 	: public IMediaTextureSample
-	, public FTickableEditorObject //Allows us to react to Tick events
 {
 public:
 	//Constructor / Destructor
 	virtual ~FOdysseyAnimationMediaTextureSample();
-	FOdysseyAnimationMediaTextureSample(UOdysseyAnimation* iAnimation);
-	
+	FOdysseyAnimationMediaTextureSample(int iWidth, int iHeight, UTexture2DDynamic* iTexture1, UTexture2DDynamic* iTexture2);
+
 public:
-	void Update(int iFrameIndex, uint32 iSequenceIndex);
-	
-	void CopyRects(const TArray<::ULIS::FRectI>& iRects);
-	void CopyRects_RenderThread(FTexture2DDynamicResource* iResource, TSharedPtr<::ULIS::FBlock> iSrc, const TArray<::ULIS::FRectI>& iRects);
+	void SetTime(FMediaTimeStamp iTime);
+	void SetDuration(FTimespan iDuration);
 
 public:
 	// Mandatrory IMediaTextureSample interface overrides
@@ -122,23 +119,11 @@ public:
 	 */
 	virtual bool IsOutputSrgb() const;
 
-protected:
-	// FTickableEditorObject implementation
-	virtual void Tick(float DeltaTime) override;
-	virtual TStatId GetStatId() const override { RETURN_QUICK_DECLARE_CYCLE_STAT(FOdysseyAnimationMediaTextureSample, STATGROUP_Tickables); }
-
 private:
-	//Events
-	void OnRenderImageChanged(UOdysseyAnimation* iAnimation, const TRange<int>& iRange, const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive);
-
-private:
-	UOdysseyAnimation* mAnimation;
-	int mCurrentFrameIndex;
-	FString mFrameId;
+	FIntPoint mDimensions;
 	FMediaTimeStamp mTime;
 	FTimespan mDuration;
-	TStrongObjectPtr<UTexture2DDynamic> mTexture1; 
-	TStrongObjectPtr<UTexture2DDynamic> mTexture2; //PATCH: Media Framework is shit when using a single texture that refreshes it self, I need 2 Textures....
+	UTexture2DDynamic* mTexture1; 
+	UTexture2DDynamic* mTexture2; //PATCH: Media Framework is shit when using a single texture that refreshes it self, I need 2 Textures....
 	mutable bool mCurrentTexture; //PATCH: true => use mTexture1, false => use mTexture2
-	TArray<::ULIS::FRectI> mInvalidRects;
 };

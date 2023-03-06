@@ -8,6 +8,7 @@
 
 class FOdysseyAnimationMediaSamples
 	: public IMediaSamples
+	, public FTickableEditorObject //Allows us to react to Tick events
 {
 public:
     FOdysseyAnimationMediaSamples();
@@ -28,9 +29,30 @@ private:
 	FTimespan FindMaxOverlapingFrame(FTimespan iStartTime, FTimespan iEndTime, int* oIndex);
 	bool SanitizeTimeRange(TRange<FMediaTimeStamp>* oTimeRange);
 
+public:
+	void Update(int iFrameIndex, uint32 iSequenceIndex);
+	
+	void CopyRects(const TArray<::ULIS::FRectI>& iRects);
+	void CopyRects_RenderThread(FTexture2DDynamicResource* iResource, TSharedPtr<::ULIS::FBlock> iSrc, const TArray<::ULIS::FRectI>& iRects);
+	
+
+protected:
+	// FTickableEditorObject implementation
+	virtual void Tick(float DeltaTime) override;
+	virtual TStatId GetStatId() const override { RETURN_QUICK_DECLARE_CYCLE_STAT(FOdysseyAnimationMediaTextureSample, STATGROUP_Tickables); }
+
+private:
+	//Events
+	void OnRenderImageChanged(UOdysseyAnimation* iAnimation, const TRange<int>& iRange, const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive);
+
 private:
 	UOdysseyAnimation* mAnimation;
 	TWeakPtr<FOdysseyAnimationMediaPlayer> mPlayer;
 	TWeakPtr<FOdysseyAnimationMediaControls> mControls;
 	TSharedPtr<class FOdysseyAnimationMediaTextureSample> mSample;
+	int mCurrentFrameIndex;
+	FString mFrameId;
+	TStrongObjectPtr<UTexture2DDynamic> mTexture1; //PATCH: Needs to be in this class, otherwise gets destriyed on the wrong thread
+	TStrongObjectPtr<UTexture2DDynamic> mTexture2; //PATCH: Media Framework is shit when using a single texture that refreshes it self, I need 2 Textures....
+	TArray<::ULIS::FRectI> mInvalidRects;
 };
