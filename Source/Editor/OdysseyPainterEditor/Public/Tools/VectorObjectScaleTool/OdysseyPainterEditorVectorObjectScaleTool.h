@@ -44,7 +44,7 @@ public:
     virtual bool CanDraw();
 
     UPROPERTY(EditAnywhere, Category="Odyssey ObjectScale Tool")
-    double Size;
+    bool Uniform;
 
 protected:
 

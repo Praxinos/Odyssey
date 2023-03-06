@@ -124,15 +124,18 @@ FOdysseyVectorHUDSelection::DrawSelectionBox( UOdysseyVectorRoot& iScene, ::ULIS
 
     if( mSelectionBox.space )
     {
+        BLMatrix2D& worldMatrix = mSelectionBox.space->GetWorldMatrix();
+        BLPoint point[4] = { worldMatrix.mapPoint( mSelectionBox.rect.x                       , mSelectionBox.rect.y                        )
+                           , worldMatrix.mapPoint( mSelectionBox.rect.x + mSelectionBox.rect.w, mSelectionBox.rect.y                        )
+                           , worldMatrix.mapPoint( mSelectionBox.rect.x + mSelectionBox.rect.w, mSelectionBox.rect.y + mSelectionBox.rect.h )
+                           , worldMatrix.mapPoint( mSelectionBox.rect.x                       , mSelectionBox.rect.y + mSelectionBox.rect.h ) };
         BLPath path;
 
-        blctx->setMatrix( mSelectionBox.space->GetWorldMatrix() );
-
-        path.moveTo( mSelectionBox.rect.x                       , mSelectionBox.rect.y                        );
-        path.lineTo( mSelectionBox.rect.x + mSelectionBox.rect.w, mSelectionBox.rect.y                        );
-        path.lineTo( mSelectionBox.rect.x + mSelectionBox.rect.w, mSelectionBox.rect.y + mSelectionBox.rect.h );
-        path.lineTo( mSelectionBox.rect.x                       , mSelectionBox.rect.y + mSelectionBox.rect.h );
-        path.lineTo( mSelectionBox.rect.x                       , mSelectionBox.rect.y                        );
+        path.moveTo( point[0] );
+        path.lineTo( point[1] );
+        path.lineTo( point[2] );
+        path.lineTo( point[3] );
+        path.close();
 
         blctx->strokePath( path );
     }

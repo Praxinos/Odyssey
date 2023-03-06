@@ -18,6 +18,7 @@ UOdysseyPainterEditorVectorObjectScaleTool::~UOdysseyPainterEditorVectorObjectSc
 }
 
 UOdysseyPainterEditorVectorObjectScaleTool::UOdysseyPainterEditorVectorObjectScaleTool()
+    : Uniform( true )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.ObjectScaleTool64");
 
@@ -91,7 +92,7 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDrag(const FOdysseyPoint& iPo
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FSelectionBox& selectionBox = mTransformHUD->GetSelectionBox();
 
-        if ( selectionBox.space )
+        if ( selectionBox.space && ( mPickedHandle != -1 ) )
         {
             BLPoint localCoords = selectionBox.space->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
             std::list<UOdysseyVectorObject*>& selectedObjectList = currentVectorLayer->GetScene()->GetSelectedObjectList();
@@ -180,7 +181,25 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDrag(const FOdysseyPoint& iPo
                 FOdysseyVector::MatrixMultiply( invertSpaceMatrix, objectWorldMatrix, objectSpaceMatrix );
 
                 scaleMatrix.reset();
-                scaleMatrix.scale( ( x2 - x1 ) / selectionBox.rect.w, ( y2 - y1 ) / selectionBox.rect.h );
+
+                if( Uniform )
+                {
+                    double x2mx1 = ( x2 - x1 );
+                    double y2my1 = ( y2 - y1 );
+                    double oldDiagonal = sqrt( ( selectionBox.rect.w * selectionBox.rect.w )
+                                             + ( selectionBox.rect.h * selectionBox.rect.h ) );
+                    double newDiagonal = sqrt( ( x2mx1 * x2mx1 ) + ( y2my1 * y2my1 ) );
+                    double ratio = newDiagonal / oldDiagonal;
+
+                    scaleMatrix.scale( ratio, ratio );
+                }
+                else
+                {
+                    double x2mx1 = ( x2 - x1 );
+                    double y2my1 = ( y2 - y1 );
+
+                    scaleMatrix.scale( x2mx1 / selectionBox.rect.w, y2my1 / selectionBox.rect.h );
+                }
 
                 // scale the object (local to the "Scaling Space" coordinates system)
                 FOdysseyVector::MatrixMultiply( scaleMatrix, objectSpaceMatrix, objectScaledMatrix );
