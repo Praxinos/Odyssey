@@ -36,6 +36,17 @@ class ODYSSEYANIMATIONPLAYER_API UOdysseyAnimationPlayer
 // - OnPlay Changed
 // - OnPause Changed
 // - OnStop Changed
+public:
+	//Events
+	FSimpleMulticastDelegate& OnAnimationChanged();
+	FSimpleMulticastDelegate& OnTextureChanged();
+	FSimpleMulticastDelegate& OnTextureUpdated();
+	FSimpleMulticastDelegate& OnFramesPerSecondChanged();
+	FSimpleMulticastDelegate& OnIsLoopingChanged();
+	FSimpleMulticastDelegate& OnCurrentTimeChanged();
+	FSimpleMulticastDelegate& OnPlay();
+	FSimpleMulticastDelegate& OnPause();
+	FSimpleMulticastDelegate& OnStop();
 
 public:
 	void SetAnimation(UOdysseyAnimation* iAnimation);
@@ -71,6 +82,7 @@ protected:
 	virtual TStatId GetStatId() const override { RETURN_QUICK_DECLARE_CYCLE_STAT(UOdysseyAnimation, STATGROUP_Tickables); }
 
 private:
+	void UpdateTexture();
 	void CopyBlockToTexture(TSharedPtr<::ULIS::FBlock> iBlock, const TArray<::ULIS::FRectI>& iRects);
 	void OnAnimationRenderImageChanged(UOdysseyAnimation* iAnimation, const TRange<int>& iRange, const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive);
 
@@ -100,4 +112,16 @@ private:
 	//The current block to display, so that it stays in memory.
 	//Makes a huge improvement in performance when drawing, be cause we don't have to retieve it from cache at each tick
 	TSharedPtr<::ULIS::FBlock> mBlock; 
+
+private:
+	//Events
+	FSimpleMulticastDelegate mOnAnimationChanged;
+	FSimpleMulticastDelegate mOnTextureChanged;
+	FSimpleMulticastDelegate mOnTextureUpdated;
+	FSimpleMulticastDelegate mOnFramesPerSecondChanged;
+	FSimpleMulticastDelegate mOnIsLoopingChanged;
+	FSimpleMulticastDelegate mOnCurrentTimeChanged;
+	FSimpleMulticastDelegate mOnPlay;
+	FSimpleMulticastDelegate mOnPause;
+	FSimpleMulticastDelegate mOnStop;
 };

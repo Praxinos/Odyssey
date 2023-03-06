@@ -22,7 +22,7 @@
 //----------------------------------------------------------- Construction / Destruction
 FOdysseyAnimationEditor::~FOdysseyAnimationEditor()
 {
-	//mPlayer->OnMediaEvent().RemoveAll(this);
+	mPlayer->OnStop().RemoveAll(this);
 	mAnimation->OnCurrentFrameChanged().RemoveAll(this);
 	mAnimation->OnRenderImageChanged().RemoveAll(this);
 }
@@ -61,7 +61,7 @@ FOdysseyAnimationEditor::InitData(UObject* iEditedObject)
     mPlayer->SeekToFrame(mAnimation->CurrentFrame);
 
 	//Set Media player and Animation callbacks
-	//mMediaPlayer->OnMediaEvent().AddRaw(this, &FOdysseyAnimationEditor::OnMediaEvent);
+	mPlayer->OnStop().AddRaw(this, &FOdysseyAnimationEditor::OnPlayerStop);
 	mAnimation->OnCurrentFrameChanged().AddRaw(this, &FOdysseyAnimationEditor::OnCurrentFrameChanged);
 	mAnimation->OnRenderImageChanged().AddRaw(this, &FOdysseyAnimationEditor::OnRenderImageChanged);
 
@@ -217,6 +217,12 @@ FOdysseyAnimationEditor::OnMediaEvent(EMediaEvent iEvent)
 			break;
 	}
 } */
+
+void
+FOdysseyAnimationEditor::OnPlayerStop()
+{
+	mPlayer->SeekToFrame(mAnimation->CurrentFrame);
+}
 
 void
 FOdysseyAnimationEditor::OnRenderImageChanged(UOdysseyAnimation* iAnimation, const TRange<int>& iRange, const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive)
