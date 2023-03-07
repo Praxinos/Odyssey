@@ -31,11 +31,8 @@ private:
 
 public:
 	void Update(int iFrameIndex, uint32 iSequenceIndex);
+	void CopyBlockToTexture(TSharedPtr<::ULIS::FBlock> iBlock, const TArray<::ULIS::FRectI>& iRects);
 	
-	void CopyRects(const TArray<::ULIS::FRectI>& iRects);
-	void CopyRects_RenderThread(FTexture2DDynamicResource* iResource, TSharedPtr<::ULIS::FBlock> iSrc, const TArray<::ULIS::FRectI>& iRects);
-	
-
 protected:
 	// FTickableEditorObject implementation
 	virtual void Tick(float DeltaTime) override;
@@ -52,7 +49,8 @@ private:
 	TSharedPtr<class FOdysseyAnimationMediaTextureSample> mSample;
 	int mCurrentFrameIndex;
 	FString mFrameId;
-	TStrongObjectPtr<UTexture2DDynamic> mTexture1; //PATCH: Needs to be in this class, otherwise gets destriyed on the wrong thread
-	TStrongObjectPtr<UTexture2DDynamic> mTexture2; //PATCH: Media Framework is shit when using a single texture that refreshes it self, I need 2 Textures....
+	TStrongObjectPtr<UTexture2D> mTexture1; //PATCH: Needs to be in this class, otherwise gets destriyed on the wrong thread
+	TStrongObjectPtr<UTexture2D> mTexture2; //PATCH: Media Framework is shit when using a single texture that refreshes it self, I need 2 Textures....
+	TSharedPtr <::ULIS::FBlock> mBlock;
 	TArray<::ULIS::FRectI> mInvalidRects;
 };

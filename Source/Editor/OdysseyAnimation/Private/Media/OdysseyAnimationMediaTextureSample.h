@@ -10,7 +10,7 @@ class FOdysseyAnimationMediaTextureSample
 public:
 	//Constructor / Destructor
 	virtual ~FOdysseyAnimationMediaTextureSample();
-	FOdysseyAnimationMediaTextureSample(int iWidth, int iHeight, UTexture2DDynamic* iTexture1, UTexture2DDynamic* iTexture2);
+	FOdysseyAnimationMediaTextureSample(int iWidth, int iHeight, UTexture2D* iTexture1, UTexture2D* iTexture2);
 
 public:
 	void SetTime(FMediaTimeStamp iTime);
@@ -123,7 +123,7 @@ private:
 	FIntPoint mDimensions;
 	FMediaTimeStamp mTime;
 	FTimespan mDuration;
-	UTexture2DDynamic* mTexture1; 
-	UTexture2DDynamic* mTexture2; //PATCH: Media Framework is shit when using a single texture that refreshes it self, I need 2 Textures....
+	UTexture2D* mTexture1; 
+	UTexture2D* mTexture2; //PATCH: Media Framework is shit when using a single texture that refreshes it self, I need 2 Textures....
 	mutable bool mCurrentTexture; //PATCH: true => use mTexture1, false => use mTexture2
 };

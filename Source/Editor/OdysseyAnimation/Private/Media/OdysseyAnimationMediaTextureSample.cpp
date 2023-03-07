@@ -1,14 +1,15 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "Media/OdysseyAnimationMediaTextureSample.h"
-#include "Engine/Texture2DDynamic.h"
+#include "Engine/Texture2D.h"
+#include "Rendering/Texture2DResource.h"
 #include "OdysseyRectUtils.h"
 
 FOdysseyAnimationMediaTextureSample::~FOdysseyAnimationMediaTextureSample()
 {
 }
 
-FOdysseyAnimationMediaTextureSample::FOdysseyAnimationMediaTextureSample(int iWidth, int iHeight, UTexture2DDynamic* iTexture1, UTexture2DDynamic* iTexture2)
+FOdysseyAnimationMediaTextureSample::FOdysseyAnimationMediaTextureSample(int iWidth, int iHeight, UTexture2D* iTexture1, UTexture2D* iTexture2)
     : mDimensions(iWidth, iHeight)
     , mTime(0)
     , mDuration(0)
@@ -72,11 +73,11 @@ FOdysseyAnimationMediaTextureSample::GetStride() const
 FRHITexture*
 FOdysseyAnimationMediaTextureSample::GetTexture() const
 {
-    FTexture2DDynamicResource* resource1 = static_cast<FTexture2DDynamicResource*>(mTexture1->GetResource());
+    FTexture2DResource* resource1 = static_cast<FTexture2DResource*>(mTexture1->GetResource());
     if (!resource1)
         return nullptr;
 
-    FTexture2DDynamicResource* resource2 = static_cast<FTexture2DDynamicResource*>(mTexture2->GetResource());
+    FTexture2DResource* resource2 = static_cast<FTexture2DResource*>(mTexture2->GetResource());
     if (!resource2)
         return nullptr;
 

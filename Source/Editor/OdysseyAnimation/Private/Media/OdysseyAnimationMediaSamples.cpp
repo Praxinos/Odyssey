@@ -5,7 +5,7 @@
 
 #include "Media/OdysseyAnimationMediaPlayer.h"
 #include "Media/OdysseyAnimationMediaTextureSample.h"
-#include "Engine/Texture2DDynamic.h"
+#include "Engine/Texture2D.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyAnimationMediaSamples"
 
@@ -30,9 +30,12 @@ FOdysseyAnimationMediaSamples::OnOpen(UOdysseyAnimation* iAnimation)
 {
 	mAnimation = iAnimation;
     mAnimation->OnRenderImageChanged().AddRaw(this, &FOdysseyAnimationMediaSamples::OnRenderImageChanged);
-	mTexture1 = TStrongObjectPtr<UTexture2DDynamic>(UTexture2DDynamic::Create(mAnimation->Width(), mAnimation->Height(), FTexture2DDynamicCreateInfo(PF_B8G8R8A8)));
-	mTexture2 = TStrongObjectPtr<UTexture2DDynamic>(UTexture2DDynamic::Create(mAnimation->Width(), mAnimation->Height(), FTexture2DDynamicCreateInfo(PF_B8G8R8A8)));
+	mTexture1 = TStrongObjectPtr<UTexture2D>(UTexture2D::CreateTransient(mAnimation->Width(), mAnimation->Height(), PF_B8G8R8A8));
+	mTexture2 = TStrongObjectPtr<UTexture2D>(UTexture2D::CreateTransient(mAnimation->Width(), mAnimation->Height(), PF_B8G8R8A8));
 	mSample = MakeShared<FOdysseyAnimationMediaTextureSample>(mAnimation->Width(), mAnimation->Height(), mTexture1.Get(), mTexture2.Get());
+
+	mTexture1->UpdateResource();
+	mTexture2->UpdateResource();
 }
 
 void
@@ -43,6 +46,7 @@ FOdysseyAnimationMediaSamples::OnClose()
 	mSample = nullptr;
 	mTexture1 = nullptr;
 	mTexture2 = nullptr;
+	mBlock = nullptr;
 }
 
 void
@@ -205,8 +209,6 @@ FOdysseyAnimationMediaSamples::FetchBestVideoSampleForTimeRange(const TRange<FMe
 		resultingSequenceIndex = overlap1 > overlap2 ? endSequenceIndex : startSequenceIndex;
 	}
 
-	//TODO: Use Cache to retrieve the sample
-	//OutSample = MakeShared<FOdysseyAnimationMediaTextureSample>(mAnimation, frameIndex, resultingSequenceIndex);
 	Update(frameIndex, resultingSequenceIndex);
 	OutSample = mSample;
 	controls->SetTime(mAnimation->GetFrameTimeRange(frameIndex).GetLowerBoundValue());
@@ -263,89 +265,72 @@ FOdysseyAnimationMediaSamples::Update(int iFrameIndex, uint32 iSequenceIndex)
 	mSample->SetTime(frameTime);
 	mSample->SetDuration(frameDuration);
 
-    CopyRects({ ::ULIS::FRectI::FromXYWH(0, 0, mAnimation->Width(), mAnimation->Height())});
+	mBlock = mAnimation->GetBlockFromId(mFrameId);
+	CopyBlockToTexture(mBlock, { ::ULIS::FRectI::FromXYWH(0, 0, mAnimation->Width(), mAnimation->Height())});
 }
 
 void
-FOdysseyAnimationMediaSamples::CopyRects(const TArray<::ULIS::FRectI>& iRects)
+FOdysseyAnimationMediaSamples::CopyBlockToTexture(TSharedPtr<::ULIS::FBlock> iBlock, const TArray<::ULIS::FRectI>& iRects)
 {
+	if ( !iBlock )
+		return;
 
-    TSharedPtr<::ULIS::FBlock> srcBlock = mAnimation->GetBlockFromId(mFrameId);
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(srcBlock->Format());
-    ENQUEUE_RENDER_COMMAND(FWriteRawDataToTexture)(
-        [this, srcBlock, iRects](FRHICommandListImmediate& RHICmdList)
-        {
-            FTexture2DDynamicResource* resource1 = static_cast<FTexture2DDynamicResource*>(mTexture1->GetResource());
-            if ( !resource1 )
-                return;
+	//convert block to BGRA8 if needed
+	if ( iBlock->Format() == ::ULIS::Format_BGRA8 )
+	{
+		TArray<FUpdateTextureRegion2D> regions;
+		for (const ::ULIS::FRectI& rect : iRects)
+		{
+			regions.Emplace(rect.x, rect.y, rect.x, rect.y, rect.w, rect.h);
+		}
+		mTexture1->UpdateTextureRegions(0, regions.Num(), regions.GetData(), iBlock->BytesPerScanLine(), iBlock->BytesPerPixel(), iBlock->Bits());
+		mTexture2->UpdateTextureRegions(0, regions.Num(), regions.GetData(), iBlock->BytesPerScanLine(), iBlock->BytesPerPixel(), iBlock->Bits());
 
-            FTexture2DDynamicResource* resource2 = static_cast<FTexture2DDynamicResource*>(mTexture2->GetResource());
-            if ( !resource2 )
-                return;
+		FRenderCommandFence fence;
+		fence.BeginFence();
+		fence.Wait();
 
-            CopyRects_RenderThread(resource1, srcBlock, iRects);
-            CopyRects_RenderThread(resource2, srcBlock, iRects);
-        }
-    );
+		return;
+	}
 
-    FRenderCommandFence fence1;
-    fence1.BeginFence();
-    fence1.Wait();
+	//Here block has not the expected format
+	//But instead of converting the whole block, we will convert only the parts of the block we need
+	::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_BGRA8);
+	TArray<FUpdateTextureRegion2D> regions;
+	TArray<TSharedPtr<::ULIS::FBlock>> blocks;
+	for (const ::ULIS::FRectI& rect : iRects)
+	{
+		TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(rect.w, rect.h, ::ULIS::Format_BGRA8);
+		ctx.ConvertFormat(*iBlock, *block, rect, ::ULIS::FVec2I(0), ::ULIS::FSchedulePolicy::AsyncCacheEfficient);
+		regions.Emplace(rect.x, rect.y, 0, 0, rect.w, rect.h);
+		blocks.Add(block);
+	}
+	ctx.Finish();
 
-    ctx.Finish();
+	for (int i = 0; i < regions.Num(); i++)
+	{
+		mTexture1->UpdateTextureRegions(
+			0,
+			1,
+			&regions[i],
+			blocks[i]->BytesPerScanLine(),
+			blocks[i]->BytesPerPixel(),
+			blocks[i]->Bits()
+		);
 
-    ENQUEUE_RENDER_COMMAND(FWriteRawDataToTexture2)(
-        [this](FRHICommandListImmediate& RHICmdList)
-        {
-            FTexture2DDynamicResource* resource1 = static_cast<FTexture2DDynamicResource*>(mTexture1->GetResource());
-            if ( !resource1 )
-                return;
+		mTexture2->UpdateTextureRegions(
+			0,
+			1,
+			&regions[i],
+			blocks[i]->BytesPerScanLine(),
+			blocks[i]->BytesPerPixel(),
+			blocks[i]->Bits()
+		);
+	}
 
-            FTexture2DDynamicResource* resource2 = static_cast<FTexture2DDynamicResource*>(mTexture2->GetResource());
-            if ( !resource2 )
-                return;
-
-            FTexture2DRHIRef rhi1 = resource1->GetTexture2DRHI();
-            FTexture2DRHIRef rhi2 = resource2->GetTexture2DRHI();
-            RHIUnlockTexture2D(rhi1, 0, false, false);
-            RHIUnlockTexture2D(rhi2, 0, false, false);
-        }
-    );
-    
-    FRenderCommandFence fence;
-    fence.BeginFence();
-    fence.Wait();
-}
-
-void
-FOdysseyAnimationMediaSamples::CopyRects_RenderThread(FTexture2DDynamicResource* iResource, TSharedPtr<::ULIS::FBlock> iSrc, const TArray<::ULIS::FRectI>& iRects)
-{
-    check(IsInRenderingThread());
-
-    FTexture2DRHIRef rhi = iResource->GetTexture2DRHI();
-
-	const int32 w = rhi->GetSizeX();
-	const int32 h = rhi->GetSizeY();
-
-    //8bits version
-	uint32 stride = 0;
-	uint8* data = reinterpret_cast<uint8*>(RHILockTexture2D(rhi, 0, RLM_WriteOnly, stride, false, false));
-    TSharedPtr<::ULIS::FBlock> dstBlock = MakeShared<::ULIS::FBlock>(data, w, h, ::ULIS::eFormat::Format_BGRA8);
-
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iSrc->Format());
-
-    // ES: Instead we copy the whole texture 
-    ::ULIS::FEvent eventConvert = FULISEventBuilder().RetainBlock(dstBlock).Build();
-    ctx.ConvertFormat(
-        *iSrc,
-        *dstBlock,
-        dstBlock->Rect(),
-        ::ULIS::FVec2I(0),
-        ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
-        0, 
-        nullptr,
-        &eventConvert
-    );
+	FRenderCommandFence fence;
+	fence.BeginFence();
+	fence.Wait();
 }
 
 void
@@ -368,7 +353,7 @@ FOdysseyAnimationMediaSamples::Tick(float DeltaTime)
     if ( mInvalidRects.IsEmpty() )
         return;
 
-    CopyRects(mInvalidRects);
+	CopyBlockToTexture(mBlock, mInvalidRects);
     mInvalidRects.Empty();
 }
 
