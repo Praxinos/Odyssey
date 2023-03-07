@@ -9,25 +9,25 @@ void UOdysseyVectorPath::Init( std::string iName )
 void
 UOdysseyVectorPath::setJointRadial()
 {
-    mJointType = JOINT_TYPE_RADIAL;
+    JointType = eJointType::Radial;
 }
 
 void
 UOdysseyVectorPath::setJointMiter()
 {
-    mJointType = JOINT_TYPE_MITER;
+    JointType = eJointType::Miter;
 }
 
 void
 UOdysseyVectorPath::setJointLinear()
 {
-    mJointType = JOINT_TYPE_LINEAR;
+    JointType = eJointType::Linear;
 }
 
 void
 UOdysseyVectorPath::setJointNone()
 {
-    mJointType = JOINT_TYPE_NONE;
+    JointType = eJointType::None;
 }
 
 std::list<UOdysseyVectorPoint*>&
@@ -458,8 +458,8 @@ _drawRadialJoint( UOdysseyVectorPath* iPath
                 , double iRadius
                 , uint32 iSteps )
 {
-    ::ULIS::FVec2D currPerpendicularVec = { iSegmentVector.y    , - iSegmentVector.x     };
-    ::ULIS::FVec2D prevPerpendicularVec = { iPrevSegmentVector.y, - iPrevSegmentVector.x };
+    ::ULIS::FVec2D currPerpendicularVec = {   iSegmentVector.y    , - iSegmentVector.x     };
+    ::ULIS::FVec2D prevPerpendicularVec = { - iPrevSegmentVector.y,   iPrevSegmentVector.x };
     ::ULIS::FVec2D edgePrevPoint = iOrigin + ( prevPerpendicularVec * iRadius );
     ::ULIS::FVec2D edgePoint = iOrigin + ( currPerpendicularVec * iRadius );
     ::ULIS::FVec2D shortestTest = edgePoint - edgePrevPoint;
@@ -586,17 +586,17 @@ UOdysseyVectorPath::DrawJoint( UOdysseyVectorVertex* iVertex, ::ULIS::FRectD &iR
             // if the dot product equals to 1.0f, then the point is perfectly smooth, hence there is no need for joints.
             if ( segment0Vector.DotProduct(segment1Vector) < 1.0f )
             {
-                switch ( mJointType )
+                switch ( JointType )
                 {
-                    case JOINT_TYPE_LINEAR :
+                    case eJointType::Linear :
                         _drawLinearJoint ( this, origin, segment0Vector, segment1Vector, vertexRadius );
                     break;
 
-                    case JOINT_TYPE_MITER :
+                    case eJointType::Miter :
                         _drawMiterJoint  ( this, origin, segment0Vector, segment1Vector, vertexRadius,  4.0f );
                     break;
 
-                    case JOINT_TYPE_RADIAL :
+                    case eJointType::Radial :
                         _drawRadialJoint ( this, origin, segment0Vector, segment1Vector, vertexRadius, 24.0f );
                     break;
 

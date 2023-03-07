@@ -12,6 +12,15 @@
 
 class UOdysseyVectorLoop;
 
+UENUM(BlueprintType)
+enum class eJointType : uint8
+{
+    None   = 0,
+    Radial = 1,
+    Linear = 2,
+    Miter  = 3
+};
+
 UCLASS()
 class ODYSSEYVECTOR_API UOdysseyVectorPath : public UOdysseyVectorObject
 {
@@ -19,11 +28,6 @@ class ODYSSEYVECTOR_API UOdysseyVectorPath : public UOdysseyVectorObject
         GENERATED_BODY()
 
     protected:
-        static const uint32 JOINT_TYPE_NONE   = 0;
-        static const uint32 JOINT_TYPE_RADIAL = 1;
-        static const uint32 JOINT_TYPE_LINEAR = 2;
-        static const uint32 JOINT_TYPE_MITER  = 3;
-        uint32 mJointType;
         void DrawJoint( UOdysseyVectorVertex* iVertex, ::ULIS::FRectD &iRoi, uint64 iFlags );
 
     protected:
@@ -44,6 +48,9 @@ class ODYSSEYVECTOR_API UOdysseyVectorPath : public UOdysseyVectorObject
         static const uint64 PICK_HANDLE_POINT   = 1;
         static const uint64 PICK_HANDLE_SEGMENT = 1 << 1;
         static const uint64 PICK_POINT          = 1 << 2;
+
+        UPROPERTY(EditAnywhere, Category="Transform")
+        eJointType JointType;
 
         ~UOdysseyVectorPath(){};
         UOdysseyVectorPath(){};
