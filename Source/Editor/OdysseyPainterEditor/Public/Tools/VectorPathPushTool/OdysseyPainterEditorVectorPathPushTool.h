@@ -9,7 +9,7 @@
 #include "OdysseyVectorPathBuilder.h"
 #include "HUD/OdysseyVectorHUDLine.h"
 #include "HUD/OdysseyVectorHUDPathCubic.h"
-
+#include "HUD/OdysseyVectorHUDPush.h"
 #include "OdysseyPainterEditorVectorPathPushTool.generated.h"
 
 typedef struct _FPushedPoint
@@ -40,6 +40,7 @@ public:
     virtual void Activate() override;
 
     virtual bool OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
+    virtual void OnMouseHover(const FOdysseyPoint& iPointInTexture) override;
     virtual void OnMouseDrag(const FOdysseyPoint& iPointInTexture) override;
     virtual bool OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
     virtual void Commit() override;
@@ -48,6 +49,7 @@ private:
     bool HasVertex( UOdysseyVectorPoint* iPoint );
     std::vector<FPushedPoint> mPushedPointArray;
     std::vector<UOdysseyVectorSegment*> mSegmentArray;
+    FOdysseyVectorHUDPush mPushHUD;
 
 public:
     // Setters
