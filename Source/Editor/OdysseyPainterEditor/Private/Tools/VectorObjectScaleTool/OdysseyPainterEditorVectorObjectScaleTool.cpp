@@ -10,6 +10,10 @@
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorPathBuilder.h"
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846L
+#endif
+
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
 UOdysseyPainterEditorVectorObjectScaleTool::~UOdysseyPainterEditorVectorObjectScaleTool()
@@ -209,13 +213,13 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDrag(const FOdysseyPoint& iPo
                     FOdysseyVector::ExtractTransformations( objectLocalMatrix
                                                           , &translationX
                                                           , &translationY
-                                                          , &rotation
+                                                          , &rotation // in radians
                                                           , &scalingX
                                                           , &scalingY );
 
                     // Apply the local transformations
                     object->Translate( translationX, translationY );
-                    object->Rotate( rotation );
+                    object->Rotate( rotation / M_PI * 180 );
                     object->Scale( scalingX, scalingY );
                 }
             }

@@ -1,5 +1,9 @@
 #include "OdysseyVectorObject.h"
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846L
+#endif
+
 UOdysseyVectorObject::~UOdysseyVectorObject()
 {
 }
@@ -155,7 +159,7 @@ UOdysseyVectorObject::UpdateMatrix()
 
         blctx->resetMatrix();
         blctx->translate( TranslationX, TranslationY );
-        blctx->rotate( Rotation );
+        blctx->rotate( Rotation * M_PI / 180.0f );
         blctx->scale( ScalingX, ScalingY );
         mLocalMatrix = blctx->userMatrix();
 

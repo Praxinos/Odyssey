@@ -1,5 +1,9 @@
 #include "OdysseyVectorLoop.h"
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846L
+#endif
+
 FOdysseyVectorLoop::~FOdysseyVectorLoop()
 {
 }
@@ -344,14 +348,16 @@ FOdysseyVectorLoop::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
             double difY = mMax.y - mMin.y;
             double linearMinX = mMin.x;
             double linearMinY = mMin.y;
-            double angle = acos( fabs( mBucket->GetHandleDotProduct() ) );
-            double linearMaxX = mMin.x + ( difX * cos( angle ) );
-            double linearMaxY = mMin.y + ( difY * sin( angle ) );
-            BLGradient linear( BLLinearGradientValues( mMin.x, mMin.y, linearMaxX, linearMaxY ) );
+            double linearMaxX = mMax.x;
+            double linearMaxY = mMax.y;
+            BLGradient linear( BLLinearGradientValues( linearMinX, linearMinY, linearMaxX, linearMaxY ) );
             FColor& gradientColor0 = mBucket->GetGradientColor0();
             FColor& gradientColor1 = mBucket->GetGradientColor1();
             BLRgba32 BLColor0;
             BLRgba32 BLColor1;
+            double angle = mBucket->GetGradientRotationInDegrees() * M_PI / 180;
+
+            linear.rotate( angle );
 
             // Note: Blend2D color format is 0xAARRGGBB
             BLColor0.r = gradientColor0.B;
@@ -368,30 +374,34 @@ FOdysseyVectorLoop::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
             linear.addStop( 0.0, BLColor0 );
             linear.addStop( 1.0, BLColor1 );
 
+            blctx->setStrokeStyle( linear );
             blctx->setFillStyle( linear );
         }
         else
         {
-            FColor& gradientColor = mBucket->GetColor();
+            FColor& color = mBucket->GetColor();
             BLRgba32 BLColor;
 
             // Note: Blend2D color format is 0xAARRGGBB
-            BLColor.r = gradientColor.B;
-            BLColor.g = gradientColor.G;
-            BLColor.b = gradientColor.R;
-            BLColor.a = gradientColor.A;
+            BLColor.r = color.B;
+            BLColor.g = color.G;
+            BLColor.b = color.R;
+            BLColor.a = color.A;
 
+            blctx->setStrokeStyle( BLColor );
             blctx->setFillStyle( BLColor );
         }
     }
     else
     {
+       blctx->setStrokeStyle( BLRgba32( 0xFFA0A0A0 ) );
        blctx->setFillStyle( BLRgba32( 0xFFA0A0A0 ) );
     }
 
     blctx->setFillRule( BL_FILL_RULE_EVEN_ODD );
 
        /*iBLContext.fillPolygon( &mPointArray[0], mPointArray.size() );*/
+    //blctx->strokePath( combinedPath );
     blctx->fillPath( combinedPath );
     /*}*/
 }

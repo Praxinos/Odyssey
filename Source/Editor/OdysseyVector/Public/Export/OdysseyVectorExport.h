@@ -40,6 +40,10 @@ namespace FOdysseyVectorExport
                         static const uint32 CHUNK_BUCKET_ENTRY = 0x94267aa5; // container
                             static const uint32 CHUNK_BUCKET_POSITION = 0xd492a193; // uint8(R)-uint8(G)-uint8(B)-uint8(A)
                             static const uint32 CHUNK_BUCKET_COLOR = 0xd951af3c; // uint8(R)-uint8(G)-uint8(B)-uint8(A)
+                            static const uint32 CHUNK_BUCKET_GRADIENT = 0x5d7bbd93; // container
+                                static const uint32 CHUNK_BUCKET_GRADIENT_HANDLE =  0x575a6a77; // container
+                                static const uint32 CHUNK_BUCKET_GRADIENT_HANDLE_POSITION = 0xed18a100; // // double(X)-double(Y)
+                                static const uint32 CHUNK_BUCKET_GRADIENT_STOP = 0xd0dfb9d3; // uint8(R)-uint8(G)-uint8(B)-uint8(A)-float(stop)
                 static const uint32 CHUNK_OBJECT_ELLIPSE =  0x9c87ca8f; // container
                     static const uint32 CHUNK_ELLIPSE_FILLED = 0xf75a11b3; // uint32(bool)
                     static const uint32 CHUNK_ELLIPSE_GEOMETRY = 0xd2637c2e; // container

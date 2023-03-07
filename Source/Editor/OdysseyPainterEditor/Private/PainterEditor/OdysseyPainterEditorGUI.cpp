@@ -604,7 +604,7 @@ FOdysseyPainterEditorGUI::GroupPaint()
             if( selectObjectList.size() )
             {
                 UOdysseyVectorGroupPaint* paintGroup = NewObject<UOdysseyVectorGroupPaint>();
-                std::vector<UOdysseyVectorObject*> cubicPathArray;
+                std::vector<UOdysseyVectorPath*> pathArray;
 
                 paintGroup = NewObject<UOdysseyVectorGroupPaint>();
                 currentVectorLayer->GetScene()->AppendChild( paintGroup );
@@ -621,11 +621,11 @@ FOdysseyPainterEditorGUI::GroupPaint()
                         for( std::list<UOdysseyVectorObject*>::iterator cit = selectedPaintGroup->GetChildrenList().begin(); cit != selectedPaintGroup->GetChildrenList().end(); ++cit )
                         {
                             UOdysseyVectorObject* childObject = (*cit);
-                            UOdysseyVectorPathCubic* cubicPath = Cast<UOdysseyVectorPathCubic>(childObject);
+                            UOdysseyVectorPath* path = Cast<UOdysseyVectorPath>(childObject);
 
-                            if( cubicPath )
+                            if( path )
                             {
-                                cubicPathArray.push_back( cubicPath );
+                                pathArray.push_back( path );
                             }
                         }
 
@@ -636,23 +636,27 @@ FOdysseyPainterEditorGUI::GroupPaint()
 
                     if( selectedObject->GetClass() == UOdysseyVectorPathCubic::StaticClass() )
                     {
-                        UOdysseyVectorPathCubic* selectedCubicPath = Cast<UOdysseyVectorPathCubic>( selectedObject );
+                        UOdysseyVectorPath* selectedPath = Cast<UOdysseyVectorPath>( selectedObject );
 
-                        cubicPathArray.push_back( selectedCubicPath );
+                        pathArray.push_back( selectedPath );
                     }
                 }
 
-                for( int i = 0; i < cubicPathArray.size(); i++ )
+                for( int i = 0; i < pathArray.size(); i++ )
                 {
-                    cubicPathArray[i]->GetParent()->RemoveChild( cubicPathArray[i] );
-                    cubicPathArray[i]->SwitchSpace( *paintGroup );
-                    cubicPathArray[i]->Invalidate();
+                    pathArray[i]->GetParent()->RemoveChild( pathArray[i] );
+                    pathArray[i]->SwitchSpace( *paintGroup );
 
-                    paintGroup->AppendChild( cubicPathArray[i] );
+                    paintGroup->AppendChild( pathArray[i] );
 
-                    cubicPathArray[i]->ResetTransform();
-                    cubicPathArray[i]->UpdateMatrix();
+                    pathArray[i]->InvalidateAllSegments();
+
+                    pathArray[i]->ResetTransform();
+                    pathArray[i]->UpdateMatrix();
                 }
+
+                // first update to update paths' segments.
+                currentVectorLayer->GetScene()->Update( 0 );
 
                 paintGroup->Invalidate();
 
@@ -660,6 +664,7 @@ FOdysseyPainterEditorGUI::GroupPaint()
                 currentVectorLayer->GetScene()->Select( paintGroup );
                 currentVectorLayer->GetScene()->Update( 0 );
 
+                // second update to update paintgroup
                 currentVectorLayer->RenderImageChanged( false );
             }
         }

@@ -24,17 +24,50 @@ ReadBucketEntry( FOdysseyVectorBucket& iBucket, uint64 iChunkEnd, FArchive &Ar )
 
                 case FOdysseyVectorExport::CHUNK_BUCKET_COLOR:
                 {
-                    uint8 R;
-                    uint8 G;
-                    uint8 B;
-                    uint8 A;
+                    uint8 R, G, B, A;
 
                     Ar << R;
                     Ar << G;
                     Ar << B;
                     Ar << A;
 
+                    iBucket.SetGradient(false);
                     iBucket.SetColor( R, G, B, A );
+                }
+                break;
+
+                case FOdysseyVectorExport::CHUNK_BUCKET_GRADIENT: // container
+                    iBucket.SetGradient( true );
+                break;
+
+                case FOdysseyVectorExport::CHUNK_BUCKET_GRADIENT_STOP:
+                {
+                    uint8 R,G,B,A;
+                    double stopAt;
+
+                    Ar << R;
+                    Ar << G;
+                    Ar << B;
+                    Ar << A;
+
+                    Ar << stopAt;
+
+                    if( stopAt == 0.0f ) iBucket.SetGradientColor0( R, G, B, A );
+                    if( stopAt == 1.0f ) iBucket.SetGradientColor1( R, G, B, A );
+                }
+                break;
+
+                case FOdysseyVectorExport::CHUNK_BUCKET_GRADIENT_HANDLE: // container
+                break;
+
+                case FOdysseyVectorExport::CHUNK_BUCKET_GRADIENT_HANDLE_POSITION:
+                {
+                    ::ULIS::FVec2D position;
+
+                    Ar << position.x;
+                    Ar << position.y;
+
+                    iBucket.GetHandle()->Set( position.x, position.y );
                 }
                 break;
 

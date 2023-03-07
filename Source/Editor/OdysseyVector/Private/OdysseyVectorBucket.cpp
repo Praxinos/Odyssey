@@ -5,6 +5,10 @@
 #define HANDLERADIUS    8
 #define HANDLEDISTANCE 40.0f
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846L
+#endif
+
 FOdysseyVectorBucket::~FOdysseyVectorBucket()
 {
 }
@@ -60,14 +64,17 @@ FOdysseyVectorBucket::SetGradient( bool iIsGradient )
 }
 
 void
-FOdysseyVectorBucket::SetGradientColors( uint8 iR0, uint8 iG0, uint8 iB0, uint8 iA0
-                                       , uint8 iR1, uint8 iG1, uint8 iB1, uint8 iA1 )
+FOdysseyVectorBucket::SetGradientColor0( uint8 iR0, uint8 iG0, uint8 iB0, uint8 iA0 )
 {
     mGradientColor0.R = iR0;
     mGradientColor0.G = iG0;
     mGradientColor0.B = iB0;
     mGradientColor0.A = iA0;
+}
 
+void
+FOdysseyVectorBucket::SetGradientColor1( uint8 iR1, uint8 iG1, uint8 iB1, uint8 iA1 )
+{
     mGradientColor1.R = iR1;
     mGradientColor1.G = iG1;
     mGradientColor1.B = iB1;
@@ -158,11 +165,11 @@ void
 FOdysseyVectorBucket::Copy( FOdysseyVectorBucket* iDestinationBucket )
 {
     iDestinationBucket->mCoords = mCoords;
-    iDestinationBucket->mColor;
+    iDestinationBucket->mColor = mColor;
 
-    iDestinationBucket->mIsGradient;
-    iDestinationBucket->mGradientColor0;
-    iDestinationBucket->mGradientColor1;
+    iDestinationBucket->mIsGradient = mIsGradient;
+    iDestinationBucket->mGradientColor0 = mGradientColor0;
+    iDestinationBucket->mGradientColor1 = mGradientColor1;
 }
 
 uint32
@@ -232,6 +239,14 @@ FOdysseyVectorBucket::GetHandleDotProduct()
     }
 
     return 0.0f;
+}
+
+double
+FOdysseyVectorBucket::GetGradientRotationInDegrees()
+{
+    double dot = GetHandleDotProduct();
+
+    return acos(dot) / M_PI * 180.0f;
 }
 
 UOdysseyVectorObject&

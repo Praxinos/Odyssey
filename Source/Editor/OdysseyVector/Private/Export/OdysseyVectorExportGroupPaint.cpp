@@ -16,6 +16,63 @@ WriteBucketPosition( FOdysseyVectorBucket& iBucket, FArchive &Ar )
 }
 
 static void
+WriteBucketGradientHandlePosition( FOdysseyVectorBucket& iBucket, FArchive &Ar )
+{
+    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_BUCKET_GRADIENT_HANDLE_POSITION
+                                    , Ar
+                                    , [&iBucket](FArchive &Ar) -> void
+    {
+        ::ULIS::FVec2D& position = iBucket.GetHandle()->GetCoords();
+
+        Ar << position.x;
+        Ar << position.y;
+    } );
+}
+
+static void
+WriteBucketGradientHandle( FOdysseyVectorBucket& iBucket, FArchive &Ar )
+{
+    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_BUCKET_GRADIENT_HANDLE
+                                    , Ar
+                                    , [&iBucket](FArchive &Ar) -> void
+    {
+        WriteBucketGradientHandlePosition( iBucket, Ar );
+    } );
+}
+
+static void
+WriteBucketGradientStop( FColor& iStopColor, double iStopAt, FArchive &Ar )
+{
+    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_BUCKET_GRADIENT_STOP
+                                    , Ar
+                                    , [&iStopColor,iStopAt](FArchive &Ar) -> void
+    {
+        Ar << iStopColor.R;
+        Ar << iStopColor.G;
+        Ar << iStopColor.B;
+        Ar << iStopColor.A;
+
+        Ar << (double) iStopAt;
+    } );
+}
+
+static void
+WriteBucketGradient( FOdysseyVectorBucket& iBucket, FArchive &Ar )
+{
+    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_BUCKET_GRADIENT
+                                    , Ar
+                                    , [&iBucket](FArchive &Ar) -> void
+    {
+        FColor gradientColor0 = iBucket.GetGradientColor0();
+        FColor gradientColor1 = iBucket.GetGradientColor1();
+
+        WriteBucketGradientHandle( iBucket, Ar );
+        WriteBucketGradientStop( gradientColor0, 0.0f, Ar );
+        WriteBucketGradientStop( gradientColor1, 1.0f, Ar );
+    } );
+}
+
+static void
 WriteBucketColor( FOdysseyVectorBucket& iBucket, FArchive &Ar )
 {
     FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_BUCKET_COLOR
@@ -39,7 +96,16 @@ WriteBucketEntry( FOdysseyVectorBucket& iBucket, FArchive &Ar )
                                     , [&iBucket](FArchive &Ar) -> void
     {
         WriteBucketPosition( iBucket, Ar );
-        WriteBucketColor( iBucket, Ar );
+
+        if( iBucket.IsGradient() == true )
+        {
+            WriteBucketGradient( iBucket, Ar );
+        }
+
+        if( iBucket.IsGradient() == false )
+        {
+            WriteBucketColor( iBucket, Ar );
+        }
     } );
 }
 

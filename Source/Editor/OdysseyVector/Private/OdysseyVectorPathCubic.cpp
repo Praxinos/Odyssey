@@ -692,17 +692,23 @@ void
 UOdysseyVectorPathCubic::SwitchSpace( UOdysseyVectorObject& iNewSpace )
 {
     BLMatrix2D& newSpaceInverseWorldMatrix = iNewSpace.GetInverseWorldMatrix();
+    BLMatrix2D& newSpaceWorldMatrix = iNewSpace.GetWorldMatrix();
 
     for( std::list<UOdysseyVectorVertex*>::iterator it = mVertexList.begin(); it != mVertexList.end(); ++it )
     {
         UOdysseyVectorVertexCubic* cubicVertex = static_cast<UOdysseyVectorVertexCubic*>(*it);
         ::ULIS::FVec2D& point = cubicVertex->GetCoords();
-        BLPoint pt;
+        BLPoint worldPt = mWorldMatrix.mapPoint( point.x, point.y );
+        BLPoint wordlVec = mWorldMatrix.mapVector( 0.70710678118f * cubicVertex->GetRadius()
+                                                 , 0.70710678118f * cubicVertex->GetRadius() );
+        BLPoint localPt = newSpaceInverseWorldMatrix.mapPoint( worldPt );
+        BLPoint localVec = newSpaceInverseWorldMatrix.mapVector( wordlVec );
+        ::ULIS::FVec2D vec = { localVec.x, localVec.y };
 
-        pt = newSpaceInverseWorldMatrix.mapPoint( mWorldMatrix.mapPoint( point.x, point.y ) );
+        point.x = localPt.x;
+        point.y = localPt.y;
 
-        point.x = pt.x;
-        point.y = pt.y;
+        cubicVertex->SetRadius( vec.Distance(), false );
     }
 
     for( std::list<UOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )

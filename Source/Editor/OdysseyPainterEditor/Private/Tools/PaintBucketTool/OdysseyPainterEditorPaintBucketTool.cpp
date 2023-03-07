@@ -353,8 +353,8 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseUpVector( UOdysseyTextureLayerImage
                     if( Gradient )
                     {
                         mPickedBucket->SetGradient( true );
-                        mPickedBucket->SetGradientColors( Color1.R, Color1.G, Color1.B, Color1.A
-                                                        , Color2.R, Color2.G, Color2.B, Color2.A );
+                        mPickedBucket->SetGradientColor0( Color1.R, Color1.G, Color1.B, Color1.A );
+                        mPickedBucket->SetGradientColor1( Color2.R, Color2.G, Color2.B, Color2.A );
                     }
                     else
                     {

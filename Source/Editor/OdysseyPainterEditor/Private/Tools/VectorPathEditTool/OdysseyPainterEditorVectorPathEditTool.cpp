@@ -65,13 +65,13 @@ UOdysseyPainterEditorVectorPathEditTool::OnKeyDown(const FKey& iKey)
     {
         UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
 
-        if ( iKey == EKeys::LeftControl )
+        if ( ( iKey == EKeys::LeftControl ) || ( iKey == EKeys::RightControl ) )
         {
             mCubicPathHUD.SetDisplayMode( FOdysseyVectorHUDPathCubic::VIEW_PATH
                                         | FOdysseyVectorHUDPathCubic::VIEW_HANDLE_SEGMENT );
         }
 
-        if ( iKey == EKeys::LeftShift )
+        if ( ( iKey == EKeys::LeftShift ) || ( iKey == EKeys::LeftShift ) )
         {
             mCubicPathHUD.SetDisplayMode( FOdysseyVectorHUDPathCubic::VIEW_PATH
                                         | FOdysseyVectorHUDPathCubic::VIEW_HANDLE_POINT );

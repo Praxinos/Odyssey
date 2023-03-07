@@ -555,6 +555,17 @@ _drawLinearJoint( UOdysseyVectorPath* iPath
 }
 
 void
+UOdysseyVectorPath::InvalidateAllSegments()
+{
+    for(std::list<UOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it)
+    {
+        UOdysseyVectorSegment *segment = (*it);
+
+        segment->Invalidate();
+    }
+}
+
+void
 UOdysseyVectorPath::DrawJoint( UOdysseyVectorVertex* iVertex, ::ULIS::FRectD &iRoi, uint64 iFlags )
 {
     UOdysseyVectorSegment* segment0 = iVertex->GetFirstSegment();
