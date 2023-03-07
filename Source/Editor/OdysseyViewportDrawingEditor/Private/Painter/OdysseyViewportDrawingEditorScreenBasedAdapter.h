@@ -91,9 +91,4 @@ private:
     TArray<TArray<FLinearColor>> mColorData;
     //TArray<FColor*> mColorDataPtr;
     FRenderCommandFence mPixelFence;
-
-    FVector mXScreenAxis;
-    FVector mYScreenAxis;
-    FVector mZScreenAxis;
-    FVector mMousePosInWorld;
 };

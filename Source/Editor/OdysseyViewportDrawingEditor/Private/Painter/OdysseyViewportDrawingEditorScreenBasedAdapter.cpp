@@ -103,56 +103,25 @@ void FOdysseyViewportDrawingEditorScreenBasedAdapter::RenderInteractorWidget(con
 
         meshAdapter->LineTraceComponent(traceHitResult, paintRay.CameraLocation, rayEnd, FCollisionQueryParams(SCENE_QUERY_STAT(Paint), true));
 
-        FVector originDeproj, xDeproj, yDeproj, middleViewport;
+        FVector originDeproj, xDeproj, yDeproj, xScreenAxis, yScreenAxis, zScreenAxis, mousePosInWorld;
 
-        iView->DeprojectFVector2D(FVector2D(0, 0), originDeproj, mZScreenAxis);
-        iView->DeprojectFVector2D(FVector2D(1, 0), xDeproj, mZScreenAxis);
-        iView->DeprojectFVector2D(FVector2D(0, 1), yDeproj, mZScreenAxis);
-        iView->DeprojectFVector2D(FVector2D(iViewport->GetSizeXY().X / 2, iViewport->GetSizeXY().Y / 2), middleViewport, mZScreenAxis);
-        iView->DeprojectFVector2D(FVector2D(iViewport->GetMouseX(), iViewport->GetMouseY()), mMousePosInWorld, mZScreenAxis);
-        //FPlane plan = iView->Project( traceHitResult.Location );
+        iView->DeprojectFVector2D(FVector2D(0, 0), originDeproj, zScreenAxis);
+        iView->DeprojectFVector2D(FVector2D(1, 0), xDeproj, zScreenAxis);
+        iView->DeprojectFVector2D(FVector2D(0, 1), yDeproj, zScreenAxis);
+        iView->DeprojectFVector2D(FVector2D(iViewport->GetMouseX(), iViewport->GetMouseY()), mousePosInWorld, zScreenAxis);
 
-        //mMultiplier = FMath::Log2(plan.W);
-
-        mXScreenAxis = xDeproj - originDeproj;
-        mYScreenAxis = yDeproj - originDeproj;
+        xScreenAxis = xDeproj - originDeproj;
+        yScreenAxis = yDeproj - originDeproj;
         
-        FVector mousePosInWorldWithZ = mMousePosInWorld + mZScreenAxis;
+        mousePosInWorld += zScreenAxis;
 
         const FLinearColor brushCueColor = FLinearColor(1.0f, 1.0f, 0.3f);
 
         if (iPDI != NULL)
         {
             int numCircleSides = 128;
-            DrawCircle(iPDI, mousePosInWorldWithZ, mXScreenAxis, mYScreenAxis, brushCueColor, drawingTool->GetBrushInstance()->GetSizeModifier(), numCircleSides, SDPG_World, 0.01f);
+            DrawCircle(iPDI, mousePosInWorld, xScreenAxis, yScreenAxis, brushCueColor, drawingTool->GetBrushInstance()->GetSizeModifier(), numCircleSides, SDPG_World, 0.01f);
         }
-
-        //The position of the projection of the hit result on the sphere view
-        FVector projectionOnSphere = traceHitResult.Location - paintRay.CameraLocation;
-        projectionOnSphere = (iView->NearClippingDistance / projectionOnSphere.Size()) * projectionOnSphere;
-        double projOnSpherelongitude = FMath::Atan2(projectionOnSphere.Y, projectionOnSphere.X);
-        double projOnSpherelatitude = FMath::Acos(projectionOnSphere.Z / iView->NearClippingDistance);
-
-        //The position of the center of the plane used to see the scene through. Is tangent to the sphere view
-        FVector positionOnSphere = middleViewport - paintRay.CameraLocation;
-        double longitude = FMath::Atan2(positionOnSphere.Y, positionOnSphere.X);
-        double latitude = FMath::Acos(positionOnSphere.Z / iView->NearClippingDistance);
-
-        double angleX = projOnSpherelongitude - longitude;
-        double angleY = projOnSpherelatitude - latitude;
-
-        FVector rotationVector = (angleY / mXScreenAxis.Size()) * mXScreenAxis;
-        FQuat quaternionRotation = FQuat::MakeFromRotationVector(rotationVector);
-
-        mXScreenAxis = quaternionRotation.RotateVector(mXScreenAxis);
-        mXScreenAxis = FVector(mXScreenAxis.X * FMath::Cos(angleX) - mXScreenAxis.Y * FMath::Sin(angleX), mXScreenAxis.X * FMath::Sin(angleX) + mXScreenAxis.Y * FMath::Cos(angleX), mXScreenAxis.Z);
-
-        mYScreenAxis = quaternionRotation.RotateVector(mYScreenAxis);
-        mYScreenAxis = FVector(mYScreenAxis.X * FMath::Cos(angleX) - mYScreenAxis.Y * FMath::Sin(angleX), mYScreenAxis.X * FMath::Sin(angleX) + mYScreenAxis.Y * FMath::Cos(angleX), mYScreenAxis.Z);
-
-        mXScreenAxis /= mXScreenAxis.Size();
-        mYScreenAxis /= mYScreenAxis.Size();
-        mZScreenAxis /= mZScreenAxis.Size();
     }
 
 }
@@ -338,16 +307,68 @@ TArray<::ULIS::FRectI> FOdysseyViewportDrawingEditorScreenBasedAdapter::GetMinim
     iStampParams.mPosition.x = iStampParams.mPosition.x + iStampParams.mBlock->Width() / 2.f;
     iStampParams.mPosition.y = iStampParams.mPosition.y + iStampParams.mBlock->Height() / 2.f;
 
+    const FViewportCursorLocation mouseViewportRay(view, viewportClient, iStampParams.mPosition.x, iStampParams.mPosition.y);
+
     FHitResult traceHitResult(1.0f);
-    const FVector rayEnd(mMousePosInWorld + mZScreenAxis * HALF_WORLD_MAX);
+    const FVector rayEnd(mouseViewportRay.GetOrigin() + mouseViewportRay.GetDirection() * HALF_WORLD_MAX);
 
-    meshAdapter->LineTraceComponent(traceHitResult, mMousePosInWorld, rayEnd, FCollisionQueryParams(SCENE_QUERY_STAT(Paint), true));
+    meshAdapter->LineTraceComponent(traceHitResult, mouseViewportRay.GetOrigin(), rayEnd, FCollisionQueryParams(SCENE_QUERY_STAT(Paint), true));
 
-    //FVector brushXAxis, brushYAxis;
+
     FVector brushXAxis = FVector( 1, 0, 0 );
     FVector brushYAxis = FVector( 0, 1, 0 );
     FVector brushZAxis = FVector( 0, 0, 1 );
     const FMatrix worldToBrushMatrix = FMatrix(brushXAxis, brushYAxis, brushZAxis, traceHitResult.Location).Inverse();
+
+    //Screen axis calculations -----------------------------------------------------
+
+    FVector originDeproj, xDeproj, yDeproj, middleViewport, xScreenAxis, yScreenAxis, zScreenAxis, mousePosInWorld;
+
+    view->DeprojectFVector2D(FVector2D(0, 0), originDeproj, zScreenAxis);
+    view->DeprojectFVector2D(FVector2D(1, 0), xDeproj, zScreenAxis);
+    view->DeprojectFVector2D(FVector2D(0, 1), yDeproj, zScreenAxis);
+    view->DeprojectFVector2D(FVector2D(mLastKnownViewport->GetSizeXY().X / 2, mLastKnownViewport->GetSizeXY().Y / 2), middleViewport, zScreenAxis);
+    view->DeprojectFVector2D(FVector2D(mLastKnownViewport->GetMouseX(), mLastKnownViewport->GetMouseY()), mousePosInWorld, zScreenAxis);
+    FPlane plan = view->Project(traceHitResult.Location);
+
+    float multiplier = FMath::Pow(90.f / view->FOV, 2) * (400.f / plan.W);
+
+    xScreenAxis = xDeproj - originDeproj;
+    yScreenAxis = yDeproj - originDeproj;
+
+    //The position of the projection of the hit result on the sphere view
+    FVector projectionOnSphere = traceHitResult.Location - mouseViewportRay.GetOrigin();
+    projectionOnSphere = (view->NearClippingDistance / projectionOnSphere.Size()) * projectionOnSphere;
+    double projOnSpherelongitude = FMath::Atan2(projectionOnSphere.Y, projectionOnSphere.X);
+    double projOnSpherelatitude = FMath::Acos(projectionOnSphere.Z / view->NearClippingDistance);
+
+    //The position of the center of the plane used to see the scene through. Is tangent to the sphere view
+    FVector positionOnSphere = middleViewport - mouseViewportRay.GetOrigin();
+    double longitude = FMath::Atan2(positionOnSphere.Y, positionOnSphere.X);
+    double latitude = FMath::Acos(positionOnSphere.Z / view->NearClippingDistance);
+
+    double angleX = projOnSpherelongitude - longitude;
+    double angleY = projOnSpherelatitude - latitude;
+
+    FVector rotationVector = (angleY / xScreenAxis.Size()) * xScreenAxis;
+    FQuat quaternionRotation = FQuat::MakeFromRotationVector(rotationVector);
+
+    xScreenAxis = FVector(xScreenAxis.X * FMath::Cos(angleX) - xScreenAxis.Y * FMath::Sin(angleX), xScreenAxis.X * FMath::Sin(angleX) + xScreenAxis.Y * FMath::Cos(angleX), xScreenAxis.Z);
+    xScreenAxis = quaternionRotation.RotateVector(xScreenAxis);
+
+    yScreenAxis = FVector(yScreenAxis.X * FMath::Cos(angleX) - yScreenAxis.Y * FMath::Sin(angleX), yScreenAxis.X * FMath::Sin(angleX) + yScreenAxis.Y * FMath::Cos(angleX), yScreenAxis.Z);
+    yScreenAxis = quaternionRotation.RotateVector(yScreenAxis);
+
+    xScreenAxis /= xScreenAxis.Size();
+    yScreenAxis /= yScreenAxis.Size();
+    zScreenAxis /= zScreenAxis.Size();
+
+    xScreenAxis *= multiplier;
+    yScreenAxis *= multiplier;
+    zScreenAxis *= multiplier;
+
+    //Screen axis calculations -----------------------------------------------------
+
 
     // Convert trace to UV position
     FVector2D coord;
@@ -369,8 +390,8 @@ TArray<::ULIS::FRectI> FOdysseyViewportDrawingEditorScreenBasedAdapter::GetMinim
         screenPaintBatchedElementParameters->ShaderParams.WorldToBrushMatrix = worldToBrushMatrix;
         screenPaintBatchedElementParameters->ShaderParams.TextureHitPoint = FVector2D( iStampParams.mPosition.x, iStampParams.mPosition.y );
         screenPaintBatchedElementParameters->ShaderParams.StampQuality = 1;
-        screenPaintBatchedElementParameters->ShaderParams.xScreenAxis = mXScreenAxis;
-        screenPaintBatchedElementParameters->ShaderParams.yScreenAxis = mYScreenAxis;
+        screenPaintBatchedElementParameters->ShaderParams.xScreenAxis = xScreenAxis;
+        screenPaintBatchedElementParameters->ShaderParams.yScreenAxis = yScreenAxis;
     }
 
     const ERHIFeatureLevel::Type featureLevel = mEditor->Component()->GetWorld()->FeatureLevel;
