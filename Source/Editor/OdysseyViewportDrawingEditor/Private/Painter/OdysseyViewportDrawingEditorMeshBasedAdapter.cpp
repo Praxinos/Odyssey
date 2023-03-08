@@ -359,7 +359,7 @@ float FOdysseyViewportDrawingEditorMeshBasedAdapter::GetStampQuality()
     float brushSize = FMath::Max(iStampParams.mBlock->Width(), iStampParams.mBlock->Height());// * FMath::Max3(mEditor->Actor()->GetActorScale().X, mEditor->Actor()->GetActorScale().Y, mEditor->Actor()->GetActorScale().Z);
     brushSize *= brushSize;
     brushSize /= GetStampQuality();
-    triangles = meshAdapter->SphereIntersectTriangles(brushSize, meshAdapter->GetComponentToWorldMatrix().InverseTransformPosition(traceHitResult.Location), mouseViewportRay.GetOrigin(), true);
+    triangles = meshAdapter->SphereIntersectTriangles(brushSize, meshAdapter->GetComponentToWorldMatrix().InverseTransformPosition(traceHitResult.Location), mouseViewportRay.GetOrigin(), false);
 
     const TArray<uint32> vertexIndices = meshAdapter->GetMeshIndices();
     uint32 triIndices = vertexIndices.Num() / 3;

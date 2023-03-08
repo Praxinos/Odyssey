@@ -73,7 +73,7 @@ void FOdysseyViewportDrawingEditorScreenBasedAdapter::Tick(float iDelta)
         TexturePaintHelpers::CopyTextureToRenderTargetTexture(mEditor->Texture(), mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
 
     if( mLastKnownViewport )
-        mEditor->GetGUI()->GetTopTab()->SetMeshMaxSize(FMath::Max(mLastKnownViewport->GetSizeXY().X, mLastKnownViewport->GetSizeXY().Y) / 2);
+        mEditor->GetGUI()->GetTopTab()->SetMeshMaxSize((FMath::Max(mLastKnownViewport->GetSizeXY().X, mLastKnownViewport->GetSizeXY().Y) / 2) * GetStampQuality());
 
     mEditor->GetSelectedTool()->Tick(iDelta);
 }
@@ -120,7 +120,7 @@ void FOdysseyViewportDrawingEditorScreenBasedAdapter::RenderInteractorWidget(con
         if (iPDI != NULL)
         {
             int numCircleSides = 128;
-            DrawCircle(iPDI, mousePosInWorld, xScreenAxis, yScreenAxis, brushCueColor, drawingTool->GetBrushInstance()->GetSizeModifier(), numCircleSides, SDPG_World, 0.01f);
+            DrawCircle(iPDI, mousePosInWorld, xScreenAxis, yScreenAxis, brushCueColor, drawingTool->GetBrushInstance()->GetSizeModifier() / GetStampQuality(), numCircleSides, SDPG_World, 0.01f);
         }
     }
 
@@ -275,6 +275,16 @@ TArray<::ULIS::FRectI> FOdysseyViewportDrawingEditorScreenBasedAdapter::GetMinim
     return finalRects;
 }
 
+float FOdysseyViewportDrawingEditorScreenBasedAdapter::GetStampQuality()
+{
+    if (mEditor->Texture() && mEditor->Component())
+    {
+        return ((FMath::Max(mEditor->Texture()->GetSizeX(), mEditor->Texture()->GetSizeY()) / mEditor->GetMeshComponentMaxSize()) + 1.f);
+    }
+
+    return 1.f;
+}
+
 ::ULIS::FEvent FOdysseyViewportDrawingEditorScreenBasedAdapter::StampOverride(UOdysseyBrushAssetBase::FStampParams iStampParams)
 {
     UOdysseyPainterEditorRasterDrawingTool* drawingTool = nullptr;
@@ -389,7 +399,7 @@ TArray<::ULIS::FRectI> FOdysseyViewportDrawingEditorScreenBasedAdapter::GetMinim
         screenPaintBatchedElementParameters->ShaderParams.Stroke2D = mStrokeBufferTexture2D;
         screenPaintBatchedElementParameters->ShaderParams.WorldToBrushMatrix = worldToBrushMatrix;
         screenPaintBatchedElementParameters->ShaderParams.TextureHitPoint = FVector2D( iStampParams.mPosition.x, iStampParams.mPosition.y );
-        screenPaintBatchedElementParameters->ShaderParams.StampQuality = 1;
+        screenPaintBatchedElementParameters->ShaderParams.StampQuality = GetStampQuality();
         screenPaintBatchedElementParameters->ShaderParams.xScreenAxis = xScreenAxis;
         screenPaintBatchedElementParameters->ShaderParams.yScreenAxis = yScreenAxis;
     }
@@ -401,16 +411,31 @@ TArray<::ULIS::FRectI> FOdysseyViewportDrawingEditorScreenBasedAdapter::GetMinim
     FHitProxyId strokePaintHitProxyId = strokePaintCanvas.GetHitProxyId();
     FBatchedElements* strokePaintBatchedElements = strokePaintCanvas.GetBatchedElements(FCanvas::ET_Triangle, screenPaintBatchedElementParameters, nullptr, SE_BLEND_Opaque);
 
-    //Todo: make ellipseIntersectTriangles ?
+     const TArray<uint32> vertexIndices = meshAdapter->GetMeshIndices();
+     uint32 triIndices = vertexIndices.Num() / 3;
+     TArray<FTexturePaintTriangleInfo> triangleInfo;
+     TArray<FTexturePaintMeshSectionInfo> sectionInfo;
+     for (uint32 i = 0; i < triIndices; i++)
+     {
+         const int32 indices[3] = { int32(vertexIndices[i * 3]), int32(vertexIndices[i * 3 + 1]), int32(vertexIndices[i * 3 + 2]) };
+         GatherTextureTriangles(meshAdapter.Get(), i, indices, &triangleInfo, &sectionInfo, mEditor->GetUVIndexUsedByCurrentTexture());
+     }
+
+    /*TArray<uint32> triangles;
+    float brushSize = HALF_WORLD_MAX;
+    triangles = meshAdapter->SphereIntersectTriangles(brushSize, traceHitResult.Location, mouseViewportRay.GetOrigin(), true);
+
     const TArray<uint32> vertexIndices = meshAdapter->GetMeshIndices();
     uint32 triIndices = vertexIndices.Num() / 3;
     TArray<FTexturePaintTriangleInfo> triangleInfo;
     TArray<FTexturePaintMeshSectionInfo> sectionInfo;
-    for (uint32 i = 0; i < triIndices; i++)
+    for (int i = 0; i < triangles.Num(); i++)
     {
-        const int32 indices[3] = { int32(vertexIndices[i * 3]), int32(vertexIndices[i * 3 + 1]), int32(vertexIndices[i * 3 + 2]) };
-        GatherTextureTriangles(meshAdapter.Get(), i, indices, &triangleInfo, &sectionInfo, mEditor->GetUVIndexUsedByCurrentTexture());
-    }
+        const int32 indices[3] = { int32(vertexIndices[triangles[i] * 3]), int32(vertexIndices[triangles[i] * 3 + 1]), int32(vertexIndices[triangles[i] * 3 + 2]) };
+        GatherTextureTriangles(meshAdapter.Get(), triangles[i], indices, &triangleInfo, &sectionInfo, mEditor->GetUVIndexUsedByCurrentTexture());
+    }*/
+
+
 
     // Process the influenced triangles - storing off a large list is much slower than processing in a single loop
     for (int32 CurIndex = 0; CurIndex < triangleInfo.Num(); ++CurIndex)
