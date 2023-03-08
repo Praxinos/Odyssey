@@ -29,7 +29,7 @@ FOdysseyVectorHUDPathCubic::GetDisplayMode()
 
 void
 FOdysseyVectorHUDPathCubic::DrawVertex( UOdysseyVectorPathCubic* iPath
-                                      , UOdysseyVectorVertexCubic* iCubicVertex
+                                      , FOdysseyVectorVertexCubic* iCubicVertex
                                       , ::ULIS::FVec2D& iFactor
                                       , ::ULIS::FRectD& iRoi
                                       , uint64 iFlags )
@@ -72,7 +72,7 @@ FOdysseyVectorHUDPathCubic::DrawVertex( UOdysseyVectorPathCubic* iPath
 
 void
 FOdysseyVectorHUDPathCubic::DrawSegment( UOdysseyVectorPathCubic* iPath
-                                       , UOdysseyVectorSegmentCubic* iCubicSegment
+                                       , FOdysseyVectorSegmentCubic* iCubicSegment
                                        , ::ULIS::FVec2D& iFactor
                                        , ::ULIS::FRectD& iRoi
                                        , uint64 iFlags )
@@ -146,8 +146,8 @@ FOdysseyVectorHUDPathCubic::Draw( UOdysseyVectorRoot& iScene, ::ULIS::FRectD& iR
         {
             UOdysseyVectorPathCubic* cubicPath = Cast<UOdysseyVectorPathCubic>(selectedObject);
             BLPoint localVector = cubicPath->GetInverseWorldMatrix().mapVector ( 0.7071f, 0.7071f );
-            std::list<UOdysseyVectorSegment*>& segmentList = cubicPath->GetSegmentList();
-            std::list<UOdysseyVectorVertex*>& vertexList = cubicPath->GetVertexList();
+            std::list<FOdysseyVectorSegment*>& segmentList = cubicPath->GetSegmentList();
+            std::list<FOdysseyVectorVertex*>& vertexList = cubicPath->GetVertexList();
             ::ULIS::FVec2D factor = { localVector.x, localVector.y };
             /*double handleRadiusX = 6.0f * factor.x;
             double handleRadiusY = 6.0f * factor.y;
@@ -156,17 +156,17 @@ FOdysseyVectorHUDPathCubic::Draw( UOdysseyVectorRoot& iScene, ::ULIS::FRectD& iR
 
             blctx->setMatrix( cubicPath->GetWorldMatrix() );
 
-            for( std::list<UOdysseyVectorSegment*>::iterator it = segmentList.begin(); it != segmentList.end(); ++it )
+            for( std::list<FOdysseyVectorSegment*>::iterator it = segmentList.begin(); it != segmentList.end(); ++it )
             {
-                UOdysseyVectorSegmentCubic* cubicSegment = Cast<UOdysseyVectorSegmentCubic>(*it);
+                FOdysseyVectorSegmentCubic* cubicSegment = Cast<FOdysseyVectorSegmentCubic>(*it);
 
                 DrawSegment( cubicPath, cubicSegment, factor, iRoi, iFlags );
             }
 
             // Points and Point size handles
-            for( std::list<UOdysseyVectorVertex*>::iterator it = vertexList.begin(); it != vertexList.end(); ++it )
+            for( std::list<FOdysseyVectorVertex*>::iterator it = vertexList.begin(); it != vertexList.end(); ++it )
             {
-                UOdysseyVectorVertexCubic *cubicVertex = static_cast<UOdysseyVectorVertexCubic*>(*it);
+                FOdysseyVectorVertexCubic *cubicVertex = static_cast<FOdysseyVectorVertexCubic*>(*it);
 
                 DrawVertex( cubicPath, cubicVertex, factor, iRoi, iFlags );
             }

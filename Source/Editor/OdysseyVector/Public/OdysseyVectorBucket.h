@@ -12,7 +12,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorBucket
         UOdysseyVectorObject& mParent;
         ::ULIS::FVec2D mCoords;
         FColor mColor;
-        UOdysseyVectorHandleBucket* mCtrlPoint;
+        FOdysseyVectorHandleBucket* mCtrlPoint;
         bool mIsGradient;
         FColor mGradientColor0;
         FColor mGradientColor1;
@@ -40,8 +40,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorBucket
         FColor& GetColor();
         void Copy( FOdysseyVectorBucket* iDestinationBucket );
         uint32 Pick( double iX, double iY );
-        UOdysseyVectorHandleBucket* PickHandle( double iX, double iY );
-        UOdysseyVectorHandleBucket* GetHandle();
+        FOdysseyVectorHandleBucket* PickHandle( double iX, double iY );
+        FOdysseyVectorHandleBucket* GetHandle();
         UOdysseyVectorObject& GetParent();
         double GetHandleDotProduct();
         void DrawCross();

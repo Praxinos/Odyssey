@@ -1,34 +1,26 @@
 #pragma once
 
-#include "CoreMinimal.h"
-
 #include <blend2d.h>
 #include <Core/Core.h>
 #include <Image/Block.h>
 #include "OdysseyVectorHandle.h"
 
-#include "OdysseyVectorHandleSegment.generated.h"
-
-UCLASS()
-class ODYSSEYVECTOR_API UOdysseyVectorHandleSegment : public UOdysseyVectorHandle
+class ODYSSEYVECTOR_API FOdysseyVectorHandleSegment : public FOdysseyVectorHandle
 {
     public:
-        GENERATED_BODY()
-
-    public:
-        static UOdysseyVectorHandleSegment* New( UOdysseyVectorSegment* iParentSegment, double iX, double iY );
-        void Init( UOdysseyVectorSegment* iParentSegment, double iX, double iY );
+        static FOdysseyVectorHandleSegment* New( FOdysseyVectorSegment* iParentSegment, double iX, double iY );
+        void Init( FOdysseyVectorSegment* iParentSegment, double iX, double iY );
 
     private:
-        UOdysseyVectorSegment* mParentSegment;
+        FOdysseyVectorSegment* mParentSegment;
 
     protected:
 
     public:
-        ~UOdysseyVectorHandleSegment();
-        UOdysseyVectorHandleSegment( );
+        ~FOdysseyVectorHandleSegment();
+        FOdysseyVectorHandleSegment( );
 
-        UOdysseyVectorSegment* GetParent();
+        FOdysseyVectorSegment* GetParent();
         void SetX( double iX );
         void SetY( double iY );
         void Set( double iX,double iY );

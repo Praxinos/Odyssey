@@ -21,7 +21,7 @@ typedef struct _FCycleNode
 {
     struct _FCycleNode* parent;
     std::list<FOdysseyVectorSection*>* bypassEdgeList;
-    UOdysseyVectorVertex* vertex;
+    FOdysseyVectorVertex* vertex;
     FOdysseyVectorSection* section;
     uint32 depth;
 } FCycleNode;
@@ -39,7 +39,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorGroupPaint : public UOdysseyVectorGroup
         GENERATED_BODY()
 
     protected:
-        uint32 MarchVertex( UOdysseyVectorVertexIntersection* iVertex );
+        uint32 MarchVertex( FOdysseyVectorVertexIntersection* iVertex );
 
         static const uint32 NOCYCLE  = 0;
         static const uint32 BLOCKED  = 1;
@@ -70,28 +70,19 @@ class ODYSSEYVECTOR_API UOdysseyVectorGroupPaint : public UOdysseyVectorGroup
         bool PickShape( ::ULIS::FRectD& iRoi, uint32 iSelectionFlags );
         UOdysseyVectorObject* CopyShape();
 
-        uint32 IntersectSegment( UOdysseyVectorSegmentCubic& iCubicSegment
-                               , std::list<UOdysseyVectorSegment*>& cubicSegmenList
-                               , std::vector<UOdysseyVectorVertexIntersection*>& iIntersectionVertexList );
+        uint32 IntersectSegment( FOdysseyVectorSegmentCubic& iCubicSegment
+                               , std::list<FOdysseyVectorSegment*>& cubicSegmenList
+                               , std::vector<FOdysseyVectorVertexIntersection*>& iIntersectionVertexList );
         void CopyBuckets( UOdysseyVectorGroupPaint* iDestination );
-        uint32 BuildGraph( std::vector<UOdysseyVectorVertexIntersection*>& iIntersectionVertexArray );
+        uint32 BuildGraph( std::vector<FOdysseyVectorVertexIntersection*>& iIntersectionVertexArray );
 
-        /*FOdysseyVectorLoop* MakeCycle( uint64 iCycleID
-                                     , std::vector<UOdysseyVectorVertex*>& iVertexArray
-                                     , std::vector<FOdysseyVectorSection*>& iSectionArray );*/
-        FOdysseyVectorLoop* March( UOdysseyVectorVertexIntersection* iNode
+        FOdysseyVectorLoop* March( FOdysseyVectorVertexIntersection* iNode
                                  , FOdysseyVectorSection* iStartSection
                                  , FOdysseyVectorSection* iEndSection );
-/*
-        FOdysseyVectorLoop* FindPath( UOdysseyVectorVertexIntersection* iVertex
-                                    , FOdysseyVectorSection* iStartSection
-                                    , FOdysseyVectorSection* iEndSection
-                                    , std::vector<UOdysseyVectorVertex*>& oVertexArray
-                                    , std::vector<UOdysseyVectorVertex*>& oSectionArray );
-*/
-        uint32 FindPath( UOdysseyVectorVertex* iVertex
+
+        uint32 FindPath( FOdysseyVectorVertex* iVertex
                                   , FOdysseyVectorSection* iSection
-                                  , std::vector<UOdysseyVectorVertex*>& iVertexArray
+                                  , std::vector<FOdysseyVectorVertex*>& iVertexArray
                                   , std::vector<FOdysseyVectorSection*>& iSectionArray
                                   , double iOrientation
                                   , uint32 );
@@ -105,7 +96,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorGroupPaint : public UOdysseyVectorGroup
         FOdysseyVectorBucket* Bucket( double iX, double iY, uint8 iR, uint8 iG, uint8 iB, uint8 iA );
         FOdysseyVectorBucket* PickBucket( double iX, double iY );
         FOdysseyVectorLoop* PickCycle( double iX, double iY );
-        UOdysseyVectorHandleBucket* PickBucketHandle( double iX, double iY );
+        FOdysseyVectorHandleBucket* PickBucketHandle( double iX, double iY );
         void DrawBuckets( ::ULIS::FRectD& iRoi, uint64 iFlags );
         void OrderCycles();
         void ClearCycles();

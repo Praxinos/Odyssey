@@ -11,7 +11,7 @@ FOdysseyVectorLoop::~FOdysseyVectorLoop()
 //static
 FOdysseyVectorLoop::FOdysseyVectorLoop( UOdysseyVectorObject& iParent
                                       , uint64 iID
-                                      , std::vector<UOdysseyVectorVertex*>& iVertexArray
+                                      , std::vector<FOdysseyVectorVertex*>& iVertexArray
                                       , std::vector<FOdysseyVectorSection*>& iSectionArray )
     : mParent( iParent )
     , mID( iID )
@@ -24,7 +24,7 @@ FOdysseyVectorLoop::FOdysseyVectorLoop( UOdysseyVectorObject& iParent
     , mParentCycle( nullptr )
 {
 /*
-    Cast<UOdysseyVectorVertexIntersection>(iVertexArray[0])->AttachLoop( this );
+    Cast<FOdysseyVectorVertexIntersection>(iVertexArray[0])->AttachLoop( this );
 */
 
 
@@ -81,7 +81,7 @@ FOdysseyVectorLoop::FitsIn( FOdysseyVectorLoop* iParentCandidate )
     return true;
 }
 
-std::vector<UOdysseyVectorVertex*>& 
+std::vector<FOdysseyVectorVertex*>& 
 FOdysseyVectorLoop::GetVertexArray()
 {
     return mVertexArray;
@@ -111,14 +111,14 @@ FOdysseyVectorLoop::GenerateID( std::vector<FOdysseyVectorSection*>& iSectionArr
 /*
 FOdysseyVectorLoop*
 FOdysseyVectorLoop::Exists( uint64 iID
-                          , std::vector<UOdysseyVectorVertex*>& iVertexArray
+                          , std::vector<FOdysseyVectorVertex*>& iVertexArray
                           , std::vector<FOdysseyVectorSection*>& iSectionArray )
 {
     for( int i = 0; i < iVertexArray.size(); i++ )
     {
-        if( iVertexArray[i]->GetClass() == UOdysseyVectorVertexIntersection::StaticClass() )
+        if( iVertexArray[i]->GetClass() == FOdysseyVectorVertexIntersection::StaticClass() )
         {
-            UOdysseyVectorVertexIntersection* intersectionVertex = Cast<UOdysseyVectorVertexIntersection>( iVertexArray[i] );
+            FOdysseyVectorVertexIntersection* intersectionVertex = Cast<FOdysseyVectorVertexIntersection>( iVertexArray[i] );
             FOdysseyVectorLoop* cycle = intersectionVertex->GetLoop();
 
             if( cycle )
@@ -136,7 +136,7 @@ FOdysseyVectorLoop::Exists( uint64 iID
 */
 
 void
-FOdysseyVectorLoop::BuildSegmentCubic( UOdysseyVectorSegmentCubic& iSegment
+FOdysseyVectorLoop::BuildSegmentCubic( FOdysseyVectorSegmentCubic& iSegment
                                      , double iFromT
                                      , double iToT )
 {
@@ -213,7 +213,7 @@ FOdysseyVectorLoop::GetValence()
 }
 
 void
-FOdysseyVectorLoop::Build( std::vector<UOdysseyVectorVertex*>& iVertexArray
+FOdysseyVectorLoop::Build( std::vector<FOdysseyVectorVertex*>& iVertexArray
                          , std::vector<FOdysseyVectorSection*>& iSectionArray )
 {
     /*double xmin, ymin, xmax, ymax;*/
@@ -228,9 +228,9 @@ FOdysseyVectorLoop::Build( std::vector<UOdysseyVectorVertex*>& iVertexArray
     if ( iVertexArray.size() ) 
     {
         FOdysseyVectorSection* firstSection = iSectionArray.front();
-        UOdysseyVectorSegment* firstSegment = firstSection->GetSegment();
+        FOdysseyVectorSegment* firstSegment = firstSection->GetSegment();
         ::ULIS::FVec2D originAt = iVertexArray[0]->GetPosition( *firstSegment );
-        UOdysseyVectorVertex* currentVertex = iVertexArray[0];
+        FOdysseyVectorVertex* currentVertex = iVertexArray[0];
 
         mMin.x = mMax.x = originAt.x;
         mMin.y = mMax.y = originAt.y;
@@ -238,8 +238,8 @@ FOdysseyVectorLoop::Build( std::vector<UOdysseyVectorVertex*>& iVertexArray
         for( int i = 0; i < iSectionArray.size(); i++ )
         {
             FOdysseyVectorSection* section = iSectionArray[i];
-            UOdysseyVectorSegment* segment = section->GetSegment();
-            UOdysseyVectorVertex* nextVertex = ( currentVertex == section->GetVertex(0) ) ? section->GetVertex(1) : section->GetVertex(0);
+            FOdysseyVectorSegment* segment = section->GetSegment();
+            FOdysseyVectorVertex* nextVertex = ( currentVertex == section->GetVertex(0) ) ? section->GetVertex(1) : section->GetVertex(0);
             double currentVertexT = currentVertex->GetT( *segment );
             double    nextVertexT =    nextVertex->GetT( *segment );
             ::ULIS::FVec2D currentAt = currentVertex->GetPosition( *segment );
@@ -253,11 +253,11 @@ FOdysseyVectorLoop::Build( std::vector<UOdysseyVectorVertex*>& iVertexArray
                 mPath.lineTo( currentAt.x, currentAt.y );
             }
 
-            BuildSegmentCubic ( static_cast<UOdysseyVectorSegmentCubic&>(*segment), currentVertexT, nextVertexT );
+            BuildSegmentCubic ( static_cast<FOdysseyVectorSegmentCubic&>(*segment), currentVertexT, nextVertexT );
 
             currentVertex = nextVertex;
 
-            if( iVertexArray[i]->GetClass() == UOdysseyVectorVertexIntersection::StaticClass() )
+            if( iVertexArray[i]->GetClass() == FOdysseyVectorVertexIntersection::StaticClass() )
             {
                 mValence++;
             }
@@ -272,7 +272,7 @@ FOdysseyVectorLoop::Build( std::vector<UOdysseyVectorVertex*>& iVertexArray
     for( int i = 0; i < iSectionArray.size(); i++ )
     {
         FOdysseyVectorSection* section = iSectionArray[i];
-        UOdysseyVectorSegment* segment = section->GetSegment();
+        FOdysseyVectorSegment* segment = section->GetSegment();
         ::ULIS::FVec2D originAt = iVertexArray[i]->GetPosition( *segment );
 //UE_LOG(LogTemp, Warning, TEXT("pointAt %d %f %f"), segment, originAt.x, originAt.y );
         if( i == 0 ) mPath.moveTo( originAt.x, originAt.y );

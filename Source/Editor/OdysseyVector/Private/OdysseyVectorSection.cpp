@@ -4,9 +4,9 @@ FOdysseyVectorSection::~FOdysseyVectorSection()
 {
 }
 
-FOdysseyVectorSection::FOdysseyVectorSection( UOdysseyVectorSegment* iSegment
-                                            , UOdysseyVectorVertex* iVertex0
-                                            , UOdysseyVectorVertex* iVertex1 )
+FOdysseyVectorSection::FOdysseyVectorSection( FOdysseyVectorSegment* iSegment
+                                            , FOdysseyVectorVertex* iVertex0
+                                            , FOdysseyVectorVertex* iVertex1 )
     : mSegment ( iSegment )
     , mVertex { iVertex0, iVertex1 }
     , mFlags( 0 )
@@ -29,11 +29,11 @@ FOdysseyVectorSection::SetInCycle( bool iInCycle )
 }
 
 ::ULIS::FVec2D
-FOdysseyVectorSection::GetVectorFromVertex( UOdysseyVectorVertex* iVertex )
+FOdysseyVectorSection::GetVectorFromVertex( FOdysseyVectorVertex* iVertex )
 {
     ::ULIS::FVec2D tangent = { 0.0f, 0.0f };
 
-    if( mSegment->GetClass() == UOdysseyVectorSegmentCubic::StaticClass() )
+    if( mSegment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
     {
 
         double T0 = mVertex[0]->GetT( *mSegment );
@@ -84,7 +84,7 @@ FOdysseyVectorSection::IncrementCycleCount()
 }
 
 void 
-FOdysseyVectorSection::UnBlock( UOdysseyVectorVertex* iVertex )
+FOdysseyVectorSection::UnBlock( FOdysseyVectorVertex* iVertex )
 {
     uint32 blocked = ( iVertex == mVertex[0] ) ? FOdysseyVectorSection::BLOCKVERTEX0
                                                : FOdysseyVectorSection::BLOCKVERTEX1;
@@ -93,7 +93,7 @@ FOdysseyVectorSection::UnBlock( UOdysseyVectorVertex* iVertex )
 }
 
 void 
-FOdysseyVectorSection::Block( UOdysseyVectorVertex* iVertex )
+FOdysseyVectorSection::Block( FOdysseyVectorVertex* iVertex )
 {
     uint32 blocked = ( iVertex == mVertex[0] ) ? FOdysseyVectorSection::BLOCKVERTEX0
                                                : FOdysseyVectorSection::BLOCKVERTEX1;
@@ -114,7 +114,7 @@ FOdysseyVectorSection::BlockAll()
 }
 
 bool 
-FOdysseyVectorSection::IsBlocked( UOdysseyVectorVertex* iVertex )
+FOdysseyVectorSection::IsBlocked( FOdysseyVectorVertex* iVertex )
 {
     uint32 blocked = ( iVertex == mVertex[0] ) ? FOdysseyVectorSection::BLOCKVERTEX0
                                                : FOdysseyVectorSection::BLOCKVERTEX1;
@@ -122,8 +122,8 @@ FOdysseyVectorSection::IsBlocked( UOdysseyVectorVertex* iVertex )
     return ( mFlags & blocked ) ? true : false;
 }
 
-UOdysseyVectorVertex*
-FOdysseyVectorSection::GetOtherVertex( UOdysseyVectorVertex* iVertex )
+FOdysseyVectorVertex*
+FOdysseyVectorSection::GetOtherVertex( FOdysseyVectorVertex* iVertex )
 {
     return ( iVertex == mVertex[0] ) ? mVertex[1] : mVertex[0];
 }
@@ -136,13 +136,13 @@ FOdysseyVectorSection::IsBlocked()
 }
 */
 
-UOdysseyVectorSegment*
+FOdysseyVectorSegment*
 FOdysseyVectorSection::GetSegment()
 {
     return mSegment;
 }
 
-UOdysseyVectorVertex*
+FOdysseyVectorVertex*
 FOdysseyVectorSection::GetVertex( int iNum )
 {
     return mVertex[iNum];

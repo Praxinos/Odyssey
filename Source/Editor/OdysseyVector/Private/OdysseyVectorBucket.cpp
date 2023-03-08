@@ -31,7 +31,7 @@ FOdysseyVectorBucket::FOdysseyVectorBucket( UOdysseyVectorObject& iParent, doubl
     : mParent ( iParent )
     , mIsGradient ( false )
 {
-    mCtrlPoint = UOdysseyVectorHandleBucket::New( this );
+    mCtrlPoint = FOdysseyVectorHandleBucket::New( this );
 
     mCtrlPoint->Set( HANDLEDISTANCE, 0.0f );
 
@@ -201,7 +201,7 @@ FOdysseyVectorBucket::Pick( double iWorldX, double iWorldY )
 
 }
 
-UOdysseyVectorHandleBucket*
+FOdysseyVectorHandleBucket*
 FOdysseyVectorBucket::PickHandle( double iWorldX, double iWorldY )
 {
     BLPoint bucketWorldCoord = mParent.GetWorldMatrix().mapPoint( mCoords.x, mCoords.y );
@@ -219,7 +219,7 @@ FOdysseyVectorBucket::PickHandle( double iWorldX, double iWorldY )
     return nullptr;
 }
 
-UOdysseyVectorHandleBucket*
+FOdysseyVectorHandleBucket*
 FOdysseyVectorBucket::GetHandle()
 {
     return mCtrlPoint;

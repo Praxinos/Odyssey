@@ -4,7 +4,7 @@
 #include <Core/Core.h>
 #include <Image/Block.h>
 
-class UOdysseyVectorSegment;
+class FOdysseyVectorSegment;
 class UOdysseyVectorLoop;
 class FOdysseyVectorSection;
 
@@ -13,10 +13,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorPoint
     public:
        /**
          * @brief Static function to allocate a new point. Note: this is the proper way to allocate a new point as we don't
-         * use the constructor to set parameters so that this can be derived from an UOBJECT if needed in future devs. Indeed
+         * use the constructor to set parameters so that this can be derived from an UOBJECT if needed in future devs. Indeed,
          * UOBJECTs have empty constructors.
          * @param iX coordinates on X axis
          * @param iY coordinates on Y axis
+         * @param iRadius radius
          */
         static FOdysseyVectorPoint* New( double iX, double iY, double iRadius );
 
@@ -27,6 +28,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPoint
          * @brief Inits the point with coordinates and radius
          * @param iX coordinates on X axis
          * @param iY coordinates on Y axis
+         * @param iRadius radius
          */
         void Init( double iX, double iY, double iRadius );
 

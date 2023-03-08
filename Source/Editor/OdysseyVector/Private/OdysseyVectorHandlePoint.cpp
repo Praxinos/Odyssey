@@ -1,27 +1,27 @@
 #include "OdysseyVectorHandlePoint.h"
 
-UOdysseyVectorHandlePoint::~UOdysseyVectorHandlePoint()
+FOdysseyVectorHandlePoint::~FOdysseyVectorHandlePoint()
 {
 }
 
-UOdysseyVectorHandlePoint::UOdysseyVectorHandlePoint()
-    : UOdysseyVectorHandle()
+FOdysseyVectorHandlePoint::FOdysseyVectorHandlePoint()
+    : FOdysseyVectorHandle()
     , mParentPoint ( nullptr )
 {
 
 }
 
 void
-UOdysseyVectorHandlePoint::Init( FOdysseyVectorPoint* iParentPoint )
+FOdysseyVectorHandlePoint::Init( FOdysseyVectorPoint* iParentPoint )
 {
     mParentPoint = iParentPoint;
 }
 
 //static
-UOdysseyVectorHandlePoint*
-UOdysseyVectorHandlePoint::New( FOdysseyVectorPoint* iParentPoint )
+FOdysseyVectorHandlePoint*
+FOdysseyVectorHandlePoint::New( FOdysseyVectorPoint* iParentPoint )
 {
-    UOdysseyVectorHandlePoint* handlePoint = NewObject<UOdysseyVectorHandlePoint>();
+    FOdysseyVectorHandlePoint* handlePoint = NewObject<FOdysseyVectorHandlePoint>();
 
     handlePoint->Init( iParentPoint );
 
@@ -29,7 +29,7 @@ UOdysseyVectorHandlePoint::New( FOdysseyVectorPoint* iParentPoint )
 }
 
 FOdysseyVectorPoint*
-UOdysseyVectorHandlePoint::GetParent()
+FOdysseyVectorHandlePoint::GetParent()
 {
     return mParentPoint;
 }

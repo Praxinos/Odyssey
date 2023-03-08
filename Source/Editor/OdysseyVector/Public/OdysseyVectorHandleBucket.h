@@ -1,24 +1,16 @@
 #pragma once
 
-#include "CoreMinimal.h"
-
 #include <blend2d.h>
 #include <Core/Core.h>
 #include <Image/Block.h>
 #include "OdysseyVectorHandle.h"
 
-#include "OdysseyVectorHandleBucket.generated.h"
-
 class FOdysseyVectorBucket;
 
-UCLASS()
-class ODYSSEYVECTOR_API UOdysseyVectorHandleBucket : public UOdysseyVectorHandle
+class ODYSSEYVECTOR_API FOdysseyVectorHandleBucket : public FOdysseyVectorHandle
 {
     public:
-        GENERATED_BODY()
-
-    public:
-        static UOdysseyVectorHandleBucket* New( FOdysseyVectorBucket* iParentBucket );
+        static FOdysseyVectorHandleBucket* New( FOdysseyVectorBucket* iParentBucket );
         void Init( FOdysseyVectorBucket* iParentBucket );
 
     private:
@@ -27,7 +19,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorHandleBucket : public UOdysseyVectorHandle
     protected:
 
     public:
-        ~UOdysseyVectorHandleBucket();
-        UOdysseyVectorHandleBucket();
+        ~FOdysseyVectorHandleBucket();
+        FOdysseyVectorHandleBucket();
         FOdysseyVectorBucket* GetParent();
 };

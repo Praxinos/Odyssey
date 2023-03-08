@@ -24,15 +24,15 @@ UOdysseyVectorCircle::Init( std::string iName, double iRadiusX, double iRadiusY 
     SetName( iName );
     SetRadius( iRadiusX, iRadiusY );
 
-    mCubicVertex[0] = UOdysseyVectorVertexCubic::New( 0.0f, 0.0f, 1.0f );
-    mCubicVertex[1] = UOdysseyVectorVertexCubic::New( 0.0f, 0.0f, 1.0f );
-    mCubicVertex[2] = UOdysseyVectorVertexCubic::New( 0.0f, 0.0f, 1.0f );
-    mCubicVertex[3] = UOdysseyVectorVertexCubic::New( 0.0f, 0.0f, 1.0f );
+    mCubicVertex[0] = FOdysseyVectorVertexCubic::New( 0.0f, 0.0f, 1.0f );
+    mCubicVertex[1] = FOdysseyVectorVertexCubic::New( 0.0f, 0.0f, 1.0f );
+    mCubicVertex[2] = FOdysseyVectorVertexCubic::New( 0.0f, 0.0f, 1.0f );
+    mCubicVertex[3] = FOdysseyVectorVertexCubic::New( 0.0f, 0.0f, 1.0f );
 
-    mCubicSegment[0] = UOdysseyVectorSegmentCubic::New( static_cast<UOdysseyVectorPathCubic*>(this), mCubicVertex[0], mCubicVertex[1] );
-    mCubicSegment[1] = UOdysseyVectorSegmentCubic::New( static_cast<UOdysseyVectorPathCubic*>(this), mCubicVertex[1], mCubicVertex[2] );
-    mCubicSegment[2] = UOdysseyVectorSegmentCubic::New( static_cast<UOdysseyVectorPathCubic*>(this), mCubicVertex[2], mCubicVertex[3] );
-    mCubicSegment[3] = UOdysseyVectorSegmentCubic::New( static_cast<UOdysseyVectorPathCubic*>(this), mCubicVertex[3], mCubicVertex[0] );
+    mCubicSegment[0] = FOdysseyVectorSegmentCubic::New( static_cast<UOdysseyVectorPathCubic*>(this), mCubicVertex[0], mCubicVertex[1] );
+    mCubicSegment[1] = FOdysseyVectorSegmentCubic::New( static_cast<UOdysseyVectorPathCubic*>(this), mCubicVertex[1], mCubicVertex[2] );
+    mCubicSegment[2] = FOdysseyVectorSegmentCubic::New( static_cast<UOdysseyVectorPathCubic*>(this), mCubicVertex[2], mCubicVertex[3] );
+    mCubicSegment[3] = FOdysseyVectorSegmentCubic::New( static_cast<UOdysseyVectorPathCubic*>(this), mCubicVertex[3], mCubicVertex[0] );
 
     AddVertex ( mCubicVertex[0] );
     AddVertex ( mCubicVertex[1] );

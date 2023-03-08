@@ -34,13 +34,13 @@ class ODYSSEYVECTOR_API UOdysseyVectorPathCubic: public UOdysseyVectorPath
     public:
         UOdysseyVectorPathCubic();
         void Init( std::string iName );
-        UOdysseyVectorSegmentCubic* AppendVertex( UOdysseyVectorVertexCubic* iPoint, bool iConnect, bool iBuildSegments );
+        FOdysseyVectorSegmentCubic* AppendVertex( FOdysseyVectorVertexCubic* iPoint, bool iConnect, bool iBuildSegments );
         bool PickPoint( double iX
                       , double iY
                       , double iSelectionRadius
                       , std::vector<FOdysseyVectorPoint*>& oPickedPointArray
                       , uint64 iSelectionFlags );
-        void Unselect( UOdysseyVectorVertex* iPoint );
+        void Unselect( FOdysseyVectorVertex* iPoint );
         bool IsFilled();
         void SetFilled( bool iIsFilled );
         void DrawStructure( ::ULIS::FRectD& iRoi, uint64 iFlags );

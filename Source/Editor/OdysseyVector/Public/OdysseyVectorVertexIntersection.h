@@ -1,48 +1,51 @@
 #pragma once
 
-#include "CoreMinimal.h"
-
 #include <blend2d.h>
 #include <Core/Core.h>
 #include <Image/Block.h>
 
-#include "OdysseyVectorVertexIntersection.generated.h"
-
 class FOdysseyVectorPath;
 class FOdysseyVectorLoop;
-class UOdysseyVectorSegment;
-class UOdysseyVectorSegmentCubic;
+class FOdysseyVectorSegment;
+class FOdysseyVectorSegmentCubic;
 
 struct FIntersection {
     ::ULIS::FVec2D position;
     double t;
 };
 
-UCLASS()
-class UOdysseyVectorVertexIntersection : public UOdysseyVectorVertex
+class FOdysseyVectorVertexIntersection : public FOdysseyVectorVertex
 {
     public:
-        GENERATED_BODY()
+        /**
+         * @brief Destructor.
+         */
+        ~FOdysseyVectorVertexIntersection();
+
+        /**
+         * @brief Constructor.
+         */
+        FOdysseyVectorVertexIntersection();
+
+        ::ULIS::FVec2D GetPosition( FOdysseyVectorSegment& iSegment );
+
+        double GetT( FOdysseyVectorSegment& );
+
+        void AddSegment( FOdysseyVectorSegmentCubic* iSegment, double t );
+        // overloaded
+        FOdysseyVectorSegment* GetSegment( FOdysseyVectorVertex& iOtherVertex );
+
+        void AttachLoop( FOdysseyVectorLoop* iLoop );
+        FOdysseyVectorLoop* GetLoop();
+
+
+        ::ULIS::FVec2D& GetCoords();
+        ::ULIS::FVec2D& GetCoordsOnSegment( FOdysseyVectorSegment* iSegment );
 
     protected:
         uint64 mIntersectionID;
         // map for intersection positions
-        std::map<UOdysseyVectorSegment*, FIntersection> mTMap;
+        std::map<FOdysseyVectorSegment*, FIntersection> mTMap;
         FOdysseyVectorLoop* mLoop;
 
-    public:
-        ~UOdysseyVectorVertexIntersection();
-        UOdysseyVectorVertexIntersection();
-        ::ULIS::FVec2D GetPosition( UOdysseyVectorSegment& iSegment );
-        double GetT( UOdysseyVectorSegment& );
-        void Draw( UOdysseyVectorPath* iPath, ::ULIS::FRectD &iRoi );
-        void AddSegment( UOdysseyVectorSegmentCubic* iSegment, double t );
-        // overloaded
-        UOdysseyVectorSegment* GetSegment( UOdysseyVectorVertex& iOtherVertex );
-        void AttachLoop( FOdysseyVectorLoop* iLoop );
-        FOdysseyVectorLoop* GetLoop();
-        ::ULIS::FVec2D& GetCoords();
-        ::ULIS::FVec2D& GetCoordsOnSegment( UOdysseyVectorSegment* iSegment );
-        FOdysseyVectorSection* GetCrossingSection( UOdysseyVectorSegment* iDiscardSegment
-                                                 , FOdysseyVectorSection* iDiscardSection );
 };

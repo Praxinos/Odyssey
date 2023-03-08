@@ -14,7 +14,7 @@
 class ODYSSEYVECTOR_API FOdysseyVectorLoop
 {
     private:
-        void BuildSegmentCubic( UOdysseyVectorSegmentCubic& iSegment
+        void BuildSegmentCubic( FOdysseyVectorSegmentCubic& iSegment
                               , double iFromT
                               , double iToT );
 
@@ -27,7 +27,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorLoop
         uint64 mID;
         FColor mColor;
         FOdysseyVectorBucket* mBucket;
-        std::vector<UOdysseyVectorVertex*> mVertexArray;
+        std::vector<FOdysseyVectorVertex*> mVertexArray;
         std::vector<FOdysseyVectorSection*> mSectionArray;
         uint32 mFlags;
         uint32 mValence;
@@ -38,17 +38,17 @@ class ODYSSEYVECTOR_API FOdysseyVectorLoop
 
     public:
         static FOdysseyVectorLoop* Exists( uint64 iID
-                                         , std::vector<UOdysseyVectorVertex*>& iVertexArray
+                                         , std::vector<FOdysseyVectorVertex*>& iVertexArray
                                          , std::vector<FOdysseyVectorSection*>& iSectionArray );
         static uint64 GenerateID( std::vector<FOdysseyVectorSection*>& iSectionArray );
 
         ~FOdysseyVectorLoop();
          FOdysseyVectorLoop( UOdysseyVectorObject& iParent
                            , uint64 iID
-                           , std::vector<UOdysseyVectorVertex*>& iVertexArray
+                           , std::vector<FOdysseyVectorVertex*>& iVertexArray
                            , std::vector<FOdysseyVectorSection*>& iSectionArray );
         void Draw( ::ULIS::FRectD& iRoi, uint64 iFlags );
-        void Build( std::vector<UOdysseyVectorVertex*>& iVertexArray
+        void Build( std::vector<FOdysseyVectorVertex*>& iVertexArray
                   , std::vector<FOdysseyVectorSection*>& iSectionArray );
         bool HitTest( double iX, double iY );
         void SetColor( uint32 iColor );
@@ -60,7 +60,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorLoop
 
         FOdysseyVectorBucket* GetBucket();
         void SetBucket( FOdysseyVectorBucket* iBucket );
-        std::vector<UOdysseyVectorVertex*>& GetVertexArray();
+        std::vector<FOdysseyVectorVertex*>& GetVertexArray();
         std::vector<FOdysseyVectorSection*>& GetSectionArray();
         void SetMarched( bool iMarched );
         bool IsMarched();

@@ -1,27 +1,27 @@
 #include "OdysseyVectorHandleBucket.h"
 
-UOdysseyVectorHandleBucket::~UOdysseyVectorHandleBucket()
+FOdysseyVectorHandleBucket::~FOdysseyVectorHandleBucket()
 {
 }
 
-UOdysseyVectorHandleBucket::UOdysseyVectorHandleBucket()
-    : UOdysseyVectorHandle()
+FOdysseyVectorHandleBucket::FOdysseyVectorHandleBucket()
+    : FOdysseyVectorHandle()
     , mParentBucket ( nullptr )
 {
 
 }
 
 void
-UOdysseyVectorHandleBucket::Init( FOdysseyVectorBucket* iParentBucket )
+FOdysseyVectorHandleBucket::Init( FOdysseyVectorBucket* iParentBucket )
 {
     mParentBucket = iParentBucket;
 }
 
 //static
-UOdysseyVectorHandleBucket*
-UOdysseyVectorHandleBucket::New( FOdysseyVectorBucket* iParentBucket )
+FOdysseyVectorHandleBucket*
+FOdysseyVectorHandleBucket::New( FOdysseyVectorBucket* iParentBucket )
 {
-    UOdysseyVectorHandleBucket* bucketHandle = NewObject<UOdysseyVectorHandleBucket>();
+    FOdysseyVectorHandleBucket* bucketHandle = NewObject<FOdysseyVectorHandleBucket>();
 
     bucketHandle->Init( iParentBucket );
 
@@ -29,7 +29,7 @@ UOdysseyVectorHandleBucket::New( FOdysseyVectorBucket* iParentBucket )
 }
 
 FOdysseyVectorBucket*
-UOdysseyVectorHandleBucket::GetParent()
+FOdysseyVectorHandleBucket::GetParent()
 {
     return mParentBucket;
 }

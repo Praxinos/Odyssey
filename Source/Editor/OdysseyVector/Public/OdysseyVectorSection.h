@@ -9,8 +9,8 @@
 class FOdysseyVectorSection
 {
     protected:
-        UOdysseyVectorSegment* mSegment;
-        UOdysseyVectorVertex* mVertex[2];
+        FOdysseyVectorSegment* mSegment;
+        FOdysseyVectorVertex* mVertex[2];
         std::list<UOdysseyVectorLoop*> mLoopList;
         uint32 mFlags;
         uint32 mCycleCount;
@@ -22,22 +22,22 @@ class FOdysseyVectorSection
 
     public:
         ~FOdysseyVectorSection();
-        FOdysseyVectorSection( UOdysseyVectorSegment* iSegment, UOdysseyVectorVertex* iVertex0, UOdysseyVectorVertex* iVertex1 );
-        UOdysseyVectorSegment* GetSegment();
-        UOdysseyVectorVertex* GetOtherVertex( UOdysseyVectorVertex* iVertex );
-        UOdysseyVectorVertex* GetVertex( int iNum );
+        FOdysseyVectorSection( FOdysseyVectorSegment* iSegment, FOdysseyVectorVertex* iVertex0, FOdysseyVectorVertex* iVertex1 );
+        FOdysseyVectorSegment* GetSegment();
+        FOdysseyVectorVertex* GetOtherVertex( FOdysseyVectorVertex* iVertex );
+        FOdysseyVectorVertex* GetVertex( int iNum );
         void AddLoop( UOdysseyVectorLoop* iLoop );
         void RemoveLoop( UOdysseyVectorLoop* iLoop );
         std::list<UOdysseyVectorLoop*>& GetLoopList();
-        ::ULIS::FVec2D GetVectorFromVertex( UOdysseyVectorVertex* iVertex );
+        ::ULIS::FVec2D GetVectorFromVertex( FOdysseyVectorVertex* iVertex );
 
         void IncrementCycleCount();
 
         void UnBlockAll();
-        void UnBlock(UOdysseyVectorVertex* iVertex);
+        void UnBlock(FOdysseyVectorVertex* iVertex);
         void BlockAll();
-        void Block( UOdysseyVectorVertex* iVertex );
-        bool IsBlocked( UOdysseyVectorVertex* iVertex );
+        void Block( FOdysseyVectorVertex* iVertex );
+        bool IsBlocked( FOdysseyVectorVertex* iVertex );
         /*bool IsBlocked();*/
 
         void SetVisited( bool iVisited );

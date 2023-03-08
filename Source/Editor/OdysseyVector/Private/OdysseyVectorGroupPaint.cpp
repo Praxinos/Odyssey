@@ -190,15 +190,15 @@ UOdysseyVectorGroupPaint::PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlag
 }
 
 uint32
-UOdysseyVectorGroupPaint::IntersectSegment( UOdysseyVectorSegmentCubic& iCubicSegment
-                                          , std::list<UOdysseyVectorSegment*>& cubicSegmenList
-                                          , std::vector<UOdysseyVectorVertexIntersection*>& iIntersectionVertexArray )
+UOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegmentCubic& iCubicSegment
+                                          , std::list<FOdysseyVectorSegment*>& cubicSegmenList
+                                          , std::vector<FOdysseyVectorVertexIntersection*>& iIntersectionVertexArray )
 {
     uint32 intersectionCount = 0;
 
-    for( std::list<UOdysseyVectorSegment*>::iterator sit = cubicSegmenList.begin(); sit != cubicSegmenList.end(); ++sit )
+    for( std::list<FOdysseyVectorSegment*>::iterator sit = cubicSegmenList.begin(); sit != cubicSegmenList.end(); ++sit )
     {
-        UOdysseyVectorSegmentCubic *intersectSegment = Cast<UOdysseyVectorSegmentCubic>(*sit);
+        FOdysseyVectorSegmentCubic *intersectSegment = Cast<FOdysseyVectorSegmentCubic>(*sit);
         ::ULIS::FRectD intersectRect = intersectSegment->GetBoundingBox() & iCubicSegment.GetBoundingBox();
 
         if( intersectRect.Area() )
@@ -211,14 +211,14 @@ UOdysseyVectorGroupPaint::IntersectSegment( UOdysseyVectorSegmentCubic& iCubicSe
 }
 
 static void
-PrintCycle( std::vector<UOdysseyVectorVertex*>& vertexArray
+PrintCycle( std::vector<FOdysseyVectorVertex*>& vertexArray
           , std::vector<FOdysseyVectorSection*>& sectionArray)
 {
     UE_LOG(LogTemp,Warning,TEXT("Array size: %d"), vertexArray.size() );
 
     for( int i = 0; i < vertexArray.size(); i++ )
     {
-        UOdysseyVectorSegment* segment = sectionArray[i]->GetSegment();
+        FOdysseyVectorSegment* segment = sectionArray[i]->GetSegment();
         BLPoint pt0 = segment->GetPath()->GetWorldMatrix().mapPoint( sectionArray[i]->GetVertex(0)->GetCoordsOnSegment(segment).x, sectionArray[i]->GetVertex(0)->GetCoordsOnSegment(segment).y );
         BLPoint pt1 = segment->GetPath()->GetWorldMatrix().mapPoint( sectionArray[i]->GetVertex(1)->GetCoordsOnSegment(segment).x, sectionArray[i]->GetVertex(1)->GetCoordsOnSegment(segment).y );
 
@@ -227,14 +227,14 @@ PrintCycle( std::vector<UOdysseyVectorVertex*>& vertexArray
 }
 
 uint32
-UOdysseyVectorGroupPaint::FindPath( UOdysseyVectorVertex* iVertex
+UOdysseyVectorGroupPaint::FindPath( FOdysseyVectorVertex* iVertex
                                   , FOdysseyVectorSection* iSection
-                                  , std::vector<UOdysseyVectorVertex*>& iVertexArray
+                                  , std::vector<FOdysseyVectorVertex*>& iVertexArray
                                   , std::vector<FOdysseyVectorSection*>& iSectionArray
                                   , double iOrientation
                                   , uint32 iDepth ) // we could also use iVertexArray.size()
 {
-    UOdysseyVectorVertex* nextVertex = ( iSection->GetVertex(0) == iVertex ) ? iSection->GetVertex(1)
+    FOdysseyVectorVertex* nextVertex = ( iSection->GetVertex(0) == iVertex ) ? iSection->GetVertex(1)
                                                                              : iSection->GetVertex(0);
     bool hasPrimary = false;
     bool hasSecondary = false;
@@ -317,7 +317,7 @@ UOdysseyVectorGroupPaint::FindPath( UOdysseyVectorVertex* iVertex
 }
 
 static void
-BlockPath( std::vector<UOdysseyVectorVertex*>& iVertexArray
+BlockPath( std::vector<FOdysseyVectorVertex*>& iVertexArray
           , std::vector<FOdysseyVectorSection*>& iSectionArray
           , bool iIsContour )
 {
@@ -328,7 +328,7 @@ BlockPath( std::vector<UOdysseyVectorVertex*>& iVertexArray
 }
 
 static double
-GetNormalVector( std::vector<UOdysseyVectorVertex*>& iVertexArray
+GetNormalVector( std::vector<FOdysseyVectorVertex*>& iVertexArray
                , std::vector<FOdysseyVectorSection*>& iSectionArray )
 {
     double z = 0;
@@ -352,7 +352,7 @@ GetNormalVector( std::vector<UOdysseyVectorVertex*>& iVertexArray
         for( int i = 0; i < arraySize; i++ )
         {
             int n = ( i + 1 ) % arraySize;
-            UOdysseyVectorSegment* segment = iSectionArray[i]->GetSegment();
+            FOdysseyVectorSegment* segment = iSectionArray[i]->GetSegment();
             ::ULIS::FVec2D& viCoords = iVertexArray[i]->GetCoordsOnSegment( segment );
             ::ULIS::FVec2D& vnCoords = iVertexArray[n]->GetCoordsOnSegment( segment );
             double ti = iVertexArray[i]->GetT( *segment );
@@ -387,7 +387,7 @@ GetNormalVector( std::vector<UOdysseyVectorVertex*>& iVertexArray
 }
 
 uint32
-UOdysseyVectorGroupPaint::MarchVertex( UOdysseyVectorVertexIntersection* iIntersectionVertex )
+UOdysseyVectorGroupPaint::MarchVertex( FOdysseyVectorVertexIntersection* iIntersectionVertex )
 {
     std::list<FOdysseyVectorSection*>& sectionList = iIntersectionVertex->GetSectionList();
 
@@ -396,7 +396,7 @@ UOdysseyVectorGroupPaint::MarchVertex( UOdysseyVectorVertexIntersection* iInters
     for( std::list<FOdysseyVectorSection*>::iterator pit = sectionList.begin(); pit != sectionList.end(); ++pit )
     {
         FOdysseyVectorSection *section = (*pit);
-        std::vector<UOdysseyVectorVertex*> vertexArray;
+        std::vector<FOdysseyVectorVertex*> vertexArray;
         std::vector<FOdysseyVectorSection*> sectionArray;
 
         if( section->IsBlocked(iIntersectionVertex) == false ) {
@@ -427,7 +427,7 @@ UOdysseyVectorGroupPaint::MarchVertex( UOdysseyVectorVertexIntersection* iInters
 void
 UOdysseyVectorGroupPaint::FindCycles()
 {
-    std::vector<UOdysseyVectorVertexIntersection*> intersectionVertexArray;
+    std::vector<FOdysseyVectorVertexIntersection*> intersectionVertexArray;
     uint32 totalVertexCount = 0;
 
     // clear mLoopList
@@ -455,10 +455,10 @@ UOdysseyVectorGroupPaint::FindCycles()
 }
 
 uint32
-UOdysseyVectorGroupPaint::BuildGraph( std::vector<UOdysseyVectorVertexIntersection*>& iIntersectionVertexArray )
+UOdysseyVectorGroupPaint::BuildGraph( std::vector<FOdysseyVectorVertexIntersection*>& iIntersectionVertexArray )
 {
-    std::list<UOdysseyVectorSegment*> cubicSegmenList;
-    UOdysseyVectorSegmentCubic *cubicSegment;
+    std::list<FOdysseyVectorSegment*> cubicSegmenList;
+    FOdysseyVectorSegmentCubic *cubicSegment;
     uint32 intersectionCount = 0;
     uint32 vertexCount = 0;
 
@@ -469,15 +469,15 @@ UOdysseyVectorGroupPaint::BuildGraph( std::vector<UOdysseyVectorVertexIntersecti
         if( child->GetClass() == UOdysseyVectorPathCubic::StaticClass() )
         {
             UOdysseyVectorPathCubic* cubicPath = Cast<UOdysseyVectorPathCubic>(child);
-            std::list<UOdysseyVectorSegment*>& segmentList = cubicPath->GetSegmentList();
+            std::list<FOdysseyVectorSegment*>& segmentList = cubicPath->GetSegmentList();
 
             mBBox = ( vertexCount == 0 ) ? cubicPath->GetBBox( false ) : mBBox | cubicPath->GetBBox( false );
 
             vertexCount += cubicPath->GetVertexList().size();
 
-            for( std::list<UOdysseyVectorSegment*>::iterator sit = segmentList.begin(); sit != segmentList.end(); ++sit )
+            for( std::list<FOdysseyVectorSegment*>::iterator sit = segmentList.begin(); sit != segmentList.end(); ++sit )
             {
-                cubicSegment = Cast<UOdysseyVectorSegmentCubic>(*sit);
+                cubicSegment = Cast<FOdysseyVectorSegmentCubic>(*sit);
 
                 cubicSegment->ClearIntersections();
 
@@ -486,7 +486,7 @@ UOdysseyVectorGroupPaint::BuildGraph( std::vector<UOdysseyVectorVertexIntersecti
         }
     }
 
-    cubicSegment = cubicSegmenList.size() ? Cast<UOdysseyVectorSegmentCubic>( cubicSegmenList.back() ) : nullptr;
+    cubicSegment = cubicSegmenList.size() ? Cast<FOdysseyVectorSegmentCubic>( cubicSegmenList.back() ) : nullptr;
 
     while( cubicSegment )
     {
@@ -495,7 +495,7 @@ UOdysseyVectorGroupPaint::BuildGraph( std::vector<UOdysseyVectorVertexIntersecti
         // remove segment from list as they are tested
         cubicSegmenList.pop_back();
 
-        cubicSegment = cubicSegmenList.size() ? Cast<UOdysseyVectorSegmentCubic>( cubicSegmenList.back() ) : nullptr;
+        cubicSegment = cubicSegmenList.size() ? Cast<FOdysseyVectorSegmentCubic>( cubicSegmenList.back() ) : nullptr;
     }
 
     //UE_LOG( LogTemp, Warning, TEXT("Intersections:%d"), iIntersectionVertexList.size() );
@@ -582,7 +582,7 @@ UOdysseyVectorGroupPaint::CopyShape()
 // check number of cycles / valence
 
 
-UOdysseyVectorHandleBucket*
+FOdysseyVectorHandleBucket*
 UOdysseyVectorGroupPaint::PickBucketHandle( double iX, double iY )
 {
     for( std::list<FOdysseyVectorBucket*>::iterator lit = mBucketList.begin(); lit != mBucketList.end(); ++lit )

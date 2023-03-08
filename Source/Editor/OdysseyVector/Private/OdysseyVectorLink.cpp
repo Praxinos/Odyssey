@@ -1,18 +1,18 @@
 #include "OdysseyVectorLink.h"
 
-UOdysseyVectorLink::~UOdysseyVectorLink()
+FOdysseyVectorLink::~FOdysseyVectorLink()
 {
 
 }
 
-UOdysseyVectorLink::UOdysseyVectorLink()
+FOdysseyVectorLink::FOdysseyVectorLink()
     : mPoint { nullptr, nullptr }
 {
 
 }
 
 void
-UOdysseyVectorLink::Init( FOdysseyVectorPoint* iPoint0
+FOdysseyVectorLink::Init( FOdysseyVectorPoint* iPoint0
                         , FOdysseyVectorPoint* iPoint1 )
 {
     mPoint[0] = iPoint0;
@@ -20,11 +20,11 @@ UOdysseyVectorLink::Init( FOdysseyVectorPoint* iPoint0
 }
 
 // static
-UOdysseyVectorLink*
-UOdysseyVectorLink::New(  FOdysseyVectorPoint* iPoint0
+FOdysseyVectorLink*
+FOdysseyVectorLink::New(  FOdysseyVectorPoint* iPoint0
                         , FOdysseyVectorPoint* iPoint1 )
 {
-    UOdysseyVectorLink* link = NewObject<UOdysseyVectorLink>();
+    FOdysseyVectorLink* link = NewObject<FOdysseyVectorLink>();
 
     link->Init ( iPoint0, iPoint1 );
 
@@ -32,13 +32,13 @@ UOdysseyVectorLink::New(  FOdysseyVectorPoint* iPoint0
 }
 
 FOdysseyVectorPoint*
-UOdysseyVectorLink::GetPoint( int iPointNum )
+FOdysseyVectorLink::GetPoint( int iPointNum )
 {
     return mPoint[iPointNum];
 }
 
 double
-UOdysseyVectorLink::GetStraightDistance()
+FOdysseyVectorLink::GetStraightDistance()
 {
     ::ULIS::FVec2D vec = { mPoint[1]->GetX() - mPoint[0]->GetX(),
                            mPoint[1]->GetY() - mPoint[0]->GetY() };
@@ -47,7 +47,7 @@ UOdysseyVectorLink::GetStraightDistance()
 }
 
 ::ULIS::FVec2D
-UOdysseyVectorLink::GetVector( bool iNormalize )
+FOdysseyVectorLink::GetVector( bool iNormalize )
 {
     ::ULIS::FVec2D vec = mPoint[1]->GetCoords() - mPoint[0]->GetCoords();
 
@@ -63,7 +63,7 @@ UOdysseyVectorLink::GetVector( bool iNormalize )
 }
 
 double
-UOdysseyVectorLink::GetDistanceSquared()
+FOdysseyVectorLink::GetDistanceSquared()
 {
     ::ULIS::FVec2D dist = mPoint[1]->GetCoords() - mPoint[0]->GetCoords();
 
@@ -71,7 +71,7 @@ UOdysseyVectorLink::GetDistanceSquared()
 }
 
 ::ULIS::FVec2D
-UOdysseyVectorLink::GetPointAt ( double t )
+FOdysseyVectorLink::GetPointAt ( double t )
 {
     ::ULIS::FVec2D& p0 =  mPoint[0]->GetCoords();
     ::ULIS::FVec2D& p1 =  mPoint[0]->GetCoords();

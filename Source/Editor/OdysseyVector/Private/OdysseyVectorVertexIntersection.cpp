@@ -1,17 +1,17 @@
 #include "OdysseyVectorVertexIntersection.h"
 #include "OdysseyVectorPath.h"
 
-UOdysseyVectorVertexIntersection::~UOdysseyVectorVertexIntersection()
+FOdysseyVectorVertexIntersection::~FOdysseyVectorVertexIntersection()
 {
 }
 
-UOdysseyVectorVertexIntersection::UOdysseyVectorVertexIntersection()
-    : UOdysseyVectorVertex ()
+FOdysseyVectorVertexIntersection::FOdysseyVectorVertexIntersection()
+    : FOdysseyVectorVertex ()
 {
 }
 
 double
-UOdysseyVectorVertexIntersection::GetT( UOdysseyVectorSegment& iSegment )
+FOdysseyVectorVertexIntersection::GetT( FOdysseyVectorSegment& iSegment )
 {
     if ( auto search = mTMap.find(&iSegment); search != mTMap.end())
         return search->second.t;
@@ -20,7 +20,7 @@ UOdysseyVectorVertexIntersection::GetT( UOdysseyVectorSegment& iSegment )
 }
 
 ::ULIS::FVec2D
-UOdysseyVectorVertexIntersection::GetPosition( UOdysseyVectorSegment& iSegment )
+FOdysseyVectorVertexIntersection::GetPosition( FOdysseyVectorSegment& iSegment )
 {
     if ( auto search = mTMap.find(&iSegment); search != mTMap.end())
         return search->second.position;
@@ -29,7 +29,7 @@ UOdysseyVectorVertexIntersection::GetPosition( UOdysseyVectorSegment& iSegment )
 }
 
 ::ULIS::FVec2D&
-UOdysseyVectorVertexIntersection::GetCoords()
+FOdysseyVectorVertexIntersection::GetCoords()
 {
     if ( auto search = mTMap.find(GetFirstSegment()); search != mTMap.end())
         return search->second.position;
@@ -38,7 +38,7 @@ UOdysseyVectorVertexIntersection::GetCoords()
 }
 
 ::ULIS::FVec2D&
-UOdysseyVectorVertexIntersection::GetCoordsOnSegment( UOdysseyVectorSegment* iSegment )
+FOdysseyVectorVertexIntersection::GetCoordsOnSegment( FOdysseyVectorSegment* iSegment )
 {
     return GetCoords();
 /*
@@ -50,14 +50,14 @@ UOdysseyVectorVertexIntersection::GetCoordsOnSegment( UOdysseyVectorSegment* iSe
 }
 
 void
-UOdysseyVectorVertexIntersection::Draw( UOdysseyVectorPath* iPath, ::ULIS::FRectD &iRoi )
+FOdysseyVectorVertexIntersection::Draw( UOdysseyVectorPath* iPath, ::ULIS::FRectD &iRoi )
 {
     // NOTE: Might not be super fast to call this for each segment
     BLContext* blctx = iPath->GetRoot()->GetEngine()->GetBLContext();
 
-    for( std::list<UOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
+    for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
     {
-        UOdysseyVectorSegment* segment = static_cast<UOdysseyVectorSegment*>(*it);
+        FOdysseyVectorSegment* segment = static_cast<FOdysseyVectorSegment*>(*it);
 
         ::ULIS::FVec2D position = GetPosition(*segment);
 
@@ -67,7 +67,7 @@ UOdysseyVectorVertexIntersection::Draw( UOdysseyVectorPath* iPath, ::ULIS::FRect
 }
 
 void
-UOdysseyVectorVertexIntersection::AddSegment( UOdysseyVectorSegmentCubic* iSegment, double t )
+FOdysseyVectorVertexIntersection::AddSegment( FOdysseyVectorSegmentCubic* iSegment, double t )
 {
     ::ULIS::FVec2D& point0 = iSegment->GetPoint(0)->GetCoords();
     ::ULIS::FVec2D& point1 = iSegment->GetPoint(1)->GetCoords();
@@ -84,19 +84,19 @@ UOdysseyVectorVertexIntersection::AddSegment( UOdysseyVectorSegmentCubic* iSegme
     intersect.position = intersectAt;
     intersect.t        = t;
 /*printf("%f %f %f\n", intersectAt.x, intersectAt.y, t);*/
-    UOdysseyVectorVertex::AddSegment( iSegment );
-//UE_LOG(LogTemp, Warning, TEXT("UOdysseyVectorVertexIntersection::AddSegment %d - size:%d"), iSegment, mTMap.size() );
+    FOdysseyVectorVertex::AddSegment( iSegment );
+//UE_LOG(LogTemp, Warning, TEXT("FOdysseyVectorVertexIntersection::AddSegment %d - size:%d"), iSegment, mTMap.size() );
     mTMap.insert( std::make_pair( iSegment, intersect ) );
 }
 
-UOdysseyVectorSegment*
-UOdysseyVectorVertexIntersection::GetSegment( UOdysseyVectorVertex& iOtherVertex )
+FOdysseyVectorSegment*
+FOdysseyVectorVertexIntersection::GetSegment( FOdysseyVectorVertex& iOtherVertex )
 {
-    for(std::list<UOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it)
+    for(std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it)
     {
-        UOdysseyVectorSegment* segment = static_cast<UOdysseyVectorSegment*>(*it);
+        FOdysseyVectorSegment* segment = static_cast<FOdysseyVectorSegment*>(*it);
 
-        if ( iOtherVertex.GetClass() == UOdysseyVectorVertex::StaticClass() )
+        if ( iOtherVertex.GetClass() == FOdysseyVectorVertex::StaticClass() )
         {
             if ( ( segment->GetPoint(0) == &iOtherVertex )
               || ( segment->GetPoint(1) == &iOtherVertex ) ) {
@@ -104,9 +104,9 @@ UOdysseyVectorVertexIntersection::GetSegment( UOdysseyVectorVertex& iOtherVertex
             }
         }
 
-        if ( iOtherVertex.GetClass() == UOdysseyVectorVertexIntersection::StaticClass() )
+        if ( iOtherVertex.GetClass() == FOdysseyVectorVertexIntersection::StaticClass() )
         {
-            if ( segment->HasIntersectionVertex ( static_cast<UOdysseyVectorVertexIntersection&>(iOtherVertex) ) )
+            if ( segment->HasIntersectionVertex ( static_cast<FOdysseyVectorVertexIntersection&>(iOtherVertex) ) )
             {
                 return segment;
             }
@@ -117,19 +117,19 @@ UOdysseyVectorVertexIntersection::GetSegment( UOdysseyVectorVertex& iOtherVertex
 }
 
 void
-UOdysseyVectorVertexIntersection::AttachLoop( FOdysseyVectorLoop* iLoop )
+FOdysseyVectorVertexIntersection::AttachLoop( FOdysseyVectorLoop* iLoop )
 {
     mLoop = iLoop;
 }
 
 FOdysseyVectorLoop*
-UOdysseyVectorVertexIntersection::GetLoop()
+FOdysseyVectorVertexIntersection::GetLoop()
 {
     return mLoop;
 }
 
 FOdysseyVectorSection*
-UOdysseyVectorVertexIntersection::GetCrossingSection( UOdysseyVectorSegment* iDiscardSegment
+FOdysseyVectorVertexIntersection::GetCrossingSection( FOdysseyVectorSegment* iDiscardSegment
                                                     , FOdysseyVectorSection* iDiscardSection )
 {
     for( std::list<FOdysseyVectorSection*>::iterator it = mSectionList.begin(); it != mSectionList.end(); ++it )

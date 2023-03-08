@@ -1,41 +1,41 @@
 #include "OdysseyVectorHandleSegment.h"
 
-UOdysseyVectorHandleSegment::~UOdysseyVectorHandleSegment()
+FOdysseyVectorHandleSegment::~FOdysseyVectorHandleSegment()
 {
 }
 
-UOdysseyVectorHandleSegment::UOdysseyVectorHandleSegment()
+FOdysseyVectorHandleSegment::FOdysseyVectorHandleSegment()
     : mParentSegment ( nullptr )
 {
 }
 
 void
-UOdysseyVectorHandleSegment::Init( UOdysseyVectorSegment* iParentSegment, double iX, double iY )
+FOdysseyVectorHandleSegment::Init( FOdysseyVectorSegment* iParentSegment, double iX, double iY )
 {
     mParentSegment = iParentSegment;
 
-    UOdysseyVectorHandle::Init( iX, iY );
+    FOdysseyVectorHandle::Init( iX, iY );
 }
 
 //static
-UOdysseyVectorHandleSegment*
-UOdysseyVectorHandleSegment::New( UOdysseyVectorSegment* iParentSegment, double iX, double iY )
+FOdysseyVectorHandleSegment*
+FOdysseyVectorHandleSegment::New( FOdysseyVectorSegment* iParentSegment, double iX, double iY )
 {
-    UOdysseyVectorHandleSegment* handleSegment = NewObject<UOdysseyVectorHandleSegment>();
+    FOdysseyVectorHandleSegment* handleSegment = NewObject<FOdysseyVectorHandleSegment>();
 
     handleSegment->Init( iParentSegment, iX, iY );
 
     return handleSegment;
 }
 
-UOdysseyVectorSegment*
-UOdysseyVectorHandleSegment::GetParent()
+FOdysseyVectorSegment*
+FOdysseyVectorHandleSegment::GetParent()
 {
     return mParentSegment;
 }
 
 void 
-UOdysseyVectorHandleSegment::SetX( double iX )
+FOdysseyVectorHandleSegment::SetX( double iX )
 {
     mCoords.x  = iX;
 
@@ -43,7 +43,7 @@ UOdysseyVectorHandleSegment::SetX( double iX )
 }
 
 void 
-UOdysseyVectorHandleSegment::SetY( double iY )
+FOdysseyVectorHandleSegment::SetY( double iY )
 {
     mCoords.y = iY;
 
@@ -51,7 +51,7 @@ UOdysseyVectorHandleSegment::SetY( double iY )
 }
 
 void 
-UOdysseyVectorHandleSegment::Set( double iX, double iY )
+FOdysseyVectorHandleSegment::Set( double iX, double iY )
 {
     mCoords.x = iX;
     mCoords.y = iY;

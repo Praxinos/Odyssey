@@ -361,10 +361,10 @@ FOdysseyVectorEngine::PickPoints( UOdysseyVectorRoot* iScene
 }
 
 bool
-FOdysseyVectorEngine::Knot( UOdysseyVectorVertex* iVertexA
-                          , UOdysseyVectorVertex* iVertexB
-                          , UOdysseyVectorSegment** oCreatedSegment
-                          , UOdysseyVectorSegment** oRemovedSegment
+FOdysseyVectorEngine::Knot( FOdysseyVectorVertex* iVertexA
+                          , FOdysseyVectorVertex* iVertexB
+                          , FOdysseyVectorSegment** oCreatedSegment
+                          , FOdysseyVectorSegment** oRemovedSegment
                           , bool iSmooth )
 {
     if( ( iVertexA->GetSegmentCount() == 1 )
@@ -382,18 +382,18 @@ FOdysseyVectorEngine::Knot( UOdysseyVectorVertex* iVertexA
         if( path->GetClass() == UOdysseyVectorPathCubic::StaticClass() )
         {
             UOdysseyVectorPathCubic* cubicPath = Cast<UOdysseyVectorPathCubic>(path);
-            UOdysseyVectorSegmentCubic* firstCubicSegment = Cast<UOdysseyVectorSegmentCubic>(iVertexB->GetFirstSegment());
+            FOdysseyVectorSegmentCubic* firstCubicSegment = Cast<FOdysseyVectorSegmentCubic>(iVertexB->GetFirstSegment());
 
             if( firstCubicSegment )
             {
-                UOdysseyVectorVertexCubic* cubicVertex0 = Cast<UOdysseyVectorVertexCubic>(firstCubicSegment->GetPoint(0));
+                FOdysseyVectorVertexCubic* cubicVertex0 = Cast<FOdysseyVectorVertexCubic>(firstCubicSegment->GetPoint(0));
                 uint32 knotVertexIndex = ( cubicVertex0 == iVertexB ) ? 0 : 1;
                 uint32 nextVertexIndex = ( cubicVertex0 == iVertexB ) ? 1 : 0;
                 ::ULIS::FVec2D& knotCtrlPointCoords = firstCubicSegment->GetControlPoint(knotVertexIndex)->GetCoords();
                 ::ULIS::FVec2D& nextCtrlPointCoords = firstCubicSegment->GetControlPoint(nextVertexIndex)->GetCoords();
-                UOdysseyVectorVertexCubic* knotVertex = Cast<UOdysseyVectorVertexCubic>(iVertexA);
-                UOdysseyVectorVertexCubic* nextVertex =  Cast<UOdysseyVectorVertexCubic>(firstCubicSegment->GetPoint(nextVertexIndex));
-                UOdysseyVectorSegmentCubic* newCubicSegment;
+                FOdysseyVectorVertexCubic* knotVertex = Cast<FOdysseyVectorVertexCubic>(iVertexA);
+                FOdysseyVectorVertexCubic* nextVertex =  Cast<FOdysseyVectorVertexCubic>(firstCubicSegment->GetPoint(nextVertexIndex));
+                FOdysseyVectorSegmentCubic* newCubicSegment;
 
                 path->RemoveSegment( firstCubicSegment );
                 path->RemoveVertex( iVertexB );
@@ -402,7 +402,7 @@ FOdysseyVectorEngine::Knot( UOdysseyVectorVertex* iVertexA
                 knotVertex->SetY( averageCoords.y );
                 knotVertex->SetRadius( averageRadius, false );
 
-                newCubicSegment = UOdysseyVectorSegmentCubic::New( cubicPath
+                newCubicSegment = FOdysseyVectorSegmentCubic::New( cubicPath
                                                                 ,  knotVertex
                                                                 ,  knotCtrlPointCoords.x
                                                                 ,  knotCtrlPointCoords.y
@@ -437,7 +437,7 @@ RecursivePickSegments( UOdysseyVectorObject* iObject
                      , double iX
                      , double iY
                      , double iRadius
-                     , std::vector<UOdysseyVectorSegment*>& oPickedSegmentArray
+                     , std::vector<FOdysseyVectorSegment*>& oPickedSegmentArray
                      , std::vector<double>& oDistanceArray )
 {
     UOdysseyVectorPath* path = Cast<UOdysseyVectorPath>(iObject);
@@ -457,11 +457,11 @@ RecursivePickSegments( UOdysseyVectorObject* iObject
 
         if( pathBBox.HitTest( ::ULIS::FVec2D( localPoint.x, localPoint.y ) ) == true )
         {
-            std::list<UOdysseyVectorSegment*>& segmentList = path->GetSegmentList();
+            std::list<FOdysseyVectorSegment*>& segmentList = path->GetSegmentList();
 
-            for( std::list<UOdysseyVectorSegment*>::iterator it = segmentList.begin(); it != segmentList.end(); ++it )
+            for( std::list<FOdysseyVectorSegment*>::iterator it = segmentList.begin(); it != segmentList.end(); ++it )
             {
-                UOdysseyVectorSegment* segment = (*it);
+                FOdysseyVectorSegment* segment = (*it);
                 ::ULIS::FRectD segmentBBox = segment->GetBoundingBox();
 
                 segmentBBox.x -=   localRadius;
@@ -496,7 +496,7 @@ FOdysseyVectorEngine::PickSegments( UOdysseyVectorRoot* iScene
                                   , double iX
                                   , double iY
                                   , double iRadius
-                                  , std::vector<UOdysseyVectorSegment*>& oPickedSegmentArray
+                                  , std::vector<FOdysseyVectorSegment*>& oPickedSegmentArray
                                   , std::vector<double>& oDistance )
 {
     RecursivePickSegments( iScene, iX, iY, iRadius, oPickedSegmentArray, oDistance );

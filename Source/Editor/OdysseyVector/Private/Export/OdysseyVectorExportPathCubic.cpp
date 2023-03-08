@@ -14,9 +14,9 @@ WritePathCubicGeometrySegments( UOdysseyVectorPathCubic& iCubicPath, FArchive &A
 
             Ar << segmentCount;
 
-            for( std::list<UOdysseyVectorSegment*>::iterator it = iCubicPath.GetSegmentList().begin(); it != iCubicPath.GetSegmentList().end(); ++it )
+            for( std::list<FOdysseyVectorSegment*>::iterator it = iCubicPath.GetSegmentList().begin(); it != iCubicPath.GetSegmentList().end(); ++it )
             {
-                UOdysseyVectorSegmentCubic* cubicSegment = static_cast<UOdysseyVectorSegmentCubic*>(*it);
+                FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
                 uint32 p0ID = cubicSegment->GetPoint(0)->GetID();
                 uint32 p1ID = cubicSegment->GetPoint(1)->GetID();
                 ::ULIS::FVec2D& ctrlPoint0 = cubicSegment->GetControlPoint(0)->GetCoords();
@@ -52,9 +52,9 @@ WritePathCubicGeometryVertices( UOdysseyVectorPathCubic& iCubicPath, FArchive &A
 
             Ar << vertexCount;
 
-            for( std::list<UOdysseyVectorVertex*>::iterator it = iCubicPath.GetVertexList().begin(); it != iCubicPath.GetVertexList().end(); ++it )
+            for( std::list<FOdysseyVectorVertex*>::iterator it = iCubicPath.GetVertexList().begin(); it != iCubicPath.GetVertexList().end(); ++it )
             {
-                UOdysseyVectorVertexCubic* vertex = static_cast<UOdysseyVectorVertexCubic*>(*it);
+                FOdysseyVectorVertexCubic* vertex = static_cast<FOdysseyVectorVertexCubic*>(*it);
                 double x = vertex->GetX();
                 double y = vertex->GetY();
                 double radius = vertex->GetRadius();

@@ -25,8 +25,8 @@ class ODYSSEYVECTOR_API UOdysseyVectorCircle : public UOdysseyVectorPathCubic
         bool PickShape( ::ULIS::FRectD& iRoi, uint32 iSelectionFlags );
         void UpdateShape( uint32 iUpdateFlags );
  
-        UOdysseyVectorVertexCubic* mCubicVertex[4];
-        UOdysseyVectorSegmentCubic* mCubicSegment[4];
+        FOdysseyVectorVertexCubic* mCubicVertex[4];
+        FOdysseyVectorSegmentCubic* mCubicSegment[4];
 
     protected :
         double mRadiusX; 
