@@ -16,17 +16,17 @@ class ODYSSEYVECTOR_API UOdysseyVectorLink : public UObject
         GENERATED_BODY()
 
     public:
-        static UOdysseyVectorLink* New( UOdysseyVectorPoint* iPoint0, UOdysseyVectorPoint* iPoint1 );
-        void Init( UOdysseyVectorPoint* iPoint0, UOdysseyVectorPoint* iPoint1 );
+        static UOdysseyVectorLink* New( FOdysseyVectorPoint* iPoint0, FOdysseyVectorPoint* iPoint1 );
+        void Init( FOdysseyVectorPoint* iPoint0, FOdysseyVectorPoint* iPoint1 );
 
     protected:
-        UOdysseyVectorPoint* mPoint[2];
+        FOdysseyVectorPoint* mPoint[2];
 
     public:
         ~UOdysseyVectorLink();
          UOdysseyVectorLink();
         ::ULIS::FVec2D GetVector( bool iNormalize );
-        UOdysseyVectorPoint* GetPoint( int iPointNum );
+        FOdysseyVectorPoint* GetPoint( int iPointNum );
         virtual double GetDistanceSquared();
         virtual ::ULIS::FVec2D GetPointAt( double t );
         double GetStraightDistance();

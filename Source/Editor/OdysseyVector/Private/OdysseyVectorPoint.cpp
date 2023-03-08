@@ -1,27 +1,27 @@
 #include "OdysseyVectorPoint.h"
 
-UOdysseyVectorPoint::~UOdysseyVectorPoint()
+FOdysseyVectorPoint::~FOdysseyVectorPoint()
 {
 }
 
-UOdysseyVectorPoint::UOdysseyVectorPoint()
+FOdysseyVectorPoint::FOdysseyVectorPoint()
 {
     Set( 0.0f,0.0f );
     SetRadius( 1.0f );
 }
 
 void
-UOdysseyVectorPoint::Init( double iX, double iY, double iRadius )
+FOdysseyVectorPoint::Init( double iX, double iY, double iRadius )
 {
     Set( iX, iY );
     SetRadius( iRadius );
 }
 
 //static
-UOdysseyVectorPoint*
-UOdysseyVectorPoint::New( double iX, double iY, double iRadius )
+FOdysseyVectorPoint*
+FOdysseyVectorPoint::New( double iX, double iY, double iRadius )
 {
-    UOdysseyVectorPoint* point = NewObject<UOdysseyVectorPoint>();
+    FOdysseyVectorPoint* point = NewObject<FOdysseyVectorPoint>();
 
     point->Init ( iX, iY, iRadius );
 
@@ -29,62 +29,62 @@ UOdysseyVectorPoint::New( double iX, double iY, double iRadius )
 }
 
 ::ULIS::FVec2D&
-UOdysseyVectorPoint::GetCoords()
+FOdysseyVectorPoint::GetCoords()
 {
     return mCoords;
 }
 
 double 
-UOdysseyVectorPoint::GetX()
+FOdysseyVectorPoint::GetX()
 {
     return mCoords.x;
 }
 
 double 
-UOdysseyVectorPoint::GetY()
+FOdysseyVectorPoint::GetY()
 {
     return mCoords.y;
 }
 
 void 
-UOdysseyVectorPoint::SetX( double iX )
+FOdysseyVectorPoint::SetX( double iX )
 {
     mCoords.x  = iX;
 }
 
 void 
-UOdysseyVectorPoint::SetY( double iY )
+FOdysseyVectorPoint::SetY( double iY )
 {
     mCoords.y = iY;
 }
 
 void 
-UOdysseyVectorPoint::Set( double iX, double iY )
+FOdysseyVectorPoint::Set( double iX, double iY )
 {
     SetX( iX );
     SetY( iY );
 }
 
 double
-UOdysseyVectorPoint::GetRadius()
+FOdysseyVectorPoint::GetRadius()
 {
     return mRadius;
 }
 
 void
-UOdysseyVectorPoint::SetRadius( double iRadius )
+FOdysseyVectorPoint::SetRadius( double iRadius )
 {
     mRadius = iRadius;
 }
 
 void
-UOdysseyVectorPoint::SetID( uint32 iID )
+FOdysseyVectorPoint::SetID( uint32 iID )
 {
     mID = iID;
 }
 
 uint32
-UOdysseyVectorPoint::GetID()
+FOdysseyVectorPoint::GetID()
 {
     return mID;
 }

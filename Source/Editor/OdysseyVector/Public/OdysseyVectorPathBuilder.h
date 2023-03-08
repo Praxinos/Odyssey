@@ -22,9 +22,9 @@ class ODYSSEYVECTOR_API UOdysseyVectorPathBuilder : public UOdysseyVectorObject
         double mCumulAngle;
         double mCumulAngleLimit;
         double mLastCubicAngleLimit;
-        std::list<UOdysseyVectorPoint*> mSamplePointList;
+        std::list<FOdysseyVectorPoint*> mSamplePointList;
         std::list<UOdysseyVectorLink*> mSampleLinkList;
-        std::list<UOdysseyVectorPoint*> mPointList;
+        std::list<FOdysseyVectorPoint*> mPointList;
         std::list<UOdysseyVectorLink*> mLinkList;
 
         /**
@@ -35,7 +35,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorPathBuilder : public UOdysseyVectorObject
          * @param iEnforce forces the creation of a cubic segment ending at this point's location.
          * @return the cubic segment created from the sample point and the previous sample point.
          */
-        UOdysseyVectorSegmentCubic* Sample( UOdysseyVectorPoint* iPoint, double iRadius, bool iEnforce );
+        UOdysseyVectorSegmentCubic* Sample( FOdysseyVectorPoint* iPoint, double iRadius, bool iEnforce );
 
         // Unimplemented. Cubic Path builder cannot be copied. It should be destroyed as soon as the curve is built
         UOdysseyVectorObject* CopyShape();
@@ -57,7 +57,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorPathBuilder : public UOdysseyVectorObject
          * @brief Clear all sample points until the point passed as parameter
          * The sample points are the one used to fit the cubic curve
          */
-        void ClearUntil( UOdysseyVectorPoint* iPoint );
+        void ClearUntil( FOdysseyVectorPoint* iPoint );
 
         /**
          * @brief Clear all sample points until the point passed as parameter
@@ -80,7 +80,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorPathBuilder : public UOdysseyVectorObject
 
         UOdysseyVectorLink* GetLastSampleLink();
 
-        UOdysseyVectorPoint* GetLastSamplePoint();
+        FOdysseyVectorPoint* GetLastSamplePoint();
 
     protected :
         UOdysseyVectorPathCubic* mCubicPath;

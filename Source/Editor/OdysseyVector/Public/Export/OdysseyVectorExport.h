@@ -32,6 +32,7 @@ namespace FOdysseyVectorExport
                 static const uint32 CHUNK_OBJECT_FOREGROUNDCOLOR = 0xd490269b; // uint8(R)-uint8(G)-uint8(B)-uint8(A)
                 static const uint32 CHUNK_OBJECT_BACKGROUNDCOLOR = 0xd9c2a698; // uint8(R)-uint8(G)-uint8(B)-uint8(A)
                 static const uint32 CHUNK_OBJECT_PATHCUBIC = 0x138d0bec; // container
+                    static const uint32 CHUNK_PATH_JOINT = 0x272518f6; // uint32(type)
                     static const uint32 CHUNK_PATHCUBIC_GEOMETRY = 0x904a4229; // container
                         static const uint32 CHUNK_PATHCUBIC_GEOMETRY_VERTICES = 0x1116a85d; // uint32(count), array[double(X)-double(Y)-double(Radius)]
                         static const uint32 CHUNK_PATHCUBIC_GEOMETRY_SEGMENTS = 0x76cacf19; // uint32(count), array[uint32(P0ID)-uint32(P1ID)-double(CX0)-double(CY0)-double(CX1)-double(CY1)]

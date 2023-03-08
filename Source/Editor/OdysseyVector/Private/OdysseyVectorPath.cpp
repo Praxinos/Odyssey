@@ -1,36 +1,32 @@
 #include "OdysseyVectorPath.h"
 
+UOdysseyVectorPath::~UOdysseyVectorPath()
+{
+}
+
+UOdysseyVectorPath::UOdysseyVectorPath()
+{
+    SetJointType( eJointType::Miter );
+}
+
 void UOdysseyVectorPath::Init( std::string iName )
 {
-    setJointMiter();
     SetName( iName );
 }
 
-void
-UOdysseyVectorPath::setJointRadial()
+eJointType
+UOdysseyVectorPath::GetJointType()
 {
-    JointType = eJointType::Radial;
+    return JointType;
 }
 
 void
-UOdysseyVectorPath::setJointMiter()
+UOdysseyVectorPath::SetJointType( eJointType mJointType )
 {
-    JointType = eJointType::Miter;
+    JointType = mJointType;
 }
 
-void
-UOdysseyVectorPath::setJointLinear()
-{
-    JointType = eJointType::Linear;
-}
-
-void
-UOdysseyVectorPath::setJointNone()
-{
-    JointType = eJointType::None;
-}
-
-std::list<UOdysseyVectorPoint*>&
+std::list<FOdysseyVectorPoint*>&
 UOdysseyVectorPath::GetSelectedPointList()
 {
     return mSelectedPointList;
@@ -364,20 +360,23 @@ _drawMiterJoint( UOdysseyVectorPath* iPath
                , double iRadius
                , double iMiterLimit )
 {
-    ::ULIS::FVec2D parallelVec0 = - iVector0;
-    ::ULIS::FVec2D parallelVec1 = - iVector1;
+    ::ULIS::FVec2D parallelVec0 = iVector0;
+    ::ULIS::FVec2D parallelVec1 = iVector1;
     ::ULIS::FVec2D perpendicularVec0 = {   parallelVec0.y, - parallelVec0.x };
     ::ULIS::FVec2D perpendicularVec1 = { - parallelVec1.y,   parallelVec1.x };
     ::ULIS::FVec2D edge0Point = iOrigin + ( perpendicularVec0 * iRadius );
     ::ULIS::FVec2D edge1Point = iOrigin + ( perpendicularVec1 * iRadius );
-    ::ULIS::FVec2D shortestTest = edge1Point - edge0Point;
+    ::ULIS::FVec2D shortestTest = edge0Point - edge1Point;
+    // have to clamp due to imprecision of the dot product
+    double dot = std::clamp<double>( shortestTest.DotProduct( parallelVec0 ), -1.0f, 1.0f );
     BLContext* blctx = iPath->GetRoot()->GetEngine()->GetBLContext();
+
+    BLMatrix2D& worldMatrix = iPath->GetWorldMatrix();
+    BLPoint worldOrigin = worldMatrix.mapPoint( iOrigin.x, iOrigin.y );
     ::ULIS::FVec2D intersectionPoint;
 
-    blctx->setStrokeWidth( 1.0f );
-
     // Find on which side should the joint be drawn by comparing the directions of our vectors
-    if ( shortestTest.DotProduct( parallelVec0 ) < 0 )
+    if ( dot < 0 )
     {
         ::ULIS::FVec2D tmp = perpendicularVec0;
         perpendicularVec0 = -tmp;
@@ -416,8 +415,14 @@ _drawMiterJoint( UOdysseyVectorPath* iPath
                 vertex[3].x = edge1Point.x;
                 vertex[3].y = edge1Point.y;
 
-                blctx->strokeLine( vertex[0].x, vertex[0].y, vertex[1].x, vertex[1].y );
-                blctx->strokeLine( vertex[0].x, vertex[0].y, vertex[3].x, vertex[3].y );
+                // we draw lines between the polygons to correct the artefacts, otherwise there is a thin line between the polygons
+                // line stroking is done in world coordinates because we need a 1 pixel width
+                blctx->save();
+                blctx->resetMatrix();
+                blctx->setStrokeWidth( 1.0f );
+                blctx->strokeLine( worldOrigin, worldMatrix.mapPoint( vertex[1].x, vertex[1].y ) );
+                blctx->strokeLine( worldOrigin, worldMatrix.mapPoint( vertex[3].x, vertex[3].y ) );
+                blctx->restore();
 
                 //blctx->strokePolygon( vertex, 4 );
                 blctx->fillPolygon( vertex, 4 );
@@ -431,17 +436,23 @@ _drawMiterJoint( UOdysseyVectorPath* iPath
                 vertex[1].x = edge0Point.x;
                 vertex[1].y = edge0Point.y;
 
-                vertex[2].x = edge0Point.x + ( parallelVec0.x * iMiterLimit * iRadius );
-                vertex[2].y = edge0Point.y + ( parallelVec0.y * iMiterLimit * iRadius );
+                vertex[2].x = edge0Point.x - ( parallelVec0.x * iMiterLimit * iRadius );
+                vertex[2].y = edge0Point.y - ( parallelVec0.y * iMiterLimit * iRadius );
 
-                vertex[3].x = edge1Point.x + ( parallelVec1.x * iMiterLimit * iRadius );
-                vertex[3].y = edge1Point.y + ( parallelVec1.y * iMiterLimit * iRadius );
+                vertex[3].x = edge1Point.x - ( parallelVec1.x * iMiterLimit * iRadius );
+                vertex[3].y = edge1Point.y - ( parallelVec1.y * iMiterLimit * iRadius );
 
                 vertex[4].x = edge1Point.x;
                 vertex[4].y = edge1Point.y;
 
-                blctx->strokeLine( vertex[0].x, vertex[0].y, vertex[1].x, vertex[1].y );
-                blctx->strokeLine( vertex[0].x, vertex[0].y, vertex[4].x, vertex[4].y );
+                // we draw lines between the polygons to correct the artefacts, otherwise there is a thin line between the polygons
+                // line stroking is done in world coordinates because we need a 1 pixel width
+                blctx->save();
+                blctx->resetMatrix();
+                blctx->setStrokeWidth( 1.0f );
+                blctx->strokeLine( worldOrigin, worldMatrix.mapPoint( vertex[1].x, vertex[1].y ) );
+                blctx->strokeLine( worldOrigin, worldMatrix.mapPoint( vertex[4].x, vertex[4].y ) );
+                blctx->restore();
 
                 //blctx->strokePolygon( vertex, 5 );
                 blctx->fillPolygon( vertex, 5 );
@@ -453,102 +464,123 @@ _drawMiterJoint( UOdysseyVectorPath* iPath
 static void
 _drawRadialJoint( UOdysseyVectorPath* iPath
                 , ::ULIS::FVec2D& iOrigin
-                , ::ULIS::FVec2D& iPrevSegmentVector
-                , ::ULIS::FVec2D& iSegmentVector
-                , double iRadius
-                , uint32 iSteps )
+                , ::ULIS::FVec2D& iVector0
+                , ::ULIS::FVec2D& iVector1
+                , double iRadius )
 {
-    ::ULIS::FVec2D currPerpendicularVec = {   iSegmentVector.y    , - iSegmentVector.x     };
-    ::ULIS::FVec2D prevPerpendicularVec = { - iPrevSegmentVector.y,   iPrevSegmentVector.x };
-    ::ULIS::FVec2D edgePrevPoint = iOrigin + ( prevPerpendicularVec * iRadius );
-    ::ULIS::FVec2D edgePoint = iOrigin + ( currPerpendicularVec * iRadius );
-    ::ULIS::FVec2D shortestTest = edgePoint - edgePrevPoint;
+    ::ULIS::FVec2D parallelVec0 = iVector0;
+    ::ULIS::FVec2D parallelVec1 = iVector1;
+    ::ULIS::FVec2D perpendicularVec0 = {   parallelVec0.y, - parallelVec0.x };
+    ::ULIS::FVec2D perpendicularVec1 = { - parallelVec1.y,   parallelVec1.x };
+    ::ULIS::FVec2D edge0Point = iOrigin + ( perpendicularVec0 * iRadius );
+    ::ULIS::FVec2D edge1Point = iOrigin + ( perpendicularVec1 * iRadius );
+    ::ULIS::FVec2D shortestTest = edge0Point - edge1Point;
     // have to clamp due to imprecision of the dot product
-    double dot = std::clamp<double>( currPerpendicularVec.DotProduct( prevPerpendicularVec ), -1.0f, 1.0f );
-    double angle = acos( dot );
-    double a = ( iSteps ) ? angle / iSteps : 0.0f;
-    BLPoint vertex[3];
+    double dot = std::clamp<double>( shortestTest.DotProduct( parallelVec0 ), -1.0f, 1.0f );
+    double angle = acos( std::clamp<double>( perpendicularVec0.DotProduct( perpendicularVec1 ), -1.0f, 1.0f ) );
+    static const int steps = 24;
+    double a = angle / steps;
     BLContext* blctx = iPath->GetRoot()->GetEngine()->GetBLContext();
-
-    blctx->setStrokeWidth( 1.0f );
+    BLMatrix2D& worldMatrix = iPath->GetWorldMatrix();
+    BLPoint worldOrigin = worldMatrix.mapPoint( iOrigin.x, iOrigin.y );
+    static BLPoint vertex[steps][3];
 
     // Find on which side should the joint be drawn by comparing the directions of our vectors
-    if ( shortestTest.DotProduct( iPrevSegmentVector ) < 0 )
+    if ( dot < 0 )
     {
-        ::ULIS::FVec2D tmp = currPerpendicularVec;
-        currPerpendicularVec = -tmp;
-
-               tmp = prevPerpendicularVec;
-        prevPerpendicularVec = -tmp;
+        ::ULIS::FVec2D tmp = perpendicularVec0;
+        perpendicularVec0 = -tmp;
 
         a = -a;
     }
 
-    // start drawing triangles at origin
-    vertex[0].x = ( iOrigin.x );
-    vertex[0].y = ( iOrigin.y );
+    double cosa = cos(a);
+    double sina = sin(a);
 
-    for ( uint32 i = 0; i < iSteps; i++ )
+    for ( uint32 i = 0; i < steps; i++ )
     {
-        double cosa = cos(a);
-        double sina = sin(a);
-        ::ULIS::FVec2D interpolatedVector = { currPerpendicularVec.x * cosa + currPerpendicularVec.y * sina,
-                                             -currPerpendicularVec.x * sina + currPerpendicularVec.y * cosa };
+        // https://stackoverflow.com/questions/11773889/how-to-calculate-a-vector-from-an-angle-with-another-vector-in-2d
+        ::ULIS::FVec2D interpolatedVector = { (  perpendicularVec0.x * cosa ) + ( perpendicularVec0.y * sina ),
+                                              ( -perpendicularVec0.x * sina ) + ( perpendicularVec0.y * cosa ) };
 
-        vertex[1].x = vertex[0].x + ( currPerpendicularVec.x * iRadius );
-        vertex[1].y = vertex[0].y + ( currPerpendicularVec.y * iRadius );
+        // start drawing triangles at origin
+        vertex[i][0].x = ( iOrigin.x );
+        vertex[i][0].y = ( iOrigin.y );
 
-        vertex[2].x = vertex[0].x + ( interpolatedVector.x * iRadius );
-        vertex[2].y = vertex[0].y + ( interpolatedVector.y * iRadius );
+        vertex[i][1].x = vertex[i][0].x + ( perpendicularVec0.x * iRadius );
+        vertex[i][1].y = vertex[i][0].y + ( perpendicularVec0.y * iRadius );
 
-        blctx->strokeLine( vertex[0].x, vertex[0].y, vertex[1].x, vertex[1].y );
-        blctx->strokeLine( vertex[0].x, vertex[0].y, vertex[2].x, vertex[2].y );
+        vertex[i][2].x = vertex[i][0].x + ( interpolatedVector.x * iRadius );
+        vertex[i][2].y = vertex[i][0].y + ( interpolatedVector.y * iRadius );
 
         //blctx->strokePolygon( vertex , 3 );
-        blctx->fillPolygon( vertex, 3 );
+        blctx->fillPolygon( vertex[i], 3 );
 
-        currPerpendicularVec = interpolatedVector;
+        perpendicularVec0 = interpolatedVector;
     }
+
+    // we draw lines between the polygons to correct the artefacts, otherwise there is a thin line between the polygons
+    // line stroking is done in world coordinates because we need a 1 pixel width
+    blctx->save();
+    blctx->resetMatrix();
+    blctx->setStrokeWidth( 1.0f );
+    for ( uint32 i = 0; i < steps; i++ )
+    {
+        blctx->strokeLine( worldOrigin, worldMatrix.mapPoint( vertex[i][1].x, vertex[i][1].y ) );
+        blctx->strokeLine( worldOrigin, worldMatrix.mapPoint( vertex[i][2].x, vertex[i][2].y ) );
+
+    }
+    blctx->restore();
 }
 
 static void
 _drawLinearJoint( UOdysseyVectorPath* iPath
                 , ::ULIS::FVec2D& iOrigin
-                , ::ULIS::FVec2D& iPrevSegmentVector
-                , ::ULIS::FVec2D& iSegmentVector
+                , ::ULIS::FVec2D& iVector0
+                , ::ULIS::FVec2D& iVector1
                 , double iRadius )
 {
-    ::ULIS::FVec2D currPerpendicularVec = { iSegmentVector.y    , - iSegmentVector.x     };
-    ::ULIS::FVec2D prevPerpendicularVec = { iPrevSegmentVector.y, - iPrevSegmentVector.x };
-    ::ULIS::FVec2D edgePrevPoint = iOrigin + ( prevPerpendicularVec * iRadius );
-    ::ULIS::FVec2D edgePoint = iOrigin + ( currPerpendicularVec * iRadius );
-    ::ULIS::FVec2D shortestTest = edgePoint - edgePrevPoint;
+    ::ULIS::FVec2D parallelVec0 = iVector0;
+    ::ULIS::FVec2D parallelVec1 = iVector1;
+    ::ULIS::FVec2D perpendicularVec0 = {   parallelVec0.y, - parallelVec0.x };
+    ::ULIS::FVec2D perpendicularVec1 = { - parallelVec1.y,   parallelVec1.x };
+    ::ULIS::FVec2D edge0Point = iOrigin + ( perpendicularVec0 * iRadius );
+    ::ULIS::FVec2D edge1Point = iOrigin + ( perpendicularVec1 * iRadius );
+    ::ULIS::FVec2D shortestTest = edge0Point - edge1Point;
+    // have to clamp due to imprecision of the dot product
+    double dot = std::clamp<double>( shortestTest.DotProduct( parallelVec0 ), -1.0f, 1.0f );
     BLContext* blctx = iPath->GetRoot()->GetEngine()->GetBLContext();
     BLPoint vertex[3];
+    BLMatrix2D& worldMatrix = iPath->GetWorldMatrix();
+    BLPoint worldOrigin = worldMatrix.mapPoint( iOrigin.x, iOrigin.y );
 
-    blctx->setStrokeWidth( 1.0f );
-
-    if ( shortestTest.DotProduct( iPrevSegmentVector ) < 0 )
+    if ( dot < 0 )
     {
-        ::ULIS::FVec2D tmp = currPerpendicularVec;
+        ::ULIS::FVec2D tmp = perpendicularVec0;
 
-        currPerpendicularVec = -tmp;
+        perpendicularVec0 = -tmp;
 
-                tmp = prevPerpendicularVec;
-        prevPerpendicularVec = -tmp;
+                tmp = perpendicularVec1;
+        perpendicularVec1 = -tmp;
     }
 
     vertex[0].x = ( iOrigin.x );
     vertex[0].y = ( iOrigin.y );
 
-    vertex[1].x = vertex[0].x + ( currPerpendicularVec.x * iRadius );
-    vertex[1].y = vertex[0].y + ( currPerpendicularVec.y * iRadius );
+    vertex[1].x = vertex[0].x + ( perpendicularVec0.x * iRadius );
+    vertex[1].y = vertex[0].y + ( perpendicularVec0.y * iRadius );
 
-    vertex[2].x = vertex[0].x + ( prevPerpendicularVec.x * iRadius );
-    vertex[2].y = vertex[0].y + ( prevPerpendicularVec.y * iRadius );
+    vertex[2].x = vertex[0].x + ( perpendicularVec1.x * iRadius );
+    vertex[2].y = vertex[0].y + ( perpendicularVec1.y * iRadius );
 
-    blctx->strokeLine( vertex[0].x, vertex[0].y, vertex[1].x, vertex[1].y );
-    blctx->strokeLine( vertex[0].x, vertex[0].y, vertex[2].x, vertex[2].y );
+    // we draw lines between the polygons to correct the artefacts, otherwise there is a thin line between the polygons
+    // line stroking is done in world coordinates because we need a 1 pixel width
+    blctx->save();
+    blctx->resetMatrix();
+    blctx->setStrokeWidth( 1.0f );
+    blctx->strokeLine( worldOrigin, worldMatrix.mapPoint( vertex[1].x, vertex[1].y ) );
+    blctx->strokeLine( worldOrigin, worldMatrix.mapPoint( vertex[2].x, vertex[2].y ) );
+    blctx->restore();
 
     //blctx->strokePolygon( vertex, 3 );
     blctx->fillPolygon( vertex, 3 );
@@ -597,7 +629,7 @@ UOdysseyVectorPath::DrawJoint( UOdysseyVectorVertex* iVertex, ::ULIS::FRectD &iR
                     break;
 
                     case eJointType::Radial :
-                        _drawRadialJoint ( this, origin, segment0Vector, segment1Vector, vertexRadius, 24.0f );
+                        _drawRadialJoint ( this, origin, segment0Vector, segment1Vector, vertexRadius );
                     break;
 
                     default:

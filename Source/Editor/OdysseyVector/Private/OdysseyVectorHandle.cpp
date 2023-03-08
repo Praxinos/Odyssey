@@ -11,5 +11,5 @@ UOdysseyVectorHandle::UOdysseyVectorHandle()
 void
 UOdysseyVectorHandle::Init( double iX, double iY )
 {
-    UOdysseyVectorPoint::Init( iX, iY, 0.0f );
+    FOdysseyVectorPoint::Init( iX, iY, 0.0f );
 }

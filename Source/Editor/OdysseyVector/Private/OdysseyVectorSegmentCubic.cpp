@@ -740,8 +740,7 @@ UOdysseyVectorSegmentCubic::Draw( UOdysseyVectorPathCubic* iPath, ::ULIS::FRectD
     // NOTE: Might not be super fast to call this for each segment
     BLContext* blctx = iPath->GetRoot()->GetEngine()->GetBLContext();
     uint32 segmentCount = GetVertex(0)->GetSegmentCount();
-
-    blctx->setStrokeWidth( 1.0f );
+    BLMatrix2D& worldMatrix = iPath->GetWorldMatrix();
 
     for ( int i = 0; i < mPolygonCache.size(); i++ )
     {
@@ -754,16 +753,26 @@ UOdysseyVectorSegmentCubic::Draw( UOdysseyVectorPathCubic* iPath, ::ULIS::FRectD
                         , { mPolygonCache[i].quadVertex[2].x, mPolygonCache[i].quadVertex[2].y }
                         , { mPolygonCache[i].quadVertex[3].x, mPolygonCache[i].quadVertex[3].y } };
 
-        if( ( i != 0 ) || ( segmentCount == 2 )  )
-        {
-            blctx->strokeLine( pt[0].x, pt[0].y, pt[3].x, pt[3].y );
-        }
         /*blctx->strokePolygon( pt, 4 );*/ // commented-out: makes the path too thick and creates artefacts
         blctx->fillPolygon( pt, 4 );
     }
 
+    // we draw lines between the polygons to correct the artefacts, otherwise there is a thin line between the polygons
+    // line stroking is done in world coordinates because we need a 1 pixel width
+    blctx->save();
+    blctx->resetMatrix();
+    blctx->setStrokeWidth( 1.0f );
+    for ( int i = 1; i < mPolygonCache.size(); i++ )
+    {
+        blctx->strokeLine( worldMatrix.mapPoint( mPolygonCache[i].quadVertex[0].x, mPolygonCache[i].quadVertex[0].y )
+                         , worldMatrix.mapPoint( mPolygonCache[i].quadVertex[3].x, mPolygonCache[i].quadVertex[3].y ) );
+    }
+    blctx->restore();
+
 #ifdef UNUSED // commented-out : it makes path too thick and creates artefacts
-    blctx->strokePath ( mBLPath );
+    blctx->setFillRule( BL_FILL_RULE_NON_ZERO );
+
+    //blctx->strokePath ( mBLPath );
     blctx->fillPath ( mBLPath );
 #endif
 

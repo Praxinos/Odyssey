@@ -38,7 +38,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorPathCubic: public UOdysseyVectorPath
         bool PickPoint( double iX
                       , double iY
                       , double iSelectionRadius
-                      , std::vector<UOdysseyVectorPoint*>& oPickedPointArray
+                      , std::vector<FOdysseyVectorPoint*>& oPickedPointArray
                       , uint64 iSelectionFlags );
         void Unselect( UOdysseyVectorVertex* iPoint );
         bool IsFilled();

@@ -5,7 +5,7 @@ UOdysseyVectorVertex::~UOdysseyVectorVertex()
 }
 
 UOdysseyVectorVertex::UOdysseyVectorVertex()
-    : UOdysseyVectorPoint()
+    : FOdysseyVectorPoint()
    , mPath ( nullptr )
 {
     SetVisited( false );
@@ -42,7 +42,7 @@ UOdysseyVectorVertex::InvalidateSegments()
 void
 UOdysseyVectorVertex::SetRadius( double iRadius )
 {
-    UOdysseyVectorPoint::SetRadius( iRadius );
+    FOdysseyVectorPoint::SetRadius( iRadius );
 
     InvalidateSegments();
 }

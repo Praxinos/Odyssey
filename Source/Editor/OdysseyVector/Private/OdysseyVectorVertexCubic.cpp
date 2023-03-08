@@ -139,7 +139,7 @@ UOdysseyVectorVertexCubic::Set( double iX
                               , double iY
                               , bool iBuildSegments )
 {
-    UOdysseyVectorPoint::Set( iX, iY );
+    FOdysseyVectorPoint::Set( iX, iY );
 
     if( iBuildSegments == true )
     {
@@ -167,7 +167,7 @@ UOdysseyVectorVertexCubic::Set( double iX
 void
 UOdysseyVectorVertexCubic::SetRadius( double iRadius, bool iBuildSegments )
 {
-    UOdysseyVectorPoint::SetRadius ( iRadius );
+    FOdysseyVectorPoint::SetRadius ( iRadius );
 
     if ( iBuildSegments == true )
     {
@@ -199,8 +199,8 @@ UOdysseyVectorVertexCubic::GetPerpendicularVector( bool iNormalize )
         for( std::list<UOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
         {
             UOdysseyVectorSegmentCubic *segment = static_cast<UOdysseyVectorSegmentCubic*>(*it);
-            UOdysseyVectorPoint* p0 = segment->GetPoint(0);
-            UOdysseyVectorPoint* p1 = segment->GetPoint(1);
+            FOdysseyVectorPoint* p0 = segment->GetPoint(0);
+            FOdysseyVectorPoint* p1 = segment->GetPoint(1);
             ::ULIS::FVec2D& point0 = segment->GetPoint(0)->GetCoords();
             ::ULIS::FVec2D& point1 = segment->GetPoint(1)->GetCoords();
             ::ULIS::FVec2D& ctrlPoint0 = segment->GetControlPoint(0)->GetCoords();

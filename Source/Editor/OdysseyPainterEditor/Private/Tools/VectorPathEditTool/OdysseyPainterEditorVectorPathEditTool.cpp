@@ -71,7 +71,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnKeyDown(const FKey& iKey)
                                         | FOdysseyVectorHUDPathCubic::VIEW_HANDLE_SEGMENT );
         }
 
-        if ( ( iKey == EKeys::LeftShift ) || ( iKey == EKeys::LeftShift ) )
+        if ( ( iKey == EKeys::LeftShift ) || ( iKey == EKeys::RightShift ) )
         {
             mCubicPathHUD.SetDisplayMode( FOdysseyVectorHUDPathCubic::VIEW_PATH
                                         | FOdysseyVectorHUDPathCubic::VIEW_HANDLE_POINT );

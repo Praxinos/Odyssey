@@ -10,7 +10,7 @@
 #include "OdysseyVectorHandle.generated.h"
 
 UCLASS()
-class ODYSSEYVECTOR_API UOdysseyVectorHandle : public UOdysseyVectorPoint
+class ODYSSEYVECTOR_API UOdysseyVectorHandle : public FOdysseyVectorPoint
 {
     public:
         GENERATED_BODY()

@@ -12,8 +12,8 @@ UOdysseyVectorLink::UOdysseyVectorLink()
 }
 
 void
-UOdysseyVectorLink::Init( UOdysseyVectorPoint* iPoint0
-                        , UOdysseyVectorPoint* iPoint1 )
+UOdysseyVectorLink::Init( FOdysseyVectorPoint* iPoint0
+                        , FOdysseyVectorPoint* iPoint1 )
 {
     mPoint[0] = iPoint0;
     mPoint[1] = iPoint1;
@@ -21,8 +21,8 @@ UOdysseyVectorLink::Init( UOdysseyVectorPoint* iPoint0
 
 // static
 UOdysseyVectorLink*
-UOdysseyVectorLink::New(  UOdysseyVectorPoint* iPoint0
-                        , UOdysseyVectorPoint* iPoint1 )
+UOdysseyVectorLink::New(  FOdysseyVectorPoint* iPoint0
+                        , FOdysseyVectorPoint* iPoint1 )
 {
     UOdysseyVectorLink* link = NewObject<UOdysseyVectorLink>();
 
@@ -31,7 +31,7 @@ UOdysseyVectorLink::New(  UOdysseyVectorPoint* iPoint0
     return link;
 }
 
-UOdysseyVectorPoint*
+FOdysseyVectorPoint*
 UOdysseyVectorLink::GetPoint( int iPointNum )
 {
     return mPoint[iPointNum];

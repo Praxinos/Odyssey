@@ -81,6 +81,16 @@ FOdysseyVectorImport::ReadObjectPathCubic( UOdysseyVectorPathCubic& iCubicPath, 
         {
             switch( iChunkID )
             {
+                case FOdysseyVectorExport::CHUNK_PATH_JOINT:
+                {
+                    uint32 jointType;
+
+                    Ar << jointType;
+
+                    iCubicPath.SetJointType(static_cast<eJointType>(jointType));
+                }
+                break;
+
                 case FOdysseyVectorExport::CHUNK_PATHCUBIC_GEOMETRY:
                 break;
 

@@ -16,16 +16,16 @@ class ODYSSEYVECTOR_API UOdysseyVectorHandlePoint : public UOdysseyVectorHandle
         GENERATED_BODY()
 
     public:
-        static UOdysseyVectorHandlePoint* New( UOdysseyVectorPoint* iParentPoint );
-        void Init( UOdysseyVectorPoint* iParentPoint );
+        static UOdysseyVectorHandlePoint* New( FOdysseyVectorPoint* iParentPoint );
+        void Init( FOdysseyVectorPoint* iParentPoint );
 
     private:
-        UOdysseyVectorPoint* mParentPoint;
+        FOdysseyVectorPoint* mParentPoint;
 
     protected:
 
     public:
         ~UOdysseyVectorHandlePoint();
         UOdysseyVectorHandlePoint();
-        UOdysseyVectorPoint* GetParent();
+        FOdysseyVectorPoint* GetParent();
 };

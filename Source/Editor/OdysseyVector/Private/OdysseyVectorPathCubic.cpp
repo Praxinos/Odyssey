@@ -4,7 +4,7 @@ UOdysseyVectorPathCubic::UOdysseyVectorPathCubic()
     : UOdysseyVectorPath()
     , Filled( false )
 {
-    setJointMiter();
+
 }
 
 bool
@@ -310,7 +310,7 @@ bool
 UOdysseyVectorPathCubic::PickPoint( double iX
                                   , double iY
                                   , double iSelectionRadius
-                                  , std::vector<UOdysseyVectorPoint*>& oPickedPointArray
+                                  , std::vector<FOdysseyVectorPoint*>& oPickedPointArray
                                   , uint64 iSelectionFlags )
 {
     for(std::list<UOdysseyVectorVertex*>::iterator it = mVertexList.begin(); it != mVertexList.end(); ++it)
@@ -354,8 +354,8 @@ UOdysseyVectorPathCubic::PickPoint( double iX
         for( std::list<UOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
         {
             UOdysseyVectorSegmentCubic* segment = static_cast<UOdysseyVectorSegmentCubic*>(*it);
-            UOdysseyVectorPoint* ctrlPoint0 = segment->GetControlPoint( 0 );
-            UOdysseyVectorPoint* ctrlPoint1 = segment->GetControlPoint( 1 );
+            FOdysseyVectorPoint* ctrlPoint0 = segment->GetControlPoint( 0 );
+            FOdysseyVectorPoint* ctrlPoint1 = segment->GetControlPoint( 1 );
 
             if( ( fabs( ctrlPoint0->GetX() - iX ) <= iSelectionRadius ) &&
                 ( fabs( ctrlPoint0->GetY() - iY ) <= iSelectionRadius ) )

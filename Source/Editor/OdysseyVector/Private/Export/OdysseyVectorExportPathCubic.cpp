@@ -82,6 +82,19 @@ WritePathCubicGeometry( UOdysseyVectorPathCubic& iCubicPath, FArchive &Ar )
     } );
 }
 
+static void
+WritePathJoint( UOdysseyVectorPath& iPath, FArchive &Ar )
+{
+    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_PATH_JOINT
+                                    , Ar
+                                    , [&iPath](FArchive &Ar) -> void
+    {
+        uint32 jointType = static_cast<uint32>(iPath.GetJointType());
+
+        Ar << jointType;
+    } );
+}
+
 void
 FOdysseyVectorExport::WriteObjectPathCubic( UOdysseyVectorPathCubic& iCubicPath, FArchive &Ar )
 {
@@ -89,6 +102,7 @@ FOdysseyVectorExport::WriteObjectPathCubic( UOdysseyVectorPathCubic& iCubicPath,
                                     , Ar
                                     , [&iCubicPath](FArchive &Ar) -> void
     {
+        WritePathJoint( iCubicPath, Ar );
         WritePathCubicGeometry( iCubicPath, Ar );
     } );
 }

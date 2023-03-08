@@ -15,7 +15,7 @@ class FOdysseyVectorSection;
 class UOdysseyVectorPath;
 
 UCLASS()
-class ODYSSEYVECTOR_API UOdysseyVectorVertex : public UOdysseyVectorPoint
+class ODYSSEYVECTOR_API UOdysseyVectorVertex : public FOdysseyVectorPoint
 {
     public:
         GENERATED_BODY()

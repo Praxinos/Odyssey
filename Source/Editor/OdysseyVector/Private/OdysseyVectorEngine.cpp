@@ -319,7 +319,7 @@ RecursivePickPoints( UOdysseyVectorObject* iObject
                    , double iX
                    , double iY
                    , double iRadius
-                   , std::vector<UOdysseyVectorPoint*>& oPickedPointArray )
+                   , std::vector<FOdysseyVectorPoint*>& oPickedPointArray )
 {
     UOdysseyVectorPath* path = Cast<UOdysseyVectorPath>(iObject);
 
@@ -355,7 +355,7 @@ FOdysseyVectorEngine::PickPoints( UOdysseyVectorRoot* iScene
                                 , double iX
                                 , double iY
                                 , double iRadius
-                                , std::vector<UOdysseyVectorPoint*>& oPickedPointArray )
+                                , std::vector<FOdysseyVectorPoint*>& oPickedPointArray )
 {
     RecursivePickPoints( iScene, iX, iY, iRadius, oPickedPointArray );
 }

@@ -41,7 +41,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorPath : public UOdysseyVectorObject
         std::list<UOdysseyVectorSegment*> mSegmentList;
         std::list<UOdysseyVectorSegment*> mInvalidatedSegmentList;
         /*std::list<UOdysseyVectorLoop*> mInvalidatedLoopList;*/
-        std::list<UOdysseyVectorPoint*> mSelectedPointList;
+        std::list<FOdysseyVectorPoint*> mSelectedPointList;
         BLPath mPath;
 
     public:
@@ -52,8 +52,8 @@ class ODYSSEYVECTOR_API UOdysseyVectorPath : public UOdysseyVectorObject
         UPROPERTY(EditAnywhere, Category="Transform")
         eJointType JointType;
 
-        ~UOdysseyVectorPath(){};
-        UOdysseyVectorPath(){};
+        ~UOdysseyVectorPath();
+        UOdysseyVectorPath();
         void Init( std::string iName );
         void AddSegment(UOdysseyVectorSegment* iSegment);
         void RemoveSegment(UOdysseyVectorSegment* iSegment);
@@ -64,11 +64,8 @@ class ODYSSEYVECTOR_API UOdysseyVectorPath : public UOdysseyVectorObject
         void DrawLoops( ::ULIS::FRectD &iRoi, uint64 iFlags );*/
         virtual void Merge( UOdysseyVectorPath* iPath ){};
         virtual void DrawStructure( ::ULIS::FRectD &iRoi );
-        void setJointRadial();
-        void setJointLinear();
-        void setJointMiter();
-        void setJointNone();
-
+        void SetJointType( eJointType mJointType );
+        eJointType GetJointType();
         /*virtual void InsertPoint( UOdysseyVectorSegment* iSegment, UOdysseyVectorVertex* iPoint );*/
         std::list<UOdysseyVectorSegment*>& GetSegmentList();
         std::list<UOdysseyVectorVertex*>& GetVertexList();
@@ -76,11 +73,11 @@ class ODYSSEYVECTOR_API UOdysseyVectorPath : public UOdysseyVectorObject
         UOdysseyVectorVertex* GetLastVertex();
         UOdysseyVectorSegment* GetFirstSegment();
         UOdysseyVectorSegment* GetLastSegment();
-        std::list<UOdysseyVectorPoint*>& GetSelectedPointList();
+        std::list<FOdysseyVectorPoint*>& GetSelectedPointList();
         virtual bool PickPoint( double iX
                               , double iY
                               , double iRadius
-                              , std::vector<UOdysseyVectorPoint*>& oPickedPointArray
+                              , std::vector<FOdysseyVectorPoint*>& oPickedPointArray
                               , uint64 iSelectionFlags ){ return false; };
         virtual void Unselect( UOdysseyVectorVertex* iVertex ){};
         void Clear();
