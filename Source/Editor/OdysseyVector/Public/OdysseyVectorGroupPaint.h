@@ -13,7 +13,7 @@
 #include "OdysseyVectorSegmentCubic.h"
 #include "OdysseyVectorGroup.h"
 #include "OdysseyVectorBucket.h"
-#include "OdysseyVectorLoop.h"
+#include "OdysseyVectorCycle.h"
 
 #include "OdysseyVectorGroupPaint.generated.h"
 

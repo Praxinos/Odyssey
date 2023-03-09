@@ -49,7 +49,7 @@ UOdysseyVectorPath::AppendVertex( FOdysseyVectorVertex* iPoint, FOdysseyVectorVe
 }
 
 /*void
-UOdysseyVectorPath::AddLoop( UOdysseyVectorLoop* iLoop )
+UOdysseyVectorPath::AddLoop( UOdysseyVectorCycle* iLoop )
 {
     mLoopList.push_back( iLoop );
 
@@ -61,7 +61,7 @@ UOdysseyVectorPath::AddLoop( UOdysseyVectorLoop* iLoop )
 }*/
 
 /*void
-UOdysseyVectorPath::RemoveLoop( UOdysseyVectorLoop* iLoop )
+UOdysseyVectorPath::RemoveLoop( UOdysseyVectorCycle* iLoop )
 {
     mLoopList.remove( iLoop );
 
@@ -113,9 +113,9 @@ UOdysseyVectorPath::UpdateShape( uint32 iUpdateFlags )
 
     // then update Loops
 /*
-    for ( std::list<UOdysseyVectorLoop*>::iterator it = mInvalidatedLoopList.begin(); it != mInvalidatedLoopList.end(); ++it )
+    for ( std::list<UOdysseyVectorCycle*>::iterator it = mInvalidatedLoopList.begin(); it != mInvalidatedLoopList.end(); ++it )
     {
-        UOdysseyVectorLoop* loop = static_cast<UOdysseyVectorLoop*>(*it);
+        UOdysseyVectorCycle* loop = static_cast<UOdysseyVectorCycle*>(*it);
 
         loop->Update();
     }
@@ -134,7 +134,7 @@ UOdysseyVectorPath::InvalidateSegment( FOdysseyVectorSegment* iSegment )
 }
 
 /*void
-UOdysseyVectorPath::InvalidateLoop( UOdysseyVectorLoop* iLoop )
+UOdysseyVectorPath::InvalidateLoop( UOdysseyVectorCycle* iLoop )
 {
     mInvalidatedLoopList.push_back ( iLoop );
 
@@ -145,9 +145,9 @@ UOdysseyVectorPath::InvalidateLoop( UOdysseyVectorLoop* iLoop )
 void
 UOdysseyVectorPath::DrawLoops( ::ULIS::FRectD &iRoi, uint64 iFlags )
 {
-    for( std::list<UOdysseyVectorLoop*>::iterator it = mLoopList.begin(); it != mLoopList.end(); ++it )
+    for( std::list<UOdysseyVectorCycle*>::iterator it = mLoopList.begin(); it != mLoopList.end(); ++it )
     {
-        UOdysseyVectorLoop* loop = static_cast<UOdysseyVectorLoop*>(*it);
+        UOdysseyVectorCycle* loop = static_cast<UOdysseyVectorCycle*>(*it);
 
         //if ( loop->IsFilled() == true )
         //{
@@ -161,9 +161,9 @@ UOdysseyVectorPath::DrawLoops( ::ULIS::FRectD &iRoi, uint64 iFlags )
 UOdysseyVectorObject*
 UOdysseyVectorPath::PickLoops( double iX, double iY, double iRadius )
 {
-    for( std::list<UOdysseyVectorLoop*>::iterator it = mLoopList.begin(); it != mLoopList.end(); ++it )
+    for( std::list<UOdysseyVectorCycle*>::iterator it = mLoopList.begin(); it != mLoopList.end(); ++it )
     {
-        UOdysseyVectorLoop* loop = static_cast<UOdysseyVectorLoop*>(*it);
+        UOdysseyVectorCycle* loop = static_cast<UOdysseyVectorCycle*>(*it);
 
         if ( loop->PickShape( iX, iY, iRadius ) )
         {
@@ -176,12 +176,12 @@ UOdysseyVectorPath::PickLoops( double iX, double iY, double iRadius )
 */
 
 /*
-UOdysseyVectorLoop*
+UOdysseyVectorCycle*
 UOdysseyVectorPath::GetLoopByID( uint64 iID )
 {
-    for( std::list<UOdysseyVectorLoop*>::iterator it = mLoopList.begin(); it != mLoopList.end(); ++it )
+    for( std::list<UOdysseyVectorCycle*>::iterator it = mLoopList.begin(); it != mLoopList.end(); ++it )
     {
-        UOdysseyVectorLoop* loop = static_cast<UOdysseyVectorLoop*>(*it);
+        UOdysseyVectorCycle* loop = static_cast<UOdysseyVectorCycle*>(*it);
 
         if ( iID == loop->GetID() )
         {

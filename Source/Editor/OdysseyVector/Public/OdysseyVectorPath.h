@@ -10,7 +10,7 @@
 
 #include "OdysseyVectorPath.generated.h"
 
-class UOdysseyVectorLoop;
+class UOdysseyVectorCycle;
 
 UENUM(BlueprintType)
 enum class eJointType : uint8
@@ -40,7 +40,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorPath : public UOdysseyVectorObject
         std::list<FOdysseyVectorVertex*> mVertexList;
         std::list<FOdysseyVectorSegment*> mSegmentList;
         std::list<FOdysseyVectorSegment*> mInvalidatedSegmentList;
-        /*std::list<UOdysseyVectorLoop*> mInvalidatedLoopList;*/
+        /*std::list<UOdysseyVectorCycle*> mInvalidatedLoopList;*/
         std::list<FOdysseyVectorPoint*> mSelectedPointList;
         BLPath mPath;
 
@@ -82,11 +82,11 @@ class ODYSSEYVECTOR_API UOdysseyVectorPath : public UOdysseyVectorObject
         virtual void Unselect( FOdysseyVectorVertex* iVertex ){};
         void Clear();
         /*bool IsLoop();
-        UOdysseyVectorLoop* GetLoopByID( uint64 iID );
-        void AddLoop( UOdysseyVectorLoop* iLoop );
-        void RemoveLoop( UOdysseyVectorLoop* iLoop );*/
+        UOdysseyVectorCycle* GetLoopByID( uint64 iID );
+        void AddLoop( UOdysseyVectorCycle* iLoop );
+        void RemoveLoop( UOdysseyVectorCycle* iLoop );*/
         void InvalidateSegment( FOdysseyVectorSegment* iSegment );
         void InvalidateAllSegments();
-        /*void InvalidateLoop( UOdysseyVectorLoop* iLoop );*/
+        /*void InvalidateLoop( UOdysseyVectorCycle* iLoop );*/
         void UpdateBBox();
 };

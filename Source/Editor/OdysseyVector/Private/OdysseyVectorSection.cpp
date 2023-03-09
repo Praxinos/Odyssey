@@ -149,18 +149,18 @@ FOdysseyVectorSection::GetVertex( int iNum )
 }
 
 void
-FOdysseyVectorSection::AddLoop( UOdysseyVectorLoop* iLoop )
+FOdysseyVectorSection::AddLoop( UOdysseyVectorCycle* iLoop )
 {
     mLoopList.push_back( iLoop );
 }
 
 void
-FOdysseyVectorSection::RemoveLoop( UOdysseyVectorLoop* iLoop )
+FOdysseyVectorSection::RemoveLoop( UOdysseyVectorCycle* iLoop )
 {
     mLoopList.remove( iLoop );
 }
 
-std::list<UOdysseyVectorLoop*>&
+std::list<UOdysseyVectorCycle*>&
 FOdysseyVectorSection::GetLoopList()
 {
     return mLoopList;

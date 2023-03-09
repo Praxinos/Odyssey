@@ -5,7 +5,7 @@
 #include <Image/Block.h>
 
 class FOdysseyVectorSegment;
-class UOdysseyVectorLoop;
+class UOdysseyVectorCycle;
 class FOdysseyVectorSection;
 
 class ODYSSEYVECTOR_API FOdysseyVectorPoint

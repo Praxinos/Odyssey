@@ -43,7 +43,7 @@ namespace FOdysseyVector
 #include "OdysseyVectorSegmentCubic.h"
 #include "OdysseyVectorRectangle.h"
 #include "OdysseyVectorGroup.h"
-#include "OdysseyVectorLoop.h"
+#include "OdysseyVectorCycle.h"
 #include "OdysseyVectorPath.h"
 #include "OdysseyVectorPathBuilder.h"
 #include "OdysseyVectorPathCubic.h"

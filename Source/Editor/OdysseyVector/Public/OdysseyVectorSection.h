@@ -4,7 +4,7 @@
 #include <Core/Core.h>
 #include <Image/Block.h>
 #include "OdysseyVectorPoint.h"
-#include "OdysseyVectorLoop.h"
+#include "OdysseyVectorCycle.h"
 
 // TODO: inherit from FOdysseyVectorLink ?
 class FOdysseyVectorSection

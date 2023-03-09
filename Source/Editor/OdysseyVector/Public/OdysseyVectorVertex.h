@@ -6,7 +6,7 @@
 #include "OdysseyVectorPoint.h"
 
 class FOdysseyVectorSegment;
-class UOdysseyVectorLoop;
+class UOdysseyVectorCycle;
 class FOdysseyVectorSection;
 class UOdysseyVectorPath;
 

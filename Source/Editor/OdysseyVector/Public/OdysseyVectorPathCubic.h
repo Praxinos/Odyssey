@@ -10,7 +10,7 @@
 #include "OdysseyVectorSegmentCubic.h"
 #include "OdysseyVectorPath.h"
 #include "OdysseyVectorBucket.h"
-#include "OdysseyVectorLoop.h"
+#include "OdysseyVectorCycle.h"
 
 #include "OdysseyVectorPathCubic.generated.h"
 
