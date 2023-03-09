@@ -1,0 +1,51 @@
+#pragma once
+
+#include "CoreMinimal.h"
+
+#include <ULIS>
+#include <blend2d.h>
+#include <Core/Core.h>
+#include <Image/Block.h>
+#include "OdysseyVectorObject.h"
+#include "OdysseyVectorGroup.h"
+
+#include "OdysseyVectorScene.generated.h"
+
+class FOdysseyVectorEngine;
+
+UCLASS()
+class ODYSSEYVECTOR_API UOdysseyVectorScene : public UOdysseyVectorObject
+{
+    public:
+        GENERATED_BODY()
+
+    private:
+        void UpdateShape( uint32 iUpdateFlags );
+        UOdysseyVectorObject* CopyShape();
+        FOdysseyVectorEngine* mEngine;
+
+    protected:
+        std::list<UOdysseyVectorObject*> mSelectedObjectList;
+        std::list<UOdysseyVectorObject*> mInvalidatedObjectList;
+
+    public:
+        ~UOdysseyVectorScene(){};
+        UOdysseyVectorScene(){};
+        void Init( std::string iName );
+        void Select( UOdysseyVectorObject* iVecObj );
+        void Unselect( UOdysseyVectorObject* iVecObj );
+        void ClearSelection();
+        UOdysseyVectorObject* GetLastSelected();
+        std::list<UOdysseyVectorObject*>& GetSelectedObjectList();
+        void DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags );
+        bool PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags ) { return false; };
+
+        void InvalidateObject( UOdysseyVectorObject* iObject );
+        void RemoveSelectedObjects();
+
+        UOdysseyVectorGroup* GroupSelectdObjects();
+        uint32 GetType();
+
+        void SetEngine( FOdysseyVectorEngine* iEngine );
+        FOdysseyVectorEngine* GetEngine();
+};
