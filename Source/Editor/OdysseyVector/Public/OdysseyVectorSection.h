@@ -6,7 +6,8 @@
 #include "OdysseyVectorPoint.h"
 #include "OdysseyVectorCycle.h"
 
-// TODO: inherit from FOdysseyVectorLink ?
+// TODO: inherit from FOdysseyVectorLink ? answer : no, because links should not have
+// intersection vertices as endpoints as there is no way to know which segments they are on
 class FOdysseyVectorSection
 {
     public:

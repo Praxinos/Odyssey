@@ -10,6 +10,9 @@ class FOdysseyVectorBucket;
 class ODYSSEYVECTOR_API FOdysseyVectorHandleBucket : public FOdysseyVectorHandle
 {
     public:
+        static uint32 StaticClass() { return mStaticClass; };
+        virtual uint32 GetClass() override { return mStaticClass; };
+
         static FOdysseyVectorHandleBucket* New( FOdysseyVectorBucket* iParentBucket );
 
         ~FOdysseyVectorHandleBucket();
@@ -19,5 +22,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorHandleBucket : public FOdysseyVectorHandle
         void Init( FOdysseyVectorBucket* iParentBucket );
 
     private:
+        static const uint32 mStaticClass = 0xe5d595c7; // value is crc32 FOdysseyVectorHandleBucket
+
         FOdysseyVectorBucket* mParentBucket;
 };

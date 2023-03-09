@@ -219,8 +219,8 @@ PrintCycle( std::vector<FOdysseyVectorVertex*>& vertexArray
     for( int i = 0; i < vertexArray.size(); i++ )
     {
         FOdysseyVectorSegment* segment = sectionArray[i]->GetSegment();
-        BLPoint pt0 = segment->GetPath()->GetWorldMatrix().mapPoint( sectionArray[i]->GetVertex(0)->GetCoordsOnSegment(segment).x, sectionArray[i]->GetVertex(0)->GetCoordsOnSegment(segment).y );
-        BLPoint pt1 = segment->GetPath()->GetWorldMatrix().mapPoint( sectionArray[i]->GetVertex(1)->GetCoordsOnSegment(segment).x, sectionArray[i]->GetVertex(1)->GetCoordsOnSegment(segment).y );
+        BLPoint pt0 = segment->GetPath()->GetWorldMatrix().mapPoint( sectionArray[i]->GetVertex(0)->GetCoords(segment).x, sectionArray[i]->GetVertex(0)->GetCoords(segment).y );
+        BLPoint pt1 = segment->GetPath()->GetWorldMatrix().mapPoint( sectionArray[i]->GetVertex(1)->GetCoords(segment).x, sectionArray[i]->GetVertex(1)->GetCoords(segment).y );
 
         UE_LOG(LogTemp,Warning,TEXT("Node: vertex:%d section:%d (%d[x:%f y:%f] -- %d[x:%f y:%f])"), vertexArray[i], sectionArray[i], sectionArray[i]->GetVertex(0), pt0.x, pt0.y, sectionArray[i]->GetVertex(1), pt1.x, pt1.y );
     }
@@ -341,8 +341,8 @@ GetNormalVector( std::vector<FOdysseyVectorVertex*>& iVertexArray
 
     if( iVertexArray.size() == 2 )
     {
-        ::ULIS::FVec2D startVector =  -iSectionArray[0]->GetVectorFromVertex( iVertexArray[1] );
-        ::ULIS::FVec2D endVector   =   iSectionArray[1]->GetVectorFromVertex( iVertexArray[1] );
+        ::ULIS::FVec2D startVector =  -iSectionArray[0]->GetVectorFromVertex( iVertexArray[1], false );
+        ::ULIS::FVec2D endVector   =   iSectionArray[1]->GetVectorFromVertex( iVertexArray[1], false );
 
         z = FOdysseyVector::Cross2D( startVector, endVector );
     }
@@ -353,10 +353,10 @@ GetNormalVector( std::vector<FOdysseyVectorVertex*>& iVertexArray
         {
             int n = ( i + 1 ) % arraySize;
             FOdysseyVectorSegment* segment = iSectionArray[i]->GetSegment();
-            ::ULIS::FVec2D& viCoords = iVertexArray[i]->GetCoordsOnSegment( segment );
-            ::ULIS::FVec2D& vnCoords = iVertexArray[n]->GetCoordsOnSegment( segment );
-            double ti = iVertexArray[i]->GetT( *segment );
-            double tn = iVertexArray[n]->GetT( *segment );
+            ::ULIS::FVec2D& viCoords = iVertexArray[i]->GetCoords( segment );
+            ::ULIS::FVec2D& vnCoords = iVertexArray[n]->GetCoords( segment );
+            double ti = iVertexArray[i]->GetT( segment );
+            double tn = iVertexArray[n]->GetT( segment );
             double deltaT = tn - ti;
             int subdiv = 8;
             double stepT = deltaT / subdiv;

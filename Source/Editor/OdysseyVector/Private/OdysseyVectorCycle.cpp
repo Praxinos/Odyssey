@@ -15,12 +15,10 @@ FOdysseyVectorCycle::FOdysseyVectorCycle( UOdysseyVectorObject& iParent
                                       , std::vector<FOdysseyVectorSection*>& iSectionArray )
     : mParent( iParent )
     , mID( iID )
-    , mColor( 0xA0, 0xA0, 0xA0, 0xFF )
     , mBucket( nullptr )
     , mVertexArray (iVertexArray)
     , mSectionArray (iSectionArray)
     , mFlags (0)
-    , mValence (0)
     , mParentCycle( nullptr )
 {
 /*
@@ -81,18 +79,6 @@ FOdysseyVectorCycle::FitsIn( FOdysseyVectorCycle* iParentCandidate )
     return true;
 }
 
-std::vector<FOdysseyVectorVertex*>& 
-FOdysseyVectorCycle::GetVertexArray()
-{
-    return mVertexArray;
-}
-
-std::vector<FOdysseyVectorSection*>&
-FOdysseyVectorCycle::GetSectionArray()
-{
-    return mSectionArray;
-}
-
 // static
 uint64
 FOdysseyVectorCycle::GenerateID( std::vector<FOdysseyVectorSection*>& iSectionArray )
@@ -106,34 +92,6 @@ FOdysseyVectorCycle::GenerateID( std::vector<FOdysseyVectorSection*>& iSectionAr
 
     return loopID;
 }
-
-// static
-/*
-FOdysseyVectorCycle*
-FOdysseyVectorCycle::Exists( uint64 iID
-                          , std::vector<FOdysseyVectorVertex*>& iVertexArray
-                          , std::vector<FOdysseyVectorSection*>& iSectionArray )
-{
-    for( int i = 0; i < iVertexArray.size(); i++ )
-    {
-        if( iVertexArray[i]->GetClass() == FOdysseyVectorVertexIntersection::StaticClass() )
-        {
-            FOdysseyVectorVertexIntersection* intersectionVertex = Cast<FOdysseyVectorVertexIntersection>( iVertexArray[i] );
-            FOdysseyVectorCycle* cycle = intersectionVertex->GetLoop();
-
-            if( cycle )
-            {
-                if( cycle->mID == iID )
-                {
-                    return cycle;
-                }
-            }
-        }
-    }
-
-    return nullptr;
-}
-*/
 
 void
 FOdysseyVectorCycle::BuildSegmentCubic( FOdysseyVectorSegmentCubic& iSegment
@@ -206,12 +164,6 @@ FOdysseyVectorCycle::BuildSegmentCubic( FOdysseyVectorSegmentCubic& iSegment
     }
 }
 
-uint32
-FOdysseyVectorCycle::GetValence()
-{
-    return mValence;
-}
-
 void
 FOdysseyVectorCycle::Build( std::vector<FOdysseyVectorVertex*>& iVertexArray
                          , std::vector<FOdysseyVectorSection*>& iSectionArray )
@@ -219,7 +171,6 @@ FOdysseyVectorCycle::Build( std::vector<FOdysseyVectorVertex*>& iVertexArray
     /*double xmin, ymin, xmax, ymax;*/
     int seg = 0;
 
-    mValence = 0;
     mPath.clear();
 
      //mPointArray.clear();
@@ -229,7 +180,7 @@ FOdysseyVectorCycle::Build( std::vector<FOdysseyVectorVertex*>& iVertexArray
     {
         FOdysseyVectorSection* firstSection = iSectionArray.front();
         FOdysseyVectorSegment* firstSegment = firstSection->GetSegment();
-        ::ULIS::FVec2D originAt = iVertexArray[0]->GetPosition( *firstSegment );
+        ::ULIS::FVec2D originAt = iVertexArray[0]->GetPosition( firstSegment );
         FOdysseyVectorVertex* currentVertex = iVertexArray[0];
 
         mMin.x = mMax.x = originAt.x;
@@ -240,9 +191,9 @@ FOdysseyVectorCycle::Build( std::vector<FOdysseyVectorVertex*>& iVertexArray
             FOdysseyVectorSection* section = iSectionArray[i];
             FOdysseyVectorSegment* segment = section->GetSegment();
             FOdysseyVectorVertex* nextVertex = ( currentVertex == section->GetVertex(0) ) ? section->GetVertex(1) : section->GetVertex(0);
-            double currentVertexT = currentVertex->GetT( *segment );
-            double    nextVertexT =    nextVertex->GetT( *segment );
-            ::ULIS::FVec2D currentAt = currentVertex->GetPosition( *segment );
+            double currentVertexT = currentVertex->GetT( segment );
+            double    nextVertexT =    nextVertex->GetT( segment );
+            ::ULIS::FVec2D currentAt = currentVertex->GetPosition( segment );
 
             if( i == 0 )
             {
@@ -256,37 +207,10 @@ FOdysseyVectorCycle::Build( std::vector<FOdysseyVectorVertex*>& iVertexArray
             BuildSegmentCubic ( static_cast<FOdysseyVectorSegmentCubic&>(*segment), currentVertexT, nextVertexT );
 
             currentVertex = nextVertex;
-
-            if( iVertexArray[i]->GetClass() == FOdysseyVectorVertexIntersection::StaticClass() )
-            {
-                mValence++;
-            }
         }
 
         mPath.close();
     }
-
-/*
-    mPath.clear();
-//UE_LOG(LogTemp, Warning, TEXT("FOdysseyVectorCycle::Build: Array size %d"), iSectionArray.size() );
-    for( int i = 0; i < iSectionArray.size(); i++ )
-    {
-        FOdysseyVectorSection* section = iSectionArray[i];
-        FOdysseyVectorSegment* segment = section->GetSegment();
-        ::ULIS::FVec2D originAt = iVertexArray[i]->GetPosition( *segment );
-//UE_LOG(LogTemp, Warning, TEXT("pointAt %d %f %f"), segment, originAt.x, originAt.y );
-        if( i == 0 ) mPath.moveTo( originAt.x, originAt.y );
-        else         mPath.lineTo( originAt.x, originAt.y );
-    }
-
-    mPath.close();
-*/
-}
-
-FColor
-FOdysseyVectorCycle::GetColor()
-{
-    return ( mBucket ) ? mBucket->GetColor() : mColor;
 }
 
 void
@@ -405,26 +329,6 @@ FOdysseyVectorCycle::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
     blctx->fillPath( combinedPath );
     /*}*/
 }
-
-void 
-FOdysseyVectorCycle::SetMarched( bool iMarched )
-{
-    if( iMarched == true )
-    {
-        mFlags |= MARCHED;
-    }
-    else
-    {
-        mFlags &= (~MARCHED);
-    }
-}
-
-bool
-FOdysseyVectorCycle::IsMarched()
-{
-    return ( mFlags & MARCHED ) ? true : false;
-}
-
 
 uint64
 FOdysseyVectorCycle::GetID()

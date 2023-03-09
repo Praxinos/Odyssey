@@ -50,7 +50,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
          */
         void RemoveSection( FOdysseyVectorSection* iSection );
 
-        //::ULIS::FRectD GetRectangle();
+        /**
+         * @brief Get the bounding volume form by this vertex and its segments.
+         * @return the bounding volume form by this vertex and its segments.
+         */
+        ::ULIS::FRectD GetRectangle();
 
         //////// setters
 
@@ -176,7 +180,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
          */
         virtual double GetT( FOdysseyVectorSegment* iSegment );
 
-        virtual void GetCoords( FOdysseyVectorSegment* iSegment );
+        virtual ::ULIS::FVec2D& GetCoords( FOdysseyVectorSegment* iSegment );
 
         /**
          * @brief Get a pointer to the path this vertex belongs to.
@@ -186,8 +190,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
 
 
         virtual ::ULIS::FVec2D GetVectorOnSegment( FOdysseyVectorSegment* iSegment, bool iNormalize );
-
-        virtual ::ULIS::FVec2D& GetCoordsOnSegment( FOdysseyVectorSegment* iSegment );
 
         /**
          * @brief Get a pointer to the next section to explore in cycle depending on the last visited section.

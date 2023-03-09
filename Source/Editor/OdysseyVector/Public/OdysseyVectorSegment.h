@@ -102,7 +102,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
         virtual ::ULIS::FVec2D GetVectorAtStart( bool iNormalize );
 
        /**
-         * @brief Get the vertex that belongs to this segment.
+         * @brief Get the vertex that belongs to this segment. Same as static_cast<FOdysseyVectorVertex*>(GetPoint(iNum))
          * @param iVertexID MUST be 0 or 1.
          * @return a pointer to the requested vertex.
          */
@@ -163,6 +163,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
          * @return vector at t.
          */
         virtual ::ULIS::FVec2D GetTangentAt( double t );
+
+        /**
+         * @brief Get the point class (ala UE)
+         */
+        virtual uint32 GetClass() = 0;
 
     protected:
         std::list<FOdysseyVectorVertexIntersection*> mIntersectionVertexList;

@@ -49,7 +49,11 @@ class ODYSSEYVECTOR_API UOdysseyVectorPathCubic: public UOdysseyVectorPath
         void DrawShapeVariable( ::ULIS::FRectD& iRoi, uint64 iFlags );
 
         void Mirror( bool iMirrorX, bool iMirrorY );
-        void Cut( ::ULIS::FVec2D& linePoint0, ::ULIS::FVec2D& linePoint1 );
+        void Cut( ::ULIS::FVec2D& linePoint0
+                , ::ULIS::FVec2D& linePoint1
+                , std::vector<FOdysseyVectorVertexCubic*>& oNewVertexArray
+                , std::vector<FOdysseyVectorSegmentCubic*>& oNewSegmentArray
+                , std::vector<FOdysseyVectorSegmentCubic*>& oOldSegmentArray );
         void SwitchSpace( UOdysseyVectorObject& iObject );
         bool Erase( ::ULIS::FRectD &iRoi );
 

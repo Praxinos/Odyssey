@@ -120,7 +120,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorBucket
         static const uint32 PICKCROSS  = 2;
         static const uint32 PICKHANDLE = 3;
 
-    private:
+    protected:
         UOdysseyVectorObject& mParent;
         ::ULIS::FVec2D mCoords;
         FColor mColor;

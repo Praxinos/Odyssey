@@ -12,4 +12,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorHandle : public FOdysseyVectorPoint
         FOdysseyVectorHandle();
 
         void Init( double iX, double iY );
+        ::ULIS::FVec2D& GetCoords();
 };

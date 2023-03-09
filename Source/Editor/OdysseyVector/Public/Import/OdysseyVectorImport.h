@@ -5,6 +5,7 @@
 #include <Core/Core.h>
 #include <Image/Block.h>
 #include "OdysseyVectorObject.h"
+#include "OdysseyVectorEllipse.h"
 #include "OdysseyVectorVertexCubic.h"
 #include "OdysseyVectorSegmentCubic.h"
 #include "OdysseyVectorPathCubic.h"

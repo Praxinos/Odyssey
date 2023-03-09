@@ -120,21 +120,15 @@ FOdysseyVectorVertex::GetFirstSegment()
     return mSegmentList.front();
 }
 
-FOdysseyVectorSection*
-FOdysseyVectorVertex::GetLastSection()
-{
-    return mSectionList.back();
-}
-
 ::ULIS::FVec2D
 FOdysseyVectorVertex::GetVectorOnSegment( FOdysseyVectorSegment* iSegment, bool iNormalize )
 {
     ::ULIS::FVec2D vec;
 
-    vec = ( iSegment->GetVertex(0) == this ) ? iSegment->GetVertex(1)->GetCoordsOnSegment(iSegment) -
-                                                                       GetCoordsOnSegment(iSegment)
-                                              :                        GetCoordsOnSegment(iSegment) -
-                                               iSegment->GetVertex(0)->GetCoordsOnSegment(iSegment);
+    vec = ( iSegment->GetVertex(0) == this ) ? iSegment->GetVertex(1)->GetCoords(iSegment) -
+                                                                       GetCoords(iSegment)
+                                              :                        GetCoords(iSegment) -
+                                               iSegment->GetVertex(0)->GetCoords(iSegment);
 
     if( iNormalize && vec.DistanceSquared() )
     {
@@ -167,9 +161,9 @@ static bool seekVertex( std::list<FOdysseyVectorVertex*>& iVertexList
 }
 
 double
-FOdysseyVectorVertex::GetT( FOdysseyVectorSegment& iSegment )
+FOdysseyVectorVertex::GetT( FOdysseyVectorSegment* iSegment )
 {
-    return ( iSegment.GetPoint(0) == this ) ? 0.0f : 1.0f;
+    return ( iSegment->GetPoint(0) == this ) ? 0.0f : 1.0f;
 }
 
 static bool seekSection( std::list<FOdysseyVectorSection*>& iSectionList
@@ -189,7 +183,7 @@ static bool seekSection( std::list<FOdysseyVectorSection*>& iSectionList
 FOdysseyVectorSection*
 FOdysseyVectorVertex::GetCycleNextSection( FOdysseyVectorSection* iLastSection, double iOrientation )
 {
-    ::ULIS::FVec2D lastSectionVector = -iLastSection->GetVectorFromVertex( this );
+    ::ULIS::FVec2D lastSectionVector = -iLastSection->GetVectorFromVertex( this, false );
 
     for( std::list<FOdysseyVectorSection*>::iterator it = mSectionList.begin(); it != mSectionList.end(); ++it )
     {
@@ -197,7 +191,7 @@ FOdysseyVectorVertex::GetCycleNextSection( FOdysseyVectorSection* iLastSection, 
 
         if( section->GetSegment() != iLastSection->GetSegment() )
         {
-            ::ULIS::FVec2D sectionVector = section->GetVectorFromVertex( this );
+            ::ULIS::FVec2D sectionVector = section->GetVectorFromVertex( this, false );
 
             if( ( FOdysseyVector::Cross2D( lastSectionVector, sectionVector ) * iOrientation > 0.0f ) )
             {
@@ -229,52 +223,6 @@ FOdysseyVectorVertex::IsVisited()
 }
 
 void
-FOdysseyVectorVertex::SetInCycle( bool iInCycle, uint32 iCycleID )
-{
-    if( iInCycle == true )
-    {
-        mFlags |= INCYCLE;
-    }
-    else
-    {
-        mFlags &= (~INCYCLE);
-    }
-
-    mCycleID = iCycleID;
-}
-
-bool
-FOdysseyVectorVertex::IsInCycle()
-{
-    return ( mFlags & INCYCLE ) ? true : false;
-}
-
-uint32
-FOdysseyVectorVertex::GetCycleID()
-{
-    return mCycleID;
-}
-
-void
-FOdysseyVectorVertex::SetMarched( bool iMarched )
-{
-    if( iMarched == true )
-    {
-        mFlags |= MARCHED;
-    }
-    else
-    {
-        mFlags &= (~MARCHED);
-    }
-}
-
-bool
-FOdysseyVectorVertex::IsMarched()
-{
-    return ( mFlags & MARCHED ) ? true : false;
-}
-
-void
 FOdysseyVectorVertex::AddSection( FOdysseyVectorSection* iSection )
 {
     mSectionList.push_back( iSection );
@@ -287,19 +235,19 @@ FOdysseyVectorVertex::RemoveSection( FOdysseyVectorSection* iSection )
 }
 
 ::ULIS::FVec2D&
-FOdysseyVectorVertex::GetCoordsOnSegment( FOdysseyVectorSegment* iSegment )
+FOdysseyVectorVertex::GetCoords( FOdysseyVectorSegment* iSegment )
 {
-    return GetCoords();
+    return mCoords;
 }
 
 bool
-FOdysseyVectorVertex::HasSegment( FOdysseyVectorSegment& iSegment )
+FOdysseyVectorVertex::HasSegment( FOdysseyVectorSegment* iSegment )
 {
     for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
     {
         FOdysseyVectorSegment* segment = static_cast<FOdysseyVectorSegment*>(*it);
 
-        if ( segment == &iSegment )
+        if ( segment == iSegment )
         {
             return true;
         }
@@ -328,7 +276,7 @@ FOdysseyVectorVertex::GetRectangle()
 }
 
 ::ULIS::FVec2D
-FOdysseyVectorVertex::GetPosition( FOdysseyVectorSegment& iSegment )
+FOdysseyVectorVertex::GetPosition( FOdysseyVectorSegment* iSegment )
 {
     return mCoords;
 }
@@ -340,14 +288,14 @@ FOdysseyVectorVertex::GetSectionList()
 }
 
 FOdysseyVectorSection*
-FOdysseyVectorVertex::GetSection( FOdysseyVectorVertex& iOtherVertex )
+FOdysseyVectorVertex::GetSection( FOdysseyVectorVertex* iOtherVertex )
 {
     for( std::list<FOdysseyVectorSection*>::iterator it = mSectionList.begin(); it != mSectionList.end(); ++it )
     {
         FOdysseyVectorSection* section = static_cast<FOdysseyVectorSection*>(*it);
 
-        if ( ( ( section->GetVertex(0) == this ) && ( section->GetVertex(1) == &iOtherVertex ) ) 
-          || ( ( section->GetVertex(1) == this ) && ( section->GetVertex(0) == &iOtherVertex ) ) )
+        if ( ( ( section->GetVertex(0) == this ) && ( section->GetVertex(1) == iOtherVertex ) ) 
+          || ( ( section->GetVertex(1) == this ) && ( section->GetVertex(0) == iOtherVertex ) ) )
         {
             return section;
         }
@@ -357,14 +305,14 @@ FOdysseyVectorVertex::GetSection( FOdysseyVectorVertex& iOtherVertex )
 }
 
 FOdysseyVectorSegment*
-FOdysseyVectorVertex::GetSegment( FOdysseyVectorVertex& iOtherVertex )
+FOdysseyVectorVertex::GetSegment( FOdysseyVectorVertex* iOtherVertex )
 {
     for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
     {
         FOdysseyVectorSegment* segment = static_cast<FOdysseyVectorSegment*>(*it);
 
-        if ( ( ( segment->GetPoint(0) == this ) && ( segment->GetPoint(1) == &iOtherVertex ) ) 
-          || ( ( segment->GetPoint(1) == this ) && ( segment->GetPoint(0) == &iOtherVertex ) ) )
+        if ( ( ( segment->GetPoint(0) == this ) && ( segment->GetPoint(1) == iOtherVertex ) ) 
+          || ( ( segment->GetPoint(1) == this ) && ( segment->GetPoint(0) == iOtherVertex ) ) )
         {
             return segment;
         }
@@ -386,23 +334,6 @@ FOdysseyVectorVertex::GetOtherSection( FOdysseyVectorSection* iSection )
             {
                 return otherSection;
             }
-        }
-    }
-
-    return nullptr;
-}
-
-
-FOdysseyVectorSegment*
-FOdysseyVectorVertex::GetOtherSegment( FOdysseyVectorSegment& iCurrentSegment )
-{
-    for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
-    {
-        FOdysseyVectorSegment* segment = static_cast<FOdysseyVectorSegment*>(*it);
-
-        if ( segment != &iCurrentSegment )
-        {
-            return segment;
         }
     }
 

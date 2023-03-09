@@ -28,12 +28,6 @@ FOdysseyVectorPoint::New( double iX, double iY, double iRadius )
     return point;
 }
 
-::ULIS::FVec2D&
-FOdysseyVectorPoint::GetCoords()
-{
-    return mCoords;
-}
-
 double 
 FOdysseyVectorPoint::GetX()
 {

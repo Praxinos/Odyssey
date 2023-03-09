@@ -128,8 +128,8 @@ UOdysseyVectorEllipse::PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags )
 
             for( int i = 0; i < 4; i++ )
             {
-                ::ULIS::FVec2D &point0 = mCubicSegment[i]->GetPoint(0)->GetCoords();
-                ::ULIS::FVec2D &point1 = mCubicSegment[i]->GetPoint(1)->GetCoords();
+                ::ULIS::FVec2D &point0 = mCubicSegment[i]->GetVertex(0)->GetCoords( mCubicSegment[i] );
+                ::ULIS::FVec2D &point1 = mCubicSegment[i]->GetVertex(1)->GetCoords( mCubicSegment[i] );
                 ::ULIS::FVec2D &ctrlPoint0 = mCubicSegment[i]->GetHandle(0)->GetCoords();
                 ::ULIS::FVec2D &ctrlPoint1 = mCubicSegment[i]->GetHandle(1)->GetCoords();
 

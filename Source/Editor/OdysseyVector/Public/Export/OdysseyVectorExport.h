@@ -7,6 +7,7 @@
 #include <Core/Core.h>
 #include <Image/Block.h>
 #include "OdysseyVectorObject.h"
+#include "OdysseyVectorEllipse.h"
 #include "OdysseyVectorPathCubic.h"
 #include "OdysseyVectorGroup.h"
 #include "OdysseyVectorGroupPaint.h"

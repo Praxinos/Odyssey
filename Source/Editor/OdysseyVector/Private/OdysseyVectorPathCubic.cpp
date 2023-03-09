@@ -139,7 +139,7 @@ UOdysseyVectorPathCubic::Erase( ::ULIS::FRectD &iRoi )
     {
         FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
         std::vector<FPolygon>& polygonCache = cubicSegment->GetPolygonCache();
-        ::ULIS::FVec2D& firstCoords = cubicSegment->GetPoint(0)->GetCoords();
+        ::ULIS::FVec2D& firstCoords = cubicSegment->GetVertex(0)->GetCoords( nullptr );
         BLPoint firstAt = mWorldMatrix.mapPoint( firstCoords.x, firstCoords.y );
         double subVertexT[2] = { 0.0f, 0.0f };
         uint32 subVertexCount = 0;
@@ -204,8 +204,9 @@ UOdysseyVectorPathCubic::Erase( ::ULIS::FRectD &iRoi )
 
                                if( subVertexCount == 2 )
                                {
-                                   subSegmentArray.push_back( cubicSegment->Sample( subVertexT[0], 1.0f
-                                                                                  , subVertexT[1], 1.0f, newVertexArray ) );
+                                   subSegmentArray.push_back( cubicSegment->Sample( subVertexT[0]
+                                                                                  , subVertexT[1]
+                                                                                  , newVertexArray ) );
                                    subVertexCount = 0;
                                }
                            }
@@ -393,7 +394,10 @@ UOdysseyVectorPathCubic::Unselect( FOdysseyVectorVertex *iVertex )
 
 void
 UOdysseyVectorPathCubic::Cut( ::ULIS::FVec2D& linePoint0
-                            , ::ULIS::FVec2D& linePoint1 )
+                            , ::ULIS::FVec2D& linePoint1
+                            , std::vector<FOdysseyVectorVertexCubic*>& oNewVertexArray
+                            , std::vector<FOdysseyVectorSegmentCubic*>& oNewSegmentArray
+                            , std::vector<FOdysseyVectorSegmentCubic*>& oOldSegmentArray )
 {
     // let's work on a copy as we are going to remove items in the original list
     std::list<FOdysseyVectorSegment*> tmpSegmentList = mSegmentList;
@@ -402,11 +406,13 @@ UOdysseyVectorPathCubic::Cut( ::ULIS::FVec2D& linePoint0
     {
         FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(tmpSegmentList.back());
 
-        if ( cubicSegment->Cut ( linePoint0, linePoint1 ) )
+        if ( cubicSegment->Cut ( linePoint0, linePoint1, oNewVertexArray, oNewSegmentArray ) )
         {
             /*mSegmentList.remove ( cubicSegment );*/ // commented out: this is in the cut func
 
             cubicSegment->Invalidate();
+
+            oOldSegmentArray.push_back( cubicSegment );
         }
 
         tmpSegmentList.pop_back ();
@@ -439,8 +445,8 @@ UOdysseyVectorPathCubic::Fill( ::ULIS::FRectD& iRoi )
         for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
         {
             FOdysseyVectorSegmentCubic *segment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
-            ::ULIS::FVec2D& point0 = segment->GetPoint(0)->GetCoords();
-            ::ULIS::FVec2D& point1 = segment->GetPoint(1)->GetCoords();
+            ::ULIS::FVec2D& point0 = segment->GetVertex(0)->GetCoords( nullptr );
+            ::ULIS::FVec2D& point1 = segment->GetVertex(1)->GetCoords( nullptr );
             ::ULIS::FVec2D& ctrlPoint0 = segment->GetHandle(0)->GetCoords();
             ::ULIS::FVec2D& ctrlPoint1 = segment->GetHandle(1)->GetCoords();
 
@@ -458,82 +464,8 @@ UOdysseyVectorPathCubic::Fill( ::ULIS::FRectD& iRoi )
 }
 
 void
-UOdysseyVectorPathCubic::DrawStructure( ::ULIS::FRectD& iRoi, uint64 iFlags )
-{
-    BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
-    BLPath path;
-    FOdysseyVectorVertexCubic *firstVertex = static_cast<FOdysseyVectorVertexCubic*>( GetFirstVertex() );
-    BLPoint localVector = mInverseWorldMatrix.mapVector ( 0.7071f, 0.7071f );
-    ::ULIS::FVec2D factor = { localVector.x, localVector.y };
-    double handleRadiusX = 6.0f * factor.x;
-    double handleRadiusY = 6.0f * factor.y;
-    double handleWidth = handleRadiusX * 2.0f;
-    double handleHeight = handleRadiusY * 2.0f;
-
-    if ( firstVertex )
-    {
-        blctx->setCompOp( BL_COMP_OP_SRC_COPY );
-
-        for(std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it)
-        {
-            FOdysseyVectorSegmentCubic *segment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
-
-            segment->DrawStructure( this, iRoi, factor.x, factor.y );
-        }
-    }
-
-    // Points and Point size handles
-    for(std::list<FOdysseyVectorVertex*>::iterator it = mVertexList.begin(); it != mVertexList.end(); ++it)
-    {
-        FOdysseyVectorVertexCubic *point = static_cast<FOdysseyVectorVertexCubic*>(*it);
-        ::ULIS::FVec2D perpendicular = point->GetPerpendicularVector( true );
-        double pointRadius = point->GetRadius();
-        double ctrlX = ( perpendicular.x * pointRadius );
-        double ctrlY = ( perpendicular.y * pointRadius );
-
-        blctx->setFillStyle( BLRgba32( 0xFFFF00FF ) );
-        blctx->fillRect( point->GetX() - handleRadiusX
-                       , point->GetY() - handleRadiusY
-                       , handleWidth
-                       , handleHeight );
-
-        blctx->setFillStyle( BLRgba32( 0xFF808080 ) );
-        blctx->fillRect( point->GetX() + ctrlX - handleRadiusX
-                       , point->GetY() + ctrlY - handleRadiusY
-                       , handleWidth
-                       , handleHeight );
-
-        blctx->fillRect( point->GetX() - ctrlX - handleRadiusX
-                       , point->GetY() - ctrlY - handleRadiusY
-                       , handleWidth
-                       , handleHeight );
-    }
-}
-
-void
 UOdysseyVectorPathCubic::DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags )
 {
-/*
-    BLPath path;
-
-    iBLContext.setCompOp(BL_COMP_OP_SRC_COPY);
-
-    iBLContext.setStrokeStyle( BLRgba32( mStrokeColor ) );
-    iBLContext.setStrokeWidth( 20 );
-
-    path.clear();
-
-    for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
-    {
-        FOdysseyVectorSegmentCubic *segment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
-        bool isStandalone = ( segment->GetPoint(0).GetSegmentCount() == 1 );
-
-        DrawSegment( path, *segment, isStandalone );
-    }
-
-    iBLContext.strokePath( path );
-*/
-
     if ( Filled )
     {
         Fill( iRoi );
@@ -572,7 +504,7 @@ UOdysseyVectorPathCubic::DrawShapeVariable( ::ULIS::FRectD &iRoi, uint64 iFlags 
 
             if( ( iRoi.Area() == 0.0f ) || clip.Area() )
             {
-                segment->Draw( this, iRoi );
+                segment->Draw( iRoi );
             }
         }
 
@@ -697,7 +629,7 @@ UOdysseyVectorPathCubic::SwitchSpace( UOdysseyVectorObject& iNewSpace )
     for( std::list<FOdysseyVectorVertex*>::iterator it = mVertexList.begin(); it != mVertexList.end(); ++it )
     {
         FOdysseyVectorVertexCubic* cubicVertex = static_cast<FOdysseyVectorVertexCubic*>(*it);
-        ::ULIS::FVec2D& point = cubicVertex->GetCoords();
+        ::ULIS::FVec2D& point = cubicVertex->GetCoords( nullptr );
         BLPoint worldPt = mWorldMatrix.mapPoint( point.x, point.y );
         BLPoint wordlVec = mWorldMatrix.mapVector( 0.70710678118f * cubicVertex->GetRadius()
                                                  , 0.70710678118f * cubicVertex->GetRadius() );
@@ -708,7 +640,7 @@ UOdysseyVectorPathCubic::SwitchSpace( UOdysseyVectorObject& iNewSpace )
         point.x = localPt.x;
         point.y = localPt.y;
 
-        cubicVertex->SetRadius( vec.Distance(), false );
+        cubicVertex->SetRadius( vec.Distance() );
     }
 
     for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )

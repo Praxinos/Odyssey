@@ -7,7 +7,7 @@
 #include "LayerStack/OdysseyTextureLayerImageVector.h"
 #include "TextureEditor/OdysseyTextureEditor.h"
 #include "OdysseyVectorEngine.h"
-#include "OdysseyVectorCircle.h"
+#include "OdysseyVectorEllipse.h"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
@@ -58,7 +58,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDown(const FOdysseyPoint
         BLPoint localCoords = scene->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
         ::ULIS::FColor color = GetEditorAs<FOdysseyPainterEditor>()->PaintColor().GetValue();
         ::ULIS::FColor rgba8 = color.ToFormat( ::ULIS::eFormat::Format_RGBA8 );
-        UOdysseyVectorCircle* circle = UOdysseyVectorCircle::New( "Circle", 0.0f, 0.0f );
+        UOdysseyVectorEllipse* circle = UOdysseyVectorEllipse::New( "Circle", 0.0f, 0.0f );
 
         scene->AppendChild( circle );
 
@@ -88,7 +88,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDrag(const FOdysseyPoint
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        UOdysseyVectorCircle* circle = Cast<UOdysseyVectorCircle>( currentVectorLayer->GetScene()->GetLastSelected() );
+        UOdysseyVectorEllipse* circle = Cast<UOdysseyVectorEllipse>( currentVectorLayer->GetScene()->GetLastSelected() );
 
         if( circle )
         {

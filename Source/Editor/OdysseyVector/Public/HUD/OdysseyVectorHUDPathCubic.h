@@ -11,12 +11,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUDPathCubic : public FOdysseyVectorHUD
         uint32 mDisplayMode;
         void DrawSegment( UOdysseyVectorPathCubic* iPath
                         , FOdysseyVectorSegmentCubic* iCubicSegment
-                        , ::ULIS::FVec2D& iFactor
                         , ::ULIS::FRectD& iRoi
                         , uint64 iFlags );
         void DrawVertex( UOdysseyVectorPathCubic* iPath
                        , FOdysseyVectorVertexCubic* iCubicVertex
-                       , ::ULIS::FVec2D& iFactor
                        , ::ULIS::FRectD& iRoi
                        , uint64 iFlags );
     public:

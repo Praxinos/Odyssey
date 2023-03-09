@@ -51,7 +51,7 @@ FOdysseyVectorVertexCubic::Init( double iX, double iY, double iRadius )
 
     //TODO: use an Init function of the FOdysseyVectorVertex class (does not exist yet ) ?
     Set( iX, iY );
-    SetRadius( iRadius, false );
+    SetRadius( iRadius );
 }
 
 // static
@@ -135,47 +135,6 @@ FOdysseyVectorVertexCubic::SmoothSegments( bool iBuildSegments )
 }
 
 void
-FOdysseyVectorVertexCubic::Set( double iX
-                              , double iY
-                              , bool iBuildSegments )
-{
-    FOdysseyVectorPoint::Set( iX, iY );
-
-    if( iBuildSegments == true )
-    {
-        BuildSegments();
-    }
-}
-
-void
-FOdysseyVectorVertexCubic::Set( double iX
-                              , double iY )
-{
-    FOdysseyVectorVertexCubic::Set( iX, iY, true );
-}
-
-void
-FOdysseyVectorVertexCubic::Set( double iX
-                              , double iY
-                              , double iRadius
-                              , bool iBuildSegments )
-{
-    SetRadius( iRadius, false );
-    Set( iX, iY, iBuildSegments );
-}
-
-void
-FOdysseyVectorVertexCubic::SetRadius( double iRadius, bool iBuildSegments )
-{
-    FOdysseyVectorPoint::SetRadius ( iRadius );
-
-    if ( iBuildSegments == true )
-    {
-        BuildSegments();
-    }
-}
-
-void
 FOdysseyVectorVertexCubic::BuildSegments()
 {
     for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
@@ -199,10 +158,10 @@ FOdysseyVectorVertexCubic::GetPerpendicularVector( bool iNormalize )
         for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
         {
             FOdysseyVectorSegmentCubic *segment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
-            FOdysseyVectorPoint* p0 = segment->GetPoint(0);
-            FOdysseyVectorPoint* p1 = segment->GetPoint(1);
-            ::ULIS::FVec2D& point0 = segment->GetPoint(0)->GetCoords();
-            ::ULIS::FVec2D& point1 = segment->GetPoint(1)->GetCoords();
+            FOdysseyVectorVertex* p0 = segment->GetVertex(0);
+            FOdysseyVectorVertex* p1 = segment->GetVertex(1);
+            ::ULIS::FVec2D& point0 = segment->GetVertex(0)->GetCoords( nullptr );
+            ::ULIS::FVec2D& point1 = segment->GetVertex(1)->GetCoords( nullptr );
             ::ULIS::FVec2D& ctrlPoint0 = segment->GetHandle(0)->GetCoords();
             ::ULIS::FVec2D& ctrlPoint1 = segment->GetHandle(1)->GetCoords();
 

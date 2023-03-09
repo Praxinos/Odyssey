@@ -56,7 +56,7 @@ FOdysseyVectorSegment::New( UOdysseyVectorPath* iPath
 ::ULIS::FVec2D
 FOdysseyVectorSegment::GetVectorAtStart( bool iNormalize )
 {
-    ::ULIS::FVec2D vec = mPoint[1]->GetCoords() - mPoint[0]->GetCoords();
+    ::ULIS::FVec2D vec = GetVertex(1)->GetCoords( nullptr ) - GetVertex(0)->GetCoords( nullptr );
 
     if( iNormalize && vec.DistanceSquared() )
     {
@@ -75,7 +75,7 @@ FOdysseyVectorSegment::GetVectorAtEnd( bool iNormalize )
 FOdysseyVectorVertex*
 FOdysseyVectorSegment::GetVertex( uint32 iVertexID )
 {
-    return Cast<FOdysseyVectorVertex>(GetPoint( iVertexID ));
+    return static_cast<FOdysseyVectorVertex*>(GetPoint( iVertexID ));
 }
 
 void
@@ -98,8 +98,8 @@ FOdysseyVectorSegment::GetSection ( double t )
         FOdysseyVectorSection* section = static_cast<FOdysseyVectorSection*>(*it);
         FOdysseyVectorVertex* vertex0 = section->GetVertex(0);
         FOdysseyVectorVertex* vertex1 = section->GetVertex(1);
-        double fromT = vertex0->GetT( *this );
-        double   toT = vertex1->GetT( *this );
+        double fromT = vertex0->GetT( this );
+        double   toT = vertex1->GetT( this );
 
         if ( ( t >= fromT ) && ( t <= toT ) )
         {
@@ -221,93 +221,6 @@ FOdysseyVectorSegment::HasIntersectionVertex( FOdysseyVectorVertexIntersection& 
     }
 
     return false;
-}
-
-FOdysseyVectorVertex*
-FOdysseyVectorSegment::GetNextVertex( double iT )
-{
-    FOdysseyVectorVertex* closestVertex = nullptr;
-    double closestT = 1.0f;
-
-    // Search intersection point between this intersection point and the next segment point
-    for(std::list<FOdysseyVectorVertexIntersection*>::iterator it = mIntersectionVertexList.begin(); it != mIntersectionVertexList.end(); ++it)
-    {
-        FOdysseyVectorVertexIntersection* intersectionVertex = static_cast<FOdysseyVectorVertexIntersection*>(*it);
-        double vertexT = intersectionVertex->GetT(*this);
-
-        if( vertexT > iT )
-        {
-            if ( vertexT <= closestT )
-            {
-                closestVertex = intersectionVertex;
-
-                closestT = vertexT;
-            }
-        }
-    }
-
-    return ( closestVertex ) ? closestVertex : Cast<FOdysseyVectorVertex>(mPoint[1]);
-}
-
-FOdysseyVectorVertex*
-FOdysseyVectorSegment::GetPreviousVertex( double iT )
-{
-    FOdysseyVectorVertex* closestVertex = nullptr;
-    double closestT = 0.0f;
-
-    // Search intersection point between this intersection point and the next segment point
-    for(std::list<FOdysseyVectorVertexIntersection*>::iterator iter = mIntersectionVertexList.begin(); iter != mIntersectionVertexList.end(); ++iter)
-    {
-        FOdysseyVectorVertexIntersection* intersectionVertex = static_cast<FOdysseyVectorVertexIntersection*>(*iter);
-        double vertexT = intersectionVertex->GetT(*this);
-
-        if( vertexT < iT )
-        {
-            if ( vertexT >= closestT )
-            {
-                closestVertex = intersectionVertex;
-
-                closestT = vertexT;
-            }
-        }
-    }
-
-    return ( closestVertex ) ? closestVertex : Cast<FOdysseyVectorVertex>(mPoint[0]);
-}
-
-FOdysseyVectorSegment*
-FOdysseyVectorSegment::GetNextSegment( )
-{
-    std::list<FOdysseyVectorSegment*>& segmentList = Cast<FOdysseyVectorVertex>(mPoint[1])->GetSegmentList();
-
-    for( std::list<FOdysseyVectorSegment*>::iterator it = segmentList.begin(); it != segmentList.end(); ++it )
-    {
-        FOdysseyVectorSegment* segment = static_cast<FOdysseyVectorSegment*>(*it);
-
-        if ( segment != this ) 
-        {
-            return segment;
-        }
-    }
-
-    return nullptr;
-}
-
-FOdysseyVectorSegment* FOdysseyVectorSegment::GetPreviousSegment( )
-{
-    std::list<FOdysseyVectorSegment*>& segmentList = Cast<FOdysseyVectorVertex>(mPoint[0])->GetSegmentList();
-
-    for( std::list<FOdysseyVectorSegment*>::iterator it = segmentList.begin(); it != segmentList.end(); ++it )
-    {
-        FOdysseyVectorSegment* segment = static_cast<FOdysseyVectorSegment*>(*it);
-
-        if ( segment != this ) 
-        {
-            return segment;
-        }
-    }
-
-    return nullptr;
 }
 
 void

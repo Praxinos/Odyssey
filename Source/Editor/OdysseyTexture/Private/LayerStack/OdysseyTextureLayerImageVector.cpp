@@ -8,7 +8,6 @@
 #include "EditorStyleSet.h"
 #include "ULISLoaderModule.h"
 #include "ULISUtils.h"
-#include "OdysseyVectorCircle.h"
 #include "Export/OdysseyVectorExport.h"
 #include "Import/OdysseyVectorImport.h"
 
@@ -40,7 +39,7 @@ UOdysseyTextureLayerImageVector::Init( uint32 iWidth, uint32 iHeight )
     mVEngine = new FOdysseyVectorEngine( (double)iWidth
                                        , (double)iHeight );
 
-    mScene = NewObject<UOdysseyVectorRoot>();
+    mScene = NewObject<UOdysseyVectorScene>();
     mScene->SetEngine( mVEngine );
     mScene->Init( "Vector Scene" );
 
@@ -61,7 +60,7 @@ UOdysseyTextureLayerImageVector::GetEngine()
     return mVEngine;
 }
 
-UOdysseyVectorRoot*
+UOdysseyVectorScene*
 UOdysseyTextureLayerImageVector::GetScene()
 {
     return mScene;

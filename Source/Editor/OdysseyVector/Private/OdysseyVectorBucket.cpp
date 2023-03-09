@@ -31,9 +31,7 @@ FOdysseyVectorBucket::FOdysseyVectorBucket( UOdysseyVectorObject& iParent, doubl
     : mParent ( iParent )
     , mIsGradient ( false )
 {
-    mCtrlPoint = FOdysseyVectorHandleBucket::New( this );
-
-    mCtrlPoint->Set( HANDLEDISTANCE, 0.0f );
+    mCtrlPoint.Set( HANDLEDISTANCE, 0.0f );
 
     SetCoords( iX, iY );
     SetColor( 128, 128, 128, 255 );
@@ -114,8 +112,8 @@ FOdysseyVectorBucket::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
     BLContext* blctx = mParent.GetScene()->GetEngine()->GetBLContext();
     BLPoint bucketWorldCoord = mParent.GetWorldMatrix().mapPoint( mCoords.x, mCoords.y );
-    BLPoint handleWorldCoord = mParent.GetWorldMatrix().mapPoint( mCoords.x + mCtrlPoint->GetX()
-                                                                , mCoords.y + mCtrlPoint->GetY() );
+    BLPoint handleWorldCoord = mParent.GetWorldMatrix().mapPoint( mCoords.x + mCtrlPoint.GetX()
+                                                                , mCoords.y + mCtrlPoint.GetY() );
     ::ULIS::FRectD bucketRect;
     ::ULIS::FRectD crossRect;
     BLRgba32 fillColor;
@@ -205,15 +203,15 @@ FOdysseyVectorHandleBucket*
 FOdysseyVectorBucket::PickHandle( double iWorldX, double iWorldY )
 {
     BLPoint bucketWorldCoord = mParent.GetWorldMatrix().mapPoint( mCoords.x, mCoords.y );
-    BLPoint handleWorldCoord = mParent.GetWorldMatrix().mapPoint( mCoords.x + mCtrlPoint->GetX()
-                                                                , mCoords.y + mCtrlPoint->GetY() );
+    BLPoint handleWorldCoord = mParent.GetWorldMatrix().mapPoint( mCoords.x + mCtrlPoint.GetX()
+                                                                , mCoords.y + mCtrlPoint.GetY() );
     double difX = iWorldX - handleWorldCoord.x;
     double difY = iWorldY - handleWorldCoord.y;
     double distance = sqrt( ( difX * difX ) + ( difY * difY ) );
 
     if( distance < HANDLERADIUS )
     {
-        return mCtrlPoint;
+        return &mCtrlPoint;
     }
 
     return nullptr;
@@ -222,13 +220,13 @@ FOdysseyVectorBucket::PickHandle( double iWorldX, double iWorldY )
 FOdysseyVectorHandleBucket*
 FOdysseyVectorBucket::GetHandle()
 {
-    return mCtrlPoint;
+    return &mCtrlPoint;
 }
 
 double
 FOdysseyVectorBucket::GetHandleDotProduct()
 {
-    ::ULIS::FVec2D controllerVec( mCtrlPoint->GetX(), mCtrlPoint->GetY() );
+    ::ULIS::FVec2D controllerVec( mCtrlPoint.GetX(), mCtrlPoint.GetY() );
     ::ULIS::FVec2D horizontalVec( 1.0f, 0.0f );
 
     if( controllerVec.DistanceSquared() )

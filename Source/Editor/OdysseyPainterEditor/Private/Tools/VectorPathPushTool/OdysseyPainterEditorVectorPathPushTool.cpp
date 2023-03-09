@@ -96,15 +96,15 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDown(const FOdysseyPoint& iPoint
             {
                 UOdysseyVectorPathCubic* cubicPath = Cast<UOdysseyVectorPathCubic>(cubicSegment->GetPath());
                 BLPoint localPoint = cubicPath->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
-                ::ULIS::FVec2D& ctrlPoint0 = cubicSegment->GetControlPoint(0)->GetCoords();
-                ::ULIS::FVec2D& ctrlPoint1 = cubicSegment->GetControlPoint(1)->GetCoords();
-                ::ULIS::FVec2D& point0 = cubicSegment->GetPoint(0)->GetCoords();
-                ::ULIS::FVec2D& point1 = cubicSegment->GetPoint(1)->GetCoords();
+                ::ULIS::FVec2D& ctrlPoint0 = cubicSegment->GetHandle(0)->GetCoords();
+                ::ULIS::FVec2D& ctrlPoint1 = cubicSegment->GetHandle(1)->GetCoords();
+                ::ULIS::FVec2D& point0 = cubicSegment->GetVertex(0)->GetCoords( cubicSegment );
+                ::ULIS::FVec2D& point1 = cubicSegment->GetVertex(1)->GetCoords( cubicSegment );
                 ::ULIS::FVec2D cp0Vec = { localPoint.x - ctrlPoint0.x, localPoint.y - ctrlPoint0.y };
                 ::ULIS::FVec2D cp1Vec = { localPoint.x - ctrlPoint1.x, localPoint.y - ctrlPoint1.y };
 
-                mPushedPointArray.push_back( FPushedPoint( cubicSegment->GetControlPoint(0), Radius / cp0Vec.Distance() ) );
-                mPushedPointArray.push_back( FPushedPoint( cubicSegment->GetControlPoint(1), Radius / cp1Vec.Distance() ) );
+                mPushedPointArray.push_back( FPushedPoint( cubicSegment->GetHandle(0), Radius / cp0Vec.Distance() ) );
+                mPushedPointArray.push_back( FPushedPoint( cubicSegment->GetHandle(1), Radius / cp1Vec.Distance() ) );
 
                 if( HasVertex( cubicSegment->GetPoint(0) ) == false )
                 {

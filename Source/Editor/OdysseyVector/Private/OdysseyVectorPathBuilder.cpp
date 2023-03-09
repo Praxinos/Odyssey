@@ -141,8 +141,8 @@ void
 UOdysseyVectorPathBuilder::Adjust( FOdysseyVectorSegmentCubic& iCubicSegment )
 {
     double totalLinkLength = GetTotalSampleLinkLength();
-    ::ULIS::FVec2D& point0 = iCubicSegment.GetPoint(0)->GetCoords();
-    ::ULIS::FVec2D& point1 = iCubicSegment.GetPoint(1)->GetCoords();
+    ::ULIS::FVec2D& point0 = iCubicSegment.GetVertex(0)->GetCoords( nullptr );
+    ::ULIS::FVec2D& point1 = iCubicSegment.GetVertex(1)->GetCoords( nullptr );
     ::ULIS::FVec2D& ctrlPoint0 = iCubicSegment.GetHandle(0)->GetCoords();
     ::ULIS::FVec2D& ctrlPoint1 = iCubicSegment.GetHandle(1)->GetCoords();
     ::ULIS::FVec2D expectedPoint0 = CubicBezierPointAtParameter( point0, ctrlPoint0, ctrlPoint1, point1, 0.33f );
@@ -411,8 +411,8 @@ void
 UOdysseyVectorPathBuilder::FitSegment( FOdysseyVectorSegmentCubic& iSegment
                                      , std::list<FOdysseyVectorLink*>& iLinkList )
 {
-    ::ULIS::FVec2D& point0 = iSegment.GetPoint(0)->GetCoords();
-    ::ULIS::FVec2D& point1 = iSegment.GetPoint(1)->GetCoords();
+    ::ULIS::FVec2D& point0 = iSegment.GetVertex(0)->GetCoords( nullptr );
+    ::ULIS::FVec2D& point1 = iSegment.GetVertex(1)->GetCoords( nullptr );
     ::ULIS::FVec2D& ctrlPoint0 = iSegment.GetHandle(0)->GetCoords();
     ::ULIS::FVec2D& ctrlPoint1 = iSegment.GetHandle(1)->GetCoords();
     double sampleLength = 0.0f;

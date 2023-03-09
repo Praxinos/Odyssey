@@ -23,6 +23,9 @@ typedef struct _FPolygon {
 class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegment
 {
     public:
+        static uint32 StaticClass() { return mStaticClass; };
+        virtual uint32 GetClass() override { return mStaticClass; };
+
        /**
          * @brief Static function to allocate a new cubic segment. Note: this is the proper way to allocate a new segment
          * as we don't use the constructor to set parameters so that this can be derived from an UOBJECT if needed in
@@ -90,13 +93,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
                  , FOdysseyVectorVertexCubic* iVertex1 );
 
        /**
-         * @brief Get a handle (a control point).
-         * @param iCtrlPointNum index of the handle (0 or 1).
-         * @return a pointer to the requested handle.
-         */
-        FOdysseyVectorHandleSegment* GetHandle( int iCtrlPointNum );
-
-       /**
          * @brief Draw the cubic segment
          * @param iRoi the region-of-interest
          */
@@ -107,9 +103,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
          * @param iRoi the region-of-interest
          */
         void DrawStructure( ::ULIS::FRectD &iRoi );
-
-        ::ULIS::FVec2D GetVectorAtEnd( bool iNormalize );
-        ::ULIS::FVec2D GetVectorAtStart( bool iNormalize );
 
        /**
          * @brief Get the segment's bounding box.
@@ -157,18 +150,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
                                   , double& oSmallestDistance ) override;
 
        /**
-         * @brief Get the number of polygons in cache.
-         * @return the number of polygons in cache.
-         */
-        uint32 GetPolygonCount();
-
-       /**
-         * @brief Get the polygons in cache.
-         * @return a reference to the array of polygons.
-         */
-        std::vector<FPolygon>& GetPolygonCache();
-
-       /**
          * @brief Intersect this cubic segment with another cubic segment. They MUST have the same coordinate system.
          * @param iTolerance a maximum distance to consider an almost-hit as a hit.
          * @param iIntersectionVertexArray array that receives the created intersection vertices.
@@ -181,6 +162,28 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
          * @brief Builds the variable thickness segment (stores values into polygon cache).
          */
         void BuildVariable();
+
+        ::ULIS::FVec2D GetVectorAtEnd( bool iNormalize );
+        ::ULIS::FVec2D GetVectorAtStart( bool iNormalize );
+
+       /**
+         * @brief Get a handle (a control point).
+         * @param iCtrlPointNum index of the handle (0 or 1).
+         * @return a pointer to the requested handle.
+         */
+        FOdysseyVectorHandleSegment* GetHandle( int iCtrlPointNum );
+
+       /**
+         * @brief Get the number of polygons in cache.
+         * @return the number of polygons in cache.
+         */
+        uint32 GetPolygonCount();
+
+       /**
+         * @brief Get the polygons in cache.
+         * @return a reference to the array of polygons.
+         */
+        std::vector<FPolygon>& GetPolygonCache();
 
        /**
          * @brief Get coordinates on the segment at parameter t.
@@ -208,8 +211,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
          */
         bool Cut( ::ULIS::FVec2D& linePoint0
                 , ::ULIS::FVec2D& linePoint1
-                , std::vector<FOdysseyVectorVertexCubic>& oNewVertexArray
-                , std::vector<FOdysseyVectorVertexCubic>& oNewSegmentArray );
+                , std::vector<FOdysseyVectorVertexCubic*>& oNewVertexArray
+                , std::vector<FOdysseyVectorSegmentCubic*>& oNewSegmentArray );
 
        /**
          * @brief Extract a cubic segment from this cubic segment. For T values 0.0 or 1.0, new vertices are not allocated
@@ -222,11 +225,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
         FOdysseyVectorSegmentCubic* Sample( double iFromT
                                           , double iToT
                                           , std::vector<FOdysseyVectorVertexCubic*>& oNewVertexArray );
-
-    protected:
-        FOdysseyVectorHandleSegment* mCtrlPoint[2];
-        std::vector<FPolygon> mPolygonCache;
-        BLPath mBLPath;
 
     private:
         void BuildVariableAdaptive( double  iFromT
@@ -247,4 +245,12 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
                                    , double iStartRadius
                                    , double iEndRadius
                                    , int    iPolygonID );
+
+    protected:
+        FOdysseyVectorHandleSegment* mCtrlPoint[2];
+        std::vector<FPolygon> mPolygonCache;
+        BLPath mBLPath;
+
+    private:
+        static const uint32 mStaticClass = 0xccff2d66 ; // value is crc32 FOdysseyVectorSegmentCubic
 };

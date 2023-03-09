@@ -121,8 +121,11 @@ UOdysseyPainterEditorVectorPathCutTool::OnMouseUp(const FOdysseyPoint& iPointInT
             if( selectedObject->GetClass() == UOdysseyVectorPathCubic::StaticClass() )
             {
                 UOdysseyVectorPathCubic *cubicPath = static_cast<UOdysseyVectorPathCubic*>(selectedObject);
+                std::vector<FOdysseyVectorVertexCubic*> oNewVertexArray;
+                std::vector<FOdysseyVectorSegmentCubic*> oNewSegmentArray;
+                std::vector<FOdysseyVectorSegmentCubic*> oOldSegmentArray;
 
-                cubicPath->Cut( mStartCutAt, endCutAt );
+                cubicPath->Cut( mStartCutAt, endCutAt, oNewVertexArray, oNewSegmentArray, oOldSegmentArray );
                 cubicPath->Invalidate();
             }
 

@@ -53,7 +53,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPoint
         /**
          * @brief Get the point class (ala UE)
          */
-        uint32 GetClass() = 0;
+        virtual uint32 GetClass() = 0;
 
         /**
          * @brief Set the point's absolute coordinate on X axis

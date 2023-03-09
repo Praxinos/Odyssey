@@ -49,7 +49,8 @@ FOdysseyVectorLink::GetStraightDistance()
 ::ULIS::FVec2D
 FOdysseyVectorLink::GetVector( bool iNormalize )
 {
-    ::ULIS::FVec2D vec = mPoint[1]->GetCoords() - mPoint[0]->GetCoords();
+    ::ULIS::FVec2D vec = ::ULIS::FVec2D( mPoint[1]->GetX() - mPoint[0]->GetX()
+                                       , mPoint[1]->GetY() - mPoint[0]->GetY() );
 
     if ( iNormalize == true )
     {
@@ -62,20 +63,13 @@ FOdysseyVectorLink::GetVector( bool iNormalize )
     return vec;
 }
 
-double
-FOdysseyVectorLink::GetDistanceSquared()
-{
-    ::ULIS::FVec2D dist = mPoint[1]->GetCoords() - mPoint[0]->GetCoords();
-
-    return dist.DistanceSquared();
-}
-
 ::ULIS::FVec2D
 FOdysseyVectorLink::GetPointAt ( double t )
 {
-    ::ULIS::FVec2D& p0 =  mPoint[0]->GetCoords();
-    ::ULIS::FVec2D& p1 =  mPoint[0]->GetCoords();
-    ::ULIS::FVec2D vec = p1 - p0;
+    ::ULIS::FVec2D vec = ::ULIS::FVec2D( mPoint[1]->GetX() - mPoint[0]->GetX()
+                                       , mPoint[1]->GetY() - mPoint[0]->GetY() );
+    ::ULIS::FVec2D pointAt = ::ULIS::FVec2D( mPoint[0]->GetX() + ( vec.x * t )
+                                           , mPoint[0]->GetY() + ( vec.y * t ) );
 
-    return p0 + ( vec * t );
+    return pointAt;
 }
