@@ -8,6 +8,9 @@
 class ODYSSEYVECTOR_API FOdysseyVectorHandleSegment : public FOdysseyVectorHandle
 {
     public:
+        static uint32 StaticClass() { return mStaticClass; };
+        uint32 GetClass() { return mStaticClass; };
+
         static FOdysseyVectorHandleSegment* New( FOdysseyVectorSegment* iParentSegment, double iX, double iY );
         ~FOdysseyVectorHandleSegment();
         FOdysseyVectorHandleSegment( );
@@ -19,5 +22,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorHandleSegment : public FOdysseyVectorHandl
         void Set( double iX,double iY );
 
     private:
+        static const uint32 mStaticClass = 0x22364e08; // value is crc32 FOdysseyVectorHandleSegment 
+
         FOdysseyVectorSegment* mParentSegment;
 };

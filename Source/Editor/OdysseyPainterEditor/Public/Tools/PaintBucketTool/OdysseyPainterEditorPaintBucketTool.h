@@ -74,7 +74,7 @@ protected:
 
     //Resources
     FOdysseyPaintEngine mPaintEngine;
-    UOdysseyVectorHandleBucket* mPickedBucketHandle;
+    FOdysseyVectorHandleBucket* mPickedBucketHandle;
     FOdysseyVectorBucket* mPickedBucket;
     double mOldLocalMouseX;
     double mOldLocalMouseY;

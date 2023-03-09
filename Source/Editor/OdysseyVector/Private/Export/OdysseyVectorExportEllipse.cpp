@@ -2,7 +2,7 @@
 #include "OdysseyVectorSegmentCubic.h"
 
 static void
-WriteEllipseGeometryRadius( UOdysseyVectorCircle& iCircle, FArchive &Ar )
+WriteEllipseGeometryRadius( UOdysseyVectorEllipse& iCircle, FArchive &Ar )
 {
     FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_ELLIPSE_GEOMETRY_RADIUS
                                     , Ar
@@ -17,7 +17,7 @@ WriteEllipseGeometryRadius( UOdysseyVectorCircle& iCircle, FArchive &Ar )
 }
 
 static void
-WriteEllipseGeometry( UOdysseyVectorCircle& iCircle, FArchive &Ar )
+WriteEllipseGeometry( UOdysseyVectorEllipse& iCircle, FArchive &Ar )
 {
     FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_ELLIPSE_GEOMETRY
                                     , Ar
@@ -28,7 +28,7 @@ WriteEllipseGeometry( UOdysseyVectorCircle& iCircle, FArchive &Ar )
 }
 
 static void
-WriteEllipseFilled( UOdysseyVectorCircle& iCircle, FArchive &Ar )
+WriteEllipseFilled( UOdysseyVectorEllipse& iCircle, FArchive &Ar )
 {
     FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_ELLIPSE_FILLED
                                     , Ar
@@ -41,7 +41,7 @@ WriteEllipseFilled( UOdysseyVectorCircle& iCircle, FArchive &Ar )
 }
 
 void
-FOdysseyVectorExport::WriteObjectEllipse( UOdysseyVectorCircle& iCircle, FArchive &Ar )
+FOdysseyVectorExport::WriteObjectEllipse( UOdysseyVectorEllipse& iCircle, FArchive &Ar )
 {
     FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_OBJECT_ELLIPSE
                                     , Ar

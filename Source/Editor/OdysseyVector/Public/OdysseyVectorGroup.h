@@ -17,13 +17,32 @@ class ODYSSEYVECTOR_API UOdysseyVectorGroup : public UOdysseyVectorObject
         GENERATED_BODY()
 
     public:
+       /**
+         * @brief Static function to allocate a new group. Note: this is the proper way to allocate a new group as we don't
+         * use the constructor to set parameters because UOBJECTs must have empty constructors.
+         * @param iName object's name
+         */
+        static UOdysseyVectorGroup* New( std::string iName );
+
+        /**
+         * @brief destructor
+         */
         ~UOdysseyVectorGroup(){};
+
+        /**
+         * @brief constructor
+         */
         UOdysseyVectorGroup(){};
+
+        /**
+         * @brief Init a group
+         * @param iName
+         */
         void Init( std::string iName );
 
     protected:
-        void DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags ) { };
-        bool PickShape( ::ULIS::FRectD& iRoi, uint32 iSelectionFlags );
-        UOdysseyVectorObject* CopyShape();
-        virtual void UpdateShape( uint32 iUpdateFlags );
+        virtual void DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags ) override { };
+        virtual bool PickShape( ::ULIS::FRectD& iRoi, uint32 iSelectionFlags ) override;
+        virtual UOdysseyVectorObject* CopyShape() override;
+        virtual void UpdateShape( uint32 iUpdateFlags ) override;
 };

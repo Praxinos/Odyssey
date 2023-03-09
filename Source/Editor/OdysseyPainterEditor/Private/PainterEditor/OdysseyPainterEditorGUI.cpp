@@ -12,7 +12,7 @@
 #include "LayerStack/OdysseyTextureLayerImageVector.h"
 #include "OdysseyTextureEditor.h"
 #include "OdysseyVectorGroupPaint.h"
-#include "OdysseyVectorCircle.h"
+#include "OdysseyVectorEllipse.h"
 #include "ToolMenus.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorGUI"
@@ -472,7 +472,7 @@ FOdysseyPainterEditorGUI::ConvertToPath()
             for( std::list<UOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
             {
                 UOdysseyVectorObject* object = (*it);
-                UOdysseyVectorCircle* circle = Cast<UOdysseyVectorCircle>(object);
+                UOdysseyVectorEllipse* circle = Cast<UOdysseyVectorEllipse>(object);
 
                 if( circle )
                 {

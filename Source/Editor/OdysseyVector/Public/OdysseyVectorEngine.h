@@ -10,26 +10,15 @@
 
 class ODYSSEYVECTOR_API FOdysseyVectorEngine
 {
-    private:
-        ::ULIS::FRectD mRoi;
-        BLContext* mBLContext;
-        BLImage* mBLImage;
-        BLImage* mBLMask;
-        uint64 mDrawingFlags;
-        std::list<FOdysseyVectorHUD*> mHUDList;
-        UOdysseyVectorGroup* mSelectionSpace;
 
     public:
-        static const uint64 RENDER_OBJECT_STRUCTURE = ( 1 << 0 );
-        static const uint64 RENDER_OBJECT_BBOX      = ( 1 << 1 );
-
         BLContext* GetBLContext();
         BLImage* GetBLImage();
         BLImage* GetBLMask();
         ~FOdysseyVectorEngine();
         FOdysseyVectorEngine( double iWidth, double iHeight );
         void RenderSelected( UOdysseyVectorScene& iScene );
-        void RenderHUD( UOdysseyVectorScene& iScene );
+
         void Render( UOdysseyVectorScene& iScene );
         void Pick( UOdysseyVectorScene& iScene, std::vector<::ULIS::FVec2D>& iPointArray, uint32 iSelectionFlags );
         void PickSegments( UOdysseyVectorScene* iScene
@@ -64,6 +53,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
         void SetDrawingFlags( uint64 iDrawingFlags );
         void AddHUD( FOdysseyVectorHUD* iHUDObject );
         void RemoveHUD( FOdysseyVectorHUD* iHUDObject );
+        void RenderHUD( UOdysseyVectorScene& iScene );
         void ClearHUD();
         ::ULIS::FRectD GenerateMask( std::vector<::ULIS::FVec2D>& iPointArray );
         void UseMaskImage();
@@ -72,6 +62,16 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
         ::ULIS::FColor GetColorImagePixelValue( uint32 iX, uint32 iY );
         void SetSelectionSpace( UOdysseyVectorGroup* iSelectionSpace );
         UOdysseyVectorGroup* GetSelectionSpace();
+
+    private:
+        ::ULIS::FRectD mRoi;
+        BLContext* mBLContext;
+        BLImage* mBLImage;
+        BLImage* mBLMask;
+        uint64 mDrawingFlags;
+        std::list<FOdysseyVectorHUD*> mHUDList;
+        UOdysseyVectorGroup* mSelectionSpace;
+
 };
 
 ODYSSEYVECTOR_API FArchive& operator<<(FArchive &Ar, FOdysseyVectorEngine* iVectorEngine );

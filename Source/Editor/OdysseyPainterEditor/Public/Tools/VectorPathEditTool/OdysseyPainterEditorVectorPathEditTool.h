@@ -41,7 +41,7 @@ private:
     double mOldLocalMouseX;
     double mOldLocalMouseY;
     FOdysseyVectorHUDPathCubic mCubicPathHUD;
-    std::vector<UOdysseyVectorPoint*> mPickedPointArray;
+    std::vector<FOdysseyVectorPoint*> mPickedPointArray;
 
 public:
     // Setters

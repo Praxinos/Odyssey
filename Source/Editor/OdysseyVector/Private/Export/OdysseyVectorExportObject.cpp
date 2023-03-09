@@ -179,7 +179,7 @@ WriteDefineObjectEntry( UOdysseyVectorObject& iObject, FArchive &Ar )
 
             case UOdysseyVectorObject::VECTORELLIPSETYPE:
             {
-                UOdysseyVectorCircle* circle = Cast<UOdysseyVectorCircle>(&iObject);
+                UOdysseyVectorEllipse* circle = Cast<UOdysseyVectorEllipse>(&iObject);
 
                 FOdysseyVectorExport::WriteObjectEllipse( *circle, Ar );
             }

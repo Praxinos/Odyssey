@@ -94,7 +94,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
          * @param iCtrlPointNum index of the handle (0 or 1).
          * @return a pointer to the requested handle.
          */
-        FOdysseyVectorHandleSegment& GetHandle( int iCtrlPointNum );
+        FOdysseyVectorHandleSegment* GetHandle( int iCtrlPointNum );
 
        /**
          * @brief Draw the cubic segment

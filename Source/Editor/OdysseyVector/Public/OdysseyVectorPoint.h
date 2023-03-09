@@ -51,6 +51,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorPoint
         double GetRadius();
 
         /**
+         * @brief Get the point class (ala UE)
+         */
+        uint32 GetClass() = 0;
+
+        /**
          * @brief Set the point's absolute coordinate on X axis
          * @param iX the desired coordinate on X axis
          */

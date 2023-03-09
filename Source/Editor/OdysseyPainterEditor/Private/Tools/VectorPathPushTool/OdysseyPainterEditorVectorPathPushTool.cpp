@@ -49,7 +49,7 @@ UOdysseyPainterEditorVectorPathPushTool::CanDraw()
 }
 
 bool
-UOdysseyPainterEditorVectorPathPushTool::HasVertex( UOdysseyVectorPoint* iPoint )
+UOdysseyPainterEditorVectorPathPushTool::HasVertex( FOdysseyVectorPoint* iPoint )
 {
     for( int i = 0; i < mPushedPointArray.size(); i++ )
     {
@@ -90,7 +90,7 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDown(const FOdysseyPoint& iPoint
 
         for( int i = 0; i < mSegmentArray.size(); i++ )
         {
-            UOdysseyVectorSegmentCubic* cubicSegment = Cast<UOdysseyVectorSegmentCubic>( mSegmentArray[i] );
+            FOdysseyVectorSegmentCubic* cubicSegment = Cast<FOdysseyVectorSegmentCubic>( mSegmentArray[i] );
 
             if( cubicSegment )
             {
@@ -169,9 +169,9 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDrag( const FOdysseyPoint& iPoin
 
         for( int i = 0; i < mPushedPointArray.size(); i++ )
         {
-            UOdysseyVectorPoint* point = mPushedPointArray[i].point;
-            UOdysseyVectorHandleSegment* handleSegment = Cast<UOdysseyVectorHandleSegment>(point);
-            UOdysseyVectorVertex* vertex = Cast<UOdysseyVectorVertex>(point);
+            FOdysseyVectorPoint* point = mPushedPointArray[i].point;
+            FOdysseyVectorHandleSegment* handleSegment = Cast<FOdysseyVectorHandleSegment>(point);
+            FOdysseyVectorVertex* vertex = Cast<FOdysseyVectorVertex>(point);
             UOdysseyVectorPath* path = ( handleSegment ) ? handleSegment->GetParent()->GetPath() : vertex->GetPath();
             BLPoint delta = path->GetInverseWorldMatrix().mapVector( iPointInTexture.deltaPosition.X
                                                                    , iPointInTexture.deltaPosition.Y );
@@ -183,7 +183,7 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDrag( const FOdysseyPoint& iPoin
             {
                 if( vertex->IsSmooth() && PreserveSmoothness )
                 {
-                    UOdysseyVectorVertexCubic* cubicVertex = Cast<UOdysseyVectorVertexCubic>(vertex);
+                    FOdysseyVectorVertexCubic* cubicVertex = Cast<FOdysseyVectorVertexCubic>(vertex);
 
                     if( cubicVertex )
                     {

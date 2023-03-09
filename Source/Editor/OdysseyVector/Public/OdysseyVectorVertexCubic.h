@@ -10,6 +10,9 @@
 class ODYSSEYVECTOR_API FOdysseyVectorVertexCubic : public FOdysseyVectorVertex
 {
     public:
+        static uint32 StaticClass() { return mStaticClass; };
+        uint32 GetClass() { return mStaticClass; };
+
        /**
          * @brief Static function to allocate a new cubic vertex. Note: this is the proper way to allocate a new cubic vertex
          * as we don't use the constructor to set parameters so that this can be derived from an UOBJECT if needed in future
@@ -77,4 +80,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertexCubic : public FOdysseyVectorVertex
 
     protected:
         FOdysseyVectorHandlePoint* mCtrlPoint;
+
+    private :
+        static const uint32 mStaticClass = 0x142a5c0; // value is crc32 FOdysseyVectorVertexCubic
 };

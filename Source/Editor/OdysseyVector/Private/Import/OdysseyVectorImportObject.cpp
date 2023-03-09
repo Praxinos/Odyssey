@@ -21,7 +21,7 @@ CreateObject( uint32 iObjectType )
         break;
 
         case UOdysseyVectorObject::VECTORELLIPSETYPE :
-            newObject = UOdysseyVectorCircle::New( "", 0.0f, 0.0f );
+            newObject = UOdysseyVectorEllipse::New( "", 0.0f, 0.0f );
         break;
 
         default :
@@ -200,7 +200,7 @@ FOdysseyVectorImport::ReadObjectsDefine( std::vector<UOdysseyVectorObject*>& vec
 
                 case FOdysseyVectorExport::CHUNK_OBJECT_ELLIPSE:
                 {
-                    UOdysseyVectorCircle* circle = Cast<UOdysseyVectorCircle>( vectorObjectArray[objectID] );
+                    UOdysseyVectorEllipse* circle = Cast<UOdysseyVectorEllipse>( vectorObjectArray[objectID] );
 
                     FOdysseyVectorImport::ReadObjectEllipse( *circle, Ar.Tell() + iChunkLen, Ar );
 

@@ -56,9 +56,9 @@ UOdysseyPainterEditorVectorPathKnotTool::OnMouseDown(const FOdysseyPoint& iPoint
         UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         ::ULIS::FRectD roi = { iPointInTexture.x - Radius, iPointInTexture.y - Radius, Radius * 2, Radius * 2 };
-        std::vector<UOdysseyVectorPoint*> pickedPointArray;
-        UOdysseyVectorSegment* createdSegment = nullptr;
-        UOdysseyVectorSegment* removedSegment = nullptr;
+        std::vector<FOdysseyVectorPoint*> pickedPointArray;
+        FOdysseyVectorSegment* createdSegment = nullptr;
+        FOdysseyVectorSegment* removedSegment = nullptr;
 
         pickedPointArray.reserve(500); // crashes if I don't reserve. I don't know why.
 /*
@@ -77,8 +77,8 @@ UOdysseyPainterEditorVectorPathKnotTool::OnMouseDown(const FOdysseyPoint& iPoint
 
         if( pickedPointArray.size() >= 2 )
         {
-            UOdysseyVectorVertex* vertexA = Cast<UOdysseyVectorVertex>( pickedPointArray[0] );
-            UOdysseyVectorVertex* vertexB = Cast<UOdysseyVectorVertex>( pickedPointArray[1] );
+            FOdysseyVectorVertex* vertexA = Cast<FOdysseyVectorVertex>( pickedPointArray[0] );
+            FOdysseyVectorVertex* vertexB = Cast<FOdysseyVectorVertex>( pickedPointArray[1] );
 
             if( ( vertexA->GetSegmentCount() == 1 ) && ( vertexB->GetSegmentCount() == 1 ) )
             {

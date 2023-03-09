@@ -112,42 +112,6 @@ FOdysseyVectorEngine::RenderHUD( UOdysseyVectorScene& iScene )
     }
 
     mBLContext->restore();
-
-/*
-    BLContext& blctx = FOdysseyVectorEngine::GetBLContext();
-    std::list<UOdysseyVectorObject*> selectedObjectList = mScene->GetSelectedObjectList();
-
-    blctx.setStrokeStyle(BLRgba32(0xFFFF0000));
-    blctx.setStrokeWidth(1.0f);
-
-    if( mDrawingFlags & RENDER_OBJECT_BBOX )
-    {
-        for( std::list<UOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
-        {
-            UOdysseyVectorObject *obj = (*it);
-            ::ULIS::FRectD bbox = obj->GetBBox( false );
-
-            blctx.save();
-            blctx.setMatrix( obj->GetWorldMatrix() );
-            obj->DrawBBox( mRoi, 0 );
-            blctx.restore();
-        }
-    }
-
-    if( mDrawingFlags & RENDER_OBJECT_STRUCTURE )
-    {
-        for( std::list<UOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
-        {
-            UOdysseyVectorObject *obj = (*it);
-            ::ULIS::FRectD bbox = obj->GetBBox( false );
-
-            blctx.save();
-            blctx.setMatrix( obj->GetWorldMatrix() );
-            obj->DrawStructure( mRoi, 0 );
-            blctx.restore();
-        }
-    }
-*/
 }
 
 void

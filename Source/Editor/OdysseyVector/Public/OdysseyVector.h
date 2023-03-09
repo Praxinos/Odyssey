@@ -47,7 +47,7 @@ namespace FOdysseyVector
 #include "OdysseyVectorPath.h"
 #include "OdysseyVectorPathBuilder.h"
 #include "OdysseyVectorPathCubic.h"
-#include "OdysseyVectorCircle.h"
+#include "OdysseyVectorEllipse.h"
 #include "OdysseyVectorEngine.h"
 #include "HUD/OdysseyVectorHUD.h"
 #include "HUD/OdysseyVectorHUDLine.h"

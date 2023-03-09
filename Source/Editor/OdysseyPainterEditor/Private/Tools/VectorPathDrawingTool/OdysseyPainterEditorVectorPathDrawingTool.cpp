@@ -56,7 +56,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDown(const FOdysseyPoint& iPo
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        UOdysseyVectorRoot* scene = currentVectorLayer->GetScene();
+        UOdysseyVectorScene* scene = currentVectorLayer->GetScene();
         UOdysseyVectorObject* selectedObject = scene->GetLastSelected();
         UOdysseyVectorPathCubic* cubicPath = NewObject<UOdysseyVectorPathCubic>();
         UOdysseyVectorPathBuilder* currentPathBuilder = NewObject<UOdysseyVectorPathBuilder>();
@@ -117,7 +117,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDrag(const FOdysseyPoint& iPo
 
         currentPathBuilder->AppendPoint( localCoords.x, localCoords.y, roundedUpRadius );
 
-        UOdysseyVectorSegmentCubic* cubicSegment = static_cast<UOdysseyVectorSegmentCubic*>(cubicPath->GetLastSegment());
+        FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(cubicPath->GetLastSegment());
 
         if ( cubicSegment )
         {

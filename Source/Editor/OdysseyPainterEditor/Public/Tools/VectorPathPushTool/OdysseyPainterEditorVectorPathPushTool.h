@@ -14,9 +14,9 @@
 
 typedef struct _FPushedPoint
 {
-     UOdysseyVectorPoint* point;
+     FOdysseyVectorPoint* point;
      double ratio;
-     _FPushedPoint( UOdysseyVectorPoint* iPoint, double iRatio )
+     _FPushedPoint( FOdysseyVectorPoint* iPoint, double iRatio )
      {
          point = iPoint;
          ratio = ( iRatio > 1.0f ) ? 1.0f : iRatio;
@@ -46,9 +46,9 @@ public:
     virtual void Commit() override;
 
 private:
-    bool HasVertex( UOdysseyVectorPoint* iPoint );
+    bool HasVertex( FOdysseyVectorPoint* iPoint );
     std::vector<FPushedPoint> mPushedPointArray;
-    std::vector<UOdysseyVectorSegment*> mSegmentArray;
+    std::vector<FOdysseyVectorSegment*> mSegmentArray;
     FOdysseyVectorHUDPush mPushHUD;
 
 public:

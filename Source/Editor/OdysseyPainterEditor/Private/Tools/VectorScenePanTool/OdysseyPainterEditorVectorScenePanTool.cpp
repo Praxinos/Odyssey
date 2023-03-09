@@ -69,7 +69,7 @@ UOdysseyPainterEditorVectorScenePanTool::OnMouseDrag(const FOdysseyPoint& iPoint
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        UOdysseyVectorRoot *scene = currentVectorLayer->GetScene();
+        UOdysseyVectorScene *scene = currentVectorLayer->GetScene();
         double difx = iPointInTexture.x - mOldWorldMouseX;
         double dify = iPointInTexture.y - mOldWorldMouseY;
 

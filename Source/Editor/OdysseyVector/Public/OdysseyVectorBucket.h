@@ -9,11 +9,6 @@
 class ODYSSEYVECTOR_API FOdysseyVectorBucket
 {
     public:
-        static const uint32 PICKNONE   = 0;
-        static const uint32 PICKBUCKET = 1;
-        static const uint32 PICKCROSS  = 2;
-        static const uint32 PICKHANDLE = 3;
-
         ~FOdysseyVectorBucket();
         FOdysseyVectorBucket( UOdysseyVectorObject& iParent, double iX, double iY );
 
@@ -85,13 +80,45 @@ class ODYSSEYVECTOR_API FOdysseyVectorBucket
          */
         void Copy( FOdysseyVectorBucket* iDestinationBucket );
 
+        /**
+         * @brief Tell whether or not this bucket is on the coordinates passed as parameters.
+         * @param iX world x coordinate on X axis
+         * @param iY world y coordinate on Y axis
+         * @return PICKNONE, PICKBUCKET, PICKCROSS or PICKHANDLE.
+         */
+        uint32 Pick( double iWorldX, double iWorldY );
 
-        uint32 Pick( double iX, double iY );
-        FOdysseyVectorHandleBucket* PickHandle( double iX, double iY );
+        /**
+         * @brief Tell whether or not this bucket's handle is on the coordinates passed as parameters.
+         * @param iX world x coordinate on X axis
+         * @param iY world y coordinate on Y axis
+         * @return a pointer to this bucket's handle.
+         */
+        FOdysseyVectorHandleBucket* PickHandle( double iWorldX, double iWorldY );
+
+        /**
+         * @brief Get the bucket's handle.
+         * @return a pointer to this bucket's handle.
+         */
         FOdysseyVectorHandleBucket* GetHandle();
+
+        /**
+         * @brief Get the bucket's parent object.
+         * @return a reference to this bucket's parent object.
+         */
         UOdysseyVectorObject& GetParent();
+
+        /**
+         * @brief Get the dot product between the vector to the handle and a horizontal vector.
+         * @return the dot product between the vector to the handle and a horizontal vector.
+         */
         double GetHandleDotProduct();
-        void DrawCross();
+
+    public:
+        static const uint32 PICKNONE   = 0;
+        static const uint32 PICKBUCKET = 1;
+        static const uint32 PICKCROSS  = 2;
+        static const uint32 PICKHANDLE = 3;
 
     private:
         UOdysseyVectorObject& mParent;

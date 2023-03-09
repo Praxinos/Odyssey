@@ -194,26 +194,26 @@ DragPoint( double iLocalX
          , double iLocalY
          , double iOldLocalX
          , double iOldLocalY
-         , UOdysseyVectorPoint *iPoint )
+         , FOdysseyVectorPoint *iPoint )
 {
     double difx = iLocalX - iOldLocalX;
     double dify = iLocalY - iOldLocalY;
 
-    if ( iPoint->GetClass() == UOdysseyVectorHandlePoint::StaticClass() )
+    if ( iPoint->GetClass() == FOdysseyVectorHandlePoint::StaticClass() )
     {
-        UOdysseyVectorHandlePoint* pointHandle = static_cast<UOdysseyVectorHandlePoint*>( iPoint );
-        UOdysseyVectorVertexCubic* cubicVertex = static_cast<UOdysseyVectorVertexCubic*>(pointHandle->GetParent());
+        FOdysseyVectorHandlePoint* pointHandle = static_cast<FOdysseyVectorHandlePoint*>( iPoint );
+        FOdysseyVectorVertexCubic* cubicVertex = static_cast<FOdysseyVectorVertexCubic*>(pointHandle->GetParent());
         ::ULIS::FVec2D dif = { cubicVertex->GetX() - iLocalX, cubicVertex->GetY() - iLocalY };
 
-        cubicVertex->SetRadius( dif.Distance(), true );
+        cubicVertex->SetRadius( dif.Distance() );
 
         return cubicVertex->GetRectangle();
     }
 
-    if( iPoint->GetClass() == UOdysseyVectorHandleSegment::StaticClass() )
+    if( iPoint->GetClass() == FOdysseyVectorHandleSegment::StaticClass() )
     {
-        UOdysseyVectorHandleSegment* segmentHandle = static_cast<UOdysseyVectorHandleSegment*>( iPoint );
-        UOdysseyVectorSegmentCubic* cubicSegment = static_cast<UOdysseyVectorSegmentCubic*>(segmentHandle->GetParent());
+        FOdysseyVectorHandleSegment* segmentHandle = static_cast<FOdysseyVectorHandleSegment*>( iPoint );
+        FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(segmentHandle->GetParent());
 
         iPoint->Set( iPoint->GetX() + difx
                    , iPoint->GetY() + dify );
@@ -221,20 +221,20 @@ DragPoint( double iLocalX
         return cubicSegment->GetBoundingBox();
     }
 
-    if( iPoint->GetClass() == UOdysseyVectorVertexCubic::StaticClass() )
+    if( iPoint->GetClass() == FOdysseyVectorVertexCubic::StaticClass() )
     {
-        UOdysseyVectorVertexCubic* cubicVertex = static_cast<UOdysseyVectorVertexCubic*>( iPoint );
-        std::list<UOdysseyVectorSegment*> segmentList = cubicVertex->GetSegmentList();
+        FOdysseyVectorVertexCubic* cubicVertex = static_cast<FOdysseyVectorVertexCubic*>( iPoint );
+        std::list<FOdysseyVectorSegment*> segmentList = cubicVertex->GetSegmentList();
 
         cubicVertex->Set( iPoint->GetX() + difx
-                        , iPoint->GetY() + dify, false );
+                        , iPoint->GetY() + dify );
 
         // Control point must move with the point
-        for( std::list<UOdysseyVectorSegment*>::iterator segit = segmentList.begin(); segit != segmentList.end(); ++segit )
+        for( std::list<FOdysseyVectorSegment*>::iterator segit = segmentList.begin(); segit != segmentList.end(); ++segit )
         {
-            UOdysseyVectorSegmentCubic* cubicSegment = static_cast<UOdysseyVectorSegmentCubic*>(*segit);
-            UOdysseyVectorHandleSegment* ctrlPoint = ( cubicSegment->GetPoint(0) == iPoint ) ? static_cast<UOdysseyVectorHandleSegment*>( cubicSegment->GetControlPoint( 0 ) ) :
-                                                                                               static_cast<UOdysseyVectorHandleSegment*>( cubicSegment->GetControlPoint( 1 ) );
+            FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(*segit);
+            FOdysseyVectorHandleSegment* ctrlPoint = ( cubicSegment->GetPoint(0) == iPoint ) ? static_cast<FOdysseyVectorHandleSegment*>( cubicSegment->GetHandle( 0 ) ) :
+                                                                                               static_cast<FOdysseyVectorHandleSegment*>( cubicSegment->GetHandle( 1 ) );
 
             ctrlPoint->Set( ctrlPoint->GetX() + difx
                           , ctrlPoint->GetY() + dify );
@@ -272,7 +272,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDrag(const FOdysseyPoint& iPoint
 
                 for( int i = 0; i < mPickedPointArray.size(); i++ )
                 {
-                    UOdysseyVectorPoint *selectedPoint = mPickedPointArray[i];
+                    FOdysseyVectorPoint *selectedPoint = mPickedPointArray[i];
                     ::ULIS::FRectD rect;
 
                     rect = DragPoint( localCoords.x, localCoords.y, mOldLocalMouseX, mOldLocalMouseY, selectedPoint );

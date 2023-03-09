@@ -54,7 +54,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDown(const FOdysseyPoint
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        UOdysseyVectorRoot* scene = currentVectorLayer->GetScene();
+        UOdysseyVectorScene* scene = currentVectorLayer->GetScene();
         BLPoint localCoords = scene->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
         ::ULIS::FColor color = GetEditorAs<FOdysseyPainterEditor>()->PaintColor().GetValue();
         ::ULIS::FColor rgba8 = color.ToFormat( ::ULIS::eFormat::Format_RGBA8 );

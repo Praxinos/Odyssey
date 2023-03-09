@@ -38,28 +38,6 @@ class ODYSSEYVECTOR_API UOdysseyVectorGroupPaint : public UOdysseyVectorGroup
     public:
         GENERATED_BODY()
 
-    protected:
-        uint32 MarchVertex( FOdysseyVectorVertexIntersection* iVertex );
-
-        static const uint32 NOCYCLE  = 0;
-        static const uint32 BLOCKED  = 1;
-        static const uint32 HASCYCLE = 2;
-
-
-        std::list<FOdysseyVectorBucket*> mBucketList;
-        std::vector<FOdysseyVectorCycle*> mLoopArray;
-
-    public:
-        UPROPERTY(EditAnywhere, Category="General")
-        bool Realtime; // relatime updates
-
-        UPROPERTY(EditAnywhere, Category="General")
-        double Tolerance;
-
-    public:
-        void ApplyBucket( FOdysseyVectorBucket* iBucket );
-        void Colorize();
-
     public:
         ~UOdysseyVectorGroupPaint();
         UOdysseyVectorGroupPaint();
@@ -88,7 +66,6 @@ class ODYSSEYVECTOR_API UOdysseyVectorGroupPaint : public UOdysseyVectorGroup
                                   , uint32 );
 
         std::list<FOdysseyVectorBucket*>& GetBucketList();
-        void MarchCycle( FOdysseyVectorCycle& iCycle );
 
         void FindCycles();
         virtual uint32 GetType();
@@ -103,4 +80,23 @@ class ODYSSEYVECTOR_API UOdysseyVectorGroupPaint : public UOdysseyVectorGroup
         void AddBucket( FOdysseyVectorBucket* iBucket );
         void RemoveBucket( FOdysseyVectorBucket* iBucket );
         void PropertyChanged(const FName& iPropertyName);
+        void ApplyBucket( FOdysseyVectorBucket* iBucket );
+        void Colorize();
+
+    protected:
+        uint32 MarchVertex( FOdysseyVectorVertexIntersection* iVertex );
+
+    protected:
+        static const uint32 NOCYCLE  = 0;
+        static const uint32 BLOCKED  = 1;
+        static const uint32 HASCYCLE = 2;
+        std::list<FOdysseyVectorBucket*> mBucketList;
+        std::vector<FOdysseyVectorCycle*> mLoopArray;
+
+    public:
+        UPROPERTY(EditAnywhere, Category="General")
+        bool Realtime; // relatime updates
+
+        UPROPERTY(EditAnywhere, Category="General")
+        double Tolerance;
 };

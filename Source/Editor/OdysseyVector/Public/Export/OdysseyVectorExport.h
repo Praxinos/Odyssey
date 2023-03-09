@@ -57,5 +57,5 @@ namespace FOdysseyVectorExport
     void ODYSSEYVECTOR_API WriteDefineObjects( std::vector<UOdysseyVectorObject*>& vectorObjectArray, FArchive &Ar );
     void ODYSSEYVECTOR_API WriteObjectPathCubic( UOdysseyVectorPathCubic& iCubicPath, FArchive &Ar );
     void ODYSSEYVECTOR_API WriteObjectGroupPaint( UOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar );
-    void ODYSSEYVECTOR_API WriteObjectEllipse( UOdysseyVectorCircle& iCircle, FArchive &Ar );
+    void ODYSSEYVECTOR_API WriteObjectEllipse( UOdysseyVectorEllipse& iCircle, FArchive &Ar );
 };
