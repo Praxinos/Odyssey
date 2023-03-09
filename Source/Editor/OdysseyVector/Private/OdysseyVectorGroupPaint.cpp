@@ -198,7 +198,7 @@ UOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegmentCubic& iCubicSe
 
     for( std::list<FOdysseyVectorSegment*>::iterator sit = cubicSegmenList.begin(); sit != cubicSegmenList.end(); ++sit )
     {
-        FOdysseyVectorSegmentCubic *intersectSegment = Cast<FOdysseyVectorSegmentCubic>(*sit);
+        FOdysseyVectorSegmentCubic *intersectSegment = static_cast<FOdysseyVectorSegmentCubic*>(*sit);
         ::ULIS::FRectD intersectRect = intersectSegment->GetBoundingBox() & iCubicSegment.GetBoundingBox();
 
         if( intersectRect.Area() )
@@ -477,7 +477,7 @@ UOdysseyVectorGroupPaint::BuildGraph( std::vector<FOdysseyVectorVertexIntersecti
 
             for( std::list<FOdysseyVectorSegment*>::iterator sit = segmentList.begin(); sit != segmentList.end(); ++sit )
             {
-                cubicSegment = Cast<FOdysseyVectorSegmentCubic>(*sit);
+                cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(*sit);
 
                 cubicSegment->ClearIntersections();
 
@@ -486,7 +486,7 @@ UOdysseyVectorGroupPaint::BuildGraph( std::vector<FOdysseyVectorVertexIntersecti
         }
     }
 
-    cubicSegment = cubicSegmenList.size() ? Cast<FOdysseyVectorSegmentCubic>( cubicSegmenList.back() ) : nullptr;
+    cubicSegment = cubicSegmenList.size() ? static_cast<FOdysseyVectorSegmentCubic*>( cubicSegmenList.back() ) : nullptr;
 
     while( cubicSegment )
     {
@@ -495,7 +495,7 @@ UOdysseyVectorGroupPaint::BuildGraph( std::vector<FOdysseyVectorVertexIntersecti
         // remove segment from list as they are tested
         cubicSegmenList.pop_back();
 
-        cubicSegment = cubicSegmenList.size() ? Cast<FOdysseyVectorSegmentCubic>( cubicSegmenList.back() ) : nullptr;
+        cubicSegment = cubicSegmenList.size() ? static_cast<FOdysseyVectorSegmentCubic*>( cubicSegmenList.back() ) : nullptr;
     }
 
     //UE_LOG( LogTemp, Warning, TEXT("Intersections:%d"), iIntersectionVertexList.size() );

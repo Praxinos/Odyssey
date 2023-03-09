@@ -21,7 +21,7 @@ FOdysseyVectorHandleBucket::Init( FOdysseyVectorBucket* iParentBucket )
 FOdysseyVectorHandleBucket*
 FOdysseyVectorHandleBucket::New( FOdysseyVectorBucket* iParentBucket )
 {
-    FOdysseyVectorHandleBucket* bucketHandle = NewObject<FOdysseyVectorHandleBucket>();
+    FOdysseyVectorHandleBucket* bucketHandle = new FOdysseyVectorHandleBucket();
 
     bucketHandle->Init( iParentBucket );
 

@@ -146,7 +146,7 @@ FOdysseyVectorHUDPathCubic::Draw( UOdysseyVectorScene& iScene, ::ULIS::FRectD& i
 
             for( std::list<FOdysseyVectorSegment*>::iterator it = segmentList.begin(); it != segmentList.end(); ++it )
             {
-                FOdysseyVectorSegmentCubic* cubicSegment = Cast<FOdysseyVectorSegmentCubic>(*it);
+                FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
 
                 DrawSegment( cubicPath, cubicSegment, iRoi, iFlags );
             }

@@ -41,18 +41,19 @@ FOdysseyVectorSegment::Init( UOdysseyVectorPath* iPath
 }
 
 // static
+/*
 FOdysseyVectorSegment*
 FOdysseyVectorSegment::New( UOdysseyVectorPath* iPath
                           , FOdysseyVectorVertex* iVertex0
                           , FOdysseyVectorVertex* iVertex1 )
 {
-    FOdysseyVectorSegment* segment = NewObject<FOdysseyVectorSegment>();
+    FOdysseyVectorSegment* segment = new FOdysseyVectorSegment();
 
     segment->Init ( iPath, iVertex0, iVertex1 );
 
     return segment;
 }
-
+*/
 ::ULIS::FVec2D
 FOdysseyVectorSegment::GetVectorAtStart( bool iNormalize )
 {
@@ -181,7 +182,7 @@ FOdysseyVectorSegment::ClearIntersections ( )
     mIntersectionVertexList.clear();
 
     // Add default section
-    AddSection ( new FOdysseyVectorSection ( this, Cast<FOdysseyVectorVertex>(mPoint[0]), Cast<FOdysseyVectorVertex>(mPoint[1]) ) );
+    AddSection ( new FOdysseyVectorSection ( this, GetVertex(0), GetVertex(1) ) );
 }
 
 void

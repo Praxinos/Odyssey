@@ -13,7 +13,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUDPush : public FOdysseyVectorHUD
         double mRadius;
 
     public:
-        ~FOdysseyVectorHUDPush();
+        virtual ~FOdysseyVectorHUDPush();
         FOdysseyVectorHUDPush();
 
         void Draw( UOdysseyVectorScene& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags );

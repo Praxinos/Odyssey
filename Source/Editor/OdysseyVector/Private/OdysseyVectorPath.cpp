@@ -214,8 +214,8 @@ UOdysseyVectorPath::AddSegment( FOdysseyVectorSegment* iSegment )
 
     iSegment->SetPath( this );
 
-    Cast<FOdysseyVectorVertex>(iSegment->GetPoint(0))->AddSegment( iSegment );
-    Cast<FOdysseyVectorVertex>(iSegment->GetPoint(1))->AddSegment( iSegment );
+    iSegment->GetVertex(0)->AddSegment( iSegment );
+    iSegment->GetVertex(1)->AddSegment( iSegment );
 }
 
 void
@@ -225,8 +225,8 @@ UOdysseyVectorPath::Clear()
     {
         FOdysseyVectorSegment *segment = (*it);
 
-        Cast<FOdysseyVectorVertex>(segment->GetPoint(0))->RemoveSegment(segment);
-        Cast<FOdysseyVectorVertex>(segment->GetPoint(1))->RemoveSegment(segment);
+        segment->GetVertex(0)->RemoveSegment(segment);
+        segment->GetVertex(1)->RemoveSegment(segment);
         /*RemoveSegment( segment );*/ // this alters the list, hence the loop and leads to a crash
     }
 
@@ -238,8 +238,8 @@ UOdysseyVectorPath::RemoveSegment( FOdysseyVectorSegment* iSegment )
 {
     mSegmentList.remove( iSegment );
 
-    Cast<FOdysseyVectorVertex>(iSegment->GetPoint(0))->RemoveSegment( iSegment );
-    Cast<FOdysseyVectorVertex>(iSegment->GetPoint(1))->RemoveSegment( iSegment );
+    iSegment->GetVertex(0)->RemoveSegment( iSegment );
+    iSegment->GetVertex(1)->RemoveSegment( iSegment );
 }
 
 std::list<FOdysseyVectorSegment*>&
@@ -278,22 +278,6 @@ UOdysseyVectorPath::GetLastVertex()
     return mVertexList.back();
 }
 
-/*
-bool
-UOdysseyVectorPath::IsLoop()
-{
-    if ( mVertexList.size() )
-    {
-        if ( mVertexList.size() == mSegmentList.size() )
-        {
-            return true;
-        }
-    }
-
-    return false;
-}
-*/
-
 FOdysseyVectorVertex*
 UOdysseyVectorPath::GetFirstVertex()
 {
@@ -303,7 +287,7 @@ UOdysseyVectorPath::GetFirstVertex()
 }
 
 void
-UOdysseyVectorPath::DrawStructure( ::ULIS::FRectD& iRoi )
+UOdysseyVectorPath::DrawStructure( ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
     BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
 

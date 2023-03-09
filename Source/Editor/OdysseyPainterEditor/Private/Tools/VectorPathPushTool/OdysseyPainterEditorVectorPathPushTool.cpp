@@ -90,7 +90,7 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDown(const FOdysseyPoint& iPoint
 
         for( int i = 0; i < mSegmentArray.size(); i++ )
         {
-            FOdysseyVectorSegmentCubic* cubicSegment = Cast<FOdysseyVectorSegmentCubic>( mSegmentArray[i] );
+            FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>( mSegmentArray[i] );
 
             if( cubicSegment )
             {
@@ -170,8 +170,8 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDrag( const FOdysseyPoint& iPoin
         for( int i = 0; i < mPushedPointArray.size(); i++ )
         {
             FOdysseyVectorPoint* point = mPushedPointArray[i].point;
-            FOdysseyVectorHandleSegment* handleSegment = Cast<FOdysseyVectorHandleSegment>(point);
-            FOdysseyVectorVertex* vertex = Cast<FOdysseyVectorVertex>(point);
+            FOdysseyVectorHandleSegment* handleSegment = static_cast<FOdysseyVectorHandleSegment*>(point);
+            FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>(point);
             UOdysseyVectorPath* path = ( handleSegment ) ? handleSegment->GetParent()->GetPath() : vertex->GetPath();
             BLPoint delta = path->GetInverseWorldMatrix().mapVector( iPointInTexture.deltaPosition.X
                                                                    , iPointInTexture.deltaPosition.Y );

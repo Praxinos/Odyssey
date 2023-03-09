@@ -25,7 +25,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUDSelection : public FOdysseyVectorHUD
         void DrawSelecting( UOdysseyVectorScene& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags );
 
     public:
-        ~FOdysseyVectorHUDSelection();
+        virtual ~FOdysseyVectorHUDSelection();
         FOdysseyVectorHUDSelection();
 
         FSelectionBox& GetSelectionBox();

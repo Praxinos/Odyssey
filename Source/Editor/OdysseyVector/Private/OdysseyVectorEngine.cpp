@@ -346,17 +346,17 @@ FOdysseyVectorEngine::Knot( FOdysseyVectorVertex* iVertexA
         if( path->GetClass() == UOdysseyVectorPathCubic::StaticClass() )
         {
             UOdysseyVectorPathCubic* cubicPath = Cast<UOdysseyVectorPathCubic>(path);
-            FOdysseyVectorSegmentCubic* firstCubicSegment = Cast<FOdysseyVectorSegmentCubic>(iVertexB->GetFirstSegment());
+            FOdysseyVectorSegmentCubic* firstCubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(iVertexB->GetFirstSegment());
 
             if( firstCubicSegment )
             {
-                FOdysseyVectorVertexCubic* cubicVertex0 = Cast<FOdysseyVectorVertexCubic>(firstCubicSegment->GetPoint(0));
+                FOdysseyVectorVertexCubic* cubicVertex0 = static_cast<FOdysseyVectorVertexCubic*>(firstCubicSegment->GetVertex(0));
                 uint32 knotVertexIndex = ( cubicVertex0 == iVertexB ) ? 0 : 1;
                 uint32 nextVertexIndex = ( cubicVertex0 == iVertexB ) ? 1 : 0;
                 ::ULIS::FVec2D& knotCtrlPointCoords = firstCubicSegment->GetHandle(knotVertexIndex)->GetCoords();
                 ::ULIS::FVec2D& nextCtrlPointCoords = firstCubicSegment->GetHandle(nextVertexIndex)->GetCoords();
-                FOdysseyVectorVertexCubic* knotVertex = Cast<FOdysseyVectorVertexCubic>(iVertexA);
-                FOdysseyVectorVertexCubic* nextVertex =  Cast<FOdysseyVectorVertexCubic>(firstCubicSegment->GetPoint(nextVertexIndex));
+                FOdysseyVectorVertexCubic* knotVertex = static_cast<FOdysseyVectorVertexCubic*>(iVertexA);
+                FOdysseyVectorVertexCubic* nextVertex = static_cast<FOdysseyVectorVertexCubic*>(firstCubicSegment->GetVertex( nextVertexIndex ));
                 FOdysseyVectorSegmentCubic* newCubicSegment;
 
                 path->RemoveSegment( firstCubicSegment );

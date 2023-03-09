@@ -16,7 +16,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUDScale : public FOdysseyVectorHUDSelecti
     public:
         static const uint32 HANDLE_RADIUS = 5;
 
-        ~FOdysseyVectorHUDScale();
+        virtual ~FOdysseyVectorHUDScale();
         FOdysseyVectorHUDScale();
 
         void Draw( UOdysseyVectorScene& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags );

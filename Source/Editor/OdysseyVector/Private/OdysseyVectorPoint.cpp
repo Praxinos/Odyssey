@@ -21,7 +21,7 @@ FOdysseyVectorPoint::Init( double iX, double iY, double iRadius )
 FOdysseyVectorPoint*
 FOdysseyVectorPoint::New( double iX, double iY, double iRadius )
 {
-    FOdysseyVectorPoint* point = NewObject<FOdysseyVectorPoint>();
+    FOdysseyVectorPoint* point = new FOdysseyVectorPoint();
 
     point->Init ( iX, iY, iRadius );
 

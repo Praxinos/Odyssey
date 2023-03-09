@@ -11,6 +11,9 @@ class FOdysseyVectorSection;
 class ODYSSEYVECTOR_API FOdysseyVectorPoint
 {
     public:
+        static uint32 StaticClass() { return mStaticClass; };
+        virtual uint32 GetClass() { return mStaticClass; };
+
        /**
          * @brief Static function to allocate a new point. Note: this is the proper way to allocate a new point as we don't
          * use the constructor to set parameters so that this can be derived from an UOBJECT if needed in future devs. Indeed,
@@ -21,7 +24,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPoint
          */
         static FOdysseyVectorPoint* New( double iX, double iY, double iRadius );
 
-        ~FOdysseyVectorPoint();
+        virtual ~FOdysseyVectorPoint();
         FOdysseyVectorPoint();
 
         /**
@@ -49,11 +52,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorPoint
          * @return the point's radius
          */
         double GetRadius();
-
-        /**
-         * @brief Get the point class (ala UE)
-         */
-        virtual uint32 GetClass() = 0;
 
         /**
          * @brief Set the point's absolute coordinate on X axis
@@ -97,4 +95,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPoint
         uint32 mID;
         ::ULIS::FVec2D mCoords;
         double mRadius;
+
+    private:
+        static const uint32 mStaticClass = 0xead829a; // value is crc32 FOdysseyVectorPoint
 };

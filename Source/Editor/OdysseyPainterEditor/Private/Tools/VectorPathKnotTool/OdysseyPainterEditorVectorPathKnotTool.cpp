@@ -77,8 +77,8 @@ UOdysseyPainterEditorVectorPathKnotTool::OnMouseDown(const FOdysseyPoint& iPoint
 
         if( pickedPointArray.size() >= 2 )
         {
-            FOdysseyVectorVertex* vertexA = Cast<FOdysseyVectorVertex>( pickedPointArray[0] );
-            FOdysseyVectorVertex* vertexB = Cast<FOdysseyVectorVertex>( pickedPointArray[1] );
+            FOdysseyVectorVertex* vertexA = static_cast<FOdysseyVectorVertex*>( pickedPointArray[0] );
+            FOdysseyVectorVertex* vertexB = static_cast<FOdysseyVectorVertex*>( pickedPointArray[1] );
 
             if( ( vertexA->GetSegmentCount() == 1 ) && ( vertexB->GetSegmentCount() == 1 ) )
             {

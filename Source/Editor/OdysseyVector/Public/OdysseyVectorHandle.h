@@ -8,7 +8,7 @@
 class ODYSSEYVECTOR_API FOdysseyVectorHandle : public FOdysseyVectorPoint
 {
     public:
-        ~FOdysseyVectorHandle();
+        virtual ~FOdysseyVectorHandle();
         FOdysseyVectorHandle();
 
         void Init( double iX, double iY );

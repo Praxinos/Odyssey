@@ -147,12 +147,7 @@ UOdysseyVectorScene::UpdateShape( uint32 iUpdateFlags )
 UOdysseyVectorObject*
 UOdysseyVectorScene::GetLastSelected()
 {
-    if ( mSelectedObjectList.empty() == true )
-    {
-        return nullptr;
-    }
-
-    return mSelectedObjectList.back();
+    return ( mSelectedObjectList.empty() == true ) ? nullptr : mSelectedObjectList.back();
 }
 
 uint32

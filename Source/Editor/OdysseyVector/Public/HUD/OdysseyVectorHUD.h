@@ -8,7 +8,7 @@
 class ODYSSEYVECTOR_API FOdysseyVectorHUD
 {
     public:
-        ~FOdysseyVectorHUD();
+        virtual ~FOdysseyVectorHUD();
         FOdysseyVectorHUD();
 
         virtual void Draw( UOdysseyVectorScene& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags ) = 0;

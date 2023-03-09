@@ -24,7 +24,7 @@ FOdysseyVectorLink*
 FOdysseyVectorLink::New(  FOdysseyVectorPoint* iPoint0
                         , FOdysseyVectorPoint* iPoint1 )
 {
-    FOdysseyVectorLink* link = NewObject<FOdysseyVectorLink>();
+    FOdysseyVectorLink* link = new FOdysseyVectorLink();
 
     link->Init ( iPoint0, iPoint1 );
 

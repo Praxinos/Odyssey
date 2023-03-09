@@ -30,11 +30,10 @@ FOdysseyVectorVertexCubic::IsSmooth()
 ::ULIS::FVec2D
 FOdysseyVectorVertexCubic::GetVectorOnSegment( FOdysseyVectorSegment* iSegment, bool iNormalize )
 {
-    FOdysseyVectorSegmentCubic* cubicSegment = Cast<FOdysseyVectorSegmentCubic>(iSegment);
     ::ULIS::FVec2D vec;
 
-    vec = ( iSegment->GetVertex(0) == this ) ? cubicSegment->GetPointAt(0.01f) - cubicSegment->GetPointAt(0.0f)
-                                             : cubicSegment->GetPointAt(0.99f) - cubicSegment->GetPointAt(1.0f);
+    vec = ( iSegment->GetVertex(0) == this ) ? iSegment->GetPointAt(0.01f) - iSegment->GetPointAt(0.0f)
+                                             : iSegment->GetPointAt(0.99f) - iSegment->GetPointAt(1.0f);
 
     if( iNormalize && vec.DistanceSquared() )
     {
@@ -58,7 +57,7 @@ FOdysseyVectorVertexCubic::Init( double iX, double iY, double iRadius )
 FOdysseyVectorVertexCubic*
 FOdysseyVectorVertexCubic::New( double iX, double iY, double iRadius )
 {
-    FOdysseyVectorVertexCubic* cubicVertex = NewObject<FOdysseyVectorVertexCubic>();
+    FOdysseyVectorVertexCubic* cubicVertex = new FOdysseyVectorVertexCubic();
 
     cubicVertex->Init ( iX, iY, iRadius );
 

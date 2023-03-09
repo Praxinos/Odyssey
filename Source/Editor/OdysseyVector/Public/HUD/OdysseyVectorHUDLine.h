@@ -12,7 +12,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUDLine : public FOdysseyVectorHUD
         ::ULIS::FVec2D mP1;
 
     public:
-        ~FOdysseyVectorHUDLine();
+        virtual ~FOdysseyVectorHUDLine();
         FOdysseyVectorHUDLine();
 
         void Draw( UOdysseyVectorScene& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags );

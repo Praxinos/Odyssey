@@ -46,7 +46,7 @@ FOdysseyVectorSegmentCubic::New( UOdysseyVectorPathCubic* iPath
                                , double iCtrlPoint1y
                                , FOdysseyVectorVertexCubic* iPoint1 )
 {
-    FOdysseyVectorSegmentCubic* cubicSegment = NewObject<FOdysseyVectorSegmentCubic>();
+    FOdysseyVectorSegmentCubic* cubicSegment = new FOdysseyVectorSegmentCubic();
 
     cubicSegment->Init (iPath, iPoint0, iCtrlPoint0x, iCtrlPoint0y, iCtrlPoint1x, iCtrlPoint1y, iPoint1 );
 
@@ -59,7 +59,7 @@ FOdysseyVectorSegmentCubic::New( UOdysseyVectorPathCubic* iPath
                                , FOdysseyVectorVertexCubic* iPoint0
                                , FOdysseyVectorVertexCubic* iPoint1 )
 {
-    FOdysseyVectorSegmentCubic* cubicSegment = NewObject<FOdysseyVectorSegmentCubic>();
+    FOdysseyVectorSegmentCubic* cubicSegment = new FOdysseyVectorSegmentCubic();
 
     cubicSegment->Init (iPath, iPoint0, iPoint1 );
 
@@ -441,7 +441,7 @@ CreateAlmostIntersection( FAlmostIntersect aisx[4]
 
         if( aisx[i].distance <= iTolerance )
         {
-            FOdysseyVectorVertexIntersection* intersectionVertex = NewObject<FOdysseyVectorVertexIntersection>();
+            FOdysseyVectorVertexIntersection* intersectionVertex = new FOdysseyVectorVertexIntersection();
 
             iIntersectionVertexArray.push_back( intersectionVertex );
 

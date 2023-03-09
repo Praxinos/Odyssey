@@ -15,7 +15,7 @@ FOdysseyVectorVertex::FOdysseyVectorVertex()
 FOdysseyVectorVertex*
 FOdysseyVectorVertex::New( double iX, double iY, double iRadius )
 {
-    FOdysseyVectorVertex* vertex = NewObject<FOdysseyVectorVertex>();
+    FOdysseyVectorVertex* vertex = new FOdysseyVectorVertex();
 
     vertex->Init( iX, iY, iRadius );
 

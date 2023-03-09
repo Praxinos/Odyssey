@@ -21,7 +21,7 @@ FOdysseyVectorHandlePoint::Init( FOdysseyVectorPoint* iParentPoint )
 FOdysseyVectorHandlePoint*
 FOdysseyVectorHandlePoint::New( FOdysseyVectorPoint* iParentPoint )
 {
-    FOdysseyVectorHandlePoint* handlePoint = NewObject<FOdysseyVectorHandlePoint>();
+    FOdysseyVectorHandlePoint* handlePoint = new FOdysseyVectorHandlePoint();
 
     handlePoint->Init( iParentPoint );
 

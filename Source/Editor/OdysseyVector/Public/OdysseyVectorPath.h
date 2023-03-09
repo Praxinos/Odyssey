@@ -63,7 +63,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorPath : public UOdysseyVectorObject
         /*UOdysseyVectorObject* PickLoops( double iX, double iY, double iRadius );
         void DrawLoops( ::ULIS::FRectD &iRoi, uint64 iFlags );*/
         virtual void Merge( UOdysseyVectorPath* iPath ){};
-        virtual void DrawStructure( ::ULIS::FRectD &iRoi );
+        virtual void DrawStructure( ::ULIS::FRectD &iRoi, uint64 iFlags ) override;
         void SetJointType( eJointType mJointType );
         eJointType GetJointType();
         /*virtual void InsertPoint( FOdysseyVectorSegment* iSegment, FOdysseyVectorVertex* iPoint );*/

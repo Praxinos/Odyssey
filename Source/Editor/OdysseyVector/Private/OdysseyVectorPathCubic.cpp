@@ -498,7 +498,7 @@ UOdysseyVectorPathCubic::DrawShapeVariable( ::ULIS::FRectD &iRoi, uint64 iFlags 
         for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
         {
             FOdysseyVectorSegmentCubic* segment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
-            FOdysseyVectorVertex* vertex0 = Cast<FOdysseyVectorVertex>(segment->GetPoint(0));
+            FOdysseyVectorVertex* vertex0 = segment->GetVertex(0);
 
             ::ULIS::FRectD clip = iRoi & segment->GetBoundingBox();
 

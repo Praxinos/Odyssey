@@ -61,7 +61,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
                                               , FOdysseyVectorVertexCubic* iVertex1 );
 
     public:
-        ~FOdysseyVectorSegmentCubic();
+        virtual ~FOdysseyVectorSegmentCubic();
          FOdysseyVectorSegmentCubic();
 
        /**

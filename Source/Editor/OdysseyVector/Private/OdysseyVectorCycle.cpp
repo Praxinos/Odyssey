@@ -21,11 +21,6 @@ FOdysseyVectorCycle::FOdysseyVectorCycle( UOdysseyVectorObject& iParent
     , mFlags (0)
     , mParentCycle( nullptr )
 {
-/*
-    Cast<FOdysseyVectorVertexIntersection>(iVertexArray[0])->AttachLoop( this );
-*/
-
-
     Build( mVertexArray, mSectionArray );
 }
 
@@ -54,7 +49,7 @@ FOdysseyVectorCycle::FitsIn( FOdysseyVectorCycle* iParentCandidate )
 {
     for( int i = 0; i < mVertexArray.size(); i++ )
     {
-        ::ULIS::FVec2D& vCoords = mVertexArray[i]->GetCoords();
+        ::ULIS::FVec2D& vCoords = mVertexArray[i]->GetCoords( mVertexArray[i]->GetFirstSegment() );
         BLPoint pt = { vCoords.x, vCoords.y };
         uint32 ret =  iParentCandidate->mPath.hitTest( pt, BL_FILL_RULE_NON_ZERO );
 

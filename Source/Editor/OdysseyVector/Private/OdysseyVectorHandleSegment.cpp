@@ -21,7 +21,7 @@ FOdysseyVectorHandleSegment::Init( FOdysseyVectorSegment* iParentSegment, double
 FOdysseyVectorHandleSegment*
 FOdysseyVectorHandleSegment::New( FOdysseyVectorSegment* iParentSegment, double iX, double iY )
 {
-    FOdysseyVectorHandleSegment* handleSegment = NewObject<FOdysseyVectorHandleSegment>();
+    FOdysseyVectorHandleSegment* handleSegment = new FOdysseyVectorHandleSegment();
 
     handleSegment->Init( iParentSegment, iX, iY );
 
