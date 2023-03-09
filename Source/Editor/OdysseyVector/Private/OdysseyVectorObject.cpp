@@ -151,9 +151,9 @@ UOdysseyVectorObject::GetTranslationY()
 void
 UOdysseyVectorObject::UpdateMatrix()
 {
-    if( GetRoot() )
+    if( GetScene() )
     {
-        BLContext* blctx = GetRoot()->GetEngine()->GetBLContext();
+        BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
 
         blctx->save();
 
@@ -263,7 +263,7 @@ UOdysseyVectorObject::DrawChildren( ::ULIS::FRectD& iRoi, uint64 iFlags )
 void
 UOdysseyVectorObject::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
-    BLContext* blctx = GetRoot()->GetEngine()->GetBLContext();
+    BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
     ::ULIS::FRectD localRoi = { 0.0f, 0.0f, 0.0f, 0.0f };
 
     // Adapt the Region-Of-Interest to the local coordinates
@@ -308,13 +308,13 @@ UOdysseyVectorObject::Invalidate()
 {
     if ( mIsInvalidated == false )
     {
-        UOdysseyVectorObject* obj = GetRoot();
+        UOdysseyVectorObject* obj = GetScene();
 
         if ( obj && ( obj != this ) )
         {
-            if ( obj->GetClass() == UOdysseyVectorRoot::StaticClass() )
+            if ( obj->GetClass() == UOdysseyVectorScene::StaticClass() )
             {
-                UOdysseyVectorRoot* root = Cast<UOdysseyVectorRoot>(obj);
+                UOdysseyVectorScene* root = Cast<UOdysseyVectorScene>(obj);
 
                 root->InvalidateObject( this );
 
@@ -332,8 +332,8 @@ UOdysseyVectorObject::Invalidate()
     }
 }
 
-UOdysseyVectorRoot*
-UOdysseyVectorObject::GetRoot()
+UOdysseyVectorScene*
+UOdysseyVectorObject::GetScene()
 {
     UOdysseyVectorObject* parent = mParent;
     UOdysseyVectorObject* root = this;
@@ -345,7 +345,7 @@ UOdysseyVectorObject::GetRoot()
         parent = parent->GetParent();
     }
 
-    return Cast<UOdysseyVectorRoot>(root);
+    return Cast<UOdysseyVectorScene>(root);
 }
 
 void

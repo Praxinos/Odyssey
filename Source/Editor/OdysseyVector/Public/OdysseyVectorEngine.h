@@ -5,7 +5,7 @@
 #include <Core/Core.h>
 #include <Image/Block.h>
 #include "OdysseyVectorSegment.h"
-#include "OdysseyVectorRoot.h"
+#include "OdysseyVectorScene.h"
 #include "HUD/OdysseyVectorHUD.h"
 
 class ODYSSEYVECTOR_API FOdysseyVectorEngine
@@ -28,17 +28,17 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
         BLImage* GetBLMask();
         ~FOdysseyVectorEngine();
         FOdysseyVectorEngine( double iWidth, double iHeight );
-        void RenderSelected( UOdysseyVectorRoot& iScene );
-        void RenderHUD( UOdysseyVectorRoot& iScene );
-        void Render( UOdysseyVectorRoot& iScene );
-        void Pick( UOdysseyVectorRoot& iScene, std::vector<::ULIS::FVec2D>& iPointArray, uint32 iSelectionFlags );
-        void PickSegments( UOdysseyVectorRoot* iScene
+        void RenderSelected( UOdysseyVectorScene& iScene );
+        void RenderHUD( UOdysseyVectorScene& iScene );
+        void Render( UOdysseyVectorScene& iScene );
+        void Pick( UOdysseyVectorScene& iScene, std::vector<::ULIS::FVec2D>& iPointArray, uint32 iSelectionFlags );
+        void PickSegments( UOdysseyVectorScene* iScene
                          , double iX
                          , double iY
                          , double iRadius
                          , std::vector<FOdysseyVectorSegment*>& oPickedSegmentArray
                          , std::vector<double>& oDistance );
-        void PickPoints( UOdysseyVectorRoot* iScene
+        void PickPoints( UOdysseyVectorScene* iScene
                        , double iX
                        , double iY
                        , double iRadius
@@ -54,7 +54,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
                                   , std::vector<UOdysseyVectorObject*>& iErasedObjectArray
                                   ,::ULIS::FRectD &iRoi
                                   , bool iSelectedOnly );
-        void Erase( UOdysseyVectorRoot& iScene, ::ULIS::FRectD &iRoi, bool iSelectedOnly );
+        void Erase( UOdysseyVectorScene& iScene, ::ULIS::FRectD &iRoi, bool iSelectedOnly );
 
         /*void Init( double iWidth, double iHeight );*/
         void InvalidateRegion( double x, double y, double w, double h );

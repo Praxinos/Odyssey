@@ -176,6 +176,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
          */
         virtual double GetT( FOdysseyVectorSegment* iSegment );
 
+        virtual void GetCoords( FOdysseyVectorSegment* iSegment );
+
         /**
          * @brief Get a pointer to the path this vertex belongs to.
          * @return a pointer to the path this vertex belongs to.

@@ -126,7 +126,7 @@ TraceLine( int32 iX0, int32 iY0, double iT0
 bool
 UOdysseyVectorPathCubic::Erase( ::ULIS::FRectD &iRoi )
 {
-    BLContext* blctx = GetRoot()->GetEngine()->GetBLContext();
+    BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
     BLImage* blimg = blctx->targetImage(); // the mask image must be selected by the vector engine at this point
     BLImageData imageData;
     std::vector<FOdysseyVectorSegmentCubic*> newSegmentArray;
@@ -248,7 +248,7 @@ UOdysseyVectorPathCubic::Erase( ::ULIS::FRectD &iRoi )
 bool
 UOdysseyVectorPathCubic::PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags )
 {
-    BLContext* blctx = GetRoot()->GetEngine()->GetBLContext();
+    BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
 
     if( iSelectionFlags & PICK_MATH_BASED )
     {
@@ -333,7 +333,7 @@ UOdysseyVectorPathCubic::PickPoint( double iX
             if( ( fabs( vertex->GetX() + ( perpendicularVector.x * vertex->GetRadius() ) - iX ) <= iSelectionRadius ) &&
                 ( fabs( vertex->GetY() + ( perpendicularVector.y * vertex->GetRadius() ) - iY ) <= iSelectionRadius ) )
             {
-                oPickedPointArray.push_back( vertex->GetControlPoint() );
+                oPickedPointArray.push_back( vertex->GetHandle() );
 
                 return true;
             }
@@ -342,7 +342,7 @@ UOdysseyVectorPathCubic::PickPoint( double iX
             if( ( fabs( vertex->GetX() - ( perpendicularVector.x * vertex->GetRadius() ) - iX ) <= iSelectionRadius ) &&
                 ( fabs( vertex->GetY() - ( perpendicularVector.y * vertex->GetRadius() ) - iY ) <= iSelectionRadius ) )
             {
-                oPickedPointArray.push_back( vertex->GetControlPoint() );
+                oPickedPointArray.push_back( vertex->GetHandle() );
 
                 return true;
             }
@@ -354,8 +354,8 @@ UOdysseyVectorPathCubic::PickPoint( double iX
         for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
         {
             FOdysseyVectorSegmentCubic* segment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
-            FOdysseyVectorPoint* ctrlPoint0 = segment->GetControlPoint( 0 );
-            FOdysseyVectorPoint* ctrlPoint1 = segment->GetControlPoint( 1 );
+            FOdysseyVectorPoint* ctrlPoint0 = segment->GetHandle( 0 );
+            FOdysseyVectorPoint* ctrlPoint1 = segment->GetHandle( 1 );
 
             if( ( fabs( ctrlPoint0->GetX() - iX ) <= iSelectionRadius ) &&
                 ( fabs( ctrlPoint0->GetY() - iY ) <= iSelectionRadius ) )
@@ -421,7 +421,7 @@ UOdysseyVectorPathCubic::Fill( ::ULIS::FRectD& iRoi )
 
     if ( /*IsLoop() &&*/ firstVertex )
     {
-        BLContext* blctx = GetRoot()->GetEngine()->GetBLContext();
+        BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
         BLPath path;
         BLRgba32 fillColor;
 
@@ -441,8 +441,8 @@ UOdysseyVectorPathCubic::Fill( ::ULIS::FRectD& iRoi )
             FOdysseyVectorSegmentCubic *segment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
             ::ULIS::FVec2D& point0 = segment->GetPoint(0)->GetCoords();
             ::ULIS::FVec2D& point1 = segment->GetPoint(1)->GetCoords();
-            ::ULIS::FVec2D& ctrlPoint0 = segment->GetControlPoint(0)->GetCoords();
-            ::ULIS::FVec2D& ctrlPoint1 = segment->GetControlPoint(1)->GetCoords();
+            ::ULIS::FVec2D& ctrlPoint0 = segment->GetHandle(0)->GetCoords();
+            ::ULIS::FVec2D& ctrlPoint1 = segment->GetHandle(1)->GetCoords();
 
             path.cubicTo( ctrlPoint0.x
                         , ctrlPoint0.y
@@ -460,7 +460,7 @@ UOdysseyVectorPathCubic::Fill( ::ULIS::FRectD& iRoi )
 void
 UOdysseyVectorPathCubic::DrawStructure( ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
-    BLContext* blctx = GetRoot()->GetEngine()->GetBLContext();
+    BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
     BLPath path;
     FOdysseyVectorVertexCubic *firstVertex = static_cast<FOdysseyVectorVertexCubic*>( GetFirstVertex() );
     BLPoint localVector = mInverseWorldMatrix.mapVector ( 0.7071f, 0.7071f );
@@ -545,7 +545,7 @@ UOdysseyVectorPathCubic::DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags )
 void
 UOdysseyVectorPathCubic::DrawShapeVariable( ::ULIS::FRectD &iRoi, uint64 iFlags )
 {
-    BLContext* blctx = GetRoot()->GetEngine()->GetBLContext();
+    BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
     BLRgba32 strokeColor;
 
     // Note: Blend2D color format is 0xAARRGGBB
@@ -601,8 +601,8 @@ UOdysseyVectorPathCubic::Mirror( bool iMirrorX, bool iMirrorY )
     for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
     {
         FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
-        FOdysseyVectorHandleSegment* ctrlPoint0 = static_cast<FOdysseyVectorHandleSegment*>(cubicSegment->GetControlPoint(0));
-        FOdysseyVectorHandleSegment* ctrlPoint1 = static_cast<FOdysseyVectorHandleSegment*>(cubicSegment->GetControlPoint(1));
+        FOdysseyVectorHandleSegment* ctrlPoint0 = static_cast<FOdysseyVectorHandleSegment*>(cubicSegment->GetHandle(0));
+        FOdysseyVectorHandleSegment* ctrlPoint1 = static_cast<FOdysseyVectorHandleSegment*>(cubicSegment->GetHandle(1));
 
         ctrlPoint0->Set( ctrlPoint0->GetX() * factorX, ctrlPoint0->GetY() * factorY );
         ctrlPoint1->Set( ctrlPoint1->GetX() * factorX, ctrlPoint1->GetY() * factorY );
@@ -636,10 +636,10 @@ UOdysseyVectorPathCubic::CopyShape()
         FOdysseyVectorVertexCubic* vertex1 = static_cast<FOdysseyVectorVertexCubic*>( originalSegment->GetPoint(1) );
         FOdysseyVectorSegmentCubic* newSegment = FOdysseyVectorSegmentCubic::New( cubicPathCopy
                                                                                 , lookupTable[vertex0]
-                                                                                , originalSegment->GetControlPoint(0)->GetX()
-                                                                                , originalSegment->GetControlPoint(0)->GetY()
-                                                                                , originalSegment->GetControlPoint(1)->GetX()
-                                                                                , originalSegment->GetControlPoint(1)->GetY()
+                                                                                , originalSegment->GetHandle(0)->GetX()
+                                                                                , originalSegment->GetHandle(0)->GetY()
+                                                                                , originalSegment->GetHandle(1)->GetX()
+                                                                                , originalSegment->GetHandle(1)->GetY()
                                                                                 , lookupTable[vertex1] );
 
         cubicPathCopy->AddSegment( newSegment );
@@ -714,8 +714,8 @@ UOdysseyVectorPathCubic::SwitchSpace( UOdysseyVectorObject& iNewSpace )
     for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
     {
         FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
-        ::ULIS::FVec2D& ctrlPoint0 = cubicSegment->GetControlPoint(0)->GetCoords();
-        ::ULIS::FVec2D& ctrlPoint1 = cubicSegment->GetControlPoint(1)->GetCoords();
+        ::ULIS::FVec2D& ctrlPoint0 = cubicSegment->GetHandle(0)->GetCoords();
+        ::ULIS::FVec2D& ctrlPoint1 = cubicSegment->GetHandle(1)->GetCoords();
         BLPoint pt;
 
         pt = newSpaceInverseWorldMatrix.mapPoint( mWorldMatrix.mapPoint( ctrlPoint0.x, ctrlPoint0.y ) );

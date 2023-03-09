@@ -23,7 +23,7 @@ FOdysseyVectorImport::ReadChunks( uint64 iChunkEnd, FArchive &Ar, std::function<
 }
 
 void
-FOdysseyVectorImport::Read( UOdysseyVectorRoot* iScene, FArchive &Ar )
+FOdysseyVectorImport::Read( UOdysseyVectorScene* iScene, FArchive &Ar )
 {
     uint32 chunkID;
     uint64 chunkLen;

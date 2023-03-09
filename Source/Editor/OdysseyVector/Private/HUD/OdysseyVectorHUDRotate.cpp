@@ -50,7 +50,7 @@ FOdysseyVectorHUDRotate::SetPivot( double iLocalX, double iLocalY )
 }
 
 void
-FOdysseyVectorHUDRotate::Draw( UOdysseyVectorRoot& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags )
+FOdysseyVectorHUDRotate::Draw( UOdysseyVectorScene& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
     std::list<UOdysseyVectorObject*>& selectedObjectList = iScene.GetSelectedObjectList();
     BLContext* blctx = iScene.GetEngine()->GetBLContext();

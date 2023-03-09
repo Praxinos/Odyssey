@@ -112,7 +112,7 @@ FOdysseyVectorBucket::GetColor()
 void
 FOdysseyVectorBucket::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
-    BLContext* blctx = mParent.GetRoot()->GetEngine()->GetBLContext();
+    BLContext* blctx = mParent.GetScene()->GetEngine()->GetBLContext();
     BLPoint bucketWorldCoord = mParent.GetWorldMatrix().mapPoint( mCoords.x, mCoords.y );
     BLPoint handleWorldCoord = mParent.GetWorldMatrix().mapPoint( mCoords.x + mCtrlPoint->GetX()
                                                                 , mCoords.y + mCtrlPoint->GetY() );

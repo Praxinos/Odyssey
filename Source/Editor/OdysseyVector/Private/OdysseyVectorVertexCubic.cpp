@@ -66,7 +66,7 @@ FOdysseyVectorVertexCubic::New( double iX, double iY, double iRadius )
 }
 
 FOdysseyVectorHandlePoint*
-FOdysseyVectorVertexCubic::GetControlPoint()
+FOdysseyVectorVertexCubic::GetHandle()
 {
     return mCtrlPoint;
 }
@@ -105,7 +105,7 @@ FOdysseyVectorVertexCubic::SmoothSegments( bool iBuildSegments )
                     smoothVector = - smoothVector;
                 }
 
-                cubicSegment->GetControlPoint(0)->Set( this->GetX() + ( smoothVector.x * distance * 0.35f ),
+                cubicSegment->GetHandle(0)->Set( this->GetX() + ( smoothVector.x * distance * 0.35f ),
                                                        this->GetY() + ( smoothVector.y * distance * 0.35f ) );
             }
 
@@ -118,7 +118,7 @@ FOdysseyVectorVertexCubic::SmoothSegments( bool iBuildSegments )
                     smoothVector = - smoothVector;
                 }
 
-                cubicSegment->GetControlPoint(1)->Set( this->GetX() + ( smoothVector.x * distance * 0.35f ),
+                cubicSegment->GetHandle(1)->Set( this->GetX() + ( smoothVector.x * distance * 0.35f ),
                                                        this->GetY() + ( smoothVector.y * distance * 0.35f ) );
             }
 
@@ -203,8 +203,8 @@ FOdysseyVectorVertexCubic::GetPerpendicularVector( bool iNormalize )
             FOdysseyVectorPoint* p1 = segment->GetPoint(1);
             ::ULIS::FVec2D& point0 = segment->GetPoint(0)->GetCoords();
             ::ULIS::FVec2D& point1 = segment->GetPoint(1)->GetCoords();
-            ::ULIS::FVec2D& ctrlPoint0 = segment->GetControlPoint(0)->GetCoords();
-            ::ULIS::FVec2D& ctrlPoint1 = segment->GetControlPoint(1)->GetCoords();
+            ::ULIS::FVec2D& ctrlPoint0 = segment->GetHandle(0)->GetCoords();
+            ::ULIS::FVec2D& ctrlPoint1 = segment->GetHandle(1)->GetCoords();
 
             if( this == p0 )
             {

@@ -38,7 +38,7 @@ FOdysseyVectorHUDSelection::SetSelecting( bool iSelecting, std::vector<::ULIS::F
 }
 
 void
-FOdysseyVectorHUDSelection::DrawSelectionSpace( UOdysseyVectorRoot& iScene,::ULIS::FRectD& iRoi,uint64 iFlags )
+FOdysseyVectorHUDSelection::DrawSelectionSpace( UOdysseyVectorScene& iScene,::ULIS::FRectD& iRoi,uint64 iFlags )
 {
     BLContext* blctx = iScene.GetEngine()->GetBLContext();
     BLPoint topLeft = { 0, 0 };
@@ -73,7 +73,7 @@ FOdysseyVectorHUDSelection::DrawSelectionSpace( UOdysseyVectorRoot& iScene,::ULI
 }
 
 void
-FOdysseyVectorHUDSelection::UpdateSelectionBox( UOdysseyVectorRoot& iScene )
+FOdysseyVectorHUDSelection::UpdateSelectionBox( UOdysseyVectorScene& iScene )
 {
     std::list<UOdysseyVectorObject*>& selectedObjectList = iScene.GetSelectedObjectList();
 
@@ -110,7 +110,7 @@ FOdysseyVectorHUDSelection::UpdateSelectionBox( UOdysseyVectorRoot& iScene )
 }
 
 void
-FOdysseyVectorHUDSelection::DrawSelectionBox( UOdysseyVectorRoot& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags )
+FOdysseyVectorHUDSelection::DrawSelectionBox( UOdysseyVectorScene& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
     std::list<UOdysseyVectorObject*>& selectedObjectList = iScene.GetSelectedObjectList();
     BLContext* blctx = iScene.GetEngine()->GetBLContext();
@@ -144,7 +144,7 @@ FOdysseyVectorHUDSelection::DrawSelectionBox( UOdysseyVectorRoot& iScene, ::ULIS
 }
 
 void
-FOdysseyVectorHUDSelection::DrawSelecting( UOdysseyVectorRoot& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags )
+FOdysseyVectorHUDSelection::DrawSelecting( UOdysseyVectorScene& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
     BLContext* blctx = iScene.GetEngine()->GetBLContext();
     BLPath path;
@@ -173,7 +173,7 @@ FOdysseyVectorHUDSelection::DrawSelecting( UOdysseyVectorRoot& iScene, ::ULIS::F
 }
 
 void
-FOdysseyVectorHUDSelection::Draw( UOdysseyVectorRoot& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags )
+FOdysseyVectorHUDSelection::Draw( UOdysseyVectorScene& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
     BLContext* blctx = iScene.GetEngine()->GetBLContext();
     ::ULIS::FRectD bbox = { 0, 0, 0, 0 };

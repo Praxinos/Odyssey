@@ -305,7 +305,7 @@ UOdysseyVectorPath::GetFirstVertex()
 void
 UOdysseyVectorPath::DrawStructure( ::ULIS::FRectD& iRoi )
 {
-    BLContext* blctx = GetRoot()->GetEngine()->GetBLContext();
+    BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
 
     blctx->setStrokeStyle( BLRgba32( 0xFF00FF00 ) );
     blctx->setStrokeWidth(1.0f);
@@ -369,7 +369,7 @@ _drawMiterJoint( UOdysseyVectorPath* iPath
     ::ULIS::FVec2D shortestTest = edge0Point - edge1Point;
     // have to clamp due to imprecision of the dot product
     double dot = std::clamp<double>( shortestTest.DotProduct( parallelVec0 ), -1.0f, 1.0f );
-    BLContext* blctx = iPath->GetRoot()->GetEngine()->GetBLContext();
+    BLContext* blctx = iPath->GetScene()->GetEngine()->GetBLContext();
 
     BLMatrix2D& worldMatrix = iPath->GetWorldMatrix();
     BLPoint worldOrigin = worldMatrix.mapPoint( iOrigin.x, iOrigin.y );
@@ -480,7 +480,7 @@ _drawRadialJoint( UOdysseyVectorPath* iPath
     double angle = acos( std::clamp<double>( perpendicularVec0.DotProduct( perpendicularVec1 ), -1.0f, 1.0f ) );
     static const int steps = 24;
     double a = angle / steps;
-    BLContext* blctx = iPath->GetRoot()->GetEngine()->GetBLContext();
+    BLContext* blctx = iPath->GetScene()->GetEngine()->GetBLContext();
     BLMatrix2D& worldMatrix = iPath->GetWorldMatrix();
     BLPoint worldOrigin = worldMatrix.mapPoint( iOrigin.x, iOrigin.y );
     static BLPoint vertex[steps][3];
@@ -549,7 +549,7 @@ _drawLinearJoint( UOdysseyVectorPath* iPath
     ::ULIS::FVec2D shortestTest = edge0Point - edge1Point;
     // have to clamp due to imprecision of the dot product
     double dot = std::clamp<double>( shortestTest.DotProduct( parallelVec0 ), -1.0f, 1.0f );
-    BLContext* blctx = iPath->GetRoot()->GetEngine()->GetBLContext();
+    BLContext* blctx = iPath->GetScene()->GetEngine()->GetBLContext();
     BLPoint vertex[3];
     BLMatrix2D& worldMatrix = iPath->GetWorldMatrix();
     BLPoint worldOrigin = worldMatrix.mapPoint( iOrigin.x, iOrigin.y );

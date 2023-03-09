@@ -47,7 +47,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorGroupPaint : public UOdysseyVectorGroup
 
 
         std::list<FOdysseyVectorBucket*> mBucketList;
-        std::vector<FOdysseyVectorLoop*> mLoopArray;
+        std::vector<FOdysseyVectorCycle*> mLoopArray;
 
     public:
         UPROPERTY(EditAnywhere, Category="General")
@@ -76,7 +76,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorGroupPaint : public UOdysseyVectorGroup
         void CopyBuckets( UOdysseyVectorGroupPaint* iDestination );
         uint32 BuildGraph( std::vector<FOdysseyVectorVertexIntersection*>& iIntersectionVertexArray );
 
-        FOdysseyVectorLoop* March( FOdysseyVectorVertexIntersection* iNode
+        FOdysseyVectorCycle* March( FOdysseyVectorVertexIntersection* iNode
                                  , FOdysseyVectorSection* iStartSection
                                  , FOdysseyVectorSection* iEndSection );
 
@@ -88,14 +88,14 @@ class ODYSSEYVECTOR_API UOdysseyVectorGroupPaint : public UOdysseyVectorGroup
                                   , uint32 );
 
         std::list<FOdysseyVectorBucket*>& GetBucketList();
-        void MarchCycle( FOdysseyVectorLoop& iCycle );
+        void MarchCycle( FOdysseyVectorCycle& iCycle );
 
         void FindCycles();
         virtual uint32 GetType();
         void SimplifyGraph();
         FOdysseyVectorBucket* Bucket( double iX, double iY, uint8 iR, uint8 iG, uint8 iB, uint8 iA );
         FOdysseyVectorBucket* PickBucket( double iX, double iY );
-        FOdysseyVectorLoop* PickCycle( double iX, double iY );
+        FOdysseyVectorCycle* PickCycle( double iX, double iY );
         FOdysseyVectorHandleBucket* PickBucketHandle( double iX, double iY );
         void DrawBuckets( ::ULIS::FRectD& iRoi, uint64 iFlags );
         void OrderCycles();

@@ -10,7 +10,7 @@ FOdysseyVectorHUDPush::FOdysseyVectorHUDPush()
 }
 
 void
-FOdysseyVectorHUDPush::Draw( UOdysseyVectorRoot& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags )
+FOdysseyVectorHUDPush::Draw( UOdysseyVectorScene& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
     BLContext* blctx = iScene.GetEngine()->GetBLContext();
 

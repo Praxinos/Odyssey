@@ -9,19 +9,15 @@ class ODYSSEYVECTOR_API FOdysseyVectorHandleSegment : public FOdysseyVectorHandl
 {
     public:
         static FOdysseyVectorHandleSegment* New( FOdysseyVectorSegment* iParentSegment, double iX, double iY );
-        void Init( FOdysseyVectorSegment* iParentSegment, double iX, double iY );
-
-    private:
-        FOdysseyVectorSegment* mParentSegment;
-
-    protected:
-
-    public:
         ~FOdysseyVectorHandleSegment();
         FOdysseyVectorHandleSegment( );
 
+        void Init( FOdysseyVectorSegment* iParentSegment, double iX, double iY );
         FOdysseyVectorSegment* GetParent();
         void SetX( double iX );
         void SetY( double iY );
         void Set( double iX,double iY );
+
+    private:
+        FOdysseyVectorSegment* mParentSegment;
 };

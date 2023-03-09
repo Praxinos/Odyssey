@@ -29,7 +29,7 @@ namespace FOdysseyVector
 }
 
 #include "OdysseyVectorObject.h"
-#include "OdysseyVectorRoot.h"
+#include "OdysseyVectorScene.h"
 #include "OdysseyVectorPoint.h"
 #include "OdysseyVectorHandle.h"
 #include "OdysseyVectorHandlePoint.h"

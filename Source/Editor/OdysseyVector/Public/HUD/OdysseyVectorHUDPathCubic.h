@@ -30,5 +30,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUDPathCubic : public FOdysseyVectorHUD
         FOdysseyVectorHUDPathCubic( uint32 iDisplayMode );
         void SetDisplayMode( uint32 iDisplayMode );
         uint32 GetDisplayMode();
-        void Draw( UOdysseyVectorRoot& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags );
+        void Draw( UOdysseyVectorScene& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags );
 };

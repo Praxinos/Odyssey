@@ -41,7 +41,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertexCubic : public FOdysseyVectorVertex
         /**
          * @brief Get a pointer to the handle (used to set the vertex's radius).
          */
-        FOdysseyVectorHandlePoint* GetControlPoint();
+        FOdysseyVectorHandlePoint* GetHandle();
 
         /**
          * @brief Get a vector perpendicular to the average tangents to the segments at this vertex.

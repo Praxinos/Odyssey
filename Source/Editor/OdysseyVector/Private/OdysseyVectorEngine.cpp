@@ -13,7 +13,7 @@ FOdysseyVectorEngine::FOdysseyVectorEngine( double iWidth, double iHeight )
     mBLImage = new BLImage( iWidth, iHeight, BL_FORMAT_PRGB32 );
     mBLMask  = new BLImage( iWidth, iHeight, BL_FORMAT_A8 );
 
-    /*mScene = NewObject<UOdysseyVectorRoot>();
+    /*mScene = NewObject<UOdysseyVectorScene>();
     mScene->Init("Vector Scene");*/
 
     mBLContext->begin( *mBLImage );
@@ -97,7 +97,7 @@ FOdysseyVectorEngine::GetColorImagePixelValue( uint32 iX, uint32 iY )
 }
 
 void
-FOdysseyVectorEngine::RenderHUD( UOdysseyVectorRoot& iScene )
+FOdysseyVectorEngine::RenderHUD( UOdysseyVectorScene& iScene )
 {
     std::list<UOdysseyVectorObject*> selectedObjectList = iScene.GetSelectedObjectList();
 
@@ -157,7 +157,7 @@ FOdysseyVectorEngine::SetDrawingFlags( uint64 iDrawingFlags )
 }
 
 void
-FOdysseyVectorEngine::Render( UOdysseyVectorRoot& iScene )
+FOdysseyVectorEngine::Render( UOdysseyVectorScene& iScene )
 {
     static ::ULIS::FRectD zeroRectangle;
     // Blend2D part
@@ -296,7 +296,7 @@ FOdysseyVectorEngine::RecursiveErase( UOdysseyVectorObject& iObj
 }
 
 void
-FOdysseyVectorEngine::Erase( UOdysseyVectorRoot& iScene
+FOdysseyVectorEngine::Erase( UOdysseyVectorScene& iScene
                            , ::ULIS::FRectD &iRoi
                            , bool iSelectedOnly )
 {
@@ -351,7 +351,7 @@ RecursivePickPoints( UOdysseyVectorObject* iObject
 }
 
 void
-FOdysseyVectorEngine::PickPoints( UOdysseyVectorRoot* iScene
+FOdysseyVectorEngine::PickPoints( UOdysseyVectorScene* iScene
                                 , double iX
                                 , double iY
                                 , double iRadius
@@ -389,8 +389,8 @@ FOdysseyVectorEngine::Knot( FOdysseyVectorVertex* iVertexA
                 FOdysseyVectorVertexCubic* cubicVertex0 = Cast<FOdysseyVectorVertexCubic>(firstCubicSegment->GetPoint(0));
                 uint32 knotVertexIndex = ( cubicVertex0 == iVertexB ) ? 0 : 1;
                 uint32 nextVertexIndex = ( cubicVertex0 == iVertexB ) ? 1 : 0;
-                ::ULIS::FVec2D& knotCtrlPointCoords = firstCubicSegment->GetControlPoint(knotVertexIndex)->GetCoords();
-                ::ULIS::FVec2D& nextCtrlPointCoords = firstCubicSegment->GetControlPoint(nextVertexIndex)->GetCoords();
+                ::ULIS::FVec2D& knotCtrlPointCoords = firstCubicSegment->GetHandle(knotVertexIndex)->GetCoords();
+                ::ULIS::FVec2D& nextCtrlPointCoords = firstCubicSegment->GetHandle(nextVertexIndex)->GetCoords();
                 FOdysseyVectorVertexCubic* knotVertex = Cast<FOdysseyVectorVertexCubic>(iVertexA);
                 FOdysseyVectorVertexCubic* nextVertex =  Cast<FOdysseyVectorVertexCubic>(firstCubicSegment->GetPoint(nextVertexIndex));
                 FOdysseyVectorSegmentCubic* newCubicSegment;
@@ -492,7 +492,7 @@ RecursivePickSegments( UOdysseyVectorObject* iObject
 }
 
 void
-FOdysseyVectorEngine::PickSegments( UOdysseyVectorRoot* iScene
+FOdysseyVectorEngine::PickSegments( UOdysseyVectorScene* iScene
                                   , double iX
                                   , double iY
                                   , double iRadius
@@ -547,7 +547,7 @@ FOdysseyVectorEngine::UseColorImage()
 }
 
 void
-FOdysseyVectorEngine::Pick( UOdysseyVectorRoot& iScene, std::vector<::ULIS::FVec2D>& iPointArray, uint32 iSelectionFlags )
+FOdysseyVectorEngine::Pick( UOdysseyVectorScene& iScene, std::vector<::ULIS::FVec2D>& iPointArray, uint32 iSelectionFlags )
 {
     ::ULIS::FRectD roi;
     std::vector<UOdysseyVectorObject*> pickedObjectArray;

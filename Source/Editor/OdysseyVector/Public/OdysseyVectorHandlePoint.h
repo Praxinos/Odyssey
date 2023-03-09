@@ -9,15 +9,12 @@ class ODYSSEYVECTOR_API FOdysseyVectorHandlePoint : public FOdysseyVectorHandle
 {
     public:
         static FOdysseyVectorHandlePoint* New( FOdysseyVectorPoint* iParentPoint );
+        ~FOdysseyVectorHandlePoint();
+        FOdysseyVectorHandlePoint();
+        FOdysseyVectorPoint* GetParent();
         void Init( FOdysseyVectorPoint* iParentPoint );
 
     private:
         FOdysseyVectorPoint* mParentPoint;
 
-    protected:
-
-    public:
-        ~FOdysseyVectorHandlePoint();
-        FOdysseyVectorHandlePoint();
-        FOdysseyVectorPoint* GetParent();
 };

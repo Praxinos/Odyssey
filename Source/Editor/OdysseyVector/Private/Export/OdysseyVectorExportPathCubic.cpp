@@ -19,8 +19,8 @@ WritePathCubicGeometrySegments( UOdysseyVectorPathCubic& iCubicPath, FArchive &A
                 FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
                 uint32 p0ID = cubicSegment->GetPoint(0)->GetID();
                 uint32 p1ID = cubicSegment->GetPoint(1)->GetID();
-                ::ULIS::FVec2D& ctrlPoint0 = cubicSegment->GetControlPoint(0)->GetCoords();
-                ::ULIS::FVec2D& ctrlPoint1 = cubicSegment->GetControlPoint(1)->GetCoords();
+                ::ULIS::FVec2D& ctrlPoint0 = cubicSegment->GetHandle(0)->GetCoords();
+                ::ULIS::FVec2D& ctrlPoint1 = cubicSegment->GetHandle(1)->GetCoords();
                 double ctrlPoint0X = ctrlPoint0.x;
                 double ctrlPoint0Y = ctrlPoint0.y;
                 double ctrlPoint1X = ctrlPoint1.x;

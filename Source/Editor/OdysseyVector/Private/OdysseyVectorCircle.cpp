@@ -67,17 +67,17 @@ UOdysseyVectorCircle::UpdateShape( uint32 iUpdateFlags )
     mCubicVertex[2]->Set(  0.0f    , -mRadiusY );
     mCubicVertex[3]->Set( -mRadiusX,  0.0f     );
 
-    mCubicSegment[0]->GetControlPoint(0)->Set(  ctlDistX,  mRadiusY );
-    mCubicSegment[0]->GetControlPoint(1)->Set(  mRadiusX,  ctlDistY );
+    mCubicSegment[0]->GetHandle(0)->Set(  ctlDistX,  mRadiusY );
+    mCubicSegment[0]->GetHandle(1)->Set(  mRadiusX,  ctlDistY );
 
-    mCubicSegment[1]->GetControlPoint(0)->Set(  mRadiusX, -ctlDistY );
-    mCubicSegment[1]->GetControlPoint(1)->Set(  ctlDistX, -mRadiusY );
+    mCubicSegment[1]->GetHandle(0)->Set(  mRadiusX, -ctlDistY );
+    mCubicSegment[1]->GetHandle(1)->Set(  ctlDistX, -mRadiusY );
 
-    mCubicSegment[2]->GetControlPoint(0)->Set( -ctlDistX, -mRadiusY );
-    mCubicSegment[2]->GetControlPoint(1)->Set( -mRadiusX, -ctlDistY );
+    mCubicSegment[2]->GetHandle(0)->Set( -ctlDistX, -mRadiusY );
+    mCubicSegment[2]->GetHandle(1)->Set( -mRadiusX, -ctlDistY );
 
-    mCubicSegment[3]->GetControlPoint(0)->Set( -mRadiusX,  ctlDistY );
-    mCubicSegment[3]->GetControlPoint(1)->Set( -ctlDistX,  mRadiusY );
+    mCubicSegment[3]->GetHandle(0)->Set( -mRadiusX,  ctlDistY );
+    mCubicSegment[3]->GetHandle(1)->Set( -ctlDistX,  mRadiusY );
 
     mCubicSegment[0]->Update();
     mCubicSegment[1]->Update();
@@ -130,8 +130,8 @@ UOdysseyVectorCircle::PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags )
             {
                 ::ULIS::FVec2D &point0 = mCubicSegment[i]->GetPoint(0)->GetCoords();
                 ::ULIS::FVec2D &point1 = mCubicSegment[i]->GetPoint(1)->GetCoords();
-                ::ULIS::FVec2D &ctrlPoint0 = mCubicSegment[i]->GetControlPoint(0)->GetCoords();
-                ::ULIS::FVec2D &ctrlPoint1 = mCubicSegment[i]->GetControlPoint(1)->GetCoords();
+                ::ULIS::FVec2D &ctrlPoint0 = mCubicSegment[i]->GetHandle(0)->GetCoords();
+                ::ULIS::FVec2D &ctrlPoint1 = mCubicSegment[i]->GetHandle(1)->GetCoords();
 
                 path.moveTo( point0.x, point0.y );
                 path.cubicTo( ctrlPoint0.x, ctrlPoint0.y, ctrlPoint1.x, ctrlPoint1.y, point1.x, point1.y );

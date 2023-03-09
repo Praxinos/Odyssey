@@ -17,12 +17,12 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUDSelection : public FOdysseyVectorHUD
         std::vector<::ULIS::FVec2D>* mPointArray;
         bool mSelecting;
         BLImage* mSelectionMask;
-        void DrawSelectionSpace( UOdysseyVectorRoot& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags );
+        void DrawSelectionSpace( UOdysseyVectorScene& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags );
         FSelectionBox mSelectionBox;
 
     protected:
-        void DrawSelectionBox( UOdysseyVectorRoot& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags );
-        void DrawSelecting( UOdysseyVectorRoot& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags );
+        void DrawSelectionBox( UOdysseyVectorScene& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags );
+        void DrawSelecting( UOdysseyVectorScene& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags );
 
     public:
         ~FOdysseyVectorHUDSelection();
@@ -30,7 +30,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUDSelection : public FOdysseyVectorHUD
 
         FSelectionBox& GetSelectionBox();
         void Init( uint32 iWidth, uint32 iHeight );
-        virtual void UpdateSelectionBox( UOdysseyVectorRoot& iScene );
-        virtual void Draw( UOdysseyVectorRoot& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags );
+        virtual void UpdateSelectionBox( UOdysseyVectorScene& iScene );
+        virtual void Draw( UOdysseyVectorScene& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags );
         void SetSelecting( bool iSelecting, std::vector<::ULIS::FVec2D>* iPointArray );
 };

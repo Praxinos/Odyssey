@@ -11,15 +11,13 @@ class ODYSSEYVECTOR_API FOdysseyVectorHandleBucket : public FOdysseyVectorHandle
 {
     public:
         static FOdysseyVectorHandleBucket* New( FOdysseyVectorBucket* iParentBucket );
+
+        ~FOdysseyVectorHandleBucket();
+        FOdysseyVectorHandleBucket();
+        FOdysseyVectorBucket* GetParent();
+
         void Init( FOdysseyVectorBucket* iParentBucket );
 
     private:
         FOdysseyVectorBucket* mParentBucket;
-
-    protected:
-
-    public:
-        ~FOdysseyVectorHandleBucket();
-        FOdysseyVectorHandleBucket();
-        FOdysseyVectorBucket* GetParent();
 };

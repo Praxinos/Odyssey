@@ -28,7 +28,7 @@ UOdysseyVectorRectangle::CopyShape()
 void
 UOdysseyVectorRectangle::DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags )
 {
-    BLContext* blctx = GetRoot()->GetEngine()->GetBLContext();
+    BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
     BLRgba32 strokeColor;
 
     strokeColor.r = Foreground.R;

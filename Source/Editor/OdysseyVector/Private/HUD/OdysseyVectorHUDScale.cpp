@@ -38,7 +38,7 @@ FOdysseyVectorHUDScale::Pick( double iWorldX, double iWorldY )
 }
 
 void
-FOdysseyVectorHUDScale::Draw( UOdysseyVectorRoot& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags )
+FOdysseyVectorHUDScale::Draw( UOdysseyVectorScene& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
     std::list<UOdysseyVectorObject*>& selectedObjectList = iScene.GetSelectedObjectList();
     BLContext* blctx = iScene.GetEngine()->GetBLContext();

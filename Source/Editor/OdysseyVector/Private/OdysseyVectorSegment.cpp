@@ -120,12 +120,14 @@ FOdysseyVectorSegment::AddSection ( FOdysseyVectorSection* iSection )
 }
 
 void
-FOdysseyVectorSegment::RemoveSection ( FOdysseyVectorSection* iSection )
+FOdysseyVectorSegment::DeleteSection ( FOdysseyVectorSection* iSection )
 {
     iSection->GetVertex(0)->RemoveSection( iSection );
     iSection->GetVertex(1)->RemoveSection( iSection );
 
     mSectionList.remove( iSection );
+
+    delete iSection;
 }
 
 std::list<FOdysseyVectorSection*>&
@@ -144,7 +146,7 @@ FOdysseyVectorSegment::AddIntersection ( FOdysseyVectorVertexIntersection* iInte
     FOdysseyVectorSection* subSection[2] = { new FOdysseyVectorSection ( this, vertex0            , iIntersectionVertex )
                                            , new FOdysseyVectorSection ( this, iIntersectionVertex, vertex1             ) };
 
-    RemoveSection( section );
+    DeleteSection( section );
 
     mIntersectionVertexList.push_back( iIntersectionVertex );
 
@@ -163,12 +165,19 @@ FOdysseyVectorSegment::ClearIntersections ( )
 
         vertex0->RemoveSection( section );
         vertex1->RemoveSection( section );
+
+        delete section;
     }
 
-    // We do not release memory so that we can undo that later
     mSectionList.clear();
 
-    // We do not release memory so that we can undo that later
+    for( std::list<FOdysseyVectorVertexIntersection*>::iterator it = mIntersectionVertexList.begin(); it != mIntersectionVertexList.end(); ++it )
+    {
+        FOdysseyVectorVertexIntersection* intersectionVertex = static_cast<FOdysseyVectorVertexIntersection*>(*it);
+
+        delete intersectionVertex;
+    }
+
     mIntersectionVertexList.clear();
 
     // Add default section

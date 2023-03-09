@@ -7,7 +7,7 @@
 
 #include "OdysseyVectorObject.generated.h"
 
-class UOdysseyVectorRoot;
+class UOdysseyVectorScene;
 class UOdysseyVectorGroup;
 
 UCLASS()
@@ -144,7 +144,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorObject : public UObject
         void MoveBack();
         void MoveFront();
         void Invalidate();
-        UOdysseyVectorRoot* GetRoot();
+        UOdysseyVectorScene* GetScene();
         bool IsInvalidated();
         bool IsSelected();
         void DrawBBox( ::ULIS::FRectD& iRoi,uint64 iFlags );

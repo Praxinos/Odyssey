@@ -8,11 +8,8 @@
 class ODYSSEYVECTOR_API FOdysseyVectorHandle : public FOdysseyVectorPoint
 {
     public:
-        void Init( double iX, double iY );
-
-    protected:
-
-    public:
         ~FOdysseyVectorHandle();
         FOdysseyVectorHandle();
+
+        void Init( double iX, double iY );
 };

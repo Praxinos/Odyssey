@@ -38,7 +38,7 @@ UOdysseyVectorGroupPaint::Colorize()
     // reset color for all cycles first
     for( int i = 0; i < mLoopArray.size(); i++ )
     {
-        FOdysseyVectorLoop *cycle = mLoopArray[i];
+        FOdysseyVectorCycle *cycle = mLoopArray[i];
 
         cycle->SetBucket( nullptr );
     }
@@ -56,7 +56,7 @@ UOdysseyVectorGroupPaint::ApplyBucket( FOdysseyVectorBucket* iBucket )
 {
     for( int i = 0; i < mLoopArray.size(); i++ )
     {
-        FOdysseyVectorLoop *cycle = mLoopArray[i];
+        FOdysseyVectorCycle *cycle = mLoopArray[i];
 
         if( cycle->HitTest( iBucket->GetCoords().x, iBucket->GetCoords().y ) )
         {
@@ -86,12 +86,12 @@ UOdysseyVectorGroupPaint::PickBucket( double iWorldX, double iWorldY )
     return nullptr;
 }
 
-FOdysseyVectorLoop*
+FOdysseyVectorCycle*
 UOdysseyVectorGroupPaint::PickCycle( double iX, double iY )
 {
     for( int i = 0; i < mLoopArray.size(); i++ )
     {
-        FOdysseyVectorLoop *cycle = mLoopArray[i];
+        FOdysseyVectorCycle *cycle = mLoopArray[i];
 
         // TODO: Bounding volume for cycles for faster search
         if( cycle->HitTest( iX, iY ) == true )
@@ -162,7 +162,7 @@ UOdysseyVectorGroupPaint::DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
     for( int i = 0; i < mLoopArray.size(); i++ )
     {
-        FOdysseyVectorLoop *cycle = mLoopArray[i];
+        FOdysseyVectorCycle *cycle = mLoopArray[i];
 
         cycle->Draw( iRoi, iFlags );
     }
@@ -177,7 +177,7 @@ UOdysseyVectorGroupPaint::PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlag
 
         for( int i = 0; i < mLoopArray.size(); i++ )
         {
-            FOdysseyVectorLoop *cycle = mLoopArray[i];
+            FOdysseyVectorCycle *cycle = mLoopArray[i];
 
             if( cycle->HitTest( pt.x, pt.y ) )
             {
@@ -415,7 +415,7 @@ UOdysseyVectorGroupPaint::MarchVertex( FOdysseyVectorVertexIntersection* iInters
                     //PrintCycle( vertexArray, sectionArray );
                     BlockPath( vertexArray, sectionArray, false );
 
-                    mLoopArray.push_back( new FOdysseyVectorLoop( *this, /*iCycleID*/0, vertexArray, sectionArray ) );
+                    mLoopArray.push_back( new FOdysseyVectorCycle( *this, /*iCycleID*/0, vertexArray, sectionArray ) );
                 }
             }
         }
@@ -508,17 +508,17 @@ UOdysseyVectorGroupPaint::OrderCycles()
 {
     for( int i = 0; i < mLoopArray.size(); i++ )
     {
-        FOdysseyVectorLoop* cycle = mLoopArray[i];
+        FOdysseyVectorCycle* cycle = mLoopArray[i];
 
         for( int j = 0; j < mLoopArray.size(); j++ )
         {
-           FOdysseyVectorLoop* innerCycle = mLoopArray[j];
+           FOdysseyVectorCycle* innerCycle = mLoopArray[j];
 
            if( cycle != innerCycle )
            {
                if( innerCycle->FitsIn( cycle ) )
                {
-                   FOdysseyVectorLoop* parentCycle = innerCycle->GetParentCycle();
+                   FOdysseyVectorCycle* parentCycle = innerCycle->GetParentCycle();
 
                    if( parentCycle )
                    {
@@ -543,7 +543,7 @@ UOdysseyVectorGroupPaint::ClearCycles()
 {
     for( int i = 0; i < mLoopArray.size(); i++ )
     {
-        FOdysseyVectorLoop *cycle = mLoopArray[i];
+        FOdysseyVectorCycle *cycle = mLoopArray[i];
 
         delete cycle;
     }

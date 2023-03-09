@@ -5,7 +5,7 @@
 #include <Image/Block.h>
 
 class FOdysseyVectorPath;
-class FOdysseyVectorLoop;
+class FOdysseyVectorCycle;
 class FOdysseyVectorSegment;
 class FOdysseyVectorSegmentCubic;
 
@@ -35,17 +35,15 @@ class FOdysseyVectorVertexIntersection : public FOdysseyVectorVertex
         // overloaded
         FOdysseyVectorSegment* GetSegment( FOdysseyVectorVertex& iOtherVertex );
 
-        void AttachLoop( FOdysseyVectorLoop* iLoop );
-        FOdysseyVectorLoop* GetLoop();
+        void AttachLoop( FOdysseyVectorCycle* iLoop );
+        FOdysseyVectorCycle* GetLoop();
 
-
-        ::ULIS::FVec2D& GetCoords();
-        ::ULIS::FVec2D& GetCoordsOnSegment( FOdysseyVectorSegment* iSegment );
+        virtual ::ULIS::FVec2D& GetCoords( FOdysseyVectorSegment* iSegment ) override;
 
     protected:
         uint64 mIntersectionID;
         // map for intersection positions
         std::map<FOdysseyVectorSegment*, FIntersection> mTMap;
-        FOdysseyVectorLoop* mLoop;
+        FOdysseyVectorCycle* mLoop;
 
 };

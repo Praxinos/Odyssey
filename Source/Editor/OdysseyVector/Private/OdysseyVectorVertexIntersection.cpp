@@ -53,7 +53,7 @@ void
 FOdysseyVectorVertexIntersection::Draw( UOdysseyVectorPath* iPath, ::ULIS::FRectD &iRoi )
 {
     // NOTE: Might not be super fast to call this for each segment
-    BLContext* blctx = iPath->GetRoot()->GetEngine()->GetBLContext();
+    BLContext* blctx = iPath->GetScene()->GetEngine()->GetBLContext();
 
     for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
     {
@@ -71,8 +71,8 @@ FOdysseyVectorVertexIntersection::AddSegment( FOdysseyVectorSegmentCubic* iSegme
 {
     ::ULIS::FVec2D& point0 = iSegment->GetPoint(0)->GetCoords();
     ::ULIS::FVec2D& point1 = iSegment->GetPoint(1)->GetCoords();
-    ::ULIS::FVec2D& ctrlPoint0 = iSegment->GetControlPoint(0)->GetCoords();
-    ::ULIS::FVec2D& ctrlPoint1 = iSegment->GetControlPoint(1)->GetCoords();
+    ::ULIS::FVec2D& ctrlPoint0 = iSegment->GetHandle(0)->GetCoords();
+    ::ULIS::FVec2D& ctrlPoint1 = iSegment->GetHandle(1)->GetCoords();
     ::ULIS::FVec2D intersectAt = ::ULIS::CubicBezierPointAtParameter<::ULIS::FVec2D>( point0
                                                                                     , ctrlPoint0
                                                                                     , ctrlPoint1
@@ -117,12 +117,12 @@ FOdysseyVectorVertexIntersection::GetSegment( FOdysseyVectorVertex& iOtherVertex
 }
 
 void
-FOdysseyVectorVertexIntersection::AttachLoop( FOdysseyVectorLoop* iLoop )
+FOdysseyVectorVertexIntersection::AttachLoop( FOdysseyVectorCycle* iLoop )
 {
     mLoop = iLoop;
 }
 
-FOdysseyVectorLoop*
+FOdysseyVectorCycle*
 FOdysseyVectorVertexIntersection::GetLoop()
 {
     return mLoop;

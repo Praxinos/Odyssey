@@ -34,7 +34,7 @@ FOdysseyVectorHUDPathCubic::DrawVertex( UOdysseyVectorPathCubic* iPath
                                       , ::ULIS::FRectD& iRoi
                                       , uint64 iFlags )
 {
-    BLContext* blctx = iPath->GetRoot()->GetEngine()->GetBLContext();
+    BLContext* blctx = iPath->GetScene()->GetEngine()->GetBLContext();
     ::ULIS::FVec2D perpendicular = iCubicVertex->GetPerpendicularVector( true );
     double pointRadius = iCubicVertex->GetRadius();
     double ctrlX = ( perpendicular.x * pointRadius );
@@ -77,11 +77,11 @@ FOdysseyVectorHUDPathCubic::DrawSegment( UOdysseyVectorPathCubic* iPath
                                        , ::ULIS::FRectD& iRoi
                                        , uint64 iFlags )
 {
-    BLContext* blctx = iPath->GetRoot()->GetEngine()->GetBLContext();
+    BLContext* blctx = iPath->GetScene()->GetEngine()->GetBLContext();
     ::ULIS::FVec2D& point0 = iCubicSegment->GetPoint(0)->GetCoords();
     ::ULIS::FVec2D& point1 = iCubicSegment->GetPoint(1)->GetCoords();
-    ::ULIS::FVec2D& ctrlPoint0 = iCubicSegment->GetControlPoint(0)->GetCoords();
-    ::ULIS::FVec2D& ctrlPoint1 = iCubicSegment->GetControlPoint(1)->GetCoords();
+    ::ULIS::FVec2D& ctrlPoint0 = iCubicSegment->GetHandle(0)->GetCoords();
+    ::ULIS::FVec2D& ctrlPoint1 = iCubicSegment->GetHandle(1)->GetCoords();
     // TODO: compute that once and pass it as parameter for all segments
     double handleRadiusX = 4.0f * iFactor.x;
     double handleRadiusY = 4.0f * iFactor.y;
@@ -132,7 +132,7 @@ FOdysseyVectorHUDPathCubic::DrawSegment( UOdysseyVectorPathCubic* iPath
 }
 
 void
-FOdysseyVectorHUDPathCubic::Draw( UOdysseyVectorRoot& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags )
+FOdysseyVectorHUDPathCubic::Draw( UOdysseyVectorScene& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
     BLContext* blctx = iScene.GetEngine()->GetBLContext();
     UOdysseyVectorObject* selectedObject = iScene.GetLastSelected();

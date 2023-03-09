@@ -52,7 +52,7 @@ namespace FOdysseyVectorExport
 
     void ODYSSEYVECTOR_API WriteChunk( uint32 iChunkID, FArchive &Ar, std::function<void(FArchive &Ar)> iCallback );
 
-    void ODYSSEYVECTOR_API Write( UOdysseyVectorRoot* iScene, FArchive &Ar );
+    void ODYSSEYVECTOR_API Write( UOdysseyVectorScene* iScene, FArchive &Ar );
     void ODYSSEYVECTOR_API WriteDeclareObjects( std::vector<UOdysseyVectorObject*>& vectorObjectArray, FArchive &Ar );
     void ODYSSEYVECTOR_API WriteDefineObjects( std::vector<UOdysseyVectorObject*>& vectorObjectArray, FArchive &Ar );
     void ODYSSEYVECTOR_API WriteObjectPathCubic( UOdysseyVectorPathCubic& iCubicPath, FArchive &Ar );

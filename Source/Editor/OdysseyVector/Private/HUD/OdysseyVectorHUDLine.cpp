@@ -36,7 +36,7 @@ FOdysseyVectorHUDLine::GetP1()
 }
 
 void
-FOdysseyVectorHUDLine::Draw( UOdysseyVectorRoot& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags )
+FOdysseyVectorHUDLine::Draw( UOdysseyVectorScene& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
     BLContext* blctx = iScene.GetEngine()->GetBLContext();
 

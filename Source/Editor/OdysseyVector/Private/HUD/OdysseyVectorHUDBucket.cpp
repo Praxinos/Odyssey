@@ -11,7 +11,7 @@ FOdysseyVectorHUDBucket::FOdysseyVectorHUDBucket()
 }
 
 void
-FOdysseyVectorHUDBucket::Draw( UOdysseyVectorRoot& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags )
+FOdysseyVectorHUDBucket::Draw( UOdysseyVectorScene& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
     std::list<UOdysseyVectorObject*>& selectedObjectList = iScene.GetSelectedObjectList();
     BLContext* blctx = iScene.GetEngine()->GetBLContext();
