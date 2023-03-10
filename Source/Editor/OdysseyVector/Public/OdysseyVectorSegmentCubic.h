@@ -99,12 +99,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
         virtual void Draw( ::ULIS::FRectD &iRoi ) override;
 
        /**
-         * @brief Draw the segment as HUD
-         * @param iRoi the region-of-interest
-         */
-        void DrawStructure( ::ULIS::FRectD &iRoi );
-
-       /**
          * @brief Get the segment's bounding box.
          * @return a reference to the segment's bounding box.
          */
@@ -247,7 +241,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
                                    , int    iPolygonID );
 
     protected:
-        FOdysseyVectorHandleSegment* mCtrlPoint[2];
+        FOdysseyVectorHandleSegment mCtrlPoint[2];
         std::vector<FPolygon> mPolygonCache;
         BLPath mBLPath;
 

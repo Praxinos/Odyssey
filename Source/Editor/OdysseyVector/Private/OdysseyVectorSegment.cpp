@@ -35,13 +35,13 @@ FOdysseyVectorSegment::Init( UOdysseyVectorPath* iPath
 {
     FOdysseyVectorLink::Init ( iVertex0, iVertex1 );
 
-    //AddSection ( new FOdysseyVectorSection ( this, iVertex0, iVertex1 ) );
+    AddSection ( new FOdysseyVectorSection ( this, iVertex0, iVertex1 ) );
 
     mPath = iPath;
 }
 
 // static
-/*
+
 FOdysseyVectorSegment*
 FOdysseyVectorSegment::New( UOdysseyVectorPath* iPath
                           , FOdysseyVectorVertex* iVertex0
@@ -53,7 +53,7 @@ FOdysseyVectorSegment::New( UOdysseyVectorPath* iPath
 
     return segment;
 }
-*/
+
 ::ULIS::FVec2D
 FOdysseyVectorSegment::GetVectorAtStart( bool iNormalize )
 {
@@ -140,7 +140,7 @@ FOdysseyVectorSegment::GetSectionList()
 void
 FOdysseyVectorSegment::AddIntersection ( FOdysseyVectorVertexIntersection* iIntersectionVertex )
 {
-    double t = iIntersectionVertex->GetT( *this );
+    double t = iIntersectionVertex->GetT( this );
     FOdysseyVectorSection* section = GetSection ( t );
     FOdysseyVectorVertex* vertex0 = section->GetVertex(0);
     FOdysseyVectorVertex* vertex1 = section->GetVertex(1);
@@ -172,13 +172,8 @@ FOdysseyVectorSegment::ClearIntersections ( )
 
     mSectionList.clear();
 
-    for( std::list<FOdysseyVectorVertexIntersection*>::iterator it = mIntersectionVertexList.begin(); it != mIntersectionVertexList.end(); ++it )
-    {
-        FOdysseyVectorVertexIntersection* intersectionVertex = static_cast<FOdysseyVectorVertexIntersection*>(*it);
-
-        delete intersectionVertex;
-    }
-
+    // do not free the intersection vertex here, as they are shared between segments. Deletion would be called twice.
+    // Leave it to the paintgroup.
     mIntersectionVertexList.clear();
 
     // Add default section
@@ -194,12 +189,6 @@ FOdysseyVectorSegment::Invalidate()
     }
 
     mPath->InvalidateSegment( this );
-}
-
-void
-FOdysseyVectorSegment::DrawStructure( ::ULIS::FRectD &iRoi )
-{
-
 }
 
 std::list<FOdysseyVectorVertexIntersection*>&

@@ -43,7 +43,6 @@ class ODYSSEYVECTOR_API UOdysseyVectorPathCubic: public UOdysseyVectorPath
         void Unselect( FOdysseyVectorVertex* iPoint );
         bool IsFilled();
         void SetFilled( bool iIsFilled );
-        void DrawStructure( ::ULIS::FRectD& iRoi, uint64 iFlags );
         void Fill( ::ULIS::FRectD& iRoi );
         void Merge( UOdysseyVectorPath* iPath );
         void DrawShapeVariable( ::ULIS::FRectD& iRoi, uint64 iFlags );

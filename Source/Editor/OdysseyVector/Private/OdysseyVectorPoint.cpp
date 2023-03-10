@@ -2,6 +2,7 @@
 
 FOdysseyVectorPoint::~FOdysseyVectorPoint()
 {
+
 }
 
 FOdysseyVectorPoint::FOdysseyVectorPoint()

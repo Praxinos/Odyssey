@@ -52,7 +52,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorGroupPaint : public UOdysseyVectorGroup
                                , std::list<FOdysseyVectorSegment*>& cubicSegmenList
                                , std::vector<FOdysseyVectorVertexIntersection*>& iIntersectionVertexList );
         void CopyBuckets( UOdysseyVectorGroupPaint* iDestination );
-        uint32 BuildGraph( std::vector<FOdysseyVectorVertexIntersection*>& iIntersectionVertexArray );
+        uint32 BuildGraph();
 
         FOdysseyVectorCycle* March( FOdysseyVectorVertexIntersection* iNode
                                  , FOdysseyVectorSection* iStartSection
@@ -92,6 +92,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorGroupPaint : public UOdysseyVectorGroup
         static const uint32 HASCYCLE = 2;
         std::list<FOdysseyVectorBucket*> mBucketList;
         std::vector<FOdysseyVectorCycle*> mLoopArray;
+        std::vector<FOdysseyVectorVertexIntersection*> mIntersectionVertexArray;
 
     public:
         UPROPERTY(EditAnywhere, Category="General")

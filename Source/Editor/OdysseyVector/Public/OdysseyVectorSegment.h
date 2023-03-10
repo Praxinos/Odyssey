@@ -13,6 +13,9 @@ class FOdysseyVectorSection;
 class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
 {
     public:
+        static uint32 StaticClass() { return mStaticClass; };
+        virtual uint32 GetClass() { return mStaticClass; };
+
        /**
          * @brief Static function to allocate a new segment. Note: this is the proper way to allocate a new segment as we don't
          * use the constructor to set parameters so that this can be derived from an UOBJECT if needed in future devs. Indeed,
@@ -44,12 +47,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
          * @param iRoi the region-of-interest
          */
         virtual void Draw( ::ULIS::FRectD &iRoi );
-
-       /**
-         * @brief Draw the segment as HUD
-         * @param iRoi the region-of-interest
-         */
-        virtual void DrawStructure( ::ULIS::FRectD &iRoi );
 
        /**
          * @brief Test whether or not this segment is close to the coordinates passed as parameter
@@ -164,14 +161,12 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
          */
         virtual ::ULIS::FVec2D GetTangentAt( double t );
 
-        /**
-         * @brief Get the point class (ala UE)
-         */
-        virtual uint32 GetClass() = 0;
-
     protected:
         std::list<FOdysseyVectorVertexIntersection*> mIntersectionVertexList;
         std::list<FOdysseyVectorSection*> mSectionList;
         UOdysseyVectorPath* mPath;
         ::ULIS::FRectD mBBox;
+
+    private:
+        static const uint32 mStaticClass = 0x45c58ef1; // value is crc32 FOdysseyVectorSegment
 };

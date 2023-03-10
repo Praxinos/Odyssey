@@ -11,18 +11,18 @@ FOdysseyVectorVertexIntersection::FOdysseyVectorVertexIntersection()
 }
 
 double
-FOdysseyVectorVertexIntersection::GetT( FOdysseyVectorSegment& iSegment )
+FOdysseyVectorVertexIntersection::GetT( FOdysseyVectorSegment* iSegment )
 {
-    if ( auto search = mTMap.find(&iSegment); search != mTMap.end())
+    if ( auto search = mTMap.find(iSegment); search != mTMap.end())
         return search->second.t;
     else
         return 0.0f;
 }
 
 ::ULIS::FVec2D
-FOdysseyVectorVertexIntersection::GetPosition( FOdysseyVectorSegment& iSegment )
+FOdysseyVectorVertexIntersection::GetPosition( FOdysseyVectorSegment* iSegment )
 {
-    if ( auto search = mTMap.find(&iSegment); search != mTMap.end())
+    if ( auto search = mTMap.find(iSegment); search != mTMap.end())
         return search->second.position;
     else
         return { 0.0f, 0.0f };
@@ -31,7 +31,7 @@ FOdysseyVectorVertexIntersection::GetPosition( FOdysseyVectorSegment& iSegment )
 ::ULIS::FVec2D&
 FOdysseyVectorVertexIntersection::GetCoords( FOdysseyVectorSegment* iSegment )
 {
-    if ( auto search = mTMap.find(GetFirstSegment()); search != mTMap.end())
+    if ( auto search = mTMap.find(iSegment); search != mTMap.end())
         return search->second.position;
     else
         return mCoords;
@@ -54,20 +54,8 @@ FOdysseyVectorVertexIntersection::AddSegment( FOdysseyVectorSegmentCubic* iSegme
 
     intersect.position = intersectAt;
     intersect.t        = t;
-/*printf("%f %f %f\n", intersectAt.x, intersectAt.y, t);*/
+
     FOdysseyVectorVertex::AddSegment( iSegment );
-//UE_LOG(LogTemp, Warning, TEXT("FOdysseyVectorVertexIntersection::AddSegment %d - size:%d"), iSegment, mTMap.size() );
+
     mTMap.insert( std::make_pair( iSegment, intersect ) );
-}
-
-void
-FOdysseyVectorVertexIntersection::AttachLoop( FOdysseyVectorCycle* iLoop )
-{
-    mLoop = iLoop;
-}
-
-FOdysseyVectorCycle*
-FOdysseyVectorVertexIntersection::GetLoop()
-{
-    return mLoop;
 }

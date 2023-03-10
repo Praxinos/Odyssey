@@ -1,6 +1,9 @@
 #include "HUD/OdysseyVectorHUDPathCubic.h"
 #include "OdysseyVectorEngine.h"
 
+static const ::ULIS::FRectD POINTRECT  = { -4, -4, 8, 8 };
+static const ::ULIS::FRectD HANDLERECT = { -4, -4, 8, 8 };
+
 FOdysseyVectorHUDPathCubic::~FOdysseyVectorHUDPathCubic()
 {
 }
@@ -39,33 +42,31 @@ FOdysseyVectorHUDPathCubic::DrawVertex( UOdysseyVectorPathCubic* iPath
     double ctrlX = ( perpendicular.x * pointRadius );
     double ctrlY = ( perpendicular.y * pointRadius );
     // TODO: compute that once and pass it as parameter for all vertices
-    double handleRadiusX = 4.0f;
-    double handleRadiusY = 4.0f;
-    double handleWidth = handleRadiusX * 2.0f;
-    double handleHeight = handleRadiusY * 2.0f;
+    BLPoint worldPoint = iPath->GetWorldMatrix().mapPoint( iCubicVertex->GetX(), iCubicVertex->GetY() );
+    BLPoint worldRadius = iPath->GetWorldMatrix().mapVector( ctrlX, ctrlY );
 
     if ( mDisplayMode & VIEW_POINT )
     {
         blctx->setFillStyle( BLRgba32( 0xFFFF00FF ) );
-        blctx->fillRect( iCubicVertex->GetX() - handleRadiusX
-                       , iCubicVertex->GetY() - handleRadiusY
-                       , handleWidth
-                       , handleHeight );
+        blctx->fillRect( worldPoint.x + POINTRECT.x
+                       , worldPoint.y + POINTRECT.y
+                       , POINTRECT.w
+                       , POINTRECT.h );
     }
 
     if ( mDisplayMode & VIEW_HANDLE_POINT )
     {
-        // control points
+        // 2 control points that represent the same handle
         blctx->setFillStyle( BLRgba32( 0xFF808080 ) );
-        blctx->fillRect( iCubicVertex->GetX() + ctrlX - handleRadiusX
-                       , iCubicVertex->GetY() + ctrlY - handleRadiusY
-                       , handleWidth
-                       , handleHeight );
+        blctx->fillRect( worldPoint.x + worldRadius.x + HANDLERECT.x
+                       , worldPoint.y + worldRadius.y + HANDLERECT.y
+                       , HANDLERECT.w
+                       , HANDLERECT.h );
 
-        blctx->fillRect( iCubicVertex->GetX() - ctrlX - handleRadiusX
-                       , iCubicVertex->GetY() - ctrlY - handleRadiusY
-                       , handleWidth
-                       , handleHeight );
+        blctx->fillRect( worldPoint.x - worldRadius.x + HANDLERECT.x
+                       , worldPoint.y - worldRadius.y + HANDLERECT.y
+                       , HANDLERECT.w
+                       , HANDLERECT.h );
     }
 }
 
@@ -85,11 +86,6 @@ FOdysseyVectorHUDPathCubic::DrawSegment( UOdysseyVectorPathCubic* iPath
     BLPoint point1 = worldMatrix.mapPoint( vertex1->GetX(), vertex1->GetY() );
     BLPoint handlePoint0 = worldMatrix.mapPoint( handle0->GetX(), handle0->GetY() );
     BLPoint handlePoint1 = worldMatrix.mapPoint( handle1->GetX(), handle1->GetY() );
-    // TODO: compute that once and pass it as parameter for all segments
-    double handleRadiusX = 4.0f;
-    double handleRadiusY = 4.0f;
-    double handleWidth = handleRadiusX * 2.0f;
-    double handleHeight = handleRadiusY * 2.0f;
 
     if ( mDisplayMode & VIEW_PATH )
     {
@@ -119,8 +115,8 @@ FOdysseyVectorHUDPathCubic::DrawSegment( UOdysseyVectorPathCubic* iPath
 
         // control handles
         blctx->setFillStyle( BLRgba32( 0xFFFF0000 ) );
-        blctx->fillRect( handlePoint0.x - handleRadiusX, handlePoint0.y - handleRadiusY, handleWidth, handleHeight );
-        blctx->fillRect( handlePoint1.x - handleRadiusX, handlePoint1.y - handleRadiusY, handleWidth, handleHeight );
+        blctx->fillRect( handlePoint0.x + HANDLERECT.x, handlePoint0.y + HANDLERECT.y, HANDLERECT.w, HANDLERECT.h );
+        blctx->fillRect( handlePoint1.x + HANDLERECT.x, handlePoint1.y + HANDLERECT.y, HANDLERECT.w, HANDLERECT.h );
     }
 }
 

@@ -125,6 +125,11 @@ UOdysseyPainterEditorVectorPathCutTool::OnMouseUp(const FOdysseyPoint& iPointInT
                 std::vector<FOdysseyVectorSegmentCubic*> oNewSegmentArray;
                 std::vector<FOdysseyVectorSegmentCubic*> oOldSegmentArray;
 
+                // crashes if I don't reserve. Why that ?
+                oNewVertexArray.reserve(50);
+                oNewSegmentArray.reserve(50);
+                oOldSegmentArray.reserve(50);
+
                 cubicPath->Cut( mStartCutAt, endCutAt, oNewVertexArray, oNewSegmentArray, oOldSegmentArray );
                 cubicPath->Invalidate();
             }

@@ -22,8 +22,8 @@ FOdysseyVectorSegmentCubic::Init( UOdysseyVectorPathCubic* iPath
 {
     FOdysseyVectorSegment::Init( iPath, iPoint0, iPoint1 );
 
-    mCtrlPoint[0] = FOdysseyVectorHandleSegment::New( this, iCtrlPoint0x, iCtrlPoint0y );
-    mCtrlPoint[1] = FOdysseyVectorHandleSegment::New( this, iCtrlPoint1x, iCtrlPoint1y );
+    mCtrlPoint[0].Init( this, iCtrlPoint0x, iCtrlPoint0y );
+    mCtrlPoint[1].Init( this, iCtrlPoint1x, iCtrlPoint1y );
 
     Update();
 }
@@ -256,8 +256,8 @@ FOdysseyVectorSegmentCubic::Sample( double iFromT
                                   , double iToT
                                   , std::vector<FOdysseyVectorVertexCubic*>& oNewVertexArray )
 {
-    ::ULIS::FVec2D& ctrlPoint0 = mCtrlPoint[0]->GetCoords();
-    ::ULIS::FVec2D& ctrlPoint1 = mCtrlPoint[1]->GetCoords();
+    ::ULIS::FVec2D& ctrlPoint0 = mCtrlPoint[0].GetCoords();
+    ::ULIS::FVec2D& ctrlPoint1 = mCtrlPoint[1].GetCoords();
     ::ULIS::FVec2D pointAt0 = GetPointAt( iFromT );
     ::ULIS::FVec2D pointAt1 = GetPointAt( iToT );
     double radius0 = mPoint[0]->GetRadius();
@@ -293,30 +293,30 @@ void
 FOdysseyVectorSegmentCubic::UpdateBoundingBox ()
 {
    mBBox.x = ULIS::FMath::Min4<double>( mPoint[0]->GetX() - mPoint[0]->GetRadius()
-                                      , mCtrlPoint[0]->GetX()
+                                      , mCtrlPoint[0].GetX()
                                       , mPoint[1]->GetX() - mPoint[1]->GetRadius()
-                                      , mCtrlPoint[1]->GetX() );
+                                      , mCtrlPoint[1].GetX() );
 
    mBBox.y = ULIS::FMath::Min4<double>( mPoint[0]->GetY() - mPoint[0]->GetRadius()
-                                      , mCtrlPoint[0]->GetY()
+                                      , mCtrlPoint[0].GetY()
                                       , mPoint[1]->GetY() - mPoint[1]->GetRadius()
-                                      , mCtrlPoint[1]->GetY() );
+                                      , mCtrlPoint[1].GetY() );
 
    mBBox.w = ULIS::FMath::Max4<double>( mPoint[0]->GetX() + mPoint[0]->GetRadius()
-                                      , mCtrlPoint[0]->GetX()
+                                      , mCtrlPoint[0].GetX()
                                       , mPoint[1]->GetX() + mPoint[1]->GetRadius()
-                                      , mCtrlPoint[1]->GetX() ) - mBBox.x;
+                                      , mCtrlPoint[1].GetX() ) - mBBox.x;
 
    mBBox.h = ULIS::FMath::Max4<double>( mPoint[0]->GetY() + mPoint[0]->GetRadius()
-                                      , mCtrlPoint[0]->GetY()
+                                      , mCtrlPoint[0].GetY()
                                       , mPoint[1]->GetY() + mPoint[1]->GetRadius()
-                                      , mCtrlPoint[1]->GetY() ) - mBBox.y;
+                                      , mCtrlPoint[1].GetY() ) - mBBox.y;
 }
 
 FOdysseyVectorHandleSegment*
 FOdysseyVectorSegmentCubic::GetHandle( int iCtrlPointNum )
 {
-    return mCtrlPoint[iCtrlPointNum];
+    return &mCtrlPoint[iCtrlPointNum];
 }
 
 ::ULIS::FRectD&
@@ -341,6 +341,7 @@ FOdysseyVectorSegmentCubic::Cut( ::ULIS::FVec2D& linePoint0
     uint32 pointCount = 1;
     ::ULIS::FVec2D ctrlPoint0Vector = GetVectorAtStart( true );
     ::ULIS::FVec2D ctrlPoint1Vector = GetVectorAtEnd( true );
+    double difRadius = mPoint[1]->GetRadius() - mPoint[0]->GetRadius();
 
     for( int i = 0; i < mPolygonCache.size(); i++ )
     {
@@ -366,8 +367,9 @@ FOdysseyVectorSegmentCubic::Cut( ::ULIS::FVec2D& linePoint0
                                                                                              , ctrlPoint1
                                                                                              , point1
                                                                                              , segmentT );
+            
 
-            newCubicPoint->SetRadius( ( mPoint[0]->GetRadius() * segmentT ) + ( mPoint[1]->GetRadius() * ( 1.0f - segmentT ) ) );
+            newCubicPoint->SetRadius( mPoint[0]->GetRadius() + ( difRadius * segmentT ) );
 
             if ( newTangent.DistanceSquared() )
             {
@@ -519,7 +521,7 @@ FOdysseyVectorSegmentCubic::Intersect( FOdysseyVectorSegmentCubic& iOther
                         if( ( segmentT != 0.0f && iOtherT != 1.0f )
                          && ( segmentT != 1.0f && iOtherT != 0.0f ) )
                         {
-                            FOdysseyVectorVertexIntersection* intersectionVertex = NewObject<FOdysseyVectorVertexIntersection>();
+                            FOdysseyVectorVertexIntersection* intersectionVertex = new FOdysseyVectorVertexIntersection();
 
                             iIntersectionVertexArray.push_back( intersectionVertex );
 

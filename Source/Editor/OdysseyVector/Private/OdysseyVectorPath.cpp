@@ -287,22 +287,6 @@ UOdysseyVectorPath::GetFirstVertex()
 }
 
 void
-UOdysseyVectorPath::DrawStructure( ::ULIS::FRectD& iRoi, uint64 iFlags )
-{
-    BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
-
-    blctx->setStrokeStyle( BLRgba32( 0xFF00FF00 ) );
-    blctx->setStrokeWidth(1.0f);
-
-    for(std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it)
-    {
-        FOdysseyVectorSegment *segment = (*it);
-
-        segment->DrawStructure( iRoi );
-    }
-}
-
-void
 UOdysseyVectorPath::DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
     for(std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it)

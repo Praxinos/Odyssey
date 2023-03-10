@@ -12,6 +12,8 @@ UOdysseyVectorGroupPaint::UOdysseyVectorGroupPaint()
     : Tolerance( 0.0f )
 {
     mDependsOnChildren = true;
+
+    mIntersectionVertexArray.reserve( 60 );
 }
 
 uint32
@@ -427,27 +429,19 @@ UOdysseyVectorGroupPaint::MarchVertex( FOdysseyVectorVertexIntersection* iInters
 void
 UOdysseyVectorGroupPaint::FindCycles()
 {
-    std::vector<FOdysseyVectorVertexIntersection*> intersectionVertexArray;
     uint32 totalVertexCount = 0;
 
-    // clear mLoopList
     ClearCycles();
 
-    intersectionVertexArray.reserve( 60 );
+    totalVertexCount = BuildGraph();
 
-    totalVertexCount = BuildGraph( intersectionVertexArray );
-/*
-    mNodeMemoryPool = ( FCycleNode* ) realloc ( mNodeMemoryPool, totalVertexCount * sizeof( FCycleNode ) );
-*/
     //UE_LOG( LogTemp, Warning, TEXT("Detection -----------------------------------------------------------") );
     //UE_LOG( LogTemp, Warning, TEXT("Intersection vertices:%d"), intersectionVertexList.size() );
 
-    for( int i = 0; i < intersectionVertexArray.size(); i++ )
+    for( int i = 0; i < mIntersectionVertexArray.size(); i++ )
     {
-        MarchVertex( intersectionVertexArray[i] );
+        MarchVertex( mIntersectionVertexArray[i] );
     }
-
-    //UE_LOG( LogTemp, Warning, TEXT("total cycles:%d"), cycleCount );
 
     OrderCycles();
 
@@ -455,7 +449,7 @@ UOdysseyVectorGroupPaint::FindCycles()
 }
 
 uint32
-UOdysseyVectorGroupPaint::BuildGraph( std::vector<FOdysseyVectorVertexIntersection*>& iIntersectionVertexArray )
+UOdysseyVectorGroupPaint::BuildGraph()
 {
     std::list<FOdysseyVectorSegment*> cubicSegmenList;
     FOdysseyVectorSegmentCubic *cubicSegment;
@@ -490,7 +484,7 @@ UOdysseyVectorGroupPaint::BuildGraph( std::vector<FOdysseyVectorVertexIntersecti
 
     while( cubicSegment )
     {
-        intersectionCount += IntersectSegment ( *cubicSegment, cubicSegmenList, iIntersectionVertexArray );
+        intersectionCount += IntersectSegment ( *cubicSegment, cubicSegmenList, mIntersectionVertexArray );
 
         // remove segment from list as they are tested
         cubicSegmenList.pop_back();
@@ -541,6 +535,13 @@ UOdysseyVectorGroupPaint::OrderCycles()
 void
 UOdysseyVectorGroupPaint::ClearCycles()
 {
+    std::vector<FOdysseyVectorVertexIntersection*> intersectionVertexArray;
+
+    for( int i = 0; i < mIntersectionVertexArray.size(); i++ )
+    {
+        delete mIntersectionVertexArray[i];
+    }
+
     for( int i = 0; i < mLoopArray.size(); i++ )
     {
         FOdysseyVectorCycle *cycle = mLoopArray[i];
