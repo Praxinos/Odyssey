@@ -7,8 +7,6 @@
 #include "LayerStack/OdysseyTextureLayerStack.h"
 #include "LayerStack/OdysseyTextureLayerImageVector.h"
 #include "TextureEditor/OdysseyTextureEditor.h"
-#include "OdysseyVectorEngine.h"
-#include "OdysseyVectorPathBuilder.h"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction

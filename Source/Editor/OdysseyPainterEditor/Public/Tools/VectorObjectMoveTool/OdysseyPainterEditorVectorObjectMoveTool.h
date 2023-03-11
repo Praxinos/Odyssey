@@ -5,7 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "Tools/OdysseyPainterEditorTool.h"
-#include "OdysseyVectorPathBuilder.h"
+#include "OdysseyVector.h"
 
 #include "OdysseyPainterEditorVectorObjectMoveTool.generated.h"
 

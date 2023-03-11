@@ -4,13 +4,7 @@
 #include <blend2d.h>
 #include <Core/Core.h>
 #include <Image/Block.h>
-#include "OdysseyVectorObject.h"
-#include "OdysseyVectorEllipse.h"
-#include "OdysseyVectorVertexCubic.h"
-#include "OdysseyVectorSegmentCubic.h"
-#include "OdysseyVectorPathCubic.h"
-#include "OdysseyVectorGroup.h"
-#include "OdysseyVectorEngine.h"
+#include "OdysseyVector.h"
 #include "Export/OdysseyVectorExport.h"
 
 namespace FOdysseyVectorImport

@@ -5,7 +5,7 @@
 
 UOdysseyVectorGroupPaint::~UOdysseyVectorGroupPaint()
 {
-    ClearCycles();
+    //ClearCycles();
 }
 
 UOdysseyVectorGroupPaint::UOdysseyVectorGroupPaint()
@@ -429,11 +429,7 @@ UOdysseyVectorGroupPaint::MarchVertex( FOdysseyVectorVertexIntersection* iInters
 void
 UOdysseyVectorGroupPaint::FindCycles()
 {
-    uint32 totalVertexCount = 0;
-
-    ClearCycles();
-
-    totalVertexCount = BuildGraph();
+    BuildGraph();
 
     //UE_LOG( LogTemp, Warning, TEXT("Detection -----------------------------------------------------------") );
     //UE_LOG( LogTemp, Warning, TEXT("Intersection vertices:%d"), intersectionVertexList.size() );
@@ -448,53 +444,25 @@ UOdysseyVectorGroupPaint::FindCycles()
     Colorize();
 }
 
-uint32
+void
 UOdysseyVectorGroupPaint::BuildGraph()
 {
     std::list<FOdysseyVectorSegment*> cubicSegmenList;
     FOdysseyVectorSegmentCubic *cubicSegment;
-    uint32 intersectionCount = 0;
-    uint32 vertexCount = 0;
 
-    for( std::list<UOdysseyVectorObject*>::iterator oit = mChildrenList.begin(); oit != mChildrenList.end(); ++oit )
-    {
-        UOdysseyVectorObject *child = (*oit);
-
-        if( child->GetClass() == UOdysseyVectorPathCubic::StaticClass() )
-        {
-            UOdysseyVectorPathCubic* cubicPath = Cast<UOdysseyVectorPathCubic>(child);
-            std::list<FOdysseyVectorSegment*>& segmentList = cubicPath->GetSegmentList();
-
-            mBBox = ( vertexCount == 0 ) ? cubicPath->GetBBox( false ) : mBBox | cubicPath->GetBBox( false );
-
-            vertexCount += cubicPath->GetVertexList().size();
-
-            for( std::list<FOdysseyVectorSegment*>::iterator sit = segmentList.begin(); sit != segmentList.end(); ++sit )
-            {
-                cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(*sit);
-
-                cubicSegment->ClearIntersections();
-
-                cubicSegmenList.push_back( cubicSegment );
-            }
-        }
-    }
+    ClearCycles( cubicSegmenList );
 
     cubicSegment = cubicSegmenList.size() ? static_cast<FOdysseyVectorSegmentCubic*>( cubicSegmenList.back() ) : nullptr;
 
     while( cubicSegment )
     {
-        intersectionCount += IntersectSegment ( *cubicSegment, cubicSegmenList, mIntersectionVertexArray );
+        IntersectSegment ( *cubicSegment, cubicSegmenList, mIntersectionVertexArray );
 
         // remove segment from list as they are tested
         cubicSegmenList.pop_back();
 
         cubicSegment = cubicSegmenList.size() ? static_cast<FOdysseyVectorSegmentCubic*>( cubicSegmenList.back() ) : nullptr;
     }
-
-    //UE_LOG( LogTemp, Warning, TEXT("Intersections:%d"), iIntersectionVertexList.size() );
-
-    return intersectionCount + vertexCount;
 }
 
 void
@@ -533,14 +501,40 @@ UOdysseyVectorGroupPaint::OrderCycles()
 }
 
 void
-UOdysseyVectorGroupPaint::ClearCycles()
+UOdysseyVectorGroupPaint::ClearCycles( std::list<FOdysseyVectorSegment*>& cubicSegmenList )
 {
-    std::vector<FOdysseyVectorVertexIntersection*> intersectionVertexArray;
+    bool bboxInit = false;
+
+    for( std::list<UOdysseyVectorObject*>::iterator oit = mChildrenList.begin(); oit != mChildrenList.end(); ++oit )
+    {
+        UOdysseyVectorObject *child = (*oit);
+
+        if( child->GetClass() == UOdysseyVectorPathCubic::StaticClass() )
+        {
+            UOdysseyVectorPathCubic* cubicPath = Cast<UOdysseyVectorPathCubic>(child);
+            std::list<FOdysseyVectorSegment*>& segmentList = cubicPath->GetSegmentList();
+
+            mBBox = ( bboxInit == false ) ? cubicPath->GetBBox( false ) : mBBox | cubicPath->GetBBox( false );
+
+            bboxInit = true;
+
+            for( std::list<FOdysseyVectorSegment*>::iterator sit = segmentList.begin(); sit != segmentList.end(); ++sit )
+            {
+                FOdysseyVectorSegmentCubic *cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(*sit);
+
+                cubicSegment->ClearIntersections();
+
+                cubicSegmenList.push_back( cubicSegment );
+            }
+        }
+    }
 
     for( int i = 0; i < mIntersectionVertexArray.size(); i++ )
     {
         delete mIntersectionVertexArray[i];
     }
+
+    mIntersectionVertexArray.clear();
 
     for( int i = 0; i < mLoopArray.size(); i++ )
     {

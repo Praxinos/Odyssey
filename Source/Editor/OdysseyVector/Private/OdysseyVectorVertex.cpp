@@ -79,7 +79,7 @@ FOdysseyVectorVertex::SetPath( UOdysseyVectorPath* iPath )
 }
 
 void
-FOdysseyVectorVertex::AddSegment( FOdysseyVectorSegment* iSegment )
+FOdysseyVectorVertex::AddSegment( FOdysseyVectorSegment* iSegment, double t )
 {
     mSegmentList.push_back( iSegment );
 }

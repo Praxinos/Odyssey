@@ -7,8 +7,7 @@
 #include "Tools/OdysseyPainterEditorTool.h"
 #include "OdysseyPaintEngine.h"
 
-#include "OdysseyVectorGroupPaint.h"
-#include "HUD/OdysseyVectorHUDBucket.h"
+#include "OdysseyVector.h"
 
 #include "OdysseyPainterEditorColorPickerTool.generated.h"
 

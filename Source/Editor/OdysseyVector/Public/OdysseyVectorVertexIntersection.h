@@ -4,17 +4,14 @@
 #include <Core/Core.h>
 #include <Image/Block.h>
 
-class FOdysseyVectorPath;
-class FOdysseyVectorCycle;
-class FOdysseyVectorSegment;
-class FOdysseyVectorSegmentCubic;
+#include "OdysseyVectorVertex.h"
 
 struct FIntersection {
     ::ULIS::FVec2D position;
     double t;
 };
 
-class FOdysseyVectorVertexIntersection : public FOdysseyVectorVertex
+class ODYSSEYVECTOR_API FOdysseyVectorVertexIntersection : public FOdysseyVectorVertex
 {
     public:
         static uint32 StaticClass() { return mStaticClass; };
@@ -34,9 +31,7 @@ class FOdysseyVectorVertexIntersection : public FOdysseyVectorVertex
 
         virtual double GetT( FOdysseyVectorSegment* iSegment ) override;
 
-        void AddSegment( FOdysseyVectorSegmentCubic* iSegment, double t );
-        // overloaded
-        FOdysseyVectorSegment* GetSegment( FOdysseyVectorVertex& iOtherVertex );
+        void AddSegment( FOdysseyVectorSegment* iSegment, double t );
 
         virtual ::ULIS::FVec2D& GetCoords( FOdysseyVectorSegment* iSegment ) override;
 

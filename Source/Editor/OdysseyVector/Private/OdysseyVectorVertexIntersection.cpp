@@ -38,24 +38,28 @@ FOdysseyVectorVertexIntersection::GetCoords( FOdysseyVectorSegment* iSegment )
 }
 
 void
-FOdysseyVectorVertexIntersection::AddSegment( FOdysseyVectorSegmentCubic* iSegment, double t )
+FOdysseyVectorVertexIntersection::AddSegment( FOdysseyVectorSegment* iSegment, double t )
 {
-    ::ULIS::FVec2D& point0 = iSegment->GetVertex(0)->GetCoords( nullptr );
-    ::ULIS::FVec2D& point1 = iSegment->GetVertex(1)->GetCoords( nullptr );
-    ::ULIS::FVec2D& ctrlPoint0 = iSegment->GetHandle(0)->GetCoords();
-    ::ULIS::FVec2D& ctrlPoint1 = iSegment->GetHandle(1)->GetCoords();
-    ::ULIS::FVec2D intersectAt = ::ULIS::CubicBezierPointAtParameter<::ULIS::FVec2D>( point0
-                                                                                    , ctrlPoint0
-                                                                                    , ctrlPoint1
-                                                                                    , point1
-                                                                                    , t );
+    if( iSegment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
+    {
+        FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(iSegment);
+        ::ULIS::FVec2D& point0 = cubicSegment->GetVertex(0)->GetCoords( nullptr );
+        ::ULIS::FVec2D& point1 = cubicSegment->GetVertex(1)->GetCoords( nullptr );
+        ::ULIS::FVec2D& ctrlPoint0 = cubicSegment->GetHandle(0)->GetCoords();
+        ::ULIS::FVec2D& ctrlPoint1 = cubicSegment->GetHandle(1)->GetCoords();
+        ::ULIS::FVec2D intersectAt = ::ULIS::CubicBezierPointAtParameter<::ULIS::FVec2D>( point0
+                                                                                        , ctrlPoint0
+                                                                                        , ctrlPoint1
+                                                                                        , point1
+                                                                                        , t );
 
-    FIntersection intersect;
+        FIntersection intersect;
 
-    intersect.position = intersectAt;
-    intersect.t        = t;
+        intersect.position = intersectAt;
+        intersect.t        = t;
 
-    FOdysseyVectorVertex::AddSegment( iSegment );
+        FOdysseyVectorVertex::AddSegment( cubicSegment, t );
 
-    mTMap.insert( std::make_pair( iSegment, intersect ) );
+        mTMap.insert( std::make_pair( cubicSegment, intersect ) );
+    }
 }

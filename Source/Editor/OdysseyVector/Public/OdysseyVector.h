@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ULIS>
+#include <blend2d.h>
 
 namespace FOdysseyVector
 {
@@ -39,10 +40,12 @@ namespace FOdysseyVector
 #include "OdysseyVectorVertexIntersection.h"
 #include "OdysseyVectorSection.h"
 #include "OdysseyVectorLink.h"
+#include "OdysseyVectorBucket.h"
 #include "OdysseyVectorSegment.h"
 #include "OdysseyVectorSegmentCubic.h"
 #include "OdysseyVectorRectangle.h"
 #include "OdysseyVectorGroup.h"
+#include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorCycle.h"
 #include "OdysseyVectorPath.h"
 #include "OdysseyVectorPathBuilder.h"
@@ -51,3 +54,10 @@ namespace FOdysseyVector
 #include "OdysseyVectorEngine.h"
 #include "HUD/OdysseyVectorHUD.h"
 #include "HUD/OdysseyVectorHUDLine.h"
+#include "HUD/OdysseyVectorHUDPathCubic.h"
+#include "HUD/OdysseyVectorHUDEraser.h"
+#include "HUD/OdysseyVectorHUDBucket.h"
+#include "HUD/OdysseyVectorHUDPush.h"
+#include "HUD/OdysseyVectorHUDSelection.h"
+#include "HUD/OdysseyVectorHUDRotate.h"
+#include "HUD/OdysseyVectorHUDScale.h"

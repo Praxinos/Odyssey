@@ -3,10 +3,10 @@
 #include <blend2d.h>
 #include <Core/Core.h>
 #include <Image/Block.h>
+
 #include "OdysseyVectorPoint.h"
 
 class FOdysseyVectorSegment;
-class UOdysseyVectorCycle;
 class FOdysseyVectorSection;
 class UOdysseyVectorPath;
 
@@ -30,7 +30,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
          * @brief Add a segment to the list of segments connected to this vertex
          * @param iSegment the segment
          */
-        virtual void AddSegment( FOdysseyVectorSegment* iSegment );
+        virtual void AddSegment( FOdysseyVectorSegment* iSegment, double t );
 
         /**
          * @brief Add a section to the list of section connected to this vertex

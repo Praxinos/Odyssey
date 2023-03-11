@@ -3,7 +3,10 @@
 #include <blend2d.h>
 #include <Core/Core.h>
 #include <Image/Block.h>
+
 #include "OdysseyVectorHandle.h"
+
+class FOdysseyVectorSegment;
 
 class ODYSSEYVECTOR_API FOdysseyVectorHandleSegment : public FOdysseyVectorHandle
 {

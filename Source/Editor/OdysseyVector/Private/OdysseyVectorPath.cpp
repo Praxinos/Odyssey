@@ -214,8 +214,8 @@ UOdysseyVectorPath::AddSegment( FOdysseyVectorSegment* iSegment )
 
     iSegment->SetPath( this );
 
-    iSegment->GetVertex(0)->AddSegment( iSegment );
-    iSegment->GetVertex(1)->AddSegment( iSegment );
+    iSegment->GetVertex(0)->AddSegment( iSegment, 0.0f );
+    iSegment->GetVertex(1)->AddSegment( iSegment, 1.0f );
 }
 
 void

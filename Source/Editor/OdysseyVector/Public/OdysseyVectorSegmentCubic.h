@@ -4,11 +4,9 @@
 #include <Core/Core.h>
 #include <Image/Block.h>
 
-#include "OdysseyVectorPoint.h"
-#include "OdysseyVectorVertex.h"
+#include "OdysseyVectorSegment.h"
 #include "OdysseyVectorVertexCubic.h"
 #include "OdysseyVectorHandleSegment.h"
-#include "OdysseyVectorSegment.h"
 
 class UOdysseyVectorPathCubic;
 

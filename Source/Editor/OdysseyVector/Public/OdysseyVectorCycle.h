@@ -11,6 +11,8 @@
 #include "OdysseyVectorPath.h"
 #include "OdysseyVectorBucket.h"
 
+class FOdysseyVectorSegmentCubic;
+
 class ODYSSEYVECTOR_API FOdysseyVectorCycle
 {
     private:

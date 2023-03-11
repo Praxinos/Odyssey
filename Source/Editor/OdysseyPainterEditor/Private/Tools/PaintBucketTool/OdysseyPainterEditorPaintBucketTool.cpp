@@ -4,7 +4,7 @@
 #include "Tools/PaintBucketTool/OdysseyPainterEditorPaintBucketTool.h"
 
 #include "OdysseyRasterBlock.h"
-#include "HUD/OdysseyVectorHUDBucket.h"
+
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction

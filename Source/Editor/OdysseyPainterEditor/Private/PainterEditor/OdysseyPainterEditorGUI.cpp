@@ -11,8 +11,9 @@
 #include "LayerStack/OdysseyTextureLayerStack.h"
 #include "LayerStack/OdysseyTextureLayerImageVector.h"
 #include "OdysseyTextureEditor.h"
-#include "OdysseyVectorGroupPaint.h"
-#include "OdysseyVectorEllipse.h"
+
+#include "OdysseyVector.h"
+
 #include "ToolMenus.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorGUI"

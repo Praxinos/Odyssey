@@ -6,12 +6,7 @@
 #include <blend2d.h>
 #include <Core/Core.h>
 #include <Image/Block.h>
-#include "OdysseyVectorObject.h"
-#include "OdysseyVectorEllipse.h"
-#include "OdysseyVectorPathCubic.h"
-#include "OdysseyVectorGroup.h"
-#include "OdysseyVectorGroupPaint.h"
-#include "OdysseyVectorEngine.h"
+#include "OdysseyVector.h"
 
 namespace FOdysseyVectorExport
 {

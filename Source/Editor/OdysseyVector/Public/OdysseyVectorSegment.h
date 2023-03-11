@@ -3,12 +3,12 @@
 #include <blend2d.h>
 #include <Core/Core.h>
 #include <Image/Block.h>
-#include "OdysseyVectorVertex.h"
+
+#include "OdysseyVectorVertexIntersection.h"
+#include "OdysseyVectorSection.h"
 #include "OdysseyVectorLink.h"
 
 class UOdysseyVectorPath;
-class FOdysseyVectorVertexIntersection;
-class FOdysseyVectorSection;
 
 class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
 {

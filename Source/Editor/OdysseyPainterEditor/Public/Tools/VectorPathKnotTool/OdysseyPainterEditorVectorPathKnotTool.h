@@ -5,9 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "Tools/OdysseyPainterEditorTool.h"
-#include "OdysseyVectorPathBuilder.h"
-#include "HUD/OdysseyVectorHUDLine.h"
-#include "HUD/OdysseyVectorHUDPathCubic.h"
+#include "OdysseyVector.h"
 
 #include "OdysseyPainterEditorVectorPathKnotTool.generated.h"
 

@@ -6,9 +6,6 @@
 #include "LayerStack/OdysseyTextureLayerStack.h"
 #include "LayerStack/OdysseyTextureLayerImageVector.h"
 #include "TextureEditor/OdysseyTextureEditor.h"
-#include "OdysseyVector.h"
-#include "OdysseyVectorEngine.h"
-#include "OdysseyVectorPathBuilder.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846L

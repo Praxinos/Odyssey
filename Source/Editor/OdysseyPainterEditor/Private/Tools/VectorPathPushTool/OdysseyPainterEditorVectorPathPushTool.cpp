@@ -6,8 +6,6 @@
 #include "LayerStack/OdysseyTextureLayerStack.h"
 #include "LayerStack/OdysseyTextureLayerImageVector.h"
 #include "TextureEditor/OdysseyTextureEditor.h"
-#include "OdysseyVectorEngine.h"
-#include "OdysseyVectorPathBuilder.h"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
@@ -170,9 +168,21 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDrag( const FOdysseyPoint& iPoin
         for( int i = 0; i < mPushedPointArray.size(); i++ )
         {
             FOdysseyVectorPoint* point = mPushedPointArray[i].point;
-            FOdysseyVectorHandleSegment* handleSegment = static_cast<FOdysseyVectorHandleSegment*>(point);
-            FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>(point);
-            UOdysseyVectorPath* path = ( handleSegment ) ? handleSegment->GetParent()->GetPath() : vertex->GetPath();
+            UOdysseyVectorPath* path;
+
+            if( point->GetClass() == FOdysseyVectorHandleSegment::StaticClass() )
+            {
+                FOdysseyVectorHandleSegment* handleSegment = static_cast<FOdysseyVectorHandleSegment*>(point);
+
+                path = handleSegment->GetParent()->GetPath();
+            }
+            else
+            {
+                FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>(point);
+
+                path = vertex->GetPath();
+            }
+
             BLPoint delta = path->GetInverseWorldMatrix().mapVector( iPointInTexture.deltaPosition.X
                                                                    , iPointInTexture.deltaPosition.Y );
 

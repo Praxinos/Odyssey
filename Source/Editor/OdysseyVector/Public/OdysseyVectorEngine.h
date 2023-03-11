@@ -4,6 +4,7 @@
 #include <blend2d.h>
 #include <Core/Core.h>
 #include <Image/Block.h>
+
 #include "OdysseyVectorSegment.h"
 #include "OdysseyVectorScene.h"
 #include "HUD/OdysseyVectorHUD.h"

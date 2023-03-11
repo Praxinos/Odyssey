@@ -4,10 +4,6 @@
 #include <Core/Core.h>
 #include <Image/Block.h>
 
-class FOdysseyVectorSegment;
-class UOdysseyVectorCycle;
-class FOdysseyVectorSection;
-
 class ODYSSEYVECTOR_API FOdysseyVectorPoint
 {
     public:

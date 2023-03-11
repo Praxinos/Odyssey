@@ -5,6 +5,7 @@
 #include <blend2d.h>
 #include <Core/Core.h>
 #include <Image/Block.h>
+
 #include "OdysseyVectorObject.h"
 #include "OdysseyVectorSegment.h"
 #include "OdysseyVectorPath.h"

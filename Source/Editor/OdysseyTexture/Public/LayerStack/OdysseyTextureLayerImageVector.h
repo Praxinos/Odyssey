@@ -11,7 +11,7 @@
 
 #include <ULIS>
 
-#include "OdysseyVectorEngine.h"
+#include "OdysseyVector.h"
 
 #include "OdysseyTextureLayerImageVector.generated.h"
 

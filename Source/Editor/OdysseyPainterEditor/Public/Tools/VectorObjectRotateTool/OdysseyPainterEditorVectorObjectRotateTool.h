@@ -5,8 +5,8 @@
 
 #include "CoreMinimal.h"
 #include "Tools/OdysseyPainterEditorTool.h"
-#include "OdysseyVectorPathBuilder.h"
-#include "HUD/OdysseyVectorHUDRotate.h"
+#include "OdysseyVector.h"
+
 #include "OdysseyPainterEditorVectorObjectRotateTool.generated.h"
 
 UCLASS()

@@ -5,11 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "Tools/OdysseyPainterEditorTool.h"
-#include "OdysseyVectorPoint.h"
-#include "OdysseyVectorPathBuilder.h"
-#include "HUD/OdysseyVectorHUDLine.h"
-#include "HUD/OdysseyVectorHUDPathCubic.h"
-#include "HUD/OdysseyVectorHUDPush.h"
+#include "OdysseyVector.h"
 #include "OdysseyPainterEditorVectorPathPushTool.generated.h"
 
 typedef struct _FPushedPoint

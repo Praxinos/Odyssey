@@ -7,6 +7,8 @@
 #include "OdysseyVectorVertex.h"
 #include "OdysseyVectorHandlePoint.h"
 
+class FOdysseyVectorSegmentCubic;
+
 class ODYSSEYVECTOR_API FOdysseyVectorVertexCubic : public FOdysseyVectorVertex
 {
     public:

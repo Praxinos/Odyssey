@@ -52,7 +52,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorGroupPaint : public UOdysseyVectorGroup
                                , std::list<FOdysseyVectorSegment*>& cubicSegmenList
                                , std::vector<FOdysseyVectorVertexIntersection*>& iIntersectionVertexList );
         void CopyBuckets( UOdysseyVectorGroupPaint* iDestination );
-        uint32 BuildGraph();
+        void BuildGraph( );
 
         FOdysseyVectorCycle* March( FOdysseyVectorVertexIntersection* iNode
                                  , FOdysseyVectorSection* iStartSection
@@ -76,7 +76,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorGroupPaint : public UOdysseyVectorGroup
         FOdysseyVectorHandleBucket* PickBucketHandle( double iX, double iY );
         void DrawBuckets( ::ULIS::FRectD& iRoi, uint64 iFlags );
         void OrderCycles();
-        void ClearCycles();
+        void ClearCycles( std::list<FOdysseyVectorSegment*>& cubicSegmenList );
         void AddBucket( FOdysseyVectorBucket* iBucket );
         void RemoveBucket( FOdysseyVectorBucket* iBucket );
         void PropertyChanged(const FName& iPropertyName);
