@@ -49,6 +49,7 @@ FOdysseyPainterEditorToolsTab::CreateWidget()
         mEditor->GetVectorEraserTool(),
         mEditor->GetPaintBucketTool(),
         mEditor->GetColorPickerTool(),
+        mEditor->GetVectorGridTool(),
     };
 
     return SNew( SOdysseyPainterEditorToolsTileView )

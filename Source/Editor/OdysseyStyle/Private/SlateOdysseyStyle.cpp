@@ -350,6 +350,7 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "PainterEditor.ToolsTab.Lasso64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/lasso_64", mIcon64x64 ) );
     Set( "PainterEditor.ToolsTab.Lasso32", new IMAGE_BRUSH( "PainterEditor/ToolsTab/lasso_32", mIcon32x32 ) );
     Set( "PainterEditor.ToolsTab.Lasso16", new IMAGE_BRUSH( "PainterEditor/ToolsTab/lasso_16", mIcon16x16 ) );
+    Set( "PainterEditor.ToolsTab.Grid64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/grid_64", mIcon64x64 ) );
     Set( "PainterEditor.ToolsTab.VectoEdit64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/vecto_edit_64", mIcon64x64 ) );
     Set( "PainterEditor.ToolsTab.VectoEdit32", new IMAGE_BRUSH( "PainterEditor/ToolsTab/vecto_edit_32", mIcon32x32 ) );
     Set( "PainterEditor.ToolsTab.VectoEdit16", new IMAGE_BRUSH( "PainterEditor/ToolsTab/vecto_edit_16", mIcon16x16 ) );

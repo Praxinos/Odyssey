@@ -24,6 +24,7 @@
 #include "Tools/VectorPathKnotTool/OdysseyTextureEditorVectorPathKnotTool.h"
 #include "Tools/PaintBucketTool/OdysseyTextureEditorPaintBucketTool.h"
 #include "Tools/ColorPickerTool/OdysseyTextureEditorColorPickerTool.h"
+#include "Tools/VectorGridTool/OdysseyTextureEditorVectorGridTool.h"
 #include "Misc/OdysseyHandle.h"
 
 /**
@@ -69,6 +70,7 @@ public:
     virtual UOdysseyTextureEditorVectorPathKnotTool* GetVectorPathKnotTool() const override;
     virtual UOdysseyTextureEditorPaintBucketTool* GetPaintBucketTool() const override;
     virtual UOdysseyTextureEditorColorPickerTool* GetColorPickerTool() const override;
+    virtual UOdysseyTextureEditorVectorGridTool* GetVectorGridTool() const override;
 
 public:
     // Overrides
@@ -107,6 +109,7 @@ private:
     UOdysseyTextureEditorVectorPathKnotTool* mVectorPathKnotTool;
     UOdysseyTextureEditorPaintBucketTool* mPaintBucketTool;
     UOdysseyTextureEditorColorPickerTool* mColorPickerTool;
+    UOdysseyTextureEditorVectorGridTool* mVectorGridTool;
 
     TSharedPtr<IOdysseyHandle> mLayerStackPreloadHandle;
 };
