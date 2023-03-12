@@ -31,23 +31,23 @@ public:
     virtual void Commit() override;
 
 private:
-    FOdysseyVectorHUDGrid *mGridHUD;
+    FOdysseyVectorHUDGrid mGridHUD;
     void Redraw(const TArray<::ULIS::FRectI>& iRects);
 
 private:
     double mOldLocalMouseX;
     double mOldLocalMouseY;
-
+    FOdysseyVectorPoint *mGridNode;
 
 public:
     // Setters
     virtual bool CanDraw();
 
     UPROPERTY(EditAnywhere, Category="Odyssey Grid Tool")
-    bool DivisionsX;
+    uint32 DivisionsX;
 
     UPROPERTY(EditAnywhere, Category="Odyssey Grid Tool")
-    bool DivisionsY;
+    uint32 DivisionsY;
 
 protected:
 

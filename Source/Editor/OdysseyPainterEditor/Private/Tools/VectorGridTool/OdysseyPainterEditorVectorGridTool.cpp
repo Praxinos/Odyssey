@@ -15,14 +15,13 @@
 //----------------------------------------------------------- Construction / Destruction
 UOdysseyPainterEditorVectorGridTool::~UOdysseyPainterEditorVectorGridTool()
 {
-    delete mGridHUD;
 }
 
 UOdysseyPainterEditorVectorGridTool::UOdysseyPainterEditorVectorGridTool()
+    : DivisionsX( 4 )
+    , DivisionsY( 4 )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Grid64");
-
-    mGridHUD = new FOdysseyVectorHUDGrid( );
 }
 
 //--------------------------------------------------------------------------------------
@@ -39,10 +38,10 @@ UOdysseyPainterEditorVectorGridTool::Activate()
         UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
 
-        mGridHUD->UpdateSelectionBox( *currentVectorLayer->GetScene() );
+        mGridHUD.MakeGrid( *currentVectorLayer->GetScene(), DivisionsX, DivisionsY );
 
         vectorEngine->ClearHUD( );
-        vectorEngine->AddHUD( mGridHUD );
+        vectorEngine->AddHUD( &mGridHUD );
 
         currentVectorLayer->RenderImageChanged(false);
     }
@@ -64,12 +63,8 @@ UOdysseyPainterEditorVectorGridTool::OnMouseDown(const FOdysseyPoint& iPointInTe
     {
         UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        FSelectionBox& selectionBox = mGridHUD->GetSelectionBox();
 
-        if( selectionBox.space )
-        {
-
-        }
+        mGridNode = mGridHUD.PickNode( iPointInTexture.x, iPointInTexture.y );
     }
 
     return true;
@@ -85,10 +80,18 @@ UOdysseyPainterEditorVectorGridTool::OnMouseDrag(const FOdysseyPoint& iPointInTe
     {
         UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        FSelectionBox& selectionBox = mGridHUD->GetSelectionBox();
 
-        if ( selectionBox.space )
+        if ( mGridNode )
         {
+            FSelectionBox& selectionBox = mGridHUD.GetSelectionBox();
+            BLPoint spacePt = selectionBox.space->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
+
+            mGridNode->Set( spacePt.x, spacePt.y );
+
+            mGridHUD.Deform();
+
+            currentVectorLayer->GetScene()->Update( UOdysseyVectorObject::FREQUENTUPDATES
+                                                  | UOdysseyVectorObject::KEEPINVALIDATED );
 
             currentVectorLayer->RenderImageChanged(true);
             //RedrawCurrentLayer( { /*beforeBBox | selectedObject->GetBBox( true )*/{ 0, 0, 0, 0 } } );
@@ -105,6 +108,8 @@ UOdysseyPainterEditorVectorGridTool::OnMouseUp(const FOdysseyPoint& iPointInText
     if( currentLayer->GetClass() == UOdysseyTextureLayerImageVector::StaticClass() )
     {
         UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
+
+        currentVectorLayer->GetScene()->Update( 0 );
 
         currentVectorLayer->RenderImageChanged(false);
 
