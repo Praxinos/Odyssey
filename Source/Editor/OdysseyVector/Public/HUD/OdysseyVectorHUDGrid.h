@@ -14,9 +14,22 @@ typedef struct _FGridPoint
 }
 FGridPoint;
 
+class ODYSSEYVECTOR_API FGridNode : public FOdysseyVectorPoint
+{
+    public:
+        ~FGridNode();
+        FGridNode();
+
+        void SetSelected( bool iSelected );
+        bool IsSelected();
+
+    private:
+        bool mSelected;
+};
+
 typedef struct _FGridCell
 {
-    FOdysseyVectorPoint *mNode[4];
+    FGridNode *mNode[4];
     std::vector<FGridPoint> mPointArray;
 }
 FGridCell;
@@ -30,10 +43,13 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUDGrid : public FOdysseyVectorHUDSelectio
         FOdysseyVectorHUDGrid();
 
         void Draw( UOdysseyVectorScene& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags );
-        FOdysseyVectorPoint *PickNode( double iWorldX, double iWorldY );
-
+        FGridNode *PickNode( double iWorldX, double iWorldY, double iWorldRadius );
+        void PickNodes( ::ULIS::FRectD& iWorldRect, std::vector<FGridNode*>& oNodeArray );
         void MakeGrid( UOdysseyVectorScene& iScene, uint32 iDivisionX, uint32 iDivisionY );
         void Deform();
+        void StartSelectionRectangle( double iWorldX, double iWorldY );
+        void DragSelectionRectangle( double iWorldX, double iWorldY );
+        void EndSelectionRectangle( std::vector<FGridNode*>& oNodeArray );
 
     protected:
         void MapPoint( UOdysseyVectorObject* iDeformedObject, FOdysseyVectorPoint* iPoint, double iSpaceX, double iSpaceY );
@@ -42,9 +58,13 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUDGrid : public FOdysseyVectorHUDSelectio
         void MakeCells( uint32 iCellCountX, uint32 iCellCountY );
         void Map( UOdysseyVectorScene& iScene );
         void DeformCell( FGridCell& iCell );
+        void UnselectNodes();
+        void DrawSelectionRectangle( UOdysseyVectorScene& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags );
 
     private:
-        std::vector<FOdysseyVectorPoint> mNodeArray;
+        ::ULIS::FVec2D mWorldSelStart; // selection rectangle is in world coordinates (to be aligned with world axis)
+        ::ULIS::FVec2D mWorldSelDrag; // selection rectangle is in world coordinates (to be aligned with world axis)
+        std::vector<FGridNode> mNodeArray;
         std::vector<FGridCell> mCellArray;
         uint32 mCellCountX;
         uint32 mCellCountY;

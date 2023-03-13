@@ -79,19 +79,6 @@ FOdysseyVectorBucket::SetGradientColor1( uint8 iR1, uint8 iG1, uint8 iB1, uint8 
     mGradientColor1.A = iA1;
 }
 
-::ULIS::FVec2D
-FOdysseyVectorBucket::GetCoords()
-{
-    return mCoords;
-}
-
-void
-FOdysseyVectorBucket::SetCoords( double iX, double iY )
-{
-    mCoords.x = iX;
-    mCoords.y = iY;
-}
-
 void
 FOdysseyVectorBucket::SetColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA )
 {

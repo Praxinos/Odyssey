@@ -11,12 +11,36 @@ FOdysseyVectorHUDGrid::FOdysseyVectorHUDGrid()
 
 }
 
+FGridNode::~FGridNode()
+{
+}
+
+FGridNode::FGridNode()
+    : mSelected( false )
+{
+}
+
+void
+FGridNode::SetSelected( bool iSelected )
+{
+    mSelected = iSelected;
+}
+
+bool
+FGridNode::IsSelected()
+{
+    return mSelected;
+}
+
 void
 FOdysseyVectorHUDGrid::Deform()
 {
-    for( int i = 0; i < mCellArray.size(); i++ )
+    if( mSelectionBox.space )
     {
-        DeformCell( mCellArray[i] );
+        for( int i = 0; i < mCellArray.size(); i++ )
+        {
+            DeformCell( mCellArray[i] );
+        }
     }
 }
 
@@ -55,26 +79,122 @@ FOdysseyVectorHUDGrid::DeformCell( FGridCell& iCell )
     }
 }
 
-FOdysseyVectorPoint *
-FOdysseyVectorHUDGrid::PickNode( double iWorldX, double iWorldY )
+void
+FOdysseyVectorHUDGrid::StartSelectionRectangle( double iWorldX, double iWorldY )
+{
+    mWorldSelStart.x = iWorldX;
+    mWorldSelStart.y = iWorldY;
+}
+
+void
+FOdysseyVectorHUDGrid::DragSelectionRectangle( double iWorldX, double iWorldY )
+{
+    mWorldSelDrag.x = iWorldX;
+    mWorldSelDrag.y = iWorldY;
+}
+
+void
+FOdysseyVectorHUDGrid::EndSelectionRectangle( std::vector<FGridNode*>& oNodeArray )
+{
+    double xmin = ::ULIS::FMath::Min( mWorldSelDrag.x, mWorldSelStart.x );
+    double ymin = ::ULIS::FMath::Min( mWorldSelDrag.y, mWorldSelStart.y );
+    double xmax = ::ULIS::FMath::Max( mWorldSelDrag.x, mWorldSelStart.x );
+    double ymax = ::ULIS::FMath::Max( mWorldSelDrag.y, mWorldSelStart.y );
+    ::ULIS::FRectD worldRect = ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax );
+
+    mWorldSelDrag.x = mWorldSelStart.x = 0.0f;
+    mWorldSelDrag.y = mWorldSelStart.y = 0.0f;
+
+    PickNodes( worldRect, oNodeArray );
+}
+
+void
+FOdysseyVectorHUDGrid::UnselectNodes()
+{
+    for( int i = 0; i < mNodeArray.size(); i++ )
+    {
+        mNodeArray[i].SetSelected( false );
+    }
+}
+
+FGridNode *
+FOdysseyVectorHUDGrid::PickNode( double iWorldX, double iWorldY, double iWorldRadius )
 {
     if( mSelectionBox.space )
     {
         BLMatrix2D worldMatrix = mSelectionBox.space->GetWorldMatrix();
+
+        UnselectNodes();
 
         for( int i = 0; i < mNodeArray.size(); i++ )
         {
             BLPoint pt = worldMatrix.mapPoint( mNodeArray[i].GetX(), mNodeArray[i].GetY() );
             ::ULIS::FVec2D vec = ::ULIS::FVec2D( iWorldX - pt.x, iWorldY - pt.y );
 
-            if ( vec.Distance() <= FOdysseyVectorHUDGrid::HANDLE_RADIUS )
+            if ( vec.Distance() <= iWorldRadius )
             {
+                mNodeArray[i].SetSelected( true );
+
                 return &mNodeArray[i];
             }
         }
     }
 
     return nullptr;
+}
+
+void
+FOdysseyVectorHUDGrid::PickNodes( ::ULIS::FRectD& iWorldRect, std::vector<FGridNode*>& oNodeArray )
+{
+    if( mSelectionBox.space )
+    {
+        BLMatrix2D worldMatrix = mSelectionBox.space->GetWorldMatrix();
+
+        UnselectNodes();
+
+        for( int i = 0; i < mNodeArray.size(); i++ )
+        {
+            BLPoint pt = worldMatrix.mapPoint( mNodeArray[i].GetX(), mNodeArray[i].GetY() );
+            ::ULIS::FVec2D coords = ::ULIS::FVec2D( pt.x, pt.y );
+
+            if ( iWorldRect.HitTest( coords ) )
+            {
+                oNodeArray.push_back( &mNodeArray[i] );
+
+                mNodeArray[i].SetSelected( true );
+            }
+        }
+    }
+}
+
+void
+FOdysseyVectorHUDGrid::DrawSelectionRectangle( UOdysseyVectorScene& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags  )
+{
+    BLContext* blctx = iScene.GetEngine()->GetBLContext();
+
+    blctx->save();
+    blctx->resetMatrix();
+
+    blctx->setStrokeStyle( BLRgba32( 0xFF0000FF ) );
+    blctx->setStrokeWidth( 1.0f );
+
+    if( mWorldSelDrag != mWorldSelStart )
+    {
+        if( mSelectionBox.space )
+        {
+            double xmin = ::ULIS::FMath::Min( mWorldSelDrag.x, mWorldSelStart.x );
+            double ymin = ::ULIS::FMath::Min( mWorldSelDrag.y, mWorldSelStart.y );
+            double xmax = ::ULIS::FMath::Max( mWorldSelDrag.x, mWorldSelStart.x );
+            double ymax = ::ULIS::FMath::Max( mWorldSelDrag.y, mWorldSelStart.y );
+
+            blctx->strokeLine( xmin, ymin, xmax, ymin );
+            blctx->strokeLine( xmax, ymin, xmax, ymax );
+            blctx->strokeLine( xmax, ymax, xmin, ymax );
+            blctx->strokeLine( xmin, ymax, xmin, ymin );
+        }
+    }
+
+    blctx->restore();
 }
 
 void
@@ -88,11 +208,11 @@ FOdysseyVectorHUDGrid::Draw( UOdysseyVectorScene& iScene, ::ULIS::FRectD& iRoi, 
     blctx->setStrokeStyle( BLRgba32( 0xFF0000FF ) );
     blctx->setStrokeWidth( 1.0f );
 
-    blctx->setFillStyle( BLRgba32( 0xFF0000FF ) );
-
     if( mSelectionBox.space )
     {
         BLMatrix2D worldMatrix = mSelectionBox.space->GetWorldMatrix();
+
+        DrawSelectionRectangle( iScene, iRoi, iFlags );
 
         for( int i = 0; i < mCellArray.size(); i++ )
         {
@@ -108,6 +228,7 @@ FOdysseyVectorHUDGrid::Draw( UOdysseyVectorScene& iScene, ::ULIS::FRectD& iRoi, 
         {
             BLPoint pt = worldMatrix.mapPoint( mNodeArray[i].GetX(), mNodeArray[i].GetY() );
 
+            blctx->setFillStyle( mNodeArray[i].IsSelected() ? BLRgba32( 0xFF00FF00 ) : BLRgba32( 0xFF0000FF ) );
             blctx->fillCircle( pt.x, pt.y, FOdysseyVectorHUDGrid::HANDLE_RADIUS );
         }
     }
@@ -148,6 +269,25 @@ FOdysseyVectorHUDGrid::MapObject( UOdysseyVectorObject* iObject )
 {
     BLMatrix2D& spaceMatrix = mSelectionBox.space->GetInverseWorldMatrix();
     std::list<UOdysseyVectorObject*>& childrenList = iObject->GetChildrenList();
+
+    if( iObject->GetClass() == UOdysseyVectorGroupPaint::StaticClass() )
+    {
+        UOdysseyVectorGroupPaint* paintGroup = Cast<UOdysseyVectorGroupPaint>(iObject);
+        std::list<FOdysseyVectorBucket*>& bucketList = paintGroup->GetBucketList();
+        BLMatrix2D conversionMatrix = spaceMatrix;
+
+        conversionMatrix.transform( paintGroup->GetWorldMatrix() );
+
+        for( std::list<FOdysseyVectorBucket*>::iterator it = bucketList.begin(); it != bucketList.end(); ++it )
+        {
+            FOdysseyVectorBucket* bucket = static_cast<FOdysseyVectorBucket*>(*it);
+            BLPoint pt = conversionMatrix.mapPoint( bucket->GetX(), bucket->GetY() );
+            double spaceX = pt.x - mSelectionBox.rect.x; // Hi Elon :) !
+            double spaceY = pt.y - mSelectionBox.rect.y;
+
+            MapPoint( iObject, bucket, spaceX, spaceY );
+        }
+    }
 
     if( iObject->GetClass() == UOdysseyVectorPathCubic::StaticClass() )
     {

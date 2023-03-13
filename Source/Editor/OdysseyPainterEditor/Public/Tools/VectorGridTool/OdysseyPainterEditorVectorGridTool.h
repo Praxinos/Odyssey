@@ -37,7 +37,8 @@ private:
 private:
     double mOldLocalMouseX;
     double mOldLocalMouseY;
-    FOdysseyVectorPoint *mGridNode;
+    std::vector<FGridNode *> mGridNodeArray;
+    bool mMultipleSelectionMode;
 
 public:
     // Setters
@@ -48,6 +49,9 @@ public:
 
     UPROPERTY(EditAnywhere, Category="Odyssey Grid Tool")
     uint32 DivisionsY;
+
+    UPROPERTY(EditAnywhere, Category="Odyssey Grid Tool")
+    double PickingRadius;
 
 protected:
 

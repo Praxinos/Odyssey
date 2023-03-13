@@ -6,7 +6,7 @@
 #include "OdysseyVectorObject.h"
 #include "OdysseyVectorHandleBucket.h"
 
-class ODYSSEYVECTOR_API FOdysseyVectorBucket
+class ODYSSEYVECTOR_API FOdysseyVectorBucket : public FOdysseyVectorPoint
 {
     public:
         ~FOdysseyVectorBucket();
@@ -28,21 +28,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorBucket
          */
         void Draw( ::ULIS::FRectD& iRoi, uint64 iFlags );
 
-        /**
-         * @brief Set this bucket's coordinates relative to the parent object
-         * @param iX position on X axis
-         * @param iY position on Y axis
-         */
-        void SetCoords( double iX, double iY );
-
         void SetGradient( bool iIsGradient );
         void SetGradientColor0( uint8 iR0, uint8 iG0, uint8 iB0, uint8 iA0 );
         void SetGradientColor1( uint8 iR1, uint8 iG1, uint8 iB1, uint8 iA1 );
-
-        /**
-         * @brief Get this bucket's coordinates
-         */
-        ::ULIS::FVec2D GetCoords();
 
         /**
          * @brief Tell whether or not the bucket is in gradient mode
@@ -122,7 +110,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorBucket
 
     protected:
         UOdysseyVectorObject& mParent;
-        ::ULIS::FVec2D mCoords;
         FColor mColor;
         FOdysseyVectorHandleBucket mCtrlPoint;
         bool mIsGradient;

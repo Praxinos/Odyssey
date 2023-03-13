@@ -20,6 +20,8 @@ UOdysseyPainterEditorVectorGridTool::~UOdysseyPainterEditorVectorGridTool()
 UOdysseyPainterEditorVectorGridTool::UOdysseyPainterEditorVectorGridTool()
     : DivisionsX( 4 )
     , DivisionsY( 4 )
+    , PickingRadius( 10 )
+    , mMultipleSelectionMode( false )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Grid64");
 }
@@ -39,6 +41,8 @@ UOdysseyPainterEditorVectorGridTool::Activate()
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
 
         mGridHUD.MakeGrid( *currentVectorLayer->GetScene(), DivisionsX, DivisionsY );
+
+        mGridNodeArray.clear();
 
         vectorEngine->ClearHUD( );
         vectorEngine->AddHUD( &mGridHUD );
@@ -64,7 +68,34 @@ UOdysseyPainterEditorVectorGridTool::OnMouseDown(const FOdysseyPoint& iPointInTe
         UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
 
-        mGridNode = mGridHUD.PickNode( iPointInTexture.x, iPointInTexture.y );
+        for( int i = 0; i < iPointInTexture.keysDown.Num(); i++ )
+        {
+            if( ( iPointInTexture.keysDown[i] == EKeys::LeftShift ) || ( iPointInTexture.keysDown[i] == EKeys::RightShift ) )
+            {
+                mMultipleSelectionMode = true;
+            }
+        }
+
+        // multiple selection mode
+        if ( mMultipleSelectionMode == true )
+        {
+            mMultipleSelectionMode = true;
+
+            mGridHUD.StartSelectionRectangle( iPointInTexture.x, iPointInTexture.y );
+        }
+        else
+        {
+            FGridNode* gridNode = mGridHUD.PickNode( iPointInTexture.x, iPointInTexture.y, PickingRadius );
+
+            mGridNodeArray.clear();
+
+            if( gridNode )
+            {
+                mGridNodeArray.push_back( gridNode );
+            }
+        }
+
+        currentVectorLayer->RenderImageChanged(false);
     }
 
     return true;
@@ -81,21 +112,29 @@ UOdysseyPainterEditorVectorGridTool::OnMouseDrag(const FOdysseyPoint& iPointInTe
         UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
 
-        if ( mGridNode )
+        if( mMultipleSelectionMode == true )
+        {
+            mGridHUD.DragSelectionRectangle( iPointInTexture.x, iPointInTexture.y );
+        }
+        else
         {
             FSelectionBox& selectionBox = mGridHUD.GetSelectionBox();
-            BLPoint spacePt = selectionBox.space->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
+            BLPoint spaceDif = selectionBox.space->GetInverseWorldMatrix().mapVector( iPointInTexture.deltaPosition.X
+                                                                                    , iPointInTexture.deltaPosition.Y );
 
-            mGridNode->Set( spacePt.x, spacePt.y );
+            for( int i = 0; i < mGridNodeArray.size(); i++ )
+            {
+                mGridNodeArray[i]->Set( mGridNodeArray[i]->GetX() + spaceDif.x, mGridNodeArray[i]->GetY() + spaceDif.y );
+            }
 
             mGridHUD.Deform();
 
             currentVectorLayer->GetScene()->Update( UOdysseyVectorObject::FREQUENTUPDATES
                                                   | UOdysseyVectorObject::KEEPINVALIDATED );
-
-            currentVectorLayer->RenderImageChanged(true);
-            //RedrawCurrentLayer( { /*beforeBBox | selectedObject->GetBBox( true )*/{ 0, 0, 0, 0 } } );
         }
+
+        currentVectorLayer->RenderImageChanged(true);
+        //RedrawCurrentLayer( { /*beforeBBox | selectedObject->GetBBox( true )*/{ 0, 0, 0, 0 } } );
     }
 }
 
@@ -109,7 +148,16 @@ UOdysseyPainterEditorVectorGridTool::OnMouseUp(const FOdysseyPoint& iPointInText
     {
         UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
 
+        if( mMultipleSelectionMode == true )
+        {
+            mGridNodeArray.clear();
+
+            mGridHUD.EndSelectionRectangle( mGridNodeArray );
+        }
+
         currentVectorLayer->GetScene()->Update( 0 );
+
+        mMultipleSelectionMode = false;
 
         currentVectorLayer->RenderImageChanged(false);
 

@@ -140,6 +140,8 @@ void
 UOdysseyVectorGroupPaint::AddBucket( FOdysseyVectorBucket* iBucket )
 {
     mBucketList.push_back( iBucket );
+
+    //iBucket->SetParent( this );
 }
 
 void

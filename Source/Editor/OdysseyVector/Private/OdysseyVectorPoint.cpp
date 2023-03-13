@@ -18,6 +18,13 @@ FOdysseyVectorPoint::Init( double iX, double iY, double iRadius )
     SetRadius( iRadius );
 }
 
+void
+FOdysseyVectorPoint::SetCoords( double iX, double iY )
+{
+    mCoords.x  = iX;
+    mCoords.y  = iY;
+}
+
 ::ULIS::FVec2D&
 FOdysseyVectorPoint::GetCoords()
 {

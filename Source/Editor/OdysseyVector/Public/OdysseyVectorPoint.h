@@ -52,6 +52,13 @@ class ODYSSEYVECTOR_API FOdysseyVectorPoint
         double GetRadius();
 
         /**
+         * @brief Set the point's absolute coordinate on X & Y axis
+         * @param iX the desired coordinate on X axis
+         * @param iY the desired coordinate on Y axis
+         */
+        virtual void SetCoords( double iX, double iY );
+
+        /**
          * @brief Set the point's absolute coordinate on X axis
          * @param iX the desired coordinate on X axis
          */
