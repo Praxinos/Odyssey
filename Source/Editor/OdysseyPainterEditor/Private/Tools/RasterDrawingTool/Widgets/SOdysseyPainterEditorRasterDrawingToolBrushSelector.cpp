@@ -51,7 +51,7 @@ SOdysseyPainterEditorRasterDrawingToolBrushSelector::Construct( const FArguments
             .Brush_UObject(mTool, &UOdysseyPainterEditorRasterDrawingTool::GetBrush)
             .OnBrushChanged(this, &SOdysseyPainterEditorRasterDrawingToolBrushSelector::OnBrushSelected)
         ]
-    + SVerticalBox::Slot()
+        + SVerticalBox::Slot()
         [
             mDetailsView.ToSharedRef()
         ]
