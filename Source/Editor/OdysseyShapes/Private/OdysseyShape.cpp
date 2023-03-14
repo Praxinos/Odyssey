@@ -50,7 +50,7 @@ UOdysseyShape::Tick(float iDeltaTime)
 }
 
 void
-UOdysseyShape::ApplyOverrides(const TMap<FName, UObject*>& iOverrides)
+UOdysseyShape::ApplyOverrides(const TMap< TObjectPtr<UClass>, TObjectPtr<UObject>>& iOverrides)
 {
 
 }

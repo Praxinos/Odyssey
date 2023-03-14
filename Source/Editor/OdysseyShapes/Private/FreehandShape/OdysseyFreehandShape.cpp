@@ -171,9 +171,9 @@ UOdysseyFreehandShape::Tick(float iDeltaTime)
 }
 
 void
-UOdysseyFreehandShape::ApplyOverrides(const TMap<FName, UObject*>& iOverrides)
+UOdysseyFreehandShape::ApplyOverrides(const TMap<TObjectPtr<UClass>, TObjectPtr<UObject>>& iOverrides)
 {
-    const UOdysseyFreehandShapeOverrides* freehandShapeOverrides = Cast<const UOdysseyFreehandShapeOverrides>(iOverrides["OdysseyFreehandShapeOverrides"]);
+    const UOdysseyFreehandShapeOverrides* freehandShapeOverrides = Cast<const UOdysseyFreehandShapeOverrides>(iOverrides[UOdysseyFreehandShapeOverrides::StaticClass()]);
     if (freehandShapeOverrides)
         freehandShapeOverrides->Override(this);
 }

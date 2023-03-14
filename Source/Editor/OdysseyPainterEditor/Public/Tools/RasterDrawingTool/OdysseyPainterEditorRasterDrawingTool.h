@@ -26,7 +26,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterDrawingTool : public U
     GENERATED_BODY()
 
 public:
-    typedef TMap<FName, UObject*> tOverride;
+    typedef TMap< TObjectPtr<UClass>, TObjectPtr<UObject>> tOverride;
 
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnApplyOverrides, const tOverride&);
     DECLARE_DELEGATE_RetVal_OneParam(TArray<FOdysseyPoint>, FAdaptShapePoints, const TArray<FOdysseyPoint>&);

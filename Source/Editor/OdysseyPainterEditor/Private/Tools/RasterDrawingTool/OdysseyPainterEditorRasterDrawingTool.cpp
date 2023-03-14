@@ -442,7 +442,7 @@ UOdysseyPainterEditorRasterDrawingTool::ApplyOverrides(UOdysseyBrushAssetBase* i
     if (BrushInstance)
         UE_LOG(LogTemp, Warning, TEXT("ApplyOverrides whould only called when no BrushInstance is active, to avoid calling ExecuteStateChanged at each value change") );
 
-    UOdysseyBlendParametersOverrides* blendParametersOverrides = Cast<UOdysseyBlendParametersOverrides>(iBrushInstance->Overrides["OdysseyBlendParametersOverrides"]);
+    UOdysseyBlendParametersOverrides* blendParametersOverrides = Cast<UOdysseyBlendParametersOverrides>(iBrushInstance->EditorOverrides[UOdysseyBlendParametersOverrides::StaticClass()]);
     if (blendParametersOverrides)
     {
         FOdysseyBlendParameters blendParameters = GetBlendParameters();
@@ -450,13 +450,13 @@ UOdysseyPainterEditorRasterDrawingTool::ApplyOverrides(UOdysseyBrushAssetBase* i
         FOdysseyObjectEditorUtils::SetPropertyValue(this, "BlendParameters", blendParameters);
     }
 
-    UOdysseyBrushOptionsOverrides* brushOptionsOverrides = Cast<UOdysseyBrushOptionsOverrides>(iBrushInstance->Overrides["OdysseyBrushOptionsOverrides"]);
+    UOdysseyBrushOptionsOverrides* brushOptionsOverrides = Cast<UOdysseyBrushOptionsOverrides>(iBrushInstance->EditorOverrides[UOdysseyBrushOptionsOverrides::StaticClass()]);
     if (brushOptionsOverrides)
         brushOptionsOverrides->Override(BrushOptions);
 
-    SelectedShapeInstance->ApplyOverrides(iBrushInstance->Overrides);
+    SelectedShapeInstance->ApplyOverrides(iBrushInstance->EditorOverrides);
 
-    mOnApplyOverridesDelegate.Broadcast(iBrushInstance->Overrides);
+    mOnApplyOverridesDelegate.Broadcast(iBrushInstance->EditorOverrides);
 }
 
 //--------------------------------------------------------------------------------------

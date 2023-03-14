@@ -44,7 +44,7 @@ public:
     virtual void Tick(float iDeltaTime);
     
     // Applies the shapes specific overrides
-    virtual void ApplyOverrides(const TMap<FName, UObject*>& iOverrides);
+    virtual void ApplyOverrides(const TMap<TObjectPtr<UClass>, TObjectPtr<UObject>>& iOverrides);
 
 public:
     // Getters

@@ -402,8 +402,6 @@ public:
     /* Run the state change action */
     void ExecuteStateChanged();
 
-    virtual void Serialize (FArchive& Ar);
-
     //Called when a simple property changes
     virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
 
@@ -413,13 +411,15 @@ public:
     UOdysseyBrushOptions*                   BrushOptions;
 
 #if WITH_EDITORONLY_DATA
-    UPROPERTY(VisibleDefaultsOnly, Instanced, Category="Overrides")
-    TMap<FName, UObject*>                        Overrides;
+    UPROPERTY(VisibleDefaultsOnly, Instanced, Category="Overrides", meta=(ShowDisplayNames, ShowInnerProperties))
+    TMap<TObjectPtr<UClass>, TObjectPtr<UObject>> EditorOverrides;
 #endif
 
-
-    // UPROPERTY(VisibleDefaultsOnly, Instanced)
-    // UObject*                                OverrideTest;
+private:
+#if WITH_EDITORONLY_DATA
+    UPROPERTY() //needed to be able to still load old brushes
+    TMap<FName, TObjectPtr<UObject>> Overrides_DEPRECATED;
+#endif
 
 private:
     TArray<FOdysseyBrushContext*>           mContexts;

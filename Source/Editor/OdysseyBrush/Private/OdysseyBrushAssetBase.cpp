@@ -63,8 +63,8 @@ UOdysseyBrushAssetBase::PostInitProperties()
     if (HasAnyFlags(RF_ArchetypeObject))
     {
         //Remove all overrides which failed to load (can happen in our case when removing overrides classes)
-        TArray<FName> keysToRemove;
-        for (auto Elem : Overrides)
+        TArray<TObjectPtr<UClass>> keysToRemove;
+        for (auto Elem : EditorOverrides)
         {
             if (!Elem.Value)
                 keysToRemove.Add(Elem.Key);
@@ -72,16 +72,18 @@ UOdysseyBrushAssetBase::PostInitProperties()
 
         for (auto& key : keysToRemove)
         {
-            Overrides.Remove(key);
+            EditorOverrides.Remove(key);
         }
 
         //Add missing classes (can happen in our case when adding overrides classes, in existing brushes)
         for (auto overrideClass : FOdysseyBrushOverride::GetClasses())
         {
-            bool containsClass = Overrides.Contains(overrideClass->GetFName());
+            FString str = overrideClass->GetFName().ToString();
+            FName name(str);
+            bool containsClass = EditorOverrides.Contains(overrideClass);
             if (!containsClass)
             {
-                Overrides.Add(overrideClass->GetFName(), NewObject<UObject>(this, overrideClass, overrideClass->GetFName() ));
+                EditorOverrides.Add(overrideClass, NewObject<UObject>(this, overrideClass, name ));
             }
         }
     }
@@ -92,31 +94,23 @@ UOdysseyBrushAssetBase::PostLoad()
 {
     Super::PostLoad();
 
-    /* if (HasAnyFlags(RF_ArchetypeObject))
+    //Convert old brushes overrides to new overrides
+
+    if (!Overrides_DEPRECATED.IsEmpty())
     {
-        //Remove all overrides which failed to load (can happen in our case when removing overrides classes)
-        TArray<FName> keysToRemove;
-        for (auto Elem : Overrides)
+        TArray<TObjectPtr<UObject>> oldOverrides;
+        Overrides_DEPRECATED.GenerateValueArray(oldOverrides);
+        for (const TObjectPtr<UObject>& oldOverride : oldOverrides)
         {
-            if (!Elem.Value)
-                keysToRemove.Add(Elem.Key);
+            UClass* overrideClass = oldOverride->GetClass();
+            
+            //EditorOverrides already contains the right classes, but does not contain the right values
+            if (EditorOverrides.Contains(overrideClass))
+                EditorOverrides[overrideClass] = oldOverride;
         }
 
-        for (auto& key : keysToRemove)
-        {
-            Overrides.Remove(key);
-        }
-
-        //Add missing classes (can happen in our case when adding overrides classes, in existing brushes)
-        for (auto overrideClass : FOdysseyBrushOverride::GetClasses())
-        {
-            bool containsClass = Overrides.Contains(overrideClass->GetFName());
-            if (!containsClass)
-            {
-                Overrides.Add(overrideClass->GetFName(), NewObject<UObject>(this, overrideClass, overrideClass->GetFName() ));
-            }
-        }
-    } */
+        Overrides_DEPRECATED.Empty();
+    }
 }
 
 //--------------------------------------------------------------------------------------
@@ -901,24 +895,6 @@ UOdysseyBrushAssetBase::ExecuteStateChanged()
 {
     FEditorScriptExecutionGuard ScriptGuard;
     OnStateChanged();
-}
-
-void
-UOdysseyBrushAssetBase::Serialize (FArchive& Ar)
-{
-	Super::Serialize(Ar);
-
-    //Serialize overrides
-    /* if (Ar->IsLoading())
-    {
-        UClass* ObjectClass = nullptr;
-        Ar << ObjectClass;
-    }
-
-    if (Ar->IsSaving())
-    {
-
-    } */
 }
 
 void
