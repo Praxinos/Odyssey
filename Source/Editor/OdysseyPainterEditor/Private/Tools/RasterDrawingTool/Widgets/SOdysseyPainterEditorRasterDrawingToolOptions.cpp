@@ -25,14 +25,15 @@ SOdysseyPainterEditorRasterDrawingToolOptions::Construct( const FArguments& InAr
 
     // Create a details view
     FDetailsViewArgs DetailsViewArgs;
+    DetailsViewArgs.DefaultsOnlyVisibility = EEditDefaultsOnlyNodeVisibility::Automatic;
     DetailsViewArgs.bUpdatesFromSelection = false;
     DetailsViewArgs.bLockable = false;
     DetailsViewArgs.bAllowSearch = false;
     DetailsViewArgs.NameAreaSettings = FDetailsViewArgs::HideNameArea;
     
     TSharedRef<IDetailsView> detailsView = PropertyEditorModule.CreateDetailView(DetailsViewArgs);
-    detailsView->RegisterInstancedCustomPropertyLayout(UOdysseyPainterEditorRasterDrawingTool::StaticClass(),
-        FOnGetDetailCustomizationInstance::CreateLambda([this]() { return FOdysseyPainterEditorRasterDrawingToolOptionsCustomization::MakeInstance(); }));
+    /* detailsView->RegisterInstancedCustomPropertyLayout(UOdysseyPainterEditorRasterDrawingTool::StaticClass(),
+        FOnGetDetailCustomizationInstance::CreateLambda([this]() { return FOdysseyPainterEditorRasterDrawingToolOptionsCustomization::MakeInstance(); })); */
 
     detailsView->SetObject(mTool);
 

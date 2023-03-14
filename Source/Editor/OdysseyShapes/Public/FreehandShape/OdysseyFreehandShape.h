@@ -129,20 +129,20 @@ private:
 private:
     //PROPERTIES
     /** Should smoothing be enabled. */
-    UPROPERTY(EditAnywhere, Category="Smoothing", meta=(InlineEditConditionToggle))
-    bool    SmoothingEnabled;
-
-    UPROPERTY( EditInstanceOnly, Category="Smoothing", meta=(DisplayName="Smoothing", editcondition = "SmoothingEnabled") )
-    FOdysseySmoothingOptions SmoothingOptions;
-
-    UPROPERTY( EditInstanceOnly, Category="Interpolation")
-    bool    AdaptativeStep = false;
-
     UPROPERTY( EditInstanceOnly, Category="Interpolation", meta = ( ClampMin = "1", ClampMax = "200", UIMin = "1", UIMax = "200", SliderExponent = "1" ) )
     float   Step = 20.f;
 
     UPROPERTY( EditInstanceOnly, Category="Interpolation")
+    bool    AdaptativeStep = false;
+
+    UPROPERTY( EditInstanceOnly, Category="Interpolation")
     EOdysseyInterpolationType InterpolationType = EOdysseyInterpolationType::kCatmullRom;
+
+    UPROPERTY( EditInstanceOnly, Category="Interpolation", meta=(InlineEditConditionToggle))
+    bool    SmoothingEnabled;
+
+    UPROPERTY( EditInstanceOnly, Category="Interpolation", meta=(DisplayName="Smoothing", editcondition = "SmoothingEnabled") )
+    FOdysseySmoothingOptions SmoothingOptions;
 
 protected:
     // protected Data Members

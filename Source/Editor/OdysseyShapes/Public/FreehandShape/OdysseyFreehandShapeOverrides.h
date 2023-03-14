@@ -20,23 +20,23 @@ class ODYSSEYSHAPES_API UOdysseyFreehandShapeOverrides : public UObject
     UOdysseyFreehandShapeOverrides();
 
     /** Enable Smoohting Method Override. */
-    UPROPERTY( EditAnywhere, Category = "Smoothing", meta=(InlineEditConditionToggle) )
+    UPROPERTY( EditAnywhere, Category = "Interpolation", meta=(InlineEditConditionToggle) )
     bool    bOverride_SmoothingMethod;
 
     /** Enable Smoothing Strength Override. */
-    UPROPERTY( EditAnywhere, Category = "Smoothing", meta=(InlineEditConditionToggle) )
+    UPROPERTY( EditAnywhere, Category = "Interpolation", meta=(InlineEditConditionToggle) )
     bool    bOverride_SmoothingStrength;
 
     /** Enable Smoothing Enabled Override. */
-    UPROPERTY( EditAnywhere, Category = "Smoothing", meta=(InlineEditConditionToggle) )
+    UPROPERTY( EditAnywhere, Category = "Interpolation", meta=(InlineEditConditionToggle) )
     bool    bOverride_SmoothingEnabled;
 
     /** Enable Smoothing RealTime Override. */
-    UPROPERTY( EditAnywhere, Category = "Smoothing", meta=(InlineEditConditionToggle) )
+    UPROPERTY( EditAnywhere, Category = "Interpolation", meta=(InlineEditConditionToggle) )
     bool    bOverride_SmoothingRealTime;
 
     /** Enable Smoothing CatchUp Override. */
-    UPROPERTY( EditAnywhere, Category = "Smoothing", meta=(InlineEditConditionToggle) )
+    UPROPERTY( EditAnywhere, Category = "Interpolation", meta=(InlineEditConditionToggle) )
     bool    bOverride_SmoothingCatchUp;
 
     /** Enable Stroke Step Override. */
@@ -56,23 +56,23 @@ class ODYSSEYSHAPES_API UOdysseyFreehandShapeOverrides : public UObject
     // Overrides Values
 
     /** Smoohting Method Override Value. */
-    UPROPERTY( EditAnywhere, Category = "Smoothing", meta = ( editcondition = "bOverride_SmoothingMethod" ) )
+    UPROPERTY( EditAnywhere, Category = "Interpolation", meta = ( editcondition = "bOverride_SmoothingMethod" ) )
     EOdysseySmoothingMethod   SmoothingMethod;
 
     /** Smoothing Strength Override Value. */
-    UPROPERTY( EditAnywhere, Category = "Smoothing", meta = ( ClampMin = "0", ClampMax = "200", UIMin = "0", UIMax = "200", SliderExponent = "1", editcondition = "bOverride_SmoothingStrength" ) )
+    UPROPERTY( EditAnywhere, Category = "Interpolation", meta = ( ClampMin = "0", ClampMax = "200", UIMin = "0", UIMax = "200", SliderExponent = "1", editcondition = "bOverride_SmoothingStrength" ) )
     int32   SmoothingStrength;
 
     /** Smoothing Enabled Override Value. */
-    UPROPERTY( EditAnywhere, Category = "Smoothing", meta = ( editcondition = "bOverride_SmoothingEnabled" ) )
+    UPROPERTY( EditAnywhere, Category = "Interpolation", meta = ( editcondition = "bOverride_SmoothingEnabled" ) )
     bool    SmoothingEnabled;
 
     /** Smoothing RealTime Override Value. */
-    UPROPERTY( EditAnywhere, Category = "Smoothing", meta = ( editcondition = "bOverride_SmoothingRealTime" ) )
+    UPROPERTY( EditAnywhere, Category = "Interpolation", meta = ( editcondition = "bOverride_SmoothingRealTime" ) )
     bool    SmoothingRealTime;
 
     /** Smoothing CatchUp Override Value. */
-    UPROPERTY( EditAnywhere, Category = "Smoothing", meta = ( editcondition = "bOverride_SmoothingCatchUp" ) )
+    UPROPERTY( EditAnywhere, Category = "Interpolation", meta = ( editcondition = "bOverride_SmoothingCatchUp" ) )
     bool    SmoothingCatchUp;
 
     /** Stroke Step Override Value. */

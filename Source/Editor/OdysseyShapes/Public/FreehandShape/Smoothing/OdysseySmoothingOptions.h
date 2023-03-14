@@ -21,18 +21,18 @@ struct ODYSSEYSHAPES_API FOdysseySmoothingOptions
     {}
 
     /** The method used for smoothing. */
-    UPROPERTY( EditAnywhere, Category="Odyssey Smoothing Options" )
+    UPROPERTY( EditAnywhere, Category="Smoothing" )
     EOdysseySmoothingMethod SmoothingMethod;
 
     /** Distance for Smooting computation. */
-    UPROPERTY( EditAnywhere, Category="Odyssey Smoothing Options", meta = ( ClampMin = "1", ClampMax = "200", UIMin = "1", UIMax = "200", SliderExponent = "1" ) )
+    UPROPERTY( EditAnywhere, Category="Smoothing", meta = ( ClampMin = "1", ClampMax = "200", UIMin = "1", UIMax = "200", SliderExponent = "1" ) )
     int32   SmoothingStrength;
 
     /** Should smoothing be real-time, meaning the first input draws directly, even though the strength is not reached yet. */
-    UPROPERTY( EditAnywhere, Category="Odyssey Smoothing Options" )
+    UPROPERTY( EditAnywhere, Category="Smoothing" )
     bool    SmoothingRealTime;
 
     /** Should smoothing catch-up to the cursor before releasing the stroke. */
-    UPROPERTY( EditAnywhere, Category="Odyssey Smoothing Options" )
+    UPROPERTY( EditAnywhere, Category="Smoothing" )
     bool    SmoothingCatchUp;
 };

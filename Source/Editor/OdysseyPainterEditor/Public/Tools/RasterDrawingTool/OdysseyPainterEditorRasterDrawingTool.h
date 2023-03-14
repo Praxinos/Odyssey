@@ -174,28 +174,28 @@ protected:
 
     //Visible properties
 
-    UPROPERTY(EditInstanceOnly, Category="Odyssey Drawing Tool")
+    UPROPERTY()
     UOdysseyBrush* Brush;
 
-    UPROPERTY(EditInstanceOnly, Category="Odyssey Drawing Tool")
+    UPROPERTY()
     UOdysseyBrushAssetBase* BrushInstance;
 
-    UPROPERTY(EditInstanceOnly, Category="Odyssey Drawing Tool")
+    UPROPERTY()
     UOdysseyBrushOptions* BrushOptions;
 
-    UPROPERTY(EditInstanceOnly, Category="Odyssey Drawing Tool")
-    FOdysseyBlendParameters BlendParameters;
-
-    UPROPERTY(EditInstanceOnly, Category="Odyssey Drawing Tool")
+    UPROPERTY()
     EOdysseyShape SelectedShape;
 
-    UPROPERTY(VisibleInstanceOnly, Category="Odyssey Drawing Tool", meta=(ShowInnerProperties))
+    UPROPERTY(VisibleInstanceOnly, Category="Shape", Instanced, meta=(ShowInnerProperties))
     class UOdysseyShape* SelectedShapeInstance;
 
 
     // Hidden properties
     UPROPERTY()
     TMap<EOdysseyShape, class UOdysseyShape*> AvailableShapes;
+
+    UPROPERTY(EditInstanceOnly, Category="Blending", meta=(ShowOnlyInnerProperties))
+    FOdysseyBlendParameters BlendParameters;
 
 protected:
     // protected Data Members

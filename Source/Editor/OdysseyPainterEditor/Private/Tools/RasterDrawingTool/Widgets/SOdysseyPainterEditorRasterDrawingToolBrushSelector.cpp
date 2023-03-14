@@ -9,7 +9,6 @@
 #include "Widgets/Brush/SOdysseyBrushSelector.h"
 #include "Widgets/SOdysseyShapeSelector.h"
 #include "Widgets/SOdysseyShape.h"
-#include "Tools/RasterDrawingTool/Customizations/OdysseyPainterEditorRasterDrawingToolBrushSelectorCustomization.h"
 
 #define LOCTEXT_NAMESPACE "SOdysseyPainterEditorRasterDrawingToolBrushSelector"
 
