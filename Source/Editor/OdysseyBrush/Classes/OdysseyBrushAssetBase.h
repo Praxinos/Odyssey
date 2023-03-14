@@ -407,11 +407,11 @@ public:
 
 public:
     //PROPERTIES
-    UPROPERTY(Transient, NonTransactional)
+    UPROPERTY(VisibleInstanceOnly, Category="Common", Instanced, Transient, NonTransactional, meta=(ShowInnerProperties, DisplayPriority="1"))
     UOdysseyBrushOptions*                   BrushOptions;
 
 #if WITH_EDITORONLY_DATA
-    UPROPERTY(VisibleDefaultsOnly, Instanced, Category="Overrides", meta=(ShowDisplayNames, ShowInnerProperties))
+    UPROPERTY(VisibleDefaultsOnly, Category="Overrides", Instanced, meta=(ShowDisplayNames, ShowInnerProperties))
     TMap<TObjectPtr<UClass>, TObjectPtr<UObject>> EditorOverrides;
 #endif
 

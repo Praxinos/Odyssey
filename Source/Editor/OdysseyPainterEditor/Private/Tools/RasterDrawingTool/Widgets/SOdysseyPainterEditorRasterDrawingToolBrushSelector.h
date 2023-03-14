@@ -19,6 +19,8 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorRasterDrawingToolBrushSelect
     typedef SOdysseyPainterEditorRasterDrawingToolBrushSelector   tSelf;
 
 public:
+    ~SOdysseyPainterEditorRasterDrawingToolBrushSelector();
+
     // Construction / Destruction
     SLATE_BEGIN_ARGS( SOdysseyPainterEditorRasterDrawingToolBrushSelector )
         {}
@@ -28,7 +30,12 @@ public:
     void  Construct( const  FArguments&  InArgs );
 
 private:
+    void OnBrushSelected(UOdysseyBrush* iBrush);
+    void OnToolBrushChanged();
+
+private:
     // Private data members
     UOdysseyPainterEditorRasterDrawingTool*                mTool;
+    TSharedPtr<IDetailsView> mDetailsView;
 };
 

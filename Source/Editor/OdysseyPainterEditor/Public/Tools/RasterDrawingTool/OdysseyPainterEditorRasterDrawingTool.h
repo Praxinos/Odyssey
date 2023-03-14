@@ -66,39 +66,38 @@ public:
     // Sets the BrushContexts to apply to brushInstance
     void SetBrushContexts(TArray<FOdysseyBrushContext*> iContexts);
 
-    // Set wether the tool can draw or not
-    void IsDrawingLocked(bool iValue);
-
     // Recreates the brush instance
     void RefreshBrushInstance();
+
+    //Sets a new brush to draw with
+    void SetBrush(UOdysseyBrush* iBrush);
 
 public:
     // Getters
 
     //Returns the selected Brush
-    UOdysseyBrush* GetBrush();
+    UOdysseyBrush* GetBrush() const;
     
     //Returns the instance of the selected Brush used to draw
-    UOdysseyBrushAssetBase* GetBrushInstance();
+    UOdysseyBrushAssetBase* GetBrushInstance() const;
 
     // Returns the BlendParameters
     FOdysseyBlendParameters GetBlendParameters() const;
 
     // Returns the BrushOptions
-    UOdysseyBrushOptions* GetBrushOptions();
+    UOdysseyBrushOptions* GetBrushOptions() const;
 
     // Returns the Selected Shape
     EOdysseyShape GetSelectedShape() const;
 
     // Retuns the instance of the selected Shape
-    UOdysseyShape* GetSelectedShapeInstance();
+    UOdysseyShape* GetSelectedShapeInstance() const;
 
     // Returns the OnApplyOverrides delegate
     FOnApplyOverrides& OnApplyOverridesDelegate();
     FAdaptShapePoints& AdaptShapePointsDelegate();
 
-    // Get wether the tool can draw or not
-    bool IsDrawingLocked();
+    FSimpleMulticastDelegate& OnBrushChanged();
 
 public:
     //Properties changes
@@ -211,4 +210,5 @@ protected:
     //Internal
     FOnApplyOverrides                   mOnApplyOverridesDelegate;
     FAdaptShapePoints                   mAdaptShapePointsDelegate;
+    FSimpleMulticastDelegate            mOnBrushChanged;
 };

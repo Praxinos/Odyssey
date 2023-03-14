@@ -30,13 +30,13 @@ public:
     FOnPropertyChanged& OnPropertyChangedDelegate() { return mOnPropertyChangedDelegate; }
 
 public:
-    UPROPERTY( EditInstanceOnly, BlueprintReadOnly, Category="Odyssey Brush Options", meta = ( ClampMin = "1", ClampMax = "2000", UIMin = "1", UIMax = "2000", SliderExponent = "2", Delta = "1", Multiple="1" ) )
+    UPROPERTY( EditInstanceOnly, BlueprintReadOnly, Category="Common", meta = ( ClampMin = "1", ClampMax = "2000", UIMin = "1", UIMax = "2000", SliderExponent = "2", Delta = "1", Multiple="1", DisplayPriority="1" ) )
     float   Size = 20.f;
 
-    UPROPERTY( EditInstanceOnly, BlueprintReadOnly, Category="Odyssey Brush Options", meta = ( ClampMin = "0", ClampMax = "100", UIMin = "0", UIMax = "100", Delta = "1", Multiple="1", Units="Percent" ) )
+    UPROPERTY( EditInstanceOnly, BlueprintReadOnly, Category="Common", meta = ( ClampMin = "0", ClampMax = "100", UIMin = "0", UIMax = "100", Delta = "1", Multiple="1", Units="Percent", DisplayPriority = "1") )
     float   Flow = 100.f;
 
-    UPROPERTY( EditInstanceOnly, BlueprintReadOnly, Category="Odyssey Brush Options")
+    UPROPERTY( BlueprintReadOnly, Category="Common")
     FOdysseyBrushColor Color;
 
 private:

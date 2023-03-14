@@ -24,42 +24,33 @@ public:
     // IDetailCustomization interface
     virtual void CustomizeDetails(IDetailLayoutBuilder& DetailLayout) override;
     // End of IDetailCustomization interface
-
-private:
-    void CustomizeBrushOptions(IDetailLayoutBuilder& iBuilder);
 };
+
+void
+SortCategories(const TMap<FName, IDetailCategoryBuilder*>& iAllCategoryMap)
+{
+    for (const TPair<FName, IDetailCategoryBuilder*>& Pair : iAllCategoryMap )
+	{
+        int32 SortOrder = Pair.Value->GetSortOrder();
+		const FName& CategoryName = Pair.Key;
+
+        if (CategoryName == TEXT("Common") )
+        {
+            SortOrder = 1;
+        }
+        else
+        {
+            SortOrder += 2; //make sure sort order is at least 2
+        }
+
+        Pair.Value->SetSortOrder(SortOrder);
+    }
+}
 
 void
 FOdysseyBrushDetails::CustomizeDetails(IDetailLayoutBuilder& iBuilder)
 {
-    CustomizeBrushOptions(iBuilder);
-}
-
-void
-FOdysseyBrushDetails::CustomizeBrushOptions(IDetailLayoutBuilder& iBuilder)
-{
-    TSharedRef<IPropertyHandle> brushOptionsHandle = iBuilder.GetProperty(GET_MEMBER_NAME_CHECKED(UOdysseyBrushAssetBase, BrushOptions));
-    if (!iBuilder.IsPropertyVisible(brushOptionsHandle))
-        return;
-
-    IDetailCategoryBuilder& globalsCategory = iBuilder.EditCategory("Globals", LOCTEXT("GlobalsCategory", "Globals"), ECategoryPriority::TypeSpecific);
-    iBuilder.HideProperty("BrushOptions");   
-
-    TArray< TWeakObjectPtr<UObject> > objects;
-    iBuilder.GetObjectsBeingCustomized( objects );
-
-    UOdysseyBrushAssetBase* brushInstance = Cast<UOdysseyBrushAssetBase>(objects[0]);
-
-    TArray<UObject*> brushOptionsObjects; //contains only one object
-    brushOptionsObjects.Add(brushInstance->GetBrushOptions());
-
-    TSharedPtr<IPropertyHandle> sizeHandle = iBuilder.AddObjectPropertyData(brushOptionsObjects, "Size");
-    if (sizeHandle.IsValid())
-        globalsCategory.AddProperty(sizeHandle.ToSharedRef());
-
-    TSharedPtr<IPropertyHandle> flowHandle = iBuilder.AddObjectPropertyData(brushOptionsObjects, "Flow");
-    if (flowHandle.IsValid())
-        globalsCategory.AddProperty(flowHandle.ToSharedRef());
+    iBuilder.SortCategories(&SortCategories);
 }
 
 void

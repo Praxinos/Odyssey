@@ -17,7 +17,7 @@ DECLARE_DELEGATE_OneParam( FOnBrushChanged, UOdysseyBrush* );
 /**
  * Implements the brush selector
  */
-class ODYSSEYWIDGETS_API SOdysseyBrushSelector : public SCompoundWidget
+class ODYSSEYPAINTEREDITOR_API SOdysseyBrushSelector : public SCompoundWidget
 {
 public:
     SLATE_BEGIN_ARGS(SOdysseyBrushSelector)

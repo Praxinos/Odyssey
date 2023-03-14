@@ -6,6 +6,7 @@
 #include "ObjectEditorUtils.h"
 #include "PropertyEditorModule.h"
 #include "ISinglePropertyView.h"
+#include "Widgets/Brush/SOdysseyBrushSelector.h"
 #include "Widgets/SOdysseyShapeSelector.h"
 #include "Widgets/SOdysseyShape.h"
 #include "Tools/RasterDrawingTool/Customizations/OdysseyPainterEditorRasterDrawingToolBrushSelectorCustomization.h"
@@ -16,29 +17,58 @@
 // SOdysseyPainterEditorRasterDrawingToolBrushSelector
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
+SOdysseyPainterEditorRasterDrawingToolBrushSelector::~SOdysseyPainterEditorRasterDrawingToolBrushSelector()
+{
+    mTool->OnBrushChanged().RemoveAll(this);
+}
+
 void
 SOdysseyPainterEditorRasterDrawingToolBrushSelector::Construct( const FArguments& InArgs )
 {
     mTool = InArgs._Tool;
+    mTool->OnBrushChanged().AddRaw(this, &SOdysseyPainterEditorRasterDrawingToolBrushSelector::OnToolBrushChanged);
 
     FPropertyEditorModule& PropertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
     
     FDetailsViewArgs DetailsViewArgs;
+    DetailsViewArgs.DefaultsOnlyVisibility = EEditDefaultsOnlyNodeVisibility::Automatic;
     DetailsViewArgs.bUpdatesFromSelection = false;
     DetailsViewArgs.bLockable = false;
     DetailsViewArgs.bAllowSearch = false;
     DetailsViewArgs.NameAreaSettings = FDetailsViewArgs::HideNameArea;
     
-    TSharedRef<IDetailsView> detailsView = PropertyEditorModule.CreateDetailView(DetailsViewArgs);
-    detailsView->RegisterInstancedCustomPropertyLayout(UOdysseyPainterEditorRasterDrawingTool::StaticClass(),
-        FOnGetDetailCustomizationInstance::CreateLambda([this]() { return FOdysseyPainterEditorRasterDrawingToolBrushSelectorCustomization::MakeInstance(); }));
+    mDetailsView = PropertyEditorModule.CreateDetailView(DetailsViewArgs);
 
-    detailsView->SetObject(mTool);
+    mDetailsView->SetObject(mTool->GetBrushInstance());
 
     this->ChildSlot
     [
-        detailsView
+        SNew(SVerticalBox)
+        +SVerticalBox::Slot()
+        .AutoHeight()
+        [
+            SNew(SOdysseyBrushSelector)
+            .Brush_UObject(mTool, &UOdysseyPainterEditorRasterDrawingTool::GetBrush)
+            .OnBrushChanged(this, &SOdysseyPainterEditorRasterDrawingToolBrushSelector::OnBrushSelected)
+        ]
+    + SVerticalBox::Slot()
+        [
+            mDetailsView.ToSharedRef()
+        ]
     ];
+}
+
+void
+SOdysseyPainterEditorRasterDrawingToolBrushSelector::OnBrushSelected(UOdysseyBrush* iBrush)
+{
+    mTool->SetBrush(iBrush);
+}
+
+void
+SOdysseyPainterEditorRasterDrawingToolBrushSelector::OnToolBrushChanged()
+{
+    mDetailsView->SetObject(mTool->GetBrushInstance());
+    mDetailsView->ForceRefresh();
 }
 
 #undef LOCTEXT_NAMESPACE

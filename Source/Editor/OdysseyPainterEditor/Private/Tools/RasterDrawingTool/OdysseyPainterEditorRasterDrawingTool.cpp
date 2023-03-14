@@ -335,16 +335,25 @@ UOdysseyPainterEditorRasterDrawingTool::RefreshBrushInstance()
 }
 
 //--------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------ Setters
+
+void
+UOdysseyPainterEditorRasterDrawingTool::SetBrush(UOdysseyBrush* iBrush)
+{
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, "Brush", iBrush);
+}
+
+//--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Getters
 
 UOdysseyBrush*
-UOdysseyPainterEditorRasterDrawingTool::GetBrush()
+UOdysseyPainterEditorRasterDrawingTool::GetBrush() const
 {
 	return Brush;
 }
 
 UOdysseyBrushAssetBase*
-UOdysseyPainterEditorRasterDrawingTool::GetBrushInstance()
+UOdysseyPainterEditorRasterDrawingTool::GetBrushInstance() const
 {
     return BrushInstance; 
 }
@@ -358,7 +367,7 @@ UOdysseyPainterEditorRasterDrawingTool::GetBlendParameters() const
 
 // Returns the BrushOptions
 UOdysseyBrushOptions*
-UOdysseyPainterEditorRasterDrawingTool::GetBrushOptions()
+UOdysseyPainterEditorRasterDrawingTool::GetBrushOptions() const
 {
     return BrushOptions;
 }
@@ -370,7 +379,7 @@ UOdysseyPainterEditorRasterDrawingTool::GetSelectedShape() const
 }
 
 UOdysseyShape*
-UOdysseyPainterEditorRasterDrawingTool::GetSelectedShapeInstance()
+UOdysseyPainterEditorRasterDrawingTool::GetSelectedShapeInstance() const
 {
     return SelectedShapeInstance;
 }
@@ -386,6 +395,12 @@ UOdysseyPainterEditorRasterDrawingTool::FAdaptShapePoints&
 UOdysseyPainterEditorRasterDrawingTool::AdaptShapePointsDelegate()
 {
     return mAdaptShapePointsDelegate;
+}
+
+FSimpleMulticastDelegate&
+UOdysseyPainterEditorRasterDrawingTool::OnBrushChanged()
+{
+    return mOnBrushChanged;
 }
 
 //--------------------------------------------------------------------------------------
@@ -473,6 +488,8 @@ UOdysseyPainterEditorRasterDrawingTool::BrushChanged()
 
     //Create the BrushInstance to use for drawing
     CreateBrushInstance(true);
+
+    mOnBrushChanged.Broadcast();
 }
 
 void

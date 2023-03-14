@@ -8,7 +8,7 @@
 #include "IDetailGroup.h"
 #include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
 #include "ObjectEditorUtils.h"
-#include "Brush/SOdysseyBrushSelector.h"
+//#include "Brush/SOdysseyBrushSelector.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorRasterDrawingToolBrushSelectorCustomization"
 
@@ -125,12 +125,12 @@ FOdysseyPainterEditorRasterDrawingToolBrushSelectorCustomization::AddBrushInstan
 void
 FOdysseyPainterEditorRasterDrawingToolBrushSelectorCustomization::AddBrushSelector(IDetailCategoryBuilder& iCategory)
 {
-    iCategory.AddCustomRow(LOCTEXT("BrushSelector", "Brush"), false)
+    /* iCategory.AddCustomRow(LOCTEXT("BrushSelector", "Brush"), false)
     [
         SNew(SOdysseyBrushSelector)
         .Brush_Raw(this, &FOdysseyPainterEditorRasterDrawingToolBrushSelectorCustomization::GetBrush)
         .OnBrushChanged(this, &FOdysseyPainterEditorRasterDrawingToolBrushSelectorCustomization::OnBrushChanged)
-    ];
+    ]; */
 }
 
 void
