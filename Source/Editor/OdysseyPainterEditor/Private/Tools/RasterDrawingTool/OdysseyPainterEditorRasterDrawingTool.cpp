@@ -335,15 +335,6 @@ UOdysseyPainterEditorRasterDrawingTool::RefreshBrushInstance()
 }
 
 //--------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------ Setters
-
-void
-UOdysseyPainterEditorRasterDrawingTool::SetBrush(UOdysseyBrush* iBrush)
-{
-    FOdysseyObjectEditorUtils::SetPropertyValue(this, "Brush", iBrush);
-}
-
-//--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Getters
 
 UOdysseyBrush*
@@ -401,6 +392,12 @@ FSimpleMulticastDelegate&
 UOdysseyPainterEditorRasterDrawingTool::OnBrushChanged()
 {
     return mOnBrushChanged;
+}
+
+FSimpleMulticastDelegate&
+UOdysseyPainterEditorRasterDrawingTool::OnShapeChanged()
+{
+    return mOnShapeChanged;
 }
 
 //--------------------------------------------------------------------------------------
@@ -496,6 +493,7 @@ void
 UOdysseyPainterEditorRasterDrawingTool::SelectedShapeChanged()
 {
     FOdysseyObjectEditorUtils::SetPropertyValue(this, "SelectedShapeInstance", AvailableShapes[SelectedShape]);
+    mOnShapeChanged.Broadcast();
 }
 
 void

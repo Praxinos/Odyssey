@@ -20,6 +20,8 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorRasterDrawingToolOptions
 
 public:
     // Construction / Destruction
+    ~SOdysseyPainterEditorRasterDrawingToolOptions();
+
     SLATE_BEGIN_ARGS( SOdysseyPainterEditorRasterDrawingToolOptions )
         {}
         SLATE_ARGUMENT(UOdysseyPainterEditorRasterDrawingTool*, Tool)
@@ -28,7 +30,12 @@ public:
     void  Construct( const  FArguments&  InArgs );
 
 private:
+    void OnShapeSelected(EOdysseyShape iShape);
+    void OnToolShapeChanged();
+
+private:
     // Private data members
     UOdysseyPainterEditorRasterDrawingTool*                mTool;
+    TSharedPtr<IDetailsView> mDetailsView;
 };
 

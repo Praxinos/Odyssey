@@ -69,9 +69,6 @@ public:
     // Recreates the brush instance
     void RefreshBrushInstance();
 
-    //Sets a new brush to draw with
-    void SetBrush(UOdysseyBrush* iBrush);
-
 public:
     // Getters
 
@@ -98,6 +95,7 @@ public:
     FAdaptShapePoints& AdaptShapePointsDelegate();
 
     FSimpleMulticastDelegate& OnBrushChanged();
+    FSimpleMulticastDelegate& OnShapeChanged();
 
 public:
     //Properties changes
@@ -211,4 +209,5 @@ protected:
     FOnApplyOverrides                   mOnApplyOverridesDelegate;
     FAdaptShapePoints                   mAdaptShapePointsDelegate;
     FSimpleMulticastDelegate            mOnBrushChanged;
+    FSimpleMulticastDelegate            mOnShapeChanged;
 };

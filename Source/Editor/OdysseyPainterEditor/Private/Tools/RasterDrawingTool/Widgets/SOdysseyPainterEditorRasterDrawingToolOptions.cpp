@@ -8,7 +8,6 @@
 #include "ISinglePropertyView.h"
 #include "Widgets/SOdysseyShapeSelector.h"
 #include "Widgets/SOdysseyShape.h"
-#include "Tools/RasterDrawingTool/Customizations/OdysseyPainterEditorRasterDrawingToolOptionsCustomization.h"
 
 #define LOCTEXT_NAMESPACE "SOdysseyPainterEditorRasterDrawingToolOptions"
 
@@ -16,10 +15,16 @@
 // SOdysseyPainterEditorRasterDrawingToolOptions
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
+SOdysseyPainterEditorRasterDrawingToolOptions::~SOdysseyPainterEditorRasterDrawingToolOptions()
+{
+    mTool->OnShapeChanged().RemoveAll(this);
+}
+
 void
 SOdysseyPainterEditorRasterDrawingToolOptions::Construct( const FArguments& InArgs )
 {
     mTool = InArgs._Tool;
+    mTool->OnShapeChanged().AddRaw(this, &SOdysseyPainterEditorRasterDrawingToolOptions::OnToolShapeChanged);
 
     FPropertyEditorModule& PropertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
 
@@ -31,16 +36,38 @@ SOdysseyPainterEditorRasterDrawingToolOptions::Construct( const FArguments& InAr
     DetailsViewArgs.bAllowSearch = false;
     DetailsViewArgs.NameAreaSettings = FDetailsViewArgs::HideNameArea;
     
-    TSharedRef<IDetailsView> detailsView = PropertyEditorModule.CreateDetailView(DetailsViewArgs);
-    /* detailsView->RegisterInstancedCustomPropertyLayout(UOdysseyPainterEditorRasterDrawingTool::StaticClass(),
-        FOnGetDetailCustomizationInstance::CreateLambda([this]() { return FOdysseyPainterEditorRasterDrawingToolOptionsCustomization::MakeInstance(); })); */
-
-    detailsView->SetObject(mTool);
+    mDetailsView = PropertyEditorModule.CreateDetailView(DetailsViewArgs);
+    mDetailsView->SetObject(mTool);
 
     this->ChildSlot
     [
-        detailsView
+        //TODO: The following works, just uncomment it when you cant to implement new shapes
+
+        /* SNew(SVerticalBox)
+        +SVerticalBox::Slot()
+        .AutoHeight()
+        [
+            SNew(SOdysseyShapeSelector)
+            .SelectedShape_UObject(mTool, &UOdysseyPainterEditorRasterDrawingTool::GetSelectedShape)
+            .OnShapeSelected(this, &SOdysseyPainterEditorRasterDrawingToolOptions::OnShapeSelected)
+        ]
+        + SVerticalBox::Slot()
+        [ */
+            mDetailsView.ToSharedRef()
+        //]
     ];
+}
+
+void
+SOdysseyPainterEditorRasterDrawingToolOptions::OnShapeSelected(EOdysseyShape iShape)
+{
+    FOdysseyObjectEditorUtils::SetPropertyValue(mTool, "SelectedShape", iShape);
+}
+
+void
+SOdysseyPainterEditorRasterDrawingToolOptions::OnToolShapeChanged()
+{
+    mDetailsView->ForceRefresh();
 }
 
 #undef LOCTEXT_NAMESPACE

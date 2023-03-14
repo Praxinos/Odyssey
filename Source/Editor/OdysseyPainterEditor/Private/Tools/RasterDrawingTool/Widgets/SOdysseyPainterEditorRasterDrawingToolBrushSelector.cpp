@@ -60,7 +60,7 @@ SOdysseyPainterEditorRasterDrawingToolBrushSelector::Construct( const FArguments
 void
 SOdysseyPainterEditorRasterDrawingToolBrushSelector::OnBrushSelected(UOdysseyBrush* iBrush)
 {
-    mTool->SetBrush(iBrush);
+    FOdysseyObjectEditorUtils::SetPropertyValue(mTool, "Brush", iBrush);
 }
 
 void
