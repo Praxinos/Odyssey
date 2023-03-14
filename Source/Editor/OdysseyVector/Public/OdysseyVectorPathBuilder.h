@@ -85,6 +85,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorPathBuilder : public UOdysseyVectorObject
 
     protected :
         UOdysseyVectorPathCubic* mCubicPath;
+        FOdysseyVectorVertexCubic* mStitchVertex;
 
         /**
          * @brief append a point at coordinates iX, iY with radius iRadius
@@ -114,8 +115,9 @@ class ODYSSEYVECTOR_API UOdysseyVectorPathBuilder : public UOdysseyVectorObject
          * @brief attach a cubic path to shape.
          *
          * @param iCubicPath the cubic path
+         * @param iStitchVertex start from this vertex (must be an end-point)
          */
-        void Attach( UOdysseyVectorPathCubic* iCubicPath );
+        void Attach( UOdysseyVectorPathCubic* iCubicPath, FOdysseyVectorVertexCubic* iStitchVertex );
 
         /**
          * @brief convenience function for AppendPoint( double iX, double iY, double iRadius, bool iEnforce );

@@ -32,7 +32,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
                        , double iX
                        , double iY
                        , double iRadius
-                       , std::vector<FOdysseyVectorPoint*>& oPickedPointArray );
+                       , std::vector<FOdysseyVectorPoint*>& oPickedPointArray
+                       , uint64 iPickingFlags );
         bool Knot( FOdysseyVectorVertex* iVertexA
                  , FOdysseyVectorVertex* iVertexB
                  , FOdysseyVectorSegment** oCreatedSegment

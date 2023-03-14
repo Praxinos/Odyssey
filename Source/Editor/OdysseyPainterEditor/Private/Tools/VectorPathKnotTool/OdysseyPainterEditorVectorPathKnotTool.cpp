@@ -71,7 +71,8 @@ UOdysseyPainterEditorVectorPathKnotTool::OnMouseDown(const FOdysseyPoint& iPoint
                                 , iPointInTexture.x
                                 , iPointInTexture.y
                                 , Radius
-                                , pickedPointArray );
+                                , pickedPointArray
+                                , UOdysseyVectorPath::PICK_POINT );
 
         if( pickedPointArray.size() >= 2 )
         {

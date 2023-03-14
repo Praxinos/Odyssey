@@ -55,6 +55,7 @@ namespace FOdysseyVector
 #include "HUD/OdysseyVectorHUD.h"
 #include "HUD/OdysseyVectorHUDLine.h"
 #include "HUD/OdysseyVectorHUDPathCubic.h"
+#include "HUD/OdysseyVectorHUDPathDrawing.h"
 #include "HUD/OdysseyVectorHUDEraser.h"
 #include "HUD/OdysseyVectorHUDBucket.h"
 #include "HUD/OdysseyVectorHUDPush.h"

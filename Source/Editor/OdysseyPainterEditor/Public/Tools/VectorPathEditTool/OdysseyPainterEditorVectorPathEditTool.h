@@ -33,7 +33,11 @@ public:
     virtual void Commit() override;
 
 private:
-    void Redraw(const TArray<::ULIS::FRectI>& iRects);
+    void Redraw( const TArray<::ULIS::FRectI>& iRects );
+    UOdysseyVectorPathCubic* FetchPath( FOdysseyVectorEngine* iVectorEngine
+                                      , UOdysseyVectorScene* iScene
+                                      , double iWorldX
+                                      , double iWorldY );
 
 private:
     double mOldLocalMouseX;

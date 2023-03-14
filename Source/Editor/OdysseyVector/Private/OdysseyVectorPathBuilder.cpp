@@ -7,6 +7,7 @@ UOdysseyVectorPathBuilder::~UOdysseyVectorPathBuilder()
 
 UOdysseyVectorPathBuilder::UOdysseyVectorPathBuilder()
     : mCubicPath ( nullptr )
+    , mStitchVertex ( nullptr )
     , mCumulAngle ( 0.0f )
     , mCumulAngleLimit ( 1.5708f ) // 90 degrees
     , mLastCubicAngleLimit ( 1.0472f ) // 60 deg
@@ -18,9 +19,10 @@ UOdysseyVectorPathBuilder::UOdysseyVectorPathBuilder()
 }
 
 void 
-UOdysseyVectorPathBuilder::Attach( UOdysseyVectorPathCubic* iCubicPath )
+UOdysseyVectorPathBuilder::Attach( UOdysseyVectorPathCubic* iCubicPath, FOdysseyVectorVertexCubic* iStitchVertex )
 {
     mCubicPath = iCubicPath;
+    mStitchVertex = iStitchVertex;
 }
 
 FOdysseyVectorLink*
@@ -240,11 +242,22 @@ UOdysseyVectorPathBuilder::Sample( FOdysseyVectorPoint* iSamplePoint, double iRa
                     ::ULIS::FVec2D entryVector = mSampleLinkList.front()->GetVector( true );
                     ::ULIS::FVec2D exitVector =  lastSampleSegmentVector;
 
-                    cubicSegment = mCubicPath->AppendVertex( cubicVertex, true, true );
+                    mCubicPath->AddVertex( cubicVertex );
 
-                    Sharp ( *cubicSegment
-                           , entryVector
-                           , exitVector );
+                    if( mStitchVertex )
+                    {
+                        cubicSegment = FOdysseyVectorSegmentCubic::New( mCubicPath, mStitchVertex, cubicVertex );
+
+                        mCubicPath->AddSegment( cubicSegment );
+
+                        cubicSegment->Invalidate();
+
+                        Sharp ( *cubicSegment
+                               , entryVector
+                               , exitVector );
+                    }
+
+                    mStitchVertex = cubicVertex;
 
                     if ( lastCubicSegment )
                     {
@@ -257,7 +270,7 @@ UOdysseyVectorPathBuilder::Sample( FOdysseyVectorPoint* iSamplePoint, double iRa
                             double length = cubicSegment->GetStraightDistance();
 
                             cubicSegment->GetHandle(0)->Set ( cubicSegment->GetPoint(0)->GetX() + ( lastCubicSegmentVector.x * length * 0.35f )
-                                                                  , cubicSegment->GetPoint(0)->GetY() + ( lastCubicSegmentVector.y * length * 0.35f ) );
+                                                            , cubicSegment->GetPoint(0)->GetY() + ( lastCubicSegmentVector.y * length * 0.35f ) );
                         }
                     }
 
@@ -310,11 +323,20 @@ UOdysseyVectorPathBuilder::AppendPoint( double iX
 
     if ( lastPoint == nullptr )
     {
-        FOdysseyVectorVertexCubic* cubicVertex = FOdysseyVectorVertexCubic::New( point->GetX()
-                                                                               , point->GetY()
-                                                                               , iRadius );
+        FOdysseyVectorVertexCubic* cubicVertex;
 
-        mCubicPath->AppendVertex( cubicVertex, false, false );
+        if( mStitchVertex == nullptr )
+        {
+            cubicVertex = FOdysseyVectorVertexCubic::New( point->GetX()
+                                                        , point->GetY()
+                                                        , iRadius );
+
+            mCubicPath->AppendVertex( cubicVertex, false, false );
+        }
+        else
+        {
+            cubicVertex = mStitchVertex;
+        }
 
         Sample ( point, iRadius, iEnforce );
     }

@@ -135,6 +135,8 @@ class ODYSSEYVECTOR_API UOdysseyVectorObject : public UObject
         std::list<UOdysseyVectorObject*>& GetChildrenList();
         void SetForegroundColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA );
         void SetBackgroundColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA );
+        void SetForegroundColor( FColor& iColor );
+        void SetBackgroundColor( FColor& iColor );
         void SetFilled(bool iIsFilled);
         void SetStrokeWidth( double iWidth );
         double GetStrokeWidth( );
@@ -150,8 +152,8 @@ class ODYSSEYVECTOR_API UOdysseyVectorObject : public UObject
         void DrawBBox( ::ULIS::FRectD& iRoi,uint64 iFlags );
         int32 PickBBox( double iX, double iY );
         bool HasSelectedParent();
-        FColor GetForegroundColor();
-        FColor GetBackgroundColor();
+        FColor& GetForegroundColor();
+        FColor& GetBackgroundColor();
         virtual void SwitchSpace( UOdysseyVectorObject& iNewSpace ){};
         // UObject overrides
         virtual void PropertyChanged(const FName& iPropertyName);

@@ -283,7 +283,8 @@ RecursivePickPoints( UOdysseyVectorObject* iObject
                    , double iX
                    , double iY
                    , double iRadius
-                   , std::vector<FOdysseyVectorPoint*>& oPickedPointArray )
+                   , std::vector<FOdysseyVectorPoint*>& oPickedPointArray
+                   , uint64 iPickingFlags )
 {
     UOdysseyVectorPath* path = Cast<UOdysseyVectorPath>(iObject);
 
@@ -302,7 +303,7 @@ RecursivePickPoints( UOdysseyVectorObject* iObject
 
         if( pathBBox.HitTest( ::ULIS::FVec2D( localPoint.x, localPoint.y ) ) == true )
         {
-            path->PickPoint( localPoint.x, localPoint.y, localRadius, oPickedPointArray, UOdysseyVectorPath::PICK_POINT );
+            path->PickPoint( localPoint.x, localPoint.y, localRadius, oPickedPointArray, iPickingFlags );
         }
     }
 
@@ -310,7 +311,7 @@ RecursivePickPoints( UOdysseyVectorObject* iObject
     {
         UOdysseyVectorObject* child = (*it);
 
-        RecursivePickPoints( child, iX, iY, iRadius, oPickedPointArray );
+        RecursivePickPoints( child, iX, iY, iRadius, oPickedPointArray, iPickingFlags );
     }
 }
 
@@ -319,9 +320,10 @@ FOdysseyVectorEngine::PickPoints( UOdysseyVectorScene* iScene
                                 , double iX
                                 , double iY
                                 , double iRadius
-                                , std::vector<FOdysseyVectorPoint*>& oPickedPointArray )
+                                , std::vector<FOdysseyVectorPoint*>& oPickedPointArray
+                                , uint64 iPickingFlags )
 {
-    RecursivePickPoints( iScene, iX, iY, iRadius, oPickedPointArray );
+    RecursivePickPoints( iScene, iX, iY, iRadius, oPickedPointArray, iPickingFlags );
 }
 
 bool

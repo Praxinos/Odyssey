@@ -13,39 +13,58 @@
 UCLASS()
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : public UOdysseyPainterEditorTool
 {
-public:
-    GENERATED_BODY()
+    public:
+        GENERATED_BODY()
 
-    DECLARE_MULTICAST_DELEGATE(FSelectionChanged)
-    FSelectionChanged mSelectionChanged;
+        DECLARE_MULTICAST_DELEGATE(FSelectionChanged)
+        FSelectionChanged mSelectionChanged;
 
-public:
-    // Destructor
-    virtual ~UOdysseyPainterEditorVectorPathDrawingTool();
+    public:
+        // Destructor
+        virtual ~UOdysseyPainterEditorVectorPathDrawingTool();
 
-    //Constructor
-    UOdysseyPainterEditorVectorPathDrawingTool();
+        //Constructor
+        UOdysseyPainterEditorVectorPathDrawingTool();
  
-    //OdysseyPainterEditorTool overrides
-    virtual void Activate() override;
+        //OdysseyPainterEditorTool overrides
+        virtual void Activate() override;
 
-    virtual bool OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
-    virtual void OnMouseDrag(const FOdysseyPoint& iPointInTexture) override;
-    virtual bool OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
-    virtual void Commit() override;
+        virtual bool OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
+        virtual void OnMouseDrag(const FOdysseyPoint& iPointInTexture) override;
+        virtual void OnMouseHover(const FOdysseyPoint& iPointInTexture) override;
+        virtual bool OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
+        virtual void Commit() override;
 
-public:
-    // Setters
-    virtual bool CanDraw();
+    protected:
+        void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent );
+        void PropertyChanged( const FName& iPropertyName );
 
-    UPROPERTY(EditAnywhere, Category="Odyssey PathDrawing Tool")
-    double Size;
-    // computed based upon whether or not the pencil size is relative to the object's transformation matrix
-    double mRealSize;
+    private:
+        UOdysseyVectorPathBuilder* MakePathBuilder( FOdysseyVectorEngine* iVectorEngine
+                                                  , UOdysseyVectorScene* iScene
+                                                  , double iWorldX
+                                                  , double iWorldY );
 
-    UPROPERTY(EditAnywhere, Category="Odyssey PathDrawing Tool")
-    bool Absolute;
+    public:
+        // Setters
+        virtual bool CanDraw();
 
-protected:
+        UPROPERTY( EditAnywhere, Category="Odyssey PathDrawing Tool" )
+        double Radius;
+        // computed based upon whether or not the pencil size is relative to the object's transformation matrix
+        double mRealSize;
 
+        UPROPERTY( EditAnywhere, Category="Odyssey PathDrawing Tool" )
+        bool Absolute;
+
+        UPROPERTY( EditAnywhere, Category="Odyssey PathDrawing Tool" )
+        bool Stitch;
+
+        UPROPERTY( EditAnywhere, Category="Odyssey PathDrawing Tool" )
+        double StitchingRadius;
+
+    protected:
+
+    private:
+        FOdysseyVectorHUDPathDrawing mPathDrawingHUD;
 };

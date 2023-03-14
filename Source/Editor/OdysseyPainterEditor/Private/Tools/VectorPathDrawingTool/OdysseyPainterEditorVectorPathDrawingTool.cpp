@@ -15,10 +15,15 @@ UOdysseyPainterEditorVectorPathDrawingTool::~UOdysseyPainterEditorVectorPathDraw
 }
 
 UOdysseyPainterEditorVectorPathDrawingTool::UOdysseyPainterEditorVectorPathDrawingTool()
-    : Size(10.0f)
-    , Absolute(true)
+    : Radius( 5.0f )
+    , Stitch( true )
+    , StitchingRadius( 10 )
+    , Absolute( true )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.VectoPen64");
+
+    mPathDrawingHUD.SetRadius( Radius );
+    mPathDrawingHUD.SetStitchingRadius( StitchingRadius );
 }
 
 //--------------------------------------------------------------------------------------
@@ -30,11 +35,12 @@ UOdysseyPainterEditorVectorPathDrawingTool::Activate()
 	//FOdysseyObjectEditorUtils::SetPropertyValue(BrushOptions, "Color", FOdysseyBrushColor(GetEditorAs<FOdysseyPainterEditor>()->PaintColor()));
     UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
 
-    if(currentVectorLayer)
+    if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
 
         vectorEngine->ClearHUD();
+        vectorEngine->AddHUD( &mPathDrawingHUD );
 
         currentVectorLayer->RenderImageChanged(false);
     }
@@ -46,42 +52,86 @@ UOdysseyPainterEditorVectorPathDrawingTool::CanDraw()
     return IsActivable();
 }
 
+// create path or get the existing one under mouse click.
+UOdysseyVectorPathBuilder*
+UOdysseyPainterEditorVectorPathDrawingTool::MakePathBuilder( FOdysseyVectorEngine* iVectorEngine
+                                                           , UOdysseyVectorScene* iScene
+                                                           , double iWorldX
+                                                           , double iWorldY )
+{
+    UOdysseyVectorPathBuilder* pathBuilder = NewObject<UOdysseyVectorPathBuilder>();
+    ::ULIS::FColor color = GetEditorAs<FOdysseyPainterEditor>()->PaintColor().GetValue();
+    ::ULIS::FColor rgba8 = color.ToFormat( ::ULIS::eFormat::Format_RGBA8 );
+    FOdysseyVectorVertexCubic* stitchCubicVertex = nullptr;
+    UOdysseyVectorPathCubic* cubicPath = nullptr;
+
+    if( Stitch )
+    {
+        std::vector<FOdysseyVectorPoint*> pickedPointArray;
+
+        pickedPointArray.reserve( 50 );
+
+        iVectorEngine->PickPoints( iScene
+                                 , iWorldX
+                                 , iWorldY
+                                 , StitchingRadius
+                                 , pickedPointArray
+                                 , UOdysseyVectorPath::PICK_POINT );
+
+        if( pickedPointArray.size() )
+        {
+            stitchCubicVertex = static_cast<FOdysseyVectorVertexCubic*>( pickedPointArray[0] );
+
+            if( stitchCubicVertex->GetSegmentCount() == 1 )
+            {
+                cubicPath = Cast<UOdysseyVectorPathCubic>( stitchCubicVertex->GetPath() );
+            }
+        }
+    }
+
+    if ( cubicPath == nullptr )
+    {
+        cubicPath = NewObject<UOdysseyVectorPathCubic>();
+
+        iScene->AppendChild( cubicPath );
+
+        cubicPath->UpdateMatrix();
+        cubicPath->SetForegroundColor( rgba8.R8(), rgba8.G8(), rgba8.B8(), rgba8.A8() );
+    }
+
+    iScene->AppendChild( pathBuilder );
+
+    pathBuilder->Attach( cubicPath, stitchCubicVertex );
+    pathBuilder->SetForegroundColor( cubicPath->GetForegroundColor() );
+    pathBuilder->UpdateMatrix();
+
+    return pathBuilder;
+}
+
 bool
 UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
+    UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
 
-    if( currentVectorLayer )
+    if( currentLayer->GetClass() == UOdysseyTextureLayerImageVector::StaticClass() )
     {
+        UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         UOdysseyVectorScene* scene = currentVectorLayer->GetScene();
         UOdysseyVectorObject* selectedObject = scene->GetLastSelected();
-        UOdysseyVectorPathCubic* cubicPath = NewObject<UOdysseyVectorPathCubic>();
-        UOdysseyVectorPathBuilder* currentPathBuilder = NewObject<UOdysseyVectorPathBuilder>();
-        float radius =  iPointInTexture.pressure * ( Size * 0.5f );
-        float roundedUpRadius = ceil (radius);
-        float roundedUpDiameter = roundedUpRadius * 2.0f;
-        ::ULIS::FColor color = GetEditorAs<FOdysseyPainterEditor>()->PaintColor().GetValue();
-        ::ULIS::FColor rgba8 = color.ToFormat( ::ULIS::eFormat::Format_RGBA8 );
+        UOdysseyVectorPathBuilder* pathBuilder = MakePathBuilder ( vectorEngine, scene, iPointInTexture.x, iPointInTexture.y );
+        UOdysseyVectorPathCubic* cubicPath = pathBuilder->GetCubicPath();
 
-        cubicPath->SetForegroundColor( rgba8.R8(), rgba8.G8(), rgba8.B8(), rgba8.A8() );
-        currentPathBuilder->SetForegroundColor( rgba8.R8(), rgba8.G8(), rgba8.B8(), rgba8.A8() );
-
-        currentPathBuilder->Attach( cubicPath );
-
-        scene->AppendChild( cubicPath );
-        scene->AppendChild( currentPathBuilder );
-
-        cubicPath->UpdateMatrix();
-        currentPathBuilder->UpdateMatrix();
+        // take the upper value to prevent stroke with width 0.0
+        float radius = iPointInTexture.pressure * Radius;
 
         BLPoint localCoords = cubicPath->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
 
-        currentPathBuilder->AppendPoint( localCoords.x, localCoords.y, roundedUpRadius );
+        pathBuilder->AppendPoint( localCoords.x, localCoords.y, radius );
 
         scene->ClearSelection();
-        scene->Select( currentPathBuilder );
+        scene->Select( pathBuilder );
 
         mSelectionChanged.Broadcast();
 
@@ -94,10 +144,26 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDown(const FOdysseyPoint& iPo
 }
 
 void
+UOdysseyPainterEditorVectorPathDrawingTool::OnMouseHover(const FOdysseyPoint& iPointInTexture)
+{
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
+    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
+
+    mPathDrawingHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
+
+    if( currentVectorLayer )
+    {
+        currentVectorLayer->RenderImageChanged(false);
+    }
+}
+
+void
 UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
+
+    mPathDrawingHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
 
     if( currentVectorLayer )
     {
@@ -105,7 +171,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDrag(const FOdysseyPoint& iPo
         UOdysseyVectorPathBuilder* currentPathBuilder = static_cast<UOdysseyVectorPathBuilder*>( currentVectorLayer->GetScene()->GetLastSelected() );
         UOdysseyVectorPathCubic* cubicPath = currentPathBuilder->GetCubicPath();
         BLPoint localCoords = cubicPath->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
-        float radius =  iPointInTexture.pressure * ( Size * 0.5f );
+        float radius =  iPointInTexture.pressure * Radius;
         float roundedUpRadius = ceil (radius);
         float roundedUpDiameter = roundedUpRadius * 2.0f;
         ::ULIS::FRectI invalidateRegion = { (int) iPointInTexture.x - (int) roundedUpRadius
@@ -159,7 +225,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUp(const FOdysseyPoint& iPoin
         {
             UOdysseyVectorPathCubic* cubicPath = currentPathBuilder->GetCubicPath();
             BLPoint localCoords = cubicPath->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
-            float radius =  iPointInTexture.pressure * ( Size * 0.5f );
+            float radius =  iPointInTexture.pressure * Radius;
             float roundedUpRadius = ceil (radius);
             float roundedUpDiameter = roundedUpRadius * 2.0f;
 
@@ -192,4 +258,30 @@ void
 UOdysseyPainterEditorVectorPathDrawingTool::Commit()
 {
 
+}
+
+void
+UOdysseyPainterEditorVectorPathDrawingTool::PropertyChanged( const FName& iPropertyName )
+{
+    if ( iPropertyName == "Radius" )
+        mPathDrawingHUD.SetRadius( Radius );
+
+    if ( ( iPropertyName == "StitchingRadius" ) || ( iPropertyName == "Stitch" ) )
+    {
+        if( Stitch == true )
+            mPathDrawingHUD.SetStitchingRadius( StitchingRadius );
+        else
+            mPathDrawingHUD.SetStitchingRadius( 0.0f );
+    }
+}
+
+void
+UOdysseyPainterEditorVectorPathDrawingTool::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent)
+{
+    Super::PostEditChangeProperty(PropertyChangedEvent);
+
+    if (PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive)
+        return;
+
+    PropertyChanged(PropertyChangedEvent.GetPropertyName());
 }

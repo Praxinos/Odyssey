@@ -496,6 +496,18 @@ UOdysseyVectorObject::RemoveChild( UOdysseyVectorObject* iChild )
 }
 
 void
+UOdysseyVectorObject::SetForegroundColor( FColor& iColor )
+{
+    Foreground = iColor;
+}
+
+void
+UOdysseyVectorObject::SetBackgroundColor( FColor& iColor )
+{
+    Background = iColor;
+}
+
+void
 UOdysseyVectorObject::SetForegroundColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA )
 {
     Foreground.R = iR;
@@ -580,13 +592,13 @@ UOdysseyVectorObject::TreeToArray( UOdysseyVectorObject* iObject, std::vector<UO
     return iOutArray.size();
 }
 
-FColor
+FColor&
 UOdysseyVectorObject::GetForegroundColor()
 {
     return Foreground;
 }
 
-FColor
+FColor&
 UOdysseyVectorObject::GetBackgroundColor()
 {
     return Background;
