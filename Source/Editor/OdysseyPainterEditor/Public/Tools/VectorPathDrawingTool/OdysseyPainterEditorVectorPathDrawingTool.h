@@ -67,4 +67,5 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
 
     private:
         FOdysseyVectorHUDPathDrawing mPathDrawingHUD;
+        FOdysseyVectorVertexCubic* mPreviousVertex;
 };

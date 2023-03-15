@@ -11,6 +11,11 @@ FOdysseyVectorPoint::FOdysseyVectorPoint()
     SetRadius( 1.0f );
 }
 
+FOdysseyVectorPoint::FOdysseyVectorPoint( double iX, double iY, double iRadius )
+{
+    Init( iX, iY, iRadius );
+}
+
 void
 FOdysseyVectorPoint::Init( double iX, double iY, double iRadius )
 {

@@ -23,6 +23,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorPoint
         virtual ~FOdysseyVectorPoint();
         FOdysseyVectorPoint();
 
+        FOdysseyVectorPoint( double iX, double iY, double iRadius );
+
         /**
          * @brief Inits the point with coordinates and radius
          * @param iX coordinates on X axis
