@@ -63,7 +63,7 @@ FULISInvalidTileMap::Invalidate(const TArray<FIntPoint>& iTileIndexes)
 void
 FULISInvalidTileMap::Invalidate(const ::ULIS::FRectI& iRect)
 {
-    if (iRect.x >= mWidth || iRect.x + iRect.w < 0 || iRect.y >= mWidth || iRect.y + iRect.y < 0)
+    if (iRect.x >= mWidth || iRect.x + iRect.w < 0 || iRect.y >= mHeight || iRect.y + iRect.y < 0)
         return;
 
     float xf = float( iRect.x ) / mTileSize;
