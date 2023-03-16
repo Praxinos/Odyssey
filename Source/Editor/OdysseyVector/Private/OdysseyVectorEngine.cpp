@@ -428,7 +428,7 @@ RecursivePickSegments( UOdysseyVectorObject* iObject
             for( std::list<FOdysseyVectorSegment*>::iterator it = segmentList.begin(); it != segmentList.end(); ++it )
             {
                 FOdysseyVectorSegment* segment = (*it);
-                ::ULIS::FRectD segmentBBox = segment->GetBoundingBox();
+                ::ULIS::FRectD segmentBBox = segment->GetBoundingBox( false );
 
                 segmentBBox.x -=   localRadius;
                 segmentBBox.y -=   localRadius;

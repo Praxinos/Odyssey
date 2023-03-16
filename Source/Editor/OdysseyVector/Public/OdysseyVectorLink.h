@@ -22,6 +22,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorLink
 
         virtual ~FOdysseyVectorLink();
          FOdysseyVectorLink();
+         FOdysseyVectorLink( FOdysseyVectorPoint* iPoint0, FOdysseyVectorPoint* iPoint1 );
 
         void Init( FOdysseyVectorPoint* iPoint0, FOdysseyVectorPoint* iPoint1 );
 

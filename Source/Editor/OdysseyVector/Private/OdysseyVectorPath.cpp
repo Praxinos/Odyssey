@@ -86,7 +86,7 @@ UOdysseyVectorPath::UpdateBBox()
     for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
     {
         FOdysseyVectorSegment* segment = static_cast<FOdysseyVectorSegment*>(*it);
-        ::ULIS::FRectD& coords = segment->GetBoundingBox();
+        ::ULIS::FRectD coords = segment->GetBoundingBox( false );
         double rx1 = coords.x, ry1 = coords.y, rx2 = coords.x + coords.w, ry2 = coords.y + coords.h;
 
         if ( rx1 < x1 ) x1 = rx1;

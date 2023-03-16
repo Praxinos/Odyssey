@@ -54,7 +54,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
          * @brief Get the bounding volume form by this vertex and its segments.
          * @return the bounding volume form by this vertex and its segments.
          */
-        ::ULIS::FRectD GetRectangle();
+        ::ULIS::FRectD GetBoundingBox( bool iWorld );
 
         //////// setters
 

@@ -319,9 +319,24 @@ FOdysseyVectorSegmentCubic::GetHandle( int iCtrlPointNum )
     return &mCtrlPoint[iCtrlPointNum];
 }
 
-::ULIS::FRectD&
-FOdysseyVectorSegmentCubic::GetBoundingBox( )
+::ULIS::FRectD
+FOdysseyVectorSegmentCubic::GetBoundingBox( bool iWorld )
 {
+    if( iWorld == true )
+    {
+        BLMatrix2D& worldMatrix = GetPath()->GetWorldMatrix();
+        BLPoint p0 = worldMatrix.mapPoint( mBBox.x          , mBBox.y           );
+        BLPoint p1 = worldMatrix.mapPoint( mBBox.x + mBBox.w, mBBox.y           );
+        BLPoint p2 = worldMatrix.mapPoint( mBBox.x + mBBox.w, mBBox.y + mBBox.h );
+        BLPoint p3 = worldMatrix.mapPoint( mBBox.x          , mBBox.y + mBBox.h );
+        ::ULIS::FRectD bbox = ::ULIS::FRectD::FromMinMax( ::ULIS::FMath::Min4( p0.x, p1.x, p2.x, p3.x )
+                                                        , ::ULIS::FMath::Min4( p0.y, p1.y, p2.y, p3.y )
+                                                        , ::ULIS::FMath::Max4( p0.x, p1.x, p2.x, p3.x )
+                                                        , ::ULIS::FMath::Max4( p0.y, p1.y, p2.y, p3.y ) );
+
+        return bbox;
+    }
+
     return mBBox;
 }
 

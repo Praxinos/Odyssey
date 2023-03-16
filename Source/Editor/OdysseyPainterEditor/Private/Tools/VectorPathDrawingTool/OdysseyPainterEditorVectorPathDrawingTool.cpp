@@ -53,6 +53,20 @@ UOdysseyPainterEditorVectorPathDrawingTool::CanDraw()
     return IsActivable();
 }
 
+static ::ULIS::FRectI
+GetInvalidationAreaFromPointer( int iX, int iY, int iRadius ) 
+{
+    int diameter = iRadius * 2;
+
+    return ::ULIS::FRectI( iX - iRadius, iY - iRadius, diameter, diameter );
+}
+
+static ::ULIS::FRectI
+RectangleDtoI( ::ULIS::FRectD iRect )
+{
+    return ::ULIS::FRectI( (int) iRect.x, (int) iRect.y, (int) iRect.w, (int) iRect.h );
+}
+
 static FOdysseyVectorVertexCubic*
 PickVertex( FOdysseyVectorEngine* iVectorEngine
           , UOdysseyVectorScene* iScene
@@ -138,7 +152,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDown(const FOdysseyPoint& iPo
         pathBuilder->SetForegroundColor( cubicPath->GetForegroundColor() );
         pathBuilder->UpdateMatrix();
 
-        pathBuilder->RecordVertex( cubicVertex, nullptr, localCoords.x, localCoords.y, radius );
+        pathBuilder->Record( cubicVertex, false );
 
         scene->ClearSelection();
         scene->Select( pathBuilder );
@@ -184,26 +198,21 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDrag(const FOdysseyPoint& iPo
         BLPoint localCoords = cubicPath->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
         float radius =  iPointInTexture.pressure * Radius;
         float roundedUpRadius = ceil (radius);
-        FOdysseyVectorSegmentCubic* cubicSegment = currentPathBuilder->RecordVertex( nullptr
-                                                                                   , mPreviousVertex
-                                                                                   , localCoords.x
-                                                                                   , localCoords.y
-                                                                                   , roundedUpRadius );
+        FOdysseyVectorPoint* newPoint = FOdysseyVectorPoint::New( localCoords.x, localCoords.y, radius );
 
-        if ( cubicSegment )
-        {
-            cubicPath->AddVertex( cubicSegment->GetVertex(1) );
-            cubicPath->AddSegment( cubicSegment );
+        currentPathBuilder->Record( newPoint, false );
 
-            mPreviousVertex = static_cast<FOdysseyVectorVertexCubic*>(cubicSegment->GetVertex(1));
+        ::ULIS::FRectI redrawRegion = GetInvalidationAreaFromPointer( iPointInTexture.x, iPointInTexture.y, Radius );
 
-            cubicSegment->Invalidate();
-        } 
+        redrawRegion = redrawRegion | RectangleDtoI( mPreviousVertex->GetBoundingBox( true ) );
 
         currentVectorLayer->GetScene()->Update( UOdysseyVectorObject::FREQUENTUPDATES
                                               | UOdysseyVectorObject::KEEPINVALIDATED );
 
-        currentVectorLayer->RenderImageChanged(true);
+        redrawRegion.Sanitize();
+        redrawRegion = redrawRegion & layerStack->GetSurface()->Block()->Rect();
+
+        currentVectorLayer->RenderImageChanged( {redrawRegion }, true);
     }
 }
 
@@ -226,7 +235,6 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUp(const FOdysseyPoint& iPoin
             BLPoint localCoords = cubicPath->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
             float radius =  iPointInTexture.pressure * Radius;
             float roundedUpRadius = /*ceil (radius)*/mPreviousVertex->GetRadius();
-            FOdysseyVectorSegmentCubic* cubicSegment;
 
             if( cubicVertex == nullptr )
             {
@@ -235,16 +243,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUp(const FOdysseyPoint& iPoin
                 cubicPath->AddVertex( cubicVertex );
             }
 
-            cubicSegment = currentPathBuilder->RecordVertex( cubicVertex
-                                                           , mPreviousVertex
-                                                           , localCoords.x
-                                                           , localCoords.y
-                                                           , roundedUpRadius );
-
-            if ( cubicSegment )
-            {
-                cubicPath->AddSegment( cubicSegment );
-            }
+            currentPathBuilder->Record( cubicVertex, true );
 
             currentVectorLayer->GetScene()->Unselect( currentPathBuilder );
             currentVectorLayer->GetScene()->RemoveChild( currentPathBuilder );

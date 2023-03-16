@@ -257,7 +257,7 @@ FOdysseyVectorVertex::HasSegment( FOdysseyVectorSegment* iSegment )
 }
 
 ::ULIS::FRectD
-FOdysseyVectorVertex::GetRectangle()
+FOdysseyVectorVertex::GetBoundingBox( bool iWorld )
 {
     ::ULIS::FRectD bbox = { 0, 0, 0, 0 };
     bool inited = false;
@@ -265,7 +265,7 @@ FOdysseyVectorVertex::GetRectangle()
     for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
     {
         FOdysseyVectorSegment* segment = static_cast<FOdysseyVectorSegment*>(*it);
-        ::ULIS::FRectD rect = segment->GetBoundingBox();
+        ::ULIS::FRectD rect = segment->GetBoundingBox( iWorld );
 
         bbox = ( inited == false ) ? rect : bbox | rect;
 

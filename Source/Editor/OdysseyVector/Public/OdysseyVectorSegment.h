@@ -145,7 +145,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
          * @brief Get the segment's bounding box.
          * @return a reference to the segment's bounding box.
          */
-        virtual ::ULIS::FRectD& GetBoundingBox() { return mBBox; };
+        virtual ::ULIS::FRectD GetBoundingBox( bool iWorld ) { return mBBox; };
 
        /**
          * @brief Get coordinates on the segment at parameter t.

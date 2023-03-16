@@ -203,7 +203,7 @@ UOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegmentCubic& iCubicSe
     for( std::list<FOdysseyVectorSegment*>::iterator sit = cubicSegmenList.begin(); sit != cubicSegmenList.end(); ++sit )
     {
         FOdysseyVectorSegmentCubic *intersectSegment = static_cast<FOdysseyVectorSegmentCubic*>(*sit);
-        ::ULIS::FRectD intersectRect = intersectSegment->GetBoundingBox() & iCubicSegment.GetBoundingBox();
+        ::ULIS::FRectD intersectRect = intersectSegment->GetBoundingBox( false ) & iCubicSegment.GetBoundingBox( false );
 
         if( intersectRect.Area() )
         {

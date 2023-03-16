@@ -100,7 +100,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
          * @brief Get the segment's bounding box.
          * @return a reference to the segment's bounding box.
          */
-        virtual ::ULIS::FRectD& GetBoundingBox() override;
+        virtual ::ULIS::FRectD GetBoundingBox( bool iWorld ) override;
 
        /**
          * @brief Update cached data for this segment.

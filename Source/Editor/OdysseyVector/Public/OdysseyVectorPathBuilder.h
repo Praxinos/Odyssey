@@ -23,9 +23,13 @@ class ODYSSEYVECTOR_API UOdysseyVectorPathBuilder : public UOdysseyVectorObject
         double mCumulAngle;
         double mCumulAngleLimit;
         double mLastCubicAngleLimit;
-        std::vector<FOdysseyVectorPoint*> mSamplePointArray;
+        std::vector<FOdysseyVectorPoint*> mSampleArray;
         std::vector<FOdysseyVectorPoint*> mPointArray;
-        std::vector<FOdysseyVectorPoint> mPointBuffer;
+        std::vector<FOdysseyVectorLink> mSampleLinkArray;
+        FOdysseyVectorVertexCubic* mInitialVertex;
+        FOdysseyVectorVertexCubic* mFinalVertex;
+        UOdysseyVectorPathCubic* mCubicPath;
+        FOdysseyVectorSegmentCubic* mCubicSegment;
 
         // Unimplemented. Cubic Path builder cannot be copied. It should be destroyed as soon as the curve is built
         UOdysseyVectorObject* CopyShape();
@@ -38,11 +42,10 @@ class ODYSSEYVECTOR_API UOdysseyVectorPathBuilder : public UOdysseyVectorObject
 
         void UpdateShape( uint32 iUpdateFlags ) {};
 
-        void Reset();
-
-        FOdysseyVectorSegmentCubic* MakeSegment( FOdysseyVectorVertexCubic* iVertex0, FOdysseyVectorVertexCubic* iVertex1 );
-        void RecordPoint( FOdysseyVectorPoint* iPoint );
-        double RecordSample( FOdysseyVectorPoint* iPoint );
+        double GetSampleAngle();
+        uint32 RecordVertex( FOdysseyVectorPoint *iPoint, bool iEnforce );
+        uint32 RecordSample( FOdysseyVectorPoint *iPoint, bool iEnforce );
+        uint32 RecordPoint( FOdysseyVectorPoint *iPoint, bool iEnforce );
 
         /**
          * @brief Try to fit the cubic curve as close as possible to the sample links passed as parameter. EXPERIMENTAL
@@ -75,10 +78,11 @@ class ODYSSEYVECTOR_API UOdysseyVectorPathBuilder : public UOdysseyVectorObject
         ::ULIS::FVec2D GetFirstVectorFromSamples();
         ::ULIS::FVec2D GetLastVectorFromSamples();
 
-    protected :
-        UOdysseyVectorPathCubic* mCubicPath;
-
     public:
+        static const uint32 NEWVERTEX  = ( 1 << 0 );
+        static const uint32 NEWSAMPLE  = ( 1 << 1 );
+        static const uint32 NEWSEGMENT = ( 1 << 2 );
+
        ~UOdysseyVectorPathBuilder();
         UOdysseyVectorPathBuilder();
 
@@ -97,9 +101,5 @@ class ODYSSEYVECTOR_API UOdysseyVectorPathBuilder : public UOdysseyVectorObject
          */
         UOdysseyVectorPathCubic* GetCubicPath( );
 
-        FOdysseyVectorSegmentCubic* RecordVertex( FOdysseyVectorVertexCubic* iRecordedVertex
-                                                , FOdysseyVectorVertexCubic* iPreviousVertex
-                                                , double iX
-                                                , double iY
-                                                , double iRadius );
+        void Record( FOdysseyVectorPoint *iPoint, bool iEnforce );
 };

@@ -205,7 +205,7 @@ DragPoint( double iLocalX
 
         cubicVertex->SetRadius( dif.Distance() );
 
-        return cubicVertex->GetRectangle();
+        return cubicVertex->GetBoundingBox( false );
     }
 
     if( iPoint->GetClass() == FOdysseyVectorHandleSegment::StaticClass() )
@@ -216,7 +216,7 @@ DragPoint( double iLocalX
         iPoint->Set( iPoint->GetX() + difx
                    , iPoint->GetY() + dify );
 
-        return cubicSegment->GetBoundingBox();
+        return cubicSegment->GetBoundingBox( false );
     }
 
     if( iPoint->GetClass() == FOdysseyVectorVertexCubic::StaticClass() )
@@ -238,7 +238,7 @@ DragPoint( double iLocalX
                           , ctrlPoint->GetY() + dify );
         }
 
-        return cubicVertex->GetRectangle();
+        return cubicVertex->GetBoundingBox( false );
     }
 
     return { 0, 0, 0, 0 };

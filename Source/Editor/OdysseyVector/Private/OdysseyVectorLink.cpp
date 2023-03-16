@@ -11,6 +11,11 @@ FOdysseyVectorLink::FOdysseyVectorLink()
 
 }
 
+FOdysseyVectorLink::FOdysseyVectorLink( FOdysseyVectorPoint* iPoint0, FOdysseyVectorPoint* iPoint1 )
+{
+    Init( iPoint0, iPoint1 );
+}
+
 void
 FOdysseyVectorLink::Init( FOdysseyVectorPoint* iPoint0
                         , FOdysseyVectorPoint* iPoint1 )

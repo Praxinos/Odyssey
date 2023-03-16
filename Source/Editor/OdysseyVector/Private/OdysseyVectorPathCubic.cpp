@@ -500,7 +500,7 @@ UOdysseyVectorPathCubic::DrawShapeVariable( ::ULIS::FRectD &iRoi, uint64 iFlags 
             FOdysseyVectorSegmentCubic* segment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
             FOdysseyVectorVertex* vertex0 = segment->GetVertex(0);
 
-            ::ULIS::FRectD clip = iRoi & segment->GetBoundingBox();
+            ::ULIS::FRectD clip = iRoi & segment->GetBoundingBox( false );
 
             if( ( iRoi.Area() == 0.0f ) || clip.Area() )
             {
