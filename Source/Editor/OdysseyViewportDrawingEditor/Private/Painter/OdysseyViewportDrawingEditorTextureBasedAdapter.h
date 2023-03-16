@@ -9,17 +9,24 @@
 class FOdysseyViewportDrawingEditorTextureBasedAdapter : public IOdysseyViewportDrawingEditorAdapter
 {
 public:
-	/** destructor */
-	~FOdysseyViewportDrawingEditorTextureBasedAdapter();
+    /** destructor */
+    ~FOdysseyViewportDrawingEditorTextureBasedAdapter();
 
-	/** constructor */
-	FOdysseyViewportDrawingEditorTextureBasedAdapter(TSharedPtr<FOdysseyViewportDrawingEditor> iEditor);
+    /** constructor */
+    FOdysseyViewportDrawingEditorTextureBasedAdapter(TSharedPtr<FOdysseyViewportDrawingEditor> iEditor);
 
-public:      
+public:
     virtual void PrepareAdapterForPainting() override;
     virtual void StartPainting() override;
-	virtual void Paint() override;
+    virtual void Paint() override;
     virtual void FinishPainting() override;
 
-    virtual void Tick() override;
+    virtual void Tick(float iDelta) override;
+
+    virtual void RenderInteractorWidget(const FSceneView* iView, FViewport* iViewport, FPrimitiveDrawInterface* iPDI) override;
+
+private:
+    void OnToolChange(UOdysseyPainterEditorTool* iNewTool);
+    virtual ::ULIS::FEvent StampOverride(UOdysseyBrushAssetBase::FStampParams iStampParams) override;
+
 };

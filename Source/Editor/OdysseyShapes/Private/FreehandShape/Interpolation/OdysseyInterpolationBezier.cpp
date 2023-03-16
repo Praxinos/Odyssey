@@ -23,7 +23,7 @@ FOdysseyInterpolationBezier::FOdysseyInterpolationBezier()
 bool
 FOdysseyInterpolationBezier::IsReady() const
 {
-    return ( mInputPoints.Num() >= 3 );
+    return (mInputPoints.Num() >= 3);
 }
 
 int
@@ -36,15 +36,15 @@ const TArray< FOdysseyPoint >& FOdysseyInterpolationBezier::ComputePoints()
 {
     mResultPoints.Empty();
 
-    if( !IsReady() )
+    if (!IsReady())
         return mResultPoints;
 
-    mInputPoints[2] = FOdysseyPoint::Average( mInputPoints[1], mInputPoints[2] );
+    mInputPoints[2] = FOdysseyPoint::Average(mInputPoints[1], mInputPoints[2]);
     TArray< FOdysseyMathUtils::FOdysseyBezierLutElement > LUT;
-    FVector2D A( mInputPoints[0].x, mInputPoints[0].y );
-    FVector2D B( mInputPoints[1].x, mInputPoints[1].y );
-    FVector2D C( mInputPoints[2].x, mInputPoints[2].y );
-    float length = FOdysseyMathUtils::QuadraticBezierGenerateLinearLUT( &LUT, A, B, C, mStep );
+    FVector2D A(mInputPoints[0].x, mInputPoints[0].y);
+    FVector2D B(mInputPoints[1].x, mInputPoints[1].y);
+    FVector2D C(mInputPoints[2].x, mInputPoints[2].y);
+    float length = FOdysseyMathUtils::QuadraticBezierGenerateLinearLUT(&LUT, A, B, C, mStep);
     float previousStrokeLength = mTotalStrokeLength;
     mTotalStrokeLength += length;
 
@@ -57,17 +57,17 @@ const TArray< FOdysseyPoint >& FOdysseyInterpolationBezier::ComputePoints()
 
     bool point_in_substroke = next > 0;
 
-    if( point_in_substroke )
+    if (point_in_substroke)
     {
-        for( float i = next; i <= length; i += mStep )
+        for (float i = next; i <= length; i += mStep)
         {
             FOdysseyMathUtils::FOdysseyBezierLutElement prevElement;
             FOdysseyMathUtils::FOdysseyBezierLutElement nextElement;
-            for( int j = iLastSelectedLUTIndex; j < LUT.Num() - 1; ++j )
+            for (int j = iLastSelectedLUTIndex; j < LUT.Num() - 1; ++j)
             {
                 prevElement = LUT[j];
                 nextElement = LUT[j + 1];
-                if( i >= prevElement.length && i <= nextElement.length )
+                if (i >= prevElement.length && i <= nextElement.length)
                 {
                     iLastSelectedLUTIndex = j;
                     break;
@@ -78,28 +78,28 @@ const TArray< FOdysseyPoint >& FOdysseyInterpolationBezier::ComputePoints()
             float nextPosParam = nextElement.length / length;
             float currPosParam = i / length;
             float posParamDelta = nextPosParam - prevPosParam;
-            float currPosParamDelta = ( posParamDelta == 0 ) ? 0 : ( currPosParam - prevPosParam ) / posParamDelta;
-            FVector2D pos = prevElement.point + ( nextElement.point - prevElement.point ) * currPosParamDelta;
-            float propertyParam = ( currPosParam < 0.5 ) ? currPosParam * 2 : ( currPosParam - 0.5 ) * 2;
-            FOdysseyPoint point = ( currPosParam < 0.5 ) ?
-                FOdysseyPoint::Lerp( mInputPoints[0], mInputPoints[1], propertyParam ) :
-                FOdysseyPoint::Lerp( mInputPoints[1], mInputPoints[2], propertyParam );
+            float currPosParamDelta = (posParamDelta == 0) ? 0 : (currPosParam - prevPosParam) / posParamDelta;
+            FVector2D pos = prevElement.point + (nextElement.point - prevElement.point) * currPosParamDelta;
+            float propertyParam = (currPosParam < 0.5) ? currPosParam * 2 : (currPosParam - 0.5) * 2;
+            FOdysseyPoint point = (currPosParam < 0.5) ?
+                FOdysseyPoint::Lerp(mInputPoints[0], mInputPoints[1], propertyParam) :
+                FOdysseyPoint::Lerp(mInputPoints[1], mInputPoints[2], propertyParam);
             point.x = pos.X;
             point.y = pos.Y;
-            mResultPoints.Add( point );
+            mResultPoints.Add(point);
             ++drawn_steps;
         }
 
         mLastDrawnLength += (float)drawn_steps * mStep;
     }
 
-    if( mTotalStrokeLength == 0.f )
+    if (mTotalStrokeLength == 0.f)
     {
         mLastDrawnLength = 0.f;
-        mResultPoints.Add( mInputPoints[2] );
+        mResultPoints.Add(mInputPoints[2]);
     }
 
-    mInputPoints.RemoveAt( 0, 2 );
+    mInputPoints.RemoveAt(0, 2);
 
     return mResultPoints;
 }

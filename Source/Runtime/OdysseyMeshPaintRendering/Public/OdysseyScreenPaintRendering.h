@@ -7,17 +7,19 @@ class FRHICommandList;
 class UTextureRenderTarget2D;
 class FGraphicsPipelineStateInitializer;
 
-namespace OdysseyMeshPaintRendering
+namespace OdysseyScreenPaintRendering
 {
 	/** Batched element parameters for mesh paint shaders */
-	struct FOdysseyMeshPaintShaderParameters
+	struct FOdysseyScreenPaintShaderParameters
 	{
 	public:
         UTexture2D* Stroke2D;
 
 		FMatrix WorldToBrushMatrix;
         FVector2D TextureHitPoint;
-		float StampQuality;
+        float StampQuality;
+		FVector xScreenAxis;
+		FVector yScreenAxis;
 	};
 
 
@@ -27,6 +29,6 @@ namespace OdysseyMeshPaintRendering
 											ERHIFeatureLevel::Type iFeatureLevel, 
 											const FMatrix& iTransform,
 											const float iGamma,
-											const FOdysseyMeshPaintShaderParameters& iShaderParams );
+											const FOdysseyScreenPaintShaderParameters& iShaderParams );
 
 }

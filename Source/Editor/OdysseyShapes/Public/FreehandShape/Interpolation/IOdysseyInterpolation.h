@@ -7,8 +7,8 @@
 #include "Input/OdysseyPoint.h"
 
 /**
- * Implements the interpolation for a stroke
- */
+* Implements the interpolation for a stroke
+*/
 class ODYSSEYSHAPES_API IOdysseyInterpolation
 {
 public:
@@ -27,10 +27,10 @@ public:
     virtual const TArray< FOdysseyPoint >& ComputePoints() = 0;
 
     void Reset();
-    void AddPoint( const FOdysseyPoint& iPoint );
+    void AddPoint(const FOdysseyPoint& iPoint);
 
     float GetStep() const;
-    void SetStep( float iValue );
+    void SetStep(float iValue);
 
 protected:
     TArray< FOdysseyPoint > mInputPoints;

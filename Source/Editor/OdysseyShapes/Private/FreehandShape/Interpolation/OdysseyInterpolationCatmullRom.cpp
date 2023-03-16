@@ -24,7 +24,7 @@ bool
 FOdysseyInterpolationCatmullRom::IsReady() const
 {
     //We need 4 points to draw a spline with Catmul-Rom
-    return ( mInputPoints.Num() >= 4 );
+    return (mInputPoints.Num() >= 4);
 }
 
 int
@@ -38,16 +38,16 @@ const TArray< FOdysseyPoint >& FOdysseyInterpolationCatmullRom::ComputePoints()
 {
     mResultPoints.Empty();
 
-    if( !IsReady() )
+    if (!IsReady())
         return mResultPoints;
 
-    ::ULIS::FVec2F P0( mInputPoints[0].x, mInputPoints[0].y );
-    ::ULIS::FVec2F P1( mInputPoints[1].x, mInputPoints[1].y );
-    ::ULIS::FVec2F P2( mInputPoints[2].x, mInputPoints[2].y );
-    ::ULIS::FVec2F P3( mInputPoints[3].x, mInputPoints[3].y );
-    ::ULIS::FCatmullRomSpline spline( P0, P1, P2, P3 );
+    ::ULIS::FVec2F P0(mInputPoints[0].x, mInputPoints[0].y);
+    ::ULIS::FVec2F P1(mInputPoints[1].x, mInputPoints[1].y);
+    ::ULIS::FVec2F P2(mInputPoints[2].x, mInputPoints[2].y);
+    ::ULIS::FVec2F P3(mInputPoints[3].x, mInputPoints[3].y);
+    ::ULIS::FCatmullRomSpline spline(P0, P1, P2, P3);
     std::vector< ::ULIS::FSplineLinearSample > LUT;
-    spline.GenerateLinearLUT( &LUT, mStep );
+    spline.GenerateLinearLUT(&LUT, mStep);
     float length = LUT.back().length;
     mTotalStrokeLength += length;
 
@@ -60,18 +60,18 @@ const TArray< FOdysseyPoint >& FOdysseyInterpolationCatmullRom::ComputePoints()
 
     bool point_in_substroke = next > 0;
 
-    if( point_in_substroke )
+    if (point_in_substroke)
     {
-        for( float i = next; i <= length; i += mStep )
+        for (float i = next; i <= length; i += mStep)
         {
             //Get prev and next element of the LUT
             ::ULIS::FSplineLinearSample prevElement;
             ::ULIS::FSplineLinearSample nextElement;
-            for( int j = iLastSelectedLUTIndex; j < LUT.size() - 1; ++j )
+            for (int j = iLastSelectedLUTIndex; j < LUT.size() - 1; ++j)
             {
                 prevElement = LUT[j];
                 nextElement = LUT[j + 1];
-                if( i >= prevElement.length && i <= nextElement.length ) {
+                if (i >= prevElement.length && i <= nextElement.length) {
                     iLastSelectedLUTIndex = j;
                     break;
                 }
@@ -90,30 +90,30 @@ const TArray< FOdysseyPoint >& FOdysseyInterpolationCatmullRom::ComputePoints()
             float posParamDelta = nextPosParam - prevPosParam;
 
             //the amount to lerp between prev and next elements
-            float currPosParamDelta = ( posParamDelta == 0 ) ? 0 : ( currPosParam - prevPosParam ) / posParamDelta;
+            float currPosParamDelta = (posParamDelta == 0) ? 0 : (currPosParam - prevPosParam) / posParamDelta;
 
             //The lerp of the position
-            ::ULIS::FVec2F posU = prevElement.point + ( nextElement.point - prevElement.point ) * currPosParamDelta;
-            FVector2D pos( posU.x, posU.y );
+            ::ULIS::FVec2F posU = prevElement.point + (nextElement.point - prevElement.point) * currPosParamDelta;
+            FVector2D pos(posU.x, posU.y);
 
             //Lerp the point parameters between input1 and input2 points
-            FOdysseyPoint point = FOdysseyPoint::Lerp( mInputPoints[1], mInputPoints[2], currPosParam);
+            FOdysseyPoint point = FOdysseyPoint::Lerp(mInputPoints[1], mInputPoints[2], currPosParam);
             point.x = pos.X;
             point.y = pos.Y;
-            mResultPoints.Add( point );
+            mResultPoints.Add(point);
             ++drawn_steps;
         }
 
         mLastDrawnLength += (float)drawn_steps * mStep;
     }
 
-    if( mTotalStrokeLength < 1.f )
+    if (mTotalStrokeLength < 1.f)
     {
         mLastDrawnLength = 0.f;
-        mResultPoints.Add( mInputPoints[1] );
+        mResultPoints.Add(mInputPoints[1]);
     }
 
-    mInputPoints.RemoveAt( 0, 1 );
+    mInputPoints.RemoveAt(0, 1);
     return  mResultPoints;
 }
 

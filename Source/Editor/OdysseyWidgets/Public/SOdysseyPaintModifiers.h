@@ -26,8 +26,9 @@ class ODYSSEYWIDGETS_API SOdysseyPaintModifiers : public SCompoundWidget
     typedef TSharedPtr< FString >       FComboItemType;
 
 public:
-    DECLARE_DELEGATE_RetVal( int, FOnGetIntProperty );
+    DECLARE_DELEGATE_RetVal( float, FOnGetIntProperty );
     DECLARE_DELEGATE_RetVal( float, FOnGetFloatProperty );
+    DECLARE_DELEGATE_TwoParams( FOnFloatValueChangedWithType, float, EPropertyChangeType::Type );
     DECLARE_DELEGATE_TwoParams( FOnInt32ValueChangedWithType, int32, EPropertyChangeType::Type );
     
 
@@ -39,10 +40,11 @@ public:
         SLATE_ATTRIBUTE( ::ULIS::eAlphaMode, AlphaMode )
         SLATE_ATTRIBUTE( bool, IsEraserButtonActive )
         SLATE_ATTRIBUTE( bool, IsPackageEdited )
-        SLATE_EVENT( FOnGetIntProperty, OnGetSize )
+        SLATE_ATTRIBUTE( float, MeshMaxSize )
+        SLATE_EVENT( FOnGetFloatProperty, OnGetSize )
         SLATE_EVENT( FOnGetFloatProperty, OnGetOpacity )
         SLATE_EVENT( FOnGetFloatProperty, OnGetFlow )
-        SLATE_EVENT( FOnInt32ValueChangedWithType, OnSizeChanged )
+        SLATE_EVENT( FOnFloatValueChangedWithType, OnSizeChanged )
         SLATE_EVENT( FOnInt32ValueChangedWithType, OnOpacityChanged )
         SLATE_EVENT( FOnInt32ValueChangedWithType, OnFlowChanged )
         SLATE_EVENT( FOnInt32ValueChanged, OnBlendingModeChanged )
@@ -61,11 +63,13 @@ private:
 
 public:
     // Public Callbacks
-    void  SetSize( int iValue );
+    void  SetSize( float iValue );
     void  SetOpacity( int iValue );
     void  SetFlow( int iValue );
     void  SetBlendingMode( ::ULIS::eBlendMode iValue );
     void  SetAlphaMode( ::ULIS::eAlphaMode iValue );
+    // Public setter for mesh size. If iValue < 0, then we work in pure size, and not in percentage
+    void  SetMeshMaxSize( float iValue = -1 );
 
 public:
     // Public Getters
@@ -74,10 +78,10 @@ public:
 
 private:
     // Private Callbacks
-    int OnGetSize() const;
+    float OnGetSize() const;
     int OnGetOpacity() const;
     int OnGetFlow() const;
-    void HandleSizeSpinBoxChanged( int iValue, ETextCommit::Type iType );
+    void HandleSizeSpinBoxChanged( float iValue, ETextCommit::Type iType );
     void HandleOpacitySpinBoxChanged( int iValue, ETextCommit::Type iType );
     void HandleFlowSpinBoxChanged( int iValue, ETextCommit::Type iType );
 
@@ -96,10 +100,15 @@ private:
     void HandleOnAlphaModeChanged(TSharedPtr<FText> NewSelection, ESelectInfo::Type SelectInfo );
     TArray< TSharedPtr< FText > > GetAlphaModesAsText();
     FText GetAlphaModeAsText() const;
+    void RefreshSizeWidget();
 
 private:
 
-    FOnGetIntProperty mOnGetSize;
+    // If it is set, then the spin box for the size will be in percentage (1 - 100) 
+    // this value here will be the multiplied by the percentage to get the true size of the brush
+    TAttribute< float > mMeshMaxSize;
+
+    FOnGetFloatProperty mOnGetSize;
     FOnGetFloatProperty mOnGetOpacity;
     FOnGetFloatProperty mOnGetFlow;
 
@@ -111,7 +120,7 @@ private:
     ::ULIS::eBlendMode    mCurrentBlendingMode;   //cache value
     ::ULIS::eAlphaMode       mCurrentAlphaMode;      //cache value
 
-    TSharedPtr< SSpinBox< int > >   mSizeSpinBox;
+    SHorizontalBox::FSlot*          mSizeSpinBoxSlot;
     TSharedPtr< SSpinBox< int > >   mOpacitySpinBox;
     TSharedPtr< SSpinBox< int > >   mFlowSpinBox;
 
@@ -123,9 +132,9 @@ private:
     TArray< TSharedPtr<FText> >                 mAlphaModes;
     TSharedPtr<SComboBox<TSharedPtr<FText> > >  mAlphaModeComboBox;
 
-    FOnInt32ValueChangedWithType            mOnSizeChangedCallback;
-    FOnInt32ValueChangedWithType            mOnOpacityChangedCallback;
-    FOnInt32ValueChangedWithType            mOnFlowChangedCallback;
+    FOnFloatValueChangedWithType    mOnSizeChangedCallback;
+    FOnInt32ValueChangedWithType    mOnOpacityChangedCallback;
+    FOnInt32ValueChangedWithType    mOnFlowChangedCallback;
     FOnInt32ValueChanged            mOnBlendingModeChangedCallback;
     FOnInt32ValueChanged            mOnAlphaModeChangedCallback;
 

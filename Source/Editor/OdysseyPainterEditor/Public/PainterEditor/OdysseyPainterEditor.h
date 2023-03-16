@@ -21,6 +21,9 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditor
     : public FOdysseyEditor
 {
 public:
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnSelectedToolChange, UOdysseyPainterEditorTool*);
+
+public:
     // Construction / Destruction
     virtual ~FOdysseyPainterEditor();
     FOdysseyPainterEditor();
@@ -32,6 +35,7 @@ protected:
 
 public:
     // Getters
+    FOnSelectedToolChange&                              OnSelectedToolChangedDelegate();
     virtual FOdysseyPainterEditorGUI*                   GetGUI() = 0;
 
     virtual FOdysseyHUDSystem*                          HUDSystem() const;
@@ -71,4 +75,5 @@ protected:
     FOdysseyHUDSystem*              mHUDSystem;
     TArray<FOdysseyBrushContext*>   mBrushContexts;
     FOdysseyBrushColor              mPaintColor;
+    FOnSelectedToolChange mOnSelectedToolChange;
 };

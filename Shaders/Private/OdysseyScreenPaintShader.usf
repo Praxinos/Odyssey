@@ -7,21 +7,21 @@ float4x4 c_WorldToBrushMatrix;
 float2 c_TextureHitPoint;
 float c_StampQuality;
 
+float3 c_xScreenAxis;
+float3 c_yScreenAxis;
+
 void MainPS( float4 InPosition : SV_POSITION,
 		   float2 InCloneTextureCoordinates : TEXCOORD0,
 		   float3 InWorldSpaceVertexPosition : TEXCOORD1,
 		   out float4 OutColor : SV_Target0)
 {
-    //InPosition.xy is in texture coordinates (0...1024)
-    //InCloneTextureCoordinates is in UV coordinates (0...1)
-    
     float heightStroke = 0;
     float widthStroke = 0;
     float numberLODsStroke = 0;
     s_Stroke2D.GetDimensions(0, widthStroke, heightStroke, numberLODsStroke);
 	widthStroke = widthStroke / c_StampQuality;
 	heightStroke = heightStroke / c_StampQuality;
-    
+	
 	float4x4 WorldToBrushMatrix = c_WorldToBrushMatrix;
 
 	// Project the pixel into the plane of the brush
@@ -30,21 +30,13 @@ void MainPS( float4 InPosition : SV_POSITION,
     // BrushSpaceVertexPosition = (x,y,z) on all points on mesh, where x, y and z equal to the difference in world between impact point and point on mesh
 	float3 BrushSpaceVertexPosition = mul(float4( WorldSpaceVertexPosition, 1.0f ), WorldToBrushMatrix).xyz;
     
-    float dist3D = length( BrushSpaceVertexPosition );
-    	
-	float distX = BrushSpaceVertexPosition.x / (2*widthStroke);
-	float distY = BrushSpaceVertexPosition.y / (2*heightStroke);
-	//float distZ = BrushSpaceVertexPosition.z / (2*heightStroke);
-	//if( distZ < 0 )
-	//	distZ = -distZ;
-		
-	float xPos = 0.5 + distX;// + sin(distY * 2 * 3.14)*distZ;
-	float yPos = 0.5 + distY;// - cos(distX * 2 * 3.14)*distZ;
+	float stampPosX = 0.5 + (c_xScreenAxis.x * BrushSpaceVertexPosition.x + c_xScreenAxis.y * BrushSpaceVertexPosition.y + c_xScreenAxis.z * BrushSpaceVertexPosition.z) / widthStroke;
+	float stampPosY = 0.5 + (c_yScreenAxis.x * BrushSpaceVertexPosition.x + c_yScreenAxis.y * BrushSpaceVertexPosition.y + c_yScreenAxis.z * BrushSpaceVertexPosition.z) / heightStroke;
 
-    OutColor = float4(0.f,0.f,0.f,0.f);
-    if( dist3D <= widthStroke || dist3D <= heightStroke )
-    {
-		OutColor = Texture2DSample(s_Stroke2D, s_TextureSampler, float2(xPos, yPos));
+	OutColor = float4( 0.f, 0.f, 0.f, 0.f);
+	if( stampPosX >= 0 && stampPosX <= 1 && stampPosY >= 0 && stampPosY <= 1 )
+	{
+		OutColor = Texture2DSample(s_Stroke2D, s_TextureSampler, float2(stampPosX, stampPosY));
 	}
 }
 

@@ -5,6 +5,8 @@
 
 #include "OdysseyViewportDrawingEditorGUI.h"
 #include "FOdysseyViewportDrawingEditorModeToolbar.h"
+#include "Materials/MaterialExpressionTextureCoordinate.h"
+#include "OdysseyViewportDrawingEditorUtils.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyViewportDrawingEditor"
 
@@ -97,6 +99,48 @@ FOdysseyViewportDrawingEditor::GetToolbar() const
 EOdysseyViewportDrawingPaintingAdapterMethod FOdysseyViewportDrawingEditor::PaintingAdapterMethod() const
 {
 	return mPaintingAdapterMethod;
+}
+
+
+int32 FOdysseyViewportDrawingEditor::GetUVIndexUsedByCurrentTexture()
+{
+	if (mMaterial != NULL)
+	{
+        for (UMaterialExpression* expression : mMaterial->GetMaterial()->GetExpressions())
+        {
+			UMaterialExpressionTextureBase* TextureBase = Cast<UMaterialExpressionTextureBase>(expression);
+			if (TextureBase != NULL &&
+				TextureBase->Texture != NULL &&
+				TextureBase->Texture == Texture() )
+			{
+				UMaterialExpressionTextureSample* TextureSample = Cast<UMaterialExpressionTextureSample>(expression);
+				if (TextureSample != NULL)
+				{
+					UMaterialExpressionTextureCoordinate* TextureCoords = Cast<UMaterialExpressionTextureCoordinate>(TextureSample->Coordinates.Expression);
+					if (TextureCoords != NULL)
+					{
+						return TextureCoords->CoordinateIndex;
+					}
+					else
+					{
+						return TextureSample->ConstCoordinate;
+					}
+				}
+			}
+		}
+	}
+	return 0;
+}
+
+float FOdysseyViewportDrawingEditor::GetMeshComponentMaxSize() const
+{
+    if (mComponent)
+    {
+        FVector extent = mComponent->GetLocalBounds().BoxExtent;
+		FVector scale = mActor->GetActorScale();
+        return FMath::Max3(extent.X, extent.Y, extent.Z) * FMath::Max3(scale.X, scale.Y, scale.Z);
+    }
+    return 1;
 }
 
 //--------------------------------------------------------------------------------------
@@ -334,7 +378,7 @@ FOdysseyViewportDrawingEditor::UpdateSelectableTextures()
 		return;
 
 	TSharedPtr<IMeshPaintGeometryAdapter> adapter = mComponentToAdapterMap.FindChecked(mComponent);
-	TexturePaintHelpers::RetrieveTexturesForComponent(mComponent, adapter.Get(), mSelectableTextures);
+	FOdysseyViewportDrawingEditorUtils::RetrieveTexturesForComponent(mComponent, mSelectableTextures);
 }
 
 void

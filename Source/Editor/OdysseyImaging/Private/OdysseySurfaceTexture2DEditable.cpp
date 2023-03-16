@@ -138,6 +138,52 @@ FillOdysseyBlockFromUTextureData( ::ULIS::FBlock* ioBlock, UTexture2D* iTexture,
     }
 }
 
+UTexture2D*
+NewUncompressedTextureFromBlockData(::ULIS::FBlock* iBlock)
+{
+    UTexture2D* newTexture = NewObject<UTexture2D>();
+    newTexture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
+
+    ETextureSourceFormat srcFormat = TextureSourceFormatForULISFormat(iBlock->Format());
+
+    InitTextureWithBlockData( iBlock, newTexture, srcFormat);
+
+    newTexture->UpdateResource();
+    FTextureCompilingManager::Get().FinishCompilation({ newTexture });
+    
+
+    return newTexture;
+
+    /*
+    check(iBlock);
+
+    // We are using the source art so grab the original width/height
+    const int32 Width = iBlock->Width();
+    const int32 Height = iBlock->Height();
+
+    check(Width > 0 && Height > 0);
+
+    EPixelFormat pixelFormat = PixelFormatForULISFormat(iBlock->Format());
+    if( pixelFormat == PF_Unknown )
+        pixelFormat = PF_B8G8R8A8;
+
+    // Allocate the new texture
+    UTexture2D* NewTexture2D = UTexture2D::CreateTransient(Width, Height, pixelFormat);
+
+    // Fill in the base mip for the texture we created
+    void* MipData = (void*)NewTexture2D->PlatformData->Mips[0].BulkData.Lock(LOCK_READ_WRITE);
+    //uint16* MipData = (uint16*)NewTexture2D->PlatformData->Mips[0].BulkData.Lock(LOCK_READ_WRITE);
+
+    FMemory::Memcpy(MipData, iBlock->Bits(), iBlock->BytesTotal());
+    NewTexture2D->PlatformData->Mips[0].BulkData.Unlock();
+
+    UE_LOG(LogTemp, Display, TEXT("Num bytes: %ld"), iBlock->BytesTotal());
+    // Update the remote texture data
+    NewTexture2D->UpdateResource();
+    return NewTexture2D;
+    */
+}
+
 ERawImageFormat::Type
 GetRawImageFormatFromTextureSourceFormat(ETextureSourceFormat iFormat)
 {

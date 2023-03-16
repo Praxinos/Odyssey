@@ -59,6 +59,10 @@ FOdysseyPainterEditor::BindShortcuts(FBaseToolkit* iToolkit)
 
 	#define MAP_ACTION(action, ...) toolkitCommands->MapAction( action, FExecuteAction::CreateRaw( this, &FOdysseyPainterEditor::__VA_ARGS__ ), FCanExecuteAction() );
 
+	/* MAP_ACTION(painterEditorCommands.Undo, Undo)
+	MAP_ACTION(painterEditorCommands.Redo, Redo )
+    MAP_ACTION(painterEditorCommands.ClearUndo, ClearUndo ) */
+
 	#undef MAP_ACTION
 }
 
@@ -71,11 +75,17 @@ FOdysseyPainterEditor::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
 bool
 FOdysseyPainterEditor::OnCloseRequested()
 {
-	//Cleanup
-	if ( mSelectedTool )
-		mSelectedTool->Inactivate();
+    //Cleanup
+    if (mSelectedTool)
+        mSelectedTool->Inactivate();
 
-	return FOdysseyEditor::OnCloseRequested();
+    return FOdysseyEditor::OnCloseRequested();
+}
+
+FOdysseyPainterEditor::FOnSelectedToolChange&
+FOdysseyPainterEditor::OnSelectedToolChangedDelegate()
+{
+    return mOnSelectedToolChange;
 }
 
 //--------------------------------------------------------------------------------------
@@ -121,27 +131,29 @@ FOdysseyPainterEditor::SetSelectedTool(UOdysseyPainterEditorTool* iTool)
 
 	if (mSelectedTool)
 		mSelectedTool->Activate();
+
+    mOnSelectedToolChange.Broadcast(iTool);
 }
 
 void
 FOdysseyPainterEditor::SelectDefaultTool()
 {
-	if ( mSelectedTool )
-	{
-		if ( mSelectedTool->IsActivable() )
-			return;
-		
-		mSelectedTool->Inactivate();
-	}
+    if (mSelectedTool)
+    {
+        if (mSelectedTool->IsActivable())
+            return;
 
-	for ( UOdysseyPainterEditorTool* tool : mTools )
-	{
-		if ( tool->IsActivable() )
-		{
-			SetSelectedTool(tool);
-			return;
-		}
-	}
+        mSelectedTool->Inactivate();
+    }
+
+    for (UOdysseyPainterEditorTool* tool : mTools)
+    {
+        if (tool->IsActivable())
+        {
+            SetSelectedTool(tool);
+            return;
+        }
+    }
 }
 
 //--------------------------------------------------------------------------------------

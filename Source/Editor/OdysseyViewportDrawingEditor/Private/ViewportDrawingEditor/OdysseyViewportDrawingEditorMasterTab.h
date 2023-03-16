@@ -22,13 +22,13 @@ protected:
     virtual TSharedPtr<SWidget> CreateWidget() override;
     TSharedRef<SWidget> OnGetMenuContent();
     void OnMenuClosed( bool iOpen );
-    TSharedRef<SWidget> GenerateMeshSelectorComboButtonItem( TSharedPtr<FString> iItem );
     FText CreateTextMeshSelector() const;
     TSharedRef<SWidget> CreateMeshComponentMenuWidget();
     
     TSharedRef<SWidget> GeneratePaintingMethodComboBoxItem(TSharedPtr<EOdysseyViewportDrawingPaintingAdapterMethod> iItem);
     void ChangeSelectionPaintingMethodComboBoxItem(TSharedPtr<EOdysseyViewportDrawingPaintingAdapterMethod> iNewSelection, ESelectInfo::Type iSelectInfo);
     static FText GetMethodAsText(EOdysseyViewportDrawingPaintingAdapterMethod iMethod);
+    static FText GetTooltipAsText(EOdysseyViewportDrawingPaintingAdapterMethod iMethod);
 
 
 protected:

@@ -36,9 +36,10 @@ struct FInstanceTexturePaintSettings
 UENUM()
 enum EOdysseyViewportDrawingPaintingAdapterMethod
 {
-    OdysseyTextureBased     UMETA(DisplayName = "Texture Based"),
-    OdysseyMeshBased        UMETA(DisplayName = "Mesh Based"),
-    OdysseyScreenBased      UMETA(DisplayName = "Screen Based"),
+    OdysseyTextureBased           UMETA(DisplayName = "Texture Based"),
+    OdysseyMeshBasedPlanar        UMETA(DisplayName = "Mesh Based (Planar)"),
+    OdysseyMeshBasedSphere        UMETA(DisplayName = "Mesh Based (Sphere)"),
+    OdysseyScreenBased            UMETA(DisplayName = "Screen Based"),
 };
 
 /**
@@ -72,7 +73,8 @@ public:
     const TMap<UMeshComponent*, TSharedPtr<IMeshPaintGeometryAdapter>>& ComponentToAdapterMap() const;
     FOdysseyViewportDrawingEditorModeToolbar* GetToolbar() const;
     EOdysseyViewportDrawingPaintingAdapterMethod PaintingAdapterMethod() const;
-
+    int32 GetUVIndexUsedByCurrentTexture();
+    float  GetMeshComponentMaxSize() const;
 
 public:
     // Setters
@@ -119,10 +121,10 @@ private:
     TArray<UMeshComponent*> mSelectableComponents;
     TArray<FPaintableTexture> mSelectableTextures;
 
-	/** Map of geometry adapters for each selectable mesh component */
-	TMap<UMeshComponent*, TSharedPtr<IMeshPaintGeometryAdapter>> mComponentToAdapterMap; //ES: I don't know exactly what this is
+	/** Map of geometry adapters for each selectable mesh component, so that we don't recreate a GeometryAdapter each time we select a mesh to paint */
+	TMap<UMeshComponent*, TSharedPtr<IMeshPaintGeometryAdapter>> mComponentToAdapterMap;
 
-    //This one allows us to remember the selected settings for a given component (like knowing which texture of the component was selected)
+    /** This one allows us to remember the selected settings for a given component (like knowing which texture of the component was selected) */
 	TMap<UMeshComponent*, FInstanceTexturePaintSettings> mComponentToTexturePaintSettingsMap;
 
     EOdysseyViewportDrawingPaintingAdapterMethod mPaintingAdapterMethod;

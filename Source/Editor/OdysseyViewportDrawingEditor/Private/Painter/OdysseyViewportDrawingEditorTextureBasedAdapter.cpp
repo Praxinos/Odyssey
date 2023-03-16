@@ -1,8 +1,9 @@
 // IDDN.FR.001.250001.006.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
+// IDDN FR.001.250001.005.S.P.2019.000.00000
+// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
 #include "OdysseyViewportDrawingEditorTextureBasedAdapter.h"
-#include "Tools/OdysseyPainterEditorTool.h"
 #include "MeshPaintHelpers.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyViewportDrawingEditorTextureBasedAdapter"
@@ -30,13 +31,15 @@ void FOdysseyViewportDrawingEditorTextureBasedAdapter::PrepareAdapterForPainting
         return;
     }
 
+    IOdysseyViewportDrawingEditorAdapter::PrepareAdapterForPainting();
+
     /*
     if (mEditor->Material())
     {
         UE_LOG(LogTemp, Warning, TEXT("BeforeOverride: GetUsedTextures:"));
         TArray<UTexture*> Textures;
         mEditor->Material()->GetUsedTextures(Textures, EMaterialQualityLevel::Num, true, GMaxRHIFeatureLevel, true);
-        UE_LOG(LogTemp, Warning, TEXT("%d"), DoesMaterialUseTexture(mEditor->Material(), mEditor->Texture()));
+        UE_LOG(LogTemp, Warning, TEXT("Does material Use Texture %d"), DoesMaterialUseTexture(mEditor->Material(), mEditor->Texture()));
         for (int i = 0; i < Textures.Num(); i++)
         {
             UE_LOG(LogTemp, Warning, TEXT("%s"), *(Textures[i]->GetFName()).ToString())
@@ -49,28 +52,31 @@ void FOdysseyViewportDrawingEditorTextureBasedAdapter::PrepareAdapterForPainting
         const int32 textureWidth = mEditor->Texture()->Source.GetSizeX();
         const int32 textureHeight = mEditor->Texture()->Source.GetSizeY();
         
-        mPaintingTexture2DRenderTarget = NewObject<UTextureRenderTarget2D>(GetTransientPackage(),NAME_None,RF_Transient);
-        mPaintingTexture2DRenderTarget->AddToRoot();
-        mPaintingTexture2DRenderTarget->InitCustomFormat(textureWidth,textureHeight,mEditor->Texture()->GetPixelFormat(),false);
-        mPaintingTexture2DRenderTarget->FinishCachePlatformData();
+        mPaintingTexture2DRenderTarget = NewObject<UTextureRenderTarget2D>(GetTransientPackage(), NAME_None, RF_Transient);
+        mPaintingTexture2DRenderTarget->ClearColor = FLinearColor(0, 0, 0, 0);
+        mPaintingTexture2DRenderTarget->bNeedsTwoCopies = false;
+        mPaintingTexture2DRenderTarget->InitAutoFormat(textureWidth, textureHeight);
         mPaintingTexture2DRenderTarget->UpdateResourceImmediate();
-
-        //IMeshPaintGeometryAdapter::DefaultApplyOrRemoveTextureOverride(mEditor->Component(), mEditor->Texture(), mPaintingTexture2DRenderTarget);
-        const ERHIFeatureLevel::Type FeatureLevel = mEditor->Component()->GetWorld()->FeatureLevel;
-        mEditor->Material()->OverrideTexture(mEditor->Texture(), mPaintingTexture2DRenderTarget, FeatureLevel);
-
+        mPaintingTexture2DRenderTarget->AddToRoot();
+    
+        const ERHIFeatureLevel::Type featureLevel = mEditor->Component()->GetWorld()->FeatureLevel;
+        mEditor->Material()->OverrideTexture(mEditor->Texture(), mPaintingTexture2DRenderTarget, featureLevel);
+        
         //A simple copy is all we need for the texture based algorithm
-        TexturePaintHelpers::CopyTextureToRenderTargetTexture(mEditor->Texture(), mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
+        TexturePaintHelpers::CopyTextureToRenderTargetTexture(mEditor->Texture(), mPaintingTexture2DRenderTarget, featureLevel);
         mState = eState::kIdleReady;
     }    
     
+    //We're using true pixel value for this adapter, so we put 0 in meshMaxSize
+    mEditor->GetGUI()->GetTopTab()->SetMeshMaxSize(0);
+
     /*
     if (mEditor->Material())
     {
         UE_LOG(LogTemp, Warning, TEXT("AfterOverride: GetUsedTextures:"));
         TArray<UTexture*> Textures;
         mEditor->Material()->GetUsedTextures(Textures, EMaterialQualityLevel::Num, true, GMaxRHIFeatureLevel, true);
-        UE_LOG(LogTemp, Warning, TEXT("%d"), DoesMaterialUseTexture(mEditor->Material(), mEditor->Texture()));
+        UE_LOG(LogTemp, Warning, TEXT("Does material Use Texture %d"), DoesMaterialUseTexture(mEditor->Material(), mEditor->Texture()));
         for (int i = 0; i < Textures.Num(); i++)
         {
             UE_LOG(LogTemp, Warning, TEXT("%s"), *(Textures[i]->GetFName()).ToString())
@@ -81,38 +87,7 @@ void FOdysseyViewportDrawingEditorTextureBasedAdapter::PrepareAdapterForPainting
 
 void FOdysseyViewportDrawingEditorTextureBasedAdapter::StartPainting()
 {
-    // Check if we have a proper meshComponent to paint on
-    const TSharedPtr<IMeshPaintGeometryAdapter>* meshAdapterPtr = mEditor->ComponentToAdapterMap().Find(mEditor->Component());
-    if (!meshAdapterPtr)
-        return;
-
-    TSharedPtr<IMeshPaintGeometryAdapter> meshAdapter = *meshAdapterPtr;
-
-    // Ray trace
-    FHitResult traceHitResult(1.0f);
-    const FVector rayEnd(mCurrentStrokeRay.mRayOrigin + mCurrentStrokeRay.mRayDirection * HALF_WORLD_MAX);
-
-    meshAdapter->LineTraceComponent(traceHitResult, mCurrentStrokeRay.mRayOrigin, rayEnd, FCollisionQueryParams(SCENE_QUERY_STAT(Paint), true));
-
-    // Convert trace to UV position
-    FVector2D coord;
-    if (UGameplayStatics::FindCollisionUV(traceHitResult, 0, coord))
-    {
-        FOdysseyPoint currentStrokePoint = mCurrentStrokeRay.mStrokePoint;
-        FOdysseyPoint lastStrokePoint = mLastStrokeRay.mStrokePoint;
-
-        currentStrokePoint.x = coord.X * mEditor->Texture()->GetSurfaceWidth();
-        currentStrokePoint.y = coord.Y * mEditor->Texture()->GetSurfaceHeight();
-        lastStrokePoint.x = coord.X * mEditor->Texture()->GetSurfaceWidth();
-        lastStrokePoint.y = coord.Y * mEditor->Texture()->GetSurfaceHeight();
-
-        currentStrokePoint.ComputeRelativeParameters(lastStrokePoint);
-
-        //mEditor->GetSelectedTool()->SetTransform(FTransform2D()); //Reset the transform as there is actually no transform to use
-        UOdysseyPainterEditorTool* tool = mEditor->GetSelectedTool();
-        if (tool)
-            tool->OnMouseDown(currentStrokePoint, EKeys::LeftMouseButton);
-    }
+    mEditor->GetSelectedTool()->OnMouseDown(mCurrentStrokeRay.mPoint, EKeys::LeftMouseButton);
 
     //A simple copy is all we need for the texture based algorithm
     if( mPaintingTexture2DRenderTarget)
@@ -121,32 +96,7 @@ void FOdysseyViewportDrawingEditorTextureBasedAdapter::StartPainting()
 
 void FOdysseyViewportDrawingEditorTextureBasedAdapter::Paint()
 {
-    // Check if we have a proper meshComponent to paint on
-    const TSharedPtr<IMeshPaintGeometryAdapter>* meshAdapterPtr = mEditor->ComponentToAdapterMap().Find(mEditor->Component());
-    if (!meshAdapterPtr)
-        return;
-
-    TSharedPtr<IMeshPaintGeometryAdapter> meshAdapter = *meshAdapterPtr;
-
-    // Ray trace
-    FHitResult traceHitResult(1.0f);
-    const FVector rayEnd(mCurrentStrokeRay.mRayOrigin + mCurrentStrokeRay.mRayDirection * HALF_WORLD_MAX);
-
-    meshAdapter->LineTraceComponent(traceHitResult, mCurrentStrokeRay.mRayOrigin, rayEnd, FCollisionQueryParams(SCENE_QUERY_STAT(Paint), true));
-
-    // Convert trace to UV position
-    FVector2D coord;
-    if (UGameplayStatics::FindCollisionUV(traceHitResult, 0, coord))
-    {
-        mCurrentStrokeRay.mStrokePoint.x = coord.X * mEditor->Texture()->GetSurfaceWidth();
-        mCurrentStrokeRay.mStrokePoint.y = coord.Y * mEditor->Texture()->GetSurfaceHeight();
-        //ES: That feels weird, as we don't have the "PointInViewport", we only have the "PointInTexture", and we don't know what mouse button is being pressed.
-        //mEditor->GetSelectedTool()->SetTransform(FTransform2D()); //Reset the transform as there is actually no transform to use
-        UOdysseyPainterEditorTool* tool = mEditor->GetSelectedTool();
-        if (tool)
-            tool->OnMouseDrag(mCurrentStrokeRay.mStrokePoint);
-        //mEditor->StrokeEngine()->To(mCurrentStrokeRay.mStrokePoint);
-    }
+    mEditor->GetSelectedTool()->OnMouseDrag(mCurrentStrokeRay.mPoint);
 
     //A simple copy is all we need for the texture based algorithm
     if (mPaintingTexture2DRenderTarget)
@@ -155,21 +105,77 @@ void FOdysseyViewportDrawingEditorTextureBasedAdapter::Paint()
 
 void FOdysseyViewportDrawingEditorTextureBasedAdapter::FinishPainting()
 {
-    //mEditor->GetSelectedTool()->SetTransform(FTransform2D()); //Reset the transform as there is actually no transform to use
-    UOdysseyPainterEditorTool* tool = mEditor->GetSelectedTool();
-    if (tool)
-        tool->OnMouseUp(mCurrentStrokeRay.mStrokePoint, EKeys::LeftMouseButton);
-    //mEditor->StrokeEngine()->End();
+    mEditor->GetSelectedTool()->OnMouseUp(mCurrentStrokeRay.mPoint, EKeys::LeftMouseButton);
 
     //A simple copy is all we need for the texture based algorithm
     if ( mPaintingTexture2DRenderTarget )
         TexturePaintHelpers::CopyTextureToRenderTargetTexture(mEditor->Texture(), mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
 }
 
-void FOdysseyViewportDrawingEditorTextureBasedAdapter::Tick()
+void FOdysseyViewportDrawingEditorTextureBasedAdapter::Tick(float iDelta)
 {
     if( mEditor->Texture() && mPaintingTexture2DRenderTarget )
         TexturePaintHelpers::CopyTextureToRenderTargetTexture(mEditor->Texture(), mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
+}
+
+void FOdysseyViewportDrawingEditorTextureBasedAdapter::RenderInteractorWidget(const FSceneView* iView, FViewport* iViewport, FPrimitiveDrawInterface* iPDI)
+{
+}
+
+::ULIS::FEvent FOdysseyViewportDrawingEditorTextureBasedAdapter::StampOverride(UOdysseyBrushAssetBase::FStampParams iStampParams)
+{
+    UOdysseyPainterEditorRasterDrawingTool* drawingTool = nullptr;
+    if (mEditor->GetSelectedTool()->IsA(UOdysseyPainterEditorRasterDrawingTool::StaticClass()))
+        drawingTool = Cast<UOdysseyPainterEditorRasterDrawingTool>(mEditor->GetSelectedTool());
+
+    checkf(drawingTool != nullptr, TEXT("Drawing tool is non existent"));
+
+    //Check if we're currently drawing on the level editor viewport. If not, we're drawing normally
+    if (!GCurrentLevelEditingViewportClient->GetEditorViewportWidget()->GetSceneViewport()->HasFocus())
+        return drawingTool->GetBrushInstance()->StampInternal(iStampParams);
+    
+    // Check if we have a proper meshComponent to paint on
+    const TSharedPtr<IMeshPaintGeometryAdapter>* meshAdapterPtr = mEditor->ComponentToAdapterMap().Find(mEditor->Component());
+    if (!meshAdapterPtr)
+        return drawingTool->GetBrushInstance()->StampInternal(iStampParams);
+
+
+    TSharedPtr<IMeshPaintGeometryAdapter> meshAdapter = *meshAdapterPtr;
+
+    FEditorViewportClient* viewportClient = (FEditorViewportClient*)mLastKnownViewport->GetClient();
+    // Compute a world space ray from the screen space mouse coordinates
+    FSceneViewFamilyContext viewFamily(FSceneViewFamily::ConstructionValues(
+        viewportClient->Viewport,
+        viewportClient->GetScene(),
+        viewportClient->EngineShowFlags)
+        .SetRealtimeUpdate(viewportClient->IsRealtime()));
+    FSceneView* view = viewportClient->CalcSceneView(&viewFamily);
+    
+    //We need to shift the coordinates of the stamp, because here, we're working in viewport coordinates, not texture coordinates (1 px in viewport != 1px in coord)
+    iStampParams.mPosition.x = iStampParams.mPosition.x + iStampParams.mBlock->Width() / 2.f;
+    iStampParams.mPosition.y = iStampParams.mPosition.y + iStampParams.mBlock->Height() / 2.f;
+
+    const FViewportCursorLocation mouseViewportRay(view, viewportClient, iStampParams.mPosition.x, iStampParams.mPosition.y);
+
+    FHitResult traceHitResult(1.0f);
+    const FVector rayEnd(mouseViewportRay.GetOrigin() + mouseViewportRay.GetDirection() * HALF_WORLD_MAX);
+
+    meshAdapter->LineTraceComponent(traceHitResult, mouseViewportRay.GetOrigin(), rayEnd, FCollisionQueryParams(SCENE_QUERY_STAT(Paint), true));
+
+    // Convert trace to UV position
+    FVector2D coord;
+    if (UGameplayStatics::FindCollisionUV(traceHitResult, mEditor->GetUVIndexUsedByCurrentTexture(), coord))
+    {
+        //And here we shift back the coordinates, because we converted it to texture coordinates
+        iStampParams.mPosition.x = coord.X * mEditor->Texture()->GetSurfaceWidth() - iStampParams.mBlock->Width() / 2.f;
+        iStampParams.mPosition.y = coord.Y * mEditor->Texture()->GetSurfaceHeight() - iStampParams.mBlock->Height() / 2.f;
+    }
+    else
+    {
+        return iStampParams.mEvent;
+    }
+
+    return drawingTool->GetBrushInstance()->StampInternal(iStampParams);
 }
 
 #undef LOCTEXT_NAMESPACE
