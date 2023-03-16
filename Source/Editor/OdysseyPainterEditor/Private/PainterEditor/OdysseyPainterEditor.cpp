@@ -97,8 +97,8 @@ FOdysseyPainterEditor::HUDSystem() const
 	return mHUDSystem;
 }
 
-FOdysseyBrushColor&
-FOdysseyPainterEditor::PaintColor()
+const FOdysseyBrushColor&
+FOdysseyPainterEditor::PaintColor() const
 {
 	return mPaintColor;
 }
@@ -118,7 +118,8 @@ FOdysseyPainterEditor::PaintColor(const FOdysseyBrushColor& iColor, bool iIsComm
 	mPaintColor = iColor;
 
 	//PATCH: should be automatic in the new drawing Tool, fix it asap
-	FOdysseyObjectEditorUtils::SetPropertyValue(GetRasterDrawingTool()->GetBrushOptions(), "Color", iColor);
+	if (iIsCommit)
+		FOdysseyObjectEditorUtils::SetPropertyValue(GetRasterDrawingTool()->GetBrushOptions(), "Color", iColor);
 }
 
 void
