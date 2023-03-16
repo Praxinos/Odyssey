@@ -350,6 +350,11 @@ UOdysseyBrushAssetBase::GetBlock() const
     return mEditedBlock;
 }
 
+TArray<::ULIS::FRectI>* UOdysseyBrushAssetBase::GetInvalidRects()
+{
+    return &mInvalidRects;
+}
+
 //--------------------------------------------------------------------------------------
 //-------------------------------------------------------- OdysseyBrushBlueprint Getters
 /*******************************/
@@ -782,58 +787,101 @@ UOdysseyBrushAssetBase::Stamp( FOdysseyBlockProxy Sample, FOdysseyPivot Pivot, f
         ctx.Dummy_OP(2, eventInputs, &eventConv);
     }
 
-    ::ULIS::FEvent eventBlend = ::ULIS::FEvent(
+    ::ULIS::FEvent eventCleanup = ::ULIS::FEvent(
         ::ULIS::FOnEventComplete(
             //Also, passing block as a copy maintains it alive until evenBlend finishes, it is very important
-            [block, src]( const ::ULIS::FRectI& iRect )
+            [block, src](const ::ULIS::FRectI& iRect)
             {
                 if (src != block.Get())
                     delete  src;
             }
         )
     );
+    ::ULIS::FEvent eventStampInternal;
 
-    if (iAntiAliasing)
+    FStampParams params;
+    params.mBlock = src;
+    params.mPosition = ULIS::FVec2F(invalidRect.x, invalidRect.y);
+    params.mRects = { src->Rect() };
+    params.mEvent = eventConv;
+    params.mFlow = Flow;
+    params.mAntiAliasing = iAntiAliasing;
+    params.mBlendingMode = BlendingMode;
+    params.mAlphaMode = AlphaMode;
+
+    ctx.Finish();
+
+    if (mStampOverrideDelegate.IsBound())
     {
-        ctx.BlendAA(
-              *src
-            , *mEditedBlock
-            , block->Rect()
-            , ::ULIS::FVec2F(invalidRect.x, invalidRect.y)
-            , ::ULIS::eBlendMode( BlendingMode )
-            , ::ULIS::eAlphaMode( AlphaMode )
-            , FMath::Clamp(Flow, 0.f, 1.f)
-            , ::ULIS::FSchedulePolicy::AsyncCacheEfficient
-            , 1
-            , &eventConv
-            , &eventBlend
-        );
+        eventStampInternal = mStampOverrideDelegate.Execute(params);
     }
     else
     {
-        ctx.Blend(
-              *src
-            , *mEditedBlock
-            , block->Rect()
-            , ::ULIS::FVec2F(invalidRect.x, invalidRect.y)
-            , ::ULIS::eBlendMode( BlendingMode )
-            , ::ULIS::eAlphaMode( AlphaMode )
-            , FMath::Clamp(Flow, 0.f, 1.f)
-            , ::ULIS::FSchedulePolicy::AsyncCacheEfficient
-            , 1
-            , &eventConv
-            , &eventBlend
-        );
+        eventStampInternal = StampInternal(params);
     }
 
-    ctx.Flush();
+    ctx.Dummy_OP(1, &eventStampInternal, &eventCleanup);
 
-    mEvent = eventBlend;
+    mEvent = eventCleanup;
+}
 
-    ::ULIS::FRectI invalidRectI( FMath::FloorToInt( invalidRect.x ), FMath::FloorToInt( invalidRect.y ), FMath::CeilToInt( invalidRect.w + 2 ), FMath::CeilToInt( invalidRect.h + 2 ) );
-    invalidRectI = invalidRectI & mEditedBlock->Rect();
-    if (invalidRectI.w > 0 && invalidRectI.h > 0)
-        mInvalidRects.Add(invalidRectI);
+
+::ULIS::FEvent
+UOdysseyBrushAssetBase::StampInternal(FStampParams iStampParams)
+{
+
+    TArray<::ULIS::FEvent> eventBlend;
+    eventBlend.SetNum(iStampParams.mRects.Num());
+    ::ULIS::eFormat target_format = mEditedBlock->Format();
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(target_format);
+
+    for (int i = 0; i < iStampParams.mRects.Num(); i++)
+    {
+        ULIS::FVec2F position = iStampParams.mPosition + ULIS::FVec2F(iStampParams.mRects[i].x, iStampParams.mRects[i].y);
+        if (iStampParams.mAntiAliasing)
+        {
+            ctx.BlendAA(
+                *iStampParams.mBlock
+                , *mEditedBlock
+                , iStampParams.mRects[i]
+                , position
+                , ::ULIS::eBlendMode(iStampParams.mBlendingMode)
+                , ::ULIS::eAlphaMode(iStampParams.mAlphaMode)
+                , FMath::Clamp(iStampParams.mFlow, 0.f, 1.f)
+                , ::ULIS::FSchedulePolicy::AsyncCacheEfficient
+                , 1
+                , &iStampParams.mEvent
+                , &eventBlend[i]
+            );
+        }
+        else
+        {
+            ctx.Blend(
+                *iStampParams.mBlock
+                , *mEditedBlock
+                , iStampParams.mRects[i]
+                , position
+                , ::ULIS::eBlendMode(iStampParams.mBlendingMode)
+                , ::ULIS::eAlphaMode(iStampParams.mAlphaMode)
+                , FMath::Clamp(iStampParams.mFlow, 0.f, 1.f)
+                , ::ULIS::FSchedulePolicy::AsyncCacheEfficient
+                , 1
+                , &iStampParams.mEvent
+                , &eventBlend[i]
+            );
+        }
+
+        ctx.Flush();
+
+        ::ULIS::FRectI invalidRectI(FMath::FloorToInt(position.x), FMath::FloorToInt(position.y), FMath::CeilToInt(iStampParams.mRects[i].w + 2.f), FMath::CeilToInt(iStampParams.mRects[i].h + 2.f));
+        invalidRectI = invalidRectI & mEditedBlock->Rect();
+        if (invalidRectI.w > 0 && invalidRectI.h > 0)
+            mInvalidRects.Add(invalidRectI);
+    }
+
+    ::ULIS::FEvent eventStampInternal;
+    ctx.Dummy_OP(eventBlend.Num(), eventBlend.GetData(), &eventStampInternal);
+    return eventStampInternal;
 }
 
 //--------------------------------------------------------------------------------------

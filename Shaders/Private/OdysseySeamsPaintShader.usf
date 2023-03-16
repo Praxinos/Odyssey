@@ -1,0 +1,75 @@
+#include "/Engine/Private/common.ush"
+
+Texture2D s_Stroke2D;
+Texture2D s_SeamMask;
+SamplerState s_Stroke2DSampler;
+SamplerState s_SeamMaskSampler;
+
+float c_WidthPixelOffset;
+float c_HeightPixelOffset;
+
+void MainPS( float4 InPosition : SV_POSITION,
+		   float2 InCloneTextureCoordinates : TEXCOORD0,
+		   float3 InWorldSpaceVertexPosition : TEXCOORD1,
+		   out float4 OutColor : SV_Target0)
+{	
+	// Texture0 will be the brush texture
+	// Texture1 will be the seam mask
+	// Texture2 will be the brush mask
+
+	// First sample the source values from brush texture and seam mask
+	float4 OldColor0 = Texture2DSample( s_Stroke2D, s_Stroke2DSampler, InCloneTextureCoordinates );
+	float4 OldColor1 = Texture2DSample( s_SeamMask, s_SeamMaskSampler, InCloneTextureCoordinates );
+
+	float4 CenterColor = OldColor0;
+
+	float2 OffsetConst = float2( c_WidthPixelOffset, c_HeightPixelOffset );
+
+	float2 OffsetIdx;
+
+	// Arbitrary large number that we will compare to against the squared sample distance.
+	// The largest we will hit in 25 samples should be 8 (distance squared = x*x+y*y)
+	int LastValidDistance = 10;
+
+	// Sample pixel data from a 5x5 grid around our current pixel
+	for( OffsetIdx.y = 2; OffsetIdx.y >= -2; OffsetIdx.y-- )
+	{
+		for( OffsetIdx.x = -2; OffsetIdx.x <= 2; OffsetIdx.x++)
+		{
+			// Compute offset coordinates for the pixel and sample the color
+			float2 Coord = InCloneTextureCoordinates + (OffsetIdx * OffsetConst);
+			float4 SampleColor = Texture2DSample( s_Stroke2D, s_Stroke2DSampler, Coord );
+
+			bool IsValid = all( Texture2DSample( s_SeamMask, s_SeamMaskSampler, Coord ).rgb == float3(0, 0, 0) );
+
+			// Calculate the squared sample distance from the center
+			int SampleDist = OffsetIdx.x * OffsetIdx.x + OffsetIdx.y * OffsetIdx.y;
+
+			if( IsValid && SampleDist < LastValidDistance)
+			{
+				CenterColor = SampleColor;
+				LastValidDistance = SampleDist;
+			}
+		}
+	} 
+	OutColor = CenterColor;
+}
+
+float4x4 c_Transform;
+
+void MainVS( float4 InPosition : ATTRIBUTE0,
+		   float2 InCloneTextureCoordinates : ATTRIBUTE2,
+		   float3 InWorldSpaceVertexPosition : ATTRIBUTE3,
+		   out float4 OutPosition : SV_POSITION,
+		   out float2 OutCloneTextureCoordinates: TEXCOORD0,
+		   out float3 OutWorldSpaceVertexPosition : TEXCOORD1 )
+{
+	// Position (on texture map, derived from the UVs of the original mesh)
+	OutPosition = mul( InPosition, c_Transform );
+
+	// Pass clone texture coordinates through to the pixel shader
+	OutCloneTextureCoordinates = InCloneTextureCoordinates;
+
+	// Position of this vertex in world space (original mesh)
+	OutWorldSpaceVertexPosition = InWorldSpaceVertexPosition;
+}

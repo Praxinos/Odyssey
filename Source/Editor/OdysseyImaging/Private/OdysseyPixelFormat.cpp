@@ -239,6 +239,6 @@ EPixelFormat PixelFormatForULISFormat( ::ULIS::eFormat iFormat )
         case ::ULIS::Format_RGBA8:  ret = PF_R8G8B8A8_UINT;         break;
         default:                    ret = PF_Unknown;               break;
     }
-    checkf( ret, TEXT( "Error, bad format !" ) ); // Crash
+    //checkf( ret, TEXT( "Error, bad format !" ) ); // Crash
     return ret;
 }

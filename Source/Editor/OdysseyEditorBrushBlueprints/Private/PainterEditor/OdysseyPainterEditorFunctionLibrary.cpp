@@ -63,12 +63,12 @@ UOdysseyPainterEditorFunctionLibrary::GetStep( UOdysseyBrushAssetBase* BrushInst
 {
     if (!BrushInstance)
         return 0.f;
-        
+
     FOdysseyPainterEditorBrushContext* context = BrushInstance->GetContext<FOdysseyPainterEditorBrushContext>("FOdysseyPainterEditorBrushContext");
-    if (!context)
-        return 0.f;
+    if (context)
+        return context->GetStep();
 
     //---
 
-    return context->GetStep();
+    return 0.f;
 }

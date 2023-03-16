@@ -45,6 +45,22 @@ class ODYSSEYBRUSH_API UOdysseyBrushAssetBase : public UObject
     GENERATED_BODY()
 
 public:
+    struct FStampParams
+    {
+        ::ULIS::FBlock* mBlock;
+        ULIS::FVec2F mPosition;
+        TArray<::ULIS::FRectI> mRects;
+        ::ULIS::FEvent mEvent;
+        float mFlow;
+        bool mAntiAliasing;
+        EOdysseyBlendingMode mBlendingMode;
+        EOdysseyAlphaMode mAlphaMode;
+    };
+
+public:
+    DECLARE_DELEGATE_RetVal_OneParam(::ULIS::FEvent, FStampOverrideDelegate, FStampParams)
+
+public:
     enum class eStepType
     {
         kNone = 0,
@@ -122,8 +138,12 @@ public:
     //Returns the BrushOptions used by the Brush
     UOdysseyBrushOptions* GetBrushOptions();
 
+    FStampOverrideDelegate& GetStampOverrideDelegate() { return mStampOverrideDelegate; }
+
     // Sets the block on which the brush is drawing
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> GetBlock() const;
+
+    TArray<::ULIS::FRectI>* GetInvalidRects();
 
 public:
     //Context Management
@@ -358,6 +378,8 @@ public:
     UFUNCTION( BlueprintCallable, Category="Odyssey|Stamps", meta = ( DefaultToSelf="Target", HideSelfPin, HidePin="Target") )
     void  Stamp( UPARAM(DisplayName="Block") FOdysseyBlockProxy Sample, UPARAM(DisplayName="Handle Position") FOdysseyPivot Pivot, float X, float Y, float Flow = 1.f, bool AntiAliasing = false, EOdysseyBlendingMode BlendingMode = EOdysseyBlendingMode::kNormal, EOdysseyAlphaMode AlphaMode = EOdysseyAlphaMode::kNormal );
 
+    ::ULIS::FEvent StampInternal(FStampParams iStampParams);
+
 public:
     /*********************************/
     /** Odyssey Brush Native Events **/
@@ -435,6 +457,7 @@ private:
     bool                                    mIsDrawing;
     TArray<::ULIS::FRectI>                  mInvalidRects;
     ::ULIS::FEvent                          mEvent;
+    FStampOverrideDelegate                  mStampOverrideDelegate;
 };
 
 template<class T> T*

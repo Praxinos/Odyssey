@@ -4,6 +4,7 @@
 #pragma once
 
 #include "OdysseyEditorTab.h"
+#include "SOdysseyPaintModifiers.h"
 
 class FOdysseyPainterEditor;
 
@@ -16,7 +17,11 @@ public:
     FOdysseyPainterEditorTopTab( FOdysseyPainterEditor* iEditor );
 
     // Spawner callback
-virtual TSharedRef<SDockTab> SpawnTab(const FSpawnTabArgs& iArgs) override;
+    virtual TSharedRef<SDockTab> SpawnTab(const FSpawnTabArgs& iArgs) override;
+
+    // Setter to change this tab's widget size from pure pixel value to percentage of mesh
+    void    SetMeshMaxSize(float iValue = -1);
+
 
 protected:
     // FOdysseyEditorTab interface
@@ -28,7 +33,7 @@ protected:
 
     virtual bool IsPackageEdited() const;
     virtual bool IsEraserButtonActive() const;
-    virtual int OnGetSize() const;
+    virtual float OnGetSize() const;
     virtual float OnGetOpacity() const;
     virtual float OnGetFlow() const;
     virtual ::ULIS::eBlendMode BlendingMode() const;
@@ -36,7 +41,7 @@ protected:
 
 protected:
     // Event Listeners
-    virtual void OnSizeChanged( int32 iValue, EPropertyChangeType::Type iChangeType);
+    virtual void OnSizeChanged( float iValue, EPropertyChangeType::Type iChangeType);
     virtual void OnOpacityChanged( int32 iValue, EPropertyChangeType::Type iChangeType);
     virtual void OnFlowChanged( int32 iValue, EPropertyChangeType::Type iChangeType);
     virtual void OnBlendingModeChanged( int32 iValue );
@@ -55,5 +60,6 @@ protected:
 
 private:
     FOdysseyPainterEditor* mEditor;
+    TSharedPtr<SOdysseyPaintModifiers> mWidget;
 };
 

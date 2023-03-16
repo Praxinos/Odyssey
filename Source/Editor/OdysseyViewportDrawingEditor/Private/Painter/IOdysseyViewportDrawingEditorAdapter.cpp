@@ -3,11 +3,24 @@
 
 #include "IOdysseyViewportDrawingEditorAdapter.h"
 #include "IMeshPaintGeometryAdapter.h"
+#include "Tools/OdysseyPainterEditorTool.h"
+#include "UObject/SavePackage.h"
 
 #define LOCTEXT_NAMESPACE "IOdysseyViewportDrawingEditorAdapter"
 
 IOdysseyViewportDrawingEditorAdapter::~IOdysseyViewportDrawingEditorAdapter()
 {
+    if( mEditor->GetSelectedTool() )
+    {
+        if (mEditor->GetSelectedTool()->IsA(UOdysseyPainterEditorRasterDrawingTool::StaticClass()))
+        {
+            UOdysseyPainterEditorRasterDrawingTool* drawingTool = Cast<UOdysseyPainterEditorRasterDrawingTool>(mEditor->GetSelectedTool());
+            UnbindStampBrushInstance(drawingTool->GetBrushInstance());
+        }
+    }
+
+    mEditor->OnSelectedToolChangedDelegate().RemoveAll(this);
+    OnToolChange(nullptr);
     mEditor->TargetToPaintWillChangeDelegate().RemoveAll(this);
     mEditor->TargetToPaintChangedDelegate().RemoveAll(this);
     
@@ -26,9 +39,23 @@ IOdysseyViewportDrawingEditorAdapter::IOdysseyViewportDrawingEditorAdapter(TShar
 {
     mEditor->TargetToPaintWillChangeDelegate().AddRaw(this, &IOdysseyViewportDrawingEditorAdapter::RemoveTextureOverride);
     mEditor->TargetToPaintChangedDelegate().AddRaw(this, &IOdysseyViewportDrawingEditorAdapter::PrepareAdapterForPainting);
+    PrepareAdapterForPainting();
 
     UOdysseyStylusInputSubsystem* inputSubsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
     inputSubsystem->AddMessageHandler(*this);
+}
+
+void IOdysseyViewportDrawingEditorAdapter::PrepareAdapterForPainting()
+{
+    mEditor->OnSelectedToolChangedDelegate().AddRaw(this, &IOdysseyViewportDrawingEditorAdapter::OnToolChange);
+    if (mEditor->GetSelectedTool())
+    {
+        if (mEditor->GetSelectedTool()->IsA(UOdysseyPainterEditorTool::StaticClass()))
+        {
+            UOdysseyPainterEditorTool* drawingTool = Cast<UOdysseyPainterEditorTool>(mEditor->GetSelectedTool());
+            OnToolChange(drawingTool);
+        }
+    }
 }
 
 bool IOdysseyViewportDrawingEditorAdapter::IsReadyToDraw() const
@@ -54,10 +81,10 @@ bool IOdysseyViewportDrawingEditorAdapter::MouseMove(FEditorViewportClient* iVie
     
     mCurrentStrokeRay.mRayOrigin = mouseViewportRay.GetOrigin();
     mCurrentStrokeRay.mRayDirection = mouseViewportRay.GetDirection();
-    mCurrentStrokeRay.mStrokePoint = FOdysseyPoint::DefaultPoint();
-    mCurrentStrokeRay.mStrokePoint.x = iX;
-    mCurrentStrokeRay.mStrokePoint.y = iY;
-    mCurrentStrokeRay.mStrokePoint.keysDown = mKeysPressed;
+    mCurrentStrokeRay.mPoint = FOdysseyPoint::DefaultPoint();
+    mCurrentStrokeRay.mPoint.x = iViewport->GetMouseX();
+    mCurrentStrokeRay.mPoint.y = iViewport->GetMouseY();
+    mCurrentStrokeRay.mPoint.keysDown = mKeysPressed;
 
     return true;
 }
@@ -130,18 +157,18 @@ bool IOdysseyViewportDrawingEditorAdapter::InputKey(FEditorViewportClient* iView
     const FViewportCursorLocation mouseViewportRay(view,(FEditorViewportClient*)iViewport->GetClient(),iViewport->GetMouseX(),iViewport->GetMouseY());
 
     //Init our StrokeRay, having all the basic info to draw 
-    FOdysseyStrokeRay strokeRay;
+    FOdysseyRay strokeRay;
     strokeRay.mRayOrigin = mouseViewportRay.GetOrigin();
     strokeRay.mRayDirection = mouseViewportRay.GetDirection();
-    strokeRay.mStrokePoint = FOdysseyPoint::DefaultPoint();
-    strokeRay.mStrokePoint.x = iViewport->GetMouseX();
-    strokeRay.mStrokePoint.y = iViewport->GetMouseY();
-    strokeRay.mStrokePoint.keysDown = mKeysPressed;
+    strokeRay.mPoint = FOdysseyPoint::DefaultPoint();
+    strokeRay.mPoint.x = iViewport->GetMouseX();
+    strokeRay.mPoint.y = iViewport->GetMouseY();
+    strokeRay.mPoint.keysDown = mKeysPressed;
 
     return InputKeyWithStrokeRay(strokeRay, iViewportClient, iViewport, iKey, iEvent);
 }
 
-bool IOdysseyViewportDrawingEditorAdapter::InputKeyWithStrokeRay(const FOdysseyStrokeRay& iRay, FEditorViewportClient* iViewportClient, FViewport* iViewport, FKey iKey, EInputEvent iEvent)
+bool IOdysseyViewportDrawingEditorAdapter::InputKeyWithStrokeRay(const FOdysseyRay& iRay, FEditorViewportClient* iViewportClient, FViewport* iViewport, FKey iKey, EInputEvent iEvent)
 {
     if(!IsReadyToDraw())
         return false;
@@ -189,18 +216,18 @@ bool IOdysseyViewportDrawingEditorAdapter::CapturedMouseMove(FEditorViewportClie
     const FViewportCursorLocation mouseViewportRay(view, (FEditorViewportClient*)iViewport->GetClient(), iViewport->GetMouseX(), iViewport->GetMouseY());
 
     //Init our StrokeRay, having all the basic info to draw 
-    FOdysseyStrokeRay strokeRay;
+    FOdysseyRay strokeRay;
     strokeRay.mRayOrigin = mouseViewportRay.GetOrigin();
     strokeRay.mRayDirection = mouseViewportRay.GetDirection();
-    strokeRay.mStrokePoint = FOdysseyPoint::DefaultPoint();
-    strokeRay.mStrokePoint.x = iMouseX;
-    strokeRay.mStrokePoint.y = iMouseY;
-    strokeRay.mStrokePoint.keysDown = mKeysPressed;
+    strokeRay.mPoint = FOdysseyPoint::DefaultPoint();
+    strokeRay.mPoint.x = iMouseX;
+    strokeRay.mPoint.y = iMouseY;
+    strokeRay.mPoint.keysDown = mKeysPressed;
 
     return CapturedMouseMoveWithStrokeRay(strokeRay, iViewportClient, iViewport, iMouseX, iMouseY);
 }
 
-bool IOdysseyViewportDrawingEditorAdapter::CapturedMouseMoveWithStrokeRay(const FOdysseyStrokeRay& iRay, FEditorViewportClient* iViewportClient, FViewport* iViewport, int32 iMouseX, int32 iMouseY)
+bool IOdysseyViewportDrawingEditorAdapter::CapturedMouseMoveWithStrokeRay(const FOdysseyRay& iRay, FEditorViewportClient* iViewportClient, FViewport* iViewport, int32 iMouseX, int32 iMouseY)
 {
     if (!IsReadyToDraw())
         return false;
@@ -210,7 +237,7 @@ bool IOdysseyViewportDrawingEditorAdapter::CapturedMouseMoveWithStrokeRay(const 
 
     if (mState == eState::kDrawing)
     {
-        if (long(mCurrentStrokeRay.mStrokePoint.x) == long(mLastStrokeRay.mStrokePoint.x) && long(mCurrentStrokeRay.mStrokePoint.y) == long(mLastStrokeRay.mStrokePoint.y))
+        if (long(mCurrentStrokeRay.mPoint.x) == long(mLastStrokeRay.mPoint.x) && long(mCurrentStrokeRay.mPoint.y) == long(mLastStrokeRay.mPoint.y))
             return true;
 
         Paint();
@@ -225,7 +252,7 @@ void IOdysseyViewportDrawingEditorAdapter::OnStylusStateChanged(const TWeakPtr<S
         return;
 
     //We only treat events on the main level Viewport
-    if( !GCurrentLevelEditingViewportClient || GCurrentLevelEditingViewportClient->GetEditorViewportWidget()->GetSceneViewport()->GetViewportWidget().Pin().Get() != iWidget.Pin().Get() )
+    if( GCurrentLevelEditingViewportClient->GetEditorViewportWidget()->GetSceneViewport()->GetViewportWidget().Pin().Get() != iWidget.Pin().Get() )
         return;
 
     FEditorViewportClient* viewportClient = (FEditorViewportClient*)mLastKnownViewport->GetClient();
@@ -245,10 +272,10 @@ void IOdysseyViewportDrawingEditorAdapter::OnStylusStateChanged(const TWeakPtr<S
     //Init our StrokeRay, having all the basic info to draw 
     float scaleDPI = iWidget.Pin().Get()->GetCachedGeometry().GetAccumulatedLayoutTransform().GetScale();
     FVector2D positionInViewport = iWidget.Pin().Get()->GetCachedGeometry().AbsoluteToLocal(iState.GetPosition()) * scaleDPI;
-    FOdysseyStrokeRay strokeRay;
+    FOdysseyRay strokeRay;
     strokeRay.mRayOrigin = mouseViewportRay.GetOrigin();
     strokeRay.mRayDirection = mouseViewportRay.GetDirection();
-    strokeRay.mStrokePoint = FOdysseyPoint( positionInViewport.X
+    strokeRay.mPoint = FOdysseyPoint( positionInViewport.X
                                                 , positionInViewport.Y
                                                 , iState.GetZ()
                                                 , iState.GetPressure()
@@ -260,7 +287,7 @@ void IOdysseyViewportDrawingEditorAdapter::OnStylusStateChanged(const TWeakPtr<S
                                                 , 0 // iState.GetRoll()
                                                 , 0); // iState.GetYaw() );
 
-    strokeRay.mStrokePoint.keysDown = mKeysPressed;
+    strokeRay.mPoint.keysDown = mKeysPressed;
 
     static bool stylusWasDown = false;
     static bool is_dragging = false;
@@ -298,24 +325,52 @@ void IOdysseyViewportDrawingEditorAdapter::RemoveTextureOverride()
     if( !mPaintingTexture2DRenderTarget || !mPaintingTexture2DRenderTarget->IsValidLowLevel() )
         return;
 
-    if (mEditor->Texture() && mEditor->Texture()->MipGenSettings == TextureMipGenSettings::TMGS_NoMipmaps)
-    {
-        mState = eState::kIdle;
-        return;
-    }
-
     if (mEditor->Component() != nullptr && mEditor->Texture() != nullptr)
     {
-        UE_LOG(LogTemp, Display, TEXT("Removing override for %s, %s-------------"), *(mEditor->Material()->GetFName().ToString()), *(mEditor->Texture()->GetFName().ToString() ) )
-
         const ERHIFeatureLevel::Type FeatureLevel = mEditor->Component()->GetWorld()->FeatureLevel;
         mEditor->Material()->OverrideTexture(mEditor->Texture(), nullptr, FeatureLevel);
-        //IMeshPaintGeometryAdapter::DefaultApplyOrRemoveTextureOverride(mEditor->Component(), mEditor->Texture(), nullptr);
 
         mPaintingTexture2DRenderTarget->ConditionalBeginDestroy();
         mPaintingTexture2DRenderTarget = nullptr;
         mState = eState::kIdle;
     }
+}
+
+void IOdysseyViewportDrawingEditorAdapter::OnToolChange(UOdysseyPainterEditorTool* iNewTool)
+{
+    if( mEditor->GetSelectedTool() )
+    {
+        if (mEditor->GetSelectedTool()->IsA(UOdysseyPainterEditorRasterDrawingTool::StaticClass()))
+        {
+            UOdysseyPainterEditorRasterDrawingTool* drawingTool = Cast<UOdysseyPainterEditorRasterDrawingTool>(mEditor->GetSelectedTool());
+            drawingTool->OnCreatedBrushInstance().RemoveAll(this);
+            drawingTool->OnDestroyBrushInstance().RemoveAll(this);
+            UnbindStampBrushInstance(drawingTool->GetBrushInstance());
+        }
+    }
+
+    if (!iNewTool)
+        return;
+
+    if (iNewTool->IsA(UOdysseyPainterEditorRasterDrawingTool::StaticClass()))
+    {
+        UOdysseyPainterEditorRasterDrawingTool* drawingTool = Cast<UOdysseyPainterEditorRasterDrawingTool>(iNewTool);
+        drawingTool->OnCreatedBrushInstance().AddRaw(this, &IOdysseyViewportDrawingEditorAdapter::BindStampBrushInstance);
+        drawingTool->OnDestroyBrushInstance().AddRaw(this, &IOdysseyViewportDrawingEditorAdapter::UnbindStampBrushInstance);
+        BindStampBrushInstance(drawingTool->GetBrushInstance());
+    }
+}
+
+void IOdysseyViewportDrawingEditorAdapter::UnbindStampBrushInstance(UOdysseyBrushAssetBase* iUnbindBrush)
+{
+    if (iUnbindBrush)
+        iUnbindBrush->GetStampOverrideDelegate().Unbind();
+}
+
+void IOdysseyViewportDrawingEditorAdapter::BindStampBrushInstance(UOdysseyBrushAssetBase* iBindBrush)
+{
+    if (iBindBrush)
+        iBindBrush->GetStampOverrideDelegate().BindRaw(this, &IOdysseyViewportDrawingEditorAdapter::StampOverride);
 }
 
 #undef LOCTEXT_NAMESPACE

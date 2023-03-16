@@ -381,6 +381,17 @@ UOdysseyPainterEditorRasterDrawingTool::OnApplyOverridesDelegate()
     return mOnApplyOverridesDelegate;
 }
 
+UOdysseyPainterEditorRasterDrawingTool::FOnDestroyBrushInstance&
+UOdysseyPainterEditorRasterDrawingTool::OnDestroyBrushInstance()
+{
+    return mOnDestroyBrushInstance;
+}
+
+UOdysseyPainterEditorRasterDrawingTool::FOnCreatedBrushInstance&
+UOdysseyPainterEditorRasterDrawingTool::OnCreatedBrushInstance()
+{
+    return mOnCreatedBrushInstance;
+}
 
 UOdysseyPainterEditorRasterDrawingTool::FAdaptShapePoints&
 UOdysseyPainterEditorRasterDrawingTool::AdaptShapePointsDelegate()
@@ -436,6 +447,8 @@ UOdysseyPainterEditorRasterDrawingTool::CreateBrushInstance(bool iApplyOverrides
     
     brushInstance->ExecuteSelected();
     brushInstance->ExecuteStateChanged();
+
+    mOnCreatedBrushInstance.Broadcast(BrushInstance);
 }
 
 /* void
