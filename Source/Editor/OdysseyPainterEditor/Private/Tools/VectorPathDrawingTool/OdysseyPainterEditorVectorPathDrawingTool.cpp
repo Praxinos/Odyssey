@@ -132,7 +132,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDown(const FOdysseyPoint& iPo
 
         if ( cubicPath == nullptr )
         {
-            cubicPath = NewObject<FOdysseyVectorPathCubic>();
+            cubicPath = new FOdysseyVectorPathCubic();
 
             scene->AppendChild( cubicPath );
 

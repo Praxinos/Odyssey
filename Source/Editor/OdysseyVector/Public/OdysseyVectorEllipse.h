@@ -8,7 +8,19 @@
 #include "OdysseyVectorSegmentCubic.h"
 #include "OdysseyVectorPathCubic.h"
 
-//#include "OdysseyVectorEllipse.generated.h"
+#include "OdysseyVectorEllipse.generated.h"
+
+USTRUCT()
+struct FOdysseyVectorEllipseParam
+{
+    GENERATED_BODY()
+
+    UPROPERTY(EditAnywhere, Category="General")
+    double RadiusX;
+
+    UPROPERTY(EditAnywhere, Category="General")
+    double RadiusY;
+};
 
 class ODYSSEYVECTOR_API FOdysseyVectorEllipse : public FOdysseyVectorPathCubic
 {
@@ -97,10 +109,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorEllipse : public FOdysseyVectorPathCubic
     protected :
         FOdysseyVectorVertexCubic* mCubicVertex[4];
         FOdysseyVectorSegmentCubic* mCubicSegment[4];
-        double mRadiusX; 
-        double mRadiusY; 
         double mStrokeWidth;
 
-
- 
+    public:
+        FOdysseyVectorEllipseParam mEllipseParam;
 };

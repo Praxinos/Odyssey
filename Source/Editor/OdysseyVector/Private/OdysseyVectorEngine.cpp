@@ -406,10 +406,10 @@ RecursivePickSegments( FOdysseyVectorObject* iObject
                      , std::vector<FOdysseyVectorSegment*>& oPickedSegmentArray
                      , std::vector<double>& oDistanceArray )
 {
-    FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(iObject);
-
-    if( path )
+    if( ( iObject->GetClass() == FOdysseyVectorPath::StaticClass()      )
+     || ( iObject->GetClass() == FOdysseyVectorPathCubic::StaticClass() ) )
     {
+        FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(iObject);
         BLPoint localVector = iObject->GetInverseWorldMatrix().mapVector( 0.7071f, 0.7071f );
         ::ULIS::FVec2D factor = { localVector.x * iRadius, localVector.y * iRadius };
         double localRadius = factor.Distance();

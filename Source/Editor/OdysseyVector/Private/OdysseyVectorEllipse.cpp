@@ -15,7 +15,7 @@ FOdysseyVectorEllipse::FOdysseyVectorEllipse()
 {
     SetName( "Circle" );
 
-    mRadiusX = mRadiusY = 0.0f;
+    mEllipseParam.RadiusX = mEllipseParam.RadiusY = 0.0f;
 }
 
 void
@@ -59,25 +59,25 @@ FOdysseyVectorEllipse::New( std::string iName, double iRadiusX, double iRadiusY 
 void
 FOdysseyVectorEllipse::UpdateShape( uint32 iUpdateFlags )
 {
-    double ctlDistX = mRadiusX * MAGICRATIO;
-    double ctlDistY = mRadiusY * MAGICRATIO;
+    double ctlDistX = mEllipseParam.RadiusX * MAGICRATIO;
+    double ctlDistY = mEllipseParam.RadiusY * MAGICRATIO;
 
-    mCubicVertex[0]->Set(  0.0f    ,  mRadiusY );
-    mCubicVertex[1]->Set(  mRadiusX,  0.0f     );
-    mCubicVertex[2]->Set(  0.0f    , -mRadiusY );
-    mCubicVertex[3]->Set( -mRadiusX,  0.0f     );
+    mCubicVertex[0]->Set(  0.0f                 ,  mEllipseParam.RadiusY );
+    mCubicVertex[1]->Set(  mEllipseParam.RadiusX,  0.0f                  );
+    mCubicVertex[2]->Set(  0.0f                 , -mEllipseParam.RadiusY );
+    mCubicVertex[3]->Set( -mEllipseParam.RadiusX,  0.0f                  );
 
-    mCubicSegment[0]->GetHandle(0)->Set(  ctlDistX,  mRadiusY );
-    mCubicSegment[0]->GetHandle(1)->Set(  mRadiusX,  ctlDistY );
+    mCubicSegment[0]->GetHandle(0)->Set(  ctlDistX             ,  mEllipseParam.RadiusY );
+    mCubicSegment[0]->GetHandle(1)->Set(  mEllipseParam.RadiusX,  ctlDistY              );
 
-    mCubicSegment[1]->GetHandle(0)->Set(  mRadiusX, -ctlDistY );
-    mCubicSegment[1]->GetHandle(1)->Set(  ctlDistX, -mRadiusY );
+    mCubicSegment[1]->GetHandle(0)->Set(  mEllipseParam.RadiusX, -ctlDistY              );
+    mCubicSegment[1]->GetHandle(1)->Set(  ctlDistX             , -mEllipseParam.RadiusY );
 
-    mCubicSegment[2]->GetHandle(0)->Set( -ctlDistX, -mRadiusY );
-    mCubicSegment[2]->GetHandle(1)->Set( -mRadiusX, -ctlDistY );
+    mCubicSegment[2]->GetHandle(0)->Set( -ctlDistX             , -mEllipseParam.RadiusY );
+    mCubicSegment[2]->GetHandle(1)->Set( -mEllipseParam.RadiusX, -ctlDistY              );
 
-    mCubicSegment[3]->GetHandle(0)->Set( -mRadiusX,  ctlDistY );
-    mCubicSegment[3]->GetHandle(1)->Set( -ctlDistX,  mRadiusY );
+    mCubicSegment[3]->GetHandle(0)->Set( -mEllipseParam.RadiusX,  ctlDistY              );
+    mCubicSegment[3]->GetHandle(1)->Set( -ctlDistX             ,  mEllipseParam.RadiusY );
 
     mCubicSegment[0]->Update();
     mCubicSegment[1]->Update();
@@ -90,7 +90,7 @@ FOdysseyVectorEllipse::CopyShape()
 {
     FOdysseyVectorEllipse* circleCopy = new FOdysseyVectorEllipse();
 
-    circleCopy->Init ( Name, mRadiusX, mRadiusY );
+    circleCopy->Init ( Name, mEllipseParam.RadiusX, mEllipseParam.RadiusY );
 
     return static_cast<FOdysseyVectorObject*>( circleCopy );
 }
@@ -108,7 +108,7 @@ FOdysseyVectorEllipse::Convert()
 void
 FOdysseyVectorEllipse::DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags )
 {
-    if ( mRadiusX && mRadiusY )
+    if ( mEllipseParam.RadiusX && mEllipseParam.RadiusY )
     {
         FOdysseyVectorPathCubic::DrawShape ( iRoi, iFlags );
     }
@@ -159,13 +159,13 @@ FOdysseyVectorEllipse::SetRadius( double iRadius )
 void
 FOdysseyVectorEllipse::SetRadius( double iRadiusX, double iRadiusY )
 {
-    mRadiusX = iRadiusX;
-    mRadiusY = iRadiusY;
+    mEllipseParam.RadiusX = iRadiusX;
+    mEllipseParam.RadiusY = iRadiusY;
 
-    mBBox.x = -mRadiusX - mStrokeWidth;
-    mBBox.y = -mRadiusY - mStrokeWidth;
-    mBBox.w =  ( mRadiusX +  mStrokeWidth ) * 2;
-    mBBox.h =  ( mRadiusY +  mStrokeWidth ) * 2;
+    mBBox.x = - mEllipseParam.RadiusX - mStrokeWidth;
+    mBBox.y = - mEllipseParam.RadiusY - mStrokeWidth;
+    mBBox.w =  ( mEllipseParam.RadiusX +  mStrokeWidth ) * 2;
+    mBBox.h =  ( mEllipseParam.RadiusY +  mStrokeWidth ) * 2;
 
     //Invalidate();
 }
@@ -173,13 +173,13 @@ FOdysseyVectorEllipse::SetRadius( double iRadiusX, double iRadiusY )
 double
 FOdysseyVectorEllipse::GetRadiusX()
 {
-    return mRadiusX;
+    return mEllipseParam.RadiusX;
 }
 
 double
 FOdysseyVectorEllipse::GetRadiusY()
 {
-    return mRadiusY;
+    return mEllipseParam.RadiusY;
 }
 
 uint32

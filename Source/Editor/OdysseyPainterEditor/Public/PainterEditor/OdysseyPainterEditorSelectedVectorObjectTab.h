@@ -10,7 +10,7 @@ class FOdysseyPainterEditor;
 class UOdysseyPainterEditorTool;
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorSelectedVectorObjectTab :
-    public FOdysseyEditorTab
+    public FOdysseyEditorTab, public FNotifyHook
 {
 public:
     // Construction / Destruction

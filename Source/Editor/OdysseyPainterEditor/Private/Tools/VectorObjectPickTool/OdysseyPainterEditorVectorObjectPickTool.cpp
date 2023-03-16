@@ -109,13 +109,18 @@ SetSelectionSpace( FOdysseyVectorEngine* iVectorEngine, FOdysseyVectorObject* iS
 {
     if( DoubleClicked() == true )
     {
-        if( ( iSelectedObject->GetClass() == FOdysseyVectorGroup::StaticClass() )
-         || ( iSelectedObject->GetClass() == FOdysseyVectorGroupPaint::StaticClass() ) )
-        {
-            FOdysseyVectorGroup* selectedGroup = static_cast<FOdysseyVectorGroup*>(iSelectedObject);
+        FOdysseyVectorGroup* selectedGroup = nullptr;
 
-            iVectorEngine->SetSelectionSpace(selectedGroup);
+        if( iSelectedObject )
+        {
+            if( ( iSelectedObject->GetClass() == FOdysseyVectorGroup::StaticClass()      )
+             || ( iSelectedObject->GetClass() == FOdysseyVectorGroupPaint::StaticClass() ) )
+            {
+                selectedGroup = static_cast<FOdysseyVectorGroup*>(iSelectedObject);
+            }
         }
+
+        iVectorEngine->SetSelectionSpace( selectedGroup );
     }
 }
 

@@ -621,11 +621,12 @@ FOdysseyPainterEditorGUI::GroupPaint()
                         for( std::list<FOdysseyVectorObject*>::iterator cit = selectedPaintGroup->GetChildrenList().begin(); cit != selectedPaintGroup->GetChildrenList().end(); ++cit )
                         {
                             FOdysseyVectorObject* childObject = (*cit);
-                            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(childObject);
 
-                            if( path )
+                            if( childObject->GetClass() == FOdysseyVectorPathCubic::StaticClass() )
                             {
-                                pathArray.push_back( path );
+                                FOdysseyVectorPathCubic* childCubicPath = static_cast<FOdysseyVectorPathCubic*>( childObject );
+
+                                pathArray.push_back( childCubicPath );
                             }
                         }
 
@@ -636,9 +637,9 @@ FOdysseyPainterEditorGUI::GroupPaint()
 
                     if( selectedObject->GetClass() == FOdysseyVectorPathCubic::StaticClass() )
                     {
-                        FOdysseyVectorPath* selectedPath = static_cast<FOdysseyVectorPath*>( selectedObject );
+                        FOdysseyVectorPathCubic* selectedCubicPath = static_cast<FOdysseyVectorPathCubic*>( selectedObject );
 
-                        pathArray.push_back( selectedPath );
+                        pathArray.push_back( selectedCubicPath );
                     }
                 }
 

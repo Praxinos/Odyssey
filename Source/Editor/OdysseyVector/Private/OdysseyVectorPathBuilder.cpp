@@ -90,15 +90,18 @@ FOdysseyVectorPathBuilder::RecordVertex( FOdysseyVectorPoint *iPoint, bool iEnfo
                 mFinalVertex = static_cast<FOdysseyVectorVertexCubic*>(iPoint);
             }
 
-            mCubicSegment = FOdysseyVectorSegmentCubic::New( mCubicPath, mInitialVertex, mFinalVertex );
+            if( mFinalVertex != mInitialVertex )
+            {
+                mCubicSegment = FOdysseyVectorSegmentCubic::New( mCubicPath, mInitialVertex, mFinalVertex );
 
-            Shape ( *mCubicSegment
-                   , mSampleLinkArray.front().GetVector( true )
-                   , mSampleLinkArray.back().GetVector( true ) );
+                Shape ( *mCubicSegment
+                       , mSampleLinkArray.front().GetVector( true )
+                       , mSampleLinkArray.back().GetVector( true ) );
 
-            Adjust( *mCubicSegment );
+                Adjust( *mCubicSegment );
 
-            ret |= FOdysseyVectorPathBuilder::NEWSEGMENT;
+                ret |= FOdysseyVectorPathBuilder::NEWSEGMENT;
+            }
 
             mCumulAngle = 0.0f;
         }
