@@ -68,18 +68,18 @@ UOdysseyPainterEditorVectorObjectMoveTool::OnMouseDrag( const FOdysseyPoint& iPo
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        std::list<UOdysseyVectorObject*>& selectObjectList = currentVectorLayer->GetScene()->GetSelectedObjectList();
+        std::list<FOdysseyVectorObject*>& selectObjectList = currentVectorLayer->GetScene()->GetSelectedObjectList();
         double difx = iPointInTexture.x - mOldWorldMouseX;
         double dify = iPointInTexture.y - mOldWorldMouseY;
-        ::ULIS::FRectD beforeBBox = UOdysseyVectorObject::GetBoundingBoxFromList( selectObjectList );
+        ::ULIS::FRectD beforeBBox = FOdysseyVectorObject::GetBoundingBoxFromList( selectObjectList );
 
-        for( std::list<UOdysseyVectorObject*>::iterator it = selectObjectList.begin(); it != selectObjectList.end(); ++it )
+        for( std::list<FOdysseyVectorObject*>::iterator it = selectObjectList.begin(); it != selectObjectList.end(); ++it )
         {
-            UOdysseyVectorObject* selectedObject = (*it);
+            FOdysseyVectorObject* selectedObject = (*it);
 
             if ( selectedObject->HasSelectedParent() == false )
             {
-                UOdysseyVectorObject* parentObject = selectedObject->GetParent();
+                FOdysseyVectorObject* parentObject = selectedObject->GetParent();
                 BLPoint localDif = parentObject->GetInverseWorldMatrix().mapVector( difx, dify );
 
                 selectedObject->Translate( selectedObject->GetTranslationX() + localDif.x
@@ -93,7 +93,7 @@ UOdysseyPainterEditorVectorObjectMoveTool::OnMouseDrag( const FOdysseyPoint& iPo
         mOldWorldMouseY = iPointInTexture.y;
 
         currentVectorLayer->RenderImageChanged(true);
-        //RedrawCurrentLayer( { { 0, 0, 0, 0 } } /*{ beforeBBox | UOdysseyVectorObject::GetBoundingBoxFromList( selectObjectList ) }*/, true );
+        //RedrawCurrentLayer( { { 0, 0, 0, 0 } } /*{ beforeBBox | FOdysseyVectorObject::GetBoundingBoxFromList( selectObjectList ) }*/, true );
     }
 }
 

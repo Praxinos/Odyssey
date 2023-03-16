@@ -6,18 +6,21 @@
 #include "OdysseyVectorObject.h"
 #include "OdysseyVectorSegment.h"
 
-#include "OdysseyVectorRectangle.generated.h"
+//#include "OdysseyVectorRectangle.generated.h"
 
-UCLASS()
-class ODYSSEYVECTOR_API UOdysseyVectorRectangle : public UOdysseyVectorObject
+class ODYSSEYVECTOR_API FOdysseyVectorRectangle : public FOdysseyVectorObject
 {
+    private:
+        static const uint32 mStaticClass = 0x9ee34077; // value is crc32 FOdysseyVectorRectangle
+
     public:
-        GENERATED_BODY()
+        static uint32 StaticClass() { return mStaticClass; };
+        virtual uint32 GetClass() { return mStaticClass; };
 
     private:
         void DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags );
         bool PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags );
-        UOdysseyVectorObject* CopyShape();
+        FOdysseyVectorObject* CopyShape();
         void UpdateShape( uint32 iUpdateFlags ) {};
 
     protected :
@@ -26,8 +29,8 @@ class ODYSSEYVECTOR_API UOdysseyVectorRectangle : public UOdysseyVectorObject
         double mStrokeWidth;
 
     public:
-        ~UOdysseyVectorRectangle();
-        UOdysseyVectorRectangle();
+        ~FOdysseyVectorRectangle();
+        FOdysseyVectorRectangle();
         void Init( std::string iName, double iWidth, double iHeight );
         void SetSize( double iWidth, double iHeight );
         double GetWidth();

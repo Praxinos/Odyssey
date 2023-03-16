@@ -56,7 +56,7 @@ UOdysseyPainterEditorVectorPathCutTool::OnMouseDown(const FOdysseyPoint& iPointI
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        UOdysseyVectorObject* selectedObject = currentVectorLayer->GetScene()->GetLastSelected();
+        FOdysseyVectorObject* selectedObject = currentVectorLayer->GetScene()->GetLastSelected();
 
         vectorEngine->AddHUD( &mLineHUD );
 
@@ -104,7 +104,7 @@ UOdysseyPainterEditorVectorPathCutTool::OnMouseUp(const FOdysseyPoint& iPointInT
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        UOdysseyVectorObject* selectedObject = currentVectorLayer->GetScene()->GetLastSelected();
+        FOdysseyVectorObject* selectedObject = currentVectorLayer->GetScene()->GetLastSelected();
 
         vectorEngine->RemoveHUD( &mLineHUD );
         vectorEngine->RemoveHUD( &mLineHUD );
@@ -116,9 +116,9 @@ UOdysseyPainterEditorVectorPathCutTool::OnMouseUp(const FOdysseyPoint& iPointInT
             endCutAt.x = localCoords.x;
             endCutAt.y = localCoords.y;
 
-            if( selectedObject->GetClass() == UOdysseyVectorPathCubic::StaticClass() )
+            if( selectedObject->GetClass() == FOdysseyVectorPathCubic::StaticClass() )
             {
-                UOdysseyVectorPathCubic *cubicPath = static_cast<UOdysseyVectorPathCubic*>(selectedObject);
+                FOdysseyVectorPathCubic *cubicPath = static_cast<FOdysseyVectorPathCubic*>(selectedObject);
                 std::vector<FOdysseyVectorVertexCubic*> oNewVertexArray;
                 std::vector<FOdysseyVectorSegmentCubic*> oNewSegmentArray;
                 std::vector<FOdysseyVectorSegmentCubic*> oOldSegmentArray;

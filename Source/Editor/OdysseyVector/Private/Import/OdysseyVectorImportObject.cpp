@@ -1,31 +1,31 @@
 #include "Import/OdysseyVectorImport.h"
 #include "OdysseyVectorPathCubic.h"
 
-static UOdysseyVectorObject*
+static FOdysseyVectorObject*
 CreateObject( uint32 iObjectType )
 {
-    UOdysseyVectorObject* newObject = nullptr;
+    FOdysseyVectorObject* newObject = nullptr;
 
     switch ( iObjectType )
     {
-        case UOdysseyVectorObject::VECTORROOTTYPE :
+        case FOdysseyVectorObject::VECTORROOTTYPE :
             // do nothing, the scene is already created by the vector layer
         break;
 
-        case UOdysseyVectorObject::VECTORPATHCUBICTYPE :
-            newObject = NewObject<UOdysseyVectorPathCubic>();
+        case FOdysseyVectorObject::VECTORPATHCUBICTYPE :
+            newObject = new FOdysseyVectorPathCubic();
         break;
 
-        case UOdysseyVectorObject::VECTORGROUPPAINTTYPE :
-            newObject = NewObject<UOdysseyVectorGroupPaint>();
+        case FOdysseyVectorObject::VECTORGROUPPAINTTYPE :
+            newObject = new FOdysseyVectorGroupPaint();
         break;
 
-        case UOdysseyVectorObject::VECTORELLIPSETYPE :
-            newObject = UOdysseyVectorEllipse::New( "", 0.0f, 0.0f );
+        case FOdysseyVectorObject::VECTORELLIPSETYPE :
+            newObject = FOdysseyVectorEllipse::New( "", 0.0f, 0.0f );
         break;
 
         default :
-            newObject = NewObject<UOdysseyVectorObject>();
+            newObject = new FOdysseyVectorObject();
         break;
     }
 
@@ -33,7 +33,7 @@ CreateObject( uint32 iObjectType )
 }
 
 void
-FOdysseyVectorImport::ReadObjectsDeclare( std::vector<UOdysseyVectorObject*>& vectorObjectArray, uint64 iChunkEnd, FArchive &Ar )
+FOdysseyVectorImport::ReadObjectsDeclare( std::vector<FOdysseyVectorObject*>& vectorObjectArray, uint64 iChunkEnd, FArchive &Ar )
 {
     FOdysseyVectorImport::ReadChunks( iChunkEnd
                                     , Ar
@@ -43,7 +43,7 @@ FOdysseyVectorImport::ReadObjectsDeclare( std::vector<UOdysseyVectorObject*>& ve
             {
                 case FOdysseyVectorExport::CHUNK_DECLARE_OBJECT_ENTRY :
                 {
-                    UOdysseyVectorObject* newObject;
+                    FOdysseyVectorObject* newObject;
                     uint32 objectType;
 
                     Ar << objectType;
@@ -66,7 +66,7 @@ FOdysseyVectorImport::ReadObjectsDeclare( std::vector<UOdysseyVectorObject*>& ve
 }
 
 static void
-ReadObjectsDefineObjectTransform( UOdysseyVectorObject& iObject, uint64 iChunkEnd, FArchive &Ar )
+ReadObjectsDefineObjectTransform( FOdysseyVectorObject& iObject, uint64 iChunkEnd, FArchive &Ar )
 {
     FOdysseyVectorImport::ReadChunks( iChunkEnd
                                     , Ar
@@ -117,7 +117,7 @@ ReadObjectsDefineObjectTransform( UOdysseyVectorObject& iObject, uint64 iChunkEn
 }
 
 void
-FOdysseyVectorImport::ReadObjectsDefine( std::vector<UOdysseyVectorObject*>& vectorObjectArray, uint64 iChunkEnd, FArchive &Ar )
+FOdysseyVectorImport::ReadObjectsDefine( std::vector<FOdysseyVectorObject*>& vectorObjectArray, uint64 iChunkEnd, FArchive &Ar )
 {
     FOdysseyVectorImport::ReadChunks( iChunkEnd
                                     , Ar
@@ -180,7 +180,7 @@ FOdysseyVectorImport::ReadObjectsDefine( std::vector<UOdysseyVectorObject*>& vec
 
                 case FOdysseyVectorExport::CHUNK_OBJECT_PATHCUBIC:
                 {
-                    UOdysseyVectorPathCubic* cubicPath = Cast<UOdysseyVectorPathCubic>( vectorObjectArray[objectID] );
+                    FOdysseyVectorPathCubic* cubicPath = static_cast<FOdysseyVectorPathCubic*>( vectorObjectArray[objectID] );
 
                     FOdysseyVectorImport::ReadObjectPathCubic( *cubicPath, Ar.Tell() + iChunkLen, Ar );
                     // immediately update invalidated segments and updates the path's BBox
@@ -190,7 +190,7 @@ FOdysseyVectorImport::ReadObjectsDefine( std::vector<UOdysseyVectorObject*>& vec
 
                 case FOdysseyVectorExport::CHUNK_OBJECT_GROUPPAINT:
                 {
-                    UOdysseyVectorGroupPaint* paintGroup = Cast<UOdysseyVectorGroupPaint>( vectorObjectArray[objectID] );
+                    FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>( vectorObjectArray[objectID] );
 
                     FOdysseyVectorImport::ReadObjectGroupPaint( *paintGroup, Ar.Tell() + iChunkLen, Ar );
 
@@ -200,7 +200,7 @@ FOdysseyVectorImport::ReadObjectsDefine( std::vector<UOdysseyVectorObject*>& vec
 
                 case FOdysseyVectorExport::CHUNK_OBJECT_ELLIPSE:
                 {
-                    UOdysseyVectorEllipse* circle = Cast<UOdysseyVectorEllipse>( vectorObjectArray[objectID] );
+                    FOdysseyVectorEllipse* circle = static_cast<FOdysseyVectorEllipse*>( vectorObjectArray[objectID] );
 
                     FOdysseyVectorImport::ReadObjectEllipse( *circle, Ar.Tell() + iChunkLen, Ar );
 

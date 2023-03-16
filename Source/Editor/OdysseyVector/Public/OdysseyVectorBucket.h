@@ -10,7 +10,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorBucket : public FOdysseyVectorPoint
 {
     public:
         ~FOdysseyVectorBucket();
-        FOdysseyVectorBucket( UOdysseyVectorObject& iParent, double iX, double iY );
+        FOdysseyVectorBucket( FOdysseyVectorObject& iParent, double iX, double iY );
 
         /**
          * @brief Set this bucket's solid color
@@ -94,7 +94,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorBucket : public FOdysseyVectorPoint
          * @brief Get the bucket's parent object.
          * @return a reference to this bucket's parent object.
          */
-        UOdysseyVectorObject& GetParent();
+        FOdysseyVectorObject& GetParent();
 
         /**
          * @brief Get the dot product between the vector to the handle and a horizontal vector.
@@ -109,7 +109,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorBucket : public FOdysseyVectorPoint
         static const uint32 PICKHANDLE = 3;
 
     protected:
-        UOdysseyVectorObject& mParent;
+        FOdysseyVectorObject& mParent;
         FColor mColor;
         FOdysseyVectorHandleBucket mCtrlPoint;
         bool mIsGradient;

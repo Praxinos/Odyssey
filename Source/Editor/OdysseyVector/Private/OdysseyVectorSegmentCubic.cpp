@@ -12,7 +12,7 @@ FOdysseyVectorSegmentCubic::FOdysseyVectorSegmentCubic()
 }
 
 void
-FOdysseyVectorSegmentCubic::Init( UOdysseyVectorPathCubic* iPath
+FOdysseyVectorSegmentCubic::Init( FOdysseyVectorPathCubic* iPath
                                 , FOdysseyVectorVertexCubic* iPoint0
                                 , double iCtrlPoint0x
                                 , double iCtrlPoint0y
@@ -29,7 +29,7 @@ FOdysseyVectorSegmentCubic::Init( UOdysseyVectorPathCubic* iPath
 }
 
 void
-FOdysseyVectorSegmentCubic::Init( UOdysseyVectorPathCubic* iPath
+FOdysseyVectorSegmentCubic::Init( FOdysseyVectorPathCubic* iPath
                                 , FOdysseyVectorVertexCubic* iPoint0
                                 , FOdysseyVectorVertexCubic* iPoint1 )
 {
@@ -38,7 +38,7 @@ FOdysseyVectorSegmentCubic::Init( UOdysseyVectorPathCubic* iPath
 
 //static
 FOdysseyVectorSegmentCubic* 
-FOdysseyVectorSegmentCubic::New( UOdysseyVectorPathCubic* iPath
+FOdysseyVectorSegmentCubic::New( FOdysseyVectorPathCubic* iPath
                                , FOdysseyVectorVertexCubic* iPoint0
                                , double iCtrlPoint0x
                                , double iCtrlPoint0y
@@ -55,7 +55,7 @@ FOdysseyVectorSegmentCubic::New( UOdysseyVectorPathCubic* iPath
 
 //static
 FOdysseyVectorSegmentCubic* 
-FOdysseyVectorSegmentCubic::New( UOdysseyVectorPathCubic* iPath
+FOdysseyVectorSegmentCubic::New( FOdysseyVectorPathCubic* iPath
                                , FOdysseyVectorVertexCubic* iPoint0
                                , FOdysseyVectorVertexCubic* iPoint1 )
 {
@@ -267,7 +267,7 @@ FOdysseyVectorSegmentCubic::Sample( double iFromT
     double toRadius = radius0 + ( deltaRadius * iToT );
     FOdysseyVectorVertexCubic* vertex0 = ( iFromT == 0.0f ) ? static_cast<FOdysseyVectorVertexCubic*>(mPoint[0]) : FOdysseyVectorVertexCubic::New( pointAt0.x, pointAt0.y, fromRadius );
     FOdysseyVectorVertexCubic* vertex1 = ( iToT   == 1.0f ) ? static_cast<FOdysseyVectorVertexCubic*>(mPoint[1]) : FOdysseyVectorVertexCubic::New( pointAt1.x, pointAt1.y, toRadius   );
-    FOdysseyVectorSegmentCubic* sampleSegment = FOdysseyVectorSegmentCubic::New( static_cast<UOdysseyVectorPathCubic*>(mPath), vertex0, ctrlPoint0.x, ctrlPoint0.y, ctrlPoint1.x, ctrlPoint1.y, vertex1 );
+    FOdysseyVectorSegmentCubic* sampleSegment = FOdysseyVectorSegmentCubic::New( static_cast<FOdysseyVectorPathCubic*>(mPath), vertex0, ctrlPoint0.x, ctrlPoint0.y, ctrlPoint1.x, ctrlPoint1.y, vertex1 );
     ::ULIS::FVec2D& sampleCtrlPoint0 = sampleSegment->GetHandle(0)->GetCoords();
     ::ULIS::FVec2D& sampleCtrlPoint1 = sampleSegment->GetHandle(1)->GetCoords();
     ::ULIS::FVec2D& samplePoint0 = sampleSegment->GetVertex(0)->GetCoords( nullptr );
@@ -415,7 +415,7 @@ FOdysseyVectorSegmentCubic::Cut( ::ULIS::FVec2D& linePoint0
         for( uint32 i = 0; i < pointCount; i++ )
         {
             uint32 n = i + 1;
-            FOdysseyVectorSegmentCubic* segment = FOdysseyVectorSegmentCubic::New( static_cast<UOdysseyVectorPathCubic*>(mPath)
+            FOdysseyVectorSegmentCubic* segment = FOdysseyVectorSegmentCubic::New( static_cast<FOdysseyVectorPathCubic*>(mPath)
                                                                                  , static_cast<FOdysseyVectorVertexCubic*>(pointChain[i])
                                                                                  , static_cast<FOdysseyVectorVertexCubic*>(pointChain[n]) );
             double distance = segment->GetStraightDistance();

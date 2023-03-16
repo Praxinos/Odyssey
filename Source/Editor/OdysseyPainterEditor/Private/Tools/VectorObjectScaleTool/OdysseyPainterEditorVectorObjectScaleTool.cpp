@@ -96,7 +96,7 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDrag(const FOdysseyPoint& iPo
         if ( selectionBox.space )
         {
             BLPoint localCoords = selectionBox.space->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
-            std::list<UOdysseyVectorObject*>& selectedObjectList = currentVectorLayer->GetScene()->GetSelectedObjectList();
+            std::list<FOdysseyVectorObject*>& selectedObjectList = currentVectorLayer->GetScene()->GetSelectedObjectList();
             double difx = localCoords.x - mOldLocalMouseX;
             double dify = localCoords.y - mOldLocalMouseY;
             //::ULIS::FRectD beforeBBox = selectedObject->GetBBox( true );
@@ -180,9 +180,9 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDrag(const FOdysseyPoint& iPo
                     scalingMatrix.scale( x2mx1 / selectionBox.rect.w, y2my1 / selectionBox.rect.h );
                 }
 
-                for( std::list<UOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
+                for( std::list<FOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
                 {
-                    UOdysseyVectorObject* object = (*it);
+                    FOdysseyVectorObject* object = (*it);
                     double translationX;
                     double translationY;
                     double rotation;

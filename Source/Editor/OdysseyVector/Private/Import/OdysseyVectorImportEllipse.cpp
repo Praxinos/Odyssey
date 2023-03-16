@@ -1,7 +1,7 @@
 #include "Import/OdysseyVectorImport.h"
 
 void
-FOdysseyVectorImport::ReadObjectEllipse( UOdysseyVectorEllipse& iCircle, uint64 iChunkEnd, FArchive &Ar )
+FOdysseyVectorImport::ReadObjectEllipse( FOdysseyVectorEllipse& iCircle, uint64 iChunkEnd, FArchive &Ar )
 {
     FOdysseyVectorImport::ReadChunks( iChunkEnd
                                     , Ar

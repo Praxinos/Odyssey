@@ -34,8 +34,8 @@ public:
 
 private:
     void Redraw( const TArray<::ULIS::FRectI>& iRects );
-    UOdysseyVectorPathCubic* FetchPath( FOdysseyVectorEngine* iVectorEngine
-                                      , UOdysseyVectorScene* iScene
+    FOdysseyVectorPathCubic* FetchPath( FOdysseyVectorEngine* iVectorEngine
+                                      , FOdysseyVectorScene* iScene
                                       , double iWorldX
                                       , double iWorldY );
 

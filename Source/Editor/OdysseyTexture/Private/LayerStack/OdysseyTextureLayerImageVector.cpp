@@ -39,7 +39,7 @@ UOdysseyTextureLayerImageVector::Init( uint32 iWidth, uint32 iHeight )
     mVEngine = new FOdysseyVectorEngine( (double)iWidth
                                        , (double)iHeight );
 
-    mScene = NewObject<UOdysseyVectorScene>();
+    mScene = new FOdysseyVectorScene();
     mScene->SetEngine( mVEngine );
     mScene->Init( "Vector Scene" );
 
@@ -60,7 +60,7 @@ UOdysseyTextureLayerImageVector::GetEngine()
     return mVEngine;
 }
 
-UOdysseyVectorScene*
+FOdysseyVectorScene*
 UOdysseyTextureLayerImageVector::GetScene()
 {
     return mScene;

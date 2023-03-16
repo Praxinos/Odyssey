@@ -9,11 +9,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUDPathCubic : public FOdysseyVectorHUD
 {
     private:
         uint32 mDisplayMode;
-        void DrawSegment( UOdysseyVectorPathCubic* iPath
+        void DrawSegment( FOdysseyVectorPathCubic* iPath
                         , FOdysseyVectorSegmentCubic* iCubicSegment
                         , ::ULIS::FRectD& iRoi
                         , uint64 iFlags );
-        void DrawVertex( UOdysseyVectorPathCubic* iPath
+        void DrawVertex( FOdysseyVectorPathCubic* iPath
                        , FOdysseyVectorVertexCubic* iCubicVertex
                        , ::ULIS::FRectD& iRoi
                        , uint64 iFlags );
@@ -28,5 +28,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUDPathCubic : public FOdysseyVectorHUD
         FOdysseyVectorHUDPathCubic( uint32 iDisplayMode );
         void SetDisplayMode( uint32 iDisplayMode );
         uint32 GetDisplayMode();
-        void Draw( UOdysseyVectorScene& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags );
+        void Draw( FOdysseyVectorScene& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags );
 };

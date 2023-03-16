@@ -12,7 +12,7 @@ FOdysseyVectorHUDPathDrawing::FOdysseyVectorHUDPathDrawing()
 }
 
 void
-FOdysseyVectorHUDPathDrawing::Draw( UOdysseyVectorScene& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags )
+FOdysseyVectorHUDPathDrawing::Draw( FOdysseyVectorScene& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
     BLContext* blctx = iScene.GetEngine()->GetBLContext();
 

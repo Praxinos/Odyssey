@@ -1,7 +1,7 @@
 #include "Import/OdysseyVectorImport.h"
 
 static void
-ReadPathCubicGeometrySegments( UOdysseyVectorPathCubic& iCubicPath
+ReadPathCubicGeometrySegments( FOdysseyVectorPathCubic& iCubicPath
                              , std::vector<FOdysseyVectorVertexCubic*>& vertexArray
                              , FArchive &Ar )
 {
@@ -42,7 +42,7 @@ ReadPathCubicGeometrySegments( UOdysseyVectorPathCubic& iCubicPath
 }
 
 static void
-ReadPathCubicGeometryVertices( UOdysseyVectorPathCubic& iCubicPath
+ReadPathCubicGeometryVertices( FOdysseyVectorPathCubic& iCubicPath
                              , std::vector<FOdysseyVectorVertexCubic*>& vertexArray
                              , FArchive &Ar )
 {
@@ -71,7 +71,7 @@ ReadPathCubicGeometryVertices( UOdysseyVectorPathCubic& iCubicPath
 }
 
 void
-FOdysseyVectorImport::ReadObjectPathCubic( UOdysseyVectorPathCubic& iCubicPath, uint64 iChunkEnd, FArchive &Ar )
+FOdysseyVectorImport::ReadObjectPathCubic( FOdysseyVectorPathCubic& iCubicPath, uint64 iChunkEnd, FArchive &Ar )
 {
     std::vector<FOdysseyVectorVertexCubic*> vertexArray;
 

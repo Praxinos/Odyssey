@@ -10,7 +10,7 @@
 
 #include "OdysseyVectorPath.generated.h"
 
-class UOdysseyVectorCycle;
+class FOdysseyVectorCycle;
 
 UENUM(BlueprintType)
 enum class eJointType : uint8
@@ -21,11 +21,26 @@ enum class eJointType : uint8
     Miter  = 3
 };
 
-UCLASS()
-class ODYSSEYVECTOR_API UOdysseyVectorPath : public UOdysseyVectorObject
+USTRUCT()
+struct FPathParam
 {
+    GENERATED_BODY()
+
+    UPROPERTY(EditAnywhere, Category="Transform")
+    eJointType JointType;
+
+    UPROPERTY(EditAnywhere,Category="General")
+    bool Filled;
+};
+
+class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
+{
+    private:
+        static const uint32 mStaticClass = 0x65f13c79; // value is crc32 FOdysseyVectorPath
+
     public:
-        GENERATED_BODY()
+        static uint32 StaticClass() { return mStaticClass; };
+        virtual uint32 GetClass() { return mStaticClass; };
 
     protected:
         void DrawJoint( FOdysseyVectorVertex* iVertex, ::ULIS::FRectD &iRoi, uint64 iFlags );
@@ -34,35 +49,37 @@ class ODYSSEYVECTOR_API UOdysseyVectorPath : public UOdysseyVectorObject
         virtual void UpdateShape( uint32 iUpdateFlags );
         virtual void DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags );
         bool PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags ) { return nullptr; };
-        UOdysseyVectorObject* CopyShape();
+        FOdysseyVectorObject* CopyShape();
 
     protected :
         std::list<FOdysseyVectorVertex*> mVertexList;
         std::list<FOdysseyVectorSegment*> mSegmentList;
         std::list<FOdysseyVectorSegment*> mInvalidatedSegmentList;
-        /*std::list<UOdysseyVectorCycle*> mInvalidatedLoopList;*/
+        /*std::list<FOdysseyVectorCycle*> mInvalidatedLoopList;*/
         std::list<FOdysseyVectorPoint*> mSelectedPointList;
         BLPath mPath;
+
+    public:
+        FPathParam mPathParam;
 
     public:
         static const uint64 PICK_HANDLE_POINT   = 1;
         static const uint64 PICK_HANDLE_SEGMENT = 1 << 1;
         static const uint64 PICK_POINT          = 1 << 2;
 
-        UPROPERTY(EditAnywhere, Category="Transform")
-        eJointType JointType;
 
-        ~UOdysseyVectorPath();
-        UOdysseyVectorPath();
+
+        ~FOdysseyVectorPath();
+        FOdysseyVectorPath();
         void Init( std::string iName );
         void AddSegment(FOdysseyVectorSegment* iSegment);
         void RemoveSegment(FOdysseyVectorSegment* iSegment);
         void AddVertex( FOdysseyVectorVertex* iVertex );
         void RemoveVertex( FOdysseyVectorVertex* iVertex );
         virtual FOdysseyVectorSegment* AppendVertex( FOdysseyVectorVertex* iVertex, FOdysseyVectorVertex* iPreviousVertex );
-        /*UOdysseyVectorObject* PickLoops( double iX, double iY, double iRadius );
+        /*FOdysseyVectorObject* PickLoops( double iX, double iY, double iRadius );
         void DrawLoops( ::ULIS::FRectD &iRoi, uint64 iFlags );*/
-        virtual void Merge( UOdysseyVectorPath* iPath ){};
+        virtual void Merge( FOdysseyVectorPath* iPath ){};
         void SetJointType( eJointType mJointType );
         eJointType GetJointType();
         /*virtual void InsertPoint( FOdysseyVectorSegment* iSegment, FOdysseyVectorVertex* iPoint );*/
@@ -79,13 +96,15 @@ class ODYSSEYVECTOR_API UOdysseyVectorPath : public UOdysseyVectorObject
                               , std::vector<FOdysseyVectorPoint*>& oPickedPointArray
                               , uint64 iSelectionFlags ){ return false; };
         virtual void Unselect( FOdysseyVectorVertex* iVertex ){};
+        bool IsFilled();
+        void SetFilled(bool iIsFilled);
         void Clear();
         /*bool IsLoop();
-        UOdysseyVectorCycle* GetLoopByID( uint64 iID );
-        void AddLoop( UOdysseyVectorCycle* iLoop );
-        void RemoveLoop( UOdysseyVectorCycle* iLoop );*/
+        FOdysseyVectorCycle* GetLoopByID( uint64 iID );
+        void AddLoop( FOdysseyVectorCycle* iLoop );
+        void RemoveLoop( FOdysseyVectorCycle* iLoop );*/
         void InvalidateSegment( FOdysseyVectorSegment* iSegment );
         void InvalidateAllSegments();
-        /*void InvalidateLoop( UOdysseyVectorCycle* iLoop );*/
+        /*void InvalidateLoop( FOdysseyVectorCycle* iLoop );*/
         void UpdateBBox();
 };

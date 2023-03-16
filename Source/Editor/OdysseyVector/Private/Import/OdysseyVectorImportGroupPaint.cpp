@@ -80,7 +80,7 @@ ReadBucketEntry( FOdysseyVectorBucket& iBucket, uint64 iChunkEnd, FArchive &Ar )
 }
 
 void
-FOdysseyVectorImport::ReadObjectGroupPaint( UOdysseyVectorGroupPaint& iPaintGroup, uint64 iChunkEnd, FArchive &Ar )
+FOdysseyVectorImport::ReadObjectGroupPaint( FOdysseyVectorGroupPaint& iPaintGroup, uint64 iChunkEnd, FArchive &Ar )
 {
     FOdysseyVectorImport::ReadChunks( iChunkEnd
                                     , Ar

@@ -72,7 +72,7 @@ UOdysseyPainterEditorVectorPathKnotTool::OnMouseDown(const FOdysseyPoint& iPoint
                                 , iPointInTexture.y
                                 , Radius
                                 , pickedPointArray
-                                , UOdysseyVectorPath::PICK_POINT );
+                                , FOdysseyVectorPath::PICK_POINT );
 
         if( pickedPointArray.size() >= 2 )
         {
@@ -84,7 +84,7 @@ UOdysseyPainterEditorVectorPathKnotTool::OnMouseDown(const FOdysseyPoint& iPoint
                 if( vertexA->GetPath() != vertexB->GetPath() )
                 {
 /*
-                    UOdysseyVectorPath* newPath = Cast<UOdysseyVectorPath>( vertexB->GetPath()->Copy() );
+                    FOdysseyVectorPath* newPath = static_cast<FOdysseyVectorPath*>( vertexB->GetPath()->Copy() );
 */
 
                     // TODO: remove vertexB->GetPath() from selected objects.

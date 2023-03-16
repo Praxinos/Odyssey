@@ -1,32 +1,19 @@
 #include "OdysseyVectorPathCubic.h"
 
-UOdysseyVectorPathCubic::UOdysseyVectorPathCubic()
-    : UOdysseyVectorPath()
-    , Filled( false )
+FOdysseyVectorPathCubic::FOdysseyVectorPathCubic()
+    : FOdysseyVectorPath()
 {
 
-}
-
-bool
-UOdysseyVectorPathCubic::IsFilled()
-{
-    return Filled;
 }
 
 void
-UOdysseyVectorPathCubic::SetFilled( bool iIsFilled )
-{
-    Filled = iIsFilled;
-}
-
-void
-UOdysseyVectorPathCubic::Init( std::string iName )
+FOdysseyVectorPathCubic::Init( std::string iName )
 {
     SetName( iName );
 }
 
 FOdysseyVectorSegmentCubic*
-UOdysseyVectorPathCubic::AppendVertex( FOdysseyVectorVertexCubic* iVertex
+FOdysseyVectorPathCubic::AppendVertex( FOdysseyVectorVertexCubic* iVertex
                                      , bool iConnect
                                      , bool iBuildSegments )
 {
@@ -124,7 +111,7 @@ TraceLine( int32 iX0, int32 iY0, double iT0
 }
 
 bool
-UOdysseyVectorPathCubic::Erase( ::ULIS::FRectD &iRoi )
+FOdysseyVectorPathCubic::Erase( ::ULIS::FRectD &iRoi )
 {
     BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
     BLImage* blimg = blctx->targetImage(); // the mask image must be selected by the vector engine at this point
@@ -247,7 +234,7 @@ UOdysseyVectorPathCubic::Erase( ::ULIS::FRectD &iRoi )
 }
 
 bool
-UOdysseyVectorPathCubic::PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags )
+FOdysseyVectorPathCubic::PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags )
 {
     BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
 
@@ -308,7 +295,7 @@ UOdysseyVectorPathCubic::PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags
 }
 
 bool
-UOdysseyVectorPathCubic::PickPoint( double iX
+FOdysseyVectorPathCubic::PickPoint( double iX
                                   , double iY
                                   , double iSelectionRadius
                                   , std::vector<FOdysseyVectorPoint*>& oPickedPointArray
@@ -380,7 +367,7 @@ UOdysseyVectorPathCubic::PickPoint( double iX
 }
 
 void
-UOdysseyVectorPathCubic::Unselect( FOdysseyVectorVertex *iVertex )
+FOdysseyVectorPathCubic::Unselect( FOdysseyVectorVertex *iVertex )
 {
     if ( iVertex == NULL )
     {
@@ -393,7 +380,7 @@ UOdysseyVectorPathCubic::Unselect( FOdysseyVectorVertex *iVertex )
 }
 
 void
-UOdysseyVectorPathCubic::Cut( ::ULIS::FVec2D& linePoint0
+FOdysseyVectorPathCubic::Cut( ::ULIS::FVec2D& linePoint0
                             , ::ULIS::FVec2D& linePoint1
                             , std::vector<FOdysseyVectorVertexCubic*>& oNewVertexArray
                             , std::vector<FOdysseyVectorSegmentCubic*>& oNewSegmentArray
@@ -420,7 +407,7 @@ UOdysseyVectorPathCubic::Cut( ::ULIS::FVec2D& linePoint0
 }
 
 void
-UOdysseyVectorPathCubic::Fill( ::ULIS::FRectD& iRoi )
+FOdysseyVectorPathCubic::Fill( ::ULIS::FRectD& iRoi )
 {
     FOdysseyVectorVertexCubic *firstVertex = static_cast<FOdysseyVectorVertexCubic*>( GetFirstVertex() );
 
@@ -431,10 +418,10 @@ UOdysseyVectorPathCubic::Fill( ::ULIS::FRectD& iRoi )
         BLPath path;
         BLRgba32 fillColor;
 
-        fillColor.r = Background.R;
-        fillColor.g = Background.G;
-        fillColor.b = Background.B;
-        fillColor.a = Background.A;
+        fillColor.r = mObjectParam.Background.R;
+        fillColor.g = mObjectParam.Background.G;
+        fillColor.b = mObjectParam.Background.B;
+        fillColor.a = mObjectParam.Background.A;
 
         blctx->setCompOp( BL_COMP_OP_SRC_COPY );
         /*iBLContext.setFillStyle(BLRgba32(0xFFFFFFFF));
@@ -464,9 +451,9 @@ UOdysseyVectorPathCubic::Fill( ::ULIS::FRectD& iRoi )
 }
 
 void
-UOdysseyVectorPathCubic::DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags )
+FOdysseyVectorPathCubic::DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags )
 {
-    if ( Filled )
+    if ( mPathParam.Filled )
     {
         Fill( iRoi );
     }
@@ -475,16 +462,16 @@ UOdysseyVectorPathCubic::DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags )
 }
 
 void
-UOdysseyVectorPathCubic::DrawShapeVariable( ::ULIS::FRectD &iRoi, uint64 iFlags )
+FOdysseyVectorPathCubic::DrawShapeVariable( ::ULIS::FRectD &iRoi, uint64 iFlags )
 {
     BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
     BLRgba32 strokeColor;
 
     // Note: Blend2D color format is 0xAARRGGBB
-    strokeColor.r = Foreground.B;
-    strokeColor.g = Foreground.G;
-    strokeColor.b = Foreground.R;
-    strokeColor.a = Foreground.A;
+    strokeColor.r = mObjectParam.Foreground.B;
+    strokeColor.g = mObjectParam.Foreground.G;
+    strokeColor.b = mObjectParam.Foreground.R;
+    strokeColor.a = mObjectParam.Foreground.A;
 
     blctx->setCompOp( BL_COMP_OP_SRC_OVER );
 
@@ -518,7 +505,7 @@ UOdysseyVectorPathCubic::DrawShapeVariable( ::ULIS::FRectD &iRoi, uint64 iFlags 
 }
 
 void
-UOdysseyVectorPathCubic::Mirror( bool iMirrorX, bool iMirrorY )
+FOdysseyVectorPathCubic::Mirror( bool iMirrorX, bool iMirrorY )
 {
     double factorX = ( iMirrorX ) ? -1.0f : 1.0f;
     double factorY = ( iMirrorY ) ? -1.0f : 1.0f;
@@ -543,10 +530,10 @@ UOdysseyVectorPathCubic::Mirror( bool iMirrorX, bool iMirrorY )
     /*Update();*/
 }
 
-UOdysseyVectorObject*
-UOdysseyVectorPathCubic::CopyShape()
+FOdysseyVectorObject*
+FOdysseyVectorPathCubic::CopyShape()
 {
-    UOdysseyVectorPathCubic* cubicPathCopy = NewObject<UOdysseyVectorPathCubic>();
+    FOdysseyVectorPathCubic* cubicPathCopy = new FOdysseyVectorPathCubic();
     std::map<FOdysseyVectorVertexCubic*, FOdysseyVectorVertexCubic*> lookupTable;
 
     for( std::list<FOdysseyVectorVertex*>::iterator it = mVertexList.begin(); it != mVertexList.end(); ++it )
@@ -579,13 +566,13 @@ UOdysseyVectorPathCubic::CopyShape()
         newSegment->BuildVariable();
     }
 
-    return static_cast<UOdysseyVectorObject*>( cubicPathCopy );
+    return static_cast<FOdysseyVectorObject*>( cubicPathCopy );
 }
 
 void
-UOdysseyVectorPathCubic::Merge( UOdysseyVectorPath* iPath )
+FOdysseyVectorPathCubic::Merge( FOdysseyVectorPath* iPath )
 {
-    UOdysseyVectorPathCubic* cubicPath = Cast<UOdysseyVectorPathCubic>(iPath);
+    FOdysseyVectorPathCubic* cubicPath = static_cast<FOdysseyVectorPathCubic*>(iPath);
     std::list<FOdysseyVectorSegment*> segmentList = cubicPath->mSegmentList; // work on a copy because of removal during iteration
     std::list<FOdysseyVectorVertex*> vertexList = cubicPath->mVertexList; // work on a copy because of removal during iteration
 
@@ -615,13 +602,13 @@ UOdysseyVectorPathCubic::Merge( UOdysseyVectorPath* iPath )
 }
 
 uint32
-UOdysseyVectorPathCubic::GetType()
+FOdysseyVectorPathCubic::GetType()
 {
-    return UOdysseyVectorObject::VECTORPATHCUBICTYPE;
+    return FOdysseyVectorObject::VECTORPATHCUBICTYPE;
 }
 
 void
-UOdysseyVectorPathCubic::SwitchSpace( UOdysseyVectorObject& iNewSpace )
+FOdysseyVectorPathCubic::SwitchSpace( FOdysseyVectorObject& iNewSpace )
 {
     BLMatrix2D& newSpaceInverseWorldMatrix = iNewSpace.GetInverseWorldMatrix();
     BLMatrix2D& newSpaceWorldMatrix = iNewSpace.GetWorldMatrix();

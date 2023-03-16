@@ -11,7 +11,7 @@ FOdysseyVectorHUDEraser::FOdysseyVectorHUDEraser()
 }
 
 void
-FOdysseyVectorHUDEraser::Draw( UOdysseyVectorScene& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags )
+FOdysseyVectorHUDEraser::Draw( FOdysseyVectorScene& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
     BLContext* blctx = iScene.GetEngine()->GetBLContext();
     ::ULIS::FRectD bbox = { 0, 0, 0, 0 };

@@ -11,13 +11,16 @@
 #include "OdysseyVectorPath.h"
 #include "OdysseyVectorPathCubic.h"
 
-#include "OdysseyVectorPathBuilder.generated.h"
+//#include "OdysseyVectorPathBuilder.generated.h"
 
-UCLASS()
-class ODYSSEYVECTOR_API UOdysseyVectorPathBuilder : public UOdysseyVectorObject
+class ODYSSEYVECTOR_API FOdysseyVectorPathBuilder : public FOdysseyVectorObject
 {
+    private:
+        static const uint32 mStaticClass =  0x6a7eba27; // value is crc32 FOdysseyVectorPathBuilder
+
     public:
-        GENERATED_BODY()
+        static uint32 StaticClass() { return mStaticClass; };
+        virtual uint32 GetClass() { return mStaticClass; };
 
     private:
         double mCumulAngle;
@@ -28,11 +31,11 @@ class ODYSSEYVECTOR_API UOdysseyVectorPathBuilder : public UOdysseyVectorObject
         std::vector<FOdysseyVectorLink> mSampleLinkArray;
         FOdysseyVectorVertexCubic* mInitialVertex;
         FOdysseyVectorVertexCubic* mFinalVertex;
-        UOdysseyVectorPathCubic* mCubicPath;
+        FOdysseyVectorPathCubic* mCubicPath;
         FOdysseyVectorSegmentCubic* mCubicSegment;
 
         // Unimplemented. Cubic Path builder cannot be copied. It should be destroyed as soon as the curve is built
-        UOdysseyVectorObject* CopyShape();
+        FOdysseyVectorObject* CopyShape();
 
         // Draw the sample links and points
         void DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags );
@@ -85,8 +88,8 @@ class ODYSSEYVECTOR_API UOdysseyVectorPathBuilder : public UOdysseyVectorObject
         static const uint32 NEWSAMPLE  = ( 1 << 1 );
         static const uint32 NEWSEGMENT = ( 1 << 2 );
 
-       ~UOdysseyVectorPathBuilder();
-        UOdysseyVectorPathBuilder();
+       ~FOdysseyVectorPathBuilder();
+        FOdysseyVectorPathBuilder();
 
         /**
          * @brief attach a cubic path to shape.
@@ -94,14 +97,14 @@ class ODYSSEYVECTOR_API UOdysseyVectorPathBuilder : public UOdysseyVectorObject
          * @param iCubicPath the cubic path
          * @param iStitchVertex start from this vertex (must be an end-point)
          */
-        void Attach( UOdysseyVectorPathCubic* iCubicPath );
+        void Attach( FOdysseyVectorPathCubic* iCubicPath );
 
         /**
          * @brief Get the attached cubic path
          *
          * @return the attached cubic path
          */
-        UOdysseyVectorPathCubic* GetCubicPath( );
+        FOdysseyVectorPathCubic* GetCubicPath( );
 
         void Record( FOdysseyVectorPoint *iPoint, bool iEnforce );
 };

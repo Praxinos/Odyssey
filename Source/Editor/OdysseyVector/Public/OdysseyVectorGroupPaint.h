@@ -32,26 +32,40 @@ typedef struct _FCycleSearch
     FOdysseyVectorSection* endSection;
 } FCycleSearch;
 
-UCLASS()
-class ODYSSEYVECTOR_API UOdysseyVectorGroupPaint : public UOdysseyVectorGroup
+USTRUCT()
+struct FGroupPaintParam
 {
-    public:
-        GENERATED_BODY()
+    GENERATED_BODY()
+
+    UPROPERTY(EditAnywhere, Category="General")
+    bool Realtime; // relatime updates
+
+    UPROPERTY(EditAnywhere, Category="General")
+    double Tolerance;
+};
+
+class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
+{
+    private:
+        static const uint32 mStaticClass =  0xa5a4b5bd; // value is crc32 FOdysseyVectorGroupPaint
 
     public:
-        ~UOdysseyVectorGroupPaint();
-        UOdysseyVectorGroupPaint();
+        static uint32 StaticClass() { return mStaticClass; };
+        virtual uint32 GetClass() { return mStaticClass; };
+
+        ~FOdysseyVectorGroupPaint();
+        FOdysseyVectorGroupPaint();
         void Init( std::string iName );
 
         void UpdateShape( uint32 iUpdateFlags );
         void DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags );
         bool PickShape( ::ULIS::FRectD& iRoi, uint32 iSelectionFlags );
-        UOdysseyVectorObject* CopyShape();
+        FOdysseyVectorObject* CopyShape();
 
         uint32 IntersectSegment( FOdysseyVectorSegmentCubic& iCubicSegment
                                , std::list<FOdysseyVectorSegment*>& cubicSegmenList
                                , std::vector<FOdysseyVectorVertexIntersection*>& iIntersectionVertexList );
-        void CopyBuckets( UOdysseyVectorGroupPaint* iDestination );
+        void CopyBuckets( FOdysseyVectorGroupPaint* iDestination );
         void BuildGraph( );
 
         FOdysseyVectorCycle* March( FOdysseyVectorVertexIntersection* iNode
@@ -95,9 +109,5 @@ class ODYSSEYVECTOR_API UOdysseyVectorGroupPaint : public UOdysseyVectorGroup
         std::vector<FOdysseyVectorVertexIntersection*> mIntersectionVertexArray;
 
     public:
-        UPROPERTY(EditAnywhere, Category="General")
-        bool Realtime; // relatime updates
-
-        UPROPERTY(EditAnywhere, Category="General")
-        double Tolerance;
+        FGroupPaintParam mGroupPaintParam;
 };

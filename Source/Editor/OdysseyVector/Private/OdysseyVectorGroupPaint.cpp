@@ -3,39 +3,40 @@
 // MUST be even number
 #define EDGESUBSAMPLES 8
 
-UOdysseyVectorGroupPaint::~UOdysseyVectorGroupPaint()
+FOdysseyVectorGroupPaint::~FOdysseyVectorGroupPaint()
 {
     //ClearCycles();
 }
 
-UOdysseyVectorGroupPaint::UOdysseyVectorGroupPaint()
-    : Tolerance( 0.0f )
+FOdysseyVectorGroupPaint::FOdysseyVectorGroupPaint()
 {
     mDependsOnChildren = true;
 
     mIntersectionVertexArray.reserve( 60 );
+
+    mGroupPaintParam.Tolerance = 0.0f;
 }
 
 uint32
-UOdysseyVectorGroupPaint::GetType()
+FOdysseyVectorGroupPaint::GetType()
 {
-    return UOdysseyVectorObject::VECTORGROUPPAINTTYPE;
+    return FOdysseyVectorObject::VECTORGROUPPAINTTYPE;
 }
 
 void
-UOdysseyVectorGroupPaint::Init( std::string iName )
+FOdysseyVectorGroupPaint::Init( std::string iName )
 {
     SetName( iName );
 }
 
 std::list<FOdysseyVectorBucket*>&
-UOdysseyVectorGroupPaint::GetBucketList()
+FOdysseyVectorGroupPaint::GetBucketList()
 {
     return mBucketList;
 }
 
 void
-UOdysseyVectorGroupPaint::Colorize()
+FOdysseyVectorGroupPaint::Colorize()
 {
     // reset color for all cycles first
     for( int i = 0; i < mLoopArray.size(); i++ )
@@ -54,7 +55,7 @@ UOdysseyVectorGroupPaint::Colorize()
 }
 
 void
-UOdysseyVectorGroupPaint::ApplyBucket( FOdysseyVectorBucket* iBucket )
+FOdysseyVectorGroupPaint::ApplyBucket( FOdysseyVectorBucket* iBucket )
 {
     for( int i = 0; i < mLoopArray.size(); i++ )
     {
@@ -73,7 +74,7 @@ UOdysseyVectorGroupPaint::ApplyBucket( FOdysseyVectorBucket* iBucket )
 }
 
 FOdysseyVectorBucket*
-UOdysseyVectorGroupPaint::PickBucket( double iWorldX, double iWorldY )
+FOdysseyVectorGroupPaint::PickBucket( double iWorldX, double iWorldY )
 {
     for( std::list<FOdysseyVectorBucket*>::iterator lit = mBucketList.begin(); lit != mBucketList.end(); ++lit )
     {
@@ -89,7 +90,7 @@ UOdysseyVectorGroupPaint::PickBucket( double iWorldX, double iWorldY )
 }
 
 FOdysseyVectorCycle*
-UOdysseyVectorGroupPaint::PickCycle( double iX, double iY )
+FOdysseyVectorGroupPaint::PickCycle( double iX, double iY )
 {
     for( int i = 0; i < mLoopArray.size(); i++ )
     {
@@ -106,7 +107,7 @@ UOdysseyVectorGroupPaint::PickCycle( double iX, double iY )
 }
 
 FOdysseyVectorBucket*
-UOdysseyVectorGroupPaint::Bucket( double iX, double iY, uint8 iR, uint8 iG, uint8 iB, uint8 iA )
+FOdysseyVectorGroupPaint::Bucket( double iX, double iY, uint8 iR, uint8 iG, uint8 iB, uint8 iA )
 {
     FOdysseyVectorBucket* bucket = PickBucket( iX, iY );
 
@@ -125,19 +126,19 @@ UOdysseyVectorGroupPaint::Bucket( double iX, double iY, uint8 iR, uint8 iG, uint
 }
 
 void
-UOdysseyVectorGroupPaint::UpdateShape( uint32 iUpdateFlags )
+FOdysseyVectorGroupPaint::UpdateShape( uint32 iUpdateFlags )
 {
-    UOdysseyVectorGroup::UpdateShape( iUpdateFlags ); // updates BBox
+    FOdysseyVectorGroup::UpdateShape( iUpdateFlags ); // updates BBox
 
-    if(   ( Realtime == true  )
-     || ( ( Realtime == false ) && ( ( iUpdateFlags & UOdysseyVectorObject::FREQUENTUPDATES ) == 0 ) ) )
+    if(   ( mGroupPaintParam.Realtime == true  )
+     || ( ( mGroupPaintParam.Realtime == false ) && ( ( iUpdateFlags & FOdysseyVectorObject::FREQUENTUPDATES ) == 0 ) ) )
     {
         FindCycles();
     }
 }
 
 void
-UOdysseyVectorGroupPaint::AddBucket( FOdysseyVectorBucket* iBucket )
+FOdysseyVectorGroupPaint::AddBucket( FOdysseyVectorBucket* iBucket )
 {
     mBucketList.push_back( iBucket );
 
@@ -145,13 +146,13 @@ UOdysseyVectorGroupPaint::AddBucket( FOdysseyVectorBucket* iBucket )
 }
 
 void
-UOdysseyVectorGroupPaint::RemoveBucket( FOdysseyVectorBucket* iBucket )
+FOdysseyVectorGroupPaint::RemoveBucket( FOdysseyVectorBucket* iBucket )
 {
     mBucketList.remove( iBucket );
 }
 
 void
-UOdysseyVectorGroupPaint::DrawBuckets( ::ULIS::FRectD& iRoi,uint64 iFlags )
+FOdysseyVectorGroupPaint::DrawBuckets( ::ULIS::FRectD& iRoi,uint64 iFlags )
 {
     for( std::list<FOdysseyVectorBucket*>::iterator lit = mBucketList.begin(); lit != mBucketList.end(); ++lit )
     {
@@ -162,7 +163,7 @@ UOdysseyVectorGroupPaint::DrawBuckets( ::ULIS::FRectD& iRoi,uint64 iFlags )
 }
 
 void
-UOdysseyVectorGroupPaint::DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags )
+FOdysseyVectorGroupPaint::DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
     for( int i = 0; i < mLoopArray.size(); i++ )
     {
@@ -173,7 +174,7 @@ UOdysseyVectorGroupPaint::DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags )
 }
 
 bool
-UOdysseyVectorGroupPaint::PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags )
+FOdysseyVectorGroupPaint::PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags )
 {
     if( iSelectionFlags & PICK_MATH_BASED )
     {
@@ -194,7 +195,7 @@ UOdysseyVectorGroupPaint::PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlag
 }
 
 uint32
-UOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegmentCubic& iCubicSegment
+FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegmentCubic& iCubicSegment
                                           , std::list<FOdysseyVectorSegment*>& cubicSegmenList
                                           , std::vector<FOdysseyVectorVertexIntersection*>& iIntersectionVertexArray )
 {
@@ -207,7 +208,7 @@ UOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegmentCubic& iCubicSe
 
         if( intersectRect.Area() )
         {
-            intersectionCount += iCubicSegment.Intersect( *intersectSegment, Tolerance, iIntersectionVertexArray );
+            intersectionCount += iCubicSegment.Intersect( *intersectSegment, mGroupPaintParam.Tolerance, iIntersectionVertexArray );
         }
     }
 
@@ -231,7 +232,7 @@ PrintCycle( std::vector<FOdysseyVectorVertex*>& vertexArray
 }
 
 uint32
-UOdysseyVectorGroupPaint::FindPath( FOdysseyVectorVertex* iVertex
+FOdysseyVectorGroupPaint::FindPath( FOdysseyVectorVertex* iVertex
                                   , FOdysseyVectorSection* iSection
                                   , std::vector<FOdysseyVectorVertex*>& iVertexArray
                                   , std::vector<FOdysseyVectorSection*>& iSectionArray
@@ -243,7 +244,7 @@ UOdysseyVectorGroupPaint::FindPath( FOdysseyVectorVertex* iVertex
     bool hasPrimary = false;
     bool hasSecondary = false;
     bool hasTertiary = false;
-    uint32 ret = UOdysseyVectorGroupPaint::NOCYCLE;
+    uint32 ret = FOdysseyVectorGroupPaint::NOCYCLE;
 
     iVertexArray.push_back( iVertex );
     iSectionArray.push_back( iSection );
@@ -260,7 +261,7 @@ UOdysseyVectorGroupPaint::FindPath( FOdysseyVectorVertex* iVertex
     {
         if( nextVertex == iVertexArray.front() )
         {
-            ret = UOdysseyVectorGroupPaint::HASCYCLE;
+            ret = FOdysseyVectorGroupPaint::HASCYCLE;
         }
     }
     else
@@ -277,11 +278,11 @@ UOdysseyVectorGroupPaint::FindPath( FOdysseyVectorVertex* iVertex
             }
             else
             {
-                ret = UOdysseyVectorGroupPaint::NOCYCLE;
+                ret = FOdysseyVectorGroupPaint::NOCYCLE;
             }
         }
 
-        if( ( ret == UOdysseyVectorGroupPaint::NOCYCLE ) && secondaryNextSection )
+        if( ( ret == FOdysseyVectorGroupPaint::NOCYCLE ) && secondaryNextSection )
         {
             if( secondaryNextSection->IsBlocked( nextVertex ) == false )
             {
@@ -289,11 +290,11 @@ UOdysseyVectorGroupPaint::FindPath( FOdysseyVectorVertex* iVertex
             }
             else
             {
-                ret = UOdysseyVectorGroupPaint::NOCYCLE;
+                ret = FOdysseyVectorGroupPaint::NOCYCLE;
             }
         }
 
-        if( ( ret == UOdysseyVectorGroupPaint::NOCYCLE ) && tertiaryNextSection )
+        if( ( ret == FOdysseyVectorGroupPaint::NOCYCLE ) && tertiaryNextSection )
         {
             if( tertiaryNextSection->IsBlocked( nextVertex ) == false )
             {
@@ -301,7 +302,7 @@ UOdysseyVectorGroupPaint::FindPath( FOdysseyVectorVertex* iVertex
             }
             else
             {
-                ret = UOdysseyVectorGroupPaint::NOCYCLE;
+                ret = FOdysseyVectorGroupPaint::NOCYCLE;
             }
         }
     }
@@ -311,7 +312,7 @@ UOdysseyVectorGroupPaint::FindPath( FOdysseyVectorVertex* iVertex
     iSection->UnBlock( iVertex );
     iVertex->SetVisited( false );
 
-    if( ret != UOdysseyVectorGroupPaint::HASCYCLE )
+    if( ret != FOdysseyVectorGroupPaint::HASCYCLE )
     {
         iVertexArray.pop_back();
         iSectionArray.pop_back();
@@ -391,7 +392,7 @@ GetNormalVector( std::vector<FOdysseyVectorVertex*>& iVertexArray
 }
 
 uint32
-UOdysseyVectorGroupPaint::MarchVertex( FOdysseyVectorVertexIntersection* iIntersectionVertex )
+FOdysseyVectorGroupPaint::MarchVertex( FOdysseyVectorVertexIntersection* iIntersectionVertex )
 {
     std::list<FOdysseyVectorSection*>& sectionList = iIntersectionVertex->GetSectionList();
 
@@ -410,7 +411,7 @@ UOdysseyVectorGroupPaint::MarchVertex( FOdysseyVectorVertexIntersection* iInters
 
             // there are situations were the algorithm takes the outer ring, in that case it would find a cycle that must be discarded.
 
-            if( ret == UOdysseyVectorGroupPaint::HASCYCLE )
+            if( ret == FOdysseyVectorGroupPaint::HASCYCLE )
             {
                 //UE_LOG(LogTemp,Warning,TEXT("candidate cycle of size:%d (sections :%d)"),vertexArray.size(),sectionArray.size());
 
@@ -429,7 +430,7 @@ UOdysseyVectorGroupPaint::MarchVertex( FOdysseyVectorVertexIntersection* iInters
 }
 
 void
-UOdysseyVectorGroupPaint::FindCycles()
+FOdysseyVectorGroupPaint::FindCycles()
 {
     BuildGraph();
 
@@ -447,7 +448,7 @@ UOdysseyVectorGroupPaint::FindCycles()
 }
 
 void
-UOdysseyVectorGroupPaint::BuildGraph()
+FOdysseyVectorGroupPaint::BuildGraph()
 {
     std::list<FOdysseyVectorSegment*> cubicSegmenList;
     FOdysseyVectorSegmentCubic *cubicSegment;
@@ -468,7 +469,7 @@ UOdysseyVectorGroupPaint::BuildGraph()
 }
 
 void
-UOdysseyVectorGroupPaint::OrderCycles()
+FOdysseyVectorGroupPaint::OrderCycles()
 {
     for( int i = 0; i < mLoopArray.size(); i++ )
     {
@@ -503,17 +504,17 @@ UOdysseyVectorGroupPaint::OrderCycles()
 }
 
 void
-UOdysseyVectorGroupPaint::ClearCycles( std::list<FOdysseyVectorSegment*>& cubicSegmenList )
+FOdysseyVectorGroupPaint::ClearCycles( std::list<FOdysseyVectorSegment*>& cubicSegmenList )
 {
     bool bboxInit = false;
 
-    for( std::list<UOdysseyVectorObject*>::iterator oit = mChildrenList.begin(); oit != mChildrenList.end(); ++oit )
+    for( std::list<FOdysseyVectorObject*>::iterator oit = mChildrenList.begin(); oit != mChildrenList.end(); ++oit )
     {
-        UOdysseyVectorObject *child = (*oit);
+        FOdysseyVectorObject *child = (*oit);
 
-        if( child->GetClass() == UOdysseyVectorPathCubic::StaticClass() )
+        if( child->GetClass() == FOdysseyVectorPathCubic::StaticClass() )
         {
-            UOdysseyVectorPathCubic* cubicPath = Cast<UOdysseyVectorPathCubic>(child);
+            FOdysseyVectorPathCubic* cubicPath = static_cast<FOdysseyVectorPathCubic*>(child);
             std::list<FOdysseyVectorSegment*>& segmentList = cubicPath->GetSegmentList();
 
             mBBox = ( bboxInit == false ) ? cubicPath->GetBBox( false ) : mBBox | cubicPath->GetBBox( false );
@@ -549,7 +550,7 @@ UOdysseyVectorGroupPaint::ClearCycles( std::list<FOdysseyVectorSegment*>& cubicS
 }
 
 void
-UOdysseyVectorGroupPaint::CopyBuckets( UOdysseyVectorGroupPaint* iDestination )
+FOdysseyVectorGroupPaint::CopyBuckets( FOdysseyVectorGroupPaint* iDestination )
 {
      for( std::list<FOdysseyVectorBucket*>::iterator lit = mBucketList.begin(); lit != mBucketList.end(); ++lit )
      {
@@ -567,10 +568,10 @@ UOdysseyVectorGroupPaint::CopyBuckets( UOdysseyVectorGroupPaint* iDestination )
      }   
 }
 
-UOdysseyVectorObject*
-UOdysseyVectorGroupPaint::CopyShape()
+FOdysseyVectorObject*
+FOdysseyVectorGroupPaint::CopyShape()
 {
-    return NewObject<UOdysseyVectorGroupPaint>();
+    return new FOdysseyVectorGroupPaint();
 }
 
 // TODO : bounding box segments.
@@ -580,7 +581,7 @@ UOdysseyVectorGroupPaint::CopyShape()
 
 
 FOdysseyVectorHandleBucket*
-UOdysseyVectorGroupPaint::PickBucketHandle( double iX, double iY )
+FOdysseyVectorGroupPaint::PickBucketHandle( double iX, double iY )
 {
     for( std::list<FOdysseyVectorBucket*>::iterator lit = mBucketList.begin(); lit != mBucketList.end(); ++lit )
     {
@@ -596,7 +597,7 @@ UOdysseyVectorGroupPaint::PickBucketHandle( double iX, double iY )
 }
 
 void
-UOdysseyVectorGroupPaint::PropertyChanged(const FName& iPropertyName)
+FOdysseyVectorGroupPaint::PropertyChanged(const FName& iPropertyName)
 {
     if ( iPropertyName == "Tolerance" )
     {

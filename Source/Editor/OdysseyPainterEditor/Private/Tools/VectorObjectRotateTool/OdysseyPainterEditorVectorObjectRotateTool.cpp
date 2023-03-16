@@ -98,7 +98,7 @@ UOdysseyPainterEditorVectorObjectRotateTool::OnMouseDrag(const FOdysseyPoint& iP
         }
         else
         {
-            std::list<UOdysseyVectorObject*>& selectedObjectList = currentVectorLayer->GetScene()->GetSelectedObjectList();
+            std::list<FOdysseyVectorObject*>& selectedObjectList = currentVectorLayer->GetScene()->GetSelectedObjectList();
             //::ULIS::FRectD beforeBBox = selectedObject->GetBBox( true );
             //::ULIS::FRectD localBBox = selectedObject->GetBBox( false );
             BLMatrix2D spaceMatrix = selectionBox.space->GetWorldMatrix();
@@ -109,9 +109,9 @@ UOdysseyPainterEditorVectorObjectRotateTool::OnMouseDrag(const FOdysseyPoint& iP
 
             BLMatrix2D::invert( invertSpaceMatrix, spaceMatrix );
 
-            for( std::list<UOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
+            for( std::list<FOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
             {
-                UOdysseyVectorObject* object = (*it);
+                FOdysseyVectorObject* object = (*it);
                 double translationX;
                 double translationY;
                 double rotation;

@@ -12,27 +12,24 @@
 #include "OdysseyVectorBucket.h"
 #include "OdysseyVectorCycle.h"
 
-#include "OdysseyVectorPathCubic.generated.h"
+//#include "OdysseyVectorPathCubic.generated.h"
 
-UCLASS()
-class ODYSSEYVECTOR_API UOdysseyVectorPathCubic: public UOdysseyVectorPath
+class ODYSSEYVECTOR_API FOdysseyVectorPathCubic: public FOdysseyVectorPath
 {
-    public:
-        GENERATED_BODY()
-
     private:
+        static const uint32 mStaticClass = 0x4cf439ca; // value is crc32 FOdysseyVectorPathCubic
+
+    public:
+        static uint32 StaticClass() { return mStaticClass; };
+        virtual uint32 GetClass() { return mStaticClass; };
 
     protected:
-        UOdysseyVectorObject* CopyShape();
+        FOdysseyVectorObject* CopyShape();
         void DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags );
         bool PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags );
 
     public:
-        UPROPERTY(EditAnywhere,Category="General")
-        bool Filled;
-
-    public:
-        UOdysseyVectorPathCubic();
+        FOdysseyVectorPathCubic();
         void Init( std::string iName );
         FOdysseyVectorSegmentCubic* AppendVertex( FOdysseyVectorVertexCubic* iPoint, bool iConnect, bool iBuildSegments );
         bool PickPoint( double iX
@@ -41,10 +38,8 @@ class ODYSSEYVECTOR_API UOdysseyVectorPathCubic: public UOdysseyVectorPath
                       , std::vector<FOdysseyVectorPoint*>& oPickedPointArray
                       , uint64 iSelectionFlags );
         void Unselect( FOdysseyVectorVertex* iPoint );
-        bool IsFilled();
-        void SetFilled( bool iIsFilled );
         void Fill( ::ULIS::FRectD& iRoi );
-        void Merge( UOdysseyVectorPath* iPath );
+        void Merge( FOdysseyVectorPath* iPath );
         void DrawShapeVariable( ::ULIS::FRectD& iRoi, uint64 iFlags );
 
         void Mirror( bool iMirrorX, bool iMirrorY );
@@ -53,7 +48,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorPathCubic: public UOdysseyVectorPath
                 , std::vector<FOdysseyVectorVertexCubic*>& oNewVertexArray
                 , std::vector<FOdysseyVectorSegmentCubic*>& oNewSegmentArray
                 , std::vector<FOdysseyVectorSegmentCubic*>& oOldSegmentArray );
-        void SwitchSpace( UOdysseyVectorObject& iObject );
+        void SwitchSpace( FOdysseyVectorObject& iObject );
         bool Erase( ::ULIS::FRectD &iRoi );
 
         uint32 GetType();

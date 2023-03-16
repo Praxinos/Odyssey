@@ -16,7 +16,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUDPush : public FOdysseyVectorHUD
         virtual ~FOdysseyVectorHUDPush();
         FOdysseyVectorHUDPush();
 
-        void Draw( UOdysseyVectorScene& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags );
+        void Draw( FOdysseyVectorScene& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags );
         void SetRadius( double iRadius );
         void SetPosition( double iX, double iY );
 };

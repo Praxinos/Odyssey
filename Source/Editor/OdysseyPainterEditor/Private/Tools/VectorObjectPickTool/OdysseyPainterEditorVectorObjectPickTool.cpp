@@ -105,13 +105,17 @@ DoubleClicked()
 }
 
 static void
-SetSelectionSpace( FOdysseyVectorEngine* iVectorEngine, UOdysseyVectorObject* iSelectedObject )
+SetSelectionSpace( FOdysseyVectorEngine* iVectorEngine, FOdysseyVectorObject* iSelectedObject )
 {
     if( DoubleClicked() == true )
     {
-        // Note: due to the dynamic_cast, the argument will be NULL if the object
-            // does not inherits of base class UOdysseyVectorGroup. That's on purpose.
-        iVectorEngine->SetSelectionSpace(dynamic_cast<UOdysseyVectorGroup*>(iSelectedObject));
+        if( ( iSelectedObject->GetClass() == FOdysseyVectorGroup::StaticClass() )
+         || ( iSelectedObject->GetClass() == FOdysseyVectorGroupPaint::StaticClass() ) )
+        {
+            FOdysseyVectorGroup* selectedGroup = static_cast<FOdysseyVectorGroup*>(iSelectedObject);
+
+            iVectorEngine->SetSelectionSpace(selectedGroup);
+        }
     }
 }
 
@@ -127,12 +131,12 @@ UOdysseyPainterEditorVectorObjectPickTool::OnMouseUp(const FOdysseyPoint& iPoint
 
         if ( mPointArray.size() == 1 )
         {
-            vectorEngine->Pick( *currentVectorLayer->GetScene(), mPointArray, UOdysseyVectorObject::PICK_MATH_BASED );
+            vectorEngine->Pick( *currentVectorLayer->GetScene(), mPointArray, FOdysseyVectorObject::PICK_MATH_BASED );
         }
 
         if ( mPointArray.size() > 1 )
         {
-            vectorEngine->Pick( *currentVectorLayer->GetScene(), mPointArray, UOdysseyVectorObject::PICK_MASK_BASED );
+            vectorEngine->Pick( *currentVectorLayer->GetScene(), mPointArray, FOdysseyVectorObject::PICK_MASK_BASED );
         }
 
         SetSelectionSpace( vectorEngine, currentVectorLayer->GetScene()->GetLastSelected() );

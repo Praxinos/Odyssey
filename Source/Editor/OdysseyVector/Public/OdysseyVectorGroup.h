@@ -8,31 +8,33 @@
 #include <Image/Block.h>
 #include "OdysseyVectorObject.h"
 
-#include "OdysseyVectorGroup.generated.h"
+//#include "OdysseyVectorGroup.generated.h"
 
-UCLASS()
-class ODYSSEYVECTOR_API UOdysseyVectorGroup : public UOdysseyVectorObject
+class ODYSSEYVECTOR_API FOdysseyVectorGroup : public FOdysseyVectorObject
 {
-    public:
-        GENERATED_BODY()
+    private:
+        static const uint32 mStaticClass = 0xd4c8357b; // value is crc32 FOdysseyVectorGroup
 
     public:
+        static uint32 StaticClass() { return mStaticClass; };
+        virtual uint32 GetClass() { return mStaticClass; };
+
        /**
          * @brief Static function to allocate a new group. Note: this is the proper way to allocate a new group as we don't
          * use the constructor to set parameters because UOBJECTs must have empty constructors.
          * @param iName object's name
          */
-        static UOdysseyVectorGroup* New( std::string iName );
+        static FOdysseyVectorGroup* New( std::string iName );
 
         /**
          * @brief destructor
          */
-        ~UOdysseyVectorGroup(){};
+        ~FOdysseyVectorGroup(){};
 
         /**
          * @brief constructor
          */
-        UOdysseyVectorGroup(){};
+        FOdysseyVectorGroup(){};
 
         /**
          * @brief Init a group
@@ -43,6 +45,6 @@ class ODYSSEYVECTOR_API UOdysseyVectorGroup : public UOdysseyVectorObject
     protected:
         virtual void DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags ) override { };
         virtual bool PickShape( ::ULIS::FRectD& iRoi, uint32 iSelectionFlags ) override;
-        virtual UOdysseyVectorObject* CopyShape() override;
+        virtual FOdysseyVectorObject* CopyShape() override;
         virtual void UpdateShape( uint32 iUpdateFlags ) override;
 };

@@ -5,12 +5,12 @@
 
 #define MAGICRATIO 0.55191502449 // = 4*(sqrt(2)-1)/3
 
-UOdysseyVectorEllipse::~UOdysseyVectorEllipse()
+FOdysseyVectorEllipse::~FOdysseyVectorEllipse()
 {
 }
 
-UOdysseyVectorEllipse::UOdysseyVectorEllipse()
-    : UOdysseyVectorPathCubic()
+FOdysseyVectorEllipse::FOdysseyVectorEllipse()
+    : FOdysseyVectorPathCubic()
     , mStrokeWidth ( 4.0f )
 {
     SetName( "Circle" );
@@ -19,7 +19,7 @@ UOdysseyVectorEllipse::UOdysseyVectorEllipse()
 }
 
 void
-UOdysseyVectorEllipse::Init( std::string iName, double iRadiusX, double iRadiusY )
+FOdysseyVectorEllipse::Init( std::string iName, double iRadiusX, double iRadiusY )
 {
     SetName( iName );
     SetRadius( iRadiusX, iRadiusY );
@@ -29,10 +29,10 @@ UOdysseyVectorEllipse::Init( std::string iName, double iRadiusX, double iRadiusY
     mCubicVertex[2] = FOdysseyVectorVertexCubic::New( 0.0f, 0.0f, 1.0f );
     mCubicVertex[3] = FOdysseyVectorVertexCubic::New( 0.0f, 0.0f, 1.0f );
 
-    mCubicSegment[0] = FOdysseyVectorSegmentCubic::New( static_cast<UOdysseyVectorPathCubic*>(this), mCubicVertex[0], mCubicVertex[1] );
-    mCubicSegment[1] = FOdysseyVectorSegmentCubic::New( static_cast<UOdysseyVectorPathCubic*>(this), mCubicVertex[1], mCubicVertex[2] );
-    mCubicSegment[2] = FOdysseyVectorSegmentCubic::New( static_cast<UOdysseyVectorPathCubic*>(this), mCubicVertex[2], mCubicVertex[3] );
-    mCubicSegment[3] = FOdysseyVectorSegmentCubic::New( static_cast<UOdysseyVectorPathCubic*>(this), mCubicVertex[3], mCubicVertex[0] );
+    mCubicSegment[0] = FOdysseyVectorSegmentCubic::New( static_cast<FOdysseyVectorPathCubic*>(this), mCubicVertex[0], mCubicVertex[1] );
+    mCubicSegment[1] = FOdysseyVectorSegmentCubic::New( static_cast<FOdysseyVectorPathCubic*>(this), mCubicVertex[1], mCubicVertex[2] );
+    mCubicSegment[2] = FOdysseyVectorSegmentCubic::New( static_cast<FOdysseyVectorPathCubic*>(this), mCubicVertex[2], mCubicVertex[3] );
+    mCubicSegment[3] = FOdysseyVectorSegmentCubic::New( static_cast<FOdysseyVectorPathCubic*>(this), mCubicVertex[3], mCubicVertex[0] );
 
     AddVertex ( mCubicVertex[0] );
     AddVertex ( mCubicVertex[1] );
@@ -46,10 +46,10 @@ UOdysseyVectorEllipse::Init( std::string iName, double iRadiusX, double iRadiusY
 }
 
 //static
-UOdysseyVectorEllipse*
-UOdysseyVectorEllipse::New( std::string iName, double iRadiusX, double iRadiusY )
+FOdysseyVectorEllipse*
+FOdysseyVectorEllipse::New( std::string iName, double iRadiusX, double iRadiusY )
 {
-    UOdysseyVectorEllipse* circle = NewObject<UOdysseyVectorEllipse>();
+    FOdysseyVectorEllipse* circle = new FOdysseyVectorEllipse();
 
     circle->Init( iName, iRadiusX, iRadiusY );
 
@@ -57,7 +57,7 @@ UOdysseyVectorEllipse::New( std::string iName, double iRadiusX, double iRadiusY 
 }
 
 void
-UOdysseyVectorEllipse::UpdateShape( uint32 iUpdateFlags )
+FOdysseyVectorEllipse::UpdateShape( uint32 iUpdateFlags )
 {
     double ctlDistX = mRadiusX * MAGICRATIO;
     double ctlDistY = mRadiusY * MAGICRATIO;
@@ -85,20 +85,20 @@ UOdysseyVectorEllipse::UpdateShape( uint32 iUpdateFlags )
     mCubicSegment[3]->Update();
 }
 
-UOdysseyVectorObject*
-UOdysseyVectorEllipse::CopyShape()
+FOdysseyVectorObject*
+FOdysseyVectorEllipse::CopyShape()
 {
-    UOdysseyVectorEllipse* circleCopy = NewObject<UOdysseyVectorEllipse>();
+    FOdysseyVectorEllipse* circleCopy = new FOdysseyVectorEllipse();
 
     circleCopy->Init ( Name, mRadiusX, mRadiusY );
 
-    return Cast<UOdysseyVectorObject>( circleCopy );
+    return static_cast<FOdysseyVectorObject*>( circleCopy );
 }
 
-UOdysseyVectorPathCubic*
-UOdysseyVectorEllipse::Convert()
+FOdysseyVectorPathCubic*
+FOdysseyVectorEllipse::Convert()
 {
-    UOdysseyVectorPathCubic* path = Cast<UOdysseyVectorPathCubic>(this->UOdysseyVectorPathCubic::CopyShape());
+    FOdysseyVectorPathCubic* path = static_cast<FOdysseyVectorPathCubic*>(this->FOdysseyVectorPathCubic::CopyShape());
 
     this->CopySettings( *path );
 
@@ -106,20 +106,20 @@ UOdysseyVectorEllipse::Convert()
 }
 
 void
-UOdysseyVectorEllipse::DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags )
+FOdysseyVectorEllipse::DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags )
 {
     if ( mRadiusX && mRadiusY )
     {
-        UOdysseyVectorPathCubic::DrawShape ( iRoi, iFlags );
+        FOdysseyVectorPathCubic::DrawShape ( iRoi, iFlags );
     }
 }
 
 bool
-UOdysseyVectorEllipse::PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags )
+FOdysseyVectorEllipse::PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags )
 {
-    if( Filled )
+    if( mPathParam.Filled )
     {
-        if( iSelectionFlags & UOdysseyVectorPathCubic::PICK_MATH_BASED )
+        if( iSelectionFlags & FOdysseyVectorPathCubic::PICK_MATH_BASED )
         {
             BLPath path;
             BLPoint pt = mInverseWorldMatrix.mapPoint( iRoi.x, iRoi.y );
@@ -144,20 +144,20 @@ UOdysseyVectorEllipse::PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags )
     }
     else
     {
-        return UOdysseyVectorPathCubic::PickShape( iRoi, iSelectionFlags );
+        return FOdysseyVectorPathCubic::PickShape( iRoi, iSelectionFlags );
     }
 
     return false;
 }
 
 void
-UOdysseyVectorEllipse::SetRadius( double iRadius )
+FOdysseyVectorEllipse::SetRadius( double iRadius )
 {
     SetRadius( iRadius, iRadius );
 }
 
 void
-UOdysseyVectorEllipse::SetRadius( double iRadiusX, double iRadiusY )
+FOdysseyVectorEllipse::SetRadius( double iRadiusX, double iRadiusY )
 {
     mRadiusX = iRadiusX;
     mRadiusY = iRadiusY;
@@ -171,19 +171,19 @@ UOdysseyVectorEllipse::SetRadius( double iRadiusX, double iRadiusY )
 }
 
 double
-UOdysseyVectorEllipse::GetRadiusX()
+FOdysseyVectorEllipse::GetRadiusX()
 {
     return mRadiusX;
 }
 
 double
-UOdysseyVectorEllipse::GetRadiusY()
+FOdysseyVectorEllipse::GetRadiusY()
 {
     return mRadiusY;
 }
 
 uint32
-UOdysseyVectorEllipse::GetType()
+FOdysseyVectorEllipse::GetType()
 {
-    return UOdysseyVectorObject::VECTORELLIPSETYPE;
+    return FOdysseyVectorObject::VECTORELLIPSETYPE;
 }

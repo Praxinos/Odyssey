@@ -9,7 +9,7 @@ FOdysseyVectorCycle::~FOdysseyVectorCycle()
 }
 
 //static
-FOdysseyVectorCycle::FOdysseyVectorCycle( UOdysseyVectorObject& iParent
+FOdysseyVectorCycle::FOdysseyVectorCycle( FOdysseyVectorObject& iParent
                                       , uint64 iID
                                       , std::vector<FOdysseyVectorVertex*>& iVertexArray
                                       , std::vector<FOdysseyVectorSection*>& iSectionArray )

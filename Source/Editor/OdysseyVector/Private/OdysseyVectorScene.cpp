@@ -1,28 +1,28 @@
 #include "OdysseyVectorScene.h"
 
-void UOdysseyVectorScene::Init( std::string iName )
+void FOdysseyVectorScene::Init( std::string iName )
 {
     SetName( iName );
 }
 
 void
-UOdysseyVectorScene::SetEngine( FOdysseyVectorEngine* iEngine )
+FOdysseyVectorScene::SetEngine( FOdysseyVectorEngine* iEngine )
 {
     mEngine = iEngine;
 }
 
 FOdysseyVectorEngine*
-UOdysseyVectorScene::GetEngine()
+FOdysseyVectorScene::GetEngine()
 {
     return mEngine;
 }
 
 void
-UOdysseyVectorScene::ClearSelection()
+FOdysseyVectorScene::ClearSelection()
 {
-    for( std::list<UOdysseyVectorObject*>::iterator it = mSelectedObjectList.begin(); it != mSelectedObjectList.end(); ++it )
+    for( std::list<FOdysseyVectorObject*>::iterator it = mSelectedObjectList.begin(); it != mSelectedObjectList.end(); ++it )
     {
-        UOdysseyVectorObject *obj = (*it);
+        FOdysseyVectorObject *obj = (*it);
 
         obj->SetIsSelected ( false );
     }
@@ -31,7 +31,7 @@ UOdysseyVectorScene::ClearSelection()
 }
 
 void
-UOdysseyVectorScene::Unselect( UOdysseyVectorObject* iVecObj )
+FOdysseyVectorScene::Unselect( FOdysseyVectorObject* iVecObj )
 {
     iVecObj->SetIsSelected( false );
 
@@ -39,7 +39,7 @@ UOdysseyVectorScene::Unselect( UOdysseyVectorObject* iVecObj )
 }
 
 void
-UOdysseyVectorScene::Select( UOdysseyVectorObject* iVecObj )
+FOdysseyVectorScene::Select( FOdysseyVectorObject* iVecObj )
 {
     if( std::find( mSelectedObjectList.begin(), mSelectedObjectList.end(), iVecObj ) == mSelectedObjectList.end() )
     {
@@ -49,30 +49,30 @@ UOdysseyVectorScene::Select( UOdysseyVectorObject* iVecObj )
     }
 }
 
-UOdysseyVectorObject*
-UOdysseyVectorScene::CopyShape()
+FOdysseyVectorObject*
+FOdysseyVectorScene::CopyShape()
 {
-    UOdysseyVectorScene* rootCopy = NewObject<UOdysseyVectorScene>();
+    FOdysseyVectorScene* rootCopy = new FOdysseyVectorScene();
 
     rootCopy->Init( Name );
 
-    return Cast<UOdysseyVectorObject>(rootCopy);
+    return static_cast<FOdysseyVectorObject*>(rootCopy);
 }
 
-UOdysseyVectorGroup*
-UOdysseyVectorScene::GroupSelectdObjects( )
+FOdysseyVectorGroup*
+FOdysseyVectorScene::GroupSelectdObjects( )
 {
-    UOdysseyVectorGroup* group = NewObject<UOdysseyVectorGroup>();
+    FOdysseyVectorGroup* group = new FOdysseyVectorGroup();
     BLPoint averageTranslation = { 0.0f, 0.0f };
     // We don't use the mSelectedObjectList because we want to keep the same order
     // and we work on a copy to be able to delete the objects while iterating
-    std::list<UOdysseyVectorObject*> objectList = mChildrenList;
+    std::list<FOdysseyVectorObject*> objectList = mChildrenList;
 
     if ( mSelectedObjectList.size() )
     {
-        for( std::list<UOdysseyVectorObject*>::iterator it = mSelectedObjectList.begin(); it != mSelectedObjectList.end(); ++it )
+        for( std::list<FOdysseyVectorObject*>::iterator it = mSelectedObjectList.begin(); it != mSelectedObjectList.end(); ++it )
         {
-            UOdysseyVectorObject *obj = (*it);
+            FOdysseyVectorObject *obj = (*it);
             BLPoint origin = obj->GetWorldMatrix().mapPoint( 0.0f, 0.0f );
 
             averageTranslation.x += origin.x;
@@ -92,7 +92,7 @@ UOdysseyVectorScene::GroupSelectdObjects( )
 
     while( objectList.size () )
     {
-        UOdysseyVectorObject *obj = objectList.back();
+        FOdysseyVectorObject *obj = objectList.back();
 
         if ( obj->IsSelected() == true )
         {
@@ -110,58 +110,58 @@ UOdysseyVectorScene::GroupSelectdObjects( )
     return group;
 }
 
-std::list<UOdysseyVectorObject*>&
-UOdysseyVectorScene::GetSelectedObjectList()
+std::list<FOdysseyVectorObject*>&
+FOdysseyVectorScene::GetSelectedObjectList()
 {
     return mSelectedObjectList;
 }
 
 void
-UOdysseyVectorScene::DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags )
+FOdysseyVectorScene::DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
 
 }
 
 void
-UOdysseyVectorScene::InvalidateObject( UOdysseyVectorObject* iObject )
+FOdysseyVectorScene::InvalidateObject( FOdysseyVectorObject* iObject )
 {
     mInvalidatedObjectList.push_back( iObject );
 }
 
 void
-UOdysseyVectorScene::UpdateShape( uint32 iUpdateFlags )
+FOdysseyVectorScene::UpdateShape( uint32 iUpdateFlags )
 {
-    for( std::list<UOdysseyVectorObject*>::iterator it = mInvalidatedObjectList.begin(); it != mInvalidatedObjectList.end(); ++it )
+    for( std::list<FOdysseyVectorObject*>::iterator it = mInvalidatedObjectList.begin(); it != mInvalidatedObjectList.end(); ++it )
     {
-        UOdysseyVectorObject *obj = (*it);
+        FOdysseyVectorObject *obj = (*it);
 
         obj->Update( iUpdateFlags );
     }
 
-    if( ( iUpdateFlags & UOdysseyVectorObject::KEEPINVALIDATED ) == 0 )
+    if( ( iUpdateFlags & FOdysseyVectorObject::KEEPINVALIDATED ) == 0 )
     {
         mInvalidatedObjectList.clear();
     }
 }
 
-UOdysseyVectorObject*
-UOdysseyVectorScene::GetLastSelected()
+FOdysseyVectorObject*
+FOdysseyVectorScene::GetLastSelected()
 {
     return ( mSelectedObjectList.empty() == true ) ? nullptr : mSelectedObjectList.back();
 }
 
 uint32
-UOdysseyVectorScene::GetType()
+FOdysseyVectorScene::GetType()
 {
-    return UOdysseyVectorObject::VECTORROOTTYPE;
+    return FOdysseyVectorObject::VECTORROOTTYPE;
 }
 
 void
-UOdysseyVectorScene::RemoveSelectedObjects()
+FOdysseyVectorScene::RemoveSelectedObjects()
 {
-    for(std::list<UOdysseyVectorObject*>::iterator it = mSelectedObjectList.begin(); it != mSelectedObjectList.end(); ++it)
+    for(std::list<FOdysseyVectorObject*>::iterator it = mSelectedObjectList.begin(); it != mSelectedObjectList.end(); ++it)
     {
-        UOdysseyVectorObject* selectedObject = (*it);
+        FOdysseyVectorObject* selectedObject = (*it);
 
         // prevent nested removal
         if( selectedObject->HasSelectedParent() == false )

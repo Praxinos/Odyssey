@@ -8,7 +8,7 @@
 #include "OdysseyVectorVertexCubic.h"
 #include "OdysseyVectorHandleSegment.h"
 
-class UOdysseyVectorPathCubic;
+class FOdysseyVectorPathCubic;
 
 typedef struct _FPolygon {
     ::ULIS::FVec2D quadVertex[4];
@@ -33,7 +33,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
          * @param iVertex1
          * @return a pointer to the newly created segment
          */
-        static FOdysseyVectorSegmentCubic* New( UOdysseyVectorPathCubic* iPath
+        static FOdysseyVectorSegmentCubic* New( FOdysseyVectorPathCubic* iPath
                                               , FOdysseyVectorVertexCubic* iVertex0
                                               , FOdysseyVectorVertexCubic* iVertex1 );
 
@@ -50,7 +50,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
          * @param iVertex1
          * @return a pointer to the newly created segment
          */
-        static FOdysseyVectorSegmentCubic* New( UOdysseyVectorPathCubic* iPath
+        static FOdysseyVectorSegmentCubic* New( FOdysseyVectorPathCubic* iPath
                                               , FOdysseyVectorVertexCubic* iVertex0
                                               , double iCtrlPoint0x
                                               , double iCtrlPoint0y
@@ -68,7 +68,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
          * @param iVertex0
          * @param iVertex1
          */
-        void Init( UOdysseyVectorPathCubic* iPath
+        void Init( FOdysseyVectorPathCubic* iPath
                  , FOdysseyVectorVertexCubic* iVertex0
                  , FOdysseyVectorVertexCubic* iVertex1 );
 
@@ -82,7 +82,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
          * @param iCtrlPoint1y
          * @param iVertex1
          */
-        void Init( UOdysseyVectorPathCubic* iPath
+        void Init( FOdysseyVectorPathCubic* iPath
                  , FOdysseyVectorVertexCubic* iVertex0
                  , double iCtrlPoint0x
                  , double iCtrlPoint0y

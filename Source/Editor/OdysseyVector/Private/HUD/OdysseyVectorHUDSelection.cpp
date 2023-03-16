@@ -38,7 +38,7 @@ FOdysseyVectorHUDSelection::SetSelecting( bool iSelecting, std::vector<::ULIS::F
 }
 
 void
-FOdysseyVectorHUDSelection::DrawSelectionSpace( UOdysseyVectorScene& iScene,::ULIS::FRectD& iRoi,uint64 iFlags )
+FOdysseyVectorHUDSelection::DrawSelectionSpace( FOdysseyVectorScene& iScene,::ULIS::FRectD& iRoi,uint64 iFlags )
 {
     BLContext* blctx = iScene.GetEngine()->GetBLContext();
     BLPoint topLeft = { 0, 0 };
@@ -48,7 +48,7 @@ FOdysseyVectorHUDSelection::DrawSelectionSpace( UOdysseyVectorScene& iScene,::UL
 
     if( iScene.GetEngine()->GetSelectionSpace() )
     {
-        UOdysseyVectorGroup* selectionSpace = iScene.GetEngine()->GetSelectionSpace();
+        FOdysseyVectorGroup* selectionSpace = iScene.GetEngine()->GetSelectionSpace();
         ::ULIS::FRectD selectionSpaceBBox = selectionSpace->GetBBox( false );
         BLRgba32 strokeColor = { 0x80, 0x80, 0x80, 0xFF };
         BLMatrix2D& worldMatrix = selectionSpace->GetWorldMatrix();
@@ -73,9 +73,9 @@ FOdysseyVectorHUDSelection::DrawSelectionSpace( UOdysseyVectorScene& iScene,::UL
 }
 
 void
-FOdysseyVectorHUDSelection::UpdateSelectionBox( UOdysseyVectorScene& iScene )
+FOdysseyVectorHUDSelection::UpdateSelectionBox( FOdysseyVectorScene& iScene )
 {
-    std::list<UOdysseyVectorObject*>& selectedObjectList = iScene.GetSelectedObjectList();
+    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene.GetSelectedObjectList();
 
     mSelectionBox.space = nullptr;
 
@@ -83,7 +83,7 @@ FOdysseyVectorHUDSelection::UpdateSelectionBox( UOdysseyVectorScene& iScene )
     {
         if( selectedObjectList.size() == 1 )
         {
-            UOdysseyVectorObject* selectedObject = iScene.GetLastSelected();
+            FOdysseyVectorObject* selectedObject = iScene.GetLastSelected();
             BLMatrix2D& worldMatrix = selectedObject->GetWorldMatrix();
 
             mSelectionBox.space = selectedObject;
@@ -95,7 +95,7 @@ FOdysseyVectorHUDSelection::UpdateSelectionBox( UOdysseyVectorScene& iScene )
             BLPoint p0, p1, p2, p3;
 
             mSelectionBox.space = &iScene;
-            mSelectionBox.rect = UOdysseyVectorObject::GetBoundingBoxFromList( selectedObjectList );
+            mSelectionBox.rect = FOdysseyVectorObject::GetBoundingBoxFromList( selectedObjectList );
             p0 = mSelectionBox.space->GetInverseWorldMatrix().mapPoint( mSelectionBox.rect.x                       , mSelectionBox.rect.y                        );
             p1 = mSelectionBox.space->GetInverseWorldMatrix().mapPoint( mSelectionBox.rect.x + mSelectionBox.rect.w, mSelectionBox.rect.y                        );
             p2 = mSelectionBox.space->GetInverseWorldMatrix().mapPoint( mSelectionBox.rect.x + mSelectionBox.rect.w, mSelectionBox.rect.y + mSelectionBox.rect.h );
@@ -110,9 +110,9 @@ FOdysseyVectorHUDSelection::UpdateSelectionBox( UOdysseyVectorScene& iScene )
 }
 
 void
-FOdysseyVectorHUDSelection::DrawSelectionBox( UOdysseyVectorScene& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags )
+FOdysseyVectorHUDSelection::DrawSelectionBox( FOdysseyVectorScene& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
-    std::list<UOdysseyVectorObject*>& selectedObjectList = iScene.GetSelectedObjectList();
+    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene.GetSelectedObjectList();
     BLContext* blctx = iScene.GetEngine()->GetBLContext();
 
     // matrix might get altered for displaying the selection rectangle of a single object. Save it.
@@ -144,7 +144,7 @@ FOdysseyVectorHUDSelection::DrawSelectionBox( UOdysseyVectorScene& iScene, ::ULI
 }
 
 void
-FOdysseyVectorHUDSelection::DrawSelecting( UOdysseyVectorScene& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags )
+FOdysseyVectorHUDSelection::DrawSelecting( FOdysseyVectorScene& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
     BLContext* blctx = iScene.GetEngine()->GetBLContext();
     BLPath path;
@@ -173,7 +173,7 @@ FOdysseyVectorHUDSelection::DrawSelecting( UOdysseyVectorScene& iScene, ::ULIS::
 }
 
 void
-FOdysseyVectorHUDSelection::Draw( UOdysseyVectorScene& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags )
+FOdysseyVectorHUDSelection::Draw( FOdysseyVectorScene& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
     BLContext* blctx = iScene.GetEngine()->GetBLContext();
     ::ULIS::FRectD bbox = { 0, 0, 0, 0 };

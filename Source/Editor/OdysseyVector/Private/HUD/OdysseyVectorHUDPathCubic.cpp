@@ -31,7 +31,7 @@ FOdysseyVectorHUDPathCubic::GetDisplayMode()
 }
 
 void
-FOdysseyVectorHUDPathCubic::DrawVertex( UOdysseyVectorPathCubic* iPath
+FOdysseyVectorHUDPathCubic::DrawVertex( FOdysseyVectorPathCubic* iPath
                                       , FOdysseyVectorVertexCubic* iCubicVertex
                                       , ::ULIS::FRectD& iRoi
                                       , uint64 iFlags )
@@ -71,7 +71,7 @@ FOdysseyVectorHUDPathCubic::DrawVertex( UOdysseyVectorPathCubic* iPath
 }
 
 void
-FOdysseyVectorHUDPathCubic::DrawSegment( UOdysseyVectorPathCubic* iPath
+FOdysseyVectorHUDPathCubic::DrawSegment( FOdysseyVectorPathCubic* iPath
                                        , FOdysseyVectorSegmentCubic* iCubicSegment
                                        , ::ULIS::FRectD& iRoi
                                        , uint64 iFlags )
@@ -121,19 +121,19 @@ FOdysseyVectorHUDPathCubic::DrawSegment( UOdysseyVectorPathCubic* iPath
 }
 
 void
-FOdysseyVectorHUDPathCubic::Draw( UOdysseyVectorScene& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags )
+FOdysseyVectorHUDPathCubic::Draw( FOdysseyVectorScene& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
     BLContext* blctx = iScene.GetEngine()->GetBLContext();
-    UOdysseyVectorObject* selectedObject = iScene.GetLastSelected();
+    FOdysseyVectorObject* selectedObject = iScene.GetLastSelected();
 
     // matrix might get altered for displaying the selection rectangle of a single object. Save it.
     blctx->save();
 
     if( selectedObject )
     {
-        if( selectedObject->GetClass() == UOdysseyVectorPathCubic::StaticClass() )
+        if( selectedObject->GetClass() == FOdysseyVectorPathCubic::StaticClass() )
         {
-            UOdysseyVectorPathCubic* cubicPath = Cast<UOdysseyVectorPathCubic>(selectedObject);
+            FOdysseyVectorPathCubic* cubicPath = static_cast<FOdysseyVectorPathCubic*>(selectedObject);
             std::list<FOdysseyVectorSegment*>& segmentList = cubicPath->GetSegmentList();
             std::list<FOdysseyVectorVertex*>& vertexList = cubicPath->GetVertexList();
 

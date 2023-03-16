@@ -129,8 +129,8 @@ UOdysseyPainterEditorVectorGridTool::OnMouseDrag(const FOdysseyPoint& iPointInTe
 
             mGridHUD.Deform();
 
-            currentVectorLayer->GetScene()->Update( UOdysseyVectorObject::FREQUENTUPDATES
-                                                  | UOdysseyVectorObject::KEEPINVALIDATED );
+            currentVectorLayer->GetScene()->Update( FOdysseyVectorObject::FREQUENTUPDATES
+                                                  | FOdysseyVectorObject::KEEPINVALIDATED );
         }
 
         currentVectorLayer->RenderImageChanged(true);

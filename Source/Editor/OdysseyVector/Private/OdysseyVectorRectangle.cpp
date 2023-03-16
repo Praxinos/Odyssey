@@ -1,40 +1,40 @@
 #include "OdysseyVectorRectangle.h"
 
-UOdysseyVectorRectangle::~UOdysseyVectorRectangle()
+FOdysseyVectorRectangle::~FOdysseyVectorRectangle()
 {
 }
 
-UOdysseyVectorRectangle::UOdysseyVectorRectangle()
+FOdysseyVectorRectangle::FOdysseyVectorRectangle()
     : mStrokeWidth ( 4.0f )
 {
 }
 
-void UOdysseyVectorRectangle::Init( std::string iName, double iWidth, double iHeight )
+void FOdysseyVectorRectangle::Init( std::string iName, double iWidth, double iHeight )
 {
     SetName( iName );
     SetSize( iWidth, iHeight );
 }
 
-UOdysseyVectorObject*
-UOdysseyVectorRectangle::CopyShape()
+FOdysseyVectorObject*
+FOdysseyVectorRectangle::CopyShape()
 {
-    UOdysseyVectorRectangle* rectangleCopy = NewObject<UOdysseyVectorRectangle>();
+    FOdysseyVectorRectangle* rectangleCopy = new FOdysseyVectorRectangle();
 
     rectangleCopy->Init( Name, mWidth, mHeight );
 
-    return Cast<UOdysseyVectorObject>( rectangleCopy );
+    return static_cast<FOdysseyVectorObject*>( rectangleCopy );
 }
 
 void
-UOdysseyVectorRectangle::DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags )
+FOdysseyVectorRectangle::DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags )
 {
     BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
     BLRgba32 strokeColor;
 
-    strokeColor.r = Foreground.R;
-    strokeColor.g = Foreground.G;
-    strokeColor.b = Foreground.B;
-    strokeColor.a = Foreground.A;
+    strokeColor.r = mObjectParam.Foreground.R;
+    strokeColor.g = mObjectParam.Foreground.G;
+    strokeColor.b = mObjectParam.Foreground.B;
+    strokeColor.a = mObjectParam.Foreground.A;
 
     blctx->setCompOp(BL_COMP_OP_SRC_COPY);
 /*
@@ -57,7 +57,7 @@ UOdysseyVectorRectangle::DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags )
 }
 
 bool
-UOdysseyVectorRectangle::PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags )
+FOdysseyVectorRectangle::PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags )
 {
     /*double x1 = - mWidth  * 0.5f;
     double y1 = - mHeight * 0.5f;
@@ -74,7 +74,7 @@ UOdysseyVectorRectangle::PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags
 }
 
 void
-UOdysseyVectorRectangle::SetSize( double iWidth, double iHeight )
+FOdysseyVectorRectangle::SetSize( double iWidth, double iHeight )
 {
     mWidth  = iWidth;
     mHeight = iHeight;
@@ -85,12 +85,12 @@ UOdysseyVectorRectangle::SetSize( double iWidth, double iHeight )
     mBBox.h =  ( ( mHeight * 0.5f ) +  mStrokeWidth ) * 2;
 }
 
-double UOdysseyVectorRectangle::GetWidth()
+double FOdysseyVectorRectangle::GetWidth()
 {
     return mWidth;
 }
 
-double UOdysseyVectorRectangle::GetHeight()
+double FOdysseyVectorRectangle::GetHeight()
 {
     return mHeight;
 }

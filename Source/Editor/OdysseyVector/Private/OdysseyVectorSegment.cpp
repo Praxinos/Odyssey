@@ -29,7 +29,7 @@ FOdysseyVectorSegment::GetTangentAt( double t )
 
 
 void
-FOdysseyVectorSegment::Init( UOdysseyVectorPath* iPath
+FOdysseyVectorSegment::Init( FOdysseyVectorPath* iPath
                            , FOdysseyVectorVertex* iVertex0
                            , FOdysseyVectorVertex* iVertex1 )
 {
@@ -43,7 +43,7 @@ FOdysseyVectorSegment::Init( UOdysseyVectorPath* iPath
 // static
 
 FOdysseyVectorSegment*
-FOdysseyVectorSegment::New( UOdysseyVectorPath* iPath
+FOdysseyVectorSegment::New( FOdysseyVectorPath* iPath
                           , FOdysseyVectorVertex* iVertex0
                           , FOdysseyVectorVertex* iVertex1 )
 {
@@ -80,12 +80,12 @@ FOdysseyVectorSegment::GetVertex( uint32 iVertexID )
 }
 
 void
-FOdysseyVectorSegment::SetPath( UOdysseyVectorPath* iPath )
+FOdysseyVectorSegment::SetPath( FOdysseyVectorPath* iPath )
 {
     mPath = iPath;
 }
 
-UOdysseyVectorPath*
+FOdysseyVectorPath*
 FOdysseyVectorSegment::GetPath()
 {
     return mPath;

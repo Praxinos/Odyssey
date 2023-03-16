@@ -1,39 +1,54 @@
 #include "OdysseyVectorPath.h"
 
-UOdysseyVectorPath::~UOdysseyVectorPath()
+FOdysseyVectorPath::~FOdysseyVectorPath()
 {
 }
 
-UOdysseyVectorPath::UOdysseyVectorPath()
+FOdysseyVectorPath::FOdysseyVectorPath()
 {
     SetJointType( eJointType::Miter );
+
+    mPathParam.Filled = false;
 }
 
-void UOdysseyVectorPath::Init( std::string iName )
+void
+FOdysseyVectorPath::Init( std::string iName )
 {
     SetName( iName );
 }
 
-eJointType
-UOdysseyVectorPath::GetJointType()
+bool
+FOdysseyVectorPath::IsFilled()
 {
-    return JointType;
+    return mPathParam.Filled;
 }
 
 void
-UOdysseyVectorPath::SetJointType( eJointType mJointType )
+FOdysseyVectorPath::SetFilled( bool iIsFilled )
 {
-    JointType = mJointType;
+    mPathParam.Filled = iIsFilled;
+}
+
+eJointType
+FOdysseyVectorPath::GetJointType()
+{
+    return mPathParam.JointType;
+}
+
+void
+FOdysseyVectorPath::SetJointType( eJointType iJointType )
+{
+    mPathParam.JointType = iJointType;
 }
 
 std::list<FOdysseyVectorPoint*>&
-UOdysseyVectorPath::GetSelectedPointList()
+FOdysseyVectorPath::GetSelectedPointList()
 {
     return mSelectedPointList;
 }
 
 FOdysseyVectorSegment*
-UOdysseyVectorPath::AppendVertex( FOdysseyVectorVertex* iPoint, FOdysseyVectorVertex* iPreviousPoint )
+FOdysseyVectorPath::AppendVertex( FOdysseyVectorVertex* iPoint, FOdysseyVectorVertex* iPreviousPoint )
 {
     AddVertex( iPoint );
 
@@ -49,7 +64,7 @@ UOdysseyVectorPath::AppendVertex( FOdysseyVectorVertex* iPoint, FOdysseyVectorVe
 }
 
 /*void
-UOdysseyVectorPath::AddLoop( UOdysseyVectorCycle* iLoop )
+FOdysseyVectorPath::AddLoop( FOdysseyVectorCycle* iLoop )
 {
     mLoopList.push_back( iLoop );
 
@@ -61,7 +76,7 @@ UOdysseyVectorPath::AddLoop( UOdysseyVectorCycle* iLoop )
 }*/
 
 /*void
-UOdysseyVectorPath::RemoveLoop( UOdysseyVectorCycle* iLoop )
+FOdysseyVectorPath::RemoveLoop( FOdysseyVectorCycle* iLoop )
 {
     mLoopList.remove( iLoop );
 
@@ -72,14 +87,14 @@ UOdysseyVectorPath::RemoveLoop( UOdysseyVectorCycle* iLoop )
     printf("%s: Removing loop\n", __func__ );
 }*/
 
-UOdysseyVectorObject*
-UOdysseyVectorPath::CopyShape()
+FOdysseyVectorObject*
+FOdysseyVectorPath::CopyShape()
 {
     return nullptr;
 }
 
 void
-UOdysseyVectorPath::UpdateBBox()
+FOdysseyVectorPath::UpdateBBox()
 {
     double x1 = DBL_MAX, y1 = DBL_MAX, x2 = -DBL_MAX, y2 = -DBL_MAX;
 
@@ -99,7 +114,7 @@ UOdysseyVectorPath::UpdateBBox()
 }
 
 void
-UOdysseyVectorPath::UpdateShape( uint32 iUpdateFlags )
+FOdysseyVectorPath::UpdateShape( uint32 iUpdateFlags )
 {
     // update segments
     for ( std::list<FOdysseyVectorSegment*>::iterator it = mInvalidatedSegmentList.begin(); it != mInvalidatedSegmentList.end(); ++it )
@@ -113,9 +128,9 @@ UOdysseyVectorPath::UpdateShape( uint32 iUpdateFlags )
 
     // then update Loops
 /*
-    for ( std::list<UOdysseyVectorCycle*>::iterator it = mInvalidatedLoopList.begin(); it != mInvalidatedLoopList.end(); ++it )
+    for ( std::list<FOdysseyVectorCycle*>::iterator it = mInvalidatedLoopList.begin(); it != mInvalidatedLoopList.end(); ++it )
     {
-        UOdysseyVectorCycle* loop = static_cast<UOdysseyVectorCycle*>(*it);
+        FOdysseyVectorCycle* loop = static_cast<FOdysseyVectorCycle*>(*it);
 
         loop->Update();
     }
@@ -126,7 +141,7 @@ UOdysseyVectorPath::UpdateShape( uint32 iUpdateFlags )
 }
 
 void
-UOdysseyVectorPath::InvalidateSegment( FOdysseyVectorSegment* iSegment )
+FOdysseyVectorPath::InvalidateSegment( FOdysseyVectorSegment* iSegment )
 {
     mInvalidatedSegmentList.push_back( iSegment );
 
@@ -134,7 +149,7 @@ UOdysseyVectorPath::InvalidateSegment( FOdysseyVectorSegment* iSegment )
 }
 
 /*void
-UOdysseyVectorPath::InvalidateLoop( UOdysseyVectorCycle* iLoop )
+FOdysseyVectorPath::InvalidateLoop( FOdysseyVectorCycle* iLoop )
 {
     mInvalidatedLoopList.push_back ( iLoop );
 
@@ -143,11 +158,11 @@ UOdysseyVectorPath::InvalidateLoop( UOdysseyVectorCycle* iLoop )
 
 /*
 void
-UOdysseyVectorPath::DrawLoops( ::ULIS::FRectD &iRoi, uint64 iFlags )
+FOdysseyVectorPath::DrawLoops( ::ULIS::FRectD &iRoi, uint64 iFlags )
 {
-    for( std::list<UOdysseyVectorCycle*>::iterator it = mLoopList.begin(); it != mLoopList.end(); ++it )
+    for( std::list<FOdysseyVectorCycle*>::iterator it = mLoopList.begin(); it != mLoopList.end(); ++it )
     {
-        UOdysseyVectorCycle* loop = static_cast<UOdysseyVectorCycle*>(*it);
+        FOdysseyVectorCycle* loop = static_cast<FOdysseyVectorCycle*>(*it);
 
         //if ( loop->IsFilled() == true )
         //{
@@ -158,12 +173,12 @@ UOdysseyVectorPath::DrawLoops( ::ULIS::FRectD &iRoi, uint64 iFlags )
 */
 
 /*
-UOdysseyVectorObject*
-UOdysseyVectorPath::PickLoops( double iX, double iY, double iRadius )
+FOdysseyVectorObject*
+FOdysseyVectorPath::PickLoops( double iX, double iY, double iRadius )
 {
-    for( std::list<UOdysseyVectorCycle*>::iterator it = mLoopList.begin(); it != mLoopList.end(); ++it )
+    for( std::list<FOdysseyVectorCycle*>::iterator it = mLoopList.begin(); it != mLoopList.end(); ++it )
     {
-        UOdysseyVectorCycle* loop = static_cast<UOdysseyVectorCycle*>(*it);
+        FOdysseyVectorCycle* loop = static_cast<FOdysseyVectorCycle*>(*it);
 
         if ( loop->PickShape( iX, iY, iRadius ) )
         {
@@ -176,12 +191,12 @@ UOdysseyVectorPath::PickLoops( double iX, double iY, double iRadius )
 */
 
 /*
-UOdysseyVectorCycle*
-UOdysseyVectorPath::GetLoopByID( uint64 iID )
+FOdysseyVectorCycle*
+FOdysseyVectorPath::GetLoopByID( uint64 iID )
 {
-    for( std::list<UOdysseyVectorCycle*>::iterator it = mLoopList.begin(); it != mLoopList.end(); ++it )
+    for( std::list<FOdysseyVectorCycle*>::iterator it = mLoopList.begin(); it != mLoopList.end(); ++it )
     {
-        UOdysseyVectorCycle* loop = static_cast<UOdysseyVectorCycle*>(*it);
+        FOdysseyVectorCycle* loop = static_cast<FOdysseyVectorCycle*>(*it);
 
         if ( iID == loop->GetID() )
         {
@@ -194,7 +209,7 @@ UOdysseyVectorPath::GetLoopByID( uint64 iID )
 */
 
 void
-UOdysseyVectorPath::AddVertex( FOdysseyVectorVertex* iVertex )
+FOdysseyVectorPath::AddVertex( FOdysseyVectorVertex* iVertex )
 {
     mVertexList.push_back( iVertex );
 
@@ -202,13 +217,13 @@ UOdysseyVectorPath::AddVertex( FOdysseyVectorVertex* iVertex )
 }
 
 void
-UOdysseyVectorPath::RemoveVertex( FOdysseyVectorVertex* iVertex )
+FOdysseyVectorPath::RemoveVertex( FOdysseyVectorVertex* iVertex )
 {
     mVertexList.remove( iVertex );
 }
 
 void
-UOdysseyVectorPath::AddSegment( FOdysseyVectorSegment* iSegment )
+FOdysseyVectorPath::AddSegment( FOdysseyVectorSegment* iSegment )
 {
     mSegmentList.push_back( iSegment );
 
@@ -219,7 +234,7 @@ UOdysseyVectorPath::AddSegment( FOdysseyVectorSegment* iSegment )
 }
 
 void
-UOdysseyVectorPath::Clear()
+FOdysseyVectorPath::Clear()
 {
     for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != --mSegmentList.end(); ++it )
     {
@@ -234,7 +249,7 @@ UOdysseyVectorPath::Clear()
 }
 
 void
-UOdysseyVectorPath::RemoveSegment( FOdysseyVectorSegment* iSegment )
+FOdysseyVectorPath::RemoveSegment( FOdysseyVectorSegment* iSegment )
 {
     mSegmentList.remove( iSegment );
 
@@ -243,19 +258,19 @@ UOdysseyVectorPath::RemoveSegment( FOdysseyVectorSegment* iSegment )
 }
 
 std::list<FOdysseyVectorSegment*>&
-UOdysseyVectorPath::GetSegmentList()
+FOdysseyVectorPath::GetSegmentList()
 {
     return mSegmentList;
 }
 
 std::list<FOdysseyVectorVertex*>&
-UOdysseyVectorPath::GetVertexList()
+FOdysseyVectorPath::GetVertexList()
 {
     return mVertexList;
 }
 
 FOdysseyVectorSegment*
-UOdysseyVectorPath::GetLastSegment()
+FOdysseyVectorPath::GetLastSegment()
 {
     if( mSegmentList.size() == 0 ) return nullptr;
 
@@ -263,7 +278,7 @@ UOdysseyVectorPath::GetLastSegment()
 }
 
 FOdysseyVectorSegment*
-UOdysseyVectorPath::GetFirstSegment()
+FOdysseyVectorPath::GetFirstSegment()
 {
     if( mSegmentList.size() == 0 ) return nullptr;
 
@@ -271,7 +286,7 @@ UOdysseyVectorPath::GetFirstSegment()
 }
 
 FOdysseyVectorVertex*
-UOdysseyVectorPath::GetLastVertex()
+FOdysseyVectorPath::GetLastVertex()
 {
     if( mVertexList.size() == 0 ) return nullptr;
 
@@ -279,7 +294,7 @@ UOdysseyVectorPath::GetLastVertex()
 }
 
 FOdysseyVectorVertex*
-UOdysseyVectorPath::GetFirstVertex()
+FOdysseyVectorPath::GetFirstVertex()
 {
     if( mVertexList.size() == 0 ) return nullptr;
 
@@ -287,7 +302,7 @@ UOdysseyVectorPath::GetFirstVertex()
 }
 
 void
-UOdysseyVectorPath::DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags )
+FOdysseyVectorPath::DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
     for(std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it)
     {
@@ -321,7 +336,7 @@ static bool intersectLine( ::ULIS::FVec2D& iOrigin0
 }
 
 static void
-_drawMiterJoint( UOdysseyVectorPath* iPath
+_drawMiterJoint( FOdysseyVectorPath* iPath
                , ::ULIS::FVec2D& iOrigin
                , ::ULIS::FVec2D& iVector0
                , ::ULIS::FVec2D& iVector1
@@ -430,7 +445,7 @@ _drawMiterJoint( UOdysseyVectorPath* iPath
 }
 
 static void
-_drawRadialJoint( UOdysseyVectorPath* iPath
+_drawRadialJoint( FOdysseyVectorPath* iPath
                 , ::ULIS::FVec2D& iOrigin
                 , ::ULIS::FVec2D& iVector0
                 , ::ULIS::FVec2D& iVector1
@@ -502,7 +517,7 @@ _drawRadialJoint( UOdysseyVectorPath* iPath
 }
 
 static void
-_drawLinearJoint( UOdysseyVectorPath* iPath
+_drawLinearJoint( FOdysseyVectorPath* iPath
                 , ::ULIS::FVec2D& iOrigin
                 , ::ULIS::FVec2D& iVector0
                 , ::ULIS::FVec2D& iVector1
@@ -555,7 +570,7 @@ _drawLinearJoint( UOdysseyVectorPath* iPath
 }
 
 void
-UOdysseyVectorPath::InvalidateAllSegments()
+FOdysseyVectorPath::InvalidateAllSegments()
 {
     for(std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it)
     {
@@ -566,7 +581,7 @@ UOdysseyVectorPath::InvalidateAllSegments()
 }
 
 void
-UOdysseyVectorPath::DrawJoint( FOdysseyVectorVertex* iVertex, ::ULIS::FRectD &iRoi, uint64 iFlags )
+FOdysseyVectorPath::DrawJoint( FOdysseyVectorVertex* iVertex, ::ULIS::FRectD &iRoi, uint64 iFlags )
 {
     FOdysseyVectorSegment* segment0 = iVertex->GetFirstSegment();
     FOdysseyVectorSegment* segment1 = iVertex->GetLastSegment();
@@ -586,7 +601,7 @@ UOdysseyVectorPath::DrawJoint( FOdysseyVectorVertex* iVertex, ::ULIS::FRectD &iR
             // if the dot product equals to 1.0f, then the point is perfectly smooth, hence there is no need for joints.
             if ( segment0Vector.DotProduct(segment1Vector) < 1.0f )
             {
-                switch ( JointType )
+                switch ( mPathParam.JointType )
                 {
                     case eJointType::Linear :
                         _drawLinearJoint ( this, origin, segment0Vector, segment1Vector, vertexRadius );

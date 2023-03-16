@@ -52,11 +52,11 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDown(const FOdysseyPoint
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        UOdysseyVectorScene* scene = currentVectorLayer->GetScene();
+        FOdysseyVectorScene* scene = currentVectorLayer->GetScene();
         BLPoint localCoords = scene->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
         ::ULIS::FColor color = GetEditorAs<FOdysseyPainterEditor>()->PaintColor().GetValue();
         ::ULIS::FColor rgba8 = color.ToFormat( ::ULIS::eFormat::Format_RGBA8 );
-        UOdysseyVectorEllipse* circle = UOdysseyVectorEllipse::New( "Circle", 0.0f, 0.0f );
+        FOdysseyVectorEllipse* circle = FOdysseyVectorEllipse::New( "Circle", 0.0f, 0.0f );
 
         scene->AppendChild( circle );
 
@@ -86,7 +86,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDrag(const FOdysseyPoint
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        UOdysseyVectorEllipse* circle = Cast<UOdysseyVectorEllipse>( currentVectorLayer->GetScene()->GetLastSelected() );
+        FOdysseyVectorEllipse* circle = static_cast<FOdysseyVectorEllipse*>( currentVectorLayer->GetScene()->GetLastSelected() );
 
         if( circle )
         {

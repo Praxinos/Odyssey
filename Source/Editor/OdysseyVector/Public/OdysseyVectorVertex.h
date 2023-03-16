@@ -8,7 +8,7 @@
 
 class FOdysseyVectorSegment;
 class FOdysseyVectorSection;
-class UOdysseyVectorPath;
+class FOdysseyVectorPath;
 
 class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
 {
@@ -93,7 +93,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
          * @brief Set the path this vertex belongs to.
          * @param iPath the path this vertex belongs to;
          */
-        void SetPath( UOdysseyVectorPath* iPath );
+        void SetPath( FOdysseyVectorPath* iPath );
 
          //////// getters
 
@@ -186,7 +186,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
          * @brief Get a pointer to the path this vertex belongs to.
          * @return a pointer to the path this vertex belongs to.
          */
-        UOdysseyVectorPath* GetPath();
+        FOdysseyVectorPath* GetPath();
 
 
         virtual ::ULIS::FVec2D GetVectorOnSegment( FOdysseyVectorSegment* iSegment, bool iNormalize );
@@ -226,7 +226,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
     protected:
         std::list<FOdysseyVectorSegment*> mSegmentList;
         std::list<FOdysseyVectorSection*> mSectionList;
-        UOdysseyVectorPath* mPath;
+        FOdysseyVectorPath* mPath;
         uint32 mFlags;
 
     private :

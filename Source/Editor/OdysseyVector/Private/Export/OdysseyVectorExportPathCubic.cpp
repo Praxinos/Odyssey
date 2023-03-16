@@ -2,7 +2,7 @@
 #include "OdysseyVectorSegmentCubic.h"
 
 static void
-WritePathCubicGeometrySegments( UOdysseyVectorPathCubic& iCubicPath, FArchive &Ar )
+WritePathCubicGeometrySegments( FOdysseyVectorPathCubic& iCubicPath, FArchive &Ar )
 {
     if( iCubicPath.GetSegmentList().size() )
     {
@@ -39,7 +39,7 @@ WritePathCubicGeometrySegments( UOdysseyVectorPathCubic& iCubicPath, FArchive &A
 }
 
 static void
-WritePathCubicGeometryVertices( UOdysseyVectorPathCubic& iCubicPath, FArchive &Ar )
+WritePathCubicGeometryVertices( FOdysseyVectorPathCubic& iCubicPath, FArchive &Ar )
 {
     if ( iCubicPath.GetVertexList().size() )
     {
@@ -71,7 +71,7 @@ WritePathCubicGeometryVertices( UOdysseyVectorPathCubic& iCubicPath, FArchive &A
 }
 
 static void
-WritePathCubicGeometry( UOdysseyVectorPathCubic& iCubicPath, FArchive &Ar )
+WritePathCubicGeometry( FOdysseyVectorPathCubic& iCubicPath, FArchive &Ar )
 {
     FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_PATHCUBIC_GEOMETRY
                                     , Ar
@@ -83,7 +83,7 @@ WritePathCubicGeometry( UOdysseyVectorPathCubic& iCubicPath, FArchive &Ar )
 }
 
 static void
-WritePathJoint( UOdysseyVectorPath& iPath, FArchive &Ar )
+WritePathJoint( FOdysseyVectorPath& iPath, FArchive &Ar )
 {
     FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_PATH_JOINT
                                     , Ar
@@ -96,7 +96,7 @@ WritePathJoint( UOdysseyVectorPath& iPath, FArchive &Ar )
 }
 
 void
-FOdysseyVectorExport::WriteObjectPathCubic( UOdysseyVectorPathCubic& iCubicPath, FArchive &Ar )
+FOdysseyVectorExport::WriteObjectPathCubic( FOdysseyVectorPathCubic& iCubicPath, FArchive &Ar )
 {
     FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_OBJECT_PATHCUBIC
                                     , Ar

@@ -8,7 +8,7 @@
 #include "OdysseyVectorSection.h"
 #include "OdysseyVectorLink.h"
 
-class UOdysseyVectorPath;
+class FOdysseyVectorPath;
 
 class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
 {
@@ -25,7 +25,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
          * @param iVertex1
          * @return a pointer to the newly created segment
          */
-        static FOdysseyVectorSegment* New( UOdysseyVectorPath* iPath
+        static FOdysseyVectorSegment* New( FOdysseyVectorPath* iPath
                                          , FOdysseyVectorVertex* iVertex0
                                          , FOdysseyVectorVertex* iVertex1 );
 
@@ -38,7 +38,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
          * @param iVertex0
          * @param iVertex1
          */
-        void Init( UOdysseyVectorPath* iPath
+        void Init( FOdysseyVectorPath* iPath
                  , FOdysseyVectorVertex* iVertex0
                  , FOdysseyVectorVertex* iVertex1 );
 
@@ -77,13 +77,13 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
          * @brief Get a pointer to the path this segment belongs to
          * @return a pointer to the path this segment belongs to
          */
-        UOdysseyVectorPath* GetPath();
+        FOdysseyVectorPath* GetPath();
 
        /**
          * @brief Set the path this segment belongs to. This is called by the path itself when the segment is added.
          * @param a pointer to the path this segment belongs to
          */
-        void SetPath( UOdysseyVectorPath* iPath );
+        void SetPath( FOdysseyVectorPath* iPath );
 
        /**
          * @brief Update cached data for this segment.
@@ -164,7 +164,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
     protected:
         std::list<FOdysseyVectorVertexIntersection*> mIntersectionVertexList;
         std::list<FOdysseyVectorSection*> mSectionList;
-        UOdysseyVectorPath* mPath;
+        FOdysseyVectorPath* mPath;
         ::ULIS::FRectD mBBox;
 
     private:

@@ -1,11 +1,11 @@
 #include "OdysseyVectorPathBuilder.h"
 
-UOdysseyVectorPathBuilder::~UOdysseyVectorPathBuilder()
+FOdysseyVectorPathBuilder::~FOdysseyVectorPathBuilder()
 {
 
 }
 
-UOdysseyVectorPathBuilder::UOdysseyVectorPathBuilder()
+FOdysseyVectorPathBuilder::FOdysseyVectorPathBuilder()
     : mCubicPath ( nullptr )
     , mCumulAngle ( 0.0f )
     , mInitialVertex( nullptr )
@@ -13,16 +13,16 @@ UOdysseyVectorPathBuilder::UOdysseyVectorPathBuilder()
     , mCumulAngleLimit ( 1.5708f ) // 90 degrees
     , mLastCubicAngleLimit ( 1.0472f ) // 60 deg
 {
-    Foreground.R = 128;
-    Foreground.G = 128;
-    Foreground.B = 128;
-    Foreground.A = 255;
+    mObjectParam.Foreground.R = 128;
+    mObjectParam.Foreground.G = 128;
+    mObjectParam.Foreground.B = 128;
+    mObjectParam.Foreground.A = 255;
 
     mSampleLinkArray.reserve( 50 );
 }
 
 void 
-UOdysseyVectorPathBuilder::Attach( UOdysseyVectorPathCubic* iCubicPath )
+FOdysseyVectorPathBuilder::Attach( FOdysseyVectorPathCubic* iCubicPath )
 {
     mCubicPath = iCubicPath;
 }
@@ -42,7 +42,7 @@ Shape( FOdysseyVectorSegmentCubic& iCubicSegment, ::ULIS::FVec2D iEntryVector, :
 }
 
 double
-UOdysseyVectorPathBuilder::GetSampleAngle()
+FOdysseyVectorPathBuilder::GetSampleAngle()
 {
     if( mSampleLinkArray.size() >= 2 )
     {
@@ -63,7 +63,7 @@ UOdysseyVectorPathBuilder::GetSampleAngle()
 }
 
 uint32
-UOdysseyVectorPathBuilder::RecordVertex( FOdysseyVectorPoint *iPoint, bool iEnforce )
+FOdysseyVectorPathBuilder::RecordVertex( FOdysseyVectorPoint *iPoint, bool iEnforce )
 {
     uint32 ret = 0;
 
@@ -83,7 +83,7 @@ UOdysseyVectorPathBuilder::RecordVertex( FOdysseyVectorPoint *iPoint, bool iEnfo
             {
                 mFinalVertex = FOdysseyVectorVertexCubic::New( iPoint->GetX(), iPoint->GetY(), iPoint->GetRadius() );
 
-                ret |= UOdysseyVectorPathBuilder::NEWVERTEX;
+                ret |= FOdysseyVectorPathBuilder::NEWVERTEX;
             }
             else
             {
@@ -98,7 +98,7 @@ UOdysseyVectorPathBuilder::RecordVertex( FOdysseyVectorPoint *iPoint, bool iEnfo
 
             Adjust( *mCubicSegment );
 
-            ret |= UOdysseyVectorPathBuilder::NEWSEGMENT;
+            ret |= FOdysseyVectorPathBuilder::NEWSEGMENT;
 
             mCumulAngle = 0.0f;
         }
@@ -108,7 +108,7 @@ UOdysseyVectorPathBuilder::RecordVertex( FOdysseyVectorPoint *iPoint, bool iEnfo
 }
 
 uint32
-UOdysseyVectorPathBuilder::RecordSample( FOdysseyVectorPoint *iPoint, bool iEnforce )
+FOdysseyVectorPathBuilder::RecordSample( FOdysseyVectorPoint *iPoint, bool iEnforce )
 {
     uint32 ret = 0;
 
@@ -131,7 +131,7 @@ UOdysseyVectorPathBuilder::RecordSample( FOdysseyVectorPoint *iPoint, bool iEnfo
             mSampleLinkArray.push_back( link );
             mSampleArray.push_back( iSample );
 
-            ret |= UOdysseyVectorPathBuilder::NEWSAMPLE;
+            ret |= FOdysseyVectorPathBuilder::NEWSAMPLE;
         }
     }
 
@@ -139,7 +139,7 @@ UOdysseyVectorPathBuilder::RecordSample( FOdysseyVectorPoint *iPoint, bool iEnfo
 }
 
 uint32
-UOdysseyVectorPathBuilder::RecordPoint( FOdysseyVectorPoint *iPoint, bool iEnforce )
+FOdysseyVectorPathBuilder::RecordPoint( FOdysseyVectorPoint *iPoint, bool iEnforce )
 {
     uint32 ret = 0;
 
@@ -149,7 +149,7 @@ UOdysseyVectorPathBuilder::RecordPoint( FOdysseyVectorPoint *iPoint, bool iEnfor
 }
 
 void
-UOdysseyVectorPathBuilder::ClearPoints()
+FOdysseyVectorPathBuilder::ClearPoints()
 {
     for( int i = 0; i < mPointArray.size(); i++ )
     {
@@ -163,7 +163,7 @@ UOdysseyVectorPathBuilder::ClearPoints()
 }
 
 void
-UOdysseyVectorPathBuilder::ClearSamples()
+FOdysseyVectorPathBuilder::ClearSamples()
 {
     for( int i = 0; i < mSampleArray.size(); i++ )
     {
@@ -178,21 +178,21 @@ UOdysseyVectorPathBuilder::ClearSamples()
 }
 
 void
-UOdysseyVectorPathBuilder::Record( FOdysseyVectorPoint *iPoint, bool iEnforce )
+FOdysseyVectorPathBuilder::Record( FOdysseyVectorPoint *iPoint, bool iEnforce )
 {
     uint32 ret = RecordPoint( iPoint, iEnforce );
 
-    if( ret & UOdysseyVectorPathBuilder::NEWSAMPLE )
+    if( ret & FOdysseyVectorPathBuilder::NEWSAMPLE )
     {
         ClearPoints();
     }
 
-    if( ret & UOdysseyVectorPathBuilder::NEWVERTEX )
+    if( ret & FOdysseyVectorPathBuilder::NEWVERTEX )
     {
         mCubicPath->AddVertex( mFinalVertex );
     }
 
-    if( ret & UOdysseyVectorPathBuilder::NEWSEGMENT )
+    if( ret & FOdysseyVectorPathBuilder::NEWSEGMENT )
     {
         mCubicPath->AddSegment( mCubicSegment );
         mCubicSegment->Invalidate();
@@ -207,14 +207,14 @@ UOdysseyVectorPathBuilder::Record( FOdysseyVectorPoint *iPoint, bool iEnforce )
     }
 }
 
-UOdysseyVectorObject*
-UOdysseyVectorPathBuilder::CopyShape()
+FOdysseyVectorObject*
+FOdysseyVectorPathBuilder::CopyShape()
 {
     return nullptr;
 }
 
 double
-UOdysseyVectorPathBuilder::GetTotalSampleLinkLength()
+FOdysseyVectorPathBuilder::GetTotalSampleLinkLength()
 {
     double length = 0.0f;
 
@@ -228,7 +228,7 @@ UOdysseyVectorPathBuilder::GetTotalSampleLinkLength()
 }
 
 ::ULIS::FVec2D
-UOdysseyVectorPathBuilder::GetSamplePointAtParameter( double iToTalLinkLength, double iT )
+FOdysseyVectorPathBuilder::GetSamplePointAtParameter( double iToTalLinkLength, double iT )
 {
     ::ULIS::FVec2D point = { 0.0f, 0.0f };
     double currentT = 0.0f;
@@ -288,7 +288,7 @@ UOdysseyVectorPathBuilder::GetSamplePointAtParameter( double iToTalLinkLength, d
  *
  */
 void
-UOdysseyVectorPathBuilder::Adjust( FOdysseyVectorSegmentCubic& iCubicSegment )
+FOdysseyVectorPathBuilder::Adjust( FOdysseyVectorSegmentCubic& iCubicSegment )
 {
     double totalLinkLength = GetTotalSampleLinkLength();
     ::ULIS::FVec2D& point0 = iCubicSegment.GetVertex(0)->GetCoords( nullptr );
@@ -356,7 +356,7 @@ UOdysseyVectorPathBuilder::Adjust( FOdysseyVectorSegmentCubic& iCubicSegment )
 }
 
 /*
-UOdysseyVectorPathBuilder::SmoothSegment( FOdysseyVectorSegmentCubic* iCubicSegment )
+FOdysseyVectorPathBuilder::SmoothSegment( FOdysseyVectorSegmentCubic* iCubicSegment )
 {
     FOdysseyVectorVertex vertex0 = iCubicSegment->GetVertex( 0 );
     FOdysseyVectorVertex vertex1 = iCubicSegment->GetVertex( 1 );
@@ -395,14 +395,14 @@ UOdysseyVectorPathBuilder::SmoothSegment( FOdysseyVectorSegmentCubic* iCubicSegm
 }
 */
 
-UOdysseyVectorPathCubic* 
-UOdysseyVectorPathBuilder::GetCubicPath()
+FOdysseyVectorPathCubic* 
+FOdysseyVectorPathBuilder::GetCubicPath()
 {
     return mCubicPath;
 }
 
 void
-UOdysseyVectorPathBuilder::FitSegment( FOdysseyVectorSegmentCubic& iSegment
+FOdysseyVectorPathBuilder::FitSegment( FOdysseyVectorSegmentCubic& iSegment
                                      , std::list<FOdysseyVectorLink*>& iLinkList )
 {
     ::ULIS::FVec2D& point0 = iSegment.GetVertex(0)->GetCoords( nullptr );
@@ -461,16 +461,16 @@ UOdysseyVectorPathBuilder::FitSegment( FOdysseyVectorSegmentCubic& iSegment
 }
 
 void
-UOdysseyVectorPathBuilder::DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags )
+FOdysseyVectorPathBuilder::DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
     BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
     BLPath path;
     BLRgba32 strokeColor;
 
-    strokeColor.r = Foreground.R;
-    strokeColor.g = Foreground.G;
-    strokeColor.b = Foreground.B;
-    strokeColor.a = Foreground.A;
+    strokeColor.r = mObjectParam.Foreground.R;
+    strokeColor.g = mObjectParam.Foreground.G;
+    strokeColor.b = mObjectParam.Foreground.B;
+    strokeColor.a = mObjectParam.Foreground.A;
 
     blctx->setCompOp(BL_COMP_OP_SRC_COPY);
     /*iBLContext.setFillStyle(BLRgba32(0xFFFFFFFF));

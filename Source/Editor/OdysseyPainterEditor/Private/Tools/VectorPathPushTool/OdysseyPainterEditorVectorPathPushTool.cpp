@@ -92,7 +92,7 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDown(const FOdysseyPoint& iPoint
 
             if( cubicSegment )
             {
-                UOdysseyVectorPathCubic* cubicPath = Cast<UOdysseyVectorPathCubic>(cubicSegment->GetPath());
+                FOdysseyVectorPathCubic* cubicPath = static_cast<FOdysseyVectorPathCubic*>(cubicSegment->GetPath());
                 BLPoint localPoint = cubicPath->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
                 ::ULIS::FVec2D& ctrlPoint0 = cubicSegment->GetHandle(0)->GetCoords();
                 ::ULIS::FVec2D& ctrlPoint1 = cubicSegment->GetHandle(1)->GetCoords();
@@ -168,7 +168,7 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDrag( const FOdysseyPoint& iPoin
         for( int i = 0; i < mPushedPointArray.size(); i++ )
         {
             FOdysseyVectorPoint* point = mPushedPointArray[i].point;
-            UOdysseyVectorPath* path;
+            FOdysseyVectorPath* path;
 
             if( point->GetClass() == FOdysseyVectorHandleSegment::StaticClass() )
             {
@@ -193,7 +193,7 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDrag( const FOdysseyPoint& iPoin
             {
                 if( vertex->IsSmooth() && PreserveSmoothness )
                 {
-                    FOdysseyVectorVertexCubic* cubicVertex = Cast<FOdysseyVectorVertexCubic>(vertex);
+                    FOdysseyVectorVertexCubic* cubicVertex = static_cast<FOdysseyVectorVertexCubic*>(vertex);
 
                     if( cubicVertex )
                     {
@@ -208,8 +208,8 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDrag( const FOdysseyPoint& iPoin
             mSegmentArray[i]->Invalidate();
         }
 
-        currentVectorLayer->GetScene()->Update( UOdysseyVectorObject::FREQUENTUPDATES
-                                              | UOdysseyVectorObject::KEEPINVALIDATED );
+        currentVectorLayer->GetScene()->Update( FOdysseyVectorObject::FREQUENTUPDATES
+                                              | FOdysseyVectorObject::KEEPINVALIDATED );
 
         currentVectorLayer->RenderImageChanged(/* { rect }, */true);
     }

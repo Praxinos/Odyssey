@@ -52,7 +52,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorCycle
          * @param iVertexArray the vertex array.
          * @param iSectionArray the section array.
          */
-         FOdysseyVectorCycle( UOdysseyVectorObject& iParent
+         FOdysseyVectorCycle( FOdysseyVectorObject& iParent
                             , uint64 iID
                             , std::vector<FOdysseyVectorVertex*>& iVertexArray
                             , std::vector<FOdysseyVectorSection*>& iSectionArray );
@@ -125,7 +125,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorCycle
 
     protected :
         BLPath mPath;
-        UOdysseyVectorObject& mParent;
+        FOdysseyVectorObject& mParent;
         uint64 mID;
         FOdysseyVectorBucket* mBucket;
         std::vector<FOdysseyVectorVertex*> mVertexArray;

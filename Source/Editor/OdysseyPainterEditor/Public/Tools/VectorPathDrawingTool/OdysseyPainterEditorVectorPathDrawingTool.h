@@ -40,8 +40,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
         void PropertyChanged( const FName& iPropertyName );
 
     private:
-        UOdysseyVectorPathBuilder* MakePathBuilder( FOdysseyVectorEngine* iVectorEngine
-                                                  , UOdysseyVectorScene* iScene
+        FOdysseyVectorPathBuilder* MakePathBuilder( FOdysseyVectorEngine* iVectorEngine
+                                                  , FOdysseyVectorScene* iScene
                                                   , double iWorldX
                                                   , double iWorldY );
 

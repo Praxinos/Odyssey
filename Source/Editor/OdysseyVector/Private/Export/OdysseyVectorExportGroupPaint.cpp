@@ -110,7 +110,7 @@ WriteBucketEntry( FOdysseyVectorBucket& iBucket, FArchive &Ar )
 }
 
 static void
-WriteGroupPaintBuckets( UOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar )
+WriteGroupPaintBuckets( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar )
 {
     if ( iPaintGroup.GetBucketList().size() )
     {
@@ -129,7 +129,7 @@ WriteGroupPaintBuckets( UOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar )
 }
 
 void
-FOdysseyVectorExport::WriteObjectGroupPaint( UOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar )
+FOdysseyVectorExport::WriteObjectGroupPaint( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar )
 {
     FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_OBJECT_GROUPPAINT
                                     , Ar

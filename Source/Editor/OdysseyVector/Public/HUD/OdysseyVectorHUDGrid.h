@@ -7,7 +7,7 @@
 
 typedef struct _FGridPoint
 {
-    UOdysseyVectorObject* mDeformedObject;
+    FOdysseyVectorObject* mDeformedObject;
     FOdysseyVectorPoint* mPoint;
     double s;
     double t;
@@ -42,24 +42,24 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUDGrid : public FOdysseyVectorHUDSelectio
         virtual ~FOdysseyVectorHUDGrid();
         FOdysseyVectorHUDGrid();
 
-        void Draw( UOdysseyVectorScene& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags );
+        void Draw( FOdysseyVectorScene& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags );
         FGridNode *PickNode( double iWorldX, double iWorldY, double iWorldRadius );
         void PickNodes( ::ULIS::FRectD& iWorldRect, std::vector<FGridNode*>& oNodeArray );
-        void MakeGrid( UOdysseyVectorScene& iScene, uint32 iDivisionX, uint32 iDivisionY );
+        void MakeGrid( FOdysseyVectorScene& iScene, uint32 iDivisionX, uint32 iDivisionY );
         void Deform();
         void StartSelectionRectangle( double iWorldX, double iWorldY );
         void DragSelectionRectangle( double iWorldX, double iWorldY );
         void EndSelectionRectangle( std::vector<FGridNode*>& oNodeArray );
 
     protected:
-        void MapPoint( UOdysseyVectorObject* iDeformedObject, FOdysseyVectorPoint* iPoint, double iSpaceX, double iSpaceY );
-        void MapObject( UOdysseyVectorObject* iObject );
+        void MapPoint( FOdysseyVectorObject* iDeformedObject, FOdysseyVectorPoint* iPoint, double iSpaceX, double iSpaceY );
+        void MapObject( FOdysseyVectorObject* iObject );
         void MakeNodes( uint32 iCellCountX, uint32 iCellCountY );
         void MakeCells( uint32 iCellCountX, uint32 iCellCountY );
-        void Map( UOdysseyVectorScene& iScene );
+        void Map( FOdysseyVectorScene& iScene );
         void DeformCell( FGridCell& iCell );
         void UnselectNodes();
-        void DrawSelectionRectangle( UOdysseyVectorScene& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags );
+        void DrawSelectionRectangle( FOdysseyVectorScene& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags );
 
     private:
         ::ULIS::FVec2D mWorldSelStart; // selection rectangle is in world coordinates (to be aligned with world axis)

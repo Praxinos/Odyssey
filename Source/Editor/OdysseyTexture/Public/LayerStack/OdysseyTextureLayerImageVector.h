@@ -22,7 +22,7 @@ class ODYSSEYTEXTURE_API UOdysseyTextureLayerImageVector
     GENERATED_BODY()
 
     private:
-        UOdysseyVectorScene* mScene;
+        FOdysseyVectorScene* mScene;
         FOdysseyVectorEngine* mVEngine;
         TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mBlock;
 
@@ -44,7 +44,7 @@ class ODYSSEYTEXTURE_API UOdysseyTextureLayerImageVector
         virtual void OnCreated_Implementation() override;
 
         FOdysseyVectorEngine* GetEngine();
-        UOdysseyVectorScene* GetScene();
+        FOdysseyVectorScene* GetScene();
 
         /**
          * @brief Renders an image in the given Block

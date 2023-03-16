@@ -8,15 +8,17 @@
 #include "OdysseyVectorSegmentCubic.h"
 #include "OdysseyVectorPathCubic.h"
 
-#include "OdysseyVectorEllipse.generated.h"
+//#include "OdysseyVectorEllipse.generated.h"
 
-UCLASS()
-class ODYSSEYVECTOR_API UOdysseyVectorEllipse : public UOdysseyVectorPathCubic
+class ODYSSEYVECTOR_API FOdysseyVectorEllipse : public FOdysseyVectorPathCubic
 {
-    public:
-        GENERATED_BODY()
+    private:
+        static const uint32 mStaticClass = 0x1147fdfe; // value is crc32 FOdysseyVectorEllipse
 
     public:
+        static uint32 StaticClass() { return mStaticClass; };
+        virtual uint32 GetClass() { return mStaticClass; };
+
        /**
          * @brief Static function to allocate a new ellipse. Note: this is the proper way to allocate a new ellipse as we don't
          * use the constructor to set parameters because UOBJECTs must have empty constructors.
@@ -24,17 +26,17 @@ class ODYSSEYVECTOR_API UOdysseyVectorEllipse : public UOdysseyVectorPathCubic
          * @param iRadiusX radius on X axis
          * @param iRadiusY radius on Y axis
          */
-        static UOdysseyVectorEllipse* New( std::string iName, double iRadiusX, double iRadiusY );
+        static FOdysseyVectorEllipse* New( std::string iName, double iRadiusX, double iRadiusY );
 
        /**
          * @brief destructor.
          */
-        ~UOdysseyVectorEllipse();
+        ~FOdysseyVectorEllipse();
 
        /**
          * @brief constructor.
          */
-         UOdysseyVectorEllipse();
+         FOdysseyVectorEllipse();
 
        /**
          * @brief Init an ellipse.
@@ -73,7 +75,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorEllipse : public UOdysseyVectorPathCubic
          * @brief Convert this ellipse to cubic path.
          * @return a newly allocated cubic path that looks the same as this ellipse.
          */
-        UOdysseyVectorPathCubic* Convert();
+        FOdysseyVectorPathCubic* Convert();
 
        /**
          * @brief Get object type
@@ -86,7 +88,7 @@ class ODYSSEYVECTOR_API UOdysseyVectorEllipse : public UOdysseyVectorPathCubic
          * @brief Copy this ellipse (for copy-paste operations).
          * @return a newly allocated ellipse that looks the same as this ellipse.
          */
-        virtual UOdysseyVectorObject* CopyShape() override;
+        virtual FOdysseyVectorObject* CopyShape() override;
 
         virtual void DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags ) override;
         virtual bool PickShape( ::ULIS::FRectD& iRoi, uint32 iSelectionFlags ) override;

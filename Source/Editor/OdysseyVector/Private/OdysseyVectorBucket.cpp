@@ -27,7 +27,7 @@ MakeRects( double iWorldX, double iWorldY, ::ULIS::FRectD& oBucketRect, ::ULIS::
     oCrossRect.h = CROSSRADIUS * 2;
 }
 
-FOdysseyVectorBucket::FOdysseyVectorBucket( UOdysseyVectorObject& iParent, double iX, double iY )
+FOdysseyVectorBucket::FOdysseyVectorBucket( FOdysseyVectorObject& iParent, double iX, double iY )
     : mParent ( iParent )
     , mIsGradient ( false )
 {
@@ -234,7 +234,7 @@ FOdysseyVectorBucket::GetGradientRotationInDegrees()
     return acos(dot) / M_PI * 180.0f;
 }
 
-UOdysseyVectorObject&
+FOdysseyVectorObject&
 FOdysseyVectorBucket::GetParent()
 {
     return mParent;

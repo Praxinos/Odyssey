@@ -74,7 +74,7 @@ FOdysseyPainterEditorSelectedVectorObjectTab::OnSelectionChanged()
         {
             UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
 
-            mDetailsView->SetObject(currentVectorLayer->GetScene()->GetLastSelected());
+            //mDetailsView->SetObject(currentVectorLayer->GetScene()->GetLastSelected());
         }
     }
 }

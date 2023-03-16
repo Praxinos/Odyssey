@@ -468,16 +468,16 @@ FOdysseyPainterEditorGUI::ConvertToPath()
             UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
             FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
             // work on a copy to be able to remove the object from selection while iterating
-            std::list<UOdysseyVectorObject*> selectedObjectList = currentVectorLayer->GetScene()->GetSelectedObjectList();
+            std::list<FOdysseyVectorObject*> selectedObjectList = currentVectorLayer->GetScene()->GetSelectedObjectList();
 
-            for( std::list<UOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
+            for( std::list<FOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
             {
-                UOdysseyVectorObject* object = (*it);
-                UOdysseyVectorEllipse* circle = Cast<UOdysseyVectorEllipse>(object);
+                FOdysseyVectorObject* object = (*it);
+                FOdysseyVectorEllipse* circle = static_cast<FOdysseyVectorEllipse*>(object);
 
                 if( circle )
                 {
-                    UOdysseyVectorPathCubic* cubicPath = circle->Convert();
+                    FOdysseyVectorPathCubic* cubicPath = circle->Convert();
 
                     currentVectorLayer->GetScene()->Unselect( circle );
                     currentVectorLayer->GetScene()->RemoveChild( circle );
@@ -506,11 +506,11 @@ FOdysseyPainterEditorGUI::BringForward()
         {
             UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
             FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-            std::list<UOdysseyVectorObject*>& selectedObjectList = currentVectorLayer->GetScene()->GetSelectedObjectList();
+            std::list<FOdysseyVectorObject*>& selectedObjectList = currentVectorLayer->GetScene()->GetSelectedObjectList();
 
-            for( std::list<UOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
+            for( std::list<FOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
             {
-                UOdysseyVectorObject* object = (*it);
+                FOdysseyVectorObject* object = (*it);
 
                 object->MoveFront();
             }
@@ -532,11 +532,11 @@ FOdysseyPainterEditorGUI::SendBackward()
         {
             UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
             FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-            std::list<UOdysseyVectorObject*>& selectedObjectList = currentVectorLayer->GetScene()->GetSelectedObjectList();
+            std::list<FOdysseyVectorObject*>& selectedObjectList = currentVectorLayer->GetScene()->GetSelectedObjectList();
 
-            for( std::list<UOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
+            for( std::list<FOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
             {
-                UOdysseyVectorObject* object = (*it);
+                FOdysseyVectorObject* object = (*it);
 
                 object->MoveBack();
             }
@@ -558,17 +558,17 @@ FOdysseyPainterEditorGUI::Ungroup()
         {
             UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
             FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-            UOdysseyVectorObject* selectedObject = currentVectorLayer->GetScene()->GetLastSelected();
-            UOdysseyVectorGroup* group = Cast<UOdysseyVectorGroup>(selectedObject);
+            FOdysseyVectorObject* selectedObject = currentVectorLayer->GetScene()->GetLastSelected();
+            FOdysseyVectorGroup* group = static_cast<FOdysseyVectorGroup*>(selectedObject);
 
             if( group )
             {
                 // we work on a copy of the list to be able to delete children while iterating
-                std::list<UOdysseyVectorObject*> childrenList = group->GetChildrenList();
+                std::list<FOdysseyVectorObject*> childrenList = group->GetChildrenList();
 
-                for( std::list<UOdysseyVectorObject*>::iterator it = childrenList.begin(); it != childrenList.end(); ++it )
+                for( std::list<FOdysseyVectorObject*>::iterator it = childrenList.begin(); it != childrenList.end(); ++it )
                 {
-                    UOdysseyVectorObject* child = (*it);
+                    FOdysseyVectorObject* child = (*it);
 
                     group->RemoveChild( child );
                     child->SwitchSpace( *group->GetParent() );
@@ -600,29 +600,28 @@ FOdysseyPainterEditorGUI::GroupPaint()
             UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
 
             FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-            std::list<UOdysseyVectorObject*>& selectObjectList = currentVectorLayer->GetScene()->GetSelectedObjectList();
+            std::list<FOdysseyVectorObject*>& selectObjectList = currentVectorLayer->GetScene()->GetSelectedObjectList();
 
             if( selectObjectList.size() )
             {
-                UOdysseyVectorGroupPaint* paintGroup = NewObject<UOdysseyVectorGroupPaint>();
-                std::vector<UOdysseyVectorPath*> pathArray;
+                FOdysseyVectorGroupPaint* paintGroup = new FOdysseyVectorGroupPaint();
+                std::vector<FOdysseyVectorPath*> pathArray;
 
-                paintGroup = NewObject<UOdysseyVectorGroupPaint>();
                 currentVectorLayer->GetScene()->AppendChild( paintGroup );
                 paintGroup->UpdateMatrix();
 
-                for( std::list<UOdysseyVectorObject*>::iterator it = selectObjectList.begin(); it != selectObjectList.end(); ++it )
+                for( std::list<FOdysseyVectorObject*>::iterator it = selectObjectList.begin(); it != selectObjectList.end(); ++it )
                 {
-                    UOdysseyVectorObject* selectedObject = (*it);
+                    FOdysseyVectorObject* selectedObject = (*it);
 
-                    if( selectedObject->GetClass() == UOdysseyVectorGroupPaint::StaticClass() )
+                    if( selectedObject->GetClass() == FOdysseyVectorGroupPaint::StaticClass() )
                     {
-                        UOdysseyVectorGroupPaint* selectedPaintGroup = Cast<UOdysseyVectorGroupPaint>(selectedObject);
+                        FOdysseyVectorGroupPaint* selectedPaintGroup = static_cast<FOdysseyVectorGroupPaint*>(selectedObject);
                         
-                        for( std::list<UOdysseyVectorObject*>::iterator cit = selectedPaintGroup->GetChildrenList().begin(); cit != selectedPaintGroup->GetChildrenList().end(); ++cit )
+                        for( std::list<FOdysseyVectorObject*>::iterator cit = selectedPaintGroup->GetChildrenList().begin(); cit != selectedPaintGroup->GetChildrenList().end(); ++cit )
                         {
-                            UOdysseyVectorObject* childObject = (*cit);
-                            UOdysseyVectorPath* path = Cast<UOdysseyVectorPath>(childObject);
+                            FOdysseyVectorObject* childObject = (*cit);
+                            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(childObject);
 
                             if( path )
                             {
@@ -635,9 +634,9 @@ FOdysseyPainterEditorGUI::GroupPaint()
                         selectedPaintGroup->CopyBuckets( paintGroup );
                     }
 
-                    if( selectedObject->GetClass() == UOdysseyVectorPathCubic::StaticClass() )
+                    if( selectedObject->GetClass() == FOdysseyVectorPathCubic::StaticClass() )
                     {
-                        UOdysseyVectorPath* selectedPath = Cast<UOdysseyVectorPath>( selectedObject );
+                        FOdysseyVectorPath* selectedPath = static_cast<FOdysseyVectorPath*>( selectedObject );
 
                         pathArray.push_back( selectedPath );
                     }

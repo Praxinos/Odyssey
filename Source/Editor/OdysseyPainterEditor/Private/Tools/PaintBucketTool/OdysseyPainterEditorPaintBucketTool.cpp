@@ -195,13 +195,13 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseDownVector( UOdysseyTextureLayerIma
                                                        , const FOdysseyPoint& iPointInTexture
                                                        , const FKey& iKey )
 {
-    UOdysseyVectorObject* selectedObject = currentVectorLayer.GetScene()->GetLastSelected();
+    FOdysseyVectorObject* selectedObject = currentVectorLayer.GetScene()->GetLastSelected();
 
     if( selectedObject )
     {
-        if( selectedObject->GetClass() == UOdysseyVectorGroupPaint::StaticClass() )
+        if( selectedObject->GetClass() == FOdysseyVectorGroupPaint::StaticClass() )
         {
-            UOdysseyVectorGroupPaint* paintGroup = Cast<UOdysseyVectorGroupPaint>( selectedObject );
+            FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>( selectedObject );
             BLPoint localCoords = paintGroup->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
             FOdysseyVectorBucket* bucket = paintGroup->PickBucket( iPointInTexture.x, iPointInTexture.y ); 
             uint32 pickedArea = bucket ? bucket->Pick( iPointInTexture.x, iPointInTexture.y ) : 0;
@@ -270,11 +270,11 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseDragVector( UOdysseyTextureLayerIma
     if( mPickedBucketHandle )
     {
         FOdysseyVectorBucket* bucket = mPickedBucketHandle->GetParent();
-        UOdysseyVectorObject& object = bucket->GetParent();
+        FOdysseyVectorObject& object = bucket->GetParent();
 
-        if( object.GetClass() == UOdysseyVectorGroupPaint::StaticClass() )
+        if( object.GetClass() == FOdysseyVectorGroupPaint::StaticClass() )
         {
-            UOdysseyVectorGroupPaint* paintGroup = Cast<UOdysseyVectorGroupPaint>(&object);
+            FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(&object);
             BLPoint localCoords = paintGroup->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
             double difX = localCoords.x - mOldLocalMouseX
                  , difY = localCoords.y - mOldLocalMouseY;
@@ -290,11 +290,11 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseDragVector( UOdysseyTextureLayerIma
 
     if( mPickedBucket )
     {
-        UOdysseyVectorObject& object = mPickedBucket->GetParent();
+        FOdysseyVectorObject& object = mPickedBucket->GetParent();
 
-        if( object.GetClass() == UOdysseyVectorGroupPaint::StaticClass() )
+        if( object.GetClass() == FOdysseyVectorGroupPaint::StaticClass() )
         {
-            UOdysseyVectorGroupPaint* paintGroup = Cast<UOdysseyVectorGroupPaint>(&object);
+            FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(&object);
             BLPoint localCoords = paintGroup->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
             double difX = localCoords.x - mOldLocalMouseX
                  , difY = localCoords.y - mOldLocalMouseY;
@@ -336,13 +336,13 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseUpVector( UOdysseyTextureLayerImage
                                                      , const FOdysseyPoint& iPointInTexture
                                                      , const FKey& iKey )
 {
-    UOdysseyVectorObject* selectedObject = currentVectorLayer.GetScene()->GetLastSelected();
+    FOdysseyVectorObject* selectedObject = currentVectorLayer.GetScene()->GetLastSelected();
 
     if( selectedObject )
     {
-        if( selectedObject->GetClass() == UOdysseyVectorGroupPaint::StaticClass() )
+        if( selectedObject->GetClass() == FOdysseyVectorGroupPaint::StaticClass() )
         {
-            UOdysseyVectorGroupPaint* paintGroup = Cast<UOdysseyVectorGroupPaint>( selectedObject );
+            FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>( selectedObject );
             BLPoint localCoords = paintGroup->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
 
             if( mPickedBucket )

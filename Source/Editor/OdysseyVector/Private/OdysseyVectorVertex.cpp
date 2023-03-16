@@ -22,7 +22,7 @@ FOdysseyVectorVertex::New( double iX, double iY, double iRadius )
     return vertex;
 }
 
-UOdysseyVectorPath* 
+FOdysseyVectorPath* 
 FOdysseyVectorVertex::GetPath()
 {
     return mPath;
@@ -73,7 +73,7 @@ FOdysseyVectorVertex::Set( double iX, double iY )
 }
 
 void
-FOdysseyVectorVertex::SetPath( UOdysseyVectorPath* iPath )
+FOdysseyVectorVertex::SetPath( FOdysseyVectorPath* iPath )
 {
     mPath = iPath;
 }

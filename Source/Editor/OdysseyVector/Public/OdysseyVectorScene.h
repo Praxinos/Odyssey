@@ -9,41 +9,44 @@
 #include "OdysseyVectorObject.h"
 #include "OdysseyVectorGroup.h"
 
-#include "OdysseyVectorScene.generated.h"
+//#include "OdysseyVectorScene.generated.h"
 
 class FOdysseyVectorEngine;
 
-UCLASS()
-class ODYSSEYVECTOR_API UOdysseyVectorScene : public UOdysseyVectorObject
+class ODYSSEYVECTOR_API FOdysseyVectorScene : public FOdysseyVectorObject
 {
+    private:
+        static const uint32 mStaticClass = 0x60719e64; // value is crc32 FOdysseyVectorScene
+
     public:
-        GENERATED_BODY()
+        static uint32 StaticClass() { return mStaticClass; };
+        virtual uint32 GetClass() { return mStaticClass; };
 
     private:
         void UpdateShape( uint32 iUpdateFlags );
-        UOdysseyVectorObject* CopyShape();
+        FOdysseyVectorObject* CopyShape();
         FOdysseyVectorEngine* mEngine;
 
     protected:
-        std::list<UOdysseyVectorObject*> mSelectedObjectList;
-        std::list<UOdysseyVectorObject*> mInvalidatedObjectList;
+        std::list<FOdysseyVectorObject*> mSelectedObjectList;
+        std::list<FOdysseyVectorObject*> mInvalidatedObjectList;
 
     public:
-        ~UOdysseyVectorScene(){};
-        UOdysseyVectorScene(){};
+        ~FOdysseyVectorScene(){};
+        FOdysseyVectorScene(){};
         void Init( std::string iName );
-        void Select( UOdysseyVectorObject* iVecObj );
-        void Unselect( UOdysseyVectorObject* iVecObj );
+        void Select( FOdysseyVectorObject* iVecObj );
+        void Unselect( FOdysseyVectorObject* iVecObj );
         void ClearSelection();
-        UOdysseyVectorObject* GetLastSelected();
-        std::list<UOdysseyVectorObject*>& GetSelectedObjectList();
+        FOdysseyVectorObject* GetLastSelected();
+        std::list<FOdysseyVectorObject*>& GetSelectedObjectList();
         void DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags );
         bool PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags ) { return false; };
 
-        void InvalidateObject( UOdysseyVectorObject* iObject );
+        void InvalidateObject( FOdysseyVectorObject* iObject );
         void RemoveSelectedObjects();
 
-        UOdysseyVectorGroup* GroupSelectdObjects();
+        FOdysseyVectorGroup* GroupSelectdObjects();
         uint32 GetType();
 
         void SetEngine( FOdysseyVectorEngine* iEngine );

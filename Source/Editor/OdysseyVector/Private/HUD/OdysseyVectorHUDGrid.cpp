@@ -168,7 +168,7 @@ FOdysseyVectorHUDGrid::PickNodes( ::ULIS::FRectD& iWorldRect, std::vector<FGridN
 }
 
 void
-FOdysseyVectorHUDGrid::DrawSelectionRectangle( UOdysseyVectorScene& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags  )
+FOdysseyVectorHUDGrid::DrawSelectionRectangle( FOdysseyVectorScene& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags  )
 {
     BLContext* blctx = iScene.GetEngine()->GetBLContext();
 
@@ -198,7 +198,7 @@ FOdysseyVectorHUDGrid::DrawSelectionRectangle( UOdysseyVectorScene& iScene, ::UL
 }
 
 void
-FOdysseyVectorHUDGrid::Draw( UOdysseyVectorScene& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags )
+FOdysseyVectorHUDGrid::Draw( FOdysseyVectorScene& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
     BLContext* blctx = iScene.GetEngine()->GetBLContext();
 
@@ -237,7 +237,7 @@ FOdysseyVectorHUDGrid::Draw( UOdysseyVectorScene& iScene, ::ULIS::FRectD& iRoi, 
 }
 
 void
-FOdysseyVectorHUDGrid::MapPoint( UOdysseyVectorObject* iObject, FOdysseyVectorPoint* iPoint, double iSpaceX, double iSpaceY )
+FOdysseyVectorHUDGrid::MapPoint( FOdysseyVectorObject* iObject, FOdysseyVectorPoint* iPoint, double iSpaceX, double iSpaceY )
 {
     double paramX = iSpaceX / mSelectionBox.rect.w;
     double paramY = iSpaceY / mSelectionBox.rect.h;
@@ -252,27 +252,27 @@ FOdysseyVectorHUDGrid::MapPoint( UOdysseyVectorObject* iObject, FOdysseyVectorPo
 }
 
 void
-FOdysseyVectorHUDGrid::Map( UOdysseyVectorScene& iScene )
+FOdysseyVectorHUDGrid::Map( FOdysseyVectorScene& iScene )
 {
-    std::list<UOdysseyVectorObject*>& selectedObjectList = iScene.GetSelectedObjectList();
+    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene.GetSelectedObjectList();
 
-    for( std::list<UOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
+    for( std::list<FOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
     {
-        UOdysseyVectorObject *obj = (*it);
+        FOdysseyVectorObject *obj = (*it);
 
         MapObject( obj );
     }
 }
 
 void
-FOdysseyVectorHUDGrid::MapObject( UOdysseyVectorObject* iObject )
+FOdysseyVectorHUDGrid::MapObject( FOdysseyVectorObject* iObject )
 {
     BLMatrix2D& spaceMatrix = mSelectionBox.space->GetInverseWorldMatrix();
-    std::list<UOdysseyVectorObject*>& childrenList = iObject->GetChildrenList();
+    std::list<FOdysseyVectorObject*>& childrenList = iObject->GetChildrenList();
 
-    if( iObject->GetClass() == UOdysseyVectorGroupPaint::StaticClass() )
+    if( iObject->GetClass() == FOdysseyVectorGroupPaint::StaticClass() )
     {
-        UOdysseyVectorGroupPaint* paintGroup = Cast<UOdysseyVectorGroupPaint>(iObject);
+        FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(iObject);
         std::list<FOdysseyVectorBucket*>& bucketList = paintGroup->GetBucketList();
         BLMatrix2D conversionMatrix = spaceMatrix;
 
@@ -289,9 +289,9 @@ FOdysseyVectorHUDGrid::MapObject( UOdysseyVectorObject* iObject )
         }
     }
 
-    if( iObject->GetClass() == UOdysseyVectorPathCubic::StaticClass() )
+    if( iObject->GetClass() == FOdysseyVectorPathCubic::StaticClass() )
     {
-        UOdysseyVectorPathCubic* cubicPath = Cast<UOdysseyVectorPathCubic>(iObject);
+        FOdysseyVectorPathCubic* cubicPath = static_cast<FOdysseyVectorPathCubic*>(iObject);
         std::list<FOdysseyVectorVertex*>& vertexList = cubicPath->GetVertexList();
         std::list<FOdysseyVectorSegment*>& segmentList = cubicPath->GetSegmentList();
         BLMatrix2D conversionMatrix = spaceMatrix;
@@ -325,9 +325,9 @@ FOdysseyVectorHUDGrid::MapObject( UOdysseyVectorObject* iObject )
     }
 
     // Recurse
-    for( std::list<UOdysseyVectorObject*>::iterator it = childrenList.begin(); it != childrenList.end(); ++it )
+    for( std::list<FOdysseyVectorObject*>::iterator it = childrenList.begin(); it != childrenList.end(); ++it )
     {
-        UOdysseyVectorObject *child = (*it);
+        FOdysseyVectorObject *child = (*it);
 
         MapObject( child );
     }
@@ -396,7 +396,7 @@ FOdysseyVectorHUDGrid::MakeCells( uint32 iCellCountX, uint32 iCellCountY )
 }
 
 void
-FOdysseyVectorHUDGrid::MakeGrid( UOdysseyVectorScene& iScene, uint32 iCellCountX, uint32 iCellCountY )
+FOdysseyVectorHUDGrid::MakeGrid( FOdysseyVectorScene& iScene, uint32 iCellCountX, uint32 iCellCountY )
 {
     UpdateSelectionBox( iScene );
 
