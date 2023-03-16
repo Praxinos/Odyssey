@@ -273,12 +273,12 @@ FOdysseyVectorSegmentCubic::Sample( double iFromT
     ::ULIS::FVec2D& samplePoint0 = sampleSegment->GetVertex(0)->GetCoords( nullptr );
     ::ULIS::FVec2D& samplePoint1 = sampleSegment->GetVertex(1)->GetCoords( nullptr );
 
-    if( vertex0 != static_cast<FOdysseyVectorVertexCubic*>(mPoint[0]) )
+    if( vertex0 != static_cast<FOdysseyVectorVertexCubic*>( mPoint[0]) )
     {
         oNewVertexArray.push_back( vertex0 );
     }
 
-    if( vertex1 != static_cast<FOdysseyVectorVertexCubic*>(mPoint[1]) )
+    if( vertex1 != static_cast<FOdysseyVectorVertexCubic*>( mPoint[1]) )
     {
         oNewVertexArray.push_back( vertex1 );
     }

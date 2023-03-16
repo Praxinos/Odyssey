@@ -46,6 +46,8 @@ class ODYSSEYVECTOR_API UOdysseyVectorPathBuilder : public UOdysseyVectorObject
         uint32 RecordVertex( FOdysseyVectorPoint *iPoint, bool iEnforce );
         uint32 RecordSample( FOdysseyVectorPoint *iPoint, bool iEnforce );
         uint32 RecordPoint( FOdysseyVectorPoint *iPoint, bool iEnforce );
+        void ClearPoints();
+        void ClearSamples();
 
         /**
          * @brief Try to fit the cubic curve as close as possible to the sample links passed as parameter. EXPERIMENTAL

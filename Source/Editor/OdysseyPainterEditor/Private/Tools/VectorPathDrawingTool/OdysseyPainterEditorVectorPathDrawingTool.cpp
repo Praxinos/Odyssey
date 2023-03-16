@@ -202,9 +202,10 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDrag(const FOdysseyPoint& iPo
 
         currentPathBuilder->Record( newPoint, false );
 
-        ::ULIS::FRectI redrawRegion = GetInvalidationAreaFromPointer( iPointInTexture.x, iPointInTexture.y, Radius );
-
-        redrawRegion = redrawRegion | RectangleDtoI( mPreviousVertex->GetBoundingBox( true ) );
+        ::ULIS::FRectI redrawRegion = GetInvalidationAreaFromPointer( iPointInTexture.x
+                                                                    , iPointInTexture.y
+                                                                    , Radius )
+                                    | RectangleDtoI( mPreviousVertex->GetBoundingBox( true ) );
 
         currentVectorLayer->GetScene()->Update( UOdysseyVectorObject::FREQUENTUPDATES
                                               | UOdysseyVectorObject::KEEPINVALIDATED );
