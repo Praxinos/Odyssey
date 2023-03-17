@@ -36,6 +36,18 @@ FOdysseyVectorLink::New(  FOdysseyVectorPoint* iPoint0
     return link;
 }
 
+void
+FOdysseyVectorLink::SetPoint0( FOdysseyVectorPoint* iPoint )
+{
+    mPoint[0] = iPoint;
+}
+
+void
+FOdysseyVectorLink::SetPoint1( FOdysseyVectorPoint* iPoint )
+{
+    mPoint[1] = iPoint;
+}
+
 FOdysseyVectorPoint*
 FOdysseyVectorLink::GetPoint( int iPointNum )
 {

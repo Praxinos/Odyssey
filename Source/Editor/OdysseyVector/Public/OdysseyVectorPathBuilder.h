@@ -26,11 +26,16 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathBuilder : public FOdysseyVectorObject
         double mCumulAngle;
         double mCumulAngleLimit;
         double mLastCubicAngleLimit;
+        uint32 mPointID;
+
+        std::vector<FOdysseyVectorPoint> mPointBuffer;
+        std::vector<FOdysseyVectorPoint> mSampleBuffer;
+        std::vector<FOdysseyVectorLink> mLinkBuffer;
+
         std::vector<FOdysseyVectorPoint*> mSampleArray;
         std::vector<FOdysseyVectorPoint*> mPointArray;
-        std::vector<FOdysseyVectorLink> mSampleLinkArray;
-        FOdysseyVectorVertexCubic* mInitialVertex;
-        FOdysseyVectorVertexCubic* mFinalVertex;
+        std::vector<FOdysseyVectorVertexCubic*> mVertexArray;
+
         FOdysseyVectorPathCubic* mCubicPath;
         FOdysseyVectorSegmentCubic* mCubicSegment;
 
@@ -46,11 +51,13 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathBuilder : public FOdysseyVectorObject
         void UpdateShape( uint32 iUpdateFlags ) {};
 
         double GetSampleAngle();
-        uint32 RecordVertex( FOdysseyVectorPoint *iPoint, bool iEnforce );
-        uint32 RecordSample( FOdysseyVectorPoint *iPoint, bool iEnforce );
-        uint32 RecordPoint( FOdysseyVectorPoint *iPoint, bool iEnforce );
-        void ClearPoints();
-        void ClearSamples();
+
+        uint32 RecordVertex( double iX, double iY, double iRadius, uint32 iID );
+        uint32 RecordSample( double iX, double iY, double iRadius, uint32 iID );
+        uint32 RecordPoint( double iX, double iY, double iRadius, uint32 iID );
+
+        void ClearPointsUntil( uint32 iID );
+        void ClearSamplesUntil( uint32 iID );
 
         /**
          * @brief Try to fit the cubic curve as close as possible to the sample links passed as parameter. EXPERIMENTAL
@@ -106,5 +113,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathBuilder : public FOdysseyVectorObject
          */
         FOdysseyVectorPathCubic* GetCubicPath( );
 
-        void Record( FOdysseyVectorPoint *iPoint, bool iEnforce );
+        void RecordStart( FOdysseyVectorVertexCubic *iVertex );
+        void RecordIntermediate( double iX, double iY, double iRadius );
+        void RecordEnd( FOdysseyVectorVertexCubic *iVertex );
 };

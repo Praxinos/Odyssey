@@ -28,6 +28,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorLink
 
         ::ULIS::FVec2D GetVector( bool iNormalize );
         FOdysseyVectorPoint* GetPoint( int iPointNum );
+        void SetPoint0( FOdysseyVectorPoint* iPoint );
+        void SetPoint1( FOdysseyVectorPoint* iPoint );
         virtual ::ULIS::FVec2D GetPointAt( double t );
         double GetStraightDistance();
 };
