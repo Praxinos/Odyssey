@@ -77,19 +77,24 @@ FOdysseyVectorPathBuilder::GetSampleAngle()
 */
 
 uint32
-FOdysseyVectorPathBuilder::RecordVertex( double iX, double iY, double iRadius, uint32 iID )
+FOdysseyVectorPathBuilder::RecordVertex()
 {
-    double angle = GetSampleAngle();
     uint32 ret = 0;
+    double angle = GetSampleAngle();
 
     mCumulAngle += angle;
 
     if ( ( angle >= mLastCubicAngleLimit ) || ( mCumulAngle >= mCumulAngleLimit ) )
     {
-        FOdysseyVectorVertexCubic* cubicVertex = FOdysseyVectorVertexCubic::New( iX, iY, iRadius );
         FOdysseyVectorVertexCubic* previousCubicVertex = mVertexArray.back();
+        // use the penultimate sample
+        uint32 penultimateSampleIndex = mSampleArray.size() - 2;
+        uint32 penultimateSampleID = mSampleArray[penultimateSampleIndex]->GetID();
+        FOdysseyVectorVertexCubic* cubicVertex = FOdysseyVectorVertexCubic::New( mSampleArray[penultimateSampleIndex]->GetX()
+                                                                               , mSampleArray[penultimateSampleIndex]->GetY()
+                                                                               , mSampleArray[penultimateSampleIndex]->GetRadius() );
 
-        cubicVertex->SetID( iID );
+        cubicVertex->SetID( penultimateSampleID );
 
         mVertexArray.push_back( cubicVertex );
 
@@ -120,7 +125,6 @@ FOdysseyVectorPathBuilder::RecordVertex( double iX, double iY, double iRadius, u
 uint32
 FOdysseyVectorPathBuilder::RecordSample( double iX, double iY, double iRadius, uint32 iID )
 {
-
     FOdysseyVectorPoint* previousSample = mSampleArray.back();
     ::ULIS::FVec2D dif = { iX - previousSample->GetX(), iY - previousSample->GetY() };
     double length = dif.Distance();
@@ -138,10 +142,10 @@ FOdysseyVectorPathBuilder::RecordSample( double iX, double iY, double iRadius, u
         mSampleArray.push_back( &mSampleBuffer[sampleIndex] );
         mLinkBuffer.push_back( FOdysseyVectorLink( previousSample, &mSampleBuffer[sampleIndex] ) );
 
-        ret |= FOdysseyVectorPathBuilder::NEWSAMPLE;
+        ret |= ( FOdysseyVectorPathBuilder::NEWSAMPLE | RecordVertex() );
     }
 
-    return ret | RecordVertex( iX, iY, iRadius, iID );
+    return ret;
 }
 
 uint32
@@ -162,23 +166,23 @@ FOdysseyVectorPathBuilder::RecordPoint( double iX, double iY, double iRadius, ui
 void
 FOdysseyVectorPathBuilder::ClearPointsUntil( uint32 iID )
 {
-    std::vector<FOdysseyVectorPoint> cleanedBuffer;
+    int bufferSize = mPointBuffer.size();
     int rank = -1;
-
-cleanedBuffer.reserve(50);
-
-    mPointArray.clear();
+    int i, j;
 
     while( mPointBuffer[++rank].GetID() != iID );
 
-    for( int i = rank; i < mPointBuffer.size(); i++ )
+    for( i = rank, j = 0; i < bufferSize; i++, j++ )
     {
-        cleanedBuffer.push_back( mPointBuffer[i] );
+        mPointBuffer[j] = mPointBuffer[i];
     }
 
-    mPointBuffer = cleanedBuffer;
+    mPointBuffer.resize( j );
 
-    for( int i = rank; i < mPointBuffer.size(); i++ )
+    // recreate pointers
+    mPointArray.clear();
+
+    for( i = rank; i < mPointBuffer.size(); i++ )
     {
         mPointArray.push_back( &mPointBuffer[i] );
     }
@@ -187,23 +191,23 @@ cleanedBuffer.reserve(50);
 void
 FOdysseyVectorPathBuilder::ClearSamplesUntil( uint32 iID )
 {
-    std::vector<FOdysseyVectorPoint> cleanedBuffer;
+    int bufferSize = mSampleBuffer.size();
     int rank = -1;
-
-cleanedBuffer.reserve(50);
-
-    mSampleArray.clear();
+    int i, j;
 
     while( mSampleBuffer[++rank].GetID() != iID );
-//UE_LOG(LogTemp, Warning, TEXT("Some warning message %d/%d"), rank, mSampleBuffer.size() );
-    for( int i = rank; i < mSampleBuffer.size(); i++ )
+
+    for( i = rank, j = 0; i < bufferSize; i++, j++ )
     {
-        cleanedBuffer.push_back( mSampleBuffer[i] );
+        mSampleBuffer[j] = mSampleBuffer[i];
     }
 
-    mSampleBuffer = cleanedBuffer;
+    mSampleBuffer.resize( j );
 
-    for( int i = 0; i < mSampleBuffer.size(); i++ )
+    // recreate pointers
+    mSampleArray.clear();
+
+    for( i = 0; i < mSampleBuffer.size(); i++ )
     {
         mSampleArray.push_back( &mSampleBuffer[i] );
     }
@@ -211,7 +215,7 @@ cleanedBuffer.reserve(50);
     // recreate links
     mLinkBuffer.clear();
 
-    for( int i = 0; i < mSampleArray.size(); i++ )
+    for( i = 0; i < mSampleArray.size() - 1; i++ )
     {
        int n = i + 1;
        FOdysseyVectorLink link = FOdysseyVectorLink( mSampleArray[i], mSampleArray[n] );
@@ -264,7 +268,19 @@ FOdysseyVectorPathBuilder::RecordIntermediate( double iX, double iY, double iRad
 void
 FOdysseyVectorPathBuilder::RecordEnd( FOdysseyVectorVertexCubic *iVertex )
 {
+    uint32 linkID0 =  0;
+    uint32 linkID1 =  mLinkBuffer.size() - 1; // last link
 
+    mCubicSegment = FOdysseyVectorSegmentCubic::New( mCubicPath, mVertexArray.back(), iVertex );
+
+    Shape ( *mCubicSegment
+           , mLinkBuffer[linkID0].GetVector( true )
+           , mLinkBuffer[linkID1].GetVector( true ) );
+
+    Adjust( *mCubicSegment );
+
+    mCubicPath->AddSegment( mCubicSegment );
+    mCubicSegment->Invalidate();
 }
 
 FOdysseyVectorObject*

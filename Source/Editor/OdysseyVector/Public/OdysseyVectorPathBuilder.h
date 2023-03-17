@@ -52,7 +52,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathBuilder : public FOdysseyVectorObject
 
         double GetSampleAngle();
 
-        uint32 RecordVertex( double iX, double iY, double iRadius, uint32 iID );
+        uint32 RecordVertex();
         uint32 RecordSample( double iX, double iY, double iRadius, uint32 iID );
         uint32 RecordPoint( double iX, double iY, double iRadius, uint32 iID );
 
