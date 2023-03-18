@@ -25,7 +25,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathBuilder : public FOdysseyVectorObject
     private:
         double mCumulAngle;
         double mCumulAngleLimit;
-        double mLastCubicAngleLimit;
+        double mAngleLimit;
+        double mSmoothLimit;
         uint32 mPointID;
 
         std::vector<FOdysseyVectorPoint> mPointBuffer;
@@ -114,6 +115,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathBuilder : public FOdysseyVectorObject
         FOdysseyVectorPathCubic* GetCubicPath( );
 
         void RecordStart( FOdysseyVectorVertexCubic *iVertex );
-        void RecordIntermediate( double iX, double iY, double iRadius );
+        FOdysseyVectorVertexCubic* RecordIntermediate( double iX, double iY, double iRadius );
         void RecordEnd( FOdysseyVectorVertexCubic *iVertex );
 };

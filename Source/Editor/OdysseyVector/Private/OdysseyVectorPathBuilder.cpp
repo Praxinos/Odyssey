@@ -10,7 +10,8 @@ FOdysseyVectorPathBuilder::FOdysseyVectorPathBuilder()
     , mCumulAngle ( 0.0f )
     , mPointID( 0 )
     , mCumulAngleLimit ( 1.5708f ) // 90 degrees
-    , mLastCubicAngleLimit ( 1.0472f ) // 60 deg
+    , mAngleLimit ( 1.0472f ) // 60 deg
+    , mSmoothLimit ( 0.261799f ) // 15 deg
 {
     mObjectParam.Foreground.R = 128;
     mObjectParam.Foreground.G = 128;
@@ -84,7 +85,7 @@ FOdysseyVectorPathBuilder::RecordVertex()
 
     mCumulAngle += angle;
 
-    if ( ( angle >= mLastCubicAngleLimit ) || ( mCumulAngle >= mCumulAngleLimit ) )
+    if ( ( angle >= mAngleLimit ) || ( mCumulAngle >= mCumulAngleLimit ) )
     {
         FOdysseyVectorVertexCubic* previousCubicVertex = mVertexArray.back();
         // use the penultimate sample
@@ -98,13 +99,15 @@ FOdysseyVectorPathBuilder::RecordVertex()
 
         mVertexArray.push_back( cubicVertex );
 
+        mCubicPath->AddVertex( mVertexArray.back() );
+
         ret |= FOdysseyVectorPathBuilder::NEWVERTEX;
 
         if( mLinkBuffer.size() >= 2 )
         {
             uint32 linkID0 =  0;
             uint32 linkID1 =  mLinkBuffer.size() - 2; // penultimate link
-
+/// TODO: Factorize that part
             mCubicSegment = FOdysseyVectorSegmentCubic::New( mCubicPath, previousCubicVertex, cubicVertex );
 
             Shape ( *mCubicSegment
@@ -112,6 +115,15 @@ FOdysseyVectorPathBuilder::RecordVertex()
                    , mLinkBuffer[linkID1].GetVector( true ) );
 
             Adjust( *mCubicSegment );
+
+            mCubicPath->AddSegment( mCubicSegment );
+
+            mCubicSegment->Smooth( mSmoothLimit );
+
+            mCubicSegment->Invalidate();
+
+            mCubicPath->Update( 0 );
+/// end TODO
 
             ret |= FOdysseyVectorPathBuilder::NEWSEGMENT;
         }
@@ -241,7 +253,7 @@ FOdysseyVectorPathBuilder::RecordStart( FOdysseyVectorVertexCubic *iVertex )
     mPointID++;
 }
 
-void
+FOdysseyVectorVertexCubic*
 FOdysseyVectorPathBuilder::RecordIntermediate( double iX, double iY, double iRadius )
 {
     uint32 ret = RecordPoint( iX, iY, iRadius, mPointID++ );
@@ -253,34 +265,43 @@ FOdysseyVectorPathBuilder::RecordIntermediate( double iX, double iY, double iRad
 
     if( ret & FOdysseyVectorPathBuilder::NEWVERTEX )
     {
-        mCubicPath->AddVertex( mVertexArray.back() );
-
         ClearSamplesUntil( mVertexArray.back()->GetID() );
     }
 
-    if( ret & FOdysseyVectorPathBuilder::NEWSEGMENT )
+    /*if( ret & FOdysseyVectorPathBuilder::NEWSEGMENT )
     {
-        mCubicPath->AddSegment( mCubicSegment );
         mCubicSegment->Invalidate();
-    }
+    }*/
+
+    return mVertexArray.back();
 }
 
 void
 FOdysseyVectorPathBuilder::RecordEnd( FOdysseyVectorVertexCubic *iVertex )
 {
-    uint32 linkID0 =  0;
-    uint32 linkID1 =  mLinkBuffer.size() - 1; // last link
+    if( iVertex != mVertexArray.back() )
+    {
+        uint32 linkID0 =  0;
+        uint32 linkID1 =  mLinkBuffer.size() - 1; // last link
 
-    mCubicSegment = FOdysseyVectorSegmentCubic::New( mCubicPath, mVertexArray.back(), iVertex );
+    /// TODO: Factorize that part
+        mCubicSegment = FOdysseyVectorSegmentCubic::New( mCubicPath, mVertexArray.back(), iVertex );
 
-    Shape ( *mCubicSegment
-           , mLinkBuffer[linkID0].GetVector( true )
-           , mLinkBuffer[linkID1].GetVector( true ) );
+        Shape ( *mCubicSegment
+               , mLinkBuffer[linkID0].GetVector( true )
+               , mLinkBuffer[linkID1].GetVector( true ) );
 
-    Adjust( *mCubicSegment );
+        Adjust( *mCubicSegment );
 
-    mCubicPath->AddSegment( mCubicSegment );
-    mCubicSegment->Invalidate();
+        mCubicPath->AddSegment( mCubicSegment );
+
+        mCubicSegment->Smooth( mSmoothLimit );
+
+        mCubicSegment->Invalidate();
+
+        mCubicPath->Update( 0 );
+    /// end TODO
+    }
 }
 
 FOdysseyVectorObject*

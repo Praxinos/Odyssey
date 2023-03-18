@@ -62,6 +62,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
         virtual ~FOdysseyVectorSegmentCubic();
          FOdysseyVectorSegmentCubic();
 
+        void Smooth( double iLimitAngleInRadians );
+
        /**
          * @brief Init a cubic segment.
          * @param iPath the path this segment belongs to

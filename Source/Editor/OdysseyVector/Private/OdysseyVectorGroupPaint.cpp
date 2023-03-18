@@ -15,6 +15,7 @@ FOdysseyVectorGroupPaint::FOdysseyVectorGroupPaint()
     mIntersectionVertexArray.reserve( 60 );
 
     mGroupPaintParam.Tolerance = 0.0f;
+    mGroupPaintParam.Realtime = false;
 }
 
 uint32

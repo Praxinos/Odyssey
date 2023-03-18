@@ -36,6 +36,71 @@ FOdysseyVectorSegmentCubic::Init( FOdysseyVectorPathCubic* iPath
     Init( iPath, iPoint0, iPoint0->GetX(), iPoint0->GetY(), iPoint1->GetX(), iPoint1->GetY(), iPoint1 );
 }
 
+void
+FOdysseyVectorSegmentCubic::Smooth( double iLimitAngleInRadians )
+{
+    FOdysseyVectorVertexCubic* vertex0 = static_cast<FOdysseyVectorVertexCubic*>(GetVertex(0));
+    FOdysseyVectorVertexCubic* vertex1 = static_cast<FOdysseyVectorVertexCubic*>(GetVertex(1));
+    FOdysseyVectorHandleSegment* handle0 = static_cast<FOdysseyVectorHandleSegment*>(GetHandle(0));
+    FOdysseyVectorHandleSegment* handle1 = static_cast<FOdysseyVectorHandleSegment*>(GetHandle(1));
+    FOdysseyVectorSegmentCubic* neighbour0 = static_cast<FOdysseyVectorSegmentCubic*>(GetVertex(0)->GetOtherSegment( static_cast<FOdysseyVectorSegment*>(this) ));
+    FOdysseyVectorSegmentCubic* neighbour1 = static_cast<FOdysseyVectorSegmentCubic*>(GetVertex(1)->GetOtherSegment( static_cast<FOdysseyVectorSegment*>(this) ));
+    ::ULIS::FVec2D v0v1 = vertex1->GetCoords( nullptr ) - vertex0->GetCoords( nullptr );
+    double length = this->GetStraightDistance();
+
+    if( neighbour0 )
+    {
+        uint32_t neighbour0VertexIndex = ( neighbour0->GetVertex(0) == vertex0 ) ? 0 : 1;
+        ::ULIS::FVec2D& neighbour0Point = neighbour0->GetVertex(neighbour0VertexIndex)->GetCoords( nullptr );
+        ::ULIS::FVec2D& neighbour0Handle = neighbour0->GetHandle(neighbour0VertexIndex)->GetCoords();
+        ::ULIS::FVec2D neighbour0Vec = neighbour0Handle - neighbour0Point;
+
+        if( neighbour0Vec.DistanceSquared() )
+        {
+            double angle;
+
+            neighbour0Vec.Normalize();
+
+            angle = acos( ULIS::FMath::Clamp<double>( neighbour0Vec.DotProduct( -v0v1 ), -1.0f, 1.0f ) );
+
+            if( fabs(angle) < iLimitAngleInRadians )
+            {
+                ::ULIS::FVec2D handleVec = handle1->GetCoords() - vertex1->GetCoords( nullptr );
+                double distance = handleVec.Distance();
+
+                handle0->Set( vertex0->GetX() - ( neighbour0Vec.x * distance )
+                            , vertex0->GetY() - ( neighbour0Vec.y * distance ) );
+            }
+        }
+    }
+
+    if( neighbour1 )
+    {
+        uint32_t neighbour1VertexIndex = ( neighbour1->GetVertex(0) == vertex0 ) ? 0 : 1;
+        ::ULIS::FVec2D& neighbour1Point = neighbour1->GetVertex(neighbour1VertexIndex)->GetCoords( nullptr );
+        ::ULIS::FVec2D& neighbour1Handle = neighbour1->GetHandle(neighbour1VertexIndex)->GetCoords();
+        ::ULIS::FVec2D neighbour1Vec = neighbour1Handle - neighbour1Point;
+
+        if( neighbour1Vec.DistanceSquared() )
+        {
+            double angle;
+
+            neighbour1Vec.Normalize();
+
+            angle = acos( ULIS::FMath::Clamp<double>( neighbour1Vec.DotProduct( v0v1 ), -1.0f, 1.0f ) );
+
+            if( fabs(angle) < iLimitAngleInRadians )
+            {
+                ::ULIS::FVec2D handleVec = handle1->GetCoords() - vertex1->GetCoords( nullptr );
+                double distance = handleVec.Distance();
+
+                handle1->Set( vertex1->GetX() - ( neighbour1Vec.x * distance )
+                            , vertex1->GetY() - ( neighbour1Vec.y * distance ) );
+            }
+        }
+    }
+}
+
 //static
 FOdysseyVectorSegmentCubic* 
 FOdysseyVectorSegmentCubic::New( FOdysseyVectorPathCubic* iPath

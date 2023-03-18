@@ -260,16 +260,26 @@ FOdysseyVectorVertex::HasSegment( FOdysseyVectorSegment* iSegment )
 FOdysseyVectorVertex::GetBoundingBox( bool iWorld )
 {
     ::ULIS::FRectD bbox = { 0, 0, 0, 0 };
-    bool inited = false;
+
+    if( iWorld )
+    {
+        BLPoint pt = GetPath()->GetWorldMatrix().mapPoint( mCoords.x, mCoords.y );
+
+        bbox.x = pt.x;
+        bbox.y = pt.y;
+    }
+    else
+    {
+        bbox.x = mCoords.x;
+        bbox.y = mCoords.y;
+    }
 
     for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
     {
         FOdysseyVectorSegment* segment = static_cast<FOdysseyVectorSegment*>(*it);
         ::ULIS::FRectD rect = segment->GetBoundingBox( iWorld );
 
-        bbox = ( inited == false ) ? rect : bbox | rect;
-
-        inited = true;
+        bbox = bbox | rect;
     }
 
     return bbox;
@@ -334,6 +344,22 @@ FOdysseyVectorVertex::GetOtherSection( FOdysseyVectorSection* iSection )
             {
                 return otherSection;
             }
+        }
+    }
+
+    return nullptr;
+}
+
+FOdysseyVectorSegment*
+FOdysseyVectorVertex::GetOtherSegment( FOdysseyVectorSegment* iSegment )
+{
+    for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
+    {
+        FOdysseyVectorSegment* otherSegment = static_cast<FOdysseyVectorSegment*>(*it);
+
+        if( otherSegment != iSegment )
+        {
+            return otherSegment;
         }
     }
 

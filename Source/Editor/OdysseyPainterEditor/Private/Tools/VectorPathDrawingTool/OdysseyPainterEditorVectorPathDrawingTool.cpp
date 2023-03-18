@@ -198,15 +198,18 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDrag(const FOdysseyPoint& iPo
         BLPoint localCoords = cubicPath->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
         float radius =  iPointInTexture.pressure * Radius;
         float roundedUpRadius = ceil (radius);
+        FOdysseyVectorVertexCubic* nextVertex;
 
-        currentPathBuilder->RecordIntermediate( localCoords.x, localCoords.y, radius );
+        nextVertex = currentPathBuilder->RecordIntermediate( localCoords.x, localCoords.y, radius );
+
+        currentVectorLayer->GetScene()->Update( 0 );
 
         ::ULIS::FRectI redrawRegion = GetInvalidationAreaFromPointer( iPointInTexture.x
                                                                     , iPointInTexture.y
                                                                     , Radius )
                                     | RectangleDtoI( mPreviousVertex->GetBoundingBox( true ) );
 
-        currentVectorLayer->GetScene()->Update( 0 );
+        mPreviousVertex = nextVertex;
 
         redrawRegion.Sanitize();
         redrawRegion = redrawRegion & layerStack->GetSurface()->Block()->Rect();
