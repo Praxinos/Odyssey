@@ -6,9 +6,16 @@ FOdysseyVectorSegment::~FOdysseyVectorSegment()
 
 FOdysseyVectorSegment::FOdysseyVectorSegment()
     : FOdysseyVectorLink ()
+    , mIsInvalidated( false )
     , mPath ( nullptr )
 {
 
+}
+
+FOdysseyVectorVertex*
+FOdysseyVectorSegment::GetOtherVertex( FOdysseyVectorVertex* iVertex )
+{
+    return ( iVertex == GetVertex(0) ) ? GetVertex(1) : GetVertex(0);
 }
 
 ::ULIS::FVec2D
@@ -180,15 +187,24 @@ FOdysseyVectorSegment::ClearIntersections ( )
     AddSection ( new FOdysseyVectorSection ( this, GetVertex(0), GetVertex(1) ) );
 }
 
+bool
+FOdysseyVectorSegment::IsInvalidated()
+{
+    return mIsInvalidated;
+}
+
 void
 FOdysseyVectorSegment::Invalidate()
 {
-    for( std::list<FOdysseyVectorVertexIntersection*>::iterator it = mIntersectionVertexList.begin(); it != mIntersectionVertexList.end(); ++it )
-    {
-        FOdysseyVectorVertexIntersection* intersectionVertex = static_cast<FOdysseyVectorVertexIntersection*>(*it);
-    }
-
     mPath->InvalidateSegment( this );
+
+    mIsInvalidated = true;
+}
+
+void
+FOdysseyVectorSegment::Update()
+{
+    mIsInvalidated = false;
 }
 
 std::list<FOdysseyVectorVertexIntersection*>&

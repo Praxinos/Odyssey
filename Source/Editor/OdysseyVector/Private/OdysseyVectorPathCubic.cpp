@@ -6,6 +6,17 @@ FOdysseyVectorPathCubic::FOdysseyVectorPathCubic()
 
 }
 
+bool
+FOdysseyVectorPathCubic::HasBaseClass( uint32 iBaseClassID )
+{
+    if( mStaticClass == iBaseClassID )
+    {
+        return true;
+    }
+
+    return FOdysseyVectorPath::HasBaseClass( iBaseClassID );
+}
+
 void
 FOdysseyVectorPathCubic::Init( std::string iName )
 {
@@ -227,8 +238,10 @@ FOdysseyVectorPathCubic::Erase( ::ULIS::FRectD &iRoi )
 
         this->AddSegment( newSegmentArray[i] );
 
-        newSegmentArray[i]->Update();
+        newSegmentArray[i]->Invalidate();
     }
+
+    Invalidate();
 
     return ( mSegmentList.size() == 0 ) ? true : false;
 }
@@ -412,20 +425,19 @@ FOdysseyVectorPathCubic::Fill( ::ULIS::FRectD& iRoi )
     FOdysseyVectorVertexCubic *firstVertex = static_cast<FOdysseyVectorVertexCubic*>( GetFirstVertex() );
 
 
-    if ( /*IsLoop() &&*/ firstVertex )
+    if ( firstVertex )
     {
         BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
         BLPath path;
-        BLRgba32 fillColor;
+        BLRgba32 blFillColor;
+        FColor& fillColor = mFillBucket.GetColor();
 
-        fillColor.r = mObjectParam.Background.R;
-        fillColor.g = mObjectParam.Background.G;
-        fillColor.b = mObjectParam.Background.B;
-        fillColor.a = mObjectParam.Background.A;
+        blFillColor.r = fillColor.R;
+        blFillColor.g = fillColor.G;
+        blFillColor.b = fillColor.B;
+        blFillColor.a = fillColor.A;
 
         blctx->setCompOp( BL_COMP_OP_SRC_COPY );
-        /*iBLContext.setFillStyle(BLRgba32(0xFFFFFFFF));
-        iBLContext.setStrokeStyle(BLRgba32(0xFF000000));*/
 
         path.moveTo( firstVertex->GetX(), firstVertex->GetY() );
 
@@ -445,7 +457,7 @@ FOdysseyVectorPathCubic::Fill( ::ULIS::FRectD& iRoi )
                         , point1.y );
         }
 
-        blctx->setFillStyle( fillColor );
+        blctx->setFillStyle( blFillColor );
         blctx->fillPath( path );
     }
 }
@@ -453,6 +465,7 @@ FOdysseyVectorPathCubic::Fill( ::ULIS::FRectD& iRoi )
 void
 FOdysseyVectorPathCubic::DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags )
 {
+
     if ( mPathParam.Filled )
     {
         Fill( iRoi );

@@ -1,5 +1,15 @@
 #include "OdysseyVectorScene.h"
 
+FOdysseyVectorScene::~FOdysseyVectorScene()
+{
+
+}
+
+FOdysseyVectorScene::FOdysseyVectorScene()
+{
+    mFillBucket.SetColor( 0, 0, 0, 0 );
+}
+
 void FOdysseyVectorScene::Init( std::string iName )
 {
     SetName( iName );
@@ -119,7 +129,35 @@ FOdysseyVectorScene::GetSelectedObjectList()
 void
 FOdysseyVectorScene::DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
+    BLContext* blctx = GetEngine()->GetBLContext();
+    static ::ULIS::FRectD zeroRectangle; // static variables are always zeroed by default
+    BLRgba32 blFillColor;
+    FColor& fillColor = mFillBucket.GetColor();
 
+    blctx->setCompOp( BL_COMP_OP_SRC_COPY );
+
+    // Note: Blend2D color format is 0xAARRGGBB
+    blFillColor.r = fillColor.B;
+    blFillColor.g = fillColor.G;
+    blFillColor.b = fillColor.R;
+    blFillColor.a = fillColor.A;
+
+    blctx->setFillStyle( blFillColor );
+
+    if ( iRoi != zeroRectangle )
+    {
+        blctx->fillRect( iRoi.x, iRoi.y, iRoi.w, iRoi.h );
+
+        // view the updated zone ( testing purpose only )
+        /*blctx.setStrokeStyle(BLRgba32(0xFFFF0000));
+        blctx.setStrokeWidth(1.0f);
+        blctx.strokeRect( mRoi.x, mRoi.y, mRoi.w, mRoi.h );*/
+    }
+    else
+    {
+        blctx->fillAll();
+        //blctx.clearAll();
+    }
 }
 
 void

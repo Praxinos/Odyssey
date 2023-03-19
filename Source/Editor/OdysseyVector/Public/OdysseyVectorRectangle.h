@@ -8,7 +8,7 @@
 
 //#include "OdysseyVectorRectangle.generated.h"
 
-class ODYSSEYVECTOR_API FOdysseyVectorRectangle : public FOdysseyVectorObject
+class ODYSSEYVECTOR_API FOdysseyVectorRectangle : public FOdysseyVectorPath
 {
     private:
         static const uint32 mStaticClass = 0x9ee34077; // value is crc32 FOdysseyVectorRectangle
@@ -16,6 +16,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorRectangle : public FOdysseyVectorObject
     public:
         static uint32 StaticClass() { return mStaticClass; };
         virtual uint32 GetClass() { return mStaticClass; };
+
+        bool HasBaseClass( uint32 iBaseClassID );
 
     private:
         void DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags );

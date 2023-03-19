@@ -16,7 +16,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorHandleBucket : public FOdysseyVectorHandle
         static FOdysseyVectorHandleBucket* New( FOdysseyVectorBucket* iParentBucket );
 
         ~FOdysseyVectorHandleBucket();
-        FOdysseyVectorHandleBucket();
+        FOdysseyVectorHandleBucket( FOdysseyVectorBucket* iParentBucket );
         FOdysseyVectorBucket* GetParent();
 
         void Init( FOdysseyVectorBucket* iParentBucket );

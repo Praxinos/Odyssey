@@ -29,6 +29,7 @@ MakeRects( double iWorldX, double iWorldY, ::ULIS::FRectD& oBucketRect, ::ULIS::
 
 FOdysseyVectorBucket::FOdysseyVectorBucket( FOdysseyVectorObject& iParent, double iX, double iY )
     : mParent ( iParent )
+    , mCtrlPoint ( this )
     , mIsGradient ( false )
 {
     mCtrlPoint.Set( HANDLEDISTANCE, 0.0f );
@@ -80,12 +81,30 @@ FOdysseyVectorBucket::SetGradientColor1( uint8 iR1, uint8 iG1, uint8 iB1, uint8 
 }
 
 void
+FOdysseyVectorBucket::SetGradientColor0( FColor& iColor )
+{
+    mGradientColor0 = iColor;
+}
+
+void
+FOdysseyVectorBucket::SetGradientColor1( FColor& iColor )
+{
+    mGradientColor1 = iColor; 
+}
+
+void
 FOdysseyVectorBucket::SetColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA )
 {
     mColor.R = iR;
     mColor.G = iG;
     mColor.B = iB;
     mColor.A = iA;
+}
+
+void
+FOdysseyVectorBucket::SetColor( FColor& iColor )
+{
+    mColor = iColor;
 }
 
 FColor&

@@ -52,10 +52,15 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
     public:
         static uint32 StaticClass() { return mStaticClass; };
         virtual uint32 GetClass() { return mStaticClass; };
+        bool HasBaseClass( uint32 iBaseClassID );
 
         ~FOdysseyVectorGroupPaint();
         FOdysseyVectorGroupPaint();
         void Init( std::string iName );
+
+        virtual void OnChildTransform( FOdysseyVectorObject* iChild ) override;
+        virtual void OnChildAdd( FOdysseyVectorObject* iChild ) override;
+        virtual void OnChildRemove( FOdysseyVectorObject* iChild ) override;
 
         void UpdateShape( uint32 iUpdateFlags );
         void DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags );
@@ -96,6 +101,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         void PropertyChanged(const FName& iPropertyName);
         void ApplyBucket( FOdysseyVectorBucket* iBucket );
         void Colorize();
+        void CheckLoops();
 
     protected:
         uint32 MarchVertex( FOdysseyVectorVertexIntersection* iVertex );

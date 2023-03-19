@@ -23,6 +23,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathCubic: public FOdysseyVectorPath
         static uint32 StaticClass() { return mStaticClass; };
         virtual uint32 GetClass() { return mStaticClass; };
 
+        bool HasBaseClass( uint32 iBaseClassID );
+
     protected:
         FOdysseyVectorObject* CopyShape();
         void DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags );

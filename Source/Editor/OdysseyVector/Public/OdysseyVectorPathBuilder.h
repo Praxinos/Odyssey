@@ -16,11 +16,13 @@
 class ODYSSEYVECTOR_API FOdysseyVectorPathBuilder : public FOdysseyVectorObject
 {
     private:
-        static const uint32 mStaticClass =  0x6a7eba27; // value is crc32 FOdysseyVectorPathBuilder
+        static const uint32 mStaticClass = 0x6a7eba27; // value is crc32 FOdysseyVectorPathBuilder
 
     public:
         static uint32 StaticClass() { return mStaticClass; };
         virtual uint32 GetClass() { return mStaticClass; };
+
+        bool HasBaseClass( uint32 iBaseClassID );
 
     private:
         double mCumulAngle;

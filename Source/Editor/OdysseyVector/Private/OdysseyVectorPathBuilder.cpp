@@ -10,7 +10,8 @@ FOdysseyVectorPathBuilder::FOdysseyVectorPathBuilder()
     , mCumulAngle ( 0.0f )
     , mPointID( 0 )
     , mCumulAngleLimit ( 1.5708f ) // 90 degrees
-    , mAngleLimit ( 1.0472f ) // 60 deg
+    //, mAngleLimit ( 1.0472f ) // 60 deg
+    , mAngleLimit ( 0.7071f ) // 45 deg
     , mSmoothLimit ( 0.261799f ) // 15 deg
 {
     mObjectParam.Foreground.R = 128;
@@ -25,6 +26,17 @@ FOdysseyVectorPathBuilder::FOdysseyVectorPathBuilder()
     mPointArray.reserve(50);
     mSampleArray.reserve(50);
     mVertexArray.reserve(50);
+}
+
+bool
+FOdysseyVectorPathBuilder::HasBaseClass( uint32 iBaseClassID )
+{
+    if( mStaticClass == iBaseClassID )
+    {
+        return true;
+    }
+
+    return FOdysseyVectorObject::HasBaseClass( iBaseClassID );
 }
 
 void 
@@ -77,6 +89,38 @@ FOdysseyVectorPathBuilder::GetSampleAngle()
             }
 */
 
+static void
+Smooth( FOdysseyVectorSegmentCubic* iNewSegment, double iLimitAngleInRadians )
+{
+    FOdysseyVectorVertex* vertex = iNewSegment->GetVertex( 0 );
+    FOdysseyVectorHandleSegment* handle = iNewSegment->GetHandle( 0 );
+    FOdysseyVectorSegmentCubic* prevSegment = static_cast<FOdysseyVectorSegmentCubic*>(vertex->GetOtherSegment( iNewSegment ));
+
+    if( prevSegment )
+    {
+        uint32_t prevVertexIndex = ( prevSegment->GetVertex(0) == vertex ) ? 0 : 1;
+        ::ULIS::FVec2D prevVector = prevSegment->GetHandleVector( prevVertexIndex, false );
+        ::ULIS::FVec2D nsegVector = iNewSegment->GetHandleVector( 0, false );
+
+        if( prevVector.DistanceSquared() && nsegVector.DistanceSquared() )
+        {
+            double distance = nsegVector.Distance();
+            double angle;
+
+            prevVector.Normalize();
+            nsegVector.Normalize();
+
+            angle = acos( ULIS::FMath::Clamp<double>( -prevVector.DotProduct( nsegVector ), -1.0f, 1.0f ) );
+
+            if( fabs(angle) < iLimitAngleInRadians )
+            {
+                handle->Set( vertex->GetX() - ( prevVector.x * distance )
+                           , vertex->GetY() - ( prevVector.y * distance ) );
+            }
+        }
+    }
+}
+
 uint32
 FOdysseyVectorPathBuilder::RecordVertex()
 {
@@ -118,7 +162,7 @@ FOdysseyVectorPathBuilder::RecordVertex()
 
             mCubicPath->AddSegment( mCubicSegment );
 
-            mCubicSegment->Smooth( mSmoothLimit );
+            Smooth( mCubicSegment, mAngleLimit );
 
             mCubicSegment->Invalidate();
 
@@ -282,25 +326,29 @@ FOdysseyVectorPathBuilder::RecordEnd( FOdysseyVectorVertexCubic *iVertex )
     if( iVertex != mVertexArray.back() )
     {
         uint32 linkID0 =  0;
-        uint32 linkID1 =  mLinkBuffer.size() - 1; // last link
 
-    /// TODO: Factorize that part
-        mCubicSegment = FOdysseyVectorSegmentCubic::New( mCubicPath, mVertexArray.back(), iVertex );
+        if( mLinkBuffer.size() )
+        {
+            uint32 linkID1 =  mLinkBuffer.size() - 1; // last link
 
-        Shape ( *mCubicSegment
-               , mLinkBuffer[linkID0].GetVector( true )
-               , mLinkBuffer[linkID1].GetVector( true ) );
+        /// TODO: Factorize that part
+            mCubicSegment = FOdysseyVectorSegmentCubic::New( mCubicPath, mVertexArray.back(), iVertex );
 
-        Adjust( *mCubicSegment );
+            Shape ( *mCubicSegment
+                   , mLinkBuffer[linkID0].GetVector( true )
+                   , mLinkBuffer[linkID1].GetVector( true ) );
 
-        mCubicPath->AddSegment( mCubicSegment );
+            Adjust( *mCubicSegment );
 
-        mCubicSegment->Smooth( mSmoothLimit );
+            mCubicPath->AddSegment( mCubicSegment );
 
-        mCubicSegment->Invalidate();
+            Smooth( mCubicSegment, mAngleLimit );
 
-        mCubicPath->Update( 0 );
-    /// end TODO
+            mCubicSegment->Invalidate();
+
+            mCubicPath->Update( 0 );
+        /// end TODO
+        }
     }
 }
 

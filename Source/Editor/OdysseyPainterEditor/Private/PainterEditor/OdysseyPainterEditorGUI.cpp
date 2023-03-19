@@ -622,7 +622,7 @@ FOdysseyPainterEditorGUI::GroupPaint()
                         {
                             FOdysseyVectorObject* childObject = (*cit);
 
-                            if( childObject->GetClass() == FOdysseyVectorPathCubic::StaticClass() )
+                            if( childObject->HasBaseClass( FOdysseyVectorPathCubic::StaticClass() ) )
                             {
                                 FOdysseyVectorPathCubic* childCubicPath = static_cast<FOdysseyVectorPathCubic*>( childObject );
 
@@ -635,7 +635,7 @@ FOdysseyPainterEditorGUI::GroupPaint()
                         selectedPaintGroup->CopyBuckets( paintGroup );
                     }
 
-                    if( selectedObject->GetClass() == FOdysseyVectorPathCubic::StaticClass() )
+                    if( selectedObject->HasBaseClass( FOdysseyVectorPathCubic::StaticClass() ) )
                     {
                         FOdysseyVectorPathCubic* selectedCubicPath = static_cast<FOdysseyVectorPathCubic*>( selectedObject );
 
@@ -646,24 +646,25 @@ FOdysseyPainterEditorGUI::GroupPaint()
                 for( int i = 0; i < pathArray.size(); i++ )
                 {
                     pathArray[i]->GetParent()->RemoveChild( pathArray[i] );
-                    pathArray[i]->SwitchSpace( *paintGroup );
+/*                    pathArray[i]->SwitchSpace( *paintGroup );*/
 
                     paintGroup->AppendChild( pathArray[i] );
-
+/*
                     pathArray[i]->InvalidateAllSegments();
 
                     pathArray[i]->ResetTransform();
                     pathArray[i]->UpdateMatrix();
+*/
                 }
 
                 // first update to update paths' segments.
                 currentVectorLayer->GetScene()->Update( 0 );
 
-                paintGroup->Invalidate();
+                //paintGroup->Invalidate();
 
                 currentVectorLayer->GetScene()->ClearSelection();
                 currentVectorLayer->GetScene()->Select( paintGroup );
-                currentVectorLayer->GetScene()->Update( 0 );
+                //currentVectorLayer->GetScene()->Update( 0 );
 
                 // second update to update paintgroup
                 currentVectorLayer->RenderImageChanged( false );

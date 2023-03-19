@@ -9,6 +9,17 @@ FOdysseyVectorRectangle::FOdysseyVectorRectangle()
 {
 }
 
+bool
+FOdysseyVectorRectangle::HasBaseClass( uint32 iBaseClassID )
+{
+    if( mStaticClass == iBaseClassID )
+    {
+        return true;
+    }
+
+    return FOdysseyVectorPath::HasBaseClass( iBaseClassID );
+}
+
 void FOdysseyVectorRectangle::Init( std::string iName, double iWidth, double iHeight )
 {
     SetName( iName );

@@ -31,6 +31,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorEllipse : public FOdysseyVectorPathCubic
         static uint32 StaticClass() { return mStaticClass; };
         virtual uint32 GetClass() { return mStaticClass; };
 
+        bool HasBaseClass( uint32 iBaseClassID );
+
        /**
          * @brief Static function to allocate a new ellipse. Note: this is the proper way to allocate a new ellipse as we don't
          * use the constructor to set parameters because UOBJECTs must have empty constructors.

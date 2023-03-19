@@ -18,6 +18,17 @@ FOdysseyVectorEllipse::FOdysseyVectorEllipse()
     mEllipseParam.RadiusX = mEllipseParam.RadiusY = 0.0f;
 }
 
+bool
+FOdysseyVectorEllipse::HasBaseClass( uint32 iBaseClassID )
+{
+    if( mStaticClass == iBaseClassID )
+    {
+        return true;
+    }
+
+    return FOdysseyVectorPathCubic::HasBaseClass( iBaseClassID );
+}
+
 void
 FOdysseyVectorEllipse::Init( std::string iName, double iRadiusX, double iRadiusY )
 {

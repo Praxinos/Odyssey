@@ -88,12 +88,14 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
        /**
          * @brief Update cached data for this segment.
          */
-        virtual void Update() {};
+        virtual void Update();
 
        /**
          * @brief Mark this segment for later update. This invalidates the path as well.
          */
         void Invalidate();
+
+        bool IsInvalidated();
 
         virtual ::ULIS::FVec2D GetVectorAtEnd( bool iNormalize );
         virtual ::ULIS::FVec2D GetVectorAtStart( bool iNormalize );
@@ -161,11 +163,15 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
          */
         virtual ::ULIS::FVec2D GetTangentAt( double t );
 
+        FOdysseyVectorVertex*
+        GetOtherVertex( FOdysseyVectorVertex* iVertex );
+
     protected:
         std::list<FOdysseyVectorVertexIntersection*> mIntersectionVertexList;
         std::list<FOdysseyVectorSection*> mSectionList;
         FOdysseyVectorPath* mPath;
         ::ULIS::FRectD mBBox;
+        bool mIsInvalidated;
 
     private:
         static const uint32 mStaticClass = 0x45c58ef1; // value is crc32 FOdysseyVectorSegment

@@ -3,8 +3,9 @@
 #include <blend2d.h>
 #include <Core/Core.h>
 #include <Image/Block.h>
-#include "OdysseyVectorObject.h"
 #include "OdysseyVectorHandleBucket.h"
+
+class FOdysseyVectorObject;
 
 class ODYSSEYVECTOR_API FOdysseyVectorBucket : public FOdysseyVectorPoint
 {
@@ -21,6 +22,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorBucket : public FOdysseyVectorPoint
          */
         void SetColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA );
 
+        void SetColor( FColor& iColor );
+
         /**
          * @brief Draw this bucket (used for HUD).
          * @param iRoi region-of-interest
@@ -29,6 +32,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorBucket : public FOdysseyVectorPoint
         void Draw( ::ULIS::FRectD& iRoi, uint64 iFlags );
 
         void SetGradient( bool iIsGradient );
+
+        void SetGradientColor0( FColor& iColor );
+        void SetGradientColor1( FColor& iColor );
         void SetGradientColor0( uint8 iR0, uint8 iG0, uint8 iB0, uint8 iA0 );
         void SetGradientColor1( uint8 iR1, uint8 iG1, uint8 iB1, uint8 iA1 );
 

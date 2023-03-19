@@ -71,7 +71,7 @@ FOdysseyVectorVertexCubic::GetHandle()
 }
 
 void
-FOdysseyVectorVertexCubic::SmoothSegments( bool iBuildSegments )
+FOdysseyVectorVertexCubic::SmoothSegments( bool iBuildSegments, bool iPreserveHandleLength )
 {
     ::ULIS::FVec2D averageVector( 0.0f, 0.0f );
 
@@ -92,33 +92,58 @@ FOdysseyVectorVertexCubic::SmoothSegments( bool iBuildSegments )
         for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
         {
             FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
-            double distance = cubicSegment->GetStraightDistance();
             ::ULIS::FVec2D smoothVector = averageVector;
 
             if ( this == cubicSegment->GetPoint(0) )
             {
                 ::ULIS::FVec2D segmentVector = cubicSegment->GetVector( false );
+                double distance;
 
                 if ( smoothVector.DotProduct( segmentVector ) < 0.0f )
                 {
                     smoothVector = - smoothVector;
                 }
 
-                cubicSegment->GetHandle(0)->Set( this->GetX() + ( smoothVector.x * distance * 0.35f ),
-                                                       this->GetY() + ( smoothVector.y * distance * 0.35f ) );
+                if( iPreserveHandleLength )
+                {
+                    ::ULIS::FVec2D& handlePos = cubicSegment->GetHandle(0)->GetCoords();
+                    ::ULIS::FVec2D handleVec = handlePos - this->GetCoords( nullptr );
+
+                    distance = handleVec.Distance();
+                }
+                else
+                {
+                    distance = cubicSegment->GetStraightDistance() * 0.35f;
+                }
+
+                cubicSegment->GetHandle(0)->Set( this->GetX() + ( smoothVector.x * distance ),
+                                                 this->GetY() + ( smoothVector.y * distance ) );
             }
 
             if ( this == cubicSegment->GetPoint(1) )
             {
                 ::ULIS::FVec2D segmentVector = - cubicSegment->GetVector( false );
+                double distance;
 
                 if ( smoothVector.DotProduct( segmentVector ) < 0.0f )
                 {
                     smoothVector = - smoothVector;
                 }
 
-                cubicSegment->GetHandle(1)->Set( this->GetX() + ( smoothVector.x * distance * 0.35f ),
-                                                       this->GetY() + ( smoothVector.y * distance * 0.35f ) );
+                if( iPreserveHandleLength )
+                {
+                    ::ULIS::FVec2D& handlePos = cubicSegment->GetHandle(1)->GetCoords();
+                    ::ULIS::FVec2D handleVec = handlePos - this->GetCoords( nullptr );
+
+                    distance = handleVec.Distance();
+                }
+                else
+                {
+                    distance = cubicSegment->GetStraightDistance() * 0.35f;
+                }
+
+                cubicSegment->GetHandle(1)->Set( this->GetX() + ( smoothVector.x * distance ),
+                                                 this->GetY() + ( smoothVector.y * distance ) );
             }
 
             if ( iBuildSegments == true )

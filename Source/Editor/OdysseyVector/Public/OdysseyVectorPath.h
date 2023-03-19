@@ -42,6 +42,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
         static uint32 StaticClass() { return mStaticClass; };
         virtual uint32 GetClass() { return mStaticClass; };
 
+        bool HasBaseClass( uint32 iBaseClassID );
+
     protected:
         void DrawJoint( FOdysseyVectorVertex* iVertex, ::ULIS::FRectD &iRoi, uint64 iFlags );
 
@@ -97,6 +99,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
                               , uint64 iSelectionFlags ){ return false; };
         virtual void Unselect( FOdysseyVectorVertex* iVertex ){};
         bool IsFilled();
+        bool IsLoop();
+        bool HasIntersections();
+        void ToVertexAndSectionArray( std::vector<FOdysseyVectorVertex*>& oVertexArray
+                                    , std::vector<FOdysseyVectorSection*>& oSectionArray );
         void SetFilled(bool iIsFilled);
         void Clear();
         /*bool IsLoop();

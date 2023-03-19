@@ -9,10 +9,11 @@ FOdysseyVectorObject::~FOdysseyVectorObject()
 }
 
 FOdysseyVectorObject::FOdysseyVectorObject()
-    : mParent ( nullptr )
-    , mIsSelected ( false )
-    , mIsInvalidated ( false )
-    , mDependsOnChildren ( false )
+    : mParent( nullptr )
+    , mIsSelected( false )
+    , mIsInvalidated( false )
+    , mDependsOnChildren( false )
+    , mFillBucket( *this, 0.0f, 0.0f )
 {
     mLocalMatrix.reset();
     mWorldMatrix.reset();
@@ -24,14 +25,33 @@ FOdysseyVectorObject::FOdysseyVectorObject()
     mObjectParam.Rotation = 0.0f;
     mObjectParam.ScalingX = 1.0f;
     mObjectParam.ScalingY = 1.0f;
-    mObjectParam.Foreground = FColor(   0,   0,   0, 255 );
-    mObjectParam.Background = FColor( 255, 255, 255, 255 );
+    mObjectParam.Foreground = FColor( 0, 0, 0, 255 );
+
+    mFillBucket.SetGradient( false );
+    mFillBucket.SetColor( 255, 255, 255, 255 );
+}
+
+FOdysseyVectorBucket&
+FOdysseyVectorObject::GetFillBucket()
+{
+    return mFillBucket;
 }
 
 void
 FOdysseyVectorObject::SetName( std::string iName )
 {
     Name.assign( iName );
+}
+
+bool
+FOdysseyVectorObject::HasBaseClass( uint32 iBaseClassID )
+{
+    if( mStaticClass == iBaseClassID )
+    {
+        return true;
+    }
+
+    return false;
 }
 
 void
@@ -129,7 +149,11 @@ FOdysseyVectorObject::CopySettings( FOdysseyVectorObject& iDestinationObject )
     iDestinationObject.UpdateMatrix();
 
     iDestinationObject.mObjectParam.Foreground = mObjectParam.Foreground;
-    iDestinationObject.mObjectParam.Background = mObjectParam.Background;
+
+    iDestinationObject.mFillBucket.SetColor( mFillBucket.GetColor() );
+    iDestinationObject.mFillBucket.SetGradient( mFillBucket.IsGradient() );
+    iDestinationObject.mFillBucket.SetGradientColor0( mFillBucket.GetGradientColor0() );
+    iDestinationObject.mFillBucket.SetGradientColor1( mFillBucket.GetGradientColor1() );
 
     iDestinationObject.mBBox = mBBox;
 
@@ -189,6 +213,11 @@ FOdysseyVectorObject::UpdateMatrix()
         }
 
         blctx->restore();
+    }
+
+    if( this->GetParent() )
+    {
+        this->GetParent()->OnChildTransform( this );
     }
 }
 
@@ -488,6 +517,8 @@ FOdysseyVectorObject::AddChild( FOdysseyVectorObject* iChild, bool iPrepend )
     {
         mChildrenList.push_back( iChild );
     }
+
+    OnChildAdd( iChild );
 }
 
 void
@@ -496,6 +527,8 @@ FOdysseyVectorObject::RemoveChild( FOdysseyVectorObject* iChild )
     iChild->mParent = nullptr;
 
     mChildrenList.remove(iChild);
+
+    OnChildRemove( iChild );
 }
 
 void
@@ -507,7 +540,7 @@ FOdysseyVectorObject::SetForegroundColor( FColor& iColor )
 void
 FOdysseyVectorObject::SetBackgroundColor( FColor& iColor )
 {
-    mObjectParam.Background = iColor;
+    mFillBucket.SetColor( iColor );
 }
 
 void
@@ -522,10 +555,7 @@ FOdysseyVectorObject::SetForegroundColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA
 void
 FOdysseyVectorObject::SetBackgroundColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA )
 {
-    mObjectParam.Background.R = iR;
-    mObjectParam.Background.G = iG;
-    mObjectParam.Background.B = iB;
-    mObjectParam.Background.A = iA;
+    mFillBucket.SetColor( iR, iG, iB, iA );
 }
 
 void 
@@ -604,7 +634,7 @@ FOdysseyVectorObject::GetForegroundColor()
 FColor&
 FOdysseyVectorObject::GetBackgroundColor()
 {
-    return mObjectParam.Background;
+    return mFillBucket.GetColor();
 }
 
 uint32

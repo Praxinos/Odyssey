@@ -67,7 +67,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertexCubic : public FOdysseyVectorVertex
          * @brief Build the cached data for this segment. Usually called via a call to path->Update()
          * @param iRadius vertex's radius.
          */
-        void SmoothSegments( bool iBuildSegments );
+        void SmoothSegments( bool iBuildSegments, bool iPreserveHandleLength );
 
         /**
          * @brief Tell whether or not the angle between the segments connected to this vertex is smooth (low).

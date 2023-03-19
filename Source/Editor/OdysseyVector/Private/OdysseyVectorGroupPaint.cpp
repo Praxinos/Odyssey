@@ -18,6 +18,17 @@ FOdysseyVectorGroupPaint::FOdysseyVectorGroupPaint()
     mGroupPaintParam.Realtime = false;
 }
 
+bool
+FOdysseyVectorGroupPaint::HasBaseClass( uint32 iBaseClassID )
+{
+    if( mStaticClass == iBaseClassID )
+    {
+        return true;
+    }
+
+    return FOdysseyVectorGroup::HasBaseClass( iBaseClassID );
+}
+
 uint32
 FOdysseyVectorGroupPaint::GetType()
 {
@@ -105,6 +116,38 @@ FOdysseyVectorGroupPaint::PickCycle( double iX, double iY )
     }
 
     return nullptr;
+}
+
+void
+FOdysseyVectorGroupPaint::OnChildTransform( FOdysseyVectorObject* iChild )
+{
+    // we don't check the type of the object. Normally they should be
+    // all of base type PathCubic, otherwise there is a bug somewhere.
+    //iChild->SwitchSpace( *this );
+}
+
+void
+FOdysseyVectorGroupPaint::OnChildAdd( FOdysseyVectorObject* iChild )
+{
+    if( iChild->HasBaseClass( FOdysseyVectorPathCubic::StaticClass() ) )
+    {
+        FOdysseyVectorPathCubic* cubicPath = static_cast<FOdysseyVectorPathCubic*>(iChild);
+
+        cubicPath->SwitchSpace( *this );
+        cubicPath->ResetTransform();
+        cubicPath->UpdateMatrix();
+
+        cubicPath->InvalidateAllSegments();
+        //cubicPath->Update( 0 );
+    }
+
+    Invalidate();
+}
+
+void
+FOdysseyVectorGroupPaint::OnChildRemove( FOdysseyVectorObject* iChild )
+{
+    Invalidate();
 }
 
 FOdysseyVectorBucket*
@@ -430,6 +473,37 @@ FOdysseyVectorGroupPaint::MarchVertex( FOdysseyVectorVertexIntersection* iInters
     return 0;
 }
 
+// build cycles from looping path as well
+void
+FOdysseyVectorGroupPaint::CheckLoops()
+{
+    for( std::list<FOdysseyVectorObject*>::iterator oit = mChildrenList.begin(); oit != mChildrenList.end(); ++oit )
+    {
+        FOdysseyVectorObject *child = (*oit);
+
+        if( child->HasBaseClass( FOdysseyVectorPathCubic::StaticClass() ) )
+        {
+            FOdysseyVectorPathCubic* cubicPath = static_cast<FOdysseyVectorPathCubic*>(child);
+
+            if( cubicPath->HasIntersections() == false )
+            {
+                if( cubicPath->IsLoop() )
+                {
+                    std::vector<FOdysseyVectorVertex*> vertexArray;
+                    std::vector<FOdysseyVectorSection*> sectionArray;
+
+                    cubicPath->ToVertexAndSectionArray( vertexArray, sectionArray );
+
+                    if( vertexArray.size() )
+                    {
+                        mLoopArray.push_back( new FOdysseyVectorCycle( *this, /*iCycleID*/0, vertexArray, sectionArray ) );
+                    }
+                }
+            }
+        }
+    }
+}
+
 void
 FOdysseyVectorGroupPaint::FindCycles()
 {
@@ -442,6 +516,8 @@ FOdysseyVectorGroupPaint::FindCycles()
     {
         MarchVertex( mIntersectionVertexArray[i] );
     }
+
+    CheckLoops();
 
     OrderCycles();
 
@@ -513,7 +589,7 @@ FOdysseyVectorGroupPaint::ClearCycles( std::list<FOdysseyVectorSegment*>& cubicS
     {
         FOdysseyVectorObject *child = (*oit);
 
-        if( child->GetClass() == FOdysseyVectorPathCubic::StaticClass() )
+        if( child->HasBaseClass( FOdysseyVectorPathCubic::StaticClass() ) )
         {
             FOdysseyVectorPathCubic* cubicPath = static_cast<FOdysseyVectorPathCubic*>(child);
             std::list<FOdysseyVectorSegment*>& segmentList = cubicPath->GetSegmentList();

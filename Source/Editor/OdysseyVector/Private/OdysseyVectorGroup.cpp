@@ -7,6 +7,17 @@ FOdysseyVectorGroup::Init( std::string iName )
 }
 
 bool
+FOdysseyVectorGroup::HasBaseClass( uint32 iBaseClassID )
+{
+    if( mStaticClass == iBaseClassID )
+    {
+        return true;
+    }
+
+    return FOdysseyVectorObject::HasBaseClass( iBaseClassID );
+}
+
+bool
 FOdysseyVectorGroup::PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags )
 {
 /*

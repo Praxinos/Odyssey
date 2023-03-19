@@ -4,11 +4,10 @@ FOdysseyVectorHandleBucket::~FOdysseyVectorHandleBucket()
 {
 }
 
-FOdysseyVectorHandleBucket::FOdysseyVectorHandleBucket()
+FOdysseyVectorHandleBucket::FOdysseyVectorHandleBucket( FOdysseyVectorBucket* iParentBucket )
     : FOdysseyVectorHandle()
-    , mParentBucket ( nullptr )
 {
-
+    Init( iParentBucket );
 }
 
 void
@@ -21,9 +20,7 @@ FOdysseyVectorHandleBucket::Init( FOdysseyVectorBucket* iParentBucket )
 FOdysseyVectorHandleBucket*
 FOdysseyVectorHandleBucket::New( FOdysseyVectorBucket* iParentBucket )
 {
-    FOdysseyVectorHandleBucket* bucketHandle = new FOdysseyVectorHandleBucket();
-
-    bucketHandle->Init( iParentBucket );
+    FOdysseyVectorHandleBucket* bucketHandle = new FOdysseyVectorHandleBucket( iParentBucket );
 
     return bucketHandle;
 }

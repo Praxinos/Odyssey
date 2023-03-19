@@ -4,6 +4,7 @@
 
 #include <blend2d.h>
 #include <ULIS>
+#include "OdysseyVectorBucket.h"
 
 #include "OdysseyVectorObject.generated.h"
 
@@ -32,9 +33,6 @@ struct FObjectParam
 
     UPROPERTY(EditAnywhere, Category="Coloring")
     FColor Foreground;
-
-    UPROPERTY(EditAnywhere,Category="Coloring")
-    FColor Background;
 };
 
 class ODYSSEYVECTOR_API FOdysseyVectorObject
@@ -45,6 +43,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
     public:
         static uint32 StaticClass() { return mStaticClass; };
         virtual uint32 GetClass() { return mStaticClass; };
+        virtual bool HasBaseClass( uint32 iBaseClassID );
 
         static const uint32 PICK_MATH_BASED = ( 1 << 0 );
         static const uint32 PICK_MASK_BASED = ( 1 << 3 );
@@ -82,6 +81,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         bool mDependsOnChildren;
         ::ULIS::FRectD mBBox;
 
+        FOdysseyVectorBucket mFillBucket;
+
         /*uint32 mStrokeColor;*/
         /*uint32 mFillColor;*/
 
@@ -100,6 +101,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
 
         virtual bool Erase( ::ULIS::FRectD &iRoi ){ return false; };
 
+        virtual void OnChildTransform( FOdysseyVectorObject* iChild ) {};
+        virtual void OnChildAdd( FOdysseyVectorObject* iChild ) {};
+        virtual void OnChildRemove( FOdysseyVectorObject* iChild ) {};
+
         void Update( uint32 iUpdateFlags );
         virtual void UpdateShape( uint32 iUpdateFlags ) {};
 
@@ -115,6 +120,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
 
         FOdysseyVectorObject* Pick( FOdysseyVectorGroup* iSelectionSpace, ::ULIS::FRectD& iRoi, uint32 iSelectionFlags );
         virtual bool PickShape( ::ULIS::FRectD& iRoi, uint32 iSelectionFlags ){ return false; };
+
+        FOdysseyVectorBucket& GetFillBucket();
 
         /*virtual void UpdateBoundingBox() = 0;*/
         void DrawChildren( ::ULIS::FRectD& iRoi, uint64 iFlags );

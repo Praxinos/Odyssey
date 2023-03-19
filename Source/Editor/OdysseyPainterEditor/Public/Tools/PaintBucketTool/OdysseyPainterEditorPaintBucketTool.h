@@ -74,6 +74,7 @@ protected:
     FOdysseyPaintEngine mPaintEngine;
     FOdysseyVectorHandleBucket* mPickedBucketHandle;
     FOdysseyVectorBucket* mPickedBucket;
+    FOdysseyVectorObject* mPickedObject;
     double mOldLocalMouseX;
     double mOldLocalMouseY;
     double mDownMouseX;

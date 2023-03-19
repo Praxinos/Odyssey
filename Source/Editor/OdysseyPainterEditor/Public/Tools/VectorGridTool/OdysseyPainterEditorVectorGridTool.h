@@ -30,6 +30,9 @@ public:
     virtual bool OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
     virtual void Commit() override;
 
+    void PropertyChanged( const FName& iPropertyName );
+    void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent );
+
 private:
     FOdysseyVectorHUDGrid mGridHUD;
     void Redraw(const TArray<::ULIS::FRectI>& iRects);

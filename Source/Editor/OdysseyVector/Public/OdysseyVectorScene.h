@@ -32,8 +32,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorScene : public FOdysseyVectorObject
         std::list<FOdysseyVectorObject*> mInvalidatedObjectList;
 
     public:
-        ~FOdysseyVectorScene(){};
-        FOdysseyVectorScene(){};
+        ~FOdysseyVectorScene();
+        FOdysseyVectorScene();
         void Init( std::string iName );
         void Select( FOdysseyVectorObject* iVecObj );
         void Unselect( FOdysseyVectorObject* iVecObj );

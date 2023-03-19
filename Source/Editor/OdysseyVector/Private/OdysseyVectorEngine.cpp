@@ -123,29 +123,11 @@ FOdysseyVectorEngine::SetDrawingFlags( uint64 iDrawingFlags )
 void
 FOdysseyVectorEngine::Render( FOdysseyVectorScene& iScene )
 {
-    static ::ULIS::FRectD zeroRectangle;
     // Blend2D part
    /* BLContextCreateInfo createInfo{};*/
 
     // Configure the number of threads to use.
     /*createInfo.threadCount = 1;*/
-
-    mBLContext->setFillStyle( BLRgba32(0xFFFFFFFF) );
-
-    if ( mRoi != zeroRectangle )
-    {
-        mBLContext->fillRect( mRoi.x, mRoi.y, mRoi.w, mRoi.h );
-
-        // view the updated zone ( testing purpose only )
-        /*blctx.setStrokeStyle(BLRgba32(0xFFFF0000));
-        blctx.setStrokeWidth(1.0f);
-        blctx.strokeRect( mRoi.x, mRoi.y, mRoi.w, mRoi.h );*/
-    }
-    else
-    {
-        mBLContext->fillAll();
-        //blctx.clearAll();
-    }
 
     iScene.Draw( mRoi, mDrawingFlags );
 
@@ -276,6 +258,8 @@ FOdysseyVectorEngine::Erase( FOdysseyVectorScene& iScene
             erasedObjectArray[i]->GetParent()->RemoveChild( erasedObjectArray[i] );
         }
     }
+
+    iScene.Update( 0 );
 }
 
 static void
@@ -386,9 +370,7 @@ FOdysseyVectorEngine::Knot( FOdysseyVectorVertex* iVertexA
                 *oCreatedSegment = newCubicSegment;
                 *oRemovedSegment = firstCubicSegment;
 
-                iVertexA->GetFirstSegment()->Invalidate();
-
-                path->Invalidate();
+                path->InvalidateAllSegments();
 
                 return true;
             }

@@ -11,10 +11,68 @@ FOdysseyVectorPath::FOdysseyVectorPath()
     mPathParam.Filled = false;
 }
 
+bool
+FOdysseyVectorPath::HasBaseClass( uint32 iBaseClassID )
+{
+    if( mStaticClass == iBaseClassID )
+    {
+        return true;
+    }
+
+    return FOdysseyVectorObject::HasBaseClass( iBaseClassID );
+}
+
 void
 FOdysseyVectorPath::Init( std::string iName )
 {
     SetName( iName );
+}
+
+void
+FOdysseyVectorPath::ToVertexAndSectionArray( std::vector<FOdysseyVectorVertex*>& oVertexArray
+                                           , std::vector<FOdysseyVectorSection*>& oSectionArray )
+{
+    if( mSegmentList.size() )
+    {
+        FOdysseyVectorSegment *segment = GetFirstSegment();
+        FOdysseyVectorVertex* firstVertex = segment->GetVertex(0);
+        FOdysseyVectorVertex* vertex = firstVertex;
+
+        do
+        {
+            FOdysseyVectorVertex* nextVertex = segment->GetOtherVertex( vertex );
+            FOdysseyVectorSegment *nextSegment = nextVertex->GetOtherSegment( segment );
+
+            oVertexArray.push_back( vertex );
+            oSectionArray.push_back( segment->GetSection( 0.5f ) );
+
+            vertex = nextVertex;
+            segment = nextSegment;
+        }
+        while( segment && ( vertex != firstVertex ) );
+    }
+}
+
+bool
+FOdysseyVectorPath::HasIntersections()
+{
+    for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
+    {
+        FOdysseyVectorSegment* segment = static_cast<FOdysseyVectorSegment*>(*it);
+
+        if( segment->GetIntersectionVertexList().size() )
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool
+FOdysseyVectorPath::IsLoop()
+{
+    return ( mSegmentList.size() == mVertexList.size() ) ? true : false;
 }
 
 bool
@@ -143,70 +201,13 @@ FOdysseyVectorPath::UpdateShape( uint32 iUpdateFlags )
 void
 FOdysseyVectorPath::InvalidateSegment( FOdysseyVectorSegment* iSegment )
 {
-    mInvalidatedSegmentList.push_back( iSegment );
-
-    Invalidate();
-}
-
-/*void
-FOdysseyVectorPath::InvalidateLoop( FOdysseyVectorCycle* iLoop )
-{
-    mInvalidatedLoopList.push_back ( iLoop );
-
-    Invalidate();
-}*/
-
-/*
-void
-FOdysseyVectorPath::DrawLoops( ::ULIS::FRectD &iRoi, uint64 iFlags )
-{
-    for( std::list<FOdysseyVectorCycle*>::iterator it = mLoopList.begin(); it != mLoopList.end(); ++it )
+    if( iSegment->IsInvalidated() == false )
     {
-        FOdysseyVectorCycle* loop = static_cast<FOdysseyVectorCycle*>(*it);
+        mInvalidatedSegmentList.push_back( iSegment );
 
-        //if ( loop->IsFilled() == true )
-        //{
-            loop->DrawShape( iRoi, iFlags );
-        //}
+        Invalidate();
     }
 }
-*/
-
-/*
-FOdysseyVectorObject*
-FOdysseyVectorPath::PickLoops( double iX, double iY, double iRadius )
-{
-    for( std::list<FOdysseyVectorCycle*>::iterator it = mLoopList.begin(); it != mLoopList.end(); ++it )
-    {
-        FOdysseyVectorCycle* loop = static_cast<FOdysseyVectorCycle*>(*it);
-
-        if ( loop->PickShape( iX, iY, iRadius ) )
-        {
-            return loop;
-        }
-    }
-
-    return nullptr;
-}
-*/
-
-/*
-FOdysseyVectorCycle*
-FOdysseyVectorPath::GetLoopByID( uint64 iID )
-{
-    for( std::list<FOdysseyVectorCycle*>::iterator it = mLoopList.begin(); it != mLoopList.end(); ++it )
-    {
-        FOdysseyVectorCycle* loop = static_cast<FOdysseyVectorCycle*>(*it);
-
-        if ( iID == loop->GetID() )
-        {
-            return loop;
-        }
-    }
-
-    return nullptr;
-}
-*/
 
 void
 FOdysseyVectorPath::AddVertex( FOdysseyVectorVertex* iVertex )
