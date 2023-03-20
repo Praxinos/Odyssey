@@ -130,6 +130,8 @@ FOdysseyVectorPathCubic::Erase( ::ULIS::FRectD &iRoi )
     std::vector<FOdysseyVectorSegmentCubic*> newSegmentArray;
     std::vector<FOdysseyVectorSegmentCubic*> oldSegmentArray;
     std::vector<FOdysseyVectorVertexCubic*> newVertexArray;
+    std::vector<FOdysseyVectorVertexCubic*> oldVertexArray;
+    std::list<FOdysseyVectorVertex*> vertexList = mVertexList; // work on a copy, for removal
 
     blimg->getData( &imageData );
 
@@ -200,12 +202,19 @@ FOdysseyVectorPathCubic::Erase( ::ULIS::FRectD &iRoi )
                                    currentPixelValue = pixelValue;
                                }
 
-                               if( subVertexCount == 2 )
+                               if( hasHit )
                                {
-                                   subSegmentArray.push_back( cubicSegment->Sample( subVertexT[0]
-                                                                                  , subVertexT[1]
-                                                                                  , newVertexArray ) );
-                                   subVertexCount = 0;
+                                   if( subVertexCount == 2 )
+                                   {
+                                       if( fabs( subVertexT[0] - subVertexT[1]) < 1.0f )
+                                       {
+                                           subSegmentArray.push_back( cubicSegment->Sample(subVertexT[0]
+                                                                    , subVertexT[1]
+                                                                    , newVertexArray ) );
+
+                                           subVertexCount = 0;
+                                       }
+                                   }
                                }
                            }
 
@@ -214,10 +223,15 @@ FOdysseyVectorPathCubic::Erase( ::ULIS::FRectD &iRoi )
                        });
         }
 
-        if( hasHit == true )
+        if( hasHit )
         {
             // won't insert anything if no subsegment were created
-            newSegmentArray.insert( newSegmentArray.end(), subSegmentArray.begin(), subSegmentArray.end() );
+            if( subSegmentArray.size() )
+            {
+                newSegmentArray.insert( newSegmentArray.end(), subSegmentArray.begin(), subSegmentArray.end() );
+            }
+
+            // in case of a hit, old segment is deleted no matter what.
             oldSegmentArray.push_back( cubicSegment );
         }
     }
@@ -229,16 +243,27 @@ FOdysseyVectorPathCubic::Erase( ::ULIS::FRectD &iRoi )
 
     for( int i = 0; i < newVertexArray.size(); i++ )
     {
-
         this->AddVertex( newVertexArray[i] );
     }
 
     for( int i = 0; i < newSegmentArray.size(); i++ )
     {
-
         this->AddSegment( newSegmentArray[i] );
 
-        newSegmentArray[i]->Invalidate();
+        /*newSegmentArray[i]->Invalidate();*/
+    }
+
+    // remove orphaned vertices
+    for( std::list<FOdysseyVectorVertex*>::iterator it = vertexList.begin(); it != vertexList.end(); ++it )
+    {
+        FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>(*it);
+
+        if( vertex->GetSegmentCount() == 0 )
+        {
+            oldVertexArray.push_back( static_cast<FOdysseyVectorVertexCubic*>(vertex) );
+
+            this->RemoveVertex( vertex );
+        }
     }
 
     Invalidate();

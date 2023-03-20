@@ -449,6 +449,7 @@ FOdysseyPainterEditorGUI::RemoveSelectedObjects()
             UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
 
             currentVectorLayer->GetScene()->RemoveSelectedObjects();
+            currentVectorLayer->GetScene()->Update( 0 );
 
             currentVectorLayer->RenderImageChanged( false );
         }

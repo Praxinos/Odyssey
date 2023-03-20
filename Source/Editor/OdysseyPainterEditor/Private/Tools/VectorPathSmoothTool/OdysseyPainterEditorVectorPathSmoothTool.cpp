@@ -89,11 +89,11 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDrag( const FOdysseyPoint& iPo
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
     UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
 
+    mPushHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
+
     if( currentLayer->GetClass() == UOdysseyTextureLayerImageVector::StaticClass() )
     {
         UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
-
-        mPushHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
 
         mPickedPointArray.clear();
 
@@ -108,7 +108,10 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDrag( const FOdysseyPoint& iPo
         {
             FOdysseyVectorVertexCubic* cubicVertex = static_cast<FOdysseyVectorVertexCubic*>(mPickedPointArray[i]);
 
-            cubicVertex->SmoothSegments( true, true );
+            if( cubicVertex->GetSegmentCount() == 2 )
+            {
+                cubicVertex->SmoothSegments( true, true );
+            }
         }
 
         currentVectorLayer->GetScene()->Update( 0 );

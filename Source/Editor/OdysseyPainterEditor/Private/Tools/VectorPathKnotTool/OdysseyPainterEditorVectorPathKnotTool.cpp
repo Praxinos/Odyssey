@@ -15,6 +15,7 @@ UOdysseyPainterEditorVectorPathKnotTool::~UOdysseyPainterEditorVectorPathKnotToo
 
 UOdysseyPainterEditorVectorPathKnotTool::UOdysseyPainterEditorVectorPathKnotTool()
     : Radius(20.0f)
+    , mPushHUD()
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathKnotTool64");
 }
@@ -32,6 +33,7 @@ UOdysseyPainterEditorVectorPathKnotTool::Activate()
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
 
         vectorEngine->ClearHUD();
+        vectorEngine->AddHUD(&mPushHUD);
 
         currentVectorLayer->RenderImageChanged(false);
     }
@@ -106,16 +108,48 @@ UOdysseyPainterEditorVectorPathKnotTool::OnMouseDown(const FOdysseyPoint& iPoint
 }
 
 void
+UOdysseyPainterEditorVectorPathKnotTool::OnMouseHover( const FOdysseyPoint& iPointInTexture )
+{
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
+    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
+
+    if( currentVectorLayer )
+    {
+        double diameter = Radius * 2.0f;
+        ::ULIS::FRectI rect = { (int)iPointInTexture.x - (int)Radius
+                              , (int)iPointInTexture.y - (int)Radius
+                              , (int)diameter
+                              , (int)diameter };
+
+        mPushHUD.SetRadius( Radius );
+        mPushHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
+/*
+        if( rect.x < 0 ) rect.x = 0;
+        if( rect.y < 0 ) rect.y = 0;
+
+        rect = rect & layerStack->GetSurface()->Block()->Rect();
+
+        if( rect.Area() )
+        {*/
+            currentVectorLayer->RenderImageChanged( /*{ rect },*/ true );
+        /*}*/
+    }
+}
+
+void
 UOdysseyPainterEditorVectorPathKnotTool::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
     UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
+
+    mPushHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
 
     if( currentLayer->GetClass() == UOdysseyTextureLayerImageVector::StaticClass() )
     {
         UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         ::ULIS::FRectD roi = { iPointInTexture.x - Radius, iPointInTexture.y - Radius, Radius * 2, Radius * 2 };
+
 /*
         vectorEngine->UseMaskImage();
         vectorEngine->GetBLContext()->setFillAlpha( 0.0f );

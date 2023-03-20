@@ -252,6 +252,8 @@ FOdysseyVectorPath::Clear()
 void
 FOdysseyVectorPath::RemoveSegment( FOdysseyVectorSegment* iSegment )
 {
+    iSegment->ClearIntersections();
+
     mSegmentList.remove( iSegment );
 
     iSegment->GetVertex(0)->RemoveSegment( iSegment );

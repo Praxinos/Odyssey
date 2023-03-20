@@ -593,6 +593,7 @@ FOdysseyVectorGroupPaint::ClearCycles( std::list<FOdysseyVectorSegment*>& cubicS
         {
             FOdysseyVectorPathCubic* cubicPath = static_cast<FOdysseyVectorPathCubic*>(child);
             std::list<FOdysseyVectorSegment*>& segmentList = cubicPath->GetSegmentList();
+            std::list<FOdysseyVectorVertex*>& vertexList = cubicPath->GetVertexList();
 
             mBBox = ( bboxInit == false ) ? cubicPath->GetBBox( false ) : mBBox | cubicPath->GetBBox( false );
 

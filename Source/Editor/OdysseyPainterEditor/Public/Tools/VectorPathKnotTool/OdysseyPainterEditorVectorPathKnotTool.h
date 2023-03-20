@@ -26,6 +26,7 @@ public:
     virtual void Activate() override;
 
     virtual bool OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
+    virtual void OnMouseHover( const FOdysseyPoint& iPointInTexture ) override;
     virtual void OnMouseDrag(const FOdysseyPoint& iPointInTexture) override;
     virtual bool OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
     virtual void Commit() override;
@@ -34,6 +35,7 @@ private:
     void Redraw(const TArray<::ULIS::FRectI>& iRects);
 
 private:
+        FOdysseyVectorHUDPush mPushHUD;
 
 public:
     // Setters
