@@ -42,8 +42,6 @@ FOdysseyVectorSegment::Init( FOdysseyVectorPath* iPath
 {
     FOdysseyVectorLink::Init ( iVertex0, iVertex1 );
 
-    AddSection ( new FOdysseyVectorSection ( this, iVertex0, iVertex1 ) );
-
     mPath = iPath;
 }
 
@@ -162,19 +160,17 @@ FOdysseyVectorSegment::AddIntersection ( FOdysseyVectorVertexIntersection* iInte
     AddSection ( subSection[1] );
 }
 
+// MUST be called only on segments belonging to this path (because of the section)
 void
-FOdysseyVectorSegment::ClearIntersections ( )
+FOdysseyVectorSegment::ClearIntersections()
 {
-    for( std::list<FOdysseyVectorSection*>::iterator it = mSectionList.begin(); it != mSectionList.end(); ++it )
+    std::list<FOdysseyVectorSection*> sectionList = mSectionList;
+
+    for( std::list<FOdysseyVectorSection*>::iterator it = sectionList.begin(); it != sectionList.end(); ++it )
     {
         FOdysseyVectorSection* section = static_cast<FOdysseyVectorSection*>(*it);
-        FOdysseyVectorVertex* vertex0 = section->GetVertex(0);
-        FOdysseyVectorVertex* vertex1 = section->GetVertex(1);
 
-        vertex0->RemoveSection( section );
-        vertex1->RemoveSection( section );
-
-        delete section;
+        DeleteSection( section );
     }
 
     mSectionList.clear();
@@ -182,9 +178,6 @@ FOdysseyVectorSegment::ClearIntersections ( )
     // do not free the intersection vertex here, as they are shared between segments. Deletion would be called twice.
     // Leave it to the paintgroup.
     mIntersectionVertexList.clear();
-
-    // Add default section
-    AddSection ( new FOdysseyVectorSection ( this, GetVertex(0), GetVertex(1) ) );
 }
 
 bool

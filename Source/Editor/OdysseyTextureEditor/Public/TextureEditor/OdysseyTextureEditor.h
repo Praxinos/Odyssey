@@ -21,6 +21,7 @@
 #include "Tools/VectorScenePanTool/OdysseyTextureEditorVectorScenePanTool.h"
 #include "Tools/VectorEraserTool/OdysseyTextureEditorVectorEraserTool.h"
 #include "Tools/VectorPathPushTool/OdysseyTextureEditorVectorPathPushTool.h"
+#include "Tools/VectorPathWidthTool/OdysseyTextureEditorVectorPathWidthTool.h"
 #include "Tools/VectorPathSmoothTool/OdysseyTextureEditorVectorPathSmoothTool.h"
 #include "Tools/VectorPathKnotTool/OdysseyTextureEditorVectorPathKnotTool.h"
 #include "Tools/PaintBucketTool/OdysseyTextureEditorPaintBucketTool.h"
@@ -68,6 +69,7 @@ public:
     virtual UOdysseyTextureEditorVectorScenePanTool* GetVectorScenePanTool() const override;
     virtual UOdysseyTextureEditorVectorEraserTool* GetVectorEraserTool() const override;
     virtual UOdysseyTextureEditorVectorPathPushTool* GetVectorPathPushTool() const override;
+    virtual UOdysseyTextureEditorVectorPathWidthTool* GetVectorPathWidthTool() const override;
     virtual UOdysseyTextureEditorVectorPathSmoothTool* GetVectorPathSmoothTool() const override;
     virtual UOdysseyTextureEditorVectorPathKnotTool* GetVectorPathKnotTool() const override;
     virtual UOdysseyTextureEditorPaintBucketTool* GetPaintBucketTool() const override;
@@ -108,6 +110,7 @@ private:
     UOdysseyTextureEditorVectorScenePanTool* mVectorScenePanTool;
     UOdysseyTextureEditorVectorEraserTool* mVectorEraserTool;
     UOdysseyTextureEditorVectorPathPushTool* mVectorPathPushTool;
+    UOdysseyTextureEditorVectorPathWidthTool* mVectorPathWidthTool;
     UOdysseyTextureEditorVectorPathSmoothTool* mVectorPathSmoothTool;
     UOdysseyTextureEditorVectorPathKnotTool* mVectorPathKnotTool;
     UOdysseyTextureEditorPaintBucketTool* mPaintBucketTool;

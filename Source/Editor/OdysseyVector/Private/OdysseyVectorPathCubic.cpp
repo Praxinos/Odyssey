@@ -250,7 +250,7 @@ FOdysseyVectorPathCubic::Erase( ::ULIS::FRectD &iRoi )
     {
         this->AddSegment( newSegmentArray[i] );
 
-        /*newSegmentArray[i]->Invalidate();*/
+        newSegmentArray[i]->Invalidate();
     }
 
     // remove orphaned vertices

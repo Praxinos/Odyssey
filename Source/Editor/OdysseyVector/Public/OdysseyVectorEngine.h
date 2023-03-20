@@ -27,7 +27,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
                          , double iY
                          , double iRadius
                          , std::vector<FOdysseyVectorSegment*>& oPickedSegmentArray
-                         , std::vector<double>& oDistance );
+                         , std::vector<double>* oDistance );
         void PickPoints( FOdysseyVectorScene* iScene
                        , double iX
                        , double iY

@@ -84,7 +84,7 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDown(const FOdysseyPoint& iPoint
                                   , iPointInTexture.y
                                   , Radius
                                   , mSegmentArray
-                                  , pickedSegmentDistanceArray );
+                                  , &pickedSegmentDistanceArray );
 
         for( int i = 0; i < mSegmentArray.size(); i++ )
         {

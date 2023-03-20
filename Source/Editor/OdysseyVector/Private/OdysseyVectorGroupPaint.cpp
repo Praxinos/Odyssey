@@ -607,6 +607,14 @@ FOdysseyVectorGroupPaint::ClearCycles( std::list<FOdysseyVectorSegment*>& cubicS
 
                 cubicSegmenList.push_back( cubicSegment );
             }
+
+            // add default intersection
+            for( std::list<FOdysseyVectorSegment*>::iterator sit = segmentList.begin(); sit != segmentList.end(); ++sit )
+            {
+                FOdysseyVectorSegmentCubic *cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(*sit);
+
+                cubicSegment->AddSection ( new FOdysseyVectorSection ( cubicSegment, cubicSegment->GetVertex(0), cubicSegment->GetVertex(1) ) );
+            }
         }
     }
 

@@ -386,7 +386,7 @@ RecursivePickSegments( FOdysseyVectorObject* iObject
                      , double iY
                      , double iRadius
                      , std::vector<FOdysseyVectorSegment*>& oPickedSegmentArray
-                     , std::vector<double>& oDistanceArray )
+                     , std::vector<double>* oDistanceArray )
 {
     if( ( iObject->GetClass() == FOdysseyVectorPath::StaticClass()      )
      || ( iObject->GetClass() == FOdysseyVectorPathCubic::StaticClass() ) )
@@ -424,7 +424,11 @@ RecursivePickSegments( FOdysseyVectorObject* iObject
                     if( segment->ProximityTest( localPoint.x, localPoint.y, localRadius, smallestDistance ) )
                     {
                         oPickedSegmentArray.push_back( segment );
-                        oDistanceArray.push_back( smallestDistance );
+
+                        if( oDistanceArray )
+                        {
+                            oDistanceArray->push_back( smallestDistance );
+                        }
                     } 
                 }
             }
@@ -445,7 +449,7 @@ FOdysseyVectorEngine::PickSegments( FOdysseyVectorScene* iScene
                                   , double iY
                                   , double iRadius
                                   , std::vector<FOdysseyVectorSegment*>& oPickedSegmentArray
-                                  , std::vector<double>& oDistance )
+                                  , std::vector<double>* oDistance )
 {
     RecursivePickSegments( iScene, iX, iY, iRadius, oPickedSegmentArray, oDistance );
 }
