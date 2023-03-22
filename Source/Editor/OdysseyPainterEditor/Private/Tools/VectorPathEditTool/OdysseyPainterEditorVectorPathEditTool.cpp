@@ -14,13 +14,16 @@ UOdysseyPainterEditorVectorPathEditTool::~UOdysseyPainterEditorVectorPathEditToo
 }
 
 UOdysseyPainterEditorVectorPathEditTool::UOdysseyPainterEditorVectorPathEditTool()
-    : Size(1.0f)
+    : Radius(10.0f)
     , mCubicPathHUD( FOdysseyVectorHUDPathCubic::VIEW_PATH
                    | FOdysseyVectorHUDPathCubic::VIEW_POINT/*
                    | FOdysseyVectorHUDPathCubic::VIEW_HANDLE_POINT
                    | FOdysseyVectorHUDPathCubic::VIEW_HANDLE_SEGMENT*/ )
+
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.VectoEdit64");
+
+    mPickingHUD.SetRadius( Radius );
 }
 
 //--------------------------------------------------------------------------------------
@@ -37,6 +40,7 @@ UOdysseyPainterEditorVectorPathEditTool::Activate()
 
         vectorEngine->ClearHUD();
         vectorEngine->AddHUD(&mCubicPathHUD);
+        vectorEngine->AddHUD(&mPickingHUD);
 
         currentVectorLayer->RenderImageChanged(false);
     }
@@ -125,46 +129,31 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDown(const FOdysseyPoint& iPoint
 
             if ( selectedObject->GetClass() == FOdysseyVectorPathCubic::StaticClass() )
             {
-                double radius = 10.0f;
                 FOdysseyVectorPathCubic *cubicPath = static_cast<FOdysseyVectorPathCubic*>( selectedObject );
                 BLPoint localCoords = cubicPath->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
-                BLPoint localSize = cubicPath->GetInverseWorldMatrix().mapVector( radius, radius );
-                double localRadius;
-
                 uint64 selectionFlags = 0;
-
-                localRadius = sqrt ( ( localSize.x * localSize.x ) + ( localSize.y * localSize.y ) );
 
                 mOldLocalMouseX = localCoords.x;
                 mOldLocalMouseY = localCoords.y;
 
                 cubicPath->Unselect( nullptr );
-/*
-                if ( QApplication::keyboardModifiers().testFlag( Qt::ControlModifier ) == true )
-                {
-                    selectionFlags = FVectorPath::PICK_HANDLE_POINT;
-                }
-                else
-                {
-*/
-                 if( mCubicPathHUD.GetDisplayMode() & FOdysseyVectorHUDPathCubic::VIEW_HANDLE_SEGMENT )
-                 {
-                    selectionFlags = FOdysseyVectorPath::PICK_HANDLE_SEGMENT;
-                 }
 
-                 if( mCubicPathHUD.GetDisplayMode() & FOdysseyVectorHUDPathCubic::VIEW_HANDLE_POINT )
-                 {
-                    selectionFlags = FOdysseyVectorPath::PICK_HANDLE_POINT;
-                 }
-
-                 if( mCubicPathHUD.GetDisplayMode() & FOdysseyVectorHUDPathCubic::VIEW_POINT )
-                 {
-                    selectionFlags = FOdysseyVectorPath::PICK_POINT;
-                 }
-/*
+                if( mCubicPathHUD.GetDisplayMode() & FOdysseyVectorHUDPathCubic::VIEW_HANDLE_SEGMENT )
+                {
+                   selectionFlags = FOdysseyVectorPath::PICK_HANDLE_SEGMENT;
                 }
-*/
-                cubicPath->PickPoint( localCoords.x, localCoords.y, localRadius, mPickedPointArray, selectionFlags );
+
+                if( mCubicPathHUD.GetDisplayMode() & FOdysseyVectorHUDPathCubic::VIEW_HANDLE_POINT )
+                {
+                   selectionFlags = FOdysseyVectorPath::PICK_HANDLE_POINT;
+                }
+
+                if( mCubicPathHUD.GetDisplayMode() & FOdysseyVectorHUDPathCubic::VIEW_POINT )
+                {
+                   selectionFlags = FOdysseyVectorPath::PICK_POINT;
+                }
+
+                cubicPath->PickPoint( iPointInTexture.x, iPointInTexture.y, Radius, mPickedPointArray, selectionFlags );
 
                 cubicPath->Invalidate();
 
@@ -185,6 +174,40 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDown(const FOdysseyPoint& iPoint
     }
 
     return true;
+}
+
+void
+UOdysseyPainterEditorVectorPathEditTool::OnMouseHover(const FOdysseyPoint& iPointInTexture)
+{
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
+    UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
+/*
+    ::ULIS::FRectI formerRegion = ::ULIS::FRectI( iPointInTexture.x - iPointInTexture.deltaPosition.X - Radius
+                                                , iPointInTexture.y - iPointInTexture.deltaPosition.Y - Radius
+                                                , Radius * 2
+                                                , Radius * 2 );
+    ::ULIS::FRectI currentRegion = ::ULIS::FRectI( iPointInTexture.x - Radius
+                                                 , iPointInTexture.y - Radius
+                                                 , Radius * 2
+                                                 , Radius * 2 );
+    ::ULIS::FRectI finalRegion = currentRegion | formerRegion;
+*/
+    mPickingHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
+
+    if( currentLayer->GetClass() == UOdysseyTextureLayerImageVector::StaticClass() )
+    {
+        UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
+/*
+        finalRegion.x -= 2;
+        finalRegion.y -= 2;
+        finalRegion.w += 4;
+        finalRegion.h += 4;
+        finalRegion = finalRegion & layerStack->GetSurface()->Block()->Rect();
+        finalRegion.Sanitize();
+*/
+        /*if( finalRegion.Area() )*/
+        currentVectorLayer->RenderImageChanged( /*{ finalRegion },**/ true );
+    }
 }
 
 static ::ULIS::FRectD
@@ -248,11 +271,15 @@ void
 UOdysseyPainterEditorVectorPathEditTool::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
+    UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
+
     static ::ULIS::FRectI oldInvalidatedArea = { 0, 0, 0, 0 };
 
-    if( currentVectorLayer )
+    mPickingHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
+
+    if( currentLayer )
     {
+        UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
         FOdysseyVectorObject* selectedObject = currentVectorLayer->GetScene()->GetLastSelected();
 
         if ( selectedObject )
@@ -310,10 +337,12 @@ bool
 UOdysseyPainterEditorVectorPathEditTool::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
+    UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
 
-    if( currentVectorLayer )
+    if( currentLayer )
     {
+        UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
+
         currentVectorLayer->GetScene()->Update( 0 );
 
         currentVectorLayer->RenderImageChanged(false);
@@ -328,4 +357,31 @@ void
 UOdysseyPainterEditorVectorPathEditTool::Commit()
 {
 
+}
+
+void
+UOdysseyPainterEditorVectorPathEditTool::PropertyChanged( const FName& iPropertyName )
+{
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
+    UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
+
+    if( currentLayer->GetClass() == UOdysseyTextureLayerImageVector::StaticClass() )
+    {
+        UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
+
+        mPickingHUD.SetRadius( Radius );
+
+        currentVectorLayer->RenderImageChanged(false);
+    }
+}
+
+void
+UOdysseyPainterEditorVectorPathEditTool::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent)
+{
+    Super::PostEditChangeProperty(PropertyChangedEvent);
+
+    if (PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive)
+        return;
+
+    PropertyChanged(PropertyChangedEvent.GetPropertyName());
 }

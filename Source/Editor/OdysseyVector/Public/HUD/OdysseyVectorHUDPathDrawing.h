@@ -17,7 +17,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUDPathDrawing : public FOdysseyVectorHUD
         virtual ~FOdysseyVectorHUDPathDrawing();
         FOdysseyVectorHUDPathDrawing();
 
-        void Draw( FOdysseyVectorScene& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags );
+        void Draw( FOdysseyVectorScene* iScene, ::ULIS::FRectD& iRoi, uint64 iFlags );
         void SetRadius( double iRadius );
         void SetStitchingRadius( double iRadius );
         void SetPosition( double iX, double iY );

@@ -20,7 +20,7 @@ UOdysseyPainterEditorVectorGridTool::~UOdysseyPainterEditorVectorGridTool()
 UOdysseyPainterEditorVectorGridTool::UOdysseyPainterEditorVectorGridTool()
     : DivisionsX( 4 )
     , DivisionsY( 4 )
-    , PickingRadius( 10 )
+    , PickingRadius( 10.0f )
     , mMultipleSelectionMode( false )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Grid64");
@@ -40,7 +40,7 @@ UOdysseyPainterEditorVectorGridTool::Activate()
         UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
 
-        mGridHUD.MakeGrid( *currentVectorLayer->GetScene(), DivisionsX, DivisionsY );
+        mGridHUD.MakeGrid( currentVectorLayer->GetScene(), DivisionsX, DivisionsY );
 
         mGridNodeArray.clear();
 
@@ -183,7 +183,7 @@ UOdysseyPainterEditorVectorGridTool::PropertyChanged( const FName& iPropertyName
     {
         UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
 
-        mGridHUD.MakeGrid( *currentVectorLayer->GetScene(), DivisionsX, DivisionsY );
+        mGridHUD.MakeGrid( currentVectorLayer->GetScene(), DivisionsX, DivisionsY );
 
         currentVectorLayer->RenderImageChanged(false);
     }

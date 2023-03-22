@@ -38,10 +38,10 @@ FOdysseyVectorHUDScale::Pick( double iWorldX, double iWorldY )
 }
 
 void
-FOdysseyVectorHUDScale::Draw( FOdysseyVectorScene& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags )
+FOdysseyVectorHUDScale::Draw( FOdysseyVectorScene* iScene, ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
-    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene.GetSelectedObjectList();
-    BLContext* blctx = iScene.GetEngine()->GetBLContext();
+    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
+    BLContext* blctx = iScene->GetEngine()->GetBLContext();
     ::ULIS::FRectD bbox = { 0, 0, 0, 0 };
 
     DrawSelectionBox( iScene, iRoi, iFlags );

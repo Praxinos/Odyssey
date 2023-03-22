@@ -11,10 +11,10 @@ FOdysseyVectorHUDBucket::FOdysseyVectorHUDBucket()
 }
 
 void
-FOdysseyVectorHUDBucket::Draw( FOdysseyVectorScene& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags )
+FOdysseyVectorHUDBucket::Draw( FOdysseyVectorScene* iScene, ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
-    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene.GetSelectedObjectList();
-    BLContext* blctx = iScene.GetEngine()->GetBLContext();
+    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
+    BLContext* blctx = iScene->GetEngine()->GetBLContext();
     ::ULIS::FRectD bbox = { 0, 0, 0, 0 };
     BLPath path;
 
@@ -23,7 +23,7 @@ FOdysseyVectorHUDBucket::Draw( FOdysseyVectorScene& iScene, ::ULIS::FRectD& iRoi
 
     if( selectedObjectList.size() == 1 )
     {
-        FOdysseyVectorObject* selectedObject = iScene.GetLastSelected();
+        FOdysseyVectorObject* selectedObject = iScene->GetLastSelected();
 
         if( selectedObject->GetClass() == FOdysseyVectorGroupPaint::StaticClass() )
         {

@@ -26,14 +26,17 @@ public:
     virtual void Activate() override;
 
     virtual bool OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
+    virtual void OnMouseHover(const FOdysseyPoint& iPointInTexture) override;
     virtual void OnMouseDrag(const FOdysseyPoint& iPointInTexture) override;
     virtual bool OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
     virtual bool OnKeyDown( const FKey& iKey );
     virtual bool OnKeyUp( const FKey& iKey );
     virtual void Commit() override;
 
-private:
-    void Redraw( const TArray<::ULIS::FRectI>& iRects );
+protected:
+    void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent );
+    void PropertyChanged( const FName& iPropertyName );
+
     FOdysseyVectorPathCubic* FetchPath( FOdysseyVectorEngine* iVectorEngine
                                       , FOdysseyVectorScene* iScene
                                       , double iWorldX
@@ -43,6 +46,7 @@ private:
     double mOldLocalMouseX;
     double mOldLocalMouseY;
     FOdysseyVectorHUDPathCubic mCubicPathHUD;
+    FOdysseyVectorHUDPicking mPickingHUD;
     std::vector<FOdysseyVectorPoint*> mPickedPointArray;
 
 public:
@@ -50,7 +54,7 @@ public:
     virtual bool CanDraw();
 
     UPROPERTY(EditAnywhere, Category="Odyssey PathEdit Tool")
-    double Size;
+    double Radius;
 
 protected:
 

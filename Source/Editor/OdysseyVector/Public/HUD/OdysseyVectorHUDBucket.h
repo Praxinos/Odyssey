@@ -13,5 +13,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUDBucket : public FOdysseyVectorHUD
         ~FOdysseyVectorHUDBucket();
         FOdysseyVectorHUDBucket();
 
-        void Draw( FOdysseyVectorScene& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags );
+        void Draw( FOdysseyVectorScene* iScene, ::ULIS::FRectD& iRoi, uint64 iFlags );
 };

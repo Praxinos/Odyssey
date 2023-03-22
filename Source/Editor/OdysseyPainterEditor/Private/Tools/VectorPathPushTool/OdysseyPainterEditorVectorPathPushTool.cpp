@@ -16,9 +16,11 @@ UOdysseyPainterEditorVectorPathPushTool::~UOdysseyPainterEditorVectorPathPushToo
 UOdysseyPainterEditorVectorPathPushTool::UOdysseyPainterEditorVectorPathPushTool()
     : Radius(20.0f)
     , PreserveSmoothness(true)
-    , mPushHUD()
+    , mPickingHUD()
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathPushTool64");
+
+    mPickingHUD.SetRadius( Radius );
 }
 
 //--------------------------------------------------------------------------------------
@@ -34,7 +36,7 @@ UOdysseyPainterEditorVectorPathPushTool::Activate()
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
 
         vectorEngine->ClearHUD();
-        vectorEngine->AddHUD(&mPushHUD);
+        vectorEngine->AddHUD(&mPickingHUD);
 
         currentVectorLayer->RenderImageChanged(false);
     }
@@ -138,8 +140,7 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseHover( const FOdysseyPoint& iPoi
                               , (int)diameter
                               , (int)diameter };
 
-        mPushHUD.SetRadius( Radius );
-        mPushHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
+        mPickingHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
 /*
         if( rect.x < 0 ) rect.x = 0;
         if( rect.y < 0 ) rect.y = 0;
@@ -163,7 +164,7 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDrag( const FOdysseyPoint& iPoin
     {
         UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
 
-        mPushHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
+        mPickingHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
 
         for( int i = 0; i < mPushedPointArray.size(); i++ )
         {
@@ -238,4 +239,31 @@ void
 UOdysseyPainterEditorVectorPathPushTool::Commit()
 {
 
+}
+
+void
+UOdysseyPainterEditorVectorPathPushTool::PropertyChanged( const FName& iPropertyName )
+{
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
+    UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
+
+    if( currentLayer->GetClass() == UOdysseyTextureLayerImageVector::StaticClass() )
+    {
+        UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
+
+        mPickingHUD.SetRadius( Radius );
+
+        currentVectorLayer->RenderImageChanged(false);
+    }
+}
+
+void
+UOdysseyPainterEditorVectorPathPushTool::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent)
+{
+    Super::PostEditChangeProperty(PropertyChangedEvent);
+
+    if (PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive)
+        return;
+
+    PropertyChanged(PropertyChangedEvent.GetPropertyName());
 }

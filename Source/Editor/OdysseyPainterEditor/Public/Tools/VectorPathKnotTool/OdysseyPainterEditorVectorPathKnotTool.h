@@ -31,11 +31,12 @@ public:
     virtual bool OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
     virtual void Commit() override;
 
-private:
-    void Redraw(const TArray<::ULIS::FRectI>& iRects);
+protected:
+    void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent );
+    void PropertyChanged( const FName& iPropertyName );
 
 private:
-        FOdysseyVectorHUDPush mPushHUD;
+        FOdysseyVectorHUDPicking mPickingHUD;
 
 public:
     // Setters

@@ -11,16 +11,16 @@ FOdysseyVectorHUDEraser::FOdysseyVectorHUDEraser()
 }
 
 void
-FOdysseyVectorHUDEraser::Draw( FOdysseyVectorScene& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags )
+FOdysseyVectorHUDEraser::Draw( FOdysseyVectorScene* iScene, ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
-    BLContext* blctx = iScene.GetEngine()->GetBLContext();
+    BLContext* blctx = iScene->GetEngine()->GetBLContext();
     ::ULIS::FRectD bbox = { 0, 0, 0, 0 };
     BLPath path;
     BLPoint topLeft = { 0, 0 };
 
     if( mBlending == true )
     {
-        blctx->blitImage( topLeft, *iScene.GetEngine()->GetBLMask() );
+        blctx->blitImage( topLeft, *iScene->GetEngine()->GetBLMask() );
     }
 
     // matrix might get altered for displaying the selection rectangle of a single object. Save it.

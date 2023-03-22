@@ -282,24 +282,34 @@ FOdysseyVectorSegmentCubic::ProximityTest( double iLocalX, double iLocalY, doubl
         }
     }
 
+    // The test above works only if pt is projectable on the sub-segment.
+    // We also should check the distance to the segment endpoints.
     // test first end-point of the segment
     dx = ( iLocalX - point0.x );
     dy = ( iLocalY - point0.y );
-    dist = sqrt( ( dx * dx ) + ( dy * dy ) );
 
-    if( dist < smallestDistance )
+    if( dx && dy )
     {
-        smallestDistance = dist;
+        dist = sqrt( ( dx * dx ) + ( dy * dy ) );
+
+        if( dist < smallestDistance )
+        {
+            smallestDistance = dist;
+        }
     }
 
     // test second end-point of the segment
     dx = ( iLocalX - point1.x );
     dy = ( iLocalY - point1.y );
-    dist = sqrt( ( dx * dx ) + ( dy * dy ) );
 
-    if( dist < smallestDistance )
+    if( dx && dy )
     {
-        smallestDistance = dist;
+        dist = sqrt( ( dx * dx ) + ( dy * dy ) );
+
+        if( dist < smallestDistance )
+        {
+            smallestDistance = dist;
+        }
     }
 
     if( smallestDistance < iDistanceTolerance )

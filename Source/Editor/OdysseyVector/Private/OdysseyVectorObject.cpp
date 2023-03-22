@@ -294,29 +294,13 @@ void
 FOdysseyVectorObject::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
     BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
-    ::ULIS::FRectD localRoi = { 0.0f, 0.0f, 0.0f, 0.0f };
-
-    // Adapt the Region-Of-Interest to the local coordinates
-    if( iRoi.Area() != 0.0f )
-    {
-        BLPoint roiCornerOrigin = { iRoi.x, iRoi.y };
-        BLPoint roiCornerSize = { iRoi.w, iRoi.h };
-        BLPoint localRoiCornerOrigin = mInverseLocalMatrix.mapPoint( roiCornerOrigin.x, roiCornerOrigin.y );
-        BLPoint localRoiCornerSize = mInverseLocalMatrix.mapVector( roiCornerSize.x, roiCornerSize.y );
-
-        localRoi.x = localRoiCornerOrigin.x;
-        localRoi.y = localRoiCornerOrigin.y;
-        localRoi.w = localRoiCornerSize.x;
-        localRoi.h = localRoiCornerSize.y;
-    }
-
-            /*printf("%s : %f %f %f %f\n",Name.c_str(), iRoi.x,iRoi.y,iRoi.w,iRoi.h);*/
 
     blctx->save();
     blctx->transform( mLocalMatrix );
-    DrawShape( localRoi, iFlags );
 
-    DrawChildren( localRoi, iFlags );
+    DrawShape( iRoi, iFlags );
+
+    DrawChildren( iRoi, iFlags );
 
     blctx->restore();
 }

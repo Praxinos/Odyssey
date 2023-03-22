@@ -19,6 +19,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUDScale : public FOdysseyVectorHUDSelecti
         virtual ~FOdysseyVectorHUDScale();
         FOdysseyVectorHUDScale();
 
-        void Draw( FOdysseyVectorScene& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags );
+        void Draw( FOdysseyVectorScene* iScene, ::ULIS::FRectD& iRoi, uint64 iFlags );
         int32 Pick( double iWorldX, double iWorldY );
 };

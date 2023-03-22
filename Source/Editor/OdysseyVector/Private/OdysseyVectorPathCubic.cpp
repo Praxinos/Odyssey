@@ -333,8 +333,8 @@ FOdysseyVectorPathCubic::PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags
 }
 
 bool
-FOdysseyVectorPathCubic::PickPoint( double iX
-                                  , double iY
+FOdysseyVectorPathCubic::PickPoint( double iWorldX
+                                  , double iWorldY
                                   , double iSelectionRadius
                                   , std::vector<FOdysseyVectorPoint*>& oPickedPointArray
                                   , uint64 iSelectionFlags )
@@ -343,30 +343,43 @@ FOdysseyVectorPathCubic::PickPoint( double iX
     {
         FOdysseyVectorVertexCubic* vertex = static_cast<FOdysseyVectorVertexCubic*>(*it);
         ::ULIS::FVec2D perpendicularVector = vertex->GetPerpendicularVector( true );
+        BLPoint worldPerpendicularVector = mWorldMatrix.mapVector( perpendicularVector.x * vertex->GetRadius()
+                                                                 , perpendicularVector.y * vertex->GetRadius() );
 
+        // Pick vertex
         if ( iSelectionFlags & PICK_POINT )
         {
-            if( ( fabs( vertex->GetX() - iX ) <= iSelectionRadius ) &&
-                ( fabs( vertex->GetY() - iY ) <= iSelectionRadius ) )
+            ::ULIS::FVec2D& localCoords = vertex->GetCoords( nullptr );
+            // convert vertex coordinates to world coordinates. Easier to detect collision inside the picking circle.
+            BLPoint worldCoords = mWorldMatrix.mapPoint( localCoords.x, localCoords.y );
+            ::ULIS::FVec2D dif = ::ULIS::FVec2D( worldCoords.x - iWorldX, worldCoords.y - iWorldY );
+
+            if( dif.Distance() <= iSelectionRadius )
             {
                 oPickedPointArray.push_back( vertex );
             }
         }
 
+        // Pick vertex handle
         if( iSelectionFlags & PICK_HANDLE_POINT )
         {
-            // Pick point handle
-            if( ( fabs( vertex->GetX() + ( perpendicularVector.x * vertex->GetRadius() ) - iX ) <= iSelectionRadius ) &&
-                ( fabs( vertex->GetY() + ( perpendicularVector.y * vertex->GetRadius() ) - iY ) <= iSelectionRadius ) )
+            ::ULIS::FVec2D& localCoords = vertex->GetCoords( nullptr );
+            // convert vertex coordinates to world coordinates. Easier to detect collision inside the picking circle.
+            BLPoint worldCoords = mWorldMatrix.mapPoint( localCoords.x, localCoords.y );
+            // There are 2 point handles, compute both
+            ::ULIS::FVec2D dif0 = ::ULIS::FVec2D( worldCoords.x + worldPerpendicularVector.x - iWorldX
+                                                , worldCoords.y + worldPerpendicularVector.y - iWorldY );
+            ::ULIS::FVec2D dif1 = ::ULIS::FVec2D( worldCoords.x - worldPerpendicularVector.x - iWorldX
+                                                , worldCoords.y - worldPerpendicularVector.y - iWorldY );
+
+            if( dif0.Distance() <= iSelectionRadius )
             {
                 oPickedPointArray.push_back( vertex->GetHandle() );
 
                 return true;
             }
 
-            // Pick point handle on the other side
-            if( ( fabs( vertex->GetX() - ( perpendicularVector.x * vertex->GetRadius() ) - iX ) <= iSelectionRadius ) &&
-                ( fabs( vertex->GetY() - ( perpendicularVector.y * vertex->GetRadius() ) - iY ) <= iSelectionRadius ) )
+            if( dif1.Distance() <= iSelectionRadius )
             {
                 oPickedPointArray.push_back( vertex->GetHandle() );
 
@@ -375,26 +388,34 @@ FOdysseyVectorPathCubic::PickPoint( double iX
         }
     }
 
+    // Pick segment handles
     if( iSelectionFlags & PICK_HANDLE_SEGMENT )
     {
         for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
         {
-            FOdysseyVectorSegmentCubic* segment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
-            FOdysseyVectorPoint* ctrlPoint0 = segment->GetHandle( 0 );
-            FOdysseyVectorPoint* ctrlPoint1 = segment->GetHandle( 1 );
+            // TODO: hit-test with segment's bounding box.
 
-            if( ( fabs( ctrlPoint0->GetX() - iX ) <= iSelectionRadius ) &&
-                ( fabs( ctrlPoint0->GetY() - iY ) <= iSelectionRadius ) )
+            FOdysseyVectorSegmentCubic* segment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
+            FOdysseyVectorHandleSegment* handle0 = segment->GetHandle(0);
+            FOdysseyVectorHandleSegment* handle1 = segment->GetHandle(1);
+            ::ULIS::FVec2D& handle0LocalCoords = handle0->GetCoords();
+            ::ULIS::FVec2D& handle1LocalCoords = handle1->GetCoords();
+            // convert handles coordinates to world coordinates. Easier to detect collision inside the picking circle.
+            BLPoint handle0WorldCoords = mWorldMatrix.mapPoint( handle0LocalCoords.x, handle0LocalCoords.y );
+            BLPoint handle1WorldCoords = mWorldMatrix.mapPoint( handle1LocalCoords.x, handle1LocalCoords.y );
+            ::ULIS::FVec2D dif0 = ::ULIS::FVec2D( handle0WorldCoords.x - iWorldX, handle0WorldCoords.y - iWorldY );
+            ::ULIS::FVec2D dif1 = ::ULIS::FVec2D( handle1WorldCoords.x - iWorldX, handle1WorldCoords.y - iWorldY );
+
+            if( dif0.Distance() <= iSelectionRadius )
             {
-                oPickedPointArray.push_back( ctrlPoint0 );
+                oPickedPointArray.push_back( handle0 );
 
                 return true;
             }
 
-            if( ( fabs( ctrlPoint1->GetX() - iX ) <= iSelectionRadius ) &&
-                ( fabs( ctrlPoint1->GetY() - iY ) <= iSelectionRadius ) )
+            if( dif1.Distance() <= iSelectionRadius )
             {
-                oPickedPointArray.push_back( ctrlPoint1 );
+                oPickedPointArray.push_back( handle1 );
 
                 return true;
             }
@@ -449,13 +470,12 @@ FOdysseyVectorPathCubic::Fill( ::ULIS::FRectD& iRoi )
 {
     FOdysseyVectorVertexCubic *firstVertex = static_cast<FOdysseyVectorVertexCubic*>( GetFirstVertex() );
 
-
     if ( firstVertex )
     {
         BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
-        BLPath path;
-        BLRgba32 blFillColor;
         FColor& fillColor = mFillBucket.GetColor();
+        BLRgba32 blFillColor;
+        BLPath path;
 
         blFillColor.r = fillColor.R;
         blFillColor.g = fillColor.G;
@@ -471,13 +491,13 @@ FOdysseyVectorPathCubic::Fill( ::ULIS::FRectD& iRoi )
             FOdysseyVectorSegmentCubic *segment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
             ::ULIS::FVec2D& point0 = segment->GetVertex(0)->GetCoords( nullptr );
             ::ULIS::FVec2D& point1 = segment->GetVertex(1)->GetCoords( nullptr );
-            ::ULIS::FVec2D& ctrlPoint0 = segment->GetHandle(0)->GetCoords();
-            ::ULIS::FVec2D& ctrlPoint1 = segment->GetHandle(1)->GetCoords();
+            ::ULIS::FVec2D& handle0 = segment->GetHandle(0)->GetCoords();
+            ::ULIS::FVec2D& handle1 = segment->GetHandle(1)->GetCoords();
 
-            path.cubicTo( ctrlPoint0.x
-                        , ctrlPoint0.y
-                        , ctrlPoint1.x
-                        , ctrlPoint1.y
+            path.cubicTo( handle0.x
+                        , handle0.y
+                        , handle1.x
+                        , handle1.y
                         , point1.x
                         , point1.y );
         }
@@ -493,6 +513,7 @@ FOdysseyVectorPathCubic::DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags )
 
     if ( mPathParam.Filled )
     {
+        // TODO: precompute the filling (build the BLPath )
         Fill( iRoi );
     }
 

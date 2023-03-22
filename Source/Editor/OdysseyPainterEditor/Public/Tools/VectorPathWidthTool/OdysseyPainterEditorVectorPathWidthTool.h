@@ -6,48 +6,34 @@
 #include "CoreMinimal.h"
 #include "Tools/OdysseyPainterEditorTool.h"
 #include "OdysseyVector.h"
-#include "OdysseyPainterEditorVectorPathPushTool.generated.h"
-
-typedef struct _FPushedPoint
-{
-     FOdysseyVectorPoint* point;
-     double ratio;
-     _FPushedPoint( FOdysseyVectorPoint* iPoint, double iRatio )
-     {
-         point = iPoint;
-         ratio = ( iRatio > 1.0f ) ? 1.0f : iRatio;
-     }
-} FPushedPoint;
+#include "OdysseyPainterEditorVectorPathWidthTool.generated.h"
 
 UCLASS()
-class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathPushTool : public UOdysseyPainterEditorTool
+class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathWidthTool : public UOdysseyPainterEditorTool
 {
 public:
     GENERATED_BODY()
 
 public:
     // Destructor
-    virtual ~UOdysseyPainterEditorVectorPathPushTool();
+    virtual ~UOdysseyPainterEditorVectorPathWidthTool();
 
     //Constructor
-    UOdysseyPainterEditorVectorPathPushTool();
+    UOdysseyPainterEditorVectorPathWidthTool();
  
     //OdysseyPainterEditorTool overrides
     virtual void Activate() override;
 
     virtual bool OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
-    virtual void OnMouseHover(const FOdysseyPoint& iPointInTexture) override;
+    virtual void OnMouseHover( const FOdysseyPoint& iPointInTexture ) override;
     virtual void OnMouseDrag(const FOdysseyPoint& iPointInTexture) override;
     virtual bool OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
     virtual void Commit() override;
 
-protected:
-    void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent );
     void PropertyChanged( const FName& iPropertyName );
+    void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent );
 
 private:
-    bool HasVertex( FOdysseyVectorPoint* iPoint );
-    std::vector<FPushedPoint> mPushedPointArray;
     std::vector<FOdysseyVectorSegment*> mSegmentArray;
     FOdysseyVectorHUDPicking mPickingHUD;
 
@@ -55,11 +41,11 @@ public:
     // Setters
     virtual bool CanDraw();
 
-    UPROPERTY(EditAnywhere, Category="Odyssey PathPush Tool")
+    UPROPERTY(EditAnywhere, Category="Odyssey PathWidth Tool")
     double Radius;
 
-    UPROPERTY(EditAnywhere,Category="Odyssey PathPush Tool")
-    bool PreserveSmoothness;
+    UPROPERTY(EditAnywhere, Category="Odyssey PathWidth Tool")
+    double Strength;
 
 protected:
 

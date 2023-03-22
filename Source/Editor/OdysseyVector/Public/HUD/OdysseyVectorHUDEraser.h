@@ -17,7 +17,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUDEraser : public FOdysseyVectorHUD
         ~FOdysseyVectorHUDEraser();
         FOdysseyVectorHUDEraser();
 
-        void Draw( FOdysseyVectorScene& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags );
+        void Draw( FOdysseyVectorScene* iScene, ::ULIS::FRectD& iRoi, uint64 iFlags );
 
         void SetRadius( double iRadius );
         void SetPosition( double iX, double iY );

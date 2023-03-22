@@ -12,9 +12,9 @@ FOdysseyVectorHUDPathDrawing::FOdysseyVectorHUDPathDrawing()
 }
 
 void
-FOdysseyVectorHUDPathDrawing::Draw( FOdysseyVectorScene& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags )
+FOdysseyVectorHUDPathDrawing::Draw( FOdysseyVectorScene* iScene, ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
-    BLContext* blctx = iScene.GetEngine()->GetBLContext();
+    BLContext* blctx = iScene->GetEngine()->GetBLContext();
 
     // matrix might get altered for displaying the selection rectangle of a single object. Save it.
     blctx->save();

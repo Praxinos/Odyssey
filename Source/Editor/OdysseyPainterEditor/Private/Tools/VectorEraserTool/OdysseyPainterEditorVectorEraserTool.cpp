@@ -138,7 +138,7 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseUp(const FOdysseyPoint& iPointInTe
         mEraserHUD.BlendMask( false );
 
         vectorEngine->UseMaskImage();
-        vectorEngine->Erase( *currentVectorLayer->GetScene(), Roi, false );
+        vectorEngine->Erase( currentVectorLayer->GetScene(), Roi, false );
         vectorEngine->UseColorImage();
 
         currentVectorLayer->RenderImageChanged(false);

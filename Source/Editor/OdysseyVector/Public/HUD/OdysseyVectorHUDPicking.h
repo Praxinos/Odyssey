@@ -5,7 +5,7 @@
 
 #include "HUD/OdysseyVectorHUD.h"
 
-class ODYSSEYVECTOR_API FOdysseyVectorHUDPush : public FOdysseyVectorHUD
+class ODYSSEYVECTOR_API FOdysseyVectorHUDPicking : public FOdysseyVectorHUD
 {
     private:
         double mX;
@@ -13,10 +13,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUDPush : public FOdysseyVectorHUD
         double mRadius;
 
     public:
-        virtual ~FOdysseyVectorHUDPush();
-        FOdysseyVectorHUDPush();
+        virtual ~FOdysseyVectorHUDPicking();
+        FOdysseyVectorHUDPicking();
 
-        void Draw( FOdysseyVectorScene& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags );
+        void Draw( FOdysseyVectorScene* iScene, ::ULIS::FRectD& iRoi, uint64 iFlags );
         void SetRadius( double iRadius );
         void SetPosition( double iX, double iY );
 };

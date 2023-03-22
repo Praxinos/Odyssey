@@ -40,7 +40,7 @@ UOdysseyPainterEditorVectorObjectScaleTool::Activate()
         UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
 
-        mTransformHUD->UpdateSelectionBox( *currentVectorLayer->GetScene() );
+        mTransformHUD->UpdateSelectionBox( currentVectorLayer->GetScene() );
 
         vectorEngine->ClearHUD( );
         vectorEngine->AddHUD( mTransformHUD );
@@ -225,7 +225,7 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDrag(const FOdysseyPoint& iPo
             currentVectorLayer->GetScene()->UpdateMatrix();
 
             // update the selection box with the newly modified matrices
-            mTransformHUD->UpdateSelectionBox( *currentVectorLayer->GetScene() );
+            mTransformHUD->UpdateSelectionBox( currentVectorLayer->GetScene() );
 
             mOldLocalMouseX = localCoords.x;
             mOldLocalMouseY = localCoords.y;

@@ -121,10 +121,10 @@ FOdysseyVectorHUDPathCubic::DrawSegment( FOdysseyVectorPathCubic* iPath
 }
 
 void
-FOdysseyVectorHUDPathCubic::Draw( FOdysseyVectorScene& iScene, ::ULIS::FRectD& iRoi, uint64 iFlags )
+FOdysseyVectorHUDPathCubic::Draw( FOdysseyVectorScene* iScene, ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
-    BLContext* blctx = iScene.GetEngine()->GetBLContext();
-    FOdysseyVectorObject* selectedObject = iScene.GetLastSelected();
+    BLContext* blctx = iScene->GetEngine()->GetBLContext();
+    FOdysseyVectorObject* selectedObject = iScene->GetLastSelected();
 
     // matrix might get altered for displaying the selection rectangle of a single object. Save it.
     blctx->save();

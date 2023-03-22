@@ -34,8 +34,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathCubic: public FOdysseyVectorPath
         FOdysseyVectorPathCubic();
         void Init( std::string iName );
         FOdysseyVectorSegmentCubic* AppendVertex( FOdysseyVectorVertexCubic* iPoint, bool iConnect, bool iBuildSegments );
-        bool PickPoint( double iX
-                      , double iY
+        bool PickPoint( double iWorldX
+                      , double iWorldY
                       , double iSelectionRadius
                       , std::vector<FOdysseyVectorPoint*>& oPickedPointArray
                       , uint64 iSelectionFlags );

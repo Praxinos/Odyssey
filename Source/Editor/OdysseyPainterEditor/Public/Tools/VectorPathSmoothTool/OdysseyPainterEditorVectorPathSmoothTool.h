@@ -30,9 +30,13 @@ public:
     virtual bool OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
     virtual void Commit() override;
 
+protected:
+    void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent );
+    void PropertyChanged( const FName& iPropertyName );
+
     private:
         std::vector<FOdysseyVectorPoint*> mPickedPointArray;
-        FOdysseyVectorHUDPush mPushHUD;
+        FOdysseyVectorHUDPicking mPickingHUD;
 
 public:
     // Setters

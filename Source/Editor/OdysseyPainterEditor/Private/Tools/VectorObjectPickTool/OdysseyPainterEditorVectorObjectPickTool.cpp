@@ -39,7 +39,7 @@ UOdysseyPainterEditorVectorObjectPickTool::Activate()
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
 
         mSelectionHUD->Init( texture->Source.GetSizeX(), texture->Source.GetSizeY() );
-        mSelectionHUD->UpdateSelectionBox( *currentVectorLayer->GetScene() );
+        mSelectionHUD->UpdateSelectionBox( currentVectorLayer->GetScene() );
 
         vectorEngine->ClearHUD( );
         vectorEngine->AddHUD( mSelectionHUD );
@@ -136,18 +136,18 @@ UOdysseyPainterEditorVectorObjectPickTool::OnMouseUp(const FOdysseyPoint& iPoint
 
         if ( mPointArray.size() == 1 )
         {
-            vectorEngine->Pick( *currentVectorLayer->GetScene(), mPointArray, FOdysseyVectorObject::PICK_MATH_BASED );
+            vectorEngine->Pick( currentVectorLayer->GetScene(), mPointArray, FOdysseyVectorObject::PICK_MATH_BASED );
         }
 
         if ( mPointArray.size() > 1 )
         {
-            vectorEngine->Pick( *currentVectorLayer->GetScene(), mPointArray, FOdysseyVectorObject::PICK_MASK_BASED );
+            vectorEngine->Pick( currentVectorLayer->GetScene(), mPointArray, FOdysseyVectorObject::PICK_MASK_BASED );
         }
 
         SetSelectionSpace( vectorEngine, currentVectorLayer->GetScene()->GetLastSelected() );
 
         mSelectionHUD->SetSelecting( false, nullptr );
-        mSelectionHUD->UpdateSelectionBox( *currentVectorLayer->GetScene() );
+        mSelectionHUD->UpdateSelectionBox( currentVectorLayer->GetScene() );
 
         mSelectionChanged.Broadcast();
 

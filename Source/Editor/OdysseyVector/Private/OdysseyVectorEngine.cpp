@@ -1,5 +1,7 @@
 #include "OdysseyVectorEngine.h"
 
+static std::list<FOdysseyVectorHUD*> _HUDList;
+
 FOdysseyVectorEngine::~FOdysseyVectorEngine()
 {
     mBLContext->end();
@@ -56,7 +58,7 @@ FOdysseyVectorEngine::GetInvalidateRegion()
 }
 
 void
-FOdysseyVectorEngine::GetColorImagePixelValue( uint32 iX, uint32 iY, uint8 *oR, uint8* oG, uint8 *oB, uint8 *oA )
+FOdysseyVectorEngine::GetColorImagePixelValue( uint32 iX, uint32 iY, uint8* oR, uint8* oG, uint8* oB, uint8* oA )
 {
     BLImageData imageData;
 
@@ -86,29 +88,29 @@ FOdysseyVectorEngine::GetColorImagePixelValue( uint32 iX, uint32 iY, uint8 *oR, 
     }
 }
 
-::ULIS::FColor
+FColor
 FOdysseyVectorEngine::GetColorImagePixelValue( uint32 iX, uint32 iY )
 {
     uint8 R, G, B, A;
 
     GetColorImagePixelValue( iX, iY, &R, &G, &B, &A );
 
-    return ::ULIS::FColor::RGBA8( R, G, B, A );
+    return FColor( R, G, B, A ); //::ULIS::FColor::RGBA8( R, G, B, A );
 }
 
 void
-FOdysseyVectorEngine::RenderHUD( FOdysseyVectorScene& iScene )
+FOdysseyVectorEngine::RenderHUD( FOdysseyVectorScene* iScene )
 {
-    std::list<FOdysseyVectorObject*> selectedObjectList = iScene.GetSelectedObjectList();
+    std::list<FOdysseyVectorObject*> selectedObjectList = iScene->GetSelectedObjectList();
 
     mBLContext->save();
     mBLContext->resetMatrix();
 
-    for( std::list<FOdysseyVectorHUD*>::iterator hit = mHUDList.begin(); hit != mHUDList.end(); ++hit )
+    for( std::list<FOdysseyVectorHUD*>::iterator hit = _HUDList.begin(); hit != _HUDList.end(); ++hit )
     {
         FOdysseyVectorHUD *hud = (*hit);
 
-            hud->Draw( iScene, mRoi, 0 );
+        hud->Draw( iScene, mRoi, 0 );
     }
 
     mBLContext->restore();
@@ -121,17 +123,22 @@ FOdysseyVectorEngine::SetDrawingFlags( uint64 iDrawingFlags )
 }
 
 void
-FOdysseyVectorEngine::Render( FOdysseyVectorScene& iScene )
+FOdysseyVectorEngine::Render( FOdysseyVectorScene* iScene, const ::ULIS::FRectI& iRect )
 {
     // Blend2D part
    /* BLContextCreateInfo createInfo{};*/
 
     // Configure the number of threads to use.
     /*createInfo.threadCount = 1;*/
+    BLRectI clipping = BLRectI( iRect.x, iRect.y, iRect.w, iRect.h );
 
-    iScene.Draw( mRoi, mDrawingFlags );
+    mBLContext->clipToRect( clipping );
+
+    iScene->Draw( mRoi, mDrawingFlags );
 
     RenderHUD( iScene );
+
+    mBLContext->restoreClipping();
 
 /*
     BLImageData imgData;
@@ -210,39 +217,39 @@ FOdysseyVectorEngine::GenerateMask( std::vector<::ULIS::FVec2D>& iPointArray )
 }
 
 void
-FOdysseyVectorEngine::RecursiveErase( FOdysseyVectorObject& iObj
+FOdysseyVectorEngine::RecursiveErase( FOdysseyVectorObject* iObj
                                     , std::vector<FOdysseyVectorObject*>& iErasedObjectArray
                                     , ::ULIS::FRectD &iRoi
                                     , bool iSelectedOnly )
 {
-    for( std::list<FOdysseyVectorObject*>::iterator it = iObj.GetChildrenList().begin(); it != iObj.GetChildrenList().end(); ++it )
+    for( std::list<FOdysseyVectorObject*>::iterator it = iObj->GetChildrenList().begin(); it != iObj->GetChildrenList().end(); ++it )
     {
         FOdysseyVectorObject *child = (*it);
 
-        RecursiveErase( *child, iErasedObjectArray, iRoi, iSelectedOnly );
+        RecursiveErase( child, iErasedObjectArray, iRoi, iSelectedOnly );
     }
 
     if( iSelectedOnly == true )
     {
-        if( iObj.IsSelected() == true )
+        if( iObj->IsSelected() == true )
         {
-            if( iObj.Erase( iRoi ) )
+            if( iObj->Erase( iRoi ) )
             {
-                iErasedObjectArray.push_back( &iObj );
+                iErasedObjectArray.push_back( iObj );
             }
         }
     }
     else
     {
-        if( iObj.Erase( iRoi ) )
+        if( iObj->Erase( iRoi ) )
         {
-            iErasedObjectArray.push_back( &iObj );
+            iErasedObjectArray.push_back( iObj );
         }
     }
 }
 
 void
-FOdysseyVectorEngine::Erase( FOdysseyVectorScene& iScene
+FOdysseyVectorEngine::Erase( FOdysseyVectorScene* iScene
                            , ::ULIS::FRectD &iRoi
                            , bool iSelectedOnly )
 {
@@ -259,13 +266,13 @@ FOdysseyVectorEngine::Erase( FOdysseyVectorScene& iScene
         }
     }
 
-    iScene.Update( 0 );
+    iScene->Update( 0 );
 }
 
 static void
 RecursivePickPoints( FOdysseyVectorObject* iObject
-                   , double iX
-                   , double iY
+                   , double iWorldX
+                   , double iWorldY
                    , double iRadius
                    , std::vector<FOdysseyVectorPoint*>& oPickedPointArray
                    , uint64 iPickingFlags )
@@ -274,20 +281,22 @@ RecursivePickPoints( FOdysseyVectorObject* iObject
 
     if( path )
     {
-        BLPoint localVector = iObject->GetInverseWorldMatrix().mapVector( 0.7071f, 0.7071f );
-        ::ULIS::FVec2D factor = { localVector.x * iRadius, localVector.y * iRadius };
-        double localRadius = factor.Distance();
-        BLPoint localPoint = iObject->GetInverseWorldMatrix().mapPoint( iX, iY );
+        double radiusRoot = iRadius ? sqrt( iRadius ) : 0.0f;
+        BLMatrix2D& inverseWorldMatrix = iObject->GetInverseWorldMatrix();
+        BLPoint localRadius = inverseWorldMatrix.mapVector( radiusRoot, radiusRoot );
+        BLPoint localPoint = inverseWorldMatrix.mapPoint( iWorldX, iWorldY );
         ::ULIS::FRectD pathBBox = path->GetBBox( false );
 
-        pathBBox.x -=   localRadius;
-        pathBBox.y -=   localRadius;
-        pathBBox.w += ( localRadius * 2 );
-        pathBBox.h += ( localRadius * 2 );
+        // get sure we hit the box be enlarging it with the picking circle radius value.
+        // otherwise we might not be able to pick points located at the box's boundaries.
+        pathBBox.x -=   localRadius.x;
+        pathBBox.y -=   localRadius.y;
+        pathBBox.w += ( localRadius.x * 2 );
+        pathBBox.h += ( localRadius.y * 2 );
 
         if( pathBBox.HitTest( ::ULIS::FVec2D( localPoint.x, localPoint.y ) ) == true )
         {
-            path->PickPoint( localPoint.x, localPoint.y, localRadius, oPickedPointArray, iPickingFlags );
+            path->PickPoint( iWorldX, iWorldY, iRadius, oPickedPointArray, iPickingFlags );
         }
     }
 
@@ -295,7 +304,7 @@ RecursivePickPoints( FOdysseyVectorObject* iObject
     {
         FOdysseyVectorObject* child = (*it);
 
-        RecursivePickPoints( child, iX, iY, iRadius, oPickedPointArray, iPickingFlags );
+        RecursivePickPoints( child, iWorldX, iWorldY, iRadius, oPickedPointArray, iPickingFlags );
     }
 }
 
@@ -317,6 +326,12 @@ FOdysseyVectorEngine::Knot( FOdysseyVectorVertex* iVertexA
                           , FOdysseyVectorSegment** oRemovedSegment
                           , bool iSmooth )
 {
+    if( oCreatedSegment )
+        *oCreatedSegment = nullptr;
+
+    if( oRemovedSegment )
+        *oRemovedSegment = nullptr;
+
     if( ( iVertexA->GetSegmentCount() == 1 )
      && ( iVertexB->GetSegmentCount() == 1 )
      && ( iVertexA->GetPath() == iVertexB->GetPath() ) )
@@ -348,8 +363,7 @@ FOdysseyVectorEngine::Knot( FOdysseyVectorVertex* iVertexA
                 path->RemoveSegment( firstCubicSegment );
                 path->RemoveVertex( iVertexB );
 
-                knotVertex->SetX( averageCoords.x );
-                knotVertex->SetY( averageCoords.y );
+                knotVertex->Set( averageCoords.x, averageCoords.y );
                 knotVertex->SetRadius( averageRadius );
 
                 newCubicSegment = FOdysseyVectorSegmentCubic::New( cubicPath
@@ -362,10 +376,10 @@ FOdysseyVectorEngine::Knot( FOdysseyVectorVertex* iVertexA
 
                 path->AddSegment( newCubicSegment );
 
-                /*if( iSmooth )
+                if( iSmooth )
                 {
-                    knotVertex->SmoothSegments( false );
-                }*/
+                    knotVertex->SmoothSegments( false, true );
+                }
 
                 *oCreatedSegment = newCubicSegment;
                 *oRemovedSegment = firstCubicSegment;
@@ -375,6 +389,8 @@ FOdysseyVectorEngine::Knot( FOdysseyVectorVertex* iVertexA
                 return true;
             }
         }
+
+        path->Update( 0 );
     }
 
     return false;
@@ -398,6 +414,8 @@ RecursivePickSegments( FOdysseyVectorObject* iObject
         BLPoint localPoint = iObject->GetInverseWorldMatrix().mapPoint( iX, iY );
         ::ULIS::FRectD pathBBox = path->GetBBox( false );
 
+        // get sure we hit the box be enlarging it with the picking circle radius value.
+        // otherwise we might not be able to pick points located at the box's boundaries.
         pathBBox.x -=   localRadius;
         pathBBox.y -=   localRadius;
         pathBBox.w += ( localRadius * 2 );
@@ -457,18 +475,18 @@ FOdysseyVectorEngine::PickSegments( FOdysseyVectorScene* iScene
 // static
 void
 FOdysseyVectorEngine::RecursivePick( FOdysseyVectorGroup* iSelectionSpace
-                                   , FOdysseyVectorObject& iObj
+                                   , FOdysseyVectorObject* iObj
                                    , std::vector<FOdysseyVectorObject*>& iSelectedObjectArray
                                    , ::ULIS::FRectD& iRoi
                                    , uint32 iSelectionFlags )
 {
-    FOdysseyVectorObject* pickedObject = ( &iObj != iSelectionSpace ) ? iObj.Pick( iSelectionSpace, iRoi, iSelectionFlags ) : nullptr;
+    FOdysseyVectorObject* pickedObject = ( iObj != iSelectionSpace ) ? iObj->Pick( iSelectionSpace, iRoi, iSelectionFlags ) : nullptr;
 
-    for( std::list<FOdysseyVectorObject*>::iterator it = iObj.GetChildrenList().begin(); it != iObj.GetChildrenList().end(); ++it )
+    for( std::list<FOdysseyVectorObject*>::iterator it = iObj->GetChildrenList().begin(); it != iObj->GetChildrenList().end(); ++it )
     {
         FOdysseyVectorObject* child = (*it);
 
-        RecursivePick( iSelectionSpace, *child, iSelectedObjectArray, iRoi, iSelectionFlags );
+        RecursivePick( iSelectionSpace, child, iSelectedObjectArray, iRoi, iSelectionFlags );
     }
 
     if( pickedObject )
@@ -499,7 +517,7 @@ FOdysseyVectorEngine::UseColorImage()
 }
 
 void
-FOdysseyVectorEngine::Pick( FOdysseyVectorScene& iScene, std::vector<::ULIS::FVec2D>& iPointArray, uint32 iSelectionFlags )
+FOdysseyVectorEngine::Pick( FOdysseyVectorScene* iScene, std::vector<::ULIS::FVec2D>& iPointArray, uint32 iSelectionFlags )
 {
     ::ULIS::FRectD roi;
     std::vector<FOdysseyVectorObject*> pickedObjectArray;
@@ -522,13 +540,13 @@ FOdysseyVectorEngine::Pick( FOdysseyVectorScene& iScene, std::vector<::ULIS::FVe
     mBLContext->flush(BL_CONTEXT_FLUSH_SYNC);
 
     // deselect all
-    iScene.ClearSelection();
+    iScene->ClearSelection();
 
     RecursivePick( mSelectionSpace, iScene, pickedObjectArray, roi, iSelectionFlags );
 
     for ( int i = 0; i < pickedObjectArray.size(); i++ )
     {
-        iScene.Select( pickedObjectArray[i] );
+        iScene->Select( pickedObjectArray[i] );
     }
 
     if( iSelectionFlags & FOdysseyVectorObject::PICK_MASK_BASED )
@@ -566,15 +584,15 @@ FOdysseyVectorEngine::InvalidateRegion( ::ULIS::FRectI& iRegion )
 
 void FOdysseyVectorEngine::AddHUD( FOdysseyVectorHUD* iHUDObject )
 {
-    mHUDList.push_back( iHUDObject );
+    _HUDList.push_back( iHUDObject );
 }
 
 void FOdysseyVectorEngine::RemoveHUD( FOdysseyVectorHUD* iHUDObject )
 {
-    mHUDList.remove( iHUDObject );
+    _HUDList.remove( iHUDObject );
 }
 
 void FOdysseyVectorEngine::ClearHUD()
 {
-    mHUDList.clear();
+    _HUDList.clear();
 }

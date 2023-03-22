@@ -41,7 +41,7 @@ UOdysseyPainterEditorVectorObjectRotateTool::Activate()
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FSelectionBox& selectionBox = mTransformHUD->GetSelectionBox(); // this is a reference, it does not matter it we get it before the call to UpdateSelectionBox 
 
-        mTransformHUD->UpdateSelectionBox( *currentVectorLayer->GetScene() );
+        mTransformHUD->UpdateSelectionBox( currentVectorLayer->GetScene() );
 
         mTransformHUD->SetPivot( selectionBox.rect.x + ( selectionBox.rect.w * 0.5f )
                                , selectionBox.rect.y + ( selectionBox.rect.h * 0.5f ) );
@@ -157,7 +157,7 @@ UOdysseyPainterEditorVectorObjectRotateTool::OnMouseDrag(const FOdysseyPoint& iP
             currentVectorLayer->GetScene()->UpdateMatrix();
 
             // update the selection box with the newly modified matrices
-            mTransformHUD->UpdateSelectionBox( *currentVectorLayer->GetScene() );
+            mTransformHUD->UpdateSelectionBox( currentVectorLayer->GetScene() );
         }
 
         currentVectorLayer->RenderImageChanged(true);
