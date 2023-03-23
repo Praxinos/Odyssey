@@ -51,12 +51,6 @@ FOdysseyVectorEngine::GetBLMask()
     return mBLMask;
 }
 
-::ULIS::FRectD&
-FOdysseyVectorEngine::GetInvalidateRegion()
-{
-    return mRoi;
-}
-
 void
 FOdysseyVectorEngine::GetColorImagePixelValue( uint32 iX, uint32 iY, uint8* oR, uint8* oG, uint8* oB, uint8* oA )
 {
@@ -134,32 +128,11 @@ FOdysseyVectorEngine::Render( FOdysseyVectorScene* iScene, const ::ULIS::FRectI&
 
     mBLContext->clipToRect( clipping );
 
-    iScene->Draw( mRoi, mDrawingFlags );
+    iScene->Draw( clipping, mDrawingFlags );
 
     RenderHUD( iScene );
 
     mBLContext->restoreClipping();
-
-/*
-    BLImageData imgData;
-    BLImageData mskData;
-
-    mBLMask->getData( &mskData );
-    mBLImage->getData( &imgData );
-
-    for ( int i = 0; i < imgData.size.h; i++ ) {
-        for ( int j = 0; j < imgData.size.w; j++ ) {
-            uint32 offset = (i*imgData.size.w)+j;
-
-            if( ((uint8*)mskData.pixelData)[offset] )
-                ((uint32*)imgData.pixelData)[offset] = 0xFFFF0000;
-
-        }
-    }
-*/
-
-    // Reset region of interest after each draw
-    memset ( &mRoi, 0, sizeof ( mRoi ) );
 
     mBLContext->flush(BL_CONTEXT_FLUSH_SYNC);
 }
@@ -553,33 +526,6 @@ FOdysseyVectorEngine::Pick( FOdysseyVectorScene* iScene, std::vector<::ULIS::FVe
     {
         UseColorImage();
     }
-}
-
-void
-FOdysseyVectorEngine::InvalidateRegion( double x, double y, double w, double h )
-{
-    mRoi.x = x;
-    mRoi.y = y;
-    mRoi.w = w;
-    mRoi.h = h;
-}
-
-void
-FOdysseyVectorEngine::InvalidateRegion( ::ULIS::FRectD& iRegion )
-{
-    mRoi.x = iRegion.x;
-    mRoi.y = iRegion.y;
-    mRoi.w = iRegion.w;
-    mRoi.h = iRegion.h;
-}
-
-void
-FOdysseyVectorEngine::InvalidateRegion( ::ULIS::FRectI& iRegion )
-{
-    mRoi.x = iRegion.x;
-    mRoi.y = iRegion.y;
-    mRoi.w = iRegion.w;
-    mRoi.h = iRegion.h;
 }
 
 void FOdysseyVectorEngine::AddHUD( FOdysseyVectorHUD* iHUDObject )
