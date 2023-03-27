@@ -26,70 +26,43 @@ UOdysseyPainterEditorVectorObjectPickTool::UOdysseyPainterEditorVectorObjectPick
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
 void
-UOdysseyPainterEditorVectorObjectPickTool::Activate()
+UOdysseyPainterEditorVectorObjectPickTool::Activate( FOdysseyVectorEngine* iEngine
+                                                   , FOdysseyVectorScene* iScene
+                                                   , int32 iSizeX
+                                                   , int32 iSizeY )
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
+    mSelectionHUD->Init( iSizeX, iSizeY );
+    mSelectionHUD->UpdateSelectionBox( iScene );
 
-    if( currentLayer->GetClass() == UOdysseyTextureLayerImageVector::StaticClass() )
-    {
-        UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
-        UTexture2D* texture = layerStack->GetTexture();
-
-        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-
-        mSelectionHUD->Init( texture->Source.GetSizeX(), texture->Source.GetSizeY() );
-        mSelectionHUD->UpdateSelectionBox( currentVectorLayer->GetScene() );
-
-        vectorEngine->ClearHUD( );
-        vectorEngine->AddHUD( mSelectionHUD );
-
-        currentVectorLayer->RenderImageChanged(false);
-    }
+    iEngine->ClearHUD( );
+    iEngine->AddHUD( mSelectionHUD );
 }
 
 bool
-UOdysseyPainterEditorVectorObjectPickTool::CanDraw()
+UOdysseyPainterEditorVectorObjectPickTool::OnMouseDown( FOdysseyVectorEngine* iEngine
+                                                      , FOdysseyVectorScene* iScene
+                                                      , const FOdysseyPoint& iPointInTexture
+                                                      , const FKey& iKey )
 {
-    return IsActivable();
-}
-
-bool
-UOdysseyPainterEditorVectorObjectPickTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
-{
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
+    ::ULIS::FVec2D point = { iPointInTexture.x, iPointInTexture.y };
 
     mPointArray.clear();
 
-    if( currentVectorLayer )
-    {
-        ::ULIS::FVec2D point = { iPointInTexture.x, iPointInTexture.y };
-        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+    mSelectionHUD->SetSelecting( true, &mPointArray );
 
-        mSelectionHUD->SetSelecting( true, &mPointArray );
-
-        mPointArray.push_back( point );
-    }
+    mPointArray.push_back( point );
 
     return true;
 }
 
 void
-UOdysseyPainterEditorVectorObjectPickTool::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
+UOdysseyPainterEditorVectorObjectPickTool::OnMouseDrag( FOdysseyVectorEngine* iEngine
+                                                      , FOdysseyVectorScene* iScene
+                                                      , const FOdysseyPoint& iPointInTexture )
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
+    ::ULIS::FVec2D point = { iPointInTexture.x, iPointInTexture.y };
 
-    if( currentVectorLayer )
-    {
-        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        ::ULIS::FVec2D point = { iPointInTexture.x, iPointInTexture.y };
-
-        mPointArray.push_back( point );
-
-        currentVectorLayer->RenderImageChanged(true);
-    }
+    mPointArray.push_back( point );
 }
 
 static bool
@@ -113,8 +86,7 @@ SetSelectionSpace( FOdysseyVectorEngine* iVectorEngine, FOdysseyVectorObject* iS
 
         if( iSelectedObject )
         {
-            if( ( iSelectedObject->GetClass() == FOdysseyVectorGroup::StaticClass()      )
-             || ( iSelectedObject->GetClass() == FOdysseyVectorGroupPaint::StaticClass() ) )
+            if( iSelectedObject->HasBaseClass( FOdysseyVectorGroup::StaticClass() ) )
             {
                 selectedGroup = static_cast<FOdysseyVectorGroup*>(iSelectedObject);
             }
@@ -125,38 +97,29 @@ SetSelectionSpace( FOdysseyVectorEngine* iVectorEngine, FOdysseyVectorObject* iS
 }
 
 bool
-UOdysseyPainterEditorVectorObjectPickTool::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
+UOdysseyPainterEditorVectorObjectPickTool::OnMouseUp( FOdysseyVectorEngine* iEngine
+                                                    , FOdysseyVectorScene* iScene
+                                                    , const FOdysseyPoint& iPointInTexture
+                                                    , const FKey& iKey )
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
-
-    if( currentVectorLayer )
+    if ( mPointArray.size() == 1 )
     {
-        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-
-        if ( mPointArray.size() == 1 )
-        {
-            vectorEngine->Pick( currentVectorLayer->GetScene(), mPointArray, FOdysseyVectorObject::PICK_MATH_BASED );
-        }
-
-        if ( mPointArray.size() > 1 )
-        {
-            vectorEngine->Pick( currentVectorLayer->GetScene(), mPointArray, FOdysseyVectorObject::PICK_MASK_BASED );
-        }
-
-        SetSelectionSpace( vectorEngine, currentVectorLayer->GetScene()->GetLastSelected() );
-
-        mSelectionHUD->SetSelecting( false, nullptr );
-        mSelectionHUD->UpdateSelectionBox( currentVectorLayer->GetScene() );
-
-        mSelectionChanged.Broadcast();
-
-        currentVectorLayer->RenderImageChanged(false);
-
-        return true;
+        iEngine->Pick( iScene, mPointArray, FOdysseyVectorObject::PICK_MATH_BASED );
     }
 
-    return false;
+    if ( mPointArray.size() > 1 )
+    {
+        iEngine->Pick( iScene, mPointArray, FOdysseyVectorObject::PICK_MASK_BASED );
+    }
+
+    SetSelectionSpace( iEngine, iScene->GetLastSelected() );
+
+    mSelectionHUD->SetSelecting( false, nullptr );
+    mSelectionHUD->UpdateSelectionBox( iScene );
+
+    mSelectionChanged.Broadcast();
+
+    return true;
 }
 
 void

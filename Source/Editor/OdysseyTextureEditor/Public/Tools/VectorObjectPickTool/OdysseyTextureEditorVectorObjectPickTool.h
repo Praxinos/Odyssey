@@ -26,13 +26,9 @@ public:
     virtual void Inactivate() override;
     virtual bool IsActivable() const override;
 
-public:
-    // Setters
-    //Wether the tool can draw or not
-    virtual bool CanDraw() override;
-
-private:
-    class UOdysseyTextureLayerImageVector* GetLayer() const;
+    virtual bool OnMouseDown( const FOdysseyPoint& iPointInTexture,const FKey& iKey ) override;
+    virtual void OnMouseDrag( const FOdysseyPoint& iPointInTexture ) override;
+    virtual bool OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
 
 private:
     void Load();
