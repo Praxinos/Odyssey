@@ -26,9 +26,10 @@ UOdysseyTextureEditorColorPickerTool::Load()
 void
 UOdysseyTextureEditorColorPickerTool::Activate()
 {
-    UOdysseyTextureLayerStack::OnCurrentLayerChanged().AddUObject(this, &UOdysseyTextureEditorColorPickerTool::OnCurrentLayerChanged);
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
+
+    UOdysseyTextureLayerStack::OnCurrentLayerChanged().AddUObject( this, &UOdysseyTextureEditorColorPickerTool::OnCurrentLayerChanged );
 
     Load();
 

@@ -22,9 +22,10 @@ UOdysseyTextureEditorVectorGridTool::UOdysseyTextureEditorVectorGridTool()
 void
 UOdysseyTextureEditorVectorGridTool::Activate()
 {
-    UOdysseyTextureLayerStack::OnCurrentLayerChanged().AddUObject(this, &UOdysseyTextureEditorVectorGridTool::OnCurrentLayerChanged);
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
+
+    UOdysseyTextureLayerStack::OnCurrentLayerChanged().AddUObject( this, &UOdysseyTextureEditorVectorGridTool::OnCurrentLayerChanged );
 
     Load();
 

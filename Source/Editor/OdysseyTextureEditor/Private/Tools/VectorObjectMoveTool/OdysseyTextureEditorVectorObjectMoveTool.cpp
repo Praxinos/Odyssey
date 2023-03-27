@@ -22,9 +22,10 @@ UOdysseyTextureEditorVectorObjectMoveTool::UOdysseyTextureEditorVectorObjectMove
 void
 UOdysseyTextureEditorVectorObjectMoveTool::Activate()
 {
-    UOdysseyTextureLayerStack::OnCurrentLayerChanged().AddUObject(this, &UOdysseyTextureEditorVectorObjectMoveTool::OnCurrentLayerChanged);
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
+
+    UOdysseyTextureLayerStack::OnCurrentLayerChanged().AddUObject( this, &UOdysseyTextureEditorVectorObjectMoveTool::OnCurrentLayerChanged );
 
     Load();
 

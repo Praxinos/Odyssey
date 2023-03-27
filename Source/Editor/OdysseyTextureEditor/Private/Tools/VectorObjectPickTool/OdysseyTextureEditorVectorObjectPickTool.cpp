@@ -22,10 +22,11 @@ UOdysseyTextureEditorVectorObjectPickTool::UOdysseyTextureEditorVectorObjectPick
 void
 UOdysseyTextureEditorVectorObjectPickTool::Activate()
 {
-    UOdysseyTextureLayerStack::OnCurrentLayerChanged().AddUObject(this, &UOdysseyTextureEditorVectorObjectPickTool::OnCurrentLayerChanged);
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
     UTexture2D* texture = layerStack->GetTexture();
+
+    UOdysseyTextureLayerStack::OnCurrentLayerChanged().AddUObject( this, &UOdysseyTextureEditorVectorObjectPickTool::OnCurrentLayerChanged );
 
     Load();
 

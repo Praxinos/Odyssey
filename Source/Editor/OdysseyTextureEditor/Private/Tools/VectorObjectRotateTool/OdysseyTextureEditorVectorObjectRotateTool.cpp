@@ -22,9 +22,10 @@ UOdysseyTextureEditorVectorObjectRotateTool::UOdysseyTextureEditorVectorObjectRo
 void
 UOdysseyTextureEditorVectorObjectRotateTool::Activate()
 {
-    UOdysseyTextureLayerStack::OnCurrentLayerChanged().AddUObject(this, &UOdysseyTextureEditorVectorObjectRotateTool::OnCurrentLayerChanged);
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
+
+    UOdysseyTextureLayerStack::OnCurrentLayerChanged().AddUObject( this, &UOdysseyTextureEditorVectorObjectRotateTool::OnCurrentLayerChanged );
 
     Load();
 
