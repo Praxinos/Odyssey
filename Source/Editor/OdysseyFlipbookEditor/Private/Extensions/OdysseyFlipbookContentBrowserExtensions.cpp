@@ -202,7 +202,7 @@ FOdysseyFlipbookContentBrowserExtensions_Impl::OnExtendContentBrowserAssetSelect
     for( auto assetIt = iSelectedAssets.CreateConstIterator(); assetIt; ++assetIt )
     {
         const FAssetData& asset = *assetIt;
-        isAnyFlipbooks = isAnyFlipbooks || ( asset.GetClass()->GetClassPathName() == UPaperFlipbook::StaticClass()->GetClassPathName() );
+        isAnyFlipbooks = isAnyFlipbooks || ( asset.GetClass() == UPaperFlipbook::StaticClass() );
     }
 
     if( isAnyFlipbooks )
