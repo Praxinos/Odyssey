@@ -38,7 +38,11 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
     protected:
         void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent );
         void PropertyChanged( const FName& iPropertyName );
-
+        FOdysseyVectorVertexCubic* PickVertex( FOdysseyVectorEngine* iVectorEngine
+                                             , FOdysseyVectorScene* iScene
+                                             , double iWorldX
+                                             , double iWorldY
+                                             , double iPickingRadius );
     private:
         FOdysseyVectorPathBuilder* MakePathBuilder( FOdysseyVectorEngine* iVectorEngine
                                                   , FOdysseyVectorScene* iScene

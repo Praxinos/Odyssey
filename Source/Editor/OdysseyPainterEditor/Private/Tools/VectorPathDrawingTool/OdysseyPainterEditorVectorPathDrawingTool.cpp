@@ -67,32 +67,35 @@ RectangleDtoI( ::ULIS::FRectD iRect )
     return ::ULIS::FRectI( (int) iRect.x, (int) iRect.y, (int) iRect.w, (int) iRect.h );
 }
 
-static FOdysseyVectorVertexCubic*
-PickVertex( FOdysseyVectorEngine* iVectorEngine
-          , FOdysseyVectorScene* iScene
-          , double iWorldX
-          , double iWorldY
-          , double iPickingRadius )
+FOdysseyVectorVertexCubic*
+UOdysseyPainterEditorVectorPathDrawingTool::PickVertex( FOdysseyVectorEngine* iVectorEngine
+                                                      , FOdysseyVectorScene* iScene
+                                                      , double iWorldX
+                                                      , double iWorldY
+                                                      , double iPickingRadius )
 {
-    std::vector<FOdysseyVectorPoint*> pickedPointArray;
-    FOdysseyVectorVertexCubic* stitchCubicVertex = nullptr;
-
-    pickedPointArray.reserve( 50 );
-
-    iVectorEngine->PickPoints( iScene
-                             , iWorldX
-                             , iWorldY
-                             , iPickingRadius
-                             , pickedPointArray
-                             , FOdysseyVectorPath::PICK_POINT );
-
-    if( pickedPointArray.size() )
+    if( Stitch )
     {
-        stitchCubicVertex = static_cast<FOdysseyVectorVertexCubic*>( pickedPointArray[0] );
+        std::vector<FOdysseyVectorPoint*> pickedPointArray;
+        FOdysseyVectorVertexCubic* stitchCubicVertex = nullptr;
 
-        if( stitchCubicVertex->GetSegmentCount() == 1 )
+        pickedPointArray.reserve( 50 );
+
+        iVectorEngine->PickPoints( iScene
+                                 , iWorldX
+                                 , iWorldY
+                                 , iPickingRadius
+                                 , pickedPointArray
+                                 , FOdysseyVectorPath::PICK_POINT );
+
+        if( pickedPointArray.size() )
         {
-            return stitchCubicVertex;
+            stitchCubicVertex = static_cast<FOdysseyVectorVertexCubic*>( pickedPointArray[0] );
+
+            if( stitchCubicVertex->GetSegmentCount() == 1 )
+            {
+                return stitchCubicVertex;
+            }
         }
     }
 
