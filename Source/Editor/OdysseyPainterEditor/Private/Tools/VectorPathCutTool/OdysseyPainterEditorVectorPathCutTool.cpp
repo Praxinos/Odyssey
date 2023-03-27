@@ -14,8 +14,7 @@ UOdysseyPainterEditorVectorPathCutTool::~UOdysseyPainterEditorVectorPathCutTool(
 }
 
 UOdysseyPainterEditorVectorPathCutTool::UOdysseyPainterEditorVectorPathCutTool()
-    : Size(1.0f)
-    , mCubicPathHUD( FOdysseyVectorHUDPathCubic::VIEW_PATH | FOdysseyVectorHUDPathCubic::VIEW_POINT )
+    : mCubicPathHUD( FOdysseyVectorHUDPathCubic::VIEW_PATH | FOdysseyVectorHUDPathCubic::VIEW_POINT )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathCutTool64");
 }
@@ -24,127 +23,89 @@ UOdysseyPainterEditorVectorPathCutTool::UOdysseyPainterEditorVectorPathCutTool()
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
 void
-UOdysseyPainterEditorVectorPathCutTool::Activate()
+UOdysseyPainterEditorVectorPathCutTool::Activate( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
-    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
-
-    if(currentVectorLayer)
-    {
-        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-
-        vectorEngine->ClearHUD();
-        vectorEngine->AddHUD(&mCubicPathHUD);
-
-        currentVectorLayer->RenderImageChanged(false);
-    }
+    iEngine->ClearHUD();
+    iEngine->AddHUD(&mCubicPathHUD);
 }
 
 bool
-UOdysseyPainterEditorVectorPathCutTool::CanDraw()
+UOdysseyPainterEditorVectorPathCutTool::OnMouseDown( FOdysseyVectorEngine* iEngine
+                                                   , FOdysseyVectorScene* iScene
+                                                   , const FOdysseyPoint& iPointInTexture
+                                                   , const FKey& iKey )
 {
-    return IsActivable();
-}
-
-bool
-UOdysseyPainterEditorVectorPathCutTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
-{
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
+    FOdysseyVectorObject* selectedObject = iScene->GetLastSelected();
 
     mLineHUD.SetP0( iPointInTexture.x, iPointInTexture.y );
+    mLineHUD.SetP1( iPointInTexture.x, iPointInTexture.y );
 
-    if( currentVectorLayer )
+    iEngine->AddHUD( &mLineHUD );
+
+    if ( selectedObject )
     {
-        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        FOdysseyVectorObject* selectedObject = currentVectorLayer->GetScene()->GetLastSelected();
+        BLPoint localCoords = selectedObject->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
 
-        vectorEngine->AddHUD( &mLineHUD );
-
-        if ( selectedObject )
-        {
-            BLPoint localCoords = selectedObject->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
-
-            mStartCutAt.x = localCoords.x;
-            mStartCutAt.y = localCoords.y;
-        }
+        mStartCutAt.x = localCoords.x;
+        mStartCutAt.y = localCoords.y;
     }
 
     return true;
 }
 
 void
-UOdysseyPainterEditorVectorPathCutTool::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
+UOdysseyPainterEditorVectorPathCutTool::OnMouseDrag( FOdysseyVectorEngine* iEngine
+                                                   , FOdysseyVectorScene* iScene
+                                                   , const FOdysseyPoint& iPointInTexture )
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
+    ::ULIS::FVec2D& p0 = mLineHUD.GetP0();
+    ::ULIS::FVec2D& p1 = mLineHUD.GetP1();
+    ::ULIS::FRectI rect = ::ULIS::FRectI::FromMinMax( ::ULIS::FMath::Min(p0.x, p1.x)
+                                                    , ::ULIS::FMath::Min(p0.y, p1.y)
+                                                    , ::ULIS::FMath::Max(p0.x, p1.x)
+                                                    , ::ULIS::FMath::Max(p0.y, p1.y) );
 
-
-    if ( currentVectorLayer )
-    {
-        ::ULIS::FVec2D& p0 = mLineHUD.GetP0();
-        ::ULIS::FVec2D& p1 = mLineHUD.GetP1();
-        ::ULIS::FRectI rect = ::ULIS::FRectI::FromMinMax(::ULIS::FMath::Min(p0.x, p1.x)
-                                                        , ::ULIS::FMath::Min(p0.y, p1.y)
-                                                        , ::ULIS::FMath::Max(p0.x, p1.x)
-                                                        , ::ULIS::FMath::Max(p0.y, p1.y));
-
-        mLineHUD.SetP1( iPointInTexture.x, iPointInTexture.y );
-
-        currentVectorLayer->RenderImageChanged(/* { rect }, */true);
-    }
+    mLineHUD.SetP1( iPointInTexture.x, iPointInTexture.y );
 }
 
 bool
-UOdysseyPainterEditorVectorPathCutTool::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
+UOdysseyPainterEditorVectorPathCutTool::OnMouseUp( FOdysseyVectorEngine* iEngine
+                                                 , FOdysseyVectorScene* iScene
+                                                 , const FOdysseyPoint& iPointInTexture
+                                                 , const FKey& iKey )
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
+    FOdysseyVectorObject* selectedObject = iScene->GetLastSelected();
     ::ULIS::FVec2D endCutAt;
 
-    if( currentVectorLayer )
+    iEngine->RemoveHUD( &mLineHUD );
+
+    if ( selectedObject )
     {
-        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        FOdysseyVectorObject* selectedObject = currentVectorLayer->GetScene()->GetLastSelected();
+        BLPoint localCoords = selectedObject->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
 
-        vectorEngine->RemoveHUD( &mLineHUD );
-        vectorEngine->RemoveHUD( &mLineHUD );
+        endCutAt.x = localCoords.x;
+        endCutAt.y = localCoords.y;
 
-        if ( selectedObject )
+        if( selectedObject->GetClass() == FOdysseyVectorPathCubic::StaticClass() )
         {
-            BLPoint localCoords = selectedObject->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
+            FOdysseyVectorPathCubic *cubicPath = static_cast<FOdysseyVectorPathCubic*>(selectedObject);
+            std::vector<FOdysseyVectorVertexCubic*> oNewVertexArray;
+            std::vector<FOdysseyVectorSegmentCubic*> oNewSegmentArray;
+            std::vector<FOdysseyVectorSegmentCubic*> oOldSegmentArray;
 
-            endCutAt.x = localCoords.x;
-            endCutAt.y = localCoords.y;
+            // crashes if I don't reserve. Why that ?
+            oNewVertexArray.reserve(50);
+            oNewSegmentArray.reserve(50);
+            oOldSegmentArray.reserve(50);
 
-            if( selectedObject->GetClass() == FOdysseyVectorPathCubic::StaticClass() )
-            {
-                FOdysseyVectorPathCubic *cubicPath = static_cast<FOdysseyVectorPathCubic*>(selectedObject);
-                std::vector<FOdysseyVectorVertexCubic*> oNewVertexArray;
-                std::vector<FOdysseyVectorSegmentCubic*> oNewSegmentArray;
-                std::vector<FOdysseyVectorSegmentCubic*> oOldSegmentArray;
-
-                // crashes if I don't reserve. Why that ?
-                oNewVertexArray.reserve(50);
-                oNewSegmentArray.reserve(50);
-                oOldSegmentArray.reserve(50);
-
-                cubicPath->Cut( mStartCutAt, endCutAt, oNewVertexArray, oNewSegmentArray, oOldSegmentArray );
-                cubicPath->Invalidate();
-            }
-
-            currentVectorLayer->GetScene()->Update( 0 );
-
-            // redraw the whole layer
-            currentVectorLayer->RenderImageChanged(false);
-
-            return true;
+            cubicPath->Cut( mStartCutAt, endCutAt, oNewVertexArray, oNewSegmentArray, oOldSegmentArray );
+            cubicPath->Invalidate();
         }
 
-        // redraw the whole layer
-        currentVectorLayer->RenderImageChanged(false);
+        iScene->Update( 0 );
     }
 
-    return false;
+    return true;
 }
 
 void

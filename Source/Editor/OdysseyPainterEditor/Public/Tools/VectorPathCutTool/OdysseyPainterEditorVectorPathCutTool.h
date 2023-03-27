@@ -22,29 +22,17 @@ public:
     //Constructor
     UOdysseyPainterEditorVectorPathCutTool();
  
+    void Activate( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    bool OnMouseDown( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture, const FKey& iKey );
+    void OnMouseDrag( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture);
+    bool OnMouseUp( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture, const FKey& iKey);
+
     //OdysseyPainterEditorTool overrides
-    virtual void Activate() override;
-
-    virtual bool OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
-    virtual void OnMouseDrag(const FOdysseyPoint& iPointInTexture) override;
-    virtual bool OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
     virtual void Commit() override;
-
-private:
-    void Redraw(const TArray<::ULIS::FRectI>& iRects);
 
 private:
     ::ULIS::FVec2D mStartCutAt;
     FOdysseyVectorHUDLine mLineHUD;
     FOdysseyVectorHUDPathCubic mCubicPathHUD;
-
-public:
-    // Setters
-    virtual bool CanDraw();
-
-    UPROPERTY(EditAnywhere, Category="Odyssey PathCut Tool")
-    double Size;
-
-protected:
 
 };
