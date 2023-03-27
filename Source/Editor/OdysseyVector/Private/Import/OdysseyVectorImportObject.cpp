@@ -17,7 +17,7 @@ CreateObject( uint32 iObjectType )
         break;
 
         case FOdysseyVectorObject::VECTORGROUPPAINTTYPE :
-            newObject = new FOdysseyVectorGroupPaint();
+            newObject = new FOdysseyVectorGroupPaint( "Paint Group" );
         break;
 
         case FOdysseyVectorObject::VECTORELLIPSETYPE :

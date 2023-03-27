@@ -13,7 +13,7 @@
 
 class FOdysseyVectorEngine;
 
-class ODYSSEYVECTOR_API FOdysseyVectorScene : public FOdysseyVectorObject
+class ODYSSEYVECTOR_API FOdysseyVectorScene : public FOdysseyVectorGroup
 {
     private:
         static const uint32 mStaticClass = 0x60719e64; // value is crc32 FOdysseyVectorScene
@@ -46,7 +46,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorScene : public FOdysseyVectorObject
         void InvalidateObject( FOdysseyVectorObject* iObject );
         void RemoveSelectedObjects();
 
-        FOdysseyVectorGroup* GroupSelectdObjects();
+        FOdysseyVectorGroup* GroupSelectedObjects();
         uint32 GetType();
 
         void SetEngine( FOdysseyVectorEngine* iEngine );

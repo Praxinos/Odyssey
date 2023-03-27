@@ -88,7 +88,7 @@ UOdysseyTextureLayerImageVector::RenderImage(TSharedPtr<::ULIS::FBlock, ESPMode:
         return iWaitList;
 
     // TODO: set region of interest as parameter ?
-    mVEngine->Render( mScene, iRect );
+    mVEngine->Render( mScene, (::ULIS::FRectI&) iRect );
 
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(mBlock->Format());
 

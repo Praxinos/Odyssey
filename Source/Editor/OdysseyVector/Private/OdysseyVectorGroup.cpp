@@ -20,13 +20,7 @@ FOdysseyVectorGroup::HasBaseClass( uint32 iBaseClassID )
 bool
 FOdysseyVectorGroup::PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags )
 {
-/*
-    if ( ( iX > mBBox.x ) && ( iX < ( mBBox.x + mBBox.w ) )
-      && ( iY > mBBox.y ) && ( iY < ( mBBox.y + mBBox.h ) ) )
-    {
-        return this;
-    }
-*/
+
     return false;
 }
 
@@ -52,11 +46,13 @@ FOdysseyVectorGroup::UpdateShape( uint32 iUpdateFlags )
         init = 1;
     }
 
-    BLPoint localP0 = mInverseWorldMatrix.mapPoint( bbox.x, bbox.y );
-    BLPoint localP1 = mInverseWorldMatrix.mapVector( bbox.x + bbox.w, bbox.y + bbox.h );
+    BLPoint p0 = mInverseWorldMatrix.mapPoint( bbox.x         , bbox.y          );
+    BLPoint p1 = mInverseWorldMatrix.mapPoint( bbox.x + bbox.w, bbox.y          );
+    BLPoint p2 = mInverseWorldMatrix.mapPoint( bbox.x + bbox.w, bbox.y + bbox.h );
+    BLPoint p3 = mInverseWorldMatrix.mapPoint( bbox.x         , bbox.y + bbox.h );
 
-    mBBox = ::ULIS::FRectD::FromMinMax( ::ULIS::FMath::Min( localP0.x, localP1.x )
-                                      , ::ULIS::FMath::Min( localP0.y, localP1.y )
-                                      , ::ULIS::FMath::Max( localP0.x, localP1.x )
-                                      , ::ULIS::FMath::Max( localP0.y, localP1.y ) );
+    mBBox = ::ULIS::FRectD::FromMinMax( ::ULIS::FMath::Min4( p0.x, p1.x, p2.x, p3.x )
+                                      , ::ULIS::FMath::Min4( p0.y, p1.y, p2.y, p3.y )
+                                      , ::ULIS::FMath::Max4( p0.x, p1.x, p2.x, p3.x )
+                                      , ::ULIS::FMath::Max4( p0.y, p1.y, p2.y, p3.y ) );
 }

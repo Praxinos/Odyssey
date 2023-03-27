@@ -77,7 +77,7 @@ UOdysseyPainterEditorVectorObjectMoveTool::OnMouseDrag( const FOdysseyPoint& iPo
         {
             FOdysseyVectorObject* selectedObject = (*it);
 
-            if ( selectedObject->HasSelectedParent() == false )
+            if ( selectedObject->HasSelectedAncestor() == false )
             {
                 FOdysseyVectorObject* parentObject = selectedObject->GetParent();
                 BLPoint localDif = parentObject->GetInverseWorldMatrix().mapVector( difx, dify );

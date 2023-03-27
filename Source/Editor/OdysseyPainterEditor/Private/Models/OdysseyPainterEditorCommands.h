@@ -42,7 +42,13 @@ public:
     TSharedPtr<FUICommandInfo> Discord;
 
     /** Action to make a paintable shape from a set of cubic bezier*/
+    TSharedPtr<FUICommandInfo> ResetView;
+
+    /** Action to make a paintable shape from a set of cubic bezier*/
     TSharedPtr<FUICommandInfo> GroupPaint;
+
+    /** Action to make a group from selected vector objects*/
+    TSharedPtr<FUICommandInfo> Group;
 
     /** Action to make a paintable shape from a set of cubic bezier*/
     TSharedPtr<FUICommandInfo> Ungroup;

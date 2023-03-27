@@ -52,6 +52,17 @@ FOdysseyVectorEngine::GetBLMask()
 }
 
 void
+FOdysseyVectorEngine::GetColorImageSize( uint32* iW, uint32* iH )
+{
+    BLImageData imageData;
+
+    mBLImage->getData( &imageData );
+
+    *iW = (uint32) imageData.size.w;
+    *iH = (uint32) imageData.size.h;
+}
+
+void
 FOdysseyVectorEngine::GetColorImagePixelValue( uint32 iX, uint32 iY, uint8* oR, uint8* oG, uint8* oB, uint8* oA )
 {
     BLImageData imageData;
@@ -93,7 +104,7 @@ FOdysseyVectorEngine::GetColorImagePixelValue( uint32 iX, uint32 iY )
 }
 
 void
-FOdysseyVectorEngine::RenderHUD( FOdysseyVectorScene* iScene )
+FOdysseyVectorEngine::RenderHUD( FOdysseyVectorScene* iScene, ::ULIS::FRectD& iRoi )
 {
     std::list<FOdysseyVectorObject*> selectedObjectList = iScene->GetSelectedObjectList();
 
@@ -104,7 +115,7 @@ FOdysseyVectorEngine::RenderHUD( FOdysseyVectorScene* iScene )
     {
         FOdysseyVectorHUD *hud = (*hit);
 
-        hud->Draw( iScene, mRoi, 0 );
+        hud->Draw( iScene, iRoi, 0 );
     }
 
     mBLContext->restore();
@@ -125,14 +136,15 @@ FOdysseyVectorEngine::Render( FOdysseyVectorScene* iScene, const ::ULIS::FRectI&
     // Configure the number of threads to use.
     /*createInfo.threadCount = 1;*/
     BLRectI clipping = BLRectI( iRect.x, iRect.y, iRect.w, iRect.h );
+    ::ULIS::FRectD roi = ::ULIS::FRectD( iRect.x, iRect.y, iRect.w, iRect.h );
 
-    mBLContext->clipToRect( clipping );
+    //mBLContext->clipToRect( clipping );
 
-    iScene->Draw( clipping, mDrawingFlags );
+    iScene->Draw( roi, mDrawingFlags );
 
-    RenderHUD( iScene );
+    RenderHUD( iScene, roi );
 
-    mBLContext->restoreClipping();
+    //mBLContext->restoreClipping();
 
     mBLContext->flush(BL_CONTEXT_FLUSH_SYNC);
 }
@@ -515,7 +527,7 @@ FOdysseyVectorEngine::Pick( FOdysseyVectorScene* iScene, std::vector<::ULIS::FVe
     // deselect all
     iScene->ClearSelection();
 
-    RecursivePick( mSelectionSpace, iScene, pickedObjectArray, roi, iSelectionFlags );
+    RecursivePick( mSelectionSpace ? mSelectionSpace : iScene, iScene, pickedObjectArray, roi, iSelectionFlags );
 
     for ( int i = 0; i < pickedObjectArray.size(); i++ )
     {

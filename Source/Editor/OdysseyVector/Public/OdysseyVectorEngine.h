@@ -189,6 +189,13 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
         FColor GetColorImagePixelValue( uint32 iX, uint32 iY );
 
         /**
+         * @brief Get the color image dimensions.
+         * @param oW width
+         * @param oH height
+         */
+        void GetColorImageSize( uint32* iW, uint32* iH );
+
+        /**
          * @brief Set the selection space, i.e the group we pick objects from. 
          *   Default is null, meaning the scene is the selection space.
          * @param iSelectionSpace a pointer to the selection space. Use NULL to define the scene as the selection space.
@@ -222,10 +229,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
          * @brief render the current HUD.
          * @param iDrawingFlags.
          */
-        void RenderHUD( FOdysseyVectorScene* iScene );
+        void RenderHUD( FOdysseyVectorScene* iScene, ::ULIS::FRectD& iRoi );
 
     private:
-        ::ULIS::FRectD mRoi;
         BLContext* mBLContext;
         BLImage* mBLImage;
         BLImage* mBLMask;

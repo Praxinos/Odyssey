@@ -8,8 +8,10 @@ FOdysseyVectorGroupPaint::~FOdysseyVectorGroupPaint()
     //ClearCycles();
 }
 
-FOdysseyVectorGroupPaint::FOdysseyVectorGroupPaint()
+FOdysseyVectorGroupPaint::FOdysseyVectorGroupPaint( std::string iName )
 {
+    SetName( iName );
+
     mDependsOnChildren = true;
 
     mIntersectionVertexArray.reserve( 60 );
@@ -35,12 +37,6 @@ FOdysseyVectorGroupPaint::GetType()
     return FOdysseyVectorObject::VECTORGROUPPAINTTYPE;
 }
 
-void
-FOdysseyVectorGroupPaint::Init( std::string iName )
-{
-    SetName( iName );
-}
-
 std::list<FOdysseyVectorBucket*>&
 FOdysseyVectorGroupPaint::GetBucketList()
 {
@@ -51,9 +47,9 @@ void
 FOdysseyVectorGroupPaint::Colorize()
 {
     // reset color for all cycles first
-    for( int i = 0; i < mLoopArray.size(); i++ )
+    for( int i = 0; i < mCycleArray.size(); i++ )
     {
-        FOdysseyVectorCycle *cycle = mLoopArray[i];
+        FOdysseyVectorCycle *cycle = mCycleArray[i];
 
         cycle->SetBucket( nullptr );
     }
@@ -69,9 +65,9 @@ FOdysseyVectorGroupPaint::Colorize()
 void
 FOdysseyVectorGroupPaint::ApplyBucket( FOdysseyVectorBucket* iBucket )
 {
-    for( int i = 0; i < mLoopArray.size(); i++ )
+    for( int i = 0; i < mCycleArray.size(); i++ )
     {
-        FOdysseyVectorCycle *cycle = mLoopArray[i];
+        FOdysseyVectorCycle *cycle = mCycleArray[i];
 
         if( cycle->HitTest( iBucket->GetCoords().x, iBucket->GetCoords().y ) )
         {
@@ -104,9 +100,9 @@ FOdysseyVectorGroupPaint::PickBucket( double iWorldX, double iWorldY )
 FOdysseyVectorCycle*
 FOdysseyVectorGroupPaint::PickCycle( double iX, double iY )
 {
-    for( int i = 0; i < mLoopArray.size(); i++ )
+    for( int i = 0; i < mCycleArray.size(); i++ )
     {
-        FOdysseyVectorCycle *cycle = mLoopArray[i];
+        FOdysseyVectorCycle *cycle = mCycleArray[i];
 
         // TODO: Bounding volume for cycles for faster search
         if( cycle->HitTest( iX, iY ) == true )
@@ -209,9 +205,9 @@ FOdysseyVectorGroupPaint::DrawBuckets( ::ULIS::FRectD& iRoi,uint64 iFlags )
 void
 FOdysseyVectorGroupPaint::DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
-    for( int i = 0; i < mLoopArray.size(); i++ )
+    for( int i = 0; i < mCycleArray.size(); i++ )
     {
-        FOdysseyVectorCycle *cycle = mLoopArray[i];
+        FOdysseyVectorCycle *cycle = mCycleArray[i];
 
         cycle->Draw( iRoi, iFlags );
     }
@@ -224,9 +220,9 @@ FOdysseyVectorGroupPaint::PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlag
     {
         BLPoint pt = mInverseWorldMatrix.mapPoint( iRoi.x, iRoi.y );
 
-        for( int i = 0; i < mLoopArray.size(); i++ )
+        for( int i = 0; i < mCycleArray.size(); i++ )
         {
-            FOdysseyVectorCycle *cycle = mLoopArray[i];
+            FOdysseyVectorCycle *cycle = mCycleArray[i];
 
             if( cycle->HitTest( pt.x, pt.y ) )
             {
@@ -239,7 +235,7 @@ FOdysseyVectorGroupPaint::PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlag
 }
 
 uint32
-FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegmentCubic& iCubicSegment
+FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegmentCubic* iCubicSegment
                                           , std::list<FOdysseyVectorSegment*>& cubicSegmenList
                                           , std::vector<FOdysseyVectorVertexIntersection*>& iIntersectionVertexArray )
 {
@@ -248,11 +244,11 @@ FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegmentCubic& iCubicSe
     for( std::list<FOdysseyVectorSegment*>::iterator sit = cubicSegmenList.begin(); sit != cubicSegmenList.end(); ++sit )
     {
         FOdysseyVectorSegmentCubic *intersectSegment = static_cast<FOdysseyVectorSegmentCubic*>(*sit);
-        ::ULIS::FRectD intersectRect = intersectSegment->GetBoundingBox( false ) & iCubicSegment.GetBoundingBox( false );
+        ::ULIS::FRectD intersectRect = intersectSegment->GetBoundingBox( false ) & iCubicSegment->GetBoundingBox( false );
 
         if( intersectRect.Area() )
         {
-            intersectionCount += iCubicSegment.Intersect( *intersectSegment, mGroupPaintParam.Tolerance, iIntersectionVertexArray );
+            intersectionCount += iCubicSegment->Intersect( *intersectSegment, mGroupPaintParam.Tolerance, iIntersectionVertexArray );
         }
     }
 
@@ -464,7 +460,7 @@ FOdysseyVectorGroupPaint::MarchVertex( FOdysseyVectorVertexIntersection* iInters
                     //PrintCycle( vertexArray, sectionArray );
                     BlockPath( vertexArray, sectionArray, false );
 
-                    mLoopArray.push_back( new FOdysseyVectorCycle( *this, /*iCycleID*/0, vertexArray, sectionArray ) );
+                    mCycleArray.push_back( new FOdysseyVectorCycle( *this, /*iCycleID*/0, vertexArray, sectionArray ) );
                 }
             }
         }
@@ -496,7 +492,7 @@ FOdysseyVectorGroupPaint::CheckLoops()
 
                     if( vertexArray.size() )
                     {
-                        mLoopArray.push_back( new FOdysseyVectorCycle( *this, /*iCycleID*/0, vertexArray, sectionArray ) );
+                        mCycleArray.push_back( new FOdysseyVectorCycle( *this, /*iCycleID*/0, vertexArray, sectionArray ) );
                     }
                 }
             }
@@ -530,13 +526,13 @@ FOdysseyVectorGroupPaint::BuildGraph()
     std::list<FOdysseyVectorSegment*> cubicSegmenList;
     FOdysseyVectorSegmentCubic *cubicSegment;
 
-    ClearCycles( cubicSegmenList );
+    Clear( cubicSegmenList );
 
     cubicSegment = cubicSegmenList.size() ? static_cast<FOdysseyVectorSegmentCubic*>( cubicSegmenList.back() ) : nullptr;
 
     while( cubicSegment )
     {
-        IntersectSegment ( *cubicSegment, cubicSegmenList, mIntersectionVertexArray );
+        IntersectSegment ( cubicSegment, cubicSegmenList, mIntersectionVertexArray );
 
         // remove segment from list as they are tested
         cubicSegmenList.pop_back();
@@ -548,13 +544,13 @@ FOdysseyVectorGroupPaint::BuildGraph()
 void
 FOdysseyVectorGroupPaint::OrderCycles()
 {
-    for( int i = 0; i < mLoopArray.size(); i++ )
+    for( int i = 0; i < mCycleArray.size(); i++ )
     {
-        FOdysseyVectorCycle* cycle = mLoopArray[i];
+        FOdysseyVectorCycle* cycle = mCycleArray[i];
 
-        for( int j = 0; j < mLoopArray.size(); j++ )
+        for( int j = 0; j < mCycleArray.size(); j++ )
         {
-           FOdysseyVectorCycle* innerCycle = mLoopArray[j];
+           FOdysseyVectorCycle* innerCycle = mCycleArray[j];
 
            if( cycle != innerCycle )
            {
@@ -581,7 +577,7 @@ FOdysseyVectorGroupPaint::OrderCycles()
 }
 
 void
-FOdysseyVectorGroupPaint::ClearCycles( std::list<FOdysseyVectorSegment*>& cubicSegmenList )
+FOdysseyVectorGroupPaint::Clear( std::list<FOdysseyVectorSegment*>& cubicSegmenList )
 {
     bool bboxInit = false;
 
@@ -625,14 +621,14 @@ FOdysseyVectorGroupPaint::ClearCycles( std::list<FOdysseyVectorSegment*>& cubicS
 
     mIntersectionVertexArray.clear();
 
-    for( int i = 0; i < mLoopArray.size(); i++ )
+    for( int i = 0; i < mCycleArray.size(); i++ )
     {
-        FOdysseyVectorCycle *cycle = mLoopArray[i];
+        FOdysseyVectorCycle *cycle = mCycleArray[i];
 
         delete cycle;
     }
 
-    mLoopArray.clear();
+    mCycleArray.clear();
 }
 
 void
@@ -657,7 +653,7 @@ FOdysseyVectorGroupPaint::CopyBuckets( FOdysseyVectorGroupPaint* iDestination )
 FOdysseyVectorObject*
 FOdysseyVectorGroupPaint::CopyShape()
 {
-    return new FOdysseyVectorGroupPaint();
+    return new FOdysseyVectorGroupPaint( "Paint Group Copy" );
 }
 
 // TODO : bounding box segments.
@@ -680,25 +676,4 @@ FOdysseyVectorGroupPaint::PickBucketHandle( double iX, double iY )
     }
 
     return nullptr;
-}
-
-void
-FOdysseyVectorGroupPaint::PropertyChanged(const FName& iPropertyName)
-{
-    if ( iPropertyName == "Tolerance" )
-    {
-        FindCycles();
-    }
-/*
-    if ( iPropertyName == "IsActivated" )
-        IsActivatedChanged();
-    if ( iPropertyName == "IsLocked" )
-        IsLockedChanged();
-    if ( iPropertyName == "IsExpanded" )
-        IsExpandedChanged();
-    if ( iPropertyName == "Parent" )
-        ParentChanged();
-    if ( iPropertyName == "Children" )
-        ChildrenChanged();
-*/
 }

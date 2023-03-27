@@ -168,7 +168,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         bool IsSelected();
         void DrawBBox( ::ULIS::FRectD& iRoi,uint64 iFlags );
         int32 PickBBox( double iX, double iY );
-        bool HasSelectedParent();
+        bool HasSelectedAncestor();
+        bool HasAncestor( FOdysseyVectorObject* iCandidateAncestor );
         FColor& GetForegroundColor();
         FColor& GetBackgroundColor();
         virtual void SwitchSpace( FOdysseyVectorObject& iNewSpace ){};

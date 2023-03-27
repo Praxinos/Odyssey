@@ -70,14 +70,14 @@ FOdysseyVectorScene::CopyShape()
 }
 
 FOdysseyVectorGroup*
-FOdysseyVectorScene::GroupSelectdObjects( )
+FOdysseyVectorScene::GroupSelectedObjects( )
 {
     FOdysseyVectorGroup* group = new FOdysseyVectorGroup();
     BLPoint averageTranslation = { 0.0f, 0.0f };
     // We don't use the mSelectedObjectList because we want to keep the same order
     // and we work on a copy to be able to delete the objects while iterating
     std::list<FOdysseyVectorObject*> objectList = mChildrenList;
-
+/*
     if ( mSelectedObjectList.size() )
     {
         for( std::list<FOdysseyVectorObject*>::iterator it = mSelectedObjectList.begin(); it != mSelectedObjectList.end(); ++it )
@@ -94,10 +94,10 @@ FOdysseyVectorScene::GroupSelectdObjects( )
 
         averageTranslation = this->GetInverseWorldMatrix().mapPoint ( averageTranslation.x, averageTranslation.y );
     }
-
+*/
     AppendChild ( group );
 
-    group->Translate( averageTranslation.x, averageTranslation.y );
+    //group->Translate( averageTranslation.x, averageTranslation.y );
     group->UpdateMatrix();
 
     while( objectList.size () )
@@ -115,7 +115,7 @@ FOdysseyVectorScene::GroupSelectdObjects( )
     }
 
     group->Invalidate();
-
+    group->Update( 0 );
 
     return group;
 }
@@ -133,6 +133,9 @@ FOdysseyVectorScene::DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags )
     static ::ULIS::FRectD zeroRectangle; // static variables are always zeroed by default
     BLRgba32 blFillColor;
     FColor& fillColor = mFillBucket.GetColor();
+    uint32 width, height;
+
+    GetEngine()->GetColorImageSize( &width, &height );
 
     blctx->setCompOp( BL_COMP_OP_SRC_COPY );
 
@@ -144,20 +147,15 @@ FOdysseyVectorScene::DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags )
 
     blctx->setFillStyle( blFillColor );
 
-    if ( iRoi != zeroRectangle )
-    {
-        blctx->fillRect( iRoi.x, iRoi.y, iRoi.w, iRoi.h );
+    blctx->save();
+    blctx->resetMatrix();
+    blctx->fillRect( 0, 0, width, height );
+    blctx->restore();
 
-        // view the updated zone ( testing purpose only )
-        /*blctx.setStrokeStyle(BLRgba32(0xFFFF0000));
-        blctx.setStrokeWidth(1.0f);
-        blctx.strokeRect( mRoi.x, mRoi.y, mRoi.w, mRoi.h );*/
-    }
-    else
-    {
-        blctx->fillAll();
-        //blctx.clearAll();
-    }
+    // view the updated zone ( testing purpose only )
+    /*blctx.setStrokeStyle(BLRgba32(0xFFFF0000));
+    blctx.setStrokeWidth(1.0f);
+    blctx.strokeRect( mRoi.x, mRoi.y, mRoi.w, mRoi.h );*/
 }
 
 void
@@ -202,7 +200,7 @@ FOdysseyVectorScene::RemoveSelectedObjects()
         FOdysseyVectorObject* selectedObject = (*it);
 
         // prevent nested removal
-        if( selectedObject->HasSelectedParent() == false )
+        if( selectedObject->HasSelectedAncestor() == false )
         {
             selectedObject->GetParent()->RemoveChild( selectedObject );
         }

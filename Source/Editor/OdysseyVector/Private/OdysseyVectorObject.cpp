@@ -118,7 +118,8 @@ FOdysseyVectorObject::ResetTransform()
 }
 
 FOdysseyVectorObject*
-FOdysseyVectorObject::Copy() {
+FOdysseyVectorObject::Copy()
+{
     FOdysseyVectorObject* objectCopy = CopyShape();
 
    // TODO, update matrices once we get a BLContext object
@@ -242,7 +243,25 @@ FOdysseyVectorObject::GetBoundingBoxFromList( std::list<FOdysseyVectorObject*>& 
 }
 
 bool
-FOdysseyVectorObject::HasSelectedParent()
+FOdysseyVectorObject::HasAncestor( FOdysseyVectorObject* iCandidateAncestor )
+{
+    FOdysseyVectorObject* parent = mParent;
+
+    while ( parent )
+    {
+        if( parent == iCandidateAncestor )
+        {
+            return true;
+        }
+
+        parent = parent->GetParent();
+    }
+
+    return false;
+}
+
+bool
+FOdysseyVectorObject::HasSelectedAncestor()
 {
     FOdysseyVectorObject* parent = mParent;
 
@@ -441,22 +460,41 @@ FOdysseyVectorObject::MoveFront()
 FOdysseyVectorObject*
 FOdysseyVectorObject::Pick( FOdysseyVectorGroup* iSelectionSpace, ::ULIS::FRectD &iRoi, uint32 iSelectionFlags )
 {
-    bool picked = PickShape( iRoi, iSelectionFlags );
-
-    // returns parent only if the parent is of Group type and is different from the selection space
-    if( picked )
+    if( HasAncestor( iSelectionSpace ) )
     {
-        // Note: We cannot use dynamic casting with UE, this is not an ideal bypass
-        if( ( this->mParent->GetClass() == FOdysseyVectorGroup::StaticClass()      )
-         || ( this->mParent->GetClass() == FOdysseyVectorGroupPaint::StaticClass() ) )
-        {
-            if( this->mParent != iSelectionSpace )
-            {
-                return this->mParent;
-            }
-        }
+        bool picked = PickShape( iRoi, iSelectionFlags );
 
-        return this;
+        // returns parent only if the parent is of Group type and is different from the selection space
+        if( picked )
+        {
+            FOdysseyVectorObject* pickedObject = this;
+            FOdysseyVectorObject* pickedObjectParent = pickedObject->GetParent();
+
+            while( pickedObjectParent && ( pickedObjectParent != iSelectionSpace ) )
+            {
+                if( pickedObjectParent->HasBaseClass( FOdysseyVectorGroup::StaticClass() ) )
+                {
+                    pickedObject = pickedObjectParent;
+                }
+
+                pickedObjectParent = pickedObjectParent->GetParent();
+            }
+
+            return pickedObject;
+    /*
+            // Note: We cannot use dynamic casting with UE, this is not an ideal bypass
+            if( ( this->mParent->GetClass() == FOdysseyVectorGroup::StaticClass()      )
+                || ( this->mParent->GetClass() == FOdysseyVectorGroupPaint::StaticClass() ) )
+            {
+                if( this->mParent != iSelectionSpace )
+                {
+                    return this->mParent;
+                }
+            }
+
+            return this;
+    */
+        }
     }
 
     return nullptr;

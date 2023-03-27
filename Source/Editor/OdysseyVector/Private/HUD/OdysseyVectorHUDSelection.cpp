@@ -55,13 +55,14 @@ FOdysseyVectorHUDSelection::DrawSelectionSpace( FOdysseyVectorScene* iScene,::UL
 
         iScene->GetEngine()->UseImage( mSelectionMask );
 
+        blctx->setCompOp( BL_COMP_OP_SRC_COPY );
+
         blctx->clearAll();
-        blctx->setFillStyle( BLRgba32( 0x80808080 ) );
+        blctx->setFillStyle( BLRgba32( 0x80FFFFFF ) );
         blctx->fillRect( 0, 0, mSelectionMask->width(), mSelectionMask->height() );
 
         blctx->setMatrix( worldMatrix );
-        blctx->setCompOp( BL_COMP_OP_SRC_COPY );
-        blctx->setFillStyle( BLRgba32( 0x800000FF ) );
+        blctx->setFillStyle( BLRgba32( 0x00000000/*0x800000FF*/ ) );
         blctx->fillRect( selectionSpaceBBox.x, selectionSpaceBBox.y, selectionSpaceBBox.w, selectionSpaceBBox.h );
 
         iScene->GetEngine()->UseColorImage();

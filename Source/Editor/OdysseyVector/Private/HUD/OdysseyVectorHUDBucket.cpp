@@ -34,8 +34,6 @@ FOdysseyVectorHUDBucket::Draw( FOdysseyVectorScene* iScene, ::ULIS::FRectD& iRoi
             paintGroup->DrawBuckets( iRoi, iFlags );
         }
 
-
-
         bbox = selectedObject->GetBBox( false );
     }
 
