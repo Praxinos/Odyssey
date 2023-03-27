@@ -27,21 +27,28 @@ public:
     UOdysseyPainterEditorVectorEraserTool();
  
     //OdysseyPainterEditorTool overrides
-    virtual void Activate() override;
+    void Activate( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
 
-    virtual bool OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
-    virtual void OnMouseHover(const FOdysseyPoint& iPointInTexture) override;
-    virtual void OnMouseDrag(const FOdysseyPoint& iPointInTexture) override;
-    virtual bool OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
+    bool OnMouseDownVector( FOdysseyVectorEngine* iEngine
+                          , FOdysseyVectorScene* iScene
+                          , const FOdysseyPoint& iPointInTexture
+                          , const FKey& iKey);
+    void OnMouseHoverVector( FOdysseyVectorEngine* iEngine
+                           , FOdysseyVectorScene* iScene
+                           , const FOdysseyPoint& iPointInTexture );
+    void OnMouseDragVector( FOdysseyVectorEngine* iEngine
+                          , FOdysseyVectorScene* iScene
+                          , const FOdysseyPoint& iPointInTexture );
+    bool OnMouseUpVector( FOdysseyVectorEngine* iEngine
+                        , FOdysseyVectorScene* iScene
+                        , const FOdysseyPoint& iPointInTexture
+                        , const FKey& iKey);
     virtual void Commit() override;
+
+protected:
+    void PropertyChanged( const FName& iPropertyName );
 
 private:
     FOdysseyVectorHUDEraser mEraserHUD;
-
-public:
-    // Setters
-    virtual bool CanDraw();
-
-protected:
 
 };

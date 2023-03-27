@@ -18,139 +18,103 @@ UOdysseyPainterEditorVectorEraserTool::UOdysseyPainterEditorVectorEraserTool()
     : Radius( 20.0f )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Eraser64");
+
+    mEraserHUD.SetRadius( Radius );
 }
 
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
 void
-UOdysseyPainterEditorVectorEraserTool::Activate()
+UOdysseyPainterEditorVectorEraserTool::Activate( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
-	//FOdysseyObjectEditorUtils::SetPropertyValue(BrushOptions, "Color", FOdysseyBrushColor(GetEditorAs<FOdysseyPainterEditor>()->PaintColor()));
-    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
-
-    if(currentVectorLayer)
-    {
-        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-
-        vectorEngine->ClearHUD( );
-        vectorEngine->AddHUD( &mEraserHUD );
-
-        currentVectorLayer->RenderImageChanged(false);
-    }
+    iEngine->ClearHUD( );
+    iEngine->AddHUD(&mEraserHUD);
 }
 
 bool
-UOdysseyPainterEditorVectorEraserTool::CanDraw()
+UOdysseyPainterEditorVectorEraserTool::OnMouseDownVector( FOdysseyVectorEngine* iEngine
+                                                        , FOdysseyVectorScene* iScene
+                                                        , const FOdysseyPoint& iPointInTexture
+                                                        , const FKey& iKey )
 {
-    return IsActivable();
-}
+    mEraserHUD.SetRadius( Radius );
+    mEraserHUD.BlendMask( true );
 
-bool
-UOdysseyPainterEditorVectorEraserTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
-{
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
-
-    if( currentVectorLayer )
-    {
-        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-
-        mEraserHUD.SetRadius( Radius );
-        mEraserHUD.BlendMask( true );
-
-        vectorEngine->UseMaskImage();
-        vectorEngine->GetBLContext()->setFillAlpha( 0.0f );
-        vectorEngine->GetBLContext()->clearAll();
-        vectorEngine->GetBLContext()->setFillAlpha( 1.0f );
-        vectorEngine->GetBLContext()->fillCircle( iPointInTexture.x, iPointInTexture.y, Radius );
-        vectorEngine->UseColorImage();
-    }
+    iEngine->UseMaskImage();
+    iEngine->GetBLContext()->setFillAlpha( 0.0f );
+    iEngine->GetBLContext()->clearAll();
+    iEngine->GetBLContext()->setFillAlpha( 1.0f );
+    iEngine->GetBLContext()->fillCircle( iPointInTexture.x, iPointInTexture.y, Radius );
+    iEngine->UseColorImage();
 
     return true;
 }
 
 void
-UOdysseyPainterEditorVectorEraserTool::OnMouseHover( const FOdysseyPoint& iPointInTexture )
+UOdysseyPainterEditorVectorEraserTool::OnMouseHoverVector( FOdysseyVectorEngine* iEngine
+                                                         , FOdysseyVectorScene* iScene
+                                                         , const FOdysseyPoint& iPointInTexture )
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
+    double diameter = Radius * 2.0f;
+    ::ULIS::FRectI rect = { (int)iPointInTexture.x - (int)Radius
+                          , (int)iPointInTexture.y - (int)Radius
+                          , (int)diameter
+                          , (int)diameter };
 
-    if( currentVectorLayer )
-    {
-        double diameter = Radius * 2.0f;
-        ::ULIS::FRectI rect = { (int)iPointInTexture.x - (int)Radius
-                              , (int)iPointInTexture.y - (int)Radius
-                              , (int)diameter
-                              , (int)diameter };
-
-        mEraserHUD.SetRadius( Radius );
-        mEraserHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
+    mEraserHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
 /*
-        if( rect.x < 0 ) rect.x = 0;
-        if( rect.y < 0 ) rect.y = 0;
+    if( rect.x < 0 ) rect.x = 0;
+    if( rect.y < 0 ) rect.y = 0;
 
-        rect = rect & layerStack->GetSurface()->Block()->Rect();
+    rect = rect & layerStack->GetSurface()->Block()->Rect();
 
-        if( rect.Area() )
-        {*/
-            currentVectorLayer->RenderImageChanged( /*{ rect },*/ true );
-        /*}*/
-    }
+    if( rect.Area() )
+    {*/
+
+    /*}*/
 }
 
 void
-UOdysseyPainterEditorVectorEraserTool::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
+UOdysseyPainterEditorVectorEraserTool::OnMouseDragVector( FOdysseyVectorEngine* iEngine
+                                                        , FOdysseyVectorScene* iScene
+                                                        , const FOdysseyPoint& iPointInTexture )
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
+    BLPoint pt = { 0, 0 };
 
-    if( currentVectorLayer )
-    {
-        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        BLPoint pt = { 0, 0 };
+    mEraserHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
 
-        mEraserHUD.SetRadius( Radius );
-        mEraserHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
-
-        vectorEngine->UseMaskImage();
-        vectorEngine->GetBLContext()->setFillAlpha( 1.0f );
-        vectorEngine->GetBLContext()->fillCircle( iPointInTexture.x, iPointInTexture.y, Radius );
-        vectorEngine->UseColorImage();
-
-        currentVectorLayer->RenderImageChanged(true);
-
-        /*vectorEngine->GetBLContext()->blitImage(pt,*vectorEngine->GetBLMask());*/
-    }
+    iEngine->UseMaskImage();
+    iEngine->GetBLContext()->setFillAlpha( 1.0f );
+    iEngine->GetBLContext()->fillCircle( iPointInTexture.x, iPointInTexture.y, Radius );
+    iEngine->UseColorImage();
 }
 
 bool
-UOdysseyPainterEditorVectorEraserTool::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
+UOdysseyPainterEditorVectorEraserTool::OnMouseUpVector( FOdysseyVectorEngine* iEngine
+                                                      , FOdysseyVectorScene* iScene
+                                                      , const FOdysseyPoint& iPointInTexture
+                                                      , const FKey& iKey )
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
+    ::ULIS::FRectD Roi;
 
-    if( currentVectorLayer )
-    {
-        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        ::ULIS::FRectD Roi;
+    mEraserHUD.BlendMask( false );
 
-        mEraserHUD.BlendMask( false );
+    iEngine->UseMaskImage();
+    iEngine->Erase( iScene, Roi, false );
+    iEngine->UseColorImage();
 
-        vectorEngine->UseMaskImage();
-        vectorEngine->Erase( currentVectorLayer->GetScene(), Roi, false );
-        vectorEngine->UseColorImage();
-
-        currentVectorLayer->RenderImageChanged(false);
-
-        return true;
-    }
-
-    return false;
+    return true;
 }
 
 void
 UOdysseyPainterEditorVectorEraserTool::Commit()
 {
 
+}
+
+void
+UOdysseyPainterEditorVectorEraserTool::PropertyChanged( const FName& iPropertyName )
+{
+    mEraserHUD.SetRadius( Radius );
 }

@@ -25,14 +25,12 @@ public:
     virtual void Activate() override;
     virtual void Inactivate() override;
     virtual bool IsActivable() const override;
+    virtual bool OnMouseDown( const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
+    virtual void OnMouseDrag( const FOdysseyPoint& iPointInTexture ) override;
+    virtual bool OnMouseUp( const FOdysseyPoint& iPointInTexture,const FKey& iKey ) override;
+    virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
 
-public:
-    // Setters
-    //Wether the tool can draw or not
-    virtual bool CanDraw() override;
-
-private:
-    class UOdysseyTextureLayerImageVector* GetLayer() const;
+    void PropertyChanged( const FName& iPropertyName );
 
 private:
     void Load();

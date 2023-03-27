@@ -12,7 +12,6 @@ UOdysseyTextureEditorColorPickerTool::~UOdysseyTextureEditorColorPickerTool()
 }
 
 UOdysseyTextureEditorColorPickerTool::UOdysseyTextureEditorColorPickerTool()
-    : mEditedBlock(nullptr)
 {
 }
 
@@ -20,26 +19,33 @@ UOdysseyTextureEditorColorPickerTool::UOdysseyTextureEditorColorPickerTool()
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
 void
-UOdysseyTextureEditorColorPickerTool::Activate()
+UOdysseyTextureEditorColorPickerTool::Load()
 {
-    UOdysseyTextureLayerStack::OnCurrentLayerChanged().AddUObject(this, &UOdysseyTextureEditorColorPickerTool::OnCurrentLayerChanged);
-    Load();
-    Super::Activate();
 }
 
 void
-UOdysseyTextureEditorColorPickerTool::Load()
+UOdysseyTextureEditorColorPickerTool::Activate()
 {
-	//Define the new active tool based on the layer type
-	UOdysseyTextureLayerImageRaster* layer = GetLayer();
-	if (!layer)
-		return;
+    UOdysseyTextureLayerStack::OnCurrentLayerChanged().AddUObject(this, &UOdysseyTextureEditorColorPickerTool::OnCurrentLayerChanged);
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
+    UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
 
-	UOdysseyRasterBlock* rasterBlock = layer->GetRasterBlock();
-	mPaintEngine.RasterBlock(rasterBlock);
+    Load();
 
-	//Should be managed by the tool
-	mPaintEngine.OnPreUpdateDelegate().BindUObject(this, &UOdysseyTextureEditorColorPickerTool::OnPaintEnginePreUpdate);
+    if( currentVectorLayer )
+    {
+        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+
+        UOdysseyPainterEditorColorPickerTool::Activate( vectorEngine, vectorScene );
+
+        currentVectorLayer->RenderImageChanged(false);
+    }
+}
+
+void
+UOdysseyTextureEditorColorPickerTool::Unload()
+{
 }
 
 void
@@ -50,44 +56,22 @@ UOdysseyTextureEditorColorPickerTool::Inactivate()
 	Unload();
 }
 
-void
-UOdysseyTextureEditorColorPickerTool::Unload()
-{
-	mPaintEngine.OnPreUpdateDelegate().Unbind();
-
-    //Cleanup
-	mPaintEngine.RasterBlock(nullptr);
-}
-
 bool
 UOdysseyTextureEditorColorPickerTool::IsActivable() const
 {
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
+    UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
+
 	if (!Super::IsActivable())
         return false; 
 
 	//Check for currentlayer
-	UOdysseyTextureLayerImageRaster* layer = GetLayer();
-	if (!layer)
+	if (!currentLayer)
 		return false;
 
-	bool isActive = UOdysseyLayerFunctionLibrary::IsLayerActivatedInStack(layer);
-	bool isLocked = UOdysseyLayerFunctionLibrary::IsLayerLockedInStack(layer);
+	bool isActive = UOdysseyLayerFunctionLibrary::IsLayerActivatedInStack(currentLayer);
+	bool isLocked = UOdysseyLayerFunctionLibrary::IsLayerLockedInStack(currentLayer);
     return isActive && !isLocked;
-}
-
-bool
-UOdysseyTextureEditorColorPickerTool::CanDraw()
-{	
-    if (!Super::CanDraw())
-        return false; 
-
-	UOdysseyTextureLayerImageRaster* layer = GetLayer();
-	if (!layer)
-		return false;
-
-	bool isActive = UOdysseyLayerFunctionLibrary::IsLayerActivatedInStack(layer);
-	bool isLocked = UOdysseyLayerFunctionLibrary::IsLayerLockedInStack(layer);
-    return !isActive || isLocked;
 }
 
 void
@@ -110,29 +94,24 @@ UOdysseyTextureEditorColorPickerTool::OnCurrentLayerChanged(UOdysseyLayerStack* 
 	Load();
 }
 
-UOdysseyTextureLayerImageRaster*
-UOdysseyTextureEditorColorPickerTool::GetLayer() const
+bool
+UOdysseyTextureEditorColorPickerTool::OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
 {
-	UOdysseyTextureLayerStack* layerstack = GetEditorAs<FOdysseyTextureEditor>()->LayerStack();
-	if ( !layerstack )
-		return nullptr;
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
+    UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
+    bool ret = false;
 
-	return Cast<UOdysseyTextureLayerImageRaster>(layerstack->CurrentLayer.Get());
-}
+    if( currentVectorLayer )
+    {
+        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-FOdysseyBlendParameters
-UOdysseyTextureEditorColorPickerTool::OnPaintEnginePreUpdate(const FOdysseyBlendParameters& iBlendParameters)
-{
-	FOdysseyBlendParameters blendParameters = iBlendParameters;
+        ret = UOdysseyPainterEditorColorPickerTool::OnMouseUpVector( vectorEngine, vectorScene, iPointInTexture, iKey );
 
-	UOdysseyTextureLayerImageRaster* layer = GetLayer();
-	if (!layer)
-		return blendParameters;
+        currentVectorLayer->RenderImageChanged(false);
+    }
 
-	if ( layer->IsAlphaLocked )
-		blendParameters.AlphaMode = EOdysseyAlphaMode(::ULIS::Alpha_Back);
-
-	return blendParameters;
+    return ret;
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -22,31 +22,23 @@ public:
     //Constructor
     UOdysseyPainterEditorVectorGridTool();
  
+    void Activate( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    bool OnMouseDown( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture, const FKey& iKey );
+    void OnMouseDrag( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture );
+    bool OnMouseUp( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture, const FKey& iKey );
+    void PropertyChanged( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FName& iPropertyName );
+
     //OdysseyPainterEditorTool overrides
-    virtual void Activate() override;
-
-    virtual bool OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
-    virtual void OnMouseDrag(const FOdysseyPoint& iPointInTexture) override;
-    virtual bool OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
     virtual void Commit() override;
-
-    void PropertyChanged( const FName& iPropertyName );
-    void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent );
 
 private:
     FOdysseyVectorHUDGrid mGridHUD;
-    void Redraw(const TArray<::ULIS::FRectI>& iRects);
 
 private:
-    double mOldLocalMouseX;
-    double mOldLocalMouseY;
     std::vector<FGridNode *> mGridNodeArray;
     bool mMultipleSelectionMode;
 
 public:
-    // Setters
-    virtual bool CanDraw();
-
     UPROPERTY(EditAnywhere, Category="Odyssey Grid Tool")
     uint32 DivisionsX;
 
@@ -55,7 +47,4 @@ public:
 
     UPROPERTY(EditAnywhere, Category="Odyssey Grid Tool")
     double PickingRadius;
-
-protected:
-
 };

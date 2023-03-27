@@ -28,12 +28,12 @@ public:
     void Initialize(FOdysseyPaintEngine* iPaintEngine);
 
     //OdysseyPainterEditorTool overrides
-    virtual void Activate() override;
+    void Activate( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
 
-    bool OnMouseUpVector( UOdysseyTextureLayerImageVector& currentVectorLayer
+    bool OnMouseUpVector( FOdysseyVectorEngine* iEngine
+                        , FOdysseyVectorScene* iScene
                         , const FOdysseyPoint& iPointInTexture
                         , const FKey& iKey );
-    virtual bool OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
 
     virtual void Commit() override;
 

@@ -30,141 +30,96 @@ UOdysseyPainterEditorVectorGridTool::UOdysseyPainterEditorVectorGridTool()
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
 void
-UOdysseyPainterEditorVectorGridTool::Activate()
+UOdysseyPainterEditorVectorGridTool::Activate( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
+    mGridHUD.MakeGrid( iScene, DivisionsX, DivisionsY );
 
-    if( currentLayer->GetClass() == UOdysseyTextureLayerImageVector::StaticClass() )
+    mGridNodeArray.clear();
+
+    iEngine->ClearHUD( );
+    iEngine->AddHUD( &mGridHUD );
+}
+
+bool
+UOdysseyPainterEditorVectorGridTool::OnMouseDown( FOdysseyVectorEngine* iEngine
+                                                , FOdysseyVectorScene* iScene
+                                                , const FOdysseyPoint& iPointInTexture
+                                                , const FKey& iKey )
+{
+    for( int i = 0; i < iPointInTexture.keysDown.Num(); i++ )
     {
-        UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
-        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+        if( ( iPointInTexture.keysDown[i] == EKeys::LeftShift ) || ( iPointInTexture.keysDown[i] == EKeys::RightShift ) )
+        {
+            mMultipleSelectionMode = true;
+        }
+    }
 
-        mGridHUD.MakeGrid( currentVectorLayer->GetScene(), DivisionsX, DivisionsY );
+    // multiple selection mode
+    if ( mMultipleSelectionMode == true )
+    {
+        mMultipleSelectionMode = true;
+
+        mGridHUD.StartSelectionRectangle( iPointInTexture.x, iPointInTexture.y );
+    }
+    else
+    {
+        FGridNode* gridNode = mGridHUD.PickNode( iPointInTexture.x, iPointInTexture.y, PickingRadius );
 
         mGridNodeArray.clear();
 
-        vectorEngine->ClearHUD( );
-        vectorEngine->AddHUD( &mGridHUD );
-
-        currentVectorLayer->RenderImageChanged(false);
-    }
-}
-
-bool
-UOdysseyPainterEditorVectorGridTool::CanDraw()
-{
-    return IsActivable();
-}
-
-bool
-UOdysseyPainterEditorVectorGridTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
-{
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
-
-    if( currentLayer->GetClass() == UOdysseyTextureLayerImageVector::StaticClass() )
-    {
-        UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
-        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-
-        for( int i = 0; i < iPointInTexture.keysDown.Num(); i++ )
+        if( gridNode )
         {
-            if( ( iPointInTexture.keysDown[i] == EKeys::LeftShift ) || ( iPointInTexture.keysDown[i] == EKeys::RightShift ) )
-            {
-                mMultipleSelectionMode = true;
-            }
+            mGridNodeArray.push_back( gridNode );
         }
-
-        // multiple selection mode
-        if ( mMultipleSelectionMode == true )
-        {
-            mMultipleSelectionMode = true;
-
-            mGridHUD.StartSelectionRectangle( iPointInTexture.x, iPointInTexture.y );
-        }
-        else
-        {
-            FGridNode* gridNode = mGridHUD.PickNode( iPointInTexture.x, iPointInTexture.y, PickingRadius );
-
-            mGridNodeArray.clear();
-
-            if( gridNode )
-            {
-                mGridNodeArray.push_back( gridNode );
-            }
-        }
-
-        currentVectorLayer->RenderImageChanged(false);
     }
 
     return true;
 }
 
 void
-UOdysseyPainterEditorVectorGridTool::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
+UOdysseyPainterEditorVectorGridTool::OnMouseDrag( FOdysseyVectorEngine* iEngine
+                                                , FOdysseyVectorScene* iScene
+                                                , const FOdysseyPoint& iPointInTexture )
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
-
-    if( currentLayer->GetClass() == UOdysseyTextureLayerImageVector::StaticClass() )
+    if( mMultipleSelectionMode == true )
     {
-        UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
-        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+        mGridHUD.DragSelectionRectangle( iPointInTexture.x, iPointInTexture.y );
+    }
+    else
+    {
+        FSelectionBox& selectionBox = mGridHUD.GetSelectionBox();
+        BLPoint spaceDif = selectionBox.space->GetInverseWorldMatrix().mapVector( iPointInTexture.deltaPosition.X
+                                                                                , iPointInTexture.deltaPosition.Y );
 
-        if( mMultipleSelectionMode == true )
+        for( int i = 0; i < mGridNodeArray.size(); i++ )
         {
-            mGridHUD.DragSelectionRectangle( iPointInTexture.x, iPointInTexture.y );
-        }
-        else
-        {
-            FSelectionBox& selectionBox = mGridHUD.GetSelectionBox();
-            BLPoint spaceDif = selectionBox.space->GetInverseWorldMatrix().mapVector( iPointInTexture.deltaPosition.X
-                                                                                    , iPointInTexture.deltaPosition.Y );
-
-            for( int i = 0; i < mGridNodeArray.size(); i++ )
-            {
-                mGridNodeArray[i]->Set( mGridNodeArray[i]->GetX() + spaceDif.x, mGridNodeArray[i]->GetY() + spaceDif.y );
-            }
-
-            mGridHUD.Deform();
-
-            currentVectorLayer->GetScene()->Update( FOdysseyVectorObject::FREQUENTUPDATES
-                                                  | FOdysseyVectorObject::KEEPINVALIDATED );
+            mGridNodeArray[i]->Set( mGridNodeArray[i]->GetX() + spaceDif.x, mGridNodeArray[i]->GetY() + spaceDif.y );
         }
 
-        currentVectorLayer->RenderImageChanged(true);
-        //RedrawCurrentLayer( { /*beforeBBox | selectedObject->GetBBox( true )*/{ 0, 0, 0, 0 } } );
+        mGridHUD.Deform();
+
+        iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES | FOdysseyVectorObject::KEEPINVALIDATED );
     }
 }
 
 bool
-UOdysseyPainterEditorVectorGridTool::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
+UOdysseyPainterEditorVectorGridTool::OnMouseUp( FOdysseyVectorEngine* iEngine
+                                              , FOdysseyVectorScene* iScene
+                                              , const FOdysseyPoint& iPointInTexture
+                                              , const FKey& iKey )
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
-
-    if( currentLayer->GetClass() == UOdysseyTextureLayerImageVector::StaticClass() )
+    if( mMultipleSelectionMode == true )
     {
-        UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
+        mGridNodeArray.clear();
 
-        if( mMultipleSelectionMode == true )
-        {
-            mGridNodeArray.clear();
-
-            mGridHUD.EndSelectionRectangle( mGridNodeArray );
-        }
-
-        currentVectorLayer->GetScene()->Update( 0 );
-
-        mMultipleSelectionMode = false;
-
-        currentVectorLayer->RenderImageChanged(false);
-
-        return true;
+        mGridHUD.EndSelectionRectangle( mGridNodeArray );
     }
 
-    return false;
+    iScene->Update( 0 );
+
+    mMultipleSelectionMode = false;
+
+    return true;
 }
 
 void
@@ -174,28 +129,9 @@ UOdysseyPainterEditorVectorGridTool::Commit()
 }
 
 void
-UOdysseyPainterEditorVectorGridTool::PropertyChanged( const FName& iPropertyName )
+UOdysseyPainterEditorVectorGridTool::PropertyChanged( FOdysseyVectorEngine* iEngine
+                                                    , FOdysseyVectorScene* iScene
+                                                    , const FName& iPropertyName )
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
-
-    if( currentLayer->GetClass() == UOdysseyTextureLayerImageVector::StaticClass() )
-    {
-        UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
-
-        mGridHUD.MakeGrid( currentVectorLayer->GetScene(), DivisionsX, DivisionsY );
-
-        currentVectorLayer->RenderImageChanged(false);
-    }
-}
-
-void
-UOdysseyPainterEditorVectorGridTool::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent)
-{
-    Super::PostEditChangeProperty(PropertyChangedEvent);
-
-    if (PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive)
-        return;
-
-    PropertyChanged(PropertyChangedEvent.GetPropertyName());
+    mGridHUD.MakeGrid( iScene, DivisionsX, DivisionsY );
 }
