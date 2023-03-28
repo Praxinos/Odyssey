@@ -43,7 +43,18 @@ UOdysseyTextureEditorPaintBucketTool::Activate()
 void
 UOdysseyTextureEditorPaintBucketTool::Load()
 {
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
+    UOdysseyTextureLayerImageRaster* currentLayerRaster = Cast<UOdysseyTextureLayerImageRaster>(layerStack->CurrentLayer.Get());
 
+	//Define the new active tool based on the layer type
+	if (!currentLayerRaster)
+		return;
+
+	UOdysseyRasterBlock* rasterBlock = currentLayerRaster->GetRasterBlock();
+	mPaintEngine.RasterBlock(rasterBlock);
+
+	//Should be managed by the tool
+	mPaintEngine.OnPreUpdateDelegate().BindUObject(this, &UOdysseyTextureEditorPaintBucketTool::OnPaintEnginePreUpdate);
 }
 
 void
@@ -56,6 +67,10 @@ UOdysseyTextureEditorPaintBucketTool::Inactivate()
 void
 UOdysseyTextureEditorPaintBucketTool::Unload()
 {
+	mPaintEngine.OnPreUpdateDelegate().Unbind();
+
+    //Cleanup
+	mPaintEngine.RasterBlock(nullptr);
 }
 
 bool
@@ -157,6 +172,22 @@ UOdysseyTextureEditorPaintBucketTool::OnMouseUp( const FOdysseyPoint& iPointInTe
     }
 
     return ret;
+}
+
+FOdysseyBlendParameters
+UOdysseyTextureEditorPaintBucketTool::OnPaintEnginePreUpdate(const FOdysseyBlendParameters& iBlendParameters)
+{
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
+    UOdysseyTextureLayerImageRaster* currentLayerRaster = Cast<UOdysseyTextureLayerImageRaster>(layerStack->CurrentLayer.Get());
+	FOdysseyBlendParameters blendParameters = iBlendParameters;
+
+	if (!currentLayerRaster)
+		return blendParameters;
+
+	if ( currentLayerRaster->IsAlphaLocked )
+		blendParameters.AlphaMode = EOdysseyAlphaMode(::ULIS::Alpha_Back);
+
+	return blendParameters;
 }
 
 #undef LOCTEXT_NAMESPACE
