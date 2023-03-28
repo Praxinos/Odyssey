@@ -40,66 +40,6 @@ FOdysseyPainterEditorToolsTab::CreateWidget()
     return SNew( SOdysseyPainterEditorToolsTileView )
         .Tools(tools)
         .OnToolSelected(this, &FOdysseyPainterEditorToolsTab::OnToolSelected);
-        
-    
-        /* SNew( SScrollBox )
-        .Orientation( Orient_Vertical )
-        .ScrollBarAlwaysVisible( false )
-        +SScrollBox::Slot()
-        [
-            SNew( SWrapBox )
-            .UseAllottedWidth( true )
-            +SWrapBox::Slot()
-            [
-                SNew( SCheckBox )
-                .Style( &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("OdysseyCheckBoxStyle.TransparentCheckBox") )
-                .OnCheckStateChanged( this, &FOdysseyPainterEditorToolsTab::OnToolCheckBoxClicked, kTool_Drawing )
-                .IsChecked_Lambda([&]() -> ECheckBoxState
-                {
-                    return Cast<UOdysseyDrawingTool>(mEditor->GetSelectedTool()) != nullptr ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
-                })
-                [
-                    SNew( SImage )
-                    .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.FreeHand32" ) )
-                ]
-            ]
-        ]
-        +SScrollBox::Slot()
-        [
-            SNew( SExpandableArea )
-            .HeaderContent()
-            [
-                SNew( STextBlock )
-                .Text( LOCTEXT( "Utils", "Utils" ) )
-                .Font( FAppStyle::GetFontStyle( "DetailsView.CategoryFontStyle" ) )
-                .ShadowOffset( FVector2D( 1.0f, 1.0f ) )
-            ]
-            .BodyContent()
-            [
-                SNew( SWrapBox )
-                .UseAllottedWidth( true )
-                +SWrapBox::Slot()
-                [
-                    SNew( SButton )
-                    .ButtonStyle( FCoreStyle::Get(), "NoBorder" )
-                    .OnClicked_Raw(this, &FOdysseyPainterEditorToolsTab::OnClear)
-                    [
-                        SNew( SImage )
-                        .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Shredder32" ) )
-                    ]
-                ]
-                +SWrapBox::Slot()
-                [
-                    SNew( SButton )
-                    .ButtonStyle( FCoreStyle::Get(), "NoBorder" )
-                    .OnClicked_Raw(this, &FOdysseyPainterEditorToolsTab::OnFill)
-                    [
-                        SNew( SImage )
-                        .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PaintBucket32" ) )
-                    ]
-                ]
-            ]
-        ] */
 }
 
 void
@@ -110,9 +50,6 @@ FOdysseyPainterEditorToolsTab::BindShortcuts(FBaseToolkit* iToolkit)
 
     #define MAP_ACTION(action, ...) toolkitCommands->MapAction( action, FExecuteAction::CreateSP( this, &FOdysseyPainterEditorToolsTab::__VA_ARGS__ ), FCanExecuteAction() );
 
-    //MAP_ACTION(painterEditorCommands.FillCurrentLayer, Fill )
-    MAP_ACTION(painterEditorCommands.ClearCurrentLayer, Clear )
-
     #undef MAP_ACTION
 }
 
@@ -122,77 +59,10 @@ FOdysseyPainterEditorToolsTab::BindShortcuts(FBaseToolkit* iToolkit)
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------- Event Listeners
 
-FReply
-FOdysseyPainterEditorToolsTab::OnClear()
-{
-    Clear();
-    return FReply::Handled();
-}
-
-FReply
-FOdysseyPainterEditorToolsTab::OnFill()
-{
-    Fill();
-    return FReply::Handled();
-}
-
-FReply
-FOdysseyPainterEditorToolsTab::OnClearUndo()
-{
-    mEditor->ClearUndo();
-    return FReply::Handled();
-}
-
 void
 FOdysseyPainterEditorToolsTab::OnToolSelected(UOdysseyPainterEditorTool* iTool)
 {
     mEditor->SetSelectedTool(iTool);
-}
-
-//--------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------ Methods
-
-void
-FOdysseyPainterEditorToolsTab::Clear()
-{
-    //TODO: FLush and commit courrent tool before clearing
-    /* if ( !mEditor->PaintEngine().PaintBlock() )
-        return;
-
-	//Do the fill
-	::ULIS::FBlock* paintBlock = mEditor->PaintEngine().PaintBlock();
-	::ULIS::FColor color = ::ULIS::FColor::Black;
-	::ULIS::FRectI rect = paintBlock->Rect();
-	::ULIS::eFormat format = paintBlock->Format();
-
-	::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
-	ctx.Fill(*paintBlock, color);
-	ctx.Finish();
-
-	paintBlock->Dirty();
-	mEditor->PaintEngine().Commit(FOdysseyBlendParameters(true, EOdysseyBlendingMode::kNormal, EOdysseyAlphaMode::kNormal, 100.0f));
-    */
-}
-
-void
-FOdysseyPainterEditorToolsTab::Fill()
-{
-    //TODO: FLush and commit courrent tool before filling
-    /*if ( !mEditor->PaintEngine().PaintBlock() )
-        return;
-
-	//Do the fill
-	::ULIS::FBlock* paintBlock = mEditor->PaintEngine().PaintBlock();
-	::ULIS::FColor color = mEditor->PaintColor().GetValue();
-	::ULIS::FRectI rect = paintBlock->Rect();
-	::ULIS::eFormat format = paintBlock->Format();
-
-	::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
-	ctx.Fill(*paintBlock, color);
-	ctx.Finish();
-
-	paintBlock->Dirty();
-	mEditor->PaintEngine().Commit(FOdysseyBlendParameters());*/
 }
 
 #undef LOCTEXT_NAMESPACE

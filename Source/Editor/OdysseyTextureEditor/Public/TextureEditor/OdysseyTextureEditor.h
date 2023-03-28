@@ -51,6 +51,10 @@ public:
     virtual FOdysseyTextureEditorGUI* GetGUI() override;
     virtual TSharedPtr<FWorkspaceItem> RegisterTabSpawners( const TSharedRef<class FTabManager>& iTabManager ) override;
 
+public:
+    // Events
+    void OnCurrentLayerChanged(class UOdysseyLayerStack* iLayerStack);
+
 protected:
     // FGCObject implementation
     virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
