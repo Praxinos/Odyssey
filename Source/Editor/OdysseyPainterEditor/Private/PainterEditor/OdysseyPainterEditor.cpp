@@ -127,22 +127,20 @@ FOdysseyPainterEditor::SetSelectedTool(UOdysseyPainterEditorTool* iTool)
 void
 FOdysseyPainterEditor::SelectDefaultTool()
 {
-	if ( mSelectedTool )
-	{
-		if ( mSelectedTool->IsActivable() )
-			return;
-		
-		mSelectedTool->Inactivate();
-	}
+	if ( mSelectedTool && mSelectedTool->IsActivable() )
+		return;
 
-	for ( UOdysseyPainterEditorTool* tool : mTools )
-	{
-		if ( tool->IsActivable() )
-		{
-			SetSelectedTool(tool);
-			return;
-		}
-	}
+	UOdysseyPainterEditorTool* toolToSelect = nullptr;
+    for (UOdysseyPainterEditorTool* tool : mTools)
+    {
+		if ( !tool->IsActivable() )
+			continue;
+
+		toolToSelect = tool;
+		break;
+    }
+
+	SetSelectedTool(toolToSelect);
 }
 
 //--------------------------------------------------------------------------------------

@@ -34,9 +34,9 @@ public:
     // Getters
     virtual FOdysseyPainterEditorGUI*                   GetGUI() = 0;
 
-    virtual FOdysseyHUDSystem*                          HUDSystem() const;
-	virtual UTexture*                                   DisplayTexture() const = 0;
-    virtual const FOdysseyBrushColor&                         PaintColor() const;
+    virtual FOdysseyHUDSystem*                              HUDSystem() const;
+	virtual UTexture*                                       DisplayTexture() const = 0;
+    virtual const FOdysseyBrushColor&                       PaintColor() const;
     virtual UOdysseyPainterEditorTool*                      GetSelectedTool() const;
     virtual TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> GetDisplayBlock() = 0;
 

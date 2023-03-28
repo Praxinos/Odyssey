@@ -17,7 +17,7 @@ SOdysseyPainterEditorToolTile::SOdysseyPainterEditorToolTile()
 void
 SOdysseyPainterEditorToolTile::Construct(const FArguments& InArgs, const TSharedRef<STableViewBase>& InOwnerTableView)
 {
-    UOdysseyPainterEditorTool* tool = InArgs._Tool;
+    mTool = InArgs._Tool;
     mOnSelected = InArgs._OnSelected;
 
     STableRow<UOdysseyPainterEditorTool*>::Construct(
@@ -27,9 +27,10 @@ SOdysseyPainterEditorToolTile::Construct(const FArguments& InArgs, const TShared
             SNew(SButton)
 		    .ButtonStyle(&FOdysseyStyle::GetWidgetStyle<FButtonStyle>("Button.TransparentNoPadding"))
             .OnClicked(this, &SOdysseyPainterEditorToolTile::OnClicked)
+            .IsEnabled(this, &SOdysseyPainterEditorToolTile::IsEnabled)
             [
                 SNew(SImage)
-                .Image(&tool->Icon)
+                .Image(&mTool->Icon)
             ]
         ],
         InOwnerTableView
@@ -41,6 +42,12 @@ SOdysseyPainterEditorToolTile::OnClicked()
 {
     mOnSelected.ExecuteIfBound();
     return FReply::Handled();
+}
+
+bool
+SOdysseyPainterEditorToolTile::IsEnabled() const
+{
+    return mTool->IsActivable();
 }
 
 #undef LOCTEXT_NAMESPACE

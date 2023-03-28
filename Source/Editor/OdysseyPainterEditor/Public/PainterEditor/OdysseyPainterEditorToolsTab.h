@@ -36,16 +36,7 @@ protected:
 
 protected:
     // Event Listeners
-    virtual FReply OnClear();
-    virtual FReply OnFill();
-    virtual FReply OnClearUndo();
-   
     void OnToolSelected(UOdysseyPainterEditorTool* iTool);
-
-protected:
-    // Methods
-    virtual void Clear();
-    virtual void Fill();
 
 private:
     FOdysseyPainterEditor* mEditor;
