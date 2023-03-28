@@ -2,6 +2,8 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Tools/OdysseyPainterEditorTool.h"
+#include "LayerStack/OdysseyTextureLayerStack.h"
+#include "TextureEditor/OdysseyTextureEditor.h"
 
 #include "Misc/TransactionObjectEvent.h"
 
@@ -14,6 +16,48 @@ UOdysseyPainterEditorTool::~UOdysseyPainterEditorTool()
 UOdysseyPainterEditorTool::UOdysseyPainterEditorTool()
     : mEditor (nullptr)
 {
+}
+
+UOdysseyTextureLayerImageVector*
+UOdysseyPainterEditorTool::GetCurrentLayerImageVector()
+{
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
+
+    if( layerStack )
+    {
+        UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
+
+        if( currentLayer )
+        {
+            if( currentLayer->GetClass() == UOdysseyTextureLayerImageVector::StaticClass() )
+            {
+                return Cast<UOdysseyTextureLayerImageVector>(currentLayer);
+            }
+        }
+    }
+
+    return nullptr;
+}
+
+UOdysseyTextureLayerImageRaster*
+UOdysseyPainterEditorTool::GetCurrentLayerImageRaster()
+{
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
+
+    if( layerStack )
+    {
+        UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
+
+        if( currentLayer )
+        {
+            if( currentLayer->GetClass() == UOdysseyTextureLayerImageRaster::StaticClass() )
+            {
+                return Cast<UOdysseyTextureLayerImageRaster>(currentLayer);
+            }
+        }
+    }
+
+    return nullptr;
 }
 
 void

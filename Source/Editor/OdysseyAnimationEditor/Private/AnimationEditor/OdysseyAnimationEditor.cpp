@@ -32,7 +32,24 @@ FOdysseyAnimationEditor::FOdysseyAnimationEditor() :
 	mAnimation(nullptr),
 	mGUI(nullptr),
 	mRasterDrawingTool(nullptr),
+	mVectorPrimitiveDrawingTool(nullptr),
+	mVectorPathDrawingTool(nullptr),
+	mVectorPathEditTool(nullptr),
+	mVectorPathCutTool(nullptr),
+	mVectorObjectPickTool(nullptr),
+	mVectorObjectMoveTool(nullptr),
+	mVectorObjectRotateTool(nullptr),
+	mVectorObjectScaleTool(nullptr),
+	mVectorSceneScaleTool(nullptr),
+	mVectorScenePanTool(nullptr),
+	mVectorEraserTool(nullptr),
+	mVectorPathPushTool(nullptr),
+	mVectorPathWidthTool(nullptr),
+	mVectorPathSmoothTool(nullptr),
+	mVectorPathKnotTool(nullptr),
 	mPaintBucketTool(nullptr),
+	mColorPickerTool(nullptr),
+	mVectorGridTool(nullptr),
 	mPlayer(nullptr),
     mTexture(),
 	mPlaybackFramesPerSecond(0)
@@ -72,14 +89,66 @@ void
 FOdysseyAnimationEditor::InitTools()
 {
 	mRasterDrawingTool = NewObject<UOdysseyAnimationEditorRasterDrawingTool>();
+	mVectorPrimitiveDrawingTool = NewObject<UOdysseyAnimationEditorVectorPrimitiveDrawingTool>();
+	mVectorPathDrawingTool = NewObject<UOdysseyAnimationEditorVectorPathDrawingTool>();
+	mVectorPathEditTool = NewObject<UOdysseyAnimationEditorVectorPathEditTool>();
+	mVectorPathCutTool = NewObject<UOdysseyAnimationEditorVectorPathCutTool>();
+	mVectorObjectPickTool = NewObject<UOdysseyAnimationEditorVectorObjectPickTool>();
+	mVectorObjectMoveTool = NewObject<UOdysseyAnimationEditorVectorObjectMoveTool>();
+	mVectorObjectRotateTool = NewObject<UOdysseyAnimationEditorVectorObjectRotateTool>();
+	mVectorObjectScaleTool = NewObject<UOdysseyAnimationEditorVectorObjectScaleTool>();
+    mVectorSceneScaleTool = NewObject<UOdysseyAnimationEditorVectorSceneScaleTool>();
+    mVectorScenePanTool = NewObject<UOdysseyAnimationEditorVectorScenePanTool>();
+    mVectorEraserTool = NewObject<UOdysseyAnimationEditorVectorEraserTool>();
+    mVectorPathPushTool = NewObject<UOdysseyAnimationEditorVectorPathPushTool>();
+    mVectorPathWidthTool = NewObject<UOdysseyAnimationEditorVectorPathWidthTool>();
+    mVectorPathSmoothTool = NewObject<UOdysseyAnimationEditorVectorPathSmoothTool>();
+    mVectorPathKnotTool = NewObject<UOdysseyAnimationEditorVectorPathKnotTool>();
 	mPaintBucketTool = NewObject<UOdysseyAnimationEditorPaintBucketTool>();
+	mColorPickerTool = NewObject<UOdysseyAnimationEditorColorPickerTool>();
+	mVectorGridTool = NewObject<UOdysseyAnimationEditorVectorGridTool>();
 
 	mRasterDrawingTool->SetEditor(this);
+    mVectorPrimitiveDrawingTool->SetEditor(this);
+    mVectorPathDrawingTool->SetEditor(this);
+    mVectorPathEditTool->SetEditor(this);
+    mVectorPathCutTool->SetEditor(this);
+    mVectorObjectPickTool->SetEditor(this);
+    mVectorObjectMoveTool->SetEditor(this);
+    mVectorObjectRotateTool->SetEditor(this);
+    mVectorObjectScaleTool->SetEditor(this);
+    mVectorSceneScaleTool->SetEditor(this);
+    mVectorScenePanTool->SetEditor(this);
+    mVectorEraserTool->SetEditor(this);
+    mVectorPathPushTool->SetEditor(this);
+    mVectorPathWidthTool->SetEditor(this);
+    mVectorPathSmoothTool->SetEditor(this);
+    mVectorPathKnotTool->SetEditor(this);
 	mPaintBucketTool->SetEditor(this);
+	mColorPickerTool->SetEditor(this);
+	mVectorGridTool->SetEditor(this);
 	mRasterDrawingTool->SetBrushContexts(mBrushContexts);
 
 	mTools.Add(mRasterDrawingTool);
 	mTools.Add(mPaintBucketTool);
+    mTools.Add(mVectorPrimitiveDrawingTool);
+    mTools.Add(mVectorPathDrawingTool);
+    mTools.Add(mVectorPathEditTool);
+    mTools.Add(mVectorPathCutTool);
+    mTools.Add(mVectorObjectPickTool);
+    mTools.Add(mVectorObjectMoveTool);
+    mTools.Add(mVectorObjectRotateTool);
+    mTools.Add(mVectorObjectScaleTool);
+    mTools.Add(mVectorSceneScaleTool);
+    mTools.Add(mVectorScenePanTool);
+    mTools.Add(mVectorEraserTool);
+    mTools.Add(mVectorPathPushTool);
+    mTools.Add(mVectorPathWidthTool);
+    mTools.Add(mVectorPathSmoothTool);
+    mTools.Add(mVectorPathKnotTool);
+	mTools.Add(mPaintBucketTool);
+	mTools.Add(mColorPickerTool);
+	mTools.Add(mVectorGridTool);
 	//mAnimationRasterDrawingTool->OnApplyOverridesDelegate().AddRaw(this, &FOdysseyPainterEditor::OnApplyOverrides);
 }
 
@@ -88,7 +157,24 @@ FOdysseyAnimationEditor::BindShortcuts(FBaseToolkit* iToolkit)
 {
 	FOdysseyPainterEditor::BindShortcuts(iToolkit);
 	mRasterDrawingTool->BindShortcuts(iToolkit);
+	mVectorPrimitiveDrawingTool->BindShortcuts(iToolkit);
+	mVectorPathDrawingTool->BindShortcuts(iToolkit);
+	mVectorPathEditTool->BindShortcuts(iToolkit);
+	mVectorPathCutTool->BindShortcuts(iToolkit);
+	mVectorObjectPickTool->BindShortcuts(iToolkit);
+	mVectorObjectMoveTool->BindShortcuts(iToolkit);
+	mVectorObjectRotateTool->BindShortcuts(iToolkit);
+	mVectorObjectScaleTool->BindShortcuts(iToolkit);
+	mVectorSceneScaleTool->BindShortcuts(iToolkit);
+	mVectorScenePanTool->BindShortcuts(iToolkit);
+	mVectorEraserTool->BindShortcuts(iToolkit);
+	mVectorPathPushTool->BindShortcuts(iToolkit);
+	mVectorPathWidthTool->BindShortcuts(iToolkit);
+	mVectorPathSmoothTool->BindShortcuts(iToolkit);
+	mVectorPathKnotTool->BindShortcuts(iToolkit);
 	mPaintBucketTool->BindShortcuts(iToolkit);
+	mColorPickerTool->BindShortcuts(iToolkit);
+	mVectorGridTool->BindShortcuts(iToolkit);
 }
 
 void
@@ -96,7 +182,24 @@ FOdysseyAnimationEditor::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
 {
 	FOdysseyPainterEditor::ExtendMenu(iOwner, iMenuName);
 	mRasterDrawingTool->ExtendMenu(iOwner, iMenuName);
+	mVectorPrimitiveDrawingTool->ExtendMenu(iOwner, iMenuName);
+	mVectorPathDrawingTool->ExtendMenu(iOwner, iMenuName);
+	mVectorPathEditTool->ExtendMenu(iOwner, iMenuName);
+	mVectorPathCutTool->ExtendMenu(iOwner, iMenuName);
+	mVectorObjectPickTool->ExtendMenu(iOwner, iMenuName);
+	mVectorObjectMoveTool->ExtendMenu(iOwner, iMenuName);
+	mVectorObjectRotateTool->ExtendMenu(iOwner, iMenuName);
+	mVectorObjectScaleTool->ExtendMenu(iOwner, iMenuName);
+	mVectorSceneScaleTool->ExtendMenu(iOwner, iMenuName);
+	mVectorScenePanTool->ExtendMenu(iOwner, iMenuName);
+	mVectorEraserTool->ExtendMenu(iOwner, iMenuName);
+	mVectorPathPushTool->ExtendMenu(iOwner, iMenuName);
+	mVectorPathWidthTool->ExtendMenu(iOwner, iMenuName);
+	mVectorPathSmoothTool->ExtendMenu(iOwner, iMenuName);
+	mVectorPathKnotTool->ExtendMenu(iOwner, iMenuName);
 	mPaintBucketTool->ExtendMenu(iOwner, iMenuName);
+	mColorPickerTool->ExtendMenu(iOwner, iMenuName);
+	mVectorGridTool->ExtendMenu(iOwner, iMenuName);
 }
 
 //--------------------------------------------------------------------------------------
@@ -147,10 +250,112 @@ FOdysseyAnimationEditor::GetRasterDrawingTool() const
 	return mRasterDrawingTool;
 }
 
+UOdysseyAnimationEditorVectorPrimitiveDrawingTool*
+FOdysseyAnimationEditor::GetVectorPrimitiveDrawingTool() const
+{
+	return mVectorPrimitiveDrawingTool;
+}
+
+UOdysseyAnimationEditorVectorPathDrawingTool*
+FOdysseyAnimationEditor::GetVectorPathDrawingTool() const
+{
+	return mVectorPathDrawingTool;
+}
+
+UOdysseyAnimationEditorVectorPathEditTool*
+FOdysseyAnimationEditor::GetVectorPathEditTool() const
+{
+    return mVectorPathEditTool;
+}
+
+UOdysseyAnimationEditorVectorPathCutTool*
+FOdysseyAnimationEditor::GetVectorPathCutTool() const
+{
+    return mVectorPathCutTool;
+}
+
+UOdysseyAnimationEditorVectorObjectPickTool*
+FOdysseyAnimationEditor::GetVectorObjectPickTool() const
+{
+    return mVectorObjectPickTool;
+}
+
+UOdysseyAnimationEditorVectorObjectMoveTool*
+FOdysseyAnimationEditor::GetVectorObjectMoveTool() const
+{
+    return mVectorObjectMoveTool;
+}
+
+UOdysseyAnimationEditorVectorObjectRotateTool*
+FOdysseyAnimationEditor::GetVectorObjectRotateTool() const
+{
+    return mVectorObjectRotateTool;
+}
+
+UOdysseyAnimationEditorVectorObjectScaleTool*
+FOdysseyAnimationEditor::GetVectorObjectScaleTool() const
+{
+    return mVectorObjectScaleTool;
+}
+
+UOdysseyAnimationEditorVectorSceneScaleTool*
+FOdysseyAnimationEditor::GetVectorSceneScaleTool() const
+{
+    return mVectorSceneScaleTool;
+}
+
+UOdysseyAnimationEditorVectorScenePanTool*
+FOdysseyAnimationEditor::GetVectorScenePanTool() const
+{
+    return mVectorScenePanTool;
+}
+
+UOdysseyAnimationEditorVectorEraserTool*
+FOdysseyAnimationEditor::GetVectorEraserTool() const
+{
+    return mVectorEraserTool;
+}
+
+UOdysseyAnimationEditorVectorPathSmoothTool*
+FOdysseyAnimationEditor::GetVectorPathSmoothTool() const
+{
+    return mVectorPathSmoothTool;
+}
+
+UOdysseyAnimationEditorVectorPathPushTool*
+FOdysseyAnimationEditor::GetVectorPathPushTool() const
+{
+    return mVectorPathPushTool;
+}
+
+UOdysseyAnimationEditorVectorPathWidthTool*
+FOdysseyAnimationEditor::GetVectorPathWidthTool() const
+{
+    return mVectorPathWidthTool;
+}
+
+UOdysseyAnimationEditorVectorPathKnotTool*
+FOdysseyAnimationEditor::GetVectorPathKnotTool() const
+{
+    return mVectorPathKnotTool;
+}
+
 UOdysseyAnimationEditorPaintBucketTool*
 FOdysseyAnimationEditor::GetPaintBucketTool() const
 {
 	return mPaintBucketTool;
+}
+
+UOdysseyAnimationEditorColorPickerTool*
+FOdysseyAnimationEditor::GetColorPickerTool() const
+{
+    return mColorPickerTool;
+}
+
+UOdysseyAnimationEditorVectorGridTool*
+FOdysseyAnimationEditor::GetVectorGridTool() const
+{
+    return mVectorGridTool;
 }
 
 //--------------------------------------------------------------------------------------
@@ -181,7 +386,24 @@ FOdysseyAnimationEditor::AddReferencedObjects(FReferenceCollector& Collector)
 {
 	FOdysseyPainterEditor::AddReferencedObjects(Collector);
 	Collector.AddReferencedObject(mRasterDrawingTool);
+	Collector.AddReferencedObject(mVectorPrimitiveDrawingTool);
+	Collector.AddReferencedObject(mVectorPathDrawingTool);
+	Collector.AddReferencedObject(mVectorPathEditTool);
+	Collector.AddReferencedObject(mVectorPathCutTool);
+	Collector.AddReferencedObject(mVectorObjectPickTool);
+	Collector.AddReferencedObject(mVectorObjectMoveTool);
+	Collector.AddReferencedObject(mVectorObjectRotateTool);
+	Collector.AddReferencedObject(mVectorObjectScaleTool);
+    Collector.AddReferencedObject(mVectorSceneScaleTool);
+    Collector.AddReferencedObject(mVectorScenePanTool);
+    Collector.AddReferencedObject(mVectorEraserTool);
+    Collector.AddReferencedObject(mVectorPathPushTool);
+    Collector.AddReferencedObject(mVectorPathWidthTool);
+    Collector.AddReferencedObject(mVectorPathSmoothTool);
+    Collector.AddReferencedObject(mVectorPathKnotTool);
 	Collector.AddReferencedObject(mPaintBucketTool);
+	Collector.AddReferencedObject(mColorPickerTool);
+	Collector.AddReferencedObject(mVectorGridTool);
 
 	Collector.AddReferencedObject(mPlayer);
 	Collector.AddReferencedObject(mTexture);

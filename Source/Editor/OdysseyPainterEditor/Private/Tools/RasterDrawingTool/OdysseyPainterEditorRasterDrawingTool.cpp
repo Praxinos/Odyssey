@@ -6,7 +6,6 @@
 #include "Tools/RasterDrawingTool/OdysseyBlendParametersOverrides.h"
 #include "Tools/RasterDrawingTool/OdysseyBrushOptionsOverrides.h"
 #include "FreehandShape/OdysseyFreehandShape.h"
-#include "Tools/RasterDrawingTool/Widgets/SOdysseyPainterEditorRasterDrawingToolOptions.h"
 #include "ObjectEditorUtils.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorRasterDrawingTool"

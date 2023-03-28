@@ -1,0 +1,36 @@
+#pragma once
+
+#include <blend2d.h>
+#include <ULIS>
+
+#include "HUD/OdysseyVectorHUD.h"
+
+typedef struct _FSelectionBox
+{
+    FOdysseyVectorObject* space;
+    ::ULIS::FRectD rect;
+} FSelectionBox;
+
+class ODYSSEYVECTOR_API FOdysseyVectorHUDSelection : public FOdysseyVectorHUD
+{
+    protected:
+        std::vector<::ULIS::FVec2D>* mPointArray;
+        bool mSelecting;
+        BLImage* mSelectionMask;
+        void DrawSelectionSpace( FOdysseyVectorScene* iScene, ::ULIS::FRectD& iRoi, uint64 iFlags );
+        FSelectionBox mSelectionBox;
+
+    protected:
+        void DrawSelectionBox( FOdysseyVectorScene* iScene, ::ULIS::FRectD& iRoi, uint64 iFlags );
+        void DrawSelecting( FOdysseyVectorScene* iScene, ::ULIS::FRectD& iRoi, uint64 iFlags );
+
+    public:
+        virtual ~FOdysseyVectorHUDSelection();
+        FOdysseyVectorHUDSelection();
+
+        FSelectionBox& GetSelectionBox();
+        void Init( uint32 iWidth, uint32 iHeight );
+        virtual void UpdateSelectionBox( FOdysseyVectorScene* iScene );
+        virtual void Draw( FOdysseyVectorScene* iScene, ::ULIS::FRectD& iRoi, uint64 iFlags );
+        void SetSelecting( bool iSelecting, std::vector<::ULIS::FVec2D>* iPointArray );
+};

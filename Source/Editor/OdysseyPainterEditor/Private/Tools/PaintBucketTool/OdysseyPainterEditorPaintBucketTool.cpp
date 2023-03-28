@@ -3,6 +3,9 @@
 
 #include "Tools/PaintBucketTool/OdysseyPainterEditorPaintBucketTool.h"
 
+#include "OdysseyRasterBlock.h"
+
+
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
 UOdysseyPainterEditorPaintBucketTool::~UOdysseyPainterEditorPaintBucketTool()
@@ -10,6 +13,13 @@ UOdysseyPainterEditorPaintBucketTool::~UOdysseyPainterEditorPaintBucketTool()
 }
 
 UOdysseyPainterEditorPaintBucketTool::UOdysseyPainterEditorPaintBucketTool()
+    : mBucketHUD()
+    , mPickedBucket( nullptr )
+    , mPickedBucketHandle( nullptr )
+    , mPickedObject( nullptr )
+    , Gradient( false )
+    , Color1( 255, 255, 255, 255 )
+    , Color2( 255, 255, 255, 255 )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PaintBucket64");
 }
@@ -18,40 +28,294 @@ UOdysseyPainterEditorPaintBucketTool::UOdysseyPainterEditorPaintBucketTool()
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
 void
-UOdysseyPainterEditorPaintBucketTool::Activate()
+UOdysseyPainterEditorPaintBucketTool::Activate( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
-	//FOdysseyObjectEditorUtils::SetPropertyValue(BrushOptions, "Color", FOdysseyBrushColor(GetEditorAs<FOdysseyPainterEditor>()->PaintColor()));
+    iEngine->ClearHUD();
+    iEngine->AddHUD(&mBucketHUD);
+}
+
+static void floodFill ( int32 x
+                      , int32 y
+                      , TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iSrcImage
+                      , TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iDstImage
+                      , TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iMask
+                      , ::ULIS::ISample& iColor
+                      , uint8 iTolerance ) {
+    if ( ( x >= 0 ) && ( x < iSrcImage->Width()  ) &&
+         ( y >= 0 ) && ( y < iSrcImage->Height() ) ) {
+        uint32 maxItems = 0xFFFF; // stack size for 65k pixels at first. Then we increase by 65k every time needed
+        int32 (*stack)[2] = (int32(*)[2]) calloc ( maxItems, sizeof(int32) * 2 );
+        // buffer to remember which pixels were already processed
+        uint8* passed = (uint8*) calloc ( iSrcImage->Width() * iSrcImage->Height(), sizeof(uint8) );
+        uint32 offset = ( y * iSrcImage->Width() ) + x;
+        ::ULIS::FColor oldColor = iSrcImage->Color( x, y );
+        int16 oldR = oldColor.R8();
+        int16 oldG = oldColor.G8();
+        int16 oldB = oldColor.B8();
+        int16 oldA = oldColor.A8();
+        uint32 nbItems = 0;
+        uint32 curItem = 0;
+        uint32 i;
+
+        // add first pixel to the stack
+        if ( ( iMask == nullptr ) || *(iMask->PixelBits(x,y)) ) {
+            stack[nbItems][0] = x;
+            stack[nbItems][1] = y;
+
+            nbItems++;
+        }
+
+        // process neighboring pixels
+        while ( curItem < nbItems ) {
+            int32 sx = stack[curItem][0],
+                  sy = stack[curItem][1];
+            int32 pos[4][2] = {{ sx + 1, sy     },
+                               { sx    , sy + 1 },
+                               { sx - 1, sy     },
+                               { sx    , sy - 1 }};
+
+            for ( i = 0; i < 4; i++ ) {
+                int32 nx = pos[i][0],
+                      ny = pos[i][1];
+
+                if ( ( nx >= 0 ) && ( nx < iSrcImage->Width()  ) &&
+                     ( ny >= 0 ) && ( ny < iSrcImage->Height() ) ) {
+                    uint32 noffset = ( ny * iSrcImage->Width() ) + nx;
+                    ::ULIS::FColor curColor = iSrcImage->Color( nx, ny );
+
+                    if ( ( iMask == nullptr ) || *(iMask->PixelBits(nx,ny)) ) {
+                        /*if ( ( dstPixel[0] != iNewR ) &&
+                             ( dstPixel[1] != iNewG ) &&
+                             ( dstPixel[2] != iNewB ) )  {*/
+                        if ( passed[noffset] == 0 ) {
+                            switch ( iSrcImage->BytesPerPixel() ) {
+                                case 3 :
+                                case 4 : {
+                                    if ( ( curColor.R8() >= ::ULIS::FMath::Max( oldR - iTolerance, 0x00 ) ) &&
+                                         ( curColor.R8() <= ::ULIS::FMath::Min( oldR + iTolerance, 0xFF ) ) &&
+                                         ( curColor.G8() >= ::ULIS::FMath::Max( oldG - iTolerance, 0x00 ) ) &&
+                                         ( curColor.G8() <= ::ULIS::FMath::Min( oldG + iTolerance, 0xFF ) ) &&
+                                         ( curColor.B8() >= ::ULIS::FMath::Max( oldB - iTolerance, 0x00 ) ) &&
+                                         ( curColor.B8() <= ::ULIS::FMath::Min( oldB + iTolerance, 0xFF ) ) &&
+                                         ( curColor.A8() >= ::ULIS::FMath::Max( oldA - iTolerance, 0x00 ) ) &&
+                                         ( curColor.A8() <= ::ULIS::FMath::Min( oldA + iTolerance, 0xFF ) ) ) {
+                                        stack[nbItems][0] = nx;
+                                        stack[nbItems][1] = ny;
+
+                                        // this is super slow
+                                        iDstImage->SetPixel( nx, ny, iColor );
+
+                                        nbItems++;
+
+                                        if ( nbItems == maxItems ) {
+                                            maxItems += 0xFFFF;
+
+                                            stack = (int32(*)[2]) realloc ( stack, sizeof ( int32 ) * 2 * maxItems );
+                                        }
+                                    }
+                                } break;
+
+                                default : 
+                                break;
+                            }
+
+                            passed[noffset] = 1;
+                        }
+                    }
+                }
+            }
+
+            curItem++;
+        }
+
+        free ( stack );
+        free ( passed );
+    }
 }
 
 bool
-UOdysseyPainterEditorPaintBucketTool::CanDraw()
+UOdysseyPainterEditorPaintBucketTool::OnMouseDown( TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock
+                                                 , const FOdysseyPoint& iPointInTexture
+                                                 , const FKey& iKey )
 {
-    return IsActivable();
-}
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> paintBlock = mPaintEngine.PaintBlock();
+    ::ULIS::FColor color = GetEditorAs<FOdysseyPainterEditor>()->PaintColor().GetValue();
+    /*::ULIS::FRectI rect = paintBlock->Rect();*/
+    ::ULIS::eFormat format = paintBlock->Format();
 
-bool
-UOdysseyPainterEditorPaintBucketTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
-{
-    if (!CanDraw())
-        return false;
+    /*if (!CanDraw())
+        return false;*/
 
     if (!mPaintEngine.PaintBlock())
         return false;
 
-	//Do the fill
-	/* ::ULIS::FBlock* paintBlock = mPaintEngine.PaintBlock();
-	::ULIS::FColor color = GetEditorAs<FOdysseyPainterEditor>()->PaintColor().GetValue();
-	::ULIS::FRectI rect = paintBlock->Rect();
-	::ULIS::eFormat format = paintBlock->Format();
-
 	::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
-	ctx.Fill(*paintBlock, color);
-	ctx.Finish();
+
+/*	ctx.Fill(*paintBlock, color);*/
+
+    floodFill ( iPointInTexture.x
+              , iPointInTexture.y
+              , iBlock
+              , paintBlock
+              , nullptr
+              , color
+              , Tolerance );
+
+	/*ctx.Finish();*/
+
 	paintBlock->Dirty();
 
-    Commit(); */
+    Commit();
 
     return true;
+}
+
+bool
+UOdysseyPainterEditorPaintBucketTool::OnMouseDown( FOdysseyVectorEngine* iEngine
+                                                 , FOdysseyVectorScene* iScene
+                                                 , const FOdysseyPoint& iPointInTexture
+                                                 , const FKey& iKey )
+{
+    FOdysseyVectorObject* selectedObject = iScene->GetLastSelected();
+
+    mDownMouseX = iPointInTexture.x;
+    mDownMouseY = iPointInTexture.y;
+
+    // Scene
+    if( selectedObject == nullptr )
+    {
+        mPickedBucket = &iScene->GetFillBucket();
+        mPickedObject =  iScene;
+    }
+
+    // Selected object
+    if( selectedObject )
+    {
+        mPickedObject = selectedObject;
+
+        if( mPickedObject->GetClass() == FOdysseyVectorGroupPaint::StaticClass() )
+        {
+            FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>( mPickedObject );
+            BLPoint localCoords = paintGroup->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
+            FOdysseyVectorBucket* bucket = paintGroup->PickBucket( iPointInTexture.x, iPointInTexture.y ); 
+            uint32 pickedArea = bucket ? bucket->Pick( iPointInTexture.x, iPointInTexture.y ) : 0;
+
+            switch( pickedArea )
+            {
+                case FOdysseyVectorBucket::PICKBUCKET :
+                    mPickedBucket = bucket;
+                break;
+
+                case FOdysseyVectorBucket::PICKHANDLE :
+                    mPickedBucketHandle = bucket->GetHandle();
+                break;
+
+                case FOdysseyVectorBucket::PICKCROSS:
+                    paintGroup->RemoveBucket( bucket );
+                break;
+
+                default :
+                    mPickedBucket = new FOdysseyVectorBucket( *paintGroup, localCoords.x, localCoords.y );
+
+                    paintGroup->AddBucket( mPickedBucket );
+                break;
+            }
+
+            mOldLocalMouseX = localCoords.x;
+            mOldLocalMouseY = localCoords.y;
+        }
+    }
+
+    return true;
+}
+
+void
+UOdysseyPainterEditorPaintBucketTool::OnMouseDrag( FOdysseyVectorEngine* iEngine
+                                                 , FOdysseyVectorScene* iScene
+                                                 , const FOdysseyPoint& iPointInTexture )
+{
+    if( mPickedBucketHandle )
+    {
+        FOdysseyVectorBucket* bucket = mPickedBucketHandle->GetParent();
+
+        if( mPickedObject->GetClass() == FOdysseyVectorGroupPaint::StaticClass() )
+        {
+            FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(mPickedObject);
+            BLPoint localCoords = paintGroup->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
+            double difX = localCoords.x - mOldLocalMouseX
+                 , difY = localCoords.y - mOldLocalMouseY;
+
+            mPickedBucketHandle->Set( mPickedBucketHandle->GetX() + difX, mPickedBucketHandle->GetY() + difY );
+
+            mOldLocalMouseX = localCoords.x;
+            mOldLocalMouseY = localCoords.y;
+        }
+    }
+
+    if( mPickedBucket )
+    {
+        if( mPickedObject->GetClass() == FOdysseyVectorGroupPaint::StaticClass() )
+        {
+            FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(mPickedObject);
+            BLPoint localCoords = paintGroup->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
+            double difX = localCoords.x - mOldLocalMouseX
+                 , difY = localCoords.y - mOldLocalMouseY;
+            ::ULIS::FVec2D bucketCoords = mPickedBucket->GetCoords();
+
+            mPickedBucket->SetCoords( bucketCoords.x + difX, bucketCoords.y + difY );
+
+            mOldLocalMouseX = localCoords.x;
+            mOldLocalMouseY = localCoords.y;
+        }
+    }
+}
+
+bool
+UOdysseyPainterEditorPaintBucketTool::OnMouseUp( FOdysseyVectorEngine* iEngine
+                                               , FOdysseyVectorScene* iScene
+                                               , const FOdysseyPoint& iPointInTexture
+                                               , const FKey& iKey )
+{
+    if( ( static_cast<int>(iPointInTexture.x) == static_cast<int>(mDownMouseX) ) 
+     && ( static_cast<int>(iPointInTexture.y) == static_cast<int>(mDownMouseY) ) )
+    {
+        if( mPickedBucket )
+        {
+            BLPoint localCoords = mPickedObject->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
+
+            if( Gradient )
+            {
+                mPickedBucket->SetGradient( true );
+                mPickedBucket->SetGradientColor0( Color1.R, Color1.G, Color1.B, Color1.A );
+                mPickedBucket->SetGradientColor1( Color2.R, Color2.G, Color2.B, Color2.A );
+            }
+            else
+            {
+                ::ULIS::FColor color = GetEditorAs<FOdysseyPainterEditor>()->PaintColor().GetValue();
+                ::ULIS::FColor rgba8 = color.ToFormat(::ULIS::eFormat::Format_RGBA8);
+                uint8 R = rgba8.R8();
+                uint8 G = rgba8.G8();
+                uint8 B = rgba8.B8();
+                uint8 A = rgba8.A8();
+
+                mPickedBucket->SetGradient( false );
+                mPickedBucket->SetColor( R, G, B, A );
+            }
+        }
+    }
+
+    if( mPickedObject->GetClass() == FOdysseyVectorGroupPaint::StaticClass() )
+    {
+        FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(mPickedObject);
+
+        paintGroup->Colorize();
+    }
+
+    mPickedBucketHandle = nullptr;
+    mPickedBucket = nullptr;
+    mPickedObject = nullptr;
+
+    return false;
 }
 
 void

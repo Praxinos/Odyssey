@@ -7,7 +7,24 @@
 #include "OdysseyAnimationEditorGUI.h"
 #include "LayerStack/OdysseyAnimationLayerStack.h"
 #include "Tools/RasterDrawingTool/OdysseyAnimationEditorRasterDrawingTool.h"
+#include "Tools/VectorPrimitiveDrawingTool/OdysseyAnimationEditorVectorPrimitiveDrawingTool.h"
+#include "Tools/VectorPathDrawingTool/OdysseyAnimationEditorVectorPathDrawingTool.h"
+#include "Tools/VectorPathEditTool/OdysseyAnimationEditorVectorPathEditTool.h"
+#include "Tools/VectorPathCutTool/OdysseyAnimationEditorVectorPathCutTool.h"
+#include "Tools/VectorObjectPickTool/OdysseyAnimationEditorVectorObjectPickTool.h"
+#include "Tools/VectorObjectMoveTool/OdysseyAnimationEditorVectorObjectMoveTool.h"
+#include "Tools/VectorObjectRotateTool/OdysseyAnimationEditorVectorObjectRotateTool.h"
+#include "Tools/VectorObjectScaleTool/OdysseyAnimationEditorVectorObjectScaleTool.h"
+#include "Tools/VectorSceneScaleTool/OdysseyAnimationEditorVectorSceneScaleTool.h"
+#include "Tools/VectorScenePanTool/OdysseyAnimationEditorVectorScenePanTool.h"
+#include "Tools/VectorEraserTool/OdysseyAnimationEditorVectorEraserTool.h"
+#include "Tools/VectorPathPushTool/OdysseyAnimationEditorVectorPathPushTool.h"
+#include "Tools/VectorPathWidthTool/OdysseyAnimationEditorVectorPathWidthTool.h"
+#include "Tools/VectorPathSmoothTool/OdysseyAnimationEditorVectorPathSmoothTool.h"
+#include "Tools/VectorPathKnotTool/OdysseyAnimationEditorVectorPathKnotTool.h"
 #include "Tools/PaintBucketTool/OdysseyAnimationEditorPaintBucketTool.h"
+#include "Tools/ColorPickerTool/OdysseyAnimationEditorColorPickerTool.h"
+#include "Tools/VectorGridTool/OdysseyAnimationEditorVectorGridTool.h"
 #include "Misc/OdysseyHandle.h"
 
 class UOdysseyAnimationPlayer;
@@ -41,7 +58,24 @@ public:
     virtual TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> GetDisplayBlock() override;
 
     virtual UOdysseyAnimationEditorRasterDrawingTool* GetRasterDrawingTool() const override;
+    virtual UOdysseyAnimationEditorVectorPrimitiveDrawingTool* GetVectorPrimitiveDrawingTool() const override;
+    virtual UOdysseyAnimationEditorVectorPathDrawingTool* GetVectorPathDrawingTool() const override;
+    virtual UOdysseyAnimationEditorVectorPathEditTool* GetVectorPathEditTool() const override;
+    virtual UOdysseyAnimationEditorVectorPathCutTool* GetVectorPathCutTool() const override;
+    virtual UOdysseyAnimationEditorVectorObjectPickTool* GetVectorObjectPickTool() const override;
+    virtual UOdysseyAnimationEditorVectorObjectMoveTool* GetVectorObjectMoveTool() const override;
+    virtual UOdysseyAnimationEditorVectorObjectRotateTool* GetVectorObjectRotateTool() const override;
+    virtual UOdysseyAnimationEditorVectorObjectScaleTool* GetVectorObjectScaleTool() const override;
+    virtual UOdysseyAnimationEditorVectorSceneScaleTool* GetVectorSceneScaleTool() const override;
+    virtual UOdysseyAnimationEditorVectorScenePanTool* GetVectorScenePanTool() const override;
+    virtual UOdysseyAnimationEditorVectorEraserTool* GetVectorEraserTool() const override;
+    virtual UOdysseyAnimationEditorVectorPathPushTool* GetVectorPathPushTool() const override;
+    virtual UOdysseyAnimationEditorVectorPathWidthTool* GetVectorPathWidthTool() const override;
+    virtual UOdysseyAnimationEditorVectorPathSmoothTool* GetVectorPathSmoothTool() const override;
+    virtual UOdysseyAnimationEditorVectorPathKnotTool* GetVectorPathKnotTool() const override;
     virtual UOdysseyAnimationEditorPaintBucketTool* GetPaintBucketTool() const override;
+    virtual UOdysseyAnimationEditorColorPickerTool* GetColorPickerTool() const override;
+    virtual UOdysseyAnimationEditorVectorGridTool* GetVectorGridTool() const override;
 
 public:
     // Overrides
@@ -63,7 +97,24 @@ private:
 	TSharedPtr<FOdysseyAnimationEditorGUI> mGUI;
     
     UOdysseyAnimationEditorRasterDrawingTool* mRasterDrawingTool;
+    UOdysseyAnimationEditorVectorPrimitiveDrawingTool* mVectorPrimitiveDrawingTool;
+    UOdysseyAnimationEditorVectorPathDrawingTool* mVectorPathDrawingTool;
+    UOdysseyAnimationEditorVectorPathEditTool* mVectorPathEditTool;
+    UOdysseyAnimationEditorVectorPathCutTool* mVectorPathCutTool;
+    UOdysseyAnimationEditorVectorObjectPickTool* mVectorObjectPickTool;
+    UOdysseyAnimationEditorVectorObjectMoveTool* mVectorObjectMoveTool;
+    UOdysseyAnimationEditorVectorObjectRotateTool* mVectorObjectRotateTool;
+    UOdysseyAnimationEditorVectorObjectScaleTool* mVectorObjectScaleTool;
+    UOdysseyAnimationEditorVectorSceneScaleTool* mVectorSceneScaleTool;
+    UOdysseyAnimationEditorVectorScenePanTool* mVectorScenePanTool;
+    UOdysseyAnimationEditorVectorEraserTool* mVectorEraserTool;
+    UOdysseyAnimationEditorVectorPathPushTool* mVectorPathPushTool;
+    UOdysseyAnimationEditorVectorPathWidthTool* mVectorPathWidthTool;
+    UOdysseyAnimationEditorVectorPathSmoothTool* mVectorPathSmoothTool;
+    UOdysseyAnimationEditorVectorPathKnotTool* mVectorPathKnotTool;
     UOdysseyAnimationEditorPaintBucketTool* mPaintBucketTool;
+    UOdysseyAnimationEditorColorPickerTool* mColorPickerTool;
+    UOdysseyAnimationEditorVectorGridTool* mVectorGridTool;
 
     TSharedPtr<IOdysseyHandle> mLayerStackPreloadHandle;
 

@@ -8,34 +8,28 @@
 #include "Widgets/SCompoundWidget.h"
 #include "Framework/SlateDelegates.h"
 
-class UOdysseyPainterEditorRasterDrawingTool;
+class UOdysseyPainterEditorTool;
 
 /////////////////////////////////////////////////////
-// SOdysseyPainterEditorRasterDrawingToolOptions
-class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorRasterDrawingToolOptions
+// SOdysseyPainterEditorToolOptions
+class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorToolOptions
     : public SCompoundWidget
 {
     typedef SCompoundWidget         tSuperClass;
-    typedef SOdysseyPainterEditorRasterDrawingToolOptions   tSelf;
+    typedef SOdysseyPainterEditorToolOptions   tSelf;
 
 public:
     // Construction / Destruction
-    ~SOdysseyPainterEditorRasterDrawingToolOptions();
-
-    SLATE_BEGIN_ARGS( SOdysseyPainterEditorRasterDrawingToolOptions )
+    SLATE_BEGIN_ARGS( SOdysseyPainterEditorToolOptions )
         {}
-        SLATE_ARGUMENT(UOdysseyPainterEditorRasterDrawingTool*, Tool)
+        SLATE_ARGUMENT(UOdysseyPainterEditorTool*, Tool)
     SLATE_END_ARGS()
 
     void  Construct( const  FArguments&  InArgs );
 
 private:
-    void OnShapeSelected(EOdysseyShape iShape);
-    void OnToolShapeChanged();
-
-private:
     // Private data members
-    UOdysseyPainterEditorRasterDrawingTool*                mTool;
+    UOdysseyPainterEditorTool*                mTool;
     TSharedPtr<IDetailsView> mDetailsView;
 };
 

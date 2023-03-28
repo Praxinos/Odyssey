@@ -1,0 +1,117 @@
+// IDDN FR.001.250001.005.S.P.2019.000.00000
+// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
+
+#include "Tools/VectorPathWidthTool/OdysseyPainterEditorVectorPathWidthTool.h"
+#include "LayerStack/OdysseyTextureLayer.h"
+#include "LayerStack/OdysseyTextureLayerStack.h"
+#include "LayerStack/OdysseyTextureLayerImageVector.h"
+#include "TextureEditor/OdysseyTextureEditor.h"
+
+//--------------------------------------------------------------------------------------
+//----------------------------------------------------------- Construction / Destruction
+UOdysseyPainterEditorVectorPathWidthTool::~UOdysseyPainterEditorVectorPathWidthTool()
+{
+}
+
+UOdysseyPainterEditorVectorPathWidthTool::UOdysseyPainterEditorVectorPathWidthTool()
+    : Radius(20.0f)
+    , Strength(0.01f) // 1 percent
+    , mPickingHUD()
+{
+    Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathWidthTool64");
+
+    mPickingHUD.SetRadius( Radius );
+}
+
+//--------------------------------------------------------------------------------------
+//---------------------------------------------------------------- OdysseyPainterEditorTool overrides
+
+void
+UOdysseyPainterEditorVectorPathWidthTool::Activate( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+{
+    iEngine->ClearHUD();
+    iEngine->AddHUD(&mPickingHUD);
+}
+
+bool
+UOdysseyPainterEditorVectorPathWidthTool::OnMouseDown( FOdysseyVectorEngine* iEngine
+                                                     , FOdysseyVectorScene* iScene
+                                                     , const FOdysseyPoint& iPointInTexture
+                                                     , const FKey& iKey)
+{
+    return true;
+}
+
+void
+UOdysseyPainterEditorVectorPathWidthTool::OnMouseHover( FOdysseyVectorEngine* iEngine
+                                                      , FOdysseyVectorScene* iScene
+                                                      , const FOdysseyPoint& iPointInTexture )
+{
+    mPickingHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
+}
+
+void
+UOdysseyPainterEditorVectorPathWidthTool::OnMouseDrag( FOdysseyVectorEngine* iEngine
+                                                     , FOdysseyVectorScene* iScene
+                                                     , const FOdysseyPoint& iPointInTexture )
+{
+    std::vector<FOdysseyVectorSegment*> segmentArray;
+
+    mPickingHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
+
+    // this callback crashes if I dont reserve memory. I have no idea why. To troubleshoot later.
+    segmentArray.reserve( 500 );
+
+    iEngine->PickSegments( iScene
+                         , iPointInTexture.x
+                         , iPointInTexture.y
+                         , Radius
+                         , segmentArray
+                         , nullptr );
+
+    for( int i = 0; i < segmentArray.size(); i++ )
+    {
+        FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>( segmentArray[i] );
+        FOdysseyVectorPathCubic* cubicPath = static_cast<FOdysseyVectorPathCubic*>(cubicSegment->GetPath());
+        BLPoint localPoint = cubicPath->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
+        FOdysseyVectorVertexCubic* vertex0 = static_cast<FOdysseyVectorVertexCubic*>(cubicSegment->GetVertex(0));
+        FOdysseyVectorVertexCubic* vertex1 = static_cast<FOdysseyVectorVertexCubic*>(cubicSegment->GetVertex(1));
+        ::ULIS::FVec2D& point0 = vertex0->GetCoords( cubicSegment );
+        ::ULIS::FVec2D& point1 = vertex1->GetCoords( cubicSegment );
+        ::ULIS::FVec2D p0Vec = { localPoint.x - point0.x, localPoint.y - point0.y };
+        ::ULIS::FVec2D p1Vec = { localPoint.x - point1.x, localPoint.y - point1.y };
+        double p0VecDistance = p0Vec.Distance();
+        double p1VecDistance = p1Vec.Distance();
+        double totaldistance = p0VecDistance + p1VecDistance;
+
+        vertex0->SetRadius( vertex0->GetRadius() * ( 1.0f + Strength * ( p0VecDistance / totaldistance ) ) );
+        vertex1->SetRadius( vertex1->GetRadius() * ( 1.0f + Strength * ( p1VecDistance / totaldistance ) ) );
+
+        cubicSegment->Invalidate();
+    }
+
+    iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES | FOdysseyVectorObject::KEEPINVALIDATED );
+}
+
+bool
+UOdysseyPainterEditorVectorPathWidthTool::OnMouseUp( FOdysseyVectorEngine* iEngine
+                                                   , FOdysseyVectorScene* iScene
+                                                   , const FOdysseyPoint& iPointInTexture
+                                                   , const FKey& iKey )
+{
+    iScene->Update( 0 );
+
+    return false;
+}
+
+void
+UOdysseyPainterEditorVectorPathWidthTool::Commit()
+{
+
+}
+
+void
+UOdysseyPainterEditorVectorPathWidthTool::PropertyChanged( const FName& iPropertyName )
+{
+    mPickingHUD.SetRadius( Radius );
+}

@@ -6,7 +6,24 @@
 #include "OdysseyEditor.h"
 #include "OdysseyPainterEditorGUI.h"
 #include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
+#include "Tools/VectorPrimitiveDrawingTool/OdysseyPainterEditorVectorPrimitiveDrawingTool.h"
+#include "Tools/VectorPathDrawingTool/OdysseyPainterEditorVectorPathDrawingTool.h"
+#include "Tools/VectorPathEditTool/OdysseyPainterEditorVectorPathEditTool.h"
+#include "Tools/VectorPathCutTool/OdysseyPainterEditorVectorPathCutTool.h"
+#include "Tools/VectorObjectPickTool/OdysseyPainterEditorVectorObjectPickTool.h"
+#include "Tools/VectorObjectMoveTool/OdysseyPainterEditorVectorObjectMoveTool.h"
+#include "Tools/VectorObjectRotateTool/OdysseyPainterEditorVectorObjectRotateTool.h"
+#include "Tools/VectorObjectScaleTool/OdysseyPainterEditorVectorObjectScaleTool.h"
+#include "Tools/VectorSceneScaleTool/OdysseyPainterEditorVectorSceneScaleTool.h"
+#include "Tools/VectorScenePanTool/OdysseyPainterEditorVectorScenePanTool.h"
+#include "Tools/VectorEraserTool/OdysseyPainterEditorVectorEraserTool.h"
+#include "Tools/VectorPathPushTool/OdysseyPainterEditorVectorPathPushTool.h"
+#include "Tools/VectorPathWidthTool/OdysseyPainterEditorVectorPathWidthTool.h"
+#include "Tools/VectorPathSmoothTool/OdysseyPainterEditorVectorPathSmoothTool.h"
+#include "Tools/VectorPathKnotTool/OdysseyPainterEditorVectorPathKnotTool.h"
 #include "Tools/PaintBucketTool/OdysseyPainterEditorPaintBucketTool.h"
+#include "Tools/ColorPickerTool/OdysseyPainterEditorColorPickerTool.h"
+#include "Tools/VectorGridTool/OdysseyPainterEditorVectorGridTool.h"
 #include <ULIS>
 
 class FOdysseyHUDSystem;
@@ -45,7 +62,24 @@ public:
     virtual TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> GetDisplayBlock() = 0;
 
     virtual UOdysseyPainterEditorRasterDrawingTool*                  GetRasterDrawingTool() const = 0;
+    virtual UOdysseyPainterEditorVectorPrimitiveDrawingTool*         GetVectorPrimitiveDrawingTool() const = 0;
+    virtual UOdysseyPainterEditorVectorPathDrawingTool*              GetVectorPathDrawingTool() const = 0;
+    virtual UOdysseyPainterEditorVectorPathEditTool*                 GetVectorPathEditTool() const = 0;
+    virtual UOdysseyPainterEditorVectorPathCutTool*                  GetVectorPathCutTool() const = 0;
+    virtual UOdysseyPainterEditorVectorObjectPickTool*               GetVectorObjectPickTool() const = 0;
+    virtual UOdysseyPainterEditorVectorObjectMoveTool*               GetVectorObjectMoveTool() const = 0;
+    virtual UOdysseyPainterEditorVectorObjectRotateTool*             GetVectorObjectRotateTool() const = 0;
+    virtual UOdysseyPainterEditorVectorObjectScaleTool*              GetVectorObjectScaleTool() const = 0;
+    virtual UOdysseyPainterEditorVectorGridTool*                     GetVectorGridTool() const = 0;
+    virtual UOdysseyPainterEditorVectorSceneScaleTool*               GetVectorSceneScaleTool() const = 0;
+    virtual UOdysseyPainterEditorVectorScenePanTool*                 GetVectorScenePanTool() const = 0;
+    virtual UOdysseyPainterEditorVectorEraserTool*                   GetVectorEraserTool() const = 0;
+    virtual UOdysseyPainterEditorVectorPathPushTool*                 GetVectorPathPushTool() const = 0;
+    virtual UOdysseyPainterEditorVectorPathWidthTool*                GetVectorPathWidthTool() const = 0;
+    virtual UOdysseyPainterEditorVectorPathSmoothTool*               GetVectorPathSmoothTool() const = 0;
+    virtual UOdysseyPainterEditorVectorPathKnotTool*                 GetVectorPathKnotTool() const = 0;
     virtual UOdysseyPainterEditorPaintBucketTool*                    GetPaintBucketTool() const = 0;
+    virtual UOdysseyPainterEditorColorPickerTool*                    GetColorPickerTool() const = 0;
 
     void SelectDefaultTool();
 

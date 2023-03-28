@@ -28,6 +28,7 @@ namespace UnrealBuildTool.Rules
 			PublicDependencyModuleNames.AddRange(
 				new string[]
 				{
+                    "blend2d",
                     "ULIS",
                     "ULISLoader",
 					// ... add other public dependencies that you statically link with here ...
@@ -49,6 +50,7 @@ namespace UnrealBuildTool.Rules
 					"OdysseyMaths",
 					"OdysseyLayerStack",
 					"OdysseyStyle",
+					"OdysseyVector",
                     "Slate",
                     "SlateCore",
                     "UnrealEd",

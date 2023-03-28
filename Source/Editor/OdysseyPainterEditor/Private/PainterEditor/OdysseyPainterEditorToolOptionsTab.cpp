@@ -3,7 +3,7 @@
 
 #include "OdysseyPainterEditorToolOptionsTab.h"
 
-#include "Tools/RasterDrawingTool/Widgets/SOdysseyPainterEditorRasterDrawingToolOptions.h"
+#include "Widgets/Tools/SOdysseyPainterEditorToolOptions.h"
 #include "Widgets/Layout/SWidgetSwitcher.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorToolOptionsTab"
@@ -37,7 +37,24 @@ FOdysseyPainterEditorToolOptionsTab::CreateWidget()
             SNullWidget::NullWidget
         ];
 
-    SetWidgetForTool(mEditor->GetRasterDrawingTool(), SNew(SOdysseyPainterEditorRasterDrawingToolOptions).Tool(mEditor->GetRasterDrawingTool()));
+    SetWidgetForTool(mEditor->GetRasterDrawingTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetRasterDrawingTool()));
+    SetWidgetForTool(mEditor->GetVectorPrimitiveDrawingTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorPrimitiveDrawingTool()));
+    SetWidgetForTool(mEditor->GetVectorPathDrawingTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorPathDrawingTool()));
+    SetWidgetForTool(mEditor->GetVectorPathEditTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorPathEditTool()));
+    SetWidgetForTool(mEditor->GetVectorPathCutTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorPathCutTool()));
+    SetWidgetForTool(mEditor->GetVectorPathKnotTool(),SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorPathKnotTool()));
+    SetWidgetForTool(mEditor->GetVectorPathWidthTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorPathWidthTool()));
+    SetWidgetForTool(mEditor->GetVectorPathSmoothTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorPathSmoothTool()));
+    SetWidgetForTool(mEditor->GetVectorObjectPickTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorObjectPickTool()));
+    SetWidgetForTool(mEditor->GetVectorObjectMoveTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorObjectMoveTool()));
+    SetWidgetForTool(mEditor->GetVectorObjectRotateTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorObjectRotateTool()));
+    SetWidgetForTool(mEditor->GetVectorObjectScaleTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorObjectScaleTool()));
+    SetWidgetForTool(mEditor->GetVectorSceneScaleTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorSceneScaleTool()));
+    SetWidgetForTool(mEditor->GetVectorScenePanTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorScenePanTool()));
+    SetWidgetForTool(mEditor->GetVectorEraserTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorEraserTool()));
+    SetWidgetForTool(mEditor->GetVectorPathPushTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorPathPushTool()));
+    SetWidgetForTool(mEditor->GetPaintBucketTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetPaintBucketTool()));
+    SetWidgetForTool(mEditor->GetVectorGridTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorGridTool()));
     //mToolsTab->GetToolsTab()->SetWidgetForTool(mEditor->GetVectorDrawingTool(), SNew(SOdysseyPainterVectorDrawingTool, mEditor->GetVectorDrawingTool()));
 
     return mWidgetSwitcher;
@@ -67,9 +84,9 @@ void
 FOdysseyPainterEditorToolOptionsTab::SetWidgetForTool(UOdysseyPainterEditorTool* iTool, TSharedPtr<SWidget> iWidget)
 {
     FWidgetSlotForTool* widgetSlotForTool = mWidgetSlotForTool.FindByPredicate(
-        [this](const FWidgetSlotForTool& iWidgetSlotForTool)
+        [this, iTool](const FWidgetSlotForTool& iWidgetSlotForTool)
         {
-            return mEditor->GetSelectedTool() == iWidgetSlotForTool.mTool;
+            return iTool == iWidgetSlotForTool.mTool;
         }
     );
 

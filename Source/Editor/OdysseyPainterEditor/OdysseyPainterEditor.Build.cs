@@ -20,6 +20,7 @@ public class OdysseyPainterEditor : ModuleRules
 
         PrivateDependencyModuleNames.AddRange(
             new string[] {
+                "blend2d",
                 "AppFramework",
                 "Core",
                 "CoreUObject",
@@ -40,16 +41,22 @@ public class OdysseyPainterEditor : ModuleRules
                 "OdysseyEditor",
                 "OdysseyImaging",
                 "OdysseyHUDSystem",
+                "OdysseyLayerStack",
                 "OdysseyStyle",
                 "OdysseyStylusInput",
+                "OdysseyVector",
                 "OdysseyWidgets"
             }
         );
 
         PublicDependencyModuleNames.AddRange(
              new string[] {
+                "OdysseyLayerStack",
                 "OdysseyPaintEngine",
                 "OdysseyShapes",
+                "OdysseyTexture",
+                "OdysseyTextureEditor",
+                "OdysseyVector",
                 "ULIS",
                 "ULISLoader"
              }

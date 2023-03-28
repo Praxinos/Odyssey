@@ -7,6 +7,8 @@
 #include "Tools/OdysseyPainterEditorTool.h"
 #include "OdysseyPaintEngine.h"
 
+#include "OdysseyVector.h"
+
 #include "OdysseyPainterEditorPaintBucketTool.generated.h"
 
 class FOdysseyPaintEngine;
@@ -26,18 +28,40 @@ public:
     void Initialize(FOdysseyPaintEngine* iPaintEngine);
 
     //OdysseyPainterEditorTool overrides
-    virtual void Activate() override;
+    void Activate( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    // Raster Mouse Down
+    bool OnMouseDown( TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock, const FOdysseyPoint& iPointInTexture, const FKey& iKey );
+    // Vector Mouse Down
+    bool OnMouseDown( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture, const FKey& iKey );
+    void OnMouseDrag( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture );
+    bool OnMouseUp( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture, const FKey& iKey );
 
-    virtual bool OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
     virtual void Commit() override;
 
 public:
-    // Setters
-    virtual bool CanDraw();
+    UPROPERTY(EditAnywhere,Category="Odyssey BucketFill Tool")
+    uint8 Tolerance;
+
+    UPROPERTY(EditAnywhere,Category="Odyssey BucketFill Tool")
+    bool Gradient;
+
+    UPROPERTY(EditAnywhere,Category="Odyssey BucketFill Tool")
+    FColor Color1;
+
+    UPROPERTY(EditAnywhere,Category="Odyssey BucketFill Tool")
+    FColor Color2;
 
 protected:
     // protected Data Members
 
     //Resources
-    FOdysseyPaintEngine                mPaintEngine;
+    FOdysseyPaintEngine mPaintEngine;
+    FOdysseyVectorHandleBucket* mPickedBucketHandle;
+    FOdysseyVectorBucket* mPickedBucket;
+    FOdysseyVectorObject* mPickedObject;
+    double mOldLocalMouseX;
+    double mOldLocalMouseY;
+    double mDownMouseX;
+    double mDownMouseY;
+    FOdysseyVectorHUDBucket mBucketHUD;
 };
