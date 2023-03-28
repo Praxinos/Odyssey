@@ -30,7 +30,9 @@ public:
 
 public:
     FReply OnClicked();
+    bool IsEnabled() const;
 
 private:
     FSimpleDelegate mOnSelected;
+    UOdysseyPainterEditorTool* mTool;
 };

@@ -19,6 +19,7 @@
 //----------------------------------------------------------- Construction / Destruction
 FOdysseyTextureEditor::~FOdysseyTextureEditor()
 {
+	UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll(this);
 	SetTexture(nullptr);
 }
 
@@ -29,6 +30,7 @@ FOdysseyTextureEditor::FOdysseyTextureEditor() :
 	mRasterDrawingTool(nullptr),
 	mPaintBucketTool(nullptr)
 {
+	UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw(this, &FOdysseyTextureEditor::OnCurrentLayerChanged);
 }
 
 //--------------------------------------------------------------------------------------
@@ -210,6 +212,17 @@ FOdysseyTextureEditor::RegisterTabSpawners(const TSharedRef<class FTabManager>& 
 	TSharedRef<FWorkspaceItem> workspaceMenuCategoryRef = workspaceMenuCategory.ToSharedRef();
 	GetGUI()->RegisterTabSpawners(iTabManager, workspaceMenuCategoryRef);
 	return workspaceMenuCategory;
+}
+
+//--------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------- Events
+
+void
+FOdysseyTextureEditor::OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStack)
+{
+	//TODO: Maybe this should be done differently later, but we don't have time for that now
+	if (iLayerStack == LayerStack())
+		SelectDefaultTool(); //Refresh the current tool when we change layer
 }
 
 //--------------------------------------------------------------------------------------
