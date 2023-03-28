@@ -74,15 +74,18 @@ UOdysseyAnimationEditorRasterDrawingTool::Unload()
 bool
 UOdysseyAnimationEditorRasterDrawingTool::IsActivable() const
 {
-	if (!Super::IsActivable())
+    if (!Super::IsActivable())
         return false; 
 
-	//Check for currentlayer
-	UOdysseyAnimationLayerImageRaster* layer = GetLayer();
-	if (!layer)
-		return false;
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(GetEditorAs<FOdysseyAnimationEditor>()->LayerStack());
+    if (!layerStack)
+        return false;
 
-	return true;
+    UOdysseyLayer* currentLayer = layerStack->CurrentLayer.Get();
+    if (!currentLayer)
+        return false;
+
+    return currentLayer->GetClass() == UOdysseyAnimationLayerImageRaster::StaticClass();
 }
 
 bool

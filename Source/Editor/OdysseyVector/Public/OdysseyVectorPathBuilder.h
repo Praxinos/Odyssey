@@ -98,7 +98,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathBuilder : public FOdysseyVectorObject
         static const uint32 NEWSAMPLE  = ( 1 << 1 );
         static const uint32 NEWSEGMENT = ( 1 << 2 );
 
-       ~FOdysseyVectorPathBuilder();
+        virtual ~FOdysseyVectorPathBuilder();
         FOdysseyVectorPathBuilder();
 
         /**

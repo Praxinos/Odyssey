@@ -69,17 +69,18 @@ UOdysseyTextureEditorRasterDrawingTool::Unload()
 bool
 UOdysseyTextureEditorRasterDrawingTool::IsActivable() const
 {
-	if (!Super::IsActivable())
+    if (!Super::IsActivable())
         return false; 
 
-	//Check for currentlayer
-	UOdysseyTextureLayerImageRaster* layer = GetLayer();
-	if (!layer)
-		return false;
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
+    if (!layerStack)
+        return false;
 
-	bool isActive = UOdysseyLayerFunctionLibrary::IsLayerActivatedInStack(layer);
-	bool isLocked = UOdysseyLayerFunctionLibrary::IsLayerLockedInStack(layer);
-    return isActive && !isLocked;
+    UOdysseyLayer* currentLayer = layerStack->CurrentLayer.Get();
+    if (!currentLayer)
+        return false;
+
+    return currentLayer->GetClass() == UOdysseyTextureLayerImageRaster::StaticClass();
 }
 
 bool

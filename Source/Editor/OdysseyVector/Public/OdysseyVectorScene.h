@@ -32,7 +32,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorScene : public FOdysseyVectorGroup
         std::list<FOdysseyVectorObject*> mInvalidatedObjectList;
 
     public:
-        ~FOdysseyVectorScene();
+        virtual ~FOdysseyVectorScene();
         FOdysseyVectorScene();
         void Init( std::string iName );
         void Select( FOdysseyVectorObject* iVecObj );

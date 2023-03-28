@@ -71,7 +71,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
 
 
 
-        ~FOdysseyVectorPath();
+        virtual ~FOdysseyVectorPath();
         FOdysseyVectorPath();
         void Init( std::string iName );
         void AddSegment(FOdysseyVectorSegment* iSegment);

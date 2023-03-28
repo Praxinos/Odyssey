@@ -41,7 +41,7 @@ UOdysseyPainterEditorColorPickerTool::OnMouseUpVector( FOdysseyVectorEngine* iEn
     FColor color = iEngine->GetColorImagePixelValue( iPointInTexture.x, iPointInTexture.y );
     ::ULIS::FColor ulisColor = ::ULIS::FColor::RGBA8( color.R, color.G, color.B, color.A );
 
-    GetEditorAs<FOdysseyPainterEditor>()->PaintColor().SetValue( ulisColor );
+    GetEditorAs<FOdysseyPainterEditor>()->PaintColor(ulisColor, true);
 
     return false;
 }

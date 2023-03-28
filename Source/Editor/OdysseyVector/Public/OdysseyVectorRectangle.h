@@ -31,7 +31,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorRectangle : public FOdysseyVectorPath
         double mStrokeWidth;
 
     public:
-        ~FOdysseyVectorRectangle();
+        virtual ~FOdysseyVectorRectangle();
         FOdysseyVectorRectangle();
         void Init( std::string iName, double iWidth, double iHeight );
         void SetSize( double iWidth, double iHeight );

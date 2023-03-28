@@ -42,7 +42,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         /**
          * @brief destructor
          */
-        ~FOdysseyVectorGroupPaint();
+        virtual ~FOdysseyVectorGroupPaint();
 
         /**
          * @brief constructor

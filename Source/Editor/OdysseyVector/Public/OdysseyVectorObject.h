@@ -94,7 +94,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         static uint32 TreeToArray( FOdysseyVectorObject* iObject, std::vector<FOdysseyVectorObject*>& iOutArray );
         static ::ULIS::FRectD GetBoundingBoxFromList( std::list<FOdysseyVectorObject*>& iObjectList );
 
-        ~FOdysseyVectorObject();
+        virtual ~FOdysseyVectorObject();
         FOdysseyVectorObject();
         void SetName( std::string iName );
         void CopySettings( FOdysseyVectorObject& iDestinationObject );

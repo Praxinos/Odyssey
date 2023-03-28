@@ -45,7 +45,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorEllipse : public FOdysseyVectorPathCubic
        /**
          * @brief destructor.
          */
-        ~FOdysseyVectorEllipse();
+        virtual ~FOdysseyVectorEllipse();
 
        /**
          * @brief constructor.

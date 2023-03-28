@@ -31,7 +31,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroup : public FOdysseyVectorObject
         /**
          * @brief destructor
          */
-        ~FOdysseyVectorGroup(){};
+        virtual ~FOdysseyVectorGroup(){};
 
         /**
          * @brief constructor

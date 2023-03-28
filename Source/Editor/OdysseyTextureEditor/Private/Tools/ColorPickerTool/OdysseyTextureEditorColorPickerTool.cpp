@@ -60,19 +60,19 @@ UOdysseyTextureEditorColorPickerTool::Inactivate()
 bool
 UOdysseyTextureEditorColorPickerTool::IsActivable() const
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
-
-	if (!Super::IsActivable())
+    if (!Super::IsActivable())
         return false; 
 
-	//Check for currentlayer
-	if (!currentLayer)
-		return false;
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
+    if (!layerStack)
+        return false;
 
-	bool isActive = UOdysseyLayerFunctionLibrary::IsLayerActivatedInStack(currentLayer);
-	bool isLocked = UOdysseyLayerFunctionLibrary::IsLayerLockedInStack(currentLayer);
-    return isActive && !isLocked;
+    UOdysseyLayer* currentLayer = layerStack->CurrentLayer.Get();
+    if (!currentLayer)
+        return false;
+
+    return      /*currentLayer->GetClass() == UOdysseyTextureLayerImageRaster::StaticClass()
+            ||  */currentLayer->GetClass() == UOdysseyTextureLayerImageVector::StaticClass();
 }
 
 void

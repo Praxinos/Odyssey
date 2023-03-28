@@ -3,9 +3,7 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "Tools/PaintBucketTool/OdysseyPainterEditorPaintBucketTool.h"
-#include "OdysseyBlendParameters.h"
 
 #include "OdysseyAnimationEditorPaintBucketTool.generated.h"
 
@@ -27,27 +25,19 @@ public:
     virtual void Activate() override;
     virtual void Inactivate() override;
     virtual bool IsActivable() const override;
-
-public:
-    // Setters
-    //Wether the tool can draw or not
-    virtual bool CanDraw() override;
+    virtual bool OnMouseDown( const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
+    virtual void OnMouseDrag( const FOdysseyPoint& iPointInTexture ) override;
+    virtual bool OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
 
 private:
-    class UOdysseyAnimationLayerImageRaster* GetLayer() const;
-
-private:
+    class UOdysseyAnimation* GetAnimation() const;
     void Load();
     void Unload();
 
 private:
     //Listeners
     void OnCurrentLayerChanged(class UOdysseyLayerStack* iLayerStack);
-    void OnLayerRenderImageChanged(class UOdysseyAnimationLayer* iLayer, const TArray<::ULIS::FRectI>& iRects);
-    void OnPaintEngineCommit(const TArray<::ULIS::FRectI>& iChangedTiles);
     FOdysseyBlendParameters OnPaintEnginePreUpdate(const FOdysseyBlendParameters& iBlendParameters);
-
-    static void OnEditedBlockInvalidated(const ::ULIS::FBlock* iBlock, const ::ULIS::FRectI* iRects, const uint32 iNumRects, void* iInfo);
 
 protected:
     // protected Data Members

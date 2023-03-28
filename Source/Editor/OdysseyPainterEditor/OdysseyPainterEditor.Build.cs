@@ -44,8 +44,6 @@ public class OdysseyPainterEditor : ModuleRules
                 "OdysseyLayerStack",
                 "OdysseyStyle",
                 "OdysseyStylusInput",
-                "OdysseyTexture",
-                "OdysseyTextureEditor",
                 "OdysseyVector",
                 "OdysseyWidgets"
             }
