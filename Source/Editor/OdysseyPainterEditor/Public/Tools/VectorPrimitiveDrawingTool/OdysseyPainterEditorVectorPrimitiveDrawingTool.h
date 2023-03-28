@@ -25,18 +25,12 @@ public:
     //Constructor
     UOdysseyPainterEditorVectorPrimitiveDrawingTool();
  
+    void Activate( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    bool OnMouseDown( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture,const FKey& iKey );
+    void OnMouseHover( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture );
+    void OnMouseDrag( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture );
+    bool OnMouseUp( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture, const FKey& iKey );
+
     //OdysseyPainterEditorTool overrides
-    virtual void Activate() override;
-
-    virtual bool OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
-    virtual void OnMouseDrag(const FOdysseyPoint& iPointInTexture) override;
-    virtual bool OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
     virtual void Commit() override;
-
-public:
-    // Setters
-    virtual bool CanDraw();
-
-protected:
-
 };

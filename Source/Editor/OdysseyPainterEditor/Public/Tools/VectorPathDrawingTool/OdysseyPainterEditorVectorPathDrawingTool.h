@@ -26,17 +26,16 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
         //Constructor
         UOdysseyPainterEditorVectorPathDrawingTool();
  
-        //OdysseyPainterEditorTool overrides
-        virtual void Activate() override;
+        void Activate( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+        bool OnMouseDown( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture,const FKey& iKey );
+        void OnMouseHover( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture );
+        ::ULIS::FRectI OnMouseDrag( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture );
+        bool OnMouseUp( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture, const FKey& iKey );
 
-        virtual bool OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
-        virtual void OnMouseDrag(const FOdysseyPoint& iPointInTexture) override;
-        virtual void OnMouseHover(const FOdysseyPoint& iPointInTexture) override;
-        virtual bool OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
+        //OdysseyPainterEditorTool overrides
         virtual void Commit() override;
 
     protected:
-        void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent );
         void PropertyChanged( const FName& iPropertyName );
         FOdysseyVectorVertexCubic* PickVertex( FOdysseyVectorEngine* iVectorEngine
                                              , FOdysseyVectorScene* iScene
@@ -50,9 +49,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
                                                   , double iWorldY );
 
     public:
-        // Setters
-        virtual bool CanDraw();
-
         UPROPERTY( EditAnywhere, Category="Odyssey PathDrawing Tool" )
         double Radius;
         // computed based upon whether or not the pencil size is relative to the object's transformation matrix
@@ -66,8 +62,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
 
         UPROPERTY( EditAnywhere, Category="Odyssey PathDrawing Tool" )
         double StitchingRadius;
-
-    protected:
 
     private:
         FOdysseyVectorHUDPathDrawing mPathDrawingHUD;

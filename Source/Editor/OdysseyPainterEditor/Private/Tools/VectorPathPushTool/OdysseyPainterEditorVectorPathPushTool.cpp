@@ -27,25 +27,10 @@ UOdysseyPainterEditorVectorPathPushTool::UOdysseyPainterEditorVectorPathPushTool
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
 void
-UOdysseyPainterEditorVectorPathPushTool::Activate()
+UOdysseyPainterEditorVectorPathPushTool::Activate( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
-    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
-
-    if(currentVectorLayer)
-    {
-        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-
-        vectorEngine->ClearHUD();
-        vectorEngine->AddHUD(&mPickingHUD);
-
-        currentVectorLayer->RenderImageChanged(false);
-    }
-}
-
-bool
-UOdysseyPainterEditorVectorPathPushTool::CanDraw()
-{
-    return IsActivable();
+    iEngine->ClearHUD();
+    iEngine->AddHUD(&mPickingHUD);
 }
 
 bool
@@ -63,62 +48,57 @@ UOdysseyPainterEditorVectorPathPushTool::HasVertex( FOdysseyVectorPoint* iPoint 
 }
 
 bool
-UOdysseyPainterEditorVectorPathPushTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
+UOdysseyPainterEditorVectorPathPushTool::OnMouseDown( FOdysseyVectorEngine* iEngine
+                                                    , FOdysseyVectorScene* iScene
+                                                    , const FOdysseyPoint& iPointInTexture
+                                                    , const FKey& iKey )
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
+    std::vector<double> pickedSegmentDistanceArray;
 
-    if( currentLayer->GetClass() == UOdysseyTextureLayerImageVector::StaticClass() )
+    // this callback crashes if I dont reserve memory. I have no idea why. To troubleshoot later.
+    mSegmentArray.reserve( 500 );
+    pickedSegmentDistanceArray.reserve( 500 ); // unused for now
+
+    mSegmentArray.clear();
+    mPushedPointArray.clear();
+
+    iEngine->PickSegments( iScene
+                         , iPointInTexture.x
+                         , iPointInTexture.y
+                         , Radius
+                         , mSegmentArray
+                         , &pickedSegmentDistanceArray );
+
+    for( int i = 0; i < mSegmentArray.size(); i++ )
     {
-        UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
-        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        std::vector<double> pickedSegmentDistanceArray;
+        FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>( mSegmentArray[i] );
 
-        // this callback crashes if I dont reserve memory. I have no idea why. To troubleshoot later.
-        mSegmentArray.reserve( 500 );
-        pickedSegmentDistanceArray.reserve( 500 ); // unused for now
-
-        mSegmentArray.clear();
-        mPushedPointArray.clear();
-
-        vectorEngine->PickSegments( currentVectorLayer->GetScene()
-                                  , iPointInTexture.x
-                                  , iPointInTexture.y
-                                  , Radius
-                                  , mSegmentArray
-                                  , &pickedSegmentDistanceArray );
-
-        for( int i = 0; i < mSegmentArray.size(); i++ )
+        if( cubicSegment )
         {
-            FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>( mSegmentArray[i] );
+            FOdysseyVectorPathCubic* cubicPath = static_cast<FOdysseyVectorPathCubic*>(cubicSegment->GetPath());
+            BLPoint localPoint = cubicPath->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
+            ::ULIS::FVec2D& ctrlPoint0 = cubicSegment->GetHandle(0)->GetCoords();
+            ::ULIS::FVec2D& ctrlPoint1 = cubicSegment->GetHandle(1)->GetCoords();
+            ::ULIS::FVec2D& point0 = cubicSegment->GetVertex(0)->GetCoords( cubicSegment );
+            ::ULIS::FVec2D& point1 = cubicSegment->GetVertex(1)->GetCoords( cubicSegment );
+            ::ULIS::FVec2D cp0Vec = { localPoint.x - ctrlPoint0.x, localPoint.y - ctrlPoint0.y };
+            ::ULIS::FVec2D cp1Vec = { localPoint.x - ctrlPoint1.x, localPoint.y - ctrlPoint1.y };
 
-            if( cubicSegment )
+            mPushedPointArray.push_back( FPushedPoint( cubicSegment->GetHandle(0), Radius / cp0Vec.Distance() ) );
+            mPushedPointArray.push_back( FPushedPoint( cubicSegment->GetHandle(1), Radius / cp1Vec.Distance() ) );
+
+            if( HasVertex( cubicSegment->GetPoint(0) ) == false )
             {
-                FOdysseyVectorPathCubic* cubicPath = static_cast<FOdysseyVectorPathCubic*>(cubicSegment->GetPath());
-                BLPoint localPoint = cubicPath->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
-                ::ULIS::FVec2D& ctrlPoint0 = cubicSegment->GetHandle(0)->GetCoords();
-                ::ULIS::FVec2D& ctrlPoint1 = cubicSegment->GetHandle(1)->GetCoords();
-                ::ULIS::FVec2D& point0 = cubicSegment->GetVertex(0)->GetCoords( cubicSegment );
-                ::ULIS::FVec2D& point1 = cubicSegment->GetVertex(1)->GetCoords( cubicSegment );
-                ::ULIS::FVec2D cp0Vec = { localPoint.x - ctrlPoint0.x, localPoint.y - ctrlPoint0.y };
-                ::ULIS::FVec2D cp1Vec = { localPoint.x - ctrlPoint1.x, localPoint.y - ctrlPoint1.y };
+                ::ULIS::FVec2D p0Vec = { localPoint.x - point0.x, localPoint.y - point0.y };
 
-                mPushedPointArray.push_back( FPushedPoint( cubicSegment->GetHandle(0), Radius / cp0Vec.Distance() ) );
-                mPushedPointArray.push_back( FPushedPoint( cubicSegment->GetHandle(1), Radius / cp1Vec.Distance() ) );
+                mPushedPointArray.push_back( FPushedPoint( cubicSegment->GetPoint(0), Radius / p0Vec.Distance() ) );
+            }
 
-                if( HasVertex( cubicSegment->GetPoint(0) ) == false )
-                {
-                    ::ULIS::FVec2D p0Vec = { localPoint.x - point0.x, localPoint.y - point0.y };
+            if( HasVertex( cubicSegment->GetPoint(1) ) == false )
+            {
+                ::ULIS::FVec2D p1Vec = { localPoint.x - point1.x, localPoint.y - point1.y };
 
-                    mPushedPointArray.push_back( FPushedPoint( cubicSegment->GetPoint(0), Radius / p0Vec.Distance() ) );
-                }
-
-                if( HasVertex( cubicSegment->GetPoint(1) ) == false )
-                {
-                    ::ULIS::FVec2D p1Vec = { localPoint.x - point1.x, localPoint.y - point1.y };
-
-                    mPushedPointArray.push_back( FPushedPoint( cubicSegment->GetPoint(1), Radius / p1Vec.Distance() ) );
-                }
+                mPushedPointArray.push_back( FPushedPoint( cubicSegment->GetPoint(1), Radius / p1Vec.Distance() ) );
             }
         }
     }
@@ -127,110 +107,88 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDown(const FOdysseyPoint& iPoint
 }
 
 void
-UOdysseyPainterEditorVectorPathPushTool::OnMouseHover( const FOdysseyPoint& iPointInTexture )
+UOdysseyPainterEditorVectorPathPushTool::OnMouseHover( FOdysseyVectorEngine* iEngine
+                                                     , FOdysseyVectorScene* iScene
+                                                     , const FOdysseyPoint& iPointInTexture )
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
+    double diameter = Radius * 2.0f;
+    ::ULIS::FRectI rect = { (int)iPointInTexture.x - (int)Radius
+                          , (int)iPointInTexture.y - (int)Radius
+                          , (int)diameter
+                          , (int)diameter };
 
-    if( currentVectorLayer )
-    {
-        double diameter = Radius * 2.0f;
-        ::ULIS::FRectI rect = { (int)iPointInTexture.x - (int)Radius
-                              , (int)iPointInTexture.y - (int)Radius
-                              , (int)diameter
-                              , (int)diameter };
-
-        mPickingHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
+    mPickingHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
 /*
-        if( rect.x < 0 ) rect.x = 0;
-        if( rect.y < 0 ) rect.y = 0;
+    if( rect.x < 0 ) rect.x = 0;
+    if( rect.y < 0 ) rect.y = 0;
 
-        rect = rect & layerStack->GetSurface()->Block()->Rect();
+    rect = rect & layerStack->GetSurface()->Block()->Rect();
 
-        if( rect.Area() )
-        {*/
-            currentVectorLayer->RenderImageChanged( /*{ rect },*/ true );
-        /*}*/
-    }
+    if( rect.Area() )
+    {*/
+    /*}*/
 }
 
 void
-UOdysseyPainterEditorVectorPathPushTool::OnMouseDrag( const FOdysseyPoint& iPointInTexture )
+UOdysseyPainterEditorVectorPathPushTool::OnMouseDrag( FOdysseyVectorEngine* iEngine
+                                                    , FOdysseyVectorScene* iScene
+                                                    , const FOdysseyPoint& iPointInTexture )
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
+    mPickingHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
 
-    if( currentLayer->GetClass() == UOdysseyTextureLayerImageVector::StaticClass() )
+    for( int i = 0; i < mPushedPointArray.size(); i++ )
     {
-        UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
+        FOdysseyVectorPoint* point = mPushedPointArray[i].point;
+        FOdysseyVectorPath* path;
 
-        mPickingHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
-
-        for( int i = 0; i < mPushedPointArray.size(); i++ )
+        if( point->GetClass() == FOdysseyVectorHandleSegment::StaticClass() )
         {
-            FOdysseyVectorPoint* point = mPushedPointArray[i].point;
-            FOdysseyVectorPath* path;
+            FOdysseyVectorHandleSegment* handleSegment = static_cast<FOdysseyVectorHandleSegment*>(point);
 
-            if( point->GetClass() == FOdysseyVectorHandleSegment::StaticClass() )
+            path = handleSegment->GetParent()->GetPath();
+        }
+        else
+        {
+            FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>(point);
+
+            path = vertex->GetPath();
+        }
+
+        BLPoint delta = path->GetInverseWorldMatrix().mapVector( iPointInTexture.deltaPosition.X
+                                                                , iPointInTexture.deltaPosition.Y );
+
+        point->SetX( point->GetX() + ( delta.x * mPushedPointArray[i].ratio ) );
+        point->SetY( point->GetY() + ( delta.y * mPushedPointArray[i].ratio ) );
+
+        /*if( vertex )
+        {
+            if( vertex->IsSmooth() && PreserveSmoothness )
             {
-                FOdysseyVectorHandleSegment* handleSegment = static_cast<FOdysseyVectorHandleSegment*>(point);
+                FOdysseyVectorVertexCubic* cubicVertex = static_cast<FOdysseyVectorVertexCubic*>(vertex);
 
-                path = handleSegment->GetParent()->GetPath();
-            }
-            else
-            {
-                FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>(point);
-
-                path = vertex->GetPath();
-            }
-
-            BLPoint delta = path->GetInverseWorldMatrix().mapVector( iPointInTexture.deltaPosition.X
-                                                                   , iPointInTexture.deltaPosition.Y );
-
-            point->SetX( point->GetX() + ( delta.x * mPushedPointArray[i].ratio ) );
-            point->SetY( point->GetY() + ( delta.y * mPushedPointArray[i].ratio ) );
-
-            /*if( vertex )
-            {
-                if( vertex->IsSmooth() && PreserveSmoothness )
+                if( cubicVertex )
                 {
-                    FOdysseyVectorVertexCubic* cubicVertex = static_cast<FOdysseyVectorVertexCubic*>(vertex);
-
-                    if( cubicVertex )
-                    {
-                        cubicVertex->SmoothSegments( false );
-                    }
+                    cubicVertex->SmoothSegments( false );
                 }
-            }*/
-        }
-
-        for( int i = 0; i < mSegmentArray.size(); i++ )
-        {
-            mSegmentArray[i]->Invalidate();
-        }
-
-        currentVectorLayer->GetScene()->Update( FOdysseyVectorObject::FREQUENTUPDATES
-                                              | FOdysseyVectorObject::KEEPINVALIDATED );
-
-        currentVectorLayer->RenderImageChanged(/* { rect }, */true);
+            }
+        }*/
     }
+
+    for( int i = 0; i < mSegmentArray.size(); i++ )
+    {
+        mSegmentArray[i]->Invalidate();
+    }
+
+    iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES | FOdysseyVectorObject::KEEPINVALIDATED );
 }
 
 bool
-UOdysseyPainterEditorVectorPathPushTool::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
+UOdysseyPainterEditorVectorPathPushTool::OnMouseUp( FOdysseyVectorEngine* iEngine
+                                                  , FOdysseyVectorScene* iScene
+                                                  , const FOdysseyPoint& iPointInTexture
+                                                  , const FKey& iKey )
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
-
-    if( currentLayer->GetClass() == UOdysseyTextureLayerImageVector::StaticClass() )
-    {
-        UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
-
-        currentVectorLayer->GetScene()->Update( 0 );
-
-        // redraw the whole layer
-        currentVectorLayer->RenderImageChanged(false);
-    }
+    iScene->Update( 0 );
 
     return false;
 }
@@ -244,26 +202,5 @@ UOdysseyPainterEditorVectorPathPushTool::Commit()
 void
 UOdysseyPainterEditorVectorPathPushTool::PropertyChanged( const FName& iPropertyName )
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
-
-    if( currentLayer->GetClass() == UOdysseyTextureLayerImageVector::StaticClass() )
-    {
-        UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
-
-        mPickingHUD.SetRadius( Radius );
-
-        currentVectorLayer->RenderImageChanged(false);
-    }
-}
-
-void
-UOdysseyPainterEditorVectorPathPushTool::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent)
-{
-    Super::PostEditChangeProperty(PropertyChangedEvent);
-
-    if (PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive)
-        return;
-
-    PropertyChanged(PropertyChangedEvent.GetPropertyName());
+    mPickingHUD.SetRadius( Radius );
 }

@@ -22,81 +22,38 @@ UOdysseyPainterEditorVectorScenePanTool::UOdysseyPainterEditorVectorScenePanTool
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
 void
-UOdysseyPainterEditorVectorScenePanTool::Activate()
+UOdysseyPainterEditorVectorScenePanTool::Activate( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
-	//FOdysseyObjectEditorUtils::SetPropertyValue(BrushOptions, "Color", FOdysseyBrushColor(GetEditorAs<FOdysseyPainterEditor>()->PaintColor()));
-    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
-
-    if(currentVectorLayer)
-    {
-        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-
-        vectorEngine->ClearHUD( );
-
-        currentVectorLayer->RenderImageChanged(false);
-    }
+    iEngine->ClearHUD();
 }
 
 bool
-UOdysseyPainterEditorVectorScenePanTool::CanDraw()
+UOdysseyPainterEditorVectorScenePanTool::OnMouseDown( FOdysseyVectorEngine* iEngine
+                                                    , FOdysseyVectorScene* iScene
+                                                    , const FOdysseyPoint& iPointInTexture
+                                                    , const FKey& iKey )
 {
-    return IsActivable();
-}
-
-bool
-UOdysseyPainterEditorVectorScenePanTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
-{
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
-
-    if( currentVectorLayer )
-    {
-        mOldWorldMouseX = iPointInTexture.x;
-        mOldWorldMouseY = iPointInTexture.y;
-    }
-
     return true;
 }
 
 void
-UOdysseyPainterEditorVectorScenePanTool::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
+UOdysseyPainterEditorVectorScenePanTool::OnMouseDrag( FOdysseyVectorEngine* iEngine
+                                                    , FOdysseyVectorScene* iScene
+                                                    , const FOdysseyPoint& iPointInTexture )
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
+    iScene->Translate( iScene->GetTranslationX() + iPointInTexture.deltaPosition.X
+                     , iScene->GetTranslationY() + iPointInTexture.deltaPosition.Y );
 
-    if( currentVectorLayer )
-    {
-        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        FOdysseyVectorScene *scene = currentVectorLayer->GetScene();
-        double difx = iPointInTexture.x - mOldWorldMouseX;
-        double dify = iPointInTexture.y - mOldWorldMouseY;
-
-        scene->Translate( scene->GetTranslationX() + difx
-                        , scene->GetTranslationY() + dify );
-
-        scene->UpdateMatrix();
-
-        mOldWorldMouseX = iPointInTexture.x;
-        mOldWorldMouseY = iPointInTexture.y;
-
-        // redraw the whole layer
-        currentVectorLayer->RenderImageChanged(true);
-    }
+    iScene->UpdateMatrix();
 }
 
 bool
-UOdysseyPainterEditorVectorScenePanTool::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
+UOdysseyPainterEditorVectorScenePanTool::OnMouseUp( FOdysseyVectorEngine* iEngine
+                                                  , FOdysseyVectorScene* iScene
+                                                  , const FOdysseyPoint& iPointInTexture
+                                                  , const FKey& iKey )
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
-
-    if( currentVectorLayer )
-    {
-        currentVectorLayer->RenderImageChanged(false);
-        return true;
-    }
-
-    return false;
+    return true;
 }
 
 void

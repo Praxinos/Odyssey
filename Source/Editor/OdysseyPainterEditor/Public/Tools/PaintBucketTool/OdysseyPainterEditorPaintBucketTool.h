@@ -28,25 +28,13 @@ public:
     void Initialize(FOdysseyPaintEngine* iPaintEngine);
 
     //OdysseyPainterEditorTool overrides
-    virtual void Activate() override;
-
-    bool OnMouseDownVector( UOdysseyTextureLayerImageVector& currentRasterLayer
-                          , const FOdysseyPoint& iPointInTexture
-                          , const FKey& iKey );
-    bool OnMouseDownRaster( UOdysseyTextureLayerImageRaster& currentRasterLayer
-                          , const FOdysseyPoint& iPointInTexture
-                          , const FKey& iKey );
-    virtual bool OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
-
-    void OnMouseDragVector( UOdysseyTextureLayerImageVector& currentVectorLayer
-                          , const FOdysseyPoint& iPointInTexture );
-    virtual void OnMouseDrag(const FOdysseyPoint& iPointInTexture) override;
-
-    bool OnMouseUpVector( UOdysseyTextureLayerImageVector& currentVectorLayer
-                        , const FOdysseyPoint& iPointInTexture
-                        , const FKey& iKey );
-    virtual bool OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
-
+    void Activate( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    // Raster Mouse Down
+    bool OnMouseDown( TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock, const FOdysseyPoint& iPointInTexture, const FKey& iKey );
+    // Vector Mouse Down
+    bool OnMouseDown( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture, const FKey& iKey );
+    void OnMouseDrag( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture );
+    bool OnMouseUp( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture, const FKey& iKey );
 
     virtual void Commit() override;
 
@@ -62,10 +50,6 @@ public:
 
     UPROPERTY(EditAnywhere,Category="Odyssey BucketFill Tool")
     FColor Color2;
-
-public:
-    // Setters
-    virtual bool CanDraw();
 
 protected:
     // protected Data Members

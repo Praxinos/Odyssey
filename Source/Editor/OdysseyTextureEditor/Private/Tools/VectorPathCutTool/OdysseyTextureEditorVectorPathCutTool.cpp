@@ -97,8 +97,7 @@ UOdysseyTextureEditorVectorPathCutTool::OnCurrentLayerChanged(UOdysseyLayerStack
 }
 
 bool
-UOdysseyTextureEditorVectorPathCutTool::OnMouseDown( const FOdysseyPoint& iPointInTexture
-                                                   , const FKey& iKey )
+UOdysseyTextureEditorVectorPathCutTool::OnMouseDown( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
@@ -135,8 +134,7 @@ UOdysseyTextureEditorVectorPathCutTool::OnMouseDrag( const FOdysseyPoint& iPoint
 }
 
 bool
-UOdysseyTextureEditorVectorPathCutTool::OnMouseUp( const FOdysseyPoint& iPointInTexture
-                                                 , const FKey& iKey )
+UOdysseyTextureEditorVectorPathCutTool::OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());

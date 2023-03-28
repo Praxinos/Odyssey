@@ -22,105 +22,67 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::UOdysseyPainterEditorVectorPrim
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
 void
-UOdysseyPainterEditorVectorPrimitiveDrawingTool::Activate()
+UOdysseyPainterEditorVectorPrimitiveDrawingTool::Activate( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
-	//FOdysseyObjectEditorUtils::SetPropertyValue(BrushOptions, "Color", FOdysseyBrushColor(GetEditorAs<FOdysseyPainterEditor>()->PaintColor()));
-    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
-
-    if(currentVectorLayer)
-    {
-        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-
-        vectorEngine->ClearHUD();
-
-        currentVectorLayer->RenderImageChanged(false);
-    }
+    iEngine->ClearHUD();
 }
 
 bool
-UOdysseyPainterEditorVectorPrimitiveDrawingTool::CanDraw()
+UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDown( FOdysseyVectorEngine* iEngine
+                                                            , FOdysseyVectorScene* iScene
+                                                            , const FOdysseyPoint& iPointInTexture
+                                                            , const FKey& iKey )
 {
-    return IsActivable();
-}
+    BLPoint localCoords = iScene->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
+    ::ULIS::FColor color = GetEditorAs<FOdysseyPainterEditor>()->PaintColor().GetValue();
+    ::ULIS::FColor rgba8 = color.ToFormat( ::ULIS::eFormat::Format_RGBA8 );
+    FOdysseyVectorEllipse* circle = FOdysseyVectorEllipse::New( "Circle", 0.0f, 0.0f );
 
-bool
-UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
-{
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
+    iScene->AppendChild( circle );
 
-    if( currentVectorLayer )
-    {
-        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        FOdysseyVectorScene* scene = currentVectorLayer->GetScene();
-        BLPoint localCoords = scene->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
-        ::ULIS::FColor color = GetEditorAs<FOdysseyPainterEditor>()->PaintColor().GetValue();
-        ::ULIS::FColor rgba8 = color.ToFormat( ::ULIS::eFormat::Format_RGBA8 );
-        FOdysseyVectorEllipse* circle = FOdysseyVectorEllipse::New( "Circle", 0.0f, 0.0f );
+    circle->SetForegroundColor( rgba8.R8(), rgba8.G8(), rgba8.B8(), rgba8.A8() );
+    circle->Translate( localCoords.x, localCoords.y );
+    circle->UpdateMatrix();
 
-        scene->AppendChild( circle );
+    iScene->ClearSelection();
+    iScene->Select( circle );
 
-        circle->SetForegroundColor( rgba8.R8(), rgba8.G8(), rgba8.B8(), rgba8.A8() );
-        circle->Translate( localCoords.x, localCoords.y );
-        circle->UpdateMatrix();
+    mSelectionChanged.Broadcast();
 
-        scene->ClearSelection();
-        scene->Select( circle );
-
-        mSelectionChanged.Broadcast();
-
-        currentVectorLayer->RenderImageChanged(false);
-
-        return true;
-    }
-
-    return false;
+    return true;
 }
 
 void
-UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
+UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDrag( FOdysseyVectorEngine* iEngine
+                                                            , FOdysseyVectorScene* iScene
+                                                            , const FOdysseyPoint& iPointInTexture )
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
+    FOdysseyVectorEllipse* circle = static_cast<FOdysseyVectorEllipse*>( iScene->GetLastSelected() );
 
-    if( currentVectorLayer )
+    if( circle )
     {
-        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        FOdysseyVectorEllipse* circle = static_cast<FOdysseyVectorEllipse*>( currentVectorLayer->GetScene()->GetLastSelected() );
+        /*BLPoint localCoords = circle->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );*/
+        BLPoint bldif = circle->GetInverseWorldMatrix().mapVector( iPointInTexture.deltaPosition.X
+                                                                 , iPointInTexture.deltaPosition.Y );
+        ::ULIS::FVec2D dif = ::ULIS::FVec2D( bldif.x, bldif.y );
 
-        if( circle )
-        {
-            /*BLPoint localCoords = circle->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );*/
-            BLPoint bldif = circle->GetInverseWorldMatrix().mapVector( iPointInTexture.deltaPosition.X
-                                                                     , iPointInTexture.deltaPosition.Y );
-            ::ULIS::FVec2D dif = ::ULIS::FVec2D( bldif.x, bldif.y );
+        circle->SetRadius( circle->GetRadiusX() + dif.x, circle->GetRadiusY() + dif.y /*difPosition.Distance()*/ );
+        circle->Invalidate();
 
-            circle->SetRadius( circle->GetRadiusX() + dif.x, circle->GetRadiusY() + dif.y /*difPosition.Distance()*/ );
-            circle->Invalidate();
-
-            currentVectorLayer->GetScene()->Update( 0 );
-
-            currentVectorLayer->RenderImageChanged(true);
-        }
+        iScene->Update( 0 );
     }
 }
 
 bool
-UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
+UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseUp( FOdysseyVectorEngine* iEngine
+                                                          , FOdysseyVectorScene* iScene
+                                                          , const FOdysseyPoint& iPointInTexture
+                                                          , const FKey& iKey )
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
-
-    if( currentVectorLayer )
-    {
-        currentVectorLayer->RenderImageChanged(false);
-    }
-
     return false;
 }
 
 void
 UOdysseyPainterEditorVectorPrimitiveDrawingTool::Commit()
 {
-
 }

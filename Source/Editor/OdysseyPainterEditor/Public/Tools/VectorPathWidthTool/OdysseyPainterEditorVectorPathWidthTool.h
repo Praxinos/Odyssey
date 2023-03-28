@@ -21,32 +21,26 @@ public:
     //Constructor
     UOdysseyPainterEditorVectorPathWidthTool();
  
-    //OdysseyPainterEditorTool overrides
-    virtual void Activate() override;
+    void Activate( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    bool OnMouseDown( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture,const FKey& iKey );
+    void OnMouseHover( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture );
+    void OnMouseDrag( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture);
+    bool OnMouseUp( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture, const FKey& iKey);
 
-    virtual bool OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
-    virtual void OnMouseHover( const FOdysseyPoint& iPointInTexture ) override;
-    virtual void OnMouseDrag(const FOdysseyPoint& iPointInTexture) override;
-    virtual bool OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
+    //OdysseyPainterEditorTool overrides
     virtual void Commit() override;
 
     void PropertyChanged( const FName& iPropertyName );
-    void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent );
 
 private:
     std::vector<FOdysseyVectorSegment*> mSegmentArray;
     FOdysseyVectorHUDPicking mPickingHUD;
 
 public:
-    // Setters
-    virtual bool CanDraw();
-
     UPROPERTY(EditAnywhere, Category="Odyssey PathWidth Tool")
     double Radius;
 
     UPROPERTY(EditAnywhere, Category="Odyssey PathWidth Tool")
     double Strength;
-
-protected:
 
 };

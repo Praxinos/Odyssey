@@ -153,31 +153,26 @@ UOdysseyTextureEditorVectorGridTool::OnMouseUp( const FOdysseyPoint& iPointInTex
 }
 
 void
-UOdysseyTextureEditorVectorGridTool::PropertyChanged( const FName& iPropertyName )
+UOdysseyTextureEditorVectorGridTool::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent )
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
 
+    //Super::PostEditChangeProperty(PropertyChangedEvent);
+
+    if (PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive)
+        return;
+
+    // redraw
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        UOdysseyPainterEditorVectorGridTool::PropertyChanged( vectorEngine, vectorScene, iPropertyName );
+        PropertyChanged( vectorEngine, vectorScene, PropertyChangedEvent.GetPropertyName());
 
         currentVectorLayer->RenderImageChanged(false);
     }
-}
-
-void
-UOdysseyTextureEditorVectorGridTool::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent )
-{
-    Super::PostEditChangeProperty(PropertyChangedEvent);
-
-    if (PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive)
-        return;
-
-    PropertyChanged(PropertyChangedEvent.GetPropertyName());
 }
 
 #undef LOCTEXT_NAMESPACE

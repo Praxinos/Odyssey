@@ -2,6 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Tools/PaintBucketTool/OdysseyTextureEditorPaintBucketTool.h"
+#include "LayerStack/OdysseyTextureLayerImageVector.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyTextureEditorPaintBucketTool"
 
@@ -12,7 +13,6 @@ UOdysseyTextureEditorPaintBucketTool::~UOdysseyTextureEditorPaintBucketTool()
 }
 
 UOdysseyTextureEditorPaintBucketTool::UOdysseyTextureEditorPaintBucketTool()
-    : mEditedBlock(nullptr)
 {
 }
 
@@ -22,24 +22,28 @@ UOdysseyTextureEditorPaintBucketTool::UOdysseyTextureEditorPaintBucketTool()
 void
 UOdysseyTextureEditorPaintBucketTool::Activate()
 {
-    UOdysseyTextureLayerStack::OnCurrentLayerChanged().AddUObject(this, &UOdysseyTextureEditorPaintBucketTool::OnCurrentLayerChanged);
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
+    UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
+
+    UOdysseyTextureLayerStack::OnCurrentLayerChanged().AddUObject( this, &UOdysseyTextureEditorPaintBucketTool::OnCurrentLayerChanged );
+
     Load();
-    Super::Activate();
+
+    if( currentVectorLayer )
+    {
+        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+
+        UOdysseyPainterEditorPaintBucketTool::Activate( vectorEngine, vectorScene );
+
+        currentVectorLayer->RenderImageChanged(false);
+    }
 }
 
 void
 UOdysseyTextureEditorPaintBucketTool::Load()
 {
-	//Define the new active tool based on the layer type
-	UOdysseyTextureLayerImageRaster* layer = GetLayer();
-	if (!layer)
-		return;
 
-	UOdysseyRasterBlock* rasterBlock = layer->GetRasterBlock();
-	mPaintEngine.RasterBlock(rasterBlock);
-
-	//Should be managed by the tool
-	mPaintEngine.OnPreUpdateDelegate().BindUObject(this, &UOdysseyTextureEditorPaintBucketTool::OnPaintEnginePreUpdate);
 }
 
 void
@@ -47,47 +51,29 @@ UOdysseyTextureEditorPaintBucketTool::Inactivate()
 {
 	UOdysseyTextureLayerStack::OnCurrentLayerChanged().RemoveAll(this);
     Super::Inactivate();
-	Unload();
 }
 
 void
 UOdysseyTextureEditorPaintBucketTool::Unload()
 {
-	mPaintEngine.OnPreUpdateDelegate().Unbind();
-
-    //Cleanup
-	mPaintEngine.RasterBlock(nullptr);
 }
 
 bool
 UOdysseyTextureEditorPaintBucketTool::IsActivable() const
 {
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
+    UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
+
 	if (!Super::IsActivable())
         return false; 
 
 	//Check for currentlayer
-	UOdysseyTextureLayerImageRaster* layer = GetLayer();
-	if (!layer)
+	if (!currentLayer)
 		return false;
 
-	bool isActive = UOdysseyLayerFunctionLibrary::IsLayerActivatedInStack(layer);
-	bool isLocked = UOdysseyLayerFunctionLibrary::IsLayerLockedInStack(layer);
+	bool isActive = UOdysseyLayerFunctionLibrary::IsLayerActivatedInStack(currentLayer);
+	bool isLocked = UOdysseyLayerFunctionLibrary::IsLayerLockedInStack(currentLayer);
     return isActive && !isLocked;
-}
-
-bool
-UOdysseyTextureEditorPaintBucketTool::CanDraw()
-{	
-    if (!Super::CanDraw())
-        return false; 
-
-	UOdysseyTextureLayerImageRaster* layer = GetLayer();
-	if (!layer)
-		return false;
-
-	bool isActive = UOdysseyLayerFunctionLibrary::IsLayerActivatedInStack(layer);
-	bool isLocked = UOdysseyLayerFunctionLibrary::IsLayerLockedInStack(layer);
-    return !isActive || isLocked;
 }
 
 void
@@ -110,29 +96,67 @@ UOdysseyTextureEditorPaintBucketTool::OnCurrentLayerChanged(UOdysseyLayerStack* 
 	Load();
 }
 
-UOdysseyTextureLayerImageRaster*
-UOdysseyTextureEditorPaintBucketTool::GetLayer() const
+bool
+UOdysseyTextureEditorPaintBucketTool::OnMouseDown( const FOdysseyPoint& iPointInTexture
+                                                  , const FKey& iKey )
 {
-	UOdysseyTextureLayerStack* layerstack = GetEditorAs<FOdysseyTextureEditor>()->LayerStack();
-	if ( !layerstack )
-		return nullptr;
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
+    UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
+    UOdysseyTextureLayerImageRaster* currentRasterLayer = Cast<UOdysseyTextureLayerImageRaster>(layerStack->CurrentLayer.Get());
+    bool ret = false;
 
-	return Cast<UOdysseyTextureLayerImageRaster>(layerstack->CurrentLayer.Get());
+    if( currentRasterLayer )
+    {
+        ret = UOdysseyPainterEditorPaintBucketTool::OnMouseDown( currentRasterLayer->GetRasterBlock()->GetBlock(), iPointInTexture, iKey );
+    }
+
+    if( currentVectorLayer )
+    {
+        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+
+        ret = UOdysseyPainterEditorPaintBucketTool::OnMouseDown( vectorEngine, vectorScene, iPointInTexture, iKey );
+    }
+
+    return ret;
 }
 
-FOdysseyBlendParameters
-UOdysseyTextureEditorPaintBucketTool::OnPaintEnginePreUpdate(const FOdysseyBlendParameters& iBlendParameters)
+void
+UOdysseyTextureEditorPaintBucketTool::OnMouseDrag( const FOdysseyPoint& iPointInTexture )
 {
-	FOdysseyBlendParameters blendParameters = iBlendParameters;
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
+    UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
 
-	UOdysseyTextureLayerImageRaster* layer = GetLayer();
-	if (!layer)
-		return blendParameters;
+    if( currentVectorLayer )
+    {
+        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-	if ( layer->IsAlphaLocked )
-		blendParameters.AlphaMode = EOdysseyAlphaMode(::ULIS::Alpha_Back);
+        UOdysseyPainterEditorPaintBucketTool::OnMouseDrag( vectorEngine, vectorScene, iPointInTexture );
 
-	return blendParameters;
+        currentVectorLayer->RenderImageChanged(true);
+    }
+}
+
+bool
+UOdysseyTextureEditorPaintBucketTool::OnMouseUp( const FOdysseyPoint& iPointInTexture
+                                                , const FKey& iKey )
+{
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
+    UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
+    bool ret = false;
+
+    if( currentVectorLayer )
+    {
+        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+
+        ret = UOdysseyPainterEditorPaintBucketTool::OnMouseUp( vectorEngine, vectorScene, iPointInTexture, iKey );
+
+        currentVectorLayer->RenderImageChanged(false);
+    }
+
+    return ret;
 }
 
 #undef LOCTEXT_NAMESPACE

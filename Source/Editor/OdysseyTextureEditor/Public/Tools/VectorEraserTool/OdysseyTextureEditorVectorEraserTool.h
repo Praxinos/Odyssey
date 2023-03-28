@@ -30,13 +30,10 @@ public:
     virtual void OnMouseDrag( const FOdysseyPoint& iPointInTexture ) override;
     virtual bool OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
 
-protected:
-    void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent );
-    void PropertyChanged( const FName& iPropertyName );
-
 private:
     void Load();
     void Unload();
+    virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
 
 private:
     //Listeners

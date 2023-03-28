@@ -22,96 +22,60 @@ UOdysseyPainterEditorVectorSceneScaleTool::UOdysseyPainterEditorVectorSceneScale
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
 void
-UOdysseyPainterEditorVectorSceneScaleTool::Activate()
+UOdysseyPainterEditorVectorSceneScaleTool::Activate( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
-	//FOdysseyObjectEditorUtils::SetPropertyValue(BrushOptions, "Color", FOdysseyBrushColor(GetEditorAs<FOdysseyPainterEditor>()->PaintColor()));
-    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
-    FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-
-    vectorEngine->ClearHUD( );
-
-    currentVectorLayer->RenderImageChanged(false);
+    iEngine->ClearHUD( );
 }
 
 bool
-UOdysseyPainterEditorVectorSceneScaleTool::CanDraw()
+UOdysseyPainterEditorVectorSceneScaleTool::OnMouseDown( FOdysseyVectorEngine* iEngine
+                                                      , FOdysseyVectorScene* iScene
+                                                      , const FOdysseyPoint& iPointInTexture
+                                                      , const FKey& iKey )
 {
-    return IsActivable();
-}
+    BLPoint localCoords = iScene->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
 
-bool
-UOdysseyPainterEditorVectorSceneScaleTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
-{
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
+    mDownWorldMouseX = iPointInTexture.x;
+    mDownWorldMouseY = iPointInTexture.y;
 
-    if( currentVectorLayer )
-    {
-        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        FOdysseyVectorScene* scene = currentVectorLayer->GetScene();
-        BLPoint localCoords = scene->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
-
-        mDownWorldMouseX = iPointInTexture.x;
-        mDownWorldMouseY = iPointInTexture.y;
-
-        mDownLocalMouseX = localCoords.x;
-        mDownLocalMouseY = localCoords.y;
-
-        mOldLocalMouseX = localCoords.x;
-        mOldLocalMouseY = localCoords.y;
-    }
+    mDownLocalMouseX = localCoords.x;
+    mDownLocalMouseY = localCoords.y;
 
     return true;
 }
 
 void
-UOdysseyPainterEditorVectorSceneScaleTool::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
+UOdysseyPainterEditorVectorSceneScaleTool::OnMouseDrag( FOdysseyVectorEngine* iEngine
+                                                      , FOdysseyVectorScene* iScene
+                                                      , const FOdysseyPoint& iPointInTexture )
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
+    uint32 imageWidth, imageHeight;
+     double factor;
 
-    if( currentVectorLayer )
-    {
-        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        FOdysseyVectorScene* scene = currentVectorLayer->GetScene();
-        BLPoint localCoords = scene->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
-        ::ULIS::FVec2D dif = { localCoords.x - mOldLocalMouseX
-                             , localCoords.y - mOldLocalMouseY };
-        double factor = ( 1.0f + ( dif.x / (double) layerStack->GetTexture()->GetSizeX() ) );
+    iEngine->GetColorImageSize( &imageWidth, &imageHeight );
 
-        scene->Scale( scene->GetScalingX() * factor
-                    , scene->GetScalingY() * factor );
+    factor = 1.0f + (double) iPointInTexture.deltaPosition.X / imageWidth;
 
-        scene->UpdateMatrix();
+    iScene->Scale( iScene->GetScalingX() * factor
+                 , iScene->GetScalingY() * factor );
 
-        BLPoint worldCoords = scene->GetWorldMatrix().mapPoint( mDownLocalMouseX, mDownLocalMouseY );
+    iScene->UpdateMatrix();
 
-        scene->Translate( scene->GetTranslationX() - ( worldCoords.x - mDownWorldMouseX )
-                        , scene->GetTranslationY() - ( worldCoords.y - mDownWorldMouseY ) );
+    BLPoint worldCoords = iScene->GetWorldMatrix().mapPoint( mDownLocalMouseX, mDownLocalMouseY );
 
-        scene->UpdateMatrix();
+    iScene->Translate( iScene->GetTranslationX() - ( worldCoords.x - mDownWorldMouseX )
+                     , iScene->GetTranslationY() - ( worldCoords.y - mDownWorldMouseY ) );
 
-        mOldLocalMouseX = localCoords.x;
-        mOldLocalMouseY = localCoords.y;
-
-        // redraw the whole image
-        currentVectorLayer->RenderImageChanged(true);
-    }
+    iScene->UpdateMatrix();
 }
 
 bool
-UOdysseyPainterEditorVectorSceneScaleTool::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
+UOdysseyPainterEditorVectorSceneScaleTool::OnMouseUp( FOdysseyVectorEngine* iEngine
+                                                    , FOdysseyVectorScene* iScene
+                                                    , const FOdysseyPoint& iPointInTexture
+                                                    , const FKey& iKey )
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
-
-    if( currentVectorLayer )
-    {
-        currentVectorLayer->RenderImageChanged(false);
-        return true;
-    }
-
-    return false;
+    return true;
 }
 
 void

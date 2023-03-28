@@ -30,157 +30,111 @@ UOdysseyPainterEditorVectorPathEditTool::UOdysseyPainterEditorVectorPathEditTool
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
 void
-UOdysseyPainterEditorVectorPathEditTool::Activate()
+UOdysseyPainterEditorVectorPathEditTool::Activate( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
-    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
-
-    if(currentVectorLayer)
-    {
-        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-
-        vectorEngine->ClearHUD();
-        vectorEngine->AddHUD(&mCubicPathHUD);
-        vectorEngine->AddHUD(&mPickingHUD);
-
-        currentVectorLayer->RenderImageChanged(false);
-    }
+    iEngine->ClearHUD();
+    iEngine->AddHUD(&mCubicPathHUD);
+    iEngine->AddHUD(&mPickingHUD);
 }
 
 bool
-UOdysseyPainterEditorVectorPathEditTool::CanDraw()
+UOdysseyPainterEditorVectorPathEditTool::OnKeyDown( FOdysseyVectorEngine* iEngine
+                                                  , FOdysseyVectorScene* iScene
+                                                  , const FKey& iKey )
 {
-    return IsActivable();
-}
-
-bool
-UOdysseyPainterEditorVectorPathEditTool::OnKeyDown(const FKey& iKey)
-{
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
-
-    /*
-        if (!CanDraw())
-            return false;
-    */
-
-    if( currentLayer->GetClass() == UOdysseyTextureLayerImageVector::StaticClass() )
+    if ( ( iKey == EKeys::LeftControl ) || ( iKey == EKeys::RightControl ) )
     {
-        UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
-
-        if ( ( iKey == EKeys::LeftControl ) || ( iKey == EKeys::RightControl ) )
-        {
-            mCubicPathHUD.SetDisplayMode( FOdysseyVectorHUDPathCubic::VIEW_PATH
-                                        | FOdysseyVectorHUDPathCubic::VIEW_HANDLE_SEGMENT );
-        }
-
-        if ( ( iKey == EKeys::LeftShift ) || ( iKey == EKeys::RightShift ) )
-        {
-            mCubicPathHUD.SetDisplayMode( FOdysseyVectorHUDPathCubic::VIEW_PATH
-                                        | FOdysseyVectorHUDPathCubic::VIEW_HANDLE_POINT );
-        }
-
-        currentVectorLayer->RenderImageChanged( true );
-    }
-
-    // TODO: find out the diference between returning true or false
-    return false;
-}
-
-bool
-UOdysseyPainterEditorVectorPathEditTool::OnKeyUp(const FKey& iKey)
-{
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
-
-/*
-    if (!CanDraw())
-        return false;
-*/
-
-    if( currentLayer->GetClass() == UOdysseyTextureLayerImageVector::StaticClass() )
-    {
-        UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
-
         mCubicPathHUD.SetDisplayMode( FOdysseyVectorHUDPathCubic::VIEW_PATH
-                                    | FOdysseyVectorHUDPathCubic::VIEW_POINT );
+                                    | FOdysseyVectorHUDPathCubic::VIEW_HANDLE_SEGMENT );
+    }
 
-        currentVectorLayer->RenderImageChanged( true );
+    if ( ( iKey == EKeys::LeftShift ) || ( iKey == EKeys::RightShift ) )
+    {
+        mCubicPathHUD.SetDisplayMode( FOdysseyVectorHUDPathCubic::VIEW_PATH
+                                    | FOdysseyVectorHUDPathCubic::VIEW_HANDLE_POINT );
     }
 
     return false;
 }
 
 bool
-UOdysseyPainterEditorVectorPathEditTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
+UOdysseyPainterEditorVectorPathEditTool::OnKeyUp( FOdysseyVectorEngine* iEngine
+                                                , FOdysseyVectorScene* iScene
+                                                , const FKey& iKey )
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayerImageVector* currentVectorLayer = GetCurrentLayerImageVector();
+    mCubicPathHUD.SetDisplayMode( FOdysseyVectorHUDPathCubic::VIEW_PATH
+                                | FOdysseyVectorHUDPathCubic::VIEW_POINT );
+
+    return false;
+}
+
+bool
+UOdysseyPainterEditorVectorPathEditTool::OnMouseDown( FOdysseyVectorEngine* iEngine
+                                                    , FOdysseyVectorScene* iScene
+                                                    , const FOdysseyPoint& iPointInTexture
+                                                    , const FKey& iKey )
+{
+    FOdysseyVectorObject* selectedObject = iScene->GetLastSelected();
 
     mPickedPointArray.clear();
 
-    if( currentVectorLayer )
+    if ( selectedObject )
     {
-        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        FOdysseyVectorObject* selectedObject = currentVectorLayer->GetScene()->GetLastSelected();
+        bool picked = false;
 
-        if ( selectedObject )
+        if ( selectedObject->GetClass() == FOdysseyVectorPathCubic::StaticClass() )
         {
-            bool picked = false;
+            FOdysseyVectorPathCubic *cubicPath = static_cast<FOdysseyVectorPathCubic*>( selectedObject );
+            BLPoint localCoords = cubicPath->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
+            uint64 selectionFlags = 0;
 
-            if ( selectedObject->GetClass() == FOdysseyVectorPathCubic::StaticClass() )
+            mOldLocalMouseX = localCoords.x;
+            mOldLocalMouseY = localCoords.y;
+
+            cubicPath->Unselect( nullptr );
+
+            if( mCubicPathHUD.GetDisplayMode() & FOdysseyVectorHUDPathCubic::VIEW_HANDLE_SEGMENT )
             {
-                FOdysseyVectorPathCubic *cubicPath = static_cast<FOdysseyVectorPathCubic*>( selectedObject );
-                BLPoint localCoords = cubicPath->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
-                uint64 selectionFlags = 0;
-
-                mOldLocalMouseX = localCoords.x;
-                mOldLocalMouseY = localCoords.y;
-
-                cubicPath->Unselect( nullptr );
-
-                if( mCubicPathHUD.GetDisplayMode() & FOdysseyVectorHUDPathCubic::VIEW_HANDLE_SEGMENT )
-                {
-                   selectionFlags = FOdysseyVectorPath::PICK_HANDLE_SEGMENT;
-                }
-
-                if( mCubicPathHUD.GetDisplayMode() & FOdysseyVectorHUDPathCubic::VIEW_HANDLE_POINT )
-                {
-                   selectionFlags = FOdysseyVectorPath::PICK_HANDLE_POINT;
-                }
-
-                if( mCubicPathHUD.GetDisplayMode() & FOdysseyVectorHUDPathCubic::VIEW_POINT )
-                {
-                   selectionFlags = FOdysseyVectorPath::PICK_POINT;
-                }
-
-                cubicPath->PickPoint( iPointInTexture.x, iPointInTexture.y, Radius, mPickedPointArray, selectionFlags );
-
-                cubicPath->Invalidate();
-
-/*
-                if ( picked == false )
-                {
-                    PickObject (event);
-                }
-*/
+                selectionFlags = FOdysseyVectorPath::PICK_HANDLE_SEGMENT;
             }
-        }
+
+            if( mCubicPathHUD.GetDisplayMode() & FOdysseyVectorHUDPathCubic::VIEW_HANDLE_POINT )
+            {
+                selectionFlags = FOdysseyVectorPath::PICK_HANDLE_POINT;
+            }
+
+            if( mCubicPathHUD.GetDisplayMode() & FOdysseyVectorHUDPathCubic::VIEW_POINT )
+            {
+                selectionFlags = FOdysseyVectorPath::PICK_POINT;
+            }
+
+            cubicPath->PickPoint( iPointInTexture.x, iPointInTexture.y, Radius, mPickedPointArray, selectionFlags );
+
+            cubicPath->Invalidate();
+
 /*
-        else
-        {
-            PickObject ( event );
-        }
+            if ( picked == false )
+            {
+                PickObject (event);
+            }
 */
+        }
     }
+/*
+    else
+    {
+        PickObject ( event );
+    }
+*/
 
     return true;
 }
 
 void
-UOdysseyPainterEditorVectorPathEditTool::OnMouseHover(const FOdysseyPoint& iPointInTexture)
+UOdysseyPainterEditorVectorPathEditTool::OnMouseHover( FOdysseyVectorEngine* iEngine
+                                                     , FOdysseyVectorScene* iScene
+                                                     , const FOdysseyPoint& iPointInTexture )
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
 /*
     ::ULIS::FRectI formerRegion = ::ULIS::FRectI( iPointInTexture.x - iPointInTexture.deltaPosition.X - Radius
                                                 , iPointInTexture.y - iPointInTexture.deltaPosition.Y - Radius
@@ -193,21 +147,6 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseHover(const FOdysseyPoint& iPoin
     ::ULIS::FRectI finalRegion = currentRegion | formerRegion;
 */
     mPickingHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
-
-    if( currentLayer->GetClass() == UOdysseyTextureLayerImageVector::StaticClass() )
-    {
-        UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
-/*
-        finalRegion.x -= 2;
-        finalRegion.y -= 2;
-        finalRegion.w += 4;
-        finalRegion.h += 4;
-        finalRegion = finalRegion & layerStack->GetSurface()->Block()->Rect();
-        finalRegion.Sanitize();
-*/
-        /*if( finalRegion.Area() )*/
-        currentVectorLayer->RenderImageChanged( /*{ finalRegion },**/ true );
-    }
 }
 
 static ::ULIS::FRectD
@@ -268,89 +207,71 @@ DragPoint( double iLocalX
 }
 
 void
-UOdysseyPainterEditorVectorPathEditTool::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
+UOdysseyPainterEditorVectorPathEditTool::OnMouseDrag( FOdysseyVectorEngine* iEngine
+                                                    , FOdysseyVectorScene* iScene
+                                                    , const FOdysseyPoint& iPointInTexture )
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
-
+    FOdysseyVectorObject* selectedObject = iScene->GetLastSelected();
     static ::ULIS::FRectI oldInvalidatedArea = { 0, 0, 0, 0 };
 
     mPickingHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
 
-    if( currentLayer )
+    if ( selectedObject )
     {
-        UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
-        FOdysseyVectorObject* selectedObject = currentVectorLayer->GetScene()->GetLastSelected();
-
-        if ( selectedObject )
+        if( selectedObject->GetClass() == FOdysseyVectorPathCubic::StaticClass() )
         {
-            if( selectedObject->GetClass() == FOdysseyVectorPathCubic::StaticClass() )
+            FOdysseyVectorPathCubic *cubicPath = static_cast<FOdysseyVectorPathCubic*>( selectedObject );
+            BLPoint localCoords = cubicPath->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
+            ::ULIS::FRectD localInvalidatedArea = { 0, 0, 0, 0 };
+            ::ULIS::FRectI invalidatedArea;
+            ::ULIS::FRectI totalInvalidatedArea;
+            BLPoint worldAreaP1;
+            BLPoint worldAreaP2;
+            bool inited = false;
+
+            for( int i = 0; i < mPickedPointArray.size(); i++ )
             {
-                FOdysseyVectorPathCubic *cubicPath = static_cast<FOdysseyVectorPathCubic*>( selectedObject );
-                BLPoint localCoords = cubicPath->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
-                ::ULIS::FRectD localInvalidatedArea = { 0, 0, 0, 0 };
-                ::ULIS::FRectI invalidatedArea;
-                ::ULIS::FRectI totalInvalidatedArea;
-                BLPoint worldAreaP1;
-                BLPoint worldAreaP2;
-                bool inited = false;
+                FOdysseyVectorPoint *selectedPoint = mPickedPointArray[i];
+                ::ULIS::FRectD rect;
 
-                for( int i = 0; i < mPickedPointArray.size(); i++ )
-                {
-                    FOdysseyVectorPoint *selectedPoint = mPickedPointArray[i];
-                    ::ULIS::FRectD rect;
+                rect = DragPoint( localCoords.x, localCoords.y, mOldLocalMouseX, mOldLocalMouseY, selectedPoint );
 
-                    rect = DragPoint( localCoords.x, localCoords.y, mOldLocalMouseX, mOldLocalMouseY, selectedPoint );
+                localInvalidatedArea = ( inited == false ) ? rect : localInvalidatedArea | rect;
 
-                    localInvalidatedArea = ( inited == false ) ? rect : localInvalidatedArea | rect;
+                inited = true;
+            }
 
-                    inited = true;
-                }
+            worldAreaP1 = cubicPath->GetWorldMatrix().mapPoint( localInvalidatedArea.x, localInvalidatedArea.y );
+            worldAreaP2 = cubicPath->GetWorldMatrix().mapPoint( localInvalidatedArea.x + localInvalidatedArea.w
+                                                              , localInvalidatedArea.y + localInvalidatedArea.h );
 
-                worldAreaP1 = cubicPath->GetWorldMatrix().mapPoint( localInvalidatedArea.x, localInvalidatedArea.y );
-                worldAreaP2 = cubicPath->GetWorldMatrix().mapPoint( localInvalidatedArea.x + localInvalidatedArea.w
-                                                                  , localInvalidatedArea.y + localInvalidatedArea.h );
+            invalidatedArea = ::ULIS::FRectI::FromMinMax( ::ULIS::FMath::Min(worldAreaP1.x,worldAreaP2.x)
+                                                        , ::ULIS::FMath::Min(worldAreaP1.y,worldAreaP2.y)
+                                                        , ::ULIS::FMath::Max(worldAreaP1.x,worldAreaP2.x)
+                                                        , ::ULIS::FMath::Max(worldAreaP1.y,worldAreaP2.y) );
 
-                invalidatedArea = ::ULIS::FRectI::FromMinMax( ::ULIS::FMath::Min(worldAreaP1.x,worldAreaP2.x)
-                                                            , ::ULIS::FMath::Min(worldAreaP1.y,worldAreaP2.y)
-                                                            , ::ULIS::FMath::Max(worldAreaP1.x,worldAreaP2.x)
-                                                            , ::ULIS::FMath::Max(worldAreaP1.y,worldAreaP2.y) );
-
-                totalInvalidatedArea = invalidatedArea | oldInvalidatedArea;
+            totalInvalidatedArea = invalidatedArea | oldInvalidatedArea;
 
 //UE_LOG(LogTemp, Warning, TEXT("%d %d %d %d"), invalidatedArea.x, invalidatedArea.y, invalidatedArea.w, invalidatedArea.h );
-                currentVectorLayer->GetScene()->Update( FOdysseyVectorObject::FREQUENTUPDATES
-                                                      | FOdysseyVectorObject::KEEPINVALIDATED );
+            iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES | FOdysseyVectorObject::KEEPINVALIDATED );
 
-                currentVectorLayer->RenderImageChanged( /*{ totalInvalidatedArea },*/ true );
+            mOldLocalMouseX = localCoords.x;
+            mOldLocalMouseY = localCoords.y;
 
-                mOldLocalMouseX = localCoords.x;
-                mOldLocalMouseY = localCoords.y;
-
-                oldInvalidatedArea = invalidatedArea;
-            }
+            oldInvalidatedArea = invalidatedArea;
         }
     }
 }
 
 bool
-UOdysseyPainterEditorVectorPathEditTool::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
+UOdysseyPainterEditorVectorPathEditTool::OnMouseUp( FOdysseyVectorEngine* iEngine
+                                                  , FOdysseyVectorScene* iScene
+                                                  , const FOdysseyPoint& iPointInTexture
+                                                  , const FKey& iKey )
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
+    iScene->Update( 0 );
 
-    if( currentLayer )
-    {
-        UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
-
-        currentVectorLayer->GetScene()->Update( 0 );
-
-        currentVectorLayer->RenderImageChanged(false);
-
-        return true;
-    }
-
-    return false;
+    return true;
 }
 
 void
@@ -362,26 +283,5 @@ UOdysseyPainterEditorVectorPathEditTool::Commit()
 void
 UOdysseyPainterEditorVectorPathEditTool::PropertyChanged( const FName& iPropertyName )
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
-
-    if( currentLayer->GetClass() == UOdysseyTextureLayerImageVector::StaticClass() )
-    {
-        UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
-
-        mPickingHUD.SetRadius( Radius );
-
-        currentVectorLayer->RenderImageChanged(false);
-    }
-}
-
-void
-UOdysseyPainterEditorVectorPathEditTool::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent)
-{
-    Super::PostEditChangeProperty(PropertyChangedEvent);
-
-    if (PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive)
-        return;
-
-    PropertyChanged(PropertyChangedEvent.GetPropertyName());
+    mPickingHUD.SetRadius( Radius );
 }

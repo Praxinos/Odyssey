@@ -28,13 +28,11 @@ public:
     virtual bool OnMouseDown( const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
     virtual void OnMouseDrag( const FOdysseyPoint& iPointInTexture ) override;
     virtual bool OnMouseUp( const FOdysseyPoint& iPointInTexture,const FKey& iKey ) override;
-    virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
-
-    void PropertyChanged( const FName& iPropertyName );
 
 private:
     void Load();
     void Unload();
+    virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
 
 private:
     //Listeners

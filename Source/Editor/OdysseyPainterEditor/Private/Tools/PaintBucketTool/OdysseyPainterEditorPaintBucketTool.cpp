@@ -28,27 +28,10 @@ UOdysseyPainterEditorPaintBucketTool::UOdysseyPainterEditorPaintBucketTool()
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
 void
-UOdysseyPainterEditorPaintBucketTool::Activate()
+UOdysseyPainterEditorPaintBucketTool::Activate( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
-
-    if( currentLayer->GetClass() == UOdysseyTextureLayerImageVector::StaticClass() )
-    {
-        UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
-        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-
-        vectorEngine->ClearHUD();
-        vectorEngine->AddHUD(&mBucketHUD);
-
-        currentVectorLayer->RenderImageChanged(false);
-    }
-}
-
-bool
-UOdysseyPainterEditorPaintBucketTool::CanDraw()
-{
-    return IsActivable();
+    iEngine->ClearHUD();
+    iEngine->AddHUD(&mBucketHUD);
 }
 
 static void floodFill ( int32 x
@@ -151,9 +134,9 @@ static void floodFill ( int32 x
 }
 
 bool
-UOdysseyPainterEditorPaintBucketTool::OnMouseDownRaster( UOdysseyTextureLayerImageRaster& currentRasterLayer
-                                                       , const FOdysseyPoint& iPointInTexture
-                                                       , const FKey& iKey )
+UOdysseyPainterEditorPaintBucketTool::OnMouseDown( TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock
+                                                 , const FOdysseyPoint& iPointInTexture
+                                                 , const FKey& iKey )
 {
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> paintBlock = mPaintEngine.PaintBlock();
     ::ULIS::FColor color = GetEditorAs<FOdysseyPainterEditor>()->PaintColor().GetValue();
@@ -172,13 +155,11 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseDownRaster( UOdysseyTextureLayerIma
 
     floodFill ( iPointInTexture.x
               , iPointInTexture.y
-              , currentRasterLayer.GetRasterBlock()->GetBlock()
+              , iBlock
               , paintBlock
               , nullptr
               , color
               , Tolerance );
-
-    
 
 	/*ctx.Finish();*/
 
@@ -186,23 +167,25 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseDownRaster( UOdysseyTextureLayerIma
 
     Commit();
 
-    currentRasterLayer.RenderImageChanged( false );
-
     return true;
 }
 
 bool
-UOdysseyPainterEditorPaintBucketTool::OnMouseDownVector( UOdysseyTextureLayerImageVector& currentVectorLayer
-                                                       , const FOdysseyPoint& iPointInTexture
-                                                       , const FKey& iKey )
+UOdysseyPainterEditorPaintBucketTool::OnMouseDown( FOdysseyVectorEngine* iEngine
+                                                 , FOdysseyVectorScene* iScene
+                                                 , const FOdysseyPoint& iPointInTexture
+                                                 , const FKey& iKey )
 {
-    FOdysseyVectorObject* selectedObject = currentVectorLayer.GetScene()->GetLastSelected();
+    FOdysseyVectorObject* selectedObject = iScene->GetLastSelected();
+
+    mDownMouseX = iPointInTexture.x;
+    mDownMouseY = iPointInTexture.y;
 
     // Scene
     if( selectedObject == nullptr )
     {
-        mPickedBucket = &currentVectorLayer.GetScene()->GetFillBucket();
-        mPickedObject =  currentVectorLayer.GetScene();
+        mPickedBucket = &iScene->GetFillBucket();
+        mPickedObject =  iScene;
     }
 
     // Selected object
@@ -243,40 +226,13 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseDownVector( UOdysseyTextureLayerIma
         }
     }
 
-    currentVectorLayer.RenderImageChanged( false );
-
-    return true;
-}
-
-bool
-UOdysseyPainterEditorPaintBucketTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
-{
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
-
-    mDownMouseX = iPointInTexture.x;
-    mDownMouseY = iPointInTexture.y;
-
-    if( currentLayer->GetClass() == UOdysseyTextureLayerImageRaster::StaticClass() )
-    {
-        UOdysseyTextureLayerImageRaster* currentRasterLayer = Cast<UOdysseyTextureLayerImageRaster>(currentLayer);
-
-        return OnMouseDownRaster( *currentRasterLayer, iPointInTexture, iKey );
-    }
-
-    if( currentLayer->GetClass() == UOdysseyTextureLayerImageVector::StaticClass() )
-    {
-        UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
-
-        return OnMouseDownVector( *currentVectorLayer, iPointInTexture, iKey );
-    }
-
     return true;
 }
 
 void
-UOdysseyPainterEditorPaintBucketTool::OnMouseDragVector( UOdysseyTextureLayerImageVector& currentVectorLayer
-                                                       , const FOdysseyPoint& iPointInTexture )
+UOdysseyPainterEditorPaintBucketTool::OnMouseDrag( FOdysseyVectorEngine* iEngine
+                                                 , FOdysseyVectorScene* iScene
+                                                 , const FOdysseyPoint& iPointInTexture )
 {
     if( mPickedBucketHandle )
     {
@@ -293,8 +249,6 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseDragVector( UOdysseyTextureLayerIma
 
             mOldLocalMouseX = localCoords.x;
             mOldLocalMouseY = localCoords.y;
-
-            currentVectorLayer.RenderImageChanged( true );
         }
     }
 
@@ -312,37 +266,15 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseDragVector( UOdysseyTextureLayerIma
 
             mOldLocalMouseX = localCoords.x;
             mOldLocalMouseY = localCoords.y;
-
-            currentVectorLayer.RenderImageChanged( true );
         }
     }
 }
 
-void
-UOdysseyPainterEditorPaintBucketTool::OnMouseDrag( const FOdysseyPoint& iPointInTexture )
-{
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
-
-    if( currentLayer->GetClass() == UOdysseyTextureLayerImageRaster::StaticClass() )
-    {
-        UOdysseyTextureLayerImageRaster* currentRasterLayer = Cast<UOdysseyTextureLayerImageRaster>(currentLayer);
-
-        // no action
-    }
-
-    if( currentLayer->GetClass() == UOdysseyTextureLayerImageVector::StaticClass() )
-    {
-        UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
-
-        OnMouseDragVector( *currentVectorLayer, iPointInTexture );
-    }
-}
-
 bool
-UOdysseyPainterEditorPaintBucketTool::OnMouseUpVector( UOdysseyTextureLayerImageVector& currentVectorLayer
-                                                     , const FOdysseyPoint& iPointInTexture
-                                                     , const FKey& iKey )
+UOdysseyPainterEditorPaintBucketTool::OnMouseUp( FOdysseyVectorEngine* iEngine
+                                               , FOdysseyVectorScene* iScene
+                                               , const FOdysseyPoint& iPointInTexture
+                                               , const FKey& iKey )
 {
     if( ( static_cast<int>(iPointInTexture.x) == static_cast<int>(mDownMouseX) ) 
      && ( static_cast<int>(iPointInTexture.y) == static_cast<int>(mDownMouseY) ) )
@@ -382,24 +314,6 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseUpVector( UOdysseyTextureLayerImage
     mPickedBucketHandle = nullptr;
     mPickedBucket = nullptr;
     mPickedObject = nullptr;
-
-    currentVectorLayer.RenderImageChanged( false );
-
-    return false;
-}
-
-bool
-UOdysseyPainterEditorPaintBucketTool::OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
-{
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
-
-    if( currentLayer->GetClass() == UOdysseyTextureLayerImageVector::StaticClass() )
-    {
-        UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
-
-        return OnMouseUpVector( *currentVectorLayer, iPointInTexture, iKey );
-    }
 
     return false;
 }

@@ -22,19 +22,18 @@ public:
     //Constructor
     UOdysseyPainterEditorVectorPathEditTool();
  
-    //OdysseyPainterEditorTool overrides
-    virtual void Activate() override;
+    void Activate( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    bool OnMouseDown( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture,const FKey& iKey );
+    void OnMouseHover( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture );
+    void OnMouseDrag( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture );
+    bool OnMouseUp( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture, const FKey& iKey );
+    bool OnKeyDown( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FKey& iKey );
+    bool OnKeyUp( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FKey& iKey );
 
-    virtual bool OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
-    virtual void OnMouseHover(const FOdysseyPoint& iPointInTexture) override;
-    virtual void OnMouseDrag(const FOdysseyPoint& iPointInTexture) override;
-    virtual bool OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
-    virtual bool OnKeyDown( const FKey& iKey );
-    virtual bool OnKeyUp( const FKey& iKey );
+    //OdysseyPainterEditorTool overrides
     virtual void Commit() override;
 
 protected:
-    void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent );
     void PropertyChanged( const FName& iPropertyName );
 
     FOdysseyVectorPathCubic* FetchPath( FOdysseyVectorEngine* iVectorEngine
@@ -50,12 +49,6 @@ private:
     std::vector<FOdysseyVectorPoint*> mPickedPointArray;
 
 public:
-    // Setters
-    virtual bool CanDraw();
-
     UPROPERTY(EditAnywhere, Category="Odyssey PathEdit Tool")
     double Radius;
-
-protected:
-
 };

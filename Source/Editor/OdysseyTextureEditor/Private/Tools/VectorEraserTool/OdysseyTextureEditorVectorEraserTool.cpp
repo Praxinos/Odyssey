@@ -171,28 +171,23 @@ UOdysseyTextureEditorVectorEraserTool::OnMouseUp( const FOdysseyPoint& iPointInT
 }
 
 void
-UOdysseyTextureEditorVectorEraserTool::PropertyChanged( const FName& iPropertyName )
+UOdysseyTextureEditorVectorEraserTool::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent )
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
 
-    if( currentVectorLayer )
-    {
-        UOdysseyPainterEditorVectorEraserTool::PropertyChanged( iPropertyName );
-
-        currentVectorLayer->RenderImageChanged(false);
-    }
-}
-
-void
-UOdysseyTextureEditorVectorEraserTool::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent)
-{
-    Super::PostEditChangeProperty(PropertyChangedEvent);
+    //Super::PostEditChangeProperty(PropertyChangedEvent);
 
     if (PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive)
         return;
 
     PropertyChanged(PropertyChangedEvent.GetPropertyName());
+
+    // redraw
+    if( currentVectorLayer )
+    {
+        currentVectorLayer->RenderImageChanged(false);
+    }
 }
 
 #undef LOCTEXT_NAMESPACE
