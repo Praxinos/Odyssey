@@ -65,6 +65,7 @@ FOdysseyPainterEditorSelectedVectorObjectTab::BindShortcuts(FBaseToolkit* iToolk
 void
 FOdysseyPainterEditorSelectedVectorObjectTab::OnSelectionChanged()
 {
+/*
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(static_cast<FOdysseyTextureEditor*>(mEditor)->LayerStack());
     UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
 
@@ -77,6 +78,7 @@ FOdysseyPainterEditorSelectedVectorObjectTab::OnSelectionChanged()
             //mDetailsView->SetObject(currentVectorLayer->GetScene()->GetLastSelected());
         }
     }
+*/
 }
 
 //--------------------------------------------------------------------------------------

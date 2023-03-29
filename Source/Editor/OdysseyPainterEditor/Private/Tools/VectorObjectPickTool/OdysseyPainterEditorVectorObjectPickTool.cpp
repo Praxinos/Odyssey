@@ -3,10 +3,6 @@
 
 #include "Tools/VectorObjectPickTool/OdysseyPainterEditorVectorObjectPickTool.h"
 #include <chrono>
-#include "LayerStack/OdysseyTextureLayer.h"
-#include "LayerStack/OdysseyTextureLayerStack.h"
-#include "LayerStack/OdysseyTextureLayerImageVector.h"
-#include "TextureEditor/OdysseyTextureEditor.h"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction

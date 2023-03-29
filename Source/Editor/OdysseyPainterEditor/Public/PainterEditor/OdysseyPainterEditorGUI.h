@@ -73,14 +73,6 @@ protected:
     virtual void GetBrushPack();
     virtual void Discord();
     virtual void SwitchTabletAPI();
-    virtual void ResetView();
-    virtual void GroupPaint();
-    virtual void Group();
-    virtual void Ungroup();
-    virtual void BringForward();
-    virtual void SendBackward();
-    virtual void ConvertToPath();
-    virtual void RemoveSelectedObjects();
 
 private:
     FOdysseyPainterEditor*                          mEditor;

@@ -6,8 +6,6 @@
 #include "CoreMinimal.h"
 #include "ToolMenuOwner.h"
 #include "Input/OdysseyPoint.h"
-#include "LayerStack/OdysseyTextureLayerImageVector.h"
-#include "LayerStack/OdysseyTextureLayerImageRaster.h"
 #include "OdysseyPainterEditorTool.generated.h"
 
 UCLASS()
@@ -67,9 +65,6 @@ protected:
     virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;
 
 public:
-    UOdysseyTextureLayerImageVector* GetCurrentLayerImageVector();
-    UOdysseyTextureLayerImageRaster* GetCurrentLayerImageRaster();
-
     void SetEditor(class FOdysseyPainterEditor* iEditor);
     template<class T> T* GetEditorAs() const { return static_cast<T*>(mEditor); };
 

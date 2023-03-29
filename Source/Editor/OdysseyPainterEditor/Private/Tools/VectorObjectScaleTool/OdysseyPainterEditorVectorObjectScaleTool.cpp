@@ -2,10 +2,6 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Tools/VectorObjectScaleTool/OdysseyPainterEditorVectorObjectScaleTool.h"
-#include "LayerStack/OdysseyTextureLayer.h"
-#include "LayerStack/OdysseyTextureLayerStack.h"
-#include "LayerStack/OdysseyTextureLayerImageVector.h"
-#include "TextureEditor/OdysseyTextureEditor.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846L

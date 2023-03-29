@@ -2,7 +2,9 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Tools/ColorPickerTool/OdysseyTextureEditorColorPickerTool.h"
-
+#include "LayerStack/OdysseyTextureLayer.h"
+#include "LayerStack/OdysseyTextureLayerStack.h"
+#include "LayerStack/OdysseyTextureLayerImageVector.h"
 #define LOCTEXT_NAMESPACE "OdysseyTextureEditorColorPickerTool"
 
 //--------------------------------------------------------------------------------------

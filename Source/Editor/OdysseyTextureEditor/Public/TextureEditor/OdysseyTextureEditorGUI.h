@@ -24,6 +24,8 @@ public:
 protected:
     //Init
 	virtual void CreateTabs() override;
+    virtual void BindShortcuts( FBaseToolkit* iToolkit ) override;
+    virtual void ExtendMenuAbout( FToolMenuOwner iOwner, FName iMenuName ) override;
 
 public:
     // GettersFName
@@ -33,6 +35,16 @@ public:
 
 protected:
 	virtual TSharedRef<FTabManager::FSplitter>	CreateRightSection() override;
+
+protected:
+    virtual void ResetView();
+    virtual void GroupPaint();
+    virtual void Group();
+    virtual void Ungroup();
+    virtual void BringForward();
+    virtual void SendBackward();
+    virtual void ConvertToPath();
+    virtual void RemoveSelectedObjects();
 
 private:
 	FOdysseyTextureEditor* mEditor;

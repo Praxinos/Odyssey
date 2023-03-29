@@ -41,29 +41,6 @@ public:
     /** Action to go to praxinos' Discord server*/
     TSharedPtr<FUICommandInfo> Discord;
 
-    /** Action to make a paintable shape from a set of cubic bezier*/
-    TSharedPtr<FUICommandInfo> ResetView;
-
-    /** Action to make a paintable shape from a set of cubic bezier*/
-    TSharedPtr<FUICommandInfo> GroupPaint;
-
-    /** Action to make a group from selected vector objects*/
-    TSharedPtr<FUICommandInfo> Group;
-
-    /** Action to make a paintable shape from a set of cubic bezier*/
-    TSharedPtr<FUICommandInfo> Ungroup;
-
-    /** Action to make a paintable shape from a set of cubic bezier*/
-    TSharedPtr<FUICommandInfo> BringForward;
-
-    /** Action to make a paintable shape from a set of cubic bezier*/
-    TSharedPtr<FUICommandInfo> SendBackward;
-
-    /** Action to make a paintable shape from a set of cubic bezier*/
-    TSharedPtr<FUICommandInfo> ConvertToPath;
-
-    /** Action to remove selected vector objects */
-    TSharedPtr<FUICommandInfo> RemoveSelectedObjects;
 
     //Undo Redo
 
@@ -85,7 +62,7 @@ public:
     /** Action for clearing the current layer */
     TSharedPtr<FUICommandInfo> ClearCurrentLayer;
 
-    
+
     //Viewport Actions
 
     /** Action to pan the viewport */

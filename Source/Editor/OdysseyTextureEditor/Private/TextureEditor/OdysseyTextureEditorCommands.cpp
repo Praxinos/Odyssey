@@ -10,6 +10,7 @@ namespace
 {
     const FName ImportExportShortcuts = "Import & Export Shortcuts";
     const FName LayerStackShortcuts = "LayerStack Shortcuts";
+    const FName HelpShortcuts = "Help Shortcuts";
 }
 
 FOdysseyTextureEditorCommands::FOdysseyTextureEditorCommands()
@@ -27,6 +28,16 @@ FOdysseyTextureEditorCommands::RegisterCommands()
     UI_CMD( ExportLayersAsTextures, ImportExportShortcuts, "Export Layers As Textures", "Export existing layers as textures within the content-browser",                                            EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::E));
     UI_CMD( ExportCurrentLayerAsTexture, ImportExportShortcuts, "Export Current Layer As Texture", "Export current layers as texture within the content-browser",                                   EUserInterfaceActionType::Button, FInputChord());
     UI_CMD( ExportTextureToOperatingSystem, ImportExportShortcuts, "Export Texture To Operating System", "Export current texture to your operating system, several file format are available",      EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::F));
+
+// Help Shortcuts Category
+    UI_CMD( ResetView, HelpShortcuts, "ResetView", "ResetView",                                                                                  EUserInterfaceActionType::Button, FInputChord() );
+    UI_CMD( GroupPaint, HelpShortcuts, "GroupPaint", "GroupPaint",                                                                               EUserInterfaceActionType::Button, FInputChord() );
+    UI_CMD( Group, HelpShortcuts, "Group", "Group",                                                                                              EUserInterfaceActionType::Button, FInputChord() );
+    UI_CMD( Ungroup, HelpShortcuts, "Ungroup", "Ungroup",                                                                                        EUserInterfaceActionType::Button, FInputChord() );
+    UI_CMD( SendBackward, HelpShortcuts, "SendBackward", "SendBackward",                                                                         EUserInterfaceActionType::Button, FInputChord() );
+    UI_CMD( BringForward, HelpShortcuts, "BringForward", "BringForward",                                                                         EUserInterfaceActionType::Button, FInputChord() );
+    UI_CMD( ConvertToPath, HelpShortcuts, "ConvertToPath", "ConvertToPath",                                                                      EUserInterfaceActionType::Button, FInputChord() );
+    UI_CMD( RemoveSelectedObjects, HelpShortcuts, "RemoveSelectedObjects", "RemoveSelectedObjects",                                              EUserInterfaceActionType::Button, FInputChord() );
 
 // LayerStack Shortcuts Category
     UI_CMD( CreateNewLayer, LayerStackShortcuts, "Create New Layer", "Create new image layer",                                                                                                      EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::N));
