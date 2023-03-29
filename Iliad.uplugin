@@ -159,6 +159,11 @@
 			"LoadingPhase": "Default"
 		},
 		{
+			"Name": "OdysseyVector",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		},
+		{
 			"Name": "OdysseyViewportDrawingEditor",
 			"Type": "Editor",
 			"LoadingPhase": "Default"
