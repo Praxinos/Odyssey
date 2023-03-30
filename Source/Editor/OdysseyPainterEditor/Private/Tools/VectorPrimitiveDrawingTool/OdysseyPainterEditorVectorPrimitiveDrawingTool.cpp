@@ -43,7 +43,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDown( FOdysseyVectorEngi
     iScene->ClearSelection();
     iScene->Select( circle );
 
-    mSelectionChanged.Broadcast();
+    mSelectionChanged.Broadcast(iScene);
 
     return true;
 }
@@ -66,6 +66,8 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDrag( FOdysseyVectorEngi
         circle->Invalidate();
 
         iScene->Update( 0 );
+
+        mSelectionChanged.Broadcast(iScene);
     }
 }
 

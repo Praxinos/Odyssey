@@ -117,6 +117,7 @@ UOdysseyTextureEditorVectorObjectMoveTool::OnMouseDown( const FOdysseyPoint& iPo
 void
 UOdysseyTextureEditorVectorObjectMoveTool::OnMouseDrag( const FOdysseyPoint& iPointInTexture )
 {
+    TSharedPtr<FOdysseyPainterEditorSelectedVectorObjectTab>& vectorObjectTab = GetEditorAs<FOdysseyTextureEditor>()->GetGUI()->GetSelectedVectorObjectTab();
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
 
@@ -128,6 +129,8 @@ UOdysseyTextureEditorVectorObjectMoveTool::OnMouseDrag( const FOdysseyPoint& iPo
         UOdysseyPainterEditorVectorObjectMoveTool::OnMouseDrag( vectorEngine, vectorScene, iPointInTexture );
 
         currentVectorLayer->RenderImageChanged(true);
+
+        vectorObjectTab.Get()->OnSelectionChanged( vectorScene );
     }
 }
 

@@ -173,4 +173,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         FColor& GetForegroundColor();
         FColor& GetBackgroundColor();
         virtual void SwitchSpace( FOdysseyVectorObject& iNewSpace ){};
+        //void PropertyChanged( const FName& iPropertyName );
 };

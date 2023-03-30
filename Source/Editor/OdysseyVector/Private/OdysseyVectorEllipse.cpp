@@ -11,11 +11,11 @@ FOdysseyVectorEllipse::~FOdysseyVectorEllipse()
 
 FOdysseyVectorEllipse::FOdysseyVectorEllipse()
     : FOdysseyVectorPathCubic()
-    , mStrokeWidth ( 4.0f )
 {
     SetName( "Circle" );
 
     mEllipseParam.RadiusX = mEllipseParam.RadiusY = 0.0f;
+    mEllipseParam.Width = 4.0f;
 }
 
 bool
@@ -35,10 +35,10 @@ FOdysseyVectorEllipse::Init( std::string iName, double iRadiusX, double iRadiusY
     SetName( iName );
     SetRadius( iRadiusX, iRadiusY );
 
-    mCubicVertex[0] = FOdysseyVectorVertexCubic::New( 0.0f, 0.0f, 1.0f );
-    mCubicVertex[1] = FOdysseyVectorVertexCubic::New( 0.0f, 0.0f, 1.0f );
-    mCubicVertex[2] = FOdysseyVectorVertexCubic::New( 0.0f, 0.0f, 1.0f );
-    mCubicVertex[3] = FOdysseyVectorVertexCubic::New( 0.0f, 0.0f, 1.0f );
+    mCubicVertex[0] = FOdysseyVectorVertexCubic::New( 0.0f, 0.0f, mEllipseParam.Width );
+    mCubicVertex[1] = FOdysseyVectorVertexCubic::New( 0.0f, 0.0f, mEllipseParam.Width );
+    mCubicVertex[2] = FOdysseyVectorVertexCubic::New( 0.0f, 0.0f, mEllipseParam.Width );
+    mCubicVertex[3] = FOdysseyVectorVertexCubic::New( 0.0f, 0.0f, mEllipseParam.Width );
 
     mCubicSegment[0] = FOdysseyVectorSegmentCubic::New( static_cast<FOdysseyVectorPathCubic*>(this), mCubicVertex[0], mCubicVertex[1] );
     mCubicSegment[1] = FOdysseyVectorSegmentCubic::New( static_cast<FOdysseyVectorPathCubic*>(this), mCubicVertex[1], mCubicVertex[2] );
@@ -72,6 +72,11 @@ FOdysseyVectorEllipse::UpdateShape( uint32 iUpdateFlags )
 {
     double ctlDistX = mEllipseParam.RadiusX * MAGICRATIO;
     double ctlDistY = mEllipseParam.RadiusY * MAGICRATIO;
+
+    mCubicVertex[0]->SetRadius( mEllipseParam.Width );
+    mCubicVertex[1]->SetRadius( mEllipseParam.Width );
+    mCubicVertex[2]->SetRadius( mEllipseParam.Width );
+    mCubicVertex[3]->SetRadius( mEllipseParam.Width );
 
     mCubicVertex[0]->Set(  0.0f                 ,  mEllipseParam.RadiusY );
     mCubicVertex[1]->Set(  mEllipseParam.RadiusX,  0.0f                  );
@@ -173,10 +178,10 @@ FOdysseyVectorEllipse::SetRadius( double iRadiusX, double iRadiusY )
     mEllipseParam.RadiusX = iRadiusX;
     mEllipseParam.RadiusY = iRadiusY;
 
-    mBBox.x = - mEllipseParam.RadiusX - mStrokeWidth;
-    mBBox.y = - mEllipseParam.RadiusY - mStrokeWidth;
-    mBBox.w =  ( mEllipseParam.RadiusX +  mStrokeWidth ) * 2;
-    mBBox.h =  ( mEllipseParam.RadiusY +  mStrokeWidth ) * 2;
+    mBBox.x = - mEllipseParam.RadiusX - mEllipseParam.Width;
+    mBBox.y = - mEllipseParam.RadiusY - mEllipseParam.Width;
+    mBBox.w =  ( mEllipseParam.RadiusX +  mEllipseParam.Width ) * 2;
+    mBBox.h =  ( mEllipseParam.RadiusY +  mEllipseParam.Width ) * 2;
 
     //Invalidate();
 }

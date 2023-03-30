@@ -12,14 +12,25 @@
 UCLASS()
 class ODYSSEYVECTOR_API UOdysseyVectorViewObject : public UObject
 {
-    GENERATED_BODY()
+    public:
+        GENERATED_BODY()
 
     public:
         ~UOdysseyVectorViewObject();
         UOdysseyVectorViewObject();
 
-        virtual void Update( FOdysseyVectorObject* iVectorObject );
+        void Update( FOdysseyVectorObject* iVectorObject );
+        void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
 
-    private:
-        FObjectParam mObjectParam;
+    protected:
+        virtual void ImportParam( FOdysseyVectorObject* iObject );
+        virtual void ExportParam( FOdysseyVectorObject* iObject );
+        virtual void PropertyChanged( const FName& iPropertyName, const FName& iCategory );
+
+    protected:
+        FOdysseyVectorObject* mObject;
+
+    public:
+        UPROPERTY(EditAnywhere, Category="Object")
+        FObjectParam ObjectParam; // UStruct from OdysseyVectorObject.h
 };

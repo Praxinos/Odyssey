@@ -20,9 +20,13 @@ FOdysseyPainterEditorSelectedVectorObjectTab::FOdysseyPainterEditorSelectedVecto
                             FSlateIcon( "OdysseyStyle", "PainterEditor.Tools16" ))
     , mEditor(iEditor)
 {
-    mEditor->GetVectorObjectPickTool()->mSelectionChanged.AddRaw(this, &FOdysseyPainterEditorSelectedVectorObjectTab::OnSelectionChanged);
-    mEditor->GetVectorPathDrawingTool()->mSelectionChanged.AddRaw(this, &FOdysseyPainterEditorSelectedVectorObjectTab::OnSelectionChanged);
-    mEditor->GetVectorPrimitiveDrawingTool()->mSelectionChanged.AddRaw(this, &FOdysseyPainterEditorSelectedVectorObjectTab::OnSelectionChanged);
+    mObjectView = NewObject<UOdysseyVectorViewObject>();
+    mPathView = NewObject<UOdysseyVectorViewPath>();
+    mEllipseView = NewObject<UOdysseyVectorViewEllipse>();
+
+    mEditor->GetVectorObjectPickTool()->mSelectionChanged.AddRaw(this, &FOdysseyPainterEditorSelectedVectorObjectTab::OnSelectionChanged );
+    mEditor->GetVectorPathDrawingTool()->mSelectionChanged.AddRaw(this, &FOdysseyPainterEditorSelectedVectorObjectTab::OnSelectionChanged );
+    mEditor->GetVectorPrimitiveDrawingTool()->mSelectionChanged.AddRaw(this, &FOdysseyPainterEditorSelectedVectorObjectTab::OnSelectionChanged );
 }
 
 //--------------------------------------------------------------------------------------
@@ -60,25 +64,55 @@ FOdysseyPainterEditorSelectedVectorObjectTab::BindShortcuts(FBaseToolkit* iToolk
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------------------- Widget Getters
 
+UOdysseyVectorViewObject*
+FOdysseyPainterEditorSelectedVectorObjectTab::GetObjectView()
+{
+    return mObjectView;
+}
+
+UOdysseyVectorViewPath*
+FOdysseyPainterEditorSelectedVectorObjectTab::GetPathView()
+{
+    return mPathView;
+}
+
+UOdysseyVectorViewEllipse*
+FOdysseyPainterEditorSelectedVectorObjectTab::GetEllipseView()
+{
+    return mEllipseView;
+}
+
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------- Event Listeners
 void
-FOdysseyPainterEditorSelectedVectorObjectTab::OnSelectionChanged()
+FOdysseyPainterEditorSelectedVectorObjectTab::OnSelectionChanged( FOdysseyVectorScene* iScene )
 {
-/*
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(static_cast<FOdysseyTextureEditor*>(mEditor)->LayerStack());
-    UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
+    FOdysseyVectorObject* selectedObject = iScene->GetLastSelected();
 
-    if( currentLayer )
+    if( selectedObject && ( iScene->GetSelectedObjectList().size() == 1 ) )
     {
-        if( currentLayer->GetClass() == UOdysseyTextureLayerImageVector::StaticClass() )
+        if( selectedObject->GetClass() == FOdysseyVectorPathCubic::StaticClass() )
         {
-            UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
-
-            //mDetailsView->SetObject(currentVectorLayer->GetScene()->GetLastSelected());
+            mPathView->Update( selectedObject );
+            mDetailsView->SetObject( mPathView );
+        }
+        else
+        if( selectedObject->GetClass() == FOdysseyVectorEllipse::StaticClass() )
+        {
+            mEllipseView->Update( selectedObject );
+            mDetailsView->SetObject( mEllipseView );
+        }
+        else
+        {
+            // default
+            mObjectView->Update( selectedObject );
+            mDetailsView->SetObject( mObjectView );
         }
     }
-*/
+    else
+    {
+        mDetailsView->SetObject(nullptr);
+    }
 }
 
 //--------------------------------------------------------------------------------------

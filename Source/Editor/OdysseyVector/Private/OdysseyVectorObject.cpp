@@ -378,7 +378,7 @@ FOdysseyVectorObject::GetScene()
         parent = parent->GetParent();
     }
 
-    return static_cast<FOdysseyVectorScene*>(root);
+    return ( root->GetClass() == FOdysseyVectorScene::StaticClass() ) ?  static_cast<FOdysseyVectorScene*>(root) : nullptr;
 }
 
 void

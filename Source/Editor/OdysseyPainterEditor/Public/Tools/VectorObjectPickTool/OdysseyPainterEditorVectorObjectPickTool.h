@@ -15,7 +15,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectPickTool : publi
 public:
     GENERATED_BODY()
 
-    DECLARE_MULTICAST_DELEGATE(FSelectionChanged)
+    DECLARE_MULTICAST_DELEGATE_OneParam(FSelectionChanged,FOdysseyVectorScene*)
     FSelectionChanged mSelectionChanged;
 
 public:

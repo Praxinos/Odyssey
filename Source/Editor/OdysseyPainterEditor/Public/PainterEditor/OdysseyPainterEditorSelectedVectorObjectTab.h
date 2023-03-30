@@ -4,6 +4,10 @@
 #pragma once
 
 #include "OdysseyEditorTab.h"
+#include "OdysseyVector.h"
+#include "View/OdysseyVectorViewObject.h"
+#include "View/OdysseyVectorViewPath.h"
+#include "View/OdysseyVectorViewEllipse.h"
 #include <ULIS>
 
 class FOdysseyPainterEditor;
@@ -17,14 +21,18 @@ public:
     virtual ~FOdysseyPainterEditorSelectedVectorObjectTab();
     FOdysseyPainterEditorSelectedVectorObjectTab(FOdysseyPainterEditor* iEditor);
 
+    UOdysseyVectorViewObject* GetObjectView();
+    UOdysseyVectorViewPath* GetPathView();
+    UOdysseyVectorViewEllipse* GetEllipseView();
+
 protected:
     // FOdysseyEditorTab interface
     virtual TSharedPtr<SWidget> CreateWidget() override;
     virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
 
-protected:
+public:
     // Event Listeners
-    void OnSelectionChanged();
+    void OnSelectionChanged( FOdysseyVectorScene* iScene );
 
 protected:
     // Methods
@@ -32,5 +40,8 @@ protected:
 private:
     FOdysseyPainterEditor* mEditor;
     TSharedPtr<IDetailsView> mDetailsView;
-};
 
+    UOdysseyVectorViewObject *mObjectView;
+    UOdysseyVectorViewPath *mPathView;
+    UOdysseyVectorViewEllipse *mEllipseView;
+};

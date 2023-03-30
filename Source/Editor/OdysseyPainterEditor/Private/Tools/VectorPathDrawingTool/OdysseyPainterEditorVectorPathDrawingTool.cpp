@@ -134,7 +134,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDown( FOdysseyVectorEngine* i
     iScene->ClearSelection();
     iScene->Select( pathBuilder );
 
-    mSelectionChanged.Broadcast();
+    mSelectionChanged.Broadcast(iScene);
 
 
     return true;
