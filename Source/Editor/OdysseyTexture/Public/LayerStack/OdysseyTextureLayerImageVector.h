@@ -57,7 +57,7 @@ class ODYSSEYTEXTURE_API UOdysseyTextureLayerImageVector
  
         void Serialize(FArchive& Ar);
 
-    private:
+    public:
         // Event Listeners
         void OnRefresh(FOdysseyVectorScene* iScene);
 };

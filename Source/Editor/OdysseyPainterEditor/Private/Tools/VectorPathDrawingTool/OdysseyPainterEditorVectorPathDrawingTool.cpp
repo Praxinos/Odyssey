@@ -2,6 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Tools/VectorPathDrawingTool/OdysseyPainterEditorVectorPathDrawingTool.h"
+#include "Undo/OdysseyVectorUndoObjectAdd.h"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
@@ -134,7 +135,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDown( FOdysseyVectorEngine* i
     iScene->ClearSelection();
     iScene->Select( pathBuilder );
 
-    mSelectionChanged.Broadcast(iScene);
+    //mSelectionChanged.Broadcast(iScene);
 
 
     return true;
@@ -172,15 +173,13 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDrag( FOdysseyVectorEngine* i
 
     mPreviousVertex = nextVertex;
 
-    redrawRegion.Sanitize();
-    //redrawRegion = redrawRegion & layerStack->GetSurface()->Block()->Rect();
-
     return redrawRegion;
 }
 
 bool
 UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUp( FOdysseyVectorEngine* iEngine
                                                      , FOdysseyVectorScene* iScene
+                                                     , FOdysseyVectorUndo** iUndo
                                                      , const FOdysseyPoint& iPointInTexture
                                                      , const FKey& iKey )
 {
@@ -190,34 +189,49 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUp( FOdysseyVectorEngine* iEn
     {
         FOdysseyVectorVertexCubic* cubicVertex = PickVertex( iEngine, iScene, iPointInTexture.x, iPointInTexture.y, StitchingRadius );
         FOdysseyVectorPathCubic* cubicPath = currentPathBuilder->GetCubicPath();
-        BLPoint localCoords = cubicPath->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
-        float radius =  iPointInTexture.pressure * Radius;
-        float roundedUpRadius = /*ceil (radius)*/mPreviousVertex->GetRadius();
 
-        // the picked cubic vertex must belong to the path we are working with
-        if( cubicVertex )
+        // in some conditions (maximizing the window), you can get a Up event without a Down event. Check cubicPath exists.
+        if( cubicPath )
         {
-            if ( cubicVertex->GetPath() != cubicPath )
+            BLPoint localCoords = cubicPath->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
+            float radius =  iPointInTexture.pressure * Radius;
+            float roundedUpRadius = /*ceil (radius)*/mPreviousVertex->GetRadius();
+
+            // the picked cubic vertex must belong to the path we are working with
+            if( cubicVertex )
             {
-                cubicVertex = nullptr;
+                if ( cubicVertex->GetPath() != cubicPath )
+                {
+                    cubicVertex = nullptr;
+                }
             }
+
+            if( cubicVertex == nullptr )
+            {
+                cubicVertex = FOdysseyVectorVertexCubic::New( localCoords.x, localCoords.y, roundedUpRadius );
+
+                cubicPath->AddVertex( cubicVertex );
+            }
+
+            currentPathBuilder->RecordEnd( cubicVertex );
+
+            iScene->Select( cubicPath );
         }
-
-        if( cubicVertex == nullptr )
-        {
-            cubicVertex = FOdysseyVectorVertexCubic::New( localCoords.x, localCoords.y, roundedUpRadius );
-
-            cubicPath->AddVertex( cubicVertex );
-        }
-
-        currentPathBuilder->RecordEnd( cubicVertex );
 
         iScene->Unselect( currentPathBuilder );
         iScene->RemoveChild( currentPathBuilder );
-        iScene->Select( currentPathBuilder->GetCubicPath() );
+        delete currentPathBuilder;
+
+        // BeginTransaction() must be called for GUndo to have a value. Please do it in the caller function.
+        if( iUndo && GUndo )
+        {
+            (*iUndo) = new FOdysseyVectorUndoObjectAdd( iScene, cubicPath );
+
+            GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(*iUndo) );
+        }
 
         // Update objects marked as invalidated
-        iScene->Update( 0 );
+        iScene->Update(0);
     }
 
     return true;

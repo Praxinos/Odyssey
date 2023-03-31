@@ -225,7 +225,7 @@ FOdysseyTextureEditorGUI::ConvertToPath()
 
             vectorScene->Update( 0 );
 
-            vectorObjectTab.Get()->OnSelectionChanged( vectorScene );
+            vectorObjectTab.Get()->Update( vectorScene );
         }
     }
 }
@@ -322,7 +322,7 @@ FOdysseyTextureEditorGUI::Ungroup()
                 currentVectorLayer->RenderImageChanged( false );
             }
 
-            vectorObjectTab.Get()->OnSelectionChanged( vectorScene );
+            vectorObjectTab.Get()->Update( vectorScene );
         }
     }
 }
@@ -359,7 +359,7 @@ FOdysseyTextureEditorGUI::Group()
 
         currentVectorLayer->RenderImageChanged( false );
 
-        vectorObjectTab.Get()->OnSelectionChanged( vectorScene );
+        vectorObjectTab.Get()->Update( vectorScene );
     }
 }
 
@@ -444,7 +444,7 @@ FOdysseyTextureEditorGUI::GroupPaint()
             currentVectorLayer->RenderImageChanged( false );
         }
 
-        vectorObjectTab.Get()->OnSelectionChanged( vectorScene );
+        vectorObjectTab.Get()->Update( vectorScene );
     }
 }
 

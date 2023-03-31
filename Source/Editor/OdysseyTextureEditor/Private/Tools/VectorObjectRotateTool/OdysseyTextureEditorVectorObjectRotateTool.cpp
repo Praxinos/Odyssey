@@ -119,6 +119,7 @@ UOdysseyTextureEditorVectorObjectRotateTool::OnMouseDown( const FOdysseyPoint& i
 void
 UOdysseyTextureEditorVectorObjectRotateTool::OnMouseDrag( const FOdysseyPoint& iPointInTexture )
 {
+    TSharedPtr<FOdysseyPainterEditorSelectedVectorObjectTab>& vectorObjectTab = GetEditorAs<FOdysseyTextureEditor>()->GetGUI()->GetSelectedVectorObjectTab();
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
 
@@ -130,6 +131,9 @@ UOdysseyTextureEditorVectorObjectRotateTool::OnMouseDrag( const FOdysseyPoint& i
         UOdysseyPainterEditorVectorObjectRotateTool::OnMouseDrag( vectorEngine, vectorScene, iPointInTexture );
 
         currentVectorLayer->RenderImageChanged(true);
+
+        // Update the VectorObjectTab widget
+        vectorObjectTab.Get()->Update( vectorScene );
     }
 }
 

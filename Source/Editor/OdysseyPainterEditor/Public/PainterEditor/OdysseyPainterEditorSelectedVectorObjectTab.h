@@ -32,7 +32,8 @@ protected:
 
 public:
     // Event Listeners
-    void OnSelectionChanged( FOdysseyVectorScene* iScene );
+    void OnRefresh( FOdysseyVectorScene* iScene );
+    void Update( FOdysseyVectorScene* iScene );
 
 protected:
     // Methods

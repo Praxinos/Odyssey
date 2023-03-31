@@ -27,6 +27,8 @@ namespace FOdysseyVector
                                               , ::ULIS::FVec2D& iSegmentP0
                                               , ::ULIS::FVec2D& iSegmentP1
                                               , double&         oDistance );
+
+    bool ODYSSEYVECTOR_API IntersectRegions( const ::ULIS::FRectI& iRegion0, const ::ULIS::FRectI& iRegion1, ::ULIS::FRectI &oRegionOut );
 }
 
 #include "OdysseyVectorObject.h"

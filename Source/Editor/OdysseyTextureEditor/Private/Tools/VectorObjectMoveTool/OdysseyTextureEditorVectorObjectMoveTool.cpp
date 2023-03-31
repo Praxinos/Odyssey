@@ -130,7 +130,8 @@ UOdysseyTextureEditorVectorObjectMoveTool::OnMouseDrag( const FOdysseyPoint& iPo
 
         currentVectorLayer->RenderImageChanged(true);
 
-        vectorObjectTab.Get()->OnSelectionChanged( vectorScene );
+        // Update the VectorObjectTab widget
+        vectorObjectTab.Get()->Update( vectorScene );
     }
 }
 

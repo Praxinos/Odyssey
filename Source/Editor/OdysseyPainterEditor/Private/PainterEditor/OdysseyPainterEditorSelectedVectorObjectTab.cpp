@@ -23,10 +23,11 @@ FOdysseyPainterEditorSelectedVectorObjectTab::FOdysseyPainterEditorSelectedVecto
     mObjectView = NewObject<UOdysseyVectorViewObject>();
     mPathView = NewObject<UOdysseyVectorViewPath>();
     mEllipseView = NewObject<UOdysseyVectorViewEllipse>();
-
+/*
     mEditor->GetVectorObjectPickTool()->mSelectionChanged.AddRaw(this, &FOdysseyPainterEditorSelectedVectorObjectTab::OnSelectionChanged );
     mEditor->GetVectorPathDrawingTool()->mSelectionChanged.AddRaw(this, &FOdysseyPainterEditorSelectedVectorObjectTab::OnSelectionChanged );
     mEditor->GetVectorPrimitiveDrawingTool()->mSelectionChanged.AddRaw(this, &FOdysseyPainterEditorSelectedVectorObjectTab::OnSelectionChanged );
+*/
 }
 
 //--------------------------------------------------------------------------------------
@@ -82,10 +83,8 @@ FOdysseyPainterEditorSelectedVectorObjectTab::GetEllipseView()
     return mEllipseView;
 }
 
-//--------------------------------------------------------------------------------------
-//---------------------------------------------------------------------- Event Listeners
 void
-FOdysseyPainterEditorSelectedVectorObjectTab::OnSelectionChanged( FOdysseyVectorScene* iScene )
+FOdysseyPainterEditorSelectedVectorObjectTab::Update( FOdysseyVectorScene* iScene )
 {
     FOdysseyVectorObject* selectedObject = iScene->GetLastSelected();
 
@@ -113,6 +112,15 @@ FOdysseyPainterEditorSelectedVectorObjectTab::OnSelectionChanged( FOdysseyVector
     {
         mDetailsView->SetObject(nullptr);
     }
+}
+
+//--------------------------------------------------------------------------------------
+//---------------------------------------------------------------------- Event Listeners
+
+void
+FOdysseyPainterEditorSelectedVectorObjectTab::OnRefresh( FOdysseyVectorScene* iScene )
+{
+    Update( iScene );
 }
 
 //--------------------------------------------------------------------------------------
