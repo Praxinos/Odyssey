@@ -117,6 +117,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathBuilder : public FOdysseyVectorObject
         FOdysseyVectorPathCubic* GetCubicPath( );
 
         void RecordStart( FOdysseyVectorVertexCubic *iVertex );
-        FOdysseyVectorVertexCubic* RecordIntermediate( double iX, double iY, double iRadius );
+        FOdysseyVectorVertexCubic* RecordIntermediate( double iX
+                                                     , double iY
+                                                     , double iRadius
+                                                     , std::vector<FOdysseyVectorVertex*>& oVertexArray
+                                                     , std::vector<FOdysseyVectorSegment*>& oSegmentArray );
         void RecordEnd( FOdysseyVectorVertexCubic *iVertex );
 };

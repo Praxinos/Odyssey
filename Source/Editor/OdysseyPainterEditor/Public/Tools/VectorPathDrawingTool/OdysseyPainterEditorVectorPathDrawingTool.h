@@ -74,4 +74,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
     private:
         FOdysseyVectorHUDPathDrawing mPathDrawingHUD;
         FOdysseyVectorVertexCubic* mPreviousVertex;
+        bool mStitched;
+
+        std::vector<FOdysseyVectorVertex*> mVertexArray;
+        std::vector<FOdysseyVectorSegment*> mSegmentArray;
 };

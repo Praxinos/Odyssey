@@ -298,7 +298,11 @@ FOdysseyVectorPathBuilder::RecordStart( FOdysseyVectorVertexCubic *iVertex )
 }
 
 FOdysseyVectorVertexCubic*
-FOdysseyVectorPathBuilder::RecordIntermediate( double iX, double iY, double iRadius )
+FOdysseyVectorPathBuilder::RecordIntermediate( double iX
+                                             , double iY
+                                             , double iRadius
+                                             , std::vector<FOdysseyVectorVertex*>& oVertexArray
+                                             , std::vector<FOdysseyVectorSegment*>& oSegmentArray )
 {
     uint32 ret = RecordPoint( iX, iY, iRadius, mPointID++ );
 
@@ -310,12 +314,16 @@ FOdysseyVectorPathBuilder::RecordIntermediate( double iX, double iY, double iRad
     if( ret & FOdysseyVectorPathBuilder::NEWVERTEX )
     {
         ClearSamplesUntil( mVertexArray.back()->GetID() );
+
+        oVertexArray.push_back( mVertexArray.back() );
     }
 
-    /*if( ret & FOdysseyVectorPathBuilder::NEWSEGMENT )
+    if( ret & FOdysseyVectorPathBuilder::NEWSEGMENT )
     {
-        mCubicSegment->Invalidate();
-    }*/
+        //mCubicSegment->Invalidate();
+
+        oSegmentArray.push_back( mCubicSegment );
+    }
 
     return mVertexArray.back();
 }

@@ -3,6 +3,7 @@
 
 #include "Tools/VectorPathDrawingTool/OdysseyPainterEditorVectorPathDrawingTool.h"
 #include "Undo/OdysseyVectorUndoObjectAdd.h"
+#include "Undo/OdysseyVectorUndoPathDrawing.h"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
@@ -31,6 +32,13 @@ UOdysseyPainterEditorVectorPathDrawingTool::Activate( FOdysseyVectorEngine* iEng
 {
     iEngine->ClearHUD();
     iEngine->AddHUD( &mPathDrawingHUD );
+
+    // record for later undoing
+    mVertexArray.clear();
+    mSegmentArray.clear();
+
+    // this is important to know what undo operation we are going to record: an ObjectAdd or a PathDrawing.
+    mStitched = true;
 }
 
 static ::ULIS::FRectI
@@ -104,6 +112,8 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDown( FOdysseyVectorEngine* i
     else
     {
         cubicVertex = FOdysseyVectorVertexCubic::New( 0.0f, 0.0f, 0.0f );
+        // record for undos
+        mVertexArray.push_back( cubicVertex );
     }
 
     mPreviousVertex = cubicVertex;
@@ -117,6 +127,9 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDown( FOdysseyVectorEngine* i
         cubicPath->AddVertex( cubicVertex );
         cubicPath->UpdateMatrix();
         cubicPath->SetForegroundColor( rgba8.R8(), rgba8.G8(), rgba8.B8(), rgba8.A8() );
+
+        // this is important to know what undo operation we are going to record: an ObjectAdd or a PathDrawing.
+        mStitched = false;
     }
 
     localCoords = cubicPath->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
@@ -167,7 +180,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDrag( FOdysseyVectorEngine* i
 
     mPathDrawingHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
 
-    nextVertex = currentPathBuilder->RecordIntermediate( localCoords.x, localCoords.y, radius );
+    nextVertex = currentPathBuilder->RecordIntermediate( localCoords.x, localCoords.y, radius, mVertexArray, mSegmentArray );
 
     iScene->Update( 0 );
 
@@ -209,6 +222,8 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUp( FOdysseyVectorEngine* iEn
             if( cubicVertex == nullptr )
             {
                 cubicVertex = FOdysseyVectorVertexCubic::New( localCoords.x, localCoords.y, roundedUpRadius );
+                // record for undos
+                mVertexArray.push_back( cubicVertex );
 
                 cubicPath->AddVertex( cubicVertex );
             }
@@ -225,7 +240,9 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUp( FOdysseyVectorEngine* iEn
         // BeginTransaction() must be called for GUndo to have a value. Please do it in the caller function.
         if( iUndo && GUndo )
         {
-            (*iUndo) = new FOdysseyVectorUndoObjectAdd( iScene, cubicPath );
+UE_LOG(LogTemp, Warning, TEXT("Some warning message %d"), mStitched );
+            (*iUndo) = ( mStitched == true ) ? static_cast<FOdysseyVectorUndo*>(new FOdysseyVectorUndoPathDrawing( cubicPath, mVertexArray, mSegmentArray )) 
+                                             : static_cast<FOdysseyVectorUndo*>(new FOdysseyVectorUndoObjectAdd( iScene, cubicPath ));
 
             GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(*iUndo) );
         }
