@@ -99,19 +99,34 @@ bool
 UOdysseyTextureEditorVectorObjectRotateTool::OnMouseDown( const FOdysseyPoint& iPointInTexture
                                                         , const FKey& iKey )
 {
+    TSharedPtr<FOdysseyPainterEditorSelectedVectorObjectTab>& vectorObjectTab = GetEditorAs<FOdysseyTextureEditor>()->GetGUI()->GetSelectedVectorObjectTab();
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
     bool ret = false;
+
+    // needed for undos
+    GEditor->BeginTransaction(LOCTEXT("ObjectRotateTool", "Rotate object"));
 
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+        FOdysseyVectorUndo* undo = nullptr;
 
-        ret = UOdysseyPainterEditorVectorObjectRotateTool::OnMouseDown( vectorEngine, vectorScene, iPointInTexture,iKey  );
+        ret = UOdysseyPainterEditorVectorObjectRotateTool::OnMouseDown( vectorEngine, vectorScene, &undo, iPointInTexture,iKey  );
+
+        if( undo )
+        {
+            // All the delegates for undos are added here for easier maintainability
+            undo->mRefreshDelegate.AddRaw( vectorObjectTab.Get(), &FOdysseyPainterEditorSelectedVectorObjectTab::OnRefresh );
+            undo->mRefreshDelegate.AddUObject( currentVectorLayer, &UOdysseyTextureLayerImageVector::OnRefresh );
+            undo->mRefreshDelegate.AddUObject( this, &UOdysseyPainterEditorVectorObjectRotateTool::OnRefresh );
+        }
 
         currentVectorLayer->RenderImageChanged(false);
     }
+
+    GEditor->EndTransaction();
 
     return ret;
 }

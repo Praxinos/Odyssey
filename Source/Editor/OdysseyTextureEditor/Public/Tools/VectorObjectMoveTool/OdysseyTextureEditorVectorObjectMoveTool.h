@@ -37,5 +37,5 @@ private:
 private:
     //Listeners
     void OnCurrentLayerChanged(class UOdysseyLayerStack* iLayerStack);
-
+    void OnRefresh( FOdysseyVectorScene* iScene );
 };

@@ -84,17 +84,21 @@ UOdysseyPainterEditorVectorGridTool::OnMouseDrag( FOdysseyVectorEngine* iEngine
     else
     {
         FSelectionBox& selectionBox = mGridHUD.GetSelectionBox();
-        BLPoint spaceDif = selectionBox.space->GetInverseWorldMatrix().mapVector( iPointInTexture.deltaPosition.X
-                                                                                , iPointInTexture.deltaPosition.Y );
 
-        for( int i = 0; i < mGridNodeArray.size(); i++ )
+        if( selectionBox.space )
         {
-            mGridNodeArray[i]->Set( mGridNodeArray[i]->GetX() + spaceDif.x, mGridNodeArray[i]->GetY() + spaceDif.y );
+            BLPoint spaceDif = selectionBox.space->GetInverseWorldMatrix().mapVector( iPointInTexture.deltaPosition.X
+                                                                                    , iPointInTexture.deltaPosition.Y );
+
+            for( int i = 0; i < mGridNodeArray.size(); i++ )
+            {
+                mGridNodeArray[i]->Set( mGridNodeArray[i]->GetX() + spaceDif.x, mGridNodeArray[i]->GetY() + spaceDif.y );
+            }
+
+            mGridHUD.Deform();
+
+            iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES | FOdysseyVectorObject::KEEPINVALIDATED );
         }
-
-        mGridHUD.Deform();
-
-        iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES | FOdysseyVectorObject::KEEPINVALIDATED );
     }
 }
 

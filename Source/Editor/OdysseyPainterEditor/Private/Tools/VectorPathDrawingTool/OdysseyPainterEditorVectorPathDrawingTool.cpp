@@ -32,13 +32,6 @@ UOdysseyPainterEditorVectorPathDrawingTool::Activate( FOdysseyVectorEngine* iEng
 {
     iEngine->ClearHUD();
     iEngine->AddHUD( &mPathDrawingHUD );
-
-    // record for later undoing
-    mVertexArray.clear();
-    mSegmentArray.clear();
-
-    // this is important to know what undo operation we are going to record: an ObjectAdd or a PathDrawing.
-    mStitched = true;
 }
 
 static ::ULIS::FRectI
@@ -104,6 +97,13 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDown( FOdysseyVectorEngine* i
     float radius = iPointInTexture.pressure * Radius;
     FOdysseyVectorPathCubic* cubicPath = nullptr;
     BLPoint localCoords;
+
+    // record for later undoing
+    mVertexArray.clear();
+    mSegmentArray.clear();
+
+    // this is important to know what undo operation we are going to record: an ObjectAdd or a PathDrawing.
+    mStitched = true;
 
     if( cubicVertex )
     {
@@ -197,6 +197,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUp( FOdysseyVectorEngine* iEn
                                                      , const FKey& iKey )
 {
     FOdysseyVectorPathBuilder* currentPathBuilder = static_cast<FOdysseyVectorPathBuilder*>( iScene->GetLastSelected() );
+    FOdysseyVectorSegmentCubic* lastSegment = nullptr;
 
     if( currentPathBuilder )
     {
@@ -228,7 +229,13 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUp( FOdysseyVectorEngine* iEn
                 cubicPath->AddVertex( cubicVertex );
             }
 
-            currentPathBuilder->RecordEnd( cubicVertex );
+            lastSegment = currentPathBuilder->RecordEnd( cubicVertex );
+
+            if( lastSegment )
+            {
+                // record for undos
+                mSegmentArray.push_back( lastSegment );
+            }
 
             iScene->Select( cubicPath );
         }
@@ -240,7 +247,6 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUp( FOdysseyVectorEngine* iEn
         // BeginTransaction() must be called for GUndo to have a value. Please do it in the caller function.
         if( iUndo && GUndo )
         {
-UE_LOG(LogTemp, Warning, TEXT("Some warning message %d"), mStitched );
             (*iUndo) = ( mStitched == true ) ? static_cast<FOdysseyVectorUndo*>(new FOdysseyVectorUndoPathDrawing( cubicPath, mVertexArray, mSegmentArray )) 
                                              : static_cast<FOdysseyVectorUndo*>(new FOdysseyVectorUndoObjectAdd( iScene, cubicPath ));
 

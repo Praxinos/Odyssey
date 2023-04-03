@@ -31,6 +31,8 @@ UOdysseyPainterEditorVectorPathEditTool::Activate( FOdysseyVectorEngine* iEngine
     iEngine->ClearHUD();
     iEngine->AddHUD(&mCubicPathHUD);
     iEngine->AddHUD(&mPickingHUD);
+
+    mUndoPointPosition = nullptr;
 }
 
 bool
@@ -67,6 +69,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnKeyUp( FOdysseyVectorEngine* iEngine
 bool
 UOdysseyPainterEditorVectorPathEditTool::OnMouseDown( FOdysseyVectorEngine* iEngine
                                                     , FOdysseyVectorScene* iScene
+                                                    , FOdysseyVectorUndo** iUndo
                                                     , const FOdysseyPoint& iPointInTexture
                                                     , const FKey& iKey )
 {
@@ -106,6 +109,27 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDown( FOdysseyVectorEngine* iEng
 
             cubicPath->PickPoint( iPointInTexture.x, iPointInTexture.y, Radius, mPickedPointArray, selectionFlags );
 
+            // TODO: put this in a function or something
+            // Control point must move with the point. Store it in the mPickedPointArray as well
+            for( int i = 0; i < mPickedPointArray.size(); i++ )
+            {
+                if( mPickedPointArray[i]->GetClass() == FOdysseyVectorVertexCubic::StaticClass() )
+                {
+                    FOdysseyVectorVertexCubic* cubicVertex = static_cast<FOdysseyVectorVertexCubic*>( mPickedPointArray[i] );
+                    std::list<FOdysseyVectorSegment*> segmentList = cubicVertex->GetSegmentList();
+
+                    for( std::list<FOdysseyVectorSegment*>::iterator segit = segmentList.begin(); segit != segmentList.end(); ++segit )
+                    {
+                        FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(*segit);
+                        FOdysseyVectorHandleSegment* handle = ( cubicVertex == cubicSegment->GetVertex( 0 ) ) ? cubicSegment->GetHandle( 0 ) :
+                                                                                                                cubicSegment->GetHandle( 1 );
+
+                        mPickedPointArray.push_back( handle );
+                    }
+                }
+            }
+            // End-of TODO
+
             cubicPath->Invalidate();
 
 /*
@@ -122,6 +146,17 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDown( FOdysseyVectorEngine* iEng
         PickObject ( event );
     }
 */
+    // BeginTransaction() must be called for GUndo to have a value. Please do it in the caller function.
+    if( iUndo && GUndo )
+    {
+        mUndoPointPosition = new FOdysseyVectorUndoPointPosition( iScene );
+
+        mUndoPointPosition->RecordPositionBefore( mPickedPointArray );
+
+        (*iUndo) = mUndoPointPosition;
+
+        GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(*iUndo) );
+    }
 
     return true;
 }
@@ -184,17 +219,6 @@ DragPoint( double iLocalX
 
         cubicVertex->Set( iPoint->GetX() + difx
                         , iPoint->GetY() + dify );
-
-        // Control point must move with the point
-        for( std::list<FOdysseyVectorSegment*>::iterator segit = segmentList.begin(); segit != segmentList.end(); ++segit )
-        {
-            FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(*segit);
-            FOdysseyVectorHandleSegment* ctrlPoint = ( cubicSegment->GetPoint(0) == iPoint ) ? static_cast<FOdysseyVectorHandleSegment*>( cubicSegment->GetHandle( 0 ) ) :
-                                                                                               static_cast<FOdysseyVectorHandleSegment*>( cubicSegment->GetHandle( 1 ) );
-
-            ctrlPoint->Set( ctrlPoint->GetX() + difx
-                          , ctrlPoint->GetY() + dify );
-        }
 
         return cubicVertex->GetBoundingBox( false );
     }
@@ -265,6 +289,11 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseUp( FOdysseyVectorEngine* iEngin
                                                   , const FOdysseyPoint& iPointInTexture
                                                   , const FKey& iKey )
 {
+    if( mUndoPointPosition )
+    {
+        mUndoPointPosition->RecordPositionAfter( mPickedPointArray );
+    }
+
     iScene->Update( 0 );
 
     return true;

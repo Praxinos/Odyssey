@@ -65,7 +65,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathBuilder : public FOdysseyVectorObject
         /**
          * @brief Try to fit the cubic curve as close as possible to the sample links passed as parameter. EXPERIMENTAL
          */
-        void FitSegment( FOdysseyVectorSegmentCubic& iSegment, std::list<FOdysseyVectorLink*>& iLinkList );
+        void FitSegment( FOdysseyVectorSegmentCubic& iSegment, std::vector<FOdysseyVectorLink>& iLinkArray );
 
         /**
          * @brief Clear all sample points until the point passed as parameter
@@ -120,7 +120,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathBuilder : public FOdysseyVectorObject
         FOdysseyVectorVertexCubic* RecordIntermediate( double iX
                                                      , double iY
                                                      , double iRadius
-                                                     , std::vector<FOdysseyVectorVertex*>& oVertexArray
-                                                     , std::vector<FOdysseyVectorSegment*>& oSegmentArray );
-        void RecordEnd( FOdysseyVectorVertexCubic *iVertex );
+                                                     , std::vector<FOdysseyVectorVertex*>& oNewVertexArray
+                                                     , std::vector<FOdysseyVectorSegment*>& oNewSegmentArray );
+        FOdysseyVectorSegmentCubic* RecordEnd( FOdysseyVectorVertexCubic *iVertex );
 };

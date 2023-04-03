@@ -23,11 +23,19 @@ public:
     UOdysseyPainterEditorVectorScenePanTool();
  
     void Activate( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    bool OnMouseDown( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture,const FKey& iKey );
+    bool OnMouseDown( FOdysseyVectorEngine* iEngine
+                    , FOdysseyVectorScene* iScene
+                    , FOdysseyVectorUndo** iUndo
+                    , const FOdysseyPoint& iPointInTexture
+                    , const FKey& iKey );
     void OnMouseHover( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture );
     void OnMouseDrag( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture );
     bool OnMouseUp( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture, const FKey& iKey );
 
     //OdysseyPainterEditorTool overrides
     virtual void Commit() override;
+
+private:
+    // the "undo transform" object is used in both the MouseDown and MouseUp events. We need to remember it.
+    FOdysseyVectorUndoObjectTransform* mUndoObjectTransform;
 };

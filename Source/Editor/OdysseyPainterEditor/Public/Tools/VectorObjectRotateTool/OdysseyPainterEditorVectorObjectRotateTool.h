@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 #include "Tools/OdysseyPainterEditorTool.h"
 #include "OdysseyVector.h"
+#include "Undo/OdysseyVectorUndoObjectTransform.h"
 
 #include "OdysseyPainterEditorVectorObjectRotateTool.generated.h"
 
@@ -23,17 +24,26 @@ public:
     UOdysseyPainterEditorVectorObjectRotateTool();
  
     void Activate( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    bool OnMouseDown( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture, const FKey& iKey );
+    bool OnMouseDown( FOdysseyVectorEngine* iEngine
+                    , FOdysseyVectorScene* iScene
+                    , FOdysseyVectorUndo** iUndo
+                    , const FOdysseyPoint& iPointInTexture
+                    , const FKey& iKey );
     void OnMouseDrag( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture);
     bool OnMouseUp( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture, const FKey& iKey );
 
     //OdysseyPainterEditorTool overrides
     virtual void Commit() override;
-
-private:
-    FOdysseyVectorHUDRotate *mTransformHUD;
-    ::ULIS::FVec2D* mPickedPivot;
+    // usually for undos. (we need to reset the HUD as if the tool was activated)
+    void OnRefresh( FOdysseyVectorScene* iScene );
 
 protected:
+    void FitHUD( FOdysseyVectorScene* iScene );
+
+private:
+    // the "undo transform" object is used in both the MouseDown and MouseUp events. We need to remember it.
+    FOdysseyVectorUndoObjectTransform* mUndoObjectTransform;
+    FOdysseyVectorHUDRotate *mTransformHUD;
+    ::ULIS::FVec2D* mPickedPivot;
 
 };

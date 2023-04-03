@@ -99,6 +99,18 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         void SetName( std::string iName );
         void CopySettings( FOdysseyVectorObject& iDestinationObject );
 
+        void GetTransform( double& oTranslationX
+                         , double& oTranslationY
+                         , double& oRotation
+                         , double& oScalingX
+                         , double& oScalingY );
+
+        void SetTransform( double oTranslationX
+                         , double oTranslationY
+                         , double oRotation
+                         , double oScalingX
+                         , double oScalingY );
+
         virtual bool Erase( ::ULIS::FRectD &iRoi ){ return false; };
 
         virtual void OnChildTransform( FOdysseyVectorObject* iChild ) {};
