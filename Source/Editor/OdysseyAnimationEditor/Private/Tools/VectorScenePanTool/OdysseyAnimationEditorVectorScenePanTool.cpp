@@ -106,7 +106,7 @@ UOdysseyAnimationEditorVectorScenePanTool::OnMouseDown( const FOdysseyPoint& iPo
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        ret = UOdysseyPainterEditorVectorScenePanTool::OnMouseDown( vectorEngine, vectorScene, iPointInTexture,iKey  );
+        ret = UOdysseyPainterEditorVectorScenePanTool::OnMouseDown( vectorEngine, vectorScene, nullptr, iPointInTexture,iKey  );
 
         currentVectorLayer->RenderImageChanged(false);
     }

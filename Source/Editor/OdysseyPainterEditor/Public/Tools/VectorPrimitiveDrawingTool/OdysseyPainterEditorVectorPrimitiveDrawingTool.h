@@ -6,7 +6,7 @@
 #include "CoreMinimal.h"
 #include "Tools/OdysseyPainterEditorTool.h"
 #include "OdysseyVector.h"
-
+#include "Undo/OdysseyVectorUndo.h"
 #include "OdysseyPainterEditorVectorPrimitiveDrawingTool.generated.h"
 
 UCLASS()
@@ -15,7 +15,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPrimitiveDrawingTool :
 public:
     GENERATED_BODY()
 
-    DECLARE_MULTICAST_DELEGATE(FSelectionChanged)
+    DECLARE_MULTICAST_DELEGATE_OneParam(FSelectionChanged,FOdysseyVectorScene*)
     FSelectionChanged mSelectionChanged;
 
 public:
@@ -29,7 +29,11 @@ public:
     bool OnMouseDown( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture,const FKey& iKey );
     void OnMouseHover( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture );
     void OnMouseDrag( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture );
-    bool OnMouseUp( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture, const FKey& iKey );
+    bool OnMouseUp( FOdysseyVectorEngine* iEngine
+                  , FOdysseyVectorScene* iScene
+                  , FOdysseyVectorUndo** iUndo
+                  , const FOdysseyPoint& iPointInTexture
+                  , const FKey& iKey );
 
     //OdysseyPainterEditorTool overrides
     virtual void Commit() override;

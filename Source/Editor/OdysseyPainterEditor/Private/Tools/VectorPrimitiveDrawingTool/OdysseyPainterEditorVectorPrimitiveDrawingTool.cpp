@@ -2,6 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Tools/VectorPrimitiveDrawingTool/OdysseyPainterEditorVectorPrimitiveDrawingTool.h"
+#include "Undo/OdysseyVectorUndoObjectAdd.h"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
@@ -43,7 +44,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDown( FOdysseyVectorEngi
     iScene->ClearSelection();
     iScene->Select( circle );
 
-    mSelectionChanged.Broadcast();
+    mSelectionChanged.Broadcast(iScene);
 
     return true;
 }
@@ -66,15 +67,31 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDrag( FOdysseyVectorEngi
         circle->Invalidate();
 
         iScene->Update( 0 );
+
+        mSelectionChanged.Broadcast(iScene);
     }
 }
 
 bool
 UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseUp( FOdysseyVectorEngine* iEngine
                                                           , FOdysseyVectorScene* iScene
+                                                          , FOdysseyVectorUndo** iUndo
                                                           , const FOdysseyPoint& iPointInTexture
                                                           , const FKey& iKey )
 {
+    FOdysseyVectorEllipse* ellipse = static_cast<FOdysseyVectorEllipse*>( iScene->GetLastSelected() );
+
+    if( ellipse )
+    {
+        // BeginTransaction() must be called for GUndo to have a value. Please do it in the caller function.
+        if( iUndo && GUndo )
+        {
+            (*iUndo) = new FOdysseyVectorUndoObjectAdd( iScene, ellipse );
+
+            GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(*iUndo) );
+        }
+    }
+
     return false;
 }
 

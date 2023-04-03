@@ -16,6 +16,13 @@ UOdysseyTextureEditorVectorObjectMoveTool::UOdysseyTextureEditorVectorObjectMove
 {
 }
 
+// refresh on Undo for example (we need to reset the selection box as if the tool was activated)
+void
+UOdysseyTextureEditorVectorObjectMoveTool::OnRefresh( FOdysseyVectorScene* iScene )
+{
+    Activate();
+}
+
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
@@ -97,19 +104,34 @@ UOdysseyTextureEditorVectorObjectMoveTool::OnCurrentLayerChanged(UOdysseyLayerSt
 bool
 UOdysseyTextureEditorVectorObjectMoveTool::OnMouseDown( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
 {
+    TSharedPtr<FOdysseyPainterEditorSelectedVectorObjectTab>& vectorObjectTab = GetEditorAs<FOdysseyTextureEditor>()->GetGUI()->GetSelectedVectorObjectTab();
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
     bool ret = false;
+
+    // needed for undos
+    GEditor->BeginTransaction(LOCTEXT("ObjectMoveTool", "Move object"));
 
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+        FOdysseyVectorUndo* undo = nullptr;
 
-        ret = UOdysseyPainterEditorVectorObjectMoveTool::OnMouseDown( vectorEngine, vectorScene, iPointInTexture, iKey );
+        ret = UOdysseyPainterEditorVectorObjectMoveTool::OnMouseDown( vectorEngine, vectorScene, &undo, iPointInTexture, iKey );
+
+        if( undo )
+        {
+            // All the delegates for undos are added here for easier maintainability
+            undo->mRefreshDelegate.AddRaw( vectorObjectTab.Get(), &FOdysseyPainterEditorSelectedVectorObjectTab::OnRefresh );
+            undo->mRefreshDelegate.AddUObject( currentVectorLayer, &UOdysseyTextureLayerImageVector::OnRefresh );
+            undo->mRefreshDelegate.AddUObject( this, &UOdysseyTextureEditorVectorObjectMoveTool::OnRefresh );
+        }
 
         currentVectorLayer->RenderImageChanged(false);
     }
+
+    GEditor->EndTransaction();
 
     return ret;
 }
@@ -117,6 +139,7 @@ UOdysseyTextureEditorVectorObjectMoveTool::OnMouseDown( const FOdysseyPoint& iPo
 void
 UOdysseyTextureEditorVectorObjectMoveTool::OnMouseDrag( const FOdysseyPoint& iPointInTexture )
 {
+    TSharedPtr<FOdysseyPainterEditorSelectedVectorObjectTab>& vectorObjectTab = GetEditorAs<FOdysseyTextureEditor>()->GetGUI()->GetSelectedVectorObjectTab();
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
 
@@ -128,6 +151,9 @@ UOdysseyTextureEditorVectorObjectMoveTool::OnMouseDrag( const FOdysseyPoint& iPo
         UOdysseyPainterEditorVectorObjectMoveTool::OnMouseDrag( vectorEngine, vectorScene, iPointInTexture );
 
         currentVectorLayer->RenderImageChanged(true);
+
+        // Update the VectorObjectTab widget
+        vectorObjectTab.Get()->Update( vectorScene );
     }
 }
 

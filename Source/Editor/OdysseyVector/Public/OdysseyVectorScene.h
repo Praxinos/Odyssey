@@ -15,6 +15,13 @@ class FOdysseyVectorEngine;
 
 class ODYSSEYVECTOR_API FOdysseyVectorScene : public FOdysseyVectorGroup
 {
+    public:
+        DECLARE_MULTICAST_DELEGATE_OneParam(FRefreshLayer,FOdysseyVectorScene*)
+        FRefreshLayer mRefreshLayer;
+
+//        DECLARE_MULTICAST_DELEGATE_OneParam(FRefreshDetailsView,FOdysseyVectorScene*)
+//        FRefreshDetailsView mDetailsView;
+
     private:
         static const uint32 mStaticClass = 0x60719e64; // value is crc32 FOdysseyVectorScene
 

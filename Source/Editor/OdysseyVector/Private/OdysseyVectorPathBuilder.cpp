@@ -298,7 +298,11 @@ FOdysseyVectorPathBuilder::RecordStart( FOdysseyVectorVertexCubic *iVertex )
 }
 
 FOdysseyVectorVertexCubic*
-FOdysseyVectorPathBuilder::RecordIntermediate( double iX, double iY, double iRadius )
+FOdysseyVectorPathBuilder::RecordIntermediate( double iX
+                                             , double iY
+                                             , double iRadius
+                                             , std::vector<FOdysseyVectorVertex*>& oNewVertexArray
+                                             , std::vector<FOdysseyVectorSegment*>& oNewSegmentArray )
 {
     uint32 ret = RecordPoint( iX, iY, iRadius, mPointID++ );
 
@@ -309,18 +313,24 @@ FOdysseyVectorPathBuilder::RecordIntermediate( double iX, double iY, double iRad
 
     if( ret & FOdysseyVectorPathBuilder::NEWVERTEX )
     {
+        //FitSegment( *mCubicSegment, mLinkBuffer );
+
         ClearSamplesUntil( mVertexArray.back()->GetID() );
+
+        oNewVertexArray.push_back( mVertexArray.back() );
     }
 
-    /*if( ret & FOdysseyVectorPathBuilder::NEWSEGMENT )
+    if( ret & FOdysseyVectorPathBuilder::NEWSEGMENT )
     {
-        mCubicSegment->Invalidate();
-    }*/
+        //mCubicSegment->Invalidate();
+
+        oNewSegmentArray.push_back( mCubicSegment );
+    }
 
     return mVertexArray.back();
 }
 
-void
+FOdysseyVectorSegmentCubic*
 FOdysseyVectorPathBuilder::RecordEnd( FOdysseyVectorVertexCubic *iVertex )
 {
     if( iVertex != mVertexArray.back() )
@@ -348,8 +358,11 @@ FOdysseyVectorPathBuilder::RecordEnd( FOdysseyVectorVertexCubic *iVertex )
 
             mCubicPath->Update( 0 );
         /// end TODO
+            return mCubicSegment;
         }
     }
+
+    return nullptr;
 }
 
 FOdysseyVectorObject*
@@ -548,7 +561,7 @@ FOdysseyVectorPathBuilder::GetCubicPath()
 
 void
 FOdysseyVectorPathBuilder::FitSegment( FOdysseyVectorSegmentCubic& iSegment
-                                     , std::list<FOdysseyVectorLink*>& iLinkList )
+                                     , std::vector<FOdysseyVectorLink>& iLinkArray )
 {
     ::ULIS::FVec2D& point0 = iSegment.GetVertex(0)->GetCoords( nullptr );
     ::ULIS::FVec2D& point1 = iSegment.GetVertex(1)->GetCoords( nullptr );
@@ -557,9 +570,9 @@ FOdysseyVectorPathBuilder::FitSegment( FOdysseyVectorSegmentCubic& iSegment
     double sampleLength = 0.0f;
     double currentT = 0.0f;
 
-    for( std::list<FOdysseyVectorLink*>::iterator it = iLinkList.begin(); it != iLinkList.end(); ++it )
+    for( int i = 0; i < iLinkArray.size(); i++ )
     {
-        FOdysseyVectorLink *link = (*it);
+        FOdysseyVectorLink *link = &iLinkArray[i];
 
         sampleLength += link->GetStraightDistance();
     }
@@ -570,15 +583,15 @@ FOdysseyVectorPathBuilder::FitSegment( FOdysseyVectorSegmentCubic& iSegment
         ::ULIS::FVec2D C1 = { 0.0f, 0.0f };
         ::ULIS::FVec2D C2 = { 0.0f, 0.0f };
 
-        for( std::list<FOdysseyVectorLink*>::iterator it = iLinkList.begin(); it != iLinkList.end(); ++it )
+        for( int i = 0; i < iLinkArray.size(); i++)
         {
-            FOdysseyVectorLink *link = (*it);
+            FOdysseyVectorLink *link = &iLinkArray[i];
             double t = currentT + ( link->GetStraightDistance() / sampleLength );
             double ct = 1.0f - t;
             double t3 = pow ( t, 3 );
             double ct3 = pow ( ct, 3 );
             ::ULIS::FVec2D PC = { link->GetPoint(1)->GetX() - ( ct3 * point0.x ) - ( t3 * point1.x )
-                        , link->GetPoint(1)->GetY() - ( ct3 * point0.y ) - ( t3 * point1.y ) };
+                                , link->GetPoint(1)->GetY() - ( ct3 * point0.y ) - ( t3 * point1.y ) };
 
             A1  += ( pow ( t, 2 ) * pow ( ( ct ), 4 ) );
             A2  += ( pow ( t, 4 ) * pow ( ( ct ), 2 ) );

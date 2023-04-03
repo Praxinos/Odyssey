@@ -110,6 +110,34 @@ FOdysseyVectorObject::GetRotation()
 }
 
 void
+FOdysseyVectorObject::GetTransform( double& oTranslationX
+                                  , double& oTranslationY
+                                  , double& oRotation
+                                  , double& oScalingX
+                                  , double& oScalingY )
+{
+    oTranslationX = mObjectParam.TranslationX;
+    oTranslationY = mObjectParam.TranslationY;
+    oRotation = mObjectParam.Rotation;
+    oScalingX = mObjectParam.ScalingX;
+    oScalingY = mObjectParam.ScalingY;
+}
+
+void
+FOdysseyVectorObject::SetTransform( double oTranslationX
+                                  , double oTranslationY
+                                  , double oRotation
+                                  , double oScalingX
+                                  , double oScalingY )
+{
+    mObjectParam.TranslationX = oTranslationX;
+    mObjectParam.TranslationY = oTranslationY;
+    mObjectParam.Rotation = oRotation;
+    mObjectParam.ScalingX = oScalingX;
+    mObjectParam.ScalingY = oScalingY;
+}
+
+void
 FOdysseyVectorObject::ResetTransform()
 {
     Translate( 0.0f, 0.0f );
@@ -378,7 +406,7 @@ FOdysseyVectorObject::GetScene()
         parent = parent->GetParent();
     }
 
-    return static_cast<FOdysseyVectorScene*>(root);
+    return ( root->GetClass() == FOdysseyVectorScene::StaticClass() ) ?  static_cast<FOdysseyVectorScene*>(root) : nullptr;
 }
 
 void

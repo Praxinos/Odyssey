@@ -22,6 +22,8 @@ class ODYSSEYTEXTURE_API UOdysseyTextureLayerImageVector
     GENERATED_BODY()
 
     private:
+        // handle to a callback to refresh the layer when a property of an object's details view is changed
+        FDelegateHandle mOnRefreshHandle;
         FOdysseyVectorScene* mScene;
         FOdysseyVectorEngine* mVEngine;
         TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mBlock;
@@ -54,4 +56,8 @@ class ODYSSEYTEXTURE_API UOdysseyTextureLayerImageVector
         virtual TArray<::ULIS::FEvent> RenderImage(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ioBlock, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList) override;
  
         void Serialize(FArchive& Ar);
+
+    public:
+        // Event Listeners
+        void OnRefresh(FOdysseyVectorScene* iScene);
 };

@@ -190,6 +190,7 @@ FOdysseyTextureEditorGUI::RemoveSelectedObjects()
 void
 FOdysseyTextureEditorGUI::ConvertToPath()
 {
+    TSharedPtr<FOdysseyPainterEditorSelectedVectorObjectTab>& vectorObjectTab = mEditor->GetGUI()->GetSelectedVectorObjectTab();
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(static_cast<FOdysseyTextureEditor*>(mEditor)->LayerStack());
     UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
 
@@ -199,8 +200,9 @@ FOdysseyTextureEditorGUI::ConvertToPath()
         {
             UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
             FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+            FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
             // work on a copy to be able to remove the object from selection while iterating
-            std::list<FOdysseyVectorObject*> selectedObjectList = currentVectorLayer->GetScene()->GetSelectedObjectList();
+            std::list<FOdysseyVectorObject*> selectedObjectList = vectorScene->GetSelectedObjectList();
 
             for( std::list<FOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
             {
@@ -211,17 +213,19 @@ FOdysseyTextureEditorGUI::ConvertToPath()
                 {
                     FOdysseyVectorPathCubic* cubicPath = circle->Convert();
 
-                    currentVectorLayer->GetScene()->Unselect( circle );
-                    currentVectorLayer->GetScene()->RemoveChild( circle );
-                    currentVectorLayer->GetScene()->AppendChild( cubicPath );
-                    currentVectorLayer->GetScene()->Select( cubicPath );
+                    vectorScene->Unselect( circle );
+                    vectorScene->RemoveChild( circle );
+                    vectorScene->AppendChild( cubicPath );
+                    vectorScene->Select( cubicPath );
 
                     cubicPath->UpdateMatrix();
                     cubicPath->Invalidate();
                 }
             }
 
-            currentVectorLayer->GetScene()->Update( 0 );
+            vectorScene->Update( 0 );
+
+            vectorObjectTab.Get()->Update( vectorScene );
         }
     }
 }
@@ -281,6 +285,7 @@ FOdysseyTextureEditorGUI::SendBackward()
 void
 FOdysseyTextureEditorGUI::Ungroup()
 {
+    TSharedPtr<FOdysseyPainterEditorSelectedVectorObjectTab>& vectorObjectTab = mEditor->GetGUI()->GetSelectedVectorObjectTab();
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(static_cast<FOdysseyTextureEditor*>(mEditor)->LayerStack());
     UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
 
@@ -290,7 +295,8 @@ FOdysseyTextureEditorGUI::Ungroup()
         {
             UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
             FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-            FOdysseyVectorObject* selectedObject = currentVectorLayer->GetScene()->GetLastSelected();
+            FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+            FOdysseyVectorObject* selectedObject = vectorScene->GetLastSelected();
             FOdysseyVectorGroup* group = static_cast<FOdysseyVectorGroup*>(selectedObject);
 
             if( group )
@@ -309,12 +315,14 @@ FOdysseyTextureEditorGUI::Ungroup()
 
                 group->GetParent()->RemoveChild( group );
 
-                currentVectorLayer->GetScene()->ClearSelection();
-                currentVectorLayer->GetScene()->UpdateMatrix();
-                currentVectorLayer->GetScene()->Update( 0 );
+                vectorScene->ClearSelection();
+                vectorScene->UpdateMatrix();
+                vectorScene->Update( 0 );
 
                 currentVectorLayer->RenderImageChanged( false );
             }
+
+            vectorObjectTab.Get()->Update( vectorScene );
         }
     }
 }
@@ -337,37 +345,43 @@ FOdysseyTextureEditorGUI::ResetView()
 void
 FOdysseyTextureEditorGUI::Group()
 {
+    TSharedPtr<FOdysseyPainterEditorSelectedVectorObjectTab>& vectorObjectTab = mEditor->GetGUI()->GetSelectedVectorObjectTab();
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(static_cast<FOdysseyTextureEditor*>(mEditor)->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
 
     if( currentVectorLayer )
     {
-        FOdysseyVectorGroup* group = currentVectorLayer->GetScene()->GroupSelectedObjects();
+        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+        FOdysseyVectorGroup* group = vectorScene->GroupSelectedObjects();
 
-        currentVectorLayer->GetScene()->ClearSelection();
-        currentVectorLayer->GetScene()->Select( group );
+        vectorScene->ClearSelection();
+        vectorScene->Select( group );
 
         currentVectorLayer->RenderImageChanged( false );
+
+        vectorObjectTab.Get()->Update( vectorScene );
     }
 }
 
 void
 FOdysseyTextureEditorGUI::GroupPaint()
 {
+    TSharedPtr<FOdysseyPainterEditorSelectedVectorObjectTab>& vectorObjectTab = mEditor->GetGUI()->GetSelectedVectorObjectTab();
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(static_cast<FOdysseyTextureEditor*>(mEditor)->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
 
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        std::list<FOdysseyVectorObject*>& selectObjectList = currentVectorLayer->GetScene()->GetSelectedObjectList();
+        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+        std::list<FOdysseyVectorObject*>& selectObjectList = vectorScene->GetSelectedObjectList();
 
         if( selectObjectList.size() )
         {
             FOdysseyVectorGroupPaint* paintGroup = new FOdysseyVectorGroupPaint( "Paint Group" );
             std::vector<FOdysseyVectorPath*> pathArray;
 
-            currentVectorLayer->GetScene()->AppendChild( paintGroup );
+            vectorScene->AppendChild( paintGroup );
             paintGroup->UpdateMatrix();
 
             for( std::list<FOdysseyVectorObject*>::iterator it = selectObjectList.begin(); it != selectObjectList.end(); ++it )
@@ -418,17 +432,19 @@ FOdysseyTextureEditorGUI::GroupPaint()
             }
 
             // first update to update paths' segments.
-            currentVectorLayer->GetScene()->Update( 0 );
+            vectorScene->Update( 0 );
 
             //paintGroup->Invalidate();
 
-            currentVectorLayer->GetScene()->ClearSelection();
-            currentVectorLayer->GetScene()->Select( paintGroup );
+            vectorScene->ClearSelection();
+            vectorScene->Select( paintGroup );
             //currentVectorLayer->GetScene()->Update( 0 );
 
             // second update to update paintgroup
             currentVectorLayer->RenderImageChanged( false );
         }
+
+        vectorObjectTab.Get()->Update( vectorScene );
     }
 }
 

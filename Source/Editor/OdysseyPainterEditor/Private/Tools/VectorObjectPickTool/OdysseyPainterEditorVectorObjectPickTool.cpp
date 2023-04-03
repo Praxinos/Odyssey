@@ -113,7 +113,7 @@ UOdysseyPainterEditorVectorObjectPickTool::OnMouseUp( FOdysseyVectorEngine* iEng
     mSelectionHUD->SetSelecting( false, nullptr );
     mSelectionHUD->UpdateSelectionBox( iScene );
 
-    mSelectionChanged.Broadcast();
+    mSelectionChanged.Broadcast(iScene);
 
     return true;
 }

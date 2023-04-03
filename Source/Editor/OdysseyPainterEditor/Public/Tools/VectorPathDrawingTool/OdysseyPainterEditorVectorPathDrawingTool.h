@@ -7,6 +7,7 @@
 #include "Tools/OdysseyPainterEditorTool.h"
 
 #include "OdysseyVector.h"
+#include "Undo/OdysseyVectorUndo.h"
 
 #include "OdysseyPainterEditorVectorPathDrawingTool.generated.h"
 
@@ -15,10 +16,10 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
 {
     public:
         GENERATED_BODY()
-
-        DECLARE_MULTICAST_DELEGATE(FSelectionChanged)
+/*
+        DECLARE_MULTICAST_DELEGATE_OneParam(FSelectionChanged,FOdysseyVectorScene*)
         FSelectionChanged mSelectionChanged;
-
+*/
     public:
         // Destructor
         virtual ~UOdysseyPainterEditorVectorPathDrawingTool();
@@ -27,10 +28,17 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
         UOdysseyPainterEditorVectorPathDrawingTool();
  
         void Activate( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-        bool OnMouseDown( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture,const FKey& iKey );
+        bool OnMouseDown( FOdysseyVectorEngine* iEngine
+                        , FOdysseyVectorScene* iScene
+                        , const FOdysseyPoint& iPointInTexture
+                        , const FKey& iKey );
         void OnMouseHover( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture );
         ::ULIS::FRectI OnMouseDrag( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture );
-        bool OnMouseUp( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture, const FKey& iKey );
+        bool OnMouseUp( FOdysseyVectorEngine* iEngine
+                      , FOdysseyVectorScene* iScene
+                      , FOdysseyVectorUndo** iUndo
+                      , const FOdysseyPoint& iPointInTexture
+                      , const FKey& iKey );
 
         //OdysseyPainterEditorTool overrides
         virtual void Commit() override;
@@ -66,4 +74,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
     private:
         FOdysseyVectorHUDPathDrawing mPathDrawingHUD;
         FOdysseyVectorVertexCubic* mPreviousVertex;
+        bool mStitched;
+
+        std::vector<FOdysseyVectorVertex*> mVertexArray;
+        std::vector<FOdysseyVectorSegment*> mSegmentArray;
 };

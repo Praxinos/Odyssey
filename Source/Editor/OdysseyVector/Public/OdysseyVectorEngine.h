@@ -9,9 +9,10 @@
 #include "OdysseyVectorScene.h"
 #include "HUD/OdysseyVectorHUD.h"
 
+//#include "OdysseyVectorScene.generated.h"
+
 class ODYSSEYVECTOR_API FOdysseyVectorEngine
 {
-
     public:
         static void AddHUD( FOdysseyVectorHUD* iHUDObject );
         static void RemoveHUD( FOdysseyVectorHUD* iHUDObject );

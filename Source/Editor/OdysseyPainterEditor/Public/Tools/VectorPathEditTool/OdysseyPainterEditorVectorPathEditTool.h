@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 #include "Tools/OdysseyPainterEditorTool.h"
 #include "OdysseyVector.h"
+#include "Undo/OdysseyVectorUndoPointPosition.h"
 
 #include "OdysseyPainterEditorVectorPathEditTool.generated.h"
 
@@ -23,7 +24,11 @@ public:
     UOdysseyPainterEditorVectorPathEditTool();
  
     void Activate( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    bool OnMouseDown( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture,const FKey& iKey );
+    bool OnMouseDown( FOdysseyVectorEngine* iEngine
+                    , FOdysseyVectorScene* iScene
+                    , FOdysseyVectorUndo** iUndo
+                    , const FOdysseyPoint& iPointInTexture
+                    , const FKey& iKey );
     void OnMouseHover( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture );
     void OnMouseDrag( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture );
     bool OnMouseUp( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture, const FKey& iKey );
@@ -42,6 +47,8 @@ protected:
                                       , double iWorldY );
 
 private:
+    // the "undo segment reshape" object is used in both the MouseDown and MouseUp events. We need to remember it.
+    FOdysseyVectorUndoPointPosition* mUndoPointPosition;
     double mOldLocalMouseX;
     double mOldLocalMouseY;
     FOdysseyVectorHUDPathCubic mCubicPathHUD;

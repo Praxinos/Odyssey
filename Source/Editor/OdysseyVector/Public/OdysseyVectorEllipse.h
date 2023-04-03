@@ -11,14 +11,17 @@
 #include "OdysseyVectorEllipse.generated.h"
 
 USTRUCT()
-struct FOdysseyVectorEllipseParam
+struct FEllipseParam
 {
     GENERATED_BODY()
 
-    UPROPERTY(EditAnywhere, Category="General")
+    UPROPERTY(EditAnywhere, Category="Geometry")
+    double Width;
+
+    UPROPERTY(EditAnywhere, Category="Geometry")
     double RadiusX;
 
-    UPROPERTY(EditAnywhere, Category="General")
+    UPROPERTY(EditAnywhere, Category="Geometry")
     double RadiusY;
 };
 
@@ -114,5 +117,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorEllipse : public FOdysseyVectorPathCubic
         double mStrokeWidth;
 
     public:
-        FOdysseyVectorEllipseParam mEllipseParam;
+        FEllipseParam mEllipseParam;
 };

@@ -2,6 +2,8 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Tools/VectorPathDrawingTool/OdysseyPainterEditorVectorPathDrawingTool.h"
+#include "Undo/OdysseyVectorUndoObjectAdd.h"
+#include "Undo/OdysseyVectorUndoPathDrawing.h"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
@@ -96,6 +98,13 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDown( FOdysseyVectorEngine* i
     FOdysseyVectorPathCubic* cubicPath = nullptr;
     BLPoint localCoords;
 
+    // record for later undoing
+    mVertexArray.clear();
+    mSegmentArray.clear();
+
+    // this is important to know what undo operation we are going to record: an ObjectAdd or a PathDrawing.
+    mStitched = true;
+
     if( cubicVertex )
     {
         cubicPath = static_cast<FOdysseyVectorPathCubic*>( cubicVertex->GetPath() );
@@ -103,6 +112,8 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDown( FOdysseyVectorEngine* i
     else
     {
         cubicVertex = FOdysseyVectorVertexCubic::New( 0.0f, 0.0f, 0.0f );
+        // record for undos
+        mVertexArray.push_back( cubicVertex );
     }
 
     mPreviousVertex = cubicVertex;
@@ -116,6 +127,9 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDown( FOdysseyVectorEngine* i
         cubicPath->AddVertex( cubicVertex );
         cubicPath->UpdateMatrix();
         cubicPath->SetForegroundColor( rgba8.R8(), rgba8.G8(), rgba8.B8(), rgba8.A8() );
+
+        // this is important to know what undo operation we are going to record: an ObjectAdd or a PathDrawing.
+        mStitched = false;
     }
 
     localCoords = cubicPath->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
@@ -134,7 +148,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDown( FOdysseyVectorEngine* i
     iScene->ClearSelection();
     iScene->Select( pathBuilder );
 
-    mSelectionChanged.Broadcast();
+    //mSelectionChanged.Broadcast(iScene);
 
 
     return true;
@@ -166,14 +180,11 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDrag( FOdysseyVectorEngine* i
 
     mPathDrawingHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
 
-    nextVertex = currentPathBuilder->RecordIntermediate( localCoords.x, localCoords.y, radius );
+    nextVertex = currentPathBuilder->RecordIntermediate( localCoords.x, localCoords.y, radius, mVertexArray, mSegmentArray );
 
     iScene->Update( 0 );
 
     mPreviousVertex = nextVertex;
-
-    redrawRegion.Sanitize();
-    //redrawRegion = redrawRegion & layerStack->GetSurface()->Block()->Rect();
 
     return redrawRegion;
 }
@@ -181,43 +192,69 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDrag( FOdysseyVectorEngine* i
 bool
 UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUp( FOdysseyVectorEngine* iEngine
                                                      , FOdysseyVectorScene* iScene
+                                                     , FOdysseyVectorUndo** iUndo
                                                      , const FOdysseyPoint& iPointInTexture
                                                      , const FKey& iKey )
 {
     FOdysseyVectorPathBuilder* currentPathBuilder = static_cast<FOdysseyVectorPathBuilder*>( iScene->GetLastSelected() );
+    FOdysseyVectorSegmentCubic* lastSegment = nullptr;
 
     if( currentPathBuilder )
     {
         FOdysseyVectorVertexCubic* cubicVertex = PickVertex( iEngine, iScene, iPointInTexture.x, iPointInTexture.y, StitchingRadius );
         FOdysseyVectorPathCubic* cubicPath = currentPathBuilder->GetCubicPath();
-        BLPoint localCoords = cubicPath->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
-        float radius =  iPointInTexture.pressure * Radius;
-        float roundedUpRadius = /*ceil (radius)*/mPreviousVertex->GetRadius();
 
-        // the picked cubic vertex must belong to the path we are working with
-        if( cubicVertex )
+        // in some conditions (maximizing the window), you can get a Up event without a Down event. Check cubicPath exists.
+        if( cubicPath )
         {
-            if ( cubicVertex->GetPath() != cubicPath )
+            BLPoint localCoords = cubicPath->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
+            float radius =  iPointInTexture.pressure * Radius;
+            float roundedUpRadius = /*ceil (radius)*/mPreviousVertex->GetRadius();
+
+            // the picked cubic vertex must belong to the path we are working with
+            if( cubicVertex )
             {
-                cubicVertex = nullptr;
+                if ( cubicVertex->GetPath() != cubicPath )
+                {
+                    cubicVertex = nullptr;
+                }
             }
+
+            if( cubicVertex == nullptr )
+            {
+                cubicVertex = FOdysseyVectorVertexCubic::New( localCoords.x, localCoords.y, roundedUpRadius );
+                // record for undos
+                mVertexArray.push_back( cubicVertex );
+
+                cubicPath->AddVertex( cubicVertex );
+            }
+
+            lastSegment = currentPathBuilder->RecordEnd( cubicVertex );
+
+            if( lastSegment )
+            {
+                // record for undos
+                mSegmentArray.push_back( lastSegment );
+            }
+
+            iScene->Select( cubicPath );
         }
-
-        if( cubicVertex == nullptr )
-        {
-            cubicVertex = FOdysseyVectorVertexCubic::New( localCoords.x, localCoords.y, roundedUpRadius );
-
-            cubicPath->AddVertex( cubicVertex );
-        }
-
-        currentPathBuilder->RecordEnd( cubicVertex );
 
         iScene->Unselect( currentPathBuilder );
         iScene->RemoveChild( currentPathBuilder );
-        iScene->Select( currentPathBuilder->GetCubicPath() );
+        delete currentPathBuilder;
+
+        // BeginTransaction() must be called for GUndo to have a value. Please do it in the caller function.
+        if( iUndo && GUndo )
+        {
+            (*iUndo) = ( mStitched == true ) ? static_cast<FOdysseyVectorUndo*>(new FOdysseyVectorUndoPathDrawing( cubicPath, mVertexArray, mSegmentArray )) 
+                                             : static_cast<FOdysseyVectorUndo*>(new FOdysseyVectorUndoObjectAdd( iScene, cubicPath ));
+
+            GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(*iUndo) );
+        }
 
         // Update objects marked as invalidated
-        iScene->Update( 0 );
+        iScene->Update(0);
     }
 
     return true;

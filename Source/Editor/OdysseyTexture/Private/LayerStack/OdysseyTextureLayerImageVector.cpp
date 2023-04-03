@@ -17,7 +17,9 @@
 
 UOdysseyTextureLayerImageVector::~UOdysseyTextureLayerImageVector()
 {
+    // TODO: free the scene
 
+    mScene->mRefreshLayer.Remove(mOnRefreshHandle);
 }
 
 UOdysseyTextureLayerImageVector::UOdysseyTextureLayerImageVector()
@@ -42,6 +44,9 @@ UOdysseyTextureLayerImageVector::Init( uint32 iWidth, uint32 iHeight )
     mScene = new FOdysseyVectorScene();
     mScene->SetEngine( mVEngine );
     mScene->Init( "Vector Scene" );
+
+    // record a callback to refresh the layer when a property of an object's details view is changed
+    mOnRefreshHandle = mScene->mRefreshLayer.AddUObject(this, &UOdysseyTextureLayerImageVector::OnRefresh);
 
     UE_LOG(LogTemp,Warning,TEXT("UOdysseyTextureLayerImageVector::Init %d %d %d"), iWidth, iHeight, mVEngine );
 
@@ -142,6 +147,15 @@ UOdysseyTextureLayerImageVector::Serialize(FArchive& Ar)
         FOdysseyVectorImport::Read( mScene, Ar );
     }
 
+}
+
+void
+UOdysseyTextureLayerImageVector::OnRefresh( FOdysseyVectorScene* iScene )
+{
+    if( mScene == iScene )
+    {
+        RenderImageChanged(false);
+    }
 }
 
 #undef LOCTEXT_NAMESPACE

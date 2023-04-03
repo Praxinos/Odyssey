@@ -262,10 +262,9 @@ RecursivePickPoints( FOdysseyVectorObject* iObject
                    , std::vector<FOdysseyVectorPoint*>& oPickedPointArray
                    , uint64 iPickingFlags )
 {
-    FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(iObject);
-
-    if( path )
+    if( iObject->GetClass() == FOdysseyVectorPathCubic::StaticClass() )
     {
+        FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(iObject);
         double radiusRoot = iRadius ? sqrt( iRadius ) : 0.0f;
         BLMatrix2D& inverseWorldMatrix = iObject->GetInverseWorldMatrix();
         BLPoint localRadius = inverseWorldMatrix.mapVector( radiusRoot, radiusRoot );

@@ -108,7 +108,7 @@ UOdysseyAnimationEditorVectorObjectRotateTool::OnMouseDown( const FOdysseyPoint&
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        ret = UOdysseyPainterEditorVectorObjectRotateTool::OnMouseDown( vectorEngine, vectorScene, iPointInTexture,iKey  );
+        ret = UOdysseyPainterEditorVectorObjectRotateTool::OnMouseDown( vectorEngine, vectorScene, nullptr, iPointInTexture,iKey  );
 
         currentVectorLayer->RenderImageChanged(false);
     }
@@ -135,7 +135,7 @@ UOdysseyAnimationEditorVectorObjectRotateTool::OnMouseDrag( const FOdysseyPoint&
 
 bool
 UOdysseyAnimationEditorVectorObjectRotateTool::OnMouseUp( const FOdysseyPoint& iPointInTexture
-                                                      , const FKey& iKey )
+                                                        , const FKey& iKey )
 {
     UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(GetEditorAs<FOdysseyAnimationEditor>()->LayerStack());
     UOdysseyAnimationLayerImageVector* currentVectorLayer = Cast<UOdysseyAnimationLayerImageVector>(layerStack->CurrentLayer.Get());
