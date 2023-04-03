@@ -101,15 +101,27 @@ UOdysseyTextureEditorVectorPathPushTool::OnMouseDown( const FOdysseyPoint& iPoin
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
     bool ret = false;
 
+    // needed for undos
+    GEditor->BeginTransaction(LOCTEXT("PathPushTool", "Push path"));
+
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+        FOdysseyVectorUndo* undo = nullptr;
 
-        ret = UOdysseyPainterEditorVectorPathPushTool::OnMouseDown( vectorEngine, vectorScene, iPointInTexture,iKey  );
+        ret = UOdysseyPainterEditorVectorPathPushTool::OnMouseDown( vectorEngine, vectorScene, &undo, iPointInTexture,iKey  );
+
+        if( undo )
+        {
+            // All the delegates for undos are added here for easier maintainability
+            undo->mRefreshDelegate.AddUObject( currentVectorLayer, &UOdysseyTextureLayerImageVector::OnRefresh );
+        }
 
         currentVectorLayer->RenderImageChanged(false);
     }
+
+    GEditor->EndTransaction();
 
     return ret;
 }

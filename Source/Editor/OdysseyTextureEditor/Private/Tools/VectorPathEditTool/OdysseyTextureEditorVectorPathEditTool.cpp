@@ -142,7 +142,7 @@ UOdysseyTextureEditorVectorPathEditTool::OnMouseDown( const FOdysseyPoint& iPoin
     bool ret = false;
 
     // needed for undos
-    GEditor->BeginTransaction(LOCTEXT("ObjectMoveTool", "Move object"));
+    GEditor->BeginTransaction(LOCTEXT("PathEditTool", "Edit path"));
 
     if( currentVectorLayer )
     {

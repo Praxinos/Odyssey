@@ -21,8 +21,31 @@ FOdysseyVectorUndoSegmentReshape::FOdysseyVectorUndoSegmentReshape( FOdysseyVect
 {
 }
 
+static void
+RecordArray( std::vector<FOdysseyVectorSegment*>& iSegmentArray, std::vector<FSegmentShape>& mSegmentShapeArray )
+{
+    mSegmentShapeArray.reserve( iSegmentArray.size() );
+
+    for( int i = 0; i < iSegmentArray.size(); i++ )
+    {
+        mSegmentShapeArray.push_back( FSegmentShape( iSegmentArray[i] ) );
+    }
+}
+
 void
-FOdysseyVectorUndoSegmentReshape::LoadArray( std::vector<FSegmentShape>& mSegmentShapeArray )
+FOdysseyVectorUndoSegmentReshape::RecordBefore( std::vector<FOdysseyVectorSegment*>& iSegmentArray )
+{
+    RecordArray( iSegmentArray, mSegmentShapeBeforeArray );
+}
+
+void
+FOdysseyVectorUndoSegmentReshape::RecordAfter( std::vector<FOdysseyVectorSegment*>& iSegmentArray )
+{
+    RecordArray( iSegmentArray, mSegmentShapeAfterArray );
+}
+
+static void
+LoadArray( std::vector<FSegmentShape>& mSegmentShapeArray )
 {
     for( int i = 0; i < mSegmentShapeArray.size(); i++ )
     {
@@ -40,10 +63,9 @@ FOdysseyVectorUndoSegmentReshape::LoadArray( std::vector<FSegmentShape>& mSegmen
             point3 = mSegmentShapeArray[i].point[3];
         }
 
-        mSegmentShapeArray[i].segment->Invalidate();
+        mSegmentShapeArray[i].segment->GetVertex(0)->InvalidateSegments();
+        mSegmentShapeArray[i].segment->GetVertex(1)->InvalidateSegments();
     }
-
-    mScene->Update( 0 );
 }
 
 void
@@ -53,6 +75,8 @@ FOdysseyVectorUndoSegmentReshape::Apply( UObject* iIgnored )
     FOdysseyVectorUndo::Apply( iIgnored );
 
     LoadArray( mSegmentShapeAfterArray );
+
+    mScene->Update( 0 );
 
     // call callbacks if any (for refreshing GUI e.g)
     mRefreshDelegate.Broadcast( mScene );
@@ -65,6 +89,8 @@ FOdysseyVectorUndoSegmentReshape::Revert( UObject* iIgnored )
     FOdysseyVectorUndo::Revert( iIgnored );
 
     LoadArray( mSegmentShapeBeforeArray );
+
+    mScene->Update( 0 );
 
     // call callbacks if any (for refreshing GUI e.g)
     mRefreshDelegate.Broadcast( mScene );

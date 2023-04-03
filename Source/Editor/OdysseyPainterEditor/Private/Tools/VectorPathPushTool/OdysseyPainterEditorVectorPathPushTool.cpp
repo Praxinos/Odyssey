@@ -27,6 +27,8 @@ UOdysseyPainterEditorVectorPathPushTool::Activate( FOdysseyVectorEngine* iEngine
 {
     iEngine->ClearHUD();
     iEngine->AddHUD(&mPickingHUD);
+
+    mUndoSegmentReshape = nullptr;
 }
 
 bool
@@ -46,6 +48,7 @@ UOdysseyPainterEditorVectorPathPushTool::HasVertex( FOdysseyVectorPoint* iPoint 
 bool
 UOdysseyPainterEditorVectorPathPushTool::OnMouseDown( FOdysseyVectorEngine* iEngine
                                                     , FOdysseyVectorScene* iScene
+                                                    , FOdysseyVectorUndo** iUndo
                                                     , const FOdysseyPoint& iPointInTexture
                                                     , const FKey& iKey )
 {
@@ -97,6 +100,18 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDown( FOdysseyVectorEngine* iEng
                 mPushedPointArray.push_back( FPushedPoint( cubicSegment->GetPoint(1), Radius / p1Vec.Distance() ) );
             }
         }
+    }
+
+    // BeginTransaction() must be called for GUndo to have a value. Please do it in the caller function.
+    if( iUndo && GUndo )
+    {
+        mUndoSegmentReshape = new FOdysseyVectorUndoSegmentReshape( iScene );
+
+        mUndoSegmentReshape->RecordBefore( mSegmentArray );
+
+        (*iUndo) = mUndoSegmentReshape;
+
+        GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(*iUndo) );
     }
 
     return true;
@@ -184,6 +199,11 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseUp( FOdysseyVectorEngine* iEngin
                                                   , const FOdysseyPoint& iPointInTexture
                                                   , const FKey& iKey )
 {
+    if( mUndoSegmentReshape )
+    {
+        mUndoSegmentReshape->RecordAfter( mSegmentArray );
+    }
+
     iScene->Update( 0 );
 
     return false;
