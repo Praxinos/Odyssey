@@ -92,6 +92,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
         FOdysseyVectorSegment* GetFirstSegment();
         FOdysseyVectorSegment* GetLastSegment();
         std::list<FOdysseyVectorPoint*>& GetSelectedPointList();
+        virtual bool Erase( ::ULIS::FRectD &iRoi
+                          , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
+                          , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray
+                          , std::vector<FOdysseyVectorVertex*>& iRemovedVertexArray
+                          , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray ){ return false; };
         virtual bool PickPoint( double iX
                               , double iY
                               , double iRadius

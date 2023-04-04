@@ -111,8 +111,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
                          , double oScalingX
                          , double oScalingY );
 
-        virtual bool Erase( ::ULIS::FRectD &iRoi ){ return false; };
-
         virtual void OnChildTransform( FOdysseyVectorObject* iChild ) {};
         virtual void OnChildAdd( FOdysseyVectorObject* iChild ) {};
         virtual void OnChildRemove( FOdysseyVectorObject* iChild ) {};

@@ -122,15 +122,19 @@ TraceLine( int32 iX0, int32 iY0, double iT0
 }
 
 bool
-FOdysseyVectorPathCubic::Erase( ::ULIS::FRectD &iRoi )
+FOdysseyVectorPathCubic::Erase( ::ULIS::FRectD &iRoi
+                              , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
+                              , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray
+                              , std::vector<FOdysseyVectorVertex*>& iRemovedVertexArray
+                              , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray )
 {
     BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
     BLImage* blimg = blctx->targetImage(); // the mask image must be selected by the vector engine at this point
     BLImageData imageData;
-    std::vector<FOdysseyVectorSegmentCubic*> newSegmentArray;
-    std::vector<FOdysseyVectorSegmentCubic*> oldSegmentArray;
-    std::vector<FOdysseyVectorVertexCubic*> newVertexArray;
-    std::vector<FOdysseyVectorVertexCubic*> oldVertexArray;
+    std::vector<FOdysseyVectorSegment*> newSegmentArray;
+    std::vector<FOdysseyVectorSegment*> oldSegmentArray;
+    std::vector<FOdysseyVectorVertex*> newVertexArray;
+    std::vector<FOdysseyVectorVertex*> oldVertexArray;
     std::list<FOdysseyVectorVertex*> vertexList = mVertexList; // work on a copy, for removal
 
     blimg->getData( &imageData );
@@ -144,7 +148,7 @@ FOdysseyVectorPathCubic::Erase( ::ULIS::FRectD &iRoi )
         double subVertexT[2] = { 0.0f, 0.0f };
         uint32 subVertexCount = 0;
         int32 currentPixelValue;
-        std::vector<FOdysseyVectorSegmentCubic*> subSegmentArray;
+        std::vector<FOdysseyVectorSegment*> subSegmentArray;
         bool hasHit = false;
 
         for( uint32 i = 0; i < polygonCache.size(); i++ )
@@ -208,9 +212,9 @@ FOdysseyVectorPathCubic::Erase( ::ULIS::FRectD &iRoi )
                                    {
                                        if( fabs( subVertexT[0] - subVertexT[1]) < 1.0f )
                                        {
-                                           subSegmentArray.push_back( cubicSegment->Sample(subVertexT[0]
-                                                                    , subVertexT[1]
-                                                                    , newVertexArray ) );
+                                           subSegmentArray.push_back( cubicSegment->Sample( subVertexT[0]
+                                                                                          , subVertexT[1]
+                                                                                          , newVertexArray ) );
 
                                            subVertexCount = 0;
                                        }
@@ -267,6 +271,11 @@ FOdysseyVectorPathCubic::Erase( ::ULIS::FRectD &iRoi )
     }
 
     Invalidate();
+
+    iAddedVertexArray.insert( iAddedVertexArray.end(), newVertexArray.begin(), newVertexArray.end() );
+    iAddedSegmentArray.insert( iAddedSegmentArray.end(), newSegmentArray.begin(), newSegmentArray.end() );
+    iRemovedVertexArray.insert( iRemovedVertexArray.end(), oldVertexArray.begin(), oldVertexArray.end() );
+    iRemovedSegmentArray.insert( iRemovedSegmentArray.end(), oldSegmentArray.begin(), oldSegmentArray.end() );
 
     return ( mSegmentList.size() == 0 ) ? true : false;
 }
@@ -441,9 +450,9 @@ FOdysseyVectorPathCubic::Unselect( FOdysseyVectorVertex *iVertex )
 void
 FOdysseyVectorPathCubic::Cut( ::ULIS::FVec2D& linePoint0
                             , ::ULIS::FVec2D& linePoint1
-                            , std::vector<FOdysseyVectorVertexCubic*>& oNewVertexArray
-                            , std::vector<FOdysseyVectorSegmentCubic*>& oNewSegmentArray
-                            , std::vector<FOdysseyVectorSegmentCubic*>& oOldSegmentArray )
+                            , std::vector<FOdysseyVectorVertex*>& oNewVertexArray
+                            , std::vector<FOdysseyVectorSegment*>& oNewSegmentArray
+                            , std::vector<FOdysseyVectorSegment*>& oOldSegmentArray )
 {
     // let's work on a copy as we are going to remove items in the original list
     std::list<FOdysseyVectorSegment*> tmpSegmentList = mSegmentList;

@@ -47,11 +47,15 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathCubic: public FOdysseyVectorPath
         void Mirror( bool iMirrorX, bool iMirrorY );
         void Cut( ::ULIS::FVec2D& linePoint0
                 , ::ULIS::FVec2D& linePoint1
-                , std::vector<FOdysseyVectorVertexCubic*>& oNewVertexArray
-                , std::vector<FOdysseyVectorSegmentCubic*>& oNewSegmentArray
-                , std::vector<FOdysseyVectorSegmentCubic*>& oOldSegmentArray );
+                , std::vector<FOdysseyVectorVertex*>& oNewVertexArray
+                , std::vector<FOdysseyVectorSegment*>& oNewSegmentArray
+                , std::vector<FOdysseyVectorSegment*>& oOldSegmentArray );
         void SwitchSpace( FOdysseyVectorObject& iObject );
-        bool Erase( ::ULIS::FRectD &iRoi );
+        bool Erase( ::ULIS::FRectD &iRoi
+                  , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
+                  , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray
+                  , std::vector<FOdysseyVectorVertex*>& iRemovedVertexArray
+                  , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray );
 
         uint32 GetType();
 };

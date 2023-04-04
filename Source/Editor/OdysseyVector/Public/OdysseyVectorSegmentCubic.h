@@ -207,8 +207,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
          */
         bool Cut( ::ULIS::FVec2D& linePoint0
                 , ::ULIS::FVec2D& linePoint1
-                , std::vector<FOdysseyVectorVertexCubic*>& oNewVertexArray
-                , std::vector<FOdysseyVectorSegmentCubic*>& oNewSegmentArray );
+                , std::vector<FOdysseyVectorVertex*>& oNewVertexArray
+                , std::vector<FOdysseyVectorSegment*>& oNewSegmentArray );
 
        /**
          * @brief Extract a cubic segment from this cubic segment. For T values 0.0 or 1.0, new vertices are not allocated
@@ -220,7 +220,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
          */
         FOdysseyVectorSegmentCubic* Sample( double iFromT
                                           , double iToT
-                                          , std::vector<FOdysseyVectorVertexCubic*>& oNewVertexArray );
+                                          , std::vector<FOdysseyVectorVertex*>& oNewVertexArray );
 
     private:
         void BuildVariableAdaptive( double  iFromT

@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 #include "Tools/OdysseyPainterEditorTool.h"
 #include "OdysseyVector.h"
+#include "Undo/OdysseyVectorUndoPathAlter.h"
 
 #include "OdysseyPainterEditorVectorPathCutTool.generated.h"
 
@@ -25,7 +26,11 @@ public:
     void Activate( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
     bool OnMouseDown( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture, const FKey& iKey );
     void OnMouseDrag( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture);
-    bool OnMouseUp( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture, const FKey& iKey);
+    bool OnMouseUp( FOdysseyVectorEngine* iEngine
+                  , FOdysseyVectorScene* iScene
+                  , FOdysseyVectorUndo** iUndo
+                  , const FOdysseyPoint& iPointInTexture
+                  , const FKey& iKey );
 
     //OdysseyPainterEditorTool overrides
     virtual void Commit() override;
@@ -34,5 +39,4 @@ private:
     ::ULIS::FVec2D mStartCutAt;
     FOdysseyVectorHUDLine mLineHUD;
     FOdysseyVectorHUDPathCubic mCubicPathHUD;
-
 };

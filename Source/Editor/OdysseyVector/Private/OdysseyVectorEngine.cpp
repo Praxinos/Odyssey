@@ -202,52 +202,82 @@ FOdysseyVectorEngine::GenerateMask( std::vector<::ULIS::FVec2D>& iPointArray )
 }
 
 void
-FOdysseyVectorEngine::RecursiveErase( FOdysseyVectorObject* iObj
-                                    , std::vector<FOdysseyVectorObject*>& iErasedObjectArray
+FOdysseyVectorEngine::RecursiveErase( FOdysseyVectorObject* iObject
+                                    , std::vector<FOdysseyVectorObject*>& iAddedObjectArray
+                                    , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
+                                    , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray
+                                    , std::vector<FOdysseyVectorObject*>& iRemovedObjectArray
+                                    , std::vector<FOdysseyVectorVertex*>& iRemovedVertexArray
+                                    , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray
                                     , ::ULIS::FRectD &iRoi
                                     , bool iSelectedOnly )
 {
-    for( std::list<FOdysseyVectorObject*>::iterator it = iObj->GetChildrenList().begin(); it != iObj->GetChildrenList().end(); ++it )
+    for( std::list<FOdysseyVectorObject*>::iterator it = iObject->GetChildrenList().begin(); it != iObject->GetChildrenList().end(); ++it )
     {
         FOdysseyVectorObject *child = (*it);
 
-        RecursiveErase( child, iErasedObjectArray, iRoi, iSelectedOnly );
+        RecursiveErase( child
+                      , iAddedObjectArray
+                      , iAddedVertexArray
+                      , iAddedSegmentArray
+                      , iRemovedObjectArray
+                      , iRemovedVertexArray
+                      , iRemovedSegmentArray
+                      , iRoi
+                      , iSelectedOnly );
     }
 
-    if( iSelectedOnly == true )
+    if( iObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) ) 
     {
-        if( iObj->IsSelected() == true )
+        FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(iObject);
+
+        if( iSelectedOnly == true )
         {
-            if( iObj->Erase( iRoi ) )
+            if( path->IsSelected() == true )
             {
-                iErasedObjectArray.push_back( iObj );
+                if( path->Erase( iRoi, iAddedVertexArray, iAddedSegmentArray, iRemovedVertexArray, iRemovedSegmentArray ) )
+                {
+                    iRemovedObjectArray.push_back( path );
+                }
             }
         }
-    }
-    else
-    {
-        if( iObj->Erase( iRoi ) )
+        else
         {
-            iErasedObjectArray.push_back( iObj );
+            if( path->Erase( iRoi, iAddedVertexArray, iAddedSegmentArray, iRemovedVertexArray, iRemovedSegmentArray ) )
+            {
+                iRemovedObjectArray.push_back( path );
+            }
         }
     }
 }
 
 void
 FOdysseyVectorEngine::Erase( FOdysseyVectorScene* iScene
+                           , std::vector<FOdysseyVectorObject*>& iAddedObjectArray
+                           , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
+                           , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray
+                           , std::vector<FOdysseyVectorObject*>& iRemovedObjectArray
+                           , std::vector<FOdysseyVectorVertex*>& iRemovedVertexArray
+                           , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray
                            , ::ULIS::FRectD &iRoi
                            , bool iSelectedOnly )
 {
-    std::vector<FOdysseyVectorObject*> erasedObjectArray;
-
-    RecursiveErase( iScene, erasedObjectArray, iRoi, iSelectedOnly  );
+    RecursiveErase( iScene
+                  , iAddedObjectArray
+                  , iAddedVertexArray
+                  , iAddedSegmentArray
+                  , iRemovedObjectArray
+                  , iRemovedVertexArray
+                  , iRemovedSegmentArray
+                  , iRoi
+                  , iSelectedOnly  );
 
     // Note: this will be refactored in case a child is erased and a parent should as well be erased. We'll see.
-    for( int i = 0; i < erasedObjectArray.size(); i++ )
+    for( int i = 0; i < iRemovedObjectArray.size(); i++ )
     {
-        if( erasedObjectArray[i]->GetChildrenList().size() == 0 )
+        if( iRemovedObjectArray[i]->GetChildrenList().size() == 0 )
         {
-            erasedObjectArray[i]->GetParent()->RemoveChild( erasedObjectArray[i] );
+            iRemovedObjectArray[i]->GetParent()->RemoveChild( iRemovedObjectArray[i] );
         }
     }
 
@@ -303,19 +333,13 @@ FOdysseyVectorEngine::PickPoints( FOdysseyVectorScene* iScene
     RecursivePickPoints( iScene, iX, iY, iRadius, oPickedPointArray, iPickingFlags );
 }
 
-bool
+FOdysseyVectorVertex*
 FOdysseyVectorEngine::Knot( FOdysseyVectorVertex* iVertexA
                           , FOdysseyVectorVertex* iVertexB
-                          , FOdysseyVectorSegment** oCreatedSegment
-                          , FOdysseyVectorSegment** oRemovedSegment
+                          , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
+                          , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray
                           , bool iSmooth )
 {
-    if( oCreatedSegment )
-        *oCreatedSegment = nullptr;
-
-    if( oRemovedSegment )
-        *oRemovedSegment = nullptr;
-
     if( ( iVertexA->GetSegmentCount() == 1 )
      && ( iVertexB->GetSegmentCount() == 1 )
      && ( iVertexA->GetPath() == iVertexB->GetPath() ) )
@@ -331,53 +355,52 @@ FOdysseyVectorEngine::Knot( FOdysseyVectorVertex* iVertexA
         if( path->GetClass() == FOdysseyVectorPathCubic::StaticClass() )
         {
             FOdysseyVectorPathCubic* cubicPath = static_cast<FOdysseyVectorPathCubic*>(path);
-            FOdysseyVectorSegmentCubic* firstCubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(iVertexB->GetFirstSegment());
+            FOdysseyVectorSegmentCubic* vertexBSegment = static_cast<FOdysseyVectorSegmentCubic*>(iVertexB->GetFirstSegment());
+            FOdysseyVectorSegmentCubic* vertexASegment = static_cast<FOdysseyVectorSegmentCubic*>(iVertexA->GetFirstSegment());
+            FOdysseyVectorVertexCubic* prevVertex = static_cast<FOdysseyVectorVertexCubic*>(vertexASegment->GetOtherVertex( iVertexA ));
+            FOdysseyVectorVertexCubic* nextVertex = static_cast<FOdysseyVectorVertexCubic*>(vertexBSegment->GetOtherVertex( iVertexB ));
+            FOdysseyVectorVertexCubic* knotVertex = FOdysseyVectorVertexCubic::New( averageCoords.x, averageCoords.y, averageRadius );
+            FOdysseyVectorSegmentCubic* newCubicSegment[2] = { FOdysseyVectorSegmentCubic::New( cubicPath
+                                                                                             ,  prevVertex
+                                                                                             ,  knotVertex ),
+                                                               FOdysseyVectorSegmentCubic::New( cubicPath
+                                                                                             ,  knotVertex
+                                                                                             ,  nextVertex ) };
+            uint32 prevVertexIndex = ( iVertexA == vertexASegment->GetVertex(0) ) ? 1 : 0;
+            uint32 nextVertexIndex = ( iVertexB == vertexBSegment->GetVertex(0) ) ? 1 : 0;
 
-            if( firstCubicSegment )
+            newCubicSegment[0]->GetHandle(0)->SetCoords( vertexASegment->GetHandle(prevVertexIndex)->GetCoords() );
+            newCubicSegment[1]->GetHandle(1)->SetCoords( vertexBSegment->GetHandle(nextVertexIndex)->GetCoords() );
+
+            path->RemoveSegment( vertexASegment );
+            path->RemoveSegment( vertexBSegment );
+            path->RemoveVertex( iVertexA );
+            path->RemoveVertex( iVertexB );
+
+            oRemovedSegmentArray.push_back( vertexASegment );
+            oRemovedSegmentArray.push_back( vertexBSegment );
+
+            path->AddVertex( knotVertex );
+            path->AddSegment( newCubicSegment[0] );
+            path->AddSegment( newCubicSegment[1] );
+
+            oAddedSegmentArray.push_back( newCubicSegment[0] );
+            oAddedSegmentArray.push_back( newCubicSegment[1] );
+
+            if( iSmooth )
             {
-                FOdysseyVectorVertexCubic* cubicVertex0 = static_cast<FOdysseyVectorVertexCubic*>(firstCubicSegment->GetVertex(0));
-                uint32 knotVertexIndex = ( cubicVertex0 == iVertexB ) ? 0 : 1;
-                uint32 nextVertexIndex = ( cubicVertex0 == iVertexB ) ? 1 : 0;
-                ::ULIS::FVec2D& knotCtrlPointCoords = firstCubicSegment->GetHandle(knotVertexIndex)->GetCoords();
-                ::ULIS::FVec2D& nextCtrlPointCoords = firstCubicSegment->GetHandle(nextVertexIndex)->GetCoords();
-                FOdysseyVectorVertexCubic* knotVertex = static_cast<FOdysseyVectorVertexCubic*>(iVertexA);
-                FOdysseyVectorVertexCubic* nextVertex = static_cast<FOdysseyVectorVertexCubic*>(firstCubicSegment->GetVertex( nextVertexIndex ));
-                FOdysseyVectorSegmentCubic* newCubicSegment;
-
-                path->RemoveSegment( firstCubicSegment );
-                path->RemoveVertex( iVertexB );
-
-                knotVertex->Set( averageCoords.x, averageCoords.y );
-                knotVertex->SetRadius( averageRadius );
-
-                newCubicSegment = FOdysseyVectorSegmentCubic::New( cubicPath
-                                                                ,  knotVertex
-                                                                ,  knotCtrlPointCoords.x
-                                                                ,  knotCtrlPointCoords.y
-                                                                ,  nextCtrlPointCoords.x
-                                                                ,  nextCtrlPointCoords.y
-                                                                ,  nextVertex );
-
-                path->AddSegment( newCubicSegment );
-
-                if( iSmooth )
-                {
-                    knotVertex->SmoothSegments( false, true );
-                }
-
-                *oCreatedSegment = newCubicSegment;
-                *oRemovedSegment = firstCubicSegment;
-
-                path->InvalidateAllSegments();
-
-                return true;
+                knotVertex->SmoothSegments( false, true );
             }
-        }
 
-        path->Update( 0 );
+            path->InvalidateAllSegments();
+
+            path->Update( 0 );
+
+            return knotVertex;
+        }
     }
 
-    return false;
+    return nullptr;
 }
 
 static void

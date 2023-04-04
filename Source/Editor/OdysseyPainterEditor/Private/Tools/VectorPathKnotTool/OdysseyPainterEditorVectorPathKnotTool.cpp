@@ -31,13 +31,15 @@ UOdysseyPainterEditorVectorPathKnotTool::Activate( FOdysseyVectorEngine* iEngine
 bool
 UOdysseyPainterEditorVectorPathKnotTool::OnMouseDown( FOdysseyVectorEngine* iEngine
                                                     , FOdysseyVectorScene* iScene
+                                                    , FOdysseyVectorUndo** iUndo
                                                     , const FOdysseyPoint& iPointInTexture
                                                     , const FKey& iKey )
 {
     ::ULIS::FRectD roi = { iPointInTexture.x - Radius, iPointInTexture.y - Radius, Radius * 2, Radius * 2 };
     std::vector<FOdysseyVectorPoint*> pickedPointArray;
-    FOdysseyVectorSegment* createdSegment = nullptr;
-    FOdysseyVectorSegment* removedSegment = nullptr;
+    std::vector<FOdysseyVectorSegment*> addedSegmentArray;
+    std::vector<FOdysseyVectorSegment*> removedSegmentArray;
+    FOdysseyVectorVertex* knotVertex;
 
     pickedPointArray.reserve(500); // crashes if I don't reserve. I don't know why.
 
@@ -67,7 +69,29 @@ UOdysseyPainterEditorVectorPathKnotTool::OnMouseDown( FOdysseyVectorEngine* iEng
                 vertexA->GetPath()->Merge( vertexB->GetPath() );
             }
 
-            iEngine->Knot( vertexA, vertexB, &createdSegment, &removedSegment, true );
+            knotVertex = iEngine->Knot( vertexA, vertexB, addedSegmentArray, removedSegmentArray, true );
+
+            if( knotVertex )
+            {
+                std::vector<FOdysseyVectorVertex*> removedVertexArray;
+                std::vector<FOdysseyVectorVertex*> addedVertexArray;
+
+                addedVertexArray.push_back( knotVertex );
+                removedVertexArray.push_back( vertexA );
+                removedVertexArray.push_back( vertexB );
+
+                // BeginTransaction() must be called for GUndo to have a value. Please do it in the caller function.
+                if( iUndo && GUndo )
+                {
+                    (*iUndo) = new FOdysseyVectorUndoPathAlter( iScene
+                                                              , removedVertexArray
+                                                              , removedSegmentArray
+                                                              , addedVertexArray
+                                                              , addedSegmentArray );
+
+                    GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(*iUndo) );
+                }
+            }
 
             iScene->Update( 0 );
         }

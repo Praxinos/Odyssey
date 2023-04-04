@@ -574,7 +574,7 @@ FOdysseyVectorObject::AddChild( FOdysseyVectorObject* iChild, bool iPrepend )
 void
 FOdysseyVectorObject::RemoveChild( FOdysseyVectorObject* iChild )
 {
-    iChild->mParent = nullptr;
+    //iChild->mParent = nullptr;
 
     mChildrenList.remove(iChild);
 

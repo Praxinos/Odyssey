@@ -99,19 +99,19 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
 
         /**
          * @brief Attach to separated segments. They MUST belong to the same path. Use FOdysseyVectorPath::Merge() if necessary.
-            Note: iVertexB will be removed from the path.
+            Note: iVertexA and iVertexB  will be removed from the path.
          * @param iScene the root object
          * @param iVertexA
          * @param iVertexB
-         * @param oCreatedSegment pointer to pointer of the newly created segment.
-         * @param oRemovedSegment pointer to pointer of the removed segment.
-         * @return false if iVertexA and iVertexA belong to different paths and have more than 1 segment already, false otherwise.
+         * @param oAddedSegmentArray array of pointer to newly created segments.
+         * @param oRemovedSegmentArray array of pointer to removed segments.
+         * @return nullptr if iVertexA and iVertexA belong to different paths and have more than 1 segment already, the joint vertex otherwise.
          */
-        bool Knot( FOdysseyVectorVertex* iVertexA
-                 , FOdysseyVectorVertex* iVertexB
-                 , FOdysseyVectorSegment** oCreatedSegment
-                 , FOdysseyVectorSegment** oRemovedSegment
-                 , bool iSmooth );
+        FOdysseyVectorVertex* Knot( FOdysseyVectorVertex* iVertexA
+                                  , FOdysseyVectorVertex* iVertexB
+                                  , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
+                                  , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray
+                                  , bool iSmooth );
 
         /**
          * @brief Erase objects based on the mask image. Currently works with cubic paths only.
@@ -119,7 +119,15 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
          * @param iRoi the region of interest.
          * @param iSelectedOnly restrict erasure to selected objects only.
          */
-        void Erase( FOdysseyVectorScene* iScene, ::ULIS::FRectD &iRoi, bool iSelectedOnly );
+        void Erase( FOdysseyVectorScene* iScene
+                  , std::vector<FOdysseyVectorObject*>& iAddedObjectArray
+                  , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
+                  , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray
+                  , std::vector<FOdysseyVectorObject*>& iRemovedObjectArray
+                  , std::vector<FOdysseyVectorVertex*>& iRemovedVertexArray
+                  , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray
+                  , ::ULIS::FRectD &iRoi
+                  , bool iSelectedOnly );
 
         /**
          * @brief Invalidate a region
@@ -223,7 +231,12 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
                                  , ::ULIS::FRectD& iRoi, uint32 iSelectionFlags );
 
         static void RecursiveErase( FOdysseyVectorObject* iObj
-                                  , std::vector<FOdysseyVectorObject*>& iErasedObjectArray
+                                  , std::vector<FOdysseyVectorObject*>& iAddedObjectArray
+                                  , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
+                                  , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray
+                                  , std::vector<FOdysseyVectorObject*>& iRemovedObjectArray
+                                  , std::vector<FOdysseyVectorVertex*>& iRemovedVertexArray
+                                  , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray
                                   , ::ULIS::FRectD &iRoi
                                   , bool iSelectedOnly );
         /**
