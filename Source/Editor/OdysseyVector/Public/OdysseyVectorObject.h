@@ -172,7 +172,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         ::ULIS::FRectD GetBBox( bool iWorld );
         void MoveBack();
         void MoveFront();
-        void Invalidate();
+        virtual void Invalidate();
         FOdysseyVectorScene* GetScene();
         bool IsInvalidated();
         bool IsSelected();

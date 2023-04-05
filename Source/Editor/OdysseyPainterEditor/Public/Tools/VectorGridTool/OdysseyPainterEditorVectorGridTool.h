@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 #include "Tools/OdysseyPainterEditorTool.h"
 #include "OdysseyVector.h"
+#include "Undo/OdysseyVectorUndoPointPosition.h"
 
 #include "OdysseyPainterEditorVectorGridTool.generated.h"
 
@@ -23,7 +24,11 @@ public:
     UOdysseyPainterEditorVectorGridTool();
  
     void Activate( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    bool OnMouseDown( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture, const FKey& iKey );
+    bool OnMouseDown( FOdysseyVectorEngine* iEngine
+                    , FOdysseyVectorScene* iScene
+                    , FOdysseyVectorUndo** iUndo
+                    , const FOdysseyPoint& iPointInTexture
+                   , const FKey& iKey );
     void OnMouseDrag( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture );
     bool OnMouseUp( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture, const FKey& iKey );
     void PropertyChanged( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FName& iPropertyName );
@@ -32,6 +37,9 @@ public:
     virtual void Commit() override;
 
 private:
+    // the "undo segment reshape" object is used in both the MouseDown and MouseUp events. We need to remember it.
+    FOdysseyVectorUndoPointPosition* mUndoPointPosition;
+    std::vector<FOdysseyVectorPoint*> mPointArray;
     FOdysseyVectorHUDGrid mGridHUD;
 
 private:

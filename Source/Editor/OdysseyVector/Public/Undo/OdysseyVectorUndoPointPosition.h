@@ -6,6 +6,7 @@
 #include <Core/Core.h>
 #include <Image/Block.h>
 #include "Undo/OdysseyVectorUndo.h"
+#include "HUD/OdysseyVectorHUDGrid.h"
 #include "OdysseyVectorObject.h"
 #include "OdysseyVectorPoint.h"
 #include "OdysseyVectorHandle.h"
@@ -17,11 +18,13 @@ struct FPointPosition
 {
     FOdysseyVectorPoint* point;
     ::ULIS::FVec2D position;
+    double radius;
 
     FPointPosition( FOdysseyVectorPoint* iPoint )
     {
         point = iPoint;
         position = iPoint->GetCoords();
+        radius = iPoint->GetRadius();
 
         /*if( iPoint->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
         {
@@ -36,8 +39,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoPointPosition : public FOdysseyVectorU
         ~FOdysseyVectorUndoPointPosition();
         FOdysseyVectorUndoPointPosition( FOdysseyVectorScene* iScene );
 
-        void RecordPositionBefore( std::vector<FOdysseyVectorPoint*>& iPointArray );
-        void RecordPositionAfter( std::vector<FOdysseyVectorPoint*>& iPointArray );
+        void RecordBefore( std::vector<FOdysseyVectorPoint*>& iPointArray );
+        void RecordAfter( std::vector<FOdysseyVectorPoint*>& iPointArray );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;

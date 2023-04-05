@@ -33,13 +33,13 @@ RecordPosition( std::vector<FOdysseyVectorPoint*>& iPointArray, std::vector<FPoi
 }
 
 void
-FOdysseyVectorUndoPointPosition::RecordPositionBefore( std::vector<FOdysseyVectorPoint*>& iPointArray )
+FOdysseyVectorUndoPointPosition::RecordBefore( std::vector<FOdysseyVectorPoint*>& iPointArray )
 {
     RecordPosition( iPointArray, mPointPositionBeforeArray );
 }
 
 void
-FOdysseyVectorUndoPointPosition::RecordPositionAfter( std::vector<FOdysseyVectorPoint*>& iPointArray )
+FOdysseyVectorUndoPointPosition::RecordAfter( std::vector<FOdysseyVectorPoint*>& iPointArray )
 {
     RecordPosition( iPointArray, mPointPositionAfterArray );
 }

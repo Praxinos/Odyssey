@@ -50,10 +50,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUDGrid : public FOdysseyVectorHUDSelectio
         void StartSelectionRectangle( double iWorldX, double iWorldY );
         void DragSelectionRectangle( double iWorldX, double iWorldY );
         void EndSelectionRectangle( std::vector<FGridNode*>& oNodeArray );
+        void Export( std::vector<FOdysseyVectorPoint*>& oPointArray );
 
     protected:
         void MapPoint( FOdysseyVectorObject* iDeformedObject, FOdysseyVectorPoint* iPoint, double iSpaceX, double iSpaceY );
-        void MapObject( FOdysseyVectorObject* iObject );
+        uint32 MapObject( FOdysseyVectorObject* iObject );
         void MakeNodes( uint32 iCellCountX, uint32 iCellCountY );
         void MakeCells( uint32 iCellCountX, uint32 iCellCountY );
         void Map( FOdysseyVectorScene* iScene );
@@ -72,4 +73,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUDGrid : public FOdysseyVectorHUDSelectio
         uint32 mNodeCountY;
         double mCellSizeX;
         double mCellSizeY;
+        uint32 mPointCount;
 };

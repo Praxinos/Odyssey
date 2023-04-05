@@ -151,7 +151,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDown( FOdysseyVectorEngine* iEng
     {
         mUndoPointPosition = new FOdysseyVectorUndoPointPosition( iScene );
 
-        mUndoPointPosition->RecordPositionBefore( mPickedPointArray );
+        mUndoPointPosition->RecordBefore( mPickedPointArray );
 
         (*iUndo) = mUndoPointPosition;
 
@@ -291,7 +291,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseUp( FOdysseyVectorEngine* iEngin
 {
     if( mUndoPointPosition )
     {
-        mUndoPointPosition->RecordPositionAfter( mPickedPointArray );
+        mUndoPointPosition->RecordAfter( mPickedPointArray );
     }
 
     iScene->Update( 0 );

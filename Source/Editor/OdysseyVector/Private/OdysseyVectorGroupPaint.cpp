@@ -146,6 +146,16 @@ FOdysseyVectorGroupPaint::OnChildRemove( FOdysseyVectorObject* iChild )
     Invalidate();
 }
 
+void
+FOdysseyVectorGroupPaint::Invalidate()
+{
+    std::list<FOdysseyVectorSegment*> cubicSegmenList;
+
+    FOdysseyVectorObject::Invalidate();
+
+    //Clear( cubicSegmenList );
+}
+
 FOdysseyVectorBucket*
 FOdysseyVectorGroupPaint::Bucket( double iX, double iY, uint8 iR, uint8 iG, uint8 iB, uint8 iA )
 {
@@ -523,21 +533,24 @@ FOdysseyVectorGroupPaint::FindCycles()
 void
 FOdysseyVectorGroupPaint::BuildGraph()
 {
-    std::list<FOdysseyVectorSegment*> cubicSegmenList;
+    std::list<FOdysseyVectorSegment*> segmentList;
     FOdysseyVectorSegmentCubic *cubicSegment;
 
-    Clear( cubicSegmenList );
+    Clear();
 
-    cubicSegment = cubicSegmenList.size() ? static_cast<FOdysseyVectorSegmentCubic*>( cubicSegmenList.back() ) : nullptr;
+    segmentList = mSegmentList;
+
+
+    cubicSegment = segmentList.size() ? static_cast<FOdysseyVectorSegmentCubic*>( segmentList.back() ) : nullptr;
 
     while( cubicSegment )
     {
-        IntersectSegment ( cubicSegment, cubicSegmenList, mIntersectionVertexArray );
+        IntersectSegment ( cubicSegment, segmentList, mIntersectionVertexArray );
 
         // remove segment from list as they are tested
-        cubicSegmenList.pop_back();
+        segmentList.pop_back();
 
-        cubicSegment = cubicSegmenList.size() ? static_cast<FOdysseyVectorSegmentCubic*>( cubicSegmenList.back() ) : nullptr;
+        cubicSegment = segmentList.size() ? static_cast<FOdysseyVectorSegmentCubic*>( segmentList.back() ) : nullptr;
     }
 }
 
@@ -577,39 +590,51 @@ FOdysseyVectorGroupPaint::OrderCycles()
 }
 
 void
-FOdysseyVectorGroupPaint::Clear( std::list<FOdysseyVectorSegment*>& cubicSegmenList )
+FOdysseyVectorGroupPaint::Clear()
 {
     bool bboxInit = false;
+
+    for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
+    {
+        FOdysseyVectorSegment *segment = (*it);
+
+        segment->ClearIntersections();
+    }
+/*
+    for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmenList.begin(); it != mSegmenList.end(); ++it )
+    {
+        FOdysseyVectorSegment *segment = (*it);
+
+UE_LOG(LogTemp, Warning, TEXT("%d %d %d"), segment->GetVertex(0)->GetSectionList().size()
+                                         , segment->GetVertex(1)->GetSectionList().size()
+                                         , segment->GetSectionList().size() );
+    }
+*/
+    mSegmentList.clear();
 
     for( std::list<FOdysseyVectorObject*>::iterator oit = mChildrenList.begin(); oit != mChildrenList.end(); ++oit )
     {
         FOdysseyVectorObject *child = (*oit);
 
-        if( child->HasBaseClass( FOdysseyVectorPathCubic::StaticClass() ) )
+        if( child->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
         {
-            FOdysseyVectorPathCubic* cubicPath = static_cast<FOdysseyVectorPathCubic*>(child);
-            std::list<FOdysseyVectorSegment*>& segmentList = cubicPath->GetSegmentList();
-            std::list<FOdysseyVectorVertex*>& vertexList = cubicPath->GetVertexList();
+            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(child);
+            std::list<FOdysseyVectorSegment*>& pathSegmentList = path->GetSegmentList();
+            //std::list<FOdysseyVectorVertex*>& pathVertexList = path->GetVertexList();
 
-            mBBox = ( bboxInit == false ) ? cubicPath->GetBBox( false ) : mBBox | cubicPath->GetBBox( false );
+            mBBox = ( bboxInit == false ) ? path->GetBBox( false ) : mBBox | path->GetBBox( false );
 
             bboxInit = true;
 
-            for( std::list<FOdysseyVectorSegment*>::iterator sit = segmentList.begin(); sit != segmentList.end(); ++sit )
+            for( std::list<FOdysseyVectorSegment*>::iterator sit = pathSegmentList.begin(); sit != pathSegmentList.end(); ++sit )
             {
-                FOdysseyVectorSegmentCubic *cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(*sit);
+                FOdysseyVectorSegment *segment = static_cast<FOdysseyVectorSegment*>(*sit);
 
-                cubicSegment->ClearIntersections();
+                segment->AddSection ( new FOdysseyVectorSection ( segment
+                                                                , segment->GetVertex(0)
+                                                                , segment->GetVertex(1) ) );
 
-                cubicSegmenList.push_back( cubicSegment );
-            }
-
-            // add default intersection
-            for( std::list<FOdysseyVectorSegment*>::iterator sit = segmentList.begin(); sit != segmentList.end(); ++sit )
-            {
-                FOdysseyVectorSegmentCubic *cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(*sit);
-
-                cubicSegment->AddSection ( new FOdysseyVectorSection ( cubicSegment, cubicSegment->GetVertex(0), cubicSegment->GetVertex(1) ) );
+                mSegmentList.push_back( segment );
             }
         }
     }

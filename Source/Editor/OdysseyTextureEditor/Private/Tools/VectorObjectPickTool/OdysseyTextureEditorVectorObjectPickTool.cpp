@@ -16,6 +16,13 @@ UOdysseyTextureEditorVectorObjectPickTool::UOdysseyTextureEditorVectorObjectPick
 {
 }
 
+// refresh on Undo for example (we need to reset the selection box as if the tool was activated)
+void
+UOdysseyTextureEditorVectorObjectPickTool::OnRefresh( FOdysseyVectorScene* iScene )
+{
+    Activate();
+}
+
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
@@ -140,18 +147,32 @@ UOdysseyTextureEditorVectorObjectPickTool::OnMouseUp( const FOdysseyPoint& iPoin
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
     bool ret = false;
 
+    // needed for undos
+    GEditor->BeginTransaction(LOCTEXT("ObjectPickTool", "Pick object"));
+
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+        FOdysseyVectorUndo* undo = nullptr;
 
-        ret = UOdysseyPainterEditorVectorObjectPickTool::OnMouseUp( vectorEngine, vectorScene, iPointInTexture, iKey );
+        ret = UOdysseyPainterEditorVectorObjectPickTool::OnMouseUp( vectorEngine, vectorScene, &undo, iPointInTexture, iKey );
+
+        if( undo )
+        {
+            // All the delegates for undos are added here for easier maintainability
+            undo->mRefreshDelegate.AddRaw( vectorObjectTab.Get(), &FOdysseyPainterEditorSelectedVectorObjectTab::OnRefresh );
+            undo->mRefreshDelegate.AddUObject( currentVectorLayer, &UOdysseyTextureLayerImageVector::OnRefresh );
+            undo->mRefreshDelegate.AddUObject( this, &UOdysseyTextureEditorVectorObjectPickTool::OnRefresh );
+        }
 
         currentVectorLayer->RenderImageChanged(false);
 
         // Update the VectorObjectTab widget
         vectorObjectTab.Get()->Update( vectorScene );
     }
+
+    GEditor->EndTransaction();
 
     return ret;
 }
