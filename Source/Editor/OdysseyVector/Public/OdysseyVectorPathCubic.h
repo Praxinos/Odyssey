@@ -41,7 +41,13 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathCubic: public FOdysseyVectorPath
                       , uint64 iSelectionFlags );
         void Unselect( FOdysseyVectorVertex* iPoint );
         void Fill( ::ULIS::FRectD& iRoi );
-        void Merge( FOdysseyVectorPath* iPath );
+        void Merge( FOdysseyVectorPath* iPath
+                  , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
+                  , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray );
+        void Merge( FOdysseyVectorPath* iMergedPath
+                  , std::vector<FOdysseyVectorVertex*>& iVertexLookup
+                  , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
+                  , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray );
         void DrawShapeVariable( ::ULIS::FRectD& iRoi, uint64 iFlags );
 
         void Mirror( bool iMirrorX, bool iMirrorY );

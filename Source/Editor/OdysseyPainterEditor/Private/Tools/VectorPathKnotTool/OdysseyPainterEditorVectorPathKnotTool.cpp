@@ -37,8 +37,12 @@ UOdysseyPainterEditorVectorPathKnotTool::OnMouseDown( FOdysseyVectorEngine* iEng
 {
     ::ULIS::FRectD roi = { iPointInTexture.x - Radius, iPointInTexture.y - Radius, Radius * 2, Radius * 2 };
     std::vector<FOdysseyVectorPoint*> pickedPointArray;
+    std::vector<FOdysseyVectorVertex*> mergedVertexArray;
+    std::vector<FOdysseyVectorSegment*> mergedSegmentArray;
+    std::vector<FOdysseyVectorVertex*> addedVertexArray;
     std::vector<FOdysseyVectorSegment*> addedSegmentArray;
     std::vector<FOdysseyVectorSegment*> removedSegmentArray;
+    std::vector<FOdysseyVectorVertex*> removedVertexArray;
     FOdysseyVectorVertex* knotVertex;
 
     pickedPointArray.reserve(500); // crashes if I don't reserve. I don't know why.
@@ -54,28 +58,30 @@ UOdysseyPainterEditorVectorPathKnotTool::OnMouseDown( FOdysseyVectorEngine* iEng
     {
         FOdysseyVectorVertex* vertexA = static_cast<FOdysseyVectorVertex*>( pickedPointArray[0] );
         FOdysseyVectorVertex* vertexB = static_cast<FOdysseyVectorVertex*>( pickedPointArray[1] );
+        FOdysseyVectorPath* mergedPath = nullptr;
 
         if( ( vertexA->GetSegmentCount() == 1 ) && ( vertexB->GetSegmentCount() == 1 ) )
         {
             if( vertexA->GetPath() != vertexB->GetPath() )
             {
+                std::vector<FOdysseyVectorVertex*> vertexLookup;
 /*
                 FOdysseyVectorPath* newPath = static_cast<FOdysseyVectorPath*>( vertexB->GetPath()->Copy() );
 */
 
                 // TODO: remove vertexB->GetPath() from selected objects.
-                vertexB->GetPath()->GetParent()->RemoveChild( vertexB->GetPath() );
+                mergedPath = vertexB->GetPath();
 
-                vertexA->GetPath()->Merge( vertexB->GetPath() );
+                vertexB->GetPath()->GetParent()->RemoveChild( mergedPath );
+                vertexA->GetPath()->Merge( mergedPath, vertexLookup, mergedVertexArray, mergedSegmentArray );
+                // update the pointer with the newly created vertex's. Note, Merge alters the original vertex's ID.
+                vertexB = vertexLookup[vertexB->GetID()];
             }
 
             knotVertex = iEngine->Knot( vertexA, vertexB, addedSegmentArray, removedSegmentArray, true );
 
             if( knotVertex )
             {
-                std::vector<FOdysseyVectorVertex*> removedVertexArray;
-                std::vector<FOdysseyVectorVertex*> addedVertexArray;
-
                 addedVertexArray.push_back( knotVertex );
                 removedVertexArray.push_back( vertexA );
                 removedVertexArray.push_back( vertexB );
@@ -83,11 +89,15 @@ UOdysseyPainterEditorVectorPathKnotTool::OnMouseDown( FOdysseyVectorEngine* iEng
                 // BeginTransaction() must be called for GUndo to have a value. Please do it in the caller function.
                 if( iUndo && GUndo )
                 {
-                    (*iUndo) = new FOdysseyVectorUndoPathAlter( iScene
-                                                              , removedVertexArray
-                                                              , removedSegmentArray
-                                                              , addedVertexArray
-                                                              , addedSegmentArray );
+                    (*iUndo) = new FOdysseyVectorUndoKnot( iScene
+                                                         , vertexA->GetPath()
+                                                         , removedVertexArray
+                                                         , removedSegmentArray
+                                                         , addedVertexArray
+                                                         , addedSegmentArray
+                                                         , mergedPath
+                                                         , mergedVertexArray
+                                                         , mergedSegmentArray );
 
                     GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(*iUndo) );
                 }

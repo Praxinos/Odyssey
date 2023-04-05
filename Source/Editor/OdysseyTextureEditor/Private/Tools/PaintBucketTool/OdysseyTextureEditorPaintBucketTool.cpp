@@ -120,6 +120,9 @@ UOdysseyTextureEditorPaintBucketTool::OnMouseDown( const FOdysseyPoint& iPointIn
     UOdysseyTextureLayerImageRaster* currentRasterLayer = Cast<UOdysseyTextureLayerImageRaster>(layerStack->CurrentLayer.Get());
     bool ret = false;
 
+    // needed for undos
+    GEditor->BeginTransaction(LOCTEXT("PaintBucketTool", "Bucket Tool"));
+
     if( currentRasterLayer )
     {
         ret = UOdysseyPainterEditorPaintBucketTool::OnMouseDown( currentRasterLayer->GetRasterBlock()->GetBlock(), iPointInTexture, iKey );
@@ -132,6 +135,8 @@ UOdysseyTextureEditorPaintBucketTool::OnMouseDown( const FOdysseyPoint& iPointIn
 
         ret = UOdysseyPainterEditorPaintBucketTool::OnMouseDown( vectorEngine, vectorScene, iPointInTexture, iKey );
     }
+
+    GEditor->EndTransaction();
 
     return ret;
 }
