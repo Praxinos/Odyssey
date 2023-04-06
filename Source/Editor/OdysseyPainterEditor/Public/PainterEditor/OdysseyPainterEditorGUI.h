@@ -16,6 +16,8 @@
 #include "OdysseyPainterEditorSelectedVectorObjectTab.h"
 #include "OdysseyPainterEditorViewportTab.h"
 
+#include "Undo/OdysseyVectorUndo.h"
+
 class FOdysseyPainterEditor;
 class FOdysseyPainterEditorController;
 
@@ -73,6 +75,8 @@ protected:
     virtual void GetBrushPack();
     virtual void Discord();
     virtual void SwitchTabletAPI();
+    void Group( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, FOdysseyVectorUndo** iUndo );
+    void ResetView( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, FOdysseyVectorUndo** iUndo );
 
 private:
     FOdysseyPainterEditor*                          mEditor;

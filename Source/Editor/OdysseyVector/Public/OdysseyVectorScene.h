@@ -36,7 +36,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorScene : public FOdysseyVectorGroup
 
     protected:
         std::list<FOdysseyVectorObject*> mSelectedObjectList;
-        std::list<FOdysseyVectorObject*> mInvalidatedObjectList;
 
     public:
         virtual ~FOdysseyVectorScene();

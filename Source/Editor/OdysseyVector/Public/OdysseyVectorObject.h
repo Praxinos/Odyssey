@@ -75,6 +75,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         BLMatrix2D mWorldMatrix;
         BLMatrix2D mInverseWorldMatrix;
         std::list<FOdysseyVectorObject*> mChildrenList;
+        std::list<FOdysseyVectorObject*> mInvalidatedChildrenList;
         FOdysseyVectorObject* mParent;
         bool mIsSelected;
         bool mIsInvalidated;

@@ -159,25 +159,8 @@ FOdysseyVectorScene::DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags )
 }
 
 void
-FOdysseyVectorScene::InvalidateObject( FOdysseyVectorObject* iObject )
-{
-    mInvalidatedObjectList.push_back( iObject );
-}
-
-void
 FOdysseyVectorScene::UpdateShape( uint32 iUpdateFlags )
 {
-    for( std::list<FOdysseyVectorObject*>::iterator it = mInvalidatedObjectList.begin(); it != mInvalidatedObjectList.end(); ++it )
-    {
-        FOdysseyVectorObject *obj = (*it);
-
-        obj->Update( iUpdateFlags );
-    }
-
-    if( ( iUpdateFlags & FOdysseyVectorObject::KEEPINVALIDATED ) == 0 )
-    {
-        mInvalidatedObjectList.clear();
-    }
 }
 
 FOdysseyVectorObject*

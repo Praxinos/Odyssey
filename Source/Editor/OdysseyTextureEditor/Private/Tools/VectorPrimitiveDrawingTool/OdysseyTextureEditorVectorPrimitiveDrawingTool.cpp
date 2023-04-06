@@ -165,6 +165,9 @@ UOdysseyTextureEditorVectorPrimitiveDrawingTool::OnMouseUp( const FOdysseyPoint&
         }
 
         currentVectorLayer->RenderImageChanged(false);
+
+        // Update the VectorObjectTab widget
+        vectorObjectTab.Get()->Update( vectorScene );
     }
 
     GEditor->EndTransaction();

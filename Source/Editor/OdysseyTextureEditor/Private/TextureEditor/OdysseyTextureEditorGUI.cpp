@@ -74,7 +74,6 @@ FOdysseyTextureEditorGUI::BindShortcuts(FBaseToolkit* iToolkit)
     MAP_ACTION(textureEditorCommands.Ungroup, Ungroup )
     MAP_ACTION(textureEditorCommands.BringForward, BringForward )
     MAP_ACTION(textureEditorCommands.SendBackward, SendBackward )
-    MAP_ACTION(textureEditorCommands.ConvertToPath, ConvertToPath )
     MAP_ACTION(textureEditorCommands.RemoveSelectedObjects, RemoveSelectedObjects )
 
     #undef MAP_ACTION
@@ -132,12 +131,6 @@ FOdysseyTextureEditorGUI::ExtendMenuAbout( FToolMenuOwner iOwner, FName iMenuNam
             , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
             , NAME_None );
         aboutSection.AddMenuEntry(
-            FOdysseyTextureEditorCommands::Get().ConvertToPath
-            , LOCTEXT("ConvertToPath", "Convert to path")
-            , LOCTEXT("ConvertToPath", "Convert to path")
-            , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
-            , NAME_None );
-        aboutSection.AddMenuEntry(
             FOdysseyTextureEditorCommands::Get().RemoveSelectedObjects
             ,LOCTEXT("RemoveSelectedObjects","RemoveSelectedObjects")
             ,LOCTEXT("RemoveSelectedObjects","RemoveSelectedObjects")
@@ -183,49 +176,6 @@ FOdysseyTextureEditorGUI::RemoveSelectedObjects()
             currentVectorLayer->GetScene()->Update( 0 );
 
             currentVectorLayer->RenderImageChanged( false );
-        }
-    }
-}
-
-void
-FOdysseyTextureEditorGUI::ConvertToPath()
-{
-    TSharedPtr<FOdysseyPainterEditorSelectedVectorObjectTab>& vectorObjectTab = mEditor->GetGUI()->GetSelectedVectorObjectTab();
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(static_cast<FOdysseyTextureEditor*>(mEditor)->LayerStack());
-    UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
-
-    if( currentLayer )
-    {
-        if( currentLayer->GetClass() == UOdysseyTextureLayerImageVector::StaticClass() )
-        {
-            UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
-            FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-            FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
-            // work on a copy to be able to remove the object from selection while iterating
-            std::list<FOdysseyVectorObject*> selectedObjectList = vectorScene->GetSelectedObjectList();
-
-            for( std::list<FOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
-            {
-                FOdysseyVectorObject* object = (*it);
-                FOdysseyVectorEllipse* circle = static_cast<FOdysseyVectorEllipse*>(object);
-
-                if( circle )
-                {
-                    FOdysseyVectorPathCubic* cubicPath = circle->Convert();
-
-                    vectorScene->Unselect( circle );
-                    vectorScene->RemoveChild( circle );
-                    vectorScene->AppendChild( cubicPath );
-                    vectorScene->Select( cubicPath );
-
-                    cubicPath->UpdateMatrix();
-                    cubicPath->Invalidate();
-                }
-            }
-
-            vectorScene->Update( 0 );
-
-            vectorObjectTab.Get()->Update( vectorScene );
         }
     }
 }
@@ -333,13 +283,28 @@ FOdysseyTextureEditorGUI::ResetView()
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(static_cast<FOdysseyTextureEditor*>(mEditor)->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
 
+    // needed for undos
+    GEditor->BeginTransaction(LOCTEXT("ResetView", "Reset View"));
+
     if( currentVectorLayer )
     {
-        currentVectorLayer->GetScene()->ResetTransform();
-        currentVectorLayer->GetScene()->UpdateMatrix();
+        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+        FOdysseyVectorUndo* undo = nullptr;
+
+        FOdysseyPainterEditorGUI::ResetView( vectorEngine, vectorScene, &undo );
+
+        if( undo && GUndo )
+        {
+            GUndo->StoreUndo( currentVectorLayer, TUniquePtr<FOdysseyVectorUndo>(undo) );
+            // All the delegates for undos are added here for easier maintainability
+            undo->mRefreshDelegate.AddUObject( currentVectorLayer, &UOdysseyTextureLayerImageVector::OnRefresh );
+        }
 
         currentVectorLayer->RenderImageChanged( false );
     }
+
+    GEditor->EndTransaction();
 }
 
 void
@@ -349,18 +314,31 @@ FOdysseyTextureEditorGUI::Group()
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(static_cast<FOdysseyTextureEditor*>(mEditor)->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
 
+    // needed for undos
+    GEditor->BeginTransaction(LOCTEXT("Group", "Group"));
+
     if( currentVectorLayer )
     {
+        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
-        FOdysseyVectorGroup* group = vectorScene->GroupSelectedObjects();
+        FOdysseyVectorUndo* undo = nullptr;
 
-        vectorScene->ClearSelection();
-        vectorScene->Select( group );
+        FOdysseyPainterEditorGUI::Group( vectorEngine, vectorScene, &undo );
+
+        if( undo && GUndo )
+        {
+            GUndo->StoreUndo( currentVectorLayer, TUniquePtr<FOdysseyVectorUndo>(undo) );
+            // All the delegates for undos are added here for easier maintainability
+            undo->mRefreshDelegate.AddRaw( vectorObjectTab.Get(), &FOdysseyPainterEditorSelectedVectorObjectTab::OnRefresh );
+            undo->mRefreshDelegate.AddUObject( currentVectorLayer, &UOdysseyTextureLayerImageVector::OnRefresh );
+        }
 
         currentVectorLayer->RenderImageChanged( false );
 
         vectorObjectTab.Get()->Update( vectorScene );
     }
+
+    GEditor->EndTransaction();
 }
 
 void

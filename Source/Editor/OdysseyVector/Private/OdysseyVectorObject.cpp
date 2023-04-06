@@ -57,6 +57,15 @@ FOdysseyVectorObject::HasBaseClass( uint32 iBaseClassID )
 void
 FOdysseyVectorObject::Update( uint32 iUpdateFlags )
 {
+    // update children first by recursively calling the Update function and, if needed,
+    // removing the object from the invalidated object list, in the same call.
+    mInvalidatedChildrenList.remove_if( [iUpdateFlags] ( FOdysseyVectorObject* child )
+                                        {
+                                            child->Update( iUpdateFlags );
+
+                                            return child->IsInvalidated() == false;
+                                        } );
+
     UpdateShape( iUpdateFlags );
 
     if( ( iUpdateFlags & FOdysseyVectorObject::KEEPINVALIDATED ) == 0 )
@@ -369,26 +378,16 @@ FOdysseyVectorObject::Invalidate()
 {
     if ( mIsInvalidated == false )
     {
-        FOdysseyVectorObject* obj = GetScene();
-
-        if ( obj && ( obj != this ) )
+        if ( mParent )
         {
-            if ( obj->GetClass() == FOdysseyVectorScene::StaticClass() )
-            {
-                FOdysseyVectorScene* root = static_cast<FOdysseyVectorScene*>(obj);
+            mParent->mInvalidatedChildrenList.push_back( this );
 
-                root->InvalidateObject( this );
-
-                mIsInvalidated = true;
-            }
-        }
-    }
-
-    if( mParent )
-    {
-        if( mParent->mDependsOnChildren == true )
-        {
             mParent->Invalidate();
+
+            // MUST have a parent to be declared as invalidated otherwise mIsInvalidated could be set
+            // even if the object has no parent because of bottom-to-top the recursive calls
+            // to Invalidate() from FOdysseyVectorVertex::Set() and then we would never reenter this "if" statement
+            mIsInvalidated = true;
         }
     }
 }

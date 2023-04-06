@@ -10,6 +10,8 @@
 #include "Models/OdysseyPainterEditorCommands.h"
 
 #include "OdysseyVector.h"
+#include "Undo/OdysseyVectorUndoGroup.h"
+#include "Undo/OdysseyVectorUndoObjectTransform.h"
 
 #include "ToolMenus.h"
 
@@ -395,6 +397,47 @@ void
 FOdysseyPainterEditorGUI::SwitchTabletAPI()
 {
     SOdysseyTabletAPISwitcher::Open();
+}
+
+void
+FOdysseyPainterEditorGUI::Group( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, FOdysseyVectorUndo** iUndo )
+{
+    FOdysseyVectorUndoGroup* undoGroup = iUndo ? new FOdysseyVectorUndoGroup( iScene, false ) : nullptr;
+    FOdysseyVectorGroup* group;
+
+    *iUndo = undoGroup;
+
+    if( undoGroup )
+    {
+        undoGroup->RecordBefore( iScene->GetSelectedObjectList() );
+    }
+
+    group = iScene->GroupSelectedObjects();
+
+    iScene->ClearSelection();
+    iScene->Select( group );
+
+    if( undoGroup )
+    {
+        undoGroup->RecordAfter( group );
+    }
+}
+
+void
+FOdysseyPainterEditorGUI::ResetView( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, FOdysseyVectorUndo** iUndo )
+{
+    FOdysseyVectorUndoObjectTransform* undoObjectTransform = iUndo ? new FOdysseyVectorUndoObjectTransform( iScene ) : nullptr;
+
+    *iUndo = undoObjectTransform;
+
+    if( undoObjectTransform )
+        undoObjectTransform->RecordTransformBefore( iScene );
+
+    iScene->ResetTransform();
+    iScene->UpdateMatrix();
+
+    if( undoObjectTransform )
+        undoObjectTransform->RecordTransformAfter( iScene );
 }
 
 #undef LOCTEXT_NAMESPACE
