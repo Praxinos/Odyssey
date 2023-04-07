@@ -8,6 +8,7 @@
 #include <Image/Block.h>
 #include "OdysseyVectorObject.h"
 #include "OdysseyVectorGroup.h"
+#include "OdysseyVectorGroupPaint.h"
 
 //#include "OdysseyVectorScene.generated.h"
 
@@ -52,7 +53,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorScene : public FOdysseyVectorGroup
         void InvalidateObject( FOdysseyVectorObject* iObject );
         void RemoveSelectedObjects();
 
-        FOdysseyVectorGroup* GroupSelectedObjects();
+        FOdysseyVectorGroup* GroupSelectedObjects( std::vector<FOdysseyVectorObject*>& oObjectArray
+                                                 , std::vector<FOdysseyVectorObject*>& oObjectOldParentArray );
+        FOdysseyVectorGroupPaint* MakePaintGroupFromSelectedObjects( std::vector<FOdysseyVectorObject*>& oCubicPathArray
+                                                                   , std::vector<FOdysseyVectorObject*>& oCubicPathOldParentArray
+                                                                   , std::vector<FOdysseyVectorObject*>& oRemovedPaintGroupArray );
         uint32 GetType();
 
         void SetEngine( FOdysseyVectorEngine* iEngine );

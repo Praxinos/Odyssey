@@ -7,27 +7,20 @@
 #include <Image/Block.h>
 #include "Undo/OdysseyVectorUndo.h"
 
-struct FGroupRecord
-{
-    FOdysseyVectorObject *object;
-    FOdysseyVectorObject *parent;
-
-    FGroupRecord( FOdysseyVectorObject *iObject )
-    {
-        object = iObject;
-        parent = iObject->GetParent();
-    }
-};
-
 class ODYSSEYVECTOR_API FOdysseyVectorUndoGroup : public FOdysseyVectorUndo
 {
     public:
         ~FOdysseyVectorUndoGroup();
-        FOdysseyVectorUndoGroup( FOdysseyVectorScene* iScene, bool iSwitchSpace );
+        FOdysseyVectorUndoGroup( FOdysseyVectorScene* iScene
+                               , FOdysseyVectorGroup* iAddedGroup
+                               , std::vector<FOdysseyVectorObject*>& iAddedObjectArray
+                               , std::vector<FOdysseyVectorObject*>& iAddedObjectOldParentArray
+                               , std::vector<FOdysseyVectorObject*>& iRemovedObjectArray );
 
-        void RecordBefore( std::list<FOdysseyVectorObject*>& iGroupedObjectList );
-        void RecordAfter( FOdysseyVectorGroup* iAddedGroup, std::vector<FOdysseyVectorGroup*>& iRemovedGroupArray );
-        void RecordAfter( FOdysseyVectorGroup* iAddedGroup );
+        FOdysseyVectorUndoGroup( FOdysseyVectorScene* iScene
+                               , FOdysseyVectorGroup* iAddedGroup
+                               , std::vector<FOdysseyVectorObject*>& iAddedObjectArray
+                               , std::vector<FOdysseyVectorObject*>& iAddedObjectOldParentArray );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;
@@ -39,9 +32,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoGroup : public FOdysseyVectorUndo
         virtual FString ToString() const override;
 
     private:
-        std::vector<FOdysseyVectorGroup*> mRemovedGroupArray;
-        std::vector<FGroupRecord> mGroupRecordArray;
+        std::vector<FOdysseyVectorObject*> mRemovedObjectArray;
+        std::vector<FOdysseyVectorObject*> mAddedObjectOldParentArray;
+        std::vector<FOdysseyVectorObject*> mAddedObjectArray;
         FOdysseyVectorGroup* mAddedGroup;
         FOdysseyVectorScene* mScene;
-        bool mSwitchSpace;
 };

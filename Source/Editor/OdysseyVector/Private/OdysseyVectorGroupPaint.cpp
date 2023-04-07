@@ -122,6 +122,7 @@ FOdysseyVectorGroupPaint::OnChildTransform( FOdysseyVectorObject* iChild )
     //iChild->SwitchSpace( *this );
 }
 
+// TODO: simply overload AddChild()
 void
 FOdysseyVectorGroupPaint::OnChildAdd( FOdysseyVectorObject* iChild )
 {
@@ -140,6 +141,7 @@ FOdysseyVectorGroupPaint::OnChildAdd( FOdysseyVectorObject* iChild )
     Invalidate();
 }
 
+// TODO: simply overload RemoveChild()
 void
 FOdysseyVectorGroupPaint::OnChildRemove( FOdysseyVectorObject* iChild )
 {
