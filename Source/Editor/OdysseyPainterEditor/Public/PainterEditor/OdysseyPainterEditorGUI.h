@@ -79,6 +79,7 @@ protected:
     void ResetView( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, FOdysseyVectorUndo** iUndo );
     void RemoveSelectedObjects( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, FOdysseyVectorUndo** iUndo );
     void GroupPaint( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, FOdysseyVectorUndo** iUndo );
+    void Ungroup( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, FOdysseyVectorUndo** iUndo );
 
 private:
     FOdysseyPainterEditor*                          mEditor;

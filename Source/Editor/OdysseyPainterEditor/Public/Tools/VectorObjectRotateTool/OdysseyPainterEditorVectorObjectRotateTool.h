@@ -41,8 +41,6 @@ protected:
     void FitHUD( FOdysseyVectorScene* iScene );
 
 private:
-    // the "undo transform" object is used in both the MouseDown and MouseUp events. We need to remember it.
-    FOdysseyVectorUndoObjectTransform* mUndoObjectTransform;
     FOdysseyVectorHUDRotate *mTransformHUD;
     ::ULIS::FVec2D* mPickedPivot;
 

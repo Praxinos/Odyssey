@@ -11,6 +11,7 @@
 
 #include "OdysseyVector.h"
 #include "Undo/OdysseyVectorUndoGroup.h"
+#include "Undo/OdysseyVectorUndoUngroup.h"
 #include "Undo/OdysseyVectorUndoObjectTransform.h"
 #include "Undo/OdysseyVectorUndoSceneRemoveSelection.h"
 
@@ -401,6 +402,37 @@ FOdysseyPainterEditorGUI::SwitchTabletAPI()
 }
 
 void
+FOdysseyPainterEditorGUI::Ungroup( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, FOdysseyVectorUndo** iUndo )
+{
+    FOdysseyVectorObject* selectedObject = iScene->GetLastSelected();
+
+    if( selectedObject )
+    {
+        if( selectedObject->HasBaseClass( FOdysseyVectorGroup::StaticClass() ) )
+        {
+            FOdysseyVectorGroup* group = static_cast<FOdysseyVectorGroup*>( selectedObject );
+            // we work on a copy of the list to be able to delete children while iterating
+            std::list<FOdysseyVectorObject*> childrenList = group->GetChildrenList();
+
+            (*iUndo) = new FOdysseyVectorUndoUngroup( iScene, group );
+
+            for( std::list<FOdysseyVectorObject*>::iterator it = childrenList.begin(); it != childrenList.end(); ++it )
+            {
+                FOdysseyVectorObject* child = (*it);
+
+                group->GetParent()->TransferChild( child );
+            }
+
+            group->GetParent()->RemoveChild( group );
+
+            iScene->ClearSelection();
+            iScene->UpdateMatrix();
+            iScene->Update( 0 );
+        }
+    }
+}
+
+void
 FOdysseyPainterEditorGUI::GroupPaint( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, FOdysseyVectorUndo** iUndo )
 {
     std::vector<FOdysseyVectorObject*> cubicPathArray;
@@ -443,23 +475,16 @@ FOdysseyPainterEditorGUI::Group( FOdysseyVectorEngine* iEngine, FOdysseyVectorSc
 void
 FOdysseyPainterEditorGUI::ResetView( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, FOdysseyVectorUndo** iUndo )
 {
-    FOdysseyVectorUndoObjectTransform* undoObjectTransform = new FOdysseyVectorUndoObjectTransform( iScene );
-
-    *iUndo = undoObjectTransform;
-    undoObjectTransform->RecordTransformBefore( iScene );
+    (*iUndo) = new FOdysseyVectorUndoObjectTransform( iScene, iScene );
 
     iScene->ResetTransform();
     iScene->UpdateMatrix();
-
-    undoObjectTransform->RecordTransformAfter( iScene );
 }
 
 void
 FOdysseyPainterEditorGUI::RemoveSelectedObjects( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, FOdysseyVectorUndo** iUndo )
 {
-    FOdysseyVectorUndoSceneRemoveSelection* undoSceneRemoveSelection = new FOdysseyVectorUndoSceneRemoveSelection( iScene );
-
-    *iUndo = undoSceneRemoveSelection;
+    (*iUndo) = new FOdysseyVectorUndoSceneRemoveSelection( iScene );
 
     iScene->RemoveSelectedObjects();
     iScene->Update( 0 );

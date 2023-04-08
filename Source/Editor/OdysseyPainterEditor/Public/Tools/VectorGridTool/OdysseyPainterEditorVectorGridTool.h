@@ -37,8 +37,6 @@ public:
     virtual void Commit() override;
 
 private:
-    // the "undo segment reshape" object is used in both the MouseDown and MouseUp events. We need to remember it.
-    FOdysseyVectorUndoPointPosition* mUndoPointPosition;
     std::vector<FOdysseyVectorPoint*> mPointArray;
     FOdysseyVectorHUDGrid mGridHUD;
 

@@ -45,8 +45,6 @@ UOdysseyPainterEditorVectorObjectScaleTool::Activate( FOdysseyVectorEngine* iEng
 
     iEngine->ClearHUD( );
     iEngine->AddHUD( mTransformHUD );
-
-    mUndoObjectTransform = nullptr;
 }
 
 bool
@@ -71,11 +69,8 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDown( FOdysseyVectorEngine* i
     // BeginTransaction() must be called for GUndo to have a value. Please do it in the caller function.
     if( iUndo && GUndo )
     {
-        mUndoObjectTransform = new FOdysseyVectorUndoObjectTransform( iScene );
         // save selected object translation/rotation/scaling before transform
-        mUndoObjectTransform->RecordTransformBefore( iScene->GetSelectedObjectList() );
-
-        (*iUndo) = mUndoObjectTransform;
+        (*iUndo) = new FOdysseyVectorUndoObjectTransform( iScene, iScene->GetSelectedObjectList() );
 
         GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(*iUndo) );
     }
@@ -237,12 +232,6 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseUp( FOdysseyVectorEngine* iEn
                                                      , const FOdysseyPoint& iPointInTexture
                                                      , const FKey& iKey )
 {
-    if( mUndoObjectTransform )
-    {
-        // save selected object translation/rotation/scaling after transform
-        mUndoObjectTransform->RecordTransformAfter( iScene->GetSelectedObjectList() );
-    }
-
     return true;
 }
 

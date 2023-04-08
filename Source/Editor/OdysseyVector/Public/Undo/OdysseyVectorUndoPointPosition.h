@@ -37,10 +37,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoPointPosition : public FOdysseyVectorU
 {
     public:
         ~FOdysseyVectorUndoPointPosition();
-        FOdysseyVectorUndoPointPosition( FOdysseyVectorScene* iScene );
-
-        void RecordBefore( std::vector<FOdysseyVectorPoint*>& iPointArray );
-        void RecordAfter( std::vector<FOdysseyVectorPoint*>& iPointArray );
+        FOdysseyVectorUndoPointPosition( FOdysseyVectorScene* iScene, std::vector<FOdysseyVectorPoint*>& iPointArray );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;
@@ -52,7 +49,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoPointPosition : public FOdysseyVectorU
         virtual FString ToString() const override;
 
     private:
-        std::vector<FPointPosition> mPointPositionBeforeArray;
-        std::vector<FPointPosition> mPointPositionAfterArray;
+        std::vector<FPointPosition> mPointPositionArray;
         FOdysseyVectorScene* mScene;
 };

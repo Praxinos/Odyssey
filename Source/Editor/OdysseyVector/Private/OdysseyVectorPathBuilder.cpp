@@ -19,13 +19,19 @@ FOdysseyVectorPathBuilder::FOdysseyVectorPathBuilder()
     mObjectParam.Foreground.B = 128;
     mObjectParam.Foreground.A = 255;
 
-    mLinkBuffer.reserve( 50 );
-    mPointBuffer.reserve( 50 );
-    mSampleBuffer.reserve( 50 );
+    mLinkBuffer.reserve(50);
+    mPointBuffer.reserve(50);
+    mSampleBuffer.reserve(50);
 
     mPointArray.reserve(50);
     mSampleArray.reserve(50);
     mVertexArray.reserve(50);
+}
+
+std::vector<FOdysseyVectorPoint*>&
+FOdysseyVectorPathBuilder::GetPointArray()
+{
+    return mPointArray;
 }
 
 bool
@@ -183,10 +189,13 @@ FOdysseyVectorPathBuilder::RecordSample( double iX, double iY, double iRadius, u
 {
     FOdysseyVectorPoint* previousSample = mSampleArray.back();
     ::ULIS::FVec2D dif = { iX - previousSample->GetX(), iY - previousSample->GetY() };
-    double length = dif.Distance();
+    BLPoint worldVector = mWorldMatrix.mapVector( dif.x, dif.y );
     uint32 ret = 0;
 
-    if( length >= 12.0f )
+    dif.x = worldVector.x;
+    dif.y = worldVector.y;
+
+    if( dif.Distance() >= 12.0f )
     {
         FOdysseyVectorPoint sample = FOdysseyVectorPoint( iX, iY, iRadius );
         uint32 sampleIndex = mSampleBuffer.size();

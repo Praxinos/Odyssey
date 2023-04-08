@@ -119,33 +119,31 @@ FOdysseyVectorGroupPaint::OnChildTransform( FOdysseyVectorObject* iChild )
 {
     // we don't check the type of the object. Normally they should be
     // all of base type PathCubic, otherwise there is a bug somewhere.
-    //iChild->SwitchSpace( *this );
+    FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(iChild);
+
+    //path->SwitchSpace( *this );
+    //path->ResetTransform();
+    //path->UpdateMatrix( false );// pass false to prevent loop
+    //path->InvalidateAllSegments();
 }
 
-// TODO: simply overload AddChild()
 void
-FOdysseyVectorGroupPaint::OnChildAdd( FOdysseyVectorObject* iChild )
+FOdysseyVectorGroupPaint::TransferChild( FOdysseyVectorObject* iFosterChild )
 {
-    if( iChild->HasBaseClass( FOdysseyVectorPathCubic::StaticClass() ) )
+    FOdysseyVectorGroup::TransferChild( iFosterChild );
+
+    if( iFosterChild->HasBaseClass( FOdysseyVectorPathCubic::StaticClass() ) )
     {
-        FOdysseyVectorPathCubic* cubicPath = static_cast<FOdysseyVectorPathCubic*>(iChild);
+        FOdysseyVectorPathCubic* cubicPath = static_cast<FOdysseyVectorPathCubic*>(iFosterChild);
 
         cubicPath->SwitchSpace( *this );
         cubicPath->ResetTransform();
         cubicPath->UpdateMatrix();
 
+        // Note: InvalidateAllSegments() will invalidate the paint group as well
         cubicPath->InvalidateAllSegments();
         //cubicPath->Update( 0 );
     }
-
-    Invalidate();
-}
-
-// TODO: simply overload RemoveChild()
-void
-FOdysseyVectorGroupPaint::OnChildRemove( FOdysseyVectorObject* iChild )
-{
-    Invalidate();
 }
 
 void

@@ -2,41 +2,34 @@
 
 FOdysseyVectorUndoSelect::~FOdysseyVectorUndoSelect()
 {
-    mSelectedObjectBeforeList.clear();
-    mSelectedObjectAfterList.clear();
+    mSelectedObjectList.clear();
 }
 
 FOdysseyVectorUndoSelect::FOdysseyVectorUndoSelect( FOdysseyVectorScene* iScene )
     : FOdysseyVectorUndo()
     , mScene( iScene )
 {
-}
-
-void
-FOdysseyVectorUndoSelect::RecordBefore()
-{
-    mSelectedObjectBeforeList = mScene->GetSelectedObjectList();
-}
-
-void
-FOdysseyVectorUndoSelect::RecordAfter()
-{
-    mSelectedObjectAfterList = mScene->GetSelectedObjectList();
+    mSelectedObjectList = mScene->GetSelectedObjectList();
 }
 
 void
 FOdysseyVectorUndoSelect::Apply( UObject* iIgnored )
 {
+    // save former selection
+    std::list<FOdysseyVectorObject*> selectedObjectList = mScene->GetSelectedObjectList();
     FOdysseyVectorUndo::Apply( iIgnored );
 
     mScene->ClearSelection();
 
-    for( std::list<FOdysseyVectorObject*>::iterator it = mSelectedObjectAfterList.begin(); it != mSelectedObjectAfterList.end(); ++it )
+    for( std::list<FOdysseyVectorObject*>::iterator it = mSelectedObjectList.begin(); it != mSelectedObjectList.end(); ++it )
     {
         FOdysseyVectorObject* object = static_cast<FOdysseyVectorObject*>(*it);
 
         mScene->Select( object );
     }
+
+    // prepare former selection for Revert()
+    mSelectedObjectList = selectedObjectList;
 
     // call callbacks if any (for refreshing GUI e.g)
     mRefreshDelegate.Broadcast( mScene );
@@ -45,16 +38,21 @@ FOdysseyVectorUndoSelect::Apply( UObject* iIgnored )
 void
 FOdysseyVectorUndoSelect::Revert( UObject* iIgnored )
 {
+    // save former selection
+    std::list<FOdysseyVectorObject*> selectedObjectList = mScene->GetSelectedObjectList();
     FOdysseyVectorUndo::Revert( iIgnored );
 
     mScene->ClearSelection();
 
-    for( std::list<FOdysseyVectorObject*>::iterator it = mSelectedObjectBeforeList.begin(); it != mSelectedObjectBeforeList.end(); ++it )
+    for( std::list<FOdysseyVectorObject*>::iterator it = mSelectedObjectList.begin(); it != mSelectedObjectList.end(); ++it )
     {
         FOdysseyVectorObject* object = static_cast<FOdysseyVectorObject*>(*it);
 
         mScene->Select( object );
     }
+
+    // prepare former selection for Apply()
+    mSelectedObjectList = selectedObjectList;
 
     // call callbacks if any (for refreshing GUI e.g)
     mRefreshDelegate.Broadcast( mScene );

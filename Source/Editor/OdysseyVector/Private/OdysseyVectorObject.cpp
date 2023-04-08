@@ -214,6 +214,12 @@ FOdysseyVectorObject::GetTranslationY()
 void
 FOdysseyVectorObject::UpdateMatrix()
 {
+    UpdateMatrix( true );
+}
+
+void
+FOdysseyVectorObject::UpdateMatrix( bool iRunTransformCallback )
+{
     if( GetScene() )
     {
         BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
@@ -247,15 +253,18 @@ FOdysseyVectorObject::UpdateMatrix()
         {
             FOdysseyVectorObject *child = (*it);
 
-            child->UpdateMatrix( );
+            child->UpdateMatrix( iRunTransformCallback );
         }
 
         blctx->restore();
     }
 
-    if( this->GetParent() )
+    if( iRunTransformCallback )
     {
-        this->GetParent()->OnChildTransform( this );
+        if( this->GetParent() )
+        {
+            this->GetParent()->OnChildTransform( this );
+        }
     }
 }
 
@@ -333,6 +342,24 @@ FOdysseyVectorObject::GetBBox( bool iWorld )
     }
 
     return mBBox;
+}
+
+void
+FOdysseyVectorObject::TransferChild( FOdysseyVectorObject* iFosterChild )
+{
+    double translationX, translationY, rotation, scalingX, scalingY;
+    BLMatrix2D localMatrix;
+
+    FOdysseyVector::MatrixMultiply( mInverseWorldMatrix, iFosterChild->mWorldMatrix, localMatrix );
+    FOdysseyVector::ExtractTransformations( localMatrix, &translationX, &translationY, &rotation, &scalingX, &scalingY );
+
+    iFosterChild->GetParent()->RemoveChild( iFosterChild );
+    
+    AppendChild( iFosterChild );
+
+    iFosterChild->SetTransform( translationX, translationY, rotation, scalingX, scalingY );
+
+    iFosterChild->UpdateMatrix();
 }
 
 void
@@ -567,7 +594,7 @@ FOdysseyVectorObject::AddChild( FOdysseyVectorObject* iChild, bool iPrepend )
         mChildrenList.push_back( iChild );
     }
 
-    OnChildAdd( iChild );
+    Invalidate();
 }
 
 void
@@ -577,7 +604,7 @@ FOdysseyVectorObject::RemoveChild( FOdysseyVectorObject* iChild )
 
     mChildrenList.remove(iChild);
 
-    OnChildRemove( iChild );
+    Invalidate();
 }
 
 void

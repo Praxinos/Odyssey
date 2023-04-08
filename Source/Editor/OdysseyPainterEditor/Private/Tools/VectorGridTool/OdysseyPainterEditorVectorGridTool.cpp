@@ -36,8 +36,6 @@ UOdysseyPainterEditorVectorGridTool::Activate( FOdysseyVectorEngine* iEngine
 
     iEngine->ClearHUD( );
     iEngine->AddHUD( &mGridHUD );
-
-    mUndoPointPosition = nullptr;
 }
 
 bool
@@ -50,11 +48,7 @@ UOdysseyPainterEditorVectorGridTool::OnMouseDown( FOdysseyVectorEngine* iEngine
     // BeginTransaction() must be called for GUndo to have a value. Please do it in the caller function.
     if( iUndo && GUndo )
     {
-        mUndoPointPosition = new FOdysseyVectorUndoPointPosition( iScene );
-
-        mUndoPointPosition->RecordBefore( mPointArray );
-
-        (*iUndo) = mUndoPointPosition;
+        (*iUndo) = new FOdysseyVectorUndoPointPosition( iScene, mPointArray );
 
         GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(*iUndo) );
     }
@@ -125,11 +119,6 @@ UOdysseyPainterEditorVectorGridTool::OnMouseUp( FOdysseyVectorEngine* iEngine
                                               , const FOdysseyPoint& iPointInTexture
                                               , const FKey& iKey )
 {
-    if( mUndoPointPosition )
-    {
-        mUndoPointPosition->RecordAfter( mPointArray );
-    }
-
     if( mMultipleSelectionMode == true )
     {
         mGridNodeArray.clear();

@@ -31,8 +31,6 @@ UOdysseyPainterEditorVectorPathEditTool::Activate( FOdysseyVectorEngine* iEngine
     iEngine->ClearHUD();
     iEngine->AddHUD(&mCubicPathHUD);
     iEngine->AddHUD(&mPickingHUD);
-
-    mUndoPointPosition = nullptr;
 }
 
 bool
@@ -149,11 +147,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDown( FOdysseyVectorEngine* iEng
     // BeginTransaction() must be called for GUndo to have a value. Please do it in the caller function.
     if( iUndo && GUndo )
     {
-        mUndoPointPosition = new FOdysseyVectorUndoPointPosition( iScene );
-
-        mUndoPointPosition->RecordBefore( mPickedPointArray );
-
-        (*iUndo) = mUndoPointPosition;
+        (*iUndo) = new FOdysseyVectorUndoPointPosition( iScene, mPickedPointArray );
 
         GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(*iUndo) );
     }
@@ -289,11 +283,6 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseUp( FOdysseyVectorEngine* iEngin
                                                   , const FOdysseyPoint& iPointInTexture
                                                   , const FKey& iKey )
 {
-    if( mUndoPointPosition )
-    {
-        mUndoPointPosition->RecordAfter( mPickedPointArray );
-    }
-
     iScene->Update( 0 );
 
     return true;

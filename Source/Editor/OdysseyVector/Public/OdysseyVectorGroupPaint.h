@@ -44,6 +44,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
          */
         virtual ~FOdysseyVectorGroupPaint();
 
+        virtual void TransferChild( FOdysseyVectorObject* iFosterChild );
+
         /**
          * @brief constructor
          */
@@ -54,18 +56,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
          * @param iChild the child.
          */
         virtual void OnChildTransform( FOdysseyVectorObject* iChild ) override;
-
-        /**
-         * @brief function called after a child is added.
-         * @param iChild the added child.
-         */
-        virtual void OnChildAdd( FOdysseyVectorObject* iChild ) override;
-
-        /**
-         * @brief function called after a child is removed.
-         * @param iChild the removed child.
-         */
-        virtual void OnChildRemove( FOdysseyVectorObject* iChild ) override;
 
         /**
          * @brief Update the shape's cached data e.g.

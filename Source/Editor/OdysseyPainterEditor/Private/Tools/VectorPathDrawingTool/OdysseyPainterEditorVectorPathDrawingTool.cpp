@@ -97,6 +97,9 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDown( FOdysseyVectorEngine* i
     float radius = iPointInTexture.pressure * Radius;
     FOdysseyVectorPathCubic* cubicPath = nullptr;
     BLPoint localCoords;
+    BLPoint localRadius;
+
+ //UE_LOG(LogTemp, Warning, TEXT("radius:%f iPointInTexture.pressure:%f"), radius, iPointInTexture.pressure ); 
 
     // record for later undoing
     mVertexArray.clear();
@@ -133,17 +136,19 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDown( FOdysseyVectorEngine* i
     }
 
     localCoords = cubicPath->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
+    localRadius = cubicPath->GetInverseWorldMatrix().mapVector( 0.7071f * radius, 0.7071f * radius );
 
     cubicVertex->Set( localCoords.x, localCoords.y );
-    cubicVertex->SetRadius( radius );
+    cubicVertex->SetRadius( ::ULIS::FVec2D( localRadius.x, localRadius.y ).Distance() );
 
     mPathBuilder = new FOdysseyVectorPathBuilder();
 
     iScene->AppendChild( mPathBuilder );
 
     mPathBuilder->Attach( cubicPath );
-    mPathBuilder->SetForegroundColor( cubicPath->GetForegroundColor() );
+    cubicPath->CopyTransformation( *cubicPath );
     mPathBuilder->UpdateMatrix();
+    mPathBuilder->SetForegroundColor( cubicPath->GetForegroundColor() );
     mPathBuilder->RecordStart( cubicVertex );
 
     iScene->ClearSelection();
@@ -168,12 +173,14 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDrag( FOdysseyVectorEngine* i
                                                        , FOdysseyVectorScene* iScene
                                                        , const FOdysseyPoint& iPointInTexture )
 {
+    mPointRadius =  iPointInTexture.pressure * Radius;
+
     if( mPathBuilder )
     {
         FOdysseyVectorPathCubic* cubicPath = mPathBuilder->GetCubicPath();
-        BLPoint localCoords = cubicPath->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
-        float radius =  iPointInTexture.pressure * Radius;
-        float roundedUpRadius = ceil (radius);
+        BLPoint localCoords;
+        BLPoint localRadius;
+        //float roundedUpRadius = ceil (radius);
         FOdysseyVectorVertexCubic* nextVertex;
         ::ULIS::FRectI redrawRegion = GetInvalidationAreaFromPointer( iPointInTexture.x
                                                                     , iPointInTexture.y
@@ -182,7 +189,14 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDrag( FOdysseyVectorEngine* i
 
         mPathDrawingHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
 
-        nextVertex = mPathBuilder->RecordIntermediate( localCoords.x, localCoords.y, radius, mVertexArray, mSegmentArray );
+        localCoords = cubicPath->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
+        localRadius = cubicPath->GetInverseWorldMatrix().mapVector( 0.7071f * mPointRadius, 0.7071f * mPointRadius );
+
+        nextVertex = mPathBuilder->RecordIntermediate( localCoords.x
+                                                     , localCoords.y
+                                                     , ::ULIS::FVec2D( localRadius.x, localRadius.y ).Distance()
+                                                     , mVertexArray
+                                                     , mSegmentArray );
 
         iScene->Update( 0 );
 
@@ -201,19 +215,19 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUp( FOdysseyVectorEngine* iEn
                                                      , const FOdysseyPoint& iPointInTexture
                                                      , const FKey& iKey )
 {
-    FOdysseyVectorSegmentCubic* lastSegment = nullptr;
-
     if( mPathBuilder )
     {
         FOdysseyVectorVertexCubic* cubicVertex = PickVertex( iEngine, iScene, iPointInTexture.x, iPointInTexture.y, StitchingRadius );
         FOdysseyVectorPathCubic* cubicPath = mPathBuilder->GetCubicPath();
+        FOdysseyVectorSegmentCubic* lastSegment = nullptr;
 
         // in some conditions (maximizing the window), you can get a Up event without a Down event. Check cubicPath exists.
         if( cubicPath )
         {
             BLPoint localCoords = cubicPath->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
-            float radius =  iPointInTexture.pressure * Radius;
-            float roundedUpRadius = /*ceil (radius)*/mPreviousVertex->GetRadius();
+            // in MouseUp events, pressure equals 0. We then use the last pressure value recorded in the Drag event.
+            BLPoint localRadius = cubicPath->GetInverseWorldMatrix().mapVector( 0.7071f * mPointRadius, 0.7071f * mPointRadius );
+            /*float roundedUpRadius = *//*ceil (radius)*//*mPreviousVertex->GetRadius();*/
 
             // the picked cubic vertex must belong to the path we are working with
             if( cubicVertex )
@@ -226,7 +240,9 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUp( FOdysseyVectorEngine* iEn
 
             if( cubicVertex == nullptr )
             {
-                cubicVertex = FOdysseyVectorVertexCubic::New( localCoords.x, localCoords.y, roundedUpRadius );
+                cubicVertex = FOdysseyVectorVertexCubic::New( localCoords.x
+                                                            , localCoords.y
+                                                            , ::ULIS::FVec2D( localRadius.x, localRadius.y ).Distance() );
                 // record for undos
                 mVertexArray.push_back( cubicVertex );
 

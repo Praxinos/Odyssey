@@ -2,21 +2,16 @@
 
 FOdysseyVectorUndoObjectTransform::~FOdysseyVectorUndoObjectTransform()
 {
-    objectTransformAfterArray.clear();
-    objectTransformBeforeArray.clear();
+    objectTransformArray.clear();
 }
 
-FOdysseyVectorUndoObjectTransform::FOdysseyVectorUndoObjectTransform( FOdysseyVectorScene* iScene )
-    : FOdysseyVectorUndo()
-    , mScene ( iScene )
-{
-}
-
-void
+static void
 RestoreObjectTransform( std::vector<FObjectTransform>& objectTransformArray )
 {
     for( int i = 0; i < objectTransformArray.size(); i++ )
     {
+        FObjectTransform formerTransform = FObjectTransform( objectTransformArray[i].object );
+
         objectTransformArray[i].object->SetTransform( objectTransformArray[i].translationX
                                                     , objectTransformArray[i].translationY
                                                     , objectTransformArray[i].rotation
@@ -24,51 +19,32 @@ RestoreObjectTransform( std::vector<FObjectTransform>& objectTransformArray )
                                                     , objectTransformArray[i].scalingY );
 
         objectTransformArray[i].object->UpdateMatrix();
+        // Replace stored data with former transform  (prepare for the counterpart operation, either Apply or Revert)
+        objectTransformArray[i] = formerTransform;
     }
 }
 
-static void
-RecordObjectTransform( std::vector<FObjectTransform>& objectTransformArray, FOdysseyVectorObject* iObject )
+FOdysseyVectorUndoObjectTransform::FOdysseyVectorUndoObjectTransform( FOdysseyVectorScene* iScene
+                                                                    , std::list<FOdysseyVectorObject*>& iObjectList )
+    : FOdysseyVectorUndo()
+    , mScene ( iScene )
+{
+    objectTransformArray.reserve( iObjectList.size() );
+
+    for( std::list<FOdysseyVectorObject*>::iterator it = iObjectList.begin(); it != iObjectList.end(); ++it )
+    {
+        FOdysseyVectorObject* object = (*it);
+
+        objectTransformArray.push_back( FObjectTransform( object ) );
+    }
+}
+
+FOdysseyVectorUndoObjectTransform::FOdysseyVectorUndoObjectTransform( FOdysseyVectorScene* iScene
+                                                                    , FOdysseyVectorObject* iObject )
+    : FOdysseyVectorUndo()
+    , mScene ( iScene )
 {
     objectTransformArray.push_back( FObjectTransform( iObject ) );
-}
-
-void
-FOdysseyVectorUndoObjectTransform::RecordTransformBefore( FOdysseyVectorObject* iObject )
-{
-    RecordObjectTransform( objectTransformBeforeArray, iObject );
-}
-
-void
-FOdysseyVectorUndoObjectTransform::RecordTransformBefore( std::list<FOdysseyVectorObject*>& iObjectList )
-{
-    objectTransformBeforeArray.reserve( iObjectList.size() );
-
-    for( std::list<FOdysseyVectorObject*>::iterator it = iObjectList.begin(); it != iObjectList.end(); ++it )
-    {
-        FOdysseyVectorObject* object = (*it);
-
-        RecordObjectTransform( objectTransformBeforeArray, object );
-    }
-}
-
-void
-FOdysseyVectorUndoObjectTransform::RecordTransformAfter( FOdysseyVectorObject* iObject )
-{
-    RecordObjectTransform( objectTransformAfterArray, iObject );
-}
-
-void
-FOdysseyVectorUndoObjectTransform::RecordTransformAfter( std::list<FOdysseyVectorObject*>& iObjectList )
-{
-    objectTransformAfterArray.reserve( iObjectList.size() );
-
-    for( std::list<FOdysseyVectorObject*>::iterator it = iObjectList.begin(); it != iObjectList.end(); ++it )
-    {
-        FOdysseyVectorObject* object = (*it);
-
-        RecordObjectTransform( objectTransformAfterArray, object );
-    }
 }
 
 void
@@ -77,7 +53,7 @@ FOdysseyVectorUndoObjectTransform::Apply( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Apply( iIgnored );
 
-    RestoreObjectTransform( objectTransformAfterArray );
+    RestoreObjectTransform( objectTransformArray );
 
     mScene->Update( 0 );
 
@@ -91,7 +67,7 @@ FOdysseyVectorUndoObjectTransform::Revert( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Revert( iIgnored );
 
-    RestoreObjectTransform( objectTransformBeforeArray );
+    RestoreObjectTransform( objectTransformArray );
 
     mScene->Update(0);
 
