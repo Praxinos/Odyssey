@@ -12,6 +12,8 @@
 #include "OdysseyVector.h"
 #include "Undo/OdysseyVectorUndoGroup.h"
 #include "Undo/OdysseyVectorUndoUngroup.h"
+#include "Undo/OdysseyVectorUndoSendBackward.h"
+#include "Undo/OdysseyVectorUndoBringForward.h"
 #include "Undo/OdysseyVectorUndoObjectTransform.h"
 #include "Undo/OdysseyVectorUndoSceneRemoveSelection.h"
 
@@ -31,6 +33,7 @@ FOdysseyPainterEditorGUI::FOdysseyPainterEditorGUI(FOdysseyPainterEditor* iEdito
     : FOdysseyEditorGUI(iEditor)
     , mEditor(iEditor)
 {
+
 }
 
 //--------------------------------------------------------------------------------------
@@ -400,6 +403,35 @@ FOdysseyPainterEditorGUI::SwitchTabletAPI()
 {
     SOdysseyTabletAPISwitcher::Open();
 }
+
+void
+FOdysseyPainterEditorGUI::BringForward( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, FOdysseyVectorUndo** iUndo )
+{
+    FOdysseyVectorObject* selectedObject = iScene->GetLastSelected();
+
+    if( selectedObject )
+    {
+        if( iUndo )
+           (*iUndo) = new FOdysseyVectorUndoBringForward( iScene, selectedObject );
+
+        selectedObject->MoveFront();
+    }
+}
+
+void
+FOdysseyPainterEditorGUI::SendBackward( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, FOdysseyVectorUndo** iUndo )
+{
+    FOdysseyVectorObject* selectedObject = iScene->GetLastSelected();
+
+    if( selectedObject )
+    {
+        if( iUndo )
+           (*iUndo) = new FOdysseyVectorUndoSendBackward( iScene, selectedObject );
+
+        selectedObject->MoveBack();
+    }
+}
+
 
 void
 FOdysseyPainterEditorGUI::Ungroup( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, FOdysseyVectorUndo** iUndo )

@@ -195,7 +195,7 @@ FOdysseyVectorPathBuilder::RecordSample( double iX, double iY, double iRadius, u
     dif.x = worldVector.x;
     dif.y = worldVector.y;
 
-    if( dif.Distance() >= 12.0f )
+    if( dif.Distance() >= 8.0f )
     {
         FOdysseyVectorPoint sample = FOdysseyVectorPoint( iX, iY, iRadius );
         uint32 sampleIndex = mSampleBuffer.size();

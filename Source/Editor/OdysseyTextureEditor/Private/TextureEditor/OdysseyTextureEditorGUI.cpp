@@ -198,52 +198,60 @@ void
 FOdysseyTextureEditorGUI::BringForward()
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(static_cast<FOdysseyTextureEditor*>(mEditor)->LayerStack());
-    UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
+    UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
 
-    if( currentLayer )
+    // needed for undos
+    GEditor->BeginTransaction(LOCTEXT("BringForward", "Bring Forward"));
+
+    if( currentVectorLayer )
     {
-        if( currentLayer->GetClass() == UOdysseyTextureLayerImageVector::StaticClass() )
+        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+        FOdysseyVectorUndo* undo = nullptr;
+
+        FOdysseyPainterEditorGUI::BringForward( vectorEngine, vectorScene, &undo );
+
+        if( undo && GUndo )
         {
-            UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
-            FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-            std::list<FOdysseyVectorObject*>& selectedObjectList = currentVectorLayer->GetScene()->GetSelectedObjectList();
-
-            for( std::list<FOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
-            {
-                FOdysseyVectorObject* object = (*it);
-
-                object->MoveFront();
-            }
-
-            currentVectorLayer->RenderImageChanged( false );
+            GUndo->StoreUndo( currentVectorLayer, TUniquePtr<FOdysseyVectorUndo>(undo) );
+            // All the delegates for undos are added here for easier maintainability
+            undo->mRefreshDelegate.AddUObject( currentVectorLayer, &UOdysseyTextureLayerImageVector::OnRefresh );
         }
+
+        currentVectorLayer->RenderImageChanged( false );
     }
+
+    GEditor->EndTransaction();
 }
 
 void
 FOdysseyTextureEditorGUI::SendBackward()
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(static_cast<FOdysseyTextureEditor*>(mEditor)->LayerStack());
-    UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
+    UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
 
-    if( currentLayer )
+    // needed for undos
+    GEditor->BeginTransaction(LOCTEXT("SendBackward", "Send Backward"));
+
+    if( currentVectorLayer )
     {
-        if( currentLayer->GetClass() == UOdysseyTextureLayerImageVector::StaticClass() )
+        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+        FOdysseyVectorUndo* undo = nullptr;
+
+        FOdysseyPainterEditorGUI::SendBackward( vectorEngine, vectorScene, &undo );
+
+        if( undo && GUndo )
         {
-            UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
-            FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-            std::list<FOdysseyVectorObject*>& selectedObjectList = currentVectorLayer->GetScene()->GetSelectedObjectList();
-
-            for( std::list<FOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
-            {
-                FOdysseyVectorObject* object = (*it);
-
-                object->MoveBack();
-            }
-
-            currentVectorLayer->RenderImageChanged( false );
+            GUndo->StoreUndo( currentVectorLayer, TUniquePtr<FOdysseyVectorUndo>(undo) );
+            // All the delegates for undos are added here for easier maintainability
+            undo->mRefreshDelegate.AddUObject( currentVectorLayer, &UOdysseyTextureLayerImageVector::OnRefresh );
         }
+
+        currentVectorLayer->RenderImageChanged( false );
     }
+
+    GEditor->EndTransaction();
 }
 
 void
