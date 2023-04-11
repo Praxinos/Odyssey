@@ -328,7 +328,7 @@ FOdysseyVectorGroupPaint::FindPath( FOdysseyVectorVertex* iVertex
             }
             else
             {
-                ret = FOdysseyVectorGroupPaint::NOCYCLE;
+                ret = FOdysseyVectorGroupPaint::BLOCKED;
             }
         }
 
@@ -340,7 +340,7 @@ FOdysseyVectorGroupPaint::FindPath( FOdysseyVectorVertex* iVertex
             }
             else
             {
-                ret = FOdysseyVectorGroupPaint::NOCYCLE;
+                ret = FOdysseyVectorGroupPaint::BLOCKED;
             }
         }
 
@@ -352,7 +352,7 @@ FOdysseyVectorGroupPaint::FindPath( FOdysseyVectorVertex* iVertex
             }
             else
             {
-                ret = FOdysseyVectorGroupPaint::NOCYCLE;
+                ret = FOdysseyVectorGroupPaint::BLOCKED;
             }
         }
     }

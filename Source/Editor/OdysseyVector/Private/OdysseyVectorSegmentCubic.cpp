@@ -412,6 +412,12 @@ FOdysseyVectorSegmentCubic::GetHandle( int iCtrlPointNum )
     return &mCtrlPoint[iCtrlPointNum];
 }
 
+FOdysseyVectorHandleSegment*
+FOdysseyVectorSegmentCubic::GetHandle( FOdysseyVectorVertex* iAssociatedVertex )
+{
+    return ( static_cast<FOdysseyVectorPoint*>(iAssociatedVertex) == mPoint[0] ) ? &mCtrlPoint[0] : &mCtrlPoint[1];
+}
+
 ::ULIS::FRectD
 FOdysseyVectorSegmentCubic::GetBoundingBox( bool iWorld )
 {

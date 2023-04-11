@@ -170,6 +170,13 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
         FOdysseyVectorHandleSegment* GetHandle( int iCtrlPointNum );
 
        /**
+         * @brief Get a handle (a control point).
+         * @param iAssociatedVertex vertex associated to the handle.
+         * @return a pointer to the requested handle.
+         */
+        FOdysseyVectorHandleSegment* GetHandle( FOdysseyVectorVertex* iAssociatedVertex );
+
+       /**
          * @brief Get the number of polygons in cache.
          * @return the number of polygons in cache.
          */

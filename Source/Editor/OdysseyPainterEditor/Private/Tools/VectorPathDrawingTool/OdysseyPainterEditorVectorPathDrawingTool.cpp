@@ -175,6 +175,8 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDrag( FOdysseyVectorEngine* i
 {
     mPointRadius =  iPointInTexture.pressure * Radius;
 
+//UE_LOG(LogTemp, Warning, TEXT("Some warning message %f %f"), iPointInTexture.acceleration.X, iPointInTexture.acceleration.Y );
+
     if( mPathBuilder )
     {
         FOdysseyVectorPathCubic* cubicPath = mPathBuilder->GetCubicPath();

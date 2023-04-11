@@ -76,6 +76,8 @@ UOdysseyPainterEditorVectorPathKnotTool::OnMouseDown( FOdysseyVectorEngine* iEng
                 vertexA->GetPath()->Merge( mergedPath, vertexLookup, mergedVertexArray, mergedSegmentArray );
                 // update the pointer with the newly created vertex's. Note, Merge alters the original vertex's ID.
                 vertexB = vertexLookup[vertexB->GetID()];
+
+                iScene->Unselect( mergedPath );
             }
 
             knotVertex = iEngine->Knot( vertexA, vertexB, addedSegmentArray, removedSegmentArray, true );

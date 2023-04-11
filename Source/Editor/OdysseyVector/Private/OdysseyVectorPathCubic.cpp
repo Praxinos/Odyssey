@@ -493,22 +493,32 @@ FOdysseyVectorPathCubic::Fill( ::ULIS::FRectD& iRoi )
 
         blctx->setCompOp( BL_COMP_OP_SRC_COPY );
 
-        path.moveTo( firstVertex->GetX(), firstVertex->GetY() );
-
-        for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
+        if( mSegmentList.size() == mVertexList.size() )
         {
-            FOdysseyVectorSegmentCubic *segment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
-            ::ULIS::FVec2D& point0 = segment->GetVertex(0)->GetCoords( nullptr );
-            ::ULIS::FVec2D& point1 = segment->GetVertex(1)->GetCoords( nullptr );
-            ::ULIS::FVec2D& handle0 = segment->GetHandle(0)->GetCoords();
-            ::ULIS::FVec2D& handle1 = segment->GetHandle(1)->GetCoords();
+            FOdysseyVectorSegmentCubic *segment = static_cast<FOdysseyVectorSegmentCubic*>(GetFirstSegment());
+            FOdysseyVectorVertex* vertex = firstVertex;
 
-            path.cubicTo( handle0.x
-                        , handle0.y
-                        , handle1.x
-                        , handle1.y
-                        , point1.x
-                        , point1.y );
+            path.moveTo( firstVertex->GetX(), firstVertex->GetY() );
+
+            do
+            {
+                FOdysseyVectorVertex* nextVertex = segment->GetOtherVertex( vertex );
+                FOdysseyVectorSegment* nextSegment = nextVertex->GetOtherSegment( segment );
+                ::ULIS::FVec2D& point1 = nextVertex->GetCoords( nullptr );
+                ::ULIS::FVec2D& handle0 = segment->GetHandle( vertex     )->GetCoords();
+                ::ULIS::FVec2D& handle1 = segment->GetHandle( nextVertex )->GetCoords();
+
+                path.cubicTo( handle0.x
+                            , handle0.y
+                            , handle1.x
+                            , handle1.y
+                            , point1.x
+                            , point1.y );
+
+                vertex = nextVertex;
+                segment = static_cast<FOdysseyVectorSegmentCubic*>(nextSegment);
+            }
+            while( segment && ( vertex != firstVertex ) );
         }
 
         blctx->setFillStyle( blFillColor );

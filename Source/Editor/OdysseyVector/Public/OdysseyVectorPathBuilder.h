@@ -13,6 +13,20 @@
 
 //#include "OdysseyVectorPathBuilder.generated.h"
 
+class FOdysseyVectorPointSample : public FOdysseyVectorPoint
+{
+    public:
+        ~FOdysseyVectorPointSample();
+        FOdysseyVectorPointSample(){};
+        FOdysseyVectorPointSample( double iX, double iY, double iRadius );
+
+        void SetSharp( bool iIsSharp );
+        bool IsSharp();
+
+    private:
+        bool mIsSharp;
+};
+
 class ODYSSEYVECTOR_API FOdysseyVectorPathBuilder : public FOdysseyVectorObject
 {
     private:
@@ -32,10 +46,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathBuilder : public FOdysseyVectorObject
         uint32 mPointID;
 
         std::vector<FOdysseyVectorPoint> mPointBuffer;
-        std::vector<FOdysseyVectorPoint> mSampleBuffer;
+        std::vector<FOdysseyVectorPointSample> mSampleBuffer;
         std::vector<FOdysseyVectorLink> mLinkBuffer;
 
-        std::vector<FOdysseyVectorPoint*> mSampleArray;
+        std::vector<FOdysseyVectorPointSample*> mSampleArray;
         std::vector<FOdysseyVectorPoint*> mPointArray;
         std::vector<FOdysseyVectorVertexCubic*> mVertexArray;
 

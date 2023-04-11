@@ -295,9 +295,8 @@ RecursivePickPoints( FOdysseyVectorObject* iObject
     if( iObject->GetClass() == FOdysseyVectorPathCubic::StaticClass() )
     {
         FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(iObject);
-        double radiusRoot = iRadius ? sqrt( iRadius ) : 0.0f;
         BLMatrix2D& inverseWorldMatrix = iObject->GetInverseWorldMatrix();
-        BLPoint localRadius = inverseWorldMatrix.mapVector( radiusRoot, radiusRoot );
+        BLPoint localRadius = inverseWorldMatrix.mapVector( 0.7071f * iRadius, 0.7071f * iRadius );
         BLPoint localPoint = inverseWorldMatrix.mapPoint( iWorldX, iWorldY );
         ::ULIS::FRectD pathBBox = path->GetBBox( false );
 

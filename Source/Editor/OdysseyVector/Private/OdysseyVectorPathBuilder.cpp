@@ -1,8 +1,29 @@
 #include "OdysseyVectorPathBuilder.h"
 
+FOdysseyVectorPointSample::~FOdysseyVectorPointSample()
+{
+}
+
+FOdysseyVectorPointSample::FOdysseyVectorPointSample( double iX, double iY, double iRadius )
+    : FOdysseyVectorPoint( iX, iY, iRadius )
+    , mIsSharp( false )
+{
+}
+
+void
+FOdysseyVectorPointSample::SetSharp( bool iIsSharp )
+{
+    mIsSharp = iIsSharp;
+}
+
+bool
+FOdysseyVectorPointSample::IsSharp()
+{
+    return mIsSharp;
+}
+
 FOdysseyVectorPathBuilder::~FOdysseyVectorPathBuilder()
 {
-
 }
 
 FOdysseyVectorPathBuilder::FOdysseyVectorPathBuilder()
@@ -10,8 +31,8 @@ FOdysseyVectorPathBuilder::FOdysseyVectorPathBuilder()
     , mCumulAngle ( 0.0f )
     , mPointID( 0 )
     , mCumulAngleLimit ( 1.5708f ) // 90 degrees
-    //, mAngleLimit ( 1.0472f ) // 60 deg
-    , mAngleLimit ( 0.7071f ) // 45 deg
+    , mAngleLimit ( 1.0472f ) // 60 deg
+    //, mAngleLimit ( 0.7071f ) // 45 deg
     , mSmoothLimit ( 0.261799f ) // 15 deg
 {
     mObjectParam.Foreground.R = 128;
@@ -96,7 +117,7 @@ FOdysseyVectorPathBuilder::GetSampleAngle()
 */
 
 static void
-Smooth( FOdysseyVectorSegmentCubic* iNewSegment, double iLimitAngleInRadians )
+Smooth( FOdysseyVectorSegmentCubic* iNewSegment, bool iSharp )
 {
     FOdysseyVectorVertex* vertex = iNewSegment->GetVertex( 0 );
     FOdysseyVectorHandleSegment* handle = iNewSegment->GetHandle( 0 );
@@ -108,18 +129,14 @@ Smooth( FOdysseyVectorSegmentCubic* iNewSegment, double iLimitAngleInRadians )
         ::ULIS::FVec2D prevVector = prevSegment->GetHandleVector( prevVertexIndex, false );
         ::ULIS::FVec2D nsegVector = iNewSegment->GetHandleVector( 0, false );
 
-        if( prevVector.DistanceSquared() && nsegVector.DistanceSquared() )
+        if( iSharp == false )
         {
-            double distance = nsegVector.Distance();
-            double angle;
-
-            prevVector.Normalize();
-            nsegVector.Normalize();
-
-            angle = acos( ULIS::FMath::Clamp<double>( -prevVector.DotProduct( nsegVector ), -1.0f, 1.0f ) );
-
-            if( fabs(angle) < iLimitAngleInRadians )
+            if( prevVector.DistanceSquared() )
             {
+                double distance = nsegVector.Distance();
+
+                prevVector.Normalize();
+
                 handle->Set( vertex->GetX() - ( prevVector.x * distance )
                            , vertex->GetY() - ( prevVector.y * distance ) );
             }
@@ -145,6 +162,8 @@ FOdysseyVectorPathBuilder::RecordVertex()
                                                                                , mSampleArray[penultimateSampleIndex]->GetY()
                                                                                , mSampleArray[penultimateSampleIndex]->GetRadius() );
 
+        mSampleArray[penultimateSampleIndex]->SetSharp( angle >= mAngleLimit );
+
         cubicVertex->SetID( penultimateSampleID );
 
         mVertexArray.push_back( cubicVertex );
@@ -168,7 +187,7 @@ FOdysseyVectorPathBuilder::RecordVertex()
 
             mCubicPath->AddSegment( mCubicSegment );
 
-            Smooth( mCubicSegment, mAngleLimit );
+            Smooth( mCubicSegment, mSampleArray[0]->IsSharp() );
 
             mCubicSegment->Invalidate();
 
@@ -197,7 +216,7 @@ FOdysseyVectorPathBuilder::RecordSample( double iX, double iY, double iRadius, u
 
     if( dif.Distance() >= 8.0f )
     {
-        FOdysseyVectorPoint sample = FOdysseyVectorPoint( iX, iY, iRadius );
+        FOdysseyVectorPointSample sample = FOdysseyVectorPointSample( iX, iY, iRadius );
         uint32 sampleIndex = mSampleBuffer.size();
 
         sample.SetID( iID );
@@ -296,8 +315,9 @@ FOdysseyVectorPathBuilder::RecordStart( FOdysseyVectorVertexCubic *iVertex )
     mPointBuffer[0].SetID( mPointID );
     mPointArray.push_back( &mPointBuffer[0] );
 
-    mSampleBuffer.push_back( FOdysseyVectorPoint( iVertex->GetX(), iVertex->GetY(), iVertex->GetRadius() ) );
+    mSampleBuffer.push_back( FOdysseyVectorPointSample( iVertex->GetX(), iVertex->GetY(), iVertex->GetRadius() ) );
     mSampleBuffer[0].SetID( mPointID );
+    mSampleBuffer[0].SetSharp( true );
     mSampleArray.push_back( &mSampleBuffer[0] );
 
     iVertex->SetID( mPointID );
@@ -361,7 +381,7 @@ FOdysseyVectorPathBuilder::RecordEnd( FOdysseyVectorVertexCubic *iVertex )
 
             mCubicPath->AddSegment( mCubicSegment );
 
-            Smooth( mCubicSegment, mAngleLimit );
+            Smooth( mCubicSegment, mSampleArray[0]->IsSharp() );
 
             mCubicSegment->Invalidate();
 
