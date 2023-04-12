@@ -49,13 +49,13 @@ FOdysseyEditor::InitGUI()
 void
 FOdysseyEditor::Undo()
 {
-
+    GEditor->UndoTransaction(true);
 }
 
 void
 FOdysseyEditor::Redo()
 {
-
+    GEditor->RedoTransaction();
 }
 
 void

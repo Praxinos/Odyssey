@@ -149,7 +149,7 @@ FOdysseyRasterBlock::SetBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iB
         mBlock = nullptr;
         Width = -1;
         Height = -1;
-        mInvalidTileMap.Clear();
+        //mInvalidTileMap.Clear();
     }
 
     if (iBlock)
@@ -166,17 +166,17 @@ FOdysseyRasterBlock::SetBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iB
         infos->Format = Format;
         iBlock->OnCleanup(::ULIS::FOnCleanupData(&FOdysseyRasterBlock::CleanupBlock, infos));
 
-        mInvalidTileMap = FULISInvalidTileMap(64, Width, Height);
+        //mInvalidTileMap = FULISInvalidTileMap(64, Width, Height);
     }
 
     //If an undoableBlock was set, don't consider it as the undoableBlock anymore
     //Let the user reload the block
-    mUndoableBlock = nullptr;
+    //mUndoableBlock = nullptr;
     
     mOnBlockPtrChanged.Broadcast();
 }
 
-bool
+/* bool
 FOdysseyRasterBlock::IsBeingEdited()
 {
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> undoableBlock = mUndoableBlock.Pin();
@@ -207,7 +207,7 @@ FOdysseyRasterBlock::GetUndoableBlock()
     mUndoableBlock = undoableBlock; //Keep Weak Reference
 
     return undoableBlock;
-}
+} */
 
 TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>
 FOdysseyRasterBlock::GetBlock()
@@ -239,7 +239,7 @@ FOdysseyRasterBlock::GetBlock()
     return block; //return the currently loaded block, the reveiver can release it whenever he wants
 }
 
-const TMap<FIntPoint, TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>>&
+/* const TMap<FIntPoint, TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>>&
 FOdysseyRasterBlock::GetOriginalTileBlocks() const
 {
     return mOriginalTileBlocks;
@@ -346,7 +346,7 @@ FOdysseyRasterBlock::ResetUndoableBlock()
 
     mInvalidTileMap.Clear();
     mOnUndoableBlockChanged.Broadcast(rects);
-}
+} */
 
 TSharedPtr<IOdysseyHandle>
 FOdysseyRasterBlock::Preload()
@@ -365,12 +365,13 @@ FOdysseyRasterBlock::OnBlockChanged()
 {
     return mOnBlockChanged;
 }
-
+/*
 FOdysseyRasterBlock::FOnUndoableBlockChanged&
 FOdysseyRasterBlock::OnUndoableBlockChanged()
 {
     return mOnUndoableBlockChanged;
 }
+*/
 
 FSimpleMulticastDelegate&
 FOdysseyRasterBlock::OnBlockPtrChanged()
@@ -515,7 +516,7 @@ FOdysseyRasterBlock::Serialize(FArchive& Ar)
     else if ( Ar.IsLoading() )
     {       
         mBulkData.Serialize(Ar, mOwner);
-        mInvalidTileMap = FULISInvalidTileMap(64, Width, Height);
+        //mInvalidTileMap = FULISInvalidTileMap(64, Width, Height);
         RemoveValueFromCache(Id.ToString());
     }
 }
