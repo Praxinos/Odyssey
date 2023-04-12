@@ -3,28 +3,33 @@
 
 #include "OdysseyRasterBlockUndo.h"
 
+#include "OdysseyRasterBlockMutator.h"
+
 void
-FOdysseyRasterBlockUndoBuilder::StoreUndo(TSharedPtr<FOdysseyRasterBlock> iRasterBlock)
+FOdysseyRasterBlockUndoBuilder::StoreUndo(const FOdysseyRasterBlockMutator& iRasterBlockMutator)
 {
-    const TMap<FIntPoint, TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>>& originalTileBlocks = iRasterBlock->GetOriginalTileBlocks();
+    const TMap<FIntPoint, TSharedPtr<::ULIS::FBlock>>& originalTileBlocks = iRasterBlockMutator.GetOriginalTileBlocks();
     if ( originalTileBlocks.IsEmpty() )
         return;
 
     FGuid undoId = FGuid::NewGuid();
     FGuid redoId = FGuid::NewGuid();
-    SaveUndoToCache(iRasterBlock, undoId.ToString(), redoId.ToString());
-
-    GUndo->StoreUndo(iRasterBlock->GetOwner(), MakeUnique<FOdysseyRasterBlockUndo>(undoId, redoId, iRasterBlock));
+    SaveUndoToCache(iRasterBlockMutator, undoId.ToString(), redoId.ToString());
+    GUndo->StoreUndo(iRasterBlockMutator.GetRasterBlock()->GetOwner(), MakeUnique<FOdysseyRasterBlockUndo>(undoId, redoId, iRasterBlockMutator.GetRasterBlock()));
 }
 
 void
-FOdysseyRasterBlockUndoBuilder::BuildRedoData(TSharedPtr<FOdysseyRasterBlock> iRasterBlock, TArray<uint8>& oData, TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock, const TMap<FIntPoint, TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>>& iOriginalTileBlocks)
+FOdysseyRasterBlockUndoBuilder::BuildRedoData(const FOdysseyRasterBlockMutator& iRasterBlockMutator, TArray<uint8>& oData, TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock)
 {
-    const FULISInvalidTileMap& invalidTileMap = iRasterBlock->GetInvalidTileMap();
+    const TMap<FIntPoint, TSharedPtr<::ULIS::FBlock>>& originalTileBlocks = iRasterBlockMutator.GetOriginalTileBlocks();
+    if ( originalTileBlocks.IsEmpty() )
+        return;
+
+    const FULISInvalidTileMap& invalidTileMap = iRasterBlockMutator.GetInvalidTileMap();
     FMemoryWriter writer(oData); //allows us to save rectangles alongside the block
 
     TArray<FIntPoint> tileIndexes;
-    iOriginalTileBlocks.GetKeys(tileIndexes);
+    originalTileBlocks.GetKeys(tileIndexes);
 
     int numTiles = tileIndexes.Num();
     writer << numTiles;
@@ -38,11 +43,11 @@ FOdysseyRasterBlockUndoBuilder::BuildRedoData(TSharedPtr<FOdysseyRasterBlock> iR
     }
     
     //copy the rectangle in the block
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iRasterBlock->GetFormat());
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iRasterBlockMutator.GetRasterBlock()->GetFormat());
     int tileSize = invalidTileMap.TileSize();
     int dataStart = oData.Num();//Do this before AddUninitialized() to keep track of where to write the block in memory
     oData.AddUninitialized(tileSize * tileSize * numTiles * iBlock->BytesPerPixel());
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> blockToSave = MakeShared<::ULIS::FBlock>(oData.GetData() + dataStart, tileSize, tileSize * numTiles, iRasterBlock->GetFormat());
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> blockToSave = MakeShared<::ULIS::FBlock>(oData.GetData() + dataStart, tileSize, tileSize * numTiles, iRasterBlockMutator.GetRasterBlock()->GetFormat());
     for (int i = 0; i < tileIndexes.Num(); i++)
     {
         ::ULIS::FRectI rect = invalidTileMap.GetTileRect(tileIndexes[i]);
@@ -52,13 +57,17 @@ FOdysseyRasterBlockUndoBuilder::BuildRedoData(TSharedPtr<FOdysseyRasterBlock> iR
 }
 
 void
-FOdysseyRasterBlockUndoBuilder::BuildUndoData(TSharedPtr<FOdysseyRasterBlock> iRasterBlock, TArray<uint8>& oData, TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock, const TMap<FIntPoint, TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>>& iOriginalTileBlocks)
+FOdysseyRasterBlockUndoBuilder::BuildUndoData(const FOdysseyRasterBlockMutator& iRasterBlockMutator, TArray<uint8>& oData, TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock)
 {
-    const FULISInvalidTileMap& invalidTileMap = iRasterBlock->GetInvalidTileMap();
+    const TMap<FIntPoint, TSharedPtr<::ULIS::FBlock>>& originalTileBlocks = iRasterBlockMutator.GetOriginalTileBlocks();
+    if ( originalTileBlocks.IsEmpty() )
+        return;
+
+    const FULISInvalidTileMap& invalidTileMap = iRasterBlockMutator.GetInvalidTileMap();
     FMemoryWriter writer(oData); //allows us to save rectangles alongside the block
 
     TArray<FIntPoint> tileIndexes;
-    iOriginalTileBlocks.GetKeys(tileIndexes);
+    originalTileBlocks.GetKeys(tileIndexes);
 
     int numTiles = tileIndexes.Num();
     writer << numTiles;
@@ -72,34 +81,33 @@ FOdysseyRasterBlockUndoBuilder::BuildUndoData(TSharedPtr<FOdysseyRasterBlock> iR
     }
     
     //copy the rectangle in the block
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iRasterBlock->GetFormat());
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iRasterBlockMutator.GetRasterBlock()->GetFormat());
     int tileSize = invalidTileMap.TileSize();
     int dataStart = oData.Num();//Do this before AddUninitialized() to keep track of where to write the block in memory
     oData.AddUninitialized(tileSize * tileSize * numTiles * iBlock->BytesPerPixel());
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> blockToSave = MakeShared<::ULIS::FBlock>(oData.GetData() + dataStart, tileSize, tileSize * numTiles, iRasterBlock->GetFormat());
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> blockToSave = MakeShared<::ULIS::FBlock>(oData.GetData() + dataStart, tileSize, tileSize * numTiles, iRasterBlockMutator.GetRasterBlock()->GetFormat());
     for (int i = 0; i < tileIndexes.Num(); i++)
     {
-        TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> tileBlock = iOriginalTileBlocks[tileIndexes[i]];
+        TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> tileBlock = originalTileBlocks[tileIndexes[i]];
         ctx.Copy(*tileBlock, *blockToSave, tileBlock->Rect(), ::ULIS::FVec2I(0, tileSize * i), ::ULIS::FSchedulePolicy::AsyncCacheEfficient);
     }
     ctx.Finish();
 }
 
 void
-FOdysseyRasterBlockUndoBuilder::SaveUndoToCache(TSharedPtr<FOdysseyRasterBlock> iRasterBlock, const FString& iUndoId, const FString& iRedoId)
+FOdysseyRasterBlockUndoBuilder::SaveUndoToCache(const FOdysseyRasterBlockMutator& iRasterBlockMutator, const FString& iUndoId, const FString& iRedoId)
 {
-    const TMap<FIntPoint, TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>>& originalTileBlocks = iRasterBlock->GetOriginalTileBlocks();
-    if (originalTileBlocks.IsEmpty())
+    const TMap<FIntPoint, TSharedPtr<::ULIS::FBlock>>& originalTileBlocks = iRasterBlockMutator.GetOriginalTileBlocks();
+    if ( originalTileBlocks.IsEmpty() )
         return;
-
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = iRasterBlock->GetBlock();
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = iRasterBlockMutator.GetRasterBlock()->GetBlock();
     if (!block)
         return;
 
     TArray<uint8> UndoData;
     TArray<uint8> RedoData;
-    BuildUndoData(iRasterBlock, UndoData, block, originalTileBlocks);
-    BuildRedoData(iRasterBlock, RedoData, block, originalTileBlocks);
+    BuildUndoData(iRasterBlockMutator, UndoData, block);
+    BuildRedoData(iRasterBlockMutator, RedoData, block);
 
     SaveToCache(iUndoId, UndoData);
     SaveToCache(iRedoId, RedoData);
@@ -155,7 +163,6 @@ FOdysseyRasterBlockUndo::Apply( UObject* Object )
     if (!rasterBlock)
         return;
 
-    rasterBlock->ResetUndoableBlock();
     LoadUndoFromCache(mRedoId.ToString());
 }
 
@@ -168,7 +175,6 @@ FOdysseyRasterBlockUndo::Revert( UObject* Object )
     if (!rasterBlock)
         return;
 
-    rasterBlock->ResetUndoableBlock(); //TODO: move to LoadUndoFromCache
     LoadUndoFromCache(mUndoId.ToString());
 }
 
@@ -190,7 +196,7 @@ FOdysseyRasterBlockUndo::LoadUndoFromCache(const FString& iId)
     if ( !block )
         return;
 
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> undoableBlock = rasterBlock->mUndoableBlock.Pin();
+    //TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> undoableBlock = rasterBlock->mUndoableBlock.Pin();
 
     TArray<::ULIS::FRectI> rects;
 
@@ -236,7 +242,7 @@ FOdysseyRasterBlockUndo::LoadUndoFromCache(const FString& iId)
                 reader << rect.h;
             }
 
-            int tileSize = rasterBlock->GetInvalidTileMap().TileSize();
+            int tileSize = 64;
             TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> blockToLoad = MakeShared<::ULIS::FBlock>(static_cast<uint8*>(dataPtr) + reader.Tell(), tileSize, tileSize * numTiles, rasterBlock->GetFormat());
             ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(rasterBlock->GetFormat());
             for (int i = 0; i < numTiles; i++)
@@ -245,23 +251,23 @@ FOdysseyRasterBlockUndo::LoadUndoFromCache(const FString& iId)
                 ctx.Copy(*blockToLoad, *block, ::ULIS::FRectI::FromXYWH(0, i * tileSize, tileSize, tileSize), ::ULIS::FVec2I(rect.x, rect.y), ::ULIS::FSchedulePolicy::AsyncCacheEfficient);
             }
 
-            if ( undoableBlock )
+            /* if ( undoableBlock )
             {
                 for ( int i = 0; i < numTiles; i++ )
                 {
                     const ::ULIS::FRectI& rect = rects[i];
                     ctx.Copy(*blockToLoad, *undoableBlock, ::ULIS::FRectI::FromXYWH(0, i * tileSize, tileSize, tileSize), ::ULIS::FVec2I(rect.x, rect.y), ::ULIS::FSchedulePolicy::AsyncCacheEfficient);
                 }
-            }
+            } */
 
             ctx.Finish();
         }
     );
     getOwner.Wait();
 
-    rasterBlock->mOnBlockChanged.Broadcast(rects, false);
-    if (undoableBlock)
-        rasterBlock->mOnUndoableBlockChanged.Broadcast(rects);
+    rasterBlock->OnBlockChanged().Broadcast(rects, false);
+    /* if ( undoableBlock )
+        rasterBlock->mOnUndoableBlockChanged.Broadcast(rects); */
 }
 
 void

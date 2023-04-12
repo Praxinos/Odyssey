@@ -43,7 +43,7 @@ public:
     /**
      * @brief Delegate called when the edited block pixels content changed
      */
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOnUndoableBlockChanged, const TArray<::ULIS::FRectI>&)
+    //DECLARE_MULTICAST_DELEGATE_OneParam(FOnUndoableBlockChanged, const TArray<::ULIS::FRectI>&)
 
 public:
     // Construction / Destruction
@@ -103,14 +103,14 @@ public:
      * 
      * @return bool
      */
-    bool IsBeingEdited();
+    //bool IsBeingEdited();
 
     /**
      * @brief Retrieves an undoable version of the internal block
      * 
      * @return TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> 
      */
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> GetUndoableBlock();
+    //TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> GetUndoableBlock();
 
     /**
      * @brief Retrieves the internal block, only for reading
@@ -124,14 +124,14 @@ public:
      * @brief Retrieves the original tile blocks containing the pixels before any call to Invalidate()
      * 
      */
-    const TMap<FIntPoint, TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>>& GetOriginalTileBlocks() const;
+    //const TMap<FIntPoint, TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>>& GetOriginalTileBlocks() const;
 
     /**
      * @brief Get the map of currently invalid tiles
      * 
      * @return const FULISInvalidTileMap& 
      */
-    const FULISInvalidTileMap& GetInvalidTileMap() const;
+    //const FULISInvalidTileMap& GetInvalidTileMap() const;
 
     /**
      * @brief Called to copy rects directly into the block tiles
@@ -141,7 +141,7 @@ public:
      * @param iRects
      * @param iIsInteractive
      */
-    void UpdateFromUndoableBlock(const TArray<::ULIS::FRectI>& iRects);
+    //void UpdateFromUndoableBlock(const TArray<::ULIS::FRectI>& iRects);
 
     /**
      * @brief Commits any changes done through UpdateFromUndoableBlock()
@@ -149,20 +149,20 @@ public:
      * 
      * @param iRects 
      */
-    void CommitUndoableBlock();
+    //void CommitUndoableBlock();
     
     /**
      * @brief Calls UpdateFromUndoableBlock() followed by CommitUndoableBlock()
      * 
      * @param iRects 
      */
-    void CommitUndoableBlock(const TArray<::ULIS::FRectI>& iRects);
+    //void CommitUndoableBlock(const TArray<::ULIS::FRectI>& iRects);
 
     /**
      * @brief Resets the Undoable block to its state before Invalidate()
      * 
      */
-    void ResetUndoableBlock();
+    //void ResetUndoableBlock();
 
     /** 
      * @brief Preloads the block in memory, and keeps it in memory until the returned handle is destroyed
@@ -173,7 +173,7 @@ public:
     FOnBlockChanged& OnBlockChanged();
 
     //Called when the block tiles content changed
-    FOnUndoableBlockChanged& OnUndoableBlockChanged();
+    //FOnUndoableBlockChanged& OnUndoableBlockChanged();
 
     //If the result of GetBlock() is kept in memory by someone
     //OnBlockPtrChanged will be called to inform that the block is no longer valid
@@ -195,10 +195,10 @@ private:
 
 private:
     //Used by FOdysseyRasterBlockUndo to save load the block tiles to an undo cache
-    friend class FOdysseyRasterBlockUndo;
-    void SaveUndoToCache(const FString& iId);
-    bool LoadUndoFromCache(const FString& iId);
-    void RemoveUndoFromCache(const FString& iId);
+    //friend class FOdysseyRasterBlockUndo;
+    //void SaveUndoToCache(const FString& iId);
+    //bool LoadUndoFromCache(const FString& iId);
+    //void RemoveUndoFromCache(const FString& iId);
 
 public:
     /**
@@ -220,12 +220,12 @@ private:
     TWeakPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mBlock; //Loaded on demand from cache, can be destroyed at any time if noone keeps a sharedptr on it
 
     //The unstable block which is currently being edited
-    TWeakPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mUndoableBlock; //Loaded on demand from cache, can be destroyed at any time if noone keeps a sharedptr on it
+    //TWeakPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mUndoableBlock; //Loaded on demand from cache, can be destroyed at any time if noone keeps a sharedptr on it
 
-    TMap<FIntPoint, TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>> mOriginalTileBlocks;
+    //TMap<FIntPoint, TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>> mOriginalTileBlocks;
 
     UE::Serialization::FEditorBulkData mBulkData; //Allows serializing the block on disk when saving
-    FULISInvalidTileMap mInvalidTileMap;
+    //FULISInvalidTileMap mInvalidTileMap;
 
     // 
     // DELEGATES
@@ -235,7 +235,7 @@ private:
     FOnBlockChanged mOnBlockChanged;
 
     //Called when the undoable block pixels changed by an internal action (like undo)
-    FOnUndoableBlockChanged mOnUndoableBlockChanged;
+    //FOnUndoableBlockChanged mOnUndoableBlockChanged;
 
     //If the result of GetBlock() is kept in memory by someone
     //mOnBlockPtrChanged will be called to inform that the block is no longer valid
@@ -247,7 +247,7 @@ private:
     //
     TWeakPtr<IOdysseyHandle> mPreloadHandle;
 
-    FOdysseyRasterBlockUndoBuilder mRasterBlockUndoBuilder;
+    //FOdysseyRasterBlockUndoBuilder mRasterBlockUndoBuilder;
 };
 
 
