@@ -165,7 +165,7 @@ UOdysseyAnimationLayerImageRaster::RenderImage(TSharedPtr<::ULIS::FBlock, ESPMod
 
     TSharedPtr<FOdysseyRasterBlock> rasterBlock = mRasterBlocks[iFrame];
 
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ULISRasterBlock = rasterBlock->IsBeingEdited() ? rasterBlock->GetUndoableBlock() : rasterBlock->GetBlock();
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ULISRasterBlock = rasterBlock->GetBlock();
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(ULISRasterBlock->Format());
 
     TArray<::ULIS::FEvent> eventConvertAndExecute = ULISUtils::ConvertAndExecute(ioBlock, ULISRasterBlock->Format(), iRect, iPos, iWaitList,
