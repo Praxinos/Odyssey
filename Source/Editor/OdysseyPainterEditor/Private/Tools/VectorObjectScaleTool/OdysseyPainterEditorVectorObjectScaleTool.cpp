@@ -216,6 +216,8 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDrag( FOdysseyVectorEngine* i
         // Update the matrix for all objects
         iScene->UpdateMatrix();
 
+        iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES | FOdysseyVectorObject::KEEPINVALIDATED );
+
         // update the selection box with the newly modified matrices
         mTransformHUD->UpdateSelectionBox( iScene );
 
@@ -232,6 +234,8 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseUp( FOdysseyVectorEngine* iEn
                                                      , const FOdysseyPoint& iPointInTexture
                                                      , const FKey& iKey )
 {
+    iScene->Update( 0 );
+
     return true;
 }
 

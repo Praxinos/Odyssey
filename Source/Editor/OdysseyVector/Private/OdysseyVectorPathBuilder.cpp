@@ -31,8 +31,8 @@ FOdysseyVectorPathBuilder::FOdysseyVectorPathBuilder()
     , mCumulAngle ( 0.0f )
     , mPointID( 0 )
     , mCumulAngleLimit ( 1.5708f ) // 90 degrees
-    , mAngleLimit ( 1.0472f ) // 60 deg
-    //, mAngleLimit ( 0.7071f ) // 45 deg
+    //, mAngleLimit ( 1.0472f ) // 60 deg
+    , mAngleLimit ( 0.7071f ) // 45 deg
     , mSmoothLimit ( 0.261799f ) // 15 deg
 {
     mObjectParam.Foreground.R = 128;

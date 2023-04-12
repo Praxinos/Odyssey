@@ -150,6 +150,8 @@ UOdysseyPainterEditorVectorObjectRotateTool::OnMouseDrag( FOdysseyVectorEngine* 
             // Update the matrix for all objects
             iScene->UpdateMatrix();
 
+            iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES | FOdysseyVectorObject::KEEPINVALIDATED );
+
             // update the selection box with the newly modified matrices
             mTransformHUD->UpdateSelectionBox( iScene );
         }
@@ -163,6 +165,8 @@ UOdysseyPainterEditorVectorObjectRotateTool::OnMouseUp( FOdysseyVectorEngine* iE
                                                       , const FKey& iKey )
 {
     mTransformHUD->SetShowBox( true );
+
+    iScene->Update( 0 );
 
     return true;
 }

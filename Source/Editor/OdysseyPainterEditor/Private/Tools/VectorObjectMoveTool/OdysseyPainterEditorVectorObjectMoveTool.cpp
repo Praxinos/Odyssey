@@ -66,6 +66,8 @@ UOdysseyPainterEditorVectorObjectMoveTool::OnMouseDrag( FOdysseyVectorEngine* iE
             selectedObject->UpdateMatrix();
         }
     }
+
+    iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES | FOdysseyVectorObject::KEEPINVALIDATED );
 }
 
 bool
@@ -74,6 +76,8 @@ UOdysseyPainterEditorVectorObjectMoveTool::OnMouseUp( FOdysseyVectorEngine* iEng
                                                     , const FOdysseyPoint& iPointInTexture
                                                     , const FKey& iKey )
 {
+    iScene->Update( 0 );
+
     return true;
 }
 

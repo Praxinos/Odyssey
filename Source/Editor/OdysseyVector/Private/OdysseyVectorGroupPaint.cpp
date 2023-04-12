@@ -121,10 +121,10 @@ FOdysseyVectorGroupPaint::OnChildTransform( FOdysseyVectorObject* iChild )
     // all of base type PathCubic, otherwise there is a bug somewhere.
     FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(iChild);
 
-    //path->SwitchSpace( *this );
-    //path->ResetTransform();
-    //path->UpdateMatrix( false );// pass false to prevent loop
-    //path->InvalidateAllSegments();
+    path->SwitchSpace( *this );
+    path->ResetTransform();
+    path->UpdateMatrix( false );// pass false to prevent loop
+    path->InvalidateAllSegments();
 }
 
 void
