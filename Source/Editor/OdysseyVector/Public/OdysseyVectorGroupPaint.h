@@ -44,6 +44,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
          */
         virtual ~FOdysseyVectorGroupPaint();
 
+        virtual void TransferChild( FOdysseyVectorObject* iFosterChild );
+
         /**
          * @brief constructor
          */
@@ -54,18 +56,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
          * @param iChild the child.
          */
         virtual void OnChildTransform( FOdysseyVectorObject* iChild ) override;
-
-        /**
-         * @brief function called after a child is added.
-         * @param iChild the added child.
-         */
-        virtual void OnChildAdd( FOdysseyVectorObject* iChild ) override;
-
-        /**
-         * @brief function called after a child is removed.
-         * @param iChild the removed child.
-         */
-        virtual void OnChildRemove( FOdysseyVectorObject* iChild ) override;
 
         /**
          * @brief Update the shape's cached data e.g.
@@ -114,6 +104,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         void RemoveBucket( FOdysseyVectorBucket* iBucket );
         void Colorize();
         void DrawBuckets( ::ULIS::FRectD& iRoi, uint64 iFlags );
+        virtual void Invalidate();
 
     protected:
         /**
@@ -160,9 +151,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         /**
          * @brief Delete all cycles, intersection vertices and sections. Create default
          * section for each segment. It also takes advantage of this process to retrieve the list of cubic segments.
-         * @param cubicSegmenList returned cubic segments.
          */
-        void Clear( std::list<FOdysseyVectorSegment*>& oCubicSegmenList );
+        void Clear();
 
         /**
          * @brief Find a cycle where the bucket passed as argument fits in and set it as the bucket for this cycle.
@@ -188,6 +178,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         std::list<FOdysseyVectorBucket*> mBucketList;
         std::vector<FOdysseyVectorCycle*> mCycleArray;
         std::vector<FOdysseyVectorVertexIntersection*> mIntersectionVertexArray;
+        // need to remember them in order to clean properly
+        std::list<FOdysseyVectorSegment*> mSegmentList;
 
     public:
         FGroupPaintParam mGroupPaintParam;

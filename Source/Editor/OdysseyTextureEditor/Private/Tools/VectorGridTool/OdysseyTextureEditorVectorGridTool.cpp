@@ -97,19 +97,32 @@ UOdysseyTextureEditorVectorGridTool::OnCurrentLayerChanged(UOdysseyLayerStack* i
 bool
 UOdysseyTextureEditorVectorGridTool::OnMouseDown( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
 {
+    TSharedPtr<FOdysseyPainterEditorSelectedVectorObjectTab>& vectorObjectTab = GetEditorAs<FOdysseyTextureEditor>()->GetGUI()->GetSelectedVectorObjectTab();
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
     bool ret = false;
+
+    // needed for undos
+    GEditor->BeginTransaction(LOCTEXT("GridTool", "Grid"));
 
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+        FOdysseyVectorUndo* undo = nullptr;
 
-        ret = UOdysseyPainterEditorVectorGridTool::OnMouseDown( vectorEngine, vectorScene, iPointInTexture, iKey );
+        ret = UOdysseyPainterEditorVectorGridTool::OnMouseDown( vectorEngine, vectorScene, &undo, iPointInTexture, iKey );
+
+        if( undo )
+        {
+            // All the delegates for undos are added here for easier maintainability
+            undo->mRefreshDelegate.AddUObject( currentVectorLayer, &UOdysseyTextureLayerImageVector::OnRefresh );
+        }
 
         currentVectorLayer->RenderImageChanged(false);
     }
+
+    GEditor->EndTransaction();
 
     return ret;
 }

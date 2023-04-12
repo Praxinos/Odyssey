@@ -237,6 +237,22 @@ FOdysseyVectorHUDGrid::Draw( FOdysseyVectorScene* iScene, ::ULIS::FRectD& iRoi, 
 }
 
 void
+FOdysseyVectorHUDGrid::Export( std::vector<FOdysseyVectorPoint*>& oPointArray )
+{
+    uint32 count = 0;
+
+    oPointArray.resize( mPointCount );
+
+    for( uint32 i = 0; i < mCellCountY * mCellCountX; i++ )
+    {
+        for( uint32 j = 0; j < mCellArray[i].mPointArray.size(); j++ )
+        {
+            oPointArray[count++] = mCellArray[i].mPointArray[j].mPoint;
+        }
+    }
+}
+
+void
 FOdysseyVectorHUDGrid::MapPoint( FOdysseyVectorObject* iObject, FOdysseyVectorPoint* iPoint, double iSpaceX, double iSpaceY )
 {
     double paramX = iSpaceX / mSelectionBox.rect.w;
@@ -256,19 +272,22 @@ FOdysseyVectorHUDGrid::Map( FOdysseyVectorScene* iScene )
 {
     std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
 
+    mPointCount = 0;
+
     for( std::list<FOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
     {
         FOdysseyVectorObject *obj = (*it);
 
-        MapObject( obj );
+        mPointCount += MapObject( obj );
     }
 }
 
-void
+uint32
 FOdysseyVectorHUDGrid::MapObject( FOdysseyVectorObject* iObject )
 {
     BLMatrix2D& spaceMatrix = mSelectionBox.space->GetInverseWorldMatrix();
     std::list<FOdysseyVectorObject*>& childrenList = iObject->GetChildrenList();
+    uint32 pointCount = 0;
 
     if( iObject->GetClass() == FOdysseyVectorGroupPaint::StaticClass() )
     {
@@ -284,6 +303,8 @@ FOdysseyVectorHUDGrid::MapObject( FOdysseyVectorObject* iObject )
             BLPoint pt = conversionMatrix.mapPoint( bucket->GetX(), bucket->GetY() );
             double spaceX = pt.x - mSelectionBox.rect.x; // Hi Elon :) !
             double spaceY = pt.y - mSelectionBox.rect.y;
+
+            pointCount++;
 
             MapPoint( iObject, bucket, spaceX, spaceY );
         }
@@ -305,6 +326,8 @@ FOdysseyVectorHUDGrid::MapObject( FOdysseyVectorObject* iObject )
             double spaceX = pt.x - mSelectionBox.rect.x; // Hi Elon :) !
             double spaceY = pt.y - mSelectionBox.rect.y;
 
+            pointCount++;
+
             MapPoint( iObject, cubicVertex, spaceX, spaceY );
         }
 
@@ -319,6 +342,8 @@ FOdysseyVectorHUDGrid::MapObject( FOdysseyVectorObject* iObject )
                 double spaceX = pt.x - mSelectionBox.rect.x; // Hi again, Elon :) !
                 double spaceY = pt.y - mSelectionBox.rect.y;
 
+                pointCount++;
+
                 MapPoint( iObject, point[i], spaceX, spaceY );
             }
         }
@@ -329,8 +354,10 @@ FOdysseyVectorHUDGrid::MapObject( FOdysseyVectorObject* iObject )
     {
         FOdysseyVectorObject *child = (*it);
 
-        MapObject( child );
+        pointCount += MapObject( child );
     }
+
+    return pointCount;
 }
 
 void

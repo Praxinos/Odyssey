@@ -67,10 +67,14 @@ UOdysseyPainterEditorVectorPathCutTool::OnMouseDrag( FOdysseyVectorEngine* iEngi
 bool
 UOdysseyPainterEditorVectorPathCutTool::OnMouseUp( FOdysseyVectorEngine* iEngine
                                                  , FOdysseyVectorScene* iScene
+                                                 , FOdysseyVectorUndo** iUndo
                                                  , const FOdysseyPoint& iPointInTexture
                                                  , const FKey& iKey )
 {
     FOdysseyVectorObject* selectedObject = iScene->GetLastSelected();
+    std::vector<FOdysseyVectorVertex*> addedVertexArray;
+    std::vector<FOdysseyVectorSegment*> addedSegmentArray;
+    std::vector<FOdysseyVectorSegment*> removedSegmentArray;
     ::ULIS::FVec2D endCutAt;
 
     iEngine->RemoveHUD( &mLineHUD );
@@ -85,20 +89,31 @@ UOdysseyPainterEditorVectorPathCutTool::OnMouseUp( FOdysseyVectorEngine* iEngine
         if( selectedObject->GetClass() == FOdysseyVectorPathCubic::StaticClass() )
         {
             FOdysseyVectorPathCubic *cubicPath = static_cast<FOdysseyVectorPathCubic*>(selectedObject);
-            std::vector<FOdysseyVectorVertexCubic*> oNewVertexArray;
-            std::vector<FOdysseyVectorSegmentCubic*> oNewSegmentArray;
-            std::vector<FOdysseyVectorSegmentCubic*> oOldSegmentArray;
 
             // crashes if I don't reserve. Why that ?
-            oNewVertexArray.reserve(50);
-            oNewSegmentArray.reserve(50);
-            oOldSegmentArray.reserve(50);
+            addedVertexArray.reserve(50);
+            addedSegmentArray.reserve(50);
+            removedSegmentArray.reserve(50);
 
-            cubicPath->Cut( mStartCutAt, endCutAt, oNewVertexArray, oNewSegmentArray, oOldSegmentArray );
+            cubicPath->Cut( mStartCutAt, endCutAt, addedVertexArray, addedSegmentArray, removedSegmentArray );
             cubicPath->Invalidate();
         }
 
         iScene->Update( 0 );
+    }
+
+    // BeginTransaction() must be called for GUndo to have a value. Please do it in the caller function.
+    if( iUndo && GUndo )
+    {
+        std::vector<FOdysseyVectorVertex*> removedVertexArray;
+
+        (*iUndo) = new FOdysseyVectorUndoPathAlter( iScene
+                                                  , removedVertexArray
+                                                  , removedSegmentArray
+                                                  , addedVertexArray
+                                                  , addedSegmentArray );
+
+        GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(*iUndo) );
     }
 
     return true;

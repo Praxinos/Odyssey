@@ -347,7 +347,7 @@ FOdysseyVectorSegmentCubic::GetVectorAtStart( bool iNormalize )
 FOdysseyVectorSegmentCubic*
 FOdysseyVectorSegmentCubic::Sample( double iFromT
                                   , double iToT
-                                  , std::vector<FOdysseyVectorVertexCubic*>& oNewVertexArray )
+                                  , std::vector<FOdysseyVectorVertex*>& oNewVertexArray )
 {
     ::ULIS::FVec2D& ctrlPoint0 = mCtrlPoint[0].GetCoords();
     ::ULIS::FVec2D& ctrlPoint1 = mCtrlPoint[1].GetCoords();
@@ -412,6 +412,12 @@ FOdysseyVectorSegmentCubic::GetHandle( int iCtrlPointNum )
     return &mCtrlPoint[iCtrlPointNum];
 }
 
+FOdysseyVectorHandleSegment*
+FOdysseyVectorSegmentCubic::GetHandle( FOdysseyVectorVertex* iAssociatedVertex )
+{
+    return ( static_cast<FOdysseyVectorPoint*>(iAssociatedVertex) == mPoint[0] ) ? &mCtrlPoint[0] : &mCtrlPoint[1];
+}
+
 ::ULIS::FRectD
 FOdysseyVectorSegmentCubic::GetBoundingBox( bool iWorld )
 {
@@ -436,8 +442,8 @@ FOdysseyVectorSegmentCubic::GetBoundingBox( bool iWorld )
 bool
 FOdysseyVectorSegmentCubic::Cut( ::ULIS::FVec2D& linePoint0
                                , ::ULIS::FVec2D& linePoint1
-                               , std::vector<FOdysseyVectorVertexCubic*>& oNewVertexArray
-                               , std::vector<FOdysseyVectorSegmentCubic*>& oNewSegmentArray )
+                               , std::vector<FOdysseyVectorVertex*>& oNewVertexArray
+                               , std::vector<FOdysseyVectorSegment*>& oNewSegmentArray )
 {
     ::ULIS::FVec2D& point0 = GetVertex(0)->GetCoords( nullptr );
     ::ULIS::FVec2D& point1 = GetVertex(1)->GetCoords( nullptr );

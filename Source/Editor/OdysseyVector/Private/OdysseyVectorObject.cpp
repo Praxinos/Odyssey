@@ -57,6 +57,15 @@ FOdysseyVectorObject::HasBaseClass( uint32 iBaseClassID )
 void
 FOdysseyVectorObject::Update( uint32 iUpdateFlags )
 {
+    // update children first by recursively calling the Update function and, if needed,
+    // removing the object from the invalidated object list, in the same call.
+    mInvalidatedChildrenList.remove_if( [iUpdateFlags] ( FOdysseyVectorObject* child )
+                                        {
+                                            child->Update( iUpdateFlags );
+
+                                            return child->IsInvalidated() == false;
+                                        } );
+
     UpdateShape( iUpdateFlags );
 
     if( ( iUpdateFlags & FOdysseyVectorObject::KEEPINVALIDATED ) == 0 )
@@ -205,6 +214,12 @@ FOdysseyVectorObject::GetTranslationY()
 void
 FOdysseyVectorObject::UpdateMatrix()
 {
+    UpdateMatrix( true );
+}
+
+void
+FOdysseyVectorObject::UpdateMatrix( bool iRunTransformCallback )
+{
     if( GetScene() )
     {
         BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
@@ -238,15 +253,18 @@ FOdysseyVectorObject::UpdateMatrix()
         {
             FOdysseyVectorObject *child = (*it);
 
-            child->UpdateMatrix( );
+            child->UpdateMatrix( iRunTransformCallback );
         }
 
         blctx->restore();
     }
 
-    if( this->GetParent() )
+    if( iRunTransformCallback )
     {
-        this->GetParent()->OnChildTransform( this );
+        if( this->GetParent() )
+        {
+            this->GetParent()->OnChildTransform( this );
+        }
     }
 }
 
@@ -327,6 +345,24 @@ FOdysseyVectorObject::GetBBox( bool iWorld )
 }
 
 void
+FOdysseyVectorObject::TransferChild( FOdysseyVectorObject* iFosterChild )
+{
+    double translationX, translationY, rotation, scalingX, scalingY;
+    BLMatrix2D localMatrix;
+
+    FOdysseyVector::MatrixMultiply( mInverseWorldMatrix, iFosterChild->mWorldMatrix, localMatrix );
+    FOdysseyVector::ExtractTransformations( localMatrix, &translationX, &translationY, &rotation, &scalingX, &scalingY );
+
+    iFosterChild->GetParent()->RemoveChild( iFosterChild );
+    
+    AppendChild( iFosterChild );
+
+    iFosterChild->SetTransform( translationX, translationY, rotation, scalingX, scalingY );
+
+    iFosterChild->UpdateMatrix();
+}
+
+void
 FOdysseyVectorObject::DrawChildren( ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
     for( std::list<FOdysseyVectorObject*>::iterator it = mChildrenList.begin(); it != mChildrenList.end(); ++it )
@@ -369,26 +405,16 @@ FOdysseyVectorObject::Invalidate()
 {
     if ( mIsInvalidated == false )
     {
-        FOdysseyVectorObject* obj = GetScene();
-
-        if ( obj && ( obj != this ) )
+        if ( mParent )
         {
-            if ( obj->GetClass() == FOdysseyVectorScene::StaticClass() )
-            {
-                FOdysseyVectorScene* root = static_cast<FOdysseyVectorScene*>(obj);
+            mParent->mInvalidatedChildrenList.push_back( this );
 
-                root->InvalidateObject( this );
-
-                mIsInvalidated = true;
-            }
-        }
-    }
-
-    if( mParent )
-    {
-        if( mParent->mDependsOnChildren == true )
-        {
             mParent->Invalidate();
+
+            // MUST have a parent to be declared as invalidated otherwise mIsInvalidated could be set
+            // even if the object has no parent because of bottom-to-top the recursive calls
+            // to Invalidate() from FOdysseyVectorVertex::Set() and then we would never reenter this "if" statement
+            mIsInvalidated = true;
         }
     }
 }
@@ -568,17 +594,17 @@ FOdysseyVectorObject::AddChild( FOdysseyVectorObject* iChild, bool iPrepend )
         mChildrenList.push_back( iChild );
     }
 
-    OnChildAdd( iChild );
+    Invalidate();
 }
 
 void
 FOdysseyVectorObject::RemoveChild( FOdysseyVectorObject* iChild )
 {
-    iChild->mParent = nullptr;
+    //iChild->mParent = nullptr;
 
     mChildrenList.remove(iChild);
 
-    OnChildRemove( iChild );
+    Invalidate();
 }
 
 void

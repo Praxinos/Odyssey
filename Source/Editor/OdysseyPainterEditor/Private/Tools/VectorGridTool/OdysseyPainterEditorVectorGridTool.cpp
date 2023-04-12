@@ -26,9 +26,11 @@ UOdysseyPainterEditorVectorGridTool::UOdysseyPainterEditorVectorGridTool()
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
 void
-UOdysseyPainterEditorVectorGridTool::Activate( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorGridTool::Activate( FOdysseyVectorEngine* iEngine
+                                             , FOdysseyVectorScene* iScene )
 {
     mGridHUD.MakeGrid( iScene, DivisionsX, DivisionsY );
+    mGridHUD.Export( mPointArray );
 
     mGridNodeArray.clear();
 
@@ -39,9 +41,18 @@ UOdysseyPainterEditorVectorGridTool::Activate( FOdysseyVectorEngine* iEngine, FO
 bool
 UOdysseyPainterEditorVectorGridTool::OnMouseDown( FOdysseyVectorEngine* iEngine
                                                 , FOdysseyVectorScene* iScene
+                                                , FOdysseyVectorUndo** iUndo
                                                 , const FOdysseyPoint& iPointInTexture
                                                 , const FKey& iKey )
 {
+    // BeginTransaction() must be called for GUndo to have a value. Please do it in the caller function.
+    if( iUndo && GUndo )
+    {
+        (*iUndo) = new FOdysseyVectorUndoPointPosition( iScene, mPointArray );
+
+        GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(*iUndo) );
+    }
+
     for( int i = 0; i < iPointInTexture.keysDown.Num(); i++ )
     {
         if( ( iPointInTexture.keysDown[i] == EKeys::LeftShift ) || ( iPointInTexture.keysDown[i] == EKeys::RightShift ) )

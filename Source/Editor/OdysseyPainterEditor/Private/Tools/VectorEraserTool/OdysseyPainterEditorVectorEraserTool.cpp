@@ -89,16 +89,44 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseDragVector( FOdysseyVectorEngine* 
 bool
 UOdysseyPainterEditorVectorEraserTool::OnMouseUpVector( FOdysseyVectorEngine* iEngine
                                                       , FOdysseyVectorScene* iScene
+                                                      , FOdysseyVectorUndo** iUndo
                                                       , const FOdysseyPoint& iPointInTexture
                                                       , const FKey& iKey )
 {
-    ::ULIS::FRectD Roi;
+    std::vector<FOdysseyVectorObject*> addedObjectArray;
+    std::vector<FOdysseyVectorVertex*> addedVertexArray;
+    std::vector<FOdysseyVectorSegment*> addedSegmentArray;
+    std::vector<FOdysseyVectorObject*> removedObjectArray;
+    std::vector<FOdysseyVectorVertex*> removedVertexArray;
+    std::vector<FOdysseyVectorSegment*> removedSegmentArray;
+    ::ULIS::FRectD roi;
 
     mEraserHUD.BlendMask( false );
 
     iEngine->UseMaskImage();
-    iEngine->Erase( iScene, Roi, false );
+    iEngine->Erase( iScene
+                  , addedObjectArray
+                  , addedVertexArray
+                  , addedSegmentArray
+                  , removedObjectArray
+                  , removedVertexArray
+                  , removedSegmentArray
+                  , roi
+                  , false );
     iEngine->UseColorImage();
+
+    if( iUndo && GUndo )
+    {
+        (*iUndo) = new FOdysseyVectorUndoErase( iScene
+                                              , addedObjectArray
+                                              , addedVertexArray
+                                              , addedSegmentArray
+                                              , removedObjectArray
+                                              , removedVertexArray
+                                              , removedSegmentArray );
+
+        GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(*iUndo) );
+    }
 
     return true;
 }

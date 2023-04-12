@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 #include "Tools/OdysseyPainterEditorTool.h"
 #include "OdysseyVector.h"
+#include "Undo/OdysseyVectorUndoErase.h"
 
 #include "OdysseyPainterEditorVectorEraserTool.generated.h"
 
@@ -41,6 +42,7 @@ public:
                           , const FOdysseyPoint& iPointInTexture );
     bool OnMouseUpVector( FOdysseyVectorEngine* iEngine
                         , FOdysseyVectorScene* iScene
+                        , FOdysseyVectorUndo** iUndo
                         , const FOdysseyPoint& iPointInTexture
                         , const FKey& iKey);
     virtual void Commit() override;

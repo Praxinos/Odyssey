@@ -11,18 +11,13 @@ FOdysseyVectorUndoPointPosition::~FOdysseyVectorUndoPointPosition()
         // nothing to do
     }
 
-    mPointPositionBeforeArray.clear();
-    mPointPositionAfterArray.clear();
+    mPointPositionArray.clear();
 }
 
-FOdysseyVectorUndoPointPosition::FOdysseyVectorUndoPointPosition( FOdysseyVectorScene* iScene )
+FOdysseyVectorUndoPointPosition::FOdysseyVectorUndoPointPosition( FOdysseyVectorScene* iScene
+                                                                , std::vector<FOdysseyVectorPoint*>& iPointArray )
     : FOdysseyVectorUndo()
     , mScene( iScene )
-{
-}
-
-static void
-RecordPosition( std::vector<FOdysseyVectorPoint*>& iPointArray, std::vector<FPointPosition>& mPointPositionArray )
 {
     mPointPositionArray.reserve( iPointArray.size() );
 
@@ -32,38 +27,17 @@ RecordPosition( std::vector<FOdysseyVectorPoint*>& iPointArray, std::vector<FPoi
     }
 }
 
-void
-FOdysseyVectorUndoPointPosition::RecordPositionBefore( std::vector<FOdysseyVectorPoint*>& iPointArray )
-{
-    RecordPosition( iPointArray, mPointPositionBeforeArray );
-}
-
-void
-FOdysseyVectorUndoPointPosition::RecordPositionAfter( std::vector<FOdysseyVectorPoint*>& iPointArray )
-{
-    RecordPosition( iPointArray, mPointPositionAfterArray );
-}
-
 static void
 LoadArray( std::vector<FPointPosition>& mPointPositionArray )
 {
     for( int i = 0; i < mPointPositionArray.size(); i++ )
     {
+        FPointPosition formerPosition = FPointPosition( mPointPositionArray[i].point );
+
+        // Note: virtual function Set() will invalidate segments in needed
         mPointPositionArray[i].point->Set( mPointPositionArray[i].position.x, mPointPositionArray[i].position.y );
-
-        if( mPointPositionArray[i].point->GetClass() == FOdysseyVectorVertexCubic::StaticClass() )
-        {
-            FOdysseyVectorVertexCubic* cubicVertex = static_cast<FOdysseyVectorVertexCubic*>( mPointPositionArray[i].point );
-
-            cubicVertex->InvalidateSegments();
-        }
-        else
-        if( mPointPositionArray[i].point->GetClass() == FOdysseyVectorHandleSegment::StaticClass() )
-        {
-            FOdysseyVectorHandleSegment* segmentHandle = static_cast<FOdysseyVectorHandleSegment*>( mPointPositionArray[i].point );
-
-            segmentHandle->GetParent()->Invalidate();
-        }
+        // replace with former value (prepare for the counterpart operation, either Apply or Revert)
+        mPointPositionArray[i] = formerPosition;
     }
 }
 
@@ -73,7 +47,7 @@ FOdysseyVectorUndoPointPosition::Apply( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Apply( iIgnored );
 
-    LoadArray( mPointPositionAfterArray );
+    LoadArray( mPointPositionArray );
 
     mScene->Update( 0 );
 
@@ -87,7 +61,7 @@ FOdysseyVectorUndoPointPosition::Revert( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Revert( iIgnored );
 
-    LoadArray( mPointPositionBeforeArray );
+    LoadArray( mPointPositionArray );
 
     mScene->Update( 0 );
 

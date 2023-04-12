@@ -45,13 +45,20 @@ class ODYSSEYVECTOR_API FOdysseyVectorPoint
          */
         double GetY();
 
-        virtual ::ULIS::FVec2D& GetCoords();
+        ::ULIS::FVec2D& GetCoords();
 
         /**
          * @brief Get the point's radius
          * @return the point's radius
          */
         double GetRadius();
+
+
+        /**
+         * @brief Set the point's absolute coordinate on X & Y axis
+         * @param iCoords the desired coordinates of type ::ULIS::FVec2D
+         */
+        void SetCoords( const ::ULIS::FVec2D& iCoords );
 
         /**
          * @brief Set the point's absolute coordinate on X & Y axis

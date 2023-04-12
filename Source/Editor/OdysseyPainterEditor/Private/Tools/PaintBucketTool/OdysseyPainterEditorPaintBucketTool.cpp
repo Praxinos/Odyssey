@@ -4,7 +4,8 @@
 #include "Tools/PaintBucketTool/OdysseyPainterEditorPaintBucketTool.h"
 
 #include "OdysseyRasterBlock.h"
-
+#include "Undo/OdysseyVectorUndoBucketAdd.h"
+#include "Undo/OdysseyVectorUndoBucketRemove.h"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
@@ -173,6 +174,7 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseDown( TSharedPtr<::ULIS::FBlock, ES
 bool
 UOdysseyPainterEditorPaintBucketTool::OnMouseDown( FOdysseyVectorEngine* iEngine
                                                  , FOdysseyVectorScene* iScene
+                                                 , FOdysseyVectorUndo** iUndo
                                                  , const FOdysseyPoint& iPointInTexture
                                                  , const FKey& iKey )
 {
@@ -212,12 +214,18 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseDown( FOdysseyVectorEngine* iEngine
 
                 case FOdysseyVectorBucket::PICKCROSS:
                     paintGroup->RemoveBucket( bucket );
+
+                    if( iUndo )
+                        (*iUndo) = new FOdysseyVectorUndoBucketRemove( iScene, paintGroup, bucket );
                 break;
 
                 default :
                     mPickedBucket = new FOdysseyVectorBucket( *paintGroup, localCoords.x, localCoords.y );
 
                     paintGroup->AddBucket( mPickedBucket );
+
+                    if( iUndo )
+                        (*iUndo) = new FOdysseyVectorUndoBucketAdd( iScene, paintGroup, mPickedBucket );
                 break;
             }
 
@@ -273,6 +281,7 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseDrag( FOdysseyVectorEngine* iEngine
 bool
 UOdysseyPainterEditorPaintBucketTool::OnMouseUp( FOdysseyVectorEngine* iEngine
                                                , FOdysseyVectorScene* iScene
+                                               , FOdysseyVectorUndo** iUndo
                                                , const FOdysseyPoint& iPointInTexture
                                                , const FKey& iKey )
 {

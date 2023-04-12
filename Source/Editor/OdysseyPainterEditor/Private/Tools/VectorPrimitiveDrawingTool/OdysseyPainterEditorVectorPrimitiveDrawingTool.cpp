@@ -68,7 +68,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDrag( FOdysseyVectorEngi
 
         iScene->Update( 0 );
 
-        mSelectionChanged.Broadcast(iScene);
+        //mSelectionChanged.Broadcast(iScene);
     }
 }
 
@@ -83,10 +83,21 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseUp( FOdysseyVectorEngine
 
     if( ellipse )
     {
+        FOdysseyVectorPathCubic* cubicPath = ellipse->Convert();
+
+        iScene->ClearSelection();
+        iScene->RemoveChild( ellipse );
+
+        delete ellipse;
+
+        iScene->AppendChild( cubicPath );
+        cubicPath->UpdateMatrix();
+        iScene->Select( cubicPath );
+
         // BeginTransaction() must be called for GUndo to have a value. Please do it in the caller function.
         if( iUndo && GUndo )
         {
-            (*iUndo) = new FOdysseyVectorUndoObjectAdd( iScene, ellipse );
+            (*iUndo) = new FOdysseyVectorUndoObjectAdd( iScene, cubicPath );
 
             GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(*iUndo) );
         }

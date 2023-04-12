@@ -43,7 +43,6 @@ protected:
     virtual void Ungroup();
     virtual void BringForward();
     virtual void SendBackward();
-    virtual void ConvertToPath();
     virtual void RemoveSelectedObjects();
 
 private:

@@ -47,8 +47,6 @@ protected:
                                       , double iWorldY );
 
 private:
-    // the "undo segment reshape" object is used in both the MouseDown and MouseUp events. We need to remember it.
-    FOdysseyVectorUndoPointPosition* mUndoPointPosition;
     double mOldLocalMouseX;
     double mOldLocalMouseY;
     FOdysseyVectorHUDPathCubic mCubicPathHUD;

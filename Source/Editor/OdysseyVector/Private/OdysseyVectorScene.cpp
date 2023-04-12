@@ -69,14 +69,80 @@ FOdysseyVectorScene::CopyShape()
     return static_cast<FOdysseyVectorObject*>(rootCopy);
 }
 
-FOdysseyVectorGroup*
-FOdysseyVectorScene::GroupSelectedObjects( )
+FOdysseyVectorGroupPaint*
+FOdysseyVectorScene::MakePaintGroupFromSelectedObjects( std::vector<FOdysseyVectorObject*>& oCubicPathArray
+                                                      , std::vector<FOdysseyVectorObject*>& oCubicPathOldParentArray
+                                                      , std::vector<FOdysseyVectorObject*>& oRemovedPaintGroupArray )
 {
-    FOdysseyVectorGroup* group = new FOdysseyVectorGroup();
+    if( mSelectedObjectList.size() )
+    {
+        FOdysseyVectorGroupPaint* paintGroup = new FOdysseyVectorGroupPaint( "Paint Group" );
+
+        AppendChild( paintGroup );
+
+        paintGroup->UpdateMatrix();
+
+        for( std::list<FOdysseyVectorObject*>::iterator it = mSelectedObjectList.begin(); it != mSelectedObjectList.end(); ++it )
+        {
+            FOdysseyVectorObject* selectedObject = (*it);
+
+            if( selectedObject->GetClass() == FOdysseyVectorGroupPaint::StaticClass() )
+            {
+                FOdysseyVectorGroupPaint* selectedPaintGroup = static_cast<FOdysseyVectorGroupPaint*>(selectedObject);
+                        
+                for( std::list<FOdysseyVectorObject*>::iterator cit = selectedPaintGroup->GetChildrenList().begin(); cit != selectedPaintGroup->GetChildrenList().end(); ++cit )
+                {
+                    FOdysseyVectorObject* childObject = (*cit);
+
+                    if( childObject->HasBaseClass( FOdysseyVectorPathCubic::StaticClass() ) )
+                    {
+                        FOdysseyVectorPathCubic* childCubicPath = static_cast<FOdysseyVectorPathCubic*>( childObject );
+
+                        oCubicPathArray.push_back( childCubicPath );
+                    }
+                }
+
+                selectedPaintGroup->GetParent()->RemoveChild( selectedPaintGroup );
+
+                selectedPaintGroup->CopyBuckets( paintGroup );
+
+                oRemovedPaintGroupArray.push_back( selectedPaintGroup );
+            }
+
+            if( selectedObject->HasBaseClass( FOdysseyVectorPathCubic::StaticClass() ) )
+            {
+                FOdysseyVectorPathCubic* selectedCubicPath = static_cast<FOdysseyVectorPathCubic*>( selectedObject );
+
+                oCubicPathArray.push_back( selectedCubicPath );
+            }
+        }
+
+        oCubicPathOldParentArray.resize( oCubicPathArray.size() );
+
+        for( int i = 0; i < oCubicPathArray.size(); i++ )
+        {
+            oCubicPathOldParentArray[i] = oCubicPathArray[i]->GetParent();
+
+            paintGroup->TransferChild( oCubicPathArray[i] );
+        }
+
+        // first update to update paths' segments.
+        Update( 0 );
+
+        ClearSelection();
+        Select( paintGroup );
+
+        return paintGroup;
+    }
+
+    return nullptr;
+}
+
+FOdysseyVectorGroup*
+FOdysseyVectorScene::GroupSelectedObjects( std::vector<FOdysseyVectorObject*>& oObjectArray
+                                         , std::vector<FOdysseyVectorObject*>& oObjectOldParentArray )
+{
     BLPoint averageTranslation = { 0.0f, 0.0f };
-    // We don't use the mSelectedObjectList because we want to keep the same order
-    // and we work on a copy to be able to delete the objects while iterating
-    std::list<FOdysseyVectorObject*> objectList = mChildrenList;
 /*
     if ( mSelectedObjectList.size() )
     {
@@ -95,29 +161,35 @@ FOdysseyVectorScene::GroupSelectedObjects( )
         averageTranslation = this->GetInverseWorldMatrix().mapPoint ( averageTranslation.x, averageTranslation.y );
     }
 */
-    AppendChild ( group );
-
-    //group->Translate( averageTranslation.x, averageTranslation.y );
-    group->UpdateMatrix();
-
-    while( objectList.size () )
+    if ( mSelectedObjectList.size() )
     {
-        FOdysseyVectorObject *obj = objectList.back();
+        FOdysseyVectorGroup* group = new FOdysseyVectorGroup();
 
-        if ( obj->IsSelected() == true )
+        AppendChild ( group );
+
+        //group->Translate( averageTranslation.x, averageTranslation.y );
+        group->UpdateMatrix();
+
+        oObjectArray.reserve( mSelectedObjectList.size() );
+        oObjectOldParentArray.reserve( mSelectedObjectList.size() );
+
+        for( std::list<FOdysseyVectorObject*>::iterator it = mSelectedObjectList.begin(); it != mSelectedObjectList.end(); ++it )
         {
-            obj->GetParent()->RemoveChild( obj );
+            FOdysseyVectorObject *obj = (*it);
 
-            group->PrependChild( obj );
+            oObjectArray.push_back( obj );
+            oObjectOldParentArray.push_back( obj->GetParent() );
+
+            group->TransferChild( obj );
         }
 
-        objectList.pop_back();
+        group->Invalidate();
+        group->Update( 0 );
+
+        return group;
     }
 
-    group->Invalidate();
-    group->Update( 0 );
-
-    return group;
+    return nullptr;
 }
 
 std::list<FOdysseyVectorObject*>&
@@ -159,25 +231,8 @@ FOdysseyVectorScene::DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags )
 }
 
 void
-FOdysseyVectorScene::InvalidateObject( FOdysseyVectorObject* iObject )
-{
-    mInvalidatedObjectList.push_back( iObject );
-}
-
-void
 FOdysseyVectorScene::UpdateShape( uint32 iUpdateFlags )
 {
-    for( std::list<FOdysseyVectorObject*>::iterator it = mInvalidatedObjectList.begin(); it != mInvalidatedObjectList.end(); ++it )
-    {
-        FOdysseyVectorObject *obj = (*it);
-
-        obj->Update( iUpdateFlags );
-    }
-
-    if( ( iUpdateFlags & FOdysseyVectorObject::KEEPINVALIDATED ) == 0 )
-    {
-        mInvalidatedObjectList.clear();
-    }
 }
 
 FOdysseyVectorObject*

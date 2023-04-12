@@ -41,17 +41,27 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathCubic: public FOdysseyVectorPath
                       , uint64 iSelectionFlags );
         void Unselect( FOdysseyVectorVertex* iPoint );
         void Fill( ::ULIS::FRectD& iRoi );
-        void Merge( FOdysseyVectorPath* iPath );
+        void Merge( FOdysseyVectorPath* iPath
+                  , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
+                  , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray );
+        void Merge( FOdysseyVectorPath* iMergedPath
+                  , std::vector<FOdysseyVectorVertex*>& iVertexLookup
+                  , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
+                  , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray );
         void DrawShapeVariable( ::ULIS::FRectD& iRoi, uint64 iFlags );
 
         void Mirror( bool iMirrorX, bool iMirrorY );
         void Cut( ::ULIS::FVec2D& linePoint0
                 , ::ULIS::FVec2D& linePoint1
-                , std::vector<FOdysseyVectorVertexCubic*>& oNewVertexArray
-                , std::vector<FOdysseyVectorSegmentCubic*>& oNewSegmentArray
-                , std::vector<FOdysseyVectorSegmentCubic*>& oOldSegmentArray );
+                , std::vector<FOdysseyVectorVertex*>& oNewVertexArray
+                , std::vector<FOdysseyVectorSegment*>& oNewSegmentArray
+                , std::vector<FOdysseyVectorSegment*>& oOldSegmentArray );
         void SwitchSpace( FOdysseyVectorObject& iObject );
-        bool Erase( ::ULIS::FRectD &iRoi );
+        bool Erase( ::ULIS::FRectD &iRoi
+                  , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
+                  , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray
+                  , std::vector<FOdysseyVectorVertex*>& iRemovedVertexArray
+                  , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray );
 
         uint32 GetType();
 };

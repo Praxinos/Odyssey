@@ -8,6 +8,7 @@
 #include "OdysseyPaintEngine.h"
 
 #include "OdysseyVector.h"
+#include "Undo/OdysseyVectorUndo.h"
 
 #include "OdysseyPainterEditorPaintBucketTool.generated.h"
 
@@ -32,9 +33,17 @@ public:
     // Raster Mouse Down
     bool OnMouseDown( TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock, const FOdysseyPoint& iPointInTexture, const FKey& iKey );
     // Vector Mouse Down
-    bool OnMouseDown( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture, const FKey& iKey );
+    bool OnMouseDown( FOdysseyVectorEngine* iEngine
+                    , FOdysseyVectorScene* iScene
+                    , FOdysseyVectorUndo** iUndo
+                    , const FOdysseyPoint& iPointInTexture
+                    , const FKey& iKey );
     void OnMouseDrag( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture );
-    bool OnMouseUp( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture, const FKey& iKey );
+    bool OnMouseUp( FOdysseyVectorEngine* iEngine
+                  , FOdysseyVectorScene* iScene
+                  , FOdysseyVectorUndo** iUndo
+                  , const FOdysseyPoint& iPointInTexture
+                  , const FKey& iKey );
 
     virtual void Commit() override;
 

@@ -75,6 +75,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         BLMatrix2D mWorldMatrix;
         BLMatrix2D mInverseWorldMatrix;
         std::list<FOdysseyVectorObject*> mChildrenList;
+        std::list<FOdysseyVectorObject*> mInvalidatedChildrenList;
         FOdysseyVectorObject* mParent;
         bool mIsSelected;
         bool mIsInvalidated;
@@ -111,11 +112,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
                          , double oScalingX
                          , double oScalingY );
 
-        virtual bool Erase( ::ULIS::FRectD &iRoi ){ return false; };
-
         virtual void OnChildTransform( FOdysseyVectorObject* iChild ) {};
-        virtual void OnChildAdd( FOdysseyVectorObject* iChild ) {};
-        virtual void OnChildRemove( FOdysseyVectorObject* iChild ) {};
 
         void Update( uint32 iUpdateFlags );
         virtual void UpdateShape( uint32 iUpdateFlags ) {};
@@ -135,6 +132,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
 
         FOdysseyVectorBucket& GetFillBucket();
 
+        virtual void TransferChild( FOdysseyVectorObject* iFosterChild );
         /*virtual void UpdateBoundingBox() = 0;*/
         void DrawChildren( ::ULIS::FRectD& iRoi, uint64 iFlags );
         void UpdateMatrix( );
@@ -174,7 +172,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         ::ULIS::FRectD GetBBox( bool iWorld );
         void MoveBack();
         void MoveFront();
-        void Invalidate();
+        virtual void Invalidate();
         FOdysseyVectorScene* GetScene();
         bool IsInvalidated();
         bool IsSelected();
@@ -186,4 +184,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         FColor& GetBackgroundColor();
         virtual void SwitchSpace( FOdysseyVectorObject& iNewSpace ){};
         //void PropertyChanged( const FName& iPropertyName );
+        void UpdateMatrix( bool iRunTransformCallback );
 };

@@ -24,6 +24,13 @@ FOdysseyVectorPoint::Init( double iX, double iY, double iRadius )
 }
 
 void
+FOdysseyVectorPoint::SetCoords( const ::ULIS::FVec2D& iCoords )
+{
+    mCoords.x  = iCoords.x;
+    mCoords.y  = iCoords.y;
+}
+
+void
 FOdysseyVectorPoint::SetCoords( double iX, double iY )
 {
     mCoords.x  = iX;

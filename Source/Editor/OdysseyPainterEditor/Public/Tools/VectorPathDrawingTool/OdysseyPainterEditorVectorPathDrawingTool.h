@@ -72,6 +72,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
         double StitchingRadius;
 
     private:
+        double mPointRadius;
+        FOdysseyVectorPathBuilder* mPathBuilder;
         FOdysseyVectorHUDPathDrawing mPathDrawingHUD;
         FOdysseyVectorVertexCubic* mPreviousVertex;
         bool mStitched;

@@ -95,9 +95,20 @@ SetSelectionSpace( FOdysseyVectorEngine* iVectorEngine, FOdysseyVectorObject* iS
 bool
 UOdysseyPainterEditorVectorObjectPickTool::OnMouseUp( FOdysseyVectorEngine* iEngine
                                                     , FOdysseyVectorScene* iScene
+                                                    , FOdysseyVectorUndo** iUndo
                                                     , const FOdysseyPoint& iPointInTexture
                                                     , const FKey& iKey )
 {
+    FOdysseyVectorUndoSelect* undoSelect = nullptr;
+
+    // BeginTransaction() must be called for GUndo to have a value. Please do it in the caller function.
+    if( iUndo && GUndo )
+    {
+        (*iUndo) = new FOdysseyVectorUndoSelect( iScene );
+
+        GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(*iUndo) );
+    }
+
     if ( mPointArray.size() == 1 )
     {
         iEngine->Pick( iScene, mPointArray, FOdysseyVectorObject::PICK_MATH_BASED );

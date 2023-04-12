@@ -50,8 +50,6 @@ UOdysseyPainterEditorVectorObjectRotateTool::Activate( FOdysseyVectorEngine* iEn
 
     iEngine->ClearHUD( );
     iEngine->AddHUD( mTransformHUD );
-
-    mUndoObjectTransform = nullptr;
 }
 
 bool
@@ -68,11 +66,8 @@ UOdysseyPainterEditorVectorObjectRotateTool::OnMouseDown( FOdysseyVectorEngine* 
     // BeginTransaction() must be called for GUndo to have a value. Please do it in the caller function.
     if( iUndo && GUndo )
     {
-        mUndoObjectTransform = new FOdysseyVectorUndoObjectTransform( iScene );
         // save selected object translation/rotation/scaling before transform
-        mUndoObjectTransform->RecordTransformBefore( iScene->GetSelectedObjectList() );
-
-        (*iUndo) = mUndoObjectTransform;
+        (*iUndo) = new FOdysseyVectorUndoObjectTransform( iScene, iScene->GetSelectedObjectList() );
 
         GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(*iUndo) );
     }
@@ -155,6 +150,8 @@ UOdysseyPainterEditorVectorObjectRotateTool::OnMouseDrag( FOdysseyVectorEngine* 
             // Update the matrix for all objects
             iScene->UpdateMatrix();
 
+            iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES | FOdysseyVectorObject::KEEPINVALIDATED );
+
             // update the selection box with the newly modified matrices
             mTransformHUD->UpdateSelectionBox( iScene );
         }
@@ -169,11 +166,7 @@ UOdysseyPainterEditorVectorObjectRotateTool::OnMouseUp( FOdysseyVectorEngine* iE
 {
     mTransformHUD->SetShowBox( true );
 
-    if( mUndoObjectTransform )
-    {
-        // save selected object translation/rotation/scaling after transform
-        mUndoObjectTransform->RecordTransformAfter( iScene->GetSelectedObjectList() );
-    }
+    iScene->Update( 0 );
 
     return true;
 }

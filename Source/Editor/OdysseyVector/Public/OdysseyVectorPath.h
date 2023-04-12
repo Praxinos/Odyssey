@@ -81,7 +81,13 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
         virtual FOdysseyVectorSegment* AppendVertex( FOdysseyVectorVertex* iVertex, FOdysseyVectorVertex* iPreviousVertex );
         /*FOdysseyVectorObject* PickLoops( double iX, double iY, double iRadius );
         void DrawLoops( ::ULIS::FRectD &iRoi, uint64 iFlags );*/
-        virtual void Merge( FOdysseyVectorPath* iPath ){};
+        virtual void Merge( FOdysseyVectorPath* iPath
+                          , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
+                          , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray ){};
+        virtual void Merge( FOdysseyVectorPath* iMergedPath
+                          , std::vector<FOdysseyVectorVertex*>& iVertexLookup
+                          , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
+                          , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray ){};
         void SetJointType( eJointType mJointType );
         eJointType GetJointType();
         /*virtual void InsertPoint( FOdysseyVectorSegment* iSegment, FOdysseyVectorVertex* iPoint );*/
@@ -92,6 +98,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
         FOdysseyVectorSegment* GetFirstSegment();
         FOdysseyVectorSegment* GetLastSegment();
         std::list<FOdysseyVectorPoint*>& GetSelectedPointList();
+        virtual bool Erase( ::ULIS::FRectD &iRoi
+                          , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
+                          , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray
+                          , std::vector<FOdysseyVectorVertex*>& iRemovedVertexArray
+                          , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray ){ return false; };
         virtual bool PickPoint( double iX
                               , double iY
                               , double iRadius

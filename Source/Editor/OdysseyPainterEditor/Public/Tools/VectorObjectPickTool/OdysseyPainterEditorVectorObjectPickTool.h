@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 #include "Tools/OdysseyPainterEditorTool.h"
 #include "OdysseyVector.h"
+#include "Undo/OdysseyVectorUndoSelect.h"
 
 #include "OdysseyPainterEditorVectorObjectPickTool.generated.h"
 
@@ -28,7 +29,11 @@ public:
     void Activate( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, int32 iSizeX, int32 iSizeY );
     bool OnMouseDown( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture, const FKey& iKey );
     void OnMouseDrag( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture );
-    bool OnMouseUp( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture, const FKey& iKey );
+    bool OnMouseUp( FOdysseyVectorEngine* iEngine
+                  , FOdysseyVectorScene* iScene
+                  , FOdysseyVectorUndo** iUndo
+                  , const FOdysseyPoint& iPointInTexture
+                  , const FKey& iKey );
 
     //OdysseyPainterEditorTool overrides
     virtual void Commit() override;
