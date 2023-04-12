@@ -15,6 +15,7 @@ public class OdysseyPaintEngine : ModuleRules
                 "CoreUObject",
                 "InputCore",
                 "Engine",
+                "UnrealEd",
                 "OdysseyCore",
                 "OdysseyImaging",
                 "OdysseyLayerStack",

@@ -7,6 +7,9 @@
 #include "OdysseyRasterBlock.h"
 #include "OdysseyRectUtils.h"
 #include "ULISLoaderModule.h"
+#include "Editor/TransBuffer.h"
+#include "UnrealEdGlobals.h"
+#include "Editor/UnrealEdEngine.h"
 
 #include <chrono>
 
@@ -15,11 +18,23 @@
 
 FOdysseyPaintEngine::~FOdysseyPaintEngine()
 {
+    if (GUnrealEd)
+    {
+        UTransBuffer* transBuffer = Cast<UTransBuffer>(GUnrealEd->Trans);
+        if (transBuffer)
+            transBuffer->OnBeforeRedoUndo().RemoveAll(this);
+    }
 }
 
 FOdysseyPaintEngine::FOdysseyPaintEngine()
     : mRasterBlock(nullptr)
 {
+    if (GUnrealEd)
+    {
+        UTransBuffer* transBuffer = Cast<UTransBuffer>(GUnrealEd->Trans);
+        if (transBuffer)
+            transBuffer->OnBeforeRedoUndo().AddRaw(this, &FOdysseyPaintEngine::OnBeforeRedoUndo);
+    }
 }
 
 void
@@ -32,36 +47,39 @@ FOdysseyPaintEngine::RasterBlock(TSharedPtr<FOdysseyRasterBlock> iRasterBlock)
     Commit(mPreviousBlendParameters);
     if (!iRasterBlock)
     {
-        mRasterBlock->OnUndoableBlockChanged().RemoveAll(this);
+        mRasterBlockMutator.SetRasterBlock(nullptr);
+        //mRasterBlock->OnUndoableBlockChanged().RemoveAll(this);
         mRasterBlock->OnBlockPtrChanged().RemoveAll(this);
-
         mRasterBlock = nullptr;
         if (mPaintBlock)
             mPaintBlock->OnInvalid(::ULIS::FOnInvalidBlock());
         
-        mEditedBlock = nullptr;
+        //mEditedBlock = nullptr;
         mPaintBlock = nullptr;
+        mInvalidRects.Empty();
         //mOriginalBlock = nullptr;
         return;
     }
 
     mRasterBlock = iRasterBlock;
-    mRasterBlock->OnUndoableBlockChanged().AddRaw(this, &::FOdysseyPaintEngine::OnEditedBlockChanged);
+    mRasterBlockMutator.SetRasterBlock(iRasterBlock);
+    //mRasterBlock->OnUndoableBlockChanged().AddRaw(this, &::FOdysseyPaintEngine::OnEditedBlockChanged);
     mRasterBlock->OnBlockPtrChanged().AddRaw(this, &::FOdysseyPaintEngine::OnBlockPtrChanged);
 
     //Realloc to match RasterBlock size and format
-    mEditedBlock = mRasterBlock->GetUndoableBlock();
+    //mEditedBlock = mRasterBlock->GetUndoableBlock();
     
-    if ( !mPaintBlock || mPaintBlock->Size() != mEditedBlock->Size() || mPaintBlock->Format() != mEditedBlock->Format())// ||
+    if ( !mPaintBlock || mPaintBlock->Width() != mRasterBlock->GetWidth() || mPaintBlock->Height() != mRasterBlock->GetHeight() || mPaintBlock->Format() != mRasterBlock->GetFormat() )// ||
+    //if ( !mPaintBlock || mPaintBlock->Size() != mEditedBlock->Size() || mPaintBlock->Format() != mEditedBlock->Format())// ||
          //!mOriginalBlock || mOriginalBlock->Size() != mEditedBlock->Size() || mOriginalBlock->Format() != mEditedBlock->Format() )
     {
-        mPaintBlock = MakeShared<::ULIS::FBlock>(mEditedBlock->Width(), mEditedBlock->Height(), mEditedBlock->Format());
+        mPaintBlock = MakeShared<::ULIS::FBlock>(mRasterBlock->GetWidth(), mRasterBlock->GetHeight(), mRasterBlock->GetFormat());
         //mOriginalBlock = MakeShared<::ULIS::FBlock>(mEditedBlock->Width(), mEditedBlock->Height(), mEditedBlock->Format());
         mPaintBlock->OnInvalid(::ULIS::FOnInvalidBlock( &FOdysseyPaintEngine::PaintBlockChanged, static_cast<void*>(this) ));
 
         //Create InvalidMaps
-        int tileSize = 64; //Could be a config variable one day, or retrieved from mRasterBlock
-        mInvalidMap = FULISInvalidTileMap(tileSize, mEditedBlock->Width(), mEditedBlock->Height());
+        //int tileSize = 64; //Could be a config variable one day, or retrieved from mRasterBlock
+        //mInvalidMap = FULISInvalidTileMap(tileSize, mEditedBlock->Width(), mEditedBlock->Height());
     }
 
     //Clear the paintblock before anything
@@ -103,7 +121,8 @@ FOdysseyPaintEngine::Update(const FOdysseyBlendParameters& iBlendParameters)
     //If blend parameters are different from the previous one used
     //Force refreshing all edited tiles, instead of just newly edited tiles
     if ( blendParameters != mPreviousBlendParameters )
-        mInvalidMap.Invalidate(mRasterBlock->GetInvalidTileMap().InvalidTiles());
+        mInvalidRects.Append(mRasterBlockMutator.GetInvalidTileMap().InvalidRects());
+        //mInvalidMap.Invalidate(mRasterBlockMutator.GetInvalidTileMap().InvalidTiles());
 
     //Update the EditedBlock content
     if (!UpdateEditedBlock(blendParameters))
@@ -123,7 +142,8 @@ FOdysseyPaintEngine::Commit(const FOdysseyBlendParameters& iBlendParameters)
     ClearPaintBlock();
 
     //Validate all the interactive modifications that has been done
-    mRasterBlock->CommitUndoableBlock();
+    mRasterBlockMutator.Commit();
+    //mRasterBlock->CommitUndoableBlock();
 }
 
 void
@@ -135,7 +155,8 @@ FOdysseyPaintEngine::Abort()
     //Clear the Paint Block
     ClearPaintBlock();
 
-    mRasterBlock->ResetUndoableBlock();
+    mRasterBlockMutator.Abort();
+    //mRasterBlock->ResetUndoableBlock();
 }
 
 //--------------------------------------------------------------------------------------
@@ -149,7 +170,8 @@ FOdysseyPaintEngine::PaintBlockChanged( const ::ULIS::FBlock* iBlock, const ::UL
     
     //Set Invalid Tile Map, so that the EditedBlock can refresh the right tiles on the next call of Update()
     TArray<::ULIS::FRectI> rects(iRects, iNumRects);
-    paintEngine->mInvalidMap.Invalidate(rects);
+    //paintEngine->mInvalidMap.Invalidate(rects);
+    paintEngine->mInvalidRects.Append(rects);
 }
 
 //--------------------------------------------------------------------------------------
@@ -177,7 +199,7 @@ FOdysseyPaintEngine::ClearPaintBlock()
     ctx.Clear(*mPaintBlock);
     ctx.Finish();
 
-    mInvalidMap.Clear();
+    mInvalidRects.Empty();
 }
 
 bool
@@ -187,36 +209,47 @@ FOdysseyPaintEngine::UpdateEditedBlock(const FOdysseyBlendParameters& iBlendPara
         return false;
 
     //Finish any pending operations before updating the blocks
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(mEditedBlock->Format());
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(mRasterBlock->GetFormat());
     ctx.Finish();
-    if ( mInvalidMap.InvalidTiles().Num() <= 0 )
+
+    if ( mInvalidRects.IsEmpty() )
         return false;
 
-    const TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> original = mRasterBlock->GetBlock();
-    TArray<::ULIS::FRectI> invalidRects = mInvalidMap.InvalidRects();
+    mRasterBlockMutator.ResetTilesFromRects(mInvalidRects);
+    mRasterBlockMutator.EditTilesFromRects(
+        mInvalidRects,
+        FOdysseyRasterBlockMutator::FEditDelegate::CreateLambda(
+            [&](const FULISInvalidTileMap& iTileMap)
+            {
+                const TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = mRasterBlock->GetBlock();
+                TArray<::ULIS::FRectI> invalidRects = iTileMap.InvalidRects();
 
-    //Blend Paint Block over OriginalBlock
-    for( const ::ULIS::FRectI& rect : invalidRects )
-    {
-        ::ULIS::FEvent eventCopy;
-        ctx.Copy( *original, *mEditedBlock, rect, rect.Position(), ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventCopy );
-        ctx.Flush();
-
-        ::ULIS::FEvent eventBlend;
-        ctx.Blend(*mPaintBlock, *mEditedBlock, rect, rect.Position(), ::ULIS::eBlendMode(iBlendParameters.BlendingMode), ::ULIS::eAlphaMode(iBlendParameters.AlphaMode), iBlendParameters.Opacity / 100.f, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 1, &eventCopy );
-    }    
-    ctx.Finish();
-
-    mRasterBlock->UpdateFromUndoableBlock(invalidRects);
-    mInvalidMap.Clear();
+                //Blend Paint Block over OriginalBlock
+                for ( const ::ULIS::FRectI& rect : invalidRects )
+                {
+                    ctx.Blend(*mPaintBlock, *block, rect, rect.Position(), ::ULIS::eBlendMode(iBlendParameters.BlendingMode), ::ULIS::eAlphaMode(iBlendParameters.AlphaMode), iBlendParameters.Opacity / 100.f, ::ULIS::FSchedulePolicy::AsyncCacheEfficient);
+                }
+                ctx.Finish();
+            }
+        )
+    );
+    mInvalidRects.Empty();
     return true;
 }
 
+void
+FOdysseyPaintEngine::OnBeforeRedoUndo( const FTransactionContext& /*TransactionContext*/ )
+{
+    Abort();
+}
+
+/*
 void
 FOdysseyPaintEngine::OnEditedBlockChanged(const TArray<::ULIS::FRectI>& iRects)
 {
     Abort();
 }
+*/
 
 void
 FOdysseyPaintEngine::OnBlockPtrChanged()

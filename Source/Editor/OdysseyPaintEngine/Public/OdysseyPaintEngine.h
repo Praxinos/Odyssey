@@ -7,6 +7,8 @@
 
 #include "ULISInvalidTileMap.h"
 #include "OdysseyBlendParameters.h"
+#include "OdysseyRasterBlockMutator.h"
+#include "Misc/ITransaction.h"
 
 #include <ULIS>
 
@@ -69,14 +71,17 @@ private:
     
     FOdysseyBlendParameters AdjustBlendParameters(const FOdysseyBlendParameters& iBlendParameters);
 
+    void OnBeforeRedoUndo( const FTransactionContext& TransactionContext );
+
 private:
     //Blocks
     TSharedPtr<FOdysseyRasterBlock> mRasterBlock;
+    FOdysseyRasterBlockMutator mRasterBlockMutator;
 
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mEditedBlock; // The Block to edit (mPaintBlock over mOriginalBlock)
+    //TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mEditedBlock; // The Block to edit (mPaintBlock over mOriginalBlock)
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mPaintBlock; // The Block containing only the modified tiles
     //TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mOriginalBlock; // The Block containing the edited block before being edited
-    
+
     //Options
     FOdysseyBlendParameters             mPreviousBlendParameters;
 
@@ -84,5 +89,6 @@ private:
     FOnPreUpdate                        mOnPreUpdateDelegate;
     
     //Internal
-    FULISInvalidTileMap                 mInvalidMap;
+    TArray<::ULIS::FRectI>              mInvalidRects;
+    //FULISInvalidTileMap                 mInvalidMap;
 };

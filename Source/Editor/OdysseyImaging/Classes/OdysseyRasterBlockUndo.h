@@ -7,17 +7,18 @@
 #include "Misc/Change.h"
 //#include "OdysseyRasterBlock.h"
 
+class FOdysseyRasterBlockMutator;
 class FOdysseyRasterBlock;
 
 class ODYSSEYIMAGING_API FOdysseyRasterBlockUndoBuilder
 {
 public:
-    void StoreUndo(TSharedPtr<FOdysseyRasterBlock> iRasterBlock);
+    void StoreUndo(const FOdysseyRasterBlockMutator& iRasterBlockMutator);
 
 private:
-    void BuildUndoData(TSharedPtr<FOdysseyRasterBlock> iRasterBlock, TArray<uint8>& oData, TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock, const TMap<FIntPoint, TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>>& iOriginalTileBlocks);
-    void BuildRedoData(TSharedPtr<FOdysseyRasterBlock> iRasterBlock, TArray<uint8>& oData, TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock, const TMap<FIntPoint, TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>>& iOriginalTileBlocks);
-    void SaveUndoToCache(TSharedPtr<FOdysseyRasterBlock> iRasterBlock, const FString& iUndoId, const FString& iRedoId);
+    void BuildUndoData(const FOdysseyRasterBlockMutator& iRasterBlockMutator, TArray<uint8>& oData, TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock);
+    void BuildRedoData(const FOdysseyRasterBlockMutator& iRasterBlockMutator, TArray<uint8>& oData, TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock);
+    void SaveUndoToCache(const FOdysseyRasterBlockMutator& iRasterBlockMutator, const FString& iUndoId, const FString& iRedoId);
     void SaveToCache(const FString& iId, const TArray<uint8>& iData);
 };
 
