@@ -5,6 +5,7 @@
 
 #include "Styling/SlateStyleRegistry.h"
 #include "Styling/CoreStyle.h"
+#include "SlateOdysseyStyle.h"
 
 TSharedPtr< ISlateStyle > FOdysseyStyle::smInstance = nullptr;
 
@@ -13,6 +14,13 @@ void
 FOdysseyStyle::ResetToDefault()
 {
     SetStyle( FCoreStyle::Create( "OdysseyStyle" ) );
+}
+
+//static
+const FSlateStyleSet&
+FOdysseyStyle::Get()
+{
+    return FSlateOdysseyStyle::Get();
 }
 
 /*static*/

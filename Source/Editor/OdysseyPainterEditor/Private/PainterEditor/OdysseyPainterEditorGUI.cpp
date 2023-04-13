@@ -5,7 +5,7 @@
 #include "OdysseyEditorTab.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyAssetEditorToolkit.h"
-#include "SOdysseyAboutScreen.h"
+#include "SOdysseyAboutWindow.h"
 #include "SOdysseyTabletAPISwitcher.h"
 #include "Models/OdysseyPainterEditorCommands.h"
 
@@ -336,7 +336,7 @@ void
 FOdysseyPainterEditorGUI::AboutIliad()
 {
     TSharedPtr<SWindow> parentWindow = FGlobalTabmanager::Get()->GetRootWindow();
-    SOdysseyAboutScreen::Open(parentWindow);
+    SOdysseyAboutWindow::Open(parentWindow);
 }
 
 void
