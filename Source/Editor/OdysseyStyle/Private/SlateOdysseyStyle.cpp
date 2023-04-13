@@ -213,6 +213,30 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "About.MorePencils16", new IMAGE_BRUSH("About/More_Pencils_16", mIcon16x16));
     Set( "About.Discord2_16", new IMAGE_BRUSH("About/Discord2_16", mIcon16x16));
 
+    Set( "About.UnderlineText", FTextBlockStyle( FAppStyle::Get().GetWidgetStyle<FTextBlockStyle>( "NormalUnderlinedText" ) )
+         .SetFontSize( 10 )
+         .SetColorAndOpacity( FLinearColor( 1.f, 1.f, 1.f ) )
+    );
+    Set( "About.SmallText", FTextBlockStyle( FAppStyle::Get().GetWidgetStyle<FTextBlockStyle>( "SmallText" ) )
+         .SetColorAndOpacity( FLinearColor( 1.f, 1.f, 1.f ) )
+    );
+    Set( "About.BigText", FTextBlockStyle( FAppStyle::Get().GetWidgetStyle<FTextBlockStyle>( "NormalText" ) )
+         .SetFontSize( 15 )
+         .SetColorAndOpacity( FLinearColor( 1.f, 1.f, 1.f ) )
+    );
+
+    Set( "About.UnderlineSubduedText", FTextBlockStyle( FAppStyle::Get().GetWidgetStyle<FTextBlockStyle>( "NormalUnderlinedText" ) )
+         .SetFontSize( 10 )
+         .SetColorAndOpacity( FLinearColor( FColor( 128, 128, 128 ) ) )
+    );
+    Set( "About.SmallSubduedText", FTextBlockStyle( FAppStyle::Get().GetWidgetStyle<FTextBlockStyle>( "SmallText" ) )
+         .SetColorAndOpacity( FLinearColor( FColor( 128, 128, 128 ) ) )
+    );
+    Set( "About.BigSubduedText", FTextBlockStyle( FAppStyle::Get().GetWidgetStyle<FTextBlockStyle>( "NormalText" ) )
+         .SetFontSize( 15 )
+         .SetColorAndOpacity( FLinearColor( FColor( 128, 128, 128 ) ) )
+    );
+
     //IliadPainterEditor Commands
     // Example of how to define icons for Actions / Commands
     /* Set( "IliadPainterEditor.ZoomIn", new IMAGE_BRUSH( "PainterEditor/arrow_down_64", mIcon64x64 ) );
@@ -552,6 +576,13 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
  *****************************************************************************/
 
 TSharedPtr< FOdysseyStyleDefault > FSlateOdysseyStyle::smStyleDefaultInstance = nullptr;
+
+//static
+const FSlateStyleSet&
+FSlateOdysseyStyle::Get()
+{
+    return *smStyleDefaultInstance;
+}
 
 /*static*/
 void
