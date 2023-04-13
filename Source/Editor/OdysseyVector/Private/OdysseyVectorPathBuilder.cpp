@@ -183,11 +183,14 @@ FOdysseyVectorPathBuilder::RecordVertex()
                    , mLinkBuffer[linkID0].GetVector( true )
                    , mLinkBuffer[linkID1].GetVector( true ) );
 
-            Adjust( *mCubicSegment );
+            //Adjust( *mCubicSegment );
 
             mCubicPath->AddSegment( mCubicSegment );
 
             Smooth( mCubicSegment, mSampleArray[0]->IsSharp() );
+
+            AdjustHandle( mCubicSegment, 0, 0.5f, 1 );
+            AdjustHandle( mCubicSegment, 1, 0.5f, 1 );
 
             mCubicSegment->Invalidate();
 
@@ -377,11 +380,14 @@ FOdysseyVectorPathBuilder::RecordEnd( FOdysseyVectorVertexCubic *iVertex )
                    , mLinkBuffer[linkID0].GetVector( true )
                    , mLinkBuffer[linkID1].GetVector( true ) );
 
-            Adjust( *mCubicSegment );
+            //Adjust( *mCubicSegment );
 
             mCubicPath->AddSegment( mCubicSegment );
 
             Smooth( mCubicSegment, mSampleArray[0]->IsSharp() );
+
+            AdjustHandle( mCubicSegment, 0, 0.5f, 1 );
+            AdjustHandle( mCubicSegment, 1, 0.5f, 1 );
 
             mCubicSegment->Invalidate();
 
@@ -439,6 +445,56 @@ FOdysseyVectorPathBuilder::GetSamplePointAtParameter( double iToTalLinkLength, d
     }
 
     return point;
+}
+
+void
+FOdysseyVectorPathBuilder::AdjustHandle( FOdysseyVectorSegmentCubic* iCubicSegment, uint32 iHandleID, double iCheckAt, int iDepth )
+{
+    double totalLinkLength = GetTotalSampleLinkLength();
+    FOdysseyVectorHandleSegment* segmentHandle0 = iCubicSegment->GetHandle( 0 );
+    FOdysseyVectorHandleSegment* segmentHandle1 = iCubicSegment->GetHandle( 1 );
+    FOdysseyVectorHandleSegment* segmentHandle = iCubicSegment->GetHandle( iHandleID );
+    FOdysseyVectorVertexCubic* cubicVertex = static_cast<FOdysseyVectorVertexCubic*>( iCubicSegment->GetVertex( iHandleID ) );
+    FOdysseyVectorVertexCubic* cubicVertex0 = static_cast<FOdysseyVectorVertexCubic*>( iCubicSegment->GetVertex(0) );
+    FOdysseyVectorVertexCubic* cubicVertex1 = static_cast<FOdysseyVectorVertexCubic*>( iCubicSegment->GetVertex(1) );
+    ::ULIS::FVec2D& point0 = cubicVertex0->GetCoords( nullptr );
+    ::ULIS::FVec2D& point1 = cubicVertex1->GetCoords( nullptr );
+    ::ULIS::FVec2D& ctrlPoint0 = segmentHandle0->GetCoords();
+    ::ULIS::FVec2D& ctrlPoint1 = segmentHandle1->GetCoords();
+    ::ULIS::FVec2D& handlePoint = segmentHandle->GetCoords();
+    ::ULIS::FVec2D expectedPoint = CubicBezierPointAtParameter( point0, ctrlPoint0, ctrlPoint1, point1, iCheckAt );
+    ::ULIS::FVec2D sampledPoint = GetSamplePointAtParameter( totalLinkLength, iCheckAt );
+    ::ULIS::FVec2D& vertexPoint = cubicVertex->GetCoords( nullptr );
+    ::ULIS::FVec2D vertexPointToExpectedPoint = expectedPoint - vertexPoint;
+    ::ULIS::FVec2D vertexPointToSampledPoint = sampledPoint - vertexPoint;
+    ::ULIS::FVec2D vertexPointToHandlePoint = handlePoint - vertexPoint;
+
+    if ( vertexPointToExpectedPoint.DistanceSquared() && vertexPointToSampledPoint.DistanceSquared() && vertexPointToHandlePoint.DistanceSquared() )
+    {
+        ::ULIS::FVec2D direction = vertexPointToHandlePoint;
+
+        vertexPointToExpectedPoint.Normalize();
+        vertexPointToSampledPoint.Normalize();
+        vertexPointToHandlePoint.Normalize();
+
+        double dot0 = vertexPointToHandlePoint.DotProduct( vertexPointToExpectedPoint );
+        double angle0 = acos( ULIS::FMath::Clamp<double>( dot0, -1.0f, 1.0f ) );
+        double dot1 = vertexPointToHandlePoint.DotProduct( vertexPointToSampledPoint );
+        double angle1 = acos( ULIS::FMath::Clamp<double>( dot1, -1.0f, 1.0f ) );
+
+        if ( dot0 )
+        {
+            double ratio = ( dot1 / dot0 );
+//UE_LOG(LogTemp, Warning, TEXT("Sample: %f %f"), sampledPoint.x, sampledPoint.y );
+UE_LOG(LogTemp, Warning, TEXT("Some warning message %f %f %f %f %f"), ratio );
+
+            segmentHandle->Set( vertexPoint.x + ( direction.x * ratio ),
+                                vertexPoint.y + ( direction.y * ratio ) );
+
+            //if( iDepth > 0 )
+                //AdjustHandle( iCubicSegment, iHandleID, (cubicVertex->GetT(iCubicSegment) + iCheckAt) * 0.5f, iDepth - 1 );
+        }
+    }
 }
 
 /*

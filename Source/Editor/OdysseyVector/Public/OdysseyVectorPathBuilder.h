@@ -100,6 +100,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathBuilder : public FOdysseyVectorObject
          */
         void Adjust( FOdysseyVectorSegmentCubic& iCubicSegment );
 
+        void AdjustHandle( FOdysseyVectorSegmentCubic* iCubicSegment, uint32 iHandleID, double iCheckAt, int iDepth );
+
         FOdysseyVectorLink* GetLastSampleLink();
 
         FOdysseyVectorPoint* GetLastSamplePoint();
