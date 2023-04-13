@@ -25,6 +25,7 @@ FOdysseyAnimationEditor::~FOdysseyAnimationEditor()
 	mPlayer->OnStop().RemoveAll(this);
 	mAnimation->OnCurrentFrameChanged().RemoveAll(this);
 	mAnimation->OnRenderImageChanged().RemoveAll(this);
+	UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll(this);
 }
 
 FOdysseyAnimationEditor::FOdysseyAnimationEditor() :
@@ -54,6 +55,7 @@ FOdysseyAnimationEditor::FOdysseyAnimationEditor() :
     mTexture(),
 	mPlaybackFramesPerSecond(0)
 {
+	UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw(this, &FOdysseyAnimationEditor::OnCurrentLayerChanged);
 }
 
 //--------------------------------------------------------------------------------------
@@ -485,6 +487,14 @@ FOdysseyAnimationEditor::OnCurrentFrameChanged(UOdysseyAnimation* iAnimation)
 	UOdysseyPainterEditorTool* tool = GetSelectedTool();
 	SetSelectedTool(nullptr);
 	SetSelectedTool(tool);
+}
+
+void
+FOdysseyAnimationEditor::OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStack)
+{
+	//TODO: Maybe this should be done differently later, but we don't have time for that now
+	if (iLayerStack == LayerStack())
+		SelectDefaultTool(); //Refresh the current tool when we change layer
 }
 
 #undef LOCTEXT_NAMESPACE
