@@ -68,7 +68,7 @@ public:
 
 private:
 	//Events
-	void OnRenderImageChanged(UOdysseyAnimation* iAnimation, const TRange<int>& iRange, const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive);
+	void OnRenderImageChanged(UOdysseyAnimation* iAnimation, const FOdysseyAnimationRenderImageId& iFrameId, const TArray<::ULIS::FRectI>& iRects);
 
 private:
 	TStrongObjectPtr<UOdysseyAnimation> mAnimation;

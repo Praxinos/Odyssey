@@ -4,6 +4,7 @@
 #pragma once
 
 #include "LayerStack/OdysseyAnimationLayer.h"
+#include "LayerStack/OdysseyAnimationLayerCell.h"
 #include "Image/OdysseyBlendingMode.h"
 
 #include <ULIS>
@@ -15,7 +16,7 @@ class ODYSSEYANIMATION_API UOdysseyAnimationLayerImageRaster
     : public UOdysseyAnimationLayer
 {
     GENERATED_BODY()
-    
+
 public:
     /**
      * @brief Delegate called when something changed the result of RenderImage()
@@ -56,20 +57,45 @@ public:
 
 public:
     //UOdysseyAnimationLayer overrides
-    virtual TRange<int> GetFrameRange() const override;
+    virtual FInt32Range GetFrameRange() const override;
     virtual FString GetFrameId(int iFrameIndex) const override;
 
 public:
-    // Public API
-    TSharedPtr<FOdysseyRasterBlock> GetRasterBlock(int iFrame) const;
+    //Public API - Cells
+    UFUNCTION(BlueprintPure)
+    int GetCellsCount() const;
 
-    const TArray<TSharedPtr<FOdysseyRasterBlock>>& GetRasterBlocks() const;
+    UFUNCTION(BlueprintPure)
+    bool GetCellIndexAtFrame(int iFrameIndex, int& oCellIndex, int& oCellFrameIndex) const;
 
-    UFUNCTION(BlueprintCallable, Category="Animation | LayerStack")
-    void AddFrame(/* uint32 iLength */);
+    UFUNCTION(BlueprintPure)
+    bool GetCellFrameRange(int iIndex, FInt32Range& oFrameRange) const;
+    
+    UFUNCTION(BlueprintPure)
+    bool GetCellLength(int iIndex, int& oLength) const;
+    
+    UFUNCTION(BlueprintPure)
+    bool GetCellType(int iIndex, FName& oType) const;
 
-    UFUNCTION(BlueprintCallable, Category = "Animation | LayerStack")
-    void InsertFrame(int iIndex /*, uint32 iLength */);
+    /**
+     * @brief Inserts a Cell of given type at given index
+     * 
+     * @param iIndex 
+     * @return uint32 
+     */
+    UFUNCTION(BlueprintCallable)
+    void AddImageCell();
+
+    UFUNCTION(BlueprintCallable)
+    void RemoveCell(int iIndex);
+
+    UFUNCTION(BlueprintCallable)
+    void SetCellLength(int iIndex, int iLength);
+
+public:
+    TArray<TSharedPtr<FOdysseyAnimationLayerCell>>& GetCells();
+    TSharedPtr<FOdysseyAnimationLayerCell> GetCell(int iIndex) const;
+    TSharedPtr<FOdysseyAnimationLayerCell> GetCellAtFrame(int iFrameIndex, int& iCelFrameIndex) const;
 
 public:
     /**
@@ -102,9 +128,6 @@ public:
     virtual TSharedPtr<IOdysseyHandle> Preload(int iFrame) override;
 
 protected:
-    void OnBlockChanged(const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive, TSharedPtr<FOdysseyRasterBlock> iRasterBlock);
-    void OnBlockPtrChanged(TSharedPtr<FOdysseyRasterBlock> iRasterBlock);
-
     void IsAlphaLockedChanged();
     void OpacityChanged();
     void BlendModeChanged();
@@ -132,6 +155,9 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation | LayerStack")
     float Opacity = 1.0f;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation | LayerStack")
+    int Offset = 0;
+
 private:
-    TArray<TSharedPtr<FOdysseyRasterBlock>> mRasterBlocks;
+    TArray<TSharedPtr<FOdysseyAnimationLayerCell>> mCells;
 };

@@ -17,5 +17,5 @@ public:
     UOdysseyAnimationLayerRoot();
 
 protected:
-    virtual void RenderImageChanged(const TRange<int>& iFrameRange, const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive) override;
+    virtual void RenderImageChanged(const FOdysseyAnimationRenderImageId& iFrameId, const TArray<::ULIS::FRectI>& iRects) override;
 };

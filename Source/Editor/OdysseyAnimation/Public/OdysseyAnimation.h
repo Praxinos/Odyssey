@@ -65,24 +65,16 @@ public:
 	uint32 Width() const;
 	uint32 Height() const;
 	::ULIS::eFormat Format() const;
-	UOdysseyAnimationLayerStack* GetLayerStack() const;
-
 	FTimespan GetDuration() const;
 	TRange<int> GetFrameRange() const;
-	TRange<FTimespan> GetFrameTimeRange(int iFrameIndex) const;
 	uint32 GetFrameCount() const;
-
 	double GetFramesPerSecond() const;
-
 	int GetFrameIndexAtTime(FTimespan iTime) const;
-	FString GetFrameIdAtTime(FTimespan iTime) const;
-	FString GetFrameId(int iFrameIndex) const;
+	TRange<FTimespan> GetFrameTimeRange(uint32 iFrameIndex) const;
 
-	TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> GetBlockAtIndex(int iIndex);
-	TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> GetBlockAtTime(FTimespan iTime);
-	TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> GetBlockFromId(const FString& iId);
+	TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> GetBlockAtIndex(uint32 iIndex);
 
-	void WaitForBlockUpdate(const FString& iFrameId);
+	UOdysseyAnimationLayerStack* GetLayerStack() const;
 
 public:
     /**

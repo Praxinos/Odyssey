@@ -3,6 +3,8 @@
 
 #include "Tools/PaintBucketTool/OdysseyAnimationEditorPaintBucketTool.h"
 #include "LayerStack/OdysseyAnimationLayerImageVector.h"
+#include "LayerStack/OdysseyAnimationLayerCell.h"
+#include "Abilities/OdysseyAnimationImageRasterEditingAbility.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyAnimationEditorPaintBucketTool"
 
@@ -54,7 +56,20 @@ UOdysseyAnimationEditorPaintBucketTool::Load()
 	if (!currentLayerRaster)
 		return;
 
-	TSharedPtr<FOdysseyRasterBlock> rasterBlock = currentLayerRaster->GetRasterBlock(animation->CurrentFrame);
+    int celIndex = INDEX_NONE;
+    int celFrameIndex = INDEX_NONE;
+    if ( !currentLayerRaster->GetCellIndexAtFrame(animation->CurrentFrame, celIndex, celFrameIndex) )
+        return;
+
+    TSharedPtr<FOdysseyAnimationLayerCell> cell = currentLayerRaster->GetCell(celIndex);
+    if ( !cell )
+        return;
+    
+    TSharedPtr<FOdysseyAnimationImageRasterEditingAbility> rasterEditableAbility = cell->GetAbility<FOdysseyAnimationImageRasterEditingAbility>();
+    if ( !rasterEditableAbility )
+        return;
+
+    TSharedPtr<FOdysseyRasterBlock> rasterBlock = rasterEditableAbility->GetRasterBlock(celFrameIndex);
 	mPaintEngine.RasterBlock(rasterBlock);
 
 	//Should be managed by the tool
@@ -136,7 +151,21 @@ UOdysseyAnimationEditorPaintBucketTool::OnMouseDown( const FOdysseyPoint& iPoint
 
     if( currentRasterLayer )
     {
-        ret = UOdysseyPainterEditorPaintBucketTool::OnMouseDownRaster( currentRasterLayer->GetRasterBlock(animation->CurrentFrame)->GetBlock(), iPointInTexture, iKey );
+        int celIndex = INDEX_NONE;
+        int celFrameIndex = INDEX_NONE;
+        if ( !currentRasterLayer->GetCellIndexAtFrame(animation->CurrentFrame, celIndex, celFrameIndex) )
+            return ret;
+
+        TSharedPtr<FOdysseyAnimationLayerCell> cell = currentRasterLayer->GetCell(celIndex);
+        if ( !cell )
+            return ret;
+
+        TSharedPtr<FOdysseyAnimationImageRasterEditingAbility> rasterEditableAbility = cell->GetAbility<FOdysseyAnimationImageRasterEditingAbility>();
+        if ( !rasterEditableAbility )
+            return ret;
+
+        TSharedPtr<FOdysseyRasterBlock> rasterBlock = rasterEditableAbility->GetRasterBlock(celFrameIndex);
+        ret = UOdysseyPainterEditorPaintBucketTool::OnMouseDownRaster(rasterBlock->GetBlock(), iPointInTexture, iKey );
     }
 
     if( currentVectorLayer )

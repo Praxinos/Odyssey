@@ -3,6 +3,7 @@
 
 #include "Widgets/LayerStack/LayerImageRaster/SOdysseyAnimationLayerImageRasterTimeline.h"
 #include "LayerStack/OdysseyAnimationLayerImageRaster.h"
+#include "LayerStack/OdysseyAnimationLayerImageRasterCell.h"
 #include "OdysseyStyleSet.h"
 
 #define LOCTEXT_NAMESPACE "SOdysseyAnimationLayerImageRasterTimeline"
@@ -21,8 +22,8 @@ void SOdysseyAnimationLayerImageRasterTimeline::Construct(const FArguments& InAr
 
     ChildSlot
     [
-        SAssignNew(mListView, SListView<TSharedPtr<FOdysseyRasterBlock>>)
-        .ListItemsSource(&mAnimationLayerImageRaster->GetRasterBlocks())
+        SAssignNew(mListView, SListView<TSharedPtr<FOdysseyAnimationLayerCell>>)
+        .ListItemsSource(&mAnimationLayerImageRaster->GetCells())
         .OnGenerateRow(this, &SOdysseyAnimationLayerImageRasterTimeline::OnGenerateRow)
         //.ExternalScrollbar() //Should I use this
         .Orientation(Orient_Horizontal)
@@ -30,24 +31,31 @@ void SOdysseyAnimationLayerImageRasterTimeline::Construct(const FArguments& InAr
 }
 
 TSharedRef<ITableRow>
-SOdysseyAnimationLayerImageRasterTimeline::OnGenerateRow(TSharedPtr<FOdysseyRasterBlock> iRasterBlock, const TSharedRef<STableViewBase>& iOwnerTable)
+SOdysseyAnimationLayerImageRasterTimeline::OnGenerateRow(TSharedPtr<FOdysseyAnimationLayerCell> iCell, const TSharedRef<STableViewBase>& iOwnerTable)
 {
-    check(iRasterBlock);
-    return SNew(STableRow<TSharedPtr<FOdysseyRasterBlock>>, iOwnerTable)
-        [
-            SNew(SBox)
-		    .HeightOverride(50.f) //TODO: Move the size in an other widget or directly in the view or track itself
-		    .WidthOverride(50.f)
-		    .HAlign(HAlign_Fill)
-		    .VAlign(VAlign_Fill)
-		    [
-                SNew(SBorder)
-			    .BorderImage(FOdysseyStyle::GetBrush("FlipbookTimeline.TimelineFrameBackground"))
-			    .BorderBackgroundColor(FLinearColor(1.f, 1.f, 1.f))
-			    .HAlign(HAlign_Fill)
-			    .VAlign(VAlign_Fill)
-            ]
-        ];
+    check(iCell);
+
+    if (iCell->GetType() == FOdysseyAnimationLayerImageRasterCell::StaticType())
+    {
+        //TODO: Create a SOdysseyAnimationLayerImageRasterCell widget
+        return SNew(STableRow<TSharedPtr<FOdysseyAnimationLayerCell>>, iOwnerTable)
+            [
+                SNew(SBox)
+                .HeightOverride(50.f) //TODO: Move the size in an other widget or directly in the view or track itself
+                .WidthOverride(50.f)
+                .HAlign(HAlign_Fill)
+                .VAlign(VAlign_Fill)
+                [
+                    SNew(SBorder)
+                    .BorderImage(FOdysseyStyle::GetBrush("FlipbookTimeline.TimelineFrameBackground"))
+                    .BorderBackgroundColor(FLinearColor(1.f, 1.f, 1.f))
+                    .HAlign(HAlign_Fill)
+                    .VAlign(VAlign_Fill)
+                ]
+            ];
+    }
+
+    return SNew(STableRow<TSharedPtr<FOdysseyAnimationLayerCell>>, iOwnerTable);
 }
 
 void

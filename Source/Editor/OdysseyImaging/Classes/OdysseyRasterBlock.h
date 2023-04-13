@@ -38,7 +38,12 @@ public:
     /**
      * @brief Delegate called when the block pixels content changed
      */
-    DECLARE_MULTICAST_DELEGATE_TwoParams(FOnBlockChanged, const TArray<::ULIS::FRectI>&, bool)
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnBlockChanged, const TArray<::ULIS::FRectI>&)
+
+    /**
+     * @brief Delegate called when the block pixels content changed
+     */
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnBlockCommited, const TArray<::ULIS::FRectI>&)
     
     /**
      * @brief Delegate called when the edited block pixels content changed
@@ -233,6 +238,9 @@ private:
 
     //Called when the block tiles content changed
     FOnBlockChanged mOnBlockChanged;
+
+    //Called when the block tiles content is Commited
+    FOnBlockCommited mOnBlockCommited;
 
     //Called when the undoable block pixels changed by an internal action (like undo)
     //FOnUndoableBlockChanged mOnUndoableBlockChanged;

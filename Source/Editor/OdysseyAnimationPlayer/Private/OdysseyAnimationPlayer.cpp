@@ -4,6 +4,7 @@
 #include "OdysseyAnimationPlayer.h"
 #include "OdysseyAnimation.h"
 #include "OdysseyRectUtils.h"
+#include "Events/OdysseyAnimationOnRenderImageChangedEvent.h"
 
 #include "ULISLoaderModule.h"
 
@@ -12,6 +13,7 @@ UOdysseyAnimationPlayer::PostInitProperties()
 {
     Super::PostInitProperties();
 	UOdysseyAnimation::OnRenderImageChanged().AddUObject(this, &UOdysseyAnimationPlayer::OnAnimationRenderImageChanged);
+	UOdysseyAnimation::OnRenderImageIdChanged().AddUObject(this, &UOdysseyAnimationPlayer::OnAnimationRenderImageIdChanged);
 }
 
 FSimpleMulticastDelegate&
@@ -256,16 +258,33 @@ UOdysseyAnimationPlayer::UpdateTexture()
 }
 
 void
-UOdysseyAnimationPlayer::OnAnimationRenderImageChanged(UOdysseyAnimation* iAnimation, const TRange<int>& iRange, const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive)
+UOdysseyAnimationPlayer::OnAnimationRenderImageDataChanged(UOdysseyAnimation* iAnimation, const FOdysseyAnimationRenderImageId& iFrameId, const TArray<::ULIS::FRectI>& iRects)
+{
+	if (iAnimation != Animation)
+		return;
+
+	if ( mFrameId != iFrameId )
+		return;
+
+	mInvalidRects.Append(iRects);
+	mInvalidRects = OdysseyRectUtils::MergeRects(mInvalidRects);
+}
+
+void
+UOdysseyAnimationPlayer::OnAnimationRenderImageIdChanged(UOdysseyAnimation* iAnimation)
 {
 	if (iAnimation != Animation)
 		return;
 
 	int frameIndex = Animation->GetFrameIndexAtTime(mCurrentTime);
-	if (!iRange.Contains(frameIndex))
+	if (frameIndex == INDEX_NONE)
 		return;
 
-	mInvalidRects.Append(iRects);
+	FOdysseyAnimationRenderImageId frameId = Animation->GetFrameId(frameIndex);
+	if ( frameId == mFrameId )
+		return;
+
+	mInvalidRects.Add(::ULIS::FRectI::FromXYWH(0, 0, Animation->GetWidth(), Animation->GetHeight()));
 	mInvalidRects = OdysseyRectUtils::MergeRects(mInvalidRects);
 }
 

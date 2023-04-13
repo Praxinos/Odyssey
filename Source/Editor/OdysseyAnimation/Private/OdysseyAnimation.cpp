@@ -68,7 +68,7 @@ UOdysseyAnimation::GetDuration() const
 	return GetFrameTimeRange(GetFrameCount() - 1).GetUpperBoundValue();
 }
 
-TRange<int>
+FInt32Range
 UOdysseyAnimation::GetFrameRange() const
 {
 	//TODO: deduce frame count from :
@@ -79,7 +79,7 @@ UOdysseyAnimation::GetFrameRange() const
 uint32
 UOdysseyAnimation::GetFrameCount() const
 {
-	TRange<int> frameRange = mLayerStack->GetFrameRange();
+	FInt32Range frameRange = mLayerStack->GetFrameRange();
 
 	//TODO: deduce frame count from :
 	// - startPoint / endPoint
@@ -267,7 +267,8 @@ void
 UOdysseyAnimation::PostInitProperties()
 {
 	Super::PostInitProperties();
-	UOdysseyAnimationLayerStack::OnRenderImageChanged().AddUObject(this, &UOdysseyAnimation::OnLayerStackRenderImageChanged);
+	UOdysseyAnimationLayerStack::OnRenderImageDataChanged().AddUObject(this, &UOdysseyAnimation::OnLayerStackRenderImageDataChanged);
+	UOdysseyAnimationLayerStack::OnRenderImageIdChanged().AddUObject(this, &UOdysseyAnimation::OnLayerStackRenderImageIdChanged);
 }
 
 void
@@ -367,7 +368,19 @@ UOdysseyAnimation::GenerateFrameBlock(const FString& iId)
 }
 
 void
-UOdysseyAnimation::OnLayerStackRenderImageChanged(UOdysseyAnimationLayerStack* iLayerStack, const TRange<int>& iRange, const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive)
+UOdysseyAnimation::OnLayerStackRenderDataImageChanged(UOdysseyAnimationLayerStack* iLayerStack, const FGuid& iFrameId, const TArray<::ULIS::FRectI>& iRects)
+{
+	OnRenderImageDataChanged().Broadcast(this, iFrameId, iRects);
+}
+
+void
+UOdysseyAnimation::OnLayerStackRenderDataImageCommited(UOdysseyAnimationLayerStack* iLayerStack, const FGuid& iFrameId, const TArray<::ULIS::FRectI>& iRects)
+{
+	OnRenderImageDataCommited().Broadcast(this, iFrameId, iRects);
+}
+
+void
+UOdysseyAnimation::OnLayerStackRenderImageIdChanged(UOdysseyAnimationLayerStack* iLayerStack)
 {
 	if (iLayerStack != mLayerStack)
 		return;
@@ -429,7 +442,7 @@ UOdysseyAnimation::OnLayerStackRenderImageChanged(UOdysseyAnimationLayerStack* i
 		frameBlock.mInvalidRects = OdysseyRectUtils::MergeRects(frameBlock.mInvalidRects);
 	}
 
-	OnRenderImageChanged().Broadcast(this, iRange, iRects, iIsInteractive);
+	OnRenderImageIdChanged().Broadcast(this);
 }
 
 

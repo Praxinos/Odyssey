@@ -40,7 +40,7 @@ protected:
 
 private:
 	//Events
-	void OnRenderImageChanged(UOdysseyAnimation* iAnimation, const TRange<int>& iRange, const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive);
+	void OnRenderImageDataChanged(UOdysseyAnimation* iAnimation, const FOdysseyAnimationRenderImageId& iFrameId, const TArray<::ULIS::FRectI>& iRects);
 
 private:
 	UOdysseyAnimation* mAnimation;

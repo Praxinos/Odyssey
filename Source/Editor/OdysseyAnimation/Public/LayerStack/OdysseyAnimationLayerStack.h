@@ -5,6 +5,7 @@
 
 #include "OdysseyLayerStack.h"
 #include "Misc/OdysseyHandle.h"
+#include "Events/OdysseyAnimationOnRenderImageIdChangedEvent.h"
 
 #include <ULIS>
 
@@ -26,11 +27,11 @@ public:
      * @brief Delegate called when something changed the result of RenderImage()
      * 
      * @param UOdysseyAnimationLayerStack* LayerStack
-     * @param const TRange<int>& FrameRange
+     * @param const FGuid& FrameRange
      * @param const TArray<::ULIS::FRectI>& Rects
      * @param bool IsInteractive
      */
-    DECLARE_MULTICAST_DELEGATE_FourParams(FOnRenderImageChanged, UOdysseyAnimationLayerStack*, const TRange<int>&, const TArray<::ULIS::FRectI>&, bool)
+    DECLARE_MULTICAST_DELEGATE_FourParams(FOnRenderImageChanged, UOdysseyAnimationLayerStack*, const FGuid&, const TArray<::ULIS::FRectI>&, bool)
     static FOnRenderImageChanged& OnRenderImageChanged(); //Delegate
 
 public:
@@ -42,9 +43,9 @@ public:
     /**
      * @brief Will return the actual frame range 
      * 
-     * @return TRange<int> 
+     * @return FInt32Range 
      */
-    TRange<int> GetFrameRange() const;
+    FInt32Range GetFrameRange() const;
     
     /**
      * @brief Returns a string identifying the frame composition (which layers)
@@ -75,5 +76,5 @@ private:
      * 
      * Called by the child layer RenderImageChanged() function
      */
-    void OnRootLayerRenderImageChanged(UOdysseyAnimationLayer* iLayer, const TRange<int>& iFrameRange, const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive);
+    void OnRootLayerRenderImageDataChanged(UOdysseyAnimationLayer* iLayer, const FOdysseyAnimationRenderImageId& iFrameId, const TArray<::ULIS::FRectI>& iRects);
 };

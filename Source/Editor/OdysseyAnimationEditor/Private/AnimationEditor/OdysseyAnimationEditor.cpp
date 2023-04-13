@@ -449,8 +449,9 @@ FOdysseyAnimationEditor::OnPlayerStop()
 }
 
 void
-FOdysseyAnimationEditor::OnRenderImageChanged(UOdysseyAnimation* iAnimation, const TRange<int>& iRange, const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive)
+FOdysseyAnimationEditor::OnRenderImageIdCommited(UOdysseyAnimation* iAnimation)
 {
+	//TODO: call only when non interactive change
 	if ( iAnimation != mAnimation )
 		return;
 

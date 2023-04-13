@@ -89,7 +89,8 @@ public:
     virtual TSharedPtr<IOdysseyHandle> Preload() override;
 
 protected:
-    void OnBlockChanged(const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive);
+    void OnBlockChanged(const TArray<::ULIS::FRectI>& iRects);
+    void OnBlockCommited(const TArray<::ULIS::FRectI>& iRects);
     void OnBlockPtrChanged();
 
     void IsAlphaLockedChanged();

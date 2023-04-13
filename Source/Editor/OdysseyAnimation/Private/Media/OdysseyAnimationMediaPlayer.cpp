@@ -215,8 +215,10 @@ FOdysseyAnimationMediaPlayer::GetPlayerFeatureFlag(EFeatureFlag iFlag) const
 }
 
 void
-FOdysseyAnimationMediaPlayer::OnRenderImageChanged(UOdysseyAnimation* iAnimation, const TRange<int>& iRange, const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive)
+FOdysseyAnimationMediaPlayer::OnRenderImageChanged(UOdysseyAnimation* iAnimation, const FOdysseyAnimationRenderImageId& iFrameId, const TArray<::ULIS::FRectI>& iRects)
 {
+	//TODO: Should be something like => OnAnimationStructureChanged or limitschanged, or whatever
+
 	if ( iAnimation != mAnimation.Get() )
 		return;
 

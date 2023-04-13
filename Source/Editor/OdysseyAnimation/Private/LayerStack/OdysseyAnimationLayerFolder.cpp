@@ -167,28 +167,28 @@ UOdysseyAnimationLayerFolder::GetMergeLayerTypesFromTypes(TSet<UClass*> iLayerTy
 }
 
 void
-UOdysseyAnimationLayerFolder::OpacityChanged()
+UOdysseyAnimationLayerFolder::OpacityChanged(bool iIsInteractive)
 {
     OnOpacityChanged().Broadcast(this);
-    RenderImageChanged(false);
+    RenderImageIdChanged();
 }
 
 void
 UOdysseyAnimationLayerFolder::BlendModeChanged()
 {
     OnBlendModeChanged().Broadcast(this);
-    RenderImageChanged(false);
+    RenderImageIdChanged();
 }
 
 void
-UOdysseyAnimationLayerFolder::PropertyChanged(const FName& iPropertyName)
+UOdysseyAnimationLayerFolder::PropertyChanged(const FName& iPropertyName, bool iIsInteractive)
 {
-    Super::PropertyChanged(iPropertyName);
+    Super::PropertyChanged(iPropertyName, iIsInteractive);
 
     if (iPropertyName == "BlendMode")
         BlendModeChanged();
     if (iPropertyName == "Opacity")
-        OpacityChanged();
+        OpacityChanged(iIsInteractive);
 }
 
 #undef LOCTEXT_NAMESPACE

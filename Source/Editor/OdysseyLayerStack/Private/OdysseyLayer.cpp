@@ -185,7 +185,7 @@ UOdysseyLayer::ChildrenChanged()
 }
 
 void
-UOdysseyLayer::PropertyChanged(const FName& iPropertyName)
+UOdysseyLayer::PropertyChanged(const FName& iPropertyName, bool iIsInteractive)
 {
     if ( iPropertyName == "Name" )
         NameChanged();
@@ -205,11 +205,7 @@ void
 UOdysseyLayer::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent)
 {
     Super::PostEditChangeProperty(PropertyChangedEvent);
-
-    if (PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive)
-        return;
-
-    PropertyChanged(PropertyChangedEvent.GetPropertyName());
+    PropertyChanged(PropertyChangedEvent.GetPropertyName(), PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive);
 }
 
 void
@@ -223,6 +219,6 @@ UOdysseyLayer::PostTransacted(const FTransactionObjectEvent& iTransactionEvent)
     const TArray<FName>& changedPropertyNames = iTransactionEvent.GetChangedProperties();
     for ( const FName& propertyName : changedPropertyNames )
     {
-        PropertyChanged(propertyName);
+        PropertyChanged(propertyName, false);
     }
 }

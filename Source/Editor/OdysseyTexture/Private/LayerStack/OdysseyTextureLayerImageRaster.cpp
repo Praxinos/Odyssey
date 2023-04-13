@@ -68,6 +68,7 @@ UOdysseyTextureLayerImageRaster::OnCreated_Implementation()
     //Caches the tiles on disk, we do this
     RasterBlock->SetBlock(block);
     RasterBlock->OnBlockChanged().AddUObject(this, &::UOdysseyTextureLayerImageRaster::OnBlockChanged);
+    RasterBlock->OnBlockCommited().AddUObject(this, &::UOdysseyTextureLayerImageRaster::OnBlockCommited);
     RasterBlock->OnBlockPtrChanged().AddUObject(this, &::UOdysseyTextureLayerImageRaster::OnBlockPtrChanged);
 }
 
@@ -78,9 +79,15 @@ UOdysseyTextureLayerImageRaster::GetRasterBlock() const
 }
 
 void
-UOdysseyTextureLayerImageRaster::OnBlockChanged(const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive)
+UOdysseyTextureLayerImageRaster::OnBlockChanged(const TArray<::ULIS::FRectI>& iRects)
 {
-    RenderImageChanged(iRects, iIsInteractive);
+    RenderImageChanged(iRects, true);
+}
+
+void
+UOdysseyTextureLayerImageRaster::OnBlockCommited(const TArray<::ULIS::FRectI>& iRects)
+{
+    RenderImageChanged(iRects, false);
 }
 
 void
@@ -240,8 +247,10 @@ UOdysseyTextureLayerImageRaster::PostLoad()
     if ( RasterBlock )
     {
         RasterBlock->OnBlockChanged().RemoveAll(this);
+        RasterBlock->OnBlockCommited().RemoveAll(this);
         RasterBlock->OnBlockPtrChanged().RemoveAll(this);
         RasterBlock->OnBlockChanged().AddUObject(this, &::UOdysseyTextureLayerImageRaster::OnBlockChanged);
+        RasterBlock->OnBlockCommited().AddUObject(this, &::UOdysseyTextureLayerImageRaster::OnBlockCommited);
         RasterBlock->OnBlockPtrChanged().AddUObject(this, &::UOdysseyTextureLayerImageRaster::OnBlockPtrChanged);
     }
 }

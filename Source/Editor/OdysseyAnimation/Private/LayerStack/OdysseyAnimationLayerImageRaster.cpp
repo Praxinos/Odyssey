@@ -7,7 +7,8 @@
 #include "ULISEventBuilder.h"
 #include "ULISLoaderModule.h"
 #include "OdysseyStyleSet.h"
-#include "OdysseyRasterBlock.h"
+#include "Abilities/OdysseyAnimationImageProviderAbility.h"
+#include "LayerStack/OdysseyAnimationLayerImageRasterCell.h"
 
 #define LOCTEXT_NAMESPACE "UOdysseyAnimationLayerImageRaster"
 
@@ -52,103 +53,161 @@ UOdysseyAnimationLayerImageRaster::UOdysseyAnimationLayerImageRaster()
 void
 UOdysseyAnimationLayerImageRaster::OnCreated_Implementation()
 {
-    AddFrame();
+    AddImageCell();
 }
 
-TRange<int>
+FInt32Range
 UOdysseyAnimationLayerImageRaster::GetFrameRange() const
 {
-    return TRange<int>::Inclusive(0, mRasterBlocks.Num() - 1);
+    uint32 length = 0;
+    for (TSharedPtr<FOdysseyAnimationLayerCell> cell : mCells)
+    {
+        length += cell->GetLength();
+    }
+    return FInt32Range::Inclusive(Offset, Offset + length - 1);
 }
 
 FString
 UOdysseyAnimationLayerImageRaster::GetFrameId(int iFrameIndex) const
 {
-    if (iFrameIndex < 0 || iFrameIndex >= mRasterBlocks.Num())
+    int cellIndex = INDEX_NONE;
+    int cellFrameIndex = INDEX_NONE;
+    if (!GetCellIndexAtFrame(iFrameIndex, cellIndex, cellFrameIndex))
         return "";
 
-	return mRasterBlocks[iFrameIndex]->GetId().ToString();
+    TSharedPtr<FOdysseyAnimationLayerCell> cell = mCells[cellIndex];
+    TSharedPtr<FOdysseyAnimationImageProviderAbility> imageProviderAbility = cell->GetAbility<FOdysseyAnimationImageProviderAbility>();
+    if (!imageProviderAbility )
+        return "";
+	return imageProviderAbility->GetFrameId(cellFrameIndex);
 }
 
-TSharedPtr<FOdysseyRasterBlock>
-UOdysseyAnimationLayerImageRaster::GetRasterBlock(int iFrame) const
+TSharedRef<IOdysseyAnimationRenderImageState>
+UOdysseyAnimationLayerImageRaster::CreateRenderImageState() const
 {
-    if (iFrame < 0 || iFrame >= mRasterBlocks.Num())
+    return MakeShared<FOdysseyAnimationLayerImageRasterRenderImageState>(this);
+}
+
+int
+UOdysseyAnimationLayerImageRaster::GetCellsCount() const
+{
+    return mCells.Num();
+}
+
+bool
+UOdysseyAnimationLayerImageRaster::GetCellIndexAtFrame(int iFrameIndex, int& oCellIndex, int& oCellFrameIndex) const
+{
+    if( iFrameIndex < Offset)
+        return false;
+
+    int frameIndex = Offset;
+    for (int i = 0; i < mCells.Num(); i++)
+    {
+        TSharedPtr<FOdysseyAnimationLayerCell> cell = mCells[i];
+        frameIndex += cell->GetLength();
+
+        if (frameIndex >= iFrameIndex)
+        {
+            oCellIndex = i;
+            oCellFrameIndex = frameIndex - iFrameIndex;
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool
+UOdysseyAnimationLayerImageRaster::GetCellFrameRange(int iIndex, FInt32Range& oFrameRange) const
+{
+    if (iIndex < 0 || iIndex >= mCells.Num())
+        return false;
+
+    uint32 startFrame = Offset;
+    for (int i = 0; i < iIndex; i++ )
+    {
+        startFrame += mCells[i]->GetLength();
+    }
+    oFrameRange = FInt32Range::Inclusive(startFrame, startFrame + mCells[iIndex]->GetLength() - 1);
+    return true;
+}
+
+bool
+UOdysseyAnimationLayerImageRaster::GetCellLength(int iIndex, int& oLength) const
+{
+    if (iIndex < 0 || iIndex >= mCells.Num())
+        return false;
+
+    oLength = mCells[iIndex]->GetLength();
+    return true;
+}
+
+bool
+UOdysseyAnimationLayerImageRaster::GetCellType(int iIndex, FName& oType) const
+{
+    if (iIndex < 0 || iIndex >= mCells.Num())
+        return false;
+
+    oType = mCells[iIndex]->GetType();
+    return true;
+}
+
+void
+UOdysseyAnimationLayerImageRaster::AddImageCell()
+{
+    UOdysseyAnimation* animation = GetAnimation();
+    if ( !animation )
+        return;
+
+    //TODO: Use iIndex to Insert
+    mCells.Add(FOdysseyAnimationLayerImageRasterCell::Create(this, animation->Width(), animation->Height(), animation->Format()));
+    RenderImageIdChanged();
+}
+
+void
+UOdysseyAnimationLayerImageRaster::RemoveCell(int iIndex)
+{
+    if (iIndex < 0 || iIndex >= mCells.Num())
+        return;
+
+    mCells.RemoveAt(iIndex);
+    RenderImageIdChanged();
+}
+
+void
+UOdysseyAnimationLayerImageRaster::SetCellLength(int iIndex, int iLength)
+{
+    if (iIndex < 0 || iIndex >= mCells.Num())
+        return;
+
+    mCells[iIndex]->SetLength(iLength);
+    RenderImageIdChanged();
+}
+
+TArray<TSharedPtr<FOdysseyAnimationLayerCell>>&
+UOdysseyAnimationLayerImageRaster::GetCells()
+{
+    return mCells;
+}
+
+TSharedPtr<FOdysseyAnimationLayerCell>
+UOdysseyAnimationLayerImageRaster::GetCell(int iIndex) const
+{
+    if ( iIndex < 0 || iIndex >= mCells.Num() )
         return nullptr;
 
-	return mRasterBlocks[iFrame];
+    return mCells[iIndex];
 }
 
-const TArray<TSharedPtr<FOdysseyRasterBlock>>&
-UOdysseyAnimationLayerImageRaster::GetRasterBlocks() const
+TSharedPtr<FOdysseyAnimationLayerCell> 
+UOdysseyAnimationLayerImageRaster::GetCellAtFrame(int iFrameIndex, int& iCelFrameIndex) const
 {
-    return mRasterBlocks;
-}
+    int celIndex = INDEX_NONE;
+    int celFrameIndex = INDEX_NONE;
+    if ( !GetCellIndexAtFrame(iFrameIndex, celIndex, celFrameIndex) )
+        return nullptr;
 
-void
-UOdysseyAnimationLayerImageRaster::AddFrame(/* uint32 iLength */)
-{
-    UOdysseyAnimation* animation = GetAnimation();
-    if ( !animation )
-        return;
-
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = MakeShared<::ULIS::FBlock>(animation->Width(), animation->Height(), animation->Format());
-
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(animation->Format());
-    ctx.Clear(*block.Get());
-    ctx.Finish();
-
-    TSharedPtr<FOdysseyRasterBlock> rasterBlock = MakeShared<FOdysseyRasterBlock>(this);
-    rasterBlock->SetBlock(block);
-    rasterBlock->OnBlockChanged().AddUObject(this, &::UOdysseyAnimationLayerImageRaster::OnBlockChanged, rasterBlock);
-    rasterBlock->OnBlockPtrChanged().AddUObject(this, &::UOdysseyAnimationLayerImageRaster::OnBlockPtrChanged, rasterBlock);
-
-    mRasterBlocks.Add(rasterBlock);
-    OnCellsChanged().Broadcast(this);
-    RenderImageChanged(TRange<int>::Inclusive(mRasterBlocks.Num() - 1, mRasterBlocks.Num() - 1), false);
-}
-
-void
-UOdysseyAnimationLayerImageRaster::InsertFrame(int iIndex /*, uint32 iLength */)
-{
-    UOdysseyAnimation* animation = GetAnimation();
-    if ( !animation )
-        return;
-
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = MakeShared<::ULIS::FBlock>(animation->Width(), animation->Height(), animation->Format());
-
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(animation->Format());
-    ctx.Clear(*block.Get());
-    ctx.Finish();
-
-    TSharedPtr<FOdysseyRasterBlock> rasterBlock = MakeShared<FOdysseyRasterBlock>(this);
-    rasterBlock->SetBlock(block);
-    rasterBlock->OnBlockChanged().AddUObject(this, &::UOdysseyAnimationLayerImageRaster::OnBlockChanged, rasterBlock);
-    rasterBlock->OnBlockPtrChanged().AddUObject(this, &::UOdysseyAnimationLayerImageRaster::OnBlockPtrChanged, rasterBlock);
-
-    mRasterBlocks.Insert(rasterBlock, iIndex);
-    OnCellsChanged().Broadcast(this);
-    RenderImageChanged(TRange<int>::Inclusive(iIndex, iIndex), false);
-}
-
-void
-UOdysseyAnimationLayerImageRaster::OnBlockChanged(const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive, TSharedPtr<FOdysseyRasterBlock> iBlock)
-{
-    int frameIndex = mRasterBlocks.Find(iBlock);
-    if (frameIndex == INDEX_NONE)
-        return;
-
-    RenderImageChanged(TRange<int>::Inclusive(frameIndex, frameIndex), iRects, iIsInteractive);
-}
-
-void
-UOdysseyAnimationLayerImageRaster::OnBlockPtrChanged(TSharedPtr<FOdysseyRasterBlock> iBlock)
-{
-    int frameIndex = mRasterBlocks.Find(iBlock);
-    if (frameIndex == INDEX_NONE)
-        return;
-
-    RenderImageChanged(TRange<int>::Inclusive(frameIndex, frameIndex), false);
+    return mCells[celIndex];
 }
 
 TArray<::ULIS::FEvent>
@@ -160,12 +219,17 @@ UOdysseyAnimationLayerImageRaster::RenderImage(TSharedPtr<::ULIS::FBlock, ESPMod
     if (!ioBlock)
         return iWaitList;
 
-    if (iFrame < 0 || iFrame >= mRasterBlocks.Num())
+    int cellIndex = INDEX_NONE;
+    int cellFrameIndex = INDEX_NONE;
+    if (!GetCellIndexAtFrame(iFrame, cellIndex, cellFrameIndex))
         return iWaitList;
 
-    TSharedPtr<FOdysseyRasterBlock> rasterBlock = mRasterBlocks[iFrame];
+    TSharedPtr<FOdysseyAnimationLayerCell> cell = mCells[cellIndex];
+    TSharedPtr<FOdysseyAnimationImageProviderAbility> imageAbility = cell->GetAbility<FOdysseyAnimationImageProviderAbility>();
+    if (!imageAbility)
+        return iWaitList;
 
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ULISRasterBlock = rasterBlock->GetBlock();
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ULISRasterBlock = imageAbility->GetBlock(cellFrameIndex);
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(ULISRasterBlock->Format());
 
     TArray<::ULIS::FEvent> eventConvertAndExecute = ULISUtils::ConvertAndExecute(ioBlock, ULISRasterBlock->Format(), iRect, iPos, iWaitList,
@@ -203,12 +267,17 @@ UOdysseyAnimationLayerImageRaster::CopyImage(TSharedPtr<::ULIS::FBlock, ESPMode:
     if (!ioBlock)
         return iWaitList;
 
-    if (iFrame < 0 || iFrame >= mRasterBlocks.Num())
+    int cellIndex = INDEX_NONE;
+    int cellFrameIndex = INDEX_NONE;
+    if (!GetCellIndexAtFrame(iFrame, cellIndex, cellFrameIndex))
         return iWaitList;
 
-    TSharedPtr<FOdysseyRasterBlock> rasterBlock = mRasterBlocks[iFrame];
+    TSharedPtr<FOdysseyAnimationLayerCell> cell = mCells[cellIndex];
+    TSharedPtr<FOdysseyAnimationImageProviderAbility> imageAbility = cell->GetAbility<FOdysseyAnimationImageProviderAbility>();
+    if (!imageAbility)
+        return iWaitList;
 
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ULISRasterBlock = rasterBlock->GetBlock();
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ULISRasterBlock = imageAbility->GetBlock(cellFrameIndex);
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(ULISRasterBlock->Format());
 
     TArray<::ULIS::FEvent> eventConvertAndExecute = ULISUtils::ConvertAndExecute(ioBlock, ULISRasterBlock->Format(), iRect, iPos, iWaitList,
@@ -276,14 +345,14 @@ void
 UOdysseyAnimationLayerImageRaster::OpacityChanged()
 {
     OnOpacityChanged().Broadcast(this);
-    RenderImageChanged(false);
+    RenderImageIdChanged();
 }
 
 void
 UOdysseyAnimationLayerImageRaster::BlendModeChanged()
 {
     OnBlendModeChanged().Broadcast(this);
-    RenderImageChanged(false);
+    RenderImageIdChanged();
 }
 
 void
@@ -304,24 +373,23 @@ UOdysseyAnimationLayerImageRaster::PostLoad()
 {
     Super::PostLoad();
 
-    //TODO: bind callbacks for all cells
+    for (TSharedPtr<FOdysseyAnimationLayerCell> cell : mCells)
+        cell->PostLoad();
 
-    for ( TSharedPtr<FOdysseyRasterBlock> rasterBlock : mRasterBlocks )
+    /* for ( TSharedPtr<FOdysseyRasterBlock> rasterBlock : mRasterBlocks )
     {
         rasterBlock->OnBlockChanged().RemoveAll(this);
         rasterBlock->OnBlockPtrChanged().RemoveAll(this);
         rasterBlock->OnBlockChanged().AddUObject(this, &::UOdysseyAnimationLayerImageRaster::OnBlockChanged, rasterBlock);
         rasterBlock->OnBlockPtrChanged().AddUObject(this, &::UOdysseyAnimationLayerImageRaster::OnBlockPtrChanged, rasterBlock);
-    }
+    } */
 }
 
 void
 UOdysseyAnimationLayerImageRaster::PostDuplicate(bool bDuplicateForPIE)
 {
-    for (TSharedPtr<FOdysseyRasterBlock> rasterBlock : mRasterBlocks)
-    {
-        rasterBlock->PostDuplicate();
-    }
+    for (TSharedPtr<FOdysseyAnimationLayerCell> cell : mCells)
+        cell->PostDuplicate();
 
     Super::PostDuplicate(bDuplicateForPIE);
 }
@@ -329,10 +397,13 @@ UOdysseyAnimationLayerImageRaster::PostDuplicate(bool bDuplicateForPIE)
 TSharedPtr<IOdysseyHandle>
 UOdysseyAnimationLayerImageRaster::Preload(int iFrame)
 {
-    if (iFrame < 0 || iFrame >= mRasterBlocks.Num() )
+    int cellIndex = INDEX_NONE;
+    int cellFrameIndex = INDEX_NONE;
+    if (!GetCellIndexAtFrame(iFrame, cellIndex, cellFrameIndex))
         return nullptr;
 
-    return mRasterBlocks[iFrame]->Preload();
+    TSharedPtr<FOdysseyAnimationLayerCell> cell = mCells[cellIndex];
+    return cell->Preload(cellFrameIndex);
 }
 
 void
@@ -342,18 +413,35 @@ UOdysseyAnimationLayerImageRaster::Serialize(FArchive& Ar)
 
     if ( Ar.IsLoading() )
     {
-        mRasterBlocks.Empty();
+        mCells.Empty();
     }
 
-    int32 numBlocks = mRasterBlocks.Num();
-    Ar << numBlocks;
-    for ( int i = 0; i < numBlocks; i++ )
+    int32 numCells = mCells.Num();
+    Ar << numCells;
+    for ( int i = 0; i < numCells; i++ )
     {
         if ( Ar.IsLoading() )
         {
-            mRasterBlocks.Add(MakeShared<FOdysseyRasterBlock>(this));
+            FName cellType;
+            Ar << cellType;
+            TSharedPtr<FOdysseyAnimationLayerCell> cell;
+            if ( cellType == FOdysseyAnimationLayerImageRasterCell::StaticType() )
+            {
+                cell = MakeShared<FOdysseyAnimationLayerImageRasterCell>(this);
+            }
+            else
+            {
+                checkf(false, TEXT(""))
+            }
+            cell->Serialize(Ar);
+            mCells.Add(cell);
         }
-        Ar << *mRasterBlocks[i];
+        else
+        {
+            FName cellType = mCells[i]->GetType();
+            Ar << cellType;
+            mCells[i]->Serialize(Ar);
+        }
     }
 }
 

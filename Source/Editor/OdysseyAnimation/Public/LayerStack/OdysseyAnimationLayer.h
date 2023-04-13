@@ -24,12 +24,32 @@ public:
      * @brief Delegate called when something changed the result of RenderImage()
      * 
      * @param UOdysseyAnimationLayer* Layer
-     * @param const TRange<int>& FrameRange
+     * @param const FOdysseyAnimationRenderImageId& FrameId
      * @param const TArray<::ULIS::FRectI>& Rects
      * @param bool IsInteractive
      */
-    DECLARE_MULTICAST_DELEGATE_FourParams(FOnRenderImageChanged, UOdysseyAnimationLayer*, const TRange<int>&, const TArray<::ULIS::FRectI>&, bool)
-    static FOnRenderImageChanged& OnRenderImageChanged();
+    DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnRenderImageDataChanged, UOdysseyAnimationLayer*, const FOdysseyAnimationRenderImageId&, const TArray<::ULIS::FRectI>&)
+    static FOnRenderImageChanged& OnRenderImageDataChanged();
+
+    /**
+     * @brief Delegate called when something changed the result of RenderImage()
+     * 
+     * @param UOdysseyAnimationLayer* Layer
+     * @param const FOdysseyAnimationRenderImageId& FrameId
+     * @param const TArray<::ULIS::FRectI>& Rects
+     * @param bool IsInteractive
+     */
+    DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnRenderImageDataChanged, UOdysseyAnimationLayer*, const FOdysseyAnimationRenderImageId&, const TArray<::ULIS::FRectI>&)
+    static FOnRenderImageChanged& OnRenderImageDataCommited();
+
+    /**
+     * @brief Delegate called when something changed the result of RenderImage()
+     * 
+     * @param UOdysseyAnimationLayer* Layer
+     * @param TSharedPtr<IOdysseyAnimationOnRenderImageIdChangedEvent> Event
+     */
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnRenderImageIdChanged, UOdysseyAnimationLayer*)
+    static FOnRenderImageIdChanged& OnRenderImageIdChanged();
 
 public:
     UOdysseyAnimationLayer();
@@ -41,7 +61,7 @@ public:
 public:
     //Getters
     UOdysseyAnimation* GetAnimation();
-    virtual TRange<int> GetFrameRange() const;
+    virtual FInt32Range GetFrameRange() const;
 
     /**
      * @brief Returns a string identifying the frame composition (which layers)
@@ -58,7 +78,7 @@ public:
      * The range can be closed or open
      * 
      */
-    //TRange<int> GetRenderImageFrameRange() const;
+    //FInt32Range GetRenderImageFrameRange() const;
 
     //TRange<float> GetRenderSoundFrameRange() const;
 
@@ -95,17 +115,21 @@ public:
      * If no range is provided, the full range of the layer is used
      * If no rects is provided, the full rect of the layer is used
      */
-    void RenderImageChanged(bool iIsInteractive);
-    void RenderImageChanged(const TRange<int>& iFrameRange, bool iIsInteractive);
-    void RenderImageChanged(const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive);
-    virtual void RenderImageChanged(const TRange<int>& iFrameRange, const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive);
+    void RenderImageDataChanged(const FGuid& iFrameId);
+    virtual void RenderImageDataChanged(const FGuid& iFrameId, const TArray<::ULIS::FRectI>& iRects);
+    void RenderImageDataCommited(const FGuid& iFrameId);
+    virtual void RenderImageDataCommited(const FGuid& iFrameId, const TArray<::ULIS::FRectI>& iRects);
 
     /**
      * @brief Called when one of the direct children layer render image changed
      * 
      * Called by the child layer RenderImageChanged() function
      */
-    virtual void ChildRenderImageChanged(UOdysseyAnimationLayer* iLayer, const TRange<int>& iFrameRange, const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive);
+    virtual void ChildRenderImageChanged(UOdysseyAnimationLayer* iLayer, const FGuid& iFrameId, const TArray<::ULIS::FRectI>& iRects);
+    virtual void ChildRenderImageCommited(UOdysseyAnimationLayer* iLayer, const FGuid& iFrameId, const TArray<::ULIS::FRectI>& iRects);
+
+    void RenderImageIdChanged();
+    void RenderImageIdCommited();
 
     /**
      * @brief Preloads the layers and keeps them preloaded untile the hiven handles are destroyed
@@ -124,5 +148,4 @@ private:
     // OPTIMIZATIONS
     //
     TMap<int, TWeakPtr<IOdysseyHandle>> mPreloadHandles;
-
 };

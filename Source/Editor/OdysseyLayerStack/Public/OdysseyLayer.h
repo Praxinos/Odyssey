@@ -179,7 +179,7 @@ protected:
     virtual void ParentChanged();
     virtual void ChildrenChanged();
 
-    virtual void PropertyChanged(const FName& iPropertyName);
+    virtual void PropertyChanged(const FName& iPropertyName, bool iIsInteractive);
 
 public:
     // UObject overrides

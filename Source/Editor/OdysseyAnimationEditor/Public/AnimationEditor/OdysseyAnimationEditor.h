@@ -90,7 +90,7 @@ private:
     //Called when the media player has seeked successfully
     void OnPlayerStop();
     void OnCurrentFrameChanged(UOdysseyAnimation* iAnimation);
-    void OnRenderImageChanged(UOdysseyAnimation* iAnimation, const TRange<int>& iRange, const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive);
+    void OnRenderImageIdCommited(UOdysseyAnimation* iAnimation);
     void OnCurrentLayerChanged(class UOdysseyLayerStack* iLayerStack);
 
 private:

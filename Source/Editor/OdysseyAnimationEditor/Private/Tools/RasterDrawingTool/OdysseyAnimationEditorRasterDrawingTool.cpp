@@ -40,7 +40,20 @@ UOdysseyAnimationEditorRasterDrawingTool::Load()
 	if (!layer)
 		return;
 
-	TSharedPtr<FOdysseyRasterBlock> rasterBlock = layer->GetRasterBlock(animation->CurrentFrame);
+	int celIndex = INDEX_NONE;
+	int celFrameIndex = INDEX_NONE;
+	if ( !layer->GetCellIndexAtFrame(animation->CurrentFrame, celIndex, celFrameIndex) )
+		return;
+
+	TSharedPtr<FOdysseyAnimationLayerCell> cell = layer->GetCell(celIndex);
+	if ( !cell )
+		return;
+
+	TSharedPtr<FOdysseyAnimationImageRasterEditingAbility> rasterEditableAbility = cell->GetAbility<FOdysseyAnimationImageRasterEditingAbility>();
+	if ( !rasterEditableAbility )
+		return;
+
+	TSharedPtr<FOdysseyRasterBlock> rasterBlock = rasterEditableAbility->GetRasterBlock(celFrameIndex);
 	mPaintEngine.RasterBlock(rasterBlock);
 
 	if ( BrushInstance )

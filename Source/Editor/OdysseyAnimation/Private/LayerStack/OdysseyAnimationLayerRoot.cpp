@@ -9,20 +9,21 @@ UOdysseyAnimationLayerRoot::UOdysseyAnimationLayerRoot()
 }
 
 void
-UOdysseyAnimationLayerRoot::RenderImageChanged(const TRange<int>& iFrameRange, const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive)
+UOdysseyAnimationLayerRoot::RenderImageDataChanged(const FOdysseyAnimationRenderImageId& iFrameId, const TArray<::ULIS::FRectI>& iRects)
 {
     UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(GetLayerStack());
 
     //inform the layerstack directly first, then send a event for others
     if (layerStack)
-        layerStack->OnRootLayerRenderImageChanged(this, iFrameRange, iRects, true);
-    OnRenderImageChanged().Broadcast(this, iFrameRange, iRects, true);
+        layerStack->OnRootLayerRenderImageChanged(this, iFrameId, iRects);
+
+    OnRenderImageChanged().Broadcast(this, iFrameId, iRects);
 
     if (!iIsInteractive)
     {
         //inform the layerstack directly first, then send a event for others
         if (layerStack)
-            layerStack->OnRootLayerRenderImageChanged(this, iFrameRange, iRects, false);
-        OnRenderImageChanged().Broadcast(this, iFrameRange, iRects, false);
+            layerStack->OnRootLayerRenderImageChanged(this, iFrameId, iRects);
+        OnRenderImageChanged().Broadcast(this, iFrameId, iRects);
     }
 }

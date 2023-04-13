@@ -7,8 +7,6 @@
 #include "ULISLoaderModule.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyAnimationLayer"
-
-
 class FOdysseyAnimationLayerPreloadHandle : public IOdysseyHandle
 {
 public:
@@ -22,12 +20,16 @@ public:
         , mFrame( iFrame )
     {
         UpdateChildrenHandles();
-        UOdysseyLayer::OnChildrenChanged().AddRaw(this, &FOdysseyAnimationLayerPreloadHandle::OnChildrenChanged);
+        UOdysseyLayer::OnRenderImageIdChanged().AddRaw(this, &FOdysseyAnimationLayerPreloadHandle::OnRenderImageIdChanged);
     }
 
-    void OnChildrenChanged(UOdysseyLayer* iLayer)
+    void OnRenderImageIdChanged(UOdysseyLayer* iLayer)
     {
         if ( iLayer != mAnimationLayer )
+            return;
+
+        FOdysseyAnimationRenderImageId frameId = iLayer->GetFrameId(iFrame);
+        if (mFrameId == frameId)
             return;
 
         UpdateChildrenHandles();
@@ -53,6 +55,8 @@ private:
     TArray<TSharedPtr<IOdysseyHandle>> mChildrenHandles;
     int mFrame;
 };
+
+//===========================
 
 UOdysseyAnimationLayer::UOdysseyAnimationLayer()
     : mPropertyTracker(this)
@@ -93,10 +97,10 @@ UOdysseyAnimationLayer::GetAnimation()
     return layerStack->GetAnimation();
 }
 
-TRange<int>
+FInt32Range
 UOdysseyAnimationLayer::GetFrameRange() const
 {
-    TArray<TRange<int>> ranges;
+    TArray<FInt32Range> ranges;
     const TArray<UOdysseyLayer*> layers = Children;
     for (UOdysseyLayer* layer : layers)
     {
@@ -107,7 +111,7 @@ UOdysseyAnimationLayer::GetFrameRange() const
         ranges.Add(animationLayer->GetFrameRange());
     }
 
-    return TRange<int>::Hull(ranges);
+    return FInt32Range::Hull(ranges);
 }
 
 FString
@@ -127,11 +131,18 @@ UOdysseyAnimationLayer::GetFrameId(int iFrameIndex) const
     return id;
 }
 
-UOdysseyAnimationLayer::FOnRenderImageChanged&
-UOdysseyAnimationLayer::OnRenderImageChanged()
+UOdysseyAnimationLayer::FOnRenderImageDataChanged&
+UOdysseyAnimationLayer::OnRenderImageDataChanged()
 {
-    static FOnRenderImageChanged onRenderImageChanged;
-    return onRenderImageChanged;
+    static FOnRenderImageDataChanged onRenderImageDataChanged;
+    return onRenderImageDataChanged;
+}
+
+UOdysseyAnimationLayer::FOnRenderImageIdChanged&
+UOdysseyAnimationLayer::OnRenderImageIdChanged()
+{
+    static FOnRenderImageIdChanged onRenderImageIdChanged;
+    return onRenderImageIdChanged;
 }
 
 TArray<::ULIS::FEvent>
@@ -176,42 +187,18 @@ UOdysseyAnimationLayer::CopyImage(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe
 }
 
 void
-UOdysseyAnimationLayer::RenderImageChanged(bool iIsInteractive)
+UOdysseyAnimationLayer::RenderImageDataChanged(const FOdysseyAnimationRenderImageId& iFrameId)
 {
     UOdysseyAnimation* animation = GetAnimation();
     if (!animation)
         return;
 
-    RenderImageChanged(GetFrameRange(), { ::ULIS::FRectI::FromXYWH(0, 0, animation->Width(), animation->Height()) }, iIsInteractive);
+    RenderImageChanged(iFrameId, { ::ULIS::FRectI::FromXYWH(0, 0, animation->Width(), animation->Height()) });
 }
 
 void
-UOdysseyAnimationLayer::RenderImageChanged(const TRange<int>& iFrameRange, bool iIsInteractive)
+UOdysseyAnimationLayer::RenderImageChanged(const FOdysseyAnimationRenderImageId& iFrameId, const TArray<::ULIS::FRectI>& iRects)
 {
-    UOdysseyAnimation* animation = GetAnimation();
-    if (!animation)
-        return;
-
-    RenderImageChanged(iFrameRange, { ::ULIS::FRectI::FromXYWH(0, 0, animation->Width(), animation->Height())}, iIsInteractive);
-}
-
-void
-UOdysseyAnimationLayer::RenderImageChanged(const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive)
-{
-    UOdysseyAnimation* animation = GetAnimation();
-    if (!animation)
-        return;
-
-    RenderImageChanged(GetFrameRange(), iRects, iIsInteractive);
-}
-
-void
-UOdysseyAnimationLayer::RenderImageChanged(const TRange<int>& iFrameRange, const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive)
-{
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(GetLayerStack());
-    if (!layerStack)
-        return;
-
     if ( !Parent )
         return;
 
@@ -221,31 +208,38 @@ UOdysseyAnimationLayer::RenderImageChanged(const TRange<int>& iFrameRange, const
 
     UOdysseyAnimationLayer* parent = Cast<UOdysseyAnimationLayer>(Parent);
     if (parent)
-        parent->ChildRenderImageChanged(this, iFrameRange, iRects, iIsInteractive);
+        parent->ChildRenderImageChanged(this, iFrameId, iRects);
     
-    OnRenderImageChanged().Broadcast(this, iFrameRange, iRects, true); //always send at least 1 interactive event
+    OnRenderImageDataChanged().Broadcast(this, iFrameId, iRects); //always send at least 1 interactive event
     if (!iIsInteractive )
-        OnRenderImageChanged().Broadcast(this, iFrameRange, iRects, false);
+        OnRenderImageDataChanged().Broadcast(this, iFrameId, iRects);
 }
 
 void
-UOdysseyAnimationLayer::ChildRenderImageChanged(UOdysseyAnimationLayer* iLayer, const TRange<int>& iFrameRange, const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive)
+UOdysseyAnimationLayer::ChildRenderImageDataChanged(UOdysseyAnimationLayer* iLayer, const FOdysseyAnimationRenderImageId& iFrameId, const TArray<::ULIS::FRectI>& iRects)
 {
-    RenderImageChanged(iFrameRange, iRects, iIsInteractive);
+    RenderImageDataChanged(iFrameId, iRects);
+}
+
+void
+UOdysseyAnimationLayer::RenderImageIdChanged()
+{
+    OnRenderImageIdChanged().Broadcast(this);
 }
 
 void
 UOdysseyAnimationLayer::IsActivatedChanged()
 {
     Super::IsActivatedChanged();
-    RenderImageChanged(false);
+    RenderImageChanged(mRenderImageState->GetFrameIds());
 }
 
 void
 UOdysseyAnimationLayer::OnTrackerChildrenChanged(const TArray<UOdysseyLayer*>& iOldChildren)
 {
+
     //TODO: Find a way to invalid only frame ranges that actually changed, instead of the while layer
-    RenderImageChanged(false);
+    RenderImageChanged(mRenderImageState->GetFrameIds());
 }
 
 TSharedPtr<IOdysseyHandle>

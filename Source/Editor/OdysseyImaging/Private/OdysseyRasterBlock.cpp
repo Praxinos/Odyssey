@@ -292,7 +292,7 @@ FOdysseyRasterBlock::UpdateFromUndoableBlock(const TArray<::ULIS::FRectI>& iRect
 
     //Send Interactive Update event
     if (iRects.Num() > 0)
-        OnBlockChanged().Broadcast(iRects, true); //always send at least one interactive event
+        OnBlockChanged().Broadcast(iRects); //always send at least one interactive event
 }
 
 void
@@ -316,7 +316,7 @@ FOdysseyRasterBlock::CommitUndoableBlock()
     if (mInvalidTileMap.InvalidRects().Num() <= 0)
         return;
 
-    OnBlockChanged().Broadcast(mInvalidTileMap.InvalidRects(), false);
+    OnBlockCommited().Broadcast(mInvalidTileMap.InvalidRects());
     mRasterBlockUndoBuilder.StoreUndo(AsShared());
     mInvalidTileMap.Clear();
     mOriginalTileBlocks.Empty();
@@ -365,6 +365,13 @@ FOdysseyRasterBlock::OnBlockChanged()
 {
     return mOnBlockChanged;
 }
+
+FOdysseyRasterBlock::FOnBlockCommited&
+FOdysseyRasterBlock::OnBlockCommited()
+{
+    return mOnBlockCommited;
+}
+
 /*
 FOdysseyRasterBlock::FOnUndoableBlockChanged&
 FOdysseyRasterBlock::OnUndoableBlockChanged()

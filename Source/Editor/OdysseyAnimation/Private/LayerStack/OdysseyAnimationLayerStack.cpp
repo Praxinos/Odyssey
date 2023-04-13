@@ -7,6 +7,8 @@
 #include "LayerStack/OdysseyAnimationLayerImageRaster.h"
 #include "OdysseyRectUtils.h"
 
+//===============================================
+
 UOdysseyAnimationLayerStack::FOnRenderImageChanged&
 UOdysseyAnimationLayerStack::OnRenderImageChanged()
 {
@@ -37,7 +39,7 @@ UOdysseyAnimationLayerStack::GetAnimation() const
     return nullptr;    
 }
 
-TRange<int>
+FInt32Range
 UOdysseyAnimationLayerStack::GetFrameRange() const
 {
     return Cast<UOdysseyAnimationLayerRoot>(LayerRoot)->GetFrameRange();
@@ -79,9 +81,9 @@ UOdysseyAnimationLayerStack::RenderImage(TSharedPtr<::ULIS::FBlock, ESPMode::Thr
 }
 
 void
-UOdysseyAnimationLayerStack::OnRootLayerRenderImageChanged(UOdysseyAnimationLayer* iLayer, const TRange<int>& iFrameRange, const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive)
+UOdysseyAnimationLayerStack::OnRootLayerRenderImageDataChanged(UOdysseyAnimationLayer* iLayer, const FOdysseyAnimationRenderImageId& iFrameRange, const TArray<::ULIS::FRectI>& iRects)
 {
-    OnRenderImageChanged().Broadcast(this, iFrameRange, iRects, iIsInteractive);
+    OnRenderImageDataChanged().Broadcast(this, iFrameId, iRects);
 }
 
 TSharedPtr<IOdysseyHandle>

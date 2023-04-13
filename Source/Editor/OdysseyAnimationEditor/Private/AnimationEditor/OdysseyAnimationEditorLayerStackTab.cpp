@@ -163,7 +163,7 @@ FOdysseyAnimationEditorLayerStackTab::OnAddFrameClicked()
         return FReply::Unhandled();
     
     UOdysseyAnimationLayerImageRaster* layerRaster = Cast<UOdysseyAnimationLayerImageRaster>(layerStack->CurrentLayer.Get());
-    layerRaster->AddFrame();
+    layerRaster->AddImageCell();
 
     return FReply::Handled();
 }

@@ -84,7 +84,8 @@ protected:
 private:
 	void UpdateTexture();
 	void CopyBlockToTexture(TSharedPtr<::ULIS::FBlock> iBlock, const TArray<::ULIS::FRectI>& iRects);
-	void OnAnimationRenderImageChanged(UOdysseyAnimation* iAnimation, const TRange<int>& iRange, const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive);
+	void OnAnimationRenderImageDataChanged(UOdysseyAnimation* iAnimation, const FOdysseyAnimationRenderImageId& iFrameId, const TArray<::ULIS::FRectI>& iRects);
+	void OnAnimationRenderImageIdChanged(UOdysseyAnimation* iAnimation);
 
 private:
 	UPROPERTY()
