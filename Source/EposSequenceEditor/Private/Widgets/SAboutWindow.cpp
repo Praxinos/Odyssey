@@ -168,7 +168,7 @@ SAboutWindow::Construct( const FArguments& iArgs )
                 .Padding( FMargin( 0.f, 1.f ) )
                 [
                     SNew( STextBlock )
-                    .Text( LOCTEXT( "copyright.team-names-1", "Elodie Moog, Fabrice Debarge, Thomas Schmitt, Clément Berthaud, " ) )
+                    .Text( LOCTEXT( "copyright.team-names-1", "Elodie Moog, Fabrice Debarge, Thomas Schmitt, Cléa Gonay, " ) )
                     .Justification( ETextJustify::Center )
                     .TextStyle( FEposSequenceEditorStyle::Get(), "About.SmallText" )
                 ]
@@ -177,9 +177,27 @@ SAboutWindow::Construct( const FArguments& iArgs )
                 .Padding( FMargin( 0.f, 1.f ) )
                 [
                     SNew( STextBlock )
-                    .Text( LOCTEXT( "copyright.team-names-2", "Naomiki Sato, Antoine Antin, Eric Scholl, Michael Schreiner" ) )
+                    .Text( LOCTEXT( "copyright.team-names-2", "Naomiki Sato, Gary Gabriel, Eric Scholl, Michael Schreiner" ) )
                     .Justification( ETextJustify::Center )
                     .TextStyle( FEposSequenceEditorStyle::Get(), "About.SmallText" )
+                ]
+                + SVerticalBox::Slot()
+                .AutoHeight()
+                .Padding( FMargin( 0.f, 5.f ) )
+                [
+                    SNew( STextBlock )
+                    .Text( LOCTEXT( "copyright.team-former-label", "Former Collaborators: " ) )
+                    .Justification( ETextJustify::Center )
+                    .TextStyle( FEposSequenceEditorStyle::Get(), "About.UnderlineSubduedText" )
+                ]
+                + SVerticalBox::Slot()
+                .AutoHeight()
+                .Padding( FMargin( 0.f, 1.f ) )
+                [
+                    SNew( STextBlock )
+                    .Text( LOCTEXT( "copyright.team-former-names", "Clément Berthaud, Antoine Antin" ) )
+                    .Justification( ETextJustify::Center )
+                    .TextStyle( FEposSequenceEditorStyle::Get(), "About.SmallSubduedText" )
                 ]
             ]
             +SVerticalBox::Slot()

@@ -78,7 +78,7 @@ FEposSequenceEditorStyle::InitSequencer()
     Set( "Sequencer.InfoBar",
          FTextBlockStyle( FAppStyle::Get().GetWidgetStyle<FTextBlockStyle>( "Sequencer.ToolBar.Heading" ) )
          .SetFont( DEFAULT_FONT( "Regular", 10 ) )
-         .SetColorAndOpacity( FLinearColor( 0.4f, 0.4, 0.4f, 1.0f ) )
+         .SetColorAndOpacity( FLinearColor( FColor( 96, 96, 96 ) ) )
     );
 
     Set( "Settings", new IMAGE_BRUSH_SVG( "epos-settings", Icon20x20 ) );
@@ -158,14 +158,28 @@ FEposSequenceEditorStyle::InitAbout()
     Set( "About.Epos", new IMAGE_BRUSH_SVG( "About/epos", Icon128x128 ) );
 
     Set( "About.UnderlineText", FTextBlockStyle( FAppStyle::Get().GetWidgetStyle<FTextBlockStyle>( "NormalUnderlinedText" ) )
-                                .SetFontSize( 10 )
-                                .SetColorAndOpacity( FLinearColor( 1.f, 1.f, 1.f ) ) );
+         .SetFontSize( 10 )
+         .SetColorAndOpacity( FLinearColor( 1.f, 1.f, 1.f ) )
+    );
     Set( "About.SmallText", FTextBlockStyle( FAppStyle::Get().GetWidgetStyle<FTextBlockStyle>( "SmallText" ) )
-                            .SetColorAndOpacity( FLinearColor( 1.f, 1.f, 1.f ) ) );
+         .SetColorAndOpacity( FLinearColor( 1.f, 1.f, 1.f ) )
+    );
     Set( "About.BigText", FTextBlockStyle( FAppStyle::Get().GetWidgetStyle<FTextBlockStyle>( "NormalText" ) )
-                          .SetFontSize( 15 )
-                          .SetColorAndOpacity( FLinearColor( 1.f, 1.f, 1.f ) ) );
+         .SetFontSize( 15 )
+         .SetColorAndOpacity( FLinearColor( 1.f, 1.f, 1.f ) )
+    );
 
+    Set( "About.UnderlineSubduedText", FTextBlockStyle( FAppStyle::Get().GetWidgetStyle<FTextBlockStyle>( "NormalUnderlinedText" ) )
+         .SetFontSize( 10 )
+         .SetColorAndOpacity( FLinearColor( FColor( 128, 128, 128 ) ) )
+    );
+    Set( "About.SmallSubduedText", FTextBlockStyle( FAppStyle::Get().GetWidgetStyle<FTextBlockStyle>( "SmallText" ) )
+         .SetColorAndOpacity( FLinearColor( FColor( 128, 128, 128 ) ) )
+    );
+    Set( "About.BigSubduedText", FTextBlockStyle( FAppStyle::Get().GetWidgetStyle<FTextBlockStyle>( "NormalText" ) )
+         .SetFontSize( 15 )
+         .SetColorAndOpacity( FLinearColor( FColor( 128, 128, 128 ) ) )
+    );
 }
 
 void
