@@ -33,7 +33,14 @@ FOdysseyRasterBlockMutator::SetRasterBlock(TSharedPtr<FOdysseyRasterBlock> iRast
 {
     Commit();
     mRasterBlock = iRasterBlock;
-    mInvalidTileMap = FULISInvalidTileMap(64, mRasterBlock->GetWidth(), mRasterBlock->GetHeight());
+    if ( mRasterBlock )
+    {
+        mInvalidTileMap = FULISInvalidTileMap(64, mRasterBlock->GetWidth(), mRasterBlock->GetHeight());
+    }
+    else
+    {
+        mInvalidTileMap = FULISInvalidTileMap();
+    }
 }
 
 const FULISInvalidTileMap&
