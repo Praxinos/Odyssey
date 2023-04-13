@@ -17,6 +17,7 @@ public:
     static void Initialize();
     static void Shutdown();
 
+    static const FSlateStyleSet& Get();
 private:
     static TSharedRef< FOdysseyStyleDefault > Create();
 

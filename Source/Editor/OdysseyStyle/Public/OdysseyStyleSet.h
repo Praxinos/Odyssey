@@ -6,7 +6,7 @@
 #include "CoreMinimal.h"
 #include "Styling/SlateColor.h"
 #include "Styling/StyleDefaults.h"
-#include "Styling/ISlateStyle.h"
+#include "Styling/SlateStyle.h"
 
 struct FSlateDynamicImageBrush;
 
@@ -16,6 +16,8 @@ struct FSlateDynamicImageBrush;
 class ODYSSEYSTYLE_API FOdysseyStyle
 {
 public:
+    static const FSlateStyleSet& Get();
+
     template< class T >
     static const T&             GetWidgetStyle( FName PropertyName, const ANSICHAR* Specifier = NULL );
 
