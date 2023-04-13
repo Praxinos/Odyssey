@@ -186,7 +186,7 @@ SAboutWindow::Construct( const FArguments& iArgs )
                 .Padding( FMargin( 0.f, 5.f ) )
                 [
                     SNew( STextBlock )
-                    .Text( LOCTEXT( "copyright.team-former-label", "Former Collaborators: " ) )
+                    .Text( LOCTEXT( "copyright.team-former-label", "Thanks to our former collaborators: " ) )
                     .Justification( ETextJustify::Center )
                     .TextStyle( FEposSequenceEditorStyle::Get(), "About.UnderlineSubduedText" )
                 ]
