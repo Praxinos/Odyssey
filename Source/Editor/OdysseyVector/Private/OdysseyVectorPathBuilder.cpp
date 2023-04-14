@@ -10,6 +10,31 @@ FOdysseyVectorPointSample::FOdysseyVectorPointSample( double iX, double iY, doub
 {
 }
 
+FOdysseyVectorPointSample::FOdysseyVectorPointSample( std::vector<FOdysseyVectorPoint*> iPointArray )
+{
+    double averageX = 0.0f;
+    double averageY = 0.0f;
+    double averageRadius = 0.0f;
+    uint32 pointCount = iPointArray.size();
+
+    if( pointCount )
+    {
+        for( uint32 i = 0; i < pointCount; i++ )
+        {
+            averageX += iPointArray[i]->GetX();
+            averageY += iPointArray[i]->GetY();
+            averageRadius += iPointArray[i]->GetRadius();
+        }
+
+        averageX /= pointCount;
+        averageY /= pointCount;
+        averageRadius /= pointCount;
+    }
+
+    Set( averageX, averageY );
+    SetRadius( averageRadius );
+}
+
 void
 FOdysseyVectorPointSample::SetSharp( bool iIsSharp )
 {
@@ -219,7 +244,7 @@ FOdysseyVectorPathBuilder::RecordSample( double iX, double iY, double iRadius, u
 
     if( dif.Distance() >= 8.0f )
     {
-        FOdysseyVectorPointSample sample = FOdysseyVectorPointSample( iX, iY, iRadius );
+        FOdysseyVectorPointSample sample = FOdysseyVectorPointSample( /*iX, iY, iRadius*/mPointArray ); // average
         uint32 sampleIndex = mSampleBuffer.size();
 
         sample.SetID( iID );
@@ -486,13 +511,13 @@ FOdysseyVectorPathBuilder::AdjustHandle( FOdysseyVectorSegmentCubic* iCubicSegme
         {
             double ratio = ( dot1 / dot0 );
 //UE_LOG(LogTemp, Warning, TEXT("Sample: %f %f"), sampledPoint.x, sampledPoint.y );
-UE_LOG(LogTemp, Warning, TEXT("Some warning message %f %f %f %f %f"), ratio );
+//UE_LOG(LogTemp, Warning, TEXT("Some warning message %f %f %f %f %f"), ratio );
 
             segmentHandle->Set( vertexPoint.x + ( direction.x * ratio ),
                                 vertexPoint.y + ( direction.y * ratio ) );
 
-            //if( iDepth > 0 )
-                //AdjustHandle( iCubicSegment, iHandleID, (cubicVertex->GetT(iCubicSegment) + iCheckAt) * 0.5f, iDepth - 1 );
+            if( iDepth > 0 )
+                AdjustHandle( iCubicSegment, iHandleID, (cubicVertex->GetT(iCubicSegment) + iCheckAt) * 0.5f, iDepth - 1 );
         }
     }
 }
@@ -749,15 +774,10 @@ FOdysseyVectorPathBuilder::DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags )
         }
     }
 
-/*
     blctx->setFillStyle(BLRgba32(0xFFFF00FF));
 
-
-    for( std::list<FOdysseyVectorPoint*>::iterator it = mSamplePointList.begin(); it != mSamplePointList.end(); ++it )
+    for( uint32 i = 0; i < mSampleArray.size() - 1; i++ )
     {
-        FOdysseyVectorPoint *samplePoint = (*it);
-
-        blctx->fillRect( samplePoint->GetX() - 3, samplePoint->GetY() - 3, 6, 6  );
+        blctx->fillRect( mSampleArray[i]->GetX() - 3, mSampleArray[i]->GetY() - 3, 6, 6  );
     }
-*/
 }

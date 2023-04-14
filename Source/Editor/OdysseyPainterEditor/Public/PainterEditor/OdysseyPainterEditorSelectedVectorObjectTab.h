@@ -8,6 +8,7 @@
 #include "View/OdysseyVectorViewObject.h"
 #include "View/OdysseyVectorViewPath.h"
 #include "View/OdysseyVectorViewEllipse.h"
+#include "View/OdysseyVectorViewGroupPaint.h"
 #include <ULIS>
 
 class FOdysseyPainterEditor;
@@ -24,6 +25,7 @@ public:
     UOdysseyVectorViewObject* GetObjectView();
     UOdysseyVectorViewPath* GetPathView();
     UOdysseyVectorViewEllipse* GetEllipseView();
+    UOdysseyVectorViewGroupPaint* GetGroupPaintView();
 
 protected:
     // FOdysseyEditorTab interface
@@ -45,4 +47,5 @@ private:
     UOdysseyVectorViewObject *mObjectView;
     UOdysseyVectorViewPath *mPathView;
     UOdysseyVectorViewEllipse *mEllipseView;
+    UOdysseyVectorViewGroupPaint *mGroupPaintView;
 };

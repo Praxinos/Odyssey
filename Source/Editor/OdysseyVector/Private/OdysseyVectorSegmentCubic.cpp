@@ -555,7 +555,7 @@ CreateAlmostIntersection( FAlmostIntersect aisx[4]
     for( int i = 0; i < 4; i++ )
     {
 
-        if( aisx[i].distance <= iTolerance )
+        if( aisx[i].distance < iTolerance )
         {
             FOdysseyVectorVertexIntersection* intersectionVertex = new FOdysseyVectorVertexIntersection();
 
@@ -580,25 +580,15 @@ FOdysseyVectorSegmentCubic::Intersect( FOdysseyVectorSegmentCubic& iOther
                                      , double iTolerance
                                      , std::vector<FOdysseyVectorVertexIntersection*>& iIntersectionVertexArray )
 {
-    ::ULIS::FVec2D& point0 = GetVertex(0)->GetCoords( nullptr );
-    ::ULIS::FVec2D& point1 = GetVertex(1)->GetCoords( nullptr );
-    ::ULIS::FVec2D& otherPoint0 = iOther.GetVertex(0)->GetCoords( nullptr );
-    ::ULIS::FVec2D& otherPoint1 = iOther.GetVertex(1)->GetCoords( nullptr );
-    /*::ULIS::FVec2D ctrlPoint0 = { mCtrlPoint[0]->GetX(), mCtrlPoint[0]->GetY() };
-    ::ULIS::FVec2D ctrlPoint1 = { mCtrlPoint[1]->GetX(), mCtrlPoint[1]->GetY() };*/
+    FOdysseyVectorVertex* vertex0 = GetVertex(0);
+    FOdysseyVectorVertex* vertex1 = GetVertex(1);
+    ::ULIS::FVec2D& point0 = vertex0->GetCoords( nullptr );
+    ::ULIS::FVec2D& point1 = vertex1->GetCoords( nullptr );
+    FOdysseyVectorVertex* otherVertex0 = iOther.GetVertex(0);
+    FOdysseyVectorVertex* otherVertex1 = iOther.GetVertex(1);
+    ::ULIS::FVec2D& otherPoint0 = otherVertex0->GetCoords( nullptr );
+    ::ULIS::FVec2D& otherPoint1 = otherVertex1->GetCoords( nullptr );
     uint32 intersectionCount = 0;
-/*
-    double shortestP0Distance = DBL_MAX;
-    int shortP0SegmentIndex = -1;
-    double shortestP1Distance = DBL_MAX;
-    int shortP1SegmentIndex = -1;
-*/
-    FAlmostIntersect aisx[4];
-
-    aisx[0].distance = DBL_MAX;
-    aisx[1].distance = DBL_MAX;
-    aisx[2].distance = DBL_MAX;
-    aisx[3].distance = DBL_MAX;
 
     for ( int i = 0; i < mPolygonCache.size(); i++ )
     {
@@ -656,16 +646,20 @@ FOdysseyVectorSegmentCubic::Intersect( FOdysseyVectorSegmentCubic& iOther
                         {
                             double distance;
                             double t = FOdysseyVector::DistanceToSegment( otherPoint0
-                                                        , poly->lineVertex[0]
-                                                        , poly->lineVertex[1]
-                                                        , distance );
+                                                                        , poly->lineVertex[0]
+                                                                        , poly->lineVertex[1]
+                                                                        , distance );
 
                             if( ( t >= 0.0f ) && ( t <= 1.0f ) )
-                                if( distance < aisx[0].distance )
+                                if( distance < otherVertex0->GetDistanceToNearestSegment() )
                                 {
-                                    aisx[0].distance = distance;
-                                    aisx[0].t        = poly->fromT + ( ( poly->toT - poly->fromT ) * t );
-                                    aisx[0].otherT   = 0.0f;
+                                    double segmentT = poly->fromT + ( ( poly->toT - poly->fromT ) * t );
+
+                                    otherVertex0->SetNearestSegment( this, distance, segmentT );
+
+                                    //aisx[0].distance = distance;
+                                    //aisx[0].t        = poly->fromT + ( ( poly->toT - poly->fromT ) * t );
+                                    //aisx[0].otherT   = 0.0f;
                                 }
                         }
 
@@ -673,16 +667,20 @@ FOdysseyVectorSegmentCubic::Intersect( FOdysseyVectorSegmentCubic& iOther
                         {
                             double distance;
                             double t = FOdysseyVector::DistanceToSegment( otherPoint1
-                                                        , poly->lineVertex[0]
-                                                        , poly->lineVertex[1]
-                                                        , distance );
+                                                                        , poly->lineVertex[0]
+                                                                        , poly->lineVertex[1]
+                                                                        , distance );
 
                             if( ( t >= 0.0f ) && ( t <= 1.0f ) )
-                                if( distance < aisx[1].distance )
+                                if( distance < otherVertex1->GetDistanceToNearestSegment() )
                                 {
-                                    aisx[1].distance = distance;
-                                    aisx[1].t        = poly->fromT + ( ( poly->toT - poly->fromT ) * t );
-                                    aisx[1].otherT   = 1.0f;
+                                    double segmentT = poly->fromT + ( ( poly->toT - poly->fromT ) * t );
+
+                                    otherVertex1->SetNearestSegment( this, distance, segmentT );
+
+                                    //aisx[1].distance = distance;
+                                    //aisx[1].t        = poly->fromT + ( ( poly->toT - poly->fromT ) * t );
+                                    //aisx[1].otherT   = 1.0f;
                                 }
                         }
 
@@ -690,16 +688,20 @@ FOdysseyVectorSegmentCubic::Intersect( FOdysseyVectorSegmentCubic& iOther
                         {
                             double distance;
                             double t = FOdysseyVector::DistanceToSegment( point0
-                                                        , interPoly->lineVertex[0]
-                                                        , interPoly->lineVertex[1]
-                                                        , distance );
+                                                                        , interPoly->lineVertex[0]
+                                                                        , interPoly->lineVertex[1]
+                                                                        , distance );
 
                             if( ( t >= 0.0f ) && ( t <= 1.0f ) )
-                                if( distance < aisx[2].distance )
+                                if( distance < vertex0->GetDistanceToNearestSegment() )
                                 {
-                                    aisx[2].distance = distance;
-                                    aisx[2].t        = 0.0f;
-                                    aisx[2].otherT   = interPoly->fromT + ( ( interPoly->toT - interPoly->fromT ) * t );
+                                    double otherSegmentT = interPoly->fromT + ( ( interPoly->toT - interPoly->fromT ) * t );
+
+                                    vertex0->SetNearestSegment( &iOther, distance, otherSegmentT );
+
+                                    //aisx[2].distance = distance;
+                                    //aisx[2].t        = 0.0f;
+                                    //aisx[2].otherT   = interPoly->fromT + ( ( interPoly->toT - interPoly->fromT ) * t );
                                 }
                         }
 
@@ -707,16 +709,20 @@ FOdysseyVectorSegmentCubic::Intersect( FOdysseyVectorSegmentCubic& iOther
                         {
                             double distance;
                             double t = FOdysseyVector::DistanceToSegment( point1
-                                                        , interPoly->lineVertex[0]
-                                                        , interPoly->lineVertex[1]
-                                                        , distance );
+                                                                        , interPoly->lineVertex[0]
+                                                                        , interPoly->lineVertex[1]
+                                                                        , distance );
 
                             if( ( t >= 0.0f ) && ( t <= 1.0f ) )
-                                if( distance < aisx[3].distance )
+                                if( distance < vertex1->GetDistanceToNearestSegment() )
                                 {
-                                    aisx[3].distance = distance;
-                                    aisx[3].t        = 1.0f;
-                                    aisx[3].otherT   = interPoly->fromT + ( ( interPoly->toT - interPoly->fromT ) * t );
+                                    double otherSegmentT = interPoly->fromT + ( ( interPoly->toT - interPoly->fromT ) * t );
+
+                                    vertex1->SetNearestSegment( &iOther, distance, otherSegmentT );
+
+                                    //aisx[3].distance = distance;
+                                    //aisx[3].t        = 1.0f;
+                                    //aisx[3].otherT   = interPoly->fromT + ( ( interPoly->toT - interPoly->fromT ) * t );
                                 }
                         }
                     }
@@ -732,9 +738,9 @@ FOdysseyVectorSegmentCubic::Intersect( FOdysseyVectorSegmentCubic& iOther
 
     }
 */
-
-    //intersectionCount += CreateAlmostIntersection( aisx, iTolerance, this, &iOther, iIntersectionVertexArray );
-
+/*
+    intersectionCount += CreateAlmostIntersection( aisx, iTolerance, this, &iOther, iIntersectionVertexArray );
+*/
     return intersectionCount;
 }
 

@@ -258,7 +258,9 @@ FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegmentCubic* iCubicSe
 
         if( intersectRect.Area() )
         {
-            intersectionCount += iCubicSegment->Intersect( *intersectSegment, mGroupPaintParam.Tolerance, iIntersectionVertexArray );
+            intersectionCount += iCubicSegment->Intersect( *intersectSegment
+                                                          , mGroupPaintParam.Tolerance
+                                                          , iIntersectionVertexArray );
         }
     }
 
@@ -530,6 +532,51 @@ FOdysseyVectorGroupPaint::FindCycles()
     Colorize();
 }
 
+static uint32
+CreateNearIntersection( FOdysseyVectorSegment *iSegment
+                      , std::vector<FOdysseyVectorVertexIntersection*>& iIntersectionVertexArray )
+{
+    FOdysseyVectorVertex* vertex0 = iSegment->GetVertex(0);
+    FOdysseyVectorVertex* vertex1 = iSegment->GetVertex(1);
+    uint32 intersectionCount = 0;
+
+    if( vertex0->GetNearestSegment() )
+    {
+        FOdysseyVectorVertexIntersection* intersectionVertex = new FOdysseyVectorVertexIntersection();
+        FOdysseyVectorSegment *nearestSegment = vertex0->GetNearestSegment();
+
+        iIntersectionVertexArray.push_back( intersectionVertex );
+
+        // AddSegment() MUST be called before AddIntersection because AddIntersection uses the value of t that is stored by AddSegment()
+        intersectionVertex->AddSegment (       iSegment, vertex0->GetT( iSegment ) );
+        intersectionVertex->AddSegment ( nearestSegment, vertex0->GetNearestSegmentT() );
+
+        iSegment->AddIntersection ( intersectionVertex );
+        nearestSegment->AddIntersection ( intersectionVertex );
+
+        intersectionCount++;
+    }
+
+    if( vertex1->GetNearestSegment() )
+    {
+        FOdysseyVectorVertexIntersection* intersectionVertex = new FOdysseyVectorVertexIntersection();
+        FOdysseyVectorSegment *nearestSegment = vertex1->GetNearestSegment();
+
+        iIntersectionVertexArray.push_back( intersectionVertex );
+
+        // AddSegment() MUST be called before AddIntersection because AddIntersection uses the value of t that is stored by AddSegment()
+        intersectionVertex->AddSegment (       iSegment, vertex1->GetT( iSegment ) );
+        intersectionVertex->AddSegment ( nearestSegment, vertex1->GetNearestSegmentT() );
+
+        iSegment->AddIntersection ( intersectionVertex );
+        nearestSegment->AddIntersection ( intersectionVertex );
+
+        intersectionCount++;
+    }
+
+    return intersectionCount;
+}
+
 void
 FOdysseyVectorGroupPaint::BuildGraph()
 {
@@ -540,12 +587,14 @@ FOdysseyVectorGroupPaint::BuildGraph()
 
     segmentList = mSegmentList;
 
-
     cubicSegment = segmentList.size() ? static_cast<FOdysseyVectorSegmentCubic*>( segmentList.back() ) : nullptr;
 
     while( cubicSegment )
     {
         IntersectSegment ( cubicSegment, segmentList, mIntersectionVertexArray );
+
+        // retrieve near-intersection
+        CreateNearIntersection( cubicSegment, mIntersectionVertexArray );
 
         // remove segment from list as they are tested
         segmentList.pop_back();
@@ -629,6 +678,9 @@ UE_LOG(LogTemp, Warning, TEXT("%d %d %d"), segment->GetVertex(0)->GetSectionList
             for( std::list<FOdysseyVectorSegment*>::iterator sit = pathSegmentList.begin(); sit != pathSegmentList.end(); ++sit )
             {
                 FOdysseyVectorSegment *segment = static_cast<FOdysseyVectorSegment*>(*sit);
+
+                segment->GetVertex(0)->SetNearestSegment( nullptr, DBL_MAX, 0.0f );
+                segment->GetVertex(1)->SetNearestSegment( nullptr, DBL_MAX, 0.0f );
 
                 segment->AddSection ( new FOdysseyVectorSection ( segment
                                                                 , segment->GetVertex(0)

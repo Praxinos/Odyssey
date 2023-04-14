@@ -28,6 +28,34 @@ FOdysseyVectorVertex::GetPath()
     return mPath;
 }
 
+FOdysseyVectorSegment*
+FOdysseyVectorVertex::GetNearestSegment()
+{
+    return mNearestSegment;
+}
+
+double
+FOdysseyVectorVertex::GetDistanceToNearestSegment()
+{
+    return mDistanceToNearestSegment;
+}
+
+double
+FOdysseyVectorVertex::GetNearestSegmentT()
+{
+    return mNearestSegmentT;
+}
+
+void
+FOdysseyVectorVertex::SetNearestSegment( FOdysseyVectorSegment* iNearestSegment
+                                       , double iDistanceToNearestSegment
+                                       , double iNearestSegmentT )
+{
+    mNearestSegment = iNearestSegment;
+    mDistanceToNearestSegment = iDistanceToNearestSegment;
+    mNearestSegmentT = iNearestSegmentT;
+}
+
 void
 FOdysseyVectorVertex::InvalidateSegments()
 {

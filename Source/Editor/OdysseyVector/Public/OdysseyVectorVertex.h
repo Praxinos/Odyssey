@@ -223,11 +223,23 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
          */
         bool IsVisited();
 
+        double GetNearestSegmentT();
+        double GetDistanceToNearestSegment();
+        FOdysseyVectorSegment* GetNearestSegment();
+        void SetNearestSegment( FOdysseyVectorSegment* iNearestSegment
+                              , double iDistanceToNearestSegment
+                              , double iNearestSegmentT );
+
     protected:
         std::list<FOdysseyVectorSegment*> mSegmentList;
         std::list<FOdysseyVectorSection*> mSectionList;
         FOdysseyVectorPath* mPath;
         uint32 mFlags;
+
+        double mDistanceToNearestSegment;
+        double mNearestSegmentT;
+        FOdysseyVectorSegment* mNearestSegment;
+
 
     private :
         static const uint32 VISITED = (1 << 2);

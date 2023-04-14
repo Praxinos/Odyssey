@@ -19,6 +19,7 @@ class FOdysseyVectorPointSample : public FOdysseyVectorPoint
         ~FOdysseyVectorPointSample();
         FOdysseyVectorPointSample(){};
         FOdysseyVectorPointSample( double iX, double iY, double iRadius );
+        FOdysseyVectorPointSample( std::vector<FOdysseyVectorPoint*> iPointArray ); // average values of points in array
 
         void SetSharp( bool iIsSharp );
         bool IsSharp();

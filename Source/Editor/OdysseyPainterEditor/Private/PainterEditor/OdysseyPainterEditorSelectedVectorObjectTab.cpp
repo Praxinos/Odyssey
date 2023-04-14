@@ -23,6 +23,7 @@ FOdysseyPainterEditorSelectedVectorObjectTab::FOdysseyPainterEditorSelectedVecto
     mObjectView = NewObject<UOdysseyVectorViewObject>();
     mPathView = NewObject<UOdysseyVectorViewPath>();
     mEllipseView = NewObject<UOdysseyVectorViewEllipse>();
+    mGroupPaintView = NewObject<UOdysseyVectorViewGroupPaint>();
 /*
     mEditor->GetVectorObjectPickTool()->mSelectionChanged.AddRaw(this, &FOdysseyPainterEditorSelectedVectorObjectTab::OnSelectionChanged );
     mEditor->GetVectorPathDrawingTool()->mSelectionChanged.AddRaw(this, &FOdysseyPainterEditorSelectedVectorObjectTab::OnSelectionChanged );
@@ -83,6 +84,12 @@ FOdysseyPainterEditorSelectedVectorObjectTab::GetEllipseView()
     return mEllipseView;
 }
 
+UOdysseyVectorViewGroupPaint*
+FOdysseyPainterEditorSelectedVectorObjectTab::GetGroupPaintView()
+{
+    return mGroupPaintView;
+}
+
 void
 FOdysseyPainterEditorSelectedVectorObjectTab::Update( FOdysseyVectorScene* iScene )
 {
@@ -100,6 +107,12 @@ FOdysseyPainterEditorSelectedVectorObjectTab::Update( FOdysseyVectorScene* iScen
         {
             mEllipseView->Update( selectedObject );
             mDetailsView->SetObject( mEllipseView );
+        }
+        else
+        if( selectedObject->GetClass() == FOdysseyVectorGroupPaint::StaticClass() )
+        {
+            mGroupPaintView->Update( selectedObject );
+            mDetailsView->SetObject( mGroupPaintView );
         }
         else
         {
