@@ -360,12 +360,16 @@ float FOdysseyViewportDrawingEditorMeshBasedAdapter::GetStampQuality()
     FHitProxyId strokePaintHitProxyId = strokePaintCanvas.GetHitProxyId();
     FBatchedElements* strokePaintBatchedElements = strokePaintCanvas.GetBatchedElements(FCanvas::ET_Triangle, meshPaintBatchedElementParameters, nullptr, SE_BLEND_Opaque);
 
+    const FMatrix& componentToWorldMatrix = meshAdapter->GetComponentToWorldMatrix();
+    const FVector componentSpaceCameraPosition(componentToWorldMatrix.InverseTransformPosition(mouseViewportRay.GetOrigin()));
+    const FVector componentSpaceBrushPosition(componentToWorldMatrix.InverseTransformPosition(traceHitResult.Location));
+
     //Todo: make ellipseIntersectTriangles ?
     TArray<uint32> triangles;
     float brushSize = FMath::Max(iStampParams.mBlock->Width(), iStampParams.mBlock->Height());// * FMath::Max3(mEditor->Actor()->GetActorScale().X, mEditor->Actor()->GetActorScale().Y, mEditor->Actor()->GetActorScale().Z);
     brushSize *= brushSize;
     brushSize /= GetStampQuality();
-    triangles = meshAdapter->SphereIntersectTriangles(brushSize, meshAdapter->GetComponentToWorldMatrix().InverseTransformPosition(traceHitResult.Location), mouseViewportRay.GetOrigin(), false);
+    triangles = meshAdapter->SphereIntersectTriangles(brushSize, componentSpaceBrushPosition, componentSpaceCameraPosition, true);
 
     const TArray<uint32> vertexIndices = meshAdapter->GetMeshIndices();
     uint32 triIndices = vertexIndices.Num() / 3;

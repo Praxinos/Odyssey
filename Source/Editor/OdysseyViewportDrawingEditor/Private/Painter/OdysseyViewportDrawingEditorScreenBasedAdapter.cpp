@@ -416,7 +416,8 @@ float FOdysseyViewportDrawingEditorScreenBasedAdapter::GetStampQuality()
     FHitProxyId strokePaintHitProxyId = strokePaintCanvas.GetHitProxyId();
     FBatchedElements* strokePaintBatchedElements = strokePaintCanvas.GetBatchedElements(FCanvas::ET_Triangle, screenPaintBatchedElementParameters, nullptr, SE_BLEND_Opaque);
 
-     const TArray<uint32> vertexIndices = meshAdapter->GetMeshIndices();
+    //This gathers all triangles
+     /*const TArray<uint32> vertexIndices = meshAdapter->GetMeshIndices();
      uint32 triIndices = vertexIndices.Num() / 3;
      TArray<FTexturePaintTriangleInfo> triangleInfo;
      TArray<FTexturePaintMeshSectionInfo> sectionInfo;
@@ -424,11 +425,17 @@ float FOdysseyViewportDrawingEditorScreenBasedAdapter::GetStampQuality()
      {
          const int32 indices[3] = { int32(vertexIndices[i * 3]), int32(vertexIndices[i * 3 + 1]), int32(vertexIndices[i * 3 + 2]) };
          GatherTextureTriangles(meshAdapter.Get(), i, indices, &triangleInfo, &sectionInfo, mEditor->GetUVIndexUsedByCurrentTexture());
-     }
+     }*/
 
-    /*TArray<uint32> triangles;
+     //This gathers all triangles that are front facing
+    TArray<uint32> triangles;
     float brushSize = HALF_WORLD_MAX;
-    triangles = meshAdapter->SphereIntersectTriangles(brushSize, traceHitResult.Location, mouseViewportRay.GetOrigin(), true);
+
+    const FMatrix& componentToWorldMatrix = meshAdapter->GetComponentToWorldMatrix();
+    const FVector componentSpaceCameraPosition(componentToWorldMatrix.InverseTransformPosition(mouseViewportRay.GetOrigin()));
+    const FVector componentSpaceBrushPosition(componentToWorldMatrix.InverseTransformPosition(traceHitResult.Location));
+
+    triangles = meshAdapter->SphereIntersectTriangles(brushSize, componentSpaceBrushPosition, componentSpaceCameraPosition, true);
 
     const TArray<uint32> vertexIndices = meshAdapter->GetMeshIndices();
     uint32 triIndices = vertexIndices.Num() / 3;
@@ -438,7 +445,7 @@ float FOdysseyViewportDrawingEditorScreenBasedAdapter::GetStampQuality()
     {
         const int32 indices[3] = { int32(vertexIndices[triangles[i] * 3]), int32(vertexIndices[triangles[i] * 3 + 1]), int32(vertexIndices[triangles[i] * 3 + 2]) };
         GatherTextureTriangles(meshAdapter.Get(), triangles[i], indices, &triangleInfo, &sectionInfo, mEditor->GetUVIndexUsedByCurrentTexture());
-    }*/
+    }
 
 
 
