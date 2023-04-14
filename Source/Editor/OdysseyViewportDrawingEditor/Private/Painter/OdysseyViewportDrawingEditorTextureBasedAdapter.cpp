@@ -58,12 +58,13 @@ void FOdysseyViewportDrawingEditorTextureBasedAdapter::PrepareAdapterForPainting
         mPaintingTexture2DRenderTarget->InitAutoFormat(textureWidth, textureHeight);
         mPaintingTexture2DRenderTarget->UpdateResourceImmediate();
         mPaintingTexture2DRenderTarget->AddToRoot();
-    
-        const ERHIFeatureLevel::Type featureLevel = mEditor->Component()->GetWorld()->FeatureLevel;
-        mEditor->Material()->OverrideTexture(mEditor->Texture(), mPaintingTexture2DRenderTarget, featureLevel);
         
-        //A simple copy is all we need for the texture based algorithm
-        TexturePaintHelpers::CopyTextureToRenderTargetTexture(mEditor->Texture(), mPaintingTexture2DRenderTarget, featureLevel);
+        mPreviousMipSettings = mEditor->Texture()->MipGenSettings;
+        mEditor->Texture()->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
+        mEditor->Texture()->UpdateResource();
+        FTextureCompilingManager::Get().FinishCompilation({ mEditor->Texture() });
+        TexturePaintHelpers::CopyTextureToRenderTargetTexture(mEditor->Texture(), mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
+
         mState = eState::kIdleReady;
     }    
     

@@ -88,5 +88,6 @@ protected:
     std::chrono::steady_clock::time_point   mStylusLastEventTime;
     bool mIsCapturedByStylus;
 
-    TextureMipGenSettings mTextureMipGenSettings;
+    /** Temporary variable (until overrides are fixed) that keep the mip settings of the texture on which we draw*/
+    TextureMipGenSettings mPreviousMipSettings;
 };

@@ -5,6 +5,8 @@
 #include "IMeshPaintGeometryAdapter.h"
 #include "Tools/OdysseyPainterEditorTool.h"
 #include "UObject/SavePackage.h"
+#include "TextureCompiler.h"
+#include "FileHelpers.h"
 
 #define LOCTEXT_NAMESPACE "IOdysseyViewportDrawingEditorAdapter"
 
@@ -322,18 +324,25 @@ void IOdysseyViewportDrawingEditorAdapter::OnStylusStateChanged(const TWeakPtr<S
 
 void IOdysseyViewportDrawingEditorAdapter::RemoveTextureOverride()
 {
-    if( !mPaintingTexture2DRenderTarget || !mPaintingTexture2DRenderTarget->IsValidLowLevel() )
-        return;
+    mState = eState::kIdle;
 
     if (mEditor->Component() != nullptr && mEditor->Texture() != nullptr)
     {
-        const ERHIFeatureLevel::Type FeatureLevel = mEditor->Component()->GetWorld()->FeatureLevel;
-        mEditor->Material()->OverrideTexture(mEditor->Texture(), nullptr, FeatureLevel);
-
-        mPaintingTexture2DRenderTarget->ConditionalBeginDestroy();
-        mPaintingTexture2DRenderTarget = nullptr;
-        mState = eState::kIdle;
+        mEditor->Texture()->MipGenSettings = mPreviousMipSettings;
+        mEditor->Texture()->UpdateResource();
+        FTextureCompilingManager::Get().FinishCompilation({ mEditor->Texture() });
+        TArray<UPackage*> packages;
+        packages.Add(mEditor->Texture()->GetPackage());
+        UEditorLoadingAndSavingUtils::SavePackages(packages, true);
     }
+
+    if (!mPaintingTexture2DRenderTarget || !mPaintingTexture2DRenderTarget->IsValidLowLevel())
+    {
+        return;
+    }
+
+    mPaintingTexture2DRenderTarget->ConditionalBeginDestroy();
+    mPaintingTexture2DRenderTarget = nullptr;
 }
 
 void IOdysseyViewportDrawingEditorAdapter::OnToolChange(UOdysseyPainterEditorTool* iNewTool)

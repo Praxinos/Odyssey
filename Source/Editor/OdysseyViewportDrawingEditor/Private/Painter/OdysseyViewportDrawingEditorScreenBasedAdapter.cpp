@@ -20,8 +20,17 @@ FOdysseyViewportDrawingEditorScreenBasedAdapter::~FOdysseyViewportDrawingEditorS
 {
     RemoveTextureOverride();
 
-    mStrokeBufferRenderTarget2D->ConditionalBeginDestroy();
-    mStrokeBufferRenderTarget2D = nullptr;
+    if (mStrokeBufferRenderTarget2D && mStrokeBufferRenderTarget2D->IsValidLowLevel())
+    {
+        mStrokeBufferRenderTarget2D->ConditionalBeginDestroy();
+        mStrokeBufferRenderTarget2D = nullptr;
+    }
+
+    if (mSeamRenderTarget2D && mSeamRenderTarget2D->IsValidLowLevel())
+    {
+        mSeamRenderTarget2D->ConditionalBeginDestroy();
+        mSeamRenderTarget2D = nullptr;
+    }
 }
 
 FOdysseyViewportDrawingEditorScreenBasedAdapter::FOdysseyViewportDrawingEditorScreenBasedAdapter(TSharedPtr<FOdysseyViewportDrawingEditor> iEditor) :
@@ -75,7 +84,8 @@ void FOdysseyViewportDrawingEditorScreenBasedAdapter::Tick(float iDelta)
     if( mLastKnownViewport )
         mEditor->GetGUI()->GetTopTab()->SetMeshMaxSize((FMath::Max(mLastKnownViewport->GetSizeXY().X, mLastKnownViewport->GetSizeXY().Y) / 2) * GetStampQuality());
 
-    mEditor->GetSelectedTool()->Tick(iDelta);
+    if (mEditor->GetSelectedTool())
+        mEditor->GetSelectedTool()->Tick(iDelta);
 }
 
 
@@ -156,15 +166,10 @@ void FOdysseyViewportDrawingEditorScreenBasedAdapter::BuildPaintingTexture2DRend
     mSeamRenderTarget2D->UpdateResourceImmediate();
     mSeamRenderTarget2D->AddToRoot();
 
-
-    if (mEditor->Texture()->MipGenSettings == TextureMipGenSettings::TMGS_NoMipmaps)
-    {
-        return;
-    }
-
-    const ERHIFeatureLevel::Type FeatureLevel = mEditor->Component()->GetWorld()->FeatureLevel;
-    mEditor->Material()->OverrideTexture(mEditor->Texture(), mPaintingTexture2DRenderTarget, FeatureLevel);
-
+    mPreviousMipSettings = mEditor->Texture()->MipGenSettings;
+    mEditor->Texture()->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
+    mEditor->Texture()->UpdateResource();
+    FTextureCompilingManager::Get().FinishCompilation({ mEditor->Texture() });
     TexturePaintHelpers::CopyTextureToRenderTargetTexture(mEditor->Texture(), mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
 }
 
