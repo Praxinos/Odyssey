@@ -594,7 +594,7 @@ FOdysseyVectorPath::DrawJoint( FOdysseyVectorVertex* iVertex, ::ULIS::FRectD &iR
     {
         ::ULIS::FVec2D segment0Vector = iVertex->GetVectorOnSegment(segment0, false);
         ::ULIS::FVec2D segment1Vector = iVertex->GetVectorOnSegment(segment1, false);
-        ::ULIS::FVec2D& origin = iVertex->GetCoords( nullptr );
+        ::ULIS::FVec2D& origin = iVertex->GetCoords();
 
         if ( segment0Vector.DistanceSquared() && segment1Vector.DistanceSquared() )
         {

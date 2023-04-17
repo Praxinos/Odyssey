@@ -78,8 +78,8 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDown( FOdysseyVectorEngine* iEng
             BLPoint localPoint = cubicPath->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
             ::ULIS::FVec2D& ctrlPoint0 = cubicSegment->GetHandle(0)->GetCoords();
             ::ULIS::FVec2D& ctrlPoint1 = cubicSegment->GetHandle(1)->GetCoords();
-            ::ULIS::FVec2D& point0 = cubicSegment->GetVertex(0)->GetCoords( cubicSegment );
-            ::ULIS::FVec2D& point1 = cubicSegment->GetVertex(1)->GetCoords( cubicSegment );
+            ::ULIS::FVec2D& point0 = cubicSegment->GetVertex(0)->GetCoords();
+            ::ULIS::FVec2D& point1 = cubicSegment->GetVertex(1)->GetCoords();
             ::ULIS::FVec2D cp0Vec = { localPoint.x - ctrlPoint0.x, localPoint.y - ctrlPoint0.y };
             ::ULIS::FVec2D cp1Vec = { localPoint.x - ctrlPoint1.x, localPoint.y - ctrlPoint1.y };
 

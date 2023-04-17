@@ -52,8 +52,8 @@ LoadArray( std::vector<FSegmentShape>& mSegmentShapeArray )
         if( mSegmentShapeArray[i].segment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
         {
             FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>( mSegmentShapeArray[i].segment );
-            ::ULIS::FVec2D& point0 = cubicSegment->GetVertex(0)->GetCoords( nullptr );
-            ::ULIS::FVec2D& point1 = cubicSegment->GetVertex(1)->GetCoords( nullptr );
+            ::ULIS::FVec2D& point0 = cubicSegment->GetVertex(0)->GetCoords();
+            ::ULIS::FVec2D& point1 = cubicSegment->GetVertex(1)->GetCoords();
             ::ULIS::FVec2D& point2 = cubicSegment->GetHandle(0)->GetCoords();
             ::ULIS::FVec2D& point3 = cubicSegment->GetHandle(1)->GetCoords();
 

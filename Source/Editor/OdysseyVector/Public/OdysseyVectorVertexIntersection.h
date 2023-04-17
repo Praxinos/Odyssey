@@ -7,7 +7,6 @@
 #include "OdysseyVectorVertex.h"
 
 struct FIntersection {
-    ::ULIS::FVec2D position;
     double t;
 };
 
@@ -25,15 +24,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertexIntersection : public FOdysseyVector
         /**
          * @brief Constructor.
          */
-        FOdysseyVectorVertexIntersection();
-
-        virtual ::ULIS::FVec2D GetPosition( FOdysseyVectorSegment* iSegment ) override;
+        FOdysseyVectorVertexIntersection( double iX, double iY );
 
         virtual double GetT( FOdysseyVectorSegment* iSegment ) override;
 
         void AddSegment( FOdysseyVectorSegment* iSegment, double t );
-
-        virtual ::ULIS::FVec2D& GetCoords( FOdysseyVectorSegment* iSegment ) override;
 
     protected:
         uint64 mIntersectionID;

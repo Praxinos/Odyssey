@@ -18,6 +18,8 @@ FOdysseyVectorGroupPaint::FOdysseyVectorGroupPaint( std::string iName )
 
     mGroupPaintParam.Tolerance = 0.0f;
     mGroupPaintParam.Realtime = false;
+    mGroupPaintParam.Wireframe = false;
+    mGroupPaintParam.WireframeColor = FColor( 255, 255, 255, 255 );
 }
 
 bool
@@ -176,6 +178,16 @@ FOdysseyVectorGroupPaint::Bucket( double iX, double iY, uint8 iR, uint8 iG, uint
 }
 
 void
+FOdysseyVectorGroupPaint::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
+{
+    uint64 extraFlags = 0;
+
+    extraFlags |= ( ( mGroupPaintParam.Wireframe ) ? FOdysseyVectorObject::DRAWSTRUCTURE : 0 );
+
+    FOdysseyVectorObject::Draw( iRoi, iFlags | extraFlags );
+}
+
+void
 FOdysseyVectorGroupPaint::UpdateShape( uint32 iUpdateFlags )
 {
     FOdysseyVectorGroup::UpdateShape( iUpdateFlags ); // updates BBox
@@ -276,8 +288,8 @@ PrintCycle( std::vector<FOdysseyVectorVertex*>& vertexArray
     for( int i = 0; i < vertexArray.size(); i++ )
     {
         FOdysseyVectorSegment* segment = sectionArray[i]->GetSegment();
-        BLPoint pt0 = segment->GetPath()->GetWorldMatrix().mapPoint( sectionArray[i]->GetVertex(0)->GetCoords(segment).x, sectionArray[i]->GetVertex(0)->GetCoords(segment).y );
-        BLPoint pt1 = segment->GetPath()->GetWorldMatrix().mapPoint( sectionArray[i]->GetVertex(1)->GetCoords(segment).x, sectionArray[i]->GetVertex(1)->GetCoords(segment).y );
+        BLPoint pt0 = segment->GetPath()->GetWorldMatrix().mapPoint( sectionArray[i]->GetVertex(0)->GetCoords().x, sectionArray[i]->GetVertex(0)->GetCoords().y );
+        BLPoint pt1 = segment->GetPath()->GetWorldMatrix().mapPoint( sectionArray[i]->GetVertex(1)->GetCoords().x, sectionArray[i]->GetVertex(1)->GetCoords().y );
 
         UE_LOG(LogTemp,Warning,TEXT("Node: vertex:%d section:%d (%d[x:%f y:%f] -- %d[x:%f y:%f])"), vertexArray[i], sectionArray[i], sectionArray[i]->GetVertex(0), pt0.x, pt0.y, sectionArray[i]->GetVertex(1), pt1.x, pt1.y );
     }
@@ -410,26 +422,34 @@ GetNormalVector( std::vector<FOdysseyVectorVertex*>& iVertexArray
         {
             int n = ( i + 1 ) % arraySize;
             FOdysseyVectorSegment* segment = iSectionArray[i]->GetSegment();
-            ::ULIS::FVec2D& viCoords = iVertexArray[i]->GetCoords( segment );
-            ::ULIS::FVec2D& vnCoords = iVertexArray[n]->GetCoords( segment );
-            double ti = iVertexArray[i]->GetT( segment );
-            double tn = iVertexArray[n]->GetT( segment );
-            double deltaT = tn - ti;
-            int subdiv = 8;
-            double stepT = deltaT / subdiv;
-            double t0 = ti;
+            ::ULIS::FVec2D& viCoords = iVertexArray[i]->GetCoords();
+            ::ULIS::FVec2D& vnCoords = iVertexArray[n]->GetCoords();
 
-            // By relying only on start and end points of a section, we lack precision. 
-            // Here we rely on more acurate computation by getting intermediate points.
-            for( int j = 0; j < subdiv; j++ )
+            if( segment )
             {
-                double t1 = t0 + stepT;
-                ::ULIS::FVec2D v0Coords = segment->GetPointAt( t0 );
-                ::ULIS::FVec2D v1Coords = segment->GetPointAt( t1 );
+                double ti = iVertexArray[i]->GetT( segment );
+                double tn = iVertexArray[n]->GetT( segment );
+                double deltaT = tn - ti;
+                int subdiv = 8;
+                double stepT = deltaT / subdiv;
+                double t0 = ti;
 
-                z += ( ( v0Coords.x - v1Coords.x ) * ( v0Coords.y + v1Coords.y ) );
+                // By relying only on start and end points of a section, we lack precision. 
+                // Here we rely on more acurate computation by getting intermediate points.
+                for( int j = 0; j < subdiv; j++ )
+                {
+                    double t1 = t0 + stepT;
+                    ::ULIS::FVec2D v0Coords = segment->GetPointAt( t0 );
+                    ::ULIS::FVec2D v1Coords = segment->GetPointAt( t1 );
 
-                t0 += stepT;
+                    z += ( ( v0Coords.x - v1Coords.x ) * ( v0Coords.y + v1Coords.y ) );
+
+                    t0 += stepT;
+                }
+            }
+            else
+            {
+                z += ( ( viCoords.x - vnCoords.x ) * ( viCoords.y + vnCoords.y ) );
             }
 
     // https://www.khronos.org/opengl/wiki/Calculating_a_Surface_Normal
@@ -532,49 +552,92 @@ FOdysseyVectorGroupPaint::FindCycles()
     Colorize();
 }
 
-static uint32
-CreateNearIntersection( FOdysseyVectorSegment *iSegment
+static void //uint32
+CreateNearIntersection( FOdysseyVectorVertex *iVertex
                       , std::vector<FOdysseyVectorVertexIntersection*>& iIntersectionVertexArray )
 {
-    FOdysseyVectorVertex* vertex0 = iSegment->GetVertex(0);
-    FOdysseyVectorVertex* vertex1 = iSegment->GetVertex(1);
-    uint32 intersectionCount = 0;
+    FOdysseyVectorSegment *nearestSegment = iVertex->GetNearestSegment();
+    //uint32 intersectionCount = 0;
 
+    if( nearestSegment )
+    {
+        double nearestSegmentT = iVertex->GetNearestSegmentT();
+        FOdysseyVectorVertex* nearestVertex;
+
+        //FOdysseyVectorSegmentCubic cubicSegment = FOdysseyVectorSegmentCubic::New()
+
+        if( ( nearestSegmentT != 0.0f ) && ( nearestSegmentT != 1.0f ) )
+        {
+            ::ULIS::FVec2D nearestVertexAt = nearestSegment->GetPointAt( nearestSegmentT );
+            FOdysseyVectorVertexIntersection* intersectionVertex = new FOdysseyVectorVertexIntersection( nearestVertexAt.x, nearestVertexAt.y );
+
+            intersectionVertex->AddSegment ( nearestSegment, nearestSegmentT );
+            nearestSegment->AddIntersection ( intersectionVertex );
+
+            iIntersectionVertexArray.push_back( intersectionVertex );
+
+            nearestVertex = intersectionVertex;
+        }
+        else
+        {
+            nearestVertex = nearestSegment->GetVertex((int)nearestSegmentT);
+        }
+
+        nearestSegment->AddSection( new FOdysseyVectorSection ( nullptr, iVertex, nearestVertex ) );
+    }
+/*
     if( vertex0->GetNearestSegment() )
     {
-        FOdysseyVectorVertexIntersection* intersectionVertex = new FOdysseyVectorVertexIntersection();
         FOdysseyVectorSegment *nearestSegment = vertex0->GetNearestSegment();
+        ::ULIS::FVec2D isxAt[2] = { vertex0->GetCoords()
+                                  , nearestSegment->GetPointAt( vertex0->GetNearestSegmentT() ) };
 
-        iIntersectionVertexArray.push_back( intersectionVertex );
+        FOdysseyVectorVertexIntersection* intersectionVertex[2] = { new FOdysseyVectorVertexIntersection( isxAt[0].x, isxAt[0].y )
+                                                                  , new FOdysseyVectorVertexIntersection( isxAt[1].x, isxAt[1].y ) };
+
+        iIntersectionVertexArray.push_back( intersectionVertex[0] );
+        iIntersectionVertexArray.push_back( intersectionVertex[1] );
 
         // AddSegment() MUST be called before AddIntersection because AddIntersection uses the value of t that is stored by AddSegment()
-        intersectionVertex->AddSegment (       iSegment, vertex0->GetT( iSegment ) );
-        intersectionVertex->AddSegment ( nearestSegment, vertex0->GetNearestSegmentT() );
+        intersectionVertex[0]->AddSegment (       iSegment, vertex0->GetT( iSegment ) );
+        intersectionVertex[1]->AddSegment ( nearestSegment, vertex0->GetNearestSegmentT() );
 
-        iSegment->AddIntersection ( intersectionVertex );
-        nearestSegment->AddIntersection ( intersectionVertex );
+        iSegment->AddIntersection ( intersectionVertex[0] );
+        nearestSegment->AddIntersection ( intersectionVertex[1] );
+
+        iSegment->AddSection ( new FOdysseyVectorSection ( nullptr
+                                                         , intersectionVertex[0]
+                                                         , intersectionVertex[1] ) );
 
         intersectionCount++;
     }
 
     if( vertex1->GetNearestSegment() )
     {
-        FOdysseyVectorVertexIntersection* intersectionVertex = new FOdysseyVectorVertexIntersection();
         FOdysseyVectorSegment *nearestSegment = vertex1->GetNearestSegment();
+        ::ULIS::FVec2D isxAt[2] = { vertex1->GetCoords()
+                                  , nearestSegment->GetPointAt( vertex1->GetNearestSegmentT() ) };
+        FOdysseyVectorVertexIntersection* intersectionVertex[2] = { new FOdysseyVectorVertexIntersection( isxAt[0].x, isxAt[0].y )
+                                                                  , new FOdysseyVectorVertexIntersection( isxAt[1].x, isxAt[1].y ) };
 
-        iIntersectionVertexArray.push_back( intersectionVertex );
+        iIntersectionVertexArray.push_back( intersectionVertex[0] );
+        iIntersectionVertexArray.push_back( intersectionVertex[1] );
 
         // AddSegment() MUST be called before AddIntersection because AddIntersection uses the value of t that is stored by AddSegment()
-        intersectionVertex->AddSegment (       iSegment, vertex1->GetT( iSegment ) );
-        intersectionVertex->AddSegment ( nearestSegment, vertex1->GetNearestSegmentT() );
+        intersectionVertex[0]->AddSegment (       iSegment, vertex1->GetT( iSegment ) );
+        intersectionVertex[1]->AddSegment ( nearestSegment, vertex1->GetNearestSegmentT() );
 
-        iSegment->AddIntersection ( intersectionVertex );
-        nearestSegment->AddIntersection ( intersectionVertex );
+        iSegment->AddIntersection ( intersectionVertex[0] );
+        nearestSegment->AddIntersection ( intersectionVertex[1] );
+
+        iSegment->AddSection ( new FOdysseyVectorSection ( nullptr
+                                                         , intersectionVertex[0]
+                                                         , intersectionVertex[1] ) );
 
         intersectionCount++;
     }
-
-    return intersectionCount;
+*/
+    //return intersectionCount;
 }
 
 void
@@ -594,7 +657,8 @@ FOdysseyVectorGroupPaint::BuildGraph()
         IntersectSegment ( cubicSegment, segmentList, mIntersectionVertexArray );
 
         // retrieve near-intersection
-        CreateNearIntersection( cubicSegment, mIntersectionVertexArray );
+        CreateNearIntersection( cubicSegment->GetVertex(0), mIntersectionVertexArray );
+        CreateNearIntersection( cubicSegment->GetVertex(1), mIntersectionVertexArray );
 
         // remove segment from list as they are tested
         segmentList.pop_back();
@@ -679,8 +743,8 @@ UE_LOG(LogTemp, Warning, TEXT("%d %d %d"), segment->GetVertex(0)->GetSectionList
             {
                 FOdysseyVectorSegment *segment = static_cast<FOdysseyVectorSegment*>(*sit);
 
-                segment->GetVertex(0)->SetNearestSegment( nullptr, DBL_MAX, 0.0f );
-                segment->GetVertex(1)->SetNearestSegment( nullptr, DBL_MAX, 0.0f );
+                segment->GetVertex(0)->SetNearestSegment( nullptr, mGroupPaintParam.Tolerance/*DBL_MAX*/, 0.0f );
+                segment->GetVertex(1)->SetNearestSegment( nullptr, mGroupPaintParam.Tolerance/*DBL_MAX*/, 0.0f );
 
                 segment->AddSection ( new FOdysseyVectorSection ( segment
                                                                 , segment->GetVertex(0)

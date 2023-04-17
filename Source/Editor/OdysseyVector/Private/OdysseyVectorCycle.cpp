@@ -49,7 +49,7 @@ FOdysseyVectorCycle::FitsIn( FOdysseyVectorCycle* iParentCandidate )
 {
     for( int i = 0; i < mVertexArray.size(); i++ )
     {
-        ::ULIS::FVec2D& vCoords = mVertexArray[i]->GetCoords( mVertexArray[i]->GetFirstSegment() );
+        ::ULIS::FVec2D& vCoords = mVertexArray[i]->GetCoords();
         BLPoint pt = { vCoords.x, vCoords.y };
         uint32 ret =  iParentCandidate->mPath.hitTest( pt, BL_FILL_RULE_NON_ZERO );
 
@@ -175,31 +175,44 @@ FOdysseyVectorCycle::Build( std::vector<FOdysseyVectorVertex*>& iVertexArray
     {
         FOdysseyVectorSection* firstSection = iSectionArray.front();
         FOdysseyVectorSegment* firstSegment = firstSection->GetSegment();
-        ::ULIS::FVec2D originAt = iVertexArray[0]->GetPosition( firstSegment );
+        ::ULIS::FVec2D originAt = iVertexArray[0]->GetCoords();
         FOdysseyVectorVertex* currentVertex = iVertexArray[0];
 
         mMin.x = mMax.x = originAt.x;
         mMin.y = mMax.y = originAt.y;
 
+        mPath.moveTo( originAt.x, originAt.y );
+
         for( int i = 0; i < iSectionArray.size(); i++ )
         {
             FOdysseyVectorSection* section = iSectionArray[i];
             FOdysseyVectorSegment* segment = section->GetSegment();
-            FOdysseyVectorVertex* nextVertex = ( currentVertex == section->GetVertex(0) ) ? section->GetVertex(1) : section->GetVertex(0);
-            double currentVertexT = currentVertex->GetT( segment );
-            double    nextVertexT =    nextVertex->GetT( segment );
-            ::ULIS::FVec2D currentAt = currentVertex->GetPosition( segment );
+            FOdysseyVectorVertex* nextVertex = ( currentVertex == section->GetVertex(0) ) ? section->GetVertex(1)
+                                                                                          : section->GetVertex(0);
 
-            if( i == 0 )
+            if( segment )
             {
-                mPath.moveTo( currentAt.x, currentAt.y );
+                double currentVertexT = currentVertex->GetT( segment );
+                double    nextVertexT =    nextVertex->GetT( segment );
+                /*::ULIS::FVec2D currentAt = currentVertex->GetPosition( segment );
+
+                if( i == 0 )
+                {
+                    mPath.moveTo( currentAt.x, currentAt.y );
+                }
+                else
+                {
+                    mPath.lineTo( currentAt.x, currentAt.y );
+                }*/
+
+                BuildSegmentCubic ( static_cast<FOdysseyVectorSegmentCubic&>(*segment), currentVertexT, nextVertexT );
             }
             else
             {
-                mPath.lineTo( currentAt.x, currentAt.y );
-            }
+                ::ULIS::FVec2D bridgeTo = nextVertex->GetCoords();
 
-            BuildSegmentCubic ( static_cast<FOdysseyVectorSegmentCubic&>(*segment), currentVertexT, nextVertexT );
+                mPath.lineTo( bridgeTo.x, bridgeTo.y );
+            }
 
             currentVertex = nextVertex;
         }

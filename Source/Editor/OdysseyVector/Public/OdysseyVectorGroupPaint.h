@@ -27,6 +27,12 @@ struct FGroupPaintParam
 
     UPROPERTY(EditAnywhere, Category="General")
     double Tolerance;
+
+    UPROPERTY(EditAnywhere, Category="General")
+    bool Wireframe;
+
+    UPROPERTY(EditAnywhere,Category="General")
+    FColor WireframeColor;
 };
 
 class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
@@ -69,6 +75,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
          * @param iFlags drawing flags.
          */
         virtual void DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags ) override;
+
+        virtual void Draw( ::ULIS::FRectD& iRoi, uint64 iFlags ) override;
 
         /**
          * @brief Pick the shape.

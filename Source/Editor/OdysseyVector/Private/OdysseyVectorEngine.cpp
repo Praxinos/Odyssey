@@ -343,8 +343,8 @@ FOdysseyVectorEngine::Knot( FOdysseyVectorVertex* iVertexA
      && ( iVertexB->GetSegmentCount() == 1 )
      && ( iVertexA->GetPath() == iVertexB->GetPath() ) )
     {
-        ::ULIS::FVec2D& vertexACoords = iVertexA->GetCoords( nullptr );
-        ::ULIS::FVec2D& vertexBCoords = iVertexB->GetCoords( nullptr );
+        ::ULIS::FVec2D& vertexACoords = iVertexA->GetCoords();
+        ::ULIS::FVec2D& vertexBCoords = iVertexB->GetCoords();
         ::ULIS::FVec2D averageCoords = ( vertexACoords + vertexBCoords ) * 0.5f;
         double vertexARadius = iVertexA->GetRadius();
         double vertexBRadius = iVertexB->GetRadius();

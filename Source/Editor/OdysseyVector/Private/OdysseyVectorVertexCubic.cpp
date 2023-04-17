@@ -107,7 +107,7 @@ FOdysseyVectorVertexCubic::SmoothSegments( bool iBuildSegments, bool iPreserveHa
                 if( iPreserveHandleLength )
                 {
                     ::ULIS::FVec2D& handlePos = cubicSegment->GetHandle(0)->GetCoords();
-                    ::ULIS::FVec2D handleVec = handlePos - this->GetCoords( nullptr );
+                    ::ULIS::FVec2D handleVec = handlePos - this->GetCoords();
 
                     distance = handleVec.Distance();
                 }
@@ -133,7 +133,7 @@ FOdysseyVectorVertexCubic::SmoothSegments( bool iBuildSegments, bool iPreserveHa
                 if( iPreserveHandleLength )
                 {
                     ::ULIS::FVec2D& handlePos = cubicSegment->GetHandle(1)->GetCoords();
-                    ::ULIS::FVec2D handleVec = handlePos - this->GetCoords( nullptr );
+                    ::ULIS::FVec2D handleVec = handlePos - this->GetCoords();
 
                     distance = handleVec.Distance();
                 }
@@ -184,8 +184,8 @@ FOdysseyVectorVertexCubic::GetPerpendicularVector( bool iNormalize )
             FOdysseyVectorSegmentCubic *segment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
             FOdysseyVectorVertex* p0 = segment->GetVertex(0);
             FOdysseyVectorVertex* p1 = segment->GetVertex(1);
-            ::ULIS::FVec2D& point0 = segment->GetVertex(0)->GetCoords( nullptr );
-            ::ULIS::FVec2D& point1 = segment->GetVertex(1)->GetCoords( nullptr );
+            ::ULIS::FVec2D& point0 = segment->GetVertex(0)->GetCoords();
+            ::ULIS::FVec2D& point1 = segment->GetVertex(1)->GetCoords();
             ::ULIS::FVec2D& ctrlPoint0 = segment->GetHandle(0)->GetCoords();
             ::ULIS::FVec2D& ctrlPoint1 = segment->GetHandle(1)->GetCoords();
 

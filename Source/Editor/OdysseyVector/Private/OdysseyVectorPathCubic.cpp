@@ -143,7 +143,7 @@ FOdysseyVectorPathCubic::Erase( ::ULIS::FRectD &iRoi
     {
         FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
         std::vector<FPolygon>& polygonCache = cubicSegment->GetPolygonCache();
-        ::ULIS::FVec2D& firstCoords = cubicSegment->GetVertex(0)->GetCoords( nullptr );
+        ::ULIS::FVec2D& firstCoords = cubicSegment->GetVertex(0)->GetCoords();
         BLPoint firstAt = mWorldMatrix.mapPoint( firstCoords.x, firstCoords.y );
         double subVertexT[2] = { 0.0f, 0.0f };
         uint32 subVertexCount = 0;
@@ -358,7 +358,7 @@ FOdysseyVectorPathCubic::PickPoint( double iWorldX
         // Pick vertex
         if ( iSelectionFlags & PICK_POINT )
         {
-            ::ULIS::FVec2D& localCoords = vertex->GetCoords( nullptr );
+            ::ULIS::FVec2D& localCoords = vertex->GetCoords();
             // convert vertex coordinates to world coordinates. Easier to detect collision inside the picking circle.
             BLPoint worldCoords = mWorldMatrix.mapPoint( localCoords.x, localCoords.y );
             ::ULIS::FVec2D dif = ::ULIS::FVec2D( worldCoords.x - iWorldX, worldCoords.y - iWorldY );
@@ -372,7 +372,7 @@ FOdysseyVectorPathCubic::PickPoint( double iWorldX
         // Pick vertex handle
         if( iSelectionFlags & PICK_HANDLE_POINT )
         {
-            ::ULIS::FVec2D& localCoords = vertex->GetCoords( nullptr );
+            ::ULIS::FVec2D& localCoords = vertex->GetCoords();
             // convert vertex coordinates to world coordinates. Easier to detect collision inside the picking circle.
             BLPoint worldCoords = mWorldMatrix.mapPoint( localCoords.x, localCoords.y );
             // There are 2 point handles, compute both
@@ -504,7 +504,7 @@ FOdysseyVectorPathCubic::Fill( ::ULIS::FRectD& iRoi )
             {
                 FOdysseyVectorVertex* nextVertex = segment->GetOtherVertex( vertex );
                 FOdysseyVectorSegment* nextSegment = nextVertex->GetOtherSegment( segment );
-                ::ULIS::FVec2D& point1 = nextVertex->GetCoords( nullptr );
+                ::ULIS::FVec2D& point1 = nextVertex->GetCoords();
                 ::ULIS::FVec2D& handle0 = segment->GetHandle( vertex     )->GetCoords();
                 ::ULIS::FVec2D& handle1 = segment->GetHandle( nextVertex )->GetCoords();
 
@@ -570,6 +570,25 @@ FOdysseyVectorPathCubic::DrawShapeVariable( ::ULIS::FRectD &iRoi, uint64 iFlags 
             if( ( iRoi.Area() == 0.0f ) || clip.Area() )
             {
                 segment->Draw( iRoi );
+
+                if( iFlags & FOdysseyVectorObject::DRAWSTRUCTURE )
+                {
+/*                    BLRgba32 wireframeColor;
+
+                    // Note: Blend2D color format is 0xAARRGGBB
+                    wireframeColor.r = mObjectParam.WireframeColor.B;
+                    wireframeColor.g = mObjectParam.WireframeColor.G;
+                    wireframeColor.b = mObjectParam.WireframeColor.R;
+                    wireframeColor.a = mObjectParam.WireframeColor.A;
+*/
+                    blctx->save();
+                    blctx->resetMatrix();
+                    blctx->setStrokeWidth( 1.0f );
+                    blctx->setStrokeStyle( BLRgba32( 0xFFFFFFFF ) );
+
+                    segment->DrawStructure( iRoi, true );
+                    blctx->restore();
+                }
             }
         }
 
@@ -737,7 +756,7 @@ FOdysseyVectorPathCubic::SwitchSpace( FOdysseyVectorObject& iNewSpace )
     for( std::list<FOdysseyVectorVertex*>::iterator it = mVertexList.begin(); it != mVertexList.end(); ++it )
     {
         FOdysseyVectorVertexCubic* cubicVertex = static_cast<FOdysseyVectorVertexCubic*>(*it);
-        ::ULIS::FVec2D& point = cubicVertex->GetCoords( nullptr );
+        ::ULIS::FVec2D& point = cubicVertex->GetCoords();
         BLPoint worldPt = mWorldMatrix.mapPoint( point.x, point.y );
         BLPoint wordlVec = mWorldMatrix.mapVector( 0.70710678118f * cubicVertex->GetRadius()
                                                  , 0.70710678118f * cubicVertex->GetRadius() );

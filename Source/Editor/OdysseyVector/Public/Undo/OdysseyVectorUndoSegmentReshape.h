@@ -23,8 +23,8 @@ struct FSegmentShape
         {
             FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(iSegment);
 
-            point[0] = cubicSegment->GetVertex(0)->GetCoords( nullptr );
-            point[1] = cubicSegment->GetVertex(1)->GetCoords( nullptr );
+            point[0] = cubicSegment->GetVertex(0)->GetCoords();
+            point[1] = cubicSegment->GetVertex(1)->GetCoords();
             point[2] = cubicSegment->GetHandle(0)->GetCoords();
             point[3] = cubicSegment->GetHandle(1)->GetCoords();
         }

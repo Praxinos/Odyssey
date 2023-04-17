@@ -153,10 +153,10 @@ FOdysseyVectorVertex::GetVectorOnSegment( FOdysseyVectorSegment* iSegment, bool 
 {
     ::ULIS::FVec2D vec;
 
-    vec = ( iSegment->GetVertex(0) == this ) ? iSegment->GetVertex(1)->GetCoords(iSegment) -
-                                                                       GetCoords(iSegment)
-                                              :                        GetCoords(iSegment) -
-                                               iSegment->GetVertex(0)->GetCoords(iSegment);
+    vec = ( iSegment->GetVertex(0) == this ) ? iSegment->GetVertex(1)->GetCoords() -
+                                                                       GetCoords()
+                                              :                        GetCoords() -
+                                               iSegment->GetVertex(0)->GetCoords();
 
     if( iNormalize && vec.DistanceSquared() )
     {
@@ -262,12 +262,6 @@ FOdysseyVectorVertex::RemoveSection( FOdysseyVectorSection* iSection )
     mSectionList.remove( iSection );
 }
 
-::ULIS::FVec2D&
-FOdysseyVectorVertex::GetCoords( FOdysseyVectorSegment* iSegment )
-{
-    return mCoords;
-}
-
 bool
 FOdysseyVectorVertex::HasSegment( FOdysseyVectorSegment* iSegment )
 {
@@ -311,12 +305,6 @@ FOdysseyVectorVertex::GetBoundingBox( bool iWorld )
     }
 
     return bbox;
-}
-
-::ULIS::FVec2D
-FOdysseyVectorVertex::GetPosition( FOdysseyVectorSegment* iSegment )
-{
-    return mCoords;
 }
 
 std::list<FOdysseyVectorSection*>&

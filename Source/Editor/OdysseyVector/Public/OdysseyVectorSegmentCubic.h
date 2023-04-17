@@ -98,6 +98,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
          */
         virtual void Draw( ::ULIS::FRectD &iRoi ) override;
 
+        virtual void DrawStructure( ::ULIS::FRectD &iRoi, bool iWorld ) override;
+
        /**
          * @brief Get the segment's bounding box.
          * @return a reference to the segment's bounding box.

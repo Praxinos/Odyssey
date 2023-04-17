@@ -62,7 +62,7 @@ FOdysseyVectorSegment::New( FOdysseyVectorPath* iPath
 ::ULIS::FVec2D
 FOdysseyVectorSegment::GetVectorAtStart( bool iNormalize )
 {
-    ::ULIS::FVec2D vec = GetVertex(1)->GetCoords( nullptr ) - GetVertex(0)->GetCoords( nullptr );
+    ::ULIS::FVec2D vec = GetVertex(1)->GetCoords() - GetVertex(0)->GetCoords();
 
     if( iNormalize && vec.DistanceSquared() )
     {

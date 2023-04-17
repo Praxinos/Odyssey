@@ -141,15 +141,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
         FOdysseyVectorSegment* GetOtherSegment( FOdysseyVectorSegment* iSegment );
 
         /**
-         * @brief Get the coordinates of this vertex depending on the segment passed as parameter.
-         * while this value would be the same for regular vertices, it may differ for intersection vertices in the case
-         * where there is some "intersection tolerance", i.e segments almost intersect.
-         * @param iSegment segment the vertex lies on.
-         * @return the coordinates of the vertex on that segment.
-         */
-        virtual ::ULIS::FVec2D GetPosition( FOdysseyVectorSegment* iSegment );
-
-        /**
          * @brief Get the number of segments connected to this vertex. Equals to a call to "GetSegmentList().size()".
          * @return the number of segments connected to this vertex.
          */
@@ -179,8 +170,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
          * @return a range from 0.0 to 1.0.
          */
         virtual double GetT( FOdysseyVectorSegment* iSegment );
-
-        virtual ::ULIS::FVec2D& GetCoords( FOdysseyVectorSegment* iSegment );
 
         /**
          * @brief Get a pointer to the path this vertex belongs to.

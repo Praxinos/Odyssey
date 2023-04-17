@@ -57,6 +57,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         static const uint32 VECTORPATHCUBICTYPE  = 5;
         static const uint32 VECTORGROUPPAINTTYPE = 6;
 
+        // drawing mask
+        static const uint32 DRAWSTRUCTURE = ( 1 << 0 );
+
         // update mask
         static const uint32 FREQUENTUPDATES = ( 1 << 0 );
         static const uint32 KEEPINVALIDATED = ( 1 << 1 );
@@ -114,13 +117,13 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
 
         virtual void OnChildTransform( FOdysseyVectorObject* iChild ) {};
 
-        void Update( uint32 iUpdateFlags );
+        virtual void Update( uint32 iUpdateFlags );
         virtual void UpdateShape( uint32 iUpdateFlags ) {};
 
         FOdysseyVectorObject* Copy();
         virtual FOdysseyVectorObject* CopyShape(){ return nullptr; };
 
-        void Draw( ::ULIS::FRectD& iRoi, uint64 iFlags );
+        virtual void Draw( ::ULIS::FRectD& iRoi, uint64 iFlags );
         virtual void DrawShape ( ::ULIS::FRectD &roi, uint64 iFlags ){};
 
         virtual void DrawStructure ( ::ULIS::FRectD &roi, uint64 iFlags ){};

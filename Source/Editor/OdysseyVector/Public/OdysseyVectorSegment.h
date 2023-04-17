@@ -48,6 +48,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
          */
         virtual void Draw( ::ULIS::FRectD &iRoi );
 
+        virtual void DrawStructure( ::ULIS::FRectD &iRoi, bool iWorld ){};
+
        /**
          * @brief Test whether or not this segment is close to the coordinates passed as parameter
          * @param iLocalX X-coordinate (in local system)
