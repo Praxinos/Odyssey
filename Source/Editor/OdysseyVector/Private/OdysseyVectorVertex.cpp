@@ -211,7 +211,7 @@ static bool seekSection( std::list<FOdysseyVectorSection*>& iSectionList
 FOdysseyVectorSection*
 FOdysseyVectorVertex::GetCycleNextSection( FOdysseyVectorSection* iLastSection, double iOrientation )
 {
-    ::ULIS::FVec2D lastSectionVector = -iLastSection->GetVectorFromVertex( this, false );
+    ::ULIS::FVec2D lastSectionVector = -iLastSection->GetVectorFromVertex( this, false, false );
 
     for( std::list<FOdysseyVectorSection*>::iterator it = mSectionList.begin(); it != mSectionList.end(); ++it )
     {
@@ -219,7 +219,7 @@ FOdysseyVectorVertex::GetCycleNextSection( FOdysseyVectorSection* iLastSection, 
 
         if( section->GetSegment() != iLastSection->GetSegment() )
         {
-            ::ULIS::FVec2D sectionVector = section->GetVectorFromVertex( this, false );
+            ::ULIS::FVec2D sectionVector = section->GetVectorFromVertex( this, false, false );
 
             if( ( FOdysseyVector::Cross2D( lastSectionVector, sectionVector ) * iOrientation > 0.0f ) )
             {

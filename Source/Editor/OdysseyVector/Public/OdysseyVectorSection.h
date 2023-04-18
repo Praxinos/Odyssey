@@ -49,10 +49,11 @@ class FOdysseyVectorSection
        /**
          * @brief Get a vector tangent to this section, starting at this vertex.
          * @param iVertex the vertex
+         * @param iStraight
          * @param iNormalize normalize the vector or not
          * return a vector tangent to this section, starting at this vertex. 
          */
-        ::ULIS::FVec2D GetVectorFromVertex( FOdysseyVectorVertex* iVertex, bool iNormalize );
+        ::ULIS::FVec2D GetVectorFromVertex( FOdysseyVectorVertex* iVertex, bool iStraight, bool iNormalize );
 
        /**
          * @brief Increment the number of cycles connected to this section. 

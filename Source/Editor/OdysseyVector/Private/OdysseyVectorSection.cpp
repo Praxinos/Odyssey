@@ -16,19 +16,22 @@ FOdysseyVectorSection::FOdysseyVectorSection( FOdysseyVectorSegment* iSegment
 }
 
 ::ULIS::FVec2D
-FOdysseyVectorSection::GetVectorFromVertex( FOdysseyVectorVertex* iVertex, bool iNormalize )
+FOdysseyVectorSection::GetVectorFromVertex( FOdysseyVectorVertex* iVertex, bool iStraight, bool iNormalize )
 {
     ::ULIS::FVec2D tangent = { 0.0f, 0.0f };
 
-    if( mSegment )
+    if( ( mSegment == nullptr ) || ( iStraight == true ) )
+    {
+        tangent =  ( iVertex == mVertex[0] ) ? mVertex[1]->GetCoords() - mVertex[0]->GetCoords()
+                                             : mVertex[0]->GetCoords() - mVertex[1]->GetCoords();
+    }
+    else
     {
         if( mSegment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
         {
-
             double T0 = mVertex[0]->GetT( mSegment );
             double T1 = mVertex[1]->GetT( mSegment );
-            double deltaT = fabs( T1 - T0 ) * 0.1f;
-            double sampleT = ( iVertex == mVertex[0] ) ? T0 + deltaT : T1 - deltaT;
+            double sampleT = ( T1 + T0 ) * 0.5f;
             ::ULIS::FVec2D sample = mSegment->GetPointAt( sampleT );
 
             tangent.x = sample.x - iVertex->GetCoords().x;
@@ -37,11 +40,6 @@ FOdysseyVectorSection::GetVectorFromVertex( FOdysseyVectorVertex* iVertex, bool 
     return mSegment->GetTangentAt( iVertex->GetT( *mSegment ) );
     */
         }
-    }
-    else
-    {
-        tangent =  ( iVertex == mVertex[0] ) ? mVertex[1]->GetCoords() - mVertex[0]->GetCoords()
-                                             : mVertex[0]->GetCoords() - mVertex[1]->GetCoords();
     }
 
     if( iNormalize )

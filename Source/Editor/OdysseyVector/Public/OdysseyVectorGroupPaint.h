@@ -133,8 +133,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
 
         void FindCycles();
 
+        void SimplifyGraph();
+
         /**
          * @brief Recursive function that traverses the graph and find cycles.
+         * @param iReturnSection
          * @param iVertex the vertex being explored, either intersection vertex or regular ones.
          * @param iSection the section that will take us to the next vertex.
          * @param oVertexArray an array that receives the explored vertices.
@@ -143,7 +146,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
          * @param iDepth current recursion depth.
          * @return iCubicSegment the segment.
          */
-        uint32 FindPath( FOdysseyVectorVertex* iVertex
+        uint32 FindPath( FOdysseyVectorSection* iReturnSection
+                       , FOdysseyVectorVertex* iVertex
                        , FOdysseyVectorSection* iSection
                        , std::vector<FOdysseyVectorVertex*>& oVertexArray
                        , std::vector<FOdysseyVectorSection*>& oSectionArray
