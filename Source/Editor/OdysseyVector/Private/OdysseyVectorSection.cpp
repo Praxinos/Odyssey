@@ -29,13 +29,9 @@ FOdysseyVectorSection::GetVectorFromVertex( FOdysseyVectorVertex* iVertex, bool 
     {
         if( mSegment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
         {
-            double T0 = mVertex[0]->GetT( mSegment );
-            double T1 = mVertex[1]->GetT( mSegment );
-            double sampleT = ( T1 + T0 ) * 0.5f;
-            ::ULIS::FVec2D sample = mSegment->GetPointAt( sampleT );
-
-            tangent.x = sample.x - iVertex->GetCoords().x;
-            tangent.y = sample.y - iVertex->GetCoords().y;
+             tangent = ( iVertex == mVertex[0] ) ?  mSegment->GetTangentAt( iVertex->GetT( mSegment ) )
+                                                 : -mSegment->GetTangentAt( iVertex->GetT( mSegment ) );
+UE_LOG(LogTemp, Warning, TEXT("%f %f"), tangent.x, tangent.y );
     /*
     return mSegment->GetTangentAt( iVertex->GetT( *mSegment ) );
     */
