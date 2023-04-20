@@ -4,12 +4,19 @@ FOdysseyVectorSegment::~FOdysseyVectorSegment()
 {
 }
 
-FOdysseyVectorSegment::FOdysseyVectorSegment()
+FOdysseyVectorSegment::FOdysseyVectorSegment( FOdysseyVectorPath* iPath
+                                            , FOdysseyVectorVertex* iVertex0
+                                            , FOdysseyVectorVertex* iVertex1 )
     : FOdysseyVectorLink ()
     , mIsInvalidated( false )
     , mPath ( nullptr )
+    , mDefaultSection( this, iVertex0, iVertex1 )
 {
+    FOdysseyVectorLink::Init ( iVertex0, iVertex1 );
 
+    mPath = iPath;
+
+    AddSection( &mDefaultSection );
 }
 
 FOdysseyVectorVertex*
@@ -32,31 +39,6 @@ FOdysseyVectorSegment::GetTangentAt( double t )
     ::ULIS::FVec2D unimplemented;
 
     return unimplemented;
-}
-
-
-void
-FOdysseyVectorSegment::Init( FOdysseyVectorPath* iPath
-                           , FOdysseyVectorVertex* iVertex0
-                           , FOdysseyVectorVertex* iVertex1 )
-{
-    FOdysseyVectorLink::Init ( iVertex0, iVertex1 );
-
-    mPath = iPath;
-}
-
-// static
-
-FOdysseyVectorSegment*
-FOdysseyVectorSegment::New( FOdysseyVectorPath* iPath
-                          , FOdysseyVectorVertex* iVertex0
-                          , FOdysseyVectorVertex* iVertex1 )
-{
-    FOdysseyVectorSegment* segment = new FOdysseyVectorSegment();
-
-    segment->Init ( iPath, iVertex0, iVertex1 );
-
-    return segment;
 }
 
 ::ULIS::FVec2D
@@ -104,8 +86,8 @@ FOdysseyVectorSegment::GetSection ( double t )
         FOdysseyVectorSection* section = static_cast<FOdysseyVectorSection*>(*it);
         FOdysseyVectorVertex* vertex0 = section->GetVertex(0);
         FOdysseyVectorVertex* vertex1 = section->GetVertex(1);
-        double fromT = vertex0->GetT( this );
-        double   toT = vertex1->GetT( this );
+        double fromT = vertex0->GetT( section );
+        double   toT = vertex1->GetT( section );
 
         if ( ( t >= fromT ) && ( t <= toT ) )
         {
@@ -119,21 +101,23 @@ FOdysseyVectorSegment::GetSection ( double t )
 void
 FOdysseyVectorSegment::AddSection ( FOdysseyVectorSection* iSection )
 {
+/*
     iSection->GetVertex(0)->AddSection( iSection );
     iSection->GetVertex(1)->AddSection( iSection );
-
+*/
     mSectionList.push_back( iSection );
 }
 
 void
-FOdysseyVectorSegment::DeleteSection ( FOdysseyVectorSection* iSection )
+FOdysseyVectorSegment::RemoveSection ( FOdysseyVectorSection* iSection )
 {
+/*
     iSection->GetVertex(0)->RemoveSection( iSection );
     iSection->GetVertex(1)->RemoveSection( iSection );
-
+*/
     mSectionList.remove( iSection );
 
-    delete iSection;
+    //delete iSection;
 }
 
 std::list<FOdysseyVectorSection*>&
@@ -142,22 +126,42 @@ FOdysseyVectorSegment::GetSectionList()
     return mSectionList;
 }
 
-void
-FOdysseyVectorSegment::AddIntersection ( FOdysseyVectorVertexIntersection* iIntersectionVertex )
+FOdysseyVectorSection*
+FOdysseyVectorSegment::GetDefaultSection()
 {
-    double t = iIntersectionVertex->GetT( this );
-    FOdysseyVectorSection* section = GetSection ( t );
+    return &mDefaultSection;
+}
+
+// MUST be called only on segments belonging to this path (because of the section)
+void
+FOdysseyVectorSegment::AddIntersection ( FOdysseyVectorVertexIntersection* iIntersectionVertex, double iT )
+{
+    FOdysseyVectorSection* section = GetSection ( iT );
     FOdysseyVectorVertex* vertex0 = section->GetVertex(0);
     FOdysseyVectorVertex* vertex1 = section->GetVertex(1);
     FOdysseyVectorSection* subSection[2] = { new FOdysseyVectorSection ( this, vertex0            , iIntersectionVertex )
                                            , new FOdysseyVectorSection ( this, iIntersectionVertex, vertex1             ) };
 
-    DeleteSection( section );
+    RemoveSection( section );
+
+    section->GetVertex(0)->RemoveSection( section );
+    section->GetVertex(1)->RemoveSection( section );
+
+    if( section != &mDefaultSection )
+    {
+        delete section;
+    }
 
     mIntersectionVertexList.push_back( iIntersectionVertex );
 
     AddSection ( subSection[0] );
     AddSection ( subSection[1] );
+
+    subSection[0]->GetVertex(0)->AddSection( subSection[0] );
+    subSection[0]->GetVertex(1)->AddSection( subSection[0] );
+
+    subSection[1]->GetVertex(0)->AddSection( subSection[1] );
+    subSection[1]->GetVertex(1)->AddSection( subSection[1] );
 }
 
 // MUST be called only on segments belonging to this path (because of the section)
@@ -170,10 +174,18 @@ FOdysseyVectorSegment::ClearIntersections()
     {
         FOdysseyVectorSection* section = static_cast<FOdysseyVectorSection*>(*it);
 
-        DeleteSection( section );
+        RemoveSection( section );
+
+        section->GetVertex(0)->RemoveSection( section );
+        section->GetVertex(1)->RemoveSection( section );
     }
 
     mSectionList.clear();
+
+    AddSection( &mDefaultSection );
+
+    mDefaultSection.GetVertex(0)->AddSection( &mDefaultSection );
+    mDefaultSection.GetVertex(1)->AddSection( &mDefaultSection );
 
     // do not free the intersection vertex here, as they are shared between segments. Deletion would be called twice.
     // Leave it to the paintgroup.

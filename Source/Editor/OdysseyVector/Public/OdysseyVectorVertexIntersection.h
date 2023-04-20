@@ -6,8 +6,27 @@
 
 #include "OdysseyVectorVertex.h"
 
-struct FIntersection {
+struct FIntersection
+{
     double t;
+};
+
+struct FExplorationPair
+{
+    FOdysseyVectorSection* returnSection;
+    FOdysseyVectorSection* departSection;
+
+    FExplorationPair()
+    {
+        returnSection = nullptr;
+        departSection = nullptr;
+    };
+
+    FExplorationPair( FOdysseyVectorSection* iReturnSection, FOdysseyVectorSection* iDepartSection )
+    {
+        returnSection = iReturnSection;
+        departSection = iDepartSection;
+    }
 };
 
 class ODYSSEYVECTOR_API FOdysseyVectorVertexIntersection : public FOdysseyVectorVertex
@@ -24,16 +43,29 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertexIntersection : public FOdysseyVector
         /**
          * @brief Constructor.
          */
-        FOdysseyVectorVertexIntersection( double iX, double iY );
+        FOdysseyVectorVertexIntersection( double iX, double iY, bool iSelfIntersect );
 
-        virtual double GetT( FOdysseyVectorSegment* iSegment ) override;
+        double GetT( FOdysseyVectorSection* iSection );
 
-        void AddSegment( FOdysseyVectorSegment* iSegment, double t );
+        void MapSection( FOdysseyVectorSection* iSection, double t );
+
+        void BuildExplorationPairs();
+        std::vector<FExplorationPair>& GetExplorationPairs();
+
+        /**
+         * @brief Get a pointer to the next section to explore in cycle depending on the last visited section.
+         * @param iLastSection the last visited section.
+         * @param iOrientation ignored.
+         * @return a pointer to the next section to explore in cycle.
+         */
+        FOdysseyVectorSection* GetCycleNextSection( FOdysseyVectorSection* iLastSection, double iOrientation );
 
     protected:
         uint64 mIntersectionID;
         // map for intersection positions
-        std::map<FOdysseyVectorSegment*, FIntersection> mTMap;
+        std::multimap<FOdysseyVectorSection*, FIntersection> mTMap; // non unique mapping (segment can intersect itself)
+        std::vector<FExplorationPair> mExplorationPairs;
+        bool mSelfIntersect;
 
     private:
         static const uint32 mStaticClass =  0x29459195; // value is crc32 FOdysseyVectorVertexIntersection

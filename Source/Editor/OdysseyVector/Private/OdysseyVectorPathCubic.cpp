@@ -37,7 +37,7 @@ FOdysseyVectorPathCubic::AppendVertex( FOdysseyVectorVertexCubic* iVertex
         // lastPoint is NULL if this is the first point added
         if( lastVertex )
         {
-            FOdysseyVectorSegmentCubic* segment = FOdysseyVectorSegmentCubic::New( this, lastVertex, iVertex );
+            FOdysseyVectorSegmentCubic* segment = new FOdysseyVectorSegmentCubic( this, lastVertex, iVertex );
 
             AddSegment( segment );
 
@@ -650,13 +650,13 @@ FOdysseyVectorPathCubic::CopyShape()
         FOdysseyVectorSegmentCubic* originalSegment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
         FOdysseyVectorVertexCubic* vertex0 = static_cast<FOdysseyVectorVertexCubic*>( originalSegment->GetPoint(0) );
         FOdysseyVectorVertexCubic* vertex1 = static_cast<FOdysseyVectorVertexCubic*>( originalSegment->GetPoint(1) );
-        FOdysseyVectorSegmentCubic* newSegment = FOdysseyVectorSegmentCubic::New( cubicPathCopy
-                                                                                , lookupTable[vertex0]
-                                                                                , originalSegment->GetHandle(0)->GetX()
-                                                                                , originalSegment->GetHandle(0)->GetY()
-                                                                                , originalSegment->GetHandle(1)->GetX()
-                                                                                , originalSegment->GetHandle(1)->GetY()
-                                                                                , lookupTable[vertex1] );
+        FOdysseyVectorSegmentCubic* newSegment = new FOdysseyVectorSegmentCubic( cubicPathCopy
+                                                                               , lookupTable[vertex0]
+                                                                               , originalSegment->GetHandle(0)->GetX()
+                                                                               , originalSegment->GetHandle(0)->GetY()
+                                                                               , originalSegment->GetHandle(1)->GetX()
+                                                                               , originalSegment->GetHandle(1)->GetY()
+                                                                               , lookupTable[vertex1] );
 
         cubicPathCopy->AddSegment( newSegment );
 
@@ -723,13 +723,13 @@ FOdysseyVectorPathCubic::Merge( FOdysseyVectorPath* iMergedPath
                             , conversionMatrix.mapPoint( handle1->GetX(), handle1->GetY() ) };
             FOdysseyVectorVertexCubic* newCubicVertex0 = static_cast<FOdysseyVectorVertexCubic*>(iVertexLookup[vertex0->GetID()]);
             FOdysseyVectorVertexCubic* newCubicVertex1 = static_cast<FOdysseyVectorVertexCubic*>(iVertexLookup[vertex1->GetID()]);
-            FOdysseyVectorSegmentCubic* newSegment = FOdysseyVectorSegmentCubic::New( this
-                                                                                    , newCubicVertex0
-                                                                                    , pt[0].x
-                                                                                    , pt[0].y
-                                                                                    , pt[1].x
-                                                                                    , pt[1].y
-                                                                                    , newCubicVertex1 );
+            FOdysseyVectorSegmentCubic* newSegment = new FOdysseyVectorSegmentCubic( this
+                                                                                   , newCubicVertex0
+                                                                                   , pt[0].x
+                                                                                   , pt[0].y
+                                                                                   , pt[1].x
+                                                                                   , pt[1].y
+                                                                                   , newCubicVertex1 );
             iAddedSegmentArray.push_back( newSegment );
 
             AddSegment( newSegment );

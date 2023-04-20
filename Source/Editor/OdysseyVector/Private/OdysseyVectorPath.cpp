@@ -114,7 +114,7 @@ FOdysseyVectorPath::AppendVertex( FOdysseyVectorVertex* iPoint, FOdysseyVectorVe
     {
         if ( iPreviousPoint->GetSegmentCount() < 2 )
         {
-            AddSegment( FOdysseyVectorSegment::New( this, iPreviousPoint, iPoint ) );
+            AddSegment( new FOdysseyVectorSegment( this, iPreviousPoint, iPoint ) );
         }
     }
 
@@ -230,8 +230,11 @@ FOdysseyVectorPath::AddSegment( FOdysseyVectorSegment* iSegment )
 
     iSegment->SetPath( this );
 
-    iSegment->GetVertex(0)->AddSegment( iSegment, 0.0f );
-    iSegment->GetVertex(1)->AddSegment( iSegment, 1.0f );
+    iSegment->GetVertex(0)->AddSegment( iSegment );
+    iSegment->GetVertex(1)->AddSegment( iSegment );
+
+    iSegment->GetVertex(0)->AddSection(iSegment->GetDefaultSection());
+    iSegment->GetVertex(1)->AddSection(iSegment->GetDefaultSection());
 }
 
 void
@@ -252,12 +255,15 @@ FOdysseyVectorPath::Clear()
 void
 FOdysseyVectorPath::RemoveSegment( FOdysseyVectorSegment* iSegment )
 {
-    iSegment->ClearIntersections();
+    iSegment->ClearIntersections(); // note: re-adds the default section
 
     mSegmentList.remove( iSegment );
 
     iSegment->GetVertex(0)->RemoveSegment( iSegment );
     iSegment->GetVertex(1)->RemoveSegment( iSegment );
+
+    iSegment->GetVertex(0)->RemoveSection(iSegment->GetDefaultSection());
+    iSegment->GetVertex(1)->RemoveSection(iSegment->GetDefaultSection());
 }
 
 std::list<FOdysseyVectorSegment*>&

@@ -4,7 +4,10 @@
 #include <Core/Core.h>
 #include <Image/Block.h>
 #include "OdysseyVectorPoint.h"
-#include "OdysseyVectorCycle.h"
+//#include "OdysseyVectorCycle.h"
+
+class FOdysseyVectorSegment;
+class FOdysseyVectorVertex;
 
 // TODO: inherit from FOdysseyVectorLink ? answer : no, because links should not have
 // intersection vertices as endpoints as there is no way to know which segments they are on
@@ -79,6 +82,9 @@ class FOdysseyVectorSection
          */
         bool IsBlocked( FOdysseyVectorVertex* iVertex );
 
+        bool IsRemoved();
+        void SetRemoved();
+
     protected:
         FOdysseyVectorSegment* mSegment;
         FOdysseyVectorVertex* mVertex[2];
@@ -88,5 +94,5 @@ class FOdysseyVectorSection
     private:
         static const uint32 BLOCKVERTEX0 = ( 1 << 0 );
         static const uint32 BLOCKVERTEX1 = ( 1 << 1 );
-
+        static const uint32 REMOVED      = ( 1 << 2 );
 };

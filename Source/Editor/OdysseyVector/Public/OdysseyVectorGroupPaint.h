@@ -192,6 +192,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         std::vector<FOdysseyVectorVertexIntersection*> mIntersectionVertexArray;
         // need to remember them in order to clean properly
         std::list<FOdysseyVectorSegment*> mSegmentList;
+        std::list<FOdysseyVectorSection*> mSectionList;
 
     public:
         FGroupPaintParam mGroupPaintParam;

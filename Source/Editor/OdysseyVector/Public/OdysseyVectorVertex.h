@@ -30,7 +30,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
          * @brief Add a segment to the list of segments connected to this vertex
          * @param iSegment the segment
          */
-        virtual void AddSegment( FOdysseyVectorSegment* iSegment, double t );
+        virtual void AddSegment( FOdysseyVectorSegment* iSegment );
 
         /**
          * @brief Add a section to the list of section connected to this vertex
@@ -120,10 +120,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
 
         /**
          * @brief Get a pointer to the section connecting this vertex and another vertex passed as argument.
-         * @param iOtherVertex a pointer to the other vertex.
-         * @return a pointer to the section connecting this vertex and iOtherVertex.
+         * @param iSegment
+         * @return
          */
-        FOdysseyVectorSection* GetSection( FOdysseyVectorVertex* iOtherVertex );
+        FOdysseyVectorSection* GetSection( FOdysseyVectorSegment* iSegment );
 
         /**
          * @brief Get a pointer to a section connected to this vertex AND located on the same segment
@@ -131,7 +131,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
          * @param iSection a pointer to a section.
          * @return a pointer to the other section.
          */
-        FOdysseyVectorSection* GetOtherSection( FOdysseyVectorSection* iSection );
+        FOdysseyVectorSection* GetOtherSection( FOdysseyVectorSection* iSection, bool iSameSegment );
 
         /**
          * @brief Get a pointer to a segment connected to this vertex AND different from that segment. 
@@ -166,10 +166,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
 
         /**
          * @brief Get the position of the vertex on the segment passed as parameter, in a range from 0.0 to 1.0.
-         * @param iSegment the segment the vertex lies on.
+         * @param iSection the section the vertex lies on.
          * @return a range from 0.0 to 1.0.
          */
-        virtual double GetT( FOdysseyVectorSegment* iSegment );
+        virtual double GetT( FOdysseyVectorSection* iSection );
 
         /**
          * @brief Get a pointer to the path this vertex belongs to.
@@ -179,14 +179,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
 
 
         virtual ::ULIS::FVec2D GetVectorOnSegment( FOdysseyVectorSegment* iSegment, bool iNormalize );
-
-        /**
-         * @brief Get a pointer to the next section to explore in cycle depending on the last visited section.
-         * @param iLastSection the last visited section.
-         * @param iOrientation ignored.
-         * @return a pointer to the next section to explore in cycle.
-         */
-        FOdysseyVectorSection* GetCycleNextSection( FOdysseyVectorSection* iLastSection, double iOrientation );
 
         /**
          * @brief Mark all connected segments for update.

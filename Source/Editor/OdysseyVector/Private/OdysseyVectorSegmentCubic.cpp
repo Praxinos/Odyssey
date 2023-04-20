@@ -6,9 +6,22 @@ FOdysseyVectorSegmentCubic::~FOdysseyVectorSegmentCubic()
 
 }
 
-FOdysseyVectorSegmentCubic::FOdysseyVectorSegmentCubic()
+FOdysseyVectorSegmentCubic::FOdysseyVectorSegmentCubic( FOdysseyVectorPathCubic* iPath
+                                                      , FOdysseyVectorVertexCubic* iPoint0
+                                                      , double iCtrlPoint0x
+                                                      , double iCtrlPoint0y
+                                                      , double iCtrlPoint1x
+                                                      , double iCtrlPoint1y
+                                                      , FOdysseyVectorVertexCubic* iPoint1 )
 {
+    Init ( iPath, iPoint0, iCtrlPoint0x, iCtrlPoint0y, iCtrlPoint1x, iCtrlPoint1y, iPoint1 );
+}
 
+FOdysseyVectorSegmentCubic::FOdysseyVectorSegmentCubic( FOdysseyVectorPathCubic* iPath
+                                                      , FOdysseyVectorVertexCubic* iPoint0
+                                                      , FOdysseyVectorVertexCubic* iPoint1 )
+{
+    Init( iPath, iPoint0, iPoint1 );
 }
 
 ::ULIS::FVec2D
@@ -117,36 +130,6 @@ FOdysseyVectorSegmentCubic::Smooth( double iLimitAngleInRadians )
             }
         }
     }
-}
-
-//static
-FOdysseyVectorSegmentCubic* 
-FOdysseyVectorSegmentCubic::New( FOdysseyVectorPathCubic* iPath
-                               , FOdysseyVectorVertexCubic* iPoint0
-                               , double iCtrlPoint0x
-                               , double iCtrlPoint0y
-                               , double iCtrlPoint1x
-                               , double iCtrlPoint1y
-                               , FOdysseyVectorVertexCubic* iPoint1 )
-{
-    FOdysseyVectorSegmentCubic* cubicSegment = new FOdysseyVectorSegmentCubic();
-
-    cubicSegment->Init (iPath, iPoint0, iCtrlPoint0x, iCtrlPoint0y, iCtrlPoint1x, iCtrlPoint1y, iPoint1 );
-
-    return cubicSegment;
-}
-
-//static
-FOdysseyVectorSegmentCubic* 
-FOdysseyVectorSegmentCubic::New( FOdysseyVectorPathCubic* iPath
-                               , FOdysseyVectorVertexCubic* iPoint0
-                               , FOdysseyVectorVertexCubic* iPoint1 )
-{
-    FOdysseyVectorSegmentCubic* cubicSegment = new FOdysseyVectorSegmentCubic();
-
-    cubicSegment->Init (iPath, iPoint0, iPoint1 );
-
-    return cubicSegment;
 }
 
 ::ULIS::FVec2D
@@ -360,7 +343,7 @@ FOdysseyVectorSegmentCubic::Sample( double iFromT
     double toRadius = radius0 + ( deltaRadius * iToT );
     FOdysseyVectorVertexCubic* vertex0 = ( iFromT == 0.0f ) ? static_cast<FOdysseyVectorVertexCubic*>(mPoint[0]) : FOdysseyVectorVertexCubic::New( pointAt0.x, pointAt0.y, fromRadius );
     FOdysseyVectorVertexCubic* vertex1 = ( iToT   == 1.0f ) ? static_cast<FOdysseyVectorVertexCubic*>(mPoint[1]) : FOdysseyVectorVertexCubic::New( pointAt1.x, pointAt1.y, toRadius   );
-    FOdysseyVectorSegmentCubic* sampleSegment = FOdysseyVectorSegmentCubic::New( static_cast<FOdysseyVectorPathCubic*>(mPath), vertex0, ctrlPoint0.x, ctrlPoint0.y, ctrlPoint1.x, ctrlPoint1.y, vertex1 );
+    FOdysseyVectorSegmentCubic* sampleSegment = new FOdysseyVectorSegmentCubic( static_cast<FOdysseyVectorPathCubic*>(mPath), vertex0, ctrlPoint0.x, ctrlPoint0.y, ctrlPoint1.x, ctrlPoint1.y, vertex1 );
     ::ULIS::FVec2D& sampleCtrlPoint0 = sampleSegment->GetHandle(0)->GetCoords();
     ::ULIS::FVec2D& sampleCtrlPoint1 = sampleSegment->GetHandle(1)->GetCoords();
     ::ULIS::FVec2D& samplePoint0 = sampleSegment->GetVertex(0)->GetCoords();
@@ -514,9 +497,9 @@ FOdysseyVectorSegmentCubic::Cut( ::ULIS::FVec2D& linePoint0
         for( uint32 i = 0; i < pointCount; i++ )
         {
             uint32 n = i + 1;
-            FOdysseyVectorSegmentCubic* segment = FOdysseyVectorSegmentCubic::New( static_cast<FOdysseyVectorPathCubic*>(mPath)
-                                                                                 , static_cast<FOdysseyVectorVertexCubic*>(pointChain[i])
-                                                                                 , static_cast<FOdysseyVectorVertexCubic*>(pointChain[n]) );
+            FOdysseyVectorSegmentCubic* segment = new FOdysseyVectorSegmentCubic( static_cast<FOdysseyVectorPathCubic*>(mPath)
+                                                                                , static_cast<FOdysseyVectorVertexCubic*>(pointChain[i])
+                                                                                , static_cast<FOdysseyVectorVertexCubic*>(pointChain[n]) );
             double distance = segment->GetStraightDistance();
 
             segment->GetHandle(0)->Set( segment->GetPoint(0)->GetX() + ( tangentChain[i].x * distance * 0.35f )
@@ -592,7 +575,7 @@ IntersectVertices( FOdysseyVectorVertex* iVertex0, FOdysseyVectorVertex* iVertex
                 if( distance < iVertex0->GetDistanceToNearestSegment() )
                 {
                     FOdysseyVectorSegment* segment1 = iVertex1->GetFirstSegment();
-                    double t = iVertex1->GetT( segment1 );
+                    double t = iVertex1->GetT( iVertex1->GetSection( segment1 ) );
 
                     iVertex0->SetNearestSegment( segment1, distance, t );
                     iVertex1->SetNearestSegment( nullptr, distance, t ); // set as null so that only one endpoints creates the section but we still have a valid distance check.
@@ -652,16 +635,18 @@ FOdysseyVectorSegmentCubic::Intersect( FOdysseyVectorSegmentCubic& iOther
                         if( ( segmentT != 0.0f && iOtherT != 1.0f )
                          && ( segmentT != 1.0f && iOtherT != 0.0f ) )
                         {
-                            FOdysseyVectorVertexIntersection* intersectionVertex = new FOdysseyVectorVertexIntersection(coords.x, coords.y);
+                            FOdysseyVectorVertexIntersection* intersectionVertex = new FOdysseyVectorVertexIntersection(coords.x, coords.y, this == &iOther );
 
                             iIntersectionVertexArray.push_back( intersectionVertex );
 
-                            // AddSegment() MUST be called before AddIntersection because AddIntersection uses the value of t that is stored by AddSegment()
-                            intersectionVertex->AddSegment (    this, segmentT );
-                            intersectionVertex->AddSegment ( &iOther,  iOtherT );
-
-                            this->AddIntersection ( intersectionVertex );
-                            iOther.AddIntersection ( intersectionVertex );
+                            intersectionVertex->AddSegment (    this );
+                            intersectionVertex->AddSegment ( &iOther );
+/*
+                            intersectionVertex->MapSection( )
+                            intersectionVertex->MapSection
+*/
+                            this->AddIntersection ( intersectionVertex, segmentT );
+                            iOther.AddIntersection ( intersectionVertex, iOtherT );
 
                             intersectionCount++;
                         }

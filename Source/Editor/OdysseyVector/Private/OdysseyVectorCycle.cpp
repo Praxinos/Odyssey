@@ -192,8 +192,8 @@ FOdysseyVectorCycle::Build( std::vector<FOdysseyVectorVertex*>& iVertexArray
 
             if( segment )
             {
-                double currentVertexT = currentVertex->GetT( segment );
-                double    nextVertexT =    nextVertex->GetT( segment );
+                double currentVertexT = currentVertex->GetT( section );
+                double    nextVertexT =    nextVertex->GetT( section );
                 /*::ULIS::FVec2D currentAt = currentVertex->GetPosition( segment );
 
                 if( i == 0 )

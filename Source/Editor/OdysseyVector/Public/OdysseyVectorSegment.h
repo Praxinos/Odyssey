@@ -17,20 +17,20 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
         virtual uint32 GetClass() { return mStaticClass; };
 
        /**
-         * @brief Static function to allocate a new segment. Note: this is the proper way to allocate a new segment as we don't
-         * use the constructor to set parameters so that this can be derived from an UOBJECT if needed in future devs. Indeed,
-         * UOBJECTs have empty constructors.
+         * @brief function to allocate a new segment.
          * @param iPath the path this segment belongs to
          * @param iVertex0
          * @param iVertex1
          * @return a pointer to the newly created segment
          */
-        static FOdysseyVectorSegment* New( FOdysseyVectorPath* iPath
-                                         , FOdysseyVectorVertex* iVertex0
-                                         , FOdysseyVectorVertex* iVertex1 );
+        FOdysseyVectorSegment( FOdysseyVectorPath* iPath
+                             , FOdysseyVectorVertex* iVertex0
+                             , FOdysseyVectorVertex* iVertex1 );
+
+        FOdysseyVectorSegment();
 
         virtual ~FOdysseyVectorSegment();
-        FOdysseyVectorSegment();
+
 
        /**
          * @brief Init a segment.
@@ -131,13 +131,13 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
          * @brief Add an intersection point. This automatically creates the attached sections.
          * @param iIntersectionVertex the intersection vertex
          */
-        void AddIntersection ( FOdysseyVectorVertexIntersection* iIntersectionVertex );
+        void AddIntersection ( FOdysseyVectorVertexIntersection* iIntersectionVertex, double iT );
 
        /**
-         * @brief Delete a section. Also frees the section.
-         * @param iSection the section to delete.
+         * @brief Remove a section. Does not free the section.
+         * @param iSection the section to remove.
          */
-        void DeleteSection ( FOdysseyVectorSection* iSection );
+        void RemoveSection ( FOdysseyVectorSection* iSection );
 
        /**
          * @brief Add a section.
@@ -168,9 +168,12 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
         FOdysseyVectorVertex*
         GetOtherVertex( FOdysseyVectorVertex* iVertex );
 
+        FOdysseyVectorSection* GetDefaultSection();
+
     protected:
         std::list<FOdysseyVectorVertexIntersection*> mIntersectionVertexList;
         std::list<FOdysseyVectorSection*> mSectionList;
+        FOdysseyVectorSection mDefaultSection;
         FOdysseyVectorPath* mPath;
         ::ULIS::FRectD mBBox;
         bool mIsInvalidated;

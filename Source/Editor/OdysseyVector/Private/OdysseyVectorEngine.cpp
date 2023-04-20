@@ -359,12 +359,12 @@ FOdysseyVectorEngine::Knot( FOdysseyVectorVertex* iVertexA
             FOdysseyVectorVertexCubic* prevVertex = static_cast<FOdysseyVectorVertexCubic*>(vertexASegment->GetOtherVertex( iVertexA ));
             FOdysseyVectorVertexCubic* nextVertex = static_cast<FOdysseyVectorVertexCubic*>(vertexBSegment->GetOtherVertex( iVertexB ));
             FOdysseyVectorVertexCubic* knotVertex = FOdysseyVectorVertexCubic::New( averageCoords.x, averageCoords.y, averageRadius );
-            FOdysseyVectorSegmentCubic* newCubicSegment[2] = { FOdysseyVectorSegmentCubic::New( cubicPath
-                                                                                             ,  prevVertex
-                                                                                             ,  knotVertex ),
-                                                               FOdysseyVectorSegmentCubic::New( cubicPath
-                                                                                             ,  knotVertex
-                                                                                             ,  nextVertex ) };
+            FOdysseyVectorSegmentCubic* newCubicSegment[2] = { new FOdysseyVectorSegmentCubic( cubicPath
+                                                                                            ,  prevVertex
+                                                                                            ,  knotVertex ),
+                                                               new FOdysseyVectorSegmentCubic( cubicPath
+                                                                                            ,  knotVertex
+                                                                                            ,  nextVertex ) };
             uint32 prevVertexIndex = ( iVertexA == vertexASegment->GetVertex(0) ) ? 1 : 0;
             uint32 nextVertexIndex = ( iVertexB == vertexBSegment->GetVertex(0) ) ? 1 : 0;
 

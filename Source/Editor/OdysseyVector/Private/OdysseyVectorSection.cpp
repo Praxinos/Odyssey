@@ -12,7 +12,6 @@ FOdysseyVectorSection::FOdysseyVectorSection( FOdysseyVectorSegment* iSegment
     , mFlags( 0 )
     , mCycleCount( 0 )
 {
-
 }
 
 ::ULIS::FVec2D
@@ -29,9 +28,9 @@ FOdysseyVectorSection::GetVectorFromVertex( FOdysseyVectorVertex* iVertex, bool 
     {
         if( mSegment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
         {
-             tangent = ( iVertex == mVertex[0] ) ?  mSegment->GetTangentAt( iVertex->GetT( mSegment ) )
-                                                 : -mSegment->GetTangentAt( iVertex->GetT( mSegment ) );
-UE_LOG(LogTemp, Warning, TEXT("%f %f"), tangent.x, tangent.y );
+             tangent = ( iVertex == mVertex[0] ) ?  mSegment->GetTangentAt( iVertex->GetT( this ) )
+                                                 : -mSegment->GetTangentAt( iVertex->GetT( this ) );
+
     /*
     return mSegment->GetTangentAt( iVertex->GetT( *mSegment ) );
     */
@@ -80,6 +79,18 @@ FOdysseyVectorSection::IsBlocked( FOdysseyVectorVertex* iVertex )
                                                : FOdysseyVectorSection::BLOCKVERTEX1;
 
     return ( mFlags & blocked ) ? true : false;
+}
+
+bool
+FOdysseyVectorSection::IsRemoved()
+{
+    return ( mFlags & REMOVED ) ? true : false;
+}
+
+void
+FOdysseyVectorSection::SetRemoved()
+{
+    mFlags |= REMOVED;
 }
 
 FOdysseyVectorVertex*

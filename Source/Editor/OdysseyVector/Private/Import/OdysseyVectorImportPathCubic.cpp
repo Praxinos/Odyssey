@@ -26,13 +26,13 @@ ReadPathCubicGeometrySegments( FOdysseyVectorPathCubic& iCubicPath
         Ar << ctrlPoint1X;
         Ar << ctrlPoint1Y;
 
-        cubicSegment = FOdysseyVectorSegmentCubic::New( &iCubicPath
-                                                      , vertexArray[p0ID]
-                                                      , ctrlPoint0X
-                                                      , ctrlPoint0Y
-                                                      , ctrlPoint1X
-                                                      , ctrlPoint1Y
-                                                      , vertexArray[p1ID] );
+        cubicSegment = new FOdysseyVectorSegmentCubic ( &iCubicPath
+                                                       , vertexArray[p0ID]
+                                                       , ctrlPoint0X
+                                                       , ctrlPoint0Y
+                                                       , ctrlPoint1X
+                                                       , ctrlPoint1Y
+                                                       , vertexArray[p1ID] );
 
         iCubicPath.AddSegment( cubicSegment );
 

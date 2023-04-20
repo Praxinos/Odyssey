@@ -24,23 +24,22 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
         static uint32 StaticClass() { return mStaticClass; };
         virtual uint32 GetClass() override { return mStaticClass; };
 
+    public:
+        virtual ~FOdysseyVectorSegmentCubic();
+
        /**
-         * @brief Static function to allocate a new cubic segment. Note: this is the proper way to allocate a new segment
-         * as we don't use the constructor to set parameters so that this can be derived from an UOBJECT if needed in
-         * future devs. Indeed, UOBJECTs have empty constructors.
+         * @brief function to allocate a new cubic segment.
          * @param iPath the path this segment belongs to
          * @param iVertex0
          * @param iVertex1
          * @return a pointer to the newly created segment
          */
-        static FOdysseyVectorSegmentCubic* New( FOdysseyVectorPathCubic* iPath
-                                              , FOdysseyVectorVertexCubic* iVertex0
-                                              , FOdysseyVectorVertexCubic* iVertex1 );
+        FOdysseyVectorSegmentCubic ( FOdysseyVectorPathCubic* iPath
+                                   , FOdysseyVectorVertexCubic* iVertex0
+                                   , FOdysseyVectorVertexCubic* iVertex1 );
 
        /**
-         * @brief Static function to allocate a new cubic segment. Note: this is the proper way to allocate a new segment
-         * as we don't use the constructor to set parameters so that this can be derived from an UOBJECT if needed in
-         * future devs. Indeed, UOBJECTs have empty constructors.
+         * @brief function to allocate a new cubic segment
          * @param iPath the path this segment belongs to
          * @param iVertex0
          * @param iCtrlPoint0x
@@ -50,17 +49,13 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
          * @param iVertex1
          * @return a pointer to the newly created segment
          */
-        static FOdysseyVectorSegmentCubic* New( FOdysseyVectorPathCubic* iPath
-                                              , FOdysseyVectorVertexCubic* iVertex0
-                                              , double iCtrlPoint0x
-                                              , double iCtrlPoint0y
-                                              , double iCtrlPoint1x
-                                              , double iCtrlPoint1y
-                                              , FOdysseyVectorVertexCubic* iVertex1 );
-
-    public:
-        virtual ~FOdysseyVectorSegmentCubic();
-         FOdysseyVectorSegmentCubic();
+        FOdysseyVectorSegmentCubic( FOdysseyVectorPathCubic* iPath
+                                  , FOdysseyVectorVertexCubic* iVertex0
+                                  , double iCtrlPoint0x
+                                  , double iCtrlPoint0y
+                                  , double iCtrlPoint1x
+                                  , double iCtrlPoint1y
+                                  , FOdysseyVectorVertexCubic* iVertex1 );
 
         void Smooth( double iLimitAngleInRadians );
 
