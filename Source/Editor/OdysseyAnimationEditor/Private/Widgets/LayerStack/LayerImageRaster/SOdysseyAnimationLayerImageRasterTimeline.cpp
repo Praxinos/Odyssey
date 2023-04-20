@@ -2,8 +2,8 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Widgets/LayerStack/LayerImageRaster/SOdysseyAnimationLayerImageRasterTimeline.h"
-#include "LayerStack/OdysseyAnimationLayerImageRaster.h"
-#include "LayerStack/OdysseyAnimationLayerImageRasterCell.h"
+#include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
+#include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
 #include "OdysseyStyleSet.h"
 
 #define LOCTEXT_NAMESPACE "SOdysseyAnimationLayerImageRasterTimeline"
@@ -22,7 +22,7 @@ void SOdysseyAnimationLayerImageRasterTimeline::Construct(const FArguments& InAr
 
     ChildSlot
     [
-        SAssignNew(mListView, SListView<TSharedPtr<FOdysseyAnimationLayerCell>>)
+        SAssignNew(mListView, SListView<TSharedPtr<FOdysseyAnimationCell>>)
         .ListItemsSource(&mAnimationLayerImageRaster->GetCells())
         .OnGenerateRow(this, &SOdysseyAnimationLayerImageRasterTimeline::OnGenerateRow)
         //.ExternalScrollbar() //Should I use this
@@ -31,14 +31,14 @@ void SOdysseyAnimationLayerImageRasterTimeline::Construct(const FArguments& InAr
 }
 
 TSharedRef<ITableRow>
-SOdysseyAnimationLayerImageRasterTimeline::OnGenerateRow(TSharedPtr<FOdysseyAnimationLayerCell> iCell, const TSharedRef<STableViewBase>& iOwnerTable)
+SOdysseyAnimationLayerImageRasterTimeline::OnGenerateRow(TSharedPtr<FOdysseyAnimationCell> iCell, const TSharedRef<STableViewBase>& iOwnerTable)
 {
     check(iCell);
 
-    if (iCell->GetType() == FOdysseyAnimationLayerImageRasterCell::StaticType())
+    if (iCell->GetType() == FOdysseyAnimationCellImageRaster::StaticType())
     {
         //TODO: Create a SOdysseyAnimationLayerImageRasterCell widget
-        return SNew(STableRow<TSharedPtr<FOdysseyAnimationLayerCell>>, iOwnerTable)
+        return SNew(STableRow<TSharedPtr<FOdysseyAnimationCell>>, iOwnerTable)
             [
                 SNew(SBox)
                 .HeightOverride(50.f) //TODO: Move the size in an other widget or directly in the view or track itself
@@ -55,7 +55,7 @@ SOdysseyAnimationLayerImageRasterTimeline::OnGenerateRow(TSharedPtr<FOdysseyAnim
             ];
     }
 
-    return SNew(STableRow<TSharedPtr<FOdysseyAnimationLayerCell>>, iOwnerTable);
+    return SNew(STableRow<TSharedPtr<FOdysseyAnimationCell>>, iOwnerTable);
 }
 
 void

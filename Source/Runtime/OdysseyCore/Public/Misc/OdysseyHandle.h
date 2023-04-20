@@ -8,3 +8,13 @@
 class ODYSSEYCORE_API IOdysseyHandle
 {
 };
+
+class ODYSSEYCORE_API FOdysseyHandleContainer : public IOdysseyHandle
+{
+public:
+    virtual ~FOdysseyHandleContainer();
+    FOdysseyHandleContainer(const TArray<TSharedPtr<IOdysseyHandle>>& iHandles);
+
+private:
+    TArray<TSharedPtr<IOdysseyHandle>> mHandles;
+};

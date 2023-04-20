@@ -22,10 +22,10 @@ public:
     void Construct(const FArguments& iArgs, class UOdysseyAnimationLayerImageRaster* iAnimationLayerImageRaster);
 
 private:
-    TSharedRef<ITableRow> OnGenerateRow(TSharedPtr<FOdysseyAnimationLayerCell> iCell, const TSharedRef<STableViewBase>& iOwnerTable);
+    TSharedRef<ITableRow> OnGenerateRow(TSharedPtr<FOdysseyAnimationCell> iCell, const TSharedRef<STableViewBase>& iOwnerTable);
     void OnCellsChanged(class UOdysseyAnimationLayerImageRaster* iLayer);
 
 private:
     class UOdysseyAnimationLayerImageRaster* mAnimationLayerImageRaster;
-    TSharedPtr<SListView<TSharedPtr<FOdysseyAnimationLayerCell>>> mListView;
+    TSharedPtr<SListView<TSharedPtr<FOdysseyAnimationCell>>> mListView;
 };

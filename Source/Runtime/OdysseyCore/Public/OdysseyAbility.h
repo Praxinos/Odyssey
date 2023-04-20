@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "CoreMinimal.h"
+
 /**
  * @brief A base class for all abilities
  * 
@@ -18,3 +20,51 @@ class ODYSSEYCORE_API IOdysseyAbility
     //    return Id;
     //}
 };
+
+class ODYSSEYCORE_API FOdysseyAbilityContainer
+{
+public:
+    ~FOdysseyAbilityContainer();
+    FOdysseyAbilityContainer();
+
+public:
+    template<class T> void HasAbility() const;
+    template<class T> TSharedPtr<T> GetAbility();
+
+protected:
+    template<class T> void SetAbility(TSharedRef<T> iAbility);
+
+protected:
+    TMap<FGuid, TSharedPtr<IOdysseyAbility>> mAbilities;
+};
+
+template<class T>
+void
+FOdysseyAbilityContainer::HasAbility() const
+{
+    return mAbilities.Contains(T::Id());
+}
+
+template<class T>
+TSharedPtr<T>
+FOdysseyAbilityContainer::GetAbility()
+{
+    TSharedPtr<IOdysseyAbility>* ability = mAbilities.Find(T::Id());
+    if ( !ability )
+        return nullptr;
+
+    return StaticCastSharedPtr<T>(*ability);
+}
+
+template<class T>
+void
+FOdysseyAbilityContainer::SetAbility(TSharedRef<T> iAbility)
+{
+    if (mAbilities.Contains(T::Id()))
+    {
+        mAbilities[T::Id()] = iAbility;
+        return;
+    }
+    
+    mAbilities.Add(T::Id(), iAbility);
+}

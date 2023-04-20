@@ -40,7 +40,8 @@ protected:
 
 private:
 	//Events
-	void OnRenderImageDataChanged(UOdysseyAnimation* iAnimation, const FOdysseyAnimationRenderImageId& iFrameId, const TArray<::ULIS::FRectI>& iRects);
+	void OnImageRenderingChanged(const FGuid& iFrameId, const TArray<::ULIS::FRectI>& iRects);
+	void OnImageRenderingCompositionChanged(const FGuid& iFrameId);
 
 private:
 	UOdysseyAnimation* mAnimation;
@@ -48,9 +49,8 @@ private:
 	TWeakPtr<FOdysseyAnimationMediaControls> mControls;
 	TSharedPtr<class FOdysseyAnimationMediaTextureSample> mSample;
 	int mCurrentFrameIndex;
-	FString mFrameId;
+	TArray<FGuid> mImageRenderingComposition;
 	TStrongObjectPtr<UTexture2D> mTexture1; //PATCH: Needs to be in this class, otherwise gets destriyed on the wrong thread
 	TStrongObjectPtr<UTexture2D> mTexture2; //PATCH: Media Framework is shit when using a single texture that refreshes it self, I need 2 Textures....
-	TSharedPtr <::ULIS::FBlock> mBlock;
 	TArray<::ULIS::FRectI> mInvalidRects;
 };

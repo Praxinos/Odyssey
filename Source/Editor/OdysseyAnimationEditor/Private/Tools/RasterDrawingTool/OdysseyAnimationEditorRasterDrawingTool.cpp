@@ -45,7 +45,7 @@ UOdysseyAnimationEditorRasterDrawingTool::Load()
 	if ( !layer->GetCellIndexAtFrame(animation->CurrentFrame, celIndex, celFrameIndex) )
 		return;
 
-	TSharedPtr<FOdysseyAnimationLayerCell> cell = layer->GetCell(celIndex);
+	TSharedPtr<FOdysseyAnimationCell> cell = layer->GetCell(celIndex);
 	if ( !cell )
 		return;
 

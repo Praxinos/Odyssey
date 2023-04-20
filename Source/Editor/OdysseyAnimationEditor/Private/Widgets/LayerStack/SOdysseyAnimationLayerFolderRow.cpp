@@ -6,7 +6,7 @@
 #include "SEnumCombo.h"
 #include "Widgets/Input/SNumericEntryBox.h"
 #include "OdysseyStyleSet.h"
-#include "LayerStack/OdysseyAnimationLayerFolder.h"
+#include "LayerStack/Layers/LayerFolder/OdysseyAnimationLayerFolder.h"
 
 #define LOCTEXT_NAMESPACE "SOdysseyAnimationLayerFolderRow"
 

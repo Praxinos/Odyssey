@@ -6,7 +6,7 @@
 #include "CoreMinimal.h"
 #include "OdysseyAbility.h"
 
-class ODYSSEYANIMATION_API FOdysseyAnimationImageProviderAbility
+/* class ODYSSEYANIMATION_API FOdysseyAnimationImageProviderAbility
     : public IOdysseyAbility
 {
 public:
@@ -34,4 +34,4 @@ public:
     virtual TSharedPtr<::ULIS::FBlock> GetBlock(uint32 iFrameIndex) const = 0;
     //virtual FString GetFrameId(uint32 iFrameIndex) const = 0;
     virtual const FOdysseyAnimationRenderImageId& GetRenderFrameIdFragment() const = 0;
-};
+}; */

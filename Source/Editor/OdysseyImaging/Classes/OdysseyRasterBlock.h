@@ -178,6 +178,9 @@ public:
     FOnBlockChanged& OnBlockChanged();
 
     //Called when the block tiles content changed
+    FOnBlockChanged& OnBlockCommited();
+
+    //Called when the block tiles content changed
     //FOnUndoableBlockChanged& OnUndoableBlockChanged();
 
     //If the result of GetBlock() is kept in memory by someone

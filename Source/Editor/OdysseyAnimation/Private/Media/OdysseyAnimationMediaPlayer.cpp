@@ -70,7 +70,6 @@ FOdysseyAnimationMediaPlayer::Open(const FString& iUrl, const IMediaOptions* iOp
 	}
 
 	mCurrentDuration = mAnimation->GetDuration();
-	mAnimation->OnRenderImageChanged().AddRaw(this, &FOdysseyAnimationMediaPlayer::OnRenderImageChanged);
 	
 	//succeeded
 	mCache->OnOpen(mAnimation.Get());
@@ -94,9 +93,6 @@ FOdysseyAnimationMediaPlayer::Open(const TSharedRef<FArchive, ESPMode::ThreadSaf
 void
 FOdysseyAnimationMediaPlayer::Close()
 {
-	if (mAnimation)
-		mAnimation->OnRenderImageChanged().RemoveAll(this);
-
 	mCache->OnClose();
 	mControls->OnClose();
 	mSamples->OnClose();
@@ -215,24 +211,15 @@ FOdysseyAnimationMediaPlayer::GetPlayerFeatureFlag(EFeatureFlag iFlag) const
 }
 
 void
-FOdysseyAnimationMediaPlayer::OnRenderImageChanged(UOdysseyAnimation* iAnimation, const FOdysseyAnimationRenderImageId& iFrameId, const TArray<::ULIS::FRectI>& iRects)
+FOdysseyAnimationMediaPlayer::Tick(float DeltaTime)
 {
-	//TODO: Should be something like => OnAnimationStructureChanged or limitschanged, or whatever
-
-	if ( iAnimation != mAnimation.Get() )
+	if ( !mAnimation )
 		return;
 
-	FTimespan duration = iAnimation->GetDuration();
+	FTimespan duration = mAnimation->GetDuration();
 	if ( duration != mCurrentDuration )
 	{
 		mCurrentDuration = duration;
-		//send event
-
-		//TODO:
-
-		//mEventSink.ReceiveMediaEvent(EMediaEvent::TracksChanged);
-		//mEventSink.ReceiveMediaEvent(EMediaEvent::MediaClosed);
-		//mEventSink.ReceiveMediaEvent(EMediaEvent::MediaOpened);
 	}
 }
 

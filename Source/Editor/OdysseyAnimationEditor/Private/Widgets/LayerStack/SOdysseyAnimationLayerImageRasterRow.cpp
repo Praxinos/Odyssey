@@ -4,7 +4,7 @@
 #include "Widgets/LayerStack/SOdysseyAnimationLayerImageRasterRow.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "OdysseyStyleSet.h"
-#include "LayerStack/OdysseyAnimationLayerImageRaster.h"
+#include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
 #include "Widgets/LayerStack/LayerImageRaster/SOdysseyAnimationLayerImageRasterTimeline.h"
 
 #define LOCTEXT_NAMESPACE "SOdysseyAnimationLayerImageRasterRow"

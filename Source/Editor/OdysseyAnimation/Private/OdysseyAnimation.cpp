@@ -3,10 +3,11 @@
 
 #include "OdysseyAnimation.h"
 
-#include "LayerStack/OdysseyAnimationLayerImageRaster.h"
+#include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
 #include "LayerStack/OdysseyAnimationLayerStack.h"
 
 #include "Misc/TransactionObjectEvent.h"
+#include "OdysseyAnimationImageRenderingAbility.h"
 
 #include <ULIS>
 #include "ULISLoaderModule.h"
@@ -23,13 +24,6 @@ UOdysseyAnimation::OnFramesPerSecondChanged()
 {
     static FOnFramesPerSecondChanged onFramesPerSecondChanged;
     return onFramesPerSecondChanged;
-}
-
-UOdysseyAnimation::FOnRenderImageChanged&
-UOdysseyAnimation::OnRenderImageChanged()
-{
-    static FOnRenderImageChanged onRenderImageChanged;
-    return onRenderImageChanged;
 }
 
 void UOdysseyAnimation::Init(const FOdysseyAnimationConfiguration& iConfiguration)
@@ -80,10 +74,6 @@ uint32
 UOdysseyAnimation::GetFrameCount() const
 {
 	FInt32Range frameRange = mLayerStack->GetFrameRange();
-
-	//TODO: deduce frame count from :
-	// - startPoint / endPoint
-
 	int startFrame = frameRange.GetUpperBound().IsInclusive() ? frameRange.GetLowerBoundValue() : frameRange.GetLowerBoundValue() + 1;
 	int endFrame = frameRange.GetUpperBound().IsInclusive() ? frameRange.GetUpperBoundValue() : frameRange.GetUpperBoundValue() - 1;
 	return endFrame - startFrame + 1;
@@ -117,6 +107,7 @@ UOdysseyAnimation::GetFrameTimeRange(int iFrameIndex) const
 	return TRange<FTimespan>(start, end);
 }
 
+/*
 TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>
 UOdysseyAnimation::GetBlockAtIndex(int iIndex)
 {
@@ -140,26 +131,26 @@ UOdysseyAnimation::GetBlockAtTime(FTimespan iTime)
 }
 
 TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>
-UOdysseyAnimation::GetBlockFromId(const FString& iId)
+UOdysseyAnimation::GetBlockFromRenderImageIdComposition(const TArray<FGuid>& iIdComposition)
 {
-	if (!mFrameBlocks.Contains(iId))
+	if (!mFrameBlocks.Contains(iIdComposition))
 		return nullptr;
 
-	if ( mFrameBlocks[iId].mInvalidRects.Num() > 0 )
-		GenerateFrameBlock(iId);
+	if ( mFrameBlocks[iIdComposition].mInvalidRects.Num() > 0 )
+		GenerateFrameBlock(iIdComposition);
 
-	return mFrameBlocks[iId].mRasterBlock->GetBlock();
+	return mFrameBlocks[iIdComposition].mRasterBlock->GetBlock();
 }
 
 void
-UOdysseyAnimation::WaitForBlockUpdate(const FString& iFrameId)
+UOdysseyAnimation::WaitForBlockUpdate(const TArray<FGuid>& iIdComposition)
 {
-	if ( !mFrameBlocks.Contains(iFrameId) )
+	if ( !mFrameBlocks.Contains(iIdComposition) )
 		return;
 
-	if ( mFrameBlocks[iFrameId].mInvalidRects.Num() > 0 )
-		GenerateFrameBlock(iFrameId);
-}
+	if ( mFrameBlocks[iIdComposition].mInvalidRects.Num() > 0 )
+		GenerateFrameBlock(iIdComposition);
+} */
 
 
 UOdysseyAnimationLayerStack*
@@ -168,35 +159,20 @@ UOdysseyAnimation::GetLayerStack() const
 	return mLayerStack;
 }
 
-FString
-UOdysseyAnimation::GetFrameId(int iFrameIndex) const
-{
-	return mLayerStack->GetFrameId(iFrameIndex);
-}
-
-FString
-UOdysseyAnimation::GetFrameIdAtTime(FTimespan iTime) const
-{
-	int frameIndex = GetFrameIndexAtTime(iTime);
-	return mLayerStack->GetFrameId(frameIndex);
-}
-
-TSharedPtr<IOdysseyHandle>
-UOdysseyAnimation::Preload(int iFrame)
-{
-    return mLayerStack->Preload(iFrame);
-}
-
 void
 UOdysseyAnimation::Serialize(FArchive& Ar)
 {
+	/* Proxy Specific
 	//Update frame blocks and Ids before any saving/loading
 	if ( Ar.IsSaving() && Ar.IsPersistent() && !Ar.IsTransacting() )
 	{
 		UpdateFrameBlocks();
-	}
+	} */
 
+	//
 	Super::Serialize(Ar);
+
+	/* Proxy Specific
 
 	int frameBlocksCount = mFrameBlocks.Num();
 	Ar << frameBlocksCount;
@@ -226,7 +202,7 @@ UOdysseyAnimation::Serialize(FArchive& Ar)
 
 			mFrameBlocks.Add(id, frameBlock);
 		}
-	}
+	} */
 
 	//TODO: Save frame 
 
@@ -267,8 +243,11 @@ void
 UOdysseyAnimation::PostInitProperties()
 {
 	Super::PostInitProperties();
-	UOdysseyAnimationLayerStack::OnRenderImageDataChanged().AddUObject(this, &UOdysseyAnimation::OnLayerStackRenderImageDataChanged);
-	UOdysseyAnimationLayerStack::OnRenderImageIdChanged().AddUObject(this, &UOdysseyAnimation::OnLayerStackRenderImageIdChanged);
+	
+	SetAbility(MakeShared<FOdysseyAnimationImageRenderingAbility>(this));
+
+	//IOdysseyAnimationImageRenderingAbility::OnDataChanged().AddUObject(this, &UOdysseyAnimation::OnImageRenderingDataChanged);
+	//IOdysseyAnimationImageRenderingAbility::OnIdCompositionChanged().AddUObject(this, &UOdysseyAnimation::OnImageRenderingIdCompositionChanged);
 }
 
 void
@@ -294,7 +273,7 @@ UOdysseyAnimation::FramesPerSecondChanged()
 
 /* Events
  *****************************************************************************/
-void
+/* void
 UOdysseyAnimation::Tick(float iDeltaTime)
 {
 	UpdateFrameBlocks();
@@ -304,24 +283,25 @@ void
 UOdysseyAnimation::UpdateFrameBlocks()
 {
 	//Remove frameblocks that are not referenced by anyone
-	TArray<FString> idsToRemove;
+	TArray<TArray<FGuid>> idsToRemove;
 	for ( auto& element : mFrameBlocks )
 	{
-		FString& frameId = element.Key;
+		TArray<FGuid>& key = element.Key;
 		FFrameBlock& frameBlock = element.Value;
 
 		if ( frameBlock.mFrameIndexes.Num() <= 0 )
-			idsToRemove.Add(frameId);
+			idsToRemove.Add(key);
 	}
 
-	for ( const FString& idToRemove : idsToRemove )
+	for ( const TArray<FGuid>& idToRemove : idsToRemove )
 	{
 		mFrameBlocks.Remove(idToRemove);
 	}
 
+	//Generate all frame blocks that needs it
 	for ( auto& element : mFrameBlocks )
 	{
-		FString& frameId = element.Key;
+		TArray<FGuid>& frameId = element.Key;
 		FFrameBlock& frameBlock = element.Value;
 		if ( frameBlock.mInvalidRects.Num() > 0 )
 			GenerateFrameBlock(frameId);
@@ -329,7 +309,7 @@ UOdysseyAnimation::UpdateFrameBlocks()
 }
 
 void
-UOdysseyAnimation::GenerateFrameBlock(const FString& iId)
+UOdysseyAnimation::GenerateFrameBlock(const TArray<FGuid>& iId)
 {
 	if (!mFrameBlocks.Contains(iId))
 		return;
@@ -358,30 +338,34 @@ UOdysseyAnimation::GenerateFrameBlock(const FString& iId)
 		eventClear = ::ULIS::FEvent::NoOP();
 	}
 
-	for (const ::ULIS::FRectI& rect : frameBlock.mInvalidRects)
+	
+    TSharedPtr<IOdysseyAnimationImageRenderingAbility> imageRenderAbility = GetAbility<IOdysseyAnimationImageRenderingAbility>();
+    if (imageRenderAbility)
 	{
-		mLayerStack->RenderImage(block, frameBlock.mFrameIndexes[0], rect, rect.Position(), {eventClear});
+		for (const ::ULIS::FRectI& rect : frameBlock.mInvalidRects)
+		{
+			imageRenderAbility->RenderImage(block, frameBlock.mFrameIndexes[0], rect, rect.Position(), {eventClear});
+		}
 	}
-	ctx.Finish();
 
+	ctx.Finish();
 	frameBlock.mInvalidRects.Empty();
 }
 
 void
-UOdysseyAnimation::OnLayerStackRenderDataImageChanged(UOdysseyAnimationLayerStack* iLayerStack, const FGuid& iFrameId, const TArray<::ULIS::FRectI>& iRects)
+UOdysseyAnimation::OnImageRenderingDataChanged(const FOnRenderImageDataChangedEvent& iEvent)
 {
-	OnRenderImageDataChanged().Broadcast(this, iFrameId, iRects);
+	//TODO: Look for each IdComposition containg the changed Id
+	//GetRects()
+	//Then Invalid thos rects for the changed IdComposition
 }
 
 void
-UOdysseyAnimation::OnLayerStackRenderDataImageCommited(UOdysseyAnimationLayerStack* iLayerStack, const FGuid& iFrameId, const TArray<::ULIS::FRectI>& iRects)
+UOdysseyAnimation::OnImageRenderingIdCompositionChanged()
 {
-	OnRenderImageDataCommited().Broadcast(this, iFrameId, iRects);
-}
+	//TODO: Find all frames to regenerate
+	//Being able to know if it comes from something we are interested in, before checking would help with performances
 
-void
-UOdysseyAnimation::OnLayerStackRenderImageIdChanged(UOdysseyAnimationLayerStack* iLayerStack)
-{
 	if (iLayerStack != mLayerStack)
 		return;
 
@@ -443,7 +427,7 @@ UOdysseyAnimation::OnLayerStackRenderImageIdChanged(UOdysseyAnimationLayerStack*
 	}
 
 	OnRenderImageIdChanged().Broadcast(this);
-}
+} */
 
 
 /* IMediaSource overrides

@@ -84,8 +84,8 @@ protected:
 private:
 	void UpdateTexture();
 	void CopyBlockToTexture(TSharedPtr<::ULIS::FBlock> iBlock, const TArray<::ULIS::FRectI>& iRects);
-	void OnAnimationRenderImageDataChanged(UOdysseyAnimation* iAnimation, const FOdysseyAnimationRenderImageId& iFrameId, const TArray<::ULIS::FRectI>& iRects);
-	void OnAnimationRenderImageIdChanged(UOdysseyAnimation* iAnimation);
+	void OnImageRenderingChanged(const FGuid& iImageRenderingId, const TArray<::ULIS::FRectI>& iRects);
+	void OnImageRenderingCompositionChanged(const FGuid& iImageRenderingId);
 
 private:
 	UPROPERTY()
@@ -107,7 +107,7 @@ private:
 private:
 	bool mIsBackward = false;
 	FTimespan mCurrentTime; 
-	FString   mFrameId;
+	TArray<FGuid>   mImageRenderingComposition;
 	TArray<::ULIS::FRectI> mInvalidRects;
 
 	//The current block to display, so that it stays in memory.

@@ -4,7 +4,7 @@
 #include "OdysseyAnimationPlayer.h"
 #include "OdysseyAnimation.h"
 #include "OdysseyRectUtils.h"
-#include "Events/OdysseyAnimationOnRenderImageChangedEvent.h"
+#include "Abilities/IOdysseyAnimationImageRenderingAbility.h"
 
 #include "ULISLoaderModule.h"
 
@@ -12,8 +12,8 @@ void
 UOdysseyAnimationPlayer::PostInitProperties()
 {
     Super::PostInitProperties();
-	UOdysseyAnimation::OnRenderImageChanged().AddUObject(this, &UOdysseyAnimationPlayer::OnAnimationRenderImageChanged);
-	UOdysseyAnimation::OnRenderImageIdChanged().AddUObject(this, &UOdysseyAnimationPlayer::OnAnimationRenderImageIdChanged);
+	IOdysseyAnimationImageRenderingAbility::OnChanged().AddUObject(this, &UOdysseyAnimationPlayer::OnImageRenderingChanged);
+	IOdysseyAnimationImageRenderingAbility::OnCompositionChanged().AddUObject(this, &UOdysseyAnimationPlayer::OnImageRenderingCompositionChanged);
 }
 
 FSimpleMulticastDelegate&
@@ -239,17 +239,31 @@ UOdysseyAnimationPlayer::Tick(float iDeltaTime)
 void
 UOdysseyAnimationPlayer::UpdateTexture()
 {
-	FString frameId = Animation->GetFrameIdAtTime(mCurrentTime);
-	if (frameId != mFrameId)
+	int frameIndex = Animation->GetFrameIndexAtTime(mCurrentTime);
+	if ( frameIndex == INDEX_NONE )
+		return;
+
+	TSharedPtr<IOdysseyAnimationImageRenderingAbility> imageRenderingAbility = Animation->GetAbility<IOdysseyAnimationImageRenderingAbility>();
+	if ( !imageRenderingAbility )
+		return;
+
+	TArray<FGuid> imageRenderingComposition = imageRenderingAbility->GetComposition(frameIndex);
+	if ( imageRenderingComposition != mImageRenderingComposition )
 	{
-		mFrameId = frameId;
+		mImageRenderingComposition = imageRenderingComposition;
 		mInvalidRects = { ::ULIS::FRectI::FromXYWH(0, 0, Animation->Width(), Animation->Height()) };
-		mBlock = Animation->GetBlockAtTime(mCurrentTime);
 	}
 
 	if (mInvalidRects.Num() > 0)
 	{
-		Animation->WaitForBlockUpdate(mFrameId); //is not asynchronous yet
+		::ULIS::eFormat format = Animation->Format();
+		::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
+		for ( const ::ULIS::FRectI& rect : mInvalidRects )
+		{
+			imageRenderingAbility->RenderInBlock(mBlock, frameIndex, rect, rect.Position(), {});
+		}
+		ctx.Finish();
+
 		CopyBlockToTexture(mBlock, mInvalidRects);
 		mInvalidRects.Empty();
 
@@ -258,12 +272,9 @@ UOdysseyAnimationPlayer::UpdateTexture()
 }
 
 void
-UOdysseyAnimationPlayer::OnAnimationRenderImageDataChanged(UOdysseyAnimation* iAnimation, const FOdysseyAnimationRenderImageId& iFrameId, const TArray<::ULIS::FRectI>& iRects)
+UOdysseyAnimationPlayer::OnImageRenderingChanged(const FGuid& iId, const TArray<::ULIS::FRectI>& iRects)
 {
-	if (iAnimation != Animation)
-		return;
-
-	if ( mFrameId != iFrameId )
+	if (!mImageRenderingComposition.Contains(iId))
 		return;
 
 	mInvalidRects.Append(iRects);
@@ -271,20 +282,24 @@ UOdysseyAnimationPlayer::OnAnimationRenderImageDataChanged(UOdysseyAnimation* iA
 }
 
 void
-UOdysseyAnimationPlayer::OnAnimationRenderImageIdChanged(UOdysseyAnimation* iAnimation)
+UOdysseyAnimationPlayer::OnImageRenderingCompositionChanged(const FGuid& iId)
 {
-	if (iAnimation != Animation)
+	if ( !mImageRenderingComposition.Contains(iId) )
 		return;
 
 	int frameIndex = Animation->GetFrameIndexAtTime(mCurrentTime);
 	if (frameIndex == INDEX_NONE)
 		return;
 
-	FOdysseyAnimationRenderImageId frameId = Animation->GetFrameId(frameIndex);
-	if ( frameId == mFrameId )
+	TSharedPtr<IOdysseyAnimationImageRenderingAbility> imageRenderingAbility = Animation->GetAbility<IOdysseyAnimationImageRenderingAbility>();
+	if ( !imageRenderingAbility )
 		return;
 
-	mInvalidRects.Add(::ULIS::FRectI::FromXYWH(0, 0, Animation->GetWidth(), Animation->GetHeight()));
+	TArray<FGuid> imageRenderingComposition = imageRenderingAbility->GetComposition(frameIndex);
+	if ( imageRenderingComposition == mImageRenderingComposition )
+		return;
+
+	mInvalidRects.Add(::ULIS::FRectI::FromXYWH(0, 0, Animation->Width(), Animation->Height()));
 	mInvalidRects = OdysseyRectUtils::MergeRects(mInvalidRects);
 }
 

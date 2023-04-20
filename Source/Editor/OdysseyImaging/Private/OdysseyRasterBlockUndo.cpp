@@ -265,8 +265,8 @@ FOdysseyRasterBlockUndo::LoadUndoFromCache(const FString& iId)
     );
     getOwner.Wait();
 
-    rasterBlock->mOnBlockChanged.Broadcast(rects);
-    rasterBlock->mOnBlockCommited.Broadcast(rects);
+    rasterBlock->OnBlockChanged().Broadcast(rects);
+    rasterBlock->OnBlockCommited().Broadcast(rects);
     /* if ( undoableBlock )
         rasterBlock->mOnUndoableBlockChanged.Broadcast(rects); */
 }

@@ -100,7 +100,7 @@ public:
     TArray<UOdysseyLayer*> GetParents() const;
 
     /**
-     * @brief Returns the Layer children recursively
+     * @brief Returns the Layer direct children
      *
      * @param Layer
      * @return int
@@ -179,7 +179,7 @@ protected:
     virtual void ParentChanged();
     virtual void ChildrenChanged();
 
-    virtual void PropertyChanged(const FName& iPropertyName, bool iIsInteractive);
+    virtual void PropertyChanged(const FName& iPropertyName);
 
 public:
     // UObject overrides

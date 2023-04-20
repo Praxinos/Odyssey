@@ -2,8 +2,8 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Tools/PaintBucketTool/OdysseyAnimationEditorPaintBucketTool.h"
-#include "LayerStack/OdysseyAnimationLayerImageVector.h"
-#include "LayerStack/OdysseyAnimationLayerCell.h"
+#include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
+#include "LayerStack/Cells/OdysseyAnimationCell.h"
 #include "Abilities/OdysseyAnimationImageRasterEditingAbility.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyAnimationEditorPaintBucketTool"
@@ -37,8 +37,6 @@ UOdysseyAnimationEditorPaintBucketTool::Activate()
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
         UOdysseyPainterEditorPaintBucketTool::ActivateVector( vectorEngine, vectorScene );
-
-        currentVectorLayer->RenderImageChanged(false);
     }
 }
 
@@ -61,7 +59,7 @@ UOdysseyAnimationEditorPaintBucketTool::Load()
     if ( !currentLayerRaster->GetCellIndexAtFrame(animation->CurrentFrame, celIndex, celFrameIndex) )
         return;
 
-    TSharedPtr<FOdysseyAnimationLayerCell> cell = currentLayerRaster->GetCell(celIndex);
+    TSharedPtr<FOdysseyAnimationCell> cell = currentLayerRaster->GetCell(celIndex);
     if ( !cell )
         return;
     
@@ -156,7 +154,7 @@ UOdysseyAnimationEditorPaintBucketTool::OnMouseDown( const FOdysseyPoint& iPoint
         if ( !currentRasterLayer->GetCellIndexAtFrame(animation->CurrentFrame, celIndex, celFrameIndex) )
             return ret;
 
-        TSharedPtr<FOdysseyAnimationLayerCell> cell = currentRasterLayer->GetCell(celIndex);
+        TSharedPtr<FOdysseyAnimationCell> cell = currentRasterLayer->GetCell(celIndex);
         if ( !cell )
             return ret;
 
@@ -182,17 +180,26 @@ UOdysseyAnimationEditorPaintBucketTool::OnMouseDown( const FOdysseyPoint& iPoint
 void
 UOdysseyAnimationEditorPaintBucketTool::OnMouseDrag( const FOdysseyPoint& iPointInTexture )
 {
+    UOdysseyAnimation* animation = GetAnimation();
+    if ( !animation )
+        return;
+
     UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(GetEditorAs<FOdysseyAnimationEditor>()->LayerStack());
     UOdysseyAnimationLayerImageVector* currentVectorLayer = Cast<UOdysseyAnimationLayerImageVector>(layerStack->CurrentLayer.Get());
 
     if( currentVectorLayer )
     {
-        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+        TSharedPtr<IOdysseyAnimationImageRenderingAbility> imageRenderAbility = currentVectorLayer->GetAbility<IOdysseyAnimationImageRenderingAbility>();
+        if ( imageRenderAbility )
+        {
+            FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+            FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        UOdysseyPainterEditorPaintBucketTool::OnMouseDragVector( vectorEngine, vectorScene, iPointInTexture );
+            UOdysseyPainterEditorPaintBucketTool::OnMouseDragVector(vectorEngine, vectorScene, iPointInTexture);
 
-        currentVectorLayer->RenderImageChanged(true);
+            
+            imageRenderAbility->OnChanged().Broadcast(imageRenderAbility->GetId(), imageRenderAbility->GetRects(animation->CurrentFrame));
+        }
     }
 }
 
@@ -200,18 +207,26 @@ bool
 UOdysseyAnimationEditorPaintBucketTool::OnMouseUp( const FOdysseyPoint& iPointInTexture
                                                 , const FKey& iKey )
 {
+    UOdysseyAnimation* animation = GetAnimation();
+    if ( !animation )
+        return false;
+
     UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(GetEditorAs<FOdysseyAnimationEditor>()->LayerStack());
     UOdysseyAnimationLayerImageVector* currentVectorLayer = Cast<UOdysseyAnimationLayerImageVector>(layerStack->CurrentLayer.Get());
     bool ret = false;
 
     if( currentVectorLayer )
     {
-        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+        TSharedPtr<IOdysseyAnimationImageRenderingAbility> imageRenderAbility = currentVectorLayer->GetAbility<IOdysseyAnimationImageRenderingAbility>();
+        if ( imageRenderAbility )
+        {
+            FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+            FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        ret = UOdysseyPainterEditorPaintBucketTool::OnMouseUpVector( vectorEngine, vectorScene, iPointInTexture, iKey );
+            ret = UOdysseyPainterEditorPaintBucketTool::OnMouseUpVector(vectorEngine, vectorScene, nullptr, iPointInTexture, iKey);
 
-        currentVectorLayer->RenderImageChanged(false);
+            imageRenderAbility->OnCommited().Broadcast(imageRenderAbility->GetId(), imageRenderAbility->GetRects(animation->CurrentFrame));
+        }
     }
 
     return ret;

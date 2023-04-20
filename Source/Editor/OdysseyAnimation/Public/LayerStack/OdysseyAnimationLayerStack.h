@@ -5,7 +5,7 @@
 
 #include "OdysseyLayerStack.h"
 #include "Misc/OdysseyHandle.h"
-#include "Events/OdysseyAnimationOnRenderImageIdChangedEvent.h"
+#include "OdysseyAbility.h"
 
 #include <ULIS>
 
@@ -16,23 +16,12 @@ class UOdysseyAnimationLayer;
 UCLASS(BlueprintType)
 class ODYSSEYANIMATION_API UOdysseyAnimationLayerStack
     : public UOdysseyLayerStack
+	, public FOdysseyAbilityContainer
 {
     GENERATED_BODY()
 
 public:
     UOdysseyAnimationLayerStack();
-
-public:
-    /**
-     * @brief Delegate called when something changed the result of RenderImage()
-     * 
-     * @param UOdysseyAnimationLayerStack* LayerStack
-     * @param const FGuid& FrameRange
-     * @param const TArray<::ULIS::FRectI>& Rects
-     * @param bool IsInteractive
-     */
-    DECLARE_MULTICAST_DELEGATE_FourParams(FOnRenderImageChanged, UOdysseyAnimationLayerStack*, const FGuid&, const TArray<::ULIS::FRectI>&, bool)
-    static FOnRenderImageChanged& OnRenderImageChanged(); //Delegate
 
 public:
     UFUNCTION(BlueprintPure, Category="LayerStack")
@@ -46,35 +35,8 @@ public:
      * @return FInt32Range 
      */
     FInt32Range GetFrameRange() const;
-    
-    /**
-     * @brief Returns a string identifying the frame composition (which layers)
-     * 
-     * @return FString 
-     */
-    virtual FString GetFrameId(int iFrameIndex) const;
 
 public:
-    /**
-     * @brief Renders an image in the given Block
-     * Takes into account the size / format of the given block
-     * 
-     */
-    TArray<::ULIS::FEvent> RenderImage(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ioBlock, int iFrame, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList);
-
-public:
-    /**
-     * @brief Preloads the layers and keeps them preloaded untile the hiven handles are destroyed
-     */
-    TSharedPtr<IOdysseyHandle> Preload(int iFrame);
-
-private:
-    friend class UOdysseyAnimationLayerRoot;
-
-    /**
-     * @brief Called when one of the direct children layer render image changed
-     * 
-     * Called by the child layer RenderImageChanged() function
-     */
-    void OnRootLayerRenderImageDataChanged(UOdysseyAnimationLayer* iLayer, const FOdysseyAnimationRenderImageId& iFrameId, const TArray<::ULIS::FRectI>& iRects);
+    //UObject overrides
+	virtual void PostInitProperties() override;
 };
