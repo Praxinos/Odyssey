@@ -684,6 +684,7 @@ FOdysseyVectorGroupPaint::BuildGraph()
 
     cubicSegment = segmentList.size() ? static_cast<FOdysseyVectorSegmentCubic*>( segmentList.back() ) : nullptr;
 
+
     while( cubicSegment )
     {
         IntersectSegment ( cubicSegment, segmentList, mIntersectionArray );
