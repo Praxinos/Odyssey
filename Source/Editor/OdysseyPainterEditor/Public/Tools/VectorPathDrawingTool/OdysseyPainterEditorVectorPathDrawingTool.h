@@ -45,7 +45,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
 
     protected:
         void PropertyChanged( const FName& iPropertyName );
-        FOdysseyVectorVertexCubic* PickVertex( FOdysseyVectorEngine* iVectorEngine
+        FOdysseyVectorVertex* PickVertex( FOdysseyVectorEngine* iVectorEngine
                                              , FOdysseyVectorScene* iScene
                                              , double iWorldX
                                              , double iWorldY
@@ -75,7 +75,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
         double mPointRadius;
         FOdysseyVectorPathBuilder* mPathBuilder;
         FOdysseyVectorHUDPathDrawing mPathDrawingHUD;
-        FOdysseyVectorVertexCubic* mPreviousVertex;
+        FOdysseyVectorVertex* mPreviousVertex;
         bool mStitched;
 
         std::vector<FOdysseyVectorVertex*> mVertexArray;

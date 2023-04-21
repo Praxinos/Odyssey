@@ -175,7 +175,7 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDrag( FOdysseyVectorEngine* iEng
         {
             if( vertex->IsSmooth() && PreserveSmoothness )
             {
-                FOdysseyVectorVertexCubic* cubicVertex = static_cast<FOdysseyVectorVertexCubic*>(vertex);
+                FOdysseyVectorVertex* cubicVertex = static_cast<FOdysseyVectorVertex*>(vertex);
 
                 if( cubicVertex )
                 {

@@ -4,8 +4,8 @@
 #include <Core/Core.h>
 #include <Image/Block.h>
 
+#include "OdysseyVectorVertex.h"
 #include "OdysseyVectorSegment.h"
-#include "OdysseyVectorVertexCubic.h"
 #include "OdysseyVectorHandleSegment.h"
 #include "OdysseyVectorIntersection.h"
 
@@ -28,6 +28,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
     public:
         virtual ~FOdysseyVectorSegmentCubic();
 
+        FOdysseyVectorSegmentCubic();
+
        /**
          * @brief function to allocate a new cubic segment.
          * @param iPath the path this segment belongs to
@@ -36,8 +38,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
          * @return a pointer to the newly created segment
          */
         FOdysseyVectorSegmentCubic ( FOdysseyVectorPathCubic* iPath
-                                   , FOdysseyVectorVertexCubic* iVertex0
-                                   , FOdysseyVectorVertexCubic* iVertex1 );
+                                   , FOdysseyVectorVertex* iVertex0
+                                   , FOdysseyVectorVertex* iVertex1 );
 
        /**
          * @brief function to allocate a new cubic segment
@@ -51,12 +53,12 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
          * @return a pointer to the newly created segment
          */
         FOdysseyVectorSegmentCubic( FOdysseyVectorPathCubic* iPath
-                                  , FOdysseyVectorVertexCubic* iVertex0
+                                  , FOdysseyVectorVertex* iVertex0
                                   , double iCtrlPoint0x
                                   , double iCtrlPoint0y
                                   , double iCtrlPoint1x
                                   , double iCtrlPoint1y
-                                  , FOdysseyVectorVertexCubic* iVertex1 );
+                                  , FOdysseyVectorVertex* iVertex1 );
 
         void Smooth( double iLimitAngleInRadians );
 
@@ -67,8 +69,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
          * @param iVertex1
          */
         void Init( FOdysseyVectorPathCubic* iPath
-                 , FOdysseyVectorVertexCubic* iVertex0
-                 , FOdysseyVectorVertexCubic* iVertex1 );
+                 , FOdysseyVectorVertex* iVertex0
+                 , FOdysseyVectorVertex* iVertex1 );
 
        /**
          * @brief Init a cubic segment.
@@ -81,12 +83,12 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
          * @param iVertex1
          */
         void Init( FOdysseyVectorPathCubic* iPath
-                 , FOdysseyVectorVertexCubic* iVertex0
+                 , FOdysseyVectorVertex* iVertex0
                  , double iCtrlPoint0x
                  , double iCtrlPoint0y
                  , double iCtrlPoint1x
                  , double iCtrlPoint1y
-                 , FOdysseyVectorVertexCubic* iVertex1 );
+                 , FOdysseyVectorVertex* iVertex1 );
 
        /**
          * @brief Draw the cubic segment

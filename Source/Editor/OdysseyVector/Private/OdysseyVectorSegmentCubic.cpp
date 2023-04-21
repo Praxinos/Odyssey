@@ -6,21 +6,25 @@ FOdysseyVectorSegmentCubic::~FOdysseyVectorSegmentCubic()
 
 }
 
+FOdysseyVectorSegmentCubic::FOdysseyVectorSegmentCubic()
+{
+}
+
 FOdysseyVectorSegmentCubic::FOdysseyVectorSegmentCubic( FOdysseyVectorPathCubic* iPath
-                                                      , FOdysseyVectorVertexCubic* iPoint0
+                                                      , FOdysseyVectorVertex* iPoint0
                                                       , double iCtrlPoint0x
                                                       , double iCtrlPoint0y
                                                       , double iCtrlPoint1x
                                                       , double iCtrlPoint1y
-                                                      , FOdysseyVectorVertexCubic* iPoint1 )
+                                                      , FOdysseyVectorVertex* iPoint1 )
     : FOdysseyVectorSegment( iPath, iPoint0, iPoint1 )
 {
     Init ( iPath, iPoint0, iCtrlPoint0x, iCtrlPoint0y, iCtrlPoint1x, iCtrlPoint1y, iPoint1 );
 }
 
 FOdysseyVectorSegmentCubic::FOdysseyVectorSegmentCubic( FOdysseyVectorPathCubic* iPath
-                                                      , FOdysseyVectorVertexCubic* iPoint0
-                                                      , FOdysseyVectorVertexCubic* iPoint1 )
+                                                      , FOdysseyVectorVertex* iPoint0
+                                                      , FOdysseyVectorVertex* iPoint1 )
     : FOdysseyVectorSegment( iPath, iPoint0, iPoint1 )
 {
     Init( iPath, iPoint0, iPoint1 );
@@ -44,12 +48,12 @@ FOdysseyVectorSegmentCubic::GetHandleVector( uint32 iHandleID, bool iNormalize )
 
 void
 FOdysseyVectorSegmentCubic::Init( FOdysseyVectorPathCubic* iPath
-                                , FOdysseyVectorVertexCubic* iPoint0
+                                , FOdysseyVectorVertex* iPoint0
                                 , double iCtrlPoint0x
                                 , double iCtrlPoint0y
                                 , double iCtrlPoint1x
                                 , double iCtrlPoint1y
-                                , FOdysseyVectorVertexCubic* iPoint1 )
+                                , FOdysseyVectorVertex* iPoint1 )
 {
     mCtrlPoint[0].Init( this, iCtrlPoint0x, iCtrlPoint0y );
     mCtrlPoint[1].Init( this, iCtrlPoint1x, iCtrlPoint1y );
@@ -59,8 +63,8 @@ FOdysseyVectorSegmentCubic::Init( FOdysseyVectorPathCubic* iPath
 
 void
 FOdysseyVectorSegmentCubic::Init( FOdysseyVectorPathCubic* iPath
-                                , FOdysseyVectorVertexCubic* iPoint0
-                                , FOdysseyVectorVertexCubic* iPoint1 )
+                                , FOdysseyVectorVertex* iPoint0
+                                , FOdysseyVectorVertex* iPoint1 )
 {
     Init( iPath, iPoint0, iPoint0->GetX(), iPoint0->GetY(), iPoint1->GetX(), iPoint1->GetY(), iPoint1 );
 }
@@ -68,8 +72,8 @@ FOdysseyVectorSegmentCubic::Init( FOdysseyVectorPathCubic* iPath
 void
 FOdysseyVectorSegmentCubic::Smooth( double iLimitAngleInRadians )
 {
-    FOdysseyVectorVertexCubic* vertex0 = static_cast<FOdysseyVectorVertexCubic*>(GetVertex(0));
-    FOdysseyVectorVertexCubic* vertex1 = static_cast<FOdysseyVectorVertexCubic*>(GetVertex(1));
+    FOdysseyVectorVertex* vertex0 = static_cast<FOdysseyVectorVertex*>(GetVertex(0));
+    FOdysseyVectorVertex* vertex1 = static_cast<FOdysseyVectorVertex*>(GetVertex(1));
     FOdysseyVectorHandleSegment* handle0 = static_cast<FOdysseyVectorHandleSegment*>(GetHandle(0));
     FOdysseyVectorHandleSegment* handle1 = static_cast<FOdysseyVectorHandleSegment*>(GetHandle(1));
     FOdysseyVectorSegmentCubic* neighbour0 = static_cast<FOdysseyVectorSegmentCubic*>(GetVertex(0)->GetOtherSegment( static_cast<FOdysseyVectorSegment*>(this) ));
@@ -155,13 +159,34 @@ FOdysseyVectorSegmentCubic::GetTangentAt( double t )
     ::ULIS::FVec2D& point1 = GetVertex(1)->GetCoords();
     ::ULIS::FVec2D& ctrlPoint0 = GetHandle(0)->GetCoords();
     ::ULIS::FVec2D& ctrlPoint1 = GetHandle(1)->GetCoords();
-    ::ULIS::FVec2D tangentAt = ::ULIS::CubicBezierTangentAtParameter<::ULIS::FVec2D>( point0
-                                                                                    , ctrlPoint0
-                                                                                    , ctrlPoint1
-                                                                                    , point1
-                                                                                    , t );
 
-    return tangentAt;
+    // Special case when control point are located at endpoint (tangentequals 0 then).
+
+    if( t == 0.0f )
+    {
+        ::ULIS::FVec2D dif0 = ctrlPoint0 - point0;
+
+        if( dif0.Distance() == 0.0f )
+        {
+            t = 0.01f;
+        }
+    }
+
+    if( t == 1.0f )
+    {
+        ::ULIS::FVec2D dif1 = ctrlPoint1 - point1;
+
+        if( dif1.Distance() == 0.0f )
+        {
+            t = 0.99f;
+        }
+    }
+
+    return ::ULIS::CubicBezierTangentAtParameter<::ULIS::FVec2D>( point0
+                                                                , ctrlPoint0
+                                                                , ctrlPoint1
+                                                                , point1
+                                                                , t );
 }
 
 void
@@ -341,20 +366,20 @@ FOdysseyVectorSegmentCubic::Sample( double iFromT
     double deltaRadius = ( radius1 - radius0 );
     double fromRadius = radius0 + ( deltaRadius * iFromT );
     double toRadius = radius0 + ( deltaRadius * iToT );
-    FOdysseyVectorVertexCubic* vertex0 = ( iFromT == 0.0f ) ? static_cast<FOdysseyVectorVertexCubic*>(mPoint[0]) : FOdysseyVectorVertexCubic::New( pointAt0.x, pointAt0.y, fromRadius );
-    FOdysseyVectorVertexCubic* vertex1 = ( iToT   == 1.0f ) ? static_cast<FOdysseyVectorVertexCubic*>(mPoint[1]) : FOdysseyVectorVertexCubic::New( pointAt1.x, pointAt1.y, toRadius   );
+    FOdysseyVectorVertex* vertex0 = ( iFromT == 0.0f ) ? static_cast<FOdysseyVectorVertex*>(mPoint[0]) : new FOdysseyVectorVertex( pointAt0.x, pointAt0.y, fromRadius );
+    FOdysseyVectorVertex* vertex1 = ( iToT   == 1.0f ) ? static_cast<FOdysseyVectorVertex*>(mPoint[1]) : new FOdysseyVectorVertex( pointAt1.x, pointAt1.y, toRadius   );
     FOdysseyVectorSegmentCubic* sampleSegment = new FOdysseyVectorSegmentCubic( static_cast<FOdysseyVectorPathCubic*>(mPath), vertex0, ctrlPoint0.x, ctrlPoint0.y, ctrlPoint1.x, ctrlPoint1.y, vertex1 );
     ::ULIS::FVec2D& sampleCtrlPoint0 = sampleSegment->GetHandle(0)->GetCoords();
     ::ULIS::FVec2D& sampleCtrlPoint1 = sampleSegment->GetHandle(1)->GetCoords();
     ::ULIS::FVec2D& samplePoint0 = sampleSegment->GetVertex(0)->GetCoords();
     ::ULIS::FVec2D& samplePoint1 = sampleSegment->GetVertex(1)->GetCoords();
 
-    if( vertex0 != static_cast<FOdysseyVectorVertexCubic*>( mPoint[0]) )
+    if( vertex0 != static_cast<FOdysseyVectorVertex*>( mPoint[0]) )
     {
         oNewVertexArray.push_back( vertex0 );
     }
 
-    if( vertex1 != static_cast<FOdysseyVectorVertexCubic*>( mPoint[1]) )
+    if( vertex1 != static_cast<FOdysseyVectorVertex*>( mPoint[1]) )
     {
         oNewVertexArray.push_back( vertex1 );
     }
@@ -433,7 +458,7 @@ FOdysseyVectorSegmentCubic::Cut( ::ULIS::FVec2D& linePoint0
     ::ULIS::FVec2D& ctrlPoint0 = GetHandle(0)->GetCoords();
     ::ULIS::FVec2D& ctrlPoint1 = GetHandle(1)->GetCoords();
     // we'll have 3 intersections at most and 2 points at tips.
-    FOdysseyVectorVertexCubic* pointChain[5] = { static_cast<FOdysseyVectorVertexCubic*>(mPoint[0]), nullptr, nullptr, nullptr, nullptr };
+    FOdysseyVectorVertex* pointChain[5] = { static_cast<FOdysseyVectorVertex*>(mPoint[0]), nullptr, nullptr, nullptr, nullptr };
     ::ULIS::FVec2D tangentChain[5] = { GetVectorAtStart( true ), { 0.0f, 0.0f }, { 0.0f, 0.0f }, { 0.0f, 0.0f }, { 0.0f, 0.0f } };
     uint32 pointCount = 1;
     ::ULIS::FVec2D ctrlPoint0Vector = GetVectorAtStart( true );
@@ -458,7 +483,7 @@ FOdysseyVectorSegmentCubic::Cut( ::ULIS::FVec2D& linePoint0
                                                                                         , ctrlPoint1
                                                                                         , point1
                                                                                         , segmentT );
-            FOdysseyVectorVertexCubic* newCubicPoint = FOdysseyVectorVertexCubic::New( pointAt.x, pointAt.y, 0.0f );
+            FOdysseyVectorVertex* newCubicPoint = new FOdysseyVectorVertex( pointAt.x, pointAt.y, 0.0f );
             ::ULIS::FVec2D newTangent = ::ULIS::CubicBezierTangentAtParameter<::ULIS::FVec2D>( point0
                                                                                              , ctrlPoint0
                                                                                              , ctrlPoint1
@@ -483,7 +508,7 @@ FOdysseyVectorSegmentCubic::Cut( ::ULIS::FVec2D& linePoint0
     if ( pointCount > 1 )
     {
         tangentChain[pointCount] = GetVectorAtEnd( true );
-        pointChain[pointCount] = static_cast<FOdysseyVectorVertexCubic*>(mPoint[1]);
+        pointChain[pointCount] = static_cast<FOdysseyVectorVertex*>(mPoint[1]);
 
         mPath->RemoveSegment( this );
 
@@ -498,8 +523,8 @@ FOdysseyVectorSegmentCubic::Cut( ::ULIS::FVec2D& linePoint0
         {
             uint32 n = i + 1;
             FOdysseyVectorSegmentCubic* segment = new FOdysseyVectorSegmentCubic( static_cast<FOdysseyVectorPathCubic*>(mPath)
-                                                                                , static_cast<FOdysseyVectorVertexCubic*>(pointChain[i])
-                                                                                , static_cast<FOdysseyVectorVertexCubic*>(pointChain[n]) );
+                                                                                , static_cast<FOdysseyVectorVertex*>(pointChain[i])
+                                                                                , static_cast<FOdysseyVectorVertex*>(pointChain[n]) );
             double distance = segment->GetStraightDistance();
 
             segment->GetHandle(0)->Set( segment->GetPoint(0)->GetX() + ( tangentChain[i].x * distance * 0.35f )
@@ -1061,8 +1086,8 @@ FOdysseyVectorSegmentCubic::Update()
 void
 FOdysseyVectorSegmentCubic::BuildVariable()
 {
-    double segmentStartRadius = static_cast<FOdysseyVectorVertexCubic*>(mPoint[0])->GetRadius();
-    double segmentEndRadius = static_cast<FOdysseyVectorVertexCubic*>(mPoint[1])->GetRadius();
+    double segmentStartRadius = static_cast<FOdysseyVectorVertex*>(mPoint[0])->GetRadius();
+    double segmentEndRadius = static_cast<FOdysseyVectorVertex*>(mPoint[1])->GetRadius();
     static ::ULIS::FVec2D zeroVector = { 0.0f, 0.0f };
     int polygonID = 0;
 

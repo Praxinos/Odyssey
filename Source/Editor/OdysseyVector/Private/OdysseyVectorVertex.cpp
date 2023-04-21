@@ -4,28 +4,59 @@ FOdysseyVectorVertex::~FOdysseyVectorVertex()
 {
 }
 
-FOdysseyVectorVertex::FOdysseyVectorVertex()
+FOdysseyVectorVertex::FOdysseyVectorVertex( double iX, double iY, double iRadius )
     : FOdysseyVectorPoint()
    , mPath ( nullptr )
 {
-    SetVisited( false );
-}
+    mCtrlPoint = FOdysseyVectorHandlePoint::New( this );
 
-//static
-FOdysseyVectorVertex*
-FOdysseyVectorVertex::New( double iX, double iY, double iRadius )
-{
-    FOdysseyVectorVertex* vertex = new FOdysseyVectorVertex();
-
-    vertex->Init( iX, iY, iRadius );
-
-    return vertex;
+    Init( iX, iY, iRadius );
 }
 
 FOdysseyVectorPath* 
 FOdysseyVectorVertex::GetPath()
 {
     return mPath;
+}
+
+::ULIS::FVec2D
+FOdysseyVectorVertex::GetVectorOnSegment( FOdysseyVectorSegment* iSegment, bool iNormalize )
+{
+    ::ULIS::FVec2D vec;
+
+    vec = ( iSegment->GetVertex(0) == this ) ? iSegment->GetPointAt(0.01f) - iSegment->GetPointAt(0.0f)
+                                             : iSegment->GetPointAt(0.99f) - iSegment->GetPointAt(1.0f);
+
+    if( iNormalize && vec.DistanceSquared() )
+    {
+        vec.Normalize();
+    }
+
+    return vec;
+}
+
+bool
+FOdysseyVectorVertex::IsSmooth()
+{
+    if( mSegmentList.size() == 2 )
+    {
+        ::ULIS::FVec2D firstSegmentVector = GetVectorOnSegment( GetFirstSegment(), true );
+        ::ULIS::FVec2D lastSegmentVector = GetVectorOnSegment( GetLastSegment(), true );
+        double dot = firstSegmentVector.DotProduct( lastSegmentVector );
+
+        if( fabs(dot) > 0.99f )
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+FOdysseyVectorHandlePoint*
+FOdysseyVectorVertex::GetHandle()
+{
+    return mCtrlPoint;
 }
 
 double
@@ -153,7 +184,7 @@ FOdysseyVectorVertex::GetFirstSegment()
 {
     return mSegmentList.front();
 }
-
+/*
 ::ULIS::FVec2D
 FOdysseyVectorVertex::GetVectorOnSegment( FOdysseyVectorSegment* iSegment, bool iNormalize )
 {
@@ -171,7 +202,7 @@ FOdysseyVectorVertex::GetVectorOnSegment( FOdysseyVectorSegment* iSegment, bool 
 
     return vec;
 }
-
+*/
 static uintptr_t
 GenerateSegmentID( FOdysseyVectorSegment* iSegment, FOdysseyVectorVertex* iP0, FOdysseyVectorVertex* iP1 )
 {

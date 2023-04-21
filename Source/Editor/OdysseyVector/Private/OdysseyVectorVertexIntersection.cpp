@@ -9,10 +9,8 @@ FOdysseyVectorVertexIntersection::~FOdysseyVectorVertexIntersection()
 FOdysseyVectorVertexIntersection::FOdysseyVectorVertexIntersection( double iX
                                                                   , double iY
                                                                   , double iT )
-    : FOdysseyVectorVertex ()
+    : FOdysseyVectorVertex ( iX, iY, 0.0f )
 {
-    mCoords.x = iX;
-    mCoords.y = iY;
     mT = iT;
 }
 

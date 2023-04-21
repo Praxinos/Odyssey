@@ -134,7 +134,7 @@ FOdysseyVectorPathBuilder::GetSampleAngle()
 /*
             if( iEnforce )
             {
-                mFinalVertex = static_cast<FOdysseyVectorVertexCubic*>(iPoint);
+                mFinalVertex = static_cast<FOdysseyVectorVertex*>(iPoint);
 
                 finalSampleID = mSampleArray.size() - 1;
                 finalLinkID = mLinkArray.size() - 1;
@@ -179,13 +179,13 @@ FOdysseyVectorPathBuilder::RecordVertex()
 
     if ( ( angle >= mAngleLimit ) || ( mCumulAngle >= mCumulAngleLimit ) )
     {
-        FOdysseyVectorVertexCubic* previousCubicVertex = mVertexArray.back();
+        FOdysseyVectorVertex* previousCubicVertex = mVertexArray.back();
         // use the penultimate sample
         uint32 penultimateSampleIndex = mSampleArray.size() - 2;
         uint32 penultimateSampleID = mSampleArray[penultimateSampleIndex]->GetID();
-        FOdysseyVectorVertexCubic* cubicVertex = FOdysseyVectorVertexCubic::New( mSampleArray[penultimateSampleIndex]->GetX()
-                                                                               , mSampleArray[penultimateSampleIndex]->GetY()
-                                                                               , mSampleArray[penultimateSampleIndex]->GetRadius() );
+        FOdysseyVectorVertex* cubicVertex = new FOdysseyVectorVertex( mSampleArray[penultimateSampleIndex]->GetX()
+                                                                    , mSampleArray[penultimateSampleIndex]->GetY()
+                                                                    , mSampleArray[penultimateSampleIndex]->GetRadius() );
 
         mSampleArray[penultimateSampleIndex]->SetSharp( angle >= mAngleLimit );
 
@@ -337,7 +337,7 @@ FOdysseyVectorPathBuilder::ClearSamplesUntil( uint32 iID )
 }
 
 void
-FOdysseyVectorPathBuilder::RecordStart( FOdysseyVectorVertexCubic *iVertex )
+FOdysseyVectorPathBuilder::RecordStart( FOdysseyVectorVertex *iVertex )
 {
     mPointBuffer.push_back( FOdysseyVectorPoint( iVertex->GetX(), iVertex->GetY(), iVertex->GetRadius() ) );
     mPointBuffer[0].SetID( mPointID );
@@ -354,7 +354,7 @@ FOdysseyVectorPathBuilder::RecordStart( FOdysseyVectorVertexCubic *iVertex )
     mPointID++;
 }
 
-FOdysseyVectorVertexCubic*
+FOdysseyVectorVertex*
 FOdysseyVectorPathBuilder::RecordIntermediate( double iX
                                              , double iY
                                              , double iRadius
@@ -388,7 +388,7 @@ FOdysseyVectorPathBuilder::RecordIntermediate( double iX
 }
 
 FOdysseyVectorSegmentCubic*
-FOdysseyVectorPathBuilder::RecordEnd( FOdysseyVectorVertexCubic *iVertex )
+FOdysseyVectorPathBuilder::RecordEnd( FOdysseyVectorVertex *iVertex )
 {
     if( iVertex != mVertexArray.back() )
     {
@@ -479,9 +479,9 @@ FOdysseyVectorPathBuilder::AdjustHandle( FOdysseyVectorSegmentCubic* iCubicSegme
     FOdysseyVectorHandleSegment* segmentHandle0 = iCubicSegment->GetHandle( 0 );
     FOdysseyVectorHandleSegment* segmentHandle1 = iCubicSegment->GetHandle( 1 );
     FOdysseyVectorHandleSegment* segmentHandle = iCubicSegment->GetHandle( iHandleID );
-    FOdysseyVectorVertexCubic* cubicVertex = static_cast<FOdysseyVectorVertexCubic*>( iCubicSegment->GetVertex( iHandleID ) );
-    FOdysseyVectorVertexCubic* cubicVertex0 = static_cast<FOdysseyVectorVertexCubic*>( iCubicSegment->GetVertex(0) );
-    FOdysseyVectorVertexCubic* cubicVertex1 = static_cast<FOdysseyVectorVertexCubic*>( iCubicSegment->GetVertex(1) );
+    FOdysseyVectorVertex* cubicVertex = static_cast<FOdysseyVectorVertex*>( iCubicSegment->GetVertex( iHandleID ) );
+    FOdysseyVectorVertex* cubicVertex0 = static_cast<FOdysseyVectorVertex*>( iCubicSegment->GetVertex(0) );
+    FOdysseyVectorVertex* cubicVertex1 = static_cast<FOdysseyVectorVertex*>( iCubicSegment->GetVertex(1) );
     ::ULIS::FVec2D& point0 = cubicVertex0->GetCoords();
     ::ULIS::FVec2D& point1 = cubicVertex1->GetCoords();
     ::ULIS::FVec2D& ctrlPoint0 = segmentHandle0->GetCoords();

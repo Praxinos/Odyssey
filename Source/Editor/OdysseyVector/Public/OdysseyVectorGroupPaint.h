@@ -134,6 +134,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
 
         void FindCycles();
 
+        void CreateNearIntersection( FOdysseyVectorVertex *iVertex );
+
         void SimplifyGraph();
 
         /**
@@ -196,6 +198,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         // need to remember them in order to clean properly
         std::list<FOdysseyVectorSegment*> mSegmentList;
         std::list<FOdysseyVectorSection*> mSectionList;
+        std::vector<FOdysseyVectorSegmentCubic> mGapSegmentArray;
 
     public:
         FGroupPaintParam mGroupPaintParam;

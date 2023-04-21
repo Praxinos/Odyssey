@@ -80,11 +80,11 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDrag( FOdysseyVectorEngine* iE
 
     for( int i = 0; i < mPickedPointArray.size(); i++ )
     {
-        FOdysseyVectorVertexCubic* cubicVertex = static_cast<FOdysseyVectorVertexCubic*>(mPickedPointArray[i]);
+        FOdysseyVectorVertex* cubicVertex = static_cast<FOdysseyVectorVertex*>(mPickedPointArray[i]);
 
         if( cubicVertex->GetSegmentCount() == 2 )
         {
-            cubicVertex->SmoothSegments( true, true );
+            FOdysseyVectorPathCubic::SmoothSegments( cubicVertex, true, true );
         }
     }
 

@@ -24,11 +24,11 @@ FOdysseyVectorPathCubic::Init( std::string iName )
 }
 
 FOdysseyVectorSegmentCubic*
-FOdysseyVectorPathCubic::AppendVertex( FOdysseyVectorVertexCubic* iVertex
+FOdysseyVectorPathCubic::AppendVertex( FOdysseyVectorVertex* iVertex
                                      , bool iConnect
                                      , bool iBuildSegments )
 {
-    FOdysseyVectorVertexCubic* lastVertex = static_cast<FOdysseyVectorVertexCubic*>( GetLastVertex() );
+    FOdysseyVectorVertex* lastVertex = static_cast<FOdysseyVectorVertex*>( GetLastVertex() );
 
     AddVertex ( iVertex );
 
@@ -40,11 +40,13 @@ FOdysseyVectorPathCubic::AppendVertex( FOdysseyVectorVertexCubic* iVertex
             FOdysseyVectorSegmentCubic* segment = new FOdysseyVectorSegmentCubic( this, lastVertex, iVertex );
 
             AddSegment( segment );
-
+/*
             if( iBuildSegments == true )
             {
                 iVertex->BuildSegments();
             }
+*/
+            segment->Invalidate();
 
             return segment;
         }
@@ -264,7 +266,7 @@ FOdysseyVectorPathCubic::Erase( ::ULIS::FRectD &iRoi
 
         if( vertex->GetSegmentCount() == 0 )
         {
-            oldVertexArray.push_back( static_cast<FOdysseyVectorVertexCubic*>(vertex) );
+            oldVertexArray.push_back( static_cast<FOdysseyVectorVertex*>(vertex) );
 
             this->RemoveVertex( vertex );
         }
@@ -350,8 +352,8 @@ FOdysseyVectorPathCubic::PickPoint( double iWorldX
 {
     for(std::list<FOdysseyVectorVertex*>::iterator it = mVertexList.begin(); it != mVertexList.end(); ++it)
     {
-        FOdysseyVectorVertexCubic* vertex = static_cast<FOdysseyVectorVertexCubic*>(*it);
-        ::ULIS::FVec2D perpendicularVector = vertex->GetPerpendicularVector( true );
+        FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>(*it);
+        ::ULIS::FVec2D perpendicularVector = FOdysseyVectorPathCubic::GetPerpendicularVector( vertex, true );
         BLPoint worldPerpendicularVector = mWorldMatrix.mapVector( perpendicularVector.x * vertex->GetRadius()
                                                                  , perpendicularVector.y * vertex->GetRadius() );
 
@@ -477,7 +479,7 @@ FOdysseyVectorPathCubic::Cut( ::ULIS::FVec2D& linePoint0
 void
 FOdysseyVectorPathCubic::Fill( ::ULIS::FRectD& iRoi )
 {
-    FOdysseyVectorVertexCubic *firstVertex = static_cast<FOdysseyVectorVertexCubic*>( GetFirstVertex() );
+    FOdysseyVectorVertex *firstVertex = static_cast<FOdysseyVectorVertex*>( GetFirstVertex() );
 
     if ( firstVertex )
     {
@@ -594,7 +596,7 @@ FOdysseyVectorPathCubic::DrawShapeVariable( ::ULIS::FRectD &iRoi, uint64 iFlags 
 
         for( std::list<FOdysseyVectorVertex*>::iterator it = mVertexList.begin(); it != mVertexList.end(); ++it )
         {
-            FOdysseyVectorVertexCubic* cubicVertex = static_cast<FOdysseyVectorVertexCubic*>(*it);
+            FOdysseyVectorVertex* cubicVertex = static_cast<FOdysseyVectorVertex*>(*it);
 
             DrawJoint( cubicVertex, iRoi, iFlags );
         }
@@ -609,7 +611,7 @@ FOdysseyVectorPathCubic::Mirror( bool iMirrorX, bool iMirrorY )
 
     for( std::list<FOdysseyVectorVertex*>::iterator it = mVertexList.begin(); it != mVertexList.end(); ++it )
     {
-        FOdysseyVectorVertexCubic* cubicPoint = static_cast<FOdysseyVectorVertexCubic*>(*it);
+        FOdysseyVectorVertex* cubicPoint = static_cast<FOdysseyVectorVertex*>(*it);
 
         cubicPoint->Set( cubicPoint->GetX() * factorX, cubicPoint->GetY() * factorY );
     }
@@ -631,14 +633,14 @@ FOdysseyVectorObject*
 FOdysseyVectorPathCubic::CopyShape()
 {
     FOdysseyVectorPathCubic* cubicPathCopy = new FOdysseyVectorPathCubic();
-    std::map<FOdysseyVectorVertexCubic*, FOdysseyVectorVertexCubic*> lookupTable;
+    std::map<FOdysseyVectorVertex*, FOdysseyVectorVertex*> lookupTable;
 
     for( std::list<FOdysseyVectorVertex*>::iterator it = mVertexList.begin(); it != mVertexList.end(); ++it )
     {
-        FOdysseyVectorVertexCubic* originalVertex = static_cast<FOdysseyVectorVertexCubic*>(*it);
-        FOdysseyVectorVertexCubic* newVertex = FOdysseyVectorVertexCubic::New( originalVertex->GetX()
-                                                                             , originalVertex->GetY()
-                                                                             , originalVertex->GetRadius() );
+        FOdysseyVectorVertex* originalVertex = static_cast<FOdysseyVectorVertex*>(*it);
+        FOdysseyVectorVertex* newVertex = new FOdysseyVectorVertex( originalVertex->GetX()
+                                                                  , originalVertex->GetY()
+                                                                  , originalVertex->GetRadius() );
 
         lookupTable.insert( std::make_pair( originalVertex, newVertex ) );
 
@@ -648,8 +650,8 @@ FOdysseyVectorPathCubic::CopyShape()
     for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
     {
         FOdysseyVectorSegmentCubic* originalSegment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
-        FOdysseyVectorVertexCubic* vertex0 = static_cast<FOdysseyVectorVertexCubic*>( originalSegment->GetPoint(0) );
-        FOdysseyVectorVertexCubic* vertex1 = static_cast<FOdysseyVectorVertexCubic*>( originalSegment->GetPoint(1) );
+        FOdysseyVectorVertex* vertex0 = static_cast<FOdysseyVectorVertex*>( originalSegment->GetPoint(0) );
+        FOdysseyVectorVertex* vertex1 = static_cast<FOdysseyVectorVertex*>( originalSegment->GetPoint(1) );
         FOdysseyVectorSegmentCubic* newSegment = new FOdysseyVectorSegmentCubic( cubicPathCopy
                                                                                , lookupTable[vertex0]
                                                                                , originalSegment->GetHandle(0)->GetX()
@@ -697,11 +699,11 @@ FOdysseyVectorPathCubic::Merge( FOdysseyVectorPath* iMergedPath
 
         for( std::list<FOdysseyVectorVertex*>::iterator it = vertexList.begin(); it != vertexList.end(); ++it )
         {
-            FOdysseyVectorVertexCubic* vertex = static_cast<FOdysseyVectorVertexCubic*>(*it);
+            FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>(*it);
             BLPoint pt = conversionMatrix.mapPoint( vertex->GetX(), vertex->GetY() );
             BLPoint rd = conversionMatrix.mapVector( 0.7071 * vertex->GetRadius(), 0.7071 * vertex->GetRadius() );
             ::ULIS::FVec2D radius = ::ULIS::FVec2D( rd.x, rd.y );
-            FOdysseyVectorVertexCubic* newVertex = FOdysseyVectorVertexCubic::New( pt.x, pt.y, radius.Distance() );
+            FOdysseyVectorVertex* newVertex = new FOdysseyVectorVertex( pt.x, pt.y, radius.Distance() );
 
             iAddedVertexArray.push_back( newVertex );
 
@@ -721,8 +723,8 @@ FOdysseyVectorPathCubic::Merge( FOdysseyVectorPath* iMergedPath
             FOdysseyVectorHandleSegment* handle1 = segment->GetHandle(1);
             BLPoint pt[2] = { conversionMatrix.mapPoint( handle0->GetX(), handle0->GetY() )
                             , conversionMatrix.mapPoint( handle1->GetX(), handle1->GetY() ) };
-            FOdysseyVectorVertexCubic* newCubicVertex0 = static_cast<FOdysseyVectorVertexCubic*>(iVertexLookup[vertex0->GetID()]);
-            FOdysseyVectorVertexCubic* newCubicVertex1 = static_cast<FOdysseyVectorVertexCubic*>(iVertexLookup[vertex1->GetID()]);
+            FOdysseyVectorVertex* newCubicVertex0 = static_cast<FOdysseyVectorVertex*>(iVertexLookup[vertex0->GetID()]);
+            FOdysseyVectorVertex* newCubicVertex1 = static_cast<FOdysseyVectorVertex*>(iVertexLookup[vertex1->GetID()]);
             FOdysseyVectorSegmentCubic* newSegment = new FOdysseyVectorSegmentCubic( this
                                                                                    , newCubicVertex0
                                                                                    , pt[0].x
@@ -755,7 +757,7 @@ FOdysseyVectorPathCubic::SwitchSpace( FOdysseyVectorObject& iNewSpace )
 
     for( std::list<FOdysseyVectorVertex*>::iterator it = mVertexList.begin(); it != mVertexList.end(); ++it )
     {
-        FOdysseyVectorVertexCubic* cubicVertex = static_cast<FOdysseyVectorVertexCubic*>(*it);
+        FOdysseyVectorVertex* cubicVertex = static_cast<FOdysseyVectorVertex*>(*it);
         ::ULIS::FVec2D& point = cubicVertex->GetCoords();
         BLPoint worldPt = mWorldMatrix.mapPoint( point.x, point.y );
         BLPoint wordlVec = mWorldMatrix.mapVector( 0.70710678118f * cubicVertex->GetRadius()
@@ -789,4 +791,169 @@ FOdysseyVectorPathCubic::SwitchSpace( FOdysseyVectorObject& iNewSpace )
 
         InvalidateSegment( cubicSegment );
     }
+}
+
+// static
+void
+FOdysseyVectorPathCubic::SmoothSegments( FOdysseyVectorVertex* iVertex, bool iBuildSegments, bool iPreserveHandleLength )
+{
+    std::list<FOdysseyVectorSegment*>& segmentList = iVertex->GetSegmentList();
+    ::ULIS::FVec2D averageVector( 0.0f, 0.0f );
+
+    if ( iVertex->GetSegmentCount() > 1 )
+    {
+        for( std::list<FOdysseyVectorSegment*>::iterator it = segmentList.begin(); it != segmentList.end(); ++it )
+        {
+            FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
+
+            averageVector += cubicSegment->GetVector( true );
+        }
+
+        if ( averageVector.DistanceSquared() )
+        {
+            averageVector.Normalize();
+        }
+ 
+        for( std::list<FOdysseyVectorSegment*>::iterator it = segmentList.begin(); it != segmentList.end(); ++it )
+        {
+            FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
+            ::ULIS::FVec2D smoothVector = averageVector;
+
+            if ( iVertex == cubicSegment->GetPoint(0) )
+            {
+                ::ULIS::FVec2D segmentVector = cubicSegment->GetVector( false );
+                double distance;
+
+                if ( smoothVector.DotProduct( segmentVector ) < 0.0f )
+                {
+                    smoothVector = - smoothVector;
+                }
+
+                if( iPreserveHandleLength )
+                {
+                    ::ULIS::FVec2D& handlePos = cubicSegment->GetHandle(0)->GetCoords();
+                    ::ULIS::FVec2D handleVec = handlePos - iVertex->GetCoords();
+
+                    distance = handleVec.Distance();
+                }
+                else
+                {
+                    distance = cubicSegment->GetStraightDistance() * 0.35f;
+                }
+
+                cubicSegment->GetHandle(0)->Set( iVertex->GetX() + ( smoothVector.x * distance ),
+                                                 iVertex->GetY() + ( smoothVector.y * distance ) );
+            }
+
+            if ( iVertex == cubicSegment->GetPoint(1) )
+            {
+                ::ULIS::FVec2D segmentVector = - cubicSegment->GetVector( false );
+                double distance;
+
+                if ( smoothVector.DotProduct( segmentVector ) < 0.0f )
+                {
+                    smoothVector = - smoothVector;
+                }
+
+                if( iPreserveHandleLength )
+                {
+                    ::ULIS::FVec2D& handlePos = cubicSegment->GetHandle(1)->GetCoords();
+                    ::ULIS::FVec2D handleVec = handlePos - iVertex->GetCoords();
+
+                    distance = handleVec.Distance();
+                }
+                else
+                {
+                    distance = cubicSegment->GetStraightDistance() * 0.35f;
+                }
+
+                cubicSegment->GetHandle(1)->Set( iVertex->GetX() + ( smoothVector.x * distance ),
+                                                 iVertex->GetY() + ( smoothVector.y * distance ) );
+            }
+
+            if ( iBuildSegments == true )
+            {
+                cubicSegment->Update();
+            }
+            else
+            {
+                cubicSegment->Invalidate();
+            }
+        }
+    }
+}
+
+// static
+::ULIS::FVec2D
+FOdysseyVectorPathCubic::GetPerpendicularVector( FOdysseyVectorVertex* iVertex, bool iNormalize )
+{
+    std::list<FOdysseyVectorSegment*>& segmentList = iVertex->GetSegmentList();
+    ::ULIS::FVec2D parallel = { 0.0f, 0.0f };
+    ::ULIS::FVec2D perpendicular = { 0.0f, 0.0f };
+
+    if ( segmentList.size() )
+    {
+        uint32 count = 0;
+
+        for( std::list<FOdysseyVectorSegment*>::iterator it = segmentList.begin(); it != segmentList.end(); ++it )
+        {
+            FOdysseyVectorSegmentCubic *segment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
+            FOdysseyVectorVertex* p0 = segment->GetVertex(0);
+            FOdysseyVectorVertex* p1 = segment->GetVertex(1);
+            ::ULIS::FVec2D& point0 = segment->GetVertex(0)->GetCoords();
+            ::ULIS::FVec2D& point1 = segment->GetVertex(1)->GetCoords();
+            ::ULIS::FVec2D& ctrlPoint0 = segment->GetHandle(0)->GetCoords();
+            ::ULIS::FVec2D& ctrlPoint1 = segment->GetHandle(1)->GetCoords();
+
+            if( iVertex == p0 )
+            {
+                // this is less computation-heavy
+                ::ULIS::FVec2D vec = { ctrlPoint0 - point0 };
+                /*::ULIS::FVec2D vec =  { CubicBezierTangentAtParameter<::ULIS::FVec2D>( point0.GetCoords()
+                                                                     , ctrlPoint0.GetCoords()
+                                                                     , ctrlPoint1.GetCoords()
+                                                                     , point1.GetCoords()
+                                                                     , 0.0f ) };*/
+
+                if ( vec.DistanceSquared() )
+                {
+                    vec.Normalize();
+
+                    parallel.x += vec.x;
+                    parallel.y += vec.y;
+                }
+            }
+
+            if( iVertex == p1 )
+            {
+                ::ULIS::FVec2D vec = { point1 - ctrlPoint1 };
+                /*::ULIS::FVec2D vec =  { CubicBezierTangentAtParameter<::ULIS::FVec2D>( point0.GetCoords()
+                                                                     , ctrlPoint0.GetCoords()
+                                                                     , ctrlPoint1.GetCoords()
+                                                                     , point1.GetCoords()
+                                                                     , 1.0f ) };*/
+
+                if ( vec.DistanceSquared() )
+                {
+                    vec.Normalize();
+
+                    parallel.x += vec.x;
+                    parallel.y += vec.y;
+                }
+            }
+        }
+
+        if ( iNormalize == true )
+        {
+            if ( parallel.DistanceSquared() )
+            {
+                parallel.Normalize();
+            }
+
+            perpendicular.x =   parallel.y;
+            perpendicular.y = - parallel.x;
+        }
+    }
+
+    return perpendicular;
 }

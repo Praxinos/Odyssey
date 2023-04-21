@@ -12,7 +12,6 @@
 #include "OdysseyVectorHandle.h"
 #include "OdysseyVectorHandleSegment.h"
 #include "OdysseyVectorVertex.h"
-#include "OdysseyVectorVertexCubic.h"
 
 struct FPointPosition
 {

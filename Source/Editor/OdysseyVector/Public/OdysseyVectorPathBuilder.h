@@ -52,7 +52,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathBuilder : public FOdysseyVectorObject
 
         std::vector<FOdysseyVectorPointSample*> mSampleArray;
         std::vector<FOdysseyVectorPoint*> mPointArray;
-        std::vector<FOdysseyVectorVertexCubic*> mVertexArray;
+        std::vector<FOdysseyVectorVertex*> mVertexArray;
 
         FOdysseyVectorPathCubic* mCubicPath;
         FOdysseyVectorSegmentCubic* mCubicSegment;
@@ -133,12 +133,12 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathBuilder : public FOdysseyVectorObject
          */
         FOdysseyVectorPathCubic* GetCubicPath( );
 
-        void RecordStart( FOdysseyVectorVertexCubic *iVertex );
-        FOdysseyVectorVertexCubic* RecordIntermediate( double iX
+        void RecordStart( FOdysseyVectorVertex *iVertex );
+        FOdysseyVectorVertex* RecordIntermediate( double iX
                                                      , double iY
                                                      , double iRadius
                                                      , std::vector<FOdysseyVectorVertex*>& oNewVertexArray
                                                      , std::vector<FOdysseyVectorSegment*>& oNewSegmentArray );
-        FOdysseyVectorSegmentCubic* RecordEnd( FOdysseyVectorVertexCubic *iVertex );
+        FOdysseyVectorSegmentCubic* RecordEnd( FOdysseyVectorVertex *iVertex );
         std::vector<FOdysseyVectorPoint*>& GetPointArray();
 };

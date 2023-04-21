@@ -35,10 +35,10 @@ FOdysseyVectorEllipse::Init( std::string iName, double iRadiusX, double iRadiusY
     SetName( iName );
     SetRadius( iRadiusX, iRadiusY );
 
-    mCubicVertex[0] = FOdysseyVectorVertexCubic::New( 0.0f, 0.0f, mEllipseParam.Width );
-    mCubicVertex[1] = FOdysseyVectorVertexCubic::New( 0.0f, 0.0f, mEllipseParam.Width );
-    mCubicVertex[2] = FOdysseyVectorVertexCubic::New( 0.0f, 0.0f, mEllipseParam.Width );
-    mCubicVertex[3] = FOdysseyVectorVertexCubic::New( 0.0f, 0.0f, mEllipseParam.Width );
+    mCubicVertex[0] = new FOdysseyVectorVertex( 0.0f, 0.0f, mEllipseParam.Width );
+    mCubicVertex[1] = new FOdysseyVectorVertex( 0.0f, 0.0f, mEllipseParam.Width );
+    mCubicVertex[2] = new FOdysseyVectorVertex( 0.0f, 0.0f, mEllipseParam.Width );
+    mCubicVertex[3] = new FOdysseyVectorVertex( 0.0f, 0.0f, mEllipseParam.Width );
 
     mCubicSegment[0] = new FOdysseyVectorSegmentCubic( static_cast<FOdysseyVectorPathCubic*>(this), mCubicVertex[0], mCubicVertex[1] );
     mCubicSegment[1] = new FOdysseyVectorSegmentCubic( static_cast<FOdysseyVectorPathCubic*>(this), mCubicVertex[1], mCubicVertex[2] );

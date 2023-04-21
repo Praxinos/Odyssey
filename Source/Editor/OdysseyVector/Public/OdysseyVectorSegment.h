@@ -27,7 +27,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
                              , FOdysseyVectorVertex* iVertex0
                              , FOdysseyVectorVertex* iVertex1 );
 
-        FOdysseyVectorSegment();
+        FOdysseyVectorSegment(){};
 
         virtual ~FOdysseyVectorSegment();
 

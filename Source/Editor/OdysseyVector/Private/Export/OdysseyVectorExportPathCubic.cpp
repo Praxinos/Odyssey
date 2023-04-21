@@ -54,7 +54,7 @@ WritePathCubicGeometryVertices( FOdysseyVectorPathCubic& iCubicPath, FArchive &A
 
             for( std::list<FOdysseyVectorVertex*>::iterator it = iCubicPath.GetVertexList().begin(); it != iCubicPath.GetVertexList().end(); ++it )
             {
-                FOdysseyVectorVertexCubic* vertex = static_cast<FOdysseyVectorVertexCubic*>(*it);
+                FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>(*it);
                 double x = vertex->GetX();
                 double y = vertex->GetY();
                 double radius = vertex->GetRadius();

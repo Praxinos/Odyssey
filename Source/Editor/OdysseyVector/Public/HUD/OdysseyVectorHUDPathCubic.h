@@ -14,7 +14,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUDPathCubic : public FOdysseyVectorHUD
                         , ::ULIS::FRectD& iRoi
                         , uint64 iFlags );
         void DrawVertex( FOdysseyVectorPathCubic* iPath
-                       , FOdysseyVectorVertexCubic* iCubicVertex
+                       , FOdysseyVectorVertex* iCubicVertex
                        , ::ULIS::FRectD& iRoi
                        , uint64 iFlags );
     public:

@@ -111,9 +111,9 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDown( FOdysseyVectorEngine* iEng
             // Control point must move with the point. Store it in the mPickedPointArray as well
             for( int i = 0; i < mPickedPointArray.size(); i++ )
             {
-                if( mPickedPointArray[i]->GetClass() == FOdysseyVectorVertexCubic::StaticClass() )
+                if( mPickedPointArray[i]->GetClass() == FOdysseyVectorVertex::StaticClass() )
                 {
-                    FOdysseyVectorVertexCubic* cubicVertex = static_cast<FOdysseyVectorVertexCubic*>( mPickedPointArray[i] );
+                    FOdysseyVectorVertex* cubicVertex = static_cast<FOdysseyVectorVertex*>( mPickedPointArray[i] );
                     std::list<FOdysseyVectorSegment*> segmentList = cubicVertex->GetSegmentList();
 
                     for( std::list<FOdysseyVectorSegment*>::iterator segit = segmentList.begin(); segit != segmentList.end(); ++segit )
@@ -187,7 +187,7 @@ DragPoint( double iLocalX
     if ( iPoint->GetClass() == FOdysseyVectorHandlePoint::StaticClass() )
     {
         FOdysseyVectorHandlePoint* pointHandle = static_cast<FOdysseyVectorHandlePoint*>( iPoint );
-        FOdysseyVectorVertexCubic* cubicVertex = static_cast<FOdysseyVectorVertexCubic*>(pointHandle->GetParent());
+        FOdysseyVectorVertex* cubicVertex = static_cast<FOdysseyVectorVertex*>(pointHandle->GetParent());
         ::ULIS::FVec2D dif = { cubicVertex->GetX() - iLocalX, cubicVertex->GetY() - iLocalY };
 
         cubicVertex->SetRadius( dif.Distance() );
@@ -206,9 +206,9 @@ DragPoint( double iLocalX
         return cubicSegment->GetBoundingBox( false );
     }
 
-    if( iPoint->GetClass() == FOdysseyVectorVertexCubic::StaticClass() )
+    if( iPoint->GetClass() == FOdysseyVectorVertex::StaticClass() )
     {
-        FOdysseyVectorVertexCubic* cubicVertex = static_cast<FOdysseyVectorVertexCubic*>( iPoint );
+        FOdysseyVectorVertex* cubicVertex = static_cast<FOdysseyVectorVertex*>( iPoint );
         std::list<FOdysseyVectorSegment*> segmentList = cubicVertex->GetSegmentList();
 
         cubicVertex->Set( iPoint->GetX() + difx

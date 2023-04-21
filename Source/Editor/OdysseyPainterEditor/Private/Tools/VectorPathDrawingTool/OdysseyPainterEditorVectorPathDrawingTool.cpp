@@ -49,7 +49,7 @@ RectangleDtoI( ::ULIS::FRectD iRect )
     return ::ULIS::FRectI( (int) iRect.x, (int) iRect.y, (int) iRect.w, (int) iRect.h );
 }
 
-FOdysseyVectorVertexCubic*
+FOdysseyVectorVertex*
 UOdysseyPainterEditorVectorPathDrawingTool::PickVertex( FOdysseyVectorEngine* iVectorEngine
                                                       , FOdysseyVectorScene* iScene
                                                       , double iWorldX
@@ -59,7 +59,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::PickVertex( FOdysseyVectorEngine* iV
     if( Stitch )
     {
         std::vector<FOdysseyVectorPoint*> pickedPointArray;
-        FOdysseyVectorVertexCubic* stitchCubicVertex = nullptr;
+        FOdysseyVectorVertex* stitchCubicVertex = nullptr;
 
         pickedPointArray.reserve( 50 );
 
@@ -72,7 +72,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::PickVertex( FOdysseyVectorEngine* iV
 
         if( pickedPointArray.size() )
         {
-            stitchCubicVertex = static_cast<FOdysseyVectorVertexCubic*>( pickedPointArray[0] );
+            stitchCubicVertex = static_cast<FOdysseyVectorVertex*>( pickedPointArray[0] );
 
             if( stitchCubicVertex->GetSegmentCount() == 1 )
             {
@@ -92,7 +92,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDown( FOdysseyVectorEngine* i
 {
     ::ULIS::FColor color = GetEditorAs<FOdysseyPainterEditor>()->PaintColor().GetValue();
     ::ULIS::FColor rgba8 = color.ToFormat( ::ULIS::eFormat::Format_RGBA8 );
-    FOdysseyVectorVertexCubic* cubicVertex = PickVertex( iEngine, iScene, iPointInTexture.x, iPointInTexture.y, StitchingRadius );
+    FOdysseyVectorVertex* cubicVertex = PickVertex( iEngine, iScene, iPointInTexture.x, iPointInTexture.y, StitchingRadius );
     // take the upper value to prevent stroke with width 0.0
     float radius = iPointInTexture.pressure * Radius;
     FOdysseyVectorPathCubic* cubicPath = nullptr;
@@ -114,7 +114,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDown( FOdysseyVectorEngine* i
     }
     else
     {
-        cubicVertex = FOdysseyVectorVertexCubic::New( 0.0f, 0.0f, 0.0f );
+        cubicVertex = new FOdysseyVectorVertex( 0.0f, 0.0f, 0.0f );
         // record for undos
         mVertexArray.push_back( cubicVertex );
     }
@@ -183,7 +183,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDrag( FOdysseyVectorEngine* i
         BLPoint localCoords;
         BLPoint localRadius;
         //float roundedUpRadius = ceil (radius);
-        FOdysseyVectorVertexCubic* nextVertex;
+        FOdysseyVectorVertex* nextVertex;
         ::ULIS::FRectI redrawRegion = GetInvalidationAreaFromPointer( iPointInTexture.x
                                                                     , iPointInTexture.y
                                                                     , Radius )
@@ -219,7 +219,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUp( FOdysseyVectorEngine* iEn
 {
     if( mPathBuilder )
     {
-        FOdysseyVectorVertexCubic* cubicVertex = PickVertex( iEngine, iScene, iPointInTexture.x, iPointInTexture.y, StitchingRadius );
+        FOdysseyVectorVertex* cubicVertex = PickVertex( iEngine, iScene, iPointInTexture.x, iPointInTexture.y, StitchingRadius );
         FOdysseyVectorPathCubic* cubicPath = mPathBuilder->GetCubicPath();
         FOdysseyVectorSegmentCubic* lastSegment = nullptr;
 
@@ -242,9 +242,9 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUp( FOdysseyVectorEngine* iEn
 
             if( cubicVertex == nullptr )
             {
-                cubicVertex = FOdysseyVectorVertexCubic::New( localCoords.x
-                                                            , localCoords.y
-                                                            , ::ULIS::FVec2D( localRadius.x, localRadius.y ).Distance() );
+                cubicVertex = new FOdysseyVectorVertex( localCoords.x
+                                                      , localCoords.y
+                                                      , ::ULIS::FVec2D( localRadius.x, localRadius.y ).Distance() );
                 // record for undos
                 mVertexArray.push_back( cubicVertex );
 

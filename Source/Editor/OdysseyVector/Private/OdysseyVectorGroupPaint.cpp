@@ -365,7 +365,6 @@ FOdysseyVectorGroupPaint::FindPath( FOdysseyVectorIntersection* iInitiatorInters
     FOdysseyVectorVertex* nextVertex = ( iSection->GetVertex(0) == iVertex ) ? iSection->GetVertex(1)
                                                                              : iSection->GetVertex(0);
     ::ULIS::FVec2D sectionVector = -iSection->GetVectorFromVertex( nextVertex, false, false );
-
     bool hasPrimary = false;
     bool hasSecondary = false;
     bool hasTertiary = false;
@@ -373,51 +372,33 @@ FOdysseyVectorGroupPaint::FindPath( FOdysseyVectorIntersection* iInitiatorInters
     static int i;
 
     iSectionArray.push_back( iSection );
-
     iVertexArray.push_back( iVertex );
-    //iVertex->SetVisited( true );
     iSection->Block( iVertex );
-
-if(i==4)
-        UE_LOG(LogTemp,Warning,TEXT("lets break"));
-
-    UE_LOG(LogTemp,Warning,TEXT("Exploring section:----%d"),i++ );
-    PrintSection( iSection );
 
     if( ( iInitiatorIntersection->HasVertex( static_cast<FOdysseyVectorVertexIntersection*>(nextVertex) ) )// cycle detected
     && ( ( ( iReturnSection->IsRemoved() == false ) && ( iReturnSection == iSection ) )
            || ( iReturnSection->IsRemoved() == true ) ) )
     {
-        UE_LOG(LogTemp,Warning,TEXT("cycle detected: %d"), iReturnSection->IsRemoved() );
+        //UE_LOG(LogTemp,Warning,TEXT("cycle detected: %d"), iReturnSection->IsRemoved() );
 
-        PrintCycle( iVertexArray, iSectionArray );
+        //PrintCycle( iVertexArray, iSectionArray );
 
-        //UE_LOG(LogTemp,Warning,TEXT("front detected") );
-            if( GetNormalVector( iVertexArray, iSectionArray ) > 0.0f )
-            {
-        //UE_LOG(LogTemp,Warning,TEXT("normal detected") );
-                //PrintCycle( iVertexArray, iSectionArray );
-                /*BlockPath( vertexArray, sectionArray, false );*/
-
-                mCycleArray.push_back( new FOdysseyVectorCycle( *this, /*iCycleID*/0, iVertexArray, iSectionArray ) );
-            }
-
-        /*if( nextVertex != iVertexArray.front() )
+        if( GetNormalVector( iVertexArray, iSectionArray ) > 0.0f )
         {
-            BlockPath( cycleVertexArray, cycleSectionArray );
-        }*/
+            mCycleArray.push_back( new FOdysseyVectorCycle( *this, /*iCycleID*/0, iVertexArray, iSectionArray ) );
+        }
 
         ret = FOdysseyVectorGroupPaint::HASCYCLE;
     }
     else
     {
-        if( nextVertex->GetClass() == FOdysseyVectorVertexCubic::StaticClass() )
+        if( nextVertex->GetClass() == FOdysseyVectorVertex::StaticClass() )
         {
             FOdysseyVectorSection* primaryNextSection = nextVertex->GetOtherSection( iSection, false );
 
             if( primaryNextSection )
             {
-        UE_LOG(LogTemp,Warning,TEXT("primary") );
+        //UE_LOG(LogTemp,Warning,TEXT("primary") );
                 if( primaryNextSection->IsBlocked( nextVertex ) == false )
                 {
                     ret = FindPath( iInitiatorIntersection, iReturnSection, nextVertex, primaryNextSection, iVertexArray, iSectionArray, iOrientation, iDepth + 1 );
@@ -439,7 +420,7 @@ if(i==4)
 
             if( primaryNextSection )
             {
-        UE_LOG(LogTemp,Warning,TEXT("primary") );
+        //UE_LOG(LogTemp,Warning,TEXT("primary") );
                 if( primaryNextSection->IsBlocked( nextPartnerVertex ) == false )
                 {
                     ret = FindPath( iInitiatorIntersection, iReturnSection, nextPartnerVertex, primaryNextSection, iVertexArray, iSectionArray, iOrientation, iDepth + 1 );
@@ -452,7 +433,7 @@ if(i==4)
 
             if( ( ret == FOdysseyVectorGroupPaint::NOCYCLE ) && secondaryNextSection )
             {
-        UE_LOG(LogTemp,Warning,TEXT("secondary") );
+        //UE_LOG(LogTemp,Warning,TEXT("secondary") );
                 if( secondaryNextSection->IsBlocked( nextIntersectionVertex ) == false )
                 {
                     ret = FindPath( iInitiatorIntersection, iReturnSection, nextIntersectionVertex, secondaryNextSection, iVertexArray, iSectionArray, iOrientation, iDepth + 1 );
@@ -465,7 +446,7 @@ if(i==4)
 
             if( ( ret == FOdysseyVectorGroupPaint::NOCYCLE ) && tertiaryNextSection )
             {
-       UE_LOG(LogTemp,Warning,TEXT("tertiary") );
+       //UE_LOG(LogTemp,Warning,TEXT("tertiary") );
                 if( tertiaryNextSection->IsBlocked( nextPartnerVertex ) == false )
                 {
                     ret = FindPath( iInitiatorIntersection, iReturnSection, nextPartnerVertex, tertiaryNextSection, iVertexArray, iSectionArray, iOrientation, iDepth + 1 );
@@ -477,17 +458,9 @@ if(i==4)
             }
         }
     }
-/*
-    iSection->Block( iVertex );
-*/
-    //iSection->UnBlock( iVertex ); // never unblock. A section is never visited more than once in one way
-    //iVertex->SetVisited( false );
 
-    /*if( ret != FOdysseyVectorGroupPaint::HASCYCLE )
-    {*/
-        iVertexArray.pop_back();
-        iSectionArray.pop_back();
-    /*}*/
+    iVertexArray.pop_back();
+    iSectionArray.pop_back();
 
     return ret;
 }
@@ -508,11 +481,19 @@ GetNormalVector( std::vector<FOdysseyVectorVertex*>& iVertexArray
 
         if( vertexn->GetClass() == FOdysseyVectorVertexIntersection::StaticClass() )
         {
-            FOdysseyVectorVertexIntersection* intersectionVertex = static_cast<FOdysseyVectorVertexIntersection*>(vertexn);
+            if( iSectionArray[i]->GetSegment() != iSectionArray[n]->GetSegment() )
+            {
+                FOdysseyVectorVertexIntersection* intersectionVertex = static_cast<FOdysseyVectorVertexIntersection*>(vertexn);
 
-            vertexn = intersectionVertex->GetPartner();
+                vertexn = intersectionVertex->GetPartner();
+            }
         }
-
+/*
+if( ( iSectionArray[i]->GetVertex(0) != vertexi ) && ( iSectionArray[i]->GetVertex(0) != vertexn ) )
+    UE_LOG(LogTemp,Warning,TEXT("Might be an issue"));
+if( ( iSectionArray[i]->GetVertex(1) != vertexi ) && ( iSectionArray[i]->GetVertex(1) != vertexn ) )
+    UE_LOG(LogTemp,Warning,TEXT("Might be an issue"));
+*/
         ::ULIS::FVec2D& viCoords = vertexi->GetCoords();
         ::ULIS::FVec2D& vnCoords = vertexn->GetCoords();
 
@@ -657,9 +638,8 @@ FOdysseyVectorGroupPaint::FindCycles()
     Colorize();
 }
 
-static void //uint32
-CreateNearIntersection( FOdysseyVectorVertex *iVertex
-                      , std::vector<FOdysseyVectorVertexIntersection*>& iIntersectionVertexArray )
+void //uint32
+FOdysseyVectorGroupPaint::CreateNearIntersection( FOdysseyVectorVertex *iVertex )
 {
     FOdysseyVectorSegment *nearestSegment = iVertex->GetNearestSegment();
     //uint32 intersectionCount = 0;
@@ -667,82 +647,28 @@ CreateNearIntersection( FOdysseyVectorVertex *iVertex
     if( nearestSegment )
     {
         double nearestSegmentT = iVertex->GetNearestSegmentT();
-        FOdysseyVectorVertex* nearestVertex;
 
-        //FOdysseyVectorSegmentCubic cubicSegment = FOdysseyVectorSegmentCubic::New()
+        ::ULIS::FVec2D nearestVertexAt = nearestSegment->GetPointAt( nearestSegmentT );
+        FOdysseyVectorVertexIntersection* intersectionVertex[2] = { new FOdysseyVectorVertexIntersection( nearestVertexAt.x, nearestVertexAt.y, nearestSegmentT )
+                                                                  , new FOdysseyVectorVertexIntersection( nearestVertexAt.x, nearestVertexAt.y, 0.0f ) };
+        uint32 gapCount = mGapSegmentArray.size();
 
-        if( ( nearestSegmentT != 0.0f ) && ( nearestSegmentT != 1.0f ) )
-        {
-            ::ULIS::FVec2D nearestVertexAt = nearestSegment->GetPointAt( nearestSegmentT );
-            FOdysseyVectorVertexIntersection* intersectionVertex = new FOdysseyVectorVertexIntersection( nearestVertexAt.x, nearestVertexAt.y, false );
+        mGapSegmentArray.push_back( FOdysseyVectorSegmentCubic( nullptr, intersectionVertex[1], iVertex ) );
 
-            intersectionVertex->AddSegment ( nearestSegment/*, nearestSegmentT*/ );
-            nearestSegment->AddIntersection ( intersectionVertex );
+        FOdysseyVectorSection* gapSection = new FOdysseyVectorSection( &mGapSegmentArray[gapCount], intersectionVertex[1], iVertex );
 
-            iIntersectionVertexArray.push_back( intersectionVertex );
+        mGapSegmentArray[gapCount].Update();
+        mGapSegmentArray[gapCount].AddSection( gapSection );
 
-            nearestVertex = intersectionVertex;
-        }
-        else
-        {
-            nearestVertex = nearestSegment->GetVertex((int)nearestSegmentT);
-        }
+        mSectionList.push_back( gapSection );
 
-        nearestSegment->AddSection( new FOdysseyVectorSection ( nullptr, iVertex, nearestVertex ) );
+        nearestSegment->AddIntersection ( intersectionVertex[0] );
+
+        mIntersectionArray.push_back( new FOdysseyVectorIntersection( intersectionVertex[0], intersectionVertex[1] ) );
+
+        //UE_LOG(LogTemp,Warning,TEXT("GetSectionCount: %d %d"),intersectionVertex[0]->GetSectionCount(),intersectionVertex[1]->GetSectionCount());
+
     }
-/*
-    if( vertex0->GetNearestSegment() )
-    {
-        FOdysseyVectorSegment *nearestSegment = vertex0->GetNearestSegment();
-        ::ULIS::FVec2D isxAt[2] = { vertex0->GetCoords()
-                                  , nearestSegment->GetPointAt( vertex0->GetNearestSegmentT() ) };
-
-        FOdysseyVectorVertexIntersection* intersectionVertex[2] = { new FOdysseyVectorVertexIntersection( isxAt[0].x, isxAt[0].y )
-                                                                  , new FOdysseyVectorVertexIntersection( isxAt[1].x, isxAt[1].y ) };
-
-        iIntersectionVertexArray.push_back( intersectionVertex[0] );
-        iIntersectionVertexArray.push_back( intersectionVertex[1] );
-
-        // AddSegment() MUST be called before AddIntersection because AddIntersection uses the value of t that is stored by AddSegment()
-        intersectionVertex[0]->AddSegment (       iSegment, vertex0->GetT( iSegment ) );
-        intersectionVertex[1]->AddSegment ( nearestSegment, vertex0->GetNearestSegmentT() );
-
-        iSegment->AddIntersection ( intersectionVertex[0] );
-        nearestSegment->AddIntersection ( intersectionVertex[1] );
-
-        iSegment->AddSection ( new FOdysseyVectorSection ( nullptr
-                                                         , intersectionVertex[0]
-                                                         , intersectionVertex[1] ) );
-
-        intersectionCount++;
-    }
-
-    if( vertex1->GetNearestSegment() )
-    {
-        FOdysseyVectorSegment *nearestSegment = vertex1->GetNearestSegment();
-        ::ULIS::FVec2D isxAt[2] = { vertex1->GetCoords()
-                                  , nearestSegment->GetPointAt( vertex1->GetNearestSegmentT() ) };
-        FOdysseyVectorVertexIntersection* intersectionVertex[2] = { new FOdysseyVectorVertexIntersection( isxAt[0].x, isxAt[0].y )
-                                                                  , new FOdysseyVectorVertexIntersection( isxAt[1].x, isxAt[1].y ) };
-
-        iIntersectionVertexArray.push_back( intersectionVertex[0] );
-        iIntersectionVertexArray.push_back( intersectionVertex[1] );
-
-        // AddSegment() MUST be called before AddIntersection because AddIntersection uses the value of t that is stored by AddSegment()
-        intersectionVertex[0]->AddSegment (       iSegment, vertex1->GetT( iSegment ) );
-        intersectionVertex[1]->AddSegment ( nearestSegment, vertex1->GetNearestSegmentT() );
-
-        iSegment->AddIntersection ( intersectionVertex[0] );
-        nearestSegment->AddIntersection ( intersectionVertex[1] );
-
-        iSegment->AddSection ( new FOdysseyVectorSection ( nullptr
-                                                         , intersectionVertex[0]
-                                                         , intersectionVertex[1] ) );
-
-        intersectionCount++;
-    }
-*/
-    //return intersectionCount;
 }
 
 void
@@ -750,6 +676,7 @@ FOdysseyVectorGroupPaint::BuildGraph()
 {
     std::list<FOdysseyVectorSegment*> segmentList;
     FOdysseyVectorSegmentCubic *cubicSegment;
+    uint32 gapSegmentCount = 0;
 
     Clear();
 
@@ -762,13 +689,29 @@ FOdysseyVectorGroupPaint::BuildGraph()
         IntersectSegment ( cubicSegment, segmentList, mIntersectionArray );
 
         // retrieve near-intersection
-        //CreateNearIntersection( cubicSegment->GetVertex(0), mIntersectionVertexArray );
-        //CreateNearIntersection( cubicSegment->GetVertex(1), mIntersectionVertexArray );
+        //CreateNearIntersection( cubicSegment->GetVertex(0) ); // moved out to the for loop below
+        //CreateNearIntersection( cubicSegment->GetVertex(1) ); // moved out to the for loop below
+
+        // TODO::Optimization: prevent those 2 function calls ?
+        if( cubicSegment->GetVertex(0)->GetNearestSegment() ) gapSegmentCount++;
+        if( cubicSegment->GetVertex(1)->GetNearestSegment() ) gapSegmentCount++;
 
         // remove segment from list as they are tested
         segmentList.pop_back();
 
         cubicSegment = segmentList.size() ? static_cast<FOdysseyVectorSegmentCubic*>( segmentList.back() ) : nullptr;
+    }
+
+    mGapSegmentArray.reserve( gapSegmentCount );  // mandatory to avoid memory shifting.
+
+    // this could be done in the above loop but we use the above loop to get the number of gaps in order to correctly size the gap segment array.
+    for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
+    {
+        FOdysseyVectorSegment *segment = static_cast<FOdysseyVectorSegment*>(*it);
+
+        // retrieve near-intersection
+        CreateNearIntersection( segment->GetVertex(0) );
+        CreateNearIntersection( segment->GetVertex(1) );
     }
 }
 
@@ -876,6 +819,17 @@ FOdysseyVectorGroupPaint::Clear()
 
     mSegmentList.clear();
 
+
+    // must be done before section deletion and intersection deletion
+    for( int i = 0; i < mGapSegmentArray.size(); i++ )
+    {
+        mGapSegmentArray[i].ClearIntersections();
+    }
+
+    mGapSegmentArray.clear();
+
+
+
     for( std::list<FOdysseyVectorSection*>::iterator it = mSectionList.begin(); it != mSectionList.end(); ++it )
     {
         FOdysseyVectorSection *section = (*it);
@@ -916,12 +870,17 @@ FOdysseyVectorGroupPaint::Clear()
         }
     }
 
+
+
     for( int i = 0; i < mIntersectionArray.size(); i++ )
     {
         delete mIntersectionArray[i];
     }
 
     mIntersectionArray.clear();
+
+
+
 
     for( int i = 0; i < mCycleArray.size(); i++ )
     {
@@ -931,6 +890,8 @@ FOdysseyVectorGroupPaint::Clear()
     }
 
     mCycleArray.clear();
+
+
 }
 
 void

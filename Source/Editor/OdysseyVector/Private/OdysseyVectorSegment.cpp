@@ -192,9 +192,12 @@ FOdysseyVectorSegment::IsInvalidated()
 void
 FOdysseyVectorSegment::Invalidate()
 {
-    mPath->InvalidateSegment( this );
+    if( mPath ) // Note: GroupPaint "gap segments" can be orphan
+    {
+        mPath->InvalidateSegment( this );
 
-    mIsInvalidated = true;
+        mIsInvalidated = true;
+    }
 }
 
 void

@@ -5,6 +5,7 @@
 #include <Image/Block.h>
 
 #include "OdysseyVectorPoint.h"
+#include "OdysseyVectorHandlePoint.h"
 
 class FOdysseyVectorSegment;
 class FOdysseyVectorSection;
@@ -14,17 +15,18 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
 {
     public:
        /**
-         * @brief Static function to allocate a new vertex. Note: this is the proper way to allocate a new vertex as we don't
-         * use the constructor to set parameters so that this can be derived from an UOBJECT if needed in future devs. Indeed,
-         * UOBJECTs have empty constructors.
+         * @brief function to allocate a new vertex.
          * @param iX coordinates on X axis
          * @param iY coordinates on Y axis
          * @param iRadius radius
          */
-        static FOdysseyVectorVertex* New( double iX, double iY, double iRadius );
-
+        FOdysseyVectorVertex ( double iX, double iY, double iRadius );
         ~FOdysseyVectorVertex();
-        FOdysseyVectorVertex();
+
+        /**
+         * @brief Get a pointer to the handle (used to set the vertex's radius).
+         */
+        FOdysseyVectorHandlePoint* GetHandle();
 
         /**
          * @brief Add a segment to the list of segments connected to this vertex
@@ -196,7 +198,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
          * @brief Tell whether or not the angle between the segments connected to this vertex is smooth (low).
          * @return true or false
          */
-        virtual bool IsSmooth() { return false; };
+        bool IsSmooth();
 
         /**
          * @brief Tell whether or not the VISITED flags is set.
@@ -212,6 +214,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
                               , double iNearestSegmentT );
 
     protected:
+        FOdysseyVectorHandlePoint* mCtrlPoint;
         std::list<FOdysseyVectorSegment*> mSegmentList;
         std::list<FOdysseyVectorSection*> mSectionList;
         FOdysseyVectorPath* mPath;
