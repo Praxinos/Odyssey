@@ -28,6 +28,12 @@ FOdysseyVectorVertex::GetPath()
     return mPath;
 }
 
+double
+FOdysseyVectorVertex::GetT( FOdysseyVectorSegment* iSegment )
+{
+    return ( this == iSegment->GetVertex(0) ) ? 0.0f : 1.0f;
+}
+
 FOdysseyVectorSegment*
 FOdysseyVectorVertex::GetNearestSegment()
 {
@@ -186,12 +192,6 @@ static bool seekVertex( std::list<FOdysseyVectorVertex*>& iVertexList
     }
 
     return false;
-}
-
-double
-FOdysseyVectorVertex::GetT( FOdysseyVectorSection* iSection )
-{
-    return ( iSection->GetVertex(0) == this ) ? 0.0f : 1.0f;
 }
 
 static bool seekSection( std::list<FOdysseyVectorSection*>& iSectionList

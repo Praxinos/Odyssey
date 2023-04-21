@@ -7,6 +7,7 @@
 #include "OdysseyVectorSegment.h"
 #include "OdysseyVectorVertexCubic.h"
 #include "OdysseyVectorHandleSegment.h"
+#include "OdysseyVectorIntersection.h"
 
 class FOdysseyVectorPathCubic;
 
@@ -145,11 +146,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
        /**
          * @brief Intersect this cubic segment with another cubic segment. They MUST have the same coordinate system.
          * @param iTolerance a maximum distance to consider an almost-hit as a hit.
-         * @param iIntersectionVertexArray array that receives the created intersection vertices.
+         * @param iIntersectionArray array that receives the created intersections.
          */
         uint32 Intersect( FOdysseyVectorSegmentCubic& iOther
                         , double iTolerance
-                        , std::vector<FOdysseyVectorVertexIntersection*>& iIntersectionVertexArray );
+                        , std::vector<FOdysseyVectorIntersection*>& iIntersectionArray );
 
        /**
          * @brief Builds the variable thickness segment (stores values into polygon cache).

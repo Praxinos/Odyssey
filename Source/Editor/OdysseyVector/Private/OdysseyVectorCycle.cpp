@@ -161,8 +161,9 @@ FOdysseyVectorCycle::BuildSegmentCubic( FOdysseyVectorSegmentCubic& iSegment
 
 void
 FOdysseyVectorCycle::Build( std::vector<FOdysseyVectorVertex*>& iVertexArray
-                         , std::vector<FOdysseyVectorSection*>& iSectionArray )
+                          , std::vector<FOdysseyVectorSection*>& iSectionArray )
 {
+    int32 arraySize = iVertexArray.size();
     /*double xmin, ymin, xmax, ymax;*/
     int seg = 0;
 
@@ -173,27 +174,32 @@ FOdysseyVectorCycle::Build( std::vector<FOdysseyVectorVertex*>& iVertexArray
 
     if ( iVertexArray.size() ) 
     {
-        FOdysseyVectorSection* firstSection = iSectionArray.front();
-        FOdysseyVectorSegment* firstSegment = firstSection->GetSegment();
         ::ULIS::FVec2D originAt = iVertexArray[0]->GetCoords();
-        FOdysseyVectorVertex* currentVertex = iVertexArray[0];
 
         mMin.x = mMax.x = originAt.x;
         mMin.y = mMax.y = originAt.y;
 
         mPath.moveTo( originAt.x, originAt.y );
 
-        for( int i = 0; i < iSectionArray.size(); i++ )
+        for( int i = 0; i < arraySize; i++ )
         {
+            int n = ( i + 1 ) % arraySize;
             FOdysseyVectorSection* section = iSectionArray[i];
             FOdysseyVectorSegment* segment = section->GetSegment();
-            FOdysseyVectorVertex* nextVertex = ( currentVertex == section->GetVertex(0) ) ? section->GetVertex(1)
-                                                                                          : section->GetVertex(0);
+            FOdysseyVectorVertex* vertexi = iVertexArray[i];
+            FOdysseyVectorVertex* vertexn = iVertexArray[n];
+
+            if( vertexi->GetClass() == FOdysseyVectorVertexIntersection::StaticClass() )
+            {
+                FOdysseyVectorVertexIntersection* intersectionVertex = static_cast<FOdysseyVectorVertexIntersection*>(vertexi);
+
+                vertexi = intersectionVertex->GetPartner();
+            }
 
             if( segment )
             {
-                double currentVertexT = currentVertex->GetT( section );
-                double    nextVertexT =    nextVertex->GetT( section );
+                double currentVertexT = vertexi->GetT( segment );
+                double    nextVertexT = vertexn->GetT( segment );
                 /*::ULIS::FVec2D currentAt = currentVertex->GetPosition( segment );
 
                 if( i == 0 )
@@ -209,12 +215,10 @@ FOdysseyVectorCycle::Build( std::vector<FOdysseyVectorVertex*>& iVertexArray
             }
             else
             {
-                ::ULIS::FVec2D bridgeTo = nextVertex->GetCoords();
+                ::ULIS::FVec2D bridgeTo = vertexn->GetCoords();
 
                 mPath.lineTo( bridgeTo.x, bridgeTo.y );
             }
-
-            currentVertex = nextVertex;
         }
 
         mPath.close();

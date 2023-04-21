@@ -9,6 +9,7 @@
 #include "OdysseyVectorObject.h"
 #include "OdysseyVectorVertex.h"
 #include "OdysseyVectorSection.h"
+#include "OdysseyVectorIntersection.h"
 #include "OdysseyVectorSegment.h"
 #include "OdysseyVectorSegmentCubic.h"
 #include "OdysseyVectorGroup.h"
@@ -119,12 +120,12 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
          * @brief Intersect a cubic segment. It creates the intersection vertices and the section (sub-segments).
          * @param iCubicSegment the segment.
          * @param cubicSegmenList the other segments to intersect iCubicSegment with.
-         * @param oIntersectionVertexList list populated by the pointers to the intersection vertices that will be created.
+         * @param oIntersectionList list populated by the pointers to the intersection that will be created.
          * @return a pointer to  copy of the object
          */
         uint32 IntersectSegment( FOdysseyVectorSegmentCubic* iCubicSegment
                                , std::list<FOdysseyVectorSegment*>& cubicSegmenList
-                               , std::vector<FOdysseyVectorVertexIntersection*>& oIntersectionVertexList );
+                               , std::vector<FOdysseyVectorIntersection*>& oIntersectionList );
 
         /**
          * @brief Build the graph that allows to detect the cycles. It basically checks intersections
@@ -137,6 +138,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
 
         /**
          * @brief Recursive function that traverses the graph and find cycles.
+         * @param iInitiatorIntersection
          * @param iReturnSection
          * @param iVertex the vertex being explored, either intersection vertex or regular ones.
          * @param iSection the section that will take us to the next vertex.
@@ -146,7 +148,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
          * @param iDepth current recursion depth.
          * @return iCubicSegment the segment.
          */
-        uint32 FindPath( FOdysseyVectorSection* iReturnSection
+        uint32 FindPath( FOdysseyVectorIntersection* iInitiatorIntersection
+                       , FOdysseyVectorSection* iReturnSection
                        , FOdysseyVectorVertex* iVertex
                        , FOdysseyVectorSection* iSection
                        , std::vector<FOdysseyVectorVertex*>& oVertexArray
@@ -181,7 +184,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
          * @brief Traverse an intersection vertex and find cycles.
          * @param iVertex intersection vertex.
          */
-        uint32 MarchVertex( FOdysseyVectorVertexIntersection* iVertex );
+        uint32 MarchIntersection( FOdysseyVectorIntersection* iIntersection );
 
     protected:
         static const uint32 NOCYCLE  = 0;
@@ -189,7 +192,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         static const uint32 HASCYCLE = 2;
         std::list<FOdysseyVectorBucket*> mBucketList;
         std::vector<FOdysseyVectorCycle*> mCycleArray;
-        std::vector<FOdysseyVectorVertexIntersection*> mIntersectionVertexArray;
+        std::vector<FOdysseyVectorIntersection*> mIntersectionArray;
         // need to remember them in order to clean properly
         std::list<FOdysseyVectorSegment*> mSegmentList;
         std::list<FOdysseyVectorSection*> mSectionList;

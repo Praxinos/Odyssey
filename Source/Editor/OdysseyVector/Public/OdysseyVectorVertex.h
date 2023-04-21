@@ -150,7 +150,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
          * @brief Get the number of sections connected to this vertex. Equals to a call to "GetSectionList().size()".
          * @return the number of sections connected to this vertex.
          */
-        uint32 GetSectionCount();
+        virtual uint32 GetSectionCount();
 
         /**
          * @brief Get a reference to the list of segments connected to this vertex.
@@ -166,10 +166,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
 
         /**
          * @brief Get the position of the vertex on the segment passed as parameter, in a range from 0.0 to 1.0.
-         * @param iSection the section the vertex lies on.
+         * @param iSegment the section the vertex lies on.
          * @return a range from 0.0 to 1.0.
          */
-        virtual double GetT( FOdysseyVectorSection* iSection );
+        virtual double GetT( FOdysseyVectorSegment* iSegment );
 
         /**
          * @brief Get a pointer to the path this vertex belongs to.

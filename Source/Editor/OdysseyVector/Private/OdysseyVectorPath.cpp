@@ -233,8 +233,8 @@ FOdysseyVectorPath::AddSegment( FOdysseyVectorSegment* iSegment )
     iSegment->GetVertex(0)->AddSegment( iSegment );
     iSegment->GetVertex(1)->AddSegment( iSegment );
 
-    iSegment->GetVertex(0)->AddSection(iSegment->GetDefaultSection());
-    iSegment->GetVertex(1)->AddSection(iSegment->GetDefaultSection());
+    iSegment->GetVertex(0)->AddSection( iSegment->GetDefaultSection() );
+    iSegment->GetVertex(1)->AddSection( iSegment->GetDefaultSection() );
 }
 
 void

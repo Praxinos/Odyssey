@@ -13,6 +13,7 @@ FOdysseyVectorSegmentCubic::FOdysseyVectorSegmentCubic( FOdysseyVectorPathCubic*
                                                       , double iCtrlPoint1x
                                                       , double iCtrlPoint1y
                                                       , FOdysseyVectorVertexCubic* iPoint1 )
+    : FOdysseyVectorSegment( iPath, iPoint0, iPoint1 )
 {
     Init ( iPath, iPoint0, iCtrlPoint0x, iCtrlPoint0y, iCtrlPoint1x, iCtrlPoint1y, iPoint1 );
 }
@@ -20,6 +21,7 @@ FOdysseyVectorSegmentCubic::FOdysseyVectorSegmentCubic( FOdysseyVectorPathCubic*
 FOdysseyVectorSegmentCubic::FOdysseyVectorSegmentCubic( FOdysseyVectorPathCubic* iPath
                                                       , FOdysseyVectorVertexCubic* iPoint0
                                                       , FOdysseyVectorVertexCubic* iPoint1 )
+    : FOdysseyVectorSegment( iPath, iPoint0, iPoint1 )
 {
     Init( iPath, iPoint0, iPoint1 );
 }
@@ -49,8 +51,6 @@ FOdysseyVectorSegmentCubic::Init( FOdysseyVectorPathCubic* iPath
                                 , double iCtrlPoint1y
                                 , FOdysseyVectorVertexCubic* iPoint1 )
 {
-    FOdysseyVectorSegment::Init( iPath, iPoint0, iPoint1 );
-
     mCtrlPoint[0].Init( this, iCtrlPoint0x, iCtrlPoint0y );
     mCtrlPoint[1].Init( this, iCtrlPoint1x, iCtrlPoint1y );
 
@@ -575,7 +575,7 @@ IntersectVertices( FOdysseyVectorVertex* iVertex0, FOdysseyVectorVertex* iVertex
                 if( distance < iVertex0->GetDistanceToNearestSegment() )
                 {
                     FOdysseyVectorSegment* segment1 = iVertex1->GetFirstSegment();
-                    double t = iVertex1->GetT( iVertex1->GetSection( segment1 ) );
+                    double t = iVertex1->GetT( segment1 );
 
                     iVertex0->SetNearestSegment( segment1, distance, t );
                     iVertex1->SetNearestSegment( nullptr, distance, t ); // set as null so that only one endpoints creates the section but we still have a valid distance check.
@@ -588,7 +588,7 @@ IntersectVertices( FOdysseyVectorVertex* iVertex0, FOdysseyVectorVertex* iVertex
 uint32
 FOdysseyVectorSegmentCubic::Intersect( FOdysseyVectorSegmentCubic& iOther
                                      , double iTolerance
-                                     , std::vector<FOdysseyVectorVertexIntersection*>& iIntersectionVertexArray )
+                                     , std::vector<FOdysseyVectorIntersection*>& iIntersectionArray )
 {
     FOdysseyVectorVertex* vertex0 = GetVertex(0);
     FOdysseyVectorVertex* vertex1 = GetVertex(1);
@@ -635,18 +635,13 @@ FOdysseyVectorSegmentCubic::Intersect( FOdysseyVectorSegmentCubic& iOther
                         if( ( segmentT != 0.0f && iOtherT != 1.0f )
                          && ( segmentT != 1.0f && iOtherT != 0.0f ) )
                         {
-                            FOdysseyVectorVertexIntersection* intersectionVertex = new FOdysseyVectorVertexIntersection(coords.x, coords.y, this == &iOther );
+                            FOdysseyVectorVertexIntersection* intersectionVertex[2] = { new FOdysseyVectorVertexIntersection( coords.x, coords.y, segmentT )
+                                                                                      , new FOdysseyVectorVertexIntersection( coords.x, coords.y, iOtherT  ) };
 
-                            iIntersectionVertexArray.push_back( intersectionVertex );
+                            iIntersectionArray.push_back( new FOdysseyVectorIntersection( intersectionVertex[0], intersectionVertex[1] ) );
 
-                            intersectionVertex->AddSegment (    this );
-                            intersectionVertex->AddSegment ( &iOther );
-/*
-                            intersectionVertex->MapSection( )
-                            intersectionVertex->MapSection
-*/
-                            this->AddIntersection ( intersectionVertex, segmentT );
-                            iOther.AddIntersection ( intersectionVertex, iOtherT );
+                            this->AddIntersection ( intersectionVertex[0] );
+                            iOther.AddIntersection ( intersectionVertex[1] );
 
                             intersectionCount++;
                         }

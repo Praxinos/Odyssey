@@ -6,28 +6,7 @@
 
 #include "OdysseyVectorVertex.h"
 
-struct FIntersection
-{
-    double t;
-};
-
-struct FExplorationPair
-{
-    FOdysseyVectorSection* returnSection;
-    FOdysseyVectorSection* departSection;
-
-    FExplorationPair()
-    {
-        returnSection = nullptr;
-        departSection = nullptr;
-    };
-
-    FExplorationPair( FOdysseyVectorSection* iReturnSection, FOdysseyVectorSection* iDepartSection )
-    {
-        returnSection = iReturnSection;
-        departSection = iDepartSection;
-    }
-};
+class FOdysseyVectorIntersection;
 
 class ODYSSEYVECTOR_API FOdysseyVectorVertexIntersection : public FOdysseyVectorVertex
 {
@@ -43,14 +22,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertexIntersection : public FOdysseyVector
         /**
          * @brief Constructor.
          */
-        FOdysseyVectorVertexIntersection( double iX, double iY, bool iSelfIntersect );
-
-        double GetT( FOdysseyVectorSection* iSection );
-
-        void MapSection( FOdysseyVectorSection* iSection, double t );
-
-        void BuildExplorationPairs();
-        std::vector<FExplorationPair>& GetExplorationPairs();
+        FOdysseyVectorVertexIntersection( double iX, double iY, double iT );
 
         /**
          * @brief Get a pointer to the next section to explore in cycle depending on the last visited section.
@@ -60,13 +32,16 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertexIntersection : public FOdysseyVector
          */
         FOdysseyVectorSection* GetCycleNextSection( FOdysseyVectorSection* iLastSection, double iOrientation );
 
-    protected:
-        uint64 mIntersectionID;
-        // map for intersection positions
-        std::multimap<FOdysseyVectorSection*, FIntersection> mTMap; // non unique mapping (segment can intersect itself)
-        std::vector<FExplorationPair> mExplorationPairs;
-        bool mSelfIntersect;
+        virtual double GetT( FOdysseyVectorSegment* iSegment ) override;
+
+        void SetIntersection( FOdysseyVectorIntersection* iIntersection );
+
+        FOdysseyVectorVertexIntersection* GetPartner();
+
+        virtual uint32 GetSectionCount() override;
 
     private:
         static const uint32 mStaticClass =  0x29459195; // value is crc32 FOdysseyVectorVertexIntersection
+        FOdysseyVectorIntersection* mIntersection;
+        double mT;
 };

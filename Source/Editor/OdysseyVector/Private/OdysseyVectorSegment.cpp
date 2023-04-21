@@ -86,8 +86,8 @@ FOdysseyVectorSegment::GetSection ( double t )
         FOdysseyVectorSection* section = static_cast<FOdysseyVectorSection*>(*it);
         FOdysseyVectorVertex* vertex0 = section->GetVertex(0);
         FOdysseyVectorVertex* vertex1 = section->GetVertex(1);
-        double fromT = vertex0->GetT( section );
-        double   toT = vertex1->GetT( section );
+        double fromT = vertex0->GetT( this );
+        double   toT = vertex1->GetT( this );
 
         if ( ( t >= fromT ) && ( t <= toT ) )
         {
@@ -134,9 +134,9 @@ FOdysseyVectorSegment::GetDefaultSection()
 
 // MUST be called only on segments belonging to this path (because of the section)
 void
-FOdysseyVectorSegment::AddIntersection ( FOdysseyVectorVertexIntersection* iIntersectionVertex, double iT )
+FOdysseyVectorSegment::AddIntersection ( FOdysseyVectorVertexIntersection* iIntersectionVertex )
 {
-    FOdysseyVectorSection* section = GetSection ( iT );
+    FOdysseyVectorSection* section = GetSection ( iIntersectionVertex->GetT( this ) );
     FOdysseyVectorVertex* vertex0 = section->GetVertex(0);
     FOdysseyVectorVertex* vertex1 = section->GetVertex(1);
     FOdysseyVectorSection* subSection[2] = { new FOdysseyVectorSection ( this, vertex0            , iIntersectionVertex )
@@ -187,7 +187,7 @@ FOdysseyVectorSegment::ClearIntersections()
     mDefaultSection.GetVertex(0)->AddSection( &mDefaultSection );
     mDefaultSection.GetVertex(1)->AddSection( &mDefaultSection );
 
-    // do not free the intersection vertex here, as they are shared between segments. Deletion would be called twice.
+    // do not free the intersection vertex here
     // Leave it to the paintgroup.
     mIntersectionVertexList.clear();
 }

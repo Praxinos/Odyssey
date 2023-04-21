@@ -31,17 +31,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
 
         virtual ~FOdysseyVectorSegment();
 
-
-       /**
-         * @brief Init a segment.
-         * @param iPath the path this segment belongs to
-         * @param iVertex0
-         * @param iVertex1
-         */
-        void Init( FOdysseyVectorPath* iPath
-                 , FOdysseyVectorVertex* iVertex0
-                 , FOdysseyVectorVertex* iVertex1 );
-
        /**
          * @brief Draw the segment
          * @param iRoi the region-of-interest
@@ -131,7 +120,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
          * @brief Add an intersection point. This automatically creates the attached sections.
          * @param iIntersectionVertex the intersection vertex
          */
-        void AddIntersection ( FOdysseyVectorVertexIntersection* iIntersectionVertex, double iT );
+        void AddIntersection ( FOdysseyVectorVertexIntersection* iIntersectionVertex );
 
        /**
          * @brief Remove a section. Does not free the section.

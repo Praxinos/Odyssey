@@ -517,7 +517,7 @@ FOdysseyVectorPathBuilder::AdjustHandle( FOdysseyVectorSegmentCubic* iCubicSegme
                                 vertexPoint.y + ( direction.y * ratio ) );
 
             if( iDepth > 0 )
-                AdjustHandle( iCubicSegment, iHandleID, ( cubicVertex->GetT( iCubicSegment->GetDefaultSection() ) + iCheckAt) * 0.5f, iDepth - 1 );
+                AdjustHandle( iCubicSegment, iHandleID, ( cubicVertex->GetT( iCubicSegment ) + iCheckAt) * 0.5f, iDepth - 1 );
         }
     }
 }
