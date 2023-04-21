@@ -15,13 +15,13 @@ FOdysseyAnimationCell::FOdysseyAnimationCell()
 }
 
 void
-FOdysseyAnimationCell::SetLength(uint32 iLength)
+FOdysseyAnimationCell::SetLength(int iLength)
 {
     //TODO: mLength should be moved to the Layer (Layer Image Raster)
     mLength = iLength;
 }
 
-uint32
+int
 FOdysseyAnimationCell::GetLength() const
 {
     return mLength;

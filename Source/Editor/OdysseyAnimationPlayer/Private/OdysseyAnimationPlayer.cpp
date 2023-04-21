@@ -258,15 +258,17 @@ UOdysseyAnimationPlayer::UpdateTexture()
 	{
 		::ULIS::eFormat format = Animation->Format();
 		::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
+		TArray<TSharedPtr<::ULIS::FBlock>> blocks;
 		for ( const ::ULIS::FRectI& rect : mInvalidRects )
 		{
-			imageRenderingAbility->RenderInBlock(mBlock, frameIndex, rect, rect.Position(), {});
+			TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(rect.w, rect.h, format);
+			imageRenderingAbility->RenderInBlock(block, frameIndex, rect, ::ULIS::FVec2I(0), {});
+			blocks.Add(block);
 		}
 		ctx.Finish();
 
-		CopyBlockToTexture(mBlock, mInvalidRects);
+		CopyBlocksToTexture(blocks, mInvalidRects);
 		mInvalidRects.Empty();
-
 		mOnTextureUpdated.Broadcast();
 	}
 }
@@ -304,17 +306,24 @@ UOdysseyAnimationPlayer::OnImageRenderingCompositionChanged(const FGuid& iId)
 }
 
 void
-UOdysseyAnimationPlayer::CopyBlockToTexture(TSharedPtr<::ULIS::FBlock> iBlock, const TArray<::ULIS::FRectI>& iRects)
+UOdysseyAnimationPlayer::CopyBlocksToTexture(const TArray<TSharedPtr<::ULIS::FBlock>>& iBlocks, const TArray<::ULIS::FRectI>& iRects)
 {
-	//convert block to BGRA8 if needed
-	if ( iBlock->Format() == ::ULIS::Format_BGRA8 )
+	if ( iBlocks.IsEmpty() )
+		return;
+
+	::ULIS::eFormat format = iBlocks[0]->Format();
+
+	//convert block to BGRA8 if needed*
+	if ( format == ::ULIS::Format_BGRA8 )
 	{
-		TArray<FUpdateTextureRegion2D> regions;
-		for (const ::ULIS::FRectI& rect : iRects)
+		TArray<TSharedPtr<FUpdateTextureRegion2D>> regions; //Keeps region object alive until fence.Wait()
+		for ( int i = 0; i < iBlocks.Num(); i++ )
 		{
-			regions.Emplace(rect.x, rect.y, rect.x, rect.y, rect.w, rect.h);
+			const TSharedPtr<::ULIS::FBlock>& block = iBlocks[i];
+			const ::ULIS::FRectI& rect = iRects[i];
+			regions.Add(MakeShared<FUpdateTextureRegion2D>(rect.x, rect.y, 0, 0, block->Rect().w, block->Rect().h));
+			Texture->UpdateTextureRegions(0, 1, regions.Last().Get(), block->BytesPerScanLine(), block->BytesPerPixel(), block->Bits());
 		}
-		Texture->UpdateTextureRegions(0, regions.Num(), regions.GetData(), iBlock->BytesPerScanLine(), iBlock->BytesPerPixel(), iBlock->Bits());
 
 		FRenderCommandFence fence;
 		fence.BeginFence();
@@ -323,29 +332,31 @@ UOdysseyAnimationPlayer::CopyBlockToTexture(TSharedPtr<::ULIS::FBlock> iBlock, c
 		return;
 	}
 
-	//Here block has not the expected format
-	//But instead of converting the whole block, we will convert only the parts of the block we need
 	::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_BGRA8);
-	TArray<FUpdateTextureRegion2D> regions;
-	TArray<TSharedPtr<::ULIS::FBlock>> blocks;
-	for (const ::ULIS::FRectI& rect : iRects)
+	TArray<TSharedPtr<::ULIS::FBlock>> convBlocks;
+	TArray<TSharedPtr<FUpdateTextureRegion2D>> regions;
+	for ( int i = 0; i < iBlocks.Num(); i++ )
 	{
-		TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(rect.w, rect.h, ::ULIS::Format_BGRA8);
-		ctx.ConvertFormat(*iBlock, *block, rect, ::ULIS::FVec2I(0), ::ULIS::FSchedulePolicy::AsyncCacheEfficient);
-		regions.Emplace(rect.x, rect.y, 0, 0, rect.w, rect.h);
-		blocks.Add(block);
+		const TSharedPtr<::ULIS::FBlock>& block = iBlocks[i];
+		const ::ULIS::FRectI& rect = iRects[i];
+
+		TSharedPtr<::ULIS::FBlock> convBlock = MakeShared<::ULIS::FBlock>(rect.w, rect.h, ::ULIS::Format_BGRA8);
+		ctx.ConvertFormat(*block, *convBlock, block->Rect(), ::ULIS::FVec2I(0), ::ULIS::FSchedulePolicy::AsyncCacheEfficient);
+		convBlocks.Add(convBlock);
+		regions.Add(MakeShared<FUpdateTextureRegion2D>(rect.x, rect.y, 0, 0, rect.w, rect.h));
 	}
+	
 	ctx.Finish();
 
-	for (int i = 0; i < regions.Num(); i++)
+	for ( int i = 0; i < regions.Num(); i++ )
 	{
 		Texture->UpdateTextureRegions(
 			0,
 			1,
-			&regions[i],
-			blocks[i]->BytesPerScanLine(),
-			blocks[i]->BytesPerPixel(),
-			blocks[i]->Bits()
+			regions[i].Get(),
+			convBlocks[i]->BytesPerScanLine(),
+			convBlocks[i]->BytesPerPixel(),
+			convBlocks[i]->Bits()
 		);
 	}
 

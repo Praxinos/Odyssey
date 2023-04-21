@@ -27,10 +27,10 @@ protected:
 
 private:
 	FTimespan FindMaxOverlapingFrame(FTimespan iStartTime, FTimespan iEndTime, int* oIndex);
-	bool SanitizeTimeRange(TRange<FMediaTimeStamp>* oTimeRange);
+	bool SanitizeTimeRange(TRange<FMediaTimeStamp>* oTimeRange, bool bReverse);
 
 public:
-	void Update(int iFrameIndex, uint32 iSequenceIndex);
+	void Update(int iFrameIndex, int64 iSequenceIndex);
 	void CopyBlockToTexture(TSharedPtr<::ULIS::FBlock> iBlock, const TArray<::ULIS::FRectI>& iRects);
 	
 protected:

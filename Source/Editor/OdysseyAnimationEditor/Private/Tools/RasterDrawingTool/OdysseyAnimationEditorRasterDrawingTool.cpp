@@ -49,7 +49,7 @@ UOdysseyAnimationEditorRasterDrawingTool::Load()
 	if ( !cell )
 		return;
 
-	TSharedPtr<FOdysseyAnimationImageRasterEditingAbility> rasterEditableAbility = cell->GetAbility<FOdysseyAnimationImageRasterEditingAbility>();
+	TSharedPtr<IOdysseyAnimationImageRasterEditingAbility> rasterEditableAbility = cell->GetAbility<IOdysseyAnimationImageRasterEditingAbility>();
 	if ( !rasterEditableAbility )
 		return;
 

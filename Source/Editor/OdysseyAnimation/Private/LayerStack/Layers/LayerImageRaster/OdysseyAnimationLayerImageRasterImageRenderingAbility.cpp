@@ -47,11 +47,16 @@ FOdysseyAnimationLayerImageRasterImageRenderingAbility::RenderOverBlock(TSharedP
     if(!rasterBlock)
         return iWaitList;
 
+    rasterBlockEvent.Append(iWaitList);
+
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
     TArray<::ULIS::FEvent> eventConvertAndExecute = ULISUtils::ConvertAndExecute(ioBlock, rasterBlock->Format(), rasterBlock->Rect(), iPos, rasterBlockEvent,
         [this, &rasterBlock, &ctx](TSharedPtr<::ULIS::FBlock> ioDest, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList) -> TArray<::ULIS::FEvent>
         {
-            ::ULIS::FEvent eventBlend = FULISEventBuilder().RetainBlock(rasterBlock).Build();
+            ::ULIS::FEvent eventBlend = FULISEventBuilder()
+                .RetainBlock(rasterBlock)
+                .Build();
+
             ctx.Blend(
                 *rasterBlock,
                 *ioDest,
@@ -96,20 +101,7 @@ FOdysseyAnimationLayerImageRasterImageRenderingAbility::RenderInBlock(TSharedPtr
     if (!cellAbility)
         return iWaitList;
 
-    ::ULIS::eFormat format = ioBlock->Format();
-
-    //Generate the folder block, which is all children layers blended together
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = MakeShared<::ULIS::FBlock>(iRect.w, iRect.h, format);
-
-    //Clear the block before blending on it
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( format );
-    ::ULIS::FEvent eventClearBlock;
-    ctx.Clear( *block, ::ULIS::FRectI::FromXYWH(0, 0, iRect.w, iRect.h), ::ULIS::FSchedulePolicy::AsyncCacheEfficient, iWaitList.Num(), iWaitList.GetData(), &eventClearBlock );
-
-    TArray<::ULIS::FEvent> eventRenderChildrenImage = cellAbility->RenderInBlock(block, iFrame, iRect, ::ULIS::FVec2I(0), {});
-    eventRenderChildrenImage.Append(iWaitList);
-
-    return eventRenderChildrenImage;
+    return cellAbility->RenderInBlock(ioBlock, iFrame, iRect, iPos, iWaitList);
 }
 
 TArray<FGuid>

@@ -83,7 +83,7 @@ protected:
 
 private:
 	void UpdateTexture();
-	void CopyBlockToTexture(TSharedPtr<::ULIS::FBlock> iBlock, const TArray<::ULIS::FRectI>& iRects);
+	void CopyBlocksToTexture(const TArray<TSharedPtr<::ULIS::FBlock>>& iBlocks, const TArray<::ULIS::FRectI>& iRects);
 	void OnImageRenderingChanged(const FGuid& iImageRenderingId, const TArray<::ULIS::FRectI>& iRects);
 	void OnImageRenderingCompositionChanged(const FGuid& iImageRenderingId);
 
@@ -109,10 +109,6 @@ private:
 	FTimespan mCurrentTime; 
 	TArray<FGuid>   mImageRenderingComposition;
 	TArray<::ULIS::FRectI> mInvalidRects;
-
-	//The current block to display, so that it stays in memory.
-	//Makes a huge improvement in performance when drawing, be cause we don't have to retieve it from cache at each tick
-	TSharedPtr<::ULIS::FBlock> mBlock; 
 
 private:
 	//Events

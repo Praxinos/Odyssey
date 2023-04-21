@@ -3,8 +3,8 @@
 
 #include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
 
-#include "Abilities/OdysseyAnimationImageRasterEditingAbility.h"
 #include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
+#include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRasterImageRasterEditingAbility.h"
 #include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRasterImageRenderingAbility.h"
 #include "ULISLoaderModule.h"
 
@@ -63,7 +63,7 @@ FOdysseyAnimationCellImageRaster::InitAbilities()
 {
     //Set Abilities
     SetAbility(MakeShared<FOdysseyAnimationCellImageRasterImageRenderingAbility>(SharedThis(this)));
-    //SetAbility(MakeShared<FImageRasterEditingAbility>(SharedThis(this)));
+    SetAbility(MakeShared<FOdysseyAnimationCellImageRasterImageRasterEditingAbility>(SharedThis(this)));
 }
 
 const FName&
@@ -76,6 +76,7 @@ void
 FOdysseyAnimationCellImageRaster::PostLoad()
 {
     FOdysseyAnimationCell::PostLoad();
+    InitAbilities();
 }
 
 void

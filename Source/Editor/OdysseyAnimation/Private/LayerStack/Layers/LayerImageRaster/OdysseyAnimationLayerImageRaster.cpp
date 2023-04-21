@@ -8,7 +8,6 @@
 #include "ULISEventBuilder.h"
 #include "ULISLoaderModule.h"
 #include "OdysseyStyleSet.h"
-#include "Abilities/OdysseyAnimationImageProviderAbility.h"
 #include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
 
 #define LOCTEXT_NAMESPACE "UOdysseyAnimationLayerImageRaster"
@@ -84,14 +83,15 @@ UOdysseyAnimationLayerImageRaster::GetCellIndexAtFrame(int iFrameIndex, int& oCe
     for (int i = 0; i < mCells.Num(); i++)
     {
         TSharedPtr<FOdysseyAnimationCell> cell = mCells[i];
-        frameIndex += cell->GetLength();
 
-        if (frameIndex >= iFrameIndex)
+        if ( frameIndex + cell->GetLength() - 1 >= iFrameIndex)
         {
             oCellIndex = i;
-            oCellFrameIndex = frameIndex - iFrameIndex;
+            oCellFrameIndex = iFrameIndex - frameIndex;
             return true;
         }
+
+        frameIndex += cell->GetLength();
     }
 
     return false;
@@ -202,11 +202,10 @@ UOdysseyAnimationLayerImageRaster::GetCell(int iIndex) const
 }
 
 TSharedPtr<FOdysseyAnimationCell> 
-UOdysseyAnimationLayerImageRaster::GetCellAtFrame(int iFrameIndex, int& iCelFrameIndex) const
+UOdysseyAnimationLayerImageRaster::GetCellAtFrame(int iFrameIndex, int& oCelFrameIndex) const
 {
     int celIndex = INDEX_NONE;
-    int celFrameIndex = INDEX_NONE;
-    if ( !GetCellIndexAtFrame(iFrameIndex, celIndex, celFrameIndex) )
+    if ( !GetCellIndexAtFrame(iFrameIndex, celIndex, oCelFrameIndex) )
         return nullptr;
 
     return mCells[celIndex];

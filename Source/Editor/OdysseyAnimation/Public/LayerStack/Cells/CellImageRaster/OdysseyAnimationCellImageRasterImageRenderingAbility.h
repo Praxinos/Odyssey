@@ -9,6 +9,7 @@ class ODYSSEYANIMATION_API FOdysseyAnimationCellImageRasterImageRenderingAbility
     : public IOdysseyAnimationImageRenderingAbility
 {
 public:
+    virtual ~FOdysseyAnimationCellImageRasterImageRenderingAbility();
     FOdysseyAnimationCellImageRasterImageRenderingAbility(TSharedPtr<FOdysseyAnimationCellImageRaster> iCellImageRaster);
 
 public:
@@ -48,5 +49,11 @@ public:
     virtual TSharedPtr<IOdysseyHandle> Preload(int iFrame) override;
 
 private:
+    void OnBlockChanged(const TArray<::ULIS::FRectI>& iRects);
+    void OnBlockCommited(const TArray<::ULIS::FRectI>& iRects);
+    void OnBlockPtrChanged();
+
+private:
     TWeakPtr<FOdysseyAnimationCellImageRaster> mCellImageRaster;
+    TSharedPtr<FOdysseyRasterBlock> mRasterBlock;
 };

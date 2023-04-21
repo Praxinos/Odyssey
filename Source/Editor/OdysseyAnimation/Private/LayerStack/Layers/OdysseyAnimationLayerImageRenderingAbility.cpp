@@ -51,7 +51,7 @@ FOdysseyAnimationLayerImageRenderingAbility::RenderInBlock(TSharedPtr<::ULIS::FB
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( ioBlock->Format() );    
 
     //Clear the block
-    ::ULIS::FEvent eventClearBlock;
+    ::ULIS::FEvent eventClearBlock = FULISEventBuilder().RetainBlock(ioBlock).Build();
     ctx.Clear( *ioBlock, ::ULIS::FRectI::FromXYWH(iPos.x, iPos.y, iRect.w, iRect.h), ::ULIS::FSchedulePolicy::AsyncCacheEfficient, iWaitList.Num(), iWaitList.GetData(), &eventClearBlock );
 
     TArray<::ULIS::FEvent> lastEvent = {eventClearBlock};

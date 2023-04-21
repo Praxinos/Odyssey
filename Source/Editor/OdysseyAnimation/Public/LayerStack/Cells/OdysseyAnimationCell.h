@@ -14,8 +14,8 @@ public:
     FOdysseyAnimationCell();
 
 public:
-    void SetLength(uint32 iLength);
-    uint32 GetLength() const;
+    void SetLength(int iLength);
+    int GetLength() const;
     virtual const FName& GetType() const = 0;
 
 public:

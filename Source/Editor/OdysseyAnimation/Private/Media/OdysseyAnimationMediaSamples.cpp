@@ -87,7 +87,7 @@ FOdysseyAnimationMediaSamples::FindMaxOverlapingFrame(FTimespan iStartTime, FTim
 }
 
 bool
-FOdysseyAnimationMediaSamples::SanitizeTimeRange(TRange<FMediaTimeStamp>* oTimeRange)
+FOdysseyAnimationMediaSamples::SanitizeTimeRange(TRange<FMediaTimeStamp>* oTimeRange, bool bReverse)
 {
     if (!mAnimation)
         return false;
@@ -156,7 +156,7 @@ FOdysseyAnimationMediaSamples::FetchBestVideoSampleForTimeRange(const TRange<FMe
 	//Sanitize the timeRange, to ensure looping and clamp it to animation duration
 	//also detects if we reached the end of the animation
 	TRange<FMediaTimeStamp> timeRange = controls->GetState() == EMediaState::Paused ? TRange<FMediaTimeStamp>(iTimeRange.GetLowerBoundValue(), iTimeRange.GetLowerBoundValue()) : iTimeRange;
-	bool isAtEnd = SanitizeTimeRange(&timeRange);
+	bool isAtEnd = SanitizeTimeRange(&timeRange, bReverse);
 
 	//Once time range is sanitized
 	//Find which frame overlaps the timerange the most
@@ -164,17 +164,20 @@ FOdysseyAnimationMediaSamples::FetchBestVideoSampleForTimeRange(const TRange<FMe
 	FTimespan endTime = timeRange.GetUpperBoundValue().Time;
 	int startFrameIndex = FMath::Clamp(mAnimation->GetFrameIndexAtTime(startTime), 0, mAnimation->GetFrameCount());
 	int endFrameIndex = FMath::Clamp(mAnimation->GetFrameIndexAtTime(endTime), 0, mAnimation->GetFrameCount());
-	uint32 startSequenceIndex = timeRange.GetLowerBoundValue().SequenceIndex;
-	uint32 endSequenceIndex = timeRange.GetUpperBoundValue().SequenceIndex;
+	int64 startSequenceIndex = timeRange.GetLowerBoundValue().SequenceIndex;
+	int64 endSequenceIndex = timeRange.GetUpperBoundValue().SequenceIndex;
 
 	//Check if range is valid
-	if (startSequenceIndex > endSequenceIndex || startSequenceIndex == endSequenceIndex && startTime > endTime)
+	if ( startSequenceIndex > endSequenceIndex )
+		return EFetchBestSampleResult::NoSample;
+
+	if (startSequenceIndex == endSequenceIndex && startTime > endTime)
 		return EFetchBestSampleResult::NoSample;
 
 	//range is valid
 	//check overlap of each frame with the time range
 	
-	uint32 resultingSequenceIndex = startSequenceIndex;
+	int64 resultingSequenceIndex = startSequenceIndex;
 	int frameIndex = 0;
 	//Only a single frame overlaps the range
 	if (startSequenceIndex == endSequenceIndex && startFrameIndex == endFrameIndex)
@@ -190,8 +193,7 @@ FOdysseyAnimationMediaSamples::FetchBestVideoSampleForTimeRange(const TRange<FMe
 	}
 	//The time range is looping enough to cover the whole animation duration,
 	//so check a single time range covering the whole animation duration.
-	else if (  (startSequenceIndex < endSequenceIndex && startTime <= endTime)
-			|| (endSequenceIndex - startSequenceIndex >= 2) )
+	else if ( startTime <= endTime || endSequenceIndex - startSequenceIndex >= 2 )
 	{
 		frameIndex = INDEX_NONE;
 		FindMaxOverlapingFrame(FTimespan(0), mAnimation->GetDuration(), &frameIndex);
@@ -249,7 +251,7 @@ FOdysseyAnimationMediaSamples::PeekVideoSampleTime(FMediaTimeStamp & TimeStamp)
 }
 
 void
-FOdysseyAnimationMediaSamples::Update(int iFrameIndex, uint32 iSequenceIndex)
+FOdysseyAnimationMediaSamples::Update(int iFrameIndex, int64 iSequenceIndex)
 {
     mCurrentFrameIndex = iFrameIndex;
 

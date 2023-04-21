@@ -95,7 +95,7 @@ public:
 public:
     TArray<TSharedPtr<FOdysseyAnimationCell>>& GetCells();
     TSharedPtr<FOdysseyAnimationCell> GetCell(int iIndex) const;
-    TSharedPtr<FOdysseyAnimationCell> GetCellAtFrame(int iFrameIndex, int& iCelFrameIndex) const;
+    TSharedPtr<FOdysseyAnimationCell> GetCellAtFrame(int iFrameIndex, int& oCelFrameIndex) const;
 
 public:
     // UOdysseyLayer Overrides

@@ -19,7 +19,7 @@ FOdysseyAnimationImageRenderingAbility::GetRects(int iFrame) const
 
 TArray<::ULIS::FEvent>
 FOdysseyAnimationImageRenderingAbility::RenderInBlock(TSharedPtr<::ULIS::FBlock> ioBlock, int iFrame, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList)
-{    
+{
     if (!mAnimation)
         return iWaitList;
 

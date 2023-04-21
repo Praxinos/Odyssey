@@ -53,7 +53,7 @@ TSharedPtr<::ULIS::FBlock>
 IOdysseyAnimationImageRenderingAbility::RenderInNewBlock(int iFrame, ::ULIS::eFormat iFormat, const ::ULIS::FRectI& iRect, TArray<::ULIS::FEvent>& oEvents)
 {
     TSharedRef<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(iRect.w, iRect.h, iFormat);
-    oEvents = RenderInBlock(block, iFrame, iRect, ::ULIS::FVec2I(0, 0), {});
+    oEvents = RenderInBlock(block, iFrame, iRect, ::ULIS::FVec2I(0), {});
     return block;
 }
 

@@ -8,9 +8,24 @@
 #include "ULISUtils.h"
 #include "ULISEventBuilder.h"
 
+
+
+FOdysseyAnimationCellImageRasterImageRenderingAbility::~FOdysseyAnimationCellImageRasterImageRenderingAbility()
+{
+    mRasterBlock->OnBlockChanged().RemoveAll(this);
+    mRasterBlock->OnBlockCommited().RemoveAll(this);
+    mRasterBlock->OnBlockPtrChanged().RemoveAll(this);
+
+    mRasterBlock = nullptr;
+}
+
 FOdysseyAnimationCellImageRasterImageRenderingAbility::FOdysseyAnimationCellImageRasterImageRenderingAbility(TSharedPtr<FOdysseyAnimationCellImageRaster> iCellImageRaster)
     : mCellImageRaster(iCellImageRaster)
+    , mRasterBlock(iCellImageRaster->GetRasterBlock())
 {
+    mRasterBlock->OnBlockChanged().AddRaw(this, &FOdysseyAnimationCellImageRasterImageRenderingAbility::OnBlockChanged);
+    mRasterBlock->OnBlockCommited().AddRaw(this, &FOdysseyAnimationCellImageRasterImageRenderingAbility::OnBlockCommited);
+    mRasterBlock->OnBlockPtrChanged().AddRaw(this, &FOdysseyAnimationCellImageRasterImageRenderingAbility::OnBlockPtrChanged);
 }
 
 TArray<::ULIS::FRectI>
@@ -89,4 +104,23 @@ FOdysseyAnimationCellImageRasterImageRenderingAbility::Preload(int iFrame)
     TArray<TSharedPtr<IOdysseyHandle>> handles = { rasterBlock->Preload() };
 
     return MakeShared<FOdysseyHandleContainer>(handles);
+}
+
+void
+FOdysseyAnimationCellImageRasterImageRenderingAbility::OnBlockChanged(const TArray<::ULIS::FRectI>& iRects)
+{
+    OnChanged().Broadcast(GetId(), iRects);
+}
+
+void
+FOdysseyAnimationCellImageRasterImageRenderingAbility::OnBlockCommited(const TArray<::ULIS::FRectI>& iRects)
+{
+    OnCommited().Broadcast(GetId(), iRects);
+}
+
+void
+FOdysseyAnimationCellImageRasterImageRenderingAbility::OnBlockPtrChanged()
+{
+    OnChanged().Broadcast(GetId(), GetRects(0));
+    OnCommited().Broadcast(GetId(), GetRects(0));
 }

@@ -4,7 +4,7 @@
 #include "Tools/PaintBucketTool/OdysseyAnimationEditorPaintBucketTool.h"
 #include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
 #include "LayerStack/Cells/OdysseyAnimationCell.h"
-#include "Abilities/OdysseyAnimationImageRasterEditingAbility.h"
+#include "Abilities/IOdysseyAnimationImageRasterEditingAbility.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyAnimationEditorPaintBucketTool"
 
@@ -63,7 +63,7 @@ UOdysseyAnimationEditorPaintBucketTool::Load()
     if ( !cell )
         return;
     
-    TSharedPtr<FOdysseyAnimationImageRasterEditingAbility> rasterEditableAbility = cell->GetAbility<FOdysseyAnimationImageRasterEditingAbility>();
+    TSharedPtr<IOdysseyAnimationImageRasterEditingAbility> rasterEditableAbility = cell->GetAbility<IOdysseyAnimationImageRasterEditingAbility>();
     if ( !rasterEditableAbility )
         return;
 
@@ -158,7 +158,7 @@ UOdysseyAnimationEditorPaintBucketTool::OnMouseDown( const FOdysseyPoint& iPoint
         if ( !cell )
             return ret;
 
-        TSharedPtr<FOdysseyAnimationImageRasterEditingAbility> rasterEditableAbility = cell->GetAbility<FOdysseyAnimationImageRasterEditingAbility>();
+        TSharedPtr<IOdysseyAnimationImageRasterEditingAbility> rasterEditableAbility = cell->GetAbility<IOdysseyAnimationImageRasterEditingAbility>();
         if ( !rasterEditableAbility )
             return ret;
 
