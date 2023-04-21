@@ -368,5 +368,19 @@ UOdysseyAnimationLayerImageRaster::Serialize(FArchive& Ar)
     }
 }
 
+void
+UOdysseyAnimationLayerImageRaster::OnCellLengthChanged(TSharedRef<FOdysseyAnimationCell> iCell)
+{
+    if (!mCells.Contains(iCell))
+        return;
+
+    TSharedPtr<IOdysseyAnimationImageRenderingAbility> imageRenderAbility = GetAbility<IOdysseyAnimationImageRenderingAbility>();
+    if ( imageRenderAbility )
+    {
+        imageRenderAbility->OnCompositionChanged().Broadcast(imageRenderAbility->GetId());
+        imageRenderAbility->OnCompositionChanged().Broadcast(imageRenderAbility->GetId());
+    }
+}
+
 
 #undef LOCTEXT_NAMESPACE

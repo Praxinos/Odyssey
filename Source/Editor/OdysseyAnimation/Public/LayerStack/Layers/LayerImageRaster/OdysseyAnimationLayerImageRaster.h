@@ -126,6 +126,10 @@ public:
      */
     virtual void Serialize(FArchive& Ar) override;
 
+private:
+    //Events
+    void OnCellLengthChanged(TSharedRef<FOdysseyAnimationCell> iCell);
+
 public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Animation | LayerStack")
     bool IsAlphaLocked = false;

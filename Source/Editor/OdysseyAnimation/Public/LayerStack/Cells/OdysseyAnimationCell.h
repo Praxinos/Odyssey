@@ -10,6 +10,10 @@ class ODYSSEYANIMATION_API FOdysseyAnimationCell
     , public FOdysseyAbilityContainer
 {
 public:
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnLengthChanged, TSharedRef<FOdysseyAnimationCell>)
+    static FOnLengthChanged& OnLengthChanged();
+
+public:
     virtual ~FOdysseyAnimationCell();
     FOdysseyAnimationCell();
 

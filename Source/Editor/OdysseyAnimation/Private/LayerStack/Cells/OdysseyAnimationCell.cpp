@@ -5,6 +5,13 @@
 
 #define LOCTEXT_NAMESPACE "FOdysseyAnimationCell"
 
+FOdysseyAnimationCell::FOnLengthChanged&
+FOdysseyAnimationCell::OnLengthChanged()
+{
+    static FOnLengthChanged& onLengthChanged;
+    return onLengthChanged;
+}
+
 FOdysseyAnimationCell::~FOdysseyAnimationCell()
 {
 }
@@ -17,8 +24,8 @@ FOdysseyAnimationCell::FOdysseyAnimationCell()
 void
 FOdysseyAnimationCell::SetLength(int iLength)
 {
-    //TODO: mLength should be moved to the Layer (Layer Image Raster)
     mLength = iLength;
+    OnLengthChanged().Broadcast(this);
 }
 
 int
