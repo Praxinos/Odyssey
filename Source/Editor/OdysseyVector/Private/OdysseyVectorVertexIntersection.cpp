@@ -41,19 +41,17 @@ FOdysseyVectorVertexIntersection::GetPartner()
 }
 
 FOdysseyVectorSection*
-FOdysseyVectorVertexIntersection::GetCycleNextSection( FOdysseyVectorSection* iLastSection, double iOrientation )
+FOdysseyVectorVertexIntersection::GetCycleNextSection( ::ULIS::FVec2D& iLastSectionVector, double iOrientation )
 {
-    ::ULIS::FVec2D lastSectionVector = -iLastSection->GetVectorFromVertex( this, false, false );
-    FOdysseyVectorVertex* buddyVertex = GetPartner();
-    std::list<FOdysseyVectorSection*>& sectionList = buddyVertex->GetSectionList();
+    //::ULIS::FVec2D lastSectionVector = -iLastSection->GetVectorFromVertex( this, false, false );
 
-    for( std::list<FOdysseyVectorSection*>::iterator it = sectionList.begin(); it != sectionList.end(); ++it )
+    for( std::list<FOdysseyVectorSection*>::iterator it = mSectionList.begin(); it != mSectionList.end(); ++it )
     {
         FOdysseyVectorSection* section = static_cast<FOdysseyVectorSection*>(*it);
-        ::ULIS::FVec2D sectionVector = section->GetVectorFromVertex( buddyVertex, false, false );
+        ::ULIS::FVec2D sectionVector = section->GetVectorFromVertex( this, false, false );
 
 //UE_LOG(LogTemp, Warning, TEXT("cross:%f"), FOdysseyVector::Cross2D( lastSectionVector, sectionVector ) );
-        if( ( FOdysseyVector::Cross2D( lastSectionVector, sectionVector ) * iOrientation > 0.0f ) )
+        if( ( FOdysseyVector::Cross2D( iLastSectionVector, sectionVector ) * iOrientation > 0.0f ) )
         {
             return section;
         }

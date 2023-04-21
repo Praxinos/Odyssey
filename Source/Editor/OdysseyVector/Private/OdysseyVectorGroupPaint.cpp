@@ -362,17 +362,10 @@ FOdysseyVectorGroupPaint::FindPath( FOdysseyVectorIntersection* iInitiatorInters
                                   , double iOrientation
                                   , uint32 iDepth ) // we could also use iVertexArray.size()
 {
-    iVertexArray.push_back( iVertex );
-
-    if( iVertex->GetClass() == FOdysseyVectorVertexIntersection::StaticClass() )
-    {
-        FOdysseyVectorVertexIntersection* intersectionVertex = static_cast<FOdysseyVectorVertexIntersection*>(iVertex);
-
-       iVertex = intersectionVertex->GetPartner();
-    }
-
     FOdysseyVectorVertex* nextVertex = ( iSection->GetVertex(0) == iVertex ) ? iSection->GetVertex(1)
                                                                              : iSection->GetVertex(0);
+    ::ULIS::FVec2D sectionVector = -iSection->GetVectorFromVertex( nextVertex, false, false );
+
     bool hasPrimary = false;
     bool hasSecondary = false;
     bool hasTertiary = false;
@@ -381,10 +374,11 @@ FOdysseyVectorGroupPaint::FindPath( FOdysseyVectorIntersection* iInitiatorInters
 
     iSectionArray.push_back( iSection );
 
+    iVertexArray.push_back( iVertex );
     //iVertex->SetVisited( true );
     iSection->Block( iVertex );
 
-if(i==2)
+if(i==4)
         UE_LOG(LogTemp,Warning,TEXT("lets break"));
 
     UE_LOG(LogTemp,Warning,TEXT("Exploring section:----%d"),i++ );
@@ -438,16 +432,17 @@ if(i==2)
         if( nextVertex->GetClass() == FOdysseyVectorVertexIntersection::StaticClass() )
         {
             FOdysseyVectorVertexIntersection* nextIntersectionVertex = static_cast<FOdysseyVectorVertexIntersection*>( nextVertex );
-            FOdysseyVectorSection* primaryNextSection = nextIntersectionVertex->GetCycleNextSection( iSection, 1.0f );
+            FOdysseyVectorVertexIntersection* nextPartnerVertex = nextIntersectionVertex->GetPartner();
+            FOdysseyVectorSection* primaryNextSection = nextPartnerVertex->GetCycleNextSection( sectionVector, 1.0f );
             FOdysseyVectorSection* secondaryNextSection = nextIntersectionVertex->GetOtherSection( iSection, true );
-            FOdysseyVectorSection* tertiaryNextSection = nextIntersectionVertex->GetCycleNextSection( iSection, -1.0f );
+            FOdysseyVectorSection* tertiaryNextSection = nextPartnerVertex->GetCycleNextSection( sectionVector, -1.0f );
 
             if( primaryNextSection )
             {
         UE_LOG(LogTemp,Warning,TEXT("primary") );
-                if( primaryNextSection->IsBlocked( nextIntersectionVertex ) == false )
+                if( primaryNextSection->IsBlocked( nextPartnerVertex ) == false )
                 {
-                    ret = FindPath( iInitiatorIntersection, iReturnSection, nextIntersectionVertex, primaryNextSection, iVertexArray, iSectionArray, iOrientation, iDepth + 1 );
+                    ret = FindPath( iInitiatorIntersection, iReturnSection, nextPartnerVertex, primaryNextSection, iVertexArray, iSectionArray, iOrientation, iDepth + 1 );
                 }
                 else
                 {
@@ -471,9 +466,9 @@ if(i==2)
             if( ( ret == FOdysseyVectorGroupPaint::NOCYCLE ) && tertiaryNextSection )
             {
        UE_LOG(LogTemp,Warning,TEXT("tertiary") );
-                if( tertiaryNextSection->IsBlocked( nextIntersectionVertex ) == false )
+                if( tertiaryNextSection->IsBlocked( nextPartnerVertex ) == false )
                 {
-                    ret = FindPath( iInitiatorIntersection, iReturnSection, nextIntersectionVertex, tertiaryNextSection, iVertexArray, iSectionArray, iOrientation, iDepth + 1 );
+                    ret = FindPath( iInitiatorIntersection, iReturnSection, nextPartnerVertex, tertiaryNextSection, iVertexArray, iSectionArray, iOrientation, iDepth + 1 );
                 }
                 else
                 {
@@ -511,11 +506,11 @@ GetNormalVector( std::vector<FOdysseyVectorVertex*>& iVertexArray
         FOdysseyVectorVertex* vertexi = iVertexArray[i];
         FOdysseyVectorVertex* vertexn = iVertexArray[n];
 
-        if( vertexi->GetClass() == FOdysseyVectorVertexIntersection::StaticClass() )
+        if( vertexn->GetClass() == FOdysseyVectorVertexIntersection::StaticClass() )
         {
-            FOdysseyVectorVertexIntersection* intersectionVertex = static_cast<FOdysseyVectorVertexIntersection*>(vertexi);
+            FOdysseyVectorVertexIntersection* intersectionVertex = static_cast<FOdysseyVectorVertexIntersection*>(vertexn);
 
-            vertexi = intersectionVertex->GetPartner();
+            vertexn = intersectionVertex->GetPartner();
         }
 
         ::ULIS::FVec2D& viCoords = vertexi->GetCoords();
@@ -578,16 +573,16 @@ FOdysseyVectorGroupPaint::MarchIntersection( FOdysseyVectorIntersection* iInters
         if( ( explorationPairs[i].returnSection->IsRemoved() == false )
          && ( explorationPairs[i].departSection->IsRemoved() == false ) )
         {
-            FOdysseyVectorVertex* buddyVertex = explorationPairs[i].intersectionVertex->GetPartner();
+            FOdysseyVectorVertex* partnerVertex = explorationPairs[i].intersectionVertex->GetPartner();
 
-            if( explorationPairs[i].departSection->IsBlocked( buddyVertex ) == false )
+            if( explorationPairs[i].departSection->IsBlocked( partnerVertex ) == false )
             {
                 std::vector<FOdysseyVectorVertex*> vertexArray;
                 std::vector<FOdysseyVectorSection*> sectionArray;
 
                 uint32 ret = FindPath( iIntersection
                                      , explorationPairs[i].returnSection
-                                     , explorationPairs[i].intersectionVertex
+                                     , partnerVertex // is on departSection
                                      , explorationPairs[i].departSection
                                      , vertexArray
                                      , sectionArray
@@ -853,9 +848,10 @@ FOdysseyVectorGroupPaint::SimplifyGraph()
                     ||  ( section->GetVertex(1)->GetSectionCount() == 1 ) )
                     {
                         keepSimplifying = true;
-
+/*
                         section->GetVertex(0)->RemoveSection( section );
                         section->GetVertex(1)->RemoveSection( section );
+*/
                         section->GetSegment()->RemoveSection( section );
                         section->SetRemoved();
                     }
@@ -884,8 +880,8 @@ FOdysseyVectorGroupPaint::Clear()
     {
         FOdysseyVectorSection *section = (*it);
 
-        if( section != section->GetSegment()->GetDefaultSection() )
-            delete section;
+        //if( section != section->GetSegment()->GetDefaultSection() )
+        delete section;
     }
 
     mSectionList.clear();

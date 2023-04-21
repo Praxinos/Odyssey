@@ -157,12 +157,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
         FOdysseyVectorVertex*
         GetOtherVertex( FOdysseyVectorVertex* iVertex );
 
-        FOdysseyVectorSection* GetDefaultSection();
-
     protected:
         std::list<FOdysseyVectorVertexIntersection*> mIntersectionVertexList;
         std::list<FOdysseyVectorSection*> mSectionList;
-        FOdysseyVectorSection mDefaultSection;
         FOdysseyVectorPath* mPath;
         ::ULIS::FRectD mBBox;
         bool mIsInvalidated;

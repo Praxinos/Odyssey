@@ -30,7 +30,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertexIntersection : public FOdysseyVector
          * @param iOrientation ignored.
          * @return a pointer to the next section to explore in cycle.
          */
-        FOdysseyVectorSection* GetCycleNextSection( FOdysseyVectorSection* iLastSection, double iOrientation );
+        FOdysseyVectorSection* GetCycleNextSection( ::ULIS::FVec2D& iLastSectionVector, double iOrientation );
 
         virtual double GetT( FOdysseyVectorSegment* iSegment ) override;
 

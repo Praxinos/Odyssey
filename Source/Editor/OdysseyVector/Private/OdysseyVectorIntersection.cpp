@@ -43,7 +43,8 @@ FOdysseyVectorIntersection::BuildExplorationPairs()
     for( std::list<FOdysseyVectorSection*>::iterator it = vertex0SectionList.begin(); it != vertex0SectionList.end(); ++it )
     {
         FOdysseyVectorSection* returnSection = static_cast<FOdysseyVectorSection*>(*it);
-        FOdysseyVectorSection* departSection = mVertex[0]->GetCycleNextSection( returnSection, 1.0f );
+        ::ULIS::FVec2D returnSectionVector = -returnSection->GetVectorFromVertex( mVertex[0], false, false );
+        FOdysseyVectorSection* departSection = mVertex[1]->GetCycleNextSection( returnSectionVector, 1.0f );
 
         mExplorationPairs.push_back( FExplorationPair( returnSection, mVertex[0], departSection ) );
     }
@@ -51,7 +52,8 @@ FOdysseyVectorIntersection::BuildExplorationPairs()
     for( std::list<FOdysseyVectorSection*>::iterator it = vertex1SectionList.begin(); it != vertex1SectionList.end(); ++it )
     {
         FOdysseyVectorSection* returnSection = static_cast<FOdysseyVectorSection*>(*it);
-        FOdysseyVectorSection* departSection = mVertex[1]->GetCycleNextSection( returnSection, 1.0f );
+        ::ULIS::FVec2D returnSectionVector = -returnSection->GetVectorFromVertex( mVertex[1], false, false );
+        FOdysseyVectorSection* departSection = mVertex[0]->GetCycleNextSection( returnSectionVector, 1.0f );
 
         mExplorationPairs.push_back( FExplorationPair( returnSection, mVertex[1], departSection ) );
     }

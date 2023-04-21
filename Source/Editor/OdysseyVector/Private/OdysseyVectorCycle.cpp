@@ -189,11 +189,11 @@ FOdysseyVectorCycle::Build( std::vector<FOdysseyVectorVertex*>& iVertexArray
             FOdysseyVectorVertex* vertexi = iVertexArray[i];
             FOdysseyVectorVertex* vertexn = iVertexArray[n];
 
-            if( vertexi->GetClass() == FOdysseyVectorVertexIntersection::StaticClass() )
+            if( vertexn->GetClass() == FOdysseyVectorVertexIntersection::StaticClass() )
             {
-                FOdysseyVectorVertexIntersection* intersectionVertex = static_cast<FOdysseyVectorVertexIntersection*>(vertexi);
+                FOdysseyVectorVertexIntersection* intersectionVertex = static_cast<FOdysseyVectorVertexIntersection*>(vertexn);
 
-                vertexi = intersectionVertex->GetPartner();
+                vertexn = intersectionVertex->GetPartner();
             }
 
             if( segment )
