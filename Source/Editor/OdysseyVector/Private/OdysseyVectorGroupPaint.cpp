@@ -419,8 +419,8 @@ FOdysseyVectorGroupPaint::FindPath( FOdysseyVectorIntersection* iInitiatorInters
     iVertexArray.push_back( iVertex );
     iSection->Block( iVertex );
 
-    UE_LOG(LogTemp, Warning, TEXT("nextVertex:") );
-    PrintVertex( nextVertex );
+    //UE_LOG(LogTemp, Warning, TEXT("exploring section:") );
+    //PrintSection( iSection );
 
     if( ( iInitiatorIntersection->HasVertex( static_cast<FOdysseyVectorVertexIntersection*>(nextVertex) ) )// cycle detected
     && ( ( ( iReturnSection->IsLinked() == true ) && ( iReturnSection == iSection ) ) // 1 return path accepted
@@ -592,11 +592,6 @@ FOdysseyVectorGroupPaint::MarchIntersection( FOdysseyVectorIntersection* iInters
 
     for( uint32 i = 0; i < explorationPairs.size(); i++ )
     {
-        ///UE_LOG(LogTemp,Warning,TEXT("<--- Return section:"));
-        //PrintSection( explorationPairs[i].returnSection );
-        //UE_LOG(LogTemp,Warning,TEXT("---> Depart section:"));
-       // PrintSection( explorationPairs[i].departSection );
-
         if( explorationPairs[i].departSection )
         {
             /*if( ( explorationPairs[i].returnSection->IsLinked() == true )
@@ -609,8 +604,6 @@ FOdysseyVectorGroupPaint::MarchIntersection( FOdysseyVectorIntersection* iInters
                 {
                     std::vector<FOdysseyVectorVertex*> vertexArray;
                     std::vector<FOdysseyVectorSection*> sectionArray;
-UE_LOG(LogTemp, Warning, TEXT("Start at vertex") );
-    PrintVertex( partnerVertex );
 
                     uint32 ret = FindPath( iIntersection
                                          , explorationPairs[i].returnSection
@@ -716,8 +709,8 @@ CreateNearIntersection( FOdysseyVectorVertex *iVertex
         // creates topology
         iSectionBuffer[sectionCount].Link();
 
+        // sections for this will be created later on in BuildGraph() 
         nearestSegment->AddIntersection ( intersectionVertex[0] );
-        CreateSegmentSections( nearestSegment, iSectionBuffer );
 
         iIntersectionArray.push_back( new FOdysseyVectorIntersection( intersectionVertex[0], intersectionVertex[1] ) );
 
@@ -733,6 +726,9 @@ FOdysseyVectorGroupPaint::BuildGraph()
     uint32 gapSegmentCount = 0;
     uint32 sectionCount = 0;
 
+    // mGenerationID acts as a boolean flag but saves us a loop
+    mGenerationID++;
+
     Clear();
 
     segmentList = mSegmentList;
@@ -745,27 +741,26 @@ FOdysseyVectorGroupPaint::BuildGraph()
 
         IntersectSegment ( cubicSegment, segmentList, mIntersectionArray );
 
-        // looped path need section as well to be converted to cycles.
+        // looped path need section as well to be converted to cycles. They always get sections not matter what.
         if( cubicSegment->GetPath()->IsLoop() == true )
         {
-            cubicSegment->GetPath()->SetIntersected( true );
+            cubicSegment->GetPath()->SetID( mGenerationID ); // mGenerationID acts as a boolean flag but saves us a loop
         }
+
+        // TODO::Optimization: prevent those 2 function calls ?
+        if( cubicSegment->GetVertex(0)->GetNearestSegment() ) gapSegmentCount++;
+        if( cubicSegment->GetVertex(1)->GetNearestSegment() ) gapSegmentCount++;
 
         intersectionCount = cubicSegment->GetIntersectionVertexCount();
 
         if( intersectionCount )
         {
-            cubicSegment->GetPath()->SetIntersected( true );
+            cubicSegment->GetPath()->SetID( mGenerationID ); // mGenerationID acts as a boolean flag but saves us a loop
         }
 
         // Note: each segment has at least 1 section.
         // Note2: even is there is no intersection, a segment can have intersection inserted from a previous intersection test.
-        // we then have to 
         sectionCount += ( 1 + intersectionCount );
-
-        // TODO::Optimization: prevent those 2 function calls ?
-        if( cubicSegment->GetVertex(0)->GetNearestSegment() ) gapSegmentCount++;
-        if( cubicSegment->GetVertex(1)->GetNearestSegment() ) gapSegmentCount++;
 
         // remove segment from list as they are tested
         segmentList.pop_back();
@@ -773,8 +768,7 @@ FOdysseyVectorGroupPaint::BuildGraph()
         cubicSegment = segmentList.size() ? static_cast<FOdysseyVectorSegmentCubic*>( segmentList.back() ) : nullptr;
     }
 
-    // each gap creates 1 segment in a T junction that needs at most 3 sections
-    sectionCount += ( gapSegmentCount * 3 );
+    
 
     // reserving whole block is required to avoid memory shifting.
     mGapSegmentBuffer.reserve( gapSegmentCount );
@@ -783,19 +777,7 @@ FOdysseyVectorGroupPaint::BuildGraph()
     // This is done to prevent one more loop that would compute which path does not have intersected segments.
     mSectionBuffer.reserve( sectionCount );
 
-    // create sections for exact intersections
-    for( std::list<FOdysseyVectorObject*>::iterator it = mChildrenList.begin(); it != mChildrenList.end(); ++it )
-    {
-        FOdysseyVectorPath *path = static_cast<FOdysseyVectorPath*>(*it);
-
-        // only for path that have intersected segments.
-        if( path->IsIntersected() )
-        {
-            CreatePathSections( path, mSectionBuffer );
-        }
-    }
-
-    // this could be done in the above loop but we use the above loop to get the number of gaps in order to correctly size the gap segment array.
+    //
     for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
     {
         FOdysseyVectorSegment *segment = static_cast<FOdysseyVectorSegment*>(*it);
@@ -803,6 +785,21 @@ FOdysseyVectorGroupPaint::BuildGraph()
         // retrieve near-intersection
         CreateNearIntersection( segment->GetVertex(0), mSectionBuffer, mGapSegmentBuffer, mIntersectionArray );
         CreateNearIntersection( segment->GetVertex(1), mSectionBuffer, mGapSegmentBuffer, mIntersectionArray );
+    }
+
+    // create sections for exact intersections
+    for( std::list<FOdysseyVectorObject*>::iterator it = mChildrenList.begin(); it != mChildrenList.end(); ++it )
+    {
+        FOdysseyVectorPath *path = static_cast<FOdysseyVectorPath*>(*it);
+
+        // only for path that have intersected segments.
+        if( path->GetID() == mGenerationID )
+        {
+            CreatePathSections( path, mSectionBuffer );
+        }
+
+        // reset here in order to avoid another loop in Clear();
+        path->GetID()
     }
 }
 
@@ -877,14 +874,6 @@ void
 FOdysseyVectorGroupPaint::Clear()
 {
     bool bboxInit = false;
-
-    // reset intersection flag for paths. This flag allows us to discard and not create segments for path without any intersection.
-    for( std::list<FOdysseyVectorObject*>::iterator it = mChildrenList.begin(); it != mChildrenList.end(); ++it )
-    {
-        FOdysseyVectorPath *path = static_cast<FOdysseyVectorPath *>(*it);
-
-        path->SetIntersected( false );
-    }
 
     for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
     {

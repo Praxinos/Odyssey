@@ -60,7 +60,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
         /*std::list<FOdysseyVectorCycle*> mInvalidatedLoopList;*/
         std::list<FOdysseyVectorPoint*> mSelectedPointList;
         BLPath mPath;
-        bool mIntersected; // set by paint groups
 
     public:
         FPathParam mPathParam;
@@ -75,8 +74,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
         virtual ~FOdysseyVectorPath();
         FOdysseyVectorPath();
         void Init( std::string iName );
-        void SetIntersected( bool iIntersected );
-        bool IsIntersected();
         void AddSegment(FOdysseyVectorSegment* iSegment);
         void RemoveSegment(FOdysseyVectorSegment* iSegment);
         void AddVertex( FOdysseyVectorVertex* iVertex );

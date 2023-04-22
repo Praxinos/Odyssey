@@ -195,6 +195,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         std::vector<FOdysseyVectorIntersection*> mIntersectionArray;
         // need to remember them in order to clean properly
         std::list<FOdysseyVectorSegment*> mSegmentList;
+        uint32 mGenerationID; // this is a value set as an ID to children paths, acts as a bool flag but saves us a loop.
 
         std::vector<FOdysseyVectorSection> mSectionBuffer;
         std::vector<FOdysseyVectorSegmentCubic> mGapSegmentBuffer;

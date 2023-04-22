@@ -11,18 +11,6 @@ FOdysseyVectorPath::FOdysseyVectorPath()
     mPathParam.Filled = false;
 }
 
-void
-FOdysseyVectorPath::SetIntersected( bool iIntersected )
-{
-    mIntersected = iIntersected;
-}
-
-bool
-FOdysseyVectorPath::IsIntersected()
-{
-    return mIntersected;
-}
-
 bool
 FOdysseyVectorPath::HasBaseClass( uint32 iBaseClassID )
 {
