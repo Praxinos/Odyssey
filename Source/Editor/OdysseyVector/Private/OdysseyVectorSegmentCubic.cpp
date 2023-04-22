@@ -611,7 +611,7 @@ IntersectVertices( FOdysseyVectorVertex* iVertex0, FOdysseyVectorVertex* iVertex
 }
 
 uint32
-FOdysseyVectorSegmentCubic::Intersect( FOdysseyVectorSegmentCubic& iOther
+FOdysseyVectorSegmentCubic::Intersect( FOdysseyVectorSegment* iOther
                                      , double iTolerance
                                      , std::vector<FOdysseyVectorIntersection*>& iIntersectionArray )
 {
@@ -619,8 +619,8 @@ FOdysseyVectorSegmentCubic::Intersect( FOdysseyVectorSegmentCubic& iOther
     FOdysseyVectorVertex* vertex1 = GetVertex(1);
     ::ULIS::FVec2D& point0 = vertex0->GetCoords();
     ::ULIS::FVec2D& point1 = vertex1->GetCoords();
-    FOdysseyVectorVertex* otherVertex0 = iOther.GetVertex(0);
-    FOdysseyVectorVertex* otherVertex1 = iOther.GetVertex(1);
+    FOdysseyVectorVertex* otherVertex0 = iOther->GetVertex(0);
+    FOdysseyVectorVertex* otherVertex1 = iOther->GetVertex(1);
     ::ULIS::FVec2D& otherPoint0 = otherVertex0->GetCoords();
     ::ULIS::FVec2D& otherPoint1 = otherVertex1->GetCoords();
     uint32 intersectionCount = 0;
@@ -631,18 +631,22 @@ FOdysseyVectorSegmentCubic::Intersect( FOdysseyVectorSegmentCubic& iOther
         int p = i - 1;
         int n = i + 1;
 
-        for( int j = 0; j < iOther.mPolygonCache.size(); j++ )
+      if( iOther->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
+      {
+        FOdysseyVectorSegmentCubic* otherCubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(iOther);
+
+        for( int j = 0; j < otherCubicSegment->mPolygonCache.size(); j++ )
         {
-            FPolygon* interPoly = &iOther.mPolygonCache[j];
+            FPolygon* interPoly = &otherCubicSegment->mPolygonCache[j];
             double polySubT, interPolySubT;
 
             // to speed things up a bit
             if( ( ( poly->xmax + iTolerance ) > ( interPoly->xmin - iTolerance ) ) && ( ( poly->xmin - iTolerance ) < ( interPoly->xmax + iTolerance ) )
              && ( ( poly->ymax + iTolerance ) > ( interPoly->ymin - iTolerance ) ) && ( ( poly->ymin - iTolerance ) < ( interPoly->ymax + iTolerance ) ) )
             {
-                if(   ( this != &iOther )
+                if(   ( this != iOther )
                 // check this is not the same sub-segment or adjacent sub-segment, or else they would always intersect
-                 || ( ( this == &iOther ) && ( ( i - j ) > 1 ) ) )
+                 || ( ( this == iOther ) && ( ( i - j ) > 1 ) ) )
                 {
                     if ( FOdysseyVector::IntersectSegment ( poly->lineVertex[0]
                                                           , poly->lineVertex[1]
@@ -666,12 +670,12 @@ FOdysseyVectorSegmentCubic::Intersect( FOdysseyVectorSegmentCubic& iOther
                             iIntersectionArray.push_back( new FOdysseyVectorIntersection( intersectionVertex[0], intersectionVertex[1] ) );
 
                             this->AddIntersection ( intersectionVertex[0] );
-                            iOther.AddIntersection ( intersectionVertex[1] );
+                            iOther->AddIntersection ( intersectionVertex[1] );
 
                             intersectionCount++;
                         }
                     }
-/////////////////////////////////////////////////
+/////////////////////////////// NEEDS REFACTORING !!!! //////////////////
                     else
                     {
                         if( ( j == 0 ) && ( otherVertex0->GetSegmentCount() == 1 ) )
@@ -695,7 +699,7 @@ FOdysseyVectorSegmentCubic::Intersect( FOdysseyVectorSegmentCubic& iOther
                                 }
                         }
 
-                        if( ( j == ( iOther.mPolygonCache.size() - 1 ) ) && ( otherVertex1->GetSegmentCount() == 1 ) )
+                        if( ( j == ( otherCubicSegment->mPolygonCache.size() - 1 ) ) && ( otherVertex1->GetSegmentCount() == 1 ) )
                         {
                             double distance;
                             double t = FOdysseyVector::DistanceToSegment( otherPoint1
@@ -729,7 +733,7 @@ FOdysseyVectorSegmentCubic::Intersect( FOdysseyVectorSegmentCubic& iOther
                                 {
                                     double otherSegmentT = interPoly->fromT + ( ( interPoly->toT - interPoly->fromT ) * t );
 
-                                    vertex0->SetNearestSegment( &iOther, distance, otherSegmentT );
+                                    vertex0->SetNearestSegment( iOther, distance, otherSegmentT );
 
                                     //aisx[2].distance = distance;
                                     //aisx[2].t        = 0.0f;
@@ -750,7 +754,7 @@ FOdysseyVectorSegmentCubic::Intersect( FOdysseyVectorSegmentCubic& iOther
                                 {
                                     double otherSegmentT = interPoly->fromT + ( ( interPoly->toT - interPoly->fromT ) * t );
 
-                                    vertex1->SetNearestSegment( &iOther, distance, otherSegmentT );
+                                    vertex1->SetNearestSegment( iOther, distance, otherSegmentT );
 
                                     //aisx[3].distance = distance;
                                     //aisx[3].t        = 1.0f;
@@ -762,6 +766,7 @@ FOdysseyVectorSegmentCubic::Intersect( FOdysseyVectorSegmentCubic& iOther
                 }
             }
         }
+      }
     }
 
     if( iTolerance )

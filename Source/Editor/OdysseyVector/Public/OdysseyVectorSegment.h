@@ -31,6 +31,14 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
 
         virtual ~FOdysseyVectorSegment();
 
+        void SetID( uint32 iID );
+
+        uint32 GetID();
+
+        void SetPaintingCode( uint32 iPaintingCode );
+
+        uint32 GetPaintingCode();
+
        /**
          * @brief Draw the segment
          * @param iRoi the region-of-interest
@@ -131,11 +139,17 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
         FOdysseyVectorVertex*
         GetOtherVertex( FOdysseyVectorVertex* iVertex );
 
+        virtual uint32 Intersect( FOdysseyVectorSegment* iOther
+                                , double iTolerance
+                                , std::vector<FOdysseyVectorIntersection*>& iIntersectionArray ){ return 0; };
+
     protected:
         std::list<FOdysseyVectorVertexIntersection*> mIntersectionVertexList;
         FOdysseyVectorPath* mPath;
         ::ULIS::FRectD mBBox;
         bool mIsInvalidated;
+        uint32 mID;
+        uint32 mPaintingCode; // used by group paint as a boolean without needing to reinitialize its value
 
     private:
         static const uint32 mStaticClass = 0x45c58ef1; // value is crc32 FOdysseyVectorSegment

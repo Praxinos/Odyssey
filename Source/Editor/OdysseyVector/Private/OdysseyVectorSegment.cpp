@@ -10,6 +10,7 @@ FOdysseyVectorSegment::FOdysseyVectorSegment( FOdysseyVectorPath* iPath
     : FOdysseyVectorLink ()
     , mIsInvalidated( false )
     , mPath ( nullptr )
+    , mPaintingCode ( 0 )
 {
     FOdysseyVectorLink::Init ( iVertex0, iVertex1 );
 
@@ -20,6 +21,30 @@ FOdysseyVectorVertex*
 FOdysseyVectorSegment::GetOtherVertex( FOdysseyVectorVertex* iVertex )
 {
     return ( iVertex == GetVertex(0) ) ? GetVertex(1) : GetVertex(0);
+}
+
+void
+FOdysseyVectorSegment::SetID( uint32 iID )
+{
+    mID = iID;
+}
+
+uint32
+FOdysseyVectorSegment::GetID()
+{
+    return mID;
+}
+
+void
+FOdysseyVectorSegment::SetPaintingCode( uint32 iPaintingCode )
+{
+    mPaintingCode = iPaintingCode;
+}
+
+uint32
+FOdysseyVectorSegment::GetPaintingCode()
+{
+    return mPaintingCode;
 }
 
 ::ULIS::FVec2D

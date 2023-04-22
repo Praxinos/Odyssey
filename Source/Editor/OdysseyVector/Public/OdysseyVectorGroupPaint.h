@@ -118,13 +118,13 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
     protected:
         /**
          * @brief Intersect a cubic segment. It creates the intersection vertices and the section (sub-segments).
-         * @param iCubicSegment the segment.
-         * @param cubicSegmenList the other segments to intersect iCubicSegment with.
+         * @param iSegment the segment.
+         * @param iSegmenList the other segments to intersect iCubicSegment with.
          * @param oIntersectionList list populated by the pointers to the intersection that will be created.
          * @return the number of intersections
          */
-        uint32 IntersectSegment( FOdysseyVectorSegmentCubic* iCubicSegment
-                               , std::list<FOdysseyVectorSegment*>& cubicSegmenList
+        uint32 IntersectSegment( FOdysseyVectorSegment* iSegment
+                               , std::list<FOdysseyVectorSegment*>& iSegmenList
                                , std::vector<FOdysseyVectorIntersection*>& oIntersectionList );
 
         /**
@@ -194,8 +194,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         std::vector<FOdysseyVectorCycle*> mCycleArray;
         std::vector<FOdysseyVectorIntersection*> mIntersectionArray;
         // need to remember them in order to clean properly
-        std::list<FOdysseyVectorSegment*> mSegmentList;
-        uint32 mGenerationID; // this is a value set as an ID to children paths, acts as a bool flag but saves us a loop.
+        std::vector<uint32> pathSectionCount;
+        uint32 mPaintingCode;
 
         std::vector<FOdysseyVectorSection> mSectionBuffer;
         std::vector<FOdysseyVectorSegmentCubic> mGapSegmentBuffer;

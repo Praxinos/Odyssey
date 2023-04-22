@@ -150,9 +150,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
          * @param iTolerance a maximum distance to consider an almost-hit as a hit.
          * @param iIntersectionArray array that receives the created intersections.
          */
-        uint32 Intersect( FOdysseyVectorSegmentCubic& iOther
-                        , double iTolerance
-                        , std::vector<FOdysseyVectorIntersection*>& iIntersectionArray );
+        virtual uint32 Intersect( FOdysseyVectorSegment* iOther
+                                , double iTolerance
+                                , std::vector<FOdysseyVectorIntersection*>& iIntersectionArray ) override;
 
        /**
          * @brief Builds the variable thickness segment (stores values into polygon cache).

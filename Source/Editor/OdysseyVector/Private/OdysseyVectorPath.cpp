@@ -5,6 +5,7 @@ FOdysseyVectorPath::~FOdysseyVectorPath()
 }
 
 FOdysseyVectorPath::FOdysseyVectorPath()
+    : mPaintingCode( 0 )
 {
     SetJointType( eJointType::Miter );
 
@@ -120,6 +121,18 @@ FOdysseyVectorPath::AppendVertex( FOdysseyVectorVertex* iPoint, FOdysseyVectorVe
     }
 
     return NULL;
+}
+
+void
+FOdysseyVectorPath::SetPaintingCode( uint32 iPaintingCode )
+{
+    mPaintingCode = iPaintingCode;
+}
+
+uint32
+FOdysseyVectorPath::GetPaintingCode()
+{
+    return mPaintingCode;
 }
 
 /*void
