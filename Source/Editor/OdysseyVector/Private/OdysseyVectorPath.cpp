@@ -11,6 +11,18 @@ FOdysseyVectorPath::FOdysseyVectorPath()
     mPathParam.Filled = false;
 }
 
+void
+FOdysseyVectorPath::SetIntersected( bool iIntersected )
+{
+    mIntersected = iIntersected;
+}
+
+bool
+FOdysseyVectorPath::IsIntersected()
+{
+    return mIntersected;
+}
+
 bool
 FOdysseyVectorPath::HasBaseClass( uint32 iBaseClassID )
 {
@@ -41,10 +53,11 @@ FOdysseyVectorPath::ToVertexAndSectionArray( std::vector<FOdysseyVectorVertex*>&
         do
         {
             FOdysseyVectorVertex* nextVertex = segment->GetOtherVertex( vertex );
+            FOdysseyVectorSection* section = vertex->GetSection( segment );
             FOdysseyVectorSegment *nextSegment = nextVertex->GetOtherSegment( segment );
 
             oVertexArray.push_back( vertex );
-            oSectionArray.push_back( segment->GetSection( 0.5f ) );
+            oSectionArray.push_back( section );
 
             vertex = nextVertex;
             segment = nextSegment;

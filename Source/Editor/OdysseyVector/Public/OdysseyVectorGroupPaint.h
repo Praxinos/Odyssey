@@ -121,7 +121,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
          * @param iCubicSegment the segment.
          * @param cubicSegmenList the other segments to intersect iCubicSegment with.
          * @param oIntersectionList list populated by the pointers to the intersection that will be created.
-         * @return a pointer to  copy of the object
+         * @return the number of intersections
          */
         uint32 IntersectSegment( FOdysseyVectorSegmentCubic* iCubicSegment
                                , std::list<FOdysseyVectorSegment*>& cubicSegmenList
@@ -133,8 +133,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         void BuildGraph( );
 
         void FindCycles();
-
-        void CreateNearIntersection( FOdysseyVectorVertex *iVertex );
 
         void SimplifyGraph();
 
@@ -197,8 +195,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         std::vector<FOdysseyVectorIntersection*> mIntersectionArray;
         // need to remember them in order to clean properly
         std::list<FOdysseyVectorSegment*> mSegmentList;
-        std::list<FOdysseyVectorSection*> mSectionList;
-        std::vector<FOdysseyVectorSegmentCubic> mGapSegmentArray;
+
+        std::vector<FOdysseyVectorSection> mSectionBuffer;
+        std::vector<FOdysseyVectorSegmentCubic> mGapSegmentBuffer;
 
     public:
         FGroupPaintParam mGroupPaintParam;

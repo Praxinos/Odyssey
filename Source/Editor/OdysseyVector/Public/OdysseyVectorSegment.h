@@ -39,6 +39,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
 
         virtual void DrawStructure( ::ULIS::FRectD &iRoi, bool iWorld ){};
 
+        uint32 GetIntersectionVertexCount();
+
+        void GetIntersectionVertices( std::vector<FOdysseyVectorVertex*>& oVertexArray );
+        void GetAllVertices( std::vector<FOdysseyVectorVertex*>& oVertexArray );
+
        /**
          * @brief Test whether or not this segment is close to the coordinates passed as parameter
          * @param iLocalX X-coordinate (in local system)
@@ -57,12 +62,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
          * @return A reference to the list of intersection vertices
          */
         std::list<FOdysseyVectorVertexIntersection*>& GetIntersectionVertexList();
-
-       /**
-         * @brief Check whether or not the intersection vertex passed as parameter belongs to this segment
-         * @return true or false
-         */
-        bool HasIntersectionVertex( FOdysseyVectorVertexIntersection& mIntersectionVertex );
 
        /**
          * @brief Get a pointer to the path this segment belongs to
@@ -104,35 +103,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
         void ClearIntersections();
 
        /**
-         * @brief Get the section that matches parameter t.
-         * @param t must be between 0.0 and 1.0.
-         * @return a pointer to the requested section.
-         */
-        FOdysseyVectorSection* GetSection ( double t );
-
-       /**
-         * @brief Get the list of sections on this segment.
-         * @return a reference to the list of sections.
-         */
-        std::list<FOdysseyVectorSection*>& GetSectionList();
-
-       /**
          * @brief Add an intersection point. This automatically creates the attached sections.
          * @param iIntersectionVertex the intersection vertex
          */
         void AddIntersection ( FOdysseyVectorVertexIntersection* iIntersectionVertex );
-
-       /**
-         * @brief Remove a section. Does not free the section.
-         * @param iSection the section to remove.
-         */
-        void RemoveSection ( FOdysseyVectorSection* iSection );
-
-       /**
-         * @brief Add a section.
-         * @param iSection the section to add.
-         */
-        void AddSection ( FOdysseyVectorSection* iSection );
 
        /**
          * @brief Get the segment's bounding box.
@@ -159,7 +133,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
 
     protected:
         std::list<FOdysseyVectorVertexIntersection*> mIntersectionVertexList;
-        std::list<FOdysseyVectorSection*> mSectionList;
         FOdysseyVectorPath* mPath;
         ::ULIS::FRectD mBBox;
         bool mIsInvalidated;
