@@ -6,6 +6,7 @@
 
 #include "OdysseyVectorVertex.h"
 
+class FOdysseyVectorSegment;
 class FOdysseyVectorIntersection;
 
 class ODYSSEYVECTOR_API FOdysseyVectorVertexIntersection : public FOdysseyVectorVertex

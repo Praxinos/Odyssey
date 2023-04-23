@@ -4,6 +4,11 @@ FOdysseyVectorSegment::~FOdysseyVectorSegment()
 {
 }
 
+FOdysseyVectorSegment::FOdysseyVectorSegment()
+    : mPath( nullptr )
+{
+}
+
 FOdysseyVectorSegment::FOdysseyVectorSegment( FOdysseyVectorPath* iPath
                                             , FOdysseyVectorVertex* iVertex0
                                             , FOdysseyVectorVertex* iVertex1 )

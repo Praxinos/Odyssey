@@ -18,6 +18,7 @@ class FOdysseyVectorSection
          * @brief default destructor
          */
         ~FOdysseyVectorSection();
+        FOdysseyVectorSection(){};
 
        /**
          * @brief constructor
@@ -28,6 +29,10 @@ class FOdysseyVectorSection
         FOdysseyVectorSection( FOdysseyVectorSegment* iSegment
                              , FOdysseyVectorVertex* iVertex0
                              , FOdysseyVectorVertex* iVertex1 );
+
+        void Init( FOdysseyVectorSegment* iSegment
+                 , FOdysseyVectorVertex* iVertex0
+                 , FOdysseyVectorVertex* iVertex1 );
 
        /**
          * @brief Get the segment it lies on.

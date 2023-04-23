@@ -7,11 +7,20 @@ FOdysseyVectorSection::~FOdysseyVectorSection()
 FOdysseyVectorSection::FOdysseyVectorSection( FOdysseyVectorSegment* iSegment
                                             , FOdysseyVectorVertex* iVertex0
                                             , FOdysseyVectorVertex* iVertex1 )
-    : mSegment ( iSegment )
-    , mVertex { iVertex0, iVertex1 }
-    , mFlags( 0 )
-    , mCycleCount( 0 )
 {
+    Init( iSegment, iVertex0, iVertex1 );
+}
+
+void
+FOdysseyVectorSection::Init( FOdysseyVectorSegment* iSegment
+                           , FOdysseyVectorVertex* iVertex0
+                           , FOdysseyVectorVertex* iVertex1 )
+{
+    mSegment = iSegment;
+    mVertex[0] = iVertex0;
+    mVertex[1] = iVertex1;
+    mCycleCount = 0;
+    mFlags = 0;
 }
 
 ::ULIS::FVec2D

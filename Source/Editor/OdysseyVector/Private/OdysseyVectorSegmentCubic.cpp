@@ -7,6 +7,7 @@ FOdysseyVectorSegmentCubic::~FOdysseyVectorSegmentCubic()
 }
 
 FOdysseyVectorSegmentCubic::FOdysseyVectorSegmentCubic()
+    : FOdysseyVectorSegment()
 {
 }
 
@@ -55,10 +56,13 @@ FOdysseyVectorSegmentCubic::Init( FOdysseyVectorPathCubic* iPath
                                 , double iCtrlPoint1y
                                 , FOdysseyVectorVertex* iPoint1 )
 {
+    mPoint[0] = iPoint0;
+    mPoint[1] = iPoint1;
+
     mCtrlPoint[0].Init( this, iCtrlPoint0x, iCtrlPoint0y );
     mCtrlPoint[1].Init( this, iCtrlPoint1x, iCtrlPoint1y );
 
-    Update();
+    Invalidate();
 }
 
 void
@@ -678,6 +682,8 @@ FOdysseyVectorSegmentCubic::Intersect( FOdysseyVectorSegment* iOther
 /////////////////////////////// NEEDS REFACTORING !!!! //////////////////
                     else
                     {
+                      if( iTolerance )
+                      {
                         if( ( j == 0 ) && ( otherVertex0->GetSegmentCount() == 1 ) )
                         {
                             double distance;
@@ -761,6 +767,7 @@ FOdysseyVectorSegmentCubic::Intersect( FOdysseyVectorSegment* iOther
                                     //aisx[3].otherT   = interPoly->fromT + ( ( interPoly->toT - interPoly->fromT ) * t );
                                 }
                         }
+                      }
                     }
 ///////////////////////////////////
                 }

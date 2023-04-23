@@ -212,6 +212,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
         void SetNearestSegment( FOdysseyVectorSegment* iNearestSegment
                               , double iDistanceToNearestSegment
                               , double iNearestSegmentT );
+        void SetNearestVertex( FOdysseyVectorVertex* iNearestVertex );
+        FOdysseyVectorVertex* GetNearestVertex();
 
     protected:
         FOdysseyVectorHandlePoint* mCtrlPoint;
@@ -223,7 +225,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
         double mDistanceToNearestSegment;
         double mNearestSegmentT;
         FOdysseyVectorSegment* mNearestSegment;
-
+        FOdysseyVectorVertex* mNearestVertex;
 
     private :
         static const uint32 VISITED = (1 << 2);

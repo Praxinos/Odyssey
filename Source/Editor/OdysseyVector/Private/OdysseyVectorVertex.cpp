@@ -7,10 +7,24 @@ FOdysseyVectorVertex::~FOdysseyVectorVertex()
 FOdysseyVectorVertex::FOdysseyVectorVertex( double iX, double iY, double iRadius )
     : FOdysseyVectorPoint()
    , mPath ( nullptr )
+   , mNearestSegment( nullptr )
+   , mNearestVertex( nullptr )
 {
     mCtrlPoint = FOdysseyVectorHandlePoint::New( this );
 
     Init( iX, iY, iRadius );
+}
+
+void
+FOdysseyVectorVertex::SetNearestVertex( FOdysseyVectorVertex* iNearestVertex )
+{
+    mNearestVertex = iNearestVertex;
+}
+
+FOdysseyVectorVertex*
+FOdysseyVectorVertex::GetNearestVertex()
+{
+    return mNearestVertex;
 }
 
 FOdysseyVectorPath* 
