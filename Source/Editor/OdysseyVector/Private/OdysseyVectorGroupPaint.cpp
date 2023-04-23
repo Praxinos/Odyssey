@@ -27,6 +27,9 @@ FOdysseyVectorGroupPaint::FOdysseyVectorGroupPaint( std::string iName )
     mGroupPaintParam.Realtime = false;
     mGroupPaintParam.Wireframe = false;
     mGroupPaintParam.WireframeColor = FColor( 255, 255, 255, 255 );
+
+    mGapSegmentBuffer.reserve( 200 );
+    mSectionBuffer.reserve( 200 );
 }
 
 bool
@@ -711,7 +714,7 @@ FOdysseyVectorGroupPaint::FindCycles()
     Colorize();
 }
 
-static void
+static uint32
 CreateNearIntersection( FOdysseyVectorVertex *iVertex
                       , std::vector<FOdysseyVectorIntersection*>& iIntersectionArray )
 {
@@ -731,18 +734,22 @@ CreateNearIntersection( FOdysseyVectorVertex *iVertex
         else
         {
             ::ULIS::FVec2D nearestVertexAt = nearestSegment->GetPointAt( nearestSegmentT );
-            FOdysseyVectorVertexIntersection* intersectionVertex[2] = { new FOdysseyVectorVertexIntersection( nearestVertexAt.x, nearestVertexAt.y, nearestSegmentT )
-                                                                      , new FOdysseyVectorVertexIntersection( nearestVertexAt.x, nearestVertexAt.y, 0.0f ) };
+            FOdysseyVectorVertexIntersection* intersectionVertex[2] = { new FOdysseyVectorVertexIntersection( nearestSegment->GetPath(), nearestVertexAt.x, nearestVertexAt.y, nearestSegmentT )
+                                                                      , new FOdysseyVectorVertexIntersection( nearestSegment->GetPath(), nearestVertexAt.x, nearestVertexAt.y, 0.0f ) };
 
             iIntersectionArray.push_back( new FOdysseyVectorIntersection( intersectionVertex[0], intersectionVertex[1] ) );
 
             nearestSegment->AddIntersection( intersectionVertex[0] );
+
+            neededIntersectionCount++;
 
             iVertex->SetNearestVertex( intersectionVertex[1] );
         }
 
         //UE_LOG(LogTemp,Warning,TEXT("GetSectionCount: %d %d"),intersectionVertex[0]->GetSectionCount(),intersectionVertex[1]->GetSectionCount());
     }
+
+    return neededIntersectionCount;
 }
 
 void
@@ -762,6 +769,7 @@ FOdysseyVectorGroupPaint::BuildGraph()
     {
         FOdysseyVectorPath *path = static_cast<FOdysseyVectorPath*>(*oit);
         std::list<FOdysseyVectorSegment*>& segmentList = path->GetSegmentList();
+        std::list<FOdysseyVectorVertex*>& vertexList = path->GetVertexList();
         uint32 intersectionCount = 0;
         uint32 gapSegmentCount = 0;
 
@@ -774,29 +782,25 @@ FOdysseyVectorGroupPaint::BuildGraph()
                 FOdysseyVectorPath *intersectPath = static_cast<FOdysseyVectorPath*>(*pit);
                 std::list<FOdysseyVectorSegment*>& intersectPathSegmentList = intersectPath->GetSegmentList();
 
-                IntersectSegment ( segment, intersectPathSegmentList, mIntersectionArray );
+                intersectionCount += IntersectSegment ( segment, intersectPathSegmentList, mIntersectionArray );
             }
 
             segment->SetPaintingCode( mPaintingCode ); // set as treated. It will be excluded from later intersection tests.
+        }
 
-            // TODO::Optimization: prevent those 2 function calls ?
-            if( segment->GetVertex(0)->GetNearestSegment() )
+        // create near-intersections
+        for( std::list<FOdysseyVectorVertex*>::iterator vit = vertexList.begin(); vit != vertexList.end(); ++vit )
+        {
+            FOdysseyVectorVertex *vertex = static_cast<FOdysseyVectorVertex*>(*vit);
+
+            if( vertex->GetNearestSegment() )
             {
                 gapSegmentCount++;
-                CreateNearIntersection( segment->GetVertex(0), mIntersectionArray );
-                segment->GetVertex(0)->GetNearestSegment()->GetPath()->SetPaintingCode( mPaintingCode );
-            }
 
-            if( segment->GetVertex(1)->GetNearestSegment() )
-            {
-                gapSegmentCount++;
-                CreateNearIntersection( segment->GetVertex(1), mIntersectionArray );
-                segment->GetVertex(1)->GetNearestSegment()->GetPath()->SetPaintingCode( mPaintingCode );
-            }
+                intersectionCount += CreateNearIntersection( vertex, mIntersectionArray );
 
-            // Get intersection count from the intersection list because intersections
-            // might have happened elsewhere than in this iteration. The number ignores the gap intersections.
-            intersectionCount += segment->GetIntersectionVertexCount();
+                vertex->GetNearestVertex()->GetPath()->SetPaintingCode( mPaintingCode );
+            }
         }
 
         if( ( intersectionCount ) || ( path->IsLoop() == true ) || ( gapSegmentCount ) )
@@ -855,6 +859,8 @@ FOdysseyVectorGroupPaint::BuildGraph()
             }
         }
     }
+
+UE_LOG(LogTemp, Warning, TEXT("%d %d"), mSectionBuffer.size(), mGapSegmentBuffer.size() );
 }
 
 void
@@ -929,14 +935,20 @@ FOdysseyVectorGroupPaint::Clear()
 {
     bool bboxInit = false;
 
-    // must be done before section deletion and intersection deletion
-    for( int i = 0; i < mGapSegmentBuffer.size(); i++ )
+    for( int i = 0; i < mCycleArray.size(); i++ )
     {
-        mGapSegmentBuffer[i].ClearIntersections();
+        FOdysseyVectorCycle *cycle = mCycleArray[i];
+
+        delete cycle;
     }
 
+    mCycleArray.clear();
+
+
+
     mGapSegmentBuffer.clear();
-    mGapSegmentBuffer.reserve( 100 );
+
+
 
     // clean section topology
     for( int i = 0; i < mSectionBuffer.size(); i++ )
@@ -950,6 +962,8 @@ FOdysseyVectorGroupPaint::Clear()
     }
 
     mSectionBuffer.clear();
+
+
 
     for( std::list<FOdysseyVectorObject*>::iterator oit = mChildrenList.begin(); oit != mChildrenList.end(); ++oit )
     {
@@ -976,28 +990,12 @@ FOdysseyVectorGroupPaint::Clear()
         }
     }
 
-
-
     for( int i = 0; i < mIntersectionArray.size(); i++ )
     {
         delete mIntersectionArray[i];
     }
 
     mIntersectionArray.clear();
-
-
-
-
-    for( int i = 0; i < mCycleArray.size(); i++ )
-    {
-        FOdysseyVectorCycle *cycle = mCycleArray[i];
-
-        delete cycle;
-    }
-
-    mCycleArray.clear();
-
-
 }
 
 void

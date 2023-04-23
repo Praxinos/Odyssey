@@ -4,9 +4,9 @@ FOdysseyVectorVertex::~FOdysseyVectorVertex()
 {
 }
 
-FOdysseyVectorVertex::FOdysseyVectorVertex( double iX, double iY, double iRadius )
+FOdysseyVectorVertex::FOdysseyVectorVertex( FOdysseyVectorPath* iPath, double iX, double iY, double iRadius )
     : FOdysseyVectorPoint()
-   , mPath ( nullptr )
+   , mPath ( iPath )
    , mNearestSegment( nullptr )
    , mNearestVertex( nullptr )
 {

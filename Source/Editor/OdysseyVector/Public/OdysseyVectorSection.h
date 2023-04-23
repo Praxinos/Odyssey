@@ -100,5 +100,5 @@ class FOdysseyVectorSection
     private:
         static const uint32 BLOCKVERTEX0 = ( 1 << 0 );
         static const uint32 BLOCKVERTEX1 = ( 1 << 1 );
-        static const uint32 UNLINKED     = ( 1 << 2 );
+        static const uint32 LINKED       = ( 1 << 2 );
 };

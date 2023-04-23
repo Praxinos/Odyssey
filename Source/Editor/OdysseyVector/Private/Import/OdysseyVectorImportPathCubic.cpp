@@ -61,7 +61,7 @@ ReadPathCubicGeometryVertices( FOdysseyVectorPathCubic& iCubicPath
         Ar << y;
         Ar << radius;
 
-        cubicVertex = new FOdysseyVectorVertex( x, y, radius );
+        cubicVertex = new FOdysseyVectorVertex( &iCubicPath, x, y, radius );
 
         iCubicPath.AddVertex( cubicVertex );
 

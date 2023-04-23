@@ -6,10 +6,11 @@ FOdysseyVectorVertexIntersection::~FOdysseyVectorVertexIntersection()
 {
 }
 
-FOdysseyVectorVertexIntersection::FOdysseyVectorVertexIntersection( double iX
+FOdysseyVectorVertexIntersection::FOdysseyVectorVertexIntersection( FOdysseyVectorPath* iPath
+                                                                  , double iX
                                                                   , double iY
                                                                   , double iT )
-    : FOdysseyVectorVertex ( iX, iY, 0.0f )
+    : FOdysseyVectorVertex ( iPath, iX, iY, 0.0f )
 {
     mT = iT;
 }

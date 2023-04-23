@@ -20,7 +20,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
          * @param iY coordinates on Y axis
          * @param iRadius radius
          */
-        FOdysseyVectorVertex ( double iX, double iY, double iRadius );
+        FOdysseyVectorVertex ( FOdysseyVectorPath* iPath, double iX, double iY, double iRadius );
         ~FOdysseyVectorVertex();
 
         /**

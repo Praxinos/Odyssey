@@ -23,7 +23,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertexIntersection : public FOdysseyVector
         /**
          * @brief Constructor.
          */
-        FOdysseyVectorVertexIntersection( double iX, double iY, double iT );
+        FOdysseyVectorVertexIntersection( FOdysseyVectorPath* iPath, double iX, double iY, double iT );
 
         /**
          * @brief Get a pointer to the next section to explore in cycle depending on the last visited section.

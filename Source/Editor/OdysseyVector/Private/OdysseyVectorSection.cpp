@@ -93,7 +93,7 @@ FOdysseyVectorSection::IsBlocked( FOdysseyVectorVertex* iVertex )
 bool
 FOdysseyVectorSection::IsLinked()
 {
-    return ( mFlags & UNLINKED ) ? false : true;
+    return ( mFlags & LINKED ) ? true : false;
 }
 
 void
@@ -102,7 +102,7 @@ FOdysseyVectorSection::Link()
     mVertex[0]->AddSection( this );
     mVertex[1]->AddSection( this );
 
-    mFlags &= (~UNLINKED);
+    mFlags |= LINKED;
 }
 
 void FOdysseyVectorSection::Unlink()
@@ -110,7 +110,7 @@ void FOdysseyVectorSection::Unlink()
     mVertex[0]->RemoveSection( this );
     mVertex[1]->RemoveSection( this );
 
-    mFlags |= UNLINKED;
+    mFlags &= (~LINKED);
 }
 
 FOdysseyVectorVertex*

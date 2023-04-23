@@ -114,26 +114,26 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDown( FOdysseyVectorEngine* i
     }
     else
     {
-        cubicVertex = new FOdysseyVectorVertex( 0.0f, 0.0f, 0.0f );
+        if ( cubicPath == nullptr )
+        {
+            cubicPath = new FOdysseyVectorPathCubic();
+
+            iScene->AppendChild( cubicPath );
+
+            // this is important to know what undo operation we are going to record: an ObjectAdd or a PathDrawing.
+            mStitched = false;
+        }
+
+        cubicVertex = new FOdysseyVectorVertex( cubicPath, 0.0f, 0.0f, 0.0f );
         // record for undos
         mVertexArray.push_back( cubicVertex );
     }
 
     mPreviousVertex = cubicVertex;
 
-    if ( cubicPath == nullptr )
-    {
-        cubicPath = new FOdysseyVectorPathCubic();
-
-        iScene->AppendChild( cubicPath );
-
-        cubicPath->AddVertex( cubicVertex );
-        cubicPath->UpdateMatrix();
-        cubicPath->SetForegroundColor( rgba8.R8(), rgba8.G8(), rgba8.B8(), rgba8.A8() );
-
-        // this is important to know what undo operation we are going to record: an ObjectAdd or a PathDrawing.
-        mStitched = false;
-    }
+    cubicPath->AddVertex( cubicVertex );
+    cubicPath->UpdateMatrix();
+    cubicPath->SetForegroundColor( rgba8.R8(), rgba8.G8(), rgba8.B8(), rgba8.A8() );
 
     localCoords = cubicPath->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
     localRadius = cubicPath->GetInverseWorldMatrix().mapVector( 0.7071f * radius, 0.7071f * radius );
@@ -242,7 +242,8 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUp( FOdysseyVectorEngine* iEn
 
             if( cubicVertex == nullptr )
             {
-                cubicVertex = new FOdysseyVectorVertex( localCoords.x
+                cubicVertex = new FOdysseyVectorVertex( cubicPath
+                                                      , localCoords.x
                                                       , localCoords.y
                                                       , ::ULIS::FVec2D( localRadius.x, localRadius.y ).Distance() );
                 // record for undos

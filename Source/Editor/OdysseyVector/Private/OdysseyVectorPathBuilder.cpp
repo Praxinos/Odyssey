@@ -183,7 +183,8 @@ FOdysseyVectorPathBuilder::RecordVertex()
         // use the penultimate sample
         uint32 penultimateSampleIndex = mSampleArray.size() - 2;
         uint32 penultimateSampleID = mSampleArray[penultimateSampleIndex]->GetID();
-        FOdysseyVectorVertex* cubicVertex = new FOdysseyVectorVertex( mSampleArray[penultimateSampleIndex]->GetX()
+        FOdysseyVectorVertex* cubicVertex = new FOdysseyVectorVertex( mCubicPath
+                                                                    , mSampleArray[penultimateSampleIndex]->GetX()
                                                                     , mSampleArray[penultimateSampleIndex]->GetY()
                                                                     , mSampleArray[penultimateSampleIndex]->GetRadius() );
 

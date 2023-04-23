@@ -638,7 +638,8 @@ FOdysseyVectorPathCubic::CopyShape()
     for( std::list<FOdysseyVectorVertex*>::iterator it = mVertexList.begin(); it != mVertexList.end(); ++it )
     {
         FOdysseyVectorVertex* originalVertex = static_cast<FOdysseyVectorVertex*>(*it);
-        FOdysseyVectorVertex* newVertex = new FOdysseyVectorVertex( originalVertex->GetX()
+        FOdysseyVectorVertex* newVertex = new FOdysseyVectorVertex( cubicPathCopy
+                                                                  , originalVertex->GetX()
                                                                   , originalVertex->GetY()
                                                                   , originalVertex->GetRadius() );
 
@@ -703,7 +704,7 @@ FOdysseyVectorPathCubic::Merge( FOdysseyVectorPath* iMergedPath
             BLPoint pt = conversionMatrix.mapPoint( vertex->GetX(), vertex->GetY() );
             BLPoint rd = conversionMatrix.mapVector( 0.7071 * vertex->GetRadius(), 0.7071 * vertex->GetRadius() );
             ::ULIS::FVec2D radius = ::ULIS::FVec2D( rd.x, rd.y );
-            FOdysseyVectorVertex* newVertex = new FOdysseyVectorVertex( pt.x, pt.y, radius.Distance() );
+            FOdysseyVectorVertex* newVertex = new FOdysseyVectorVertex( this, pt.x, pt.y, radius.Distance() );
 
             iAddedVertexArray.push_back( newVertex );
 
