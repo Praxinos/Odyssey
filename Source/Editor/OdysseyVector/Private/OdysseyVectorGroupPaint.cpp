@@ -28,8 +28,8 @@ FOdysseyVectorGroupPaint::FOdysseyVectorGroupPaint( std::string iName )
     mGroupPaintParam.Wireframe = false;
     mGroupPaintParam.WireframeColor = FColor( 255, 255, 255, 255 );
 
-    mGapSegmentBuffer.reserve( 200 );
-    mSectionBuffer.reserve( 200 );
+    //mGapSegmentBuffer.reserve( 200 );
+    //mSectionBuffer.reserve( 200 );
 }
 
 bool
@@ -462,12 +462,14 @@ FOdysseyVectorGroupPaint::FindPath( FOdysseyVectorIntersection* iInitiatorInters
     && ( ( ( iReturnSection->IsLinked() == true ) && ( iReturnSection == iSection ) ) // 1 return path accepted
            || ( iReturnSection->IsLinked() == false ) ) ) // any return path accepted
     {
-        //UE_LOG(LogTemp,Warning,TEXT("cycle detected: %d"), iReturnSection->IsRemoved() );
+        //UE_LOG(LogTemp,Warning,TEXT("cycle detected") );
 
         //PrintCycle( iVertexArray, iSectionArray );
 
         if( GetNormalVector( iVertexArray, iSectionArray ) > 0.0f )
         {
+        //UE_LOG(LogTemp,Warning,TEXT("normal detected") );
+
             mCycleArray.push_back( new FOdysseyVectorCycle( *this, /*iCycleID*/0, iVertexArray, iSectionArray ) );
         }
 
@@ -564,10 +566,11 @@ GetNormalVector( std::vector<FOdysseyVectorVertex*>& iVertexArray
 
         if( vertexn->GetClass() == FOdysseyVectorVertexIntersection::StaticClass() )
         {
-            if( iSectionArray[i]->GetSegment() != iSectionArray[n]->GetSegment() )
-            {
-                FOdysseyVectorVertexIntersection* intersectionVertex = static_cast<FOdysseyVectorVertexIntersection*>(vertexn);
+            FOdysseyVectorVertexIntersection* intersectionVertex = static_cast<FOdysseyVectorVertexIntersection*>(vertexn);
 
+            if( ( iSectionArray[i]->GetSegment() != iSectionArray[n]->GetSegment() )
+             || ( intersectionVertex->SelfIntersects() == true ) )
+            {
                 vertexn = intersectionVertex->GetPartner();
             }
         }
@@ -734,8 +737,9 @@ CreateNearIntersection( FOdysseyVectorVertex *iVertex
         else
         {
             ::ULIS::FVec2D nearestVertexAt = nearestSegment->GetPointAt( nearestSegmentT );
-            FOdysseyVectorVertexIntersection* intersectionVertex[2] = { new FOdysseyVectorVertexIntersection( nearestSegment->GetPath(), nearestVertexAt.x, nearestVertexAt.y, nearestSegmentT )
-                                                                      , new FOdysseyVectorVertexIntersection( nearestSegment->GetPath(), nearestVertexAt.x, nearestVertexAt.y, 0.0f ) };
+            FOdysseyVectorVertexIntersection* intersectionVertex[2] = { new FOdysseyVectorVertexIntersection( nearestSegment->GetPath(), false, nearestVertexAt.x, nearestVertexAt.y, nearestSegmentT )
+                                                                        // technically this one should belong to some dummy path
+                                                                      , new FOdysseyVectorVertexIntersection( nearestSegment->GetPath(), false, nearestVertexAt.x, nearestVertexAt.y, 0.0f ) };
 
             iIntersectionArray.push_back( new FOdysseyVectorIntersection( intersectionVertex[0], intersectionVertex[1] ) );
 
@@ -786,6 +790,11 @@ FOdysseyVectorGroupPaint::BuildGraph()
             }
 
             segment->SetPaintingCode( mPaintingCode ); // set as treated. It will be excluded from later intersection tests.
+
+            if( segment->GetIntersectionVertexCount() )
+            {
+                segment->GetPath()->SetPaintingCode( mPaintingCode );
+            }
         }
 
         // create near-intersections
@@ -803,7 +812,7 @@ FOdysseyVectorGroupPaint::BuildGraph()
             }
         }
 
-        if( ( intersectionCount ) || ( path->IsLoop() == true ) || ( gapSegmentCount ) )
+        if( ( path->IsLoop() == true ) || ( gapSegmentCount ) )
         {
             // acts as a boolean flag
             path->SetPaintingCode( mPaintingCode );
@@ -860,7 +869,7 @@ FOdysseyVectorGroupPaint::BuildGraph()
         }
     }
 
-UE_LOG(LogTemp, Warning, TEXT("%d %d"), mSectionBuffer.size(), mGapSegmentBuffer.size() );
+//UE_LOG(LogTemp, Warning, TEXT("%d %d"), mSectionBuffer.size(), mGapSegmentBuffer.size() );
 }
 
 void
@@ -915,7 +924,6 @@ FOdysseyVectorGroupPaint::SimplifyGraph()
             {
                 if( section->GetSegment() )
                 {
-
                     if( ( section->GetVertex(0)->GetSectionCount() == 1 )
                     ||  ( section->GetVertex(1)->GetSectionCount() == 1 ) )
                     {

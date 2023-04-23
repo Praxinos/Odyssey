@@ -7,12 +7,20 @@ FOdysseyVectorVertexIntersection::~FOdysseyVectorVertexIntersection()
 }
 
 FOdysseyVectorVertexIntersection::FOdysseyVectorVertexIntersection( FOdysseyVectorPath* iPath
+                                                                  , bool iSelfIntersects
                                                                   , double iX
                                                                   , double iY
                                                                   , double iT )
     : FOdysseyVectorVertex ( iPath, iX, iY, 0.0f )
 {
     mT = iT;
+    mSelfIntersects = iSelfIntersects;
+}
+
+bool 
+FOdysseyVectorVertexIntersection::SelfIntersects()
+{
+    return mSelfIntersects;
 }
 
 uint32

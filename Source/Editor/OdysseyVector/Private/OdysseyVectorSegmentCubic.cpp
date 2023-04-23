@@ -668,8 +668,8 @@ FOdysseyVectorSegmentCubic::Intersect( FOdysseyVectorSegment* iOther
                         if( ( segmentT != 0.0f && iOtherT != 1.0f )
                          && ( segmentT != 1.0f && iOtherT != 0.0f ) )
                         {
-                            FOdysseyVectorVertexIntersection* intersectionVertex[2] = { new FOdysseyVectorVertexIntersection( nullptr, coords.x, coords.y, segmentT )
-                                                                                      , new FOdysseyVectorVertexIntersection( nullptr, coords.x, coords.y, iOtherT  ) };
+                            FOdysseyVectorVertexIntersection* intersectionVertex[2] = { new FOdysseyVectorVertexIntersection( nullptr, ( this == iOther ), coords.x, coords.y, segmentT )
+                                                                                      , new FOdysseyVectorVertexIntersection( nullptr, ( this == iOther ), coords.x, coords.y, iOtherT  ) };
 
                             iIntersectionArray.push_back( new FOdysseyVectorIntersection( intersectionVertex[0], intersectionVertex[1] ) );
 

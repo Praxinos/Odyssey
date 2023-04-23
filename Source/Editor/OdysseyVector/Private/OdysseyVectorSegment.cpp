@@ -114,6 +114,7 @@ FOdysseyVectorSegment::AddIntersection ( FOdysseyVectorVertexIntersection* iInte
                                                                              , mIntersectionVertexList.end()
                                                                              , [&t,this]( FOdysseyVectorVertexIntersection* iVertex )
                                                                                {
+
                                                                                    return ( iVertex->GetT( this ) > t );
                                                                                } );
 

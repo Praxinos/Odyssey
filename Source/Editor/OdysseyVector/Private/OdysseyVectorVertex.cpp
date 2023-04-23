@@ -105,6 +105,7 @@ FOdysseyVectorVertex::SetNearestSegment( FOdysseyVectorSegment* iNearestSegment
     mNearestSegment = iNearestSegment;
     mDistanceToNearestSegment = iDistanceToNearestSegment;
     mNearestSegmentT = iNearestSegmentT;
+    mNearestVertex = nullptr;
 }
 
 void
