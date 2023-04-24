@@ -8,7 +8,8 @@
 class UOdysseyAnimation;
 class UOdysseyAnimationPlayer;
 
-class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineHeader : public SCompoundWidget
+class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineHeader
+	: public SOdysseyAnimationTimelineWidget
 {
 public:
 	DECLARE_DELEGATE_OneParam(FOnOffsetChanged, float)
@@ -16,22 +17,12 @@ public:
 
 public:
 	SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineHeader)
-		: _Animation(nullptr)
-		, _Player(nullptr)
-		, _FrameWidth(50.f)
-		, _Zoom(1.0f)
-		, _Offset(0.0f)
 	{}
-		SLATE_ARGUMENT(UOdysseyAnimation*, Animation)
-		SLATE_ARGUMENT(UOdysseyAnimationPlayer*, Player)
-		SLATE_ATTRIBUTE(float, FrameWidth)
-		SLATE_ATTRIBUTE(float, Zoom)
-		SLATE_ATTRIBUTE(float, Offset)
-		SLATE_EVENT(FOnOffsetChanged, OnOffsetChanged)
-		SLATE_EVENT(FOnZoomChanged, OnZoomChanged)
 	SLATE_END_ARGS()
 
-	void Construct(const FArguments& InArgs);
+	void Construct(
+		const FArguments& InArgs,
+		TSharedPtr<SOdysseyAnimationLayerStack> iLayerStackWidget);
 
 	// SWidget interface
 	virtual int32 OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const override;
@@ -39,22 +30,8 @@ public:
 	virtual FReply OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
 	virtual FReply OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
 	virtual FReply OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
-	// End of SWidget interface
+	// End of SWidget interfacepublic:
 
 private:
-	//Events
-	FOnZoomChanged 				mOnZoomChanged;
-	FOnOffsetChanged 			mOnOffsetChanged;
-
-	//Attributes
-	UOdysseyAnimation*			mAnimation;
-	UOdysseyAnimationPlayer*	mPlayer;
-	TAttribute<float> 			mFrameWidth;
-	TAttribute<float> 			mZoom;
-	TAttribute<float> 			mOffset;
-
-	//State
-	FVector2D 					mOffsetMousePosition;
-	bool 						mIsOffsetting;
-    bool 						mIsScrubbing;
+	bool mIsScrubbing = false;
 };

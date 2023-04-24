@@ -14,9 +14,19 @@ SOdysseyAnimationLayerImageRasterTimeline::~SOdysseyAnimationLayerImageRasterTim
     UOdysseyAnimationLayerImageRaster::OnCellsChanged().RemoveAll(this);
 }
 
-void SOdysseyAnimationLayerImageRasterTimeline::Construct(const FArguments& InArgs, UOdysseyAnimationLayerImageRaster* iAnimationLayerImageRaster)
+void SOdysseyAnimationLayerImageRasterTimeline::Construct(
+    const FArguments& InArgs,
+    TSharedPtr<SOdysseyAnimationLayerStack> iLayerStackWidget,
+    UOdysseyAnimationLayerImageRaster* iAnimationLayerImageRaster
+)
 {
     ensure(iAnimationLayerImageRaster);
+    
+	SOdysseyAnimationTimelineWidget::Construct(
+		SOdysseyAnimationTimelineWidget::FArguments(),
+        iLayerStackWidget
+	);
+    
     mAnimationLayerImageRaster = iAnimationLayerImageRaster;
     UOdysseyAnimationLayerImageRaster::OnCellsChanged().AddRaw(this, &SOdysseyAnimationLayerImageRasterTimeline::OnCellsChanged);
 
@@ -41,8 +51,8 @@ SOdysseyAnimationLayerImageRasterTimeline::OnGenerateRow(TSharedPtr<FOdysseyAnim
         return SNew(STableRow<TSharedPtr<FOdysseyAnimationCell>>, iOwnerTable)
             [
                 SNew(SBox)
-                .HeightOverride(50.f) //TODO: Move the size in an other widget or directly in the view or track itself
-                .WidthOverride(50.f)
+                .WidthOverride_Raw(this, &SOdysseyAnimationLayerImageRasterTimeline::GetCellWidth)
+                .HeightOverride_Raw(this, &SOdysseyAnimationLayerImageRasterTimeline::GetCellHeight)
                 .HAlign(HAlign_Fill)
                 .VAlign(VAlign_Fill)
                 [
@@ -65,6 +75,18 @@ SOdysseyAnimationLayerImageRasterTimeline::OnCellsChanged(UOdysseyAnimationLayer
         return;
 
     mListView->RebuildList();
+}
+
+FOptionalSize
+SOdysseyAnimationLayerImageRasterTimeline::GetCellWidth() const
+{
+    return GetLayerStackWidget()->GetTimelineFrameWidth();
+}
+
+FOptionalSize
+SOdysseyAnimationLayerImageRasterTimeline::GetCellHeight() const
+{
+    return GetLayerStackWidget()->GetTimelineBaseFrameSize();
 }
 
 #undef LOCTEXT_NAMESPACE

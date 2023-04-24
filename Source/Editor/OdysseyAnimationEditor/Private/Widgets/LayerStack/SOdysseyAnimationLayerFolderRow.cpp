@@ -7,18 +7,23 @@
 #include "Widgets/Input/SNumericEntryBox.h"
 #include "OdysseyStyleSet.h"
 #include "LayerStack/Layers/LayerFolder/OdysseyAnimationLayerFolder.h"
+#include "Widgets/LayerStack/SOdysseyAnimationLayerStack.h"
 
 #define LOCTEXT_NAMESPACE "SOdysseyAnimationLayerFolderRow"
 
 //CONSTRUCTION/DESTRUCTION----------------------------------------------- SMultiColumnTableRow
-void SOdysseyAnimationLayerFolderRow::Construct(const FArguments& InArgs, const TSharedRef<SOdysseyLayerStackTreeView>& iOwnerTableView, UOdysseyAnimationLayerFolder* iAnimationLayerFolder)
+void SOdysseyAnimationLayerFolderRow::Construct(
+    const FArguments& iArgs,
+    TSharedPtr<SOdysseyAnimationLayerStack> iLayerStackWidget,
+    class UOdysseyAnimationLayerFolder* iAnimationLayerFolder
+)
 {
     ensure(iAnimationLayerFolder);
     mAnimationLayerFolder = iAnimationLayerFolder;
 
-    SOdysseyLayerRow::Construct(
-        SOdysseyLayerRow::FArguments(),
-        iOwnerTableView,
+    SOdysseyAnimationLayerRow::Construct(
+        SOdysseyAnimationLayerRow::FArguments(),
+        iLayerStackWidget,
 		iAnimationLayerFolder
     );
 

@@ -6,6 +6,8 @@
 #include "CoreMinimal.h"
 #include "Widgets/SOdysseyLayerRow.h"
 
+class SOdysseyAnimationLayerStack;
+
 /**
  * Implements a layer row widget
  */
@@ -18,8 +20,21 @@ public:
     SLATE_END_ARGS()
 
 public:
+    void Construct(
+        const FArguments& iArgs,
+        TSharedPtr<SOdysseyAnimationLayerStack> iLayerStackWidget,
+        class UOdysseyAnimationLayer* iLayer
+    );
+
+public:
+    TSharedPtr<SOdysseyAnimationLayerStack> GetLayerStackWidget() const;
+
+public:
     virtual TSharedRef<SWidget> GenerateWidgetForColumn( const FName& InColumnName ) override;
 
 protected:
     virtual TSharedRef<SWidget> GenerateTimelineWidget();
+
+private:
+    TWeakPtr<SOdysseyAnimationLayerStack> mLayerStackWidget;
 };

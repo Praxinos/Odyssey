@@ -8,7 +8,7 @@
 FOdysseyAnimationCell::FOnLengthChanged&
 FOdysseyAnimationCell::OnLengthChanged()
 {
-    static FOnLengthChanged& onLengthChanged;
+    static FOnLengthChanged onLengthChanged;
     return onLengthChanged;
 }
 
@@ -25,7 +25,7 @@ void
 FOdysseyAnimationCell::SetLength(int iLength)
 {
     mLength = iLength;
-    OnLengthChanged().Broadcast(this);
+    OnLengthChanged().Broadcast(AsShared());
 }
 
 int

@@ -6,6 +6,11 @@
 
 #define LOCTEXT_NAMESPACE "SOdysseyAnimationLayerStack"
 
+//Define base frame width to be 50 pixels
+#define BASE_FRAMEWIDTH 50.f
+#define MIN_ZOOM 0.01f
+#define MAX_ZOOM 1.0f
+#define ZOOM_STEP 0.08f
 
 SOdysseyAnimationLayerStack::~SOdysseyAnimationLayerStack()
 {
@@ -15,8 +20,9 @@ SOdysseyAnimationLayerStack::SOdysseyAnimationLayerStack()
     : mAnimation(nullptr)
     , mPlayer(nullptr)
     , mTreeView()
-    , mZoom(1.0f)
-    , mOffset(0.0f)
+    , mTimelineZoom(1.f)
+	, mTimelineOffset(0.f)
+	, mTimelineScrollBar(nullptr)
 {
 }
 
@@ -39,12 +45,7 @@ SOdysseyAnimationLayerStack::Construct(const FArguments& InArgs)
                 .VAlignCell(VAlign_Fill)
                 .HAlignCell(HAlign_Fill)
                 [
-                    SNew(SOdysseyAnimationTimelineHeader)
-                    .Animation(mAnimation)
-                    .Player(mPlayer)
-                    .FrameWidth(50.f)
-                    .Zoom(this, &SOdysseyAnimationLayerStack::GetZoom)
-                    .Offset(this, &SOdysseyAnimationLayerStack::GetOffset)
+                    SNew(SOdysseyAnimationTimelineHeader, SharedThis(this))
                 ]
             }
         )
@@ -59,26 +60,81 @@ SOdysseyAnimationLayerStack::OnGenerateRow(UOdysseyLayer* iLayer, const TSharedR
     UClass* layerClass = iLayer->GetClass();
     if (layerClass == UOdysseyAnimationLayerFolder::StaticClass())
     {
-        return SNew(SOdysseyAnimationLayerFolderRow, mTreeView.ToSharedRef(), Cast<UOdysseyAnimationLayerFolder>(iLayer));
+        return SNew(SOdysseyAnimationLayerFolderRow, SharedThis(this), Cast<UOdysseyAnimationLayerFolder>(iLayer));
     }
     else if (layerClass == UOdysseyAnimationLayerImageRaster::StaticClass())
     {
-        return SNew(SOdysseyAnimationLayerImageRasterRow, mTreeView.ToSharedRef(), Cast<UOdysseyAnimationLayerImageRaster>(iLayer));
+        return SNew(SOdysseyAnimationLayerImageRasterRow, SharedThis(this), Cast<UOdysseyAnimationLayerImageRaster>(iLayer));
     }
 
-    return SNew(SOdysseyLayerRow, mTreeView.ToSharedRef(), Cast<UOdysseyLayer>(iLayer)); //Default widget
+    return SNew(SOdysseyAnimationLayerRow, SharedThis(this), Cast<UOdysseyAnimationLayer>(iLayer)); //Default widget
+}
+
+UOdysseyAnimation*
+SOdysseyAnimationLayerStack::GetAnimation() const
+{
+    return mAnimation;
+}
+
+UOdysseyAnimationPlayer*
+SOdysseyAnimationLayerStack::GetPlayer() const
+{
+    return mPlayer;
+}
+
+TSharedPtr<SOdysseyLayerStackTreeView>
+SOdysseyAnimationLayerStack::GetTreeView() const
+{
+    return mTreeView;
+}
+
+void
+SOdysseyAnimationLayerStack::TimelineZoomIn()
+{
+	mTimelineZoom = FMath::Clamp(mTimelineZoom * (1.0f - ZOOM_STEP), MIN_ZOOM, MAX_ZOOM);
+}
+
+void
+SOdysseyAnimationLayerStack::TimelineZoomOut()
+{
+	mTimelineZoom = FMath::Clamp(mTimelineZoom * (1.0f + ZOOM_STEP), MIN_ZOOM, MAX_ZOOM);
+}
+
+void
+SOdysseyAnimationLayerStack::SetTimelineZoom(float iZoom)
+{
+	mTimelineZoom = iZoom;
+}
+
+void
+SOdysseyAnimationLayerStack::SetTimelineOffset( float iOffset )
+{
+    mTimelineOffset = iOffset;
 }
 
 float
-SOdysseyAnimationLayerStack::GetZoom() const
+SOdysseyAnimationLayerStack::GetTimelineBaseFrameSize()
 {
-    return mZoom;
+	return BASE_FRAMEWIDTH;
 }
 
 float
-SOdysseyAnimationLayerStack::GetOffset() const
+SOdysseyAnimationLayerStack::GetTimelineFrameWidth() const
 {
-    return mOffset;
+	return BASE_FRAMEWIDTH * mTimelineZoom;
+}
+
+float
+SOdysseyAnimationLayerStack::GetTimelineZoom() const
+{
+	return mTimelineZoom;
+}
+
+float
+SOdysseyAnimationLayerStack::GetTimelineOffset() const
+{
+    //TODO: use SScrollBar offset to define that offset
+	return mTimelineOffset;
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -6,6 +6,8 @@
 #include "CoreMinimal.h"
 #include "Widgets/LayerStack/SOdysseyAnimationLayerRow.h"
 
+class SOdysseyAnimationLayerStack;
+
 /**
  * Implements a layer row widget
  */
@@ -19,7 +21,11 @@ public:
 
 public:
     // Construction / Destruction
-    void Construct(const FArguments& iArgs, const TSharedRef<SOdysseyLayerStackTreeView>& iOwnerTableView, class UOdysseyAnimationLayerImageRaster* iAnimationLayerImageRaster);
+    void Construct(
+        const FArguments& iArgs,
+        TSharedPtr<SOdysseyAnimationLayerStack> iLayerStackWidget,
+        class UOdysseyAnimationLayerImageRaster* iAnimationLayerImageRaster
+    );
 
 private:
     virtual TSharedRef<SWidget> GenerateHeaderWidget() override;

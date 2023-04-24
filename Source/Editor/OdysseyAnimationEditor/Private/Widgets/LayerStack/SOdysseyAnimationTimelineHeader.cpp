@@ -13,29 +13,19 @@
 // SOdysseyAnimationTimelineHeader
 
 void
-SOdysseyAnimationTimelineHeader::Construct(const FArguments& InArgs)
+SOdysseyAnimationTimelineHeader::Construct(
+	const FArguments& InArgs,
+	TSharedPtr<SOdysseyAnimationLayerStack> iLayerStackWidget
+)
 {
-	mAnimation = InArgs._Animation;
-	mPlayer = InArgs._Player;
-	mZoom = InArgs._Zoom;
-    mOffset = InArgs._Offset;
-	mFrameWidth = InArgs._FrameWidth;
-	
-	mOnOffsetChanged = InArgs._OnOffsetChanged;
-	mOnZoomChanged = InArgs._OnZoomChanged;
-
-	mIsOffsetting = false;
-    mIsScrubbing = false;
-
-	/* ChildSlot
-	[
-	]; */
+	SOdysseyAnimationTimelineWidget::Construct(
+		SOdysseyAnimationTimelineWidget::FArguments(),
+		iLayerStackWidget
+	);
 }
 
 int32 SOdysseyAnimationTimelineHeader::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
 {
-	const bool bActiveFeedback = IsHovered() || mIsScrubbing;
-
 	const FSlateBrush* GenericBrush = FCoreStyle::Get().GetBrush( "GenericWhiteBox" );
 	const FLinearColor& backgroundColorEven = FOdysseyStyle::GetColor("ScrubWidget.backgroundColorEven");
 	const FLinearColor& backgroundColorOdd = FOdysseyStyle::GetColor("ScrubWidget.backgroundColorOdd");
@@ -48,13 +38,10 @@ int32 SOdysseyAnimationTimelineHeader::OnPaint(const FPaintArgs& Args, const FGe
 	const FSlateFontInfo textFontInfo = FCoreStyle::GetDefaultFontStyle("Regular", 10);
 	const FSlateBrush* backgroundBrush = FAppStyle::GetBrush( TEXT( "ProgressBar.Background" ) );
 
-	// const bool bEnabled = ShouldBeEnabled( bParentEnabled );
-	// const ESlateDrawEffect DrawEffects = bEnabled ? ESlateDrawEffect::None : ESlateDrawEffect::DisabledEffect;
-
-	const float height = AllottedGeometry.GetLocalSize().Y;
+	const float height = AllottedGeometry.GetLocalSize().Y;  
 	const float width = AllottedGeometry.GetLocalSize().X;
-	float offset = mOffset.Get();
-	const float frameSize = mFrameWidth.Get() * mZoom.Get();
+	float offset = GetLayerStackWidget()->GetTimelineOffset();
+	const float frameSize = GetLayerStackWidget()->GetTimelineFrameWidth();
 	const float frameNumberMinSize = 30.f;
 	const int32 frameNumberFrequency = FMath::Max(1, FGenericPlatformMath::CeilToInt(frameNumberMinSize / frameSize));
 	int32 startKey = FGenericPlatformMath::FloorToInt(offset);
@@ -76,20 +63,6 @@ int32 SOdysseyAnimationTimelineHeader::OnPaint(const FPaintArgs& Args, const FGe
 			ESlateDrawEffect::None,
 			InWidgetStyle.GetColorAndOpacityTint() * backgroundColor
 		);
-
-		//Draw key line
-		/* const FVector2D pos(x, 0.f);
-		const FVector2D size(1, height);
-		FSlateDrawElement::MakeBox(
-			OutDrawElements,
-			backgroundLayer,
-			AllottedGeometry.ToPaintGeometry(pos, size),
-			backgroundBrush,
-			ESlateDrawEffect::None,
-			InWidgetStyle.GetColorAndOpacityTint()
-			); */
-
-
 
 		//Draw key num
 		if (!(keyNum % frameNumberFrequency))
@@ -118,7 +91,7 @@ int32 SOdysseyAnimationTimelineHeader::OnPaint(const FPaintArgs& Args, const FGe
 	FLinearColor lineColor = FLinearColor::Red;
 	lineColor.A = 0.3f;
 
-	int currentFrame = mAnimation->CurrentFrame;
+	int currentFrame = GetLayerStackWidget()->GetAnimation()->CurrentFrame;
 	float currentFramePos = currentFrame * frameSize;
 
 	FSlateDrawElement::MakeBox(
@@ -132,7 +105,7 @@ int32 SOdysseyAnimationTimelineHeader::OnPaint(const FPaintArgs& Args, const FGe
 
 	//Draw Current Time
 
-	float currentTime = mPlayer->GetCurrentTime().GetTotalSeconds() * mAnimation->GetFramesPerSecond();
+	float currentTime = GetLayerStackWidget()->GetPlayer()->GetCurrentTime().GetTotalSeconds() * GetLayerStackWidget()->GetAnimation()->GetFramesPerSecond();
 	float currentTimePos = currentTime * frameSize;
 
 	FSlateDrawElement::MakeBox(
@@ -144,31 +117,6 @@ int32 SOdysseyAnimationTimelineHeader::OnPaint(const FPaintArgs& Args, const FGe
 		FLinearColor::Red
 	);
 
-	/*
-	
-	const float linePosition = ( mScrubPosition - offset) * frameSize;
-	
-	FLinearColor lineColor = FLinearColor::Red;
-	lineColor.A = 0.3f;
-
-	FSlateDrawElement::MakeBox(
-		OutDrawElements,
-		LayerId,
-		AllottedGeometry.ToPaintGeometry(FVector2D(linePosition - 8.0f, 0.f), FVector2D(17.0f, height)),
-		GenericBrush,
-		ESlateDrawEffect::None,
-		lineColor
-	);
-
-	FSlateDrawElement::MakeBox(
-		OutDrawElements,
-		LayerId,
-		AllottedGeometry.ToPaintGeometry(FVector2D(linePosition - 1.0f, 0.f), FVector2D(3.0f, height)),
-		GenericBrush,
-		ESlateDrawEffect::None,
-		FLinearColor::Red
-	);*/
-
 	return LayerId;
 }
 
@@ -176,13 +124,14 @@ FReply SOdysseyAnimationTimelineHeader::OnMouseWheel(const FGeometry& MyGeometry
 {
 	if (MouseEvent.IsControlDown())
 	{
-		const float minZoom = 0.01f;
-		const float maxZoom = 1.0f;
-		const float directionScale = 0.08f;
-		const float direction = MouseEvent.GetWheelDelta();
-
-		float zoom = mZoom.Get() * (1.0f + direction * directionScale);
-		mOnZoomChanged.ExecuteIfBound(zoom);
+		if (MouseEvent.GetWheelDelta() > 0.f)
+		{
+			GetLayerStackWidget()->TimelineZoomOut();
+		}
+		else
+		{
+			GetLayerStackWidget()->TimelineZoomIn();
+		}
 		return FReply::Handled();
 	}
 	else
@@ -191,81 +140,67 @@ FReply SOdysseyAnimationTimelineHeader::OnMouseWheel(const FGeometry& MyGeometry
 	}
 }
 
-FReply SOdysseyAnimationTimelineHeader::OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
+FReply 
+SOdysseyAnimationTimelineHeader::OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
+	FReply reply = SOdysseyAnimationTimelineWidget::OnMouseButtonDown(MyGeometry, MouseEvent);
+	if (reply.IsEventHandled())
+		return reply;
+	
 	if (MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
 	{
-		if (MouseEvent.IsControlDown())
-		{
-			mIsOffsetting = true;
-			mOffsetMousePosition = MouseEvent.GetScreenSpacePosition();
-			mOffsetMousePosition.Y = mOffset.Get();
-			return FReply::Handled();
-		}
-		else 
-		{
-			mIsScrubbing = true;
+		mIsScrubbing = true;
 
-			const float minScrub = 0.0f;
-			float frame = (MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition()).X / mFrameWidth.Get() + mOffset.Get());
-			FTimespan time = FTimespan::FromSeconds(frame / mAnimation->GetFramesPerSecond());
-			mPlayer->Stop();
-			mPlayer->SeekToTime(time);
+		const float minScrub = 0.0f;
+		float frame = (MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition()).X / GetLayerStackWidget()->GetTimelineFrameWidth() + GetLayerStackWidget()->GetTimelineOffset());
+		FTimespan time = FTimespan::FromSeconds(frame / GetLayerStackWidget()->GetAnimation()->GetFramesPerSecond());
+		GetLayerStackWidget()->GetPlayer()->Stop();
+		GetLayerStackWidget()->GetPlayer()->SeekToTime(time);
 
-			// This has prevent throttling on so that viewports continue to run whilst dragging the slider
-			return FReply::Handled().CaptureMouse( SharedThis(this) ).PreventThrottling();
-		}
+		// This has prevent throttling on so that viewports continue to run whilst dragging the slider
+		return FReply::Handled().CaptureMouse( SharedThis(this) ).PreventThrottling();
 	}
-	else
-	{
-		return FReply::Unhandled();
-	}
+
+	return FReply::Unhandled();
 }
 
-FReply SOdysseyAnimationTimelineHeader::OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
+FReply
+SOdysseyAnimationTimelineHeader::OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
-	if (mIsOffsetting)
-	{
-		const float minOffset = 0.0f;
-		float mouseOffset = MouseEvent.GetScreenSpacePosition().X - mOffsetMousePosition.X;
-		float offset = FMath::Max(minOffset, mOffsetMousePosition.Y - (mouseOffset / mFrameWidth.Get())); //mOffsetMousePosition.Y contains the starting offset instead of the Y position
-		mOnOffsetChanged.ExecuteIfBound(offset);
-		return FReply::Handled();
-	}
-	else if(mIsScrubbing)
+	FReply reply = SOdysseyAnimationTimelineWidget::OnMouseMove(MyGeometry, MouseEvent);
+	if (reply.IsEventHandled())
+		return reply;
+
+	if(mIsScrubbing)
 	{
 		const float minScrub = 0.0f;
-		float frame = MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition()).X / mFrameWidth.Get() + mOffset.Get();
-		FTimespan time = FTimespan::FromSeconds(frame / mAnimation->GetFramesPerSecond());
-		mPlayer->SeekToTime(time);
+		float frame = MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition()).X / GetLayerStackWidget()->GetTimelineFrameWidth() + GetLayerStackWidget()->GetTimelineOffset();
+		FTimespan time = FTimespan::FromSeconds(frame / GetLayerStackWidget()->GetAnimation()->GetFramesPerSecond());
+		GetLayerStackWidget()->GetPlayer()->SeekToTime(time);
 		return FReply::Handled();
 	}
-	else
-	{
-		return FReply::Unhandled();
-	}
+	
+	return FReply::Unhandled();
 }
 
-FReply SOdysseyAnimationTimelineHeader::OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
+FReply
+SOdysseyAnimationTimelineHeader::OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
-	if (mIsOffsetting)
-	{
-		mIsOffsetting = false;
-		return FReply::Handled();
-	}
-	else if (mIsScrubbing)
+	FReply reply = SOdysseyAnimationTimelineWidget::OnMouseButtonUp(MyGeometry, MouseEvent);
+	if (reply.IsEventHandled())
+		return reply;
+
+	if (mIsScrubbing)
 	{
 		const float minScrub = 0.0f;
-		float frame = MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition()).X / mFrameWidth.Get() + mOffset.Get();
-		FOdysseyObjectEditorUtils::SetPropertyValue(mAnimation, "CurrentFrame", (int)frame);
+		float frame = MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition()).X / GetLayerStackWidget()->GetTimelineFrameWidth() + GetLayerStackWidget()->GetTimelineOffset();
+		FOdysseyObjectEditorUtils::SetPropertyValue(GetLayerStackWidget()->GetAnimation(), "CurrentFrame", (int)frame);
 		
 		mIsScrubbing = false;
 		return FReply::Handled().ReleaseMouseCapture();
 	}
-	else
-	{
-		return FReply::Unhandled();
-	}
+	
+	return FReply::Unhandled();
 }
 
 //////////////////////////////////////////////////////////////////////////

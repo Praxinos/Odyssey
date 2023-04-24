@@ -4,12 +4,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Widgets/LayerStack/SOdysseyAnimationTimelineWidget.h"
 
 /**
  * Implements a layer row widget
  */
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerImageRasterTimeline
-    : public SCompoundWidget
+    : public SOdysseyAnimationTimelineWidget
 {
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationLayerImageRasterTimeline)
@@ -19,11 +20,18 @@ public:
 public:
     // Construction / Destruction
     ~SOdysseyAnimationLayerImageRasterTimeline();
-    void Construct(const FArguments& iArgs, class UOdysseyAnimationLayerImageRaster* iAnimationLayerImageRaster);
+    void Construct(
+        const FArguments& iArgs, 
+        TSharedPtr<SOdysseyAnimationLayerStack> iLayerStackWidget,
+        class UOdysseyAnimationLayerImageRaster* iAnimationLayerImageRaster
+    );
 
 private:
     TSharedRef<ITableRow> OnGenerateRow(TSharedPtr<FOdysseyAnimationCell> iCell, const TSharedRef<STableViewBase>& iOwnerTable);
     void OnCellsChanged(class UOdysseyAnimationLayerImageRaster* iLayer);
+
+    FOptionalSize GetCellWidth() const;
+    FOptionalSize GetCellHeight() const;
 
 private:
     class UOdysseyAnimationLayerImageRaster* mAnimationLayerImageRaster;

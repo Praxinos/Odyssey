@@ -6,18 +6,23 @@
 #include "OdysseyStyleSet.h"
 #include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
 #include "Widgets/LayerStack/LayerImageRaster/SOdysseyAnimationLayerImageRasterTimeline.h"
+#include "Widgets/LayerStack/SOdysseyAnimationLayerStack.h"
 
 #define LOCTEXT_NAMESPACE "SOdysseyAnimationLayerImageRasterRow"
 
 //CONSTRUCTION/DESTRUCTION----------------------------------------------- SMultiColumnTableRow
-void SOdysseyAnimationLayerImageRasterRow::Construct(const FArguments& InArgs, const TSharedRef<SOdysseyLayerStackTreeView>& iOwnerTableView, UOdysseyAnimationLayerImageRaster* iAnimationLayerImageRaster)
+void SOdysseyAnimationLayerImageRasterRow::Construct(
+    const FArguments& InArgs,
+    TSharedPtr<SOdysseyAnimationLayerStack> iLayerStackWidget,
+    UOdysseyAnimationLayerImageRaster* iAnimationLayerImageRaster
+)
 {
     ensure(iAnimationLayerImageRaster);
     mAnimationLayerImageRaster = iAnimationLayerImageRaster;
 
-    SOdysseyLayerRow::Construct(
-        SOdysseyLayerRow::FArguments(),
-        iOwnerTableView,
+    SOdysseyAnimationLayerRow::Construct(
+        SOdysseyAnimationLayerRow::FArguments(),
+        iLayerStackWidget,
 		iAnimationLayerImageRaster
     );
 
@@ -106,7 +111,7 @@ SOdysseyAnimationLayerImageRasterRow::GenerateOptionsWidget()
 TSharedRef<SWidget>
 SOdysseyAnimationLayerImageRasterRow::GenerateTimelineWidget()
 {
-    return SNew(SOdysseyAnimationLayerImageRasterTimeline, mAnimationLayerImageRaster);
+    return SNew(SOdysseyAnimationLayerImageRasterTimeline, GetLayerStackWidget(), mAnimationLayerImageRaster);
 }
 
 void

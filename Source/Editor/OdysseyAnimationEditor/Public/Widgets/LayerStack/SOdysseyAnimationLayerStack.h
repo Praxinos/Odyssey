@@ -28,17 +28,31 @@ public:
     
     void Construct(const FArguments& InArgs);
 
-private:
-    TSharedRef<ITableRow> OnGenerateRow(UOdysseyLayer* iLayer, const TSharedRef<STableViewBase>& iOwnerTable);
+    UOdysseyAnimation* GetAnimation() const;
+    UOdysseyAnimationPlayer* GetPlayer() const;
+    TSharedPtr<SOdysseyLayerStackTreeView> GetTreeView() const;
+
+
+    void TimelineZoomIn();
+    void TimelineZoomOut();
+
+
+	void SetTimelineZoom(float iZoom);
+	void SetTimelineOffset(float iOffset);
+
+	static float GetTimelineBaseFrameSize();
+	float GetTimelineFrameWidth() const;
+	float GetTimelineZoom() const;
+	float GetTimelineOffset() const;
 
 private:
-    float GetZoom() const;
-    float GetOffset() const;
+    TSharedRef<ITableRow> OnGenerateRow(UOdysseyLayer* iLayer, const TSharedRef<STableViewBase>& iOwnerTable);
 
 private:
     UOdysseyAnimation* mAnimation;
     UOdysseyAnimationPlayer* mPlayer;
     TSharedPtr<SOdysseyLayerStackTreeView> mTreeView;
-    float mZoom;
-    float mOffset;
+	float mTimelineZoom;
+	float mTimelineOffset;
+	TSharedPtr<SScrollBar> mTimelineScrollBar;
 };
