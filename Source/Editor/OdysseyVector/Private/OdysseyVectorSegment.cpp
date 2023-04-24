@@ -201,3 +201,11 @@ FOdysseyVectorSegment::Draw( ::ULIS::FRectD &iRoi )
 {
 
 }
+
+::ULIS::FVec2D
+FOdysseyVectorSegment::GetVectorFromVertex( FOdysseyVectorVertex* iVertex, bool iNormalize )
+{
+    ::ULIS::FVec2D vector = ::ULIS::FVec2D( 0.0f, 0.0f );
+
+    return vector;
+}

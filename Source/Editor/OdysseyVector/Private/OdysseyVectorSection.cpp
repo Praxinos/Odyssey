@@ -4,9 +4,15 @@ FOdysseyVectorSection::~FOdysseyVectorSection()
 {
 }
 
+FOdysseyVectorSection::FOdysseyVectorSection()
+{
+    Init( nullptr, nullptr, nullptr );
+}
+
 FOdysseyVectorSection::FOdysseyVectorSection( FOdysseyVectorSegment* iSegment
                                             , FOdysseyVectorVertex* iVertex0
                                             , FOdysseyVectorVertex* iVertex1 )
+    : FOdysseyVectorSection()
 {
     Init( iSegment, iVertex0, iVertex1 );
 }
@@ -19,6 +25,8 @@ FOdysseyVectorSection::Init( FOdysseyVectorSegment* iSegment
     mSegment = iSegment;
     mVertex[0] = iVertex0;
     mVertex[1] = iVertex1;
+    mCycle[0] = nullptr;
+    mCycle[1] = nullptr;
     mCycleCount = 0;
     mFlags = 0;
 }
@@ -39,10 +47,6 @@ FOdysseyVectorSection::GetVectorFromVertex( FOdysseyVectorVertex* iVertex, bool 
         {
              tangent = ( iVertex == mVertex[0] ) ?  mSegment->GetTangentAt( iVertex->GetT( mSegment ) )
                                                  : -mSegment->GetTangentAt( iVertex->GetT( mSegment ) );
-
-    /*
-    return mSegment->GetTangentAt( iVertex->GetT( *mSegment ) );
-    */
         }
     }
 
@@ -55,12 +59,6 @@ FOdysseyVectorSection::GetVectorFromVertex( FOdysseyVectorVertex* iVertex, bool 
     }
 
     return tangent;
-}
-
-void
-FOdysseyVectorSection::IncrementCycleCount()
-{
-    mCycleCount++;
 }
 
 void 
@@ -94,6 +92,18 @@ bool
 FOdysseyVectorSection::IsLinked()
 {
     return ( mFlags & LINKED ) ? true : false;
+}
+
+void
+FOdysseyVectorSection::AddCycle( FOdysseyVectorCycle* iCycle )
+{
+    mCycle[mCycleCount++] = iCycle;
+}
+
+FOdysseyVectorCycle*
+FOdysseyVectorSection::GetOtherCycle( FOdysseyVectorCycle* iCycle )
+{
+    return ( mCycle[0] == iCycle ) ? mCycle[1] : mCycle[0];
 }
 
 void

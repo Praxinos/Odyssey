@@ -138,7 +138,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
 
         /**
          * @brief Recursive function that traverses the graph and find cycles.
-         * @param iInitiatorIntersection
          * @param iReturnSection
          * @param iVertex the vertex being explored, either intersection vertex or regular ones.
          * @param iSection the section that will take us to the next vertex.
@@ -148,8 +147,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
          * @param iDepth current recursion depth.
          * @return iCubicSegment the segment.
          */
-        uint32 FindPath( FOdysseyVectorIntersection* iInitiatorIntersection
-                       , FOdysseyVectorSection* iReturnSection
+        uint32 FindPath( FOdysseyVectorSection* iReturnSection
                        , FOdysseyVectorVertex* iVertex
                        , FOdysseyVectorSection* iSection
                        , std::vector<FOdysseyVectorVertex*>& oVertexArray
@@ -185,6 +183,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
          * @param iVertex intersection vertex.
          */
         uint32 MarchIntersection( FOdysseyVectorIntersection* iIntersection );
+
+        uint32 MarchGapSegment( FOdysseyVectorSegmentCubic* iGapSegment );
+
+        void PropagateBuckets();
 
     protected:
         static const uint32 NOCYCLE  = 0;

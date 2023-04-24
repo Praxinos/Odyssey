@@ -10,9 +10,9 @@ FOdysseyVectorCycle::~FOdysseyVectorCycle()
 
 //static
 FOdysseyVectorCycle::FOdysseyVectorCycle( FOdysseyVectorObject& iParent
-                                      , uint64 iID
-                                      , std::vector<FOdysseyVectorVertex*>& iVertexArray
-                                      , std::vector<FOdysseyVectorSection*>& iSectionArray )
+                                        , uint64 iID
+                                        , std::vector<FOdysseyVectorVertex*>& iVertexArray
+                                        , std::vector<FOdysseyVectorSection*>& iSectionArray )
     : mParent( iParent )
     , mID( iID )
     , mBucket( nullptr )
@@ -20,6 +20,7 @@ FOdysseyVectorCycle::FOdysseyVectorCycle( FOdysseyVectorObject& iParent
     , mSectionArray (iSectionArray)
     , mFlags (0)
     , mParentCycle( nullptr )
+    , mPropagated( false )
 {
     Build( mVertexArray, mSectionArray );
 }
@@ -189,6 +190,8 @@ FOdysseyVectorCycle::Build( std::vector<FOdysseyVectorVertex*>& iVertexArray
             FOdysseyVectorVertex* vertexi = iVertexArray[i];
             FOdysseyVectorVertex* vertexn = iVertexArray[n];
 
+            section->AddCycle( this );
+
             if( vertexn->GetClass() == FOdysseyVectorVertexIntersection::StaticClass() )
             {
                 FOdysseyVectorVertexIntersection* intersectionVertex = static_cast<FOdysseyVectorVertexIntersection*>(vertexn);
@@ -239,6 +242,46 @@ FOdysseyVectorBucket*
 FOdysseyVectorCycle::GetBucket()
 {
     return mBucket;
+}
+
+void
+FOdysseyVectorCycle::SetPropagated( bool iPropagated )
+{
+    mPropagated = iPropagated;
+}
+
+bool
+FOdysseyVectorCycle::IsPropagated()
+{
+    return mPropagated;
+}
+
+void
+FOdysseyVectorCycle::PropagateBucket()
+{
+    if( mBucket )
+    {
+        for( int i = 0; i < mSectionArray.size(); i++ )
+        {
+            FOdysseyVectorCycle* otherCycle = mSectionArray[i]->GetOtherCycle( this );
+
+            if( otherCycle )
+            {
+                if( otherCycle->GetBucket() == nullptr )
+                {
+                    otherCycle->SetBucket( mBucket );
+                }
+            }
+        }
+    }
+
+    SetPropagated( true );
+}
+
+std::vector<FOdysseyVectorSection*>&
+FOdysseyVectorCycle::GetSectionArray()
+{
+    return mSectionArray;
 }
 
 bool

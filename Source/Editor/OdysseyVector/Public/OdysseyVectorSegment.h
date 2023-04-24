@@ -8,6 +8,7 @@
 #include "OdysseyVectorSection.h"
 #include "OdysseyVectorLink.h"
 
+class FOdysseyVectorObject;
 class FOdysseyVectorPath;
 
 class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
@@ -45,7 +46,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
          */
         virtual void Draw( ::ULIS::FRectD &iRoi );
 
-        virtual void DrawStructure( ::ULIS::FRectD &iRoi, bool iWorld ){};
+        virtual void DrawStructure( FOdysseyVectorObject* iParentObject, ::ULIS::FRectD &iRoi, bool iWorld ){};
 
         uint32 GetIntersectionVertexCount();
 
@@ -142,6 +143,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
         virtual uint32 Intersect( FOdysseyVectorSegment* iOther
                                 , double iTolerance
                                 , std::vector<FOdysseyVectorIntersection*>& iIntersectionArray ){ return 0; };
+
+        virtual ::ULIS::FVec2D GetVectorFromVertex( FOdysseyVectorVertex* iVertex, bool iNormalize );
 
     protected:
         std::list<FOdysseyVectorVertexIntersection*> mIntersectionVertexList;

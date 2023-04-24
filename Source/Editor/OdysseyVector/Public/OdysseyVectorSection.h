@@ -8,6 +8,7 @@
 
 class FOdysseyVectorSegment;
 class FOdysseyVectorVertex;
+class FOdysseyVectorCycle;
 
 // TODO: inherit from FOdysseyVectorLink ? answer : no, because links should not have
 // intersection vertices as endpoints as there is no way to know which segments they are on
@@ -18,7 +19,7 @@ class FOdysseyVectorSection
          * @brief default destructor
          */
         ~FOdysseyVectorSection();
-        FOdysseyVectorSection(){};
+        FOdysseyVectorSection();
 
        /**
          * @brief constructor
@@ -64,11 +65,6 @@ class FOdysseyVectorSection
         ::ULIS::FVec2D GetVectorFromVertex( FOdysseyVectorVertex* iVertex, bool iStraight, bool iNormalize );
 
        /**
-         * @brief Increment the number of cycles connected to this section. 
-         */
-        void IncrementCycleCount();
-
-       /**
          * @brief Block the section for traversal from the vertex passed as parameter. Used by the GroupPaint class.
          * @param iVertex
          */
@@ -91,11 +87,15 @@ class FOdysseyVectorSection
         void Link();
         void Unlink();
 
+        void AddCycle( FOdysseyVectorCycle* iCycle );
+        FOdysseyVectorCycle* GetOtherCycle( FOdysseyVectorCycle* iCycle );
+
     protected:
         FOdysseyVectorSegment* mSegment;
         FOdysseyVectorVertex* mVertex[2];
         uint32 mFlags;
         uint32 mCycleCount;
+        FOdysseyVectorCycle* mCycle[2]; // there are 2 cycles per section at most. No need for a complicated container.
 
     private:
         static const uint32 BLOCKVERTEX0 = ( 1 << 0 );

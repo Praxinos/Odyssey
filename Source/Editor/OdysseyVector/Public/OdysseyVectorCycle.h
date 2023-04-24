@@ -123,6 +123,12 @@ class ODYSSEYVECTOR_API FOdysseyVectorCycle
          */
         uint64 GetID();
 
+        std::vector<FOdysseyVectorSection*>& GetSectionArray();
+
+        bool IsPropagated();
+        void PropagateBucket();
+        void SetPropagated( bool iPropagated );
+
     protected :
         BLPath mPath;
         FOdysseyVectorObject& mParent;
@@ -135,4 +141,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorCycle
         ::ULIS::FVec2D mMax;
         std::list<FOdysseyVectorCycle*> mChildrenList;
         FOdysseyVectorCycle* mParentCycle;
+        bool mPropagated;
 };

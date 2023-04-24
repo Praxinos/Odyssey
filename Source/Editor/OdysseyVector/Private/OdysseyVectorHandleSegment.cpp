@@ -58,3 +58,12 @@ FOdysseyVectorHandleSegment::Set( double iX, double iY )
 
     mParentSegment->Invalidate();
 }
+
+void 
+FOdysseyVectorHandleSegment::Set( const ::ULIS::FVec2D& iCoords )
+{
+    mCoords.x = iCoords.x;
+    mCoords.y = iCoords.y;
+
+    mParentSegment->Invalidate();
+}

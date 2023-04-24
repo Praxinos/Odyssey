@@ -35,6 +35,12 @@ FOdysseyVectorVertexIntersection::SetIntersection( FOdysseyVectorIntersection* i
     mIntersection = iIntersection;
 }
 
+FOdysseyVectorIntersection*
+FOdysseyVectorVertexIntersection::GetIntersection()
+{
+    return mIntersection;
+}
+
 double
 FOdysseyVectorVertexIntersection::GetT( FOdysseyVectorSegment* iSegment )
 {

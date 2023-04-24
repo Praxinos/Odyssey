@@ -157,6 +157,23 @@ FOdysseyVectorSegmentCubic::GetPointAt( double t )
 }
 
 ::ULIS::FVec2D
+FOdysseyVectorSegmentCubic::GetVectorFromVertex( FOdysseyVectorVertex* iVertex, bool iNormalize )
+{
+    ::ULIS::FVec2D tangent = ( iVertex == mPoint[0] ) ?  GetTangentAt( 0.0f )
+                                                      : -GetTangentAt( 1.0f );
+
+    if( iNormalize )
+    {
+        if( tangent.DistanceSquared() )
+        {
+            tangent.Normalize();
+        }
+    }
+
+    return tangent;
+}
+
+::ULIS::FVec2D
 FOdysseyVectorSegmentCubic::GetTangentAt( double t )
 {
     ::ULIS::FVec2D& point0 = GetVertex(0)->GetCoords();
@@ -172,7 +189,7 @@ FOdysseyVectorSegmentCubic::GetTangentAt( double t )
 
         if( dif0.Distance() == 0.0f )
         {
-            t = 0.01f;
+            t = 0.0001f;
         }
     }
 
@@ -182,7 +199,7 @@ FOdysseyVectorSegmentCubic::GetTangentAt( double t )
 
         if( dif1.Distance() == 0.0f )
         {
-            t = 0.99f;
+            t = 0.9999f;
         }
     }
 
@@ -603,11 +620,13 @@ IntersectVertices( FOdysseyVectorVertex* iVertex0, FOdysseyVectorVertex* iVertex
             {
                 if( distance < iVertex0->GetDistanceToNearestSegment() )
                 {
+                    //FOdysseyVectorSegment* segment0 = iVertex0->GetFirstSegment();
                     FOdysseyVectorSegment* segment1 = iVertex1->GetFirstSegment();
-                    double t = iVertex1->GetT( segment1 );
+                    //double t0 = iVertex0->GetT( segment0 );
+                    double t1 = iVertex1->GetT( segment1 );
 
-                    iVertex0->SetNearestSegment( segment1, distance, t );
-                    iVertex1->SetNearestSegment( nullptr, distance, t ); // set as null so that only one endpoints creates the section but we still have a valid distance check.
+                    iVertex0->SetNearestSegment( segment1, distance, t1 );
+                    //iVertex1->SetNearestSegment( segment0, distance, t0 ); // set as null so that only one endpoints creates the section but we still have a valid distance check.
                 }
             }
         }
@@ -782,6 +801,11 @@ FOdysseyVectorSegmentCubic::Intersect( FOdysseyVectorSegment* iOther
         IntersectVertices( vertex0, otherVertex1, iTolerance );
         IntersectVertices( vertex1, otherVertex0, iTolerance );
         IntersectVertices( vertex1, otherVertex1, iTolerance );
+
+        IntersectVertices( otherVertex0, vertex0, iTolerance );
+        IntersectVertices( otherVertex0, vertex1, iTolerance );
+        IntersectVertices( otherVertex1, vertex0, iTolerance );
+        IntersectVertices( otherVertex1, vertex1, iTolerance );
     }
 /*
     if( shortestP0Distance < 3.0f )
@@ -808,29 +832,26 @@ std::vector<FPolygon>&
 }
 
 void
-FOdysseyVectorSegmentCubic::DrawStructure( ::ULIS::FRectD &iRoi, bool iWorld )
+FOdysseyVectorSegmentCubic::DrawStructure( FOdysseyVectorObject* iParentObject, ::ULIS::FRectD &iRoi, bool iWorld )
 {
-    if( mPath )
-    {
-        BLContext* blctx = mPath->GetScene()->GetEngine()->GetBLContext();
-        BLMatrix2D& worldMatrix = mPath->GetWorldMatrix();
-        FOdysseyVectorVertex* vertex0 = GetVertex(0);
-        FOdysseyVectorVertex* vertex1 = GetVertex(1);
-        FOdysseyVectorHandleSegment* handle0 = GetHandle(0);
-        FOdysseyVectorHandleSegment* handle1 = GetHandle(1);
-        BLPoint point0 = iWorld ? worldMatrix.mapPoint( vertex0->GetX(), vertex0->GetY() ) : BLPoint( vertex0->GetX(), vertex0->GetY() );
-        BLPoint point1 = iWorld ? worldMatrix.mapPoint( vertex1->GetX(), vertex1->GetY() ) : BLPoint( vertex1->GetX(), vertex1->GetY() );
-        BLPoint handlePoint0 = iWorld ? worldMatrix.mapPoint( handle0->GetX(), handle0->GetY() ) : BLPoint( handle0->GetX(), handle0->GetY() );
-        BLPoint handlePoint1 = iWorld ? worldMatrix.mapPoint( handle1->GetX(), handle1->GetY() ) : BLPoint( handle1->GetX(), handle1->GetY() );
-        BLPath path;
+    BLContext* blctx = iParentObject->GetScene()->GetEngine()->GetBLContext();
+    BLMatrix2D& worldMatrix = iParentObject->GetWorldMatrix();
+    FOdysseyVectorVertex* vertex0 = GetVertex(0);
+    FOdysseyVectorVertex* vertex1 = GetVertex(1);
+    FOdysseyVectorHandleSegment* handle0 = GetHandle(0);
+    FOdysseyVectorHandleSegment* handle1 = GetHandle(1);
+    BLPoint point0 = iWorld ? worldMatrix.mapPoint( vertex0->GetX(), vertex0->GetY() ) : BLPoint( vertex0->GetX(), vertex0->GetY() );
+    BLPoint point1 = iWorld ? worldMatrix.mapPoint( vertex1->GetX(), vertex1->GetY() ) : BLPoint( vertex1->GetX(), vertex1->GetY() );
+    BLPoint handlePoint0 = iWorld ? worldMatrix.mapPoint( handle0->GetX(), handle0->GetY() ) : BLPoint( handle0->GetX(), handle0->GetY() );
+    BLPoint handlePoint1 = iWorld ? worldMatrix.mapPoint( handle1->GetX(), handle1->GetY() ) : BLPoint( handle1->GetX(), handle1->GetY() );
+    BLPath path;
 
-        path.moveTo( point0 );
-        path.cubicTo( handlePoint0
-                    , handlePoint1
-                    , point1 );
+    path.moveTo( point0 );
+    path.cubicTo( handlePoint0
+                , handlePoint1
+                , point1 );
 
-        blctx->strokePath( path );
-    }
+    blctx->strokePath( path );
 }
 
 void

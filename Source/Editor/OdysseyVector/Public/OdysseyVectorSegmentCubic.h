@@ -96,7 +96,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
          */
         virtual void Draw( ::ULIS::FRectD &iRoi ) override;
 
-        virtual void DrawStructure( ::ULIS::FRectD &iRoi, bool iWorld ) override;
+        virtual void DrawStructure( FOdysseyVectorObject* iParentObject, ::ULIS::FRectD &iRoi, bool iWorld ) override;
 
        /**
          * @brief Get the segment's bounding box.
@@ -228,6 +228,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
         FOdysseyVectorSegmentCubic* Sample( double iFromT
                                           , double iToT
                                           , std::vector<FOdysseyVectorVertex*>& oNewVertexArray );
+
+        virtual ::ULIS::FVec2D GetVectorFromVertex( FOdysseyVectorVertex* iVertex, bool iNormalize ) override;
 
     private:
         void BuildVariableAdaptive( double  iFromT

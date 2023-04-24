@@ -56,6 +56,30 @@ FOdysseyVectorGroupPaint::GetBucketList()
 }
 
 void
+FOdysseyVectorGroupPaint::PropagateBuckets()
+{
+    bool doPropagate = true;
+
+    while( doPropagate == true )
+    {
+        doPropagate = false;
+
+        for( int i = 0; i < mCycleArray.size(); i++ )
+        {
+            FOdysseyVectorCycle *cycle = mCycleArray[i];
+            FOdysseyVectorBucket* bucket = cycle->GetBucket();
+
+            if( cycle->IsPropagated() == false )
+            {
+                cycle->PropagateBucket();
+
+                doPropagate = true;
+            }
+        }
+    }
+}
+
+void
 FOdysseyVectorGroupPaint::Colorize()
 {
     // reset color for all cycles first
@@ -64,6 +88,7 @@ FOdysseyVectorGroupPaint::Colorize()
         FOdysseyVectorCycle *cycle = mCycleArray[i];
 
         cycle->SetBucket( nullptr );
+        cycle->SetPropagated( false );
     }
 
     for( std::list<FOdysseyVectorBucket*>::iterator lit = mBucketList.begin(); lit != mBucketList.end(); ++lit )
@@ -72,6 +97,8 @@ FOdysseyVectorGroupPaint::Colorize()
 
         ApplyBucket( bucket );
     }
+
+    PropagateBuckets();
 }
 
 void
@@ -238,11 +265,28 @@ FOdysseyVectorGroupPaint::DrawBuckets( ::ULIS::FRectD& iRoi,uint64 iFlags )
 void
 FOdysseyVectorGroupPaint::DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
+    BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
+
     for( int i = 0; i < mCycleArray.size(); i++ )
     {
         FOdysseyVectorCycle *cycle = mCycleArray[i];
 
         cycle->Draw( iRoi, iFlags );
+    }
+
+    if( iFlags & FOdysseyVectorObject::DRAWSTRUCTURE )
+    {
+        blctx->save();
+        blctx->resetMatrix();
+        blctx->setStrokeWidth( 1.0f );
+        blctx->setStrokeStyle( BLRgba32( 0xFF0000FF ) );
+
+        for( int i = 0; i < mGapSegmentBuffer.size(); i++ )
+        {
+            mGapSegmentBuffer[i].DrawStructure( this, iRoi, true );
+        }
+
+        blctx->restore();
     }
 }
 
@@ -279,13 +323,38 @@ CreateVertexGapSegment( FOdysseyVectorVertex* iVertex
         uint32 sectionCount = iSectionBuffer.size();
         uint32 gapCount = iGapSegmentBuffer.size();
 
-        iGapSegmentBuffer.emplace_back();
-        iGapSegmentBuffer[gapCount].Init( nullptr, nearestVertex, iVertex );
-        iGapSegmentBuffer[gapCount].Update();
+        // if both vertices are regular vertices, only the one with the highest ptr has the right to create the segment
+        if( ( ( nearestVertex->GetNearestVertex() == iVertex )  && ( iVertex > nearestVertex ) )
+        ||    ( nearestVertex->GetNearestVertex() != iVertex )
+        // or if the nearest vertex is an intersection vertex.
+        ||    ( nearestVertex->GetClass() == FOdysseyVectorVertexIntersection::StaticClass() ) )
+        {
+            iGapSegmentBuffer.emplace_back();
+            iGapSegmentBuffer[gapCount].Init( nullptr, nearestVertex, iVertex );
 
-        iSectionBuffer.emplace_back();
-        iSectionBuffer[sectionCount].Init( &iGapSegmentBuffer[gapCount], nearestVertex, iVertex );
-        iSectionBuffer[sectionCount].Link();
+            iSectionBuffer.emplace_back();
+            iSectionBuffer[sectionCount].Init( &iGapSegmentBuffer[gapCount], nearestVertex, iVertex );
+            iSectionBuffer[sectionCount].Link();
+
+            ::ULIS::FVec2D delta = iVertex->GetCoords() - nearestVertex->GetCoords();
+            double length = delta.Distance() * 0.33f;
+
+            if( iVertex->GetClass() != FOdysseyVectorVertexIntersection::StaticClass() )
+            {
+                ::ULIS::FVec2D vertexVector = iVertex->GetFirstSegment()->GetVectorFromVertex( iVertex, true );
+
+                iGapSegmentBuffer[gapCount].GetHandle(1)->Set( iVertex->GetCoords() - ( vertexVector * length ) );
+            }
+
+            if( nearestVertex->GetClass() != FOdysseyVectorVertexIntersection::StaticClass() )
+            {
+                ::ULIS::FVec2D vertexVector = nearestVertex->GetFirstSegment()->GetVectorFromVertex( nearestVertex, true );
+
+                iGapSegmentBuffer[gapCount].GetHandle(0)->Set( nearestVertex->GetCoords() - ( vertexVector * length ) );
+            }
+
+            iGapSegmentBuffer[gapCount].Update();
+        }
     }
 }
 
@@ -433,8 +502,7 @@ NextSection( FOdysseyVectorVertex* iNextVertex, FOdysseyVectorSection* iSection 
 }
 */
 uint32
-FOdysseyVectorGroupPaint::FindPath( FOdysseyVectorIntersection* iInitiatorIntersection
-                                  , FOdysseyVectorSection* iReturnSection
+FOdysseyVectorGroupPaint::FindPath( FOdysseyVectorSection* iReturnSection
                                   , FOdysseyVectorVertex* iVertex
                                   , FOdysseyVectorSection* iSection
                                   , std::vector<FOdysseyVectorVertex*>& iVertexArray
@@ -450,6 +518,7 @@ FOdysseyVectorGroupPaint::FindPath( FOdysseyVectorIntersection* iInitiatorInters
     bool hasTertiary = false;
     uint32 ret = FOdysseyVectorGroupPaint::NOCYCLE;
     static int i;
+    bool isLoop = false;
 
     iSectionArray.push_back( iSection );
     iVertexArray.push_back( iVertex );
@@ -457,8 +526,20 @@ FOdysseyVectorGroupPaint::FindPath( FOdysseyVectorIntersection* iInitiatorInters
 
     //UE_LOG(LogTemp, Warning, TEXT("exploring section:") );
     //PrintSection( iSection );
+    // loop checking if initiator is of type 
+    if( iVertexArray[0]->GetClass() == FOdysseyVectorVertexIntersection::StaticClass() )
+    {
+        FOdysseyVectorVertexIntersection* intersectionVertex = static_cast<FOdysseyVectorVertexIntersection*>(iVertexArray[0]);
 
-    if( ( iInitiatorIntersection->HasVertex( static_cast<FOdysseyVectorVertexIntersection*>(nextVertex) ) )// cycle detected
+        isLoop = intersectionVertex->GetIntersection()->HasVertex( static_cast<FOdysseyVectorVertexIntersection*>(nextVertex) );
+    }
+
+    if( iVertexArray[0]->GetClass() == FOdysseyVectorVertex::StaticClass() )
+    {
+        isLoop = ( iVertexArray[0] == nextVertex );
+    }
+
+    if( ( isLoop == true )// cycle detected
     && ( ( ( iReturnSection->IsLinked() == true ) && ( iReturnSection == iSection ) ) // 1 return path accepted
            || ( iReturnSection->IsLinked() == false ) ) ) // any return path accepted
     {
@@ -486,7 +567,7 @@ FOdysseyVectorGroupPaint::FindPath( FOdysseyVectorIntersection* iInitiatorInters
         //UE_LOG(LogTemp,Warning,TEXT("primary") );
                 if( primaryNextSection->IsBlocked( nextVertex ) == false )
                 {
-                    ret = FindPath( iInitiatorIntersection, iReturnSection, nextVertex, primaryNextSection, iVertexArray, iSectionArray, iOrientation, iDepth + 1 );
+                    ret = FindPath( iReturnSection, nextVertex, primaryNextSection, iVertexArray, iSectionArray, iOrientation, iDepth + 1 );
                 }
                 else
                 {
@@ -508,7 +589,7 @@ FOdysseyVectorGroupPaint::FindPath( FOdysseyVectorIntersection* iInitiatorInters
         //UE_LOG(LogTemp,Warning,TEXT("primary") );
                 if( primaryNextSection->IsBlocked( nextPartnerVertex ) == false )
                 {
-                    ret = FindPath( iInitiatorIntersection, iReturnSection, nextPartnerVertex, primaryNextSection, iVertexArray, iSectionArray, iOrientation, iDepth + 1 );
+                    ret = FindPath( iReturnSection, nextPartnerVertex, primaryNextSection, iVertexArray, iSectionArray, iOrientation, iDepth + 1 );
                 }
                 else
                 {
@@ -521,7 +602,7 @@ FOdysseyVectorGroupPaint::FindPath( FOdysseyVectorIntersection* iInitiatorInters
         //UE_LOG(LogTemp,Warning,TEXT("secondary") );
                 if( secondaryNextSection->IsBlocked( nextIntersectionVertex ) == false )
                 {
-                    ret = FindPath( iInitiatorIntersection, iReturnSection, nextIntersectionVertex, secondaryNextSection, iVertexArray, iSectionArray, iOrientation, iDepth + 1 );
+                    ret = FindPath( iReturnSection, nextIntersectionVertex, secondaryNextSection, iVertexArray, iSectionArray, iOrientation, iDepth + 1 );
                 }
                 else
                 {
@@ -534,7 +615,7 @@ FOdysseyVectorGroupPaint::FindPath( FOdysseyVectorIntersection* iInitiatorInters
        //UE_LOG(LogTemp,Warning,TEXT("tertiary") );
                 if( tertiaryNextSection->IsBlocked( nextPartnerVertex ) == false )
                 {
-                    ret = FindPath( iInitiatorIntersection, iReturnSection, nextPartnerVertex, tertiaryNextSection, iVertexArray, iSectionArray, iOrientation, iDepth + 1 );
+                    ret = FindPath( iReturnSection, nextPartnerVertex, tertiaryNextSection, iVertexArray, iSectionArray, iOrientation, iDepth + 1 );
                 }
                 else
                 {
@@ -625,16 +706,10 @@ FOdysseyVectorGroupPaint::MarchIntersection( FOdysseyVectorIntersection* iInters
 {
     std::vector<FExplorationPair>& explorationPairs = iIntersection->GetExplorationPairs();
 
-    //UE_LOG(LogTemp,Warning,TEXT("vertex :%f %f (sections :%d)"), iIntersectionVertex->GetCoords().x, iIntersectionVertex->GetCoords().y, iIntersectionVertex->GetSectionCount() );
-
-    //PrintVertex( iIntersection );
-
     for( uint32 i = 0; i < explorationPairs.size(); i++ )
     {
         if( explorationPairs[i].departSection )
         {
-            /*if( ( explorationPairs[i].returnSection->IsLinked() == true )
-             && ( explorationPairs[i].departSection->IsLinked() == true ) )*/
             if( explorationPairs[i].departSection->IsLinked() == true )
             {
                 FOdysseyVectorVertex* partnerVertex = explorationPairs[i].intersectionVertex->GetPartner();
@@ -644,8 +719,7 @@ FOdysseyVectorGroupPaint::MarchIntersection( FOdysseyVectorIntersection* iInters
                     std::vector<FOdysseyVectorVertex*> vertexArray;
                     std::vector<FOdysseyVectorSection*> sectionArray;
 
-                    uint32 ret = FindPath( iIntersection
-                                         , explorationPairs[i].returnSection
+                    uint32 ret = FindPath( explorationPairs[i].returnSection
                                          , partnerVertex // is on departSection
                                          , explorationPairs[i].departSection
                                          , vertexArray
@@ -653,6 +727,39 @@ FOdysseyVectorGroupPaint::MarchIntersection( FOdysseyVectorIntersection* iInters
                                          , 1.0f
                                          , 0 );
                 }
+            }
+        }
+    }
+
+    return 0;
+}
+
+uint32
+FOdysseyVectorGroupPaint::MarchGapSegment( FOdysseyVectorSegmentCubic* iGapSegment )
+{
+    FOdysseyVectorVertex* vertex0 = iGapSegment->GetVertex(0);
+    FOdysseyVectorVertex* vertex1 = iGapSegment->GetVertex(1);
+
+    if( ( vertex0->GetClass() == FOdysseyVectorVertex::StaticClass() )
+     && ( vertex1->GetClass() == FOdysseyVectorVertex::StaticClass() ) )
+    {
+        FOdysseyVectorSection* returnSection = vertex0->GetSection( iGapSegment );
+        FOdysseyVectorSection* departSection = vertex0->GetOtherSection( returnSection, false );
+
+        if( departSection ) // departSection can be nullptr after graph simplification
+        {                   //  when obtained from FOdysseyVectorVertex::GetSection() as it is removed from topology
+            if( departSection->IsBlocked( vertex0 ) == false )
+            {
+                std::vector<FOdysseyVectorVertex*> vertexArray;
+                std::vector<FOdysseyVectorSection*> sectionArray;
+
+                uint32 ret = FindPath( returnSection
+                                     , vertex0 // is on departSection
+                                     , departSection
+                                     , vertexArray
+                                     , sectionArray
+                                     , 1.0f
+                                     , 0 );
             }
         }
     }
@@ -704,10 +811,16 @@ FOdysseyVectorGroupPaint::FindCycles()
 
     SimplifyGraph();
 
-    // explore the graph
+    // explore the graph from intersections
     for( int i = 0; i < mIntersectionArray.size(); i++ )
     {
         MarchIntersection( mIntersectionArray[i] );
+    }
+
+    // explore the graph from gaps
+    for(int i = 0; i < mGapSegmentBuffer.size(); i++)
+    {
+        MarchGapSegment( &mGapSegmentBuffer[i] );
     }
 
     CheckLoops();
@@ -717,12 +830,12 @@ FOdysseyVectorGroupPaint::FindCycles()
     Colorize();
 }
 
-static uint32
+static FOdysseyVectorVertex*
 CreateNearIntersection( FOdysseyVectorVertex *iVertex
                       , std::vector<FOdysseyVectorIntersection*>& iIntersectionArray )
 {
     FOdysseyVectorSegment *nearestSegment = iVertex->GetNearestSegment();
-    uint32 neededIntersectionCount = 0;
+    FOdysseyVectorVertex* nearestVertex = nullptr;
 
     if( nearestSegment )
     {
@@ -730,9 +843,9 @@ CreateNearIntersection( FOdysseyVectorVertex *iVertex
 
         if( ( nearestSegmentT == 0.0f ) || ( nearestSegmentT == 1.0f ) )
         {
-            FOdysseyVectorVertex* nearestSegmentVertex = iVertex->GetNearestSegment()->GetVertex( (int) nearestSegmentT );
+            nearestVertex = iVertex->GetNearestSegment()->GetVertex( (int) nearestSegmentT );
 
-            iVertex->SetNearestVertex( nearestSegmentVertex );
+            iVertex->SetNearestVertex( nearestVertex );
         }
         else
         {
@@ -745,15 +858,15 @@ CreateNearIntersection( FOdysseyVectorVertex *iVertex
 
             nearestSegment->AddIntersection( intersectionVertex[0] );
 
-            neededIntersectionCount++;
+            nearestVertex = intersectionVertex[1];
 
-            iVertex->SetNearestVertex( intersectionVertex[1] );
+            iVertex->SetNearestVertex( nearestVertex );
         }
 
         //UE_LOG(LogTemp,Warning,TEXT("GetSectionCount: %d %d"),intersectionVertex[0]->GetSectionCount(),intersectionVertex[1]->GetSectionCount());
     }
 
-    return neededIntersectionCount;
+    return nearestVertex;
 }
 
 void
@@ -804,10 +917,13 @@ FOdysseyVectorGroupPaint::BuildGraph()
 
             if( vertex->GetNearestSegment() )
             {
-                gapSegmentCount++;
-
-                intersectionCount += CreateNearIntersection( vertex, mIntersectionArray );
-
+                FOdysseyVectorVertex* nearestVertex = CreateNearIntersection( vertex, mIntersectionArray );
+/*
+                if( nearestVertex->GetClass() == FOdysseyVectorVertexIntersection::StaticClass() )
+                {
+                    intersectionCount++;
+                }
+*/
                 vertex->GetNearestVertex()->GetPath()->SetPaintingCode( mPaintingCode );
             }
         }
@@ -817,8 +933,6 @@ FOdysseyVectorGroupPaint::BuildGraph()
             // acts as a boolean flag
             path->SetPaintingCode( mPaintingCode );
         }
-
-        totalGapSegmentCount += gapSegmentCount;
 
         pathList.pop_front(); // we don't need the path anymore. By and by the list will empty by itself.
     }
@@ -837,8 +951,32 @@ FOdysseyVectorGroupPaint::BuildGraph()
             for( std::list<FOdysseyVectorSegment*>::iterator sit = segmentList.begin(); sit != segmentList.end(); ++sit )
             {
                 FOdysseyVectorSegment *segment = (*sit);
+                FOdysseyVectorVertex* vertex0 = segment->GetVertex(0);
+                FOdysseyVectorVertex* vertex1 = segment->GetVertex(1);
+                FOdysseyVectorVertex* nearestVertex0 = vertex0->GetNearestVertex();
+                FOdysseyVectorVertex* nearestVertex1 = vertex1->GetNearestVertex();
 
                 totalSectionCount += ( 1 + segment->GetIntersectionVertexCount() );
+
+                if( nearestVertex0 )
+                {
+                    if( ( ( nearestVertex0->GetNearestVertex() == vertex0 ) && ( vertex0 > nearestVertex0 ) )
+                       || ( nearestVertex0->GetNearestVertex() != vertex0 ) ) // Note : intersections don't have nearest vertices.
+                    {
+                        totalGapSegmentCount++;
+                        totalSectionCount++;
+                    }
+                }
+
+                if( nearestVertex1 )
+                {
+                    if( ( ( nearestVertex1->GetNearestVertex() == vertex1 ) && ( vertex1 > nearestVertex1 ) )
+                       || ( nearestVertex1->GetNearestVertex() != vertex1 ) ) // Note : intersections don't have nearest vertices.
+                    {
+                        totalGapSegmentCount++;
+                        totalSectionCount++;
+                    }
+                }
             }
         }
     }
@@ -849,6 +987,7 @@ FOdysseyVectorGroupPaint::BuildGraph()
     mSectionBuffer.reserve( totalSectionCount + totalGapSegmentCount );
 
     // create sections for exact intersections on each segment
+
     for( std::list<FOdysseyVectorObject*>::iterator oit = mChildrenList.begin(); oit != mChildrenList.end(); ++oit )
     {
         FOdysseyVectorPath *path = static_cast<FOdysseyVectorPath*>(*oit);
