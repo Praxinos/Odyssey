@@ -4,7 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Widgets/LayerStack/SOdysseyAnimationLayerRow.h"
+#include "Widgets/LayerStack/Layers/SOdysseyAnimationLayerRow.h"
 
 class SOdysseyAnimationLayerStack;
 

@@ -1,11 +1,11 @@
 // IDDN FR.001.250001.005.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
-#include "Widgets/LayerStack/SOdysseyAnimationLayerImageRasterRow.h"
+#include "Widgets/LayerStack/Layers/LayerImageRaster/SOdysseyAnimationLayerImageRasterRow.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "OdysseyStyleSet.h"
 #include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
-#include "Widgets/LayerStack/LayerImageRaster/SOdysseyAnimationLayerImageRasterTimeline.h"
+#include "Widgets/LayerStack/Layers/LayerImageRaster/SOdysseyAnimationLayerImageRasterTimeline.h"
 #include "Widgets/LayerStack/SOdysseyAnimationLayerStack.h"
 
 #define LOCTEXT_NAMESPACE "SOdysseyAnimationLayerImageRasterRow"
