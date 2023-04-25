@@ -12,9 +12,23 @@
 SOdysseyAnimationLayerImageRasterTimeline::~SOdysseyAnimationLayerImageRasterTimeline()
 {
     UOdysseyAnimationLayerImageRaster::OnCellsChanged().RemoveAll(this);
+
+    //
+    TSharedPtr<SOdysseyAnimationLayerStack> layerstackWidget = GetLayerStackWidget();
+    if (layerstackWidget)
+    {
+        layerstackWidget->OnTimelineOffsetChanged().RemoveAll(this);
+    }
 }
 
-void SOdysseyAnimationLayerImageRasterTimeline::Construct(
+SOdysseyAnimationLayerImageRasterTimeline::SOdysseyAnimationLayerImageRasterTimeline()
+    : mIsRefreshPending(false)
+{
+
+}
+
+void
+SOdysseyAnimationLayerImageRasterTimeline::Construct(
     const FArguments& InArgs,
     TSharedPtr<SOdysseyAnimationLayerStack> iLayerStackWidget,
     UOdysseyAnimationLayerImageRaster* iAnimationLayerImageRaster
@@ -22,50 +36,60 @@ void SOdysseyAnimationLayerImageRasterTimeline::Construct(
 {
     ensure(iAnimationLayerImageRaster);
     
+    SOdysseyAnimationTimelineWidget::FArguments args;
+    args.BaseOffset(4.f);
+
 	SOdysseyAnimationTimelineWidget::Construct(
-		SOdysseyAnimationTimelineWidget::FArguments(),
+		args,
         iLayerStackWidget
 	);
     
     mAnimationLayerImageRaster = iAnimationLayerImageRaster;
     UOdysseyAnimationLayerImageRaster::OnCellsChanged().AddRaw(this, &SOdysseyAnimationLayerImageRasterTimeline::OnCellsChanged);
-
-    ChildSlot
-    [
-        SAssignNew(mListView, SListView<TSharedPtr<FOdysseyAnimationCell>>)
-        .ListItemsSource(&mAnimationLayerImageRaster->GetCells())
-        .OnGenerateRow(this, &SOdysseyAnimationLayerImageRasterTimeline::OnGenerateRow)
-        //.ExternalScrollbar() //Should I use this
-        .Orientation(Orient_Horizontal)
-    ];
+    RequestRefresh();
 }
 
-TSharedRef<ITableRow>
-SOdysseyAnimationLayerImageRasterTimeline::OnGenerateRow(TSharedPtr<FOdysseyAnimationCell> iCell, const TSharedRef<STableViewBase>& iOwnerTable)
+void
+SOdysseyAnimationLayerImageRasterTimeline::RequestRefresh()
 {
-    check(iCell);
+    mIsRefreshPending = true;
+}
 
-    if (iCell->GetType() == FOdysseyAnimationCellImageRaster::StaticType())
+void
+SOdysseyAnimationLayerImageRasterTimeline::Tick( const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime )
+{
+    if ( mIsRefreshPending )
     {
-        //TODO: Create a SOdysseyAnimationLayerImageRasterCell widget
-        return SNew(STableRow<TSharedPtr<FOdysseyAnimationCell>>, iOwnerTable)
+        RefreshWidgets();
+        mIsRefreshPending = false;
+    }
+}
+
+void
+SOdysseyAnimationLayerImageRasterTimeline::RefreshWidgets()
+{
+
+    ClearChildren();
+
+    TArray<TSharedPtr<FOdysseyAnimationCell>>& cells = mAnimationLayerImageRaster->GetCells();
+    for (TSharedPtr<FOdysseyAnimationCell> cell : cells)
+    {
+        AddChild()
+        [
+            SNew(SBox)
+            .WidthOverride_Raw(this, &SOdysseyAnimationLayerImageRasterTimeline::GetCellWidth)
+            .HeightOverride_Raw(this, &SOdysseyAnimationLayerImageRasterTimeline::GetCellHeight)
+            .HAlign(HAlign_Fill)
+            .VAlign(VAlign_Fill)
             [
-                SNew(SBox)
-                .WidthOverride_Raw(this, &SOdysseyAnimationLayerImageRasterTimeline::GetCellWidth)
-                .HeightOverride_Raw(this, &SOdysseyAnimationLayerImageRasterTimeline::GetCellHeight)
+                SNew(SBorder)
+                .BorderImage(FOdysseyStyle::GetBrush("FlipbookTimeline.TimelineFrameBackground"))
+                .BorderBackgroundColor(FLinearColor(1.f, 1.f, 1.f))
                 .HAlign(HAlign_Fill)
                 .VAlign(VAlign_Fill)
-                [
-                    SNew(SBorder)
-                    .BorderImage(FOdysseyStyle::GetBrush("FlipbookTimeline.TimelineFrameBackground"))
-                    .BorderBackgroundColor(FLinearColor(1.f, 1.f, 1.f))
-                    .HAlign(HAlign_Fill)
-                    .VAlign(VAlign_Fill)
-                ]
-            ];
+            ]
+        ];
     }
-
-    return SNew(STableRow<TSharedPtr<FOdysseyAnimationCell>>, iOwnerTable);
 }
 
 void
@@ -74,7 +98,7 @@ SOdysseyAnimationLayerImageRasterTimeline::OnCellsChanged(UOdysseyAnimationLayer
     if (iLayer != mAnimationLayerImageRaster)
         return;
 
-    mListView->RebuildList();
+    RequestRefresh();
 }
 
 FOptionalSize

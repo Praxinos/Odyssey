@@ -34,22 +34,37 @@ SOdysseyAnimationLayerStack::Construct(const FArguments& InArgs)
     mPlayer = InArgs._Player;
     ChildSlot
     [
-        SAssignNew(mTreeView, SOdysseyLayerStackTreeView)
-        .LayerStack(mAnimation->GetLayerStack())
-        .OnGenerateRow(this, &SOdysseyAnimationLayerStack::OnGenerateRow)
-        .HeaderManualWidth(200.f)
-        .AdditionalColumns(
-            {
-                SHeaderRow::Column("Timeline")
-                .DefaultLabel(LOCTEXT("", ""))
-                .VAlignCell(VAlign_Fill)
-                .HAlignCell(HAlign_Fill)
-                [
-                    SNew(SOdysseyAnimationTimelineHeader, SharedThis(this))
-                ]
-            }
-        )
+        SNew(SVerticalBox)
+        +SVerticalBox::Slot()
+        .FillHeight(1.0f)
+        [
+            SAssignNew(mTreeView, SOdysseyLayerStackTreeView)
+            .LayerStack(mAnimation->GetLayerStack())
+            .OnGenerateRow(this, &SOdysseyAnimationLayerStack::OnGenerateRow)
+            .HeaderManualWidth(200.f)
+            .AdditionalColumns(
+                {
+                    SHeaderRow::Column("Timeline")
+                    .DefaultLabel(LOCTEXT("", ""))
+                    .VAlignCell(VAlign_Fill)
+                    .HAlignCell(HAlign_Fill)
+                    [
+                        SNew(SOdysseyAnimationTimelineHeader, SharedThis(this))
+                    ]
+                }
+            )
+        ]
+        +SVerticalBox::Slot()
+        .AutoHeight()
+        [
+            SAssignNew(mTimelineScrollBar, SScrollBar)
+            .Orientation( Orient_Horizontal )
+            .OnUserScrolled_Raw(this, &SOdysseyAnimationLayerStack::OnTimelineScrollBarScrolled)
+        ]
     ];
+
+    //Set Scrollbar Params
+    mTimelineScrollBar->SetState(0.f, 0.5f);
 }
 
 TSharedRef<ITableRow>
@@ -68,6 +83,19 @@ SOdysseyAnimationLayerStack::OnGenerateRow(UOdysseyLayer* iLayer, const TSharedR
     }
 
     return SNew(SOdysseyAnimationLayerRow, SharedThis(this), Cast<UOdysseyAnimationLayer>(iLayer)); //Default widget
+}
+
+void
+SOdysseyAnimationLayerStack::OnTimelineScrollBarScrolled(float iOffset)
+{
+    float visiblePercent = 0.5f;
+    float scrollbarOffset = FMath::Clamp(iOffset, 0.f, visiblePercent);
+    mTimelineScrollBar->SetState(scrollbarOffset, visiblePercent);
+
+    int lastFrameIndex = mAnimation->GetFrameRange().GetUpperBoundValue();
+    float offsetPercent = (scrollbarOffset / (1.f - visiblePercent));
+    SetTimelineOffset(offsetPercent * lastFrameIndex);
+    //Set mOffset
 }
 
 UOdysseyAnimation*
@@ -110,6 +138,7 @@ void
 SOdysseyAnimationLayerStack::SetTimelineOffset( float iOffset )
 {
     mTimelineOffset = iOffset;
+    mOnTimelineOffsetChanged.Broadcast();
 }
 
 float
@@ -135,6 +164,12 @@ SOdysseyAnimationLayerStack::GetTimelineOffset() const
 {
     //TODO: use SScrollBar offset to define that offset
 	return mTimelineOffset;
+}
+
+FSimpleMulticastDelegate&
+SOdysseyAnimationLayerStack::OnTimelineOffsetChanged()
+{
+    return mOnTimelineOffsetChanged;
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -43,7 +43,8 @@ SOdysseyAnimationLayerRow::GenerateWidgetForColumn( const FName& InColumnName )
 TSharedRef<SWidget>
 SOdysseyAnimationLayerRow::GenerateTimelineWidget()
 {
-    return SNullWidget::NullWidget;
+    return SNew(SOdysseyAnimationTimelineWidget, GetLayerStackWidget())
+        .BaseOffset(4.0f);
 }
 
 

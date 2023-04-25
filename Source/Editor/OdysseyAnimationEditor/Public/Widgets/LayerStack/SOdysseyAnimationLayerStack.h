@@ -32,10 +32,8 @@ public:
     UOdysseyAnimationPlayer* GetPlayer() const;
     TSharedPtr<SOdysseyLayerStackTreeView> GetTreeView() const;
 
-
     void TimelineZoomIn();
     void TimelineZoomOut();
-
 
 	void SetTimelineZoom(float iZoom);
 	void SetTimelineOffset(float iOffset);
@@ -45,8 +43,13 @@ public:
 	float GetTimelineZoom() const;
 	float GetTimelineOffset() const;
 
+public:
+    //Events
+    FSimpleMulticastDelegate& OnTimelineOffsetChanged();
+
 private:
     TSharedRef<ITableRow> OnGenerateRow(UOdysseyLayer* iLayer, const TSharedRef<STableViewBase>& iOwnerTable);
+    void OnTimelineScrollBarScrolled(float iOffset);
 
 private:
     UOdysseyAnimation* mAnimation;
@@ -55,4 +58,5 @@ private:
 	float mTimelineZoom;
 	float mTimelineOffset;
 	TSharedPtr<SScrollBar> mTimelineScrollBar;
+    FSimpleMulticastDelegate mOnTimelineOffsetChanged;
 };

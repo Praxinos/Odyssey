@@ -83,39 +83,7 @@ int32 SOdysseyAnimationTimelineHeader::OnPaint(const FPaintArgs& Args, const FGe
 		}
 	}
 
-	LayerId = SCompoundWidget::OnPaint( Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
-
-	// Draw a current frame
-	++LayerId;
-
-	FLinearColor lineColor = FLinearColor::Red;
-	lineColor.A = 0.3f;
-
-	int currentFrame = GetLayerStackWidget()->GetAnimation()->CurrentFrame;
-	float currentFramePos = currentFrame * frameSize;
-
-	FSlateDrawElement::MakeBox(
-		OutDrawElements,
-		LayerId,
-		AllottedGeometry.ToPaintGeometry(FVector2D(currentFramePos, 0.f), FVector2D(frameSize, height)),
-		GenericBrush,
-		ESlateDrawEffect::None,
-		lineColor
-	);
-
-	//Draw Current Time
-
-	float currentTime = GetLayerStackWidget()->GetPlayer()->GetCurrentTime().GetTotalSeconds() * GetLayerStackWidget()->GetAnimation()->GetFramesPerSecond();
-	float currentTimePos = currentTime * frameSize;
-
-	FSlateDrawElement::MakeBox(
-		OutDrawElements,
-		LayerId,
-		AllottedGeometry.ToPaintGeometry(FVector2D(currentTimePos, 0.f), FVector2D(1.f, height)),
-		GenericBrush,
-		ESlateDrawEffect::None,
-		FLinearColor::Red
-	);
+	LayerId = SOdysseyAnimationTimelineWidget::OnPaint( Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
 
 	return LayerId;
 }

@@ -20,20 +20,28 @@ public:
 public:
     // Construction / Destruction
     ~SOdysseyAnimationLayerImageRasterTimeline();
+    SOdysseyAnimationLayerImageRasterTimeline();
     void Construct(
         const FArguments& iArgs, 
         TSharedPtr<SOdysseyAnimationLayerStack> iLayerStackWidget,
         class UOdysseyAnimationLayerImageRaster* iAnimationLayerImageRaster
     );
 
+public:
+    //SWidget overrides
+    void Tick( const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime );
+
 private:
+    void RequestRefresh();
+    void RefreshWidgets();
     TSharedRef<ITableRow> OnGenerateRow(TSharedPtr<FOdysseyAnimationCell> iCell, const TSharedRef<STableViewBase>& iOwnerTable);
     void OnCellsChanged(class UOdysseyAnimationLayerImageRaster* iLayer);
+    void OnTimelineOffsetChanged();
 
     FOptionalSize GetCellWidth() const;
     FOptionalSize GetCellHeight() const;
 
 private:
     class UOdysseyAnimationLayerImageRaster* mAnimationLayerImageRaster;
-    TSharedPtr<SListView<TSharedPtr<FOdysseyAnimationCell>>> mListView;
+    bool mIsRefreshPending;
 };
