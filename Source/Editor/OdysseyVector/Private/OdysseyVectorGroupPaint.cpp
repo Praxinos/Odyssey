@@ -58,24 +58,27 @@ FOdysseyVectorGroupPaint::GetBucketList()
 void
 FOdysseyVectorGroupPaint::PropagateBuckets()
 {
-    bool doPropagate = true;
+    std::vector<FOdysseyVectorCycle*> cycleArray = mCycleArray; // work on a copy
+    std::vector<FOdysseyVectorCycle*> oContaminatedCycleArray;
 
-    while( doPropagate == true )
+    oContaminatedCycleArray.reserve( cycleArray.size() );
+
+    while( cycleArray.size() )
     {
-        doPropagate = false;
-
-        for( int i = 0; i < mCycleArray.size(); i++ )
+        for( int i = 0; i < cycleArray.size(); i++ )
         {
-            FOdysseyVectorCycle *cycle = mCycleArray[i];
+            FOdysseyVectorCycle *cycle = cycleArray[i];
             FOdysseyVectorBucket* bucket = cycle->GetBucket();
 
             if( cycle->IsPropagated() == false )
             {
-                cycle->PropagateBucket();
-
-                doPropagate = true;
+                cycle->PropagateBucket( oContaminatedCycleArray );
             }
         }
+
+        cycleArray = oContaminatedCycleArray;
+
+        oContaminatedCycleArray.clear();
     }
 }
 
@@ -169,21 +172,13 @@ FOdysseyVectorGroupPaint::OnChildTransform( FOdysseyVectorObject* iChild )
 void
 FOdysseyVectorGroupPaint::TransferChild( FOdysseyVectorObject* iFosterChild )
 {
-    FOdysseyVectorGroup::TransferChild( iFosterChild );
+    FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(iFosterChild);
 
-    // Unsure this whole code block is needed, as OnChildTransform does the job.
-    if( iFosterChild->HasBaseClass( FOdysseyVectorPathCubic::StaticClass() ) )
-    {
-        FOdysseyVectorPathCubic* cubicPath = static_cast<FOdysseyVectorPathCubic*>(iFosterChild);
+    iFosterChild->GetParent()->RemoveChild( iFosterChild );
 
-        cubicPath->SwitchSpace( *this );
-        cubicPath->ResetTransform();
-        cubicPath->UpdateMatrix();
+    AppendChild( iFosterChild );
 
-        // Note: InvalidateAllSegments() will invalidate the paint group as well
-        cubicPath->InvalidateAllSegments();
-        //cubicPath->Update( 0 );
-    }
+    OnChildTransform( path );
 }
 
 void
@@ -871,6 +866,20 @@ CreateNearIntersection( FOdysseyVectorVertex *iVertex
     return nearestVertex;
 }
 
+double
+FOdysseyVectorGroupPaint::GetGapTolerance()
+{
+    return mGroupPaintParam.Tolerance;
+}
+
+void
+FOdysseyVectorGroupPaint::SetGapTolerance( double iGapTolerance )
+{
+    mGroupPaintParam.Tolerance = iGapTolerance;
+
+    Invalidate();
+}
+
 void
 FOdysseyVectorGroupPaint::BuildGraph()
 {
@@ -920,13 +929,9 @@ FOdysseyVectorGroupPaint::BuildGraph()
             if( vertex->GetNearestSegment() )
             {
                 FOdysseyVectorVertex* nearestVertex = CreateNearIntersection( vertex, mIntersectionArray );
-/*
-                if( nearestVertex->GetClass() == FOdysseyVectorVertexIntersection::StaticClass() )
-                {
-                    intersectionCount++;
-                }
-*/
-                vertex->GetNearestVertex()->GetPath()->SetPaintingCode( mPaintingCode );
+
+                vertex->GetNearestSegment()->GetPath()->SetPaintingCode( mPaintingCode );
+                vertex->GetPath()->SetPaintingCode( mPaintingCode );
             }
         }
 
@@ -966,7 +971,7 @@ FOdysseyVectorGroupPaint::BuildGraph()
                        || ( nearestVertex0->GetNearestVertex() != vertex0 ) ) // Note : intersections don't have nearest vertices.
                     {
                         totalGapSegmentCount++;
-                        totalSectionCount++;
+                        //totalSectionCount++;
                     }
                 }
 
@@ -976,7 +981,7 @@ FOdysseyVectorGroupPaint::BuildGraph()
                        || ( nearestVertex1->GetNearestVertex() != vertex1 ) ) // Note : intersections don't have nearest vertices.
                     {
                         totalGapSegmentCount++;
-                        totalSectionCount++;
+                        //totalSectionCount++;
                     }
                 }
             }

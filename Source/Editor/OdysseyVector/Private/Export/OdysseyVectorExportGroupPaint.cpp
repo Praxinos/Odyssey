@@ -128,6 +128,30 @@ WriteGroupPaintBuckets( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar )
     }
 }
 
+static void
+WriteGroupPaintGapTolerance( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar )
+{
+    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_GROUPPAINT_GAP_TOLERANCE
+                                    , Ar
+                                    , [&iPaintGroup](FArchive &Ar) -> void
+    {
+        double gapTolerance = iPaintGroup.GetGapTolerance();
+
+        Ar << gapTolerance;
+    } );
+}
+
+static void
+WriteGroupPaintGap( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar )
+{
+    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_GROUPPAINT_GAP
+                                    , Ar
+                                    , [&iPaintGroup](FArchive &Ar) -> void
+    {
+        WriteGroupPaintGapTolerance( iPaintGroup, Ar );
+    } );
+}
+
 void
 FOdysseyVectorExport::WriteObjectGroupPaint( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar )
 {
@@ -135,6 +159,7 @@ FOdysseyVectorExport::WriteObjectGroupPaint( FOdysseyVectorGroupPaint& iPaintGro
                                     , Ar
                                     , [&iPaintGroup](FArchive &Ar) -> void
     {
+        WriteGroupPaintGap( iPaintGroup, Ar );
         WriteGroupPaintBuckets( iPaintGroup, Ar );
     } );
 }

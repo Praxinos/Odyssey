@@ -116,7 +116,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorCycle
         std::vector<FOdysseyVectorSection*>& GetSectionArray();
 
         bool IsPropagated();
-        void PropagateBucket();
+        void PropagateBucket( std::vector<FOdysseyVectorCycle*>& oContaminatedCycleArray );
         void SetPropagated( bool iPropagated );
         void Merge( FOdysseyVectorCycle* iMergeCycle );
 

@@ -626,7 +626,7 @@ IntersectVertices( FOdysseyVectorVertex* iVertex0, FOdysseyVectorVertex* iVertex
                     double t1 = iVertex1->GetT( segment1 );
 
                     iVertex0->SetNearestSegment( segment1, distance, t1 );
-                    //iVertex1->SetNearestSegment( segment0, distance, t0 ); // set as null so that only one endpoints creates the section but we still have a valid distance check.
+                    //iVertex1->SetNearestSegment( segment0, distance, t0 );
                 }
             }
         }

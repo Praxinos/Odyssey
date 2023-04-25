@@ -133,17 +133,17 @@ FOdysseyVectorObject::GetTransform( double& oTranslationX
 }
 
 void
-FOdysseyVectorObject::SetTransform( double oTranslationX
-                                  , double oTranslationY
-                                  , double oRotation
-                                  , double oScalingX
-                                  , double oScalingY )
+FOdysseyVectorObject::SetTransform( double iTranslationX
+                                  , double iTranslationY
+                                  , double iRotation
+                                  , double iScalingX
+                                  , double iScalingY )
 {
-    mObjectParam.TranslationX = oTranslationX;
-    mObjectParam.TranslationY = oTranslationY;
-    mObjectParam.Rotation = oRotation;
-    mObjectParam.ScalingX = oScalingX;
-    mObjectParam.ScalingY = oScalingY;
+    mObjectParam.TranslationX = iTranslationX;
+    mObjectParam.TranslationY = iTranslationY;
+    mObjectParam.Rotation = iRotation;
+    mObjectParam.ScalingX = iScalingX;
+    mObjectParam.ScalingY = iScalingY;
 }
 
 void

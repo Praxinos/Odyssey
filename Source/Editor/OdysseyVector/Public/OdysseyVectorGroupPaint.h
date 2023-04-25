@@ -115,6 +115,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         void DrawBuckets( ::ULIS::FRectD& iRoi, uint64 iFlags );
         virtual void Invalidate();
         void MergeCycles();
+        double GetGapTolerance();
+        void SetGapTolerance( double iGapTolerance );
 
     protected:
         /**

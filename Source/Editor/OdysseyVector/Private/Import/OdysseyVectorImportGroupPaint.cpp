@@ -91,6 +91,19 @@ FOdysseyVectorImport::ReadObjectGroupPaint( FOdysseyVectorGroupPaint& iPaintGrou
                 case FOdysseyVectorExport::CHUNK_GROUPPAINT_BUCKETS:
                 break;
 
+                case FOdysseyVectorExport::CHUNK_GROUPPAINT_GAP:
+                break;
+
+                case FOdysseyVectorExport::CHUNK_GROUPPAINT_GAP_TOLERANCE:
+                {
+                    double gapTolerance;
+
+                    Ar << gapTolerance;
+
+                    iPaintGroup.SetGapTolerance( gapTolerance );
+                }
+                break;
+
                 case FOdysseyVectorExport::CHUNK_BUCKET_ENTRY:
                 {
                     FOdysseyVectorBucket* bucket = new FOdysseyVectorBucket( iPaintGroup, 0.0f, 0.0f );

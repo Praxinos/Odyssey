@@ -109,11 +109,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
                          , double& oScalingX
                          , double& oScalingY );
 
-        void SetTransform( double oTranslationX
-                         , double oTranslationY
-                         , double oRotation
-                         , double oScalingX
-                         , double oScalingY );
+        void SetTransform( double iTranslationX
+                         , double iTranslationY
+                         , double iRotation
+                         , double iScalingX
+                         , double iScalingY );
 
         virtual void OnChildTransform( FOdysseyVectorObject* iChild ) {};
 

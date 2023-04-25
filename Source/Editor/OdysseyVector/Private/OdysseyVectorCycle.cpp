@@ -28,11 +28,20 @@ FOdysseyVectorCycle::FOdysseyVectorCycle( FOdysseyVectorObject& iParent
 void
 FOdysseyVectorCycle::Merge( FOdysseyVectorCycle* iMergeCycle )
 {
-    mVertexArray.insert(mVertexArray.end(), iMergeCycle->mVertexArray.begin(), iMergeCycle->mVertexArray.end());
-    mSectionArray.insert(mSectionArray.end(), iMergeCycle->mSectionArray.begin(), iMergeCycle->mSectionArray.end());
+    mVertexArray.insert( mVertexArray.end(), iMergeCycle->mVertexArray.begin(), iMergeCycle->mVertexArray.end() );
+    mSectionArray.insert( mSectionArray.end(), iMergeCycle->mSectionArray.begin(), iMergeCycle->mSectionArray.end() );
 
+    for( int i = 0; i < iMergeCycle->mSectionArray.size(); i++ )
+    {
+        iMergeCycle->mSectionArray[i]->AddCycle( this );
+    }
 
-    Build( iMergeCycle->mVertexArray, iMergeCycle->mSectionArray );
+    mPath.addPath( iMergeCycle->mPath );
+
+    mMin.x = ::ULIS::FMath::Min( mMin.x, iMergeCycle->mMin.x );
+    mMin.y = ::ULIS::FMath::Min( mMin.y, iMergeCycle->mMin.y );
+    mMax.x = ::ULIS::FMath::Max( mMax.x, iMergeCycle->mMax.x );
+    mMax.y = ::ULIS::FMath::Max( mMax.y, iMergeCycle->mMax.y );
 }
 
 FOdysseyVectorCycle*
@@ -259,7 +268,7 @@ FOdysseyVectorCycle::IsPropagated()
 }
 
 void
-FOdysseyVectorCycle::PropagateBucket()
+FOdysseyVectorCycle::PropagateBucket( std::vector<FOdysseyVectorCycle*>& oContaminatedCycleArray )
 {
     if( mBucket )
     {
@@ -272,12 +281,14 @@ FOdysseyVectorCycle::PropagateBucket()
                 if( otherCycle->GetBucket() == nullptr )
                 {
                     otherCycle->SetBucket( mBucket );
+
+                    oContaminatedCycleArray.push_back( otherCycle );
                 }
             }
         }
-    }
 
-    SetPropagated( true );
+        SetPropagated( true );
+    }
 }
 
 std::vector<FOdysseyVectorSection*>&
