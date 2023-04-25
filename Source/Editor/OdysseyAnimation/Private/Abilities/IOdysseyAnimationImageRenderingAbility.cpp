@@ -2,6 +2,8 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Abilities/IOdysseyAnimationImageRenderingAbility.h"
+#include "ULISEventBuilder.h"
+#include "ULISLoaderModule.h"
 
 
 IOdysseyAnimationImageRenderingAbility::FOnChanged&
@@ -53,7 +55,11 @@ TSharedPtr<::ULIS::FBlock>
 IOdysseyAnimationImageRenderingAbility::RenderInNewBlock(int iFrame, ::ULIS::eFormat iFormat, const ::ULIS::FRectI& iRect, TArray<::ULIS::FEvent>& oEvents)
 {
     TSharedRef<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(iRect.w, iRect.h, iFormat);
-    oEvents = RenderInBlock(block, iFrame, iRect, ::ULIS::FVec2I(0), {});
+
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iFormat);
+    ::ULIS::FEvent eventClearBlock = FULISEventBuilder().RetainBlock(block).Build();
+    ctx.Clear(*block, block->Rect(), ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventClearBlock);
+    oEvents = RenderInBlock(block, iFrame, iRect, ::ULIS::FVec2I(0), {eventClearBlock});
     return block;
 }
 

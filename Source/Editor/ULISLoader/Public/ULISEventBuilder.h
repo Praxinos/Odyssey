@@ -15,7 +15,7 @@ public:
     ::ULIS::FEvent Build();
 
     FULISEventBuilder& OnComplete( const FOnComplete& iFunction );
-    FULISEventBuilder& RetainBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>& iBlock);
+    FULISEventBuilder& RetainBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock);
 
 private:
     struct FParams

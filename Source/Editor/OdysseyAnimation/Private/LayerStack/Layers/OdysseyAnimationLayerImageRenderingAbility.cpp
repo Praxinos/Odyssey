@@ -51,10 +51,10 @@ FOdysseyAnimationLayerImageRenderingAbility::RenderInBlock(TSharedPtr<::ULIS::FB
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( ioBlock->Format() );    
 
     //Clear the block
-    ::ULIS::FEvent eventClearBlock = FULISEventBuilder().RetainBlock(ioBlock).Build();
-    ctx.Clear( *ioBlock, ::ULIS::FRectI::FromXYWH(iPos.x, iPos.y, iRect.w, iRect.h), ::ULIS::FSchedulePolicy::AsyncCacheEfficient, iWaitList.Num(), iWaitList.GetData(), &eventClearBlock );
+    /* ::ULIS::FEvent eventClearBlock = FULISEventBuilder().RetainBlock(ioBlock).Build();
+    ctx.Clear( *ioBlock, ::ULIS::FRectI::FromXYWH(iPos.x, iPos.y, iRect.w, iRect.h), ::ULIS::FSchedulePolicy::AsyncCacheEfficient, iWaitList.Num(), iWaitList.GetData(), &eventClearBlock ); */
 
-    TArray<::ULIS::FEvent> lastEvent = {eventClearBlock};
+    TArray<::ULIS::FEvent> lastEvent = iWaitList;
     for (int i = children.Num() - 1; i >= 0 ; i--)
     {
         UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(children[i]);

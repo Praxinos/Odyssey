@@ -30,7 +30,7 @@ FULISEventBuilder::OnComplete( const FOnComplete& iFunction )
 }
 
 FULISEventBuilder&
-FULISEventBuilder::RetainBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>& iBlock)
+FULISEventBuilder::RetainBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock)
 {
     mParams.mRetainedBlocks.Add(iBlock);
     return *this;

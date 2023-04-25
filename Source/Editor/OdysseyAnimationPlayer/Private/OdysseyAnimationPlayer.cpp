@@ -261,8 +261,8 @@ UOdysseyAnimationPlayer::UpdateTexture()
 		TArray<TSharedPtr<::ULIS::FBlock>> blocks;
 		for ( const ::ULIS::FRectI& rect : mInvalidRects )
 		{
-			TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(rect.w, rect.h, format);
-			imageRenderingAbility->RenderInBlock(block, frameIndex, rect, ::ULIS::FVec2I(0), {});
+			TArray<ULIS::FEvent> events;
+			TSharedPtr<::ULIS::FBlock> block = imageRenderingAbility->RenderInNewBlock(frameIndex, format, rect, events);
 			blocks.Add(block);
 		}
 		ctx.Finish();
