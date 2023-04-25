@@ -25,6 +25,16 @@ FOdysseyVectorCycle::FOdysseyVectorCycle( FOdysseyVectorObject& iParent
     Build( mVertexArray, mSectionArray );
 }
 
+void
+FOdysseyVectorCycle::Merge( FOdysseyVectorCycle* iMergeCycle )
+{
+    mVertexArray.insert(mVertexArray.end(), iMergeCycle->mVertexArray.begin(), iMergeCycle->mVertexArray.end());
+    mSectionArray.insert(mSectionArray.end(), iMergeCycle->mSectionArray.begin(), iMergeCycle->mSectionArray.end());
+
+
+    Build( iMergeCycle->mVertexArray, iMergeCycle->mSectionArray );
+}
+
 FOdysseyVectorCycle*
 FOdysseyVectorCycle::GetParentCycle()
 {
@@ -32,17 +42,9 @@ FOdysseyVectorCycle::GetParentCycle()
 }
 
 void
-FOdysseyVectorCycle::AppendChild( FOdysseyVectorCycle *iChild )
+FOdysseyVectorCycle::SetParentCycle( FOdysseyVectorCycle *iParent )
 {
-    mChildrenList.push_back( iChild );
-
-    iChild->mParentCycle = this;
-}
-
-void
-FOdysseyVectorCycle::RemoveChild( FOdysseyVectorCycle *iChild )
-{
-    mChildrenList.remove( iChild );
+    this->mParentCycle = iParent;
 }
 
 bool
@@ -168,7 +170,7 @@ FOdysseyVectorCycle::Build( std::vector<FOdysseyVectorVertex*>& iVertexArray
     /*double xmin, ymin, xmax, ymax;*/
     int seg = 0;
 
-    mPath.clear();
+    //mPath.clear();
 
      //mPointArray.clear();
      //mPointArray.reserve(200);
@@ -228,7 +230,7 @@ FOdysseyVectorCycle::Build( std::vector<FOdysseyVectorVertex*>& iVertexArray
             }
         }
 
-        mPath.close();
+        //mPath.close();
     }
 }
 
@@ -294,6 +296,7 @@ FOdysseyVectorCycle::HitTest( double iX, double iY )
 */
     BLContext* blctx = mParent.GetScene()->GetEngine()->GetBLContext();
     BLPoint pt = { iX, iY };
+/*
     BLPoint* vertex = ( BLPoint*) mPath.vertexData();
     BLPath combinedPath = mPath;
 
@@ -303,9 +306,9 @@ FOdysseyVectorCycle::HitTest( double iX, double iY )
 
         combinedPath.addPath( child->mPath );
     }
-
+*/
     // WARNING: looks like in this version the return value is a bool (in the shape of an int) but in later version is a enum value. We will have to fix that.
-    uint32 ret = combinedPath.hitTest( pt, BL_FILL_RULE_EVEN_ODD );
+    uint32 ret = mPath.hitTest( pt, BL_FILL_RULE_EVEN_ODD );
 
     return ( ret ) ? true : false;
 }
@@ -314,6 +317,7 @@ void
 FOdysseyVectorCycle::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
     BLContext* blctx = mParent.GetScene()->GetEngine()->GetBLContext();
+/*
     BLPath combinedPath = mPath;
 
     for( std::list<FOdysseyVectorCycle*>::iterator oit = mChildrenList.begin(); oit != mChildrenList.end(); ++oit )
@@ -322,7 +326,7 @@ FOdysseyVectorCycle::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
 
         combinedPath.addPath( child->mPath );
     }
-
+*/
     if( mBucket )
     {
         if( mBucket->IsGradient() )
@@ -385,7 +389,7 @@ FOdysseyVectorCycle::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
 
        /*iBLContext.fillPolygon( &mPointArray[0], mPointArray.size() );*/
     //blctx->strokePath( combinedPath );
-    blctx->fillPath( combinedPath );
+    blctx->fillPath( mPath );
     /*}*/
 }
 

@@ -97,7 +97,11 @@ FOdysseyVectorSection::IsLinked()
 void
 FOdysseyVectorSection::AddCycle( FOdysseyVectorCycle* iCycle )
 {
-    mCycle[mCycleCount++] = iCycle;
+    // check is mandatory. See GroupPaint_figure1.png for explanations
+    if( mCycleCount < 2 )
+    {
+        mCycle[mCycleCount++] = iCycle;
+    }
 }
 
 FOdysseyVectorCycle*

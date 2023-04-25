@@ -827,6 +827,8 @@ FOdysseyVectorGroupPaint::FindCycles()
 
     OrderCycles();
 
+    MergeCycles();
+
     Colorize();
 }
 
@@ -1012,6 +1014,21 @@ FOdysseyVectorGroupPaint::BuildGraph()
 }
 
 void
+FOdysseyVectorGroupPaint::MergeCycles()
+{
+    for(int i = 0; i < mCycleArray.size(); i++)
+    {
+        FOdysseyVectorCycle* cycle = mCycleArray[i];
+        FOdysseyVectorCycle* parentCycle = cycle->GetParentCycle();
+
+        if( parentCycle )
+        {
+            parentCycle->Merge( cycle );
+        }
+    }
+}
+
+void
 FOdysseyVectorGroupPaint::OrderCycles()
 {
     for( int i = 0; i < mCycleArray.size(); i++ )
@@ -1032,13 +1049,12 @@ FOdysseyVectorGroupPaint::OrderCycles()
                    {
                        if( parentCycle->FitsIn( cycle ) == false )
                        {
-                           parentCycle->RemoveChild( innerCycle );
-                           cycle->AppendChild( innerCycle );
+                           innerCycle->SetParentCycle( cycle );
                        }
                    }
                    else
                    {
-                       cycle->AppendChild( innerCycle );
+                       innerCycle->SetParentCycle( cycle );
                    }
                }
            }

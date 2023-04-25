@@ -71,17 +71,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorCycle
          */
         bool HitTest( double iLocalX, double iLocalY );
 
-        /**
-         * @brief Add a child cycle. A child cycle allows a parent cycle to have holes.
-         * @param iChild the child cycle.
-         */
-        void AppendChild( FOdysseyVectorCycle *iChild );
-
-        /**
-         * @brief Remove a child cycle. A child cycle allows a parent cycle to have holes.
-         * @param iChild the child cycle.
-         */
-        void RemoveChild( FOdysseyVectorCycle *iChild );
+        void SetParentCycle( FOdysseyVectorCycle *iParent );
 
         /**
          * @brief Get this cycle's parent cycle.
@@ -128,6 +118,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorCycle
         bool IsPropagated();
         void PropagateBucket();
         void SetPropagated( bool iPropagated );
+        void Merge( FOdysseyVectorCycle* iMergeCycle );
 
     protected :
         BLPath mPath;
