@@ -54,11 +54,11 @@ SOdysseyAnimationTimelineWidget::OnMouseButtonDown(const FGeometry& MyGeometry, 
 			mIsOffsetting = true;
 			mOffsetMousePosition = MouseEvent.GetScreenSpacePosition();
 			mOffsetMousePosition.Y = GetLayerStackWidget()->GetTimelineOffset();
-			return FReply::Handled();
+    		return FReply::Handled().CaptureMouse(AsShared()).PreventThrottling();
 		}
 	}
 
-    return FReply::Unhandled();
+	return FReply::Unhandled();
 }
 
 FReply
@@ -81,7 +81,7 @@ SOdysseyAnimationTimelineWidget::OnMouseButtonUp(const FGeometry& MyGeometry, co
 	if (mIsOffsetting)
 	{
 		mIsOffsetting = false;
-		return FReply::Handled();
+    	return FReply::Handled().CaptureMouse(AsShared());
 	}
     return FReply::Unhandled();
 }

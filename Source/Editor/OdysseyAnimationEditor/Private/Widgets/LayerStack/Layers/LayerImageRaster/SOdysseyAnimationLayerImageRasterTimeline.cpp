@@ -4,6 +4,7 @@
 #include "Widgets/LayerStack/Layers/LayerImageRaster/SOdysseyAnimationLayerImageRasterTimeline.h"
 #include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
 #include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
+#include "Widgets/LayerStack/Layers/LayerImageRaster/SOdysseyAnimationLayerImageRasterCellSection.h"
 #include "OdysseyStyleSet.h"
 
 #define LOCTEXT_NAMESPACE "SOdysseyAnimationLayerImageRasterTimeline"
@@ -12,17 +13,11 @@
 SOdysseyAnimationLayerImageRasterTimeline::~SOdysseyAnimationLayerImageRasterTimeline()
 {
     UOdysseyAnimationLayerImageRaster::OnCellsChanged().RemoveAll(this);
-
-    //
-    TSharedPtr<SOdysseyAnimationLayerStack> layerstackWidget = GetLayerStackWidget();
-    if (layerstackWidget)
-    {
-        layerstackWidget->OnTimelineOffsetChanged().RemoveAll(this);
-    }
 }
 
 SOdysseyAnimationLayerImageRasterTimeline::SOdysseyAnimationLayerImageRasterTimeline()
     : mIsRefreshPending(false)
+    , mIsOffsettingLayer(false)
 {
 
 }
@@ -65,29 +60,46 @@ SOdysseyAnimationLayerImageRasterTimeline::Tick( const FGeometry& AllottedGeomet
     }
 }
 
+float
+SOdysseyAnimationLayerImageRasterTimeline::GetLayerOffset() const
+{
+    return mIsOffsettingLayer ? mLayerOffset : mAnimationLayerImageRaster->Offset;
+}
+
+float
+SOdysseyAnimationLayerImageRasterTimeline::GetCellHeight() const
+{
+    return GetLayerStackWidget()->GetTimelineBaseFrameSize();
+}
+
 void
 SOdysseyAnimationLayerImageRasterTimeline::RefreshWidgets()
 {
-
     ClearChildren();
+    AddPreBehaviourWidget();
+    AddCellsWidgets();
+}
 
+void
+SOdysseyAnimationLayerImageRasterTimeline::AddPreBehaviourWidget()
+{
+    AddChild()
+    [
+        SNew(SOdysseyAnimationTimelineSection, GetLayerStackWidget())
+        .WidthInFrames(this, &SOdysseyAnimationLayerImageRasterTimeline::GetLayerOffset)
+        .HeightInScreenUnits(this, &SOdysseyAnimationLayerImageRasterTimeline::GetCellHeight)
+    ];
+}
+
+void
+SOdysseyAnimationLayerImageRasterTimeline::AddCellsWidgets()
+{
     TArray<TSharedPtr<FOdysseyAnimationCell>>& cells = mAnimationLayerImageRaster->GetCells();
     for (TSharedPtr<FOdysseyAnimationCell> cell : cells)
     {
         AddChild()
         [
-            SNew(SBox)
-            .WidthOverride_Raw(this, &SOdysseyAnimationLayerImageRasterTimeline::GetCellWidth)
-            .HeightOverride_Raw(this, &SOdysseyAnimationLayerImageRasterTimeline::GetCellHeight)
-            .HAlign(HAlign_Fill)
-            .VAlign(VAlign_Fill)
-            [
-                SNew(SBorder)
-                .BorderImage(FOdysseyStyle::GetBrush("FlipbookTimeline.TimelineFrameBackground"))
-                .BorderBackgroundColor(FLinearColor(1.f, 1.f, 1.f))
-                .HAlign(HAlign_Fill)
-                .VAlign(VAlign_Fill)
-            ]
+            SNew(SOdysseyAnimationLayerImageRasterCellSection, GetLayerStackWidget(), cell)
         ];
     }
 }
@@ -101,16 +113,48 @@ SOdysseyAnimationLayerImageRasterTimeline::OnCellsChanged(UOdysseyAnimationLayer
     RequestRefresh();
 }
 
-FOptionalSize
-SOdysseyAnimationLayerImageRasterTimeline::GetCellWidth() const
+FReply
+SOdysseyAnimationLayerImageRasterTimeline::OnMouseButtonDown(const FGeometry& iGeometry, const FPointerEvent& iEvent)
 {
-    return GetLayerStackWidget()->GetTimelineFrameWidth();
+    FReply reply = SOdysseyAnimationTimelineWidget::OnMouseButtonDown(iGeometry, iEvent);
+    if (reply.IsEventHandled())
+		return reply;
+
+    mIsOffsettingLayer = true;
+    mOffsetMousePosition = iEvent.GetScreenSpacePosition();
+    mOffsetMousePosition.Y = mAnimationLayerImageRaster->Offset;
+    mLayerOffset = mAnimationLayerImageRaster->Offset;
+
+    return FReply::Handled().CaptureMouse(AsShared()).PreventThrottling();
 }
 
-FOptionalSize
-SOdysseyAnimationLayerImageRasterTimeline::GetCellHeight() const
+FReply
+SOdysseyAnimationLayerImageRasterTimeline::OnMouseMove(const FGeometry& iGeometry, const FPointerEvent& iEvent)
 {
-    return GetLayerStackWidget()->GetTimelineBaseFrameSize();
+    FReply reply = SOdysseyAnimationTimelineWidget::OnMouseMove(iGeometry, iEvent);
+    if (reply.IsEventHandled())
+		return reply;
+
+    const float minOffset = 0.0f;
+    float mouseOffset = iEvent.GetScreenSpacePosition().X - mOffsetMousePosition.X;
+    //mOffsetMousePosition.Y contains the starting offset instead of the Y position
+    mLayerOffset = (int)FMath::Max(minOffset, mOffsetMousePosition.Y + (mouseOffset / GetLayerStackWidget()->GetTimelineFrameWidth()));
+
+    return FReply::Handled();
 }
+
+FReply
+SOdysseyAnimationLayerImageRasterTimeline::OnMouseButtonUp(const FGeometry& iGeometry, const FPointerEvent& iEvent)
+{
+    FReply reply = SOdysseyAnimationTimelineWidget::OnMouseButtonUp(iGeometry, iEvent);
+    if (reply.IsEventHandled())
+		return reply;
+
+    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageRaster, "Offset", mLayerOffset);
+    mIsOffsettingLayer = false;
+
+    return FReply::Handled().ReleaseMouseCapture();
+}
+
 
 #undef LOCTEXT_NAMESPACE

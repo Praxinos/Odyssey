@@ -29,19 +29,27 @@ public:
 
 public:
     //SWidget overrides
+	virtual FReply OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
+	virtual FReply OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
+	virtual FReply OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
     void Tick( const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime );
 
 private:
     void RequestRefresh();
     void RefreshWidgets();
-    TSharedRef<ITableRow> OnGenerateRow(TSharedPtr<FOdysseyAnimationCell> iCell, const TSharedRef<STableViewBase>& iOwnerTable);
     void OnCellsChanged(class UOdysseyAnimationLayerImageRaster* iLayer);
-    void OnTimelineOffsetChanged();
+    
+    float GetLayerOffset() const;
+    float GetCellHeight() const;
 
-    FOptionalSize GetCellWidth() const;
-    FOptionalSize GetCellHeight() const;
+    void AddPreBehaviourWidget();
+    void AddCellsWidgets();
 
 private:
     class UOdysseyAnimationLayerImageRaster* mAnimationLayerImageRaster;
     bool mIsRefreshPending;
+    bool mIsOffsettingLayer;
+
+    FVector2D mOffsetMousePosition;
+    int mLayerOffset;
 };
