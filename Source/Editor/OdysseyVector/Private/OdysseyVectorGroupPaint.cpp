@@ -68,7 +68,6 @@ FOdysseyVectorGroupPaint::PropagateBuckets()
         for( int i = 0; i < cycleArray.size(); i++ )
         {
             FOdysseyVectorCycle *cycle = cycleArray[i];
-            FOdysseyVectorBucket* bucket = cycle->GetBucket();
 
             if( cycle->IsPropagated() == false )
             {

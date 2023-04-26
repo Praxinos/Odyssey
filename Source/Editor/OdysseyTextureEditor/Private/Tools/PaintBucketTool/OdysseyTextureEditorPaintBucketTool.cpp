@@ -152,6 +152,23 @@ UOdysseyTextureEditorPaintBucketTool::OnMouseDown( const FOdysseyPoint& iPointIn
 }
 
 void
+UOdysseyTextureEditorPaintBucketTool::OnMouseHover( const FOdysseyPoint& iPointInTexture )
+{
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
+    UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
+
+    if( currentVectorLayer )
+    {
+        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+
+        UOdysseyPainterEditorPaintBucketTool::OnMouseHover( vectorEngine, vectorScene, iPointInTexture );
+
+        currentVectorLayer->RenderImageChanged(true);
+    }
+}
+
+void
 UOdysseyTextureEditorPaintBucketTool::OnMouseDrag( const FOdysseyPoint& iPointInTexture )
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());

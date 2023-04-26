@@ -4,14 +4,17 @@
 #include <ULIS>
 
 #include "HUD/OdysseyVectorHUD.h"
+#include "OdysseyVectorGroupPaint.h"
 
 class ODYSSEYVECTOR_API FOdysseyVectorHUDBucket : public FOdysseyVectorHUD
 {
     private:
+        FOdysseyVectorCycle* mCycle;
 
     public:
         ~FOdysseyVectorHUDBucket();
         FOdysseyVectorHUDBucket();
 
         void Draw( FOdysseyVectorScene* iScene, ::ULIS::FRectD& iRoi, uint64 iFlags );
+        void SetCycle( FOdysseyVectorCycle* iCycle );
 };

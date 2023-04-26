@@ -38,6 +38,7 @@ public:
                     , FOdysseyVectorUndo** iUndo
                     , const FOdysseyPoint& iPointInTexture
                     , const FKey& iKey );
+    void OnMouseHover( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture );
     void OnMouseDrag( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture );
     bool OnMouseUp( FOdysseyVectorEngine* iEngine
                   , FOdysseyVectorScene* iScene

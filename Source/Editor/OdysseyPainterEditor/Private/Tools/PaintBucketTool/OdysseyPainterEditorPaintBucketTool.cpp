@@ -219,6 +219,12 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseDown( FOdysseyVectorEngine* iEngine
                         (*iUndo) = new FOdysseyVectorUndoBucketRemove( iScene, paintGroup, bucket );
                 break;
 
+                case FOdysseyVectorBucket::PICKPROPAGATED:
+                    bucket->SetPropagated( bucket->IsPropagated() ? false : true );
+
+                    paintGroup->Colorize();
+                break;
+
                 default :
                     mPickedBucket = new FOdysseyVectorBucket( *paintGroup, localCoords.x, localCoords.y );
 
@@ -235,6 +241,25 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseDown( FOdysseyVectorEngine* iEngine
     }
 
     return true;
+}
+
+void
+UOdysseyPainterEditorPaintBucketTool::OnMouseHover( FOdysseyVectorEngine* iEngine
+                                                  , FOdysseyVectorScene* iScene
+                                                  , const FOdysseyPoint& iPointInTexture )
+{
+    FOdysseyVectorObject* selectedObject = iScene->GetLastSelected();
+
+    if( selectedObject )
+    {
+        if( selectedObject->GetClass() == FOdysseyVectorGroupPaint::StaticClass() )
+        {
+            FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>( selectedObject );
+            BLPoint localCoords = paintGroup->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
+
+            mBucketHUD.SetCycle( paintGroup->PickCycle( localCoords.x, localCoords.y ) );
+        }
+    }
 }
 
 void

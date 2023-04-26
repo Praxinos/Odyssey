@@ -108,16 +108,21 @@ class ODYSSEYVECTOR_API FOdysseyVectorBucket : public FOdysseyVectorPoint
          */
         double GetHandleDotProduct();
 
+        void SetPropagated( bool iPropagated );
+        bool IsPropagated();
+
     public:
         static const uint32 PICKNONE   = 0;
         static const uint32 PICKBUCKET = 1;
         static const uint32 PICKCROSS  = 2;
-        static const uint32 PICKHANDLE = 3;
+        static const uint32 PICKPROPAGATED = 3;
+        static const uint32 PICKHANDLE = 4;
 
     protected:
         FOdysseyVectorObject& mParent;
         FColor mColor;
         FOdysseyVectorHandleBucket mCtrlPoint;
+        bool mPropagated;
         bool mIsGradient;
         FColor mGradientColor0;
         FColor mGradientColor1;

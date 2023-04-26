@@ -119,6 +119,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorCycle
         void PropagateBucket( std::vector<FOdysseyVectorCycle*>& oContaminatedCycleArray );
         void SetPropagated( bool iPropagated );
         void Merge( FOdysseyVectorCycle* iMergeCycle );
+        void FillPath();
+        void StrokePath();
 
     protected :
         BLPath mPath;

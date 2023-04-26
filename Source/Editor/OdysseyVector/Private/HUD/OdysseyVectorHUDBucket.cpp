@@ -7,7 +7,14 @@ FOdysseyVectorHUDBucket::~FOdysseyVectorHUDBucket()
 }
 
 FOdysseyVectorHUDBucket::FOdysseyVectorHUDBucket()
+    : mCycle ( nullptr )
 {
+}
+
+void
+FOdysseyVectorHUDBucket::SetCycle( FOdysseyVectorCycle* iCycle )
+{
+    mCycle = iCycle;
 }
 
 void
@@ -30,7 +37,18 @@ FOdysseyVectorHUDBucket::Draw( FOdysseyVectorScene* iScene, ::ULIS::FRectD& iRoi
             FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(selectedObject);
             BLMatrix2D& worldMatrix = paintGroup->GetWorldMatrix();
 
-            blctx->setMatrix( worldMatrix ); 
+            blctx->setMatrix( worldMatrix );
+
+            if ( mCycle )
+            {
+                blctx->setCompOp( BL_COMP_OP_SRC_OVER );
+                blctx->setStrokeStyle( BLRgba32( 0x808080FF ) );
+                blctx->setStrokeWidth( 4.0f );
+                mCycle->StrokePath();
+
+                mCycle = nullptr; // reset after each draw
+            }
+
             paintGroup->DrawBuckets( iRoi, iFlags );
         }
 

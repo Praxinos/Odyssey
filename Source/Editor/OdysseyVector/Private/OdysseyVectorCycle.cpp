@@ -270,7 +270,7 @@ FOdysseyVectorCycle::IsPropagated()
 void
 FOdysseyVectorCycle::PropagateBucket( std::vector<FOdysseyVectorCycle*>& oContaminatedCycleArray )
 {
-    if( mBucket )
+    if( mBucket && mBucket->IsPropagated() )
     {
         for( int i = 0; i < mSectionArray.size(); i++ )
         {
@@ -322,6 +322,22 @@ FOdysseyVectorCycle::HitTest( double iX, double iY )
     uint32 ret = mPath.hitTest( pt, BL_FILL_RULE_EVEN_ODD );
 
     return ( ret ) ? true : false;
+}
+
+void
+FOdysseyVectorCycle::FillPath()
+{
+    BLContext* blctx = mParent.GetScene()->GetEngine()->GetBLContext();
+    blctx->setFillRule( BL_FILL_RULE_EVEN_ODD );
+    blctx->fillPath( mPath );
+}
+
+void
+FOdysseyVectorCycle::StrokePath()
+{
+    BLContext* blctx = mParent.GetScene()->GetEngine()->GetBLContext();
+
+    blctx->strokePath( mPath );
 }
 
 void
