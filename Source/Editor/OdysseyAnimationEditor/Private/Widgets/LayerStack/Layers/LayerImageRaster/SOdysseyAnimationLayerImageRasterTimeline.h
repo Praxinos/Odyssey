@@ -50,6 +50,11 @@ private:
     bool mIsRefreshPending;
     bool mIsOffsettingLayer;
 
-    FVector2D mOffsetMousePosition;
-    int mLayerOffset;
+    //Layer Offset System
+    struct
+    {
+        int mStartOffset;
+        int mOffset;
+        double mMousePosition;
+    } mLayerOffsetData;
 };

@@ -63,7 +63,7 @@ SOdysseyAnimationLayerImageRasterTimeline::Tick( const FGeometry& AllottedGeomet
 float
 SOdysseyAnimationLayerImageRasterTimeline::GetLayerOffset() const
 {
-    return mIsOffsettingLayer ? mLayerOffset : mAnimationLayerImageRaster->Offset;
+    return mIsOffsettingLayer ? mLayerOffsetData.mOffset : mAnimationLayerImageRaster->Offset;
 }
 
 float
@@ -121,9 +121,10 @@ SOdysseyAnimationLayerImageRasterTimeline::OnMouseButtonDown(const FGeometry& iG
 		return reply;
 
     mIsOffsettingLayer = true;
-    mOffsetMousePosition = iEvent.GetScreenSpacePosition();
-    mOffsetMousePosition.Y = mAnimationLayerImageRaster->Offset;
-    mLayerOffset = mAnimationLayerImageRaster->Offset;
+
+    mLayerOffsetData.mMousePosition = iEvent.GetScreenSpacePosition().X;
+    mLayerOffsetData.mStartOffset= mAnimationLayerImageRaster->Offset;
+    mLayerOffsetData.mOffset = mAnimationLayerImageRaster->Offset;
 
     return FReply::Handled().CaptureMouse(AsShared()).PreventThrottling();
 }
@@ -135,12 +136,18 @@ SOdysseyAnimationLayerImageRasterTimeline::OnMouseMove(const FGeometry& iGeometr
     if (reply.IsEventHandled())
 		return reply;
 
-    const float minOffset = 0.0f;
-    float mouseOffset = iEvent.GetScreenSpacePosition().X - mOffsetMousePosition.X;
-    //mOffsetMousePosition.Y contains the starting offset instead of the Y position
-    mLayerOffset = (int)FMath::Max(minOffset, mOffsetMousePosition.Y + (mouseOffset / GetLayerStackWidget()->GetTimelineFrameWidth()));
+    if ( mIsOffsettingLayer )
+    {
+        const float minOffset = 0.0f;
+        float mouseOffset = iEvent.GetScreenSpacePosition().X - mLayerOffsetData.mMousePosition;
+        float offset = mLayerOffsetData.mStartOffset + (mouseOffset / GetLayerStackWidget()->GetTimelineFrameWidth());
+        //mOffsetMousePosition.Y contains the starting offset instead of the Y position
+        mLayerOffsetData.mOffset = (int)FMath::Max(minOffset, offset);
 
-    return FReply::Handled();
+        return FReply::Handled();
+    }
+
+    return FReply::Unhandled();
 }
 
 FReply
@@ -150,10 +157,15 @@ SOdysseyAnimationLayerImageRasterTimeline::OnMouseButtonUp(const FGeometry& iGeo
     if (reply.IsEventHandled())
 		return reply;
 
-    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageRaster, "Offset", mLayerOffset);
-    mIsOffsettingLayer = false;
+    if ( mIsOffsettingLayer )
+    {
+        FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageRaster, "Offset", mLayerOffsetData.mOffset);
+        mIsOffsettingLayer = false;
 
-    return FReply::Handled().ReleaseMouseCapture();
+        return FReply::Handled().ReleaseMouseCapture();
+    }
+
+    return FReply::Unhandled();
 }
 
 
