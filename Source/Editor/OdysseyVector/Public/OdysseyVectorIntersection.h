@@ -9,30 +9,6 @@
 #include "OdysseyVectorVertexIntersection.h"
 //#include "OdysseyVectorCycle.h"
 
-struct FExplorationPair
-{
-    FOdysseyVectorSection* returnSection;
-    FOdysseyVectorSection* departSection;
-    FOdysseyVectorVertexIntersection* intersectionVertex;
-
-    FExplorationPair()
-    {
-        returnSection = nullptr;
-        departSection = nullptr;
-        intersectionVertex = nullptr;
-    };
-
-    FExplorationPair( FOdysseyVectorSection* iReturnSection
-                    , FOdysseyVectorVertexIntersection* iIntersectionVertex
-                    , FOdysseyVectorSection* iDepartSection )
-    {
-        returnSection = iReturnSection;
-        departSection = iDepartSection;
-        intersectionVertex = iIntersectionVertex;
-    }
-};
-
-
 class FOdysseyVectorIntersection
 {
     public:
@@ -57,10 +33,8 @@ class FOdysseyVectorIntersection
         FOdysseyVectorVertexIntersection* GetVertex( int iNum );
         bool HasVertex( FOdysseyVectorVertexIntersection* iVertex );
 
-        void BuildExplorationPairs();
-        std::vector<FExplorationPair>& GetExplorationPairs();
+        void BuildExplorationPairs( std::vector<FExplorationPair>& iExplorationPairsArray );
 
     protected:
-        std::vector<FExplorationPair> mExplorationPairs;
         FOdysseyVectorVertexIntersection* mVertex[2];
 };

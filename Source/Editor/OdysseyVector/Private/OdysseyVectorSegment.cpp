@@ -209,3 +209,11 @@ FOdysseyVectorSegment::GetVectorFromVertex( FOdysseyVectorVertex* iVertex, bool 
 
     return vector;
 }
+/*
+void
+FOdysseyVectorSegment::BuildExplorationPairs( std::vector<FExplorationPair>& iExplorationPairsArray )
+{
+    GetVertex(0)->BuildExplorationPairs( iExplorationPairsArray );
+    GetVertex(1)->BuildExplorationPairs( iExplorationPairsArray );
+}
+*/

@@ -97,6 +97,9 @@ class FOdysseyVectorSection
         uint32 mCycleCount;
         FOdysseyVectorCycle* mCycle[2]; // there are 2 cycles per section at most. No need for a complicated container.
 
+    public:
+        uint32 mID; // temp
+
     private:
         static const uint32 BLOCKVERTEX0 = ( 1 << 0 );
         static const uint32 BLOCKVERTEX1 = ( 1 << 1 );

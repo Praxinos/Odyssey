@@ -31,7 +31,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertexIntersection : public FOdysseyVector
          * @param iOrientation ignored.
          * @return a pointer to the next section to explore in cycle.
          */
-        FOdysseyVectorSection* GetCycleNextSection( ::ULIS::FVec2D& iLastSectionVector, double iOrientation );
+        virtual FOdysseyVectorSection* GetCycleNextSection( FOdysseyVectorSection* iLastSection, double iOrientation ) override;
 
         virtual double GetT( FOdysseyVectorSegment* iSegment ) override;
 
@@ -41,6 +41,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertexIntersection : public FOdysseyVector
 
         virtual uint32 GetSectionCount() override;
         bool SelfIntersects();
+        virtual void BuildExplorationPairs( std::vector<FExplorationPair>& iExplorationPairsArray ) override;
 
     private:
         static const uint32 mStaticClass =  0x29459195; // value is crc32 FOdysseyVectorVertexIntersection

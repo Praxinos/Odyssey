@@ -145,6 +145,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
                                 , std::vector<FOdysseyVectorIntersection*>& iIntersectionArray ){ return 0; };
 
         virtual ::ULIS::FVec2D GetVectorFromVertex( FOdysseyVectorVertex* iVertex, bool iNormalize );
+        void BuildExplorationPairs( std::vector<FExplorationPair>& iExplorationPairsArray );
 
     protected:
         std::list<FOdysseyVectorVertexIntersection*> mIntersectionVertexList;

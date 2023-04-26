@@ -21,7 +21,7 @@ namespace FOdysseyVector
                                            , double* line0t
                                            , double* line1t );
 
-    double ODYSSEYVECTOR_API Cross2D( ::ULIS::FVec2D& iA, ::ULIS::FVec2D &iB );
+    double ODYSSEYVECTOR_API Cross2D( const ::ULIS::FVec2D& iA, const ::ULIS::FVec2D &iB );
 
     double ODYSSEYVECTOR_API DistanceToSegment( ::ULIS::FVec2D& iPt
                                               , ::ULIS::FVec2D& iSegmentP0

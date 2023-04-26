@@ -10,6 +10,30 @@
 class FOdysseyVectorSegment;
 class FOdysseyVectorSection;
 class FOdysseyVectorPath;
+class FOdysseyVectorVertex;
+
+struct FExplorationPair
+{
+    FOdysseyVectorSection* returnSection;
+    FOdysseyVectorVertex*  departVertex;
+    FOdysseyVectorSection* departSection;
+
+    FExplorationPair()
+    {
+        returnSection = nullptr;
+        departVertex = nullptr;
+        departSection = nullptr;
+    };
+
+    FExplorationPair( FOdysseyVectorSection* iReturnSection
+                    , FOdysseyVectorVertex*  iDepartVertex
+                    , FOdysseyVectorSection* iDepartSection )
+    {
+        returnSection = iReturnSection;
+        departVertex = iDepartVertex;
+        departSection = iDepartSection;
+    }
+};
 
 class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
 {
@@ -214,6 +238,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
                               , double iNearestSegmentT );
         void SetNearestVertex( FOdysseyVectorVertex* iNearestVertex );
         FOdysseyVectorVertex* GetNearestVertex();
+        virtual FOdysseyVectorSection* GetCycleNextSection( FOdysseyVectorSection* iLastSection, double iOrientation );
+        virtual void BuildExplorationPairs( std::vector<FExplorationPair>& iExplorationPairsArray );
 
     protected:
         FOdysseyVectorHandlePoint* mCtrlPoint;

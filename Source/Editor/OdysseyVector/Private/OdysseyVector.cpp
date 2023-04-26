@@ -36,7 +36,7 @@ FOdysseyVector::ExtractTransformations( BLMatrix2D &iMatrix
 }
 
 double
-FOdysseyVector::Cross2D( ::ULIS::FVec2D& iA, ::ULIS::FVec2D &iB )
+FOdysseyVector::Cross2D( const ::ULIS::FVec2D& iA, const ::ULIS::FVec2D &iB )
 {
     return ( iA.x * iB.y ) - ( iA.y * iB.x );
 }

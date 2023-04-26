@@ -6,6 +6,11 @@ FOdysseyVectorSection::~FOdysseyVectorSection()
 
 FOdysseyVectorSection::FOdysseyVectorSection()
 {
+// mID can be remove. Only there for debugging purpose.
+    static int ID;
+
+    mID = ID++;
+
     Init( nullptr, nullptr, nullptr );
 }
 

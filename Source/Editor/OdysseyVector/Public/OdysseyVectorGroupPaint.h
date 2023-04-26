@@ -181,13 +181,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
          */
         void CheckLoops();
 
-        /**
-         * @brief Traverse an intersection vertex and find cycles.
-         * @param iVertex intersection vertex.
-         */
-        uint32 MarchIntersection( FOdysseyVectorIntersection* iIntersection );
-
-        uint32 MarchGapSegment( FOdysseyVectorSegmentCubic* iGapSegment );
+        uint32 Explore( FExplorationPair* iExplorationPair );
 
         void PropagateBuckets();
 
