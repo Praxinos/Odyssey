@@ -15,12 +15,15 @@
 void
 SOdysseyAnimationTimelineHeader::Construct(
 	const FArguments& InArgs,
-	TSharedPtr<SOdysseyAnimationLayerStack> iLayerStackWidget
+	FOdysseyAnimationEditor* iEditor
 )
 {
+	SOdysseyAnimationTimelineWidget::FArguments args;
+	args.BaseOffset(0.f);
+
 	SOdysseyAnimationTimelineWidget::Construct(
-		SOdysseyAnimationTimelineWidget::FArguments(),
-		iLayerStackWidget
+		args,
+		iEditor
 	);
 }
 
@@ -40,8 +43,8 @@ int32 SOdysseyAnimationTimelineHeader::OnPaint(const FPaintArgs& Args, const FGe
 
 	const float height = AllottedGeometry.GetLocalSize().Y;  
 	const float width = AllottedGeometry.GetLocalSize().X;
-	float offset = GetLayerStackWidget()->GetTimelineOffset();
-	const float frameSize = GetLayerStackWidget()->GetTimelineFrameWidth();
+	float offset = GetEditor()->Timeline()->GetOffset();
+	const float frameSize = GetEditor()->Timeline()->GetFrameWidth();
 	const float frameNumberMinSize = 30.f;
 	const int32 frameNumberFrequency = FMath::Max(1, FGenericPlatformMath::CeilToInt(frameNumberMinSize / frameSize));
 	int32 startKey = FGenericPlatformMath::FloorToInt(offset);
@@ -94,11 +97,11 @@ FReply SOdysseyAnimationTimelineHeader::OnMouseWheel(const FGeometry& MyGeometry
 	{
 		if (MouseEvent.GetWheelDelta() > 0.f)
 		{
-			GetLayerStackWidget()->TimelineZoomOut();
+			GetEditor()->Timeline()->ZoomOut();
 		}
 		else
 		{
-			GetLayerStackWidget()->TimelineZoomIn();
+			GetEditor()->Timeline()->ZoomIn();
 		}
 		return FReply::Handled();
 	}
@@ -120,10 +123,10 @@ SOdysseyAnimationTimelineHeader::OnMouseButtonDown(const FGeometry& MyGeometry, 
 		mIsScrubbing = true;
 
 		const float minScrub = 0.0f;
-		float frame = (MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition()).X / GetLayerStackWidget()->GetTimelineFrameWidth() + GetLayerStackWidget()->GetTimelineOffset());
-		FTimespan time = FTimespan::FromSeconds(frame / GetLayerStackWidget()->GetAnimation()->GetFramesPerSecond());
-		GetLayerStackWidget()->GetPlayer()->Stop();
-		GetLayerStackWidget()->GetPlayer()->SeekToTime(time);
+		float frame = (MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition()).X / GetEditor()->Timeline()->GetFrameWidth() + GetEditor()->Timeline()->GetOffset());
+		FTimespan time = FTimespan::FromSeconds(frame / GetEditor()->Animation()->GetFramesPerSecond());
+		GetEditor()->Player()->Stop();
+		GetEditor()->Player()->SeekToTime(time);
 
 		// This has prevent throttling on so that viewports continue to run whilst dragging the slider
 		return FReply::Handled().CaptureMouse( SharedThis(this) ).PreventThrottling();
@@ -142,9 +145,9 @@ SOdysseyAnimationTimelineHeader::OnMouseMove(const FGeometry& MyGeometry, const 
 	if(mIsScrubbing)
 	{
 		const float minScrub = 0.0f;
-		float frame = MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition()).X / GetLayerStackWidget()->GetTimelineFrameWidth() + GetLayerStackWidget()->GetTimelineOffset();
-		FTimespan time = FTimespan::FromSeconds(frame / GetLayerStackWidget()->GetAnimation()->GetFramesPerSecond());
-		GetLayerStackWidget()->GetPlayer()->SeekToTime(time);
+		float frame = MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition()).X / GetEditor()->Timeline()->GetFrameWidth() + GetEditor()->Timeline()->GetOffset();
+		FTimespan time = FTimespan::FromSeconds(frame / GetEditor()->Animation()->GetFramesPerSecond());
+		GetEditor()->Player()->SeekToTime(time);
 		return FReply::Handled();
 	}
 	
@@ -161,8 +164,8 @@ SOdysseyAnimationTimelineHeader::OnMouseButtonUp(const FGeometry& MyGeometry, co
 	if (mIsScrubbing)
 	{
 		const float minScrub = 0.0f;
-		float frame = MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition()).X / GetLayerStackWidget()->GetTimelineFrameWidth() + GetLayerStackWidget()->GetTimelineOffset();
-		FOdysseyObjectEditorUtils::SetPropertyValue(GetLayerStackWidget()->GetAnimation(), "CurrentFrame", (int)frame);
+		float frame = MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition()).X / GetEditor()->Timeline()->GetFrameWidth() + GetEditor()->Timeline()->GetOffset();
+		FOdysseyObjectEditorUtils::SetPropertyValue(GetEditor()->Animation(), "CurrentFrame", (int)frame);
 		
 		mIsScrubbing = false;
 		return FReply::Handled().ReleaseMouseCapture();

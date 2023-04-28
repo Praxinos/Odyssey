@@ -4,10 +4,9 @@
 #include "Widgets/SOdysseyAnimationPlaybackControls.h"
 
 void
-SOdysseyAnimationPlaybackControls::Construct(const FArguments& InArgs)
+SOdysseyAnimationPlaybackControls::Construct(const FArguments& InArgs, FOdysseyAnimationEditor* iEditor)
 {
-    mAnimation = InArgs._Animation;
-	mPlayer = InArgs._Player;
+    mEditor = iEditor;
     mPlaybackFramesPerSecond = InArgs._PlaybackFramesPerSecond;
 
 	ChildSlot
@@ -122,13 +121,13 @@ SOdysseyAnimationPlaybackControls::Construct(const FArguments& InArgs)
 bool
 SOdysseyAnimationPlaybackControls::IsPlayingForward() const
 {
-    return mPlayer->GetStatus() == EOdysseyAnimationPlayerStatus::Playing && !mPlayer->IsBackward();
+    return mEditor->Player()->GetStatus() == EOdysseyAnimationPlayerStatus::Playing && !mEditor->Player()->IsBackward();
 }
 
 bool
 SOdysseyAnimationPlaybackControls::IsPlayingBackward() const
 {
-	return mPlayer->GetStatus() == EOdysseyAnimationPlayerStatus::Playing && mPlayer->IsBackward();
+	return mEditor->Player()->GetStatus() == EOdysseyAnimationPlayerStatus::Playing && mEditor->Player()->IsBackward();
 }
 
 
@@ -147,61 +146,61 @@ SOdysseyAnimationPlaybackControls::GetPlayBackwardButtonVisibility() const
 EVisibility
 SOdysseyAnimationPlaybackControls::GetLoopingButtonVisibility() const
 {
-	return mPlayer->GetIsLooping() ? EVisibility::Visible : EVisibility::Collapsed;
+	return mEditor->Player()->GetIsLooping() ? EVisibility::Visible : EVisibility::Collapsed;
 }
 
 EVisibility
 SOdysseyAnimationPlaybackControls::GetNotLoopingButtonVisibility() const
 {
-	return mPlayer->GetIsLooping() ? EVisibility::Collapsed : EVisibility::Visible;
+	return mEditor->Player()->GetIsLooping() ? EVisibility::Collapsed : EVisibility::Visible;
 }
 
 FReply
 SOdysseyAnimationPlaybackControls::OnPlayClicked()
 {
-	mPlayer->Play(false);
+	mEditor->Player()->Play(false);
     return FReply::Handled();
 }
 
 FReply
 SOdysseyAnimationPlaybackControls::OnPlayBackwardClicked()
 {
-	mPlayer->Play(true);
+	mEditor->Player()->Play(true);
     return FReply::Handled();
 }
 
 FReply
 SOdysseyAnimationPlaybackControls::OnStopClicked()
 {
-    mPlayer->Stop();
+    mEditor->Player()->Stop();
     return FReply::Handled();
 }
 
 FReply
 SOdysseyAnimationPlaybackControls::OnBeginningClicked()
 {
-	FOdysseyObjectEditorUtils::SetPropertyValue(mAnimation, "CurrentFrame", 0);
+	FOdysseyObjectEditorUtils::SetPropertyValue(mEditor->Animation(), "CurrentFrame", 0);
     return FReply::Handled();
 }
 
 FReply
 SOdysseyAnimationPlaybackControls::OnEndClicked()
 {
-	FOdysseyObjectEditorUtils::SetPropertyValue(mAnimation, "CurrentFrame", mAnimation->GetFrameRange().GetUpperBoundValue());
+	FOdysseyObjectEditorUtils::SetPropertyValue(mEditor->Animation(), "CurrentFrame", mEditor->Animation()->GetFrameRange().GetUpperBoundValue());
     return FReply::Handled();
 }
 
 FReply
 SOdysseyAnimationPlaybackControls::OnPreviousClicked()
 {
-	FOdysseyObjectEditorUtils::SetPropertyValue(mAnimation, "CurrentFrame", mAnimation->CurrentFrame - 1);
+	FOdysseyObjectEditorUtils::SetPropertyValue(mEditor->Animation(), "CurrentFrame", mEditor->Animation()->CurrentFrame - 1);
 	return FReply::Handled();
 }
 
 FReply
 SOdysseyAnimationPlaybackControls::OnNextClicked()
 {
-	FOdysseyObjectEditorUtils::SetPropertyValue(mAnimation, "CurrentFrame", mAnimation->CurrentFrame + 1);
+	FOdysseyObjectEditorUtils::SetPropertyValue(mEditor->Animation(), "CurrentFrame", mEditor->Animation()->CurrentFrame + 1);
 	return FReply::Handled();
 }
 
@@ -224,6 +223,6 @@ SOdysseyAnimationPlaybackControls::OnNextKeyClicked()
 FReply
 SOdysseyAnimationPlaybackControls::OnLoopClicked()
 {
-    mPlayer->SetIsLooping(!mPlayer->GetIsLooping());
+    mEditor->Player()->SetIsLooping(!mEditor->Player()->GetIsLooping());
     return FReply::Handled();
 }

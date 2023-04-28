@@ -4,7 +4,8 @@
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineWidget.h"
 
 SOdysseyAnimationTimelineWidget::SOdysseyAnimationTimelineWidget()
-	: mOffsetMousePosition(0)
+	: mEditor(nullptr)
+	, mOffsetMousePosition(0)
 	, mIsOffsetting(false)
     , mIsScrubbing(false)
 {
@@ -13,23 +14,23 @@ SOdysseyAnimationTimelineWidget::SOdysseyAnimationTimelineWidget()
 void
 SOdysseyAnimationTimelineWidget::Construct(
     const FArguments& iArgs,
-	TSharedPtr<SOdysseyAnimationLayerStack> iLayerStackWidget
+	FOdysseyAnimationEditor* iEditor
 )
 {
-    mLayerStackWidget = iLayerStackWidget;
+    mEditor = iEditor;
 
 	ChildSlot
 	[
-		SAssignNew(mPanel, SOdysseyAnimationTimelinePanel, iLayerStackWidget)
+		SAssignNew(mPanel, SOdysseyAnimationTimelinePanel, iEditor)
 		.Clipping(EWidgetClipping::ClipToBounds)
 		.BaseOffset(iArgs._BaseOffset)
 	];
 }
 
-TSharedPtr<SOdysseyAnimationLayerStack>
-SOdysseyAnimationTimelineWidget::GetLayerStackWidget() const
+FOdysseyAnimationEditor*
+SOdysseyAnimationTimelineWidget::GetEditor() const
 {
-    return mLayerStackWidget.Pin();
+    return mEditor;
 }
 
 void
@@ -53,7 +54,7 @@ SOdysseyAnimationTimelineWidget::OnMouseButtonDown(const FGeometry& MyGeometry, 
 		{
 			mIsOffsetting = true;
 			mOffsetMousePosition = MouseEvent.GetScreenSpacePosition();
-			mOffsetMousePosition.Y = GetLayerStackWidget()->GetTimelineOffset();
+			mOffsetMousePosition.Y = GetEditor()->Timeline()->GetOffset();
     		return FReply::Handled().CaptureMouse(AsShared()).PreventThrottling();
 		}
 	}
@@ -69,7 +70,7 @@ SOdysseyAnimationTimelineWidget::OnMouseMove(const FGeometry& MyGeometry, const 
 		const float minOffset = 0.0f;
 		float mouseOffset = MouseEvent.GetScreenSpacePosition().X - mOffsetMousePosition.X;
         //mOffsetMousePosition.Y contains the starting offset instead of the Y position
-		GetLayerStackWidget()->SetTimelineOffset(FMath::Max(minOffset, mOffsetMousePosition.Y - (mouseOffset / GetLayerStackWidget()->GetTimelineFrameWidth())));
+		GetEditor()->Timeline()->SetOffset(FMath::Max(minOffset, mOffsetMousePosition.Y - (mouseOffset / GetEditor()->Timeline()->GetFrameWidth())));
 		return FReply::Handled();
 	}
 	return FReply::Unhandled();
@@ -98,17 +99,11 @@ SOdysseyAnimationTimelinePanel::SOdysseyAnimationTimelinePanel()
 void
 SOdysseyAnimationTimelinePanel::Construct(
     const FArguments& iArgs,
-	TSharedPtr<SOdysseyAnimationLayerStack> iLayerStackWidget
+	FOdysseyAnimationEditor* iEditor
 )
 {
-    mLayerStackWidget = iLayerStackWidget;
+    mEditor = iEditor;
 	mBaseOffset = iArgs._BaseOffset;
-}
-
-TSharedPtr<SOdysseyAnimationLayerStack>
-SOdysseyAnimationTimelinePanel::GetLayerStackWidget() const
-{
-    return mLayerStackWidget.Pin();
 }
 
 FChildren*
@@ -150,7 +145,7 @@ void
 SOdysseyAnimationTimelinePanel::OnArrangeChildren(const FGeometry& AllottedGeometry, FArrangedChildren& ArrangedChildren) const
 {
 	float scrollPadding = AllottedGeometry.GetLocalSize().X;
-	float currentChildOffset = -GetLayerStackWidget()->GetTimelineOffset() * GetLayerStackWidget()->GetTimelineFrameWidth() + mBaseOffset;
+	float currentChildOffset = -mEditor->Timeline()->GetOffset() * mEditor->Timeline()->GetFrameWidth() + mBaseOffset;
 
 	for (int32 SlotIndex = 0; SlotIndex < mChildren.Num(); ++SlotIndex)
 	{
@@ -191,13 +186,13 @@ SOdysseyAnimationTimelinePanel::OnPaint(const FPaintArgs& Args, const FGeometry&
 
 	const float height = AllottedGeometry.GetLocalSize().Y;  
 	const float width = AllottedGeometry.GetLocalSize().X;
-	float offset = GetLayerStackWidget()->GetTimelineOffset();
-	const float frameSize = GetLayerStackWidget()->GetTimelineFrameWidth();
+	float offset = mEditor->Timeline()->GetOffset();
+	const float frameSize = mEditor->Timeline()->GetFrameWidth();
 
 	FLinearColor lineColor = FLinearColor::Red;
 	lineColor.A = 0.3f;
 
-	int currentFrame = GetLayerStackWidget()->GetAnimation()->GetFrameIndexAtTime(GetLayerStackWidget()->GetPlayer()->GetCurrentTime());
+	int currentFrame = mEditor->Animation()->GetFrameIndexAtTime(mEditor->Player()->GetCurrentTime());
 	float currentFramePos = (currentFrame - offset) * frameSize + mBaseOffset;
 
 	FSlateDrawElement::MakeBox(

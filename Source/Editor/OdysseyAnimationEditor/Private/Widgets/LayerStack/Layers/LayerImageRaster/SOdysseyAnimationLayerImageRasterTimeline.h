@@ -23,7 +23,7 @@ public:
     SOdysseyAnimationLayerImageRasterTimeline();
     void Construct(
         const FArguments& iArgs, 
-        TSharedPtr<SOdysseyAnimationLayerStack> iLayerStackWidget,
+        FOdysseyAnimationEditor* iEditor,
         class UOdysseyAnimationLayerImageRaster* iAnimationLayerImageRaster
     );
 
@@ -58,7 +58,6 @@ private:
     bool mIsRefreshPending;
     bool mIsOffsettingLayer;
     bool mIsDraggingCellLengthHandle;
-
 
 	const FSlateBrush* mTimingHandleBrush;
 	const FSlateBrush* mLengthHandleBrush;

@@ -5,16 +5,10 @@
 
 #include "CoreMinimal.h"
 
-class UOdysseyAnimation;
-class UOdysseyAnimationPlayer;
-
+class FOdysseyAnimationEditor;
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineHeader
 	: public SOdysseyAnimationTimelineWidget
 {
-public:
-	DECLARE_DELEGATE_OneParam(FOnOffsetChanged, float)
-	DECLARE_DELEGATE_OneParam(FOnZoomChanged, float)
-
 public:
 	SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineHeader)
 	{}
@@ -22,7 +16,7 @@ public:
 
 	void Construct(
 		const FArguments& InArgs,
-		TSharedPtr<SOdysseyAnimationLayerStack> iLayerStackWidget);
+		FOdysseyAnimationEditor* iEditor);
 
 	// SWidget interface
 	virtual int32 OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const override;

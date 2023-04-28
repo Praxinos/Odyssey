@@ -9,16 +9,13 @@
  * Implements the Animation Layer stack widget
  */
 
-class UOdysseyAnimation;
-class UOdysseyAnimationPlayer;
+class FOdysseyAnimationEditor;
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerStack
     : public SCompoundWidget
 {
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationLayerStack)
         {}
-        SLATE_ARGUMENT( UOdysseyAnimation*, Animation )
-        SLATE_ARGUMENT( UOdysseyAnimationPlayer*, Player )
     SLATE_END_ARGS()
 
 public:
@@ -26,37 +23,15 @@ public:
     ~SOdysseyAnimationLayerStack();
     SOdysseyAnimationLayerStack();
     
-    void Construct(const FArguments& InArgs);
-
-    UOdysseyAnimation* GetAnimation() const;
-    UOdysseyAnimationPlayer* GetPlayer() const;
+    void Construct(const FArguments& InArgs, FOdysseyAnimationEditor* iAnimationEditor);
     TSharedPtr<SOdysseyLayerStackTreeView> GetTreeView() const;
-
-    void TimelineZoomIn();
-    void TimelineZoomOut();
-
-	void SetTimelineZoom(float iZoom);
-	void SetTimelineOffset(float iOffset);
-
-	static float GetTimelineBaseFrameSize();
-	float GetTimelineFrameWidth() const;
-	float GetTimelineZoom() const;
-	float GetTimelineOffset() const;
-
-public:
-    //Events
-    FSimpleMulticastDelegate& OnTimelineOffsetChanged();
 
 private:
     TSharedRef<ITableRow> OnGenerateRow(UOdysseyLayer* iLayer, const TSharedRef<STableViewBase>& iOwnerTable);
     void OnTimelineScrollBarScrolled(float iOffset);
 
 private:
-    UOdysseyAnimation* mAnimation;
-    UOdysseyAnimationPlayer* mPlayer;
+    FOdysseyAnimationEditor* mEditor;
     TSharedPtr<SOdysseyLayerStackTreeView> mTreeView;
-	float mTimelineZoom;
-	float mTimelineOffset;
 	TSharedPtr<SScrollBar> mTimelineScrollBar;
-    FSimpleMulticastDelegate mOnTimelineOffsetChanged;
 };

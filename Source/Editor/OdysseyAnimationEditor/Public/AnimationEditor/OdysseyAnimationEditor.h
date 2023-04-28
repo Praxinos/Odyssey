@@ -6,6 +6,7 @@
 #include "OdysseyPainterEditor.h"
 #include "OdysseyAnimationEditorGUI.h"
 #include "LayerStack/OdysseyAnimationLayerStack.h"
+#include "AnimationEditor/OdysseyAnimationEditorTimeline.h"
 #include "Tools/RasterDrawingTool/OdysseyAnimationEditorRasterDrawingTool.h"
 #include "Tools/PaintBucketTool/OdysseyAnimationEditorPaintBucketTool.h"
 #include "Tools/ColorPickerTool/OdysseyAnimationEditorColorPickerTool.h"
@@ -35,7 +36,8 @@ public:
     // Getters
 	virtual UOdysseyAnimation*				    Animation() const;
     virtual UOdysseyAnimationLayerStack*	    LayerStack() const;
-    virtual UOdysseyAnimationPlayer*                   Player() const;
+    virtual UOdysseyAnimationPlayer*            Player() const;
+    virtual FOdysseyAnimationEditorTimeline*    Timeline();
     virtual float                               PlaybackFramesPerSecond() const;
 
 	virtual UTexture*                           DisplayTexture() const override;
@@ -82,6 +84,8 @@ private:
 private:
     UOdysseyAnimation* mAnimation;
 	TSharedPtr<FOdysseyAnimationEditorGUI> mGUI;
+
+    FOdysseyAnimationEditorTimeline mTimeline; //Those are just the editor specific data of the timeline
     
     UOdysseyAnimationEditorRasterDrawingTool* mRasterDrawingTool;
     UOdysseyAnimationEditorPaintBucketTool* mPaintBucketTool;

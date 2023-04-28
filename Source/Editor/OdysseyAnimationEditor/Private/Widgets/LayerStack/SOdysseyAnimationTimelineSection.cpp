@@ -6,12 +6,12 @@
 void
 SOdysseyAnimationTimelineSection::Construct(
 	const FArguments& iArgs, 
-	TSharedPtr<SOdysseyAnimationLayerStack> iLayerStackWidget
+	FOdysseyAnimationEditor* iEditor
 )
 {
+	mEditor = iEditor;
     mWidthInFrames = iArgs._WidthInFrames;
     mHeightInScreenUnits = iArgs._HeightInScreenUnits;
-    mLayerStackWidget = iLayerStackWidget;
 
 	ChildSlot
 	[
@@ -26,22 +26,22 @@ SOdysseyAnimationTimelineSection::Construct(
 	];
 }
 
-TSharedPtr<SOdysseyAnimationLayerStack>
-SOdysseyAnimationTimelineSection::GetLayerStackWidget() const
+FOdysseyAnimationEditor*
+SOdysseyAnimationTimelineSection::GetEditor() const
 {
-    return mLayerStackWidget.Pin();
+    return mEditor;
 }
 
 FOptionalSize
 SOdysseyAnimationTimelineSection::GetSectionWidth() const
 {
-	return mWidthInFrames.Get() * GetLayerStackWidget()->GetTimelineFrameWidth();
+	return mWidthInFrames.Get() * GetEditor()->Timeline()->GetFrameWidth();
 }
 
 FOptionalSize
 SOdysseyAnimationTimelineSection::GetSectionHeight() const
 {
-    return mHeightInScreenUnits.Get(); //GetLayerStackWidget()->GetTimelineBaseFrameSize();
+    return mHeightInScreenUnits.Get();
 }
 
 void

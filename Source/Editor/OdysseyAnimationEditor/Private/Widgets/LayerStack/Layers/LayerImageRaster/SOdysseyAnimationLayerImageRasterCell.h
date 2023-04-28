@@ -16,9 +16,13 @@ public:
 public:
     void Construct(
         const FArguments& iArgs,
-        TSharedPtr<FOdysseyAnimationCell> iCell
+        FOdysseyAnimationEditor* iEditor,
+        UOdysseyAnimationLayerImageRaster* iLayer,
+        int iCellIndex
     );
 
 private:
-    TWeakPtr<FOdysseyAnimationCell> mCell;
+    FOdysseyAnimationEditor* mEditor;
+    UOdysseyAnimationLayerImageRaster* mLayer;
+    int mCellIndex;
 };

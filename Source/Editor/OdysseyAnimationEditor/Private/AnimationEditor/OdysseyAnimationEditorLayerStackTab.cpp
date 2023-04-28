@@ -57,18 +57,14 @@ FOdysseyAnimationEditorLayerStackTab::CreateWidget()
                 + SHorizontalBox::Slot()
                 .AutoWidth()
                 [
-                    SNew(SOdysseyAnimationPlaybackControls)
-                    .Animation(Animation())
-                    .Player(Player())
+                    SNew(SOdysseyAnimationPlaybackControls, mEditor)
                     .PlaybackFramesPerSecond(this, &FOdysseyAnimationEditorLayerStackTab::PlaybackFramesPerSecond)
                 ]
             ]
             + SVerticalBox::Slot()
             .FillHeight(1.0)
             [
-                SNew(SOdysseyAnimationLayerStack)
-                .Animation(Animation())
-                .Player(Player())
+                SNew(SOdysseyAnimationLayerStack, mEditor)
             ];
 }
 

@@ -14,7 +14,8 @@
 //CONSTRUCTION/DESTRUCTION----------------------------------------------- SMultiColumnTableRow
 void SOdysseyAnimationLayerFolderRow::Construct(
     const FArguments& iArgs,
-    TSharedPtr<SOdysseyAnimationLayerStack> iLayerStackWidget,
+    const TSharedRef<SOdysseyLayerStackTreeView>& iOwnerTableView,
+    FOdysseyAnimationEditor* iEditor,
     class UOdysseyAnimationLayerFolder* iAnimationLayerFolder
 )
 {
@@ -23,7 +24,8 @@ void SOdysseyAnimationLayerFolderRow::Construct(
 
     SOdysseyAnimationLayerRow::Construct(
         SOdysseyAnimationLayerRow::FArguments(),
-        iLayerStackWidget,
+        iOwnerTableView,
+        iEditor,
 		iAnimationLayerFolder
     );
 
@@ -35,7 +37,6 @@ void SOdysseyAnimationLayerFolderRow::Construct(
 TSharedRef<SWidget>
 SOdysseyAnimationLayerFolderRow::GenerateHeaderWidget()
 {
-	TSharedRef<SWidget> defaultWidget = SOdysseyLayerRow::GenerateHeaderWidget();
 	return SNew(SHorizontalBox)
 		+ SHorizontalBox::Slot()
         .VAlign(VAlign_Center)

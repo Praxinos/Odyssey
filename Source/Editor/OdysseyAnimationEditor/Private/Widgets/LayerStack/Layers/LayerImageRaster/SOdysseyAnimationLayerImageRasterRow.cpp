@@ -13,7 +13,8 @@
 //CONSTRUCTION/DESTRUCTION----------------------------------------------- SMultiColumnTableRow
 void SOdysseyAnimationLayerImageRasterRow::Construct(
     const FArguments& InArgs,
-    TSharedPtr<SOdysseyAnimationLayerStack> iLayerStackWidget,
+    const TSharedRef<SOdysseyLayerStackTreeView>& iOwnerTableView,
+    FOdysseyAnimationEditor* iEditor,
     UOdysseyAnimationLayerImageRaster* iAnimationLayerImageRaster
 )
 {
@@ -22,7 +23,8 @@ void SOdysseyAnimationLayerImageRasterRow::Construct(
 
     SOdysseyAnimationLayerRow::Construct(
         SOdysseyAnimationLayerRow::FArguments(),
-        iLayerStackWidget,
+        iOwnerTableView,
+        iEditor,
 		iAnimationLayerImageRaster
     );
 
@@ -34,7 +36,6 @@ void SOdysseyAnimationLayerImageRasterRow::Construct(
 TSharedRef<SWidget>
 SOdysseyAnimationLayerImageRasterRow::GenerateHeaderWidget()
 {
-	TSharedRef<SWidget> defaultWidget = SOdysseyLayerRow::GenerateHeaderWidget();
     return SNew(SHorizontalBox)
         +SHorizontalBox::Slot()
         .Padding(FMargin(0.f, 0.f, 2.f, 0.f))
@@ -111,7 +112,7 @@ SOdysseyAnimationLayerImageRasterRow::GenerateOptionsWidget()
 TSharedRef<SWidget>
 SOdysseyAnimationLayerImageRasterRow::GenerateTimelineWidget()
 {
-    return SNew(SOdysseyAnimationLayerImageRasterTimeline, GetLayerStackWidget(), mAnimationLayerImageRaster);
+    return SNew(SOdysseyAnimationLayerImageRasterTimeline, GetEditor(), mAnimationLayerImageRaster);
 }
 
 void

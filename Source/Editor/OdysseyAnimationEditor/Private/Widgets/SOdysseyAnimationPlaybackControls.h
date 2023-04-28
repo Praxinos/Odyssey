@@ -6,8 +6,7 @@
 #include "CoreMinimal.h"
 #include "Widgets/Input/SButton.h"
 
-class UOdysseyAnimationPlayer;
-class UOdysseyAnimation;
+class FOdysseyAnimationEditor;
 
 //////////////////////////////////////////////////////////////////////////
 // SOdysseyAnimationPlaybackControls
@@ -17,13 +16,11 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationPlaybackControls : public SCom
 public:
 	SLATE_BEGIN_ARGS(SOdysseyAnimationPlaybackControls)
 		{}
-        SLATE_ARGUMENT(UOdysseyAnimation*, Animation)
-        SLATE_ARGUMENT(UOdysseyAnimationPlayer*, Player)
         SLATE_ATTRIBUTE(float, PlaybackFramesPerSecond)
 
 	SLATE_END_ARGS()
 
-	void Construct(const FArguments& InArgs);
+	void Construct(const FArguments& InArgs, FOdysseyAnimationEditor* iEditor);
 
 private:
     bool IsPlayingForward() const;
@@ -50,7 +47,6 @@ private:
 	FReply OnLoopClicked();
 
 private:
-    UOdysseyAnimation* mAnimation;
-    UOdysseyAnimationPlayer* mPlayer;
+	FOdysseyAnimationEditor* mEditor;
     TAttribute<float> mPlaybackFramesPerSecond;
 };

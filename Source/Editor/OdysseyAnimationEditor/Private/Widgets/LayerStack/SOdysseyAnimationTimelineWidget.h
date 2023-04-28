@@ -6,13 +6,14 @@
 #include "CoreMinimal.h"
 
 class SOdysseyAnimationTimelinePanel;
+class FOdysseyAnimationEditor;
 
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineWidget
     : public SCompoundWidget
 {
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineWidget)
-        : _BaseOffset(0.f)
+        : _BaseOffset(4.f)
         {}
         SLATE_ARGUMENT(float, BaseOffset)
     SLATE_END_ARGS()
@@ -22,14 +23,14 @@ public:
 
     void Construct(
         const FArguments& iArgs,
-        TSharedPtr<SOdysseyAnimationLayerStack> iLayerStackWidget
+        FOdysseyAnimationEditor* iEditor
     );
 
 public:
     using FSlot = FBasicLayoutWidgetSlot;
     using FScopedWidgetSlotArguments = TPanelChildren<FSlot>::FScopedWidgetSlotArguments;
 
-    TSharedPtr<SOdysseyAnimationLayerStack> GetLayerStackWidget() const;
+    FOdysseyAnimationEditor* GetEditor() const;
     void ClearChildren();
     FScopedWidgetSlotArguments AddChild();
 
@@ -39,7 +40,7 @@ public:
 	virtual FReply OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
 
 private:
-    TWeakPtr<SOdysseyAnimationLayerStack> mLayerStackWidget;
+    FOdysseyAnimationEditor*            mEditor;
     TSharedPtr<SOdysseyAnimationTimelinePanel> mPanel;
 	FVector2D 					        mOffsetMousePosition;
 	bool 						        mIsOffsetting;
@@ -61,14 +62,13 @@ public:
 
     void Construct(
         const FArguments& iArgs,
-        TSharedPtr<SOdysseyAnimationLayerStack> iLayerStackWidget
+        FOdysseyAnimationEditor* iEditor
     );
 
 public:
     using FSlot = FBasicLayoutWidgetSlot;
     using FScopedWidgetSlotArguments = TPanelChildren<FSlot>::FScopedWidgetSlotArguments;
 
-    TSharedPtr<SOdysseyAnimationLayerStack> GetLayerStackWidget() const;
     void ClearChildren();
     FScopedWidgetSlotArguments AddChild();
 
@@ -86,7 +86,7 @@ private:
     float ArrangeChildHorizontalAndReturnOffset(const FGeometry& AllottedGeometry, FArrangedChildren& ArrangedChildren, const SScrollBox::FSlot& ThisSlot, float CurChildOffset) const;
 
 private:
-    TWeakPtr<SOdysseyAnimationLayerStack> mLayerStackWidget;
+    FOdysseyAnimationEditor*            mEditor;
 
 	//State
 	TPanelChildren<SScrollBox::FSlot>   mChildren;

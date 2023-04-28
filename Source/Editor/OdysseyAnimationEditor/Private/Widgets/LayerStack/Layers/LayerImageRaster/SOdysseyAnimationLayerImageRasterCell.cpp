@@ -6,10 +6,14 @@
 void
 SOdysseyAnimationLayerImageRasterCell::Construct(
     const FArguments& iArgs,
-	TSharedPtr<FOdysseyAnimationCell> iCell
+	FOdysseyAnimationEditor* iEditor,
+	UOdysseyAnimationLayerImageRaster* iLayer,
+	int iCellIndex
 )
 {
-	mCell = iCell;
+	mEditor = iEditor;
+	mLayer = iLayer;
+	mCellIndex = iCellIndex;
 
 	ChildSlot
 	[

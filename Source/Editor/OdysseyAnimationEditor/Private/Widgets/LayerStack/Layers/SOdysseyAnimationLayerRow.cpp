@@ -11,23 +11,24 @@
 void
 SOdysseyAnimationLayerRow::Construct(
     const FArguments& iArgs,
-    TSharedPtr<SOdysseyAnimationLayerStack> iLayerStackWidget,
+    const TSharedRef<SOdysseyLayerStackTreeView>& iOwnerTableView,
+    FOdysseyAnimationEditor* iEditor,
     UOdysseyAnimationLayer* iLayer
 )
 {
-    mLayerStackWidget = iLayerStackWidget;
+    mEditor = iEditor;
 
     SOdysseyLayerRow::Construct(
         SOdysseyLayerRow::FArguments(),
-        iLayerStackWidget->GetTreeView().ToSharedRef(),
+        iOwnerTableView,
 		iLayer
     );
 }
 
-TSharedPtr<SOdysseyAnimationLayerStack>
-SOdysseyAnimationLayerRow::GetLayerStackWidget() const
+FOdysseyAnimationEditor*
+SOdysseyAnimationLayerRow::GetEditor()
 {
-    return mLayerStackWidget.Pin();
+    return mEditor;
 }
 
 TSharedRef<SWidget>
@@ -43,8 +44,7 @@ SOdysseyAnimationLayerRow::GenerateWidgetForColumn( const FName& InColumnName )
 TSharedRef<SWidget>
 SOdysseyAnimationLayerRow::GenerateTimelineWidget()
 {
-    return SNew(SOdysseyAnimationTimelineWidget, GetLayerStackWidget())
-        .BaseOffset(4.0f);
+    return SNew(SOdysseyAnimationTimelineWidget, mEditor);
 }
 
 

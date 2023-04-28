@@ -7,6 +7,7 @@
 #include "Widgets/SOdysseyLayerRow.h"
 
 class SOdysseyAnimationLayerStack;
+class FOdysseyAnimationEditor;
 
 /**
  * Implements a layer row widget
@@ -22,12 +23,13 @@ public:
 public:
     void Construct(
         const FArguments& iArgs,
-        TSharedPtr<SOdysseyAnimationLayerStack> iLayerStackWidget,
+        const TSharedRef<SOdysseyLayerStackTreeView>& iOwnerTableView,
+        FOdysseyAnimationEditor* iEditor,
         class UOdysseyAnimationLayer* iLayer
     );
 
 public:
-    TSharedPtr<SOdysseyAnimationLayerStack> GetLayerStackWidget() const;
+    FOdysseyAnimationEditor* GetEditor();
 
 public:
     virtual TSharedRef<SWidget> GenerateWidgetForColumn( const FName& InColumnName ) override;
@@ -36,5 +38,5 @@ protected:
     virtual TSharedRef<SWidget> GenerateTimelineWidget();
 
 private:
-    TWeakPtr<SOdysseyAnimationLayerStack> mLayerStackWidget;
+    FOdysseyAnimationEditor* mEditor;
 };

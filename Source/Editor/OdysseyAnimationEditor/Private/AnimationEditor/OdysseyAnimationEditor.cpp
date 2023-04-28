@@ -133,6 +133,12 @@ FOdysseyAnimationEditor::Player() const
 	return mPlayer;
 }
 
+FOdysseyAnimationEditorTimeline*
+FOdysseyAnimationEditor::Timeline()
+{
+	return &mTimeline;
+}
+
 float
 FOdysseyAnimationEditor::PlaybackFramesPerSecond() const
 {

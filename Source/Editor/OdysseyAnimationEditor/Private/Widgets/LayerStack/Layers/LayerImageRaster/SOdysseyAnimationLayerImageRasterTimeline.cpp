@@ -29,7 +29,7 @@ SOdysseyAnimationLayerImageRasterTimeline::SOdysseyAnimationLayerImageRasterTime
 void
 SOdysseyAnimationLayerImageRasterTimeline::Construct(
     const FArguments& InArgs,
-    TSharedPtr<SOdysseyAnimationLayerStack> iLayerStackWidget,
+    FOdysseyAnimationEditor* iEditor,
     UOdysseyAnimationLayerImageRaster* iAnimationLayerImageRaster
 )
 {
@@ -43,7 +43,7 @@ SOdysseyAnimationLayerImageRasterTimeline::Construct(
 
 	SOdysseyAnimationTimelineWidget::Construct(
 		args,
-        iLayerStackWidget
+        iEditor
 	);
     
     mAnimationLayerImageRaster = iAnimationLayerImageRaster;
@@ -76,7 +76,7 @@ SOdysseyAnimationLayerImageRasterTimeline::GetLayerOffset() const
 float
 SOdysseyAnimationLayerImageRasterTimeline::GetCellHeight() const
 {
-    return GetLayerStackWidget()->GetTimelineBaseFrameSize();
+    return GetEditor()->Timeline()->GetBaseFrameSize();
 }
 
 float
@@ -103,7 +103,7 @@ SOdysseyAnimationLayerImageRasterTimeline::AddPreBehaviourWidget()
 {
     AddChild()
     [
-        SNew(SOdysseyAnimationTimelineSection, GetLayerStackWidget())
+        SNew(SOdysseyAnimationTimelineSection, GetEditor())
         .WidthInFrames(this, &SOdysseyAnimationLayerImageRasterTimeline::GetLayerOffset)
         .HeightInScreenUnits(this, &SOdysseyAnimationLayerImageRasterTimeline::GetCellHeight)
     ];
@@ -118,14 +118,14 @@ SOdysseyAnimationLayerImageRasterTimeline::AddCellsWidgets()
         TSharedPtr<FOdysseyAnimationCell> cell = cells[i];
         AddChild()
         [
-            SNew(SOdysseyAnimationTimelineSection, GetLayerStackWidget())
+            SNew(SOdysseyAnimationTimelineSection, GetEditor())
             .WidthInFrames(this, &SOdysseyAnimationLayerImageRasterTimeline::GetCellLength, i)
             .HeightInScreenUnits(this, &SOdysseyAnimationLayerImageRasterTimeline::GetCellHeight)
             [
                 SNew(SOverlay)
                 +SOverlay::Slot()
                 [
-                    SNew(SOdysseyAnimationLayerImageRasterCell, cell)
+                    SNew(SOdysseyAnimationLayerImageRasterCell, GetEditor(), mAnimationLayerImageRaster, i)       
                 ]
                 +SOverlay::Slot() //Timing Handle Top Left
                 .Padding(-mLengthHandleBrush->ImageSize.X / 2, 0.f, 0.f, 0.f)
@@ -195,7 +195,7 @@ SOdysseyAnimationLayerImageRasterTimeline::OnMouseMove(const FGeometry& iGeometr
     {
         const int minOffset = 0;
         float mouseOffset = iEvent.GetScreenSpacePosition().X - mLayerOffsetData.mMousePosition;
-        int offset = (int)(mLayerOffsetData.mStartOffset + (mouseOffset / GetLayerStackWidget()->GetTimelineFrameWidth()));
+        int offset = (int)(mLayerOffsetData.mStartOffset + (mouseOffset / GetEditor()->Timeline()->GetFrameWidth()));
         mLayerOffsetData.mOffset = FMath::Max(minOffset, offset);
 
         return FReply::Handled();
@@ -225,13 +225,13 @@ SOdysseyAnimationLayerImageRasterTimeline::OnMouseButtonUp(const FGeometry& iGeo
 EVisibility
 SOdysseyAnimationLayerImageRasterTimeline::GetTimingHandleVisibility() const
 {
-	return (GetLayerStackWidget()->GetTimelineFrameWidth() < mTimingHandleBrush->ImageSize.X / 2) ? EVisibility::Collapsed : EVisibility::Visible;
+	return (GetEditor()->Timeline()->GetFrameWidth() < mTimingHandleBrush->ImageSize.X / 2) ? EVisibility::Collapsed : EVisibility::Visible;
 }
 
 EVisibility
 SOdysseyAnimationLayerImageRasterTimeline::GetLengthHandleVisibility() const
 {
-	return (GetLayerStackWidget()->GetTimelineFrameWidth() < mLengthHandleBrush->ImageSize.X / 2) ? EVisibility::Collapsed : EVisibility::Visible;
+	return (GetEditor()->Timeline()->GetFrameWidth() < mLengthHandleBrush->ImageSize.X / 2) ? EVisibility::Collapsed : EVisibility::Visible;
 }
 
 void
@@ -251,9 +251,9 @@ SOdysseyAnimationLayerImageRasterTimeline::OnLengthHandleDragged(const FGeometry
     float mouseOffset = iEvent.GetScreenSpacePosition().X - mLengthHandleDragData.mMousePosition;
     int mouseOffsetInt = 0;
     if ( mouseOffset > 0 )
-        mouseOffsetInt = (int)(mouseOffset / GetLayerStackWidget()->GetTimelineFrameWidth() + 0.5f);
+        mouseOffsetInt = (int)(mouseOffset / GetEditor()->Timeline()->GetFrameWidth() + 0.5f);
     else
-        mouseOffsetInt = (int)(mouseOffset / GetLayerStackWidget()->GetTimelineFrameWidth() - 0.5f);
+        mouseOffsetInt = (int)(mouseOffset / GetEditor()->Timeline()->GetFrameWidth() - 0.5f);
 
     int length = mLengthHandleDragData.mStartLength + mouseOffsetInt;
     mLengthHandleDragData.mLength = FMath::Max(minLength, length);
