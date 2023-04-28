@@ -35,7 +35,7 @@ SOdysseyAnimationTimelineSection::GetEditor() const
 FOptionalSize
 SOdysseyAnimationTimelineSection::GetSectionWidth() const
 {
-	return mWidthInFrames.Get() * GetEditor()->Timeline()->GetFrameWidth();
+	return mWidthInFrames.Get() * mEditor->Timeline()->GetFrameWidth();
 }
 
 FOptionalSize

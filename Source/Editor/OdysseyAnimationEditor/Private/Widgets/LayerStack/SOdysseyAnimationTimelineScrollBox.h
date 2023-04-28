@@ -5,21 +5,19 @@
 
 #include "CoreMinimal.h"
 
-class SOdysseyAnimationTimelinePanel;
+class SOdysseyAnimationTimelineScrollPanel;
 class FOdysseyAnimationEditor;
 
-class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineWidget
+class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineScrollBox
     : public SCompoundWidget
 {
 public:
-    SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineWidget)
-        : _BaseOffset(4.f)
+    SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineScrollBox)
         {}
-        SLATE_ARGUMENT(float, BaseOffset)
     SLATE_END_ARGS()
 
 public:
-    SOdysseyAnimationTimelineWidget();
+    SOdysseyAnimationTimelineScrollBox();
 
     void Construct(
         const FArguments& iArgs,
@@ -34,31 +32,21 @@ public:
     void ClearChildren();
     FScopedWidgetSlotArguments AddChild();
 
-public:
-	virtual FReply OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
-	virtual FReply OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
-	virtual FReply OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
-
 private:
     FOdysseyAnimationEditor*            mEditor;
-    TSharedPtr<SOdysseyAnimationTimelinePanel> mPanel;
-	FVector2D 					        mOffsetMousePosition;
-	bool 						        mIsOffsetting;
-    bool 						        mIsScrubbing;
+    TSharedPtr<SOdysseyAnimationTimelineScrollPanel> mPanel;
 };
 
-class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelinePanel
+class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineScrollPanel
     : public SPanel
 {
 public:
-    SLATE_BEGIN_ARGS(SOdysseyAnimationTimelinePanel)
-        : _BaseOffset(0.f)
+    SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineScrollPanel)
         {}
-        SLATE_ARGUMENT(float, BaseOffset)
     SLATE_END_ARGS()
 
 public:
-    SOdysseyAnimationTimelinePanel();
+    SOdysseyAnimationTimelineScrollPanel();
 
     void Construct(
         const FArguments& iArgs,
@@ -90,5 +78,4 @@ private:
 
 	//State
 	TPanelChildren<SScrollBox::FSlot>   mChildren;
-    float mBaseOffset;
 };

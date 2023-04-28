@@ -1,18 +1,15 @@
 // IDDN FR.001.250001.005.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
-#include "Widgets/LayerStack/SOdysseyAnimationTimelineWidget.h"
+#include "Widgets/LayerStack/SOdysseyAnimationTimelineScrollBox.h"
 
-SOdysseyAnimationTimelineWidget::SOdysseyAnimationTimelineWidget()
+SOdysseyAnimationTimelineScrollBox::SOdysseyAnimationTimelineScrollBox()
 	: mEditor(nullptr)
-	, mOffsetMousePosition(0)
-	, mIsOffsetting(false)
-    , mIsScrubbing(false)
 {
 }
 
 void
-SOdysseyAnimationTimelineWidget::Construct(
+SOdysseyAnimationTimelineScrollBox::Construct(
     const FArguments& iArgs,
 	FOdysseyAnimationEditor* iEditor
 )
@@ -21,111 +18,67 @@ SOdysseyAnimationTimelineWidget::Construct(
 
 	ChildSlot
 	[
-		SAssignNew(mPanel, SOdysseyAnimationTimelinePanel, iEditor)
+		SAssignNew(mPanel, SOdysseyAnimationTimelineScrollPanel, iEditor)
 		.Clipping(EWidgetClipping::ClipToBounds)
-		.BaseOffset(iArgs._BaseOffset)
 	];
 }
 
 FOdysseyAnimationEditor*
-SOdysseyAnimationTimelineWidget::GetEditor() const
+SOdysseyAnimationTimelineScrollBox::GetEditor() const
 {
     return mEditor;
 }
 
 void
-SOdysseyAnimationTimelineWidget::ClearChildren()
+SOdysseyAnimationTimelineScrollBox::ClearChildren()
 {
 	mPanel->ClearChildren();
 }
 
-SOdysseyAnimationTimelineWidget::FScopedWidgetSlotArguments
-SOdysseyAnimationTimelineWidget::AddChild()
+SOdysseyAnimationTimelineScrollBox::FScopedWidgetSlotArguments
+SOdysseyAnimationTimelineScrollBox::AddChild()
 {
 	return mPanel->AddChild();
 }
 
-FReply 
-SOdysseyAnimationTimelineWidget::OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
-{
-	if (MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
-	{
-		if (MouseEvent.IsControlDown())
-		{
-			mIsOffsetting = true;
-			mOffsetMousePosition = MouseEvent.GetScreenSpacePosition();
-			mOffsetMousePosition.Y = GetEditor()->Timeline()->GetOffset();
-    		return FReply::Handled().CaptureMouse(AsShared()).PreventThrottling();
-		}
-	}
-
-	return FReply::Unhandled();
-}
-
-FReply
-SOdysseyAnimationTimelineWidget::OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
-{
-	if (mIsOffsetting)
-	{
-		const float minOffset = 0.0f;
-		float mouseOffset = MouseEvent.GetScreenSpacePosition().X - mOffsetMousePosition.X;
-        //mOffsetMousePosition.Y contains the starting offset instead of the Y position
-		GetEditor()->Timeline()->SetOffset(FMath::Max(minOffset, mOffsetMousePosition.Y - (mouseOffset / GetEditor()->Timeline()->GetFrameWidth())));
-		return FReply::Handled();
-	}
-	return FReply::Unhandled();
-}
-
-FReply
-SOdysseyAnimationTimelineWidget::OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
-{
-	if (mIsOffsetting)
-	{
-		mIsOffsetting = false;
-    	return FReply::Handled().CaptureMouse(AsShared());
-	}
-    return FReply::Unhandled();
-}
-
 //=================
 //=================
 //=================
 
-SOdysseyAnimationTimelinePanel::SOdysseyAnimationTimelinePanel()
+SOdysseyAnimationTimelineScrollPanel::SOdysseyAnimationTimelineScrollPanel()
 	: mChildren(this)
 {
 }
 
 void
-SOdysseyAnimationTimelinePanel::Construct(
+SOdysseyAnimationTimelineScrollPanel::Construct(
     const FArguments& iArgs,
 	FOdysseyAnimationEditor* iEditor
 )
 {
     mEditor = iEditor;
-	mBaseOffset = iArgs._BaseOffset;
 }
 
 FChildren*
-SOdysseyAnimationTimelinePanel::GetChildren()
+SOdysseyAnimationTimelineScrollPanel::GetChildren()
 {
 	return &mChildren;
 }
 
 void
-SOdysseyAnimationTimelinePanel::ClearChildren()
+SOdysseyAnimationTimelineScrollPanel::ClearChildren()
 {
 	mChildren.Empty();
 }
 
-SOdysseyAnimationTimelinePanel::FScopedWidgetSlotArguments
-SOdysseyAnimationTimelinePanel::AddChild()
+SOdysseyAnimationTimelineScrollPanel::FScopedWidgetSlotArguments
+SOdysseyAnimationTimelineScrollPanel::AddChild()
 {
 	return FScopedWidgetSlotArguments{ MakeUnique<FSlot>(), mChildren, INDEX_NONE };
 }
 
 FVector2D
-SOdysseyAnimationTimelinePanel::ComputeDesiredSize(float) const
+SOdysseyAnimationTimelineScrollPanel::ComputeDesiredSize(float) const
 {
 	FVector2D desiredSize = FVector2D::ZeroVector;
 	for (int32 SlotIndex = 0; SlotIndex < mChildren.Num(); ++SlotIndex)
@@ -142,10 +95,10 @@ SOdysseyAnimationTimelinePanel::ComputeDesiredSize(float) const
 }
 
 void
-SOdysseyAnimationTimelinePanel::OnArrangeChildren(const FGeometry& AllottedGeometry, FArrangedChildren& ArrangedChildren) const
+SOdysseyAnimationTimelineScrollPanel::OnArrangeChildren(const FGeometry& AllottedGeometry, FArrangedChildren& ArrangedChildren) const
 {
 	float scrollPadding = AllottedGeometry.GetLocalSize().X;
-	float currentChildOffset = -mEditor->Timeline()->GetOffset() * mEditor->Timeline()->GetFrameWidth() + mBaseOffset;
+	float currentChildOffset = -mEditor->Timeline()->GetOffset() * mEditor->Timeline()->GetFrameWidth();
 
 	for (int32 SlotIndex = 0; SlotIndex < mChildren.Num(); ++SlotIndex)
 	{
@@ -160,7 +113,7 @@ SOdysseyAnimationTimelinePanel::OnArrangeChildren(const FGeometry& AllottedGeome
 }
 
 float
-SOdysseyAnimationTimelinePanel::ArrangeChildHorizontalAndReturnOffset(const FGeometry& AllottedGeometry, FArrangedChildren& ArrangedChildren, const SScrollBox::FSlot& ThisSlot, float CurChildOffset) const
+SOdysseyAnimationTimelineScrollPanel::ArrangeChildHorizontalAndReturnOffset(const FGeometry& AllottedGeometry, FArrangedChildren& ArrangedChildren, const SScrollBox::FSlot& ThisSlot, float CurChildOffset) const
 {
 	const FMargin& ThisPadding = ThisSlot.GetPadding();
 	const FVector2D& WidgetDesiredSize = ThisSlot.GetWidget()->GetDesiredSize();
@@ -175,7 +128,7 @@ SOdysseyAnimationTimelinePanel::ArrangeChildHorizontalAndReturnOffset(const FGeo
 }
 
 int32
-SOdysseyAnimationTimelinePanel::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
+SOdysseyAnimationTimelineScrollPanel::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
 {
 	// Draw a current frame
 	LayerId = SPanel::OnPaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
@@ -193,7 +146,7 @@ SOdysseyAnimationTimelinePanel::OnPaint(const FPaintArgs& Args, const FGeometry&
 	lineColor.A = 0.3f;
 
 	int currentFrame = mEditor->Animation()->GetFrameIndexAtTime(mEditor->Player()->GetCurrentTime());
-	float currentFramePos = (currentFrame - offset) * frameSize + mBaseOffset;
+	float currentFramePos = (currentFrame - offset) * frameSize;
 
 	FSlateDrawElement::MakeBox(
 		OutDrawElements,

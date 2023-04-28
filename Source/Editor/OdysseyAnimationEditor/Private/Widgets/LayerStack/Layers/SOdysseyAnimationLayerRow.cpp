@@ -3,6 +3,7 @@
 
 #include "Widgets/LayerStack/Layers/SOdysseyAnimationLayerRow.h"
 #include "Widgets/LayerStack/SOdysseyAnimationLayerStack.h"
+#include "Widgets/LayerStack/SOdysseyAnimationTimelineControl.h"
 
 #define LOCTEXT_NAMESPACE "SOdysseyAnimationLayerRow"
 
@@ -36,7 +37,15 @@ SOdysseyAnimationLayerRow::GenerateWidgetForColumn( const FName& InColumnName )
 {
     if (InColumnName == "Timeline")
     {
-        return GenerateTimelineWidget();
+        return 
+            SNew(SBorder)
+            .Padding(FMargin(4.f, 0.f, 0.f, 0.f)) //Patch
+            [
+                SNew(SOdysseyAnimationTimelineControl, mEditor)
+                [
+                    GenerateTimelineWidget()
+                ]
+            ];
     }
     return SOdysseyLayerRow::GenerateWidgetForColumn(InColumnName);
 }
@@ -44,7 +53,7 @@ SOdysseyAnimationLayerRow::GenerateWidgetForColumn( const FName& InColumnName )
 TSharedRef<SWidget>
 SOdysseyAnimationLayerRow::GenerateTimelineWidget()
 {
-    return SNew(SOdysseyAnimationTimelineWidget, mEditor);
+    return SNullWidget::NullWidget;
 }
 
 

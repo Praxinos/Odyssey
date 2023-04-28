@@ -4,13 +4,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Widgets/LayerStack/SOdysseyAnimationTimelineWidget.h"
+#include "Widgets/LayerStack/SOdysseyAnimationTimelineScrollBox.h"
 
+class SOdysseyAnimationTimelineScrollBox;
 /**
  * Implements a layer row widget
  */
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerImageRasterTimeline
-    : public SOdysseyAnimationTimelineWidget
+    : public SCompoundWidget
 {
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationLayerImageRasterTimeline)
@@ -29,9 +30,6 @@ public:
 
 public:
     //SWidget overrides
-	virtual FReply OnMouseButtonDown(const FGeometry& iGeometry, const FPointerEvent& iEvent) override;
-	virtual FReply OnMouseMove(const FGeometry& iGeometry, const FPointerEvent& MouseEvent) override;
-	virtual FReply OnMouseButtonUp(const FGeometry& iGeometry, const FPointerEvent& MouseEvent) override;
     void Tick( const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime );
 
 private:
@@ -53,8 +51,15 @@ private:
     void OnLengthHandleDragged(const FGeometry& iGeometry, const FPointerEvent& iEvent);
     void OnLengthHandleDragStopped(const FGeometry& iGeometry, const FPointerEvent& iEvent);
 
+    FReply OnCellsMouseButtonDown(const FGeometry& iGeometry, const FPointerEvent& iEvent);
+    FReply OnCellsMouseMove(const FGeometry& iGeometry, const FPointerEvent& MouseEvent);
+    FReply OnCellsMouseButtonUp(const FGeometry& iGeometry, const FPointerEvent& MouseEvent);
+
 private:
+    FOdysseyAnimationEditor* mEditor;
     class UOdysseyAnimationLayerImageRaster* mAnimationLayerImageRaster;
+    TSharedPtr<SOdysseyAnimationTimelineScrollBox> mScrollBox;
+    TSharedPtr<SBorder> mCellsBorder;
     bool mIsRefreshPending;
     bool mIsOffsettingLayer;
     bool mIsDraggingCellLengthHandle;

@@ -7,7 +7,7 @@
 
 class FOdysseyAnimationEditor;
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineHeader
-	: public SOdysseyAnimationTimelineWidget
+	: public SCompoundWidget
 {
 public:
 	SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineHeader)
@@ -28,4 +28,5 @@ public:
 
 private:
 	bool mIsScrubbing = false;
+	FOdysseyAnimationEditor* mEditor;
 };

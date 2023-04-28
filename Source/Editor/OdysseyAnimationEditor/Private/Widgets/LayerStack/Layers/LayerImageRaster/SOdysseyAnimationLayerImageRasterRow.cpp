@@ -112,7 +112,16 @@ SOdysseyAnimationLayerImageRasterRow::GenerateOptionsWidget()
 TSharedRef<SWidget>
 SOdysseyAnimationLayerImageRasterRow::GenerateTimelineWidget()
 {
-    return SNew(SOdysseyAnimationLayerImageRasterTimeline, GetEditor(), mAnimationLayerImageRaster);
+    return
+        SNew(SOverlay)
+        + SOverlay::Slot()
+        [
+            SOdysseyAnimationLayerRow::GenerateTimelineWidget()
+        ]
+        + SOverlay::Slot()
+        [
+            SNew(SOdysseyAnimationLayerImageRasterTimeline, GetEditor(), mAnimationLayerImageRaster)
+        ];
 }
 
 void

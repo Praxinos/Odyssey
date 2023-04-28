@@ -39,7 +39,10 @@ SOdysseyAnimationLayerStack::Construct(const FArguments& InArgs, FOdysseyAnimati
                     .VAlignCell(VAlign_Fill)
                     .HAlignCell(HAlign_Fill)
                     [
-                        SNew(SOdysseyAnimationTimelineHeader, mEditor)
+                        SNew(SOdysseyAnimationTimelineControl, mEditor)
+                        [
+                            SNew(SOdysseyAnimationTimelineHeader, mEditor)
+                        ]
                     ]
                 }
             )
