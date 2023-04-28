@@ -12,8 +12,12 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineScrollBox
     : public SCompoundWidget
 {
 public:
+    using FSlot = FBasicLayoutWidgetSlot;
+    using FScopedWidgetSlotArguments = TPanelChildren<FSlot>::FScopedWidgetSlotArguments;
+
     SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineScrollBox)
         {}
+        SLATE_SLOT_ARGUMENT( FSlot, Slots )
     SLATE_END_ARGS()
 
 public:
@@ -25,8 +29,8 @@ public:
     );
 
 public:
-    using FSlot = FBasicLayoutWidgetSlot;
-    using FScopedWidgetSlotArguments = TPanelChildren<FSlot>::FScopedWidgetSlotArguments;
+    /** @return a new slot. Slots contain children */
+    static FSlot::FSlotArguments Slot();
 
     FOdysseyAnimationEditor* GetEditor() const;
     void ClearChildren();
@@ -50,6 +54,7 @@ public:
 
     void Construct(
         const FArguments& iArgs,
+        TArray<SOdysseyAnimationTimelineScrollBox::FSlot::FSlotArguments> iSlots,
         FOdysseyAnimationEditor* iEditor
     );
 
@@ -66,16 +71,15 @@ public:
 
 protected:
 	// Begin SWidget overrides.
-    virtual int32 OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const override;
 	virtual FVector2D ComputeDesiredSize(float) const override;
 	// End SWidget overrides.
 
 private:
-    float ArrangeChildHorizontalAndReturnOffset(const FGeometry& AllottedGeometry, FArrangedChildren& ArrangedChildren, const SScrollBox::FSlot& ThisSlot, float CurChildOffset) const;
+    float ArrangeChildHorizontalAndReturnOffset(const FGeometry& AllottedGeometry, FArrangedChildren& ArrangedChildren, const SOdysseyAnimationTimelineScrollBox::FSlot& ThisSlot, float CurChildOffset) const;
 
 private:
     FOdysseyAnimationEditor*            mEditor;
 
 	//State
-	TPanelChildren<SScrollBox::FSlot>   mChildren;
+	TPanelChildren<SOdysseyAnimationTimelineScrollBox::FSlot>   mChildren;
 };

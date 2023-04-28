@@ -3,6 +3,12 @@
 
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineScrollBox.h"
 
+SOdysseyAnimationTimelineScrollBox::FSlot::FSlotArguments
+SOdysseyAnimationTimelineScrollBox::Slot()
+{
+	return FSlot::FSlotArguments(MakeUnique<FSlot>());
+}
+
 SOdysseyAnimationTimelineScrollBox::SOdysseyAnimationTimelineScrollBox()
 	: mEditor(nullptr)
 {
@@ -18,7 +24,7 @@ SOdysseyAnimationTimelineScrollBox::Construct(
 
 	ChildSlot
 	[
-		SAssignNew(mPanel, SOdysseyAnimationTimelineScrollPanel, iEditor)
+		SAssignNew(mPanel, SOdysseyAnimationTimelineScrollPanel, MoveTemp(const_cast<TArray<FSlot::FSlotArguments>&>(iArgs._Slots)),  iEditor)
 		.Clipping(EWidgetClipping::ClipToBounds)
 	];
 }
@@ -53,10 +59,12 @@ SOdysseyAnimationTimelineScrollPanel::SOdysseyAnimationTimelineScrollPanel()
 void
 SOdysseyAnimationTimelineScrollPanel::Construct(
     const FArguments& iArgs,
+    TArray<SOdysseyAnimationTimelineScrollBox::FSlot::FSlotArguments> iSlots,
 	FOdysseyAnimationEditor* iEditor
 )
 {
     mEditor = iEditor;
+	mChildren.AddSlots(MoveTemp(iSlots));
 }
 
 FChildren*
@@ -113,7 +121,7 @@ SOdysseyAnimationTimelineScrollPanel::OnArrangeChildren(const FGeometry& Allotte
 }
 
 float
-SOdysseyAnimationTimelineScrollPanel::ArrangeChildHorizontalAndReturnOffset(const FGeometry& AllottedGeometry, FArrangedChildren& ArrangedChildren, const SScrollBox::FSlot& ThisSlot, float CurChildOffset) const
+SOdysseyAnimationTimelineScrollPanel::ArrangeChildHorizontalAndReturnOffset(const FGeometry& AllottedGeometry, FArrangedChildren& ArrangedChildren, const SOdysseyAnimationTimelineScrollBox::FSlot& ThisSlot, float CurChildOffset) const
 {
 	const FMargin& ThisPadding = ThisSlot.GetPadding();
 	const FVector2D& WidgetDesiredSize = ThisSlot.GetWidget()->GetDesiredSize();
@@ -125,37 +133,4 @@ SOdysseyAnimationTimelineScrollPanel::ArrangeChildHorizontalAndReturnOffset(cons
 
 	ArrangedChildren.AddWidget(AllottedGeometry.MakeChild(ThisSlot.GetWidget(), FVector2D(CurChildOffset + ThisPadding.Left, YAlignmentResult.Offset), FVector2D(WidgetDesiredSize.X, YAlignmentResult.Size)));
 	return CurChildOffset + ThisSlotDesiredWidth;
-}
-
-int32
-SOdysseyAnimationTimelineScrollPanel::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
-{
-	// Draw a current frame
-	LayerId = SPanel::OnPaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
-
-	++LayerId;
-
-	const FSlateBrush* GenericBrush = FCoreStyle::Get().GetBrush( "GenericWhiteBox" );
-
-	const float height = AllottedGeometry.GetLocalSize().Y;  
-	const float width = AllottedGeometry.GetLocalSize().X;
-	float offset = mEditor->Timeline()->GetOffset();
-	const float frameSize = mEditor->Timeline()->GetFrameWidth();
-
-	FLinearColor lineColor = FLinearColor::Red;
-	lineColor.A = 0.3f;
-
-	int currentFrame = mEditor->Animation()->GetFrameIndexAtTime(mEditor->Player()->GetCurrentTime());
-	float currentFramePos = (currentFrame - offset) * frameSize;
-
-	FSlateDrawElement::MakeBox(
-		OutDrawElements,
-		LayerId,
-		AllottedGeometry.ToPaintGeometry(FVector2D(currentFramePos, 0.f), FVector2D(frameSize, height)),
-		GenericBrush,
-		ESlateDrawEffect::None,
-		lineColor
-	);
-
-	return LayerId;
 }

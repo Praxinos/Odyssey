@@ -6,6 +6,7 @@
 #include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
 #include "Widgets/LayerStack/Layers/LayerImageRaster/SOdysseyAnimationLayerImageRasterCell.h"
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineSection.h"
+#include "Widgets/LayerStack/SOdysseyAnimationTimelineFrameSelector.h"
 #include "OdysseyStyleSet.h"
 
 #define LOCTEXT_NAMESPACE "SOdysseyAnimationLayerImageRasterTimeline"
@@ -41,7 +42,44 @@ SOdysseyAnimationLayerImageRasterTimeline::Construct(
     
     ChildSlot
     [
-        SAssignNew(mScrollBox, SOdysseyAnimationTimelineScrollBox, iEditor)
+        SNew(SVerticalBox)
+        + SVerticalBox::Slot()
+        .AutoHeight()
+        [
+            SAssignNew(mScrollBox, SOdysseyAnimationTimelineScrollBox, iEditor)
+            + SOdysseyAnimationTimelineScrollBox::Slot()
+            [
+                SNew(SHorizontalBox)
+                + SHorizontalBox::Slot()
+                .AutoWidth()
+                [
+                    SNew(SOdysseyAnimationTimelineSection, mEditor)
+                    .WidthInFrames(this, &SOdysseyAnimationLayerImageRasterTimeline::GetLayerOffset)
+                    .HeightInScreenUnits(this, &SOdysseyAnimationLayerImageRasterTimeline::GetCellHeight)
+                ]
+                + SHorizontalBox::Slot()
+                .AutoWidth()
+                [
+                    SAssignNew(mCellsBorder, SBorder)
+                    .Padding(FMargin(0.f))
+                    .OnMouseButtonDown(this, &SOdysseyAnimationLayerImageRasterTimeline::OnCellsMouseButtonDown)
+                    .OnMouseMove(this, &SOdysseyAnimationLayerImageRasterTimeline::OnCellsMouseMove)
+                    .OnMouseButtonUp(this, &SOdysseyAnimationLayerImageRasterTimeline::OnCellsMouseButtonUp)
+                    [
+                        SAssignNew(mCellsBox, SHorizontalBox)
+                    ]
+                ]
+            ]
+        ]
+        + SVerticalBox::Slot()
+        .AutoHeight()
+        [
+            SNew(SBox)
+            .HeightOverride(20.f)
+            [
+                SNew(SOdysseyAnimationTimelineFrameSelector, mEditor)
+            ]
+        ]
     ];
 
     mAnimationLayerImageRaster = iAnimationLayerImageRaster;
@@ -91,45 +129,18 @@ SOdysseyAnimationLayerImageRasterTimeline::GetCellLength(int iCellIndex) const
 void
 SOdysseyAnimationLayerImageRasterTimeline::RefreshWidgets()
 {
-    mScrollBox->ClearChildren();
-    AddPreBehaviourWidget();
+    mCellsBox->ClearChildren();
     AddCellsWidgets();
-}
-
-void
-SOdysseyAnimationLayerImageRasterTimeline::AddPreBehaviourWidget()
-{
-    mScrollBox->AddChild()
-    [
-        SNew(SOdysseyAnimationTimelineSection, mEditor)
-        .WidthInFrames(this, &SOdysseyAnimationLayerImageRasterTimeline::GetLayerOffset)
-        .HeightInScreenUnits(this, &SOdysseyAnimationLayerImageRasterTimeline::GetCellHeight)
-    ];
 }
 
 void
 SOdysseyAnimationLayerImageRasterTimeline::AddCellsWidgets()
 {
-    TSharedPtr<SHorizontalBox> cellsBox = nullptr;
-
-    mScrollBox->AddChild()
-    [
-        SAssignNew(mCellsBorder, SBorder)
-        .Padding(FMargin(0.f))
-        .OnMouseButtonDown(this, &SOdysseyAnimationLayerImageRasterTimeline::OnCellsMouseButtonDown)
-        .OnMouseMove(this, &SOdysseyAnimationLayerImageRasterTimeline::OnCellsMouseMove)
-        .OnMouseButtonUp(this, &SOdysseyAnimationLayerImageRasterTimeline::OnCellsMouseButtonUp)
-        [
-            SAssignNew(cellsBox, SHorizontalBox)
-        ]
-    ];
-        
-
     TArray<TSharedPtr<FOdysseyAnimationCell>>& cells = mAnimationLayerImageRaster->GetCells();
     for (int i = 0; i < cells.Num(); i++)
     {
         TSharedPtr<FOdysseyAnimationCell> cell = cells[i];
-        cellsBox->AddSlot()
+        mCellsBox->AddSlot()
         .AutoWidth()
         [
             SNew(SOdysseyAnimationTimelineSection, mEditor)

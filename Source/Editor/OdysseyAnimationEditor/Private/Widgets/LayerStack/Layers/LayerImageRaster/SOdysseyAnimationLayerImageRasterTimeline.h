@@ -41,7 +41,6 @@ private:
     float GetCellHeight() const;
     float GetCellLength(int iCellIndex) const;
 
-    void AddPreBehaviourWidget();
     void AddCellsWidgets();
     
     EVisibility GetTimingHandleVisibility() const;
@@ -60,6 +59,8 @@ private:
     class UOdysseyAnimationLayerImageRaster* mAnimationLayerImageRaster;
     TSharedPtr<SOdysseyAnimationTimelineScrollBox> mScrollBox;
     TSharedPtr<SBorder> mCellsBorder;
+    TSharedPtr<SHorizontalBox> mCellsBox;
+    
     bool mIsRefreshPending;
     bool mIsOffsettingLayer;
     bool mIsDraggingCellLengthHandle;
