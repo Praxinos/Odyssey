@@ -20,6 +20,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorPaintBucketTool : public UOd
     GENERATED_BODY()
 
 public:
+    static bool DoubleClicked();
+
     // Destructor
     virtual ~UOdysseyPainterEditorPaintBucketTool();
 
@@ -51,6 +53,9 @@ public:
 public:
     UPROPERTY(EditAnywhere,Category="Odyssey BucketFill Tool")
     uint8 Tolerance;
+
+    UPROPERTY(EditAnywhere,Category="Odyssey BucketFill Tool")
+    bool Propagate;
 
     UPROPERTY(EditAnywhere,Category="Odyssey BucketFill Tool")
     bool Gradient;

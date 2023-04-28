@@ -19,6 +19,7 @@ UOdysseyPainterEditorPaintBucketTool::UOdysseyPainterEditorPaintBucketTool()
     , mPickedBucketHandle( nullptr )
     , mPickedObject( nullptr )
     , Gradient( false )
+    , Propagate( true )
     , Color1( 255, 255, 255, 255 )
     , Color2( 255, 255, 255, 255 )
 {
@@ -171,6 +172,19 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseDown( TSharedPtr<::ULIS::FBlock, ES
     return true;
 }
 
+// static
+bool
+UOdysseyPainterEditorPaintBucketTool::DoubleClicked()
+{
+    uint64 clickTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    static uint64 previousClickTime = 0;
+    bool doubleClicked = ( ( clickTime - previousClickTime ) < 200 ) ? true : false;
+
+    previousClickTime = clickTime;
+
+    return doubleClicked;
+}
+
 bool
 UOdysseyPainterEditorPaintBucketTool::OnMouseDown( FOdysseyVectorEngine* iEngine
                                                  , FOdysseyVectorScene* iScene
@@ -205,7 +219,17 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseDown( FOdysseyVectorEngine* iEngine
             switch( pickedArea )
             {
                 case FOdysseyVectorBucket::PICKBUCKET :
+                {
                     mPickedBucket = bucket;
+
+                    if( UOdysseyPainterEditorPaintBucketTool::DoubleClicked() == true )
+                    {
+                        paintGroup->RemoveBucket( bucket );
+
+                        if( iUndo )
+                            (*iUndo) = new FOdysseyVectorUndoBucketRemove( iScene, paintGroup, bucket );
+                    }
+                }
                 break;
 
                 case FOdysseyVectorBucket::PICKHANDLE :
@@ -226,12 +250,24 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseDown( FOdysseyVectorEngine* iEngine
                 break;
 
                 default :
-                    mPickedBucket = new FOdysseyVectorBucket( *paintGroup, localCoords.x, localCoords.y );
+                {
+                    FOdysseyVectorCycle* cycle = paintGroup->PickCycle( localCoords.x, localCoords.y );
+                    FOdysseyVectorBucket* cycleBucket = ( cycle ) ? cycle->GetBucket() : nullptr;
 
-                    paintGroup->AddBucket( mPickedBucket );
+                    if( cycleBucket )
+                    {
+                        mPickedBucket = cycleBucket;
+                    }
+                    else
+                    {
+                        mPickedBucket = new FOdysseyVectorBucket( *paintGroup, localCoords.x, localCoords.y, Propagate );
 
-                    if( iUndo )
-                        (*iUndo) = new FOdysseyVectorUndoBucketAdd( iScene, paintGroup, mPickedBucket );
+                        paintGroup->AddBucket( mPickedBucket );
+
+                        if( iUndo )
+                            (*iUndo) = new FOdysseyVectorUndoBucketAdd( iScene, paintGroup, mPickedBucket );
+                    }
+                }
                 break;
             }
 

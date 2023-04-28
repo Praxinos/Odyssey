@@ -4,6 +4,7 @@
 #define CROSSRADIUS     6
 #define HANDLERADIUS    8
 #define HANDLEDISTANCE 40.0f
+#define PELLETRADIUS    4
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846L
@@ -36,11 +37,11 @@ MakeRects( double iWorldX
     oPropagateRect.h = CROSSRADIUS * 2;
 }
 
-FOdysseyVectorBucket::FOdysseyVectorBucket( FOdysseyVectorObject& iParent, double iX, double iY )
+FOdysseyVectorBucket::FOdysseyVectorBucket( FOdysseyVectorObject& iParent, double iX, double iY, bool iPropagated )
     : mParent ( iParent )
     , mCtrlPoint ( this )
     , mIsGradient ( false )
-    , mPropagated( false )
+    , mPropagated( iPropagated )
 {
     mCtrlPoint.Set( HANDLEDISTANCE, 0.0f );
 
@@ -138,7 +139,48 @@ FOdysseyVectorBucket::GetColor()
 }
 
 void
-FOdysseyVectorBucket::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
+FOdysseyVectorBucket::Draw( FBucketDrawingFlags iDrawingFlags )
+{
+    if( iDrawingFlags & FBucketDrawingFlags::BUCKET )
+    {
+        DrawBucket( iDrawingFlags );
+    }
+
+    if( iDrawingFlags & FBucketDrawingFlags::PELLET )
+    {
+        DrawPellet( iDrawingFlags );
+    }
+}
+
+void
+FOdysseyVectorBucket::DrawPellet( FBucketDrawingFlags iDrawingFlags )
+{
+    BLContext* blctx = mParent.GetScene()->GetEngine()->GetBLContext();
+    BLPoint bucketWorldCoord = mParent.GetWorldMatrix().mapPoint( mCoords.x, mCoords.y );
+    BLRgba32 fillColor;
+
+    // Note: Blend2D color format is 0xAARRGGBB
+    fillColor.setR( mColor.B );
+    fillColor.setG( mColor.G );
+    fillColor.setB( mColor.R );
+    fillColor.setA( mColor.A );
+
+    blctx->save();
+    blctx->resetMatrix();
+
+    // Bucket
+    blctx->setFillStyle( fillColor );
+    blctx->fillCircle( bucketWorldCoord.x, bucketWorldCoord.y, PELLETRADIUS );
+
+    blctx->setStrokeWidth( 1.0f );
+    blctx->setStrokeStyle( mPropagated ? BLRgba32( 0xFF00FF00 ) : BLRgba32( 0xFF000000 ) );
+    blctx->strokeCircle( bucketWorldCoord.x, bucketWorldCoord.y, PELLETRADIUS );
+
+    blctx->restore();
+}
+
+void
+FOdysseyVectorBucket::DrawBucket( FBucketDrawingFlags iDrawingFlags )
 {
     BLContext* blctx = mParent.GetScene()->GetEngine()->GetBLContext();
     BLPoint bucketWorldCoord = mParent.GetWorldMatrix().mapPoint( mCoords.x, mCoords.y );
@@ -153,13 +195,12 @@ FOdysseyVectorBucket::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
     MakeRects( bucketWorldCoord.x, bucketWorldCoord.y, bucketRect, crossRect, propagateRect );
 
     // Note: Blend2D color format is 0xAARRGGBB
-    fillColor.r = mColor.B;
-    fillColor.g = mColor.G;
-    fillColor.b = mColor.R;
-    fillColor.a = mColor.A;
+    fillColor.setR( mColor.B );
+    fillColor.setG( mColor.G );
+    fillColor.setB( mColor.R );
+    fillColor.setA( mColor.A );
 
     blctx->save();
-
     blctx->resetMatrix();
 
     // Bucket

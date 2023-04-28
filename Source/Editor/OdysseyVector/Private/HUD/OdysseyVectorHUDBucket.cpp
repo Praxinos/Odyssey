@@ -42,14 +42,14 @@ FOdysseyVectorHUDBucket::Draw( FOdysseyVectorScene* iScene, ::ULIS::FRectD& iRoi
             if ( mCycle )
             {
                 blctx->setCompOp( BL_COMP_OP_SRC_OVER );
-                blctx->setStrokeStyle( BLRgba32( 0x808080FF ) );
+                blctx->setStrokeStyle( BLRgba32( 0x800000FF ) );
                 blctx->setStrokeWidth( 4.0f );
-                mCycle->StrokePath();
+                mCycle->StrokePath( true );
 
-                mCycle = nullptr; // reset after each draw
+                mCycle = nullptr; // reset after each draw, for safety. The tool has to set the cycle at each hovering.
             }
 
-            paintGroup->DrawBuckets( iRoi, iFlags );
+            paintGroup->DrawBuckets( FBucketDrawingFlags::PELLET );
         }
 
         bbox = selectedObject->GetBBox( false );

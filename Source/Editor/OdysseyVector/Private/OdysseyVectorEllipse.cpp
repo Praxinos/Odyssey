@@ -155,7 +155,7 @@ FOdysseyVectorEllipse::PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags )
 
             path.close();
 
-            return path.hitTest( pt, BL_FILL_RULE_EVEN_ODD ) ? true : false;
+            return ( path.hitTest( pt, BL_FILL_RULE_EVEN_ODD ) == BL_HIT_TEST_IN ) ? true : false;
         }
     }
     else

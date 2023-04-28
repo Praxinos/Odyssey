@@ -115,23 +115,24 @@ class ODYSSEYVECTOR_API FOdysseyVectorCycle
 
         std::vector<FOdysseyVectorSection*>& GetSectionArray();
 
-        bool IsPropagated();
-        void PropagateBucket( std::vector<FOdysseyVectorCycle*>& oContaminatedCycleArray );
-        void SetPropagated( bool iPropagated );
+        void SetPropagatedBucket( FOdysseyVectorBucket* iPropagatedBucket );
+        FOdysseyVectorBucket* GetPropagatedBucket();
+        bool PropagateBucket();
         void Merge( FOdysseyVectorCycle* iMergeCycle );
         void FillPath();
-        void StrokePath();
+        void StrokePath( bool iWorld );
 
     protected :
         BLPath mPath;
         FOdysseyVectorObject& mParent;
         uint64 mID;
         FOdysseyVectorBucket* mBucket;
+        FOdysseyVectorBucket* mPropagatedBucket;
         std::vector<FOdysseyVectorVertex*> mVertexArray;
         std::vector<FOdysseyVectorSection*> mSectionArray;
         uint32 mFlags;
-        ::ULIS::FVec2D mMin;
-        ::ULIS::FVec2D mMax;
+        //::ULIS::FVec2D mMin;
+        //::ULIS::FVec2D mMax;
         std::list<FOdysseyVectorCycle*> mChildrenList;
         FOdysseyVectorCycle* mParentCycle;
         bool mPropagated;

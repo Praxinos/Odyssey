@@ -16,6 +16,7 @@ FOdysseyVectorCycle::FOdysseyVectorCycle( FOdysseyVectorObject& iParent
     : mParent( iParent )
     , mID( iID )
     , mBucket( nullptr )
+    , mPropagatedBucket( nullptr )
     , mVertexArray (iVertexArray)
     , mSectionArray (iSectionArray)
     , mFlags (0)
@@ -37,11 +38,12 @@ FOdysseyVectorCycle::Merge( FOdysseyVectorCycle* iMergeCycle )
     }
 
     mPath.addPath( iMergeCycle->mPath );
-
+/*
     mMin.x = ::ULIS::FMath::Min( mMin.x, iMergeCycle->mMin.x );
     mMin.y = ::ULIS::FMath::Min( mMin.y, iMergeCycle->mMin.y );
     mMax.x = ::ULIS::FMath::Max( mMax.x, iMergeCycle->mMax.x );
     mMax.y = ::ULIS::FMath::Max( mMax.y, iMergeCycle->mMax.y );
+*/
 }
 
 FOdysseyVectorCycle*
@@ -59,25 +61,22 @@ FOdysseyVectorCycle::SetParentCycle( FOdysseyVectorCycle *iParent )
 bool
 FOdysseyVectorCycle::FitsIn( FOdysseyVectorCycle* iParentCandidate )
 {
+    // First test : get sure they don't share a common section
+    for( int i = 0; i < mSectionArray.size(); i++ )
+    {
+        if( mSectionArray[i]->GetOtherCycle( this ) == iParentCandidate )
+        {
+            return false;
+        }
+    }
+
     for( int i = 0; i < mVertexArray.size(); i++ )
     {
         ::ULIS::FVec2D& vCoords = mVertexArray[i]->GetCoords();
         BLPoint pt = { vCoords.x, vCoords.y };
-        uint32 ret =  iParentCandidate->mPath.hitTest( pt, BL_FILL_RULE_NON_ZERO );
+        uint32 ret =  iParentCandidate->mPath.hitTest( pt, BL_FILL_RULE_EVEN_ODD );
 
-        // we also need to test if the point lies on the loop boundaries
-        /*if( ret == 0 )
-        {
-            for ( int j = 0; j < iParentCandidate->mVertexArray.size(); j++ )
-            {
-                if( mVertexArray[i] == iParentCandidate->mVertexArray[j] )
-                {
-                    ret = 1;
-                }
-            }
-        }*/
-
-        if( ret == 0 )
+        if( ret != BL_HIT_TEST_IN )
         {
             return false;
         }
@@ -100,6 +99,43 @@ FOdysseyVectorCycle::GenerateID( std::vector<FOdysseyVectorSection*>& iSectionAr
     return loopID;
 }
 
+void
+FOdysseyVectorCycle::BuildSegmentCubic( FOdysseyVectorSegmentCubic& iSegment
+                                      , double iFromT
+                                      , double iToT )
+{
+    ::ULIS::FVec2D& point0 = iSegment.GetVertex(0)->GetCoords();
+    ::ULIS::FVec2D& point1 = iSegment.GetVertex(1)->GetCoords();
+    ::ULIS::FVec2D& ctrlPoint0 = iSegment.GetHandle(0)->GetCoords();
+    ::ULIS::FVec2D& ctrlPoint1 = iSegment.GetHandle(1)->GetCoords();
+    ::ULIS::FVec2D samplePoint0;
+    ::ULIS::FVec2D samplePoint1;
+    ::ULIS::FVec2D sampleCtrlPoint0;
+    ::ULIS::FVec2D sampleCtrlPoint1;
+
+    if( iFromT < iToT )
+    {
+        FOdysseyVector::BezierExtract( point0, ctrlPoint0, ctrlPoint1, point1
+                                     , iFromT, iToT
+                                     , samplePoint0, sampleCtrlPoint0, sampleCtrlPoint1, samplePoint1 );
+
+        mPath.cubicTo( BLPoint( sampleCtrlPoint0.x, sampleCtrlPoint0.y )
+                     , BLPoint( sampleCtrlPoint1.x, sampleCtrlPoint1.y )
+                     , BLPoint( samplePoint1.x, samplePoint1.y ) );
+    }
+    else
+    {
+        FOdysseyVector::BezierExtract( point0, ctrlPoint0, ctrlPoint1, point1
+                                     , iToT, iFromT
+                                     , samplePoint0, sampleCtrlPoint0, sampleCtrlPoint1, samplePoint1 );
+
+        mPath.cubicTo( BLPoint( sampleCtrlPoint1.x, sampleCtrlPoint1.y )
+                     , BLPoint( sampleCtrlPoint0.x, sampleCtrlPoint0.y )
+                     , BLPoint( samplePoint0.x, samplePoint0.y ) );
+    }
+}
+
+/*
 void
 FOdysseyVectorCycle::BuildSegmentCubic( FOdysseyVectorSegmentCubic& iSegment
                                      , double iFromT
@@ -170,6 +206,7 @@ FOdysseyVectorCycle::BuildSegmentCubic( FOdysseyVectorSegmentCubic& iSegment
         }
     }
 }
+*/
 
 void
 FOdysseyVectorCycle::Build( std::vector<FOdysseyVectorVertex*>& iVertexArray
@@ -188,8 +225,8 @@ FOdysseyVectorCycle::Build( std::vector<FOdysseyVectorVertex*>& iVertexArray
     {
         ::ULIS::FVec2D originAt = iVertexArray[0]->GetCoords();
 
-        mMin.x = mMax.x = originAt.x;
-        mMin.y = mMax.y = originAt.y;
+        //mMin.x = mMax.x = originAt.x;
+        //mMin.y = mMax.y = originAt.y;
 
         mPath.moveTo( originAt.x, originAt.y );
 
@@ -214,32 +251,13 @@ FOdysseyVectorCycle::Build( std::vector<FOdysseyVectorVertex*>& iVertexArray
                 }
             }
 
-            if( segment )
-            {
-                double currentVertexT = vertexi->GetT( segment );
-                double    nextVertexT = vertexn->GetT( segment );
-                /*::ULIS::FVec2D currentAt = currentVertex->GetPosition( segment );
+            double currentVertexT = vertexi->GetT( segment );
+            double    nextVertexT = vertexn->GetT( segment );
 
-                if( i == 0 )
-                {
-                    mPath.moveTo( currentAt.x, currentAt.y );
-                }
-                else
-                {
-                    mPath.lineTo( currentAt.x, currentAt.y );
-                }*/
-
-                BuildSegmentCubic ( static_cast<FOdysseyVectorSegmentCubic&>(*segment), currentVertexT, nextVertexT );
-            }
-            else
-            {
-                ::ULIS::FVec2D bridgeTo = vertexn->GetCoords();
-
-                mPath.lineTo( bridgeTo.x, bridgeTo.y );
-            }
+            BuildSegmentCubic ( static_cast<FOdysseyVectorSegmentCubic&>(*segment), currentVertexT, nextVertexT );
         }
 
-        //mPath.close();
+        mPath.close();
     }
 }
 
@@ -247,6 +265,15 @@ void
 FOdysseyVectorCycle::SetBucket( FOdysseyVectorBucket* iBucket )
 {
     mBucket = iBucket;
+
+    if( mBucket )
+    {
+        mPropagatedBucket = mBucket->IsPropagated() ? mBucket : nullptr;
+    }
+    else
+    {
+        mPropagatedBucket = nullptr;
+    }
 }
 
 FOdysseyVectorBucket*
@@ -256,39 +283,38 @@ FOdysseyVectorCycle::GetBucket()
 }
 
 void
-FOdysseyVectorCycle::SetPropagated( bool iPropagated )
+FOdysseyVectorCycle::SetPropagatedBucket( FOdysseyVectorBucket* iPropagatedBucket )
 {
-    mPropagated = iPropagated;
+    mPropagatedBucket = iPropagatedBucket;
+}
+
+FOdysseyVectorBucket*
+FOdysseyVectorCycle::GetPropagatedBucket()
+{
+    return mPropagatedBucket;
 }
 
 bool
-FOdysseyVectorCycle::IsPropagated()
+FOdysseyVectorCycle::PropagateBucket()
 {
-    return mPropagated;
-}
-
-void
-FOdysseyVectorCycle::PropagateBucket( std::vector<FOdysseyVectorCycle*>& oContaminatedCycleArray )
-{
-    if( mBucket && mBucket->IsPropagated() )
+    for( int i = 0; i < mSectionArray.size(); i++ )
     {
-        for( int i = 0; i < mSectionArray.size(); i++ )
+        FOdysseyVectorCycle* neighbourCycle = mSectionArray[i]->GetOtherCycle( this );
+
+        if( neighbourCycle )
         {
-            FOdysseyVectorCycle* otherCycle = mSectionArray[i]->GetOtherCycle( this );
+            FOdysseyVectorBucket* neighbourPropagatedBucket = neighbourCycle->GetPropagatedBucket();
 
-            if( otherCycle )
+            if( neighbourPropagatedBucket )
             {
-                if( otherCycle->GetBucket() == nullptr )
-                {
-                    otherCycle->SetBucket( mBucket );
+                this->SetPropagatedBucket( neighbourPropagatedBucket );
 
-                    oContaminatedCycleArray.push_back( otherCycle );
-                }
+                return true;
             }
         }
-
-        SetPropagated( true );
     }
+
+    return false;
 }
 
 std::vector<FOdysseyVectorSection*>&
@@ -300,28 +326,13 @@ FOdysseyVectorCycle::GetSectionArray()
 bool
 FOdysseyVectorCycle::HitTest( double iX, double iY )
 {
-/*
-    mPath.clear();
-    mPath.moveTo(0,0);
-    mPath.lineTo(0,0);
-*/
     BLContext* blctx = mParent.GetScene()->GetEngine()->GetBLContext();
     BLPoint pt = { iX, iY };
-/*
-    BLPoint* vertex = ( BLPoint*) mPath.vertexData();
-    BLPath combinedPath = mPath;
 
-    for( std::list<FOdysseyVectorCycle*>::iterator oit = mChildrenList.begin(); oit != mChildrenList.end(); ++oit )
-    {
-        FOdysseyVectorCycle *child = (*oit);
-
-        combinedPath.addPath( child->mPath );
-    }
-*/
     // WARNING: looks like in this version the return value is a bool (in the shape of an int) but in later version is a enum value. We will have to fix that.
     uint32 ret = mPath.hitTest( pt, BL_FILL_RULE_EVEN_ODD );
 
-    return ( ret ) ? true : false;
+    return ( ret == BL_HIT_TEST_IN ) ? true : false;
 }
 
 void
@@ -333,17 +344,51 @@ FOdysseyVectorCycle::FillPath()
 }
 
 void
-FOdysseyVectorCycle::StrokePath()
+FOdysseyVectorCycle::StrokePath( bool iWorld )
 {
     BLContext* blctx = mParent.GetScene()->GetEngine()->GetBLContext();
 
-    blctx->strokePath( mPath );
+    if( iWorld == true )
+    {
+        BLPath worldPath = mPath;
+
+        worldPath.transform( mParent.GetWorldMatrix() );
+
+        blctx->save();
+        blctx->resetMatrix();
+        blctx->strokePath( worldPath );
+        blctx->restore();
+    }
+    else
+    {
+        blctx->strokePath( mPath );
+    }
+}
+
+static void
+ShowCycle( std::vector<FOdysseyVectorVertex*>& vertexArray
+          , std::vector<FOdysseyVectorSection*>& sectionArray)
+{
+    UE_LOG(LogTemp,Warning,TEXT("Array size: %d"), vertexArray.size() );
+
+    for( int i = 0; i < vertexArray.size(); i++ )
+    {
+        FOdysseyVectorSegment* segment = sectionArray[i]->GetSegment();
+        FOdysseyVectorVertex* vertex0 = segment->GetVertex(0);
+        FOdysseyVectorVertex* vertex1 = segment->GetVertex(1);
+        FOdysseyVectorPath* path = vertex0->GetPath();
+        BLPoint pt0 = path->GetWorldMatrix().mapPoint( vertex0->GetCoords().x, vertex0->GetCoords().y );
+        BLPoint pt1 = path->GetWorldMatrix().mapPoint( vertex1->GetCoords().x, vertex1->GetCoords().y );
+
+        UE_LOG(LogTemp,Warning,TEXT("Node: vertex:%d section:%d (%d[x:%f y:%f] -- %d[x:%f y:%f])"), vertexArray[i], sectionArray[i], sectionArray[i]->GetVertex(0), pt0.x, pt0.y, sectionArray[i]->GetVertex(1), pt1.x, pt1.y );
+    }
 }
 
 void
 FOdysseyVectorCycle::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
     BLContext* blctx = mParent.GetScene()->GetEngine()->GetBLContext();
+    FOdysseyVectorBucket* bucket = mBucket ? mBucket : mPropagatedBucket;
 /*
     BLPath combinedPath = mPath;
 
@@ -354,10 +399,11 @@ FOdysseyVectorCycle::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
         combinedPath.addPath( child->mPath );
     }
 */
-    if( mBucket )
+    if( bucket )
     {
-        if( mBucket->IsGradient() )
+        if( bucket->IsGradient() )
         {
+/*
             double difX = mMax.x - mMin.x;
             double difY = mMax.y - mMin.y;
             double linearMinX = mMin.x;
@@ -365,11 +411,11 @@ FOdysseyVectorCycle::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
             double linearMaxX = mMax.x;
             double linearMaxY = mMax.y;
             BLGradient linear( BLLinearGradientValues( linearMinX, linearMinY, linearMaxX, linearMaxY ) );
-            FColor& gradientColor0 = mBucket->GetGradientColor0();
-            FColor& gradientColor1 = mBucket->GetGradientColor1();
+            FColor& gradientColor0 = bucket->GetGradientColor0();
+            FColor& gradientColor1 = bucket->GetGradientColor1();
             BLRgba32 BLColor0;
             BLRgba32 BLColor1;
-            double angle = mBucket->GetGradientRotationInDegrees() * M_PI / 180;
+            double angle = bucket->GetGradientRotationInDegrees() * M_PI / 180;
 
             linear.rotate( angle );
 
@@ -390,17 +436,18 @@ FOdysseyVectorCycle::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
 
             blctx->setStrokeStyle( linear );
             blctx->setFillStyle( linear );
+*/
         }
         else
         {
-            FColor& color = mBucket->GetColor();
+            FColor& color = bucket->GetColor();
             BLRgba32 BLColor;
 
             // Note: Blend2D color format is 0xAARRGGBB
-            BLColor.r = color.B;
-            BLColor.g = color.G;
-            BLColor.b = color.R;
-            BLColor.a = color.A;
+            BLColor.setR( color.B );
+            BLColor.setG( color.G );
+            BLColor.setB( color.R );
+            BLColor.setA( color.A );
 
             blctx->setStrokeStyle( BLColor );
             blctx->setFillStyle( BLColor );
@@ -417,6 +464,7 @@ FOdysseyVectorCycle::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
        /*iBLContext.fillPolygon( &mPointArray[0], mPointArray.size() );*/
     //blctx->strokePath( combinedPath );
     blctx->fillPath( mPath );
+    //blctx->strokePath( mPath );
     /*}*/
 }
 

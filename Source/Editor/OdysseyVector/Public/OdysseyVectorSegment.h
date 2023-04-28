@@ -40,6 +40,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
 
         uint32 GetPaintingCode();
 
+        void Link();
+        void Unlink();
+
        /**
          * @brief Draw the segment
          * @param iRoi the region-of-interest

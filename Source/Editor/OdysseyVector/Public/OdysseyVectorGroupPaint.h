@@ -112,11 +112,14 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         void AddBucket( FOdysseyVectorBucket* iBucket );
         void RemoveBucket( FOdysseyVectorBucket* iBucket );
         void Colorize();
-        void DrawBuckets( ::ULIS::FRectD& iRoi, uint64 iFlags );
+        void DrawBuckets( FBucketDrawingFlags iDrawingFlags );
         virtual void Invalidate();
         void MergeCycles();
         double GetGapTolerance();
         void SetGapTolerance( double iGapTolerance );
+        bool IsWireframe();
+        void SetWireframe( bool iIsWireframe );
+
 
     protected:
         /**

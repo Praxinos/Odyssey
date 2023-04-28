@@ -42,10 +42,10 @@ FOdysseyVectorRectangle::DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags )
     BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
     BLRgba32 strokeColor;
 
-    strokeColor.r = mObjectParam.Foreground.R;
-    strokeColor.g = mObjectParam.Foreground.G;
-    strokeColor.b = mObjectParam.Foreground.B;
-    strokeColor.a = mObjectParam.Foreground.A;
+    strokeColor.setR( mObjectParam.Foreground.R );
+    strokeColor.setG( mObjectParam.Foreground.G );
+    strokeColor.setB( mObjectParam.Foreground.B );
+    strokeColor.setA( mObjectParam.Foreground.A );
 
     blctx->setCompOp(BL_COMP_OP_SRC_COPY);
 /*

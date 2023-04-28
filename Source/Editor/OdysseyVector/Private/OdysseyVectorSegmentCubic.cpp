@@ -380,6 +380,8 @@ FOdysseyVectorSegmentCubic::Sample( double iFromT
                                   , double iToT
                                   , std::vector<FOdysseyVectorVertex*>& oNewVertexArray )
 {
+    ::ULIS::FVec2D& point0 = mPoint[0]->GetCoords();
+    ::ULIS::FVec2D& point1 = mPoint[1]->GetCoords();
     ::ULIS::FVec2D& ctrlPoint0 = mCtrlPoint[0].GetCoords();
     ::ULIS::FVec2D& ctrlPoint1 = mCtrlPoint[1].GetCoords();
     ::ULIS::FVec2D pointAt0 = GetPointAt( iFromT );
@@ -391,7 +393,7 @@ FOdysseyVectorSegmentCubic::Sample( double iFromT
     double toRadius = radius0 + ( deltaRadius * iToT );
     FOdysseyVectorVertex* vertex0 = ( iFromT == 0.0f ) ? static_cast<FOdysseyVectorVertex*>(mPoint[0]) : new FOdysseyVectorVertex( mPath, pointAt0.x, pointAt0.y, fromRadius );
     FOdysseyVectorVertex* vertex1 = ( iToT   == 1.0f ) ? static_cast<FOdysseyVectorVertex*>(mPoint[1]) : new FOdysseyVectorVertex( mPath, pointAt1.x, pointAt1.y, toRadius   );
-    FOdysseyVectorSegmentCubic* sampleSegment = new FOdysseyVectorSegmentCubic( static_cast<FOdysseyVectorPathCubic*>(mPath), vertex0, ctrlPoint0.x, ctrlPoint0.y, ctrlPoint1.x, ctrlPoint1.y, vertex1 );
+    FOdysseyVectorSegmentCubic* sampleSegment = new FOdysseyVectorSegmentCubic( static_cast<FOdysseyVectorPathCubic*>(mPath), vertex0, vertex1 );
     ::ULIS::FVec2D& sampleCtrlPoint0 = sampleSegment->GetHandle(0)->GetCoords();
     ::ULIS::FVec2D& sampleCtrlPoint1 = sampleSegment->GetHandle(1)->GetCoords();
     ::ULIS::FVec2D& samplePoint0 = sampleSegment->GetVertex(0)->GetCoords();
@@ -407,8 +409,13 @@ FOdysseyVectorSegmentCubic::Sample( double iFromT
         oNewVertexArray.push_back( vertex1 );
     }
 
+/*
     ::ULIS::CubicBezierInverseSplitAtParameter<::ULIS::FVec2D>( &samplePoint0, &sampleCtrlPoint0, &sampleCtrlPoint1, &samplePoint1, iFromT );
     ::ULIS::CubicBezierSplitAtParameter       <::ULIS::FVec2D>( &samplePoint0, &sampleCtrlPoint0, &sampleCtrlPoint1, &samplePoint1, iToT   );
+*/
+    FOdysseyVector::BezierExtract( point0, ctrlPoint0, ctrlPoint1, point1
+                                 , iFromT, iToT
+                                 , samplePoint0, sampleCtrlPoint0, sampleCtrlPoint1, samplePoint1 );
 
     return sampleSegment;
 }

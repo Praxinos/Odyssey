@@ -140,3 +140,27 @@ FOdysseyVector::IntersectRegions( const ::ULIS::FRectI& iRegion0, const ::ULIS::
 
     return oRegionOut.Area() ? true : false;
 }
+
+void
+FOdysseyVector::BezierExtract( ::ULIS::FVec2D& iP0
+                             , ::ULIS::FVec2D& iP1
+                             , ::ULIS::FVec2D& iP2
+                             , ::ULIS::FVec2D& iP3
+                             , double fromT
+                             , double toT
+                             , ::ULIS::FVec2D& oP0
+                             , ::ULIS::FVec2D& oP1
+                             , ::ULIS::FVec2D& oP2
+                             , ::ULIS::FVec2D& oP3 )
+{
+    oP0 = iP0;
+    oP1 = iP1;
+    oP2 = iP2;
+    oP3 = iP3;
+
+    ::ULIS::CubicBezierInverseSplitAtParameter<::ULIS::FVec2D>( &oP0, &oP1, &oP2, &oP3, fromT );
+
+    toT = ( toT - fromT ) / ( 1.0f - fromT ); // adjust t
+
+    ::ULIS::CubicBezierSplitAtParameter<::ULIS::FVec2D>( &oP0, &oP1, &oP2, &oP3, toT );
+}

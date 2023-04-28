@@ -58,39 +58,41 @@ FOdysseyVectorGroupPaint::GetBucketList()
 void
 FOdysseyVectorGroupPaint::PropagateBuckets()
 {
-    std::vector<FOdysseyVectorCycle*> cycleArray = mCycleArray; // work on a copy
-    std::vector<FOdysseyVectorCycle*> oContaminatedCycleArray;
+    bool doPropagate = true;
 
-    oContaminatedCycleArray.reserve( cycleArray.size() );
-
-    while( cycleArray.size() )
+    while( doPropagate )
     {
-        for( int i = 0; i < cycleArray.size(); i++ )
-        {
-            FOdysseyVectorCycle *cycle = cycleArray[i];
+        doPropagate = false;
 
-            if( cycle->IsPropagated() == false )
+        for( int i = 0; i < mCycleArray.size(); i++ )
+        {
+            FOdysseyVectorCycle *cycle = mCycleArray[i];
+
+            if( ( cycle->GetBucket() == nullptr ) && ( cycle->GetPropagatedBucket() == nullptr ) )
             {
-                cycle->PropagateBucket( oContaminatedCycleArray );
+                if( cycle->PropagateBucket() == true )
+                {
+                    doPropagate = true;
+                }
             }
         }
-
-        cycleArray = oContaminatedCycleArray;
-
-        oContaminatedCycleArray.clear();
     }
 }
 
 void
 FOdysseyVectorGroupPaint::Colorize()
 {
+    BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
+
+    blctx->save();
+    blctx->setMatrix( mWorldMatrix );
+
     // reset color for all cycles first
     for( int i = 0; i < mCycleArray.size(); i++ )
     {
         FOdysseyVectorCycle *cycle = mCycleArray[i];
 
         cycle->SetBucket( nullptr );
-        cycle->SetPropagated( false );
     }
 
     for( std::list<FOdysseyVectorBucket*>::iterator lit = mBucketList.begin(); lit != mBucketList.end(); ++lit )
@@ -101,6 +103,8 @@ FOdysseyVectorGroupPaint::Colorize()
     }
 
     PropagateBuckets();
+
+    blctx->restore();
 }
 
 void
@@ -141,6 +145,8 @@ FOdysseyVectorGroupPaint::PickBucket( double iWorldX, double iWorldY )
 FOdysseyVectorCycle*
 FOdysseyVectorGroupPaint::PickCycle( double iX, double iY )
 {
+    BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
+
     for( int i = 0; i < mCycleArray.size(); i++ )
     {
         FOdysseyVectorCycle *cycle = mCycleArray[i];
@@ -197,7 +203,7 @@ FOdysseyVectorGroupPaint::Bucket( double iX, double iY, uint8 iR, uint8 iG, uint
 
     if( bucket == nullptr )
     {
-        bucket = new FOdysseyVectorBucket( *this, iX, iY );
+        bucket = new FOdysseyVectorBucket( *this, iX, iY, false );
 
         AddBucket( bucket );
     }
@@ -246,13 +252,13 @@ FOdysseyVectorGroupPaint::RemoveBucket( FOdysseyVectorBucket* iBucket )
 }
 
 void
-FOdysseyVectorGroupPaint::DrawBuckets( ::ULIS::FRectD& iRoi,uint64 iFlags )
+FOdysseyVectorGroupPaint::DrawBuckets( FBucketDrawingFlags iDrawingFlags )
 {
     for( std::list<FOdysseyVectorBucket*>::iterator lit = mBucketList.begin(); lit != mBucketList.end(); ++lit )
     {
         FOdysseyVectorBucket *bucket = static_cast<FOdysseyVectorBucket*>(*lit);
 
-        bucket->Draw( iRoi, iFlags );
+        bucket->Draw( iDrawingFlags );
     }
 }
 
@@ -326,22 +332,25 @@ CreateVertexGapSegment( FOdysseyVectorVertex* iVertex
             iGapSegmentBuffer.emplace_back();
             // Warning: setting a parent path here leads to bugs, due to path update of a segment not really belonging to it.
             iGapSegmentBuffer[gapCount].Init( nullptr/*static_cast<FOdysseyVectorPathCubic*>(iVertex->GetPath())*/, nearestVertex, iVertex );
+            //iGapSegmentBuffer[gapCount].Link(); // not necessary. saves us some cpu cycles
 
             iSectionBuffer.emplace_back();
             iSectionBuffer[sectionCount].Init( &iGapSegmentBuffer[gapCount], nearestVertex, iVertex );
             iSectionBuffer[sectionCount].Link();
-/*
+
             ::ULIS::FVec2D delta = iVertex->GetCoords() - nearestVertex->GetCoords();
             double length = delta.Distance() * 0.33f;
-
-            if( iVertex->GetClass() != FOdysseyVectorVertexIntersection::StaticClass() )
+/*
+            if( ( iVertex->GetClass() != FOdysseyVectorVertexIntersection::StaticClass() )
+             && ( iVertex->GetSectionCount() == 2 ) )
             {
                 ::ULIS::FVec2D vertexVector = iVertex->GetFirstSegment()->GetVectorFromVertex( iVertex, true );
 
                 iGapSegmentBuffer[gapCount].GetHandle(1)->Set( iVertex->GetCoords() - ( vertexVector * length ) );
             }
 
-            if( nearestVertex->GetClass() != FOdysseyVectorVertexIntersection::StaticClass() )
+            if( ( nearestVertex->GetClass() != FOdysseyVectorVertexIntersection::StaticClass() )
+             && ( nearestVertex->GetSectionCount() == 2 ) )
             {
                 ::ULIS::FVec2D vertexVector = nearestVertex->GetFirstSegment()->GetVectorFromVertex( nearestVertex, true );
 
@@ -748,7 +757,8 @@ FOdysseyVectorGroupPaint::CheckLoops()
         {
             FOdysseyVectorPathCubic* cubicPath = static_cast<FOdysseyVectorPathCubic*>(child);
 
-            if( cubicPath->HasIntersections() == false )
+            // check that this loop hasn't been intersected, then it cannot be considered a loop anymore.
+            if( cubicPath->GetPaintingCode() != mPaintingCode )
             {
                 if( cubicPath->IsLoop() )
                 {
@@ -787,13 +797,16 @@ FOdysseyVectorGroupPaint::FindCycles()
     // Build exploration pair before simplification
     for( int i = 0; i < mGapSegmentBuffer.size(); i++ )
     {
+        FOdysseyVectorVertex* vertex0 = mGapSegmentBuffer[i].GetVertex(0);
+        FOdysseyVectorVertex* vertex1 = mGapSegmentBuffer[i].GetVertex(1);
+
         //mGapSegmentBuffer[i].BuildExplorationPairs( explorationPairsBuffer );
 
-        if( mGapSegmentBuffer[i].GetVertex(0)->GetClass() == FOdysseyVectorVertex::StaticClass() )
-            mGapSegmentBuffer[i].GetVertex(0)->BuildExplorationPairs( explorationPairsBuffer );
+        if( vertex0->GetClass() == FOdysseyVectorVertex::StaticClass() )
+            vertex0->BuildExplorationPairs( explorationPairsBuffer );
 
-        if( mGapSegmentBuffer[i].GetVertex(1)->GetClass() == FOdysseyVectorVertex::StaticClass() )
-            mGapSegmentBuffer[i].GetVertex(1)->BuildExplorationPairs( explorationPairsBuffer );
+        if( vertex1->GetClass() == FOdysseyVectorVertex::StaticClass() )
+            vertex1->BuildExplorationPairs( explorationPairsBuffer );
     }
 
     SimplifyGraph();
@@ -804,7 +817,7 @@ FOdysseyVectorGroupPaint::FindCycles()
         Explore( &explorationPairsBuffer[i] );
     }
 
-    CheckLoops();
+    //CheckLoops();
 
     OrderCycles();
 
@@ -866,6 +879,18 @@ FOdysseyVectorGroupPaint::SetGapTolerance( double iGapTolerance )
     Invalidate();
 }
 
+bool
+FOdysseyVectorGroupPaint::IsWireframe()
+{
+    return mGroupPaintParam.Wireframe;
+}
+
+void
+FOdysseyVectorGroupPaint::SetWireframe( bool iIsWireframe )
+{
+    mGroupPaintParam.Wireframe = iIsWireframe;
+}
+
 void
 FOdysseyVectorGroupPaint::BuildGraph()
 {
@@ -885,7 +910,6 @@ FOdysseyVectorGroupPaint::BuildGraph()
         std::list<FOdysseyVectorSegment*>& segmentList = path->GetSegmentList();
         std::list<FOdysseyVectorVertex*>& vertexList = path->GetVertexList();
         uint32 intersectionCount = 0;
-        uint32 gapSegmentCount = 0;
 
         for( std::list<FOdysseyVectorSegment*>::iterator sit = segmentList.begin(); sit != segmentList.end(); ++sit )
         {
@@ -921,7 +945,7 @@ FOdysseyVectorGroupPaint::BuildGraph()
             }
         }
 
-        if( ( path->IsLoop() == true ) || ( gapSegmentCount ) )
+        if( path->IsLoop() == true )
         {
             // acts as a boolean flag
             path->SetPaintingCode( mPaintingCode );
@@ -992,6 +1016,21 @@ FOdysseyVectorGroupPaint::BuildGraph()
 
             CreatePathSections( path, mSectionBuffer, mGapSegmentBuffer );
 
+            // create a cycle right now for untouched looped-paths
+            if( ( path->IsLoop() == true ) && ( path->HasIntersections() == false ) )
+            {
+                std::vector<FOdysseyVectorVertex*> vertexArray;
+                std::vector<FOdysseyVectorSection*> sectionArray;
+
+                path->ToVertexAndSectionArray( vertexArray, sectionArray );
+
+                if( vertexArray.size() )
+                {
+                    mCycleArray.push_back( new FOdysseyVectorCycle( *this, /*iCycleID*/0, vertexArray, sectionArray ) );
+                }
+            }
+
+            // Do some clearing here, taking advantage of that loop to save some CPU cycles.
             for( std::list<FOdysseyVectorSegment*>::iterator sit = segmentList.begin(); sit != segmentList.end(); ++sit )
             {
                 FOdysseyVectorSegment *segment = (*sit);
@@ -1098,8 +1137,12 @@ FOdysseyVectorGroupPaint::Clear()
 
     mCycleArray.clear();
 
-
-
+/* commented out : not necessary. Saves us some CPU cycles.
+    for( int i = 0; i < mGapSegmentBuffer.size(); i++ )
+    {
+        mGapSegmentBuffer[i].Unlink();
+    }
+*/
     mGapSegmentBuffer.clear();
 
 
@@ -1161,7 +1204,7 @@ FOdysseyVectorGroupPaint::CopyBuckets( FOdysseyVectorGroupPaint* iDestination )
         ::ULIS::FVec2D bucketCoords = bucket->GetCoords();
         BLPoint bucketWorldPosition = mWorldMatrix.mapPoint( bucketCoords.x, bucketCoords.y );
         BLPoint destinationBucketPosition = iDestination->mInverseWorldMatrix.mapPoint( bucketWorldPosition );
-        FOdysseyVectorBucket *bucketCopy = new FOdysseyVectorBucket( *iDestination, 0.0f, 0.0f );
+        FOdysseyVectorBucket *bucketCopy = new FOdysseyVectorBucket( *iDestination, 0.0f, 0.0f, bucket->IsPropagated() );
 
         bucket->Copy( bucketCopy );
 

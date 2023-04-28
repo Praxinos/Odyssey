@@ -488,10 +488,10 @@ FOdysseyVectorPathCubic::Fill( ::ULIS::FRectD& iRoi )
         BLRgba32 blFillColor;
         BLPath path;
 
-        blFillColor.r = fillColor.R;
-        blFillColor.g = fillColor.G;
-        blFillColor.b = fillColor.B;
-        blFillColor.a = fillColor.A;
+        blFillColor.setR( fillColor.R );
+        blFillColor.setG( fillColor.G );
+        blFillColor.setB( fillColor.B );
+        blFillColor.setA( fillColor.A );
 
         blctx->setCompOp( BL_COMP_OP_SRC_COPY );
 
@@ -548,10 +548,10 @@ FOdysseyVectorPathCubic::DrawShapeVariable( ::ULIS::FRectD &iRoi, uint64 iFlags 
     BLRgba32 strokeColor;
 
     // Note: Blend2D color format is 0xAARRGGBB
-    strokeColor.r = mObjectParam.Foreground.B;
-    strokeColor.g = mObjectParam.Foreground.G;
-    strokeColor.b = mObjectParam.Foreground.R;
-    strokeColor.a = mObjectParam.Foreground.A;
+    strokeColor.setR( mObjectParam.Foreground.B );
+    strokeColor.setG( mObjectParam.Foreground.G );
+    strokeColor.setB( mObjectParam.Foreground.R );
+    strokeColor.setA( mObjectParam.Foreground.A );
 
     blctx->setCompOp( BL_COMP_OP_SRC_OVER );
 

@@ -61,8 +61,9 @@ UOdysseyPainterEditorVectorObjectPickTool::OnMouseDrag( FOdysseyVectorEngine* iE
     mPointArray.push_back( point );
 }
 
-static bool
-DoubleClicked()
+//static
+bool
+UOdysseyPainterEditorVectorObjectPickTool::DoubleClicked()
 {
     uint64 clickTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     static uint64 previousClickTime = 0;
@@ -76,7 +77,7 @@ DoubleClicked()
 static void
 SetSelectionSpace( FOdysseyVectorEngine* iVectorEngine, FOdysseyVectorObject* iSelectedObject )
 {
-    if( DoubleClicked() == true )
+    if( UOdysseyPainterEditorVectorObjectPickTool::DoubleClicked() == true )
     {
         FOdysseyVectorGroup* selectedGroup = nullptr;
 

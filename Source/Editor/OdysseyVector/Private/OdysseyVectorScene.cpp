@@ -212,10 +212,10 @@ FOdysseyVectorScene::DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags )
     blctx->setCompOp( BL_COMP_OP_SRC_COPY );
 
     // Note: Blend2D color format is 0xAARRGGBB
-    blFillColor.r = fillColor.B;
-    blFillColor.g = fillColor.G;
-    blFillColor.b = fillColor.R;
-    blFillColor.a = fillColor.A;
+    blFillColor.setR( fillColor.B );
+    blFillColor.setG( fillColor.G );
+    blFillColor.setB( fillColor.R );
+    blFillColor.setA( fillColor.A );
 
     blctx->setFillStyle( blFillColor );
 

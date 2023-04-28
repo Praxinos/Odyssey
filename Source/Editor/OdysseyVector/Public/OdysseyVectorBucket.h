@@ -7,11 +7,17 @@
 
 class FOdysseyVectorObject;
 
+enum FBucketDrawingFlags
+{
+    BUCKET = 1,
+    PELLET = 2
+};
+
 class ODYSSEYVECTOR_API FOdysseyVectorBucket : public FOdysseyVectorPoint
 {
     public:
         ~FOdysseyVectorBucket();
-        FOdysseyVectorBucket( FOdysseyVectorObject& iParent, double iX, double iY );
+        FOdysseyVectorBucket( FOdysseyVectorObject& iParent, double iX, double iY,  bool iPropagated );
 
         /**
          * @brief Set this bucket's solid color
@@ -29,7 +35,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorBucket : public FOdysseyVectorPoint
          * @param iRoi region-of-interest
          * @param iFlags drawing flags
          */
-        void Draw( ::ULIS::FRectD& iRoi, uint64 iFlags );
+        void Draw( FBucketDrawingFlags iDrawingFlags );
 
         void SetGradient( bool iIsGradient );
 
@@ -110,6 +116,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorBucket : public FOdysseyVectorPoint
 
         void SetPropagated( bool iPropagated );
         bool IsPropagated();
+
+    private:
+        void DrawBucket( FBucketDrawingFlags iDrawingFlags );
+        void DrawPellet( FBucketDrawingFlags iDrawingFlags );
 
     public:
         static const uint32 PICKNONE   = 0;

@@ -13,7 +13,7 @@ FOdysseyVectorObject::FOdysseyVectorObject()
     , mIsSelected( false )
     , mIsInvalidated( false )
     , mDependsOnChildren( false )
-    , mFillBucket( *this, 0.0f, 0.0f )
+    , mFillBucket( *this, 0.0f, 0.0f, false )
 {
     mLocalMatrix.reset();
     mWorldMatrix.reset();
@@ -259,6 +259,7 @@ FOdysseyVectorObject::UpdateMatrix( bool iRunTransformCallback )
         blctx->restore();
     }
 
+    //TODO: design issue. there will be a call on parent's callback when parent matrix is updated. Need to fix that.
     if( iRunTransformCallback )
     {
         if( this->GetParent() )

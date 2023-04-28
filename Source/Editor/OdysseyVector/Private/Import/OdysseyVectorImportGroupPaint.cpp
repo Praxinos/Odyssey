@@ -91,6 +91,16 @@ FOdysseyVectorImport::ReadObjectGroupPaint( FOdysseyVectorGroupPaint& iPaintGrou
                 case FOdysseyVectorExport::CHUNK_GROUPPAINT_BUCKETS:
                 break;
 
+                case FOdysseyVectorExport::CHUNK_GROUPPAINT_WIREFRAME:
+                {
+                    uint32 wireframe;
+
+                    Ar << wireframe;
+
+                    iPaintGroup.SetWireframe( wireframe ? true : false );
+                }
+                break;
+
                 case FOdysseyVectorExport::CHUNK_GROUPPAINT_GAP:
                 break;
 
@@ -106,7 +116,7 @@ FOdysseyVectorImport::ReadObjectGroupPaint( FOdysseyVectorGroupPaint& iPaintGrou
 
                 case FOdysseyVectorExport::CHUNK_BUCKET_ENTRY:
                 {
-                    FOdysseyVectorBucket* bucket = new FOdysseyVectorBucket( iPaintGroup, 0.0f, 0.0f );
+                    FOdysseyVectorBucket* bucket = new FOdysseyVectorBucket( iPaintGroup, 0.0f, 0.0f, false );
 
                     iPaintGroup.AddBucket( bucket );
 

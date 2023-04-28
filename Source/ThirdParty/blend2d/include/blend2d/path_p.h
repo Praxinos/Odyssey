@@ -1,42 +1,36 @@
-// Blend2D - 2D Vector Graphics Powered by a JIT Compiler
+// This file is part of Blend2D project <https://blend2d.com>
 //
-//  * Official Blend2D Home Page: https://blend2d.com
-//  * Official Github Repository: https://github.com/blend2d/blend2d
-//
-// Copyright (c) 2017-2020 The Blend2D Authors
-//
-// This software is provided 'as-is', without any express or implied
-// warranty. In no event will the authors be held liable for any damages
-// arising from the use of this software.
-//
-// Permission is granted to anyone to use this software for any purpose,
-// including commercial applications, and to alter it and redistribute it
-// freely, subject to the following restrictions:
-//
-// 1. The origin of this software must not be misrepresented; you must not
-//    claim that you wrote the original software. If you use this software
-//    in a product, an acknowledgment in the product documentation would be
-//    appreciated but is not required.
-// 2. Altered source versions must be plainly marked as such, and must not be
-//    misrepresented as being the original software.
-// 3. This notice may not be removed or altered from any source distribution.
+// See blend2d.h or LICENSE.md for license and copyright information
+// SPDX-License-Identifier: Zlib
 
 #ifndef BLEND2D_PATH_P_H_INCLUDED
 #define BLEND2D_PATH_P_H_INCLUDED
 
-#include "./api-internal_p.h"
-#include "./math_p.h"
-#include "./path.h"
+#include "api-internal_p.h"
+#include "math_p.h"
+#include "path.h"
 
 //! \cond INTERNAL
 //! \addtogroup blend2d_internal
 //! \{
 
-// ============================================================================
-// [BLApproximationOptions]
-// ============================================================================
+//! \name Path - Private Structs
+//! \{
 
-static BL_INLINE constexpr BLApproximationOptions blMakeDefaultApproximationOptions() noexcept {
+//! Private implementation that extends \ref BLPathImpl.
+struct BLPathPrivateImpl : public BLPathImpl {
+  BLBox controlBox;
+  BLBox boundingBox;
+};
+
+//! \}
+
+//! \name Path - Private API
+//! \{
+
+namespace BLPathPrivate {
+
+static BL_INLINE constexpr BLApproximationOptions makeDefaultApproximationOptions() noexcept {
   return BLApproximationOptions {
     BL_FLATTEN_MODE_DEFAULT, // Default flattening mode.
     BL_OFFSET_MODE_DEFAULT,  // Default offset mode.
@@ -47,27 +41,20 @@ static BL_INLINE constexpr BLApproximationOptions blMakeDefaultApproximationOpti
   };
 }
 
-// ============================================================================
-// [BLInternalPathImpl]
-// ============================================================================
+static BL_INLINE BLPathPrivateImpl* getImpl(const BLPathCore* self) noexcept {
+  return static_cast<BLPathPrivateImpl*>(self->_d.impl);
+}
 
-//! Internal implementation that extends `BLPathImpl`.
-struct BLInternalPathImpl : public BLPathImpl {
-  BLBox controlBox;
-  BLBox boundingBox;
-};
+BL_HIDDEN BLResult freeImpl(BLPathPrivateImpl* impl, BLObjectInfo info) noexcept;
 
-template<>
-struct BLInternalCastImpl<BLPathImpl> { typedef BLInternalPathImpl Type; };
+} // {BLPathPrivate}
 
-BL_HIDDEN BLResult blPathImplDelete(BLPathImpl* impl_) noexcept;
-BL_HIDDEN BLResult blPathAddTransformedPathWithType(BLPathCore* self, const BLPathCore* other, const BLRange* range, const BLMatrix2D* m, uint32_t mType) noexcept;
-BL_HIDDEN BLResult blPathTransformWithType(BLPathCore* self, const BLRange* range, const BLMatrix2D* m, uint32_t mType) noexcept;
+//! \}
 
-// ============================================================================
-// [BLPathIterator]
-// ============================================================================
+//! \name Path - Private Iterator
+//! \{
 
+//! Path iterator that can iterate over RAW data.
 struct BLPathIterator {
   const uint8_t* cmd;
   const uint8_t* end;
@@ -112,30 +99,28 @@ struct BLPathIterator {
   }
 };
 
-// ============================================================================
-// [BLPathAppender]
-// ============================================================================
+//! \}
 
-//! Low-level interface that can be used to append vertices & commands to an
-//! existing path fast. The interface is designed in a way that the user using
-//! it must reserve enough space and then call `append...()` functions that
-//! can only be called when there is enough storage left for that command. The
-//! storage requirements are specified by `begin()` or by `ensure()`. The latter
-//! is mostly used to reallocate the array in case more vertices are needed than
-//! initially passed to `begin()`.
+//! \name Path - Private Appender
+//! \{
+
+//! Low-level interface that can be used to append vertices & commands to an existing path fast. The interface is
+//! designed in a way that the user using it must reserve enough space and then call `append...()` functions that
+//! can only be called when there is enough storage left for that command. The storage requirements are specified
+//! by `begin()` or by `ensure()`. The latter is mostly used to reallocate the array in case more vertices are needed
+//! than initially passed to `begin()`.
 //!
-//! When designing a loop the appender can be used in the following way, where
-//! `SourceT` is an iterable object that can provide us some path vertices and
-//! commands:
+//! When designing a loop the appender can be used in the following way, where `SourceT` is an iterable object that
+//! can provide us some path vertices and commands:
 //!
 //! ```
 //! template<typename Iterator>
 //! BLResult appendToPath(BLPath& dst, const Iterator& iter) noexcept {
-//!   BLPathAppender appender;
+//!   BLPathPrivate::BLPathAppender appender;
 //!   BL_PROPAGATE(appender.beginAssign(dst, 32));
 //!
 //!   while (!iter.end()) {
-//!     // Number of vertices required by a cubic curve is 3.
+//!     // Maximum number of vertices required by moveTo/lineTo/quadTo/cubicTo.
 //!     BL_PROPAGATE(appender.ensure(dst, 3));
 //!
 //!     switch (iter.command()) {
@@ -155,8 +140,11 @@ struct BLPathIterator {
 //! ```
 class BLPathAppender {
 public:
-  uint8_t* cmd;
-  uint8_t* end;
+  // Internal struct that represents a single command and prevents compile thinking that it may alias.
+  struct Cmd { uint8_t value; };
+
+  Cmd* cmd;
+  Cmd* end;
   BLPoint* vtx;
 
   BL_INLINE BLPathAppender() noexcept
@@ -167,18 +155,25 @@ public:
   BL_INLINE size_t remainingSize() const noexcept { return (size_t)(end - cmd); }
 
   BL_INLINE size_t currentIndex(const BLPath& dst) const noexcept {
-    return (size_t)(cmd - dst.impl->commandData);
+    return (size_t)(cmd - reinterpret_cast<Cmd*>(BLPathPrivate::getImpl(&dst)->commandData));
   }
 
-  BL_INLINE BLResult begin(BLPathCore* dst, uint32_t op, size_t n) noexcept {
+  BL_INLINE void _advance(size_t n) noexcept {
+    BL_ASSERT(remainingSize() >= n);
+
+    cmd += n;
+    vtx += n;
+  }
+
+  BL_INLINE BLResult begin(BLPathCore* dst, BLModifyOp op, size_t n) noexcept {
     BLPoint* vtxPtrLocal;
     uint8_t* cmdPtrLocal;
     BL_PROPAGATE(blPathModifyOp(dst, op, n, &cmdPtrLocal, &vtxPtrLocal));
 
-    BLPathImpl* dstI = dst->impl;
+    BLPathImpl* dstI = BLPathPrivate::getImpl(dst);
     vtx = vtxPtrLocal;
-    cmd = cmdPtrLocal;
-    end = dstI->commandData + dstI->capacity;
+    cmd = reinterpret_cast<Cmd*>(cmdPtrLocal);
+    end = reinterpret_cast<Cmd*>(dstI->commandData + dstI->capacity);
 
     BL_ASSERT(remainingSize() >= n);
     return BL_SUCCESS;
@@ -191,18 +186,19 @@ public:
     if (BL_LIKELY(remainingSize() >= n))
       return BL_SUCCESS;
 
-    BLInternalPathImpl* dstI = blInternalCast(dst->impl);
-    dstI->size = (size_t)(cmd - dstI->commandData);
+    BLPathImpl* dstI = BLPathPrivate::getImpl(dst);
+
+    dstI->size = (size_t)(reinterpret_cast<uint8_t*>(cmd) - dstI->commandData);
     BL_ASSERT(dstI->size <= dstI->capacity);
 
     uint8_t* cmdPtrLocal;
     BLPoint* vtxPtrLocal;
     BL_PROPAGATE(blPathModifyOp(dst, BL_MODIFY_OP_APPEND_GROW, n, &cmdPtrLocal, &vtxPtrLocal));
 
-    dstI = blInternalCast(dst->impl);
+    dstI = BLPathPrivate::getImpl(dst);
     vtx = vtxPtrLocal;
-    cmd = cmdPtrLocal;
-    end = dstI->commandData + dstI->capacity;
+    cmd = reinterpret_cast<Cmd*>(cmdPtrLocal);
+    end = reinterpret_cast<Cmd*>(dstI->commandData + dstI->capacity);
 
     BL_ASSERT(remainingSize() >= n);
     return BL_SUCCESS;
@@ -214,11 +210,13 @@ public:
   }
 
   BL_INLINE void sync(BLPathCore* dst) noexcept {
-    BL_ASSERT(!empty());
+    BLPathImpl* dstI = BLPathPrivate::getImpl(dst);
+    size_t newSize = (size_t)(reinterpret_cast<uint8_t*>(cmd) - dstI->commandData);
 
-    BLInternalPathImpl* dstI = blInternalCast(dst->impl);
-    dstI->size = (size_t)(cmd - dstI->commandData);
-    BL_ASSERT(dstI->size <= dstI->capacity);
+    BL_ASSERT(!empty());
+    BL_ASSERT(newSize <= dstI->capacity);
+
+    dstI->size = newSize;
   }
 
   BL_INLINE void done(BLPathCore* dst) noexcept {
@@ -231,9 +229,11 @@ public:
 
   BL_INLINE void moveTo(double x0, double y0) noexcept {
     BL_ASSERT(remainingSize() >= 1);
-    cmd[0] = BL_PATH_CMD_MOVE;
-    cmd++;
+
+    cmd[0].value = BL_PATH_CMD_MOVE;
     vtx[0].reset(x0, y0);
+
+    cmd++;
     vtx++;
   }
 
@@ -242,9 +242,11 @@ public:
 
   BL_INLINE void lineTo(double x1, double y1) noexcept {
     BL_ASSERT(remainingSize() >= 1);
-    cmd[0] = BL_PATH_CMD_ON;
-    cmd++;
+
+    cmd[0].value = BL_PATH_CMD_ON;
     vtx[0].reset(x1, y1);
+
+    cmd++;
     vtx++;
   }
 
@@ -254,11 +256,13 @@ public:
 
   BL_INLINE void quadTo(double x1, double y1, double x2, double y2) noexcept {
     BL_ASSERT(remainingSize() >= 2);
-    cmd[0] = BL_PATH_CMD_QUAD;
-    cmd[1] = BL_PATH_CMD_ON;
-    cmd += 2;
+
+    cmd[0].value = BL_PATH_CMD_QUAD;
+    cmd[1].value = BL_PATH_CMD_ON;
     vtx[0].reset(x1, y1);
     vtx[1].reset(x2, y2);
+
+    cmd += 2;
     vtx += 2;
   }
 
@@ -268,28 +272,31 @@ public:
 
   BL_INLINE void cubicTo(double x1, double y1, double x2, double y2, double x3, double y3) noexcept {
     BL_ASSERT(remainingSize() >= 3);
-    cmd[0] = BL_PATH_CMD_CUBIC;
-    cmd[1] = BL_PATH_CMD_CUBIC;
-    cmd[2] = BL_PATH_CMD_ON;
-    cmd += 3;
+
+    cmd[0].value = BL_PATH_CMD_CUBIC;
+    cmd[1].value = BL_PATH_CMD_CUBIC;
+    cmd[2].value = BL_PATH_CMD_ON;
     vtx[0].reset(x1, y1);
     vtx[1].reset(x2, y2);
     vtx[2].reset(x3, y3);
+
+    cmd += 3;
     vtx += 3;
   }
 
   BL_INLINE void arcQuadrantTo(const BLPoint& p1, const BLPoint& p2) noexcept {
     BL_ASSERT(remainingSize() >= 3);
 
-    cmd[0] = BL_PATH_CMD_CUBIC;
-    cmd[1] = BL_PATH_CMD_CUBIC;
-    cmd[2] = BL_PATH_CMD_ON;
-    cmd += 3;
+    cmd[0].value = BL_PATH_CMD_CUBIC;
+    cmd[1].value = BL_PATH_CMD_CUBIC;
+    cmd[2].value = BL_PATH_CMD_ON;
 
     BLPoint p0 = vtx[-1];
     vtx[0] = p0 + (p1 - p0) * BL_M_KAPPA;
     vtx[1] = p2 + (p1 - p2) * BL_M_KAPPA;
     vtx[2] = p2;
+
+    cmd += 3;
     vtx += 3;
   }
 
@@ -297,53 +304,57 @@ public:
     BL_ASSERT(remainingSize() >= 3);
     double k = 4.0 * w / (3.0 * (1.0 + w));
 
-    cmd[0] = BL_PATH_CMD_CUBIC;
-    cmd[1] = BL_PATH_CMD_CUBIC;
-    cmd[2] = BL_PATH_CMD_ON;
-    cmd += 3;
+    cmd[0].value = BL_PATH_CMD_CUBIC;
+    cmd[1].value = BL_PATH_CMD_CUBIC;
+    cmd[2].value = BL_PATH_CMD_ON;
 
     BLPoint p0 = vtx[-1];
     vtx[0] = p0 + (p1 - p0) * k;
     vtx[1] = p2 + (p1 - p2) * k;
     vtx[2] = p2;
+
+    cmd += 3;
     vtx += 3;
   }
 
   BL_INLINE void addVertex(uint8_t cmd_, const BLPoint& p) noexcept {
     BL_ASSERT(remainingSize() >= 1);
 
-    cmd[0] = cmd_;
-    cmd++;
+    cmd[0].value = cmd_;
     vtx[0] = p;
+
+    cmd++;
     vtx++;
   }
 
   BL_INLINE void addVertex(uint8_t cmd_, double x, double y) noexcept {
     BL_ASSERT(remainingSize() >= 1);
 
-    cmd[0] = cmd_;
-    cmd++;
+    cmd[0].value = cmd_;
     vtx[0].reset(x, y);
+
+    cmd++;
     vtx++;
   }
 
   BL_INLINE void close() noexcept {
     BL_ASSERT(remainingSize() >= 1);
 
-    cmd[0] = BL_PATH_CMD_CLOSE;
-    cmd++;
+    cmd[0].value = BL_PATH_CMD_CLOSE;
     vtx[0].reset(blNaN<double>(), blNaN<double>());
+
+    cmd++;
     vtx++;
   }
 
-  BL_INLINE void addBox(double x0, double y0, double x1, double y1, uint32_t dir) noexcept {
+  BL_INLINE void addBox(double x0, double y0, double x1, double y1, BLGeometryDirection dir) noexcept {
     BL_ASSERT(remainingSize() >= 5);
 
-    cmd[0] = BL_PATH_CMD_MOVE;
-    cmd[1] = BL_PATH_CMD_ON;
-    cmd[2] = BL_PATH_CMD_ON;
-    cmd[3] = BL_PATH_CMD_ON;
-    cmd[4] = BL_PATH_CMD_CLOSE;
+    cmd[0].value = BL_PATH_CMD_MOVE;
+    cmd[1].value = BL_PATH_CMD_ON;
+    cmd[2].value = BL_PATH_CMD_ON;
+    cmd[3].value = BL_PATH_CMD_ON;
+    cmd[4].value = BL_PATH_CMD_CLOSE;
 
     vtx[0].reset(x0, y0);
     vtx[1].reset(x1, y0);
@@ -368,6 +379,8 @@ public:
     addBox(x0, y0, x1, y1, BL_GEOMETRY_DIRECTION_CCW);
   }
 };
+
+//! \}
 
 //! \}
 //! \endcond

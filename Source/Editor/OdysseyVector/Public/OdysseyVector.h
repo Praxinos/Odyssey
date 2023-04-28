@@ -28,6 +28,17 @@ namespace FOdysseyVector
                                               , ::ULIS::FVec2D& iSegmentP1
                                               , double&         oDistance );
 
+    void ODYSSEYVECTOR_API BezierExtract( ::ULIS::FVec2D& iP0
+                                        , ::ULIS::FVec2D& iP1
+                                        , ::ULIS::FVec2D& iP2
+                                        , ::ULIS::FVec2D& iP3
+                                        , double fromT
+                                        , double toT
+                                        , ::ULIS::FVec2D& oP0
+                                        , ::ULIS::FVec2D& oP1
+                                        , ::ULIS::FVec2D& oP2
+                                        , ::ULIS::FVec2D& oP3 );
+
     bool ODYSSEYVECTOR_API IntersectRegions( const ::ULIS::FRectI& iRegion0, const ::ULIS::FRectI& iRegion1, ::ULIS::FRectI &oRegionOut );
 }
 

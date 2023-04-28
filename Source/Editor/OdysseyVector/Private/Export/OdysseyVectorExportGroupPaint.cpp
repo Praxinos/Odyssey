@@ -152,6 +152,19 @@ WriteGroupPaintGap( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar )
     } );
 }
 
+static void
+WriteGroupPaintWireframe( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar )
+{
+    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_GROUPPAINT_WIREFRAME
+                                    , Ar
+                                    , [&iPaintGroup](FArchive &Ar) -> void
+    {
+        uint32 wireframe = static_cast<uint32>(iPaintGroup.IsWireframe());
+
+        Ar << wireframe;
+    } );
+}
+
 void
 FOdysseyVectorExport::WriteObjectGroupPaint( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar )
 {
@@ -159,6 +172,7 @@ FOdysseyVectorExport::WriteObjectGroupPaint( FOdysseyVectorGroupPaint& iPaintGro
                                     , Ar
                                     , [&iPaintGroup](FArchive &Ar) -> void
     {
+        WriteGroupPaintWireframe( iPaintGroup, Ar );
         WriteGroupPaintGap( iPaintGroup, Ar );
         WriteGroupPaintBuckets( iPaintGroup, Ar );
     } );

@@ -81,6 +81,20 @@ FOdysseyVectorSegment::GetVectorAtStart( bool iNormalize )
     return vec;
 }
 
+void
+FOdysseyVectorSegment::Link()
+{
+    GetVertex(0)->AddSegment(this);
+    GetVertex(1)->AddSegment(this);
+}
+
+void
+FOdysseyVectorSegment::Unlink()
+{
+    GetVertex(0)->RemoveSegment(this);
+    GetVertex(1)->RemoveSegment(this);
+}
+
 ::ULIS::FVec2D
 FOdysseyVectorSegment::GetVectorAtEnd( bool iNormalize )
 {

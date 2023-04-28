@@ -20,6 +20,7 @@ public:
     FSelectionChanged mSelectionChanged;
 
 public:
+    static bool DoubleClicked();
     // Destructor
     virtual ~UOdysseyPainterEditorVectorObjectPickTool();
 
