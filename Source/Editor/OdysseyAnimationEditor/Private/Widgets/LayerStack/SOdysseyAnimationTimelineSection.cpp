@@ -20,6 +20,9 @@ SOdysseyAnimationTimelineSection::Construct(
 		.HeightOverride_Raw(this, &SOdysseyAnimationTimelineSection::GetSectionHeight)
 		.HAlign(HAlign_Fill)
 		.VAlign(VAlign_Fill)
+		[
+			iArgs._Content.Widget
+		]
 	];
 }
 

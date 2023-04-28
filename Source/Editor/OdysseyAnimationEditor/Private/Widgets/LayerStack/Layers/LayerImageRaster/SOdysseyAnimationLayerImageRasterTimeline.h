@@ -29,9 +29,9 @@ public:
 
 public:
     //SWidget overrides
-	virtual FReply OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
-	virtual FReply OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
-	virtual FReply OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
+	virtual FReply OnMouseButtonDown(const FGeometry& iGeometry, const FPointerEvent& iEvent) override;
+	virtual FReply OnMouseMove(const FGeometry& iGeometry, const FPointerEvent& MouseEvent) override;
+	virtual FReply OnMouseButtonUp(const FGeometry& iGeometry, const FPointerEvent& MouseEvent) override;
     void Tick( const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime );
 
 private:
@@ -41,20 +41,39 @@ private:
     
     float GetLayerOffset() const;
     float GetCellHeight() const;
+    float GetCellLength(int iCellIndex) const;
 
     void AddPreBehaviourWidget();
     void AddCellsWidgets();
+    
+    EVisibility GetTimingHandleVisibility() const;
+    EVisibility GetLengthHandleVisibility() const;
+
+    void OnLengthHandleDragStarted(const FGeometry& iGeometry, const FPointerEvent& iEvent, int iCellIndex);
+    void OnLengthHandleDragged(const FGeometry& iGeometry, const FPointerEvent& iEvent);
+    void OnLengthHandleDragStopped(const FGeometry& iGeometry, const FPointerEvent& iEvent);
 
 private:
     class UOdysseyAnimationLayerImageRaster* mAnimationLayerImageRaster;
     bool mIsRefreshPending;
     bool mIsOffsettingLayer;
+    bool mIsDraggingCellLengthHandle;
 
-    //Layer Offset System
+
+	const FSlateBrush* mTimingHandleBrush;
+	const FSlateBrush* mLengthHandleBrush;
     struct
     {
         int mStartOffset;
         int mOffset;
         double mMousePosition;
     } mLayerOffsetData;
+
+    struct
+    {
+        int mCellIndex = INDEX_NONE;
+        int mStartLength;
+        int mLength;
+        double mMousePosition;
+    } mLengthHandleDragData;
 };

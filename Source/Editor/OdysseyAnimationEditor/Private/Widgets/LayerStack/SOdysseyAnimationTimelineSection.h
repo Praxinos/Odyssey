@@ -12,6 +12,7 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineSection
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineSection)
         {}
+        SLATE_DEFAULT_SLOT( FArguments, Content )
         SLATE_ATTRIBUTE(float, WidthInFrames)
         SLATE_ATTRIBUTE(float, HeightInScreenUnits)
     SLATE_END_ARGS()
