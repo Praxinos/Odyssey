@@ -3,6 +3,8 @@
 
 #include "Widgets/LayerStack/Layers/LayerImageRaster/SOdysseyAnimationLayerImageRasterCell.h"
 
+#define LOCTEXT_NAMESPACE "SOdysseyAnimationLayerImageRasterCell"
+
 void
 SOdysseyAnimationLayerImageRasterCell::Construct(
     const FArguments& iArgs,
@@ -14,6 +16,8 @@ SOdysseyAnimationLayerImageRasterCell::Construct(
 	mEditor = iEditor;
 	mLayer = iLayer;
 	mCellIndex = iCellIndex;
+	mOnBuildContextMenu = iArgs._OnBuildContextMenu;
+	mOnMapActions = iArgs._OnMapActions;
 
 	ChildSlot
 	[
@@ -22,3 +26,41 @@ SOdysseyAnimationLayerImageRasterCell::Construct(
 		.BorderBackgroundColor(FLinearColor(1.f, 1.f, 1.f))
 	];
 }
+
+bool
+SOdysseyAnimationLayerImageRasterCell::SupportsKeyboardFocus() const
+{
+	return true;
+}
+
+FReply
+SOdysseyAnimationLayerImageRasterCell::OnKeyDown( const FGeometry& iGeometry, const FKeyEvent& iKeyEvent )
+{
+	TSharedPtr<FUICommandList> commandList = MakeShared<FUICommandList>();
+	mOnMapActions.ExecuteIfBound(commandList);
+	if (commandList->ProcessCommandBindings(iKeyEvent))
+        return FReply::Handled();
+
+    return SCompoundWidget::OnKeyDown(iGeometry, iKeyEvent);
+}
+
+FReply
+SOdysseyAnimationLayerImageRasterCell::OnMouseButtonUp(const FGeometry& iGeometry, const FPointerEvent& iEvent)
+{
+	if (iEvent.GetEffectingButton() == EKeys::RightMouseButton)
+    {
+		TSharedPtr<FUICommandList> commandList = MakeShared<FUICommandList>();
+		mOnMapActions.ExecuteIfBound(commandList);
+
+		FMenuBuilder menuBuilder(true, commandList);
+		mOnBuildContextMenu.ExecuteIfBound(menuBuilder);
+
+		TSharedRef<SWidget> menuContents = menuBuilder.MakeWidget();
+		FWidgetPath widgetPath = iEvent.GetEventPath() != nullptr ? *iEvent.GetEventPath() : FWidgetPath();
+		FSlateApplication::Get().PushMenu(AsShared(), widgetPath, menuContents, iEvent.GetScreenSpacePosition(), FPopupTransitionEffect(FPopupTransitionEffect::ContextMenu));
+    	return FReply::Handled();
+	}
+	return FReply::Unhandled();
+}
+
+#undef LOCTEXT_NAMESPACE

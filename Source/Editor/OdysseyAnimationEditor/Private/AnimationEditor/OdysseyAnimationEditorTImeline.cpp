@@ -1,5 +1,7 @@
 #include "OdysseyAnimationEditorTImeline.h"
 
+#include "Framework/Commands/GenericCommands.h"
+
 //Define base frame width to be 50 pixels
 #define BASE_FRAMEWIDTH 50.f
 #define MIN_ZOOM 0.01f
@@ -38,6 +40,13 @@ FOdysseyAnimationEditorTimeline::SetOffset(float iOffset)
     mOnOffsetChanged.Broadcast();
 }
 
+void
+FOdysseyAnimationEditorTimeline::SetSelectedFrames(const FInt32Range& iSelectedFrames)
+{
+    mSelectedFrames = iSelectedFrames;
+    mOnSelectedFramesChanged.Broadcast();
+}
+
 //static
 float
 FOdysseyAnimationEditorTimeline::GetBaseFrameSize()
@@ -61,6 +70,12 @@ float
 FOdysseyAnimationEditorTimeline::GetOffset() const
 {
     return mOffset;
+}
+
+FInt32Range
+FOdysseyAnimationEditorTimeline::GetSelectedFrames() const
+{
+    return mSelectedFrames;
 }
 
 FSimpleMulticastDelegate&

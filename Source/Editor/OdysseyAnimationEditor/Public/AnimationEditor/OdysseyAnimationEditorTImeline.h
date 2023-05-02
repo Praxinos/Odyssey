@@ -15,21 +15,26 @@ public:
 
 	void SetZoom(float iZoom);
 	void SetOffset(float iOffset);
+    void SetSelectedFrames(const FInt32Range& iSelectedFrames);
 
 	static float GetBaseFrameSize();
 	float GetFrameWidth() const;
 	float GetZoom() const;
 	float GetOffset() const;
+    FInt32Range GetSelectedFrames() const;
 
 public:
     //Events
+    FSimpleMulticastDelegate& OnSelectedFramesChanged();
     FSimpleMulticastDelegate& OnOffsetChanged();
     FSimpleMulticastDelegate& OnZoomChanged();
 
 private:
     float mZoom;
 	float mOffset;
+    FInt32Range mSelectedFrames;
 
-    FSimpleMulticastDelegate mOnOffsetChanged;
     FSimpleMulticastDelegate mOnZoomChanged;
+    FSimpleMulticastDelegate mOnOffsetChanged;
+    FSimpleMulticastDelegate mOnSelectedFramesChanged;
 };

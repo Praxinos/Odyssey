@@ -30,12 +30,14 @@ public:
 
 public:
     //SWidget overrides
-    void Tick( const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime );
+	virtual bool SupportsKeyboardFocus() const override;
+    virtual FReply OnKeyDown( const FGeometry& iGeometry, const FKeyEvent& iKeyEvent ) override;
+    virtual FReply OnMouseButtonUp(const FGeometry& iGeometry, const FPointerEvent& iEvent) override;
+    virtual void Tick( const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime ) override;
 
 private:
     void RequestRefresh();
     void RefreshWidgets();
-    void OnCellsChanged(class UOdysseyAnimationLayerImageRaster* iLayer);
     
     float GetLayerOffset() const;
     float GetCellHeight() const;
@@ -46,6 +48,14 @@ private:
     EVisibility GetTimingHandleVisibility() const;
     EVisibility GetLengthHandleVisibility() const;
 
+    void MapActions(TSharedPtr<FUICommandList> iCommandList);
+    void BuildContextMenu(FMenuBuilder& iMenuBuilder);
+
+    void SelectAllFrames();
+    void DeleteSelectedFrames();
+
+private:
+    void OnCellsChanged(class UOdysseyAnimationLayerImageRaster* iLayer);
     void OnLengthHandleDragStarted(const FGeometry& iGeometry, const FPointerEvent& iEvent, int iCellIndex);
     void OnLengthHandleDragged(const FGeometry& iGeometry, const FPointerEvent& iEvent);
     void OnLengthHandleDragStopped(const FGeometry& iGeometry, const FPointerEvent& iEvent);
@@ -53,6 +63,10 @@ private:
     FReply OnCellsMouseButtonDown(const FGeometry& iGeometry, const FPointerEvent& iEvent);
     FReply OnCellsMouseMove(const FGeometry& iGeometry, const FPointerEvent& MouseEvent);
     FReply OnCellsMouseButtonUp(const FGeometry& iGeometry, const FPointerEvent& MouseEvent);
+    void OnCellsMapActions(TSharedPtr<FUICommandList> iCommandList);
+    void OnCellsBuildContextMenu(FMenuBuilder& iMenuBuilder);
+    void OnFrameSelectorMapActions(TSharedPtr<FUICommandList> iCommandList);
+    void OnFrameSelectorBuildContextMenu(FMenuBuilder& iMenuBuilder);
 
 private:
     FOdysseyAnimationEditor* mEditor;

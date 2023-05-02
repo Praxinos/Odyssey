@@ -15,6 +15,8 @@ SOdysseyAnimationTimelineFrameSelector::Construct(
 )
 {
 	mEditor = iEditor;
+	mOnBuildContextMenu = InArgs._OnBuildContextMenu;
+	mOnMapActions = InArgs._OnMapActions;
 
 	ChildSlot
 	[
@@ -40,21 +42,26 @@ int32 SOdysseyAnimationTimelineFrameSelector::OnPaint(const FPaintArgs& Args, co
 	FLinearColor lineColor = FLinearColor::Green;
 	lineColor.A = 0.3f;
 
-	int firstFrame = FMath::Min(mSelectionData.mStartFrame, mSelectionData.mEndFrame);
-	int lastFrame = FMath::Max(mSelectionData.mStartFrame, mSelectionData.mEndFrame);
+	int firstFrame = INDEX_NONE;
+	int lastFrame = INDEX_NONE;
 
-	float firstFramePos = (firstFrame - offset) * frameSize;
-	float lastFramePos = (lastFrame - offset) * frameSize;
-	float selectionSize = lastFramePos - firstFramePos + frameSize;
+	bool bDisplay = GetSelectedFrames(firstFrame, lastFrame);
 
-	FSlateDrawElement::MakeBox(
-		OutDrawElements,
-		LayerId,
-		AllottedGeometry.ToPaintGeometry(FVector2D(firstFramePos, 0.f), FVector2D(selectionSize, height)),
-		GenericBrush,
-		ESlateDrawEffect::None,
-		lineColor
-	);
+	if(bDisplay)
+	{
+		float firstFramePos = (firstFrame - offset) * frameSize;
+		float lastFramePos = (lastFrame - offset) * frameSize;
+		float selectionSize = lastFramePos - firstFramePos + frameSize;
+
+		FSlateDrawElement::MakeBox(
+			OutDrawElements,
+			LayerId,
+			AllottedGeometry.ToPaintGeometry(FVector2D(firstFramePos, 0.f), FVector2D(selectionSize, height)),
+			GenericBrush,
+			ESlateDrawEffect::None,
+			lineColor
+		);
+	}
 
 	return LayerId;
 }
@@ -71,8 +78,8 @@ SOdysseyAnimationTimelineFrameSelector::OnMouseButtonDown(const FGeometry& MyGeo
 		float frameWidth = mEditor->Timeline()->GetFrameWidth();
 		float frame = (int)(posX / frameWidth + timelineOffset);
 
-		mSelectionData.mStartFrame = frame;
-		mSelectionData.mEndFrame = frame;
+		mSelectionData.mCursorFrame = frame;
+		mSelectionData.mSelectedFrames = FInt32Range::Inclusive(frame, frame);
 
 		// This has prevent throttling on so that viewports continue to run whilst dragging the slider
 		return FReply::Handled().CaptureMouse( SharedThis(this) ).PreventThrottling();
@@ -91,8 +98,14 @@ SOdysseyAnimationTimelineFrameSelector::OnMouseMove(const FGeometry& MyGeometry,
 		float frameWidth = mEditor->Timeline()->GetFrameWidth();
 		float frame = (int)(posX / frameWidth + timelineOffset);
 
-		mSelectionData.mEndFrame = frame;
-		
+		if (frame < mSelectionData.mCursorFrame)
+		{
+			mSelectionData.mSelectedFrames = FInt32Range::Inclusive(frame, mSelectionData.mCursorFrame);
+		}
+		else
+		{
+			mSelectionData.mSelectedFrames = FInt32Range::Inclusive(mSelectionData.mCursorFrame, frame);
+		}
 		return FReply::Handled();
 	}
 	
@@ -100,20 +113,42 @@ SOdysseyAnimationTimelineFrameSelector::OnMouseMove(const FGeometry& MyGeometry,
 }
 
 FReply
-SOdysseyAnimationTimelineFrameSelector::OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
+SOdysseyAnimationTimelineFrameSelector::OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& iEvent)
 {
 	if (mIsSelecting)
 	{
-		int firstFrame = FMath::Min(mSelectionData.mStartFrame, mSelectionData.mEndFrame);
-		int lastFrame = FMath::Max(mSelectionData.mStartFrame, mSelectionData.mEndFrame);
-
-		FInt32Range range = FInt32Range::Inclusive(firstFrame, lastFrame);
-		//mEditor->Timeline()->SetSelectedFrameRange(range);
 		mIsSelecting = false;
+		mEditor->Timeline()->SetSelectedFrames(mSelectionData.mSelectedFrames);
 		return FReply::Handled().ReleaseMouseCapture();
 	}
+	/* else if (iEvent.GetEffectingButton() == EKeys::RightMouseButton)
+    {
+		TSharedPtr<FUICommandList> commandList = MakeShared<FUICommandList>();
+		mOnMapActions.ExecuteIfBound(commandList);
+
+		FMenuBuilder menuBuilder(true, commandList);
+		mOnBuildContextMenu.ExecuteIfBound(menuBuilder);
+
+		TSharedRef<SWidget> menuContents = menuBuilder.MakeWidget();
+		FWidgetPath widgetPath = iEvent.GetEventPath() != nullptr ? *iEvent.GetEventPath() : FWidgetPath();
+		FSlateApplication::Get().PushMenu(AsShared(), widgetPath, menuContents, iEvent.GetScreenSpacePosition(), FPopupTransitionEffect(FPopupTransitionEffect::ContextMenu));
+    	return FReply::Handled();
+	} */
 	
 	return FReply::Unhandled();
+}
+
+bool
+SOdysseyAnimationTimelineFrameSelector::GetSelectedFrames(int& oStartFrame, int& oEndFrame) const
+{
+	bool isLowerClosed = mEditor->Timeline()->GetSelectedFrames().GetLowerBound().IsClosed();
+	bool isUpperClosed = mEditor->Timeline()->GetSelectedFrames().GetUpperBound().IsClosed();
+	if (!mIsSelecting && (!isLowerClosed || !isUpperClosed))
+		return false;
+
+	oStartFrame = mIsSelecting ? mSelectionData.mSelectedFrames.GetLowerBoundValue() : mEditor->Timeline()->GetSelectedFrames().GetLowerBoundValue();
+	oEndFrame = mIsSelecting ? mSelectionData.mSelectedFrames.GetUpperBoundValue() : mEditor->Timeline()->GetSelectedFrames().GetUpperBoundValue();
+	return true;
 }
 
 //////////////////////////////////////////////////////////////////////////

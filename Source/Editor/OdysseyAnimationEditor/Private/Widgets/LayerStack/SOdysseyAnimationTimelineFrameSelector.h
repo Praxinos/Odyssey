@@ -10,8 +10,14 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineFrameSelector
 	: public SCompoundWidget
 {
 public:
+    DECLARE_DELEGATE_OneParam(FOnBuildContextMenu, FMenuBuilder&)
+    DECLARE_DELEGATE_OneParam(FOnMapActions, TSharedPtr<FUICommandList>)
+
+public:
 	SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineFrameSelector)
 	{}
+        SLATE_EVENT(FOnBuildContextMenu, OnBuildContextMenu)
+        SLATE_EVENT(FOnMapActions, OnMapActions)
 	SLATE_END_ARGS()
 
 	void Construct(
@@ -26,12 +32,18 @@ public:
 	// End of SWidget interfacepublic:
 
 private:
+	bool GetSelectedFrames(int& oStartFrame, int& oEndFrame) const;
+
+private:
 	bool mIsSelecting = false;
 	FOdysseyAnimationEditor* mEditor;
 
     struct
     {
-        int mStartFrame;
-		int mEndFrame;
+		int mCursorFrame;
+        FInt32Range mSelectedFrames;
     } mSelectionData;
+
+	FOnBuildContextMenu mOnBuildContextMenu;
+    FOnMapActions mOnMapActions;
 };

@@ -78,6 +78,8 @@ SOdysseyAnimationLayerImageRasterTimeline::Construct(
             .HeightOverride(20.f)
             [
                 SNew(SOdysseyAnimationTimelineFrameSelector, mEditor)
+                .OnMapActions(this, &SOdysseyAnimationLayerImageRasterTimeline::OnFrameSelectorMapActions)
+                .OnBuildContextMenu(this, &SOdysseyAnimationLayerImageRasterTimeline::OnFrameSelectorBuildContextMenu)
             ]
         ]
     ];
@@ -151,6 +153,8 @@ SOdysseyAnimationLayerImageRasterTimeline::AddCellsWidgets()
                 +SOverlay::Slot()
                 [
                     SNew(SOdysseyAnimationLayerImageRasterCell, mEditor, mAnimationLayerImageRaster, i)
+                    .OnMapActions(this, &SOdysseyAnimationLayerImageRasterTimeline::OnCellsMapActions)
+                    .OnBuildContextMenu(this, &SOdysseyAnimationLayerImageRasterTimeline::OnCellsBuildContextMenu)
                 ]
                 +SOverlay::Slot() //Timing Handle Top Left
                 .Padding(-mLengthHandleBrush->ImageSize.X / 2, 0.f, 0.f, 0.f)
@@ -184,6 +188,42 @@ SOdysseyAnimationLayerImageRasterTimeline::AddCellsWidgets()
     }
 }
 
+bool
+SOdysseyAnimationLayerImageRasterTimeline::SupportsKeyboardFocus() const
+{
+    return true;
+}
+
+FReply
+SOdysseyAnimationLayerImageRasterTimeline::OnKeyDown( const FGeometry& iGeometry, const FKeyEvent& iKeyEvent )
+{
+	TSharedPtr<FUICommandList> commandList = MakeShared<FUICommandList>();
+    MapActions(commandList);
+	if (commandList->ProcessCommandBindings(iKeyEvent))
+        return FReply::Handled();
+
+    return SCompoundWidget::OnKeyDown(iGeometry, iKeyEvent);
+}
+
+FReply
+SOdysseyAnimationLayerImageRasterTimeline::OnMouseButtonUp(const FGeometry& iGeometry, const FPointerEvent& iEvent)
+{
+	if (iEvent.GetEffectingButton() == EKeys::RightMouseButton)
+    {
+		TSharedPtr<FUICommandList> commandList = MakeShared<FUICommandList>();
+		MapActions(commandList);
+
+		FMenuBuilder menuBuilder(true, commandList);
+		BuildContextMenu(menuBuilder);
+
+		TSharedRef<SWidget> menuContents = menuBuilder.MakeWidget();
+		FWidgetPath widgetPath = iEvent.GetEventPath() != nullptr ? *iEvent.GetEventPath() : FWidgetPath();
+		FSlateApplication::Get().PushMenu(AsShared(), widgetPath, menuContents, iEvent.GetScreenSpacePosition(), FPopupTransitionEffect(FPopupTransitionEffect::ContextMenu));
+    	return FReply::Handled();
+	}
+	return FReply::Unhandled();
+}
+
 void
 SOdysseyAnimationLayerImageRasterTimeline::OnCellsChanged(UOdysseyAnimationLayerImageRaster* iLayer)
 {
@@ -196,13 +236,18 @@ SOdysseyAnimationLayerImageRasterTimeline::OnCellsChanged(UOdysseyAnimationLayer
 FReply
 SOdysseyAnimationLayerImageRasterTimeline::OnCellsMouseButtonDown(const FGeometry& iGeometry, const FPointerEvent& iEvent)
 {
-    mIsOffsettingLayer = true;
+    if (iEvent.GetEffectingButton() == EKeys::LeftMouseButton)
+    {
+        mIsOffsettingLayer = true;
 
-    mLayerOffsetData.mMousePosition = iEvent.GetScreenSpacePosition().X;
-    mLayerOffsetData.mStartOffset= mAnimationLayerImageRaster->Offset;
-    mLayerOffsetData.mOffset = mAnimationLayerImageRaster->Offset;
+        mLayerOffsetData.mMousePosition = iEvent.GetScreenSpacePosition().X;
+        mLayerOffsetData.mStartOffset= mAnimationLayerImageRaster->Offset;
+        mLayerOffsetData.mOffset = mAnimationLayerImageRaster->Offset;
 
-    return FReply::Handled().CaptureMouse(mCellsBorder.ToSharedRef()).PreventThrottling();
+        return FReply::Handled().CaptureMouse(mCellsBorder.ToSharedRef()).PreventThrottling();
+    }
+
+    return FReply::Unhandled();
 }
 
 FReply
@@ -232,6 +277,55 @@ SOdysseyAnimationLayerImageRasterTimeline::OnCellsMouseButtonUp(const FGeometry&
         return FReply::Handled().ReleaseMouseCapture();
     }
     return FReply::Unhandled();
+}
+
+void
+SOdysseyAnimationLayerImageRasterTimeline::OnCellsMapActions(TSharedPtr<FUICommandList> iCommandList)
+{
+    MapActions(iCommandList);
+}
+
+void
+SOdysseyAnimationLayerImageRasterTimeline::OnCellsBuildContextMenu(FMenuBuilder& iMenuBuilder)
+{
+    BuildContextMenu(iMenuBuilder);
+}
+
+void
+SOdysseyAnimationLayerImageRasterTimeline::OnFrameSelectorMapActions(TSharedPtr<FUICommandList> iCommandList)
+{
+    MapActions(iCommandList);
+}
+
+void
+SOdysseyAnimationLayerImageRasterTimeline::OnFrameSelectorBuildContextMenu(FMenuBuilder& iMenuBuilder)
+{
+    BuildContextMenu(iMenuBuilder);
+}
+
+void
+SOdysseyAnimationLayerImageRasterTimeline::MapActions(TSharedPtr<FUICommandList> iCommandList)
+{
+	iCommandList->MapAction(
+        FGenericCommands::Get().SelectAll,
+        FExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageRasterTimeline::SelectAllFrames)
+    );
+
+    iCommandList->MapAction(
+        FGenericCommands::Get().Delete,
+        FExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageRasterTimeline::DeleteSelectedFrames)
+    );
+}
+
+void
+SOdysseyAnimationLayerImageRasterTimeline::BuildContextMenu(FMenuBuilder& iMenuBuilder)
+{
+    const FText commonSectionTitle = LOCTEXT("OdysseyAnimationTimelineCommonSection", "Common");
+    iMenuBuilder.BeginSection("Common", commonSectionTitle);
+    iMenuBuilder.AddMenuEntry(FGenericCommands::Get().SelectAll);
+    iMenuBuilder.AddMenuEntry(FGenericCommands::Get().Delete);
+    //iMenuBuilder.AddMenuSeparator();
+    iMenuBuilder.EndSection();
 }
 
 EVisibility
@@ -276,6 +370,66 @@ SOdysseyAnimationLayerImageRasterTimeline::OnLengthHandleDragStopped(const FGeom
 {
     mAnimationLayerImageRaster->SetCellLength(mLengthHandleDragData.mCellIndex, mLengthHandleDragData.mLength);
     mIsDraggingCellLengthHandle = false;
+}
+
+void
+SOdysseyAnimationLayerImageRasterTimeline::SelectAllFrames()
+{
+    FInt32Range frameRange = mAnimationLayerImageRaster->GetFrameRange();
+    mEditor->Timeline()->SetSelectedFrames(frameRange);
+}
+
+void
+SOdysseyAnimationLayerImageRasterTimeline::DeleteSelectedFrames()
+{
+    bool isLowerClosed = mEditor->Timeline()->GetSelectedFrames().GetLowerBound().IsClosed();
+    bool isUpperClosed = mEditor->Timeline()->GetSelectedFrames().GetUpperBound().IsClosed();
+
+    int startFrame = mEditor->Animation()->CurrentFrame;
+    int endFrame = mEditor->Animation()->CurrentFrame;
+    if ( isLowerClosed && isUpperClosed )
+    {
+        startFrame = mEditor->Timeline()->GetSelectedFrames().GetLowerBoundValue();
+        endFrame = mEditor->Timeline()->GetSelectedFrames().GetUpperBoundValue();
+    }
+
+    TMap<int, int> cellsLength;
+    for (int i = endFrame; i >= startFrame; i--)
+    {
+        int cellIndex = INDEX_NONE;
+        int cellFrameIndex = INDEX_NONE;
+        if (!mAnimationLayerImageRaster->GetCellIndexAtFrame(i, cellIndex, cellFrameIndex))
+            continue;
+
+        if (!cellsLength.Contains(cellIndex))
+        {
+            int cellLength = INDEX_NONE;
+            if ( !mAnimationLayerImageRaster->GetCellLength(cellIndex, cellLength) )
+                continue;
+
+            cellsLength.Add(cellIndex, cellLength);
+        }
+        cellsLength[cellIndex]--;
+    }
+
+    TArray< int > cellIndexes;
+    cellsLength.GetKeys(cellIndexes);
+    cellIndexes.Sort();
+
+    for (int i = cellIndexes.Num() - 1; i >= 0; i--)
+    {
+        int cellIndex = cellIndexes[i];
+        int cellLength = cellsLength[cellIndex];
+
+        if (cellLength <= 0)
+        {
+            //Remove the cell
+            mAnimationLayerImageRaster->RemoveCell(cellIndex);
+            continue;
+        }
+
+        mAnimationLayerImageRaster->SetCellLength(cellIndex, cellLength);
+    }
 }
 
 #undef LOCTEXT_NAMESPACE
