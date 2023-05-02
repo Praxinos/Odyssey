@@ -618,7 +618,7 @@ IntersectVertices( FOdysseyVectorVertex* iVertex0, FOdysseyVectorVertex* iVertex
 {
     if( iVertex0 != iVertex1 )
     {
-        if( ( iVertex0->GetSegmentCount() == 1 ) && ( iVertex1->GetSegmentCount() == 1 ) )
+        if( ( iVertex0->GetSegmentCount() == 1 ) /*&& ( iVertex1->GetSegmentCount() == 1 )*/ )
         {
             ::ULIS::FVec2D& point0 = iVertex0->GetCoords();
             ::ULIS::FVec2D& point1 = iVertex1->GetCoords();
@@ -897,223 +897,139 @@ FOdysseyVectorSegmentCubic::Draw( ::ULIS::FRectD &iRoi )
                          , worldMatrix.mapPoint( mPolygonCache[i].quadVertex[3].x, mPolygonCache[i].quadVertex[3].y ) );
     }
     blctx->restore();
-
-#ifdef UNUSED // commented-out : it makes path too thick and creates artefacts
-    blctx->setFillRule( BL_FILL_RULE_NON_ZERO );
-
-    //blctx->strokePath ( mBLPath );
-    blctx->fillPath ( mBLPath );
-#endif
-
 }
 
-void
-FOdysseyVectorSegmentCubic::BuildVariableThickness( double iFromT
-                                                  , double iToT
-                                                  , ::ULIS::FVec2D& iFromPoint
-                                                  , ::ULIS::FVec2D& iToPoint
-                                                  , ::ULIS::FVec2D* iPrevSegmentVector
-                                                  , ::ULIS::FVec2D* iNextSegmentVector
-                                                  , double iStartRadius
-                                                  , double iEndRadius
-                                                  , int    iPolygonID )
+static void
+ThickenPolygon( FPolygon* iPolygon
+              , double iRadiusFrom
+              , double iRadiusTo
+              , const ::ULIS::FVec2D& iNormalizedTangentFrom
+              , const ::ULIS::FVec2D& iNormalizedTangentTo )
 {
-    // TODO: use references for speed
-    ::ULIS::FVec2D& point0 = GetVertex(0)->GetCoords();
-    ::ULIS::FVec2D& point1 = GetVertex(1)->GetCoords();
-    ::ULIS::FVec2D& ctrlPoint0 = GetHandle(0)->GetCoords();
-    ::ULIS::FVec2D& ctrlPoint1 = GetHandle(1)->GetCoords();
-    ::ULIS::FVec2D sampleTangent[2] = { ::ULIS::CubicBezierTangentAtParameter<::ULIS::FVec2D>( point0
-                                                                                             , ctrlPoint0
-                                                                                             , ctrlPoint1
-                                                                                             , point1
-                                                                                             , iFromT ),
-                                        ::ULIS::CubicBezierTangentAtParameter<::ULIS::FVec2D>( point0
-                                                                                             , ctrlPoint0
-                                                                                             , ctrlPoint1
-                                                                                             , point1
-                                                                                             , ( iToT == 1.0f ) ? 0.999f : iToT ) };
-    static ::ULIS::FVec2D zeroVector = { 0.0f, 0.0f };
-    FPolygon* cachedPolygon = &mPolygonCache[iPolygonID];
+    ::ULIS::FVec2D perpendicularVecFrom = { iNormalizedTangentFrom.y, -iNormalizedTangentFrom.x };
+    ::ULIS::FVec2D perpendicularVecTo   = { iNormalizedTangentTo.y  , -iNormalizedTangentTo.x   };
 
-    // Note: no need to normalize sampleTangent[] vectors. The averaging won't be any different than with a normalized version.
-    ::ULIS::FVec2D parallelVecFrom[2] = { *iPrevSegmentVector, sampleTangent[0]    };
-    ::ULIS::FVec2D   parallelVecTo[2] = { sampleTangent[1]   , *iNextSegmentVector };
-    ::ULIS::FVec2D averageVecFrom = ( parallelVecFrom[0] + parallelVecFrom[1] ) * 0.5f;
-    ::ULIS::FVec2D averageVecTo   = (   parallelVecTo[0] +   parallelVecTo[1] ) * 0.5f;
-    ::ULIS::FVec2D perpendicularVecFrom = { averageVecFrom.y, -averageVecFrom.x };
-    ::ULIS::FVec2D perpendicularVecTo = { averageVecTo.y, -averageVecTo.x };
-    /*int prevPolygonID = iPolygonID - 1;*/
+    perpendicularVecFrom *= iRadiusFrom;
+    perpendicularVecTo   *= iRadiusTo;
 
-    if ( perpendicularVecFrom.DistanceSquared() && perpendicularVecTo.DistanceSquared() )
-    {
-        perpendicularVecFrom.Normalize();
-        perpendicularVecTo.Normalize();
-    }
+    iPolygon->quadVertex[0].x = iPolygon->lineVertex[0].x + perpendicularVecFrom.x;
+    iPolygon->quadVertex[0].y = iPolygon->lineVertex[0].y + perpendicularVecFrom.y;
 
-    perpendicularVecFrom *= iStartRadius;
-    perpendicularVecTo *= iEndRadius;
+    iPolygon->quadVertex[1].x = iPolygon->lineVertex[1].x + perpendicularVecTo.x;
+    iPolygon->quadVertex[1].y = iPolygon->lineVertex[1].y + perpendicularVecTo.y;
 
-    cachedPolygon->quadVertex[0].x = iFromPoint.x + perpendicularVecFrom.x;
-    cachedPolygon->quadVertex[0].y = iFromPoint.y + perpendicularVecFrom.y;
+    iPolygon->quadVertex[2].x = iPolygon->lineVertex[1].x - perpendicularVecTo.x;
+    iPolygon->quadVertex[2].y = iPolygon->lineVertex[1].y - perpendicularVecTo.y;
 
-    cachedPolygon->quadVertex[1].x = iToPoint.x + perpendicularVecTo.x;
-    cachedPolygon->quadVertex[1].y = iToPoint.y + perpendicularVecTo.y;
-
-    cachedPolygon->quadVertex[2].x = iToPoint.x - perpendicularVecTo.x;
-    cachedPolygon->quadVertex[2].y = iToPoint.y - perpendicularVecTo.y;
-
-    cachedPolygon->quadVertex[3].x = iFromPoint.x - perpendicularVecFrom.x;
-    cachedPolygon->quadVertex[3].y = iFromPoint.y - perpendicularVecFrom.y;
-
-    cachedPolygon->lineVertex[0].x = iFromPoint.x;
-    cachedPolygon->lineVertex[0].y = iFromPoint.y;
-
-    cachedPolygon->lineVertex[1].x = iToPoint.x;
-    cachedPolygon->lineVertex[1].y = iToPoint.y;
-
-    cachedPolygon->xmax = ( cachedPolygon->lineVertex[0].x > cachedPolygon->lineVertex[1].x ) ? cachedPolygon->lineVertex[0].x
-                                                                                              : cachedPolygon->lineVertex[1].x;
-    cachedPolygon->ymax = ( cachedPolygon->lineVertex[0].y > cachedPolygon->lineVertex[1].y ) ? cachedPolygon->lineVertex[0].y
-                                                                                              : cachedPolygon->lineVertex[1].y;
-    cachedPolygon->xmin = ( cachedPolygon->lineVertex[0].x < cachedPolygon->lineVertex[1].x ) ? cachedPolygon->lineVertex[0].x
-                                                                                              : cachedPolygon->lineVertex[1].x;
-    cachedPolygon->ymin = ( cachedPolygon->lineVertex[0].y < cachedPolygon->lineVertex[1].y ) ? cachedPolygon->lineVertex[0].y
-                                                                                              : cachedPolygon->lineVertex[1].y;
-
-    cachedPolygon->fromT = iFromT;
-    cachedPolygon->toT = iToT;
-/*
-printf("cached polygon: %d - %f %f - %f %f - %f %f - %f %f - %f %f\n", iPolygonID
-                                                                , cachedPolygon->quadVertex[0].x
-                                                                , cachedPolygon->quadVertex[0].y
-                                                                , cachedPolygon->quadVertex[1].x
-                                                                , cachedPolygon->quadVertex[1].y
-                                                                , cachedPolygon->quadVertex[2].x
-                                                                , cachedPolygon->quadVertex[2].y
-                                                                , cachedPolygon->quadVertex[3].x
-                                                                , cachedPolygon->quadVertex[3].y
-                                                                , cachedPolygon->fromT
-                                                                , cachedPolygon->toT );
-*/
+    iPolygon->quadVertex[3].x = iPolygon->lineVertex[0].x - perpendicularVecFrom.x;
+    iPolygon->quadVertex[3].y = iPolygon->lineVertex[0].y - perpendicularVecFrom.y;
 }
 
+// De Casteljau algorithm. Stopping condition : dot product between p0p3-p0p1 is bigger than some limit value. Same for p3p0-p3p2.
 void
 FOdysseyVectorSegmentCubic::BuildVariableAdaptive( double  iFromT
                                                  , double  iToT
-                                                 , double  iStartRadius
-                                                 , double  iEndRadius
-                                                 , ::ULIS::FVec2D* iPrevSegmentVector
-                                                 , ::ULIS::FVec2D* iNextSegmentVector
-                                                 , int32   iMaxRecurseDepth
-                                                 , int    *iPolygonID )
+                                                 , double  iRadiusFrom
+                                                 , double  iRadiusTo
+                                                 , ::ULIS::FVec2D iBezier[4]
+                                                 , const ::ULIS::FVec2D& iNormalizedTangentFrom
+                                                 , const ::ULIS::FVec2D& iNormalizedTangentTo
+                                                 , int32   iMaxRecurseDepth )
 {
-    ::ULIS::FVec2D& point0 = GetVertex(0)->GetCoords();
-    ::ULIS::FVec2D& point1 = GetVertex(1)->GetCoords();
-    ::ULIS::FVec2D& ctrlPoint0 = GetHandle(0)->GetCoords();
-    ::ULIS::FVec2D& ctrlPoint1 = GetHandle(1)->GetCoords();
-    double radiusDiff = iEndRadius - iStartRadius;
-    double radiusStep = radiusDiff / 3;
-    double rangeDiff = iToT - iFromT;
-    double rangeStep = rangeDiff / 3;
-    double sampleRange[4] = { iFromT, iFromT + rangeStep, iToT - rangeStep, iToT };
-    ::ULIS::FVec2D samplePoint[4] = { ::ULIS::CubicBezierPointAtParameter<::ULIS::FVec2D>( point0, ctrlPoint0, ctrlPoint1, point1, sampleRange[0] ),
-                                      ::ULIS::CubicBezierPointAtParameter<::ULIS::FVec2D>( point0, ctrlPoint0, ctrlPoint1, point1, sampleRange[1] ),
-                                      ::ULIS::CubicBezierPointAtParameter<::ULIS::FVec2D>( point0, ctrlPoint0, ctrlPoint1, point1, sampleRange[2] ),
-                                      ::ULIS::CubicBezierPointAtParameter<::ULIS::FVec2D>( point0, ctrlPoint0, ctrlPoint1, point1, sampleRange[3] ), };
-    ::ULIS::FVec2D subSegment[3] = { { samplePoint[1].x - samplePoint[0].x, samplePoint[1].y - samplePoint[0].y },
-                                     { samplePoint[2].x - samplePoint[1].x, samplePoint[2].y - samplePoint[1].y },
-                                     { samplePoint[3].x - samplePoint[2].x, samplePoint[3].y - samplePoint[2].y } };
-    ::ULIS::FVec2D subTangent[3] = { ::ULIS::CubicBezierTangentAtParameter<::ULIS::FVec2D>( point0, ctrlPoint0, ctrlPoint1, point1, sampleRange[0] ),
-                                     ::ULIS::CubicBezierTangentAtParameter<::ULIS::FVec2D>( point0, ctrlPoint0, ctrlPoint1, point1, sampleRange[1] ),
-                                     ::ULIS::CubicBezierTangentAtParameter<::ULIS::FVec2D>( point0, ctrlPoint0, ctrlPoint1, point1, sampleRange[2] ) };
-    bool doRefine = false;
-    double radius = iStartRadius;
-    ::ULIS::FVec2D *prevSegmentVector = iPrevSegmentVector;
-    ::ULIS::FVec2D *nextSegmentVector;
-    double angleCosineLimit = 0.999f;
-    static ::ULIS::FVec2D nilVector = { 0.0f, 0.0f };
+    ::ULIS::FVec2D childBezier[2][4];
+    ::ULIS::FVec2D straightVector = iBezier[3] - iBezier[0];
+    ::ULIS::FVec2D ctrlVector[2] = { iBezier[1] - iBezier[0]
+                                   , iBezier[2] - iBezier[3] };
+    double dotLimit = 0.99975f;
 
-    for( int i = 0; i < 3; i++ )
+    if( straightVector.DistanceSquared() )
     {
-        int n = ( i + 1 );
-        double subTanDistanceSquared = subTangent[i].DistanceSquared();
-        double subSegDistanceSquared = subSegment[i].DistanceSquared();
-
-
-
-        if( /*subTanDistanceSquared &&*/ subSegDistanceSquared )
-        {
-            // Note: must be normalized in order to get a correct value for the dot product
-            if ( subTanDistanceSquared )
-            {
-                subTangent[i].Normalize();
-            }
-
-            subSegment[i].Normalize();
-
-            if( subTangent[i].DotProduct( subSegment[i] ) <= angleCosineLimit )
-            {
-                doRefine = true;
-            }
-        }
+        straightVector.Normalize();
     }
 
-    --iMaxRecurseDepth;
-
-    if( ( doRefine == true ) && iMaxRecurseDepth >= 0 )
+    if( ctrlVector[0].DistanceSquared() )
     {
-        for( int i = 0; i < 3; i++ )
+        ctrlVector[0].Normalize();
+    }
+
+    if( ctrlVector[1].DistanceSquared() )
+    {
+        ctrlVector[1].Normalize();
+    }
+
+    if( ( iMaxRecurseDepth >= 0 )
+     && ( ( ctrlVector[0].DotProduct(  straightVector ) < dotLimit )
+       || ( ctrlVector[1].DotProduct( -straightVector ) < dotLimit ) ) )
+    {
+        ::ULIS::FVec2D tangent = ::ULIS::CubicBezierTangentAtParameter<::ULIS::FVec2D>( iBezier[0]
+                                                                                      , iBezier[1]
+                                                                                      , iBezier[2]
+                                                                                      , iBezier[3]
+                                                                                      , 0.5f );
+        if( tangent.DistanceSquared() )
         {
-            int n = ( i + 1 );
+            double radiusAt = ( iRadiusFrom + iRadiusTo ) * 0.5f;
+            double splitsAt = ( iToT + iFromT ) * 0.5f;
 
-            nextSegmentVector = ( i == 0x02 ) ? iNextSegmentVector : &subTangent[n];
+            tangent.Normalize();
 
-            BuildVariableAdaptive( sampleRange[i]
-                                 , sampleRange[n]
-                                 , radius
-                                 , radius + radiusStep
-                                 , prevSegmentVector
-                                 , nextSegmentVector
-                                 , iMaxRecurseDepth
-                                 , iPolygonID );
+            memcpy( childBezier[0], iBezier, sizeof( childBezier[0] ) );
+            memcpy( childBezier[1], iBezier, sizeof( childBezier[1] ) );
 
-            // Note: within the segment, the previous vector (at origin) is the segment's vector itself
-            prevSegmentVector = &subTangent[n];
+            // First sub-bezier from the divided parent bezier
+            // Note: we always split at 0.5f. The splitsAt variable just helps setting the fromT and toT variables of the polygon cache.
+            ::ULIS::CubicBezierSplitAtParameter       <::ULIS::FVec2D>( &childBezier[0][0]
+                                                                      , &childBezier[0][1]
+                                                                      , &childBezier[0][2]
+                                                                      , &childBezier[0][3]
+                                                                      , 0.5f );
+            BuildVariableAdaptive( iFromT  
+                                 , splitsAt
+                                 , iRadiusFrom
+                                 , radiusAt
+                                 , childBezier[0]
+                                 , iNormalizedTangentFrom
+                                 , tangent
+                                 , iMaxRecurseDepth - 1 );
 
-            radius += radiusStep;
+            // Second sub-bezier from the divided parent bezier
+            // Note: we always split at 0.5f. The splitsAt variable just helps setting the fromT and toT variables of the polygon cache.
+            ::ULIS::CubicBezierInverseSplitAtParameter<::ULIS::FVec2D>( &childBezier[1][0]
+                                                                      , &childBezier[1][1]
+                                                                      , &childBezier[1][2]
+                                                                      , &childBezier[1][3]
+                                                                      , 0.5f );
+            BuildVariableAdaptive( splitsAt
+                                 , iToT
+                                 , radiusAt
+                                 , iRadiusTo
+                                 , childBezier[1]
+                                 , tangent
+                                 , iNormalizedTangentTo
+                                 , iMaxRecurseDepth - 1 );
         }
     }
     else
     {
-        IncreasePolygonCache (3);
+        uint32 polyCount = mPolygonCache.size();
+        FPolygon* polygon;
 
-        /*printf("increasing cache %d\n",mPolygonCache.size());*/
+        mPolygonCache.emplace_back();
 
-        for( int i = 0; i < 3; i++ )
-        {
-            int n = ( i + 1 );
-            ::ULIS::FVec2D dist = samplePoint[n] - samplePoint[i];
+        polygon = &mPolygonCache[polyCount];
 
-            nextSegmentVector = ( i == 0x02 ) ? iNextSegmentVector : &subTangent[n];
+        polygon->lineVertex[0] = iBezier[0];
+        polygon->lineVertex[1] = iBezier[3];
+        polygon->fromT = iFromT;
+        polygon->toT = iToT;
 
-                BuildVariableThickness( sampleRange[i]
-                                      , sampleRange[n]
-                                      , samplePoint[i]
-                                      , samplePoint[n]
-                                      , prevSegmentVector
-                                      , nextSegmentVector
-                                      , radius
-                                      , radius + radiusStep
-                                      , *iPolygonID );
+        // this may be a bit too memory-consuming. Don't know. Keep it for now.
+        polygon->xmax = ::ULIS::FMath::Max( polygon->lineVertex[0].x, polygon->lineVertex[1].x );
+        polygon->ymax = ::ULIS::FMath::Max( polygon->lineVertex[0].y, polygon->lineVertex[1].y );
+        polygon->xmin = ::ULIS::FMath::Min( polygon->lineVertex[0].x, polygon->lineVertex[1].x );
+        polygon->ymin = ::ULIS::FMath::Min( polygon->lineVertex[0].y, polygon->lineVertex[1].y );
 
-                (*iPolygonID)++; // insures polygons are ordered
-
-            // Note: within the segment, the previous vector (at origin) is the segment's vector itself
-            prevSegmentVector = &subTangent[n];
-
-            radius += radiusStep;
-        }
+        ThickenPolygon( polygon, iRadiusFrom, iRadiusTo, iNormalizedTangentFrom, iNormalizedTangentTo );
     }
 }
 
@@ -1131,44 +1047,37 @@ FOdysseyVectorSegmentCubic::BuildVariable()
     double segmentStartRadius = static_cast<FOdysseyVectorVertex*>(mPoint[0])->GetRadius();
     double segmentEndRadius = static_cast<FOdysseyVectorVertex*>(mPoint[1])->GetRadius();
     static ::ULIS::FVec2D zeroVector = { 0.0f, 0.0f };
-    int polygonID = 0;
+    ::ULIS::FVec2D bezier[4] = { mPoint[0]->GetCoords(), mCtrlPoint[0].GetCoords(), mCtrlPoint[1].GetCoords(), mPoint[1]->GetCoords() };
+    ::ULIS::FVec2D tangent[2] = { ::ULIS::CubicBezierTangentAtParameter<::ULIS::FVec2D>( bezier[0]
+                                                                                       , bezier[1]
+                                                                                       , bezier[2]
+                                                                                       , bezier[3]
+                                                                                       , 0.0f )
+                                , ::ULIS::CubicBezierTangentAtParameter<::ULIS::FVec2D>( bezier[0]
+                                                                                       , bezier[1]
+                                                                                       , bezier[2]
+                                                                                       , bezier[3]
+                                                                                       , 1.0f ) };
 
     ResetPolygonCache();
     UpdateBoundingBox();
 
-/*printf("\n");*/
+    if( tangent[0].DistanceSquared() )
+    {
+        tangent[0].Normalize();
+    }
+
+    if( tangent[1].DistanceSquared() )
+    {
+        tangent[1].Normalize();
+    }
+
     BuildVariableAdaptive ( 0.0f
                           , 1.0f
                           , segmentStartRadius
                           , segmentEndRadius
-                          , &zeroVector
-                          , &zeroVector
-                          , 8
-                          , &polygonID );
-/*
-    if ( mPolygonCache.size() )
-    {
-        mBLPath.clear();
-
-        mBLPath.moveTo ( mPolygonCache[0].quadVertex[0].x
-                       , mPolygonCache[0].quadVertex[0].y );
-
-        for ( int i = 0; i < mPolygonCache.size(); i++ )
-        {
-            mBLPath.lineTo ( mPolygonCache[i].quadVertex[1].x
-                           , mPolygonCache[i].quadVertex[1].y );
-        }
-
-        for ( int i = mPolygonCache.size(); --i >= 0; )
-        {
-            mBLPath.lineTo ( mPolygonCache[i].quadVertex[2].x
-                           , mPolygonCache[i].quadVertex[2].y );
-        }
-
-        mBLPath.lineTo ( mPolygonCache[0].quadVertex[3].x
-                       , mPolygonCache[0].quadVertex[3].y );
-
-        mBLPath.close();
-    }
-*/
+                          , bezier
+                          , tangent[0]
+                          , tangent[1]
+                          , 16 );
 }

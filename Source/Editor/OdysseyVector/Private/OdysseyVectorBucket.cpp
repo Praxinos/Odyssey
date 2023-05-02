@@ -168,7 +168,9 @@ FOdysseyVectorBucket::DrawPellet( FBucketDrawingFlags iDrawingFlags )
     blctx->save();
     blctx->resetMatrix();
 
-    // Bucket
+    // Pellet
+    blctx->setFillStyle( BLRgba32( 0xFFFFFFFF ) );
+    blctx->fillCircle( bucketWorldCoord.x, bucketWorldCoord.y, PELLETRADIUS + 1.0f );
     blctx->setFillStyle( fillColor );
     blctx->fillCircle( bucketWorldCoord.x, bucketWorldCoord.y, PELLETRADIUS );
 

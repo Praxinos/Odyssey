@@ -234,22 +234,12 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
     private:
         void BuildVariableAdaptive( double  iFromT
                                   , double  iToT
-                                  , double  iStartRadius
-                                  , double  iEndRadius
-                                  , ::ULIS::FVec2D* iPrevSegmentVector
-                                  , ::ULIS::FVec2D* iNextSegmentVector
-                                  , int32   iMaxRecurseDepth
-                                  , int    *iPolygonID );
-
-        void BuildVariableThickness( double iFromT
-                                   , double iToT
-                                   , ::ULIS::FVec2D& iFromPoint
-                                   , ::ULIS::FVec2D& iToPoint
-                                   , ::ULIS::FVec2D* iPrevSegmentVector
-                                   , ::ULIS::FVec2D* iNextSegmentVector
-                                   , double iStartRadius
-                                   , double iEndRadius
-                                   , int    iPolygonID );
+                                  , double  iRadiusFrom
+                                  , double  iRadiusTo
+                                  , ::ULIS::FVec2D iBezier[4]
+                                  , const ::ULIS::FVec2D& iNormalizedTangentFrom
+                                  , const ::ULIS::FVec2D& iNormalizedTangentTo
+                                  , int32   iMaxRecurseDepth );
 
     protected:
         FOdysseyVectorHandleSegment mCtrlPoint[2];

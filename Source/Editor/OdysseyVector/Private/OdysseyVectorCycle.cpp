@@ -389,6 +389,9 @@ FOdysseyVectorCycle::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
     BLContext* blctx = mParent.GetScene()->GetEngine()->GetBLContext();
     FOdysseyVectorBucket* bucket = mBucket ? mBucket : mPropagatedBucket;
+    BLBox bbox;
+
+    mPath.getBoundingBox( &bbox );
 /*
     BLPath combinedPath = mPath;
 
@@ -403,13 +406,10 @@ FOdysseyVectorCycle::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
     {
         if( bucket->IsGradient() )
         {
-/*
-            double difX = mMax.x - mMin.x;
-            double difY = mMax.y - mMin.y;
-            double linearMinX = mMin.x;
-            double linearMinY = mMin.y;
-            double linearMaxX = mMax.x;
-            double linearMaxY = mMax.y;
+            double linearMinX = bbox.x0;
+            double linearMinY = bbox.y0;
+            double linearMaxX = bbox.x1;
+            double linearMaxY = bbox.y1;
             BLGradient linear( BLLinearGradientValues( linearMinX, linearMinY, linearMaxX, linearMaxY ) );
             FColor& gradientColor0 = bucket->GetGradientColor0();
             FColor& gradientColor1 = bucket->GetGradientColor1();
@@ -420,23 +420,22 @@ FOdysseyVectorCycle::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
             linear.rotate( angle );
 
             // Note: Blend2D color format is 0xAARRGGBB
-            BLColor0.r = gradientColor0.B;
-            BLColor0.g = gradientColor0.G;
-            BLColor0.b = gradientColor0.R;
-            BLColor0.a = gradientColor0.A;
+            BLColor0.setR( gradientColor0.B );
+            BLColor0.setG( gradientColor0.G );
+            BLColor0.setB( gradientColor0.R );
+            BLColor0.setA( gradientColor0.A );
 
             // Note: Blend2D color format is 0xAARRGGBB
-            BLColor1.r = gradientColor1.B;
-            BLColor1.g = gradientColor1.G;
-            BLColor1.b = gradientColor1.R;
-            BLColor1.a = gradientColor1.A;
+            BLColor1.setR( gradientColor1.B );
+            BLColor1.setG( gradientColor1.G );
+            BLColor1.setB( gradientColor1.R );
+            BLColor1.setA( gradientColor1.A );
 
             linear.addStop( 0.0, BLColor0 );
             linear.addStop( 1.0, BLColor1 );
 
             blctx->setStrokeStyle( linear );
             blctx->setFillStyle( linear );
-*/
         }
         else
         {
