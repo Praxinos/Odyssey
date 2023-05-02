@@ -696,20 +696,23 @@ FOdysseyVectorSegmentCubic::Intersect( FOdysseyVectorSegment* iOther
                         if( ( segmentT != 0.0f && iOtherT != 1.0f )
                          && ( segmentT != 1.0f && iOtherT != 0.0f ) )
                         {
-                            FOdysseyVectorVertexIntersection* intersectionVertex[2] = { new FOdysseyVectorVertexIntersection( this->GetPath()/*nullptr*/, ( this == iOther ), coords.x, coords.y, segmentT )
+                            FOdysseyVectorVertexIntersection* intersectionVertex[2] = { new FOdysseyVectorVertexIntersection(   this->GetPath()/*nullptr*/, ( this == iOther ), coords.x, coords.y, segmentT )
                                                                                       , new FOdysseyVectorVertexIntersection( iOther->GetPath()/*nullptr*/, ( this == iOther ), coords.x, coords.y, iOtherT  ) };
 
                             iIntersectionArray.push_back( new FOdysseyVectorIntersection( intersectionVertex[0], intersectionVertex[1] ) );
 
-                            this->AddIntersection ( intersectionVertex[0] );
-                            iOther->AddIntersection ( intersectionVertex[1] );
+                              this->AddIntersection( intersectionVertex[0] );
+                            iOther->AddIntersection( intersectionVertex[1] );
 
                             intersectionCount++;
+
+//BLPoint pt = iOther->GetPath()->GetParent()->GetWorldMatrix().mapPoint( coords.x, coords.y );
+//UE_LOG(LogTemp, Warning, TEXT("Intersection: %f %f"), pt.x, pt.y );
                         }
                     }
 /////////////////////////////// NEEDS REFACTORING !!!! //////////////////
-                    else
-                    {
+                    /*else
+                    {*/
                       if( iTolerance )
                       {
                         if( ( j == 0 ) && ( otherVertex0->GetSegmentCount() == 1 ) )
@@ -796,7 +799,7 @@ FOdysseyVectorSegmentCubic::Intersect( FOdysseyVectorSegment* iOther
                                 }
                         }
                       }
-                    }
+                    /*}*/
 ///////////////////////////////////
                 }
             }
@@ -870,11 +873,9 @@ FOdysseyVectorSegmentCubic::Draw( ::ULIS::FRectD &iRoi )
     BLContext* blctx = mPath->GetScene()->GetEngine()->GetBLContext();
     uint32 segmentCount = GetVertex(0)->GetSegmentCount();
     BLMatrix2D& worldMatrix = mPath->GetWorldMatrix();
-
+/*
     for ( int i = 0; i < mPolygonCache.size(); i++ )
     {
-       /* int n = i + 1;*/
-
         // the stroke thing is very slow and slows the all thing, we have to find something better
         //iBLContext.strokePolygon( mPolygonCache[i].vertex, 4 );
         BLPoint pt[4] = { { mPolygonCache[i].quadVertex[0].x, mPolygonCache[i].quadVertex[0].y }
@@ -882,7 +883,6 @@ FOdysseyVectorSegmentCubic::Draw( ::ULIS::FRectD &iRoi )
                         , { mPolygonCache[i].quadVertex[2].x, mPolygonCache[i].quadVertex[2].y }
                         , { mPolygonCache[i].quadVertex[3].x, mPolygonCache[i].quadVertex[3].y } };
 
-        /*blctx->strokePolygon( pt, 4 );*/ // commented-out: makes the path too thick and creates artefacts
         blctx->fillPolygon( pt, 4 );
     }
 
@@ -895,6 +895,18 @@ FOdysseyVectorSegmentCubic::Draw( ::ULIS::FRectD &iRoi )
     {
         blctx->strokeLine( worldMatrix.mapPoint( mPolygonCache[i].quadVertex[0].x, mPolygonCache[i].quadVertex[0].y )
                          , worldMatrix.mapPoint( mPolygonCache[i].quadVertex[3].x, mPolygonCache[i].quadVertex[3].y ) );
+    }
+    blctx->restore();
+
+*/
+    blctx->save();
+    blctx->resetMatrix();
+    blctx->setStrokeStyle( BLRgba32( 0xFF00FF00 ) );
+    blctx->setStrokeWidth( 1.0f );
+    for ( int i = 0; i < mPolygonCache.size(); i++ )
+    {
+        blctx->strokeLine( worldMatrix.mapPoint( mPolygonCache[i].lineVertex[0].x, mPolygonCache[i].lineVertex[0].y )
+                         , worldMatrix.mapPoint( mPolygonCache[i].lineVertex[1].x, mPolygonCache[i].lineVertex[1].y ) );
     }
     blctx->restore();
 }
@@ -934,7 +946,7 @@ FOdysseyVectorSegmentCubic::BuildVariableAdaptive( double  iFromT
                                                  , ::ULIS::FVec2D iBezier[4]
                                                  , const ::ULIS::FVec2D& iNormalizedTangentFrom
                                                  , const ::ULIS::FVec2D& iNormalizedTangentTo
-                                                 , int32   iMaxRecurseDepth )
+                                                 , int32   iRecurseDepth )
 {
     ::ULIS::FVec2D childBezier[2][4];
     ::ULIS::FVec2D straightVector = iBezier[3] - iBezier[0];
@@ -957,9 +969,14 @@ FOdysseyVectorSegmentCubic::BuildVariableAdaptive( double  iFromT
         ctrlVector[1].Normalize();
     }
 
-    if( ( iMaxRecurseDepth >= 0 )
-     && ( ( ctrlVector[0].DotProduct(  straightVector ) < dotLimit )
-       || ( ctrlVector[1].DotProduct( -straightVector ) < dotLimit ) ) )
+    if( ( iRecurseDepth < 4  ) // Force at least 4 subdivisions because the intersections for paint groups are tested linearly and we need
+                               // precision. If the segment is flat, then the T value at linear intersection does not match the T value
+                               // we would get with regular Bezier-Bezier intersection, but these are very complicated to implement so we
+                               // just stick with linear intersections. By dividing the bezier segment with smaller liner segments whose
+                               // T values at end points are known, we get almost correct values for T at intersections.
+     || ( ( iRecurseDepth < 16 ) // <--- do not subdivide forever though.
+       && ( ( ctrlVector[0].DotProduct(  straightVector ) < dotLimit )
+         || ( ctrlVector[1].DotProduct( -straightVector ) < dotLimit ) ) ) )
     {
         ::ULIS::FVec2D tangent = ::ULIS::CubicBezierTangentAtParameter<::ULIS::FVec2D>( iBezier[0]
                                                                                       , iBezier[1]
@@ -990,7 +1007,7 @@ FOdysseyVectorSegmentCubic::BuildVariableAdaptive( double  iFromT
                                  , childBezier[0]
                                  , iNormalizedTangentFrom
                                  , tangent
-                                 , iMaxRecurseDepth - 1 );
+                                 , iRecurseDepth + 1 );
 
             // Second sub-bezier from the divided parent bezier
             // Note: we always split at 0.5f. The splitsAt variable just helps setting the fromT and toT variables of the polygon cache.
@@ -1006,7 +1023,7 @@ FOdysseyVectorSegmentCubic::BuildVariableAdaptive( double  iFromT
                                  , childBezier[1]
                                  , tangent
                                  , iNormalizedTangentTo
-                                 , iMaxRecurseDepth - 1 );
+                                 , iRecurseDepth + 1 );
         }
     }
     else
@@ -1079,5 +1096,5 @@ FOdysseyVectorSegmentCubic::BuildVariable()
                           , bezier
                           , tangent[0]
                           , tangent[1]
-                          , 16 );
+                          , 0 );
 }
