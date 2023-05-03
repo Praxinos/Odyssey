@@ -28,7 +28,7 @@ public:
     FOdysseyAbilityContainer();
 
 public:
-    template<class T> void HasAbility() const;
+    template<class T> bool HasAbility() const;
     template<class T> TSharedPtr<T> GetAbility();
 
 protected:
@@ -39,7 +39,7 @@ protected:
 };
 
 template<class T>
-void
+bool
 FOdysseyAbilityContainer::HasAbility() const
 {
     return mAbilities.Contains(T::Id());

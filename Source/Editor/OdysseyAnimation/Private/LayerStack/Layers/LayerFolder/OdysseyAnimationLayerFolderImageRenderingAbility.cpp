@@ -10,7 +10,7 @@ FOdysseyAnimationLayerFolderImageRenderingAbility::FOdysseyAnimationLayerFolderI
 }
 
 TArray<::ULIS::FEvent>
-FOdysseyAnimationLayerFolderImageRenderingAbility::RenderOverBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ioBlock, int iFrame, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList)
+FOdysseyAnimationLayerFolderImageRenderingAbility::RenderOverBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ioBlock, int iFrame, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
 {
     if (!mLayerFolder)
         return iWaitList;
@@ -19,40 +19,49 @@ FOdysseyAnimationLayerFolderImageRenderingAbility::RenderOverBlock(TSharedPtr<::
         return iWaitList;
 
     ::ULIS::eFormat format = ioBlock->Format();
-
-    //Generate the folder block, which is all children layers blended together
-    TArray<::ULIS::FEvent> folderBlockEvent;
-    TSharedPtr<::ULIS::FBlock> folderBlock = RenderInNewBlock(iFrame, format, iRect, folderBlockEvent);
-    if(!folderBlock)
-        return iWaitList;
-
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
-    //Convert the destination if needed and Blend the folderBlock
-    TArray<::ULIS::FEvent> eventConvertAndExecute = ULISUtils::ConvertAndExecute(ioBlock, folderBlock->Format(), folderBlock->Rect(), iPos, folderBlockEvent,
-        [this, &folderBlock, &ctx](TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ioDest, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList) -> TArray<::ULIS::FEvent>
-        {
-            //if ioBlock and mBlock use same format, Blend directly in ioBlock
-            ::ULIS::FEvent eventBlend = FULISEventBuilder().RetainBlock(folderBlock).Build();
 
-            ctx.Blend(
-                *folderBlock,
-                *ioDest,
-                iRect,
-                iPos,
-                ::ULIS::eBlendMode(mLayerFolder->BlendMode),
-                ::ULIS::Alpha_Normal,
-                mLayerFolder->Opacity,
-                ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
-                iWaitList.Num(),
-                iWaitList.GetData(),
-                &eventBlend
-            );
+    TArray<::ULIS::FEvent> events;
+    for (int i = 0; i < iRects.Num(); i++)
+    {
 
-            return { eventBlend };
-        }
-    );
-    
+        //Generate the folder block, which is all children layers blended together
+        TArray<::ULIS::FEvent> folderBlockEvent;
+        TSharedPtr<::ULIS::FBlock> folderBlock = RenderInNewBlock(iFrame, format, iRects[i], folderBlockEvent);
+        if(!folderBlock)
+            continue;
+
+        folderBlockEvent.Append(iWaitList);
+            
+        //Convert the destination if needed and Blend the folderBlock
+        TArray<::ULIS::FEvent> eventConvertAndExecute = ULISUtils::ConvertAndExecute(ioBlock, folderBlock->Format(), folderBlock->Rect(), iPos[i], folderBlockEvent,
+            [this, &folderBlock, &ctx](TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ioDest, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList) -> TArray<::ULIS::FEvent>
+            {
+                //if ioBlock and mBlock use same format, Blend directly in ioBlock
+                ::ULIS::FEvent eventBlend = FULISEventBuilder().RetainBlock(folderBlock).RetainBlock(ioDest).Build();
+
+                ctx.Blend(
+                    *folderBlock,
+                    *ioDest,
+                    iRect,
+                    iPos,
+                    ::ULIS::eBlendMode(mLayerFolder->BlendMode),
+                    ::ULIS::Alpha_Normal,
+                    mLayerFolder->Opacity,
+                    ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
+                    iWaitList.Num(),
+                    iWaitList.GetData(),
+                    &eventBlend
+                );
+
+                return { eventBlend };
+            }
+        );
+
+        events.Append(eventConvertAndExecute);
+    }
+
     ctx.Flush();
 
-    return eventConvertAndExecute;
+    return events;
 }

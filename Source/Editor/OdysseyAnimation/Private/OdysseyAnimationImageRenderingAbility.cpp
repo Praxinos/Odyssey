@@ -18,7 +18,7 @@ FOdysseyAnimationImageRenderingAbility::GetRects(int iFrame) const
 }
 
 TArray<::ULIS::FEvent>
-FOdysseyAnimationImageRenderingAbility::RenderInBlock(TSharedPtr<::ULIS::FBlock> ioBlock, int iFrame, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList)
+FOdysseyAnimationImageRenderingAbility::RenderInBlock(TSharedPtr<::ULIS::FBlock> ioBlock, int iFrame, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
 {
     if (!mAnimation)
         return iWaitList;
@@ -60,7 +60,7 @@ FOdysseyAnimationImageRenderingAbility::RenderInBlock(TSharedPtr<::ULIS::FBlock>
     if (!layerStackAbility)
         return iWaitList;
 
-    return layerStackAbility->RenderInBlock(ioBlock, iFrame, iRect, iPos, iWaitList);
+    return layerStackAbility->RenderInBlock(ioBlock, iFrame, iRects, iPos, iWaitList);
 }
 
 TArray<FGuid>

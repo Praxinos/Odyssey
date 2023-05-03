@@ -43,7 +43,7 @@ FOdysseyAnimationCellImageRasterImageRenderingAbility::GetRects(int iFrame) cons
 }
 
 TArray<::ULIS::FEvent>
-FOdysseyAnimationCellImageRasterImageRenderingAbility::RenderInBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ioBlock, int iFrame, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList)
+FOdysseyAnimationCellImageRasterImageRenderingAbility::RenderInBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ioBlock, int iFrame, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
 {
     TSharedPtr<FOdysseyAnimationCellImageRaster> cellImageRaster = mCellImageRaster.Pin();
     if (!cellImageRaster)
@@ -61,27 +61,33 @@ FOdysseyAnimationCellImageRasterImageRenderingAbility::RenderInBlock(TSharedPtr<
         return iWaitList;
     
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(block->Format());
-    TArray<::ULIS::FEvent> eventConvertAndExecute = ULISUtils::ConvertAndExecute(ioBlock, block->Format(), iRect, iPos, iWaitList,
-        [this, &block, &ctx](TSharedPtr<::ULIS::FBlock> ioDest, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList) -> TArray<::ULIS::FEvent>
-        {
-            ::ULIS::FEvent eventCopy = FULISEventBuilder().RetainBlock(block).Build();
-            ctx.Copy(
-                *block,
-                *ioDest,
-                iRect,
-                iPos,
-                ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
-                iWaitList.Num(),
-                iWaitList.GetData(),
-                &eventCopy
-            );
-            return { eventCopy };
-        }
-    );
+
+    TArray<::ULIS::FEvent> events;
+    for (int i = 0; i < iRects.Num(); i++)
+    {
+        TArray<::ULIS::FEvent> eventConvertAndExecute = ULISUtils::ConvertAndExecute(ioBlock, block->Format(), iRects[i], iPos[i], iWaitList,
+            [this, &block, &ctx](TSharedPtr<::ULIS::FBlock> ioDest, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList) -> TArray<::ULIS::FEvent>
+            {
+                ::ULIS::FEvent eventCopy = FULISEventBuilder().RetainBlock(block).RetainBlock(ioDest).Build();
+                ctx.Copy(
+                    *block,
+                    *ioDest,
+                    iRect,
+                    iPos,
+                    ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
+                    iWaitList.Num(),
+                    iWaitList.GetData(),
+                    &eventCopy
+                );
+                return { eventCopy };
+            }
+        );
+        events.Append(eventConvertAndExecute);
+    }
 
     ctx.Flush();
 
-    return eventConvertAndExecute;
+    return events;
 }
 
 TArray<FGuid>

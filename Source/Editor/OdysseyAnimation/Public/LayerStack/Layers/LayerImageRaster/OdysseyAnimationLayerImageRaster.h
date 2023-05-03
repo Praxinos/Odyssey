@@ -37,6 +37,12 @@ public:
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnOpacityChanged, UOdysseyAnimationLayerImageRaster*)
 
     /**
+     * @brief Delegate called when something changed the result of RenderImage()
+     *
+     */
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnOffsetChanged, UOdysseyAnimationLayerImageRaster*)
+
+    /**
      * @brief Delegate called when adding / removing cells
      * 
      */
@@ -46,6 +52,7 @@ public:
     static FOnIsAlphaLockedChanged& OnIsAlphaLockedChanged();
     static FOnBlendModeChanged& OnBlendModeChanged();
     static FOnOpacityChanged& OnOpacityChanged();
+    static FOnOffsetChanged& OnOffsetChanged();
     static FOnCellsChanged& OnCellsChanged();
 
 public:
@@ -110,6 +117,7 @@ public:
 protected:
     void IsAlphaLockedChanged();
     void OpacityChanged();
+    void OffsetChanged();
     void BlendModeChanged();
     virtual void PropertyChanged(const FName& iPropertyName) override;
 

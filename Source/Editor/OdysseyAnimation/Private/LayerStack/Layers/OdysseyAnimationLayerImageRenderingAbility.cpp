@@ -36,7 +36,7 @@ FOdysseyAnimationLayerImageRenderingAbility::GetRects(int iFrame) const
 }
 
 TArray<::ULIS::FEvent>
-FOdysseyAnimationLayerImageRenderingAbility::RenderInBlock(TSharedPtr<::ULIS::FBlock> ioBlock, int iFrame, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList)
+FOdysseyAnimationLayerImageRenderingAbility::RenderInBlock(TSharedPtr<::ULIS::FBlock> ioBlock, int iFrame, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
 {
     if (!mLayer)
         return iWaitList;
@@ -48,11 +48,7 @@ FOdysseyAnimationLayerImageRenderingAbility::RenderInBlock(TSharedPtr<::ULIS::FB
     if (children.IsEmpty())
         return iWaitList;
 
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( ioBlock->Format() );    
-
-    //Clear the block
-    /* ::ULIS::FEvent eventClearBlock = FULISEventBuilder().RetainBlock(ioBlock).Build();
-    ctx.Clear( *ioBlock, ::ULIS::FRectI::FromXYWH(iPos.x, iPos.y, iRect.w, iRect.h), ::ULIS::FSchedulePolicy::AsyncCacheEfficient, iWaitList.Num(), iWaitList.GetData(), &eventClearBlock ); */
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( ioBlock->Format() );
 
     TArray<::ULIS::FEvent> lastEvent = iWaitList;
     for (int i = children.Num() - 1; i >= 0 ; i--)
@@ -68,7 +64,7 @@ FOdysseyAnimationLayerImageRenderingAbility::RenderInBlock(TSharedPtr<::ULIS::FB
         if (!layerAbility)
             continue;
 
-        lastEvent = layerAbility->RenderOverBlock(ioBlock, iFrame, iRect, iPos, lastEvent);
+        lastEvent = layerAbility->RenderOverBlock(ioBlock, iFrame, iRects, iPos, lastEvent);
     }
     
     ctx.Flush();

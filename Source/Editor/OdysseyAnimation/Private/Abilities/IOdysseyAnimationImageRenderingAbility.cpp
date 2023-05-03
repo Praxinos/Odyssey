@@ -46,9 +46,73 @@ IOdysseyAnimationImageRenderingAbility::GetId() const
 }
 
 TArray<::ULIS::FEvent>
+IOdysseyAnimationImageRenderingAbility::RenderOverBlock(TSharedPtr<::ULIS::FBlock> ioBlock, int iFrame, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
+{
+    return RenderInBlock(ioBlock, iFrame, iRects, iPos, iWaitList);
+}
+
+TArray<::ULIS::FEvent>
+IOdysseyAnimationImageRenderingAbility::RenderOverBlock(TSharedPtr<::ULIS::FBlock> ioBlock, int iFrame, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FEvent>& iWaitList)
+{
+    TArray<::ULIS::FVec2I> pos;
+    for (const ::ULIS::FRectI& rect : iRects)
+        pos.Add(rect.Position());
+
+    return RenderOverBlock(ioBlock, iFrame, iRects, pos, iWaitList);
+}
+
+TArray<::ULIS::FEvent>
 IOdysseyAnimationImageRenderingAbility::RenderOverBlock(TSharedPtr<::ULIS::FBlock> ioBlock, int iFrame, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList)
 {
-    return RenderInBlock(ioBlock, iFrame, iRect, iPos, iWaitList);
+    TArray<::ULIS::FRectI> rects = { iRect };
+    TArray<::ULIS::FVec2I> pos = { iPos };
+    return RenderOverBlock(ioBlock, iFrame, rects, pos, iWaitList);
+}
+
+TArray<::ULIS::FEvent>
+IOdysseyAnimationImageRenderingAbility::RenderOverBlock(TSharedPtr<::ULIS::FBlock> ioBlock, int iFrame, const ::ULIS::FRectI& iRect, const TArray<::ULIS::FEvent>& iWaitList)
+{
+    TArray<::ULIS::FRectI> rects = { iRect };
+    TArray<::ULIS::FVec2I> pos = { iRect.Position() };
+    return RenderOverBlock(ioBlock, iFrame, rects, pos, iWaitList);
+}
+
+TArray<::ULIS::FEvent>
+IOdysseyAnimationImageRenderingAbility::RenderOverBlock(TSharedPtr<::ULIS::FBlock> ioBlock, int iFrame, const TArray<::ULIS::FEvent>& iWaitList)
+{
+    return RenderOverBlock(ioBlock, iFrame, GetRects(iFrame), iWaitList);
+}
+
+TArray<::ULIS::FEvent>
+IOdysseyAnimationImageRenderingAbility::RenderInBlock(TSharedPtr<::ULIS::FBlock> ioBlock, int iFrame, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FEvent>& iWaitList)
+{
+    TArray<::ULIS::FVec2I> pos;
+    for (const ::ULIS::FRectI& rect : iRects)
+        pos.Add(rect.Position());
+
+    return RenderInBlock(ioBlock, iFrame, iRects, pos, iWaitList);
+}
+
+TArray<::ULIS::FEvent>
+IOdysseyAnimationImageRenderingAbility::RenderInBlock(TSharedPtr<::ULIS::FBlock> ioBlock, int iFrame, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList)
+{
+    TArray<::ULIS::FRectI> rects = { iRect };
+    TArray<::ULIS::FVec2I> pos = { iPos };
+    return RenderInBlock(ioBlock, iFrame, rects, pos, iWaitList);
+}
+
+TArray<::ULIS::FEvent>
+IOdysseyAnimationImageRenderingAbility::RenderInBlock(TSharedPtr<::ULIS::FBlock> ioBlock, int iFrame, const ::ULIS::FRectI& iRect, const TArray<::ULIS::FEvent>& iWaitList)
+{
+    TArray<::ULIS::FRectI> rects = { iRect };
+    TArray<::ULIS::FVec2I> pos = { iRect.Position() };
+    return RenderInBlock(ioBlock, iFrame, rects, pos, iWaitList);
+}
+
+TArray<::ULIS::FEvent>
+IOdysseyAnimationImageRenderingAbility::RenderInBlock(TSharedPtr<::ULIS::FBlock> ioBlock, int iFrame, const TArray<::ULIS::FEvent>& iWaitList)
+{
+    return RenderInBlock(ioBlock, iFrame, GetRects(iFrame), iWaitList);
 }
 
 TSharedPtr<::ULIS::FBlock>

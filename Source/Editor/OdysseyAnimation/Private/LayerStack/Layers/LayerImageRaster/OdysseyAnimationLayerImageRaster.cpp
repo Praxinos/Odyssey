@@ -33,6 +33,13 @@ UOdysseyAnimationLayerImageRaster::OnOpacityChanged()
     return onOpacityChanged;
 }
 
+UOdysseyAnimationLayerImageRaster::FOnOffsetChanged&
+UOdysseyAnimationLayerImageRaster::OnOffsetChanged()
+{
+    static FOnOffsetChanged onOffsetChanged;
+    return onOffsetChanged;
+}
+
 UOdysseyAnimationLayerImageRaster::FOnCellsChanged&
 UOdysseyAnimationLayerImageRaster::OnCellsChanged()
 {
@@ -148,7 +155,7 @@ UOdysseyAnimationLayerImageRaster::AddImageCell()
     if ( imageRenderAbility )
     {
         imageRenderAbility->OnCompositionChanged().Broadcast(imageRenderAbility->GetId());
-        imageRenderAbility->OnCompositionChanged().Broadcast(imageRenderAbility->GetId());
+        imageRenderAbility->OnCompositionCommited().Broadcast(imageRenderAbility->GetId());
     }
 }
 
@@ -166,7 +173,7 @@ UOdysseyAnimationLayerImageRaster::RemoveCell(int iIndex)
     if ( imageRenderAbility )
     {
         imageRenderAbility->OnCompositionChanged().Broadcast(imageRenderAbility->GetId());
-        imageRenderAbility->OnCompositionChanged().Broadcast(imageRenderAbility->GetId());
+        imageRenderAbility->OnCompositionCommited().Broadcast(imageRenderAbility->GetId());
     }
 }
 
@@ -182,7 +189,7 @@ UOdysseyAnimationLayerImageRaster::SetCellLength(int iIndex, int iLength)
     if ( imageRenderAbility )
     {
         imageRenderAbility->OnCompositionChanged().Broadcast(imageRenderAbility->GetId());
-        imageRenderAbility->OnCompositionChanged().Broadcast(imageRenderAbility->GetId());
+        imageRenderAbility->OnCompositionCommited().Broadcast(imageRenderAbility->GetId());
     }
 }
 
@@ -214,33 +221,110 @@ UOdysseyAnimationLayerImageRaster::GetCellAtFrame(int iFrameIndex, int& oCelFram
 void
 UOdysseyAnimationLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
 {
-    //TODO: Merge Cells and Raster Blocks
+    UOdysseyAnimation* animation = GetAnimation();
+    if ( !animation )
+        return;
 
-    /*
+    TSharedPtr<IOdysseyAnimationImageRenderingAbility> thisImageRenderAbility = GetAbility<IOdysseyAnimationImageRenderingAbility>();
+    if ( !thisImageRenderAbility )
+        return;
+
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("Layer Image Raster", "Merge Layers"));
 #endif
 
-    RasterBlock->Modify();
-    
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ULISRasterBlock = RasterBlock->GetBlock();
-
-    //Make tmpblock to merge the layers into
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(ULISRasterBlock->Format());
-
-    TArray<::ULIS::FEvent> lastEvent = {};
-    for (UOdysseyLayer* layer : iLayers)
+    //Get all frame ranges and combine them
+    TArray<FInt32Range> frameRanges = {};
+    for (int layerIndex = 0; layerIndex < iLayers.Num(); layerIndex++)
     {
-        UOdysseyAnimationLayer* animationLayer = Cast<UOdysseyAnimationLayer>(layer);
-        if (!animationLayer)
+        UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(iLayers[layerIndex]);
+        if ( !layer )
             continue;
 
-        lastEvent = animationLayer->RenderImage(ULISRasterBlock, ULISRasterBlock->Rect(), ::ULIS::FVec2I(0), lastEvent);
+        if ( !layer->HasAbility<IOdysseyAnimationImageRenderingAbility>() )
+            continue;
+
+        frameRanges.Add(layer->GetFrameRange());
     }
+    FInt32Range frameRange = FInt32Range::Hull(frameRanges);
+
+    //Deduce offset from frame ranges
+    int offset = frameRange.GetLowerBoundValue();
+
+    //Get cell ranges from each frame ImageRenderAbility composition
+    int startFrame = frameRange.GetUpperBound().IsInclusive() ? frameRange.GetLowerBoundValue() : frameRange.GetLowerBoundValue() + 1;
+	int endFrame = frameRange.GetUpperBound().IsInclusive() ? frameRange.GetUpperBoundValue() : frameRange.GetUpperBoundValue() - 1;
+    TArray<FGuid> previousIds;
+    TArray<FInt32Range> cellRanges;
+    for (int frameIndex = startFrame; frameIndex <= endFrame; frameIndex++)
+    {
+        TArray<FGuid> currentIds;
+        for (int layerIndex = 0; layerIndex < iLayers.Num(); layerIndex++)
+        {
+            UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(iLayers[layerIndex]);
+            if ( !layer )
+                continue;
+
+            TSharedPtr<IOdysseyAnimationImageRenderingAbility> imageRenderAbility = layer->GetAbility<IOdysseyAnimationImageRenderingAbility>();
+            if ( !imageRenderAbility )
+                return;
+
+            currentIds.Append(imageRenderAbility->GetComposition(frameIndex));
+        }
+
+        //Do we need a new cell
+        if (currentIds != previousIds)
+        {
+            //do we already have a cell at this position
+            cellRanges.Add(FInt32Range::Inclusive(frameIndex, frameIndex));
+            previousIds = currentIds;
+        }
+        else
+        {
+            cellRanges.Last().SetUpperBoundValue(frameIndex);
+        }
+    }
+
+    TArray<TSharedPtr<FOdysseyAnimationCell>> cells;
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_RGBA8);
+    
+    for (const FInt32Range& cellRange : cellRanges)
+    {
+        TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(this, animation->Width(), animation->Height(), animation->Format());
+        cell->SetLength(cellRange.GetUpperBoundValue() - cellRange.GetLowerBoundValue() + 1);
+
+        TSharedPtr<FOdysseyRasterBlock> rasterBlock = cell->GetRasterBlock();
+        TSharedPtr<::ULIS::FBlock> ULISBlock = rasterBlock->GetBlock();
+        int frame = cellRange.GetLowerBoundValue();
+        ::ULIS::FRectI rect = ::ULIS::FRectI::FromXYWH(0, 0, rasterBlock->GetWidth(), rasterBlock->GetHeight());
+
+
+        TArray<::ULIS::FEvent> lastEvent;
+        for (int layerIndex = 0; layerIndex < iLayers.Num(); layerIndex++)
+        {
+            UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(iLayers[layerIndex]);
+            if ( !layer )
+                continue;
+
+            TSharedPtr<IOdysseyAnimationImageRenderingAbility> imageRenderAbility = layer->GetAbility<IOdysseyAnimationImageRenderingAbility>();
+            if ( !imageRenderAbility )
+                return;
+
+            lastEvent = imageRenderAbility->RenderOverBlock(ULISBlock, frame, rect, lastEvent);
+        }
+
+        cells.Add(cell);
+    }
+
     ctx.Finish();
 
-    RasterBlock->Invalidate({ ULISRasterBlock->Rect() }, false);
-    */
+    mCells = cells;
+    Offset = offset;
+
+    OnCellsChanged().Broadcast(this);
+    
+    thisImageRenderAbility->OnCompositionChanged().Broadcast(thisImageRenderAbility->GetId());
+    thisImageRenderAbility->OnCompositionCommited().Broadcast(thisImageRenderAbility->GetId());
 }
 
 void
@@ -261,12 +345,29 @@ UOdysseyAnimationLayerImageRaster::OpacityChanged()
     TSharedPtr<IOdysseyAnimationImageRenderingAbility> imageRenderAbility = GetAbility<IOdysseyAnimationImageRenderingAbility>();
     if ( !imageRenderAbility )
         return;
-    {
-        //TODO: react to interactive events by not commiting immediately
-        ::ULIS::FRectI rect = ::ULIS::FRectI::FromXYWH(0, 0, animation->Width(), animation->Height());
-        imageRenderAbility->OnChanged().Broadcast(imageRenderAbility->GetId(), { rect });
-        imageRenderAbility->OnCommited().Broadcast(imageRenderAbility->GetId(), { rect });
-    }
+
+    //TODO: react to interactive events by not commiting immediately
+    ::ULIS::FRectI rect = ::ULIS::FRectI::FromXYWH(0, 0, animation->Width(), animation->Height());
+    imageRenderAbility->OnChanged().Broadcast(imageRenderAbility->GetId(), { rect });
+    imageRenderAbility->OnCommited().Broadcast(imageRenderAbility->GetId(), { rect });
+}
+
+void
+UOdysseyAnimationLayerImageRaster::OffsetChanged()
+{
+    OnOpacityChanged().Broadcast(this);
+
+    UOdysseyAnimation* animation = GetAnimation();
+    if ( !animation )
+        return;
+
+    TSharedPtr<IOdysseyAnimationImageRenderingAbility> imageRenderAbility = GetAbility<IOdysseyAnimationImageRenderingAbility>();
+    if ( !imageRenderAbility )
+        return;
+
+    //TODO: react to interactive events by not commiting immediately
+    imageRenderAbility->OnCompositionChanged().Broadcast(imageRenderAbility->GetId());
+    imageRenderAbility->OnCompositionCommited().Broadcast(imageRenderAbility->GetId());
 }
 
 void
@@ -299,6 +400,8 @@ UOdysseyAnimationLayerImageRaster::PropertyChanged(const FName& iPropertyName)
         OpacityChanged();
     if (iPropertyName == "IsAlphaLocked")
         IsAlphaLockedChanged();
+    if (iPropertyName == "Offset")
+        OffsetChanged();
 }
 
 void
@@ -378,7 +481,7 @@ UOdysseyAnimationLayerImageRaster::OnCellLengthChanged(TSharedRef<FOdysseyAnimat
     if ( imageRenderAbility )
     {
         imageRenderAbility->OnCompositionChanged().Broadcast(imageRenderAbility->GetId());
-        imageRenderAbility->OnCompositionChanged().Broadcast(imageRenderAbility->GetId());
+        imageRenderAbility->OnCompositionCommited().Broadcast(imageRenderAbility->GetId());
     }
 }
 
