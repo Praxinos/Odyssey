@@ -98,9 +98,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         /**
          * @brief Copy buckets from this PaintGroup to a destination PaintGroup.
          * @param iDestination the destination PaintGroup.
+         * @param iSwitchSpace
          * @return a pointer to  copy of the object
          */
-        void CopyBuckets( FOdysseyVectorGroupPaint* iDestination );
+        void CopyBuckets( FOdysseyVectorGroupPaint* iDestination, bool iSwitchSpace );
 
         virtual uint32 GetType();
 

@@ -10,6 +10,16 @@ ReadBucketEntry( FOdysseyVectorBucket& iBucket, uint64 iChunkEnd, FArchive &Ar )
         {
             switch( iChunkID )
             {
+                case FOdysseyVectorExport::CHUNK_BUCKET_PROPAGATED:
+                {
+                    uint32 propagated;
+
+                    Ar << propagated;
+
+                    iBucket.SetPropagated( propagated ? true : false );
+                }
+                break;
+
                 case FOdysseyVectorExport::CHUNK_BUCKET_POSITION:
                 {
                     double x;

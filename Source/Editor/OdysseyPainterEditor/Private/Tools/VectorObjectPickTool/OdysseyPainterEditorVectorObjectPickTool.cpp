@@ -12,6 +12,7 @@ UOdysseyPainterEditorVectorObjectPickTool::~UOdysseyPainterEditorVectorObjectPic
 }
 
 UOdysseyPainterEditorVectorObjectPickTool::UOdysseyPainterEditorVectorObjectPickTool()
+    : mControlKeyPressed( false )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Lasso64");
 
@@ -32,6 +33,92 @@ UOdysseyPainterEditorVectorObjectPickTool::Activate( FOdysseyVectorEngine* iEngi
 
     iEngine->ClearHUD( );
     iEngine->AddHUD( mSelectionHUD );
+}
+
+void
+UOdysseyPainterEditorVectorObjectPickTool::Copy( FOdysseyVectorEngine* iEngine
+                                               , FOdysseyVectorScene* iScene
+                                               , FOdysseyVectorUndo** iUndo )
+{
+    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
+
+    if( selectedObjectList.size() )
+    {
+        // First step : clear previously copied objects
+        mCopiedObjectList.remove_if( []( FOdysseyVectorObject* iCopiedObject ){ delete iCopiedObject; return true; } );
+
+        // second step : copy selection.
+        for( std::list<FOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
+        {
+            FOdysseyVectorObject* selectedObject = (*it);
+
+            if( selectedObject->HasSelectedAncestor() == false )
+            {
+                mCopiedObjectList.push_back( selectedObject->Copy() );
+            }
+        }
+    }
+}
+
+void
+UOdysseyPainterEditorVectorObjectPickTool::Paste( FOdysseyVectorEngine* iEngine
+                                                , FOdysseyVectorScene* iScene
+                                                , FOdysseyVectorUndo** iUndo )
+{
+    iScene->ClearSelection();
+
+    for( std::list<FOdysseyVectorObject*>::iterator it = mCopiedObjectList.begin(); it != mCopiedObjectList.end(); ++it )
+    {
+        FOdysseyVectorObject* copiedObject = (*it);
+        FOdysseyVectorObject* newObject = copiedObject->Copy();
+        BLPoint shifting;
+
+        iScene->AppendChild( newObject );
+
+        shifting = iScene->GetInverseWorldMatrix().mapVector( 10.0f, 10.0f ); // shift object by 10 pixels
+
+        newObject->Invalidate();
+        newObject->Translate( newObject->GetTranslationX() + shifting.x, newObject->GetTranslationY() + shifting.y );
+        newObject->UpdateMatrix();
+
+        iScene->Select( newObject );
+    }
+
+    iScene->Update( 0 );
+}
+
+bool
+UOdysseyPainterEditorVectorObjectPickTool::OnKeyDown( FOdysseyVectorEngine* iEngine
+                                                    , FOdysseyVectorScene* iScene
+                                                    , FOdysseyVectorUndo** iUndo
+                                                    , const FKey& iKey )
+{
+    if( mControlKeyPressed )
+    {
+        if( iKey == EKeys::C )
+        {
+            Copy( iEngine, iScene, iUndo );
+        }
+
+        if( iKey == EKeys::V )
+        {
+            Paste( iEngine, iScene, iUndo );
+        }
+    }
+
+    mControlKeyPressed = ( ( iKey == EKeys::LeftControl ) || ( iKey == EKeys::RightControl ) ) ? true : false;
+
+    return false;
+}
+
+bool
+UOdysseyPainterEditorVectorObjectPickTool::OnKeyUp( FOdysseyVectorEngine* iEngine
+                                                  , FOdysseyVectorScene* iScene
+                                                  , const FKey& iKey )
+{
+    mControlKeyPressed = ( ( iKey == EKeys::LeftControl ) || ( iKey == EKeys::RightControl ) ) ? false : true;
+
+    return false;
 }
 
 bool

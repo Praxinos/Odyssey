@@ -1,6 +1,9 @@
 #include "OdysseyVectorSegmentCubic.h"
 #include "OdysseyVectorPathCubic.h"
 
+#define MINRECURSE 4
+#define MAXRECURSE 8
+
 FOdysseyVectorSegmentCubic::~FOdysseyVectorSegmentCubic()
 {
 
@@ -56,8 +59,6 @@ FOdysseyVectorSegmentCubic::Init( FOdysseyVectorPathCubic* iPath
                                 , double iCtrlPoint1y
                                 , FOdysseyVectorVertex* iPoint1 )
 {
-    mPath = iPath;
-
     mPoint[0] = iPoint0;
     mPoint[1] = iPoint1;
 
@@ -409,10 +410,6 @@ FOdysseyVectorSegmentCubic::Sample( double iFromT
         oNewVertexArray.push_back( vertex1 );
     }
 
-/*
-    ::ULIS::CubicBezierInverseSplitAtParameter<::ULIS::FVec2D>( &samplePoint0, &sampleCtrlPoint0, &sampleCtrlPoint1, &samplePoint1, iFromT );
-    ::ULIS::CubicBezierSplitAtParameter       <::ULIS::FVec2D>( &samplePoint0, &sampleCtrlPoint0, &sampleCtrlPoint1, &samplePoint1, iToT   );
-*/
     FOdysseyVector::BezierExtract( point0, ctrlPoint0, ctrlPoint1, point1
                                  , iFromT, iToT
                                  , samplePoint0, sampleCtrlPoint0, sampleCtrlPoint1, samplePoint1 );
@@ -873,7 +870,7 @@ FOdysseyVectorSegmentCubic::Draw( ::ULIS::FRectD &iRoi )
     BLContext* blctx = mPath->GetScene()->GetEngine()->GetBLContext();
     uint32 segmentCount = GetVertex(0)->GetSegmentCount();
     BLMatrix2D& worldMatrix = mPath->GetWorldMatrix();
-/*
+
     for ( int i = 0; i < mPolygonCache.size(); i++ )
     {
         // the stroke thing is very slow and slows the all thing, we have to find something better
@@ -897,8 +894,7 @@ FOdysseyVectorSegmentCubic::Draw( ::ULIS::FRectD &iRoi )
                          , worldMatrix.mapPoint( mPolygonCache[i].quadVertex[3].x, mPolygonCache[i].quadVertex[3].y ) );
     }
     blctx->restore();
-
-*/
+/*
     blctx->save();
     blctx->resetMatrix();
     blctx->setStrokeStyle( BLRgba32( 0xFF00FF00 ) );
@@ -909,6 +905,7 @@ FOdysseyVectorSegmentCubic::Draw( ::ULIS::FRectD &iRoi )
                          , worldMatrix.mapPoint( mPolygonCache[i].lineVertex[1].x, mPolygonCache[i].lineVertex[1].y ) );
     }
     blctx->restore();
+*/
 }
 
 static void
@@ -969,12 +966,13 @@ FOdysseyVectorSegmentCubic::BuildVariableAdaptive( double  iFromT
         ctrlVector[1].Normalize();
     }
 
-    if( ( iRecurseDepth < 4  ) // Force at least 4 subdivisions because the intersections for paint groups are tested linearly and we need
-                               // precision. If the segment is flat, then the T value at linear intersection does not match the T value
-                               // we would get with regular Bezier-Bezier intersection, but these are very complicated to implement so we
-                               // just stick with linear intersections. By dividing the bezier segment with smaller liner segments whose
-                               // T values at end points are known, we get almost correct values for T at intersections.
-     || ( ( iRecurseDepth < 16 ) // <--- do not subdivide forever though.
+    if( ( iRecurseDepth < MINRECURSE  ) // <-- Force at least 4 subdivisions because the intersections for paint groups are tested 
+                                        // linearly and we need precision. If the cubic segment is made of few linear sub-segments, 
+                                        // then the T value at intersection does not match the T value we would get with mathematically
+                                        // accurate Bezier-Bezier intersection, but these are very complicated to implement so we just 
+                                        // stick with linear intersections. By dividing the bezier segment with smaller liner segments
+                                        // whose T values at end points are known, we get almost correct values for T at intersections.
+     || ( ( iRecurseDepth < MAXRECURSE ) // <--- do not subdivide forever though.
        && ( ( ctrlVector[0].DotProduct(  straightVector ) < dotLimit )
          || ( ctrlVector[1].DotProduct( -straightVector ) < dotLimit ) ) ) )
     {

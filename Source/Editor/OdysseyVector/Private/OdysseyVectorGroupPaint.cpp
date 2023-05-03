@@ -1149,14 +1149,25 @@ FOdysseyVectorGroupPaint::Clear()
 }
 
 void
-FOdysseyVectorGroupPaint::CopyBuckets( FOdysseyVectorGroupPaint* iDestination )
+FOdysseyVectorGroupPaint::CopyBuckets( FOdysseyVectorGroupPaint* iDestination, bool iSwitchSpace )
 {
+     BLMatrix2D conversionMatrix;
+
+     if( iSwitchSpace )
+     {
+         conversionMatrix = iDestination->GetInverseWorldMatrix();
+         conversionMatrix.transform( mWorldMatrix );
+     }
+     else
+     {
+         conversionMatrix.reset();
+     }
+
      for( std::list<FOdysseyVectorBucket*>::iterator lit = mBucketList.begin(); lit != mBucketList.end(); ++lit )
      {
         FOdysseyVectorBucket *bucket = static_cast<FOdysseyVectorBucket*>(*lit);
         ::ULIS::FVec2D bucketCoords = bucket->GetCoords();
-        BLPoint bucketWorldPosition = mWorldMatrix.mapPoint( bucketCoords.x, bucketCoords.y );
-        BLPoint destinationBucketPosition = iDestination->mInverseWorldMatrix.mapPoint( bucketWorldPosition );
+        BLPoint destinationBucketPosition = conversionMatrix.mapPoint( bucketCoords.x, bucketCoords.y );
         FOdysseyVectorBucket *bucketCopy = new FOdysseyVectorBucket( *iDestination, 0.0f, 0.0f, bucket->IsPropagated() );
 
         bucket->Copy( bucketCopy );
@@ -1170,7 +1181,13 @@ FOdysseyVectorGroupPaint::CopyBuckets( FOdysseyVectorGroupPaint* iDestination )
 FOdysseyVectorObject*
 FOdysseyVectorGroupPaint::CopyShape()
 {
-    return new FOdysseyVectorGroupPaint( "Paint Group Copy" );
+    FOdysseyVectorGroupPaint* groupPaintCopy = new FOdysseyVectorGroupPaint( "Paint Group Copy" );
+
+    groupPaintCopy->mGroupPaintParam = mGroupPaintParam;
+
+    CopyBuckets( groupPaintCopy, false );
+
+    return groupPaintCopy;
 }
 
 // TODO : bounding box segments.

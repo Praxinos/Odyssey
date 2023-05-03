@@ -120,7 +120,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         virtual void Update( uint32 iUpdateFlags );
         virtual void UpdateShape( uint32 iUpdateFlags ) {};
 
-        FOdysseyVectorObject* Copy();
+        virtual FOdysseyVectorObject* Copy();
         virtual FOdysseyVectorObject* CopyShape(){ return nullptr; };
 
         virtual void Draw( ::ULIS::FRectD& iRoi, uint64 iFlags );

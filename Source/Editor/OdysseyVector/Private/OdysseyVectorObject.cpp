@@ -169,11 +169,10 @@ FOdysseyVectorObject::Copy()
         for( std::list<FOdysseyVectorObject*>::iterator it = mChildrenList.begin(); it != mChildrenList.end(); ++it )
         {
             FOdysseyVectorObject *child = (*it);
+            FOdysseyVectorObject *childCopy = child->Copy() ;
 
-            objectCopy->AppendChild( child->Copy() );
+            objectCopy->AppendChild( childCopy );
         }
-
-        objectCopy->Invalidate();
     }
 
     return objectCopy;
@@ -595,7 +594,7 @@ FOdysseyVectorObject::AddChild( FOdysseyVectorObject* iChild, bool iPrepend )
         mChildrenList.push_back( iChild );
     }
 
-    Invalidate();
+    iChild->Invalidate();
 }
 
 void

@@ -2,6 +2,19 @@
 #include "OdysseyVectorSegmentCubic.h"
 
 static void
+WriteBucketPropagated( FOdysseyVectorBucket& iBucket, FArchive &Ar )
+{
+    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_BUCKET_PROPAGATED
+                                    , Ar
+                                    , [&iBucket](FArchive &Ar) -> void
+    {
+        uint32 propagated = iBucket.IsPropagated() ? 1 : 0;
+
+        Ar << propagated;
+    } );
+}
+
+static void
 WriteBucketPosition( FOdysseyVectorBucket& iBucket, FArchive &Ar )
 {
     FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_BUCKET_POSITION
@@ -96,6 +109,7 @@ WriteBucketEntry( FOdysseyVectorBucket& iBucket, FArchive &Ar )
                                     , [&iBucket](FArchive &Ar) -> void
     {
         WriteBucketPosition( iBucket, Ar );
+        WriteBucketPropagated( iBucket, Ar );
 
         if( iBucket.IsGradient() == true )
         {

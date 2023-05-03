@@ -249,7 +249,8 @@ FOdysseyVectorBucket::Copy( FOdysseyVectorBucket* iDestinationBucket )
 {
     iDestinationBucket->mCoords = mCoords;
     iDestinationBucket->mColor = mColor;
-
+    iDestinationBucket->mCtrlPoint = mCtrlPoint;
+    iDestinationBucket->mPropagated = mPropagated;
     iDestinationBucket->mIsGradient = mIsGradient;
     iDestinationBucket->mGradientColor0 = mGradientColor0;
     iDestinationBucket->mGradientColor1 = mGradientColor1;

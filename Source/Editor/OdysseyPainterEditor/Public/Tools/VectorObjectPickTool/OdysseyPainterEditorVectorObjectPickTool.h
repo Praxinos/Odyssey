@@ -35,11 +35,18 @@ public:
                   , FOdysseyVectorUndo** iUndo
                   , const FOdysseyPoint& iPointInTexture
                   , const FKey& iKey );
+    bool OnKeyDown( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, FOdysseyVectorUndo** iUndo, const FKey& iKey );
+    bool OnKeyUp( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FKey& iKey );
 
     //OdysseyPainterEditorTool overrides
     virtual void Commit() override;
 
+    void Copy( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, FOdysseyVectorUndo** iUndo );
+    void Paste( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, FOdysseyVectorUndo** iUndo );
+
 private:
     FOdysseyVectorHUDSelection *mSelectionHUD;
     std::vector<::ULIS::FVec2D> mPointArray;
+    std::list<FOdysseyVectorObject*> mCopiedObjectList;
+    bool mControlKeyPressed;
 };

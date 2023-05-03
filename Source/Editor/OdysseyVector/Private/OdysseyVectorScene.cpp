@@ -104,7 +104,7 @@ FOdysseyVectorScene::MakePaintGroupFromSelectedObjects( std::vector<FOdysseyVect
 
                 selectedPaintGroup->GetParent()->RemoveChild( selectedPaintGroup );
 
-                selectedPaintGroup->CopyBuckets( paintGroup );
+                selectedPaintGroup->CopyBuckets( paintGroup, true );
 
                 oRemovedPaintGroupArray.push_back( selectedPaintGroup );
             }
