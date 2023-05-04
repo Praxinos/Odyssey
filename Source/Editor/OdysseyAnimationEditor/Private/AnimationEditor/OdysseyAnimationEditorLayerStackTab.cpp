@@ -7,6 +7,8 @@
 #include "Widgets/SOdysseyAnimationPlaybackControls.h"
 #include "Widgets/SOdysseyLayerStackAddLayerButton.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
+#include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
+#include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationCellsMutator.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyAnimationEditorLayerStackTab"
 
@@ -159,7 +161,15 @@ FOdysseyAnimationEditorLayerStackTab::OnAddFrameClicked()
         return FReply::Unhandled();
     
     UOdysseyAnimationLayerImageRaster* layerRaster = Cast<UOdysseyAnimationLayerImageRaster>(layerStack->CurrentLayer.Get());
-    layerRaster->AddImageCell();
+
+    TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(layerRaster, Animation()->Width(), Animation()->Height(), Animation()->Format());
+
+#ifdef WITH_EDITOR
+    FScopedTransaction ScopedTransaction(LOCTEXT("Layer Image Raster", "Add Frame"));
+#endif
+    FOdysseyAnimationCellsMutator mutator(layerRaster);
+    mutator.Add({ cell });
+    mutator.Commit();
 
     return FReply::Handled();
 }

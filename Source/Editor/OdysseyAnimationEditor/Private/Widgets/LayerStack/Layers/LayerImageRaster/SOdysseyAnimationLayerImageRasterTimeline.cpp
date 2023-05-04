@@ -108,7 +108,7 @@ SOdysseyAnimationLayerImageRasterTimeline::Tick( const FGeometry& AllottedGeomet
 float
 SOdysseyAnimationLayerImageRasterTimeline::GetLayerOffset() const
 {
-    return mIsOffsettingLayer ? mLayerOffsetData.mOffset : mAnimationLayerImageRaster->Offset;
+    return mIsOffsettingLayer ? mLayerOffsetData.mOffset : mAnimationLayerImageRaster->GetOffset();
 }
 
 float
@@ -241,8 +241,8 @@ SOdysseyAnimationLayerImageRasterTimeline::OnCellsMouseButtonDown(const FGeometr
         mIsOffsettingLayer = true;
 
         mLayerOffsetData.mMousePosition = iEvent.GetScreenSpacePosition().X;
-        mLayerOffsetData.mStartOffset= mAnimationLayerImageRaster->Offset;
-        mLayerOffsetData.mOffset = mAnimationLayerImageRaster->Offset;
+        mLayerOffsetData.mStartOffset= mAnimationLayerImageRaster->GetOffset();
+        mLayerOffsetData.mOffset = mAnimationLayerImageRaster->GetOffset();
 
         return FReply::Handled().CaptureMouse(mCellsBorder.ToSharedRef()).PreventThrottling();
     }
@@ -271,7 +271,12 @@ SOdysseyAnimationLayerImageRasterTimeline::OnCellsMouseButtonUp(const FGeometry&
 {
     if ( mIsOffsettingLayer )
     {
-        FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageRaster, "Offset", mLayerOffsetData.mOffset);
+#ifdef WITH_EDITOR
+        FScopedTransaction ScopedTransaction(LOCTEXT("Layer Image Raster", "Change Layer Offset"));
+#endif
+        FOdysseyAnimationCellsMutator mutator(mAnimationLayerImageRaster);
+        mutator.SetOffset(mLayerOffsetData.mOffset);
+        mutator.Commit();
         mIsOffsettingLayer = false;
 
         return FReply::Handled().ReleaseMouseCapture();
@@ -368,7 +373,13 @@ SOdysseyAnimationLayerImageRasterTimeline::OnLengthHandleDragged(const FGeometry
 void
 SOdysseyAnimationLayerImageRasterTimeline::OnLengthHandleDragStopped(const FGeometry& iGeometry, const FPointerEvent& iEvent)
 {
-    mAnimationLayerImageRaster->SetCellLength(mLengthHandleDragData.mCellIndex, mLengthHandleDragData.mLength);
+#ifdef WITH_EDITOR
+    FScopedTransaction ScopedTransaction(LOCTEXT("Layer Image Raster", "Change Cell Length"));
+#endif
+    FOdysseyAnimationCellsMutator mutator(mAnimationLayerImageRaster);
+    mutator.SetLength(mLengthHandleDragData.mCellIndex, mLengthHandleDragData.mLength);
+    mutator.Commit();
+
     mIsDraggingCellLengthHandle = false;
 }
 
@@ -382,6 +393,8 @@ SOdysseyAnimationLayerImageRasterTimeline::SelectAllFrames()
 void
 SOdysseyAnimationLayerImageRasterTimeline::DeleteSelectedFrames()
 {
+    //TODO: Simplify this
+
     bool isLowerClosed = mEditor->Timeline()->GetSelectedFrames().GetLowerBound().IsClosed();
     bool isUpperClosed = mEditor->Timeline()->GetSelectedFrames().GetUpperBound().IsClosed();
 
@@ -416,6 +429,11 @@ SOdysseyAnimationLayerImageRasterTimeline::DeleteSelectedFrames()
     cellsLength.GetKeys(cellIndexes);
     cellIndexes.Sort();
 
+#ifdef WITH_EDITOR
+    FScopedTransaction ScopedTransaction(LOCTEXT("Layer Image Raster", "Remove Frames"));
+#endif
+
+    FOdysseyAnimationCellsMutator mutator(mAnimationLayerImageRaster);
     for (int i = cellIndexes.Num() - 1; i >= 0; i--)
     {
         int cellIndex = cellIndexes[i];
@@ -424,12 +442,13 @@ SOdysseyAnimationLayerImageRasterTimeline::DeleteSelectedFrames()
         if (cellLength <= 0)
         {
             //Remove the cell
-            mAnimationLayerImageRaster->RemoveCell(cellIndex);
+            mutator.Remove(cellIndex);
             continue;
         }
 
-        mAnimationLayerImageRaster->SetCellLength(cellIndex, cellLength);
+        mutator.SetLength(cellIndex, cellLength);
     }
+    mutator.Commit();
 }
 
 #undef LOCTEXT_NAMESPACE

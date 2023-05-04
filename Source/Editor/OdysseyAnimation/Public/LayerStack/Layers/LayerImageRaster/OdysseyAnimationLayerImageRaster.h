@@ -36,11 +36,6 @@ public:
      */
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnOpacityChanged, UOdysseyAnimationLayerImageRaster*)
 
-    /**
-     * @brief Delegate called when something changed the result of RenderImage()
-     *
-     */
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOnOffsetChanged, UOdysseyAnimationLayerImageRaster*)
 
     /**
      * @brief Delegate called when adding / removing cells
@@ -52,7 +47,6 @@ public:
     static FOnIsAlphaLockedChanged& OnIsAlphaLockedChanged();
     static FOnBlendModeChanged& OnBlendModeChanged();
     static FOnOpacityChanged& OnOpacityChanged();
-    static FOnOffsetChanged& OnOffsetChanged();
     static FOnCellsChanged& OnCellsChanged();
 
 public:
@@ -90,16 +84,17 @@ public:
      * @param iIndex 
      * @return uint32 
      */
-    UFUNCTION(BlueprintCallable)
+    /* UFUNCTION(BlueprintCallable)
     void AddImageCell();
 
     UFUNCTION(BlueprintCallable)
     void RemoveCell(int iIndex);
 
     UFUNCTION(BlueprintCallable)
-    void SetCellLength(int iIndex, int iLength);
+    void SetCellLength(int iIndex, int iLength); */
 
 public:
+    int GetOffset() const;
     TArray<TSharedPtr<FOdysseyAnimationCell>>& GetCells();
     TSharedPtr<FOdysseyAnimationCell> GetCell(int iIndex) const;
     TSharedPtr<FOdysseyAnimationCell> GetCellAtFrame(int iFrameIndex, int& oCelFrameIndex) const;
@@ -117,8 +112,8 @@ public:
 protected:
     void IsAlphaLockedChanged();
     void OpacityChanged();
-    void OffsetChanged();
     void BlendModeChanged();
+    void CellsChanged();
     virtual void PropertyChanged(const FName& iPropertyName) override;
 
 public:
@@ -134,10 +129,6 @@ public:
      */
     virtual void Serialize(FArchive& Ar) override;
 
-private:
-    //Events
-    void OnCellLengthChanged(TSharedRef<FOdysseyAnimationCell> iCell);
-
 public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Animation | LayerStack")
     bool IsAlphaLocked = false;
@@ -148,9 +139,16 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation | LayerStack")
     float Opacity = 1.0f;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation | LayerStack")
-    int Offset = 0;
+    //UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation | LayerStack")
 
 private:
     TArray<TSharedPtr<FOdysseyAnimationCell>> mCells;
+    int mOffset = 0;
+
+private:
+    friend class FOdysseyAnimationCellsMutator;
+    friend class FOdysseyAddCellsMutation;
+    friend class FOdysseyRemoveCellsMutation;
+    friend class FOdysseySetCellLengthMutation;
+    friend class FOdysseySetCellsOffsetMutation;
 };

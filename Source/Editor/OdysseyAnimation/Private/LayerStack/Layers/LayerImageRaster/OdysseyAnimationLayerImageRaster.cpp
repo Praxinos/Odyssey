@@ -33,13 +33,6 @@ UOdysseyAnimationLayerImageRaster::OnOpacityChanged()
     return onOpacityChanged;
 }
 
-UOdysseyAnimationLayerImageRaster::FOnOffsetChanged&
-UOdysseyAnimationLayerImageRaster::OnOffsetChanged()
-{
-    static FOnOffsetChanged onOffsetChanged;
-    return onOffsetChanged;
-}
-
 UOdysseyAnimationLayerImageRaster::FOnCellsChanged&
 UOdysseyAnimationLayerImageRaster::OnCellsChanged()
 {
@@ -60,7 +53,11 @@ UOdysseyAnimationLayerImageRaster::UOdysseyAnimationLayerImageRaster()
 void
 UOdysseyAnimationLayerImageRaster::OnCreated_Implementation()
 {
-    AddImageCell();
+    UOdysseyAnimation* animation = GetAnimation();
+    if ( !animation )
+        return;
+
+    mCells.Add(FOdysseyAnimationCellImageRaster::Create(this, animation->Width(), animation->Height(), animation->Format()));
 }
 
 FInt32Range
@@ -71,7 +68,7 @@ UOdysseyAnimationLayerImageRaster::GetFrameRange() const
     {
         length += cell->GetLength();
     }
-    return FInt32Range::Inclusive(Offset, Offset + length - 1);
+    return FInt32Range::Inclusive(mOffset, mOffset + length - 1);
 }
 
 int
@@ -83,10 +80,10 @@ UOdysseyAnimationLayerImageRaster::GetCellsCount() const
 bool
 UOdysseyAnimationLayerImageRaster::GetCellIndexAtFrame(int iFrameIndex, int& oCellIndex, int& oCellFrameIndex) const
 {
-    if( iFrameIndex < Offset)
+    if( iFrameIndex < mOffset )
         return false;
 
-    int frameIndex = Offset;
+    int frameIndex = mOffset;
     for (int i = 0; i < mCells.Num(); i++)
     {
         TSharedPtr<FOdysseyAnimationCell> cell = mCells[i];
@@ -110,7 +107,7 @@ UOdysseyAnimationLayerImageRaster::GetCellFrameRange(int iIndex, FInt32Range& oF
     if (iIndex < 0 || iIndex >= mCells.Num())
         return false;
 
-    uint32 startFrame = Offset;
+    uint32 startFrame = mOffset;
     for (int i = 0; i < iIndex; i++ )
     {
         startFrame += mCells[i]->GetLength();
@@ -138,7 +135,7 @@ UOdysseyAnimationLayerImageRaster::GetCellType(int iIndex, FName& oType) const
     oType = mCells[iIndex]->GetType();
     return true;
 }
-
+/*
 void
 UOdysseyAnimationLayerImageRaster::AddImageCell()
 {
@@ -191,6 +188,13 @@ UOdysseyAnimationLayerImageRaster::SetCellLength(int iIndex, int iLength)
         imageRenderAbility->OnCompositionChanged().Broadcast(imageRenderAbility->GetId());
         imageRenderAbility->OnCompositionCommited().Broadcast(imageRenderAbility->GetId());
     }
+}*/
+
+
+int
+UOdysseyAnimationLayerImageRaster::GetOffset() const
+{
+    return mOffset;
 }
 
 TArray<TSharedPtr<FOdysseyAnimationCell>>&
@@ -317,14 +321,12 @@ UOdysseyAnimationLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
     }
 
     ctx.Finish();
-
-    mCells = cells;
-    Offset = offset;
-
-    OnCellsChanged().Broadcast(this);
     
-    thisImageRenderAbility->OnCompositionChanged().Broadcast(thisImageRenderAbility->GetId());
-    thisImageRenderAbility->OnCompositionCommited().Broadcast(thisImageRenderAbility->GetId());
+    FOdysseyAnimationCellsMutator mutator(this);
+    mutator.Remove(0, mCells.Num());
+    mutator.Add(cells);
+    mutator.SetOffset(offset);
+    mutator.Commit();
 }
 
 void
@@ -353,24 +355,6 @@ UOdysseyAnimationLayerImageRaster::OpacityChanged()
 }
 
 void
-UOdysseyAnimationLayerImageRaster::OffsetChanged()
-{
-    OnOpacityChanged().Broadcast(this);
-
-    UOdysseyAnimation* animation = GetAnimation();
-    if ( !animation )
-        return;
-
-    TSharedPtr<IOdysseyAnimationImageRenderingAbility> imageRenderAbility = GetAbility<IOdysseyAnimationImageRenderingAbility>();
-    if ( !imageRenderAbility )
-        return;
-
-    //TODO: react to interactive events by not commiting immediately
-    imageRenderAbility->OnCompositionChanged().Broadcast(imageRenderAbility->GetId());
-    imageRenderAbility->OnCompositionCommited().Broadcast(imageRenderAbility->GetId());
-}
-
-void
 UOdysseyAnimationLayerImageRaster::BlendModeChanged()
 {
     OnBlendModeChanged().Broadcast(this);
@@ -390,6 +374,19 @@ UOdysseyAnimationLayerImageRaster::BlendModeChanged()
 }
 
 void
+UOdysseyAnimationLayerImageRaster::CellsChanged()
+{
+    OnCellsChanged().Broadcast(this);
+
+    TSharedPtr<IOdysseyAnimationImageRenderingAbility> imageRenderAbility = GetAbility<IOdysseyAnimationImageRenderingAbility>();
+    if ( !imageRenderAbility )
+        return;
+
+    imageRenderAbility->OnCompositionChanged().Broadcast(imageRenderAbility->GetId());
+    imageRenderAbility->OnCompositionCommited().Broadcast(imageRenderAbility->GetId());
+}
+
+void
 UOdysseyAnimationLayerImageRaster::PropertyChanged(const FName& iPropertyName)
 {
     Super::PropertyChanged(iPropertyName);
@@ -400,8 +397,6 @@ UOdysseyAnimationLayerImageRaster::PropertyChanged(const FName& iPropertyName)
         OpacityChanged();
     if (iPropertyName == "IsAlphaLocked")
         IsAlphaLockedChanged();
-    if (iPropertyName == "Offset")
-        OffsetChanged();
 }
 
 void
@@ -437,6 +432,11 @@ UOdysseyAnimationLayerImageRaster::Serialize(FArchive& Ar)
 
     //TODO: check undo
 
+    if ( Ar.IsTransacting() || !Ar.IsPersistent() )
+        return;
+
+    Ar << mOffset;
+
     if ( Ar.IsLoading() )
     {
         mCells.Empty();
@@ -468,20 +468,6 @@ UOdysseyAnimationLayerImageRaster::Serialize(FArchive& Ar)
             Ar << cellType;
             mCells[i]->Serialize(Ar);
         }
-    }
-}
-
-void
-UOdysseyAnimationLayerImageRaster::OnCellLengthChanged(TSharedRef<FOdysseyAnimationCell> iCell)
-{
-    if (!mCells.Contains(iCell))
-        return;
-
-    TSharedPtr<IOdysseyAnimationImageRenderingAbility> imageRenderAbility = GetAbility<IOdysseyAnimationImageRenderingAbility>();
-    if ( imageRenderAbility )
-    {
-        imageRenderAbility->OnCompositionChanged().Broadcast(imageRenderAbility->GetId());
-        imageRenderAbility->OnCompositionCommited().Broadcast(imageRenderAbility->GetId());
     }
 }
 

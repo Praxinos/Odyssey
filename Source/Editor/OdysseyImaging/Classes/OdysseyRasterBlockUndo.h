@@ -28,8 +28,6 @@ public:
     ~FOdysseyRasterBlockUndo();
     FOdysseyRasterBlockUndo();
 
-    
-
 	/** Makes the change to the object */
     //REDO
 	virtual void Apply( UObject* Object ) override;
@@ -39,7 +37,7 @@ public:
 	virtual void Revert( UObject* Object ) override;
 
 	/** Describes this change (for debugging) */
-	virtual FString ToString() const override;
+    virtual FString ToString() const override;
 
 public:
     FOdysseyRasterBlockUndo(const FGuid& iUndoId, const FGuid& iRedoId, TSharedPtr<FOdysseyRasterBlock> iBlock);
