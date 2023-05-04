@@ -135,98 +135,16 @@ FOdysseyVectorCycle::BuildSegmentCubic( FOdysseyVectorSegmentCubic& iSegment
     }
 }
 
-/*
-void
-FOdysseyVectorCycle::BuildSegmentCubic( FOdysseyVectorSegmentCubic& iSegment
-                                     , double iFromT
-                                     , double iToT )
-{
-    std::vector<FPolygon>& polygonCache = iSegment.GetPolygonCache();
-    uint32 polyCount = iSegment.GetPolygonCount();
-    bool revert = ( iFromT < iToT ) ? false : true;
-
-    if ( revert == false )
-    {
-        for( uint32 i = 0; i < polyCount; i++ )
-        {
-            if( polygonCache[i].toT >= iFromT && polygonCache[i].fromT <= iToT )
-            {
-                ::ULIS::FVec2D to   = { polygonCache[i].lineVertex[1].x, polygonCache[i].lineVertex[1].y };
-                ::ULIS::FVec2D from = { polygonCache[i].lineVertex[0].x, polygonCache[i].lineVertex[0].y };
-
-                // clipping part
-                if ( polygonCache[i].toT > iToT )
-                {
-                    ::ULIS::FVec2D dir = polygonCache[i].lineVertex[1] - polygonCache[i].lineVertex[0];
-
-                    to.x = polygonCache[i].lineVertex[0].x + dir.x * ( ( iToT - polygonCache[i].fromT ) / ( polygonCache[i].toT - polygonCache[i].fromT ) );
-                    to.y = polygonCache[i].lineVertex[0].y + dir.y * ( ( iToT - polygonCache[i].fromT ) / ( polygonCache[i].toT - polygonCache[i].fromT ) );
-                }
-
-                mPath.lineTo( to.x, to.y );
-
-                // take advantage of this func to set the bouding limits.
-                if ( to.x < mMin.x ) mMin.x = to.x;
-                if ( to.y < mMin.y ) mMin.y = to.y;
-                if ( to.x > mMax.x ) mMax.x = to.x;
-                if ( to.y > mMax.y ) mMax.y = to.y;
-            }
-        }
-    }
-    else
-    {
-        double tmp = iFromT;
-        iFromT = iToT;
-        iToT = tmp;
-
-        for( int i = polyCount - 1; i > 0; i-- )
-        {
-            if( polygonCache[i].toT >= iFromT && polygonCache[i].fromT <= iToT )
-            {
-                ::ULIS::FVec2D to   = { polygonCache[i].lineVertex[1].x, polygonCache[i].lineVertex[1].y };
-                ::ULIS::FVec2D from = { polygonCache[i].lineVertex[0].x, polygonCache[i].lineVertex[0].y };
-
-                // clipping part
-                if ( polygonCache[i].fromT < iFromT )
-                {
-                    ::ULIS::FVec2D dir = polygonCache[i].lineVertex[1] - polygonCache[i].lineVertex[0];
-
-                    from.x = polygonCache[i].lineVertex[0].x + dir.x * ( ( iFromT - polygonCache[i].fromT ) / ( polygonCache[i].toT - polygonCache[i].fromT ) );
-                    from.y = polygonCache[i].lineVertex[0].y + dir.y * ( ( iFromT - polygonCache[i].fromT ) / ( polygonCache[i].toT - polygonCache[i].fromT ) );
-                }
-
-                mPath.lineTo( from.x, from.y );
-
-                // take advantage of this func to set the bouding limits.
-                if ( to.x < mMin.x ) mMin.x = to.x;
-                if ( to.y < mMin.y ) mMin.y = to.y;
-                if ( to.x > mMax.x ) mMax.x = to.x;
-                if ( to.y > mMax.y ) mMax.y = to.y;
-            }
-        }
-    }
-}
-*/
-
 void
 FOdysseyVectorCycle::Build( std::vector<FOdysseyVectorVertex*>& iVertexArray
                           , std::vector<FOdysseyVectorSection*>& iSectionArray )
 {
     int32 arraySize = iVertexArray.size();
-    /*double xmin, ymin, xmax, ymax;*/
     int seg = 0;
-
-    //mPath.clear();
-
-     //mPointArray.clear();
-     //mPointArray.reserve(200);
 
     if ( iVertexArray.size() ) 
     {
         ::ULIS::FVec2D originAt = iVertexArray[0]->GetCoords();
-
-        //mMin.x = mMax.x = originAt.x;
-        //mMin.y = mMax.y = originAt.y;
 
         mPath.moveTo( originAt.x, originAt.y );
 
@@ -234,7 +152,9 @@ FOdysseyVectorCycle::Build( std::vector<FOdysseyVectorVertex*>& iVertexArray
         {
             int n = ( i + 1 ) % arraySize;
             FOdysseyVectorSection* section = iSectionArray[i];
-            FOdysseyVectorSegment* segment = section->GetSegment();
+            FOdysseyVectorVertex* sectionVertex0 = section->GetVertex(0);
+            FOdysseyVectorVertex* sectionVertex1 = section->GetVertex(1);
+            ::ULIS::FVec2D* sectionBezier = section->GetBezier();
             FOdysseyVectorVertex* vertexi = iVertexArray[i];
             FOdysseyVectorVertex* vertexn = iVertexArray[n];
 
@@ -251,10 +171,19 @@ FOdysseyVectorCycle::Build( std::vector<FOdysseyVectorVertex*>& iVertexArray
                 }
             }
 
-            double currentVertexT = vertexi->GetT( segment );
-            double    nextVertexT = vertexn->GetT( segment );
-
-            BuildSegmentCubic ( static_cast<FOdysseyVectorSegmentCubic&>(*segment), currentVertexT, nextVertexT );
+            // check it goes the same direction
+            if( vertexi == sectionVertex0 )
+            {
+                mPath.cubicTo( sectionBezier[1].x, sectionBezier[1].y
+                             , sectionBezier[2].x, sectionBezier[2].y
+                             , sectionBezier[3].x, sectionBezier[3].y );
+            }
+            else
+            {
+                mPath.cubicTo( sectionBezier[2].x, sectionBezier[2].y
+                             , sectionBezier[1].x, sectionBezier[1].y
+                             , sectionBezier[0].x, sectionBezier[0].y );
+            }
         }
 
         mPath.close();
@@ -389,19 +318,11 @@ FOdysseyVectorCycle::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
     BLContext* blctx = mParent.GetScene()->GetEngine()->GetBLContext();
     FOdysseyVectorBucket* bucket = mBucket ? mBucket : mPropagatedBucket;
+    BLMatrix2D& worldMatrix = mParent.GetWorldMatrix();
     BLBox bbox;
 
     mPath.getBoundingBox( &bbox );
-/*
-    BLPath combinedPath = mPath;
 
-    for( std::list<FOdysseyVectorCycle*>::iterator oit = mChildrenList.begin(); oit != mChildrenList.end(); ++oit )
-    {
-        FOdysseyVectorCycle *child = (*oit);
-
-        combinedPath.addPath( child->mPath );
-    }
-*/
     if( bucket )
     {
         if( bucket->IsGradient() )
@@ -459,12 +380,37 @@ FOdysseyVectorCycle::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
     }
 
     blctx->setFillRule( BL_FILL_RULE_EVEN_ODD );
-
-       /*iBLContext.fillPolygon( &mPointArray[0], mPointArray.size() );*/
-    //blctx->strokePath( combinedPath );
     blctx->fillPath( mPath );
-    //blctx->strokePath( mPath );
-    /*}*/
+
+    blctx->save();
+    blctx->resetMatrix();
+    blctx->setStrokeWidth( 1.0f );
+
+    // stroke borders or else there will be a small 1 pixel gap. We draw it only once: the cycle responsible for drawing the 
+    // section is the cycle that was first attached to the section. That way we don't draw it twice. The paint group could be
+    // responsible for drawing the sections as well, but then we have to retrieve the bucket color, if any. this would be to
+    // complicated. We draw in world coordinates to be sure to get 1 pixel-width strokes.
+    for( int i = 0; i < mSectionArray.size(); i++ )
+    {
+        FOdysseyVectorSection* section = mSectionArray[i];
+
+        if( section->GetCycle(0) == this )
+        {
+            ::ULIS::FVec2D* sectionBezier = section->GetBezier();
+            BLPoint pt[4] = { worldMatrix.mapPoint( sectionBezier[0].x, sectionBezier[0].y )
+                            , worldMatrix.mapPoint( sectionBezier[1].x, sectionBezier[1].y )
+                            , worldMatrix.mapPoint( sectionBezier[2].x, sectionBezier[2].y )
+                            , worldMatrix.mapPoint( sectionBezier[3].x, sectionBezier[3].y ) };
+            BLPath path;
+
+            path.moveTo( pt[0] );
+            path.cubicTo( pt[1], pt[2], pt[3] );
+
+            blctx->strokePath( path );
+        }
+    }
+
+    blctx->restore();
 }
 
 uint64

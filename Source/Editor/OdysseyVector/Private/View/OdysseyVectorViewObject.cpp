@@ -2,6 +2,7 @@
 
 UOdysseyVectorViewObject::~UOdysseyVectorViewObject()
 {
+
 }
 
 UOdysseyVectorViewObject::UOdysseyVectorViewObject()

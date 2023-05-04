@@ -86,9 +86,10 @@ class FOdysseyVectorSection
         bool IsLinked();
         void Link();
         void Unlink();
-
+        FOdysseyVectorCycle* GetCycle( uint32 iCycleID );
         void AddCycle( FOdysseyVectorCycle* iCycle );
         FOdysseyVectorCycle* GetOtherCycle( FOdysseyVectorCycle* iCycle );
+        ::ULIS::FVec2D* GetBezier();
 
     protected:
         FOdysseyVectorSegment* mSegment;
@@ -96,9 +97,7 @@ class FOdysseyVectorSection
         uint32 mFlags;
         uint32 mCycleCount;
         FOdysseyVectorCycle* mCycle[2]; // there are 2 cycles per section at most. No need for a complicated container.
-
-    public:
-        uint32 mID; // temp
+        ::ULIS::FVec2D mBezier[4];
 
     private:
         static const uint32 BLOCKVERTEX0 = ( 1 << 0 );

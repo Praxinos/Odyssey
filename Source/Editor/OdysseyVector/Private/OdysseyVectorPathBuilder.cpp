@@ -775,10 +775,14 @@ FOdysseyVectorPathBuilder::DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags )
         }
     }
 
+    blctx->save();
+    blctx->resetMatrix();
     blctx->setFillStyle(BLRgba32(0xFFFF00FF));
-
     for( uint32 i = 0; i < mSampleArray.size() - 1; i++ )
     {
-        blctx->fillRect( mSampleArray[i]->GetX() - 3, mSampleArray[i]->GetY() - 3, 6, 6  );
+        BLPoint pt = mWorldMatrix.mapPoint( mSampleArray[i]->GetX(), mSampleArray[i]->GetY() );
+
+        blctx->fillRect( pt.x - 3, pt.y - 3, 6, 6  );
     }
+    blctx->restore();
 }

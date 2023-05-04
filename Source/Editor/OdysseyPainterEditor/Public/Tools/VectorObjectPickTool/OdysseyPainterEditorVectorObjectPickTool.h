@@ -48,5 +48,4 @@ private:
     FOdysseyVectorHUDSelection *mSelectionHUD;
     std::vector<::ULIS::FVec2D> mPointArray;
     std::list<FOdysseyVectorObject*> mCopiedObjectList;
-    bool mControlKeyPressed;
 };

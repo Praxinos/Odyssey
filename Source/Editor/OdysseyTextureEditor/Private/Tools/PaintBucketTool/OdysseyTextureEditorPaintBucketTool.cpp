@@ -187,7 +187,7 @@ UOdysseyTextureEditorPaintBucketTool::OnMouseDrag( const FOdysseyPoint& iPointIn
 
 bool
 UOdysseyTextureEditorPaintBucketTool::OnMouseUp( const FOdysseyPoint& iPointInTexture
-                                                , const FKey& iKey )
+                                               , const FKey& iKey )
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());

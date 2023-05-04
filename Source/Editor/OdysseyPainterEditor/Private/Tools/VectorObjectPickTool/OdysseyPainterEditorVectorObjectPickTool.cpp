@@ -12,7 +12,6 @@ UOdysseyPainterEditorVectorObjectPickTool::~UOdysseyPainterEditorVectorObjectPic
 }
 
 UOdysseyPainterEditorVectorObjectPickTool::UOdysseyPainterEditorVectorObjectPickTool()
-    : mControlKeyPressed( false )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Lasso64");
 
@@ -93,7 +92,7 @@ UOdysseyPainterEditorVectorObjectPickTool::OnKeyDown( FOdysseyVectorEngine* iEng
                                                     , FOdysseyVectorUndo** iUndo
                                                     , const FKey& iKey )
 {
-    if( mControlKeyPressed )
+    if( FSlateApplication::Get().GetModifierKeys().IsControlDown() )
     {
         if( iKey == EKeys::C )
         {
@@ -106,8 +105,6 @@ UOdysseyPainterEditorVectorObjectPickTool::OnKeyDown( FOdysseyVectorEngine* iEng
         }
     }
 
-    mControlKeyPressed = ( ( iKey == EKeys::LeftControl ) || ( iKey == EKeys::RightControl ) ) ? true : false;
-
     return false;
 }
 
@@ -116,8 +113,6 @@ UOdysseyPainterEditorVectorObjectPickTool::OnKeyUp( FOdysseyVectorEngine* iEngin
                                                   , FOdysseyVectorScene* iScene
                                                   , const FKey& iKey )
 {
-    mControlKeyPressed = ( ( iKey == EKeys::LeftControl ) || ( iKey == EKeys::RightControl ) ) ? false : true;
-
     return false;
 }
 

@@ -274,6 +274,7 @@ FOdysseyVectorGroupPaint::DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags )
         cycle->Draw( iRoi, iFlags );
     }
 
+
     if( iFlags & FOdysseyVectorObject::DRAWSTRUCTURE )
     {
         blctx->save();
@@ -458,7 +459,7 @@ PrintSection( FOdysseyVectorSection* iSection)
     BLPoint segpt0 = path->GetWorldMatrix().mapPoint( segment->GetVertex(0)->GetCoords().x, segment->GetVertex(0)->GetCoords().y );
     BLPoint segpt1 = path->GetWorldMatrix().mapPoint( segment->GetVertex(1)->GetCoords().x, segment->GetVertex(1)->GetCoords().y );
 
-    UE_LOG(LogTemp,Warning,TEXT("Section:ID:%d [x:%f y:%f] -- [x:%f y:%f]/segment[x:%f y:%f] -- [x:%f y:%f]"), iSection->mID, pt0.x, pt0.y, pt1.x, pt1.y, segpt0.x, segpt0.y, segpt1.x, segpt1.y );
+    UE_LOG(LogTemp,Warning,TEXT("Section: [x:%f y:%f] -- [x:%f y:%f]/segment[x:%f y:%f] -- [x:%f y:%f]"), pt0.x, pt0.y, pt1.x, pt1.y, segpt0.x, segpt0.y, segpt1.x, segpt1.y );
 }
 
 static void
@@ -1090,14 +1091,8 @@ FOdysseyVectorGroupPaint::Clear()
 
     mCycleArray.clear();
 
-/* commented out : not necessary. Saves us some CPU cycles.
-    for( int i = 0; i < mGapSegmentBuffer.size(); i++ )
-    {
-        mGapSegmentBuffer[i].Unlink();
-    }
-*/
+    // Clear gap segments. Not necessary to unlink them, as these are not linked. Only section are linked.
     mGapSegmentBuffer.clear();
-
 
 
     // clean section topology

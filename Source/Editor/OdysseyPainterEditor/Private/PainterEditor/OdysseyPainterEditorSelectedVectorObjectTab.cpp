@@ -12,6 +12,7 @@
 //----------------------------------------------------------- Construction / Destruction
 FOdysseyPainterEditorSelectedVectorObjectTab::~FOdysseyPainterEditorSelectedVectorObjectTab()
 {
+
 }
 
 FOdysseyPainterEditorSelectedVectorObjectTab::FOdysseyPainterEditorSelectedVectorObjectTab(FOdysseyPainterEditor* iEditor)
@@ -29,6 +30,22 @@ FOdysseyPainterEditorSelectedVectorObjectTab::FOdysseyPainterEditorSelectedVecto
     mEditor->GetVectorPathDrawingTool()->mSelectionChanged.AddRaw(this, &FOdysseyPainterEditorSelectedVectorObjectTab::OnSelectionChanged );
     mEditor->GetVectorPrimitiveDrawingTool()->mSelectionChanged.AddRaw(this, &FOdysseyPainterEditorSelectedVectorObjectTab::OnSelectionChanged );
 */
+}
+
+void
+FOdysseyPainterEditorSelectedVectorObjectTab::AddReferencedObjects(FReferenceCollector& Collector)
+{
+    // Prevent these UObjects from being destroyed by garbage collection
+	Collector.AddReferencedObject(mObjectView);
+	Collector.AddReferencedObject(mPathView);
+	Collector.AddReferencedObject(mEllipseView);
+	Collector.AddReferencedObject(mGroupPaintView);
+}
+
+FString
+FOdysseyPainterEditorSelectedVectorObjectTab::GetReferencerName() const
+{
+    return "FOdysseyPainterEditorSelectedVectorObjectTab";
 }
 
 //--------------------------------------------------------------------------------------
