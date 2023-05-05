@@ -90,4 +90,7 @@ protected:
 
     /** Temporary variable (until overrides are fixed) that keep the mip settings of the texture on which we draw*/
     TextureMipGenSettings mPreviousMipSettings;
+
+    /** Current or previous selected tool which still has delegates on this adapter, we keep it here so that we can handle said delegates */
+    UOdysseyPainterEditorRasterDrawingTool* mDrawingTool;
 };
