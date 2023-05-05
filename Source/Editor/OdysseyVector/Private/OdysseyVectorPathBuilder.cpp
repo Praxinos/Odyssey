@@ -56,9 +56,8 @@ FOdysseyVectorPathBuilder::FOdysseyVectorPathBuilder()
     , mCumulAngle ( 0.0f )
     , mPointID( 0 )
     , mCumulAngleLimit ( 1.5708f ) // 90 degrees
-    //, mAngleLimit ( 1.0472f ) // 60 deg
-    , mAngleLimit ( 0.7071f ) // 45 deg
-    , mSmoothLimit ( 0.261799f ) // 15 deg
+    , mAngleLimit ( 1.0472f ) // 60 deg
+    //, mAngleLimit ( 0.7071f ) // 45 deg
 {
     mObjectParam.Foreground.R = 128;
     mObjectParam.Foreground.G = 128;
@@ -208,8 +207,6 @@ FOdysseyVectorPathBuilder::RecordVertex()
             Shape ( *mCubicSegment
                    , mLinkBuffer[linkID0].GetVector( true )
                    , mLinkBuffer[linkID1].GetVector( true ) );
-
-            //Adjust( *mCubicSegment );
 
             mCubicPath->AddSegment( mCubicSegment );
 
@@ -406,8 +403,6 @@ FOdysseyVectorPathBuilder::RecordEnd( FOdysseyVectorVertex *iVertex )
                    , mLinkBuffer[linkID0].GetVector( true )
                    , mLinkBuffer[linkID1].GetVector( true ) );
 
-            //Adjust( *mCubicSegment );
-
             mCubicPath->AddSegment( mCubicSegment );
 
             Smooth( mCubicSegment, mSampleArray[0]->IsSharp() );
@@ -473,6 +468,40 @@ FOdysseyVectorPathBuilder::GetSamplePointAtParameter( double iToTalLinkLength, d
     return point;
 }
 
+/*
+ * The idea here is to adjust the cubic curve if it drifts away too much from the sample points
+ * How do we do that ? We have the samples points :
+ *
+ *      o o o o o o o
+ *   A                 B
+ *
+ * and we have computed the cubic curve from entry vector and exit vector (first and last sample points).
+ * The length of the handles by default is 0.35 the length of the distance between A and B.
+ *      _____________
+ *     /             \
+ *    /               \
+ *   A                 B
+ *
+ * We then pick a point P1 at position 0.33f and P2 at 0.66f on this cubic curve :
+ *      _____________
+ *     P1           P2
+ *    /               \
+ *   A                 B
+ *
+ * we compare this position with an interpolated sample point "s" located at 0.33f and 0.66f as well. 
+ *      _____________
+ *     P1           P2
+ *    /   s1     s2   \
+ *   A                 B
+ *
+ * from the angles between vectors [A-B,A-P1] and [A-B,A-s1], we get a ratio that we use to decrease the length of the handles.
+ * same goes for A-P2 and A-s2. Not perfect but not bad. Works only when decreasing the handles' length though, not increasing.
+ *      _____________
+ *    /               \
+ *   A                 B
+ *
+ */
+
 void
 FOdysseyVectorPathBuilder::AdjustHandle( FOdysseyVectorSegmentCubic* iCubicSegment, uint32 iHandleID, double iCheckAt, int iDepth )
 {
@@ -510,7 +539,7 @@ FOdysseyVectorPathBuilder::AdjustHandle( FOdysseyVectorSegmentCubic* iCubicSegme
 
         if ( dot0 )
         {
-            double ratio = ( dot1 / dot0 );
+            double ratio = fabs( dot1 / dot0 );
 //UE_LOG(LogTemp, Warning, TEXT("Sample: %f %f"), sampledPoint.x, sampledPoint.y );
 //UE_LOG(LogTemp, Warning, TEXT("Some warning message %f %f %f %f %f"), ratio );
 
@@ -522,147 +551,6 @@ FOdysseyVectorPathBuilder::AdjustHandle( FOdysseyVectorSegmentCubic* iCubicSegme
         }
     }
 }
-
-/*
- * The idea here is to adjust the cubic curve if it drifts away too much from the sample points
- * How do we do that ? We have the samples points :
- *
- *      o o o o o o o
- *   A                 B
- *
- * and we have computed the cubic curve from entry vector and exit vector (first and last sample points).
- * The length of the handles by default is 0.35 the length of the distance between A and B.
- *      _____________
- *     /             \
- *    /               \
- *   A                 B
- *
- * We then pick a point P1 at position 0.33f and P2 at 0.66f on this cubic curve :
- *      _____________
- *     P1           P2
- *    /               \
- *   A                 B
- *
- * we compare this position with an interpolated sample point "s" located at 0.33f and 0.66f as well. 
- *      _____________
- *     P1           P2
- *    /   s1     s2   \
- *   A                 B
- *
- * from the angles between vectors [A-B,A-P1] and [A-B,A-s1], we get a ratio that we use to decrease the length of the handles.
- * same goes for A-P2 and A-s2. Not perfect but not bad. Works only when decreasing the handles' length though, not increasing.
- *      _____________
- *    /               \
- *   A                 B
- *
- */
-void
-FOdysseyVectorPathBuilder::Adjust( FOdysseyVectorSegmentCubic& iCubicSegment )
-{
-    double totalLinkLength = GetTotalSampleLinkLength();
-    ::ULIS::FVec2D& point0 = iCubicSegment.GetVertex(0)->GetCoords();
-    ::ULIS::FVec2D& point1 = iCubicSegment.GetVertex(1)->GetCoords();
-    ::ULIS::FVec2D& ctrlPoint0 = iCubicSegment.GetHandle(0)->GetCoords();
-    ::ULIS::FVec2D& ctrlPoint1 = iCubicSegment.GetHandle(1)->GetCoords();
-    ::ULIS::FVec2D expectedPoint0 = CubicBezierPointAtParameter( point0, ctrlPoint0, ctrlPoint1, point1, 0.33f );
-    ::ULIS::FVec2D sampledPoint0 = GetSamplePointAtParameter( totalLinkLength, 0.33f );
-    ::ULIS::FVec2D p0ToExpectedPoint0 = expectedPoint0 - point0;
-    ::ULIS::FVec2D p0ToSampledPoint0 = sampledPoint0 - point0;
-    ::ULIS::FVec2D cubicSegmentVector = iCubicSegment.GetVector( true );
-
-    if ( p0ToExpectedPoint0.DistanceSquared() && p0ToSampledPoint0.DistanceSquared() )
-    {
-        p0ToExpectedPoint0.Normalize();
-        p0ToSampledPoint0.Normalize();
-
-        double dot = p0ToSampledPoint0.DotProduct( cubicSegmentVector );
-        double angle = acos( ULIS::FMath::Clamp<double>( dot, -1.0f, 1.0f ) );
-        double refDot = p0ToExpectedPoint0.DotProduct ( cubicSegmentVector );
-        double refAngle = acos( ULIS::FMath::Clamp<double>( refDot, -1.0f, 1.0f ) );
-
-        if ( fabs ( refAngle ) > 0.0001f )
-        {
-            double ratio = angle / refAngle;
-
-            if( ratio < 1.0f )
-            {
-                ::ULIS::FVec2D ctrlVec = ctrlPoint0 - point0;
-
-                ctrlPoint0.x = point0.x + ( ctrlVec.x * ratio );
-                ctrlPoint0.y = point0.y + ( ctrlVec.y * ratio );
-            }
-        }
-    }
-
-    ::ULIS::FVec2D expectedPoint1 = CubicBezierPointAtParameter( point0, ctrlPoint0, ctrlPoint1, point1, 0.66f );
-    ::ULIS::FVec2D sampledPoint1 = GetSamplePointAtParameter( totalLinkLength, 0.66f );
-    ::ULIS::FVec2D p1ToExpectedPoint1 = expectedPoint1 - point1;
-    ::ULIS::FVec2D p1ToSampledPoint1 = sampledPoint1 - point1;
-
-    if ( p1ToExpectedPoint1.DistanceSquared() && p1ToSampledPoint1.DistanceSquared() )
-    {
-        p1ToExpectedPoint1.Normalize();
-        p1ToSampledPoint1.Normalize();
-
-        double dot = p1ToSampledPoint1.DotProduct( - cubicSegmentVector );
-        double angle = acos( ULIS::FMath::Clamp<double>( dot, -1.0f, 1.0f ) );
-        double refDot = p1ToExpectedPoint1.DotProduct ( - cubicSegmentVector );
-        double refAngle = acos( ULIS::FMath::Clamp<double>( refDot, -1.0f, 1.0f ) );
-
-        if ( fabs ( refAngle ) > 0.0001f )
-        {
-            double ratio = angle / refAngle;
-
-            if ( ratio < 1.0f )
-            {
-                ::ULIS::FVec2D ctrlVec = ctrlPoint1 - point1;
-
-                ctrlPoint1.x = point1.x + ( ctrlVec.x * ratio );
-                ctrlPoint1.y = point1.y + ( ctrlVec.y * ratio );
-            }
-        }
-    }
-}
-
-/*
-FOdysseyVectorPathBuilder::SmoothSegment( FOdysseyVectorSegmentCubic* iCubicSegment )
-{
-    FOdysseyVectorVertex vertex0 = iCubicSegment->GetVertex( 0 );
-    FOdysseyVectorVertex vertex1 = iCubicSegment->GetVertex( 1 );
-    FOdysseyVectorSegmentCubic* prevCubicSegment = vertex0->GetOtherSegment( iCubicSegment );
-    FOdysseyVectorSegmentCubic* nextCubicSegment = vertex1->GetOtherSegment( iCubicSegment );
-
-    if ( prevCubicSegment )
-    {
-        ::ULIS::FVec2D prevCubicSegmentVector = prevCubicSegment->GetVectorAtEnd( true );
-        double smoothDot = entryVector.DotProduct( prevCubicSegmentVector );
-        double smoothAngle = acos( ULIS::FMath::Clamp<double>( smoothDot, -1.0f, 1.0f ) );
-
-        if ( fabs(smoothAngle) < mLastCubicAngleLimit )
-        {
-            double length = iCubicSegment->GetStraightDistance();
-
-            iCubicSegment->GetHandle(0)->Set ( vertex0->GetX() + ( prevCubicSegmentVector.x * length * 0.35f )
-                                             , vertex0->GetY() + ( prevCubicSegmentVector.y * length * 0.35f ) );
-        }
-    }
-
-    if ( nextCubicSegment )
-    {
-        ::ULIS::FVec2D nextCubicSegmentVector = nextCubicSegment->GetVectorAtStart( true );
-        double smoothDot = entryVector.DotProduct( nextCubicSegmentVector );
-        double smoothAngle = acos( ULIS::FMath::Clamp<double>( smoothDot, -1.0f, 1.0f ) );
-
-        if ( fabs(smoothAngle) < mLastCubicAngleLimit )
-        {
-            double length = iCubicSegment->GetStraightDistance();
-
-            iCubicSegment->GetHandle(1)->Set ( vertex1->GetX() + ( nextCubicSegmentVector.x * length * 0.35f )
-                                             , vertex1->GetY() + ( nextCubicSegmentVector.y * length * 0.35f ) );
-        }
-    }
-}
-*/
 
 FOdysseyVectorPathCubic* 
 FOdysseyVectorPathBuilder::GetCubicPath()

@@ -230,6 +230,8 @@ FOdysseyVectorGroupPaint::UpdateShape( uint32 iUpdateFlags )
 {
     FOdysseyVectorGroup::UpdateShape( iUpdateFlags ); // updates BBox
 
+    UpdateBBox();
+
     if(   ( mGroupPaintParam.Realtime == true  )
      || ( ( mGroupPaintParam.Realtime == false ) && ( ( iUpdateFlags & FOdysseyVectorObject::FREQUENTUPDATES ) == 0 ) ) )
     {
@@ -237,18 +239,27 @@ FOdysseyVectorGroupPaint::UpdateShape( uint32 iUpdateFlags )
     }
 }
 
+/*void
+FOdysseyVectorGroupPaint::InvalidateColoring()
+{
+
+}*/
+
 void
 FOdysseyVectorGroupPaint::AddBucket( FOdysseyVectorBucket* iBucket )
 {
     mBucketList.push_back( iBucket );
 
     //iBucket->SetParent( this );
+    //InvalidateColor();
 }
 
 void
 FOdysseyVectorGroupPaint::RemoveBucket( FOdysseyVectorBucket* iBucket )
 {
     mBucketList.remove( iBucket );
+
+    //InvalidateColor();
 }
 
 void
@@ -679,15 +690,24 @@ GetNormalVector( std::vector<FOdysseyVectorVertex*>& iVertexArray
         int subdiv = 8;
         double stepT = deltaT / subdiv;
         double t0 = ti;
-//UE_LOG(LogTemp,Warning,TEXT("%f %f"), ti, tn);
+
         // By relying only on start and end points of a section, we lack precision. 
         // Here we rely on more acurate computation by getting intermediate points.
         for( int j = 0; j < subdiv; j++ )
         {
             double t1 = t0 + stepT;
-            ::ULIS::FVec2D v0Coords = segment->GetPointAt( t0 );
-            ::ULIS::FVec2D v1Coords = segment->GetPointAt( t1 );
+            // however at end points, we need the same coordinates for each section. Relying on T value does not guarantee that
+            // due to imprecision and would fake the calculation. So, we use the value stored in viCoords and vnCoords.
+            ::ULIS::FVec2D v0Coords = ( j == 0          ) ? viCoords : segment->GetPointAt( t0 );
+            ::ULIS::FVec2D v1Coords = ( j == subdiv - 1 ) ? vnCoords : segment->GetPointAt( t1 );
+/*
+            BLMatrix2D& worldMatrix = segment->GetPath()->GetWorldMatrix();
+            BLPoint w0coords = worldMatrix.mapPoint( v0Coords.x, v0Coords.y );
+            BLPoint w1coords = worldMatrix.mapPoint( v1Coords.x, v1Coords.y );
 
+UE_LOG(LogTemp,Warning,TEXT("v0coords:t:%f:c:%f %f v1coords:t:%f:c:%f %f"), t0, w0coords.x, w0coords.y, t1, w1coords.x, w1coords.y);
+
+*/
             z += ( ( v0Coords.x - v1Coords.x ) * ( v0Coords.y + v1Coords.y ) );
 
             t0 += stepT;
@@ -1076,11 +1096,58 @@ FOdysseyVectorGroupPaint::SimplifyGraph()
     } while ( keepSimplifying );
 }
 
+void
+FOdysseyVectorGroupPaint::UpdateBBox()
+{
+    double xmin = DBL_MAX, ymin = DBL_MAX, xmax = -DBL_MAX, ymax = -DBL_MAX;
+    bool hasBBox = false;
+
+    for( std::list<FOdysseyVectorObject*>::iterator oit = mChildrenList.begin(); oit != mChildrenList.end(); ++oit )
+    {
+        FOdysseyVectorObject *child = (*oit);
+
+        if( child->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+        {
+            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(child);
+            ::ULIS::FRectD pathBBox = path->GetBBox( false );
+
+            if( pathBBox.Area() )
+            {
+                double x1 = pathBBox.x
+                     , y1 = pathBBox.y
+                     , x2 = pathBBox.x + pathBBox.w
+                     , y2 = pathBBox.y + pathBBox.h;
+
+                hasBBox = true;
+
+                if( x1 < xmin ) xmin = x1;
+                if( y1 < ymin ) ymin = y1;
+                if( x2 > xmax ) xmax = x2;
+                if( y2 > ymax ) ymax = y2;
+            }
+        }
+    }
+
+    for( std::list<FOdysseyVectorBucket*>::iterator bit = mBucketList.begin(); bit != mBucketList.end(); ++bit )
+    {
+        FOdysseyVectorBucket *bucket = (*bit);
+        ::ULIS::FVec2D& bucketCoords = bucket->GetCoords();
+
+        hasBBox = true;
+
+        if( bucketCoords.x < xmin ) xmin = bucketCoords.x;
+        if( bucketCoords.y < ymin ) ymin = bucketCoords.y;
+        if( bucketCoords.x > xmax ) xmax = bucketCoords.x;
+        if( bucketCoords.y > ymax ) ymax = bucketCoords.y;
+    }
+
+    mBBox = ( hasBBox ) ? ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax ) : ::ULIS::FRectD( 0.0f, 0.0f, 0.0f, 0.0f );
+}
 
 void
 FOdysseyVectorGroupPaint::Clear()
 {
-    bool bboxInit = false;
+
 
     for( int i = 0; i < mCycleArray.size(); i++ )
     {
@@ -1118,11 +1185,6 @@ FOdysseyVectorGroupPaint::Clear()
         {
             FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(child);
             std::list<FOdysseyVectorSegment*>& pathSegmentList = path->GetSegmentList();
-            //std::list<FOdysseyVectorVertex*>& pathVertexList = path->GetVertexList();
-
-            mBBox = ( bboxInit == false ) ? path->GetBBox( false ) : mBBox | path->GetBBox( false );
-
-            bboxInit = true;
 
             for( std::list<FOdysseyVectorSegment*>::iterator sit = pathSegmentList.begin(); sit != pathSegmentList.end(); ++sit )
             {

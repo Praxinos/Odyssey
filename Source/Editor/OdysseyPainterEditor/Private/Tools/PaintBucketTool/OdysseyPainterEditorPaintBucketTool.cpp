@@ -276,6 +276,8 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseDown( FOdysseyVectorEngine* iEngine
         }
     }
 
+    iScene->Update( 0 ); // paint group could be invalidated after bucket deletion / adding. Update it.
+
     return true;
 }
 

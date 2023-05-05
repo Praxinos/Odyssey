@@ -120,7 +120,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         void SetGapTolerance( double iGapTolerance );
         bool IsWireframe();
         void SetWireframe( bool iIsWireframe );
-
+        void UpdateBBox();
 
     protected:
         /**
