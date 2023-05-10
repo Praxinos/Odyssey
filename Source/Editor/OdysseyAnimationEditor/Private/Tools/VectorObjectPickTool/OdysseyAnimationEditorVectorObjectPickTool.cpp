@@ -35,7 +35,7 @@ UOdysseyAnimationEditorVectorObjectPickTool::Activate()
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        UOdysseyPainterEditorVectorObjectPickTool::Activate( vectorEngine, vectorScene, animation->Width(), animation->Height());
+        UOdysseyPainterEditorVectorObjectPickTool::ActivateVector( vectorEngine, vectorScene, animation->Width(), animation->Height());
 
         currentVectorLayer->RenderImageChanged(false);
     }
@@ -107,7 +107,7 @@ UOdysseyAnimationEditorVectorObjectPickTool::OnMouseDown(const FOdysseyPoint& iP
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        ret = UOdysseyPainterEditorVectorObjectPickTool::OnMouseDown(vectorEngine,vectorScene,iPointInTexture,iKey);
+        ret = UOdysseyPainterEditorVectorObjectPickTool::OnMouseDownVector(vectorEngine,vectorScene,iPointInTexture,iKey);
 
         currentVectorLayer->RenderImageChanged(false);
     }
@@ -126,7 +126,7 @@ UOdysseyAnimationEditorVectorObjectPickTool::OnMouseDrag( const FOdysseyPoint& i
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        UOdysseyPainterEditorVectorObjectPickTool::OnMouseDrag( vectorEngine, vectorScene, iPointInTexture );
+        UOdysseyPainterEditorVectorObjectPickTool::OnMouseDragVector( vectorEngine, vectorScene, iPointInTexture );
 
         currentVectorLayer->RenderImageChanged(true);
     }
@@ -144,7 +144,7 @@ UOdysseyAnimationEditorVectorObjectPickTool::OnMouseUp( const FOdysseyPoint& iPo
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        ret = UOdysseyPainterEditorVectorObjectPickTool::OnMouseUp( vectorEngine, vectorScene, nullptr, iPointInTexture, iKey );
+        ret = UOdysseyPainterEditorVectorObjectPickTool::OnMouseUpVector( vectorEngine, vectorScene, nullptr, iPointInTexture, iKey );
 
         currentVectorLayer->RenderImageChanged(false);
     }

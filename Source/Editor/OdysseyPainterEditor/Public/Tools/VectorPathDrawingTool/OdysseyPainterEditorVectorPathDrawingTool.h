@@ -27,18 +27,23 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
         //Constructor
         UOdysseyPainterEditorVectorPathDrawingTool();
  
-        void Activate( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-        bool OnMouseDown( FOdysseyVectorEngine* iEngine
-                        , FOdysseyVectorScene* iScene
-                        , const FOdysseyPoint& iPointInTexture
-                        , const FKey& iKey );
-        void OnMouseHover( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture );
-        ::ULIS::FRectI OnMouseDrag( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture );
-        bool OnMouseUp( FOdysseyVectorEngine* iEngine
-                      , FOdysseyVectorScene* iScene
-                      , FOdysseyVectorUndo** iUndo
-                      , const FOdysseyPoint& iPointInTexture
-                      , const FKey& iKey );
+        void ActivateVector( FOdysseyVectorEngine* iEngine
+                           , FOdysseyVectorScene* iScene );
+        bool OnMouseDownVector( FOdysseyVectorEngine* iEngine
+                              , FOdysseyVectorScene* iScene
+                              , const FOdysseyPoint& iPointInTexture
+                              , const FKey& iKey );
+        void OnMouseHoverVector( FOdysseyVectorEngine* iEngine
+                               , FOdysseyVectorScene* iScene
+                               , const FOdysseyPoint& iPointInTexture );
+        ::ULIS::FRectI OnMouseDragVector( FOdysseyVectorEngine* iEngine
+                              , FOdysseyVectorScene* iScene
+                              , const FOdysseyPoint& iPointInTexture );
+        bool OnMouseUpVector( FOdysseyVectorEngine* iEngine
+                            , FOdysseyVectorScene* iScene
+                            , FOdysseyVectorUndo** iUndo
+                            , const FOdysseyPoint& iPointInTexture
+                            , const FKey& iKey );
 
         //OdysseyPainterEditorTool overrides
         virtual void Commit() override;
@@ -46,10 +51,10 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
     protected:
         void PropertyChanged( const FName& iPropertyName );
         FOdysseyVectorVertex* PickVertex( FOdysseyVectorEngine* iVectorEngine
-                                             , FOdysseyVectorScene* iScene
-                                             , double iWorldX
-                                             , double iWorldY
-                                             , double iPickingRadius );
+                                        , FOdysseyVectorScene* iScene
+                                        , double iWorldX
+                                        , double iWorldY
+                                        , double iPickingRadius );
     private:
         FOdysseyVectorPathBuilder* MakePathBuilder( FOdysseyVectorEngine* iVectorEngine
                                                   , FOdysseyVectorScene* iScene

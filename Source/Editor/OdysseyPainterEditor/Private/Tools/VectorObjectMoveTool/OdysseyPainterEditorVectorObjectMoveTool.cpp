@@ -18,17 +18,17 @@ UOdysseyPainterEditorVectorObjectMoveTool::UOdysseyPainterEditorVectorObjectMove
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
 void
-UOdysseyPainterEditorVectorObjectMoveTool::Activate( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorObjectMoveTool::ActivateVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
     iEngine->ClearHUD();
 }
 
 bool
-UOdysseyPainterEditorVectorObjectMoveTool::OnMouseDown( FOdysseyVectorEngine* iEngine
-                                                      , FOdysseyVectorScene* iScene
-                                                      , FOdysseyVectorUndo** iUndo
-                                                      , const FOdysseyPoint& iPointInTexture
-                                                      , const FKey& iKey )
+UOdysseyPainterEditorVectorObjectMoveTool::OnMouseDownVector( FOdysseyVectorEngine* iEngine
+                                                            , FOdysseyVectorScene* iScene
+                                                            , FOdysseyVectorUndo** iUndo
+                                                            , const FOdysseyPoint& iPointInTexture
+                                                            , const FKey& iKey )
 {
     // BeginTransaction() must be called for GUndo to have a value. Please do it in the caller function.
     if( iUndo && GUndo )
@@ -43,9 +43,9 @@ UOdysseyPainterEditorVectorObjectMoveTool::OnMouseDown( FOdysseyVectorEngine* iE
 }
 
 void
-UOdysseyPainterEditorVectorObjectMoveTool::OnMouseDrag( FOdysseyVectorEngine* iEngine
-                                                      , FOdysseyVectorScene* iScene
-                                                      , const FOdysseyPoint& iPointInTexture )
+UOdysseyPainterEditorVectorObjectMoveTool::OnMouseDragVector( FOdysseyVectorEngine* iEngine
+                                                            , FOdysseyVectorScene* iScene
+                                                            , const FOdysseyPoint& iPointInTexture )
 {
     std::list<FOdysseyVectorObject*>& selectObjectList = iScene->GetSelectedObjectList();
     ::ULIS::FRectD beforeBBox = FOdysseyVectorObject::GetBoundingBoxFromList( selectObjectList );
@@ -71,10 +71,10 @@ UOdysseyPainterEditorVectorObjectMoveTool::OnMouseDrag( FOdysseyVectorEngine* iE
 }
 
 bool
-UOdysseyPainterEditorVectorObjectMoveTool::OnMouseUp( FOdysseyVectorEngine* iEngine
-                                                    , FOdysseyVectorScene* iScene
-                                                    , const FOdysseyPoint& iPointInTexture
-                                                    , const FKey& iKey )
+UOdysseyPainterEditorVectorObjectMoveTool::OnMouseUpVector( FOdysseyVectorEngine* iEngine
+                                                          , FOdysseyVectorScene* iScene
+                                                          , const FOdysseyPoint& iPointInTexture
+                                                          , const FKey& iKey )
 {
     iScene->Update( 0 );
 

@@ -34,7 +34,7 @@ UOdysseyTextureEditorVectorObjectScaleTool::Activate()
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        UOdysseyPainterEditorVectorObjectScaleTool::Activate( vectorEngine, vectorScene );
+        UOdysseyPainterEditorVectorObjectScaleTool::ActivateVector( vectorEngine, vectorScene );
 
         currentVectorLayer->RenderImageChanged(false);
     }
@@ -112,14 +112,13 @@ UOdysseyTextureEditorVectorObjectScaleTool::OnMouseDown( const FOdysseyPoint& iP
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
         FOdysseyVectorUndo* undo = nullptr;
 
-        ret = UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDown( vectorEngine, vectorScene, &undo, iPointInTexture,iKey  );
+        ret = UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDownVector( vectorEngine, vectorScene, &undo, iPointInTexture,iKey  );
 
         if( undo )
         {
             // All the delegates for undos are added here for easier maintainability
             undo->mRefreshDelegate.AddRaw( vectorObjectTab.Get(), &FOdysseyPainterEditorSelectedVectorObjectTab::OnRefresh );
             undo->mRefreshDelegate.AddUObject( currentVectorLayer, &UOdysseyTextureLayerImageVector::OnRefresh );
-            undo->mRefreshDelegate.AddUObject( this, &UOdysseyPainterEditorVectorObjectScaleTool::OnRefresh );
         }
 
         currentVectorLayer->RenderImageChanged(false);
@@ -142,7 +141,7 @@ UOdysseyTextureEditorVectorObjectScaleTool::OnMouseDrag( const FOdysseyPoint& iP
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDrag( vectorEngine, vectorScene, iPointInTexture );
+        UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDragVector( vectorEngine, vectorScene, iPointInTexture );
 
         currentVectorLayer->RenderImageChanged(true);
 
@@ -164,7 +163,7 @@ UOdysseyTextureEditorVectorObjectScaleTool::OnMouseUp( const FOdysseyPoint& iPoi
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        ret = UOdysseyPainterEditorVectorObjectScaleTool::OnMouseUp( vectorEngine, vectorScene, iPointInTexture, iKey );
+        ret = UOdysseyPainterEditorVectorObjectScaleTool::OnMouseUpVector( vectorEngine, vectorScene, iPointInTexture, iKey );
 
         currentVectorLayer->RenderImageChanged(false);
     }

@@ -34,7 +34,7 @@ UOdysseyTextureEditorVectorPathCutTool::Activate()
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        UOdysseyPainterEditorVectorPathCutTool::Activate( vectorEngine, vectorScene );
+        UOdysseyPainterEditorVectorPathCutTool::ActivateVector( vectorEngine, vectorScene );
 
         currentVectorLayer->RenderImageChanged(false);
     }
@@ -107,7 +107,7 @@ UOdysseyTextureEditorVectorPathCutTool::OnMouseDown( const FOdysseyPoint& iPoint
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        ret = UOdysseyPainterEditorVectorPathCutTool::OnMouseDown( vectorEngine, vectorScene, iPointInTexture,iKey  );
+        ret = UOdysseyPainterEditorVectorPathCutTool::OnMouseDownVector( vectorEngine, vectorScene, iPointInTexture,iKey  );
 
         currentVectorLayer->RenderImageChanged(false);
     }
@@ -126,7 +126,7 @@ UOdysseyTextureEditorVectorPathCutTool::OnMouseDrag( const FOdysseyPoint& iPoint
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        UOdysseyPainterEditorVectorPathCutTool::OnMouseDrag( vectorEngine, vectorScene, iPointInTexture );
+        UOdysseyPainterEditorVectorPathCutTool::OnMouseDragVector( vectorEngine, vectorScene, iPointInTexture );
 
         currentVectorLayer->RenderImageChanged(true);
     }
@@ -148,7 +148,7 @@ UOdysseyTextureEditorVectorPathCutTool::OnMouseUp( const FOdysseyPoint& iPointIn
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
         FOdysseyVectorUndo* undo = nullptr;
 
-        ret = UOdysseyPainterEditorVectorPathCutTool::OnMouseUp( vectorEngine, vectorScene, &undo, iPointInTexture, iKey );
+        ret = UOdysseyPainterEditorVectorPathCutTool::OnMouseUpVector( vectorEngine, vectorScene, &undo, iPointInTexture, iKey );
 
         if( undo )
         {

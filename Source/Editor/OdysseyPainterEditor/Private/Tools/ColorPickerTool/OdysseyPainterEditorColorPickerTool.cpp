@@ -21,7 +21,7 @@ UOdysseyPainterEditorColorPickerTool::UOdysseyPainterEditorColorPickerTool()
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
 void
-UOdysseyPainterEditorColorPickerTool::Activate( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorColorPickerTool::ActivateVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
     iEngine->ClearHUD();
 }

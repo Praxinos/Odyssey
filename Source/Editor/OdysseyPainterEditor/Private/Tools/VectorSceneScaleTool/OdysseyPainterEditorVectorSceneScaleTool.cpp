@@ -18,17 +18,17 @@ UOdysseyPainterEditorVectorSceneScaleTool::UOdysseyPainterEditorVectorSceneScale
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
 void
-UOdysseyPainterEditorVectorSceneScaleTool::Activate( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorSceneScaleTool::ActivateVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
     iEngine->ClearHUD( );
 }
 
 bool
-UOdysseyPainterEditorVectorSceneScaleTool::OnMouseDown( FOdysseyVectorEngine* iEngine
-                                                      , FOdysseyVectorScene* iScene
-                                                      , FOdysseyVectorUndo** iUndo
-                                                      , const FOdysseyPoint& iPointInTexture
-                                                      , const FKey& iKey )
+UOdysseyPainterEditorVectorSceneScaleTool::OnMouseDownVector( FOdysseyVectorEngine* iEngine
+                                                            , FOdysseyVectorScene* iScene
+                                                            , FOdysseyVectorUndo** iUndo
+                                                            , const FOdysseyPoint& iPointInTexture
+                                                            , const FKey& iKey )
 {
     BLPoint localCoords = iScene->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
 
@@ -51,9 +51,9 @@ UOdysseyPainterEditorVectorSceneScaleTool::OnMouseDown( FOdysseyVectorEngine* iE
 }
 
 void
-UOdysseyPainterEditorVectorSceneScaleTool::OnMouseDrag( FOdysseyVectorEngine* iEngine
-                                                      , FOdysseyVectorScene* iScene
-                                                      , const FOdysseyPoint& iPointInTexture )
+UOdysseyPainterEditorVectorSceneScaleTool::OnMouseDragVector( FOdysseyVectorEngine* iEngine
+                                                            , FOdysseyVectorScene* iScene
+                                                            , const FOdysseyPoint& iPointInTexture )
 {
     uint32 imageWidth, imageHeight;
      double factor;
@@ -76,10 +76,10 @@ UOdysseyPainterEditorVectorSceneScaleTool::OnMouseDrag( FOdysseyVectorEngine* iE
 }
 
 bool
-UOdysseyPainterEditorVectorSceneScaleTool::OnMouseUp( FOdysseyVectorEngine* iEngine
-                                                    , FOdysseyVectorScene* iScene
-                                                    , const FOdysseyPoint& iPointInTexture
-                                                    , const FKey& iKey )
+UOdysseyPainterEditorVectorSceneScaleTool::OnMouseUpVector( FOdysseyVectorEngine* iEngine
+                                                          , FOdysseyVectorScene* iScene
+                                                          , const FOdysseyPoint& iPointInTexture
+                                                          , const FKey& iKey )
 {
     return true;
 }

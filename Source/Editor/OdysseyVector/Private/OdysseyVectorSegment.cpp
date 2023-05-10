@@ -13,8 +13,8 @@ FOdysseyVectorSegment::FOdysseyVectorSegment( FOdysseyVectorPath* iPath
                                             , FOdysseyVectorVertex* iVertex0
                                             , FOdysseyVectorVertex* iVertex1 )
     : FOdysseyVectorLink ()
-    , mIsInvalidated( false )
     , mPath ( iPath )
+    , mIsInvalidated( false )
     , mPaintingCode ( 0 )
 {
     FOdysseyVectorLink::Init ( iVertex0, iVertex1 );

@@ -13,11 +13,11 @@ UOdysseyPainterEditorVectorPathDrawingTool::~UOdysseyPainterEditorVectorPathDraw
 
 UOdysseyPainterEditorVectorPathDrawingTool::UOdysseyPainterEditorVectorPathDrawingTool()
     : Radius( 5.0f )
+    , Absolute( true )
     , Stitch( true )
     , StitchingRadius( 10 )
-    , Absolute( true )
-    , mPreviousVertex( nullptr )
     , mPathBuilder( nullptr )
+    , mPreviousVertex( nullptr )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.VectoPen64");
 
@@ -29,7 +29,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::UOdysseyPainterEditorVectorPathDrawi
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
 void
-UOdysseyPainterEditorVectorPathDrawingTool::Activate( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorPathDrawingTool::ActivateVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
     iEngine->ClearHUD();
     iEngine->AddHUD( &mPathDrawingHUD );
@@ -85,10 +85,10 @@ UOdysseyPainterEditorVectorPathDrawingTool::PickVertex( FOdysseyVectorEngine* iV
 }
 
 bool
-UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDown( FOdysseyVectorEngine* iEngine
-                                                       , FOdysseyVectorScene* iScene
-                                                       , const FOdysseyPoint& iPointInTexture
-                                                       , const FKey& iKey )
+UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorEngine* iEngine
+                                                             , FOdysseyVectorScene* iScene
+                                                             , const FOdysseyPoint& iPointInTexture
+                                                             , const FKey& iKey )
 {
     ::ULIS::FColor color = GetEditorAs<FOdysseyPainterEditor>()->PaintColor().GetValue();
     ::ULIS::FColor rgba8 = color.ToFormat( ::ULIS::eFormat::Format_RGBA8 );
@@ -161,17 +161,17 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDown( FOdysseyVectorEngine* i
 }
 
 void
-UOdysseyPainterEditorVectorPathDrawingTool::OnMouseHover( FOdysseyVectorEngine* iEngine
-                                                        , FOdysseyVectorScene* iScene
-                                                        , const FOdysseyPoint& iPointInTexture )
+UOdysseyPainterEditorVectorPathDrawingTool::OnMouseHoverVector( FOdysseyVectorEngine* iEngine
+                                                              , FOdysseyVectorScene* iScene
+                                                              , const FOdysseyPoint& iPointInTexture )
 {
     mPathDrawingHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
 }
 
 ::ULIS::FRectI
-UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDrag( FOdysseyVectorEngine* iEngine
-                                                       , FOdysseyVectorScene* iScene
-                                                       , const FOdysseyPoint& iPointInTexture )
+UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( FOdysseyVectorEngine* iEngine
+                                                             , FOdysseyVectorScene* iScene
+                                                             , const FOdysseyPoint& iPointInTexture )
 {
     mPointRadius =  iPointInTexture.pressure * Radius;
 
@@ -211,11 +211,11 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDrag( FOdysseyVectorEngine* i
 }
 
 bool
-UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUp( FOdysseyVectorEngine* iEngine
-                                                     , FOdysseyVectorScene* iScene
-                                                     , FOdysseyVectorUndo** iUndo
-                                                     , const FOdysseyPoint& iPointInTexture
-                                                     , const FKey& iKey )
+UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorEngine* iEngine
+                                                           , FOdysseyVectorScene* iScene
+                                                           , FOdysseyVectorUndo** iUndo
+                                                           , const FOdysseyPoint& iPointInTexture
+                                                           , const FKey& iKey )
 {
     if( mPathBuilder )
     {

@@ -18,17 +18,17 @@ UOdysseyPainterEditorVectorScenePanTool::UOdysseyPainterEditorVectorScenePanTool
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
 void
-UOdysseyPainterEditorVectorScenePanTool::Activate( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorScenePanTool::ActivateVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
     iEngine->ClearHUD();
 }
 
 bool
-UOdysseyPainterEditorVectorScenePanTool::OnMouseDown( FOdysseyVectorEngine* iEngine
-                                                    , FOdysseyVectorScene* iScene
-                                                    , FOdysseyVectorUndo** iUndo
-                                                    , const FOdysseyPoint& iPointInTexture
-                                                    , const FKey& iKey )
+UOdysseyPainterEditorVectorScenePanTool::OnMouseDownVector( FOdysseyVectorEngine* iEngine
+                                                          , FOdysseyVectorScene* iScene
+                                                          , FOdysseyVectorUndo** iUndo
+                                                          , const FOdysseyPoint& iPointInTexture
+                                                          , const FKey& iKey )
 {
     // BeginTransaction() must be called for GUndo to have a value. Please do it in the caller function.
     if( iUndo && GUndo )
@@ -43,9 +43,9 @@ UOdysseyPainterEditorVectorScenePanTool::OnMouseDown( FOdysseyVectorEngine* iEng
 }
 
 void
-UOdysseyPainterEditorVectorScenePanTool::OnMouseDrag( FOdysseyVectorEngine* iEngine
-                                                    , FOdysseyVectorScene* iScene
-                                                    , const FOdysseyPoint& iPointInTexture )
+UOdysseyPainterEditorVectorScenePanTool::OnMouseDragVector( FOdysseyVectorEngine* iEngine
+                                                          , FOdysseyVectorScene* iScene
+                                                          , const FOdysseyPoint& iPointInTexture )
 {
     iScene->Translate( iScene->GetTranslationX() + iPointInTexture.deltaPosition.X
                      , iScene->GetTranslationY() + iPointInTexture.deltaPosition.Y );
@@ -54,10 +54,10 @@ UOdysseyPainterEditorVectorScenePanTool::OnMouseDrag( FOdysseyVectorEngine* iEng
 }
 
 bool
-UOdysseyPainterEditorVectorScenePanTool::OnMouseUp( FOdysseyVectorEngine* iEngine
-                                                  , FOdysseyVectorScene* iScene
-                                                  , const FOdysseyPoint& iPointInTexture
-                                                  , const FKey& iKey )
+UOdysseyPainterEditorVectorScenePanTool::OnMouseUpVector( FOdysseyVectorEngine* iEngine
+                                                        , FOdysseyVectorScene* iScene
+                                                        , const FOdysseyPoint& iPointInTexture
+                                                        , const FKey& iKey )
 {
     return true;
 }

@@ -19,17 +19,17 @@ UOdysseyPainterEditorVectorPathCutTool::UOdysseyPainterEditorVectorPathCutTool()
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
 void
-UOdysseyPainterEditorVectorPathCutTool::Activate( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorPathCutTool::ActivateVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
     iEngine->ClearHUD();
     iEngine->AddHUD(&mCubicPathHUD);
 }
 
 bool
-UOdysseyPainterEditorVectorPathCutTool::OnMouseDown( FOdysseyVectorEngine* iEngine
-                                                   , FOdysseyVectorScene* iScene
-                                                   , const FOdysseyPoint& iPointInTexture
-                                                   , const FKey& iKey )
+UOdysseyPainterEditorVectorPathCutTool::OnMouseDownVector( FOdysseyVectorEngine* iEngine
+                                                         , FOdysseyVectorScene* iScene
+                                                         , const FOdysseyPoint& iPointInTexture
+                                                         , const FKey& iKey )
 {
     FOdysseyVectorObject* selectedObject = iScene->GetLastSelected();
 
@@ -50,9 +50,9 @@ UOdysseyPainterEditorVectorPathCutTool::OnMouseDown( FOdysseyVectorEngine* iEngi
 }
 
 void
-UOdysseyPainterEditorVectorPathCutTool::OnMouseDrag( FOdysseyVectorEngine* iEngine
-                                                   , FOdysseyVectorScene* iScene
-                                                   , const FOdysseyPoint& iPointInTexture )
+UOdysseyPainterEditorVectorPathCutTool::OnMouseDragVector( FOdysseyVectorEngine* iEngine
+                                                         , FOdysseyVectorScene* iScene
+                                                         , const FOdysseyPoint& iPointInTexture )
 {
     ::ULIS::FVec2D& p0 = mLineHUD.GetP0();
     ::ULIS::FVec2D& p1 = mLineHUD.GetP1();
@@ -65,11 +65,11 @@ UOdysseyPainterEditorVectorPathCutTool::OnMouseDrag( FOdysseyVectorEngine* iEngi
 }
 
 bool
-UOdysseyPainterEditorVectorPathCutTool::OnMouseUp( FOdysseyVectorEngine* iEngine
-                                                 , FOdysseyVectorScene* iScene
-                                                 , FOdysseyVectorUndo** iUndo
-                                                 , const FOdysseyPoint& iPointInTexture
-                                                 , const FKey& iKey )
+UOdysseyPainterEditorVectorPathCutTool::OnMouseUpVector( FOdysseyVectorEngine* iEngine
+                                                       , FOdysseyVectorScene* iScene
+                                                       , FOdysseyVectorUndo** iUndo
+                                                       , const FOdysseyPoint& iPointInTexture
+                                                       , const FKey& iKey )
 {
     FOdysseyVectorObject* selectedObject = iScene->GetLastSelected();
     std::vector<FOdysseyVectorVertex*> addedVertexArray;

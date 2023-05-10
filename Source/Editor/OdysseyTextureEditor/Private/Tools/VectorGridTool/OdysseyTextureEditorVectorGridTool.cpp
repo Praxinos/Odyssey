@@ -34,7 +34,7 @@ UOdysseyTextureEditorVectorGridTool::Activate()
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        UOdysseyPainterEditorVectorGridTool::Activate( vectorEngine, vectorScene );
+        UOdysseyPainterEditorVectorGridTool::ActivateVector( vectorEngine, vectorScene );
 
         currentVectorLayer->RenderImageChanged(false);
     }
@@ -111,7 +111,7 @@ UOdysseyTextureEditorVectorGridTool::OnMouseDown( const FOdysseyPoint& iPointInT
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
         FOdysseyVectorUndo* undo = nullptr;
 
-        ret = UOdysseyPainterEditorVectorGridTool::OnMouseDown( vectorEngine, vectorScene, &undo, iPointInTexture, iKey );
+        ret = UOdysseyPainterEditorVectorGridTool::OnMouseDownVector( vectorEngine, vectorScene, &undo, iPointInTexture, iKey );
 
         if( undo )
         {
@@ -138,7 +138,7 @@ UOdysseyTextureEditorVectorGridTool::OnMouseDrag( const FOdysseyPoint& iPointInT
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        UOdysseyPainterEditorVectorGridTool::OnMouseDrag( vectorEngine, vectorScene, iPointInTexture );
+        UOdysseyPainterEditorVectorGridTool::OnMouseDragVector( vectorEngine, vectorScene, iPointInTexture );
 
         currentVectorLayer->RenderImageChanged(true);
     }
@@ -156,7 +156,7 @@ UOdysseyTextureEditorVectorGridTool::OnMouseUp( const FOdysseyPoint& iPointInTex
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        ret = UOdysseyPainterEditorVectorGridTool::OnMouseUp( vectorEngine, vectorScene, iPointInTexture, iKey );
+        ret = UOdysseyPainterEditorVectorGridTool::OnMouseUpVector( vectorEngine, vectorScene, iPointInTexture, iKey );
 
         currentVectorLayer->RenderImageChanged(false);
     }
@@ -181,7 +181,7 @@ UOdysseyTextureEditorVectorGridTool::PostEditChangeProperty( FPropertyChangedEve
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        PropertyChanged( vectorEngine, vectorScene, PropertyChangedEvent.GetPropertyName());
+        PropertyChangedVector( vectorEngine, vectorScene, PropertyChangedEvent.GetPropertyName());
 
         currentVectorLayer->RenderImageChanged(false);
     }

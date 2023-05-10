@@ -10,9 +10,9 @@ UOdysseyPainterEditorVectorPathPushTool::~UOdysseyPainterEditorVectorPathPushToo
 }
 
 UOdysseyPainterEditorVectorPathPushTool::UOdysseyPainterEditorVectorPathPushTool()
-    : Radius(20.0f)
-    , PreserveSmoothness(true)
-    , mPickingHUD()
+    : mPickingHUD()
+    , Radius( 20.0f )
+    , PreserveSmoothness( true )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathPushTool64");
 
@@ -23,7 +23,7 @@ UOdysseyPainterEditorVectorPathPushTool::UOdysseyPainterEditorVectorPathPushTool
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
 void
-UOdysseyPainterEditorVectorPathPushTool::Activate( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorPathPushTool::ActivateVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
     iEngine->ClearHUD();
     iEngine->AddHUD(&mPickingHUD);
@@ -46,11 +46,11 @@ UOdysseyPainterEditorVectorPathPushTool::HasVertex( FOdysseyVectorPoint* iPoint 
 }
 
 bool
-UOdysseyPainterEditorVectorPathPushTool::OnMouseDown( FOdysseyVectorEngine* iEngine
-                                                    , FOdysseyVectorScene* iScene
-                                                    , FOdysseyVectorUndo** iUndo
-                                                    , const FOdysseyPoint& iPointInTexture
-                                                    , const FKey& iKey )
+UOdysseyPainterEditorVectorPathPushTool::OnMouseDownVector( FOdysseyVectorEngine* iEngine
+                                                          , FOdysseyVectorScene* iScene
+                                                          , FOdysseyVectorUndo** iUndo
+                                                          , const FOdysseyPoint& iPointInTexture
+                                                          , const FKey& iKey )
 {
     std::vector<double> pickedSegmentDistanceArray;
 
@@ -118,9 +118,9 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDown( FOdysseyVectorEngine* iEng
 }
 
 void
-UOdysseyPainterEditorVectorPathPushTool::OnMouseHover( FOdysseyVectorEngine* iEngine
-                                                     , FOdysseyVectorScene* iScene
-                                                     , const FOdysseyPoint& iPointInTexture )
+UOdysseyPainterEditorVectorPathPushTool::OnMouseHoverVector( FOdysseyVectorEngine* iEngine
+                                                           , FOdysseyVectorScene* iScene
+                                                           , const FOdysseyPoint& iPointInTexture )
 {
     double diameter = Radius * 2.0f;
     ::ULIS::FRectI rect = { (int)iPointInTexture.x - (int)Radius
@@ -141,9 +141,9 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseHover( FOdysseyVectorEngine* iEn
 }
 
 void
-UOdysseyPainterEditorVectorPathPushTool::OnMouseDrag( FOdysseyVectorEngine* iEngine
-                                                    , FOdysseyVectorScene* iScene
-                                                    , const FOdysseyPoint& iPointInTexture )
+UOdysseyPainterEditorVectorPathPushTool::OnMouseDragVector( FOdysseyVectorEngine* iEngine
+                                                          , FOdysseyVectorScene* iScene
+                                                          , const FOdysseyPoint& iPointInTexture )
 {
     mPickingHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
 
@@ -194,10 +194,10 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDrag( FOdysseyVectorEngine* iEng
 }
 
 bool
-UOdysseyPainterEditorVectorPathPushTool::OnMouseUp( FOdysseyVectorEngine* iEngine
-                                                  , FOdysseyVectorScene* iScene
-                                                  , const FOdysseyPoint& iPointInTexture
-                                                  , const FKey& iKey )
+UOdysseyPainterEditorVectorPathPushTool::OnMouseUpVector( FOdysseyVectorEngine* iEngine
+                                                        , FOdysseyVectorScene* iScene
+                                                        , const FOdysseyPoint& iPointInTexture
+                                                        , const FKey& iKey )
 {
     if( mUndoSegmentReshape )
     {

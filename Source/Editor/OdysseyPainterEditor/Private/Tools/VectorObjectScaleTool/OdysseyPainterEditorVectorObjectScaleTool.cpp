@@ -22,13 +22,6 @@ UOdysseyPainterEditorVectorObjectScaleTool::UOdysseyPainterEditorVectorObjectSca
     mTransformHUD = new FOdysseyVectorHUDScale( );
 }
 
-// refresh on Undo for example (we need to reset the selection box as if the tool was activated)
-void
-UOdysseyPainterEditorVectorObjectScaleTool::OnRefresh( FOdysseyVectorScene* iScene )
-{
-    FitHUD( iScene );
-}
-
 void
 UOdysseyPainterEditorVectorObjectScaleTool::FitHUD( FOdysseyVectorScene* iScene )
 {
@@ -39,7 +32,8 @@ UOdysseyPainterEditorVectorObjectScaleTool::FitHUD( FOdysseyVectorScene* iScene 
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
 void
-UOdysseyPainterEditorVectorObjectScaleTool::Activate( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorObjectScaleTool::ActivateVector( FOdysseyVectorEngine* iEngine
+                                                          , FOdysseyVectorScene* iScene )
 {
     FitHUD( iScene );
 
@@ -48,11 +42,11 @@ UOdysseyPainterEditorVectorObjectScaleTool::Activate( FOdysseyVectorEngine* iEng
 }
 
 bool
-UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDown( FOdysseyVectorEngine* iEngine
-                                                       , FOdysseyVectorScene* iScene
-                                                       , FOdysseyVectorUndo** iUndo
-                                                       , const FOdysseyPoint& iPointInTexture
-                                                       , const FKey& iKey )
+UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDownVector( FOdysseyVectorEngine* iEngine
+                                                             , FOdysseyVectorScene* iScene
+                                                             , FOdysseyVectorUndo** iUndo
+                                                             , const FOdysseyPoint& iPointInTexture
+                                                             , const FKey& iKey )
 {
     FSelectionBox& selectionBox = mTransformHUD->GetSelectionBox();
 
@@ -79,9 +73,9 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDown( FOdysseyVectorEngine* i
 }
 
 void
-UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDrag( FOdysseyVectorEngine* iEngine
-                                                       , FOdysseyVectorScene* iScene
-                                                       , const FOdysseyPoint& iPointInTexture )
+UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDragVector( FOdysseyVectorEngine* iEngine
+                                                             , FOdysseyVectorScene* iScene
+                                                             , const FOdysseyPoint& iPointInTexture )
 {
     FSelectionBox& selectionBox = mTransformHUD->GetSelectionBox();
 
@@ -99,7 +93,7 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDrag( FOdysseyVectorEngine* i
              , oldY2 = selectionBox.rect.y + selectionBox.rect.h;
         double oldDiagonal = sqrt( ( selectionBox.rect.w * selectionBox.rect.w )
                                  + ( selectionBox.rect.h * selectionBox.rect.h ) );
-        double x1, y1, x2, y2;
+        double x1 = 0.0f, y1 = 0.0f, x2 = 0.0f, y2 = 0.0f;
         ::ULIS::FVec2D pivot;
 
         if ( mPickedHandle == 0 )
@@ -229,10 +223,10 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDrag( FOdysseyVectorEngine* i
 }
 
 bool
-UOdysseyPainterEditorVectorObjectScaleTool::OnMouseUp( FOdysseyVectorEngine* iEngine
-                                                     , FOdysseyVectorScene* iScene
-                                                     , const FOdysseyPoint& iPointInTexture
-                                                     , const FKey& iKey )
+UOdysseyPainterEditorVectorObjectScaleTool::OnMouseUpVector( FOdysseyVectorEngine* iEngine
+                                                           , FOdysseyVectorScene* iScene
+                                                           , const FOdysseyPoint& iPointInTexture
+                                                           , const FKey& iKey )
 {
     iScene->Update( 0 );
 

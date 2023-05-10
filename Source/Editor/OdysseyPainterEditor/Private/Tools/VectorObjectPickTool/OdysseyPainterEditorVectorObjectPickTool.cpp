@@ -22,10 +22,10 @@ UOdysseyPainterEditorVectorObjectPickTool::UOdysseyPainterEditorVectorObjectPick
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
 void
-UOdysseyPainterEditorVectorObjectPickTool::Activate( FOdysseyVectorEngine* iEngine
-                                                   , FOdysseyVectorScene* iScene
-                                                   , int32 iSizeX
-                                                   , int32 iSizeY )
+UOdysseyPainterEditorVectorObjectPickTool::ActivateVector( FOdysseyVectorEngine* iEngine
+                                                         , FOdysseyVectorScene* iScene
+                                                         , int32 iSizeX
+                                                         , int32 iSizeY )
 {
     mSelectionHUD->Init( iSizeX, iSizeY );
     mSelectionHUD->UpdateSelectionBox( iScene );
@@ -87,10 +87,10 @@ UOdysseyPainterEditorVectorObjectPickTool::Paste( FOdysseyVectorEngine* iEngine
 }
 
 bool
-UOdysseyPainterEditorVectorObjectPickTool::OnKeyDown( FOdysseyVectorEngine* iEngine
-                                                    , FOdysseyVectorScene* iScene
-                                                    , FOdysseyVectorUndo** iUndo
-                                                    , const FKey& iKey )
+UOdysseyPainterEditorVectorObjectPickTool::OnKeyDownVector( FOdysseyVectorEngine* iEngine
+                                                          , FOdysseyVectorScene* iScene
+                                                          , FOdysseyVectorUndo** iUndo
+                                                          , const FKey& iKey )
 {
     if( FSlateApplication::Get().GetModifierKeys().IsControlDown() )
     {
@@ -109,18 +109,18 @@ UOdysseyPainterEditorVectorObjectPickTool::OnKeyDown( FOdysseyVectorEngine* iEng
 }
 
 bool
-UOdysseyPainterEditorVectorObjectPickTool::OnKeyUp( FOdysseyVectorEngine* iEngine
-                                                  , FOdysseyVectorScene* iScene
-                                                  , const FKey& iKey )
+UOdysseyPainterEditorVectorObjectPickTool::OnKeyUpVector( FOdysseyVectorEngine* iEngine
+                                                        , FOdysseyVectorScene* iScene
+                                                        , const FKey& iKey )
 {
     return false;
 }
 
 bool
-UOdysseyPainterEditorVectorObjectPickTool::OnMouseDown( FOdysseyVectorEngine* iEngine
-                                                      , FOdysseyVectorScene* iScene
-                                                      , const FOdysseyPoint& iPointInTexture
-                                                      , const FKey& iKey )
+UOdysseyPainterEditorVectorObjectPickTool::OnMouseDownVector( FOdysseyVectorEngine* iEngine
+                                                            , FOdysseyVectorScene* iScene
+                                                            , const FOdysseyPoint& iPointInTexture
+                                                            , const FKey& iKey )
 {
     ::ULIS::FVec2D point = { iPointInTexture.x, iPointInTexture.y };
 
@@ -134,9 +134,9 @@ UOdysseyPainterEditorVectorObjectPickTool::OnMouseDown( FOdysseyVectorEngine* iE
 }
 
 void
-UOdysseyPainterEditorVectorObjectPickTool::OnMouseDrag( FOdysseyVectorEngine* iEngine
-                                                      , FOdysseyVectorScene* iScene
-                                                      , const FOdysseyPoint& iPointInTexture )
+UOdysseyPainterEditorVectorObjectPickTool::OnMouseDragVector( FOdysseyVectorEngine* iEngine
+                                                            , FOdysseyVectorScene* iScene
+                                                            , const FOdysseyPoint& iPointInTexture )
 {
     ::ULIS::FVec2D point = { iPointInTexture.x, iPointInTexture.y };
 
@@ -176,11 +176,11 @@ SetSelectionSpace( FOdysseyVectorEngine* iVectorEngine, FOdysseyVectorObject* iS
 }
 
 bool
-UOdysseyPainterEditorVectorObjectPickTool::OnMouseUp( FOdysseyVectorEngine* iEngine
-                                                    , FOdysseyVectorScene* iScene
-                                                    , FOdysseyVectorUndo** iUndo
-                                                    , const FOdysseyPoint& iPointInTexture
-                                                    , const FKey& iKey )
+UOdysseyPainterEditorVectorObjectPickTool::OnMouseUpVector( FOdysseyVectorEngine* iEngine
+                                                          , FOdysseyVectorScene* iScene
+                                                          , FOdysseyVectorUndo** iUndo
+                                                          , const FOdysseyPoint& iPointInTexture
+                                                          , const FKey& iKey )
 {
     FOdysseyVectorUndoSelect* undoSelect = nullptr;
 

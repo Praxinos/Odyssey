@@ -41,7 +41,7 @@ UOdysseyTextureEditorVectorObjectMoveTool::Activate()
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        UOdysseyPainterEditorVectorObjectMoveTool::Activate( vectorEngine, vectorScene );
+        UOdysseyPainterEditorVectorObjectMoveTool::ActivateVector( vectorEngine, vectorScene );
 
         currentVectorLayer->RenderImageChanged(false);
     }
@@ -118,7 +118,7 @@ UOdysseyTextureEditorVectorObjectMoveTool::OnMouseDown( const FOdysseyPoint& iPo
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
         FOdysseyVectorUndo* undo = nullptr;
 
-        ret = UOdysseyPainterEditorVectorObjectMoveTool::OnMouseDown( vectorEngine, vectorScene, &undo, iPointInTexture, iKey );
+        ret = UOdysseyPainterEditorVectorObjectMoveTool::OnMouseDownVector( vectorEngine, vectorScene, &undo, iPointInTexture, iKey );
 
         if( undo )
         {
@@ -148,7 +148,7 @@ UOdysseyTextureEditorVectorObjectMoveTool::OnMouseDrag( const FOdysseyPoint& iPo
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        UOdysseyPainterEditorVectorObjectMoveTool::OnMouseDrag( vectorEngine, vectorScene, iPointInTexture );
+        UOdysseyPainterEditorVectorObjectMoveTool::OnMouseDragVector( vectorEngine, vectorScene, iPointInTexture );
 
         currentVectorLayer->RenderImageChanged(true);
 
@@ -169,7 +169,7 @@ UOdysseyTextureEditorVectorObjectMoveTool::OnMouseUp( const FOdysseyPoint& iPoin
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        ret = UOdysseyPainterEditorVectorObjectMoveTool::OnMouseUp( vectorEngine, vectorScene, iPointInTexture, iKey );
+        ret = UOdysseyPainterEditorVectorObjectMoveTool::OnMouseUpVector( vectorEngine, vectorScene, iPointInTexture, iKey );
 
         currentVectorLayer->RenderImageChanged(false);
     }

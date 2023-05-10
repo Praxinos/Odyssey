@@ -27,16 +27,29 @@ public:
     //Constructor
     UOdysseyPainterEditorVectorObjectPickTool();
  
-    void Activate( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, int32 iSizeX, int32 iSizeY );
-    bool OnMouseDown( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture, const FKey& iKey );
-    void OnMouseDrag( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture );
-    bool OnMouseUp( FOdysseyVectorEngine* iEngine
-                  , FOdysseyVectorScene* iScene
-                  , FOdysseyVectorUndo** iUndo
-                  , const FOdysseyPoint& iPointInTexture
-                  , const FKey& iKey );
-    bool OnKeyDown( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, FOdysseyVectorUndo** iUndo, const FKey& iKey );
-    bool OnKeyUp( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FKey& iKey );
+    void ActivateVector( FOdysseyVectorEngine* iEngine
+                       , FOdysseyVectorScene* iScene
+                       , int32 iSizeX
+                       , int32 iSizeY );
+    bool OnMouseDownVector( FOdysseyVectorEngine* iEngine
+                          , FOdysseyVectorScene* iScene
+                          , const FOdysseyPoint& iPointInTexture
+                          , const FKey& iKey );
+    void OnMouseDragVector( FOdysseyVectorEngine* iEngine
+                          , FOdysseyVectorScene* iScene
+                          , const FOdysseyPoint& iPointInTexture );
+    bool OnMouseUpVector( FOdysseyVectorEngine* iEngine
+                        , FOdysseyVectorScene* iScene
+                        , FOdysseyVectorUndo** iUndo
+                        , const FOdysseyPoint& iPointInTexture
+                        , const FKey& iKey );
+    bool OnKeyDownVector( FOdysseyVectorEngine* iEngine
+                        , FOdysseyVectorScene* iScene
+                        , FOdysseyVectorUndo** iUndo
+                        , const FKey& iKey );
+    bool OnKeyUpVector( FOdysseyVectorEngine* iEngine
+                        , FOdysseyVectorScene* iScene
+                        , const FKey& iKey );
 
     //OdysseyPainterEditorTool overrides
     virtual void Commit() override;

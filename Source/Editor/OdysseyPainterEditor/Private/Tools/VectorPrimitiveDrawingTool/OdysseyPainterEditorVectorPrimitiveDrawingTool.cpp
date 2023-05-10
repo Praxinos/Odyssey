@@ -19,16 +19,16 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::UOdysseyPainterEditorVectorPrim
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
 void
-UOdysseyPainterEditorVectorPrimitiveDrawingTool::Activate( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorPrimitiveDrawingTool::ActivateVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
     iEngine->ClearHUD();
 }
 
 bool
-UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDown( FOdysseyVectorEngine* iEngine
-                                                            , FOdysseyVectorScene* iScene
-                                                            , const FOdysseyPoint& iPointInTexture
-                                                            , const FKey& iKey )
+UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDownVector( FOdysseyVectorEngine* iEngine
+                                                                  , FOdysseyVectorScene* iScene
+                                                                  , const FOdysseyPoint& iPointInTexture
+                                                                  , const FKey& iKey )
 {
     BLPoint localCoords = iScene->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
     ::ULIS::FColor color = GetEditorAs<FOdysseyPainterEditor>()->PaintColor().GetValue();
@@ -50,9 +50,9 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDown( FOdysseyVectorEngi
 }
 
 void
-UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDrag( FOdysseyVectorEngine* iEngine
-                                                            , FOdysseyVectorScene* iScene
-                                                            , const FOdysseyPoint& iPointInTexture )
+UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDragVector( FOdysseyVectorEngine* iEngine
+                                                                  , FOdysseyVectorScene* iScene
+                                                                  , const FOdysseyPoint& iPointInTexture )
 {
     FOdysseyVectorEllipse* circle = static_cast<FOdysseyVectorEllipse*>( iScene->GetLastSelected() );
 
@@ -73,11 +73,11 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDrag( FOdysseyVectorEngi
 }
 
 bool
-UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseUp( FOdysseyVectorEngine* iEngine
-                                                          , FOdysseyVectorScene* iScene
-                                                          , FOdysseyVectorUndo** iUndo
-                                                          , const FOdysseyPoint& iPointInTexture
-                                                          , const FKey& iKey )
+UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseUpVector( FOdysseyVectorEngine* iEngine
+                                                                , FOdysseyVectorScene* iScene
+                                                                , FOdysseyVectorUndo** iUndo
+                                                                , const FOdysseyPoint& iPointInTexture
+                                                                , const FKey& iKey )
 {
     FOdysseyVectorEllipse* ellipse = static_cast<FOdysseyVectorEllipse*>( iScene->GetLastSelected() );
 

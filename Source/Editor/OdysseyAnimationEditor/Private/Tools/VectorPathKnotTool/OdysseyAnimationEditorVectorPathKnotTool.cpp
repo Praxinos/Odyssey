@@ -34,7 +34,7 @@ UOdysseyAnimationEditorVectorPathKnotTool::Activate()
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        UOdysseyPainterEditorVectorPathKnotTool::Activate( vectorEngine, vectorScene );
+        UOdysseyPainterEditorVectorPathKnotTool::ActivateVector( vectorEngine, vectorScene );
 
         currentVectorLayer->RenderImageChanged(false);
     }
@@ -106,7 +106,7 @@ UOdysseyAnimationEditorVectorPathKnotTool::OnMouseDown( const FOdysseyPoint& iPo
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        ret = UOdysseyPainterEditorVectorPathKnotTool::OnMouseDown( vectorEngine, vectorScene, nullptr, iPointInTexture,iKey  );
+        ret = UOdysseyPainterEditorVectorPathKnotTool::OnMouseDownVector( vectorEngine, vectorScene, nullptr, iPointInTexture,iKey  );
 
         currentVectorLayer->RenderImageChanged(false);
     }
@@ -125,7 +125,7 @@ UOdysseyAnimationEditorVectorPathKnotTool::OnMouseHover( const FOdysseyPoint& iP
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        UOdysseyPainterEditorVectorPathKnotTool::OnMouseHover( vectorEngine, vectorScene, iPointInTexture );
+        UOdysseyPainterEditorVectorPathKnotTool::OnMouseHoverVector( vectorEngine, vectorScene, iPointInTexture );
 
         currentVectorLayer->RenderImageChanged(true);
     }
@@ -142,7 +142,7 @@ UOdysseyAnimationEditorVectorPathKnotTool::OnMouseDrag( const FOdysseyPoint& iPo
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        UOdysseyPainterEditorVectorPathKnotTool::OnMouseDrag( vectorEngine, vectorScene, iPointInTexture );
+        UOdysseyPainterEditorVectorPathKnotTool::OnMouseDragVector( vectorEngine, vectorScene, iPointInTexture );
 
         currentVectorLayer->RenderImageChanged(true);
     }
@@ -160,7 +160,7 @@ UOdysseyAnimationEditorVectorPathKnotTool::OnMouseUp( const FOdysseyPoint& iPoin
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        ret = UOdysseyPainterEditorVectorPathKnotTool::OnMouseUp( vectorEngine, vectorScene, iPointInTexture, iKey );
+        ret = UOdysseyPainterEditorVectorPathKnotTool::OnMouseUpVector( vectorEngine, vectorScene, iPointInTexture, iKey );
 
         currentVectorLayer->RenderImageChanged(false);
     }

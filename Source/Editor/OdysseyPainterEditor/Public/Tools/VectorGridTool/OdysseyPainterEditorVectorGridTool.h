@@ -23,15 +23,23 @@ public:
     //Constructor
     UOdysseyPainterEditorVectorGridTool();
  
-    void Activate( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    bool OnMouseDown( FOdysseyVectorEngine* iEngine
-                    , FOdysseyVectorScene* iScene
-                    , FOdysseyVectorUndo** iUndo
-                    , const FOdysseyPoint& iPointInTexture
-                   , const FKey& iKey );
-    void OnMouseDrag( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture );
-    bool OnMouseUp( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture, const FKey& iKey );
-    void PropertyChanged( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FName& iPropertyName );
+    void ActivateVector( FOdysseyVectorEngine* iEngine
+                       , FOdysseyVectorScene* iScene );
+    bool OnMouseDownVector( FOdysseyVectorEngine* iEngine
+                          , FOdysseyVectorScene* iScene
+                          , FOdysseyVectorUndo** iUndo
+                          , const FOdysseyPoint& iPointInTexture
+                          , const FKey& iKey );
+    void OnMouseDragVector( FOdysseyVectorEngine* iEngine
+                          , FOdysseyVectorScene* iScene
+                          , const FOdysseyPoint& iPointInTexture );
+    bool OnMouseUpVector( FOdysseyVectorEngine* iEngine
+                        , FOdysseyVectorScene* iScene
+                        , const FOdysseyPoint& iPointInTexture
+                        , const FKey& iKey );
+    void PropertyChangedVector( FOdysseyVectorEngine* iEngine
+                              , FOdysseyVectorScene* iScene
+                              , const FName& iPropertyName );
 
     //OdysseyPainterEditorTool overrides
     virtual void Commit() override;

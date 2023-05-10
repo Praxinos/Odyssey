@@ -34,7 +34,7 @@ UOdysseyAnimationEditorVectorObjectMoveTool::Activate()
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        UOdysseyPainterEditorVectorObjectMoveTool::Activate( vectorEngine, vectorScene );
+        UOdysseyPainterEditorVectorObjectMoveTool::ActivateVector( vectorEngine, vectorScene );
 
         currentVectorLayer->RenderImageChanged(false);
     }
@@ -106,7 +106,7 @@ UOdysseyAnimationEditorVectorObjectMoveTool::OnMouseDown( const FOdysseyPoint& i
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        ret = UOdysseyPainterEditorVectorObjectMoveTool::OnMouseDown( vectorEngine, vectorScene, nullptr, iPointInTexture, iKey );
+        ret = UOdysseyPainterEditorVectorObjectMoveTool::OnMouseDownVector( vectorEngine, vectorScene, nullptr, iPointInTexture, iKey );
 
         currentVectorLayer->RenderImageChanged(false);
     }
@@ -125,7 +125,7 @@ UOdysseyAnimationEditorVectorObjectMoveTool::OnMouseDrag( const FOdysseyPoint& i
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        UOdysseyPainterEditorVectorObjectMoveTool::OnMouseDrag( vectorEngine, vectorScene, iPointInTexture );
+        UOdysseyPainterEditorVectorObjectMoveTool::OnMouseDragVector( vectorEngine, vectorScene, iPointInTexture );
 
         currentVectorLayer->RenderImageChanged(true);
     }
@@ -143,7 +143,7 @@ UOdysseyAnimationEditorVectorObjectMoveTool::OnMouseUp( const FOdysseyPoint& iPo
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        ret = UOdysseyPainterEditorVectorObjectMoveTool::OnMouseUp( vectorEngine, vectorScene, iPointInTexture, iKey );
+        ret = UOdysseyPainterEditorVectorObjectMoveTool::OnMouseUpVector( vectorEngine, vectorScene, iPointInTexture, iKey );
 
         currentVectorLayer->RenderImageChanged(false);
     }

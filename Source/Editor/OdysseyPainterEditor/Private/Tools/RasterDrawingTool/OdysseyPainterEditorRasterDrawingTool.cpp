@@ -23,8 +23,8 @@ UOdysseyPainterEditorRasterDrawingTool::UOdysseyPainterEditorRasterDrawingTool()
     , Brush(nullptr)
     , BrushInstance(nullptr)
     , BrushOptions(CreateDefaultSubobject<UOdysseyBrushOptions>("UOdysseyPainterEditorRasterDrawingTool::BrushOptions", true))
-    , BlendParameters()
     , SelectedShape(EOdysseyShape::kFreehand)
+    , BlendParameters()
     , SelectedShapeInstance(nullptr)
 
     //Internal

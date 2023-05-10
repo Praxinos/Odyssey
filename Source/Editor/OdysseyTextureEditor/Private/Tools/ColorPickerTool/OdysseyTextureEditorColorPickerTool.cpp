@@ -40,7 +40,7 @@ UOdysseyTextureEditorColorPickerTool::Activate()
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        UOdysseyPainterEditorColorPickerTool::Activate( vectorEngine, vectorScene );
+        UOdysseyPainterEditorColorPickerTool::ActivateVector( vectorEngine, vectorScene );
 
         currentVectorLayer->RenderImageChanged(false);
     }

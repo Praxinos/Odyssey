@@ -22,13 +22,6 @@ UOdysseyPainterEditorVectorObjectRotateTool::UOdysseyPainterEditorVectorObjectRo
     mTransformHUD = new FOdysseyVectorHUDRotate();
 }
 
-// refresh on Undo for example (we need to reset the selection box as if the tool was activated)
-void
-UOdysseyPainterEditorVectorObjectRotateTool::OnRefresh( FOdysseyVectorScene* iScene )
-{
-    FitHUD( iScene );
-}
-
 void
 UOdysseyPainterEditorVectorObjectRotateTool::FitHUD( FOdysseyVectorScene* iScene )
 {
@@ -44,7 +37,8 @@ UOdysseyPainterEditorVectorObjectRotateTool::FitHUD( FOdysseyVectorScene* iScene
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
 void
-UOdysseyPainterEditorVectorObjectRotateTool::Activate( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorObjectRotateTool::ActivateVector( FOdysseyVectorEngine* iEngine
+                                                           , FOdysseyVectorScene* iScene )
 {
     FitHUD( iScene );
 
@@ -53,11 +47,11 @@ UOdysseyPainterEditorVectorObjectRotateTool::Activate( FOdysseyVectorEngine* iEn
 }
 
 bool
-UOdysseyPainterEditorVectorObjectRotateTool::OnMouseDown( FOdysseyVectorEngine* iEngine
-                                                        , FOdysseyVectorScene* iScene
-                                                        , FOdysseyVectorUndo** iUndo
-                                                        , const FOdysseyPoint& iPointInTexture
-                                                        , const FKey& iKey )
+UOdysseyPainterEditorVectorObjectRotateTool::OnMouseDownVector( FOdysseyVectorEngine* iEngine
+                                                              , FOdysseyVectorScene* iScene
+                                                              , FOdysseyVectorUndo** iUndo
+                                                              , const FOdysseyPoint& iPointInTexture
+                                                              , const FKey& iKey )
 {
     mPickedPivot = mTransformHUD->PickPivot( iPointInTexture.x, iPointInTexture.y ) ? &mTransformHUD->GetPivot() : nullptr;
 
@@ -76,9 +70,9 @@ UOdysseyPainterEditorVectorObjectRotateTool::OnMouseDown( FOdysseyVectorEngine* 
 }
 
 void
-UOdysseyPainterEditorVectorObjectRotateTool::OnMouseDrag( FOdysseyVectorEngine* iEngine
-                                                        , FOdysseyVectorScene* iScene
-                                                        , const FOdysseyPoint& iPointInTexture )
+UOdysseyPainterEditorVectorObjectRotateTool::OnMouseDragVector( FOdysseyVectorEngine* iEngine
+                                                              , FOdysseyVectorScene* iScene
+                                                              , const FOdysseyPoint& iPointInTexture )
 {
     FSelectionBox& selectionBox = mTransformHUD->GetSelectionBox();
 
@@ -159,10 +153,10 @@ UOdysseyPainterEditorVectorObjectRotateTool::OnMouseDrag( FOdysseyVectorEngine* 
 }
 
 bool
-UOdysseyPainterEditorVectorObjectRotateTool::OnMouseUp( FOdysseyVectorEngine* iEngine
-                                                      , FOdysseyVectorScene* iScene
-                                                      , const FOdysseyPoint& iPointInTexture
-                                                      , const FKey& iKey )
+UOdysseyPainterEditorVectorObjectRotateTool::OnMouseUpVector( FOdysseyVectorEngine* iEngine
+                                                            , FOdysseyVectorScene* iScene
+                                                            , const FOdysseyPoint& iPointInTexture
+                                                            , const FKey& iKey )
 {
     mTransformHUD->SetShowBox( true );
 

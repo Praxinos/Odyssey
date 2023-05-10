@@ -10,9 +10,9 @@ UOdysseyPainterEditorVectorPathWidthTool::~UOdysseyPainterEditorVectorPathWidthT
 }
 
 UOdysseyPainterEditorVectorPathWidthTool::UOdysseyPainterEditorVectorPathWidthTool()
-    : Radius(20.0f)
-    , Strength(0.01f) // 1 percent
-    , mPickingHUD()
+    : mPickingHUD()
+    , Radius( 20.0f )
+    , Strength( 0.01f ) // 1 percent
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathWidthTool64");
 
@@ -23,33 +23,33 @@ UOdysseyPainterEditorVectorPathWidthTool::UOdysseyPainterEditorVectorPathWidthTo
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
 void
-UOdysseyPainterEditorVectorPathWidthTool::Activate( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorPathWidthTool::ActivateVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
     iEngine->ClearHUD();
     iEngine->AddHUD(&mPickingHUD);
 }
 
 bool
-UOdysseyPainterEditorVectorPathWidthTool::OnMouseDown( FOdysseyVectorEngine* iEngine
-                                                     , FOdysseyVectorScene* iScene
-                                                     , const FOdysseyPoint& iPointInTexture
-                                                     , const FKey& iKey)
+UOdysseyPainterEditorVectorPathWidthTool::OnMouseDownVector( FOdysseyVectorEngine* iEngine
+                                                           , FOdysseyVectorScene* iScene
+                                                           , const FOdysseyPoint& iPointInTexture
+                                                           , const FKey& iKey)
 {
     return true;
 }
 
 void
-UOdysseyPainterEditorVectorPathWidthTool::OnMouseHover( FOdysseyVectorEngine* iEngine
-                                                      , FOdysseyVectorScene* iScene
-                                                      , const FOdysseyPoint& iPointInTexture )
+UOdysseyPainterEditorVectorPathWidthTool::OnMouseHoverVector( FOdysseyVectorEngine* iEngine
+                                                            , FOdysseyVectorScene* iScene
+                                                            , const FOdysseyPoint& iPointInTexture )
 {
     mPickingHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
 }
 
 void
-UOdysseyPainterEditorVectorPathWidthTool::OnMouseDrag( FOdysseyVectorEngine* iEngine
-                                                     , FOdysseyVectorScene* iScene
-                                                     , const FOdysseyPoint& iPointInTexture )
+UOdysseyPainterEditorVectorPathWidthTool::OnMouseDragVector( FOdysseyVectorEngine* iEngine
+                                                           , FOdysseyVectorScene* iScene
+                                                           , const FOdysseyPoint& iPointInTexture )
 {
     std::vector<FOdysseyVectorSegment*> segmentArray;
 
@@ -90,10 +90,10 @@ UOdysseyPainterEditorVectorPathWidthTool::OnMouseDrag( FOdysseyVectorEngine* iEn
 }
 
 bool
-UOdysseyPainterEditorVectorPathWidthTool::OnMouseUp( FOdysseyVectorEngine* iEngine
-                                                   , FOdysseyVectorScene* iScene
-                                                   , const FOdysseyPoint& iPointInTexture
-                                                   , const FKey& iKey )
+UOdysseyPainterEditorVectorPathWidthTool::OnMouseUpVector( FOdysseyVectorEngine* iEngine
+                                                         , FOdysseyVectorScene* iScene
+                                                         , const FOdysseyPoint& iPointInTexture
+                                                         , const FKey& iKey )
 {
     iScene->Update( 0 );
 

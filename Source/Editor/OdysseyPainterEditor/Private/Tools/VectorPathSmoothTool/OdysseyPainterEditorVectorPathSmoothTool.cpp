@@ -10,8 +10,8 @@ UOdysseyPainterEditorVectorPathSmoothTool::~UOdysseyPainterEditorVectorPathSmoot
 }
 
 UOdysseyPainterEditorVectorPathSmoothTool::UOdysseyPainterEditorVectorPathSmoothTool()
-    : Radius(20.0f)
-    , mPickingHUD()
+    : mPickingHUD()
+    , Radius(20.0f)
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathSmoothTool64");
 
@@ -20,29 +20,26 @@ UOdysseyPainterEditorVectorPathSmoothTool::UOdysseyPainterEditorVectorPathSmooth
     mPickingHUD.SetRadius( Radius );
 }
 
-//--------------------------------------------------------------------------------------
-//---------------------------------------------------------------- OdysseyPainterEditorTool overrides
-
 void
-UOdysseyPainterEditorVectorPathSmoothTool::Activate( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorPathSmoothTool::ActivateVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
     iEngine->ClearHUD();
     iEngine->AddHUD(&mPickingHUD);
 }
 
 bool
-UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDown( FOdysseyVectorEngine* iEngine
-                                                      , FOdysseyVectorScene* iScene
-                                                      , const FOdysseyPoint& iPointInTexture
-                                                      , const FKey& iKey )
+UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDownVector( FOdysseyVectorEngine* iEngine
+                                                            , FOdysseyVectorScene* iScene
+                                                            , const FOdysseyPoint& iPointInTexture
+                                                            , const FKey& iKey )
 {
     return true;
 }
 
 void
-UOdysseyPainterEditorVectorPathSmoothTool::OnMouseHover( FOdysseyVectorEngine* iEngine
-                                                       , FOdysseyVectorScene* iScene
-                                                       , const FOdysseyPoint& iPointInTexture )
+UOdysseyPainterEditorVectorPathSmoothTool::OnMouseHoverVector( FOdysseyVectorEngine* iEngine
+                                                             , FOdysseyVectorScene* iScene
+                                                             , const FOdysseyPoint& iPointInTexture )
 {
     double diameter = Radius * 2.0f;
     ::ULIS::FRectI rect = { (int)iPointInTexture.x - (int)Radius
@@ -63,9 +60,9 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseHover( FOdysseyVectorEngine* i
 }
 
 void
-UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDrag( FOdysseyVectorEngine* iEngine
-                                                      , FOdysseyVectorScene* iScene
-                                                      , const FOdysseyPoint& iPointInTexture )
+UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDragVector( FOdysseyVectorEngine* iEngine
+                                                            , FOdysseyVectorScene* iScene
+                                                            , const FOdysseyPoint& iPointInTexture )
 {
     mPickingHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
 
@@ -92,10 +89,10 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDrag( FOdysseyVectorEngine* iE
 }
 
 bool
-UOdysseyPainterEditorVectorPathSmoothTool::OnMouseUp( FOdysseyVectorEngine* iEngine
-                                                    , FOdysseyVectorScene* iScene
-                                                    , const FOdysseyPoint& iPointInTexture
-                                                    , const FKey& iKey )
+UOdysseyPainterEditorVectorPathSmoothTool::OnMouseUpVector( FOdysseyVectorEngine* iEngine
+                                                          , FOdysseyVectorScene* iScene
+                                                          , const FOdysseyPoint& iPointInTexture
+                                                          , const FKey& iKey )
 {
 
     return false;

@@ -34,7 +34,7 @@ UOdysseyAnimationEditorVectorObjectScaleTool::Activate()
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        UOdysseyPainterEditorVectorObjectScaleTool::Activate( vectorEngine, vectorScene );
+        UOdysseyPainterEditorVectorObjectScaleTool::ActivateVector( vectorEngine, vectorScene );
 
         currentVectorLayer->RenderImageChanged(false);
     }
@@ -96,7 +96,7 @@ UOdysseyAnimationEditorVectorObjectScaleTool::OnCurrentLayerChanged(UOdysseyLaye
 
 bool
 UOdysseyAnimationEditorVectorObjectScaleTool::OnMouseDown( const FOdysseyPoint& iPointInTexture
-                                                       , const FKey& iKey )
+                                                         , const FKey& iKey )
 {
     UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(GetEditorAs<FOdysseyAnimationEditor>()->LayerStack());
     UOdysseyAnimationLayerImageVector* currentVectorLayer = Cast<UOdysseyAnimationLayerImageVector>(layerStack->CurrentLayer.Get());
@@ -107,7 +107,7 @@ UOdysseyAnimationEditorVectorObjectScaleTool::OnMouseDown( const FOdysseyPoint& 
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        ret = UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDown( vectorEngine, vectorScene, nullptr, iPointInTexture,iKey  );
+        ret = UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDownVector( vectorEngine, vectorScene, nullptr, iPointInTexture,iKey  );
 
         currentVectorLayer->RenderImageChanged(false);
     }
@@ -126,7 +126,7 @@ UOdysseyAnimationEditorVectorObjectScaleTool::OnMouseDrag( const FOdysseyPoint& 
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDrag( vectorEngine, vectorScene, iPointInTexture );
+        UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDragVector( vectorEngine, vectorScene, iPointInTexture );
 
         currentVectorLayer->RenderImageChanged(true);
     }
@@ -134,7 +134,7 @@ UOdysseyAnimationEditorVectorObjectScaleTool::OnMouseDrag( const FOdysseyPoint& 
 
 bool
 UOdysseyAnimationEditorVectorObjectScaleTool::OnMouseUp( const FOdysseyPoint& iPointInTexture
-                                                     , const FKey& iKey )
+                                                       , const FKey& iKey )
 {
     UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(GetEditorAs<FOdysseyAnimationEditor>()->LayerStack());
     UOdysseyAnimationLayerImageVector* currentVectorLayer = Cast<UOdysseyAnimationLayerImageVector>(layerStack->CurrentLayer.Get());
@@ -145,7 +145,7 @@ UOdysseyAnimationEditorVectorObjectScaleTool::OnMouseUp( const FOdysseyPoint& iP
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        ret = UOdysseyPainterEditorVectorObjectScaleTool::OnMouseUp( vectorEngine, vectorScene, iPointInTexture, iKey );
+        ret = UOdysseyPainterEditorVectorObjectScaleTool::OnMouseUpVector( vectorEngine, vectorScene, iPointInTexture, iKey );
 
         currentVectorLayer->RenderImageChanged(false);
     }

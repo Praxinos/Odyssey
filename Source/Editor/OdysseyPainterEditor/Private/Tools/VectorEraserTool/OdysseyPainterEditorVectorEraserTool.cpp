@@ -22,7 +22,7 @@ UOdysseyPainterEditorVectorEraserTool::UOdysseyPainterEditorVectorEraserTool()
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
 void
-UOdysseyPainterEditorVectorEraserTool::Activate( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorEraserTool::ActivateVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
     iEngine->ClearHUD( );
     iEngine->AddHUD(&mEraserHUD);
@@ -81,7 +81,11 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseDragVector( FOdysseyVectorEngine* 
     mEraserHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
 
     iEngine->UseMaskImage();
-    iEngine->GetBLContext()->setFillAlpha( 1.0f );
+    iEngine->GetBLContext()->setStrokeWidth( Radius * 2 );
+    iEngine->GetBLContext()->strokeLine( iPointInTexture.x - iPointInTexture.deltaPosition.X
+                                       , iPointInTexture.y - iPointInTexture.deltaPosition.Y
+                                       , iPointInTexture.x 
+                                       , iPointInTexture.y );
     iEngine->GetBLContext()->fillCircle( iPointInTexture.x, iPointInTexture.y, Radius );
     iEngine->UseColorImage();
 }

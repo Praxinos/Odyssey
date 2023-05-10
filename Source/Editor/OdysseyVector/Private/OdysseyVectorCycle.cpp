@@ -37,7 +37,7 @@ FOdysseyVectorCycle::Merge( FOdysseyVectorCycle* iMergeCycle )
         iMergeCycle->mSectionArray[i]->AddCycle( this );
     }
 
-    mPath.addPath( iMergeCycle->mPath );
+    mCombinedPath.addPath( iMergeCycle->mContourPath );
 /*
     mMin.x = ::ULIS::FMath::Min( mMin.x, iMergeCycle->mMin.x );
     mMin.y = ::ULIS::FMath::Min( mMin.y, iMergeCycle->mMin.y );
@@ -74,7 +74,7 @@ FOdysseyVectorCycle::FitsIn( FOdysseyVectorCycle* iParentCandidate )
     {
         ::ULIS::FVec2D& vCoords = mVertexArray[i]->GetCoords();
         BLPoint pt = { vCoords.x, vCoords.y };
-        uint32 ret =  iParentCandidate->mPath.hitTest( pt, BL_FILL_RULE_EVEN_ODD );
+        uint32 ret =  iParentCandidate->mContourPath.hitTest( pt, BL_FILL_RULE_EVEN_ODD );
 
         if( ret != BL_HIT_TEST_IN )
         {
@@ -119,9 +119,9 @@ FOdysseyVectorCycle::BuildSegmentCubic( FOdysseyVectorSegmentCubic& iSegment
                                      , iFromT, iToT
                                      , samplePoint0, sampleCtrlPoint0, sampleCtrlPoint1, samplePoint1 );
 
-        mPath.cubicTo( BLPoint( sampleCtrlPoint0.x, sampleCtrlPoint0.y )
-                     , BLPoint( sampleCtrlPoint1.x, sampleCtrlPoint1.y )
-                     , BLPoint( samplePoint1.x, samplePoint1.y ) );
+        mContourPath.cubicTo( BLPoint( sampleCtrlPoint0.x, sampleCtrlPoint0.y )
+                            , BLPoint( sampleCtrlPoint1.x, sampleCtrlPoint1.y )
+                            , BLPoint( samplePoint1.x, samplePoint1.y ) );
     }
     else
     {
@@ -129,9 +129,9 @@ FOdysseyVectorCycle::BuildSegmentCubic( FOdysseyVectorSegmentCubic& iSegment
                                      , iToT, iFromT
                                      , samplePoint0, sampleCtrlPoint0, sampleCtrlPoint1, samplePoint1 );
 
-        mPath.cubicTo( BLPoint( sampleCtrlPoint1.x, sampleCtrlPoint1.y )
-                     , BLPoint( sampleCtrlPoint0.x, sampleCtrlPoint0.y )
-                     , BLPoint( samplePoint0.x, samplePoint0.y ) );
+        mContourPath.cubicTo( BLPoint( sampleCtrlPoint1.x, sampleCtrlPoint1.y )
+                            , BLPoint( sampleCtrlPoint0.x, sampleCtrlPoint0.y )
+                            , BLPoint( samplePoint0.x, samplePoint0.y ) );
     }
 }
 
@@ -146,7 +146,7 @@ FOdysseyVectorCycle::Build( std::vector<FOdysseyVectorVertex*>& iVertexArray
     {
         ::ULIS::FVec2D originAt = iVertexArray[0]->GetCoords();
 
-        mPath.moveTo( originAt.x, originAt.y );
+        mContourPath.moveTo( originAt.x, originAt.y );
 
         for( int i = 0; i < arraySize; i++ )
         {
@@ -174,20 +174,22 @@ FOdysseyVectorCycle::Build( std::vector<FOdysseyVectorVertex*>& iVertexArray
             // check it goes the same direction
             if( vertexi == sectionVertex0 )
             {
-                mPath.cubicTo( sectionBezier[1].x, sectionBezier[1].y
-                             , sectionBezier[2].x, sectionBezier[2].y
-                             , sectionBezier[3].x, sectionBezier[3].y );
+                mContourPath.cubicTo( sectionBezier[1].x, sectionBezier[1].y
+                                    , sectionBezier[2].x, sectionBezier[2].y
+                                    , sectionBezier[3].x, sectionBezier[3].y );
             }
             else
             {
-                mPath.cubicTo( sectionBezier[2].x, sectionBezier[2].y
-                             , sectionBezier[1].x, sectionBezier[1].y
-                             , sectionBezier[0].x, sectionBezier[0].y );
+                mContourPath.cubicTo( sectionBezier[2].x, sectionBezier[2].y
+                                    , sectionBezier[1].x, sectionBezier[1].y
+                                    , sectionBezier[0].x, sectionBezier[0].y );
             }
         }
 
-        mPath.close();
+        mContourPath.close();
     }
+
+    mCombinedPath = mContourPath;
 }
 
 void
@@ -259,7 +261,7 @@ FOdysseyVectorCycle::HitTest( double iX, double iY )
     BLPoint pt = { iX, iY };
 
     // WARNING: looks like in this version the return value is a bool (in the shape of an int) but in later version is a enum value. We will have to fix that.
-    uint32 ret = mPath.hitTest( pt, BL_FILL_RULE_EVEN_ODD );
+    uint32 ret = mCombinedPath.hitTest( pt, BL_FILL_RULE_EVEN_ODD );
 
     return ( ret == BL_HIT_TEST_IN ) ? true : false;
 }
@@ -268,8 +270,9 @@ void
 FOdysseyVectorCycle::FillPath()
 {
     BLContext* blctx = mParent.GetScene()->GetEngine()->GetBLContext();
+
     blctx->setFillRule( BL_FILL_RULE_EVEN_ODD );
-    blctx->fillPath( mPath );
+    blctx->fillPath( mCombinedPath );
 }
 
 void
@@ -279,7 +282,7 @@ FOdysseyVectorCycle::StrokePath( bool iWorld )
 
     if( iWorld == true )
     {
-        BLPath worldPath = mPath;
+        BLPath worldPath = mCombinedPath;
 
         worldPath.transform( mParent.GetWorldMatrix() );
 
@@ -290,7 +293,7 @@ FOdysseyVectorCycle::StrokePath( bool iWorld )
     }
     else
     {
-        blctx->strokePath( mPath );
+        blctx->strokePath( mCombinedPath );
     }
 }
 
@@ -321,7 +324,7 @@ FOdysseyVectorCycle::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
     BLMatrix2D& worldMatrix = mParent.GetWorldMatrix();
     BLBox bbox;
 
-    mPath.getBoundingBox( &bbox );
+    mContourPath.getBoundingBox( &bbox );
 
     if( bucket )
     {
@@ -380,7 +383,7 @@ FOdysseyVectorCycle::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
     }
 
     blctx->setFillRule( BL_FILL_RULE_EVEN_ODD );
-    blctx->fillPath( mPath );
+    blctx->fillPath( mCombinedPath );
 
     blctx->save();
     blctx->resetMatrix();

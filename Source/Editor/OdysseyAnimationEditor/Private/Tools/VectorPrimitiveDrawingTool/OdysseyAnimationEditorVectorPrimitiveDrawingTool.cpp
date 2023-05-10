@@ -34,7 +34,7 @@ UOdysseyAnimationEditorVectorPrimitiveDrawingTool::Activate()
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        UOdysseyPainterEditorVectorPrimitiveDrawingTool::Activate( vectorEngine, vectorScene );
+        UOdysseyPainterEditorVectorPrimitiveDrawingTool::ActivateVector( vectorEngine, vectorScene );
 
         currentVectorLayer->RenderImageChanged(false);
     }
@@ -106,7 +106,7 @@ UOdysseyAnimationEditorVectorPrimitiveDrawingTool::OnMouseDown( const FOdysseyPo
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        ret = UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDown( vectorEngine, vectorScene, iPointInTexture,iKey  );
+        ret = UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDownVector( vectorEngine, vectorScene, iPointInTexture,iKey  );
 
         currentVectorLayer->RenderImageChanged(false);
     }
@@ -125,7 +125,7 @@ UOdysseyAnimationEditorVectorPrimitiveDrawingTool::OnMouseDrag( const FOdysseyPo
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDrag( vectorEngine, vectorScene, iPointInTexture );
+        UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDragVector( vectorEngine, vectorScene, iPointInTexture );
 
         currentVectorLayer->RenderImageChanged(true);
     }
@@ -143,7 +143,7 @@ UOdysseyAnimationEditorVectorPrimitiveDrawingTool::OnMouseUp( const FOdysseyPoin
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        ret = UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseUp( vectorEngine, vectorScene, nullptr, iPointInTexture, iKey );
+        ret = UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseUpVector( vectorEngine, vectorScene, nullptr, iPointInTexture, iKey );
 
         currentVectorLayer->RenderImageChanged(false);
     }

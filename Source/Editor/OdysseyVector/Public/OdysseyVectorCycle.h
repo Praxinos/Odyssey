@@ -123,7 +123,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorCycle
         void StrokePath( bool iWorld );
 
     protected :
-        BLPath mPath;
+        BLPath mContourPath;
+        BLPath mCombinedPath;
         FOdysseyVectorObject& mParent;
         uint64 mID;
         FOdysseyVectorBucket* mBucket;

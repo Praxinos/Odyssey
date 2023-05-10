@@ -23,38 +23,6 @@ FOdysseyVectorPathCubic::Init( std::string iName )
     SetName( iName );
 }
 
-FOdysseyVectorSegmentCubic*
-FOdysseyVectorPathCubic::AppendVertex( FOdysseyVectorVertex* iVertex
-                                     , bool iConnect
-                                     , bool iBuildSegments )
-{
-    FOdysseyVectorVertex* lastVertex = static_cast<FOdysseyVectorVertex*>( GetLastVertex() );
-
-    AddVertex ( iVertex );
-
-    if ( iConnect == true )
-    {
-        // lastPoint is NULL if this is the first point added
-        if( lastVertex )
-        {
-            FOdysseyVectorSegmentCubic* segment = new FOdysseyVectorSegmentCubic( this, lastVertex, iVertex );
-
-            AddSegment( segment );
-/*
-            if( iBuildSegments == true )
-            {
-                iVertex->BuildSegments();
-            }
-*/
-            segment->Invalidate();
-
-            return segment;
-        }
-    }
-
-    return nullptr;
-}
-
 // Note: callbak returns true to end immediately, false to keep tracing
 static bool
 TraceLine( int32 iX0, int32 iY0, double iT0

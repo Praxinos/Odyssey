@@ -34,7 +34,7 @@ UOdysseyTextureEditorVectorPrimitiveDrawingTool::Activate()
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        UOdysseyPainterEditorVectorPrimitiveDrawingTool::Activate( vectorEngine, vectorScene );
+        UOdysseyPainterEditorVectorPrimitiveDrawingTool::ActivateVector( vectorEngine, vectorScene );
 
         currentVectorLayer->RenderImageChanged(false);
     }
@@ -107,7 +107,7 @@ UOdysseyTextureEditorVectorPrimitiveDrawingTool::OnMouseDown( const FOdysseyPoin
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        ret = UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDown( vectorEngine, vectorScene, iPointInTexture,iKey  );
+        ret = UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDownVector( vectorEngine, vectorScene, iPointInTexture,iKey  );
 
         currentVectorLayer->RenderImageChanged(false);
 
@@ -130,7 +130,7 @@ UOdysseyTextureEditorVectorPrimitiveDrawingTool::OnMouseDrag( const FOdysseyPoin
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDrag( vectorEngine, vectorScene, iPointInTexture );
+        UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDragVector( vectorEngine, vectorScene, iPointInTexture );
 
         currentVectorLayer->RenderImageChanged(true);
 
@@ -156,7 +156,7 @@ UOdysseyTextureEditorVectorPrimitiveDrawingTool::OnMouseUp( const FOdysseyPoint&
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
         FOdysseyVectorUndo* undo = nullptr;
 
-        ret = UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseUp( vectorEngine, vectorScene, &undo, iPointInTexture, iKey );
+        ret = UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseUpVector( vectorEngine, vectorScene, &undo, iPointInTexture, iKey );
 
         if( undo )
         {

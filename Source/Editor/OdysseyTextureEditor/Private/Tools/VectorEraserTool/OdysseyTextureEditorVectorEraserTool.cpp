@@ -34,7 +34,7 @@ UOdysseyTextureEditorVectorEraserTool::Activate()
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        UOdysseyPainterEditorVectorEraserTool::Activate( vectorEngine, vectorScene );
+        UOdysseyPainterEditorVectorEraserTool::ActivateVector( vectorEngine, vectorScene );
 
         currentVectorLayer->RenderImageChanged(false);
     }

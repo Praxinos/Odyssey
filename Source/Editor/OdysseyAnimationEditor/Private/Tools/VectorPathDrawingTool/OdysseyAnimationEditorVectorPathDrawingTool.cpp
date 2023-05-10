@@ -34,7 +34,7 @@ UOdysseyAnimationEditorVectorPathDrawingTool::Activate()
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        UOdysseyPainterEditorVectorPathDrawingTool::Activate( vectorEngine, vectorScene );
+        UOdysseyPainterEditorVectorPathDrawingTool::ActivateVector( vectorEngine, vectorScene );
 
         currentVectorLayer->RenderImageChanged(false);
     }
@@ -106,7 +106,7 @@ UOdysseyAnimationEditorVectorPathDrawingTool::OnMouseDown( const FOdysseyPoint& 
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        ret = UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDown( vectorEngine, vectorScene, iPointInTexture,iKey  );
+        ret = UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( vectorEngine, vectorScene, iPointInTexture,iKey  );
 
         currentVectorLayer->RenderImageChanged(false);
     }
@@ -125,7 +125,7 @@ UOdysseyAnimationEditorVectorPathDrawingTool::OnMouseHover( const FOdysseyPoint&
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        UOdysseyPainterEditorVectorPathDrawingTool::OnMouseHover( vectorEngine, vectorScene, iPointInTexture );
+        UOdysseyPainterEditorVectorPathDrawingTool::OnMouseHoverVector( vectorEngine, vectorScene, iPointInTexture );
 
         currentVectorLayer->RenderImageChanged(true);
     }
@@ -144,7 +144,7 @@ UOdysseyAnimationEditorVectorPathDrawingTool::OnMouseDrag( const FOdysseyPoint& 
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
         ::ULIS::FRectI redrawRect;
 
-        redrawRect = UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDrag( vectorEngine, vectorScene, iPointInTexture );
+        redrawRect = UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( vectorEngine, vectorScene, iPointInTexture );
 
         redrawRect = redrawRect & ::ULIS::FRectI::FromXYWH(0, 0, animation->Width(), animation->Height());
 
@@ -164,7 +164,7 @@ UOdysseyAnimationEditorVectorPathDrawingTool::OnMouseUp( const FOdysseyPoint& iP
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        ret = UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUp( vectorEngine, vectorScene, nullptr, iPointInTexture, iKey );
+        ret = UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( vectorEngine, vectorScene, nullptr, iPointInTexture, iKey );
 
         currentVectorLayer->RenderImageChanged(false);
     }

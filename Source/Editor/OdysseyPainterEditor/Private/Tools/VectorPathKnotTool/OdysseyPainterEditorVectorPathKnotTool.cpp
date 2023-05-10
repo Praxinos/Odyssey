@@ -10,8 +10,8 @@ UOdysseyPainterEditorVectorPathKnotTool::~UOdysseyPainterEditorVectorPathKnotToo
 }
 
 UOdysseyPainterEditorVectorPathKnotTool::UOdysseyPainterEditorVectorPathKnotTool()
-    : Radius(20.0f)
-    , mPickingHUD()
+    : mPickingHUD()
+    , Radius(20.0f)
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathKnotTool64");
 
@@ -22,18 +22,18 @@ UOdysseyPainterEditorVectorPathKnotTool::UOdysseyPainterEditorVectorPathKnotTool
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
 void
-UOdysseyPainterEditorVectorPathKnotTool::Activate( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorPathKnotTool::ActivateVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
     iEngine->ClearHUD();
     iEngine->AddHUD(&mPickingHUD);
 }
 
 bool
-UOdysseyPainterEditorVectorPathKnotTool::OnMouseDown( FOdysseyVectorEngine* iEngine
-                                                    , FOdysseyVectorScene* iScene
-                                                    , FOdysseyVectorUndo** iUndo
-                                                    , const FOdysseyPoint& iPointInTexture
-                                                    , const FKey& iKey )
+UOdysseyPainterEditorVectorPathKnotTool::OnMouseDownVector( FOdysseyVectorEngine* iEngine
+                                                          , FOdysseyVectorScene* iScene
+                                                          , FOdysseyVectorUndo** iUndo
+                                                          , const FOdysseyPoint& iPointInTexture
+                                                          , const FKey& iKey )
 {
     ::ULIS::FRectD roi = { iPointInTexture.x - Radius, iPointInTexture.y - Radius, Radius * 2, Radius * 2 };
     std::vector<FOdysseyVectorPoint*> pickedPointArray;
@@ -113,9 +113,9 @@ UOdysseyPainterEditorVectorPathKnotTool::OnMouseDown( FOdysseyVectorEngine* iEng
 }
 
 void
-UOdysseyPainterEditorVectorPathKnotTool::OnMouseHover( FOdysseyVectorEngine* iEngine
-                                                     , FOdysseyVectorScene* iScene
-                                                     , const FOdysseyPoint& iPointInTexture )
+UOdysseyPainterEditorVectorPathKnotTool::OnMouseHoverVector( FOdysseyVectorEngine* iEngine
+                                                           , FOdysseyVectorScene* iScene
+                                                           , const FOdysseyPoint& iPointInTexture )
 {
     double diameter = Radius * 2.0f;
     ::ULIS::FRectI rect = { (int)iPointInTexture.x - (int)Radius
@@ -136,18 +136,18 @@ UOdysseyPainterEditorVectorPathKnotTool::OnMouseHover( FOdysseyVectorEngine* iEn
 }
 
 void
-UOdysseyPainterEditorVectorPathKnotTool::OnMouseDrag( FOdysseyVectorEngine* iEngine
-                                                    , FOdysseyVectorScene* iScene
-                                                    , const FOdysseyPoint& iPointInTexture )
+UOdysseyPainterEditorVectorPathKnotTool::OnMouseDragVector( FOdysseyVectorEngine* iEngine
+                                                          , FOdysseyVectorScene* iScene
+                                                          , const FOdysseyPoint& iPointInTexture )
 {
     mPickingHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
 }
 
 bool
-UOdysseyPainterEditorVectorPathKnotTool::OnMouseUp( FOdysseyVectorEngine* iEngine
-                                                  , FOdysseyVectorScene* iScene
-                                                  , const FOdysseyPoint& iPointInTexture
-                                                  , const FKey& iKey )
+UOdysseyPainterEditorVectorPathKnotTool::OnMouseUpVector( FOdysseyVectorEngine* iEngine
+                                                        , FOdysseyVectorScene* iScene
+                                                        , const FOdysseyPoint& iPointInTexture
+                                                        , const FKey& iKey )
 {
     return false;
 }
