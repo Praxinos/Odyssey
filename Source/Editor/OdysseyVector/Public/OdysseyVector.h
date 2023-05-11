@@ -23,10 +23,10 @@ namespace FOdysseyVector
 
     double ODYSSEYVECTOR_API Cross2D( const ::ULIS::FVec2D& iA, const ::ULIS::FVec2D &iB );
 
-    double ODYSSEYVECTOR_API DistanceToSegment( ::ULIS::FVec2D& iPt
-                                              , ::ULIS::FVec2D& iSegmentP0
-                                              , ::ULIS::FVec2D& iSegmentP1
-                                              , double&         oDistance );
+    double ODYSSEYVECTOR_API DistanceToSegment( const ::ULIS::FVec2D& iPt
+                                              , const ::ULIS::FVec2D& iSegmentP0
+                                              , const ::ULIS::FVec2D& iSegmentP1
+                                              , double& oDistance );
 
     void ODYSSEYVECTOR_API BezierExtract( ::ULIS::FVec2D& iP0
                                         , ::ULIS::FVec2D& iP1

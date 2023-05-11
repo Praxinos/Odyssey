@@ -115,9 +115,8 @@ FOdysseyVectorPathCubic::Erase( ::ULIS::FRectD &iRoi
         std::vector<FPolygon>& polygonCache = cubicSegment->GetPolygonCache();
         ::ULIS::FVec2D& firstCoords = cubicSegment->GetVertex(0)->GetCoords();
         BLPoint firstAt = mWorldMatrix.mapPoint( firstCoords.x, firstCoords.y );
-        double subVertexT[2] = { 0.0f, 0.0f };
-        uint32 subVertexCount = 0;
-        int32 currentPixelValue;
+        std::vector<double> subVertexT;
+        int32 previousPixelValue;
         std::vector<FOdysseyVectorSegment*> subSegmentArray;
         bool hasHit = false;
 
@@ -130,19 +129,19 @@ FOdysseyVectorPathCubic::Erase( ::ULIS::FRectD &iRoi
                      , p1.x, p1.y, polygonCache[i].toT
                      , [cubicSegment
                      , &imageData
-                     , &currentPixelValue
+                     , &previousPixelValue
                      , &subVertexT
-                     , &subVertexCount
                      , &subSegmentArray
                      , &newVertexArray
                      , &hasHit]( int32 iX, int32 iY, double iT) -> bool
                        {
-                           if( ( iX >= 0 && iX < imageData.size.w )
+                           /*if( ( iX >= 0 && iX < imageData.size.w )
                             && ( iY >= 0 && iY < imageData.size.h ) )
-                           {
+                           {*/
                                uint8 *pixel = static_cast<uint8*>(imageData.pixelData);
                                uint32 offset = ( iY * imageData.size.w ) + iX;
-                               int32 pixelValue = pixel[offset];
+                               int32 pixelValue = ( ( iX >= 0 && iX < imageData.size.w )
+                                                 && ( iY >= 0 && iY < imageData.size.h ) ) ? pixel[offset] : 0;
 
                                if( pixelValue == 255 ) hasHit = true;
 
@@ -150,19 +149,19 @@ FOdysseyVectorPathCubic::Erase( ::ULIS::FRectD &iRoi
                                {
                                    if( pixelValue == 0 )
                                    {
-                                       subVertexT[subVertexCount++] = iT;
+                                       subVertexT.push_back( iT );
                                    }
 
-                                   currentPixelValue = pixelValue;
+                                   previousPixelValue = pixelValue;
                                }
 
                                if( ( iT > 0.0f ) && ( iT < 1.0f ) )
                                {
-                                   if( (int32) abs(currentPixelValue - pixelValue) == (int32) 255 )
+                                   if( (int32) abs( pixelValue - previousPixelValue ) == 255 )
                                    {
-                                       subVertexT[subVertexCount++] = iT;
+                                       subVertexT.push_back( iT );
 
-                                       currentPixelValue = pixelValue;
+                                       previousPixelValue = pixelValue;
                                    }
                                }
 
@@ -170,27 +169,24 @@ FOdysseyVectorPathCubic::Erase( ::ULIS::FRectD &iRoi
                                {
                                    if( pixelValue == 0 )
                                    {
-                                       subVertexT[subVertexCount++] = iT;
+                                       subVertexT.push_back( iT );
                                    }
-
-                                   currentPixelValue = pixelValue;
                                }
 
-                               if( hasHit )
+                               if( subVertexT.size() == 2 )
                                {
-                                   if( subVertexCount == 2 )
-                                   {
-                                       if( fabs( subVertexT[0] - subVertexT[1]) < 1.0f )
-                                       {
-                                           subSegmentArray.push_back( cubicSegment->Sample( subVertexT[0]
-                                                                                          , subVertexT[1]
-                                                                                          , newVertexArray ) );
+                                   uint32 tCount = subVertexT.size();
+                                   double t0 = subVertexT[0];
+                                   double t1 = subVertexT[1];
 
-                                           subVertexCount = 0;
-                                       }
-                                   }
+                                    if( fabs( subVertexT[0] - subVertexT[1]) < 1.0f )
+                                    {
+                                        subSegmentArray.push_back( cubicSegment->Sample( t0, t1, newVertexArray ) );
+                                    }
+
+                                   subVertexT.clear();
                                }
-                           }
+                           /*}*/
 
                            // keep tracing the line
                            return false;

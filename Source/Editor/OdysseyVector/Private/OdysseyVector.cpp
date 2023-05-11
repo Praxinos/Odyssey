@@ -69,10 +69,10 @@ FOdysseyVector::IntersectSegment( ::ULIS::FVec2D& line0p0
 
 // https://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
 double
-FOdysseyVector::DistanceToSegment( ::ULIS::FVec2D& iPt
-                                 , ::ULIS::FVec2D& iSegmentP0
-                                 , ::ULIS::FVec2D& iSegmentP1
-                                 , double&         oDistance )
+FOdysseyVector::DistanceToSegment( const ::ULIS::FVec2D& iPt
+                                 , const ::ULIS::FVec2D& iSegmentP0
+                                 , const ::ULIS::FVec2D& iSegmentP1
+                                 , double& oDistance )
 {
     // Return minimum distance between line segment vw and point p
     ::ULIS::FVec2D p0p1 = iSegmentP1 - iSegmentP0;

@@ -486,7 +486,7 @@ FOdysseyVectorSegmentCubic::Cut( ::ULIS::FVec2D& linePoint0
     ::ULIS::FVec2D& ctrlPoint1 = GetHandle(1)->GetCoords();
     // we'll have 3 intersections at most and 2 points at tips.
     FOdysseyVectorVertex* pointChain[5] = { static_cast<FOdysseyVectorVertex*>(mPoint[0]), nullptr, nullptr, nullptr, nullptr };
-    ::ULIS::FVec2D tangentChain[5] = { GetVectorAtStart( true ), { 0.0f, 0.0f }, { 0.0f, 0.0f }, { 0.0f, 0.0f }, { 0.0f, 0.0f } };
+    double tChain[5] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
     uint32 pointCount = 1;
     ::ULIS::FVec2D ctrlPoint0Vector = GetVectorAtStart( true );
     ::ULIS::FVec2D ctrlPoint1Vector = GetVectorAtEnd( true );
@@ -511,21 +511,10 @@ FOdysseyVectorSegmentCubic::Cut( ::ULIS::FVec2D& linePoint0
                                                                                         , point1
                                                                                         , segmentT );
             FOdysseyVectorVertex* newCubicPoint = new FOdysseyVectorVertex( mPath, pointAt.x, pointAt.y, 0.0f );
-            ::ULIS::FVec2D newTangent = ::ULIS::CubicBezierTangentAtParameter<::ULIS::FVec2D>( point0
-                                                                                             , ctrlPoint0
-                                                                                             , ctrlPoint1
-                                                                                             , point1
-                                                                                             , segmentT );
-            
 
             newCubicPoint->SetRadius( mPoint[0]->GetRadius() + ( difRadius * segmentT ) );
 
-            if ( newTangent.DistanceSquared() )
-            {
-                newTangent.Normalize();
-            }
-
-            tangentChain[pointCount] = newTangent;
+            tChain[pointCount] = segmentT;
             pointChain[pointCount] = newCubicPoint;
 
             pointCount++;
@@ -534,7 +523,7 @@ FOdysseyVectorSegmentCubic::Cut( ::ULIS::FVec2D& linePoint0
 
     if ( pointCount > 1 )
     {
-        tangentChain[pointCount] = GetVectorAtEnd( true );
+        tChain[pointCount] = 1.0f;
         pointChain[pointCount] = static_cast<FOdysseyVectorVertex*>(mPoint[1]);
 
         mPath->RemoveSegment( this );
@@ -549,20 +538,22 @@ FOdysseyVectorSegmentCubic::Cut( ::ULIS::FVec2D& linePoint0
         for( uint32 i = 0; i < pointCount; i++ )
         {
             uint32 n = i + 1;
-            FOdysseyVectorSegmentCubic* segment = new FOdysseyVectorSegmentCubic( static_cast<FOdysseyVectorPathCubic*>(mPath)
-                                                                                , static_cast<FOdysseyVectorVertex*>(pointChain[i])
-                                                                                , static_cast<FOdysseyVectorVertex*>(pointChain[n]) );
-            double distance = segment->GetStraightDistance();
+            FOdysseyVectorSegmentCubic* newSegment = new FOdysseyVectorSegmentCubic( static_cast<FOdysseyVectorPathCubic*>(mPath)
+                                                                                   , static_cast<FOdysseyVectorVertex*>(pointChain[i])
+                                                                                   , static_cast<FOdysseyVectorVertex*>(pointChain[n]) );
+            ::ULIS::FVec2D& newSegmentPoint0 = newSegment->GetVertex(0)->GetCoords();
+            ::ULIS::FVec2D& newSegmentPoint1 = newSegment->GetVertex(1)->GetCoords();
+            ::ULIS::FVec2D& newSegmentCtrlPoint0 = newSegment->GetHandle(0)->GetCoords();
+            ::ULIS::FVec2D& newSegmentCtrlPoint1 = newSegment->GetHandle(1)->GetCoords();
 
-            segment->GetHandle(0)->Set( segment->GetPoint(0)->GetX() + ( tangentChain[i].x * distance * 0.35f )
-                                      , segment->GetPoint(0)->GetY() + ( tangentChain[i].y * distance * 0.35f ) );
+            FOdysseyVector::BezierExtract( point0, ctrlPoint0, ctrlPoint1, point1
+                                         , tChain[i]
+                                         , tChain[n]
+                                         , newSegmentPoint0, newSegmentCtrlPoint0, newSegmentCtrlPoint1, newSegmentPoint1 );
 
-            segment->GetHandle(1)->Set( segment->GetPoint(1)->GetX() - ( tangentChain[n].x * distance * 0.35f )
-                                      , segment->GetPoint(1)->GetY() - ( tangentChain[n].y * distance * 0.35f ) );
+            mPath->AddSegment( newSegment );
 
-            mPath->AddSegment( segment );
-
-            oNewSegmentArray.push_back( segment );
+            oNewSegmentArray.push_back( newSegment );
         }
 
         return true;
@@ -639,6 +630,32 @@ IntersectVertices( FOdysseyVectorVertex* iVertex0, FOdysseyVectorVertex* iVertex
     }
 }
 
+static double
+DistanceToSegmentConstrained( const ::ULIS::FVec2D& iPt
+                            , const ::ULIS::FVec2D& iSegmentP0
+                            , const ::ULIS::FVec2D& iSegmentP1
+                            , double&         oDistance)
+{
+    double t = FOdysseyVector::DistanceToSegment( iPt, iSegmentP0, iSegmentP1, oDistance );
+
+    if( t < 0.0f )
+    {
+        t = 0.0f;
+
+        oDistance = ( iSegmentP0 - iPt ).Distance();
+    }
+
+
+    if( t > 1.0f )
+    {
+        t = 1.0f;
+
+        oDistance = ( iSegmentP1 - iPt ).Distance();
+    }
+
+    return t;
+}
+
 uint32
 FOdysseyVectorSegmentCubic::Intersect( FOdysseyVectorSegment* iOther
                                      , double iTolerance
@@ -710,90 +727,70 @@ FOdysseyVectorSegmentCubic::Intersect( FOdysseyVectorSegment* iOther
 /////////////////////////////// NEEDS REFACTORING !!!! //////////////////
                     /*else
                     {*/
-                      if( iTolerance )
+                      if( iTolerance && ( this != otherCubicSegment ) ) // limitation: tolerance can only work with different segments, otherwise it's too complicated to have something coherent
                       {
                         if( ( j == 0 ) && ( otherVertex0->GetSegmentCount() == 1 ) )
                         {
                             double distance;
-                            double t = FOdysseyVector::DistanceToSegment( otherPoint0
-                                                                        , poly->lineVertex[0]
-                                                                        , poly->lineVertex[1]
-                                                                        , distance );
+                            double t = DistanceToSegmentConstrained( otherPoint0
+                                                                   , poly->lineVertex[0]
+                                                                   , poly->lineVertex[1]
+                                                                   , distance );
 
-                            if( ( t >= 0.0f ) && ( t <= 1.0f ) )
-                                if( distance < otherVertex0->GetDistanceToNearestSegment() )
-                                {
-                                    double segmentT = poly->fromT + ( ( poly->toT - poly->fromT ) * t );
+                            if( distance < otherVertex0->GetDistanceToNearestSegment() )
+                            {
+                                double segmentT = poly->fromT + ( ( poly->toT - poly->fromT ) * t );
 
-                                    otherVertex0->SetNearestSegment( this, distance, segmentT );
-
-                                    //aisx[0].distance = distance;
-                                    //aisx[0].t        = poly->fromT + ( ( poly->toT - poly->fromT ) * t );
-                                    //aisx[0].otherT   = 0.0f;
-                                }
+                                otherVertex0->SetNearestSegment( this, distance, segmentT );
+                            }
                         }
 
                         if( ( j == ( otherCubicSegment->mPolygonCache.size() - 1 ) ) && ( otherVertex1->GetSegmentCount() == 1 ) )
                         {
                             double distance;
-                            double t = FOdysseyVector::DistanceToSegment( otherPoint1
-                                                                        , poly->lineVertex[0]
-                                                                        , poly->lineVertex[1]
-                                                                        , distance );
+                            double t = DistanceToSegmentConstrained( otherPoint1
+                                                                   , poly->lineVertex[0]
+                                                                   , poly->lineVertex[1]
+                                                                   , distance );
 
-                            if( ( t >= 0.0f ) && ( t <= 1.0f ) )
-                                if( distance < otherVertex1->GetDistanceToNearestSegment() )
-                                {
-                                    double segmentT = poly->fromT + ( ( poly->toT - poly->fromT ) * t );
+                            if( distance < otherVertex1->GetDistanceToNearestSegment() )
+                            {
+                                double segmentT = poly->fromT + ( ( poly->toT - poly->fromT ) * t );
 
-                                    otherVertex1->SetNearestSegment( this, distance, segmentT );
-
-                                    //aisx[1].distance = distance;
-                                    //aisx[1].t        = poly->fromT + ( ( poly->toT - poly->fromT ) * t );
-                                    //aisx[1].otherT   = 1.0f;
-                                }
+                                otherVertex1->SetNearestSegment( this, distance, segmentT );
+                            }
                         }
 
                         if( ( i == 0 ) && ( vertex0->GetSegmentCount() == 1 ) )
                         {
                             double distance;
-                            double t = FOdysseyVector::DistanceToSegment( point0
-                                                                        , interPoly->lineVertex[0]
-                                                                        , interPoly->lineVertex[1]
-                                                                        , distance );
+                            double t = DistanceToSegmentConstrained( point0
+                                                                   , interPoly->lineVertex[0]
+                                                                   , interPoly->lineVertex[1]
+                                                                   , distance );
 
-                            if( ( t >= 0.0f ) && ( t <= 1.0f ) )
-                                if( distance < vertex0->GetDistanceToNearestSegment() )
-                                {
-                                    double otherSegmentT = interPoly->fromT + ( ( interPoly->toT - interPoly->fromT ) * t );
+                            if( distance < vertex0->GetDistanceToNearestSegment() )
+                            {
+                                double otherSegmentT = interPoly->fromT + ( ( interPoly->toT - interPoly->fromT ) * t );
 
-                                    vertex0->SetNearestSegment( iOther, distance, otherSegmentT );
-
-                                    //aisx[2].distance = distance;
-                                    //aisx[2].t        = 0.0f;
-                                    //aisx[2].otherT   = interPoly->fromT + ( ( interPoly->toT - interPoly->fromT ) * t );
-                                }
+                                vertex0->SetNearestSegment( iOther, distance, otherSegmentT );
+                            }
                         }
 
                         if( ( i == ( mPolygonCache.size() - 1 ) ) && ( vertex1->GetSegmentCount() == 1 ) )
                         {
                             double distance;
-                            double t = FOdysseyVector::DistanceToSegment( point1
-                                                                        , interPoly->lineVertex[0]
-                                                                        , interPoly->lineVertex[1]
-                                                                        , distance );
+                            double t = DistanceToSegmentConstrained( point1
+                                                                   , interPoly->lineVertex[0]
+                                                                   , interPoly->lineVertex[1]
+                                                                   , distance );
 
-                            if( ( t >= 0.0f ) && ( t <= 1.0f ) )
-                                if( distance < vertex1->GetDistanceToNearestSegment() )
-                                {
-                                    double otherSegmentT = interPoly->fromT + ( ( interPoly->toT - interPoly->fromT ) * t );
+                            if( distance < vertex1->GetDistanceToNearestSegment() )
+                            {
+                                double otherSegmentT = interPoly->fromT + ( ( interPoly->toT - interPoly->fromT ) * t );
 
-                                    vertex1->SetNearestSegment( iOther, distance, otherSegmentT );
-
-                                    //aisx[3].distance = distance;
-                                    //aisx[3].t        = 1.0f;
-                                    //aisx[3].otherT   = interPoly->fromT + ( ( interPoly->toT - interPoly->fromT ) * t );
-                                }
+                                vertex1->SetNearestSegment( iOther, distance, otherSegmentT );
+                            }
                         }
                       }
                     /*}*/
@@ -803,7 +800,7 @@ FOdysseyVectorSegmentCubic::Intersect( FOdysseyVectorSegment* iOther
         }
       }
     }
-
+/*
     if( iTolerance )
     {
         IntersectVertices( vertex0, otherVertex0, iTolerance );
@@ -816,6 +813,7 @@ FOdysseyVectorSegmentCubic::Intersect( FOdysseyVectorSegment* iOther
         IntersectVertices( otherVertex1, vertex0, iTolerance );
         IntersectVertices( otherVertex1, vertex1, iTolerance );
     }
+*/
 /*
     if( shortestP0Distance < 3.0f )
     {

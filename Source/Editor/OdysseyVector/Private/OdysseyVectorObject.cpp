@@ -603,6 +603,7 @@ FOdysseyVectorObject::RemoveChild( FOdysseyVectorObject* iChild )
     //iChild->mParent = nullptr;
 
     mChildrenList.remove(iChild);
+    mInvalidatedChildrenList.remove(iChild);
 
     Invalidate();
 }

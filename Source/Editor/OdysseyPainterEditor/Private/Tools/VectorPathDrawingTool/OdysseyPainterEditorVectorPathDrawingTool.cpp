@@ -125,13 +125,14 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorEng
         }
 
         cubicVertex = new FOdysseyVectorVertex( cubicPath, 0.0f, 0.0f, 0.0f );
+
+        cubicPath->AddVertex( cubicVertex );
         // record for undos
         mVertexArray.push_back( cubicVertex );
     }
 
     mPreviousVertex = cubicVertex;
 
-    cubicPath->AddVertex( cubicVertex );
     cubicPath->UpdateMatrix();
     cubicPath->SetForegroundColor( rgba8.R8(), rgba8.G8(), rgba8.B8(), rgba8.A8() );
 
@@ -200,7 +201,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( FOdysseyVectorEng
                                                      , mVertexArray
                                                      , mSegmentArray );
 
-        iScene->Update( 0 );
+        iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES | FOdysseyVectorObject::KEEPINVALIDATED );
 
         mPreviousVertex = nextVertex;
 

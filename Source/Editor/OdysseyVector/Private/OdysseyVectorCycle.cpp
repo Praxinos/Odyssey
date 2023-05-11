@@ -38,12 +38,6 @@ FOdysseyVectorCycle::Merge( FOdysseyVectorCycle* iMergeCycle )
     }
 
     mCombinedPath.addPath( iMergeCycle->mContourPath );
-/*
-    mMin.x = ::ULIS::FMath::Min( mMin.x, iMergeCycle->mMin.x );
-    mMin.y = ::ULIS::FMath::Min( mMin.y, iMergeCycle->mMin.y );
-    mMax.x = ::ULIS::FMath::Max( mMax.x, iMergeCycle->mMax.x );
-    mMax.y = ::ULIS::FMath::Max( mMax.y, iMergeCycle->mMax.y );
-*/
 }
 
 FOdysseyVectorCycle*
@@ -295,6 +289,8 @@ FOdysseyVectorCycle::StrokePath( bool iWorld )
     {
         blctx->strokePath( mCombinedPath );
     }
+
+    blctx->flush( BL_CONTEXT_FLUSH_SYNC );
 }
 
 static void
