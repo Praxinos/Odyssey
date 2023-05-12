@@ -4,12 +4,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Tools/OdysseyPainterEditorTool.h"
+#include "Tools/DefaultTool/OdysseyPainterEditorDefaultTool.h"
 #include "OdysseyVector.h"
 #include "OdysseyPainterEditorVectorPathSmoothTool.generated.h"
 
 UCLASS()
-class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathSmoothTool : public UOdysseyPainterEditorTool
+class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathSmoothTool : public UOdysseyPainterEditorDefaultTool
 {
 public:
     GENERATED_BODY()

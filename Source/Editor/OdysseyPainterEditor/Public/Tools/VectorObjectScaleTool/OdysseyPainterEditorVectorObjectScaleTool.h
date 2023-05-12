@@ -4,13 +4,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Tools/OdysseyPainterEditorTool.h"
+#include "Tools/DefaultTool/OdysseyPainterEditorDefaultTool.h"
 #include "OdysseyVector.h"
 
 #include "OdysseyPainterEditorVectorObjectScaleTool.generated.h"
 
 UCLASS()
-class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectScaleTool : public UOdysseyPainterEditorTool
+class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectScaleTool : public UOdysseyPainterEditorDefaultTool
 {
 public:
     GENERATED_BODY()

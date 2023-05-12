@@ -93,6 +93,42 @@ UOdysseyTextureEditorVectorScenePanTool::OnCurrentLayerChanged(UOdysseyLayerStac
 }
 
 bool
+UOdysseyTextureEditorVectorScenePanTool::OnKeyDown( const FKey& iKey )
+{
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
+    UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
+    bool ret = false;
+
+    if( currentVectorLayer )
+    {
+        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+
+        ret = UOdysseyPainterEditorVectorScenePanTool::OnKeyDownVector( vectorEngine, vectorScene, iKey );
+    }
+
+    return ret;
+}
+
+bool
+UOdysseyTextureEditorVectorScenePanTool::OnKeyUp( const FKey& iKey )
+{
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
+    UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
+    bool ret = false;
+
+    if( currentVectorLayer )
+    {
+        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+
+        ret = UOdysseyPainterEditorVectorScenePanTool::OnKeyUpVector( vectorEngine, vectorScene, iKey );
+    }
+
+    return ret;
+}
+
+bool
 UOdysseyTextureEditorVectorScenePanTool::OnMouseDown( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());

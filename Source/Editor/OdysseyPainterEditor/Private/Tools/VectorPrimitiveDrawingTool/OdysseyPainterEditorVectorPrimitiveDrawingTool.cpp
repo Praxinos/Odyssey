@@ -90,6 +90,17 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseUpVector( FOdysseyVector
     {
         FOdysseyVectorPathCubic* cubicPath = ellipse->Convert();
 
+        // Undo must be called before association with parent object
+        // needed for valid GUndo pointer
+        GEditor->BeginTransaction(LOCTEXT("VectorPrimitiveDrawingTool","Vector Primitive Drawing Tool"));
+        if( GUndo )
+        {
+            FOdysseyVectorUndo *undo = new FOdysseyVectorUndoObjectAdd( iScene, cubicPath );
+
+            GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
+        }
+        GEditor->EndTransaction();
+
         iScene->ClearSelection();
         iScene->RemoveChild( ellipse );
 
@@ -98,16 +109,6 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseUpVector( FOdysseyVector
         iScene->AppendChild( cubicPath );
         cubicPath->UpdateMatrix();
         iScene->Select( cubicPath );
-
-        // needed for valid GUndo pointer
-        GEditor->BeginTransaction(LOCTEXT("VectorPrimitiveDrawingTool","Vector Primitive Drawing Tool"));
-        if( GUndo )
-        {
-            FOdysseyVectorUndo *undo = new FOdysseyVectorUndoObjectAdd( iScene, iScene, cubicPath );
-
-            GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
-        }
-        GEditor->EndTransaction();
     }
 
     iScene->Update( 0 ); // update vector scene and GUI widgets via delegates.

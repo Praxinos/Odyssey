@@ -58,5 +58,7 @@ UOdysseyVectorViewObject::PostEditChangeProperty( FPropertyChangedEvent& Propert
 
         // call delegates
         //scene->mRefreshLayer.Broadcast(scene);
+
+        scene->Update( 0 );
     }
 }

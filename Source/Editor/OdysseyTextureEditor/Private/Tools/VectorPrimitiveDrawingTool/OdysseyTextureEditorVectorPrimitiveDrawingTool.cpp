@@ -93,6 +93,42 @@ UOdysseyTextureEditorVectorPrimitiveDrawingTool::OnCurrentLayerChanged(UOdysseyL
 }
 
 bool
+UOdysseyTextureEditorVectorPrimitiveDrawingTool::OnKeyDown( const FKey& iKey )
+{
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
+    UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
+    bool ret = false;
+
+    if( currentVectorLayer )
+    {
+        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+
+        ret = UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnKeyDownVector( vectorEngine, vectorScene, iKey );
+    }
+
+    return ret;
+}
+
+bool
+UOdysseyTextureEditorVectorPrimitiveDrawingTool::OnKeyUp( const FKey& iKey )
+{
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
+    UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
+    bool ret = false;
+
+    if( currentVectorLayer )
+    {
+        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+
+        ret = UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnKeyUpVector( vectorEngine, vectorScene, iKey );
+    }
+
+    return ret;
+}
+
+bool
 UOdysseyTextureEditorVectorPrimitiveDrawingTool::OnMouseDown( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
 {
     TSharedPtr<FOdysseyPainterEditorSelectedVectorObjectTab>& vectorObjectTab = GetEditorAs<FOdysseyTextureEditor>()->GetGUI()->GetSelectedVectorObjectTab();

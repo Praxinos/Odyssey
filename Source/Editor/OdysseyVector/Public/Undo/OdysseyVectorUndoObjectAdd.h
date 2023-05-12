@@ -12,7 +12,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoObjectAdd : public FOdysseyVectorUndo
 {
     public:
         ~FOdysseyVectorUndoObjectAdd();
-        FOdysseyVectorUndoObjectAdd( FOdysseyVectorScene* iScene, FOdysseyVectorObject* iParent, FOdysseyVectorObject* iObject );
+        FOdysseyVectorUndoObjectAdd( FOdysseyVectorScene* iScene, FOdysseyVectorObject* iObject );
+        FOdysseyVectorUndoObjectAdd( FOdysseyVectorScene* iScene, std::list<FOdysseyVectorObject*>& iObjectList );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;
@@ -24,6 +25,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoObjectAdd : public FOdysseyVectorUndo
         virtual FString ToString() const override;
 
     private:
-        FOdysseyVectorObject* mParent;
-        FOdysseyVectorObject* mObject;
+        std::vector<FOdysseyVectorObject*> mFormerParentArray;
+        std::vector<FOdysseyVectorObject*> mObjectArray;
 };

@@ -122,6 +122,17 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorEng
         {
             cubicPath = new FOdysseyVectorPathCubic();
 
+            // This undo must be set before association with the new parent object
+            // needed for valid GUndo pointer
+            GEditor->BeginTransaction(LOCTEXT("VectorPathDrawingTool","Vector Path Drawing Tool"));
+            if( GUndo )
+            {
+                FOdysseyVectorUndo* undo = static_cast<FOdysseyVectorUndo*>( new FOdysseyVectorUndoObjectAdd( iScene, cubicPath ) );
+
+                GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
+            }
+            GEditor->EndTransaction();
+
             iScene->AppendChild( cubicPath );
 
             // this is important to know what undo operation we are going to record: an ObjectAdd or a PathDrawing.
@@ -273,20 +284,20 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorEngin
         delete mPathBuilder;
         mPathBuilder = nullptr;
 
-        // needed for valid GUndo pointer
-        GEditor->BeginTransaction(LOCTEXT("VectorPathDrawingTool","Vector Path Drawing Tool"));
-        if( GUndo )
+        if( mStitched == true )
         {
-            FOdysseyVectorUndo* undo = ( mStitched == true ) ? static_cast<FOdysseyVectorUndo*>( new FOdysseyVectorUndoPathAlter( iScene
-                                                                                                                                , mVertexArray
-                                                                                                                                , mSegmentArray )) 
-                                                             : static_cast<FOdysseyVectorUndo*>( new FOdysseyVectorUndoObjectAdd( iScene
-                                                                                                                                , iScene
-                                                                                                                                , cubicPath ));
+            // needed for valid GUndo pointer
+            GEditor->BeginTransaction(LOCTEXT("VectorPathDrawingTool","Vector Path Drawing Tool"));
+            if( GUndo )
+            {
+                FOdysseyVectorUndo* undo = static_cast<FOdysseyVectorUndo*>( new FOdysseyVectorUndoPathAlter( iScene
+                                                                                                            , mVertexArray
+                                                                                                            , mSegmentArray ) );
 
-            GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
+                GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
+            }
+            GEditor->EndTransaction();
         }
-        GEditor->EndTransaction();
     }
 
     iScene->Update( 0 ); // update vector scene and GUI widgets via delegates.

@@ -11,6 +11,11 @@ FOdysseyVectorEngine::FOdysseyVectorEngine( double iWidth, double iHeight )
     : mDrawingFlags( 0 )
     , mSelectionSpace( nullptr )
 {
+    //BLContextCreateInfo createInfo {};
+
+    // Configure the number of threads to use.
+    //createInfo.threadCount = 8;
+
     mBLContext = new BLContext();
     mBLImage = new BLImage( iWidth, iHeight, BL_FORMAT_PRGB32 );
     mBLMask  = new BLImage( iWidth, iHeight, BL_FORMAT_A8 );
@@ -18,7 +23,7 @@ FOdysseyVectorEngine::FOdysseyVectorEngine( double iWidth, double iHeight )
     /*mScene = NewObject<FOdysseyVectorScene>();
     mScene->Init("Vector Scene");*/
 
-    mBLContext->begin( *mBLImage );
+    mBLContext->begin( *mBLImage/*, createInfo*/ );
 }
 
 void

@@ -35,5 +35,5 @@ public:
                               , const FKey& iKey );
 
     protected:
-        std::list<FOdysseyVectorObject*> mCopiedObjectList;
+        static std::list<FOdysseyVectorObject*>& GetCopiedObjectList();
 };
