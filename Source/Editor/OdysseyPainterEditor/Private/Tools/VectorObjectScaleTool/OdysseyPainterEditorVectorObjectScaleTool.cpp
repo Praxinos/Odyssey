@@ -3,6 +3,8 @@
 
 #include "Tools/VectorObjectScaleTool/OdysseyPainterEditorVectorObjectScaleTool.h"
 
+#define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorObjectScaleTool"
+
 #ifndef M_PI
 #define M_PI 3.14159265358979323846L
 #endif
@@ -39,12 +41,13 @@ UOdysseyPainterEditorVectorObjectScaleTool::ActivateVector( FOdysseyVectorEngine
 
     iEngine->ClearHUD( );
     iEngine->AddHUD( mTransformHUD );
+
+    iScene->Update( 0 ); // refresh vector scene and GUI widgets via delegates.
 }
 
 bool
 UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDownVector( FOdysseyVectorEngine* iEngine
                                                              , FOdysseyVectorScene* iScene
-                                                             , FOdysseyVectorUndo** iUndo
                                                              , const FOdysseyPoint& iPointInTexture
                                                              , const FKey& iKey )
 {
@@ -60,14 +63,18 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDownVector( FOdysseyVectorEng
         mOldLocalMouseY = localCoords.y;
     }
 
-    // BeginTransaction() must be called for GUndo to have a value. Please do it in the caller function.
-    if( iUndo && GUndo )
+    // needed for valid GUndo pointer
+    GEditor->BeginTransaction(LOCTEXT("VectorObjectScaleTool","Vector Object Scale Tool"));
+    if( GUndo )
     {
         // save selected object translation/rotation/scaling before transform
-        (*iUndo) = new FOdysseyVectorUndoObjectTransform( iScene, iScene->GetSelectedObjectList() );
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoObjectTransform( iScene, iScene->GetSelectedObjectList() );
 
-        GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(*iUndo) );
+        GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
     }
+    GEditor->EndTransaction();
+
+    iScene->Update( 0 ); // refresh vector scene and GUI widgets via delegates.
 
     return true;
 }
@@ -210,8 +217,6 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDragVector( FOdysseyVectorEng
         // Update the matrix for all objects
         iScene->UpdateMatrix();
 
-        iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES | FOdysseyVectorObject::KEEPINVALIDATED );
-
         // update the selection box with the newly modified matrices
         mTransformHUD->UpdateSelectionBox( iScene );
 
@@ -220,6 +225,8 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDragVector( FOdysseyVectorEng
 
         //RedrawCurrentLayer( { /*beforeBBox | selectedObject->GetBBox( true )*/{ 0, 0, 0, 0 } } );
     }
+
+    iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES | FOdysseyVectorObject::KEEPINVALIDATED );
 }
 
 bool
@@ -228,7 +235,7 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseUpVector( FOdysseyVectorEngin
                                                            , const FOdysseyPoint& iPointInTexture
                                                            , const FKey& iKey )
 {
-    iScene->Update( 0 );
+    iScene->Update( 0 ); // refresh vector scene and GUI widgets via delegates.
 
     return true;
 }
@@ -238,3 +245,5 @@ UOdysseyPainterEditorVectorObjectScaleTool::Commit()
 {
 
 }
+
+#undef LOCTEXT_NAMESPACE

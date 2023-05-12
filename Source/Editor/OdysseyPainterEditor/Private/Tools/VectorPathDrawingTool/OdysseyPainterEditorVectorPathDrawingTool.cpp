@@ -5,6 +5,8 @@
 #include "Undo/OdysseyVectorUndoObjectAdd.h"
 #include "Undo/OdysseyVectorUndoPathAlter.h"
 
+#define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorPathDrawingTool"
+
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
 UOdysseyPainterEditorVectorPathDrawingTool::~UOdysseyPainterEditorVectorPathDrawingTool()
@@ -33,6 +35,8 @@ UOdysseyPainterEditorVectorPathDrawingTool::ActivateVector( FOdysseyVectorEngine
 {
     iEngine->ClearHUD();
     iEngine->AddHUD( &mPathDrawingHUD );
+
+    iScene->Update( 0 ); // refresh vector scene and GUI widgets via delegates.
 }
 
 static ::ULIS::FRectI
@@ -154,7 +158,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorEng
 
     iScene->ClearSelection();
 
-
+    iScene->Update( 0 ); // refresh vector scene and GUI widgets via delegates.
     //mSelectionChanged.Broadcast(iScene);
 
 
@@ -167,6 +171,8 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseHoverVector( FOdysseyVectorEn
                                                               , const FOdysseyPoint& iPointInTexture )
 {
     mPathDrawingHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
+
+    iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES ); // refresh vector scene and GUI widgets via delegates.
 }
 
 ::ULIS::FRectI
@@ -214,7 +220,6 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( FOdysseyVectorEng
 bool
 UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorEngine* iEngine
                                                            , FOdysseyVectorScene* iScene
-                                                           , FOdysseyVectorUndo** iUndo
                                                            , const FOdysseyPoint& iPointInTexture
                                                            , const FKey& iKey )
 {
@@ -268,20 +273,23 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorEngin
         delete mPathBuilder;
         mPathBuilder = nullptr;
 
-        // BeginTransaction() must be called for GUndo to have a value. Please do it in the caller function.
-        if( iUndo && GUndo )
+        // needed for valid GUndo pointer
+        GEditor->BeginTransaction(LOCTEXT("VectorPathDrawingTool","Vector Path Drawing Tool"));
+        if( GUndo )
         {
-            (*iUndo) = ( mStitched == true ) ? static_cast<FOdysseyVectorUndo*>( new FOdysseyVectorUndoPathAlter( iScene
-                                                                                                                , mVertexArray
-                                                                                                                , mSegmentArray )) 
-                                             : static_cast<FOdysseyVectorUndo*>( new FOdysseyVectorUndoObjectAdd( iScene, cubicPath ));
+            FOdysseyVectorUndo* undo = ( mStitched == true ) ? static_cast<FOdysseyVectorUndo*>( new FOdysseyVectorUndoPathAlter( iScene
+                                                                                                                                , mVertexArray
+                                                                                                                                , mSegmentArray )) 
+                                                             : static_cast<FOdysseyVectorUndo*>( new FOdysseyVectorUndoObjectAdd( iScene
+                                                                                                                                , iScene
+                                                                                                                                , cubicPath ));
 
-            GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(*iUndo) );
+            GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
         }
-
-        // Update objects marked as invalidated
-        iScene->Update(0);
+        GEditor->EndTransaction();
     }
+
+    iScene->Update( 0 ); // update vector scene and GUI widgets via delegates.
 
     return true;
 }
@@ -306,3 +314,5 @@ UOdysseyPainterEditorVectorPathDrawingTool::PropertyChanged( const FName& iPrope
             mPathDrawingHUD.SetStitchingRadius( 0.0f );
     }
 }
+
+#undef LOCTEXT_NAMESPACE

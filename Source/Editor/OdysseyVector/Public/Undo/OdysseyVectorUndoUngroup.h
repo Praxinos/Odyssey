@@ -25,5 +25,4 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoUngroup : public FOdysseyVectorUndo
     private:
         std::list<FOdysseyVectorObject*> mUngroupedObjectList;
         FOdysseyVectorGroup* mGroup;
-        FOdysseyVectorScene* mScene;
 };

@@ -36,6 +36,7 @@ public:
 protected:
 	virtual TSharedRef<FTabManager::FSplitter>	CreateRightSection() override;
 
+
 protected:
     virtual void ResetView();
     virtual void GroupPaint();
@@ -44,6 +45,13 @@ protected:
     virtual void BringForward();
     virtual void SendBackward();
     virtual void RemoveSelectedObjects();
+
+public:
+    void BindVectorScene( FOdysseyVectorScene* iScene );
+protected:
+    void OnRefresh( FOdysseyVectorScene* iScene, uint32 iUpdateFlags );
+    void UnbindAllVectorScenes();
+    void BindAllVectorScenes( UOdysseyLayerStack* iLayerStack );
 
 private:
 	FOdysseyTextureEditor* mEditor;

@@ -26,8 +26,7 @@ RestoreObjectTransform( std::vector<FObjectTransform>& objectTransformArray )
 
 FOdysseyVectorUndoObjectTransform::FOdysseyVectorUndoObjectTransform( FOdysseyVectorScene* iScene
                                                                     , std::list<FOdysseyVectorObject*>& iObjectList )
-    : FOdysseyVectorUndo()
-    , mScene ( iScene )
+    : FOdysseyVectorUndo( iScene )
 {
     objectTransformArray.reserve( iObjectList.size() );
 
@@ -41,8 +40,7 @@ FOdysseyVectorUndoObjectTransform::FOdysseyVectorUndoObjectTransform( FOdysseyVe
 
 FOdysseyVectorUndoObjectTransform::FOdysseyVectorUndoObjectTransform( FOdysseyVectorScene* iScene
                                                                     , FOdysseyVectorObject* iObject )
-    : FOdysseyVectorUndo()
-    , mScene ( iScene )
+    : FOdysseyVectorUndo( iScene )
 {
     objectTransformArray.push_back( FObjectTransform( iObject ) );
 }
@@ -55,10 +53,8 @@ FOdysseyVectorUndoObjectTransform::Apply( UObject* iIgnored )
 
     RestoreObjectTransform( objectTransformArray );
 
-    mScene->Update( 0 );
-
-    // call callbacks if any (for refreshing GUI e.g)
-    mRefreshDelegate.Broadcast( mScene );
+    // update invalidated objects and call callbacks if any (for refreshing GUI e.g)
+    mScene->Update(0);
 }
 
 void
@@ -69,10 +65,8 @@ FOdysseyVectorUndoObjectTransform::Revert( UObject* iIgnored )
 
     RestoreObjectTransform( objectTransformArray );
 
+    // update invalidated objects and call callbacks if any (for refreshing GUI e.g)
     mScene->Update(0);
-
-    // call callbacks if any (for refreshing GUI e.g)
-    mRefreshDelegate.Broadcast( mScene );
 }
 
 /** Describes this change (for debugging) */

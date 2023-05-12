@@ -3,6 +3,8 @@
 
 #include "Tools/VectorPathCutTool/OdysseyPainterEditorVectorPathCutTool.h"
 
+#define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorPathCutTool"
+
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
 UOdysseyPainterEditorVectorPathCutTool::~UOdysseyPainterEditorVectorPathCutTool()
@@ -23,6 +25,8 @@ UOdysseyPainterEditorVectorPathCutTool::ActivateVector( FOdysseyVectorEngine* iE
 {
     iEngine->ClearHUD();
     iEngine->AddHUD(&mCubicPathHUD);
+
+    iScene->Update( 0 ); // refresh vector scene and GUI widgets via delegates.
 }
 
 bool
@@ -46,6 +50,8 @@ UOdysseyPainterEditorVectorPathCutTool::OnMouseDownVector( FOdysseyVectorEngine*
         mStartCutAt.y = localCoords.y;
     }
 
+    iScene->Update( 0 ); // refresh vector scene and GUI widgets via delegates.
+
     return true;
 }
 
@@ -62,12 +68,13 @@ UOdysseyPainterEditorVectorPathCutTool::OnMouseDragVector( FOdysseyVectorEngine*
                                                     , ::ULIS::FMath::Max(p0.y, p1.y) );
 
     mLineHUD.SetP1( iPointInTexture.x, iPointInTexture.y );
+
+    iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES ); // refresh vector scene and GUI widgets via delegates.
 }
 
 bool
 UOdysseyPainterEditorVectorPathCutTool::OnMouseUpVector( FOdysseyVectorEngine* iEngine
                                                        , FOdysseyVectorScene* iScene
-                                                       , FOdysseyVectorUndo** iUndo
                                                        , const FOdysseyPoint& iPointInTexture
                                                        , const FKey& iKey )
 {
@@ -98,23 +105,25 @@ UOdysseyPainterEditorVectorPathCutTool::OnMouseUpVector( FOdysseyVectorEngine* i
             cubicPath->Cut( mStartCutAt, endCutAt, addedVertexArray, addedSegmentArray, removedSegmentArray );
             cubicPath->Invalidate();
         }
-
-        iScene->Update( 0 );
     }
 
-    // BeginTransaction() must be called for GUndo to have a value. Please do it in the caller function.
-    if( iUndo && GUndo )
+    // needed for valid GUndo pointer
+    GEditor->BeginTransaction(LOCTEXT("VectorPathCutTool","Vector Path Cut Tool"));
+    if( GUndo )
     {
-        std::vector<FOdysseyVectorVertex*> removedVertexArray;
+        std::vector<FOdysseyVectorVertex*> removedVertexArray; // empty on purpose.
 
-        (*iUndo) = new FOdysseyVectorUndoPathAlter( iScene
-                                                  , removedVertexArray
-                                                  , removedSegmentArray
-                                                  , addedVertexArray
-                                                  , addedSegmentArray );
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoPathAlter( iScene
+                                                                  , removedVertexArray
+                                                                  , removedSegmentArray
+                                                                  , addedVertexArray
+                                                                  , addedSegmentArray );
 
-        GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(*iUndo) );
+        GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
     }
+    GEditor->EndTransaction();
+
+    iScene->Update( 0 ); // refresh vector scene and GUI widgets via delegates.
 
     return true;
 }
@@ -124,3 +133,5 @@ UOdysseyPainterEditorVectorPathCutTool::Commit()
 {
 
 }
+
+#undef LOCTEXT_NAMESPACE

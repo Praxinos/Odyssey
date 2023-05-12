@@ -3,6 +3,8 @@
 
 #include "Tools/VectorEraserTool/OdysseyPainterEditorVectorEraserTool.h"
 
+#define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorEraserTool"
+
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
 UOdysseyPainterEditorVectorEraserTool::~UOdysseyPainterEditorVectorEraserTool()
@@ -26,6 +28,8 @@ UOdysseyPainterEditorVectorEraserTool::ActivateVector( FOdysseyVectorEngine* iEn
 {
     iEngine->ClearHUD( );
     iEngine->AddHUD(&mEraserHUD);
+
+    iScene->Update( 0 ); // refresh vector scene and GUI widgets via delegates.
 }
 
 bool
@@ -43,6 +47,8 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseDownVector( FOdysseyVectorEngine* 
     iEngine->GetBLContext()->setFillAlpha( 1.0f );
     iEngine->GetBLContext()->fillCircle( iPointInTexture.x, iPointInTexture.y, Radius );
     iEngine->UseColorImage();
+
+    iScene->Update( 0 ); // refresh vector scene and GUI widgets via delegates.
 
     return true;
 }
@@ -69,6 +75,8 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseHoverVector( FOdysseyVectorEngine*
     {*/
 
     /*}*/
+    // refresh vector scene and GUI widgets via delegates.
+    iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES );
 }
 
 void
@@ -88,12 +96,14 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseDragVector( FOdysseyVectorEngine* 
                                        , iPointInTexture.y );
     iEngine->GetBLContext()->fillCircle( iPointInTexture.x, iPointInTexture.y, Radius );
     iEngine->UseColorImage();
+
+    // refresh vector scene and GUI widgets via delegates.
+    iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES );
 }
 
 bool
 UOdysseyPainterEditorVectorEraserTool::OnMouseUpVector( FOdysseyVectorEngine* iEngine
                                                       , FOdysseyVectorScene* iScene
-                                                      , FOdysseyVectorUndo** iUndo
                                                       , const FOdysseyPoint& iPointInTexture
                                                       , const FKey& iKey )
 {
@@ -119,18 +129,23 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseUpVector( FOdysseyVectorEngine* iE
                   , false );
     iEngine->UseColorImage();
 
-    if( iUndo && GUndo )
-    {
-        (*iUndo) = new FOdysseyVectorUndoErase( iScene
-                                              , addedObjectArray
-                                              , addedVertexArray
-                                              , addedSegmentArray
-                                              , removedObjectArray
-                                              , removedVertexArray
-                                              , removedSegmentArray );
+    iScene->Update( 0 ); // refresh vector scene and GUI widgets via delegates.
 
-        GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(*iUndo) );
+    // needed for valid GUndo pointer
+    GEditor->BeginTransaction(LOCTEXT("EraserTool","Erase"));
+    if( GUndo )
+    {
+        FOdysseyVectorUndo *undo = new FOdysseyVectorUndoErase( iScene
+                                                              , addedObjectArray
+                                                              , addedVertexArray
+                                                              , addedSegmentArray
+                                                              , removedObjectArray
+                                                              , removedVertexArray
+                                                              , removedSegmentArray );
+
+        GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
     }
+    GEditor->EndTransaction();
 
     return true;
 }
@@ -146,3 +161,5 @@ UOdysseyPainterEditorVectorEraserTool::PropertyChanged( const FName& iPropertyNa
 {
     mEraserHUD.SetRadius( Radius );
 }
+
+#undef LOCTEXT_NAMESPACE

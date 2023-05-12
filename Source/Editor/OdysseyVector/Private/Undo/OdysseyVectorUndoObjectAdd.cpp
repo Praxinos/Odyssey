@@ -12,8 +12,10 @@ FOdysseyVectorUndoObjectAdd::~FOdysseyVectorUndoObjectAdd()
     }
 }
 
-FOdysseyVectorUndoObjectAdd::FOdysseyVectorUndoObjectAdd( FOdysseyVectorObject* iParent, FOdysseyVectorObject* iObject )
-    : FOdysseyVectorUndo()
+FOdysseyVectorUndoObjectAdd::FOdysseyVectorUndoObjectAdd( FOdysseyVectorScene* iScene
+                                                        , FOdysseyVectorObject* iParent
+                                                        , FOdysseyVectorObject* iObject )
+    : FOdysseyVectorUndo( iScene )
     , mParent( iParent )
     , mObject( iObject )
 {
@@ -30,8 +32,8 @@ FOdysseyVectorUndoObjectAdd::Apply( UObject* iIgnored )
 
     scene->Select( mObject );
 
-    // call callbacks if any (for refreshing GUI e.g)
-    mRefreshDelegate.Broadcast( scene );
+    // update invalidated objects and call callbacks if any (for refreshing GUI e.g)
+    mScene->Update(0);
 }
 
 void
@@ -45,8 +47,8 @@ FOdysseyVectorUndoObjectAdd::Revert( UObject* iIgnored )
 
     scene->ClearSelection();
 
-    // call callbacks if any (for refreshing GUI e.g)
-    mRefreshDelegate.Broadcast( scene );
+    // update invalidated objects and call callbacks if any (for refreshing GUI e.g)
+    mScene->Update(0);
 }
 
 /** Describes this change (for debugging) */

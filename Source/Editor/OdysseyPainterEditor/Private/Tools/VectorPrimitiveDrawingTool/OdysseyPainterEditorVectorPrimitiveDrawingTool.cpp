@@ -4,6 +4,8 @@
 #include "Tools/VectorPrimitiveDrawingTool/OdysseyPainterEditorVectorPrimitiveDrawingTool.h"
 #include "Undo/OdysseyVectorUndoObjectAdd.h"
 
+#define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorPrimitiveDrawingTool"
+
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
 UOdysseyPainterEditorVectorPrimitiveDrawingTool::~UOdysseyPainterEditorVectorPrimitiveDrawingTool()
@@ -22,6 +24,8 @@ void
 UOdysseyPainterEditorVectorPrimitiveDrawingTool::ActivateVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
     iEngine->ClearHUD();
+
+    iScene->Update( 0 ); // update vector scene and GUI widgets via delegates.
 }
 
 bool
@@ -44,7 +48,9 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDownVector( FOdysseyVect
     iScene->ClearSelection();
     iScene->Select( circle );
 
-    mSelectionChanged.Broadcast(iScene);
+    //mSelectionChanged.Broadcast(iScene);
+
+    iScene->Update( 0 ); // update vector scene and GUI widgets via delegates.
 
     return true;
 }
@@ -66,16 +72,15 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDragVector( FOdysseyVect
         circle->SetRadius( circle->GetRadiusX() + dif.x, circle->GetRadiusY() + dif.y /*difPosition.Distance()*/ );
         circle->Invalidate();
 
-        iScene->Update( 0 );
-
         //mSelectionChanged.Broadcast(iScene);
     }
+
+    iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES ); // update vector scene and GUI widgets via delegates.
 }
 
 bool
 UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseUpVector( FOdysseyVectorEngine* iEngine
                                                                 , FOdysseyVectorScene* iScene
-                                                                , FOdysseyVectorUndo** iUndo
                                                                 , const FOdysseyPoint& iPointInTexture
                                                                 , const FKey& iKey )
 {
@@ -94,14 +99,18 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseUpVector( FOdysseyVector
         cubicPath->UpdateMatrix();
         iScene->Select( cubicPath );
 
-        // BeginTransaction() must be called for GUndo to have a value. Please do it in the caller function.
-        if( iUndo && GUndo )
+        // needed for valid GUndo pointer
+        GEditor->BeginTransaction(LOCTEXT("VectorPrimitiveDrawingTool","Vector Primitive Drawing Tool"));
+        if( GUndo )
         {
-            (*iUndo) = new FOdysseyVectorUndoObjectAdd( iScene, cubicPath );
+            FOdysseyVectorUndo *undo = new FOdysseyVectorUndoObjectAdd( iScene, iScene, cubicPath );
 
-            GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(*iUndo) );
+            GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
         }
+        GEditor->EndTransaction();
     }
+
+    iScene->Update( 0 ); // update vector scene and GUI widgets via delegates.
 
     return false;
 }
@@ -110,3 +119,5 @@ void
 UOdysseyPainterEditorVectorPrimitiveDrawingTool::Commit()
 {
 }
+
+#undef LOCTEXT_NAMESPACE

@@ -16,8 +16,7 @@ FOdysseyVectorUndoSegmentReshape::~FOdysseyVectorUndoSegmentReshape()
 }
 
 FOdysseyVectorUndoSegmentReshape::FOdysseyVectorUndoSegmentReshape( FOdysseyVectorScene* iScene )
-    : FOdysseyVectorUndo()
-    , mScene( iScene )
+    : FOdysseyVectorUndo( iScene )
 {
 }
 
@@ -76,10 +75,8 @@ FOdysseyVectorUndoSegmentReshape::Apply( UObject* iIgnored )
 
     LoadArray( mSegmentShapeAfterArray );
 
-    mScene->Update( 0 );
-
-    // call callbacks if any (for refreshing GUI e.g)
-    mRefreshDelegate.Broadcast( mScene );
+    // update invalidated objects and call callbacks if any (for refreshing GUI e.g)
+    mScene->Update(0);
 }
 
 void
@@ -90,10 +87,8 @@ FOdysseyVectorUndoSegmentReshape::Revert( UObject* iIgnored )
 
     LoadArray( mSegmentShapeBeforeArray );
 
-    mScene->Update( 0 );
-
-    // call callbacks if any (for refreshing GUI e.g)
-    mRefreshDelegate.Broadcast( mScene );
+    // update invalidated objects and call callbacks if any (for refreshing GUI e.g)
+    mScene->Update(0);
 }
 
 /** Describes this change (for debugging) */

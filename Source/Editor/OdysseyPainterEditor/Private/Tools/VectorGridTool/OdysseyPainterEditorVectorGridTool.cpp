@@ -3,6 +3,8 @@
 
 #include "Tools/VectorGridTool/OdysseyPainterEditorVectorGridTool.h"
 
+#define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorGridTool"
+
 #ifndef M_PI
 #define M_PI 3.14159265358979323846L
 #endif
@@ -36,22 +38,25 @@ UOdysseyPainterEditorVectorGridTool::ActivateVector( FOdysseyVectorEngine* iEngi
 
     iEngine->ClearHUD( );
     iEngine->AddHUD( &mGridHUD );
+
+    iScene->Update( 0 ); // refresh vector scene and GUI widgets via delegates.
 }
 
 bool
 UOdysseyPainterEditorVectorGridTool::OnMouseDownVector( FOdysseyVectorEngine* iEngine
                                                       , FOdysseyVectorScene* iScene
-                                                      , FOdysseyVectorUndo** iUndo
                                                       , const FOdysseyPoint& iPointInTexture
                                                       , const FKey& iKey )
 {
-    // BeginTransaction() must be called for GUndo to have a value. Please do it in the caller function.
-    if( iUndo && GUndo )
+    // needed for valid GUndo pointer
+    GEditor->BeginTransaction(LOCTEXT("VectorGridTool","Vector Grid Tool"));
+    if( GUndo )
     {
-        (*iUndo) = new FOdysseyVectorUndoPointPosition( iScene, mPointArray );
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoPointPosition( iScene, mPointArray );
 
-        GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(*iUndo) );
+        GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
     }
+    GEditor->EndTransaction();
 
     for( int i = 0; i < iPointInTexture.keysDown.Num(); i++ )
     {
@@ -79,6 +84,8 @@ UOdysseyPainterEditorVectorGridTool::OnMouseDownVector( FOdysseyVectorEngine* iE
             mGridNodeArray.push_back( gridNode );
         }
     }
+
+    iScene->Update( 0 ); // refresh vector scene and GUI widgets via delegates.
 
     return true;
 }
@@ -108,6 +115,7 @@ UOdysseyPainterEditorVectorGridTool::OnMouseDragVector( FOdysseyVectorEngine* iE
 
             mGridHUD.Deform();
 
+            // refresh vector scene and GUI widgets via delegates.
             iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES | FOdysseyVectorObject::KEEPINVALIDATED );
         }
     }
@@ -126,7 +134,7 @@ UOdysseyPainterEditorVectorGridTool::OnMouseUpVector( FOdysseyVectorEngine* iEng
         mGridHUD.EndSelectionRectangle( mGridNodeArray );
     }
 
-    iScene->Update( 0 );
+    iScene->Update( 0 ); // refresh vector scene and GUI widgets via delegates.
 
     mMultipleSelectionMode = false;
 
@@ -146,3 +154,5 @@ UOdysseyPainterEditorVectorGridTool::PropertyChangedVector( FOdysseyVectorEngine
 {
     mGridHUD.MakeGrid( iScene, DivisionsX, DivisionsY );
 }
+
+#undef LOCTEXT_NAMESPACE

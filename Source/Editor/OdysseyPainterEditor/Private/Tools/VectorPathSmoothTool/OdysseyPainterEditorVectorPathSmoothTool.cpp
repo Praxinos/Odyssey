@@ -25,6 +25,8 @@ UOdysseyPainterEditorVectorPathSmoothTool::ActivateVector( FOdysseyVectorEngine*
 {
     iEngine->ClearHUD();
     iEngine->AddHUD(&mPickingHUD);
+
+    iScene->Update( 0 ); // update vector scene and GUI widgets via delegates.
 }
 
 bool
@@ -33,6 +35,8 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDownVector( FOdysseyVectorEngi
                                                             , const FOdysseyPoint& iPointInTexture
                                                             , const FKey& iKey )
 {
+    iScene->Update( 0 ); // update vector scene and GUI widgets via delegates.
+
     return true;
 }
 
@@ -57,6 +61,7 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseHoverVector( FOdysseyVectorEng
     if( rect.Area() )
     {*/
     /*}*/
+    iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES ); // update vector scene and GUI widgets via delegates.
 }
 
 void
@@ -85,7 +90,7 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDragVector( FOdysseyVectorEngi
         }
     }
 
-    iScene->Update( 0 );
+    iScene->Update( 0 ); // update vector scene and GUI widgets via delegates.
 }
 
 bool
@@ -94,6 +99,7 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseUpVector( FOdysseyVectorEngine
                                                           , const FOdysseyPoint& iPointInTexture
                                                           , const FKey& iKey )
 {
+    iScene->Update( 0 ); // update vector scene and GUI widgets via delegates.
 
     return false;
 }

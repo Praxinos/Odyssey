@@ -12,7 +12,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoObjectAdd : public FOdysseyVectorUndo
 {
     public:
         ~FOdysseyVectorUndoObjectAdd();
-        FOdysseyVectorUndoObjectAdd( FOdysseyVectorObject* iParent, FOdysseyVectorObject* iObject );
+        FOdysseyVectorUndoObjectAdd( FOdysseyVectorScene* iScene, FOdysseyVectorObject* iParent, FOdysseyVectorObject* iObject );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;

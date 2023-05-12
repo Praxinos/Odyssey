@@ -57,6 +57,6 @@ UOdysseyVectorViewObject::PostEditChangeProperty( FPropertyChangedEvent& Propert
                        , FName(PropertyChangedEvent.Property->GetMetaData(TEXT("Category"))) );
 
         // call delegates
-        scene->mRefreshLayer.Broadcast(scene);
+        //scene->mRefreshLayer.Broadcast(scene);
     }
 }

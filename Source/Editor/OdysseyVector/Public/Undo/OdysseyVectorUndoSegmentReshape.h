@@ -52,5 +52,4 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoSegmentReshape : public FOdysseyVector
     private:
         std::vector<FSegmentShape> mSegmentShapeBeforeArray;
         std::vector<FSegmentShape> mSegmentShapeAfterArray;
-        FOdysseyVectorScene* mScene;
 };

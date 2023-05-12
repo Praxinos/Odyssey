@@ -16,8 +16,7 @@ FOdysseyVectorUndoPointPosition::~FOdysseyVectorUndoPointPosition()
 
 FOdysseyVectorUndoPointPosition::FOdysseyVectorUndoPointPosition( FOdysseyVectorScene* iScene
                                                                 , std::vector<FOdysseyVectorPoint*>& iPointArray )
-    : FOdysseyVectorUndo()
-    , mScene( iScene )
+    : FOdysseyVectorUndo( iScene )
 {
     mPointPositionArray.reserve( iPointArray.size() );
 
@@ -49,10 +48,8 @@ FOdysseyVectorUndoPointPosition::Apply( UObject* iIgnored )
 
     LoadArray( mPointPositionArray );
 
-    mScene->Update( 0 );
-
-    // call callbacks if any (for refreshing GUI e.g)
-    mRefreshDelegate.Broadcast( mScene );
+    // update invalidated objects and call callbacks if any (for refreshing GUI e.g)
+    mScene->Update(0);
 }
 
 void
@@ -63,10 +60,8 @@ FOdysseyVectorUndoPointPosition::Revert( UObject* iIgnored )
 
     LoadArray( mPointPositionArray );
 
-    mScene->Update( 0 );
-
-    // call callbacks if any (for refreshing GUI e.g)
-    mRefreshDelegate.Broadcast( mScene );
+    // update invalidated objects and call callbacks if any (for refreshing GUI e.g)
+    mScene->Update(0);
 }
 
 /** Describes this change (for debugging) */

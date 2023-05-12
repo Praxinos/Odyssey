@@ -4,20 +4,17 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Tools/OdysseyPainterEditorTool.h"
+#include "Tools/DefaultTool/OdysseyPainterEditorDefaultTool.h"
 #include "OdysseyVector.h"
 #include "Undo/OdysseyVectorUndoSelect.h"
 
 #include "OdysseyPainterEditorVectorObjectPickTool.generated.h"
 
 UCLASS()
-class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectPickTool : public UOdysseyPainterEditorTool
+class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectPickTool : public UOdysseyPainterEditorDefaultTool
 {
 public:
     GENERATED_BODY()
-
-    DECLARE_MULTICAST_DELEGATE_OneParam(FSelectionChanged,FOdysseyVectorScene*)
-    FSelectionChanged mSelectionChanged;
 
 public:
     static bool DoubleClicked();
@@ -40,25 +37,22 @@ public:
                           , const FOdysseyPoint& iPointInTexture );
     bool OnMouseUpVector( FOdysseyVectorEngine* iEngine
                         , FOdysseyVectorScene* iScene
-                        , FOdysseyVectorUndo** iUndo
                         , const FOdysseyPoint& iPointInTexture
                         , const FKey& iKey );
-    bool OnKeyDownVector( FOdysseyVectorEngine* iEngine
-                        , FOdysseyVectorScene* iScene
-                        , FOdysseyVectorUndo** iUndo
-                        , const FKey& iKey );
-    bool OnKeyUpVector( FOdysseyVectorEngine* iEngine
-                        , FOdysseyVectorScene* iScene
-                        , const FKey& iKey );
+    virtual bool OnKeyDownVector( FOdysseyVectorEngine* iEngine
+                                , FOdysseyVectorScene* iScene
+                                , const FKey& iKey ) override;
+    virtual bool OnKeyUpVector( FOdysseyVectorEngine* iEngine
+                              , FOdysseyVectorScene* iScene
+                              , const FKey& iKey ) override;
 
     //OdysseyPainterEditorTool overrides
     virtual void Commit() override;
 
-    void Copy( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, FOdysseyVectorUndo** iUndo );
-    void Paste( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, FOdysseyVectorUndo** iUndo );
+    void Copy( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    void Paste( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
 
 private:
     FOdysseyVectorHUDSelection *mSelectionHUD;
     std::vector<::ULIS::FVec2D> mPointArray;
-    std::list<FOdysseyVectorObject*> mCopiedObjectList;
 };

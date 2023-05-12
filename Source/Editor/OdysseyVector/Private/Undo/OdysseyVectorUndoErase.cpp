@@ -58,7 +58,7 @@ FOdysseyVectorUndoErase::FOdysseyVectorUndoErase( FOdysseyVectorScene* iScene
                                                 , std::vector<FOdysseyVectorObject*>& iRemovedObjectArray
                                                 , std::vector<FOdysseyVectorVertex*>& iRemovedVertexArray
                                                 , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray )
-    : mScene( iScene )
+    : FOdysseyVectorUndo( iScene )
 {
     mAddedObjectArray = iAddedObjectArray;
     mAddedVertexArray = iAddedVertexArray;
@@ -112,10 +112,8 @@ FOdysseyVectorUndoErase::Apply( UObject* iIgnored )
         mAddedSegmentArray[i]->Invalidate();
     }
 
-    mScene->Update( 0 );
-
-    // call callbacks if any (for refreshing GUI e.g)
-    mRefreshDelegate.Broadcast( mScene );
+    // update invalidated objects and call callbacks if any (for refreshing GUI e.g)
+    mScene->Update(0);
 }
 
 void
@@ -162,10 +160,8 @@ FOdysseyVectorUndoErase::Revert( UObject* iIgnored )
         mRemovedSegmentArray[i]->Invalidate();
     }
 
+    // update invalidated objects and call callbacks if any (for refreshing GUI e.g)
     mScene->Update( 0 );
-
-    // call callbacks if any (for refreshing GUI e.g)
-    mRefreshDelegate.Broadcast( mScene );
 }
 
 /** Describes this change (for debugging) */

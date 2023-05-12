@@ -27,6 +27,8 @@ UOdysseyPainterEditorVectorPathWidthTool::ActivateVector( FOdysseyVectorEngine* 
 {
     iEngine->ClearHUD();
     iEngine->AddHUD(&mPickingHUD);
+
+    iScene->Update( 0 ); // update vector scene and GUI widgets via delegates.
 }
 
 bool
@@ -35,6 +37,8 @@ UOdysseyPainterEditorVectorPathWidthTool::OnMouseDownVector( FOdysseyVectorEngin
                                                            , const FOdysseyPoint& iPointInTexture
                                                            , const FKey& iKey)
 {
+    iScene->Update( 0 ); // update vector scene and GUI widgets via delegates.
+
     return true;
 }
 
@@ -44,6 +48,8 @@ UOdysseyPainterEditorVectorPathWidthTool::OnMouseHoverVector( FOdysseyVectorEngi
                                                             , const FOdysseyPoint& iPointInTexture )
 {
     mPickingHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
+
+    iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES ); // update vector scene and GUI widgets via delegates.
 }
 
 void
@@ -86,6 +92,7 @@ UOdysseyPainterEditorVectorPathWidthTool::OnMouseDragVector( FOdysseyVectorEngin
         cubicSegment->Invalidate();
     }
 
+    // update vector scene and GUI widgets via delegates.
     iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES | FOdysseyVectorObject::KEEPINVALIDATED );
 }
 
@@ -95,7 +102,7 @@ UOdysseyPainterEditorVectorPathWidthTool::OnMouseUpVector( FOdysseyVectorEngine*
                                                          , const FOdysseyPoint& iPointInTexture
                                                          , const FKey& iKey )
 {
-    iScene->Update( 0 );
+    iScene->Update( 0 ); // update vector scene and GUI widgets via delegates.
 
     return false;
 }

@@ -49,5 +49,4 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoPointPosition : public FOdysseyVectorU
 
     private:
         std::vector<FPointPosition> mPointPositionArray;
-        FOdysseyVectorScene* mScene;
 };

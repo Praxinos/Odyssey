@@ -41,7 +41,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
                               , const FOdysseyPoint& iPointInTexture );
         bool OnMouseUpVector( FOdysseyVectorEngine* iEngine
                             , FOdysseyVectorScene* iScene
-                            , FOdysseyVectorUndo** iUndo
                             , const FOdysseyPoint& iPointInTexture
                             , const FKey& iKey );
 

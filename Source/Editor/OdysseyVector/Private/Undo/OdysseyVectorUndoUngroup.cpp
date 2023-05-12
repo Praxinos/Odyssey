@@ -16,9 +16,8 @@ FOdysseyVectorUndoUngroup::~FOdysseyVectorUndoUngroup()
 }
 
 FOdysseyVectorUndoUngroup::FOdysseyVectorUndoUngroup( FOdysseyVectorScene* iScene, FOdysseyVectorGroup* iGroup )
-    : FOdysseyVectorUndo()
+    : FOdysseyVectorUndo(iScene)
     , mGroup( iGroup )
-    , mScene( iScene )
 {
     mUngroupedObjectList = iGroup->GetChildrenList();
 }
@@ -40,11 +39,8 @@ FOdysseyVectorUndoUngroup::Apply( UObject* iIgnored )
 
     mGroup->GetParent()->RemoveChild( mGroup );
 
-    // update invalidated objects
-    mScene->Update( 0 );
-
-    // call callbacks if any (for refreshing GUI e.g)
-    mRefreshDelegate.Broadcast( mScene );
+    // update invalidated objects and call callbacks if any (for refreshing GUI e.g)
+    mScene->Update(0);
 }
 
 void
@@ -64,11 +60,8 @@ FOdysseyVectorUndoUngroup::Revert( UObject* iIgnored )
         mGroup->TransferChild( child );
     }
 
-    // update invalidated objects
-    mScene->Update( 0 );
-
-    // call callbacks if any (for refreshing GUI e.g)
-    mRefreshDelegate.Broadcast( mScene );
+    // update invalidated objects and call callbacks if any (for refreshing GUI e.g)
+    mScene->Update(0);
 }
 
 /** Describes this change (for debugging) */

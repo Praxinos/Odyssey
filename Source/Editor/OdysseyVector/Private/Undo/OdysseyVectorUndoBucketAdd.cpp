@@ -15,8 +15,7 @@ FOdysseyVectorUndoBucketAdd::~FOdysseyVectorUndoBucketAdd()
 FOdysseyVectorUndoBucketAdd::FOdysseyVectorUndoBucketAdd( FOdysseyVectorScene* iScene
                                                         , FOdysseyVectorGroupPaint* iPaintGroup
                                                         , FOdysseyVectorBucket* iBucket )
-    : FOdysseyVectorUndo()
-    , mScene( iScene )
+    : FOdysseyVectorUndo( iScene )
     , mPaintGroup( iPaintGroup )
     , mBucket( iBucket )
 {
@@ -31,8 +30,8 @@ FOdysseyVectorUndoBucketAdd::Apply( UObject* iIgnored )
     mPaintGroup->AddBucket( mBucket );
     mPaintGroup->Colorize();
 
-    // call callbacks if any (for refreshing GUI e.g)
-    mRefreshDelegate.Broadcast( mScene );
+    // update invalidated objects and call callbacks if any (for refreshing GUI e.g)
+    mScene->Update(0);
 }
 
 void
@@ -44,8 +43,8 @@ FOdysseyVectorUndoBucketAdd::Revert( UObject* iIgnored )
     mPaintGroup->RemoveBucket( mBucket );
     mPaintGroup->Colorize();
 
-    // call callbacks if any (for refreshing GUI e.g)
-    mRefreshDelegate.Broadcast( mScene );
+    // update invalidated objects and call callbacks if any (for refreshing GUI e.g)
+    mScene->Update(0);
 }
 
 /** Describes this change (for debugging) */

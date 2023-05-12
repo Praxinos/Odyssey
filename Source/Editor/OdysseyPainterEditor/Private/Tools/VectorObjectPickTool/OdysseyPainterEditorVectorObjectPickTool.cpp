@@ -4,6 +4,8 @@
 #include "Tools/VectorObjectPickTool/OdysseyPainterEditorVectorObjectPickTool.h"
 #include <chrono>
 
+#define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorObjectPickTool"
+
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
 UOdysseyPainterEditorVectorObjectPickTool::~UOdysseyPainterEditorVectorObjectPickTool()
@@ -32,78 +34,17 @@ UOdysseyPainterEditorVectorObjectPickTool::ActivateVector( FOdysseyVectorEngine*
 
     iEngine->ClearHUD( );
     iEngine->AddHUD( mSelectionHUD );
-}
 
-void
-UOdysseyPainterEditorVectorObjectPickTool::Copy( FOdysseyVectorEngine* iEngine
-                                               , FOdysseyVectorScene* iScene
-                                               , FOdysseyVectorUndo** iUndo )
-{
-    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
-
-    if( selectedObjectList.size() )
-    {
-        // First step : clear previously copied objects
-        mCopiedObjectList.remove_if( []( FOdysseyVectorObject* iCopiedObject ){ delete iCopiedObject; return true; } );
-
-        // second step : copy selection.
-        for( std::list<FOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
-        {
-            FOdysseyVectorObject* selectedObject = (*it);
-
-            if( selectedObject->HasSelectedAncestor() == false )
-            {
-                mCopiedObjectList.push_back( selectedObject->Copy() );
-            }
-        }
-    }
-}
-
-void
-UOdysseyPainterEditorVectorObjectPickTool::Paste( FOdysseyVectorEngine* iEngine
-                                                , FOdysseyVectorScene* iScene
-                                                , FOdysseyVectorUndo** iUndo )
-{
-    iScene->ClearSelection();
-
-    for( std::list<FOdysseyVectorObject*>::iterator it = mCopiedObjectList.begin(); it != mCopiedObjectList.end(); ++it )
-    {
-        FOdysseyVectorObject* copiedObject = (*it);
-        FOdysseyVectorObject* newObject = copiedObject->Copy();
-        BLPoint shifting;
-
-        iScene->AppendChild( newObject );
-
-        shifting = iScene->GetInverseWorldMatrix().mapVector( 10.0f, 10.0f ); // shift object by 10 pixels
-
-        newObject->Invalidate();
-        newObject->Translate( newObject->GetTranslationX() + shifting.x, newObject->GetTranslationY() + shifting.y );
-        newObject->UpdateMatrix();
-
-        iScene->Select( newObject );
-    }
-
-    iScene->Update( 0 );
+    iScene->Update( 0 ); // refresh vector scene and GUI widgets via delegates.
 }
 
 bool
 UOdysseyPainterEditorVectorObjectPickTool::OnKeyDownVector( FOdysseyVectorEngine* iEngine
                                                           , FOdysseyVectorScene* iScene
-                                                          , FOdysseyVectorUndo** iUndo
                                                           , const FKey& iKey )
 {
-    if( FSlateApplication::Get().GetModifierKeys().IsControlDown() )
-    {
-        if( iKey == EKeys::C )
-        {
-            Copy( iEngine, iScene, iUndo );
-        }
-
-        if( iKey == EKeys::V )
-        {
-            Paste( iEngine, iScene, iUndo );
-        }
-    }
+    // Note: this also calls iScene->Update(0)
+    UOdysseyPainterEditorDefaultTool::OnKeyDownVector( iEngine, iScene, iKey );
 
     return false;
 }
@@ -113,6 +54,9 @@ UOdysseyPainterEditorVectorObjectPickTool::OnKeyUpVector( FOdysseyVectorEngine* 
                                                         , FOdysseyVectorScene* iScene
                                                         , const FKey& iKey )
 {
+    // Note: this also calls iScene->Update(0)
+    UOdysseyPainterEditorDefaultTool::OnKeyUpVector( iEngine, iScene, iKey );
+
     return false;
 }
 
@@ -130,6 +74,8 @@ UOdysseyPainterEditorVectorObjectPickTool::OnMouseDownVector( FOdysseyVectorEngi
 
     mPointArray.push_back( point );
 
+    iScene->Update( 0 ); // refresh vector scene and GUI widgets via delegates.
+
     return true;
 }
 
@@ -141,6 +87,8 @@ UOdysseyPainterEditorVectorObjectPickTool::OnMouseDragVector( FOdysseyVectorEngi
     ::ULIS::FVec2D point = { iPointInTexture.x, iPointInTexture.y };
 
     mPointArray.push_back( point );
+
+    iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES ); // refresh vector scene and GUI widgets via delegates.
 }
 
 //static
@@ -178,19 +126,20 @@ SetSelectionSpace( FOdysseyVectorEngine* iVectorEngine, FOdysseyVectorObject* iS
 bool
 UOdysseyPainterEditorVectorObjectPickTool::OnMouseUpVector( FOdysseyVectorEngine* iEngine
                                                           , FOdysseyVectorScene* iScene
-                                                          , FOdysseyVectorUndo** iUndo
                                                           , const FOdysseyPoint& iPointInTexture
                                                           , const FKey& iKey )
 {
     FOdysseyVectorUndoSelect* undoSelect = nullptr;
 
-    // BeginTransaction() must be called for GUndo to have a value. Please do it in the caller function.
-    if( iUndo && GUndo )
+    // needed for valid GUndo pointer
+    GEditor->BeginTransaction(LOCTEXT("VectorObjectPickTool","Vector Object Pick Tool"));
+    if( GUndo )
     {
-        (*iUndo) = new FOdysseyVectorUndoSelect( iScene );
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelect( iScene );
 
-        GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(*iUndo) );
+        GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
     }
+    GEditor->EndTransaction();
 
     if ( mPointArray.size() == 1 )
     {
@@ -207,7 +156,7 @@ UOdysseyPainterEditorVectorObjectPickTool::OnMouseUpVector( FOdysseyVectorEngine
     mSelectionHUD->SetSelecting( false, nullptr );
     mSelectionHUD->UpdateSelectionBox( iScene );
 
-    mSelectionChanged.Broadcast(iScene);
+    iScene->Update( 0 ); // refresh vector scene and GUI widgets via delegates.
 
     return true;
 }
@@ -217,3 +166,5 @@ UOdysseyPainterEditorVectorObjectPickTool::Commit()
 {
 
 }
+
+#undef LOCTEXT_NAMESPACE

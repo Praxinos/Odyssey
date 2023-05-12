@@ -14,8 +14,7 @@ FOdysseyVectorUndoSendBackward::~FOdysseyVectorUndoSendBackward()
 
 FOdysseyVectorUndoSendBackward::FOdysseyVectorUndoSendBackward( FOdysseyVectorScene* iScene
                                                               , FOdysseyVectorObject* iObject )
-    : FOdysseyVectorUndo()
-    , mScene( iScene )
+    : FOdysseyVectorUndo( iScene )
     , mObject( iObject )
 {
 }
@@ -28,8 +27,8 @@ FOdysseyVectorUndoSendBackward::Apply( UObject* iIgnored )
 
     mObject->MoveBack();
 
-    // call callbacks if any (for refreshing GUI e.g)
-    mRefreshDelegate.Broadcast( mScene );
+    // update invalidated objects and call callbacks if any (for refreshing GUI e.g)
+    mScene->Update(0);
 }
 
 void
@@ -40,8 +39,8 @@ FOdysseyVectorUndoSendBackward::Revert( UObject* iIgnored )
 
     mObject->MoveFront();
 
-    // call callbacks if any (for refreshing GUI e.g)
-    mRefreshDelegate.Broadcast( mScene );
+    // update invalidated objects and call callbacks if any (for refreshing GUI e.g)
+    mScene->Update(0);
 }
 
 /** Describes this change (for debugging) */

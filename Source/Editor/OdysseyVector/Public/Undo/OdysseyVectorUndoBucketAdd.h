@@ -28,7 +28,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoBucketAdd : public FOdysseyVectorUndo
         virtual FString ToString() const override;
 
     private:
-        FOdysseyVectorScene* mScene;
         FOdysseyVectorGroupPaint* mPaintGroup;
         FOdysseyVectorBucket* mBucket;
 };

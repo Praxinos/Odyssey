@@ -43,7 +43,6 @@ public:
                           , const FOdysseyPoint& iPointInTexture );
     bool OnMouseUpVector( FOdysseyVectorEngine* iEngine
                         , FOdysseyVectorScene* iScene
-                        , FOdysseyVectorUndo** iUndo
                         , const FOdysseyPoint& iPointInTexture
                         , const FKey& iKey);
     virtual void Commit() override;

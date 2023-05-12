@@ -27,6 +27,12 @@ FOdysseyVectorScene::GetEngine()
     return mEngine;
 }
 
+FOdysseyVectorScene::FUpdateDelegate&
+FOdysseyVectorScene::OnUpdateDelegate()
+{
+    return mOnUpdateDelegate;
+}
+
 void
 FOdysseyVectorScene::ClearSelection()
 {
@@ -233,6 +239,14 @@ FOdysseyVectorScene::DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags )
 void
 FOdysseyVectorScene::UpdateShape( uint32 iUpdateFlags )
 {
+}
+
+void
+FOdysseyVectorScene::Update( uint32 iUpdateFlags )
+{
+    FOdysseyVectorObject::Update( iUpdateFlags );
+
+    mOnUpdateDelegate.Broadcast( this, iUpdateFlags );
 }
 
 FOdysseyVectorObject*

@@ -3,6 +3,8 @@
 
 #include "Tools/VectorPathKnotTool/OdysseyPainterEditorVectorPathKnotTool.h"
 
+#define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorPathKnotTool"
+
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
 UOdysseyPainterEditorVectorPathKnotTool::~UOdysseyPainterEditorVectorPathKnotTool()
@@ -26,12 +28,13 @@ UOdysseyPainterEditorVectorPathKnotTool::ActivateVector( FOdysseyVectorEngine* i
 {
     iEngine->ClearHUD();
     iEngine->AddHUD(&mPickingHUD);
+
+    iScene->Update( 0 ); // update vector scene and GUI widgets via delegates.
 }
 
 bool
 UOdysseyPainterEditorVectorPathKnotTool::OnMouseDownVector( FOdysseyVectorEngine* iEngine
                                                           , FOdysseyVectorScene* iScene
-                                                          , FOdysseyVectorUndo** iUndo
                                                           , const FOdysseyPoint& iPointInTexture
                                                           , const FKey& iKey )
 {
@@ -88,26 +91,28 @@ UOdysseyPainterEditorVectorPathKnotTool::OnMouseDownVector( FOdysseyVectorEngine
                 removedVertexArray.push_back( vertexA );
                 removedVertexArray.push_back( vertexB );
 
-                // BeginTransaction() must be called for GUndo to have a value. Please do it in the caller function.
-                if( iUndo && GUndo )
+                // needed for valid GUndo pointer
+                GEditor->BeginTransaction(LOCTEXT("VectorPathKnotTool","Vector Path Knot Tool"));
+                if( GUndo )
                 {
-                    (*iUndo) = new FOdysseyVectorUndoKnot( iScene
-                                                         , vertexA->GetPath()
-                                                         , removedVertexArray
-                                                         , removedSegmentArray
-                                                         , addedVertexArray
-                                                         , addedSegmentArray
-                                                         , mergedPath
-                                                         , mergedVertexArray
-                                                         , mergedSegmentArray );
+                    FOdysseyVectorUndo *undo = new FOdysseyVectorUndoKnot( iScene
+                                                                         , vertexA->GetPath()
+                                                                         , removedVertexArray
+                                                                         , removedSegmentArray
+                                                                         , addedVertexArray
+                                                                         , addedSegmentArray
+                                                                         , mergedPath
+                                                                         , mergedVertexArray
+                                                                         , mergedSegmentArray );
 
-                    GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(*iUndo) );
+                    GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
                 }
+                GEditor->EndTransaction();
             }
-
-            iScene->Update( 0 );
         }
     }
+
+    iScene->Update( 0 ); // update vector scene and GUI widgets via delegates.
 
     return true;
 }
@@ -133,6 +138,7 @@ UOdysseyPainterEditorVectorPathKnotTool::OnMouseHoverVector( FOdysseyVectorEngin
     if( rect.Area() )
     {*/
     /*}*/
+    iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES ); // update vector scene and GUI widgets via delegates.
 }
 
 void
@@ -141,6 +147,8 @@ UOdysseyPainterEditorVectorPathKnotTool::OnMouseDragVector( FOdysseyVectorEngine
                                                           , const FOdysseyPoint& iPointInTexture )
 {
     mPickingHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
+
+    iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES ); // update vector scene and GUI widgets via delegates.
 }
 
 bool
@@ -149,6 +157,8 @@ UOdysseyPainterEditorVectorPathKnotTool::OnMouseUpVector( FOdysseyVectorEngine* 
                                                         , const FOdysseyPoint& iPointInTexture
                                                         , const FKey& iKey )
 {
+    iScene->Update( 0 ); // update vector scene and GUI widgets via delegates.
+
     return false;
 }
 
@@ -162,3 +172,5 @@ UOdysseyPainterEditorVectorPathKnotTool::PropertyChanged( const FName& iProperty
 {
     mPickingHUD.SetRadius( Radius );
 }
+
+#undef LOCTEXT_NAMESPACE

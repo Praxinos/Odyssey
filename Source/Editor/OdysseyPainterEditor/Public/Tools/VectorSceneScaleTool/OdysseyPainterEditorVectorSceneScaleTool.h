@@ -25,7 +25,6 @@ public:
                        , FOdysseyVectorScene* iScene );
     bool OnMouseDownVector( FOdysseyVectorEngine* iEngine
                           , FOdysseyVectorScene* iScene
-                          , FOdysseyVectorUndo** iUndo
                           , const FOdysseyPoint& iPointInTexture
                           , const FKey& iKey );
     void OnMouseHoverVector( FOdysseyVectorEngine* iEngine
