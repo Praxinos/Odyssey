@@ -2,11 +2,6 @@
 // EPOS is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "StoryboardViewport/FilmOverlays.h"
-#include "Rendering/DrawElements.h"
-#include "Widgets/SBoxPanel.h"
-#include "Styling/SlateTypes.h"
-#include "Widgets/Images/SImage.h"
-#include "Widgets/Text/STextBlock.h"
 #include "Widgets/Layout/SBox.h"
 #include "Widgets/Layout/SHeader.h"
 #include "Widgets/Layout/SGridPanel.h"
@@ -15,11 +10,10 @@
 #include "Widgets/Input/SComboButton.h"
 #include "Widgets/Colors/SColorBlock.h"
 #include "Widgets/Input/SCheckBox.h"
-#include "EditorStyleSet.h"
 #include "Styles/EposSequenceEditorStyle.h"
-#include "Widgets/Input/NumericTypeInterface.h"
 #include "Widgets/Input/SSpinBox.h"
 #include "Widgets/Colors/SColorPicker.h"
+#include "FilmOverlayToolkit2.h"
 
 #define LOCTEXT_NAMESPACE "EposSequenceEditorFilmOverlays"
 
@@ -465,18 +459,34 @@ int32 SFilmOverlay::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeo
 
 void SFilmOverlayOptions::Construct(const FArguments& InArgs)
 {
-    MasterColorTint = FLinearColor(1.f, 1.f, 1.f, .5f);
+    PrimaryColorTint = FLinearColor(1.f, 1.f, 1.f, .5f);
 
-    MasterFilmOverlays.Add(NAME_None, TUniquePtr<IFilmOverlay>(new FFilmOverlay_None));
-    MasterFilmOverlays.Add("3x3Grid", TUniquePtr<IFilmOverlay>(new FFilmOverlay_Grid(3, 3)));
-    MasterFilmOverlays.Add("2x2Grid", TUniquePtr<IFilmOverlay>(new FFilmOverlay_Grid(2, 2)));
-    MasterFilmOverlays.Add("Crosshair", TUniquePtr<IFilmOverlay>(new FFilmOverlay_Crosshair));
-    MasterFilmOverlays.Add("Rabatment", TUniquePtr<IFilmOverlay>(new FFilmOverlay_Rabatment));
+    PrimaryOverlays.Add(MakeShareable(new FFilmOverlay_None));
+    UFilmOverlayToolkit2::RegisterPrimaryFilmOverlay(NAME_None, PrimaryOverlays.Last());
 
-    ToggleableOverlays.Add("ActionSafeFrame",   TUniquePtr<IFilmOverlay>(new FFilmOverlay_SafeFrame(LOCTEXT("ActionSafeFrame", "Action Safe"), 95.f, FLinearColor::Red)));
-    ToggleableOverlays.Add("TitleSafeFrame",    TUniquePtr<IFilmOverlay>(new FFilmOverlay_SafeFrame(LOCTEXT("TitleSafeFrame", "Title Safe"), 90.f, FLinearColor::Yellow)));
-    ToggleableOverlays.Add("CustomSafeFrame",   TUniquePtr<IFilmOverlay>(new FFilmOverlay_SafeFrame(LOCTEXT("CustomSafeFrame", "Custom Safe"), 85.f, FLinearColor::Green)));
-    ToggleableOverlays.Add("LetterBox",         TUniquePtr<IFilmOverlay>(new FFilmOverlay_LetterBox));
+    PrimaryOverlays.Add(MakeShareable(new FFilmOverlay_Grid(3, 3)));
+    UFilmOverlayToolkit2::RegisterPrimaryFilmOverlay("3x3Grid", PrimaryOverlays.Last());
+
+    PrimaryOverlays.Add(MakeShareable(new FFilmOverlay_Grid(2, 2)));
+    UFilmOverlayToolkit2::RegisterPrimaryFilmOverlay("2x2Grid", PrimaryOverlays.Last());
+
+    PrimaryOverlays.Add(MakeShareable(new FFilmOverlay_Crosshair));
+    UFilmOverlayToolkit2::RegisterPrimaryFilmOverlay("Crosshair", PrimaryOverlays.Last());
+
+    PrimaryOverlays.Add(MakeShareable(new FFilmOverlay_Rabatment));
+    UFilmOverlayToolkit2::RegisterPrimaryFilmOverlay("Rabatment", PrimaryOverlays.Last());
+
+    ToggleableOverlays.Add(MakeShareable(new FFilmOverlay_SafeFrame(LOCTEXT("ActionSafeFrame", "Action Safe"), 95.f, FLinearColor::Red)));
+    UFilmOverlayToolkit2::RegisterToggleableFilmOverlay("ActionSafeFrame", ToggleableOverlays.Last());
+
+    ToggleableOverlays.Add(MakeShareable(new FFilmOverlay_SafeFrame(LOCTEXT("TitleSafeFrame", "Title Safe"), 90.f, FLinearColor::Yellow)));
+    UFilmOverlayToolkit2::RegisterToggleableFilmOverlay("TitleSafeFrame", ToggleableOverlays.Last());
+
+    ToggleableOverlays.Add(MakeShareable(new FFilmOverlay_SafeFrame(LOCTEXT("CustomSafeFrame", "Custom Safe"), 85.f, FLinearColor::Green)));
+    UFilmOverlayToolkit2::RegisterToggleableFilmOverlay("CustomSafeFrame", ToggleableOverlays.Last());
+
+    ToggleableOverlays.Add(MakeShareable(new FFilmOverlay_LetterBox));
+    UFilmOverlayToolkit2::RegisterToggleableFilmOverlay("LetterBox", ToggleableOverlays.Last());
 
     OverlayWidget = SNew(SFilmOverlay)
         .Visibility(EVisibility::HitTestInvisible)
@@ -502,17 +512,17 @@ void SFilmOverlayOptions::Construct(const FArguments& InArgs)
     ];
 }
 
-FLinearColor SFilmOverlayOptions::GetMasterColorTint() const
+FLinearColor SFilmOverlayOptions::GetPrimaryColorTint() const
 {
-    return MasterColorTint;
+    return PrimaryColorTint;
 }
 
-void SFilmOverlayOptions::OnMasterColorTintChanged(const FLinearColor& Tint)
+void SFilmOverlayOptions::OnPrimaryColorTintChanged(const FLinearColor& Tint)
 {
-    IFilmOverlay* Overlay = GetMasterFilmOverlay();
+    IFilmOverlay* Overlay = GetPrimaryFilmOverlay();
     if (Overlay)
     {
-        Overlay->SetTint(MasterColorTint);
+        Overlay->SetTint(PrimaryColorTint);
     }
 }
 
@@ -538,7 +548,7 @@ TSharedRef<SWidget> SFilmOverlayOptions::GetMenuContent()
             + SVerticalBox::Slot()
             .AutoHeight()
             [
-                ConstructMasterOverlaysMenu()
+                ConstructPrimaryOverlaysMenu()
             ]
         ]
 
@@ -559,7 +569,7 @@ TSharedRef<SWidget> SFilmOverlayOptions::GetMenuContent()
             + SHorizontalBox::Slot()
             .VAlign(VAlign_Center)
             [
-                WidgetHelpers::CreateColorWidget(&MasterColorTint, FOnColorPicked::CreateRaw(this, &SFilmOverlayOptions::OnMasterColorTintChanged))
+                WidgetHelpers::CreateColorWidget(&PrimaryColorTint, FOnColorPicked::CreateRaw(this, &SFilmOverlayOptions::OnPrimaryColorTintChanged))
             ]
         ]
 
@@ -585,24 +595,24 @@ TSharedRef<SWidget> SFilmOverlayOptions::GetMenuContent()
         ];
 }
 
-TSharedRef<SWidget> SFilmOverlayOptions::ConstructMasterOverlaysMenu()
+TSharedRef<SWidget> SFilmOverlayOptions::ConstructPrimaryOverlaysMenu()
 {
     TSharedRef<SUniformGridPanel> OverlaysPanel = SNew(SUniformGridPanel).SlotPadding(10.f);
 
     TArray<FName> OverlayNames;
-    MasterFilmOverlays.GenerateKeyArray(OverlayNames);
+    UFilmOverlayToolkit2::GetPrimaryFilmOverlays().GenerateKeyArray(OverlayNames);
 
     const int32 NumColumns = FMath::Log2( static_cast<float>( OverlayNames.Num() - 1 ) );
 
     int32 ColumnIndex = 0, RowIndex = 0;
     for (int32 OverlayIndex = 0; OverlayIndex < OverlayNames.Num(); ++OverlayIndex)
     {
-        IFilmOverlay& Overlay = *MasterFilmOverlays[OverlayNames[OverlayIndex]].Get();
+        IFilmOverlay& Overlay = *UFilmOverlayToolkit2::GetPrimaryFilmOverlays()[OverlayNames[OverlayIndex]].Get();
         OverlaysPanel->AddSlot(ColumnIndex, RowIndex)
         [
             SNew(SButton)
             .ButtonStyle(FAppStyle::Get(), "HoverHintOnly")
-            .OnClicked(this, &SFilmOverlayOptions::SetMasterFilmOverlay, OverlayNames[OverlayIndex])
+            .OnClicked(this, &SFilmOverlayOptions::SetPrimaryFilmOverlay, OverlayNames[OverlayIndex])
             [
                 SNew(SVerticalBox)
 
@@ -647,19 +657,23 @@ TSharedRef<SWidget> SFilmOverlayOptions::ConstructToggleableOverlaysMenu()
     TSharedRef<SGridPanel> GridPanel = SNew(SGridPanel);
 
     int32 Row = 0;
-    for (auto& Pair : ToggleableOverlays)
+    for (const TPair<FName, TSharedPtr<IFilmOverlay> >& Pair : UFilmOverlayToolkit2::GetToggleableFilmOverlays())
     {
-        TSharedPtr<SWidget> Settings = Pair.Value->ConstructSettingsWidget();
+        TSharedPtr<IFilmOverlay> FilmOverlay = Pair.Value;
+        if (!FilmOverlay.IsValid())
+        {
+            continue;
+        }
+
+        TSharedPtr<SWidget> Settings = FilmOverlay->ConstructSettingsWidget();
         if (!Settings.IsValid())
         {
             continue;
         }
 
-        TUniquePtr<IFilmOverlay>* Ptr = &Pair.Value;
-
-        auto OnCheckStateChanged = [=](ECheckBoxState InNewState){ (*Ptr)->SetEnabled(InNewState == ECheckBoxState::Checked); };
-        auto IsChecked = [=]{ return (*Ptr)->IsEnabled() ? ECheckBoxState::Checked : ECheckBoxState::Unchecked; };
-        auto IsEnabled = [=]{ return (*Ptr)->IsEnabled(); };
+        auto OnCheckStateChanged = [=](ECheckBoxState InNewState){ FilmOverlay->SetEnabled(InNewState == ECheckBoxState::Checked); };
+        auto IsChecked = [=]{ return FilmOverlay->IsEnabled() ? ECheckBoxState::Checked : ECheckBoxState::Unchecked; };
+        auto IsEnabled = [=]{ return FilmOverlay->IsEnabled(); };
 
         Settings->SetEnabled(TAttribute<bool>::Create(TAttribute<bool>::FGetter::CreateLambda(IsEnabled)));
 
@@ -694,13 +708,13 @@ TSharedRef<SWidget> SFilmOverlayOptions::ConstructToggleableOverlaysMenu()
     return GridPanel;
 }
 
-FReply SFilmOverlayOptions::SetMasterFilmOverlay(FName InName)
+FReply SFilmOverlayOptions::SetPrimaryFilmOverlay(FName InName)
 {
-    CurrentMasterOverlay = InName;
-    IFilmOverlay* Overlay = GetMasterFilmOverlay();
+    CurrentPrimaryOverlay = InName;
+    IFilmOverlay* Overlay = GetPrimaryFilmOverlay();
     if (Overlay)
     {
-        Overlay->SetTint(MasterColorTint);
+        Overlay->SetTint(PrimaryColorTint);
     }
     return FReply::Unhandled();
 }
@@ -714,16 +728,22 @@ TArray<IFilmOverlay*> SFilmOverlayOptions::GetActiveFilmOverlays() const
 {
     TArray<IFilmOverlay*> Overlays;
 
-    if (IFilmOverlay* Overlay = GetMasterFilmOverlay())
+    if (IFilmOverlay* Overlay = GetPrimaryFilmOverlay())
     {
         Overlays.Add(Overlay);
     }
 
-    for (auto& Pair: ToggleableOverlays)
+    for (const TPair<FName, TSharedPtr<IFilmOverlay> >& Pair : UFilmOverlayToolkit2::GetToggleableFilmOverlays())
     {
-        if (Pair.Value->IsEnabled())
+        TSharedPtr<IFilmOverlay> FilmOverlay = Pair.Value;
+        if (!FilmOverlay.IsValid())
         {
-            Overlays.Add(Pair.Value.Get());
+            continue;
+        }
+
+        if (FilmOverlay->IsEnabled())
+        {
+            Overlays.Add(FilmOverlay.Get());
         }
     }
 
@@ -732,19 +752,19 @@ TArray<IFilmOverlay*> SFilmOverlayOptions::GetActiveFilmOverlays() const
 
 const FSlateBrush* SFilmOverlayOptions::GetCurrentThumbnail() const
 {
-    if (!CurrentMasterOverlay.IsNone())
+    if (!CurrentPrimaryOverlay.IsNone())
     {
-        return MasterFilmOverlays[CurrentMasterOverlay]->GetThumbnail();
+        return UFilmOverlayToolkit2::GetPrimaryFilmOverlays()[CurrentPrimaryOverlay].Get()->GetThumbnail();
     }
 
     return FEposSequenceEditorStyle::Get().GetBrush("FilmOverlay.DefaultThumbnail");
 }
 
-IFilmOverlay* SFilmOverlayOptions::GetMasterFilmOverlay() const
+IFilmOverlay* SFilmOverlayOptions::GetPrimaryFilmOverlay() const
 {
-    if (!CurrentMasterOverlay.IsNone())
+    if (!CurrentPrimaryOverlay.IsNone())
     {
-        return MasterFilmOverlays[CurrentMasterOverlay].Get();
+        return UFilmOverlayToolkit2::GetPrimaryFilmOverlays()[CurrentPrimaryOverlay].Get();
     }
     return nullptr;
 }
