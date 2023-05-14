@@ -8,7 +8,7 @@
 
 class UMovieSceneCinematicShotSection;
 class UMovieSceneSequence;
-class UMoviePipelineMasterConfig;
+class UMoviePipelinePrimaryConfig;
 
 class FEposSequencePipelineRenderer
     : public IMovieRendererInterface
@@ -22,6 +22,6 @@ public:
 
     virtual FString GetDisplayName() const override;
 
-public:
-    UMoviePipelineMasterConfig* mMasterConfig { nullptr };
+private:
+    UMoviePipelinePrimaryConfig* mPrimaryConfig { nullptr };
 };

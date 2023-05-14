@@ -1045,13 +1045,25 @@ GetTransformKeys( ISequencer& iSequencer, const TOptional<FTransformData>& LastT
 // From ...\UE_4.26\Engine\Source\Editor\MovieSceneTools\Public\KeyframeTrackEditor.h
 static
 void
-AddKeysToSection( ISequencer& iSequencer, UMovieSceneSection* Section, FFrameNumber KeyTime, const FGeneratedTrackKeys& Keys, ESequencerKeyMode KeyMode )
+AddKeysToSection( ISequencer& iSequencer, UMovieSceneSection* Section, FFrameNumber KeyTime, const FGeneratedTrackKeys& Keys, ESequencerKeyMode KeyMode, EKeyFrameTrackEditorSetDefault SetDefault = EKeyFrameTrackEditorSetDefault::SetDefault )
 {
     EAutoChangeMode AutoChangeMode = iSequencer.GetAutoChangeMode();
 
     FMovieSceneChannelProxy& Proxy = Section->GetChannelProxy();
 
-    const bool bSetDefaults = iSequencer.GetAutoSetTrackDefaults();
+    const bool bSetDefaults = iSequencer.GetAutoSetTrackDefaults() && ( SetDefault != EKeyFrameTrackEditorSetDefault::DoNotSetDefault );
+
+    // The default value is a value for the channel when there are no keyframes. For example, if you add keys and
+    // then delete them all, the default value is the value of the channel. In the implementation of ApplyDefault,
+    // all the setters check that the default value is only set when there are NO keyframes. So, ApplyDefault needs
+    // to be called here in AddKeysToSection BEFORE any keys are added.
+    if( bSetDefaults )
+    {
+        for( const FMovieSceneChannelValueSetter& GeneratedKey : Keys )
+        {
+            GeneratedKey->ApplyDefault( Section, Proxy, SetDefault );
+        }
+    }
 
     if( KeyMode != ESequencerKeyMode::AutoKey || AutoChangeMode == EAutoChangeMode::AutoKey || AutoChangeMode == EAutoChangeMode::All )
     {
@@ -1069,14 +1081,6 @@ AddKeysToSection( ISequencer& iSequencer, UMovieSceneSection* Section, FFrameNum
         for( const FMovieSceneChannelValueSetter& GeneratedKey : Keys )
         {
             GeneratedKey->Apply( Section, Proxy, KeyTime, InterpolationMode, bKeyEvenIfUnchanged, bKeyEvenIfEmpty );
-        }
-    }
-
-    if( bSetDefaults )
-    {
-        for( const FMovieSceneChannelValueSetter& GeneratedKey : Keys )
-        {
-            GeneratedKey->ApplyDefault( Section, Proxy );
         }
     }
 }

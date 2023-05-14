@@ -47,7 +47,7 @@ GetMostRelevantCameraAspectRatio( ISequencer* iSequencer, UMovieSceneSequence* i
 
     UE::MovieScene::FSequenceVisitParams params;
     params.bVisitSections = true;
-    params.bVisitMasterTracks = true;
+    params.bVisitRootTracks = true;
     params.bVisitSubSequences = true;
 
     FSequenceCameraVisitor camera_visitor;

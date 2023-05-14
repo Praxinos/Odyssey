@@ -15,7 +15,7 @@
 #include "LevelSequence.h"
 #include "MoviePipeline.h"
 #include "MoviePipelineBlueprintLibrary.h"
-#include "MoviePipelineMasterConfig.h"
+#include "MoviePipelinePrimaryConfig.h"
 #include "MovieScene.h"
 #include "MovieSceneCommonHelpers.h"
 #include "MovieSceneSection.h"
@@ -1428,7 +1428,7 @@ UMoviePipelineStoryboardBlueprintLibrary::GetNotes( const UMoviePipeline* iMovie
 
     ULevelSequence* level_sequence = iMoviePipeline->GetTargetSequence();
 
-    FFrameRate effective_framerate = iMoviePipeline->GetPipelineMasterConfig()->GetEffectiveFrameRate( iMoviePipeline->GetTargetSequence() );
+    FFrameRate effective_framerate = iMoviePipeline->GetPipelinePrimaryConfig()->GetEffectiveFrameRate( iMoviePipeline->GetTargetSequence() );
 
     //FTimecode master_timecode = UMoviePipelineBlueprintLibrary::GetMasterTimecode( iMoviePipeline );
     FFrameNumber master_current_frame_in_levelsequence = UMoviePipelineBlueprintLibrary::GetMasterFrameNumber( iMoviePipeline );
@@ -1516,7 +1516,7 @@ UMoviePipelineStoryboardBlueprintLibrary::GetNotes( const UMoviePipeline* iMovie
 
     UE::MovieScene::FSequenceVisitParams params;
     params.bVisitSections = true;
-    params.bVisitMasterTracks = true;
+    params.bVisitRootTracks = true;
     params.bVisitSubSequences = true;
 
     FSequenceNoteVisitor note_visitor;
