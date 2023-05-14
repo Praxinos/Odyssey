@@ -96,7 +96,7 @@ EposSequenceRenderHelpers::CreateLevelSequenceTransient( TArray<UEposMovieSceneS
     levelMovieScene->SetDisplayRate( displayRate );
 
     // Add CinematicShotTrack
-    UMovieSceneCinematicShotTrack* shotTrack = levelMovieScene->AddMasterTrack<UMovieSceneCinematicShotTrack>();
+    UMovieSceneCinematicShotTrack* shotTrack = levelMovieScene->AddTrack<UMovieSceneCinematicShotTrack>();
 
     // Add Shot Sections
     for( int i = 0; i < iSequences.Num(); i++ )

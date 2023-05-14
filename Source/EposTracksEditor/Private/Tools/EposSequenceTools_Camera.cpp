@@ -256,7 +256,7 @@ ShotSequenceTools::CreateCameraCut( IMovieScenePlayer& iPlayer, UMovieSceneSeque
     //---
 
     // If there's a cinematic shot track, no need to set this camera to a shot
-    UMovieSceneTrack* CinematicShotTrack = movieScene->FindMasterTrack( UMovieSceneCinematicBoardTrack::StaticClass() );
+    UMovieSceneTrack* CinematicShotTrack = movieScene->FindTrack( UMovieSceneCinematicBoardTrack::StaticClass() );
     if( CinematicShotTrack )
         return;
 

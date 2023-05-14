@@ -39,7 +39,7 @@ UObject* UBoardSequenceFactoryNew::FactoryCreateNew( UClass* iClass, UObject* iP
     FFrameRate TickResolution = NewBoardSequence->GetMovieScene()->GetTickResolution();
     NewBoardSequence->GetMovieScene()->SetPlaybackRange( 0, ( TrackSettings->DefaultSectionDuration * TickResolution ).FloorToFrame().Value );
 
-    auto newTrack = NewBoardSequence->GetMovieScene()->AddMasterTrack<UMovieSceneCinematicBoardTrack>();
+    auto newTrack = NewBoardSequence->GetMovieScene()->AddTrack<UMovieSceneCinematicBoardTrack>();
 
     return NewBoardSequence;
 }

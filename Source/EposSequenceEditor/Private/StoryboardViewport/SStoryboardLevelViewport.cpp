@@ -1128,7 +1128,7 @@ void SStoryboardLevelViewport::Tick(const FGeometry& AllottedGeometry, const dou
     }
 
     // Find the cinematic shot track
-    UMovieSceneCinematicBoardTrack* CinematicBoardTrack = Cast<UMovieSceneCinematicBoardTrack>(Sequence->GetMovieScene()->FindMasterTrack(UMovieSceneCinematicBoardTrack::StaticClass()));
+    UMovieSceneCinematicBoardTrack* CinematicBoardTrack = Cast<UMovieSceneCinematicBoardTrack>(Sequence->GetMovieScene()->FindTrack(UMovieSceneCinematicBoardTrack::StaticClass()));
 
     const FFrameRate OuterResolution = Sequencer->GetFocusedTickResolution();
     const FFrameRate OuterPlayRate   = Sequencer->GetFocusedDisplayRate();

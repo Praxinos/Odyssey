@@ -157,7 +157,7 @@ FExportImageSequenceNamingFormatter::GetSequence() const
     if( !focusedMovieScene )
         return info;
 
-    UMovieSceneCinematicBoardTrack* boardTrack = focusedMovieScene->FindMasterTrack<UMovieSceneCinematicBoardTrack>();
+    UMovieSceneCinematicBoardTrack* boardTrack = focusedMovieScene->FindTrack<UMovieSceneCinematicBoardTrack>();
     if( !boardTrack )
         return info;
 

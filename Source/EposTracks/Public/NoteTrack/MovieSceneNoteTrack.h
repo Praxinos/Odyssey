@@ -31,7 +31,7 @@ public:
     const TArray<UMovieSceneSection*>& GetNoteSections() const;
 
     /** @return true if this is a master audio track */
-    bool IsAMasterTrack() const;
+    bool ContainsTrack() const;
 
 public:
     // UMovieSceneTrack interface

@@ -244,7 +244,7 @@ FBoardSequenceCustomization::CreateInfoText() const
     check( current_board == mBoardSequence );
     const UMovieScene* current_moviescene = current_board ? current_board->GetMovieScene() : nullptr;
 
-    UMovieSceneCinematicBoardTrack* board_track = current_moviescene ? current_moviescene->FindMasterTrack<UMovieSceneCinematicBoardTrack>() : nullptr;
+    UMovieSceneCinematicBoardTrack* board_track = current_moviescene ? current_moviescene->FindTrack<UMovieSceneCinematicBoardTrack>() : nullptr;
     UMovieSceneSection* board_section = board_track ? MovieSceneHelpers::FindSectionAtTime( board_track->GetAllSections(), mSequencer->GetLocalTime().Time.FrameNumber ) : nullptr;
     UMovieSceneSubSection* board_subsection = Cast<UMovieSceneSubSection>( board_section );
 

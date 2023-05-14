@@ -58,7 +58,7 @@ ShotSequenceTools::CreateNote( ISequencer& iSequencer, UMovieSceneSequence* iSeq
     movie_scene->Modify();
     iSequence->Modify();
 
-    auto newTrack = movie_scene->AddMasterTrack<UMovieSceneNoteTrack>();
+    auto newTrack = movie_scene->AddTrack<UMovieSceneNoteTrack>();
     ensure( newTrack );
 
     TRange<FFrameNumber> range = movie_scene->GetPlaybackRange();
@@ -129,7 +129,7 @@ ShotSequenceTools::DeleteNote( ISequencer& iSequencer, UMovieSceneSequence* iSeq
     track->RemoveSection( *iNoteSection );
 
     if( !track->GetAllSections().Num() )
-        movie_scene->RemoveMasterTrack( *track );
+        movie_scene->RemoveTrack( *track );
 
     iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::RefreshAllImmediately );
 }

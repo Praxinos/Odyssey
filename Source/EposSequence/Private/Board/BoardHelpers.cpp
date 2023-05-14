@@ -57,7 +57,7 @@ BoardHelpers::FindParent( UEposMovieSceneSequence* iSequence )
         if( !sequence )
             continue;
 
-        UMovieSceneTrack* track = sequence->GetMovieScene()->FindMasterTrack<UMovieSceneCinematicBoardTrack>();
+        UMovieSceneTrack* track = sequence->GetMovieScene()->FindTrack<UMovieSceneCinematicBoardTrack>();
         if( !track )
             continue;
 
@@ -82,7 +82,7 @@ BoardHelpers::FindParent( UEposMovieSceneSequence* iSequence )
 UMovieSceneSubSection*
 BoardHelpers::FindParentSectionOfSequence( UMovieSceneSequence* iParentSequence, UMovieSceneSequence* iChildSequence )
 {
-    UMovieSceneTrack* track = iParentSequence->GetMovieScene()->FindMasterTrack<UMovieSceneCinematicBoardTrack>();
+    UMovieSceneTrack* track = iParentSequence->GetMovieScene()->FindTrack<UMovieSceneCinematicBoardTrack>();
     if( !track )
         return nullptr;
 
@@ -145,7 +145,7 @@ BoardHelpers::ResizeParentSequenceRecursively( UEposMovieSceneSequence* iSequenc
 
         int32 child_full_duration = UE::MovieScene::DiscreteSize( parent_section->GetTrueRange() );
 
-        UMovieSceneTrack* child_track = child_sequence->GetMovieScene()->FindMasterTrack<UMovieSceneCinematicBoardTrack>();
+        UMovieSceneTrack* child_track = child_sequence->GetMovieScene()->FindTrack<UMovieSceneCinematicBoardTrack>();
         if( !child_track )
             child_track = child_sequence->GetMovieScene()->GetCameraCutTrack();
 

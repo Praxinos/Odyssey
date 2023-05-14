@@ -122,10 +122,10 @@ UMovieSceneNoteTrack::AddNewNoteOnRow( UStoryNote* iNote, FFrameNumber iStartTim
 }
 
 bool
-UMovieSceneNoteTrack::IsAMasterTrack() const
+UMovieSceneNoteTrack::ContainsTrack() const
 {
     UMovieScene* MovieScene = Cast<UMovieScene>( GetOuter() );
-    return MovieScene ? MovieScene->IsAMasterTrack( *this ) : false;
+    return MovieScene ? MovieScene->ContainsTrack( *this ) : false;
 }
 
 //---

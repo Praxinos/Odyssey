@@ -156,7 +156,7 @@ FCinematicBoardTrackEditor::HandleAddCinematicBoardTrackMenuEntryCanExecute() co
 {
     UMovieScene* focusedMovieScene = GetFocusedMovieScene();
 
-    return ( ( focusedMovieScene != nullptr ) && ( focusedMovieScene->FindMasterTrack<UMovieSceneCinematicBoardTrack>() == nullptr ) );
+    return ( ( focusedMovieScene != nullptr ) && ( focusedMovieScene->FindTrack<UMovieSceneCinematicBoardTrack>() == nullptr ) );
 }
 
 
@@ -779,13 +779,13 @@ FCinematicBoardTrackEditor::CanAddSubSequence( const UMovieSceneSequence& iSeque
 
     // make sure we are not contained in the other sequence (circular dependency)
     // @todo sequencer: this check is not sufficient (does not prevent circular dependencies of 2+ levels)
-    UMovieSceneSubTrack* sequenceSubTrack = sequenceMovieScene->FindMasterTrack<UMovieSceneSubTrack>();
+    UMovieSceneSubTrack* sequenceSubTrack = sequenceMovieScene->FindTrack<UMovieSceneSubTrack>();
     if( sequenceSubTrack && sequenceSubTrack->ContainsSequence( *focusedSequence, true ) )
     {
         return false;
     }
 
-    UMovieSceneCinematicBoardTrack* boardTrack = sequenceMovieScene->FindMasterTrack<UMovieSceneCinematicBoardTrack>();
+    UMovieSceneCinematicBoardTrack* boardTrack = sequenceMovieScene->FindTrack<UMovieSceneCinematicBoardTrack>();
     if( boardTrack && boardTrack->ContainsSequence( *focusedSequence, true ) )
     {
         return false;
