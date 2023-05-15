@@ -135,61 +135,6 @@ UOdysseyAnimationLayerImageRaster::GetCellType(int iIndex, FName& oType) const
     oType = mCells[iIndex]->GetType();
     return true;
 }
-/*
-void
-UOdysseyAnimationLayerImageRaster::AddImageCell()
-{
-    UOdysseyAnimation* animation = GetAnimation();
-    if ( !animation )
-        return;
-
-    //TODO: Use iIndex to Insert
-    mCells.Add(FOdysseyAnimationCellImageRaster::Create(this, animation->Width(), animation->Height(), animation->Format()));
-    
-    OnCellsChanged().Broadcast(this);
-
-    TSharedPtr<IOdysseyAnimationImageRenderingAbility> imageRenderAbility = GetAbility<IOdysseyAnimationImageRenderingAbility>();
-    if ( imageRenderAbility )
-    {
-        imageRenderAbility->OnCompositionChanged().Broadcast(imageRenderAbility->GetId());
-        imageRenderAbility->OnCompositionCommited().Broadcast(imageRenderAbility->GetId());
-    }
-}
-
-void
-UOdysseyAnimationLayerImageRaster::RemoveCell(int iIndex)
-{
-    if (iIndex < 0 || iIndex >= mCells.Num())
-        return;
-
-    mCells.RemoveAt(iIndex);
-
-    OnCellsChanged().Broadcast(this);
-
-    TSharedPtr<IOdysseyAnimationImageRenderingAbility> imageRenderAbility = GetAbility<IOdysseyAnimationImageRenderingAbility>();
-    if ( imageRenderAbility )
-    {
-        imageRenderAbility->OnCompositionChanged().Broadcast(imageRenderAbility->GetId());
-        imageRenderAbility->OnCompositionCommited().Broadcast(imageRenderAbility->GetId());
-    }
-}
-
-void
-UOdysseyAnimationLayerImageRaster::SetCellLength(int iIndex, int iLength)
-{
-    if (iIndex < 0 || iIndex >= mCells.Num())
-        return;
-
-    mCells[iIndex]->SetLength(iLength);
-    
-    TSharedPtr<IOdysseyAnimationImageRenderingAbility> imageRenderAbility = GetAbility<IOdysseyAnimationImageRenderingAbility>();
-    if ( imageRenderAbility )
-    {
-        imageRenderAbility->OnCompositionChanged().Broadcast(imageRenderAbility->GetId());
-        imageRenderAbility->OnCompositionCommited().Broadcast(imageRenderAbility->GetId());
-    }
-}*/
-
 
 int
 UOdysseyAnimationLayerImageRaster::GetOffset() const
@@ -314,7 +259,7 @@ UOdysseyAnimationLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
             if ( !imageRenderAbility )
                 return;
 
-            lastEvent = imageRenderAbility->RenderOverBlock(ULISBlock, frame, rect, lastEvent);
+            lastEvent = imageRenderAbility->BuildRenderer(frame, false)->RenderOverBlock(ULISBlock, rect, lastEvent);
         }
 
         cells.Add(cell);
@@ -350,8 +295,8 @@ UOdysseyAnimationLayerImageRaster::OpacityChanged()
 
     //TODO: react to interactive events by not commiting immediately
     ::ULIS::FRectI rect = ::ULIS::FRectI::FromXYWH(0, 0, animation->Width(), animation->Height());
-    imageRenderAbility->OnChanged().Broadcast(imageRenderAbility->GetId(), { rect });
-    imageRenderAbility->OnCommited().Broadcast(imageRenderAbility->GetId(), { rect });
+    imageRenderAbility->Changed(imageRenderAbility->GetId(), { rect });
+    imageRenderAbility->Commited(imageRenderAbility->GetId(), { rect });
 }
 
 void
@@ -368,8 +313,8 @@ UOdysseyAnimationLayerImageRaster::BlendModeChanged()
         return;
     {
         ::ULIS::FRectI rect = ::ULIS::FRectI::FromXYWH(0, 0, animation->Width(), animation->Height());
-        imageRenderAbility->OnChanged().Broadcast(imageRenderAbility->GetId(), { rect });
-        imageRenderAbility->OnCommited().Broadcast(imageRenderAbility->GetId(), { rect });
+        imageRenderAbility->Changed(imageRenderAbility->GetId(), { rect });
+        imageRenderAbility->Commited(imageRenderAbility->GetId(), { rect });
     }
 }
 
@@ -382,8 +327,8 @@ UOdysseyAnimationLayerImageRaster::CellsChanged()
     if ( !imageRenderAbility )
         return;
 
-    imageRenderAbility->OnCompositionChanged().Broadcast(imageRenderAbility->GetId());
-    imageRenderAbility->OnCompositionCommited().Broadcast(imageRenderAbility->GetId());
+    imageRenderAbility->CompositionChanged(imageRenderAbility->GetId());
+    imageRenderAbility->CompositionCommited(imageRenderAbility->GetId());
 }
 
 void

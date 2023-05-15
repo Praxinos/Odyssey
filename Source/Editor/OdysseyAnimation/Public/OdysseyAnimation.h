@@ -9,6 +9,7 @@
 #include "OdysseyRasterBlock.h"
 #include "LayerStack/OdysseyAnimationLayerStack.h"
 #include "BaseMediaSource.h"
+#include "OdysseyAnimationProxy.h"
 #include <ULIS>
 
 #include "OdysseyAnimation.generated.h"
@@ -54,6 +55,7 @@ public:
 public:
 	//Getters
 	UOdysseyAnimationLayerStack* GetLayerStack() const;
+	TSharedPtr<FOdysseyAnimationProxy> GetProxy() const;
 
 	//Size and Format
 	uint32 Width() const;
@@ -86,21 +88,6 @@ public:
     virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent) override;
     virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;
 	virtual void PostInitProperties() override;
-
-protected:
-
-
-private:
-	//---- Proxy ----
-
-	//void OnImageRenderingDataChanged(const FOnRenderImageDataChangedEvent& iEvent);
-	//void OnImageRenderingIdCompositionChanged();
-	//void UpdateFrameBlocks();
-	//void GenerateFrameBlock(const TArray<FGuid>& iId);
-	
-	// FTickableEditorObject implementation
-	//virtual void Tick(float DeltaTime) override;
-	//virtual TStatId GetStatId() const override { RETURN_QUICK_DECLARE_CYCLE_STAT(UOdysseyAnimation, STATGROUP_Tickables); }
 	
 protected:
     //Property changed methods
@@ -130,6 +117,8 @@ private:
 
 	UPROPERTY(meta=(LoadBehavior = "LazyOnDemand"))
 	TObjectPtr<UOdysseyAnimationLayerStack> mLayerStack;
+
+	TSharedPtr<FOdysseyAnimationProxy> mProxy;
 
 
 

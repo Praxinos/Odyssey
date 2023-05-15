@@ -7,10 +7,6 @@ class FULISLoaderModule : public IULISLoaderModule
 {
 public:
     FULISLoaderModule()
-        : mThreadPool( nullptr )
-        , mCommandQueue( nullptr )
-        , mFontEngine( nullptr )
-        , mContextMap()
     {}
 
 private:
@@ -27,42 +23,76 @@ public:
 
 private:
     // Private Data Members
-    ::ULIS::FThreadPool*    mThreadPool;
-    ::ULIS::FCommandQueue*  mCommandQueue;
-    ::ULIS::FFontEngine*    mFontEngine;
-    TMap< uint32, ::ULIS::FContext* > mContextMap;
+    struct FData
+    {
+        ::ULIS::FThreadPool*    mThreadPool;
+        ::ULIS::FCommandQueue*  mCommandQueue;
+        ::ULIS::FFontEngine*    mFontEngine;
+        TMap< uint32, ::ULIS::FContext* > mContextMap;
+    };
+
+    TMap<uint32, FData> mThreadsData;
+
+    FData& GetCurrentThreadData();
 };
 
 IMPLEMENT_MODULE( FULISLoaderModule, ULISLoader )
 
 void FULISLoaderModule::StartupModule() {
+    /*
     mThreadPool     = new ::ULIS::FThreadPool();
     mCommandQueue   = new ::ULIS::FCommandQueue( *mThreadPool );
     mFontEngine     = new ::ULIS::FFontEngine();
+    */
 }
 
 void FULISLoaderModule::ShutdownModule() {
-    for( auto it : mContextMap )
-        delete  it.Value;
-    delete  mCommandQueue;
-    delete  mThreadPool;
-    delete  mFontEngine;
+    for( auto it : mThreadsData )
+    {
+        for( auto itMap : it.Value.mContextMap )
+            delete  itMap.Value;
+        delete  it.Value.mCommandQueue;
+        delete  it.Value.mThreadPool;
+        delete  it.Value.mFontEngine;
+    }
+}
+
+FULISLoaderModule::FData&
+FULISLoaderModule::GetCurrentThreadData() {
+    const uint32 CurrentThreadId = FPlatformTLS::GetCurrentThreadId();
+    if (!mThreadsData.Contains(CurrentThreadId))
+    {
+        ::ULIS::FThreadPool* threadPool = new ::ULIS::FThreadPool();
+        mThreadsData.Add(
+            CurrentThreadId,
+            {
+                new ::ULIS::FThreadPool(),
+                new ::ULIS::FCommandQueue( *threadPool),
+                new ::ULIS::FFontEngine(),
+                TMap< uint32, ::ULIS::FContext* >()
+            }
+        );
+    }
+
+    return mThreadsData[CurrentThreadId];
 }
 
 ::ULIS::FThreadPool&
 FULISLoaderModule::ThreadPool() {
-    return  *mThreadPool;
+    
+    return  *GetCurrentThreadData().mThreadPool;
 }
 
 ::ULIS::FContext&
 FULISLoaderModule::FindOrAddContext( ::ULIS::eFormat iFormat ) {
     uint32 key = static_cast< uint32 >( iFormat );
-    ::ULIS::FContext** val = mContextMap.Find( key );
+    ::ULIS::FContext** val = GetCurrentThreadData().mContextMap.Find( key );
     if( val ) {
         return  **val;
     } else {
-        ::ULIS::FContext* ctx = new ::ULIS::FContext( *mCommandQueue, iFormat, ::ULIS::PerformanceIntent_MEM );
-        mContextMap.Add( key, ctx );
+        //TODO: why are we using PerformanceIntent_MEM instead of PerformanceIntent_Max ?
+        ::ULIS::FContext* ctx = new ::ULIS::FContext( *GetCurrentThreadData().mCommandQueue, iFormat, ::ULIS::PerformanceIntent_MEM );
+        GetCurrentThreadData().mContextMap.Add( key, ctx );
         return  *ctx;
     }
 }
@@ -70,11 +100,11 @@ FULISLoaderModule::FindOrAddContext( ::ULIS::eFormat iFormat ) {
 void
 FULISLoaderModule::RemoveContext( ::ULIS::eFormat iFormat ) {
     uint32 key = static_cast< uint32 >( iFormat );
-    mContextMap.Remove( key );
+    GetCurrentThreadData().mContextMap.Remove( key );
 }
 
 ::ULIS::FFontEngine&
 FULISLoaderModule::FontEngine() {
-    return  *mFontEngine;
+    return  *GetCurrentThreadData().mFontEngine;
 }
 

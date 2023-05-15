@@ -8,38 +8,10 @@ FOdysseyAnimationLayerStackImageRenderingAbility::FOdysseyAnimationLayerStackIma
 {
 }
 
-TArray<::ULIS::FRectI>
-FOdysseyAnimationLayerStackImageRenderingAbility::GetRects(int iFrame) const
+TSharedPtr<IOdysseyImageRenderer>
+FOdysseyAnimationLayerStackImageRenderingAbility::BuildRenderer(int iFrame, bool iThreadSafe) const
 {
-    if (!mLayerStack)
-        return {};
-
-    UOdysseyAnimationLayer* layerRoot = Cast<UOdysseyAnimationLayer>(mLayerStack->LayerRoot);
-    if ( !layerRoot )
-        return {};
-
-    TSharedPtr<IOdysseyAnimationImageRenderingAbility> layerRootAbility = layerRoot->GetAbility<IOdysseyAnimationImageRenderingAbility>();
-    if (!layerRootAbility)
-        return {};
-
-    return layerRootAbility->GetRects(iFrame);
-}
-
-TArray<::ULIS::FEvent>
-FOdysseyAnimationLayerStackImageRenderingAbility::RenderInBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ioBlock, int iFrame, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
-{
-    if (!mLayerStack)
-        return iWaitList;
-
-    UOdysseyAnimationLayer* layerRoot = Cast<UOdysseyAnimationLayer>(mLayerStack->LayerRoot);
-    if ( !layerRoot )
-        return iWaitList;
-
-    TSharedPtr<IOdysseyAnimationImageRenderingAbility> layerRootAbility = layerRoot->GetAbility<IOdysseyAnimationImageRenderingAbility>();
-    if (!layerRootAbility)
-        return iWaitList;
-
-    return layerRootAbility->RenderInBlock(ioBlock, iFrame, iRects, iPos, iWaitList);
+    return MakeShared<FOdysseyAnimationLayerStackImageRenderer>(mLayerStack, iFrame, iThreadSafe);
 }
 
 TArray<FGuid>

@@ -2,15 +2,27 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Abilities/IOdysseyAnimationImageRenderingAbility.h"
-#include "ULISEventBuilder.h"
-#include "ULISLoaderModule.h"
 
+
+IOdysseyAnimationImageRenderingAbility::FOnChanged&
+IOdysseyAnimationImageRenderingAbility::OnPreChanged()
+{
+    static FOnChanged onPreChanged;
+    return onPreChanged;
+}
 
 IOdysseyAnimationImageRenderingAbility::FOnChanged&
 IOdysseyAnimationImageRenderingAbility::OnChanged()
 {
     static FOnChanged onChanged;
     return onChanged;
+}
+
+IOdysseyAnimationImageRenderingAbility::FOnChanged&
+IOdysseyAnimationImageRenderingAbility::OnPreCommited()
+{
+    static FOnChanged onPreCommited;
+    return onPreCommited;
 }
 
 IOdysseyAnimationImageRenderingAbility::FOnChanged&
@@ -21,6 +33,13 @@ IOdysseyAnimationImageRenderingAbility::OnCommited()
 }
 
 IOdysseyAnimationImageRenderingAbility::FOnCompositionChanged&
+IOdysseyAnimationImageRenderingAbility::OnPreCompositionChanged()
+{
+    static FOnCompositionChanged onPreCompositionChanged;
+    return onPreCompositionChanged;
+}
+
+IOdysseyAnimationImageRenderingAbility::FOnCompositionChanged&
 IOdysseyAnimationImageRenderingAbility::OnCompositionChanged()
 {
     static FOnCompositionChanged onCompositionChanged;
@@ -28,10 +47,45 @@ IOdysseyAnimationImageRenderingAbility::OnCompositionChanged()
 }
 
 IOdysseyAnimationImageRenderingAbility::FOnCompositionChanged&
+IOdysseyAnimationImageRenderingAbility::OnPreCompositionCommited()
+{
+    static FOnCompositionChanged onPreCompositionCommited;
+    return onPreCompositionCommited;
+}
+
+IOdysseyAnimationImageRenderingAbility::FOnCompositionChanged&
 IOdysseyAnimationImageRenderingAbility::OnCompositionCommited()
 {
     static FOnCompositionChanged onCompositionCommited;
     return onCompositionCommited;
+}
+
+void
+IOdysseyAnimationImageRenderingAbility::Changed(const FGuid& iId, const TArray<::ULIS::FRectI>& iRects)
+{
+    IOdysseyAnimationImageRenderingAbility::OnPreChanged().Broadcast(iId, iRects);
+    IOdysseyAnimationImageRenderingAbility::OnChanged().Broadcast(iId, iRects);
+}
+
+void
+IOdysseyAnimationImageRenderingAbility::Commited(const FGuid& iId, const TArray<::ULIS::FRectI>& iRects)
+{
+    IOdysseyAnimationImageRenderingAbility::OnPreCommited().Broadcast(iId, iRects);
+    IOdysseyAnimationImageRenderingAbility::OnCommited().Broadcast(iId, iRects);
+}
+
+void
+IOdysseyAnimationImageRenderingAbility::CompositionChanged(const FGuid& iId)
+{
+    IOdysseyAnimationImageRenderingAbility::OnPreCompositionChanged().Broadcast(iId);
+    IOdysseyAnimationImageRenderingAbility::OnCompositionChanged().Broadcast(iId);
+}
+
+void
+IOdysseyAnimationImageRenderingAbility::CompositionCommited(const FGuid& iId)
+{
+    IOdysseyAnimationImageRenderingAbility::OnPreCompositionCommited().Broadcast(iId);
+    IOdysseyAnimationImageRenderingAbility::OnCompositionCommited().Broadcast(iId);
 }
 
 IOdysseyAnimationImageRenderingAbility::IOdysseyAnimationImageRenderingAbility()
@@ -43,88 +97,6 @@ const FGuid&
 IOdysseyAnimationImageRenderingAbility::GetId() const
 {
     return mId;
-}
-
-TArray<::ULIS::FEvent>
-IOdysseyAnimationImageRenderingAbility::RenderOverBlock(TSharedPtr<::ULIS::FBlock> ioBlock, int iFrame, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
-{
-    return RenderInBlock(ioBlock, iFrame, iRects, iPos, iWaitList);
-}
-
-TArray<::ULIS::FEvent>
-IOdysseyAnimationImageRenderingAbility::RenderOverBlock(TSharedPtr<::ULIS::FBlock> ioBlock, int iFrame, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FEvent>& iWaitList)
-{
-    TArray<::ULIS::FVec2I> pos;
-    for (const ::ULIS::FRectI& rect : iRects)
-        pos.Add(rect.Position());
-
-    return RenderOverBlock(ioBlock, iFrame, iRects, pos, iWaitList);
-}
-
-TArray<::ULIS::FEvent>
-IOdysseyAnimationImageRenderingAbility::RenderOverBlock(TSharedPtr<::ULIS::FBlock> ioBlock, int iFrame, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList)
-{
-    TArray<::ULIS::FRectI> rects = { iRect };
-    TArray<::ULIS::FVec2I> pos = { iPos };
-    return RenderOverBlock(ioBlock, iFrame, rects, pos, iWaitList);
-}
-
-TArray<::ULIS::FEvent>
-IOdysseyAnimationImageRenderingAbility::RenderOverBlock(TSharedPtr<::ULIS::FBlock> ioBlock, int iFrame, const ::ULIS::FRectI& iRect, const TArray<::ULIS::FEvent>& iWaitList)
-{
-    TArray<::ULIS::FRectI> rects = { iRect };
-    TArray<::ULIS::FVec2I> pos = { iRect.Position() };
-    return RenderOverBlock(ioBlock, iFrame, rects, pos, iWaitList);
-}
-
-TArray<::ULIS::FEvent>
-IOdysseyAnimationImageRenderingAbility::RenderOverBlock(TSharedPtr<::ULIS::FBlock> ioBlock, int iFrame, const TArray<::ULIS::FEvent>& iWaitList)
-{
-    return RenderOverBlock(ioBlock, iFrame, GetRects(iFrame), iWaitList);
-}
-
-TArray<::ULIS::FEvent>
-IOdysseyAnimationImageRenderingAbility::RenderInBlock(TSharedPtr<::ULIS::FBlock> ioBlock, int iFrame, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FEvent>& iWaitList)
-{
-    TArray<::ULIS::FVec2I> pos;
-    for (const ::ULIS::FRectI& rect : iRects)
-        pos.Add(rect.Position());
-
-    return RenderInBlock(ioBlock, iFrame, iRects, pos, iWaitList);
-}
-
-TArray<::ULIS::FEvent>
-IOdysseyAnimationImageRenderingAbility::RenderInBlock(TSharedPtr<::ULIS::FBlock> ioBlock, int iFrame, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList)
-{
-    TArray<::ULIS::FRectI> rects = { iRect };
-    TArray<::ULIS::FVec2I> pos = { iPos };
-    return RenderInBlock(ioBlock, iFrame, rects, pos, iWaitList);
-}
-
-TArray<::ULIS::FEvent>
-IOdysseyAnimationImageRenderingAbility::RenderInBlock(TSharedPtr<::ULIS::FBlock> ioBlock, int iFrame, const ::ULIS::FRectI& iRect, const TArray<::ULIS::FEvent>& iWaitList)
-{
-    TArray<::ULIS::FRectI> rects = { iRect };
-    TArray<::ULIS::FVec2I> pos = { iRect.Position() };
-    return RenderInBlock(ioBlock, iFrame, rects, pos, iWaitList);
-}
-
-TArray<::ULIS::FEvent>
-IOdysseyAnimationImageRenderingAbility::RenderInBlock(TSharedPtr<::ULIS::FBlock> ioBlock, int iFrame, const TArray<::ULIS::FEvent>& iWaitList)
-{
-    return RenderInBlock(ioBlock, iFrame, GetRects(iFrame), iWaitList);
-}
-
-TSharedPtr<::ULIS::FBlock>
-IOdysseyAnimationImageRenderingAbility::RenderInNewBlock(int iFrame, ::ULIS::eFormat iFormat, const ::ULIS::FRectI& iRect, TArray<::ULIS::FEvent>& oEvents)
-{
-    TSharedRef<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(iRect.w, iRect.h, iFormat);
-
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iFormat);
-    ::ULIS::FEvent eventClearBlock = FULISEventBuilder().RetainBlock(block).Build();
-    ctx.Clear(*block, block->Rect(), ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventClearBlock);
-    oEvents = RenderInBlock(block, iFrame, iRect, ::ULIS::FVec2I(0), {eventClearBlock});
-    return block;
 }
 
 TSharedPtr<IOdysseyHandle>

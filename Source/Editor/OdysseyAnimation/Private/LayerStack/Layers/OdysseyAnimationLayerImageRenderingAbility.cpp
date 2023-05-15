@@ -9,67 +9,10 @@ FOdysseyAnimationLayerImageRenderingAbility::FOdysseyAnimationLayerImageRenderin
 {
 }
 
-TArray<::ULIS::FRectI>
-FOdysseyAnimationLayerImageRenderingAbility::GetRects(int iFrame) const
+TSharedPtr<IOdysseyImageRenderer>
+FOdysseyAnimationLayerImageRenderingAbility::BuildRenderer(int iFrame, bool iThreadSafe) const
 {
-    if (!mLayer)
-        return {};
-
-    TArray<::ULIS::FRectI> rects;
-    const TArray<UOdysseyLayer*>& children = mLayer->GetChildren();
-    for (UOdysseyLayer* child : children)
-    {
-        UOdysseyAnimationLayer* animationChild = Cast<UOdysseyAnimationLayer>(child);
-        if (!animationChild)
-            continue;
-
-        if (!animationChild->IsActivated)
-            continue;
-
-        TSharedPtr<IOdysseyAnimationImageRenderingAbility> layerAbility = animationChild->GetAbility<IOdysseyAnimationImageRenderingAbility>();
-        if (!layerAbility)
-            continue;
-
-        rects.Append(layerAbility->GetRects(iFrame));
-    }
-    return OdysseyRectUtils::MergeRects(rects);
-}
-
-TArray<::ULIS::FEvent>
-FOdysseyAnimationLayerImageRenderingAbility::RenderInBlock(TSharedPtr<::ULIS::FBlock> ioBlock, int iFrame, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
-{
-    if (!mLayer)
-        return iWaitList;
-
-    if (!ioBlock)
-        return iWaitList;
-
-    const TArray<UOdysseyLayer*>& children = mLayer->GetChildren();
-    if (children.IsEmpty())
-        return iWaitList;
-
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( ioBlock->Format() );
-
-    TArray<::ULIS::FEvent> lastEvent = iWaitList;
-    for (int i = children.Num() - 1; i >= 0 ; i--)
-    {
-        UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(children[i]);
-        if (!layer)
-            continue;
-
-        if (!layer->IsActivated)
-            continue;
-
-        TSharedPtr<IOdysseyAnimationImageRenderingAbility> layerAbility = layer->GetAbility<IOdysseyAnimationImageRenderingAbility>();
-        if (!layerAbility)
-            continue;
-
-        lastEvent = layerAbility->RenderOverBlock(ioBlock, iFrame, iRects, iPos, lastEvent);
-    }
-    
-    ctx.Flush();
-
-    return lastEvent;
+    return MakeShared<FOdysseyAnimationLayerImageRenderer>(mLayer, iFrame, iThreadSafe);
 }
 
 TArray<FGuid>

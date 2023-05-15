@@ -13,23 +13,16 @@ public:
 
 public:
     /**
-     * @brief Returns the full rect that can be rendered
+     * @brief Creates a renderer able to render an image at the specified frame
+     * This renderer is made to always render the same rendering composition
+     * For example : if you delete a layer, you should create a new renderer
+     * but if you are just drawing on the layer, you can reuse the renderer
      * 
-     * @return ::ULIS::FRect 
+     * iThreadSafe, defines if the created renderer will be used in an other thread than the main thread.
+     * In that case, the renderer will be made so that it always renders exactly the same image all the time
+     * and you will have to recreate the renderer even if you're are just drawing on the layer
      */
-    virtual TArray<::ULIS::FRectI> GetRects(int iFrame) const override;
-
-    /**
-     * @brief Renders in (without blending for example) the given block
-     * 
-     * @param ioBlock 
-     * @param iFrame 
-     * @param iRect 
-     * @param iPos 
-     * @param iWaitList 
-     * @return TArray<::ULIS::FEvent> 
-     */
-    virtual TArray<::ULIS::FEvent> RenderInBlock(TSharedPtr<::ULIS::FBlock> ioBlock, int iFrame, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList) override;
+    virtual TSharedPtr<IOdysseyImageRenderer> BuildRenderer(int iFrame, bool iThreadSafe) const override;
 
     /**
      * @brief Returns the full Render Image Id, eventually composed of underlying ids

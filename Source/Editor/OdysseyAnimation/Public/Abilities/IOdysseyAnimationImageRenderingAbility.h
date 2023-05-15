@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "OdysseyAbility.h"
+#include "OdysseyImageRenderer.h"
 
 /**
  * @brief Represents the ability to render an image in a given block
@@ -29,71 +30,51 @@ public:
     DECLARE_MULTICAST_DELEGATE_TwoParams(FOnChanged, const FGuid&, const TArray<::ULIS::FRectI>&);
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnCompositionChanged, const FGuid&);
 
+    //Called before OnChanged() is called, so that some part of ILIAD can react prior to other parts (ex: animation Proxy invalidation)
+    static FOnChanged& OnPreChanged();
+
     //Called when some data of this object, related with image rendering changed interactively
     static FOnChanged& OnChanged();
+
+    //Called before OnCommited() is called, so that some part of ILIAD can react prior to other parts (ex: animation Proxy invalidation)
+    static FOnChanged& OnPreCommited();
 
     //Called when some data of this object, related with image rendering has been commited
     static FOnChanged& OnCommited();
 
+    //Called before OnCompositionChanged() is called, so that some part of ILIAD can react prior to other parts (ex: animation Proxy invalidation)
+    static FOnCompositionChanged& OnPreCompositionChanged();
+
     //Called when the list of ImageRenderingAbility composing this ability changed interactively, including its ordering
     static FOnCompositionChanged& OnCompositionChanged();
 
+    //Called before OnCompositionCommited() is called, so that some part of ILIAD can react prior to other parts (ex: animation Proxy invalidation)
+    static FOnCompositionChanged& OnPreCompositionCommited();
+
     //Called when the list of ImageRenderingAbility composing this ability changed, including its ordering
     static FOnCompositionChanged& OnCompositionCommited();
+
+public:
+    static void Changed(const FGuid& iId, const TArray<::ULIS::FRectI>& iRects);
+    static void Commited(const FGuid& iId, const TArray<::ULIS::FRectI>& iRects);
+    static void CompositionChanged(const FGuid& iId);
+    static void CompositionCommited(const FGuid& iId);
 
 public:
     IOdysseyAnimationImageRenderingAbility();
 
 public:
     /**
-     * @brief Returns the full rect that can be rendered
+     * @brief Creates a renderer able to render an image at the specified frame
+     * This renderer is made to always render the same rendering composition
+     * For example : if you delete a layer, you should create a new renderer
+     * but if you are just drawing on the layer, you can reuse the renderer
      * 
-     * @return ::ULIS::FRect 
+     * iThreadSafe, defines if the created renderer will be used in an other thread than the main thread.
+     * In that case, the renderer will be made so that it always renders exactly the same image all the time
+     * and you will have to recreate the renderer even if you're are just drawing on the layer
      */
-    virtual TArray<::ULIS::FRectI> GetRects(int iFrame) const = 0;
-
-    /**
-     * @brief Renders over (by blending for example) the given block
-     * By default does the same thing as RenderInBlock
-     *
-     * @param ioBlock
-     * @param iFrame
-     * @param iRect
-     * @param iPos
-     * @param iWaitList
-     * @return TArray<::ULIS::FEvent>
-     */
-    virtual TArray<::ULIS::FEvent> RenderOverBlock(TSharedPtr<::ULIS::FBlock> ioBlock, int iFrame, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList);
-    TArray<::ULIS::FEvent> RenderOverBlock(TSharedPtr<::ULIS::FBlock> ioBlock, int iFrame, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FEvent>& iWaitList);
-    TArray<::ULIS::FEvent> RenderOverBlock(TSharedPtr<::ULIS::FBlock> ioBlock, int iFrame, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList);
-    TArray<::ULIS::FEvent> RenderOverBlock(TSharedPtr<::ULIS::FBlock> ioBlock, int iFrame, const ::ULIS::FRectI& iRect, const TArray<::ULIS::FEvent>& iWaitList);
-    TArray<::ULIS::FEvent> RenderOverBlock(TSharedPtr<::ULIS::FBlock> ioBlock, int iFrame, const TArray<::ULIS::FEvent>& iWaitList);
-
-    /**
-     * @brief Renders in (without blending for example) the given block
-     *
-     * @param ioBlock
-     * @param iFrame
-     * @param iRect
-     * @param iPos
-     * @param iWaitList
-     * @return TArray<::ULIS::FEvent>
-     */
-    virtual TArray<::ULIS::FEvent> RenderInBlock(TSharedPtr<::ULIS::FBlock> ioBlock, int iFrame, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList) = 0;
-    TArray<::ULIS::FEvent> RenderInBlock(TSharedPtr<::ULIS::FBlock> ioBlock, int iFrame, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FEvent>& iWaitList);
-    TArray<::ULIS::FEvent> RenderInBlock(TSharedPtr<::ULIS::FBlock> ioBlock, int iFrame, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList);
-    TArray<::ULIS::FEvent> RenderInBlock(TSharedPtr<::ULIS::FBlock> ioBlock, int iFrame, const ::ULIS::FRectI& iRect, const TArray<::ULIS::FEvent>& iWaitList);
-    TArray<::ULIS::FEvent> RenderInBlock(TSharedPtr<::ULIS::FBlock> ioBlock, int iFrame, const TArray<::ULIS::FEvent>& iWaitList);
-
-    /**
-     * @brief Renders a new block
-     *
-     * @param iFrame
-     * @param iRect
-     * @param oEvents
-     * @return TSharedPtr<::ULIS::FBlock>
-     */
-    TSharedPtr<::ULIS::FBlock> RenderInNewBlock(int iFrame, ::ULIS::eFormat iFormat, const ::ULIS::FRectI& iRect, TArray<::ULIS::FEvent>& oEvents);
+    virtual TSharedPtr<IOdysseyImageRenderer> BuildRenderer(int iFrame, bool iThreadSafe) const = 0;
 
     /**
      * @brief Returns the full Render Image Id, eventually composed of underlying ids

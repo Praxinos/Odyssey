@@ -1,0 +1,55 @@
+// IDDN FR.001.250001.005.S.P.2019.000.00000
+// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
+
+#pragma once
+
+#include "OdysseyAnimationProxyImageRenderer.h"
+
+
+FOdysseyAnimationProxyImageRenderer::FOdysseyAnimationProxyImageRenderer(UOdysseyAnimation* iAnimation, const TArray<FGuid>& iFrameComposition, bool iThreadSafe)
+    : mRect(::ULIS::FRectI::FromXYWH(0, 0, iAnimation->Width(), iAnimation->Height()))
+    , mProxy(iAnimation->GetProxy())
+    , mFrameComposition(iFrameComposition)
+{
+
+}
+
+TArray<::ULIS::FRectI>
+FOdysseyAnimationProxyImageRenderer::GetRects() const
+{
+    return {mRect};
+}
+
+TArray<::ULIS::FEvent>
+FOdysseyAnimationProxyImageRenderer::RenderInBlock(TSharedPtr<::ULIS::FBlock> ioBlock, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
+{
+    TSharedPtr<::ULIS::FBlock> block = mProxy->GetBlock(mFrameComposition);
+    if (!block)
+        return iWaitList;
+
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(block->Format());
+    TArray<::ULIS::FEvent> events = iWaitList;
+    for ( int i = 0; i < iRects.Num(); i++ )
+    {
+        TArray<::ULIS::FEvent> eventConvertAndExecute = ULISUtils::ConvertAndExecute(ioBlock, block->Format(), iRects[i], iPos[i], iWaitList,
+            [this, &block, &ctx](TSharedPtr<::ULIS::FBlock> ioDest, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList) -> TArray<::ULIS::FEvent>
+            {
+                ::ULIS::FEvent eventCopy = FULISEventBuilder().RetainBlock(block).RetainBlock(ioDest).Build();
+                ctx.Copy(
+                    *block,
+                    *ioDest,
+                    iRect,
+                    iPos,
+                    ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
+                    iWaitList.Num(),
+                    iWaitList.GetData(),
+                    &eventCopy
+                );
+                return { eventCopy };
+            }
+        );
+        events.Append(eventConvertAndExecute);
+        ctx.Flush();
+    }
+    return events;
+}

@@ -262,7 +262,7 @@ UOdysseyAnimationPlayer::UpdateTexture()
 		for ( const ::ULIS::FRectI& rect : mInvalidRects )
 		{
 			TArray<ULIS::FEvent> events;
-			TSharedPtr<::ULIS::FBlock> block = imageRenderingAbility->RenderInNewBlock(frameIndex, format, rect, events);
+			TSharedPtr<::ULIS::FBlock> block = imageRenderingAbility->BuildRenderer(frameIndex, false)->RenderInNewBlock(format, rect, events);
 			blocks.Add(block);
 		}
 		ctx.Finish();

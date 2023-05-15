@@ -78,8 +78,8 @@ UOdysseyAnimationLayerFolder::OpacityChanged()
     {
         //TODO: react to interactive events by not commiting immediately
         ::ULIS::FRectI rect = ::ULIS::FRectI::FromXYWH(0, 0, animation->Width(), animation->Height());
-        imageRenderAbility->OnChanged().Broadcast(imageRenderAbility->GetId(), {rect});
-        imageRenderAbility->OnCommited().Broadcast(imageRenderAbility->GetId(), {rect});
+        imageRenderAbility->Changed(imageRenderAbility->GetId(), {rect});
+        imageRenderAbility->Commited(imageRenderAbility->GetId(), {rect});
     }
 }
 
@@ -97,8 +97,8 @@ UOdysseyAnimationLayerFolder::BlendModeChanged()
         return;
     {
         ::ULIS::FRectI rect = ::ULIS::FRectI::FromXYWH(0, 0, animation->Width(), animation->Height());
-        imageRenderAbility->OnChanged().Broadcast(imageRenderAbility->GetId(), {rect});
-        imageRenderAbility->OnCommited().Broadcast(imageRenderAbility->GetId(), {rect});
+        imageRenderAbility->Changed(imageRenderAbility->GetId(), {rect});
+        imageRenderAbility->Commited(imageRenderAbility->GetId(), {rect});
     }
 }
 

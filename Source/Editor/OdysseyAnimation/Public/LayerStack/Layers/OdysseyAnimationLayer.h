@@ -25,4 +25,5 @@ public:
 protected:
     //Property changes
     virtual void ChildrenChanged() override;
+    virtual void IsActivatedChanged() override;
 };
