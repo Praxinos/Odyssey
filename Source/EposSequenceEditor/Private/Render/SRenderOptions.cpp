@@ -12,7 +12,7 @@
 #include "Interfaces/IPluginManager.h"
 #include "MoviePipelineCommandLineEncoder.h"
 #include "MoviePipelineCommandLineEncoderSettings.h"
-#include "MoviePipelineMasterConfig.h"
+#include "MoviePipelinePrimaryConfig.h"
 #include "MovieSceneSequence.h"
 #include "SEnumCombo.h"
 //#include "Widgets/Layout/SUniformGridPanel.h"
@@ -546,10 +546,10 @@ SRenderOptions::Construct( const FArguments& iArgs )
         //AssetPickerConfig.SaveSettingsName = TEXT( "MoviePipelineConfigAsset" ); // Use the same as in MovieRenderQueue menu ... no ... to not share the same ThumbnailScale value
 
         AssetPickerConfig.AssetShowWarningText = LOCTEXT( "NoConfigs_Warning", "No Master Configurations Found" );
-        AssetPickerConfig.Filter.ClassPaths.Add( UMoviePipelineMasterConfig::StaticClass()->GetClassPathName() );
-        AssetPickerConfig.OnAssetSelected = FOnAssetSelected::CreateSP( this, &SRenderOptions::OnMasterConfigSelected );
-        AssetPickerConfig.OnAssetDoubleClicked = FOnAssetDoubleClicked::CreateSP( this, &SRenderOptions::OnMasterConfigDoubleClicked );
-        AssetPickerConfig.OnAssetEnterPressed = FOnAssetEnterPressed::CreateSP( this, &SRenderOptions::OnMasterConfigEnterPressed );
+        AssetPickerConfig.Filter.ClassPaths.Add( UMoviePipelinePrimaryConfig::StaticClass()->GetClassPathName() );
+        AssetPickerConfig.OnAssetSelected = FOnAssetSelected::CreateSP( this, &SRenderOptions::OnPrimaryConfigSelected );
+        AssetPickerConfig.OnAssetDoubleClicked = FOnAssetDoubleClicked::CreateSP( this, &SRenderOptions::OnPrimaryConfigDoubleClicked );
+        AssetPickerConfig.OnAssetEnterPressed = FOnAssetEnterPressed::CreateSP( this, &SRenderOptions::OnPrimaryConfigEnterPressed );
     }
 
     //---
@@ -666,10 +666,10 @@ SRenderOptions::IsCanceled()
     return !mUserDlgResponse;
 }
 
-UMoviePipelineMasterConfig*
-SRenderOptions::GetMasterConfig()
+UMoviePipelinePrimaryConfig*
+SRenderOptions::GetPrimaryConfig()
 {
-    return mMasterConfig;
+    return mPrimaryConfig;
 }
 
 FReply
@@ -678,7 +678,7 @@ SRenderOptions::OnKeyDown( const FGeometry& iMyGeometry, const FKeyEvent& iKeyEv
     if( iKeyEvent.GetKey() == EKeys::Escape )
     {
         mUserDlgResponse = false;
-        mMasterConfig = nullptr;
+        mPrimaryConfig = nullptr;
 
         mParentWindow.Pin()->RequestDestroyWindow();
 
@@ -689,25 +689,25 @@ SRenderOptions::OnKeyDown( const FGeometry& iMyGeometry, const FKeyEvent& iKeyEv
 }
 
 void
-SRenderOptions::OnMasterConfigSelected( const FAssetData& iAssetData )
+SRenderOptions::OnPrimaryConfigSelected( const FAssetData& iAssetData )
 {
-    mMasterConfig = Cast<UMoviePipelineMasterConfig>( iAssetData.GetAsset() );
+    mPrimaryConfig = Cast<UMoviePipelinePrimaryConfig>( iAssetData.GetAsset() );
 }
 
 void
-SRenderOptions::OnMasterConfigDoubleClicked( const FAssetData& iAssetData )
+SRenderOptions::OnPrimaryConfigDoubleClicked( const FAssetData& iAssetData )
 {
     if( EncoderSettingsVisibility().IsVisible() && !mIsExecutablePathValid )
         return;
 
     mUserDlgResponse = true;
-    mMasterConfig = CastChecked<UMoviePipelineMasterConfig>( iAssetData.GetAsset() );
+    mPrimaryConfig = CastChecked<UMoviePipelinePrimaryConfig>( iAssetData.GetAsset() );
 
     mParentWindow.Pin()->RequestDestroyWindow();
 }
 
 void
-SRenderOptions::OnMasterConfigEnterPressed( const TArray<FAssetData>& iAssetData )
+SRenderOptions::OnPrimaryConfigEnterPressed( const TArray<FAssetData>& iAssetData )
 {
     if( !iAssetData.Num() )
         return;
@@ -716,7 +716,7 @@ SRenderOptions::OnMasterConfigEnterPressed( const TArray<FAssetData>& iAssetData
         return;
 
     mUserDlgResponse = true;
-    mMasterConfig = CastChecked<UMoviePipelineMasterConfig>( iAssetData[0].GetAsset() );
+    mPrimaryConfig = CastChecked<UMoviePipelinePrimaryConfig>( iAssetData[0].GetAsset() );
 
     mParentWindow.Pin()->RequestDestroyWindow();
 }
@@ -724,10 +724,10 @@ SRenderOptions::OnMasterConfigEnterPressed( const TArray<FAssetData>& iAssetData
 EVisibility
 SRenderOptions::EncoderSettingsVisibility() const
 {
-    if( !mMasterConfig )
+    if( !mPrimaryConfig )
         return EVisibility::Collapsed;
 
-    UMoviePipelineCommandLineEncoder* setting = mMasterConfig->FindSetting<UMoviePipelineCommandLineEncoder>( true /* bIncludeDisabledSettings */ );
+    UMoviePipelineCommandLineEncoder* setting = mPrimaryConfig->FindSetting<UMoviePipelineCommandLineEncoder>( true /* bIncludeDisabledSettings */ );
     if( !setting )
         return EVisibility::Collapsed;
 
@@ -747,7 +747,7 @@ SRenderOptions::EncoderSettingsVisibility() const
 //bool
 //SRenderOptions::CanAccept() const
 //{
-//    return !!mMasterConfig;
+//    return !!mPrimaryConfig;
 //}
 //
 //FReply

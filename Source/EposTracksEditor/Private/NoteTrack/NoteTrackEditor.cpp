@@ -333,11 +333,11 @@ FNoteTrackEditor::AddNewMasterNote( FFrameNumber KeyTime, UStoryNote* iNote, UMo
 
     FocusedMovieScene->Modify();
 
-    FFindOrCreateMasterTrackResult<UMovieSceneNoteTrack> TrackResult;
+    FFindOrCreateRootTrackResult<UMovieSceneNoteTrack> TrackResult;
     TrackResult.Track = NoteTrack;
     if( !NoteTrack )
     {
-        TrackResult = FindOrCreateMasterTrack<UMovieSceneNoteTrack>();
+        TrackResult = FindOrCreateRootTrack<UMovieSceneNoteTrack>();
         NoteTrack = TrackResult.Track;
     }
 
@@ -434,7 +434,7 @@ FNoteTrackEditor::HandleAddNoteTrackMenuEntryExecute()
     const FScopedTransaction Transaction( NSLOCTEXT( "Sequencer", "AddNoteTrack_Transaction", "Add Note Track" ) );
     FocusedMovieScene->Modify();
 
-    auto NewTrack = FocusedMovieScene->AddMasterTrack<UMovieSceneNoteTrack>();
+    auto NewTrack = FocusedMovieScene->AddTrack<UMovieSceneNoteTrack>();
     ensure( NewTrack );
 
     NewTrack->SetDisplayName( LOCTEXT( "NoteTrackName", "Note" ) );

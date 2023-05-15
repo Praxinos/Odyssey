@@ -127,7 +127,7 @@ FExportImageSequenceNamingFormatter::GetShot() const
 
     UE::MovieScene::FSequenceVisitParams params;
     params.bVisitSections = true;
-    params.bVisitMasterTracks = true;
+    params.bVisitRootTracks = true;
     params.bVisitSubSequences = true;
 
     FSequenceShotVisitor shot_visitor;
@@ -157,7 +157,7 @@ FExportImageSequenceNamingFormatter::GetSequence() const
     if( !focusedMovieScene )
         return info;
 
-    UMovieSceneCinematicBoardTrack* boardTrack = focusedMovieScene->FindMasterTrack<UMovieSceneCinematicBoardTrack>();
+    UMovieSceneCinematicBoardTrack* boardTrack = focusedMovieScene->FindTrack<UMovieSceneCinematicBoardTrack>();
     if( !boardTrack )
         return info;
 

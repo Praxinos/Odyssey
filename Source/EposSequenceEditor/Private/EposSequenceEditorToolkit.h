@@ -77,6 +77,7 @@ public:
     virtual FString GetWorldCentricTabPrefix() const override;
     virtual FLinearColor GetWorldCentricTabColorScale() const override;
     virtual FText GetTabSuffix() const override;
+    virtual void BringToolkitToFront() override;
 
     //~ IEposSequenceEditorToolkit interface
     virtual TSharedPtr<ISequencer> GetSequencer() const override;

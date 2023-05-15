@@ -12,7 +12,6 @@
 #include "SequencerSettings.h"
 
 #include "Board/BoardSequence.h"
-#include "Board/BoardSequenceActions.h"
 #include "Board/BoardSequenceCustomization.h"
 #include "EposSequenceEditorCommands.h"
 #include "Export/ImageSequence/ExportImageSequenceSettings.h"
@@ -24,7 +23,6 @@
 #include "Settings/EposSequenceEditorSettings.h"
 #include "Settings/EposSequenceEditorSettingsCustomization.h"
 #include "Shot/ShotSequence.h"
-#include "Shot/ShotSequenceActions.h"
 #include "Shot/ShotSequenceCustomization.h"
 #include "StoryboardCreationDialog/NewStoryboardDialog.h"
 #include "StoryboardViewport/StoryboardViewportLayoutEntity.h"
@@ -46,7 +44,6 @@ FEposSequenceEditorModule::StartupModule()
 {
     FEposSequenceEditorStyle::Register(); // Must be done before Commands(), as it uses style
     RegisterCommands();
-    RegisterAssetTools();
     RegisterMenuExtensions();
     RegisterLevelEditorExtensions();
     RegisterSettings();
@@ -64,7 +61,6 @@ FEposSequenceEditorModule::ShutdownModule()
     UnregisterSettings();
     UnregisterMenuExtensions();
     UnregisterLevelEditorExtensions();
-    UnregisterAssetTools();
     UnregisterCommands();
     FEposSequenceEditorStyle::Unregister();
 }
@@ -99,33 +95,6 @@ FEposSequenceEditorModule::UnregisterCommands()
 }
 
 //---
-
-void
-FEposSequenceEditorModule::RegisterAssetTools()
-{
-    IAssetTools& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>( "AssetTools" ).Get();
-
-    EAssetTypeCategories::Type eposAssetCategory = AssetTools.RegisterAdvancedAssetCategory( FName( TEXT( "EPOS" ) ), LOCTEXT( "EposAssetsCategory", "EPOS" ) );
-    EAssetTypeCategories::Type cinematicAssetCategoryBit = AssetTools.RegisterAdvancedAssetCategory( FName( TEXT( "Cinematics" ) ), LOCTEXT( "CinematicsAssetCategory", "Cinematics" ) );
-
-    mBoardSequenceTypeActions = MakeShared<FBoardSequenceActions>( eposAssetCategory, cinematicAssetCategoryBit );
-    AssetTools.RegisterAssetTypeActions( mBoardSequenceTypeActions.ToSharedRef() );
-
-    mShotSequenceTypeActions = MakeShared<FShotSequenceActions>( eposAssetCategory, cinematicAssetCategoryBit );
-    AssetTools.RegisterAssetTypeActions( mShotSequenceTypeActions.ToSharedRef() );
-}
-
-void
-FEposSequenceEditorModule::UnregisterAssetTools()
-{
-    FAssetToolsModule* AssetToolsModule = FModuleManager::GetModulePtr<FAssetToolsModule>( "AssetTools" );
-    if( !AssetToolsModule )
-        return;
-
-    IAssetTools& AssetTools = AssetToolsModule->Get();
-    AssetTools.UnregisterAssetTypeActions( mBoardSequenceTypeActions.ToSharedRef() );
-    AssetTools.UnregisterAssetTypeActions( mShotSequenceTypeActions.ToSharedRef() );
-}
 
 void
 FEposSequenceEditorModule::RegisterMenuExtensions()

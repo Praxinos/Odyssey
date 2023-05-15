@@ -45,7 +45,7 @@ BoardSequenceTools::FindCinematicBoardTrack( ISequencer* iSequencer )
     if( focusedMovieScene->IsReadOnly() )
         return nullptr;
 
-    UMovieSceneCinematicBoardTrack* boardTrack = focusedMovieScene->FindMasterTrack<UMovieSceneCinematicBoardTrack>();
+    UMovieSceneCinematicBoardTrack* boardTrack = focusedMovieScene->FindTrack<UMovieSceneCinematicBoardTrack>();
     if( !boardTrack )
         return nullptr;
 
@@ -69,7 +69,7 @@ BoardSequenceTools::FindOrCreateCinematicBoardTrack( ISequencer* iSequencer )
         return nullptr;
     }
 
-    UMovieSceneCinematicBoardTrack* boardTrack = focusedMovieScene->FindMasterTrack<UMovieSceneCinematicBoardTrack>();
+    UMovieSceneCinematicBoardTrack* boardTrack = focusedMovieScene->FindTrack<UMovieSceneCinematicBoardTrack>();
     if( boardTrack != nullptr )
     {
         return boardTrack;
@@ -78,7 +78,7 @@ BoardSequenceTools::FindOrCreateCinematicBoardTrack( ISequencer* iSequencer )
     const FScopedTransaction transaction( LOCTEXT( "AddCinematicBoardTrack_Transaction", "Add Board Track" ) );
     focusedMovieScene->Modify();
 
-    auto newTrack = focusedMovieScene->AddMasterTrack<UMovieSceneCinematicBoardTrack>();
+    auto newTrack = focusedMovieScene->AddTrack<UMovieSceneCinematicBoardTrack>();
     ensure( newTrack );
 
     iSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemAdded );
@@ -163,7 +163,7 @@ ShotSequenceTools::FindNextOrPreviousShot( UMovieSceneSequence* iSequence, FFram
 {
     UMovieScene* OwnerMovieScene = iSequence->GetMovieScene();
 
-    UMovieSceneTrack* CinematicBoardTrack = OwnerMovieScene->FindMasterTrack( UMovieSceneCinematicBoardTrack::StaticClass() );
+    UMovieSceneTrack* CinematicBoardTrack = OwnerMovieScene->FindTrack( UMovieSceneCinematicBoardTrack::StaticClass() );
     if( !CinematicBoardTrack )
     {
         return nullptr;

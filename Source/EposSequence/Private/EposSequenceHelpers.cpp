@@ -15,7 +15,7 @@
 #include "LevelSequence.h"
 #include "MoviePipeline.h"
 #include "MoviePipelineBlueprintLibrary.h"
-#include "MoviePipelineMasterConfig.h"
+#include "MoviePipelinePrimaryConfig.h"
 #include "MovieScene.h"
 #include "MovieSceneCommonHelpers.h"
 #include "MovieSceneSection.h"
@@ -81,7 +81,7 @@ BoardSequenceHelpers::FInnerSequenceResult
 BoardSequenceHelpers::GetInnerSequence( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceId, const FFrameNumber& iFrameNumber )
 {
     UMovieScene* moviescene = iSequence ? iSequence->GetMovieScene() : nullptr;
-    UMovieSceneCinematicBoardTrack* board_track = moviescene ? moviescene->FindMasterTrack<UMovieSceneCinematicBoardTrack>() : nullptr;
+    UMovieSceneCinematicBoardTrack* board_track = moviescene ? moviescene->FindTrack<UMovieSceneCinematicBoardTrack>() : nullptr;
     UMovieSceneSection* section = board_track ? MovieSceneHelpers::FindSectionAtTime( board_track->GetAllSections(), iFrameNumber ) : nullptr;
     UMovieSceneSubSection* subsection = Cast<UMovieSceneSubSection>( section );
 
@@ -336,7 +336,7 @@ EposSequenceHelpers::GetNotesRecursive( IMovieScenePlayer& iPlayer, UMovieSceneS
     TArray<TWeakObjectPtr<UMovieSceneNoteSection>> note_sections = GetNotes( iPlayer, iSequence, iSequenceID, iFrameNumber );
 
     UMovieScene* movie_scene = iSequence->GetMovieScene();
-    UMovieSceneCinematicBoardTrack* track = movie_scene->FindMasterTrack<UMovieSceneCinematicBoardTrack>();
+    UMovieSceneCinematicBoardTrack* track = movie_scene->FindTrack<UMovieSceneCinematicBoardTrack>();
     if( !track )
         return note_sections;
 
@@ -370,7 +370,7 @@ EposSequenceHelpers::GetNotes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* 
     TArray<TWeakObjectPtr<UMovieSceneNoteSection>> note_sections;
 
     UMovieScene* movie_scene = iSequence->GetMovieScene();
-    TArray<UMovieSceneTrack*> tracks = movie_scene->GetMasterTracks();
+    TArray<UMovieSceneTrack*> tracks = movie_scene->GetTracks();
 #if WITH_EDITORONLY_DATA
     tracks.StableSort( []( const UMovieSceneTrack& iA, const UMovieSceneTrack& iB )
                        {
@@ -1012,6 +1012,9 @@ ShotSequenceHelpers::GetCameraTransformTimes( UMovieSceneSequence* iSequence )
     if( !cameracut_section )
         return keys;
 
+    if( !cameracut_section->GetCameraBindingID().IsValid() )
+        return keys;
+
     UMovieSceneTrack* track = moviescene->FindTrack<UMovieScene3DTransformTrack>( cameracut_section->GetCameraBindingID().GetGuid() );
     if( !track )
         return keys;
@@ -1079,7 +1082,7 @@ BoardSequenceHelpers::GetCameraTransformTimesRecursive( const UMovieSceneSubSect
         if( !innerMovieScene )
             return keys;
 
-        UMovieSceneCinematicBoardTrack* board_track = innerMovieScene->FindMasterTrack<UMovieSceneCinematicBoardTrack>();
+        UMovieSceneCinematicBoardTrack* board_track = innerMovieScene->FindTrack<UMovieSceneCinematicBoardTrack>();
         if( !board_track )
             return keys;
 
@@ -1428,10 +1431,10 @@ UMoviePipelineStoryboardBlueprintLibrary::GetNotes( const UMoviePipeline* iMovie
 
     ULevelSequence* level_sequence = iMoviePipeline->GetTargetSequence();
 
-    FFrameRate effective_framerate = iMoviePipeline->GetPipelineMasterConfig()->GetEffectiveFrameRate( iMoviePipeline->GetTargetSequence() );
+    FFrameRate effective_framerate = iMoviePipeline->GetPipelinePrimaryConfig()->GetEffectiveFrameRate( iMoviePipeline->GetTargetSequence() );
 
     //FTimecode master_timecode = UMoviePipelineBlueprintLibrary::GetMasterTimecode( iMoviePipeline );
-    FFrameNumber master_current_frame_in_levelsequence = UMoviePipelineBlueprintLibrary::GetMasterFrameNumber( iMoviePipeline );
+    FFrameNumber master_current_frame_in_levelsequence = UMoviePipelineBlueprintLibrary::GetRootFrameNumber( iMoviePipeline );
     FFrameNumber master_current_frame = FFrameRate::TransformTime( master_current_frame_in_levelsequence, effective_framerate, level_sequence->GetMovieScene()->GetTickResolution() ).GetFrame();
 
     ////FTimecode shot_timecode = UMoviePipelineBlueprintLibrary::GetCurrentShotTimecode( iMoviePipeline );
@@ -1516,7 +1519,7 @@ UMoviePipelineStoryboardBlueprintLibrary::GetNotes( const UMoviePipeline* iMovie
 
     UE::MovieScene::FSequenceVisitParams params;
     params.bVisitSections = true;
-    params.bVisitMasterTracks = true;
+    params.bVisitRootTracks = true;
     params.bVisitSubSequences = true;
 
     FSequenceNoteVisitor note_visitor;

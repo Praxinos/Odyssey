@@ -280,7 +280,7 @@ void FEposSequenceEditorToolkit::GoToFocusedSequence( TArray< UEposMovieSceneSeq
         if( !child_sequence )
             continue;
 
-        UMovieSceneTrack* track = sequence->GetMovieScene()->FindMasterTrack<UMovieSceneCinematicBoardTrack>();
+        UMovieSceneTrack* track = sequence->GetMovieScene()->FindTrack<UMovieSceneCinematicBoardTrack>();
         if( !track )
             continue;
 
@@ -432,6 +432,15 @@ FText FEposSequenceEditorToolkit::GetTabSuffix() const
     }
 
     return FText::GetEmpty();
+}
+
+void FEposSequenceEditorToolkit::BringToolkitToFront()
+{
+    IEposSequenceEditorToolkit::BringToolkitToFront();
+
+    FLevelEditorModule& LevelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>( "LevelEditor" );
+    TSharedPtr<FTabManager> LevelEditorTabManager = LevelEditorModule.GetLevelEditorTabManager();
+    LevelEditorTabManager->TryInvokeTab( LevelEditorTabIds::Sequencer );
 }
 
 //---

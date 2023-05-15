@@ -29,9 +29,6 @@ private:
     void RegisterCommands();
     void UnregisterCommands();
 
-    void RegisterAssetTools();
-    void UnregisterAssetTools();
-
     void RegisterMenuExtensions();
     void UnregisterMenuExtensions();
 

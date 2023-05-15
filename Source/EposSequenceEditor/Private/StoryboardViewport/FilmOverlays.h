@@ -3,54 +3,13 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
-#include "Misc/Attribute.h"
-#include "Input/Reply.h"
-#include "Widgets/DeclarativeSyntaxSupport.h"
-#include "Widgets/SWidget.h"
 #include "Widgets/SCompoundWidget.h"
+#include "IFilmOverlay.h"
 
 class FPaintArgs;
 class FSlateWindowElementList;
 struct FSlateBrush;
 
-/** Abstract base class that defines how an overlay should be drawn over the viewport */
-struct IFilmOverlay
-{
-    IFilmOverlay() : Tint(FLinearColor::White), bEnabled(false) {}
-
-    virtual ~IFilmOverlay() {};
-
-    /** Get a localized display name that is representative of this overlay */
-    virtual FText GetDisplayName() const = 0;
-
-    /** Get a slate thumbnail brush that is representative of this overlay. 36x24 recommended */
-    virtual const FSlateBrush* GetThumbnail() const = 0;
-
-    /** Construct a widget that controls this overlay's arbitrary settings. Only used for toggleable overlays. */
-    virtual TSharedPtr<SWidget> ConstructSettingsWidget() { return nullptr; }
-
-    /** Paint the overlay */
-    virtual void Paint(const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId) const = 0;
-
-public:
-
-    /** Get/Set a custom tint for this overlay */
-    const FLinearColor& GetTint() const { return Tint; }
-    void SetTint(const FLinearColor& InTint) { Tint = InTint; }
-
-    /** Get/Set whether this overlay should be drawn */
-    bool IsEnabled() const { return bEnabled; }
-    void SetEnabled(bool bInEnabled) { bEnabled = bInEnabled; }
-
-protected:
-
-    /** Tint to apply to this overlay */
-    FLinearColor Tint;
-
-    /** Whether this overlay is enabled or not */
-    bool bEnabled;
-};
 
 /** A widget that sits on top of a viewport, and draws custom content */
 class SFilmOverlay : public SCompoundWidget
@@ -93,7 +52,7 @@ private:
     TSharedRef<SWidget> GetMenuContent();
 
     /** Construct the part of the menu that defines the set of film overlays */
-    TSharedRef<SWidget> ConstructMasterOverlaysMenu();
+    TSharedRef<SWidget> ConstructPrimaryOverlaysMenu();
 
     /** Construct the part of the menu that defines the set of toggleable overlays (currently just safe-frames) */
     TSharedRef<SWidget> ConstructToggleableOverlaysMenu();
@@ -103,32 +62,32 @@ private:
     /** Get the thumbnail to be displayed on the combo box button */
     const FSlateBrush* GetCurrentThumbnail() const;
 
-    /** Get the master film overlay ptr (may be nullptr) */
-    IFilmOverlay* GetMasterFilmOverlay() const;
+    /** Get the primary film overlay ptr (may be nullptr) */
+    IFilmOverlay* GetPrimaryFilmOverlay() const;
 
     /** Get an array of all enabled film overlays */
     TArray<IFilmOverlay*> GetActiveFilmOverlays() const;
 
-    /** Set the current master overlay to the specified name */
-    FReply SetMasterFilmOverlay(FName InName);
+    /** Set the current primary overlay to the specified name */
+    FReply SetPrimaryFilmOverlay(FName InName);
 
-    /** Get/Set the color tint override for the current master overlay */
-    FLinearColor GetMasterColorTint() const;
-    void OnMasterColorTintChanged(const FLinearColor& Tint);
+    /** Get/Set the color tint override for the current primary overlay */
+    FLinearColor GetPrimaryColorTint() const;
+    void OnPrimaryColorTintChanged(const FLinearColor& Tint);
 
 private:
 
-    /** Set of master film overlays (only one can be active at a time) */
-    TMap<FName, TUniquePtr<IFilmOverlay>> MasterFilmOverlays;
+    /** The name of the current primary overlay */
+    FName CurrentPrimaryOverlay;
 
-    /** The name of the current master overlay */
-    FName CurrentMasterOverlay;
+    /** Color tint to apply to primary overlays */
+    FLinearColor PrimaryColorTint;
 
-    /** Color tint to apply to master overlays */
-    FLinearColor MasterColorTint;
+    /** Primary overlays (only one can be active at a time) */
+    TArray<TSharedPtr<IFilmOverlay>> PrimaryOverlays;
 
-    /** A map of toggleable overlays (any number can be active at a time) */
-    TMap<FName, TUniquePtr<IFilmOverlay>> ToggleableOverlays;
+    /** Toggleable overlays (any number can be active at a time) */
+    TArray<TSharedPtr<IFilmOverlay>> ToggleableOverlays;
 
     /** The overlay widget we control */
     TSharedPtr<SFilmOverlay> OverlayWidget;

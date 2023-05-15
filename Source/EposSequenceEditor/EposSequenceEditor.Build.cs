@@ -78,6 +78,8 @@ public class EposSequenceEditor : ModuleRules
                 "ToolWidgets",
                 "EditorScriptingUtilities",
                 "MovieRenderPipelineEditor",
+                "LevelSequenceEditor",
+                "AssetDefinition",
                 // [EDITOR] custom plugin dependencies
                 "EposTracksEditor",
                 "EposNamingConvention",

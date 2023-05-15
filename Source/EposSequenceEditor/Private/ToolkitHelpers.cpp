@@ -205,6 +205,8 @@ ToolkitHelpers::CreatePropertyTrack( ISequencer* iSequencer, AActor* iActor, con
     TArray<FString> PropertyNames;
     iPropertyPath.ParseIntoArray( PropertyNames, TEXT( "." ) );
 
+    //TODO: added in 5.2
+    //bool bReplaceWithTransformTrack = false;
     for( const FString& PropertyName : PropertyNames )
     {
         FProperty* Property = PropertyOwnerClass->FindPropertyByName( *PropertyName );
@@ -212,6 +214,15 @@ ToolkitHelpers::CreatePropertyTrack( ISequencer* iSequencer, AActor* iActor, con
         if( Property != nullptr )
         {
             PropertyPath->AddProperty( FPropertyInfo( Property ) );
+
+            //TODO: added in 5.2
+            //// Transform tracks are a special case and must be handled separately.
+            //if( PropertyOwner->IsA( USceneComponent::StaticClass() ) &&
+            //    ( PropertyName == TEXT( "RelativeLocation" ) || PropertyName == TEXT( "RelativeRotation" ) || PropertyName == TEXT( "RelativeScale3D" ) ) )
+            //{
+            //    bReplaceWithTransformTrack = true;
+            //    break;
+            //}
         }
 
         FStructProperty* StructProperty = CastField<FStructProperty>( Property );
@@ -232,6 +243,20 @@ ToolkitHelpers::CreatePropertyTrack( ISequencer* iSequencer, AActor* iActor, con
 
         break;
     }
+
+    //TODO: added in 5.2
+    //if( bReplaceWithTransformTrack )
+    //{
+    //    FGuid ComponentBinding = iSequencer->GetHandleToObject( PropertyOwner );
+    //    UClass* TrackClass = UMovieScene3DTransformTrack::StaticClass();
+    //    UMovieSceneTrack* NewTrack = MovieScene->FindTrack( TrackClass, ComponentBinding );
+    //    if( !NewTrack )
+    //    {
+    //        NewTrack = MovieScene->AddTrack( TrackClass, ComponentBinding );
+    //        CreateDefaultTrackSection( NewTrack, PropertyOwner );
+    //    }
+    //    return;
+    //}
 
     if( !iSequencer->CanKeyProperty( FCanKeyPropertyParams( PropertyOwner->GetClass(), *PropertyPath ) ) )
         return;

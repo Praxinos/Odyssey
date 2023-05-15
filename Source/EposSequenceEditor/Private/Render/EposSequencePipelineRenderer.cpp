@@ -31,7 +31,7 @@ FText FEposSequencePipelineRenderer::MoviePipelineQueueTabLabel = LOCTEXT( "Stor
 void
 FEposSequencePipelineRenderer::RenderMovie( UMovieSceneSequence* iSequence, const TArray<UMovieSceneCinematicShotSection*>& iSections ) //override
 {
-    if( !mMasterConfig )
+    if( !mPrimaryConfig )
     {
         TSharedPtr<SRenderOptions> render_options_widget;
 
@@ -51,7 +51,7 @@ FEposSequencePipelineRenderer::RenderMovie( UMovieSceneSequence* iSequence, cons
         if( render_options_widget->IsCanceled() )
             return;
 
-        mMasterConfig = render_options_widget->GetMasterConfig();
+        mPrimaryConfig = render_options_widget->GetPrimaryConfig();
     }
 
     //---
@@ -96,10 +96,10 @@ FEposSequencePipelineRenderer::RenderMovie( UMovieSceneSequence* iSequence, cons
         //    ActiveJob->SetPresetOrigin( ProjectSettings->LastPresetOrigin.Get() );
         //}
 
-        ActiveJob->SetPresetOrigin( mMasterConfig );
-        // or ActiveJob->SetConfiguration( mMasterConfig ); ??
+        ActiveJob->SetPresetOrigin( mPrimaryConfig );
+        // or ActiveJob->SetConfiguration( mPrimaryConfig ); ??
 
-        mMasterConfig = nullptr;
+        mPrimaryConfig = nullptr;
     }
 
     UMoviePipelineEditorBlueprintLibrary::EnsureJobHasDefaultSettings( ActiveJob );

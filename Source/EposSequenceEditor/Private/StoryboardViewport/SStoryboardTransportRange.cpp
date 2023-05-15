@@ -2,14 +2,15 @@
 // EPOS is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "StoryboardViewport/SStoryboardTransportRange.h"
-#include "Rendering/DrawElements.h"
+#include "MVVM/SharedList.h"
 #include "SequencerKeyCollection.h"
-#include "MovieSceneSequence.h"
-#include "EditorStyleSet.h"
+#include "SequencerSettings.h"
+#include "Misc/QualifiedFrameTime.h"
+#include "MovieSceneTimeHelpers.h"
+#include "Styling/AppStyle.h"
 #include "Styles/EposSequenceEditorStyle.h"
-#include "MovieScene.h"
 #include "ISequencer.h"
-#include "CommonMovieSceneTools.h"
+#include "TimeToPixel.h"
 
 #define LOCTEXT_NAMESPACE "SStoryboardTransportRange"
 
@@ -81,9 +82,18 @@ void SStoryboardTransportRange::SetTime(const FGeometry& MyGeometry, const FPoin
         Lerp = FMath::Clamp(Lerp, 0.f, 1.f);
 
         FMovieSceneEditorData& EditorData = Sequencer->GetFocusedMovieSceneSequence()->GetMovieScene()->GetEditorData();
-        double NewTimeSeconds = EditorData.ViewStart + (EditorData.ViewEnd - EditorData.ViewStart ) * Lerp;
+        double NewTimeSeconds = EditorData.ViewStart + (EditorData.ViewEnd - EditorData.ViewStart) * Lerp;
 
-        Sequencer->SetLocalTime(NewTimeSeconds * Sequencer->GetFocusedTickResolution(), ESnapTimeMode::STM_All);
+        FFrameTime ScrubTime = NewTimeSeconds * Sequencer->GetFocusedTickResolution();
+
+        // Clamp first, snap to frame last
+        if (Sequencer->GetSequencerSettings()->ShouldKeepCursorInPlayRangeWhileScrubbing())
+        {
+            TRange<FFrameNumber> PlaybackRange = Sequencer->GetFocusedMovieSceneSequence()->GetMovieScene()->GetPlaybackRange();
+            ScrubTime = UE::MovieScene::ClampToDiscreteRange(ScrubTime, PlaybackRange);
+        }
+
+        Sequencer->SetLocalTime(ScrubTime, ESnapTimeMode::STM_All);
     }
 }
 
@@ -99,7 +109,7 @@ void SStoryboardTransportRange::Tick(const FGeometry& AllottedGeometry, const do
     ISequencer* Sequencer = GetSequencer();
     if (Sequencer)
     {
-        TRange<double> ViewRange = Sequencer->GetFocusedMovieSceneSequence()->GetMovieScene()->GetEditorData().GetWorkingRange();
+        TRange<double> ViewRange = Sequencer->GetFocusedMovieSceneSequence()->GetMovieScene()->GetEditorData().GetViewRange();
 
         // Anything within 3 pixel's worth of time is a duplicate as far as we're concerned
         FTimeToPixel TimeToPixelConverter(AllottedGeometry, ViewRange, Sequencer->GetFocusedTickResolution());
@@ -180,7 +190,7 @@ int32 SStoryboardTransportRange::OnPaint(const FPaintArgs& Args, const FGeometry
     const float TrackHeight = AllottedGeometry.GetLocalSize().Y - TrackOffsetY;
 
     FFrameRate           TickResolution  = Sequencer->GetFocusedTickResolution();
-    TRange<double>       ViewRange = Sequencer->GetFocusedMovieSceneSequence()->GetMovieScene()->GetEditorData().GetViewRange();
+    TRange<double>       ViewRange       = Sequencer->GetFocusedMovieSceneSequence()->GetMovieScene()->GetEditorData().GetViewRange();
     TRange<FFrameNumber> PlaybackRange   = Sequencer->GetFocusedMovieSceneSequence()->GetMovieScene()->GetPlaybackRange();
 
     // Anything within 3 pixel's worth of time is a duplicate as far as we're concerned
@@ -197,7 +207,7 @@ int32 SStoryboardTransportRange::OnPaint(const FPaintArgs& Args, const FGeometry
     FSlateDrawElement::MakeBox(
         OutDrawElements,
         LayerId,
-        AllottedGeometry.ToPaintGeometry( FVector2D(0.f, TrackOffsetY),  FVector2D(AllottedGeometry.GetLocalSize().X, TrackHeight)),
+        AllottedGeometry.ToPaintGeometry(  FVector2D(AllottedGeometry.GetLocalSize().X, TrackHeight), FSlateLayoutTransform(FVector2f(0.f, TrackOffsetY))),
         FAppStyle::Get().GetBrush("WhiteBrush"),
         DrawEffects,
         FLinearColor(DarkGray)
@@ -212,7 +222,7 @@ int32 SStoryboardTransportRange::OnPaint(const FPaintArgs& Args, const FGeometry
     FSlateDrawElement::MakeBox(
         OutDrawElements,
         ++LayerId,
-        AllottedGeometry.ToPaintGeometry( FVector2D(AllottedGeometry.GetLocalSize().X*PlaybackStartLerp, TrackOffsetY),  FVector2D(AllottedGeometry.GetLocalSize().X*(PlaybackEndLerp - PlaybackStartLerp), TrackHeight)),
+        AllottedGeometry.ToPaintGeometry(  FVector2f(AllottedGeometry.GetLocalSize().X*(PlaybackEndLerp - PlaybackStartLerp), TrackHeight), FSlateLayoutTransform(FVector2f(AllottedGeometry.GetLocalSize().X*PlaybackStartLerp, TrackOffsetY))),
         FAppStyle::Get().GetBrush("WhiteBrush"),
         DrawEffects,
         FLinearColor(MidGray)
@@ -228,7 +238,7 @@ int32 SStoryboardTransportRange::OnPaint(const FPaintArgs& Args, const FGeometry
         FSlateDrawElement::MakeBox(
             OutDrawElements,
             ++LayerId,
-            AllottedGeometry.ToPaintGeometry( FVector2D(AllottedGeometry.GetLocalSize().X*PlaybackStartLerp, TrackOffsetY), FVector2D(AllottedGeometry.GetLocalSize().X * (ClampedProgressLerp - PlaybackStartLerp), TrackHeight) ),
+            AllottedGeometry.ToPaintGeometry( FVector2f(AllottedGeometry.GetLocalSize().X * (ClampedProgressLerp - PlaybackStartLerp), TrackHeight) , FSlateLayoutTransform(FVector2f(AllottedGeometry.GetLocalSize().X*PlaybackStartLerp, TrackOffsetY))),
             FAppStyle::Get().GetBrush("WhiteBrush"),
             DrawEffects,
             FLinearColor(LightGray)
@@ -300,7 +310,7 @@ int32 SStoryboardTransportRange::OnPaint(const FPaintArgs& Args, const FGeometry
         FSlateDrawElement::MakeBox(
             OutDrawElements,
             ++LayerId,
-            AllottedGeometry.ToPaintGeometry(FVector2D(PositionX - FMath::CeilToFloat(BrushWidth/2), 0.f), FVector2D(BrushWidth, BrushHeight)),
+            AllottedGeometry.ToPaintGeometry(FVector2f(BrushWidth, BrushHeight), FSlateLayoutTransform(FVector2f(PositionX - FMath::CeilToFloat(BrushWidth/2), 0.f))),
             FEposSequenceEditorStyle::Get().GetBrush("CinematicViewportPlayMarker"),
             DrawEffects,
             bPlayMarkerOnKey ? KeyframeColor : LightGray
@@ -331,7 +341,7 @@ int32 SStoryboardTransportRange::OnPaint(const FPaintArgs& Args, const FGeometry
         FSlateDrawElement::MakeBox(
             OutDrawElements,
             LayerId+1,
-            AllottedGeometry.ToPaintGeometry(FVector2D(AllottedGeometry.GetLocalSize().X*PlaybackStartLerp, TrackOffsetY), FVector2D(BrushWidth, TrackHeight)),
+            AllottedGeometry.ToPaintGeometry(FVector2f(BrushWidth, TrackHeight), FSlateLayoutTransform(FVector2f(AllottedGeometry.GetLocalSize().X*PlaybackStartLerp, TrackOffsetY))),
             FEposSequenceEditorStyle::Get().GetBrush("CinematicViewportRangeStart"),
             DrawEffects,
             FColor(32, 128, 32) // 120, 75, 50 (HSV)
@@ -340,7 +350,7 @@ int32 SStoryboardTransportRange::OnPaint(const FPaintArgs& Args, const FGeometry
         FSlateDrawElement::MakeBox(
             OutDrawElements,
             LayerId+1,
-            AllottedGeometry.ToPaintGeometry(FVector2D(AllottedGeometry.GetLocalSize().X*PlaybackEndLerp - BrushWidth, TrackOffsetY), FVector2D(BrushWidth, TrackHeight)),
+            AllottedGeometry.ToPaintGeometry(FVector2f(BrushWidth, TrackHeight), FSlateLayoutTransform(FVector2f(AllottedGeometry.GetLocalSize().X*PlaybackEndLerp - BrushWidth, TrackOffsetY))),
             FEposSequenceEditorStyle::Get().GetBrush("CinematicViewportRangeEnd"),
             DrawEffects,
             FColor(128, 32, 32) // 0, 75, 50 (HSV)

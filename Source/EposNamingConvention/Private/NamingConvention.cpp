@@ -36,7 +36,7 @@ static
 FRelevantPathMap
 FindSiblingSequencePaths( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iParentSequence )
 {
-    UMovieSceneCinematicBoardTrack* boardTrack = iParentSequence->GetMovieScene()->FindMasterTrack<UMovieSceneCinematicBoardTrack>();
+    UMovieSceneCinematicBoardTrack* boardTrack = iParentSequence->GetMovieScene()->FindTrack<UMovieSceneCinematicBoardTrack>();
     if( !boardTrack )
         return FRelevantPathMap();
 
@@ -131,7 +131,7 @@ FindAllNotePaths( const IMovieScenePlayer& iPlayer )
 
     for( auto sequence : sequences )
     {
-        auto tracks = sequence->GetMovieScene()->GetMasterTracks();
+        auto tracks = sequence->GetMovieScene()->GetTracks();
         for( auto track : tracks )
         {
             if( !track->IsA<UMovieSceneNoteTrack>() )
@@ -788,7 +788,7 @@ static
 TOptional<FSequenceNameElements>
 FindSiblingNameElements( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iParentSequence, FFrameNumber iFrameNumber )
 {
-    UMovieSceneCinematicBoardTrack* boardTrack = iParentSequence->GetMovieScene()->FindMasterTrack<UMovieSceneCinematicBoardTrack>();
+    UMovieSceneCinematicBoardTrack* boardTrack = iParentSequence->GetMovieScene()->FindTrack<UMovieSceneCinematicBoardTrack>();
     if( !boardTrack )
         return TOptional<FSequenceNameElements>();
 

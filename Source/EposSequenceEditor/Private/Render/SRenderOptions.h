@@ -9,7 +9,7 @@
 
 #include "SRenderOptions.generated.h"
 
-class UMoviePipelineMasterConfig;
+class UMoviePipelinePrimaryConfig;
 class UMovieSceneSequence;
 struct FAssetData;
 
@@ -41,7 +41,7 @@ public:
     bool IsOk();
     bool IsCanceled();
 
-    UMoviePipelineMasterConfig* GetMasterConfig();
+    UMoviePipelinePrimaryConfig* GetPrimaryConfig();
 
 private:
     virtual FReply OnKeyDown( const FGeometry& iMyGeometry, const FKeyEvent& iKeyEvent ) override;
@@ -52,16 +52,16 @@ private:
 //    FReply  OnCancel();
 
 private:
-    void OnMasterConfigSelected( const FAssetData& iAssetData );
-    void OnMasterConfigDoubleClicked( const FAssetData& iAssetData );
-    void OnMasterConfigEnterPressed( const TArray<FAssetData>& iAssetData );
+    void OnPrimaryConfigSelected( const FAssetData& iAssetData );
+    void OnPrimaryConfigDoubleClicked( const FAssetData& iAssetData );
+    void OnPrimaryConfigEnterPressed( const TArray<FAssetData>& iAssetData );
 
     EVisibility EncoderSettingsVisibility() const;
 
 private:
-    TWeakPtr< SWindow >         mParentWindow;
-    bool                        mUserDlgResponse { false }; // == Cancel
+    TWeakPtr< SWindow >             mParentWindow;
+    bool                            mUserDlgResponse { false }; // == Cancel
 
-    UMoviePipelineMasterConfig* mMasterConfig { nullptr };
-    bool                        mIsExecutablePathValid { false };
+    UMoviePipelinePrimaryConfig*    mPrimaryConfig { nullptr };
+    bool                            mIsExecutablePathValid { false };
 };
