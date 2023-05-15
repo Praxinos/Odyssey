@@ -17,6 +17,10 @@
   "Plugins": [
     {
       "Enabled": true,
+      "Name": "LevelSequenceEditor"
+    },
+    {
+      "Enabled": true,
       "Name": "EditorScriptingUtilities"
     },
     {

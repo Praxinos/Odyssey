@@ -434,6 +434,15 @@ FText FEposSequenceEditorToolkit::GetTabSuffix() const
     return FText::GetEmpty();
 }
 
+void FEposSequenceEditorToolkit::BringToolkitToFront()
+{
+    IEposSequenceEditorToolkit::BringToolkitToFront();
+
+    FLevelEditorModule& LevelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>( "LevelEditor" );
+    TSharedPtr<FTabManager> LevelEditorTabManager = LevelEditorModule.GetLevelEditorTabManager();
+    LevelEditorTabManager->TryInvokeTab( LevelEditorTabIds::Sequencer );
+}
+
 //---
 
 TSharedRef<FExtender>
