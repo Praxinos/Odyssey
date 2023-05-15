@@ -4,13 +4,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Tools/OdysseyPainterEditorTool.h"
+#include "Tools/DefaultTool/OdysseyPainterEditorDefaultTool.h"
 #include "OdysseyVector.h"
 
 #include "OdysseyPainterEditorVectorObjectScaleTool.generated.h"
 
 UCLASS()
-class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectScaleTool : public UOdysseyPainterEditorTool
+class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectScaleTool : public UOdysseyPainterEditorDefaultTool
 {
 public:
     GENERATED_BODY()
@@ -22,18 +22,21 @@ public:
     //Constructor
     UOdysseyPainterEditorVectorObjectScaleTool();
  
-    void Activate( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    bool OnMouseDown( FOdysseyVectorEngine* iEngine
-                    , FOdysseyVectorScene* iScene
-                    , FOdysseyVectorUndo** iUndo
-                    , const FOdysseyPoint& iPointInTexture
-                    , const FKey& iKey );
-    void OnMouseDrag( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture );
-    bool OnMouseUp( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture, const FKey& iKey );
+    void ActivateVector ( FOdysseyVectorEngine* iEngine
+                        , FOdysseyVectorScene* iScene );
+    bool OnMouseDownVector( FOdysseyVectorEngine* iEngine
+                          , FOdysseyVectorScene* iScene
+                          , const FOdysseyPoint& iPointInTexture
+                          , const FKey& iKey );
+    void OnMouseDragVector( FOdysseyVectorEngine* iEngine
+                          , FOdysseyVectorScene* iScene
+                          , const FOdysseyPoint& iPointInTexture );
+    bool OnMouseUpVector( FOdysseyVectorEngine* iEngine
+                        , FOdysseyVectorScene* iScene
+                        , const FOdysseyPoint& iPointInTexture
+                        , const FKey& iKey );
     //OdysseyPainterEditorTool overrides
     virtual void Commit() override;
-    // usually for undos. (we need to reset the HUD as if the tool was activated)
-    void OnRefresh( FOdysseyVectorScene* iScene );
 
 protected:
     void FitHUD( FOdysseyVectorScene* iScene );

@@ -40,9 +40,7 @@ UOdysseyTextureEditorColorPickerTool::Activate()
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        UOdysseyPainterEditorColorPickerTool::Activate( vectorEngine, vectorScene );
-
-        currentVectorLayer->RenderImageChanged(false);
+        UOdysseyPainterEditorColorPickerTool::ActivateVector( vectorEngine, vectorScene );
     }
 }
 
@@ -110,8 +108,6 @@ UOdysseyTextureEditorColorPickerTool::OnMouseUp( const FOdysseyPoint& iPointInTe
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
         ret = UOdysseyPainterEditorColorPickerTool::OnMouseUpVector( vectorEngine, vectorScene, iPointInTexture, iKey );
-
-        currentVectorLayer->RenderImageChanged(false);
     }
 
     return ret;

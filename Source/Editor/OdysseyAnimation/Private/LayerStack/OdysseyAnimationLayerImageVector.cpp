@@ -11,8 +11,8 @@ UOdysseyAnimationLayerImageVector::~UOdysseyAnimationLayerImageVector()
 }
 
 UOdysseyAnimationLayerImageVector::UOdysseyAnimationLayerImageVector()
-    : mVEngine(nullptr)
-    , mScene(nullptr)
+    : mScene(nullptr)
+    , mVEngine(nullptr)
 {
 	LayerTypeName = LOCTEXT("LayerTypeName", "Vector Image Layer");
     Icon = *FOdysseyStyle::GetBrush( "OdysseyLayerStack.ImageLayer16");

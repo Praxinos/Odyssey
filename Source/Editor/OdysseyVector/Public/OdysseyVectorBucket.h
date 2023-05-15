@@ -7,11 +7,17 @@
 
 class FOdysseyVectorObject;
 
+enum FBucketDrawingFlags
+{
+    BUCKET = 1,
+    PELLET = 2
+};
+
 class ODYSSEYVECTOR_API FOdysseyVectorBucket : public FOdysseyVectorPoint
 {
     public:
         ~FOdysseyVectorBucket();
-        FOdysseyVectorBucket( FOdysseyVectorObject& iParent, double iX, double iY );
+        FOdysseyVectorBucket( FOdysseyVectorObject& iParent, double iX, double iY,  bool iPropagated );
 
         /**
          * @brief Set this bucket's solid color
@@ -29,7 +35,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorBucket : public FOdysseyVectorPoint
          * @param iRoi region-of-interest
          * @param iFlags drawing flags
          */
-        void Draw( ::ULIS::FRectD& iRoi, uint64 iFlags );
+        void Draw( FBucketDrawingFlags iDrawingFlags );
 
         void SetGradient( bool iIsGradient );
 
@@ -108,16 +114,25 @@ class ODYSSEYVECTOR_API FOdysseyVectorBucket : public FOdysseyVectorPoint
          */
         double GetHandleDotProduct();
 
+        void SetPropagated( bool iPropagated );
+        bool IsPropagated();
+
+    private:
+        void DrawBucket( FBucketDrawingFlags iDrawingFlags );
+        void DrawPellet( FBucketDrawingFlags iDrawingFlags );
+
     public:
         static const uint32 PICKNONE   = 0;
         static const uint32 PICKBUCKET = 1;
         static const uint32 PICKCROSS  = 2;
-        static const uint32 PICKHANDLE = 3;
+        static const uint32 PICKPROPAGATED = 3;
+        static const uint32 PICKHANDLE = 4;
 
     protected:
         FOdysseyVectorObject& mParent;
         FColor mColor;
         FOdysseyVectorHandleBucket mCtrlPoint;
+        bool mPropagated;
         bool mIsGradient;
         FColor mGradientColor0;
         FColor mGradientColor1;

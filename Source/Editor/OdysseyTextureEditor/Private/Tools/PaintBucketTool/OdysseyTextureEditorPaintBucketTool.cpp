@@ -34,9 +34,7 @@ UOdysseyTextureEditorPaintBucketTool::Activate()
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        UOdysseyPainterEditorPaintBucketTool::Activate( vectorEngine, vectorScene );
-
-        currentVectorLayer->RenderImageChanged(false);
+        UOdysseyPainterEditorPaintBucketTool::ActivateVector( vectorEngine, vectorScene );
     }
 }
 
@@ -113,42 +111,42 @@ UOdysseyTextureEditorPaintBucketTool::OnCurrentLayerChanged(UOdysseyLayerStack* 
 
 bool
 UOdysseyTextureEditorPaintBucketTool::OnMouseDown( const FOdysseyPoint& iPointInTexture
-                                                  , const FKey& iKey )
+                                                 , const FKey& iKey )
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
     UOdysseyTextureLayerImageRaster* currentRasterLayer = Cast<UOdysseyTextureLayerImageRaster>(layerStack->CurrentLayer.Get());
     bool ret = false;
 
-    // needed for undos
-    GEditor->BeginTransaction(LOCTEXT("PaintBucketTool", "Bucket Tool"));
-
     if( currentRasterLayer )
     {
-        ret = UOdysseyPainterEditorPaintBucketTool::OnMouseDown( currentRasterLayer->GetRasterBlock()->GetBlock(), iPointInTexture, iKey );
+        ret = UOdysseyPainterEditorPaintBucketTool::OnMouseDownRaster( currentRasterLayer->GetRasterBlock()->GetBlock(), iPointInTexture, iKey );
     }
 
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
-        FOdysseyVectorUndo* undo = nullptr;
 
-        ret = UOdysseyPainterEditorPaintBucketTool::OnMouseDown( vectorEngine, vectorScene, &undo, iPointInTexture, iKey );
-
-        if( undo )
-        {
-            GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
-            // All the delegates for undos are added here for easier maintainability
-            undo->mRefreshDelegate.AddUObject( currentVectorLayer, &UOdysseyTextureLayerImageVector::OnRefresh );
-        }
-
-        currentVectorLayer->RenderImageChanged(false);
+        ret = UOdysseyPainterEditorPaintBucketTool::OnMouseDownVector( vectorEngine, vectorScene, iPointInTexture, iKey );
     }
 
-    GEditor->EndTransaction();
-
     return ret;
+}
+
+void
+UOdysseyTextureEditorPaintBucketTool::OnMouseHover( const FOdysseyPoint& iPointInTexture )
+{
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
+    UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
+
+    if( currentVectorLayer )
+    {
+        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+
+        UOdysseyPainterEditorPaintBucketTool::OnMouseHoverVector( vectorEngine, vectorScene, iPointInTexture );
+    }
 }
 
 void
@@ -162,42 +160,25 @@ UOdysseyTextureEditorPaintBucketTool::OnMouseDrag( const FOdysseyPoint& iPointIn
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        UOdysseyPainterEditorPaintBucketTool::OnMouseDrag( vectorEngine, vectorScene, iPointInTexture );
-
-        currentVectorLayer->RenderImageChanged(true);
+        UOdysseyPainterEditorPaintBucketTool::OnMouseDragVector( vectorEngine, vectorScene, iPointInTexture );
     }
 }
 
 bool
 UOdysseyTextureEditorPaintBucketTool::OnMouseUp( const FOdysseyPoint& iPointInTexture
-                                                , const FKey& iKey )
+                                               , const FKey& iKey )
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
     bool ret = false;
 
-    // needed for undos
-    GEditor->BeginTransaction(LOCTEXT("PaintBucketTool", "Bucket Tool"));
-
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
-        FOdysseyVectorUndo* undo = nullptr;
 
-        ret = UOdysseyPainterEditorPaintBucketTool::OnMouseUp( vectorEngine, vectorScene, &undo, iPointInTexture, iKey );
-
-        if( undo )
-        {
-            GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
-            // All the delegates for undos are added here for easier maintainability
-            undo->mRefreshDelegate.AddUObject( currentVectorLayer, &UOdysseyTextureLayerImageVector::OnRefresh );
-        }
-
-        currentVectorLayer->RenderImageChanged(false);
+        ret = UOdysseyPainterEditorPaintBucketTool::OnMouseUpVector( vectorEngine, vectorScene, iPointInTexture, iKey );
     }
-
-    GEditor->EndTransaction();
 
     return ret;
 }

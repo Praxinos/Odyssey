@@ -44,5 +44,4 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoObjectTransform : public FOdysseyVecto
 
     private:
         std::vector<FObjectTransform> objectTransformArray;
-        FOdysseyVectorScene* mScene;
 };

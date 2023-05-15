@@ -12,7 +12,6 @@
 #include "OdysseyVectorHandle.h"
 #include "OdysseyVectorHandleSegment.h"
 #include "OdysseyVectorVertex.h"
-#include "OdysseyVectorVertexCubic.h"
 
 struct FPointPosition
 {
@@ -50,5 +49,4 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoPointPosition : public FOdysseyVectorU
 
     private:
         std::vector<FPointPosition> mPointPositionArray;
-        FOdysseyVectorScene* mScene;
 };

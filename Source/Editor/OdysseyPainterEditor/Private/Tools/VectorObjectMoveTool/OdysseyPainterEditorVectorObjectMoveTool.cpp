@@ -3,6 +3,8 @@
 
 #include "Tools/VectorObjectMoveTool/OdysseyPainterEditorVectorObjectMoveTool.h"
 
+#define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorObjectMoveTool"
+
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
 UOdysseyPainterEditorVectorObjectMoveTool::~UOdysseyPainterEditorVectorObjectMoveTool()
@@ -18,34 +20,39 @@ UOdysseyPainterEditorVectorObjectMoveTool::UOdysseyPainterEditorVectorObjectMove
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
 void
-UOdysseyPainterEditorVectorObjectMoveTool::Activate( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorObjectMoveTool::ActivateVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
     iEngine->ClearHUD();
+
+    iScene->Update( 0 ); // refresh vector scene and GUI widgets via delegates.
 }
 
 bool
-UOdysseyPainterEditorVectorObjectMoveTool::OnMouseDown( FOdysseyVectorEngine* iEngine
-                                                      , FOdysseyVectorScene* iScene
-                                                      , FOdysseyVectorUndo** iUndo
-                                                      , const FOdysseyPoint& iPointInTexture
-                                                      , const FKey& iKey )
+UOdysseyPainterEditorVectorObjectMoveTool::OnMouseDownVector( FOdysseyVectorEngine* iEngine
+                                                            , FOdysseyVectorScene* iScene
+                                                            , const FOdysseyPoint& iPointInTexture
+                                                            , const FKey& iKey )
 {
-    // BeginTransaction() must be called for GUndo to have a value. Please do it in the caller function.
-    if( iUndo && GUndo )
+    // needed for valid GUndo pointer
+    GEditor->BeginTransaction(LOCTEXT("VectorObjectMoveTool","Vector Object Move Tool"));
+    if( GUndo )
     {
         // save selected object translation/rotation/scaling before transform
-        (*iUndo) = new FOdysseyVectorUndoObjectTransform( iScene, iScene->GetSelectedObjectList() );
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoObjectTransform( iScene, iScene->GetSelectedObjectList() );
 
-        GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(*iUndo) );
+        GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
     }
+    GEditor->EndTransaction();
+
+    iScene->Update( 0 ); // refresh vector scene and GUI widgets via delegates.
 
     return true;
 }
 
 void
-UOdysseyPainterEditorVectorObjectMoveTool::OnMouseDrag( FOdysseyVectorEngine* iEngine
-                                                      , FOdysseyVectorScene* iScene
-                                                      , const FOdysseyPoint& iPointInTexture )
+UOdysseyPainterEditorVectorObjectMoveTool::OnMouseDragVector( FOdysseyVectorEngine* iEngine
+                                                            , FOdysseyVectorScene* iScene
+                                                            , const FOdysseyPoint& iPointInTexture )
 {
     std::list<FOdysseyVectorObject*>& selectObjectList = iScene->GetSelectedObjectList();
     ::ULIS::FRectD beforeBBox = FOdysseyVectorObject::GetBoundingBoxFromList( selectObjectList );
@@ -67,16 +74,17 @@ UOdysseyPainterEditorVectorObjectMoveTool::OnMouseDrag( FOdysseyVectorEngine* iE
         }
     }
 
+    // refresh vector scene and GUI widgets via delegates.
     iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES | FOdysseyVectorObject::KEEPINVALIDATED );
 }
 
 bool
-UOdysseyPainterEditorVectorObjectMoveTool::OnMouseUp( FOdysseyVectorEngine* iEngine
-                                                    , FOdysseyVectorScene* iScene
-                                                    , const FOdysseyPoint& iPointInTexture
-                                                    , const FKey& iKey )
+UOdysseyPainterEditorVectorObjectMoveTool::OnMouseUpVector( FOdysseyVectorEngine* iEngine
+                                                          , FOdysseyVectorScene* iScene
+                                                          , const FOdysseyPoint& iPointInTexture
+                                                          , const FKey& iKey )
 {
-    iScene->Update( 0 );
+    iScene->Update( 0 ); // refresh vector scene and GUI widgets via delegates.
 
     return true;
 }
@@ -86,3 +94,5 @@ UOdysseyPainterEditorVectorObjectMoveTool::Commit()
 {
 
 }
+
+#undef LOCTEXT_NAMESPACE

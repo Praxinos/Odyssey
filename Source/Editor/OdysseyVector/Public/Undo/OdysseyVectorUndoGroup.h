@@ -36,5 +36,4 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoGroup : public FOdysseyVectorUndo
         std::vector<FOdysseyVectorObject*> mAddedObjectOldParentArray;
         std::vector<FOdysseyVectorObject*> mAddedObjectArray;
         FOdysseyVectorGroup* mAddedGroup;
-        FOdysseyVectorScene* mScene;
 };

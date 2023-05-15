@@ -8,13 +8,14 @@
 #include "View/OdysseyVectorViewObject.h"
 #include "View/OdysseyVectorViewPath.h"
 #include "View/OdysseyVectorViewEllipse.h"
+#include "View/OdysseyVectorViewGroupPaint.h"
 #include <ULIS>
 
 class FOdysseyPainterEditor;
 class UOdysseyPainterEditorTool;
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorSelectedVectorObjectTab :
-    public FOdysseyEditorTab, public FNotifyHook
+    public FOdysseyEditorTab, public FNotifyHook, public FGCObject
 {
 public:
     // Construction / Destruction
@@ -24,11 +25,14 @@ public:
     UOdysseyVectorViewObject* GetObjectView();
     UOdysseyVectorViewPath* GetPathView();
     UOdysseyVectorViewEllipse* GetEllipseView();
+    UOdysseyVectorViewGroupPaint* GetGroupPaintView();
 
 protected:
     // FOdysseyEditorTab interface
     virtual TSharedPtr<SWidget> CreateWidget() override;
     virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
+    virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
+    virtual FString GetReferencerName() const override;
 
 public:
     // Event Listeners
@@ -42,7 +46,8 @@ private:
     FOdysseyPainterEditor* mEditor;
     TSharedPtr<IDetailsView> mDetailsView;
 
-    UOdysseyVectorViewObject *mObjectView;
-    UOdysseyVectorViewPath *mPathView;
-    UOdysseyVectorViewEllipse *mEllipseView;
+    UOdysseyVectorViewObject* mObjectView;
+    UOdysseyVectorViewPath* mPathView;
+    UOdysseyVectorViewEllipse* mEllipseView;
+    UOdysseyVectorViewGroupPaint* mGroupPaintView;
 };

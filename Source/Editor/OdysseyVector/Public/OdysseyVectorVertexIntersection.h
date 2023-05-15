@@ -6,10 +6,8 @@
 
 #include "OdysseyVectorVertex.h"
 
-struct FIntersection {
-    ::ULIS::FVec2D position;
-    double t;
-};
+class FOdysseyVectorSegment;
+class FOdysseyVectorIntersection;
 
 class ODYSSEYVECTOR_API FOdysseyVectorVertexIntersection : public FOdysseyVectorVertex
 {
@@ -25,21 +23,29 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertexIntersection : public FOdysseyVector
         /**
          * @brief Constructor.
          */
-        FOdysseyVectorVertexIntersection();
+        FOdysseyVectorVertexIntersection( FOdysseyVectorPath* iPath, bool iSelfIntersects, double iX, double iY, double iT );
 
-        virtual ::ULIS::FVec2D GetPosition( FOdysseyVectorSegment* iSegment ) override;
+        /**
+         * @brief Get a pointer to the next section to explore in cycle depending on the last visited section.
+         * @param iLastSection the last visited section.
+         * @param iOrientation ignored.
+         * @return a pointer to the next section to explore in cycle.
+         */
+        virtual FOdysseyVectorSection* GetCycleNextSection( FOdysseyVectorSection* iLastSection, double iOrientation ) override;
 
         virtual double GetT( FOdysseyVectorSegment* iSegment ) override;
 
-        void AddSegment( FOdysseyVectorSegment* iSegment, double t );
+        void SetIntersection( FOdysseyVectorIntersection* iIntersection );
+        FOdysseyVectorIntersection* GetIntersection();
+        FOdysseyVectorVertexIntersection* GetPartner();
 
-        virtual ::ULIS::FVec2D& GetCoords( FOdysseyVectorSegment* iSegment ) override;
-
-    protected:
-        uint64 mIntersectionID;
-        // map for intersection positions
-        std::map<FOdysseyVectorSegment*, FIntersection> mTMap;
+        virtual uint32 GetSectionCount() override;
+        bool SelfIntersects();
+        virtual void BuildExplorationPairs( std::vector<FExplorationPair>& iExplorationPairsArray ) override;
 
     private:
         static const uint32 mStaticClass =  0x29459195; // value is crc32 FOdysseyVectorVertexIntersection
+        FOdysseyVectorIntersection* mIntersection;
+        double mT;
+        bool mSelfIntersects;
 };

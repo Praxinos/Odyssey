@@ -9,6 +9,7 @@
 #include "OdysseyVectorObject.h"
 #include "OdysseyVectorVertex.h"
 #include "OdysseyVectorSection.h"
+#include "OdysseyVectorIntersection.h"
 #include "OdysseyVectorSegment.h"
 #include "OdysseyVectorSegmentCubic.h"
 #include "OdysseyVectorGroup.h"
@@ -27,6 +28,12 @@ struct FGroupPaintParam
 
     UPROPERTY(EditAnywhere, Category="General")
     double Tolerance;
+
+    UPROPERTY(EditAnywhere, Category="General")
+    bool Wireframe;
+
+    UPROPERTY(EditAnywhere,Category="General")
+    FColor WireframeColor;
 };
 
 class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
@@ -70,6 +77,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
          */
         virtual void DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags ) override;
 
+        virtual void Draw( ::ULIS::FRectD& iRoi, uint64 iFlags ) override;
+
         /**
          * @brief Pick the shape.
          * @param iRoi picking region.
@@ -89,9 +98,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         /**
          * @brief Copy buckets from this PaintGroup to a destination PaintGroup.
          * @param iDestination the destination PaintGroup.
+         * @param iSwitchSpace
          * @return a pointer to  copy of the object
          */
-        void CopyBuckets( FOdysseyVectorGroupPaint* iDestination );
+        void CopyBuckets( FOdysseyVectorGroupPaint* iDestination, bool iSwitchSpace );
 
         virtual uint32 GetType();
 
@@ -103,20 +113,26 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         void AddBucket( FOdysseyVectorBucket* iBucket );
         void RemoveBucket( FOdysseyVectorBucket* iBucket );
         void Colorize();
-        void DrawBuckets( ::ULIS::FRectD& iRoi, uint64 iFlags );
+        void DrawBuckets( FBucketDrawingFlags iDrawingFlags );
         virtual void Invalidate();
+        void MergeCycles();
+        double GetGapTolerance();
+        void SetGapTolerance( double iGapTolerance );
+        bool IsWireframe();
+        void SetWireframe( bool iIsWireframe );
+        void UpdateBBox();
 
     protected:
         /**
          * @brief Intersect a cubic segment. It creates the intersection vertices and the section (sub-segments).
-         * @param iCubicSegment the segment.
-         * @param cubicSegmenList the other segments to intersect iCubicSegment with.
-         * @param oIntersectionVertexList list populated by the pointers to the intersection vertices that will be created.
-         * @return a pointer to  copy of the object
+         * @param iSegment the segment.
+         * @param iSegmenList the other segments to intersect iCubicSegment with.
+         * @param oIntersectionList list populated by the pointers to the intersection that will be created.
+         * @return the number of intersections
          */
-        uint32 IntersectSegment( FOdysseyVectorSegmentCubic* iCubicSegment
-                               , std::list<FOdysseyVectorSegment*>& cubicSegmenList
-                               , std::vector<FOdysseyVectorVertexIntersection*>& oIntersectionVertexList );
+        uint32 IntersectSegment( FOdysseyVectorSegment* iSegment
+                               , std::list<FOdysseyVectorSegment*>& iSegmenList
+                               , std::vector<FOdysseyVectorIntersection*>& oIntersectionList );
 
         /**
          * @brief Build the graph that allows to detect the cycles. It basically checks intersections
@@ -125,8 +141,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
 
         void FindCycles();
 
+        void SimplifyGraph();
+
         /**
          * @brief Recursive function that traverses the graph and find cycles.
+         * @param iReturnSection
          * @param iVertex the vertex being explored, either intersection vertex or regular ones.
          * @param iSection the section that will take us to the next vertex.
          * @param oVertexArray an array that receives the explored vertices.
@@ -135,7 +154,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
          * @param iDepth current recursion depth.
          * @return iCubicSegment the segment.
          */
-        uint32 FindPath( FOdysseyVectorVertex* iVertex
+        uint32 FindPath( FOdysseyVectorSection* iReturnSection
+                       , FOdysseyVectorVertex* iVertex
                        , FOdysseyVectorSection* iSection
                        , std::vector<FOdysseyVectorVertex*>& oVertexArray
                        , std::vector<FOdysseyVectorSection*>& oSectionArray
@@ -165,11 +185,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
          */
         void CheckLoops();
 
-        /**
-         * @brief Traverse an intersection vertex and find cycles.
-         * @param iVertex intersection vertex.
-         */
-        uint32 MarchVertex( FOdysseyVectorVertexIntersection* iVertex );
+        uint32 Explore( FExplorationPair* iExplorationPair );
+
+        void PropagateBuckets();
 
     protected:
         static const uint32 NOCYCLE  = 0;
@@ -177,9 +195,13 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         static const uint32 HASCYCLE = 2;
         std::list<FOdysseyVectorBucket*> mBucketList;
         std::vector<FOdysseyVectorCycle*> mCycleArray;
-        std::vector<FOdysseyVectorVertexIntersection*> mIntersectionVertexArray;
+        std::vector<FOdysseyVectorIntersection*> mIntersectionArray;
         // need to remember them in order to clean properly
-        std::list<FOdysseyVectorSegment*> mSegmentList;
+        std::vector<uint32> pathSectionCount;
+        uint32 mPaintingCode;
+
+        std::vector<FOdysseyVectorSection> mSectionBuffer;
+        std::vector<FOdysseyVectorSegmentCubic> mGapSegmentBuffer;
 
     public:
         FGroupPaintParam mGroupPaintParam;

@@ -4,7 +4,7 @@
 
 #include <blend2d.h>
 #include <ULIS>
-#include "OdysseyVectorVertexCubic.h"
+#include "OdysseyVectorVertex.h"
 #include "OdysseyVectorSegmentCubic.h"
 #include "OdysseyVectorPathCubic.h"
 
@@ -112,7 +112,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorEllipse : public FOdysseyVectorPathCubic
         virtual void UpdateShape( uint32 iUpdateFlags ) override;
 
     protected :
-        FOdysseyVectorVertexCubic* mCubicVertex[4];
+        FOdysseyVectorVertex* mCubicVertex[4];
         FOdysseyVectorSegmentCubic* mCubicSegment[4];
         double mStrokeWidth;
 

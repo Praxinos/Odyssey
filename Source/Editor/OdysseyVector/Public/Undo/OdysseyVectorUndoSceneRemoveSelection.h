@@ -26,5 +26,4 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoSceneRemoveSelection : public FOdyssey
 
     private:
         std::list<FOdysseyVectorObject*> mRemovedObjectList;
-        FOdysseyVectorScene* mScene;
 };

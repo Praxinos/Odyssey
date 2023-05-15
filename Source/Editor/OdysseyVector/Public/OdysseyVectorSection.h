@@ -4,7 +4,11 @@
 #include <Core/Core.h>
 #include <Image/Block.h>
 #include "OdysseyVectorPoint.h"
-#include "OdysseyVectorCycle.h"
+//#include "OdysseyVectorCycle.h"
+
+class FOdysseyVectorSegment;
+class FOdysseyVectorVertex;
+class FOdysseyVectorCycle;
 
 // TODO: inherit from FOdysseyVectorLink ? answer : no, because links should not have
 // intersection vertices as endpoints as there is no way to know which segments they are on
@@ -15,6 +19,7 @@ class FOdysseyVectorSection
          * @brief default destructor
          */
         ~FOdysseyVectorSection();
+        FOdysseyVectorSection();
 
        /**
          * @brief constructor
@@ -25,6 +30,10 @@ class FOdysseyVectorSection
         FOdysseyVectorSection( FOdysseyVectorSegment* iSegment
                              , FOdysseyVectorVertex* iVertex0
                              , FOdysseyVectorVertex* iVertex1 );
+
+        void Init( FOdysseyVectorSegment* iSegment
+                 , FOdysseyVectorVertex* iVertex0
+                 , FOdysseyVectorVertex* iVertex1 );
 
        /**
          * @brief Get the segment it lies on.
@@ -49,15 +58,11 @@ class FOdysseyVectorSection
        /**
          * @brief Get a vector tangent to this section, starting at this vertex.
          * @param iVertex the vertex
+         * @param iStraight
          * @param iNormalize normalize the vector or not
          * return a vector tangent to this section, starting at this vertex. 
          */
-        ::ULIS::FVec2D GetVectorFromVertex( FOdysseyVectorVertex* iVertex, bool iNormalize );
-
-       /**
-         * @brief Increment the number of cycles connected to this section. 
-         */
-        void IncrementCycleCount();
+        ::ULIS::FVec2D GetVectorFromVertex( FOdysseyVectorVertex* iVertex, bool iStraight, bool iNormalize );
 
        /**
          * @brief Block the section for traversal from the vertex passed as parameter. Used by the GroupPaint class.
@@ -78,14 +83,24 @@ class FOdysseyVectorSection
          */
         bool IsBlocked( FOdysseyVectorVertex* iVertex );
 
+        bool IsLinked();
+        void Link();
+        void Unlink();
+        FOdysseyVectorCycle* GetCycle( uint32 iCycleID );
+        void AddCycle( FOdysseyVectorCycle* iCycle );
+        FOdysseyVectorCycle* GetOtherCycle( FOdysseyVectorCycle* iCycle );
+        ::ULIS::FVec2D* GetBezier();
+
     protected:
         FOdysseyVectorSegment* mSegment;
         FOdysseyVectorVertex* mVertex[2];
         uint32 mFlags;
         uint32 mCycleCount;
+        FOdysseyVectorCycle* mCycle[2]; // there are 2 cycles per section at most. No need for a complicated container.
+        ::ULIS::FVec2D mBezier[4];
 
     private:
         static const uint32 BLOCKVERTEX0 = ( 1 << 0 );
         static const uint32 BLOCKVERTEX1 = ( 1 << 1 );
-
+        static const uint32 LINKED       = ( 1 << 2 );
 };

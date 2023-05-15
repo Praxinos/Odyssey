@@ -34,9 +34,7 @@ UOdysseyTextureEditorVectorPrimitiveDrawingTool::Activate()
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        UOdysseyPainterEditorVectorPrimitiveDrawingTool::Activate( vectorEngine, vectorScene );
-
-        currentVectorLayer->RenderImageChanged(false);
+        UOdysseyPainterEditorVectorPrimitiveDrawingTool::ActivateVector( vectorEngine, vectorScene );
     }
 }
 
@@ -95,6 +93,42 @@ UOdysseyTextureEditorVectorPrimitiveDrawingTool::OnCurrentLayerChanged(UOdysseyL
 }
 
 bool
+UOdysseyTextureEditorVectorPrimitiveDrawingTool::OnKeyDown( const FKey& iKey )
+{
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
+    UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
+    bool ret = false;
+
+    if( currentVectorLayer )
+    {
+        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+
+        ret = UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnKeyDownVector( vectorEngine, vectorScene, iKey );
+    }
+
+    return ret;
+}
+
+bool
+UOdysseyTextureEditorVectorPrimitiveDrawingTool::OnKeyUp( const FKey& iKey )
+{
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
+    UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
+    bool ret = false;
+
+    if( currentVectorLayer )
+    {
+        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+
+        ret = UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnKeyUpVector( vectorEngine, vectorScene, iKey );
+    }
+
+    return ret;
+}
+
+bool
 UOdysseyTextureEditorVectorPrimitiveDrawingTool::OnMouseDown( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
 {
     TSharedPtr<FOdysseyPainterEditorSelectedVectorObjectTab>& vectorObjectTab = GetEditorAs<FOdysseyTextureEditor>()->GetGUI()->GetSelectedVectorObjectTab();
@@ -107,12 +141,7 @@ UOdysseyTextureEditorVectorPrimitiveDrawingTool::OnMouseDown( const FOdysseyPoin
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        ret = UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDown( vectorEngine, vectorScene, iPointInTexture,iKey  );
-
-        currentVectorLayer->RenderImageChanged(false);
-
-        // Update the VectorObjectTab widget
-        vectorObjectTab.Get()->Update( vectorScene );
+        ret = UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDownVector( vectorEngine, vectorScene, iPointInTexture,iKey  );
     }
 
     return ret;
@@ -130,12 +159,7 @@ UOdysseyTextureEditorVectorPrimitiveDrawingTool::OnMouseDrag( const FOdysseyPoin
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDrag( vectorEngine, vectorScene, iPointInTexture );
-
-        currentVectorLayer->RenderImageChanged(true);
-
-        // Update the VectorObjectTab widget
-        vectorObjectTab.Get()->Update( vectorScene );
+        UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDragVector( vectorEngine, vectorScene, iPointInTexture );
     }
 }
 
@@ -147,30 +171,13 @@ UOdysseyTextureEditorVectorPrimitiveDrawingTool::OnMouseUp( const FOdysseyPoint&
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
     bool ret = false;
 
-    // needed for undos
-    GEditor->BeginTransaction(LOCTEXT("PrimitiveDrawingTool", "Draw Ellipse"));
-
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
-        FOdysseyVectorUndo* undo = nullptr;
 
-        ret = UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseUp( vectorEngine, vectorScene, &undo, iPointInTexture, iKey );
-
-        if( undo )
-        {
-            undo->mRefreshDelegate.AddRaw( vectorObjectTab.Get(), &FOdysseyPainterEditorSelectedVectorObjectTab::OnRefresh );
-            undo->mRefreshDelegate.AddUObject( currentVectorLayer, &UOdysseyTextureLayerImageVector::OnRefresh );
-        }
-
-        currentVectorLayer->RenderImageChanged(false);
-
-        // Update the VectorObjectTab widget
-        vectorObjectTab.Get()->Update( vectorScene );
+        ret = UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseUpVector( vectorEngine, vectorScene, iPointInTexture, iKey );
     }
-
-    GEditor->EndTransaction();
 
     return ret;
 }

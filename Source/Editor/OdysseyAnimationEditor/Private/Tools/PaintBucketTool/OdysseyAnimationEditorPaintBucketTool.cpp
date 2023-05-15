@@ -34,7 +34,7 @@ UOdysseyAnimationEditorPaintBucketTool::Activate()
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        UOdysseyPainterEditorPaintBucketTool::Activate( vectorEngine, vectorScene );
+        UOdysseyPainterEditorPaintBucketTool::ActivateVector( vectorEngine, vectorScene );
 
         currentVectorLayer->RenderImageChanged(false);
     }
@@ -136,7 +136,7 @@ UOdysseyAnimationEditorPaintBucketTool::OnMouseDown( const FOdysseyPoint& iPoint
 
     if( currentRasterLayer )
     {
-        ret = UOdysseyPainterEditorPaintBucketTool::OnMouseDown( currentRasterLayer->GetRasterBlock(animation->CurrentFrame)->GetBlock(), iPointInTexture, iKey );
+        ret = UOdysseyPainterEditorPaintBucketTool::OnMouseDownRaster( currentRasterLayer->GetRasterBlock(animation->CurrentFrame)->GetBlock(), iPointInTexture, iKey );
     }
 
     if( currentVectorLayer )
@@ -144,7 +144,7 @@ UOdysseyAnimationEditorPaintBucketTool::OnMouseDown( const FOdysseyPoint& iPoint
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        ret = UOdysseyPainterEditorPaintBucketTool::OnMouseDown( vectorEngine, vectorScene, nullptr, iPointInTexture, iKey );
+        ret = UOdysseyPainterEditorPaintBucketTool::OnMouseDownVector( vectorEngine, vectorScene, iPointInTexture, iKey );
     }
 
     return ret;
@@ -161,7 +161,7 @@ UOdysseyAnimationEditorPaintBucketTool::OnMouseDrag( const FOdysseyPoint& iPoint
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        UOdysseyPainterEditorPaintBucketTool::OnMouseDrag( vectorEngine, vectorScene, iPointInTexture );
+        UOdysseyPainterEditorPaintBucketTool::OnMouseDragVector( vectorEngine, vectorScene, iPointInTexture );
 
         currentVectorLayer->RenderImageChanged(true);
     }
@@ -180,7 +180,7 @@ UOdysseyAnimationEditorPaintBucketTool::OnMouseUp( const FOdysseyPoint& iPointIn
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        ret = UOdysseyPainterEditorPaintBucketTool::OnMouseUp( vectorEngine, vectorScene, nullptr, iPointInTexture, iKey );
+        ret = UOdysseyPainterEditorPaintBucketTool::OnMouseUpVector( vectorEngine, vectorScene, iPointInTexture, iKey );
 
         currentVectorLayer->RenderImageChanged(false);
     }

@@ -10,6 +10,31 @@ FOdysseyVectorPointSample::FOdysseyVectorPointSample( double iX, double iY, doub
 {
 }
 
+FOdysseyVectorPointSample::FOdysseyVectorPointSample( std::vector<FOdysseyVectorPoint*> iPointArray )
+{
+    double averageX = 0.0f;
+    double averageY = 0.0f;
+    double averageRadius = 0.0f;
+    uint32 pointCount = iPointArray.size();
+
+    if( pointCount )
+    {
+        for( uint32 i = 0; i < pointCount; i++ )
+        {
+            averageX += iPointArray[i]->GetX();
+            averageY += iPointArray[i]->GetY();
+            averageRadius += iPointArray[i]->GetRadius();
+        }
+
+        averageX /= pointCount;
+        averageY /= pointCount;
+        averageRadius /= pointCount;
+    }
+
+    Set( averageX, averageY );
+    SetRadius( averageRadius );
+}
+
 void
 FOdysseyVectorPointSample::SetSharp( bool iIsSharp )
 {
@@ -27,13 +52,12 @@ FOdysseyVectorPathBuilder::~FOdysseyVectorPathBuilder()
 }
 
 FOdysseyVectorPathBuilder::FOdysseyVectorPathBuilder()
-    : mCubicPath ( nullptr )
-    , mCumulAngle ( 0.0f )
-    , mPointID( 0 )
+    : mCumulAngle ( 0.0f )
+    , mCubicPath ( nullptr )
     , mCumulAngleLimit ( 1.5708f ) // 90 degrees
-    //, mAngleLimit ( 1.0472f ) // 60 deg
-    , mAngleLimit ( 0.7071f ) // 45 deg
-    , mSmoothLimit ( 0.261799f ) // 15 deg
+    , mPointID( 0 )
+    , mAngleLimit ( 1.0472f ) // 60 deg
+    //, mAngleLimit ( 0.7071f ) // 45 deg
 {
     mObjectParam.Foreground.R = 128;
     mObjectParam.Foreground.G = 128;
@@ -109,7 +133,7 @@ FOdysseyVectorPathBuilder::GetSampleAngle()
 /*
             if( iEnforce )
             {
-                mFinalVertex = static_cast<FOdysseyVectorVertexCubic*>(iPoint);
+                mFinalVertex = static_cast<FOdysseyVectorVertex*>(iPoint);
 
                 finalSampleID = mSampleArray.size() - 1;
                 finalLinkID = mLinkArray.size() - 1;
@@ -154,13 +178,14 @@ FOdysseyVectorPathBuilder::RecordVertex()
 
     if ( ( angle >= mAngleLimit ) || ( mCumulAngle >= mCumulAngleLimit ) )
     {
-        FOdysseyVectorVertexCubic* previousCubicVertex = mVertexArray.back();
+        FOdysseyVectorVertex* previousCubicVertex = mVertexArray.back();
         // use the penultimate sample
         uint32 penultimateSampleIndex = mSampleArray.size() - 2;
         uint32 penultimateSampleID = mSampleArray[penultimateSampleIndex]->GetID();
-        FOdysseyVectorVertexCubic* cubicVertex = FOdysseyVectorVertexCubic::New( mSampleArray[penultimateSampleIndex]->GetX()
-                                                                               , mSampleArray[penultimateSampleIndex]->GetY()
-                                                                               , mSampleArray[penultimateSampleIndex]->GetRadius() );
+        FOdysseyVectorVertex* cubicVertex = new FOdysseyVectorVertex( mCubicPath
+                                                                    , mSampleArray[penultimateSampleIndex]->GetX()
+                                                                    , mSampleArray[penultimateSampleIndex]->GetY()
+                                                                    , mSampleArray[penultimateSampleIndex]->GetRadius() );
 
         mSampleArray[penultimateSampleIndex]->SetSharp( angle >= mAngleLimit );
 
@@ -177,17 +202,18 @@ FOdysseyVectorPathBuilder::RecordVertex()
             uint32 linkID0 =  0;
             uint32 linkID1 =  mLinkBuffer.size() - 2; // penultimate link
 /// TODO: Factorize that part
-            mCubicSegment = FOdysseyVectorSegmentCubic::New( mCubicPath, previousCubicVertex, cubicVertex );
+            mCubicSegment = new FOdysseyVectorSegmentCubic( mCubicPath, previousCubicVertex, cubicVertex );
 
             Shape ( *mCubicSegment
                    , mLinkBuffer[linkID0].GetVector( true )
                    , mLinkBuffer[linkID1].GetVector( true ) );
 
-            Adjust( *mCubicSegment );
-
             mCubicPath->AddSegment( mCubicSegment );
 
             Smooth( mCubicSegment, mSampleArray[0]->IsSharp() );
+
+            AdjustHandle( mCubicSegment, 0, 0.5f, 1 );
+            AdjustHandle( mCubicSegment, 1, 0.5f, 1 );
 
             mCubicSegment->Invalidate();
 
@@ -216,7 +242,7 @@ FOdysseyVectorPathBuilder::RecordSample( double iX, double iY, double iRadius, u
 
     if( dif.Distance() >= 8.0f )
     {
-        FOdysseyVectorPointSample sample = FOdysseyVectorPointSample( iX, iY, iRadius );
+        FOdysseyVectorPointSample sample = FOdysseyVectorPointSample( /*iX, iY, iRadius*/mPointArray ); // average
         uint32 sampleIndex = mSampleBuffer.size();
 
         sample.SetID( iID );
@@ -309,7 +335,7 @@ FOdysseyVectorPathBuilder::ClearSamplesUntil( uint32 iID )
 }
 
 void
-FOdysseyVectorPathBuilder::RecordStart( FOdysseyVectorVertexCubic *iVertex )
+FOdysseyVectorPathBuilder::RecordStart( FOdysseyVectorVertex *iVertex )
 {
     mPointBuffer.push_back( FOdysseyVectorPoint( iVertex->GetX(), iVertex->GetY(), iVertex->GetRadius() ) );
     mPointBuffer[0].SetID( mPointID );
@@ -326,7 +352,7 @@ FOdysseyVectorPathBuilder::RecordStart( FOdysseyVectorVertexCubic *iVertex )
     mPointID++;
 }
 
-FOdysseyVectorVertexCubic*
+FOdysseyVectorVertex*
 FOdysseyVectorPathBuilder::RecordIntermediate( double iX
                                              , double iY
                                              , double iRadius
@@ -360,7 +386,7 @@ FOdysseyVectorPathBuilder::RecordIntermediate( double iX
 }
 
 FOdysseyVectorSegmentCubic*
-FOdysseyVectorPathBuilder::RecordEnd( FOdysseyVectorVertexCubic *iVertex )
+FOdysseyVectorPathBuilder::RecordEnd( FOdysseyVectorVertex *iVertex )
 {
     if( iVertex != mVertexArray.back() )
     {
@@ -371,17 +397,18 @@ FOdysseyVectorPathBuilder::RecordEnd( FOdysseyVectorVertexCubic *iVertex )
             uint32 linkID1 =  mLinkBuffer.size() - 1; // last link
 
         /// TODO: Factorize that part
-            mCubicSegment = FOdysseyVectorSegmentCubic::New( mCubicPath, mVertexArray.back(), iVertex );
+            mCubicSegment = new FOdysseyVectorSegmentCubic( mCubicPath, mVertexArray.back(), iVertex );
 
             Shape ( *mCubicSegment
                    , mLinkBuffer[linkID0].GetVector( true )
                    , mLinkBuffer[linkID1].GetVector( true ) );
 
-            Adjust( *mCubicSegment );
-
             mCubicPath->AddSegment( mCubicSegment );
 
             Smooth( mCubicSegment, mSampleArray[0]->IsSharp() );
+
+            AdjustHandle( mCubicSegment, 0, 0.5f, 1 );
+            AdjustHandle( mCubicSegment, 1, 0.5f, 1 );
 
             mCubicSegment->Invalidate();
 
@@ -474,113 +501,56 @@ FOdysseyVectorPathBuilder::GetSamplePointAtParameter( double iToTalLinkLength, d
  *   A                 B
  *
  */
+
 void
-FOdysseyVectorPathBuilder::Adjust( FOdysseyVectorSegmentCubic& iCubicSegment )
+FOdysseyVectorPathBuilder::AdjustHandle( FOdysseyVectorSegmentCubic* iCubicSegment, uint32 iHandleID, double iCheckAt, int iDepth )
 {
     double totalLinkLength = GetTotalSampleLinkLength();
-    ::ULIS::FVec2D& point0 = iCubicSegment.GetVertex(0)->GetCoords( nullptr );
-    ::ULIS::FVec2D& point1 = iCubicSegment.GetVertex(1)->GetCoords( nullptr );
-    ::ULIS::FVec2D& ctrlPoint0 = iCubicSegment.GetHandle(0)->GetCoords();
-    ::ULIS::FVec2D& ctrlPoint1 = iCubicSegment.GetHandle(1)->GetCoords();
-    ::ULIS::FVec2D expectedPoint0 = CubicBezierPointAtParameter( point0, ctrlPoint0, ctrlPoint1, point1, 0.33f );
-    ::ULIS::FVec2D sampledPoint0 = GetSamplePointAtParameter( totalLinkLength, 0.33f );
-    ::ULIS::FVec2D p0ToExpectedPoint0 = expectedPoint0 - point0;
-    ::ULIS::FVec2D p0ToSampledPoint0 = sampledPoint0 - point0;
-    ::ULIS::FVec2D cubicSegmentVector = iCubicSegment.GetVector( true );
+    FOdysseyVectorHandleSegment* segmentHandle0 = iCubicSegment->GetHandle( 0 );
+    FOdysseyVectorHandleSegment* segmentHandle1 = iCubicSegment->GetHandle( 1 );
+    FOdysseyVectorHandleSegment* segmentHandle = iCubicSegment->GetHandle( iHandleID );
+    FOdysseyVectorVertex* cubicVertex = static_cast<FOdysseyVectorVertex*>( iCubicSegment->GetVertex( iHandleID ) );
+    FOdysseyVectorVertex* cubicVertex0 = static_cast<FOdysseyVectorVertex*>( iCubicSegment->GetVertex(0) );
+    FOdysseyVectorVertex* cubicVertex1 = static_cast<FOdysseyVectorVertex*>( iCubicSegment->GetVertex(1) );
+    ::ULIS::FVec2D& point0 = cubicVertex0->GetCoords();
+    ::ULIS::FVec2D& point1 = cubicVertex1->GetCoords();
+    ::ULIS::FVec2D& ctrlPoint0 = segmentHandle0->GetCoords();
+    ::ULIS::FVec2D& ctrlPoint1 = segmentHandle1->GetCoords();
+    ::ULIS::FVec2D& handlePoint = segmentHandle->GetCoords();
+    ::ULIS::FVec2D expectedPoint = CubicBezierPointAtParameter( point0, ctrlPoint0, ctrlPoint1, point1, iCheckAt );
+    ::ULIS::FVec2D sampledPoint = GetSamplePointAtParameter( totalLinkLength, iCheckAt );
+    ::ULIS::FVec2D& vertexPoint = cubicVertex->GetCoords();
+    ::ULIS::FVec2D vertexPointToExpectedPoint = expectedPoint - vertexPoint;
+    ::ULIS::FVec2D vertexPointToSampledPoint = sampledPoint - vertexPoint;
+    ::ULIS::FVec2D vertexPointToHandlePoint = handlePoint - vertexPoint;
 
-    if ( p0ToExpectedPoint0.DistanceSquared() && p0ToSampledPoint0.DistanceSquared() )
+    if ( vertexPointToExpectedPoint.DistanceSquared() && vertexPointToSampledPoint.DistanceSquared() && vertexPointToHandlePoint.DistanceSquared() )
     {
-        p0ToExpectedPoint0.Normalize();
-        p0ToSampledPoint0.Normalize();
+        ::ULIS::FVec2D direction = vertexPointToHandlePoint;
 
-        double dot = p0ToSampledPoint0.DotProduct( cubicSegmentVector );
-        double angle = acos( ULIS::FMath::Clamp<double>( dot, -1.0f, 1.0f ) );
-        double refDot = p0ToExpectedPoint0.DotProduct ( cubicSegmentVector );
-        double refAngle = acos( ULIS::FMath::Clamp<double>( refDot, -1.0f, 1.0f ) );
+        vertexPointToExpectedPoint.Normalize();
+        vertexPointToSampledPoint.Normalize();
+        vertexPointToHandlePoint.Normalize();
 
-        if ( fabs ( refAngle ) > 0.0001f )
+        double dot0 = vertexPointToHandlePoint.DotProduct( vertexPointToExpectedPoint );
+        double angle0 = acos( ULIS::FMath::Clamp<double>( dot0, -1.0f, 1.0f ) );
+        double dot1 = vertexPointToHandlePoint.DotProduct( vertexPointToSampledPoint );
+        double angle1 = acos( ULIS::FMath::Clamp<double>( dot1, -1.0f, 1.0f ) );
+
+        if ( dot0 )
         {
-            double ratio = angle / refAngle;
+            double ratio = fabs( dot1 / dot0 );
+//UE_LOG(LogTemp, Warning, TEXT("Sample: %f %f"), sampledPoint.x, sampledPoint.y );
+//UE_LOG(LogTemp, Warning, TEXT("Some warning message %f %f %f %f %f"), ratio );
 
-            if( ratio < 1.0f )
-            {
-                ::ULIS::FVec2D ctrlVec = ctrlPoint0 - point0;
+            segmentHandle->Set( vertexPoint.x + ( direction.x * ratio ),
+                                vertexPoint.y + ( direction.y * ratio ) );
 
-                ctrlPoint0.x = point0.x + ( ctrlVec.x * ratio );
-                ctrlPoint0.y = point0.y + ( ctrlVec.y * ratio );
-            }
-        }
-    }
-
-    ::ULIS::FVec2D expectedPoint1 = CubicBezierPointAtParameter( point0, ctrlPoint0, ctrlPoint1, point1, 0.66f );
-    ::ULIS::FVec2D sampledPoint1 = GetSamplePointAtParameter( totalLinkLength, 0.66f );
-    ::ULIS::FVec2D p1ToExpectedPoint1 = expectedPoint1 - point1;
-    ::ULIS::FVec2D p1ToSampledPoint1 = sampledPoint1 - point1;
-
-    if ( p1ToExpectedPoint1.DistanceSquared() && p1ToSampledPoint1.DistanceSquared() )
-    {
-        p1ToExpectedPoint1.Normalize();
-        p1ToSampledPoint1.Normalize();
-
-        double dot = p1ToSampledPoint1.DotProduct( - cubicSegmentVector );
-        double angle = acos( ULIS::FMath::Clamp<double>( dot, -1.0f, 1.0f ) );
-        double refDot = p1ToExpectedPoint1.DotProduct ( - cubicSegmentVector );
-        double refAngle = acos( ULIS::FMath::Clamp<double>( refDot, -1.0f, 1.0f ) );
-
-        if ( fabs ( refAngle ) > 0.0001f )
-        {
-            double ratio = angle / refAngle;
-
-            if ( ratio < 1.0f )
-            {
-                ::ULIS::FVec2D ctrlVec = ctrlPoint1 - point1;
-
-                ctrlPoint1.x = point1.x + ( ctrlVec.x * ratio );
-                ctrlPoint1.y = point1.y + ( ctrlVec.y * ratio );
-            }
+            if( iDepth > 0 )
+                AdjustHandle( iCubicSegment, iHandleID, ( cubicVertex->GetT( iCubicSegment ) + iCheckAt) * 0.5f, iDepth - 1 );
         }
     }
 }
-
-/*
-FOdysseyVectorPathBuilder::SmoothSegment( FOdysseyVectorSegmentCubic* iCubicSegment )
-{
-    FOdysseyVectorVertex vertex0 = iCubicSegment->GetVertex( 0 );
-    FOdysseyVectorVertex vertex1 = iCubicSegment->GetVertex( 1 );
-    FOdysseyVectorSegmentCubic* prevCubicSegment = vertex0->GetOtherSegment( iCubicSegment );
-    FOdysseyVectorSegmentCubic* nextCubicSegment = vertex1->GetOtherSegment( iCubicSegment );
-
-    if ( prevCubicSegment )
-    {
-        ::ULIS::FVec2D prevCubicSegmentVector = prevCubicSegment->GetVectorAtEnd( true );
-        double smoothDot = entryVector.DotProduct( prevCubicSegmentVector );
-        double smoothAngle = acos( ULIS::FMath::Clamp<double>( smoothDot, -1.0f, 1.0f ) );
-
-        if ( fabs(smoothAngle) < mLastCubicAngleLimit )
-        {
-            double length = iCubicSegment->GetStraightDistance();
-
-            iCubicSegment->GetHandle(0)->Set ( vertex0->GetX() + ( prevCubicSegmentVector.x * length * 0.35f )
-                                             , vertex0->GetY() + ( prevCubicSegmentVector.y * length * 0.35f ) );
-        }
-    }
-
-    if ( nextCubicSegment )
-    {
-        ::ULIS::FVec2D nextCubicSegmentVector = nextCubicSegment->GetVectorAtStart( true );
-        double smoothDot = entryVector.DotProduct( nextCubicSegmentVector );
-        double smoothAngle = acos( ULIS::FMath::Clamp<double>( smoothDot, -1.0f, 1.0f ) );
-
-        if ( fabs(smoothAngle) < mLastCubicAngleLimit )
-        {
-            double length = iCubicSegment->GetStraightDistance();
-
-            iCubicSegment->GetHandle(1)->Set ( vertex1->GetX() + ( nextCubicSegmentVector.x * length * 0.35f )
-                                             , vertex1->GetY() + ( nextCubicSegmentVector.y * length * 0.35f ) );
-        }
-    }
-}
-*/
 
 FOdysseyVectorPathCubic* 
 FOdysseyVectorPathBuilder::GetCubicPath()
@@ -592,8 +562,8 @@ void
 FOdysseyVectorPathBuilder::FitSegment( FOdysseyVectorSegmentCubic& iSegment
                                      , std::vector<FOdysseyVectorLink>& iLinkArray )
 {
-    ::ULIS::FVec2D& point0 = iSegment.GetVertex(0)->GetCoords( nullptr );
-    ::ULIS::FVec2D& point1 = iSegment.GetVertex(1)->GetCoords( nullptr );
+    ::ULIS::FVec2D& point0 = iSegment.GetVertex(0)->GetCoords();
+    ::ULIS::FVec2D& point1 = iSegment.GetVertex(1)->GetCoords();
     ::ULIS::FVec2D& ctrlPoint0 = iSegment.GetHandle(0)->GetCoords();
     ::ULIS::FVec2D& ctrlPoint1 = iSegment.GetHandle(1)->GetCoords();
     double sampleLength = 0.0f;
@@ -654,10 +624,10 @@ FOdysseyVectorPathBuilder::DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags )
     BLPath path;
     BLRgba32 strokeColor;
 
-    strokeColor.r = mObjectParam.Foreground.R;
-    strokeColor.g = mObjectParam.Foreground.G;
-    strokeColor.b = mObjectParam.Foreground.B;
-    strokeColor.a = mObjectParam.Foreground.A;
+    strokeColor.setR( mObjectParam.Foreground.R );
+    strokeColor.setG( mObjectParam.Foreground.G );
+    strokeColor.setB( mObjectParam.Foreground.B );
+    strokeColor.setA( mObjectParam.Foreground.A );
 
     blctx->setCompOp(BL_COMP_OP_SRC_COPY);
     /*iBLContext.setFillStyle(BLRgba32(0xFFFFFFFF));
@@ -693,15 +663,14 @@ FOdysseyVectorPathBuilder::DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags )
         }
     }
 
-/*
+    blctx->save();
+    blctx->resetMatrix();
     blctx->setFillStyle(BLRgba32(0xFFFF00FF));
-
-
-    for( std::list<FOdysseyVectorPoint*>::iterator it = mSamplePointList.begin(); it != mSamplePointList.end(); ++it )
+    for( uint32 i = 0; i < mSampleArray.size() - 1; i++ )
     {
-        FOdysseyVectorPoint *samplePoint = (*it);
+        BLPoint pt = mWorldMatrix.mapPoint( mSampleArray[i]->GetX(), mSampleArray[i]->GetY() );
 
-        blctx->fillRect( samplePoint->GetX() - 3, samplePoint->GetY() - 3, 6, 6  );
+        blctx->fillRect( pt.x - 3, pt.y - 3, 6, 6  );
     }
-*/
+    blctx->restore();
 }

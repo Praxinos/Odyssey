@@ -1,65 +1,89 @@
 #include "OdysseyVectorVertexIntersection.h"
+#include "OdysseyVectorIntersection.h"
 #include "OdysseyVectorPath.h"
 
 FOdysseyVectorVertexIntersection::~FOdysseyVectorVertexIntersection()
 {
 }
 
-FOdysseyVectorVertexIntersection::FOdysseyVectorVertexIntersection()
-    : FOdysseyVectorVertex ()
+FOdysseyVectorVertexIntersection::FOdysseyVectorVertexIntersection( FOdysseyVectorPath* iPath
+                                                                  , bool iSelfIntersects
+                                                                  , double iX
+                                                                  , double iY
+                                                                  , double iT )
+    : FOdysseyVectorVertex ( iPath, iX, iY, 0.0f )
 {
+    mT = iT;
+    mSelfIntersects = iSelfIntersects;
+}
+
+bool 
+FOdysseyVectorVertexIntersection::SelfIntersects()
+{
+    return mSelfIntersects;
+}
+
+uint32
+FOdysseyVectorVertexIntersection::GetSectionCount()
+{
+    return GetSectionList().size() + GetPartner()->GetSectionList().size();
+}
+
+void
+FOdysseyVectorVertexIntersection::SetIntersection( FOdysseyVectorIntersection* iIntersection )
+{
+    mIntersection = iIntersection;
+}
+
+FOdysseyVectorIntersection*
+FOdysseyVectorVertexIntersection::GetIntersection()
+{
+    return mIntersection;
 }
 
 double
 FOdysseyVectorVertexIntersection::GetT( FOdysseyVectorSegment* iSegment )
 {
-    if ( auto search = mTMap.find(iSegment); search != mTMap.end())
-        return search->second.t;
-    else
-        return 0.0f;
+    return mT;
 }
 
-::ULIS::FVec2D
-FOdysseyVectorVertexIntersection::GetPosition( FOdysseyVectorSegment* iSegment )
+FOdysseyVectorVertexIntersection*
+FOdysseyVectorVertexIntersection::GetPartner()
 {
-    if ( auto search = mTMap.find(iSegment); search != mTMap.end())
-        return search->second.position;
-    else
-        return { 0.0f, 0.0f };
-}
-
-::ULIS::FVec2D&
-FOdysseyVectorVertexIntersection::GetCoords( FOdysseyVectorSegment* iSegment )
-{
-    if ( auto search = mTMap.find(iSegment); search != mTMap.end())
-        return search->second.position;
-    else
-        return mCoords;
+    return mIntersection->GetOtherVertex( this );
 }
 
 void
-FOdysseyVectorVertexIntersection::AddSegment( FOdysseyVectorSegment* iSegment, double t )
+FOdysseyVectorVertexIntersection::BuildExplorationPairs( std::vector<FExplorationPair>& iExplorationPairsArray )
 {
-    if( iSegment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
+    for( std::list<FOdysseyVectorSection*>::iterator it = mSectionList.begin(); it != mSectionList.end(); ++it )
     {
-        FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(iSegment);
-        ::ULIS::FVec2D& point0 = cubicSegment->GetVertex(0)->GetCoords( nullptr );
-        ::ULIS::FVec2D& point1 = cubicSegment->GetVertex(1)->GetCoords( nullptr );
-        ::ULIS::FVec2D& ctrlPoint0 = cubicSegment->GetHandle(0)->GetCoords();
-        ::ULIS::FVec2D& ctrlPoint1 = cubicSegment->GetHandle(1)->GetCoords();
-        ::ULIS::FVec2D intersectAt = ::ULIS::CubicBezierPointAtParameter<::ULIS::FVec2D>( point0
-                                                                                        , ctrlPoint0
-                                                                                        , ctrlPoint1
-                                                                                        , point1
-                                                                                        , t );
+        FOdysseyVectorSection* returnSection = static_cast<FOdysseyVectorSection*>(*it);
+        FOdysseyVectorVertexIntersection* partnerVertex = GetPartner();
+        FOdysseyVectorSection* departSection = GetCycleNextSection( returnSection, 1.0f );
 
-        FIntersection intersect;
-
-        intersect.position = intersectAt;
-        intersect.t        = t;
-
-        FOdysseyVectorVertex::AddSegment( cubicSegment, t );
-
-        mTMap.insert( std::make_pair( cubicSegment, intersect ) );
+        iExplorationPairsArray.push_back( FExplorationPair( returnSection, partnerVertex, departSection ) );
     }
+}
+
+FOdysseyVectorSection*
+FOdysseyVectorVertexIntersection::GetCycleNextSection( FOdysseyVectorSection* iLastSection, double iOrientation )
+{
+    ::ULIS::FVec2D lastSectionVector = -iLastSection->GetVectorFromVertex( this, false, false );
+    FOdysseyVectorVertexIntersection* partnerVertex = GetPartner();
+    std::list<FOdysseyVectorSection*>& sectionList = partnerVertex->GetSectionList();
+
+    for( std::list<FOdysseyVectorSection*>::iterator it = sectionList.begin(); it != sectionList.end(); ++it )
+    {
+        FOdysseyVectorSection* section = static_cast<FOdysseyVectorSection*>(*it);
+        ::ULIS::FVec2D sectionVector = section->GetVectorFromVertex( partnerVertex, false, false );
+
+//UE_LOG(LogTemp, Warning, TEXT("cross:%f"), FOdysseyVector::Cross2D( lastSectionVector, sectionVector ) );
+        if( ( FOdysseyVector::Cross2D( lastSectionVector, sectionVector ) * iOrientation > 0.0f ) )
+        {
+            return section;
+        }
+    }
+
+    return /*GetOtherSection( iLastSection )*/nullptr;
 }

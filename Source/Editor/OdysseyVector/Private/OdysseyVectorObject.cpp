@@ -13,7 +13,7 @@ FOdysseyVectorObject::FOdysseyVectorObject()
     , mIsSelected( false )
     , mIsInvalidated( false )
     , mDependsOnChildren( false )
-    , mFillBucket( *this, 0.0f, 0.0f )
+    , mFillBucket( *this, 0.0f, 0.0f, false )
 {
     mLocalMatrix.reset();
     mWorldMatrix.reset();
@@ -133,17 +133,17 @@ FOdysseyVectorObject::GetTransform( double& oTranslationX
 }
 
 void
-FOdysseyVectorObject::SetTransform( double oTranslationX
-                                  , double oTranslationY
-                                  , double oRotation
-                                  , double oScalingX
-                                  , double oScalingY )
+FOdysseyVectorObject::SetTransform( double iTranslationX
+                                  , double iTranslationY
+                                  , double iRotation
+                                  , double iScalingX
+                                  , double iScalingY )
 {
-    mObjectParam.TranslationX = oTranslationX;
-    mObjectParam.TranslationY = oTranslationY;
-    mObjectParam.Rotation = oRotation;
-    mObjectParam.ScalingX = oScalingX;
-    mObjectParam.ScalingY = oScalingY;
+    mObjectParam.TranslationX = iTranslationX;
+    mObjectParam.TranslationY = iTranslationY;
+    mObjectParam.Rotation = iRotation;
+    mObjectParam.ScalingX = iScalingX;
+    mObjectParam.ScalingY = iScalingY;
 }
 
 void
@@ -169,11 +169,10 @@ FOdysseyVectorObject::Copy()
         for( std::list<FOdysseyVectorObject*>::iterator it = mChildrenList.begin(); it != mChildrenList.end(); ++it )
         {
             FOdysseyVectorObject *child = (*it);
+            FOdysseyVectorObject *childCopy = child->Copy() ;
 
-            objectCopy->AppendChild( child->Copy() );
+            objectCopy->AppendChild( childCopy );
         }
-
-        objectCopy->Invalidate();
     }
 
     return objectCopy;
@@ -259,6 +258,7 @@ FOdysseyVectorObject::UpdateMatrix( bool iRunTransformCallback )
         blctx->restore();
     }
 
+    //TODO: design issue. there will be a call on parent's callback when parent matrix is updated. Need to fix that.
     if( iRunTransformCallback )
     {
         if( this->GetParent() )
@@ -594,7 +594,7 @@ FOdysseyVectorObject::AddChild( FOdysseyVectorObject* iChild, bool iPrepend )
         mChildrenList.push_back( iChild );
     }
 
-    Invalidate();
+    iChild->Invalidate();
 }
 
 void
@@ -603,6 +603,7 @@ FOdysseyVectorObject::RemoveChild( FOdysseyVectorObject* iChild )
     //iChild->mParent = nullptr;
 
     mChildrenList.remove(iChild);
+    mInvalidatedChildrenList.remove(iChild);
 
     Invalidate();
 }

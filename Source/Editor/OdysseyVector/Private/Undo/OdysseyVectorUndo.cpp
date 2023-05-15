@@ -4,8 +4,9 @@ FOdysseyVectorUndo::~FOdysseyVectorUndo()
 {
 }
 
-FOdysseyVectorUndo::FOdysseyVectorUndo()
+FOdysseyVectorUndo::FOdysseyVectorUndo( FOdysseyVectorScene *iScene )
     : mApplied( true )
+    , mScene( iScene )
 {
 }
 

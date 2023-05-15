@@ -8,45 +8,88 @@ FOdysseyVectorUndoObjectAdd::~FOdysseyVectorUndoObjectAdd()
     }
     else
     {
-        delete mObject;
+        for( int i = 0; i < mObjectArray.size(); i++ )
+        {
+            delete mObjectArray[i];
+        }
     }
 }
 
-FOdysseyVectorUndoObjectAdd::FOdysseyVectorUndoObjectAdd( FOdysseyVectorObject* iParent, FOdysseyVectorObject* iObject )
-    : FOdysseyVectorUndo()
-    , mParent( iParent )
-    , mObject( iObject )
+FOdysseyVectorUndoObjectAdd::FOdysseyVectorUndoObjectAdd( FOdysseyVectorScene* iScene
+                                                        , FOdysseyVectorObject* iObject )
+    : FOdysseyVectorUndo( iScene )
 {
+    mFormerParentArray.push_back( iObject->GetParent() );
+    mObjectArray.push_back( iObject );
+}
+
+FOdysseyVectorUndoObjectAdd::FOdysseyVectorUndoObjectAdd( FOdysseyVectorScene* iScene
+                                                        , std::list<FOdysseyVectorObject*>& iObjectList )
+    : FOdysseyVectorUndo( iScene )
+{
+    for( std::list<FOdysseyVectorObject*>::iterator it = iObjectList.begin(); it != iObjectList.end(); ++it )
+    {
+        FOdysseyVectorObject* object = static_cast<FOdysseyVectorObject*>(*it);
+
+        mFormerParentArray.push_back( object->GetParent() );
+        mObjectArray.push_back( object );
+    }
 }
 
 void
 FOdysseyVectorUndoObjectAdd::Apply( UObject* iIgnored )
 {
-    FOdysseyVectorScene* scene = mParent->GetScene();
     // call method from base class
     FOdysseyVectorUndo::Apply( iIgnored );
 
-    mParent->AppendChild( mObject );
+    for( int i = 0; i < mObjectArray.size(); i++ )
+    {
+        FOdysseyVectorObject* currentParent = mObjectArray[i]->GetParent();
 
-    scene->Select( mObject );
+        if( currentParent )
+        {
+            mFormerParentArray[i]->TransferChild( mObjectArray[i] );
+        }
+        else
+        {
+            mFormerParentArray[i]->AppendChild( mObjectArray[i] );
+        }
 
-    // call callbacks if any (for refreshing GUI e.g)
-    mRefreshDelegate.Broadcast( scene );
+        mFormerParentArray[i] = currentParent;
+    }
+
+    // update invalidated objects and call callbacks if any (for refreshing GUI e.g)
+    mScene->Update(0);
 }
 
 void
 FOdysseyVectorUndoObjectAdd::Revert( UObject* iIgnored )
 {
-    FOdysseyVectorScene* scene = mParent->GetScene();
     // call method from base class
     FOdysseyVectorUndo::Revert( iIgnored );
 
-    mParent->RemoveChild( mObject );
+    for( int i = 0; i < mObjectArray.size(); i++ )
+    {
+        FOdysseyVectorObject* currentParent = mObjectArray[i]->GetParent();
 
-    scene->ClearSelection();
+        if( mFormerParentArray[i] )
+        {
+            mFormerParentArray[i]->TransferChild( mObjectArray[i] );
+        }
+        else
+        {
+            currentParent->RemoveChild( mObjectArray[i] );
 
-    // call callbacks if any (for refreshing GUI e.g)
-    mRefreshDelegate.Broadcast( scene );
+            mObjectArray[i]->SetParent( nullptr );
+        }
+
+        mFormerParentArray[i] = currentParent;
+    }
+
+    mScene->ClearSelection();
+
+    // update invalidated objects and call callbacks if any (for refreshing GUI e.g)
+    mScene->Update(0);
 }
 
 /** Describes this change (for debugging) */

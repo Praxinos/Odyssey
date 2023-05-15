@@ -34,9 +34,7 @@ UOdysseyTextureEditorVectorPathEditTool::Activate()
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        UOdysseyPainterEditorVectorPathEditTool::Activate( vectorEngine, vectorScene );
-
-        currentVectorLayer->RenderImageChanged(false);
+        UOdysseyPainterEditorVectorPathEditTool::ActivateVector( vectorEngine, vectorScene );
     }
 }
 
@@ -106,9 +104,7 @@ UOdysseyTextureEditorVectorPathEditTool::OnKeyDown( const FKey& iKey )
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        ret = UOdysseyPainterEditorVectorPathEditTool::OnKeyDown( vectorEngine, vectorScene, iKey  );
-
-        currentVectorLayer->RenderImageChanged(false);
+        ret = UOdysseyPainterEditorVectorPathEditTool::OnKeyDownVector( vectorEngine, vectorScene, iKey  );
     }
 
     return ret;
@@ -126,9 +122,7 @@ UOdysseyTextureEditorVectorPathEditTool::OnKeyUp( const FKey& iKey )
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        ret = UOdysseyPainterEditorVectorPathEditTool::OnKeyUp( vectorEngine, vectorScene, iKey  );
-
-        currentVectorLayer->RenderImageChanged(false);
+        ret = UOdysseyPainterEditorVectorPathEditTool::OnKeyUpVector( vectorEngine, vectorScene, iKey  );
     }
 
     return ret;
@@ -141,24 +135,12 @@ UOdysseyTextureEditorVectorPathEditTool::OnMouseDown( const FOdysseyPoint& iPoin
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
     bool ret = false;
 
-    // needed for undos
-    GEditor->BeginTransaction(LOCTEXT("PathEditTool", "Edit path"));
-
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
-        FOdysseyVectorUndo* undo = nullptr;
 
-        ret = UOdysseyPainterEditorVectorPathEditTool::OnMouseDown( vectorEngine, vectorScene, &undo, iPointInTexture,iKey  );
-
-        if( undo )
-        {
-            // All the delegates for undos are added here for easier maintainability
-            undo->mRefreshDelegate.AddUObject( currentVectorLayer, &UOdysseyTextureLayerImageVector::OnRefresh );
-        }
-
-        currentVectorLayer->RenderImageChanged(false);
+        ret = UOdysseyPainterEditorVectorPathEditTool::OnMouseDownVector( vectorEngine, vectorScene, iPointInTexture,iKey  );
     }
 
     GEditor->EndTransaction();
@@ -177,9 +159,7 @@ UOdysseyTextureEditorVectorPathEditTool::OnMouseHover( const FOdysseyPoint& iPoi
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        UOdysseyPainterEditorVectorPathEditTool::OnMouseHover( vectorEngine, vectorScene, iPointInTexture );
-
-        currentVectorLayer->RenderImageChanged(true);
+        UOdysseyPainterEditorVectorPathEditTool::OnMouseHoverVector( vectorEngine, vectorScene, iPointInTexture );
     }
 }
 
@@ -194,9 +174,7 @@ UOdysseyTextureEditorVectorPathEditTool::OnMouseDrag( const FOdysseyPoint& iPoin
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        UOdysseyPainterEditorVectorPathEditTool::OnMouseDrag( vectorEngine, vectorScene, iPointInTexture );
-
-        currentVectorLayer->RenderImageChanged(true);
+        UOdysseyPainterEditorVectorPathEditTool::OnMouseDragVector( vectorEngine, vectorScene, iPointInTexture );
     }
 }
 
@@ -212,9 +190,7 @@ UOdysseyTextureEditorVectorPathEditTool::OnMouseUp( const FOdysseyPoint& iPointI
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        ret = UOdysseyPainterEditorVectorPathEditTool::OnMouseUp( vectorEngine, vectorScene, iPointInTexture, iKey );
-
-        currentVectorLayer->RenderImageChanged(false);
+        ret = UOdysseyPainterEditorVectorPathEditTool::OnMouseUpVector( vectorEngine, vectorScene, iPointInTexture, iKey );
     }
 
     return ret;

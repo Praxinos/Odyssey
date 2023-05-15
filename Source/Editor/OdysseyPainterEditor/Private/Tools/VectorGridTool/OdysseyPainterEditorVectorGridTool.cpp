@@ -3,6 +3,8 @@
 
 #include "Tools/VectorGridTool/OdysseyPainterEditorVectorGridTool.h"
 
+#define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorGridTool"
+
 #ifndef M_PI
 #define M_PI 3.14159265358979323846L
 #endif
@@ -14,10 +16,10 @@ UOdysseyPainterEditorVectorGridTool::~UOdysseyPainterEditorVectorGridTool()
 }
 
 UOdysseyPainterEditorVectorGridTool::UOdysseyPainterEditorVectorGridTool()
-    : DivisionsX( 4 )
+    : mMultipleSelectionMode( false )
+    , DivisionsX( 4 )
     , DivisionsY( 4 )
     , PickingRadius( 10.0f )
-    , mMultipleSelectionMode( false )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Grid64");
 }
@@ -26,8 +28,8 @@ UOdysseyPainterEditorVectorGridTool::UOdysseyPainterEditorVectorGridTool()
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
 void
-UOdysseyPainterEditorVectorGridTool::Activate( FOdysseyVectorEngine* iEngine
-                                             , FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorGridTool::ActivateVector( FOdysseyVectorEngine* iEngine
+                                                   , FOdysseyVectorScene* iScene )
 {
     mGridHUD.MakeGrid( iScene, DivisionsX, DivisionsY );
     mGridHUD.Export( mPointArray );
@@ -36,22 +38,25 @@ UOdysseyPainterEditorVectorGridTool::Activate( FOdysseyVectorEngine* iEngine
 
     iEngine->ClearHUD( );
     iEngine->AddHUD( &mGridHUD );
+
+    iScene->Update( 0 ); // refresh vector scene and GUI widgets via delegates.
 }
 
 bool
-UOdysseyPainterEditorVectorGridTool::OnMouseDown( FOdysseyVectorEngine* iEngine
-                                                , FOdysseyVectorScene* iScene
-                                                , FOdysseyVectorUndo** iUndo
-                                                , const FOdysseyPoint& iPointInTexture
-                                                , const FKey& iKey )
+UOdysseyPainterEditorVectorGridTool::OnMouseDownVector( FOdysseyVectorEngine* iEngine
+                                                      , FOdysseyVectorScene* iScene
+                                                      , const FOdysseyPoint& iPointInTexture
+                                                      , const FKey& iKey )
 {
-    // BeginTransaction() must be called for GUndo to have a value. Please do it in the caller function.
-    if( iUndo && GUndo )
+    // needed for valid GUndo pointer
+    GEditor->BeginTransaction(LOCTEXT("VectorGridTool","Vector Grid Tool"));
+    if( GUndo )
     {
-        (*iUndo) = new FOdysseyVectorUndoPointPosition( iScene, mPointArray );
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoPointPosition( iScene, mPointArray );
 
-        GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(*iUndo) );
+        GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
     }
+    GEditor->EndTransaction();
 
     for( int i = 0; i < iPointInTexture.keysDown.Num(); i++ )
     {
@@ -80,13 +85,15 @@ UOdysseyPainterEditorVectorGridTool::OnMouseDown( FOdysseyVectorEngine* iEngine
         }
     }
 
+    iScene->Update( 0 ); // refresh vector scene and GUI widgets via delegates.
+
     return true;
 }
 
 void
-UOdysseyPainterEditorVectorGridTool::OnMouseDrag( FOdysseyVectorEngine* iEngine
-                                                , FOdysseyVectorScene* iScene
-                                                , const FOdysseyPoint& iPointInTexture )
+UOdysseyPainterEditorVectorGridTool::OnMouseDragVector( FOdysseyVectorEngine* iEngine
+                                                      , FOdysseyVectorScene* iScene
+                                                      , const FOdysseyPoint& iPointInTexture )
 {
     if( mMultipleSelectionMode == true )
     {
@@ -108,16 +115,17 @@ UOdysseyPainterEditorVectorGridTool::OnMouseDrag( FOdysseyVectorEngine* iEngine
 
             mGridHUD.Deform();
 
+            // refresh vector scene and GUI widgets via delegates.
             iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES | FOdysseyVectorObject::KEEPINVALIDATED );
         }
     }
 }
 
 bool
-UOdysseyPainterEditorVectorGridTool::OnMouseUp( FOdysseyVectorEngine* iEngine
-                                              , FOdysseyVectorScene* iScene
-                                              , const FOdysseyPoint& iPointInTexture
-                                              , const FKey& iKey )
+UOdysseyPainterEditorVectorGridTool::OnMouseUpVector( FOdysseyVectorEngine* iEngine
+                                                    , FOdysseyVectorScene* iScene
+                                                    , const FOdysseyPoint& iPointInTexture
+                                                    , const FKey& iKey )
 {
     if( mMultipleSelectionMode == true )
     {
@@ -126,7 +134,7 @@ UOdysseyPainterEditorVectorGridTool::OnMouseUp( FOdysseyVectorEngine* iEngine
         mGridHUD.EndSelectionRectangle( mGridNodeArray );
     }
 
-    iScene->Update( 0 );
+    iScene->Update( 0 ); // refresh vector scene and GUI widgets via delegates.
 
     mMultipleSelectionMode = false;
 
@@ -140,9 +148,11 @@ UOdysseyPainterEditorVectorGridTool::Commit()
 }
 
 void
-UOdysseyPainterEditorVectorGridTool::PropertyChanged( FOdysseyVectorEngine* iEngine
-                                                    , FOdysseyVectorScene* iScene
-                                                    , const FName& iPropertyName )
+UOdysseyPainterEditorVectorGridTool::PropertyChangedVector( FOdysseyVectorEngine* iEngine
+                                                          , FOdysseyVectorScene* iScene
+                                                          , const FName& iPropertyName )
 {
     mGridHUD.MakeGrid( iScene, DivisionsX, DivisionsY );
 }
+
+#undef LOCTEXT_NAMESPACE

@@ -3,6 +3,8 @@
 
 #include "Tools/VectorScenePanTool/OdysseyPainterEditorVectorScenePanTool.h"
 
+#define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorScenePanTool"
+
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
 UOdysseyPainterEditorVectorScenePanTool::~UOdysseyPainterEditorVectorScenePanTool()
@@ -18,47 +20,56 @@ UOdysseyPainterEditorVectorScenePanTool::UOdysseyPainterEditorVectorScenePanTool
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
 void
-UOdysseyPainterEditorVectorScenePanTool::Activate( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorScenePanTool::ActivateVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
     iEngine->ClearHUD();
+
+    iScene->Update( 0 ); // update vector scene and GUI widgets via delegates.
 }
 
 bool
-UOdysseyPainterEditorVectorScenePanTool::OnMouseDown( FOdysseyVectorEngine* iEngine
-                                                    , FOdysseyVectorScene* iScene
-                                                    , FOdysseyVectorUndo** iUndo
-                                                    , const FOdysseyPoint& iPointInTexture
-                                                    , const FKey& iKey )
+UOdysseyPainterEditorVectorScenePanTool::OnMouseDownVector( FOdysseyVectorEngine* iEngine
+                                                          , FOdysseyVectorScene* iScene
+                                                          , const FOdysseyPoint& iPointInTexture
+                                                          , const FKey& iKey )
 {
-    // BeginTransaction() must be called for GUndo to have a value. Please do it in the caller function.
-    if( iUndo && GUndo )
+    // needed for valid GUndo pointer
+    GEditor->BeginTransaction(LOCTEXT("VectorScenePanTool","Vector Scene Pan Tool"));
+    if( GUndo )
     {
         // save selected object translation/rotation/scaling before transform
-        (*iUndo) = new FOdysseyVectorUndoObjectTransform( iScene, iScene );
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoObjectTransform( iScene, iScene );
 
-        GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(*iUndo) );
+        GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
     }
+    GEditor->EndTransaction();
+
+    iScene->Update( 0 ); // update vector scene and GUI widgets via delegates.
 
     return true;
 }
 
 void
-UOdysseyPainterEditorVectorScenePanTool::OnMouseDrag( FOdysseyVectorEngine* iEngine
-                                                    , FOdysseyVectorScene* iScene
-                                                    , const FOdysseyPoint& iPointInTexture )
+UOdysseyPainterEditorVectorScenePanTool::OnMouseDragVector( FOdysseyVectorEngine* iEngine
+                                                          , FOdysseyVectorScene* iScene
+                                                          , const FOdysseyPoint& iPointInTexture )
 {
     iScene->Translate( iScene->GetTranslationX() + iPointInTexture.deltaPosition.X
                      , iScene->GetTranslationY() + iPointInTexture.deltaPosition.Y );
 
     iScene->UpdateMatrix();
+
+    iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES ); // update vector scene and GUI widgets via delegates.
 }
 
 bool
-UOdysseyPainterEditorVectorScenePanTool::OnMouseUp( FOdysseyVectorEngine* iEngine
-                                                  , FOdysseyVectorScene* iScene
-                                                  , const FOdysseyPoint& iPointInTexture
-                                                  , const FKey& iKey )
+UOdysseyPainterEditorVectorScenePanTool::OnMouseUpVector( FOdysseyVectorEngine* iEngine
+                                                        , FOdysseyVectorScene* iScene
+                                                        , const FOdysseyPoint& iPointInTexture
+                                                        , const FKey& iKey )
 {
+    iScene->Update( 0 ); // update vector scene and GUI widgets via delegates.
+
     return true;
 }
 
@@ -67,3 +78,5 @@ UOdysseyPainterEditorVectorScenePanTool::Commit()
 {
 
 }
+
+#undef LOCTEXT_NAMESPACE

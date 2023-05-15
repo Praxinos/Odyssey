@@ -8,6 +8,7 @@
 #include "OdysseyVectorSection.h"
 #include "OdysseyVectorLink.h"
 
+class FOdysseyVectorObject;
 class FOdysseyVectorPath;
 
 class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
@@ -17,36 +18,43 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
         virtual uint32 GetClass() { return mStaticClass; };
 
        /**
-         * @brief Static function to allocate a new segment. Note: this is the proper way to allocate a new segment as we don't
-         * use the constructor to set parameters so that this can be derived from an UOBJECT if needed in future devs. Indeed,
-         * UOBJECTs have empty constructors.
+         * @brief function to allocate a new segment.
          * @param iPath the path this segment belongs to
          * @param iVertex0
          * @param iVertex1
          * @return a pointer to the newly created segment
          */
-        static FOdysseyVectorSegment* New( FOdysseyVectorPath* iPath
-                                         , FOdysseyVectorVertex* iVertex0
-                                         , FOdysseyVectorVertex* iVertex1 );
+        FOdysseyVectorSegment( FOdysseyVectorPath* iPath
+                             , FOdysseyVectorVertex* iVertex0
+                             , FOdysseyVectorVertex* iVertex1 );
 
-        virtual ~FOdysseyVectorSegment();
         FOdysseyVectorSegment();
 
-       /**
-         * @brief Init a segment.
-         * @param iPath the path this segment belongs to
-         * @param iVertex0
-         * @param iVertex1
-         */
-        void Init( FOdysseyVectorPath* iPath
-                 , FOdysseyVectorVertex* iVertex0
-                 , FOdysseyVectorVertex* iVertex1 );
+        virtual ~FOdysseyVectorSegment();
+
+        void SetID( uint32 iID );
+
+        uint32 GetID();
+
+        void SetPaintingCode( uint32 iPaintingCode );
+
+        uint32 GetPaintingCode();
+
+        void Link();
+        void Unlink();
 
        /**
          * @brief Draw the segment
          * @param iRoi the region-of-interest
          */
         virtual void Draw( ::ULIS::FRectD &iRoi );
+
+        virtual void DrawStructure( FOdysseyVectorObject* iParentObject, ::ULIS::FRectD &iRoi, bool iWorld ){};
+
+        uint32 GetIntersectionVertexCount();
+
+        void GetIntersectionVertices( std::vector<FOdysseyVectorVertex*>& oVertexArray );
+        void GetAllVertices( std::vector<FOdysseyVectorVertex*>& oVertexArray );
 
        /**
          * @brief Test whether or not this segment is close to the coordinates passed as parameter
@@ -66,12 +74,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
          * @return A reference to the list of intersection vertices
          */
         std::list<FOdysseyVectorVertexIntersection*>& GetIntersectionVertexList();
-
-       /**
-         * @brief Check whether or not the intersection vertex passed as parameter belongs to this segment
-         * @return true or false
-         */
-        bool HasIntersectionVertex( FOdysseyVectorVertexIntersection& mIntersectionVertex );
 
        /**
          * @brief Get a pointer to the path this segment belongs to
@@ -113,35 +115,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
         void ClearIntersections();
 
        /**
-         * @brief Get the section that matches parameter t.
-         * @param t must be between 0.0 and 1.0.
-         * @return a pointer to the requested section.
-         */
-        FOdysseyVectorSection* GetSection ( double t );
-
-       /**
-         * @brief Get the list of sections on this segment.
-         * @return a reference to the list of sections.
-         */
-        std::list<FOdysseyVectorSection*>& GetSectionList();
-
-       /**
          * @brief Add an intersection point. This automatically creates the attached sections.
          * @param iIntersectionVertex the intersection vertex
          */
         void AddIntersection ( FOdysseyVectorVertexIntersection* iIntersectionVertex );
-
-       /**
-         * @brief Delete a section. Also frees the section.
-         * @param iSection the section to delete.
-         */
-        void DeleteSection ( FOdysseyVectorSection* iSection );
-
-       /**
-         * @brief Add a section.
-         * @param iSection the section to add.
-         */
-        void AddSection ( FOdysseyVectorSection* iSection );
 
        /**
          * @brief Get the segment's bounding box.
@@ -166,12 +143,20 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
         FOdysseyVectorVertex*
         GetOtherVertex( FOdysseyVectorVertex* iVertex );
 
+        virtual uint32 Intersect( FOdysseyVectorSegment* iOther
+                                , double iTolerance
+                                , std::vector<FOdysseyVectorIntersection*>& iIntersectionArray ){ return 0; };
+
+        virtual ::ULIS::FVec2D GetVectorFromVertex( FOdysseyVectorVertex* iVertex, bool iNormalize );
+        void BuildExplorationPairs( std::vector<FExplorationPair>& iExplorationPairsArray );
+
     protected:
         std::list<FOdysseyVectorVertexIntersection*> mIntersectionVertexList;
-        std::list<FOdysseyVectorSection*> mSectionList;
         FOdysseyVectorPath* mPath;
         ::ULIS::FRectD mBBox;
         bool mIsInvalidated;
+        uint32 mID;
+        uint32 mPaintingCode; // used by group paint as a boolean without needing to reinitialize its value
 
     private:
         static const uint32 mStaticClass = 0x45c58ef1; // value is crc32 FOdysseyVectorSegment

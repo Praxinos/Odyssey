@@ -7,16 +7,13 @@
 #include <blend2d.h>
 #include <Core/Core.h>
 #include <Image/Block.h>
+#include "OdysseyVectorScene.h"
 
 class ODYSSEYVECTOR_API FOdysseyVectorUndo : public FCommandChange
 {
     public:
-        DECLARE_MULTICAST_DELEGATE_OneParam(FRefreshDelegate,FOdysseyVectorScene*)
-        FRefreshDelegate mRefreshDelegate;
-
-    public:
         ~FOdysseyVectorUndo();
-        FOdysseyVectorUndo();
+        FOdysseyVectorUndo( FOdysseyVectorScene* iScene );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;
@@ -29,4 +26,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndo : public FCommandChange
 
     protected:
         bool mApplied;
+        FOdysseyVectorScene* mScene;
 };

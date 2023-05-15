@@ -1,9 +1,10 @@
 #include "OdysseyVectorBucket.h"
 
 #define BUCKETRADIUS   10
-#define CROSSRADIUS     5
+#define CROSSRADIUS     6
 #define HANDLERADIUS    8
 #define HANDLEDISTANCE 40.0f
+#define PELLETRADIUS    4
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846L
@@ -14,7 +15,11 @@ FOdysseyVectorBucket::~FOdysseyVectorBucket()
 }
 
 static void
-MakeRects( double iWorldX, double iWorldY, ::ULIS::FRectD& oBucketRect, ::ULIS::FRectD& oCrossRect )
+MakeRects( double iWorldX
+         , double iWorldY
+         , ::ULIS::FRectD& oBucketRect
+         , ::ULIS::FRectD& oCrossRect
+         , ::ULIS::FRectD& oPropagateRect )
 {
     oBucketRect.x = iWorldX - BUCKETRADIUS;
     oBucketRect.y = iWorldY - BUCKETRADIUS;
@@ -25,17 +30,37 @@ MakeRects( double iWorldX, double iWorldY, ::ULIS::FRectD& oBucketRect, ::ULIS::
     oCrossRect.y = oBucketRect.y + oBucketRect.h;
     oCrossRect.w = CROSSRADIUS * 2;
     oCrossRect.h = CROSSRADIUS * 2;
+
+    oPropagateRect.x = oBucketRect.x;
+    oPropagateRect.y = oBucketRect.y + oBucketRect.h;
+    oPropagateRect.w = CROSSRADIUS * 2;
+    oPropagateRect.h = CROSSRADIUS * 2;
 }
 
-FOdysseyVectorBucket::FOdysseyVectorBucket( FOdysseyVectorObject& iParent, double iX, double iY )
+FOdysseyVectorBucket::FOdysseyVectorBucket( FOdysseyVectorObject& iParent, double iX, double iY, bool iPropagated )
     : mParent ( iParent )
     , mCtrlPoint ( this )
+    , mPropagated( iPropagated )
     , mIsGradient ( false )
 {
     mCtrlPoint.Set( HANDLEDISTANCE, 0.0f );
 
     SetCoords( iX, iY );
     SetColor( 128, 128, 128, 255 );
+}
+
+void
+FOdysseyVectorBucket::SetPropagated( bool iPropagated )
+{
+    mPropagated = iPropagated;
+
+    //mParent.Invalidate();
+}
+
+bool
+FOdysseyVectorBucket::IsPropagated()
+{
+    return mPropagated;
 }
 
 bool
@@ -114,7 +139,50 @@ FOdysseyVectorBucket::GetColor()
 }
 
 void
-FOdysseyVectorBucket::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
+FOdysseyVectorBucket::Draw( FBucketDrawingFlags iDrawingFlags )
+{
+    if( iDrawingFlags & FBucketDrawingFlags::BUCKET )
+    {
+        DrawBucket( iDrawingFlags );
+    }
+
+    if( iDrawingFlags & FBucketDrawingFlags::PELLET )
+    {
+        DrawPellet( iDrawingFlags );
+    }
+}
+
+void
+FOdysseyVectorBucket::DrawPellet( FBucketDrawingFlags iDrawingFlags )
+{
+    BLContext* blctx = mParent.GetScene()->GetEngine()->GetBLContext();
+    BLPoint bucketWorldCoord = mParent.GetWorldMatrix().mapPoint( mCoords.x, mCoords.y );
+    BLRgba32 fillColor;
+
+    // Note: Blend2D color format is 0xAARRGGBB
+    fillColor.setR( mColor.B );
+    fillColor.setG( mColor.G );
+    fillColor.setB( mColor.R );
+    fillColor.setA( mColor.A );
+
+    blctx->save();
+    blctx->resetMatrix();
+
+    // Pellet
+    blctx->setFillStyle( BLRgba32( 0xFFFFFFFF ) );
+    blctx->fillCircle( bucketWorldCoord.x, bucketWorldCoord.y, PELLETRADIUS + 1.0f );
+    blctx->setFillStyle( fillColor );
+    blctx->fillCircle( bucketWorldCoord.x, bucketWorldCoord.y, PELLETRADIUS );
+
+    blctx->setStrokeWidth( 1.0f );
+    blctx->setStrokeStyle( mPropagated ? BLRgba32( 0xFF00FF00 ) : BLRgba32( 0xFF000000 ) );
+    blctx->strokeCircle( bucketWorldCoord.x, bucketWorldCoord.y, PELLETRADIUS );
+
+    blctx->restore();
+}
+
+void
+FOdysseyVectorBucket::DrawBucket( FBucketDrawingFlags iDrawingFlags )
 {
     BLContext* blctx = mParent.GetScene()->GetEngine()->GetBLContext();
     BLPoint bucketWorldCoord = mParent.GetWorldMatrix().mapPoint( mCoords.x, mCoords.y );
@@ -122,18 +190,19 @@ FOdysseyVectorBucket::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
                                                                 , mCoords.y + mCtrlPoint.GetY() );
     ::ULIS::FRectD bucketRect;
     ::ULIS::FRectD crossRect;
+    ::ULIS::FRectD propagateRect;
     BLRgba32 fillColor;
 
-    MakeRects( bucketWorldCoord.x, bucketWorldCoord.y, bucketRect, crossRect );
+    // TODO: store rectangles as class members.
+    MakeRects( bucketWorldCoord.x, bucketWorldCoord.y, bucketRect, crossRect, propagateRect );
 
     // Note: Blend2D color format is 0xAARRGGBB
-    fillColor.r = mColor.B;
-    fillColor.g = mColor.G;
-    fillColor.b = mColor.R;
-    fillColor.a = mColor.A;
+    fillColor.setR( mColor.B );
+    fillColor.setG( mColor.G );
+    fillColor.setB( mColor.R );
+    fillColor.setA( mColor.A );
 
     blctx->save();
-
     blctx->resetMatrix();
 
     // Bucket
@@ -157,9 +226,19 @@ FOdysseyVectorBucket::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
     blctx->strokeLine( crossRect.x              , crossRect.y, crossRect.x + crossRect.h, crossRect.y + crossRect.h );
     blctx->strokeLine( crossRect.x + crossRect.w, crossRect.y, crossRect.x              , crossRect.y + crossRect.h );
 
+    // propagated
+    blctx->setFillStyle( mPropagated ? BLRgba32( 0xFF00FF00 ) : BLRgba32( 0xFF808080 ) );
+    blctx->fillRect( propagateRect.x, propagateRect.y, propagateRect.w, propagateRect.h );
+
+    blctx->setStrokeWidth( 1.0f );
+    blctx->setStrokeStyle( BLRgba32( 0xFF000000 ) );
+    blctx->strokeRect( propagateRect.x, propagateRect.y, propagateRect.w, propagateRect.h );
+
     // Handle
-    blctx->strokeLine( bucketWorldCoord.x, bucketWorldCoord.y, handleWorldCoord.x, handleWorldCoord.y );
+    blctx->setFillStyle( BLRgba32( 0xFF808080 ) );
     blctx->fillCircle( handleWorldCoord.x, handleWorldCoord.y, HANDLERADIUS );
+    blctx->setStrokeStyle( BLRgba32( 0xFF000000 ) );
+    blctx->strokeLine( bucketWorldCoord.x, bucketWorldCoord.y, handleWorldCoord.x, handleWorldCoord.y );
     blctx->strokeCircle( handleWorldCoord.x, handleWorldCoord.y, HANDLERADIUS );
 
     blctx->restore();
@@ -170,7 +249,8 @@ FOdysseyVectorBucket::Copy( FOdysseyVectorBucket* iDestinationBucket )
 {
     iDestinationBucket->mCoords = mCoords;
     iDestinationBucket->mColor = mColor;
-
+    iDestinationBucket->mCtrlPoint = mCtrlPoint;
+    iDestinationBucket->mPropagated = mPropagated;
     iDestinationBucket->mIsGradient = mIsGradient;
     iDestinationBucket->mGradientColor0 = mGradientColor0;
     iDestinationBucket->mGradientColor1 = mGradientColor1;
@@ -183,8 +263,9 @@ FOdysseyVectorBucket::Pick( double iWorldX, double iWorldY )
     ::ULIS::FVec2D pt = ::ULIS::FVec2D( iWorldX, iWorldY );
     ::ULIS::FRectD bucketRect;
     ::ULIS::FRectD crossRect;
+    ::ULIS::FRectD propagateRect;
 
-    MakeRects( bucketWorldCoord.x, bucketWorldCoord.y, bucketRect, crossRect );
+    MakeRects( bucketWorldCoord.x, bucketWorldCoord.y, bucketRect, crossRect, propagateRect );
 
     if( bucketRect.HitTest( pt ) )
     {
@@ -194,6 +275,11 @@ FOdysseyVectorBucket::Pick( double iWorldX, double iWorldY )
     if( crossRect.HitTest( pt ) )
     {
         return FOdysseyVectorBucket::PICKCROSS;
+    }
+
+    if( propagateRect.HitTest( pt ) )
+    {
+        return FOdysseyVectorBucket::PICKPROPAGATED;
     }
 
     if ( PickHandle( iWorldX, iWorldY ) )

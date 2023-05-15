@@ -5,6 +5,7 @@ FOdysseyVectorPath::~FOdysseyVectorPath()
 }
 
 FOdysseyVectorPath::FOdysseyVectorPath()
+    : mPaintingCode( 0 )
 {
     SetJointType( eJointType::Miter );
 
@@ -41,10 +42,11 @@ FOdysseyVectorPath::ToVertexAndSectionArray( std::vector<FOdysseyVectorVertex*>&
         do
         {
             FOdysseyVectorVertex* nextVertex = segment->GetOtherVertex( vertex );
+            FOdysseyVectorSection* section = vertex->GetSection( segment );
             FOdysseyVectorSegment *nextSegment = nextVertex->GetOtherSegment( segment );
 
             oVertexArray.push_back( vertex );
-            oSectionArray.push_back( segment->GetSection( 0.5f ) );
+            oSectionArray.push_back( section );
 
             vertex = nextVertex;
             segment = nextSegment;
@@ -114,11 +116,23 @@ FOdysseyVectorPath::AppendVertex( FOdysseyVectorVertex* iPoint, FOdysseyVectorVe
     {
         if ( iPreviousPoint->GetSegmentCount() < 2 )
         {
-            AddSegment( FOdysseyVectorSegment::New( this, iPreviousPoint, iPoint ) );
+            AddSegment( new FOdysseyVectorSegment( this, iPreviousPoint, iPoint ) );
         }
     }
 
     return NULL;
+}
+
+void
+FOdysseyVectorPath::SetPaintingCode( uint32 iPaintingCode )
+{
+    mPaintingCode = iPaintingCode;
+}
+
+uint32
+FOdysseyVectorPath::GetPaintingCode()
+{
+    return mPaintingCode;
 }
 
 /*void
@@ -154,21 +168,42 @@ FOdysseyVectorPath::CopyShape()
 void
 FOdysseyVectorPath::UpdateBBox()
 {
-    double x1 = DBL_MAX, y1 = DBL_MAX, x2 = -DBL_MAX, y2 = -DBL_MAX;
+    double xmin = DBL_MAX, ymin = DBL_MAX, xmax = -DBL_MAX, ymax = -DBL_MAX;
+    bool hasBBox = false;
 
     for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
     {
         FOdysseyVectorSegment* segment = static_cast<FOdysseyVectorSegment*>(*it);
-        ::ULIS::FRectD coords = segment->GetBoundingBox( false );
-        double rx1 = coords.x, ry1 = coords.y, rx2 = coords.x + coords.w, ry2 = coords.y + coords.h;
+        ::ULIS::FRectD segmentBBox = segment->GetBoundingBox( false );
+        double rx1 = segmentBBox.x
+             , ry1 = segmentBBox.y
+             , rx2 = segmentBBox.x + segmentBBox.w
+             , ry2 = segmentBBox.y + segmentBBox.h;
 
-        if ( rx1 < x1 ) x1 = rx1;
-        if ( ry1 < y1 ) y1 = ry1;
-        if ( rx2 > x2 ) x2 = rx2;
-        if ( ry2 > y2 ) y2 = ry2;
+        hasBBox = true;
+
+        if ( rx1 < xmin ) xmin = rx1;
+        if ( ry1 < ymin ) ymin = ry1;
+        if ( rx2 > xmax ) xmax = rx2;
+        if ( ry2 > ymax ) ymax = ry2;
     }
 
-    mBBox = ::ULIS::TRectangle<double>::FromMinMax( x1, y1, x2, y2 );
+    // This is in case there are oprhaned vertices, which should not happen. Once we
+    // are sure orphaned vertices are impossible, the loop below can be removed.
+    for( std::list<FOdysseyVectorVertex*>::iterator it = mVertexList.begin(); it != mVertexList.end(); ++it )
+    {
+        FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>(*it);
+        ::ULIS::FVec2D& vertexCoords = vertex->GetCoords();
+
+        hasBBox = true;
+
+        if ( vertexCoords.x < xmin ) xmin = vertexCoords.x;
+        if ( vertexCoords.y < ymin ) ymin = vertexCoords.y;
+        if ( vertexCoords.x > xmax ) xmax = vertexCoords.x;
+        if ( vertexCoords.y > ymax ) ymax = vertexCoords.y;
+    }
+
+    mBBox = ( hasBBox ) ? ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax ) : ::ULIS::FRectD( 0.0f, 0.0f, 0.0f, 0.0f );
 }
 
 void
@@ -230,8 +265,13 @@ FOdysseyVectorPath::AddSegment( FOdysseyVectorSegment* iSegment )
 
     iSegment->SetPath( this );
 
-    iSegment->GetVertex(0)->AddSegment( iSegment, 0.0f );
-    iSegment->GetVertex(1)->AddSegment( iSegment, 1.0f );
+    iSegment->GetVertex(0)->AddSegment( iSegment );
+    iSegment->GetVertex(1)->AddSegment( iSegment );
+
+/*
+    iSegment->GetVertex(0)->AddSection( iSegment->GetDefaultSection() );
+    iSegment->GetVertex(1)->AddSection( iSegment->GetDefaultSection() );
+*/
 }
 
 void
@@ -252,12 +292,17 @@ FOdysseyVectorPath::Clear()
 void
 FOdysseyVectorPath::RemoveSegment( FOdysseyVectorSegment* iSegment )
 {
-    iSegment->ClearIntersections();
+    iSegment->ClearIntersections(); // note: re-adds the default section
 
     mSegmentList.remove( iSegment );
 
     iSegment->GetVertex(0)->RemoveSegment( iSegment );
     iSegment->GetVertex(1)->RemoveSegment( iSegment );
+
+/*
+    iSegment->GetVertex(0)->RemoveSection(iSegment->GetDefaultSection());
+    iSegment->GetVertex(1)->RemoveSection(iSegment->GetDefaultSection());
+*/
 }
 
 std::list<FOdysseyVectorSegment*>&
@@ -594,7 +639,7 @@ FOdysseyVectorPath::DrawJoint( FOdysseyVectorVertex* iVertex, ::ULIS::FRectD &iR
     {
         ::ULIS::FVec2D segment0Vector = iVertex->GetVectorOnSegment(segment0, false);
         ::ULIS::FVec2D segment1Vector = iVertex->GetVectorOnSegment(segment1, false);
-        ::ULIS::FVec2D& origin = iVertex->GetCoords( nullptr );
+        ::ULIS::FVec2D& origin = iVertex->GetCoords();
 
         if ( segment0Vector.DistanceSquared() && segment1Vector.DistanceSquared() )
         {

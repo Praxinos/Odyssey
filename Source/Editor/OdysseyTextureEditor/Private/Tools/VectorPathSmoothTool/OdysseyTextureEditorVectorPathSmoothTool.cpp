@@ -34,9 +34,7 @@ UOdysseyTextureEditorVectorPathSmoothTool::Activate()
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        UOdysseyPainterEditorVectorPathSmoothTool::Activate( vectorEngine, vectorScene );
-
-        currentVectorLayer->RenderImageChanged(false);
+        UOdysseyPainterEditorVectorPathSmoothTool::ActivateVector( vectorEngine, vectorScene );
     }
 }
 
@@ -95,6 +93,42 @@ UOdysseyTextureEditorVectorPathSmoothTool::OnCurrentLayerChanged(UOdysseyLayerSt
 }
 
 bool
+UOdysseyTextureEditorVectorPathSmoothTool::OnKeyDown( const FKey& iKey )
+{
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
+    UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
+    bool ret = false;
+
+    if( currentVectorLayer )
+    {
+        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+
+        ret = UOdysseyPainterEditorVectorPathSmoothTool::OnKeyDownVector( vectorEngine, vectorScene, iKey );
+    }
+
+    return ret;
+}
+
+bool
+UOdysseyTextureEditorVectorPathSmoothTool::OnKeyUp( const FKey& iKey )
+{
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
+    UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
+    bool ret = false;
+
+    if( currentVectorLayer )
+    {
+        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+
+        ret = UOdysseyPainterEditorVectorPathSmoothTool::OnKeyUpVector( vectorEngine, vectorScene, iKey );
+    }
+
+    return ret;
+}
+
+bool
 UOdysseyTextureEditorVectorPathSmoothTool::OnMouseDown( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
@@ -106,9 +140,7 @@ UOdysseyTextureEditorVectorPathSmoothTool::OnMouseDown( const FOdysseyPoint& iPo
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        ret = UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDown( vectorEngine, vectorScene, iPointInTexture,iKey  );
-
-        currentVectorLayer->RenderImageChanged(false);
+        ret = UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDownVector( vectorEngine, vectorScene, iPointInTexture,iKey  );
     }
 
     return ret;
@@ -125,9 +157,7 @@ UOdysseyTextureEditorVectorPathSmoothTool::OnMouseHover( const FOdysseyPoint& iP
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        UOdysseyPainterEditorVectorPathSmoothTool::OnMouseHover( vectorEngine, vectorScene, iPointInTexture );
-
-        currentVectorLayer->RenderImageChanged(true);
+        UOdysseyPainterEditorVectorPathSmoothTool::OnMouseHoverVector( vectorEngine, vectorScene, iPointInTexture );
     }
 }
 
@@ -142,9 +172,7 @@ UOdysseyTextureEditorVectorPathSmoothTool::OnMouseDrag( const FOdysseyPoint& iPo
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDrag( vectorEngine, vectorScene, iPointInTexture );
-
-        currentVectorLayer->RenderImageChanged(true);
+        UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDragVector( vectorEngine, vectorScene, iPointInTexture );
     }
 }
 
@@ -160,9 +188,7 @@ UOdysseyTextureEditorVectorPathSmoothTool::OnMouseUp( const FOdysseyPoint& iPoin
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        ret = UOdysseyPainterEditorVectorPathSmoothTool::OnMouseUp( vectorEngine, vectorScene, iPointInTexture, iKey );
-
-        currentVectorLayer->RenderImageChanged(false);
+        ret = UOdysseyPainterEditorVectorPathSmoothTool::OnMouseUpVector( vectorEngine, vectorScene, iPointInTexture, iKey );
     }
 
     return ret;

@@ -4,28 +4,205 @@ FOdysseyVectorVertex::~FOdysseyVectorVertex()
 {
 }
 
-FOdysseyVectorVertex::FOdysseyVectorVertex()
+FOdysseyVectorVertex::FOdysseyVectorVertex( FOdysseyVectorPath* iPath, double iX, double iY, double iRadius )
     : FOdysseyVectorPoint()
-   , mPath ( nullptr )
+   , mPath ( iPath )
+   , mNearestSegment( nullptr )
+   , mNearestVertex( nullptr )
 {
-    SetVisited( false );
+    mCtrlPoint = FOdysseyVectorHandlePoint::New( this );
+
+    Init( iX, iY, iRadius );
 }
 
-//static
-FOdysseyVectorVertex*
-FOdysseyVectorVertex::New( double iX, double iY, double iRadius )
+void
+FOdysseyVectorVertex::SetNearestVertex( FOdysseyVectorVertex* iNearestVertex )
 {
-    FOdysseyVectorVertex* vertex = new FOdysseyVectorVertex();
+    mNearestVertex = iNearestVertex;
+}
 
-    vertex->Init( iX, iY, iRadius );
-
-    return vertex;
+FOdysseyVectorVertex*
+FOdysseyVectorVertex::GetNearestVertex()
+{
+    return mNearestVertex;
 }
 
 FOdysseyVectorPath* 
 FOdysseyVectorVertex::GetPath()
 {
     return mPath;
+}
+
+void
+FOdysseyVectorVertex::BuildExplorationPairs( std::vector<FExplorationPair>& iExplorationPairsArray )
+{
+    for( std::list<FOdysseyVectorSection*>::iterator it = mSectionList.begin(); it != mSectionList.end(); ++it )
+    {
+        FOdysseyVectorSection* returnSection = static_cast<FOdysseyVectorSection*>(*it);
+        FOdysseyVectorSection* departSection = GetCycleNextSection( returnSection, 1.0f );
+
+        iExplorationPairsArray.push_back( FExplorationPair( returnSection, this, departSection ) );
+    }
+}
+
+FOdysseyVectorSection*
+FOdysseyVectorVertex::GetCycleNextSection( FOdysseyVectorSection* iLastSection, double iOrientation )
+{
+    uint32 sectionCount = mSectionList.size();
+
+    if( mSectionList.size() == 2 )
+    {
+        return GetOtherSection( iLastSection, false );
+    }
+
+    if( mSectionList.size() > 2 )
+    {
+        ::ULIS::FVec2D lastSectionVector = iLastSection->GetVectorFromVertex( this, false, true );
+        FOdysseyVectorSection* minDotSection = nullptr;
+        FOdysseyVectorSection* maxDotSection = nullptr;
+        ::ULIS::FVec2D minDotSectionVector;
+        ::ULIS::FVec2D maxDotSectionVector;
+        double minDot =  DBL_MAX;
+        double maxDot = -DBL_MAX;
+        std::vector<FOdysseyVectorSection*> rightSideSection;
+        std::vector<FOdysseyVectorSection*> wrongSideSection;
+
+        rightSideSection.reserve( sectionCount );
+        wrongSideSection.reserve( sectionCount );
+
+        for( std::list<FOdysseyVectorSection*>::iterator it = mSectionList.begin(); it != mSectionList.end(); ++it )
+        {
+            FOdysseyVectorSection* section = static_cast<FOdysseyVectorSection*>(*it);
+            ::ULIS::FVec2D sectionVector = section->GetVectorFromVertex( this, false, true );
+
+            if( section != iLastSection )
+            {
+                if( ( FOdysseyVector::Cross2D( -lastSectionVector, sectionVector ) * iOrientation > 0.0f ) )
+                {
+                    rightSideSection.push_back( section );
+                }
+                else
+                {
+                    wrongSideSection.push_back( section );
+                }
+            }
+        }
+
+        for( int i = 0; i < rightSideSection.size(); i++ )
+        {
+            FOdysseyVectorSection* section = rightSideSection[i];
+            ::ULIS::FVec2D sectionVector = section->GetVectorFromVertex( this, false, true );
+            double dot = lastSectionVector.DotProduct( sectionVector );
+
+            if( dot > maxDot )
+            {
+                maxDotSection = section;
+                maxDotSectionVector = sectionVector;
+                maxDot = dot;
+            }
+        }
+
+        if( maxDotSection )
+        {
+            return maxDotSection;
+        }
+
+        for( int i = 0; i < wrongSideSection.size(); i++ )
+        {
+            FOdysseyVectorSection* section = wrongSideSection[i];
+            ::ULIS::FVec2D sectionVector = section->GetVectorFromVertex( this, false, true );
+            double dot = lastSectionVector.DotProduct( sectionVector );
+
+            if( dot < minDot )
+            {
+                minDotSection = section;
+                minDotSectionVector = sectionVector;
+                minDot = dot;
+            }
+        }
+
+        if( minDotSection )
+        {
+            return minDotSection;
+        }
+    }
+
+    return nullptr;
+}
+
+::ULIS::FVec2D
+FOdysseyVectorVertex::GetVectorOnSegment( FOdysseyVectorSegment* iSegment, bool iNormalize )
+{
+    ::ULIS::FVec2D vec;
+
+    vec = ( iSegment->GetVertex(0) == this ) ? iSegment->GetPointAt(0.01f) - iSegment->GetPointAt(0.0f)
+                                             : iSegment->GetPointAt(0.99f) - iSegment->GetPointAt(1.0f);
+
+    if( iNormalize && vec.DistanceSquared() )
+    {
+        vec.Normalize();
+    }
+
+    return vec;
+}
+
+bool
+FOdysseyVectorVertex::IsSmooth()
+{
+    if( mSegmentList.size() == 2 )
+    {
+        ::ULIS::FVec2D firstSegmentVector = GetVectorOnSegment( GetFirstSegment(), true );
+        ::ULIS::FVec2D lastSegmentVector = GetVectorOnSegment( GetLastSegment(), true );
+        double dot = firstSegmentVector.DotProduct( lastSegmentVector );
+
+        if( fabs(dot) > 0.99f )
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+FOdysseyVectorHandlePoint*
+FOdysseyVectorVertex::GetHandle()
+{
+    return mCtrlPoint;
+}
+
+double
+FOdysseyVectorVertex::GetT( FOdysseyVectorSegment* iSegment )
+{
+    return ( this == iSegment->GetVertex(0) ) ? 0.0f : 1.0f;
+}
+
+FOdysseyVectorSegment*
+FOdysseyVectorVertex::GetNearestSegment()
+{
+    return mNearestSegment;
+}
+
+double
+FOdysseyVectorVertex::GetDistanceToNearestSegment()
+{
+    return mDistanceToNearestSegment;
+}
+
+double
+FOdysseyVectorVertex::GetNearestSegmentT()
+{
+    return mNearestSegmentT;
+}
+
+void
+FOdysseyVectorVertex::SetNearestSegment( FOdysseyVectorSegment* iNearestSegment
+                                       , double iDistanceToNearestSegment
+                                       , double iNearestSegmentT )
+{
+    mNearestSegment = iNearestSegment;
+    mDistanceToNearestSegment = iDistanceToNearestSegment;
+    mNearestSegmentT = iNearestSegmentT;
+    mNearestVertex = nullptr;
 }
 
 void
@@ -79,7 +256,7 @@ FOdysseyVectorVertex::SetPath( FOdysseyVectorPath* iPath )
 }
 
 void
-FOdysseyVectorVertex::AddSegment( FOdysseyVectorSegment* iSegment, double t )
+FOdysseyVectorVertex::AddSegment( FOdysseyVectorSegment* iSegment )
 {
     mSegmentList.push_back( iSegment );
 }
@@ -119,16 +296,16 @@ FOdysseyVectorVertex::GetFirstSegment()
 {
     return mSegmentList.front();
 }
-
+/*
 ::ULIS::FVec2D
 FOdysseyVectorVertex::GetVectorOnSegment( FOdysseyVectorSegment* iSegment, bool iNormalize )
 {
     ::ULIS::FVec2D vec;
 
-    vec = ( iSegment->GetVertex(0) == this ) ? iSegment->GetVertex(1)->GetCoords(iSegment) -
-                                                                       GetCoords(iSegment)
-                                              :                        GetCoords(iSegment) -
-                                               iSegment->GetVertex(0)->GetCoords(iSegment);
+    vec = ( iSegment->GetVertex(0) == this ) ? iSegment->GetVertex(1)->GetCoords() -
+                                                                       GetCoords()
+                                              :                        GetCoords() -
+                                               iSegment->GetVertex(0)->GetCoords();
 
     if( iNormalize && vec.DistanceSquared() )
     {
@@ -137,7 +314,7 @@ FOdysseyVectorVertex::GetVectorOnSegment( FOdysseyVectorSegment* iSegment, bool 
 
     return vec;
 }
-
+*/
 static uintptr_t
 GenerateSegmentID( FOdysseyVectorSegment* iSegment, FOdysseyVectorVertex* iP0, FOdysseyVectorVertex* iP1 )
 {
@@ -160,12 +337,6 @@ static bool seekVertex( std::list<FOdysseyVectorVertex*>& iVertexList
     return false;
 }
 
-double
-FOdysseyVectorVertex::GetT( FOdysseyVectorSegment* iSegment )
-{
-    return ( iSegment->GetPoint(0) == this ) ? 0.0f : 1.0f;
-}
-
 static bool seekSection( std::list<FOdysseyVectorSection*>& iSectionList
                        , FOdysseyVectorSection *iSection )
 {
@@ -178,29 +349,6 @@ static bool seekSection( std::list<FOdysseyVectorSection*>& iSectionList
     }
 
     return false;
-}
-
-FOdysseyVectorSection*
-FOdysseyVectorVertex::GetCycleNextSection( FOdysseyVectorSection* iLastSection, double iOrientation )
-{
-    ::ULIS::FVec2D lastSectionVector = -iLastSection->GetVectorFromVertex( this, false );
-
-    for( std::list<FOdysseyVectorSection*>::iterator it = mSectionList.begin(); it != mSectionList.end(); ++it )
-    {
-        FOdysseyVectorSection* section = static_cast<FOdysseyVectorSection*>(*it);
-
-        if( section->GetSegment() != iLastSection->GetSegment() )
-        {
-            ::ULIS::FVec2D sectionVector = section->GetVectorFromVertex( this, false );
-
-            if( ( FOdysseyVector::Cross2D( lastSectionVector, sectionVector ) * iOrientation > 0.0f ) )
-            {
-                return section;
-            }
-        }
-    }
-
-    return /*GetOtherSection( iLastSection )*/nullptr;
 }
 
 void
@@ -232,12 +380,6 @@ void
 FOdysseyVectorVertex::RemoveSection( FOdysseyVectorSection* iSection )
 {
     mSectionList.remove( iSection );
-}
-
-::ULIS::FVec2D&
-FOdysseyVectorVertex::GetCoords( FOdysseyVectorSegment* iSegment )
-{
-    return mCoords;
 }
 
 bool
@@ -285,12 +427,6 @@ FOdysseyVectorVertex::GetBoundingBox( bool iWorld )
     return bbox;
 }
 
-::ULIS::FVec2D
-FOdysseyVectorVertex::GetPosition( FOdysseyVectorSegment* iSegment )
-{
-    return mCoords;
-}
-
 std::list<FOdysseyVectorSection*>&
 FOdysseyVectorVertex::GetSectionList()
 {
@@ -298,14 +434,13 @@ FOdysseyVectorVertex::GetSectionList()
 }
 
 FOdysseyVectorSection*
-FOdysseyVectorVertex::GetSection( FOdysseyVectorVertex* iOtherVertex )
+FOdysseyVectorVertex::GetSection( FOdysseyVectorSegment* iSegment )
 {
     for( std::list<FOdysseyVectorSection*>::iterator it = mSectionList.begin(); it != mSectionList.end(); ++it )
     {
         FOdysseyVectorSection* section = static_cast<FOdysseyVectorSection*>(*it);
 
-        if ( ( ( section->GetVertex(0) == this ) && ( section->GetVertex(1) == iOtherVertex ) ) 
-          || ( ( section->GetVertex(1) == this ) && ( section->GetVertex(0) == iOtherVertex ) ) )
+        if( section->GetSegment() == iSegment )
         {
             return section;
         }
@@ -332,7 +467,7 @@ FOdysseyVectorVertex::GetSegment( FOdysseyVectorVertex* iOtherVertex )
 }
 
 FOdysseyVectorSection*
-FOdysseyVectorVertex::GetOtherSection( FOdysseyVectorSection* iSection )
+FOdysseyVectorVertex::GetOtherSection( FOdysseyVectorSection* iSection, bool iSameSegment )
 {
     for( std::list<FOdysseyVectorSection*>::iterator it = mSectionList.begin(); it != mSectionList.end(); ++it )
     {
@@ -340,7 +475,14 @@ FOdysseyVectorVertex::GetOtherSection( FOdysseyVectorSection* iSection )
 
         if( otherSection != iSection )
         {
-            if ( otherSection->GetSegment() == iSection->GetSegment() )
+            if( iSameSegment == true )
+            {
+                if ( otherSection->GetSegment() == iSection->GetSegment() )
+                {
+                    return otherSection;
+                }
+            }
+            else
             {
                 return otherSection;
             }

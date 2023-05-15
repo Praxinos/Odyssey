@@ -37,7 +37,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoPathAlter : public FOdysseyVectorUndo
         virtual FString ToString() const override;
 
     private:
-        FOdysseyVectorScene* mScene;
         std::vector<FOdysseyVectorVertex*> mRemovedVertexArray;
         std::vector<FOdysseyVectorSegment*> mRemovedSegmentArray;
         std::vector<FOdysseyVectorVertex*> mAddedVertexArray;

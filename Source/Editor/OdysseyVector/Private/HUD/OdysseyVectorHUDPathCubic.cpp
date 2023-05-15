@@ -32,12 +32,12 @@ FOdysseyVectorHUDPathCubic::GetDisplayMode()
 
 void
 FOdysseyVectorHUDPathCubic::DrawVertex( FOdysseyVectorPathCubic* iPath
-                                      , FOdysseyVectorVertexCubic* iCubicVertex
+                                      , FOdysseyVectorVertex* iCubicVertex
                                       , ::ULIS::FRectD& iRoi
                                       , uint64 iFlags )
 {
     BLContext* blctx = iPath->GetScene()->GetEngine()->GetBLContext();
-    ::ULIS::FVec2D perpendicular = iCubicVertex->GetPerpendicularVector( true );
+    ::ULIS::FVec2D perpendicular = iPath->GetPerpendicularVector( iCubicVertex, true );
     double pointRadius = iCubicVertex->GetRadius();
     double ctrlX = ( perpendicular.x * pointRadius );
     double ctrlY = ( perpendicular.y * pointRadius );
@@ -150,7 +150,7 @@ FOdysseyVectorHUDPathCubic::Draw( FOdysseyVectorScene* iScene, ::ULIS::FRectD& i
             // Points and Point size handles
             for( std::list<FOdysseyVectorVertex*>::iterator it = vertexList.begin(); it != vertexList.end(); ++it )
             {
-                FOdysseyVectorVertexCubic *cubicVertex = static_cast<FOdysseyVectorVertexCubic*>(*it);
+                FOdysseyVectorVertex *cubicVertex = static_cast<FOdysseyVectorVertex*>(*it);
 
                 DrawVertex( cubicPath, cubicVertex, iRoi, iFlags );
             }

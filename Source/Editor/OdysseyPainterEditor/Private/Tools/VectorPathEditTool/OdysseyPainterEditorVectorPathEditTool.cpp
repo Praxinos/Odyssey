@@ -3,6 +3,8 @@
 
 #include "Tools/VectorPathEditTool/OdysseyPainterEditorVectorPathEditTool.h"
 
+#define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorPathEditTool"
+
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
 UOdysseyPainterEditorVectorPathEditTool::~UOdysseyPainterEditorVectorPathEditTool()
@@ -10,12 +12,9 @@ UOdysseyPainterEditorVectorPathEditTool::~UOdysseyPainterEditorVectorPathEditToo
 }
 
 UOdysseyPainterEditorVectorPathEditTool::UOdysseyPainterEditorVectorPathEditTool()
-    : Radius(10.0f)
-    , mCubicPathHUD( FOdysseyVectorHUDPathCubic::VIEW_PATH
-                   | FOdysseyVectorHUDPathCubic::VIEW_POINT/*
-                   | FOdysseyVectorHUDPathCubic::VIEW_HANDLE_POINT
-                   | FOdysseyVectorHUDPathCubic::VIEW_HANDLE_SEGMENT*/ )
-
+    : mCubicPathHUD( FOdysseyVectorHUDPathCubic::VIEW_PATH
+                   | FOdysseyVectorHUDPathCubic::VIEW_POINT )
+    , Radius(10.0f)
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.VectoEdit64");
 
@@ -26,17 +25,19 @@ UOdysseyPainterEditorVectorPathEditTool::UOdysseyPainterEditorVectorPathEditTool
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
 void
-UOdysseyPainterEditorVectorPathEditTool::Activate( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorPathEditTool::ActivateVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
     iEngine->ClearHUD();
     iEngine->AddHUD(&mCubicPathHUD);
     iEngine->AddHUD(&mPickingHUD);
+
+    iScene->Update( 0 ); // update vector scene and GUI widgets via delegates.
 }
 
 bool
-UOdysseyPainterEditorVectorPathEditTool::OnKeyDown( FOdysseyVectorEngine* iEngine
-                                                  , FOdysseyVectorScene* iScene
-                                                  , const FKey& iKey )
+UOdysseyPainterEditorVectorPathEditTool::OnKeyDownVector( FOdysseyVectorEngine* iEngine
+                                                        , FOdysseyVectorScene* iScene
+                                                        , const FKey& iKey )
 {
     if ( ( iKey == EKeys::LeftControl ) || ( iKey == EKeys::RightControl ) )
     {
@@ -50,26 +51,29 @@ UOdysseyPainterEditorVectorPathEditTool::OnKeyDown( FOdysseyVectorEngine* iEngin
                                     | FOdysseyVectorHUDPathCubic::VIEW_HANDLE_POINT );
     }
 
+    iScene->Update( 0 ); // update vector scene and GUI widgets via delegates.
+
     return false;
 }
 
 bool
-UOdysseyPainterEditorVectorPathEditTool::OnKeyUp( FOdysseyVectorEngine* iEngine
-                                                , FOdysseyVectorScene* iScene
-                                                , const FKey& iKey )
+UOdysseyPainterEditorVectorPathEditTool::OnKeyUpVector( FOdysseyVectorEngine* iEngine
+                                                      , FOdysseyVectorScene* iScene
+                                                      , const FKey& iKey )
 {
     mCubicPathHUD.SetDisplayMode( FOdysseyVectorHUDPathCubic::VIEW_PATH
                                 | FOdysseyVectorHUDPathCubic::VIEW_POINT );
 
+    iScene->Update( 0 ); // update vector scene and GUI widgets via delegates.
+
     return false;
 }
 
 bool
-UOdysseyPainterEditorVectorPathEditTool::OnMouseDown( FOdysseyVectorEngine* iEngine
-                                                    , FOdysseyVectorScene* iScene
-                                                    , FOdysseyVectorUndo** iUndo
-                                                    , const FOdysseyPoint& iPointInTexture
-                                                    , const FKey& iKey )
+UOdysseyPainterEditorVectorPathEditTool::OnMouseDownVector( FOdysseyVectorEngine* iEngine
+                                                          , FOdysseyVectorScene* iScene
+                                                          , const FOdysseyPoint& iPointInTexture
+                                                          , const FKey& iKey )
 {
     FOdysseyVectorObject* selectedObject = iScene->GetLastSelected();
 
@@ -111,9 +115,9 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDown( FOdysseyVectorEngine* iEng
             // Control point must move with the point. Store it in the mPickedPointArray as well
             for( int i = 0; i < mPickedPointArray.size(); i++ )
             {
-                if( mPickedPointArray[i]->GetClass() == FOdysseyVectorVertexCubic::StaticClass() )
+                if( mPickedPointArray[i]->GetClass() == FOdysseyVectorVertex::StaticClass() )
                 {
-                    FOdysseyVectorVertexCubic* cubicVertex = static_cast<FOdysseyVectorVertexCubic*>( mPickedPointArray[i] );
+                    FOdysseyVectorVertex* cubicVertex = static_cast<FOdysseyVectorVertex*>( mPickedPointArray[i] );
                     std::list<FOdysseyVectorSegment*> segmentList = cubicVertex->GetSegmentList();
 
                     for( std::list<FOdysseyVectorSegment*>::iterator segit = segmentList.begin(); segit != segmentList.end(); ++segit )
@@ -129,36 +133,29 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDown( FOdysseyVectorEngine* iEng
             // End-of TODO
 
             cubicPath->Invalidate();
-
-/*
-            if ( picked == false )
-            {
-                PickObject (event);
-            }
-*/
         }
     }
-/*
-    else
-    {
-        PickObject ( event );
-    }
-*/
-    // BeginTransaction() must be called for GUndo to have a value. Please do it in the caller function.
-    if( iUndo && GUndo )
-    {
-        (*iUndo) = new FOdysseyVectorUndoPointPosition( iScene, mPickedPointArray );
 
-        GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(*iUndo) );
+    iScene->Update( 0 ); // update vector scene and GUI widgets via delegates.
+
+    // needed for valid GUndo pointer
+    GEditor->BeginTransaction(LOCTEXT("VectorPathEditTool","Vector Path Edit Tool"));
+    if( GUndo )
+    {
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoPointPosition( iScene, mPickedPointArray );
+
+        GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
     }
+    GEditor->EndTransaction();
+
 
     return true;
 }
 
 void
-UOdysseyPainterEditorVectorPathEditTool::OnMouseHover( FOdysseyVectorEngine* iEngine
-                                                     , FOdysseyVectorScene* iScene
-                                                     , const FOdysseyPoint& iPointInTexture )
+UOdysseyPainterEditorVectorPathEditTool::OnMouseHoverVector( FOdysseyVectorEngine* iEngine
+                                                           , FOdysseyVectorScene* iScene
+                                                           , const FOdysseyPoint& iPointInTexture )
 {
 /*
     ::ULIS::FRectI formerRegion = ::ULIS::FRectI( iPointInTexture.x - iPointInTexture.deltaPosition.X - Radius
@@ -172,6 +169,8 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseHover( FOdysseyVectorEngine* iEn
     ::ULIS::FRectI finalRegion = currentRegion | formerRegion;
 */
     mPickingHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
+
+    iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES ); // update vector scene and GUI widgets via delegates.
 }
 
 static ::ULIS::FRectD
@@ -187,7 +186,7 @@ DragPoint( double iLocalX
     if ( iPoint->GetClass() == FOdysseyVectorHandlePoint::StaticClass() )
     {
         FOdysseyVectorHandlePoint* pointHandle = static_cast<FOdysseyVectorHandlePoint*>( iPoint );
-        FOdysseyVectorVertexCubic* cubicVertex = static_cast<FOdysseyVectorVertexCubic*>(pointHandle->GetParent());
+        FOdysseyVectorVertex* cubicVertex = static_cast<FOdysseyVectorVertex*>(pointHandle->GetParent());
         ::ULIS::FVec2D dif = { cubicVertex->GetX() - iLocalX, cubicVertex->GetY() - iLocalY };
 
         cubicVertex->SetRadius( dif.Distance() );
@@ -206,9 +205,9 @@ DragPoint( double iLocalX
         return cubicSegment->GetBoundingBox( false );
     }
 
-    if( iPoint->GetClass() == FOdysseyVectorVertexCubic::StaticClass() )
+    if( iPoint->GetClass() == FOdysseyVectorVertex::StaticClass() )
     {
-        FOdysseyVectorVertexCubic* cubicVertex = static_cast<FOdysseyVectorVertexCubic*>( iPoint );
+        FOdysseyVectorVertex* cubicVertex = static_cast<FOdysseyVectorVertex*>( iPoint );
         std::list<FOdysseyVectorSegment*> segmentList = cubicVertex->GetSegmentList();
 
         cubicVertex->Set( iPoint->GetX() + difx
@@ -221,9 +220,9 @@ DragPoint( double iLocalX
 }
 
 void
-UOdysseyPainterEditorVectorPathEditTool::OnMouseDrag( FOdysseyVectorEngine* iEngine
-                                                    , FOdysseyVectorScene* iScene
-                                                    , const FOdysseyPoint& iPointInTexture )
+UOdysseyPainterEditorVectorPathEditTool::OnMouseDragVector( FOdysseyVectorEngine* iEngine
+                                                          , FOdysseyVectorScene* iScene
+                                                          , const FOdysseyPoint& iPointInTexture )
 {
     FOdysseyVectorObject* selectedObject = iScene->GetLastSelected();
     static ::ULIS::FRectI oldInvalidatedArea = { 0, 0, 0, 0 };
@@ -267,6 +266,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDrag( FOdysseyVectorEngine* iEng
             totalInvalidatedArea = invalidatedArea | oldInvalidatedArea;
 
 //UE_LOG(LogTemp, Warning, TEXT("%d %d %d %d"), invalidatedArea.x, invalidatedArea.y, invalidatedArea.w, invalidatedArea.h );
+            // update vector scene and GUI widgets via delegates.
             iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES | FOdysseyVectorObject::KEEPINVALIDATED );
 
             mOldLocalMouseX = localCoords.x;
@@ -278,12 +278,12 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDrag( FOdysseyVectorEngine* iEng
 }
 
 bool
-UOdysseyPainterEditorVectorPathEditTool::OnMouseUp( FOdysseyVectorEngine* iEngine
-                                                  , FOdysseyVectorScene* iScene
-                                                  , const FOdysseyPoint& iPointInTexture
-                                                  , const FKey& iKey )
+UOdysseyPainterEditorVectorPathEditTool::OnMouseUpVector( FOdysseyVectorEngine* iEngine
+                                                        , FOdysseyVectorScene* iScene
+                                                        , const FOdysseyPoint& iPointInTexture
+                                                        , const FKey& iKey )
 {
-    iScene->Update( 0 );
+    iScene->Update( 0 ); // update vector scene and GUI widgets via delegates.
 
     return true;
 }
@@ -299,3 +299,5 @@ UOdysseyPainterEditorVectorPathEditTool::PropertyChanged( const FName& iProperty
 {
     mPickingHUD.SetRadius( Radius );
 }
+
+#undef LOCTEXT_NAMESPACE

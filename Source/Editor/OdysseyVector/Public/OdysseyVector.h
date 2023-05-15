@@ -21,12 +21,23 @@ namespace FOdysseyVector
                                            , double* line0t
                                            , double* line1t );
 
-    double ODYSSEYVECTOR_API Cross2D( ::ULIS::FVec2D& iA, ::ULIS::FVec2D &iB );
+    double ODYSSEYVECTOR_API Cross2D( const ::ULIS::FVec2D& iA, const ::ULIS::FVec2D &iB );
 
-    double ODYSSEYVECTOR_API DistanceToSegment( ::ULIS::FVec2D& iPt
-                                              , ::ULIS::FVec2D& iSegmentP0
-                                              , ::ULIS::FVec2D& iSegmentP1
-                                              , double&         oDistance );
+    double ODYSSEYVECTOR_API DistanceToSegment( const ::ULIS::FVec2D& iPt
+                                              , const ::ULIS::FVec2D& iSegmentP0
+                                              , const ::ULIS::FVec2D& iSegmentP1
+                                              , double& oDistance );
+
+    void ODYSSEYVECTOR_API BezierExtract( ::ULIS::FVec2D& iP0
+                                        , ::ULIS::FVec2D& iP1
+                                        , ::ULIS::FVec2D& iP2
+                                        , ::ULIS::FVec2D& iP3
+                                        , double fromT
+                                        , double toT
+                                        , ::ULIS::FVec2D& oP0
+                                        , ::ULIS::FVec2D& oP1
+                                        , ::ULIS::FVec2D& oP2
+                                        , ::ULIS::FVec2D& oP3 );
 
     bool ODYSSEYVECTOR_API IntersectRegions( const ::ULIS::FRectI& iRegion0, const ::ULIS::FRectI& iRegion1, ::ULIS::FRectI &oRegionOut );
 }
@@ -38,7 +49,6 @@ namespace FOdysseyVector
 #include "OdysseyVectorHandlePoint.h"
 #include "OdysseyVectorHandleSegment.h"
 #include "OdysseyVectorVertex.h"
-#include "OdysseyVectorVertexCubic.h"
 #include "OdysseyVectorVertexIntersection.h"
 #include "OdysseyVectorSection.h"
 #include "OdysseyVectorLink.h"

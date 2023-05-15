@@ -25,6 +25,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoSendBackward : public FOdysseyVectorUn
         virtual FString ToString() const override;
 
     private:
-        FOdysseyVectorScene* mScene;
         FOdysseyVectorObject* mObject;
 };

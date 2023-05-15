@@ -17,8 +17,11 @@ class FOdysseyVectorEngine;
 class ODYSSEYVECTOR_API FOdysseyVectorScene : public FOdysseyVectorGroup
 {
     public:
-        DECLARE_MULTICAST_DELEGATE_OneParam(FRefreshLayer,FOdysseyVectorScene*)
-        FRefreshLayer mRefreshLayer;
+        DECLARE_MULTICAST_DELEGATE_TwoParams(FUpdateDelegate, FOdysseyVectorScene*, uint32 iUpdateFlags )
+        FUpdateDelegate mOnUpdateDelegate;
+
+    public:
+        FUpdateDelegate& OnUpdateDelegate();
 
 //        DECLARE_MULTICAST_DELEGATE_OneParam(FRefreshDetailsView,FOdysseyVectorScene*)
 //        FRefreshDetailsView mDetailsView;
@@ -29,6 +32,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorScene : public FOdysseyVectorGroup
     public:
         static uint32 StaticClass() { return mStaticClass; };
         virtual uint32 GetClass() { return mStaticClass; };
+
 
     private:
         void UpdateShape( uint32 iUpdateFlags );
@@ -41,6 +45,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorScene : public FOdysseyVectorGroup
     public:
         virtual ~FOdysseyVectorScene();
         FOdysseyVectorScene();
+        virtual void Update( uint32 iUpdateFlags ) override;
         void Init( std::string iName );
         void Select( FOdysseyVectorObject* iVecObj );
         void Unselect( FOdysseyVectorObject* iVecObj );

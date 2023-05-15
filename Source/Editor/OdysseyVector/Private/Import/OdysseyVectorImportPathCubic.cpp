@@ -2,7 +2,7 @@
 
 static void
 ReadPathCubicGeometrySegments( FOdysseyVectorPathCubic& iCubicPath
-                             , std::vector<FOdysseyVectorVertexCubic*>& vertexArray
+                             , std::vector<FOdysseyVectorVertex*>& vertexArray
                              , FArchive &Ar )
 {
     uint32 segmentCount;
@@ -26,13 +26,13 @@ ReadPathCubicGeometrySegments( FOdysseyVectorPathCubic& iCubicPath
         Ar << ctrlPoint1X;
         Ar << ctrlPoint1Y;
 
-        cubicSegment = FOdysseyVectorSegmentCubic::New( &iCubicPath
-                                                      , vertexArray[p0ID]
-                                                      , ctrlPoint0X
-                                                      , ctrlPoint0Y
-                                                      , ctrlPoint1X
-                                                      , ctrlPoint1Y
-                                                      , vertexArray[p1ID] );
+        cubicSegment = new FOdysseyVectorSegmentCubic ( &iCubicPath
+                                                       , vertexArray[p0ID]
+                                                       , ctrlPoint0X
+                                                       , ctrlPoint0Y
+                                                       , ctrlPoint1X
+                                                       , ctrlPoint1Y
+                                                       , vertexArray[p1ID] );
 
         iCubicPath.AddSegment( cubicSegment );
 
@@ -43,7 +43,7 @@ ReadPathCubicGeometrySegments( FOdysseyVectorPathCubic& iCubicPath
 
 static void
 ReadPathCubicGeometryVertices( FOdysseyVectorPathCubic& iCubicPath
-                             , std::vector<FOdysseyVectorVertexCubic*>& vertexArray
+                             , std::vector<FOdysseyVectorVertex*>& vertexArray
                              , FArchive &Ar )
 {
     uint32 vertexCount;
@@ -52,7 +52,7 @@ ReadPathCubicGeometryVertices( FOdysseyVectorPathCubic& iCubicPath
 
     for( uint32 i = 0; i < vertexCount; i++ )
     {
-        FOdysseyVectorVertexCubic* cubicVertex;
+        FOdysseyVectorVertex* cubicVertex;
         double x;
         double y;
         double radius;
@@ -61,7 +61,7 @@ ReadPathCubicGeometryVertices( FOdysseyVectorPathCubic& iCubicPath
         Ar << y;
         Ar << radius;
 
-        cubicVertex = FOdysseyVectorVertexCubic::New( x, y, radius );
+        cubicVertex = new FOdysseyVectorVertex( &iCubicPath, x, y, radius );
 
         iCubicPath.AddVertex( cubicVertex );
 
@@ -73,7 +73,7 @@ ReadPathCubicGeometryVertices( FOdysseyVectorPathCubic& iCubicPath
 void
 FOdysseyVectorImport::ReadObjectPathCubic( FOdysseyVectorPathCubic& iCubicPath, uint64 iChunkEnd, FArchive &Ar )
 {
-    std::vector<FOdysseyVectorVertexCubic*> vertexArray;
+    std::vector<FOdysseyVectorVertex*> vertexArray;
 
     FOdysseyVectorImport::ReadChunks( iChunkEnd
                                     , Ar

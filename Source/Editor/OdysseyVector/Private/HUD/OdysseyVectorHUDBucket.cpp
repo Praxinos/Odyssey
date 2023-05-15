@@ -7,7 +7,14 @@ FOdysseyVectorHUDBucket::~FOdysseyVectorHUDBucket()
 }
 
 FOdysseyVectorHUDBucket::FOdysseyVectorHUDBucket()
+    : mCycle ( nullptr )
 {
+}
+
+void
+FOdysseyVectorHUDBucket::SetCycle( FOdysseyVectorCycle* iCycle )
+{
+    mCycle = iCycle;
 }
 
 void
@@ -30,8 +37,19 @@ FOdysseyVectorHUDBucket::Draw( FOdysseyVectorScene* iScene, ::ULIS::FRectD& iRoi
             FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(selectedObject);
             BLMatrix2D& worldMatrix = paintGroup->GetWorldMatrix();
 
-            blctx->setMatrix( worldMatrix ); 
-            paintGroup->DrawBuckets( iRoi, iFlags );
+            blctx->setMatrix( worldMatrix );
+
+            if ( mCycle )
+            {
+                blctx->setCompOp( BL_COMP_OP_SRC_OVER );
+                blctx->setStrokeStyle( BLRgba32( 0x800000FF ) );
+                blctx->setStrokeWidth( 4.0f );
+                mCycle->StrokePath( true );
+
+                mCycle = nullptr; // reset after each draw, for safety. The tool has to set the cycle at each hovering.
+            }
+
+            paintGroup->DrawBuckets( FBucketDrawingFlags::PELLET );
         }
 
         bbox = selectedObject->GetBBox( false );

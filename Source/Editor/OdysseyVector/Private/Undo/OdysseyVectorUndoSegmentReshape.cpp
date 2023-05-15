@@ -16,8 +16,7 @@ FOdysseyVectorUndoSegmentReshape::~FOdysseyVectorUndoSegmentReshape()
 }
 
 FOdysseyVectorUndoSegmentReshape::FOdysseyVectorUndoSegmentReshape( FOdysseyVectorScene* iScene )
-    : FOdysseyVectorUndo()
-    , mScene( iScene )
+    : FOdysseyVectorUndo( iScene )
 {
 }
 
@@ -52,8 +51,8 @@ LoadArray( std::vector<FSegmentShape>& mSegmentShapeArray )
         if( mSegmentShapeArray[i].segment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
         {
             FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>( mSegmentShapeArray[i].segment );
-            ::ULIS::FVec2D& point0 = cubicSegment->GetVertex(0)->GetCoords( nullptr );
-            ::ULIS::FVec2D& point1 = cubicSegment->GetVertex(1)->GetCoords( nullptr );
+            ::ULIS::FVec2D& point0 = cubicSegment->GetVertex(0)->GetCoords();
+            ::ULIS::FVec2D& point1 = cubicSegment->GetVertex(1)->GetCoords();
             ::ULIS::FVec2D& point2 = cubicSegment->GetHandle(0)->GetCoords();
             ::ULIS::FVec2D& point3 = cubicSegment->GetHandle(1)->GetCoords();
 
@@ -76,10 +75,8 @@ FOdysseyVectorUndoSegmentReshape::Apply( UObject* iIgnored )
 
     LoadArray( mSegmentShapeAfterArray );
 
-    mScene->Update( 0 );
-
-    // call callbacks if any (for refreshing GUI e.g)
-    mRefreshDelegate.Broadcast( mScene );
+    // update invalidated objects and call callbacks if any (for refreshing GUI e.g)
+    mScene->Update(0);
 }
 
 void
@@ -90,10 +87,8 @@ FOdysseyVectorUndoSegmentReshape::Revert( UObject* iIgnored )
 
     LoadArray( mSegmentShapeBeforeArray );
 
-    mScene->Update( 0 );
-
-    // call callbacks if any (for refreshing GUI e.g)
-    mRefreshDelegate.Broadcast( mScene );
+    // update invalidated objects and call callbacks if any (for refreshing GUI e.g)
+    mScene->Update(0);
 }
 
 /** Describes this change (for debugging) */

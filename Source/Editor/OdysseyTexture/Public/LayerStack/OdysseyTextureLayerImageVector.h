@@ -23,7 +23,7 @@ class ODYSSEYTEXTURE_API UOdysseyTextureLayerImageVector
 
     private:
         // handle to a callback to refresh the layer when a property of an object's details view is changed
-        FDelegateHandle mOnRefreshHandle;
+        //FDelegateHandle mOnRefreshHandle;
         FOdysseyVectorScene* mScene;
         FOdysseyVectorEngine* mVEngine;
         TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mBlock;

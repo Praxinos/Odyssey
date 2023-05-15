@@ -415,6 +415,8 @@ FOdysseyPainterEditorGUI::BringForward( FOdysseyVectorEngine* iEngine, FOdysseyV
            (*iUndo) = new FOdysseyVectorUndoBringForward( iScene, selectedObject );
 
         selectedObject->MoveFront();
+
+        iScene->Update( 0 );
     }
 }
 
@@ -429,6 +431,8 @@ FOdysseyPainterEditorGUI::SendBackward( FOdysseyVectorEngine* iEngine, FOdysseyV
            (*iUndo) = new FOdysseyVectorUndoSendBackward( iScene, selectedObject );
 
         selectedObject->MoveBack();
+
+        iScene->Update( 0 );
     }
 }
 
@@ -484,6 +488,7 @@ FOdysseyPainterEditorGUI::GroupPaint( FOdysseyVectorEngine* iEngine, FOdysseyVec
 
         iScene->ClearSelection();
         iScene->Select( paintGroup );
+        iScene->Update( 0 );
     }
 }
 
@@ -501,6 +506,7 @@ FOdysseyPainterEditorGUI::Group( FOdysseyVectorEngine* iEngine, FOdysseyVectorSc
 
         iScene->ClearSelection();
         iScene->Select( group );
+        iScene->Update( 0 );
     }
 }
 
@@ -511,6 +517,7 @@ FOdysseyPainterEditorGUI::ResetView( FOdysseyVectorEngine* iEngine, FOdysseyVect
 
     iScene->ResetTransform();
     iScene->UpdateMatrix();
+    iScene->Update( 0 );
 }
 
 void

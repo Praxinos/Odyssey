@@ -19,12 +19,12 @@ UOdysseyTextureLayerImageVector::~UOdysseyTextureLayerImageVector()
 {
     // TODO: free the scene
 
-    mScene->mRefreshLayer.Remove(mOnRefreshHandle);
+    //mScene->OnUpdateDelegate().Remove(mOnRefreshHandle);
 }
 
 UOdysseyTextureLayerImageVector::UOdysseyTextureLayerImageVector()
-    : mVEngine(nullptr)
-    , mScene(nullptr)
+    : mScene(nullptr)
+    , mVEngine(nullptr)
 {
 	LayerTypeName = LOCTEXT("LayerTypeName", "Vector Image Layer");
     Icon = *FOdysseyStyle::GetBrush( "OdysseyLayerStack.ImageLayer16");
@@ -46,7 +46,7 @@ UOdysseyTextureLayerImageVector::Init( uint32 iWidth, uint32 iHeight )
     mScene->Init( "Vector Scene" );
 
     // record a callback to refresh the layer when a property of an object's details view is changed
-    mOnRefreshHandle = mScene->mRefreshLayer.AddUObject(this, &UOdysseyTextureLayerImageVector::OnRefresh);
+    //mOnRefreshHandle = mScene->OnUpdateDelegate().AddUObject( this, &UOdysseyTextureLayerImageVector::OnRefresh );
 
     UE_LOG(LogTemp,Warning,TEXT("UOdysseyTextureLayerImageVector::Init %d %d %d"), iWidth, iHeight, mVEngine );
 

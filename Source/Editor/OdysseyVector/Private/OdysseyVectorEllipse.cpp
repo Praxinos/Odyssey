@@ -35,15 +35,15 @@ FOdysseyVectorEllipse::Init( std::string iName, double iRadiusX, double iRadiusY
     SetName( iName );
     SetRadius( iRadiusX, iRadiusY );
 
-    mCubicVertex[0] = FOdysseyVectorVertexCubic::New( 0.0f, 0.0f, mEllipseParam.Width );
-    mCubicVertex[1] = FOdysseyVectorVertexCubic::New( 0.0f, 0.0f, mEllipseParam.Width );
-    mCubicVertex[2] = FOdysseyVectorVertexCubic::New( 0.0f, 0.0f, mEllipseParam.Width );
-    mCubicVertex[3] = FOdysseyVectorVertexCubic::New( 0.0f, 0.0f, mEllipseParam.Width );
+    mCubicVertex[0] = new FOdysseyVectorVertex( this, 0.0f, 0.0f, mEllipseParam.Width );
+    mCubicVertex[1] = new FOdysseyVectorVertex( this, 0.0f, 0.0f, mEllipseParam.Width );
+    mCubicVertex[2] = new FOdysseyVectorVertex( this, 0.0f, 0.0f, mEllipseParam.Width );
+    mCubicVertex[3] = new FOdysseyVectorVertex( this, 0.0f, 0.0f, mEllipseParam.Width );
 
-    mCubicSegment[0] = FOdysseyVectorSegmentCubic::New( static_cast<FOdysseyVectorPathCubic*>(this), mCubicVertex[0], mCubicVertex[1] );
-    mCubicSegment[1] = FOdysseyVectorSegmentCubic::New( static_cast<FOdysseyVectorPathCubic*>(this), mCubicVertex[1], mCubicVertex[2] );
-    mCubicSegment[2] = FOdysseyVectorSegmentCubic::New( static_cast<FOdysseyVectorPathCubic*>(this), mCubicVertex[2], mCubicVertex[3] );
-    mCubicSegment[3] = FOdysseyVectorSegmentCubic::New( static_cast<FOdysseyVectorPathCubic*>(this), mCubicVertex[3], mCubicVertex[0] );
+    mCubicSegment[0] = new FOdysseyVectorSegmentCubic( static_cast<FOdysseyVectorPathCubic*>(this), mCubicVertex[0], mCubicVertex[1] );
+    mCubicSegment[1] = new FOdysseyVectorSegmentCubic( static_cast<FOdysseyVectorPathCubic*>(this), mCubicVertex[1], mCubicVertex[2] );
+    mCubicSegment[2] = new FOdysseyVectorSegmentCubic( static_cast<FOdysseyVectorPathCubic*>(this), mCubicVertex[2], mCubicVertex[3] );
+    mCubicSegment[3] = new FOdysseyVectorSegmentCubic( static_cast<FOdysseyVectorPathCubic*>(this), mCubicVertex[3], mCubicVertex[0] );
 
     AddVertex ( mCubicVertex[0] );
     AddVertex ( mCubicVertex[1] );
@@ -144,8 +144,8 @@ FOdysseyVectorEllipse::PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags )
 
             for( int i = 0; i < 4; i++ )
             {
-                ::ULIS::FVec2D &point0 = mCubicSegment[i]->GetVertex(0)->GetCoords( mCubicSegment[i] );
-                ::ULIS::FVec2D &point1 = mCubicSegment[i]->GetVertex(1)->GetCoords( mCubicSegment[i] );
+                ::ULIS::FVec2D &point0 = mCubicSegment[i]->GetVertex(0)->GetCoords();
+                ::ULIS::FVec2D &point1 = mCubicSegment[i]->GetVertex(1)->GetCoords();
                 ::ULIS::FVec2D &ctrlPoint0 = mCubicSegment[i]->GetHandle(0)->GetCoords();
                 ::ULIS::FVec2D &ctrlPoint1 = mCubicSegment[i]->GetHandle(1)->GetCoords();
 
@@ -155,7 +155,7 @@ FOdysseyVectorEllipse::PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags )
 
             path.close();
 
-            return path.hitTest( pt, BL_FILL_RULE_EVEN_ODD ) ? true : false;
+            return ( path.hitTest( pt, BL_FILL_RULE_EVEN_ODD ) == BL_HIT_TEST_IN ) ? true : false;
         }
     }
     else

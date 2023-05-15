@@ -5,17 +5,49 @@ FOdysseyVectorSegment::~FOdysseyVectorSegment()
 }
 
 FOdysseyVectorSegment::FOdysseyVectorSegment()
-    : FOdysseyVectorLink ()
-    , mIsInvalidated( false )
-    , mPath ( nullptr )
+    : mPath( nullptr )
 {
+}
 
+FOdysseyVectorSegment::FOdysseyVectorSegment( FOdysseyVectorPath* iPath
+                                            , FOdysseyVectorVertex* iVertex0
+                                            , FOdysseyVectorVertex* iVertex1 )
+    : FOdysseyVectorLink ()
+    , mPath ( iPath )
+    , mIsInvalidated( false )
+    , mPaintingCode ( 0 )
+{
+    FOdysseyVectorLink::Init ( iVertex0, iVertex1 );
 }
 
 FOdysseyVectorVertex*
 FOdysseyVectorSegment::GetOtherVertex( FOdysseyVectorVertex* iVertex )
 {
     return ( iVertex == GetVertex(0) ) ? GetVertex(1) : GetVertex(0);
+}
+
+void
+FOdysseyVectorSegment::SetID( uint32 iID )
+{
+    mID = iID;
+}
+
+uint32
+FOdysseyVectorSegment::GetID()
+{
+    return mID;
+}
+
+void
+FOdysseyVectorSegment::SetPaintingCode( uint32 iPaintingCode )
+{
+    mPaintingCode = iPaintingCode;
+}
+
+uint32
+FOdysseyVectorSegment::GetPaintingCode()
+{
+    return mPaintingCode;
 }
 
 ::ULIS::FVec2D
@@ -34,35 +66,10 @@ FOdysseyVectorSegment::GetTangentAt( double t )
     return unimplemented;
 }
 
-
-void
-FOdysseyVectorSegment::Init( FOdysseyVectorPath* iPath
-                           , FOdysseyVectorVertex* iVertex0
-                           , FOdysseyVectorVertex* iVertex1 )
-{
-    FOdysseyVectorLink::Init ( iVertex0, iVertex1 );
-
-    mPath = iPath;
-}
-
-// static
-
-FOdysseyVectorSegment*
-FOdysseyVectorSegment::New( FOdysseyVectorPath* iPath
-                          , FOdysseyVectorVertex* iVertex0
-                          , FOdysseyVectorVertex* iVertex1 )
-{
-    FOdysseyVectorSegment* segment = new FOdysseyVectorSegment();
-
-    segment->Init ( iPath, iVertex0, iVertex1 );
-
-    return segment;
-}
-
 ::ULIS::FVec2D
 FOdysseyVectorSegment::GetVectorAtStart( bool iNormalize )
 {
-    ::ULIS::FVec2D vec = GetVertex(1)->GetCoords( nullptr ) - GetVertex(0)->GetCoords( nullptr );
+    ::ULIS::FVec2D vec = GetVertex(1)->GetCoords() - GetVertex(0)->GetCoords();
 
     if( iNormalize && vec.DistanceSquared() )
     {
@@ -70,6 +77,20 @@ FOdysseyVectorSegment::GetVectorAtStart( bool iNormalize )
     }
 
     return vec;
+}
+
+void
+FOdysseyVectorSegment::Link()
+{
+    GetVertex(0)->AddSegment(this);
+    GetVertex(1)->AddSegment(this);
+}
+
+void
+FOdysseyVectorSegment::Unlink()
+{
+    GetVertex(0)->RemoveSegment(this);
+    GetVertex(1)->RemoveSegment(this);
 }
 
 ::ULIS::FVec2D
@@ -96,86 +117,39 @@ FOdysseyVectorSegment::GetPath()
     return mPath;
 }
 
-FOdysseyVectorSection*
-FOdysseyVectorSegment::GetSection ( double t )
-{
-    for( std::list<FOdysseyVectorSection*>::iterator it = mSectionList.begin(); it != mSectionList.end(); ++it )
-    {
-        FOdysseyVectorSection* section = static_cast<FOdysseyVectorSection*>(*it);
-        FOdysseyVectorVertex* vertex0 = section->GetVertex(0);
-        FOdysseyVectorVertex* vertex1 = section->GetVertex(1);
-        double fromT = vertex0->GetT( this );
-        double   toT = vertex1->GetT( this );
-
-        if ( ( t >= fromT ) && ( t <= toT ) )
-        {
-            return section;
-        }
-    }
-
-    return nullptr;
-}
-
-void
-FOdysseyVectorSegment::AddSection ( FOdysseyVectorSection* iSection )
-{
-    iSection->GetVertex(0)->AddSection( iSection );
-    iSection->GetVertex(1)->AddSection( iSection );
-
-    mSectionList.push_back( iSection );
-}
-
-void
-FOdysseyVectorSegment::DeleteSection ( FOdysseyVectorSection* iSection )
-{
-    iSection->GetVertex(0)->RemoveSection( iSection );
-    iSection->GetVertex(1)->RemoveSection( iSection );
-
-    mSectionList.remove( iSection );
-
-    delete iSection;
-}
-
-std::list<FOdysseyVectorSection*>&
-FOdysseyVectorSegment::GetSectionList()
-{
-    return mSectionList;
-}
-
+// MUST be called only on segments belonging to this path (because of the section)
 void
 FOdysseyVectorSegment::AddIntersection ( FOdysseyVectorVertexIntersection* iIntersectionVertex )
 {
     double t = iIntersectionVertex->GetT( this );
-    FOdysseyVectorSection* section = GetSection ( t );
+    std::list<FOdysseyVectorVertexIntersection*>::iterator it = std::find_if ( mIntersectionVertexList.begin()
+                                                                             , mIntersectionVertexList.end()
+                                                                             , [&t,this]( FOdysseyVectorVertexIntersection* iVertex )
+                                                                               {
+
+                                                                                   return ( iVertex->GetT( this ) > t );
+                                                                               } );
+
+    mIntersectionVertexList.insert( it, iIntersectionVertex );
+
+/*
+    FOdysseyVectorSection* section = GetSection ( iIntersectionVertex->GetT( this ) );
     FOdysseyVectorVertex* vertex0 = section->GetVertex(0);
     FOdysseyVectorVertex* vertex1 = section->GetVertex(1);
     FOdysseyVectorSection* subSection[2] = { new FOdysseyVectorSection ( this, vertex0            , iIntersectionVertex )
                                            , new FOdysseyVectorSection ( this, iIntersectionVertex, vertex1             ) };
+*/
+    //if( t )
+    
 
-    DeleteSection( section );
-
-    mIntersectionVertexList.push_back( iIntersectionVertex );
-
-    AddSection ( subSection[0] );
-    AddSection ( subSection[1] );
+   // mIntersectionVertexList.push_back( iIntersectionVertex );
 }
 
 // MUST be called only on segments belonging to this path (because of the section)
 void
 FOdysseyVectorSegment::ClearIntersections()
 {
-    std::list<FOdysseyVectorSection*> sectionList = mSectionList;
-
-    for( std::list<FOdysseyVectorSection*>::iterator it = sectionList.begin(); it != sectionList.end(); ++it )
-    {
-        FOdysseyVectorSection* section = static_cast<FOdysseyVectorSection*>(*it);
-
-        DeleteSection( section );
-    }
-
-    mSectionList.clear();
-
-    // do not free the intersection vertex here, as they are shared between segments. Deletion would be called twice.
+    // do not free the intersection vertex here
     // Leave it to the paintgroup.
     mIntersectionVertexList.clear();
 }
@@ -189,9 +163,12 @@ FOdysseyVectorSegment::IsInvalidated()
 void
 FOdysseyVectorSegment::Invalidate()
 {
-    mPath->InvalidateSegment( this );
+    if( mPath ) // Note: GroupPaint "gap segments" can be orphan
+    {
+        mPath->InvalidateSegment( this );
 
-    mIsInvalidated = true;
+        mIsInvalidated = true;
+    }
 }
 
 void
@@ -206,20 +183,29 @@ FOdysseyVectorSegment::GetIntersectionVertexList()
     return mIntersectionVertexList;
 }
 
-bool
-FOdysseyVectorSegment::HasIntersectionVertex( FOdysseyVectorVertexIntersection& mIntersectionVertex )
+uint32
+FOdysseyVectorSegment::GetIntersectionVertexCount()
+{
+    return mIntersectionVertexList.size();
+}
+
+void
+FOdysseyVectorSegment::GetIntersectionVertices( std::vector<FOdysseyVectorVertex*>& oVertexArray )
 {
     for( std::list<FOdysseyVectorVertexIntersection*>::iterator it = mIntersectionVertexList.begin(); it != mIntersectionVertexList.end(); ++it )
     {
         FOdysseyVectorVertexIntersection* intersectionVertex = static_cast<FOdysseyVectorVertexIntersection*>(*it);
 
-        if ( intersectionVertex == &mIntersectionVertex ) 
-        {
-            return true;
-        }
+        oVertexArray.push_back( intersectionVertex );
     }
+}
 
-    return false;
+void
+FOdysseyVectorSegment::GetAllVertices( std::vector<FOdysseyVectorVertex*>& oVertexArray )
+{
+    oVertexArray.push_back( static_cast<FOdysseyVectorVertex*>(mPoint[0]) );
+    GetIntersectionVertices( oVertexArray );
+    oVertexArray.push_back( static_cast<FOdysseyVectorVertex*>(mPoint[1]) );
 }
 
 void
@@ -227,3 +213,19 @@ FOdysseyVectorSegment::Draw( ::ULIS::FRectD &iRoi )
 {
 
 }
+
+::ULIS::FVec2D
+FOdysseyVectorSegment::GetVectorFromVertex( FOdysseyVectorVertex* iVertex, bool iNormalize )
+{
+    ::ULIS::FVec2D vector = ::ULIS::FVec2D( 0.0f, 0.0f );
+
+    return vector;
+}
+/*
+void
+FOdysseyVectorSegment::BuildExplorationPairs( std::vector<FExplorationPair>& iExplorationPairsArray )
+{
+    GetVertex(0)->BuildExplorationPairs( iExplorationPairsArray );
+    GetVertex(1)->BuildExplorationPairs( iExplorationPairsArray );
+}
+*/

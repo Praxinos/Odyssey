@@ -42,8 +42,7 @@ FOdysseyVectorUndoPathAlter::FOdysseyVectorUndoPathAlter( FOdysseyVectorScene* i
                                                         , FOdysseyVectorSegment* iRemovedSegment
                                                         , FOdysseyVectorVertex* iAddedVertex
                                                         , FOdysseyVectorSegment* iAddedSegment )
-    : FOdysseyVectorUndo()
-    , mScene( iScene )
+    : FOdysseyVectorUndo( iScene )
 {
     if( iRemovedVertex ) 
         mRemovedVertexArray.push_back( iRemovedVertex );
@@ -72,8 +71,7 @@ FOdysseyVectorUndoPathAlter::FOdysseyVectorUndoPathAlter( FOdysseyVectorScene* i
 FOdysseyVectorUndoPathAlter::FOdysseyVectorUndoPathAlter( FOdysseyVectorScene* iScene
                                                         , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
                                                         , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray )
-    : FOdysseyVectorUndo()
-    , mScene( iScene )
+    : FOdysseyVectorUndo( iScene )
 {
     mAddedVertexArray = iAddedVertexArray;
     mAddedSegmentArray = iAddedSegmentArray;
@@ -106,8 +104,8 @@ FOdysseyVectorUndoPathAlter::Apply( UObject* iIgnored )
         mAddedSegmentArray[i]->GetPath()->AddSegment( mAddedSegmentArray[i] );
     }
 
-    // call callbacks if any (for refreshing GUI e.g)
-    mRefreshDelegate.Broadcast( mScene );
+    // update invalidated objects and call callbacks if any (for refreshing GUI e.g)
+    mScene->Update(0);
 }
 
 void
@@ -137,8 +135,8 @@ FOdysseyVectorUndoPathAlter::Revert( UObject* iIgnored )
         mAddedVertexArray[i]->GetPath()->RemoveVertex( mAddedVertexArray[i] );
     }
 
-    // call callbacks if any (for refreshing GUI e.g)
-    mRefreshDelegate.Broadcast( mScene );
+    // update invalidated objects and call callbacks if any (for refreshing GUI e.g)
+    mScene->Update(0);
 }
 
 /** Describes this change (for debugging) */

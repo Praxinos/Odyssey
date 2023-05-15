@@ -10,18 +10,34 @@ FOdysseyVectorCycle::~FOdysseyVectorCycle()
 
 //static
 FOdysseyVectorCycle::FOdysseyVectorCycle( FOdysseyVectorObject& iParent
-                                      , uint64 iID
-                                      , std::vector<FOdysseyVectorVertex*>& iVertexArray
-                                      , std::vector<FOdysseyVectorSection*>& iSectionArray )
+                                        , uint64 iID
+                                        , std::vector<FOdysseyVectorVertex*>& iVertexArray
+                                        , std::vector<FOdysseyVectorSection*>& iSectionArray )
     : mParent( iParent )
     , mID( iID )
     , mBucket( nullptr )
+    , mPropagatedBucket( nullptr )
     , mVertexArray (iVertexArray)
     , mSectionArray (iSectionArray)
     , mFlags (0)
     , mParentCycle( nullptr )
+    , mPropagated( false )
 {
     Build( mVertexArray, mSectionArray );
+}
+
+void
+FOdysseyVectorCycle::Merge( FOdysseyVectorCycle* iMergeCycle )
+{
+    mVertexArray.insert( mVertexArray.end(), iMergeCycle->mVertexArray.begin(), iMergeCycle->mVertexArray.end() );
+    mSectionArray.insert( mSectionArray.end(), iMergeCycle->mSectionArray.begin(), iMergeCycle->mSectionArray.end() );
+
+    for( int i = 0; i < iMergeCycle->mSectionArray.size(); i++ )
+    {
+        iMergeCycle->mSectionArray[i]->AddCycle( this );
+    }
+
+    mCombinedPath.addPath( iMergeCycle->mContourPath );
 }
 
 FOdysseyVectorCycle*
@@ -31,41 +47,30 @@ FOdysseyVectorCycle::GetParentCycle()
 }
 
 void
-FOdysseyVectorCycle::AppendChild( FOdysseyVectorCycle *iChild )
+FOdysseyVectorCycle::SetParentCycle( FOdysseyVectorCycle *iParent )
 {
-    mChildrenList.push_back( iChild );
-
-    iChild->mParentCycle = this;
-}
-
-void
-FOdysseyVectorCycle::RemoveChild( FOdysseyVectorCycle *iChild )
-{
-    mChildrenList.remove( iChild );
+    this->mParentCycle = iParent;
 }
 
 bool
 FOdysseyVectorCycle::FitsIn( FOdysseyVectorCycle* iParentCandidate )
 {
+    // First test : get sure they don't share a common section
+    for( int i = 0; i < mSectionArray.size(); i++ )
+    {
+        if( mSectionArray[i]->GetOtherCycle( this ) == iParentCandidate )
+        {
+            return false;
+        }
+    }
+
     for( int i = 0; i < mVertexArray.size(); i++ )
     {
-        ::ULIS::FVec2D& vCoords = mVertexArray[i]->GetCoords( mVertexArray[i]->GetFirstSegment() );
+        ::ULIS::FVec2D& vCoords = mVertexArray[i]->GetCoords();
         BLPoint pt = { vCoords.x, vCoords.y };
-        uint32 ret =  iParentCandidate->mPath.hitTest( pt, BL_FILL_RULE_NON_ZERO );
+        uint32 ret =  iParentCandidate->mContourPath.hitTest( pt, BL_FILL_RULE_EVEN_ODD );
 
-        // we also need to test if the point lies on the loop boundaries
-        /*if( ret == 0 )
-        {
-            for ( int j = 0; j < iParentCandidate->mVertexArray.size(); j++ )
-            {
-                if( mVertexArray[i] == iParentCandidate->mVertexArray[j] )
-                {
-                    ret = 1;
-                }
-            }
-        }*/
-
-        if( ret == 0 )
+        if( ret != BL_HIT_TEST_IN )
         {
             return false;
         }
@@ -90,128 +95,110 @@ FOdysseyVectorCycle::GenerateID( std::vector<FOdysseyVectorSection*>& iSectionAr
 
 void
 FOdysseyVectorCycle::BuildSegmentCubic( FOdysseyVectorSegmentCubic& iSegment
-                                     , double iFromT
-                                     , double iToT )
+                                      , double iFromT
+                                      , double iToT )
 {
-    std::vector<FPolygon>& polygonCache = iSegment.GetPolygonCache();
-    uint32 polyCount = iSegment.GetPolygonCount();
-    bool revert = ( iFromT < iToT ) ? false : true;
+    ::ULIS::FVec2D& point0 = iSegment.GetVertex(0)->GetCoords();
+    ::ULIS::FVec2D& point1 = iSegment.GetVertex(1)->GetCoords();
+    ::ULIS::FVec2D& ctrlPoint0 = iSegment.GetHandle(0)->GetCoords();
+    ::ULIS::FVec2D& ctrlPoint1 = iSegment.GetHandle(1)->GetCoords();
+    ::ULIS::FVec2D samplePoint0;
+    ::ULIS::FVec2D samplePoint1;
+    ::ULIS::FVec2D sampleCtrlPoint0;
+    ::ULIS::FVec2D sampleCtrlPoint1;
 
-    if ( revert == false )
+    if( iFromT < iToT )
     {
-        for( uint32 i = 0; i < polyCount; i++ )
-        {
-            if( polygonCache[i].toT >= iFromT && polygonCache[i].fromT <= iToT )
-            {
-                ::ULIS::FVec2D to   = { polygonCache[i].lineVertex[1].x, polygonCache[i].lineVertex[1].y };
-                ::ULIS::FVec2D from = { polygonCache[i].lineVertex[0].x, polygonCache[i].lineVertex[0].y };
+        FOdysseyVector::BezierExtract( point0, ctrlPoint0, ctrlPoint1, point1
+                                     , iFromT, iToT
+                                     , samplePoint0, sampleCtrlPoint0, sampleCtrlPoint1, samplePoint1 );
 
-                // clipping part
-                if ( polygonCache[i].toT > iToT )
-                {
-                    ::ULIS::FVec2D dir = polygonCache[i].lineVertex[1] - polygonCache[i].lineVertex[0];
-
-                    to.x = polygonCache[i].lineVertex[0].x + dir.x * ( ( iToT - polygonCache[i].fromT ) / ( polygonCache[i].toT - polygonCache[i].fromT ) );
-                    to.y = polygonCache[i].lineVertex[0].y + dir.y * ( ( iToT - polygonCache[i].fromT ) / ( polygonCache[i].toT - polygonCache[i].fromT ) );
-                }
-
-                mPath.lineTo( to.x, to.y );
-
-                // take advantage of this func to set the bouding limits.
-                if ( to.x < mMin.x ) mMin.x = to.x;
-                if ( to.y < mMin.y ) mMin.y = to.y;
-                if ( to.x > mMax.x ) mMax.x = to.x;
-                if ( to.y > mMax.y ) mMax.y = to.y;
-            }
-        }
+        mContourPath.cubicTo( BLPoint( sampleCtrlPoint0.x, sampleCtrlPoint0.y )
+                            , BLPoint( sampleCtrlPoint1.x, sampleCtrlPoint1.y )
+                            , BLPoint( samplePoint1.x, samplePoint1.y ) );
     }
     else
     {
-        double tmp = iFromT;
-        iFromT = iToT;
-        iToT = tmp;
+        FOdysseyVector::BezierExtract( point0, ctrlPoint0, ctrlPoint1, point1
+                                     , iToT, iFromT
+                                     , samplePoint0, sampleCtrlPoint0, sampleCtrlPoint1, samplePoint1 );
 
-        for( int i = polyCount - 1; i > 0; i-- )
-        {
-            if( polygonCache[i].toT >= iFromT && polygonCache[i].fromT <= iToT )
-            {
-                ::ULIS::FVec2D to   = { polygonCache[i].lineVertex[1].x, polygonCache[i].lineVertex[1].y };
-                ::ULIS::FVec2D from = { polygonCache[i].lineVertex[0].x, polygonCache[i].lineVertex[0].y };
-
-                // clipping part
-                if ( polygonCache[i].fromT < iFromT )
-                {
-                    ::ULIS::FVec2D dir = polygonCache[i].lineVertex[1] - polygonCache[i].lineVertex[0];
-
-                    from.x = polygonCache[i].lineVertex[0].x + dir.x * ( ( iFromT - polygonCache[i].fromT ) / ( polygonCache[i].toT - polygonCache[i].fromT ) );
-                    from.y = polygonCache[i].lineVertex[0].y + dir.y * ( ( iFromT - polygonCache[i].fromT ) / ( polygonCache[i].toT - polygonCache[i].fromT ) );
-                }
-
-                mPath.lineTo( from.x, from.y );
-
-                // take advantage of this func to set the bouding limits.
-                if ( to.x < mMin.x ) mMin.x = to.x;
-                if ( to.y < mMin.y ) mMin.y = to.y;
-                if ( to.x > mMax.x ) mMax.x = to.x;
-                if ( to.y > mMax.y ) mMax.y = to.y;
-            }
-        }
+        mContourPath.cubicTo( BLPoint( sampleCtrlPoint1.x, sampleCtrlPoint1.y )
+                            , BLPoint( sampleCtrlPoint0.x, sampleCtrlPoint0.y )
+                            , BLPoint( samplePoint0.x, samplePoint0.y ) );
     }
 }
 
 void
 FOdysseyVectorCycle::Build( std::vector<FOdysseyVectorVertex*>& iVertexArray
-                         , std::vector<FOdysseyVectorSection*>& iSectionArray )
+                          , std::vector<FOdysseyVectorSection*>& iSectionArray )
 {
-    /*double xmin, ymin, xmax, ymax;*/
+    int32 arraySize = iVertexArray.size();
     int seg = 0;
-
-    mPath.clear();
-
-     //mPointArray.clear();
-     //mPointArray.reserve(200);
 
     if ( iVertexArray.size() ) 
     {
-        FOdysseyVectorSection* firstSection = iSectionArray.front();
-        FOdysseyVectorSegment* firstSegment = firstSection->GetSegment();
-        ::ULIS::FVec2D originAt = iVertexArray[0]->GetPosition( firstSegment );
-        FOdysseyVectorVertex* currentVertex = iVertexArray[0];
+        ::ULIS::FVec2D originAt = iVertexArray[0]->GetCoords();
 
-        mMin.x = mMax.x = originAt.x;
-        mMin.y = mMax.y = originAt.y;
+        mContourPath.moveTo( originAt.x, originAt.y );
 
-        for( int i = 0; i < iSectionArray.size(); i++ )
+        for( int i = 0; i < arraySize; i++ )
         {
+            int n = ( i + 1 ) % arraySize;
             FOdysseyVectorSection* section = iSectionArray[i];
-            FOdysseyVectorSegment* segment = section->GetSegment();
-            FOdysseyVectorVertex* nextVertex = ( currentVertex == section->GetVertex(0) ) ? section->GetVertex(1) : section->GetVertex(0);
-            double currentVertexT = currentVertex->GetT( segment );
-            double    nextVertexT =    nextVertex->GetT( segment );
-            ::ULIS::FVec2D currentAt = currentVertex->GetPosition( segment );
+            FOdysseyVectorVertex* sectionVertex0 = section->GetVertex(0);
+            FOdysseyVectorVertex* sectionVertex1 = section->GetVertex(1);
+            ::ULIS::FVec2D* sectionBezier = section->GetBezier();
+            FOdysseyVectorVertex* vertexi = iVertexArray[i];
+            FOdysseyVectorVertex* vertexn = iVertexArray[n];
 
-            if( i == 0 )
+            section->AddCycle( this );
+
+            if( vertexn->GetClass() == FOdysseyVectorVertexIntersection::StaticClass() )
             {
-                mPath.moveTo( currentAt.x, currentAt.y );
+                FOdysseyVectorVertexIntersection* intersectionVertex = static_cast<FOdysseyVectorVertexIntersection*>(vertexn);
+
+                if( ( iSectionArray[i]->GetSegment() != iSectionArray[n]->GetSegment() )
+                 || ( intersectionVertex->SelfIntersects() == true ) )
+                {
+                    vertexn = intersectionVertex->GetPartner();
+                }
+            }
+
+            // check it goes the same direction
+            if( vertexi == sectionVertex0 )
+            {
+                mContourPath.cubicTo( sectionBezier[1].x, sectionBezier[1].y
+                                    , sectionBezier[2].x, sectionBezier[2].y
+                                    , sectionBezier[3].x, sectionBezier[3].y );
             }
             else
             {
-                mPath.lineTo( currentAt.x, currentAt.y );
+                mContourPath.cubicTo( sectionBezier[2].x, sectionBezier[2].y
+                                    , sectionBezier[1].x, sectionBezier[1].y
+                                    , sectionBezier[0].x, sectionBezier[0].y );
             }
-
-            BuildSegmentCubic ( static_cast<FOdysseyVectorSegmentCubic&>(*segment), currentVertexT, nextVertexT );
-
-            currentVertex = nextVertex;
         }
 
-        mPath.close();
+        mContourPath.close();
     }
+
+    mCombinedPath = mContourPath;
 }
 
 void
 FOdysseyVectorCycle::SetBucket( FOdysseyVectorBucket* iBucket )
 {
     mBucket = iBucket;
+
+    if( mBucket )
+    {
+        mPropagatedBucket = mBucket->IsPropagated() ? mBucket : nullptr;
+    }
+    else
+    {
+        mPropagatedBucket = nullptr;
+    }
 }
 
 FOdysseyVectorBucket*
@@ -220,75 +207,149 @@ FOdysseyVectorCycle::GetBucket()
     return mBucket;
 }
 
+void
+FOdysseyVectorCycle::SetPropagatedBucket( FOdysseyVectorBucket* iPropagatedBucket )
+{
+    mPropagatedBucket = iPropagatedBucket;
+}
+
+FOdysseyVectorBucket*
+FOdysseyVectorCycle::GetPropagatedBucket()
+{
+    return mPropagatedBucket;
+}
+
+bool
+FOdysseyVectorCycle::PropagateBucket()
+{
+    for( int i = 0; i < mSectionArray.size(); i++ )
+    {
+        FOdysseyVectorCycle* neighbourCycle = mSectionArray[i]->GetOtherCycle( this );
+
+        if( neighbourCycle )
+        {
+            FOdysseyVectorBucket* neighbourPropagatedBucket = neighbourCycle->GetPropagatedBucket();
+
+            if( neighbourPropagatedBucket )
+            {
+                this->SetPropagatedBucket( neighbourPropagatedBucket );
+
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+std::vector<FOdysseyVectorSection*>&
+FOdysseyVectorCycle::GetSectionArray()
+{
+    return mSectionArray;
+}
+
 bool
 FOdysseyVectorCycle::HitTest( double iX, double iY )
 {
-/*
-    mPath.clear();
-    mPath.moveTo(0,0);
-    mPath.lineTo(0,0);
-*/
     BLContext* blctx = mParent.GetScene()->GetEngine()->GetBLContext();
     BLPoint pt = { iX, iY };
-    BLPoint* vertex = ( BLPoint*) mPath.vertexData();
-    BLPath combinedPath = mPath;
-
-    for( std::list<FOdysseyVectorCycle*>::iterator oit = mChildrenList.begin(); oit != mChildrenList.end(); ++oit )
-    {
-        FOdysseyVectorCycle *child = (*oit);
-
-        combinedPath.addPath( child->mPath );
-    }
 
     // WARNING: looks like in this version the return value is a bool (in the shape of an int) but in later version is a enum value. We will have to fix that.
-    uint32 ret = combinedPath.hitTest( pt, BL_FILL_RULE_EVEN_ODD );
+    uint32 ret = mCombinedPath.hitTest( pt, BL_FILL_RULE_EVEN_ODD );
 
-    return ( ret ) ? true : false;
+    return ( ret == BL_HIT_TEST_IN ) ? true : false;
+}
+
+void
+FOdysseyVectorCycle::FillPath()
+{
+    BLContext* blctx = mParent.GetScene()->GetEngine()->GetBLContext();
+
+    blctx->setFillRule( BL_FILL_RULE_EVEN_ODD );
+    blctx->fillPath( mCombinedPath );
+}
+
+void
+FOdysseyVectorCycle::StrokePath( bool iWorld )
+{
+    BLContext* blctx = mParent.GetScene()->GetEngine()->GetBLContext();
+
+    if( iWorld == true )
+    {
+        BLPath worldPath = mCombinedPath;
+
+        worldPath.transform( mParent.GetWorldMatrix() );
+
+        blctx->save();
+        blctx->resetMatrix();
+        blctx->strokePath( worldPath );
+        blctx->restore();
+    }
+    else
+    {
+        blctx->strokePath( mCombinedPath );
+    }
+
+    blctx->flush( BL_CONTEXT_FLUSH_SYNC );
+}
+
+static void
+ShowCycle( std::vector<FOdysseyVectorVertex*>& vertexArray
+          , std::vector<FOdysseyVectorSection*>& sectionArray)
+{
+    UE_LOG(LogTemp,Warning,TEXT("Array size: %d"), vertexArray.size() );
+
+    for( int i = 0; i < vertexArray.size(); i++ )
+    {
+        FOdysseyVectorSegment* segment = sectionArray[i]->GetSegment();
+        FOdysseyVectorVertex* vertex0 = segment->GetVertex(0);
+        FOdysseyVectorVertex* vertex1 = segment->GetVertex(1);
+        FOdysseyVectorPath* path = vertex0->GetPath();
+        BLPoint pt0 = path->GetWorldMatrix().mapPoint( vertex0->GetCoords().x, vertex0->GetCoords().y );
+        BLPoint pt1 = path->GetWorldMatrix().mapPoint( vertex1->GetCoords().x, vertex1->GetCoords().y );
+
+        UE_LOG(LogTemp,Warning,TEXT("Node: vertex:%d section:%d (%d[x:%f y:%f] -- %d[x:%f y:%f])"), vertexArray[i], sectionArray[i], sectionArray[i]->GetVertex(0), pt0.x, pt0.y, sectionArray[i]->GetVertex(1), pt1.x, pt1.y );
+    }
 }
 
 void
 FOdysseyVectorCycle::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
 {
     BLContext* blctx = mParent.GetScene()->GetEngine()->GetBLContext();
-    BLPath combinedPath = mPath;
+    FOdysseyVectorBucket* bucket = mBucket ? mBucket : mPropagatedBucket;
+    BLMatrix2D& worldMatrix = mParent.GetWorldMatrix();
+    BLBox bbox;
 
-    for( std::list<FOdysseyVectorCycle*>::iterator oit = mChildrenList.begin(); oit != mChildrenList.end(); ++oit )
+    mContourPath.getBoundingBox( &bbox );
+
+    if( bucket )
     {
-        FOdysseyVectorCycle *child = (*oit);
-
-        combinedPath.addPath( child->mPath );
-    }
-
-    if( mBucket )
-    {
-        if( mBucket->IsGradient() )
+        if( bucket->IsGradient() )
         {
-            double difX = mMax.x - mMin.x;
-            double difY = mMax.y - mMin.y;
-            double linearMinX = mMin.x;
-            double linearMinY = mMin.y;
-            double linearMaxX = mMax.x;
-            double linearMaxY = mMax.y;
+            double linearMinX = bbox.x0;
+            double linearMinY = bbox.y0;
+            double linearMaxX = bbox.x1;
+            double linearMaxY = bbox.y1;
             BLGradient linear( BLLinearGradientValues( linearMinX, linearMinY, linearMaxX, linearMaxY ) );
-            FColor& gradientColor0 = mBucket->GetGradientColor0();
-            FColor& gradientColor1 = mBucket->GetGradientColor1();
+            FColor& gradientColor0 = bucket->GetGradientColor0();
+            FColor& gradientColor1 = bucket->GetGradientColor1();
             BLRgba32 BLColor0;
             BLRgba32 BLColor1;
-            double angle = mBucket->GetGradientRotationInDegrees() * M_PI / 180;
+            double angle = bucket->GetGradientRotationInDegrees() * M_PI / 180;
 
             linear.rotate( angle );
 
             // Note: Blend2D color format is 0xAARRGGBB
-            BLColor0.r = gradientColor0.B;
-            BLColor0.g = gradientColor0.G;
-            BLColor0.b = gradientColor0.R;
-            BLColor0.a = gradientColor0.A;
+            BLColor0.setR( gradientColor0.B );
+            BLColor0.setG( gradientColor0.G );
+            BLColor0.setB( gradientColor0.R );
+            BLColor0.setA( gradientColor0.A );
 
             // Note: Blend2D color format is 0xAARRGGBB
-            BLColor1.r = gradientColor1.B;
-            BLColor1.g = gradientColor1.G;
-            BLColor1.b = gradientColor1.R;
-            BLColor1.a = gradientColor1.A;
+            BLColor1.setR( gradientColor1.B );
+            BLColor1.setG( gradientColor1.G );
+            BLColor1.setB( gradientColor1.R );
+            BLColor1.setA( gradientColor1.A );
 
             linear.addStop( 0.0, BLColor0 );
             linear.addStop( 1.0, BLColor1 );
@@ -298,14 +359,14 @@ FOdysseyVectorCycle::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
         }
         else
         {
-            FColor& color = mBucket->GetColor();
+            FColor& color = bucket->GetColor();
             BLRgba32 BLColor;
 
             // Note: Blend2D color format is 0xAARRGGBB
-            BLColor.r = color.B;
-            BLColor.g = color.G;
-            BLColor.b = color.R;
-            BLColor.a = color.A;
+            BLColor.setR( color.B );
+            BLColor.setG( color.G );
+            BLColor.setB( color.R );
+            BLColor.setA( color.A );
 
             blctx->setStrokeStyle( BLColor );
             blctx->setFillStyle( BLColor );
@@ -318,11 +379,37 @@ FOdysseyVectorCycle::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
     }
 
     blctx->setFillRule( BL_FILL_RULE_EVEN_ODD );
+    blctx->fillPath( mCombinedPath );
 
-       /*iBLContext.fillPolygon( &mPointArray[0], mPointArray.size() );*/
-    //blctx->strokePath( combinedPath );
-    blctx->fillPath( combinedPath );
-    /*}*/
+    blctx->save();
+    blctx->resetMatrix();
+    blctx->setStrokeWidth( 1.0f );
+
+    // stroke borders or else there will be a small 1 pixel gap. We draw it only once: the cycle responsible for drawing the 
+    // section is the cycle that was first attached to the section. That way we don't draw it twice. The paint group could be
+    // responsible for drawing the sections as well, but then we have to retrieve the bucket color, if any. this would be to
+    // complicated. We draw in world coordinates to be sure to get 1 pixel-width strokes.
+    for( int i = 0; i < mSectionArray.size(); i++ )
+    {
+        FOdysseyVectorSection* section = mSectionArray[i];
+
+        if( section->GetCycle(0) == this )
+        {
+            ::ULIS::FVec2D* sectionBezier = section->GetBezier();
+            BLPoint pt[4] = { worldMatrix.mapPoint( sectionBezier[0].x, sectionBezier[0].y )
+                            , worldMatrix.mapPoint( sectionBezier[1].x, sectionBezier[1].y )
+                            , worldMatrix.mapPoint( sectionBezier[2].x, sectionBezier[2].y )
+                            , worldMatrix.mapPoint( sectionBezier[3].x, sectionBezier[3].y ) };
+            BLPath path;
+
+            path.moveTo( pt[0] );
+            path.cubicTo( pt[1], pt[2], pt[3] );
+
+            blctx->strokePath( path );
+        }
+    }
+
+    blctx->restore();
 }
 
 uint64

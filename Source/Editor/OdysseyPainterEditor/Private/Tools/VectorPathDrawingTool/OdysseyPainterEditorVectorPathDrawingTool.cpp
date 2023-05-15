@@ -5,6 +5,8 @@
 #include "Undo/OdysseyVectorUndoObjectAdd.h"
 #include "Undo/OdysseyVectorUndoPathAlter.h"
 
+#define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorPathDrawingTool"
+
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
 UOdysseyPainterEditorVectorPathDrawingTool::~UOdysseyPainterEditorVectorPathDrawingTool()
@@ -13,11 +15,11 @@ UOdysseyPainterEditorVectorPathDrawingTool::~UOdysseyPainterEditorVectorPathDraw
 
 UOdysseyPainterEditorVectorPathDrawingTool::UOdysseyPainterEditorVectorPathDrawingTool()
     : Radius( 5.0f )
+    , Absolute( true )
     , Stitch( true )
     , StitchingRadius( 10 )
-    , Absolute( true )
-    , mPreviousVertex( nullptr )
     , mPathBuilder( nullptr )
+    , mPreviousVertex( nullptr )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.VectoPen64");
 
@@ -29,10 +31,12 @@ UOdysseyPainterEditorVectorPathDrawingTool::UOdysseyPainterEditorVectorPathDrawi
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
 void
-UOdysseyPainterEditorVectorPathDrawingTool::Activate( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorPathDrawingTool::ActivateVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
     iEngine->ClearHUD();
     iEngine->AddHUD( &mPathDrawingHUD );
+
+    iScene->Update( 0 ); // refresh vector scene and GUI widgets via delegates.
 }
 
 static ::ULIS::FRectI
@@ -49,7 +53,7 @@ RectangleDtoI( ::ULIS::FRectD iRect )
     return ::ULIS::FRectI( (int) iRect.x, (int) iRect.y, (int) iRect.w, (int) iRect.h );
 }
 
-FOdysseyVectorVertexCubic*
+FOdysseyVectorVertex*
 UOdysseyPainterEditorVectorPathDrawingTool::PickVertex( FOdysseyVectorEngine* iVectorEngine
                                                       , FOdysseyVectorScene* iScene
                                                       , double iWorldX
@@ -59,7 +63,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::PickVertex( FOdysseyVectorEngine* iV
     if( Stitch )
     {
         std::vector<FOdysseyVectorPoint*> pickedPointArray;
-        FOdysseyVectorVertexCubic* stitchCubicVertex = nullptr;
+        FOdysseyVectorVertex* stitchCubicVertex = nullptr;
 
         pickedPointArray.reserve( 50 );
 
@@ -72,7 +76,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::PickVertex( FOdysseyVectorEngine* iV
 
         if( pickedPointArray.size() )
         {
-            stitchCubicVertex = static_cast<FOdysseyVectorVertexCubic*>( pickedPointArray[0] );
+            stitchCubicVertex = static_cast<FOdysseyVectorVertex*>( pickedPointArray[0] );
 
             if( stitchCubicVertex->GetSegmentCount() == 1 )
             {
@@ -85,14 +89,14 @@ UOdysseyPainterEditorVectorPathDrawingTool::PickVertex( FOdysseyVectorEngine* iV
 }
 
 bool
-UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDown( FOdysseyVectorEngine* iEngine
-                                                       , FOdysseyVectorScene* iScene
-                                                       , const FOdysseyPoint& iPointInTexture
-                                                       , const FKey& iKey )
+UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorEngine* iEngine
+                                                             , FOdysseyVectorScene* iScene
+                                                             , const FOdysseyPoint& iPointInTexture
+                                                             , const FKey& iKey )
 {
     ::ULIS::FColor color = GetEditorAs<FOdysseyPainterEditor>()->PaintColor().GetValue();
     ::ULIS::FColor rgba8 = color.ToFormat( ::ULIS::eFormat::Format_RGBA8 );
-    FOdysseyVectorVertexCubic* cubicVertex = PickVertex( iEngine, iScene, iPointInTexture.x, iPointInTexture.y, StitchingRadius );
+    FOdysseyVectorVertex* cubicVertex = PickVertex( iEngine, iScene, iPointInTexture.x, iPointInTexture.y, StitchingRadius );
     // take the upper value to prevent stroke with width 0.0
     float radius = iPointInTexture.pressure * Radius;
     FOdysseyVectorPathCubic* cubicPath = nullptr;
@@ -114,26 +118,38 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDown( FOdysseyVectorEngine* i
     }
     else
     {
-        cubicVertex = FOdysseyVectorVertexCubic::New( 0.0f, 0.0f, 0.0f );
+        if ( cubicPath == nullptr )
+        {
+            cubicPath = new FOdysseyVectorPathCubic();
+
+            // This undo must be set before association with the new parent object
+            // needed for valid GUndo pointer
+            GEditor->BeginTransaction(LOCTEXT("VectorPathDrawingTool","Vector Path Drawing Tool"));
+            if( GUndo )
+            {
+                FOdysseyVectorUndo* undo = static_cast<FOdysseyVectorUndo*>( new FOdysseyVectorUndoObjectAdd( iScene, cubicPath ) );
+
+                GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
+            }
+            GEditor->EndTransaction();
+
+            iScene->AppendChild( cubicPath );
+
+            // this is important to know what undo operation we are going to record: an ObjectAdd or a PathDrawing.
+            mStitched = false;
+        }
+
+        cubicVertex = new FOdysseyVectorVertex( cubicPath, 0.0f, 0.0f, 0.0f );
+
+        cubicPath->AddVertex( cubicVertex );
         // record for undos
         mVertexArray.push_back( cubicVertex );
     }
 
     mPreviousVertex = cubicVertex;
 
-    if ( cubicPath == nullptr )
-    {
-        cubicPath = new FOdysseyVectorPathCubic();
-
-        iScene->AppendChild( cubicPath );
-
-        cubicPath->AddVertex( cubicVertex );
-        cubicPath->UpdateMatrix();
-        cubicPath->SetForegroundColor( rgba8.R8(), rgba8.G8(), rgba8.B8(), rgba8.A8() );
-
-        // this is important to know what undo operation we are going to record: an ObjectAdd or a PathDrawing.
-        mStitched = false;
-    }
+    cubicPath->UpdateMatrix();
+    cubicPath->SetForegroundColor( rgba8.R8(), rgba8.G8(), rgba8.B8(), rgba8.A8() );
 
     localCoords = cubicPath->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
     localRadius = cubicPath->GetInverseWorldMatrix().mapVector( 0.7071f * radius, 0.7071f * radius );
@@ -153,7 +169,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDown( FOdysseyVectorEngine* i
 
     iScene->ClearSelection();
 
-
+    iScene->Update( 0 ); // refresh vector scene and GUI widgets via delegates.
     //mSelectionChanged.Broadcast(iScene);
 
 
@@ -161,17 +177,19 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDown( FOdysseyVectorEngine* i
 }
 
 void
-UOdysseyPainterEditorVectorPathDrawingTool::OnMouseHover( FOdysseyVectorEngine* iEngine
-                                                        , FOdysseyVectorScene* iScene
-                                                        , const FOdysseyPoint& iPointInTexture )
+UOdysseyPainterEditorVectorPathDrawingTool::OnMouseHoverVector( FOdysseyVectorEngine* iEngine
+                                                              , FOdysseyVectorScene* iScene
+                                                              , const FOdysseyPoint& iPointInTexture )
 {
     mPathDrawingHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
+
+    iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES ); // refresh vector scene and GUI widgets via delegates.
 }
 
 ::ULIS::FRectI
-UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDrag( FOdysseyVectorEngine* iEngine
-                                                       , FOdysseyVectorScene* iScene
-                                                       , const FOdysseyPoint& iPointInTexture )
+UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( FOdysseyVectorEngine* iEngine
+                                                             , FOdysseyVectorScene* iScene
+                                                             , const FOdysseyPoint& iPointInTexture )
 {
     mPointRadius =  iPointInTexture.pressure * Radius;
 
@@ -183,7 +201,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDrag( FOdysseyVectorEngine* i
         BLPoint localCoords;
         BLPoint localRadius;
         //float roundedUpRadius = ceil (radius);
-        FOdysseyVectorVertexCubic* nextVertex;
+        FOdysseyVectorVertex* nextVertex;
         ::ULIS::FRectI redrawRegion = GetInvalidationAreaFromPointer( iPointInTexture.x
                                                                     , iPointInTexture.y
                                                                     , Radius )
@@ -200,7 +218,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDrag( FOdysseyVectorEngine* i
                                                      , mVertexArray
                                                      , mSegmentArray );
 
-        iScene->Update( 0 );
+        iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES | FOdysseyVectorObject::KEEPINVALIDATED );
 
         mPreviousVertex = nextVertex;
 
@@ -211,15 +229,14 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDrag( FOdysseyVectorEngine* i
 }
 
 bool
-UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUp( FOdysseyVectorEngine* iEngine
-                                                     , FOdysseyVectorScene* iScene
-                                                     , FOdysseyVectorUndo** iUndo
-                                                     , const FOdysseyPoint& iPointInTexture
-                                                     , const FKey& iKey )
+UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorEngine* iEngine
+                                                           , FOdysseyVectorScene* iScene
+                                                           , const FOdysseyPoint& iPointInTexture
+                                                           , const FKey& iKey )
 {
     if( mPathBuilder )
     {
-        FOdysseyVectorVertexCubic* cubicVertex = PickVertex( iEngine, iScene, iPointInTexture.x, iPointInTexture.y, StitchingRadius );
+        FOdysseyVectorVertex* cubicVertex = PickVertex( iEngine, iScene, iPointInTexture.x, iPointInTexture.y, StitchingRadius );
         FOdysseyVectorPathCubic* cubicPath = mPathBuilder->GetCubicPath();
         FOdysseyVectorSegmentCubic* lastSegment = nullptr;
 
@@ -242,9 +259,10 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUp( FOdysseyVectorEngine* iEn
 
             if( cubicVertex == nullptr )
             {
-                cubicVertex = FOdysseyVectorVertexCubic::New( localCoords.x
-                                                            , localCoords.y
-                                                            , ::ULIS::FVec2D( localRadius.x, localRadius.y ).Distance() );
+                cubicVertex = new FOdysseyVectorVertex( cubicPath
+                                                      , localCoords.x
+                                                      , localCoords.y
+                                                      , ::ULIS::FVec2D( localRadius.x, localRadius.y ).Distance() );
                 // record for undos
                 mVertexArray.push_back( cubicVertex );
 
@@ -266,20 +284,23 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUp( FOdysseyVectorEngine* iEn
         delete mPathBuilder;
         mPathBuilder = nullptr;
 
-        // BeginTransaction() must be called for GUndo to have a value. Please do it in the caller function.
-        if( iUndo && GUndo )
+        if( mStitched == true )
         {
-            (*iUndo) = ( mStitched == true ) ? static_cast<FOdysseyVectorUndo*>( new FOdysseyVectorUndoPathAlter( iScene
-                                                                                                                , mVertexArray
-                                                                                                                , mSegmentArray )) 
-                                             : static_cast<FOdysseyVectorUndo*>( new FOdysseyVectorUndoObjectAdd( iScene, cubicPath ));
+            // needed for valid GUndo pointer
+            GEditor->BeginTransaction(LOCTEXT("VectorPathDrawingTool","Vector Path Drawing Tool"));
+            if( GUndo )
+            {
+                FOdysseyVectorUndo* undo = static_cast<FOdysseyVectorUndo*>( new FOdysseyVectorUndoPathAlter( iScene
+                                                                                                            , mVertexArray
+                                                                                                            , mSegmentArray ) );
 
-            GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(*iUndo) );
+                GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
+            }
+            GEditor->EndTransaction();
         }
-
-        // Update objects marked as invalidated
-        iScene->Update(0);
     }
+
+    iScene->Update( 0 ); // update vector scene and GUI widgets via delegates.
 
     return true;
 }
@@ -304,3 +325,5 @@ UOdysseyPainterEditorVectorPathDrawingTool::PropertyChanged( const FName& iPrope
             mPathDrawingHUD.SetStitchingRadius( 0.0f );
     }
 }
+
+#undef LOCTEXT_NAMESPACE

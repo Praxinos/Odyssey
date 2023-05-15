@@ -31,7 +31,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoErase : public FOdysseyVectorUndo
         virtual FString ToString() const override;
 
     private:
-        FOdysseyVectorScene* mScene;
         std::vector<FOdysseyVectorObject*> mAddedObjectArray;
         std::vector<FOdysseyVectorVertex*> mAddedVertexArray;
         std::vector<FOdysseyVectorSegment*> mAddedSegmentArray;

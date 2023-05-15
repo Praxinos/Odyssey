@@ -20,6 +20,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorPaintBucketTool : public UOd
     GENERATED_BODY()
 
 public:
+    static bool DoubleClicked();
+
     // Destructor
     virtual ~UOdysseyPainterEditorPaintBucketTool();
 
@@ -29,27 +31,33 @@ public:
     void Initialize(FOdysseyPaintEngine* iPaintEngine);
 
     //OdysseyPainterEditorTool overrides
-    void Activate( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    void ActivateVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
     // Raster Mouse Down
-    bool OnMouseDown( TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock, const FOdysseyPoint& iPointInTexture, const FKey& iKey );
+    bool OnMouseDownRaster( TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock, const FOdysseyPoint& iPointInTexture, const FKey& iKey );
     // Vector Mouse Down
-    bool OnMouseDown( FOdysseyVectorEngine* iEngine
-                    , FOdysseyVectorScene* iScene
-                    , FOdysseyVectorUndo** iUndo
-                    , const FOdysseyPoint& iPointInTexture
-                    , const FKey& iKey );
-    void OnMouseDrag( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture );
-    bool OnMouseUp( FOdysseyVectorEngine* iEngine
-                  , FOdysseyVectorScene* iScene
-                  , FOdysseyVectorUndo** iUndo
-                  , const FOdysseyPoint& iPointInTexture
-                  , const FKey& iKey );
+    bool OnMouseDownVector( FOdysseyVectorEngine* iEngine
+                          , FOdysseyVectorScene* iScene
+                          , const FOdysseyPoint& iPointInTexture
+                          , const FKey& iKey );
+    void OnMouseHoverVector( FOdysseyVectorEngine* iEngine
+                           , FOdysseyVectorScene* iScene
+                           , const FOdysseyPoint& iPointInTexture );
+    void OnMouseDragVector( FOdysseyVectorEngine* iEngine
+                          , FOdysseyVectorScene* iScene
+                          , const FOdysseyPoint& iPointInTexture );
+    bool OnMouseUpVector( FOdysseyVectorEngine* iEngine
+                        , FOdysseyVectorScene* iScene
+                        , const FOdysseyPoint& iPointInTexture
+                        , const FKey& iKey );
 
     virtual void Commit() override;
 
 public:
     UPROPERTY(EditAnywhere,Category="Odyssey BucketFill Tool")
     uint8 Tolerance;
+
+    UPROPERTY(EditAnywhere,Category="Odyssey BucketFill Tool")
+    bool Propagate;
 
     UPROPERTY(EditAnywhere,Category="Odyssey BucketFill Tool")
     bool Gradient;

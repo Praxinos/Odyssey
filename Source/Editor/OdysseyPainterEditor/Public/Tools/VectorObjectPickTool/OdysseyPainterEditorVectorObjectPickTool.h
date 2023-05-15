@@ -4,39 +4,53 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Tools/OdysseyPainterEditorTool.h"
+#include "Tools/DefaultTool/OdysseyPainterEditorDefaultTool.h"
 #include "OdysseyVector.h"
 #include "Undo/OdysseyVectorUndoSelect.h"
 
 #include "OdysseyPainterEditorVectorObjectPickTool.generated.h"
 
 UCLASS()
-class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectPickTool : public UOdysseyPainterEditorTool
+class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectPickTool : public UOdysseyPainterEditorDefaultTool
 {
 public:
     GENERATED_BODY()
 
-    DECLARE_MULTICAST_DELEGATE_OneParam(FSelectionChanged,FOdysseyVectorScene*)
-    FSelectionChanged mSelectionChanged;
-
 public:
+    static bool DoubleClicked();
     // Destructor
     virtual ~UOdysseyPainterEditorVectorObjectPickTool();
 
     //Constructor
     UOdysseyPainterEditorVectorObjectPickTool();
  
-    void Activate( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, int32 iSizeX, int32 iSizeY );
-    bool OnMouseDown( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture, const FKey& iKey );
-    void OnMouseDrag( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture );
-    bool OnMouseUp( FOdysseyVectorEngine* iEngine
-                  , FOdysseyVectorScene* iScene
-                  , FOdysseyVectorUndo** iUndo
-                  , const FOdysseyPoint& iPointInTexture
-                  , const FKey& iKey );
+    void ActivateVector( FOdysseyVectorEngine* iEngine
+                       , FOdysseyVectorScene* iScene
+                       , int32 iSizeX
+                       , int32 iSizeY );
+    bool OnMouseDownVector( FOdysseyVectorEngine* iEngine
+                          , FOdysseyVectorScene* iScene
+                          , const FOdysseyPoint& iPointInTexture
+                          , const FKey& iKey );
+    void OnMouseDragVector( FOdysseyVectorEngine* iEngine
+                          , FOdysseyVectorScene* iScene
+                          , const FOdysseyPoint& iPointInTexture );
+    bool OnMouseUpVector( FOdysseyVectorEngine* iEngine
+                        , FOdysseyVectorScene* iScene
+                        , const FOdysseyPoint& iPointInTexture
+                        , const FKey& iKey );
+    virtual bool OnKeyDownVector( FOdysseyVectorEngine* iEngine
+                                , FOdysseyVectorScene* iScene
+                                , const FKey& iKey ) override;
+    virtual bool OnKeyUpVector( FOdysseyVectorEngine* iEngine
+                              , FOdysseyVectorScene* iScene
+                              , const FKey& iKey ) override;
 
     //OdysseyPainterEditorTool overrides
     virtual void Commit() override;
+
+    void Copy( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    void Paste( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
 
 private:
     FOdysseyVectorHUDSelection *mSelectionHUD;

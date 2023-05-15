@@ -60,6 +60,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
         /*std::list<FOdysseyVectorCycle*> mInvalidatedLoopList;*/
         std::list<FOdysseyVectorPoint*> mSelectedPointList;
         BLPath mPath;
+        uint32 mPaintingCode;
 
     public:
         FPathParam mPathParam;
@@ -124,4 +125,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
         void InvalidateAllSegments();
         /*void InvalidateLoop( FOdysseyVectorCycle* iLoop );*/
         void UpdateBBox();
+        void SetPaintingCode( uint32 iPaintingCode );
+        uint32 GetPaintingCode();
 };

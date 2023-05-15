@@ -4,9 +4,10 @@
 #include <Core/Core.h>
 #include <Image/Block.h>
 
+#include "OdysseyVectorVertex.h"
 #include "OdysseyVectorSegment.h"
-#include "OdysseyVectorVertexCubic.h"
 #include "OdysseyVectorHandleSegment.h"
+#include "OdysseyVectorIntersection.h"
 
 class FOdysseyVectorPathCubic;
 
@@ -24,23 +25,24 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
         static uint32 StaticClass() { return mStaticClass; };
         virtual uint32 GetClass() override { return mStaticClass; };
 
+    public:
+        virtual ~FOdysseyVectorSegmentCubic();
+
+        FOdysseyVectorSegmentCubic();
+
        /**
-         * @brief Static function to allocate a new cubic segment. Note: this is the proper way to allocate a new segment
-         * as we don't use the constructor to set parameters so that this can be derived from an UOBJECT if needed in
-         * future devs. Indeed, UOBJECTs have empty constructors.
+         * @brief function to allocate a new cubic segment.
          * @param iPath the path this segment belongs to
          * @param iVertex0
          * @param iVertex1
          * @return a pointer to the newly created segment
          */
-        static FOdysseyVectorSegmentCubic* New( FOdysseyVectorPathCubic* iPath
-                                              , FOdysseyVectorVertexCubic* iVertex0
-                                              , FOdysseyVectorVertexCubic* iVertex1 );
+        FOdysseyVectorSegmentCubic ( FOdysseyVectorPathCubic* iPath
+                                   , FOdysseyVectorVertex* iVertex0
+                                   , FOdysseyVectorVertex* iVertex1 );
 
        /**
-         * @brief Static function to allocate a new cubic segment. Note: this is the proper way to allocate a new segment
-         * as we don't use the constructor to set parameters so that this can be derived from an UOBJECT if needed in
-         * future devs. Indeed, UOBJECTs have empty constructors.
+         * @brief function to allocate a new cubic segment
          * @param iPath the path this segment belongs to
          * @param iVertex0
          * @param iCtrlPoint0x
@@ -50,17 +52,13 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
          * @param iVertex1
          * @return a pointer to the newly created segment
          */
-        static FOdysseyVectorSegmentCubic* New( FOdysseyVectorPathCubic* iPath
-                                              , FOdysseyVectorVertexCubic* iVertex0
-                                              , double iCtrlPoint0x
-                                              , double iCtrlPoint0y
-                                              , double iCtrlPoint1x
-                                              , double iCtrlPoint1y
-                                              , FOdysseyVectorVertexCubic* iVertex1 );
-
-    public:
-        virtual ~FOdysseyVectorSegmentCubic();
-         FOdysseyVectorSegmentCubic();
+        FOdysseyVectorSegmentCubic( FOdysseyVectorPathCubic* iPath
+                                  , FOdysseyVectorVertex* iVertex0
+                                  , double iCtrlPoint0x
+                                  , double iCtrlPoint0y
+                                  , double iCtrlPoint1x
+                                  , double iCtrlPoint1y
+                                  , FOdysseyVectorVertex* iVertex1 );
 
         void Smooth( double iLimitAngleInRadians );
 
@@ -71,8 +69,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
          * @param iVertex1
          */
         void Init( FOdysseyVectorPathCubic* iPath
-                 , FOdysseyVectorVertexCubic* iVertex0
-                 , FOdysseyVectorVertexCubic* iVertex1 );
+                 , FOdysseyVectorVertex* iVertex0
+                 , FOdysseyVectorVertex* iVertex1 );
 
        /**
          * @brief Init a cubic segment.
@@ -85,18 +83,20 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
          * @param iVertex1
          */
         void Init( FOdysseyVectorPathCubic* iPath
-                 , FOdysseyVectorVertexCubic* iVertex0
+                 , FOdysseyVectorVertex* iVertex0
                  , double iCtrlPoint0x
                  , double iCtrlPoint0y
                  , double iCtrlPoint1x
                  , double iCtrlPoint1y
-                 , FOdysseyVectorVertexCubic* iVertex1 );
+                 , FOdysseyVectorVertex* iVertex1 );
 
        /**
          * @brief Draw the cubic segment
          * @param iRoi the region-of-interest
          */
         virtual void Draw( ::ULIS::FRectD &iRoi ) override;
+
+        virtual void DrawStructure( FOdysseyVectorObject* iParentObject, ::ULIS::FRectD &iRoi, bool iWorld ) override;
 
        /**
          * @brief Get the segment's bounding box.
@@ -148,11 +148,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
        /**
          * @brief Intersect this cubic segment with another cubic segment. They MUST have the same coordinate system.
          * @param iTolerance a maximum distance to consider an almost-hit as a hit.
-         * @param iIntersectionVertexArray array that receives the created intersection vertices.
+         * @param iIntersectionArray array that receives the created intersections.
          */
-        uint32 Intersect( FOdysseyVectorSegmentCubic& iOther
-                        , double iTolerance
-                        , std::vector<FOdysseyVectorVertexIntersection*>& iIntersectionVertexArray );
+        virtual uint32 Intersect( FOdysseyVectorSegment* iOther
+                                , double iTolerance
+                                , std::vector<FOdysseyVectorIntersection*>& iIntersectionArray ) override;
 
        /**
          * @brief Builds the variable thickness segment (stores values into polygon cache).
@@ -229,25 +229,17 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
                                           , double iToT
                                           , std::vector<FOdysseyVectorVertex*>& oNewVertexArray );
 
+        virtual ::ULIS::FVec2D GetVectorFromVertex( FOdysseyVectorVertex* iVertex, bool iNormalize ) override;
+
     private:
         void BuildVariableAdaptive( double  iFromT
                                   , double  iToT
-                                  , double  iStartRadius
-                                  , double  iEndRadius
-                                  , ::ULIS::FVec2D* iPrevSegmentVector
-                                  , ::ULIS::FVec2D* iNextSegmentVector
-                                  , int32   iMaxRecurseDepth
-                                  , int    *iPolygonID );
-
-        void BuildVariableThickness( double iFromT
-                                   , double iToT
-                                   , ::ULIS::FVec2D& iFromPoint
-                                   , ::ULIS::FVec2D& iToPoint
-                                   , ::ULIS::FVec2D* iPrevSegmentVector
-                                   , ::ULIS::FVec2D* iNextSegmentVector
-                                   , double iStartRadius
-                                   , double iEndRadius
-                                   , int    iPolygonID );
+                                  , double  iRadiusFrom
+                                  , double  iRadiusTo
+                                  , ::ULIS::FVec2D iBezier[4]
+                                  , const ::ULIS::FVec2D& iNormalizedTangentFrom
+                                  , const ::ULIS::FVec2D& iNormalizedTangentTo
+                                  , int32   iMaxRecurseDepth );
 
     protected:
         FOdysseyVectorHandleSegment mCtrlPoint[2];

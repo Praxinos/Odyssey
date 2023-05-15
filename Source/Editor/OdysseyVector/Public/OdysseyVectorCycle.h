@@ -71,17 +71,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorCycle
          */
         bool HitTest( double iLocalX, double iLocalY );
 
-        /**
-         * @brief Add a child cycle. A child cycle allows a parent cycle to have holes.
-         * @param iChild the child cycle.
-         */
-        void AppendChild( FOdysseyVectorCycle *iChild );
-
-        /**
-         * @brief Remove a child cycle. A child cycle allows a parent cycle to have holes.
-         * @param iChild the child cycle.
-         */
-        void RemoveChild( FOdysseyVectorCycle *iChild );
+        void SetParentCycle( FOdysseyVectorCycle *iParent );
 
         /**
          * @brief Get this cycle's parent cycle.
@@ -123,16 +113,28 @@ class ODYSSEYVECTOR_API FOdysseyVectorCycle
          */
         uint64 GetID();
 
+        std::vector<FOdysseyVectorSection*>& GetSectionArray();
+
+        void SetPropagatedBucket( FOdysseyVectorBucket* iPropagatedBucket );
+        FOdysseyVectorBucket* GetPropagatedBucket();
+        bool PropagateBucket();
+        void Merge( FOdysseyVectorCycle* iMergeCycle );
+        void FillPath();
+        void StrokePath( bool iWorld );
+
     protected :
-        BLPath mPath;
+        BLPath mContourPath;
+        BLPath mCombinedPath;
         FOdysseyVectorObject& mParent;
         uint64 mID;
         FOdysseyVectorBucket* mBucket;
+        FOdysseyVectorBucket* mPropagatedBucket;
         std::vector<FOdysseyVectorVertex*> mVertexArray;
         std::vector<FOdysseyVectorSection*> mSectionArray;
         uint32 mFlags;
-        ::ULIS::FVec2D mMin;
-        ::ULIS::FVec2D mMax;
+        //::ULIS::FVec2D mMin;
+        //::ULIS::FVec2D mMax;
         std::list<FOdysseyVectorCycle*> mChildrenList;
         FOdysseyVectorCycle* mParentCycle;
+        bool mPropagated;
 };

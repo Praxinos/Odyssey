@@ -6,7 +6,7 @@
 #include <Core/Core.h>
 #include <Image/Block.h>
 #include "OdysseyVectorObject.h"
-#include "OdysseyVectorVertexCubic.h"
+#include "OdysseyVectorVertex.h"
 #include "OdysseyVectorSegmentCubic.h"
 #include "OdysseyVectorPath.h"
 #include "OdysseyVectorBucket.h"
@@ -31,9 +31,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathCubic: public FOdysseyVectorPath
         bool PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags );
 
     public:
+        static void SmoothSegments( FOdysseyVectorVertex* iVertex, bool iBuildSegments, bool iPreserveHandleLength );
+        static ::ULIS::FVec2D GetPerpendicularVector( FOdysseyVectorVertex* iVertex, bool iNormalize );
+
         FOdysseyVectorPathCubic();
         void Init( std::string iName );
-        FOdysseyVectorSegmentCubic* AppendVertex( FOdysseyVectorVertexCubic* iPoint, bool iConnect, bool iBuildSegments );
         bool PickPoint( double iWorldX
                       , double iWorldY
                       , double iSelectionRadius

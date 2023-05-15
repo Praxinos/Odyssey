@@ -27,9 +27,8 @@ FOdysseyVectorUndoGroup::FOdysseyVectorUndoGroup( FOdysseyVectorScene* iScene
                                                 , std::vector<FOdysseyVectorObject*>& iAddedObjectArray
                                                 , std::vector<FOdysseyVectorObject*>& iAddedObjectOldParentArray
                                                 , std::vector<FOdysseyVectorObject*>& iRemovedObjectArray  )
-    : FOdysseyVectorUndo()
+    : FOdysseyVectorUndo( iScene )
     , mAddedGroup( iAddedGroup )
-    , mScene( iScene )
 {
     mRemovedObjectArray = iRemovedObjectArray;
     mAddedObjectOldParentArray = iAddedObjectOldParentArray;
@@ -40,9 +39,8 @@ FOdysseyVectorUndoGroup::FOdysseyVectorUndoGroup( FOdysseyVectorScene* iScene
                                                 , FOdysseyVectorGroup* iAddedGroup
                                                 , std::vector<FOdysseyVectorObject*>& iAddedObjectArray
                                                 , std::vector<FOdysseyVectorObject*>& iAddedObjectOldParentArray  )
-    : FOdysseyVectorUndo()
+    : FOdysseyVectorUndo( iScene )
     , mAddedGroup( iAddedGroup )
-    , mScene( iScene )
 {
     mAddedObjectOldParentArray = iAddedObjectOldParentArray;
     mAddedObjectArray = iAddedObjectArray;
@@ -79,11 +77,8 @@ FOdysseyVectorUndoGroup::Apply( UObject* iIgnored )
         mAddedObjectArray[i]->Invalidate();
     }
 
-    // update invalidated objects
-    mScene->Update( 0 );
-
-    // call callbacks if any (for refreshing GUI e.g)
-    mRefreshDelegate.Broadcast( mScene );
+    // update invalidated objects and call callbacks if any (for refreshing GUI e.g)
+    mScene->Update(0);
 }
 
 void
@@ -118,11 +113,8 @@ FOdysseyVectorUndoGroup::Revert( UObject* iIgnored )
         mAddedObjectArray[i]->Invalidate();
     }
 
-    // update invalidated objects
-    mScene->Update( 0 );
-
-    // call callbacks if any (for refreshing GUI e.g)
-    mRefreshDelegate.Broadcast( mScene );
+    // update invalidated objects and call callbacks if any (for refreshing GUI e.g)
+    mScene->Update(0);
 }
 
 /** Describes this change (for debugging) */

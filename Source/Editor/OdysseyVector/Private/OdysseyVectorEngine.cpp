@@ -11,6 +11,11 @@ FOdysseyVectorEngine::FOdysseyVectorEngine( double iWidth, double iHeight )
     : mDrawingFlags( 0 )
     , mSelectionSpace( nullptr )
 {
+    //BLContextCreateInfo createInfo {};
+
+    // Configure the number of threads to use.
+    //createInfo.threadCount = 8;
+
     mBLContext = new BLContext();
     mBLImage = new BLImage( iWidth, iHeight, BL_FORMAT_PRGB32 );
     mBLMask  = new BLImage( iWidth, iHeight, BL_FORMAT_A8 );
@@ -18,7 +23,7 @@ FOdysseyVectorEngine::FOdysseyVectorEngine( double iWidth, double iHeight )
     /*mScene = NewObject<FOdysseyVectorScene>();
     mScene->Init("Vector Scene");*/
 
-    mBLContext->begin( *mBLImage );
+    mBLContext->begin( *mBLImage/*, createInfo*/ );
 }
 
 void
@@ -343,8 +348,8 @@ FOdysseyVectorEngine::Knot( FOdysseyVectorVertex* iVertexA
      && ( iVertexB->GetSegmentCount() == 1 )
      && ( iVertexA->GetPath() == iVertexB->GetPath() ) )
     {
-        ::ULIS::FVec2D& vertexACoords = iVertexA->GetCoords( nullptr );
-        ::ULIS::FVec2D& vertexBCoords = iVertexB->GetCoords( nullptr );
+        ::ULIS::FVec2D& vertexACoords = iVertexA->GetCoords();
+        ::ULIS::FVec2D& vertexBCoords = iVertexB->GetCoords();
         ::ULIS::FVec2D averageCoords = ( vertexACoords + vertexBCoords ) * 0.5f;
         double vertexARadius = iVertexA->GetRadius();
         double vertexBRadius = iVertexB->GetRadius();
@@ -356,15 +361,15 @@ FOdysseyVectorEngine::Knot( FOdysseyVectorVertex* iVertexA
             FOdysseyVectorPathCubic* cubicPath = static_cast<FOdysseyVectorPathCubic*>(path);
             FOdysseyVectorSegmentCubic* vertexBSegment = static_cast<FOdysseyVectorSegmentCubic*>(iVertexB->GetFirstSegment());
             FOdysseyVectorSegmentCubic* vertexASegment = static_cast<FOdysseyVectorSegmentCubic*>(iVertexA->GetFirstSegment());
-            FOdysseyVectorVertexCubic* prevVertex = static_cast<FOdysseyVectorVertexCubic*>(vertexASegment->GetOtherVertex( iVertexA ));
-            FOdysseyVectorVertexCubic* nextVertex = static_cast<FOdysseyVectorVertexCubic*>(vertexBSegment->GetOtherVertex( iVertexB ));
-            FOdysseyVectorVertexCubic* knotVertex = FOdysseyVectorVertexCubic::New( averageCoords.x, averageCoords.y, averageRadius );
-            FOdysseyVectorSegmentCubic* newCubicSegment[2] = { FOdysseyVectorSegmentCubic::New( cubicPath
-                                                                                             ,  prevVertex
-                                                                                             ,  knotVertex ),
-                                                               FOdysseyVectorSegmentCubic::New( cubicPath
-                                                                                             ,  knotVertex
-                                                                                             ,  nextVertex ) };
+            FOdysseyVectorVertex* prevVertex = static_cast<FOdysseyVectorVertex*>(vertexASegment->GetOtherVertex( iVertexA ));
+            FOdysseyVectorVertex* nextVertex = static_cast<FOdysseyVectorVertex*>(vertexBSegment->GetOtherVertex( iVertexB ));
+            FOdysseyVectorVertex* knotVertex = new FOdysseyVectorVertex( cubicPath, averageCoords.x, averageCoords.y, averageRadius );
+            FOdysseyVectorSegmentCubic* newCubicSegment[2] = { new FOdysseyVectorSegmentCubic( cubicPath
+                                                                                            ,  prevVertex
+                                                                                            ,  knotVertex ),
+                                                               new FOdysseyVectorSegmentCubic( cubicPath
+                                                                                            ,  knotVertex
+                                                                                            ,  nextVertex ) };
             uint32 prevVertexIndex = ( iVertexA == vertexASegment->GetVertex(0) ) ? 1 : 0;
             uint32 nextVertexIndex = ( iVertexB == vertexBSegment->GetVertex(0) ) ? 1 : 0;
 
@@ -388,7 +393,7 @@ FOdysseyVectorEngine::Knot( FOdysseyVectorVertex* iVertexA
 
             if( iSmooth )
             {
-                knotVertex->SmoothSegments( false, true );
+                FOdysseyVectorPathCubic::SmoothSegments( knotVertex, false, true );
             }
 
             path->InvalidateAllSegments();

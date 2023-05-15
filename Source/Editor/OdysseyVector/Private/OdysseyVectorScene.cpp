@@ -27,6 +27,12 @@ FOdysseyVectorScene::GetEngine()
     return mEngine;
 }
 
+FOdysseyVectorScene::FUpdateDelegate&
+FOdysseyVectorScene::OnUpdateDelegate()
+{
+    return mOnUpdateDelegate;
+}
+
 void
 FOdysseyVectorScene::ClearSelection()
 {
@@ -104,7 +110,7 @@ FOdysseyVectorScene::MakePaintGroupFromSelectedObjects( std::vector<FOdysseyVect
 
                 selectedPaintGroup->GetParent()->RemoveChild( selectedPaintGroup );
 
-                selectedPaintGroup->CopyBuckets( paintGroup );
+                selectedPaintGroup->CopyBuckets( paintGroup, true );
 
                 oRemovedPaintGroupArray.push_back( selectedPaintGroup );
             }
@@ -212,10 +218,10 @@ FOdysseyVectorScene::DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags )
     blctx->setCompOp( BL_COMP_OP_SRC_COPY );
 
     // Note: Blend2D color format is 0xAARRGGBB
-    blFillColor.r = fillColor.B;
-    blFillColor.g = fillColor.G;
-    blFillColor.b = fillColor.R;
-    blFillColor.a = fillColor.A;
+    blFillColor.setR( fillColor.B );
+    blFillColor.setG( fillColor.G );
+    blFillColor.setB( fillColor.R );
+    blFillColor.setA( fillColor.A );
 
     blctx->setFillStyle( blFillColor );
 
@@ -233,6 +239,14 @@ FOdysseyVectorScene::DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags )
 void
 FOdysseyVectorScene::UpdateShape( uint32 iUpdateFlags )
 {
+}
+
+void
+FOdysseyVectorScene::Update( uint32 iUpdateFlags )
+{
+    FOdysseyVectorObject::Update( iUpdateFlags );
+
+    mOnUpdateDelegate.Broadcast( this, iUpdateFlags );
 }
 
 FOdysseyVectorObject*

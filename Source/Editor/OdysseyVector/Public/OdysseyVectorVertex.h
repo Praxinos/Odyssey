@@ -5,32 +5,58 @@
 #include <Image/Block.h>
 
 #include "OdysseyVectorPoint.h"
+#include "OdysseyVectorHandlePoint.h"
 
 class FOdysseyVectorSegment;
 class FOdysseyVectorSection;
 class FOdysseyVectorPath;
+class FOdysseyVectorVertex;
+
+struct FExplorationPair
+{
+    FOdysseyVectorSection* returnSection;
+    FOdysseyVectorVertex*  departVertex;
+    FOdysseyVectorSection* departSection;
+
+    FExplorationPair()
+    {
+        returnSection = nullptr;
+        departVertex = nullptr;
+        departSection = nullptr;
+    };
+
+    FExplorationPair( FOdysseyVectorSection* iReturnSection
+                    , FOdysseyVectorVertex*  iDepartVertex
+                    , FOdysseyVectorSection* iDepartSection )
+    {
+        returnSection = iReturnSection;
+        departVertex = iDepartVertex;
+        departSection = iDepartSection;
+    }
+};
 
 class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
 {
     public:
        /**
-         * @brief Static function to allocate a new vertex. Note: this is the proper way to allocate a new vertex as we don't
-         * use the constructor to set parameters so that this can be derived from an UOBJECT if needed in future devs. Indeed,
-         * UOBJECTs have empty constructors.
+         * @brief function to allocate a new vertex.
          * @param iX coordinates on X axis
          * @param iY coordinates on Y axis
          * @param iRadius radius
          */
-        static FOdysseyVectorVertex* New( double iX, double iY, double iRadius );
-
+        FOdysseyVectorVertex ( FOdysseyVectorPath* iPath, double iX, double iY, double iRadius );
         ~FOdysseyVectorVertex();
-        FOdysseyVectorVertex();
+
+        /**
+         * @brief Get a pointer to the handle (used to set the vertex's radius).
+         */
+        FOdysseyVectorHandlePoint* GetHandle();
 
         /**
          * @brief Add a segment to the list of segments connected to this vertex
          * @param iSegment the segment
          */
-        virtual void AddSegment( FOdysseyVectorSegment* iSegment, double t );
+        virtual void AddSegment( FOdysseyVectorSegment* iSegment );
 
         /**
          * @brief Add a section to the list of section connected to this vertex
@@ -120,10 +146,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
 
         /**
          * @brief Get a pointer to the section connecting this vertex and another vertex passed as argument.
-         * @param iOtherVertex a pointer to the other vertex.
-         * @return a pointer to the section connecting this vertex and iOtherVertex.
+         * @param iSegment
+         * @return
          */
-        FOdysseyVectorSection* GetSection( FOdysseyVectorVertex* iOtherVertex );
+        FOdysseyVectorSection* GetSection( FOdysseyVectorSegment* iSegment );
 
         /**
          * @brief Get a pointer to a section connected to this vertex AND located on the same segment
@@ -131,7 +157,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
          * @param iSection a pointer to a section.
          * @return a pointer to the other section.
          */
-        FOdysseyVectorSection* GetOtherSection( FOdysseyVectorSection* iSection );
+        FOdysseyVectorSection* GetOtherSection( FOdysseyVectorSection* iSection, bool iSameSegment );
 
         /**
          * @brief Get a pointer to a segment connected to this vertex AND different from that segment. 
@@ -139,15 +165,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
          * @return a pointer to the other segment.
          */
         FOdysseyVectorSegment* GetOtherSegment( FOdysseyVectorSegment* iSegment );
-
-        /**
-         * @brief Get the coordinates of this vertex depending on the segment passed as parameter.
-         * while this value would be the same for regular vertices, it may differ for intersection vertices in the case
-         * where there is some "intersection tolerance", i.e segments almost intersect.
-         * @param iSegment segment the vertex lies on.
-         * @return the coordinates of the vertex on that segment.
-         */
-        virtual ::ULIS::FVec2D GetPosition( FOdysseyVectorSegment* iSegment );
 
         /**
          * @brief Get the number of segments connected to this vertex. Equals to a call to "GetSegmentList().size()".
@@ -159,7 +176,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
          * @brief Get the number of sections connected to this vertex. Equals to a call to "GetSectionList().size()".
          * @return the number of sections connected to this vertex.
          */
-        uint32 GetSectionCount();
+        virtual uint32 GetSectionCount();
 
         /**
          * @brief Get a reference to the list of segments connected to this vertex.
@@ -175,12 +192,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
 
         /**
          * @brief Get the position of the vertex on the segment passed as parameter, in a range from 0.0 to 1.0.
-         * @param iSegment the segment the vertex lies on.
+         * @param iSegment the section the vertex lies on.
          * @return a range from 0.0 to 1.0.
          */
         virtual double GetT( FOdysseyVectorSegment* iSegment );
-
-        virtual ::ULIS::FVec2D& GetCoords( FOdysseyVectorSegment* iSegment );
 
         /**
          * @brief Get a pointer to the path this vertex belongs to.
@@ -190,14 +205,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
 
 
         virtual ::ULIS::FVec2D GetVectorOnSegment( FOdysseyVectorSegment* iSegment, bool iNormalize );
-
-        /**
-         * @brief Get a pointer to the next section to explore in cycle depending on the last visited section.
-         * @param iLastSection the last visited section.
-         * @param iOrientation ignored.
-         * @return a pointer to the next section to explore in cycle.
-         */
-        FOdysseyVectorSection* GetCycleNextSection( FOdysseyVectorSection* iLastSection, double iOrientation );
 
         /**
          * @brief Mark all connected segments for update.
@@ -215,7 +222,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
          * @brief Tell whether or not the angle between the segments connected to this vertex is smooth (low).
          * @return true or false
          */
-        virtual bool IsSmooth() { return false; };
+        bool IsSmooth();
 
         /**
          * @brief Tell whether or not the VISITED flags is set.
@@ -223,11 +230,28 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
          */
         bool IsVisited();
 
+        double GetNearestSegmentT();
+        double GetDistanceToNearestSegment();
+        FOdysseyVectorSegment* GetNearestSegment();
+        void SetNearestSegment( FOdysseyVectorSegment* iNearestSegment
+                              , double iDistanceToNearestSegment
+                              , double iNearestSegmentT );
+        void SetNearestVertex( FOdysseyVectorVertex* iNearestVertex );
+        FOdysseyVectorVertex* GetNearestVertex();
+        virtual FOdysseyVectorSection* GetCycleNextSection( FOdysseyVectorSection* iLastSection, double iOrientation );
+        virtual void BuildExplorationPairs( std::vector<FExplorationPair>& iExplorationPairsArray );
+
     protected:
+        FOdysseyVectorHandlePoint* mCtrlPoint;
         std::list<FOdysseyVectorSegment*> mSegmentList;
         std::list<FOdysseyVectorSection*> mSectionList;
         FOdysseyVectorPath* mPath;
         uint32 mFlags;
+
+        double mDistanceToNearestSegment;
+        double mNearestSegmentT;
+        FOdysseyVectorSegment* mNearestSegment;
+        FOdysseyVectorVertex* mNearestVertex;
 
     private :
         static const uint32 VISITED = (1 << 2);

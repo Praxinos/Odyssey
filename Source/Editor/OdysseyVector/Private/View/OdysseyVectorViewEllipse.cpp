@@ -28,10 +28,16 @@ UOdysseyVectorViewEllipse::ExportParam( FOdysseyVectorObject* iObject )
 void
 UOdysseyVectorViewEllipse::PropertyChanged( const FName& iPropertyName, const FName& iCategory )
 {
+    FOdysseyVectorScene* scene = mObject->GetScene();
+
     UOdysseyVectorViewPath::PropertyChanged( iPropertyName, iCategory );
 
     if( iCategory == "Geometry" )
     {
         mObject->Update( 0 );
     }
+
+    mObject->Invalidate();
+
+    scene->Update(0);
 }

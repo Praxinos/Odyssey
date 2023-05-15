@@ -2,6 +2,19 @@
 #include "OdysseyVectorSegmentCubic.h"
 
 static void
+WriteBucketPropagated( FOdysseyVectorBucket& iBucket, FArchive &Ar )
+{
+    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_BUCKET_PROPAGATED
+                                    , Ar
+                                    , [&iBucket](FArchive &Ar) -> void
+    {
+        uint32 propagated = iBucket.IsPropagated() ? 1 : 0;
+
+        Ar << propagated;
+    } );
+}
+
+static void
 WriteBucketPosition( FOdysseyVectorBucket& iBucket, FArchive &Ar )
 {
     FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_BUCKET_POSITION
@@ -96,6 +109,7 @@ WriteBucketEntry( FOdysseyVectorBucket& iBucket, FArchive &Ar )
                                     , [&iBucket](FArchive &Ar) -> void
     {
         WriteBucketPosition( iBucket, Ar );
+        WriteBucketPropagated( iBucket, Ar );
 
         if( iBucket.IsGradient() == true )
         {
@@ -128,6 +142,43 @@ WriteGroupPaintBuckets( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar )
     }
 }
 
+static void
+WriteGroupPaintGapTolerance( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar )
+{
+    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_GROUPPAINT_GAP_TOLERANCE
+                                    , Ar
+                                    , [&iPaintGroup](FArchive &Ar) -> void
+    {
+        double gapTolerance = iPaintGroup.GetGapTolerance();
+
+        Ar << gapTolerance;
+    } );
+}
+
+static void
+WriteGroupPaintGap( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar )
+{
+    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_GROUPPAINT_GAP
+                                    , Ar
+                                    , [&iPaintGroup](FArchive &Ar) -> void
+    {
+        WriteGroupPaintGapTolerance( iPaintGroup, Ar );
+    } );
+}
+
+static void
+WriteGroupPaintWireframe( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar )
+{
+    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_GROUPPAINT_WIREFRAME
+                                    , Ar
+                                    , [&iPaintGroup](FArchive &Ar) -> void
+    {
+        uint32 wireframe = static_cast<uint32>(iPaintGroup.IsWireframe());
+
+        Ar << wireframe;
+    } );
+}
+
 void
 FOdysseyVectorExport::WriteObjectGroupPaint( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar )
 {
@@ -135,6 +186,8 @@ FOdysseyVectorExport::WriteObjectGroupPaint( FOdysseyVectorGroupPaint& iPaintGro
                                     , Ar
                                     , [&iPaintGroup](FArchive &Ar) -> void
     {
+        WriteGroupPaintWireframe( iPaintGroup, Ar );
+        WriteGroupPaintGap( iPaintGroup, Ar );
         WriteGroupPaintBuckets( iPaintGroup, Ar );
     } );
 }

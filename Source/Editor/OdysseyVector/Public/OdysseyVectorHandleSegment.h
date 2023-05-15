@@ -23,6 +23,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorHandleSegment : public FOdysseyVectorHandl
         void SetX( double iX );
         void SetY( double iY );
         void Set( double iX,double iY );
+        void Set( const ::ULIS::FVec2D& iCoords );
 
     private:
         static const uint32 mStaticClass = 0x22364e08; // value is crc32 FOdysseyVectorHandleSegment 

@@ -19,6 +19,7 @@ class FOdysseyVectorPointSample : public FOdysseyVectorPoint
         ~FOdysseyVectorPointSample();
         FOdysseyVectorPointSample(){};
         FOdysseyVectorPointSample( double iX, double iY, double iRadius );
+        FOdysseyVectorPointSample( std::vector<FOdysseyVectorPoint*> iPointArray ); // average values of points in array
 
         void SetSharp( bool iIsSharp );
         bool IsSharp();
@@ -42,7 +43,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathBuilder : public FOdysseyVectorObject
         double mCumulAngle;
         double mCumulAngleLimit;
         double mAngleLimit;
-        double mSmoothLimit;
         uint32 mPointID;
 
         std::vector<FOdysseyVectorPoint> mPointBuffer;
@@ -51,7 +51,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathBuilder : public FOdysseyVectorObject
 
         std::vector<FOdysseyVectorPointSample*> mSampleArray;
         std::vector<FOdysseyVectorPoint*> mPointArray;
-        std::vector<FOdysseyVectorVertexCubic*> mVertexArray;
+        std::vector<FOdysseyVectorVertex*> mVertexArray;
 
         FOdysseyVectorPathCubic* mCubicPath;
         FOdysseyVectorSegmentCubic* mCubicSegment;
@@ -100,6 +100,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathBuilder : public FOdysseyVectorObject
          */
         void Adjust( FOdysseyVectorSegmentCubic& iCubicSegment );
 
+        void AdjustHandle( FOdysseyVectorSegmentCubic* iCubicSegment, uint32 iHandleID, double iCheckAt, int iDepth );
+
         FOdysseyVectorLink* GetLastSampleLink();
 
         FOdysseyVectorPoint* GetLastSamplePoint();
@@ -130,12 +132,12 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathBuilder : public FOdysseyVectorObject
          */
         FOdysseyVectorPathCubic* GetCubicPath( );
 
-        void RecordStart( FOdysseyVectorVertexCubic *iVertex );
-        FOdysseyVectorVertexCubic* RecordIntermediate( double iX
+        void RecordStart( FOdysseyVectorVertex *iVertex );
+        FOdysseyVectorVertex* RecordIntermediate( double iX
                                                      , double iY
                                                      , double iRadius
                                                      , std::vector<FOdysseyVectorVertex*>& oNewVertexArray
                                                      , std::vector<FOdysseyVectorSegment*>& oNewSegmentArray );
-        FOdysseyVectorSegmentCubic* RecordEnd( FOdysseyVectorVertexCubic *iVertex );
+        FOdysseyVectorSegmentCubic* RecordEnd( FOdysseyVectorVertex *iVertex );
         std::vector<FOdysseyVectorPoint*>& GetPointArray();
 };

@@ -36,7 +36,7 @@ FOdysseyVector::ExtractTransformations( BLMatrix2D &iMatrix
 }
 
 double
-FOdysseyVector::Cross2D( ::ULIS::FVec2D& iA, ::ULIS::FVec2D &iB )
+FOdysseyVector::Cross2D( const ::ULIS::FVec2D& iA, const ::ULIS::FVec2D &iB )
 {
     return ( iA.x * iB.y ) - ( iA.y * iB.x );
 }
@@ -69,10 +69,10 @@ FOdysseyVector::IntersectSegment( ::ULIS::FVec2D& line0p0
 
 // https://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
 double
-FOdysseyVector::DistanceToSegment( ::ULIS::FVec2D& iPt
-                                 , ::ULIS::FVec2D& iSegmentP0
-                                 , ::ULIS::FVec2D& iSegmentP1
-                                 , double&         oDistance )
+FOdysseyVector::DistanceToSegment( const ::ULIS::FVec2D& iPt
+                                 , const ::ULIS::FVec2D& iSegmentP0
+                                 , const ::ULIS::FVec2D& iSegmentP1
+                                 , double& oDistance )
 {
     // Return minimum distance between line segment vw and point p
     ::ULIS::FVec2D p0p1 = iSegmentP1 - iSegmentP0;
@@ -139,4 +139,28 @@ FOdysseyVector::IntersectRegions( const ::ULIS::FRectI& iRegion0, const ::ULIS::
     oRegionOut.h = ( y1 < y2 ) ? y2 - y1 : 0;
 
     return oRegionOut.Area() ? true : false;
+}
+
+void
+FOdysseyVector::BezierExtract( ::ULIS::FVec2D& iP0
+                             , ::ULIS::FVec2D& iP1
+                             , ::ULIS::FVec2D& iP2
+                             , ::ULIS::FVec2D& iP3
+                             , double fromT
+                             , double toT
+                             , ::ULIS::FVec2D& oP0
+                             , ::ULIS::FVec2D& oP1
+                             , ::ULIS::FVec2D& oP2
+                             , ::ULIS::FVec2D& oP3 )
+{
+    oP0 = iP0;
+    oP1 = iP1;
+    oP2 = iP2;
+    oP3 = iP3;
+
+    ::ULIS::CubicBezierInverseSplitAtParameter<::ULIS::FVec2D>( &oP0, &oP1, &oP2, &oP3, fromT );
+
+    toT = ( toT - fromT ) / ( 1.0f - fromT ); // adjust t
+
+    ::ULIS::CubicBezierSplitAtParameter<::ULIS::FVec2D>( &oP0, &oP1, &oP2, &oP3, toT );
 }

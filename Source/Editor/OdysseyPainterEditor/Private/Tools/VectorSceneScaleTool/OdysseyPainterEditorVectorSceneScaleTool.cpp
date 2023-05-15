@@ -3,6 +3,8 @@
 
 #include "Tools/VectorSceneScaleTool/OdysseyPainterEditorVectorSceneScaleTool.h"
 
+#define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorSceneScaleTool"
+
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
 UOdysseyPainterEditorVectorSceneScaleTool::~UOdysseyPainterEditorVectorSceneScaleTool()
@@ -18,28 +20,31 @@ UOdysseyPainterEditorVectorSceneScaleTool::UOdysseyPainterEditorVectorSceneScale
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
 void
-UOdysseyPainterEditorVectorSceneScaleTool::Activate( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorSceneScaleTool::ActivateVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
     iEngine->ClearHUD( );
+
+    iScene->Update( 0 ); // update vector scene and GUI widgets via delegates.
 }
 
 bool
-UOdysseyPainterEditorVectorSceneScaleTool::OnMouseDown( FOdysseyVectorEngine* iEngine
-                                                      , FOdysseyVectorScene* iScene
-                                                      , FOdysseyVectorUndo** iUndo
-                                                      , const FOdysseyPoint& iPointInTexture
-                                                      , const FKey& iKey )
+UOdysseyPainterEditorVectorSceneScaleTool::OnMouseDownVector( FOdysseyVectorEngine* iEngine
+                                                            , FOdysseyVectorScene* iScene
+                                                            , const FOdysseyPoint& iPointInTexture
+                                                            , const FKey& iKey )
 {
     BLPoint localCoords = iScene->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
 
-    // BeginTransaction() must be called for GUndo to have a value. Please do it in the caller function.
-    if( iUndo && GUndo )
+    // needed for valid GUndo pointer
+    GEditor->BeginTransaction(LOCTEXT("VectorSceneScaleTool","Vector Scene Scale Tool"));
+    if( GUndo )
     {
         // save selected object translation/rotation/scaling before transform
-        (*iUndo) = new FOdysseyVectorUndoObjectTransform( iScene, iScene );
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoObjectTransform( iScene, iScene );
 
-        GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(*iUndo) );
+        GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
     }
+    GEditor->EndTransaction();
 
     mDownWorldMouseX = iPointInTexture.x;
     mDownWorldMouseY = iPointInTexture.y;
@@ -47,13 +52,15 @@ UOdysseyPainterEditorVectorSceneScaleTool::OnMouseDown( FOdysseyVectorEngine* iE
     mDownLocalMouseX = localCoords.x;
     mDownLocalMouseY = localCoords.y;
 
+    iScene->Update( 0 ); // update vector scene and GUI widgets via delegates.
+
     return true;
 }
 
 void
-UOdysseyPainterEditorVectorSceneScaleTool::OnMouseDrag( FOdysseyVectorEngine* iEngine
-                                                      , FOdysseyVectorScene* iScene
-                                                      , const FOdysseyPoint& iPointInTexture )
+UOdysseyPainterEditorVectorSceneScaleTool::OnMouseDragVector( FOdysseyVectorEngine* iEngine
+                                                            , FOdysseyVectorScene* iScene
+                                                            , const FOdysseyPoint& iPointInTexture )
 {
     uint32 imageWidth, imageHeight;
      double factor;
@@ -73,14 +80,18 @@ UOdysseyPainterEditorVectorSceneScaleTool::OnMouseDrag( FOdysseyVectorEngine* iE
                      , iScene->GetTranslationY() - ( worldCoords.y - mDownWorldMouseY ) );
 
     iScene->UpdateMatrix();
+
+    iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES ); // update vector scene and GUI widgets via delegates.
 }
 
 bool
-UOdysseyPainterEditorVectorSceneScaleTool::OnMouseUp( FOdysseyVectorEngine* iEngine
-                                                    , FOdysseyVectorScene* iScene
-                                                    , const FOdysseyPoint& iPointInTexture
-                                                    , const FKey& iKey )
+UOdysseyPainterEditorVectorSceneScaleTool::OnMouseUpVector( FOdysseyVectorEngine* iEngine
+                                                          , FOdysseyVectorScene* iScene
+                                                          , const FOdysseyPoint& iPointInTexture
+                                                          , const FKey& iKey )
 {
+    iScene->Update( 0 ); // update vector scene and GUI widgets via delegates.
+
     return true;
 }
 
@@ -89,3 +100,5 @@ UOdysseyPainterEditorVectorSceneScaleTool::Commit()
 {
 
 }
+
+#undef LOCTEXT_NAMESPACE
