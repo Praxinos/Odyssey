@@ -1012,6 +1012,9 @@ ShotSequenceHelpers::GetCameraTransformTimes( UMovieSceneSequence* iSequence )
     if( !cameracut_section )
         return keys;
 
+    if( !cameracut_section->GetCameraBindingID().IsValid() )
+        return keys;
+
     UMovieSceneTrack* track = moviescene->FindTrack<UMovieScene3DTransformTrack>( cameracut_section->GetCameraBindingID().GetGuid() );
     if( !track )
         return keys;
