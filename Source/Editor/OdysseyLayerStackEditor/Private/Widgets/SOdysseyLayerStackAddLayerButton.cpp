@@ -124,7 +124,12 @@ SOdysseyLayerStackAddLayerButton::AddLayerFromClass(FAssetData iAssetData)
 		layerClass = blueprint->GeneratedClass;
 
 	if ( !layerClass )
-		return;
+		return;  
+
+#ifdef WITH_EDITOR
+    //Allows to have a single undo if there is side effects (auto adding frames in animation layer) in mOnAdded callback
+    FScopedTransaction ScopedTransaction(LOCTEXT("LayerStackTransaction", "Add Layer"));
+#endif
 
     UOdysseyLayer* currentLayer = layerStack->CurrentLayer.Get();
     if (currentLayer)
