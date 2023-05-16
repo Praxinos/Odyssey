@@ -19,6 +19,7 @@ SOdysseyLayerStackAddLayerButton::~SOdysseyLayerStackAddLayerButton()
 void SOdysseyLayerStackAddLayerButton::Construct(const FArguments& InArgs)
 {
     mLayerStack = InArgs._LayerStack;
+    mOnAdded = InArgs._OnAdded;
 
     SComboButton::FArguments args;
     args.OnGetMenuContent(this, &SOdysseyLayerStackAddLayerButton::MakeMenu)
@@ -143,7 +144,8 @@ SOdysseyLayerStackAddLayerButton::AddLayerFromClass(FAssetData iAssetData)
     {
 		currentLayer = layerStack->AddLayer(layerClass);
     }
-
+    
+    mOnAdded.ExecuteIfBound(currentLayer);
     FOdysseyObjectEditorUtils::SetPropertyValue(layerStack, "CurrentLayer", TSoftObjectPtr<UOdysseyLayer>(currentLayer));
 }
 

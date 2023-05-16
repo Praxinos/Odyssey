@@ -20,8 +20,17 @@ FOdysseyViewportDrawingEditorMeshBasedAdapter::~FOdysseyViewportDrawingEditorMes
 {
     RemoveTextureOverride();
 
-    mStrokeBufferRenderTarget2D->ConditionalBeginDestroy();
-    mStrokeBufferRenderTarget2D = nullptr;
+    if ( mStrokeBufferRenderTarget2D && mStrokeBufferRenderTarget2D->IsValidLowLevel())
+    {
+        mStrokeBufferRenderTarget2D->ConditionalBeginDestroy();
+        mStrokeBufferRenderTarget2D = nullptr;
+    }
+
+    if (mSeamRenderTarget2D && mSeamRenderTarget2D->IsValidLowLevel())
+    {
+        mSeamRenderTarget2D->ConditionalBeginDestroy();
+        mSeamRenderTarget2D = nullptr;
+    }
 }
 
 FOdysseyViewportDrawingEditorMeshBasedAdapter::FOdysseyViewportDrawingEditorMeshBasedAdapter(TSharedPtr<FOdysseyViewportDrawingEditor> iEditor) :
@@ -75,7 +84,8 @@ void FOdysseyViewportDrawingEditorMeshBasedAdapter::Tick(float iDelta)
     if (mEditor->Texture() && mPaintingTexture2DRenderTarget)
         TexturePaintHelpers::CopyTextureToRenderTargetTexture(mEditor->Texture(), mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
 
-    mEditor->GetSelectedTool()->Tick(iDelta);
+    if (mEditor->GetSelectedTool() )
+        mEditor->GetSelectedTool()->Tick(iDelta);
 }
 
 
@@ -156,14 +166,10 @@ void FOdysseyViewportDrawingEditorMeshBasedAdapter::BuildPaintingTexture2DRender
     mSeamRenderTarget2D->UpdateResourceImmediate();
     mSeamRenderTarget2D->AddToRoot();
 
-    if (mEditor->Texture()->MipGenSettings == TextureMipGenSettings::TMGS_NoMipmaps)
-    {
-        return;
-    }
-
-    const ERHIFeatureLevel::Type FeatureLevel = mEditor->Component()->GetWorld()->FeatureLevel;
-    mEditor->Material()->OverrideTexture(mEditor->Texture(), mPaintingTexture2DRenderTarget, FeatureLevel);
-
+    mPreviousMipSettings = mEditor->Texture()->MipGenSettings;
+    mEditor->Texture()->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
+    mEditor->Texture()->UpdateResource();
+    FTextureCompilingManager::Get().FinishCompilation({ mEditor->Texture() });
     TexturePaintHelpers::CopyTextureToRenderTargetTexture(mEditor->Texture(), mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
 }
 
@@ -354,12 +360,16 @@ float FOdysseyViewportDrawingEditorMeshBasedAdapter::GetStampQuality()
     FHitProxyId strokePaintHitProxyId = strokePaintCanvas.GetHitProxyId();
     FBatchedElements* strokePaintBatchedElements = strokePaintCanvas.GetBatchedElements(FCanvas::ET_Triangle, meshPaintBatchedElementParameters, nullptr, SE_BLEND_Opaque);
 
+    const FMatrix& componentToWorldMatrix = meshAdapter->GetComponentToWorldMatrix();
+    const FVector componentSpaceCameraPosition(componentToWorldMatrix.InverseTransformPosition(mouseViewportRay.GetOrigin()));
+    const FVector componentSpaceBrushPosition(componentToWorldMatrix.InverseTransformPosition(traceHitResult.Location));
+
     //Todo: make ellipseIntersectTriangles ?
     TArray<uint32> triangles;
     float brushSize = FMath::Max(iStampParams.mBlock->Width(), iStampParams.mBlock->Height());// * FMath::Max3(mEditor->Actor()->GetActorScale().X, mEditor->Actor()->GetActorScale().Y, mEditor->Actor()->GetActorScale().Z);
     brushSize *= brushSize;
     brushSize /= GetStampQuality();
-    triangles = meshAdapter->SphereIntersectTriangles(brushSize, meshAdapter->GetComponentToWorldMatrix().InverseTransformPosition(traceHitResult.Location), mouseViewportRay.GetOrigin(), false);
+    triangles = meshAdapter->SphereIntersectTriangles(brushSize, componentSpaceBrushPosition, componentSpaceCameraPosition, true);
 
     const TArray<uint32> vertexIndices = meshAdapter->GetMeshIndices();
     uint32 triIndices = vertexIndices.Num() / 3;

@@ -20,8 +20,17 @@ FOdysseyViewportDrawingEditorScreenBasedAdapter::~FOdysseyViewportDrawingEditorS
 {
     RemoveTextureOverride();
 
-    mStrokeBufferRenderTarget2D->ConditionalBeginDestroy();
-    mStrokeBufferRenderTarget2D = nullptr;
+    if (mStrokeBufferRenderTarget2D && mStrokeBufferRenderTarget2D->IsValidLowLevel())
+    {
+        mStrokeBufferRenderTarget2D->ConditionalBeginDestroy();
+        mStrokeBufferRenderTarget2D = nullptr;
+    }
+
+    if (mSeamRenderTarget2D && mSeamRenderTarget2D->IsValidLowLevel())
+    {
+        mSeamRenderTarget2D->ConditionalBeginDestroy();
+        mSeamRenderTarget2D = nullptr;
+    }
 }
 
 FOdysseyViewportDrawingEditorScreenBasedAdapter::FOdysseyViewportDrawingEditorScreenBasedAdapter(TSharedPtr<FOdysseyViewportDrawingEditor> iEditor) :
@@ -75,7 +84,8 @@ void FOdysseyViewportDrawingEditorScreenBasedAdapter::Tick(float iDelta)
     if( mLastKnownViewport )
         mEditor->GetGUI()->GetTopTab()->SetMeshMaxSize((FMath::Max(mLastKnownViewport->GetSizeXY().X, mLastKnownViewport->GetSizeXY().Y) / 2) * GetStampQuality());
 
-    mEditor->GetSelectedTool()->Tick(iDelta);
+    if (mEditor->GetSelectedTool())
+        mEditor->GetSelectedTool()->Tick(iDelta);
 }
 
 
@@ -156,15 +166,10 @@ void FOdysseyViewportDrawingEditorScreenBasedAdapter::BuildPaintingTexture2DRend
     mSeamRenderTarget2D->UpdateResourceImmediate();
     mSeamRenderTarget2D->AddToRoot();
 
-
-    if (mEditor->Texture()->MipGenSettings == TextureMipGenSettings::TMGS_NoMipmaps)
-    {
-        return;
-    }
-
-    const ERHIFeatureLevel::Type FeatureLevel = mEditor->Component()->GetWorld()->FeatureLevel;
-    mEditor->Material()->OverrideTexture(mEditor->Texture(), mPaintingTexture2DRenderTarget, FeatureLevel);
-
+    mPreviousMipSettings = mEditor->Texture()->MipGenSettings;
+    mEditor->Texture()->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
+    mEditor->Texture()->UpdateResource();
+    FTextureCompilingManager::Get().FinishCompilation({ mEditor->Texture() });
     TexturePaintHelpers::CopyTextureToRenderTargetTexture(mEditor->Texture(), mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
 }
 
@@ -411,7 +416,8 @@ float FOdysseyViewportDrawingEditorScreenBasedAdapter::GetStampQuality()
     FHitProxyId strokePaintHitProxyId = strokePaintCanvas.GetHitProxyId();
     FBatchedElements* strokePaintBatchedElements = strokePaintCanvas.GetBatchedElements(FCanvas::ET_Triangle, screenPaintBatchedElementParameters, nullptr, SE_BLEND_Opaque);
 
-     const TArray<uint32> vertexIndices = meshAdapter->GetMeshIndices();
+    //This gathers all triangles
+     /*const TArray<uint32> vertexIndices = meshAdapter->GetMeshIndices();
      uint32 triIndices = vertexIndices.Num() / 3;
      TArray<FTexturePaintTriangleInfo> triangleInfo;
      TArray<FTexturePaintMeshSectionInfo> sectionInfo;
@@ -419,11 +425,17 @@ float FOdysseyViewportDrawingEditorScreenBasedAdapter::GetStampQuality()
      {
          const int32 indices[3] = { int32(vertexIndices[i * 3]), int32(vertexIndices[i * 3 + 1]), int32(vertexIndices[i * 3 + 2]) };
          GatherTextureTriangles(meshAdapter.Get(), i, indices, &triangleInfo, &sectionInfo, mEditor->GetUVIndexUsedByCurrentTexture());
-     }
+     }*/
 
-    /*TArray<uint32> triangles;
+     //This gathers all triangles that are front facing
+    TArray<uint32> triangles;
     float brushSize = HALF_WORLD_MAX;
-    triangles = meshAdapter->SphereIntersectTriangles(brushSize, traceHitResult.Location, mouseViewportRay.GetOrigin(), true);
+
+    const FMatrix& componentToWorldMatrix = meshAdapter->GetComponentToWorldMatrix();
+    const FVector componentSpaceCameraPosition(componentToWorldMatrix.InverseTransformPosition(mouseViewportRay.GetOrigin()));
+    const FVector componentSpaceBrushPosition(componentToWorldMatrix.InverseTransformPosition(traceHitResult.Location));
+
+    triangles = meshAdapter->SphereIntersectTriangles(brushSize, componentSpaceBrushPosition, componentSpaceCameraPosition, true);
 
     const TArray<uint32> vertexIndices = meshAdapter->GetMeshIndices();
     uint32 triIndices = vertexIndices.Num() / 3;
@@ -433,7 +445,7 @@ float FOdysseyViewportDrawingEditorScreenBasedAdapter::GetStampQuality()
     {
         const int32 indices[3] = { int32(vertexIndices[triangles[i] * 3]), int32(vertexIndices[triangles[i] * 3 + 1]), int32(vertexIndices[triangles[i] * 3 + 2]) };
         GatherTextureTriangles(meshAdapter.Get(), triangles[i], indices, &triangleInfo, &sectionInfo, mEditor->GetUVIndexUsedByCurrentTexture());
-    }*/
+    }
 
 
 
