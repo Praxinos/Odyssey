@@ -23,12 +23,24 @@ public:
     /*
     void Resume();
     void Pause();
+    */
 
 	void Serialize(FArchive& Ar);
-    */
+
+private:
+    void OnImageRenderingPreChanged(const FGuid& iId, const TArray<::ULIS::FRectI>& iRects);
+    void OnImageRenderingPreCompositionChanged(const FGuid& iId);
 
 private:
     UOdysseyAnimation* mAnimation;
+
+    /* struct FBlockData
+    {
+        TSharedPtr<FOdysseyRasterBlock> block;
+        TArray<::ULIS::FRectI> mInvalidRects;
+    };
+
+    TMap<TArray<FGuid>, FBlockData> mBlockData; */
 
     /*
     struct FBlockToFrames

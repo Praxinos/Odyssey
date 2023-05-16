@@ -53,11 +53,6 @@ UOdysseyAnimationLayerImageRaster::UOdysseyAnimationLayerImageRaster()
 void
 UOdysseyAnimationLayerImageRaster::OnCreated_Implementation()
 {
-    UOdysseyAnimation* animation = GetAnimation();
-    if ( !animation )
-        return;
-
-    mCells.Add(FOdysseyAnimationCellImageRaster::Create(this, animation->Width(), animation->Height(), animation->Format()));
 }
 
 FInt32Range

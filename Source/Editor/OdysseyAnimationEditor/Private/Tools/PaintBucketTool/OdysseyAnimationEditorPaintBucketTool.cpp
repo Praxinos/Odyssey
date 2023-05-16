@@ -223,7 +223,7 @@ UOdysseyAnimationEditorPaintBucketTool::OnMouseUp( const FOdysseyPoint& iPointIn
             FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
             FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-            ret = UOdysseyPainterEditorPaintBucketTool::OnMouseUpVector(vectorEngine, vectorScene, nullptr, iPointInTexture, iKey);
+            ret = UOdysseyPainterEditorPaintBucketTool::OnMouseUpVector(vectorEngine, vectorScene, iPointInTexture, iKey);
 
             imageRenderAbility->Commited(imageRenderAbility->GetId(), imageRenderAbility->BuildRenderer(animation->CurrentFrame, false)->GetRects());
         }

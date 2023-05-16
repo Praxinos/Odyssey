@@ -5,6 +5,8 @@
 
 FOdysseyAnimationProxy::~FOdysseyAnimationProxy()
 {
+    IOdysseyAnimationImageRenderingAbility::OnPreChanged().RemoveAll(this);
+    IOdysseyAnimationImageRenderingAbility::OnPreCompositionChanged().RemoveAll(this);
     /*
     delete mThread;
     mThread = nullptr;
@@ -15,7 +17,8 @@ FOdysseyAnimationProxy::FOdysseyAnimationProxy(UOdysseyAnimation* iAnimation)
     : mAnimation(iAnimation)
     //, mStopTaskCounter(0)
 {
-
+    IOdysseyAnimationImageRenderingAbility::OnPreChanged().AddRaw(this, &FOdysseyAnimationProxy::OnImageRenderingPreChanged);
+    IOdysseyAnimationImageRenderingAbility::OnPreCompositionChanged().AddRaw(this, &FOdysseyAnimationProxy::OnImageRenderingPreCompositionChanged);
     //this line starts the thread which will execute Init() => Run()
     //mThread = FRunnableThread::Create(this, TEXT("FOdysseyAnimationProxy"), 0, TPri_BelowNormal); //windows default = 8mb for thread, could specify more
 }
@@ -31,9 +34,12 @@ FOdysseyAnimationProxy::GetBlock(const TArray<FGuid>& iFrameComposition)
     if (!animationAbility)
         return nullptr;
 
-    TSharedPtr<IOdysseyImageRenderer> renderer = animationAbility->BuildRenderer(frameIndex, false);
+    TSharedPtr<IOdysseyImageRenderer> renderer = MakeShared<FOdysseyAnimationImageRenderer>(mAnimation, frameIndex, false);
     TArray<::ULIS::FEvent> events;
-    return renderer->RenderInNewBlock(mAnimation->Format(), ::ULIS::FRectI::FromXYWH(0, 0, mAnimation->Width(), mAnimation->Height()), events);
+    TSharedPtr<::ULIS::FBlock> block = renderer->RenderInNewBlock(mAnimation->Format(), ::ULIS::FRectI::FromXYWH(0, 0, mAnimation->Width(), mAnimation->Height()), events);
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(block->Format());
+    ctx.Finish();
+    return block;
 }
 
 bool
@@ -122,3 +128,23 @@ FOdysseyAnimationProxy::Pause()
     WaitForPause();
 }
 */
+
+void
+FOdysseyAnimationProxy::Serialize(FArchive& Ar)
+{
+    //TODO: Save/Load proxy blocks and Ids
+    //How about the undos ?
+}
+
+void
+FOdysseyAnimationProxy::OnImageRenderingPreChanged(const FGuid& iId, const TArray<::ULIS::FRectI>& iRects)
+{
+    //Invalidate iRects if iId is contained in the BlockData Map
+}
+
+void
+FOdysseyAnimationProxy::OnImageRenderingPreCompositionChanged(const FGuid& iId)
+{
+    //Invalidate full animation rect if iId is contained in the BlockData Map
+    //Make a full check of the animation, to find if some frames should be removed, or even added to the BlockData Map
+}

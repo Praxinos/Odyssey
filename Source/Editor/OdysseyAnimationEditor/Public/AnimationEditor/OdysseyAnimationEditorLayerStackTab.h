@@ -32,6 +32,7 @@ protected:
 
 protected:
     // Event 
+    void OnLayerAdded(class UOdysseyLayer* iLayer);
     //DEBUG:
     FReply OnAddFrameClicked();
     //DEBUG:
