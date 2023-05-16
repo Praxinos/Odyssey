@@ -14,10 +14,14 @@ class UOdysseyLayerStack;
 class ODYSSEYLAYERSTACKEDITOR_API SOdysseyLayerStackAddLayerButton : public SComboButton
 {
 public:
+    DECLARE_DELEGATE_OneParam(FOnAdded, UOdysseyLayer*);
+
+public:
 
     SLATE_BEGIN_ARGS(SOdysseyLayerStackAddLayerButton)
         {}
         SLATE_ATTRIBUTE( UOdysseyLayerStack*, LayerStack )
+        SLATE_EVENT( FOnAdded, OnAdded )
     SLATE_END_ARGS()
 
 public:
@@ -32,4 +36,5 @@ private:
 
 private:
     TAttribute<UOdysseyLayerStack*> mLayerStack;
+    FOnAdded mOnAdded;
 };
