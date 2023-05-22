@@ -7,6 +7,8 @@
 
 #include "Internationalization/Regex.h"
 
+#include <string_view>
+
 //---
 
 static
