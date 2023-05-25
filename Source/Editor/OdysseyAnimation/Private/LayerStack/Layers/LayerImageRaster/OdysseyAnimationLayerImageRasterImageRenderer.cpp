@@ -5,7 +5,7 @@
 
 #include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRasterImageRenderer.h"
 
-FOdysseyAnimationLayerImageRasterImageRenderer::FOdysseyAnimationLayerImageRasterImageRenderer(UOdysseyAnimationLayerImageRaster* iLayer, int iFrame, bool iThreadSafe)
+FOdysseyAnimationLayerImageRasterImageRenderer::FOdysseyAnimationLayerImageRasterImageRenderer(UOdysseyAnimationLayerImageRaster* iLayer, int iFrame)
     : mCellRenderer(nullptr)
     , mBlendMode(::ULIS::eBlendMode(iLayer->BlendMode))
     , mOpacity(iLayer->Opacity) 
@@ -23,7 +23,7 @@ FOdysseyAnimationLayerImageRasterImageRenderer::FOdysseyAnimationLayerImageRaste
     if (!cellAbility)
         return;
 
-    mCellRenderer = cellAbility->BuildRenderer(cellFrameIndex, iThreadSafe);
+    mCellRenderer = cellAbility->BuildRenderer(cellFrameIndex);
 }
 
 TArray<::ULIS::FRectI>

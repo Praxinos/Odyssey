@@ -6,7 +6,7 @@
 #include "LayerStack/Layers/OdysseyAnimationLayerImageRenderer.h"
 #include "OdysseyRectUtils.h"
 
-FOdysseyAnimationLayerImageRenderer::FOdysseyAnimationLayerImageRenderer(UOdysseyAnimationLayer* iLayer, int iFrame, bool iThreadSafe)
+FOdysseyAnimationLayerImageRenderer::FOdysseyAnimationLayerImageRenderer(UOdysseyAnimationLayer* iLayer, int iFrame)
 {    
     const TArray<UOdysseyLayer*>& children = iLayer->GetChildren();
     for (int i = children.Num() - 1; i >= 0 ; i--)
@@ -22,7 +22,7 @@ FOdysseyAnimationLayerImageRenderer::FOdysseyAnimationLayerImageRenderer(UOdysse
         if (!layerAbility)
             continue;
 
-        mChildrenRenderers.Add(layerAbility->BuildRenderer(iFrame, iThreadSafe));
+        mChildrenRenderers.Add(layerAbility->BuildRenderer(iFrame));
     }
 }
 

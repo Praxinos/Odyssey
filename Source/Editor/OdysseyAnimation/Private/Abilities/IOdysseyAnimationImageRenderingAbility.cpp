@@ -33,10 +33,10 @@ IOdysseyAnimationImageRenderingAbility::OnCommited()
 }
 
 IOdysseyAnimationImageRenderingAbility::FOnCompositionChanged&
-IOdysseyAnimationImageRenderingAbility::OnPreCompositionChanged()
+IOdysseyAnimationImageRenderingAbility::OnCompositionPreChanged()
 {
-    static FOnCompositionChanged onPreCompositionChanged;
-    return onPreCompositionChanged;
+    static FOnCompositionChanged onCompositionPreChanged;
+    return onCompositionPreChanged;
 }
 
 IOdysseyAnimationImageRenderingAbility::FOnCompositionChanged&
@@ -47,10 +47,10 @@ IOdysseyAnimationImageRenderingAbility::OnCompositionChanged()
 }
 
 IOdysseyAnimationImageRenderingAbility::FOnCompositionChanged&
-IOdysseyAnimationImageRenderingAbility::OnPreCompositionCommited()
+IOdysseyAnimationImageRenderingAbility::OnCompositionPreCommited()
 {
-    static FOnCompositionChanged onPreCompositionCommited;
-    return onPreCompositionCommited;
+    static FOnCompositionChanged onCompositionPreCommited;
+    return onCompositionPreCommited;
 }
 
 IOdysseyAnimationImageRenderingAbility::FOnCompositionChanged&
@@ -77,14 +77,14 @@ IOdysseyAnimationImageRenderingAbility::Commited(const FGuid& iId, const TArray<
 void
 IOdysseyAnimationImageRenderingAbility::CompositionChanged(const FGuid& iId)
 {
-    IOdysseyAnimationImageRenderingAbility::OnPreCompositionChanged().Broadcast(iId);
+    IOdysseyAnimationImageRenderingAbility::OnCompositionPreChanged().Broadcast(iId);
     IOdysseyAnimationImageRenderingAbility::OnCompositionChanged().Broadcast(iId);
 }
 
 void
 IOdysseyAnimationImageRenderingAbility::CompositionCommited(const FGuid& iId)
 {
-    IOdysseyAnimationImageRenderingAbility::OnPreCompositionCommited().Broadcast(iId);
+    IOdysseyAnimationImageRenderingAbility::OnCompositionPreCommited().Broadcast(iId);
     IOdysseyAnimationImageRenderingAbility::OnCompositionCommited().Broadcast(iId);
 }
 

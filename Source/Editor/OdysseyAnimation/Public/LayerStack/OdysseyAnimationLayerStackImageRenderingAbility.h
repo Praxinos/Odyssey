@@ -17,12 +17,8 @@ public:
      * This renderer is made to always render the same rendering composition
      * For example : if you delete a layer, you should create a new renderer
      * but if you are just drawing on the layer, you can reuse the renderer
-     * 
-     * iThreadSafe, defines if the created renderer will be used in an other thread than the main thread.
-     * In that case, the renderer will be made so that it always renders exactly the same image all the time
-     * and you will have to recreate the renderer even if you're are just drawing on the layer
      */
-    virtual TSharedPtr<IOdysseyImageRenderer> BuildRenderer(int iFrame, bool iThreadSafe) const override;
+    virtual TSharedPtr<IOdysseyImageRenderer> BuildRenderer(int iFrame) const override;
     
     /**
      * @brief Returns the full Render Image Id, eventually composed of underlying ids

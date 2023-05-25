@@ -259,10 +259,15 @@ UOdysseyAnimationPlayer::UpdateTexture()
 		::ULIS::eFormat format = Animation->Format();
 		::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
 		TArray<TSharedPtr<::ULIS::FBlock>> blocks;
+		TArray<TSharedPtr<IOdysseyImageRenderer>> renderers;
+		TArray<ULIS::FEvent> allEvents;
 		for ( const ::ULIS::FRectI& rect : mInvalidRects )
 		{
 			TArray<ULIS::FEvent> events;
-			TSharedPtr<::ULIS::FBlock> block = imageRenderingAbility->BuildRenderer(frameIndex, false)->RenderInNewBlock(format, rect, events);
+			TSharedPtr<IOdysseyImageRenderer> renderer = imageRenderingAbility->BuildRenderer(frameIndex);
+			renderers.Add(renderer);
+			TSharedPtr<::ULIS::FBlock> block = renderer->RenderInNewBlock(format, rect, events);
+			allEvents.Append(events);
 			blocks.Add(block);
 		}
 		ctx.Finish();

@@ -258,6 +258,9 @@ private:
     //
     TWeakPtr<IOdysseyHandle> mPreloadHandle;
 
+    FCriticalSection mMutex;
+    TSharedPtr<FThreadSafeCounter> mAvailableCounter;
+
     //FOdysseyRasterBlockUndoBuilder mRasterBlockUndoBuilder;
 };
 

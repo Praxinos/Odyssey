@@ -51,10 +51,9 @@ FOdysseyMutator::~FOdysseyMutator()
     Commit();
 }
 
-FOdysseyMutator::FOdysseyMutator(UObject* iObject, const FString& iName, bool iGenerateUndo)
+FOdysseyMutator::FOdysseyMutator(UObject* iObject, const FString& iName)
     : mObject(iObject)
     , mRootMutation(MakeShared<FOdysseyRootMutation>(iName))
-    , mGenerateUndo(iGenerateUndo)
 {
 }
 
@@ -77,11 +76,8 @@ FOdysseyMutator::Commit()
     if (mRootMutation->GetMutations().Num() <= 0)
         return;
 
-    if (mGenerateUndo)
-    {
-        ensure(GEditor->IsTransactionActive());
+    if (GEditor->IsTransactionActive())
         GUndo->StoreUndo(mObject, MakeUnique<FOdysseyMutationsUndo>(mRootMutation));
-    }
     
     mRootMutation->OnMutated().ExecuteIfBound();
     mRootMutation = MakeShared<FOdysseyRootMutation>(mRootMutation->GetName());

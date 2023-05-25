@@ -25,7 +25,7 @@ FOdysseyAnimationEditor::~FOdysseyAnimationEditor()
 {
 	mPlayer->OnStop().RemoveAll(this);
 	mAnimation->OnCurrentFrameChanged().RemoveAll(this);
-	IOdysseyAnimationImageRenderingAbility::OnCompositionChanged().RemoveAll(this);
+	IOdysseyAnimationImageRenderingAbility::OnCompositionCommited().RemoveAll(this);
 	UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll(this);
 }
 
@@ -71,7 +71,7 @@ FOdysseyAnimationEditor::InitData(UObject* iEditedObject)
 	//Set Media player and Animation callbacks
 	mPlayer->OnStop().AddRaw(this, &FOdysseyAnimationEditor::OnPlayerStop);
 	mAnimation->OnCurrentFrameChanged().AddRaw(this, &FOdysseyAnimationEditor::OnCurrentFrameChanged);
-	IOdysseyAnimationImageRenderingAbility::OnCompositionChanged().AddRaw(this, &FOdysseyAnimationEditor::OnImageRenderingCompositionCommited);
+	IOdysseyAnimationImageRenderingAbility::OnCompositionCommited().AddRaw(this, &FOdysseyAnimationEditor::OnImageRenderingCompositionCommited);
 
 	FOdysseyPainterEditor::InitData(iEditedObject);
 }

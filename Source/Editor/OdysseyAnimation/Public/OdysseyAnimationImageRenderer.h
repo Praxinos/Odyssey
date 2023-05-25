@@ -9,7 +9,7 @@ class ODYSSEYANIMATION_API FOdysseyAnimationImageRenderer
     : public IOdysseyImageRenderer
 {
 public:
-    FOdysseyAnimationImageRenderer(UOdysseyAnimation* iAnimation, int iFrame, bool iThreadSafe);
+    FOdysseyAnimationImageRenderer(UOdysseyAnimation* iAnimation, int iFrame);
 
 public:
     /**

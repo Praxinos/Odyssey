@@ -14,7 +14,7 @@ public:
     ~FOdysseyMutator();
 
     //Constructor
-    FOdysseyMutator(UObject* iObject, const FString& iName, bool iGenerateUndo = true);
+    FOdysseyMutator(UObject* iObject, const FString& iName);
 
 public:
     //Getters
@@ -30,7 +30,6 @@ public:
 private:
     UObject* mObject;
     TSharedPtr<FOdysseyRootMutation> mRootMutation;
-    bool mGenerateUndo;
 };
 
 class ODYSSEYCORE_API FOdysseyRootMutation

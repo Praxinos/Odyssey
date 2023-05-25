@@ -5,8 +5,8 @@
 
 #include "LayerStack/Layers/LayerFolder/OdysseyAnimationLayerFolderImageRenderer.h"
 
-FOdysseyAnimationLayerFolderImageRenderer::FOdysseyAnimationLayerFolderImageRenderer(UOdysseyAnimationLayerFolder* iLayer, int iFrame, bool iThreadSafe)
-    : FOdysseyAnimationLayerImageRenderer(iLayer, iFrame, iThreadSafe)
+FOdysseyAnimationLayerFolderImageRenderer::FOdysseyAnimationLayerFolderImageRenderer(UOdysseyAnimationLayerFolder* iLayer, int iFrame)
+    : FOdysseyAnimationLayerImageRenderer(iLayer, iFrame)
     , mBlendMode(::ULIS::eBlendMode(iLayer->BlendMode))
     , mOpacity(iLayer->Opacity)
 {

@@ -9,7 +9,7 @@ class ODYSSEYANIMATION_API FOdysseyAnimationCellImageRasterImageRenderer
     : public IOdysseyImageRenderer
 {
 public:
-    FOdysseyAnimationCellImageRasterImageRenderer(TSharedPtr<FOdysseyAnimationCellImageRaster> iCell, int iFrame, bool iThreadSafe);
+    FOdysseyAnimationCellImageRasterImageRenderer(TSharedPtr<FOdysseyAnimationCellImageRaster> iCell, int iFrame);
 
 public:
     /**

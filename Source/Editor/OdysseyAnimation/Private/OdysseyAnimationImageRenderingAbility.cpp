@@ -10,9 +10,9 @@ FOdysseyAnimationImageRenderingAbility::FOdysseyAnimationImageRenderingAbility(U
 }
 
 TSharedPtr<IOdysseyImageRenderer>
-FOdysseyAnimationImageRenderingAbility::BuildRenderer(int iFrame, bool iThreadSafe) const
+FOdysseyAnimationImageRenderingAbility::BuildRenderer(int iFrame) const
 {
-    return MakeShared<FOdysseyAnimationProxyImageRenderer>(mAnimation, GetComposition(iFrame), iThreadSafe);
+    return MakeShared<FOdysseyAnimationProxyImageRenderer>(mAnimation, iFrame);
 }
 
 TArray<FGuid>
@@ -49,5 +49,12 @@ FOdysseyAnimationImageRenderingAbility::Preload(int iFrame)
     if (!layerStackAbility)
         return nullptr;
 
-    return layerStackAbility->Preload(iFrame);
+    TArray<TSharedPtr<IOdysseyHandle>> handles =
+    {
+        mAnimation->GetProxy()->Preload(iFrame),
+        layerStackAbility->Preload(iFrame)
+    };
+    
+
+    return MakeShared<FOdysseyHandleContainer>(handles);
 }

@@ -11,7 +11,7 @@ class ODYSSEYANIMATION_API FOdysseyAnimationProxyImageRenderer
     : public IOdysseyImageRenderer
 {
 public:
-    FOdysseyAnimationProxyImageRenderer(UOdysseyAnimation* iAnimation, const TArray<FGuid>& iFrameComposition, bool iThreadSafe);
+    FOdysseyAnimationProxyImageRenderer(UOdysseyAnimation* iAnimation, int iFrameIndex);
 
 public:
     /**
@@ -34,7 +34,9 @@ public:
     virtual TArray<::ULIS::FEvent> RenderInBlock(TSharedPtr<::ULIS::FBlock> ioBlock, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList) override;
 
 public:
+    UOdysseyAnimation* mAnimation;
     ::ULIS::FRectI mRect;
     TSharedPtr<FOdysseyAnimationProxy> mProxy;
-    TArray<FGuid> mFrameComposition;
+    int mFrameIndex;
+    TSharedPtr<IOdysseyImageRenderer> mAnimationRenderer;
 };

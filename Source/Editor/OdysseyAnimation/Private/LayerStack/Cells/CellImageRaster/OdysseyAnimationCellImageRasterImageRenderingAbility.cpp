@@ -29,9 +29,9 @@ FOdysseyAnimationCellImageRasterImageRenderingAbility::FOdysseyAnimationCellImag
 }
 
 TSharedPtr<IOdysseyImageRenderer>
-FOdysseyAnimationCellImageRasterImageRenderingAbility::BuildRenderer(int iFrame, bool iThreadSafe) const
+FOdysseyAnimationCellImageRasterImageRenderingAbility::BuildRenderer(int iFrame) const
 {
-    return MakeShared<FOdysseyAnimationCellImageRasterImageRenderer>(mCellImageRaster.Pin(), iFrame, iThreadSafe);
+    return MakeShared<FOdysseyAnimationCellImageRasterImageRenderer>(mCellImageRaster.Pin(), iFrame);
 }
 
 TArray<FGuid>

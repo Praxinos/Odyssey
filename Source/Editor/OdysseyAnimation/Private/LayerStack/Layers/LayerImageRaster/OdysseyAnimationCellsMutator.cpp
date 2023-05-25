@@ -4,8 +4,8 @@
 #include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationCellsMutator.h"
 #include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
 
-FOdysseyAnimationCellsMutator::FOdysseyAnimationCellsMutator(UOdysseyAnimationLayerImageRaster* iLayer, bool iGenerateUndo)
-    : FOdysseyMutator(iLayer, "FOdysseyAnimationCellsMutator", iGenerateUndo)
+FOdysseyAnimationCellsMutator::FOdysseyAnimationCellsMutator(UOdysseyAnimationLayerImageRaster* iLayer)
+    : FOdysseyMutator(iLayer, "FOdysseyAnimationCellsMutator")
     , mLayer(iLayer)
 {
     GetRootMutation()->OnMutated().BindLambda(

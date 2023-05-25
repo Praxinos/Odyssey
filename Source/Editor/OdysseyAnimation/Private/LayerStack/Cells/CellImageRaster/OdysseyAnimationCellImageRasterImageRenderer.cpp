@@ -8,17 +8,9 @@
 #include "ULISUtils.h"
 #include "ULISEventBuilder.h"
 
-FOdysseyAnimationCellImageRasterImageRenderer::FOdysseyAnimationCellImageRasterImageRenderer(TSharedPtr<FOdysseyAnimationCellImageRaster> iCell, int iFrame, bool iThreadSafe)
-    : mRasterBlock(nullptr)
-{    
-    if (iThreadSafe)
-    {
-        //TODO: Copy rasterblock ?
-    }
-    else
-    {
-        mRasterBlock = iCell->GetRasterBlock();
-    }
+FOdysseyAnimationCellImageRasterImageRenderer::FOdysseyAnimationCellImageRasterImageRenderer(TSharedPtr<FOdysseyAnimationCellImageRaster> iCell, int iFrame)
+    : mRasterBlock(iCell->GetRasterBlock())
+{
 }
 
 TArray<::ULIS::FRectI>

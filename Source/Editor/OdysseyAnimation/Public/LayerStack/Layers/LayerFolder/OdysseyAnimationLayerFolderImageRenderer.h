@@ -9,7 +9,7 @@ class ODYSSEYANIMATION_API FOdysseyAnimationLayerFolderImageRenderer
     : public FOdysseyAnimationLayerImageRenderer
 {
 public:
-    FOdysseyAnimationLayerFolderImageRenderer(UOdysseyAnimationLayerFolder* iLayer, int iFrame, bool iThreadSafe);
+    FOdysseyAnimationLayerFolderImageRenderer(UOdysseyAnimationLayerFolder* iLayer, int iFrame);
 
 public:
     /**

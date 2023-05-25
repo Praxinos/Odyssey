@@ -38,7 +38,7 @@ void UOdysseyAnimation::Init(const FOdysseyAnimationConfiguration& iConfiguratio
 	mLayerStack->CurrentLayer = TSoftObjectPtr<UOdysseyLayer>(layer);
 
 	TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(layer, mWidth, mHeight, Format());
-	FOdysseyAnimationCellsMutator mutator(Cast<UOdysseyAnimationLayerImageRaster>(layer), false);
+	FOdysseyAnimationCellsMutator mutator(Cast<UOdysseyAnimationLayerImageRaster>(layer));
 	mutator.Add({ cell });
 	mutator.Commit();
 }
@@ -72,6 +72,10 @@ UOdysseyAnimation::GetFrameRange() const
 {
 	//TODO: deduce frame count from :
 	// - startPoint / endPoint
+
+	if ( !mLayerStack )
+		return FInt32Range();
+
 	return mLayerStack->GetFrameRange();
 }
 

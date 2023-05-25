@@ -6,12 +6,15 @@
 #include "OdysseyAnimationProxyImageRenderer.h"
 
 
-FOdysseyAnimationProxyImageRenderer::FOdysseyAnimationProxyImageRenderer(UOdysseyAnimation* iAnimation, const TArray<FGuid>& iFrameComposition, bool iThreadSafe)
-    : mRect(::ULIS::FRectI::FromXYWH(0, 0, iAnimation->Width(), iAnimation->Height()))
+FOdysseyAnimationProxyImageRenderer::FOdysseyAnimationProxyImageRenderer(UOdysseyAnimation* iAnimation, int iFrameIndex)
+    : mAnimation(iAnimation)
+    , mRect(::ULIS::FRectI::FromXYWH(0, 0, iAnimation->Width(), iAnimation->Height()))
     , mProxy(iAnimation->GetProxy())
-    , mFrameComposition(iFrameComposition)
+    , mFrameIndex(iFrameIndex)
+    , mAnimationRenderer(nullptr)
 {
-
+    TSharedPtr<IOdysseyAnimationImageRenderingAbility> animationAbility = mAnimation->GetAbility<IOdysseyAnimationImageRenderingAbility>();
+    mAnimationRenderer = MakeShared<FOdysseyAnimationImageRenderer>(mAnimation, iFrameIndex);
 }
 
 TArray<::ULIS::FRectI>
@@ -23,12 +26,14 @@ FOdysseyAnimationProxyImageRenderer::GetRects() const
 TArray<::ULIS::FEvent>
 FOdysseyAnimationProxyImageRenderer::RenderInBlock(TSharedPtr<::ULIS::FBlock> ioBlock, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
 {
-    TSharedPtr<::ULIS::FBlock> block = mProxy->GetBlock(mFrameComposition);
-    if (!block)
-        return iWaitList;
+    TSharedPtr<::ULIS::FBlock> block = mProxy->GetBlock(mFrameIndex);
+    if ( !block )
+        return mAnimationRenderer->RenderInBlock(ioBlock, iRects, iPos, iWaitList);
 
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(block->Format());
-    TArray<::ULIS::FEvent> events = iWaitList;
+
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(ioBlock->Format());
+
+    TArray<::ULIS::FEvent> events;
     for ( int i = 0; i < iRects.Num(); i++ )
     {
         TArray<::ULIS::FEvent> eventConvertAndExecute = ULISUtils::ConvertAndExecute(ioBlock, block->Format(), iRects[i], iPos[i], iWaitList,
@@ -49,7 +54,9 @@ FOdysseyAnimationProxyImageRenderer::RenderInBlock(TSharedPtr<::ULIS::FBlock> io
             }
         );
         events.Append(eventConvertAndExecute);
-        ctx.Flush();
     }
+
+    ctx.Flush();
+
     return events;
 }

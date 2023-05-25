@@ -198,7 +198,7 @@ UOdysseyAnimationEditorPaintBucketTool::OnMouseDrag( const FOdysseyPoint& iPoint
             UOdysseyPainterEditorPaintBucketTool::OnMouseDragVector(vectorEngine, vectorScene, iPointInTexture);
 
             
-            imageRenderAbility->Changed(imageRenderAbility->GetId(), imageRenderAbility->BuildRenderer(animation->CurrentFrame, false)->GetRects());
+            imageRenderAbility->Changed(imageRenderAbility->GetId(), imageRenderAbility->BuildRenderer(animation->CurrentFrame)->GetRects());
         }
     }
 }
@@ -225,7 +225,7 @@ UOdysseyAnimationEditorPaintBucketTool::OnMouseUp( const FOdysseyPoint& iPointIn
 
             ret = UOdysseyPainterEditorPaintBucketTool::OnMouseUpVector(vectorEngine, vectorScene, iPointInTexture, iKey);
 
-            imageRenderAbility->Commited(imageRenderAbility->GetId(), imageRenderAbility->BuildRenderer(animation->CurrentFrame, false)->GetRects());
+            imageRenderAbility->Commited(imageRenderAbility->GetId(), imageRenderAbility->BuildRenderer(animation->CurrentFrame)->GetRects());
         }
     }
 

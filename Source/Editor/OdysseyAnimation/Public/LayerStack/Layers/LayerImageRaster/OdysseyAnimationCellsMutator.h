@@ -12,7 +12,7 @@ class ODYSSEYANIMATION_API FOdysseyAnimationCellsMutator
 {
 public:
     //FOdysseyAnimationCellsMutator(TSharedPtr<FOdysseyAnimationCellsContainer>& iCells,  bool iGenerateUndo = true);
-    FOdysseyAnimationCellsMutator(UOdysseyAnimationLayerImageRaster* iLayer, bool iGenerateUndo = true);
+    FOdysseyAnimationCellsMutator(UOdysseyAnimationLayerImageRaster* iLayer);
 
 public:
     void Add(TArray<TSharedPtr<FOdysseyAnimationCell>> iCells, int iIndex = INDEX_NONE);

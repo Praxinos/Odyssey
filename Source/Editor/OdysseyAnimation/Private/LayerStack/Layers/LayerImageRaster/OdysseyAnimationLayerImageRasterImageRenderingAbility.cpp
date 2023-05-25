@@ -9,9 +9,9 @@ FOdysseyAnimationLayerImageRasterImageRenderingAbility::FOdysseyAnimationLayerIm
 }
 
 TSharedPtr<IOdysseyImageRenderer>
-FOdysseyAnimationLayerImageRasterImageRenderingAbility::BuildRenderer(int iFrame, bool iThreadSafe) const
+FOdysseyAnimationLayerImageRasterImageRenderingAbility::BuildRenderer(int iFrame) const
 {
-    return MakeShared<FOdysseyAnimationLayerImageRasterImageRenderer>(mLayerImageRaster, iFrame, iThreadSafe);
+    return MakeShared<FOdysseyAnimationLayerImageRasterImageRenderer>(mLayerImageRaster, iFrame);
 }
 
 TArray<FGuid>

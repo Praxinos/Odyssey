@@ -6,40 +6,61 @@
 FOdysseyAnimationProxy::~FOdysseyAnimationProxy()
 {
     IOdysseyAnimationImageRenderingAbility::OnPreChanged().RemoveAll(this);
-    IOdysseyAnimationImageRenderingAbility::OnPreCompositionChanged().RemoveAll(this);
-    /*
+    IOdysseyAnimationImageRenderingAbility::OnCommited().RemoveAll(this);
+    IOdysseyAnimationImageRenderingAbility::OnCompositionPreChanged().RemoveAll(this);
+    IOdysseyAnimationImageRenderingAbility::OnCompositionCommited().RemoveAll(this);
+    
     delete mThread;
     mThread = nullptr;
-    */
 }
 
 FOdysseyAnimationProxy::FOdysseyAnimationProxy(UOdysseyAnimation* iAnimation)
     : mAnimation(iAnimation)
-    //, mStopTaskCounter(0)
+    , mStopTaskCounter(0)
+    , mBlockData()
+    , mFramesToBlockData()
 {
     IOdysseyAnimationImageRenderingAbility::OnPreChanged().AddRaw(this, &FOdysseyAnimationProxy::OnImageRenderingPreChanged);
-    IOdysseyAnimationImageRenderingAbility::OnPreCompositionChanged().AddRaw(this, &FOdysseyAnimationProxy::OnImageRenderingPreCompositionChanged);
+    IOdysseyAnimationImageRenderingAbility::OnCommited().AddRaw(this, &FOdysseyAnimationProxy::OnImageRenderingCommited);
+    IOdysseyAnimationImageRenderingAbility::OnCompositionPreChanged().AddRaw(this, &FOdysseyAnimationProxy::OnImageRenderingCompositionPreChanged);
+    IOdysseyAnimationImageRenderingAbility::OnCompositionCommited().AddRaw(this, &FOdysseyAnimationProxy::OnImageRenderingCompositionCommited);
     //this line starts the thread which will execute Init() => Run()
-    //mThread = FRunnableThread::Create(this, TEXT("FOdysseyAnimationProxy"), 0, TPri_BelowNormal); //windows default = 8mb for thread, could specify more
+    mThread = FRunnableThread::Create(this, TEXT("FOdysseyAnimationProxy"), 0, TPri_BelowNormal); //windows default = 8mb for thread, could specify more
+}
+
+TSharedPtr<FBlockData>
+FOdysseyAnimationProxy::GetBlockDataForComposition(const TArray<FGuid>& iComposition)
+{
+    for (TSharedPtr<FBlockData> blockData : mBlockData)
+    {
+        if (blockData->GetComposition() == iComposition)
+            return blockData;
+    }
+
+    return nullptr;
 }
 
 TSharedPtr<::ULIS::FBlock>
-FOdysseyAnimationProxy::GetBlock(const TArray<FGuid>& iFrameComposition)
-{
-    //TODO: use available image if possible
-    //TODO: Find the right frame or use iFrameIndex instead of iFrameComposition
-    int frameIndex = 0;
-
-    TSharedPtr<IOdysseyAnimationImageRenderingAbility> animationAbility = mAnimation->GetAbility<IOdysseyAnimationImageRenderingAbility>();
-    if (!animationAbility)
+FOdysseyAnimationProxy::GetBlock(int iFrameIndex)
+{   
+    if (!mFramesToBlockData.Contains(iFrameIndex))
         return nullptr;
 
-    TSharedPtr<IOdysseyImageRenderer> renderer = MakeShared<FOdysseyAnimationImageRenderer>(mAnimation, frameIndex, false);
-    TArray<::ULIS::FEvent> events;
-    TSharedPtr<::ULIS::FBlock> block = renderer->RenderInNewBlock(mAnimation->Format(), ::ULIS::FRectI::FromXYWH(0, 0, mAnimation->Width(), mAnimation->Height()), events);
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(block->Format());
-    ctx.Finish();
+    TSharedPtr<FBlockData> blockData = mFramesToBlockData[iFrameIndex];
+    TSharedPtr<::ULIS::FBlock> block = blockData->GetBlock(); //To keep the block in memory
+    blockData->Render(true); //Renders only if needed, so this is safe
+
     return block;
+}
+
+TSharedPtr<IOdysseyHandle>
+FOdysseyAnimationProxy::Preload(int iFrameIndex)
+{
+    if (!mFramesToBlockData.Contains(iFrameIndex))
+        return nullptr;
+    
+    TSharedPtr<FBlockData> blockData = mFramesToBlockData[iFrameIndex];
+    return blockData->GetRasterBlock()->Preload();
 }
 
 bool
@@ -51,9 +72,8 @@ FOdysseyAnimationProxy::Init()
 uint32
 FOdysseyAnimationProxy::Run()
 {
-    /*
     //While not told to stop this thread 
-    while (StopTaskCounter.GetValue() == 0)
+    while (mStopTaskCounter.GetValue() == 0)
     {
         //Manage pausing the thread
         if(mPauseTaskCounter.GetValue() != 0)
@@ -62,59 +82,24 @@ FOdysseyAnimationProxy::Run()
             continue;
         }
 
-        //Sleep if there is nothing to work on
-        if (mPending.IsEmpty())
+        TSharedPtr<FBlockData> blockData;
+        if (!mPendingBlockData.Dequeue(blockData)) //PendingBlockData is a ThreadSafe queue
         {
             FPlatformProcess::Sleep(0.03); //Arbitrary number
             continue;
-        }
-
-        //Get a pending frame to render
-        FPendingFrame pendingFrame = mPending.Pop(); //FIFO
-        if (IsFrameLocked(pendingFrame))
-        {
-            if (mPending.IsEmpty())
-                FPlatformProcess::Sleep(0.03); //Arbitrary number
-            
-            mPending.Push(pendingFrame);
-            continue;
-        }
-
-        //If frame id is already in mIds, then we don't have to render it again
-        if (mIds.Contains(pendingFrame.mId))
-            continue;
-
-        //=======
-
-
-        //Check if the frame id is still correct
-        //then render
-        if (pendingFrame.mId == mIds)
-
-        mAnimation->Render();
-
-        //Rendering the animation, means the hierarchy should not change
-        //Ideally, we should generate a rendering pipeline
-        // So that it holds the rendering path, blocks, options, etc...
-
-        TSharedPtr<FOdysseyRenderingPipeline> renderingPipeline = imageRenderingAbility->GenerateRenderingPipeline();
-        block = renderingPipeline->RenderInNewBlock();
-        StoreForFrame(block);
+        }   
+        blockData->Render(false);
     }
-    */
     return 0;
 }
 
 void
 FOdysseyAnimationProxy::Stop()
 {
-    /*
     mStopTaskCounter.Increment();
-    WaitForCompletion();
-    */
+    mThread->WaitForCompletion();
 }
 
-/*
 void
 FOdysseyAnimationProxy::Resume()
 {
@@ -125,9 +110,7 @@ void
 FOdysseyAnimationProxy::Pause()
 {
     mPauseTaskCounter.Increment();
-    WaitForPause();
 }
-*/
 
 void
 FOdysseyAnimationProxy::Serialize(FArchive& Ar)
@@ -139,12 +122,354 @@ FOdysseyAnimationProxy::Serialize(FArchive& Ar)
 void
 FOdysseyAnimationProxy::OnImageRenderingPreChanged(const FGuid& iId, const TArray<::ULIS::FRectI>& iRects)
 {
-    //Invalidate iRects if iId is contained in the BlockData Map
+    for (TSharedPtr<FBlockData> blockData : mBlockData)
+    {
+        if (blockData->GetComposition().Contains(iId))
+        {
+            blockData->LockPending(iId);
+            blockData->AppendInvalidRects(iRects);
+        }
+    }
 }
 
 void
-FOdysseyAnimationProxy::OnImageRenderingPreCompositionChanged(const FGuid& iId)
+FOdysseyAnimationProxy::OnImageRenderingCommited(const FGuid& iId, const TArray<::ULIS::FRectI>& iRects)
 {
-    //Invalidate full animation rect if iId is contained in the BlockData Map
-    //Make a full check of the animation, to find if some frames should be removed, or even added to the BlockData Map
+    for (TSharedPtr<FBlockData> blockData : mBlockData)
+    {
+        if (blockData->GetComposition().Contains(iId))
+        {
+            if (blockData->UnlockPending(iId))
+                mPendingBlockData.Enqueue(blockData); //mPendingBlockData is ThreadSafe
+        }
+    }
+}
+
+void
+FOdysseyAnimationProxy::OnImageRenderingCompositionPreChanged(const FGuid& iId)
+{
+    for (TSharedPtr<FBlockData> blockData : mBlockData)
+    {
+        if (blockData->GetComposition().Contains(iId))
+            blockData->LockPending(iId);
+    }
+
+    TSharedPtr<IOdysseyAnimationImageRenderingAbility> animationAbility = mAnimation->GetAbility<IOdysseyAnimationImageRenderingAbility>();
+    FInt32Range range = mAnimation->GetFrameRange();
+
+    TArray<FInt32Range> rangesToRemove;
+    if ( !mAnimationRange.GetUpperBound().IsOpen() && !mAnimationRange.GetLowerBound().IsOpen() )
+        rangesToRemove = FInt32Range::Difference(mAnimationRange, range);
+
+    TArray<TSharedPtr<FBlockData>> blockDataToEnqueue;
+    TMap<TSharedPtr<FBlockData>, TArray<int>> frameIndexesToRemove;
+    TMap<TSharedPtr<FBlockData>, TArray<int>> frameIndexesToAdd;
+
+    //Remove unused indexes
+    for ( const FInt32Range& rangeToRemove : rangesToRemove )
+    {
+        int startFrame = rangeToRemove.GetLowerBound().IsInclusive() ? rangeToRemove.GetLowerBoundValue() : rangeToRemove.GetLowerBoundValue() + 1;
+        int endFrame = rangeToRemove.GetUpperBound().IsInclusive() ? rangeToRemove.GetUpperBoundValue() : rangeToRemove.GetUpperBoundValue() - 1;
+        for ( int i = startFrame; i <= endFrame; i++ )
+        {
+            if ( !frameIndexesToRemove.Contains(mFramesToBlockData[i]) )
+            {
+                frameIndexesToRemove.Add(mFramesToBlockData[i], { i });
+            }
+            else
+            {
+                frameIndexesToRemove[mFramesToBlockData[i]].Add(i);
+            }
+        }
+    }
+
+    mAnimationRange = range;
+
+    if ( !mAnimationRange.GetUpperBound().IsOpen() && !mAnimationRange.GetLowerBound().IsOpen() )
+    {
+        //Add new indexes
+        int startFrame = mAnimationRange.GetLowerBound().IsInclusive() ? mAnimationRange.GetLowerBoundValue() : mAnimationRange.GetLowerBoundValue() + 1;
+        int endFrame = mAnimationRange.GetUpperBound().IsInclusive() ? mAnimationRange.GetUpperBoundValue() : mAnimationRange.GetUpperBoundValue() - 1;
+        for ( int i = startFrame; i <= endFrame; i++ )
+        {
+            TArray<FGuid> composition = animationAbility->GetComposition(i);
+            const TSharedPtr<FBlockData>* blockDataPtr = mFramesToBlockData.Find(i);
+            TSharedPtr<FBlockData> blockData = blockDataPtr ? *blockDataPtr : nullptr;
+            if ( blockData )
+            {
+                const TArray<FGuid>& blockDataComposition = blockData->GetComposition();
+                if ( blockDataComposition == composition )
+                    continue;
+
+                if ( !frameIndexesToRemove.Contains(blockData) )
+                {
+                    frameIndexesToRemove.Add(blockData, { i });
+                }
+                else
+                {
+                    frameIndexesToRemove[blockData].Add(i);
+                }
+            }
+
+            blockData = GetBlockDataForComposition(composition);
+            if ( !blockData )
+            {
+                TSharedPtr<FOdysseyRasterBlock> block = MakeShared<FOdysseyRasterBlock>(mAnimation);
+                block->SetBlock(MakeShared<::ULIS::FBlock>(mAnimation->Width(), mAnimation->Height(), mAnimation->Format()));
+                blockData = MakeShared<FBlockData>(mAnimation, composition, block);
+                blockData->LockPending(iId);
+                mBlockData.Add(blockData);
+                blockDataToEnqueue.Add(blockData);
+            }
+
+            if ( !frameIndexesToAdd.Contains(blockData) )
+            {
+                frameIndexesToAdd.Add(blockData, { i });
+            }
+            else
+            {
+                frameIndexesToAdd[blockData].Add(i);
+            }
+        }
+    }
+
+    for (auto& element : frameIndexesToRemove)
+    {
+        TSharedPtr<FBlockData> blockData = element.Key;
+        TArray<int> frameIndexes = element.Value; 
+        for (int frameIndex : frameIndexes)
+        {
+            blockData->RemoveFrameIndex(frameIndex);
+            mFramesToBlockData.Remove(frameIndex);
+        }
+    }
+
+    for (auto& element : frameIndexesToAdd)
+    {
+        TSharedPtr<FBlockData> blockData = element.Key;
+        TArray<int> frameIndexes = element.Value; 
+        for (int frameIndex : frameIndexes)
+        {
+            blockData->AddFrameIndex(frameIndex);
+            mFramesToBlockData.Add(frameIndex, blockData);
+        }
+    }
+
+    //Remove unused blockData
+    mBlockData.RemoveAll(
+        [](TSharedPtr<FBlockData> iBlockData)
+        {
+            return iBlockData->GetFrameIndexes().IsEmpty();
+        }
+    );
+}
+
+void
+FOdysseyAnimationProxy::OnImageRenderingCompositionCommited(const FGuid& iId)
+{
+    for (TSharedPtr<FBlockData> blockData : mBlockData)
+    {
+        if (blockData->GetComposition().Contains(iId))
+        {
+            if (blockData->UnlockPending(iId))
+                mPendingBlockData.Enqueue(blockData); //mPendingBlockData is ThreadSafe
+        }
+    }
+}
+
+//=================================================================
+
+FBlockData::FBlockData(UOdysseyAnimation* iAnimation, const TArray<FGuid>& iComposition, TSharedPtr<FOdysseyRasterBlock> iRasterBlock)
+    : mAnimation(iAnimation)
+    , mComposition(iComposition)
+    , mState((int)eState::kInvalid)
+    , mRasterBlock(iRasterBlock)
+    //, mULISBlock(iRasterBlock->GetBlock())
+    , mInvalidRects({ ::ULIS::FRectI::FromXYWH(0, 0, iRasterBlock->GetWidth(), iRasterBlock->GetHeight())})
+    , mFrameIndexes()
+{
+}
+
+TSharedPtr<::ULIS::FBlock>
+FBlockData::GetBlock()
+{
+    //return mULISBlock;
+    
+    mRenderMutex.Lock();
+    TSharedPtr<::ULIS::FBlock> block = mRasterBlock->GetBlock();
+    mRenderMutex.Unlock();
+    return block;
+}
+
+const TArray<FGuid>&
+FBlockData::GetComposition() const
+{
+    return mComposition;
+}
+
+TSharedPtr<FOdysseyRasterBlock>
+FBlockData::GetRasterBlock() const
+{
+    return mRasterBlock;
+}
+
+const TArray<::ULIS::FRectI>&
+FBlockData::GetInvalidRects() const
+{
+    return mInvalidRects;
+}
+
+void
+FBlockData::SetInvalidRects(const TArray<::ULIS::FRectI>& iInvalidRects)
+{
+    FScopeLock Lock(&mEditMutex);
+    mInvalidRects = iInvalidRects;
+    mState = (int)eState::kInvalid; //not pending anymore, just invalid until SetPending() is called
+}
+
+void
+FBlockData::LockPending(const FGuid& iId)
+{
+    FScopeLock Lock(&mEditMutex);
+    mLockPendingIds.Add(iId);
+    mState = mState & ~((int)eState::kPending);
+}
+
+bool
+FBlockData::UnlockPending(const FGuid& iId)
+{
+    FScopeLock Lock(&mEditMutex);
+
+    mLockPendingIds.Remove(iId);
+    if ( mLockPendingIds.IsEmpty())
+    {
+        if (!mInvalidRects.IsEmpty())
+            mState = ((int)eState::kInvalid) | ((int)eState::kPending);
+    }
+
+    return mState & ((int)eState::kPending);
+}
+
+void
+FBlockData::AppendInvalidRects(const TArray<::ULIS::FRectI>& iInvalidRects)
+{
+    FScopeLock Lock(&mEditMutex);
+    mInvalidRects.Append(iInvalidRects);
+    mInvalidRects = OdysseyRectUtils::MergeRects(mInvalidRects);
+    mState = (int)eState::kInvalid; //not pending anymore, just invalid until SetPending() is called
+}
+
+TSharedPtr<IOdysseyImageRenderer>
+FBlockData::BuildRenderer()
+{
+    return MakeShared<FOdysseyAnimationImageRenderer>(mAnimation, mFrameIndexes.Array()[0]);
+}
+
+const TSet<int>&
+FBlockData::GetFrameIndexes()
+{
+    return mFrameIndexes;
+}
+
+void
+FBlockData::AddFrameIndex(int iFrameIndex)
+{
+    FScopeLock Lock(&mEditMutex);
+    mFrameIndexes.Add(iFrameIndex);
+}
+
+void
+FBlockData::RemoveFrameIndex(int iFrameIndex)
+{
+    FScopeLock Lock(&mEditMutex);
+    mFrameIndexes.Remove(iFrameIndex);
+}
+
+bool
+FBlockData::IsInvalid() const
+{
+    return mState & ((int)eState::kInvalid);
+}
+
+bool
+FBlockData::IsPending() const
+{
+    return mState & ((int)eState::kPending);
+}
+
+void
+FBlockData::Render(bool iForceRender)
+{
+    mRenderMutex.Lock(); //Lock any other thread from rendering
+    mEditMutex.Lock(); //Lock any other thread from editing values (like mInvalidRects)
+
+    //If it is already rendered, don't need to render it again
+    if (!IsInvalid())
+    {
+        mEditMutex.Unlock();
+        mRenderMutex.Unlock();
+        return;
+    }
+
+    if (!iForceRender && !IsPending())
+    {
+        mEditMutex.Unlock();
+        mRenderMutex.Unlock();
+        return;
+    }
+
+    //If not used, it is useless to render it
+    if (mFrameIndexes.IsEmpty())
+    {
+        mEditMutex.Unlock();
+        mRenderMutex.Unlock();
+        return;
+    }
+
+    //Get all variables we need to render, to ensure the values we use are not modified during the process
+    TArray<::ULIS::FRectI> invalidRects = mInvalidRects;
+    TSharedPtr<IOdysseyImageRenderer> renderer = BuildRenderer();
+    TSharedPtr<FOdysseyRasterBlock> rasterBlock = mRasterBlock;
+
+    //Clear the invalid rects, before rendering so we can detect if new invalid rects are present when we are done
+    mInvalidRects.Empty();
+    mEditMutex.Unlock();
+
+    //Get the block from the raster block
+    TSharedPtr<::ULIS::FBlock> block = rasterBlock->GetBlock();
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(block->Format());
+
+    //Render until there is no invalid rects to render anymore
+    while (!invalidRects.IsEmpty())
+    {    
+        TArray<::ULIS::FEvent> events = renderer->RenderInBlock(block, invalidRects, {});
+        ctx.Finish();
+
+        //We are done, check if there is new rectangles to render
+        mEditMutex.Lock();
+
+        //No invalid rects to render
+        if (mInvalidRects.IsEmpty())
+        {
+            mState = (int)eState::kValid;
+            mEditMutex.Unlock();
+            break;
+        }
+
+        //new invalid rects to render, get the new renderer and invalid rects
+        invalidRects.Append(mInvalidRects);
+        invalidRects = OdysseyRectUtils::MergeRects(invalidRects);
+        mInvalidRects.Empty();
+
+        if (!iForceRender && !IsPending())
+        {
+            mInvalidRects = invalidRects;
+            mEditMutex.Unlock();
+            break;
+        }
+
+        renderer = BuildRenderer();
+        mEditMutex.Unlock();
+    }   
+    mRenderMutex.Unlock();
 }
