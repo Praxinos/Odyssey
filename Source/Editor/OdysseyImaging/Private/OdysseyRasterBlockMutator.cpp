@@ -24,6 +24,7 @@ FOdysseyRasterBlockMutator::FOdysseyRasterBlockMutator(TSharedPtr<FOdysseyRaster
     , mInvalidTileMap(64, iRasterBlock->GetWidth(), iRasterBlock->GetHeight())
     , mOriginalTileBlocks()
     , mRasterBlockUndoBuilder()
+    , mHandle(iRasterBlock->Preload())
 {
 
 }
@@ -36,10 +37,12 @@ FOdysseyRasterBlockMutator::SetRasterBlock(TSharedPtr<FOdysseyRasterBlock> iRast
     if ( mRasterBlock )
     {
         mInvalidTileMap = FULISInvalidTileMap(64, mRasterBlock->GetWidth(), mRasterBlock->GetHeight());
+        mHandle = iRasterBlock->Preload();
     }
     else
     {
         mInvalidTileMap = FULISInvalidTileMap();
+        mHandle = nullptr;
     }
 }
 
@@ -121,7 +124,7 @@ FOdysseyRasterBlockMutator::EditTilesFromRects(const TArray<::ULIS::FRectI>& iRe
     iDelegate.ExecuteIfBound(invalidTileMap);
     ctx.Finish();
 
-    mRasterBlock->OnBlockChanged().Broadcast(iRects, true); //always send at least one interactive event
+    mRasterBlock->OnBlockChanged().Broadcast(iRects); //always send at least one interactive event
 }
 
 void
@@ -133,7 +136,7 @@ FOdysseyRasterBlockMutator::Commit()
     if (mOriginalTileBlocks.IsEmpty())
         return;
 
-    mRasterBlock->OnBlockChanged().Broadcast(mInvalidTileMap.InvalidRects(), false);
+    mRasterBlock->OnBlockCommited().Broadcast(mInvalidTileMap.InvalidRects());
     mRasterBlockUndoBuilder.StoreUndo(*this);
     mInvalidTileMap.Clear();
     mOriginalTileBlocks.Empty();

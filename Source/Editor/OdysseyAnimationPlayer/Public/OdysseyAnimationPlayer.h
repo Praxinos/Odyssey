@@ -6,6 +6,8 @@
 //#include "OdysseyAnimation.h"
 #include "CoreMinimal.h"
 #include "TickableEditorObject.h"
+#include "ULISInvalidTileMap.h"
+#include "Misc/OdysseyHandle.h"
 
 #include <ULIS>
 
@@ -83,8 +85,9 @@ protected:
 
 private:
 	void UpdateTexture();
-	void CopyBlockToTexture(TSharedPtr<::ULIS::FBlock> iBlock, const TArray<::ULIS::FRectI>& iRects);
-	void OnAnimationRenderImageChanged(UOdysseyAnimation* iAnimation, const TRange<int>& iRange, const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive);
+	void CopyBlocksToTexture(const TArray<TSharedPtr<::ULIS::FBlock>>& iBlocks, const TArray<::ULIS::FRectI>& iRects);
+	void OnImageRenderingChanged(const FGuid& iImageRenderingId, const TArray<::ULIS::FRectI>& iRects);
+	void OnImageRenderingCompositionChanged(const FGuid& iImageRenderingId);
 
 private:
 	UPROPERTY()
@@ -106,12 +109,9 @@ private:
 private:
 	bool mIsBackward = false;
 	FTimespan mCurrentTime; 
-	FString   mFrameId;
-	TArray<::ULIS::FRectI> mInvalidRects;
-
-	//The current block to display, so that it stays in memory.
-	//Makes a huge improvement in performance when drawing, be cause we don't have to retieve it from cache at each tick
-	TSharedPtr<::ULIS::FBlock> mBlock; 
+	TArray<FGuid>   mImageRenderingComposition;
+	FULISInvalidTileMap mInvalidTileMap;
+	TSharedPtr<IOdysseyHandle> mAnimationHandle;
 
 private:
 	//Events

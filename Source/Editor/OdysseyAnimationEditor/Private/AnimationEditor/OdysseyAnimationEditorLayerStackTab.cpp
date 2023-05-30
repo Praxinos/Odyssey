@@ -7,6 +7,8 @@
 #include "Widgets/SOdysseyAnimationPlaybackControls.h"
 #include "Widgets/SOdysseyLayerStackAddLayerButton.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
+#include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
+#include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationCellsMutator.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyAnimationEditorLayerStackTab"
 
@@ -42,6 +44,7 @@ FOdysseyAnimationEditorLayerStackTab::CreateWidget()
                 [
                     SNew(SOdysseyLayerStackAddLayerButton)
                     .LayerStack(LayerStack())
+                    .OnAdded( this, &FOdysseyAnimationEditorLayerStackTab::OnLayerAdded)
                 ]
                 //DEBUG:
                 + SHorizontalBox::Slot()
@@ -57,18 +60,14 @@ FOdysseyAnimationEditorLayerStackTab::CreateWidget()
                 + SHorizontalBox::Slot()
                 .AutoWidth()
                 [
-                    SNew(SOdysseyAnimationPlaybackControls)
-                    .Animation(Animation())
-                    .Player(Player())
+                    SNew(SOdysseyAnimationPlaybackControls, mEditor)
                     .PlaybackFramesPerSecond(this, &FOdysseyAnimationEditorLayerStackTab::PlaybackFramesPerSecond)
                 ]
             ]
             + SVerticalBox::Slot()
             .FillHeight(1.0)
             [
-                SNew(SOdysseyAnimationLayerStack)
-                .Animation(Animation())
-                .Player(Player())
+                SNew(SOdysseyAnimationLayerStack, mEditor)
             ];
 }
 
@@ -154,6 +153,25 @@ FOdysseyAnimationEditorLayerStackTab::ChangeLayerOpacity( float iOpacity )
     FOdysseyObjectEditorUtils::SetPropertyValue(layerStack->CurrentLayer.Get(), "Opacity", FMath::Clamp(iOpacity, 0.f, 1.f));
 }
 
+void
+FOdysseyAnimationEditorLayerStackTab::OnLayerAdded(UOdysseyLayer* iLayer)
+{
+    if (iLayer->GetClass() == UOdysseyAnimationLayerImageRaster::StaticClass())
+    {
+        UOdysseyAnimationLayerImageRaster* layer = Cast<UOdysseyAnimationLayerImageRaster>(iLayer);
+        TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(layer, Animation()->Width(), Animation()->Height(), Animation()->Format());
+
+#ifdef WITH_EDITOR
+        FScopedTransaction ScopedTransaction(LOCTEXT("Layer Image Raster", "Add Frame"));
+#endif
+        FOdysseyAnimationCellsMutator mutator(layer);
+        mutator.Add({ cell });
+        mutator.Commit();
+
+        return;
+    }
+}
+
 //DEBUG:
 FReply
 FOdysseyAnimationEditorLayerStackTab::OnAddFrameClicked()
@@ -163,7 +181,15 @@ FOdysseyAnimationEditorLayerStackTab::OnAddFrameClicked()
         return FReply::Unhandled();
     
     UOdysseyAnimationLayerImageRaster* layerRaster = Cast<UOdysseyAnimationLayerImageRaster>(layerStack->CurrentLayer.Get());
-    layerRaster->AddFrame();
+
+    TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(layerRaster, Animation()->Width(), Animation()->Height(), Animation()->Format());
+
+#ifdef WITH_EDITOR
+    FScopedTransaction ScopedTransaction(LOCTEXT("Layer Image Raster", "Add Frame"));
+#endif
+    FOdysseyAnimationCellsMutator mutator(layerRaster);
+    mutator.Add({ cell });
+    mutator.Commit();
 
     return FReply::Handled();
 }

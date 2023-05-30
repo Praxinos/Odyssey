@@ -4,6 +4,7 @@
 #include "OdysseyAnimationPlayer.h"
 #include "OdysseyAnimation.h"
 #include "OdysseyRectUtils.h"
+#include "Abilities/IOdysseyAnimationImageRenderingAbility.h"
 
 #include "ULISLoaderModule.h"
 
@@ -11,7 +12,9 @@ void
 UOdysseyAnimationPlayer::PostInitProperties()
 {
     Super::PostInitProperties();
-	UOdysseyAnimation::OnRenderImageChanged().AddUObject(this, &UOdysseyAnimationPlayer::OnAnimationRenderImageChanged);
+
+	IOdysseyAnimationImageRenderingAbility::OnChanged().AddUObject(this, &UOdysseyAnimationPlayer::OnImageRenderingChanged);
+	IOdysseyAnimationImageRenderingAbility::OnCompositionChanged().AddUObject(this, &UOdysseyAnimationPlayer::OnImageRenderingCompositionChanged);
 }
 
 FSimpleMulticastDelegate&
@@ -76,6 +79,7 @@ UOdysseyAnimationPlayer::SetAnimation(UOdysseyAnimation* iAnimation)
 	Texture = UTexture2D::CreateTransient(Animation->Width(), Animation->Height(), PF_B8G8R8A8);
 	Texture->UpdateResource();
 	FramesPerSecond = Animation->GetFramesPerSecond();
+	mInvalidTileMap = FULISInvalidTileMap(64, Animation->Width(), Animation->Height());
 
 	mOnAnimationChanged.Broadcast();
 	mOnTextureChanged.Broadcast();
@@ -237,50 +241,93 @@ UOdysseyAnimationPlayer::Tick(float iDeltaTime)
 void
 UOdysseyAnimationPlayer::UpdateTexture()
 {
-	FString frameId = Animation->GetFrameIdAtTime(mCurrentTime);
-	if (frameId != mFrameId)
+	int frameIndex = Animation->GetFrameIndexAtTime(mCurrentTime);
+	if ( frameIndex == INDEX_NONE )
+		return;
+
+	TSharedPtr<IOdysseyAnimationImageRenderingAbility> imageRenderingAbility = Animation->GetAbility<IOdysseyAnimationImageRenderingAbility>();
+	if ( !imageRenderingAbility )
+		return;
+
+	TArray<FGuid> imageRenderingComposition = imageRenderingAbility->GetComposition(frameIndex);
+	if ( imageRenderingComposition != mImageRenderingComposition )
 	{
-		mFrameId = frameId;
-		mInvalidRects = { ::ULIS::FRectI::FromXYWH(0, 0, Animation->Width(), Animation->Height()) };
-		mBlock = Animation->GetBlockAtTime(mCurrentTime);
+		mImageRenderingComposition = imageRenderingComposition;
+		mAnimationHandle = imageRenderingAbility->Preload(frameIndex);
+		mInvalidTileMap.Invalidate(::ULIS::FRectI::FromXYWH(0, 0, Animation->Width(), Animation->Height()));
 	}
 
-	if (mInvalidRects.Num() > 0)
+	if (!mInvalidTileMap.InvalidTiles().IsEmpty())
 	{
-		Animation->WaitForBlockUpdate(mFrameId); //is not asynchronous yet
-		CopyBlockToTexture(mBlock, mInvalidRects);
-		mInvalidRects.Empty();
+		TSharedPtr<IOdysseyImageRenderer> renderer = imageRenderingAbility->BuildRenderer(frameIndex);
 
+		TArray<TSharedPtr<::ULIS::FBlock>> blocks;
+		TArray<::ULIS::FRectI> invalidRects = mInvalidTileMap.InvalidRects();
+		for ( const ::ULIS::FRectI& rect : invalidRects )
+		{
+			TArray<::ULIS::FEvent> events;
+			TSharedPtr<::ULIS::FBlock> block = renderer->RenderInNewBlock(Animation->Format(), rect, events);
+			blocks.Add(block);
+		}
+		
+		::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(Animation->Format());
+		ctx.Finish();
+
+		CopyBlocksToTexture(blocks, invalidRects);
+		mInvalidTileMap.Clear();
 		mOnTextureUpdated.Broadcast();
 	}
 }
 
 void
-UOdysseyAnimationPlayer::OnAnimationRenderImageChanged(UOdysseyAnimation* iAnimation, const TRange<int>& iRange, const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive)
+UOdysseyAnimationPlayer::OnImageRenderingChanged(const FGuid& iId, const TArray<::ULIS::FRectI>& iRects)
 {
-	if (iAnimation != Animation)
+	if (!mImageRenderingComposition.Contains(iId))
 		return;
 
-	int frameIndex = Animation->GetFrameIndexAtTime(mCurrentTime);
-	if (!iRange.Contains(frameIndex))
-		return;
-
-	mInvalidRects.Append(iRects);
-	mInvalidRects = OdysseyRectUtils::MergeRects(mInvalidRects);
+	mInvalidTileMap.Invalidate(iRects);
 }
 
 void
-UOdysseyAnimationPlayer::CopyBlockToTexture(TSharedPtr<::ULIS::FBlock> iBlock, const TArray<::ULIS::FRectI>& iRects)
+UOdysseyAnimationPlayer::OnImageRenderingCompositionChanged(const FGuid& iId)
 {
-	//convert block to BGRA8 if needed
-	if ( iBlock->Format() == ::ULIS::Format_BGRA8 )
+	if ( !mImageRenderingComposition.Contains(iId) )
+		return;
+
+	int frameIndex = Animation->GetFrameIndexAtTime(mCurrentTime);
+	if (frameIndex == INDEX_NONE)
+		return;
+
+	TSharedPtr<IOdysseyAnimationImageRenderingAbility> imageRenderingAbility = Animation->GetAbility<IOdysseyAnimationImageRenderingAbility>();
+	if ( !imageRenderingAbility )
+		return;
+
+	TArray<FGuid> imageRenderingComposition = imageRenderingAbility->GetComposition(frameIndex);
+	if ( imageRenderingComposition == mImageRenderingComposition )
+		return;
+
+	mInvalidTileMap.Invalidate(::ULIS::FRectI::FromXYWH(0, 0, Animation->Width(), Animation->Height()));
+}
+
+void
+UOdysseyAnimationPlayer::CopyBlocksToTexture(const TArray<TSharedPtr<::ULIS::FBlock>>& iBlocks, const TArray<::ULIS::FRectI>& iRects)
+{
+	if ( iBlocks.IsEmpty() )
+		return;
+
+	::ULIS::eFormat format = iBlocks[0]->Format();
+
+	//convert block to BGRA8 if needed*
+	if ( format == ::ULIS::Format_BGRA8 )
 	{
-		TArray<FUpdateTextureRegion2D> regions;
-		for (const ::ULIS::FRectI& rect : iRects)
+		TArray<TSharedPtr<FUpdateTextureRegion2D>> regions; //Keeps region object alive until fence.Wait()
+		for ( int i = 0; i < iBlocks.Num(); i++ )
 		{
-			regions.Emplace(rect.x, rect.y, rect.x, rect.y, rect.w, rect.h);
+			const TSharedPtr<::ULIS::FBlock>& block = iBlocks[i];
+			const ::ULIS::FRectI& rect = iRects[i];
+			regions.Add(MakeShared<FUpdateTextureRegion2D>(rect.x, rect.y, 0, 0, block->Rect().w, block->Rect().h));
+			Texture->UpdateTextureRegions(0, 1, regions.Last().Get(), block->BytesPerScanLine(), block->BytesPerPixel(), block->Bits());
 		}
-		Texture->UpdateTextureRegions(0, regions.Num(), regions.GetData(), iBlock->BytesPerScanLine(), iBlock->BytesPerPixel(), iBlock->Bits());
 
 		FRenderCommandFence fence;
 		fence.BeginFence();
@@ -289,29 +336,31 @@ UOdysseyAnimationPlayer::CopyBlockToTexture(TSharedPtr<::ULIS::FBlock> iBlock, c
 		return;
 	}
 
-	//Here block has not the expected format
-	//But instead of converting the whole block, we will convert only the parts of the block we need
 	::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_BGRA8);
-	TArray<FUpdateTextureRegion2D> regions;
-	TArray<TSharedPtr<::ULIS::FBlock>> blocks;
-	for (const ::ULIS::FRectI& rect : iRects)
+	TArray<TSharedPtr<::ULIS::FBlock>> convBlocks;
+	TArray<TSharedPtr<FUpdateTextureRegion2D>> regions;
+	for ( int i = 0; i < iBlocks.Num(); i++ )
 	{
-		TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(rect.w, rect.h, ::ULIS::Format_BGRA8);
-		ctx.ConvertFormat(*iBlock, *block, rect, ::ULIS::FVec2I(0), ::ULIS::FSchedulePolicy::AsyncCacheEfficient);
-		regions.Emplace(rect.x, rect.y, 0, 0, rect.w, rect.h);
-		blocks.Add(block);
+		const TSharedPtr<::ULIS::FBlock>& block = iBlocks[i];
+		const ::ULIS::FRectI& rect = iRects[i];
+
+		TSharedPtr<::ULIS::FBlock> convBlock = MakeShared<::ULIS::FBlock>(rect.w, rect.h, ::ULIS::Format_BGRA8);
+		ctx.ConvertFormat(*block, *convBlock, block->Rect(), ::ULIS::FVec2I(0), ::ULIS::FSchedulePolicy::AsyncCacheEfficient);
+		convBlocks.Add(convBlock);
+		regions.Add(MakeShared<FUpdateTextureRegion2D>(rect.x, rect.y, 0, 0, rect.w, rect.h));
 	}
+	
 	ctx.Finish();
 
-	for (int i = 0; i < regions.Num(); i++)
+	for ( int i = 0; i < regions.Num(); i++ )
 	{
 		Texture->UpdateTextureRegions(
 			0,
 			1,
-			&regions[i],
-			blocks[i]->BytesPerScanLine(),
-			blocks[i]->BytesPerPixel(),
-			blocks[i]->Bits()
+			regions[i].Get(),
+			convBlocks[i]->BytesPerScanLine(),
+			convBlocks[i]->BytesPerPixel(),
+			convBlocks[i]->Bits()
 		);
 	}
 

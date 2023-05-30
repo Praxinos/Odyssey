@@ -100,7 +100,7 @@ public:
     TArray<UOdysseyLayer*> GetParents() const;
 
     /**
-     * @brief Returns the Layer children recursively
+     * @brief Returns the Layer direct children
      *
      * @param Layer
      * @return int

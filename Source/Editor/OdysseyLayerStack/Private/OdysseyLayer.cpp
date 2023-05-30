@@ -205,7 +205,7 @@ void
 UOdysseyLayer::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent)
 {
     Super::PostEditChangeProperty(PropertyChangedEvent);
-
+    
     if (PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive)
         return;
 

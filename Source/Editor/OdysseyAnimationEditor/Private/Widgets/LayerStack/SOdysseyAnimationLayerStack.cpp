@@ -6,49 +6,58 @@
 
 #define LOCTEXT_NAMESPACE "SOdysseyAnimationLayerStack"
 
-
 SOdysseyAnimationLayerStack::~SOdysseyAnimationLayerStack()
 {
 }
 
 SOdysseyAnimationLayerStack::SOdysseyAnimationLayerStack()
-    : mAnimation(nullptr)
-    , mPlayer(nullptr)
+    : mEditor(nullptr)
     , mTreeView()
-    , mZoom(1.0f)
-    , mOffset(0.0f)
+	, mTimelineScrollBar(nullptr)
 {
 }
 
 //CONSTRUCTION/DESTRUCTION-----------------------------------------------
 void
-SOdysseyAnimationLayerStack::Construct(const FArguments& InArgs)
+SOdysseyAnimationLayerStack::Construct(const FArguments& InArgs, FOdysseyAnimationEditor* iEditor )
 {
-    mAnimation = InArgs._Animation;
-    mPlayer = InArgs._Player;
+    mEditor = iEditor;
     ChildSlot
     [
-        SAssignNew(mTreeView, SOdysseyLayerStackTreeView)
-        .LayerStack(mAnimation->GetLayerStack())
-        .OnGenerateRow(this, &SOdysseyAnimationLayerStack::OnGenerateRow)
-        .HeaderManualWidth(200.f)
-        .AdditionalColumns(
-            {
-                SHeaderRow::Column("Timeline")
-                .DefaultLabel(LOCTEXT("", ""))
-                .VAlignCell(VAlign_Fill)
-                .HAlignCell(HAlign_Fill)
-                [
-                    SNew(SOdysseyAnimationTimelineHeader)
-                    .Animation(mAnimation)
-                    .Player(mPlayer)
-                    .FrameWidth(50.f)
-                    .Zoom(this, &SOdysseyAnimationLayerStack::GetZoom)
-                    .Offset(this, &SOdysseyAnimationLayerStack::GetOffset)
-                ]
-            }
-        )
+        SNew(SVerticalBox)
+        +SVerticalBox::Slot()
+        .FillHeight(1.0f)
+        [
+            SAssignNew(mTreeView, SOdysseyLayerStackTreeView)
+            .LayerStack(mEditor->Animation()->GetLayerStack())
+            .OnGenerateRow(this, &SOdysseyAnimationLayerStack::OnGenerateRow)
+            .HeaderManualWidth(200.f)
+            .AdditionalColumns(
+                {
+                    SHeaderRow::Column("Timeline")
+                    .DefaultLabel(LOCTEXT("", ""))
+                    .VAlignCell(VAlign_Fill)
+                    .HAlignCell(HAlign_Fill)
+                    [
+                        SNew(SOdysseyAnimationTimelineControl, mEditor)
+                        [
+                            SNew(SOdysseyAnimationTimelineHeader, mEditor)
+                        ]
+                    ]
+                }
+            )
+        ]
+        +SVerticalBox::Slot()
+        .AutoHeight()
+        [
+            SAssignNew(mTimelineScrollBar, SScrollBar)
+            .Orientation( Orient_Horizontal )
+            .OnUserScrolled_Raw(this, &SOdysseyAnimationLayerStack::OnTimelineScrollBarScrolled)
+        ]
     ];
+
+    //Set Scrollbar Params
+    mTimelineScrollBar->SetState(0.f, 0.5f);
 }
 
 TSharedRef<ITableRow>
@@ -59,26 +68,32 @@ SOdysseyAnimationLayerStack::OnGenerateRow(UOdysseyLayer* iLayer, const TSharedR
     UClass* layerClass = iLayer->GetClass();
     if (layerClass == UOdysseyAnimationLayerFolder::StaticClass())
     {
-        return SNew(SOdysseyAnimationLayerFolderRow, mTreeView.ToSharedRef(), Cast<UOdysseyAnimationLayerFolder>(iLayer));
+        return SNew(SOdysseyAnimationLayerFolderRow, GetTreeView().ToSharedRef(), mEditor, Cast<UOdysseyAnimationLayerFolder>(iLayer));
     }
     else if (layerClass == UOdysseyAnimationLayerImageRaster::StaticClass())
     {
-        return SNew(SOdysseyAnimationLayerImageRasterRow, mTreeView.ToSharedRef(), Cast<UOdysseyAnimationLayerImageRaster>(iLayer));
+        return SNew(SOdysseyAnimationLayerImageRasterRow, GetTreeView().ToSharedRef(), mEditor, Cast<UOdysseyAnimationLayerImageRaster>(iLayer));
     }
 
-    return SNew(SOdysseyLayerRow, mTreeView.ToSharedRef(), Cast<UOdysseyLayer>(iLayer)); //Default widget
+    return SNew(SOdysseyAnimationLayerRow, GetTreeView().ToSharedRef(), mEditor, Cast<UOdysseyAnimationLayer>(iLayer)); //Default widget
 }
 
-float
-SOdysseyAnimationLayerStack::GetZoom() const
+void
+SOdysseyAnimationLayerStack::OnTimelineScrollBarScrolled(float iOffset)
 {
-    return mZoom;
+    float visiblePercent = 0.5f;
+    float scrollbarOffset = FMath::Clamp(iOffset, 0.f, visiblePercent);
+    mTimelineScrollBar->SetState(scrollbarOffset, visiblePercent);
+
+    int lastFrameIndex = mEditor->Animation()->GetFrameRange().GetUpperBoundValue();
+    float offsetPercent = (scrollbarOffset / (1.f - visiblePercent));
+    mEditor->Timeline()->SetOffset(offsetPercent * lastFrameIndex);
 }
 
-float
-SOdysseyAnimationLayerStack::GetOffset() const
+TSharedPtr<SOdysseyLayerStackTreeView>
+SOdysseyAnimationLayerStack::GetTreeView() const
 {
-    return mOffset;
+    return mTreeView;
 }
 
 #undef LOCTEXT_NAMESPACE

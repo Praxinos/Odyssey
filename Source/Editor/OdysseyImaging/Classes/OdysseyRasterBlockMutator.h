@@ -4,6 +4,7 @@
 #pragma once
 
 #include "OdysseyRasterBlockUndo.h"
+#include "Misc/OdysseyHandle.h"
 
 class FOdysseyRasterBlock;
 
@@ -35,4 +36,5 @@ private:
     FULISInvalidTileMap mInvalidTileMap;
     TMap<FIntPoint, TSharedPtr<::ULIS::FBlock>> mOriginalTileBlocks;
     FOdysseyRasterBlockUndoBuilder mRasterBlockUndoBuilder;
+    TSharedPtr<IOdysseyHandle> mHandle;
 };

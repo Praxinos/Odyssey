@@ -9,6 +9,7 @@
 #include "OdysseyRasterBlock.h"
 #include "LayerStack/OdysseyAnimationLayerStack.h"
 #include "BaseMediaSource.h"
+#include "OdysseyAnimationProxy.h"
 #include <ULIS>
 
 #include "OdysseyAnimation.generated.h"
@@ -16,7 +17,8 @@
 UCLASS(config=EditorPerProjectUserSettings, PerObjectConfig)
 class ODYSSEYANIMATION_API UOdysseyAnimation
 	: public UBaseMediaSource
-	, public FTickableEditorObject //Allows us to react to Tick events
+	, public FOdysseyAbilityContainer
+	//, public FTickableEditorObject //Allows us to react to Tick events
 {
 	GENERATED_BODY()
 
@@ -35,17 +37,6 @@ public:
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnFramesPerSecondChanged, UOdysseyAnimation*)
     static FOnFramesPerSecondChanged& OnFramesPerSecondChanged();
 
-    /**
-     * @brief Delegate called when pixels of a frame changed
-     * 
-     * @param UOdysseyAnimation* Animation
-     * @param const TRange<int>& FrameRange
-     * @param const TArray<::ULIS::FRectI>& Rects
-     * @param bool IsInteractive
-     */
-    DECLARE_MULTICAST_DELEGATE_FourParams(FOnRenderImageChanged, UOdysseyAnimation*, const TRange<int>&, const TArray<::ULIS::FRectI>&, bool)
-    static FOnRenderImageChanged& OnRenderImageChanged(); //Delegate
-
 public:
 	void Init(const FOdysseyAnimationConfiguration& iConfiguration);
 
@@ -62,33 +53,28 @@ public:
 	virtual bool Validate() const override;
 
 public:
+	//Getters
+	UOdysseyAnimationLayerStack* GetLayerStack() const;
+	TSharedPtr<FOdysseyAnimationProxy> GetProxy() const;
+
+	//Size and Format
 	uint32 Width() const;
 	uint32 Height() const;
 	::ULIS::eFormat Format() const;
-	UOdysseyAnimationLayerStack* GetLayerStack() const;
 
+	//Duration and speed
 	FTimespan GetDuration() const;
-	TRange<int> GetFrameRange() const;
-	TRange<FTimespan> GetFrameTimeRange(int iFrameIndex) const;
+	FInt32Range GetFrameRange() const;
 	uint32 GetFrameCount() const;
-
 	double GetFramesPerSecond() const;
 
+	//Time
+	//Index to the frame at a given time
 	int GetFrameIndexAtTime(FTimespan iTime) const;
-	FString GetFrameIdAtTime(FTimespan iTime) const;
-	FString GetFrameId(int iFrameIndex) const;
 
-	TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> GetBlockAtIndex(int iIndex);
-	TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> GetBlockAtTime(FTimespan iTime);
-	TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> GetBlockFromId(const FString& iId);
-
-	void WaitForBlockUpdate(const FString& iFrameId);
-
-public:
-    /**
-     * @brief Preloads the given frame and keeps it preloaded until the handle is destroyed
-     */
-    TSharedPtr<IOdysseyHandle> Preload(int iFrame);
+	//Time range of the frame at iFrameIndex
+	TRange<FTimespan> GetFrameTimeRange(int iFrameIndex) const;
+	//TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> GetBlockAtIndex(uint32 iIndex);
 
 public:
 	//UObject overrides
@@ -102,21 +88,7 @@ public:
     virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent) override;
     virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;
 	virtual void PostInitProperties() override;
-
-protected:
-	// FTickableEditorObject implementation
-	virtual void Tick(float DeltaTime) override;
-	virtual TStatId GetStatId() const override { RETURN_QUICK_DECLARE_CYCLE_STAT(UOdysseyAnimation, STATGROUP_Tickables); }
-
-private:
-	void UpdateFrameBlocks();
-	void GenerateFrameBlock(const FString& iId);
-
-private:
-	//Events
-	void OnLayerStackRenderImageChanged(UOdysseyAnimationLayerStack* iLayerStack, const TRange<int>& iRange, const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive);
 	
-
 protected:
     //Property changed methods
     virtual void PropertyChanged(const FName& iPropertyName);
@@ -146,8 +118,15 @@ private:
 	UPROPERTY(meta=(LoadBehavior = "LazyOnDemand"))
 	TObjectPtr<UOdysseyAnimationLayerStack> mLayerStack;
 
+	TSharedPtr<FOdysseyAnimationProxy> mProxy;
+
+
+
+	/*
+	//This is an attemps to create a simple proxy
+
 	UPROPERTY()
-	TArray<FString> mFrameIds;
+	TArray<TArray<FGuid>> mFrameIds;
 
 	struct FFrameBlock
 	{
@@ -157,5 +136,5 @@ private:
 	};
 
 	//Not UPROPERTY because of FOdysseyRasterBlock needing an owner on load (causes crash)
-	TMap<FString, FFrameBlock> mFrameBlocks;
+	TMap<TArray<FGuid>, FFrameBlock> mFrameBlocks; */
 };

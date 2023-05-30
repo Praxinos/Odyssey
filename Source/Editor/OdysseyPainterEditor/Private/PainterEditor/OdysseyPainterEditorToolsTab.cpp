@@ -54,6 +54,8 @@ FOdysseyPainterEditorToolsTab::CreateWidget()
         mEditor->GetVectorGridTool(),
     };
 
+    tools = tools.FilterByPredicate([](UOdysseyPainterEditorTool* iTool){return !!iTool;});
+
     return SNew( SOdysseyPainterEditorToolsTileView )
         .Tools(tools)
         .OnToolSelected(this, &FOdysseyPainterEditorToolsTab::OnToolSelected);

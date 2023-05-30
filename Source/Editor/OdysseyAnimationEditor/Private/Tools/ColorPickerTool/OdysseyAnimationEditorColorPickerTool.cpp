@@ -2,7 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Tools/ColorPickerTool/OdysseyAnimationEditorColorPickerTool.h"
-#include "LayerStack/OdysseyAnimationLayerImageVector.h"
+#include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyAnimationEditorColorPickerTool"
 
@@ -40,8 +40,6 @@ UOdysseyAnimationEditorColorPickerTool::Activate()
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
         UOdysseyPainterEditorColorPickerTool::ActivateVector( vectorEngine, vectorScene );
-
-        currentVectorLayer->RenderImageChanged(false);
     }
 }
 
@@ -109,8 +107,6 @@ UOdysseyAnimationEditorColorPickerTool::OnMouseUp( const FOdysseyPoint& iPointIn
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
         ret = UOdysseyPainterEditorColorPickerTool::OnMouseUpVector( vectorEngine, vectorScene, iPointInTexture, iKey );
-
-        currentVectorLayer->RenderImageChanged(false);
     }
 
     return ret;

@@ -26,6 +26,7 @@ struct FBlockCleanupInfo
     int Width;
     int Height;
     int Format;
+    TSharedPtr<FThreadSafeCounter> AvailableCounter;
 };
 
 class FOdysseyRasterBlockPreloadHandle : public IOdysseyHandle
@@ -53,7 +54,7 @@ RemoveValueFromCache(const FString& iId)
     UE::DerivedData::FValue derivedDataValue = UE::DerivedData::FValue::Compress(sharedBuffer);
 
     //Store the tile in cache
-    UE::DerivedData::FRequestOwner putOwner(UE::DerivedData::EPriority::Lowest);
+    UE::DerivedData::FRequestOwner putOwner(UE::DerivedData::EPriority::Blocking);
     UE::DerivedData::GetCache().PutValue(
         {
             {
@@ -65,7 +66,7 @@ RemoveValueFromCache(const FString& iId)
         },
         putOwner
     );
-    putOwner.KeepAlive();
+    putOwner.Wait();
 }
 
 FOdysseyRasterBlock::~FOdysseyRasterBlock()
@@ -75,12 +76,14 @@ FOdysseyRasterBlock::~FOdysseyRasterBlock()
 FOdysseyRasterBlock::FOdysseyRasterBlock()
     : mOwner(nullptr)
     , Id(FGuid::NewGuid())
+    , mAvailableCounter(MakeShared<FThreadSafeCounter>(0))
 {
 }
 
 FOdysseyRasterBlock::FOdysseyRasterBlock(UObject* iOwner)
     : mOwner(iOwner)
     , Id(FGuid::NewGuid())
+    , mAvailableCounter(MakeShared<FThreadSafeCounter>(0))
 {
 }
 
@@ -127,16 +130,26 @@ FOdysseyRasterBlock::CleanupBlock(uint8* iData, void* iInfo)
 
     ::ULIS::FBlock block(iData, infos->Width, infos->Height, (::ULIS::eFormat)infos->Format);
     SaveBlockToCache(block, infos->Id.ToString()); //TODO: maybe save only if version changed ?
+    infos->AvailableCounter->Set(0);
 
     ::ULIS::OnCleanup_FreeMemory(iData, iInfo); //we have the responsability to delete the block data
-
     delete iInfo;
 }
 
 void
 FOdysseyRasterBlock::SetBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock)
 {
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> currentBlock = mBlock.Pin();
+    FScopeLock Lock(&mMutex);
+
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> currentBlock;
+    do
+    {
+        currentBlock = mBlock.Pin();
+        if ( currentBlock )
+            break;
+    }
+    while ( mAvailableCounter->GetValue() == 1 );
+    
     if (iBlock == currentBlock)
         return;
     
@@ -164,7 +177,9 @@ FOdysseyRasterBlock::SetBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iB
         infos->Width = Width;
         infos->Height = Height;
         infos->Format = Format;
+        infos->AvailableCounter = mAvailableCounter;
         iBlock->OnCleanup(::ULIS::FOnCleanupData(&FOdysseyRasterBlock::CleanupBlock, infos));
+        mAvailableCounter->Set(1);
 
         //mInvalidTileMap = FULISInvalidTileMap(64, Width, Height);
     }
@@ -212,12 +227,21 @@ FOdysseyRasterBlock::GetUndoableBlock()
 TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>
 FOdysseyRasterBlock::GetBlock()
 {
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = mBlock.Pin();
-    if ( block )
-        return block;
+	FScopeLock Lock(&mMutex);
 
     if ( Width <= 0 || Height <= 0 )
         return nullptr;
+    
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block;
+    do
+    {
+        block = mBlock.Pin();
+        if ( block )
+            return block;
+    }
+    while ( mAvailableCounter->GetValue() == 1 );
+
+    mAvailableCounter->Set(1);
 
     //Load Block from DDC
     block = MakeShared<::ULIS::FBlock>(Width, Height, (::ULIS::eFormat)Format);
@@ -227,6 +251,7 @@ FOdysseyRasterBlock::GetBlock()
     infos->Width = Width;
     infos->Height = Height;
     infos->Format = Format;
+    infos->AvailableCounter = mAvailableCounter;
     block->OnCleanup(::ULIS::FOnCleanupData(&FOdysseyRasterBlock::CleanupBlock, infos));
     mBlock = block; //watch the loaded block
 
@@ -292,7 +317,7 @@ FOdysseyRasterBlock::UpdateFromUndoableBlock(const TArray<::ULIS::FRectI>& iRect
 
     //Send Interactive Update event
     if (iRects.Num() > 0)
-        OnBlockChanged().Broadcast(iRects, true); //always send at least one interactive event
+        OnBlockChanged().Broadcast(iRects); //always send at least one interactive event
 }
 
 void
@@ -316,7 +341,7 @@ FOdysseyRasterBlock::CommitUndoableBlock()
     if (mInvalidTileMap.InvalidRects().Num() <= 0)
         return;
 
-    OnBlockChanged().Broadcast(mInvalidTileMap.InvalidRects(), false);
+    OnBlockCommited().Broadcast(mInvalidTileMap.InvalidRects());
     mRasterBlockUndoBuilder.StoreUndo(AsShared());
     mInvalidTileMap.Clear();
     mOriginalTileBlocks.Empty();
@@ -365,6 +390,13 @@ FOdysseyRasterBlock::OnBlockChanged()
 {
     return mOnBlockChanged;
 }
+
+FOdysseyRasterBlock::FOnBlockCommited&
+FOdysseyRasterBlock::OnBlockCommited()
+{
+    return mOnBlockCommited;
+}
+
 /*
 FOdysseyRasterBlock::FOnUndoableBlockChanged&
 FOdysseyRasterBlock::OnUndoableBlockChanged()

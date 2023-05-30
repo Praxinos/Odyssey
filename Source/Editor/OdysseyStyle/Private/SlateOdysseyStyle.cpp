@@ -589,10 +589,11 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
 		.SetPressed(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_NotLooping_ON_24", mIcon24x24))
 	);
 
-    //OdysseyScrubWidget
-    Set("ScrubWidget.backgroundColorEven", FLinearColor(1.0f, 1.0f, 1.0f, 0.05f));
-    Set("ScrubWidget.backgroundColorOdd", FLinearColor(0.0f, 0.0f, 0.0f, 0.05f));
-
+    //Animation Timeline Header
+    Set("TimelineHeader.backgroundColorEven", FLinearColor(1.0f, 1.0f, 1.0f, 0.05f));
+    Set("TimelineHeader.backgroundColorOdd", FLinearColor(0.0f, 0.0f, 0.0f, 0.05f));
+    Set("TimelineHeader.ProxyDoneColor", FLinearColor(0.0f, 1.0f, 0.0f, 0.5f));
+    Set("TimelineHeader.ProxyPendingColor", FLinearColor(1.0f, 0.6f, 0.0f, 0.5f));
 #endif
 }
 

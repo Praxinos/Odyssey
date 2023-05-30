@@ -14,7 +14,8 @@ public class OdysseyCore : ModuleRules
                 "Core",
                 "CoreUObject",
                 "Engine",
-                "InputCore"
+                "InputCore",
+                "UnrealEd"
              }
         );
     }
