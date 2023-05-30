@@ -342,7 +342,7 @@ float FOdysseyViewportDrawingEditorMeshBasedAdapter::GetStampQuality()
         iStampParams.mPosition.x = coord.X * mEditor->Texture()->GetSurfaceWidth() - iStampParams.mBlock->Width() / 2.f;
         iStampParams.mPosition.y = coord.Y * mEditor->Texture()->GetSurfaceHeight() - iStampParams.mBlock->Height() / 2.f;
 
-        mStrokeBufferTexture2D = NewUncompressedTextureFromBlockData(iStampParams.mBlock);
+        mStrokeBufferTexture2D = NewRGBAFTextureFromBlockData(iStampParams.mBlock);
     }
 
     TRefCountPtr< FOdysseyMeshPaintBatchedElementParameters > meshPaintBatchedElementParameters(new FOdysseyMeshPaintBatchedElementParameters());

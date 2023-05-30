@@ -139,12 +139,12 @@ FillOdysseyBlockFromUTextureData( ::ULIS::FBlock* ioBlock, UTexture2D* iTexture,
 }
 
 UTexture2D*
-NewUncompressedTextureFromBlockData(::ULIS::FBlock* iBlock)
+NewRGBAFTextureFromBlockData(::ULIS::FBlock* iBlock)
 {
     UTexture2D* newTexture = NewObject<UTexture2D>();
     newTexture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
 
-    ETextureSourceFormat srcFormat = TextureSourceFormatForULISFormat(iBlock->Format());
+    ETextureSourceFormat srcFormat = TextureSourceFormatForULISFormat(::ULIS::eFormat::Format_RGBAF);
 
     InitTextureWithBlockData( iBlock, newTexture, srcFormat);
 
