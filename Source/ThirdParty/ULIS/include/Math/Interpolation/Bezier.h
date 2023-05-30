@@ -23,6 +23,13 @@ struct FCubicBezierControlPoint {
     FVec2F ctrlCCW;
 };
 
+template< class T > inline T CubicBezierTangentAtParameter(const T& iP0,const T& iP1,const T& iP2,const T& iP3,float t) {
+    float u = (1 - t);
+    return 3 * u * u * (iP1 - iP0)
+         + 6 * t * u * (iP2 - iP1)
+         + 3 * t * t * (iP3 - iP2);
+}
+
 template< class T > inline T CubicBezierPointAtParameter( const T& iP0, const T& iP1, const T& iP2, const T& iP3, float t ) {
     float u = ( 1 - t );
     float u2 = u*u;

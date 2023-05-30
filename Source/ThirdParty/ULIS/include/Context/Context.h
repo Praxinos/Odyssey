@@ -2128,7 +2128,6 @@ public:
         , const FEvent* iWaitList = nullptr
         , FEvent* iEvent = nullptr
     );
-    
 /////////////////////////////////////////////////////
 // FX Noise
     /*!
