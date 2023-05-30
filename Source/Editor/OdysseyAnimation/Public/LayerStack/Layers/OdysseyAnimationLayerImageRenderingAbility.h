@@ -34,7 +34,7 @@ public:
      * 
      * @param iFrame 
      */
-    virtual TSharedPtr<IOdysseyHandle> Preload(int iFrame) override;
+    virtual TSharedPtr<IOdysseyHandle> Preload(int iFrame) const override;
 
 private:
     UOdysseyAnimationLayer* mLayer;

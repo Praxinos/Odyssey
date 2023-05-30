@@ -6,6 +6,8 @@
 //#include "OdysseyAnimation.h"
 #include "CoreMinimal.h"
 #include "TickableEditorObject.h"
+#include "ULISInvalidTileMap.h"
+#include "Misc/OdysseyHandle.h"
 
 #include <ULIS>
 
@@ -108,7 +110,8 @@ private:
 	bool mIsBackward = false;
 	FTimespan mCurrentTime; 
 	TArray<FGuid>   mImageRenderingComposition;
-	TArray<::ULIS::FRectI> mInvalidRects;
+	FULISInvalidTileMap mInvalidTileMap;
+	TSharedPtr<IOdysseyHandle> mAnimationHandle;
 
 private:
 	//Events

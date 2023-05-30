@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Misc/OdysseyHandle.h"
 #include <ULIS>
 
 class ODYSSEYIMAGING_API IOdysseyImageRenderer
@@ -58,5 +59,10 @@ public:
      * @return TSharedPtr<::ULIS::FBlock>
      */
     TSharedPtr<::ULIS::FBlock> RenderInNewBlock(::ULIS::eFormat iFormat, const ::ULIS::FRectI& iRect, TArray<::ULIS::FEvent>& oEvents);
-   
+
+public:
+    void AddHandle(TSharedPtr<IOdysseyHandle> iHandle);
+
+private:
+    TArray<TSharedPtr<IOdysseyHandle>> mHandles;
 };

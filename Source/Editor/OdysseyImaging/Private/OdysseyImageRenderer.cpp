@@ -86,3 +86,9 @@ IOdysseyImageRenderer::RenderInNewBlock(::ULIS::eFormat iFormat, const ::ULIS::F
     oEvents = RenderInBlock(block, iRect, ::ULIS::FVec2I(0), {eventClearBlock});
     return block;
 }
+
+void
+IOdysseyImageRenderer::AddHandle(TSharedPtr<IOdysseyHandle> iHandle)
+{
+    mHandles.Add( iHandle );
+}

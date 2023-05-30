@@ -36,7 +36,7 @@ FOdysseyAnimationLayerImageRasterImageRenderingAbility::GetComposition(int iFram
 }
 
 TSharedPtr<IOdysseyHandle>
-FOdysseyAnimationLayerImageRasterImageRenderingAbility::Preload(int iFrameIndex)
+FOdysseyAnimationLayerImageRasterImageRenderingAbility::Preload(int iFrameIndex) const
 {
     if (!mLayerImageRaster )
         return nullptr;

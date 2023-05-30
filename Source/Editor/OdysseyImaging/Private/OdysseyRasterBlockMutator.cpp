@@ -24,6 +24,7 @@ FOdysseyRasterBlockMutator::FOdysseyRasterBlockMutator(TSharedPtr<FOdysseyRaster
     , mInvalidTileMap(64, iRasterBlock->GetWidth(), iRasterBlock->GetHeight())
     , mOriginalTileBlocks()
     , mRasterBlockUndoBuilder()
+    , mHandle(iRasterBlock->Preload())
 {
 
 }
@@ -36,10 +37,12 @@ FOdysseyRasterBlockMutator::SetRasterBlock(TSharedPtr<FOdysseyRasterBlock> iRast
     if ( mRasterBlock )
     {
         mInvalidTileMap = FULISInvalidTileMap(64, mRasterBlock->GetWidth(), mRasterBlock->GetHeight());
+        mHandle = iRasterBlock->Preload();
     }
     else
     {
         mInvalidTileMap = FULISInvalidTileMap();
+        mHandle = nullptr;
     }
 }
 

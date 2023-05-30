@@ -53,8 +53,6 @@ FOdysseyAnimationEditor::InitData(UObject* iEditedObject)
 
 	TSharedPtr<IOdysseyAnimationImageRenderingAbility> imageRenderAbility = mAnimation->GetAbility<IOdysseyAnimationImageRenderingAbility>();
 	mImageRenderingComposition = imageRenderAbility->GetComposition(mAnimation->CurrentFrame);
-
-	mLayerStackPreloadHandle = imageRenderAbility->Preload(mAnimation->CurrentFrame);
 	mPlaybackFramesPerSecond = mAnimation->GetFramesPerSecond();
 
 	//Configure a Media player and media texture to be able to display and play the animation
@@ -232,9 +230,6 @@ FOdysseyAnimationEditor::OnImageRenderingCompositionCommited(const FGuid& iFrame
 
 	mImageRenderingComposition = imageRenderingComposition;
 
-	//Preload the new current frame for edition
-	mLayerStackPreloadHandle = imageRenderAbility->Preload(mAnimation->CurrentFrame);
-
 	//Reload the tool
 	//TODO: we should maybe do this in a different way, it feels a bit weird to unselect and reselect the whole tool
 	UOdysseyPainterEditorTool* tool = GetSelectedTool();
@@ -250,7 +245,6 @@ FOdysseyAnimationEditor::OnCurrentFrameChanged(UOdysseyAnimation* iAnimation)
 
 	//Preload the new current frame for edition
 	TSharedPtr<IOdysseyAnimationImageRenderingAbility> imageRenderAbility = mAnimation->GetAbility<IOdysseyAnimationImageRenderingAbility>();
-	mLayerStackPreloadHandle = imageRenderAbility->Preload(mAnimation->CurrentFrame);
 	mImageRenderingComposition = imageRenderAbility->GetComposition(mAnimation->CurrentFrame);
 
 	//Display the new current frame

@@ -100,7 +100,7 @@ IOdysseyAnimationImageRenderingAbility::GetId() const
 }
 
 TSharedPtr<IOdysseyHandle>
-IOdysseyAnimationImageRenderingAbility::Preload(int iFrame)
+IOdysseyAnimationImageRenderingAbility::Preload(int iFrame) const
 {
     return nullptr;
 }

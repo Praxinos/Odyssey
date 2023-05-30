@@ -31,7 +31,9 @@ FOdysseyAnimationCellImageRasterImageRenderingAbility::FOdysseyAnimationCellImag
 TSharedPtr<IOdysseyImageRenderer>
 FOdysseyAnimationCellImageRasterImageRenderingAbility::BuildRenderer(int iFrame) const
 {
-    return MakeShared<FOdysseyAnimationCellImageRasterImageRenderer>(mCellImageRaster.Pin(), iFrame);
+    TSharedPtr<IOdysseyImageRenderer> renderer = MakeShared<FOdysseyAnimationCellImageRasterImageRenderer>(mCellImageRaster.Pin(), iFrame);
+    renderer->AddHandle(Preload(iFrame));
+    return renderer;
 }
 
 TArray<FGuid>
@@ -41,7 +43,7 @@ FOdysseyAnimationCellImageRasterImageRenderingAbility::GetComposition(int iFrame
 }
 
 TSharedPtr<IOdysseyHandle>
-FOdysseyAnimationCellImageRasterImageRenderingAbility::Preload(int iFrame)
+FOdysseyAnimationCellImageRasterImageRenderingAbility::Preload(int iFrame) const
 {
     TSharedPtr<FOdysseyAnimationCellImageRaster> cellImageRaster = mCellImageRaster.Pin();
     if (!cellImageRaster)

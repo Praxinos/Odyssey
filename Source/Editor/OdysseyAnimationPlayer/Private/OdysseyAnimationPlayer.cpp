@@ -12,6 +12,7 @@ void
 UOdysseyAnimationPlayer::PostInitProperties()
 {
     Super::PostInitProperties();
+
 	IOdysseyAnimationImageRenderingAbility::OnChanged().AddUObject(this, &UOdysseyAnimationPlayer::OnImageRenderingChanged);
 	IOdysseyAnimationImageRenderingAbility::OnCompositionChanged().AddUObject(this, &UOdysseyAnimationPlayer::OnImageRenderingCompositionChanged);
 }
@@ -78,6 +79,7 @@ UOdysseyAnimationPlayer::SetAnimation(UOdysseyAnimation* iAnimation)
 	Texture = UTexture2D::CreateTransient(Animation->Width(), Animation->Height(), PF_B8G8R8A8);
 	Texture->UpdateResource();
 	FramesPerSecond = Animation->GetFramesPerSecond();
+	mInvalidTileMap = FULISInvalidTileMap(64, Animation->Width(), Animation->Height());
 
 	mOnAnimationChanged.Broadcast();
 	mOnTextureChanged.Broadcast();
@@ -251,29 +253,28 @@ UOdysseyAnimationPlayer::UpdateTexture()
 	if ( imageRenderingComposition != mImageRenderingComposition )
 	{
 		mImageRenderingComposition = imageRenderingComposition;
-		mInvalidRects = { ::ULIS::FRectI::FromXYWH(0, 0, Animation->Width(), Animation->Height()) };
+		mAnimationHandle = imageRenderingAbility->Preload(frameIndex);
+		mInvalidTileMap.Invalidate(::ULIS::FRectI::FromXYWH(0, 0, Animation->Width(), Animation->Height()));
 	}
 
-	if (mInvalidRects.Num() > 0)
+	if (!mInvalidTileMap.InvalidTiles().IsEmpty())
 	{
-		::ULIS::eFormat format = Animation->Format();
-		::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
+		TSharedPtr<IOdysseyImageRenderer> renderer = imageRenderingAbility->BuildRenderer(frameIndex);
+
 		TArray<TSharedPtr<::ULIS::FBlock>> blocks;
-		TArray<TSharedPtr<IOdysseyImageRenderer>> renderers;
-		TArray<ULIS::FEvent> allEvents;
-		for ( const ::ULIS::FRectI& rect : mInvalidRects )
+		TArray<::ULIS::FRectI> invalidRects = mInvalidTileMap.InvalidRects();
+		for ( const ::ULIS::FRectI& rect : invalidRects )
 		{
-			TArray<ULIS::FEvent> events;
-			TSharedPtr<IOdysseyImageRenderer> renderer = imageRenderingAbility->BuildRenderer(frameIndex);
-			renderers.Add(renderer);
-			TSharedPtr<::ULIS::FBlock> block = renderer->RenderInNewBlock(format, rect, events);
-			allEvents.Append(events);
+			TArray<::ULIS::FEvent> events;
+			TSharedPtr<::ULIS::FBlock> block = renderer->RenderInNewBlock(Animation->Format(), rect, events);
 			blocks.Add(block);
 		}
+		
+		::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(Animation->Format());
 		ctx.Finish();
 
-		CopyBlocksToTexture(blocks, mInvalidRects);
-		mInvalidRects.Empty();
+		CopyBlocksToTexture(blocks, invalidRects);
+		mInvalidTileMap.Clear();
 		mOnTextureUpdated.Broadcast();
 	}
 }
@@ -284,8 +285,7 @@ UOdysseyAnimationPlayer::OnImageRenderingChanged(const FGuid& iId, const TArray<
 	if (!mImageRenderingComposition.Contains(iId))
 		return;
 
-	mInvalidRects.Append(iRects);
-	mInvalidRects = OdysseyRectUtils::MergeRects(mInvalidRects);
+	mInvalidTileMap.Invalidate(iRects);
 }
 
 void
@@ -306,8 +306,7 @@ UOdysseyAnimationPlayer::OnImageRenderingCompositionChanged(const FGuid& iId)
 	if ( imageRenderingComposition == mImageRenderingComposition )
 		return;
 
-	mInvalidRects.Add(::ULIS::FRectI::FromXYWH(0, 0, Animation->Width(), Animation->Height()));
-	mInvalidRects = OdysseyRectUtils::MergeRects(mInvalidRects);
+	mInvalidTileMap.Invalidate(::ULIS::FRectI::FromXYWH(0, 0, Animation->Width(), Animation->Height()));
 }
 
 void

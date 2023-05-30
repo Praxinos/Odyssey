@@ -91,8 +91,6 @@ private:
     UOdysseyAnimationEditorPaintBucketTool* mPaintBucketTool;
     UOdysseyAnimationEditorColorPickerTool* mColorPickerTool;
 
-    TSharedPtr<IOdysseyHandle> mLayerStackPreloadHandle;
-
     UOdysseyAnimationPlayer* mPlayer;
     UOdysseyAnimationTexture* mTexture;
 

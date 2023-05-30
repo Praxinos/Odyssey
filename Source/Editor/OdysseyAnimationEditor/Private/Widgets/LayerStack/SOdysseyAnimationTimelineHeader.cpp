@@ -31,13 +31,14 @@ SOdysseyAnimationTimelineHeader::Construct(
 int32 SOdysseyAnimationTimelineHeader::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
 {
 	const FSlateBrush* GenericBrush = FCoreStyle::Get().GetBrush( "GenericWhiteBox" );
-	const FLinearColor& backgroundColorEven = FOdysseyStyle::GetColor("ScrubWidget.backgroundColorEven");
-	const FLinearColor& backgroundColorOdd = FOdysseyStyle::GetColor("ScrubWidget.backgroundColorOdd");
+	const FLinearColor& backgroundColorEven = FOdysseyStyle::GetColor("TimelineHeader.backgroundColorEven");
+	const FLinearColor& backgroundColorOdd = FOdysseyStyle::GetColor("TimelineHeader.backgroundColorOdd");
 
 	FAppStyle::GetBrush( TEXT( "ProgressBar.Background" ) );
 
 	const int32 backgroundLayer = LayerId;
 	const int32 textLayer = backgroundLayer + 1;
+	const int32 proxyLayer = textLayer + 1;
 
 	const FSlateFontInfo textFontInfo = FCoreStyle::GetDefaultFontStyle("Regular", 10);
 	const FSlateBrush* backgroundBrush = FAppStyle::GetBrush( TEXT( "ProgressBar.Background" ) );
@@ -50,6 +51,11 @@ int32 SOdysseyAnimationTimelineHeader::OnPaint(const FPaintArgs& Args, const FGe
 	const int32 frameNumberFrequency = FMath::Max(1, FGenericPlatformMath::CeilToInt(frameNumberMinSize / frameSize));
 	int32 startKey = FGenericPlatformMath::FloorToInt(offset);
 	int32 endKey = FGenericPlatformMath::CeilToInt(offset + (width / frameSize));
+
+	UOdysseyAnimation* animation = mEditor->Animation();
+	TSharedPtr<FOdysseyAnimationProxy> proxy = animation->GetProxy();
+	FInt32Range animationRange = animation->GetFrameRange();
+
 	for(int32 keyNum = startKey; keyNum <= endKey; keyNum++)
 	{
 		float x = (keyNum - offset) * frameSize;
@@ -84,6 +90,24 @@ int32 SOdysseyAnimationTimelineHeader::OnPaint(const FPaintArgs& Args, const FGe
 				frameString, 
 				textFontInfo, 
 				ESlateDrawEffect::None);
+		}
+
+		if (animationRange.Contains(keyNum))
+		{
+			bool isProxyDone = proxy->IsDone(keyNum);
+			const FLinearColor& proxyDoneColor = FOdysseyStyle::GetColor("TimelineHeader.ProxyDoneColor");
+			const FLinearColor& proxyPendingColor = FOdysseyStyle::GetColor("TimelineHeader.ProxyPendingColor");
+			const FVector2D proxyPos(x, height - 2.f);
+			const FVector2D proxySize(frameSize, 2.f);
+			const FColor color = isProxyDone ? proxyDoneColor.ToFColor(true) : proxyPendingColor.ToFColor(true);
+			FSlateDrawElement::MakeBox(
+				OutDrawElements,
+				proxyLayer,
+				AllottedGeometry.ToPaintGeometry(proxyPos, proxySize),
+				GenericBrush,
+				ESlateDrawEffect::None,
+				InWidgetStyle.GetColorAndOpacityTint() * color
+			);
 		}
 	}
 

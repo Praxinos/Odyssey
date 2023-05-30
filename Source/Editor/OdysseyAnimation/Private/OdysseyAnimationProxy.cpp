@@ -54,13 +54,23 @@ FOdysseyAnimationProxy::GetBlock(int iFrameIndex)
 }
 
 TSharedPtr<IOdysseyHandle>
-FOdysseyAnimationProxy::Preload(int iFrameIndex)
+FOdysseyAnimationProxy::Preload(int iFrameIndex) const
 {
     if (!mFramesToBlockData.Contains(iFrameIndex))
         return nullptr;
     
     TSharedPtr<FBlockData> blockData = mFramesToBlockData[iFrameIndex];
     return blockData->GetRasterBlock()->Preload();
+}
+
+bool
+FOdysseyAnimationProxy::IsDone(int iFrameIndex) const
+{
+    if ( !mFramesToBlockData.Contains(iFrameIndex) )
+        return false;
+
+    TSharedPtr<FBlockData> blockData = mFramesToBlockData[iFrameIndex];
+    return !blockData->IsInvalid();
 }
 
 bool
@@ -285,19 +295,17 @@ FBlockData::FBlockData(UOdysseyAnimation* iAnimation, const TArray<FGuid>& iComp
     , mState((int)eState::kInvalid)
     , mRasterBlock(iRasterBlock)
     //, mULISBlock(iRasterBlock->GetBlock())
-    , mInvalidRects({ ::ULIS::FRectI::FromXYWH(0, 0, iRasterBlock->GetWidth(), iRasterBlock->GetHeight())})
+    , mInvalidTileMap(64, iRasterBlock->GetWidth(), iRasterBlock->GetHeight())
     , mFrameIndexes()
 {
+    mInvalidTileMap.Invalidate(::ULIS::FRectI::FromXYWH(0, 0, iRasterBlock->GetWidth(), iRasterBlock->GetHeight()));
 }
 
 TSharedPtr<::ULIS::FBlock>
 FBlockData::GetBlock()
 {
-    //return mULISBlock;
-    
-    mRenderMutex.Lock();
+    FScopeLock renderLock(&mRenderMutex);
     TSharedPtr<::ULIS::FBlock> block = mRasterBlock->GetBlock();
-    mRenderMutex.Unlock();
     return block;
 }
 
@@ -311,20 +319,6 @@ TSharedPtr<FOdysseyRasterBlock>
 FBlockData::GetRasterBlock() const
 {
     return mRasterBlock;
-}
-
-const TArray<::ULIS::FRectI>&
-FBlockData::GetInvalidRects() const
-{
-    return mInvalidRects;
-}
-
-void
-FBlockData::SetInvalidRects(const TArray<::ULIS::FRectI>& iInvalidRects)
-{
-    FScopeLock Lock(&mEditMutex);
-    mInvalidRects = iInvalidRects;
-    mState = (int)eState::kInvalid; //not pending anymore, just invalid until SetPending() is called
 }
 
 void
@@ -343,7 +337,7 @@ FBlockData::UnlockPending(const FGuid& iId)
     mLockPendingIds.Remove(iId);
     if ( mLockPendingIds.IsEmpty())
     {
-        if (!mInvalidRects.IsEmpty())
+        if (!mInvalidTileMap.InvalidTiles().IsEmpty())
             mState = ((int)eState::kInvalid) | ((int)eState::kPending);
     }
 
@@ -354,8 +348,7 @@ void
 FBlockData::AppendInvalidRects(const TArray<::ULIS::FRectI>& iInvalidRects)
 {
     FScopeLock Lock(&mEditMutex);
-    mInvalidRects.Append(iInvalidRects);
-    mInvalidRects = OdysseyRectUtils::MergeRects(mInvalidRects);
+    mInvalidTileMap.Invalidate(iInvalidRects);
     mState = (int)eState::kInvalid; //not pending anymore, just invalid until SetPending() is called
 }
 
@@ -400,21 +393,19 @@ FBlockData::IsPending() const
 void
 FBlockData::Render(bool iForceRender)
 {
-    mRenderMutex.Lock(); //Lock any other thread from rendering
+    FScopeLock renderLock(&mRenderMutex);
     mEditMutex.Lock(); //Lock any other thread from editing values (like mInvalidRects)
 
     //If it is already rendered, don't need to render it again
     if (!IsInvalid())
     {
         mEditMutex.Unlock();
-        mRenderMutex.Unlock();
         return;
     }
 
     if (!iForceRender && !IsPending())
     {
         mEditMutex.Unlock();
-        mRenderMutex.Unlock();
         return;
     }
 
@@ -422,17 +413,16 @@ FBlockData::Render(bool iForceRender)
     if (mFrameIndexes.IsEmpty())
     {
         mEditMutex.Unlock();
-        mRenderMutex.Unlock();
         return;
     }
 
     //Get all variables we need to render, to ensure the values we use are not modified during the process
-    TArray<::ULIS::FRectI> invalidRects = mInvalidRects;
+    TArray<::ULIS::FRectI> invalidRects = mInvalidTileMap.InvalidRects();
     TSharedPtr<IOdysseyImageRenderer> renderer = BuildRenderer();
     TSharedPtr<FOdysseyRasterBlock> rasterBlock = mRasterBlock;
 
     //Clear the invalid rects, before rendering so we can detect if new invalid rects are present when we are done
-    mInvalidRects.Empty();
+    mInvalidTileMap.Clear();
     mEditMutex.Unlock();
 
     //Get the block from the raster block
@@ -442,14 +432,22 @@ FBlockData::Render(bool iForceRender)
     //Render until there is no invalid rects to render anymore
     while (!invalidRects.IsEmpty())
     {    
-        TArray<::ULIS::FEvent> events = renderer->RenderInBlock(block, invalidRects, {});
+        TArray<::ULIS::FEvent> clearEvents;
+        for (const ::ULIS::FRectI& rect : invalidRects)
+        {    
+            ::ULIS::FEvent eventClearBlock = FULISEventBuilder().RetainBlock(block).Build();
+            ctx.Clear(*block, rect, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventClearBlock);
+            clearEvents.Add(eventClearBlock);
+        }
+
+        TArray<::ULIS::FEvent> events = renderer->RenderInBlock(block, invalidRects, clearEvents);
         ctx.Finish();
 
         //We are done, check if there is new rectangles to render
         mEditMutex.Lock();
 
         //No invalid rects to render
-        if (mInvalidRects.IsEmpty())
+        if ( mInvalidTileMap.InvalidTiles().IsEmpty() )
         {
             mState = (int)eState::kValid;
             mEditMutex.Unlock();
@@ -457,13 +455,13 @@ FBlockData::Render(bool iForceRender)
         }
 
         //new invalid rects to render, get the new renderer and invalid rects
-        invalidRects.Append(mInvalidRects);
-        invalidRects = OdysseyRectUtils::MergeRects(invalidRects);
-        mInvalidRects.Empty();
+        mInvalidTileMap.Invalidate(invalidRects);
+        invalidRects = mInvalidTileMap.InvalidRects();
+        mInvalidTileMap.Clear();
 
         if (!iForceRender && !IsPending())
         {
-            mInvalidRects = invalidRects;
+            mInvalidTileMap.Invalidate(invalidRects);
             mEditMutex.Unlock();
             break;
         }
@@ -471,5 +469,4 @@ FBlockData::Render(bool iForceRender)
         renderer = BuildRenderer();
         mEditMutex.Unlock();
     }   
-    mRenderMutex.Unlock();
 }

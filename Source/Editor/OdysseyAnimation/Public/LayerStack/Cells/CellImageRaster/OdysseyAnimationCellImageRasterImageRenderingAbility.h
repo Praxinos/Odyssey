@@ -35,7 +35,7 @@ public:
      * 
      * @param iFrame 
      */
-    virtual TSharedPtr<IOdysseyHandle> Preload(int iFrame) override;
+    virtual TSharedPtr<IOdysseyHandle> Preload(int iFrame) const override;
 
 private:
     void OnBlockChanged(const TArray<::ULIS::FRectI>& iRects);

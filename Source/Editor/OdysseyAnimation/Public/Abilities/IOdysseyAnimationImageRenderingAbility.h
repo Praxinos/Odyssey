@@ -91,7 +91,7 @@ public:
      *
      * @param iFrame
      */
-    virtual TSharedPtr<IOdysseyHandle> Preload(int iFrame);
+    virtual TSharedPtr<IOdysseyHandle> Preload(int iFrame) const;
 
 public:
     FGuid mId; //TODO: Move to somewhere it can be serialized

@@ -36,7 +36,7 @@ FOdysseyAnimationImageRenderingAbility::GetComposition(int iFrameIndex) const
 }
 
 TSharedPtr<IOdysseyHandle>
-FOdysseyAnimationImageRenderingAbility::Preload(int iFrame)
+FOdysseyAnimationImageRenderingAbility::Preload(int iFrame) const
 {
     if (!mAnimation)
         return nullptr;

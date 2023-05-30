@@ -16,7 +16,8 @@ public:
 
 public:
     TSharedPtr<::ULIS::FBlock> GetBlock(int iFrameIndex);
-    TSharedPtr<IOdysseyHandle> Preload(int iFrameIndex);
+    TSharedPtr<IOdysseyHandle> Preload(int iFrameIndex) const;
+    bool IsDone(int iFrameIndex) const;
 
 public:
     virtual bool Init() override;
@@ -66,8 +67,6 @@ public:
 
     TSharedPtr<FOdysseyRasterBlock> GetRasterBlock() const;
 
-    const TArray<::ULIS::FRectI>& GetInvalidRects() const;
-    void SetInvalidRects(const TArray<::ULIS::FRectI>& iInvalidRects);
     void AppendInvalidRects(const TArray<::ULIS::FRectI>& iInvalidRects);
 
     const TSet<int>& GetFrameIndexes();
@@ -98,7 +97,7 @@ private:
     int mState;
     TSharedPtr<FOdysseyRasterBlock> mRasterBlock;
     TSharedPtr<::ULIS::FBlock> mULISBlock; //DEBUG
-    TArray<::ULIS::FRectI> mInvalidRects;
+    FULISInvalidTileMap mInvalidTileMap;
     TSet<int> mFrameIndexes;
     
     FCriticalSection mEditMutex;
