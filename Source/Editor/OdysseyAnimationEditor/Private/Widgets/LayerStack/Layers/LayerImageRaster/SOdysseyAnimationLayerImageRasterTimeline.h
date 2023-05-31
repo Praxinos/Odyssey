@@ -157,6 +157,10 @@ private:
 
     struct
     {
+        TArray<TSharedPtr<FCellData>> mEditedCellData;
+        int mFirstCellToRemove;
+        int mNumCellsToRemove;
+        int mMinOffset;
         int mOffset;
         double mMousePosition;
     } mAddCellsHandleDragData;

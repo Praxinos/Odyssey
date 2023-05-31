@@ -135,6 +135,7 @@ SOdysseyAnimationLayerImageRasterTimeline::Tick( const FGeometry& AllottedGeomet
 {
     if ( mIsRebuildPending )
     {
+        mEditingOffset = false;
         BuildCellsData();
         mIsRebuildPending = false;
     }
@@ -712,28 +713,17 @@ SOdysseyAnimationLayerImageRasterTimeline::OnTimingHandleDragStopped(const FGeom
             mutator.SetOffset(mOffset);
         }
 
-        if ( mTimingHandleDragData.mNumCellsToRemove > 0 )
-        {
-            mutator.Remove(mTimingHandleDragData.mFirstCellToRemove, mTimingHandleDragData.mNumCellsToRemove);
-        }
-
         for ( TSharedPtr<FCellData> cellData : mTimingHandleDragData.mEditedCellData )
         {
             mutator.SetLength(cellData->mCellIndex, cellData->mLength);
         }
+
+        if ( mTimingHandleDragData.mNumCellsToRemove > 0 )
+        {
+            mutator.Remove(mTimingHandleDragData.mFirstCellToRemove, mTimingHandleDragData.mNumCellsToRemove);
+        }
         mutator.Commit();
     }
-
-    //Reset every cellsdata
-    mEditingOffset = false;
-    for ( TSharedPtr<FCellData> cellData : mCellsData )
-    {
-        cellData->mEditingLength = false;
-        cellData->mIsVisible = true;
-        cellData->mIsTimingHandleVisible = true;
-        cellData->mIsLengthHandleVisible = true;
-    }
-    RequestRebuild();
 }
 
 EVisibility
@@ -745,6 +735,8 @@ SOdysseyAnimationLayerImageRasterTimeline::GetAddCellsHandleVisibility() const
 void
 SOdysseyAnimationLayerImageRasterTimeline::OnAddCellsHandleDragStarted(const FGeometry& iGeometry, const FPointerEvent& iEvent)
 {
+    FInt32Range layerRange = mAnimationLayerImageRaster->GetFrameRange();
+    mAddCellsHandleDragData.mMinOffset = layerRange.GetLowerBoundValue() - layerRange.GetUpperBoundValue();
     mAddCellsHandleDragData.mMousePosition = iEvent.GetScreenSpacePosition().X;
 }
 
@@ -766,41 +758,103 @@ SOdysseyAnimationLayerImageRasterTimeline::OnAddCellsHandleDragged(const FGeomet
     else
         mouseOffsetInt = (int)(mouseOffset / mEditor->Timeline()->GetFrameWidth() - 0.5f);
 
-    mAddCellsHandleDragData.mOffset = FMath::Max(mouseOffsetInt, 0);
+    mouseOffsetInt = FMath::Max(mouseOffsetInt, mAddCellsHandleDragData.mMinOffset);
 
+    mAddCellsHandleDragData.mOffset = mouseOffsetInt;
 
-    if ( mAddCellsHandleDragData.mOffset == 0 )
-        return;
-
-    for ( int i = 0; i < mAddCellsHandleDragData.mOffset; i++ )
+    for ( TSharedPtr<FCellData> cellData : mCellsData )
     {
-        TSharedPtr<FCellData> cellData = AddCellData(nullptr, 0); //0 is ok as it is a temporary cell
-        AddCellSection(cellData);
+        cellData->mEditingLength = false;
+        cellData->mIsVisible = true;
+        cellData->mIsTimingHandleVisible = true;
+        cellData->mIsLengthHandleVisible = true;
+    }
+
+    mAddCellsHandleDragData.mNumCellsToRemove = 0;
+    mAddCellsHandleDragData.mFirstCellToRemove = 0;
+    mAddCellsHandleDragData.mEditedCellData.Empty();
+
+    if ( mAddCellsHandleDragData.mOffset > 0 )
+    {
+        for ( int i = 0; i < mAddCellsHandleDragData.mOffset; i++ )
+        {
+            TSharedPtr<FCellData> cellData = AddCellData(nullptr, 0); //0 is ok as it is a temporary cell
+            AddCellSection(cellData);
+        }
+    }
+    else
+    {
+        //for each cell adjust its length or hide it 
+        for ( int i = mCellsData.Num() - 1; i >= 0 && mouseOffsetInt < 0; i-- )
+        {
+            TSharedPtr<FCellData> cellData = mCellsData[i];
+            int length = cellData->mCell->GetLength();
+            int lengthToRemove = FMath::Min(length, -mouseOffsetInt);
+
+            cellData->mEditingLength = true;
+            cellData->mLength = cellData->mCell->GetLength() - lengthToRemove;
+            if ( cellData->mLength <= 0 )
+            {
+                //hide the cell and cell's handles if needed
+                cellData->mIsVisible = false;
+                cellData->mIsTimingHandleVisible = false;
+                cellData->mIsLengthHandleVisible = false;
+                mAddCellsHandleDragData.mNumCellsToRemove++;
+                mAddCellsHandleDragData.mFirstCellToRemove = i;
+            }
+            else
+            {
+                mAddCellsHandleDragData.mEditedCellData.Add(cellData);
+            }
+            mouseOffsetInt += lengthToRemove;
+        }
     }
 }
 
 void
 SOdysseyAnimationLayerImageRasterTimeline::OnAddCellsHandleDragStopped(const FGeometry& iGeometry, const FPointerEvent& iEvent)
 {
-    if ( mAddCellsHandleDragData.mOffset <= 0 )
+    if ( mAddCellsHandleDragData.mOffset == 0 )
         return;
 
+    if ( mAddCellsHandleDragData.mOffset > 0 )
+    {
+    #ifdef WITH_EDITOR
+        FScopedTransaction ScopedTransaction(LOCTEXT("Layer Image Raster", "Change Cell Timing"));
+    #endif
+
+        //Create cells to add
+        UOdysseyAnimation* animation = mAnimationLayerImageRaster->GetAnimation();
+        TArray<TSharedPtr<FOdysseyAnimationCell>> cells;
+        for ( int i = 0; i < mAddCellsHandleDragData.mOffset; i++)
+        {
+            TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(mAnimationLayerImageRaster, animation->Width(), animation->Height(), animation->Format());
+            cells.Add(cell);
+        }
+
+        FOdysseyAnimationCellsMutator mutator(mAnimationLayerImageRaster);
+        mutator.Add(cells);
+        mutator.Commit();
+    }
+    else
+    {
 #ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("Layer Image Raster", "Change Cell Timing"));
+        FScopedTransaction ScopedTransaction(LOCTEXT("Layer Image Raster", "Change Cell Timing"));
 #endif
 
-    //Create cells to add
-    UOdysseyAnimation* animation = mAnimationLayerImageRaster->GetAnimation();
-    TArray<TSharedPtr<FOdysseyAnimationCell>> cells;
-    for ( int i = 0; i < mAddCellsHandleDragData.mOffset; i++)
-    {
-        TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(mAnimationLayerImageRaster, animation->Width(), animation->Height(), animation->Format());
-        cells.Add(cell);
-    }
+        FOdysseyAnimationCellsMutator mutator(mAnimationLayerImageRaster);
 
-    FOdysseyAnimationCellsMutator mutator(mAnimationLayerImageRaster);
-    mutator.Add(cells);
-    mutator.Commit();
+        for ( TSharedPtr<FCellData> cellData : mAddCellsHandleDragData.mEditedCellData )
+        {
+            mutator.SetLength(cellData->mCellIndex, cellData->mLength);
+        }
+
+        if ( mAddCellsHandleDragData.mNumCellsToRemove > 0 )
+        {
+            mutator.Remove(mAddCellsHandleDragData.mFirstCellToRemove, mAddCellsHandleDragData.mNumCellsToRemove);
+        }
+        mutator.Commit();
+    }
 }
 
 void

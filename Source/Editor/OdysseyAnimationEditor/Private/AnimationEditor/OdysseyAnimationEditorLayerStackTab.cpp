@@ -46,19 +46,10 @@ FOdysseyAnimationEditorLayerStackTab::CreateWidget()
                     .LayerStack(LayerStack())
                     .OnAdded( this, &FOdysseyAnimationEditorLayerStackTab::OnLayerAdded)
                 ]
-                //DEBUG:
                 + SHorizontalBox::Slot()
-                .AutoWidth()
-                [
-                    SNew(SButton)
-                    .ButtonStyle(FEditorStyle::Get(), "FlatButton.Success")
-                    .HAlign( HAlign_Center )
-                    .Text( LOCTEXT( "create-asset", "Add Frame" ) )
-                    .OnClicked( this, &FOdysseyAnimationEditorLayerStackTab::OnAddFrameClicked )
-                ]
-                //DEBUG:
-                + SHorizontalBox::Slot()
-                .AutoWidth()
+                .FillWidth(1.f)
+                .HAlign( HAlign_Center )
+                .VAlign( VAlign_Center )
                 [
                     SNew(SOdysseyAnimationPlaybackControls, mEditor)
                     .PlaybackFramesPerSecond(this, &FOdysseyAnimationEditorLayerStackTab::PlaybackFramesPerSecond)
@@ -171,28 +162,5 @@ FOdysseyAnimationEditorLayerStackTab::OnLayerAdded(UOdysseyLayer* iLayer)
         return;
     }
 }
-
-//DEBUG:
-FReply
-FOdysseyAnimationEditorLayerStackTab::OnAddFrameClicked()
-{
-    UOdysseyAnimationLayerStack* layerStack = LayerStack();
-    if (!layerStack)
-        return FReply::Unhandled();
-    
-    UOdysseyAnimationLayerImageRaster* layerRaster = Cast<UOdysseyAnimationLayerImageRaster>(layerStack->CurrentLayer.Get());
-
-    TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(layerRaster, Animation()->Width(), Animation()->Height(), Animation()->Format());
-
-#ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("Layer Image Raster", "Add Frame"));
-#endif
-    FOdysseyAnimationCellsMutator mutator(layerRaster);
-    mutator.Add({ cell });
-    mutator.Commit();
-
-    return FReply::Handled();
-}
-//DEBUG:
 
 #undef LOCTEXT_NAMESPACE
