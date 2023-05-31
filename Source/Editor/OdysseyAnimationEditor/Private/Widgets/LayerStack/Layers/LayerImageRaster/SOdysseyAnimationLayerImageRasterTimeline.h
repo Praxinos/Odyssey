@@ -45,16 +45,15 @@ private:
     TSharedRef<SWidget> CreateCellWidget(TSharedPtr<FCellData> iCellData);
     TSharedRef<SWidget> CreateTimingHandleWidget(TSharedPtr<FCellData> iCellData);
     TSharedRef<SWidget> CreateLengthHandleWidget(TSharedPtr<FCellData> iCellData);
+    TSharedRef<SWidget> CreateAddCellsHandleWidget();
+
     void BuildCellsData();
+    TSharedPtr<FCellData> AddCellData(TSharedPtr<FOdysseyAnimationCell> iCell, int iCellIndex);
+    void RemoveCellData(int iIndex);
+
     void RefreshWidgets();
-    
-    float GetLayerOffset() const;
-    float GetCellHeight() const;
-    float GetCellLength(TSharedPtr<FCellData> iCellData) const;
-    
-    EVisibility GetTimingHandleVisibility(TSharedPtr<FCellData> iCellData) const;
-    EVisibility GetLengthHandleVisibility(TSharedPtr<FCellData> iCellData) const;
-    EVisibility GetCellVisibility(TSharedPtr<FCellData> iCellData) const;
+    void AddCellSection(TSharedPtr<FCellData> iCellData);
+    void RemoveCellSection(TSharedPtr<FCellData> iCellData);
 
     void MapActions(TSharedPtr<FUICommandList> iCommandList);
     void BuildContextMenu(FMenuBuilder& iMenuBuilder);
@@ -64,12 +63,29 @@ private:
 
 private:
     void OnCellsChanged(class UOdysseyAnimationLayerImageRaster* iLayer);
+
+private:
+    //Widget Methods
+    float GetLayerOffset() const;
+
+    EVisibility GetCellVisibility(TSharedPtr<FCellData> iCellData) const;
+    float GetCellHeight() const;
+    float GetCellLength(TSharedPtr<FCellData> iCellData) const;
+
+    EVisibility GetLengthHandleVisibility(TSharedPtr<FCellData> iCellData) const;
     void OnLengthHandleDragStarted(const FGeometry& iGeometry, const FPointerEvent& iEvent, TSharedPtr<FCellData> iCellData);
     void OnLengthHandleDragged(const FGeometry& iGeometry, const FPointerEvent& iEvent);
     void OnLengthHandleDragStopped(const FGeometry& iGeometry, const FPointerEvent& iEvent);
+
+    EVisibility GetTimingHandleVisibility(TSharedPtr<FCellData> iCellData) const;
     void OnTimingHandleDragStarted(const FGeometry& iGeometry, const FPointerEvent& iEvent, TSharedPtr<FCellData> iCellData);
     void OnTimingHandleDragged(const FGeometry& iGeometry, const FPointerEvent& iEvent);
     void OnTimingHandleDragStopped(const FGeometry& iGeometry, const FPointerEvent& iEvent);
+
+    EVisibility GetAddCellsHandleVisibility() const;
+    void OnAddCellsHandleDragStarted(const FGeometry& iGeometry, const FPointerEvent& iEvent);
+    void OnAddCellsHandleDragged(const FGeometry& iGeometry, const FPointerEvent& iEvent);
+    void OnAddCellsHandleDragStopped(const FGeometry& iGeometry, const FPointerEvent& iEvent);
 
     FReply OnCellsMouseButtonDown(const FGeometry& iGeometry, const FPointerEvent& iEvent);
     FReply OnCellsMouseMove(const FGeometry& iGeometry, const FPointerEvent& MouseEvent);
@@ -82,14 +98,30 @@ private:
 private:
     FOdysseyAnimationEditor* mEditor;
     class UOdysseyAnimationLayerImageRaster* mAnimationLayerImageRaster;
-    TSharedPtr<SOdysseyAnimationTimelineScrollBox> mScrollBox;
+
     TSharedPtr<SBorder> mCellsBorder;
+    TSharedPtr<SBox> mPreCellsBox;
     TSharedPtr<SHorizontalBox> mCellsBox;
+    TSharedPtr<SBox> mPostCellsBox;
     TSharedPtr<SHorizontalBox> mHandlesBox;
+
+    const FSlateBrush* mTimingHandleBrush;
+    const FSlateBrush* mLengthHandleBrush;
+    const FSlateBrush* mAddCellsHandleBrush;
+
+private:
+    //Events structures
+    bool mIsRefreshPending;
+    bool mIsRebuildPending;
+    bool mOffsettingLayer;
+    int  mOffset;
+    bool mEditingOffset;
 
     struct FCellData
     {
         TSharedPtr<FOdysseyAnimationCell> mCell;
+        TSharedPtr<SWidget> mCellSectionWidget;
+        TSharedPtr<SWidget> mHandlesSectionWidget;
         int mCellIndex;
         bool mIsVisible;
         bool mIsTimingHandleVisible;
@@ -99,28 +131,13 @@ private:
     };
     TArray<TSharedPtr<FCellData>> mCellsData;
 
-    bool mIsRefreshPending;
-    bool mIsRebuildPending;
-    bool mOffsettingLayer;
-    int mOffset;
-    bool mEditingOffset;
-    /* bool mIsDraggingCellLengthHandle;
-    bool mIsDraggingCellTimingHandle; */
-
-	const FSlateBrush* mTimingHandleBrush;
-	const FSlateBrush* mLengthHandleBrush;
     struct
     {
-        //int mStartOffset;
-        //int mOffset;
         double mMousePosition;
     } mLayerOffsetData;
 
     struct
     {
-        //int mCellIndex = INDEX_NONE;
-        //int mStartLength;
-        //int mLength;
         TSharedPtr<FCellData> mCellData;
         double mMousePosition;
     } mLengthHandleDragData;
@@ -137,4 +154,10 @@ private:
         int mMaxOffset;
         double mMousePosition;
     } mTimingHandleDragData;
+
+    struct
+    {
+        int mOffset;
+        double mMousePosition;
+    } mAddCellsHandleDragData;
 };

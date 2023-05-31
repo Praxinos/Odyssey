@@ -25,6 +25,7 @@ SOdysseyAnimationLayerImageRasterTimeline::SOdysseyAnimationLayerImageRasterTime
     , mEditingOffset(false)
 	, mTimingHandleBrush(nullptr)
 	, mLengthHandleBrush(nullptr)
+    , mAddCellsHandleBrush(nullptr)
 {
 
 }
@@ -41,6 +42,7 @@ SOdysseyAnimationLayerImageRasterTimeline::Construct(
     mEditor = iEditor;
     mTimingHandleBrush = FOdysseyStyle::GetBrush("FlipbookTimeline.TimelineFrameTimingHandle");
 	mLengthHandleBrush = FOdysseyStyle::GetBrush("FlipbookTimeline.TimelineFrameLengthHandle");
+    mAddCellsHandleBrush = FOdysseyStyle::GetBrush("AnimationLayerTimeline.AddCellsHandle");
     
     ChildSlot
     [
@@ -48,7 +50,7 @@ SOdysseyAnimationLayerImageRasterTimeline::Construct(
         + SVerticalBox::Slot()
         .AutoHeight()
         [
-            SAssignNew(mScrollBox, SOdysseyAnimationTimelineScrollBox, iEditor)
+            SNew(SOdysseyAnimationTimelineScrollBox, iEditor)
             + SOdysseyAnimationTimelineScrollBox::Slot()
             [
                 SNew(SHorizontalBox)
@@ -58,6 +60,9 @@ SOdysseyAnimationLayerImageRasterTimeline::Construct(
                     SNew(SOdysseyAnimationTimelineSection, mEditor)
                     .WidthInFrames(this, &SOdysseyAnimationLayerImageRasterTimeline::GetLayerOffset)
                     .HeightInScreenUnits(this, &SOdysseyAnimationLayerImageRasterTimeline::GetCellHeight)
+                    [
+                        SAssignNew(mPreCellsBox, SBox)
+                    ]
                 ]
                 + SHorizontalBox::Slot()
                 .AutoWidth()
@@ -77,6 +82,19 @@ SOdysseyAnimationLayerImageRasterTimeline::Construct(
                         [
                             SAssignNew(mHandlesBox, SHorizontalBox)
                         ]
+                    ]
+                ]
+                + SHorizontalBox::Slot()
+                .AutoWidth()
+                [
+                    //Add Cells Handle
+                    SNew(SOverlay)
+                    + SOverlay::Slot()
+                    .Padding(0.f, 0.f, mAddCellsHandleBrush->ImageSize.X, 0.f)
+                    .HAlign(HAlign_Left)
+                    .VAlign(VAlign_Top)
+                    [
+                        CreateAddCellsHandleWidget()
                     ]
                 ]
             ]
@@ -142,10 +160,86 @@ SOdysseyAnimationLayerImageRasterTimeline::GetCellHeight() const
 float
 SOdysseyAnimationLayerImageRasterTimeline::GetCellLength(TSharedPtr<SOdysseyAnimationLayerImageRasterTimeline::FCellData> iCellData) const
 {
-    if (iCellData->mEditingLength)
+    if ( !iCellData->mCell || iCellData->mEditingLength )
         return iCellData->mLength;
 
-    return iCellData->mCell ? iCellData->mCell->GetLength() : 0;
+    return iCellData->mCell->GetLength();
+}
+
+TSharedPtr<SOdysseyAnimationLayerImageRasterTimeline::FCellData>
+SOdysseyAnimationLayerImageRasterTimeline::AddCellData(TSharedPtr<FOdysseyAnimationCell> iCell, int iCellIndex)
+{
+    TSharedPtr<FCellData> cellData = MakeShared<FCellData>();
+    cellData->mCell = iCell;
+    cellData->mCellIndex = iCellIndex;
+    cellData->mIsVisible = true;
+    cellData->mIsTimingHandleVisible = true;
+    cellData->mIsLengthHandleVisible = true;
+    cellData->mEditingLength = false;
+    cellData->mLength = 1;
+    mCellsData.Add(cellData);
+
+    return cellData;
+}
+
+void
+SOdysseyAnimationLayerImageRasterTimeline::RemoveCellData(int iIndex)
+{
+    mCellsData.RemoveAt(iIndex);
+}
+
+void
+SOdysseyAnimationLayerImageRasterTimeline::AddCellSection(TSharedPtr<FCellData> iCellData)
+{
+    iCellData->mCellSectionWidget = SNew(SOdysseyAnimationTimelineSection, mEditor)
+        .WidthInFrames(this, &SOdysseyAnimationLayerImageRasterTimeline::GetCellLength, iCellData)
+        .HeightInScreenUnits(this, &SOdysseyAnimationLayerImageRasterTimeline::GetCellHeight)
+        [
+            CreateCellWidget(iCellData)
+        ];
+
+    iCellData->mHandlesSectionWidget = SNew(SOdysseyAnimationTimelineSection, mEditor)
+        .WidthInFrames(this, &SOdysseyAnimationLayerImageRasterTimeline::GetCellLength, iCellData)
+        .HeightInScreenUnits(this, &SOdysseyAnimationLayerImageRasterTimeline::GetCellHeight)
+        [
+            SNew(SOverlay)
+            + SOverlay::Slot() //Timing Handle Top Left
+            .Padding(-mLengthHandleBrush->ImageSize.X / 2, 0.f, -mLengthHandleBrush->ImageSize.X / 2, 0.f)
+            .HAlign(HAlign_Left)
+            .VAlign(VAlign_Top)
+            [
+                CreateTimingHandleWidget(iCellData)
+            ]
+
+            + SOverlay::Slot() //Length Handle Top Right
+            .Padding(0.0f, 0.0f, -mLengthHandleBrush->ImageSize.X / 2, 0.f)
+            .HAlign(HAlign_Right)
+            .VAlign(VAlign_Center)
+            [
+                CreateLengthHandleWidget(iCellData)
+            ]
+        ];
+
+    //Cells widgets
+    mCellsBox->AddSlot()
+    .AutoWidth()
+    [
+        iCellData->mCellSectionWidget.ToSharedRef()
+    ];
+
+    //Handle widgets
+    mHandlesBox->AddSlot()
+    .AutoWidth()
+    [
+        iCellData->mHandlesSectionWidget.ToSharedRef()
+    ];
+}
+
+void
+SOdysseyAnimationLayerImageRasterTimeline::RemoveCellSection(TSharedPtr<FCellData> iCellData)
+{
+    mCellsBox->RemoveSlot(iCellData->mCellSectionWidget.ToSharedRef());
+    mHandlesBox->RemoveSlot(iCellData->mHandlesSectionWidget.ToSharedRef());
 }
 
 void
@@ -155,44 +249,10 @@ SOdysseyAnimationLayerImageRasterTimeline::RefreshWidgets()
     mHandlesBox->ClearChildren();
 
     TArray<TSharedPtr<FOdysseyAnimationCell>>& cells = mAnimationLayerImageRaster->GetCells();
-    for ( TSharedPtr<FCellData> cellData : mCellsData )
+    for ( int i = 0; i < mCellsData.Num(); i++ )
     {
-        mCellsBox->AddSlot()
-        .AutoWidth()
-        [
-            SNew(SOdysseyAnimationTimelineSection, mEditor)
-            .WidthInFrames(this, &SOdysseyAnimationLayerImageRasterTimeline::GetCellLength, cellData)
-            .HeightInScreenUnits(this, &SOdysseyAnimationLayerImageRasterTimeline::GetCellHeight)
-            [
-                CreateCellWidget(cellData)
-            ]
-        ];
-
-        mHandlesBox->AddSlot()
-        .AutoWidth()
-        [
-            SNew(SOdysseyAnimationTimelineSection, mEditor)
-            .WidthInFrames(this, &SOdysseyAnimationLayerImageRasterTimeline::GetCellLength, cellData)
-            .HeightInScreenUnits(this, &SOdysseyAnimationLayerImageRasterTimeline::GetCellHeight)
-            [
-                SNew(SOverlay)
-                + SOverlay::Slot() //Timing Handle Top Left
-                .Padding(-mLengthHandleBrush->ImageSize.X / 2, 0.f, -mLengthHandleBrush->ImageSize.X / 2, 0.f)
-                .HAlign(HAlign_Left)
-                .VAlign(VAlign_Top)
-                [
-                    CreateTimingHandleWidget(cellData)
-                ]
-        
-                +SOverlay::Slot() //Length Handle Top Right
-                .Padding(0.0f, 0.0f, -mLengthHandleBrush->ImageSize.X/2, 0.f)
-                .HAlign(HAlign_Right)
-                .VAlign(VAlign_Center)
-                [
-                    CreateLengthHandleWidget(cellData)
-                ]
-            ]
-        ];
+        TSharedPtr<FCellData> cellData = mCellsData[i];
+        AddCellSection(cellData);
     }
 }
 
@@ -235,73 +295,36 @@ SOdysseyAnimationLayerImageRasterTimeline::CreateLengthHandleWidget(TSharedPtr<F
 }
 
 TSharedRef<SWidget>
+SOdysseyAnimationLayerImageRasterTimeline::CreateAddCellsHandleWidget()
+{
+    return SNew(SBox)
+        .Visibility(this, &SOdysseyAnimationLayerImageRasterTimeline::GetAddCellsHandleVisibility)
+        .WidthOverride(mAddCellsHandleBrush->ImageSize.X)
+        .HeightOverride(mAddCellsHandleBrush->ImageSize.Y)
+        [
+            SNew(SOdysseyAnimationCellHandle)
+            .OnDragStarted(this, &SOdysseyAnimationLayerImageRasterTimeline::OnAddCellsHandleDragStarted)
+            .OnDragged(this, &SOdysseyAnimationLayerImageRasterTimeline::OnAddCellsHandleDragged)
+            .OnDragStopped(this, &SOdysseyAnimationLayerImageRasterTimeline::OnAddCellsHandleDragStopped)
+            [
+                SNew(SImage)
+                .Image(mAddCellsHandleBrush)
+            ]
+        ];
+}
+
+TSharedRef<SWidget>
 SOdysseyAnimationLayerImageRasterTimeline::CreateCellWidget(TSharedPtr<FCellData> iCellData)
 {
     return SNew(SOdysseyAnimationTimelineSection, mEditor)
-        .WidthInFrames(this, &SOdysseyAnimationLayerImageRasterTimeline::GetCellLength, iCellData)
-        .HeightInScreenUnits(this, &SOdysseyAnimationLayerImageRasterTimeline::GetCellHeight)
-        [
-            SNew(SOdysseyAnimationLayerImageRasterCell, mEditor, mAnimationLayerImageRaster)
-            .Visibility(this, &SOdysseyAnimationLayerImageRasterTimeline::GetCellVisibility, iCellData)
-            .OnMapActions(this, &SOdysseyAnimationLayerImageRasterTimeline::OnCellsMapActions)
-            .OnBuildContextMenu(this, &SOdysseyAnimationLayerImageRasterTimeline::OnCellsBuildContextMenu)
-        ];
-
-    /*
-    return SNew(SOdysseyAnimationTimelineSection, mEditor)
-        .WidthInFrames(this, &SOdysseyAnimationLayerImageRasterTimeline::GetCellLength, iCellData)
-        .HeightInScreenUnits(this, &SOdysseyAnimationLayerImageRasterTimeline::GetCellHeight)
-        [
-            SNew(SOverlay)
-            +SOverlay::Slot()
-            [
-                SNew(SOdysseyAnimationLayerImageRasterCell, mEditor, mAnimationLayerImageRaster)
-                .Visibility(this, &SOdysseyAnimationLayerImageRasterTimeline::GetCellVisibility, iCellData)
-                .OnMapActions(this, &SOdysseyAnimationLayerImageRasterTimeline::OnCellsMapActions)
-                .OnBuildContextMenu(this, &SOdysseyAnimationLayerImageRasterTimeline::OnCellsBuildContextMenu)
-            ]
-            +SOverlay::Slot() //Timing Handle Top Left
-            .Padding(-mLengthHandleBrush->ImageSize.X / 2, 0.f, -mLengthHandleBrush->ImageSize.X / 2, 0.f)
-            .HAlign(HAlign_Left)
-            .VAlign(VAlign_Top)
-            [
-                SNew(SBox)
-                .Visibility(this, &SOdysseyAnimationLayerImageRasterTimeline::GetTimingHandleVisibility, iCellData)
-                .WidthOverride(mTimingHandleBrush->ImageSize.X)
-                .HeightOverride(mTimingHandleBrush->ImageSize.Y)
-                [
-                    SNew(SOdysseyAnimationCellHandle)
-                    .OnDragStarted(this, &SOdysseyAnimationLayerImageRasterTimeline::OnTimingHandleDragStarted, iCellData)
-                    .OnDragged(this, &SOdysseyAnimationLayerImageRasterTimeline::OnTimingHandleDragged)
-                    .OnDragStopped(this, &SOdysseyAnimationLayerImageRasterTimeline::OnTimingHandleDragStopped)
-                    [
-                        SNew(SImage)
-                        .Image(mTimingHandleBrush)
-                    ]
-                ]
-            ]
-            +SOverlay::Slot() //Length Handle Top Right
-            .Padding(0.0f, 0.0f, -mLengthHandleBrush->ImageSize.X/2, 0.f)
-            .HAlign(HAlign_Right)
-            .VAlign(VAlign_Center)
-            [
-                SNew(SBox)
-                .Visibility(this, &SOdysseyAnimationLayerImageRasterTimeline::GetLengthHandleVisibility, iCellData)
-                .WidthOverride(mLengthHandleBrush->ImageSize.X)
-                .HeightOverride(mLengthHandleBrush->ImageSize.Y)
-                [
-                    SNew(SOdysseyAnimationCellHandle)
-                    .OnDragStarted(this, &SOdysseyAnimationLayerImageRasterTimeline::OnLengthHandleDragStarted, iCellData)
-                    .OnDragged(this, &SOdysseyAnimationLayerImageRasterTimeline::OnLengthHandleDragged)
-                    .OnDragStopped(this, &SOdysseyAnimationLayerImageRasterTimeline::OnLengthHandleDragStopped)
-                    [
-                        SNew(SImage)
-                        .Image(mLengthHandleBrush)
-                    ]
-                ]
-            ]
-        ];
-        */
+    .WidthInFrames(this, &SOdysseyAnimationLayerImageRasterTimeline::GetCellLength, iCellData)
+    .HeightInScreenUnits(this, &SOdysseyAnimationLayerImageRasterTimeline::GetCellHeight)
+    [
+        SNew(SOdysseyAnimationLayerImageRasterCell, mEditor, mAnimationLayerImageRaster)
+        .Visibility(this, &SOdysseyAnimationLayerImageRasterTimeline::GetCellVisibility, iCellData)
+        .OnMapActions(this, &SOdysseyAnimationLayerImageRasterTimeline::OnCellsMapActions)
+        .OnBuildContextMenu(this, &SOdysseyAnimationLayerImageRasterTimeline::OnCellsBuildContextMenu)
+    ];
 }
 
 void
@@ -312,15 +335,7 @@ SOdysseyAnimationLayerImageRasterTimeline::BuildCellsData()
     TArray<TSharedPtr<FOdysseyAnimationCell>>& cells = mAnimationLayerImageRaster->GetCells();
     for (int i = 0; i < cells.Num(); i++)
     {
-        TSharedPtr<FCellData> cellData = MakeShared<FCellData>();
-        cellData->mCell = cells[i];
-        cellData->mCellIndex = i;
-        cellData->mIsVisible = true;
-        cellData->mIsTimingHandleVisible = true;
-        cellData->mIsLengthHandleVisible = true;
-        cellData->mEditingLength = false;
-        cellData->mLength = 0;
-        mCellsData.Add(cellData);
+        AddCellData(cells[i], i);
     }
 }
 
@@ -719,6 +734,73 @@ SOdysseyAnimationLayerImageRasterTimeline::OnTimingHandleDragStopped(const FGeom
         cellData->mIsLengthHandleVisible = true;
     }
     RequestRebuild();
+}
+
+EVisibility
+SOdysseyAnimationLayerImageRasterTimeline::GetAddCellsHandleVisibility() const
+{
+    return EVisibility::Visible; //Could be more complicated than that one day
+}
+
+void
+SOdysseyAnimationLayerImageRasterTimeline::OnAddCellsHandleDragStarted(const FGeometry& iGeometry, const FPointerEvent& iEvent)
+{
+    mAddCellsHandleDragData.mMousePosition = iEvent.GetScreenSpacePosition().X;
+}
+
+void
+SOdysseyAnimationLayerImageRasterTimeline::OnAddCellsHandleDragged(const FGeometry& iGeometry, const FPointerEvent& iEvent)
+{
+    //Remove temporary cells
+    for ( TSharedPtr<FCellData> lastCellData = mCellsData.Last(); !lastCellData->mCell; lastCellData = mCellsData.Last() ) //detect temporary cells
+    {
+        RemoveCellSection(lastCellData);
+        RemoveCellData(mCellsData.Num() - 1);
+    }
+
+    //Compute Mouse Offset
+    float mouseOffset = iEvent.GetScreenSpacePosition().X - mAddCellsHandleDragData.mMousePosition;
+    int mouseOffsetInt = 0;
+    if ( mouseOffset > 0 )
+        mouseOffsetInt = (int)(mouseOffset / mEditor->Timeline()->GetFrameWidth() + 0.5f);
+    else
+        mouseOffsetInt = (int)(mouseOffset / mEditor->Timeline()->GetFrameWidth() - 0.5f);
+
+    mAddCellsHandleDragData.mOffset = FMath::Max(mouseOffsetInt, 0);
+
+
+    if ( mAddCellsHandleDragData.mOffset == 0 )
+        return;
+
+    for ( int i = 0; i < mAddCellsHandleDragData.mOffset; i++ )
+    {
+        TSharedPtr<FCellData> cellData = AddCellData(nullptr, 0); //0 is ok as it is a temporary cell
+        AddCellSection(cellData);
+    }
+}
+
+void
+SOdysseyAnimationLayerImageRasterTimeline::OnAddCellsHandleDragStopped(const FGeometry& iGeometry, const FPointerEvent& iEvent)
+{
+    if ( mAddCellsHandleDragData.mOffset <= 0 )
+        return;
+
+#ifdef WITH_EDITOR
+    FScopedTransaction ScopedTransaction(LOCTEXT("Layer Image Raster", "Change Cell Timing"));
+#endif
+
+    //Create cells to add
+    UOdysseyAnimation* animation = mAnimationLayerImageRaster->GetAnimation();
+    TArray<TSharedPtr<FOdysseyAnimationCell>> cells;
+    for ( int i = 0; i < mAddCellsHandleDragData.mOffset; i++)
+    {
+        TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(mAnimationLayerImageRaster, animation->Width(), animation->Height(), animation->Format());
+        cells.Add(cell);
+    }
+
+    FOdysseyAnimationCellsMutator mutator(mAnimationLayerImageRaster);
+    mutator.Add(cells);
+    mutator.Commit();
 }
 
 void
