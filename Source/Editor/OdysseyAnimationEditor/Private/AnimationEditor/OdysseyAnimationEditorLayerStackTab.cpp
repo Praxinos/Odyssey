@@ -13,6 +13,7 @@
 #include "ContentBrowserModule.h"
 #include "ULISLoaderModule.h"
 #include "ULISEventBuilder.h"
+#include "Misc/ScopedSlowTask.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyAnimationEditorLayerStackTab"
 
@@ -169,10 +170,14 @@ FOdysseyAnimationEditorLayerStackTab::ImportTextureSequence()
     if ( !layerImageRaster )
         return;
     
+    FScopedSlowTask progressBar(assetsData.Num(), LOCTEXT("LookingForUnusedAssetsText", "Importing Texture Sequence"));
+    progressBar.MakeDialog();
+
     TArray<TSharedPtr<FOdysseyAnimationCell>> cells;
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(animation->Format());
     for( int i = 0; i < assetsData.Num(); i++ )
     {
+        progressBar.EnterProgressFrame();
         UTexture2D* openedTexture = static_cast<UTexture2D*>(assetsData[i].GetAsset());
         TSharedPtr<::ULIS::FBlock> textureBlock = MakeShareable(NewBlockFromUTextureData(openedTexture, animation->Format()));
         if (textureBlock->Width() == animation->Width() && textureBlock->Height() == animation->Height() && textureBlock->Format() == animation->Format())
