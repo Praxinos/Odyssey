@@ -8,18 +8,22 @@
 
 namespace
 {
+    const FName ImportExportShortcuts = "Import & Export Shortcuts";
     const FName LayerStackShortcuts = "LayerStack Shortcuts";
 }
 
 FOdysseyAnimationEditorCommands::FOdysseyAnimationEditorCommands()
     : TCommands<FOdysseyAnimationEditorCommands>( "IliadAnimationEditor", NSLOCTEXT( "Contexts", "IliadAnimationEditor", "Iliad Texture Editor" ), NAME_None, FEditorStyle::GetStyleSetName() )
 {
+    AddBundle(ImportExportShortcuts, LOCTEXT("ImportExportShortcutsCategory", "Import & Export Shortcuts"));
     AddBundle(LayerStackShortcuts, LOCTEXT("LayerStackShortcutsCategory", "LayerStack Shortcuts"));
 }
 
 void
 FOdysseyAnimationEditorCommands::RegisterCommands()
 {
+// Import & Export Shortcuts Category
+    UI_CMD( ImportTextureSequence, ImportExportShortcuts, "Import Texture Sequence", "Import several textures from the content-browser in a new layer",                                               EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::P));
 
 // LayerStack Shortcuts Category
     UI_CMD( CreateNewAnimationLayerImageRaster, LayerStackShortcuts, "Create New Aniamtion Layer Image Raster", "Create New Aniamtion Layer Image Raster",                                                                                                      EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::N));

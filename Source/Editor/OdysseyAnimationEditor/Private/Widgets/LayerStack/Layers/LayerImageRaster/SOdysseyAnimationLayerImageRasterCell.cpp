@@ -9,13 +9,11 @@ void
 SOdysseyAnimationLayerImageRasterCell::Construct(
     const FArguments& iArgs,
 	FOdysseyAnimationEditor* iEditor,
-	UOdysseyAnimationLayerImageRaster* iLayer,
-	int iCellIndex
+	UOdysseyAnimationLayerImageRaster* iLayer
 )
 {
 	mEditor = iEditor;
 	mLayer = iLayer;
-	mCellIndex = iCellIndex;
 	mOnBuildContextMenu = iArgs._OnBuildContextMenu;
 	mOnMapActions = iArgs._OnMapActions;
 

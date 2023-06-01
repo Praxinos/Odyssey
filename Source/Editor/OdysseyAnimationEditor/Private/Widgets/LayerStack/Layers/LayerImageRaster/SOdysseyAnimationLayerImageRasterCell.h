@@ -23,8 +23,7 @@ public:
     void Construct(
         const FArguments& iArgs,
         FOdysseyAnimationEditor* iEditor,
-        UOdysseyAnimationLayerImageRaster* iLayer,
-        int iCellIndex
+        UOdysseyAnimationLayerImageRaster* iLayer
     );
 
 public:
@@ -35,7 +34,6 @@ public:
 private:
     FOdysseyAnimationEditor* mEditor;
     UOdysseyAnimationLayerImageRaster* mLayer;
-    int mCellIndex;
 
     FOnBuildContextMenu mOnBuildContextMenu;
     FOnMapActions mOnMapActions;

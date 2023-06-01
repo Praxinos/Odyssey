@@ -9,6 +9,11 @@
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
 #include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationCellsMutator.h"
+#include "IContentBrowserSingleton.h"
+#include "ContentBrowserModule.h"
+#include "ULISLoaderModule.h"
+#include "ULISEventBuilder.h"
+#include "Misc/ScopedSlowTask.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyAnimationEditorLayerStackTab"
 
@@ -46,19 +51,10 @@ FOdysseyAnimationEditorLayerStackTab::CreateWidget()
                     .LayerStack(LayerStack())
                     .OnAdded( this, &FOdysseyAnimationEditorLayerStackTab::OnLayerAdded)
                 ]
-                //DEBUG:
                 + SHorizontalBox::Slot()
-                .AutoWidth()
-                [
-                    SNew(SButton)
-                    .ButtonStyle(FEditorStyle::Get(), "FlatButton.Success")
-                    .HAlign( HAlign_Center )
-                    .Text( LOCTEXT( "create-asset", "Add Frame" ) )
-                    .OnClicked( this, &FOdysseyAnimationEditorLayerStackTab::OnAddFrameClicked )
-                ]
-                //DEBUG:
-                + SHorizontalBox::Slot()
-                .AutoWidth()
+                .FillWidth(1.f)
+                .HAlign( HAlign_Center )
+                .VAlign( VAlign_Center )
                 [
                     SNew(SOdysseyAnimationPlaybackControls, mEditor)
                     .PlaybackFramesPerSecond(this, &FOdysseyAnimationEditorLayerStackTab::PlaybackFramesPerSecond)
@@ -79,6 +75,7 @@ FOdysseyAnimationEditorLayerStackTab::BindShortcuts(FBaseToolkit* iToolkit)
 
     #define MAP_ACTION(action, ...) toolkitCommands->MapAction( action, FExecuteAction::CreateSP( this, &FOdysseyAnimationEditorLayerStackTab::__VA_ARGS__ ), FCanExecuteAction() );
 
+    MAP_ACTION(AnimationEditorCommands.ImportTextureSequence, ImportTextureSequence )
     MAP_ACTION(AnimationEditorCommands.CreateNewAnimationLayerImageRaster, CreateNewLayer )
     MAP_ACTION(AnimationEditorCommands.ChangeLayerOpacity10, ChangeLayerOpacity, 0.1f )
     MAP_ACTION(AnimationEditorCommands.ChangeLayerOpacity20, ChangeLayerOpacity, 0.2f )
@@ -92,6 +89,12 @@ FOdysseyAnimationEditorLayerStackTab::BindShortcuts(FBaseToolkit* iToolkit)
     MAP_ACTION(AnimationEditorCommands.ChangeLayerOpacity100, ChangeLayerOpacity, 1.0f )
 
     #undef MAP_ACTION
+}
+
+void
+FOdysseyAnimationEditorLayerStackTab::ExtendMenu(FToolMenuOwner iOwner, FName iMenuName)
+{
+    ExtendMenuFile(iOwner, iMenuName);
 }
 
 //--------------------------------------------------------------------------------------
@@ -126,6 +129,78 @@ FOdysseyAnimationEditorLayerStackTab::PlaybackFramesPerSecond() const
 
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Methods
+
+void
+FOdysseyAnimationEditorLayerStackTab::ExtendMenuFile( FToolMenuOwner iOwner, FName iMenuName )
+{
+    UToolMenu* menu = UToolMenus::Get()->FindMenu(*(iMenuName.ToString() + FString(".File")));
+
+    FToolMenuSection& section = menu->AddSection("OdysseyAnimation", LOCTEXT("OdysseyAnimation", "Odyssey Animation"), FToolMenuInsert("FileLoadAndSave", EToolMenuInsertType::After));
+    {
+        section.AddMenuEntry( FOdysseyAnimationEditorCommands::Get().ImportTextureSequence );
+    }
+}
+
+void           
+FOdysseyAnimationEditorLayerStackTab::ImportTextureSequence()
+{
+    UOdysseyLayerStack* layerStack = mEditor->LayerStack();
+    if ( !layerStack )
+        return;
+
+    FScopedTransaction ScopedTransaction(LOCTEXT("LayerStack", "Import Textures Sequence"));
+
+    FOpenAssetDialogConfig openAssetDialogConfig;
+    openAssetDialogConfig.DialogTitleOverride = LOCTEXT( "ImportTextureDialogTitle", "Import Textures Sequence" );
+    openAssetDialogConfig.DefaultPath = FPaths::GetPath(mEditor->Animation()->GetPathName() );
+    openAssetDialogConfig.bAllowMultipleSelection = true;
+    openAssetDialogConfig.AssetClassNames.Add( UTexture2D::StaticClass()->GetClassPathName() );
+
+    FContentBrowserModule& contentBrowserModule = FModuleManager::LoadModuleChecked<FContentBrowserModule>( "ContentBrowser" );
+    TArray < FAssetData > assetsData = contentBrowserModule.Get().CreateModalOpenAssetDialog( openAssetDialogConfig );
+    assetsData.Sort();
+
+    UOdysseyAnimation* animation = mEditor->Animation();
+
+    if ( assetsData.Num() > 0 )
+        layerStack->Modify();
+
+    UOdysseyLayer* layer = layerStack->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass());
+    UOdysseyAnimationLayerImageRaster* layerImageRaster = Cast<UOdysseyAnimationLayerImageRaster>(layer);
+    if ( !layerImageRaster )
+        return;
+    
+    FScopedSlowTask progressBar(assetsData.Num(), LOCTEXT("LookingForUnusedAssetsText", "Importing Texture Sequence"));
+    progressBar.MakeDialog();
+
+    TArray<TSharedPtr<FOdysseyAnimationCell>> cells;
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(animation->Format());
+    for( int i = 0; i < assetsData.Num(); i++ )
+    {
+        progressBar.EnterProgressFrame();
+        UTexture2D* openedTexture = static_cast<UTexture2D*>(assetsData[i].GetAsset());
+        TSharedPtr<::ULIS::FBlock> textureBlock = MakeShareable(NewBlockFromUTextureData(openedTexture, animation->Format()));
+        if (textureBlock->Width() == animation->Width() && textureBlock->Height() == animation->Height() && textureBlock->Format() == animation->Format())
+        {
+            TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(layerImageRaster, textureBlock);
+            cells.Add(cell);
+        }
+        else
+        {
+            TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(layerImageRaster, animation->Width(), animation->Height(), animation->Format());
+            TSharedPtr<::ULIS::FBlock> cellBlock = cell->GetRasterBlock()->GetBlock();
+            ::ULIS::FEvent eventConvertFormat = FULISEventBuilder().RetainBlock(cellBlock).RetainBlock(textureBlock).Build();
+            ctx.ConvertFormat(*textureBlock, *cellBlock, ::ULIS::FRectI::Auto, ::ULIS::FVec2I(0), ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventConvertFormat);
+            ctx.Finish(); //avoids having too much blocks in memory at the same time
+            cells.Add(cell);
+        }
+    }
+    
+    FOdysseyAnimationCellsMutator mutator(layerImageRaster);
+    mutator.Add(cells);
+    mutator.Commit();
+}
+
 
 void
 FOdysseyAnimationEditorLayerStackTab::CreateNewLayer()
@@ -171,28 +246,5 @@ FOdysseyAnimationEditorLayerStackTab::OnLayerAdded(UOdysseyLayer* iLayer)
         return;
     }
 }
-
-//DEBUG:
-FReply
-FOdysseyAnimationEditorLayerStackTab::OnAddFrameClicked()
-{
-    UOdysseyAnimationLayerStack* layerStack = LayerStack();
-    if (!layerStack)
-        return FReply::Unhandled();
-    
-    UOdysseyAnimationLayerImageRaster* layerRaster = Cast<UOdysseyAnimationLayerImageRaster>(layerStack->CurrentLayer.Get());
-
-    TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(layerRaster, Animation()->Width(), Animation()->Height(), Animation()->Format());
-
-#ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("Layer Image Raster", "Add Frame"));
-#endif
-    FOdysseyAnimationCellsMutator mutator(layerRaster);
-    mutator.Add({ cell });
-    mutator.Commit();
-
-    return FReply::Handled();
-}
-//DEBUG:
 
 #undef LOCTEXT_NAMESPACE
