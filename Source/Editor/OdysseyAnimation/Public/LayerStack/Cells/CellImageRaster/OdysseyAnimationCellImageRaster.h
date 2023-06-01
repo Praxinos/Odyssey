@@ -10,6 +10,7 @@ class ODYSSEYANIMATION_API FOdysseyAnimationCellImageRaster
     
 public:
     static TSharedPtr<FOdysseyAnimationCellImageRaster> Create(UObject* iOwner, int iWidth, int iHeight, ::ULIS::eFormat iFormat);
+    static TSharedPtr<FOdysseyAnimationCellImageRaster> Create(UObject* iOwner, TSharedPtr<::ULIS::FBlock> iBlock);
     static const FName& StaticType();
 
 public:
@@ -17,6 +18,7 @@ public:
     FOdysseyAnimationCellImageRaster(UObject* iOwner);
 
     void Init(int iWidth, int iHeight, ::ULIS::eFormat iFormat);
+    void Init(TSharedPtr<::ULIS::FBlock> iBlock);
     TSharedPtr<FOdysseyRasterBlock> GetRasterBlock() const;
 
 public:

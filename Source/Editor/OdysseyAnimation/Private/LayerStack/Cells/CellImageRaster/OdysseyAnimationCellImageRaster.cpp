@@ -18,6 +18,14 @@ FOdysseyAnimationCellImageRaster::Create(UObject* iOwner, int iWidth, int iHeigh
     return cell;
 }
 
+TSharedPtr<FOdysseyAnimationCellImageRaster>
+FOdysseyAnimationCellImageRaster::Create(UObject* iOwner, TSharedPtr<::ULIS::FBlock> iBlock)
+{
+    TSharedPtr<FOdysseyAnimationCellImageRaster> cell = MakeShared<FOdysseyAnimationCellImageRaster>(iOwner);
+    cell->Init(iBlock);
+    return cell;
+}
+
 TSharedPtr<FOdysseyRasterBlock>
 FOdysseyAnimationCellImageRaster::GetRasterBlock() const
 {
@@ -53,6 +61,16 @@ FOdysseyAnimationCellImageRaster::Init(int iWidth, int iHeight, ::ULIS::eFormat 
     ctx.Finish();
 
     mRasterBlock->SetBlock(block);
+
+    //InitDelegates();
+    InitAbilities();
+}
+
+void
+FOdysseyAnimationCellImageRaster::Init(TSharedPtr<::ULIS::FBlock> iBlock)
+{
+    mRasterBlock = MakeShared<FOdysseyRasterBlock>(mOwner);
+    mRasterBlock->SetBlock(iBlock);
 
     //InitDelegates();
     InitAbilities();
