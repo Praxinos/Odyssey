@@ -63,19 +63,19 @@ public:
 
 public:
     //Public API - Cells
-    UFUNCTION(BlueprintPure)
+    UFUNCTION(BlueprintPure, Category="Animation Layer")
     int GetCellsCount() const;
 
-    UFUNCTION(BlueprintPure)
+    UFUNCTION(BlueprintPure, Category = "Animation Layer")
     bool GetCellIndexAtFrame(int iFrameIndex, int& oCellIndex, int& oCellFrameIndex) const;
 
-    UFUNCTION(BlueprintPure)
+    UFUNCTION(BlueprintPure, Category = "Animation Layer")
     bool GetCellFrameRange(int iIndex, FInt32Range& oFrameRange) const;
     
-    UFUNCTION(BlueprintPure)
+    UFUNCTION(BlueprintPure, Category = "Animation Layer")
     bool GetCellLength(int iIndex, int& oLength) const;
     
-    UFUNCTION(BlueprintPure)
+    UFUNCTION(BlueprintPure, Category = "Animation Layer")
     bool GetCellType(int iIndex, FName& oType) const;
 
     /**
