@@ -5,6 +5,12 @@
 #include "ULISEventBuilder.h"
 #include "ULISLoaderModule.h"
 
+IOdysseyImageRenderer::IOdysseyImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects)
+    : mRenderType(iRenderType)
+    , mDefaultRects(iDefaultRects)
+{
+}
+
 TArray<::ULIS::FEvent>
 IOdysseyImageRenderer::RenderOverBlock(TSharedPtr<::ULIS::FBlock> ioBlock, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
 {
@@ -40,7 +46,7 @@ IOdysseyImageRenderer::RenderOverBlock(TSharedPtr<::ULIS::FBlock> ioBlock, const
 TArray<::ULIS::FEvent>
 IOdysseyImageRenderer::RenderOverBlock(TSharedPtr<::ULIS::FBlock> ioBlock, const TArray<::ULIS::FEvent>& iWaitList)
 {
-    return RenderOverBlock(ioBlock, GetRects(), iWaitList);
+    return RenderOverBlock(ioBlock, mDefaultRects, iWaitList);
 }
 
 TArray<::ULIS::FEvent>
@@ -72,7 +78,7 @@ IOdysseyImageRenderer::RenderInBlock(TSharedPtr<::ULIS::FBlock> ioBlock, const :
 TArray<::ULIS::FEvent>
 IOdysseyImageRenderer::RenderInBlock(TSharedPtr<::ULIS::FBlock> ioBlock, const TArray<::ULIS::FEvent>& iWaitList)
 {
-    return RenderInBlock(ioBlock, GetRects(), iWaitList);
+    return RenderInBlock(ioBlock, mDefaultRects, iWaitList);
 }
 
 TSharedPtr<::ULIS::FBlock>
@@ -85,6 +91,12 @@ IOdysseyImageRenderer::RenderInNewBlock(::ULIS::eFormat iFormat, const ::ULIS::F
     ctx.Clear(*block, block->Rect(), ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventClearBlock);
     oEvents = RenderInBlock(block, iRect, ::ULIS::FVec2I(0), {eventClearBlock});
     return block;
+}
+
+IOdysseyImageRenderer::eRenderType
+IOdysseyImageRenderer::GetRenderType() const
+{
+    return mRenderType;
 }
 
 void

@@ -41,7 +41,8 @@ namespace UnrealBuildTool.Rules
 					"RenderCore",
 					"RHI",
 					"UnrealEd",
-                    "OdysseyAnimationPlayer"
+                    "OdysseyAnimationPlayer",
+					"OdysseyImaging"
 				}
 				);
 

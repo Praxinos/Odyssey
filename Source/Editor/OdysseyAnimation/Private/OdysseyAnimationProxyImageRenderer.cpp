@@ -6,26 +6,23 @@
 #include "OdysseyAnimationProxyImageRenderer.h"
 
 
-FOdysseyAnimationProxyImageRenderer::FOdysseyAnimationProxyImageRenderer(UOdysseyAnimation* iAnimation, int iFrameIndex)
-    : mAnimation(iAnimation)
-    , mRect(::ULIS::FRectI::FromXYWH(0, 0, iAnimation->Width(), iAnimation->Height()))
+FOdysseyAnimationProxyImageRenderer::FOdysseyAnimationProxyImageRenderer(UOdysseyAnimation* iAnimation, int iFrameIndex, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI> iDefaultRects)
+    : IOdysseyImageRenderer(iRenderType, iDefaultRects)
+    , mAnimation(iAnimation)
     , mProxy(iAnimation->GetProxy())
     , mFrameIndex(iFrameIndex)
     , mAnimationRenderer(nullptr)
 {
     TSharedPtr<IOdysseyAnimationImageRenderingAbility> animationAbility = mAnimation->GetAbility<IOdysseyAnimationImageRenderingAbility>();
-    mAnimationRenderer = MakeShared<FOdysseyAnimationImageRenderer>(mAnimation, iFrameIndex);
-}
-
-TArray<::ULIS::FRectI>
-FOdysseyAnimationProxyImageRenderer::GetRects() const
-{
-    return {mRect};
+    mAnimationRenderer = MakeShared<FOdysseyAnimationImageRenderer>(mAnimation, iFrameIndex, iRenderType, iDefaultRects);
 }
 
 TArray<::ULIS::FEvent>
 FOdysseyAnimationProxyImageRenderer::RenderInBlock(TSharedPtr<::ULIS::FBlock> ioBlock, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
 {
+    if (GetRenderType() != IOdysseyImageRenderer::eRenderType::Render)
+        return mAnimationRenderer->RenderInBlock(ioBlock, iRects, iPos, iWaitList);
+
     TSharedPtr<::ULIS::FBlock> block = mProxy->GetBlock(mFrameIndex);
     if ( !block )
         return mAnimationRenderer->RenderInBlock(ioBlock, iRects, iPos, iWaitList);

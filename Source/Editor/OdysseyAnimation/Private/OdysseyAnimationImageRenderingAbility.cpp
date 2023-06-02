@@ -10,13 +10,13 @@ FOdysseyAnimationImageRenderingAbility::FOdysseyAnimationImageRenderingAbility(U
 }
 
 TSharedPtr<IOdysseyImageRenderer>
-FOdysseyAnimationImageRenderingAbility::BuildRenderer(int iFrame) const
+FOdysseyAnimationImageRenderingAbility::BuildRenderer(int iFrame, IOdysseyImageRenderer::eRenderType iRenderType) const
 {
-    return MakeShared<FOdysseyAnimationProxyImageRenderer>(mAnimation, iFrame);
+    return MakeShared<FOdysseyAnimationProxyImageRenderer>(mAnimation, iFrame, iRenderType, GetRects());
 }
 
 TArray<FGuid>
-FOdysseyAnimationImageRenderingAbility::GetComposition(int iFrameIndex) const
+FOdysseyAnimationImageRenderingAbility::GetComposition(int iFrameIndex, IOdysseyImageRenderer::eRenderType iRenderType) const
 {
     TArray<FGuid> idComposition = { GetId() };
     if (!mAnimation)
@@ -30,13 +30,13 @@ FOdysseyAnimationImageRenderingAbility::GetComposition(int iFrameIndex) const
     if (!layerStackAbility)
         return idComposition;
 
-    idComposition.Append(layerStackAbility->GetComposition(iFrameIndex));
+    idComposition.Append(layerStackAbility->GetComposition(iFrameIndex, iRenderType));
 
     return idComposition;
 }
 
 TSharedPtr<IOdysseyHandle>
-FOdysseyAnimationImageRenderingAbility::Preload(int iFrame) const
+FOdysseyAnimationImageRenderingAbility::Preload(int iFrame, IOdysseyImageRenderer::eRenderType iRenderType) const
 {
     if (!mAnimation)
         return nullptr;
@@ -49,12 +49,26 @@ FOdysseyAnimationImageRenderingAbility::Preload(int iFrame) const
     if (!layerStackAbility)
         return nullptr;
 
-    TArray<TSharedPtr<IOdysseyHandle>> handles =
+
+    TArray<TSharedPtr<IOdysseyHandle>> handles = {};
+
+    if (iRenderType == IOdysseyImageRenderer::eRenderType::Editor)
     {
-        mAnimation->GetProxy()->Preload(iFrame),
-        layerStackAbility->Preload(iFrame)
-    };
-    
+        handles.Add(layerStackAbility->Preload(iFrame, iRenderType));
+    }
+    else if (iRenderType == IOdysseyImageRenderer::eRenderType::Render)
+    {
+        handles.Add(mAnimation->GetProxy()->Preload(iFrame));
+    }
 
     return MakeShared<FOdysseyHandleContainer>(handles);
+}
+
+TArray<::ULIS::FRectI>
+FOdysseyAnimationImageRenderingAbility::GetRects() const
+{
+    if (!mAnimation)
+        return {};
+
+    return { ::ULIS::FRectI::FromXYWH(0, 0, mAnimation->Width(), mAnimation->Height()) };
 }

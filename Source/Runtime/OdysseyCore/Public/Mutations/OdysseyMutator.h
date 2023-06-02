@@ -3,9 +3,20 @@
 
 #pragma once
 
-#include "Mutations/OdysseyMutation.h"
-
 class FOdysseyRootMutation;
+
+class ODYSSEYCORE_API IOdysseyMutation
+{
+public:
+    virtual ~IOdysseyMutation() {}
+
+public:
+    //Applies the mutation
+    virtual void Apply() = 0;
+
+    //Reverts the mutation (Undo)
+    virtual void Revert() = 0;
+};
 
 class ODYSSEYCORE_API FOdysseyMutator
 {
@@ -14,7 +25,7 @@ public:
     ~FOdysseyMutator();
 
     //Constructor
-    FOdysseyMutator(UObject* iObject, const FString& iName);
+    FOdysseyMutator(UObject* iObject, const FString& iName, bool iGenerateUndo = true);
 
 public:
     //Getters
@@ -24,12 +35,20 @@ public:
     //Setters
     void AddAndApplyMutation(TSharedPtr<IOdysseyMutation> iMutation);
     
+    //Defines the current state as an intermediate state (non commited)
+    //Allows for UI to change interactively while changing values
+    void Change();
+
+    //Commits the current state as the definitive value
     void Commit();
+
+    //Aborts any change to go back to the original state
     void Abort();
 
 private:
     UObject* mObject;
     TSharedPtr<FOdysseyRootMutation> mRootMutation;
+    bool mGenerateUndo;
 };
 
 class ODYSSEYCORE_API FOdysseyRootMutation
@@ -39,14 +58,10 @@ public:
     FOdysseyRootMutation(const FString& iName);
 
 public:
-    FSimpleDelegate& OnMutated();
+    FSimpleDelegate& OnChanged();
+    FSimpleDelegate& OnCommited();
 
 public:
-    static const FGuid& StaticID();
-
-    //A unique identifier for the mutation type
-    virtual const FGuid& GetID() override;
-
     //Applies the mutation
     virtual void Apply() override;
 
@@ -63,5 +78,41 @@ public:
 public:
     FString mName;
     TArray<TSharedPtr<IOdysseyMutation>> mMutations;
-    FSimpleDelegate mOnMutated;
+    FSimpleDelegate mOnChanged;
+    FSimpleDelegate mOnCommited;
+};
+
+template <typename T>
+class FOdysseyMutation
+    : public IOdysseyMutation
+{
+public:
+    DECLARE_DELEGATE_OneParam(FMutationDelegate, TSharedPtr<T>)
+
+public:
+    virtual ~FOdysseyMutation() {}
+    FOdysseyMutation(TSharedPtr<T> iData, FMutationDelegate iApply, FMutationDelegate iRevert)
+        : mData(iData)
+        , mApply(iApply)
+        , mRevert(iRevert)
+    {
+    }
+
+public:
+    //Applies the mutation
+    virtual void Apply() override
+    {
+        mApply.ExecuteIfBound(mData);
+    }
+
+    //Reverts the mutation (Undo)
+    virtual void Revert() override
+    {
+        mRevert.ExecuteIfBound(mData);
+    }
+
+private:
+    TSharedPtr<T> mData;
+    FMutationDelegate mApply;
+    FMutationDelegate mRevert;
 };

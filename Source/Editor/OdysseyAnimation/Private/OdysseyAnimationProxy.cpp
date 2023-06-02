@@ -202,7 +202,7 @@ FOdysseyAnimationProxy::OnImageRenderingCompositionPreChanged(const FGuid& iId)
         int endFrame = mAnimationRange.GetUpperBound().IsInclusive() ? mAnimationRange.GetUpperBoundValue() : mAnimationRange.GetUpperBoundValue() - 1;
         for ( int i = startFrame; i <= endFrame; i++ )
         {
-            TArray<FGuid> composition = animationAbility->GetComposition(i);
+            TArray<FGuid> composition = animationAbility->GetComposition(i, IOdysseyImageRenderer::eRenderType::Render);
             const TSharedPtr<FBlockData>* blockDataPtr = mFramesToBlockData.Find(i);
             TSharedPtr<FBlockData> blockData = blockDataPtr ? *blockDataPtr : nullptr;
             if ( blockData )
@@ -355,7 +355,8 @@ FBlockData::AppendInvalidRects(const TArray<::ULIS::FRectI>& iInvalidRects)
 TSharedPtr<IOdysseyImageRenderer>
 FBlockData::BuildRenderer()
 {
-    return MakeShared<FOdysseyAnimationImageRenderer>(mAnimation, mFrameIndexes.Array()[0]);
+    TArray<::ULIS::FRectI> rects = { ::ULIS::FRectI::FromXYWH(0, 0, mAnimation->Width(), mAnimation->Height()) };
+    return MakeShared<FOdysseyAnimationImageRenderer>(mAnimation, mFrameIndexes.Array()[0], IOdysseyImageRenderer::eRenderType::Render, rects );
 }
 
 const TSet<int>&

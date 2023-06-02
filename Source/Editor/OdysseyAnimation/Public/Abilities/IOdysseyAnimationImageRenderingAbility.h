@@ -55,10 +55,12 @@ public:
     static FOnCompositionChanged& OnCompositionCommited();
 
 public:
-    static void Changed(const FGuid& iId, const TArray<::ULIS::FRectI>& iRects);
-    static void Commited(const FGuid& iId, const TArray<::ULIS::FRectI>& iRects);
-    static void CompositionChanged(const FGuid& iId);
-    static void CompositionCommited(const FGuid& iId);
+    void Changed(); //Changes the whole rect
+    void Changed(const TArray<::ULIS::FRectI>& iRects);
+    void Commited(); //Changes the whole rect
+    void Commited(const TArray<::ULIS::FRectI>& iRects);
+    void CompositionChanged();
+    void CompositionCommited();
 
 public:
     IOdysseyAnimationImageRenderingAbility();
@@ -70,14 +72,21 @@ public:
      * For example : if you delete a layer, you should create a new renderer
      * but if you are just drawing on the layer, you can reuse the renderer
      */
-    virtual TSharedPtr<IOdysseyImageRenderer> BuildRenderer(int iFrame) const = 0;
+    virtual TSharedPtr<IOdysseyImageRenderer> BuildRenderer(int iFrame, IOdysseyImageRenderer::eRenderType iRenderType) const = 0;
+    
+    /**
+     * @brief Returns the full rect that can be rendered
+     * 
+     * @return ::ULIS::FRect 
+     */
+    virtual TArray<::ULIS::FRectI> GetRects() const = 0;
 
     /**
      * @brief Returns the full Render Image Id, eventually composed of underlying ids
      *
      * @return const FGuid&
      */
-    virtual TArray<FGuid> GetComposition(int iFrameIndex) const = 0;
+    virtual TArray<FGuid> GetComposition(int iFrameIndex, IOdysseyImageRenderer::eRenderType iRenderType) const = 0;
 
     /**
      * @brief Returns the image rendering id of this rendering ability, without underlying ids
@@ -91,7 +100,7 @@ public:
      *
      * @param iFrame
      */
-    virtual TSharedPtr<IOdysseyHandle> Preload(int iFrame) const;
+    virtual TSharedPtr<IOdysseyHandle> Preload(int iFrame, IOdysseyImageRenderer::eRenderType iRenderType) const;
 
 public:
     FGuid mId; //TODO: Move to somewhere it can be serialized

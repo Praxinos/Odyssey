@@ -5,13 +5,11 @@
 
 #include "OdysseyImageRenderer.h"
 
-class FOdysseyAnimationProxy;
-
-class ODYSSEYANIMATION_API FOdysseyAnimationProxyImageRenderer
+class ODYSSEYANIMATION_API FOdysseyAnimationLightTableImageRenderer
     : public IOdysseyImageRenderer
 {
 public:
-    FOdysseyAnimationProxyImageRenderer(UOdysseyAnimation* iAnimation, int iFrameIndex, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI> iDefaultRects);
+    FOdysseyAnimationLightTableImageRenderer(TSharedPtr<FOdysseyAnimationLightTable> iLightTable, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects);
 
 public:
     /**
@@ -27,8 +25,12 @@ public:
     virtual TArray<::ULIS::FEvent> RenderInBlock(TSharedPtr<::ULIS::FBlock> ioBlock, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList) override;
 
 public:
-    UOdysseyAnimation* mAnimation;
-    TSharedPtr<FOdysseyAnimationProxy> mProxy;
-    int mFrameIndex;
-    TSharedPtr<IOdysseyImageRenderer> mAnimationRenderer;
+    struct FFrameData
+    {
+        float mOpacity;
+        FOdysseyAnimationLightTable::eFrameDisplayMode mDisplayMode;
+        ::ULIS::FColor mColor;
+        TSharedPtr<IOdysseyImageRenderer> mRenderer;
+    };
+    TArray<FFrameData> mFramesData;
 };

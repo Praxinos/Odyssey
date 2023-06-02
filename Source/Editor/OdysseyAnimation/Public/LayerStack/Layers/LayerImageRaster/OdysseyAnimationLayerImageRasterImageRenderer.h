@@ -9,16 +9,9 @@ class ODYSSEYANIMATION_API FOdysseyAnimationLayerImageRasterImageRenderer
     : public IOdysseyImageRenderer
 {
 public:
-    FOdysseyAnimationLayerImageRasterImageRenderer(UOdysseyAnimationLayerImageRaster* iLayer, int iFrame);
+    FOdysseyAnimationLayerImageRasterImageRenderer(UOdysseyAnimationLayerImageRaster* iLayer, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects);
 
 public:
-    /**
-     * @brief Returns the full rect that can be rendered
-     * 
-     * @return ::ULIS::FRect 
-     */
-    virtual TArray<::ULIS::FRectI> GetRects() const override;
-
     /**
      * @brief Renders over (by blending for example) the given block
      * By default does the same thing as RenderInBlock
@@ -47,4 +40,8 @@ public:
     TSharedPtr<IOdysseyImageRenderer> mCellRenderer;
     ::ULIS::eBlendMode mBlendMode;
     float mOpacity;
+
+    bool mIsLightTableActivated;
+    EOdysseyLightTableDisplayPosition mLightTableDisplayPosition;
+    TSharedPtr<IOdysseyImageRenderer> mLightTableRenderer;
 };

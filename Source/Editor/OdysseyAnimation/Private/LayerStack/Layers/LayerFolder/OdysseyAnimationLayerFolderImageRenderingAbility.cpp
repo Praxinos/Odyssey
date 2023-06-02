@@ -10,7 +10,7 @@ FOdysseyAnimationLayerFolderImageRenderingAbility::FOdysseyAnimationLayerFolderI
 }
 
 TSharedPtr<IOdysseyImageRenderer>
-FOdysseyAnimationLayerFolderImageRenderingAbility::BuildRenderer(int iFrame) const
+FOdysseyAnimationLayerFolderImageRenderingAbility::BuildRenderer(int iFrame, IOdysseyImageRenderer::eRenderType iRenderType) const
 {
-    return MakeShared<FOdysseyAnimationLayerFolderImageRenderer>(mLayerFolder, iFrame);
+    return MakeShared<FOdysseyAnimationLayerFolderImageRenderer>(mLayerFolder, iFrame, iRenderType, GetRects());
 }

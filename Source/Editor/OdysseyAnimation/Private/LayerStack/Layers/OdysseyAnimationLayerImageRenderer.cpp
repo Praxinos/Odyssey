@@ -6,7 +6,8 @@
 #include "LayerStack/Layers/OdysseyAnimationLayerImageRenderer.h"
 #include "OdysseyRectUtils.h"
 
-FOdysseyAnimationLayerImageRenderer::FOdysseyAnimationLayerImageRenderer(UOdysseyAnimationLayer* iLayer, int iFrame)
+FOdysseyAnimationLayerImageRenderer::FOdysseyAnimationLayerImageRenderer(UOdysseyAnimationLayer* iLayer, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects)
+    : IOdysseyImageRenderer(iRenderType, iDefaultRects)
 {    
     const TArray<UOdysseyLayer*>& children = iLayer->GetChildren();
     for (int i = children.Num() - 1; i >= 0 ; i--)
@@ -22,10 +23,10 @@ FOdysseyAnimationLayerImageRenderer::FOdysseyAnimationLayerImageRenderer(UOdysse
         if (!layerAbility)
             continue;
 
-        mChildrenRenderers.Add(layerAbility->BuildRenderer(iFrame));
+        mChildrenRenderers.Add(layerAbility->BuildRenderer(iFrame, iRenderType));
     }
 }
-
+/*
 TArray<::ULIS::FRectI>
 FOdysseyAnimationLayerImageRenderer::GetRects() const
 {
@@ -36,6 +37,7 @@ FOdysseyAnimationLayerImageRenderer::GetRects() const
     }
     return OdysseyRectUtils::MergeRects(rects);
 }
+*/
 
 TArray<::ULIS::FEvent>
 FOdysseyAnimationLayerImageRenderer::RenderInBlock(TSharedPtr<::ULIS::FBlock> ioBlock, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)

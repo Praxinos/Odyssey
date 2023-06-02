@@ -5,11 +5,12 @@
 
 #include "Abilities/IOdysseyAnimationImageRenderingAbility.h"
 
-class ODYSSEYANIMATION_API FOdysseyAnimationLayerImageRasterImageRenderingAbility
+class ODYSSEYANIMATION_API FOdysseyAnimationLightTableImageRenderingAbility
     : public IOdysseyAnimationImageRenderingAbility
 {
 public:
-    FOdysseyAnimationLayerImageRasterImageRenderingAbility(UOdysseyAnimationLayerImageRaster* iLayerImageRaster);
+    virtual ~FOdysseyAnimationLightTableImageRenderingAbility() {}
+    FOdysseyAnimationLightTableImageRenderingAbility(TSharedPtr<FOdysseyAnimationLightTable> iLightTable);
 
 public:
     /**
@@ -28,13 +29,6 @@ public:
      * @return const FGuid& 
      */
     virtual TArray<FGuid> GetComposition(int iFrameIndex, IOdysseyImageRenderer::eRenderType iRenderType) const override;
-    
-    /**
-     * @brief Preloads in memory everything needed to make RenderImage() as fast as possible
-     * 
-     * @param iFrame 
-     */
-    virtual TSharedPtr<IOdysseyHandle> Preload(int iFrame, IOdysseyImageRenderer::eRenderType iRenderType) const override;
 
     /**
      * @brief Returns the full rect that can be rendered
@@ -43,6 +37,13 @@ public:
      */
     virtual TArray<::ULIS::FRectI> GetRects() const override;
 
+    /**
+     * @brief Preloads in memory everything needed to make RenderImage() as fast as possible
+     * 
+     * @param iFrame 
+     */
+    virtual TSharedPtr<IOdysseyHandle> Preload(int iFrame, IOdysseyImageRenderer::eRenderType iRenderType) const override;
+
 private:
-    UOdysseyAnimationLayerImageRaster* mLayerImageRaster;
+    TWeakPtr<FOdysseyAnimationLightTable> mLightTable;
 };

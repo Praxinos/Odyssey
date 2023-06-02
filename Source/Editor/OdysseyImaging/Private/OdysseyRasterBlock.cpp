@@ -245,6 +245,7 @@ FOdysseyRasterBlock::GetBlock()
 
     //Load Block from DDC
     block = MakeShared<::ULIS::FBlock>(Width, Height, (::ULIS::eFormat)Format);
+    //mDebugBlock = block;
 
     FBlockCleanupInfo* infos = new FBlockCleanupInfo();
     infos->Id = Id;
@@ -421,10 +422,11 @@ FOdysseyRasterBlock::SaveBlockToCache(const ::ULIS::FBlock& iBlock, const FStrin
     );
 
     FSharedBuffer sharedBuffer = FSharedBuffer::MakeView(iBlock.Bits(), iBlock.BytesTotal());
-    UE::DerivedData::FValue derivedDataValue = UE::DerivedData::FValue::Compress(sharedBuffer);
+    //UE::DerivedData::FValue derivedDataValue = UE::DerivedData::FValue::Compress(sharedBuffer);
+    UE::DerivedData::FValue derivedDataValue(FCompressedBuffer::Compress(sharedBuffer, ECompressedBufferCompressor::Selkie, ECompressedBufferCompressionLevel::Normal, 0));
 
     //Store the tile in cache
-    UE::DerivedData::FRequestOwner putOwner(UE::DerivedData::EPriority::Lowest);
+    UE::DerivedData::FRequestOwner putOwner(UE::DerivedData::EPriority::Highest);
     UE::DerivedData::GetCache().PutValue(
         {
             {
@@ -444,12 +446,21 @@ FOdysseyRasterBlock::LoadBlockFromCache(TSharedRef<::ULIS::FBlock, ESPMode::Thre
 {
     bool success = false;
 
+
+    double start = FPlatformTime::Seconds();
+
+    // put code you want to time here.
+
     //Load Block from DDC
     FString CacheKey = FDerivedDataCacheInterface::BuildCacheKey(
 		FOdysseyRasterBlock_CACHE_NAME,
         FOdysseyRasterBlock_CACHE_VERSION, //a GUID identifying the version of the key
 		iId
 	);
+
+    double end = FPlatformTime::Seconds();
+    UE_LOG(LogTemp, Warning, TEXT("BuildCacheKey %f seconds."), end - start);
+    start = FPlatformTime::Seconds();
 
     UE::DerivedData::FRequestOwner getOwner(UE::DerivedData::EPriority::Blocking);
     UE::DerivedData::GetCache().GetValue(
@@ -461,17 +472,26 @@ FOdysseyRasterBlock::LoadBlockFromCache(TSharedRef<::ULIS::FBlock, ESPMode::Thre
             }
         },
 		getOwner,
-		[&, this](UE::DerivedData::FCacheGetValueResponse&& iResponse)
+		[&, this, start](UE::DerivedData::FCacheGetValueResponse&& iResponse)
         {
+            double end2 = FPlatformTime::Seconds();
+            UE_LOG(LogTemp, Warning, TEXT("GetCache().GetValue() %f seconds."), end2 - start);
             if (iResponse.Status != UE::DerivedData::EStatus::Ok)
                 return;
     
             if ( !iResponse.Value.HasData() || iResponse.Value.GetRawSize() == 1) //assume the block is empty, see RemoveValueFromCache()
                 return;
 
-            FSharedBuffer rawData = iResponse.Value.GetData().Decompress();
+            //FSharedBuffer rawData = iResponse.Value.GetData().Decompress();
+
             FUniqueBuffer uniqueBuffer = FUniqueBuffer::MakeView(oBlock->Bits(), oBlock->BytesTotal());
-            uniqueBuffer.GetView().CopyFrom(rawData);
+            double start2 = FPlatformTime::Seconds();
+            if ( !iResponse.Value.GetData().TryDecompressTo(uniqueBuffer) )
+                return;
+
+            end2 = FPlatformTime::Seconds();
+            UE_LOG(LogTemp, Warning, TEXT("TryDecompressTo() %f seconds."), end2 - start2);
+            //uniqueBuffer.GetView().CopyFrom(rawData);
             success = true;
         }
     );

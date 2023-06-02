@@ -52,7 +52,7 @@ FOdysseyAnimationEditor::InitData(UObject* iEditedObject)
 	mAnimation = Cast<UOdysseyAnimation>(iEditedObject);
 
 	TSharedPtr<IOdysseyAnimationImageRenderingAbility> imageRenderAbility = mAnimation->GetAbility<IOdysseyAnimationImageRenderingAbility>();
-	mImageRenderingComposition = imageRenderAbility->GetComposition(mAnimation->CurrentFrame);
+	mImageRenderingComposition = imageRenderAbility->GetComposition(mAnimation->CurrentFrame, IOdysseyImageRenderer::eRenderType::Render);
 	mPlaybackFramesPerSecond = mAnimation->GetFramesPerSecond();
 
 	//Configure a Media player and media texture to be able to display and play the animation
@@ -60,6 +60,7 @@ FOdysseyAnimationEditor::InitData(UObject* iEditedObject)
     mTexture = NewObject<UOdysseyAnimationTexture>();
 
 	mPlayer->SetAnimation(mAnimation);
+	mPlayer->SetRenderType(IOdysseyImageRenderer::eRenderType::Editor);
 	mTexture->SetPlayer(mPlayer);
 	mTexture->UpdateResource();
 
@@ -224,7 +225,7 @@ void
 FOdysseyAnimationEditor::OnImageRenderingCompositionCommited(const FGuid& iFrameId)
 {
 	TSharedPtr<IOdysseyAnimationImageRenderingAbility> imageRenderAbility = mAnimation->GetAbility<IOdysseyAnimationImageRenderingAbility>();
-	TArray<FGuid> imageRenderingComposition = imageRenderAbility->GetComposition(mAnimation->CurrentFrame);
+	TArray<FGuid> imageRenderingComposition = imageRenderAbility->GetComposition(mAnimation->CurrentFrame, IOdysseyImageRenderer::eRenderType::Render);
 	if ( imageRenderingComposition == mImageRenderingComposition )
 		return;
 
@@ -245,7 +246,7 @@ FOdysseyAnimationEditor::OnCurrentFrameChanged(UOdysseyAnimation* iAnimation)
 
 	//Preload the new current frame for edition
 	TSharedPtr<IOdysseyAnimationImageRenderingAbility> imageRenderAbility = mAnimation->GetAbility<IOdysseyAnimationImageRenderingAbility>();
-	mImageRenderingComposition = imageRenderAbility->GetComposition(mAnimation->CurrentFrame);
+	mImageRenderingComposition = imageRenderAbility->GetComposition(mAnimation->CurrentFrame, IOdysseyImageRenderer::eRenderType::Render);
 
 	//Display the new current frame
 	mPlayer->SeekToFrame(mAnimation->CurrentFrame);

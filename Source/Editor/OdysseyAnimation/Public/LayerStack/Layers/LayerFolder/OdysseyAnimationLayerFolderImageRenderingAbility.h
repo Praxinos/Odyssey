@@ -18,7 +18,7 @@ public:
      * For example : if you delete a layer, you should create a new renderer
      * but if you are just drawing on the layer, you can reuse the renderer
      */
-    virtual TSharedPtr<IOdysseyImageRenderer> BuildRenderer(int iFrame) const override;
+    virtual TSharedPtr<IOdysseyImageRenderer> BuildRenderer(int iFrame, IOdysseyImageRenderer::eRenderType iRenderType) const override;
     
 private:
     UOdysseyAnimationLayerFolder* mLayerFolder;

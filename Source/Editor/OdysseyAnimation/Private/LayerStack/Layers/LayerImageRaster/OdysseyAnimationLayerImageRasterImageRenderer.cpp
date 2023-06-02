@@ -4,11 +4,15 @@
 #pragma once
 
 #include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRasterImageRenderer.h"
+#include "LayerStack/LightTable/OdysseyAnimationLightTableImageRenderer.h"
 
-FOdysseyAnimationLayerImageRasterImageRenderer::FOdysseyAnimationLayerImageRasterImageRenderer(UOdysseyAnimationLayerImageRaster* iLayer, int iFrame)
-    : mCellRenderer(nullptr)
+FOdysseyAnimationLayerImageRasterImageRenderer::FOdysseyAnimationLayerImageRasterImageRenderer(UOdysseyAnimationLayerImageRaster* iLayer, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects)
+    : IOdysseyImageRenderer(iRenderType, iDefaultRects)
+    , mCellRenderer(nullptr)
     , mBlendMode(::ULIS::eBlendMode(iLayer->BlendMode))
     , mOpacity(iLayer->Opacity) 
+    , mIsLightTableActivated(iLayer->bIsLightTableActivated)
+    , mLightTableDisplayPosition(iLayer->GetLightTable()->GetDisplayPosition())
 {    
     int cellIndex = INDEX_NONE;
     int cellFrameIndex = INDEX_NONE;
@@ -23,16 +27,10 @@ FOdysseyAnimationLayerImageRasterImageRenderer::FOdysseyAnimationLayerImageRaste
     if (!cellAbility)
         return;
 
-    mCellRenderer = cellAbility->BuildRenderer(cellFrameIndex);
-}
+    mCellRenderer = cellAbility->BuildRenderer(cellFrameIndex, iRenderType);
 
-TArray<::ULIS::FRectI>
-FOdysseyAnimationLayerImageRasterImageRenderer::GetRects() const
-{
-    if (!mCellRenderer)
-        return {};
-
-    return mCellRenderer->GetRects();
+    if ( iRenderType == IOdysseyImageRenderer::eRenderType::Editor && mIsLightTableActivated )
+        mLightTableRenderer = MakeShared<FOdysseyAnimationLightTableImageRenderer>(iLayer->GetLightTable(), iFrame, iRenderType, iDefaultRects);
 }
 
 TArray<::ULIS::FEvent>
@@ -40,8 +38,17 @@ FOdysseyAnimationLayerImageRasterImageRenderer::RenderInBlock(TSharedPtr<::ULIS:
 {
     if (!mCellRenderer)
         return iWaitList;
+        
+    TArray<::ULIS::FEvent> events = iWaitList;
+    if ( GetRenderType() == IOdysseyImageRenderer::eRenderType::Editor && mIsLightTableActivated && mLightTableDisplayPosition == EOdysseyLightTableDisplayPosition::UnderLayer )
+        events = mLightTableRenderer->RenderOverBlock(ioBlock, iRects, iPos, events);
 
-    return mCellRenderer->RenderInBlock(ioBlock, iRects, iPos, iWaitList);
+    events = mCellRenderer->RenderInBlock(ioBlock, iRects, iPos, events);
+
+    if ( GetRenderType() == IOdysseyImageRenderer::eRenderType::Editor && mIsLightTableActivated && mLightTableDisplayPosition == EOdysseyLightTableDisplayPosition::AboveLayer )
+        events = mLightTableRenderer->RenderOverBlock(ioBlock, iRects, iPos, events);
+
+    return events;
 }
 
 TArray<::ULIS::FEvent>
@@ -52,6 +59,10 @@ FOdysseyAnimationLayerImageRasterImageRenderer::RenderOverBlock(TSharedPtr<::ULI
 
     if (!ioBlock)
         return iWaitList;
+
+    TArray<::ULIS::FEvent> lightTableEvents = iWaitList;
+    if ( GetRenderType() == IOdysseyImageRenderer::eRenderType::Editor && mIsLightTableActivated && mLightTableDisplayPosition == EOdysseyLightTableDisplayPosition::UnderLayer )
+        lightTableEvents = mLightTableRenderer->RenderOverBlock(ioBlock, iRects, iPos, iWaitList);
 
     ::ULIS::eFormat format = ioBlock->Format();
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
@@ -65,7 +76,7 @@ FOdysseyAnimationLayerImageRasterImageRenderer::RenderOverBlock(TSharedPtr<::ULI
         if(!rasterBlock)
             continue;
 
-        rasterBlockEvent.Append(iWaitList);
+        rasterBlockEvent.Append(lightTableEvents);
 
         TArray<::ULIS::FEvent> eventConvertAndExecute = ULISUtils::ConvertAndExecute(ioBlock, rasterBlock->Format(), rasterBlock->Rect(), iPos[i], rasterBlockEvent,
             [this, &rasterBlock, &ctx](TSharedPtr<::ULIS::FBlock> ioDest, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList) -> TArray<::ULIS::FEvent>
@@ -96,6 +107,9 @@ FOdysseyAnimationLayerImageRasterImageRenderer::RenderOverBlock(TSharedPtr<::ULI
     }
 
     ctx.Flush();
+
+    if ( GetRenderType() == IOdysseyImageRenderer::eRenderType::Editor && mIsLightTableActivated && mLightTableDisplayPosition == EOdysseyLightTableDisplayPosition::AboveLayer )
+        events = mLightTableRenderer->RenderOverBlock(ioBlock, iRects, iPos, events);
 
     return events;
 }

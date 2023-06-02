@@ -256,7 +256,7 @@ FOdysseyAnimationMediaSamples::Update(int iFrameIndex, int64 iSequenceIndex)
     mCurrentFrameIndex = iFrameIndex;
 
 	TSharedPtr<IOdysseyAnimationImageRenderingAbility> imageRenderAbility = mAnimation->GetAbility<IOdysseyAnimationImageRenderingAbility>();
-	TArray<FGuid> imageRenderingComposition = imageRenderAbility->GetComposition(mCurrentFrameIndex);
+	TArray<FGuid> imageRenderingComposition = imageRenderAbility->GetComposition(mCurrentFrameIndex, IOdysseyImageRenderer::eRenderType::Render);
 
     TRange<FTimespan> timeRange = mAnimation->GetFrameTimeRange(mCurrentFrameIndex);
 	FMediaTimeStamp frameTime = FMediaTimeStamp(timeRange.GetLowerBoundValue(), iSequenceIndex);
@@ -273,7 +273,7 @@ FOdysseyAnimationMediaSamples::Update(int iFrameIndex, int64 iSequenceIndex)
 	::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(mAnimation->Format());
 	::ULIS::FRectI rect = ::ULIS::FRectI::FromXYWH(0, 0, mAnimation->Width(), mAnimation->Height());
 	TArray<::ULIS::FEvent> events;
-	TSharedPtr<::ULIS::FBlock> block = imageRenderAbility->BuildRenderer(mCurrentFrameIndex)->RenderInNewBlock(mAnimation->Format(), rect, events);
+	TSharedPtr<::ULIS::FBlock> block = imageRenderAbility->BuildRenderer(mCurrentFrameIndex, IOdysseyImageRenderer::eRenderType::Render)->RenderInNewBlock(mAnimation->Format(), rect, events);
 	ctx.Finish();
 
 	CopyBlockToTexture(block, { rect });
@@ -369,7 +369,7 @@ FOdysseyAnimationMediaSamples::OnImageRenderingCompositionChanged(const FGuid& i
 		mInvalidRects = { ::ULIS::FRectI::FromXYWH( 0, 0, mAnimation->Width(), mAnimation->Height() ) };
 
 		TSharedPtr<IOdysseyAnimationImageRenderingAbility> imageRenderAbility = mAnimation->GetAbility<IOdysseyAnimationImageRenderingAbility>();
-		TArray<FGuid> imageRenderingComposition = imageRenderAbility->GetComposition(mCurrentFrameIndex);
+		TArray<FGuid> imageRenderingComposition = imageRenderAbility->GetComposition(mCurrentFrameIndex, IOdysseyImageRenderer::eRenderType::Render);
 		if ( imageRenderingComposition == mImageRenderingComposition )
 			return;
 
@@ -390,7 +390,7 @@ FOdysseyAnimationMediaSamples::Tick(float DeltaTime)
 	TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(mAnimation->Width(), mAnimation->Height(), mAnimation->Format());
 
 
-	TSharedPtr<IOdysseyImageRenderer> renderer = imageRenderAbility->BuildRenderer(mCurrentFrameIndex);
+	TSharedPtr<IOdysseyImageRenderer> renderer = imageRenderAbility->BuildRenderer(mCurrentFrameIndex, IOdysseyImageRenderer::eRenderType::Render);
 	for ( const ::ULIS::FRectI& rect : mInvalidRects )
 	{
 		renderer->RenderInBlock(block, rect, rect.Position(), {});

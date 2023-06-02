@@ -9,16 +9,9 @@ class ODYSSEYANIMATION_API FOdysseyAnimationLayerStackImageRenderer
     : public IOdysseyImageRenderer
 {
 public:
-    FOdysseyAnimationLayerStackImageRenderer(UOdysseyAnimationLayerStack* iLayerStack, int iFrame);
+    FOdysseyAnimationLayerStackImageRenderer(UOdysseyAnimationLayerStack* iLayerStack, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI> iDefaultRects);
 
 public:
-    /**
-     * @brief Returns the full rect that can be rendered
-     * 
-     * @return ::ULIS::FRect 
-     */
-    virtual TArray<::ULIS::FRectI> GetRects() const override;
-
     /**
      * @brief Renders in (without blending for example) the given block
      * 

@@ -8,15 +8,10 @@
 #include "ULISUtils.h"
 #include "ULISEventBuilder.h"
 
-FOdysseyAnimationCellImageRasterImageRenderer::FOdysseyAnimationCellImageRasterImageRenderer(TSharedPtr<FOdysseyAnimationCellImageRaster> iCell, int iFrame)
-    : mRasterBlock(iCell->GetRasterBlock())
+FOdysseyAnimationCellImageRasterImageRenderer::FOdysseyAnimationCellImageRasterImageRenderer(TSharedPtr<FOdysseyAnimationCellImageRaster> iCell, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects)
+    : IOdysseyImageRenderer(iRenderType, iDefaultRects)
+    , mRasterBlock(iCell->GetRasterBlock())
 {
-}
-
-TArray<::ULIS::FRectI>
-FOdysseyAnimationCellImageRasterImageRenderer::GetRects() const
-{
-    return { ULIS::FRectI::FromXYWH(0, 0, mRasterBlock->GetWidth(), mRasterBlock->GetHeight()) };
 }
 
 TArray<::ULIS::FEvent>

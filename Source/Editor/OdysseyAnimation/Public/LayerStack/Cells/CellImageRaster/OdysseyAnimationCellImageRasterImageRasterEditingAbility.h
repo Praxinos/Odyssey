@@ -9,6 +9,7 @@ class ODYSSEYANIMATION_API FOdysseyAnimationCellImageRasterImageRasterEditingAbi
     : public IOdysseyAnimationImageRasterEditingAbility
 {
 public:
+    virtual ~FOdysseyAnimationCellImageRasterImageRasterEditingAbility() {}
     FOdysseyAnimationCellImageRasterImageRasterEditingAbility(TSharedPtr<FOdysseyAnimationCellImageRaster> iCellImageRaster);
 
 public:

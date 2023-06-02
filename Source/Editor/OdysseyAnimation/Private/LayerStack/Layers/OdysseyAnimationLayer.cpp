@@ -45,8 +45,8 @@ UOdysseyAnimationLayer::ChildrenChanged()
     TSharedPtr<IOdysseyAnimationImageRenderingAbility> imageRenderAbility = GetAbility<IOdysseyAnimationImageRenderingAbility>();
     if ( imageRenderAbility )
     {
-        imageRenderAbility->CompositionChanged(imageRenderAbility->GetId());
-        imageRenderAbility->CompositionCommited(imageRenderAbility->GetId());
+        imageRenderAbility->CompositionChanged();
+        imageRenderAbility->CompositionCommited();
     }
 }
 
@@ -62,8 +62,8 @@ UOdysseyAnimationLayer::IsActivatedChanged()
     TSharedPtr<IOdysseyAnimationImageRenderingAbility> imageRenderAbility = parentLayer->GetAbility<IOdysseyAnimationImageRenderingAbility>();
     if ( imageRenderAbility )
     {
-        imageRenderAbility->CompositionChanged(imageRenderAbility->GetId());
-        imageRenderAbility->CompositionCommited(imageRenderAbility->GetId());
+        imageRenderAbility->CompositionChanged();
+        imageRenderAbility->CompositionCommited();
     }
 }
 

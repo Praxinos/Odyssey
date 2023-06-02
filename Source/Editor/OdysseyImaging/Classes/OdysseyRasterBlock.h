@@ -262,6 +262,8 @@ private:
     TSharedPtr<FThreadSafeCounter> mAvailableCounter;
 
     //FOdysseyRasterBlockUndoBuilder mRasterBlockUndoBuilder;
+
+    TSharedPtr<::ULIS::FBlock> mDebugBlock;
 };
 
 

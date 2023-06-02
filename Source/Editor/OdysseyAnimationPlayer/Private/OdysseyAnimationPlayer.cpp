@@ -180,6 +180,18 @@ UOdysseyAnimationPlayer::IsBackward() const
 }
 
 void
+UOdysseyAnimationPlayer::SetRenderType(IOdysseyImageRenderer::eRenderType iRenderType)
+{
+	mRenderType = iRenderType;
+}
+
+IOdysseyImageRenderer::eRenderType
+UOdysseyAnimationPlayer::GetRenderType() const
+{
+	return mRenderType;
+}
+
+void
 UOdysseyAnimationPlayer::Tick(float iDeltaTime)
 {
 	if (!Animation)
@@ -249,17 +261,17 @@ UOdysseyAnimationPlayer::UpdateTexture()
 	if ( !imageRenderingAbility )
 		return;
 
-	TArray<FGuid> imageRenderingComposition = imageRenderingAbility->GetComposition(frameIndex);
+	TArray<FGuid> imageRenderingComposition = imageRenderingAbility->GetComposition(frameIndex, mRenderType);
 	if ( imageRenderingComposition != mImageRenderingComposition )
 	{
 		mImageRenderingComposition = imageRenderingComposition;
-		mAnimationHandle = imageRenderingAbility->Preload(frameIndex);
+		mAnimationHandle = imageRenderingAbility->Preload(frameIndex, mRenderType);
 		mInvalidTileMap.Invalidate(::ULIS::FRectI::FromXYWH(0, 0, Animation->Width(), Animation->Height()));
 	}
 
 	if (!mInvalidTileMap.InvalidTiles().IsEmpty())
 	{
-		TSharedPtr<IOdysseyImageRenderer> renderer = imageRenderingAbility->BuildRenderer(frameIndex);
+		TSharedPtr<IOdysseyImageRenderer> renderer = imageRenderingAbility->BuildRenderer(frameIndex, mRenderType);
 
 		TArray<TSharedPtr<::ULIS::FBlock>> blocks;
 		TArray<::ULIS::FRectI> invalidRects = mInvalidTileMap.InvalidRects();
@@ -302,7 +314,7 @@ UOdysseyAnimationPlayer::OnImageRenderingCompositionChanged(const FGuid& iId)
 	if ( !imageRenderingAbility )
 		return;
 
-	TArray<FGuid> imageRenderingComposition = imageRenderingAbility->GetComposition(frameIndex);
+	TArray<FGuid> imageRenderingComposition = imageRenderingAbility->GetComposition(frameIndex, mRenderType);
 	if ( imageRenderingComposition == mImageRenderingComposition )
 		return;
 

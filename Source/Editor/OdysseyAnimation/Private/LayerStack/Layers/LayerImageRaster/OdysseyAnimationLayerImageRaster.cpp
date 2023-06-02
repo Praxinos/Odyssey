@@ -9,6 +9,7 @@
 #include "ULISLoaderModule.h"
 #include "OdysseyStyleSet.h"
 #include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
+#include "LayerStack/LightTable/OdysseyAnimationLightTable.h"
 
 #define LOCTEXT_NAMESPACE "UOdysseyAnimationLayerImageRaster"
 
@@ -131,6 +132,12 @@ UOdysseyAnimationLayerImageRaster::GetCellType(int iIndex, FName& oType) const
     return true;
 }
 
+TSharedPtr<FOdysseyAnimationLightTable>
+UOdysseyAnimationLayerImageRaster::GetLightTable()
+{
+    return mLightTable;
+}
+
 int
 UOdysseyAnimationLayerImageRaster::GetOffset() const
 {
@@ -213,7 +220,7 @@ UOdysseyAnimationLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
             if ( !imageRenderAbility )
                 return;
 
-            currentIds.Append(imageRenderAbility->GetComposition(frameIndex));
+            currentIds.Append(imageRenderAbility->GetComposition(frameIndex, IOdysseyImageRenderer::eRenderType::Render));
         }
 
         //Do we need a new cell
@@ -254,7 +261,7 @@ UOdysseyAnimationLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
             if ( !imageRenderAbility )
                 return;
 
-            lastEvent = imageRenderAbility->BuildRenderer(frame)->RenderOverBlock(ULISBlock, rect, lastEvent);
+            lastEvent = imageRenderAbility->BuildRenderer(frame, IOdysseyImageRenderer::eRenderType::Render)->RenderOverBlock(ULISBlock, rect, lastEvent);
         }
 
         cells.Add(cell);
@@ -290,8 +297,8 @@ UOdysseyAnimationLayerImageRaster::OpacityChanged()
 
     //TODO: react to interactive events by not commiting immediately
     ::ULIS::FRectI rect = ::ULIS::FRectI::FromXYWH(0, 0, animation->Width(), animation->Height());
-    imageRenderAbility->Changed(imageRenderAbility->GetId(), { rect });
-    imageRenderAbility->Commited(imageRenderAbility->GetId(), { rect });
+    imageRenderAbility->Changed({ rect });
+    imageRenderAbility->Commited({ rect });
 }
 
 void
@@ -308,8 +315,8 @@ UOdysseyAnimationLayerImageRaster::BlendModeChanged()
         return;
     {
         ::ULIS::FRectI rect = ::ULIS::FRectI::FromXYWH(0, 0, animation->Width(), animation->Height());
-        imageRenderAbility->Changed(imageRenderAbility->GetId(), { rect });
-        imageRenderAbility->Commited(imageRenderAbility->GetId(), { rect });
+        imageRenderAbility->Changed({ rect });
+        imageRenderAbility->Commited({ rect });
     }
 }
 
@@ -322,8 +329,8 @@ UOdysseyAnimationLayerImageRaster::CellsChanged()
     if ( !imageRenderAbility )
         return;
 
-    imageRenderAbility->CompositionChanged(imageRenderAbility->GetId());
-    imageRenderAbility->CompositionCommited(imageRenderAbility->GetId());
+    imageRenderAbility->CompositionChanged();
+    imageRenderAbility->CompositionCommited();
 }
 
 void
@@ -344,6 +351,7 @@ UOdysseyAnimationLayerImageRaster::PostInitProperties()
 {
     Super::PostInitProperties();
 
+    mLightTable = FOdysseyAnimationLightTable::Create(this);
     SetAbility(MakeShared<FOdysseyAnimationLayerImageRasterImageRenderingAbility>(this));
 }
 

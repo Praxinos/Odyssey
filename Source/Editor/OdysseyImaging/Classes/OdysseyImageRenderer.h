@@ -10,16 +10,16 @@
 class ODYSSEYIMAGING_API IOdysseyImageRenderer
 {
 public:
+    enum class eRenderType
+    {
+        Render, //renders only the expected final render result
+        Editor //renders what is expected in an editor (can render the animation lighttable for example)
+    };
+
     virtual ~IOdysseyImageRenderer() {};
+    IOdysseyImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects);
 
 public:
-    /**
-     * @brief Returns the full rect that can be rendered
-     * 
-     * @return ::ULIS::FRect 
-     */
-    virtual TArray<::ULIS::FRectI> GetRects() const = 0;
-    
     /**
      * @brief Renders over (by blending for example) the given block
      * By default does the same thing as RenderInBlock
@@ -61,8 +61,11 @@ public:
     TSharedPtr<::ULIS::FBlock> RenderInNewBlock(::ULIS::eFormat iFormat, const ::ULIS::FRectI& iRect, TArray<::ULIS::FEvent>& oEvents);
 
 public:
+    IOdysseyImageRenderer::eRenderType GetRenderType() const;
     void AddHandle(TSharedPtr<IOdysseyHandle> iHandle);
 
 private:
+    IOdysseyImageRenderer::eRenderType mRenderType;
     TArray<TSharedPtr<IOdysseyHandle>> mHandles;
+    TArray<::ULIS::FRectI> mDefaultRects;
 };
