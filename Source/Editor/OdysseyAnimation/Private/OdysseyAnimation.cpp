@@ -168,6 +168,13 @@ UOdysseyAnimation::PostInitProperties()
 }
 
 void
+UOdysseyAnimation::PostLoad()
+{
+	Super::PostLoad();
+	mProxy->PostLoad();
+}
+
+void
 UOdysseyAnimation::PropertyChanged(const FName& iPropertyName)
 {
 	if ( iPropertyName == "CurrentFrame" )

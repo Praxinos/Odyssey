@@ -91,13 +91,6 @@ FOdysseyAnimationCellImageRaster::GetType() const
 }
 
 void
-FOdysseyAnimationCellImageRaster::PostLoad()
-{
-    FOdysseyAnimationCell::PostLoad();
-    InitAbilities();
-}
-
-void
 FOdysseyAnimationCellImageRaster::PostDuplicate()
 {
     FOdysseyAnimationCell::PostDuplicate();
@@ -113,6 +106,8 @@ FOdysseyAnimationCellImageRaster::Serialize(FArchive& Ar)
         mRasterBlock = MakeShared<FOdysseyRasterBlock>(mOwner);
     }
     Ar << *mRasterBlock;
+
+    InitAbilities();
 }
 
 #undef LOCTEXT_NAMESPACE
