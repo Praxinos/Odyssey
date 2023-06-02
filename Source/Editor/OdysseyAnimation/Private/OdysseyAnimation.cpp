@@ -64,7 +64,8 @@ UOdysseyAnimation::Format() const
 FTimespan
 UOdysseyAnimation::GetDuration() const
 {
-	return GetFrameTimeRange(GetFrameCount() - 1).GetUpperBoundValue();
+	FInt32Range range = GetFrameRange();
+	return FTimespan::FromSeconds((range.GetUpperBoundValue() + 1) / GetFramesPerSecond()) - FTimespan(1);
 }
 
 FInt32Range
