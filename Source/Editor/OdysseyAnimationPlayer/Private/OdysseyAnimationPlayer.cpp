@@ -266,7 +266,20 @@ UOdysseyAnimationPlayer::UpdateTexture()
 	{
 		mImageRenderingComposition = imageRenderingComposition;
 		mAnimationHandle = imageRenderingAbility->Preload(frameIndex, mRenderType);
-		mInvalidTileMap.Invalidate(::ULIS::FRectI::FromXYWH(0, 0, Animation->Width(), Animation->Height()));
+		//mInvalidTileMap.Invalidate(::ULIS::FRectI::FromXYWH(0, 0, Animation->Width(), Animation->Height()));
+
+		::ULIS::FRectI rect = ::ULIS::FRectI::FromXYWH(0, 0, Animation->Width(), Animation->Height());
+		TSharedPtr<IOdysseyImageRenderer> renderer = imageRenderingAbility->BuildRenderer(frameIndex, mRenderType);
+		TArray<::ULIS::FEvent> events;
+		TSharedPtr<::ULIS::FBlock> block = renderer->RenderInNewBlock(Animation->Format(), rect, events);
+
+		::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(Animation->Format());
+		ctx.Finish();
+
+		CopyBlocksToTexture({ block }, { rect });
+		mInvalidTileMap.Clear();
+		mOnTextureUpdated.Broadcast();
+		return;
 	}
 
 	if (!mInvalidTileMap.InvalidTiles().IsEmpty())
