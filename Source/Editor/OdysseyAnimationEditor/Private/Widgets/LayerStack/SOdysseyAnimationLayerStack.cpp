@@ -39,7 +39,7 @@ SOdysseyAnimationLayerStack::Construct(const FArguments& InArgs, FOdysseyAnimati
                     .VAlignCell(VAlign_Fill)
                     .HAlignCell(HAlign_Fill)
                     [
-                        SNew(SOdysseyAnimationTimelineControl, mEditor)
+                        SAssignNew(mTimelineControl, SOdysseyAnimationTimelineControl, mEditor)
                         [
                             SNew(SOdysseyAnimationTimelineHeader, mEditor)
                         ]
@@ -81,19 +81,52 @@ SOdysseyAnimationLayerStack::OnGenerateRow(UOdysseyLayer* iLayer, const TSharedR
 void
 SOdysseyAnimationLayerStack::OnTimelineScrollBarScrolled(float iOffset)
 {
-    float visiblePercent = 0.5f;
-    float scrollbarOffset = FMath::Clamp(iOffset, 0.f, visiblePercent);
-    mTimelineScrollBar->SetState(scrollbarOffset, visiblePercent);
-
     int lastFrameIndex = mEditor->Animation()->GetFrameRange().GetUpperBoundValue();
+    float frameWidth = mEditor->Timeline()->GetFrameWidth();
+    float columnWidth = mTimelineControl->GetPaintSpaceGeometry().GetLocalSize().X;
+    float contentWidth = (lastFrameIndex + 1) * frameWidth;
+    float adjustedContentWidth = FMath::Max(contentWidth, columnWidth) + columnWidth - frameWidth;
+    float visiblePercent = columnWidth / adjustedContentWidth;
+    float scrollbarOffset = FMath::Clamp(iOffset, 0.f, 1.f - visiblePercent);
     float offsetPercent = (scrollbarOffset / (1.f - visiblePercent));
-    mEditor->Timeline()->SetOffset(offsetPercent * lastFrameIndex);
+    float offsetAmount = FMath::Max(lastFrameIndex, columnWidth / frameWidth - 1.f);
+    mEditor->Timeline()->SetOffset(offsetPercent * offsetAmount);
 }
 
 TSharedPtr<SOdysseyLayerStackTreeView>
 SOdysseyAnimationLayerStack::GetTreeView() const
 {
     return mTreeView;
+}
+
+void
+SOdysseyAnimationLayerStack::Tick( const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime )
+{
+    TSharedPtr<SHeaderRow> headerRow = mTreeView->GetHeaderRow();
+    const TIndirectArray<SHeaderRow::FColumn>& columns = headerRow->GetColumns();
+
+    for ( const SHeaderRow::FColumn& column : columns )
+    {
+        if ( column.ColumnId != "Timeline" )
+            continue;
+
+        int lastFrameIndex = mEditor->Animation()->GetFrameRange().GetUpperBoundValue();
+        float frameWidth = mEditor->Timeline()->GetFrameWidth();
+        float offset = mEditor->Timeline()->GetOffset() * frameWidth;
+
+        float columnWidth = mTimelineControl->GetPaintSpaceGeometry().GetLocalSize().X;
+        float contentWidth = (lastFrameIndex + 1) * frameWidth;
+        float adjustedContentWidth = FMath::Max(contentWidth, columnWidth) + columnWidth - frameWidth;
+
+        float visiblePercent = columnWidth / adjustedContentWidth;
+
+
+        float offsetPercent = offset / adjustedContentWidth;
+        float scrollbarOffset = FMath::Clamp(offsetPercent, 0.f, 1.f - visiblePercent);
+        mTimelineScrollBar->SetState(scrollbarOffset, visiblePercent);
+
+        break;
+    }
 }
 
 #undef LOCTEXT_NAMESPACE

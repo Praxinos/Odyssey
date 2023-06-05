@@ -27,6 +27,9 @@ public:
     TSharedPtr<SOdysseyLayerStackTreeView> GetTreeView() const;
 
 private:
+    virtual void Tick( const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime ) override;
+
+private:
     TSharedRef<ITableRow> OnGenerateRow(UOdysseyLayer* iLayer, const TSharedRef<STableViewBase>& iOwnerTable);
     void OnTimelineScrollBarScrolled(float iOffset);
 
@@ -34,4 +37,5 @@ private:
     FOdysseyAnimationEditor* mEditor;
     TSharedPtr<SOdysseyLayerStackTreeView> mTreeView;
 	TSharedPtr<SScrollBar> mTimelineScrollBar;
+    TSharedPtr<class SOdysseyAnimationTimelineControl> mTimelineControl;
 };
