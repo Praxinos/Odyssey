@@ -34,6 +34,8 @@ private:
     TMap<uint32, FData> mThreadsData;
 
     FData& GetCurrentThreadData();
+
+    FCriticalSection mMutex;
 };
 
 IMPLEMENT_MODULE( FULISLoaderModule, ULISLoader )
@@ -59,6 +61,7 @@ void FULISLoaderModule::ShutdownModule() {
 
 FULISLoaderModule::FData&
 FULISLoaderModule::GetCurrentThreadData() {
+    FScopeLock lock(&mMutex);
     const uint32 CurrentThreadId = FPlatformTLS::GetCurrentThreadId();
     if (!mThreadsData.Contains(CurrentThreadId))
     {
@@ -91,7 +94,7 @@ FULISLoaderModule::FindOrAddContext( ::ULIS::eFormat iFormat ) {
         return  **val;
     } else {
         //TODO: why are we using PerformanceIntent_MEM instead of PerformanceIntent_Max ?
-        ::ULIS::FContext* ctx = new ::ULIS::FContext( *GetCurrentThreadData().mCommandQueue, iFormat, ::ULIS::PerformanceIntent_MEM );
+        ::ULIS::FContext* ctx = new ::ULIS::FContext( *GetCurrentThreadData().mCommandQueue, iFormat, ::ULIS::PerformanceIntent_Max );
         GetCurrentThreadData().mContextMap.Add( key, ctx );
         return  *ctx;
     }
