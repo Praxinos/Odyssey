@@ -24,6 +24,7 @@
 FOdysseyAnimationEditor::~FOdysseyAnimationEditor()
 {
 	mPlayer->OnStop().RemoveAll(this);
+	mPlayer->Stop();
 	mAnimation->OnCurrentFrameChanged().RemoveAll(this);
 	IOdysseyAnimationImageRenderingAbility::OnCompositionCommited().RemoveAll(this);
 	UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll(this);
