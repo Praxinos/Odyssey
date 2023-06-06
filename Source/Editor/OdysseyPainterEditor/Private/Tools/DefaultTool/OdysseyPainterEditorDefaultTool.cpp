@@ -105,10 +105,10 @@ UOdysseyPainterEditorDefaultTool::Paste( FOdysseyVectorEngine* iEngine
     }
 
     iScene->Update( 0 );
-    iScene->Signal( FOdysseyVectorScene::SCENE_REDRAW
-                  | FOdysseyVectorScene::OBJECT_MODIFIED
-                  | FOdysseyVectorScene::OBJECT_SELECTED
-                  | FOdysseyVectorScene::OBJECT_TRANSFORMED );
+    iScene->Signal( FOdysseyVectorScene::SIGNALL_SCENE_REDRAW
+                  | FOdysseyVectorScene::SIGNALL_OBJECT_MODIFIED
+                  | FOdysseyVectorScene::SIGNALL_OBJECT_SELECTED
+                  | FOdysseyVectorScene::SIGNALL_OBJECT_TRANSFORMED );
 }
 
 bool

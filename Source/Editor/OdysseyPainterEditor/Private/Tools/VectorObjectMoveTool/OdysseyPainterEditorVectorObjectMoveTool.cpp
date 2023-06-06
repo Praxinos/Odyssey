@@ -24,7 +24,7 @@ UOdysseyPainterEditorVectorObjectMoveTool::ActivateVector( FOdysseyVectorEngine*
 {
     iEngine->ClearHUD();
 
-    iScene->Signal( FOdysseyVectorScene::SCENE_REDRAW );
+    iScene->Signal( FOdysseyVectorScene::SIGNALL_SCENE_REDRAW );
 }
 
 bool
@@ -44,7 +44,7 @@ UOdysseyPainterEditorVectorObjectMoveTool::OnMouseDownVector( FOdysseyVectorEngi
     }
     GEditor->EndTransaction();
 
-    iScene->Signal( FOdysseyVectorScene::SCENE_REDRAW );
+    iScene->Signal( FOdysseyVectorScene::SIGNALL_SCENE_REDRAW );
 
     return true;
 }
@@ -76,7 +76,7 @@ UOdysseyPainterEditorVectorObjectMoveTool::OnMouseDragVector( FOdysseyVectorEngi
 
     // update invalidated objects
     iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES | FOdysseyVectorObject::KEEPINVALIDATED );
-    iScene->Signal( FOdysseyVectorScene::SCENE_REDRAW | FOdysseyVectorScene::OBJECT_TRANSFORMED );
+    iScene->Signal( FOdysseyVectorScene::SIGNALL_SCENE_REDRAW | FOdysseyVectorScene::SIGNALL_OBJECT_TRANSFORMED );
 }
 
 bool
@@ -85,7 +85,7 @@ UOdysseyPainterEditorVectorObjectMoveTool::OnMouseUpVector( FOdysseyVectorEngine
                                                           , const FOdysseyPoint& iPointInTexture
                                                           , const FKey& iKey )
 {
-    iScene->Signal( FOdysseyVectorScene::SCENE_REDRAW );
+    iScene->Signal( FOdysseyVectorScene::SIGNALL_SCENE_REDRAW );
 
     return true;
 }

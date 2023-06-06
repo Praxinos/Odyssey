@@ -35,7 +35,7 @@ UOdysseyPainterEditorVectorObjectPickTool::ActivateVector( FOdysseyVectorEngine*
     iEngine->ClearHUD( );
     iEngine->AddHUD( mSelectionHUD );
 
-    iScene->Signal( FOdysseyVectorScene::SCENE_REDRAW );
+    iScene->Signal( FOdysseyVectorScene::SIGNALL_SCENE_REDRAW );
 }
 
 bool
@@ -75,7 +75,7 @@ UOdysseyPainterEditorVectorObjectPickTool::OnMouseDownVector( FOdysseyVectorEngi
 
     mPointArray.push_back( ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y ) );
 
-    iScene->Signal( FOdysseyVectorScene::SCENE_REDRAW );
+    iScene->Signal( FOdysseyVectorScene::SIGNALL_SCENE_REDRAW );
 
     return true;
 }
@@ -89,7 +89,7 @@ UOdysseyPainterEditorVectorObjectPickTool::OnMouseDragVector( FOdysseyVectorEngi
 
     mPointArray.push_back( point );
 
-    iScene->Signal( FOdysseyVectorScene::SCENE_REDRAW );
+    iScene->Signal( FOdysseyVectorScene::SIGNALL_SCENE_REDRAW );
 }
 
 static void
@@ -170,7 +170,7 @@ UOdysseyPainterEditorVectorObjectPickTool::OnMouseUpVector( FOdysseyVectorEngine
     mSelectionHUD->UpdateSelectionBox( iScene );
 
     iScene->Update( 0 ); // update invalidated objects
-    iScene->Signal( FOdysseyVectorScene::SCENE_REDRAW | FOdysseyVectorScene::OBJECT_SELECTED );
+    iScene->Signal( FOdysseyVectorScene::SIGNALL_SCENE_REDRAW | FOdysseyVectorScene::SIGNALL_OBJECT_SELECTED );
 
     return true;
 }

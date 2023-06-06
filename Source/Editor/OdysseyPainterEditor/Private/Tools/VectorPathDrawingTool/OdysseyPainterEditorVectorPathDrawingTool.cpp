@@ -37,7 +37,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::ActivateVector( FOdysseyVectorEngine
     iEngine->ClearHUD();
     iEngine->AddHUD( &mPathDrawingHUD );
 
-    iScene->Signal( FOdysseyVectorScene::SCENE_REDRAW );
+    iScene->Signal( FOdysseyVectorScene::SIGNALL_SCENE_REDRAW );
 }
 
 static ::ULIS::FRectI
@@ -173,10 +173,10 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorEng
 
     // update invalidated objects
     iScene->Update( 0 );
-    iScene->Signal( FOdysseyVectorScene::SCENE_REDRAW
-                  | FOdysseyVectorScene::OBJECT_SELECTED
-                  | FOdysseyVectorScene::OBJECT_MODIFIED
-                  | FOdysseyVectorScene::OBJECT_TRANSFORMED );
+    iScene->Signal( FOdysseyVectorScene::SIGNALL_SCENE_REDRAW
+                  | FOdysseyVectorScene::SIGNALL_OBJECT_SELECTED
+                  | FOdysseyVectorScene::SIGNALL_OBJECT_MODIFIED
+                  | FOdysseyVectorScene::SIGNALL_OBJECT_TRANSFORMED );
 
     return true;
 }
@@ -333,7 +333,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorEngin
     }
 
     iScene->Update( 0 ); // update invalidated objects
-    iScene->Signal( FOdysseyVectorScene::SCENE_REDRAW | FOdysseyVectorScene::OBJECT_MODIFIED );
+    iScene->Signal( FOdysseyVectorScene::SIGNALL_SCENE_REDRAW | FOdysseyVectorScene::SIGNALL_OBJECT_MODIFIED );
 
     return true;
 }

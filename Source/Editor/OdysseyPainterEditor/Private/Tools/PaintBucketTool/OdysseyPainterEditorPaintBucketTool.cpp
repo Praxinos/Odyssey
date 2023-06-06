@@ -39,7 +39,7 @@ UOdysseyPainterEditorPaintBucketTool::ActivateVector( FOdysseyVectorEngine* iEng
     iEngine->AddHUD(&mBucketHUD);
 
     iScene->Update( 0 );
-    iScene->Signal( FOdysseyVectorScene::SCENE_REDRAW );
+    iScene->Signal( FOdysseyVectorScene::SIGNALL_SCENE_REDRAW );
 }
 
 static void floodFill ( int32 x
@@ -307,7 +307,7 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseDownVector( FOdysseyVectorEngine* i
     }
 
     iScene->Update( 0 ); // paint group could be invalidated after bucket deletion / adding. Update it.
-    iScene->Signal( FOdysseyVectorScene::SCENE_REDRAW );
+    iScene->Signal( FOdysseyVectorScene::SIGNALL_SCENE_REDRAW );
 
     return true;
 }
@@ -330,7 +330,7 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseHoverVector( FOdysseyVectorEngine* 
         }
     }
 
-    iScene->Signal( FOdysseyVectorScene::SCENE_REDRAW );
+    iScene->Signal( FOdysseyVectorScene::SIGNALL_SCENE_REDRAW );
 }
 
 void
@@ -374,7 +374,7 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseDragVector( FOdysseyVectorEngine* i
     }
 
     iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES ); // update vector scene
-    iScene->Signal( FOdysseyVectorScene::SCENE_REDRAW );
+    iScene->Signal( FOdysseyVectorScene::SIGNALL_SCENE_REDRAW );
 }
 
 bool
@@ -423,8 +423,8 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseUpVector( FOdysseyVectorEngine* iEn
     mPickedObject = nullptr;
 
     iScene->Update( 0 );
-    iScene->Signal( FOdysseyVectorScene::SCENE_REDRAW
-                  | FOdysseyVectorScene::OBJECT_MODIFIED );
+    iScene->Signal( FOdysseyVectorScene::SIGNALL_SCENE_REDRAW
+                  | FOdysseyVectorScene::SIGNALL_OBJECT_MODIFIED );
 
     return false;
 }

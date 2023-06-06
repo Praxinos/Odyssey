@@ -189,14 +189,14 @@ FOdysseyTextureEditorGUI::OnVectorSceneSignal( FOdysseyVectorScene* iScene, uint
 
     if( currentVectorLayer && ( currentVectorLayer->GetScene() == iScene ) )
     {
-        if( iSignalFlags & FOdysseyVectorScene::SCENE_REDRAW )
+        if( iSignalFlags & FOdysseyVectorScene::SIGNALL_SCENE_REDRAW )
         {
             currentVectorLayer->RenderImageChanged( false );
         }
 
-        if( ( iSignalFlags & FOdysseyVectorScene::OBJECT_TRANSFORMED )
-         || ( iSignalFlags & FOdysseyVectorScene::OBJECT_SELECTED    )
-         || ( iSignalFlags & FOdysseyVectorScene::OBJECT_MODIFIED    ) )
+        if( ( iSignalFlags & FOdysseyVectorScene::SIGNALL_OBJECT_TRANSFORMED )
+         || ( iSignalFlags & FOdysseyVectorScene::SIGNALL_OBJECT_SELECTED    )
+         || ( iSignalFlags & FOdysseyVectorScene::SIGNALL_OBJECT_MODIFIED    ) )
         {
             vectorObjectTab.Get()->Update( iScene );
         }

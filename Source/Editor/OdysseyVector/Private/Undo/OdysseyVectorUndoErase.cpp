@@ -115,9 +115,9 @@ FOdysseyVectorUndoErase::Apply( UObject* iIgnored )
     // update invalidated objects
     mScene->Update(0);
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->Signal( FOdysseyVectorScene::SCENE_REDRAW
-                  | FOdysseyVectorScene::OBJECT_SELECTED
-                  | FOdysseyVectorScene::OBJECT_MODIFIED );
+    mScene->Signal( FOdysseyVectorScene::SIGNALL_SCENE_REDRAW
+                  | FOdysseyVectorScene::SIGNALL_OBJECT_SELECTED
+                  | FOdysseyVectorScene::SIGNALL_OBJECT_MODIFIED );
 }
 
 void
@@ -167,9 +167,9 @@ FOdysseyVectorUndoErase::Revert( UObject* iIgnored )
     // update invalidated objects
     mScene->Update( 0 );
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->Signal( FOdysseyVectorScene::SCENE_REDRAW
-                  | FOdysseyVectorScene::OBJECT_SELECTED
-                  | FOdysseyVectorScene::OBJECT_MODIFIED );
+    mScene->Signal( FOdysseyVectorScene::SIGNALL_SCENE_REDRAW
+                  | FOdysseyVectorScene::SIGNALL_OBJECT_SELECTED
+                  | FOdysseyVectorScene::SIGNALL_OBJECT_MODIFIED );
 }
 
 /** Describes this change (for debugging) */
