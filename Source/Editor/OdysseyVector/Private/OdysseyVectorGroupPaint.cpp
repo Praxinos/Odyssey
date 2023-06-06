@@ -232,10 +232,16 @@ FOdysseyVectorGroupPaint::UpdateShape( uint32 iUpdateFlags )
 
     UpdateBBox();
 
-    if(   ( mGroupPaintParam.Realtime == true  )
-     || ( ( mGroupPaintParam.Realtime == false ) && ( ( iUpdateFlags & FOdysseyVectorObject::FREQUENTUPDATES ) == 0 ) ) )
+    if( ( mGroupPaintParam.Realtime == true  )
+   || ( ( mGroupPaintParam.Realtime == false ) && ( ( iUpdateFlags & FOdysseyVectorObject::FREQUENTUPDATES ) == 0 ) ) )
     {
-        FindCycles();
+        if( ( mInvalidationFlags & FOdysseyVectorObject::INVALIDATE_SHAPE )
+         || ( mInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD ) )
+        {
+            FindCycles();
+        }
+
+        Colorize();
     }
 }
 
@@ -251,7 +257,7 @@ FOdysseyVectorGroupPaint::AddBucket( FOdysseyVectorBucket* iBucket )
     mBucketList.push_back( iBucket );
 
     //iBucket->SetParent( this );
-    //InvalidateColor();
+    Invalidate();
 }
 
 void
@@ -259,7 +265,7 @@ FOdysseyVectorGroupPaint::RemoveBucket( FOdysseyVectorBucket* iBucket )
 {
     mBucketList.remove( iBucket );
 
-    //InvalidateColor();
+    Invalidate();
 }
 
 void
@@ -796,8 +802,6 @@ FOdysseyVectorGroupPaint::FindCycles()
     OrderCycles();
 
     MergeCycles();
-
-    Colorize();
 }
 
 static FOdysseyVectorVertex*

@@ -52,17 +52,30 @@ public:
 
     virtual void Commit() override;
 
+    private:
+        void SetBucketColor( FOdysseyVectorBucket* iBucket );
+
     protected:
-        void OnMouseUpVectorMovePoint( FOdysseyVectorEngine* iEngine
-                                     , FOdysseyVectorScene* iScene
-                                     , FOdysseyVectorPoint* iPoint
-                                     , const FOdysseyPoint& iPointInTexture
-                                     , const FKey& iKey );
-        void OnMouseUpVectorCreateBucket( FOdysseyVectorEngine* iEngine
-                                        , FOdysseyVectorScene* iScene
+        void OnMouseUpVectorCreateBucket( FOdysseyVectorScene* iScene
                                         , FOdysseyVectorGroupPaint* paintGroup
                                         , const FOdysseyPoint& iPointInTexture
                                         , const FKey& iKey );
+        void OnMouseUpVectorRemoveBucket( FOdysseyVectorScene* iScene
+                                        , FOdysseyVectorGroupPaint* paintGroup
+                                        , FOdysseyVectorBucket* iBucket
+                                        , const FOdysseyPoint& iPointInTexture
+                                        , const FKey& iKey );
+        void OnMouseUpVectorMovePoint( FOdysseyVectorScene* iScene
+                                     , FOdysseyVectorGroupPaint* paintGroup
+                                     , FOdysseyVectorPoint* iPoint
+                                     , ::ULIS::FVec2D iPointOriginalPosition
+                                     , const FOdysseyPoint& iPointInTexture
+                                     , const FKey& iKey );
+        void OnMouseUpVectorPropagateBucket( FOdysseyVectorScene* iScene
+                                           , FOdysseyVectorBucket* iBucket
+                                           , bool iPropagate );
+        void OnMouseUpVectorColorBucket( FOdysseyVectorScene* iScene
+                                       , FOdysseyVectorBucket* iBucket );
 
 public:
     UPROPERTY(EditAnywhere,Category="Odyssey BucketFill Tool")
@@ -91,6 +104,7 @@ protected:
     double mOldLocalMouseY;
     double mDownMouseX;
     double mDownMouseY;
+    ::ULIS::FVec2D mPointPosition;
     FOdysseyVectorHUDBucket mBucketHUD;
     uint32 mPickedArea;
 };

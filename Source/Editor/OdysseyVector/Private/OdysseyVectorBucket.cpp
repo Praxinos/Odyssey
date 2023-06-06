@@ -37,6 +37,18 @@ MakeRects( double iWorldX
     oPropagateRect.h = CROSSRADIUS * 2;
 }
 
+FOdysseyVectorBucket::FOdysseyVectorBucket( FOdysseyVectorObject& iParent )
+    : mParent ( iParent )
+    , mCtrlPoint ( this )
+    , mPropagated( false )
+    , mIsGradient ( false )
+    , mColor( 128, 128, 128, 255 )
+{
+    mCtrlPoint.Set( HANDLEDISTANCE, 0.0f );
+
+    SetCoords( 0.0, 0.0f );
+}
+
 FOdysseyVectorBucket::FOdysseyVectorBucket( FOdysseyVectorObject& iParent, double iX, double iY, bool iPropagated )
     : mParent ( iParent )
     , mCtrlPoint ( this )
@@ -49,12 +61,42 @@ FOdysseyVectorBucket::FOdysseyVectorBucket( FOdysseyVectorObject& iParent, doubl
     SetColor( 128, 128, 128, 255 );
 }
 
+void 
+FOdysseyVectorBucket::SetX( double iX )
+{
+    FOdysseyVectorPoint::SetX( iX );
+
+    mParent.Invalidate( FOdysseyVectorObject::INVALIDATE_COLOR );
+}
+
+void 
+FOdysseyVectorBucket::SetY( double iY )
+{
+    FOdysseyVectorPoint::SetY( iY );
+
+    mParent.Invalidate( FOdysseyVectorObject::INVALIDATE_COLOR );
+}
+
+void 
+FOdysseyVectorBucket::Set( double iX, double iY )
+{
+    FOdysseyVectorPoint::Set( iX, iY );
+
+    mParent.Invalidate( FOdysseyVectorObject::INVALIDATE_COLOR );
+}
+
+void
+FOdysseyVectorBucket::Invalidate()
+{
+    mParent.Invalidate( FOdysseyVectorObject::INVALIDATE_COLOR );
+}
+
 void
 FOdysseyVectorBucket::SetPropagated( bool iPropagated )
 {
     mPropagated = iPropagated;
 
-    //mParent.Invalidate();
+    mParent.Invalidate( FOdysseyVectorObject::INVALIDATE_COLOR );
 }
 
 bool
@@ -254,6 +296,8 @@ FOdysseyVectorBucket::Copy( FOdysseyVectorBucket* iDestinationBucket )
     iDestinationBucket->mIsGradient = mIsGradient;
     iDestinationBucket->mGradientColor0 = mGradientColor0;
     iDestinationBucket->mGradientColor1 = mGradientColor1;
+
+    //iDestinationBucket->Invalidate();
 }
 
 uint32

@@ -37,7 +37,7 @@ UOdysseyPainterEditorVectorEllipseView::PropertyChanged( const FName& iPropertyN
         mObject->Update( 0 );
     }
 
-    mObject->Invalidate();
+    mObject->Invalidate( FOdysseyVectorObject::INVALIDATE_ALL );
 
     scene->Update(0);
 }

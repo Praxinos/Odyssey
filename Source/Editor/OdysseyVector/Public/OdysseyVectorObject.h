@@ -64,6 +64,12 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         static const uint32 FREQUENTUPDATES = ( 1 << 0 );
         static const uint32 KEEPINVALIDATED = ( 1 << 1 );
 
+        // invalidation mask
+        static const uint32 INVALIDATE_CHILD = ( 1 << 0 ); // must not be set manually
+        static const uint32 INVALIDATE_SHAPE = ( 1 << 1 );
+        static const uint32 INVALIDATE_COLOR = ( 1 << 2 );
+        static const uint32 INVALIDATE_ALL   = ( INVALIDATE_SHAPE | INVALIDATE_COLOR );
+
         static constexpr float BBOX_POINT_RADIUS = 4.0f;
 
     protected:
@@ -81,7 +87,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         std::list<FOdysseyVectorObject*> mInvalidatedChildrenList;
         FOdysseyVectorObject* mParent;
         bool mIsSelected;
-        bool mIsInvalidated;
         bool mDependsOnChildren;
         ::ULIS::FRectD mBBox;
 
@@ -92,6 +97,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
 
         // used when saving
         uint32 mID;
+        uint32 mInvalidationFlags;
 
     public:
         static uint32 TreeToList( FOdysseyVectorObject* iObject, std::list<FOdysseyVectorObject*>& iOutList );
@@ -175,6 +181,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         ::ULIS::FRectD GetBBox( bool iWorld );
         void MoveBack();
         void MoveFront();
+        virtual void Invalidate( uint32 iInvalidationFlags );
         virtual void Invalidate();
         FOdysseyVectorScene* GetScene();
         bool IsInvalidated();

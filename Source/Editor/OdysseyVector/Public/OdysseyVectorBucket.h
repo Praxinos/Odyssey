@@ -18,7 +18,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorBucket : public FOdysseyVectorPoint
     public:
         ~FOdysseyVectorBucket();
         FOdysseyVectorBucket( FOdysseyVectorObject& iParent, double iX, double iY,  bool iPropagated );
-
+        FOdysseyVectorBucket( FOdysseyVectorObject& iParent );
         /**
          * @brief Set this bucket's solid color
          * @param iR red
@@ -116,6 +116,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorBucket : public FOdysseyVectorPoint
 
         void SetPropagated( bool iPropagated );
         bool IsPropagated();
+        void SetX( double iX );
+        void SetY( double iY );
+        void Set( double iX, double iY );
+        void Invalidate();
 
     private:
         void DrawBucket( FBucketDrawingFlags iDrawingFlags );

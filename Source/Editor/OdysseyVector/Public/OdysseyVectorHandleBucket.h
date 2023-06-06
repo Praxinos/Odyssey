@@ -13,13 +13,14 @@ class ODYSSEYVECTOR_API FOdysseyVectorHandleBucket : public FOdysseyVectorHandle
         static uint32 StaticClass() { return mStaticClass; };
         virtual uint32 GetClass() override { return mStaticClass; };
 
-        static FOdysseyVectorHandleBucket* New( FOdysseyVectorBucket* iParentBucket );
 
         ~FOdysseyVectorHandleBucket();
         FOdysseyVectorHandleBucket( FOdysseyVectorBucket* iParentBucket );
         FOdysseyVectorBucket* GetParent();
 
-        void Init( FOdysseyVectorBucket* iParentBucket );
+        void SetX( double iX );
+        void SetY( double iY );
+        void Set( double iX, double iY );
 
     private:
         static const uint32 mStaticClass = 0xe5d595c7; // value is crc32 FOdysseyVectorHandleBucket

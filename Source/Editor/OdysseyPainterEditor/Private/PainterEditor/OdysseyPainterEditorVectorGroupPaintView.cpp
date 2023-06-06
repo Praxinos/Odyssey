@@ -37,7 +37,7 @@ UOdysseyPainterEditorVectorGroupPaintView::PropertyChanged( const FName& iProper
         mObject->UpdateMatrix();
     }*/
 
-    mObject->Invalidate();
+    mObject->Invalidate( FOdysseyVectorObject::INVALIDATE_ALL );
 
     scene->Update( 0 );
 }

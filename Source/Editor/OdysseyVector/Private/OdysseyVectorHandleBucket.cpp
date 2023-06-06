@@ -6,27 +6,36 @@ FOdysseyVectorHandleBucket::~FOdysseyVectorHandleBucket()
 
 FOdysseyVectorHandleBucket::FOdysseyVectorHandleBucket( FOdysseyVectorBucket* iParentBucket )
     : FOdysseyVectorHandle()
+    , mParentBucket ( iParentBucket )
 {
-    Init( iParentBucket );
-}
-
-void
-FOdysseyVectorHandleBucket::Init( FOdysseyVectorBucket* iParentBucket )
-{
-    mParentBucket = iParentBucket;
-}
-
-//static
-FOdysseyVectorHandleBucket*
-FOdysseyVectorHandleBucket::New( FOdysseyVectorBucket* iParentBucket )
-{
-    FOdysseyVectorHandleBucket* bucketHandle = new FOdysseyVectorHandleBucket( iParentBucket );
-
-    return bucketHandle;
 }
 
 FOdysseyVectorBucket*
 FOdysseyVectorHandleBucket::GetParent()
 {
     return mParentBucket;
+}
+
+void 
+FOdysseyVectorHandleBucket::SetX( double iX )
+{
+    FOdysseyVectorPoint::SetX( iX );
+
+    mParentBucket->Invalidate();
+}
+
+void 
+FOdysseyVectorHandleBucket::SetY( double iY )
+{
+    FOdysseyVectorPoint::SetY( iY );
+
+    mParentBucket->Invalidate();
+}
+
+void 
+FOdysseyVectorHandleBucket::Set( double iX, double iY )
+{
+    FOdysseyVectorPoint::Set( iX, iY );
+
+    mParentBucket->Invalidate();
 }

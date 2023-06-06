@@ -11,9 +11,9 @@ FOdysseyVectorObject::~FOdysseyVectorObject()
 FOdysseyVectorObject::FOdysseyVectorObject()
     : mParent( nullptr )
     , mIsSelected( false )
-    , mIsInvalidated( false )
     , mDependsOnChildren( false )
     , mFillBucket( *this, 0.0f, 0.0f, false )
+    , mInvalidationFlags ( 0 )
 {
     mLocalMatrix.reset();
     mWorldMatrix.reset();
@@ -70,7 +70,7 @@ FOdysseyVectorObject::Update( uint32 iUpdateFlags )
 
     if( ( iUpdateFlags & FOdysseyVectorObject::KEEPINVALIDATED ) == 0 )
     {
-        mIsInvalidated = false;
+        mInvalidationFlags = 0;
     }
 }
 
@@ -393,7 +393,7 @@ FOdysseyVectorObject::Draw( uint64 iFlags )
 bool
 FOdysseyVectorObject::IsInvalidated()
 {
-    return mIsInvalidated;
+    return mInvalidationFlags != 0 ? true : false;
 }
 
 bool
@@ -405,18 +405,24 @@ FOdysseyVectorObject::IsSelected()
 void
 FOdysseyVectorObject::Invalidate()
 {
-    if ( mIsInvalidated == false )
+    Invalidate( FOdysseyVectorObject::INVALIDATE_ALL );
+}
+
+void
+FOdysseyVectorObject::Invalidate( uint32 iInvalidationFlags )
+{
+    if ( mInvalidationFlags == 0 )
     {
         if ( mParent )
         {
             mParent->mInvalidatedChildrenList.push_back( this );
 
-            mParent->Invalidate();
+            mParent->Invalidate( mParent->mInvalidationFlags | INVALIDATE_CHILD );
 
-            // MUST have a parent to be declared as invalidated otherwise mIsInvalidated could be set
+            // MUST have a parent to be declared as invalidated otherwise mInvalidationFlags could be set
             // even if the object has no parent because of bottom-to-top the recursive calls
             // to Invalidate() from FOdysseyVectorVertex::Set() and then we would never reenter this "if" statement
-            mIsInvalidated = true;
+            mInvalidationFlags = iInvalidationFlags;
         }
     }
 }
