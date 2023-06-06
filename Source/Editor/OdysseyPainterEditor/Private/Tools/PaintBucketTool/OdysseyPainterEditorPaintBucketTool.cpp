@@ -153,10 +153,12 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseDownRaster( TSharedPtr<::ULIS::FBlo
     /*if (!CanDraw())
         return false;*/
 
-    if (!mPaintEngine.PaintBlock())
+    if (!paintBlock)
         return false;
 
-	::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
+    GEditor->BeginTransaction(TEXT("PaintEngine"), LOCTEXT("OnPaintStroke", "FlooFill"), nullptr);
+
+	//::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
 
 /*	ctx.Fill(*paintBlock, color);*/
 
@@ -173,6 +175,8 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseDownRaster( TSharedPtr<::ULIS::FBlo
 	paintBlock->Dirty();
 
     Commit();
+
+    GEditor->EndTransaction();
 
     return true;
 }
