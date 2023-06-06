@@ -45,6 +45,8 @@ protected:
     virtual void BringForward();
     virtual void SendBackward();
     virtual void RemoveSelectedObjects();
+    virtual void FlipHorizontal();
+    virtual void FlipVertical();
 
 public:
     void BindVectorScene( FOdysseyVectorScene* iScene );

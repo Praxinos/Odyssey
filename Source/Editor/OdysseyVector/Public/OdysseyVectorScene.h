@@ -43,6 +43,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorScene : public FOdysseyVectorGroup
         void UpdateShape( uint32 iUpdateFlags );
         FOdysseyVectorObject* CopyShape();
         FOdysseyVectorEngine* mEngine;
+        void FlipSelection( bool iWorld, double iXFactor, double iYFactor );
 
     protected:
         std::list<FOdysseyVectorObject*> mSelectedObjectList;
@@ -50,6 +51,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorScene : public FOdysseyVectorGroup
     public:
         virtual ~FOdysseyVectorScene();
         FOdysseyVectorScene();
+        void FlipSelectionHorizontal( bool iWorld );
+        void FlipSelectionVertical( bool iWorld );
         void Signal( uint64 iSignalFlags );
         virtual void Update( uint32 iUpdateFlags ) override;
         void Init( std::string iName );
@@ -60,7 +63,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorScene : public FOdysseyVectorGroup
         std::list<FOdysseyVectorObject*>& GetSelectedObjectList();
         virtual void DrawShape( uint64 iFlags ) override;
         bool PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags ) { return false; };
-
+        ::ULIS::FVec2D GetWorldPositionFromSelection();
         void InvalidateObject( FOdysseyVectorObject* iObject );
         void RemoveSelectedObjects();
 

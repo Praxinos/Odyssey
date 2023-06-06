@@ -95,6 +95,8 @@ FOdysseyTextureEditorGUI::BindShortcuts(FBaseToolkit* iToolkit)
     MAP_ACTION(textureEditorCommands.BringForward, BringForward )
     MAP_ACTION(textureEditorCommands.SendBackward, SendBackward )
     MAP_ACTION(textureEditorCommands.RemoveSelectedObjects, RemoveSelectedObjects )
+    MAP_ACTION(textureEditorCommands.FlipHorizontal, FlipHorizontal )
+    MAP_ACTION(textureEditorCommands.FlipVertical, FlipVertical )
 
     #undef MAP_ACTION
 }
@@ -152,10 +154,22 @@ FOdysseyTextureEditorGUI::ExtendMenuAbout( FToolMenuOwner iOwner, FName iMenuNam
             , NAME_None );
         aboutSection.AddMenuEntry(
             FOdysseyTextureEditorCommands::Get().RemoveSelectedObjects
-            ,LOCTEXT("RemoveSelectedObjects","RemoveSelectedObjects")
-            ,LOCTEXT("RemoveSelectedObjects","RemoveSelectedObjects")
-            ,FSlateIcon("OdysseyStyle","OdysseyLogo.Iliad16")
-            ,NAME_None);
+            , LOCTEXT("RemoveSelectedObjects","RemoveSelectedObjects")
+            , LOCTEXT("RemoveSelectedObjects","RemoveSelectedObjects")
+            , FSlateIcon("OdysseyStyle","OdysseyLogo.Iliad16")
+            , NAME_None );
+        aboutSection.AddMenuEntry(
+            FOdysseyTextureEditorCommands::Get().FlipHorizontal
+            , LOCTEXT("FlipHorizontal","FlipHorizontal")
+            , LOCTEXT("FlipHorizontal","FlipHorizontal")
+            , FSlateIcon("OdysseyStyle","OdysseyLogo.Iliad16")
+            , NAME_None );
+        aboutSection.AddMenuEntry(
+            FOdysseyTextureEditorCommands::Get().FlipVertical
+            , LOCTEXT("FlipVertical","FlipVertical")
+            , LOCTEXT("FlipVertical","FlipVertical")
+            , FSlateIcon("OdysseyStyle","OdysseyLogo.Iliad16")
+            , NAME_None );
     }
 }
 
@@ -215,7 +229,7 @@ FOdysseyTextureEditorGUI::RemoveSelectedObjects()
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        FOdysseyPainterEditorGUI::RemoveSelectedObjects( vectorEngine, vectorScene, currentVectorLayer );
+        FOdysseyPainterEditorGUI::RemoveSelectedObjects( vectorEngine, vectorScene );
     }
 }
 
@@ -230,7 +244,7 @@ FOdysseyTextureEditorGUI::BringForward()
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        FOdysseyPainterEditorGUI::BringForward( vectorEngine, vectorScene, currentVectorLayer );
+        FOdysseyPainterEditorGUI::BringForward( vectorEngine, vectorScene );
     }
 }
 
@@ -245,7 +259,7 @@ FOdysseyTextureEditorGUI::SendBackward()
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        FOdysseyPainterEditorGUI::SendBackward( vectorEngine, vectorScene, currentVectorLayer );
+        FOdysseyPainterEditorGUI::SendBackward( vectorEngine, vectorScene );
     }
 }
 
@@ -261,7 +275,7 @@ FOdysseyTextureEditorGUI::Ungroup()
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        FOdysseyPainterEditorGUI::Ungroup( vectorEngine, vectorScene, currentVectorLayer );
+        FOdysseyPainterEditorGUI::Ungroup( vectorEngine, vectorScene );
     }
 }
 
@@ -276,7 +290,7 @@ FOdysseyTextureEditorGUI::ResetView()
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        FOdysseyPainterEditorGUI::ResetView( vectorEngine, vectorScene, currentVectorLayer );
+        FOdysseyPainterEditorGUI::ResetView( vectorEngine, vectorScene );
     }
 }
 
@@ -292,7 +306,7 @@ FOdysseyTextureEditorGUI::Group()
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        FOdysseyPainterEditorGUI::Group( vectorEngine, vectorScene, currentVectorLayer );
+        FOdysseyPainterEditorGUI::Group( vectorEngine, vectorScene );
     }
 }
 
@@ -308,7 +322,39 @@ FOdysseyTextureEditorGUI::GroupPaint()
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        FOdysseyPainterEditorGUI::GroupPaint( vectorEngine, vectorScene, currentVectorLayer );
+        FOdysseyPainterEditorGUI::GroupPaint( vectorEngine, vectorScene );
+    }
+}
+
+void
+FOdysseyTextureEditorGUI::FlipHorizontal()
+{
+    TSharedPtr<FOdysseyPainterEditorSelectedVectorObjectTab>& vectorObjectTab = mEditor->GetGUI()->GetSelectedVectorObjectTab();
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(static_cast<FOdysseyTextureEditor*>(mEditor)->LayerStack());
+    UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
+
+    if( currentVectorLayer )
+    {
+        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+
+        FOdysseyPainterEditorGUI::FlipHorizontal( vectorEngine, vectorScene );
+    }
+}
+
+void
+FOdysseyTextureEditorGUI::FlipVertical()
+{
+    TSharedPtr<FOdysseyPainterEditorSelectedVectorObjectTab>& vectorObjectTab = mEditor->GetGUI()->GetSelectedVectorObjectTab();
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(static_cast<FOdysseyTextureEditor*>(mEditor)->LayerStack());
+    UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
+
+    if( currentVectorLayer )
+    {
+        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+
+        FOdysseyPainterEditorGUI::FlipVertical( vectorEngine, vectorScene );
     }
 }
 

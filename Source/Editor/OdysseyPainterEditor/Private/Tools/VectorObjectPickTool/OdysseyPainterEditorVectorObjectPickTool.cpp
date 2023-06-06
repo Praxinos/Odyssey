@@ -6,6 +6,31 @@
 
 #define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorObjectPickTool"
 
+#include "Models/OdysseyPainterEditorCommands.h"
+#include "Framework/MultiBox/MultiBoxBuilder.h"
+
+class FOdysseyTextureEditorMenuVector : public FMenuBuilder
+{
+    public:
+       ~FOdysseyTextureEditorMenuVector(){};
+        FOdysseyTextureEditorMenuVector();
+};
+
+
+
+FOdysseyTextureEditorMenuVector::FOdysseyTextureEditorMenuVector()
+    : FMenuBuilder( true, NULL )
+{
+    this->AddMenuEntry(
+            FOdysseyPainterEditorCommands::Get().AboutIliad
+            , NAME_None
+            , LOCTEXT("AboutIliad", "About Iliad")
+            , LOCTEXT("AboutIliad_Tooltip", "to get more information about the plugin, the team that created it, etc.")
+            , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16") );
+
+    this->AddMenuSeparator();
+}
+
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
 UOdysseyPainterEditorVectorObjectPickTool::~UOdysseyPainterEditorVectorObjectPickTool()
@@ -66,16 +91,32 @@ UOdysseyPainterEditorVectorObjectPickTool::OnMouseDownVector( FOdysseyVectorEngi
                                                             , const FOdysseyPoint& iPointInTexture
                                                             , const FKey& iKey )
 {
-    mPressedMouseCoords.x = iPointInTexture.x;
-    mPressedMouseCoords.y = iPointInTexture.y;
+    if( iKey == EKeys::RightMouseButton )
+    {
+static FOdysseyTextureEditorMenuVector menu;
 
-    mPointArray.clear();
+        FSlateApplication::Get().PushMenu(
+        GetEditorAs<FOdysseyPainterEditor>()->GetGUI()->GetWidget(),
+        FWidgetPath(),
+        menu.MakeWidget(),
+        FVector2D(iPointInTexture.x, iPointInTexture.y),
+        FPopupTransitionEffect(FPopupTransitionEffect::ContextMenu)
+        );
+    }
 
-    mSelectionHUD->SetSelecting( true, &mPointArray );
+    if( iKey == EKeys::LeftMouseButton )
+    {
+        mPressedMouseCoords.x = iPointInTexture.x;
+        mPressedMouseCoords.y = iPointInTexture.y;
 
-    mPointArray.push_back( ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y ) );
+        mPointArray.clear();
 
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+        mSelectionHUD->SetSelecting( true, &mPointArray );
+
+        mPointArray.push_back( ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y ) );
+
+        iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    }
 
     return true;
 }

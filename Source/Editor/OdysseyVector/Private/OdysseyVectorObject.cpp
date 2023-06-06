@@ -81,6 +81,25 @@ FOdysseyVectorObject::SetIsSelected( bool iIsSelected )
 }
 
 void
+FOdysseyVectorObject::Transfer( const BLMatrix2D& iMatrix )
+{
+    BLMatrix2D inverseMatrix = iMatrix;
+    BLMatrix2D localMatrix;
+
+    inverseMatrix.invert();
+
+    FOdysseyVector::MatrixMultiply( inverseMatrix, mWorldMatrix, localMatrix );
+    FOdysseyVector::ExtractTransformations( localMatrix
+                                          , &mObjectParam.TranslationX
+                                          , &mObjectParam.TranslationY
+                                          , &mObjectParam.Rotation
+                                          , &mObjectParam.ScalingX
+                                          , &mObjectParam.ScalingY );
+
+    //UpdateMatrix();
+}
+
+void
 FOdysseyVectorObject::Translate( double iX, double iY )
 {
     mObjectParam.TranslationX = iX;

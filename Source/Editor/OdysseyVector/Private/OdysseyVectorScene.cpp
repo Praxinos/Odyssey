@@ -146,6 +146,98 @@ FOdysseyVectorScene::MakePaintGroupFromSelectedObjects( std::vector<FOdysseyVect
     return nullptr;
 }
 
+::ULIS::FVec2D
+FOdysseyVectorScene::GetWorldPositionFromSelection()
+{
+    BLPoint averagePosition = BLPoint( 0.0f, 0.0f );
+
+    if ( mSelectedObjectList.size() )
+    {
+        for( std::list<FOdysseyVectorObject*>::iterator it = mSelectedObjectList.begin(); it != mSelectedObjectList.end(); ++it )
+        {
+            FOdysseyVectorObject *obj = (*it);
+            ::ULIS::FRectD bbox = obj->GetBBox( true );
+            BLPoint middle = BLPoint( bbox.x + bbox.w * 0.5f
+                                    , bbox.y + bbox.h * 0.5f );
+
+            averagePosition.x += middle.x;
+            averagePosition.y += middle.y;
+        }
+
+        averagePosition.x /= mSelectedObjectList.size();
+        averagePosition.y /= mSelectedObjectList.size();
+    }
+
+    return ::ULIS::FVec2D( averagePosition.x, averagePosition.y );
+}
+
+void
+FOdysseyVectorScene::FlipSelectionHorizontal( bool iWorld )
+{
+    FlipSelection( iWorld, -1.0f, 1.0f );
+}
+
+void
+FOdysseyVectorScene::FlipSelectionVertical( bool iWorld )
+{
+    FlipSelection( iWorld, 1.0f, -1.0f );
+}
+
+void
+FOdysseyVectorScene::FlipSelection( bool iWorld, double iXFactor, double iYFactor )
+{
+    ::ULIS::FVec2D axisPosition = GetWorldPositionFromSelection();
+    BLMatrix2D inverseAxisMatrix;
+    BLMatrix2D axisMatrix;
+    BLMatrix2D flippingMatrix;
+
+    axisMatrix.reset();
+    axisMatrix.translate( axisPosition.x, axisPosition.y );
+
+    BLMatrix2D::invert( inverseAxisMatrix, axisMatrix );
+
+    flippingMatrix.resetToScaling( iXFactor, iYFactor );
+
+    for( std::list<FOdysseyVectorObject*>::iterator it = mSelectedObjectList.begin(); it != mSelectedObjectList.end(); ++it )
+    {
+        FOdysseyVectorObject *object = (*it);
+
+        if( object->HasSelectedAncestor() == false )
+        {
+            BLMatrix2D& objectWorldMatrix = object->GetWorldMatrix();
+            BLPoint objectWorldCenter = objectWorldMatrix.mapPoint( 0.0f, 0.0f );
+            BLPoint objectLocalCenter = inverseAxisMatrix.mapPoint( objectWorldCenter ); 
+            BLPoint objectLocalFlippedCenter = flippingMatrix.mapPoint( objectLocalCenter );
+            BLPoint objectWorldFlippedCenter = axisMatrix.mapPoint( objectLocalFlippedCenter );
+
+            objectLocalCenter = object->GetParent()->GetInverseWorldMatrix().mapPoint( objectWorldFlippedCenter );
+
+            object->Translate( objectLocalCenter.x, objectLocalCenter.y );
+            object->Scale( iXFactor * object->GetScalingX(), iYFactor * object->GetScalingY() );
+            object->Rotate( -object->GetRotation() );
+
+            object->UpdateMatrix();
+        }
+    }
+            
+/*
+            BLMatrix2D objectAxisMatrix;
+            BLMatrix2D finalLocalMatrix;
+            BLMatrix2D finalWorldMatrix;
+
+            FOdysseyVector::MatrixMultiply( inverseAxisMatrix, objectWorldMatrix, objectAxisMatrix );
+            FOdysseyVector::MatrixMultiply( iFlippingMatrix, objectAxisMatrix, finalLocalMatrix );
+            FOdysseyVector::MatrixMultiply( axisMatrix, finalLocalMatrix, finalWorldMatrix );
+
+            objectWorldMatrix = finalWorldMatrix;
+
+            object->Transfer( object->GetParent()->GetWorldMatrix() );
+            object->UpdateMatrix();
+        }
+    }
+*/
+}
+
 FOdysseyVectorGroup*
 FOdysseyVectorScene::GroupSelectedObjects( std::vector<FOdysseyVectorObject*>& oObjectArray
                                          , std::vector<FOdysseyVectorObject*>& oObjectOldParentArray )

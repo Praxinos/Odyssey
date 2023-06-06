@@ -104,4 +104,10 @@ public:
 
     /** Action to remove selected vector objects */
     TSharedPtr<FUICommandInfo> RemoveSelectedObjects;
+
+    /** Action to remove selected vector objects */
+    TSharedPtr<FUICommandInfo> FlipHorizontal;
+
+    /** Action to remove selected vector objects */
+    TSharedPtr<FUICommandInfo> FlipVertical;
 };
