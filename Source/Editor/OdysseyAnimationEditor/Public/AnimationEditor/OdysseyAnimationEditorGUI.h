@@ -8,6 +8,7 @@
 #include "OdysseyAnimationEditorLayerStackTab.h"
 
 class FOdysseyAnimationEditor;
+class FOdysseyAnimationEditorLightTableTab;
 
 /**
  * Implements an Editor toolkit for textures.
@@ -28,6 +29,7 @@ public:
     // GettersFName
 	virtual FName GetLayoutName() override;
     TSharedPtr<FOdysseyAnimationEditorLayerStackTab>& GetLayerStackTab();
+    TSharedPtr<FOdysseyAnimationEditorLightTableTab>& GetLightTableTab();
 
 protected:
 	virtual TSharedRef<FTabManager::FSplitter>	CreateBottomSection() override;
@@ -37,5 +39,6 @@ private:
 
 private:
     //Tabs
-    TSharedPtr<FOdysseyAnimationEditorLayerStackTab>          mLayerStackTab;
+    TSharedPtr<FOdysseyAnimationEditorLayerStackTab> mLayerStackTab;
+    TSharedPtr<FOdysseyAnimationEditorLightTableTab> mLightTableTab;
 };

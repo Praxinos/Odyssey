@@ -4,6 +4,7 @@
 #include "AnimationEditor/OdysseyAnimationEditorGUI.h"
 
 #include "AnimationEditor/OdysseyAnimationEditor.h"
+#include "AnimationEditor/OdysseyAnimationEditorLightTableTab.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyAnimationEditorGUI"
 
@@ -31,6 +32,7 @@ FOdysseyAnimationEditorGUI::CreateTabs()
 
 	//ADD NEW TABS
 	ODYSSEY_ADD_TAB(mLayerStackTab, FOdysseyAnimationEditorLayerStackTab, mEditor);
+	ODYSSEY_ADD_TAB(mLightTableTab, FOdysseyAnimationEditorLightTableTab, mEditor);
 }
 
 TSharedRef<FTabManager::FSplitter>
@@ -60,6 +62,12 @@ TSharedPtr<FOdysseyAnimationEditorLayerStackTab>&
 FOdysseyAnimationEditorGUI::GetLayerStackTab()
 {
 	return mLayerStackTab;
+}
+
+TSharedPtr<FOdysseyAnimationEditorLightTableTab>&
+FOdysseyAnimationEditorGUI::GetLightTableTab()
+{
+	return mLightTableTab;
 }
 
 #undef LOCTEXT_NAMESPACE

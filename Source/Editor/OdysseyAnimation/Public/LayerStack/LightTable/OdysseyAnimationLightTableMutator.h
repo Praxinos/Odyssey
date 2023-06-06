@@ -19,7 +19,7 @@ public:
 public:
     void SetKeyIsActivated(int iIndex, bool iIsActivated);
     void SetKeyFrameOffset(int iIndex, int iOffset);
-    void SetKeyFrameOpacity(int iIndex, float iOpacity);
+    void SetKeyOpacity(int iIndex, float iOpacity);
 
 private:
     TSharedPtr<FOdysseyAnimationLightTable> mLightTable;
