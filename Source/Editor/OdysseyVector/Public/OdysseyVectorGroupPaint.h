@@ -56,7 +56,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         /**
          * @brief constructor
          */
-        FOdysseyVectorGroupPaint( std::string iName );
+        FOdysseyVectorGroupPaint( const FString& iName );
 
         /**
          * @brief function called after a child has its matrix updated.

@@ -8,7 +8,7 @@ FOdysseyVectorObject::~FOdysseyVectorObject()
 {
 }
 
-FOdysseyVectorObject::FOdysseyVectorObject()
+FOdysseyVectorObject::FOdysseyVectorObject( const FString& iName )
     : mParent( nullptr )
     , mIsSelected( false )
     , mDependsOnChildren( false )
@@ -19,6 +19,8 @@ FOdysseyVectorObject::FOdysseyVectorObject()
     mWorldMatrix.reset();
     mInverseLocalMatrix.reset();
     mInverseWorldMatrix.reset();
+
+    SetName( iName );
 
     mObjectParam.TranslationX = 0.0f;
     mObjectParam.TranslationY = 0.0f;
@@ -38,9 +40,9 @@ FOdysseyVectorObject::GetFillBucket()
 }
 
 void
-FOdysseyVectorObject::SetName( std::string iName )
+FOdysseyVectorObject::SetName( const FString& iName )
 {
-    Name.assign( iName );
+    mObjectParam.Name = iName;
 }
 
 bool
@@ -213,8 +215,7 @@ FOdysseyVectorObject::CopySettings( FOdysseyVectorObject& iDestinationObject )
 
     iDestinationObject.mBBox = mBBox;
 
-    iDestinationObject.Name = Name;
-    iDestinationObject.Name.append("_Copy");
+    iDestinationObject.SetName( mObjectParam.Name + FString("_Copy") );
 }
 
 double

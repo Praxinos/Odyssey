@@ -4,8 +4,9 @@ FOdysseyVectorPath::~FOdysseyVectorPath()
 {
 }
 
-FOdysseyVectorPath::FOdysseyVectorPath()
-    : mPaintingCode( 0 )
+FOdysseyVectorPath::FOdysseyVectorPath( const FString& iName )
+    : FOdysseyVectorObject( iName )
+    , mPaintingCode( 0 )
 {
     SetJointType( eJointType::Miter );
 
@@ -24,7 +25,7 @@ FOdysseyVectorPath::HasBaseClass( uint32 iBaseClassID )
 }
 
 void
-FOdysseyVectorPath::Init( std::string iName )
+FOdysseyVectorPath::Init( const FString& iName )
 {
     SetName( iName );
 }

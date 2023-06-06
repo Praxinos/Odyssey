@@ -15,7 +15,8 @@ FOdysseyVectorGroupPaint::~FOdysseyVectorGroupPaint()
     //ClearCycles();
 }
 
-FOdysseyVectorGroupPaint::FOdysseyVectorGroupPaint( std::string iName )
+FOdysseyVectorGroupPaint::FOdysseyVectorGroupPaint( const FString& iName )
+    : FOdysseyVectorGroup( iName )
 {
     SetName( iName );
 

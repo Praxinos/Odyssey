@@ -4,11 +4,27 @@
 
 #include <blend2d.h>
 #include "OdysseyVectorObject.h"
-#include "OdysseyVectorSegment.h"
+#include "OdysseyVectorSegmentCubic.h"
+#include "OdysseyVectorPathCubic.h"
 
-//#include "OdysseyVectorRectangle.generated.h"
+#include "OdysseyVectorRectangle.generated.h"
 
-class ODYSSEYVECTOR_API FOdysseyVectorRectangle : public FOdysseyVectorPath
+USTRUCT()
+struct FRectangleParam
+{
+    GENERATED_BODY()
+
+    UPROPERTY(EditAnywhere, Category="Geometry")
+    double StrokeWidth;
+
+    UPROPERTY(EditAnywhere, Category="Geometry")
+    double Width;
+
+    UPROPERTY(EditAnywhere, Category="Geometry")
+    double Height;
+};
+
+class ODYSSEYVECTOR_API FOdysseyVectorRectangle : public FOdysseyVectorPathCubic
 {
     private:
         static const uint32 mStaticClass = 0x9ee34077; // value is crc32 FOdysseyVectorRectangle
@@ -23,18 +39,21 @@ class ODYSSEYVECTOR_API FOdysseyVectorRectangle : public FOdysseyVectorPath
         void DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags );
         bool PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags );
         FOdysseyVectorObject* CopyShape();
-        void UpdateShape( uint32 iUpdateFlags ) {};
+        void UpdateShape( uint32 iUpdateFlags );
 
     protected :
-        double mWidth;
-        double mHeight; 
-        double mStrokeWidth;
+        FOdysseyVectorVertex* mCubicVertex[4];
+        FOdysseyVectorSegmentCubic* mCubicSegment[4];
 
     public:
         virtual ~FOdysseyVectorRectangle();
-        FOdysseyVectorRectangle();
-        void Init( std::string iName, double iWidth, double iHeight );
+        FOdysseyVectorRectangle( FString iName, double iWidth, double iHeight );
+        void Init( const FString& iName, double iWidth, double iHeight );
         void SetSize( double iWidth, double iHeight );
         double GetWidth();
         double GetHeight();
+        FOdysseyVectorPathCubic* Convert();
+
+    public:
+        FRectangleParam mRectangleParam;
 };

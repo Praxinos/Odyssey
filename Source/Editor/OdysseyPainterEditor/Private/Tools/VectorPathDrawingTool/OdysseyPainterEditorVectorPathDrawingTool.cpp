@@ -128,7 +128,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorEng
     {
         if ( cubicPath == nullptr )
         {
-            cubicPath = new FOdysseyVectorPathCubic();
+            cubicPath = new FOdysseyVectorPathCubic( FString("CubicPath") );
 
             // This undo must be set before association with the new parent object
             // needed for valid GUndo pointer

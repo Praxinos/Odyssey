@@ -5,12 +5,15 @@ FOdysseyVectorScene::~FOdysseyVectorScene()
 
 }
 
-FOdysseyVectorScene::FOdysseyVectorScene()
+FOdysseyVectorScene::FOdysseyVectorScene( const FString& iName )
+    : FOdysseyVectorGroup( iName )
 {
     mFillBucket.SetColor( 0, 0, 0, 0 );
+
+    Init( iName );
 }
 
-void FOdysseyVectorScene::Init( std::string iName )
+void FOdysseyVectorScene::Init( const FString& iName )
 {
     SetName( iName );
 }
@@ -70,9 +73,7 @@ FOdysseyVectorScene::Select( FOdysseyVectorObject* iVecObj )
 FOdysseyVectorObject*
 FOdysseyVectorScene::CopyShape()
 {
-    FOdysseyVectorScene* rootCopy = new FOdysseyVectorScene();
-
-    rootCopy->Init( Name );
+    FOdysseyVectorScene* rootCopy = new FOdysseyVectorScene( mObjectParam.Name );
 
     return static_cast<FOdysseyVectorObject*>(rootCopy);
 }
@@ -263,7 +264,7 @@ FOdysseyVectorScene::GroupSelectedObjects( std::vector<FOdysseyVectorObject*>& o
 */
     if ( mSelectedObjectList.size() )
     {
-        FOdysseyVectorGroup* group = new FOdysseyVectorGroup();
+        FOdysseyVectorGroup* group = new FOdysseyVectorGroup( FString("Group") );
 
         AppendChild ( group );
 

@@ -1,7 +1,7 @@
 #include "OdysseyVectorPathCubic.h"
 
-FOdysseyVectorPathCubic::FOdysseyVectorPathCubic()
-    : FOdysseyVectorPath()
+FOdysseyVectorPathCubic::FOdysseyVectorPathCubic( const FString& iName )
+    : FOdysseyVectorPath( iName )
 {
 
 }
@@ -18,7 +18,7 @@ FOdysseyVectorPathCubic::HasBaseClass( uint32 iBaseClassID )
 }
 
 void
-FOdysseyVectorPathCubic::Init( std::string iName )
+FOdysseyVectorPathCubic::Init( FString& iName )
 {
     SetName( iName );
 }
@@ -600,7 +600,7 @@ FOdysseyVectorPathCubic::Mirror( bool iMirrorX, bool iMirrorY )
 FOdysseyVectorObject*
 FOdysseyVectorPathCubic::CopyShape()
 {
-    FOdysseyVectorPathCubic* cubicPathCopy = new FOdysseyVectorPathCubic();
+    FOdysseyVectorPathCubic* cubicPathCopy = new FOdysseyVectorPathCubic( FString("Cubic Path") );
     std::map<FOdysseyVectorVertex*, FOdysseyVectorVertex*> lookupTable;
 
     for( std::list<FOdysseyVectorVertex*>::iterator it = mVertexList.begin(); it != mVertexList.end(); ++it )

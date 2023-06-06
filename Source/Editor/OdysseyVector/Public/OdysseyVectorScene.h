@@ -50,12 +50,12 @@ class ODYSSEYVECTOR_API FOdysseyVectorScene : public FOdysseyVectorGroup
 
     public:
         virtual ~FOdysseyVectorScene();
-        FOdysseyVectorScene();
+        FOdysseyVectorScene( const FString& iName );
         void FlipSelectionHorizontal( bool iWorld );
         void FlipSelectionVertical( bool iWorld );
         void Signal( uint64 iSignalFlags );
         virtual void Update( uint32 iUpdateFlags ) override;
-        void Init( std::string iName );
+        void Init( const FString& iName );
         void Select( FOdysseyVectorObject* iVecObj );
         void Unselect( FOdysseyVectorObject* iVecObj );
         void ClearSelection();

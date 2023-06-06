@@ -34,8 +34,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathCubic: public FOdysseyVectorPath
         static void SmoothSegments( FOdysseyVectorVertex* iVertex, bool iBuildSegments, bool iPreserveHandleLength );
         static ::ULIS::FVec2D GetPerpendicularVector( FOdysseyVectorVertex* iVertex, bool iNormalize );
 
-        FOdysseyVectorPathCubic();
-        void Init( std::string iName );
+        FOdysseyVectorPathCubic( const FString& iName );
+        void Init( FString& iName );
         bool PickPoint( double iWorldX
                       , double iWorldY
                       , double iSelectionRadius

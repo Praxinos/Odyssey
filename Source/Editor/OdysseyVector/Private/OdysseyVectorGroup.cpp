@@ -1,7 +1,12 @@
 #include "OdysseyVectorGroup.h"
 
+FOdysseyVectorGroup::FOdysseyVectorGroup( const FString& iName )
+    : FOdysseyVectorObject( iName )
+{
+}
+
 void
-FOdysseyVectorGroup::Init( std::string iName )
+FOdysseyVectorGroup::Init( FString& iName )
 {
     SetName( iName );
 }
@@ -27,7 +32,7 @@ FOdysseyVectorGroup::PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags )
 FOdysseyVectorObject*
 FOdysseyVectorGroup::CopyShape()
 {
-    return new FOdysseyVectorGroup();
+    return new FOdysseyVectorGroup( mObjectParam.Name );
 }
 
 void

@@ -45,7 +45,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDownVector( FOdysseyVect
     BLPoint localCoords = iScene->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
     ::ULIS::FColor color = GetEditorAs<FOdysseyPainterEditor>()->PaintColor().GetValue();
     ::ULIS::FColor rgba8 = color.ToFormat( ::ULIS::eFormat::Format_RGBA8 );
-    FOdysseyVectorEllipse* circle = FOdysseyVectorEllipse::New( "Circle", 0.0f, 0.0f );
+    FOdysseyVectorEllipse* circle = new FOdysseyVectorEllipse( FString("Circle"), 0.0f, 0.0f );
 
     iScene->AppendChild( circle );
 

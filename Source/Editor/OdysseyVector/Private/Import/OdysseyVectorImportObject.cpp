@@ -13,19 +13,19 @@ CreateObject( uint32 iObjectType )
         break;
 
         case FOdysseyVectorObject::VECTORPATHCUBICTYPE :
-            newObject = new FOdysseyVectorPathCubic();
+            newObject = new FOdysseyVectorPathCubic( FString("CubicPath"));
         break;
 
         case FOdysseyVectorObject::VECTORGROUPPAINTTYPE :
-            newObject = new FOdysseyVectorGroupPaint( "Paint Group" );
+            newObject = new FOdysseyVectorGroupPaint( FString("PaintGroup") );
         break;
 
         case FOdysseyVectorObject::VECTORELLIPSETYPE :
-            newObject = FOdysseyVectorEllipse::New( "", 0.0f, 0.0f );
+            newObject = new FOdysseyVectorEllipse( FString("Ellipse"), 0.0f, 0.0f );
         break;
 
         default :
-            newObject = new FOdysseyVectorObject();
+            newObject = new FOdysseyVectorObject( FString("Object") );
         break;
     }
 

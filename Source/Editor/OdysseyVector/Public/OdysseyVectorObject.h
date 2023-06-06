@@ -16,6 +16,9 @@ struct FObjectParam
 {
     GENERATED_BODY()
 
+    UPROPERTY(EditAnywhere, Category="Identity")
+    FString Name;
+
     UPROPERTY(EditAnywhere, Category="Transform")
     double TranslationX;
 
@@ -72,9 +75,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
 
         static constexpr float BBOX_POINT_RADIUS = 4.0f;
 
-    protected:
-        std::string Name;
-
     public:
         FObjectParam mObjectParam;
 
@@ -105,8 +105,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         static ::ULIS::FRectD GetBoundingBoxFromList( std::list<FOdysseyVectorObject*>& iObjectList );
 
         virtual ~FOdysseyVectorObject();
-        FOdysseyVectorObject();
-        void SetName( std::string iName );
+        FOdysseyVectorObject( const FString& iName );
+        void SetName( const FString& iName );
         void CopySettings( FOdysseyVectorObject& iDestinationObject );
         virtual void FlipHorizontal(){};
         virtual void FlipVertical(){};

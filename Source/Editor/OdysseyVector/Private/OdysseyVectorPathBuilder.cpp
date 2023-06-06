@@ -66,7 +66,8 @@ FOdysseyVectorPathBuilder::~FOdysseyVectorPathBuilder()
 }
 
 FOdysseyVectorPathBuilder::FOdysseyVectorPathBuilder()
-    : mCumulAngle ( 0.0f )
+    : FOdysseyVectorObject( FString("PathBuilder") )
+    , mCumulAngle ( 0.0f )
     , mCubicPath ( nullptr )
     , mCumulAngleLimit ( 1.5708f ) // 90 degrees
     , mPointID( 0 )
@@ -217,8 +218,8 @@ FOdysseyVectorPathBuilder::RecordVertex()
 
             Smooth( mCubicSegment, mSampleBuffer[0].IsSharp() );
 
-            AdjustHandle( mCubicSegment, 0, 0.5f, 1 );
-            AdjustHandle( mCubicSegment, 1, 0.5f, 1 );
+            AdjustHandle( mCubicSegment, 0, 0.5f, 3 );
+            AdjustHandle( mCubicSegment, 1, 0.5f, 3 );
 
             mCubicSegment->Invalidate();
 
@@ -399,8 +400,8 @@ FOdysseyVectorPathBuilder::RecordEnd( FOdysseyVectorVertex *iVertex )
 
             Smooth( mCubicSegment, mSampleBuffer[0].IsSharp() );
 
-            AdjustHandle( mCubicSegment, 0, 0.5f, 1 );
-            AdjustHandle( mCubicSegment, 1, 0.5f, 1 );
+            AdjustHandle( mCubicSegment, 0, 0.5f, 3 );
+            AdjustHandle( mCubicSegment, 1, 0.5f, 3 );
 
             mCubicSegment->Invalidate();
 
