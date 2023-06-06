@@ -53,6 +53,30 @@ SOdysseyAnimationLayerImageRasterRow::GenerateHeaderWidget()
             SNew(SCheckBox)
             .Type(ESlateCheckBoxType::ToggleButton)
             .ForegroundColor(FSlateColor::UseForeground())
+            .CheckedHoveredImage(FOdysseyStyle::GetBrush("OdysseyLayerStack.LightTableON16"))
+            .CheckedImage(FOdysseyStyle::GetBrush("OdysseyLayerStack.LightTableON16"))
+            .CheckedPressedImage(FOdysseyStyle::GetBrush("OdysseyLayerStack.LightTableON16"))
+            .UncheckedHoveredImage(FOdysseyStyle::GetBrush("OdysseyLayerStack.LightTableOFF16"))
+            .UncheckedImage(FOdysseyStyle::GetBrush("OdysseyLayerStack.LightTableOFF16"))
+            .UncheckedPressedImage(FOdysseyStyle::GetBrush("OdysseyLayerStack.LightTableOFF16"))
+            .OnCheckStateChanged(this, &SOdysseyAnimationLayerImageRasterRow::OnLightTableCheckStateChanged)
+            .IsChecked(this, &SOdysseyAnimationLayerImageRasterRow::GetLightTableIsChecked)
+            [
+                //Just for the checkbox to take the space of an icon
+                SNew(SImage)
+                    .Visibility(EVisibility::Hidden)
+                    .Image(FOdysseyStyle::GetBrush("OdysseyLayerStack.LightTableON16"))
+		    ]
+        ]
+        +SHorizontalBox::Slot()
+        .Padding(FMargin(0.f, 0.f, 2.f, 0.f))
+        .VAlign(VAlign_Center)
+        .AutoWidth()
+        [
+            //AlphaLock
+            SNew(SCheckBox)
+            .Type(ESlateCheckBoxType::ToggleButton)
+            .ForegroundColor(FSlateColor::UseForeground())
             .CheckedHoveredImage(FOdysseyStyle::GetBrush("OdysseyLayerStack.AlphaLocked16"))
             .CheckedImage(FOdysseyStyle::GetBrush("OdysseyLayerStack.AlphaLocked16"))
             .CheckedPressedImage(FOdysseyStyle::GetBrush("OdysseyLayerStack.AlphaLocked16"))
@@ -116,6 +140,12 @@ SOdysseyAnimationLayerImageRasterRow::GenerateTimelineWidget()
 }
 
 void
+SOdysseyAnimationLayerImageRasterRow::OnLightTableCheckStateChanged(ECheckBoxState iState)
+{
+    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageRaster, "bIsLightTableActivated", iState == ECheckBoxState::Checked);
+}
+
+void
 SOdysseyAnimationLayerImageRasterRow::OnIsAlphaLockedCheckStateChanged(ECheckBoxState iState)
 {
     FScopedTransaction ScopedTransaction(LOCTEXT("LayerTransaction", "Change Layer Alpha Lock"));
@@ -147,6 +177,12 @@ void
 SOdysseyAnimationLayerImageRasterRow::OnOpacityEndSliderMovement(int iValue)
 {
     GEditor->EndTransaction();
+}
+
+ECheckBoxState
+SOdysseyAnimationLayerImageRasterRow::GetLightTableIsChecked() const
+{
+	return mAnimationLayerImageRaster->bIsLightTableActivated ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 }
 
 ECheckBoxState

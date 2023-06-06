@@ -285,6 +285,21 @@ UOdysseyAnimationLayerImageRaster::IsAlphaLockedChanged()
 }
 
 void
+UOdysseyAnimationLayerImageRaster::IsLightTableActivatedChanged()
+{   
+    UOdysseyAnimation* animation = GetAnimation();
+    if ( !animation )
+        return;
+
+    TSharedPtr<IOdysseyAnimationImageRenderingAbility> imageRenderAbility = GetAbility<IOdysseyAnimationImageRenderingAbility>();
+    if ( !imageRenderAbility )
+        return;
+
+    imageRenderAbility->Changed();
+    imageRenderAbility->Commited();
+}
+
+void
 UOdysseyAnimationLayerImageRaster::OpacityChanged()
 {
     OnOpacityChanged().Broadcast(this);
@@ -297,10 +312,8 @@ UOdysseyAnimationLayerImageRaster::OpacityChanged()
     if ( !imageRenderAbility )
         return;
 
-    //TODO: react to interactive events by not commiting immediately
-    ::ULIS::FRectI rect = ::ULIS::FRectI::FromXYWH(0, 0, animation->Width(), animation->Height());
-    imageRenderAbility->Changed({ rect });
-    imageRenderAbility->Commited({ rect });
+    imageRenderAbility->Changed();
+    imageRenderAbility->Commited();
 }
 
 void
@@ -315,11 +328,9 @@ UOdysseyAnimationLayerImageRaster::BlendModeChanged()
     TSharedPtr<IOdysseyAnimationImageRenderingAbility> imageRenderAbility = GetAbility<IOdysseyAnimationImageRenderingAbility>();
     if ( !imageRenderAbility )
         return;
-    {
-        ::ULIS::FRectI rect = ::ULIS::FRectI::FromXYWH(0, 0, animation->Width(), animation->Height());
-        imageRenderAbility->Changed({ rect });
-        imageRenderAbility->Commited({ rect });
-    }
+
+    imageRenderAbility->Changed();
+    imageRenderAbility->Commited();
 }
 
 void
@@ -346,6 +357,8 @@ UOdysseyAnimationLayerImageRaster::PropertyChanged(const FName& iPropertyName)
         OpacityChanged();
     if (iPropertyName == "IsAlphaLocked")
         IsAlphaLockedChanged();
+    if (iPropertyName == "bIsLightTableActivated")
+        IsLightTableActivatedChanged();
 }
 
 void

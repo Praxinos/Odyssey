@@ -113,6 +113,7 @@ public:
     virtual void Merge(const TArray<UOdysseyLayer*>& Layers) override;
 
 protected:
+    void IsLightTableActivatedChanged();
     void IsAlphaLockedChanged();
     void OpacityChanged();
     void BlendModeChanged();

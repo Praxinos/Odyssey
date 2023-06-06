@@ -34,6 +34,8 @@ private:
     virtual TSharedRef<SWidget> GenerateTimelineWidget() override;
     void OnIsAlphaLockedCheckStateChanged(ECheckBoxState iState);
     ECheckBoxState GetIsAlphaLockedIsChecked() const;
+    void OnLightTableCheckStateChanged(ECheckBoxState iState);
+    ECheckBoxState GetLightTableIsChecked() const;
 
 private:
     void OnBlendModeComboBoxChanged(int32 iValue, ESelectInfo::Type iSelectInfo);
