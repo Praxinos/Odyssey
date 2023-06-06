@@ -5,39 +5,21 @@
 
 #include "CoreMinimal.h"
 #include "Widgets/Layout/SScrollBox.h"
+#include "OdysseyPaletteEntry.h"
 
 #include "OdysseyPalette.generated.h"
 
-
-USTRUCT(BlueprintType)
-struct FOdysseyColorEntry
-{
-    GENERATED_BODY()
-
-public:
-    UPROPERTY()
-    FName EntryName;
-
-    UPROPERTY()
-    FColor Color;
-};
-
 /////////////////////////////////////////////////////
 // OdysseyColorPalette
-UCLASS()
+UCLASS(BlueprintType, config = EditorPerProjectUserSettings, PerObjectConfig)
 class ODYSSEYPALETTE_API UOdysseyPalette : public UObject
 {
     GENERATED_BODY()
 
 public:
-    TSharedPtr<SWidget> CreateWidget();
+    UPROPERTY(EditAnywhere, Category = Palette)
+    TArray<UOdysseyPaletteEntry*> mPaletteEntries;
 
-public:
-    UPROPERTY(EditAnywhere)
-    TMap<FName, FColor> mPaletteMap;
-
-private:
-    TSharedPtr<SScrollBox> mElementsWidget;
-    /** The widget representation of the Bezier in Editor */
-    TSharedPtr<IDetailsView> mDetailsView;
+    UPROPERTY(config, DuplicateTransient, meta = (AllowedClasses = "OdysseyPaletteEntry"))
+    TSoftObjectPtr<UOdysseyPaletteEntry> CurrentEntry;
 };

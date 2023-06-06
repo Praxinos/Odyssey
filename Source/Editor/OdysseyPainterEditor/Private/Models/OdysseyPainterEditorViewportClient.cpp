@@ -797,7 +797,7 @@ FOdysseyPainterEditorViewportClient::OnInputEventWithState(const FOdysseyPoint& 
             FOdysseyPoint strokePoint_in_texture = GetLocalMousePosition(iPointInViewport);
             FVector2D position_in_texture(strokePoint_in_texture.x, strokePoint_in_texture.y);
             mOnPickColor.ExecuteIfBound(eOdysseyEventState::kSet, position_in_texture);
-
+            
             mIsCurrentModeActive = false;
             return true;
         }

@@ -4,14 +4,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Layout/Visibility.h"
 #include "Widgets/SCompoundWidget.h"
-#include "Widgets/DeclarativeSyntaxSupport.h"
-#include "PropertyCustomizationHelpers.h"
-#include "AssetThumbnail.h"
-#include "Engine/StaticMesh.h"
 #include "FOdysseyPalette.h"
-#include "Framework/MultiBox/MultiBoxBuilder.h"
 
 /** Delegate used to set a generic object */
 DECLARE_DELEGATE_OneParam( FOnMeshChanged, UStaticMesh* );
@@ -19,7 +13,7 @@ DECLARE_DELEGATE_OneParam( FOnMeshChanged, UStaticMesh* );
 /**
  * Implements the mesh selector
  */
-class ODYSSEYWIDGETS_API SOdysseyPalette : public STreeView<UOdysseyPalette*>
+class ODYSSEYWIDGETS_API SOdysseyPalette : public SCompoundWidget
 {
 public:
     SLATE_BEGIN_ARGS(SOdysseyPalette)
@@ -33,7 +27,7 @@ public:
 
 public:
     // Getter / Setter
-    FOdysseyPalette* GetColorPalette();
+    FOdysseyPalette* GetColorPalette() const;
 
 private:
     // Private internal callbacks
@@ -45,9 +39,18 @@ private:
     //Internal Widget Creation
     TSharedRef<SWidget> CreateColorPaletteWidget();
 
+public:
+    virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;
+
+
+private:
+    void OnGetChildren(UOdysseyPaletteEntry* iParent, TArray<UOdysseyPaletteEntry*>& oChildren) const;
+    TSharedRef<ITableRow> OnGenerateRow(UOdysseyPaletteEntry* iEntry, const TSharedRef<STableViewBase>& iOwnerTable);
+
 private:
     // Private data
     TSharedPtr< FOdysseyPalette > mColorPalette;
     TSharedPtr< FAssetThumbnailPool > mAssetThumbnailPool;
     SScrollBox::FSlot*  mColorPaletteSlot;
+    TSharedPtr<STreeView<UOdysseyPaletteEntry*>> mPaletteTreeView;
 };

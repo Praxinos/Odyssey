@@ -12,12 +12,12 @@ namespace UnrealBuildTool.Rules
             PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
             PublicIncludePaths.AddRange(
-				new string[] {
-					// ... add public include paths required here ...
-				}
-				);
+                new string[] {
+                Path.Combine(ModuleDirectory, "Public", "Palette"),
+                }
+            );
 
-			PrivateIncludePaths.AddRange(
+            PrivateIncludePaths.AddRange(
 				new string[] {
 					// ... add other private include paths required here ...
 				}
