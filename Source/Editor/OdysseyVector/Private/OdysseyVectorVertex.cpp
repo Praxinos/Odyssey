@@ -100,6 +100,34 @@ FOdysseyVectorVertex::GetAverageStraightVectorOnSegment( bool iNormalize )
     return averageVector;
 }
 
+//static
+void
+FOdysseyVectorVertex::ArrayToSegmentArray( std::vector<FOdysseyVectorVertex*>& iVertexArray
+                                         , std::vector<FOdysseyVectorSegment*>& oSegmentArray )
+{
+
+    if( iVertexArray.size() )
+    {
+        oSegmentArray.reserve( iVertexArray.size() );
+
+        for( int i = 0; i < iVertexArray.size(); i++ )
+        {
+            FOdysseyVectorVertex* vertex = iVertexArray[i];
+            std::list<FOdysseyVectorSegment*>& segmentList = vertex->GetSegmentList();
+
+            for( std::list<FOdysseyVectorSegment*>::iterator it = segmentList.begin(); it != segmentList.end(); ++it )
+            {
+                FOdysseyVectorSegment* segment = (*it);
+
+                if( std::find( oSegmentArray.begin(), oSegmentArray.end(), segment ) == oSegmentArray.end() )
+                {
+                    oSegmentArray.push_back( segment );
+                }
+            }
+        }
+    }
+}
+
 ::ULIS::FVec2D
 FOdysseyVectorVertex::GetAverageVectorOnSegment( bool iNormalize )
 {

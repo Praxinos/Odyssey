@@ -6,7 +6,6 @@
 #include "CoreMinimal.h"
 #include "Tools/DefaultTool/OdysseyPainterEditorDefaultTool.h"
 #include "OdysseyVector.h"
-#include "Undo/OdysseyVectorUndoSegmentReshape.h"
 
 #include "HUD/OdysseyVectorHUDPicking.h"
 #include "HUD/OdysseyVectorHUDPathPush.h"

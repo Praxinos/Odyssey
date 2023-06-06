@@ -586,9 +586,11 @@ FOdysseyVectorEngine::Pick( FOdysseyVectorScene* iScene
 std::list<FOdysseyVectorHUD*>&
 FOdysseyVectorEngine::GetHUDList()
 {
-    static std::list<FOdysseyVectorHUD*> HUDList;
+    /*static std::list<FOdysseyVectorHUD*> HUDList;
 
-    return HUDList;
+    return HUDList;*/
+
+    return mHUDList;
 }
 
 // static

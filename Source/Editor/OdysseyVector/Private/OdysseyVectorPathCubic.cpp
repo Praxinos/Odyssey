@@ -767,15 +767,14 @@ void
 FOdysseyVectorPathCubic::SmoothSegments( FOdysseyVectorVertex* iVertex, bool iBuildSegments, bool iPreserveHandleLength )
 {
     ::ULIS::FVec2D perpendicularVector = iVertex->GetAverageStraightVectorOnSegment( true );
-//UE_LOG(LogTemp, Warning, TEXT("Some warning message %f %f"), perpendicularVector.x, perpendicularVector.y ); 
-/*
+
+    // if the perpendicular vector is 0, use one of the segment's vector as a reference.
     if( perpendicularVector.DistanceSquared() == 0.0f && iVertex->GetFirstSegment() )
     {
         perpendicularVector = iVertex->GetFirstSegment()->GetHandleVector( iVertex, true );
-
         perpendicularVector = ::ULIS::FVec2D( perpendicularVector.y, -perpendicularVector.x );
     }
-*/
+
     SmoothSegments( iVertex, perpendicularVector, iBuildSegments, iPreserveHandleLength );
 }
 

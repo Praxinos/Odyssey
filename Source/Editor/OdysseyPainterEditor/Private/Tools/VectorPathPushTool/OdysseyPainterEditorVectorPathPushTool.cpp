@@ -2,6 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Tools/VectorPathPushTool/OdysseyPainterEditorVectorPathPushTool.h"
+#include "Undo/OdysseyVectorUndoSegmentReshape.h"
 
 #define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorPathPushTool"
 
@@ -180,22 +181,21 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDragVector( FOdysseyVectorEngine
     for( int i = 0; i < mPushedPointArray.size(); i++ )
     {
         FOdysseyVectorPoint* point = mPushedPointArray[i].point;
-/*
+
         if( point->GetClass() == FOdysseyVectorVertex::StaticClass() )
         {
             FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>(point);
 
             if( mPushedPointArray[i].isSmooth && PreserveSmoothness )
             {
-UE_LOG(LogTemp, Warning, TEXT("Some warning message") ); 
                 if( vertex )
                 {
                     ::ULIS::FVec2D perpendicularVector = vertex->GetAverageVectorOnSegmentHandle(true);
 
+                    // if the perpendicular vector is 0, use one of the segment's vector as a reference.
                     if( perpendicularVector.DistanceSquared() == 0.0f && vertex->GetFirstSegment() )
                     {
                         perpendicularVector = vertex->GetVectorOnSegment( vertex->GetFirstSegment(), true );
-
                         perpendicularVector = ::ULIS::FVec2D( perpendicularVector.y, -perpendicularVector.x );
                     }
 
@@ -203,7 +203,6 @@ UE_LOG(LogTemp, Warning, TEXT("Some warning message") );
                 }
             }
         }
-*/
     }
 
     for( int i = 0; i < mSegmentArray.size(); i++ )

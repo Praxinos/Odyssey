@@ -14,11 +14,11 @@
 class ODYSSEYVECTOR_API FOdysseyVectorEngine
 {
     public:
-        static std::list<FOdysseyVectorHUD*>& GetHUDList();
-        static void AddHUD( FOdysseyVectorHUD* iHUDObject );
-        static void RemoveHUD( FOdysseyVectorHUD* iHUDObject );
-        static void ClearHUD();
-        static void ResetHUD( FOdysseyVectorScene* iScene );
+        std::list<FOdysseyVectorHUD*>& GetHUDList();
+        void AddHUD( FOdysseyVectorHUD* iHUDObject );
+        void RemoveHUD( FOdysseyVectorHUD* iHUDObject );
+        void ClearHUD();
+        void ResetHUD( FOdysseyVectorScene* iScene );
 
         /**
          * @brief Get the rendering context (Blend2D)
@@ -257,7 +257,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
         BLImage* mBLImage;
         BLImage* mBLMask;
         uint64 mDrawingFlags;
-
+        std::list<FOdysseyVectorHUD*> mHUDList;
         FOdysseyVectorGroup* mSelectionSpace;
 
 };

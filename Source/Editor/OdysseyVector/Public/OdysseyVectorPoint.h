@@ -4,6 +4,8 @@
 #include <Core/Core.h>
 #include <Image/Block.h>
 
+class FOdysseyVectorVertex;
+
 class ODYSSEYVECTOR_API FOdysseyVectorPoint
 {
     public:
@@ -104,6 +106,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorPoint
          * it should no be considered consistent through the whole execution of the program.
          */
         uint32 GetID();
+
+        static void ArrayToVertexArray( std::vector<FOdysseyVectorPoint*>& iPointArray
+                                      , std::vector<FOdysseyVectorVertex*>& oVertexArray );
 
     protected:
         uint32 mID;

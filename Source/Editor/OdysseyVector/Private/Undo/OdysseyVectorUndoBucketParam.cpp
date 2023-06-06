@@ -39,7 +39,7 @@ FOdysseyVectorUndoBucketParam::Apply( UObject* iIgnored )
     // update invalidated objects
     mScene->Update(0);
 
-    FOdysseyVectorEngine::ResetHUD( mScene );
+    mScene->GetEngine()->ResetHUD( mScene );
     // call callbacks if any (for refreshing GUI e.g)
     mScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
@@ -61,7 +61,7 @@ FOdysseyVectorUndoBucketParam::Revert( UObject* iIgnored )
     // update invalidated objects
     mScene->Update(0);
 
-    FOdysseyVectorEngine::ResetHUD( mScene );
+    mScene->GetEngine()->ResetHUD( mScene );
     // call callbacks if any (for refreshing GUI e.g)
     mScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }

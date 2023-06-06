@@ -243,6 +243,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
         ::ULIS::FVec2D GetAverageVectorOnSegment( bool iNormalize );
         ::ULIS::FVec2D GetAverageVectorOnSegmentHandle( bool iNormalize );
         ::ULIS::FVec2D GetAverageStraightVectorOnSegment( bool iNormalize );
+        static void ArrayToSegmentArray( std::vector<FOdysseyVectorVertex*>& iVertexArray
+                                       , std::vector<FOdysseyVectorSegment*>& oSegmentArray );
 
     protected:
         FOdysseyVectorHandlePoint* mCtrlPoint;
