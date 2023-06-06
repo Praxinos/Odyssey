@@ -4,10 +4,10 @@ FOdysseyVectorRectangle::~FOdysseyVectorRectangle()
 {
 }
 
-FOdysseyVectorRectangle::FOdysseyVectorRectangle( const FString iName, double iWidth, double iHeight )
-    : FOdysseyVectorPathCubic( iName )
+FOdysseyVectorRectangle::FOdysseyVectorRectangle( const FString iName, double iWidth, double iHeight, double iStrokeWidth )
+    : FOdysseyVectorPrimitive( iName )
 {
-    mRectangleParam.StrokeWidth = 4.0f;
+    mRectangleParam.StrokeWidth = iStrokeWidth;
 
     Init( iName, iWidth, iHeight );
 }
@@ -29,10 +29,10 @@ FOdysseyVectorRectangle::Init( const FString& iName, double iWidth, double iHeig
     SetName( iName );
     SetSize( iWidth, iHeight );
 
-    mCubicVertex[0] = new FOdysseyVectorVertex( this, 0.0f, 0.0f, mRectangleParam.Width );
-    mCubicVertex[1] = new FOdysseyVectorVertex( this, 0.0f, 0.0f, mRectangleParam.Width );
-    mCubicVertex[2] = new FOdysseyVectorVertex( this, 0.0f, 0.0f, mRectangleParam.Width );
-    mCubicVertex[3] = new FOdysseyVectorVertex( this, 0.0f, 0.0f, mRectangleParam.Width );
+    mCubicVertex[0] = new FOdysseyVectorVertex( this, 0.0f, 0.0f, mRectangleParam.StrokeWidth );
+    mCubicVertex[1] = new FOdysseyVectorVertex( this, 0.0f, 0.0f, mRectangleParam.StrokeWidth );
+    mCubicVertex[2] = new FOdysseyVectorVertex( this, 0.0f, 0.0f, mRectangleParam.StrokeWidth );
+    mCubicVertex[3] = new FOdysseyVectorVertex( this, 0.0f, 0.0f, mRectangleParam.StrokeWidth );
 
     mCubicSegment[0] = new FOdysseyVectorSegmentCubic( static_cast<FOdysseyVectorPathCubic*>(this), mCubicVertex[0], mCubicVertex[1] );
     mCubicSegment[1] = new FOdysseyVectorSegmentCubic( static_cast<FOdysseyVectorPathCubic*>(this), mCubicVertex[1], mCubicVertex[2] );
@@ -53,27 +53,27 @@ FOdysseyVectorRectangle::Init( const FString& iName, double iWidth, double iHeig
 void
 FOdysseyVectorRectangle::UpdateShape( uint32 iUpdateFlags )
 {
-    mCubicVertex[0]->SetRadius( mRectangleParam.Width );
-    mCubicVertex[1]->SetRadius( mRectangleParam.Width );
-    mCubicVertex[2]->SetRadius( mRectangleParam.Width );
-    mCubicVertex[3]->SetRadius( mRectangleParam.Width );
+    mCubicVertex[0]->SetRadius( mRectangleParam.StrokeWidth );
+    mCubicVertex[1]->SetRadius( mRectangleParam.StrokeWidth );
+    mCubicVertex[2]->SetRadius( mRectangleParam.StrokeWidth );
+    mCubicVertex[3]->SetRadius( mRectangleParam.StrokeWidth );
 
     mCubicVertex[0]->Set( 0.0f                 , 0.0f                 );
     mCubicVertex[1]->Set( mRectangleParam.Width, 0.0f                 );
     mCubicVertex[2]->Set( mRectangleParam.Width, mRectangleParam.Height );
     mCubicVertex[3]->Set( 0.0f                 , mRectangleParam.Height );
 
-    mCubicSegment[0]->GetHandle(0)->Set(  mRectangleParam.Width  * 0.25f,  0.0f );
-    mCubicSegment[0]->GetHandle(1)->Set( -mRectangleParam.Width  * 0.25f,  0.0f );
+    mCubicSegment[0]->GetHandle(0)->Set(  mRectangleParam.Width  * 0.25f,  0.0f                          );
+    mCubicSegment[0]->GetHandle(1)->Set(  mRectangleParam.Width  * 0.75f,  0.0f                          );
 
-    mCubicSegment[1]->GetHandle(0)->Set(  mRectangleParam.Height * 0.25f,  0.0f );
-    mCubicSegment[1]->GetHandle(1)->Set( -mRectangleParam.Height * 0.25f,  0.0f );
+    mCubicSegment[1]->GetHandle(0)->Set(  mRectangleParam.Width         , mRectangleParam.Height * 0.25f );
+    mCubicSegment[1]->GetHandle(1)->Set(  mRectangleParam.Width         , mRectangleParam.Height * 0.75f );
 
-    mCubicSegment[2]->GetHandle(0)->Set( -mRectangleParam.Width  * 0.25f,  0.0f );
-    mCubicSegment[2]->GetHandle(1)->Set(  mRectangleParam.Width  * 0.25f,  0.0f );
+    mCubicSegment[2]->GetHandle(0)->Set(  mRectangleParam.Width  * 0.75f,  mRectangleParam.Height        );
+    mCubicSegment[2]->GetHandle(1)->Set(  mRectangleParam.Width  * 0.25f,  mRectangleParam.Height        );
 
-    mCubicSegment[3]->GetHandle(0)->Set( -mRectangleParam.Height * 0.25f,  0.0f );
-    mCubicSegment[3]->GetHandle(1)->Set(  mRectangleParam.Height * 0.25f,  0.0f );
+    mCubicSegment[3]->GetHandle(0)->Set(  0.0f                          , mRectangleParam.Height * 0.75f );
+    mCubicSegment[3]->GetHandle(1)->Set(  0.0f                          , mRectangleParam.Height * 0.25f );
 
     mCubicSegment[0]->Update();
     mCubicSegment[1]->Update();
@@ -86,7 +86,8 @@ FOdysseyVectorRectangle::CopyShape()
 {
     FOdysseyVectorRectangle* rectangleCopy = new FOdysseyVectorRectangle( mObjectParam.Name
                                                                         , mRectangleParam.Width
-                                                                        , mRectangleParam.Height );
+                                                                        , mRectangleParam.Height
+                                                                        , mRectangleParam.StrokeWidth );
 
     return static_cast<FOdysseyVectorObject*>( rectangleCopy );
 }

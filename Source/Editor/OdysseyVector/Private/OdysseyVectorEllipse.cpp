@@ -9,10 +9,10 @@ FOdysseyVectorEllipse::~FOdysseyVectorEllipse()
 {
 }
 
-FOdysseyVectorEllipse::FOdysseyVectorEllipse( const FString& iName, double iRadiusX, double iRadiusY )
-    : FOdysseyVectorPathCubic( iName )
+FOdysseyVectorEllipse::FOdysseyVectorEllipse( const FString& iName, double iRadiusX, double iRadiusY, double iStrokeWidth )
+    : FOdysseyVectorPrimitive( iName )
 {
-    mEllipseParam.StrokeWidth = 4.0f;
+    mEllipseParam.StrokeWidth = iStrokeWidth;
 
     Init( iName, iRadiusX, iRadiusY );
 }
@@ -94,7 +94,8 @@ FOdysseyVectorEllipse::CopyShape()
 {
     FOdysseyVectorEllipse* circleCopy = new FOdysseyVectorEllipse( mObjectParam.Name
                                                                  , mEllipseParam.RadiusX
-                                                                 , mEllipseParam.RadiusY );
+                                                                 , mEllipseParam.RadiusY
+                                                                 , mEllipseParam.StrokeWidth );
 
     return static_cast<FOdysseyVectorObject*>( circleCopy );
 }

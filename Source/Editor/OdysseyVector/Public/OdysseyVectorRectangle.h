@@ -5,7 +5,7 @@
 #include <blend2d.h>
 #include "OdysseyVectorObject.h"
 #include "OdysseyVectorSegmentCubic.h"
-#include "OdysseyVectorPathCubic.h"
+#include "OdysseyVectorPrimitive.h"
 
 #include "OdysseyVectorRectangle.generated.h"
 
@@ -24,7 +24,7 @@ struct FRectangleParam
     double Height;
 };
 
-class ODYSSEYVECTOR_API FOdysseyVectorRectangle : public FOdysseyVectorPathCubic
+class ODYSSEYVECTOR_API FOdysseyVectorRectangle : public FOdysseyVectorPrimitive
 {
     private:
         static const uint32 mStaticClass = 0x9ee34077; // value is crc32 FOdysseyVectorRectangle
@@ -47,12 +47,12 @@ class ODYSSEYVECTOR_API FOdysseyVectorRectangle : public FOdysseyVectorPathCubic
 
     public:
         virtual ~FOdysseyVectorRectangle();
-        FOdysseyVectorRectangle( FString iName, double iWidth, double iHeight );
+        FOdysseyVectorRectangle( FString iName, double iWidth, double iHeight, double iStrokeWidth );
         void Init( const FString& iName, double iWidth, double iHeight );
         void SetSize( double iWidth, double iHeight );
         double GetWidth();
         double GetHeight();
-        FOdysseyVectorPathCubic* Convert();
+        virtual FOdysseyVectorPathCubic* Convert() override;
 
     public:
         FRectangleParam mRectangleParam;

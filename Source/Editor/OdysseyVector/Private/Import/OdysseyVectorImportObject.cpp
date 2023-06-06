@@ -19,11 +19,11 @@ CreateObject( uint32 iObjectType )
         case FOdysseyVectorObject::VECTORGROUPPAINTTYPE :
             newObject = new FOdysseyVectorGroupPaint( FString("PaintGroup") );
         break;
-
+/*
         case FOdysseyVectorObject::VECTORELLIPSETYPE :
-            newObject = new FOdysseyVectorEllipse( FString("Ellipse"), 0.0f, 0.0f );
+            newObject = new FOdysseyVectorEllipse( FString("Ellipse"), 0.0f, 0.0f, 4.0f );
         break;
-
+*/
         default :
             newObject = new FOdysseyVectorObject( FString("Object") );
         break;

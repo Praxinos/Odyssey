@@ -9,6 +9,14 @@
 #include "Undo/OdysseyVectorUndo.h"
 #include "OdysseyPainterEditorVectorPrimitiveDrawingTool.generated.h"
 
+UENUM()
+enum class EOdysseyVectorPrimitiveType : uint8
+{
+    Ellipse,
+    Rectangle,
+    Line
+};
+
 UCLASS()
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPrimitiveDrawingTool : public UOdysseyPainterEditorDefaultTool
 {
@@ -43,4 +51,11 @@ public:
 
     //OdysseyPainterEditorTool overrides
     virtual void Commit() override;
+
+    public:
+        UPROPERTY(EditAnywhere, Category="Primitive Drawing Tool")
+        EOdysseyVectorPrimitiveType PrimitiveType;
+
+        UPROPERTY(EditAnywhere, Category="Primitive Drawing Tool")
+        double StrokeWidth;
 };

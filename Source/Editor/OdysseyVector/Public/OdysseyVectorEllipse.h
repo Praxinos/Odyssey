@@ -6,7 +6,7 @@
 #include <ULIS>
 #include "OdysseyVectorVertex.h"
 #include "OdysseyVectorSegmentCubic.h"
-#include "OdysseyVectorPathCubic.h"
+#include "OdysseyVectorPrimitive.h"
 
 #include "OdysseyVectorEllipse.generated.h"
 
@@ -25,7 +25,7 @@ struct FEllipseParam
     double RadiusY;
 };
 
-class ODYSSEYVECTOR_API FOdysseyVectorEllipse : public FOdysseyVectorPathCubic
+class ODYSSEYVECTOR_API FOdysseyVectorEllipse : public FOdysseyVectorPrimitive
 {
     private:
         static const uint32 mStaticClass = 0x1147fdfe; // value is crc32 FOdysseyVectorEllipse
@@ -44,7 +44,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorEllipse : public FOdysseyVectorPathCubic
        /**
          * @brief constructor.
          */
-         FOdysseyVectorEllipse( const FString& iName, double iRadiusX, double iRadiusY );
+         FOdysseyVectorEllipse( const FString& iName, double iRadiusX, double iRadiusY, double iStrokeWidth );
 
        /**
          * @brief Init an ellipse.
@@ -83,7 +83,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorEllipse : public FOdysseyVectorPathCubic
          * @brief Convert this ellipse to cubic path.
          * @return a newly allocated cubic path that looks the same as this ellipse.
          */
-        FOdysseyVectorPathCubic* Convert();
+        virtual FOdysseyVectorPathCubic* Convert() override;
 
        /**
          * @brief Get object type
