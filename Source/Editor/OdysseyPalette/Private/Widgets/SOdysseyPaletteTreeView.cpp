@@ -13,8 +13,8 @@ static FName contextMenuName = "OdysseyPaletteContextMenu";
 
 SOdysseyPaletteTreeView::~SOdysseyPaletteTreeView()
 {
-    //UOdysseyPalette::OnCurrentLayerChanged().RemoveAll(this);
-    //UOdysseyPalette::OnHierarchyChanged().RemoveAll(this);
+    UOdysseyPalette::OnCurrentEntryChanged().RemoveAll(this);
+    UOdysseyPalette::OnHierarchyChanged().RemoveAll(this);
 	//UOdysseyPaletteEntry::OnIsExpandedChanged().RemoveAll(this);
 }
 
@@ -23,8 +23,8 @@ SOdysseyPaletteTreeView::SOdysseyPaletteTreeView()
     , mCommandList(MakeShared<FUICommandList>())
 {
     MapActionsToCommandList();
-    //UOdysseyPalette::OnCurrentLayerChanged().AddRaw(this, &SOdysseyPaletteTreeView::OnCurrentEntryChanged);
-    //UOdysseyPalette::OnHierarchyChanged().AddRaw(this, &SOdysseyPaletteTreeView::OnPaletteHierarchyChanged);
+    UOdysseyPalette::OnCurrentEntryChanged().AddRaw(this, &SOdysseyPaletteTreeView::OnCurrentEntryChanged);
+    UOdysseyPalette::OnHierarchyChanged().AddRaw(this, &SOdysseyPaletteTreeView::OnPaletteHierarchyChanged);
 	//UOdysseyPaletteEntry::OnIsExpandedChanged().AddRaw(this, &SOdysseyPaletteTreeView::OnEntryIsExpandedChanged);
 }
 
@@ -60,10 +60,8 @@ void SOdysseyPaletteTreeView::Construct(const FArguments& InArgs)
         headerRow->AddColumn(columnArguments);
     }
 
-    //const TArray<UOdysseyPaletteEntry*>* rootEntries = mPalette ? &mPalette->GetRootLayers() : nullptr;
+    const TArray<UOdysseyPaletteEntry*>* rootEntries = mPalette ? &mPalette->GetRootEntries() : nullptr;
     
-    const TArray<UOdysseyPaletteEntry*>* rootEntries = mPalette ? &mPalette->mPaletteEntries : nullptr;
-
     STreeView<UOdysseyPaletteEntry*>::Construct(
         STreeView<UOdysseyPaletteEntry*>::FArguments()
         .TreeItemsSource(rootEntries)
@@ -248,11 +246,10 @@ SOdysseyPaletteTreeView::ResetDropZone()
 void
 SOdysseyPaletteTreeView::OnGetChildren(UOdysseyPaletteEntry* iParent, TArray<UOdysseyPaletteEntry*>& oChildren) const
 {
-    oChildren = mPalette->mPaletteEntries;
-    /*if (!mPalette)
+    if (!mPalette)
         return;
     
-    oChildren = iParent->GetChildren();*/
+    oChildren = iParent->GetChildren();
 }
 
 void
@@ -287,33 +284,31 @@ SOdysseyPaletteTreeView::OnPaletteHierarchyChanged(UOdysseyPalette* iPalette)
 void
 SOdysseyPaletteTreeView::SetCurrentEntryFromSelectorItem()
 {
-/*
     if ( !mPalette )
         return;
 
-	if ( mPalette->GetLayers().Num() == 0)
+	if ( mPalette->GetEntries().Num() == 0)
 		return;
 
     if (!SelectorItem)
     {
-        FOdysseyObjectEditorUtils::SetPropertyValue(mPalette, "CurrentLayer", TSoftObjectPtr<UOdysseyPaletteEntry>(mPalette->GetRootLayers()[0]));
+        FOdysseyObjectEditorUtils::SetPropertyValue(mPalette, "CurrentEntry", TSoftObjectPtr<UOdysseyPaletteEntry>(mPalette->GetRootEntries()[0]));
         return;
     }
 
-    UOdysseyPalette* selectorLayerStack = SelectorItem->GetLayerStack();
-    if (selectorLayerStack != mPalette )
+    UOdysseyPalette* selectorPalette = SelectorItem->GetPalette();
+    if (selectorPalette != mPalette )
         return;
 
-    if (SelectorItem == mPalette->CurrentLayer)
+    if (SelectorItem == mPalette->CurrentEntry)
         return;
         
-    FOdysseyObjectEditorUtils::SetPropertyValue(mPalette, "CurrentLayer", TSoftObjectPtr<UOdysseyPaletteEntry>(SelectorItem));*/
+    FOdysseyObjectEditorUtils::SetPropertyValue(mPalette, "CurrentEntry", TSoftObjectPtr<UOdysseyPaletteEntry>(SelectorItem));
 }
 
 void
 SOdysseyPaletteTreeView::Private_SignalSelectionChanged(ESelectInfo::Type SelectInfo)
 {
-/*
     if ( !mPalette )
     {
         STreeView< UOdysseyPaletteEntry* >::Private_SignalSelectionChanged(SelectInfo);
@@ -321,10 +316,10 @@ SOdysseyPaletteTreeView::Private_SignalSelectionChanged(ESelectInfo::Type Select
     }
 
     //Ensure selectorItem = currentLayer if currentLayer is selected
-    UOdysseyPaletteEntry* currentLayer = mPalette->CurrentLayer.Get();
-    if ( currentLayer && Private_IsItemSelected(currentLayer) )
+    UOdysseyPaletteEntry* currentEntry = mPalette->CurrentEntry.Get();
+    if ( currentEntry && Private_IsItemSelected(currentEntry) )
     {
-        Private_SetItemSelection(currentLayer, true, true);
+        Private_SetItemSelection(currentEntry, true, true);
     }
     else
     {
@@ -334,27 +329,26 @@ SOdysseyPaletteTreeView::Private_SignalSelectionChanged(ESelectInfo::Type Select
         SetCurrentEntryFromSelectorItem();
     }
 
-    STreeView< UOdysseyPaletteEntry* >::Private_SignalSelectionChanged(SelectInfo);*/
+    STreeView< UOdysseyPaletteEntry* >::Private_SignalSelectionChanged(SelectInfo);
 }
 
 void
-SOdysseyPaletteTreeView::OnCurrentEntryChanged(UOdysseyPalette* iLayerStack)
+SOdysseyPaletteTreeView::OnCurrentEntryChanged(UOdysseyPalette* iPalette)
 {
-/*
     if ( !mPalette )
         return;
 
-    if ( iLayerStack != mPalette )
+    if (iPalette != mPalette )
         return;
 
     Private_ClearSelection();
 
-    UOdysseyPaletteEntry* currentLayer = mPalette->CurrentLayer.Get();
-    if( currentLayer )
+    UOdysseyPaletteEntry* currentEntry = mPalette->CurrentEntry.Get();
+    if( currentEntry )
     {
-        Private_SetItemSelection(currentLayer, true, true);
+        Private_SetItemSelection(currentEntry, true, true);
         Private_SignalSelectionChanged(ESelectInfo::Direct);
-    }*/
+    }
 }
 
 // ContextMenu

@@ -9,6 +9,13 @@
 
 class UOdysseyPalette;
 
+UENUM(BlueprintType)
+enum  class  EGetEntryChildrenMethod : uint8
+{
+    DepthFirst,
+    BreadthFirst
+};
+
 /////////////////////////////////////////////////////
 // OdysseyColorPaletteEntry
 UCLASS()
@@ -54,8 +61,69 @@ public:
     static FOnChildrenChanged& OnChildrenChanged();
 
 public:
+    // Events
+
+    /**
+     * @brief Called when the node has been created by the given Palette
+     *
+     */
+    UFUNCTION(BlueprintNativeEvent, Category = "Palette")
+    void OnCreated();
+    virtual void OnCreated_Implementation();
+
+public:
     UFUNCTION(BlueprintPure, Category = PaletteEntry)
     UOdysseyPalette* GetPalette() const;
+
+    /**
+     * @brief Returns the entries children recursively
+     *
+     * @return int
+     */
+    UFUNCTION(BlueprintPure, Category = "Palette")
+    TArray<UOdysseyPaletteEntry*> GetChildrenRecursively(EGetEntryChildrenMethod iMethod = EGetEntryChildrenMethod::DepthFirst) const;
+
+    /**
+    * @brief Returns the index of the entry in its parent
+    *
+    * @return int
+    */
+    UFUNCTION(BlueprintPure, Category = "Palette")
+    int GetIndexInParent() const;
+
+
+     /**
+     * @brief Returns wether the given entry is a child of the given ParentEntry
+     *
+     * @return bool
+     */
+    UFUNCTION(BlueprintPure, Category = "Palette")
+    bool IsChildOf(UOdysseyPaletteEntry* iEntry) const;
+
+     /**
+     * @brief Returns the parent entry
+     *
+     * @return int
+     */
+    UFUNCTION(BlueprintPure, Category = "Palette")
+    UOdysseyPaletteEntry* GetParent() const;
+
+    /**
+     * @brief Returns the parents entries from direct parent to root parent
+     *
+     * @return int
+     */
+    UFUNCTION(BlueprintPure, Category = "Palette")
+    TArray<UOdysseyPaletteEntry*> GetParents() const;
+
+     /**
+     * @brief Returns the entry children recursively
+     *
+     * @return int
+     */
+    UFUNCTION(BlueprintPure, Category = "Palette")
+    const TArray<UOdysseyPaletteEntry*>& GetChildren() const;
+
 
 protected:
     //Property changed methods

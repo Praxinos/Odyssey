@@ -8,6 +8,7 @@
 UOdysseyPaletteEntryFolder::UOdysseyPaletteEntryFolder()
 {
     EntryTypeName = LOCTEXT("EntryTypeName", "Folder Entry");
+    CanHaveChildren = true;
 }
 
 #undef LOCTEXT_NAMESPACE

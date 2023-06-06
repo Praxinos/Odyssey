@@ -17,11 +17,19 @@ class ODYSSEYPALETTE_API UOdysseyPalette : public UObject
     GENERATED_BODY()
 
 public:
+    /* Called when the current entry changed */
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnCurrentEntryChanged, UOdysseyPalette*)
+
     /* Called when the Entry hierarchy changed at some point */
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnHierarchyChanged, UOdysseyPalette*);
 
 public:
     //Delegates
+
+    /**
+     * @brief Returns the CurrentLayerChanged delegate
+     */
+    static FOnCurrentEntryChanged& OnCurrentEntryChanged();
 
     /**
      * @brief Returns the HierarchyChanged delegate
@@ -200,12 +208,9 @@ protected:
 
 
 public:
-    UPROPERTY(EditAnywhere, Category = Palette)
-    TArray<UOdysseyPaletteEntry*> mPaletteEntries;
-
     UPROPERTY(config, DuplicateTransient, meta = (AllowedClasses = "OdysseyPaletteEntry"))
     TSoftObjectPtr<UOdysseyPaletteEntry> CurrentEntry;
 
     UPROPERTY()
-   TObjectPtr<UOdysseyPaletteEntry> PaletteRoot;
+    TObjectPtr<UOdysseyPaletteEntry> PaletteRoot;
 };

@@ -590,9 +590,6 @@ UOdysseyLayerStack::MoveLayers(TArray<UOdysseyLayer*> Layers, UOdysseyLayer* Par
     if ( !ParentLayer )
         ParentLayer = LayerRoot;
 
-    if ( !ParentLayer )
-        ParentLayer = LayerRoot;
-
 	//If the given parent can't have children or isn't contained in this layerstack
 	if ( !ParentLayer->CanHaveChildren || !ContainsLayer(ParentLayer))
 		return;

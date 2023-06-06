@@ -40,9 +40,67 @@ UOdysseyPaletteEntry::OnChildrenChanged()
     return onChildrenChanged;
 }
 
+void UOdysseyPaletteEntry::OnCreated_Implementation()
+{
+}
+
 UOdysseyPalette* UOdysseyPaletteEntry::GetPalette() const
 {
     return Cast<UOdysseyPalette>(GetOuter());
+}
+
+TArray<UOdysseyPaletteEntry*> UOdysseyPaletteEntry::GetChildrenRecursively(EGetEntryChildrenMethod iMethod /*= EGetEntryChildrenMethod::DepthFirst*/) const
+{
+    TArray<UOdysseyPaletteEntry*> children;
+    if (iMethod == EGetEntryChildrenMethod::DepthFirst)
+    {
+        for (UOdysseyPaletteEntry* child : Children)
+        {
+            children.Add(child);
+            children.Append(child->GetChildrenRecursively(iMethod));
+        }
+    }
+    else if (iMethod == EGetEntryChildrenMethod::BreadthFirst)
+    {
+        children = Children;
+        for (UOdysseyPaletteEntry* child : Children)
+            children.Append(child->GetChildrenRecursively(iMethod));
+    }
+    return children;
+}
+
+int UOdysseyPaletteEntry::GetIndexInParent() const
+{
+    if ( !Parent )
+        return INDEX_NONE;
+    return Parent->Children.Find(const_cast<UOdysseyPaletteEntry*>(this));
+}
+
+bool UOdysseyPaletteEntry::IsChildOf(UOdysseyPaletteEntry* iEntry) const
+{
+    return GetParents().Find(iEntry) != INDEX_NONE;
+}
+
+UOdysseyPaletteEntry* UOdysseyPaletteEntry::GetParent() const
+{
+    return Parent;
+}
+
+TArray<UOdysseyPaletteEntry*> UOdysseyPaletteEntry::GetParents() const
+{
+    TArray<UOdysseyPaletteEntry*> parents;
+    UOdysseyPaletteEntry* parent = Parent;
+    while ( parent )
+    {
+        parents.Add(parent);
+        parent = parent->Parent;
+    }
+    return parents;
+}
+
+const TArray<UOdysseyPaletteEntry*>& UOdysseyPaletteEntry::GetChildren() const
+{
+    return Children;
 }
 
 void UOdysseyPaletteEntry::NameChanged()

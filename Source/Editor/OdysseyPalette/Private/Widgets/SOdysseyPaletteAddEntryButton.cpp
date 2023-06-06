@@ -6,6 +6,7 @@
 #include "OdysseyPaletteEntryColor.h"
 #include "OdysseyPaletteEntryMaterial.h"
 #include "OdysseyPaletteEntryFolder.h"
+#include "UObject/OdysseyObjectEditorUtils.h"
 
 #define LOCTEXT_NAMESPACE "SOdysseyPaletteAddEntryButton"
 
@@ -101,33 +102,41 @@ TSharedRef<SWidget> SOdysseyPaletteAddEntryButton::MakeMenu()
 void
 SOdysseyPaletteAddEntryButton::AddEntryFromClass(FAssetData iAssetData)
 {
-    UObject* loadedAsset = iAssetData.FastGetAsset(true);
-    if (!loadedAsset)
+    UOdysseyPalette* palette = mPalette.Get();
+    if (!palette)
         return;
-    
-    UClass* entryClass = Cast<UClass>(loadedAsset);
 
-    if (entryClass == UOdysseyPaletteEntryColor::StaticClass())
+	UObject* loadedAsset = iAssetData.FastGetAsset(true);
+	if ( !loadedAsset )
+		return;
+
+	UClass* entryClass = Cast<UClass>(loadedAsset);
+	if ( UBlueprint* blueprint = Cast<UBlueprint>(loadedAsset) )
+		entryClass = blueprint->GeneratedClass;
+
+	if ( !entryClass )
+		return;
+
+    UOdysseyPaletteEntry* currentEntry = palette->CurrentEntry.Get();
+    if (currentEntry)
     {
-        UOdysseyPaletteEntryColor* entry = NewObject< UOdysseyPaletteEntryColor >(mPalette.Get(), entryClass, NAME_None, RF_Public | RF_Transactional);
-        entry->AddToRoot();
-        entry->EntryName = FText::FromString("Name");
-        mPalette.Get()->mPaletteEntries.Add(entry);
+        if (currentEntry->CanHaveChildren)
+        {
+			currentEntry = palette->AddEntry(entryClass, currentEntry);
+        }
+        else
+        {
+			UOdysseyPaletteEntry* parent = currentEntry->GetParent();
+			int index = currentEntry->GetIndexInParent();
+			currentEntry = palette->AddEntry(entryClass, parent, index);
+        }
     }
-    else if (entryClass == UOdysseyPaletteEntryMaterial::StaticClass())
+    else
     {
-        UOdysseyPaletteEntryMaterial* entry = NewObject< UOdysseyPaletteEntryMaterial >(mPalette.Get(), entryClass, NAME_None, RF_Public | RF_Transactional);
-        entry->AddToRoot();
-        entry->EntryName = FText::FromString("Name");
-        mPalette.Get()->mPaletteEntries.Add(entry);
+		currentEntry = palette->AddEntry(entryClass);
     }
-    else if (entryClass == UOdysseyPaletteEntryFolder::StaticClass())
-    {
-        UOdysseyPaletteEntryFolder* entry = NewObject< UOdysseyPaletteEntryFolder >(mPalette.Get(), entryClass, NAME_None, RF_Public | RF_Transactional);
-        entry->AddToRoot();
-        entry->EntryName = FText::FromString("Name");
-        mPalette.Get()->mPaletteEntries.Add(entry);
-    }
+
+    FOdysseyObjectEditorUtils::SetPropertyValue(palette, "CurrentEntry", TSoftObjectPtr<UOdysseyPaletteEntry>(currentEntry));
 }
 
 #undef LOCTEXT_NAMESPACE
