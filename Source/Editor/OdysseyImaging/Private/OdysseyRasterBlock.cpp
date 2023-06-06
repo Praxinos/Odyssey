@@ -419,6 +419,7 @@ FOdysseyRasterBlock::OnBlockPtrChanged()
 void
 FOdysseyRasterBlock::SaveBlockToCache(const ::ULIS::FBlock& iBlock, const FString& iId)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyRasterBlock::SaveBlockToCache);
     FString CacheKey = FDerivedDataCacheInterface::BuildCacheKey(
         FOdysseyRasterBlock_CACHE_NAME,
         FOdysseyRasterBlock_CACHE_VERSION, //a GUID identifying the version of the key
@@ -448,6 +449,8 @@ FOdysseyRasterBlock::SaveBlockToCache(const ::ULIS::FBlock& iBlock, const FStrin
 bool
 FOdysseyRasterBlock::LoadBlockFromCache(TSharedRef<::ULIS::FBlock, ESPMode::ThreadSafe> oBlock, const FString& iId)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyRasterBlock::LoadBlockFromCache);
+
     bool success = false;
 
     // put code you want to time here.

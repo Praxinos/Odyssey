@@ -253,6 +253,7 @@ UOdysseyAnimationPlayer::Tick(float iDeltaTime)
 void
 UOdysseyAnimationPlayer::UpdateTexture()
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyAnimationPlayer::UpdateTexture);
 	int frameIndex = Animation->GetFrameIndexAtTime(mCurrentTime);
 	if ( frameIndex == INDEX_NONE )
 		return;
@@ -270,10 +271,14 @@ UOdysseyAnimationPlayer::UpdateTexture()
 
 		::ULIS::FRectI rect = ::ULIS::FRectI::FromXYWH(0, 0, Animation->Width(), Animation->Height());
 		TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(Animation->Width(), Animation->Height(), Animation->Format());
-		renderer->Copy(block, rect, {});
 
-		::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(Animation->Format());
-		ctx.Finish();
+		{
+			TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyAnimationPlayer::UpdateTexture);
+			renderer->Copy(block, rect, {});
+
+			::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(Animation->Format());
+			ctx.Finish();
+		}
 
 		CopyBlocksToTexture({ block }, { rect });
 		mInvalidTileMap.Clear();
