@@ -54,14 +54,19 @@ void
 UOdysseyTextureEditorVectorPathDrawingTool::Unload()
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
 
-    if( currentVectorLayer )
+    // layerStack might be NULL when closing the program
+    if( layerStack )
     {
-        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+        UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
 
-        UOdysseyPainterEditorVectorPathDrawingTool::UnloadVector( vectorEngine, vectorScene );
+        if( currentVectorLayer )
+        {
+            FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+            FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+
+            UOdysseyPainterEditorVectorPathDrawingTool::UnloadVector( vectorEngine, vectorScene );
+        }
     }
 }
 

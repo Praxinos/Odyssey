@@ -55,14 +55,19 @@ void
 UOdysseyTextureEditorVectorObjectRotateTool::Unload()
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
 
-    if( currentVectorLayer )
+    // layerStack might be NULL when closing the program
+    if( layerStack )
     {
-        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+        UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
 
-        UOdysseyPainterEditorVectorObjectRotateTool::UnloadVector( vectorEngine, vectorScene );
+        if( currentVectorLayer )
+        {
+            FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+            FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+
+            UOdysseyPainterEditorVectorObjectRotateTool::UnloadVector( vectorEngine, vectorScene );
+        }
     }
 }
 

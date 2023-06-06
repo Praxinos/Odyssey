@@ -215,20 +215,25 @@ FOdysseyTextureEditorGUI::OnVectorSceneSignal( FOdysseyVectorScene* iScene, uint
 {
     TSharedPtr<FOdysseyPainterEditorSelectedVectorObjectTab>& vectorObjectTab = mEditor->GetGUI()->GetSelectedVectorObjectTab();
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(static_cast<FOdysseyTextureEditor*>(mEditor)->LayerStack());
-    UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
 
-    if( currentVectorLayer && ( currentVectorLayer->GetScene() == iScene ) )
+    // layerStack might be NULL when closing the program
+    if( layerStack )
     {
-        if( iSignalFlags & FOdysseyVectorScene::SIGNAL_SCENE_REDRAW )
-        {
-            currentVectorLayer->RenderImageChanged( false );
-        }
+        UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
 
-        if( ( iSignalFlags & FOdysseyVectorScene::SIGNAL_OBJECT_TRANSFORMED )
-         || ( iSignalFlags & FOdysseyVectorScene::SIGNAL_OBJECT_SELECTED    )
-         || ( iSignalFlags & FOdysseyVectorScene::SIGNAL_OBJECT_MODIFIED    ) )
+        if( currentVectorLayer && ( currentVectorLayer->GetScene() == iScene ) )
         {
-            vectorObjectTab.Get()->Update( iScene );
+            if( iSignalFlags & FOdysseyVectorScene::SIGNAL_SCENE_REDRAW )
+            {
+                currentVectorLayer->RenderImageChanged( false );
+            }
+
+            if( ( iSignalFlags & FOdysseyVectorScene::SIGNAL_OBJECT_TRANSFORMED )
+             || ( iSignalFlags & FOdysseyVectorScene::SIGNAL_OBJECT_SELECTED    )
+             || ( iSignalFlags & FOdysseyVectorScene::SIGNAL_OBJECT_MODIFIED    ) )
+            {
+                vectorObjectTab.Get()->Update( iScene );
+            }
         }
     }
 }

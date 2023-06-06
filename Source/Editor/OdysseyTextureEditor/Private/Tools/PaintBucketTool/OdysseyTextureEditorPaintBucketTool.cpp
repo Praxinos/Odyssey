@@ -65,23 +65,28 @@ void
 UOdysseyTextureEditorPaintBucketTool::Unload()
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayerImageRaster* currentLayerRaster = Cast<UOdysseyTextureLayerImageRaster>(layerStack->CurrentLayer.Get());
-    UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
 
-    if( currentLayerRaster )
+    // layerStack might be NULL when closing the program
+    if( layerStack )
     {
-	    mPaintEngine.OnPreUpdateDelegate().Unbind();
+        UOdysseyTextureLayerImageRaster* currentLayerRaster = Cast<UOdysseyTextureLayerImageRaster>(layerStack->CurrentLayer.Get());
+        UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
 
-        //Cleanup
-	    mPaintEngine.RasterBlock(nullptr);
-    }
+        if( currentLayerRaster )
+        {
+	        mPaintEngine.OnPreUpdateDelegate().Unbind();
 
-    if( currentVectorLayer )
-    {
-        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+            //Cleanup
+	        mPaintEngine.RasterBlock(nullptr);
+        }
 
-        UOdysseyPainterEditorPaintBucketTool::UnloadVector( vectorEngine, vectorScene );
+        if( currentVectorLayer )
+        {
+            FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+            FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+
+            UOdysseyPainterEditorPaintBucketTool::UnloadVector( vectorEngine, vectorScene );
+        }
     }
 }
 

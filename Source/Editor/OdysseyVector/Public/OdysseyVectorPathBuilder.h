@@ -28,6 +28,22 @@ class FOdysseyVectorPointSample : public FOdysseyVectorPoint
         bool mIsSharp;
 };
 
+class FOdysseyVectorLinkSample: public FOdysseyVectorLink
+{
+    public:
+        ~FOdysseyVectorLinkSample();
+        FOdysseyVectorLinkSample(){};
+        void Init( FOdysseyVectorPointSample* iSamplePoint0, FOdysseyVectorPointSample* iSamplePoint1 );
+
+    private:
+        // Stores a copy of the sample points passed as parameters in the constructor.
+        // The reason behind this is the fact that the sample points are stored in a
+        // buffer (std::vector), and the buffer can be reallocated then the pointers 
+        // become invalid. So, it's preferable to work on a copy, we are sure that the
+        // data are always valid.
+        FOdysseyVectorPointSample mSamplePoint[2];
+};
+
 class ODYSSEYVECTOR_API FOdysseyVectorPathBuilder : public FOdysseyVectorObject
 {
     private:
@@ -47,7 +63,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathBuilder : public FOdysseyVectorObject
 
         std::vector<FOdysseyVectorPoint> mPointBuffer;
         std::vector<FOdysseyVectorPointSample> mSampleBuffer;
-        std::vector<FOdysseyVectorLink> mLinkBuffer;
+        std::vector<FOdysseyVectorLinkSample> mLinkBuffer;
 
         std::vector<FOdysseyVectorPointSample*> mSampleArray;
         std::vector<FOdysseyVectorPoint*> mPointArray;

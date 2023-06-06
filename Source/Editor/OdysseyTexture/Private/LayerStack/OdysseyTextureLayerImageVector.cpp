@@ -115,8 +115,7 @@ UOdysseyTextureLayerImageVector::RenderImageChanged( const TArray<::ULIS::FRectI
     if( layerStack->CurrentLayer.Get() == this )
     {
         mVEngine->RenderHUD( mScene );
-    }else
-UE_LOG(LogTemp, Warning, TEXT("not current layer") ); 
+    }
 
     UOdysseyTextureLayer::RenderImageChanged( iRects, iIsInteractive );
 }
