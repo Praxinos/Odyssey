@@ -10,6 +10,11 @@ FOdysseyVectorHUDPicking::FOdysseyVectorHUDPicking()
 }
 
 void
+FOdysseyVectorHUDPicking::Reset(FOdysseyVectorScene* iScene)
+{
+}
+
+void
 FOdysseyVectorHUDPicking::Draw( FOdysseyVectorScene* iScene, uint64 iFlags )
 {
     BLContext* blctx = iScene->GetEngine()->GetBLContext();

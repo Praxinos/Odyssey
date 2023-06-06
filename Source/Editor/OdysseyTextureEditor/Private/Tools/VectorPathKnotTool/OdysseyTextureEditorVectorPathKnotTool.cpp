@@ -22,25 +22,24 @@ UOdysseyTextureEditorVectorPathKnotTool::UOdysseyTextureEditorVectorPathKnotTool
 void
 UOdysseyTextureEditorVectorPathKnotTool::Activate()
 {
+    UOdysseyTextureLayerStack::OnCurrentLayerChanged().AddUObject( this, &UOdysseyTextureEditorVectorPathKnotTool::OnCurrentLayerChanged );
+    Load();
+    Super::Activate();
+}
+
+void
+UOdysseyTextureEditorVectorPathKnotTool::Load()
+{
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
-
-    UOdysseyTextureLayerStack::OnCurrentLayerChanged().AddUObject( this, &UOdysseyTextureEditorVectorPathKnotTool::OnCurrentLayerChanged );
-
-    Load();
 
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        UOdysseyPainterEditorVectorPathKnotTool::ActivateVector( vectorEngine, vectorScene );
+        UOdysseyPainterEditorVectorPathKnotTool::LoadVector( vectorEngine, vectorScene );
     }
-}
-
-void
-UOdysseyTextureEditorVectorPathKnotTool::Load()
-{
 }
 
 void
@@ -48,11 +47,22 @@ UOdysseyTextureEditorVectorPathKnotTool::Inactivate()
 {
 	UOdysseyTextureLayerStack::OnCurrentLayerChanged().RemoveAll(this);
     Super::Inactivate();
+    Unload();
 }
 
 void
 UOdysseyTextureEditorVectorPathKnotTool::Unload()
 {
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
+    UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
+
+    if( currentVectorLayer )
+    {
+        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+
+        UOdysseyPainterEditorVectorPathKnotTool::UnloadVector( vectorEngine, vectorScene );
+    }
 }
 
 bool
@@ -86,6 +96,15 @@ UOdysseyTextureEditorVectorPathKnotTool::OnCurrentLayerChanged(UOdysseyLayerStac
 		Inactivate(); //close the tool
 		return;
 	}
+
+    // We have to redraw all layers in order to draw all layers without the HUD.
+    // This will be removed when we'll have a dedicated HUD layer.
+    TArray<UOdysseyLayer*> layers = iLayerStack->GetLayers();
+    for( int i = 0; i < layers.Num(); i++ )
+    {
+        UOdysseyTextureLayer* textureLayer = static_cast<UOdysseyTextureLayer*>(layers[i]);
+        textureLayer->RenderImageChanged(false);
+    }
 
 	//Reload the tool to edit the new layer
 	Unload();

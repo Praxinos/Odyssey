@@ -22,25 +22,24 @@ UOdysseyTextureEditorVectorPathSmoothTool::UOdysseyTextureEditorVectorPathSmooth
 void
 UOdysseyTextureEditorVectorPathSmoothTool::Activate()
 {
+    UOdysseyTextureLayerStack::OnCurrentLayerChanged().AddUObject( this, &UOdysseyTextureEditorVectorPathSmoothTool::OnCurrentLayerChanged );
+    Load();
+    Super::Activate();
+}
+
+void
+UOdysseyTextureEditorVectorPathSmoothTool::Load()
+{
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
-
-    UOdysseyTextureLayerStack::OnCurrentLayerChanged().AddUObject( this, &UOdysseyTextureEditorVectorPathSmoothTool::OnCurrentLayerChanged );
-
-    Load();
 
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        UOdysseyPainterEditorVectorPathSmoothTool::ActivateVector( vectorEngine, vectorScene );
+        UOdysseyPainterEditorVectorPathSmoothTool::LoadVector( vectorEngine, vectorScene );
     }
-}
-
-void
-UOdysseyTextureEditorVectorPathSmoothTool::Load()
-{
 }
 
 void
@@ -48,11 +47,22 @@ UOdysseyTextureEditorVectorPathSmoothTool::Inactivate()
 {
 	UOdysseyTextureLayerStack::OnCurrentLayerChanged().RemoveAll(this);
     Super::Inactivate();
+    Unload();
 }
 
 void
 UOdysseyTextureEditorVectorPathSmoothTool::Unload()
 {
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
+    UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
+
+    if( currentVectorLayer )
+    {
+        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+
+        UOdysseyPainterEditorVectorPathSmoothTool::UnloadVector( vectorEngine, vectorScene );
+    }
 }
 
 bool
@@ -86,6 +96,15 @@ UOdysseyTextureEditorVectorPathSmoothTool::OnCurrentLayerChanged(UOdysseyLayerSt
 		Inactivate(); //close the tool
 		return;
 	}
+
+    // We have to redraw all layers in order to draw all layers without the HUD.
+    // This will be removed when we'll have a dedicated HUD layer.
+    TArray<UOdysseyLayer*> layers = iLayerStack->GetLayers();
+    for( int i = 0; i < layers.Num(); i++ )
+    {
+        UOdysseyTextureLayer* textureLayer = static_cast<UOdysseyTextureLayer*>(layers[i]);
+        textureLayer->RenderImageChanged(false);
+    }
 
 	//Reload the tool to edit the new layer
 	Unload();

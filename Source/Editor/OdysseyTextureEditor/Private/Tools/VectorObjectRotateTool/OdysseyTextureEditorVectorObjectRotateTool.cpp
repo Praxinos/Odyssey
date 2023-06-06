@@ -22,25 +22,24 @@ UOdysseyTextureEditorVectorObjectRotateTool::UOdysseyTextureEditorVectorObjectRo
 void
 UOdysseyTextureEditorVectorObjectRotateTool::Activate()
 {
+    UOdysseyTextureLayerStack::OnCurrentLayerChanged().AddUObject( this, &UOdysseyTextureEditorVectorObjectRotateTool::OnCurrentLayerChanged );
+    Load();
+    Super::Activate();
+}
+
+void
+UOdysseyTextureEditorVectorObjectRotateTool::Load()
+{
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
-
-    UOdysseyTextureLayerStack::OnCurrentLayerChanged().AddUObject( this, &UOdysseyTextureEditorVectorObjectRotateTool::OnCurrentLayerChanged );
-
-    Load();
 
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        UOdysseyPainterEditorVectorObjectRotateTool::ActivateVector( vectorEngine, vectorScene );
+        UOdysseyPainterEditorVectorObjectRotateTool::LoadVector( vectorEngine, vectorScene );
     }
-}
-
-void
-UOdysseyTextureEditorVectorObjectRotateTool::Load()
-{
 }
 
 void
@@ -49,11 +48,22 @@ UOdysseyTextureEditorVectorObjectRotateTool::Inactivate()
 	UOdysseyTextureLayerStack::OnCurrentLayerChanged().RemoveAll(this);
     Super::Inactivate();
 
+    Unload();
 }
 
 void
 UOdysseyTextureEditorVectorObjectRotateTool::Unload()
 {
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
+    UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
+
+    if( currentVectorLayer )
+    {
+        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+
+        UOdysseyPainterEditorVectorObjectRotateTool::UnloadVector( vectorEngine, vectorScene );
+    }
 }
 
 bool
@@ -87,6 +97,15 @@ UOdysseyTextureEditorVectorObjectRotateTool::OnCurrentLayerChanged(UOdysseyLayer
 		Inactivate(); //close the tool
 		return;
 	}
+
+    // We have to redraw all layers in order to draw all layers without the HUD.
+    // This will be removed when we'll have a dedicated HUD layer.
+    TArray<UOdysseyLayer*> layers = iLayerStack->GetLayers();
+    for( int i = 0; i < layers.Num(); i++ )
+    {
+        UOdysseyTextureLayer* textureLayer = static_cast<UOdysseyTextureLayer*>(layers[i]);
+        textureLayer->RenderImageChanged(false);
+    }
 
 	//Reload the tool to edit the new layer
 	Unload();

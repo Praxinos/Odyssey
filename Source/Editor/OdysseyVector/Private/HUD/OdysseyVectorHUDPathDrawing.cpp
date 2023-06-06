@@ -12,6 +12,11 @@ FOdysseyVectorHUDPathDrawing::FOdysseyVectorHUDPathDrawing()
 }
 
 void
+FOdysseyVectorHUDPathDrawing::Reset(FOdysseyVectorScene* iScene)
+{
+}
+
+void
 FOdysseyVectorHUDPathDrawing::Draw( FOdysseyVectorScene* iScene, uint64 iFlags )
 {
     BLContext* blctx = iScene->GetEngine()->GetBLContext();

@@ -28,16 +28,22 @@ UOdysseyPainterEditorVectorGridTool::UOdysseyPainterEditorVectorGridTool()
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
 void
-UOdysseyPainterEditorVectorGridTool::ActivateVector( FOdysseyVectorEngine* iEngine
-                                                   , FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorGridTool::UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
+    iEngine->RemoveHUD( &mGridHUD );
+
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+}
+
+void
+UOdysseyPainterEditorVectorGridTool::LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+{
+    iEngine->AddHUD( &mGridHUD );
+
     mGridHUD.MakeGrid( iScene, DivisionsX, DivisionsY );
     mGridHUD.Export( mPointArray );
-
+    // clear selected nodes
     mGridNodeArray.clear();
-
-    iEngine->ClearHUD( );
-    iEngine->AddHUD( &mGridHUD );
 
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }

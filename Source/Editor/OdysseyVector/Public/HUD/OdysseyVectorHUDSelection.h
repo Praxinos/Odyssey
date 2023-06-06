@@ -31,6 +31,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUDSelection : public FOdysseyVectorHUD
         FSelectionBox& GetSelectionBox();
         void Init( uint32 iWidth, uint32 iHeight );
         virtual void UpdateSelectionBox( FOdysseyVectorScene* iScene );
-        virtual void Draw( FOdysseyVectorScene* iScene, uint64 iFlags );
+
+        virtual void Draw( FOdysseyVectorScene* iScene, uint64 iFlags ) override;
+        virtual void Reset( FOdysseyVectorScene* iScene ) override;
+
         void SetSelecting( bool iSelecting, std::vector<::ULIS::FVec2D>* iPointArray );
 };

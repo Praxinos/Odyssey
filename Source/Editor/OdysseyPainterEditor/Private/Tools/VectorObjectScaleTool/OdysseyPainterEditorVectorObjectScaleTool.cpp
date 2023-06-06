@@ -34,13 +34,19 @@ UOdysseyPainterEditorVectorObjectScaleTool::FitHUD( FOdysseyVectorScene* iScene 
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
 void
-UOdysseyPainterEditorVectorObjectScaleTool::ActivateVector( FOdysseyVectorEngine* iEngine
-                                                          , FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorObjectScaleTool::UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
-    FitHUD( iScene );
+    iEngine->RemoveHUD( mTransformHUD );
 
-    iEngine->ClearHUD( );
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+}
+
+void
+UOdysseyPainterEditorVectorObjectScaleTool::LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+{
     iEngine->AddHUD( mTransformHUD );
+
+    FitHUD( iScene );
 
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }

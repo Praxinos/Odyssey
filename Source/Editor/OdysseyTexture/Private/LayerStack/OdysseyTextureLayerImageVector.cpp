@@ -15,6 +15,20 @@
 
 #define LOCTEXT_NAMESPACE "UOdysseyTextureLayerImageVector"
 
+UOdysseyTextureLayerImageVector::FOnBlendModeChanged&
+UOdysseyTextureLayerImageVector::OnBlendModeChanged()
+{
+    static FOnBlendModeChanged onBlendModeChanged;
+    return onBlendModeChanged;
+}
+
+UOdysseyTextureLayerImageVector::FOnOpacityChanged&
+UOdysseyTextureLayerImageVector::OnOpacityChanged()
+{
+    static FOnOpacityChanged onOpacityChanged;
+    return onOpacityChanged;
+}
+
 UOdysseyTextureLayerImageVector::~UOdysseyTextureLayerImageVector()
 {
     // TODO: free the scene
@@ -92,7 +106,17 @@ UOdysseyTextureLayerImageVector::RenderImageChanged( bool iIsInteractive )
 void
 UOdysseyTextureLayerImageVector::RenderImageChanged( const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive )
 {
-    mVEngine->Render( mScene ); // render once to buffer, then the call below will copy each rectangle from the buffer to the layer
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetLayerStack());
+
+    // render once to buffer, then the call to RenderImageChanged() will copy each rectangle from the buffer to the layer
+    mVEngine->Render( mScene );
+
+    // HUD displaying only for the current layer.
+    if( layerStack->CurrentLayer.Get() == this )
+    {
+        mVEngine->RenderHUD( mScene );
+    }else
+UE_LOG(LogTemp, Warning, TEXT("not current layer") ); 
 
     UOdysseyTextureLayer::RenderImageChanged( iRects, iIsInteractive );
 }
@@ -118,9 +142,9 @@ UOdysseyTextureLayerImageVector::RenderImage(TSharedPtr<::ULIS::FBlock, ESPMode:
                 *ioDest,
                 iRect,
                 iPos,
-                ::ULIS::eBlendMode(/*BlendMode*/::ULIS::eBlendMode::Blend_Normal),
+                ::ULIS::eBlendMode(BlendMode),
                 ::ULIS::Alpha_Normal,
-                /*Opacity*/1.0f,
+                Opacity,
                 ::ULIS::FSchedulePolicy::/*CacheEfficient*/AsyncCacheEfficient,
                 iWaitList.Num(),
                 iWaitList.GetData(),
@@ -158,6 +182,45 @@ UOdysseyTextureLayerImageVector::Serialize(FArchive& Ar)
         FOdysseyVectorImport::Read( mScene, Ar );
     }
 
+}
+
+void
+UOdysseyTextureLayerImageVector::PropertyChanged(const FName& iPropertyName)
+{
+    Super::PropertyChanged(iPropertyName);
+
+    if (iPropertyName == "BlendMode")
+        BlendModeChanged();
+    if (iPropertyName == "Opacity")
+        OpacityChanged();
+/*
+    if (iPropertyName == "IsAlphaLocked")
+        IsAlphaLockedChanged();
+*/
+}
+
+void
+UOdysseyTextureLayerImageVector::OpacityChanged()
+{
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetLayerStack());
+    if (!layerStack)
+        return;
+
+    OnOpacityChanged().Broadcast(this);
+
+    RenderImageChanged({ ::ULIS::FRectI::FromXYWH(0, 0, mBlock->Width(), mBlock->Height()) }, false);
+}
+
+void
+UOdysseyTextureLayerImageVector::BlendModeChanged()
+{
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetLayerStack());
+    if (!layerStack)
+        return;
+
+    OnBlendModeChanged().Broadcast(this);
+
+    RenderImageChanged({ ::ULIS::FRectI::FromXYWH(0, 0, mBlock->Width(), mBlock->Height()) }, false);
 }
 
 #undef LOCTEXT_NAMESPACE

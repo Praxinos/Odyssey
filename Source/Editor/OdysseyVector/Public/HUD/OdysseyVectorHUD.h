@@ -12,4 +12,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
         FOdysseyVectorHUD();
 
         virtual void Draw( FOdysseyVectorScene* iScene, uint64 iFlags ) = 0;
+        virtual void Reset( FOdysseyVectorScene* iScene ) = 0;
 };

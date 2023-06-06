@@ -106,6 +106,8 @@ FOdysseyVectorUndoPathAlter::Apply( UObject* iIgnored )
 
     // update invalidated objects
     mScene->Update(0);
+
+    FOdysseyVectorEngine::ResetHUD( mScene );
     // call callbacks if any (for refreshing GUI e.g)
     mScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW
                   | FOdysseyVectorScene::SIGNAL_OBJECT_SELECTED
@@ -141,6 +143,8 @@ FOdysseyVectorUndoPathAlter::Revert( UObject* iIgnored )
 
     // update invalidated objects
     mScene->Update(0);
+
+    FOdysseyVectorEngine::ResetHUD( mScene );
     // call callbacks if any (for refreshing GUI e.g)
     mScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW
                   | FOdysseyVectorScene::SIGNAL_OBJECT_SELECTED

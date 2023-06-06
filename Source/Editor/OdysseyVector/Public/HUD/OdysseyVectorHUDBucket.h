@@ -15,6 +15,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUDBucket : public FOdysseyVectorHUD
         ~FOdysseyVectorHUDBucket();
         FOdysseyVectorHUDBucket();
 
-        void Draw( FOdysseyVectorScene* iScene, uint64 iFlags );
+        virtual void Draw( FOdysseyVectorScene* iScene, uint64 iFlags ) override;
+        virtual void Reset( FOdysseyVectorScene* iScene ) override;
         void SetCycle( FOdysseyVectorCycle* iCycle );
 };

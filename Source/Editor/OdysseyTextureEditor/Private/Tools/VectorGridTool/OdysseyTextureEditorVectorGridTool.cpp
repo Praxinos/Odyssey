@@ -22,25 +22,24 @@ UOdysseyTextureEditorVectorGridTool::UOdysseyTextureEditorVectorGridTool()
 void
 UOdysseyTextureEditorVectorGridTool::Activate()
 {
+    UOdysseyTextureLayerStack::OnCurrentLayerChanged().AddUObject( this, &UOdysseyTextureEditorVectorGridTool::OnCurrentLayerChanged );
+    Load();
+    Super::Activate();
+}
+
+void
+UOdysseyTextureEditorVectorGridTool::Load()
+{
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
-
-    UOdysseyTextureLayerStack::OnCurrentLayerChanged().AddUObject( this, &UOdysseyTextureEditorVectorGridTool::OnCurrentLayerChanged );
-
-    Load();
 
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        UOdysseyPainterEditorVectorGridTool::ActivateVector( vectorEngine, vectorScene );
+        UOdysseyPainterEditorVectorGridTool::LoadVector( vectorEngine, vectorScene );
     }
-}
-
-void
-UOdysseyTextureEditorVectorGridTool::Load()
-{
 }
 
 void
@@ -48,11 +47,23 @@ UOdysseyTextureEditorVectorGridTool::Inactivate()
 {
 	UOdysseyTextureLayerStack::OnCurrentLayerChanged().RemoveAll(this);
     Super::Inactivate();
+
+    Unload();
 }
 
 void
 UOdysseyTextureEditorVectorGridTool::Unload()
 {
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
+    UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
+
+    if( currentVectorLayer )
+    {
+        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+
+        UOdysseyPainterEditorVectorGridTool::UnloadVector( vectorEngine, vectorScene );
+    }
 }
 
 bool
@@ -86,6 +97,15 @@ UOdysseyTextureEditorVectorGridTool::OnCurrentLayerChanged(UOdysseyLayerStack* i
 		Inactivate(); //close the tool
 		return;
 	}
+
+    // We have to redraw all layers in order to draw all layers without the HUD.
+    // This will be removed when we'll have a dedicated HUD layer.
+    TArray<UOdysseyLayer*> layers = iLayerStack->GetLayers();
+    for( int i = 0; i < layers.Num(); i++ )
+    {
+        UOdysseyTextureLayer* textureLayer = static_cast<UOdysseyTextureLayer*>(layers[i]);
+        textureLayer->RenderImageChanged(false);
+    }
 
 	//Reload the tool to edit the new layer
 	Unload();

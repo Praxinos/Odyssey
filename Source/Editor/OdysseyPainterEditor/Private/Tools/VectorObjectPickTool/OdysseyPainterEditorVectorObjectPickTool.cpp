@@ -24,15 +24,24 @@ UOdysseyPainterEditorVectorObjectPickTool::UOdysseyPainterEditorVectorObjectPick
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
 void
-UOdysseyPainterEditorVectorObjectPickTool::ActivateVector( FOdysseyVectorEngine* iEngine
-                                                         , FOdysseyVectorScene* iScene
-                                                         , int32 iSizeX
-                                                         , int32 iSizeY )
+UOdysseyPainterEditorVectorObjectPickTool::UnloadVector( FOdysseyVectorEngine* iEngine
+                                                       , FOdysseyVectorScene* iScene )
+{
+    iEngine->RemoveHUD( mSelectionHUD );
+
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+}
+
+void
+UOdysseyPainterEditorVectorObjectPickTool::LoadVector( FOdysseyVectorEngine* iEngine
+                                                     , FOdysseyVectorScene* iScene
+                                                     , int32 iSizeX
+                                                     , int32 iSizeY )
 {
     mSelectionHUD->Init( iSizeX, iSizeY );
     mSelectionHUD->UpdateSelectionBox( iScene );
 
-    iEngine->ClearHUD( );
+    //iEngine->ClearHUD( );
     iEngine->AddHUD( mSelectionHUD );
 
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );

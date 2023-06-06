@@ -198,6 +198,12 @@ FOdysseyVectorHUDGrid::DrawSelectionRectangle( FOdysseyVectorScene* iScene, uint
 }
 
 void
+FOdysseyVectorHUDGrid::Reset(FOdysseyVectorScene* iScene)
+{
+    Map( iScene );
+}
+
+void
 FOdysseyVectorHUDGrid::Draw( FOdysseyVectorScene* iScene, uint64 iFlags )
 {
     BLContext* blctx = iScene->GetEngine()->GetBLContext();

@@ -74,6 +74,12 @@ FOdysseyVectorHUDSelection::DrawSelectionSpace( FOdysseyVectorScene* iScene, uin
 }
 
 void
+FOdysseyVectorHUDSelection::Reset(FOdysseyVectorScene* iScene)
+{
+    UpdateSelectionBox( iScene );
+}
+
+void
 FOdysseyVectorHUDSelection::UpdateSelectionBox( FOdysseyVectorScene* iScene )
 {
     std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();

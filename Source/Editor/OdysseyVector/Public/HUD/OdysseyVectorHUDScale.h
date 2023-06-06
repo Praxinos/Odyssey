@@ -19,6 +19,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUDScale : public FOdysseyVectorHUDSelecti
         virtual ~FOdysseyVectorHUDScale();
         FOdysseyVectorHUDScale();
 
-        void Draw( FOdysseyVectorScene* iScene, uint64 iFlags );
+        virtual void Draw( FOdysseyVectorScene* iScene, uint64 iFlags ) override;
+        virtual void Reset( FOdysseyVectorScene* iScene ) override;
+
         int32 Pick( double iWorldX, double iWorldY );
 };

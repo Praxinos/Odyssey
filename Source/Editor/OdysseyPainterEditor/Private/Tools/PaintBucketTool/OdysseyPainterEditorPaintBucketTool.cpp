@@ -33,12 +33,18 @@ UOdysseyPainterEditorPaintBucketTool::UOdysseyPainterEditorPaintBucketTool()
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
 void
-UOdysseyPainterEditorPaintBucketTool::ActivateVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorPaintBucketTool::UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
-    iEngine->ClearHUD();
-    iEngine->AddHUD(&mBucketHUD);
+    iEngine->RemoveHUD( &mBucketHUD );
 
-    iScene->Update( 0 );
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+}
+
+void
+UOdysseyPainterEditorPaintBucketTool::LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+{
+    iEngine->AddHUD( &mBucketHUD );
+
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
 
@@ -231,19 +237,19 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseDownVector( FOdysseyVectorEngine* i
             switch( mPickedArea )
             {
                 case FOdysseyVectorBucket::PICKBUCKET :
-                {
                     mPickedBucket = bucket;
                     mPointPosition.x = mPickedBucket->GetX();
                     mPointPosition.y = mPickedBucket->GetY();
-                }
+                break;
+
+                case FOdysseyVectorBucket::PICKPROPAGATED :
+                    mPickedBucket = bucket;
                 break;
 
                 case FOdysseyVectorBucket::PICKHANDLE :
-                {
                     mPickedBucket = bucket;
                     mPointPosition.x = mPickedBucket->GetHandle()->GetX();
                     mPointPosition.y = mPickedBucket->GetHandle()->GetY();
-                }
                 break;
 
                 default :

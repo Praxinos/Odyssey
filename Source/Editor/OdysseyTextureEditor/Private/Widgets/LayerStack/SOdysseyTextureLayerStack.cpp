@@ -89,6 +89,10 @@ SOdysseyTextureLayerStack::OnGenerateRow(UOdysseyLayer* iLayer, const TSharedRef
     {
         return SNew(SOdysseyTextureLayerImageRasterRow, mTreeView.ToSharedRef(), Cast<UOdysseyTextureLayerImageRaster>(iLayer));
     }
+    else if (layerClass == UOdysseyTextureLayerImageVector::StaticClass())
+    {
+        return SNew(SOdysseyTextureLayerImageVectorRow, mTreeView.ToSharedRef(), Cast<UOdysseyTextureLayerImageVector>(iLayer));
+    }
 
     return SNew(SOdysseyLayerRow, mTreeView.ToSharedRef(), Cast<UOdysseyLayer>(iLayer)); //Default widget
 }

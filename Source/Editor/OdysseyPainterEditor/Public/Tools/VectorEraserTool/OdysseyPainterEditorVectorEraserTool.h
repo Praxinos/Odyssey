@@ -28,7 +28,8 @@ public:
     UOdysseyPainterEditorVectorEraserTool();
  
     //OdysseyPainterEditorTool overrides
-    void ActivateVector( FOdysseyVectorEngine* iEngine
+    void UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    void LoadVector( FOdysseyVectorEngine* iEngine
                        , FOdysseyVectorScene* iScene );
 
     bool OnMouseDownVector( FOdysseyVectorEngine* iEngine

@@ -50,6 +50,12 @@ FOdysseyVectorHUDRotate::SetPivot( double iLocalX, double iLocalY )
 }
 
 void
+FOdysseyVectorHUDRotate::Reset(FOdysseyVectorScene* iScene)
+{
+    FOdysseyVectorHUDSelection::Reset( iScene );
+}
+
+void
 FOdysseyVectorHUDRotate::Draw( FOdysseyVectorScene* iScene, uint64 iFlags )
 {
     std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();

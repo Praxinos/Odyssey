@@ -39,6 +39,8 @@ FOdysseyTextureEditorGUI::OnCurrentLayerChanged( UOdysseyLayerStack* iLayerStack
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
+        //FOdysseyVectorEngine::ClearHUD();
+
         OnVectorSceneSignal( vectorScene, FOdysseyVectorScene::SIGNAL_ALL );
     }
 }

@@ -1,7 +1,5 @@
 #include "OdysseyVectorEngine.h"
 
-static std::list<FOdysseyVectorHUD*> _HUDList;
-
 FOdysseyVectorEngine::~FOdysseyVectorEngine()
 {
     mBLContext->end();
@@ -11,10 +9,10 @@ FOdysseyVectorEngine::FOdysseyVectorEngine( double iWidth, double iHeight )
     : mDrawingFlags( 0 )
     , mSelectionSpace( nullptr )
 {
-    //BLContextCreateInfo createInfo {};
+    BLContextCreateInfo createInfo {};
 
     // Configure the number of threads to use.
-    //createInfo.threadCount = 8;
+    createInfo.threadCount = 8;
 
     mBLContext = new BLContext();
     mBLImage = new BLImage( iWidth, iHeight, BL_FORMAT_PRGB32 );
@@ -23,7 +21,7 @@ FOdysseyVectorEngine::FOdysseyVectorEngine( double iWidth, double iHeight )
     /*mScene = NewObject<FOdysseyVectorScene>();
     mScene->Init("Vector Scene");*/
 
-    mBLContext->begin( *mBLImage/*, createInfo*/ );
+    mBLContext->begin( *mBLImage, createInfo );
 }
 
 void
@@ -129,7 +127,7 @@ FOdysseyVectorEngine::RenderHUD( FOdysseyVectorScene* iScene )
     mBLContext->save();
     mBLContext->resetMatrix();
 
-    for( std::list<FOdysseyVectorHUD*>::iterator hit = _HUDList.begin(); hit != _HUDList.end(); ++hit )
+    for( std::list<FOdysseyVectorHUD*>::iterator hit = GetHUDList().begin(); hit != GetHUDList().end(); ++hit )
     {
         FOdysseyVectorHUD *hud = (*hit);
 
@@ -137,6 +135,8 @@ FOdysseyVectorEngine::RenderHUD( FOdysseyVectorScene* iScene )
     }
 
     mBLContext->restore();
+
+    mBLContext->flush(BL_CONTEXT_FLUSH_SYNC);
 }
 
 void
@@ -169,7 +169,7 @@ UE_LOG(LogTemp, Warning, TEXT("Some warning message %d %d %d %d"), mRoi.x, mRoi.
     mBLContext->strokeRect(mRoi.x,mRoi.y,mRoi.w,mRoi.h);
     mBLContext->restore();
 */
-    RenderHUD( iScene );
+    //RenderHUD( iScene );
 
     //mBLContext->restoreClipping();
 
@@ -582,17 +582,44 @@ FOdysseyVectorEngine::Pick( FOdysseyVectorScene* iScene
     }
 }
 
-void FOdysseyVectorEngine::AddHUD( FOdysseyVectorHUD* iHUDObject )
+// static
+std::list<FOdysseyVectorHUD*>&
+FOdysseyVectorEngine::GetHUDList()
 {
-    _HUDList.push_back( iHUDObject );
+    static std::list<FOdysseyVectorHUD*> HUDList;
+
+    return HUDList;
 }
 
-void FOdysseyVectorEngine::RemoveHUD( FOdysseyVectorHUD* iHUDObject )
+// static
+void
+FOdysseyVectorEngine::AddHUD( FOdysseyVectorHUD* iHUDObject )
 {
-    _HUDList.remove( iHUDObject );
+    GetHUDList().push_back( iHUDObject );
 }
 
-void FOdysseyVectorEngine::ClearHUD()
+// static
+void
+FOdysseyVectorEngine::RemoveHUD( FOdysseyVectorHUD* iHUDObject )
 {
-    _HUDList.clear();
+    GetHUDList().remove( iHUDObject );
+}
+
+// static
+void
+FOdysseyVectorEngine::ClearHUD()
+{
+    GetHUDList().clear();
+}
+
+// static
+void
+FOdysseyVectorEngine::ResetHUD( FOdysseyVectorScene* iScene )
+{
+    for( std::list<FOdysseyVectorHUD*>::iterator hit = GetHUDList().begin(); hit != GetHUDList().end(); ++hit )
+    {
+        FOdysseyVectorHUD *hud = (*hit);
+
+        hud->Reset( iScene );
+    }
 }

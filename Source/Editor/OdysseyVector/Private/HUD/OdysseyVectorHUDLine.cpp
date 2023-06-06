@@ -36,6 +36,11 @@ FOdysseyVectorHUDLine::GetP1()
 }
 
 void
+FOdysseyVectorHUDLine::Reset(FOdysseyVectorScene* iScene)
+{
+}
+
+void
 FOdysseyVectorHUDLine::Draw( FOdysseyVectorScene* iScene, uint64 iFlags )
 {
     BLContext* blctx = iScene->GetEngine()->GetBLContext();

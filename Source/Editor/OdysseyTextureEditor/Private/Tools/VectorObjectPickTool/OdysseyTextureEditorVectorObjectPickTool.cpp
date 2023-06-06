@@ -17,39 +17,31 @@ UOdysseyTextureEditorVectorObjectPickTool::UOdysseyTextureEditorVectorObjectPick
 {
 }
 
-// refresh on Undo for example (we need to reset the selection box as if the tool was activated)
-void
-UOdysseyTextureEditorVectorObjectPickTool::OnRefresh( FOdysseyVectorScene* iScene )
-{
-    Activate();
-}
-
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
 void
 UOdysseyTextureEditorVectorObjectPickTool::Activate()
 {
+    UOdysseyTextureLayerStack::OnCurrentLayerChanged().AddUObject( this, &UOdysseyTextureEditorVectorObjectPickTool::OnCurrentLayerChanged );
+    Load();
+    Super::Activate();
+}
+
+void
+UOdysseyTextureEditorVectorObjectPickTool::Load()
+{
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
     UTexture2D* texture = layerStack->GetTexture();
-
-    UOdysseyTextureLayerStack::OnCurrentLayerChanged().AddUObject( this, &UOdysseyTextureEditorVectorObjectPickTool::OnCurrentLayerChanged );
-
-    Load();
 
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        UOdysseyPainterEditorVectorObjectPickTool::ActivateVector( vectorEngine, vectorScene, texture->Source.GetSizeX(), texture->Source.GetSizeY() );
+        UOdysseyPainterEditorVectorObjectPickTool::LoadVector( vectorEngine, vectorScene, texture->Source.GetSizeX(), texture->Source.GetSizeY() );
     }
-}
-
-void
-UOdysseyTextureEditorVectorObjectPickTool::Load()
-{
 }
 
 void
@@ -57,11 +49,23 @@ UOdysseyTextureEditorVectorObjectPickTool::Inactivate()
 {
 	UOdysseyTextureLayerStack::OnCurrentLayerChanged().RemoveAll(this);
     Super::Inactivate();
+
+    Unload();
 }
 
 void
 UOdysseyTextureEditorVectorObjectPickTool::Unload()
 {
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
+    UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
+
+    if( currentVectorLayer )
+    {
+        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+
+        UOdysseyPainterEditorVectorObjectPickTool::UnloadVector( vectorEngine, vectorScene );
+    }
 }
 
 bool
@@ -95,6 +99,15 @@ UOdysseyTextureEditorVectorObjectPickTool::OnCurrentLayerChanged(UOdysseyLayerSt
 		Inactivate(); //close the tool
 		return;
 	}
+
+    // We have to redraw all layers in order to draw all layers without the HUD.
+    // This will be removed when we'll have a dedicated HUD layer.
+    TArray<UOdysseyLayer*> layers = iLayerStack->GetLayers();
+    for( int i = 0; i < layers.Num(); i++ )
+    {
+        UOdysseyTextureLayer* textureLayer = static_cast<UOdysseyTextureLayer*>(layers[i]);
+        textureLayer->RenderImageChanged(false);
+    }
 
 	//Reload the tool to edit the new layer
 	Unload();
@@ -145,21 +158,6 @@ UOdysseyTextureEditorVectorObjectPickTool::OnMouseDown( const FOdysseyPoint& iPo
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
     bool ret = false;
 
-  if(FSlateApplication::Get().GetModifierKeys().IsControlDown())
-  {
-    if( iKey == EKeys::LeftMouseButton )
-    {
-        FSlateApplication::Get().PushMenu(
-        //textureEditor->GetGUI()->GetViewportTab().Get()->GetViewport().Get()->GetViewportWidget().ToSharedRef(),
-        textureEditor->GetGUI()->GetViewportTab().Get()->Widget().ToSharedRef(),
-        FWidgetPath(),
-        textureEditor->GetGUI()->GetVectorContextMenu()->Widget().ToSharedRef(),
-        FSlateApplication::Get().GetCursorPos(),
-        FPopupTransitionEffect(FPopupTransitionEffect::ContextMenu)
-        );
-    }
-  }
-  else
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
@@ -189,11 +187,26 @@ UOdysseyTextureEditorVectorObjectPickTool::OnMouseDrag( const FOdysseyPoint& iPo
 bool
 UOdysseyTextureEditorVectorObjectPickTool::OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
 {
-    TSharedPtr<FOdysseyPainterEditorSelectedVectorObjectTab>& vectorObjectTab = GetEditorAs<FOdysseyTextureEditor>()->GetGUI()->GetSelectedVectorObjectTab();
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
+    FOdysseyTextureEditor* textureEditor =  GetEditorAs<FOdysseyTextureEditor>();
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(textureEditor->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
     bool ret = false;
 
+  /*if(FSlateApplication::Get().GetModifierKeys().IsControlDown())
+  {*/
+    if( iKey == EKeys::RightMouseButton )
+    {
+        FSlateApplication::Get().PushMenu(
+        //textureEditor->GetGUI()->GetViewportTab().Get()->GetViewport().Get()->GetViewportWidget().ToSharedRef(),
+        textureEditor->GetGUI()->GetViewportTab().Get()->Widget().ToSharedRef(),
+        FWidgetPath(),
+        textureEditor->GetGUI()->GetVectorContextMenu()->Widget().ToSharedRef(),
+        FSlateApplication::Get().GetCursorPos(),
+        FPopupTransitionEffect(FPopupTransitionEffect::ContextMenu)
+        );
+    }
+  /*}*/
+  else
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();

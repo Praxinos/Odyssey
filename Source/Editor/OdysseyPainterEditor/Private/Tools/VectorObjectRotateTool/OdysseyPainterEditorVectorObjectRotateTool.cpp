@@ -39,13 +39,19 @@ UOdysseyPainterEditorVectorObjectRotateTool::FitHUD( FOdysseyVectorScene* iScene
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
 void
-UOdysseyPainterEditorVectorObjectRotateTool::ActivateVector( FOdysseyVectorEngine* iEngine
-                                                           , FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorObjectRotateTool::UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
-    FitHUD( iScene );
+    iEngine->RemoveHUD( mTransformHUD );
 
-    iEngine->ClearHUD( );
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+}
+
+void
+UOdysseyPainterEditorVectorObjectRotateTool::LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+{
     iEngine->AddHUD( mTransformHUD );
+
+    FitHUD( iScene );
 
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }

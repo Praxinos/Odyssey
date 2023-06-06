@@ -42,7 +42,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUDGrid : public FOdysseyVectorHUDSelectio
         virtual ~FOdysseyVectorHUDGrid();
         FOdysseyVectorHUDGrid();
 
-        void Draw( FOdysseyVectorScene* iScene, uint64 iFlags );
+        virtual void Draw( FOdysseyVectorScene* iScene, uint64 iFlags ) override;
+        virtual void Reset( FOdysseyVectorScene* iScene ) override;
+
         FGridNode *PickNode( double iWorldX, double iWorldY, double iWorldRadius );
         void PickNodes( ::ULIS::FRectD& iWorldRect, std::vector<FGridNode*>& oNodeArray );
         void MakeGrid( FOdysseyVectorScene* iScene, uint32 iDivisionX, uint32 iDivisionY );

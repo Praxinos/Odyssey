@@ -38,6 +38,12 @@ FOdysseyVectorHUDScale::Pick( double iWorldX, double iWorldY )
 }
 
 void
+FOdysseyVectorHUDScale::Reset(FOdysseyVectorScene* iScene)
+{
+    FOdysseyVectorHUDSelection::Reset( iScene );
+}
+
+void
 FOdysseyVectorHUDScale::Draw( FOdysseyVectorScene* iScene, uint64 iFlags )
 {
     std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();

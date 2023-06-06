@@ -24,10 +24,11 @@ public:
     //Constructor
     UOdysseyPainterEditorVectorObjectPickTool();
  
-    void ActivateVector( FOdysseyVectorEngine* iEngine
-                       , FOdysseyVectorScene* iScene
-                       , int32 iSizeX
-                       , int32 iSizeY );
+    void UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    void LoadVector( FOdysseyVectorEngine* iEngine
+                   , FOdysseyVectorScene* iScene
+                   , int32 iSizeX
+                   , int32 iSizeY );
     bool OnMouseDownVector( FOdysseyVectorEngine* iEngine
                           , FOdysseyVectorScene* iScene
                           , const FOdysseyPoint& iPointInTexture

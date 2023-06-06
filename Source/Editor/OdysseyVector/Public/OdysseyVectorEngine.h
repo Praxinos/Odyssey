@@ -14,9 +14,11 @@
 class ODYSSEYVECTOR_API FOdysseyVectorEngine
 {
     public:
+        static std::list<FOdysseyVectorHUD*>& GetHUDList();
         static void AddHUD( FOdysseyVectorHUD* iHUDObject );
         static void RemoveHUD( FOdysseyVectorHUD* iHUDObject );
         static void ClearHUD();
+        static void ResetHUD( FOdysseyVectorScene* iScene );
 
         /**
          * @brief Get the rendering context (Blend2D)
@@ -227,6 +229,12 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
          */
         void UseImage( BLImage* iImage );
 
+        /**
+         * @brief render the current HUD.
+         * @param iDrawingFlags.
+         */
+        void RenderHUD( FOdysseyVectorScene* iScene );
+
     protected:
         static void RecursivePick( FOdysseyVectorGroup* iSelectionSpace
                                  , FOdysseyVectorObject* iObj
@@ -242,11 +250,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
                                   , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray
                                   , ::ULIS::FRectD &iRoi
                                   , bool iSelectedOnly );
-        /**
-         * @brief render the current HUD.
-         * @param iDrawingFlags.
-         */
-        void RenderHUD( FOdysseyVectorScene* iScene );
+
 
     private:
         BLContext* mBLContext;

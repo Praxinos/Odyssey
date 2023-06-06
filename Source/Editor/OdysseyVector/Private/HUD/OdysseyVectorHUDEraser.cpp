@@ -11,6 +11,12 @@ FOdysseyVectorHUDEraser::FOdysseyVectorHUDEraser()
 }
 
 void
+FOdysseyVectorHUDEraser::Reset(FOdysseyVectorScene* iScene)
+{
+
+}
+
+void
 FOdysseyVectorHUDEraser::Draw( FOdysseyVectorScene* iScene, uint64 iFlags )
 {
     BLContext* blctx = iScene->GetEngine()->GetBLContext();

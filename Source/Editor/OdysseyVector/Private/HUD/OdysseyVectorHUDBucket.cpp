@@ -18,6 +18,12 @@ FOdysseyVectorHUDBucket::SetCycle( FOdysseyVectorCycle* iCycle )
 }
 
 void
+FOdysseyVectorHUDBucket::Reset( FOdysseyVectorScene* iScene )
+{
+
+}
+
+void
 FOdysseyVectorHUDBucket::Draw( FOdysseyVectorScene* iScene, uint64 iFlags )
 {
     std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();

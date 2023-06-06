@@ -25,5 +25,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUDRotate : public FOdysseyVectorHUDSelect
         bool PickPivot( double iWorldX, double iWorldY );
         ::ULIS::FVec2D& GetPivot();
         void SetPivot( double iLocalX, double iLocalY );
-        void Draw( FOdysseyVectorScene* iScene, uint64 iFlags );
+        virtual void Draw( FOdysseyVectorScene* iScene, uint64 iFlags ) override;
+        virtual void Reset( FOdysseyVectorScene* iScene ) override;
 };
