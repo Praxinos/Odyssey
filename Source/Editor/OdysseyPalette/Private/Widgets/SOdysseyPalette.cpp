@@ -95,15 +95,6 @@ FString SOdysseyPalette::ObjectPath() const
     return mColorPalette->GetPalette()->GetPathName();
 }
 
-FReply SOdysseyPalette::HandleMeshColorBlockMouseButtonDown()
-{
-    mColorPaletteSlot->DetachWidget();
-    mColorPalette->AddNewPaletteEntry();
-    mColorPaletteSlot->AttachWidget( CreateColorPaletteWidget() );
-    return FReply::Handled();
-}
-
-
 
 TSharedRef<SWidget> SOdysseyPalette::CreateColorPaletteWidget()
 {
@@ -160,17 +151,8 @@ TSharedRef<SWidget> SOdysseyPalette::CreateColorPaletteWidget()
         ];
 }
 
-//TODO: MAKE OnHierarchyChanged instead
-void SOdysseyPalette::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
-{
-    SCompoundWidget::Tick( AllottedGeometry, InCurrentTime, InDeltaTime );
-    if( mPaletteTreeView.IsValid() )
-        mPaletteTreeView->RequestTreeRefresh();
-}
-
 TSharedRef<ITableRow> SOdysseyPalette::OnGenerateRow(UOdysseyPaletteEntry* iEntry, const TSharedRef<STableViewBase>& iOwnerTable)
 {
-    UE_LOG(LogTemp, Display, TEXT("GENERATE ROW"));
     check(iEntry);
 
     UClass* entryClass = iEntry->GetClass();

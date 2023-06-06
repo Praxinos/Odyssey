@@ -23,7 +23,6 @@ public:
     //Getter / Setter
     UOdysseyPalette* GetPalette() const;
     void SetPalette( UOdysseyPalette* iColorPalette );
-    void AddNewPaletteEntry();
 
 private:
     //CallBacks

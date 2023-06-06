@@ -8,6 +8,7 @@
 #include "Undo/OdysseyVectorUndoBucketAdd.h"
 #include "Undo/OdysseyVectorUndoBucketRemove.h"
 #include "Undo/OdysseyVectorUndoBucketParam.h"
+#include "Palette/OdysseyPaletteEntryColor.h"
 
 #define LOCTEXT_NAMESPACE "UOdysseyPainterEditorPaintBucketTool"
 
@@ -198,8 +199,19 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseDownRaster( TSharedPtr<::ULIS::FBlo
                                                        , const FOdysseyPoint& iPointInTexture
                                                        , const FKey& iKey )
 {
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> paintBlock = mPaintEngine.PaintBlock();
     ::ULIS::FColor color = GetEditorAs<FOdysseyPainterEditor>()->PaintColor().GetValue();
+    UOdysseyPaletteEntry* entry = nullptr;
+    if (GetEditorAs<FOdysseyPainterEditor>()->GetGUI()->GetColorPaletteTab()->PaletteWidget()->GetColorPalette()->GetPalette())
+    {
+        entry = GetEditorAs<FOdysseyPainterEditor>()->GetGUI()->GetColorPaletteTab()->PaletteWidget()->GetColorPalette()->GetPalette()->CurrentEntry.Get();
+        if (entry && entry->IsA(UOdysseyPaletteEntryColor::StaticClass()))
+        {
+            UOdysseyPaletteEntryColor* colorEntry = Cast< UOdysseyPaletteEntryColor >(entry);
+            color = ::ULIS::FColor::RGBAF(colorEntry->EntryColor.R, colorEntry->EntryColor.G, colorEntry->EntryColor.B, colorEntry->EntryColor.A);
+        }
+    }
+
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> paintBlock = mPaintEngine.PaintBlock();
     /*::ULIS::FRectI rect = paintBlock->Rect();*/
     ::ULIS::eFormat format = paintBlock->Format();
 
@@ -429,13 +441,26 @@ UOdysseyPainterEditorPaintBucketTool::SetBucketColor( FOdysseyVectorBucket* iBuc
     else
     {
         ::ULIS::FColor color = GetEditorAs<FOdysseyPainterEditor>()->PaintColor().GetValue();
+        UOdysseyPaletteEntry* entry = nullptr;
+        if (GetEditorAs<FOdysseyPainterEditor>()->GetGUI()->GetColorPaletteTab()->PaletteWidget()->GetColorPalette()->GetPalette())
+        {
+            entry = GetEditorAs<FOdysseyPainterEditor>()->GetGUI()->GetColorPaletteTab()->PaletteWidget()->GetColorPalette()->GetPalette()->CurrentEntry.Get();
+            if (entry && entry->IsA(UOdysseyPaletteEntryColor::StaticClass()))
+            {
+                UOdysseyPaletteEntryColor* colorEntry = Cast< UOdysseyPaletteEntryColor >(entry);
+                color = ::ULIS::FColor::RGBAF(colorEntry->EntryColor.R, colorEntry->EntryColor.G, colorEntry->EntryColor.B, colorEntry->EntryColor.A);
+            }
+        }
+
         ::ULIS::FColor rgba8 = color.ToFormat(::ULIS::eFormat::Format_RGBA8);
         uint8 R = rgba8.R8();
         uint8 G = rgba8.G8();
         uint8 B = rgba8.B8();
         uint8 A = rgba8.A8();
 
-        iBucket->SetGradient( false );
+        if (entry && entry->IsA(UOdysseyPaletteEntryColor::StaticClass()))
+            iBucket->GetParent().SetPaletteEntry( entry );
+        iBucket->SetGradient(false);
         iBucket->SetColor( R, G, B, A );
     }
 

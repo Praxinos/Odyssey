@@ -20,6 +20,7 @@ public class OdysseyVector : ModuleRules
                 "SlateCore",
                 "OdysseyCore",
                 "OdysseyStyle",
+                "OdysseyPalette",
                 "blend2d",
                 "ULIS",
                 "ULISLoader"

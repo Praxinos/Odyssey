@@ -625,10 +625,21 @@ FOdysseyVectorPathBuilder::DrawShape( uint64 iFlags )
     BLPath path;
     BLRgba32 strokeColor;
 
-    strokeColor.setR( mObjectParam.Foreground.R );
-    strokeColor.setG( mObjectParam.Foreground.G );
-    strokeColor.setB( mObjectParam.Foreground.B );
-    strokeColor.setA( mObjectParam.Foreground.A );
+    if (mObjectParam.Entry)
+    {
+        FColor color = Cast< UOdysseyPaletteEntryColor >(mObjectParam.Entry)->EntryColor;
+        strokeColor.setR(color.B);
+        strokeColor.setG(color.G);
+        strokeColor.setB(color.R);
+        strokeColor.setA(color.A);
+    }
+    else
+    {
+        strokeColor.setR(mObjectParam.Foreground.R);
+        strokeColor.setG(mObjectParam.Foreground.G);
+        strokeColor.setB(mObjectParam.Foreground.B);
+        strokeColor.setA(mObjectParam.Foreground.A);
+    }
 
     blctx->setCompOp(BL_COMP_OP_SRC_COPY);
 

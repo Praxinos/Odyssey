@@ -76,12 +76,12 @@ FReply SOdysseyPaletteColorRow::HandleEntryColorMouseButtonDown(const FGeometry&
 
 void SOdysseyPaletteColorRow::OnSetColorFromColorPicker(FLinearColor iNewColor)
 {
-    mColorEntry->EntryColor = iNewColor;
+    mColorEntry->EntryColor = iNewColor.ToFColorSRGB();
 }
 
 FLinearColor SOdysseyPaletteColorRow::GetEntryColor() const
 {
-    return mColorEntry->EntryColor;
+    return FLinearColor( mColorEntry->EntryColor );
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -120,12 +120,22 @@ void UOdysseyPaletteEntry::IsExpandedChanged()
 
 void UOdysseyPaletteEntry::ParentChanged()
 {
+    UOdysseyPalette* palette = GetPalette();
+    if (!palette)
+        return;
+
     OnParentChanged().Broadcast(this);
+    palette->HierarchyChanged();
 }
 
 void UOdysseyPaletteEntry::ChildrenChanged()
 {
+    UOdysseyPalette* palette = GetPalette();
+    if (!palette)
+        return;
+
     OnChildrenChanged().Broadcast(this);
+    palette->HierarchyChanged();
 }
 
 void UOdysseyPaletteEntry::PropertyChanged(const FName& iPropertyName)

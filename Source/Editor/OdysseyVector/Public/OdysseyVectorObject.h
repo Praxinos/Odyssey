@@ -5,6 +5,7 @@
 #include <blend2d.h>
 #include <ULIS>
 #include "OdysseyVectorBucket.h"
+#include "Palette/OdysseyPaletteEntry.h"
 
 #include "OdysseyVectorObject.generated.h"
 
@@ -36,6 +37,10 @@ struct FObjectParam
 
     UPROPERTY(EditAnywhere, Category="Coloring")
     FColor Foreground;
+
+    //How to store it, since vectorObject isn't an UObject ?
+    UPROPERTY(EditAnywhere, Category = "PaletteEntry")
+    UOdysseyPaletteEntry* Entry = nullptr;
 };
 
 class ODYSSEYVECTOR_API FOdysseyVectorObject
@@ -176,6 +181,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         void SetBackgroundColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA );
         void SetForegroundColor( FColor& iColor );
         void SetBackgroundColor( FColor& iColor );
+        void SetPaletteEntry(UOdysseyPaletteEntry* iEntry);
         void SetFilled(bool iIsFilled);
         void SetStrokeWidth( double iWidth );
         double GetStrokeWidth( );

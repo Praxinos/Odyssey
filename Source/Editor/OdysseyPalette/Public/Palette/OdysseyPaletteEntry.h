@@ -72,7 +72,7 @@ public:
     virtual void OnCreated_Implementation();
 
 public:
-    UFUNCTION(BlueprintPure, Category = PaletteEntry)
+    UFUNCTION(BlueprintPure, Category = "Palette")
     UOdysseyPalette* GetPalette() const;
 
     /**
@@ -141,7 +141,7 @@ public:
     virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;
 
 public:
-    UPROPERTY(EditAnywhere, Category = PaletteEntry)
+    UPROPERTY(EditAnywhere, Category = "PaletteEntry")
     FText EntryName;
 
     UPROPERTY(EditDefaultsOnly, Category = "PaletteEntry")

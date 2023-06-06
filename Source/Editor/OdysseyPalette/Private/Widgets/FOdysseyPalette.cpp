@@ -33,16 +33,6 @@ void FOdysseyPalette::SetPalette(UOdysseyPalette* iColorPalette)
     mPalette = iColorPalette;
 }
 
-void FOdysseyPalette::AddNewPaletteEntry()
-{
-/*
-    int32 num = mPalette->mPaletteEntries.Num() + 1;
-    FString formattedString = FString::Printf(TEXT("Entry %d"), num);
-    FName newEntryText = FName(*formattedString);
-
-    //mPalette->mPaletteMap.Add(newEntryText, FColor(200, 200, 100));*/
-}
-
 //CALLBACKS -------------------------------------------
 
 

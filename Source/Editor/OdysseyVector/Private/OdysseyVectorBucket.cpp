@@ -1,4 +1,5 @@
 #include "OdysseyVectorBucket.h"
+#include "Palette/OdysseyPaletteEntryColor.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846L
@@ -143,16 +144,30 @@ FOdysseyVectorBucket::SetGradientColor1( FColor& iColor )
 void
 FOdysseyVectorBucket::SetColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA )
 {
-    mColor.R = iR;
-    mColor.G = iG;
-    mColor.B = iB;
-    mColor.A = iA;
+    if (GetParent().mObjectParam.Entry)
+    {
+        mColor = Cast< UOdysseyPaletteEntryColor >(GetParent().mObjectParam.Entry)->EntryColor;
+    }
+    else
+    {
+        mColor.R = iR;
+        mColor.G = iG;
+        mColor.B = iB;
+        mColor.A = iA;
+    }
 }
 
 void
 FOdysseyVectorBucket::SetColor( FColor& iColor )
 {
-    mColor = iColor;
+    if (GetParent().mObjectParam.Entry)
+    {
+        mColor = Cast< UOdysseyPaletteEntryColor >(GetParent().mObjectParam.Entry)->EntryColor;
+    }
+    else
+    {
+        mColor = iColor;
+    }
 }
 
 FColor&

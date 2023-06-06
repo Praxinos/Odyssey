@@ -5,6 +5,7 @@
 #include "Tools/VectorPathDrawingTool/OdysseyPainterEditorVectorPathDrawingToolHUD.h"
 #include "Undo/OdysseyVectorUndoObjectAdd.h"
 #include "Undo/OdysseyVectorUndoPathAlter.h"
+#include "Palette/OdysseyPaletteEntryColor.h"
 
 #define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorPathDrawingTool"
 
@@ -118,8 +119,20 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorEng
                                                              , const FOdysseyPoint& iPointInTexture
                                                              , const FKey& iKey )
 {
+    //TODO: change architecture to have a easier time getting the palette
     ::ULIS::FColor color = GetEditorAs<FOdysseyPainterEditor>()->PaintColor().GetValue();
-    //TSharedPtr<SOdysseyPaintModifiers> widget = GetEditorAs<FOdysseyPainterEditor>()->GetGUI()->GetTopTab().Get()->GetWidget();
+    UOdysseyPaletteEntry* entry = nullptr;
+    if (GetEditorAs<FOdysseyPainterEditor>()->GetGUI()->GetColorPaletteTab()->PaletteWidget()->GetColorPalette()->GetPalette())
+    {
+        entry = GetEditorAs<FOdysseyPainterEditor>()->GetGUI()->GetColorPaletteTab()->PaletteWidget()->GetColorPalette()->GetPalette()->CurrentEntry.Get();
+        if (entry && entry->IsA(UOdysseyPaletteEntryColor::StaticClass()))
+        {
+            UOdysseyPaletteEntryColor* colorEntry = Cast< UOdysseyPaletteEntryColor >(entry);
+            color = ::ULIS::FColor::RGBAF(colorEntry->EntryColor.R, colorEntry->EntryColor.G, colorEntry->EntryColor.B, colorEntry->EntryColor.A);
+        }
+    }
+
+    
     ::ULIS::FColor rgba8 = color.ToFormat( ::ULIS::eFormat::Format_RGBA8 );
     FOdysseyVectorVertex* cubicVertex = PickVertex( iEngine, iScene, iPointInTexture.x, iPointInTexture.y, StitchingRadius );
     FOdysseyVectorPathCubic* cubicPath = nullptr;
@@ -172,6 +185,9 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorEng
 
     cubicPath->UpdateMatrix();
     cubicPath->SetForegroundColor( rgba8.R8(), rgba8.G8(), rgba8.B8(), rgba8.A8() );
+    
+    if (entry && entry->IsA(UOdysseyPaletteEntryColor::StaticClass()))
+        cubicPath->SetPaletteEntry( entry );
 
     localCoords = cubicPath->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
     //localRadius = cubicPath->GetInverseWorldMatrix().mapVector( 0.7071f * radius, 0.7071f * radius );

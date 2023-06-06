@@ -34,15 +34,10 @@ private:
     // Private internal callbacks
     void OnObjectChanged(const FAssetData& AssetData);
     FString ObjectPath() const;
-    FReply HandleMeshColorBlockMouseButtonDown();
 
 private:
     //Internal Widget Creation
     TSharedRef<SWidget> CreateColorPaletteWidget();
-
-public:
-    virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;
-
 
 private:
     TSharedRef<ITableRow> OnGenerateRow(UOdysseyPaletteEntry* iEntry, const TSharedRef<STableViewBase>& iOwnerTable);

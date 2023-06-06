@@ -6,6 +6,7 @@
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "ToolMenus.h"
 #include "Framework/Commands/GenericCommands.h"
+#include "ToolMenus/Public/ToolMenuContext.h"
 
 #define LOCTEXT_NAMESPACE "SOdysseyPaletteTreeView"
 
@@ -359,7 +360,6 @@ SOdysseyPaletteTreeView::OnCurrentEntryChanged(UOdysseyPalette* iPalette)
 TSharedPtr<SWidget>
 SOdysseyPaletteTreeView::OnContextMenuOpening()
 {
-/*
     //Create a new command, so that we can add context menu specific entries 
     TSharedRef<FUICommandList> commandList = MakeShared<FUICommandList>();
     commandList->Append(mCommandList);
@@ -371,13 +371,11 @@ SOdysseyPaletteTreeView::OnContextMenuOpening()
 
     //Build menu
     FToolMenuContext menuContext(commandList, extender);
-    return UToolMenus::Get()->GenerateWidget(contextMenuName, menuContext);*/
-    return SNullWidget::NullWidget;
+    return UToolMenus::Get()->GenerateWidget(contextMenuName, menuContext);
 }
 
 void SOdysseyPaletteTreeView::CreateContextMenu()
 {
-/*
     UToolMenus* ToolMenus = UToolMenus::Get();
     if (!ensure(ToolMenus))
         return;
@@ -387,23 +385,17 @@ void SOdysseyPaletteTreeView::CreateContextMenu()
 
     UToolMenu* Menu = ToolMenus->RegisterMenu(contextMenuName);
     
-    FToolMenuSection& selectionSection = Menu->AddSection("Selection", LOCTEXT("LayerStackCommonSection", "Selection"));
+    FToolMenuSection& selectionSection = Menu->AddSection("Selection", LOCTEXT("PaletteCommonSection", "Selection"));
     {
         selectionSection.AddMenuEntry(FGenericCommands::Get().SelectAll);
     }
 
-    FToolMenuSection& commonSection = Menu->AddSection("Common", LOCTEXT("LayerStackCommonSection", "Common"));
+    FToolMenuSection& commonSection = Menu->AddSection("Common", LOCTEXT("PaletteCommonSection", "Common"));
     {
         commonSection.AddMenuEntry(FGenericCommands::Get().Delete);
         commonSection.AddMenuEntry(FGenericCommands::Get().Duplicate);
         commonSection.AddMenuEntry(FGenericCommands::Get().Rename);
     }
-
-    FToolMenuSection& layerSection = Menu->AddSection("Layer", LOCTEXT("LayerStackLayerSection", "Layer"));
-    {
-        layerSection.AddMenuEntry(FOdysseyLayerStackEditorCommands::Get().MergeSelectedLayers);
-        layerSection.AddMenuEntry(FOdysseyLayerStackEditorCommands::Get().FlattenSelectedLayers);
-    }*/
 }
 
 TArray<TSharedPtr<FExtender>>
@@ -415,7 +407,6 @@ SOdysseyPaletteTreeView::ExtendContextMenu()
 void
 SOdysseyPaletteTreeView::MapActionsToCommandList()
 {
-/*
     mCommandList->MapAction(
         FGenericCommands::Get().SelectAll,
         FExecuteAction::CreateRaw(this, &SOdysseyPaletteTreeView::SelectAllEntries)
@@ -436,18 +427,6 @@ SOdysseyPaletteTreeView::MapActionsToCommandList()
         FGenericCommands::Get().Rename,
         FExecuteAction::CreateRaw(this, &SOdysseyPaletteTreeView::RenameCurrentEntry)
     );
-
-    mCommandList->MapAction(
-        FOdysseyLayerStackEditorCommands::Get().MergeSelectedLayers,
-        FExecuteAction::CreateRaw(this, &SOdysseyPaletteTreeView::MergeSelectedLayers),
-        FCanExecuteAction::CreateRaw(this, &SOdysseyPaletteTreeView::CanMergeSelectedLayers)
-    );
-
-    mCommandList->MapAction(
-        FOdysseyLayerStackEditorCommands::Get().FlattenSelectedLayers,
-        FExecuteAction::CreateRaw(this, &SOdysseyPaletteTreeView::FlattenSelectedLayers),
-        FCanExecuteAction::CreateRaw(this, &SOdysseyPaletteTreeView::CanFlattenSelectedLayers)
-    );*/
 }
 
 // Commands
@@ -466,32 +445,30 @@ SOdysseyPaletteTreeView::SelectAllEntries()
 void
 SOdysseyPaletteTreeView::DeleteSelectedEntries()
 {
-/*
     if ( !mPalette )
         return;
 
-    TArray<UOdysseyPaletteEntry*> selectedLayers = GetSelectedItems();
-    mPalette->RemoveLayers(selectedLayers);*/
+    TArray<UOdysseyPaletteEntry*> selectedEntries = GetSelectedItems();
+    mPalette->RemoveEntries(selectedEntries);
 }
 
 bool
 SOdysseyPaletteTreeView::CanDeleteSelectedEntries()
 {
-/*
     if ( !mPalette )
         return false;
 
-    TArray<UOdysseyPaletteEntry*> selectedLayers = GetSelectedItems();
-    if (selectedLayers.Num() <= 0)
+    TArray<UOdysseyPaletteEntry*> selectedEntries = GetSelectedItems();
+    if (selectedEntries.Num() <= 0)
         return false;
 
-    //If one of the root layers is not selected, we can delete selected layers
-    const TArray<UOdysseyPaletteEntry*>& rootLayers = mPalette->GetRootLayers();
-    for (UOdysseyPaletteEntry* rootLayer : rootLayers)
+    //If one of the root layers is not selected, we can delete selected entries
+    const TArray<UOdysseyPaletteEntry*>& rootEntries = mPalette->GetRootEntries();
+    for (UOdysseyPaletteEntry* rootEntry : rootEntries)
     {
-        if (!selectedLayers.Contains(rootLayer))
+        if (!selectedEntries.Contains(rootEntry))
             return true;
-    }*/
+    }
     
     return false;
 }
@@ -499,31 +476,28 @@ SOdysseyPaletteTreeView::CanDeleteSelectedEntries()
 void
 SOdysseyPaletteTreeView::DuplicateSelectedEntries()
 {
-/*
     if ( !mPalette )
         return;
 
-    TArray<UOdysseyPaletteEntry*> selectedLayers = GetSelectedItems();
-    if (selectedLayers.Num() <= 0)
+    TArray<UOdysseyPaletteEntry*> selectedEntries = GetSelectedItems();
+    if (selectedEntries.Num() <= 0)
         return;
 
-	//manage current layer seperately
-	TArray<UOdysseyPaletteEntry*> duplicatedLayers = mPalette->DuplicateLayers(selectedLayers);
-    SetItemSelection(duplicatedLayers, true);*/
+	TArray<UOdysseyPaletteEntry*> duplicatedEntries = mPalette->DuplicateEntries(selectedEntries);
+    SetItemSelection(duplicatedEntries, true);
 }
 
 void
 SOdysseyPaletteTreeView::RenameCurrentEntry()
 {
-/*
     if ( !mPalette )
         return;
 
-    if (!mPalette->CurrentLayer)
+    if (!mPalette->CurrentEntry)
         return;
     
     mIsRenamePending = true; //has to come before ScrollItemIntoView() in case the item is already into view, which will trigger OnItemScrolledIntoView() immediately
-	RequestScrollIntoView(mPalette->CurrentLayer.Get());*/
+	RequestScrollIntoView(mPalette->CurrentEntry.Get());
 }
     
 void

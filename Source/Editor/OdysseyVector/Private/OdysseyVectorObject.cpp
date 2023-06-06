@@ -1,4 +1,5 @@
 #include "OdysseyVectorObject.h"
+#include "Palette/OdysseyPaletteEntryColor.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846L
@@ -699,6 +700,11 @@ FOdysseyVectorObject::SetBackgroundColor( FColor& iColor )
     mFillBucket.SetColor( iColor );
 }
 
+void FOdysseyVectorObject::SetPaletteEntry(UOdysseyPaletteEntry* iEntry)
+{
+    mObjectParam.Entry = iEntry;
+}
+
 void
 FOdysseyVectorObject::SetForegroundColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA )
 {
@@ -784,12 +790,20 @@ FOdysseyVectorObject::TreeToArray( FOdysseyVectorObject* iObject, std::vector<FO
 FColor&
 FOdysseyVectorObject::GetForegroundColor()
 {
+    if (mObjectParam.Entry && mObjectParam.Entry->IsA(UOdysseyPaletteEntryColor::StaticClass()))
+    {
+        return Cast< UOdysseyPaletteEntryColor >(mObjectParam.Entry)->EntryColor;
+    }
     return mObjectParam.Foreground;
 }
 
 FColor&
 FOdysseyVectorObject::GetBackgroundColor()
 {
+    if (mObjectParam.Entry && mObjectParam.Entry->IsA(UOdysseyPaletteEntryColor::StaticClass()))
+    {
+        return Cast< UOdysseyPaletteEntryColor >(mObjectParam.Entry)->EntryColor;
+    }
     return mFillBucket.GetColor();
 }
 

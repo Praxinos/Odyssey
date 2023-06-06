@@ -520,9 +520,8 @@ void UOdysseyPalette::AddEntriesToHierarchy(TArray<UOdysseyPaletteEntry*> iEntri
 
 void UOdysseyPalette::RemoveEntriesFromHierarchy(TArray<UOdysseyPaletteEntry*> iEntries)
 {
-/*
     TArray<UOdysseyPaletteEntry*> parents;
-    TArray<UOdysseyPaletteEntry*> entriesToRemove = UOdysseyLayerStackFunctionLibrary::FilterTopmostLayers(iEntries);
+    TArray<UOdysseyPaletteEntry*> entriesToRemove = iEntries;// UOdysseyLayerStackFunctionLibrary::FilterTopmostLayers(iEntries);
     GetEntriesUniqueParents(entriesToRemove, parents);
 
     //Call propertyPreChange in a stable state of the palette
@@ -545,7 +544,6 @@ void UOdysseyPalette::RemoveEntriesFromHierarchy(TArray<UOdysseyPaletteEntry*> i
 
     for (UOdysseyPaletteEntry* parent : parents )
         FOdysseyObjectEditorUtils::PostChangePropertyValue(parent, "Children", EPropertyChangeType::ArrayRemove);
-*/
 }
 
 UOdysseyPaletteEntry* UOdysseyPalette::CopyEntryInternal(UOdysseyPaletteEntry* iEntry, UOdysseyPaletteEntry* iParent, int iIndexInParent)
