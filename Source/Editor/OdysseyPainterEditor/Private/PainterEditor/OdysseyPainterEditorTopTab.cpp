@@ -100,6 +100,7 @@ FOdysseyPainterEditorTopTab::CreateWidget()
         .OnUndoButtonClicked_Raw(this, &FOdysseyPainterEditorTopTab::OnUndoButtonClicked)
         .OnRedoButtonClicked_Raw(this, &FOdysseyPainterEditorTopTab::OnRedoButtonClicked)
         .OnEraserButtonClicked_Raw(this, &FOdysseyPainterEditorTopTab::OnEraserButtonClicked)
+        .OnClearButtonClicked_Raw(this, &FOdysseyPainterEditorTopTab::OnClearButtonClicked)
         .IsPackageEdited_Raw(this, &FOdysseyPainterEditorTopTab::IsPackageEdited)
         .IsEraserButtonActive_Raw(this, &FOdysseyPainterEditorTopTab::IsEraserButtonActive);
 
@@ -331,7 +332,14 @@ FOdysseyPainterEditorTopTab::ToggleEraserButton()
 FReply
 FOdysseyPainterEditorTopTab::OnEraserButtonClicked()
 {
-    FOdysseyPainterEditorTopTab::ToggleEraserButton();
+    ToggleEraserButton();
+    return FReply::Handled();
+}
+
+FReply
+FOdysseyPainterEditorTopTab::OnClearButtonClicked()
+{
+    mEditor->Clear();
     return FReply::Handled();
 }
 

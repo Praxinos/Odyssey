@@ -430,6 +430,41 @@ FOdysseyTextureEditor::OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStack)
 }
 
 //--------------------------------------------------------------------------------------
+//----------------------------------------------------------------------- Common Actions
+
+void
+FOdysseyTextureEditor::Clear()
+{
+	if ( !LayerStack() )
+		return;
+
+    UOdysseyTextureLayerImageRaster* currentLayerRaster = Cast<UOdysseyTextureLayerImageRaster>(LayerStack()->CurrentLayer.Get());
+
+	if (currentLayerRaster)
+	{		
+	#ifdef WITH_EDITOR
+		FScopedTransaction ScopedTransaction(LOCTEXT("Layer Image Raster", "Clear Canvas"));
+	#endif
+		
+		TSharedPtr<FOdysseyRasterBlock> rasterBlock = currentLayerRaster->GetRasterBlock();
+		FOdysseyRasterBlockMutator mutator(rasterBlock);
+		mutator.EditTilesFromRects(
+			{ ::ULIS::FRectI::FromXYWH(0, 0, rasterBlock->GetWidth(), rasterBlock->GetHeight()) },
+			FOdysseyRasterBlockMutator::FEditDelegate::CreateLambda(
+				[&](const FULISInvalidTileMap& iTileMap)
+				{
+					TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ULISRasterBlock = rasterBlock->GetBlock();
+					::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(rasterBlock->GetFormat());
+					ctx.Clear(*ULISRasterBlock, ::ULIS::FRectI::Auto, ::ULIS::FSchedulePolicy::AsyncCacheEfficient);
+					ctx.Finish();
+				}
+			)
+		);
+		mutator.Commit();
+	}
+}
+
+//--------------------------------------------------------------------------------------
 //------------------------------------------------------------- FGCObject implementation
 
 void

@@ -53,6 +53,7 @@ public:
         SLATE_EVENT( FOnClicked, OnUndoButtonClicked )
         SLATE_EVENT( FOnClicked, OnRedoButtonClicked )
         SLATE_EVENT( FOnClicked, OnEraserButtonClicked )
+        SLATE_EVENT( FOnClicked, OnClearButtonClicked )
     SLATE_END_ARGS()
 
     void  Construct( const  FArguments&  InArgs );

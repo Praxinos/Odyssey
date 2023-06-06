@@ -13,7 +13,8 @@
 #include "OdysseyAnimationPlayer.h"
 #include "OdysseyAnimationTexture.h"
 #include "Abilities/IOdysseyAnimationImageRenderingAbility.h"
-
+#include "Abilities/IOdysseyAnimationImageRasterEditingAbility.h"
+#include "ULISLoaderModule.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyAnimationEditor"
 
@@ -269,6 +270,46 @@ FOdysseyAnimationEditor::OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStack)
 
 	
     Timeline()->SetSelectedFrames(FInt32Range()); //Clear Selected frames when changing layer
+}
+
+//--------------------------------------------------------------------------------------
+//----------------------------------------------------------------------- Common Actions
+
+void
+FOdysseyAnimationEditor::Clear()
+{
+    UOdysseyAnimationLayerImageRaster* currentLayerRaster = Cast<UOdysseyAnimationLayerImageRaster>(LayerStack()->CurrentLayer.Get());
+	if (currentLayerRaster)
+	{		
+	#ifdef WITH_EDITOR
+		FScopedTransaction ScopedTransaction(LOCTEXT("Layer Image Raster", "Clear Canvas"));
+	#endif
+
+		int celFrameIndex = INDEX_NONE;
+		TSharedPtr<FOdysseyAnimationCell> cell = currentLayerRaster->GetCellAtFrame(Animation()->CurrentFrame, celFrameIndex);
+		if (cell)
+		{
+			TSharedPtr<IOdysseyAnimationImageRasterEditingAbility> rasterEditableAbility = cell->GetAbility<IOdysseyAnimationImageRasterEditingAbility>();
+			if ( rasterEditableAbility )
+			{
+				TSharedPtr<FOdysseyRasterBlock> rasterBlock = rasterEditableAbility->GetRasterBlock(celFrameIndex);
+				FOdysseyRasterBlockMutator mutator(rasterBlock);
+				mutator.EditTilesFromRects(
+					{ ::ULIS::FRectI::FromXYWH(0, 0, rasterBlock->GetWidth(), rasterBlock->GetHeight()) },
+					FOdysseyRasterBlockMutator::FEditDelegate::CreateLambda(
+						[&](const FULISInvalidTileMap& iTileMap)
+						{
+							TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ULISRasterBlock = rasterBlock->GetBlock();
+							::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(rasterBlock->GetFormat());
+							ctx.Clear(*ULISRasterBlock, ::ULIS::FRectI::Auto, ::ULIS::FSchedulePolicy::AsyncCacheEfficient);
+							ctx.Finish();
+						}
+					)
+				);
+				mutator.Commit();
+			}
+		}
+	}
 }
 
 #undef LOCTEXT_NAMESPACE

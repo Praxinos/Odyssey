@@ -94,6 +94,10 @@ public:
     virtual void ExtendMenu( FToolMenuOwner iOwner, FName iMenuName ) override;
     virtual bool OnCloseRequested() override;
 
+public:
+    //Common Actions
+    virtual void Clear() = 0;
+
 protected:
     //Callbacks
     virtual void OnApplyOverrides(const TMap<FName, UObject*>& iOverrides);
