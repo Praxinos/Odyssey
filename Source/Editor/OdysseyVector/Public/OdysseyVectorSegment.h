@@ -138,7 +138,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
          * @param t between 0.0 and 1.0.
          * @return vector at t.
          */
-        virtual ::ULIS::FVec2D GetTangentAt( double t );
+        virtual ::ULIS::FVec2D GetTangentAt( double t, bool iNormalize );
 
         FOdysseyVectorVertex*
         GetOtherVertex( FOdysseyVectorVertex* iVertex );

@@ -136,13 +136,8 @@ FOdysseyVectorVertex::GetVectorOnSegment( FOdysseyVectorSegment* iSegment, bool 
 {
     ::ULIS::FVec2D vec;
 
-    vec = ( iSegment->GetVertex(0) == this ) ? iSegment->GetPointAt(0.01f) - iSegment->GetPointAt(0.0f)
-                                             : iSegment->GetPointAt(0.99f) - iSegment->GetPointAt(1.0f);
-
-    if( iNormalize && vec.DistanceSquared() )
-    {
-        vec.Normalize();
-    }
+    vec = ( iSegment->GetVertex(0) == this ) ?  iSegment->GetTangentAt(0.0f, iNormalize)
+                                             : -iSegment->GetTangentAt(1.0f, iNormalize);
 
     return vec;
 }

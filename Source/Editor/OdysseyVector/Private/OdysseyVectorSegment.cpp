@@ -59,7 +59,7 @@ FOdysseyVectorSegment::GetPointAt( double t )
 }
 
 ::ULIS::FVec2D
-FOdysseyVectorSegment::GetTangentAt( double t )
+FOdysseyVectorSegment::GetTangentAt( double t, bool iNormalize )
 {
     ::ULIS::FVec2D unimplemented;
 

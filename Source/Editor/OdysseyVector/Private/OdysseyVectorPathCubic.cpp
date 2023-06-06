@@ -253,11 +253,13 @@ FOdysseyVectorPathCubic::PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags
 
     if( iSelectionFlags & PICK_MATH_BASED )
     {
+        BLPoint pt = mInverseWorldMatrix.mapPoint( iRoi.x, iRoi.y );
+
         for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
         {
             FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
  
-            if( cubicSegment->Pick( iRoi.x, iRoi.y, 0.0f ) )
+            if( cubicSegment->Pick( pt.x, pt.y, 0.0f ) )
             {
                 return true;
             }

@@ -160,8 +160,52 @@ FOdysseyVectorSegmentCubic::GetPointAt( double t )
 ::ULIS::FVec2D
 FOdysseyVectorSegmentCubic::GetVectorFromVertex( FOdysseyVectorVertex* iVertex, bool iNormalize )
 {
-    ::ULIS::FVec2D tangent = ( iVertex == mPoint[0] ) ?  GetTangentAt( 0.0f )
-                                                      : -GetTangentAt( 1.0f );
+    ::ULIS::FVec2D tangent = ( iVertex == mPoint[0] ) ?  GetTangentAt( 0.0f, iNormalize )
+                                                      : -GetTangentAt( 1.0f, iNormalize );
+
+
+    return tangent;
+}
+
+::ULIS::FVec2D
+FOdysseyVectorSegmentCubic::GetTangentAt( double t, bool iNormalize )
+{
+    ::ULIS::FVec2D& point0 = GetVertex(0)->GetCoords();
+    ::ULIS::FVec2D& point1 = GetVertex(1)->GetCoords();
+    ::ULIS::FVec2D& ctrlPoint0 = GetHandle(0)->GetCoords();
+    ::ULIS::FVec2D& ctrlPoint1 = GetHandle(1)->GetCoords();
+    ::ULIS::FVec2D tangent;
+
+    // Special case when control point are located at endpoint (tangentequals 0 then).
+
+    if( ( t > 0.0f ) && ( t < 1.0f ) )
+    {
+        tangent = ::ULIS::CubicBezierTangentAtParameter<::ULIS::FVec2D>( point0
+                                                                       , ctrlPoint0
+                                                                       , ctrlPoint1
+                                                                       , point1
+                                                                       , t );
+    }
+
+    if( t == 0.0f )
+    {
+        tangent = ctrlPoint0 - point0;
+
+        if( tangent.Distance() == 0.0f ) 
+        {
+            tangent = ctrlPoint1 - point0;
+        }
+    }
+
+    if( t == 1.0f )
+    {
+        tangent =  point1 - ctrlPoint1;
+
+        if( tangent.Distance() == 0.0f )
+        {
+            tangent = point1 - ctrlPoint0;
+        }
+    }
 
     if( iNormalize )
     {
@@ -172,43 +216,6 @@ FOdysseyVectorSegmentCubic::GetVectorFromVertex( FOdysseyVectorVertex* iVertex, 
     }
 
     return tangent;
-}
-
-::ULIS::FVec2D
-FOdysseyVectorSegmentCubic::GetTangentAt( double t )
-{
-    ::ULIS::FVec2D& point0 = GetVertex(0)->GetCoords();
-    ::ULIS::FVec2D& point1 = GetVertex(1)->GetCoords();
-    ::ULIS::FVec2D& ctrlPoint0 = GetHandle(0)->GetCoords();
-    ::ULIS::FVec2D& ctrlPoint1 = GetHandle(1)->GetCoords();
-
-    // Special case when control point are located at endpoint (tangentequals 0 then).
-
-    if( t == 0.0f )
-    {
-        ::ULIS::FVec2D dif0 = ctrlPoint0 - point0;
-
-        if( dif0.Distance() == 0.0f )
-        {
-            t = 0.0001f;
-        }
-    }
-
-    if( t == 1.0f )
-    {
-        ::ULIS::FVec2D dif1 = ctrlPoint1 - point1;
-
-        if( dif1.Distance() == 0.0f )
-        {
-            t = 0.9999f;
-        }
-    }
-
-    return ::ULIS::CubicBezierTangentAtParameter<::ULIS::FVec2D>( point0
-                                                                , ctrlPoint0
-                                                                , ctrlPoint1
-                                                                , point1
-                                                                , t );
 }
 
 void
@@ -225,8 +232,8 @@ FOdysseyVectorSegmentCubic::ResetPolygonCache( )
 }
 
 bool
-FOdysseyVectorSegmentCubic::Pick( double iX
-                                , double iY
+FOdysseyVectorSegmentCubic::Pick( double iLocalX
+                                , double iLocalY
                                 , double iRadius )
 {
     for ( int i = 0; i < mPolygonCache.size(); i++ )
@@ -239,8 +246,8 @@ FOdysseyVectorSegmentCubic::Pick( double iX
             int n = ( j + 1 ) % 4;
             ::ULIS::FVec2D vivn = { mPolygonCache[i].quadVertex[n].x - mPolygonCache[i].quadVertex[j].x
                                   , mPolygonCache[i].quadVertex[n].y - mPolygonCache[i].quadVertex[j].y };
-            ::ULIS::FVec2D vivt = { iX - mPolygonCache[i].quadVertex[j].x
-                                  , iY - mPolygonCache[i].quadVertex[j].y };
+            ::ULIS::FVec2D vivt = { iLocalX - mPolygonCache[i].quadVertex[j].x
+                                  , iLocalY - mPolygonCache[i].quadVertex[j].y };
             // https://stackoverflow.com/questions/15490795/determine-if-a-2d-point-is-within-a-quadrilateral
             // Compute the quantity
             double quantity = (vivt.x) * (vivn.y) - (vivn.x) * (vivt.y);

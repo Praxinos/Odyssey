@@ -93,8 +93,8 @@ FOdysseyVectorSection::GetVectorFromVertex( FOdysseyVectorVertex* iVertex, bool 
     {
         if( mSegment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
         {
-             tangent = ( iVertex == mVertex[0] ) ?  mSegment->GetTangentAt( iVertex->GetT( mSegment ) )
-                                                 : -mSegment->GetTangentAt( iVertex->GetT( mSegment ) );
+             tangent = ( iVertex == mVertex[0] ) ?  mSegment->GetTangentAt( iVertex->GetT( mSegment ), false )
+                                                 : -mSegment->GetTangentAt( iVertex->GetT( mSegment ), false );
         }
     }
 

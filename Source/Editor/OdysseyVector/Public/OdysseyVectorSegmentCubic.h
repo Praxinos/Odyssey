@@ -196,7 +196,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
          * @param t between 0.0 and 1.0.
          * @return vector at t.
          */
-        virtual ::ULIS::FVec2D GetTangentAt( double t ) override;
+        virtual ::ULIS::FVec2D GetTangentAt( double t, bool iNormalize ) override;
 
        /**
          * @brief Cut the segment with a straight line segment passed as parameter.

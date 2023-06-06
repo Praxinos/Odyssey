@@ -319,7 +319,7 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseDragVector( FOdysseyVectorEngine* i
         mOldLocalMouseY = localCoords.y;
     }
 
-    iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES ); // update vector scene
+    iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES | FOdysseyVectorObject::KEEPINVALIDATED ); // update vector scene
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
 
