@@ -7,6 +7,7 @@
 
 #include "OdysseyTextureEditorLayerStackTab.h"
 #include "OdysseyTextureEditorTextureDetailsTab.h"
+#include "OdysseyTextureEditorVectorContextMenu.h"
 
 class FOdysseyTextureEditor;
 
@@ -24,6 +25,7 @@ public:
 protected:
     //Init
 	virtual void CreateTabs() override;
+    virtual void CreateContextMenus() override;
     virtual void BindShortcuts( FBaseToolkit* iToolkit ) override;
     virtual void ExtendMenuAbout( FToolMenuOwner iOwner, FName iMenuName ) override;
 
@@ -32,6 +34,7 @@ public:
 	virtual FName GetLayoutName() override;
     TSharedPtr<FOdysseyTextureEditorLayerStackTab>& GetLayerStackTab();
 	TSharedPtr<FOdysseyTextureEditorTextureDetailsTab>& GetTextureDetailsTab();
+	TSharedPtr<FOdysseyTextureEditorVectorContextMenu>& GetVectorContextMenu();
 
 protected:
 	virtual TSharedRef<FTabManager::FSplitter>	CreateRightSection() override;
@@ -61,4 +64,5 @@ private:
     //Tabs
     TSharedPtr<FOdysseyTextureEditorLayerStackTab>          mLayerStackTab;
 	TSharedPtr<FOdysseyTextureEditorTextureDetailsTab>      mTextureDetailsTab;
+	TSharedPtr<FOdysseyTextureEditorVectorContextMenu>      mVectorContextMenu;
 };

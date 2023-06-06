@@ -6,31 +6,6 @@
 
 #define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorObjectPickTool"
 
-#include "Models/OdysseyPainterEditorCommands.h"
-#include "Framework/MultiBox/MultiBoxBuilder.h"
-
-class FOdysseyTextureEditorMenuVector : public FMenuBuilder
-{
-    public:
-       ~FOdysseyTextureEditorMenuVector(){};
-        FOdysseyTextureEditorMenuVector();
-};
-
-
-
-FOdysseyTextureEditorMenuVector::FOdysseyTextureEditorMenuVector()
-    : FMenuBuilder( true, NULL )
-{
-    this->AddMenuEntry(
-            FOdysseyPainterEditorCommands::Get().AboutIliad
-            , NAME_None
-            , LOCTEXT("AboutIliad", "About Iliad")
-            , LOCTEXT("AboutIliad_Tooltip", "to get more information about the plugin, the team that created it, etc.")
-            , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16") );
-
-    this->AddMenuSeparator();
-}
-
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
 UOdysseyPainterEditorVectorObjectPickTool::~UOdysseyPainterEditorVectorObjectPickTool()
@@ -91,19 +66,18 @@ UOdysseyPainterEditorVectorObjectPickTool::OnMouseDownVector( FOdysseyVectorEngi
                                                             , const FOdysseyPoint& iPointInTexture
                                                             , const FKey& iKey )
 {
-    if( iKey == EKeys::RightMouseButton )
+/*
+    if( iKey == EKeys::LeftMouseButton )
     {
-static FOdysseyTextureEditorMenuVector menu;
-
         FSlateApplication::Get().PushMenu(
-        GetEditorAs<FOdysseyPainterEditor>()->GetGUI()->GetWidget(),
+        GetEditorAs<FOdysseyPainterEditor>()->GetGUI()->GetViewportTab().Get()->GetViewport().Get()->GetViewportWidget().ToSharedRef(),
         FWidgetPath(),
-        menu.MakeWidget(),
+        GetEditorAs<FOdysseyPainterEditor>()->GetGUI()->GetVectorContextMenu()->Widget().ToSharedRef(),
         FVector2D(iPointInTexture.x, iPointInTexture.y),
         FPopupTransitionEffect(FPopupTransitionEffect::ContextMenu)
         );
     }
-
+*/
     if( iKey == EKeys::LeftMouseButton )
     {
         mPressedMouseCoords.x = iPointInTexture.x;

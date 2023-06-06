@@ -2,6 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "TextureEditor/OdysseyTextureEditorGUI.h"
+#include "TextureEditor/OdysseyTextureEditorVectorContextMenu.h"
 #include "LayerStack/OdysseyTextureLayerStack.h"
 #include "LayerStack/OdysseyTextureLayerImageVector.h"
 #include "TextureEditor/OdysseyTextureEditor.h"
@@ -53,6 +54,13 @@ FOdysseyTextureEditorGUI::CreateTabs()
 	//ADD NEW TABS
 	ODYSSEY_ADD_TAB(mLayerStackTab, FOdysseyTextureEditorLayerStackTab, mEditor);
 	ODYSSEY_ADD_TAB(mTextureDetailsTab, FOdysseyTextureEditorTextureDetailsTab, mEditor);
+}
+
+void
+FOdysseyTextureEditorGUI::CreateContextMenus()
+{
+	//ADD NEW CONTEXT MENUS
+	ODYSSEY_ADD_CONTEXT_MENU(mVectorContextMenu, FOdysseyTextureEditorVectorContextMenu, mEditor);
 }
 
 TSharedRef<FTabManager::FSplitter>
@@ -192,6 +200,12 @@ TSharedPtr<FOdysseyTextureEditorTextureDetailsTab>&
 FOdysseyTextureEditorGUI::GetTextureDetailsTab()
 {
 	return mTextureDetailsTab;
+}
+
+TSharedPtr<FOdysseyTextureEditorVectorContextMenu>&
+FOdysseyTextureEditorGUI::GetVectorContextMenu()
+{
+	return mVectorContextMenu;
 }
 
 void

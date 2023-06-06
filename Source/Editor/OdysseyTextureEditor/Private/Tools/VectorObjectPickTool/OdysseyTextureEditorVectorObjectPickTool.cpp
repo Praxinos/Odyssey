@@ -3,6 +3,7 @@
 
 #include "Tools/VectorObjectPickTool/OdysseyTextureEditorVectorObjectPickTool.h"
 #include "LayerStack/OdysseyTextureLayerImageVector.h"
+#include "PainterEditor/OdysseyPainterEditorViewportTab.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyTextureEditorVectorObjectPickTool"
 
@@ -139,10 +140,24 @@ UOdysseyTextureEditorVectorObjectPickTool::OnKeyUp( const FKey& iKey )
 bool
 UOdysseyTextureEditorVectorObjectPickTool::OnMouseDown( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
+    FOdysseyTextureEditor* textureEditor =  GetEditorAs<FOdysseyTextureEditor>();
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(textureEditor->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
     bool ret = false;
 
+  if(FSlateApplication::Get().GetModifierKeys().IsControlDown())
+    if( iKey == EKeys::LeftMouseButton )
+    {
+        FSlateApplication::Get().PushMenu(
+        //textureEditor->GetGUI()->GetViewportTab().Get()->GetViewport().Get()->GetViewportWidget().ToSharedRef(),
+        textureEditor->GetGUI()->GetViewportTab().Get()->Widget().ToSharedRef(),
+        FWidgetPath(),
+        textureEditor->GetGUI()->GetVectorContextMenu()->Widget().ToSharedRef(),
+        FSlateApplication::Get().GetCursorPos(),
+        FPopupTransitionEffect(FPopupTransitionEffect::ContextMenu)
+        );
+    }
+  else
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
