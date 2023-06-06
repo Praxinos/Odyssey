@@ -8,6 +8,9 @@
 UOdysseyPaletteEntryColor::UOdysseyPaletteEntryColor()
 {
     EntryTypeName = LOCTEXT( "EntryTypeName", "Color Entry" );
+    DefaultName = LOCTEXT("DefaultName", "Color");
+    Icon = *FOdysseyStyle::GetBrush("OdysseyLayerStack.LayerBitmap16");
+    EntryColor = FColor::Black;
 }
 
 #undef LOCTEXT_NAMESPACE

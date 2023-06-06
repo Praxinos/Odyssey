@@ -18,7 +18,7 @@ enum  class  EGetEntryChildrenMethod : uint8
 
 /////////////////////////////////////////////////////
 // OdysseyColorPaletteEntry
-UCLASS()
+UCLASS(Abstract, BlueprintType, config = EditorPerProjectUserSettings, PerObjectConfig)
 class ODYSSEYPALETTE_API UOdysseyPaletteEntry : public UObject
 {
     GENERATED_BODY()
@@ -144,15 +144,30 @@ public:
     UPROPERTY(EditAnywhere, Category = PaletteEntry)
     FText EntryName;
 
-    UPROPERTY(EditDefaultsOnly, Category = PaletteEntryDescription)
+    UPROPERTY(EditDefaultsOnly, Category = "PaletteEntry")
     FText EntryTypeName = FText::FromString(TEXT("Unnamed Entry Type"));
 
-    UPROPERTY(EditDefaultsOnly, Category = PaletteEntryDescription)
+    UPROPERTY(EditDefaultsOnly, Category = "PaletteEntry")
+    FText DefaultName = FText::FromString(TEXT("Entry"));
+
+    UPROPERTY(EditDefaultsOnly, Category = "PaletteEntry")
     FText Description = FText::FromString(TEXT(""));
 
+    UPROPERTY(EditDefaultsOnly, Category = "PaletteEntry")
+    FSlateBrush Icon;
+
+    UPROPERTY(EditDefaultsOnly, Category = "PaletteEntry")
+    FSlateBrush IconExpanded;
+
+    UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "PaletteEntry")
+    bool IsActivated = true;
+
     //Defaults Properties
-    UPROPERTY(EditDefaultsOnly, Category = PaletteEntry)
+    UPROPERTY(EditDefaultsOnly, Category = "PaletteEntry")
     bool CanHaveChildren = false;
+
+    UPROPERTY(config, BlueprintReadWrite, Category = "PaletteEntry", NonTransactional)
+    bool IsExpanded = true;
 
     UPROPERTY()
     UOdysseyPaletteEntry* Parent;

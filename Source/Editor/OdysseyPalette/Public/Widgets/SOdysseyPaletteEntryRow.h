@@ -22,11 +22,11 @@ public:
     
 public:
     // Construction / Destruction
-    void Construct(const FArguments& iArgs, const TSharedRef<STreeView<UOdysseyPaletteEntry*>>& iOwnerTableView, UOdysseyPaletteEntry* iEntry);
+    void Construct(const FArguments& iArgs, const TSharedRef<SOdysseyPaletteTreeView>& iOwnerTableView, UOdysseyPaletteEntry* iEntry);
     
 public:
     //Getters
-    //UOdysseyLayer* GetLayer();
+    UOdysseyPaletteEntry* GetPaletteEntry();
 
 	//Commands
 	void Rename();
@@ -39,12 +39,10 @@ protected:
 protected:
 	virtual TSharedRef<SWidget> GenerateHeaderWidget();
     TSharedRef<SWidget> GenerateIsActivatedWidget();
+    TSharedRef<SWidget> GenerateExpandableHeaderWidget();
 
-    TSharedRef<SWidget> GenerateColorWidget();
-    /*
     void OnIsActivatedCheckBoxStateChanged(ECheckBoxState iState);
     ECheckBoxState GetIsActivatedCheckBoxState() const;
-    */
 	
     void OnEntryNameCommited(const FText& iText, ETextCommit::Type iType);
     
@@ -55,19 +53,13 @@ protected:
     
     FReply OnRowAcceptDrop(const FDragDropEvent& iEvent, EItemDropZone iDropZone, UOdysseyPaletteEntry* iEntry);
 
-    FReply OnRowDragDetected(const FGeometry& iGeometry, const FPointerEvent& iEvent, TWeakPtr<STreeView<UOdysseyPaletteEntry*>> iTreeView);
+    FReply OnRowDragDetected(const FGeometry& iGeometry, const FPointerEvent& iEvent, TWeakPtr<SOdysseyPaletteTreeView> iTreeView);
     
-    /*
 
 private:
-    void OnIsOptionsDisplayedCheckBoxStateChanged(ECheckBoxState iState);
-    ECheckBoxState GetIsOptionsDisplayedCheckBoxState() const;
-    */
     EItemDropZone ComputeItemDropZoneForLeaf(FVector2D iLocalPointerPos, FVector2D iLocalSize, bool iCanHaveChildren, bool iIsExpanded);
     
 private:
     TSharedPtr<SInlineEditableTextBlock> mNameWidget = nullptr;
-    //bool mIsOptionsDisplayed = false;
-
     UOdysseyPaletteEntry* mEntry = nullptr;
 };

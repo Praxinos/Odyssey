@@ -11,7 +11,7 @@
 class UOdysseyPalette;
 
 /**
- * Implements the Layer stack widget
+ * Implements the Palette widget
  */
 class ODYSSEYPALETTE_API SOdysseyPaletteTreeView
     : public STreeView<UOdysseyPaletteEntry*>
@@ -46,7 +46,7 @@ public:
 
 protected:
     //SWidget overrides
-    int32 OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const;
+    int32 OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 EntryId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const;
     virtual FReply OnKeyDown( const FGeometry& iGeometry, const FKeyEvent& iKeyEvent ) override;
 
     virtual FReply OnDragOver(const FGeometry& MyGeometry, const FDragDropEvent& DragDropEvent) override;
@@ -78,6 +78,12 @@ private:
      * 
      */
     void SetCurrentEntryFromSelectorItem();
+
+    /**
+     * @brief Refresh the list of root entries
+     * 
+     */
+    void RefreshRootEntriesArray();
 
     /**
      * @brief Refreshes all rows expansion states from the state stored in the entry
@@ -146,7 +152,7 @@ protected:
 
     /**
      * @brief Called when the treeview changed one of its row expansion state
-     * Allows synchronization between treeview expansion state and layer expansion state
+     * Allows synchronization between treeview expansion state and entry expansion state
      * 
      * @param iEntry 
      * @param iIsExpanded 

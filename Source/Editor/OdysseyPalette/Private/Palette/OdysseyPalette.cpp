@@ -483,8 +483,7 @@ UOdysseyPaletteEntry* UOdysseyPalette::CreateEntry(UClass* iEntryType)
         return nullptr;
         
     //Name the layer
-    //FString name = entry->DefaultName.ToString() + TEXT(" ") + FString::FromInt(GetEntries().Num() + 1);
-    FString name = FString("Name");
+    FString name = entry->DefaultName.ToString() + TEXT(" ") + FString::FromInt(GetEntries().Num() + 1);
     entry->EntryName = FText::FromString(name);
 
     //Initialize the entry

@@ -49,8 +49,8 @@ FOdysseyPaletteDragDropOperation::GetText() const
 const FSlateBrush*
 FOdysseyPaletteDragDropOperation::GetIcon() const
 {
-	//if (mPaletteEntries.Num() == 1)
-	//	return &mPaletteEntries[0]->Icon;
+	if (mPaletteEntries.Num() == 1)
+		return &mPaletteEntries[0]->Icon;
 
 	return FOdysseyStyle::GetBrush("PainterEditor.Layers16");
 }
@@ -60,7 +60,7 @@ FOdysseyPaletteDragDropOperation::GetTopmostPaletteEntries() const
 {
 
 	TArray< UOdysseyPaletteEntry* > topmostEntries;
-/*	for (UOdysseyPaletteEntry* entry : mPaletteEntries)
+	for (UOdysseyPaletteEntry* entry : mPaletteEntries)
 	{
 		bool hasParentInDraggedEntries = false;
 		TArray<UOdysseyPaletteEntry*> parents = entry->GetParents();
@@ -77,7 +77,7 @@ FOdysseyPaletteDragDropOperation::GetTopmostPaletteEntries() const
 			continue;
 
 		topmostEntries.Add(entry);
-	}*/
+	}
 	return topmostEntries;
 }
 
