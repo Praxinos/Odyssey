@@ -313,7 +313,7 @@ ShowCycle( std::vector<FOdysseyVectorVertex*>& vertexArray
 }
 
 void
-FOdysseyVectorCycle::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
+FOdysseyVectorCycle::Draw( uint64 iFlags )
 {
     BLContext* blctx = mParent.GetScene()->GetEngine()->GetBLContext();
     FOdysseyVectorBucket* bucket = mBucket ? mBucket : mPropagatedBucket;

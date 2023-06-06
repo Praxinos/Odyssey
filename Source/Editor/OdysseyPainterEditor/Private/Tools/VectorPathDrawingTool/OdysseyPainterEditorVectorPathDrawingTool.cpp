@@ -20,6 +20,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::UOdysseyPainterEditorVectorPathDrawi
     , StitchingRadius( 10 )
     , mPathBuilder( nullptr )
     , mPreviousVertex( nullptr )
+    , iOldPointInTexture( 0, 0 )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.VectoPen64");
 
@@ -36,7 +37,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::ActivateVector( FOdysseyVectorEngine
     iEngine->ClearHUD();
     iEngine->AddHUD( &mPathDrawingHUD );
 
-    iScene->Update( 0 ); // refresh vector scene and GUI widgets via delegates.
+    iScene->Signal( FOdysseyVectorScene::SCENE_REDRAW );
 }
 
 static ::ULIS::FRectI
@@ -44,7 +45,7 @@ GetInvalidationAreaFromPointer( int iX, int iY, int iRadius )
 {
     int diameter = iRadius * 2;
 
-    return ::ULIS::FRectI( iX - iRadius, iY - iRadius, diameter, diameter );
+    return ::ULIS::FRectI( iX - iRadius - 1, iY - iRadius - 1, diameter + 2, diameter + 2 );
 }
 
 static ::ULIS::FRectI
@@ -168,22 +169,46 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorEng
     mPathBuilder->RecordStart( cubicVertex );
 
     iScene->ClearSelection();
+    iScene->Select( cubicPath );
 
-    iScene->Update( 0 ); // refresh vector scene and GUI widgets via delegates.
-    //mSelectionChanged.Broadcast(iScene);
-
+    // update invalidated objects
+    iScene->Update( 0 );
+    iScene->Signal( FOdysseyVectorScene::SCENE_REDRAW
+                  | FOdysseyVectorScene::OBJECT_SELECTED
+                  | FOdysseyVectorScene::OBJECT_MODIFIED
+                  | FOdysseyVectorScene::OBJECT_TRANSFORMED );
 
     return true;
 }
 
-void
+::ULIS::FRectI
 UOdysseyPainterEditorVectorPathDrawingTool::OnMouseHoverVector( FOdysseyVectorEngine* iEngine
                                                               , FOdysseyVectorScene* iScene
                                                               , const FOdysseyPoint& iPointInTexture )
 {
+    ::ULIS::FRectI redrawRegion = { 0, 0, 0, 0 };
+    ::ULIS::FRectI imageRegion;
+    ::ULIS::FRectI toolRegion = GetInvalidationAreaFromPointer( iPointInTexture.x
+                                                              , iPointInTexture.y
+                                                              , ::ULIS::FMath::Max( Radius, StitchingRadius ) )
+                              // we use iOldPointInTexture instead of iPointInTexture.deltaPosition because the latter is not reliable
+                              | GetInvalidationAreaFromPointer( iOldPointInTexture.x
+                                                              , iOldPointInTexture.y
+                                                              , ::ULIS::FMath::Max( Radius, StitchingRadius ) );
+//UE_LOG(LogTemp, Warning, TEXT("Some warning message %f %f"), iOldPointInTexture.x, iOldPointInTexture.y );
+    iEngine->GetColorImageSize( imageRegion );
+
     mPathDrawingHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
 
-    iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES ); // refresh vector scene and GUI widgets via delegates.
+    // commented out: redrawing will be performed by the caller function
+    //iScene->Signal( FOdysseyVectorScene::SCENE_REDRAW );
+
+    FOdysseyVector::IntersectRegions( toolRegion, imageRegion, redrawRegion );
+
+    iOldPointInTexture.x = iPointInTexture.x;
+    iOldPointInTexture.y = iPointInTexture.y;
+
+    return redrawRegion;
 }
 
 ::ULIS::FRectI
@@ -191,9 +216,14 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( FOdysseyVectorEng
                                                              , FOdysseyVectorScene* iScene
                                                              , const FOdysseyPoint& iPointInTexture )
 {
-    mPointRadius =  iPointInTexture.pressure * Radius;
+    ::ULIS::FRectI redrawRegion = { 0, 0, 0, 0 };
+    ::ULIS::FRectI imageRegion;
 
-//UE_LOG(LogTemp, Warning, TEXT("Some warning message %f %f"), iPointInTexture.acceleration.X, iPointInTexture.acceleration.Y );
+    iEngine->GetColorImageSize( imageRegion );
+
+    mPointRadius = iPointInTexture.pressure * Radius;
+
+//UE_LOG(LogTemp, Warning, TEXT("Some warning message %f %f"), iPointInTexture.x, iPointInTexture.y );
 
     if( mPathBuilder )
     {
@@ -202,10 +232,10 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( FOdysseyVectorEng
         BLPoint localRadius;
         //float roundedUpRadius = ceil (radius);
         FOdysseyVectorVertex* nextVertex;
-        ::ULIS::FRectI redrawRegion = GetInvalidationAreaFromPointer( iPointInTexture.x
-                                                                    , iPointInTexture.y
-                                                                    , Radius )
-                                    | RectangleDtoI( mPreviousVertex->GetBoundingBox( true ) );
+        ::ULIS::FRectI toolRegion = GetInvalidationAreaFromPointer( iPointInTexture.x
+                                                                  , iPointInTexture.y
+                                                                  , ::ULIS::FMath::Max( Radius, StitchingRadius ) )
+                                  | RectangleDtoI( mPreviousVertex->GetBoundingBox( true ) );
 
         mPathDrawingHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
 
@@ -218,14 +248,18 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( FOdysseyVectorEng
                                                      , mVertexArray
                                                      , mSegmentArray );
 
-        iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES | FOdysseyVectorObject::KEEPINVALIDATED );
-
         mPreviousVertex = nextVertex;
 
-        return redrawRegion;
+        iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES | FOdysseyVectorObject::KEEPINVALIDATED );
+
+        FOdysseyVector::IntersectRegions( toolRegion, imageRegion, redrawRegion );
     }
 
-    return ::ULIS::FRectI( 0, 0, 0, 0 );
+    //iEngine->InvalidateRegion( redrawRegion );
+    // commented out: redrawing will be performed by the caller function
+    //iScene->Signal( FOdysseyVectorScene::SCENE_REDRAW );
+
+    return redrawRegion;
 }
 
 bool
@@ -276,8 +310,6 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorEngin
                 // record for undos
                 mSegmentArray.push_back( lastSegment );
             }
-
-            iScene->Select( cubicPath );
         }
 
         iScene->RemoveChild( mPathBuilder );
@@ -300,7 +332,8 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorEngin
         }
     }
 
-    iScene->Update( 0 ); // update vector scene and GUI widgets via delegates.
+    iScene->Update( 0 ); // update invalidated objects
+    iScene->Signal( FOdysseyVectorScene::SCENE_REDRAW | FOdysseyVectorScene::OBJECT_MODIFIED );
 
     return true;
 }

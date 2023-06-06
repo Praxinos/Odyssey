@@ -441,7 +441,7 @@ FOdysseyVectorPathCubic::Cut( ::ULIS::FVec2D& linePoint0
 }
 
 void
-FOdysseyVectorPathCubic::Fill( ::ULIS::FRectD& iRoi )
+FOdysseyVectorPathCubic::Fill()
 {
     FOdysseyVectorVertex *firstVertex = static_cast<FOdysseyVectorVertex*>( GetFirstVertex() );
 
@@ -456,8 +456,6 @@ FOdysseyVectorPathCubic::Fill( ::ULIS::FRectD& iRoi )
         blFillColor.setG( fillColor.G );
         blFillColor.setB( fillColor.B );
         blFillColor.setA( fillColor.A );
-
-        blctx->setCompOp( BL_COMP_OP_SRC_COPY );
 
         if( mSegmentList.size() == mVertexList.size() )
         {
@@ -493,20 +491,20 @@ FOdysseyVectorPathCubic::Fill( ::ULIS::FRectD& iRoi )
 }
 
 void
-FOdysseyVectorPathCubic::DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags )
+FOdysseyVectorPathCubic::DrawShape( uint64 iFlags )
 {
 
     if ( mPathParam.Filled )
     {
         // TODO: precompute the filling (build the BLPath )
-        Fill( iRoi );
+        Fill();
     }
 
-    DrawShapeVariable( iRoi, iFlags );
+    DrawShapeVariable( iFlags );
 }
 
 void
-FOdysseyVectorPathCubic::DrawShapeVariable( ::ULIS::FRectD &iRoi, uint64 iFlags )
+FOdysseyVectorPathCubic::DrawShapeVariable( uint64 iFlags )
 {
     BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
     BLRgba32 strokeColor;
@@ -516,8 +514,6 @@ FOdysseyVectorPathCubic::DrawShapeVariable( ::ULIS::FRectD &iRoi, uint64 iFlags 
     strokeColor.setG( mObjectParam.Foreground.G );
     strokeColor.setB( mObjectParam.Foreground.R );
     strokeColor.setA( mObjectParam.Foreground.A );
-
-    blctx->setCompOp( BL_COMP_OP_SRC_OVER );
 
     if( mSegmentList.size() )
     {
@@ -541,12 +537,7 @@ FOdysseyVectorPathCubic::DrawShapeVariable( ::ULIS::FRectD &iRoi, uint64 iFlags 
                 FOdysseyVectorSegmentCubic* segment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
                 FOdysseyVectorVertex* vertex0 = segment->GetVertex(0);
 
-                ::ULIS::FRectD clip = iRoi & segment->GetBoundingBox( false );
-
-                if( ( iRoi.Area() == 0.0f ) || clip.Area() )
-                {
-                    segment->DrawStructure( this, iRoi, true );
-                }
+                segment->DrawStructure( this, true );
             }
 
             blctx->restore();
@@ -554,7 +545,7 @@ FOdysseyVectorPathCubic::DrawShapeVariable( ::ULIS::FRectD &iRoi, uint64 iFlags 
         else
         {
             // We fill with stroke color because our curve is made of filled shapes.
-            blctx->setFillRule( BL_FILL_RULE_NON_ZERO );
+            //blctx->setFillRule( BL_FILL_RULE_NON_ZERO );
             blctx->setFillStyle( BLRgba32( strokeColor ) );
             blctx->setStrokeStyle( BLRgba32( strokeColor ) );
 
@@ -563,19 +554,14 @@ FOdysseyVectorPathCubic::DrawShapeVariable( ::ULIS::FRectD &iRoi, uint64 iFlags 
                 FOdysseyVectorSegmentCubic* segment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
                 FOdysseyVectorVertex* vertex0 = segment->GetVertex(0);
 
-                ::ULIS::FRectD clip = iRoi & segment->GetBoundingBox( false );
-
-                if( ( iRoi.Area() == 0.0f ) || clip.Area() )
-                {
-                    segment->Draw( iRoi );
-                }
+                segment->Draw();
             }
 
             for( std::list<FOdysseyVectorVertex*>::iterator it = mVertexList.begin(); it != mVertexList.end(); ++it )
             {
                 FOdysseyVectorVertex* cubicVertex = static_cast<FOdysseyVectorVertex*>(*it);
 
-                DrawJoint( cubicVertex, iRoi, iFlags );
+                DrawJoint( cubicVertex, iFlags );
             }
         }
     }

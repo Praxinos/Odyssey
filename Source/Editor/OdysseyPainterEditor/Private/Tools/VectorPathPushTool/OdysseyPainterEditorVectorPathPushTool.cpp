@@ -32,7 +32,7 @@ UOdysseyPainterEditorVectorPathPushTool::ActivateVector( FOdysseyVectorEngine* i
 
     mUndoSegmentReshape = nullptr;
 
-    iScene->Update( 0 ); // update vector scene and GUI widgets via delegates.
+    iScene->Signal( FOdysseyVectorScene::SCENE_REDRAW );
 }
 
 bool
@@ -119,7 +119,7 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDownVector( FOdysseyVectorEngine
     }
     GEditor->EndTransaction();
 
-    iScene->Update( 0 ); // update vector scene and GUI widgets via delegates.
+    iScene->Signal( FOdysseyVectorScene::SCENE_REDRAW );
 
     return true;
 }
@@ -146,7 +146,7 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseHoverVector( FOdysseyVectorEngin
     {*/
     /*}*/
 
-    iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES ); // update vector scene and GUI widgets via delegates.
+    iScene->Signal( FOdysseyVectorScene::SCENE_REDRAW );
 }
 
 void
@@ -201,6 +201,7 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDragVector( FOdysseyVectorEngine
 
     // update vector scene and GUI widgets via delegates.
     iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES | FOdysseyVectorObject::KEEPINVALIDATED );
+    iScene->Signal( FOdysseyVectorScene::SCENE_REDRAW );
 }
 
 bool
@@ -214,7 +215,8 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseUpVector( FOdysseyVectorEngine* 
         mUndoSegmentReshape->RecordAfter( mSegmentArray );
     }
 
-    iScene->Update( 0 ); // update vector scene and GUI widgets via delegates.
+    iScene->Update( 0 ); // update invalidated objects
+    iScene->Signal( FOdysseyVectorScene::SCENE_REDRAW | FOdysseyVectorScene::OBJECT_MODIFIED );
 
     return false;
 }

@@ -18,7 +18,7 @@ FOdysseyVectorHUDBucket::SetCycle( FOdysseyVectorCycle* iCycle )
 }
 
 void
-FOdysseyVectorHUDBucket::Draw( FOdysseyVectorScene* iScene, ::ULIS::FRectD& iRoi, uint64 iFlags )
+FOdysseyVectorHUDBucket::Draw( FOdysseyVectorScene* iScene, uint64 iFlags )
 {
     std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
     BLContext* blctx = iScene->GetEngine()->GetBLContext();

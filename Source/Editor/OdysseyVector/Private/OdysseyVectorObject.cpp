@@ -363,27 +363,29 @@ FOdysseyVectorObject::TransferChild( FOdysseyVectorObject* iFosterChild )
 }
 
 void
-FOdysseyVectorObject::DrawChildren( ::ULIS::FRectD& iRoi, uint64 iFlags )
+FOdysseyVectorObject::DrawChildren( uint64 iFlags )
 {
     for( std::list<FOdysseyVectorObject*>::iterator it = mChildrenList.begin(); it != mChildrenList.end(); ++it )
     {
         FOdysseyVectorObject *child = (*it);
 
-        child->Draw( iRoi, iFlags );
+        child->Draw( iFlags );
     }
 }
 
 void
-FOdysseyVectorObject::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
+FOdysseyVectorObject::Draw( uint64 iFlags )
 {
     BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
 
     blctx->save();
     blctx->transform( mLocalMatrix );
 
-    DrawShape( iRoi, iFlags );
+    blctx->setCompOp( BL_COMP_OP_SRC_OVER );
 
-    DrawChildren( iRoi, iFlags );
+    DrawShape( iFlags );
+
+    DrawChildren( iFlags );
 
     blctx->restore();
 }

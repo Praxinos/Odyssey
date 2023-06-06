@@ -107,7 +107,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorEllipse : public FOdysseyVectorPathCubic
          */
         virtual FOdysseyVectorObject* CopyShape() override;
 
-        virtual void DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags ) override;
+        virtual void DrawShape( uint64 iFlags ) override;
         virtual bool PickShape( ::ULIS::FRectD& iRoi, uint32 iSelectionFlags ) override;
         virtual void UpdateShape( uint32 iUpdateFlags ) override;
 

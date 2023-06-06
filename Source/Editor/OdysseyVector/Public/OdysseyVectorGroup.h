@@ -45,7 +45,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroup : public FOdysseyVectorObject
         void Init( std::string iName );
 
     protected:
-        virtual void DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags ) override { };
+        virtual void DrawShape( uint64 iFlags ) override { };
         virtual bool PickShape( ::ULIS::FRectD& iRoi, uint32 iSelectionFlags ) override;
         virtual FOdysseyVectorObject* CopyShape() override;
         virtual void UpdateShape( uint32 iUpdateFlags ) override;

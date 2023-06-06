@@ -24,7 +24,7 @@ UOdysseyPainterEditorVectorScenePanTool::ActivateVector( FOdysseyVectorEngine* i
 {
     iEngine->ClearHUD();
 
-    iScene->Update( 0 ); // update vector scene and GUI widgets via delegates.
+    iScene->Signal( FOdysseyVectorScene::SCENE_REDRAW );
 }
 
 bool
@@ -44,7 +44,7 @@ UOdysseyPainterEditorVectorScenePanTool::OnMouseDownVector( FOdysseyVectorEngine
     }
     GEditor->EndTransaction();
 
-    iScene->Update( 0 ); // update vector scene and GUI widgets via delegates.
+    iScene->Signal( FOdysseyVectorScene::SCENE_REDRAW );
 
     return true;
 }
@@ -60,6 +60,7 @@ UOdysseyPainterEditorVectorScenePanTool::OnMouseDragVector( FOdysseyVectorEngine
     iScene->UpdateMatrix();
 
     iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES ); // update vector scene and GUI widgets via delegates.
+    iScene->Signal( FOdysseyVectorScene::SCENE_REDRAW );
 }
 
 bool
@@ -68,7 +69,8 @@ UOdysseyPainterEditorVectorScenePanTool::OnMouseUpVector( FOdysseyVectorEngine* 
                                                         , const FOdysseyPoint& iPointInTexture
                                                         , const FKey& iKey )
 {
-    iScene->Update( 0 ); // update vector scene and GUI widgets via delegates.
+    iScene->Update( 0 ); // update invalidated objects
+    iScene->Signal( FOdysseyVectorScene::SCENE_REDRAW );
 
     return true;
 }

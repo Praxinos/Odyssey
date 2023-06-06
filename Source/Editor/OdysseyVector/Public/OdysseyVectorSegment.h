@@ -47,9 +47,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
          * @brief Draw the segment
          * @param iRoi the region-of-interest
          */
-        virtual void Draw( ::ULIS::FRectD &iRoi );
+        virtual void Draw();
 
-        virtual void DrawStructure( FOdysseyVectorObject* iParentObject, ::ULIS::FRectD &iRoi, bool iWorld ){};
+        virtual void DrawStructure( FOdysseyVectorObject* iParentObject, bool iWorld ){};
 
         uint32 GetIntersectionVertexCount();
 

@@ -47,7 +47,7 @@ UOdysseyPainterEditorVectorObjectRotateTool::ActivateVector( FOdysseyVectorEngin
     iEngine->ClearHUD( );
     iEngine->AddHUD( mTransformHUD );
 
-    iScene->Update( 0 ); // refresh vector scene and GUI widgets via delegates.
+    iScene->Signal( FOdysseyVectorScene::SCENE_REDRAW );
 }
 
 bool
@@ -71,7 +71,7 @@ UOdysseyPainterEditorVectorObjectRotateTool::OnMouseDownVector( FOdysseyVectorEn
     }
     GEditor->EndTransaction();
 
-    iScene->Update( 0 ); // refresh vector scene and GUI widgets via delegates.
+    iScene->Signal( FOdysseyVectorScene::SCENE_REDRAW );
 
     return true;
 }
@@ -157,6 +157,7 @@ UOdysseyPainterEditorVectorObjectRotateTool::OnMouseDragVector( FOdysseyVectorEn
     }
 
     iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES | FOdysseyVectorObject::KEEPINVALIDATED );
+    iScene->Signal( FOdysseyVectorScene::SCENE_REDRAW | FOdysseyVectorScene::OBJECT_TRANSFORMED );
 }
 
 bool
@@ -167,7 +168,7 @@ UOdysseyPainterEditorVectorObjectRotateTool::OnMouseUpVector( FOdysseyVectorEngi
 {
     mTransformHUD->SetShowBox( true );
 
-    iScene->Update( 0 ); // refresh vector scene and GUI widgets via delegates.
+    iScene->Signal( FOdysseyVectorScene::SCENE_REDRAW );
 
     return true;
 }

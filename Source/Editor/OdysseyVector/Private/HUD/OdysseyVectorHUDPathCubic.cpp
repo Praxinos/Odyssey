@@ -33,7 +33,6 @@ FOdysseyVectorHUDPathCubic::GetDisplayMode()
 void
 FOdysseyVectorHUDPathCubic::DrawVertex( FOdysseyVectorPathCubic* iPath
                                       , FOdysseyVectorVertex* iCubicVertex
-                                      , ::ULIS::FRectD& iRoi
                                       , uint64 iFlags )
 {
     BLContext* blctx = iPath->GetScene()->GetEngine()->GetBLContext();
@@ -73,7 +72,6 @@ FOdysseyVectorHUDPathCubic::DrawVertex( FOdysseyVectorPathCubic* iPath
 void
 FOdysseyVectorHUDPathCubic::DrawSegment( FOdysseyVectorPathCubic* iPath
                                        , FOdysseyVectorSegmentCubic* iCubicSegment
-                                       , ::ULIS::FRectD& iRoi
                                        , uint64 iFlags )
 {
     BLContext* blctx = iPath->GetScene()->GetEngine()->GetBLContext();
@@ -121,7 +119,7 @@ FOdysseyVectorHUDPathCubic::DrawSegment( FOdysseyVectorPathCubic* iPath
 }
 
 void
-FOdysseyVectorHUDPathCubic::Draw( FOdysseyVectorScene* iScene, ::ULIS::FRectD& iRoi, uint64 iFlags )
+FOdysseyVectorHUDPathCubic::Draw( FOdysseyVectorScene* iScene, uint64 iFlags )
 {
     BLContext* blctx = iScene->GetEngine()->GetBLContext();
     FOdysseyVectorObject* selectedObject = iScene->GetLastSelected();
@@ -144,7 +142,7 @@ FOdysseyVectorHUDPathCubic::Draw( FOdysseyVectorScene* iScene, ::ULIS::FRectD& i
             {
                 FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
 
-                DrawSegment( cubicPath, cubicSegment, iRoi, iFlags );
+                DrawSegment( cubicPath, cubicSegment, iFlags );
             }
 
             // Points and Point size handles
@@ -152,7 +150,7 @@ FOdysseyVectorHUDPathCubic::Draw( FOdysseyVectorScene* iScene, ::ULIS::FRectD& i
             {
                 FOdysseyVectorVertex *cubicVertex = static_cast<FOdysseyVectorVertex*>(*it);
 
-                DrawVertex( cubicPath, cubicVertex, iRoi, iFlags );
+                DrawVertex( cubicPath, cubicVertex, iFlags );
             }
         }
     }

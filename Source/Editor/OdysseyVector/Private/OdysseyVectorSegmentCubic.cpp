@@ -223,6 +223,7 @@ void
 FOdysseyVectorSegmentCubic::ResetPolygonCache( )
 {
     mPolygonCache.clear();
+    mPolygonCache.reserve( 200 );
 }
 
 bool
@@ -839,7 +840,7 @@ std::vector<FPolygon>&
 }
 
 void
-FOdysseyVectorSegmentCubic::DrawStructure( FOdysseyVectorObject* iParentObject, ::ULIS::FRectD &iRoi, bool iWorld )
+FOdysseyVectorSegmentCubic::DrawStructure( FOdysseyVectorObject* iParentObject, bool iWorld )
 {
     BLContext* blctx = iParentObject->GetScene()->GetEngine()->GetBLContext();
     BLMatrix2D& worldMatrix = iParentObject->GetWorldMatrix();
@@ -862,7 +863,7 @@ FOdysseyVectorSegmentCubic::DrawStructure( FOdysseyVectorObject* iParentObject, 
 }
 
 void
-FOdysseyVectorSegmentCubic::Draw( ::ULIS::FRectD &iRoi )
+FOdysseyVectorSegmentCubic::Draw( )
 {
     // NOTE: Might not be super fast to call this for each segment
     BLContext* blctx = mPath->GetScene()->GetEngine()->GetBLContext();
@@ -892,6 +893,7 @@ FOdysseyVectorSegmentCubic::Draw( ::ULIS::FRectD &iRoi )
                          , worldMatrix.mapPoint( mPolygonCache[i].quadVertex[3].x, mPolygonCache[i].quadVertex[3].y ) );
     }
     blctx->restore();
+
 /*
     blctx->save();
     blctx->resetMatrix();

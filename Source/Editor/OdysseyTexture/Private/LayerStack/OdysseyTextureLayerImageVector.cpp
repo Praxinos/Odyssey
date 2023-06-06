@@ -83,6 +83,20 @@ UOdysseyTextureLayerImageVector::OnCreated_Implementation()
     Init( texture->Source.GetSizeX(), texture->Source.GetSizeY() );
 }
 
+void
+UOdysseyTextureLayerImageVector::RenderImageChanged( bool iIsInteractive )
+{
+    UOdysseyTextureLayer::RenderImageChanged( iIsInteractive );
+}
+
+void
+UOdysseyTextureLayerImageVector::RenderImageChanged( const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive )
+{
+    mVEngine->Render( mScene ); // render once to buffer, then the call below will copy each rectangle from the buffer to the layer
+
+    UOdysseyTextureLayer::RenderImageChanged( iRects, iIsInteractive );
+}
+
 TArray<::ULIS::FEvent>
 UOdysseyTextureLayerImageVector::RenderImage(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ioBlock, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList)
 {
@@ -91,9 +105,6 @@ UOdysseyTextureLayerImageVector::RenderImage(TSharedPtr<::ULIS::FBlock, ESPMode:
 
     if (!ioBlock)
         return iWaitList;
-
-    // TODO: set region of interest as parameter ?
-    mVEngine->Render( mScene, (::ULIS::FRectI&) iRect );
 
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(mBlock->Format());
 

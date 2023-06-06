@@ -39,7 +39,7 @@ UOdysseyPainterEditorVectorGridTool::ActivateVector( FOdysseyVectorEngine* iEngi
     iEngine->ClearHUD( );
     iEngine->AddHUD( &mGridHUD );
 
-    iScene->Update( 0 ); // refresh vector scene and GUI widgets via delegates.
+    iScene->Signal( FOdysseyVectorScene::SCENE_REDRAW );
 }
 
 bool
@@ -85,7 +85,7 @@ UOdysseyPainterEditorVectorGridTool::OnMouseDownVector( FOdysseyVectorEngine* iE
         }
     }
 
-    iScene->Update( 0 ); // refresh vector scene and GUI widgets via delegates.
+    iScene->Signal( FOdysseyVectorScene::SCENE_REDRAW );
 
     return true;
 }
@@ -115,10 +115,12 @@ UOdysseyPainterEditorVectorGridTool::OnMouseDragVector( FOdysseyVectorEngine* iE
 
             mGridHUD.Deform();
 
-            // refresh vector scene and GUI widgets via delegates.
+            // update invalidated objects
             iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES | FOdysseyVectorObject::KEEPINVALIDATED );
         }
     }
+
+    iScene->Signal( FOdysseyVectorScene::SCENE_REDRAW );
 }
 
 bool
@@ -134,7 +136,8 @@ UOdysseyPainterEditorVectorGridTool::OnMouseUpVector( FOdysseyVectorEngine* iEng
         mGridHUD.EndSelectionRectangle( mGridNodeArray );
     }
 
-    iScene->Update( 0 ); // refresh vector scene and GUI widgets via delegates.
+    iScene->Update( 0 );
+    iScene->Signal( FOdysseyVectorScene::SCENE_REDRAW );
 
     mMultipleSelectionMode = false;
 

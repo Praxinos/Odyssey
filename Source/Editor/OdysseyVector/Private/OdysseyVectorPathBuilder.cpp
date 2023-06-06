@@ -217,7 +217,7 @@ FOdysseyVectorPathBuilder::RecordVertex()
 
             mCubicSegment->Invalidate();
 
-            mCubicPath->Update( 0 );
+            //mCubicPath->Update( 0 );
 /// end TODO
 
             ret |= FOdysseyVectorPathBuilder::NEWSEGMENT;
@@ -618,7 +618,7 @@ FOdysseyVectorPathBuilder::FitSegment( FOdysseyVectorSegmentCubic& iSegment
 }
 
 void
-FOdysseyVectorPathBuilder::DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags )
+FOdysseyVectorPathBuilder::DrawShape( uint64 iFlags )
 {
     BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
     BLPath path;
@@ -630,8 +630,6 @@ FOdysseyVectorPathBuilder::DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags )
     strokeColor.setA( mObjectParam.Foreground.A );
 
     blctx->setCompOp(BL_COMP_OP_SRC_COPY);
-    /*iBLContext.setFillStyle(BLRgba32(0xFFFFFFFF));
-    iBLContext.setStrokeStyle(BLRgba32(0xFF000000));*/
 
     blctx->setStrokeStyle( strokeColor );
 

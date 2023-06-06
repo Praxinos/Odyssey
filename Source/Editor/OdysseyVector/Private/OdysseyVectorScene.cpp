@@ -27,10 +27,10 @@ FOdysseyVectorScene::GetEngine()
     return mEngine;
 }
 
-FOdysseyVectorScene::FUpdateDelegate&
-FOdysseyVectorScene::OnUpdateDelegate()
+FOdysseyVectorScene::FSignalDelegate&
+FOdysseyVectorScene::OnSignalDelegate()
 {
-    return mOnUpdateDelegate;
+    return mOnSignalDelegate;
 }
 
 void
@@ -205,17 +205,16 @@ FOdysseyVectorScene::GetSelectedObjectList()
 }
 
 void
-FOdysseyVectorScene::DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags )
+FOdysseyVectorScene::DrawShape( uint64 iFlags )
 {
     BLContext* blctx = GetEngine()->GetBLContext();
     static ::ULIS::FRectD zeroRectangle; // static variables are always zeroed by default
     BLRgba32 blFillColor;
     FColor& fillColor = mFillBucket.GetColor();
-    uint32 width, height;
-
-    GetEngine()->GetColorImageSize( &width, &height );
 
     blctx->setCompOp( BL_COMP_OP_SRC_COPY );
+
+//UE_LOG(LogTemp, Warning, TEXT("Some warning message:%d %d %d %d"), roi.x, roi.y, roi.w, roi.h );
 
     // Note: Blend2D color format is 0xAARRGGBB
     blFillColor.setR( fillColor.B );
@@ -227,7 +226,8 @@ FOdysseyVectorScene::DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags )
 
     blctx->save();
     blctx->resetMatrix();
-    blctx->fillRect( 0, 0, width, height );
+    //blctx->clearAll();
+    blctx->fillAll();
     blctx->restore();
 
     // view the updated zone ( testing purpose only )
@@ -245,8 +245,12 @@ void
 FOdysseyVectorScene::Update( uint32 iUpdateFlags )
 {
     FOdysseyVectorObject::Update( iUpdateFlags );
+}
 
-    mOnUpdateDelegate.Broadcast( this, iUpdateFlags );
+void
+FOdysseyVectorScene::Signal( uint64 iSignalFlags )
+{
+    mOnSignalDelegate.Broadcast( this, iSignalFlags );
 }
 
 FOdysseyVectorObject*

@@ -33,9 +33,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
                               , FOdysseyVectorScene* iScene
                               , const FOdysseyPoint& iPointInTexture
                               , const FKey& iKey );
-        void OnMouseHoverVector( FOdysseyVectorEngine* iEngine
-                               , FOdysseyVectorScene* iScene
-                               , const FOdysseyPoint& iPointInTexture );
+        ::ULIS::FRectI OnMouseHoverVector( FOdysseyVectorEngine* iEngine
+                                         , FOdysseyVectorScene* iScene
+                                         , const FOdysseyPoint& iPointInTexture );
         ::ULIS::FRectI OnMouseDragVector( FOdysseyVectorEngine* iEngine
                               , FOdysseyVectorScene* iScene
                               , const FOdysseyPoint& iPointInTexture );
@@ -81,6 +81,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
         FOdysseyVectorHUDPathDrawing mPathDrawingHUD;
         FOdysseyVectorVertex* mPreviousVertex;
         bool mStitched;
+        ::ULIS::FVec2D iOldPointInTexture;
 
         std::vector<FOdysseyVectorVertex*> mVertexArray;
         std::vector<FOdysseyVectorSegment*> mSegmentArray;

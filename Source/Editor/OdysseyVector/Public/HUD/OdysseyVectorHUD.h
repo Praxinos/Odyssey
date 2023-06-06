@@ -11,5 +11,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
         virtual ~FOdysseyVectorHUD();
         FOdysseyVectorHUD();
 
-        virtual void Draw( FOdysseyVectorScene* iScene, ::ULIS::FRectD& iRoi, uint64 iFlags ) = 0;
+        virtual void Draw( FOdysseyVectorScene* iScene, uint64 iFlags ) = 0;
 };

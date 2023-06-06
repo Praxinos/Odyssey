@@ -75,13 +75,13 @@ protected:
     virtual void GetBrushPack();
     virtual void Discord();
     virtual void SwitchTabletAPI();
-    void Group( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, FOdysseyVectorUndo** iUndo );
-    void ResetView( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, FOdysseyVectorUndo** iUndo );
-    void RemoveSelectedObjects( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, FOdysseyVectorUndo** iUndo );
-    void GroupPaint( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, FOdysseyVectorUndo** iUndo );
-    void Ungroup( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, FOdysseyVectorUndo** iUndo );
-    void SendBackward( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, FOdysseyVectorUndo** iUndo );
-    void BringForward( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, FOdysseyVectorUndo** iUndo );
+    void Group( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, UObject* iStoreUndoObject );
+    void ResetView( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, UObject* iStoreUndoObject );
+    void RemoveSelectedObjects( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, UObject* iStoreUndoObject );
+    void GroupPaint( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, UObject* iStoreUndoObject );
+    void Ungroup( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, UObject* iStoreUndoObject );
+    void SendBackward( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, UObject* iStoreUndoObject );
+    void BringForward( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, UObject* iStoreUndoObject );
 
 private:
     FOdysseyPainterEditor*                          mEditor;

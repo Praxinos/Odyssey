@@ -216,13 +216,13 @@ FOdysseyVectorGroupPaint::Bucket( double iX, double iY, uint8 iR, uint8 iG, uint
 }
 
 void
-FOdysseyVectorGroupPaint::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
+FOdysseyVectorGroupPaint::Draw( uint64 iFlags )
 {
     uint64 extraFlags = 0;
 
     extraFlags |= ( ( mGroupPaintParam.Wireframe ) ? FOdysseyVectorObject::DRAWSTRUCTURE : 0 );
 
-    FOdysseyVectorObject::Draw( iRoi, iFlags | extraFlags );
+    FOdysseyVectorObject::Draw( iFlags | extraFlags );
 }
 
 void
@@ -274,7 +274,7 @@ FOdysseyVectorGroupPaint::DrawBuckets( FBucketDrawingFlags iDrawingFlags )
 }
 
 void
-FOdysseyVectorGroupPaint::DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags )
+FOdysseyVectorGroupPaint::DrawShape( uint64 iFlags )
 {
     BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
 
@@ -282,7 +282,7 @@ FOdysseyVectorGroupPaint::DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags )
     {
         FOdysseyVectorCycle *cycle = mCycleArray[i];
 
-        cycle->Draw( iRoi, iFlags );
+        cycle->Draw( iFlags );
     }
 
 
@@ -295,7 +295,7 @@ FOdysseyVectorGroupPaint::DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags )
 
         for( int i = 0; i < mGapSegmentBuffer.size(); i++ )
         {
-            mGapSegmentBuffer[i].DrawStructure( this, iRoi, true );
+            mGapSegmentBuffer[i].DrawStructure( this, true );
         }
 
         blctx->restore();

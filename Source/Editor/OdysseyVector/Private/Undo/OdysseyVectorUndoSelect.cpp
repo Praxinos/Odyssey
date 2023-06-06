@@ -30,8 +30,11 @@ FOdysseyVectorUndoSelect::Apply( UObject* iIgnored )
     // prepare former selection for Revert()
     mSelectedObjectList = selectedObjectList;
 
-    // update invalidated objects and call callbacks if any (for refreshing GUI e.g)
+    // update invalidated objects
     mScene->Update(0);
+    // call callbacks if any (for refreshing GUI e.g)
+    mScene->Signal( FOdysseyVectorScene::SCENE_REDRAW
+                  | FOdysseyVectorScene::OBJECT_SELECTED );
 }
 
 void
@@ -53,8 +56,11 @@ FOdysseyVectorUndoSelect::Revert( UObject* iIgnored )
     // prepare former selection for Apply()
     mSelectedObjectList = selectedObjectList;
 
-    // update invalidated objects and call callbacks if any (for refreshing GUI e.g)
+    // update invalidated objects
     mScene->Update(0);
+    // call callbacks if any (for refreshing GUI e.g)
+    mScene->Signal( FOdysseyVectorScene::SCENE_REDRAW
+                  | FOdysseyVectorScene::OBJECT_SELECTED );
 }
 
 /** Describes this change (for debugging) */

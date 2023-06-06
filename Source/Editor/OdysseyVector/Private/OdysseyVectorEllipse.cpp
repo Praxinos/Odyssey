@@ -122,11 +122,11 @@ FOdysseyVectorEllipse::Convert()
 }
 
 void
-FOdysseyVectorEllipse::DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags )
+FOdysseyVectorEllipse::DrawShape( uint64 iFlags )
 {
     if ( mEllipseParam.RadiusX && mEllipseParam.RadiusY )
     {
-        FOdysseyVectorPathCubic::DrawShape ( iRoi, iFlags );
+        FOdysseyVectorPathCubic::DrawShape ( iFlags );
     }
 }
 

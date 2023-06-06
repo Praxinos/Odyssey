@@ -350,13 +350,13 @@ FOdysseyVectorPath::GetFirstVertex()
 }
 
 void
-FOdysseyVectorPath::DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags )
+FOdysseyVectorPath::DrawShape( uint64 iFlags )
 {
     for(std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it)
     {
         FOdysseyVectorSegment *segment = (*it);
 
-        segment->Draw( iRoi );
+        segment->Draw();
     }
 
     /*DrawLoops( iRoi, iFlags );*/
@@ -629,7 +629,7 @@ FOdysseyVectorPath::InvalidateAllSegments()
 }
 
 void
-FOdysseyVectorPath::DrawJoint( FOdysseyVectorVertex* iVertex, ::ULIS::FRectD &iRoi, uint64 iFlags )
+FOdysseyVectorPath::DrawJoint( FOdysseyVectorVertex* iVertex, uint64 iFlags )
 {
     FOdysseyVectorSegment* segment0 = iVertex->GetFirstSegment();
     FOdysseyVectorSegment* segment1 = iVertex->GetLastSegment();

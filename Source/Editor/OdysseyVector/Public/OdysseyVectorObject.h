@@ -48,7 +48,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         static const uint32 PICK_MATH_BASED = ( 1 << 0 );
         static const uint32 PICK_MASK_BASED = ( 1 << 3 );
 
-        // DO NOT CHANGE !
+        // DO NOT CHANGE ! These values are saved in the save file.
         static const uint32 VECTORROOTTYPE       = 0;
         static const uint32 VECTOROBJECTTYPE     = 1;
         static const uint32 VECTORGROUPTYPE      = 2;
@@ -123,10 +123,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         virtual FOdysseyVectorObject* Copy();
         virtual FOdysseyVectorObject* CopyShape(){ return nullptr; };
 
-        virtual void Draw( ::ULIS::FRectD& iRoi, uint64 iFlags );
-        virtual void DrawShape ( ::ULIS::FRectD &roi, uint64 iFlags ){};
+        virtual void Draw( uint64 iFlags );
+        virtual void DrawShape ( uint64 iFlags ){};
 
-        virtual void DrawStructure ( ::ULIS::FRectD &roi, uint64 iFlags ){};
+        virtual void DrawStructure ( uint64 iFlags ){};
 
         virtual uint32 GetType();
 
@@ -137,7 +137,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
 
         virtual void TransferChild( FOdysseyVectorObject* iFosterChild );
         /*virtual void UpdateBoundingBox() = 0;*/
-        void DrawChildren( ::ULIS::FRectD& iRoi, uint64 iFlags );
+        void DrawChildren( uint64 iFlags );
         void UpdateMatrix( );
         void Translate( double iX, double iY );
         void Rotate( double iAngle );

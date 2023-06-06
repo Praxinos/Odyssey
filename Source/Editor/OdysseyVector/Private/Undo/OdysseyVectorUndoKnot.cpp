@@ -62,7 +62,12 @@ FOdysseyVectorUndoKnot::Apply( UObject* iIgnored )
 
     FOdysseyVectorUndoPathAlter::Apply( iIgnored );
 
-    //mPath->Update( 0 );
+    mScene->Update( 0 );
+    // call callbacks if any (for refreshing GUI e.g)
+    mScene->Signal( FOdysseyVectorScene::SCENE_REDRAW
+                  | FOdysseyVectorScene::OBJECT_SELECTED
+                  | FOdysseyVectorScene::OBJECT_MODIFIED
+                  | FOdysseyVectorScene::OBJECT_TRANSFORMED );
 }
 
 void
@@ -86,7 +91,11 @@ FOdysseyVectorUndoKnot::Revert( UObject* iIgnored )
     }
 
     // Update the bbox
-    mPath->Update( 0 );
+    mScene->Update( 0 );
+    mScene->Signal( FOdysseyVectorScene::SCENE_REDRAW
+                  | FOdysseyVectorScene::OBJECT_SELECTED
+                  | FOdysseyVectorScene::OBJECT_MODIFIED
+                  | FOdysseyVectorScene::OBJECT_TRANSFORMED );
 }
 
 /** Describes this change (for debugging) */

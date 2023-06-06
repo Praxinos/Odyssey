@@ -75,9 +75,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
          * @param iRoi region of interest.
          * @param iFlags drawing flags.
          */
-        virtual void DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags ) override;
+        virtual void DrawShape( uint64 iFlags ) override;
 
-        virtual void Draw( ::ULIS::FRectD& iRoi, uint64 iFlags ) override;
+        virtual void Draw( uint64 iFlags ) override;
 
         /**
          * @brief Pick the shape.

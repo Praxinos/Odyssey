@@ -45,11 +45,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
         bool HasBaseClass( uint32 iBaseClassID );
 
     protected:
-        void DrawJoint( FOdysseyVectorVertex* iVertex, ::ULIS::FRectD &iRoi, uint64 iFlags );
+        void DrawJoint( FOdysseyVectorVertex* iVertex, uint64 iFlags );
 
     protected:
         virtual void UpdateShape( uint32 iUpdateFlags );
-        virtual void DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags );
+        virtual void DrawShape( uint64 iFlags );
         bool PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags ) { return nullptr; };
         FOdysseyVectorObject* CopyShape();
 

@@ -94,9 +94,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
          * @brief Draw the cubic segment
          * @param iRoi the region-of-interest
          */
-        virtual void Draw( ::ULIS::FRectD &iRoi ) override;
+        virtual void Draw() override;
 
-        virtual void DrawStructure( FOdysseyVectorObject* iParentObject, ::ULIS::FRectD &iRoi, bool iWorld ) override;
+        virtual void DrawStructure( FOdysseyVectorObject* iParentObject, bool iWorld ) override;
 
        /**
          * @brief Get the segment's bounding box.

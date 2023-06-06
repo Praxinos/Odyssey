@@ -112,8 +112,12 @@ FOdysseyVectorUndoErase::Apply( UObject* iIgnored )
         mAddedSegmentArray[i]->Invalidate();
     }
 
-    // update invalidated objects and call callbacks if any (for refreshing GUI e.g)
+    // update invalidated objects
     mScene->Update(0);
+    // call callbacks if any (for refreshing GUI e.g)
+    mScene->Signal( FOdysseyVectorScene::SCENE_REDRAW
+                  | FOdysseyVectorScene::OBJECT_SELECTED
+                  | FOdysseyVectorScene::OBJECT_MODIFIED );
 }
 
 void
@@ -160,8 +164,12 @@ FOdysseyVectorUndoErase::Revert( UObject* iIgnored )
         mRemovedSegmentArray[i]->Invalidate();
     }
 
-    // update invalidated objects and call callbacks if any (for refreshing GUI e.g)
+    // update invalidated objects
     mScene->Update( 0 );
+    // call callbacks if any (for refreshing GUI e.g)
+    mScene->Signal( FOdysseyVectorScene::SCENE_REDRAW
+                  | FOdysseyVectorScene::OBJECT_SELECTED
+                  | FOdysseyVectorScene::OBJECT_MODIFIED );
 }
 
 /** Describes this change (for debugging) */

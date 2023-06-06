@@ -25,7 +25,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::ActivateVector( FOdysseyVectorE
 {
     iEngine->ClearHUD();
 
-    iScene->Update( 0 ); // update vector scene and GUI widgets via delegates.
+    iScene->Signal( FOdysseyVectorScene::SCENE_REDRAW );
 }
 
 bool
@@ -50,7 +50,8 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDownVector( FOdysseyVect
 
     //mSelectionChanged.Broadcast(iScene);
 
-    iScene->Update( 0 ); // update vector scene and GUI widgets via delegates.
+    iScene->Update( 0 ); // update invalidated objects
+    iScene->Signal( FOdysseyVectorScene::SCENE_REDRAW | FOdysseyVectorScene::OBJECT_SELECTED );
 
     return true;
 }
@@ -75,7 +76,8 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDragVector( FOdysseyVect
         //mSelectionChanged.Broadcast(iScene);
     }
 
-    iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES ); // update vector scene and GUI widgets via delegates.
+    iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES ); // update invalidated objects
+    iScene->Signal( FOdysseyVectorScene::SCENE_REDRAW | FOdysseyVectorScene::OBJECT_MODIFIED );
 }
 
 bool
@@ -111,7 +113,11 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseUpVector( FOdysseyVector
         iScene->Select( cubicPath );
     }
 
-    iScene->Update( 0 ); // update vector scene and GUI widgets via delegates.
+    iScene->Update( 0 ); // update invalidate objects
+    iScene->Signal( FOdysseyVectorScene::SCENE_REDRAW
+                  | FOdysseyVectorScene::OBJECT_SELECTED
+                  | FOdysseyVectorScene::OBJECT_MODIFIED
+                  | FOdysseyVectorScene::OBJECT_TRANSFORMED );
 
     return false;
 }

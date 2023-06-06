@@ -38,7 +38,7 @@ FOdysseyVectorHUDSelection::SetSelecting( bool iSelecting, std::vector<::ULIS::F
 }
 
 void
-FOdysseyVectorHUDSelection::DrawSelectionSpace( FOdysseyVectorScene* iScene,::ULIS::FRectD& iRoi,uint64 iFlags )
+FOdysseyVectorHUDSelection::DrawSelectionSpace( FOdysseyVectorScene* iScene, uint64 iFlags )
 {
     BLContext* blctx = iScene->GetEngine()->GetBLContext();
     BLPoint topLeft = { 0, 0 };
@@ -111,7 +111,7 @@ FOdysseyVectorHUDSelection::UpdateSelectionBox( FOdysseyVectorScene* iScene )
 }
 
 void
-FOdysseyVectorHUDSelection::DrawSelectionBox( FOdysseyVectorScene* iScene, ::ULIS::FRectD& iRoi, uint64 iFlags )
+FOdysseyVectorHUDSelection::DrawSelectionBox( FOdysseyVectorScene* iScene, uint64 iFlags )
 {
     std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
     BLContext* blctx = iScene->GetEngine()->GetBLContext();
@@ -145,7 +145,7 @@ FOdysseyVectorHUDSelection::DrawSelectionBox( FOdysseyVectorScene* iScene, ::ULI
 }
 
 void
-FOdysseyVectorHUDSelection::DrawSelecting( FOdysseyVectorScene* iScene, ::ULIS::FRectD& iRoi, uint64 iFlags )
+FOdysseyVectorHUDSelection::DrawSelecting( FOdysseyVectorScene* iScene, uint64 iFlags )
 {
     BLContext* blctx = iScene->GetEngine()->GetBLContext();
     BLPath path;
@@ -174,19 +174,19 @@ FOdysseyVectorHUDSelection::DrawSelecting( FOdysseyVectorScene* iScene, ::ULIS::
 }
 
 void
-FOdysseyVectorHUDSelection::Draw( FOdysseyVectorScene* iScene, ::ULIS::FRectD& iRoi, uint64 iFlags )
+FOdysseyVectorHUDSelection::Draw( FOdysseyVectorScene* iScene, uint64 iFlags )
 {
     BLContext* blctx = iScene->GetEngine()->GetBLContext();
     ::ULIS::FRectD bbox = { 0, 0, 0, 0 };
 
-    DrawSelectionSpace( iScene, iRoi, iFlags );
+    DrawSelectionSpace( iScene, iFlags );
 
     if( mSelecting )
     {
-        DrawSelecting( iScene, iRoi, iFlags );
+        DrawSelecting( iScene, iFlags );
     }
     else
     {
-        DrawSelectionBox( iScene, iRoi, iFlags );
+        DrawSelectionBox( iScene, iFlags );
     }
 }

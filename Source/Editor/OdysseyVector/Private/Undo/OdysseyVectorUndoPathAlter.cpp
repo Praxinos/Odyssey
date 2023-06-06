@@ -104,8 +104,12 @@ FOdysseyVectorUndoPathAlter::Apply( UObject* iIgnored )
         mAddedSegmentArray[i]->GetPath()->AddSegment( mAddedSegmentArray[i] );
     }
 
-    // update invalidated objects and call callbacks if any (for refreshing GUI e.g)
+    // update invalidated objects
     mScene->Update(0);
+    // call callbacks if any (for refreshing GUI e.g)
+    mScene->Signal( FOdysseyVectorScene::SCENE_REDRAW
+                  | FOdysseyVectorScene::OBJECT_SELECTED
+                  | FOdysseyVectorScene::OBJECT_MODIFIED );
 }
 
 void
@@ -135,8 +139,12 @@ FOdysseyVectorUndoPathAlter::Revert( UObject* iIgnored )
         mAddedVertexArray[i]->GetPath()->RemoveVertex( mAddedVertexArray[i] );
     }
 
-    // update invalidated objects and call callbacks if any (for refreshing GUI e.g)
+    // update invalidated objects
     mScene->Update(0);
+    // call callbacks if any (for refreshing GUI e.g)
+    mScene->Signal( FOdysseyVectorScene::SCENE_REDRAW
+                  | FOdysseyVectorScene::OBJECT_SELECTED
+                  | FOdysseyVectorScene::OBJECT_MODIFIED );
 }
 
 /** Describes this change (for debugging) */

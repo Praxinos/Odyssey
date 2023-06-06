@@ -168,7 +168,7 @@ FOdysseyVectorHUDGrid::PickNodes( ::ULIS::FRectD& iWorldRect, std::vector<FGridN
 }
 
 void
-FOdysseyVectorHUDGrid::DrawSelectionRectangle( FOdysseyVectorScene* iScene, ::ULIS::FRectD& iRoi, uint64 iFlags  )
+FOdysseyVectorHUDGrid::DrawSelectionRectangle( FOdysseyVectorScene* iScene, uint64 iFlags  )
 {
     BLContext* blctx = iScene->GetEngine()->GetBLContext();
 
@@ -198,7 +198,7 @@ FOdysseyVectorHUDGrid::DrawSelectionRectangle( FOdysseyVectorScene* iScene, ::UL
 }
 
 void
-FOdysseyVectorHUDGrid::Draw( FOdysseyVectorScene* iScene, ::ULIS::FRectD& iRoi, uint64 iFlags )
+FOdysseyVectorHUDGrid::Draw( FOdysseyVectorScene* iScene, uint64 iFlags )
 {
     BLContext* blctx = iScene->GetEngine()->GetBLContext();
 
@@ -212,7 +212,7 @@ FOdysseyVectorHUDGrid::Draw( FOdysseyVectorScene* iScene, ::ULIS::FRectD& iRoi, 
     {
         BLMatrix2D worldMatrix = mSelectionBox.space->GetWorldMatrix();
 
-        DrawSelectionRectangle( iScene, iRoi, iFlags );
+        DrawSelectionRectangle( iScene, iFlags );
 
         for( int i = 0; i < mCellArray.size(); i++ )
         {

@@ -35,7 +35,7 @@ UOdysseyPainterEditorVectorObjectPickTool::ActivateVector( FOdysseyVectorEngine*
     iEngine->ClearHUD( );
     iEngine->AddHUD( mSelectionHUD );
 
-    iScene->Update( 0 ); // refresh vector scene and GUI widgets via delegates.
+    iScene->Signal( FOdysseyVectorScene::SCENE_REDRAW );
 }
 
 bool
@@ -74,7 +74,7 @@ UOdysseyPainterEditorVectorObjectPickTool::OnMouseDownVector( FOdysseyVectorEngi
 
     mPointArray.push_back( point );
 
-    iScene->Update( 0 ); // refresh vector scene and GUI widgets via delegates.
+    iScene->Signal( FOdysseyVectorScene::SCENE_REDRAW );
 
     return true;
 }
@@ -88,26 +88,13 @@ UOdysseyPainterEditorVectorObjectPickTool::OnMouseDragVector( FOdysseyVectorEngi
 
     mPointArray.push_back( point );
 
-    iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES ); // refresh vector scene and GUI widgets via delegates.
-}
-
-//static
-bool
-UOdysseyPainterEditorVectorObjectPickTool::DoubleClicked()
-{
-    uint64 clickTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-    static uint64 previousClickTime = 0;
-    bool doubleClicked = ( ( clickTime - previousClickTime ) < 200 ) ? true : false;
-
-    previousClickTime = clickTime;
-
-    return doubleClicked;
+    iScene->Signal( FOdysseyVectorScene::SCENE_REDRAW );
 }
 
 static void
 SetSelectionSpace( FOdysseyVectorEngine* iVectorEngine, FOdysseyVectorObject* iSelectedObject )
 {
-    if( UOdysseyPainterEditorVectorObjectPickTool::DoubleClicked() == true )
+    if( UOdysseyPainterEditorDefaultTool::DoubleClicked() == true )
     {
         FOdysseyVectorGroup* selectedGroup = nullptr;
 
@@ -156,7 +143,8 @@ UOdysseyPainterEditorVectorObjectPickTool::OnMouseUpVector( FOdysseyVectorEngine
     mSelectionHUD->SetSelecting( false, nullptr );
     mSelectionHUD->UpdateSelectionBox( iScene );
 
-    iScene->Update( 0 ); // refresh vector scene and GUI widgets via delegates.
+    iScene->Update( 0 ); // update invalidated objects
+    iScene->Signal( FOdysseyVectorScene::SCENE_REDRAW | FOdysseyVectorScene::OBJECT_SELECTED );
 
     return true;
 }

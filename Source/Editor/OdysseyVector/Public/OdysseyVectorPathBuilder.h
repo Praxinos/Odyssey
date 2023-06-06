@@ -60,7 +60,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathBuilder : public FOdysseyVectorObject
         FOdysseyVectorObject* CopyShape();
 
         // Draw the sample links and points
-        void DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags );
+        void DrawShape( uint64 iFlags );
 
         // Unimplemented. Cubic Path builder cannot be picked. It should be destroyed as soon as the curve is built
         bool PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags ) { return false; };

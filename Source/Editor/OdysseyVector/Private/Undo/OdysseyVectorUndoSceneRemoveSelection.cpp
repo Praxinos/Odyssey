@@ -39,8 +39,11 @@ FOdysseyVectorUndoSceneRemoveSelection::Apply( UObject* iIgnored )
 
     mScene->ClearSelection();
 
-    // update invalidated objects and call callbacks if any (for refreshing GUI e.g)
+    // update invalidated objects
     mScene->Update(0);
+    // call callbacks if any (for refreshing GUI e.g)
+    mScene->Signal( FOdysseyVectorScene::SCENE_REDRAW
+                  | FOdysseyVectorScene::OBJECT_SELECTED );
 }
 
 void
@@ -62,8 +65,11 @@ FOdysseyVectorUndoSceneRemoveSelection::Revert( UObject* iIgnored )
         mScene->Select( object );
     }
 
-    // update invalidated objects and call callbacks if any (for refreshing GUI e.g)
+    // update invalidated objects
     mScene->Update(0);
+    // call callbacks if any (for refreshing GUI e.g)
+    mScene->Signal( FOdysseyVectorScene::SCENE_REDRAW
+                  | FOdysseyVectorScene::OBJECT_SELECTED );
 }
 
 /** Describes this change (for debugging) */

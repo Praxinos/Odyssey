@@ -42,7 +42,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUDGrid : public FOdysseyVectorHUDSelectio
         virtual ~FOdysseyVectorHUDGrid();
         FOdysseyVectorHUDGrid();
 
-        void Draw( FOdysseyVectorScene* iScene, ::ULIS::FRectD& iRoi, uint64 iFlags );
+        void Draw( FOdysseyVectorScene* iScene, uint64 iFlags );
         FGridNode *PickNode( double iWorldX, double iWorldY, double iWorldRadius );
         void PickNodes( ::ULIS::FRectD& iWorldRect, std::vector<FGridNode*>& oNodeArray );
         void MakeGrid( FOdysseyVectorScene* iScene, uint32 iDivisionX, uint32 iDivisionY );
@@ -60,7 +60,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUDGrid : public FOdysseyVectorHUDSelectio
         void Map( FOdysseyVectorScene* iScene );
         void DeformCell( FGridCell& iCell );
         void UnselectNodes();
-        void DrawSelectionRectangle( FOdysseyVectorScene* iScene, ::ULIS::FRectD& iRoi, uint64 iFlags );
+        void DrawSelectionRectangle( FOdysseyVectorScene* iScene, uint64 iFlags );
 
     private:
         ::ULIS::FVec2D mWorldSelStart; // selection rectangle is in world coordinates (to be aligned with world axis)

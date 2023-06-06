@@ -55,6 +55,9 @@ class ODYSSEYTEXTURE_API UOdysseyTextureLayerImageVector
          */
         virtual TArray<::ULIS::FEvent> RenderImage(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ioBlock, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList) override;
  
+        virtual void RenderImageChanged( const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive ) override;
+        virtual void RenderImageChanged(bool iIsInteractive) override;
+
         void Serialize(FArchive& Ar);
 
     public:

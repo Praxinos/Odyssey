@@ -15,7 +15,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUDLine : public FOdysseyVectorHUD
         virtual ~FOdysseyVectorHUDLine();
         FOdysseyVectorHUDLine();
 
-        void Draw( FOdysseyVectorScene* iScene, ::ULIS::FRectD& iRoi, uint64 iFlags );
+        void Draw( FOdysseyVectorScene* iScene, uint64 iFlags );
         void SetP0( double x, double y );
         void SetP1( double x, double y );
         ::ULIS::FVec2D& GetP0();

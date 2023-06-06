@@ -57,6 +57,19 @@ FOdysseyVectorEngine::GetBLMask()
 }
 
 void
+FOdysseyVectorEngine::GetColorImageSize( ::ULIS::FRectI& oRedrawRegion )
+{
+    uint32 width, height;
+
+    GetColorImageSize( &width, &height );
+
+    oRedrawRegion.x = 0;
+    oRedrawRegion.y = 0;
+    oRedrawRegion.w = width;
+    oRedrawRegion.h = height;
+}
+
+void
 FOdysseyVectorEngine::GetColorImageSize( uint32* iW, uint32* iH )
 {
     BLImageData imageData;
@@ -109,7 +122,7 @@ FOdysseyVectorEngine::GetColorImagePixelValue( uint32 iX, uint32 iY )
 }
 
 void
-FOdysseyVectorEngine::RenderHUD( FOdysseyVectorScene* iScene, ::ULIS::FRectD& iRoi )
+FOdysseyVectorEngine::RenderHUD( FOdysseyVectorScene* iScene )
 {
     std::list<FOdysseyVectorObject*> selectedObjectList = iScene->GetSelectedObjectList();
 
@@ -120,7 +133,7 @@ FOdysseyVectorEngine::RenderHUD( FOdysseyVectorScene* iScene, ::ULIS::FRectD& iR
     {
         FOdysseyVectorHUD *hud = (*hit);
 
-        hud->Draw( iScene, iRoi, 0 );
+        hud->Draw( iScene, 0 );
     }
 
     mBLContext->restore();
@@ -133,21 +146,30 @@ FOdysseyVectorEngine::SetDrawingFlags( uint64 iDrawingFlags )
 }
 
 void
-FOdysseyVectorEngine::Render( FOdysseyVectorScene* iScene, const ::ULIS::FRectI& iRect )
+FOdysseyVectorEngine::Render( FOdysseyVectorScene* iScene/*, const ::ULIS::FRectI& iRegion*/ )
 {
     // Blend2D part
    /* BLContextCreateInfo createInfo{};*/
 
     // Configure the number of threads to use.
     /*createInfo.threadCount = 1;*/
-    BLRectI clipping = BLRectI( iRect.x, iRect.y, iRect.w, iRect.h );
-    ::ULIS::FRectD roi = ::ULIS::FRectD( iRect.x, iRect.y, iRect.w, iRect.h );
 
-    //mBLContext->clipToRect( clipping );
+    /*if( iRegion.Area() != 0 )
+    {
+        mBLContext->clipToRect( iRegion.x, iRegion.y, iRegion.w, iRegion.h );
+    }*/
 
-    iScene->Draw( roi, mDrawingFlags );
-
-    RenderHUD( iScene, roi );
+    iScene->Draw( mDrawingFlags );
+/*
+    mBLContext->save();
+    mBLContext->resetMatrix();
+UE_LOG(LogTemp, Warning, TEXT("Some warning message %d %d %d %d"), mRoi.x, mRoi.y, mRoi.w, mRoi.h );
+    mBLContext->setStrokeStyle(BLRgba32(0xFF0000FF));
+    mBLContext->setStrokeWidth(2.0f);
+    mBLContext->strokeRect(mRoi.x,mRoi.y,mRoi.w,mRoi.h);
+    mBLContext->restore();
+*/
+    RenderHUD( iScene );
 
     //mBLContext->restoreClipping();
 

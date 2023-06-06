@@ -49,9 +49,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
         /**
          * @brief Render the scene to the current buffer
          * @param iScene the scene (root node of the object hierarchy).
-         * @param iRect the region to render (clipping region).
          */
-        void Render( FOdysseyVectorScene* iScene, const ::ULIS::FRectI& iRect );
+        void Render( FOdysseyVectorScene* iScene/*, const ::ULIS::FRectI& iRegion*/ );
 
         /**
          * @brief Pick an object
@@ -129,6 +128,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
                   , ::ULIS::FRectD &iRoi
                   , bool iSelectedOnly );
 
+        void ValidateRegion();
+
         /**
          * @brief Invalidate a region
          * @param iX
@@ -142,19 +143,15 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
          * @brief Invalidate a region (floating point).
          * @param iRegion
          */
-        void InvalidateRegion( ::ULIS::FRectD& iRegion );
+        void InvalidateRegion( const ::ULIS::FRectD& iRegion );
 
         /**
          * @brief Invalidate a region (integer).
          * @param iRegion
          */
-        void InvalidateRegion( ::ULIS::FRectI& iRegion );
+        void InvalidateRegion( const ::ULIS::FRectI& iRegion );
 
-        /**
-         * @brief Get the invalidated region.
-         * @return a reference to the invalidated region.
-         */
-        ::ULIS::FRectD& GetInvalidateRegion();
+        ::ULIS::FRectI& GetInvalidatedRegion();
 
         /**
          * @brief Set drawing flags. Currently none.
@@ -204,6 +201,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
          */
         void GetColorImageSize( uint32* iW, uint32* iH );
 
+        void GetColorImageSize( ::ULIS::FRectI& redrawRegion );
+
         /**
          * @brief Set the selection space, i.e the group we pick objects from. 
          *   Default is null, meaning the scene is the selection space.
@@ -243,7 +242,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
          * @brief render the current HUD.
          * @param iDrawingFlags.
          */
-        void RenderHUD( FOdysseyVectorScene* iScene, ::ULIS::FRectD& iRoi );
+        void RenderHUD( FOdysseyVectorScene* iScene );
 
     private:
         BLContext* mBLContext;

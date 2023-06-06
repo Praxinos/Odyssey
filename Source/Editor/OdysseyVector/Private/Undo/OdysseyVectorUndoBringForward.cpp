@@ -27,8 +27,10 @@ FOdysseyVectorUndoBringForward::Apply( UObject* iIgnored )
 
     mObject->MoveFront();
 
-    // update invalidated objects and call callbacks if any (for refreshing GUI e.g)
+    // update invalidated objects
     mScene->Update(0);
+    // call callbacks if any (for refreshing GUI e.g)
+    mScene->Signal( FOdysseyVectorScene::SCENE_REDRAW );
 }
 
 void
@@ -39,8 +41,10 @@ FOdysseyVectorUndoBringForward::Revert( UObject* iIgnored )
 
     mObject->MoveBack();
 
-    // update invalidated objects and call callbacks if any (for refreshing GUI e.g)
+    // update invalidated objects
     mScene->Update(0);
+    // call callbacks if any (for refreshing GUI e.g)
+    mScene->Signal( FOdysseyVectorScene::SCENE_REDRAW );
 }
 
 /** Describes this change (for debugging) */

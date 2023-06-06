@@ -75,8 +75,11 @@ FOdysseyVectorUndoSegmentReshape::Apply( UObject* iIgnored )
 
     LoadArray( mSegmentShapeAfterArray );
 
-    // update invalidated objects and call callbacks if any (for refreshing GUI e.g)
+    // update invalidated objects
     mScene->Update(0);
+    // call callbacks if any (for refreshing GUI e.g)
+    mScene->Signal( FOdysseyVectorScene::SCENE_REDRAW
+                  | FOdysseyVectorScene::OBJECT_MODIFIED );
 }
 
 void
@@ -87,8 +90,11 @@ FOdysseyVectorUndoSegmentReshape::Revert( UObject* iIgnored )
 
     LoadArray( mSegmentShapeBeforeArray );
 
-    // update invalidated objects and call callbacks if any (for refreshing GUI e.g)
+    // update invalidated objects
     mScene->Update(0);
+    // call callbacks if any (for refreshing GUI e.g)
+    mScene->Signal( FOdysseyVectorScene::SCENE_REDRAW
+                  | FOdysseyVectorScene::OBJECT_MODIFIED );
 }
 
 /** Describes this change (for debugging) */

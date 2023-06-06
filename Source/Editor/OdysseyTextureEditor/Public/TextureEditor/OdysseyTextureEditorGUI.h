@@ -49,7 +49,7 @@ protected:
 public:
     void BindVectorScene( FOdysseyVectorScene* iScene );
 protected:
-    void OnRefresh( FOdysseyVectorScene* iScene, uint32 iUpdateFlags );
+    void OnVectorSceneSignal( FOdysseyVectorScene* iScene, uint64 iSignalFlags );
     void UnbindAllVectorScenes();
     void BindAllVectorScenes( UOdysseyLayerStack* iLayerStack );
 

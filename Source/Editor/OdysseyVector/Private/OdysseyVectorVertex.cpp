@@ -409,6 +409,8 @@ FOdysseyVectorVertex::GetBoundingBox( bool iWorld )
 
         bbox.x = pt.x;
         bbox.y = pt.y;
+        bbox.w = 1;
+        bbox.h = 1;
     }
     else
     {

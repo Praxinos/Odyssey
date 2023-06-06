@@ -209,7 +209,7 @@ FOdysseyVectorSegment::GetAllVertices( std::vector<FOdysseyVectorVertex*>& oVert
 }
 
 void
-FOdysseyVectorSegment::Draw( ::ULIS::FRectD &iRoi )
+FOdysseyVectorSegment::Draw()
 {
 
 }
