@@ -35,6 +35,12 @@ FOdysseyVectorSegmentCubic::FOdysseyVectorSegmentCubic( FOdysseyVectorPath* iPat
 }
 
 ::ULIS::FVec2D
+FOdysseyVectorSegmentCubic::GetHandleVector( FOdysseyVectorVertex* iVertex, bool iNormalize )
+{
+    return GetHandleVector( ( mPoint[0] == iVertex ) ? 0 : 1, iNormalize );
+}
+
+::ULIS::FVec2D
 FOdysseyVectorSegmentCubic::GetHandleVector( uint32 iHandleID, bool iNormalize )
 {
     ::ULIS::FVec2D vec = GetHandle(iHandleID)->GetCoords() - GetVertex(iHandleID)->GetCoords();

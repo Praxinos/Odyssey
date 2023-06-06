@@ -64,6 +64,23 @@ FOdysseyVectorLink::GetStraightDistance()
 }
 
 ::ULIS::FVec2D
+FOdysseyVectorLink::GetVector( FOdysseyVectorPoint* iPoint, bool iNormalize )
+{
+    ::ULIS::FVec2D vec = ::ULIS::FVec2D( mPoint[1]->GetX() - mPoint[0]->GetX()
+                                       , mPoint[1]->GetY() - mPoint[0]->GetY() );
+
+    if ( iNormalize == true )
+    {
+        if ( vec.DistanceSquared() )
+        {
+            vec.Normalize();
+        }
+    }
+
+    return ( iPoint == mPoint[0] ) ? vec : -vec;
+}
+
+::ULIS::FVec2D
 FOdysseyVectorLink::GetVector( bool iNormalize )
 {
     ::ULIS::FVec2D vec = ::ULIS::FVec2D( mPoint[1]->GetX() - mPoint[0]->GetX()

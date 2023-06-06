@@ -105,7 +105,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
          */
         virtual void Update() override;
 
-        ::ULIS::FVec2D GetHandleVector( uint32 iHandleID, bool iNormalize );
+        virtual ::ULIS::FVec2D GetHandleVector( uint32 iHandleID, bool iNormalize ) override;
+        virtual ::ULIS::FVec2D GetHandleVector( FOdysseyVectorVertex* iVertex, bool iNormalize ) override;
 
         void UpdateBoundingBox();
 

@@ -1,9 +1,6 @@
 #include "HUD/OdysseyVectorHUDPathCubic.h"
 #include "OdysseyVectorEngine.h"
 
-static const ::ULIS::FRectD POINTRECT  = { -4, -4, 8, 8 };
-static const ::ULIS::FRectD HANDLERECT = { -4, -4, 8, 8 };
-
 FOdysseyVectorHUDPathCubic::~FOdysseyVectorHUDPathCubic()
 {
 }

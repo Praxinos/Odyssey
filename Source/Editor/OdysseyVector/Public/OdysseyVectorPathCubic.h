@@ -32,6 +32,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathCubic: public FOdysseyVectorPath
 
     public:
         static void SmoothSegments( FOdysseyVectorVertex* iVertex, bool iBuildSegments, bool iPreserveHandleLength );
+        static void SmoothSegments( FOdysseyVectorVertex* iVertex
+                                  , ::ULIS::FVec2D iPerpendicularVector
+                                  , bool iBuildSegments
+                                  , bool iPreserveHandleLength );
         static ::ULIS::FVec2D GetPerpendicularVector( FOdysseyVectorVertex* iVertex, bool iNormalize );
 
         FOdysseyVectorPathCubic( const FString& iName );

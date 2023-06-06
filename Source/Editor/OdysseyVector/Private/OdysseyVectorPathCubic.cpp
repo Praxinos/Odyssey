@@ -766,8 +766,24 @@ FOdysseyVectorPathCubic::SwitchSpace( FOdysseyVectorObject& iNewSpace )
 void
 FOdysseyVectorPathCubic::SmoothSegments( FOdysseyVectorVertex* iVertex, bool iBuildSegments, bool iPreserveHandleLength )
 {
+    ::ULIS::FVec2D perpendicularVector = iVertex->GetAverageStraightVectorOnSegment( true );
+//UE_LOG(LogTemp, Warning, TEXT("Some warning message %f %f"), perpendicularVector.x, perpendicularVector.y ); 
+/*
+    if( perpendicularVector.DistanceSquared() == 0.0f && iVertex->GetFirstSegment() )
+    {
+        perpendicularVector = iVertex->GetFirstSegment()->GetHandleVector( iVertex, true );
+
+        perpendicularVector = ::ULIS::FVec2D( perpendicularVector.y, -perpendicularVector.x );
+    }
+*/
+    SmoothSegments( iVertex, perpendicularVector, iBuildSegments, iPreserveHandleLength );
+}
+
+// static
+void
+FOdysseyVectorPathCubic::SmoothSegments( FOdysseyVectorVertex* iVertex, ::ULIS::FVec2D iPerpendicularVector, bool iBuildSegments, bool iPreserveHandleLength )
+{
     std::list<FOdysseyVectorSegment*>& segmentList = iVertex->GetSegmentList();
-    ::ULIS::FVec2D averageVector( 0.0f, 0.0f );
 
     if ( iVertex->GetSegmentCount() > 1 )
     {
@@ -775,27 +791,17 @@ FOdysseyVectorPathCubic::SmoothSegments( FOdysseyVectorVertex* iVertex, bool iBu
         {
             FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
 
-            averageVector += cubicSegment->GetVector( true );
-        }
-
-        if ( averageVector.DistanceSquared() )
-        {
-            averageVector.Normalize();
-        }
- 
-        for( std::list<FOdysseyVectorSegment*>::iterator it = segmentList.begin(); it != segmentList.end(); ++it )
-        {
-            FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
-            ::ULIS::FVec2D smoothVector = averageVector;
-
             if ( iVertex == cubicSegment->GetPoint(0) )
             {
-                ::ULIS::FVec2D segmentVector = cubicSegment->GetVector( false );
+                ::ULIS::FVec2D segmentVector = iVertex->GetVectorOnSegment( cubicSegment, true );
+                double dot = iPerpendicularVector.DotProduct( segmentVector );
+                ::ULIS::FVec2D tangentVector = ::ULIS::FVec2D( iPerpendicularVector.y, -iPerpendicularVector.x );
                 double distance;
 
-                if ( smoothVector.DotProduct( segmentVector ) < 0.0f )
+                // if perpendicular vector equals 0 or is orthogonal to the segment vector
+                if ( tangentVector.DotProduct( segmentVector )  < 0.0f )
                 {
-                    smoothVector = - smoothVector;
+                    tangentVector = -tangentVector;
                 }
 
                 if( iPreserveHandleLength )
@@ -810,18 +816,21 @@ FOdysseyVectorPathCubic::SmoothSegments( FOdysseyVectorVertex* iVertex, bool iBu
                     distance = cubicSegment->GetStraightDistance() * 0.35f;
                 }
 
-                cubicSegment->GetHandle(0)->Set( iVertex->GetX() + ( smoothVector.x * distance ),
-                                                 iVertex->GetY() + ( smoothVector.y * distance ) );
+                cubicSegment->GetHandle(0)->Set( iVertex->GetX() + ( tangentVector.x * distance ),
+                                                 iVertex->GetY() + ( tangentVector.y * distance ) );
             }
 
             if ( iVertex == cubicSegment->GetPoint(1) )
             {
-                ::ULIS::FVec2D segmentVector = - cubicSegment->GetVector( false );
+                ::ULIS::FVec2D segmentVector = iVertex->GetVectorOnSegment( cubicSegment, true );
+                double dot = iPerpendicularVector.DotProduct( segmentVector );
+                ::ULIS::FVec2D tangentVector = ::ULIS::FVec2D( iPerpendicularVector.y, -iPerpendicularVector.x );
                 double distance;
 
-                if ( smoothVector.DotProduct( segmentVector ) < 0.0f )
+                // if perpendicular vector equals 0 or is orthogonal to the segment vector
+                if ( tangentVector.DotProduct( segmentVector ) < 0.0f )
                 {
-                    smoothVector = - smoothVector;
+                    tangentVector = -tangentVector;
                 }
 
                 if( iPreserveHandleLength )
@@ -836,8 +845,8 @@ FOdysseyVectorPathCubic::SmoothSegments( FOdysseyVectorVertex* iVertex, bool iBu
                     distance = cubicSegment->GetStraightDistance() * 0.35f;
                 }
 
-                cubicSegment->GetHandle(1)->Set( iVertex->GetX() + ( smoothVector.x * distance ),
-                                                 iVertex->GetY() + ( smoothVector.y * distance ) );
+                cubicSegment->GetHandle(1)->Set( iVertex->GetX() + ( tangentVector.x * distance ),
+                                                 iVertex->GetY() + ( tangentVector.y * distance ) );
             }
 
             if ( iBuildSegments == true )

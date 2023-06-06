@@ -55,6 +55,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
 
         void GetIntersectionVertices( std::vector<FOdysseyVectorVertex*>& oVertexArray );
         void GetAllVertices( std::vector<FOdysseyVectorVertex*>& oVertexArray );
+        virtual ::ULIS::FVec2D GetHandleVector( uint32 iHandleID, bool iNormalize );
+        virtual ::ULIS::FVec2D GetHandleVector( FOdysseyVectorVertex* iVertex, bool iNormalize );
 
        /**
          * @brief Test whether or not this segment is close to the coordinates passed as parameter

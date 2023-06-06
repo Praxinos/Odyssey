@@ -16,6 +16,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUDPathCubic : public FOdysseyVectorHUD
                        , FOdysseyVectorVertex* iCubicVertex
                        , uint64 iFlags );
     public:
+        static inline ::ULIS::FRectD POINTRECT  = { -4, -4, 8, 8 };
+        static inline ::ULIS::FRectD HANDLERECT = { -4, -4, 8, 8 };
+
         static const uint32 VIEW_PATH           = ( 1 << 0 );
         static const uint32 VIEW_POINT          = ( 1 << 1 );
         static const uint32 VIEW_HANDLE_POINT   = ( 1 << 2 );

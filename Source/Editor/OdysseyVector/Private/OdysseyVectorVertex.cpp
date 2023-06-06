@@ -46,6 +46,87 @@ FOdysseyVectorVertex::BuildExplorationPairs( std::vector<FExplorationPair>& iExp
     }
 }
 
+::ULIS::FVec2D
+FOdysseyVectorVertex::GetAverageVectorOnSegmentHandle( bool iNormalize )
+{
+    uint32 segmentCount = GetSegmentCount();
+    ::ULIS::FVec2D averageVector( 0.0f, 0.0f );
+
+    if( segmentCount )
+    {
+        for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
+        {
+            FOdysseyVectorSegment* segment = (*it);
+
+            averageVector += segment->GetHandleVector( this, true );
+        }
+
+        averageVector.x /= segmentCount;
+        averageVector.y /= segmentCount;
+
+        if ( iNormalize && averageVector.DistanceSquared() )
+        {
+            averageVector.Normalize();
+        }
+    }
+
+    return averageVector;
+}
+
+::ULIS::FVec2D
+FOdysseyVectorVertex::GetAverageStraightVectorOnSegment( bool iNormalize )
+{
+    uint32 segmentCount = GetSegmentCount();
+    ::ULIS::FVec2D averageVector( 0.0f, 0.0f );
+
+    if( segmentCount )
+    {
+        for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
+        {
+            FOdysseyVectorSegment* segment = (*it);
+
+            averageVector += segment->GetVector( this, true );
+        }
+
+        averageVector.x /= segmentCount;
+        averageVector.y /= segmentCount;
+
+        if ( iNormalize && averageVector.DistanceSquared() )
+        {
+            averageVector.Normalize();
+        }
+    }
+
+    return averageVector;
+}
+
+::ULIS::FVec2D
+FOdysseyVectorVertex::GetAverageVectorOnSegment( bool iNormalize )
+{
+    uint32 segmentCount = GetSegmentCount();
+    ::ULIS::FVec2D averageVector( 0.0f, 0.0f );
+
+    if( segmentCount )
+    {
+        for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
+        {
+            FOdysseyVectorSegment* segment = (*it);
+
+            averageVector += GetVectorOnSegment( segment, true );
+        }
+
+        averageVector.x /= segmentCount;
+        averageVector.y /= segmentCount;
+
+        if ( iNormalize && averageVector.DistanceSquared() )
+        {
+            averageVector.Normalize();
+        }
+    }
+
+    return averageVector;
+}
+
 FOdysseyVectorSection*
 FOdysseyVectorVertex::GetCycleNextSection( FOdysseyVectorSection* iLastSection, double iOrientation )
 {

@@ -200,6 +200,18 @@ FOdysseyVectorSegment::GetIntersectionVertices( std::vector<FOdysseyVectorVertex
     }
 }
 
+::ULIS::FVec2D
+FOdysseyVectorSegment::GetHandleVector( uint32 iHandleID, bool iNormalize )
+{
+    return ::ULIS::FVec2D( 0.0f, 0.0f );
+}
+
+::ULIS::FVec2D
+FOdysseyVectorSegment::GetHandleVector( FOdysseyVectorVertex* iVertex, bool iNormalize )
+{
+    return ::ULIS::FVec2D( 0.0f, 0.0f );
+}
+
 void
 FOdysseyVectorSegment::GetAllVertices( std::vector<FOdysseyVectorVertex*>& oVertexArray )
 {

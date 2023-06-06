@@ -240,6 +240,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
         FOdysseyVectorVertex* GetNearestVertex();
         virtual FOdysseyVectorSection* GetCycleNextSection( FOdysseyVectorSection* iLastSection, double iOrientation );
         virtual void BuildExplorationPairs( std::vector<FExplorationPair>& iExplorationPairsArray );
+        ::ULIS::FVec2D GetAverageVectorOnSegment( bool iNormalize );
+        ::ULIS::FVec2D GetAverageVectorOnSegmentHandle( bool iNormalize );
+        ::ULIS::FVec2D GetAverageStraightVectorOnSegment( bool iNormalize );
 
     protected:
         FOdysseyVectorHandlePoint* mCtrlPoint;

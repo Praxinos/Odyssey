@@ -8,16 +8,39 @@
 #include "OdysseyVector.h"
 #include "Undo/OdysseyVectorUndoSegmentReshape.h"
 
+#include "HUD/OdysseyVectorHUDPicking.h"
+#include "HUD/OdysseyVectorHUDPathPush.h"
+
 #include "OdysseyPainterEditorVectorPathPushTool.generated.h"
 
 typedef struct _FPushedPoint
 {
      FOdysseyVectorPoint* point;
      double ratio;
-     _FPushedPoint( FOdysseyVectorPoint* iPoint, double iRatio )
+     bool isSmooth;
+     ::ULIS::FVec2D perpendicularVector; // perpendicular vector
+
+     _FPushedPoint( FOdysseyVectorPoint* iPoint, double iRatio, bool iIsSmooth )
      {
          point = iPoint;
          ratio = ( iRatio > 1.0f ) ? 1.0f : iRatio;
+         isSmooth = iIsSmooth;
+
+         if( isSmooth )
+         {
+             if( iPoint->GetClass() == FOdysseyVectorVertex::StaticClass() )
+             {
+                 FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>(iPoint);
+                 FOdysseyVectorSegment* segment = vertex->GetFirstSegment();
+
+                 if( segment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
+                 {
+                     FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(segment);
+
+                     perpendicularVector = cubicSegment->GetHandleVector( vertex, true );
+                 }
+             }
+         }
      }
 } FPushedPoint;
 
@@ -62,6 +85,7 @@ private:
     std::vector<FPushedPoint> mPushedPointArray;
     std::vector<FOdysseyVectorSegment*> mSegmentArray;
     FOdysseyVectorHUDPicking mPickingHUD;
+    FOdysseyVectorHUDPathPush mPathPushHUD;
 
 public:
     UPROPERTY(EditAnywhere, Category="Odyssey PathPush Tool")

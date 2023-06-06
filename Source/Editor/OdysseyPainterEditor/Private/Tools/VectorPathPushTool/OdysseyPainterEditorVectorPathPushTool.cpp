@@ -28,6 +28,7 @@ void
 UOdysseyPainterEditorVectorPathPushTool::UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
     iEngine->RemoveHUD( &mPickingHUD );
+    iEngine->RemoveHUD( &mPathPushHUD );
 
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
@@ -36,6 +37,7 @@ void
 UOdysseyPainterEditorVectorPathPushTool::LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
     iEngine->AddHUD( &mPickingHUD );
+    iEngine->AddHUD( &mPathPushHUD );
 
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
@@ -90,22 +92,24 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDownVector( FOdysseyVectorEngine
             ::ULIS::FVec2D& point1 = cubicSegment->GetVertex(1)->GetCoords();
             ::ULIS::FVec2D cp0Vec = { localPoint.x - ctrlPoint0.x, localPoint.y - ctrlPoint0.y };
             ::ULIS::FVec2D cp1Vec = { localPoint.x - ctrlPoint1.x, localPoint.y - ctrlPoint1.y };
+            FOdysseyVectorVertex* vertex0 = cubicSegment->GetVertex(0);
+            FOdysseyVectorVertex* vertex1 = cubicSegment->GetVertex(1);
 
-            mPushedPointArray.push_back( FPushedPoint( cubicSegment->GetHandle(0), Radius / cp0Vec.Distance() ) );
-            mPushedPointArray.push_back( FPushedPoint( cubicSegment->GetHandle(1), Radius / cp1Vec.Distance() ) );
+            mPushedPointArray.push_back( FPushedPoint( cubicSegment->GetHandle(0), Radius / cp0Vec.Distance(), false ) );
+            mPushedPointArray.push_back( FPushedPoint( cubicSegment->GetHandle(1), Radius / cp1Vec.Distance(), false ) );
 
-            if( HasVertex( cubicSegment->GetPoint(0) ) == false )
+            if( HasVertex( vertex0 ) == false )
             {
                 ::ULIS::FVec2D p0Vec = { localPoint.x - point0.x, localPoint.y - point0.y };
 
-                mPushedPointArray.push_back( FPushedPoint( cubicSegment->GetPoint(0), Radius / p0Vec.Distance() ) );
+                mPushedPointArray.push_back( FPushedPoint( cubicSegment->GetPoint(0), Radius / p0Vec.Distance(), vertex0->IsSmooth() ) );
             }
 
-            if( HasVertex( cubicSegment->GetPoint(1) ) == false )
+            if( HasVertex( vertex1 ) == false )
             {
                 ::ULIS::FVec2D p1Vec = { localPoint.x - point1.x, localPoint.y - point1.y };
 
-                mPushedPointArray.push_back( FPushedPoint( cubicSegment->GetPoint(1), Radius / p1Vec.Distance() ) );
+                mPushedPointArray.push_back( FPushedPoint( cubicSegment->GetPoint(1), Radius / p1Vec.Distance(), vertex1->IsSmooth() ) );
             }
         }
     }
@@ -137,15 +141,6 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseHoverVector( FOdysseyVectorEngin
                           , (int)diameter };
 
     mPickingHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
-/*
-    if( rect.x < 0 ) rect.x = 0;
-    if( rect.y < 0 ) rect.y = 0;
-
-    rect = rect & layerStack->GetSurface()->Block()->Rect();
-
-    if( rect.Area() )
-    {*/
-    /*}*/
 
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
@@ -180,19 +175,35 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDragVector( FOdysseyVectorEngine
 
         point->SetX( point->GetX() + ( delta.x * mPushedPointArray[i].ratio ) );
         point->SetY( point->GetY() + ( delta.y * mPushedPointArray[i].ratio ) );
+    }
 
-        /*if( vertex )
+    for( int i = 0; i < mPushedPointArray.size(); i++ )
+    {
+        FOdysseyVectorPoint* point = mPushedPointArray[i].point;
+/*
+        if( point->GetClass() == FOdysseyVectorVertex::StaticClass() )
         {
-            if( vertex->IsSmooth() && PreserveSmoothness )
-            {
-                FOdysseyVectorVertex* cubicVertex = static_cast<FOdysseyVectorVertex*>(vertex);
+            FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>(point);
 
-                if( cubicVertex )
+            if( mPushedPointArray[i].isSmooth && PreserveSmoothness )
+            {
+UE_LOG(LogTemp, Warning, TEXT("Some warning message") ); 
+                if( vertex )
                 {
-                    cubicVertex->SmoothSegments( false );
+                    ::ULIS::FVec2D perpendicularVector = vertex->GetAverageVectorOnSegmentHandle(true);
+
+                    if( perpendicularVector.DistanceSquared() == 0.0f && vertex->GetFirstSegment() )
+                    {
+                        perpendicularVector = vertex->GetVectorOnSegment( vertex->GetFirstSegment(), true );
+
+                        perpendicularVector = ::ULIS::FVec2D( perpendicularVector.y, -perpendicularVector.x );
+                    }
+
+                    FOdysseyVectorPathCubic::SmoothSegments(vertex,perpendicularVector,false,true);
                 }
             }
-        }*/
+        }
+*/
     }
 
     for( int i = 0; i < mSegmentArray.size(); i++ )

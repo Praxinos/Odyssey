@@ -155,9 +155,8 @@ Smooth( FOdysseyVectorSegmentCubic* iNewSegment, bool iSharp )
 
     if( prevSegment )
     {
-        uint32_t prevVertexIndex = ( prevSegment->GetVertex(0) == vertex ) ? 0 : 1;
-        ::ULIS::FVec2D prevVector = prevSegment->GetHandleVector( prevVertexIndex, false );
-        ::ULIS::FVec2D nsegVector = iNewSegment->GetHandleVector( 0, false );
+        ::ULIS::FVec2D prevVector = prevSegment->GetHandleVector( vertex, false );
+        ::ULIS::FVec2D nsegVector = iNewSegment->GetHandleVector( vertex, false );
 
         if( iSharp == false )
         {

@@ -509,7 +509,7 @@ FOdysseyVectorEngine::PickSegments( FOdysseyVectorScene* iScene
 void
 FOdysseyVectorEngine::RecursivePick( FOdysseyVectorGroup* iSelectionSpace
                                    , FOdysseyVectorObject* iObj
-                                   , std::vector<FOdysseyVectorObject*>& iSelectedObjectArray
+                                   , std::vector<FOdysseyVectorObject*>& oSelectedObjectArray
                                    , ::ULIS::FRectD& iRoi
                                    , uint32 iSelectionFlags )
 {
@@ -519,12 +519,12 @@ FOdysseyVectorEngine::RecursivePick( FOdysseyVectorGroup* iSelectionSpace
     {
         FOdysseyVectorObject* child = (*it);
 
-        RecursivePick( iSelectionSpace, child, iSelectedObjectArray, iRoi, iSelectionFlags );
+        RecursivePick( iSelectionSpace, child, oSelectedObjectArray, iRoi, iSelectionFlags );
     }
 
     if( pickedObject )
     {
-        iSelectedObjectArray.push_back( pickedObject );
+        oSelectedObjectArray.push_back( pickedObject );
     }
 }
 
