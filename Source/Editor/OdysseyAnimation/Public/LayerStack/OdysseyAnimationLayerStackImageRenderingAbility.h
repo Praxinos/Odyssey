@@ -18,7 +18,7 @@ public:
      * For example : if you delete a layer, you should create a new renderer
      * but if you are just drawing on the layer, you can reuse the renderer
      */
-    virtual TSharedPtr<IOdysseyImageRenderer> BuildRenderer(int iFrame) const override;
+    virtual TSharedPtr<IOdysseyImageRenderer> BuildRenderer(int iFrame, IOdysseyImageRenderer::eRenderType iRenderType) const override;
     
     /**
      * @brief Returns the full Render Image Id, eventually composed of underlying ids
@@ -27,14 +27,21 @@ public:
      * 
      * @return const FGuid& 
      */
-    virtual TArray<FGuid> GetComposition(int iFrameIndex) const override;
+    virtual TArray<FGuid> GetComposition(int iFrameIndex, IOdysseyImageRenderer::eRenderType iRenderType) const override;
     
     /**
      * @brief Preloads in memory everything needed to make RenderImage() as fast as possible
      * 
      * @param iFrame 
      */
-    virtual TSharedPtr<IOdysseyHandle> Preload(int iFrame) const override;
+    virtual TSharedPtr<IOdysseyHandle> Preload(int iFrame, IOdysseyImageRenderer::eRenderType iRenderType) const override;
+
+    /**
+     * @brief Returns the full rect that can be rendered
+     * 
+     * @return ::ULIS::FRect 
+     */
+    virtual TArray<::ULIS::FRectI> GetRects() const override;
 
 private:
     UOdysseyAnimationLayerStack* mLayerStack;

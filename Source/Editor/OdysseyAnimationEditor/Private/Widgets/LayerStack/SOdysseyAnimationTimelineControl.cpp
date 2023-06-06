@@ -2,6 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineControl.h"
+#include "Widgets/LayerStack/SOdysseyAnimationTimelineCurrentFrame.h"
 
 SOdysseyAnimationTimelineControl::SOdysseyAnimationTimelineControl()
 	: mEditor(nullptr)
@@ -19,40 +20,37 @@ SOdysseyAnimationTimelineControl::Construct(
     mEditor = iEditor;
 	ChildSlot
 	[
-		iArgs._Content.Widget
+		SNew(SOverlay)
+		+ SOverlay::Slot()
+		[
+			iArgs._Content.Widget
+		]
+		+ SOverlay::Slot()
+		[
+			SNew(SOdysseyAnimationTimelineCurrentFrame, mEditor)
+		]
 	];
 }
 
-int32
-SOdysseyAnimationTimelineControl::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
+FReply
+SOdysseyAnimationTimelineControl::OnMouseWheel(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
-	// Draw a current frame
-	LayerId = SCompoundWidget::OnPaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
-	++LayerId;
-
-	const FSlateBrush* GenericBrush = FCoreStyle::Get().GetBrush( "GenericWhiteBox" );
-
-	const float height = AllottedGeometry.GetLocalSize().Y;  
-	const float width = AllottedGeometry.GetLocalSize().X;
-	float offset = mEditor->Timeline()->GetOffset();
-	const float frameSize = mEditor->Timeline()->GetFrameWidth();
-
-	FLinearColor lineColor = FLinearColor::Red;
-	lineColor.A = 0.3f;
-
-	int currentFrame = mEditor->Animation()->GetFrameIndexAtTime(mEditor->Player()->GetCurrentTime());
-	float currentFramePos = (currentFrame - offset) * frameSize;
-
-	FSlateDrawElement::MakeBox(
-		OutDrawElements,
-		LayerId,
-		AllottedGeometry.ToPaintGeometry(FVector2D(currentFramePos, 0.f), FVector2D(frameSize, height)),
-		GenericBrush,
-		ESlateDrawEffect::None,
-		lineColor
-	);
-
-	return LayerId;
+	if (MouseEvent.IsControlDown())
+	{
+		if (MouseEvent.GetWheelDelta() > 0.f)
+		{
+			mEditor->Timeline()->ZoomOut();
+		}
+		else
+		{
+			mEditor->Timeline()->ZoomIn();
+		}
+		return FReply::Handled();
+	}
+	else
+	{
+		return FReply::Unhandled();
+	}
 }
 
 FReply 

@@ -116,26 +116,6 @@ int32 SOdysseyAnimationTimelineHeader::OnPaint(const FPaintArgs& Args, const FGe
 	return LayerId;
 }
 
-FReply SOdysseyAnimationTimelineHeader::OnMouseWheel(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
-{
-	if (MouseEvent.IsControlDown())
-	{
-		if (MouseEvent.GetWheelDelta() > 0.f)
-		{
-			mEditor->Timeline()->ZoomOut();
-		}
-		else
-		{
-			mEditor->Timeline()->ZoomIn();
-		}
-		return FReply::Handled();
-	}
-	else
-	{
-		return FReply::Unhandled();
-	}
-}
-
 FReply 
 SOdysseyAnimationTimelineHeader::OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {	

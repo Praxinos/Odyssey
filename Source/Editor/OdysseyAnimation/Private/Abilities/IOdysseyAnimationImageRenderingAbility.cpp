@@ -61,31 +61,45 @@ IOdysseyAnimationImageRenderingAbility::OnCompositionCommited()
 }
 
 void
-IOdysseyAnimationImageRenderingAbility::Changed(const FGuid& iId, const TArray<::ULIS::FRectI>& iRects)
+IOdysseyAnimationImageRenderingAbility::Changed()
 {
-    IOdysseyAnimationImageRenderingAbility::OnPreChanged().Broadcast(iId, iRects);
-    IOdysseyAnimationImageRenderingAbility::OnChanged().Broadcast(iId, iRects);
+    OnPreChanged().Broadcast(GetId(), GetRects());
+    OnChanged().Broadcast(GetId(), GetRects());
 }
 
 void
-IOdysseyAnimationImageRenderingAbility::Commited(const FGuid& iId, const TArray<::ULIS::FRectI>& iRects)
+IOdysseyAnimationImageRenderingAbility::Changed(const TArray<::ULIS::FRectI>& iRects)
 {
-    IOdysseyAnimationImageRenderingAbility::OnPreCommited().Broadcast(iId, iRects);
-    IOdysseyAnimationImageRenderingAbility::OnCommited().Broadcast(iId, iRects);
+    OnPreChanged().Broadcast(GetId(), iRects);
+    OnChanged().Broadcast(GetId(), iRects);
 }
 
 void
-IOdysseyAnimationImageRenderingAbility::CompositionChanged(const FGuid& iId)
+IOdysseyAnimationImageRenderingAbility::Commited()
 {
-    IOdysseyAnimationImageRenderingAbility::OnCompositionPreChanged().Broadcast(iId);
-    IOdysseyAnimationImageRenderingAbility::OnCompositionChanged().Broadcast(iId);
+    OnPreCommited().Broadcast(GetId(), GetRects());
+    OnCommited().Broadcast(GetId(), GetRects());
 }
 
 void
-IOdysseyAnimationImageRenderingAbility::CompositionCommited(const FGuid& iId)
+IOdysseyAnimationImageRenderingAbility::Commited(const TArray<::ULIS::FRectI>& iRects)
 {
-    IOdysseyAnimationImageRenderingAbility::OnCompositionPreCommited().Broadcast(iId);
-    IOdysseyAnimationImageRenderingAbility::OnCompositionCommited().Broadcast(iId);
+    OnPreCommited().Broadcast(GetId(), iRects);
+    OnCommited().Broadcast(GetId(), iRects);
+}
+
+void
+IOdysseyAnimationImageRenderingAbility::CompositionChanged()
+{
+    OnCompositionPreChanged().Broadcast(GetId());
+    OnCompositionChanged().Broadcast(GetId());
+}
+
+void
+IOdysseyAnimationImageRenderingAbility::CompositionCommited()
+{
+    OnCompositionPreCommited().Broadcast(GetId());
+    OnCompositionCommited().Broadcast(GetId());
 }
 
 IOdysseyAnimationImageRenderingAbility::IOdysseyAnimationImageRenderingAbility()
@@ -100,7 +114,19 @@ IOdysseyAnimationImageRenderingAbility::GetId() const
 }
 
 TSharedPtr<IOdysseyHandle>
-IOdysseyAnimationImageRenderingAbility::Preload(int iFrame) const
+IOdysseyAnimationImageRenderingAbility::Preload(int iFrame, IOdysseyImageRenderer::eRenderType iRenderType) const
 {
     return nullptr;
+}
+
+::ULIS::eBlendMode
+IOdysseyAnimationImageRenderingAbility::GetBlendMode() const
+{
+    return ::ULIS::Blend_Normal;
+}
+
+float
+IOdysseyAnimationImageRenderingAbility::GetOpacity() const
+{
+    return 1.f;
 }

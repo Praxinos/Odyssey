@@ -97,6 +97,20 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
             [
             SNew( SButton )
             .ButtonStyle( FCoreStyle::Get(), "NoBorder" )
+            .ToolTipText( LOCTEXT("ClearButton", "Clear the whole canvas.") )
+            .VAlign( VAlign_Center )
+            .ContentPadding( FMargin( 0.0, 0.0 ) )
+            .OnClicked( InArgs._OnClearButtonClicked )
+                [
+                    SNew( SImage )
+                    .Image( FOdysseyStyle::GetBrush( "PainterEditor.TopBar.Clear32" ) )
+                ]
+            ]
+            +SHorizontalBox::Slot()
+            .Padding( 3.f, 3.f, 33.f, 3.f )
+            [
+            SNew( SButton )
+            .ButtonStyle( FCoreStyle::Get(), "NoBorder" )
             .ToolTipText( LOCTEXT("EraserButton", "Switch the current tool to Eraser mode.") )
             .VAlign( VAlign_Center )
             .ContentPadding( FMargin( 0.0, 0.0 ) )

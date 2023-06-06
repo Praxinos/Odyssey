@@ -13,7 +13,8 @@
 #include "OdysseyAnimationPlayer.h"
 #include "OdysseyAnimationTexture.h"
 #include "Abilities/IOdysseyAnimationImageRenderingAbility.h"
-
+#include "Abilities/IOdysseyAnimationImageRasterEditingAbility.h"
+#include "ULISLoaderModule.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyAnimationEditor"
 
@@ -24,6 +25,7 @@
 FOdysseyAnimationEditor::~FOdysseyAnimationEditor()
 {
 	mPlayer->OnStop().RemoveAll(this);
+	mPlayer->Stop();
 	mAnimation->OnCurrentFrameChanged().RemoveAll(this);
 	IOdysseyAnimationImageRenderingAbility::OnCompositionCommited().RemoveAll(this);
 	UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll(this);
@@ -52,7 +54,7 @@ FOdysseyAnimationEditor::InitData(UObject* iEditedObject)
 	mAnimation = Cast<UOdysseyAnimation>(iEditedObject);
 
 	TSharedPtr<IOdysseyAnimationImageRenderingAbility> imageRenderAbility = mAnimation->GetAbility<IOdysseyAnimationImageRenderingAbility>();
-	mImageRenderingComposition = imageRenderAbility->GetComposition(mAnimation->CurrentFrame);
+	mImageRenderingComposition = imageRenderAbility->GetComposition(mAnimation->CurrentFrame, IOdysseyImageRenderer::eRenderType::Render);
 	mPlaybackFramesPerSecond = mAnimation->GetFramesPerSecond();
 
 	//Configure a Media player and media texture to be able to display and play the animation
@@ -60,6 +62,7 @@ FOdysseyAnimationEditor::InitData(UObject* iEditedObject)
     mTexture = NewObject<UOdysseyAnimationTexture>();
 
 	mPlayer->SetAnimation(mAnimation);
+	mPlayer->SetRenderType(IOdysseyImageRenderer::eRenderType::Editor);
 	mTexture->SetPlayer(mPlayer);
 	mTexture->UpdateResource();
 
@@ -224,7 +227,7 @@ void
 FOdysseyAnimationEditor::OnImageRenderingCompositionCommited(const FGuid& iFrameId)
 {
 	TSharedPtr<IOdysseyAnimationImageRenderingAbility> imageRenderAbility = mAnimation->GetAbility<IOdysseyAnimationImageRenderingAbility>();
-	TArray<FGuid> imageRenderingComposition = imageRenderAbility->GetComposition(mAnimation->CurrentFrame);
+	TArray<FGuid> imageRenderingComposition = imageRenderAbility->GetComposition(mAnimation->CurrentFrame, IOdysseyImageRenderer::eRenderType::Render);
 	if ( imageRenderingComposition == mImageRenderingComposition )
 		return;
 
@@ -245,7 +248,7 @@ FOdysseyAnimationEditor::OnCurrentFrameChanged(UOdysseyAnimation* iAnimation)
 
 	//Preload the new current frame for edition
 	TSharedPtr<IOdysseyAnimationImageRenderingAbility> imageRenderAbility = mAnimation->GetAbility<IOdysseyAnimationImageRenderingAbility>();
-	mImageRenderingComposition = imageRenderAbility->GetComposition(mAnimation->CurrentFrame);
+	mImageRenderingComposition = imageRenderAbility->GetComposition(mAnimation->CurrentFrame, IOdysseyImageRenderer::eRenderType::Render);
 
 	//Display the new current frame
 	mPlayer->SeekToFrame(mAnimation->CurrentFrame);
@@ -264,6 +267,49 @@ FOdysseyAnimationEditor::OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStack)
 	//TODO: Maybe this should be done differently later, but we don't have time for that now
 	if (iLayerStack == LayerStack())
 		SelectDefaultTool(); //Refresh the current tool when we change layer
+
+	
+    Timeline()->SetSelectedFrames(FInt32Range()); //Clear Selected frames when changing layer
+}
+
+//--------------------------------------------------------------------------------------
+//----------------------------------------------------------------------- Common Actions
+
+void
+FOdysseyAnimationEditor::Clear()
+{
+    UOdysseyAnimationLayerImageRaster* currentLayerRaster = Cast<UOdysseyAnimationLayerImageRaster>(LayerStack()->CurrentLayer.Get());
+	if (currentLayerRaster)
+	{		
+	#ifdef WITH_EDITOR
+		FScopedTransaction ScopedTransaction(LOCTEXT("Layer Image Raster", "Clear Canvas"));
+	#endif
+
+		int celFrameIndex = INDEX_NONE;
+		TSharedPtr<FOdysseyAnimationCell> cell = currentLayerRaster->GetCellAtFrame(Animation()->CurrentFrame, celFrameIndex);
+		if (cell)
+		{
+			TSharedPtr<IOdysseyAnimationImageRasterEditingAbility> rasterEditableAbility = cell->GetAbility<IOdysseyAnimationImageRasterEditingAbility>();
+			if ( rasterEditableAbility )
+			{
+				TSharedPtr<FOdysseyRasterBlock> rasterBlock = rasterEditableAbility->GetRasterBlock(celFrameIndex);
+				FOdysseyRasterBlockMutator mutator(rasterBlock);
+				mutator.EditTilesFromRects(
+					{ ::ULIS::FRectI::FromXYWH(0, 0, rasterBlock->GetWidth(), rasterBlock->GetHeight()) },
+					FOdysseyRasterBlockMutator::FEditDelegate::CreateLambda(
+						[&](const FULISInvalidTileMap& iTileMap)
+						{
+							TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ULISRasterBlock = rasterBlock->GetBlock();
+							::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(rasterBlock->GetFormat());
+							ctx.Clear(*ULISRasterBlock, ::ULIS::FRectI::Auto, ::ULIS::FSchedulePolicy::AsyncCacheEfficient);
+							ctx.Finish();
+						}
+					)
+				);
+				mutator.Commit();
+			}
+		}
+	}
 }
 
 #undef LOCTEXT_NAMESPACE

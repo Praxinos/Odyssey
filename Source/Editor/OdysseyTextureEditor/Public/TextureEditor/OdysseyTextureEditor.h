@@ -89,6 +89,10 @@ public:
     // Events
     void OnCurrentLayerChanged(class UOdysseyLayerStack* iLayerStack);
 
+public:
+    //Common Actions
+    virtual void Clear() override;
+
 protected:
     // FGCObject implementation
     virtual void AddReferencedObjects(FReferenceCollector& Collector) override;

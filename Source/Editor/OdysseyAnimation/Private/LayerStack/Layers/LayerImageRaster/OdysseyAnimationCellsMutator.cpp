@@ -8,7 +8,7 @@ FOdysseyAnimationCellsMutator::FOdysseyAnimationCellsMutator(UOdysseyAnimationLa
     : FOdysseyMutator(iLayer, "FOdysseyAnimationCellsMutator")
     , mLayer(iLayer)
 {
-    GetRootMutation()->OnMutated().BindLambda(
+    GetRootMutation()->OnCommited().BindLambda(
         [iLayer]()
         {
             iLayer->CellsChanged();
@@ -69,21 +69,6 @@ FOdysseyAddCellsMutation::FOdysseyAddCellsMutation(UOdysseyAnimationLayerImageRa
 {
 }
 
-//static
-const FGuid&
-FOdysseyAddCellsMutation::StaticID()
-{
-    static FGuid id = FGuid::NewGuid();
-    return id;
-}
-
-const
-FGuid&
-FOdysseyAddCellsMutation::GetID()
-{
-    return StaticID();
-}
-
 void
 FOdysseyAddCellsMutation::Apply()
 {
@@ -103,21 +88,6 @@ FOdysseyRemoveCellsMutation::FOdysseyRemoveCellsMutation(UOdysseyAnimationLayerI
     , mIndex(iIndex)
     , mCells(iCells)
 {
-}
-
-//static
-const FGuid&
-FOdysseyRemoveCellsMutation::StaticID()
-{
-    static FGuid id = FGuid::NewGuid();
-    return id;
-}
-
-const
-FGuid&
-FOdysseyRemoveCellsMutation::GetID()
-{
-    return StaticID();
 }
 
 void
@@ -142,21 +112,6 @@ FOdysseySetCellLengthMutation::FOdysseySetCellLengthMutation(UOdysseyAnimationLa
 {
 }
 
-//static
-const FGuid&
-FOdysseySetCellLengthMutation::StaticID()
-{
-    static FGuid id = FGuid::NewGuid();
-    return id;
-}
-
-const
-FGuid&
-FOdysseySetCellLengthMutation::GetID()
-{
-    return StaticID();
-}
-
 void
 FOdysseySetCellLengthMutation::Apply()
 {
@@ -177,21 +132,6 @@ FOdysseySetCellsOffsetMutation::FOdysseySetCellsOffsetMutation(UOdysseyAnimation
     , mNewOffset(iNewOffset)
     , mOldOffset(iOldOffset)
 {
-}
-
-//static
-const FGuid&
-FOdysseySetCellsOffsetMutation::StaticID()
-{
-    static FGuid id = FGuid::NewGuid();
-    return id;
-}
-
-const
-FGuid&
-FOdysseySetCellsOffsetMutation::GetID()
-{
-    return StaticID();
 }
 
 void

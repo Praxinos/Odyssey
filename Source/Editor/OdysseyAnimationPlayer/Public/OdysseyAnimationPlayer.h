@@ -8,6 +8,7 @@
 #include "TickableEditorObject.h"
 #include "ULISInvalidTileMap.h"
 #include "Misc/OdysseyHandle.h"
+#include "OdysseyImageRenderer.h"
 
 #include <ULIS>
 
@@ -74,6 +75,9 @@ public:
 	FTimespan GetCurrentTime() const;
 	bool IsBackward() const;
 
+	void SetRenderType(IOdysseyImageRenderer::eRenderType iRenderType);
+	IOdysseyImageRenderer::eRenderType GetRenderType() const;
+
 public:
 	//Uobject Overrides
 	virtual void PostInitProperties() override;
@@ -112,6 +116,7 @@ private:
 	TArray<FGuid>   mImageRenderingComposition;
 	FULISInvalidTileMap mInvalidTileMap;
 	TSharedPtr<IOdysseyHandle> mAnimationHandle;
+	IOdysseyImageRenderer::eRenderType mRenderType = IOdysseyImageRenderer::eRenderType::Render;
 
 private:
 	//Events

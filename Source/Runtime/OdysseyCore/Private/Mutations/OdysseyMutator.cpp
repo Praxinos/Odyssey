@@ -51,9 +51,10 @@ FOdysseyMutator::~FOdysseyMutator()
     Commit();
 }
 
-FOdysseyMutator::FOdysseyMutator(UObject* iObject, const FString& iName)
+FOdysseyMutator::FOdysseyMutator(UObject* iObject, const FString& iName, bool iGenerateUndo)
     : mObject(iObject)
     , mRootMutation(MakeShared<FOdysseyRootMutation>(iName))
+    , mGenerateUndo(iGenerateUndo)
 {
 }
 
@@ -71,15 +72,26 @@ FOdysseyMutator::AddAndApplyMutation(TSharedPtr<IOdysseyMutation> iMutation)
 }
 
 void
+FOdysseyMutator::Change()
+{
+    if (mRootMutation->GetMutations().Num() <= 0)
+        return;
+    
+    mRootMutation->OnChanged().ExecuteIfBound();
+}
+
+void
 FOdysseyMutator::Commit()
 {
     if (mRootMutation->GetMutations().Num() <= 0)
         return;
-
-    if (GEditor->IsTransactionActive())
-        GUndo->StoreUndo(mObject, MakeUnique<FOdysseyMutationsUndo>(mRootMutation));
     
-    mRootMutation->OnMutated().ExecuteIfBound();
+    mRootMutation->OnChanged().ExecuteIfBound();
+
+    if ( mGenerateUndo && GEditor->IsTransactionActive() )
+        GUndo->StoreUndo(mObject, MakeUnique<FOdysseyMutationsUndo>(mRootMutation));
+
+    mRootMutation->OnCommited().ExecuteIfBound();
     mRootMutation = MakeShared<FOdysseyRootMutation>(mRootMutation->GetName());
 }
 
@@ -99,24 +111,15 @@ FOdysseyRootMutation::FOdysseyRootMutation(const FString& iName)
 }
 
 FSimpleDelegate&
-FOdysseyRootMutation::OnMutated()
+FOdysseyRootMutation::OnChanged()
 {
-    return mOnMutated;
+    return mOnChanged;
 }
 
-//static
-const FGuid&
-FOdysseyRootMutation::StaticID()
+FSimpleDelegate&
+FOdysseyRootMutation::OnCommited()
 {
-    static FGuid id = FGuid::NewGuid();
-    return id;
-}
-
-const
-FGuid&
-FOdysseyRootMutation::GetID()
-{
-    return StaticID();
+    return mOnCommited;
 }
 
 void
@@ -126,7 +129,8 @@ FOdysseyRootMutation::Apply()
     {
         mMutations[i]->Apply();
     }
-    mOnMutated.ExecuteIfBound();
+    mOnChanged.ExecuteIfBound();
+    mOnCommited.ExecuteIfBound();
 }
 
 void
@@ -136,7 +140,8 @@ FOdysseyRootMutation::Revert()
     {
         mMutations[i]->Revert();
     }
-    mOnMutated.ExecuteIfBound();
+    mOnChanged.ExecuteIfBound();
+    mOnCommited.ExecuteIfBound();
 }
 
 const FString&

@@ -42,6 +42,7 @@ SOdysseyAnimationLayerRow::GenerateWidgetForColumn( const FName& InColumnName )
             .Padding(FMargin(4.f, 0.f, 0.f, 0.f)) //Patch
             [
                 SNew(SOdysseyAnimationTimelineControl, mEditor)
+                .Clipping(EWidgetClipping::ClipToBoundsAlways)
                 [
                     GenerateTimelineWidget()
                 ]

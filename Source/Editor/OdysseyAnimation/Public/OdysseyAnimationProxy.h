@@ -19,6 +19,8 @@ public:
     TSharedPtr<IOdysseyHandle> Preload(int iFrameIndex) const;
     bool IsDone(int iFrameIndex) const;
 
+    void PostLoad();
+
 public:
     virtual bool Init() override;
     virtual uint32 Run() override;

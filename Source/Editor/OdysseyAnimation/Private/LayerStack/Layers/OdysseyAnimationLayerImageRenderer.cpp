@@ -6,7 +6,8 @@
 #include "LayerStack/Layers/OdysseyAnimationLayerImageRenderer.h"
 #include "OdysseyRectUtils.h"
 
-FOdysseyAnimationLayerImageRenderer::FOdysseyAnimationLayerImageRenderer(UOdysseyAnimationLayer* iLayer, int iFrame)
+FOdysseyAnimationLayerImageRenderer::FOdysseyAnimationLayerImageRenderer(UOdysseyAnimationLayer* iLayer, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects)
+    : IOdysseyImageRenderer(iRenderType, iDefaultRects)
 {    
     const TArray<UOdysseyLayer*>& children = iLayer->GetChildren();
     for (int i = children.Num() - 1; i >= 0 ; i--)
@@ -18,41 +19,60 @@ FOdysseyAnimationLayerImageRenderer::FOdysseyAnimationLayerImageRenderer(UOdysse
         if (!animationChild->IsActivated)
             continue;
 
-        TSharedPtr<IOdysseyAnimationImageRenderingAbility> layerAbility = animationChild->GetAbility<IOdysseyAnimationImageRenderingAbility>();
-        if (!layerAbility)
+        TSharedPtr<IOdysseyAnimationImageRenderingAbility> imageRenderingAbility = animationChild->GetAbility<IOdysseyAnimationImageRenderingAbility>();
+        if (!imageRenderingAbility)
             continue;
 
-        mChildrenRenderers.Add(layerAbility->BuildRenderer(iFrame));
-    }
-}
+        FChildData data;
+        data.mRenderer = imageRenderingAbility->BuildRenderer(iFrame, iRenderType);
+        data.mBlendMode = imageRenderingAbility->GetBlendMode();
+        data.mOpacity = imageRenderingAbility->GetOpacity();
 
-TArray<::ULIS::FRectI>
-FOdysseyAnimationLayerImageRenderer::GetRects() const
-{
-    TArray<::ULIS::FRectI> rects;
-    for (TSharedPtr<IOdysseyImageRenderer> childRenderer : mChildrenRenderers)
-    {
-        rects.Append(childRenderer->GetRects());
+        mChildrenData.Add(data);
     }
-    return OdysseyRectUtils::MergeRects(rects);
 }
 
 TArray<::ULIS::FEvent>
-FOdysseyAnimationLayerImageRenderer::RenderInBlock(TSharedPtr<::ULIS::FBlock> ioBlock, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
+FOdysseyAnimationLayerImageRenderer::Blend(TSharedPtr<::ULIS::FBlock> ioBlock, ::ULIS::eBlendMode iBlendMode, float iOpacity, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
 {
     if (!ioBlock)
         return iWaitList;
 
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( ioBlock->Format() );
-
-    TArray<::ULIS::FEvent> lastEvent = iWaitList;
-
-    for (TSharedPtr<IOdysseyImageRenderer> childRenderer : mChildrenRenderers)
+    TArray<::ULIS::FEvent> events;
+    for (int i = 0; i < iRects.Num(); i++)
     {
-        lastEvent = childRenderer->RenderOverBlock(ioBlock, iRects, iPos, lastEvent);
-    }
-    
-    ctx.Flush();
+        const ::ULIS::FRectI& rect = iRects[i];
+        const ::ULIS::FVec2I& pos = iPos[i];
+        TSharedPtr<::ULIS::FBlock> childrenBlock = MakeShared<::ULIS::FBlock>(rect.w, rect.h, ioBlock->Format());
+        ::ULIS::FRectI childrenBlockRect = childrenBlock->Rect();
+        ::ULIS::FVec2I childrenBlockPos(0);
+        TArray<::ULIS::FEvent> clearEvents = Clear(childrenBlock, { childrenBlockRect }, { childrenBlockPos }, iWaitList);
 
+        TArray<::ULIS::FEvent> lastEvent = clearEvents;
+        for (const FChildData& childData : mChildrenData)
+        {
+            lastEvent = childData.mRenderer->Blend(childrenBlock, childData.mBlendMode, childData.mOpacity, { childrenBlockRect }, { childrenBlockPos }, lastEvent);
+        }
+
+        lastEvent = ConvertAndBlend(childrenBlock, ioBlock, iBlendMode, iOpacity, { rect }, { pos }, lastEvent);
+
+        events.Append(lastEvent);
+    }
+
+    return events;
+}
+
+TArray<::ULIS::FEvent>
+FOdysseyAnimationLayerImageRenderer::Copy(TSharedPtr<::ULIS::FBlock> ioBlock, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
+{
+    if (!ioBlock)
+        return iWaitList;
+
+    TArray<::ULIS::FEvent> clearEvents = Clear(ioBlock, iRects, iPos, iWaitList);
+    TArray<::ULIS::FEvent> lastEvent = clearEvents;
+    for (const FChildData& childData : mChildrenData)
+    {
+        lastEvent = childData.mRenderer->Blend(ioBlock, childData.mBlendMode, childData.mOpacity, iRects, iPos, lastEvent);
+    }
     return lastEvent;
 }

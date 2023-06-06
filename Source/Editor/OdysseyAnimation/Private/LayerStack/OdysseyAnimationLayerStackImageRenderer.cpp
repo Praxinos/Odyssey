@@ -5,22 +5,23 @@
 
 #include "LayerStack/OdysseyAnimationLayerStackImageRenderer.h"
 
-FOdysseyAnimationLayerStackImageRenderer::FOdysseyAnimationLayerStackImageRenderer(UOdysseyAnimationLayerStack* iLayerStack, int iFrame)
-    : mLayerRootRenderer(nullptr)
+FOdysseyAnimationLayerStackImageRenderer::FOdysseyAnimationLayerStackImageRenderer(UOdysseyAnimationLayerStack* iLayerStack, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI> iDefaultRects)
+    : IOdysseyImageRenderer(iRenderType, iDefaultRects)
+    , mLayerRootRenderer(nullptr)
 {
     UOdysseyAnimationLayer* layerRoot = Cast<UOdysseyAnimationLayer>(iLayerStack->LayerRoot);
     TSharedPtr<IOdysseyAnimationImageRenderingAbility> layerRootAbility = layerRoot->GetAbility<IOdysseyAnimationImageRenderingAbility>();
-    mLayerRootRenderer = layerRootAbility->BuildRenderer(iFrame);
-}
-
-TArray<::ULIS::FRectI>
-FOdysseyAnimationLayerStackImageRenderer::GetRects() const
-{
-    return mLayerRootRenderer->GetRects();
+    mLayerRootRenderer = layerRootAbility->BuildRenderer(iFrame, iRenderType);
 }
 
 TArray<::ULIS::FEvent>
-FOdysseyAnimationLayerStackImageRenderer::RenderInBlock(TSharedPtr<::ULIS::FBlock> ioBlock, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
+FOdysseyAnimationLayerStackImageRenderer::Blend(TSharedPtr<::ULIS::FBlock> ioBlock, ::ULIS::eBlendMode iBlendMode, float iOpacity, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
 {
-    return mLayerRootRenderer->RenderInBlock(ioBlock, iRects, iPos, iWaitList);
+    return mLayerRootRenderer->Blend(ioBlock, iBlendMode, iOpacity, iRects, iPos, iWaitList);
+}
+
+TArray<::ULIS::FEvent>
+FOdysseyAnimationLayerStackImageRenderer::Copy(TSharedPtr<::ULIS::FBlock> ioBlock, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
+{
+    return mLayerRootRenderer->Copy(ioBlock, iRects, iPos, iWaitList);
 }

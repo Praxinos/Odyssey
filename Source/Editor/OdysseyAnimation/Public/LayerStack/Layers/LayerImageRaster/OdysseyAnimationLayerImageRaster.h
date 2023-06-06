@@ -11,6 +11,8 @@
 
 #include "OdysseyAnimationLayerImageRaster.generated.h"
 
+class FOdysseyAnimationLightTable;
+
 UCLASS(BlueprintType)
 class ODYSSEYANIMATION_API UOdysseyAnimationLayerImageRaster
     : public UOdysseyAnimationLayer
@@ -94,6 +96,7 @@ public:
     void SetCellLength(int iIndex, int iLength); */
 
 public:
+    TSharedPtr<FOdysseyAnimationLightTable> GetLightTable();
     int GetOffset() const;
     TArray<TSharedPtr<FOdysseyAnimationCell>>& GetCells();
     TSharedPtr<FOdysseyAnimationCell> GetCell(int iIndex) const;
@@ -110,6 +113,7 @@ public:
     virtual void Merge(const TArray<UOdysseyLayer*>& Layers) override;
 
 protected:
+    void IsLightTableActivatedChanged();
     void IsAlphaLockedChanged();
     void OpacityChanged();
     void BlendModeChanged();
@@ -120,7 +124,6 @@ public:
     // UObject overrides
 	virtual void PostInitProperties() override;
     virtual void PostDuplicate(bool bDuplicateForPIE) override;
-    virtual void PostLoad() override;
 
     /**
      * @brief Serialize this object
@@ -139,10 +142,14 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation | LayerStack")
     float Opacity = 1.0f;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation | LayerStack")
+    bool bIsLightTableActivated = true;
+
     //UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation | LayerStack")
 
 private:
     TArray<TSharedPtr<FOdysseyAnimationCell>> mCells;
+    TSharedPtr<FOdysseyAnimationLightTable> mLightTable;
     int mOffset = 0;
 
 private:

@@ -23,7 +23,6 @@ public:
     virtual const FName& GetType() const = 0;
 
 public:
-    virtual void PostLoad();
     virtual void PostDuplicate();
     virtual void Serialize(FArchive& Ar);
 

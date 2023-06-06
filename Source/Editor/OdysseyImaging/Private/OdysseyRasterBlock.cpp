@@ -20,15 +20,6 @@
 #define FOdysseyRasterBlock_CACHE_NAME TEXT("OdysseyRasterBlock")
 #define FOdysseyRasterBlock_CACHE_VERSION TEXT("A6ED84107BAD11EDA1EB0242AC120002")
 
-struct FBlockCleanupInfo
-{
-    FGuid Id;
-    int Width;
-    int Height;
-    int Format;
-    TSharedPtr<FThreadSafeCounter> AvailableCounter;
-};
-
 class FOdysseyRasterBlockPreloadHandle : public IOdysseyHandle
 {
 public:
@@ -77,6 +68,7 @@ FOdysseyRasterBlock::FOdysseyRasterBlock()
     : mOwner(nullptr)
     , Id(FGuid::NewGuid())
     , mAvailableCounter(MakeShared<FThreadSafeCounter>(0))
+    , mCleanupInfos(nullptr)
 {
 }
 
@@ -84,6 +76,7 @@ FOdysseyRasterBlock::FOdysseyRasterBlock(UObject* iOwner)
     : mOwner(iOwner)
     , Id(FGuid::NewGuid())
     , mAvailableCounter(MakeShared<FThreadSafeCounter>(0))
+    , mCleanupInfos(nullptr)
 {
 }
 
@@ -128,9 +121,14 @@ FOdysseyRasterBlock::CleanupBlock(uint8* iData, void* iInfo)
 {
     FBlockCleanupInfo* infos = static_cast<FBlockCleanupInfo*>(iInfo);
 
-    ::ULIS::FBlock block(iData, infos->Width, infos->Height, (::ULIS::eFormat)infos->Format);
-    SaveBlockToCache(block, infos->Id.ToString()); //TODO: maybe save only if version changed ?
-    infos->AvailableCounter->Set(0);
+    if ( infos->mIsCacheInvalid )
+    {
+        ::ULIS::FBlock block(iData, infos->mWidth, infos->mHeight, (::ULIS::eFormat)infos->mFormat);
+        SaveBlockToCache(block, infos->mId.ToString());
+        infos->mIsCacheInvalid = false;
+    }
+
+    infos->mAvailableCounter->Set(0);
 
     ::ULIS::OnCleanup_FreeMemory(iData, iInfo); //we have the responsability to delete the block data
     delete iInfo;
@@ -157,6 +155,8 @@ FOdysseyRasterBlock::SetBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iB
     {
         //remove OnCleanup Callback
         currentBlock->OnCleanup(::ULIS::FOnCleanupData(&::ULIS::OnCleanup_FreeMemory));
+        delete mCleanupInfos;
+        mCleanupInfos = nullptr;
 
         //Cleanup everything else
         mBlock = nullptr;
@@ -172,13 +172,14 @@ FOdysseyRasterBlock::SetBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iB
         Height = iBlock->Height();
         Format = iBlock->Format();
 
-        FBlockCleanupInfo* infos = new FBlockCleanupInfo();
-        infos->Id = Id;
-        infos->Width = Width;
-        infos->Height = Height;
-        infos->Format = Format;
-        infos->AvailableCounter = mAvailableCounter;
-        iBlock->OnCleanup(::ULIS::FOnCleanupData(&FOdysseyRasterBlock::CleanupBlock, infos));
+        mCleanupInfos = new FBlockCleanupInfo();
+        mCleanupInfos->mId = Id;
+        mCleanupInfos->mWidth = Width;
+        mCleanupInfos->mHeight = Height;
+        mCleanupInfos->mFormat = Format;
+        mCleanupInfos->mAvailableCounter = mAvailableCounter;
+        mCleanupInfos->mIsCacheInvalid = true;
+        iBlock->OnCleanup(::ULIS::FOnCleanupData(&FOdysseyRasterBlock::CleanupBlock, mCleanupInfos));
         mAvailableCounter->Set(1);
 
         //mInvalidTileMap = FULISInvalidTileMap(64, Width, Height);
@@ -245,18 +246,22 @@ FOdysseyRasterBlock::GetBlock()
 
     //Load Block from DDC
     block = MakeShared<::ULIS::FBlock>(Width, Height, (::ULIS::eFormat)Format);
+    //mDebugBlock = block;
 
-    FBlockCleanupInfo* infos = new FBlockCleanupInfo();
-    infos->Id = Id;
-    infos->Width = Width;
-    infos->Height = Height;
-    infos->Format = Format;
-    infos->AvailableCounter = mAvailableCounter;
-    block->OnCleanup(::ULIS::FOnCleanupData(&FOdysseyRasterBlock::CleanupBlock, infos));
+    mCleanupInfos = new FBlockCleanupInfo();
+    mCleanupInfos->mId = Id;
+    mCleanupInfos->mWidth = Width;
+    mCleanupInfos->mHeight = Height;
+    mCleanupInfos->mFormat = Format;
+    mCleanupInfos->mAvailableCounter = mAvailableCounter;
+    mCleanupInfos->mIsCacheInvalid = false;
+    block->OnCleanup(::ULIS::FOnCleanupData(&FOdysseyRasterBlock::CleanupBlock, mCleanupInfos));
     mBlock = block; //watch the loaded block
 
     if ( LoadBlockFromCache(block.ToSharedRef(), Id.ToString()) )
         return block;
+
+    mCleanupInfos->mIsCacheInvalid = true;
 
     if ( LoadBlockFromBulkData(block.ToSharedRef()) )
         return block;
@@ -414,6 +419,7 @@ FOdysseyRasterBlock::OnBlockPtrChanged()
 void
 FOdysseyRasterBlock::SaveBlockToCache(const ::ULIS::FBlock& iBlock, const FString& iId)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyRasterBlock::SaveBlockToCache);
     FString CacheKey = FDerivedDataCacheInterface::BuildCacheKey(
         FOdysseyRasterBlock_CACHE_NAME,
         FOdysseyRasterBlock_CACHE_VERSION, //a GUID identifying the version of the key
@@ -422,9 +428,10 @@ FOdysseyRasterBlock::SaveBlockToCache(const ::ULIS::FBlock& iBlock, const FStrin
 
     FSharedBuffer sharedBuffer = FSharedBuffer::MakeView(iBlock.Bits(), iBlock.BytesTotal());
     UE::DerivedData::FValue derivedDataValue = UE::DerivedData::FValue::Compress(sharedBuffer);
+    //UE::DerivedData::FValue derivedDataValue(FCompressedBuffer::Compress(sharedBuffer, ECompressedBufferCompressor::Selkie, ECompressedBufferCompressionLevel::Normal, 0));
 
     //Store the tile in cache
-    UE::DerivedData::FRequestOwner putOwner(UE::DerivedData::EPriority::Lowest);
+    UE::DerivedData::FRequestOwner putOwner(UE::DerivedData::EPriority::Highest);
     UE::DerivedData::GetCache().PutValue(
         {
             {
@@ -442,7 +449,11 @@ FOdysseyRasterBlock::SaveBlockToCache(const ::ULIS::FBlock& iBlock, const FStrin
 bool
 FOdysseyRasterBlock::LoadBlockFromCache(TSharedRef<::ULIS::FBlock, ESPMode::ThreadSafe> oBlock, const FString& iId)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyRasterBlock::LoadBlockFromCache);
+
     bool success = false;
+
+    // put code you want to time here.
 
     //Load Block from DDC
     FString CacheKey = FDerivedDataCacheInterface::BuildCacheKey(
@@ -469,9 +480,10 @@ FOdysseyRasterBlock::LoadBlockFromCache(TSharedRef<::ULIS::FBlock, ESPMode::Thre
             if ( !iResponse.Value.HasData() || iResponse.Value.GetRawSize() == 1) //assume the block is empty, see RemoveValueFromCache()
                 return;
 
-            FSharedBuffer rawData = iResponse.Value.GetData().Decompress();
             FUniqueBuffer uniqueBuffer = FUniqueBuffer::MakeView(oBlock->Bits(), oBlock->BytesTotal());
-            uniqueBuffer.GetView().CopyFrom(rawData);
+            if ( !iResponse.Value.GetData().TryDecompressTo(uniqueBuffer) )
+                return;
+
             success = true;
         }
     );

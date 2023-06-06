@@ -11,7 +11,6 @@ class ODYSSEYANIMATION_API FOdysseyAnimationCellsMutator
     : public FOdysseyMutator
 {
 public:
-    //FOdysseyAnimationCellsMutator(TSharedPtr<FOdysseyAnimationCellsContainer>& iCells,  bool iGenerateUndo = true);
     FOdysseyAnimationCellsMutator(UOdysseyAnimationLayerImageRaster* iLayer);
 
 public:
@@ -33,11 +32,6 @@ public:
     FOdysseyAddCellsMutation(UOdysseyAnimationLayerImageRaster* iLayer, int iIndex, TArray<TSharedPtr<FOdysseyAnimationCell>> iCells);
 
 public:
-    static const FGuid& StaticID();
-
-    //A unique identifier for the mutation type
-    virtual const FGuid& GetID() override;
-
     //Applies the mutation
     virtual void Apply() override;
 
@@ -57,11 +51,6 @@ public:
     FOdysseyRemoveCellsMutation(UOdysseyAnimationLayerImageRaster* iLayer, int iIndex, TArray<TSharedPtr<FOdysseyAnimationCell>> iCells);
 
 public:
-    static const FGuid& StaticID();
-
-    //A unique identifier for the mutation type
-    virtual const FGuid& GetID() override;
-
     //Applies the mutation
     virtual void Apply() override;
 
@@ -81,11 +70,6 @@ public:
     FOdysseySetCellLengthMutation(UOdysseyAnimationLayerImageRaster* iLayer, int iIndex, int iNewLength, int iOldLength);
 
 public:
-    static const FGuid& StaticID();
-
-    //A unique identifier for the mutation type
-    virtual const FGuid& GetID() override;
-
     //Applies the mutation
     virtual void Apply() override;
 
@@ -106,11 +90,6 @@ public:
     FOdysseySetCellsOffsetMutation(UOdysseyAnimationLayerImageRaster* iLayer, int iNewOffset, int iOldOffset);
     
 public:
-    static const FGuid& StaticID();
-
-    //A unique identifier for the mutation type
-    virtual const FGuid& GetID() override;
-
     //Applies the mutation
     virtual void Apply() override;
 

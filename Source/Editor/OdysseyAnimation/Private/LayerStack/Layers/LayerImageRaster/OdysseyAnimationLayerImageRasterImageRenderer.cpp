@@ -4,11 +4,14 @@
 #pragma once
 
 #include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRasterImageRenderer.h"
+#include "LayerStack/LightTable/OdysseyAnimationLightTableImageRenderer.h"
 
-FOdysseyAnimationLayerImageRasterImageRenderer::FOdysseyAnimationLayerImageRasterImageRenderer(UOdysseyAnimationLayerImageRaster* iLayer, int iFrame)
-    : mCellRenderer(nullptr)
+FOdysseyAnimationLayerImageRasterImageRenderer::FOdysseyAnimationLayerImageRasterImageRenderer(UOdysseyAnimationLayerImageRaster* iLayer, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects)
+    : IOdysseyImageRenderer(iRenderType, iDefaultRects)
+    , mCellRenderer(nullptr)
     , mBlendMode(::ULIS::eBlendMode(iLayer->BlendMode))
     , mOpacity(iLayer->Opacity) 
+    , mLightTableDisplayPosition(iLayer->GetLightTable()->GetDisplayPosition())
 {    
     int cellIndex = INDEX_NONE;
     int cellFrameIndex = INDEX_NONE;
@@ -23,79 +26,44 @@ FOdysseyAnimationLayerImageRasterImageRenderer::FOdysseyAnimationLayerImageRaste
     if (!cellAbility)
         return;
 
-    mCellRenderer = cellAbility->BuildRenderer(cellFrameIndex);
-}
+    mCellRenderer = cellAbility->BuildRenderer(cellFrameIndex, iRenderType);
 
-TArray<::ULIS::FRectI>
-FOdysseyAnimationLayerImageRasterImageRenderer::GetRects() const
-{
-    if (!mCellRenderer)
-        return {};
-
-    return mCellRenderer->GetRects();
+    if ( iRenderType == IOdysseyImageRenderer::eRenderType::Editor && iLayer->bIsLightTableActivated )
+        mLightTableRenderer = MakeShared<FOdysseyAnimationLightTableImageRenderer>(iLayer->GetLightTable(), iFrame, iRenderType, iDefaultRects);
 }
 
 TArray<::ULIS::FEvent>
-FOdysseyAnimationLayerImageRasterImageRenderer::RenderInBlock(TSharedPtr<::ULIS::FBlock> ioBlock, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
+FOdysseyAnimationLayerImageRasterImageRenderer::Blend(TSharedPtr<::ULIS::FBlock> ioBlock, ::ULIS::eBlendMode iBlendMode, float iOpacity, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
 {
     if (!mCellRenderer)
         return iWaitList;
+        
+    TArray<::ULIS::FEvent> events = iWaitList;
+    if ( mLightTableRenderer && mLightTableDisplayPosition == EOdysseyLightTableDisplayPosition::UnderLayer )
+        events = mLightTableRenderer->Blend(ioBlock, ::ULIS::Blend_Normal, 1.f, iRects, iPos, events);
 
-    return mCellRenderer->RenderInBlock(ioBlock, iRects, iPos, iWaitList);
+    events = mCellRenderer->Blend(ioBlock, iBlendMode, iOpacity, iRects, iPos, events);
+
+    if ( mLightTableRenderer && mLightTableDisplayPosition == EOdysseyLightTableDisplayPosition::AboveLayer )
+        events = mLightTableRenderer->Blend(ioBlock, ::ULIS::Blend_Normal, 1.f, iRects, iPos, events);
+
+    return events;
 }
 
 TArray<::ULIS::FEvent>
-FOdysseyAnimationLayerImageRasterImageRenderer::RenderOverBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ioBlock, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
+FOdysseyAnimationLayerImageRasterImageRenderer::Copy(TSharedPtr<::ULIS::FBlock> ioBlock, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
 {
     if (!mCellRenderer)
         return iWaitList;
+        
+    TArray<::ULIS::FEvent> events = Clear(ioBlock, iRects, iPos, iWaitList);
+    if ( mLightTableRenderer && mLightTableDisplayPosition == EOdysseyLightTableDisplayPosition::UnderLayer )
+        events = mLightTableRenderer->Blend(ioBlock, ::ULIS::Blend_Normal, 1.f, iRects, iPos, events);
 
-    if (!ioBlock)
-        return iWaitList;
+    events = mCellRenderer->Blend(ioBlock, ::ULIS::Blend_Normal, 1.f, iRects, iPos, events);
 
-    ::ULIS::eFormat format = ioBlock->Format();
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
-
-    TArray<::ULIS::FEvent> events;
-    for (int i = 0; i < iRects.Num(); i++)
-    {
-        //Generate the folder block, which is all children layers blended together
-        TArray<::ULIS::FEvent> rasterBlockEvent;
-        TSharedPtr<::ULIS::FBlock> rasterBlock = mCellRenderer->RenderInNewBlock(format, iRects[i], rasterBlockEvent);
-        if(!rasterBlock)
-            continue;
-
-        rasterBlockEvent.Append(iWaitList);
-
-        TArray<::ULIS::FEvent> eventConvertAndExecute = ULISUtils::ConvertAndExecute(ioBlock, rasterBlock->Format(), rasterBlock->Rect(), iPos[i], rasterBlockEvent,
-            [this, &rasterBlock, &ctx](TSharedPtr<::ULIS::FBlock> ioDest, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList) -> TArray<::ULIS::FEvent>
-            {
-                ::ULIS::FEvent eventBlend = FULISEventBuilder()
-                    .RetainBlock(rasterBlock)
-                    .RetainBlock(ioDest)
-                    .Build();
-
-                ctx.Blend(
-                    *rasterBlock,
-                    *ioDest,
-                    iRect,
-                    iPos,
-                    mBlendMode,
-                    ::ULIS::Alpha_Normal,
-                    mOpacity,
-                    ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
-                    iWaitList.Num(),
-                    iWaitList.GetData(),
-                    &eventBlend
-                );
-                return { eventBlend };
-            }
-        );
-
-        events.Append(eventConvertAndExecute);
-    }
-
-    ctx.Flush();
+    if ( mLightTableRenderer && mLightTableDisplayPosition == EOdysseyLightTableDisplayPosition::AboveLayer )
+        events = mLightTableRenderer->Blend(ioBlock, ::ULIS::Blend_Normal, 1.f, iRects, iPos, events);
 
     return events;
 }

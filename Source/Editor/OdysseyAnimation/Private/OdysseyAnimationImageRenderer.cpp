@@ -5,23 +5,23 @@
 
 #include "OdysseyAnimationImageRenderer.h"
 
-FOdysseyAnimationImageRenderer::FOdysseyAnimationImageRenderer(UOdysseyAnimation* iAnimation, int iFrame)
-    : mRect(::ULIS::FRectI::FromXYWH(0, 0, iAnimation->Width(), iAnimation->Height()))
+FOdysseyAnimationImageRenderer::FOdysseyAnimationImageRenderer(UOdysseyAnimation* iAnimation, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI> iDefaultRects)
+    : IOdysseyImageRenderer(iRenderType, iDefaultRects)
     , mLayerStackRenderer(nullptr)
 {
     UOdysseyAnimationLayerStack* layerStack = iAnimation->GetLayerStack();
     TSharedPtr<IOdysseyAnimationImageRenderingAbility> layerStackAbility = layerStack->GetAbility<IOdysseyAnimationImageRenderingAbility>();
-    mLayerStackRenderer = layerStackAbility->BuildRenderer(iFrame);
-}
-
-TArray<::ULIS::FRectI>
-FOdysseyAnimationImageRenderer::GetRects() const
-{
-    return {mRect};
+    mLayerStackRenderer = layerStackAbility->BuildRenderer(iFrame, iRenderType);
 }
 
 TArray<::ULIS::FEvent>
-FOdysseyAnimationImageRenderer::RenderInBlock(TSharedPtr<::ULIS::FBlock> ioBlock, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
+FOdysseyAnimationImageRenderer::Blend(TSharedPtr<::ULIS::FBlock> ioBlock, ::ULIS::eBlendMode iBlendMode, float iOpacity, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
 {
-    return mLayerStackRenderer->RenderInBlock(ioBlock, iRects, iPos, iWaitList);
+    return mLayerStackRenderer->Blend(ioBlock, iBlendMode, iOpacity, iRects, iPos, iWaitList);
+}
+
+TArray<::ULIS::FEvent>
+FOdysseyAnimationImageRenderer::Copy(TSharedPtr<::ULIS::FBlock> ioBlock, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
+{
+    return mLayerStackRenderer->Copy(ioBlock, iRects, iPos, iWaitList);
 }

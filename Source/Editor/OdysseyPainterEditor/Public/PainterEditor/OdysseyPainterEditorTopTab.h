@@ -50,6 +50,7 @@ protected:
     virtual FReply OnUndoButtonClicked();
     virtual FReply OnRedoButtonClicked();
     virtual FReply OnEraserButtonClicked();
+    virtual FReply OnClearButtonClicked();
 
 protected:
     // Methods

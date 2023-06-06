@@ -34,6 +34,8 @@ private:
     TMap<uint32, FData> mThreadsData;
 
     FData& GetCurrentThreadData();
+
+    FCriticalSection mMutex;
 };
 
 IMPLEMENT_MODULE( FULISLoaderModule, ULISLoader )
@@ -59,6 +61,7 @@ void FULISLoaderModule::ShutdownModule() {
 
 FULISLoaderModule::FData&
 FULISLoaderModule::GetCurrentThreadData() {
+    FScopeLock lock(&mMutex);
     const uint32 CurrentThreadId = FPlatformTLS::GetCurrentThreadId();
     if (!mThreadsData.Contains(CurrentThreadId))
     {

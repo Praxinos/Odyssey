@@ -70,6 +70,10 @@ public:
     virtual FOdysseyAnimationEditorGUI* GetGUI() override;
     virtual TSharedPtr<FWorkspaceItem> RegisterTabSpawners( const TSharedRef<class FTabManager>& iTabManager ) override;
 
+public:
+    //Common Actions
+    virtual void Clear() override;
+
 protected:
     // FGCObject implementation
     virtual void AddReferencedObjects(FReferenceCollector& Collector) override;

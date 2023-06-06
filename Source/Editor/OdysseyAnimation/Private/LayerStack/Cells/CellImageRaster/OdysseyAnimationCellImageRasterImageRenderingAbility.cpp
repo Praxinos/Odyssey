@@ -29,21 +29,21 @@ FOdysseyAnimationCellImageRasterImageRenderingAbility::FOdysseyAnimationCellImag
 }
 
 TSharedPtr<IOdysseyImageRenderer>
-FOdysseyAnimationCellImageRasterImageRenderingAbility::BuildRenderer(int iFrame) const
+FOdysseyAnimationCellImageRasterImageRenderingAbility::BuildRenderer(int iFrame, IOdysseyImageRenderer::eRenderType iRenderType) const
 {
-    TSharedPtr<IOdysseyImageRenderer> renderer = MakeShared<FOdysseyAnimationCellImageRasterImageRenderer>(mCellImageRaster.Pin(), iFrame);
-    renderer->AddHandle(Preload(iFrame));
+    TSharedPtr<IOdysseyImageRenderer> renderer = MakeShared<FOdysseyAnimationCellImageRasterImageRenderer>(mCellImageRaster.Pin(), iFrame, iRenderType, GetRects());
+    renderer->AddHandle(Preload(iFrame, iRenderType));
     return renderer;
 }
 
 TArray<FGuid>
-FOdysseyAnimationCellImageRasterImageRenderingAbility::GetComposition(int iFrameIndex) const
+FOdysseyAnimationCellImageRasterImageRenderingAbility::GetComposition(int iFrameIndex, IOdysseyImageRenderer::eRenderType iRenderType) const
 {
     return { GetId() };
 }
 
 TSharedPtr<IOdysseyHandle>
-FOdysseyAnimationCellImageRasterImageRenderingAbility::Preload(int iFrame) const
+FOdysseyAnimationCellImageRasterImageRenderingAbility::Preload(int iFrame, IOdysseyImageRenderer::eRenderType iRenderType) const
 {
     TSharedPtr<FOdysseyAnimationCellImageRaster> cellImageRaster = mCellImageRaster.Pin();
     if (!cellImageRaster)
@@ -58,21 +58,35 @@ FOdysseyAnimationCellImageRasterImageRenderingAbility::Preload(int iFrame) const
     return MakeShared<FOdysseyHandleContainer>(handles);
 }
 
+TArray<::ULIS::FRectI>
+FOdysseyAnimationCellImageRasterImageRenderingAbility::GetRects() const
+{
+    TSharedPtr<FOdysseyAnimationCellImageRaster> cellImageRaster = mCellImageRaster.Pin();
+    if (!cellImageRaster)
+        return {};
+
+    TSharedPtr<FOdysseyRasterBlock> rasterBlock = cellImageRaster->GetRasterBlock();
+    if (!rasterBlock)
+        return {};
+
+    return { ::ULIS::FRectI::FromXYWH(0, 0, rasterBlock->GetWidth(), rasterBlock->GetHeight()) };
+}
+
 void
 FOdysseyAnimationCellImageRasterImageRenderingAbility::OnBlockChanged(const TArray<::ULIS::FRectI>& iRects)
 {
-    Changed(GetId(), iRects);
+    Changed(iRects);
 }
 
 void
 FOdysseyAnimationCellImageRasterImageRenderingAbility::OnBlockCommited(const TArray<::ULIS::FRectI>& iRects)
 {
-    Commited(GetId(), iRects);
+    Commited(iRects);
 }
 
 void
 FOdysseyAnimationCellImageRasterImageRenderingAbility::OnBlockPtrChanged()
 {
-    Changed(GetId(), { ULIS::FRectI::FromXYWH(0, 0, mRasterBlock->GetWidth(), mRasterBlock->GetHeight()) });
-    Commited(GetId(), { ULIS::FRectI::FromXYWH(0, 0, mRasterBlock->GetWidth(), mRasterBlock->GetHeight()) });
+    Changed();
+    Commited();
 }

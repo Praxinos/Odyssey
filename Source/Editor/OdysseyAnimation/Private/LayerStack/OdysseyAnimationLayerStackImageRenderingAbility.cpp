@@ -9,13 +9,13 @@ FOdysseyAnimationLayerStackImageRenderingAbility::FOdysseyAnimationLayerStackIma
 }
 
 TSharedPtr<IOdysseyImageRenderer>
-FOdysseyAnimationLayerStackImageRenderingAbility::BuildRenderer(int iFrame) const
+FOdysseyAnimationLayerStackImageRenderingAbility::BuildRenderer(int iFrame, IOdysseyImageRenderer::eRenderType iRenderType) const
 {
-    return MakeShared<FOdysseyAnimationLayerStackImageRenderer>(mLayerStack, iFrame);
+    return MakeShared<FOdysseyAnimationLayerStackImageRenderer>(mLayerStack, iFrame, iRenderType, GetRects());
 }
 
 TArray<FGuid>
-FOdysseyAnimationLayerStackImageRenderingAbility::GetComposition(int iFrameIndex) const
+FOdysseyAnimationLayerStackImageRenderingAbility::GetComposition(int iFrameIndex, IOdysseyImageRenderer::eRenderType iRenderType) const
 {
     TArray<FGuid> idComposition = { GetId() };
     if (!mLayerStack)
@@ -29,12 +29,12 @@ FOdysseyAnimationLayerStackImageRenderingAbility::GetComposition(int iFrameIndex
     if (!layerRootAbility)
         return idComposition;
     
-    idComposition.Append(layerRootAbility->GetComposition(iFrameIndex));
+    idComposition.Append(layerRootAbility->GetComposition(iFrameIndex, iRenderType));
     return idComposition;
 }
 
 TSharedPtr<IOdysseyHandle>
-FOdysseyAnimationLayerStackImageRenderingAbility::Preload(int iFrame) const
+FOdysseyAnimationLayerStackImageRenderingAbility::Preload(int iFrame, IOdysseyImageRenderer::eRenderType iRenderType) const
 {
     if ( !mLayerStack )
         return nullptr;
@@ -47,5 +47,18 @@ FOdysseyAnimationLayerStackImageRenderingAbility::Preload(int iFrame) const
     if (!layerRootAbility)
         return nullptr;
 
-    return layerRootAbility->Preload(iFrame);
+    return layerRootAbility->Preload(iFrame, iRenderType);
+}
+
+TArray<::ULIS::FRectI>
+FOdysseyAnimationLayerStackImageRenderingAbility::GetRects() const
+{
+    if (!mLayerStack )
+        return {};
+
+    UOdysseyAnimation* animation = mLayerStack->GetAnimation();
+    if (!animation)
+        return {};
+
+    return { ::ULIS::FRectI::FromXYWH(0, 0, animation->Width(), animation->Height()) };
 }

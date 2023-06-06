@@ -9,8 +9,14 @@ FOdysseyAnimationLayerFolderImageRenderingAbility::FOdysseyAnimationLayerFolderI
 {
 }
 
-TSharedPtr<IOdysseyImageRenderer>
-FOdysseyAnimationLayerFolderImageRenderingAbility::BuildRenderer(int iFrame) const
+::ULIS::eBlendMode
+FOdysseyAnimationLayerFolderImageRenderingAbility::GetBlendMode() const
 {
-    return MakeShared<FOdysseyAnimationLayerFolderImageRenderer>(mLayerFolder, iFrame);
+    return (::ULIS::eBlendMode)mLayerFolder->BlendMode;
+}
+
+float
+FOdysseyAnimationLayerFolderImageRenderingAbility::GetOpacity() const
+{
+    return mLayerFolder->Opacity;
 }
