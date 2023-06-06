@@ -110,19 +110,22 @@ SOdysseyPaletteAddEntryButton::AddEntryFromClass(FAssetData iAssetData)
     if (entryClass == UOdysseyPaletteEntryColor::StaticClass())
     {
         UOdysseyPaletteEntryColor* entry = NewObject< UOdysseyPaletteEntryColor >(mPalette.Get(), entryClass, NAME_None, RF_Public | RF_Transactional);
-        entry->EntryName = FName("Name");
+        entry->AddToRoot();
+        entry->EntryName = FText::FromString("Name");
         mPalette.Get()->mPaletteEntries.Add(entry);
     }
     else if (entryClass == UOdysseyPaletteEntryMaterial::StaticClass())
     {
         UOdysseyPaletteEntryMaterial* entry = NewObject< UOdysseyPaletteEntryMaterial >(mPalette.Get(), entryClass, NAME_None, RF_Public | RF_Transactional);
-        entry->EntryName = FName("Name");
+        entry->AddToRoot();
+        entry->EntryName = FText::FromString("Name");
         mPalette.Get()->mPaletteEntries.Add(entry);
     }
     else if (entryClass == UOdysseyPaletteEntryFolder::StaticClass())
     {
         UOdysseyPaletteEntryFolder* entry = NewObject< UOdysseyPaletteEntryFolder >(mPalette.Get(), entryClass, NAME_None, RF_Public | RF_Transactional);
-        entry->EntryName = FName("Name");
+        entry->AddToRoot();
+        entry->EntryName = FText::FromString("Name");
         mPalette.Get()->mPaletteEntries.Add(entry);
     }
 }

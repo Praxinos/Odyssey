@@ -9,7 +9,7 @@
 /**
  * The Model of the MeshSelector
  */
-class ODYSSEYWIDGETS_API FOdysseyPalette :  public TSharedFromThis<FOdysseyPalette>
+class ODYSSEYPALETTE_API FOdysseyPalette :  public TSharedFromThis<FOdysseyPalette>
 {
 
     friend class SOdysseyPalette; // For the access to private callbacks
@@ -21,8 +21,8 @@ public:
 
 public:
     //Getter / Setter
-    UOdysseyPalette* GetColorPalette() const;
-    void SetColorPalette( UOdysseyPalette* iColorPalette );
+    UOdysseyPalette* GetPalette() const;
+    void SetPalette( UOdysseyPalette* iColorPalette );
     void AddNewPaletteEntry();
 
 private:

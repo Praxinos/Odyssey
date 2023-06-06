@@ -2,6 +2,8 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "SOdysseyPaletteEntryRow.h"
+#include "OdysseyPaletteDragDropOperation.h"
+#include "UObject/OdysseyObjectEditorUtils.h"
 
 #define LOCTEXT_NAMESPACE "SOdysseyPaletteEntryRow"
 
@@ -12,10 +14,10 @@ void SOdysseyPaletteEntryRow::Construct(const FArguments& InArgs, const TSharedR
     mEntry = iEntry;
 
     SMultiColumnTableRow<UOdysseyPaletteEntry*>::FArguments args;
-    args.Style(&FOdysseyStyle::GetWidgetStyle<FTableRowStyle>("OdysseyLayerStack.AlternatedRows"));
-        //.OnCanAcceptDrop(this, &SOdysseyPaletteEntryRow::OnRowCanAcceptDrop)
-        //.OnAcceptDrop(this, &SOdysseyPaletteEntryRow::OnRowAcceptDrop)
-        //.OnDragDetected(this, &SOdysseyPaletteEntryRow::OnRowDragDetected, TWeakPtr<SOdysseyLayerStackTreeView>(iOwnerTableView));
+    args.Style(&FOdysseyStyle::GetWidgetStyle<FTableRowStyle>("OdysseyLayerStack.AlternatedRows"))
+        .OnCanAcceptDrop(this, &SOdysseyPaletteEntryRow::OnRowCanAcceptDrop)
+        .OnAcceptDrop(this, &SOdysseyPaletteEntryRow::OnRowAcceptDrop)
+        .OnDragDetected(this, &SOdysseyPaletteEntryRow::OnRowDragDetected, TWeakPtr<STreeView<UOdysseyPaletteEntry*>>(iOwnerTableView));
 
     SMultiColumnTableRow<UOdysseyPaletteEntry*>::Construct(
         args,
@@ -35,12 +37,12 @@ SOdysseyPaletteEntryRow::GenerateWidgetForColumn( const FName& InColumnName )
     {
         return GenerateIsActivatedWidget();
     }
+	else if (InColumnName == "Header")
+	{
+		return GenerateHeaderWidget();
+	}
 
-    SAssignNew(mNameWidget, SInlineEditableTextBlock)
-        .Text(this, &SOdysseyPaletteEntryRow::GetEntryName)
-        .Font(this, &SOdysseyPaletteEntryRow::GetEntryNameFont);
-
-	return mNameWidget.ToSharedRef();
+	return SNullWidget::NullWidget;
 }
 
 
@@ -64,12 +66,11 @@ SOdysseyPaletteEntryRow::GetBorder() const
 TSharedRef<SWidget>
 SOdysseyPaletteEntryRow::GenerateHeaderWidget()
 {
-	return SAssignNew(mNameWidget, SInlineEditableTextBlock)
-		.Text(this, &SOdysseyPaletteEntryRow::GetEntryName)
-		.Font(this, &SOdysseyPaletteEntryRow::GetEntryNameFont);
-		//.OnTextCommitted(this, &SOdysseyPaletteEntryRow::OnLayerNameCommited)
-		//.IsSelected(this, &SOdysseyPaletteEntryRow::IsSelectedExclusively); //Allows edition to work
-		//.Clipping(EWidgetClipping::ClipToBounds)
+    return SAssignNew(mNameWidget, SInlineEditableTextBlock)
+        .Text(this, &SOdysseyPaletteEntryRow::GetEntryName)
+        .Font(this, &SOdysseyPaletteEntryRow::GetEntryNameFont)
+        .OnTextCommitted(this, &SOdysseyPaletteEntryRow::OnEntryNameCommited)
+        .IsSelected(this, &SOdysseyPaletteEntryRow::IsSelectedExclusively); //Allows edition to work
 }
 
 TSharedRef<SWidget>
@@ -93,6 +94,7 @@ SOdysseyPaletteEntryRow::GenerateIsActivatedWidget()
 				.Image(FOdysseyStyle::GetBrush("OdysseyLayerStack.Visible16"))
 		];
 }
+
 /*
 void
 SOdysseyPaletteEntryRow::OnIsActivatedCheckBoxStateChanged(ECheckBoxState iState)
@@ -124,7 +126,7 @@ SOdysseyPaletteEntryRow::GetIsLockedCheckBoxState() const
 FText
 SOdysseyPaletteEntryRow::GetEntryName() const
 {
-    return FText::FromName(mEntry->EntryName);
+    return mEntry->EntryName;
 }
 
 FSlateFontInfo
@@ -139,15 +141,13 @@ SOdysseyPaletteEntryRow::GetLayer()
 {
     return mEntry;
 }
-
+*/
 void
-SOdysseyPaletteEntryRow::OnLayerNameCommited(const FText& iText, ETextCommit::Type iType)
+SOdysseyPaletteEntryRow::OnEntryNameCommited(const FText& iText, ETextCommit::Type iType)
 {
-    FScopedTransaction ScopedTransaction(LOCTEXT("LayerTransaction", "Change Layer Name"));
-	FOdysseyObjectEditorUtils::SetPropertyValue(mEntry, "Name", iText);
+    FScopedTransaction ScopedTransaction(LOCTEXT("PaletteTransaction", "Change Entry Name"));
+	FOdysseyObjectEditorUtils::SetPropertyValue(mEntry, "EntryName", iText);
 }
-
-
 
 void
 SOdysseyPaletteEntryRow::Rename()
@@ -190,57 +190,57 @@ SOdysseyPaletteEntryRow::ComputeItemDropZoneForLeaf(FVector2D iLocalPointerPos, 
 
 	
 }
-*/
 
-/*
+
+
 TOptional<EItemDropZone>
 SOdysseyPaletteEntryRow::OnRowCanAcceptDrop(const FDragDropEvent& iEvent, EItemDropZone iDropZone, UOdysseyPaletteEntry* iEntry)
 {
-    StaticCastSharedPtr<STreeView<UOdysseyPaletteEntry*>>(OwnerTablePtr.Pin())->ResetDropZone();
+    //StaticCastSharedPtr<STreeView<UOdysseyPaletteEntry*>>(OwnerTablePtr.Pin())->ResetDropZone();
 
     EItemDropZone emptyDropZone;
 	if ( !mEntry )
 		return emptyDropZone;
 
-	UOdysseyPalette* Palette = mEntry->GetPalette();
-	if ( !Palette )
+	UOdysseyPalette* palette = mEntry->GetPalette();
+	if ( !palette )
 		return emptyDropZone;
     //check if CanHaveChildren
     //allow Onto
     
-	TSharedPtr<FOdysseyLayerStackDragDropOperation> operation = iEvent.GetOperationAs<FOdysseyLayerStackDragDropOperation>();
+	TSharedPtr<FOdysseyPaletteDragDropOperation> operation = iEvent.GetOperationAs<FOdysseyPaletteDragDropOperation>();
     if (!operation)
         return emptyDropZone;
 
-	UOdysseyLayerStack* operationLayerStack = operation->GetLayerStack();
+	UOdysseyPalette* operationLayerStack = operation->GetPalette();
 	if ( !operationLayerStack )
 		return emptyDropZone;
 
 	FGeometry geometry = GetTickSpaceGeometry();
 	const FVector2D localPointerPos = geometry.AbsoluteToLocal(iEvent.GetScreenSpacePosition());
-	EItemDropZone expectedDropZone = ComputeItemDropZoneForLeaf(localPointerPos, geometry.GetLocalSize(), mEntry->CanHaveChildren, mEntry->IsExpanded);
+	EItemDropZone expectedDropZone = ComputeItemDropZoneForLeaf(localPointerPos, geometry.GetLocalSize(), false, true); //mEntry->CanHaveChildren, mEntry->IsExpanded);
 
-	if ( operationLayerStack == Palette ) //droped from same layerstack, do a move of topmost dropped layers
+	if ( operationLayerStack == palette ) //droped from same layerstack, do a move of topmost dropped layers
 	{
-		UOdysseyLayer* parent = mEntry->GetParent();
-		TArray<UOdysseyLayer*> layers = operation->GetLayers();
-		switch ( expectedDropZone )
+		UOdysseyPaletteEntry* parent = mEntry;//mEntry->GetParent();
+		TArray<UOdysseyPaletteEntry*> entries = operation->GetPaletteEntries();
+		/*switch (expectedDropZone)
 		{
 			case EItemDropZone::AboveItem:
 			case EItemDropZone::BelowItem:
 			{
-				if ( !operationLayerStack->CanMoveLayers(layers, parent) )
+				if ( !operationLayerStack->CanMoveLayers(entries, parent) )
 					return emptyDropZone;
 			}
 			break;
 
 			case EItemDropZone::OntoItem:
 			{
-				if ( !operationLayerStack->CanMoveLayers(layers, parent) )
+				if ( !operationLayerStack->CanMoveLayers(entries, parent) )
 					return emptyDropZone;
 			}
 			break;
-		}
+		}*/
 	}
 
 	return expectedDropZone;
@@ -249,81 +249,81 @@ SOdysseyPaletteEntryRow::OnRowCanAcceptDrop(const FDragDropEvent& iEvent, EItemD
 FReply
 SOdysseyPaletteEntryRow::OnRowAcceptDrop(const FDragDropEvent& iEvent, EItemDropZone iDropZone, UOdysseyPaletteEntry* iEntry)
 {
-    StaticCastSharedPtr<SOdysseyLayerStackTreeView>(OwnerTablePtr.Pin())->ResetDropZone();
+    //StaticCastSharedPtr<STreeView<UOdysseyPaletteEntry*>>(OwnerTablePtr.Pin())->ResetDropZone();
 
 	TOptional<EItemDropZone> dropZone = OnRowCanAcceptDrop(iEvent, iDropZone, iEntry);
     if (!dropZone.IsSet())
         return FReply::Unhandled();
 
-	TSharedPtr<FOdysseyLayerStackDragDropOperation> operation = iEvent.GetOperationAs<FOdysseyLayerStackDragDropOperation>();
+	TSharedPtr<FOdysseyPaletteDragDropOperation> operation = iEvent.GetOperationAs<FOdysseyPaletteDragDropOperation>();
     if (!operation)
         return FReply::Unhandled();
 
-    UOdysseyLayerStack* layerStack = mEntry->GetLayerStack();
-	if ( !layerStack )
+    UOdysseyPalette* palette = mEntry->GetPalette();
+	if ( !palette )
 		return FReply::Unhandled();
 
-	UOdysseyLayerStack* operationLayerStack = operation->GetLayerStack();
-	if ( !operationLayerStack )
+	UOdysseyPalette* operationPalette = operation->GetPalette();
+	if ( !operationPalette )
 		return FReply::Unhandled();
 
-	UOdysseyLayer* parent = mEntry->GetParent();
-    TArray<UOdysseyLayer*> layers = operation->GetLayers();
-	int index = mEntry->GetIndexInParent();
+	UOdysseyPaletteEntry* parent = mEntry;//mEntry->GetParent();
+    TArray<UOdysseyPaletteEntry*> entries = operation->GetPaletteEntries();
+	int index = 0;//mEntry->GetIndexInParent();
 
 	switch ( iDropZone )
 	{
 		case EItemDropZone::AboveItem:
 		{
 			//do nothing
-			if ( operationLayerStack == layerStack ) //droped from same layerstack, do a move of topmost dropped layers
+			if ( operationPalette == palette ) //dropped from same Palette, do a move of topmost dropped layers
 			{
-				layerStack->MoveLayers(layers, parent, index);
+				//palette->MoveLayers(entries, parent, index);
 			}
 			else
 			{
-				layerStack->CopyLayers(layers, parent, index);
+				//palette->CopyLayers(entries, parent, index);
 			}
 		}
 		break;
 
 		case EItemDropZone::OntoItem:
 		{
-			if ( operationLayerStack == layerStack ) //droped from same layerstack, do a move of topmost dropped layers
+			if ( operationPalette == palette ) //droped from same layerstack, do a move of topmost dropped layers
 			{
-				if ( mEntry->CanHaveChildren )
+				/*if (mEntry->CanHaveChildren)
 				{
-					layerStack->MoveLayers(layers, mEntry, 0);
+					palette->MoveLayers(entries, mEntry, 0);
 				}
 				else
 				{
-					layerStack->MoveLayers(layers, parent, index);
-				}
+					palette->MoveLayers(entries, parent, index);
+				}*/
 			}
 			else
 			{
-				if ( mEntry->CanHaveChildren )
+				/*if (mEntry->CanHaveChildren)
 				{
-					layerStack->CopyLayers(layers, mEntry, 0);
+					palette->CopyLayers(entries, mEntry, 0);
 				}
 				else
 				{
-					layerStack->CopyLayers(layers, parent, index);
-				}
+					palette->CopyLayers(entries, parent, index);
+				}*/
 			}
 		}
 		break;
 
 		case EItemDropZone::BelowItem:
 		{
-			if ( operationLayerStack == layerStack ) //droped from same layerstack, do a move of topmost dropped layers
+			/*if (operationPalette == palette) //droped from same layerstack, do a move of topmost dropped layers
 			{
-				layerStack->MoveLayers(layers, parent, index + 1);
+				palette->MoveLayers(entries, parent, index + 1);
 			}
 			else
 			{
-				layerStack->CopyLayers(layers, parent, index + 1);
-			}
+				palette->CopyLayers(entries, parent, index + 1);
+			}*/
 		}
 		break;
 	}
@@ -331,13 +331,18 @@ SOdysseyPaletteEntryRow::OnRowAcceptDrop(const FDragDropEvent& iEvent, EItemDrop
     return FReply::Handled();
 }
 
+
 FReply
 SOdysseyPaletteEntryRow::OnRowDragDetected(const FGeometry& iGeometry, const FPointerEvent& iEvent, TWeakPtr<STreeView<UOdysseyPaletteEntry*>> iTreeView)
 {
-    TSharedPtr<SOdysseyLayerStackTreeView> treeView = iTreeView.Pin();
+    TSharedPtr<STreeView<UOdysseyPaletteEntry*>> treeView = iTreeView.Pin();
 	if (treeView.IsValid() && iEvent.IsMouseButtonDown( EKeys::LeftMouseButton ))
 	{
-		TSharedPtr<FOdysseyLayerStackDragDropOperation> operation = treeView->CreateDragDropOperation();
+		//TSharedPtr<FOdysseyLayerStackDragDropOperation> operation = treeView->CreateDragDropOperation();
+        //TSharedPtr<FOdysseyPaletteDragDropOperation> operation = MakeShared<FOdysseyPaletteDragDropOperation>( mPalette, treeView->GetSelectedItems());
+        TSharedPtr<FOdysseyPaletteDragDropOperation> operation = MakeShared<FOdysseyPaletteDragDropOperation>( mEntry->GetPalette(), treeView->GetSelectedItems());
+
+		operation->Construct();
 
 		if (operation.IsValid())
 		{
@@ -358,7 +363,6 @@ SOdysseyPaletteEntryRow::OnRowDragDetected(const FGeometry& iGeometry, const FPo
 	return FReply::Unhandled();
 }
 
-*/
 /*
 void
 SOdysseyPaletteEntryRow::OnIsOptionsDisplayedCheckBoxStateChanged(ECheckBoxState iState)
@@ -371,5 +375,5 @@ SOdysseyPaletteEntryRow::GetIsOptionsDisplayedCheckBoxState() const
 {
 	return mIsOptionsDisplayed ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 }
-
-#undef LOCTEXT_NAMESPACE*/
+*/
+#undef LOCTEXT_NAMESPACE

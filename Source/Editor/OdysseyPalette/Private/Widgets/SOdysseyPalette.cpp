@@ -3,9 +3,11 @@
 
 #include "SOdysseyPalette.h"
 #include "Widgets/Colors/SColorBlock.h"
-#include "Widgets/Colors/SColorPicker.h"
 #include "SOdysseyPaletteAddEntryButton.h"
 #include "SOdysseyPaletteEntryRow.h"
+#include "PropertyCustomizationHelpers.h"
+#include "SOdysseyPaletteFolderRow.h"
+#include "SOdysseyPaletteColorRow.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyPalette"
 
@@ -30,7 +32,6 @@ void SOdysseyPalette::Construct(const FArguments& InArgs)
 
     ChildSlot
     [
-
         SNew(SScrollBox)
         .Orientation(Orient_Vertical)
         .ScrollBarAlwaysVisible(false)
@@ -57,7 +58,7 @@ void SOdysseyPalette::Construct(const FArguments& InArgs)
         ]
     ];
 
-    if( mColorPalette->GetColorPalette() )
+    if( mColorPalette->GetPalette() )
         mColorPaletteSlot->AttachWidget( CreateColorPaletteWidget());
 }
 
@@ -75,13 +76,13 @@ FOdysseyPalette* SOdysseyPalette::GetColorPalette() const
 void SOdysseyPalette::OnObjectChanged(const FAssetData& AssetData)
 {
     if (AssetData.IsValid())
-        mColorPalette->SetColorPalette( CastChecked< UOdysseyPalette >(AssetData.GetAsset()));
+        mColorPalette->SetPalette( CastChecked< UOdysseyPalette >(AssetData.GetAsset()));
     else
-        mColorPalette->SetColorPalette(nullptr);
+        mColorPalette->SetPalette(nullptr);
 
     mColorPaletteSlot->DetachWidget();
 
-    if(mColorPalette->GetColorPalette())
+    if(mColorPalette->GetPalette())
         mColorPaletteSlot->AttachWidget(CreateColorPaletteWidget());
 }
 
@@ -91,7 +92,7 @@ FString SOdysseyPalette::ObjectPath() const
     if (!mColorPalette)
         return FString();
 
-    return mColorPalette->GetColorPalette()->GetPathName();
+    return mColorPalette->GetPalette()->GetPathName();
 }
 
 FReply SOdysseyPalette::HandleMeshColorBlockMouseButtonDown()
@@ -109,7 +110,19 @@ TSharedRef<SWidget> SOdysseyPalette::CreateColorPaletteWidget()
     TSharedRef<SHeaderRow> headerRow = SNew(SHeaderRow)
         .SplitterHandleSize(0.f) //Fixes alignment between header row and actual rows
         + SHeaderRow::Column("IsActivated")
-            .ToolTipText(LOCTEXT("OdysseyLayerIsActivatedButtonToolTip", "Toggle Layer Activation"))
+            .ToolTipText(LOCTEXT("OdysseyPaletteEntryIsActivatedButtonToolTip", "Toggle Entry Activation"))
+            .FixedWidth(24.f)
+            .HAlignHeader(HAlign_Center)
+            .VAlignHeader(VAlign_Center)
+            .HAlignCell(HAlign_Center)
+            .VAlignCell(VAlign_Top)
+            [
+                SNew(SImage)
+                .ColorAndOpacity(FSlateColor::UseForeground())
+                .Image(FOdysseyStyle::GetBrush("OdysseyLayerStack.Visible16"))
+            ]
+        + SHeaderRow::Column("Color")
+            .ToolTipText(LOCTEXT("OdysseyPaletteEntryColorToolTip", "Entry Color"))
             .FixedWidth(24.f)
             .HAlignHeader(HAlign_Center)
             .VAlignHeader(VAlign_Center)
@@ -118,9 +131,8 @@ TSharedRef<SWidget> SOdysseyPalette::CreateColorPaletteWidget()
             //.DefaultTooltip(FText::FromName(GetColumnID()))
             //.HeaderContentPadding(FMargin(20.0f, 0.0f, 20.0f, 0.0f))
             [
-                SNew(SImage)
-                .ColorAndOpacity(FSlateColor::UseForeground())
-                .Image(FOdysseyStyle::GetBrush("OdysseyLayerStack.Visible16"))
+                SNew(SColorBlock)
+                .Color( FLinearColor::Black )
             ]
         + SHeaderRow::Column("Header")
             .DefaultLabel(LOCTEXT("", ""))
@@ -135,22 +147,16 @@ TSharedRef<SWidget> SOdysseyPalette::CreateColorPaletteWidget()
         .AutoHeight()
         [
             SNew(SOdysseyPaletteAddEntryButton)
-            .Palette(mColorPalette->GetColorPalette())
+            .Palette(mColorPalette->GetPalette())
         ]
         + SVerticalBox::Slot()
         .Padding(5)
         .AutoHeight()
         [
-            SAssignNew(mPaletteTreeView, STreeView<UOdysseyPaletteEntry*>)
-            .TreeItemsSource(&mColorPalette->GetColorPalette()->mPaletteEntries)
+            SAssignNew(mPaletteTreeView, SOdysseyPaletteTreeView)
+            //.TreeItemsSource(&mColorPalette->GetColorPalette()->mPaletteEntries)
+            .Palette(mColorPalette->GetPalette())
             .OnGenerateRow(this, &SOdysseyPalette::OnGenerateRow)
-            .OnGetChildren(this, &SOdysseyPalette::OnGetChildren)
-            //.OnExpansionChanged(this, &SOdysseyLayerStackTreeView::OnExpansionChanged)
-            //.OnSelectionChanged( this, &SOdysseyLayerStackTreeView::OnSelectionChanged )
-            //.OnItemScrolledIntoView(this, &SOdysseyLayerStackTreeView::OnItemScrolledIntoView)
-            //.OnContextMenuOpening(this, &SOdysseyLayerStackTreeView::OnContextMenuOpening)
-            //.SelectionMode(ESelectionMode::Multi)
-            .HeaderRow(headerRow)
         ];
 }
 
@@ -162,18 +168,6 @@ void SOdysseyPalette::Tick(const FGeometry& AllottedGeometry, const double InCur
         mPaletteTreeView->RequestTreeRefresh();
 }
 
-void
-SOdysseyPalette::OnGetChildren(UOdysseyPaletteEntry* iParent, TArray<UOdysseyPaletteEntry*>& oChildren) const
-{
-    oChildren = mColorPalette->GetColorPalette()->mPaletteEntries;
-
-    UE_LOG(LogTemp, Display, TEXT("oChildren: %d"), oChildren.Num());
-    /*if (!iParent)
-        return;
-
-    oChildren = iParent->mChildren;*/
-}
-
 TSharedRef<ITableRow> SOdysseyPalette::OnGenerateRow(UOdysseyPaletteEntry* iEntry, const TSharedRef<STableViewBase>& iOwnerTable)
 {
     UE_LOG(LogTemp, Display, TEXT("GENERATE ROW"));
@@ -181,14 +175,14 @@ TSharedRef<ITableRow> SOdysseyPalette::OnGenerateRow(UOdysseyPaletteEntry* iEntr
 
     UClass* entryClass = iEntry->GetClass();
     
-    /*if (entryClass == UOdysseyAnimationLayerFolder::StaticClass())
+    if (entryClass == UOdysseyPaletteEntryColor::StaticClass())
     {
-        return SNew(SOdysseyAnimationLayerFolderRow, mTreeView.ToSharedRef(), Cast<UOdysseyAnimationLayerFolder>(iLayer));
+        return SNew(SOdysseyPaletteColorRow, mPaletteTreeView.ToSharedRef(), Cast<UOdysseyPaletteEntryColor>(iEntry));
     }
-    else if (layerClass == UOdysseyAnimationLayerImageRaster::StaticClass())
+    else if (entryClass == UOdysseyPaletteEntryFolder::StaticClass())
     {
-        return SNew(SOdysseyAnimationLayerImageRasterRow, mTreeView.ToSharedRef(), Cast<UOdysseyAnimationLayerImageRaster>(iLayer));
-    }*/
+        return SNew(SOdysseyPaletteFolderRow, mPaletteTreeView.ToSharedRef(), Cast<UOdysseyPaletteEntryFolder>(iEntry));
+    }
 
     return SNew(SOdysseyPaletteEntryRow, mPaletteTreeView.ToSharedRef(), Cast<UOdysseyPaletteEntry>(iEntry)); //Default widget
 }

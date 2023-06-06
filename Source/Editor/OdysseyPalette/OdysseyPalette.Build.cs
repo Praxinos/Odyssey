@@ -14,6 +14,9 @@ namespace UnrealBuildTool.Rules
             PublicIncludePaths.AddRange(
                 new string[] {
                 Path.Combine(ModuleDirectory, "Public", "Palette"),
+                Path.Combine(ModuleDirectory, "Public", "Widgets"),
+                Path.Combine(ModuleDirectory, "Public", "DragDropOperations"),
+
                 }
             );
 
@@ -35,6 +38,7 @@ namespace UnrealBuildTool.Rules
 			PrivateDependencyModuleNames.AddRange(
 				new string[]
                 {
+                    "AppFramework",
                     "AssetTools",
                     "Core",
                     "CoreUObject",
@@ -46,9 +50,11 @@ namespace UnrealBuildTool.Rules
                     "Slate",
                     "SlateCore",
                     "UnrealEd",
+                    "OdysseyStyle",
+                    "PropertyEditor",
 					// ... add private dependencies that you statically link with here ...
 				}
-				);
+                );
 
 			DynamicallyLoadedModuleNames.AddRange(
 				new string[]

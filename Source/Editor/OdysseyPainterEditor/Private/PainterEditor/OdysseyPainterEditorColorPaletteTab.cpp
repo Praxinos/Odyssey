@@ -3,7 +3,7 @@
 
 #include "OdysseyPainterEditorColorPaletteTab.h"
 
-#include "Palette/SOdysseyPalette.h"
+#include "SOdysseyPalette.h"
 #include "OdysseyPainterEditor.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorColorPaletteTab"

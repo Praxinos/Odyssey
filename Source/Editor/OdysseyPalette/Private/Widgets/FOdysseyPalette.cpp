@@ -23,12 +23,12 @@ FOdysseyPalette::~FOdysseyPalette()
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------- Getter / Setter
 
-UOdysseyPalette* FOdysseyPalette::GetColorPalette() const
+UOdysseyPalette* FOdysseyPalette::GetPalette() const
 {
     return mPalette;
 }
 
-void FOdysseyPalette::SetColorPalette(UOdysseyPalette* iColorPalette)
+void FOdysseyPalette::SetPalette(UOdysseyPalette* iColorPalette)
 {
     mPalette = iColorPalette;
 }

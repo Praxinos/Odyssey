@@ -1,0 +1,583 @@
+// IDDN FR.001.250001.005.S.P.2019.000.00000
+// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
+
+#include "Widgets/SOdysseyPaletteTreeView.h"
+#include "OdysseyStyleSet.h"
+#include "UObject/OdysseyObjectEditorUtils.h"
+#include "ToolMenus.h"
+#include "Framework/Commands/GenericCommands.h"
+
+#define LOCTEXT_NAMESPACE "SOdysseyPaletteTreeView"
+
+static FName contextMenuName = "OdysseyPaletteContextMenu";
+
+SOdysseyPaletteTreeView::~SOdysseyPaletteTreeView()
+{
+    //UOdysseyPalette::OnCurrentLayerChanged().RemoveAll(this);
+    //UOdysseyPalette::OnHierarchyChanged().RemoveAll(this);
+	//UOdysseyPaletteEntry::OnIsExpandedChanged().RemoveAll(this);
+}
+
+SOdysseyPaletteTreeView::SOdysseyPaletteTreeView()
+    : mPalette(nullptr)
+    , mCommandList(MakeShared<FUICommandList>())
+{
+    MapActionsToCommandList();
+    //UOdysseyPalette::OnCurrentLayerChanged().AddRaw(this, &SOdysseyPaletteTreeView::OnCurrentEntryChanged);
+    //UOdysseyPalette::OnHierarchyChanged().AddRaw(this, &SOdysseyPaletteTreeView::OnPaletteHierarchyChanged);
+	//UOdysseyPaletteEntry::OnIsExpandedChanged().AddRaw(this, &SOdysseyPaletteTreeView::OnEntryIsExpandedChanged);
+}
+
+//CONSTRUCTION/DESTRUCTION-----------------------------------------------
+void SOdysseyPaletteTreeView::Construct(const FArguments& InArgs)
+{
+    mPalette = InArgs._Palette;
+
+    TSharedRef<SHeaderRow> headerRow = SNew(SHeaderRow)
+        .SplitterHandleSize(0.f) //Fixes alignment between header row and actual rows
+        + SHeaderRow::Column("IsActivated")
+            .ToolTipText(LOCTEXT("OdysseyPaletteEntryIsActivatedButtonToolTip", "Toggle Entry Activation"))
+            .FixedWidth(24.f)
+            .HAlignHeader(HAlign_Center)
+            .VAlignHeader(VAlign_Center)
+            .HAlignCell(HAlign_Center)
+            .VAlignCell(VAlign_Top)
+            [
+                SNew(SImage)
+                .ColorAndOpacity(FSlateColor::UseForeground())
+                .Image(FOdysseyStyle::GetBrush("OdysseyLayerStack.Visible16"))
+            ]
+        + SHeaderRow::Column("Header")
+            .DefaultLabel(LOCTEXT("", ""))
+            .VAlignCell(VAlign_Top)
+            .FillWidth(InArgs._HeaderFillWidth)
+            .FixedWidth(InArgs._HeaderFixedWidth)
+            .ManualWidth(InArgs._HeaderManualWidth)
+            .FillSized(InArgs._HeaderFillSized);
+
+    for( SHeaderRow::FColumn::FArguments columnArguments : InArgs._AdditionalColumns)
+    {
+        headerRow->AddColumn(columnArguments);
+    }
+
+    //const TArray<UOdysseyPaletteEntry*>* rootEntries = mPalette ? &mPalette->GetRootLayers() : nullptr;
+    
+    const TArray<UOdysseyPaletteEntry*>* rootEntries = mPalette ? &mPalette->mPaletteEntries : nullptr;
+
+    STreeView<UOdysseyPaletteEntry*>::Construct(
+        STreeView<UOdysseyPaletteEntry*>::FArguments()
+        .TreeItemsSource(rootEntries)
+        .OnGenerateRow( InArgs._OnGenerateRow )
+        .OnGetChildren( this, &SOdysseyPaletteTreeView::OnGetChildren )
+        .OnExpansionChanged( this, &SOdysseyPaletteTreeView::OnExpansionChanged )
+        //.OnSelectionChanged( this, &SOdysseyLayerStackTreeView::OnSelectionChanged )
+        .OnItemScrolledIntoView(this, &SOdysseyPaletteTreeView::OnItemScrolledIntoView)
+        .OnContextMenuOpening( this, &SOdysseyPaletteTreeView::OnContextMenuOpening )
+        .SelectionMode( ESelectionMode::Multi )
+        .HeaderRow(headerRow)
+    );
+
+    //Menus
+    CreateContextMenu();
+}
+
+//--------------------------------------------------------------------------------------
+//-------------------------------------------------------------------- SWidget overrides
+
+int32
+SOdysseyPaletteTreeView::OnPaint( const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled ) const
+{
+    int32 entryId = STreeView<UOdysseyPaletteEntry*>::OnPaint( Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled );
+
+    if (mDisplayDropZone)
+    {
+        if (!ItemsSource || ItemsSource->Num() <= 0)
+            return entryId;
+
+        TSharedPtr<SMultiColumnTableRow<UOdysseyPaletteEntry*>> rowWidget = StaticCastSharedPtr<SMultiColumnTableRow<UOdysseyPaletteEntry*>>(WidgetFromItem(ItemsSource->Last()));
+        if (!rowWidget)
+            return entryId;
+
+        const FTableRowStyle& style = FOdysseyStyle::GetWidgetStyle<FTableRowStyle>("OdysseyLayerStack.AlternatedRows");
+        const FSlateBrush* DropIndicatorBrush = &style.DropIndicator_Above;
+
+        FGeometry geometry = rowWidget->GetPaintSpaceGeometry();
+        const FVector2D& widgetSize = geometry.GetLocalSize();
+        FVector2D translate(0.f, widgetSize.Y);
+        FVector2D parentAbsolutePosition(geometry.AbsolutePosition.X, geometry.AbsolutePosition.Y);
+        geometry = FGeometry(translate, parentAbsolutePosition, widgetSize, 1.0f);
+
+        if (Private_GetOrientation() == Orient_Vertical)
+        {
+            FSlateDrawElement::MakeBox
+            (
+                OutDrawElements,
+                entryId++,
+                geometry.ToPaintGeometry(),
+                DropIndicatorBrush,
+                ESlateDrawEffect::None,
+                DropIndicatorBrush->GetTint(InWidgetStyle) * InWidgetStyle.GetColorAndOpacityTint()
+            );
+        }
+        else
+        {
+            // Reuse the drop indicator asset for horizontal, by rotating the drawn box 90 degrees.
+            const FVector2D LocalSize(geometry.GetLocalSize());
+            const FVector2D Pivot(LocalSize * 0.5f);
+            const FVector2D RotatedLocalSize(LocalSize.Y, LocalSize.X);
+            FSlateLayoutTransform RotatedTransform(Pivot - RotatedLocalSize * 0.5f);	// Make the box centered to the alloted geometry, so that it can be rotated around the center.
+
+            FSlateDrawElement::MakeRotatedBox(
+                OutDrawElements,
+                entryId++,
+                geometry.ToPaintGeometry(RotatedLocalSize, RotatedTransform),
+                DropIndicatorBrush,
+                ESlateDrawEffect::None,
+                -HALF_PI,	// 90 deg CCW
+                RotatedLocalSize * 0.5f,	// Relative center to the flipped
+                FSlateDrawElement::RelativeToElement,
+                DropIndicatorBrush->GetTint(InWidgetStyle) * InWidgetStyle.GetColorAndOpacityTint()
+            );
+        }
+    }
+
+	return entryId;
+}
+
+FReply
+SOdysseyPaletteTreeView::OnKeyDown( const FGeometry& iGeometry, const FKeyEvent& iKeyEvent )
+{
+	if (mCommandList->ProcessCommandBindings(iKeyEvent))
+        return FReply::Handled();
+
+    return STreeView<UOdysseyPaletteEntry*>::OnKeyDown(iGeometry, iKeyEvent);
+}
+
+FReply
+SOdysseyPaletteTreeView::OnDragOver(const FGeometry& MyGeometry, const FDragDropEvent& DragDropEvent)
+{
+    if ( !mPalette )
+        return FReply::Unhandled();
+    
+    TSharedPtr<FOdysseyPaletteDragDropOperation> operation = DragDropEvent.GetOperationAs<FOdysseyPaletteDragDropOperation>();
+    if (!operation)
+        return FReply::Unhandled();
+
+    /*UOdysseyPalette* operationLayerStack = operation->GetLayerStack();
+	if ( !operationLayerStack )*/
+		return FReply::Unhandled();
+
+    if (!ItemsSource || ItemsSource->Num() <= 0)
+        return FReply::Unhandled();
+
+    TSharedPtr<SMultiColumnTableRow<UOdysseyPaletteEntry*>> rowWidget = StaticCastSharedPtr<SMultiColumnTableRow<UOdysseyPaletteEntry*>>(WidgetFromItem(ItemsSource->Last()));
+    if (!rowWidget)
+        return FReply::Unhandled();
+
+    FGeometry geometry = rowWidget->GetTickSpaceGeometry();
+    const FVector2D localPointerPos = geometry.AbsoluteToLocal(DragDropEvent.GetScreenSpacePosition());
+    const FVector2D& widgetSize = geometry.GetLocalSize();
+
+    //Don't display the dropzone if we don't drag under the last line
+    if (localPointerPos.Y <= widgetSize.Y)
+    {
+        mDisplayDropZone = false;
+        return FReply::Unhandled();
+    }
+
+    mDisplayDropZone = true;
+
+	return FReply::Handled();
+}
+
+void
+SOdysseyPaletteTreeView::OnDragLeave(const FDragDropEvent& DragDropEvent)
+{
+    mDisplayDropZone = false;
+}
+
+FReply
+SOdysseyPaletteTreeView::OnDrop(const FGeometry& MyGeometry, const FDragDropEvent& DragDropEvent)
+{
+    mDisplayDropZone = false;
+
+    if ( !mPalette )
+        return FReply::Unhandled();
+    
+    TSharedPtr<FOdysseyPaletteDragDropOperation> operation = DragDropEvent.GetOperationAs<FOdysseyPaletteDragDropOperation>();
+    if (!operation)
+        return FReply::Unhandled();
+
+    UOdysseyPalette* operationPalette = operation->GetPalette();
+	if ( !operationPalette)
+		return FReply::Unhandled();
+
+    TSharedPtr<SMultiColumnTableRow<UOdysseyPaletteEntry*>> rowWidget = StaticCastSharedPtr<SMultiColumnTableRow<UOdysseyPaletteEntry*>>(WidgetFromItem(ItemsSource->Last()));
+    if (!rowWidget)
+        return FReply::Unhandled();
+    
+    FGeometry geometry = rowWidget->GetTickSpaceGeometry();
+    const FVector2D localPointerPos = geometry.AbsoluteToLocal(DragDropEvent.GetScreenSpacePosition());
+    const FVector2D& widgetSize = geometry.GetLocalSize();
+
+    //Don't drop if we don't drag under the last line
+    if (localPointerPos.Y <= widgetSize.Y)
+        return FReply::Unhandled();
+
+    //do nothing
+    TArray<UOdysseyPaletteEntry*> entries = operation->GetPaletteEntries();
+    if ( operationPalette == mPalette ) //dropped from same Palette, do a move of topmost dropped layers
+    {
+        mPalette->MoveEntries(entries, nullptr, mPalette->GetRootEntries().Num());
+    }
+    else
+    {
+        mPalette->CopyEntries(entries, nullptr, mPalette->GetRootEntries().Num());
+    }
+	return FReply::Handled();
+}
+
+void
+SOdysseyPaletteTreeView::ResetDropZone()
+{
+    mDisplayDropZone = false;
+}
+
+//PRIVATE API-----------------------------------------------------------
+
+void
+SOdysseyPaletteTreeView::OnGetChildren(UOdysseyPaletteEntry* iParent, TArray<UOdysseyPaletteEntry*>& oChildren) const
+{
+    oChildren = mPalette->mPaletteEntries;
+    /*if (!mPalette)
+        return;
+    
+    oChildren = iParent->GetChildren();*/
+}
+
+void
+SOdysseyPaletteTreeView::RefreshAllExpansionStates()
+{
+    /*if (!mPalette)
+        return;
+
+    TArray<UOdysseyPaletteEntry*> layers = mPalette->GetLayers();
+    for(UOdysseyPaletteEntry* layer : layers )
+    {
+        if(!layer )
+            continue;
+
+        SetItemExpansion(layer, layer->IsExpanded);
+    }*/
+}
+
+void
+SOdysseyPaletteTreeView::OnPaletteHierarchyChanged(UOdysseyPalette* iPalette)
+{
+    if ( !mPalette )
+        return;
+
+	if ( iPalette != mPalette )
+		return;
+
+    RefreshAllExpansionStates();
+    RequestTreeRefresh();
+}
+
+void
+SOdysseyPaletteTreeView::SetCurrentEntryFromSelectorItem()
+{
+/*
+    if ( !mPalette )
+        return;
+
+	if ( mPalette->GetLayers().Num() == 0)
+		return;
+
+    if (!SelectorItem)
+    {
+        FOdysseyObjectEditorUtils::SetPropertyValue(mPalette, "CurrentLayer", TSoftObjectPtr<UOdysseyPaletteEntry>(mPalette->GetRootLayers()[0]));
+        return;
+    }
+
+    UOdysseyPalette* selectorLayerStack = SelectorItem->GetLayerStack();
+    if (selectorLayerStack != mPalette )
+        return;
+
+    if (SelectorItem == mPalette->CurrentLayer)
+        return;
+        
+    FOdysseyObjectEditorUtils::SetPropertyValue(mPalette, "CurrentLayer", TSoftObjectPtr<UOdysseyPaletteEntry>(SelectorItem));*/
+}
+
+void
+SOdysseyPaletteTreeView::Private_SignalSelectionChanged(ESelectInfo::Type SelectInfo)
+{
+/*
+    if ( !mPalette )
+    {
+        STreeView< UOdysseyPaletteEntry* >::Private_SignalSelectionChanged(SelectInfo);
+        return;
+    }
+
+    //Ensure selectorItem = currentLayer if currentLayer is selected
+    UOdysseyPaletteEntry* currentLayer = mPalette->CurrentLayer.Get();
+    if ( currentLayer && Private_IsItemSelected(currentLayer) )
+    {
+        Private_SetItemSelection(currentLayer, true, true);
+    }
+    else
+    {
+        if ( !Private_IsItemSelected(SelectorItem) )
+            Private_SetItemSelection(SelectorItem, true, true);
+
+        SetCurrentEntryFromSelectorItem();
+    }
+
+    STreeView< UOdysseyPaletteEntry* >::Private_SignalSelectionChanged(SelectInfo);*/
+}
+
+void
+SOdysseyPaletteTreeView::OnCurrentEntryChanged(UOdysseyPalette* iLayerStack)
+{
+/*
+    if ( !mPalette )
+        return;
+
+    if ( iLayerStack != mPalette )
+        return;
+
+    Private_ClearSelection();
+
+    UOdysseyPaletteEntry* currentLayer = mPalette->CurrentLayer.Get();
+    if( currentLayer )
+    {
+        Private_SetItemSelection(currentLayer, true, true);
+        Private_SignalSelectionChanged(ESelectInfo::Direct);
+    }*/
+}
+
+// ContextMenu
+
+TSharedPtr<SWidget>
+SOdysseyPaletteTreeView::OnContextMenuOpening()
+{
+/*
+    //Create a new command, so that we can add context menu specific entries 
+    TSharedRef<FUICommandList> commandList = MakeShared<FUICommandList>();
+    commandList->Append(mCommandList);
+
+    //Allows us to extend the menu context by inserting entries everywhere we want
+    //Overriding CreateContextMenu does not allow that
+    TArray<TSharedPtr<FExtender>> extenders = ExtendContextMenu();
+    TSharedPtr<FExtender> extender = FExtender::Combine(extenders);
+
+    //Build menu
+    FToolMenuContext menuContext(commandList, extender);
+    return UToolMenus::Get()->GenerateWidget(contextMenuName, menuContext);*/
+    return SNullWidget::NullWidget;
+}
+
+void SOdysseyPaletteTreeView::CreateContextMenu()
+{
+/*
+    UToolMenus* ToolMenus = UToolMenus::Get();
+    if (!ensure(ToolMenus))
+        return;
+    
+    if (ToolMenus->IsMenuRegistered(contextMenuName))
+        return;
+
+    UToolMenu* Menu = ToolMenus->RegisterMenu(contextMenuName);
+    
+    FToolMenuSection& selectionSection = Menu->AddSection("Selection", LOCTEXT("LayerStackCommonSection", "Selection"));
+    {
+        selectionSection.AddMenuEntry(FGenericCommands::Get().SelectAll);
+    }
+
+    FToolMenuSection& commonSection = Menu->AddSection("Common", LOCTEXT("LayerStackCommonSection", "Common"));
+    {
+        commonSection.AddMenuEntry(FGenericCommands::Get().Delete);
+        commonSection.AddMenuEntry(FGenericCommands::Get().Duplicate);
+        commonSection.AddMenuEntry(FGenericCommands::Get().Rename);
+    }
+
+    FToolMenuSection& layerSection = Menu->AddSection("Layer", LOCTEXT("LayerStackLayerSection", "Layer"));
+    {
+        layerSection.AddMenuEntry(FOdysseyLayerStackEditorCommands::Get().MergeSelectedLayers);
+        layerSection.AddMenuEntry(FOdysseyLayerStackEditorCommands::Get().FlattenSelectedLayers);
+    }*/
+}
+
+TArray<TSharedPtr<FExtender>>
+SOdysseyPaletteTreeView::ExtendContextMenu()
+{
+	return TArray< TSharedPtr<FExtender> >();
+}
+
+void
+SOdysseyPaletteTreeView::MapActionsToCommandList()
+{
+/*
+    mCommandList->MapAction(
+        FGenericCommands::Get().SelectAll,
+        FExecuteAction::CreateRaw(this, &SOdysseyPaletteTreeView::SelectAllEntries)
+    );
+
+    mCommandList->MapAction(
+        FGenericCommands::Get().Delete,
+        FExecuteAction::CreateRaw(this, &SOdysseyPaletteTreeView::DeleteSelectedEntries),
+        FCanExecuteAction::CreateRaw(this, &SOdysseyPaletteTreeView::CanDeleteSelectedEntries)
+    );
+
+    mCommandList->MapAction(
+        FGenericCommands::Get().Duplicate,
+        FExecuteAction::CreateRaw(this, &SOdysseyPaletteTreeView::DuplicateSelectedEntries)
+    );
+
+    mCommandList->MapAction(
+        FGenericCommands::Get().Rename,
+        FExecuteAction::CreateRaw(this, &SOdysseyPaletteTreeView::RenameCurrentEntry)
+    );
+
+    mCommandList->MapAction(
+        FOdysseyLayerStackEditorCommands::Get().MergeSelectedLayers,
+        FExecuteAction::CreateRaw(this, &SOdysseyPaletteTreeView::MergeSelectedLayers),
+        FCanExecuteAction::CreateRaw(this, &SOdysseyPaletteTreeView::CanMergeSelectedLayers)
+    );
+
+    mCommandList->MapAction(
+        FOdysseyLayerStackEditorCommands::Get().FlattenSelectedLayers,
+        FExecuteAction::CreateRaw(this, &SOdysseyPaletteTreeView::FlattenSelectedLayers),
+        FCanExecuteAction::CreateRaw(this, &SOdysseyPaletteTreeView::CanFlattenSelectedLayers)
+    );*/
+}
+
+// Commands
+
+void
+SOdysseyPaletteTreeView::SelectAllEntries()
+{
+    if ( !mPalette )
+        return;
+
+    //ItemsSource is the ListView::ItemsSource, which contains all displayed items, even deep children
+    //It is NOT the same as TreeItemsSource or mRootLayers which only contain root elements
+    SetItemSelection(*ItemsSource, true);
+}
+
+void
+SOdysseyPaletteTreeView::DeleteSelectedEntries()
+{
+/*
+    if ( !mPalette )
+        return;
+
+    TArray<UOdysseyPaletteEntry*> selectedLayers = GetSelectedItems();
+    mPalette->RemoveLayers(selectedLayers);*/
+}
+
+bool
+SOdysseyPaletteTreeView::CanDeleteSelectedEntries()
+{
+/*
+    if ( !mPalette )
+        return false;
+
+    TArray<UOdysseyPaletteEntry*> selectedLayers = GetSelectedItems();
+    if (selectedLayers.Num() <= 0)
+        return false;
+
+    //If one of the root layers is not selected, we can delete selected layers
+    const TArray<UOdysseyPaletteEntry*>& rootLayers = mPalette->GetRootLayers();
+    for (UOdysseyPaletteEntry* rootLayer : rootLayers)
+    {
+        if (!selectedLayers.Contains(rootLayer))
+            return true;
+    }*/
+    
+    return false;
+}
+
+void
+SOdysseyPaletteTreeView::DuplicateSelectedEntries()
+{
+/*
+    if ( !mPalette )
+        return;
+
+    TArray<UOdysseyPaletteEntry*> selectedLayers = GetSelectedItems();
+    if (selectedLayers.Num() <= 0)
+        return;
+
+	//manage current layer seperately
+	TArray<UOdysseyPaletteEntry*> duplicatedLayers = mPalette->DuplicateLayers(selectedLayers);
+    SetItemSelection(duplicatedLayers, true);*/
+}
+
+void
+SOdysseyPaletteTreeView::RenameCurrentEntry()
+{
+/*
+    if ( !mPalette )
+        return;
+
+    if (!mPalette->CurrentLayer)
+        return;
+    
+    mIsRenamePending = true; //has to come before ScrollItemIntoView() in case the item is already into view, which will trigger OnItemScrolledIntoView() immediately
+	RequestScrollIntoView(mPalette->CurrentLayer.Get());*/
+}
+    
+void
+SOdysseyPaletteTreeView::OnEntryIsExpandedChanged(UOdysseyPaletteEntry* iLayerNode)
+{
+/*
+    if ( !mPalette )
+        return;
+    
+    if (iLayerNode->GetLayerStack() != mPalette )
+        return;
+    
+    if(IsItemExpanded(Cast<UOdysseyPaletteEntry>(iLayerNode)) == iLayerNode->IsExpanded )
+        return;
+
+    SetItemExpansion(Cast<UOdysseyPaletteEntry>(iLayerNode), iLayerNode->IsExpanded);*/
+}
+
+void
+SOdysseyPaletteTreeView::OnExpansionChanged( UOdysseyPaletteEntry* iLayerNode, bool iIsExpanded )
+{
+    //FOdysseyObjectEditorUtils::SetPropertyValue(iLayerNode, "IsExpanded", iIsExpanded);
+}
+
+void
+SOdysseyPaletteTreeView::OnItemScrolledIntoView(UOdysseyPaletteEntry* iLayer, const TSharedPtr<ITableRow>& iRow)
+{
+/*
+    if ( !mPalette )
+        return;
+
+    if (!iLayer || !iRow)
+        return;
+
+    if (mIsRenamePending && iLayer == mPalette->CurrentLayer)
+    {
+        TSharedPtr<SOdysseyLayerRow> layerRow = StaticCastSharedPtr<SOdysseyLayerRow>(iRow);
+        layerRow->Rename();
+        mIsRenamePending = false;
+    }*/
+}
+    
+TSharedPtr<FOdysseyPaletteDragDropOperation>
+SOdysseyPaletteTreeView::CreateDragDropOperation() const
+{
+    if ( !mPalette )
+        return nullptr;
+
+    TSharedRef<FOdysseyPaletteDragDropOperation> operation =  MakeShared<FOdysseyPaletteDragDropOperation>(mPalette, GetSelectedItems());
+	operation->Construct();
+    return operation;
+}
+
+#undef LOCTEXT_NAMESPACE

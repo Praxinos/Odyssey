@@ -19,5 +19,5 @@ public:
 
 public:
     UPROPERTY(EditAnywhere, Category = Palette)
-    FColor EntryColor;
+    FLinearColor EntryColor;
 };

@@ -11,7 +11,7 @@ class UOdysseyPalette;
 /**
  * Implements the Layer stack widget
  */
-class ODYSSEYWIDGETS_API SOdysseyPaletteAddEntryButton : public SComboButton
+class ODYSSEYPALETTE_API SOdysseyPaletteAddEntryButton : public SComboButton
 {
 public:
 

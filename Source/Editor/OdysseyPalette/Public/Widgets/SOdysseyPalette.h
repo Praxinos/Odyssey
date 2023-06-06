@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 #include "Widgets/SCompoundWidget.h"
 #include "FOdysseyPalette.h"
+#include "SOdysseyPaletteTreeView.h"
 
 /** Delegate used to set a generic object */
 DECLARE_DELEGATE_OneParam( FOnMeshChanged, UStaticMesh* );
@@ -13,7 +14,7 @@ DECLARE_DELEGATE_OneParam( FOnMeshChanged, UStaticMesh* );
 /**
  * Implements the mesh selector
  */
-class ODYSSEYWIDGETS_API SOdysseyPalette : public SCompoundWidget
+class ODYSSEYPALETTE_API SOdysseyPalette : public SCompoundWidget
 {
 public:
     SLATE_BEGIN_ARGS(SOdysseyPalette)
@@ -44,7 +45,6 @@ public:
 
 
 private:
-    void OnGetChildren(UOdysseyPaletteEntry* iParent, TArray<UOdysseyPaletteEntry*>& oChildren) const;
     TSharedRef<ITableRow> OnGenerateRow(UOdysseyPaletteEntry* iEntry, const TSharedRef<STableViewBase>& iOwnerTable);
 
 private:
@@ -52,5 +52,5 @@ private:
     TSharedPtr< FOdysseyPalette > mColorPalette;
     TSharedPtr< FAssetThumbnailPool > mAssetThumbnailPool;
     SScrollBox::FSlot*  mColorPaletteSlot;
-    TSharedPtr<STreeView<UOdysseyPaletteEntry*>> mPaletteTreeView;
+    TSharedPtr<SOdysseyPaletteTreeView> mPaletteTreeView;
 };
