@@ -30,7 +30,9 @@ FOdysseyVectorScene::GetEngine()
 FOdysseyVectorScene::FSignalDelegate&
 FOdysseyVectorScene::OnSignalDelegate()
 {
-    return mOnSignalDelegate;
+    static FSignalDelegate onSignalDelegate;
+
+    return onSignalDelegate;
 }
 
 void
@@ -250,7 +252,7 @@ FOdysseyVectorScene::Update( uint32 iUpdateFlags )
 void
 FOdysseyVectorScene::Signal( uint64 iSignalFlags )
 {
-    mOnSignalDelegate.Broadcast( this, iSignalFlags );
+    OnSignalDelegate().Broadcast( this, iSignalFlags );
 }
 
 FOdysseyVectorObject*

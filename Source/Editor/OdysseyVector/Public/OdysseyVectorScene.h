@@ -18,15 +18,15 @@ class ODYSSEYVECTOR_API FOdysseyVectorScene : public FOdysseyVectorGroup
 {
     public:
         DECLARE_MULTICAST_DELEGATE_TwoParams(FSignalDelegate, FOdysseyVectorScene*, uint64 iDelegateFlags )
-        FSignalDelegate mOnSignalDelegate;
 
     public:
         static const uint64 SCENE_REDRAW       = ( 1 << 0 );
         static const uint64 OBJECT_TRANSFORMED = ( 1 << 1 );
         static const uint64 OBJECT_MODIFIED    = ( 1 << 2 );
         static const uint64 OBJECT_SELECTED    = ( 1 << 3 );
+        static const uint64 SIGNALL_ALL        = 0xFFFFFFFFFFFFFFFF;
 
-        FSignalDelegate& OnSignalDelegate();
+        static FSignalDelegate& OnSignalDelegate();
 
 //        DECLARE_MULTICAST_DELEGATE_OneParam(FRefreshDetailsView,FOdysseyVectorScene*)
 //        FRefreshDetailsView mDetailsView;

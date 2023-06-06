@@ -14,19 +14,32 @@
 //----------------------------------------------------------- Construction / Destruction
 FOdysseyTextureEditorGUI::~FOdysseyTextureEditorGUI()
 {
-    //UnbindAllVectorScenes();
+	UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll(this);
+	FOdysseyVectorScene::OnSignalDelegate().RemoveAll(this);
 }
 
 FOdysseyTextureEditorGUI::FOdysseyTextureEditorGUI(FOdysseyTextureEditor* iEditor) :
 	FOdysseyPainterEditorGUI(iEditor),
 	mEditor( iEditor )
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(static_cast<FOdysseyTextureEditor*>(mEditor)->LayerStack());
-
-    // bind refresh function to delegates on existing vector scenes at load. Needed to refresh necessary widgets.
-    BindAllVectorScenes( layerStack );
     // Get sure the binding is set up everytime we add or remove a layer in the layer stack.
-    layerStack->OnHierarchyChanged().AddRaw( this, &FOdysseyTextureEditorGUI::BindAllVectorScenes );
+	UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw( this, &FOdysseyTextureEditorGUI::OnCurrentLayerChanged );
+    // bind refresh function to delegates on existing vector scenes at load. Needed to refresh necessary widgets.
+    FOdysseyVectorScene::OnSignalDelegate().AddRaw( this, &FOdysseyTextureEditorGUI::OnVectorSceneSignal );
+}
+
+void
+FOdysseyTextureEditorGUI::OnCurrentLayerChanged( UOdysseyLayerStack* iLayerStack )
+{
+    UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(iLayerStack->CurrentLayer.Get());
+
+    if( currentVectorLayer )
+    {
+        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+
+        OnVectorSceneSignal( vectorScene, FOdysseyVectorScene::SIGNALL_ALL );
+    }
 }
 
 //--------------------------------------------------------------------------------------
@@ -165,50 +178,6 @@ TSharedPtr<FOdysseyTextureEditorTextureDetailsTab>&
 FOdysseyTextureEditorGUI::GetTextureDetailsTab()
 {
 	return mTextureDetailsTab;
-}
-
-void
-FOdysseyTextureEditorGUI::BindVectorScene( FOdysseyVectorScene* iScene )
-{
-    iScene->OnSignalDelegate().RemoveAll( this ); // bind only once
-    iScene->OnSignalDelegate().AddRaw( this, &FOdysseyTextureEditorGUI::OnVectorSceneSignal );
-}
-
-void
-FOdysseyTextureEditorGUI::BindAllVectorScenes( UOdysseyLayerStack* iLayerStack )
-{
-    TArray<UOdysseyLayer*> layers = iLayerStack->GetLayers();
-
-    for( int i = 0; i < layers.Num(); i++ )
-    {
-        UOdysseyTextureLayerImageVector* vectorLayer = Cast<UOdysseyTextureLayerImageVector>(layers[i]);
-
-        if( vectorLayer )
-        {
-            FOdysseyVectorScene* scene = vectorLayer->GetScene();
-
-            BindVectorScene( scene );
-        } 
-    }
-}
-
-void
-FOdysseyTextureEditorGUI::UnbindAllVectorScenes()
-{
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(static_cast<FOdysseyTextureEditor*>(mEditor)->LayerStack());
-    TArray<UOdysseyLayer*> layers = layerStack->GetLayers();
-
-    for( int i = 0; i < layers.Num(); i++ )
-    {
-        UOdysseyTextureLayerImageVector* vectorLayer = Cast<UOdysseyTextureLayerImageVector>(layers[i]);
-
-        if( vectorLayer )
-        {
-            FOdysseyVectorScene* scene = vectorLayer->GetScene();
-
-            scene->OnSignalDelegate().RemoveAll( this );
-        } 
-    }
 }
 
 void

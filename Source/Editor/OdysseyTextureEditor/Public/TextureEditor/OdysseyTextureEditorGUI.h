@@ -50,8 +50,7 @@ public:
     void BindVectorScene( FOdysseyVectorScene* iScene );
 protected:
     void OnVectorSceneSignal( FOdysseyVectorScene* iScene, uint64 iSignalFlags );
-    void UnbindAllVectorScenes();
-    void BindAllVectorScenes( UOdysseyLayerStack* iLayerStack );
+    void OnCurrentLayerChanged( UOdysseyLayerStack* iLayerStack );
 
 private:
 	FOdysseyTextureEditor* mEditor;
