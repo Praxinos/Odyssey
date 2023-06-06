@@ -26,6 +26,7 @@ public:
     void OpenColorSlidersTab();
     void OpenBrushSelectorTab();
     void OpenColorWheelTab();
+    void OpenColorPaletteTab();
     void OpenMeshSelectorTab();
     void OpenToolOptionsTab();
     void OpenTextureDetailsTab();

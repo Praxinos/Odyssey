@@ -37,6 +37,7 @@ FOdysseyPainterEditorGUI::CreateTabs()
     FOdysseyEditorGUI::CreateTabs();
 
     ODYSSEY_ADD_TAB(mMeshSelectorTab, FOdysseyPainterEditorMeshSelectorTab, mEditor)
+    ODYSSEY_ADD_TAB(mColorPaletteTab, FOdysseyPainterEditorPaletteTab, mEditor)
     ODYSSEY_ADD_TAB(mViewportTab, FOdysseyPainterEditorViewportTab, mEditor);
     ODYSSEY_ADD_TAB(mHUDTab, FOdysseyPainterEditorHUDTab, mEditor);
     ODYSSEY_ADD_TAB(mBrushSelectorTab, FOdysseyPainterEditorBrushSelectorTab, mEditor);
@@ -227,6 +228,14 @@ FOdysseyPainterEditorGUI::CreateRightSection()
             ->AddTab(mColorSlidersTab->ID(), ETabState::OpenedTab)
             ->SetHideTabWell(false)
             ->SetSizeCoefficient(0.3f)
+        )
+        // ColorPalette
+        ->Split
+        (
+            FTabManager::NewStack()
+            ->AddTab(mColorPaletteTab->ID(), ETabState::OpenedTab)
+            ->SetHideTabWell(true)
+            ->SetSizeCoefficient(0.3f)
         );
 }
 
@@ -323,6 +332,12 @@ TSharedPtr<FOdysseyPainterEditorMeshSelectorTab>&
 FOdysseyPainterEditorGUI::GetMeshSelectorTab()
 {
     return mMeshSelectorTab;
+}
+
+TSharedPtr<FOdysseyPainterEditorPaletteTab>& 
+FOdysseyPainterEditorGUI::GetColorPaletteTab()
+{
+    return mColorPaletteTab;
 }
 
 TSharedPtr<FOdysseyPainterEditorColorWheelTab>&

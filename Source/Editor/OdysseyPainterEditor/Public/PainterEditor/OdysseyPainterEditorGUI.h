@@ -6,6 +6,7 @@
 #include "OdysseyEditorGUI.h"
 
 #include "OdysseyPainterEditorBrushSelectorTab.h"
+#include "OdysseyPainterEditorColorPaletteTab.h"
 #include "OdysseyPainterEditorColorSlidersTab.h"
 #include "OdysseyPainterEditorColorWheelTab.h"
 #include "OdysseyPainterEditorHUDTab.h"
@@ -61,6 +62,7 @@ public:
     TSharedPtr<FOdysseyPainterEditorViewportTab>& GetViewportTab();
     TSharedPtr<FOdysseyPainterEditorBrushSelectorTab>& GetBrushSelectorTab();
     TSharedPtr<FOdysseyPainterEditorMeshSelectorTab>& GetMeshSelectorTab();
+    TSharedPtr<FOdysseyPainterEditorPaletteTab>& GetColorPaletteTab();
     TSharedPtr<FOdysseyPainterEditorColorWheelTab>& GetColorWheelTab();
     TSharedPtr<FOdysseyPainterEditorColorSlidersTab>& GetColorSlidersTab();
     TSharedPtr<FOdysseyPainterEditorTopTab>& GetTopTab();
@@ -98,6 +100,7 @@ protected:
     TSharedPtr<FOdysseyPainterEditorViewportTab>                mViewportTab;
     TSharedPtr<FOdysseyPainterEditorBrushSelectorTab>           mBrushSelectorTab;
     TSharedPtr<FOdysseyPainterEditorMeshSelectorTab>            mMeshSelectorTab;
+    TSharedPtr<FOdysseyPainterEditorPaletteTab>            mColorPaletteTab;
     TSharedPtr<FOdysseyPainterEditorColorWheelTab>              mColorWheelTab;
     TSharedPtr<FOdysseyPainterEditorColorSlidersTab>            mColorSlidersTab;
     TSharedPtr<FOdysseyPainterEditorTopTab>                     mTopTab;
