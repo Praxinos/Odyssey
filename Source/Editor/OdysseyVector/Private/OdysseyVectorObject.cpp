@@ -431,19 +431,19 @@ FOdysseyVectorObject::Invalidate()
 void
 FOdysseyVectorObject::Invalidate( uint32 iInvalidationFlags )
 {
-    if ( mInvalidationFlags == 0 )
+    if ( mParent )
     {
-        if ( mParent )
+        if( mInvalidationFlags == 0 )
         {
             mParent->mInvalidatedChildrenList.push_back( this );
 
             mParent->Invalidate( mParent->mInvalidationFlags | INVALIDATE_CHILD );
-
-            // MUST have a parent to be declared as invalidated otherwise mInvalidationFlags could be set
-            // even if the object has no parent because of bottom-to-top the recursive calls
-            // to Invalidate() from FOdysseyVectorVertex::Set() and then we would never reenter this "if" statement
-            mInvalidationFlags = iInvalidationFlags;
         }
+
+        // MUST have a parent to be declared as invalidated otherwise mInvalidationFlags could be set
+        // even if the object has no parent because of bottom-to-top the recursive calls
+        // to Invalidate() from FOdysseyVectorVertex::Set() and then we would never reenter this "if" statement
+        mInvalidationFlags |= iInvalidationFlags;
     }
 }
 

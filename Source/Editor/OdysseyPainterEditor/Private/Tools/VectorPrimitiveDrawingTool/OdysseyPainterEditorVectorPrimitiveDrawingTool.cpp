@@ -100,7 +100,6 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDragVector( FOdysseyVect
                 ::ULIS::FVec2D dif = ::ULIS::FVec2D( bldif.x, bldif.y );
 
                 ellipse->SetRadius( ellipse->GetRadiusX() + dif.x, ellipse->GetRadiusY() + dif.y /*difPosition.Distance()*/ );
-                ellipse->Invalidate();
             }
             break;
 
@@ -112,7 +111,6 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDragVector( FOdysseyVect
                 ::ULIS::FVec2D dif = ::ULIS::FVec2D( bldif.x, bldif.y );
 
                 rectangle->SetSize( rectangle->GetWidth() + dif.x, rectangle->GetHeight() + dif.y /*difPosition.Distance()*/ );
-                rectangle->Invalidate();
             }
             break;
 
@@ -121,7 +119,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDragVector( FOdysseyVect
         }
     }
 
-    iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES ); // update invalidated objects
+    iScene->Update( /*FOdysseyVectorObject::FREQUENTUPDATES*/0 ); // update invalidated objects
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW | FOdysseyVectorScene::SIGNAL_OBJECT_MODIFIED );
 }
 

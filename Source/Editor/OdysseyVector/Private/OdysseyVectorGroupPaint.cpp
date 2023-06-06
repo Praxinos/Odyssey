@@ -187,16 +187,6 @@ FOdysseyVectorGroupPaint::TransferChild( FOdysseyVectorObject* iFosterChild )
     OnChildTransform( path );
 }
 
-void
-FOdysseyVectorGroupPaint::Invalidate()
-{
-    std::list<FOdysseyVectorSegment*> cubicSegmenList;
-
-    FOdysseyVectorObject::Invalidate();
-
-    //Clear( cubicSegmenList );
-}
-
 FOdysseyVectorBucket*
 FOdysseyVectorGroupPaint::Bucket( double iX, double iY, uint8 iR, uint8 iG, uint8 iB, uint8 iA )
 {

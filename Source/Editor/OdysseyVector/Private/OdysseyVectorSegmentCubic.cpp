@@ -868,10 +868,46 @@ FOdysseyVectorSegmentCubic::DrawStructure( FOdysseyVectorObject* iParentObject, 
 }
 
 void
+FOdysseyVectorSegmentCubic::MakeBLPath()
+{
+    mBLPath.clear();
+
+    if( mPolygonCache.size() )
+    {
+        int i;
+
+        mBLPath.moveTo( mPolygonCache[0].quadVertex[0].x
+                      , mPolygonCache[0].quadVertex[0].y );
+
+        for ( i = 0; i < mPolygonCache.size(); i++ )
+        {
+            mBLPath.lineTo( mPolygonCache[i].quadVertex[1].x
+                          , mPolygonCache[i].quadVertex[1].y );
+        }
+
+        for ( --i ; i >= 0; i-- )
+        {
+            mBLPath.lineTo( mPolygonCache[i].quadVertex[2].x
+                          , mPolygonCache[i].quadVertex[2].y );
+        }
+
+        mBLPath.lineTo( mPolygonCache[0].quadVertex[3].x
+                      , mPolygonCache[0].quadVertex[3].y );
+
+        mBLPath.close();
+    }
+}
+
+void
 FOdysseyVectorSegmentCubic::Draw( )
 {
+
     // NOTE: Might not be super fast to call this for each segment
     BLContext* blctx = mPath->GetScene()->GetEngine()->GetBLContext();
+
+    blctx->fillPath( mBLPath );
+
+#ifdef unused
     uint32 segmentCount = GetVertex(0)->GetSegmentCount();
     BLMatrix2D& worldMatrix = mPath->GetWorldMatrix();
 
@@ -911,6 +947,8 @@ FOdysseyVectorSegmentCubic::Draw( )
     }
     blctx->restore();
 */
+#endif
+
 }
 
 static void
@@ -1100,4 +1138,6 @@ FOdysseyVectorSegmentCubic::BuildVariable()
                           , tangent[0]
                           , tangent[1]
                           , 0 );
+
+    MakeBLPath();
 }

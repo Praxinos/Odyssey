@@ -218,8 +218,8 @@ FOdysseyVectorPathBuilder::RecordVertex()
 
             Smooth( mCubicSegment, mSampleBuffer[0].IsSharp() );
 
-            AdjustHandle( mCubicSegment, 0, 0.5f, 3 );
-            AdjustHandle( mCubicSegment, 1, 0.5f, 3 );
+            AdjustHandle( mCubicSegment, 0, 0.5f, 1 );
+            AdjustHandle( mCubicSegment, 1, 0.5f, 1 );
 
             mCubicSegment->Invalidate();
 
@@ -400,8 +400,8 @@ FOdysseyVectorPathBuilder::RecordEnd( FOdysseyVectorVertex *iVertex )
 
             Smooth( mCubicSegment, mSampleBuffer[0].IsSharp() );
 
-            AdjustHandle( mCubicSegment, 0, 0.5f, 3 );
-            AdjustHandle( mCubicSegment, 1, 0.5f, 3 );
+            AdjustHandle( mCubicSegment, 0, 0.5f, 1 );
+            AdjustHandle( mCubicSegment, 1, 0.5f, 1 );
 
             mCubicSegment->Invalidate();
 
@@ -533,9 +533,12 @@ FOdysseyVectorPathBuilder::AdjustHandle( FOdysseyVectorSegmentCubic* iCubicSegme
         if ( dot0 )
         {
             double ratio = fabs( dot1 / dot0 );
-//UE_LOG(LogTemp, Warning, TEXT("Sample: %f %f"), sampledPoint.x, sampledPoint.y );
-//UE_LOG(LogTemp, Warning, TEXT("Some warning message %f %f %f %f %f"), ratio );
-
+/*
+UE_LOG(LogTemp, Warning, TEXT("Depth: %d"), iDepth );
+UE_LOG(LogTemp, Warning, TEXT("Sample: %f %f"), sampledPoint.x, sampledPoint.y );
+UE_LOG(LogTemp, Warning, TEXT("Expected: %f %f"), expectedPoint.x, expectedPoint.y );
+UE_LOG(LogTemp, Warning, TEXT("Some warning message %f %f %f"), angle0, angle1, ratio );
+*/
             segmentHandle->Set( vertexPoint.x + ( direction.x * ratio ),
                                 vertexPoint.y + ( direction.y * ratio ) );
 

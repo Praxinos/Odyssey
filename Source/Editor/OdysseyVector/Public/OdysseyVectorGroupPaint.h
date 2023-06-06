@@ -114,7 +114,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         void RemoveBucket( FOdysseyVectorBucket* iBucket );
         void Colorize();
         void DrawBuckets( FBucketDrawingFlags iDrawingFlags );
-        virtual void Invalidate();
         void MergeCycles();
         double GetGapTolerance();
         void SetGapTolerance( double iGapTolerance );
