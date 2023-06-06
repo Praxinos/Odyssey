@@ -266,6 +266,9 @@ FOdysseyAnimationEditor::OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStack)
 	//TODO: Maybe this should be done differently later, but we don't have time for that now
 	if (iLayerStack == LayerStack())
 		SelectDefaultTool(); //Refresh the current tool when we change layer
+
+	
+    Timeline()->SetSelectedFrames(FInt32Range()); //Clear Selected frames when changing layer
 }
 
 #undef LOCTEXT_NAMESPACE

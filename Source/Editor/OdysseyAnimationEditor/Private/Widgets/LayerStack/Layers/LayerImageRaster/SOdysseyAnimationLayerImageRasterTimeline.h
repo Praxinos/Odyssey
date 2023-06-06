@@ -68,6 +68,8 @@ private:
     //Widget Methods
     float GetLayerOffset() const;
 
+    EVisibility GetFrameSelectorVisibility() const;
+
     EVisibility GetCellVisibility(TSharedPtr<FCellData> iCellData) const;
     float GetCellHeight() const;
     float GetCellLength(TSharedPtr<FCellData> iCellData) const;

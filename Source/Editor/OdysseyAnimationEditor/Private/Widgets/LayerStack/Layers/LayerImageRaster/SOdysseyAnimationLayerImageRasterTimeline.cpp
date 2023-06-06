@@ -102,13 +102,10 @@ SOdysseyAnimationLayerImageRasterTimeline::Construct(
         + SVerticalBox::Slot()
         .AutoHeight()
         [
-            SNew(SBox)
-            .HeightOverride(20.f)
-            [
-                SNew(SOdysseyAnimationTimelineFrameSelector, mEditor)
-                .OnMapActions(this, &SOdysseyAnimationLayerImageRasterTimeline::OnFrameSelectorMapActions)
-                .OnBuildContextMenu(this, &SOdysseyAnimationLayerImageRasterTimeline::OnFrameSelectorBuildContextMenu)
-            ]
+            SNew(SOdysseyAnimationTimelineFrameSelector, mEditor)
+            .Visibility(this, &SOdysseyAnimationLayerImageRasterTimeline::GetFrameSelectorVisibility)
+            .OnMapActions(this, &SOdysseyAnimationLayerImageRasterTimeline::OnFrameSelectorMapActions)
+            .OnBuildContextMenu(this, &SOdysseyAnimationLayerImageRasterTimeline::OnFrameSelectorBuildContextMenu)
         ]
     ];
 
@@ -485,6 +482,13 @@ SOdysseyAnimationLayerImageRasterTimeline::BuildContextMenu(FMenuBuilder& iMenuB
     iMenuBuilder.AddMenuEntry(FGenericCommands::Get().Delete);
     //iMenuBuilder.AddMenuSeparator();
     iMenuBuilder.EndSection();
+}
+
+EVisibility
+SOdysseyAnimationLayerImageRasterTimeline::GetFrameSelectorVisibility() const
+{
+    bool isCurrentLayer = mAnimationLayerImageRaster->GetLayerStack()->CurrentLayer == mAnimationLayerImageRaster;
+	return isCurrentLayer ? EVisibility::Visible : EVisibility::Hidden;
 }
 
 EVisibility

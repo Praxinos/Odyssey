@@ -20,9 +20,13 @@ SOdysseyAnimationTimelineFrameSelector::Construct(
 
 	ChildSlot
 	[
-		//use this scrollbox to display other widgets in the FrameSelector area
-		//for now there is no wodgets to display, but I can clearly imagine some
-		SNew(SOdysseyAnimationTimelineScrollBox, iEditor)
+		SNew(SBox)
+		.HeightOverride(20.f)
+		[
+			//use this scrollbox to display other widgets in the FrameSelector area
+			//for now there is no wodgets to display, but I can clearly imagine some
+			SNew(SOdysseyAnimationTimelineScrollBox, iEditor)
+		]
 	];
 }
 
