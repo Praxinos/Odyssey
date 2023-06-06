@@ -55,4 +55,5 @@ public:
 private:
     FOdysseyVectorHUDSelection *mSelectionHUD;
     std::vector<::ULIS::FVec2D> mPointArray;
+    ::ULIS::FVec2D mPressedMouseCoords;
 };

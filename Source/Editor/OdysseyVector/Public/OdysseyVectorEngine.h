@@ -57,10 +57,14 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
          * @param iScene the root object
          * @param iPointArray an array defining the selection area.
          * @param iSelectionFlags FOdysseyVectorObject::PICK_MASK_BASED or FOdysseyVectorObject::PICK_MATH_BASED
+         * @return an array of pointers to picked objects.
          *  FOdysseyVectorObject::PICK_MASK_BASED: in that case the mask buffer must be filled with 0xFF where picking is wanted.
          *  FOdysseyVectorObject::PICK_MATH_BASED: in that case collisions are mathematically computed.
          */
-        void Pick( FOdysseyVectorScene* iScene, std::vector<::ULIS::FVec2D>& iPointArray, uint32 iSelectionFlags );
+        void Pick( FOdysseyVectorScene* iScene
+                 , std::vector<::ULIS::FVec2D>& iPointArray
+                 , std::vector<FOdysseyVectorObject*>& oPickedObjectArray
+                 , uint32 iSelectionFlags );
 
         /**
          * @brief Pick segments depending on a selection circle passed as parameters.

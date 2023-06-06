@@ -6,7 +6,6 @@
 #include "CoreMinimal.h"
 #include "Tools/OdysseyPainterEditorTool.h"
 #include "OdysseyVector.h"
-#include "Undo/OdysseyVectorUndoPointPosition.h"
 
 #include "OdysseyPainterEditorVectorPathEditTool.generated.h"
 
@@ -56,6 +55,16 @@ protected:
                                       , FOdysseyVectorScene* iScene
                                       , double iWorldX
                                       , double iWorldY );
+    void OnMouseDownDeletePoint( FOdysseyVectorEngine* iEngine
+                               , FOdysseyVectorScene* iScene
+                               , FOdysseyVectorPath* iPath
+                               , const FOdysseyPoint& iPointInTexture
+                               , const FKey& iKey );
+    void OnMouseDownMovePoint( FOdysseyVectorEngine* iEngine
+                             , FOdysseyVectorScene* iScene
+                             , FOdysseyVectorPath* iPath
+                             , const FOdysseyPoint& iPointInTexture
+                             , const FKey& iKey );
 
 private:
     double mOldLocalMouseX;

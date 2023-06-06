@@ -14,7 +14,7 @@ FOdysseyVectorSegmentCubic::FOdysseyVectorSegmentCubic()
 {
 }
 
-FOdysseyVectorSegmentCubic::FOdysseyVectorSegmentCubic( FOdysseyVectorPathCubic* iPath
+FOdysseyVectorSegmentCubic::FOdysseyVectorSegmentCubic( FOdysseyVectorPath* iPath
                                                       , FOdysseyVectorVertex* iPoint0
                                                       , double iCtrlPoint0x
                                                       , double iCtrlPoint0y
@@ -23,15 +23,15 @@ FOdysseyVectorSegmentCubic::FOdysseyVectorSegmentCubic( FOdysseyVectorPathCubic*
                                                       , FOdysseyVectorVertex* iPoint1 )
     : FOdysseyVectorSegment( iPath, iPoint0, iPoint1 )
 {
-    Init ( iPath, iPoint0, iCtrlPoint0x, iCtrlPoint0y, iCtrlPoint1x, iCtrlPoint1y, iPoint1 );
+    Init ( iPoint0, iCtrlPoint0x, iCtrlPoint0y, iCtrlPoint1x, iCtrlPoint1y, iPoint1 );
 }
 
-FOdysseyVectorSegmentCubic::FOdysseyVectorSegmentCubic( FOdysseyVectorPathCubic* iPath
+FOdysseyVectorSegmentCubic::FOdysseyVectorSegmentCubic( FOdysseyVectorPath* iPath
                                                       , FOdysseyVectorVertex* iPoint0
                                                       , FOdysseyVectorVertex* iPoint1 )
     : FOdysseyVectorSegment( iPath, iPoint0, iPoint1 )
 {
-    Init( iPath, iPoint0, iPoint1 );
+    Init( iPoint0, iPoint1 );
 }
 
 ::ULIS::FVec2D
@@ -51,8 +51,7 @@ FOdysseyVectorSegmentCubic::GetHandleVector( uint32 iHandleID, bool iNormalize )
 }
 
 void
-FOdysseyVectorSegmentCubic::Init( FOdysseyVectorPathCubic* iPath
-                                , FOdysseyVectorVertex* iPoint0
+FOdysseyVectorSegmentCubic::Init( FOdysseyVectorVertex* iPoint0
                                 , double iCtrlPoint0x
                                 , double iCtrlPoint0y
                                 , double iCtrlPoint1x
@@ -69,11 +68,10 @@ FOdysseyVectorSegmentCubic::Init( FOdysseyVectorPathCubic* iPath
 }
 
 void
-FOdysseyVectorSegmentCubic::Init( FOdysseyVectorPathCubic* iPath
-                                , FOdysseyVectorVertex* iPoint0
+FOdysseyVectorSegmentCubic::Init( FOdysseyVectorVertex* iPoint0
                                 , FOdysseyVectorVertex* iPoint1 )
 {
-    Init( iPath, iPoint0, iPoint0->GetX(), iPoint0->GetY(), iPoint1->GetX(), iPoint1->GetY(), iPoint1 );
+    Init( iPoint0, iPoint0->GetX(), iPoint0->GetY(), iPoint1->GetX(), iPoint1->GetY(), iPoint1 );
 }
 
 void

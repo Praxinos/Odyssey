@@ -37,7 +37,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
          * @param iVertex1
          * @return a pointer to the newly created segment
          */
-        FOdysseyVectorSegmentCubic ( FOdysseyVectorPathCubic* iPath
+        FOdysseyVectorSegmentCubic ( FOdysseyVectorPath* iPath
                                    , FOdysseyVectorVertex* iVertex0
                                    , FOdysseyVectorVertex* iVertex1 );
 
@@ -52,7 +52,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
          * @param iVertex1
          * @return a pointer to the newly created segment
          */
-        FOdysseyVectorSegmentCubic( FOdysseyVectorPathCubic* iPath
+        FOdysseyVectorSegmentCubic( FOdysseyVectorPath* iPath
                                   , FOdysseyVectorVertex* iVertex0
                                   , double iCtrlPoint0x
                                   , double iCtrlPoint0y
@@ -64,17 +64,14 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
 
        /**
          * @brief Init a cubic segment.
-         * @param iPath the path this segment belongs to
          * @param iVertex0
          * @param iVertex1
          */
-        void Init( FOdysseyVectorPathCubic* iPath
-                 , FOdysseyVectorVertex* iVertex0
+        void Init( FOdysseyVectorVertex* iVertex0
                  , FOdysseyVectorVertex* iVertex1 );
 
        /**
          * @brief Init a cubic segment.
-         * @param iPath the path this segment belongs to
          * @param iVertex0
          * @param iCtrlPoint0x
          * @param iCtrlPoint0y
@@ -82,8 +79,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
          * @param iCtrlPoint1y
          * @param iVertex1
          */
-        void Init( FOdysseyVectorPathCubic* iPath
-                 , FOdysseyVectorVertex* iVertex0
+        void Init( FOdysseyVectorVertex* iVertex0
                  , double iCtrlPoint0x
                  , double iCtrlPoint0y
                  , double iCtrlPoint1x

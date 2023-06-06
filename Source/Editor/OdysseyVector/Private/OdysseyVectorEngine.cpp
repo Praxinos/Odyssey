@@ -550,10 +550,12 @@ FOdysseyVectorEngine::UseColorImage()
 }
 
 void
-FOdysseyVectorEngine::Pick( FOdysseyVectorScene* iScene, std::vector<::ULIS::FVec2D>& iPointArray, uint32 iSelectionFlags )
+FOdysseyVectorEngine::Pick( FOdysseyVectorScene* iScene
+                          , std::vector<::ULIS::FVec2D>& iPointArray
+                          , std::vector<FOdysseyVectorObject*>& oPickedObjectArray
+                          , uint32 iSelectionFlags )
 {
     ::ULIS::FRectD roi;
-    std::vector<FOdysseyVectorObject*> pickedObjectArray;
 
     if( iSelectionFlags & FOdysseyVectorObject::PICK_MASK_BASED )
     {
@@ -572,15 +574,7 @@ FOdysseyVectorEngine::Pick( FOdysseyVectorScene* iScene, std::vector<::ULIS::FVe
 
     mBLContext->flush(BL_CONTEXT_FLUSH_SYNC);
 
-    // deselect all
-    iScene->ClearSelection();
-
-    RecursivePick( mSelectionSpace ? mSelectionSpace : iScene, iScene, pickedObjectArray, roi, iSelectionFlags );
-
-    for ( int i = 0; i < pickedObjectArray.size(); i++ )
-    {
-        iScene->Select( pickedObjectArray[i] );
-    }
+    RecursivePick( mSelectionSpace ? mSelectionSpace : iScene, iScene, oPickedObjectArray, roi, iSelectionFlags );
 
     if( iSelectionFlags & FOdysseyVectorObject::PICK_MASK_BASED )
     {

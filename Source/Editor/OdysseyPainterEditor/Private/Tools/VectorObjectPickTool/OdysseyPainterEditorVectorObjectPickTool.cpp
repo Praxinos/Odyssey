@@ -66,13 +66,14 @@ UOdysseyPainterEditorVectorObjectPickTool::OnMouseDownVector( FOdysseyVectorEngi
                                                             , const FOdysseyPoint& iPointInTexture
                                                             , const FKey& iKey )
 {
-    ::ULIS::FVec2D point = { iPointInTexture.x, iPointInTexture.y };
+    mPressedMouseCoords.x = iPointInTexture.x;
+    mPressedMouseCoords.y = iPointInTexture.y;
 
     mPointArray.clear();
 
     mSelectionHUD->SetSelecting( true, &mPointArray );
 
-    mPointArray.push_back( point );
+    mPointArray.push_back( ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y ) );
 
     iScene->Signal( FOdysseyVectorScene::SCENE_REDRAW );
 
@@ -116,6 +117,7 @@ UOdysseyPainterEditorVectorObjectPickTool::OnMouseUpVector( FOdysseyVectorEngine
                                                           , const FOdysseyPoint& iPointInTexture
                                                           , const FKey& iKey )
 {
+    std::vector<FOdysseyVectorObject*> pickedObjectArray;
     FOdysseyVectorUndoSelect* undoSelect = nullptr;
 
     // needed for valid GUndo pointer
@@ -128,14 +130,38 @@ UOdysseyPainterEditorVectorObjectPickTool::OnMouseUpVector( FOdysseyVectorEngine
     }
     GEditor->EndTransaction();
 
+    // deselect all if control key is not pressed
+    if( FSlateApplication::Get().GetModifierKeys().IsControlDown() == false )
+    {
+        iScene->ClearSelection();
+    }
+
     if ( mPointArray.size() == 1 )
     {
-        iEngine->Pick( iScene, mPointArray, FOdysseyVectorObject::PICK_MATH_BASED );
+        iEngine->Pick( iScene, mPointArray, pickedObjectArray, FOdysseyVectorObject::PICK_MATH_BASED );
     }
 
     if ( mPointArray.size() > 1 )
     {
-        iEngine->Pick( iScene, mPointArray, FOdysseyVectorObject::PICK_MASK_BASED );
+        iEngine->Pick( iScene, mPointArray, pickedObjectArray, FOdysseyVectorObject::PICK_MASK_BASED );
+    }
+
+    // if no dragging occured, we only select the object that is the most forward
+    if( ( iPointInTexture.x == mPressedMouseCoords.x )
+     && ( iPointInTexture.y == mPressedMouseCoords.y ) )
+    {
+        if( pickedObjectArray.size() )
+        {
+            iScene->Select( pickedObjectArray.back() );
+        }
+    }
+    // otherwise we select all objects lying in the selection area
+    else
+    {
+        for ( int i = 0; i < pickedObjectArray.size(); i++ )
+        {
+            iScene->Select( pickedObjectArray[i] );
+        }
     }
 
     SetSelectionSpace( iEngine, iScene->GetLastSelected() );

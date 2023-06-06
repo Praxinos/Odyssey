@@ -343,7 +343,7 @@ CreateVertexGapSegment( FOdysseyVectorVertex* iVertex
         {
             iGapSegmentBuffer.emplace_back();
             // Warning: setting a parent path here leads to bugs, due to path update of a segment not really belonging to it.
-            iGapSegmentBuffer[gapCount].Init( nullptr/*static_cast<FOdysseyVectorPathCubic*>(iVertex->GetPath())*/, nearestVertex, iVertex );
+            iGapSegmentBuffer[gapCount].Init( nearestVertex, iVertex );
             //iGapSegmentBuffer[gapCount].Link(); // not necessary. saves us some cpu cycles
 
             iSectionBuffer.emplace_back();
