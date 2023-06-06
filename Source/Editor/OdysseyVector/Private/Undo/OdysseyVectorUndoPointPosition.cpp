@@ -26,6 +26,16 @@ FOdysseyVectorUndoPointPosition::FOdysseyVectorUndoPointPosition( FOdysseyVector
     }
 }
 
+FOdysseyVectorUndoPointPosition::FOdysseyVectorUndoPointPosition( FOdysseyVectorScene* iScene
+                                                                , FOdysseyVectorPoint* iPoint
+                                                                , double iX
+                                                                , double iY
+                                                                , double iRadius )
+    : FOdysseyVectorUndo( iScene )
+{
+    mPointPositionArray.push_back( FPointPosition( iPoint, iX, iY, iRadius ) );
+}
+
 static void
 LoadArray( std::vector<FPointPosition>& mPointPositionArray )
 {

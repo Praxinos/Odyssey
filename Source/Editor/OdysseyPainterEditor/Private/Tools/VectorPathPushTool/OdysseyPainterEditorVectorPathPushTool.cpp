@@ -30,8 +30,6 @@ UOdysseyPainterEditorVectorPathPushTool::ActivateVector( FOdysseyVectorEngine* i
     iEngine->ClearHUD();
     iEngine->AddHUD(&mPickingHUD);
 
-    mUndoSegmentReshape = nullptr;
-
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
 
@@ -109,11 +107,7 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDownVector( FOdysseyVectorEngine
     GEditor->BeginTransaction(LOCTEXT("VectorPathPushTool","Vector Path Push Tool"));
     if( GUndo )
     {
-        mUndoSegmentReshape = new FOdysseyVectorUndoSegmentReshape( iScene );
-
-        mUndoSegmentReshape->RecordBefore( mSegmentArray );
-
-        FOdysseyVectorUndo* undo = mUndoSegmentReshape;
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSegmentReshape( iScene, mSegmentArray );
 
         GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
     }
@@ -210,11 +204,6 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseUpVector( FOdysseyVectorEngine* 
                                                         , const FOdysseyPoint& iPointInTexture
                                                         , const FKey& iKey )
 {
-    if( mUndoSegmentReshape )
-    {
-        mUndoSegmentReshape->RecordAfter( mSegmentArray );
-    }
-
     iScene->Update( 0 ); // update invalidated objects
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW | FOdysseyVectorScene::SIGNAL_OBJECT_MODIFIED );
 

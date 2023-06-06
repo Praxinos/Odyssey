@@ -44,7 +44,7 @@ UOdysseyTextureLayerImageRaster::UOdysseyTextureLayerImageRaster()
     : RasterBlock(MakeShared<FOdysseyRasterBlock>(this))
 {
 	LayerTypeName = LOCTEXT("LayerTypeName", "Raster Image Layer");
-    Icon = *FOdysseyStyle::GetBrush( "OdysseyLayerStack.ImageLayer16");
+    Icon = *FOdysseyStyle::GetBrush( "OdysseyLayerStack.LayerBitmap16");
 }
 
 void

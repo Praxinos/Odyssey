@@ -24,11 +24,14 @@ struct FPointPosition
         point = iPoint;
         position = iPoint->GetCoords();
         radius = iPoint->GetRadius();
+    }
 
-        /*if( iPoint->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
-        {
-
-        }*/
+    FPointPosition( FOdysseyVectorPoint* iPoint, double iX, double iY, double iRadius )
+    {
+        point = iPoint;
+        position.x = iX;
+        position.y = iY;
+        radius = iRadius;
     }
 };
 
@@ -37,6 +40,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoPointPosition : public FOdysseyVectorU
     public:
         ~FOdysseyVectorUndoPointPosition();
         FOdysseyVectorUndoPointPosition( FOdysseyVectorScene* iScene, std::vector<FOdysseyVectorPoint*>& iPointArray );
+        FOdysseyVectorUndoPointPosition( FOdysseyVectorScene* iScene
+                                       , FOdysseyVectorPoint* iPoint
+                                       , double iX
+                                       , double iY
+                                       , double iRadius );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;

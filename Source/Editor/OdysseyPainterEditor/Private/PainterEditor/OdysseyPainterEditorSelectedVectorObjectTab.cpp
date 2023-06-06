@@ -21,10 +21,10 @@ FOdysseyPainterEditorSelectedVectorObjectTab::FOdysseyPainterEditorSelectedVecto
                             FSlateIcon( "OdysseyStyle", "PainterEditor.Tools16" ))
     , mEditor(iEditor)
 {
-    mObjectView = NewObject<UOdysseyVectorViewObject>();
-    mPathView = NewObject<UOdysseyVectorViewPath>();
-    mEllipseView = NewObject<UOdysseyVectorViewEllipse>();
-    mGroupPaintView = NewObject<UOdysseyVectorViewGroupPaint>();
+    mObjectView = NewObject<UOdysseyPainterEditorVectorObjectView>();
+    mPathView = NewObject<UOdysseyPainterEditorVectorPathView>();
+    mEllipseView = NewObject<UOdysseyPainterEditorVectorEllipseView>();
+    mGroupPaintView = NewObject<UOdysseyPainterEditorVectorGroupPaintView>();
 /*
     mEditor->GetVectorObjectPickTool()->mSelectionChanged.AddRaw(this, &FOdysseyPainterEditorSelectedVectorObjectTab::OnSelectionChanged );
     mEditor->GetVectorPathDrawingTool()->mSelectionChanged.AddRaw(this, &FOdysseyPainterEditorSelectedVectorObjectTab::OnSelectionChanged );
@@ -83,25 +83,25 @@ FOdysseyPainterEditorSelectedVectorObjectTab::BindShortcuts(FBaseToolkit* iToolk
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------------------- Widget Getters
 
-UOdysseyVectorViewObject*
+UOdysseyPainterEditorVectorObjectView*
 FOdysseyPainterEditorSelectedVectorObjectTab::GetObjectView()
 {
     return mObjectView;
 }
 
-UOdysseyVectorViewPath*
+UOdysseyPainterEditorVectorPathView*
 FOdysseyPainterEditorSelectedVectorObjectTab::GetPathView()
 {
     return mPathView;
 }
 
-UOdysseyVectorViewEllipse*
+UOdysseyPainterEditorVectorEllipseView*
 FOdysseyPainterEditorSelectedVectorObjectTab::GetEllipseView()
 {
     return mEllipseView;
 }
 
-UOdysseyVectorViewGroupPaint*
+UOdysseyPainterEditorVectorGroupPaintView*
 FOdysseyPainterEditorSelectedVectorObjectTab::GetGroupPaintView()
 {
     return mGroupPaintView;

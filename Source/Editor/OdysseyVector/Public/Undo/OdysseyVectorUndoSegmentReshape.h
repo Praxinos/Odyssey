@@ -35,10 +35,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoSegmentReshape : public FOdysseyVector
 {
     public:
         ~FOdysseyVectorUndoSegmentReshape();
-        FOdysseyVectorUndoSegmentReshape( FOdysseyVectorScene* iScene );
+        FOdysseyVectorUndoSegmentReshape( FOdysseyVectorScene* iScene, std::vector<FOdysseyVectorSegment*>& iSegmentArray );
 
-        void RecordBefore( std::vector<FOdysseyVectorSegment*>& iSegmentArray );
-        void RecordAfter( std::vector<FOdysseyVectorSegment*>& iSegmentArray );
+        void SwapArray();
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;
@@ -50,6 +49,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoSegmentReshape : public FOdysseyVector
         virtual FString ToString() const override;
 
     private:
-        std::vector<FSegmentShape> mSegmentShapeBeforeArray;
-        std::vector<FSegmentShape> mSegmentShapeAfterArray;
+        std::vector<FSegmentShape> mSegmentShapeArray;
 };

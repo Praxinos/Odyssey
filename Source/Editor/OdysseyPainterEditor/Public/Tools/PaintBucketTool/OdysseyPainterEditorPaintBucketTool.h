@@ -52,6 +52,18 @@ public:
 
     virtual void Commit() override;
 
+    protected:
+        void OnMouseUpVectorMovePoint( FOdysseyVectorEngine* iEngine
+                                     , FOdysseyVectorScene* iScene
+                                     , FOdysseyVectorPoint* iPoint
+                                     , const FOdysseyPoint& iPointInTexture
+                                     , const FKey& iKey );
+        void OnMouseUpVectorCreateBucket( FOdysseyVectorEngine* iEngine
+                                        , FOdysseyVectorScene* iScene
+                                        , FOdysseyVectorGroupPaint* paintGroup
+                                        , const FOdysseyPoint& iPointInTexture
+                                        , const FKey& iKey );
+
 public:
     UPROPERTY(EditAnywhere,Category="Odyssey BucketFill Tool")
     uint8 Tolerance;
@@ -73,7 +85,6 @@ protected:
 
     //Resources
     FOdysseyPaintEngine mPaintEngine;
-    FOdysseyVectorHandleBucket* mPickedBucketHandle;
     FOdysseyVectorBucket* mPickedBucket;
     FOdysseyVectorObject* mPickedObject;
     double mOldLocalMouseX;
@@ -81,4 +92,5 @@ protected:
     double mDownMouseX;
     double mDownMouseY;
     FOdysseyVectorHUDBucket mBucketHUD;
+    uint32 mPickedArea;
 };

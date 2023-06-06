@@ -428,6 +428,10 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     //OdysseyLayerStack
     Set( "OdysseyLayerStack.ImageLayer64", new IMAGE_BRUSH( "OdysseyLayerStack/image_layer_64", mIcon64x64 ) );
     Set( "OdysseyLayerStack.ImageLayer16", new IMAGE_BRUSH( "OdysseyLayerStack/image_layer_16", mIcon16x16 ) );
+    Set( "OdysseyLayerStack.LayerBitmap64", new IMAGE_BRUSH( "OdysseyLayerStack/layer_bitmap_64", mIcon64x64 ) );
+    Set( "OdysseyLayerStack.LayerBitmap16", new IMAGE_BRUSH( "OdysseyLayerStack/layer_bitmap_16", mIcon16x16 ) );
+    Set( "OdysseyLayerStack.LayerVector64", new IMAGE_BRUSH( "OdysseyLayerStack/layer_vector_64", mIcon64x64 ) );
+    Set( "OdysseyLayerStack.LayerVector16", new IMAGE_BRUSH( "OdysseyLayerStack/layer_vector_16", mIcon16x16 ) );
     Set( "OdysseyLayerStack.NotVisible64", new IMAGE_BRUSH( "OdysseyLayerStack/not_visible_64", mIcon64x64 ) );
     Set( "OdysseyLayerStack.NotVisible16", new IMAGE_BRUSH( "OdysseyLayerStack/not_visible_16", mIcon16x16 ) );
     Set( "OdysseyLayerStack.Visible64", new IMAGE_BRUSH( "OdysseyLayerStack/visible_64", mIcon64x64 ) );

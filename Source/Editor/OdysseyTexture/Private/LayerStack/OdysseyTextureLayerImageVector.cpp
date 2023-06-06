@@ -27,8 +27,8 @@ UOdysseyTextureLayerImageVector::UOdysseyTextureLayerImageVector()
     , mVEngine(nullptr)
 {
 	LayerTypeName = LOCTEXT("LayerTypeName", "Vector Image Layer");
-    Icon = *FOdysseyStyle::GetBrush( "OdysseyLayerStack.ImageLayer16");
-} 
+    Icon = *FOdysseyStyle::GetBrush( "OdysseyLayerStack.LayerVector16");
+}
 
 void
 UOdysseyTextureLayerImageVector::Init( uint32 iWidth, uint32 iHeight )
@@ -48,7 +48,7 @@ UOdysseyTextureLayerImageVector::Init( uint32 iWidth, uint32 iHeight )
     // record a callback to refresh the layer when a property of an object's details view is changed
     //mOnRefreshHandle = mScene->OnUpdateDelegate().AddUObject( this, &UOdysseyTextureLayerImageVector::OnRefresh );
 
-    UE_LOG(LogTemp,Warning,TEXT("UOdysseyTextureLayerImageVector::Init %d %d %d"), iWidth, iHeight, mVEngine );
+    //UE_LOG(LogTemp,Warning,TEXT("UOdysseyTextureLayerImageVector::Init %d %d %d"), iWidth, iHeight, mVEngine );
 
     mVEngine->GetBLImage()->getData( &imgData );
 
@@ -158,15 +158,6 @@ UOdysseyTextureLayerImageVector::Serialize(FArchive& Ar)
         FOdysseyVectorImport::Read( mScene, Ar );
     }
 
-}
-
-void
-UOdysseyTextureLayerImageVector::OnRefresh( FOdysseyVectorScene* iScene )
-{
-    if( mScene == iScene )
-    {
-        RenderImageChanged(false);
-    }
 }
 
 #undef LOCTEXT_NAMESPACE

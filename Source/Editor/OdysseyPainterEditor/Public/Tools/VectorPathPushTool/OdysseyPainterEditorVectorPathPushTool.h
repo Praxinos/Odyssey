@@ -58,8 +58,6 @@ protected:
     void PropertyChanged( const FName& iPropertyName );
 
 private:
-    // the "undo segment reshape" object is used in both the MouseDown and MouseUp events. We need to remember it.
-    FOdysseyVectorUndoSegmentReshape* mUndoSegmentReshape;
     bool HasVertex( FOdysseyVectorPoint* iPoint );
     std::vector<FPushedPoint> mPushedPointArray;
     std::vector<FOdysseyVectorSegment*> mSegmentArray;
