@@ -32,6 +32,17 @@
  * because it will only cache its data when a Non-Interactive Update() or Commit() is called.
  */
 
+
+struct FBlockCleanupInfo
+{
+    FGuid mId;
+    int mWidth;
+    int mHeight;
+    int mFormat;
+    bool mIsCacheInvalid;
+    TSharedPtr<FThreadSafeCounter> mAvailableCounter;
+};
+
 class ODYSSEYIMAGING_API FOdysseyRasterBlock : public TSharedFromThis<FOdysseyRasterBlock>
 {
 public:
@@ -217,6 +228,8 @@ public:
     void Serialize(FArchive& Ar);
 
 private:
+    friend class FOdysseyRasterBlockMutator;
+
     UObject* mOwner;
 
     FGuid Id; //unique ID identifying the block
@@ -260,10 +273,7 @@ private:
 
     FCriticalSection mMutex;
     TSharedPtr<FThreadSafeCounter> mAvailableCounter;
-
-    //FOdysseyRasterBlockUndoBuilder mRasterBlockUndoBuilder;
-
-    TSharedPtr<::ULIS::FBlock> mDebugBlock;
+    FBlockCleanupInfo* mCleanupInfos;
 };
 
 
