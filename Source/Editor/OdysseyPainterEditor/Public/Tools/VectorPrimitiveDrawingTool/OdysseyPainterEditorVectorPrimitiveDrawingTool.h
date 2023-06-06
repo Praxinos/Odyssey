@@ -56,6 +56,6 @@ public:
         UPROPERTY(EditAnywhere, Category="Primitive Drawing Tool")
         EOdysseyVectorPrimitiveType PrimitiveType;
 
-        UPROPERTY(EditAnywhere, Category="Primitive Drawing Tool")
+        UPROPERTY(EditAnywhere, Category="Primitive Drawing Tool", meta = (ClampMin = "0.0", UIMin = "0.0"))
         double StrokeWidth;
 };

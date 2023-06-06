@@ -64,8 +64,10 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDownVector( FOdysseyVectorEngine
                                                           , const FKey& iKey )
 {
     std::vector<double> pickedSegmentDistanceArray;
+    std::vector<FOdysseyVectorVertex*> vertexArray;
 
     // this callback crashes if I dont reserve memory. I have no idea why. To troubleshoot later.
+    vertexArray.reserve( 500 );
     mSegmentArray.reserve( 500 );
     pickedSegmentDistanceArray.reserve( 500 ); // unused for now
 
@@ -104,6 +106,7 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDownVector( FOdysseyVectorEngine
                 ::ULIS::FVec2D p0Vec = { localPoint.x - point0.x, localPoint.y - point0.y };
 
                 mPushedPointArray.push_back( FPushedPoint( cubicSegment->GetPoint(0), Radius / p0Vec.Distance(), vertex0->IsSmooth() ) );
+                vertexArray.push_back( vertex0 );
             }
 
             if( HasVertex( vertex1 ) == false )
@@ -111,6 +114,7 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDownVector( FOdysseyVectorEngine
                 ::ULIS::FVec2D p1Vec = { localPoint.x - point1.x, localPoint.y - point1.y };
 
                 mPushedPointArray.push_back( FPushedPoint( cubicSegment->GetPoint(1), Radius / p1Vec.Distance(), vertex1->IsSmooth() ) );
+                vertexArray.push_back( vertex1 );
             }
         }
     }
@@ -119,7 +123,11 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDownVector( FOdysseyVectorEngine
     GEditor->BeginTransaction(LOCTEXT("VectorPathPushTool","Vector Path Push Tool"));
     if( GUndo )
     {
-        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSegmentReshape( iScene, mSegmentArray );
+        // due to the "preserve smoothing" option, the segments that are altered could be more numerous than the one picked.
+        // we have to include them from the picked vertices.
+        std::vector<FOdysseyVectorSegment*> savedSegmentArray;
+        FOdysseyVectorVertex::ArrayToSegmentArray( vertexArray, savedSegmentArray );
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSegmentReshape( iScene, savedSegmentArray );
 
         GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
     }
@@ -172,7 +180,7 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDragVector( FOdysseyVectorEngine
         }
 
         BLPoint delta = path->GetInverseWorldMatrix().mapVector( iPointInTexture.deltaPosition.X
-                                                                , iPointInTexture.deltaPosition.Y );
+                                                               , iPointInTexture.deltaPosition.Y );
 
         point->SetX( point->GetX() + ( delta.x * mPushedPointArray[i].ratio ) );
         point->SetY( point->GetY() + ( delta.y * mPushedPointArray[i].ratio ) );

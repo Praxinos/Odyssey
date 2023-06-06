@@ -61,7 +61,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
                                                   , double iWorldY );
 
     public:
-        UPROPERTY( EditAnywhere, Category="Odyssey PathDrawing Tool" )
+        UPROPERTY( EditAnywhere, Category="Odyssey PathDrawing Tool", meta = (ClampMin = "0.0", UIMin = "0.0") )
         double Radius;
         // computed based upon whether or not the pencil size is relative to the object's transformation matrix
         double mRealSize;
@@ -72,7 +72,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
         UPROPERTY( EditAnywhere, Category="Odyssey PathDrawing Tool" )
         bool Stitch;
 
-        UPROPERTY( EditAnywhere, Category="Odyssey PathDrawing Tool" )
+        UPROPERTY( EditAnywhere, Category="Odyssey PathDrawing Tool", meta = (ClampMin = "0.0", UIMin = "0.0") )
         double StitchingRadius;
 
     private:

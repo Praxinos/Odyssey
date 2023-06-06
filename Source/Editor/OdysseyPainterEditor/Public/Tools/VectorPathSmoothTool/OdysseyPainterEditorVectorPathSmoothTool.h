@@ -49,6 +49,6 @@ protected:
         FOdysseyVectorHUDPathPush mPathPushHUD;
 
 public:
-    UPROPERTY(EditAnywhere, Category="Odyssey PathSmooth Tool")
+    UPROPERTY(EditAnywhere, Category="Odyssey PathSmooth Tool", meta = (ClampMin = "0.0", UIMin = "0.0"))
     double Radius;
 };

@@ -23,7 +23,6 @@ FOdysseyPainterEditorSelectedVectorObjectTab::FOdysseyPainterEditorSelectedVecto
 {
     mObjectView = NewObject<UOdysseyPainterEditorVectorObjectView>();
     mPathView = NewObject<UOdysseyPainterEditorVectorPathView>();
-    mEllipseView = NewObject<UOdysseyPainterEditorVectorEllipseView>();
     mGroupPaintView = NewObject<UOdysseyPainterEditorVectorGroupPaintView>();
 /*
     mEditor->GetVectorObjectPickTool()->mSelectionChanged.AddRaw(this, &FOdysseyPainterEditorSelectedVectorObjectTab::OnSelectionChanged );
@@ -38,7 +37,6 @@ FOdysseyPainterEditorSelectedVectorObjectTab::AddReferencedObjects(FReferenceCol
     // Prevent these UObjects from being destroyed by garbage collection
 	Collector.AddReferencedObject(mObjectView);
 	Collector.AddReferencedObject(mPathView);
-	Collector.AddReferencedObject(mEllipseView);
 	Collector.AddReferencedObject(mGroupPaintView);
 }
 
@@ -95,17 +93,14 @@ FOdysseyPainterEditorSelectedVectorObjectTab::GetPathView()
     return mPathView;
 }
 
-UOdysseyPainterEditorVectorEllipseView*
-FOdysseyPainterEditorSelectedVectorObjectTab::GetEllipseView()
-{
-    return mEllipseView;
-}
-
 UOdysseyPainterEditorVectorGroupPaintView*
 FOdysseyPainterEditorSelectedVectorObjectTab::GetGroupPaintView()
 {
     return mGroupPaintView;
 }
+
+//--------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------ Methods
 
 void
 FOdysseyPainterEditorSelectedVectorObjectTab::Update( FOdysseyVectorScene* iScene )
@@ -118,12 +113,6 @@ FOdysseyPainterEditorSelectedVectorObjectTab::Update( FOdysseyVectorScene* iScen
         {
             mPathView->Update( selectedObject );
             mDetailsView->SetObject( mPathView );
-        }
-        else
-        if( selectedObject->GetClass() == FOdysseyVectorEllipse::StaticClass() )
-        {
-            mEllipseView->Update( selectedObject );
-            mDetailsView->SetObject( mEllipseView );
         }
         else
         if( selectedObject->GetClass() == FOdysseyVectorGroupPaint::StaticClass() )
@@ -144,16 +133,5 @@ FOdysseyPainterEditorSelectedVectorObjectTab::Update( FOdysseyVectorScene* iScen
     }
 }
 
-//--------------------------------------------------------------------------------------
-//---------------------------------------------------------------------- Event Listeners
-
-void
-FOdysseyPainterEditorSelectedVectorObjectTab::OnRefresh( FOdysseyVectorScene* iScene )
-{
-    Update( iScene );
-}
-
-//--------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------ Methods
 
 #undef LOCTEXT_NAMESPACE

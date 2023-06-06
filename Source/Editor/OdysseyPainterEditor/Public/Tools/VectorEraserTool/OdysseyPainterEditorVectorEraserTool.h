@@ -17,7 +17,7 @@ public:
     GENERATED_BODY()
 
 public:
-    UPROPERTY(EditAnywhere, Category="Eraser Tool")
+    UPROPERTY(EditAnywhere, Category="Eraser Tool", meta = (ClampMin = "0.0", UIMin = "0.0") )
     double Radius;
 
 public:

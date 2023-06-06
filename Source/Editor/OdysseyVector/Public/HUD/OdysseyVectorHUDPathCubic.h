@@ -15,9 +15,27 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUDPathCubic : public FOdysseyVectorHUD
         void DrawVertex( FOdysseyVectorPathCubic* iPath
                        , FOdysseyVectorVertex* iCubicVertex
                        , uint64 iFlags );
+        void DrawCircle( BLContext* iBLCtx
+                       , double iWorldx
+                       , double iWorldY
+                       , double iOuterRadius
+                       , double iInnerRadius
+                       , const BLRgba32& iOuterColor
+                       , const BLRgba32& iInnerColor );
+        void DrawLine( BLContext* iBLCtx
+                     , double iWorldx0
+                     , double iWorldY0
+                     , double iWorldx1
+                     , double iWorldY1
+                     , double iOuterWidth
+                     , double iInnerWidth
+                     , const BLRgba32& iOuterColor
+                     , const BLRgba32& iInnerColor );
     public:
-        static inline ::ULIS::FRectD POINTRECT  = { -4, -4, 8, 8 };
-        static inline ::ULIS::FRectD HANDLERECT = { -4, -4, 8, 8 };
+        static const uint32 VERTEXRADIUSINNER = 4;
+        static const uint32 VERTEXRADIUSOUTER = VERTEXRADIUSINNER + 2;
+        static const uint32 HANDLERADIUSINNER = 3;
+        static const uint32 HANDLERADIUSOUTER = HANDLERADIUSINNER + 2;
 
         static const uint32 VIEW_PATH           = ( 1 << 0 );
         static const uint32 VIEW_POINT          = ( 1 << 1 );

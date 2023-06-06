@@ -47,10 +47,10 @@ private:
     FOdysseyVectorHUDPicking mPickingHUD;
 
 public:
-    UPROPERTY(EditAnywhere, Category="Odyssey PathWidth Tool")
+    UPROPERTY(EditAnywhere, Category="Odyssey PathWidth Tool", meta = (ClampMin = "0.0", UIMin = "0.0"))
     double Radius;
 
-    UPROPERTY(EditAnywhere, Category="Odyssey PathWidth Tool")
+    UPROPERTY(EditAnywhere, Category="Odyssey PathWidth Tool", meta = (ClampMin = "0.0", UIMin = "0.0"))
     double Strength;
 
 };

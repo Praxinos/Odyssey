@@ -7,7 +7,6 @@
 #include "OdysseyVector.h"
 #include "OdysseyPainterEditorVectorObjectView.h"
 #include "OdysseyPainterEditorVectorPathView.h"
-#include "OdysseyPainterEditorVectorEllipseView.h"
 #include "OdysseyPainterEditorVectorGroupPaintView.h"
 #include <ULIS>
 
@@ -24,7 +23,6 @@ public:
 
     UOdysseyPainterEditorVectorObjectView* GetObjectView();
     UOdysseyPainterEditorVectorPathView* GetPathView();
-    UOdysseyPainterEditorVectorEllipseView* GetEllipseView();
     UOdysseyPainterEditorVectorGroupPaintView* GetGroupPaintView();
 
 protected:
@@ -48,6 +46,5 @@ private:
 
     UOdysseyPainterEditorVectorObjectView* mObjectView;
     UOdysseyPainterEditorVectorPathView* mPathView;
-    UOdysseyPainterEditorVectorEllipseView* mEllipseView;
     UOdysseyPainterEditorVectorGroupPaintView* mGroupPaintView;
 };

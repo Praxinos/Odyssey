@@ -50,6 +50,6 @@ private:
         FOdysseyVectorHUDPicking mPickingHUD;
 
 public:
-    UPROPERTY(EditAnywhere, Category="Odyssey PathKnot Tool")
+    UPROPERTY(EditAnywhere, Category="Odyssey PathKnot Tool", meta = (ClampMin = "0.0", UIMin = "0.0") )
     double Radius;
 };

@@ -74,6 +74,6 @@ private:
     std::vector<FOdysseyVectorPoint*> mPickedPointArray;
 
 public:
-    UPROPERTY(EditAnywhere, Category="Odyssey PathEdit Tool")
+    UPROPERTY(EditAnywhere, Category="Odyssey PathEdit Tool", meta = (ClampMin = "0.0", UIMin = "0.0") )
     double Radius;
 };

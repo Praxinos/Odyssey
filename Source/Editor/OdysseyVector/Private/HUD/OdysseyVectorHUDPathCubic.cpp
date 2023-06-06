@@ -28,6 +28,49 @@ FOdysseyVectorHUDPathCubic::GetDisplayMode()
 }
 
 void
+FOdysseyVectorHUDPathCubic::DrawLine( BLContext* iBLCtx
+                                    , double iWorldx0
+                                    , double iWorldY0
+                                    , double iWorldx1
+                                    , double iWorldY1
+                                    , double iOuterWidth
+                                    , double iInnerWidth
+                                    , const BLRgba32& iOuterColor
+                                    , const BLRgba32& iInnerColor )
+{
+    // Draw 2 lines. We draw a contour and the inside with different colors,
+    // that way the background color does not interfere as it can be of only one color.
+    // outer
+    iBLCtx->setStrokeWidth( iOuterWidth );
+    iBLCtx->setStrokeStyle( iOuterColor );
+    iBLCtx->strokeLine( iWorldx0, iWorldY0, iWorldx1, iWorldY1 );
+    // inner
+    iBLCtx->setStrokeWidth( iInnerWidth );
+    iBLCtx->setStrokeStyle( iInnerColor );
+    iBLCtx->strokeLine( iWorldx0, iWorldY0, iWorldx1, iWorldY1 );
+}
+
+void
+FOdysseyVectorHUDPathCubic::DrawCircle( BLContext* iBLCtx
+                                      , double iWorldx
+                                      , double iWorldY
+                                      , double iOuterRadius
+                                      , double iInnerRadius
+                                      , const BLRgba32& iOuterColor
+                                      , const BLRgba32& iInnerColor )
+{
+    // Draw 2 circles. We draw a contour and the inside with different colors,
+    // that way the background color does not interfere as it can be of only one color.
+    // Here we could also use stroke methods but I believe this is faster. Just a belief, I haven't benchmarked it.
+    // outer
+    iBLCtx->setFillStyle( iOuterColor );
+    iBLCtx->fillCircle( iWorldx, iWorldY, iOuterRadius );
+    // inner
+    iBLCtx->setFillStyle( iInnerColor );
+    iBLCtx->fillCircle( iWorldx, iWorldY, iInnerRadius );
+}
+
+void
 FOdysseyVectorHUDPathCubic::DrawVertex( FOdysseyVectorPathCubic* iPath
                                       , FOdysseyVectorVertex* iCubicVertex
                                       , uint64 iFlags )
@@ -43,26 +86,32 @@ FOdysseyVectorHUDPathCubic::DrawVertex( FOdysseyVectorPathCubic* iPath
 
     if ( mDisplayMode & VIEW_POINT )
     {
-        blctx->setFillStyle( BLRgba32( 0xFFFF00FF ) );
-        blctx->fillRect( worldPoint.x + POINTRECT.x
-                       , worldPoint.y + POINTRECT.y
-                       , POINTRECT.w
-                       , POINTRECT.h );
+        DrawCircle( blctx
+                  , worldPoint.x
+                  , worldPoint.y
+                  , VERTEXRADIUSOUTER
+                  , VERTEXRADIUSINNER
+                  , BLRgba32( 0xFF000000 )
+                  , BLRgba32( 0xFFD0E040 ) ); // teal (ABGR)
     }
 
     if ( mDisplayMode & VIEW_HANDLE_POINT )
     {
-        // 2 control points that represent the same handle
-        blctx->setFillStyle( BLRgba32( 0xFF808080 ) );
-        blctx->fillRect( worldPoint.x + worldRadius.x + HANDLERECT.x
-                       , worldPoint.y + worldRadius.y + HANDLERECT.y
-                       , HANDLERECT.w
-                       , HANDLERECT.h );
+        DrawCircle( blctx
+                  , worldPoint.x + worldRadius.x
+                  , worldPoint.y + worldRadius.y
+                  , HANDLERADIUSOUTER
+                  , HANDLERADIUSINNER
+                  , BLRgba32( 0xFF000000 )
+                  , BLRgba32( 0xFF808080 ) );
 
-        blctx->fillRect( worldPoint.x - worldRadius.x + HANDLERECT.x
-                       , worldPoint.y - worldRadius.y + HANDLERECT.y
-                       , HANDLERECT.w
-                       , HANDLERECT.h );
+        DrawCircle( blctx
+                  , worldPoint.x - worldRadius.x
+                  , worldPoint.y - worldRadius.y
+                  , HANDLERADIUSOUTER
+                  , HANDLERADIUSINNER
+                  , BLRgba32( 0xFF000000 )
+                  , BLRgba32( 0xFF808080 ) );
     }
 }
 
@@ -99,19 +148,42 @@ FOdysseyVectorHUDPathCubic::DrawSegment( FOdysseyVectorPathCubic* iPath
 
     if ( mDisplayMode & VIEW_HANDLE_SEGMENT )
     {
-        blctx->setStrokeWidth( 1.0f );
-        blctx->setStrokeStyle( BLRgba32( 0xFFFF0000 ) );
-
         // line to control handle 0
-        blctx->strokeLine( point0, handlePoint0 );
-
+        DrawLine( blctx
+                , point0.x
+                , point0.y
+                , handlePoint0.x
+                , handlePoint0.y
+                , 2.0f
+                , 1.0f
+                , BLRgba32( 0xFF000000 )
+                , BLRgba32( 0xFFFFFFFF ) );
         // line to control handle 1
-        blctx->strokeLine( point1, handlePoint1 );
-
-        // control handles
-        blctx->setFillStyle( BLRgba32( 0xFFFF0000 ) );
-        blctx->fillRect( handlePoint0.x + HANDLERECT.x, handlePoint0.y + HANDLERECT.y, HANDLERECT.w, HANDLERECT.h );
-        blctx->fillRect( handlePoint1.x + HANDLERECT.x, handlePoint1.y + HANDLERECT.y, HANDLERECT.w, HANDLERECT.h );
+        DrawLine( blctx
+                , point1.x
+                , point1.y
+                , handlePoint1.x
+                , handlePoint1.y
+                , 2.0f
+                , 1.0f
+                , BLRgba32( 0xFF000000 )
+                , BLRgba32( 0xFFFFFFFF ) );
+        // control handle 0
+        DrawCircle( blctx
+                  , handlePoint1.x
+                  , handlePoint1.y
+                  , HANDLERADIUSOUTER
+                  , HANDLERADIUSINNER
+                  , BLRgba32( 0xFF000000 )
+                  , BLRgba32( 0xFFFFFFFF ) );
+        // control handle 1
+        DrawCircle( blctx
+                  , handlePoint0.x
+                  , handlePoint0.y
+                  , HANDLERADIUSOUTER
+                  , HANDLERADIUSINNER
+                  , BLRgba32( 0xFF000000 )
+                  , BLRgba32( 0xFFFFFFFF ) );
     }
 }
 
