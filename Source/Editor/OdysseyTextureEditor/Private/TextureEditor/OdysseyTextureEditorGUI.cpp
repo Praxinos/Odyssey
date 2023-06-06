@@ -38,7 +38,7 @@ FOdysseyTextureEditorGUI::OnCurrentLayerChanged( UOdysseyLayerStack* iLayerStack
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
 
-        OnVectorSceneSignal( vectorScene, FOdysseyVectorScene::SIGNALL_ALL );
+        OnVectorSceneSignal( vectorScene, FOdysseyVectorScene::SIGNAL_ALL );
     }
 }
 
@@ -189,14 +189,14 @@ FOdysseyTextureEditorGUI::OnVectorSceneSignal( FOdysseyVectorScene* iScene, uint
 
     if( currentVectorLayer && ( currentVectorLayer->GetScene() == iScene ) )
     {
-        if( iSignalFlags & FOdysseyVectorScene::SIGNALL_SCENE_REDRAW )
+        if( iSignalFlags & FOdysseyVectorScene::SIGNAL_SCENE_REDRAW )
         {
             currentVectorLayer->RenderImageChanged( false );
         }
 
-        if( ( iSignalFlags & FOdysseyVectorScene::SIGNALL_OBJECT_TRANSFORMED )
-         || ( iSignalFlags & FOdysseyVectorScene::SIGNALL_OBJECT_SELECTED    )
-         || ( iSignalFlags & FOdysseyVectorScene::SIGNALL_OBJECT_MODIFIED    ) )
+        if( ( iSignalFlags & FOdysseyVectorScene::SIGNAL_OBJECT_TRANSFORMED )
+         || ( iSignalFlags & FOdysseyVectorScene::SIGNAL_OBJECT_SELECTED    )
+         || ( iSignalFlags & FOdysseyVectorScene::SIGNAL_OBJECT_MODIFIED    ) )
         {
             vectorObjectTab.Get()->Update( iScene );
         }

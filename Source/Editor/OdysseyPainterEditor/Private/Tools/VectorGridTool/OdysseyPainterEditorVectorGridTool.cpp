@@ -39,7 +39,7 @@ UOdysseyPainterEditorVectorGridTool::ActivateVector( FOdysseyVectorEngine* iEngi
     iEngine->ClearHUD( );
     iEngine->AddHUD( &mGridHUD );
 
-    iScene->Signal( FOdysseyVectorScene::SIGNALL_SCENE_REDRAW );
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
 
 bool
@@ -85,7 +85,7 @@ UOdysseyPainterEditorVectorGridTool::OnMouseDownVector( FOdysseyVectorEngine* iE
         }
     }
 
-    iScene->Signal( FOdysseyVectorScene::SIGNALL_SCENE_REDRAW );
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 
     return true;
 }
@@ -120,7 +120,7 @@ UOdysseyPainterEditorVectorGridTool::OnMouseDragVector( FOdysseyVectorEngine* iE
         }
     }
 
-    iScene->Signal( FOdysseyVectorScene::SIGNALL_SCENE_REDRAW );
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
 
 bool
@@ -137,7 +137,7 @@ UOdysseyPainterEditorVectorGridTool::OnMouseUpVector( FOdysseyVectorEngine* iEng
     }
 
     iScene->Update( 0 );
-    iScene->Signal( FOdysseyVectorScene::SIGNALL_SCENE_REDRAW );
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 
     mMultipleSelectionMode = false;
 

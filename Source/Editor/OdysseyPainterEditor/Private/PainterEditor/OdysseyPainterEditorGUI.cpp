@@ -426,7 +426,7 @@ FOdysseyPainterEditorGUI::BringForward( FOdysseyVectorEngine* iEngine, FOdysseyV
         iScene->Update( 0 );
     }
     // call callbacks if any (for refreshing GUI e.g)
-    iScene->Signal( FOdysseyVectorScene::SIGNALL_SCENE_REDRAW );
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
 
 void
@@ -451,7 +451,7 @@ FOdysseyPainterEditorGUI::SendBackward( FOdysseyVectorEngine* iEngine, FOdysseyV
         iScene->Update( 0 );
     }
     // call callbacks if any (for refreshing GUI e.g)
-    iScene->Signal( FOdysseyVectorScene::SIGNALL_SCENE_REDRAW );
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
 
 
@@ -493,7 +493,7 @@ FOdysseyPainterEditorGUI::Ungroup( FOdysseyVectorEngine* iEngine, FOdysseyVector
         }
     }
     // call callbacks if any (for refreshing GUI e.g)
-    iScene->Signal( FOdysseyVectorScene::SIGNALL_SCENE_REDRAW | FOdysseyVectorScene::SIGNALL_OBJECT_SELECTED );
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW | FOdysseyVectorScene::SIGNAL_OBJECT_SELECTED );
 }
 
 void
@@ -527,7 +527,7 @@ FOdysseyPainterEditorGUI::GroupPaint( FOdysseyVectorEngine* iEngine, FOdysseyVec
         iScene->Update( 0 );
     }
     // call callbacks if any (for refreshing GUI e.g)
-    iScene->Signal( FOdysseyVectorScene::SIGNALL_SCENE_REDRAW | FOdysseyVectorScene::SIGNALL_OBJECT_SELECTED );
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW | FOdysseyVectorScene::SIGNAL_OBJECT_SELECTED );
 }
 
 void
@@ -555,7 +555,7 @@ FOdysseyPainterEditorGUI::Group( FOdysseyVectorEngine* iEngine, FOdysseyVectorSc
         iScene->Update( 0 );
     }
     // call callbacks if any (for refreshing GUI e.g)
-    iScene->Signal( FOdysseyVectorScene::SIGNALL_SCENE_REDRAW | FOdysseyVectorScene::SIGNALL_OBJECT_SELECTED );
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW | FOdysseyVectorScene::SIGNAL_OBJECT_SELECTED );
 }
 
 void
@@ -575,7 +575,7 @@ FOdysseyPainterEditorGUI::ResetView( FOdysseyVectorEngine* iEngine, FOdysseyVect
     iScene->UpdateMatrix();
     iScene->Update( 0 );
     // call callbacks if any (for refreshing GUI e.g)
-    iScene->Signal( FOdysseyVectorScene::SIGNALL_SCENE_REDRAW );
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
 
 void
@@ -594,7 +594,7 @@ FOdysseyPainterEditorGUI::RemoveSelectedObjects( FOdysseyVectorEngine* iEngine, 
     iScene->RemoveSelectedObjects();
     iScene->Update( 0 );
     // call callbacks if any (for refreshing GUI e.g)
-    iScene->Signal( FOdysseyVectorScene::SIGNALL_SCENE_REDRAW | FOdysseyVectorScene::SIGNALL_OBJECT_SELECTED );
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW | FOdysseyVectorScene::SIGNAL_OBJECT_SELECTED );
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -42,7 +42,7 @@ UOdysseyPainterEditorVectorObjectScaleTool::ActivateVector( FOdysseyVectorEngine
     iEngine->ClearHUD( );
     iEngine->AddHUD( mTransformHUD );
 
-    iScene->Signal( FOdysseyVectorScene::SIGNALL_SCENE_REDRAW );
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
 
 bool
@@ -74,7 +74,7 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDownVector( FOdysseyVectorEng
     }
     GEditor->EndTransaction();
 
-    iScene->Signal( FOdysseyVectorScene::SIGNALL_SCENE_REDRAW );
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 
     return true;
 }
@@ -227,7 +227,7 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDragVector( FOdysseyVectorEng
     }
 
     iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES | FOdysseyVectorObject::KEEPINVALIDATED );
-    iScene->Signal( FOdysseyVectorScene::SIGNALL_SCENE_REDRAW | FOdysseyVectorScene::SIGNALL_OBJECT_TRANSFORMED );
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW | FOdysseyVectorScene::SIGNAL_OBJECT_TRANSFORMED );
 }
 
 bool
@@ -236,7 +236,7 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseUpVector( FOdysseyVectorEngin
                                                            , const FOdysseyPoint& iPointInTexture
                                                            , const FKey& iKey )
 {
-    iScene->Signal( FOdysseyVectorScene::SIGNALL_SCENE_REDRAW );
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 
     return true;
 }

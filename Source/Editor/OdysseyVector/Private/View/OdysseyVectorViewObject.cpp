@@ -60,6 +60,6 @@ UOdysseyVectorViewObject::PostEditChangeProperty( FPropertyChangedEvent& Propert
         //scene->mRefreshLayer.Broadcast(scene);
 
         scene->Update( 0 );
-        scene->Signal( FOdysseyVectorScene::SIGNALL_SCENE_REDRAW );
+        scene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
     }
 }

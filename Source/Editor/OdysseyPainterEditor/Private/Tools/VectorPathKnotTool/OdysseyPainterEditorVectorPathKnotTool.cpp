@@ -29,7 +29,7 @@ UOdysseyPainterEditorVectorPathKnotTool::ActivateVector( FOdysseyVectorEngine* i
     iEngine->ClearHUD();
     iEngine->AddHUD(&mPickingHUD);
 
-    iScene->Signal( FOdysseyVectorScene::SIGNALL_SCENE_REDRAW );
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
 
 bool
@@ -112,9 +112,9 @@ UOdysseyPainterEditorVectorPathKnotTool::OnMouseDownVector( FOdysseyVectorEngine
         }
     }
 
-    iScene->Signal( FOdysseyVectorScene::SIGNALL_SCENE_REDRAW
-                  | FOdysseyVectorScene::SIGNALL_OBJECT_SELECTED
-                  | FOdysseyVectorScene::SIGNALL_OBJECT_MODIFIED );
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW
+                  | FOdysseyVectorScene::SIGNAL_OBJECT_SELECTED
+                  | FOdysseyVectorScene::SIGNAL_OBJECT_MODIFIED );
 
     return true;
 }
@@ -140,7 +140,7 @@ UOdysseyPainterEditorVectorPathKnotTool::OnMouseHoverVector( FOdysseyVectorEngin
     if( rect.Area() )
     {*/
     /*}*/
-    iScene->Signal( FOdysseyVectorScene::SIGNALL_SCENE_REDRAW );
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
 
 void
@@ -150,7 +150,7 @@ UOdysseyPainterEditorVectorPathKnotTool::OnMouseDragVector( FOdysseyVectorEngine
 {
     mPickingHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
 
-    iScene->Signal( FOdysseyVectorScene::SIGNALL_SCENE_REDRAW );
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
 
 bool
@@ -159,7 +159,7 @@ UOdysseyPainterEditorVectorPathKnotTool::OnMouseUpVector( FOdysseyVectorEngine* 
                                                         , const FOdysseyPoint& iPointInTexture
                                                         , const FKey& iKey )
 {
-    iScene->Signal( FOdysseyVectorScene::SIGNALL_SCENE_REDRAW );
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 
     return false;
 }

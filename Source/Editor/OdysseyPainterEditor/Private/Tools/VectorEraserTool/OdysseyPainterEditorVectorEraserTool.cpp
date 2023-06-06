@@ -30,7 +30,7 @@ UOdysseyPainterEditorVectorEraserTool::ActivateVector( FOdysseyVectorEngine* iEn
     iEngine->AddHUD(&mEraserHUD);
 
     iScene->Update( 0 );
-    iScene->Signal( FOdysseyVectorScene::SIGNALL_SCENE_REDRAW );
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
 
 bool
@@ -50,7 +50,7 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseDownVector( FOdysseyVectorEngine* 
     iEngine->UseColorImage();
 
     iScene->Update( 0 );
-    iScene->Signal( FOdysseyVectorScene::SIGNALL_SCENE_REDRAW );
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 
     return true;
 }
@@ -78,7 +78,7 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseHoverVector( FOdysseyVectorEngine*
 
     /*}*/
     // refresh vector scene and GUI widgets via delegates.
-    iScene->Signal( FOdysseyVectorScene::SIGNALL_SCENE_REDRAW );
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
 
 void
@@ -99,7 +99,7 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseDragVector( FOdysseyVectorEngine* 
     iEngine->GetBLContext()->fillCircle( iPointInTexture.x, iPointInTexture.y, Radius );
     iEngine->UseColorImage();
 
-    iScene->Signal( FOdysseyVectorScene::SIGNALL_SCENE_REDRAW );
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
 
 bool
@@ -131,7 +131,7 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseUpVector( FOdysseyVectorEngine* iE
     iEngine->UseColorImage();
 
     iScene->Update( 0 ); // update invalidated objects
-    iScene->Signal( FOdysseyVectorScene::SIGNALL_SCENE_REDRAW | FOdysseyVectorScene::SIGNALL_OBJECT_SELECTED );
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW | FOdysseyVectorScene::SIGNAL_OBJECT_SELECTED );
 
     // needed for valid GUndo pointer
     GEditor->BeginTransaction(LOCTEXT("EraserTool","Erase"));

@@ -26,7 +26,7 @@ UOdysseyPainterEditorVectorPathCutTool::ActivateVector( FOdysseyVectorEngine* iE
     iEngine->ClearHUD();
     iEngine->AddHUD(&mCubicPathHUD);
 
-    iScene->Signal( FOdysseyVectorScene::SIGNALL_SCENE_REDRAW );
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
 
 bool
@@ -50,7 +50,7 @@ UOdysseyPainterEditorVectorPathCutTool::OnMouseDownVector( FOdysseyVectorEngine*
         mStartCutAt.y = localCoords.y;
     }
 
-    iScene->Signal( FOdysseyVectorScene::SIGNALL_SCENE_REDRAW );
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 
     return true;
 }
@@ -70,7 +70,7 @@ UOdysseyPainterEditorVectorPathCutTool::OnMouseDragVector( FOdysseyVectorEngine*
     mLineHUD.SetP1( iPointInTexture.x, iPointInTexture.y );
 
     iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES ); // refresh vector scene and GUI widgets via delegates.
-    iScene->Signal( FOdysseyVectorScene::SIGNALL_SCENE_REDRAW );
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
 
 bool
@@ -125,7 +125,7 @@ UOdysseyPainterEditorVectorPathCutTool::OnMouseUpVector( FOdysseyVectorEngine* i
     GEditor->EndTransaction();
 
     iScene->Update( 0 ); // update invalidated objects
-    iScene->Signal( FOdysseyVectorScene::SIGNALL_SCENE_REDRAW | FOdysseyVectorScene::SIGNALL_OBJECT_MODIFIED );
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW | FOdysseyVectorScene::SIGNAL_OBJECT_MODIFIED );
 
     return true;
 }

@@ -25,7 +25,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::ActivateVector( FOdysseyVectorE
 {
     iEngine->ClearHUD();
 
-    iScene->Signal( FOdysseyVectorScene::SIGNALL_SCENE_REDRAW );
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
 
 bool
@@ -51,7 +51,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDownVector( FOdysseyVect
     //mSelectionChanged.Broadcast(iScene);
 
     iScene->Update( 0 ); // update invalidated objects
-    iScene->Signal( FOdysseyVectorScene::SIGNALL_SCENE_REDRAW | FOdysseyVectorScene::SIGNALL_OBJECT_SELECTED );
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW | FOdysseyVectorScene::SIGNAL_OBJECT_SELECTED );
 
     return true;
 }
@@ -77,7 +77,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDragVector( FOdysseyVect
     }
 
     iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES ); // update invalidated objects
-    iScene->Signal( FOdysseyVectorScene::SIGNALL_SCENE_REDRAW | FOdysseyVectorScene::SIGNALL_OBJECT_MODIFIED );
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW | FOdysseyVectorScene::SIGNAL_OBJECT_MODIFIED );
 }
 
 bool
@@ -114,10 +114,10 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseUpVector( FOdysseyVector
     }
 
     iScene->Update( 0 ); // update invalidate objects
-    iScene->Signal( FOdysseyVectorScene::SIGNALL_SCENE_REDRAW
-                  | FOdysseyVectorScene::SIGNALL_OBJECT_SELECTED
-                  | FOdysseyVectorScene::SIGNALL_OBJECT_MODIFIED
-                  | FOdysseyVectorScene::SIGNALL_OBJECT_TRANSFORMED );
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW
+                  | FOdysseyVectorScene::SIGNAL_OBJECT_SELECTED
+                  | FOdysseyVectorScene::SIGNAL_OBJECT_MODIFIED
+                  | FOdysseyVectorScene::SIGNAL_OBJECT_TRANSFORMED );
 
     return false;
 }
