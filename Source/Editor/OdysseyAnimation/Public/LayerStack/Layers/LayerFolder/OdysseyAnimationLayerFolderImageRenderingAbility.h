@@ -12,14 +12,11 @@ public:
     FOdysseyAnimationLayerFolderImageRenderingAbility(UOdysseyAnimationLayerFolder* iLayerFolder);
 
 public:
-    /**
-     * @brief Creates a renderer able to render an image at the specified frame
-     * This renderer is made to always render the same rendering composition
-     * For example : if you delete a layer, you should create a new renderer
-     * but if you are just drawing on the layer, you can reuse the renderer
-     */
-    virtual TSharedPtr<IOdysseyImageRenderer> BuildRenderer(int iFrame, IOdysseyImageRenderer::eRenderType iRenderType) const override;
-    
+    //TODO: Move GetBlendMode and GetOpacity() in their own ability, so that the one using the ability will be the one calling OnChanged, etc...
+    // Like BlendParamsAbility->OnChanged() => parentRenderingAbility->OnChanged
+    virtual ::ULIS::eBlendMode GetBlendMode() const override;
+    virtual float GetOpacity() const override;
+
 private:
     UOdysseyAnimationLayerFolder* mLayerFolder;
 };

@@ -89,3 +89,15 @@ FOdysseyAnimationLayerImageRasterImageRenderingAbility::GetRects() const
 
     return { ::ULIS::FRectI::FromXYWH(0, 0, animation->Width(), animation->Height()) };
 }
+
+::ULIS::eBlendMode
+FOdysseyAnimationLayerImageRasterImageRenderingAbility::GetBlendMode() const
+{
+    return (::ULIS::eBlendMode)mLayerImageRaster->BlendMode;
+}
+
+float
+FOdysseyAnimationLayerImageRasterImageRenderingAbility::GetOpacity() const
+{
+    return mLayerImageRaster->Opacity;
+}

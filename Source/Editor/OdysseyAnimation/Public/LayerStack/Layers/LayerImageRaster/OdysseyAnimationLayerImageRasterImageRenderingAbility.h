@@ -43,6 +43,12 @@ public:
      */
     virtual TArray<::ULIS::FRectI> GetRects() const override;
 
+public:
+    //TODO: Move GetBlendMode and GetOpacity() in their own ability, so that the one using the ability will be the one calling OnChanged, etc...
+    // Like BlendParamsAbility->OnChanged() => parentRenderingAbility->OnChanged
+    virtual ::ULIS::eBlendMode GetBlendMode() const override;
+    virtual float GetOpacity() const override;
+
 private:
     UOdysseyAnimationLayerImageRaster* mLayerImageRaster;
 };

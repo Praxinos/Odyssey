@@ -15,7 +15,13 @@ FOdysseyAnimationLayerStackImageRenderer::FOdysseyAnimationLayerStackImageRender
 }
 
 TArray<::ULIS::FEvent>
-FOdysseyAnimationLayerStackImageRenderer::RenderInBlock(TSharedPtr<::ULIS::FBlock> ioBlock, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
+FOdysseyAnimationLayerStackImageRenderer::Blend(TSharedPtr<::ULIS::FBlock> ioBlock, ::ULIS::eBlendMode iBlendMode, float iOpacity, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
 {
-    return mLayerRootRenderer->RenderInBlock(ioBlock, iRects, iPos, iWaitList);
+    return mLayerRootRenderer->Blend(ioBlock, iBlendMode, iOpacity, iRects, iPos, iWaitList);
+}
+
+TArray<::ULIS::FEvent>
+FOdysseyAnimationLayerStackImageRenderer::Copy(TSharedPtr<::ULIS::FBlock> ioBlock, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
+{
+    return mLayerRootRenderer->Copy(ioBlock, iRects, iPos, iWaitList);
 }

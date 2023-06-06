@@ -118,3 +118,15 @@ IOdysseyAnimationImageRenderingAbility::Preload(int iFrame, IOdysseyImageRendere
 {
     return nullptr;
 }
+
+::ULIS::eBlendMode
+IOdysseyAnimationImageRenderingAbility::GetBlendMode() const
+{
+    return ::ULIS::Blend_Normal;
+}
+
+float
+IOdysseyAnimationImageRenderingAbility::GetOpacity() const
+{
+    return 1.f;
+}

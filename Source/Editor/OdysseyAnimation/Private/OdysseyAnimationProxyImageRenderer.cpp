@@ -14,46 +14,43 @@ FOdysseyAnimationProxyImageRenderer::FOdysseyAnimationProxyImageRenderer(UOdysse
     , mAnimationRenderer(nullptr)
 {
     TSharedPtr<IOdysseyAnimationImageRenderingAbility> animationAbility = mAnimation->GetAbility<IOdysseyAnimationImageRenderingAbility>();
-    mAnimationRenderer = MakeShared<FOdysseyAnimationImageRenderer>(mAnimation, iFrameIndex, iRenderType, iDefaultRects);
+
+    if ( GetRenderType() != IOdysseyImageRenderer::eRenderType::Render )
+        mAnimationRenderer = MakeShared<FOdysseyAnimationImageRenderer>(mAnimation, iFrameIndex, iRenderType, iDefaultRects);
 }
 
 TArray<::ULIS::FEvent>
-FOdysseyAnimationProxyImageRenderer::RenderInBlock(TSharedPtr<::ULIS::FBlock> ioBlock, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
+FOdysseyAnimationProxyImageRenderer::Blend(TSharedPtr<::ULIS::FBlock> ioBlock, ::ULIS::eBlendMode iBlendMode, float iOpacity, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
 {
     if (GetRenderType() != IOdysseyImageRenderer::eRenderType::Render)
-        return mAnimationRenderer->RenderInBlock(ioBlock, iRects, iPos, iWaitList);
+        return mAnimationRenderer->Blend(ioBlock, iBlendMode, iOpacity, iRects, iPos, iWaitList);
 
     TSharedPtr<::ULIS::FBlock> block = mProxy->GetBlock(mFrameIndex);
     if ( !block )
-        return mAnimationRenderer->RenderInBlock(ioBlock, iRects, iPos, iWaitList);
-
-
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(ioBlock->Format());
-
-    TArray<::ULIS::FEvent> events;
-    for ( int i = 0; i < iRects.Num(); i++ )
     {
-        TArray<::ULIS::FEvent> eventConvertAndExecute = ULISUtils::ConvertAndExecute(ioBlock, block->Format(), iRects[i], iPos[i], iWaitList,
-            [this, &block, &ctx](TSharedPtr<::ULIS::FBlock> ioDest, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList) -> TArray<::ULIS::FEvent>
-            {
-                ::ULIS::FEvent eventCopy = FULISEventBuilder().RetainBlock(block).RetainBlock(ioDest).Build();
-                ctx.Copy(
-                    *block,
-                    *ioDest,
-                    iRect,
-                    iPos,
-                    ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
-                    iWaitList.Num(),
-                    iWaitList.GetData(),
-                    &eventCopy
-                );
-                return { eventCopy };
-            }
-        );
-        events.Append(eventConvertAndExecute);
+        if (mAnimationRenderer)
+            return mAnimationRenderer->Blend(ioBlock, iBlendMode, iOpacity, iRects, iPos, iWaitList);
+
+        return iWaitList;
     }
 
-    ctx.Flush();
+    return ConvertAndBlend(block, ioBlock, iBlendMode, iOpacity, iRects, iPos, iWaitList);
+}
 
-    return events;
+TArray<::ULIS::FEvent>
+FOdysseyAnimationProxyImageRenderer::Copy(TSharedPtr<::ULIS::FBlock> ioBlock, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
+{
+    if (GetRenderType() != IOdysseyImageRenderer::eRenderType::Render)
+        return mAnimationRenderer->Copy(ioBlock, iRects, iPos, iWaitList);
+
+    TSharedPtr<::ULIS::FBlock> block = mProxy->GetBlock(mFrameIndex);
+    if ( !block )
+    {
+        if (mAnimationRenderer)
+            return mAnimationRenderer->Copy(ioBlock, iRects, iPos, iWaitList);
+
+        return iWaitList;
+    }
+
+    return ConvertAndCopy(block, ioBlock, iRects, iPos, iWaitList);
 }

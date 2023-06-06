@@ -494,7 +494,7 @@ FBlockData::Render(bool iForceRender)
             clearEvents.Add(eventClearBlock);
         }
 
-        TArray<::ULIS::FEvent> events = renderer->RenderInBlock(block, invalidRects, clearEvents);
+        TArray<::ULIS::FEvent> events = renderer->Copy(block, invalidRects, clearEvents);
         ctx.Finish();
 
         //We are done, check if there is new rectangles to render

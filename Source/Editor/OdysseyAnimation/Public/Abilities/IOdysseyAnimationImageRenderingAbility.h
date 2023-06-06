@@ -73,7 +73,7 @@ public:
      * but if you are just drawing on the layer, you can reuse the renderer
      */
     virtual TSharedPtr<IOdysseyImageRenderer> BuildRenderer(int iFrame, IOdysseyImageRenderer::eRenderType iRenderType) const = 0;
-    
+
     /**
      * @brief Returns the full rect that can be rendered
      * 
@@ -101,6 +101,12 @@ public:
      * @param iFrame
      */
     virtual TSharedPtr<IOdysseyHandle> Preload(int iFrame, IOdysseyImageRenderer::eRenderType iRenderType) const;
+
+public:
+    //TODO: Move GetBlendMode and GetOpacity() in their own ability, so that the one using the ability will be the one calling OnChanged, etc...
+    // Like BlendParamsAbility->OnChanged() => parentRenderingAbility->OnChanged
+    virtual ::ULIS::eBlendMode GetBlendMode() const;
+    virtual float GetOpacity() const;
 
 public:
     FGuid mId; //TODO: Move to somewhere it can be serialized

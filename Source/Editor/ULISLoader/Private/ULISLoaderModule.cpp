@@ -94,7 +94,7 @@ FULISLoaderModule::FindOrAddContext( ::ULIS::eFormat iFormat ) {
         return  **val;
     } else {
         //TODO: why are we using PerformanceIntent_MEM instead of PerformanceIntent_Max ?
-        ::ULIS::FContext* ctx = new ::ULIS::FContext( *GetCurrentThreadData().mCommandQueue, iFormat, ::ULIS::PerformanceIntent_Max );
+        ::ULIS::FContext* ctx = new ::ULIS::FContext( *GetCurrentThreadData().mCommandQueue, iFormat, ::ULIS::PerformanceIntent_MEM );
         GetCurrentThreadData().mContextMap.Add( key, ctx );
         return  *ctx;
     }

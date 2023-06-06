@@ -261,7 +261,9 @@ UOdysseyAnimationLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
             if ( !imageRenderAbility )
                 return;
 
-            lastEvent = imageRenderAbility->BuildRenderer(frame, IOdysseyImageRenderer::eRenderType::Render)->RenderOverBlock(ULISBlock, rect, lastEvent);
+            TSharedPtr<IOdysseyImageRenderer> renderer = imageRenderAbility->BuildRenderer(frame, IOdysseyImageRenderer::eRenderType::Render);
+
+            lastEvent = renderer->Blend(ULISBlock, imageRenderAbility->GetBlendMode(), imageRenderAbility->GetOpacity(), rect, lastEvent);
         }
 
         cells.Add(cell);

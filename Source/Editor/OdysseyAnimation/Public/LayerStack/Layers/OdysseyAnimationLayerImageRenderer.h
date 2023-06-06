@@ -12,18 +12,15 @@ public:
     FOdysseyAnimationLayerImageRenderer(UOdysseyAnimationLayer* iLayer, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects);
 
 public:
-    /**
-     * @brief Renders in (without blending for example) the given block
-     * 
-     * @param ioBlock 
-     * @param iFrame 
-     * @param iRect 
-     * @param iPos 
-     * @param iWaitList 
-     * @return TArray<::ULIS::FEvent> 
-     */
-    virtual TArray<::ULIS::FEvent> RenderInBlock(TSharedPtr<::ULIS::FBlock> ioBlock, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList) override;    
+    virtual TArray<::ULIS::FEvent> Blend(TSharedPtr<::ULIS::FBlock> ioBlock, ::ULIS::eBlendMode iBlendMode, float iOpacity, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList) override;
+    virtual TArray<::ULIS::FEvent> Copy(TSharedPtr<::ULIS::FBlock> ioBlock, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList) override;
 
 public:
-    TArray<TSharedPtr<IOdysseyImageRenderer>> mChildrenRenderers;
+    struct FChildData
+    {
+        TSharedPtr<IOdysseyImageRenderer> mRenderer;
+        ::ULIS::eBlendMode mBlendMode;
+        float mOpacity;
+    };
+    TArray<FChildData> mChildrenData;
 };

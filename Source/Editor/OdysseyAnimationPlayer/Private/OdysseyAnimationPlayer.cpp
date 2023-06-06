@@ -266,12 +266,11 @@ UOdysseyAnimationPlayer::UpdateTexture()
 	{
 		mImageRenderingComposition = imageRenderingComposition;
 		mAnimationHandle = imageRenderingAbility->Preload(frameIndex, mRenderType);
-		//mInvalidTileMap.Invalidate(::ULIS::FRectI::FromXYWH(0, 0, Animation->Width(), Animation->Height()));
+		TSharedPtr<IOdysseyImageRenderer> renderer = imageRenderingAbility->BuildRenderer(frameIndex, mRenderType);
 
 		::ULIS::FRectI rect = ::ULIS::FRectI::FromXYWH(0, 0, Animation->Width(), Animation->Height());
-		TSharedPtr<IOdysseyImageRenderer> renderer = imageRenderingAbility->BuildRenderer(frameIndex, mRenderType);
-		TArray<::ULIS::FEvent> events;
-		TSharedPtr<::ULIS::FBlock> block = renderer->RenderInNewBlock(Animation->Format(), rect, events);
+		TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(Animation->Width(), Animation->Height(), Animation->Format());
+		renderer->Copy(block, rect, {});
 
 		::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(Animation->Format());
 		ctx.Finish();
@@ -290,8 +289,8 @@ UOdysseyAnimationPlayer::UpdateTexture()
 		TArray<::ULIS::FRectI> invalidRects = mInvalidTileMap.InvalidRects();
 		for ( const ::ULIS::FRectI& rect : invalidRects )
 		{
-			TArray<::ULIS::FEvent> events;
-			TSharedPtr<::ULIS::FBlock> block = renderer->RenderInNewBlock(Animation->Format(), rect, events);
+			TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(rect.w, rect.h, Animation->Format());
+			renderer->Copy(block, rect, ::ULIS::FVec2I(0), {});
 			blocks.Add(block);
 		}
 		
