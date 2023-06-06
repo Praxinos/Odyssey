@@ -75,6 +75,11 @@ FOdysseyEditorGUI::BindShortcuts(FBaseToolkit* iToolkit)
 	{
 		mTabs[i].Get()->BindShortcuts(iToolkit);
 	}
+
+	for (int i = 0; i < mContextMenus.Num(); i++)
+	{
+		mContextMenus[i].Get()->BindShortcuts(iToolkit);
+	}
 }
 
 void

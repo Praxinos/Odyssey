@@ -16,10 +16,12 @@ public:
     virtual ~FOdysseyPainterEditorVectorContextMenu();
     FOdysseyPainterEditorVectorContextMenu(FOdysseyPainterEditor* iEditor);
 
-protected:
+public:
     // FOdysseyEditorTab interface
     virtual TSharedPtr<SWidget> CreateWidget() override;
     virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
+    //virtual void OnToolkitInitialized( FBaseToolkit* iToolkit ) override;
+    //virtual void ExtendMenu( FToolMenuOwner iOwner, FName iMenuName ) override;
 
 private:
     FOdysseyPainterEditor* mEditor;

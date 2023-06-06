@@ -14,63 +14,61 @@ FOdysseyTextureEditorVectorContextMenu::~FOdysseyTextureEditorVectorContextMenu(
 {
 }
 
+// https://www.tbwrightartist.com/posts/right_click_context_menu_slate/
 FOdysseyTextureEditorVectorContextMenu::FOdysseyTextureEditorVectorContextMenu(FOdysseyTextureEditor* iEditor)
 	: FOdysseyPainterEditorVectorContextMenu( static_cast<FOdysseyPainterEditor*>(iEditor) )
 {
+    mMenu.BeginSection("Context");
+    {
+
     mMenu.AddMenuEntry(
-        FOdysseyTextureEditorCommands::Get().ResetView
-        , NAME_None
-        , LOCTEXT("ResetView", "ResetView")
-        , LOCTEXT("ResetView", "ResetView")
-        , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16") );
+          LOCTEXT("ResetView", "Reset View")
+        , LOCTEXT("ResetView", "Reset View")
+        , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
+        , FUIAction(FExecuteAction::CreateSP(iEditor->GetGUI(), &FOdysseyTextureEditorGUI::ResetView)));
     mMenu.AddMenuEntry(
-        FOdysseyTextureEditorCommands::Get().GroupPaint
-        , NAME_None
-        , LOCTEXT("GroupPaint", "GroupPaint")
-        , LOCTEXT("GroupPaint", "GroupPaint")
-        , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16") );
+          LOCTEXT("GroupPaint", "Make Paint Group")
+        , LOCTEXT("GroupPaint", "Make Paint Group")
+        , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
+        , FUIAction(FExecuteAction::CreateSP(iEditor->GetGUI(), &FOdysseyTextureEditorGUI::GroupPaint)));
     mMenu.AddMenuEntry(
-        FOdysseyTextureEditorCommands::Get().Group
-        , NAME_None
+          LOCTEXT("Group", "Group")
         , LOCTEXT("Group", "Group")
-        , LOCTEXT("Group", "Group")
-        , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16") );
+        , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
+        , FUIAction(FExecuteAction::CreateSP(iEditor->GetGUI(), &FOdysseyTextureEditorGUI::Group)));
     mMenu.AddMenuEntry(
-        FOdysseyTextureEditorCommands::Get().Ungroup
-        , NAME_None
+          LOCTEXT("Ungroup", "Ungroup")
         , LOCTEXT("Ungroup", "Ungroup")
-        , LOCTEXT("Ungroup", "Ungroup")
-        , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16") );
+        , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
+        , FUIAction(FExecuteAction::CreateSP(iEditor->GetGUI(), &FOdysseyTextureEditorGUI::Ungroup)));
     mMenu.AddMenuEntry(
-        FOdysseyTextureEditorCommands::Get().BringForward
-        , NAME_None
+          LOCTEXT("BringForward", "Bring forward")
         , LOCTEXT("BringForward", "Bring forward")
-        , LOCTEXT("BringForward", "Bring forward")
-        , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16") );
+        , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
+        , FUIAction(FExecuteAction::CreateSP(iEditor->GetGUI(), &FOdysseyTextureEditorGUI::BringForward)));
     mMenu.AddMenuEntry(
-        FOdysseyTextureEditorCommands::Get().SendBackward
-        , NAME_None
+          LOCTEXT("SendBackward", "Send backward")
         , LOCTEXT("SendBackward", "Send backward")
-        , LOCTEXT("SendBackward", "Send backward")
-        , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16") );
+        , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
+        , FUIAction(FExecuteAction::CreateSP(iEditor->GetGUI(), &FOdysseyTextureEditorGUI::SendBackward)));
     mMenu.AddMenuEntry(
-        FOdysseyTextureEditorCommands::Get().RemoveSelectedObjects
-        , NAME_None
-        , LOCTEXT("RemoveSelectedObjects","RemoveSelectedObjects")
-        , LOCTEXT("RemoveSelectedObjects","RemoveSelectedObjects")
-        , FSlateIcon("OdysseyStyle","OdysseyLogo.Iliad16") );
+          LOCTEXT("RemoveSelectedObjects","Remove Selected Objects")
+        , LOCTEXT("RemoveSelectedObjects","Remove Selected Objects")
+        , FSlateIcon("OdysseyStyle","OdysseyLogo.Iliad16")
+        , FUIAction(FExecuteAction::CreateSP(iEditor->GetGUI(), &FOdysseyTextureEditorGUI::RemoveSelectedObjects)));
     mMenu.AddMenuEntry(
-        FOdysseyTextureEditorCommands::Get().FlipHorizontal
-        , NAME_None
-        , LOCTEXT("FlipHorizontal","FlipHorizontal")
-        , LOCTEXT("FlipHorizontal","FlipHorizontal")
-        , FSlateIcon("OdysseyStyle","OdysseyLogo.Iliad16") );
+          LOCTEXT("FlipHorizontal","Flip Horizontal")
+        , LOCTEXT("FlipHorizontal","Flip Horizontal")
+        , FSlateIcon("OdysseyStyle","OdysseyLogo.Iliad16")
+        , FUIAction(FExecuteAction::CreateSP(iEditor->GetGUI(), &FOdysseyTextureEditorGUI::FlipHorizontal)));
     mMenu.AddMenuEntry(
-        FOdysseyTextureEditorCommands::Get().FlipVertical
-        , NAME_None
-        , LOCTEXT("FlipVertical","FlipVertical")
-        , LOCTEXT("FlipVertical","FlipVertical")
-        , FSlateIcon("OdysseyStyle","OdysseyLogo.Iliad16") );
+          LOCTEXT("FlipVertical","Flip Vertical")
+        , LOCTEXT("FlipVertical","Flip Vertical")
+        , FSlateIcon("OdysseyStyle","OdysseyLogo.Iliad16")
+        , FUIAction(FExecuteAction::CreateSP(iEditor->GetGUI(), &FOdysseyTextureEditorGUI::FlipVertical)));
+
+    }
+    mMenu.EndSection();
 }
 
 //--------------------------------------------------------------------------------------
@@ -79,33 +77,21 @@ FOdysseyTextureEditorVectorContextMenu::FOdysseyTextureEditorVectorContextMenu(F
 void
 FOdysseyTextureEditorVectorContextMenu::BindShortcuts(FBaseToolkit* iToolkit)
 {
-/*
-    const TSharedRef<FUICommandList>& toolkitCommands = iToolkit->GetToolkitCommands();
-    const FOdysseyTextureEditorCommands& textureEditorCommands = FOdysseyTextureEditorCommands::Get();
-    //const FOdysseyLayerStackEditorCommands& layerStackEditorCommands = FOdysseyLayerStackEditorCommands::Get();
-
-    #define MAP_ACTION(action, ...) toolkitCommands->MapAction( action, FExecuteAction::CreateSP( this, &FOdysseyTextureEditorLayerStackTab::__VA_ARGS__ ), FCanExecuteAction() );
-
-    MAP_ACTION(textureEditorCommands.ImportTexturesAsLayers, ImportTexturesAsLayers )
-    MAP_ACTION(textureEditorCommands.ExportLayersAsTextures, ExportLayersAsTextures )
-    MAP_ACTION(textureEditorCommands.ExportCurrentLayerAsTexture, ExportCurrentLayerAsTexture )
-    MAP_ACTION(textureEditorCommands.ExportTextureToOperatingSystem, ExportTextureToOperatingSystem )
-    MAP_ACTION(textureEditorCommands.CreateNewLayer, CreateNewLayer )
-    MAP_ACTION(textureEditorCommands.ChangeLayerOpacity10, ChangeLayerOpacity, 0.1f )
-    MAP_ACTION(textureEditorCommands.ChangeLayerOpacity20, ChangeLayerOpacity, 0.2f )
-    MAP_ACTION(textureEditorCommands.ChangeLayerOpacity30, ChangeLayerOpacity, 0.3f )
-    MAP_ACTION(textureEditorCommands.ChangeLayerOpacity40, ChangeLayerOpacity, 0.4f )
-    MAP_ACTION(textureEditorCommands.ChangeLayerOpacity50, ChangeLayerOpacity, 0.5f )
-    MAP_ACTION(textureEditorCommands.ChangeLayerOpacity60, ChangeLayerOpacity, 0.6f )
-    MAP_ACTION(textureEditorCommands.ChangeLayerOpacity70, ChangeLayerOpacity, 0.7f )
-    MAP_ACTION(textureEditorCommands.ChangeLayerOpacity80, ChangeLayerOpacity, 0.8f )
-    MAP_ACTION(textureEditorCommands.ChangeLayerOpacity90, ChangeLayerOpacity, 0.9f )
-    MAP_ACTION(textureEditorCommands.ChangeLayerOpacity100, ChangeLayerOpacity, 1.0f )
-    //MAP_ACTION(layerStackEditorCommands.DuplicateCurrentLayer, DuplicateCurrentLayer )
-    //MAP_ACTION(layerStackEditorCommands.DeleteCurrentLayer, DeleteCurrentLayer )
-
-    #undef MAP_ACTION
-*/
+    FOdysseyPainterEditorVectorContextMenu::BindShortcuts( iToolkit );
 }
+
+/*
+void
+FOdysseyTextureEditorVectorContextMenu::OnToolkitInitialized( FBaseToolkit* iToolkit )
+{
+    FOdysseyPainterEditorVectorContextMenu::OnToolkitInitialized( iToolkit );
+}
+
+void
+FOdysseyTextureEditorVectorContextMenu::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
+{
+    FOdysseyPainterEditorVectorContextMenu::ExtendMenu( iOwner, iMenuName );
+}
+*/
 
 #undef LOCTEXT_NAMESPACE

@@ -196,8 +196,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         std::list<FOdysseyVectorBucket*> mBucketList;
         std::vector<FOdysseyVectorCycle*> mCycleArray;
         std::vector<FOdysseyVectorIntersection*> mIntersectionArray;
-        // need to remember them in order to clean properly
-        std::vector<uint32> pathSectionCount;
         uint32 mPaintingCode;
 
         std::vector<FOdysseyVectorSection> mSectionBuffer;

@@ -61,6 +61,12 @@ FOdysseyVectorSection::Init( FOdysseyVectorSegment* iSegment
     }
 }
 
+uint32
+FOdysseyVectorSection::GetFlags()
+{
+    return mFlags;
+}
+
 ::ULIS::FVec2D*
 FOdysseyVectorSection::GetBezier()
 {

@@ -146,6 +146,7 @@ UOdysseyTextureEditorVectorObjectPickTool::OnMouseDown( const FOdysseyPoint& iPo
     bool ret = false;
 
   if(FSlateApplication::Get().GetModifierKeys().IsControlDown())
+  {
     if( iKey == EKeys::LeftMouseButton )
     {
         FSlateApplication::Get().PushMenu(
@@ -157,6 +158,7 @@ UOdysseyTextureEditorVectorObjectPickTool::OnMouseDown( const FOdysseyPoint& iPo
         FPopupTransitionEffect(FPopupTransitionEffect::ContextMenu)
         );
     }
+  }
   else
     if( currentVectorLayer )
     {

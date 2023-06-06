@@ -40,7 +40,7 @@ protected:
 	virtual TSharedRef<FTabManager::FSplitter>	CreateRightSection() override;
 
 
-protected:
+public:
     virtual void ResetView();
     virtual void GroupPaint();
     virtual void Group();

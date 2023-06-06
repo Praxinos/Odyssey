@@ -476,7 +476,7 @@ PrintSection( FOdysseyVectorSection* iSection)
     BLPoint segpt0 = path->GetWorldMatrix().mapPoint( segment->GetVertex(0)->GetCoords().x, segment->GetVertex(0)->GetCoords().y );
     BLPoint segpt1 = path->GetWorldMatrix().mapPoint( segment->GetVertex(1)->GetCoords().x, segment->GetVertex(1)->GetCoords().y );
 
-    UE_LOG(LogTemp,Warning,TEXT("Section: [x:%f y:%f] -- [x:%f y:%f]/segment[x:%f y:%f] -- [x:%f y:%f]"), pt0.x, pt0.y, pt1.x, pt1.y, segpt0.x, segpt0.y, segpt1.x, segpt1.y );
+    UE_LOG(LogTemp,Warning,TEXT("Section: [x:%f y:%f] -- [x:%f y:%f]/segment[x:%f y:%f] -- [x:%f y:%f] - flags : %d"), pt0.x, pt0.y, pt1.x, pt1.y, segpt0.x, segpt0.y, segpt1.x, segpt1.y, iSection->GetFlags() );
 }
 
 static void
@@ -559,17 +559,19 @@ FOdysseyVectorGroupPaint::FindPath( FOdysseyVectorSection* iReturnSection
     // loop checking if initiator is of type 
     if( iVertexArray[0]->GetClass() == FOdysseyVectorVertexIntersection::StaticClass() )
     {
-        FOdysseyVectorVertexIntersection* intersectionVertex = static_cast<FOdysseyVectorVertexIntersection*>(iVertexArray[0]);
+        FOdysseyVectorVertexIntersection* initiatorVertex = static_cast<FOdysseyVectorVertexIntersection*>(iVertexArray[0]);
 
-        isLoop = intersectionVertex->GetIntersection()->HasVertex( static_cast<FOdysseyVectorVertexIntersection*>(nextVertex) );
+        isLoop = initiatorVertex->GetIntersection()->HasVertex( static_cast<FOdysseyVectorVertexIntersection*>(nextVertex) );
     }
-
+/*
     if( iVertexArray[0]->GetClass() == FOdysseyVectorVertex::StaticClass() )
     {
         isLoop = ( iVertexArray[0] == nextVertex );
     }
-
+*/
     //PrintSection(iSection);
+    //UE_LOG(LogTemp,Warning,TEXT("IsLoop: %d %d"), isLoop, iVertexArray.size() );
+    //PrintVertex(nextVertex);
 
     if( ( isLoop == true )// cycle detected
     && ( ( ( iReturnSection->IsLinked() == true ) && ( iReturnSection == iSection ) ) // 1 return path accepted
@@ -596,7 +598,7 @@ FOdysseyVectorGroupPaint::FindPath( FOdysseyVectorSection* iReturnSection
 
             if( primaryNextSection )
             {
-        // UE_LOG(LogTemp,Warning,TEXT("primary") );
+         //UE_LOG(LogTemp,Warning,TEXT("primary flags: %d %d"), primaryNextSection->GetFlags(), nextVertex->GetSectionCount() );
                 if( primaryNextSection->IsBlocked( nextVertex ) == false )
                 {
                     ret = FindPath( iReturnSection, nextVertex, primaryNextSection, iVertexArray, iSectionArray, iOrientation, iDepth + 1 );
@@ -797,6 +799,17 @@ FOdysseyVectorGroupPaint::FindCycles()
     for( int i = 0; i < explorationPairsBuffer.size(); i++ )
     {
         Explore( &explorationPairsBuffer[i] );
+    }
+
+    // section topology must be unlinked now or else if we transfer path to another group, it may not be cleaned
+    for( int i = 0; i < mSectionBuffer.size(); i++ )
+    {
+        FOdysseyVectorSection *section = &mSectionBuffer[i];
+
+        if( section->IsLinked() == true )
+        {
+            section->Unlink();
+        }
     }
 
     OrderCycles();
@@ -1166,16 +1179,7 @@ FOdysseyVectorGroupPaint::Clear()
     mGapSegmentBuffer.clear();
 
 
-    // clean section topology
-    for( int i = 0; i < mSectionBuffer.size(); i++ )
-    {
-        FOdysseyVectorSection *section = &mSectionBuffer[i];
-
-        if( section->IsLinked() == true )
-        {
-            section->Unlink();
-        }
-    }
+    // clean section topology (unlinking has been moved after the cycle detection).
 
     mSectionBuffer.clear();
 

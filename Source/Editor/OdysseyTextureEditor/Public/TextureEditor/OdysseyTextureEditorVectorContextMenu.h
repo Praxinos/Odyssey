@@ -19,5 +19,6 @@ class ODYSSEYTEXTUREEDITOR_API FOdysseyTextureEditorVectorContextMenu :
         // FOdysseyTextureEditorVectorContextMenu interface
         virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
         //virtual void ExtendMenu( FToolMenuOwner iOwner, FName iMenuName ) override;
+        //virtual void OnToolkitInitialized( FBaseToolkit* iToolkit ) override;
 };
 

@@ -36,6 +36,7 @@ FOdysseyPainterEditorVectorContextMenu::CreateWidget()
 void
 FOdysseyPainterEditorVectorContextMenu::BindShortcuts(FBaseToolkit* iToolkit)
 {
+    FOdysseyEditorContextMenu::BindShortcuts(iToolkit);
 /*
     const TSharedRef<FUICommandList>& toolkitCommands = iToolkit->GetToolkitCommands();
     const FOdysseyPainterEditorCommands& painterEditorCommands = FOdysseyPainterEditorCommands::Get();
@@ -46,4 +47,17 @@ FOdysseyPainterEditorVectorContextMenu::BindShortcuts(FBaseToolkit* iToolkit)
 */
 }
 
+/*
+void
+FOdysseyPainterEditorVectorContextMenu::OnToolkitInitialized( FBaseToolkit* iToolkit )
+{
+    FOdysseyEditorContextMenu::OnToolkitInitialized( iToolkit );
+}
+
+void
+FOdysseyPainterEditorVectorContextMenu::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
+{
+    FOdysseyEditorContextMenu::ExtendMenu( iOwner, iMenuName );
+}
+*/
 #undef LOCTEXT_NAMESPACE

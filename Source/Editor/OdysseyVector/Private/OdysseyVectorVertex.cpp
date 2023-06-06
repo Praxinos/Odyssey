@@ -9,6 +9,7 @@ FOdysseyVectorVertex::FOdysseyVectorVertex( FOdysseyVectorPath* iPath, double iX
    , mPath ( iPath )
    , mNearestSegment( nullptr )
    , mNearestVertex( nullptr )
+   , mFlags( 0 )
 {
     mCtrlPoint = FOdysseyVectorHandlePoint::New( this );
 
