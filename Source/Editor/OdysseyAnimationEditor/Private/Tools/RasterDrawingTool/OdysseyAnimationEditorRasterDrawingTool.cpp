@@ -102,18 +102,67 @@ UOdysseyAnimationEditorRasterDrawingTool::IsActivable() const
 }
 
 bool
+UOdysseyAnimationEditorRasterDrawingTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
+{
+	if (!CanDraw())
+		return false;
+
+	UOdysseyAnimation* animation = GetAnimation();
+	if (!animation)
+		return false;
+
+	UOdysseyAnimationLayerImageRaster* layer = GetLayer();
+	if (!layer)
+		return false;
+
+	FInt32Range range = layer->GetFrameRange();
+
+	if (animation->CurrentFrame < range.GetLowerBoundValue())
+	{
+		//Add a frame at current frame and extend it 
+		TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(layer, animation->Width(), animation->Height(), animation->Format());
+        cell->SetLength(range.GetLowerBoundValue() - animation->CurrentFrame);
+
+		FOdysseyAnimationCellsMutator mutator(layer);
+		mutator.Add({cell}, 0);
+		mutator.SetOffset(layer->GetOffset() - cell->GetLength());
+		mutator.Commit();
+	}
+	else if (animation->CurrentFrame > range.GetUpperBoundValue())
+	{
+		//Add a frame at current frame and extend previous frame to it 
+		TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(layer, animation->Width(), animation->Height(), animation->Format());
+        cell->SetLength(1);
+		
+		FOdysseyAnimationCellsMutator mutator(layer);
+
+		int lastCellIndex = layer->GetCellsCount() - 1;
+		if ( lastCellIndex >= 0 )
+		{
+			int cellLength;
+			if ( layer->GetCellLength(lastCellIndex, cellLength) )
+			{
+				mutator.SetLength(lastCellIndex, cellLength + animation->CurrentFrame - range.GetUpperBoundValue() - 1);
+			}
+		}
+
+		mutator.Add({cell});
+		mutator.Commit();
+	}
+
+	return UOdysseyPainterEditorRasterDrawingTool::OnMouseDown(iPointInTexture, iKey);	
+}
+
+bool
 UOdysseyAnimationEditorRasterDrawingTool::CanDraw()
 {	
-    if (!Super::CanDraw())
-        return false; 
-
 	UOdysseyAnimationLayerImageRaster* layer = GetLayer();
 	if (!layer)
 		return false;
 
 	bool isActive = UOdysseyLayerFunctionLibrary::IsLayerActivatedInStack(layer);
 	bool isLocked = UOdysseyLayerFunctionLibrary::IsLayerLockedInStack(layer);
-    return isActive && !isLocked;
+	return isActive && !isLocked;
 }
 
 void

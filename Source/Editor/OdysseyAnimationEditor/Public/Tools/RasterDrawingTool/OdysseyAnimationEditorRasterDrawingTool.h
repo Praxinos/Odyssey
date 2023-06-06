@@ -27,6 +27,7 @@ public:
     virtual void Activate() override;
     virtual void Inactivate() override;
     virtual bool IsActivable() const override;
+    virtual bool OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
 
 public:
     // Paint Engine Stroke API
