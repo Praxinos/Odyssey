@@ -19,7 +19,7 @@ class FOdysseyVectorPointSample : public FOdysseyVectorPoint
         ~FOdysseyVectorPointSample();
         FOdysseyVectorPointSample(){};
         FOdysseyVectorPointSample( double iX, double iY, double iRadius );
-        FOdysseyVectorPointSample( std::vector<FOdysseyVectorPoint*> iPointArray ); // average values of points in array
+        FOdysseyVectorPointSample( std::vector<FOdysseyVectorPoint>& iPointBuffer ); // average values of points in array
 
         void SetSharp( bool iIsSharp );
         bool IsSharp();
@@ -64,9 +64,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathBuilder : public FOdysseyVectorObject
         std::vector<FOdysseyVectorPoint> mPointBuffer;
         std::vector<FOdysseyVectorPointSample> mSampleBuffer;
         std::vector<FOdysseyVectorLinkSample> mLinkBuffer;
-
+/*
         std::vector<FOdysseyVectorPointSample*> mSampleArray;
         std::vector<FOdysseyVectorPoint*> mPointArray;
+*/
         std::vector<FOdysseyVectorVertex*> mVertexArray;
 
         FOdysseyVectorPathCubic* mCubicPath;
