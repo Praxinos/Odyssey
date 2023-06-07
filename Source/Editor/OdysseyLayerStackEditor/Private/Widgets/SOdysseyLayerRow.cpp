@@ -143,67 +143,33 @@ SOdysseyLayerRow::GenerateOptionsWidget()
 TSharedRef<SWidget>
 SOdysseyLayerRow::GenerateIsOptionsDisplayedWidget()
 {
+	const FCheckBoxStyle* isOptionsDisplayedToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("LayerStack.IsOptionsDisplayedToggle");
 	return SNew(SCheckBox)
-		.Type(ESlateCheckBoxType::ToggleButton)
-		.ForegroundColor(FSlateColor::UseForeground())
-		.CheckedHoveredImage(FOdysseyStyle::GetBrush("OdysseyLayerStack.OptionsDisplayed16"))
-		.CheckedImage(FOdysseyStyle::GetBrush("OdysseyLayerStack.OptionsDisplayed16"))
-		.CheckedPressedImage(FOdysseyStyle::GetBrush("OdysseyLayerStack.OptionsDisplayed16"))
-		.UncheckedHoveredImage(FOdysseyStyle::GetBrush("OdysseyLayerStack.OptionsHidden16"))
-		.UncheckedImage(FOdysseyStyle::GetBrush("OdysseyLayerStack.OptionsHidden16"))
-		.UncheckedPressedImage(FOdysseyStyle::GetBrush("OdysseyLayerStack.OptionsHidden16"))
+		.Style(isOptionsDisplayedToggleStyle)
 		.OnCheckStateChanged(this, &SOdysseyLayerRow::OnIsOptionsDisplayedCheckBoxStateChanged)
-		.IsChecked(this, &SOdysseyLayerRow::GetIsOptionsDisplayedCheckBoxState)
-		[
-			//Just for the checkbox to take the space of an icon
-			SNew(SImage)
-				.Visibility(EVisibility::Hidden)
-				.Image(FOdysseyStyle::GetBrush("OdysseyLayerStack.OptionsDisplayed16"))
-		];
+		.IsChecked(this, &SOdysseyLayerRow::GetIsOptionsDisplayedCheckBoxState);
 }
 
 TSharedRef<SWidget>
 SOdysseyLayerRow::GenerateIsActivatedWidget()
 {
+	const FCheckBoxStyle* isActivatedToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("LayerStack.IsActivatedToggle");
+
 	return SNew(SCheckBox)
-		.Type(ESlateCheckBoxType::ToggleButton)
-		.ForegroundColor(FSlateColor::UseForeground())
-		.CheckedHoveredImage(FOdysseyStyle::GetBrush("OdysseyLayerStack.Visible16"))
-		.CheckedImage(FOdysseyStyle::GetBrush("OdysseyLayerStack.Visible16"))
-		.CheckedPressedImage(FOdysseyStyle::GetBrush("OdysseyLayerStack.Visible16"))
-		.UncheckedHoveredImage(FOdysseyStyle::GetBrush("OdysseyLayerStack.NotVisible16"))
-		.UncheckedImage(FOdysseyStyle::GetBrush("OdysseyLayerStack.NotVisible16"))
-		.UncheckedPressedImage(FOdysseyStyle::GetBrush("OdysseyLayerStack.NotVisible16"))
+		.Style(isActivatedToggleStyle)
 		.OnCheckStateChanged(this, &SOdysseyLayerRow::OnIsActivatedCheckBoxStateChanged)
-		.IsChecked(this, &SOdysseyLayerRow::GetIsActivatedCheckBoxState)
-		[
-			//Just for the checkbox to take the space of an icon
-			SNew(SImage)
-				.Visibility(EVisibility::Hidden)
-				.Image(FOdysseyStyle::GetBrush("OdysseyLayerStack.Visible16"))
-		];
+		.IsChecked(this, &SOdysseyLayerRow::GetIsActivatedCheckBoxState);
 }
 
 TSharedRef<SWidget>
 SOdysseyLayerRow::GenerateIsLockedWidget()
 {
+	const FCheckBoxStyle* isLockedToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("LayerStack.IsLockedToggle");
+
 	return SNew(SCheckBox)
-		.Type(ESlateCheckBoxType::ToggleButton)
-		.ForegroundColor(FSlateColor::UseForeground())
-		.CheckedHoveredImage(FOdysseyStyle::GetBrush("OdysseyLayerStack.Locked16"))
-		.CheckedImage(FOdysseyStyle::GetBrush("OdysseyLayerStack.Locked16"))
-		.CheckedPressedImage(FOdysseyStyle::GetBrush("OdysseyLayerStack.Locked16"))
-		.UncheckedHoveredImage(FOdysseyStyle::GetBrush("OdysseyLayerStack.Unlocked16"))
-		.UncheckedImage(FOdysseyStyle::GetBrush("OdysseyLayerStack.Unlocked16"))
-		.UncheckedPressedImage(FOdysseyStyle::GetBrush("OdysseyLayerStack.Unlocked16"))
+		.Style(isLockedToggleStyle)
 		.OnCheckStateChanged(this, &SOdysseyLayerRow::OnIsLockedCheckBoxStateChanged)
-		.IsChecked(this, &SOdysseyLayerRow::GetIsLockedCheckBoxState)
-		[
-			//Just for the checkbox to take the space of an icon
-			SNew(SImage)
-				.Visibility(EVisibility::Hidden)
-				.Image(FOdysseyStyle::GetBrush("OdysseyLayerStack.Locked16"))
-		];
+		.IsChecked(this, &SOdysseyLayerRow::GetIsLockedCheckBoxState);
 }
 
 void

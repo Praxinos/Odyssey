@@ -28,6 +28,8 @@ void SOdysseyTextureLayerImageRasterRow::Construct(const FArguments& InArgs, con
 TSharedRef<SWidget>
 SOdysseyTextureLayerImageRasterRow::GenerateHeaderWidget()
 {
+    const FCheckBoxStyle* alphaLockedToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("Texture.AlphaLockedToggle");
+
 	TSharedRef<SWidget> defaultWidget = SOdysseyLayerRow::GenerateHeaderWidget();
     return SNew(SHorizontalBox)
         +SHorizontalBox::Slot()
@@ -44,22 +46,9 @@ SOdysseyTextureLayerImageRasterRow::GenerateHeaderWidget()
         [
             //AlphaLock
             SNew(SCheckBox)
-            .Type(ESlateCheckBoxType::ToggleButton)
-            .ForegroundColor(FSlateColor::UseForeground())
-            .CheckedHoveredImage(FOdysseyStyle::GetBrush("OdysseyLayerStack.AlphaLocked16"))
-            .CheckedImage(FOdysseyStyle::GetBrush("OdysseyLayerStack.AlphaLocked16"))
-            .CheckedPressedImage(FOdysseyStyle::GetBrush("OdysseyLayerStack.AlphaLocked16"))
-            .UncheckedHoveredImage(FOdysseyStyle::GetBrush("OdysseyLayerStack.AlphaUnlocked16"))
-            .UncheckedImage(FOdysseyStyle::GetBrush("OdysseyLayerStack.AlphaUnlocked16"))
-            .UncheckedPressedImage(FOdysseyStyle::GetBrush("OdysseyLayerStack.AlphaUnlocked16"))
+            .Style(alphaLockedToggleStyle)
             .OnCheckStateChanged(this, &SOdysseyTextureLayerImageRasterRow::OnIsAlphaLockedCheckStateChanged)
             .IsChecked(this, &SOdysseyTextureLayerImageRasterRow::GetIsAlphaLockedIsChecked)
-            [
-                //Just for the checkbox to take the space of an icon
-                SNew(SImage)
-                    .Visibility(EVisibility::Hidden)
-                    .Image(FOdysseyStyle::GetBrush("OdysseyLayerStack.AlphaLocked16"))
-		    ]
         ]
         +SHorizontalBox::Slot()
         .Padding(FMargin(0.f, 0.f, 2.f, 0.f))
