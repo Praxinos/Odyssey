@@ -86,6 +86,14 @@ FOdysseyVectorBucket::Set( double iX, double iY )
 }
 
 void
+FOdysseyVectorBucket::Set( double iX, double iY, double iRadius )
+{
+    FOdysseyVectorPoint::Set( iX, iY, iRadius );
+
+    mParent.Invalidate( FOdysseyVectorObject::INVALIDATE_COLOR );
+}
+
+void
 FOdysseyVectorBucket::Invalidate()
 {
     mParent.Invalidate( FOdysseyVectorObject::INVALIDATE_COLOR );

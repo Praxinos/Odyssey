@@ -17,6 +17,7 @@ UOdysseyPainterEditorVectorPathEditTool::UOdysseyPainterEditorVectorPathEditTool
     : mCubicPathHUD( FOdysseyVectorHUDPathCubic::VIEW_PATH
                    | FOdysseyVectorHUDPathCubic::VIEW_POINT )
     , Radius(10.0f)
+    , mSelectionFlags ( 0 )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.VectoEdit64");
 
@@ -191,7 +192,6 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownMovePoint( FOdysseyVectorEng
                                                              , const FKey& iKey )
 {
     BLPoint localCoords = iPath->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
-    uint64 selectionFlags = 0;
 
     mPickedPointArray.clear();
 
@@ -202,37 +202,40 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownMovePoint( FOdysseyVectorEng
 
     if( mCubicPathHUD.GetDisplayMode() & FOdysseyVectorHUDPathCubic::VIEW_HANDLE_SEGMENT )
     {
-        selectionFlags = FOdysseyVectorPath::PICK_HANDLE_SEGMENT;
+        mSelectionFlags = FOdysseyVectorPath::PICK_HANDLE_SEGMENT;
     }
 
     if( mCubicPathHUD.GetDisplayMode() & FOdysseyVectorHUDPathCubic::VIEW_HANDLE_POINT )
     {
-        selectionFlags = FOdysseyVectorPath::PICK_HANDLE_POINT;
+        mSelectionFlags = FOdysseyVectorPath::PICK_HANDLE_POINT;
     }
 
     if( mCubicPathHUD.GetDisplayMode() & FOdysseyVectorHUDPathCubic::VIEW_POINT )
     {
-        selectionFlags = FOdysseyVectorPath::PICK_POINT;
+        mSelectionFlags = FOdysseyVectorPath::PICK_POINT;
     }
 
-    iPath->PickPoint( iPointInTexture.x, iPointInTexture.y, Radius, mPickedPointArray, selectionFlags );
+    iPath->PickPoint( iPointInTexture.x, iPointInTexture.y, Radius, mPickedPointArray, mSelectionFlags );
 
     // TODO: put this in a function or something
     // Control point must move with the point. Store it in the mPickedPointArray as well
-    for( int i = 0; i < mPickedPointArray.size(); i++ )
+    if( mSelectionFlags == FOdysseyVectorPath::PICK_POINT )
     {
-        if( mPickedPointArray[i]->GetClass() == FOdysseyVectorVertex::StaticClass() )
+        for( int i = 0; i < mPickedPointArray.size(); i++ )
         {
-            FOdysseyVectorVertex* cubicVertex = static_cast<FOdysseyVectorVertex*>( mPickedPointArray[i] );
-            std::list<FOdysseyVectorSegment*> segmentList = cubicVertex->GetSegmentList();
-
-            for( std::list<FOdysseyVectorSegment*>::iterator segit = segmentList.begin(); segit != segmentList.end(); ++segit )
+            if( mPickedPointArray[i]->GetClass() == FOdysseyVectorVertex::StaticClass() )
             {
-                FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(*segit);
-                FOdysseyVectorHandleSegment* handle = ( cubicVertex == cubicSegment->GetVertex( 0 ) ) ? cubicSegment->GetHandle( 0 ) :
-                                                                                                        cubicSegment->GetHandle( 1 );
+                FOdysseyVectorVertex* cubicVertex = static_cast<FOdysseyVectorVertex*>( mPickedPointArray[i] );
+                std::list<FOdysseyVectorSegment*> segmentList = cubicVertex->GetSegmentList();
 
-                mPickedPointArray.push_back( handle );
+                for( std::list<FOdysseyVectorSegment*>::iterator segit = segmentList.begin(); segit != segmentList.end(); ++segit )
+                {
+                    FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(*segit);
+                    FOdysseyVectorHandleSegment* handle = ( cubicVertex == cubicSegment->GetVertex( 0 ) ) ? cubicSegment->GetHandle( 0 ) :
+                                                                                                            cubicSegment->GetHandle( 1 );
+
+                    mPickedPointArray.push_back( handle );
+                }
             }
         }
     }
@@ -310,15 +313,15 @@ DragPoint( double iLocalX
          , double iLocalY
          , double iOldLocalX
          , double iOldLocalY
-         , FOdysseyVectorPoint *iPoint )
+         , FOdysseyVectorPoint *iPoint
+         , uint64 iSelectionFlags )
 {
     double difx = iLocalX - iOldLocalX;
     double dify = iLocalY - iOldLocalY;
 
-    if ( iPoint->GetClass() == FOdysseyVectorHandlePoint::StaticClass() )
+    if ( iSelectionFlags == FOdysseyVectorPath::PICK_HANDLE_POINT  )
     {
-        FOdysseyVectorHandlePoint* pointHandle = static_cast<FOdysseyVectorHandlePoint*>( iPoint );
-        FOdysseyVectorVertex* cubicVertex = static_cast<FOdysseyVectorVertex*>(pointHandle->GetParent());
+        FOdysseyVectorVertex* cubicVertex = static_cast<FOdysseyVectorVertex*>( iPoint );
         ::ULIS::FVec2D dif = { cubicVertex->GetX() - iLocalX, cubicVertex->GetY() - iLocalY };
 
         cubicVertex->SetRadius( dif.Distance() );
@@ -326,7 +329,7 @@ DragPoint( double iLocalX
         return cubicVertex->GetBoundingBox( false );
     }
 
-    if( iPoint->GetClass() == FOdysseyVectorHandleSegment::StaticClass() )
+    if( iSelectionFlags == FOdysseyVectorPath::PICK_HANDLE_SEGMENT )
     {
         FOdysseyVectorHandleSegment* segmentHandle = static_cast<FOdysseyVectorHandleSegment*>( iPoint );
         FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(segmentHandle->GetParent());
@@ -337,7 +340,7 @@ DragPoint( double iLocalX
         return cubicSegment->GetBoundingBox( false );
     }
 
-    if( iPoint->GetClass() == FOdysseyVectorVertex::StaticClass() )
+    if( iSelectionFlags == FOdysseyVectorPath::PICK_POINT )
     {
         FOdysseyVectorVertex* cubicVertex = static_cast<FOdysseyVectorVertex*>( iPoint );
         std::list<FOdysseyVectorSegment*> segmentList = cubicVertex->GetSegmentList();
@@ -379,7 +382,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDragVector( FOdysseyVectorEngine
                 FOdysseyVectorPoint *selectedPoint = mPickedPointArray[i];
                 ::ULIS::FRectD rect;
 
-                rect = DragPoint( localCoords.x, localCoords.y, mOldLocalMouseX, mOldLocalMouseY, selectedPoint );
+                rect = DragPoint( localCoords.x, localCoords.y, mOldLocalMouseX, mOldLocalMouseY, selectedPoint, mSelectionFlags );
 
                 localInvalidatedArea = ( inited == false ) ? rect : localInvalidatedArea | rect;
 

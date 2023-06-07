@@ -85,6 +85,14 @@ FOdysseyVectorPoint::Set( double iX, double iY )
     SetY( iY );
 }
 
+void 
+FOdysseyVectorPoint::Set( double iX, double iY, double iRadius )
+{
+    SetX( iX );
+    SetY( iY );
+    SetRadius( iRadius );
+}
+
 double
 FOdysseyVectorPoint::GetRadius()
 {

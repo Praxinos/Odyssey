@@ -46,7 +46,6 @@ namespace FOdysseyVector
 #include "OdysseyVectorScene.h"
 #include "OdysseyVectorPoint.h"
 #include "OdysseyVectorHandle.h"
-#include "OdysseyVectorHandlePoint.h"
 #include "OdysseyVectorHandleSegment.h"
 #include "OdysseyVectorVertex.h"
 #include "OdysseyVectorVertexIntersection.h"

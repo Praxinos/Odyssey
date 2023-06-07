@@ -87,7 +87,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPoint
          * @param iY the desired coordinate on Y axis
          */
         virtual void Set( double iX, double iY );
-
+        virtual void Set( double iX, double iY, double iRadius );
         /**
          * @brief Set the point's absolute radius
          * @param iRadius the desired point's radius

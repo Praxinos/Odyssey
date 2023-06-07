@@ -351,14 +351,14 @@ FOdysseyVectorPathCubic::PickPoint( double iWorldX
 
             if( dif0.Distance() <= iSelectionRadius )
             {
-                oPickedPointArray.push_back( vertex->GetHandle() );
+                oPickedPointArray.push_back( vertex );
 
                 return true;
             }
 
             if( dif1.Distance() <= iSelectionRadius )
             {
-                oPickedPointArray.push_back( vertex->GetHandle() );
+                oPickedPointArray.push_back( vertex );
 
                 return true;
             }

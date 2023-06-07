@@ -72,6 +72,7 @@ private:
     FOdysseyVectorHUDPathCubic mCubicPathHUD;
     FOdysseyVectorHUDPicking mPickingHUD;
     std::vector<FOdysseyVectorPoint*> mPickedPointArray;
+    uint64 mSelectionFlags;
 
 public:
     UPROPERTY(EditAnywhere, Category="Odyssey PathEdit Tool", meta = (ClampMin = "0.0", UIMin = "0.0") )

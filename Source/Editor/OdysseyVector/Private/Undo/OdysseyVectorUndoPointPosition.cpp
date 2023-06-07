@@ -44,7 +44,9 @@ LoadArray( std::vector<FPointPosition>& mPointPositionArray )
         FPointPosition formerPosition = FPointPosition( mPointPositionArray[i].point );
 
         // Note: virtual function Set() will invalidate segments in needed
-        mPointPositionArray[i].point->Set( mPointPositionArray[i].position.x, mPointPositionArray[i].position.y );
+        mPointPositionArray[i].point->Set( mPointPositionArray[i].position.x
+                                         , mPointPositionArray[i].position.y
+                                         , mPointPositionArray[i].radius  );
         // replace with former value (prepare for the counterpart operation, either Apply or Revert)
         mPointPositionArray[i] = formerPosition;
     }

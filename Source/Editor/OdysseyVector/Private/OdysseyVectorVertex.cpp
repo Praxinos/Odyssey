@@ -11,8 +11,6 @@ FOdysseyVectorVertex::FOdysseyVectorVertex( FOdysseyVectorPath* iPath, double iX
    , mNearestVertex( nullptr )
    , mFlags( 0 )
 {
-    mCtrlPoint = FOdysseyVectorHandlePoint::New( this );
-
     Init( iX, iY, iRadius );
 }
 
@@ -267,12 +265,6 @@ FOdysseyVectorVertex::IsSmooth()
     }
 
     return false;
-}
-
-FOdysseyVectorHandlePoint*
-FOdysseyVectorVertex::GetHandle()
-{
-    return mCtrlPoint;
 }
 
 double
