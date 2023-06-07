@@ -46,6 +46,7 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
         SNew( SWrapBox )
         .UseAllottedWidth( true ) // if true put all slot horizontally   if false put all slot vertically
         +SWrapBox::Slot()
+        .Padding( 0.f, 0.f, 33.f, 0.f )
         [
             SNew( SHorizontalBox )
 
@@ -97,20 +98,6 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
             [
             SNew( SButton )
             .ButtonStyle( FCoreStyle::Get(), "NoBorder" )
-            .ToolTipText( LOCTEXT("ClearButton", "Clear the whole canvas.") )
-            .VAlign( VAlign_Center )
-            .ContentPadding( FMargin( 0.0, 0.0 ) )
-            .OnClicked( InArgs._OnClearButtonClicked )
-                [
-                    SNew( SImage )
-                    .Image( FOdysseyStyle::GetBrush( "PainterEditor.TopBar.Clear32" ) )
-                ]
-            ]
-            +SHorizontalBox::Slot()
-            .Padding( 3.f, 3.f, 33.f, 3.f )
-            [
-            SNew( SButton )
-            .ButtonStyle( FCoreStyle::Get(), "NoBorder" )
             .ToolTipText( LOCTEXT("EraserButton", "Switch the current tool to Eraser mode.") )
             .VAlign( VAlign_Center )
             .ContentPadding( FMargin( 0.0, 0.0 ) )
@@ -119,6 +106,20 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
                     SNew( SImage )
                     .Image( FOdysseyStyle::GetBrush( "PainterEditor.TopBar.Eraser32" ) )
                     .ColorAndOpacity_Lambda( [this](){ return ( mIsEraserButtonActive.Get() == true ? FSlateColor( FLinearColor( 1.0f, 0.5f, 0.0f, 1.0f ) ) : FSlateColor( FLinearColor( 1.0f, 1.0f, 1.0f, 1.0f ) ) ); } )
+                ]
+            ]
+            +SHorizontalBox::Slot()
+            .Padding( 3.f, 3.f, 3.f, 3.f )
+            [
+            SNew( SButton )
+            .ButtonStyle( FCoreStyle::Get(), "NoBorder" )
+            .ToolTipText( LOCTEXT("ClearButton", "Clear the whole canvas.") )
+            .VAlign( VAlign_Center )
+            .ContentPadding( FMargin( 0.0, 0.0 ) )
+            .OnClicked( InArgs._OnClearButtonClicked )
+                [
+                    SNew( SImage )
+                    .Image( FOdysseyStyle::GetBrush( "PainterEditor.TopBar.Clear32" ) )
                 ]
             ]
         ]
