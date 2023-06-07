@@ -610,6 +610,8 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
         .SetCheckedHoveredImage(IMAGE_BRUSH("OdysseyAnimation/LightTableToggle_ON_16", mIcon16x16))
         .SetCheckedPressedImage(IMAGE_BRUSH("OdysseyAnimation/LightTableToggle_ON_16", mIcon16x16))
 	);
+
+    Set("Animation.AddCellsHandle", new IMAGE_BRUSH("OdysseyAnimation/AddCellsHandle_16", mIcon16x16));
 #endif
 }
 

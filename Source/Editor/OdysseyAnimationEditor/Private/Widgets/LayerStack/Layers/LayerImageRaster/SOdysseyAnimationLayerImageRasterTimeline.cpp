@@ -42,7 +42,7 @@ SOdysseyAnimationLayerImageRasterTimeline::Construct(
     mEditor = iEditor;
     mTimingHandleBrush = FOdysseyStyle::GetBrush("FlipbookTimeline.TimelineFrameTimingHandle");
 	mLengthHandleBrush = FOdysseyStyle::GetBrush("FlipbookTimeline.TimelineFrameLengthHandle");
-    mAddCellsHandleBrush = FOdysseyStyle::GetBrush("AnimationLayerTimeline.AddCellsHandle");
+    mAddCellsHandleBrush = FOdysseyStyle::GetBrush("Animation.AddCellsHandle");
     
     ChildSlot
     [
