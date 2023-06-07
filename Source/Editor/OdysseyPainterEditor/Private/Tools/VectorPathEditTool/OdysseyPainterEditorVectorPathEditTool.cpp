@@ -342,13 +342,17 @@ DragPoint( double iLocalX
 
     if( iSelectionFlags == FOdysseyVectorPath::PICK_POINT )
     {
-        FOdysseyVectorVertex* cubicVertex = static_cast<FOdysseyVectorVertex*>( iPoint );
-        std::list<FOdysseyVectorSegment*> segmentList = cubicVertex->GetSegmentList();
+        // Segment handles are also included in the selection. Check we are on a vertex.
+        if( iPoint->GetClass() == FOdysseyVectorVertex::StaticClass() )
+        {
+            FOdysseyVectorVertex* cubicVertex = static_cast<FOdysseyVectorVertex*>( iPoint );
+            std::list<FOdysseyVectorSegment*> segmentList = cubicVertex->GetSegmentList();
 
-        cubicVertex->Set( iPoint->GetX() + difx
-                        , iPoint->GetY() + dify );
+            cubicVertex->Set( iPoint->GetX() + difx
+                            , iPoint->GetY() + dify );
 
-        return cubicVertex->GetBoundingBox( false );
+            return cubicVertex->GetBoundingBox( false );
+        }
     }
 
     return { 0, 0, 0, 0 };
