@@ -10,6 +10,7 @@
 #include "OdysseyTextureEditorModule.h"
 #include "OdysseyTextureEditorSettings.h"
 #include "OdysseyTexture.h"
+#include "OdysseyStyleSet.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyTextureAssetTypeActions"
 
@@ -72,6 +73,18 @@ void FOdysseyTextureAssetTypeActions::OpenAssetEditor(const TArray<UObject*>& In
             }
 		}
 	}
+}
+
+const FSlateBrush*
+FOdysseyTextureAssetTypeActions::GetThumbnailBrush(const FAssetData& InAssetData, const FName InClassName) const
+{
+    return FOdysseyStyle::GetBrush("ClassThumbnail.OdysseyTexture");
+}
+
+const FSlateBrush*
+FOdysseyTextureAssetTypeActions::GetIconBrush(const FAssetData& InAssetData, const FName InClassName) const
+{
+    return FOdysseyStyle::GetBrush("ClassIcon.OdysseyTexture");
 }
 
 #undef LOCTEXT_NAMESPACE
