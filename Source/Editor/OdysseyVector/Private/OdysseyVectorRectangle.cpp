@@ -2,6 +2,15 @@
 
 FOdysseyVectorRectangle::~FOdysseyVectorRectangle()
 {
+    delete mCubicVertex[0];
+    delete mCubicVertex[1];
+    delete mCubicVertex[2];
+    delete mCubicVertex[3];
+
+    delete mCubicSegment[0];
+    delete mCubicSegment[1];
+    delete mCubicSegment[2];
+    delete mCubicSegment[3];
 }
 
 FOdysseyVectorRectangle::FOdysseyVectorRectangle( const FString iName, double iWidth, double iHeight, double iStrokeWidth )

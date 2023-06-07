@@ -5,7 +5,7 @@ FOdysseyVectorEngine::~FOdysseyVectorEngine()
     mBLContext->end();
 }
 
-FOdysseyVectorEngine::FOdysseyVectorEngine( double iWidth, double iHeight )
+FOdysseyVectorEngine::FOdysseyVectorEngine( FOdysseyVectorScene* iScene, double iWidth, double iHeight )
     : mDrawingFlags( 0 )
     , mSelectionSpace( nullptr )
 {
@@ -20,6 +20,8 @@ FOdysseyVectorEngine::FOdysseyVectorEngine( double iWidth, double iHeight )
 
     /*mScene = NewObject<FOdysseyVectorScene>();
     mScene->Init("Vector Scene");*/
+
+    SetScene( iScene );
 
     mBLContext->begin( *mBLImage, createInfo );
 }
@@ -120,9 +122,25 @@ FOdysseyVectorEngine::GetColorImagePixelValue( uint32 iX, uint32 iY )
 }
 
 void
-FOdysseyVectorEngine::RenderHUD( FOdysseyVectorScene* iScene )
+FOdysseyVectorEngine::SetScene( FOdysseyVectorScene* iScene )
 {
-    std::list<FOdysseyVectorObject*> selectedObjectList = iScene->GetSelectedObjectList();
+    mScene = iScene;
+
+    mScene->SetEngine( this );
+
+    ResetHUD();
+}
+
+FOdysseyVectorScene*
+FOdysseyVectorEngine::GetScene()
+{
+    return mScene;
+}
+
+void
+FOdysseyVectorEngine::RenderHUD( /*FOdysseyVectorScene* iScene */ )
+{
+    std::list<FOdysseyVectorObject*> selectedObjectList = mScene->GetSelectedObjectList();
 
     mBLContext->save();
     mBLContext->resetMatrix();
@@ -131,7 +149,7 @@ FOdysseyVectorEngine::RenderHUD( FOdysseyVectorScene* iScene )
     {
         FOdysseyVectorHUD *hud = (*hit);
 
-        hud->Draw( iScene, 0 );
+        hud->Draw( mScene, 0 );
     }
 
     mBLContext->restore();
@@ -146,7 +164,7 @@ FOdysseyVectorEngine::SetDrawingFlags( uint64 iDrawingFlags )
 }
 
 void
-FOdysseyVectorEngine::Render( FOdysseyVectorScene* iScene/*, const ::ULIS::FRectI& iRegion*/ )
+FOdysseyVectorEngine::Render()
 {
     // Blend2D part
    /* BLContextCreateInfo createInfo{};*/
@@ -159,7 +177,7 @@ FOdysseyVectorEngine::Render( FOdysseyVectorScene* iScene/*, const ::ULIS::FRect
         mBLContext->clipToRect( iRegion.x, iRegion.y, iRegion.w, iRegion.h );
     }*/
 
-    iScene->Draw( mDrawingFlags );
+    mScene->Draw( mDrawingFlags );
 /*
     mBLContext->save();
     mBLContext->resetMatrix();
@@ -582,46 +600,37 @@ FOdysseyVectorEngine::Pick( FOdysseyVectorScene* iScene
     }
 }
 
-// static
 std::list<FOdysseyVectorHUD*>&
 FOdysseyVectorEngine::GetHUDList()
 {
-    /*static std::list<FOdysseyVectorHUD*> HUDList;
-
-    return HUDList;*/
-
     return mHUDList;
 }
 
-// static
 void
 FOdysseyVectorEngine::AddHUD( FOdysseyVectorHUD* iHUDObject )
 {
     GetHUDList().push_back( iHUDObject );
 }
 
-// static
 void
 FOdysseyVectorEngine::RemoveHUD( FOdysseyVectorHUD* iHUDObject )
 {
     GetHUDList().remove( iHUDObject );
 }
 
-// static
 void
 FOdysseyVectorEngine::ClearHUD()
 {
     GetHUDList().clear();
 }
 
-// static
 void
-FOdysseyVectorEngine::ResetHUD( FOdysseyVectorScene* iScene )
+FOdysseyVectorEngine::ResetHUD()
 {
     for( std::list<FOdysseyVectorHUD*>::iterator hit = GetHUDList().begin(); hit != GetHUDList().end(); ++hit )
     {
         FOdysseyVectorHUD *hud = (*hit);
 
-        hud->Reset( iScene );
+        hud->Reset( mScene );
     }
 }

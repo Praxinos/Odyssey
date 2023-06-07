@@ -46,7 +46,7 @@ UOdysseyTextureEditorPaintBucketTool::Load()
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
         UOdysseyPainterEditorPaintBucketTool::LoadVector( vectorEngine, vectorScene );
     }
@@ -83,7 +83,7 @@ UOdysseyTextureEditorPaintBucketTool::Unload()
         if( currentVectorLayer )
         {
             FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-            FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+            FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
             UOdysseyPainterEditorPaintBucketTool::UnloadVector( vectorEngine, vectorScene );
         }
@@ -154,7 +154,7 @@ UOdysseyTextureEditorPaintBucketTool::OnMouseDown( const FOdysseyPoint& iPointIn
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
         ret = UOdysseyPainterEditorPaintBucketTool::OnMouseDownVector( vectorEngine, vectorScene, iPointInTexture, iKey );
     }
@@ -171,7 +171,7 @@ UOdysseyTextureEditorPaintBucketTool::OnMouseHover( const FOdysseyPoint& iPointI
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
         UOdysseyPainterEditorPaintBucketTool::OnMouseHoverVector( vectorEngine, vectorScene, iPointInTexture );
     }
@@ -186,7 +186,7 @@ UOdysseyTextureEditorPaintBucketTool::OnMouseDrag( const FOdysseyPoint& iPointIn
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
         UOdysseyPainterEditorPaintBucketTool::OnMouseDragVector( vectorEngine, vectorScene, iPointInTexture );
     }
@@ -203,7 +203,7 @@ UOdysseyTextureEditorPaintBucketTool::OnMouseUp( const FOdysseyPoint& iPointInTe
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
         ret = UOdysseyPainterEditorPaintBucketTool::OnMouseUpVector( vectorEngine, vectorScene, iPointInTexture, iKey );
     }

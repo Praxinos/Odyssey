@@ -7,9 +7,10 @@
 #include "OdysseyLayerFunctionLibrary.h"
 #include "LayerStack/OdysseyTextureLayerStack.h"
 #include "LayerStack/OdysseyTextureLayerImageRaster.h"
+#include "LayerStack/OdysseyTextureLayerImageVector.h"
 #include "OdysseyPaintEngine.h"
 #include "OdysseyBlendParameters.h"
-
+#include "Undo/OdysseyVectorUndoEngineClear.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyTextureEditor"
 
@@ -439,6 +440,7 @@ FOdysseyTextureEditor::Clear()
 		return;
 
     UOdysseyTextureLayerImageRaster* currentLayerRaster = Cast<UOdysseyTextureLayerImageRaster>(LayerStack()->CurrentLayer.Get());
+    UOdysseyTextureLayerImageVector* currentLayerVector = Cast<UOdysseyTextureLayerImageVector>(LayerStack()->CurrentLayer.Get());
 
 	if (currentLayerRaster)
 	{		
@@ -462,6 +464,25 @@ FOdysseyTextureEditor::Clear()
 		);
 		mutator.Commit();
 	}
+
+    if( currentLayerVector )
+    {
+        FOdysseyVectorEngine* vectorEngine = currentLayerVector->GetEngine();
+
+        // needed for undos
+        GEditor->BeginTransaction(LOCTEXT("ClearVectorScene", "Clear Vector Scene"));
+        if( GUndo )
+        {
+            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoEngineClear( vectorEngine );
+
+            GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+        }
+        GEditor->EndTransaction();
+
+        vectorEngine->SetScene( new FOdysseyVectorScene("Scene") );
+
+        currentLayerVector->RenderImageChanged(false);
+    }
 }
 
 //--------------------------------------------------------------------------------------

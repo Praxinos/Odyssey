@@ -57,6 +57,8 @@ public:
         void SetBucketColor( FOdysseyVectorBucket* iBucket );
 
     protected:
+        void OnMouseUpVectorClearBucket( FOdysseyVectorScene* iScene
+                                       , FOdysseyVectorBucket* iBucket );
         void OnMouseUpVectorCreateBucket( FOdysseyVectorScene* iScene
                                         , FOdysseyVectorGroupPaint* paintGroup
                                         , const FOdysseyPoint& iPointInTexture

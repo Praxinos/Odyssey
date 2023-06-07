@@ -36,7 +36,7 @@ UOdysseyTextureEditorVectorGridTool::Load()
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
         UOdysseyPainterEditorVectorGridTool::LoadVector( vectorEngine, vectorScene );
     }
@@ -64,7 +64,7 @@ UOdysseyTextureEditorVectorGridTool::Unload()
         if( currentVectorLayer )
         {
             FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-            FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+            FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
             UOdysseyPainterEditorVectorGridTool::UnloadVector( vectorEngine, vectorScene );
         }
@@ -128,7 +128,7 @@ UOdysseyTextureEditorVectorGridTool::OnMouseDown( const FOdysseyPoint& iPointInT
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
         ret = UOdysseyPainterEditorVectorGridTool::OnMouseDownVector( vectorEngine, vectorScene, iPointInTexture, iKey );
     }
@@ -145,7 +145,7 @@ UOdysseyTextureEditorVectorGridTool::OnMouseDrag( const FOdysseyPoint& iPointInT
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
         UOdysseyPainterEditorVectorGridTool::OnMouseDragVector( vectorEngine, vectorScene, iPointInTexture );
     }
@@ -161,7 +161,7 @@ UOdysseyTextureEditorVectorGridTool::OnMouseUp( const FOdysseyPoint& iPointInTex
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
         ret = UOdysseyPainterEditorVectorGridTool::OnMouseUpVector( vectorEngine, vectorScene, iPointInTexture, iKey );
     }
@@ -184,7 +184,7 @@ UOdysseyTextureEditorVectorGridTool::PostEditChangeProperty( FPropertyChangedEve
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
         PropertyChangedVector( vectorEngine, vectorScene, PropertyChangedEvent.GetPropertyName());
 

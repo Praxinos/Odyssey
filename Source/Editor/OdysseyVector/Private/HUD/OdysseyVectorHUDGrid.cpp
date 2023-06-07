@@ -200,7 +200,7 @@ FOdysseyVectorHUDGrid::DrawSelectionRectangle( FOdysseyVectorScene* iScene, uint
 void
 FOdysseyVectorHUDGrid::Reset(FOdysseyVectorScene* iScene)
 {
-    Map( iScene );
+    MakeGrid( iScene, mCellCountX, mCellCountY );
 }
 
 void

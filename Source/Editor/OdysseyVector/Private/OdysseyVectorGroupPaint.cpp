@@ -554,12 +554,12 @@ FOdysseyVectorGroupPaint::FindPath( FOdysseyVectorSection* iReturnSection
 
         isLoop = initiatorVertex->GetIntersection()->HasVertex( static_cast<FOdysseyVectorVertexIntersection*>(nextVertex) );
     }
-/*
+
     if( iVertexArray[0]->GetClass() == FOdysseyVectorVertex::StaticClass() )
     {
         isLoop = ( iVertexArray[0] == nextVertex );
     }
-*/
+
     //PrintSection(iSection);
     //UE_LOG(LogTemp,Warning,TEXT("IsLoop: %d %d"), isLoop, iVertexArray.size() );
     //PrintVertex(nextVertex);

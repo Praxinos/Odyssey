@@ -37,7 +37,7 @@ FOdysseyTextureEditorGUI::OnCurrentLayerChanged( UOdysseyLayerStack* iLayerStack
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
         //FOdysseyVectorEngine::ClearHUD();
 
@@ -221,7 +221,7 @@ FOdysseyTextureEditorGUI::OnVectorSceneSignal( FOdysseyVectorScene* iScene, uint
     {
         UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
 
-        if( currentVectorLayer && ( currentVectorLayer->GetScene() == iScene ) )
+        if( currentVectorLayer && ( currentVectorLayer->GetEngine()->GetScene() == iScene ) )
         {
             if( iSignalFlags & FOdysseyVectorScene::SIGNAL_SCENE_REDRAW )
             {
@@ -248,7 +248,7 @@ FOdysseyTextureEditorGUI::RemoveSelectedObjects()
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
         FOdysseyPainterEditorGUI::RemoveSelectedObjects( vectorEngine, vectorScene );
     }
@@ -263,7 +263,7 @@ FOdysseyTextureEditorGUI::BringForward()
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
         FOdysseyPainterEditorGUI::BringForward( vectorEngine, vectorScene );
     }
@@ -278,7 +278,7 @@ FOdysseyTextureEditorGUI::SendBackward()
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
         FOdysseyPainterEditorGUI::SendBackward( vectorEngine, vectorScene );
     }
@@ -294,7 +294,7 @@ FOdysseyTextureEditorGUI::Ungroup()
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
         FOdysseyPainterEditorGUI::Ungroup( vectorEngine, vectorScene );
     }
@@ -309,7 +309,7 @@ FOdysseyTextureEditorGUI::ResetView()
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
         FOdysseyPainterEditorGUI::ResetView( vectorEngine, vectorScene );
     }
@@ -325,7 +325,7 @@ FOdysseyTextureEditorGUI::Group()
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
         FOdysseyPainterEditorGUI::Group( vectorEngine, vectorScene );
     }
@@ -341,7 +341,7 @@ FOdysseyTextureEditorGUI::GroupPaint()
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
         FOdysseyPainterEditorGUI::GroupPaint( vectorEngine, vectorScene );
     }
@@ -357,7 +357,7 @@ FOdysseyTextureEditorGUI::FlipHorizontal()
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
         FOdysseyPainterEditorGUI::FlipHorizontal( vectorEngine, vectorScene );
     }
@@ -373,7 +373,7 @@ FOdysseyTextureEditorGUI::FlipVertical()
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
         FOdysseyPainterEditorGUI::FlipVertical( vectorEngine, vectorScene );
     }

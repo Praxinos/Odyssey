@@ -9,14 +9,6 @@
 #include "SOdysseyTabletAPISwitcher.h"
 #include "Models/OdysseyPainterEditorCommands.h"
 
-#include "OdysseyVector.h"
-#include "Undo/OdysseyVectorUndoGroup.h"
-#include "Undo/OdysseyVectorUndoUngroup.h"
-#include "Undo/OdysseyVectorUndoSendBackward.h"
-#include "Undo/OdysseyVectorUndoBringForward.h"
-#include "Undo/OdysseyVectorUndoObjectTransform.h"
-#include "Undo/OdysseyVectorUndoSceneRemoveSelection.h"
-
 #include "ToolMenus.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorGUI"
@@ -407,252 +399,56 @@ FOdysseyPainterEditorGUI::SwitchTabletAPI()
 void
 FOdysseyPainterEditorGUI::BringForward( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
-    FOdysseyVectorObject* selectedObject = iScene->GetLastSelected();
-
-    if( selectedObject )
-    {
-        // needed for undos
-        GEditor->BeginTransaction(LOCTEXT("BringForward", "Bring forward"));
-        if( GUndo )
-        {
-           FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBringForward( iScene, selectedObject );
-
-            GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-        }
-        GEditor->EndTransaction();
-
-        selectedObject->MoveFront();
-
-        iScene->Update( 0 );
-    }
-
-    iEngine->ResetHUD( iScene );
-    // call callbacks if any (for refreshing GUI e.g)
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    mEditor->BringForward( iEngine, iScene );
 }
 
 void
 FOdysseyPainterEditorGUI::SendBackward( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
-    FOdysseyVectorObject* selectedObject = iScene->GetLastSelected();
-
-    if( selectedObject )
-    {
-        // needed for undos
-        GEditor->BeginTransaction(LOCTEXT("SendBackward", "Send backward"));
-        if( GUndo )
-        {
-           FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSendBackward( iScene, selectedObject );
-
-            GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-        }
-        GEditor->EndTransaction();
-
-        selectedObject->MoveBack();
-
-        iScene->Update( 0 );
-    }
-
-    iEngine->ResetHUD( iScene );
-    // call callbacks if any (for refreshing GUI e.g)
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    mEditor->SendBackward( iEngine, iScene );
 }
 
 
 void
 FOdysseyPainterEditorGUI::Ungroup( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
-    FOdysseyVectorObject* selectedObject = iScene->GetLastSelected();
-
-    if( selectedObject )
-    {
-        if( selectedObject->HasBaseClass( FOdysseyVectorGroup::StaticClass() ) )
-        {
-            FOdysseyVectorGroup* group = static_cast<FOdysseyVectorGroup*>( selectedObject );
-            // we work on a copy of the list to be able to delete children while iterating
-            std::list<FOdysseyVectorObject*> childrenList = group->GetChildrenList();
-
-            // needed for undos
-            GEditor->BeginTransaction(LOCTEXT("Ungroup", "Ungroup"));
-            if( GUndo )
-            {
-                FOdysseyVectorUndo* undo = new FOdysseyVectorUndoUngroup( iScene, group );
-
-                GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-            }
-            GEditor->EndTransaction();
-
-            for( std::list<FOdysseyVectorObject*>::iterator it = childrenList.begin(); it != childrenList.end(); ++it )
-            {
-                FOdysseyVectorObject* child = (*it);
-
-                group->GetParent()->TransferChild( child );
-            }
-
-            group->GetParent()->RemoveChild( group );
-
-            iScene->ClearSelection();
-            iScene->UpdateMatrix();
-            iScene->Update( 0 );
-        }
-    }
-
-    iEngine->ResetHUD( iScene );
-    // call callbacks if any (for refreshing GUI e.g)
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW | FOdysseyVectorScene::SIGNAL_OBJECT_SELECTED );
+    mEditor->Ungroup( iEngine, iScene );
 }
 
 void
 FOdysseyPainterEditorGUI::GroupPaint( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
-    std::vector<FOdysseyVectorObject*> cubicPathArray;
-    std::vector<FOdysseyVectorObject*> cubicPathOldParentArray;
-    std::vector<FOdysseyVectorObject*> removedPaintGroupArray;
-    FOdysseyVectorGroupPaint* paintGroup = iScene->MakePaintGroupFromSelectedObjects( cubicPathArray
-                                                                                    , cubicPathOldParentArray
-                                                                                    , removedPaintGroupArray );
-
-    if( paintGroup )
-    {
-        // needed for undos
-        GEditor->BeginTransaction(LOCTEXT("GroupPaint", "Group Paint"));
-        if( GUndo )
-        {
-            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoGroup( iScene
-                                                                  , paintGroup
-                                                                  , cubicPathArray
-                                                                  , cubicPathOldParentArray
-                                                                  , removedPaintGroupArray );
-
-            GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-        }
-        GEditor->EndTransaction();
-
-        iScene->ClearSelection();
-        iScene->Select( paintGroup );
-        iScene->Update( 0 );
-    }
-
-    iEngine->ResetHUD( iScene );
-    // call callbacks if any (for refreshing GUI e.g)
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW | FOdysseyVectorScene::SIGNAL_OBJECT_SELECTED );
+    mEditor->GroupPaint( iEngine, iScene );
 }
 
 void
 FOdysseyPainterEditorGUI::Group( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
-
-    std::vector<FOdysseyVectorObject*> objectArray;
-    std::vector<FOdysseyVectorObject*> objectOldParentArray;
-    FOdysseyVectorGroup* group = iScene->GroupSelectedObjects( objectArray, objectOldParentArray );
-
-    if( group )
-    {
-        // needed for undos
-        GEditor->BeginTransaction(LOCTEXT("Group", "group"));
-        if( GUndo )
-        {
-            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoGroup( iScene, group, objectArray, objectOldParentArray );
-
-            GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-        }
-        GEditor->EndTransaction();
-
-        iScene->ClearSelection();
-        iScene->Select( group );
-        iScene->Update( 0 );
-    }
-
-    iEngine->ResetHUD( iScene );
-    // call callbacks if any (for refreshing GUI e.g)
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW | FOdysseyVectorScene::SIGNAL_OBJECT_SELECTED );
+    mEditor->Group( iEngine, iScene );
 }
 
 void
 FOdysseyPainterEditorGUI::ResetView( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
-    // needed for undos
-    GEditor->BeginTransaction(LOCTEXT("ResetView", "Reset view"));
-    if( GUndo )
-    {
-        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoObjectTransform( iScene, iScene );
-
-        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-    }
-    GEditor->EndTransaction();
-
-    iScene->ResetTransform();
-    iScene->UpdateMatrix();
-    iScene->Update( 0 );
-
-    iEngine->ResetHUD( iScene );
-    // call callbacks if any (for refreshing GUI e.g)
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    mEditor->ResetView( iEngine, iScene );
 }
 
 void
 FOdysseyPainterEditorGUI::RemoveSelectedObjects( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
-    // needed for undos
-    GEditor->BeginTransaction(LOCTEXT("RemoveSelectedObjects", "Remove selected objects"));
-    if( GUndo )
-    {
-        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSceneRemoveSelection( iScene );
-
-        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-    }
-    GEditor->EndTransaction();
-
-    iScene->RemoveSelectedObjects();
-    iScene->Update( 0 );
-
-    iEngine->ResetHUD( iScene );
-    // call callbacks if any (for refreshing GUI e.g)
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW | FOdysseyVectorScene::SIGNAL_OBJECT_SELECTED );
+    mEditor->RemoveSelectedObjects( iEngine, iScene );
 }
 
 void
 FOdysseyPainterEditorGUI::FlipHorizontal( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
-    // needed for undos
-    GEditor->BeginTransaction(LOCTEXT("FlipHorizontal", "Flip Horizontal"));
-    if( GUndo )
-    {
-        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoObjectTransform( iScene, iScene->GetSelectedObjectList() );
-
-        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-    }
-    GEditor->EndTransaction();
-
-    iScene->FlipSelectionHorizontal( true /*ignored for now*/ );
-
-    iScene->Update( 0 );
-
-    iEngine->ResetHUD( iScene );
-    // call callbacks if any (for refreshing GUI e.g)
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW | FOdysseyVectorScene::SIGNAL_OBJECT_SELECTED );
+    mEditor->FlipHorizontal( iEngine, iScene );
 }
 
 void
 FOdysseyPainterEditorGUI::FlipVertical( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
-    // needed for undos
-    GEditor->BeginTransaction(LOCTEXT("FlipVertical", "Flip Vertical"));
-    if( GUndo )
-    {
-        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoObjectTransform( iScene, iScene->GetSelectedObjectList() );
-
-        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-    }
-    GEditor->EndTransaction();
-
-    iScene->FlipSelectionVertical( true /*ignored for now*/ );
-
-    iScene->Update( 0 );
-
-    iEngine->ResetHUD( iScene );
-    // call callbacks if any (for refreshing GUI e.g)
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW | FOdysseyVectorScene::SIGNAL_OBJECT_SELECTED );
+    mEditor->FlipVertical( iEngine, iScene );
 }
 
 #undef LOCTEXT_NAMESPACE

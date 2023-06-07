@@ -37,8 +37,7 @@ UOdysseyTextureLayerImageVector::~UOdysseyTextureLayerImageVector()
 }
 
 UOdysseyTextureLayerImageVector::UOdysseyTextureLayerImageVector()
-    : mScene(nullptr)
-    , mVEngine(nullptr)
+    : mEngine(nullptr)
 {
 	LayerTypeName = LOCTEXT("LayerTypeName", "Vector Image Layer");
     Icon = *FOdysseyStyle::GetBrush( "OdysseyLayerStack.LayerVector16");
@@ -52,19 +51,16 @@ UOdysseyTextureLayerImageVector::Init( uint32 iWidth, uint32 iHeight )
     Width  = iWidth;
     Height = iHeight;
 
-    mVEngine = new FOdysseyVectorEngine( (double)iWidth
+    mEngine = new FOdysseyVectorEngine( new FOdysseyVectorScene( "Scene" )
+                                       , (double)iWidth
                                        , (double)iHeight );
-
-    mScene = new FOdysseyVectorScene( FString("Scene") );
-    mScene->SetEngine( mVEngine );
-    mScene->Init( "Vector Scene" );
 
     // record a callback to refresh the layer when a property of an object's details view is changed
     //mOnRefreshHandle = mScene->OnUpdateDelegate().AddUObject( this, &UOdysseyTextureLayerImageVector::OnRefresh );
 
     //UE_LOG(LogTemp,Warning,TEXT("UOdysseyTextureLayerImageVector::Init %d %d %d"), iWidth, iHeight, mVEngine );
 
-    mVEngine->GetBLImage()->getData( &imgData );
+    mEngine->GetBLImage()->getData( &imgData );
 
     mBlock = MakeShared<::ULIS::FBlock>(static_cast<uint8*>(imgData.pixelData)
                                , iWidth
@@ -76,13 +72,7 @@ UOdysseyTextureLayerImageVector::Init( uint32 iWidth, uint32 iHeight )
 FOdysseyVectorEngine*
 UOdysseyTextureLayerImageVector::GetEngine()
 {
-    return mVEngine;
-}
-
-FOdysseyVectorScene*
-UOdysseyTextureLayerImageVector::GetScene()
-{
-    return mScene;
+    return mEngine;
 }
 
 void
@@ -109,12 +99,12 @@ UOdysseyTextureLayerImageVector::RenderImageChanged( const TArray<::ULIS::FRectI
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetLayerStack());
 
     // render once to buffer, then the call to RenderImageChanged() will copy each rectangle from the buffer to the layer
-    mVEngine->Render( mScene );
+    mEngine->Render();
 
     // HUD displaying only for the current layer.
     if( layerStack->CurrentLayer.Get() == this )
     {
-        mVEngine->RenderHUD( mScene );
+        mEngine->RenderHUD();
     }
 
     UOdysseyTextureLayer::RenderImageChanged( iRects, iIsInteractive );
@@ -165,22 +155,20 @@ UOdysseyTextureLayerImageVector::Serialize(FArchive& Ar)
 {
     Super::Serialize( Ar );
 
+    if ( mEngine == nullptr )
+    {
+        Init( Width, Height );
+    }
+
     if( Ar.IsSaving() )
     {
-
-        FOdysseyVectorExport::Write( mScene, Ar );
+        FOdysseyVectorExport::Write( mEngine->GetScene(), Ar );
     }
 
     if( Ar.IsLoading() )
     {
-        if ( mVEngine == nullptr )
-        {
-            Init( Width, Height );
-        }
-
-        FOdysseyVectorImport::Read( mScene, Ar );
+        FOdysseyVectorImport::Read( mEngine->GetScene(), Ar );
     }
-
 }
 
 void

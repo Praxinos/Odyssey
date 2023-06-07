@@ -548,6 +548,7 @@ FOdysseyVectorPathCubic::DrawShapeVariable( uint64 iFlags )
         {
             // We fill with stroke color because our curve is made of filled shapes.
             //blctx->setFillRule( BL_FILL_RULE_NON_ZERO );
+            blctx->setFillRule( BL_FILL_RULE_EVEN_ODD );
             blctx->setFillStyle( BLRgba32( strokeColor ) );
             blctx->setStrokeStyle( BLRgba32( strokeColor ) );
 

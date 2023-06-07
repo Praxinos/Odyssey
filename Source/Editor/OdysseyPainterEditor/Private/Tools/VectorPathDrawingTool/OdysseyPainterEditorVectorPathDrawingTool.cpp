@@ -16,8 +16,9 @@ UOdysseyPainterEditorVectorPathDrawingTool::~UOdysseyPainterEditorVectorPathDraw
 UOdysseyPainterEditorVectorPathDrawingTool::UOdysseyPainterEditorVectorPathDrawingTool()
     : Radius( 5.0f )
     , Absolute( true )
-    , Stitch( true )
+    , Stitch( false )
     , StitchingRadius( 10 )
+    , AverageStitchedRadius( true )
     , mPathBuilder( nullptr )
     , mPreviousVertex( nullptr )
     , iOldPointInTexture( 0, 0 )
@@ -68,7 +69,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::PickVertex( FOdysseyVectorEngine* iV
                                                       , double iWorldY
                                                       , double iPickingRadius )
 {
-    if( Stitch )
+    if( Stitch || FSlateApplication::Get().GetModifierKeys().IsShiftDown() )
     {
         std::vector<FOdysseyVectorPoint*> pickedPointArray;
         FOdysseyVectorVertex* stitchCubicVertex = nullptr;
@@ -109,7 +110,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorEng
     float radius = iPointInTexture.pressure * Radius;
     FOdysseyVectorPathCubic* cubicPath = nullptr;
     BLPoint localCoords;
-    BLPoint localRadius;
+    BLPoint localRadiusVec;
 
  //UE_LOG(LogTemp, Warning, TEXT("radius:%f iPointInTexture.pressure:%f"), radius, iPointInTexture.pressure ); 
 
@@ -152,6 +153,18 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorEng
         cubicPath->AddVertex( cubicVertex );
         // record for undos
         mVertexArray.push_back( cubicVertex );
+
+        localRadiusVec = cubicPath->GetInverseWorldMatrix().mapVector( 0.7071f * radius, 0.7071f * radius );
+        double localRadius = ::ULIS::FVec2D( localRadiusVec.x, localRadiusVec.y ).Distance();
+
+        if( AverageStitchedRadius )
+        {
+            cubicVertex->SetRadius( ( cubicVertex->GetRadius() + localRadius ) * 0.5f );
+        }
+        else
+        {
+            cubicVertex->SetRadius( localRadius );
+        }
     }
 
     mPreviousVertex = cubicVertex;
@@ -160,10 +173,10 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorEng
     cubicPath->SetForegroundColor( rgba8.R8(), rgba8.G8(), rgba8.B8(), rgba8.A8() );
 
     localCoords = cubicPath->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
-    localRadius = cubicPath->GetInverseWorldMatrix().mapVector( 0.7071f * radius, 0.7071f * radius );
+    //localRadius = cubicPath->GetInverseWorldMatrix().mapVector( 0.7071f * radius, 0.7071f * radius );
 
     cubicVertex->Set( localCoords.x, localCoords.y );
-    cubicVertex->SetRadius( ::ULIS::FVec2D( localRadius.x, localRadius.y ).Distance() );
+    // cubicVertex->SetRadius( ::ULIS::FVec2D( localRadius.x, localRadius.y ).Distance() );
 
     mPathBuilder = new FOdysseyVectorPathBuilder();
 
@@ -215,7 +228,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseHoverVector( FOdysseyVectorEn
     iOldPointInTexture.x = iPointInTexture.x;
     iOldPointInTexture.y = iPointInTexture.y;
 
-    return redrawRegion;
+    return /*redrawRegion*/imageRegion;
 }
 
 ::ULIS::FRectI
@@ -266,7 +279,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( FOdysseyVectorEng
     // commented out: redrawing will be performed by the caller function
     //iScene->Signal( FOdysseyVectorScene::SCENE_REDRAW );
 
-    return redrawRegion;
+    return /*redrawRegion*/imageRegion;
 }
 
 bool

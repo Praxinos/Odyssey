@@ -18,7 +18,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
         void AddHUD( FOdysseyVectorHUD* iHUDObject );
         void RemoveHUD( FOdysseyVectorHUD* iHUDObject );
         void ClearHUD();
-        void ResetHUD( FOdysseyVectorScene* iScene );
+        void ResetHUD();
 
         /**
          * @brief Get the rendering context (Blend2D)
@@ -46,13 +46,13 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
         /**
          * @brief Constructor
          */
-        FOdysseyVectorEngine( double iWidth, double iHeight );
+        FOdysseyVectorEngine( FOdysseyVectorScene* iScene, double iWidth, double iHeight );
 
         /**
          * @brief Render the scene to the current buffer
          * @param iScene the scene (root node of the object hierarchy).
          */
-        void Render( FOdysseyVectorScene* iScene/*, const ::ULIS::FRectI& iRegion*/ );
+        void Render( /*FOdysseyVectorScene* iScene*//*, const ::ULIS::FRectI& iRegion*/ );
 
         /**
          * @brief Pick an object
@@ -233,7 +233,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
          * @brief render the current HUD.
          * @param iDrawingFlags.
          */
-        void RenderHUD( FOdysseyVectorScene* iScene );
+        void RenderHUD( /*FOdysseyVectorScene* iScene*/ );
+
+        void SetScene( FOdysseyVectorScene* iScene );
+        FOdysseyVectorScene* GetScene( );
 
     protected:
         static void RecursivePick( FOdysseyVectorGroup* iSelectionSpace
@@ -259,5 +262,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
         uint64 mDrawingFlags;
         std::list<FOdysseyVectorHUD*> mHUDList;
         FOdysseyVectorGroup* mSelectionSpace;
-
+        FOdysseyVectorScene* mScene;
 };

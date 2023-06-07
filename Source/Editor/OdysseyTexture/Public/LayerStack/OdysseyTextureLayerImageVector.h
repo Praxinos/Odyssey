@@ -42,8 +42,8 @@ class ODYSSEYTEXTURE_API UOdysseyTextureLayerImageVector
     private:
         // handle to a callback to refresh the layer when a property of an object's details view is changed
         //FDelegateHandle mOnRefreshHandle;
-        FOdysseyVectorScene* mScene;
-        FOdysseyVectorEngine* mVEngine;
+        //FOdysseyVectorScene* mScene;
+        FOdysseyVectorEngine* mEngine;
         TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mBlock;
 
         void Init( uint32 iWidth, uint32 iHeight );
@@ -64,7 +64,7 @@ class ODYSSEYTEXTURE_API UOdysseyTextureLayerImageVector
         virtual void OnCreated_Implementation() override;
 
         FOdysseyVectorEngine* GetEngine();
-        FOdysseyVectorScene* GetScene();
+        //FOdysseyVectorScene* GetScene();
 
         /**
          * @brief Renders an image in the given Block

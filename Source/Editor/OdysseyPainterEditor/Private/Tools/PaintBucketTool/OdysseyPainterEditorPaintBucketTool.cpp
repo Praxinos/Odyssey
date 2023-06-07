@@ -476,6 +476,23 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseUpVectorColorBucket( FOdysseyVector
     SetBucketColor( iBucket );
 }
 
+void
+UOdysseyPainterEditorPaintBucketTool::OnMouseUpVectorClearBucket( FOdysseyVectorScene* iScene
+                                                                , FOdysseyVectorBucket* iBucket )
+{
+    // needed for valid GUndo pointer
+    GEditor->BeginTransaction(LOCTEXT("PaintBucketTool","Paint Bucket"));
+    if( GUndo )
+    {
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( iScene, iBucket->GetParent(), iBucket );
+
+        GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
+    }
+    GEditor->EndTransaction();
+
+    iBucket->SetColor( 0, 0, 0, 0 );
+}
+
 bool
 UOdysseyPainterEditorPaintBucketTool::OnMouseUpVector( FOdysseyVectorEngine* iEngine
                                                      , FOdysseyVectorScene* iScene
@@ -491,12 +508,14 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseUpVector( FOdysseyVectorEngine* iEn
             if( ( static_cast<int>(iPointInTexture.x) == static_cast<int>(mDownMouseX) ) 
              && ( static_cast<int>(iPointInTexture.y) == static_cast<int>(mDownMouseY) ) )
             {
-                /*switch( mPickedArea )
+                if ( FSlateApplication::Get().GetModifierKeys().IsAltDown() )
                 {
-                    default:*/
-                        OnMouseUpVectorColorBucket( iScene, mPickedBucket );
-                    /*break;
-                }*/
+                    OnMouseUpVectorClearBucket( iScene, mPickedBucket );
+                }
+                else
+                {
+                    OnMouseUpVectorColorBucket( iScene, mPickedBucket );
+                }
             }
         }
 

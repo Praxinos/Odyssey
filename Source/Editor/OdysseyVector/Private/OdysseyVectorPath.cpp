@@ -688,17 +688,37 @@ FOdysseyVectorPath::DrawJoint( FOdysseyVectorVertex* iVertex, uint64 iFlags )
     FOdysseyVectorSegment* segment0 = iVertex->GetFirstSegment();
     FOdysseyVectorSegment* segment1 = iVertex->GetLastSegment();
     double vertexRadius = iVertex->GetRadius();
+    BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
 
     if ( ( segment0 && segment1 ) && ( segment0 != segment1 ) )
     {
         ::ULIS::FVec2D segment0Vector = iVertex->GetVectorOnSegment(segment0, false);
         ::ULIS::FVec2D segment1Vector = iVertex->GetVectorOnSegment(segment1, false);
         ::ULIS::FVec2D& origin = iVertex->GetCoords();
+        BLPoint worldOrigin = mWorldMatrix.mapPoint( origin.x, origin.y );
 
         if ( segment0Vector.DistanceSquared() && segment1Vector.DistanceSquared() )
         {
+            ::ULIS::FVec2D perpendicularVector0, perpendicularVector1;
+
             segment0Vector.Normalize();
             segment1Vector.Normalize();
+
+            perpendicularVector0 = ::ULIS::FVec2D( segment0Vector.y, -segment0Vector.x );
+            perpendicularVector1 = ::ULIS::FVec2D( segment1Vector.y, -segment1Vector.x );
+
+            blctx->save();
+            blctx->resetMatrix();
+            blctx->setStrokeWidth( 1.0f );
+            blctx->strokeLine( worldOrigin, mWorldMatrix.mapPoint( origin.x + perpendicularVector0.x * vertexRadius
+                                                                 , origin.y + perpendicularVector0.y * vertexRadius ) );
+            blctx->strokeLine( worldOrigin, mWorldMatrix.mapPoint( origin.x - perpendicularVector0.x * vertexRadius
+                                                                 , origin.y - perpendicularVector0.y * vertexRadius ) );
+            blctx->strokeLine( worldOrigin, mWorldMatrix.mapPoint( origin.x + perpendicularVector1.x * vertexRadius
+                                                                 , origin.y + perpendicularVector1.y * vertexRadius ) );
+            blctx->strokeLine( worldOrigin, mWorldMatrix.mapPoint( origin.x - perpendicularVector1.x * vertexRadius
+                                                                 , origin.y - perpendicularVector1.y * vertexRadius ) );
+            blctx->restore();
 
             // if the dot product equals to 1.0f, then the point is perfectly smooth, hence there is no need for joints.
             if ( segment0Vector.DotProduct(segment1Vector) < 1.0f )

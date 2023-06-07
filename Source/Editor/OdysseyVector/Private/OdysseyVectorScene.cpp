@@ -2,20 +2,13 @@
 
 FOdysseyVectorScene::~FOdysseyVectorScene()
 {
-
+    mSelectedObjectList.clear();
 }
 
 FOdysseyVectorScene::FOdysseyVectorScene( const FString& iName )
     : FOdysseyVectorGroup( iName )
 {
     mFillBucket.SetColor( 0, 0, 0, 0 );
-
-    Init( iName );
-}
-
-void FOdysseyVectorScene::Init( const FString& iName )
-{
-    SetName( iName );
 }
 
 void

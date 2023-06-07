@@ -59,6 +59,10 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDownVector( FOdysseyVect
             primitive = new FOdysseyVectorRectangle( FString("Rectangle"), 0.0f, 0.0f, StrokeWidth );
         break;
 
+        case EOdysseyVectorPrimitiveType::Line:
+            primitive = new FOdysseyVectorLine( FString("Rectangle"), 0.0f, 0.0f, StrokeWidth );
+        break;
+
         default:
             primitive = new FOdysseyVectorEllipse( FString("Circle"), 0.0f, 0.0f, StrokeWidth );
         break;
@@ -111,6 +115,17 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDragVector( FOdysseyVect
                 ::ULIS::FVec2D dif = ::ULIS::FVec2D( bldif.x, bldif.y );
 
                 rectangle->SetSize( rectangle->GetWidth() + dif.x, rectangle->GetHeight() + dif.y /*difPosition.Distance()*/ );
+            }
+            break;
+
+            case EOdysseyVectorPrimitiveType::Line:
+            {
+                FOdysseyVectorLine* line = static_cast<FOdysseyVectorLine*>(primitive);
+                BLPoint bldif = line->GetInverseWorldMatrix().mapVector( iPointInTexture.deltaPosition.X
+                                                                       , iPointInTexture.deltaPosition.Y );
+                ::ULIS::FVec2D dif = ::ULIS::FVec2D( bldif.x, bldif.y );
+
+                line->SetSize( line->GetWidth() + dif.x, line->GetHeight() + dif.y /*difPosition.Distance()*/ );
             }
             break;
 

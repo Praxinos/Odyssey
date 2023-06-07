@@ -51,6 +51,7 @@ namespace FOdysseyVector
 #include "OdysseyVectorVertex.h"
 #include "OdysseyVectorVertexIntersection.h"
 #include "OdysseyVectorSection.h"
+#include "OdysseyVectorLine.h"
 #include "OdysseyVectorLink.h"
 #include "OdysseyVectorBucket.h"
 #include "OdysseyVectorSegment.h"

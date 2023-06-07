@@ -26,7 +26,7 @@ struct FGroupPaintParam
     UPROPERTY(EditAnywhere, Category="General")
     bool Realtime; // relatime updates
 
-    UPROPERTY(EditAnywhere, Category="General")
+    UPROPERTY(EditAnywhere, Category="General", meta = (ClampMin = "0.0", UIMin = "0.0"))
     double Tolerance;
 
     UPROPERTY(EditAnywhere, Category="General")
