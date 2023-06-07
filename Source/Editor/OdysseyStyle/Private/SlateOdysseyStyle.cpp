@@ -662,7 +662,10 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
         .SetCheckedPressedImage(IMAGE_BRUSH("OdysseyLayerStack/alpha_unlocked_16", mIcon16x16))
 	);
 
-    Set("Animation.AddCellsHandle", new IMAGE_BRUSH("OdysseyAnimation/AddCellsHandle_16", mIcon16x16));
+    Set("Animation.AddCellsHandleRight", new IMAGE_BRUSH("OdysseyAnimation/AddCellsHandleRight_16", mIcon16x16));
+    Set("Animation.AddCellsHandleLeft", new IMAGE_BRUSH("OdysseyAnimation/AddCellsHandleLeft_16", mIcon16x16));
+    Set("Animation.CellTimingHandle", new IMAGE_BRUSH("OdysseyAnimation/CellTimingHandle_16", mIcon16x16));
+    Set("Animation.CellLengthHandle", new IMAGE_BRUSH("OdysseyAnimation/CellLengthHandle_16", mIcon16x16));
 
     //Texture
     Set("Texture.AlphaLockedToggle", FCheckBoxStyle()
