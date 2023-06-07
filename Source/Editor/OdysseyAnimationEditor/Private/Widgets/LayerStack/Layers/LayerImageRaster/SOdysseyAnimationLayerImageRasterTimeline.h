@@ -49,10 +49,12 @@ private:
     TSharedRef<SWidget> CreateAddCellsHandleLeftWidget();
 
     void BuildCellsData();
+    TSharedPtr<FCellData> InsertCellData(int iIndex, TSharedPtr<FOdysseyAnimationCell> iCell, int iCellIndex);
     TSharedPtr<FCellData> AddCellData(TSharedPtr<FOdysseyAnimationCell> iCell, int iCellIndex);
     void RemoveCellData(int iIndex);
 
     void RefreshWidgets();
+    void InsertCellSection(int iIndex, TSharedPtr<FCellData> iCellData);
     void AddCellSection(TSharedPtr<FCellData> iCellData);
     void RemoveCellSection(TSharedPtr<FCellData> iCellData);
 
@@ -104,9 +106,7 @@ private:
     class UOdysseyAnimationLayerImageRaster* mAnimationLayerImageRaster;
 
     TSharedPtr<SBorder> mCellsBorder;
-    TSharedPtr<SBox> mPreCellsBox;
     TSharedPtr<SHorizontalBox> mCellsBox;
-    TSharedPtr<SBox> mPostCellsBox;
     TSharedPtr<SHorizontalBox> mHandlesBox;
 
     const FSlateBrush* mTimingHandleBrush;
@@ -166,6 +166,8 @@ private:
         int mFirstCellToRemove;
         int mNumCellsToRemove;
         int mMinOffset;
+        int mMaxOffset;
+        bool mHasMaxOffset;
         int mOffset;
         double mMousePosition;
         bool mIsRightHandle;
