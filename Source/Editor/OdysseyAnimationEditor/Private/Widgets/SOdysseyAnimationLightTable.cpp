@@ -83,9 +83,11 @@ SOdysseyAnimationLightTable::Rebuild()
 			[
 				SNew(STextBlock)
 				.Text(offsetText)
+				.Justification(ETextJustify::Center)
 			]
 			+SVerticalBox::Slot()
 			.AutoHeight()
+			.HAlign(HAlign_Center)
 			[
 				SNew(SCheckBox)
 				.OnCheckStateChanged(this, &SOdysseyAnimationLightTable::OnKeyIsActivatedCheckStateChanged, i)
