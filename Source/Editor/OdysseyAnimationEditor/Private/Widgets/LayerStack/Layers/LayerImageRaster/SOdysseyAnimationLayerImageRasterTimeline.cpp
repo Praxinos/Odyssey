@@ -212,7 +212,7 @@ SOdysseyAnimationLayerImageRasterTimeline::AddCellSection(TSharedPtr<FCellData> 
             + SOverlay::Slot() //Length Handle Top Right
             .Padding(0.0f, 0.0f, -mLengthHandleBrush->ImageSize.X / 2, 0.f)
             .HAlign(HAlign_Right)
-            .VAlign(VAlign_Center)
+            .VAlign(VAlign_Bottom)
             [
                 CreateLengthHandleWidget(iCellData)
             ]
