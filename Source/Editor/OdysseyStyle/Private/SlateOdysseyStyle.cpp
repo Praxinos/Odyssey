@@ -595,6 +595,10 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set("TimelineHeader.ProxyDoneColor", FLinearColor(0.0f, 1.0f, 0.0f, 0.5f));
     Set("TimelineHeader.ProxyPendingColor", FLinearColor(1.0f, 0.6f, 0.0f, 0.5f));
 
+    Set("Animation.LightTable64", new IMAGE_BRUSH("OdysseyAnimation/LightTable_64", mIcon64x64));
+    Set("Animation.LightTable24", new IMAGE_BRUSH("OdysseyAnimation/LightTable_24", mIcon24x24));
+    Set("Animation.LightTable16", new IMAGE_BRUSH("OdysseyAnimation/LightTable_16", mIcon16x16));
+
     Set("Animation.LightTableToggle", FCheckBoxStyle()
         .SetForegroundColor(FLinearColor(0, 0, 0, 0))
         .SetCheckBoxType(ESlateCheckBoxType::ToggleButton)

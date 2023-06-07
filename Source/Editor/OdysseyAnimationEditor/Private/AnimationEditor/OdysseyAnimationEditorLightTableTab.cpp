@@ -17,8 +17,8 @@ FOdysseyAnimationEditorLightTableTab::~FOdysseyAnimationEditorLightTableTab()
 
 FOdysseyAnimationEditorLightTableTab::FOdysseyAnimationEditorLightTableTab(FOdysseyAnimationEditor* iEditor)
 	: FOdysseyEditorTab(TEXT("OdysseyAnimationEditor_LightTable")
-    , LOCTEXT( "OdysseyAnimationEditorLightTableTab", "Lighttable" )
-    , FSlateIcon( "OdysseyStyle", "AnimationEditor.LightTable16" ))
+    , LOCTEXT( "OdysseyAnimationEditorLightTableTab", "LightTable" )
+    , FSlateIcon( "OdysseyStyle", "Animation.LightTable16" ))
     , mEditor(iEditor)
 {
 }
