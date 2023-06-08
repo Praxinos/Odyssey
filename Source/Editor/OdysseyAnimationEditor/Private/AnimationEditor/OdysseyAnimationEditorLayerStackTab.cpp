@@ -162,19 +162,20 @@ FOdysseyAnimationEditorLayerStackTab::ImportTextureSequence()
 
     UOdysseyAnimation* animation = mEditor->Animation();
 
-    if ( assetsData.Num() > 0 )
-        layerStack->Modify();
+    if ( assetsData.Num() <= 0 )
+        return;
 
     UOdysseyLayer* layer = layerStack->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass());
     UOdysseyAnimationLayerImageRaster* layerImageRaster = Cast<UOdysseyAnimationLayerImageRaster>(layer);
     if ( !layerImageRaster )
         return;
     
+    layerStack->Modify();
+    
     FScopedSlowTask progressBar(assetsData.Num(), LOCTEXT("LookingForUnusedAssetsText", "Importing Texture Sequence"));
     progressBar.MakeDialog();
 
     TArray<TSharedPtr<FOdysseyAnimationCell>> cells;
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(animation->Format());
     for( int i = 0; i < assetsData.Num(); i++ )
     {
         progressBar.EnterProgressFrame();
@@ -188,10 +189,24 @@ FOdysseyAnimationEditorLayerStackTab::ImportTextureSequence()
         else
         {
             TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(layerImageRaster, animation->Width(), animation->Height(), animation->Format());
-            TSharedPtr<::ULIS::FBlock> cellBlock = cell->GetRasterBlock()->GetBlock();
-            ::ULIS::FEvent eventConvertFormat = FULISEventBuilder().RetainBlock(cellBlock).RetainBlock(textureBlock).Build();
-            ctx.ConvertFormat(*textureBlock, *cellBlock, ::ULIS::FRectI::Auto, ::ULIS::FVec2I(0), ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventConvertFormat);
-            ctx.Finish(); //avoids having too much blocks in memory at the same time
+            TSharedPtr<FOdysseyRasterBlock> rasterBlock = cell->GetRasterBlock();
+            FOdysseyRasterBlockMutator rasterBlockMutator(rasterBlock, false);
+            ::ULIS::FRectI invalidRect = ::ULIS::FRectI::FromXYWH(0, 0, animation->Width(), animation->Height());
+            rasterBlockMutator.EditTilesFromRects(
+                { invalidRect },
+                FOdysseyRasterBlockMutator::FEditDelegate::CreateLambda(
+                    [&](const FULISInvalidTileMap& iTileMap)
+                    {
+                        TSharedPtr<::ULIS::FBlock> block = rasterBlock->GetBlock();
+                        ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(block->Format());
+                        ::ULIS::FEvent eventConvertFormat = FULISEventBuilder().RetainBlock(block).RetainBlock(textureBlock).Build();
+                        ctx.ConvertFormat(*textureBlock, *block, ::ULIS::FRectI::Auto, ::ULIS::FVec2I(0), ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventConvertFormat);
+                        ctx.Finish(); //avoids having too much blocks in memory at the same time
+                    }
+                )
+            );
+            rasterBlockMutator.Commit();
+            
             cells.Add(cell);
         }
     }
