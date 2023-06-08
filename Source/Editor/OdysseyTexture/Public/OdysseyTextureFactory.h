@@ -22,6 +22,8 @@ private:
     virtual bool ConfigureProperties() override;
 
     virtual FString GetDefaultNewAssetName() const;
+    
+    virtual FName GetNewAssetThumbnailOverride() const override;
 
 private:
     int                  mTextureWidth;

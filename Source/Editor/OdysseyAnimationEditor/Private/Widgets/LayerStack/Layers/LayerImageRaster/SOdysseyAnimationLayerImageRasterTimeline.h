@@ -45,13 +45,16 @@ private:
     TSharedRef<SWidget> CreateCellWidget(TSharedPtr<FCellData> iCellData);
     TSharedRef<SWidget> CreateTimingHandleWidget(TSharedPtr<FCellData> iCellData);
     TSharedRef<SWidget> CreateLengthHandleWidget(TSharedPtr<FCellData> iCellData);
-    TSharedRef<SWidget> CreateAddCellsHandleWidget();
+    TSharedRef<SWidget> CreateAddCellsHandleRightWidget();
+    TSharedRef<SWidget> CreateAddCellsHandleLeftWidget();
 
     void BuildCellsData();
+    TSharedPtr<FCellData> InsertCellData(int iIndex, TSharedPtr<FOdysseyAnimationCell> iCell, int iCellIndex);
     TSharedPtr<FCellData> AddCellData(TSharedPtr<FOdysseyAnimationCell> iCell, int iCellIndex);
     void RemoveCellData(int iIndex);
 
     void RefreshWidgets();
+    void InsertCellSection(int iIndex, TSharedPtr<FCellData> iCellData);
     void AddCellSection(TSharedPtr<FCellData> iCellData);
     void RemoveCellSection(TSharedPtr<FCellData> iCellData);
 
@@ -84,8 +87,9 @@ private:
     void OnTimingHandleDragged(const FGeometry& iGeometry, const FPointerEvent& iEvent);
     void OnTimingHandleDragStopped(const FGeometry& iGeometry, const FPointerEvent& iEvent);
 
-    EVisibility GetAddCellsHandleVisibility() const;
-    void OnAddCellsHandleDragStarted(const FGeometry& iGeometry, const FPointerEvent& iEvent);
+    EVisibility GetAddCellsHandleRightVisibility() const;
+    EVisibility GetAddCellsHandleLeftVisibility() const;
+    void OnAddCellsHandleDragStarted(const FGeometry& iGeometry, const FPointerEvent& iEvent, bool iIsRightHandle);
     void OnAddCellsHandleDragged(const FGeometry& iGeometry, const FPointerEvent& iEvent);
     void OnAddCellsHandleDragStopped(const FGeometry& iGeometry, const FPointerEvent& iEvent);
 
@@ -102,14 +106,13 @@ private:
     class UOdysseyAnimationLayerImageRaster* mAnimationLayerImageRaster;
 
     TSharedPtr<SBorder> mCellsBorder;
-    TSharedPtr<SBox> mPreCellsBox;
     TSharedPtr<SHorizontalBox> mCellsBox;
-    TSharedPtr<SBox> mPostCellsBox;
     TSharedPtr<SHorizontalBox> mHandlesBox;
 
     const FSlateBrush* mTimingHandleBrush;
     const FSlateBrush* mLengthHandleBrush;
-    const FSlateBrush* mAddCellsHandleBrush;
+    const FSlateBrush* mAddCellsHandleRightBrush;
+    const FSlateBrush* mAddCellsHandleLeftBrush;
 
 private:
     //Events structures
@@ -163,7 +166,10 @@ private:
         int mFirstCellToRemove;
         int mNumCellsToRemove;
         int mMinOffset;
+        int mMaxOffset;
+        bool mHasMaxOffset;
         int mOffset;
         double mMousePosition;
+        bool mIsRightHandle;
     } mAddCellsHandleDragData;
 };

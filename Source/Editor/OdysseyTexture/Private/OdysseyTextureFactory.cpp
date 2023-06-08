@@ -46,6 +46,12 @@ UOdysseyTextureFactory::GetDefaultNewAssetName() const
     return !mDefaultName.IsEmpty() ? mDefaultName : Super::GetDefaultNewAssetName();
 }
 
+FName
+UOdysseyTextureFactory::GetNewAssetThumbnailOverride() const
+{
+    return TEXT("ClassThumbnail.OdysseyTexture");
+}
+
 UObject*
 UOdysseyTextureFactory::FactoryCreateNew( UClass* iClass, UObject* iParent, FName iName, EObjectFlags iFlags, UObject* iContext, FFeedbackContext* iWarn )
 {

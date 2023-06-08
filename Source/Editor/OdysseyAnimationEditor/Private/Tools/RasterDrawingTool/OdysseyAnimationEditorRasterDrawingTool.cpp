@@ -102,18 +102,102 @@ UOdysseyAnimationEditorRasterDrawingTool::IsActivable() const
 }
 
 bool
+UOdysseyAnimationEditorRasterDrawingTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
+{
+	if (!CanDraw())
+		return false;
+
+	UOdysseyAnimation* animation = GetAnimation();
+	if (!animation)
+		return false;
+
+	UOdysseyAnimationLayerImageRaster* layer = GetLayer();
+	if (!layer)
+		return false;
+
+	FInt32Range range = layer->GetFrameRange();
+
+	if (animation->CurrentFrame < range.GetLowerBoundValue())
+	{
+		//Add a frame at current frame and extend it 
+		TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(layer, animation->Width(), animation->Height(), animation->Format());
+        cell->SetLength(range.GetLowerBoundValue() - animation->CurrentFrame);
+
+		FOdysseyAnimationCellsMutator mutator(layer);
+		mutator.Add({cell}, 0);
+		mutator.SetOffset(layer->GetOffset() - cell->GetLength());
+		mutator.Commit();
+	}
+	else if (animation->CurrentFrame > range.GetUpperBoundValue())
+	{
+		//Add a frame at current frame and extend previous frame to it 
+		TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(layer, animation->Width(), animation->Height(), animation->Format());
+        cell->SetLength(1);
+		
+		FOdysseyAnimationCellsMutator mutator(layer);
+
+		int lastCellIndex = layer->GetCellsCount() - 1;
+		if ( lastCellIndex >= 0 )
+		{
+			int cellLength;
+			if ( layer->GetCellLength(lastCellIndex, cellLength) )
+			{
+				mutator.SetLength(lastCellIndex, cellLength + animation->CurrentFrame - range.GetUpperBoundValue() - 1);
+			}
+		}
+
+		mutator.Add({cell});
+		mutator.Commit();
+	}
+	else
+	{
+		int cellIndex;
+		int cellFrameIndex;
+		if(layer->GetCellIndexAtFrame(animation->CurrentFrame, cellIndex, cellFrameIndex))
+		{
+			if (cellIndex >= 0 && cellFrameIndex != 0)
+			{
+				TSharedPtr<FOdysseyAnimationCell> currentCell = layer->GetCell(cellIndex);
+				TSharedPtr<IOdysseyAnimationImageRenderingAbility> imageRenderAbility = currentCell->GetAbility<IOdysseyAnimationImageRenderingAbility>();
+				if ( imageRenderAbility )
+				{
+					//Here we need to break the instance
+					//We get the render of the current frame, and create a raster cell to draw on it
+
+					TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(animation->Width(), animation->Height(), animation->Format());
+					TSharedPtr<IOdysseyImageRenderer> renderer = imageRenderAbility->BuildRenderer(cellFrameIndex, IOdysseyImageRenderer::eRenderType::Render);
+					renderer->Copy(block, block->Rect(), {});
+					::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(block->Format());
+					ctx.Finish();
+
+					int currentCellLength = cellFrameIndex;
+					int newCellLength = currentCell->GetLength() - currentCellLength;
+
+					TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(layer, block);
+					cell->SetLength(newCellLength);
+
+					FOdysseyAnimationCellsMutator mutator(layer);
+					mutator.SetLength(cellIndex, currentCellLength);
+					mutator.Add({ cell }, cellIndex + 1);
+					mutator.Commit();
+				}
+			}
+		}
+	}
+
+	return UOdysseyPainterEditorRasterDrawingTool::OnMouseDown(iPointInTexture, iKey);	
+}
+
+bool
 UOdysseyAnimationEditorRasterDrawingTool::CanDraw()
 {	
-    if (!Super::CanDraw())
-        return false; 
-
 	UOdysseyAnimationLayerImageRaster* layer = GetLayer();
 	if (!layer)
 		return false;
 
 	bool isActive = UOdysseyLayerFunctionLibrary::IsLayerActivatedInStack(layer);
 	bool isLocked = UOdysseyLayerFunctionLibrary::IsLayerLockedInStack(layer);
-    return isActive && !isLocked;
+	return isActive && !isLocked;
 }
 
 void

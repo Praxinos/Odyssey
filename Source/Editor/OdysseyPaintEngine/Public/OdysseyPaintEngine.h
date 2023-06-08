@@ -90,5 +90,6 @@ private:
     
     //Internal
     TArray<::ULIS::FRectI>              mInvalidRects;
+	bool mIsBeforeUndoBound;
     //FULISInvalidTileMap                 mInvalidMap;
 };

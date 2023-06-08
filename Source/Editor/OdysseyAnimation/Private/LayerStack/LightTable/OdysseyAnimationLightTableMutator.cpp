@@ -142,7 +142,7 @@ FOdysseyAnimationLightTableMutator::SetKeyFrameOffset(int iIndex, int iOffset)
     AddAndApplyMutation(mutation);
 }
 
-struct FSetKeyFrameOpacityData
+struct FSetKeyOpacityData
 {
     int mIndex;
     float mNewOpacity;
@@ -150,17 +150,17 @@ struct FSetKeyFrameOpacityData
 };
 
 void
-FOdysseyAnimationLightTableMutator::SetKeyFrameOpacity(int iIndex, float iOpacity)
+FOdysseyAnimationLightTableMutator::SetKeyOpacity(int iIndex, float iOpacity)
 {
-    TSharedRef<FSetKeyFrameOpacityData> data = MakeShared<FSetKeyFrameOpacityData>();
+    TSharedRef<FSetKeyOpacityData> data = MakeShared<FSetKeyOpacityData>();
     data->mIndex = iIndex;
     data->mNewOpacity = iOpacity;
     data->mOldOpacity = mLightTable->mKeysData[iIndex].mOpacity;
 
-    TSharedRef<IOdysseyMutation> mutation = MakeShared<FOdysseyMutation<FSetKeyFrameOpacityData>>(
+    TSharedRef<IOdysseyMutation> mutation = MakeShared<FOdysseyMutation<FSetKeyOpacityData>>(
         data,
-        FOdysseyMutation<FSetKeyFrameOpacityData>::FMutationDelegate::CreateLambda([lighttable = mLightTable](TSharedPtr<FSetKeyFrameOpacityData> iData) { lighttable->mKeysData[iData->mIndex].mOpacity = iData->mNewOpacity; }),
-        FOdysseyMutation<FSetKeyFrameOpacityData>::FMutationDelegate::CreateLambda([lighttable = mLightTable](TSharedPtr<FSetKeyFrameOpacityData> iData) { lighttable->mKeysData[iData->mIndex].mOpacity = iData->mOldOpacity; })
+        FOdysseyMutation<FSetKeyOpacityData>::FMutationDelegate::CreateLambda([lighttable = mLightTable](TSharedPtr<FSetKeyOpacityData> iData) { lighttable->mKeysData[iData->mIndex].mOpacity = iData->mNewOpacity; }),
+        FOdysseyMutation<FSetKeyOpacityData>::FMutationDelegate::CreateLambda([lighttable = mLightTable](TSharedPtr<FSetKeyOpacityData> iData) { lighttable->mKeysData[iData->mIndex].mOpacity = iData->mOldOpacity; })
     );
 
     AddAndApplyMutation(mutation);

@@ -18,23 +18,12 @@
 
 FOdysseyPaintEngine::~FOdysseyPaintEngine()
 {
-    if (GUnrealEd)
-    {
-        UTransBuffer* transBuffer = Cast<UTransBuffer>(GUnrealEd->Trans);
-        if (transBuffer)
-            transBuffer->OnBeforeRedoUndo().RemoveAll(this);
-    }
 }
 
 FOdysseyPaintEngine::FOdysseyPaintEngine()
     : mRasterBlock(nullptr)
+	, mIsBeforeUndoBound(false)
 {
-    if (GUnrealEd)
-    {
-        UTransBuffer* transBuffer = Cast<UTransBuffer>(GUnrealEd->Trans);
-        if (transBuffer)
-            transBuffer->OnBeforeRedoUndo().AddRaw(this, &FOdysseyPaintEngine::OnBeforeRedoUndo);
-    }
 }
 
 void
@@ -135,6 +124,15 @@ FOdysseyPaintEngine::Commit(const FOdysseyBlendParameters& iBlendParameters)
     if (!mRasterBlock)
         return;
 
+	if ( mIsBeforeUndoBound && GUnrealEd )
+	{
+		UTransBuffer* transBuffer = Cast<UTransBuffer>(GUnrealEd->Trans);
+		if ( transBuffer )
+			transBuffer->OnBeforeRedoUndo().RemoveAll(this);
+
+		mIsBeforeUndoBound = false;
+	}
+
     //Update the EditedBlock content
     Update(iBlendParameters);
 
@@ -151,6 +149,15 @@ FOdysseyPaintEngine::Abort()
 {
     if (!mRasterBlock)
         return;
+
+	if ( mIsBeforeUndoBound && GUnrealEd )
+	{
+		UTransBuffer* transBuffer = Cast<UTransBuffer>(GUnrealEd->Trans);
+		if ( transBuffer )
+			transBuffer->OnBeforeRedoUndo().RemoveAll(this);
+
+		mIsBeforeUndoBound = false;
+	}
 
     //Clear the Paint Block
     ClearPaintBlock();
@@ -214,6 +221,15 @@ FOdysseyPaintEngine::UpdateEditedBlock(const FOdysseyBlendParameters& iBlendPara
 
     if ( mInvalidRects.IsEmpty() )
         return false;
+
+	if (!mIsBeforeUndoBound && GUnrealEd )
+	{
+		UTransBuffer* transBuffer = Cast<UTransBuffer>(GUnrealEd->Trans);
+		if ( transBuffer )
+			transBuffer->OnBeforeRedoUndo().AddRaw(this, &FOdysseyPaintEngine::OnBeforeRedoUndo);
+
+		mIsBeforeUndoBound = true;
+	}
 
     mRasterBlockMutator.ResetTilesFromRects(mInvalidRects);
     mRasterBlockMutator.EditTilesFromRects(

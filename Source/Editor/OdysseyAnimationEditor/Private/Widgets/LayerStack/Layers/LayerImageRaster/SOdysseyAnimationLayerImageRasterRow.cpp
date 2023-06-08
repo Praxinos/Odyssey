@@ -36,6 +36,9 @@ void SOdysseyAnimationLayerImageRasterRow::Construct(
 TSharedRef<SWidget>
 SOdysseyAnimationLayerImageRasterRow::GenerateHeaderWidget()
 {
+    const FCheckBoxStyle* lightTableToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("Animation.LightTableToggle");
+    const FCheckBoxStyle* alphaLockedToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("Animation.AlphaLockedToggle");
+
     return SNew(SHorizontalBox)
         +SHorizontalBox::Slot()
         .Padding(FMargin(0.f, 0.f, 2.f, 0.f))
@@ -51,22 +54,9 @@ SOdysseyAnimationLayerImageRasterRow::GenerateHeaderWidget()
         [
             //AlphaLock
             SNew(SCheckBox)
-            .Type(ESlateCheckBoxType::ToggleButton)
-            .ForegroundColor(FSlateColor::UseForeground())
-            .CheckedHoveredImage(FOdysseyStyle::GetBrush("OdysseyLayerStack.LightTableON16"))
-            .CheckedImage(FOdysseyStyle::GetBrush("OdysseyLayerStack.LightTableON16"))
-            .CheckedPressedImage(FOdysseyStyle::GetBrush("OdysseyLayerStack.LightTableON16"))
-            .UncheckedHoveredImage(FOdysseyStyle::GetBrush("OdysseyLayerStack.LightTableOFF16"))
-            .UncheckedImage(FOdysseyStyle::GetBrush("OdysseyLayerStack.LightTableOFF16"))
-            .UncheckedPressedImage(FOdysseyStyle::GetBrush("OdysseyLayerStack.LightTableOFF16"))
+            .Style(lightTableToggleStyle)
             .OnCheckStateChanged(this, &SOdysseyAnimationLayerImageRasterRow::OnLightTableCheckStateChanged)
             .IsChecked(this, &SOdysseyAnimationLayerImageRasterRow::GetLightTableIsChecked)
-            [
-                //Just for the checkbox to take the space of an icon
-                SNew(SImage)
-                    .Visibility(EVisibility::Hidden)
-                    .Image(FOdysseyStyle::GetBrush("OdysseyLayerStack.LightTableON16"))
-		    ]
         ]
         +SHorizontalBox::Slot()
         .Padding(FMargin(0.f, 0.f, 2.f, 0.f))
@@ -75,22 +65,9 @@ SOdysseyAnimationLayerImageRasterRow::GenerateHeaderWidget()
         [
             //AlphaLock
             SNew(SCheckBox)
-            .Type(ESlateCheckBoxType::ToggleButton)
-            .ForegroundColor(FSlateColor::UseForeground())
-            .CheckedHoveredImage(FOdysseyStyle::GetBrush("OdysseyLayerStack.AlphaLocked16"))
-            .CheckedImage(FOdysseyStyle::GetBrush("OdysseyLayerStack.AlphaLocked16"))
-            .CheckedPressedImage(FOdysseyStyle::GetBrush("OdysseyLayerStack.AlphaLocked16"))
-            .UncheckedHoveredImage(FOdysseyStyle::GetBrush("OdysseyLayerStack.AlphaUnlocked16"))
-            .UncheckedImage(FOdysseyStyle::GetBrush("OdysseyLayerStack.AlphaUnlocked16"))
-            .UncheckedPressedImage(FOdysseyStyle::GetBrush("OdysseyLayerStack.AlphaUnlocked16"))
+            .Style(alphaLockedToggleStyle)
             .OnCheckStateChanged(this, &SOdysseyAnimationLayerImageRasterRow::OnIsAlphaLockedCheckStateChanged)
             .IsChecked(this, &SOdysseyAnimationLayerImageRasterRow::GetIsAlphaLockedIsChecked)
-            [
-                //Just for the checkbox to take the space of an icon
-                SNew(SImage)
-                    .Visibility(EVisibility::Hidden)
-                    .Image(FOdysseyStyle::GetBrush("OdysseyLayerStack.AlphaLocked16"))
-		    ]
         ]
         +SHorizontalBox::Slot()
         .Padding(FMargin(0.f, 0.f, 2.f, 0.f))

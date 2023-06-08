@@ -21,6 +21,8 @@ public:
     virtual uint32 GetCategories() override;
     virtual void BuildBackendFilter( FARFilter & InFilter ) override;
 	virtual void OpenAssetEditor(const TArray<UObject*>& InObjects, TSharedPtr<class IToolkitHost> EditWithinLevelEditor = TSharedPtr<IToolkitHost>()) override;
+    virtual const FSlateBrush* GetThumbnailBrush(const FAssetData& InAssetData, const FName InClassName) const override;
+	virtual const FSlateBrush* GetIconBrush(const FAssetData& InAssetData, const FName InClassName) const override;
     // End of IAssetTypeActions interface
 
 private:
