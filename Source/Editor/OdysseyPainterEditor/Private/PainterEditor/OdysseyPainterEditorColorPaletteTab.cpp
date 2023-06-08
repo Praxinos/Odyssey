@@ -19,7 +19,7 @@ FOdysseyPainterEditorPaletteTab::~FOdysseyPainterEditorPaletteTab()
 FOdysseyPainterEditorPaletteTab::FOdysseyPainterEditorPaletteTab(FOdysseyPainterEditor* iEditor)
 	: FOdysseyEditorTab(TEXT("OdysseyPainterEditor_Palette"),
                             LOCTEXT( "OdysseyPainterEditorPaletteTab", "Palette" ),
-                            FSlateIcon( "OdysseyStyle", "PainterEditor.Mesh16" ))
+                            FSlateIcon( "OdysseyStyle", "OdysseyPalette.PaletteTab" ))
     , mEditor(iEditor)
     , mPaletteWidget(nullptr)
 {

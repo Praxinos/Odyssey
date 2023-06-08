@@ -232,7 +232,7 @@ SOdysseyPaletteEntryRow::OnRowCanAcceptDrop(const FDragDropEvent& iEvent, EItemD
 	const FVector2D localPointerPos = geometry.AbsoluteToLocal(iEvent.GetScreenSpacePosition());
 	EItemDropZone expectedDropZone = ComputeItemDropZoneForLeaf(localPointerPos, geometry.GetLocalSize(), mEntry->CanHaveChildren, mEntry->IsExpanded);
 
-	if ( operationPalette == palette ) //dropped from same palette, do a move of topmost dropped layers
+	if ( operationPalette == palette ) //dropped from same palette, do a move of topmost dropped entries
 	{
 		UOdysseyPaletteEntry* parent = mEntry->GetParent();
 		TArray<UOdysseyPaletteEntry*> entries = operation->GetPaletteEntries();
@@ -288,7 +288,7 @@ SOdysseyPaletteEntryRow::OnRowAcceptDrop(const FDragDropEvent& iEvent, EItemDrop
 		case EItemDropZone::AboveItem:
 		{
 			//do nothing
-			if ( operationPalette == palette ) //dropped from same Palette, do a move of topmost dropped layers
+			if ( operationPalette == palette ) //dropped from same Palette, do a move of topmost dropped entries
 			{
 				palette->MoveEntries(entries, parent, index);
 			}
@@ -301,7 +301,7 @@ SOdysseyPaletteEntryRow::OnRowAcceptDrop(const FDragDropEvent& iEvent, EItemDrop
 
 		case EItemDropZone::OntoItem:
 		{
-			if ( operationPalette == palette ) //droped from same palette, do a move of topmost dropped layers
+			if ( operationPalette == palette ) //droped from same palette, do a move of topmost dropped entries
 			{
 				if (mEntry->CanHaveChildren)
 				{
@@ -328,7 +328,7 @@ SOdysseyPaletteEntryRow::OnRowAcceptDrop(const FDragDropEvent& iEvent, EItemDrop
 
 		case EItemDropZone::BelowItem:
 		{
-			if (operationPalette == palette) //droped from same palette, do a move of topmost dropped layers
+			if (operationPalette == palette) //droped from same palette, do a move of topmost dropped entries
 			{
 				palette->MoveEntries(entries, parent, index + 1);
 			}
@@ -356,7 +356,7 @@ SOdysseyPaletteEntryRow::OnRowDragDetected(const FGeometry& iGeometry, const FPo
 		{
 			//PATCH: Unreal does not manage collision between SInlineWidget entering editiong mode
 			//		 and Drag'n'Drop, which can lead to cases where after dropping an element,
-			//       a layer will start editing its name, which is not an expected behaviour
+			//       an entry will start editing its name, which is not an expected behaviour
 			//       We call OnDragOver on the namewidget to reset the timer responsible for
 			//       entering editing mode.
 			//       As the handle to the timerdelegate is private, it's the only way to do it

@@ -181,6 +181,13 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "OdysseyBrush.EditBrush16", new IMAGE_BRUSH( "Brush/edit_brush_16", mIcon16x16 ) );
     Set( "OdysseyBrush.EditBrush64", new IMAGE_BRUSH( "Brush/edit_brush_64", mIcon64x64 ) );
 
+    // OdysseyPalette
+    Set("ClassThumbnail.OdysseyPalette", new IMAGE_BRUSH("OdysseyPalette/OdysseyPaletteDefaultThumbnail_64", mIcon64x64));
+    Set("OdysseyPalette.EntryColor", new IMAGE_BRUSH("OdysseyPalette/OdysseyPaletteEntryColor_16", mIcon16x16));
+    Set("OdysseyPalette.EntryMaterial", new IMAGE_BRUSH("OdysseyPalette/OdysseyPaletteEntryMaterial_16", mIcon16x16));
+    Set("OdysseyPalette.PaletteTab", new IMAGE_BRUSH("OdysseyPalette/OdysseyPaletteTab_16", mIcon16x16));
+
+
     // OdysseyWidgets - AdvancedColorWheel
     FVector2D AdvancedColorWheelSize( 1024, 1024 );
     Set( "AdvancedColorWheel.WheelBG", new IMAGE_BRUSH( "Color/AdvancedColorWheel/WheelBG", AdvancedColorWheelSize ) );

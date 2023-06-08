@@ -78,12 +78,13 @@ TSharedRef<SWidget> SOdysseyPaletteAddEntryButton::MakeMenu()
 
         //Material
         entryCDO = UOdysseyPaletteEntryMaterial::StaticClass()->GetDefaultObject<UOdysseyPaletteEntryMaterial>();
+        FUIAction action = FUIAction(FExecuteAction::CreateRaw(this, &SOdysseyPaletteAddEntryButton::AddEntryFromClass, FAssetData(UOdysseyPaletteEntryMaterial::StaticClass())), FCanExecuteAction::CreateLambda([](){return false;}));
 
         menuBuilder.AddMenuEntry(
             entryCDO->EntryTypeName,
             entryCDO->Description,
             FSlateIcon(),
-            FUIAction(FExecuteAction::CreateRaw(this, &SOdysseyPaletteAddEntryButton::AddEntryFromClass, FAssetData(UOdysseyPaletteEntryMaterial::StaticClass()))));
+            FUIAction( action ));
 
         //Folder
         entryCDO = UOdysseyPaletteEntryFolder::StaticClass()->GetDefaultObject<UOdysseyPaletteEntryFolder>();

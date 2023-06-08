@@ -36,7 +36,6 @@ SOdysseyPaletteColorRow::GenerateHeaderWidget()
         .Padding(FMargin(0.f, 0.f, 2.f, 0.f))
         .VAlign(VAlign_Center)
         [
-            //LayerName
             SOdysseyPaletteEntryRow::GenerateHeaderWidget()
         ]
         + SHorizontalBox::Slot()

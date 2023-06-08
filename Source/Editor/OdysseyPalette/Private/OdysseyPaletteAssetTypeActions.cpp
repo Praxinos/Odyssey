@@ -25,7 +25,7 @@ FOdysseyPaletteAssetTypeActions::GetName() const
 FColor
 FOdysseyPaletteAssetTypeActions::GetTypeColor() const
 {
-    return FColor( 200, 50, 50 );
+    return FColor( 235, 130, 20 );
 }
 
 UClass*

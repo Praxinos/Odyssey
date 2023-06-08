@@ -286,7 +286,16 @@ SOdysseyPaletteTreeView::SetCurrentEntryFromSelectorItem()
 
     if (SelectorItem == mPalette->CurrentEntry)
         return;
-        
+    
+    //TODO: Get Referenced Objects
+    /*
+    UObject* object = Cast<UObject>(SelectorItem);
+    FReferencerInformationList ReferencesIncludingUndo;
+    bool bReferencedInMemoryOrUndoStack = IsReferenced(object, GARBAGE_COLLECTION_KEEPFLAGS, EInternalObjectFlags::GarbageCollectionKeepFlags, true, &ReferencesIncludingUndo);
+
+    UE_LOG(LogTemp, Display, TEXT("%d, %d"), ReferencesIncludingUndo.ExternalReferences.Num(), ReferencesIncludingUndo.InternalReferences.Num());
+    */
+
     FOdysseyObjectEditorUtils::SetPropertyValue(mPalette, "CurrentEntry", TSoftObjectPtr<UOdysseyPaletteEntry>(SelectorItem));
 }
 
