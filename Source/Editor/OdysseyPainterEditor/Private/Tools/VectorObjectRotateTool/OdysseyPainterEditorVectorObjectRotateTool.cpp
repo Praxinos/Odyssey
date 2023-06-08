@@ -49,6 +49,7 @@ UOdysseyPainterEditorVectorObjectRotateTool::UnloadVector( FOdysseyVectorEngine*
 void
 UOdysseyPainterEditorVectorObjectRotateTool::LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
+    iEngine->ClearHUD();
     iEngine->AddHUD( mTransformHUD );
 
     FitHUD( iScene );

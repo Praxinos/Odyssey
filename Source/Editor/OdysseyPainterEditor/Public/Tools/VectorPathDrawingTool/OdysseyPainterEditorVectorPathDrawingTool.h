@@ -81,10 +81,11 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
     private:
         double mPointRadius;
         FOdysseyVectorPathBuilder* mPathBuilder;
+        ::ULIS::FVec2D mOldPointInTexture;
         FOdysseyVectorHUDPathDrawing mPathDrawingHUD;
         FOdysseyVectorVertex* mPreviousVertex;
         bool mStitched;
-        ::ULIS::FVec2D iOldPointInTexture;
+
 
         std::vector<FOdysseyVectorVertex*> mVertexArray;
         std::vector<FOdysseyVectorSegment*> mSegmentArray;

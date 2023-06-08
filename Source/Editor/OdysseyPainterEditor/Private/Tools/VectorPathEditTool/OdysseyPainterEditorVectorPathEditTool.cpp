@@ -16,8 +16,8 @@ UOdysseyPainterEditorVectorPathEditTool::~UOdysseyPainterEditorVectorPathEditToo
 UOdysseyPainterEditorVectorPathEditTool::UOdysseyPainterEditorVectorPathEditTool()
     : mCubicPathHUD( FOdysseyVectorHUDPathCubic::VIEW_PATH
                    | FOdysseyVectorHUDPathCubic::VIEW_POINT )
-    , Radius(10.0f)
     , mSelectionFlags ( 0 )
+    , Radius(10.0f)
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.VectoEdit64");
 
@@ -39,6 +39,7 @@ UOdysseyPainterEditorVectorPathEditTool::UnloadVector( FOdysseyVectorEngine* iEn
 void
 UOdysseyPainterEditorVectorPathEditTool::LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
+    iEngine->ClearHUD();
     iEngine->AddHUD(&mCubicPathHUD);
     iEngine->AddHUD(&mPickingHUD);
 

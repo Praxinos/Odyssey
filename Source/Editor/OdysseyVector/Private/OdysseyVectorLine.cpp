@@ -81,7 +81,7 @@ FOdysseyVectorLine::Convert()
 }
 
 void
-FOdysseyVectorLine::DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags )
+FOdysseyVectorLine::DrawShape( uint64 iFlags )
 {
     if ( mLineParam.Width && mLineParam.Height )
     {

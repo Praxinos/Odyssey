@@ -99,7 +99,7 @@ FOdysseyVectorPathCubic::Erase( ::ULIS::FRectD &iRoi
                               , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray )
 {
     BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
-    BLImage* blimg = blctx->targetImage(); // the mask image must be selected by the vector engine at this point
+    BLImage* blimg = GetScene()->GetEngine()->GetBLMask(); // the mask image must be selected by the vector engine at this point
     BLImageData imageData;
     std::vector<FOdysseyVectorSegment*> newSegmentArray;
     std::vector<FOdysseyVectorSegment*> oldSegmentArray;
@@ -268,7 +268,7 @@ FOdysseyVectorPathCubic::PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags
 
     if ( iSelectionFlags & PICK_MASK_BASED )
     {
-        BLImage* blimg = blctx->targetImage(); // the mask image must be selected by the vector engine at this point
+        BLImage* blimg = GetScene()->GetEngine()->GetBLMask(); // the mask image must be selected by the vector engine at this point
         BLImageData imageData;
 
         blimg->getData( &imageData );

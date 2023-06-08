@@ -44,6 +44,7 @@ UOdysseyPainterEditorVectorObjectScaleTool::UnloadVector( FOdysseyVectorEngine* 
 void
 UOdysseyPainterEditorVectorObjectScaleTool::LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
+    iEngine->ClearHUD();
     iEngine->AddHUD( mTransformHUD );
 
     FitHUD( iScene );

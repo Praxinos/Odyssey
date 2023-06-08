@@ -17,11 +17,11 @@ UOdysseyPainterEditorVectorPathDrawingTool::UOdysseyPainterEditorVectorPathDrawi
     : Radius( 5.0f )
     , Absolute( true )
     , Stitch( false )
-    , StitchingRadius( 10 )
     , AverageStitchedRadius( true )
+    , StitchingRadius( 10 )
     , mPathBuilder( nullptr )
     , mPreviousVertex( nullptr )
-    , iOldPointInTexture( 0, 0 )
+    , mOldPointInTexture( 0, 0 )
     , mPathDrawingHUD( Radius, Stitch, StitchingRadius )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.VectoPen64");
@@ -41,6 +41,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::UnloadVector( FOdysseyVectorEngine* 
 void
 UOdysseyPainterEditorVectorPathDrawingTool::LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
+    iEngine->ClearHUD();
     iEngine->AddHUD( &mPathDrawingHUD );
 
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
@@ -209,11 +210,11 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseHoverVector( FOdysseyVectorEn
     ::ULIS::FRectI toolRegion = GetInvalidationAreaFromPointer( iPointInTexture.x
                                                               , iPointInTexture.y
                                                               , ::ULIS::FMath::Max( Radius, StitchingRadius ) )
-                              // we use iOldPointInTexture instead of iPointInTexture.deltaPosition because the latter is not reliable
-                              | GetInvalidationAreaFromPointer( iOldPointInTexture.x
-                                                              , iOldPointInTexture.y
+                              // we use mOldPointInTexture instead of iPointInTexture.deltaPosition because the latter is not reliable
+                              | GetInvalidationAreaFromPointer( mOldPointInTexture.x
+                                                              , mOldPointInTexture.y
                                                               , ::ULIS::FMath::Max( Radius, StitchingRadius ) );
-//UE_LOG(LogTemp, Warning, TEXT("Some warning message %f %f"), iOldPointInTexture.x, iOldPointInTexture.y );
+//UE_LOG(LogTemp, Warning, TEXT("Some warning message %f %f"), mOldPointInTexture.x, mOldPointInTexture.y );
     iEngine->GetColorImageSize( imageRegion );
 
     mPathDrawingHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
@@ -223,8 +224,8 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseHoverVector( FOdysseyVectorEn
 
     FOdysseyVector::IntersectRegions( toolRegion, imageRegion, redrawRegion );
 
-    iOldPointInTexture.x = iPointInTexture.x;
-    iOldPointInTexture.y = iPointInTexture.y;
+    mOldPointInTexture.x = iPointInTexture.x;
+    mOldPointInTexture.y = iPointInTexture.y;
 
     return /*redrawRegion*/imageRegion;
 }

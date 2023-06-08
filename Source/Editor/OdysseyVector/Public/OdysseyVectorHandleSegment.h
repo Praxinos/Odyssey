@@ -20,9 +20,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorHandleSegment : public FOdysseyVectorHandl
 
         void Init( FOdysseyVectorSegment* iParentSegment, double iX, double iY );
         FOdysseyVectorSegment* GetParent();
-        void SetX( double iX );
-        void SetY( double iY );
-        void Set( double iX,double iY );
+        virtual void SetX( double iX ) override;
+        virtual void SetY( double iY ) override;
+        virtual void Set( double iX, double iY ) override;
+        virtual void Set( double iX, double iY, double iRadius ) override;
         void Set( const ::ULIS::FVec2D& iCoords );
 
     private:

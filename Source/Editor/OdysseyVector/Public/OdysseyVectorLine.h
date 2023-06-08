@@ -36,10 +36,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorLine : public FOdysseyVectorPrimitive
         bool HasBaseClass( uint32 iBaseClassID );
 
     private:
-        void DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags );
-        bool PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags );
-        FOdysseyVectorObject* CopyShape();
-        void UpdateShape( uint32 iUpdateFlags );
+        virtual void DrawShape( uint64 iFlags ) override;
+        virtual bool PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags ) override;
+        virtual FOdysseyVectorObject* CopyShape() override;
+        virtual void UpdateShape( uint32 iUpdateFlags ) override;
 
     protected :
         FOdysseyVectorVertex* mCubicVertex[2];

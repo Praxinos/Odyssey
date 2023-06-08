@@ -15,7 +15,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUDRotate : public FOdysseyVectorHUDSelect
         bool mShowBox;
 
     public:
-        static const uint32 PIVOT_RADIUS = 20;
+        static const uint32 PIVOT_RADIUS = 10;
         //static const uint32 HANDLE_RADIUS = 5;
 
         ~FOdysseyVectorHUDRotate();

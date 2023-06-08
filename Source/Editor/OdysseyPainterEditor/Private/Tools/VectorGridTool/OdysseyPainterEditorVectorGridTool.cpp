@@ -38,6 +38,7 @@ UOdysseyPainterEditorVectorGridTool::UnloadVector( FOdysseyVectorEngine* iEngine
 void
 UOdysseyPainterEditorVectorGridTool::LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
+    iEngine->ClearHUD();
     iEngine->AddHUD( &mGridHUD );
 
     mGridHUD.MakeGrid( iScene, DivisionsX, DivisionsY );

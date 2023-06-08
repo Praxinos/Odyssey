@@ -33,6 +33,7 @@ UOdysseyPainterEditorVectorPathWidthTool::UnloadVector( FOdysseyVectorEngine* iE
 void
 UOdysseyPainterEditorVectorPathWidthTool::LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
+    iEngine->ClearHUD();
     iEngine->AddHUD( &mPickingHUD );
 
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );

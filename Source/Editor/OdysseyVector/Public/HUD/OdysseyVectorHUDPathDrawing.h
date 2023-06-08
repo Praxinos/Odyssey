@@ -11,6 +11,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUDPathDrawing : public FOdysseyVectorHUD
         double mX;
         double mY;
         double mRadius;
+        bool mStitching;
         double mStitchingRadius;
 
     public:
@@ -25,7 +26,4 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUDPathDrawing : public FOdysseyVectorHUD
         void SetStitching( bool iStitching );
         void SetStitchingRadius( double iRadius );
         void SetPosition( double iX, double iY );
-
-    private:
-        bool mStitching;
 };

@@ -41,7 +41,7 @@ UOdysseyPainterEditorVectorObjectPickTool::LoadVector( FOdysseyVectorEngine* iEn
     mSelectionHUD->Init( iSizeX, iSizeY );
     mSelectionHUD->UpdateSelectionBox( iScene );
 
-    //iEngine->ClearHUD( );
+    iEngine->ClearHUD();
     iEngine->AddHUD( mSelectionHUD );
 
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
@@ -160,22 +160,23 @@ UOdysseyPainterEditorVectorObjectPickTool::OnMouseUpVector( FOdysseyVectorEngine
         iScene->ClearSelection();
     }
 
-    if ( mPointArray.size() == 1 )
-    {
-        iEngine->Pick( iScene, mPointArray, pickedObjectArray, FOdysseyVectorObject::PICK_MATH_BASED );
-    }
-
     if ( mPointArray.size() > 1 )
     {
         iEngine->Pick( iScene, mPointArray, pickedObjectArray, FOdysseyVectorObject::PICK_MASK_BASED );
     }
 
+    if ( mPointArray.size() == 1 )
+    {
+        iEngine->Pick( iScene, mPointArray, pickedObjectArray, FOdysseyVectorObject::PICK_MATH_BASED );
+    }
+//UE_LOG(LogTemp, Warning, TEXT("UOdysseyPainterEditorVectorObjectPickTool::OnMouseUpVector %X"), iEngine );
     // if no dragging occured, we only select the object that is the most forward
     if( ( iPointInTexture.x == mPressedMouseCoords.x )
      && ( iPointInTexture.y == mPressedMouseCoords.y ) )
     {
         if( pickedObjectArray.size() )
         {
+
             iScene->Select( pickedObjectArray.back() );
         }
     }

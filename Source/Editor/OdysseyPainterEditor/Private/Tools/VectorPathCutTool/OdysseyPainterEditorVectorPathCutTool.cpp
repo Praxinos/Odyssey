@@ -31,6 +31,7 @@ UOdysseyPainterEditorVectorPathCutTool::UnloadVector( FOdysseyVectorEngine* iEng
 void
 UOdysseyPainterEditorVectorPathCutTool::LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
+    iEngine->ClearHUD();
     iEngine->AddHUD( &mCubicPathHUD );
 
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );

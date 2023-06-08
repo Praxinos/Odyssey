@@ -54,7 +54,7 @@ UOdysseyTextureLayerImageVector::Init( uint32 iWidth, uint32 iHeight )
     mEngine = new FOdysseyVectorEngine( new FOdysseyVectorScene( "Scene" )
                                        , (double)iWidth
                                        , (double)iHeight );
-
+//UE_LOG(LogTemp, Warning, TEXT("UOdysseyTextureLayerImageVector::Init %X"), mEngine );
     // record a callback to refresh the layer when a property of an object's details view is changed
     //mOnRefreshHandle = mScene->OnUpdateDelegate().AddUObject( this, &UOdysseyTextureLayerImageVector::OnRefresh );
 
@@ -155,18 +155,27 @@ UOdysseyTextureLayerImageVector::Serialize(FArchive& Ar)
 {
     Super::Serialize( Ar );
 
-    if ( mEngine == nullptr )
-    {
-        Init( Width, Height );
-    }
-
     if( Ar.IsSaving() )
     {
-        FOdysseyVectorExport::Write( mEngine->GetScene(), Ar );
+        FOdysseyVectorExport::Write( mEngine ? mEngine->GetScene() : nullptr, Ar );
     }
 
     if( Ar.IsLoading() )
     {
+        if ( mEngine == nullptr )
+        {
+            // commented out: at that point, the texture owning the layer stack doe snot have width and height values. 
+            // This should be changed. As a bypass, I store dimensions in Width and Height UProperties.
+            //UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetLayerStack());
+            //if(!layerStack)
+            //    return;
+            //UTexture2D* texture = layerStack->GetTexture();
+
+            //Init( texture->Source.GetSizeX(), texture->Source.GetSizeY() );
+
+            Init( Width, Height );
+        }
+
         FOdysseyVectorImport::Read( mEngine->GetScene(), Ar );
     }
 }

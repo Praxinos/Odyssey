@@ -211,9 +211,6 @@ FOdysseyVectorHUDGrid::Draw( FOdysseyVectorScene* iScene, uint64 iFlags )
     blctx->save();
     blctx->resetMatrix();
 
-    blctx->setStrokeStyle( BLRgba32( 0xFF0000FF ) );
-    blctx->setStrokeWidth( 1.0f );
-
     if( mSelectionBox.space )
     {
         BLMatrix2D worldMatrix = mSelectionBox.space->GetWorldMatrix();
@@ -227,6 +224,11 @@ FOdysseyVectorHUDGrid::Draw( FOdysseyVectorScene* iScene, uint64 iFlags )
                               worldMatrix.mapPoint( mCellArray[i].mNode[2]->GetX(), mCellArray[i].mNode[2]->GetY() ),
                               worldMatrix.mapPoint( mCellArray[i].mNode[3]->GetX(), mCellArray[i].mNode[3]->GetY() ) };
 
+            blctx->setStrokeWidth( 2.0f );
+            blctx->setStrokeStyle( BLRgba32(0xFF808080) );
+            blctx->strokePolygon( pt, 4 );
+            blctx->setStrokeStyle( BLRgba32(0xFF0000FF) );
+            blctx->setStrokeWidth( 1.0f );
             blctx->strokePolygon( pt, 4 );
         }
 
@@ -236,6 +238,9 @@ FOdysseyVectorHUDGrid::Draw( FOdysseyVectorScene* iScene, uint64 iFlags )
 
             blctx->setFillStyle( mNodeArray[i].IsSelected() ? BLRgba32( 0xFF00FF00 ) : BLRgba32( 0xFF0000FF ) );
             blctx->fillCircle( pt.x, pt.y, FOdysseyVectorHUDGrid::HANDLE_RADIUS );
+            blctx->setStrokeWidth( 1.0f );
+            blctx->setStrokeStyle( BLRgba32(0xFF808080) );
+            blctx->strokeCircle( pt.x, pt.y, FOdysseyVectorHUDGrid::HANDLE_RADIUS );
         }
     }
 

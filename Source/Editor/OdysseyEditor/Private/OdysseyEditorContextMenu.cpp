@@ -15,8 +15,8 @@ FOdysseyEditorContextMenu::FOdysseyEditorContextMenu(FName iID, FText iDisplayNa
 	: mID(iID)
 	, mDisplayName(iDisplayName)
 	, mIcon(iIcon)
-	, mWidget(nullptr)
     , mMenu(true, NULL)
+	, mWidget(nullptr)
 {
 }
 

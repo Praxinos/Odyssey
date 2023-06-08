@@ -30,6 +30,7 @@ UOdysseyPainterEditorVectorScenePanTool::UnloadVector( FOdysseyVectorEngine* iEn
 void
 UOdysseyPainterEditorVectorScenePanTool::LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
+    //iEngine->ClearHUD();
     //iEngine->AddHUD( &mDummyHUD );
 
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );

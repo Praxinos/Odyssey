@@ -43,6 +43,7 @@ UOdysseyPainterEditorPaintBucketTool::UnloadVector( FOdysseyVectorEngine* iEngin
 void
 UOdysseyPainterEditorPaintBucketTool::LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
+    iEngine->ClearHUD();
     iEngine->AddHUD( &mBucketHUD );
 
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );

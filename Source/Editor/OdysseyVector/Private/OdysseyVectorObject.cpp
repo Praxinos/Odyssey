@@ -6,6 +6,14 @@
 
 FOdysseyVectorObject::~FOdysseyVectorObject()
 {
+    for( std::list<FOdysseyVectorObject*>::iterator it = mChildrenList.begin(); it != mChildrenList.end(); ++it )
+    {
+        FOdysseyVectorObject *obj = (*it);
+
+        delete obj;
+    }
+
+    mChildrenList.clear();
 }
 
 FOdysseyVectorObject::FOdysseyVectorObject( const FString& iName )

@@ -112,7 +112,7 @@ FOdysseyVectorRectangle::Convert()
 }
 
 void
-FOdysseyVectorRectangle::DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags )
+FOdysseyVectorRectangle::DrawShape( uint64 iFlags )
 {
     if ( mRectangleParam.Width && mRectangleParam.Height )
     {

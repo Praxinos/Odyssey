@@ -34,6 +34,7 @@ UOdysseyPainterEditorVectorEraserTool::UnloadVector( FOdysseyVectorEngine* iEngi
 void
 UOdysseyPainterEditorVectorEraserTool::LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
+    iEngine->ClearHUD();
     iEngine->AddHUD( &mEraserHUD );
 
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );

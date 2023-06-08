@@ -24,6 +24,7 @@ FOdysseyVectorEngine::FOdysseyVectorEngine( FOdysseyVectorScene* iScene, double 
     SetScene( iScene );
 
     mBLContext->begin( *mBLImage, createInfo );
+    //UseColorImage();
 }
 
 void
@@ -177,6 +178,8 @@ FOdysseyVectorEngine::Render()
         mBLContext->clipToRect( iRegion.x, iRegion.y, iRegion.w, iRegion.h );
     }*/
 
+    //mBLContext->begin( *mBLImage );
+
     mScene->Draw( mDrawingFlags );
 /*
     mBLContext->save();
@@ -192,6 +195,8 @@ UE_LOG(LogTemp, Warning, TEXT("Some warning message %d %d %d %d"), mRoi.x, mRoi.
     //mBLContext->restoreClipping();
 
     mBLContext->flush(BL_CONTEXT_FLUSH_SYNC);
+
+    //mBLContext->end();
 }
 
 ::ULIS::FRectD
@@ -578,8 +583,8 @@ FOdysseyVectorEngine::Pick( FOdysseyVectorScene* iScene
     if( iSelectionFlags & FOdysseyVectorObject::PICK_MASK_BASED )
     {
         UseMaskImage();
-
         roi = GenerateMask( iPointArray );
+        UseColorImage();
     }
     else
     {
@@ -593,11 +598,12 @@ FOdysseyVectorEngine::Pick( FOdysseyVectorScene* iScene
     mBLContext->flush(BL_CONTEXT_FLUSH_SYNC);
 
     RecursivePick( mSelectionSpace ? mSelectionSpace : iScene, iScene, oPickedObjectArray, roi, iSelectionFlags );
-
+/*
     if( iSelectionFlags & FOdysseyVectorObject::PICK_MASK_BASED )
     {
         UseColorImage();
     }
+*/
 }
 
 std::list<FOdysseyVectorHUD*>&

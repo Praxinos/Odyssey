@@ -35,6 +35,7 @@ UOdysseyPainterEditorVectorPathSmoothTool::UnloadVector( FOdysseyVectorEngine* i
 void
 UOdysseyPainterEditorVectorPathSmoothTool::LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
+    iEngine->ClearHUD();
     iEngine->AddHUD( &mPickingHUD );
     iEngine->AddHUD( &mPathPushHUD );
 

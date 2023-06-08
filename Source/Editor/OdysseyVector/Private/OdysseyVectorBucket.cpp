@@ -40,9 +40,9 @@ MakeRects( double iWorldX
 FOdysseyVectorBucket::FOdysseyVectorBucket( FOdysseyVectorObject& iParent )
     : mParent ( iParent )
     , mCtrlPoint ( this )
+    , mColor( 128, 128, 128, 255 )
     , mPropagated( false )
     , mIsGradient ( false )
-    , mColor( 128, 128, 128, 255 )
 {
     mCtrlPoint.Set( HANDLEDISTANCE, 0.0f );
 

@@ -20,11 +20,11 @@ SOdysseyAnimationLayerImageRasterTimeline::~SOdysseyAnimationLayerImageRasterTim
 SOdysseyAnimationLayerImageRasterTimeline::SOdysseyAnimationLayerImageRasterTimeline()
     : mIsRefreshPending(false)
     , mIsRebuildPending(false)
+	, mTimingHandleBrush(nullptr)
     , mOffsettingLayer(false)
     , mOffset(0)
-    , mEditingOffset(false)
-	, mTimingHandleBrush(nullptr)
 	, mLengthHandleBrush(nullptr)
+    , mEditingOffset(false)
     , mAddCellsHandleBrush(nullptr)
 {
 

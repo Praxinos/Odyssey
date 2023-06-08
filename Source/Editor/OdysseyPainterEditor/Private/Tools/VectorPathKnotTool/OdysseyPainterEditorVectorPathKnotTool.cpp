@@ -34,6 +34,7 @@ UOdysseyPainterEditorVectorPathKnotTool::UnloadVector( FOdysseyVectorEngine* iEn
 void
 UOdysseyPainterEditorVectorPathKnotTool::LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
+    iEngine->ClearHUD();
     iEngine->AddHUD( &mPickingHUD );
 
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );

@@ -76,7 +76,7 @@ FOdysseyVectorHUDRotate::Draw( FOdysseyVectorScene* iScene, uint64 iFlags )
         blctx->save();
         blctx->resetMatrix();
 
-        blctx->setFillStyle( BLRgba32( 0xFF0000FF ) );
+        blctx->setFillStyle( BLRgba32( 0x400000FF ) );
         blctx->fillCircle( pivot.x, pivot.y, FOdysseyVectorHUDRotate::PIVOT_RADIUS );
 
         blctx->setStrokeWidth( 1.0f );

@@ -68,11 +68,11 @@ FOdysseyVectorPathBuilder::~FOdysseyVectorPathBuilder()
 FOdysseyVectorPathBuilder::FOdysseyVectorPathBuilder()
     : FOdysseyVectorObject( FString("PathBuilder") )
     , mCumulAngle ( 0.0f )
-    , mCubicPath ( nullptr )
     , mCumulAngleLimit ( 1.5708f ) // 90 degrees
-    , mPointID( 0 )
     , mAngleLimit ( 1.0472f ) // 60 deg
     //, mAngleLimit ( 0.7071f ) // 45 deg
+    , mPointID( 0 )
+    , mCubicPath ( nullptr )
 {
     mObjectParam.Foreground.R = 128;
     mObjectParam.Foreground.G = 128;
