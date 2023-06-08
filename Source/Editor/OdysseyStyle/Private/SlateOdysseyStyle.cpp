@@ -463,36 +463,36 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
         .SetPadding(FMargin(8)) //8 because left+right = 16 and top+bottom = 16
         .SetForegroundColor(FLinearColor(0, 0, 0, 0))
         .SetCheckBoxType(ESlateCheckBoxType::ToggleButton)
-        .SetUncheckedImage(IMAGE_BRUSH("OdysseyLayerStack/options_displayed_16", mIcon16x16))
-        .SetUncheckedHoveredImage(IMAGE_BRUSH("OdysseyLayerStack/options_displayed_16", mIcon16x16))
-        .SetUncheckedPressedImage(IMAGE_BRUSH("OdysseyLayerStack/options_displayed_16", mIcon16x16))
-        .SetCheckedImage(IMAGE_BRUSH("OdysseyLayerStack/options_hidden_16", mIcon16x16))
-        .SetCheckedHoveredImage(IMAGE_BRUSH("OdysseyLayerStack/options_hidden_16", mIcon16x16))
-        .SetCheckedPressedImage(IMAGE_BRUSH("OdysseyLayerStack/options_hidden_16", mIcon16x16))
+        .SetUncheckedImage(IMAGE_BRUSH("OdysseyLayerStack/options_hidden_16", mIcon16x16))
+        .SetUncheckedHoveredImage(IMAGE_BRUSH("OdysseyLayerStack/options_hidden_16", mIcon16x16))
+        .SetUncheckedPressedImage(IMAGE_BRUSH("OdysseyLayerStack/options_hidden_16", mIcon16x16))
+        .SetCheckedImage(IMAGE_BRUSH("OdysseyLayerStack/options_displayed_16", mIcon16x16))
+        .SetCheckedHoveredImage(IMAGE_BRUSH("OdysseyLayerStack/options_displayed_16", mIcon16x16))
+        .SetCheckedPressedImage(IMAGE_BRUSH("OdysseyLayerStack/options_displayed_16", mIcon16x16))
 	);
 
     Set("LayerStack.IsActivatedToggle", FCheckBoxStyle()
         .SetPadding(FMargin(8)) //8 because left+right = 16 and top+bottom = 16
         .SetForegroundColor(FLinearColor(0, 0, 0, 0))
         .SetCheckBoxType(ESlateCheckBoxType::ToggleButton)
-        .SetUncheckedImage(IMAGE_BRUSH("OdysseyLayerStack/visible_16", mIcon16x16))
-        .SetUncheckedHoveredImage(IMAGE_BRUSH("OdysseyLayerStack/visible_16", mIcon16x16))
-        .SetUncheckedPressedImage(IMAGE_BRUSH("OdysseyLayerStack/visible_16", mIcon16x16))
-        .SetCheckedImage(IMAGE_BRUSH("OdysseyLayerStack/not_visible_16", mIcon16x16))
-        .SetCheckedHoveredImage(IMAGE_BRUSH("OdysseyLayerStack/not_visible_16", mIcon16x16))
-        .SetCheckedPressedImage(IMAGE_BRUSH("OdysseyLayerStack/not_visible_16", mIcon16x16))
+        .SetUncheckedImage(IMAGE_BRUSH("OdysseyLayerStack/not_visible_16", mIcon16x16))
+        .SetUncheckedHoveredImage(IMAGE_BRUSH("OdysseyLayerStack/not_visible_16", mIcon16x16))
+        .SetUncheckedPressedImage(IMAGE_BRUSH("OdysseyLayerStack/not_visible_16", mIcon16x16))
+        .SetCheckedImage(IMAGE_BRUSH("OdysseyLayerStack/visible_16", mIcon16x16))
+        .SetCheckedHoveredImage(IMAGE_BRUSH("OdysseyLayerStack/visible_16", mIcon16x16))
+        .SetCheckedPressedImage(IMAGE_BRUSH("OdysseyLayerStack/visible_16", mIcon16x16))
 	);
 
     Set("LayerStack.IsLockedToggle", FCheckBoxStyle()
         .SetPadding(FMargin(8)) //8 because left+right = 16 and top+bottom = 16
         .SetForegroundColor(FLinearColor(0, 0, 0, 0))
         .SetCheckBoxType(ESlateCheckBoxType::ToggleButton)
-        .SetUncheckedImage(IMAGE_BRUSH("OdysseyLayerStack/locked_16", mIcon16x16))
-        .SetUncheckedHoveredImage(IMAGE_BRUSH("OdysseyLayerStack/locked_16", mIcon16x16))
-        .SetUncheckedPressedImage(IMAGE_BRUSH("OdysseyLayerStack/locked_16", mIcon16x16))
-        .SetCheckedImage(IMAGE_BRUSH("OdysseyLayerStack/unlocked_16", mIcon16x16))
-        .SetCheckedHoveredImage(IMAGE_BRUSH("OdysseyLayerStack/unlocked_16", mIcon16x16))
-        .SetCheckedPressedImage(IMAGE_BRUSH("OdysseyLayerStack/unlocked_16", mIcon16x16))
+        .SetUncheckedImage(IMAGE_BRUSH("OdysseyLayerStack/unlocked_16", mIcon16x16))
+        .SetUncheckedHoveredImage(IMAGE_BRUSH("OdysseyLayerStack/unlocked_16", mIcon16x16))
+        .SetUncheckedPressedImage(IMAGE_BRUSH("OdysseyLayerStack/unlocked_16", mIcon16x16))
+        .SetCheckedImage(IMAGE_BRUSH("OdysseyLayerStack/locked_16", mIcon16x16))
+        .SetCheckedHoveredImage(IMAGE_BRUSH("OdysseyLayerStack/locked_16", mIcon16x16))
+        .SetCheckedPressedImage(IMAGE_BRUSH("OdysseyLayerStack/locked_16", mIcon16x16))
 	);
     
     //OdysseyViewportDrawingEditor
@@ -664,12 +664,12 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
         .SetPadding(FMargin(8)) //8 because left+right = 16 and top+bottom = 16
         .SetForegroundColor(FLinearColor(0, 0, 0, 0))
         .SetCheckBoxType(ESlateCheckBoxType::ToggleButton)
-        .SetUncheckedImage(IMAGE_BRUSH("OdysseyLayerStack/alpha_locked_16", mIcon16x16))
-        .SetUncheckedHoveredImage(IMAGE_BRUSH("OdysseyLayerStack/alpha_locked_16", mIcon16x16))
-        .SetUncheckedPressedImage(IMAGE_BRUSH("OdysseyLayerStack/alpha_locked_16", mIcon16x16))
-        .SetCheckedImage(IMAGE_BRUSH("OdysseyLayerStack/alpha_unlocked_16", mIcon16x16))
-        .SetCheckedHoveredImage(IMAGE_BRUSH("OdysseyLayerStack/alpha_unlocked_16", mIcon16x16))
-        .SetCheckedPressedImage(IMAGE_BRUSH("OdysseyLayerStack/alpha_unlocked_16", mIcon16x16))
+        .SetUncheckedImage(IMAGE_BRUSH("OdysseyLayerStack/alpha_unlocked_16", mIcon16x16))
+        .SetUncheckedHoveredImage(IMAGE_BRUSH("OdysseyLayerStack/alpha_unlocked_16", mIcon16x16))
+        .SetUncheckedPressedImage(IMAGE_BRUSH("OdysseyLayerStack/alpha_unlocked_16", mIcon16x16))
+        .SetCheckedImage(IMAGE_BRUSH("OdysseyLayerStack/alpha_locked_16", mIcon16x16))
+        .SetCheckedHoveredImage(IMAGE_BRUSH("OdysseyLayerStack/alpha_locked_16", mIcon16x16))
+        .SetCheckedPressedImage(IMAGE_BRUSH("OdysseyLayerStack/alpha_locked_16", mIcon16x16))
 	);
 
     Set("Animation.AddCellsHandleRight", new IMAGE_BRUSH("OdysseyAnimation/AddCellsHandleRight_16", mIcon16x16));
@@ -683,12 +683,12 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
         .SetPadding(FMargin(8)) //8 because left+right = 16 and top+bottom = 16
         .SetForegroundColor(FLinearColor(0, 0, 0, 0))
         .SetCheckBoxType(ESlateCheckBoxType::ToggleButton)
-        .SetUncheckedImage(IMAGE_BRUSH("OdysseyLayerStack/alpha_locked_16", mIcon16x16))
-        .SetUncheckedHoveredImage(IMAGE_BRUSH("OdysseyLayerStack/alpha_locked_16", mIcon16x16))
-        .SetUncheckedPressedImage(IMAGE_BRUSH("OdysseyLayerStack/alpha_locked_16", mIcon16x16))
-        .SetCheckedImage(IMAGE_BRUSH("OdysseyLayerStack/alpha_unlocked_16", mIcon16x16))
-        .SetCheckedHoveredImage(IMAGE_BRUSH("OdysseyLayerStack/alpha_unlocked_16", mIcon16x16))
-        .SetCheckedPressedImage(IMAGE_BRUSH("OdysseyLayerStack/alpha_unlocked_16", mIcon16x16))
+        .SetUncheckedImage(IMAGE_BRUSH("OdysseyLayerStack/alpha_unlocked_16", mIcon16x16))
+        .SetUncheckedHoveredImage(IMAGE_BRUSH("OdysseyLayerStack/alpha_unlocked_16", mIcon16x16))
+        .SetUncheckedPressedImage(IMAGE_BRUSH("OdysseyLayerStack/alpha_unlocked_16", mIcon16x16))
+        .SetCheckedImage(IMAGE_BRUSH("OdysseyLayerStack/alpha_locked_16", mIcon16x16))
+        .SetCheckedHoveredImage(IMAGE_BRUSH("OdysseyLayerStack/alpha_locked_16", mIcon16x16))
+        .SetCheckedPressedImage(IMAGE_BRUSH("OdysseyLayerStack/alpha_locked_16", mIcon16x16))
 	);
 #endif
 }
