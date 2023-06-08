@@ -5,9 +5,10 @@ FOdysseyVectorHUDPathDrawing::~FOdysseyVectorHUDPathDrawing()
 {
 }
 
-FOdysseyVectorHUDPathDrawing::FOdysseyVectorHUDPathDrawing()
-    : mRadius( 10.0f )
-    , mStitchingRadius( 0.0f )
+FOdysseyVectorHUDPathDrawing::FOdysseyVectorHUDPathDrawing( double iRadius, bool iStitching, double iStitchingRadius )
+    : mRadius( iRadius )
+    , mStitching( iStitching )
+    , mStitchingRadius( iStitchingRadius )
 {
 }
 
@@ -30,13 +31,19 @@ FOdysseyVectorHUDPathDrawing::Draw( FOdysseyVectorScene* iScene, uint64 iFlags )
     blctx->setStrokeStyle( BLRgba32( 0xFF0000FF ) );
     blctx->strokeCircle( mX, mY, mRadius );
 
-    if( mStitchingRadius > 0.0f )
+    if( mStitching )
     {
         blctx->setStrokeStyle( BLRgba32( 0xFF00FF00 ) );
         blctx->strokeCircle( mX, mY, mStitchingRadius );
     }
 
     blctx->restore();
+}
+
+void
+FOdysseyVectorHUDPathDrawing::SetStitching( bool iStitching )
+{
+    mStitching = iStitching;
 }
 
 void

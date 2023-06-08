@@ -22,11 +22,9 @@ UOdysseyPainterEditorVectorPathDrawingTool::UOdysseyPainterEditorVectorPathDrawi
     , mPathBuilder( nullptr )
     , mPreviousVertex( nullptr )
     , iOldPointInTexture( 0, 0 )
+    , mPathDrawingHUD( Radius, Stitch, StitchingRadius )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.VectoPen64");
-
-    mPathDrawingHUD.SetRadius( Radius );
-    mPathDrawingHUD.SetStitchingRadius( StitchingRadius );
 }
 
 //--------------------------------------------------------------------------------------
@@ -370,12 +368,14 @@ UOdysseyPainterEditorVectorPathDrawingTool::PropertyChanged( const FName& iPrope
     if ( iPropertyName == "Radius" )
         mPathDrawingHUD.SetRadius( Radius );
 
-    if ( ( iPropertyName == "StitchingRadius" ) || ( iPropertyName == "Stitch" ) )
+    if ( iPropertyName == "StitchingRadius" )
     {
-        if( Stitch == true )
-            mPathDrawingHUD.SetStitchingRadius( StitchingRadius );
-        else
-            mPathDrawingHUD.SetStitchingRadius( 0.0f );
+        mPathDrawingHUD.SetStitchingRadius( StitchingRadius );
+    }
+
+    if ( iPropertyName == "Stitch" )
+    {
+        mPathDrawingHUD.SetStitching( Stitch );
     }
 }
 
