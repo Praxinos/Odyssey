@@ -10,21 +10,23 @@ FOdysseyRasterBlockMutator::~FOdysseyRasterBlockMutator()
     Commit();
 }
 
-FOdysseyRasterBlockMutator::FOdysseyRasterBlockMutator()
+FOdysseyRasterBlockMutator::FOdysseyRasterBlockMutator(bool iStoreUndo)
     : mRasterBlock(nullptr)
     , mInvalidTileMap()
     , mOriginalTileBlocks()
     , mRasterBlockUndoBuilder()
+    , mStoreUndo(iStoreUndo)
 {
 
 }
 
-FOdysseyRasterBlockMutator::FOdysseyRasterBlockMutator(TSharedPtr<FOdysseyRasterBlock> iRasterBlock)
+FOdysseyRasterBlockMutator::FOdysseyRasterBlockMutator(TSharedPtr<FOdysseyRasterBlock> iRasterBlock, bool iStoreUndo)
     : mRasterBlock(iRasterBlock)
     , mInvalidTileMap(64, iRasterBlock->GetWidth(), iRasterBlock->GetHeight())
     , mOriginalTileBlocks()
     , mRasterBlockUndoBuilder()
     , mHandle(iRasterBlock->Preload())
+    , mStoreUndo(iStoreUndo)
 {
 
 }
@@ -139,7 +141,10 @@ FOdysseyRasterBlockMutator::Commit()
     
     mRasterBlock->mCleanupInfos->mIsCacheInvalid = true;
     mRasterBlock->OnBlockCommited().Broadcast(mInvalidTileMap.InvalidRects());
-    mRasterBlockUndoBuilder.StoreUndo(*this);
+    if ( mStoreUndo )
+    {
+        mRasterBlockUndoBuilder.StoreUndo(*this);
+    }
     mInvalidTileMap.Clear();
     mOriginalTileBlocks.Empty();
 }
