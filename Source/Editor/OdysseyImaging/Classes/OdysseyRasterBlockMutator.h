@@ -15,8 +15,8 @@ public:
 
 public:
     ~FOdysseyRasterBlockMutator();
-    FOdysseyRasterBlockMutator();
-    FOdysseyRasterBlockMutator(TSharedPtr<FOdysseyRasterBlock> iRasterBlock);
+    FOdysseyRasterBlockMutator(bool iStoreUndo = true);
+    FOdysseyRasterBlockMutator(TSharedPtr<FOdysseyRasterBlock> iRasterBlock, bool iStoreUndo = true);
 
 public:
     void SetRasterBlock(TSharedPtr<FOdysseyRasterBlock> iRasterBlock);
@@ -37,4 +37,5 @@ private:
     TMap<FIntPoint, TSharedPtr<::ULIS::FBlock>> mOriginalTileBlocks;
     FOdysseyRasterBlockUndoBuilder mRasterBlockUndoBuilder;
     TSharedPtr<IOdysseyHandle> mHandle;
+    bool mStoreUndo;
 };

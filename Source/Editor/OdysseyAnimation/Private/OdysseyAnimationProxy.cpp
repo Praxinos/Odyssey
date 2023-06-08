@@ -2,6 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "OdysseyAnimationProxy.h"
+#include "OdysseyRasterBlockMutator.h"
 
 FOdysseyAnimationProxy::~FOdysseyAnimationProxy()
 {
@@ -479,23 +480,33 @@ FBlockData::Render(bool iForceRender)
     mInvalidTileMap.Clear();
     mEditMutex.Unlock();
 
-    //Get the block from the raster block
-    TSharedPtr<::ULIS::FBlock> block = rasterBlock->GetBlock();
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(block->Format());
-
     //Render until there is no invalid rects to render anymore
     while (!invalidRects.IsEmpty())
-    {    
-        TArray<::ULIS::FEvent> clearEvents;
-        for (const ::ULIS::FRectI& rect : invalidRects)
-        {    
-            ::ULIS::FEvent eventClearBlock = FULISEventBuilder().RetainBlock(block).Build();
-            ctx.Clear(*block, rect, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventClearBlock);
-            clearEvents.Add(eventClearBlock);
-        }
+    {   
+        FOdysseyRasterBlockMutator rasterBlockMutator(rasterBlock, false);
+        rasterBlockMutator.EditTilesFromRects(
+            invalidRects,
+            FOdysseyRasterBlockMutator::FEditDelegate::CreateLambda(
+                [&](const FULISInvalidTileMap& iTileMap)
+                {
+                    TSharedPtr<::ULIS::FBlock> block = rasterBlock->GetBlock();
+                    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(block->Format());
+                    TArray<::ULIS::FRectI> rects = iTileMap.InvalidRects();
 
-        TArray<::ULIS::FEvent> events = renderer->Copy(block, invalidRects, clearEvents);
-        ctx.Finish();
+                    TArray<::ULIS::FEvent> clearEvents;
+                    for (const ::ULIS::FRectI& rect : rects)
+                    {    
+                        ::ULIS::FEvent eventClearBlock = FULISEventBuilder().RetainBlock(block).Build();
+                        ctx.Clear(*block, rect, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventClearBlock);
+                        clearEvents.Add(eventClearBlock);
+                    }
+
+                    renderer->Copy(block, rects, clearEvents);
+                    ctx.Finish();
+                }
+            )
+        );
+        rasterBlockMutator.Commit();
 
         //We are done, check if there is new rectangles to render
         mEditMutex.Lock();
