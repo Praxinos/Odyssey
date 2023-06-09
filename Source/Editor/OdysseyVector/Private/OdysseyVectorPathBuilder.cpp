@@ -93,13 +93,19 @@ FOdysseyVectorPathBuilder::HasBaseClass( uint32 iBaseClassID )
         return true;
     }
 
-    return FOdysseyVectorObject::HasBaseClass( iBaseClassID );
+    return HasBaseClass( iBaseClassID );
 }
 
 void 
 FOdysseyVectorPathBuilder::Attach( FOdysseyVectorPathCubic* iCubicPath )
 {
     mCubicPath = iCubicPath;
+}
+
+uint32
+FOdysseyVectorPathBuilder::GetPointCount()
+{
+    return mPointBuffer.size();
 }
 
 static void

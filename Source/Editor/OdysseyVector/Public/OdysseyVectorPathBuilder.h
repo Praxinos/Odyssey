@@ -156,5 +156,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathBuilder : public FOdysseyVectorObject
                                                      , std::vector<FOdysseyVectorVertex*>& oNewVertexArray
                                                      , std::vector<FOdysseyVectorSegment*>& oNewSegmentArray );
         FOdysseyVectorSegmentCubic* RecordEnd( FOdysseyVectorVertex *iVertex );
-        std::vector<FOdysseyVectorPoint*>& GetPointArray();
+        uint32 GetPointCount();
 };

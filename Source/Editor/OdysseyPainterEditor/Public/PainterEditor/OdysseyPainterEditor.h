@@ -91,6 +91,7 @@ public:
     void BringForward( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
     void FlipHorizontal( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
     void FlipVertical( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    void SelectAll( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
 
     void SelectDefaultTool();
 

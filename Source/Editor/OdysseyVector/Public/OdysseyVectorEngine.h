@@ -237,6 +237,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
 
         void SetScene( FOdysseyVectorScene* iScene );
         FOdysseyVectorScene* GetScene( );
+        void SelectAllInSelectionSpace();
 
     protected:
         static void RecursivePick( FOdysseyVectorGroup* iSelectionSpace

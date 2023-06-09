@@ -188,7 +188,7 @@ FOdysseyPainterEditor::Tick(float iDeltaTime)
 }
 
 //--------------------------------------------------------------------------------------
-//------------------------------------------------- Methods
+//------------------------------------------------- Generic methods for vector layers
 
 void
 FOdysseyPainterEditor::BringForward( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
@@ -355,6 +355,26 @@ FOdysseyPainterEditor::Group( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene
 }
 
 void
+FOdysseyPainterEditor::SelectAll( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+{
+    // needed for undos
+    GEditor->BeginTransaction(LOCTEXT("SelectAll", "Select All"));
+    if( GUndo )
+    {
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelect( iScene );
+
+        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+    }
+    GEditor->EndTransaction();
+
+    iEngine->SelectAllInSelectionSpace();
+
+    iEngine->ResetHUD();
+    // call callbacks if any (for refreshing GUI e.g)
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+}
+
+void
 FOdysseyPainterEditor::ResetView( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
     // needed for undos
@@ -400,11 +420,15 @@ FOdysseyPainterEditor::RemoveSelectedObjects( FOdysseyVectorEngine* iEngine, FOd
 void
 FOdysseyPainterEditor::FlipHorizontal( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
+    std::vector<FObjectTransform> objecTransformArray;
+
+    FObjectTransform::MakeArrayFromObjectList( iScene->GetSelectedObjectList(), objecTransformArray );
+
     // needed for undos
     GEditor->BeginTransaction(LOCTEXT("FlipHorizontal", "Flip Horizontal"));
     if( GUndo )
     {
-        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoObjectTransform( iScene, iScene->GetSelectedObjectList() );
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoObjectTransform( iScene, objecTransformArray );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
     }
@@ -422,11 +446,15 @@ FOdysseyPainterEditor::FlipHorizontal( FOdysseyVectorEngine* iEngine, FOdysseyVe
 void
 FOdysseyPainterEditor::FlipVertical( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
+    std::vector<FObjectTransform> objecTransformArray;
+
+    FObjectTransform::MakeArrayFromObjectList( iScene->GetSelectedObjectList(), objecTransformArray );
+
     // needed for undos
     GEditor->BeginTransaction(LOCTEXT("FlipVertical", "Flip Vertical"));
     if( GUndo )
     {
-        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoObjectTransform( iScene, iScene->GetSelectedObjectList() );
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoObjectTransform( iScene, objecTransformArray );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
     }

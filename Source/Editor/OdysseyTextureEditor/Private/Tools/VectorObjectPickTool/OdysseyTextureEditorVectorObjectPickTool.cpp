@@ -40,7 +40,7 @@ UOdysseyTextureEditorVectorObjectPickTool::Load()
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
-        UOdysseyPainterEditorVectorObjectPickTool::LoadVector( vectorEngine, vectorScene, texture->Source.GetSizeX(), texture->Source.GetSizeY() );
+        UOdysseyPainterEditorVectorObjectPickTool::LoadVector( vectorEngine, vectorScene );
     }
 }
 

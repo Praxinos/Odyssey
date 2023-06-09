@@ -13,26 +13,24 @@
 //----------------------------------------------------------- Construction / Destruction
 UOdysseyPainterEditorVectorObjectRotateTool::~UOdysseyPainterEditorVectorObjectRotateTool()
 {
-    delete mTransformHUD;
 }
 
 UOdysseyPainterEditorVectorObjectRotateTool::UOdysseyPainterEditorVectorObjectRotateTool()
     : mPickedPivot( nullptr )
+    , mTransformHUD()
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.ObjectRotateTool64");
-
-    mTransformHUD = new FOdysseyVectorHUDRotate();
 }
 
 void
 UOdysseyPainterEditorVectorObjectRotateTool::FitHUD( FOdysseyVectorScene* iScene )
 {
-    FSelectionBox& selectionBox = mTransformHUD->GetSelectionBox(); // this is a reference, it does not matter it we get it before the call to UpdateSelectionBox 
+    FSelectionBox& selectionBox = mTransformHUD.GetSelectionBox(); // this is a reference, it does not matter it we get it before the call to UpdateSelectionBox 
 
-    mTransformHUD->UpdateSelectionBox( iScene );
+    mTransformHUD.UpdateSelectionBox( iScene );
 
-    mTransformHUD->SetPivot( selectionBox.rect.x + ( selectionBox.rect.w * 0.5f )
-                           , selectionBox.rect.y + ( selectionBox.rect.h * 0.5f ) );
+    mTransformHUD.SetPivot( selectionBox.rect.x + ( selectionBox.rect.w * 0.5f )
+                          , selectionBox.rect.y + ( selectionBox.rect.h * 0.5f ) );
 }
 
 //--------------------------------------------------------------------------------------
@@ -41,7 +39,7 @@ UOdysseyPainterEditorVectorObjectRotateTool::FitHUD( FOdysseyVectorScene* iScene
 void
 UOdysseyPainterEditorVectorObjectRotateTool::UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
-    iEngine->RemoveHUD( mTransformHUD );
+    iEngine->RemoveHUD( &mTransformHUD );
 
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
@@ -50,7 +48,7 @@ void
 UOdysseyPainterEditorVectorObjectRotateTool::LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
     iEngine->ClearHUD();
-    iEngine->AddHUD( mTransformHUD );
+    iEngine->AddHUD( &mTransformHUD );
 
     FitHUD( iScene );
 
@@ -63,10 +61,10 @@ UOdysseyPainterEditorVectorObjectRotateTool::OnMouseDownVector( FOdysseyVectorEn
                                                               , const FOdysseyPoint& iPointInTexture
                                                               , const FKey& iKey )
 {
-    mPickedPivot = mTransformHUD->PickPivot( iPointInTexture.x, iPointInTexture.y ) ? &mTransformHUD->GetPivot() : nullptr;
+    mPickedPivot = mTransformHUD.PickPivot( iPointInTexture.x, iPointInTexture.y ) ? &mTransformHUD.GetPivot() : nullptr;
 
-    mTransformHUD->SetShowBox( false );
-
+    mTransformHUD.SetShowBox( false );
+/*
     // needed for valid GUndo pointer
     GEditor->BeginTransaction(LOCTEXT("VectorObjectRotateTool","Vector Object Rotate Tool"));
     if( GUndo )
@@ -77,6 +75,13 @@ UOdysseyPainterEditorVectorObjectRotateTool::OnMouseDownVector( FOdysseyVectorEn
         GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
     }
     GEditor->EndTransaction();
+*/
+    // remember for undos. we don't set undos in the mouse down event because it could conflict with the undo created by
+    // UOdysseyPainterEditorVectorObjectPickTool::OnMouseUpVector() called when no dragging was made.
+    mObjectTransformArray.clear();
+    FObjectTransform::MakeArrayFromObjectList( iScene->GetSelectedObjectList(), mObjectTransformArray );
+
+    mDragging = false;
 
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 
@@ -88,7 +93,9 @@ UOdysseyPainterEditorVectorObjectRotateTool::OnMouseDragVector( FOdysseyVectorEn
                                                               , FOdysseyVectorScene* iScene
                                                               , const FOdysseyPoint& iPointInTexture )
 {
-    FSelectionBox& selectionBox = mTransformHUD->GetSelectionBox();
+    FSelectionBox& selectionBox = mTransformHUD.GetSelectionBox();
+
+    mDragging = true;
 
     if( selectionBox.space )
     {
@@ -96,7 +103,7 @@ UOdysseyPainterEditorVectorObjectRotateTool::OnMouseDragVector( FOdysseyVectorEn
         {
             BLPoint localCoords = selectionBox.space->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
 
-            mTransformHUD->SetPivot( localCoords.x, localCoords.y );
+            mTransformHUD.SetPivot( localCoords.x, localCoords.y );
         }
         else
         {
@@ -105,7 +112,7 @@ UOdysseyPainterEditorVectorObjectRotateTool::OnMouseDragVector( FOdysseyVectorEn
             //::ULIS::FRectD localBBox = selectedObject->GetBBox( false );
             BLMatrix2D spaceMatrix = selectionBox.space->GetWorldMatrix();
             BLMatrix2D invertSpaceMatrix;
-            ::ULIS::FVec2D& pivot = mTransformHUD->GetPivot();
+            ::ULIS::FVec2D& pivot = mTransformHUD.GetPivot();
 
             spaceMatrix.translate( pivot.x, pivot.y );
 
@@ -159,7 +166,7 @@ UOdysseyPainterEditorVectorObjectRotateTool::OnMouseDragVector( FOdysseyVectorEn
             iScene->UpdateMatrix();
 
             // update the selection box with the newly modified matrices
-            mTransformHUD->UpdateSelectionBox( iScene );
+            mTransformHUD.UpdateSelectionBox( iScene );
         }
     }
 
@@ -173,7 +180,31 @@ UOdysseyPainterEditorVectorObjectRotateTool::OnMouseUpVector( FOdysseyVectorEngi
                                                             , const FOdysseyPoint& iPointInTexture
                                                             , const FKey& iKey )
 {
-    mTransformHUD->SetShowBox( true );
+    mTransformHUD.SetShowBox( true );
+
+    if( mDragging == true )
+    {
+        // needed for valid GUndo pointer
+        GEditor->BeginTransaction(LOCTEXT("VectorObjectRotateTool","Vector Object Rotate Tool"));
+        if( GUndo )
+        {
+            // save selected object translation/rotation/scaling before transform
+            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoObjectTransform( iScene, mObjectTransformArray );
+
+            GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
+        }
+        GEditor->EndTransaction();
+    }
+    else
+    {
+        mPointArray.clear();
+        mPointArray.push_back( ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y ) );
+
+        // includes its own undo record
+        UOdysseyPainterEditorVectorObjectPickTool::OnMouseUpVector( iEngine, iScene, iPointInTexture, iKey );
+
+        FitHUD( iScene );
+    }
 
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 

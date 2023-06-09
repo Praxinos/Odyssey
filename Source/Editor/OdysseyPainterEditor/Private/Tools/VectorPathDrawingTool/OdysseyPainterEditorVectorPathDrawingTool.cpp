@@ -105,11 +105,8 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorEng
     ::ULIS::FColor color = GetEditorAs<FOdysseyPainterEditor>()->PaintColor().GetValue();
     ::ULIS::FColor rgba8 = color.ToFormat( ::ULIS::eFormat::Format_RGBA8 );
     FOdysseyVectorVertex* cubicVertex = PickVertex( iEngine, iScene, iPointInTexture.x, iPointInTexture.y, StitchingRadius );
-    // take the upper value to prevent stroke with width 0.0
-    float radius = iPointInTexture.pressure * Radius;
     FOdysseyVectorPathCubic* cubicPath = nullptr;
     BLPoint localCoords;
-    BLPoint localRadiusVec;
 
  //UE_LOG(LogTemp, Warning, TEXT("radius:%f iPointInTexture.pressure:%f"), radius, iPointInTexture.pressure ); 
 
@@ -152,18 +149,6 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorEng
         cubicPath->AddVertex( cubicVertex );
         // record for undos
         mVertexArray.push_back( cubicVertex );
-
-        localRadiusVec = cubicPath->GetInverseWorldMatrix().mapVector( 0.7071f * radius, 0.7071f * radius );
-        double localRadius = ::ULIS::FVec2D( localRadiusVec.x, localRadiusVec.y ).Distance();
-
-        if( AverageStitchedRadius )
-        {
-            cubicVertex->SetRadius( ( cubicVertex->GetRadius() + localRadius ) * 0.5f );
-        }
-        else
-        {
-            cubicVertex->SetRadius( localRadius );
-        }
     }
 
     mPreviousVertex = cubicVertex;
@@ -247,8 +232,10 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( FOdysseyVectorEng
     if( mPathBuilder )
     {
         FOdysseyVectorPathCubic* cubicPath = mPathBuilder->GetCubicPath();
+
         BLPoint localCoords;
-        BLPoint localRadius;
+        BLPoint localRadiusVec;
+        double localRadius;
         //float roundedUpRadius = ceil (radius);
         FOdysseyVectorVertex* nextVertex;
         ::ULIS::FRectI toolRegion = GetInvalidationAreaFromPointer( iPointInTexture.x
@@ -259,11 +246,25 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( FOdysseyVectorEng
         mPathDrawingHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
 
         localCoords = cubicPath->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
-        localRadius = cubicPath->GetInverseWorldMatrix().mapVector( 0.7071f * mPointRadius, 0.7071f * mPointRadius );
+        localRadiusVec = cubicPath->GetInverseWorldMatrix().mapVector( 0.7071f * mPointRadius, 0.7071f * mPointRadius );
+        localRadius = ::ULIS::FVec2D( localRadiusVec.x, localRadiusVec.y ).Distance();
+
+        // small trick to set a radius to the first point, as pressure is only valid in drag events but first point is created on down events.
+        if( mPathBuilder->GetPointCount() == 1 )
+        {
+            if( mStitched && AverageStitchedRadius )
+            {
+                mPreviousVertex->SetRadius( ( mPreviousVertex->GetRadius() + localRadius ) * 0.5f );
+            }
+            else
+            {
+                mPreviousVertex->SetRadius( localRadius );
+            }
+        }
 
         nextVertex = mPathBuilder->RecordIntermediate( localCoords.x
                                                      , localCoords.y
-                                                     , ::ULIS::FVec2D( localRadius.x, localRadius.y ).Distance()
+                                                     , localRadius
                                                      , mVertexArray
                                                      , mSegmentArray );
 

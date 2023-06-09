@@ -24,25 +24,33 @@ RestoreObjectTransform( std::vector<FObjectTransform>& objectTransformArray )
     }
 }
 
-FOdysseyVectorUndoObjectTransform::FOdysseyVectorUndoObjectTransform( FOdysseyVectorScene* iScene
-                                                                    , std::list<FOdysseyVectorObject*>& iObjectList )
-    : FOdysseyVectorUndo( iScene )
+// static
+void
+FObjectTransform::MakeArrayFromObjectList( std::list<FOdysseyVectorObject*>& iObjectList
+                                         , std::vector<FObjectTransform>& oObjectTransformArray )
 {
-    objectTransformArray.reserve( iObjectList.size() );
+    oObjectTransformArray.reserve( iObjectList.size() );
 
     for( std::list<FOdysseyVectorObject*>::iterator it = iObjectList.begin(); it != iObjectList.end(); ++it )
     {
         FOdysseyVectorObject* object = (*it);
 
-        objectTransformArray.push_back( FObjectTransform( object ) );
+        oObjectTransformArray.push_back( FObjectTransform( object ) );
     }
 }
 
 FOdysseyVectorUndoObjectTransform::FOdysseyVectorUndoObjectTransform( FOdysseyVectorScene* iScene
-                                                                    , FOdysseyVectorObject* iObject )
+                                                                    , const FObjectTransform& iObjectTransform )
     : FOdysseyVectorUndo( iScene )
 {
-    objectTransformArray.push_back( FObjectTransform( iObject ) );
+    objectTransformArray.push_back( iObjectTransform );
+}
+
+FOdysseyVectorUndoObjectTransform::FOdysseyVectorUndoObjectTransform( FOdysseyVectorScene* iScene
+                                                                    , std::vector<FObjectTransform>& iObjectTransformArray )
+    : FOdysseyVectorUndo( iScene )
+{
+    objectTransformArray = iObjectTransformArray;
 }
 
 void

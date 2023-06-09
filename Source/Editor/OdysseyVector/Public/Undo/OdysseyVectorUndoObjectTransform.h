@@ -9,7 +9,7 @@
 #include "OdysseyVectorObject.h"
 #include "OdysseyVectorScene.h"
 
-struct FObjectTransform
+struct ODYSSEYVECTOR_API FObjectTransform
 {
     FOdysseyVectorObject* object;
     double translationX;
@@ -24,14 +24,17 @@ struct FObjectTransform
 
         iObject->GetTransform( translationX, translationY, rotation, scalingX, scalingY );
     }
+
+    static void MakeArrayFromObjectList( std::list<FOdysseyVectorObject*>& iObjectList
+                                       , std::vector<FObjectTransform>& oObjectTransformArray );
 };
 
 class ODYSSEYVECTOR_API FOdysseyVectorUndoObjectTransform : public FOdysseyVectorUndo
 {
     public:
         ~FOdysseyVectorUndoObjectTransform();
-        FOdysseyVectorUndoObjectTransform( FOdysseyVectorScene* iScene, FOdysseyVectorObject* iObject );
-        FOdysseyVectorUndoObjectTransform( FOdysseyVectorScene* iScene, std::list<FOdysseyVectorObject*>& iObjectList );
+        FOdysseyVectorUndoObjectTransform( FOdysseyVectorScene* iScene, const FObjectTransform& iObjectTransform );
+        FOdysseyVectorUndoObjectTransform( FOdysseyVectorScene* iScene, std::vector<FObjectTransform>& iObjectTransformArray );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;

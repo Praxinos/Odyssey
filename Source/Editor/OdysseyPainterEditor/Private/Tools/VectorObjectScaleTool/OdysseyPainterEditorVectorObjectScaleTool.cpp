@@ -13,21 +13,19 @@
 //----------------------------------------------------------- Construction / Destruction
 UOdysseyPainterEditorVectorObjectScaleTool::~UOdysseyPainterEditorVectorObjectScaleTool()
 {
-    delete mTransformHUD;
 }
 
 UOdysseyPainterEditorVectorObjectScaleTool::UOdysseyPainterEditorVectorObjectScaleTool()
     : Uniform( true )
+    , mTransformHUD()
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.ObjectScaleTool64");
-
-    mTransformHUD = new FOdysseyVectorHUDScale( );
 }
 
 void
 UOdysseyPainterEditorVectorObjectScaleTool::FitHUD( FOdysseyVectorScene* iScene )
 {
-    mTransformHUD->UpdateSelectionBox( iScene );
+    mTransformHUD.UpdateSelectionBox( iScene );
 }
 
 //--------------------------------------------------------------------------------------
@@ -36,7 +34,7 @@ UOdysseyPainterEditorVectorObjectScaleTool::FitHUD( FOdysseyVectorScene* iScene 
 void
 UOdysseyPainterEditorVectorObjectScaleTool::UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
-    iEngine->RemoveHUD( mTransformHUD );
+    iEngine->RemoveHUD( &mTransformHUD );
 
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
@@ -45,7 +43,7 @@ void
 UOdysseyPainterEditorVectorObjectScaleTool::LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
     iEngine->ClearHUD();
-    iEngine->AddHUD( mTransformHUD );
+    iEngine->AddHUD( &mTransformHUD );
 
     FitHUD( iScene );
 
@@ -58,18 +56,19 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDownVector( FOdysseyVectorEng
                                                              , const FOdysseyPoint& iPointInTexture
                                                              , const FKey& iKey )
 {
-    FSelectionBox& selectionBox = mTransformHUD->GetSelectionBox();
+    FSelectionBox& selectionBox = mTransformHUD.GetSelectionBox();
 
     if( selectionBox.space )
     {
         BLPoint localCoords = selectionBox.space->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
 
-        mPickedHandle = mTransformHUD->Pick( iPointInTexture.x, iPointInTexture.y );
+        mPickedHandle = mTransformHUD.Pick( iPointInTexture.x, iPointInTexture.y );
 
         mOldLocalMouseX = localCoords.x;
         mOldLocalMouseY = localCoords.y;
     }
 
+/*
     // needed for valid GUndo pointer
     GEditor->BeginTransaction(LOCTEXT("VectorObjectScaleTool","Vector Object Scale Tool"));
     if( GUndo )
@@ -80,6 +79,13 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDownVector( FOdysseyVectorEng
         GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
     }
     GEditor->EndTransaction();
+*/
+    // remember for undos. we don't set undos in the mouse down event because it could conflict with the undo created by
+    // UOdysseyPainterEditorVectorObjectPickTool::OnMouseUpVector() called when no dragging was made.
+    mObjectTransformArray.clear();
+    FObjectTransform::MakeArrayFromObjectList( iScene->GetSelectedObjectList(), mObjectTransformArray );
+
+    mDragging = false;
 
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 
@@ -91,7 +97,9 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDragVector( FOdysseyVectorEng
                                                              , FOdysseyVectorScene* iScene
                                                              , const FOdysseyPoint& iPointInTexture )
 {
-    FSelectionBox& selectionBox = mTransformHUD->GetSelectionBox();
+    FSelectionBox& selectionBox = mTransformHUD.GetSelectionBox();
+
+    mDragging = true;
 
     if ( selectionBox.space )
     {
@@ -225,7 +233,7 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDragVector( FOdysseyVectorEng
         iScene->UpdateMatrix();
 
         // update the selection box with the newly modified matrices
-        mTransformHUD->UpdateSelectionBox( iScene );
+        mTransformHUD.UpdateSelectionBox( iScene );
 
         mOldLocalMouseX = localCoords.x;
         mOldLocalMouseY = localCoords.y;
@@ -243,6 +251,30 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseUpVector( FOdysseyVectorEngin
                                                            , const FOdysseyPoint& iPointInTexture
                                                            , const FKey& iKey )
 {
+    if( mDragging == true )
+    {
+        // needed for valid GUndo pointer
+        GEditor->BeginTransaction(LOCTEXT("VectorObjectScaleTool","Vector Object Scale Tool"));
+        if( GUndo )
+        {
+            // save selected object translation/rotation/scaling before transform
+            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoObjectTransform( iScene, mObjectTransformArray );
+
+            GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
+        }
+        GEditor->EndTransaction();
+    }
+    else
+    {
+        mPointArray.clear();
+        mPointArray.push_back( ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y ) );
+
+        // includes its own undo record
+        UOdysseyPainterEditorVectorObjectPickTool::OnMouseUpVector( iEngine, iScene, iPointInTexture, iKey );
+
+        FitHUD( iScene );
+    }
+
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 
     return true;

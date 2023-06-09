@@ -127,6 +127,11 @@ UOdysseyPainterEditorDefaultTool::OnKeyDownVector( FOdysseyVectorEngine* iEngine
         {
             Paste( iEngine, iScene );
         }
+
+        if( iKey == EKeys::A )
+        {
+            GetEditorAs<FOdysseyPainterEditor>()->SelectAll( iEngine, iScene );
+        }
     }
 
     if( iKey == EKeys::Delete )

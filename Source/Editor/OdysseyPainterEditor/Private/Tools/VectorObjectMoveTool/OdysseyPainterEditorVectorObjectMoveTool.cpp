@@ -42,6 +42,7 @@ UOdysseyPainterEditorVectorObjectMoveTool::OnMouseDownVector( FOdysseyVectorEngi
                                                             , const FOdysseyPoint& iPointInTexture
                                                             , const FKey& iKey )
 {
+/*
     // needed for valid GUndo pointer
     GEditor->BeginTransaction(LOCTEXT("VectorObjectMoveTool","Vector Object Move Tool"));
     if( GUndo )
@@ -52,6 +53,13 @@ UOdysseyPainterEditorVectorObjectMoveTool::OnMouseDownVector( FOdysseyVectorEngi
         GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
     }
     GEditor->EndTransaction();
+*/
+    // remember for undos. we don't set undos in the mouse down event because it could conflict with the undo created by
+    // UOdysseyPainterEditorVectorObjectPickTool::OnMouseUpVector() called when no dragging was made.
+    mObjectTransformArray.clear();
+    FObjectTransform::MakeArrayFromObjectList( iScene->GetSelectedObjectList(), mObjectTransformArray );
+
+    mDragging = false;
 
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 
@@ -65,6 +73,8 @@ UOdysseyPainterEditorVectorObjectMoveTool::OnMouseDragVector( FOdysseyVectorEngi
 {
     std::list<FOdysseyVectorObject*>& selectObjectList = iScene->GetSelectedObjectList();
     ::ULIS::FRectD beforeBBox = FOdysseyVectorObject::GetBoundingBoxFromList( selectObjectList );
+
+    mDragging = true;
 
     for( std::list<FOdysseyVectorObject*>::iterator it = selectObjectList.begin(); it != selectObjectList.end(); ++it )
     {
@@ -86,7 +96,7 @@ UOdysseyPainterEditorVectorObjectMoveTool::OnMouseDragVector( FOdysseyVectorEngi
     // update invalidated objects
     iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES | FOdysseyVectorObject::KEEPINVALIDATED );
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW | FOdysseyVectorScene::SIGNAL_OBJECT_TRANSFORMED );
-}
+} 
 
 bool
 UOdysseyPainterEditorVectorObjectMoveTool::OnMouseUpVector( FOdysseyVectorEngine* iEngine
@@ -94,6 +104,28 @@ UOdysseyPainterEditorVectorObjectMoveTool::OnMouseUpVector( FOdysseyVectorEngine
                                                           , const FOdysseyPoint& iPointInTexture
                                                           , const FKey& iKey )
 {
+    if( mDragging == true )
+    {
+        // needed for valid GUndo pointer
+        GEditor->BeginTransaction(LOCTEXT("VectorObjectMoveTool","Vector Object Move Tool"));
+        if( GUndo )
+        {
+            // save selected object translation/rotation/scaling before transform
+            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoObjectTransform( iScene, mObjectTransformArray );
+
+            GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
+        }
+        GEditor->EndTransaction();
+    }
+    else
+    {
+        mPointArray.clear();
+        mPointArray.push_back( ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y ) );
+
+        // includes its own undo record
+        UOdysseyPainterEditorVectorObjectPickTool::OnMouseUpVector( iEngine, iScene, iPointInTexture, iKey );
+    }
+
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 
     return true;

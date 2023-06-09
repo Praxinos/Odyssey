@@ -10,14 +10,12 @@
 //----------------------------------------------------------- Construction / Destruction
 UOdysseyPainterEditorVectorObjectPickTool::~UOdysseyPainterEditorVectorObjectPickTool()
 {
-    delete mSelectionHUD;
 }
 
 UOdysseyPainterEditorVectorObjectPickTool::UOdysseyPainterEditorVectorObjectPickTool()
+    : mSelectionHUD()
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Lasso64");
-
-    mSelectionHUD = new FOdysseyVectorHUDSelection( );
 }
 
 //--------------------------------------------------------------------------------------
@@ -27,22 +25,20 @@ void
 UOdysseyPainterEditorVectorObjectPickTool::UnloadVector( FOdysseyVectorEngine* iEngine
                                                        , FOdysseyVectorScene* iScene )
 {
-    iEngine->RemoveHUD( mSelectionHUD );
+    iEngine->RemoveHUD( &mSelectionHUD );
 
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
 
 void
 UOdysseyPainterEditorVectorObjectPickTool::LoadVector( FOdysseyVectorEngine* iEngine
-                                                     , FOdysseyVectorScene* iScene
-                                                     , int32 iSizeX
-                                                     , int32 iSizeY )
+                                                     , FOdysseyVectorScene* iScene )
 {
-    mSelectionHUD->Init( iSizeX, iSizeY );
-    mSelectionHUD->UpdateSelectionBox( iScene );
+    mSelectionHUD.Init( iEngine->GetBLImage()->width(), iEngine->GetBLImage()->height() );
+    mSelectionHUD.UpdateSelectionBox( iScene );
 
     iEngine->ClearHUD();
-    iEngine->AddHUD( mSelectionHUD );
+    iEngine->AddHUD( &mSelectionHUD );
 
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
@@ -94,7 +90,7 @@ UOdysseyPainterEditorVectorObjectPickTool::OnMouseDownVector( FOdysseyVectorEngi
 
         mPointArray.clear();
 
-        mSelectionHUD->SetSelecting( true, &mPointArray );
+        mSelectionHUD.SetSelecting( true, &mPointArray );
 
         mPointArray.push_back( ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y ) );
 
@@ -160,39 +156,34 @@ UOdysseyPainterEditorVectorObjectPickTool::OnMouseUpVector( FOdysseyVectorEngine
         iScene->ClearSelection();
     }
 
+    // dragging occured
     if ( mPointArray.size() > 1 )
     {
         iEngine->Pick( iScene, mPointArray, pickedObjectArray, FOdysseyVectorObject::PICK_MASK_BASED );
-    }
 
-    if ( mPointArray.size() == 1 )
-    {
-        iEngine->Pick( iScene, mPointArray, pickedObjectArray, FOdysseyVectorObject::PICK_MATH_BASED );
-    }
-//UE_LOG(LogTemp, Warning, TEXT("UOdysseyPainterEditorVectorObjectPickTool::OnMouseUpVector %X"), iEngine );
-    // if no dragging occured, we only select the object that is the most forward
-    if( ( iPointInTexture.x == mPressedMouseCoords.x )
-     && ( iPointInTexture.y == mPressedMouseCoords.y ) )
-    {
-        if( pickedObjectArray.size() )
-        {
-
-            iScene->Select( pickedObjectArray.back() );
-        }
-    }
-    // otherwise we select all objects lying in the selection area
-    else
-    {
+        // when dragging occured, we select all objects lying in the selection area.
         for ( int i = 0; i < pickedObjectArray.size(); i++ )
         {
             iScene->Select( pickedObjectArray[i] );
         }
     }
 
+    // no dragging occured
+    if ( mPointArray.size() == 1 )
+    {
+        iEngine->Pick( iScene, mPointArray, pickedObjectArray, FOdysseyVectorObject::PICK_MATH_BASED );
+
+        // if no dragging occured, we only select the object that is the most forward
+        if( pickedObjectArray.size() )
+        {
+            iScene->Select( pickedObjectArray.back() );
+        }
+    }
+
     SetSelectionSpace( iEngine, iScene->GetLastSelected() );
 
-    mSelectionHUD->SetSelecting( false, nullptr );
-    mSelectionHUD->UpdateSelectionBox( iScene );
+    mSelectionHUD.SetSelecting( false, nullptr );
+    mSelectionHUD.UpdateSelectionBox( iScene );
 
     iScene->Update( 0 ); // update invalidated objects
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW | FOdysseyVectorScene::SIGNAL_OBJECT_SELECTED );

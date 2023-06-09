@@ -165,6 +165,23 @@ FOdysseyVectorEngine::SetDrawingFlags( uint64 iDrawingFlags )
 }
 
 void
+FOdysseyVectorEngine::SelectAllInSelectionSpace()
+{
+    // TODO: set scene as the default selection space
+    FOdysseyVectorGroup* selectionSpace = mSelectionSpace ? mSelectionSpace : mScene;
+    std::list<FOdysseyVectorObject*>& childrenList = selectionSpace->GetChildrenList();
+
+    mScene->ClearSelection();
+
+    for( std::list<FOdysseyVectorObject*>::iterator it = childrenList.begin(); it != childrenList.end(); ++it )
+    {
+        FOdysseyVectorObject *child = (*it);
+
+        mScene->Select( child );
+    }
+}
+
+void
 FOdysseyVectorEngine::Render()
 {
     // Blend2D part

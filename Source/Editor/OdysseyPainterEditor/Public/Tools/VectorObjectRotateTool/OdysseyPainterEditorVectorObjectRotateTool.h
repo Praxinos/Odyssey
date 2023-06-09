@@ -4,14 +4,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Tools/DefaultTool/OdysseyPainterEditorDefaultTool.h"
+#include "Tools/VectorObjectPickTool/OdysseyPainterEditorVectorObjectPickTool.h"
 #include "OdysseyVector.h"
 #include "Undo/OdysseyVectorUndoObjectTransform.h"
 
 #include "OdysseyPainterEditorVectorObjectRotateTool.generated.h"
 
 UCLASS()
-class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectRotateTool : public UOdysseyPainterEditorDefaultTool
+class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectRotateTool : public UOdysseyPainterEditorVectorObjectPickTool
 {
 public:
     GENERATED_BODY()
@@ -23,19 +23,19 @@ public:
     //Constructor
     UOdysseyPainterEditorVectorObjectRotateTool();
 
-    void UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    void LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    bool OnMouseDownVector( FOdysseyVectorEngine* iEngine
-                          , FOdysseyVectorScene* iScene
-                          , const FOdysseyPoint& iPointInTexture
-                          , const FKey& iKey );
-    void OnMouseDragVector( FOdysseyVectorEngine* iEngine
-                          , FOdysseyVectorScene* iScene
-                          , const FOdysseyPoint& iPointInTexture );
-    bool OnMouseUpVector( FOdysseyVectorEngine* iEngine
-                        , FOdysseyVectorScene* iScene
-                        , const FOdysseyPoint& iPointInTexture
-                        , const FKey& iKey );
+    virtual void UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene ) override;
+    virtual void LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene ) override;
+    virtual bool OnMouseDownVector( FOdysseyVectorEngine* iEngine
+                                  , FOdysseyVectorScene* iScene
+                                  , const FOdysseyPoint& iPointInTexture
+                                  , const FKey& iKey ) override;
+    virtual void OnMouseDragVector( FOdysseyVectorEngine* iEngine
+                                  , FOdysseyVectorScene* iScene
+                                  , const FOdysseyPoint& iPointInTexture ) override;
+    virtual bool OnMouseUpVector( FOdysseyVectorEngine* iEngine
+                                , FOdysseyVectorScene* iScene
+                                , const FOdysseyPoint& iPointInTexture
+                                , const FKey& iKey ) override;
 
     //OdysseyPainterEditorTool overrides
     virtual void Commit() override;
@@ -46,7 +46,8 @@ protected:
     void FitHUD( FOdysseyVectorScene* iScene );
 
 private:
-    FOdysseyVectorHUDRotate *mTransformHUD;
+    FOdysseyVectorHUDRotate mTransformHUD;
+    std::vector<FObjectTransform> mObjectTransformArray;
+    bool mDragging;
     ::ULIS::FVec2D* mPickedPivot;
-
 };

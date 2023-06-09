@@ -24,22 +24,19 @@ public:
     //Constructor
     UOdysseyPainterEditorVectorObjectPickTool();
  
-    void UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    void LoadVector( FOdysseyVectorEngine* iEngine
-                   , FOdysseyVectorScene* iScene
-                   , int32 iSizeX
-                   , int32 iSizeY );
-    bool OnMouseDownVector( FOdysseyVectorEngine* iEngine
-                          , FOdysseyVectorScene* iScene
-                          , const FOdysseyPoint& iPointInTexture
-                          , const FKey& iKey );
-    void OnMouseDragVector( FOdysseyVectorEngine* iEngine
-                          , FOdysseyVectorScene* iScene
-                          , const FOdysseyPoint& iPointInTexture );
-    bool OnMouseUpVector( FOdysseyVectorEngine* iEngine
-                        , FOdysseyVectorScene* iScene
-                        , const FOdysseyPoint& iPointInTexture
-                        , const FKey& iKey );
+    virtual void UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    virtual void LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    virtual bool OnMouseDownVector( FOdysseyVectorEngine* iEngine
+                                  , FOdysseyVectorScene* iScene
+                                  , const FOdysseyPoint& iPointInTexture
+                                  , const FKey& iKey );
+    virtual void OnMouseDragVector( FOdysseyVectorEngine* iEngine
+                                  , FOdysseyVectorScene* iScene
+                                  , const FOdysseyPoint& iPointInTexture );
+    virtual bool OnMouseUpVector( FOdysseyVectorEngine* iEngine
+                                , FOdysseyVectorScene* iScene
+                                , const FOdysseyPoint& iPointInTexture
+                                , const FKey& iKey );
     virtual bool OnKeyDownVector( FOdysseyVectorEngine* iEngine
                                 , FOdysseyVectorScene* iScene
                                 , const FKey& iKey ) override;
@@ -53,8 +50,8 @@ public:
     void Copy( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
     void Paste( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
 
-private:
-    FOdysseyVectorHUDSelection *mSelectionHUD;
+protected:
+    FOdysseyVectorHUDSelection mSelectionHUD;
     std::vector<::ULIS::FVec2D> mPointArray;
     ::ULIS::FVec2D mPressedMouseCoords;
 };
