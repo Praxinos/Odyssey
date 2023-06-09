@@ -79,8 +79,21 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDownVector( FOdysseyVect
                                                                   , const FKey& iKey )
 {
     BLPoint localCoords = iScene->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
+
     ::ULIS::FColor color = GetEditorAs<FOdysseyPainterEditor>()->PaintColor().GetValue();
+    UOdysseyPaletteEntry* entry = nullptr;
+    if (GetEditorAs<FOdysseyPainterEditor>()->GetGUI()->GetColorPaletteTab()->PaletteWidget()->GetColorPalette()->GetPalette())
+    {
+        entry = GetEditorAs<FOdysseyPainterEditor>()->GetGUI()->GetColorPaletteTab()->PaletteWidget()->GetColorPalette()->GetPalette()->CurrentEntry.Get();
+        if (entry && entry->IsA(UOdysseyPaletteEntryColor::StaticClass()))
+        {
+            UOdysseyPaletteEntryColor* colorEntry = Cast< UOdysseyPaletteEntryColor >(entry);
+            color = ::ULIS::FColor::RGBA8(colorEntry->EntryColor.R, colorEntry->EntryColor.G, colorEntry->EntryColor.B, colorEntry->EntryColor.A);
+        }
+    }
+
     ::ULIS::FColor rgba8 = color.ToFormat( ::ULIS::eFormat::Format_RGBA8 );
+
     FOdysseyVectorPrimitive* primitive;
 
     mMouseDown.x = iPointInTexture.x;
@@ -104,6 +117,9 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDownVector( FOdysseyVect
             primitive = new FOdysseyVectorEllipse( FString("Circle"), 0.0f, 0.0f, StrokeWidth );
         break;
     }
+
+    if (entry && entry->IsA(UOdysseyPaletteEntryColor::StaticClass()))
+        primitive->SetPaletteEntry(entry);
 
     iScene->AppendChild( primitive );
 

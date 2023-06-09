@@ -394,10 +394,23 @@ FOdysseyVectorCycle::Draw( uint64 iFlags )
             FColor& color = bucket->GetColor();
             BLRgba32 BLColor;
 
-            BLColor.setR( color.R );
-            BLColor.setG( color.G );
-            BLColor.setB( color.B );
-            BLColor.setA( color.A );
+            // Note: Blend2D color format is 0xAARRGGBB
+            if (mParent.mObjectParam.Entry)
+            {
+                FColor colorParent = Cast< UOdysseyPaletteEntryColor >(mParent.mObjectParam.Entry)->EntryColor;
+                BLColor.setR(colorParent.B);
+                BLColor.setG(colorParent.G);
+                BLColor.setB(colorParent.R);
+                BLColor.setA(colorParent.A);
+            }
+            else
+            {
+                BLColor.setR(color.B);
+                BLColor.setG(color.G);
+                BLColor.setB(color.R);
+                BLColor.setA(color.A);
+            }
+
 
             blctx->setStrokeStyle( BLColor );
             blctx->setFillStyle( BLColor );

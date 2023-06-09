@@ -259,6 +259,7 @@ FOdysseyVectorObject::CopySettings( FOdysseyVectorObject& iDestinationObject )
     iDestinationObject.UpdateMatrix();
 
     iDestinationObject.mObjectParam.Foreground = mObjectParam.Foreground;
+    iDestinationObject.mObjectParam.Entry = mObjectParam.Entry;
 
     iDestinationObject.mFillBucket.SetColor( mFillBucket.GetColor() );
     iDestinationObject.mFillBucket.SetGradient( mFillBucket.IsGradient() );
