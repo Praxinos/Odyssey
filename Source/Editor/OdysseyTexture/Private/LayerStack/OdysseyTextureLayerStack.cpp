@@ -33,8 +33,18 @@ UOdysseyTextureLayerStack::CreateFromTexture(UTexture2D* iTexture, UObject* iOut
 
     //Fill LayerImage with content of Texture
     TSharedPtr<FOdysseyRasterBlock> rasterBlock = layer->GetRasterBlock();
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = rasterBlock->GetBlock();
-    FillOdysseyBlockFromUTextureData(block.Get(), iTexture, block->Format());
+    FOdysseyRasterBlockMutator rasterBlockMutator(rasterBlock, false);
+    rasterBlockMutator.EditTilesFromRects(
+        { ::ULIS::FRectI::FromXYWH(0, 0, rasterBlock->GetWidth(), rasterBlock->GetHeight()) },
+        FOdysseyRasterBlockMutator::FEditDelegate::CreateLambda(
+            [&](const FULISInvalidTileMap& iTileMap)
+            {
+                TSharedPtr<::ULIS::FBlock> block = rasterBlock->GetBlock();
+                FillOdysseyBlockFromUTextureData(block.Get(), iTexture, block->Format());
+            }
+        )
+    );
+    rasterBlockMutator.Commit();
 
     //Set the layer as Current Layer
     layerStack->AddLayersToHierarchy({ layer }, layerStack->LayerRoot, 0);
