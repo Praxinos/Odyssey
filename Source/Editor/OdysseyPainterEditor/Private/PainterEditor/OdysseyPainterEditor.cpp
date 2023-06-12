@@ -188,7 +188,8 @@ FOdysseyPainterEditor::Tick(float iDeltaTime)
 }
 
 //--------------------------------------------------------------------------------------
-//------------------------------------------------- Generic methods for vector layers
+//------ Generic methods for vector layers. currently placed here, although it's not really needed.
+//------ This might be put somewhere else, in a CommonFunctions file or something as static methods.
 
 void
 FOdysseyPainterEditor::BringForward( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )

@@ -48,31 +48,33 @@ public:
     //OdysseyPainterEditorTool overrides
     virtual void Commit() override;
 
-protected:
+
     void PropertyChanged( const FName& iPropertyName );
 
+private:
     FOdysseyVectorPathCubic* FetchPath( FOdysseyVectorEngine* iVectorEngine
                                       , FOdysseyVectorScene* iScene
                                       , double iWorldX
                                       , double iWorldY );
     void OnMouseDownDeletePoint( FOdysseyVectorEngine* iEngine
                                , FOdysseyVectorScene* iScene
-                               , FOdysseyVectorPath* iPath
                                , const FOdysseyPoint& iPointInTexture
                                , const FKey& iKey );
-    void OnMouseDownMovePoint( FOdysseyVectorEngine* iEngine
+    void OnMouseDownPickPoint( FOdysseyVectorEngine* iEngine
                              , FOdysseyVectorScene* iScene
-                             , FOdysseyVectorPath* iPath
                              , const FOdysseyPoint& iPointInTexture
                              , const FKey& iKey );
 
+    void DetectPickingMode();
+
 private:
-    double mOldLocalMouseX;
-    double mOldLocalMouseY;
     FOdysseyVectorHUDPathCubic mCubicPathHUD;
     FOdysseyVectorHUDPicking mPickingHUD;
     std::vector<FOdysseyVectorPoint*> mPickedPointArray;
     uint64 mSelectionFlags;
+    ::ULIS::FVec2D mOldPointInTexture;
+    TSharedPtr< SViewport > mViewportWidget; // to force keyboard focus on mouse hover.
+                                             // Prevents the user from having to click at least once in the viewport.
 
 public:
     UPROPERTY(EditAnywhere, Category="Odyssey PathEdit Tool", meta = (ClampMin = "0.0", UIMin = "0.0") )

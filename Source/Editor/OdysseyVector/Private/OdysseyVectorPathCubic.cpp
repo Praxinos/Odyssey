@@ -403,19 +403,6 @@ FOdysseyVectorPathCubic::PickPoint( double iWorldX
 }
 
 void
-FOdysseyVectorPathCubic::Unselect( FOdysseyVectorVertex *iVertex )
-{
-    if ( iVertex == NULL )
-    {
-        mSelectedPointList.clear();
-    }
-    else
-    {
-        mSelectedPointList.remove( iVertex );
-    }
-}
-
-void
 FOdysseyVectorPathCubic::Cut( ::ULIS::FVec2D& linePoint0
                             , ::ULIS::FVec2D& linePoint1
                             , std::vector<FOdysseyVectorVertex*>& oNewVertexArray

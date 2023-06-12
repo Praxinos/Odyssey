@@ -111,7 +111,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
                               , double iRadius
                               , std::vector<FOdysseyVectorPoint*>& oPickedPointArray
                               , uint64 iSelectionFlags ){ return false; };
-        virtual void Unselect( FOdysseyVectorVertex* iVertex ){};
         bool IsFilled();
         bool IsLoop();
         bool HasIntersections();

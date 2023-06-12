@@ -45,7 +45,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathCubic: public FOdysseyVectorPath
                       , double iSelectionRadius
                       , std::vector<FOdysseyVectorPoint*>& oPickedPointArray
                       , uint64 iSelectionFlags );
-        void Unselect( FOdysseyVectorVertex* iPoint );
         void Fill();
         void Merge( FOdysseyVectorPath* iPath
                   , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray

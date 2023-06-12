@@ -196,13 +196,15 @@ void
 FOdysseyVectorHUDPathCubic::Draw( FOdysseyVectorScene* iScene, uint64 iFlags )
 {
     BLContext* blctx = iScene->GetEngine()->GetBLContext();
-    FOdysseyVectorObject* selectedObject = iScene->GetLastSelected();
+    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
 
     // matrix might get altered for displaying the selection rectangle of a single object. Save it.
     blctx->save();
 
-    if( selectedObject )
+    for( std::list<FOdysseyVectorObject*>::iterator oit = selectedObjectList.begin(); oit != selectedObjectList.end(); ++oit )
     {
+        FOdysseyVectorObject* selectedObject = *oit;
+
         if( selectedObject->GetClass() == FOdysseyVectorPathCubic::StaticClass() )
         {
             FOdysseyVectorPathCubic* cubicPath = static_cast<FOdysseyVectorPathCubic*>(selectedObject);
@@ -212,17 +214,17 @@ FOdysseyVectorHUDPathCubic::Draw( FOdysseyVectorScene* iScene, uint64 iFlags )
             // drawn in World coordinates to get sure the size of HUD items is always the same
             blctx->resetMatrix();
 
-            for( std::list<FOdysseyVectorSegment*>::iterator it = segmentList.begin(); it != segmentList.end(); ++it )
+            for( std::list<FOdysseyVectorSegment*>::iterator sit = segmentList.begin(); sit != segmentList.end(); ++sit )
             {
-                FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
+                FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(*sit);
 
                 DrawSegment( cubicPath, cubicSegment, iFlags );
             }
 
             // Points and Point size handles
-            for( std::list<FOdysseyVectorVertex*>::iterator it = vertexList.begin(); it != vertexList.end(); ++it )
+            for( std::list<FOdysseyVectorVertex*>::iterator vit = vertexList.begin(); vit != vertexList.end(); ++vit )
             {
-                FOdysseyVectorVertex *cubicVertex = static_cast<FOdysseyVectorVertex*>(*it);
+                FOdysseyVectorVertex *cubicVertex = static_cast<FOdysseyVectorVertex*>(*vit);
 
                 DrawVertex( cubicPath, cubicVertex, iFlags );
             }
