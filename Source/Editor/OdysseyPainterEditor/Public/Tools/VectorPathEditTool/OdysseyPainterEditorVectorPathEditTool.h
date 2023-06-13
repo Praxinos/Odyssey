@@ -9,6 +9,28 @@
 
 #include "OdysseyPainterEditorVectorPathEditTool.generated.h"
 
+typedef struct FStitchingPair
+{
+    FOdysseyVectorVertex* vertex[2];
+    ::ULIS::FVec2D handle[2];
+
+    FStitchingPair( FOdysseyVectorVertex* iVertex0, ::ULIS::FVec2D& iHandle0
+                  , FOdysseyVectorVertex* iVertex1, ::ULIS::FVec2D& iHandle1 )
+    {
+        // Note: ordering will ease comparisons between stitching pairs.
+        vertex[0] = iVertex0 < iVertex1 ? iVertex0 : iVertex1;
+        handle[0] = iVertex0 < iVertex1 ? iHandle0 : iHandle1;
+
+        vertex[1] = iVertex0 < iVertex1 ? iVertex1 : iVertex0;
+        handle[1] = iVertex0 < iVertex1 ? iHandle1 : iHandle0;
+    }
+
+    bool operator==(const FStitchingPair& rhs)
+    {
+        return ( ( vertex[0] == rhs.vertex[0] ) && ( vertex[1] == rhs.vertex[1] ) );
+    }
+} FStitchingPair;
+
 UCLASS()
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathEditTool : public UOdysseyPainterEditorTool
 {
