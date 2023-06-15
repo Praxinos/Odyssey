@@ -15,6 +15,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::~UOdysseyPainterEditorVectorPri
 UOdysseyPainterEditorVectorPrimitiveDrawingTool::UOdysseyPainterEditorVectorPrimitiveDrawingTool()
     : PrimitiveType ( EOdysseyVectorPrimitiveType::Ellipse )
     , StrokeWidth( 4.0f )
+    , Uniform( false )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Circle64");
 }
@@ -49,6 +50,9 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDownVector( FOdysseyVect
     ::ULIS::FColor color = GetEditorAs<FOdysseyPainterEditor>()->PaintColor().GetValue();
     ::ULIS::FColor rgba8 = color.ToFormat( ::ULIS::eFormat::Format_RGBA8 );
     FOdysseyVectorPrimitive* primitive;
+
+    mMouseDown.x = iPointInTexture.x;
+    mMouseDown.y = iPointInTexture.y;
 
     switch( PrimitiveType )
     {
@@ -95,38 +99,39 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDragVector( FOdysseyVect
 
     if( primitive )
     {
+        BLPoint bldif = primitive->GetInverseWorldMatrix().mapVector( iPointInTexture.x - mMouseDown.x
+                                                                    , iPointInTexture.y - mMouseDown.y );
+        ::ULIS::FVec2D size = ::ULIS::FVec2D( bldif.x, bldif.y );
+
+        if( Uniform || FSlateApplication::Get().GetModifierKeys().IsControlDown() )
+        {
+            size.x = ::ULIS::FVec2D( bldif.x, bldif.y ).Distance() * 0.7071f;
+            size.y = size.x;
+        }
+
         switch( PrimitiveType )
         {
             case EOdysseyVectorPrimitiveType::Ellipse:
             {
                 FOdysseyVectorEllipse* ellipse = static_cast<FOdysseyVectorEllipse*>(primitive);
-                BLPoint bldif = ellipse->GetInverseWorldMatrix().mapVector( iPointInTexture.deltaPosition.X
-                                                                          , iPointInTexture.deltaPosition.Y );
-                ::ULIS::FVec2D dif = ::ULIS::FVec2D( bldif.x, bldif.y );
 
-                ellipse->SetRadius( ellipse->GetRadiusX() + dif.x, ellipse->GetRadiusY() + dif.y /*difPosition.Distance()*/ );
+                ellipse->SetRadius( size.x, size.y );
             }
             break;
 
             case EOdysseyVectorPrimitiveType::Rectangle:
             {
                 FOdysseyVectorRectangle* rectangle = static_cast<FOdysseyVectorRectangle*>(primitive);
-                BLPoint bldif = rectangle->GetInverseWorldMatrix().mapVector( iPointInTexture.deltaPosition.X
-                                                                            , iPointInTexture.deltaPosition.Y );
-                ::ULIS::FVec2D dif = ::ULIS::FVec2D( bldif.x, bldif.y );
 
-                rectangle->SetSize( rectangle->GetWidth() + dif.x, rectangle->GetHeight() + dif.y /*difPosition.Distance()*/ );
+                rectangle->SetSize( size.x, size.y );
             }
             break;
 
             case EOdysseyVectorPrimitiveType::Line:
             {
                 FOdysseyVectorLine* line = static_cast<FOdysseyVectorLine*>(primitive);
-                BLPoint bldif = line->GetInverseWorldMatrix().mapVector( iPointInTexture.deltaPosition.X
-                                                                       , iPointInTexture.deltaPosition.Y );
-                ::ULIS::FVec2D dif = ::ULIS::FVec2D( bldif.x, bldif.y );
 
-                line->SetSize( line->GetWidth() + dif.x, line->GetHeight() + dif.y /*difPosition.Distance()*/ );
+                line->SetSize( size.x, size.y );
             }
             break;
 

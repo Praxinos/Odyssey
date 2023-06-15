@@ -752,6 +752,29 @@ FOdysseyVectorPathCubic::SwitchSpace( FOdysseyVectorObject& iNewSpace )
 
 // static
 void
+FOdysseyVectorPathCubic::SharpSegments( FOdysseyVectorVertex* iVertex, bool iBuildSegments, bool iPreserveHandleLength )
+{
+    std::list<FOdysseyVectorSegment*>& segmentList = iVertex->GetSegmentList();
+
+    for( std::list<FOdysseyVectorSegment*>::iterator it = segmentList.begin(); it != segmentList.end(); ++it )
+    {
+        FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
+
+        cubicSegment->GetHandle( iVertex )->Set( iVertex->GetX(), iVertex->GetY() );
+
+        if ( iBuildSegments == true )
+        {
+            cubicSegment->Update();
+        }
+        else
+        {
+            cubicSegment->Invalidate();
+        }
+    }
+}
+
+// static
+void
 FOdysseyVectorPathCubic::SmoothSegments( FOdysseyVectorVertex* iVertex, bool iBuildSegments, bool iPreserveHandleLength )
 {
     ::ULIS::FVec2D perpendicularVector = iVertex->GetAverageStraightVectorOnSegment( true );

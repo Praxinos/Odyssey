@@ -58,4 +58,9 @@ public:
 
         UPROPERTY(EditAnywhere, Category="Primitive Drawing Tool", meta = (ClampMin = "0.0", UIMin = "0.0"))
         double StrokeWidth;
+
+        UPROPERTY(EditAnywhere, Category="Primitive Drawing Tool")
+        bool Uniform;
+
+       ::ULIS::FVec2D mMouseDown;
 };

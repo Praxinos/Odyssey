@@ -79,10 +79,6 @@ UOdysseyPainterEditorVectorPathKnotTool::OnMouseDownVector( FOdysseyVectorEngine
             if( vertexA->GetPath() != vertexB->GetPath() )
             {
                 std::vector<FOdysseyVectorVertex*> vertexLookup;
-/*
-                FOdysseyVectorPath* newPath = static_cast<FOdysseyVectorPath*>( vertexB->GetPath()->Copy() );
-*/
-
                 // TODO: remove vertexB->GetPath() from selected objects.
                 mergedPath = vertexB->GetPath();
 
@@ -102,6 +98,7 @@ UOdysseyPainterEditorVectorPathKnotTool::OnMouseDownVector( FOdysseyVectorEngine
             {
                 addedVertexArray.push_back( knotVertex );
                 removedVertexArray.push_back( vertexA );
+                removedVertexArray.push_back( vertexB );
 
                 // needed for valid GUndo pointer
                 GEditor->BeginTransaction(LOCTEXT("VectorPathKnotTool","Vector Path Knot Tool"));

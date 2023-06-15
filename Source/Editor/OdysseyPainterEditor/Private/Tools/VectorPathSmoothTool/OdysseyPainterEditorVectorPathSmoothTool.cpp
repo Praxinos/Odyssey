@@ -111,7 +111,14 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseUpVector( FOdysseyVectorEngine
 
         if( cubicVertex->GetSegmentCount() == 2 )
         {
-            FOdysseyVectorPathCubic::SmoothSegments( cubicVertex, true, true );
+            if( FSlateApplication::Get().GetModifierKeys().IsShiftDown() )
+            {
+                FOdysseyVectorPathCubic::SharpSegments( cubicVertex, true, false );
+            }
+            else
+            {
+                FOdysseyVectorPathCubic::SmoothSegments( cubicVertex, true, false );
+            }
         }
     }
 

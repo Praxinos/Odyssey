@@ -630,7 +630,7 @@ FOdysseyVectorObject::AddChild( FOdysseyVectorObject* iChild, bool iPrepend )
         mChildrenList.push_back( iChild );
     }
 
-    Invalidate();
+    iChild->Invalidate();
 }
 
 void

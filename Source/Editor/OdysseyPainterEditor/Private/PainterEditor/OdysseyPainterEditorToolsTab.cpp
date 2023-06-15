@@ -34,10 +34,10 @@ FOdysseyPainterEditorToolsTab::CreateWidget()
 {
     TArray<UOdysseyPainterEditorTool*> tools = {
         mEditor->GetRasterDrawingTool(),
-        mEditor->GetVectorPrimitiveDrawingTool(),
         mEditor->GetVectorPathDrawingTool(),
         mEditor->GetVectorPathEditTool(),
         mEditor->GetVectorPathCutTool(),
+        mEditor->GetVectorPrimitiveDrawingTool(),
         mEditor->GetVectorObjectPickTool(),
         mEditor->GetVectorObjectMoveTool(),
         mEditor->GetVectorObjectRotateTool(),

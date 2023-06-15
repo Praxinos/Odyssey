@@ -31,6 +31,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathCubic: public FOdysseyVectorPath
         bool PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags );
 
     public:
+        static void SharpSegments( FOdysseyVectorVertex* iVertex, bool iBuildSegments, bool iPreserveHandleLength );
         static void SmoothSegments( FOdysseyVectorVertex* iVertex, bool iBuildSegments, bool iPreserveHandleLength );
         static void SmoothSegments( FOdysseyVectorVertex* iVertex
                                   , ::ULIS::FVec2D iPerpendicularVector

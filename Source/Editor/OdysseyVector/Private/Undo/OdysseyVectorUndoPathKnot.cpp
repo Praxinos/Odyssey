@@ -2,14 +2,22 @@
 
 FOdysseyVectorUndoPathKnot::~FOdysseyVectorUndoPathKnot()
 {
-    for( int i = 0; i < mMergedSegmentArray.size(); i++ )
+    if( mApplied )
     {
-        delete mMergedSegmentArray[i];
+        // nothing to do
     }
-
-    for( int i = 0; i < mMergedVertexArray.size(); i++ )
+    else
     {
-        delete mMergedVertexArray[i];
+        for( int i = 0; i < mMergedSegmentArray.size(); i++ )
+        {
+            //if( 
+            delete mMergedSegmentArray[i];
+        }
+
+        for( int i = 0; i < mMergedVertexArray.size(); i++ )
+        {
+            delete mMergedVertexArray[i];
+        }
     }
 
     mMergedVertexArray.clear();

@@ -49,6 +49,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorPoint
 
         ::ULIS::FVec2D& GetCoords();
 
+        //virtual ::ULIS::FVec2D GetWorldCoords() = 0;
+
         /**
          * @brief Get the point's radius
          * @return the point's radius
