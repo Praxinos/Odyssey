@@ -182,6 +182,7 @@ PathDeletePoint( FOdysseyVectorPath* iPath
             {
                 if( stitchingVertex[0] )
                 {
+                    // for vertices that were not picked but that cannot be stitched, delete them as well.
                     extendedPointArray.push_back( stitchingVertex[0] );
                 }
             }
@@ -263,11 +264,14 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownDeletePoint( FOdysseyVectorE
                                                                , const FKey& iKey )
 {
     std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
+    std::vector<FOdysseyVectorPath*> removedPathArray;
     std::vector<FOdysseyVectorVertex*> removedVertexArray;
     std::vector<FOdysseyVectorSegment*> removedSegmentArray;
+    std::vector<FOdysseyVectorPath*> addedPathArray;
     std::vector<FOdysseyVectorVertex*> addedVertexArray; // not filled, here just for the undo record
     std::vector<FOdysseyVectorSegment*> addedSegmentArray;
 
+    removedPathArray.reserve( 10 );
     removedVertexArray.reserve( 10 );
     removedSegmentArray.reserve( 10 );
     addedSegmentArray.reserve( 10 );
@@ -286,6 +290,14 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownDeletePoint( FOdysseyVectorE
                            , addedSegmentArray
                            , Radius
                            , iPointInTexture );
+
+            // remove path if empty
+            if( path->GetSegmentList().size() == 0 )
+            {
+                path->GetParent()->RemoveChild( path );
+                // for undoing
+                removedPathArray.push_back( path );
+            }
         }
     }
 
@@ -294,8 +306,10 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownDeletePoint( FOdysseyVectorE
     if( GUndo )
     {
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoPathAlter( iScene
+                                                                  , removedPathArray
                                                                   , removedVertexArray
                                                                   , removedSegmentArray
+                                                                  , addedPathArray
                                                                   , addedVertexArray
                                                                   , addedSegmentArray );
 

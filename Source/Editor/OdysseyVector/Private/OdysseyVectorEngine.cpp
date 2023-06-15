@@ -460,7 +460,7 @@ FOdysseyVectorEngine::Knot( FOdysseyVectorVertex* iVertexA
 
             path->InvalidateAllSegments();
 
-            path->Update( 0 );
+            //mScene->Update( 0 );
 
             return knotVertex;
         }

@@ -342,7 +342,9 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorEngin
             GEditor->BeginTransaction(LOCTEXT("VectorPathDrawingTool","Vector Path Drawing Tool"));
             if( GUndo )
             {
+                std::vector<FOdysseyVectorPath*> addedPathArray; // empty on purpose.
                 FOdysseyVectorUndo* undo = static_cast<FOdysseyVectorUndo*>( new FOdysseyVectorUndoPathAlter( iScene
+                                                                                                            , addedPathArray
                                                                                                             , mVertexArray
                                                                                                             , mSegmentArray ) );
 

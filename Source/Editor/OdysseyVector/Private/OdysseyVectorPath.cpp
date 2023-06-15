@@ -2,6 +2,7 @@
 
 FOdysseyVectorPath::~FOdysseyVectorPath()
 {
+   // TODO: free vertices and segments.
 }
 
 FOdysseyVectorPath::FOdysseyVectorPath( const FString& iName )

@@ -120,11 +120,15 @@ UOdysseyPainterEditorVectorPathCutTool::OnMouseUpVector( FOdysseyVectorEngine* i
     GEditor->BeginTransaction(LOCTEXT("VectorPathCutTool","Vector Path Cut Tool"));
     if( GUndo )
     {
+        std::vector<FOdysseyVectorPath*> removedPathArray; // empty on purpose.
         std::vector<FOdysseyVectorVertex*> removedVertexArray; // empty on purpose.
+        std::vector<FOdysseyVectorPath*> addedPathArray; // empty on purpose.
 
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoPathAlter( iScene
+                                                                  , removedPathArray
                                                                   , removedVertexArray
                                                                   , removedSegmentArray
+                                                                  , addedPathArray
                                                                   , addedVertexArray
                                                                   , addedSegmentArray );
 

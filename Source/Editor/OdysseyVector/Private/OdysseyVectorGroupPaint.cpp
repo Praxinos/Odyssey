@@ -792,6 +792,10 @@ FOdysseyVectorGroupPaint::FindCycles()
         Explore( &explorationPairsBuffer[i] );
     }
 
+    OrderCycles();
+
+    MergeCycles();
+
     // section topology must be unlinked now or else if we transfer path to another group, it may not be cleaned
     for( int i = 0; i < mSectionBuffer.size(); i++ )
     {
@@ -802,10 +806,6 @@ FOdysseyVectorGroupPaint::FindCycles()
             section->Unlink();
         }
     }
-
-    OrderCycles();
-
-    MergeCycles();
 }
 
 static FOdysseyVectorVertex*

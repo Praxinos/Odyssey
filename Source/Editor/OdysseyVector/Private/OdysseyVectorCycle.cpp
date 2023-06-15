@@ -38,6 +38,8 @@ FOdysseyVectorCycle::Merge( FOdysseyVectorCycle* iMergeCycle )
     }
 
     mCombinedPath.addPath( iMergeCycle->mContourPath );
+
+    //for( int i = 0; i < iMergeCycle->mSectionArray.size(); i++ )
 }
 
 FOdysseyVectorCycle*
@@ -276,18 +278,48 @@ FOdysseyVectorCycle::StrokePath( bool iWorld )
 
     if( iWorld == true )
     {
-        BLPath worldPath = mCombinedPath;
-
-        worldPath.transform( mParent.GetWorldMatrix() );
+        BLMatrix2D worldMatrix = mParent.GetWorldMatrix();
 
         blctx->save();
-        blctx->resetMatrix();
-        blctx->strokePath( worldPath );
+
+        if( iWorld )
+        {
+            blctx->resetMatrix();
+        }
+
+        for( int i = 0; i < mSectionArray.size(); i++ )
+        {
+            ::ULIS::FVec2D* bezier = mSectionArray[i]->GetBezier();
+
+            // During the merge, we merged all sections belonging to children cycles. However, some sections  may not be
+            // boundary sections. For instance, the below section noted as ====== is not a boundary section. so we have
+            // to filter to get sure we draw only boundary sections for a better visual result. Only sections linked to
+            // the cycles are drawn. See FOdysseyVectorCycle::Merge() and FOdysseyVectorSection::AddCycle() for details.
+            //   ___________________
+            //  |    ___________    |
+            //  |   |           |   |
+            //  |   |===========|   |
+            //  |   |___________|   |
+            //  |___________________|
+            //
+            // note: we use mCombinedPath only for the filling part.
+            //
+            if( mSectionArray[i]->HasCycle( this ) )
+            {
+                BLPoint pt[4] = { iWorld ? worldMatrix.mapPoint( bezier[0].x, bezier[0].y ) : BLPoint( bezier[0].x, bezier[0].y )
+                                , iWorld ? worldMatrix.mapPoint( bezier[1].x, bezier[1].y ) : BLPoint( bezier[1].x, bezier[1].y )
+                                , iWorld ? worldMatrix.mapPoint( bezier[2].x, bezier[2].y ) : BLPoint( bezier[2].x, bezier[2].y )
+                                , iWorld ? worldMatrix.mapPoint( bezier[3].x, bezier[3].y ) : BLPoint( bezier[3].x, bezier[3].y ) };
+                BLPath sectionPath;
+
+                sectionPath.moveTo ( pt[0] );
+                sectionPath.cubicTo( pt[1], pt[2], pt[3] );
+
+                blctx->strokePath( sectionPath );
+            }
+        }
+
         blctx->restore();
-    }
-    else
-    {
-        blctx->strokePath( mCombinedPath );
     }
 
     blctx->flush( BL_CONTEXT_FLUSH_SYNC );
