@@ -28,9 +28,9 @@ public:
                                   , FOdysseyVectorScene* iScene
                                   , const FOdysseyPoint& iPointInTexture
                                   , const FKey& iKey ) override;
-    virtual void OnMouseDragVector( FOdysseyVectorEngine* iEngine
-                                  , FOdysseyVectorScene* iScene
-                                  , const FOdysseyPoint& iPointInTexture ) override;
+    virtual ::ULIS::FRectI OnMouseDragVector( FOdysseyVectorEngine* iEngine
+                                            , FOdysseyVectorScene* iScene
+                                            , const FOdysseyPoint& iPointInTexture ) override;
     virtual bool OnMouseUpVector( FOdysseyVectorEngine* iEngine
                                 , FOdysseyVectorScene* iScene
                                 , const FOdysseyPoint& iPointInTexture

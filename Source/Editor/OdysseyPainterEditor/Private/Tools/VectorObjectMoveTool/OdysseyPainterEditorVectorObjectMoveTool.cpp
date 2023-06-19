@@ -2,6 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Tools/VectorObjectMoveTool/OdysseyPainterEditorVectorObjectMoveTool.h"
+#include "Tools/VectorObjectMoveTool/OdysseyPainterEditorVectorObjectMoveToolHUD.h"
 
 #define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorObjectMoveTool"
 
@@ -9,11 +10,15 @@
 //----------------------------------------------------------- Construction / Destruction
 UOdysseyPainterEditorVectorObjectMoveTool::~UOdysseyPainterEditorVectorObjectMoveTool()
 {
+    delete mObjectMoveHUD;
 }
 
 UOdysseyPainterEditorVectorObjectMoveTool::UOdysseyPainterEditorVectorObjectMoveTool()
+    : Radius(10.0f)
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.ObjectMoveTool64");
+
+    mObjectMoveHUD = new FOdysseyPainterEditorVectorObjectMoveToolHUD( this );
 }
 
 //--------------------------------------------------------------------------------------
@@ -22,7 +27,7 @@ UOdysseyPainterEditorVectorObjectMoveTool::UOdysseyPainterEditorVectorObjectMove
 void
 UOdysseyPainterEditorVectorObjectMoveTool::UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
-    //iEngine->RemoveHUD( &mDummyHUD );
+    iEngine->RemoveHUD( mObjectMoveHUD );
 
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
@@ -30,8 +35,10 @@ UOdysseyPainterEditorVectorObjectMoveTool::UnloadVector( FOdysseyVectorEngine* i
 void
 UOdysseyPainterEditorVectorObjectMoveTool::LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
-    // iEngine->ClearHUD();
-    //iEngine->AddHUD( &mDummyHUD );
+    iEngine->ClearHUD();
+    iEngine->AddHUD( mObjectMoveHUD );
+
+    mObjectMoveHUD->Reset( iScene ); // update selection box
 
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
@@ -66,13 +73,33 @@ UOdysseyPainterEditorVectorObjectMoveTool::OnMouseDownVector( FOdysseyVectorEngi
     return true;
 }
 
-void
+::ULIS::FRectI
+UOdysseyPainterEditorVectorObjectMoveTool::OnMouseHoverVector( FOdysseyVectorEngine* iEngine
+                                                             , FOdysseyVectorScene* iScene
+                                                             , const FOdysseyPoint& iPointInTexture )
+{
+    ::ULIS::FRectI redrawRegion = { 0, 0, 0, 0 };
+    ::ULIS::FRectI imageRegion;
+
+    iEngine->GetColorImageSize( imageRegion );
+
+    if( mObjectMoveHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y ) )
+    {
+        redrawRegion = imageRegion;
+    }
+
+    return redrawRegion;
+}
+
+::ULIS::FRectI
 UOdysseyPainterEditorVectorObjectMoveTool::OnMouseDragVector( FOdysseyVectorEngine* iEngine
                                                             , FOdysseyVectorScene* iScene
                                                             , const FOdysseyPoint& iPointInTexture )
 {
     std::list<FOdysseyVectorObject*>& selectObjectList = iScene->GetSelectedObjectList();
     ::ULIS::FRectD beforeBBox = FOdysseyVectorObject::GetBoundingBoxFromList( selectObjectList );
+    ::ULIS::FRectI redrawRegion = { 0, 0, 0, 0 };
+    uint32 gizmoFlags = mObjectMoveHUD->GetGizmoFlags();
 
     mDragging = true;
 
@@ -86,6 +113,19 @@ UOdysseyPainterEditorVectorObjectMoveTool::OnMouseDragVector( FOdysseyVectorEngi
             BLPoint localDif = parentObject->GetInverseWorldMatrix().mapVector( iPointInTexture.deltaPosition.X
                                                                               , iPointInTexture.deltaPosition.Y );
 
+            if( gizmoFlags )
+            {
+                if( ( gizmoFlags & FOdysseyPainterEditorVectorObjectMoveToolHUD::PICK_XAXIS ) == 0 )
+                {
+                    localDif.x = 0;
+                }
+
+                if( ( gizmoFlags & FOdysseyPainterEditorVectorObjectMoveToolHUD::PICK_YAXIS ) == 0 )
+                {
+                    localDif.y = 0;
+                }
+            }
+
             selectedObject->Translate( selectedObject->GetTranslationX() + localDif.x
                                      , selectedObject->GetTranslationY() + localDif.y );
 
@@ -93,9 +133,13 @@ UOdysseyPainterEditorVectorObjectMoveTool::OnMouseDragVector( FOdysseyVectorEngi
         }
     }
 
+    mObjectMoveHUD->Reset( iScene ); // Updates selection box and gizmo position
+
     // update invalidated objects
     iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES | FOdysseyVectorObject::KEEPINVALIDATED );
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW | FOdysseyVectorScene::SIGNAL_OBJECT_TRANSFORMED );
+
+    return redrawRegion; // unused
 } 
 
 bool

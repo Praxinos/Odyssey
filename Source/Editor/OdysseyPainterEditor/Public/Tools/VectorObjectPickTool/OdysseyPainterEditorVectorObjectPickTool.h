@@ -30,7 +30,7 @@ public:
                                   , FOdysseyVectorScene* iScene
                                   , const FOdysseyPoint& iPointInTexture
                                   , const FKey& iKey );
-    virtual void OnMouseDragVector( FOdysseyVectorEngine* iEngine
+    virtual ::ULIS::FRectI OnMouseDragVector( FOdysseyVectorEngine* iEngine
                                   , FOdysseyVectorScene* iScene
                                   , const FOdysseyPoint& iPointInTexture );
     virtual bool OnMouseUpVector( FOdysseyVectorEngine* iEngine

@@ -321,7 +321,7 @@ FOdysseyVectorPathCubic::PickPoint( double iWorldX
         FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>(*it);
         ::ULIS::FVec2D perpendicularVector = FOdysseyVectorPathCubic::GetPerpendicularVector( vertex, true );
         BLPoint worldPerpendicularVector = mWorldMatrix.mapVector( perpendicularVector.x * vertex->GetRadius()
-                                                                 , perpendicularVector.y * vertex->GetRadius() );
+                                                                    , perpendicularVector.y * vertex->GetRadius() );
 
         // Pick vertex
         if ( iSelectionFlags & PICK_POINT )

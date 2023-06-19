@@ -239,13 +239,19 @@ UOdysseyTextureEditorVectorPathDrawingTool::PostEditChangeProperty( FPropertyCha
     if (PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive)
         return;
 
-    PropertyChanged(PropertyChangedEvent.GetPropertyName());
-
-    // redraw
     if( currentVectorLayer )
     {
-        currentVectorLayer->RenderImageChanged(false);
+        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+
+        PropertyChangedVector( vectorEngine, vectorScene, PropertyChangedEvent.GetPropertyName() );
     }
+
+    // redraw
+    /*if( currentVectorLayer )
+    {
+        currentVectorLayer->RenderImageChanged(false);
+    }*/
 }
 
 #undef LOCTEXT_NAMESPACE

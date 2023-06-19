@@ -88,12 +88,13 @@ UOdysseyPainterEditorVectorObjectRotateTool::OnMouseDownVector( FOdysseyVectorEn
     return true;
 }
 
-void
+::ULIS::FRectI
 UOdysseyPainterEditorVectorObjectRotateTool::OnMouseDragVector( FOdysseyVectorEngine* iEngine
                                                               , FOdysseyVectorScene* iScene
                                                               , const FOdysseyPoint& iPointInTexture )
 {
     FSelectionBox& selectionBox = mTransformHUD.GetSelectionBox();
+    ::ULIS::FRectI redrawRegion = { 0, 0, 0, 0 };
 
     mDragging = true;
 
@@ -172,6 +173,8 @@ UOdysseyPainterEditorVectorObjectRotateTool::OnMouseDragVector( FOdysseyVectorEn
 
     iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES | FOdysseyVectorObject::KEEPINVALIDATED );
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW | FOdysseyVectorScene::SIGNAL_OBJECT_TRANSFORMED );
+
+    return redrawRegion; // unused for now
 }
 
 bool

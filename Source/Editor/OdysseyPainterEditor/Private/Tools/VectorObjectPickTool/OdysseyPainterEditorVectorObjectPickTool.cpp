@@ -100,16 +100,20 @@ UOdysseyPainterEditorVectorObjectPickTool::OnMouseDownVector( FOdysseyVectorEngi
     return true;
 }
 
-void
+::ULIS::FRectI
 UOdysseyPainterEditorVectorObjectPickTool::OnMouseDragVector( FOdysseyVectorEngine* iEngine
                                                             , FOdysseyVectorScene* iScene
                                                             , const FOdysseyPoint& iPointInTexture )
 {
+    ::ULIS::FRectI redrawRegion = { 0, 0, 0, 0 };
+
     ::ULIS::FVec2D point = { iPointInTexture.x, iPointInTexture.y };
 
     mPointArray.push_back( point );
 
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+
+    return redrawRegion; // unused;
 }
 
 static void

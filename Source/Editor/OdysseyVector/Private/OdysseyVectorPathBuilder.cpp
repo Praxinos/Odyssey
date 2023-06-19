@@ -93,7 +93,7 @@ FOdysseyVectorPathBuilder::HasBaseClass( uint32 iBaseClassID )
         return true;
     }
 
-    return HasBaseClass( iBaseClassID );
+    return FOdysseyVectorObject::HasBaseClass( iBaseClassID );
 }
 
 void 

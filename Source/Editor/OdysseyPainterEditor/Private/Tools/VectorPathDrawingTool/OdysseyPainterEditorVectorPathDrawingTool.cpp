@@ -2,6 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Tools/VectorPathDrawingTool/OdysseyPainterEditorVectorPathDrawingTool.h"
+#include "Tools/VectorPathDrawingTool/OdysseyPainterEditorVectorPathDrawingToolHUD.h"
 #include "Undo/OdysseyVectorUndoObjectAdd.h"
 #include "Undo/OdysseyVectorUndoPathAlter.h"
 
@@ -11,6 +12,7 @@
 //----------------------------------------------------------- Construction / Destruction
 UOdysseyPainterEditorVectorPathDrawingTool::~UOdysseyPainterEditorVectorPathDrawingTool()
 {
+    delete mPathDrawingHUD;
 }
 
 UOdysseyPainterEditorVectorPathDrawingTool::UOdysseyPainterEditorVectorPathDrawingTool()
@@ -22,9 +24,10 @@ UOdysseyPainterEditorVectorPathDrawingTool::UOdysseyPainterEditorVectorPathDrawi
     , mPathBuilder( nullptr )
     , mPreviousVertex( nullptr )
     , mOldPointInTexture( 0, 0 )
-    , mPathDrawingHUD( Radius, Stitch, StitchingRadius )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.VectoPen64");
+
+    mPathDrawingHUD = new FOdysseyPainterEditorVectorPathDrawingToolHUD( this );
 }
 
 //--------------------------------------------------------------------------------------
@@ -33,7 +36,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::UOdysseyPainterEditorVectorPathDrawi
 void
 UOdysseyPainterEditorVectorPathDrawingTool::UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
-    iEngine->RemoveHUD( &mPathDrawingHUD );
+    iEngine->RemoveHUD( mPathDrawingHUD );
 
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
@@ -42,7 +45,9 @@ void
 UOdysseyPainterEditorVectorPathDrawingTool::LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
     iEngine->ClearHUD();
-    iEngine->AddHUD( &mPathDrawingHUD );
+    iEngine->AddHUD( mPathDrawingHUD );
+
+    mPathDrawingHUD->Reset( iScene ); // creates the quadtree;
 
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
@@ -182,6 +187,8 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorEng
                   | FOdysseyVectorScene::SIGNAL_OBJECT_MODIFIED
                   | FOdysseyVectorScene::SIGNAL_OBJECT_TRANSFORMED );
 
+    mPathDrawingHUD->Reset( iScene ); // re-creates the quadtree;
+
     return true;
 }
 
@@ -202,17 +209,21 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseHoverVector( FOdysseyVectorEn
 //UE_LOG(LogTemp, Warning, TEXT("Some warning message %f %f"), mOldPointInTexture.x, mOldPointInTexture.y );
     iEngine->GetColorImageSize( imageRegion );
 
-    mPathDrawingHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
-
     // commented out: redrawing will be performed by the caller function
     //iScene->Signal( FOdysseyVectorScene::SCENE_REDRAW );
 
+    // crop toolRegion in case it leaves the screen
     FOdysseyVector::IntersectRegions( toolRegion, imageRegion, redrawRegion );
 
     mOldPointInTexture.x = iPointInTexture.x;
     mOldPointInTexture.y = iPointInTexture.y;
 
-    return /*redrawRegion*/imageRegion;
+    if( mPathDrawingHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y ) == true )
+    {
+        redrawRegion = imageRegion;
+    }
+
+    return redrawRegion;
 }
 
 ::ULIS::FRectI
@@ -241,9 +252,18 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( FOdysseyVectorEng
         ::ULIS::FRectI toolRegion = GetInvalidationAreaFromPointer( iPointInTexture.x
                                                                   , iPointInTexture.y
                                                                   , ::ULIS::FMath::Max( Radius, StitchingRadius ) )
-                                  | RectangleDtoI( mPreviousVertex->GetBoundingBox( true ) );
+                                  // we use mOldPointInTexture instead of iPointInTexture.deltaPosition because the latter is not reliable
+                                  | GetInvalidationAreaFromPointer( mOldPointInTexture.x
+                                                                  , mOldPointInTexture.y
+                                                                  , ::ULIS::FMath::Max( Radius, StitchingRadius ) );
 
-        mPathDrawingHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
+        // crop toolRegion in case it leaves the screen, store to redrawRegion
+        FOdysseyVector::IntersectRegions( toolRegion, imageRegion, redrawRegion );
+
+        if( mPathDrawingHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y ) == true )
+        {
+            redrawRegion = imageRegion; // needs full redraw
+        }
 
         localCoords = cubicPath->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
         localRadiusVec = cubicPath->GetInverseWorldMatrix().mapVector( 0.7071f * mPointRadius, 0.7071f * mPointRadius );
@@ -268,18 +288,24 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( FOdysseyVectorEng
                                                      , mVertexArray
                                                      , mSegmentArray );
 
+        if( nextVertex != mPreviousVertex )
+        {
+            redrawRegion = imageRegion; // needs full redraw
+        }
+
         mPreviousVertex = nextVertex;
 
         iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES | FOdysseyVectorObject::KEEPINVALIDATED );
-
-        FOdysseyVector::IntersectRegions( toolRegion, imageRegion, redrawRegion );
     }
+
+    mOldPointInTexture.x = iPointInTexture.x;
+    mOldPointInTexture.y = iPointInTexture.y;
 
     //iEngine->InvalidateRegion( redrawRegion );
     // commented out: redrawing will be performed by the caller function
     //iScene->Signal( FOdysseyVectorScene::SCENE_REDRAW );
 
-    return /*redrawRegion*/imageRegion;
+    return redrawRegion;
 }
 
 bool
@@ -354,6 +380,8 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorEngin
         }
     }
 
+    mPathDrawingHUD->Reset( iScene ); // refreshes the quadtree;
+
     iScene->Update( 0 ); // update invalidated objects
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW | FOdysseyVectorScene::SIGNAL_OBJECT_MODIFIED );
 
@@ -366,21 +394,33 @@ UOdysseyPainterEditorVectorPathDrawingTool::Commit()
 
 }
 
-void
-UOdysseyPainterEditorVectorPathDrawingTool::PropertyChanged( const FName& iPropertyName )
+FOdysseyVectorPathBuilder*
+UOdysseyPainterEditorVectorPathDrawingTool::GetPathBuilder()
 {
+    return mPathBuilder;
+}
+
+void
+UOdysseyPainterEditorVectorPathDrawingTool::PropertyChangedVector( FOdysseyVectorEngine* iEngine
+                                                                 , FOdysseyVectorScene* iScene
+                                                                 , const FName& iPropertyName )
+{
+/*
     if ( iPropertyName == "Radius" )
-        mPathDrawingHUD.SetRadius( Radius );
+    {
+    }
 
     if ( iPropertyName == "StitchingRadius" )
     {
-        mPathDrawingHUD.SetStitchingRadius( StitchingRadius );
     }
 
     if ( iPropertyName == "Stitch" )
     {
-        mPathDrawingHUD.SetStitching( Stitch );
     }
+*/
+    mPathDrawingHUD->Reset( iScene ); // rebuilds quadtree if stitch mode changes
+
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
 
 #undef LOCTEXT_NAMESPACE

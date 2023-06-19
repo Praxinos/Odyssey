@@ -10,6 +10,8 @@
 
 #include "OdysseyPainterEditorVectorObjectMoveTool.generated.h"
 
+class FOdysseyPainterEditorVectorObjectMoveToolHUD;
+
 UCLASS()
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectMoveTool : public UOdysseyPainterEditorVectorObjectPickTool
 {
@@ -29,9 +31,12 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectMoveTool : publi
                                       , FOdysseyVectorScene* iScene
                                       , const FOdysseyPoint& iPointInTexture
                                       , const FKey& iKey ) override;
-        virtual void OnMouseDragVector( FOdysseyVectorEngine* iEngine
-                                      , FOdysseyVectorScene* iScene
-                                      , const FOdysseyPoint& iPointInTexture ) override;
+        ::ULIS::FRectI OnMouseHoverVector( FOdysseyVectorEngine* iEngine
+                                         , FOdysseyVectorScene* iScene
+                                         , const FOdysseyPoint& iPointInTexture );
+        ::ULIS::FRectI OnMouseDragVector( FOdysseyVectorEngine* iEngine
+                                        , FOdysseyVectorScene* iScene
+                                        , const FOdysseyPoint& iPointInTexture );
         virtual bool OnMouseUpVector( FOdysseyVectorEngine* iEngine
                                     , FOdysseyVectorScene* iScene
                                     , const FOdysseyPoint& iPointInTexture
@@ -40,7 +45,12 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectMoveTool : publi
         //OdysseyPainterEditorTool overrides
         virtual void Commit() override;
 
+    public:
+        UPROPERTY( EditAnywhere, Category="Odyssey ObjectMove Tool", meta = (ClampMin = "0.0", UIMin = "0.0") )
+        double Radius;
+
     private:
+        FOdysseyPainterEditorVectorObjectMoveToolHUD* mObjectMoveHUD;
         std::vector<FObjectTransform> mObjectTransformArray;
         bool mDragging;
 };

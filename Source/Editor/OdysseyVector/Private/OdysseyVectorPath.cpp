@@ -261,9 +261,17 @@ FOdysseyVectorPath::UpdateBBox()
     mBBox = ( hasBBox ) ? ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax ) : ::ULIS::FRectD( 0.0f, 0.0f, 0.0f, 0.0f );
 }
 
+BLPath&
+FOdysseyVectorPath::GetBLPath()
+{
+    return mBLPath;
+}
+
 void
 FOdysseyVectorPath::UpdateShape( uint32 iUpdateFlags )
 {
+    mBLPath.clear();
+
     // update segments
     for ( std::list<FOdysseyVectorSegment*>::iterator it = mInvalidatedSegmentList.begin(); it != mInvalidatedSegmentList.end(); ++it )
     {
@@ -274,18 +282,27 @@ FOdysseyVectorPath::UpdateShape( uint32 iUpdateFlags )
 
     mInvalidatedSegmentList.clear();
 
-    // then update Loops
-/*
-    for ( std::list<FOdysseyVectorCycle*>::iterator it = mInvalidatedLoopList.begin(); it != mInvalidatedLoopList.end(); ++it )
-    {
-        FOdysseyVectorCycle* loop = static_cast<FOdysseyVectorCycle*>(*it);
-
-        loop->Update();
-    }
-
-    mInvalidatedLoopList.clear();
-*/
     UpdateBBox();
+
+    // cache BL Path (for drawing structure for example)
+    for ( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
+    {
+        FOdysseyVectorSegment* segment = static_cast<FOdysseyVectorSegment*>(*it);
+        ::ULIS::FVec2D& point0 = segment->GetVertex(0)->GetCoords();
+        ::ULIS::FVec2D& point1 = segment->GetVertex(1)->GetCoords();
+
+        if( segment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
+        {
+            FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(segment);
+            ::ULIS::FVec2D& ctrlPoint0 = cubicSegment->GetHandle(0)->GetCoords();
+            ::ULIS::FVec2D& ctrlPoint1 = cubicSegment->GetHandle(1)->GetCoords();
+
+            mBLPath.moveTo( point0.x, point0.y );
+            mBLPath.cubicTo( ctrlPoint0.x, ctrlPoint0.y
+                           , ctrlPoint1.x, ctrlPoint1.y
+                           , point1.x, point1.y );
+        }
+    }
 }
 
 void
