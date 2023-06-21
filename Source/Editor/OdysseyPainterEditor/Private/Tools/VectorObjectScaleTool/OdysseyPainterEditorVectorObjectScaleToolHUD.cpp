@@ -74,30 +74,30 @@ FOdysseyPainterEditorVectorObjectScaleToolHUD::Draw( FOdysseyVectorScene* iScene
         // Top-left handle
         blctx->setFillStyle( ( mHandleFlags & PICK_TOPLEFT     ) ? BLRgba32( 0xFF0000FF )
                                                                  : BLRgba32( 0xFFD0E040 ) );
-        blctx->fillCircle( point[0].x, point[0].y, FOdysseyVectorHUDScale::HANDLE_RADIUS );
+        blctx->fillCircle( point[0].x, point[0].y, HANDLE_RADIUS );
 
         // Top-right handle
         blctx->setFillStyle( ( mHandleFlags & PICK_TOPRIGHT    ) ? BLRgba32( 0xFF0000FF )
                                                                  : BLRgba32( 0xFFD0E040 ) );
-        blctx->fillCircle( point[1].x, point[1].y, FOdysseyVectorHUDScale::HANDLE_RADIUS );
+        blctx->fillCircle( point[1].x, point[1].y, HANDLE_RADIUS );
 
         // Bottom-right handle
         blctx->setFillStyle( ( mHandleFlags & PICK_BOTTOMRIGHT ) ? BLRgba32( 0xFF0000FF )
                                                                  : BLRgba32( 0xFFD0E040 ) );
-        blctx->fillCircle( point[2].x, point[2].y, FOdysseyVectorHUDScale::HANDLE_RADIUS );
+        blctx->fillCircle( point[2].x, point[2].y, HANDLE_RADIUS );
 
         // Bottom-left handle
         blctx->setFillStyle( ( mHandleFlags & PICK_BOTTOMLEFT  ) ? BLRgba32( 0xFF0000FF )
                                                                  : BLRgba32( 0xFFD0E040 ) );
-        blctx->fillCircle( point[3].x, point[3].y, FOdysseyVectorHUDScale::HANDLE_RADIUS );
+        blctx->fillCircle( point[3].x, point[3].y, HANDLE_RADIUS );
 
         // Draw a black circle all around the handles
         blctx->setStrokeStyle ( BLRgba32( 0xFF000000 ) );
         blctx->setStrokeWidth ( 1.0f );
-        blctx->strokeCircle( point[0].x, point[0].y, FOdysseyVectorHUDScale::HANDLE_RADIUS );
-        blctx->strokeCircle( point[1].x, point[1].y, FOdysseyVectorHUDScale::HANDLE_RADIUS );
-        blctx->strokeCircle( point[2].x, point[2].y, FOdysseyVectorHUDScale::HANDLE_RADIUS );
-        blctx->strokeCircle( point[3].x, point[3].y, FOdysseyVectorHUDScale::HANDLE_RADIUS );
+        blctx->strokeCircle( point[0].x, point[0].y, HANDLE_RADIUS );
+        blctx->strokeCircle( point[1].x, point[1].y, HANDLE_RADIUS );
+        blctx->strokeCircle( point[2].x, point[2].y, HANDLE_RADIUS );
+        blctx->strokeCircle( point[3].x, point[3].y, HANDLE_RADIUS );
 
         blctx->restore();
     }
