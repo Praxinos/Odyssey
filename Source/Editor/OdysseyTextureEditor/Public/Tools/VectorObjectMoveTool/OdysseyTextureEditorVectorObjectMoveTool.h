@@ -36,6 +36,7 @@ public:
 private:
     void Load();
     void Unload();
+    virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
 
 private:
     //Listeners

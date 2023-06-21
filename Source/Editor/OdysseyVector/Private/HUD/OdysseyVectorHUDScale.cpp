@@ -12,7 +12,7 @@ FOdysseyVectorHUDScale::FOdysseyVectorHUDScale()
 }
 
 int32
-FOdysseyVectorHUDScale::Pick( double iWorldX, double iWorldY )
+FOdysseyVectorHUDScale::Pick( double iWorldX, double iWorldY, double iPickingRadius )
 {
     if( mSelectionBox.space )
     {
@@ -27,7 +27,7 @@ FOdysseyVectorHUDScale::Pick( double iWorldX, double iWorldY )
         {
             ::ULIS::FVec2D vec = { iWorldX - point[i].x, iWorldY - point[i].y };
  
-            if ( vec.Distance() <= FOdysseyVectorHUDScale::HANDLE_RADIUS )
+            if ( vec.Distance() <= iPickingRadius )
             {
                 return i;
             }

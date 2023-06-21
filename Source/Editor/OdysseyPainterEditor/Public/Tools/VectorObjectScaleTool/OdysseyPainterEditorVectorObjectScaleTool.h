@@ -53,5 +53,6 @@ public:
     UPROPERTY(EditAnywhere, Category="Odyssey ObjectScale Tool")
     bool Uniform;
 
-
+    //UPROPERTY( EditAnywhere, Category="Odyssey ObjectMove Tool", meta = (ClampMin = "0.0", UIMin = "0.0") )
+    double PickingRadius;
 };

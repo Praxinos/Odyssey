@@ -15,6 +15,7 @@ UOdysseyPainterEditorVectorObjectMoveTool::~UOdysseyPainterEditorVectorObjectMov
 
 UOdysseyPainterEditorVectorObjectMoveTool::UOdysseyPainterEditorVectorObjectMoveTool()
     : Radius(10.0f)
+    , World( false )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.ObjectMoveTool64");
 
@@ -96,13 +97,96 @@ UOdysseyPainterEditorVectorObjectMoveTool::OnMouseDragVector( FOdysseyVectorEngi
                                                             , FOdysseyVectorScene* iScene
                                                             , const FOdysseyPoint& iPointInTexture )
 {
-    std::list<FOdysseyVectorObject*>& selectObjectList = iScene->GetSelectedObjectList();
-    ::ULIS::FRectD beforeBBox = FOdysseyVectorObject::GetBoundingBoxFromList( selectObjectList );
+    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
+    //::ULIS::FRectD beforeBBox = FOdysseyVectorObject::GetBoundingBoxFromList( selectedObjectList );
     ::ULIS::FRectI redrawRegion = { 0, 0, 0, 0 };
     uint32 gizmoFlags = mObjectMoveHUD->GetGizmoFlags();
+    FSelectionBox& selectionBox = mObjectMoveHUD->GetSelectionBox();
 
     mDragging = true;
 
+    if( selectionBox.space )
+    {
+        BLMatrix2D spaceMatrix = World ? iScene->GetWorldMatrix()
+                                       : selectionBox.space->GetWorldMatrix();
+        BLMatrix2D invertSpaceMatrix;
+        BLMatrix2D translateMatrix;
+        BLPoint translateBy;
+
+        BLMatrix2D::invert( invertSpaceMatrix, spaceMatrix );
+
+        translateBy = invertSpaceMatrix.mapVector( iPointInTexture.deltaPosition.X
+                                                 , iPointInTexture.deltaPosition.Y );
+
+        translateMatrix.reset();
+
+        if ( ( gizmoFlags & FOdysseyPainterEditorVectorObjectMoveToolHUD::PICK_XAXIS )
+          || ( gizmoFlags == 0 ) )
+        {
+            translateMatrix.translate( translateBy.x, 0 );
+        }
+
+        if ( ( gizmoFlags & FOdysseyPainterEditorVectorObjectMoveToolHUD::PICK_YAXIS )
+          || ( gizmoFlags == 0 ) )
+        {
+            translateMatrix.translate( 0, translateBy.y );
+        }
+
+        for( std::list<FOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
+        {
+            FOdysseyVectorObject* object = (*it);
+
+            if ( object->HasSelectedAncestor() == false )
+            {
+                double translationX;
+                double translationY;
+                double rotation;
+                double scalingX;
+                double scalingY;
+                BLMatrix2D objectSpaceMatrix;
+                BLMatrix2D objectTranslateMatrix;
+                BLMatrix2D objectLocalMatrix;
+                BLMatrix2D objectWorldMatrix = object->GetWorldMatrix();
+                BLMatrix2D parentInverseWorldMatrix = object->GetParent()->GetInverseWorldMatrix();
+
+                // transfer object in "Selection Space" coordinates system
+                FOdysseyVector::MatrixMultiply( invertSpaceMatrix, objectWorldMatrix, objectSpaceMatrix );
+
+                // translate the object (local to the "Selection Space" coordinates system)
+                FOdysseyVector::MatrixMultiply( translateMatrix, objectSpaceMatrix, objectTranslateMatrix );
+
+                // transfer the object back to world coordinates system
+                FOdysseyVector::MatrixMultiply( spaceMatrix, objectTranslateMatrix, objectWorldMatrix );
+
+                // Convert the object to its parent coordinate system, i.e its local coordinates system.
+                FOdysseyVector::MatrixMultiply( parentInverseWorldMatrix, objectWorldMatrix, objectLocalMatrix );
+
+                // Extract the local transformations
+                FOdysseyVector::ExtractTransformations( objectLocalMatrix
+                                                     , &translationX
+                                                     , &translationY
+                                                     , &rotation // in radians
+                                                     , &scalingX
+                                                     , &scalingY );
+
+                // Apply the local transformations
+                object->Translate( translationX, translationY );
+                object->Rotate( rotation / M_PI * 180 ); // in degrees
+                object->Scale( scalingX, scalingY );
+            }
+        }
+
+        // Update the matrix for all objects
+        iScene->UpdateMatrix();
+
+        // update the selection box with the newly modified matrices
+        mObjectMoveHUD->Reset( iScene ); // Updates selection box and gizmo position
+    }
+
+    //::ULIS::FRectD beforeBBox = selectedObject->GetBBox( true );
+    //::ULIS::FRectD localBBox = selectedObject->GetBBox( false );
+
+/*
     for( std::list<FOdysseyVectorObject*>::iterator it = selectObjectList.begin(); it != selectObjectList.end(); ++it )
     {
         FOdysseyVectorObject* selectedObject = (*it);
@@ -134,7 +218,7 @@ UOdysseyPainterEditorVectorObjectMoveTool::OnMouseDragVector( FOdysseyVectorEngi
     }
 
     mObjectMoveHUD->Reset( iScene ); // Updates selection box and gizmo position
-
+*/
     // update invalidated objects
     iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES | FOdysseyVectorObject::KEEPINVALIDATED );
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW | FOdysseyVectorScene::SIGNAL_OBJECT_TRANSFORMED );
@@ -170,6 +254,8 @@ UOdysseyPainterEditorVectorObjectMoveTool::OnMouseUpVector( FOdysseyVectorEngine
         UOdysseyPainterEditorVectorObjectPickTool::OnMouseUpVector( iEngine, iScene, iPointInTexture, iKey );
     }
 
+    mObjectMoveHUD->Reset( iScene ); // updates selection box and gizmo
+
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 
     return true;
@@ -179,6 +265,19 @@ void
 UOdysseyPainterEditorVectorObjectMoveTool::Commit()
 {
 
+}
+
+void
+UOdysseyPainterEditorVectorObjectMoveTool::PropertyChangedVector( FOdysseyVectorEngine* iEngine
+                                                                , FOdysseyVectorScene* iScene
+                                                                , const FName& iPropertyName )
+{
+    if( iPropertyName == "World" )
+    {
+        mObjectMoveHUD->Reset( iScene ); // updates selection box and gizmo
+    }
+
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
 
 #undef LOCTEXT_NAMESPACE

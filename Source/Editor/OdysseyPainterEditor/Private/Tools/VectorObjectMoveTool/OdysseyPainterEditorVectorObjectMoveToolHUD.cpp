@@ -14,7 +14,7 @@ FOdysseyPainterEditorVectorObjectMoveToolHUD::FOdysseyPainterEditorVectorObjectM
 void
 FOdysseyPainterEditorVectorObjectMoveToolHUD::Reset( FOdysseyVectorScene* iScene )
 {
-    UpdateSelectionBox( iScene );
+    UpdateSelectionBox( iScene, mObjectMoveTool->World );
 
     UpdateGizmo();
 }
@@ -31,6 +31,8 @@ FOdysseyPainterEditorVectorObjectMoveToolHUD::PickGizmo( double iWorldX
 {
     FSelectionBox& selectionBox = GetSelectionBox();
     uint32 newFlags = 0;
+
+    mGizmoFlags &= (~PICK_CHANGED);
 
     if( selectionBox.space )
     {
@@ -93,14 +95,14 @@ FOdysseyPainterEditorVectorObjectMoveToolHUD::UpdateGizmo()
         {
             mXAxis.Normalize();
 
-            mXAxis = mXAxis * 40.0f;
+            mXAxis = mXAxis * 80.0f;
         }
 
         if( mYAxis.DistanceSquared() )
         {
             mYAxis.Normalize();
 
-            mYAxis = mYAxis * 40.0f;
+            mYAxis = mYAxis * 80.0f;
         }
     }
 }

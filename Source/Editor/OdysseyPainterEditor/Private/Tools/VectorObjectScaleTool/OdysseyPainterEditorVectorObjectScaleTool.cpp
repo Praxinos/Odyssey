@@ -17,6 +17,7 @@ UOdysseyPainterEditorVectorObjectScaleTool::~UOdysseyPainterEditorVectorObjectSc
 
 UOdysseyPainterEditorVectorObjectScaleTool::UOdysseyPainterEditorVectorObjectScaleTool()
     : Uniform( true )
+    , PickingRadius( 25.0f )
     , mTransformHUD()
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.ObjectScaleTool64");
@@ -25,7 +26,7 @@ UOdysseyPainterEditorVectorObjectScaleTool::UOdysseyPainterEditorVectorObjectSca
 void
 UOdysseyPainterEditorVectorObjectScaleTool::FitHUD( FOdysseyVectorScene* iScene )
 {
-    mTransformHUD.UpdateSelectionBox( iScene );
+    mTransformHUD.UpdateSelectionBox( iScene, false );
 }
 
 //--------------------------------------------------------------------------------------
@@ -62,7 +63,7 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDownVector( FOdysseyVectorEng
     {
         BLPoint localCoords = selectionBox.space->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
 
-        mPickedHandle = mTransformHUD.Pick( iPointInTexture.x, iPointInTexture.y );
+        mPickedHandle = mTransformHUD.Pick( iPointInTexture.x, iPointInTexture.y, PickingRadius );
 
         mOldLocalMouseX = localCoords.x;
         mOldLocalMouseY = localCoords.y;
@@ -192,41 +193,45 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDragVector( FOdysseyVectorEng
             for( std::list<FOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
             {
                 FOdysseyVectorObject* object = (*it);
-                double translationX;
-                double translationY;
-                double rotation;
-                double scalingX;
-                double scalingY;
-                BLMatrix2D objectSpaceMatrix;
-                BLMatrix2D objectScaledMatrix;
-                BLMatrix2D objectLocalMatrix;
-                BLMatrix2D objectWorldMatrix = object->GetWorldMatrix();
-                BLMatrix2D parentInverseWorldMatrix = object->GetParent()->GetInverseWorldMatrix();
 
-                // transfer object in "Scaling Space" coordinates system
-                FOdysseyVector::MatrixMultiply( invertSpaceMatrix, objectWorldMatrix, objectSpaceMatrix );
+                if ( object->HasSelectedAncestor() == false )
+                {
+                    double translationX;
+                    double translationY;
+                    double rotation;
+                    double scalingX;
+                    double scalingY;
+                    BLMatrix2D objectSpaceMatrix;
+                    BLMatrix2D objectScaledMatrix;
+                    BLMatrix2D objectLocalMatrix;
+                    BLMatrix2D objectWorldMatrix = object->GetWorldMatrix();
+                    BLMatrix2D parentInverseWorldMatrix = object->GetParent()->GetInverseWorldMatrix();
 
-                // scale the object (local to the "Scaling Space" coordinates system)
-                FOdysseyVector::MatrixMultiply( scalingMatrix, objectSpaceMatrix, objectScaledMatrix );
+                    // transfer object in "Scaling Space" coordinates system
+                    FOdysseyVector::MatrixMultiply( invertSpaceMatrix, objectWorldMatrix, objectSpaceMatrix );
 
-                // transfer the object back to world coordinates system
-                FOdysseyVector::MatrixMultiply( spaceMatrix, objectScaledMatrix, objectWorldMatrix );
+                    // scale the object (local to the "Scaling Space" coordinates system)
+                    FOdysseyVector::MatrixMultiply( scalingMatrix, objectSpaceMatrix, objectScaledMatrix );
 
-                // Convert the object to its parent coordinate system, i.e its local coordinates system.
-                FOdysseyVector::MatrixMultiply( parentInverseWorldMatrix, objectWorldMatrix, objectLocalMatrix );
+                    // transfer the object back to world coordinates system
+                    FOdysseyVector::MatrixMultiply( spaceMatrix, objectScaledMatrix, objectWorldMatrix );
 
-                // Extract the local transformations
-                FOdysseyVector::ExtractTransformations( objectLocalMatrix
-                                                        , &translationX
-                                                        , &translationY
-                                                        , &rotation // in radians
-                                                        , &scalingX
-                                                        , &scalingY );
+                    // Convert the object to its parent coordinate system, i.e its local coordinates system.
+                    FOdysseyVector::MatrixMultiply( parentInverseWorldMatrix, objectWorldMatrix, objectLocalMatrix );
 
-                // Apply the local transformations
-                object->Translate( translationX, translationY );
-                object->Rotate( rotation / M_PI * 180 );
-                object->Scale( scalingX, scalingY );
+                    // Extract the local transformations
+                    FOdysseyVector::ExtractTransformations( objectLocalMatrix
+                                                            , &translationX
+                                                            , &translationY
+                                                            , &rotation // in radians
+                                                            , &scalingX
+                                                            , &scalingY );
+
+                    // Apply the local transformations
+                    object->Translate( translationX, translationY );
+                    object->Rotate( rotation / M_PI * 180 );
+                    object->Scale( scalingX, scalingY );
+                }
             }
         }
 
@@ -234,7 +239,7 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDragVector( FOdysseyVectorEng
         iScene->UpdateMatrix();
 
         // update the selection box with the newly modified matrices
-        mTransformHUD.UpdateSelectionBox( iScene );
+        mTransformHUD.UpdateSelectionBox( iScene, false );
 
         mOldLocalMouseX = localCoords.x;
         mOldLocalMouseY = localCoords.y;

@@ -41,6 +41,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectMoveTool : publi
                                     , FOdysseyVectorScene* iScene
                                     , const FOdysseyPoint& iPointInTexture
                                     , const FKey& iKey ) override;
+        void PropertyChangedVector( FOdysseyVectorEngine* iEngine
+                                  , FOdysseyVectorScene* iScene
+                                  , const FName& iPropertyName );
 
         //OdysseyPainterEditorTool overrides
         virtual void Commit() override;
@@ -48,6 +51,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectMoveTool : publi
     public:
         UPROPERTY( EditAnywhere, Category="Odyssey ObjectMove Tool", meta = (ClampMin = "0.0", UIMin = "0.0") )
         double Radius;
+
+        UPROPERTY( EditAnywhere, Category="Odyssey ObjectMove Tool" )
+        bool World;
 
     private:
         FOdysseyPainterEditorVectorObjectMoveToolHUD* mObjectMoveHUD;

@@ -74,13 +74,13 @@ FOdysseyVectorHUDSelection::DrawSelectionSpace( FOdysseyVectorScene* iScene, uin
 }
 
 void
-FOdysseyVectorHUDSelection::Reset(FOdysseyVectorScene* iScene)
+FOdysseyVectorHUDSelection::Reset( FOdysseyVectorScene* iScene )
 {
-    UpdateSelectionBox( iScene );
+    UpdateSelectionBox( iScene, false );
 }
 
 void
-FOdysseyVectorHUDSelection::UpdateSelectionBox( FOdysseyVectorScene* iScene )
+FOdysseyVectorHUDSelection::UpdateSelectionBox( FOdysseyVectorScene* iScene, bool iForceWorld )
 {
     std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
 
@@ -88,7 +88,7 @@ FOdysseyVectorHUDSelection::UpdateSelectionBox( FOdysseyVectorScene* iScene )
 
     if( selectedObjectList.size() )
     {
-        if( selectedObjectList.size() == 1 )
+        if( ( selectedObjectList.size() == 1 ) && ( iForceWorld == false ) )
         {
             FOdysseyVectorObject* selectedObject = iScene->GetLastSelected();
             BLMatrix2D& worldMatrix = selectedObject->GetWorldMatrix();
@@ -96,8 +96,7 @@ FOdysseyVectorHUDSelection::UpdateSelectionBox( FOdysseyVectorScene* iScene )
             mSelectionBox.space = selectedObject;
             mSelectionBox.rect = selectedObject->GetBBox( false );
         }
-
-        if( selectedObjectList.size() > 1 )
+        else
         {
             BLPoint p0, p1, p2, p3;
 

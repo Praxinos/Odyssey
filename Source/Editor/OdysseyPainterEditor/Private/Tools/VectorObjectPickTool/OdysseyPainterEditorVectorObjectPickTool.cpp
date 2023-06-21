@@ -35,7 +35,7 @@ UOdysseyPainterEditorVectorObjectPickTool::LoadVector( FOdysseyVectorEngine* iEn
                                                      , FOdysseyVectorScene* iScene )
 {
     mSelectionHUD.Init( iEngine->GetBLImage()->width(), iEngine->GetBLImage()->height() );
-    mSelectionHUD.UpdateSelectionBox( iScene );
+    mSelectionHUD.UpdateSelectionBox( iScene, false );
 
     iEngine->ClearHUD();
     iEngine->AddHUD( &mSelectionHUD );
@@ -187,7 +187,7 @@ UOdysseyPainterEditorVectorObjectPickTool::OnMouseUpVector( FOdysseyVectorEngine
     SetSelectionSpace( iEngine, iScene->GetLastSelected() );
 
     mSelectionHUD.SetSelecting( false, nullptr );
-    mSelectionHUD.UpdateSelectionBox( iScene );
+    mSelectionHUD.UpdateSelectionBox( iScene, false );
 
     iScene->Update( 0 ); // update invalidated objects
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW | FOdysseyVectorScene::SIGNAL_OBJECT_SELECTED );

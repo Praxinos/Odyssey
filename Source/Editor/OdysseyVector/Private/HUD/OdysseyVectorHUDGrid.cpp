@@ -436,7 +436,7 @@ FOdysseyVectorHUDGrid::MakeCells( uint32 iCellCountX, uint32 iCellCountY )
 void
 FOdysseyVectorHUDGrid::MakeGrid( FOdysseyVectorScene* iScene, uint32 iCellCountX, uint32 iCellCountY )
 {
-    UpdateSelectionBox( iScene );
+    UpdateSelectionBox( iScene, false );
 
     if( mSelectionBox.rect.Area() )
     {
