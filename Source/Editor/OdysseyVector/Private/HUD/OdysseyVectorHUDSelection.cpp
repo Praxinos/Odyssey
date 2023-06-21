@@ -125,9 +125,6 @@ FOdysseyVectorHUDSelection::DrawSelectionBox( FOdysseyVectorScene* iScene, uint6
     blctx->save();
     blctx->resetMatrix();
 
-    blctx->setStrokeStyle( BLRgba32( 0xFF0000FF ) );
-    blctx->setStrokeWidth( 1.0f );
-
     if( mSelectionBox.space )
     {
         BLMatrix2D& worldMatrix = mSelectionBox.space->GetWorldMatrix();
@@ -143,6 +140,12 @@ FOdysseyVectorHUDSelection::DrawSelectionBox( FOdysseyVectorScene* iScene, uint6
         path.lineTo( point[3] );
         path.close();
 
+        blctx->setStrokeStyle( BLRgba32( 0xFF000000 ) );
+        blctx->setStrokeWidth( 2.0f );
+        blctx->strokePath( path );
+
+        blctx->setStrokeStyle( BLRgba32( 0xFFD0E040 ) );
+        blctx->setStrokeWidth( 1.0f );
         blctx->strokePath( path );
     }
 

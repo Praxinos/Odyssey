@@ -32,11 +32,10 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorObjectMoveToolHUD : pu
         virtual void Draw( FOdysseyVectorScene* iScene, uint64 iFlags ) override;
         virtual void Reset( FOdysseyVectorScene* iScene ) override;
 
-        uint32 SetCursorPosition( double iX, double iY );
-
-        void UpdateGizmo();
         uint32 GetGizmoFlags();
+        uint32 SetCursorPosition( double iX, double iY );
 
     private:
         void PickGizmo( double iWorldX, double iWorldY );
+        void UpdateGizmo();
 };

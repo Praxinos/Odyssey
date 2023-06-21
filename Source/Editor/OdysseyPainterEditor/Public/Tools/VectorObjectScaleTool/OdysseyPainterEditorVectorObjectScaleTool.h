@@ -9,6 +9,8 @@
 
 #include "OdysseyPainterEditorVectorObjectScaleTool.generated.h"
 
+class FOdysseyPainterEditorVectorObjectScaleToolHUD;
+
 UCLASS()
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectScaleTool : public UOdysseyPainterEditorVectorObjectPickTool
 {
@@ -28,6 +30,9 @@ public:
                                   , FOdysseyVectorScene* iScene
                                   , const FOdysseyPoint& iPointInTexture
                                   , const FKey& iKey ) override;
+    ::ULIS::FRectI OnMouseHoverVector( FOdysseyVectorEngine* iEngine
+                                     , FOdysseyVectorScene* iScene
+                                     , const FOdysseyPoint& iPointInTexture );
     virtual ::ULIS::FRectI OnMouseDragVector( FOdysseyVectorEngine* iEngine
                                             , FOdysseyVectorScene* iScene
                                             , const FOdysseyPoint& iPointInTexture ) override;
@@ -42,12 +47,12 @@ protected:
     void FitHUD( FOdysseyVectorScene* iScene );
 
 private:
-    FOdysseyVectorHUDScale mTransformHUD;
+    FOdysseyPainterEditorVectorObjectScaleToolHUD* mObjectScaleHUD;
     std::vector<FObjectTransform> mObjectTransformArray;
     bool mDragging;
     double mOldLocalMouseX;
     double mOldLocalMouseY;
-    int32 mPickedHandle;
+    uint32 mHandleFlags;
 
 public:
     UPROPERTY(EditAnywhere, Category="Odyssey ObjectScale Tool")

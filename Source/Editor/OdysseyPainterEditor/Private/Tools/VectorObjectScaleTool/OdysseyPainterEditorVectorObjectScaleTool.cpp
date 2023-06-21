@@ -2,6 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Tools/VectorObjectScaleTool/OdysseyPainterEditorVectorObjectScaleTool.h"
+#include "Tools/VectorObjectScaleTool/OdysseyPainterEditorVectorObjectScaleToolHUD.h"
 
 #define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorObjectScaleTool"
 
@@ -18,15 +19,11 @@ UOdysseyPainterEditorVectorObjectScaleTool::~UOdysseyPainterEditorVectorObjectSc
 UOdysseyPainterEditorVectorObjectScaleTool::UOdysseyPainterEditorVectorObjectScaleTool()
     : Uniform( true )
     , PickingRadius( 25.0f )
-    , mTransformHUD()
+    , mHandleFlags( 0 )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.ObjectScaleTool64");
-}
 
-void
-UOdysseyPainterEditorVectorObjectScaleTool::FitHUD( FOdysseyVectorScene* iScene )
-{
-    mTransformHUD.UpdateSelectionBox( iScene, false );
+    mObjectScaleHUD = new FOdysseyPainterEditorVectorObjectScaleToolHUD( this );
 }
 
 //--------------------------------------------------------------------------------------
@@ -35,7 +32,7 @@ UOdysseyPainterEditorVectorObjectScaleTool::FitHUD( FOdysseyVectorScene* iScene 
 void
 UOdysseyPainterEditorVectorObjectScaleTool::UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
-    iEngine->RemoveHUD( &mTransformHUD );
+    iEngine->RemoveHUD( mObjectScaleHUD );
 
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
@@ -44,9 +41,9 @@ void
 UOdysseyPainterEditorVectorObjectScaleTool::LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
     iEngine->ClearHUD();
-    iEngine->AddHUD( &mTransformHUD );
+    iEngine->AddHUD( mObjectScaleHUD );
 
-    FitHUD( iScene );
+    mObjectScaleHUD->Reset( iScene );
 
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
@@ -57,30 +54,16 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDownVector( FOdysseyVectorEng
                                                              , const FOdysseyPoint& iPointInTexture
                                                              , const FKey& iKey )
 {
-    FSelectionBox& selectionBox = mTransformHUD.GetSelectionBox();
+    FSelectionBox& selectionBox = mObjectScaleHUD->GetSelectionBox();
 
     if( selectionBox.space )
     {
         BLPoint localCoords = selectionBox.space->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
 
-        mPickedHandle = mTransformHUD.Pick( iPointInTexture.x, iPointInTexture.y, PickingRadius );
-
         mOldLocalMouseX = localCoords.x;
         mOldLocalMouseY = localCoords.y;
     }
 
-/*
-    // needed for valid GUndo pointer
-    GEditor->BeginTransaction(LOCTEXT("VectorObjectScaleTool","Vector Object Scale Tool"));
-    if( GUndo )
-    {
-        // save selected object translation/rotation/scaling before transform
-        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoObjectTransform( iScene, iScene->GetSelectedObjectList() );
-
-        GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
-    }
-    GEditor->EndTransaction();
-*/
     // remember for undos. we don't set undos in the mouse down event because it could conflict with the undo created by
     // UOdysseyPainterEditorVectorObjectPickTool::OnMouseUpVector() called when no dragging was made.
     mObjectTransformArray.clear();
@@ -94,11 +77,25 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDownVector( FOdysseyVectorEng
 }
 
 ::ULIS::FRectI
+UOdysseyPainterEditorVectorObjectScaleTool::OnMouseHoverVector( FOdysseyVectorEngine* iEngine
+                                                              , FOdysseyVectorScene* iScene
+                                                              , const FOdysseyPoint& iPointInTexture )
+{
+    ::ULIS::FRectI redrawRegion = { 0, 0, 0, 0 };
+
+    mHandleFlags = mObjectScaleHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
+
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+
+    return redrawRegion; // unused for now
+}
+
+::ULIS::FRectI
 UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDragVector( FOdysseyVectorEngine* iEngine
                                                              , FOdysseyVectorScene* iScene
                                                              , const FOdysseyPoint& iPointInTexture )
 {
-    FSelectionBox& selectionBox = mTransformHUD.GetSelectionBox();
+    FSelectionBox& selectionBox = mObjectScaleHUD->GetSelectionBox();
     ::ULIS::FRectI redrawRegion = { 0, 0, 0, 0 };
 
     mDragging = true;
@@ -120,7 +117,7 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDragVector( FOdysseyVectorEng
         double x1 = 0.0f, y1 = 0.0f, x2 = 0.0f, y2 = 0.0f;
         ::ULIS::FVec2D pivot;
 
-        if ( mPickedHandle == 0 )
+        if ( mHandleFlags & FOdysseyPainterEditorVectorObjectScaleToolHUD::PICK_TOPLEFT )
         {
             x1 = localCoords.x;
             y1 = localCoords.y;
@@ -131,7 +128,7 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDragVector( FOdysseyVectorEng
             pivot.y = oldY2;
         }
 
-        if ( mPickedHandle == 1 )
+        if ( mHandleFlags & FOdysseyPainterEditorVectorObjectScaleToolHUD::PICK_TOPRIGHT )
         {
             x1 = oldX1;
             y1 = localCoords.y;
@@ -142,7 +139,7 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDragVector( FOdysseyVectorEng
             pivot.y = oldY2;
         }
 
-        if ( mPickedHandle == 2 )
+        if ( mHandleFlags & FOdysseyPainterEditorVectorObjectScaleToolHUD::PICK_BOTTOMRIGHT )
         {
             x1 = oldX1;
             y1 = oldY1;
@@ -153,7 +150,7 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDragVector( FOdysseyVectorEng
             pivot.y = oldY1;
         }
 
-        if ( mPickedHandle == 3 )
+        if ( mHandleFlags & FOdysseyPainterEditorVectorObjectScaleToolHUD::PICK_BOTTOMLEFT )
         {
             x1 = localCoords.x;
             y1 = oldY1;
@@ -164,7 +161,7 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDragVector( FOdysseyVectorEng
             pivot.y = oldY1;
         }
 
-        if( mPickedHandle != -1 )
+        if( ( mHandleFlags & FOdysseyPainterEditorVectorObjectScaleToolHUD::HANDLE_MASK ) != 0 )
         {
             BLMatrix2D spaceMatrix = selectionBox.space->GetWorldMatrix();
             BLMatrix2D invertSpaceMatrix;
@@ -239,7 +236,7 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDragVector( FOdysseyVectorEng
         iScene->UpdateMatrix();
 
         // update the selection box with the newly modified matrices
-        mTransformHUD.UpdateSelectionBox( iScene, false );
+        mObjectScaleHUD->UpdateSelectionBox( iScene, false );
 
         mOldLocalMouseX = localCoords.x;
         mOldLocalMouseY = localCoords.y;
@@ -280,7 +277,7 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseUpVector( FOdysseyVectorEngin
         // includes its own undo record
         UOdysseyPainterEditorVectorObjectPickTool::OnMouseUpVector( iEngine, iScene, iPointInTexture, iKey );
 
-        FitHUD( iScene );
+        mObjectScaleHUD->Reset( iScene );
     }
 
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
