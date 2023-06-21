@@ -112,9 +112,9 @@ FOdysseyPainterEditorVectorObjectMoveToolHUD::DrawGizmo( FOdysseyVectorScene* iS
 {
     BLContext* blctx = iScene->GetEngine()->GetBLContext();
     BLRgba32 xAxisColor = ( mGizmoFlags & PICK_XAXIS ) ? BLRgba32( 0xFF0000FF )
-                                                        : BLRgba32( 0xFFD0E040 );// teal (ABGR)
+                                                       : BLRgba32( 0xFFD0E040 );// teal (ABGR)
     BLRgba32 yAxisColor = ( mGizmoFlags & PICK_YAXIS ) ? BLRgba32( 0xFF0000FF )
-                                                        : BLRgba32( 0xFFD0E040 );// teal (ABGR)
+                                                       : BLRgba32( 0xFFD0E040 );// teal (ABGR)
 
     blctx->save();
     blctx->resetMatrix();
