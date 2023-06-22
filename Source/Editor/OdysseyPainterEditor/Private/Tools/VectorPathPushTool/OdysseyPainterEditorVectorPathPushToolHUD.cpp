@@ -1,22 +1,26 @@
-#include "HUD/OdysseyVectorHUDPathPush.h"
+#include "Tools/VectorPathPushTool/OdysseyPainterEditorVectorPathPushToolHUD.h"
 #include "OdysseyVectorEngine.h"
 
-FOdysseyVectorHUDPathPush::~FOdysseyVectorHUDPathPush()
+FOdysseyPainterEditorVectorPathPushToolHUD::~FOdysseyPainterEditorVectorPathPushToolHUD()
 {
 }
 
-FOdysseyVectorHUDPathPush::FOdysseyVectorHUDPathPush()
-    : mRestrictToSelection ( false )
+FOdysseyPainterEditorVectorPathPushToolHUD::FOdysseyPainterEditorVectorPathPushToolHUD( UOdysseyPainterEditorVectorPathPushTool* iPathPushTool )
+    : mPathPushTool( iPathPushTool )
+    , mX( 0.0f )
+    , mY( 0.0f )
+{
+
+}
+
+void
+FOdysseyPainterEditorVectorPathPushToolHUD::Reset(FOdysseyVectorScene* iScene)
 {
 }
 
 void
-FOdysseyVectorHUDPathPush::Reset(FOdysseyVectorScene* iScene)
-{
-}
-
-void
-FOdysseyVectorHUDPathPush::DrawObjectRecursive( FOdysseyVectorObject* iObj, BLContext* iBLCtx )
+FOdysseyPainterEditorVectorPathPushToolHUD::DrawObjectRecursive( FOdysseyVectorObject* iObj
+                                                               , BLContext* iBLCtx )
 {
     if( iObj->GetClass() == FOdysseyVectorPathCubic::StaticClass() )
     {
@@ -54,7 +58,7 @@ FOdysseyVectorHUDPathPush::DrawObjectRecursive( FOdysseyVectorObject* iObj, BLCo
 }
 
 void
-FOdysseyVectorHUDPathPush::Draw( FOdysseyVectorScene* iScene, uint64 iFlags )
+FOdysseyPainterEditorVectorPathPushToolHUD::Draw( FOdysseyVectorScene* iScene, uint64 iFlags )
 {
     BLContext* blctx = iScene->GetEngine()->GetBLContext();
 
@@ -62,7 +66,7 @@ FOdysseyVectorHUDPathPush::Draw( FOdysseyVectorScene* iScene, uint64 iFlags )
     blctx->save();
     blctx->resetMatrix();
 
-    if( mRestrictToSelection )
+    if( mPathPushTool->RestrictToSelection )
     {
         std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
 
@@ -78,5 +82,16 @@ FOdysseyVectorHUDPathPush::Draw( FOdysseyVectorScene* iScene, uint64 iFlags )
         DrawObjectRecursive( iScene, blctx );
     }
 
+    blctx->setStrokeStyle( BLRgba32( 0xFF0000FF ) );
+    blctx->setStrokeWidth( 1.0f );
+    blctx->strokeCircle( mX, mY, mPathPushTool->Radius );
+
     blctx->restore();
+}
+
+void
+FOdysseyPainterEditorVectorPathPushToolHUD::SetCursorPosition( double iX, double iY )
+{
+    mX = iX;
+    mY = iY;
 }

@@ -2,6 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Tools/VectorPathPushTool/OdysseyPainterEditorVectorPathPushTool.h"
+#include "Tools/VectorPathPushTool/OdysseyPainterEditorVectorPathPushToolHUD.h"
 #include "Undo/OdysseyVectorUndoSegmentReshape.h"
 
 #define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorPathPushTool"
@@ -13,13 +14,12 @@ UOdysseyPainterEditorVectorPathPushTool::~UOdysseyPainterEditorVectorPathPushToo
 }
 
 UOdysseyPainterEditorVectorPathPushTool::UOdysseyPainterEditorVectorPathPushTool()
-    : mPickingHUD()
-    , Radius( 20.0f )
+    : Radius( 20.0f )
     , PreserveSmoothness( true )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathPushTool64");
 
-    mPickingHUD.SetRadius( Radius );
+    mPathPushHUD = new FOdysseyPainterEditorVectorPathPushToolHUD( this );
 }
 
 //--------------------------------------------------------------------------------------
@@ -28,8 +28,7 @@ UOdysseyPainterEditorVectorPathPushTool::UOdysseyPainterEditorVectorPathPushTool
 void
 UOdysseyPainterEditorVectorPathPushTool::UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
-    iEngine->RemoveHUD( &mPickingHUD );
-    iEngine->RemoveHUD( &mPathPushHUD );
+    iEngine->RemoveHUD( mPathPushHUD );
 
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
@@ -38,8 +37,9 @@ void
 UOdysseyPainterEditorVectorPathPushTool::LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
     iEngine->ClearHUD();
-    iEngine->AddHUD( &mPickingHUD );
-    iEngine->AddHUD( &mPathPushHUD );
+    iEngine->AddHUD( mPathPushHUD );
+
+    mPathPushHUD->Reset( iScene );
 
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
@@ -76,6 +76,7 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDownVector( FOdysseyVectorEngine
     mPushedPointArray.clear();
 
     iEngine->PickSegments( iScene
+                         , RestrictToSelection
                          , iPointInTexture.x
                          , iPointInTexture.y
                          , Radius
@@ -150,7 +151,7 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseHoverVector( FOdysseyVectorEngin
                           , (int)diameter
                           , (int)diameter };
 
-    mPickingHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
+    mPathPushHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
 
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
@@ -160,7 +161,7 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDragVector( FOdysseyVectorEngine
                                                           , FOdysseyVectorScene* iScene
                                                           , const FOdysseyPoint& iPointInTexture )
 {
-    mPickingHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
+    mPathPushHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
 
     for( int i = 0; i < mPushedPointArray.size(); i++ )
     {
@@ -245,7 +246,7 @@ UOdysseyPainterEditorVectorPathPushTool::Commit()
 void
 UOdysseyPainterEditorVectorPathPushTool::PropertyChanged( const FName& iPropertyName )
 {
-    mPickingHUD.SetRadius( Radius );
+
 }
 
 #undef LOCTEXT_NAMESPACE

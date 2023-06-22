@@ -45,8 +45,8 @@ protected:
 
     private:
         std::vector<FOdysseyVectorPoint*> mPickedPointArray;
-        FOdysseyVectorHUDPicking mPickingHUD;
-        FOdysseyVectorHUDPathPush mPathPushHUD;
+        //FOdysseyVectorHUDPicking mPickingHUD;
+        //FOdysseyVectorHUDPathPush mPathPushHUD;
 
 public:
     UPROPERTY(EditAnywhere, Category="Odyssey PathSmooth Tool", meta = (ClampMin = "0.0", UIMin = "0.0"))

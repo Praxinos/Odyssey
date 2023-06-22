@@ -351,6 +351,8 @@ UOdysseyPainterEditorPaintBucketTool::SetBucketColor( FOdysseyVectorBucket* iBuc
         iBucket->SetGradient( false );
         iBucket->SetColor( R, G, B, A );
     }
+
+    iBucket->SetPropagated( Propagate );
 }
 
 void

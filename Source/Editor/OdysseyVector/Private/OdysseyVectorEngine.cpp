@@ -536,13 +536,28 @@ RecursivePickSegments( FOdysseyVectorObject* iObject
 
 void
 FOdysseyVectorEngine::PickSegments( FOdysseyVectorScene* iScene
+                                  , bool iRestrictToSelection
                                   , double iX
                                   , double iY
                                   , double iRadius
                                   , std::vector<FOdysseyVectorSegment*>& oPickedSegmentArray
                                   , std::vector<double>* oDistance )
 {
-    RecursivePickSegments( iScene, iX, iY, iRadius, oPickedSegmentArray, oDistance );
+    if( iRestrictToSelection )
+    {
+        std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
+
+        for( std::list<FOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
+        {
+            FOdysseyVectorObject* selectedObject = (*it);
+
+            RecursivePickSegments( selectedObject, iX, iY, iRadius, oPickedSegmentArray, oDistance );
+        }
+    }
+    else
+    {
+        RecursivePickSegments( iScene, iX, iY, iRadius, oPickedSegmentArray, oDistance );
+    }
 }
 
 // static

@@ -73,6 +73,7 @@ UOdysseyPainterEditorVectorPathWidthTool::OnMouseDragVector( FOdysseyVectorEngin
     segmentArray.reserve( 500 );
 
     iEngine->PickSegments( iScene
+                         , false
                          , iPointInTexture.x
                          , iPointInTexture.y
                          , Radius

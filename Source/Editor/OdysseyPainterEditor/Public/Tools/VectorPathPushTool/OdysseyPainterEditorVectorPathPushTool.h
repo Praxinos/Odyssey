@@ -7,10 +7,9 @@
 #include "Tools/DefaultTool/OdysseyPainterEditorDefaultTool.h"
 #include "OdysseyVector.h"
 
-#include "HUD/OdysseyVectorHUDPicking.h"
-#include "HUD/OdysseyVectorHUDPathPush.h"
-
 #include "OdysseyPainterEditorVectorPathPushTool.generated.h"
+
+class FOdysseyPainterEditorVectorPathPushToolHUD;
 
 typedef struct _FPushedPoint
 {
@@ -83,14 +82,16 @@ private:
     bool HasVertex( FOdysseyVectorPoint* iPoint );
     std::vector<FPushedPoint> mPushedPointArray;
     std::vector<FOdysseyVectorSegment*> mSegmentArray;
-    FOdysseyVectorHUDPicking mPickingHUD;
-    FOdysseyVectorHUDPathPush mPathPushHUD;
+    //FOdysseyVectorHUDPicking mPickingHUD;
+    FOdysseyPainterEditorVectorPathPushToolHUD *mPathPushHUD;
 
 public:
     UPROPERTY(EditAnywhere, Category="Odyssey PathPush Tool", meta = (ClampMin = "0.0", UIMin = "0.0"))
     double Radius;
 
-    UPROPERTY(EditAnywhere,Category="Odyssey PathPush Tool")
+    UPROPERTY(EditAnywhere, Category="Odyssey PathPush Tool")
     bool PreserveSmoothness;
 
+    UPROPERTY(EditAnywhere, Category="Odyssey PathPush Tool")
+    bool RestrictToSelection;
 };

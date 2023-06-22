@@ -144,50 +144,53 @@ UOdysseyPainterEditorVectorObjectPickTool::OnMouseUpVector( FOdysseyVectorEngine
     std::vector<FOdysseyVectorObject*> pickedObjectArray;
     FOdysseyVectorUndoSelect* undoSelect = nullptr;
 
-    // needed for valid GUndo pointer
-    GEditor->BeginTransaction(LOCTEXT("VectorObjectPickTool","Vector Object Pick Tool"));
-    if( GUndo )
+    if( iKey == EKeys::LeftMouseButton )
     {
-        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelect( iScene );
-
-        GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
-    }
-    GEditor->EndTransaction();
-
-    // deselect all if control key is not pressed
-    if( FSlateApplication::Get().GetModifierKeys().IsControlDown() == false )
-    {
-        iScene->ClearSelection();
-    }
-
-    // dragging occured
-    if ( mPointArray.size() > 1 )
-    {
-        iEngine->Pick( iScene, mPointArray, pickedObjectArray, FOdysseyVectorObject::PICK_MASK_BASED );
-
-        // when dragging occured, we select all objects lying in the selection area.
-        for ( int i = 0; i < pickedObjectArray.size(); i++ )
+        // needed for valid GUndo pointer
+        GEditor->BeginTransaction(LOCTEXT("VectorObjectPickTool","Vector Object Pick Tool"));
+        if( GUndo )
         {
-            iScene->Select( pickedObjectArray[i] );
+            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelect( iScene );
+
+            GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
         }
-    }
+        GEditor->EndTransaction();
 
-    // no dragging occured
-    if ( mPointArray.size() == 1 )
-    {
-        iEngine->Pick( iScene, mPointArray, pickedObjectArray, FOdysseyVectorObject::PICK_MATH_BASED );
-
-        // if no dragging occured, we only select the object that is the most forward
-        if( pickedObjectArray.size() )
+        // deselect all if control key is not pressed
+        if( FSlateApplication::Get().GetModifierKeys().IsControlDown() == false )
         {
-            iScene->Select( pickedObjectArray.back() );
+            iScene->ClearSelection();
         }
+
+        // dragging occured
+        if ( mPointArray.size() > 1 )
+        {
+            iEngine->Pick( iScene, mPointArray, pickedObjectArray, FOdysseyVectorObject::PICK_MASK_BASED );
+
+            // when dragging occured, we select all objects lying in the selection area.
+            for ( int i = 0; i < pickedObjectArray.size(); i++ )
+            {
+                iScene->Select( pickedObjectArray[i] );
+            }
+        }
+
+        // no dragging occured
+        if ( mPointArray.size() == 1 )
+        {
+            iEngine->Pick( iScene, mPointArray, pickedObjectArray, FOdysseyVectorObject::PICK_MATH_BASED );
+
+            // if no dragging occured, we only select the object that is the most forward
+            if( pickedObjectArray.size() )
+            {
+                iScene->Select( pickedObjectArray.back() );
+            }
+        }
+
+        SetSelectionSpace( iEngine, iScene->GetLastSelected() );
+
+        mSelectionHUD.SetSelecting( false, nullptr );
+        mSelectionHUD.UpdateSelectionBox( iScene, false );
     }
-
-    SetSelectionSpace( iEngine, iScene->GetLastSelected() );
-
-    mSelectionHUD.SetSelecting( false, nullptr );
-    mSelectionHUD.UpdateSelectionBox( iScene, false );
 
     iScene->Update( 0 ); // update invalidated objects
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW | FOdysseyVectorScene::SIGNAL_OBJECT_SELECTED );

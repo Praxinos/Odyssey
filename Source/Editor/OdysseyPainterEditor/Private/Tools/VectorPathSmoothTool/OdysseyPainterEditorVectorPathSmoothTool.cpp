@@ -13,21 +13,21 @@ UOdysseyPainterEditorVectorPathSmoothTool::~UOdysseyPainterEditorVectorPathSmoot
 }
 
 UOdysseyPainterEditorVectorPathSmoothTool::UOdysseyPainterEditorVectorPathSmoothTool()
-    : mPickingHUD()
-    , Radius(20.0f)
+    : /*mPickingHUD()
+    , */Radius(20.0f)
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathSmoothTool64");
 
     mPickedPointArray.reserve( 50 );
 
-    mPickingHUD.SetRadius( Radius );
+    //mPickingHUD.SetRadius( Radius );
 }
 
 void
 UOdysseyPainterEditorVectorPathSmoothTool::UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
-    iEngine->RemoveHUD( &mPickingHUD );
-    iEngine->RemoveHUD( &mPathPushHUD );
+    //iEngine->RemoveHUD( &mPickingHUD );
+    //iEngine->RemoveHUD( &mPathPushHUD );
 
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
@@ -36,8 +36,8 @@ void
 UOdysseyPainterEditorVectorPathSmoothTool::LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
     iEngine->ClearHUD();
-    iEngine->AddHUD( &mPickingHUD );
-    iEngine->AddHUD( &mPathPushHUD );
+    //iEngine->AddHUD( &mPickingHUD );
+    //iEngine->AddHUD( &mPathPushHUD );
 
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
@@ -71,7 +71,7 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseHoverVector( FOdysseyVectorEng
                           , (int)diameter
                           , (int)diameter };
 
-    mPickingHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
+    //mPickingHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
 
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
@@ -137,7 +137,7 @@ UOdysseyPainterEditorVectorPathSmoothTool::Commit()
 void
 UOdysseyPainterEditorVectorPathSmoothTool::PropertyChanged( const FName& iPropertyName )
 {
-    mPickingHUD.SetRadius( Radius );
+    //mPickingHUD.SetRadius( Radius );
 }
 
 #undef LOCTEXT_NAMESPACE

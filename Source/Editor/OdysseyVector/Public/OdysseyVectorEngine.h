@@ -78,6 +78,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
          *  and coordinates iX,iY. Distance is in local coordinates. Can be NULL.
          */
         void PickSegments( FOdysseyVectorScene* iScene
+                         , bool iRestrictToSelection
                          , double iX
                          , double iY
                          , double iRadius
