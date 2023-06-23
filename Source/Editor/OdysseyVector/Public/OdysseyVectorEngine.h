@@ -87,6 +87,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
 
         /**
          * @brief Pick segments depending on a selection circle passed as parameters.
+         * @param iRestrictToSelection restrict to selected objects (and children objects)
          * @param iScene the root object
          * @param iX "world" x-axis coordinates for the selection circle.
          * @param iY "world" y-axis coordinates for the selection circle.
@@ -97,6 +98,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
          *  FOdysseyVectorPath::PICK_POINT : pick vertices
          */
         void PickPoints( FOdysseyVectorScene* iScene
+                       , bool iRestrictToSelection
                        , double iX
                        , double iY
                        , double iRadius

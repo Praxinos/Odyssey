@@ -81,6 +81,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::PickVertex( FOdysseyVectorEngine* iV
         pickedPointArray.reserve( 50 );
 
         iVectorEngine->PickPoints( iScene
+                                 , false
                                  , iWorldX
                                  , iWorldY
                                  , iPickingRadius

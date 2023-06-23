@@ -10,6 +10,9 @@
 
 #include "OdysseyPainterEditorVectorGridTool.generated.h"
 
+class FGridNode;
+class FOdysseyPainterEditorVectorGridToolHUD;
+
 UCLASS()
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorGridTool : public UOdysseyPainterEditorTool
 {
@@ -44,9 +47,7 @@ public:
 
 private:
     std::vector<FOdysseyVectorPoint*> mPointArray;
-    FOdysseyVectorHUDGrid mGridHUD;
-
-private:
+    FOdysseyPainterEditorVectorGridToolHUD* mGridHUD;
     std::vector<FGridNode *> mGridNodeArray;
     bool mMultipleSelectionMode;
 

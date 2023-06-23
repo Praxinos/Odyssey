@@ -6,7 +6,10 @@
 #include "CoreMinimal.h"
 #include "Tools/DefaultTool/OdysseyPainterEditorDefaultTool.h"
 #include "OdysseyVector.h"
+
 #include "OdysseyPainterEditorVectorPathSmoothTool.generated.h"
+
+class FOdysseyPainterEditorVectorPathSmoothToolHUD;
 
 UCLASS()
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathSmoothTool : public UOdysseyPainterEditorDefaultTool
@@ -45,10 +48,12 @@ protected:
 
     private:
         std::vector<FOdysseyVectorPoint*> mPickedPointArray;
-        //FOdysseyVectorHUDPicking mPickingHUD;
-        //FOdysseyVectorHUDPathPush mPathPushHUD;
+        FOdysseyPainterEditorVectorPathSmoothToolHUD* mPathSmoothHUD;
 
 public:
     UPROPERTY(EditAnywhere, Category="Odyssey PathSmooth Tool", meta = (ClampMin = "0.0", UIMin = "0.0"))
     double Radius;
+
+    UPROPERTY(EditAnywhere, Category="Odyssey PathSmooth Tool")
+    bool RestrictToSelection;
 };

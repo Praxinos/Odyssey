@@ -390,13 +390,31 @@ RecursivePickPoints( FOdysseyVectorObject* iObject
 
 void
 FOdysseyVectorEngine::PickPoints( FOdysseyVectorScene* iScene
+                                , bool iRestrictToSelection
                                 , double iX
                                 , double iY
                                 , double iRadius
                                 , std::vector<FOdysseyVectorPoint*>& oPickedPointArray
                                 , uint64 iPickingFlags )
 {
-    RecursivePickPoints( iScene, iX, iY, iRadius, oPickedPointArray, iPickingFlags );
+    if( iRestrictToSelection )
+    {
+        std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
+
+        for( std::list<FOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
+        {
+            FOdysseyVectorObject* selectedObject = (*it);
+
+            if( selectedObject->HasSelectedAncestor() == false )
+            {
+                RecursivePickPoints( selectedObject, iX, iY, iRadius, oPickedPointArray, iPickingFlags );
+            }
+        }
+    }
+    else
+    {
+        RecursivePickPoints( iScene, iX, iY, iRadius, oPickedPointArray, iPickingFlags );
+    }
 }
 
 FOdysseyVectorVertex*
@@ -551,7 +569,10 @@ FOdysseyVectorEngine::PickSegments( FOdysseyVectorScene* iScene
         {
             FOdysseyVectorObject* selectedObject = (*it);
 
-            RecursivePickSegments( selectedObject, iX, iY, iRadius, oPickedSegmentArray, oDistance );
+            if( selectedObject->HasSelectedAncestor() == false )
+            {
+                RecursivePickSegments( selectedObject, iX, iY, iRadius, oPickedSegmentArray, oDistance );
+            }
         }
     }
     else

@@ -72,5 +72,3 @@ namespace FOdysseyVector
 #include "HUD/OdysseyVectorHUDBucket.h"
 #include "HUD/OdysseyVectorHUDPicking.h"
 #include "HUD/OdysseyVectorHUDSelection.h"
-#include "HUD/OdysseyVectorHUDRotate.h"
-#include "HUD/OdysseyVectorHUDGrid.h"

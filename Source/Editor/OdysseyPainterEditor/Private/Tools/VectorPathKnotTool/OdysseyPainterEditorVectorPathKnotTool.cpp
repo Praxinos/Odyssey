@@ -62,6 +62,7 @@ UOdysseyPainterEditorVectorPathKnotTool::OnMouseDownVector( FOdysseyVectorEngine
     pickedPointArray.reserve(500); // crashes if I don't reserve. I don't know why.
 
     iEngine->PickPoints( iScene
+                       , false
                        , iPointInTexture.x
                        , iPointInTexture.y
                        , Radius

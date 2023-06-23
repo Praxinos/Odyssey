@@ -81,10 +81,20 @@ UOdysseyPainterEditorVectorSceneScaleTool::OnMouseDragVectorStatic( double iLoca
 
     iEngine->GetColorImageSize( &imageWidth, &imageHeight );
 
-    factor = 1.0f + (double) iPointInTexture.deltaPosition.X / imageWidth;
+    factor = (double) iPointInTexture.deltaPosition.X / imageWidth;
 
-    iScene->Scale( iScene->GetScalingX() * factor
-                 , iScene->GetScalingY() * factor );
+    if ( FSlateApplication::Get().GetModifierKeys().IsShiftDown() )
+    {
+        factor *= 4.0f;
+    }
+
+    if ( FSlateApplication::Get().GetModifierKeys().IsControlDown() )
+    {
+        factor *= 0.25f;
+    }
+
+    iScene->Scale( iScene->GetScalingX() * ( 1.0f + factor )
+                 , iScene->GetScalingY() * ( 1.0f + factor ) );
 
     iScene->UpdateMatrix();
 

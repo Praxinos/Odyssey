@@ -9,10 +9,9 @@ FOdysseyPainterEditorVectorScenePanToolHUD::FOdysseyPainterEditorVectorScenePanT
     : mScenePanTool( iScenePanTool )
 {
     BLFontFace face;
-
+   // TODO: do something depending on to the O.S
     BLResult err = face.createFromFile("C:/Windows/Fonts/lucon.ttf"); // Lucida console
  
-
     mFont.createFromFace( face, 16.0f );
 }
 
@@ -28,17 +27,27 @@ FOdysseyPainterEditorVectorScenePanToolHUD::DrawText( FOdysseyVectorScene* iScen
     BLContext* blctx = iScene->GetEngine()->GetBLContext();
     char str[255];
 
+    blctx->setCompOp( BL_COMP_OP_DIFFERENCE  );
+    blctx->setFillStyle( BLRgba32( 0xFFD0E040 ) );
+
+    // Zoom
     snprintf( str
             , 255
-            , "Zoom[x:%.2f y:%.2f] Pan[x:%.2f y:%.2f]"
+            , "Zoom[x:%.2f y:%.2f]"
             , iScene->GetScalingX()
-            , iScene->GetScalingY()
+            , iScene->GetScalingY() );
+
+    blctx->fillUtf8Text( BLPoint( iFrame.x + 10, iFrame.y + iFrame.h - 10 ), mFont, str );
+
+    // Pan
+    snprintf( str
+            , 255
+            , "Pan[x:%.2f y:%.2f]"
             , iScene->GetTranslationX()
             , iScene->GetTranslationY() );
 
-    blctx->setCompOp( BL_COMP_OP_DIFFERENCE  );
-    blctx->setFillStyle( BLRgba32( 0xFFD0E040 ) );
-    blctx->fillUtf8Text( BLPoint( iFrame.x + 10, iFrame.y + iFrame.h - 10 ), mFont, str );
+    blctx->fillUtf8Text( BLPoint( iFrame.x + 10, iFrame.y + iFrame.h - 28 ), mFont, str );
+
 //    blctx->setStrokeStyle( BLRgba32( 0xFF000000 ) );
 //    blctx->setStrokeWidth( 1.0f );
 //    blctx->strokeUtf8Text( BLPoint( iFrame.x + 10, iFrame.y + iFrame.h - 10 ), mFont, str );
@@ -104,6 +113,4 @@ FOdysseyPainterEditorVectorScenePanToolHUD::Draw( FOdysseyVectorScene* iScene, u
     DrawText( iScene, frame );
 
     blctx->restore();
-
-
 }

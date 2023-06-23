@@ -2,7 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Tools/VectorGridTool/OdysseyPainterEditorVectorGridTool.h"
-
+#include "Tools/VectorGridTool/OdysseyPainterEditorVectorGridToolHUD.h"
 #define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorGridTool"
 
 #ifndef M_PI
@@ -22,6 +22,8 @@ UOdysseyPainterEditorVectorGridTool::UOdysseyPainterEditorVectorGridTool()
     , PickingRadius( 10.0f )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Grid64");
+
+    mGridHUD = new FOdysseyPainterEditorVectorGridToolHUD( this );
 }
 
 //--------------------------------------------------------------------------------------
@@ -30,7 +32,7 @@ UOdysseyPainterEditorVectorGridTool::UOdysseyPainterEditorVectorGridTool()
 void
 UOdysseyPainterEditorVectorGridTool::UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
-    iEngine->RemoveHUD( &mGridHUD );
+    iEngine->RemoveHUD( mGridHUD );
 
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
@@ -39,10 +41,10 @@ void
 UOdysseyPainterEditorVectorGridTool::LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
     iEngine->ClearHUD();
-    iEngine->AddHUD( &mGridHUD );
+    iEngine->AddHUD( mGridHUD );
 
-    mGridHUD.MakeGrid( iScene, DivisionsX, DivisionsY );
-    mGridHUD.Export( mPointArray );
+    mGridHUD->MakeGrid( iScene, DivisionsX, DivisionsY );
+    mGridHUD->Export( mPointArray );
     // clear selected nodes
     mGridNodeArray.clear();
 
@@ -65,29 +67,20 @@ UOdysseyPainterEditorVectorGridTool::OnMouseDownVector( FOdysseyVectorEngine* iE
     }
     GEditor->EndTransaction();
 
-    for( int i = 0; i < iPointInTexture.keysDown.Num(); i++ )
-    {
-        if( ( iPointInTexture.keysDown[i] == EKeys::LeftShift ) || ( iPointInTexture.keysDown[i] == EKeys::RightShift ) )
-        {
-            mMultipleSelectionMode = true;
-        }
-    }
-
     // multiple selection mode
-    if ( mMultipleSelectionMode == true )
+    if ( FSlateApplication::Get().GetModifierKeys().IsShiftDown() )
     {
         mMultipleSelectionMode = true;
 
-        mGridHUD.StartSelectionRectangle( iPointInTexture.x, iPointInTexture.y );
+        mGridHUD->StartSelectionRectangle( iPointInTexture.x, iPointInTexture.y );
     }
     else
     {
-        FGridNode* gridNode = mGridHUD.PickNode( iPointInTexture.x, iPointInTexture.y, PickingRadius );
-
-        mGridNodeArray.clear();
+        FGridNode *gridNode = mGridHUD->PickNode( iPointInTexture.x, iPointInTexture.y, PickingRadius );
 
         if( gridNode )
         {
+            mGridNodeArray.clear();
             mGridNodeArray.push_back( gridNode );
         }
     }
@@ -104,11 +97,11 @@ UOdysseyPainterEditorVectorGridTool::OnMouseDragVector( FOdysseyVectorEngine* iE
 {
     if( mMultipleSelectionMode == true )
     {
-        mGridHUD.DragSelectionRectangle( iPointInTexture.x, iPointInTexture.y );
+        mGridHUD->DragSelectionRectangle( iPointInTexture.x, iPointInTexture.y );
     }
     else
     {
-        FSelectionBox& selectionBox = mGridHUD.GetSelectionBox();
+        FSelectionBox& selectionBox = mGridHUD->GetSelectionBox();
 
         if( selectionBox.space )
         {
@@ -120,7 +113,7 @@ UOdysseyPainterEditorVectorGridTool::OnMouseDragVector( FOdysseyVectorEngine* iE
                 mGridNodeArray[i]->Set( mGridNodeArray[i]->GetX() + spaceDif.x, mGridNodeArray[i]->GetY() + spaceDif.y );
             }
 
-            mGridHUD.Deform();
+            mGridHUD->Deform();
 
             // update invalidated objects
             iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES | FOdysseyVectorObject::KEEPINVALIDATED );
@@ -139,8 +132,7 @@ UOdysseyPainterEditorVectorGridTool::OnMouseUpVector( FOdysseyVectorEngine* iEng
     if( mMultipleSelectionMode == true )
     {
         mGridNodeArray.clear();
-
-        mGridHUD.EndSelectionRectangle( mGridNodeArray );
+        mGridHUD->EndSelectionRectangle( mGridNodeArray );
     }
 
     iScene->Update( 0 );
@@ -162,7 +154,7 @@ UOdysseyPainterEditorVectorGridTool::PropertyChangedVector( FOdysseyVectorEngine
                                                           , FOdysseyVectorScene* iScene
                                                           , const FName& iPropertyName )
 {
-    mGridHUD.MakeGrid( iScene, DivisionsX, DivisionsY );
+    mGridHUD->MakeGrid( iScene, DivisionsX, DivisionsY );
 }
 
 #undef LOCTEXT_NAMESPACE

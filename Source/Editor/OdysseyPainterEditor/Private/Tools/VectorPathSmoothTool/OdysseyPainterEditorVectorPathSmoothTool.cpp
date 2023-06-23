@@ -2,6 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Tools/VectorPathSmoothTool/OdysseyPainterEditorVectorPathSmoothTool.h"
+#include "Tools/VectorPathSmoothTool/OdysseyPainterEditorVectorPathSmoothToolHUD.h"
 #include "Undo/OdysseyVectorUndoSegmentReshape.h"
 
 #define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorPathSmoothTool"
@@ -13,21 +14,19 @@ UOdysseyPainterEditorVectorPathSmoothTool::~UOdysseyPainterEditorVectorPathSmoot
 }
 
 UOdysseyPainterEditorVectorPathSmoothTool::UOdysseyPainterEditorVectorPathSmoothTool()
-    : /*mPickingHUD()
-    , */Radius(20.0f)
+    : Radius(20.0f)
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathSmoothTool64");
 
     mPickedPointArray.reserve( 50 );
 
-    //mPickingHUD.SetRadius( Radius );
+    mPathSmoothHUD = new FOdysseyPainterEditorVectorPathSmoothToolHUD( this );
 }
 
 void
 UOdysseyPainterEditorVectorPathSmoothTool::UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
-    //iEngine->RemoveHUD( &mPickingHUD );
-    //iEngine->RemoveHUD( &mPathPushHUD );
+    iEngine->RemoveHUD( mPathSmoothHUD );
 
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
@@ -36,8 +35,7 @@ void
 UOdysseyPainterEditorVectorPathSmoothTool::LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
     iEngine->ClearHUD();
-    //iEngine->AddHUD( &mPickingHUD );
-    //iEngine->AddHUD( &mPathPushHUD );
+    iEngine->AddHUD( mPathSmoothHUD );
 
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
@@ -51,6 +49,7 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDownVector( FOdysseyVectorEngi
     mPickedPointArray.clear();
 
     iEngine->PickPoints( iScene
+                       , RestrictToSelection
                        , iPointInTexture.x
                        , iPointInTexture.y
                        , Radius
@@ -71,7 +70,7 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseHoverVector( FOdysseyVectorEng
                           , (int)diameter
                           , (int)diameter };
 
-    //mPickingHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
+    mPathSmoothHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
 
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
@@ -81,6 +80,7 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDragVector( FOdysseyVectorEngi
                                                             , FOdysseyVectorScene* iScene
                                                             , const FOdysseyPoint& iPointInTexture )
 {
+    mPathSmoothHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
 }
 
 bool

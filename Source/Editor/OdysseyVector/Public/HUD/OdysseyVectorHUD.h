@@ -41,6 +41,8 @@ class ODYSSEYVECTOR_API FPointQuadTree
 class ODYSSEYVECTOR_API FOdysseyVectorHUD
 {
     public:
+        static void DrawObjectRecursive( FOdysseyVectorObject* iObj, BLContext* iBLCtx );
+
         virtual ~FOdysseyVectorHUD();
         FOdysseyVectorHUD();
 

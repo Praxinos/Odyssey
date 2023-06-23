@@ -6,7 +6,6 @@
 #include <Core/Core.h>
 #include <Image/Block.h>
 #include "Undo/OdysseyVectorUndo.h"
-#include "HUD/OdysseyVectorHUDGrid.h"
 #include "OdysseyVectorObject.h"
 #include "OdysseyVectorPoint.h"
 #include "OdysseyVectorHandle.h"

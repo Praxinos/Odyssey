@@ -10,6 +10,8 @@
 
 #include "OdysseyPainterEditorVectorObjectRotateTool.generated.h"
 
+class FOdysseyPainterEditorVectorObjectRotateToolHUD;
+
 UCLASS()
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectRotateTool : public UOdysseyPainterEditorVectorObjectPickTool
 {
@@ -42,12 +44,19 @@ public:
     // usually for undos. (we need to reset the HUD as if the tool was activated)
     void OnRefresh( FOdysseyVectorScene* iScene );
 
+    bool IsDragging();
+    bool IsRotating();
+    double GetCumulAngle();
+
 protected:
     void FitHUD( FOdysseyVectorScene* iScene );
 
 private:
-    FOdysseyVectorHUDRotate mTransformHUD;
+    FOdysseyPainterEditorVectorObjectRotateToolHUD* mObjectRotateHUD;
     std::vector<FObjectTransform> mObjectTransformArray;
     bool mDragging;
+    bool mRotating;
     ::ULIS::FVec2D* mPickedPivot;
+    ::ULIS::FVec2D mStartAtVector;
+    double mCumulAngle;
 };

@@ -17,7 +17,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorScenePanToolHUD : publ
 
         virtual void Draw( FOdysseyVectorScene* iScene, uint64 iFlags ) override;
         virtual void Reset( FOdysseyVectorScene* iScene ) override;
-
+        void SetFactor( double iFactor );
     private:
         void DrawFrame( FOdysseyVectorScene* iScene
                       , ::ULIS::FRectD& iFrame

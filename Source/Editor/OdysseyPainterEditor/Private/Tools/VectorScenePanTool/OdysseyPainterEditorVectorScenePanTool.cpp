@@ -73,8 +73,20 @@ UOdysseyPainterEditorVectorScenePanTool::OnMouseDragVectorStatic( FOdysseyVector
                                                                 , FOdysseyVectorScene* iScene
                                                                 , const FOdysseyPoint& iPointInTexture )
 {
-    iScene->Translate( iScene->GetTranslationX() + iPointInTexture.deltaPosition.X
-                        , iScene->GetTranslationY() + iPointInTexture.deltaPosition.Y );
+    double factor = 1.0f;
+
+    if ( FSlateApplication::Get().GetModifierKeys().IsShiftDown() )
+    {
+        factor *= 4.0f;
+    }
+
+    if ( FSlateApplication::Get().GetModifierKeys().IsControlDown() )
+    {
+        factor *= 0.25f;
+    }
+
+    iScene->Translate( iScene->GetTranslationX() + ( iPointInTexture.deltaPosition.X * factor )
+                     , iScene->GetTranslationY() + ( iPointInTexture.deltaPosition.Y * factor ) );
     iScene->UpdateMatrix();
 
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
