@@ -45,8 +45,6 @@ UOdysseyPainterEditorVectorGridTool::LoadVector( FOdysseyVectorEngine* iEngine, 
 
     mGridHUD->MakeGrid( iScene, DivisionsX, DivisionsY );
     mGridHUD->Export( mPointArray );
-    // clear selected nodes
-    mGridNodeArray.clear();
 
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
@@ -76,12 +74,18 @@ UOdysseyPainterEditorVectorGridTool::OnMouseDownVector( FOdysseyVectorEngine* iE
     }
     else
     {
-        FGridNode *gridNode = mGridHUD->PickNode( iPointInTexture.x, iPointInTexture.y, PickingRadius );
+        bool picked;
 
-        if( gridNode )
+        mGridHUD->GetSelection( mGridNodeArray );
+
+        picked = mGridHUD->PickNodes( iPointInTexture.x
+                                    , iPointInTexture.y
+                                    , PickingRadius
+                                    , FSlateApplication::Get().GetModifierKeys().IsControlDown() ? false : true );
+
+        if( picked == true )
         {
-            mGridNodeArray.clear();
-            mGridNodeArray.push_back( gridNode );
+            mGridHUD->GetSelection( mGridNodeArray );
         }
     }
 
@@ -131,8 +135,7 @@ UOdysseyPainterEditorVectorGridTool::OnMouseUpVector( FOdysseyVectorEngine* iEng
 {
     if( mMultipleSelectionMode == true )
     {
-        mGridNodeArray.clear();
-        mGridHUD->EndSelectionRectangle( mGridNodeArray );
+        mGridHUD->EndSelectionRectangle( FSlateApplication::Get().GetModifierKeys().IsControlDown() ? false : true );
     }
 
     iScene->Update( 0 );

@@ -48,6 +48,12 @@ public:
                         , FOdysseyVectorScene* iScene
                         , const FOdysseyPoint& iPointInTexture
                         , const FKey& iKey );
+    virtual bool OnKeyUpVector( FOdysseyVectorEngine* iEngine
+                              , FOdysseyVectorScene* iScene
+                              , const FKey& iKey ) override;
+    virtual bool OnKeyDownVector( FOdysseyVectorEngine* iEngine
+                                , FOdysseyVectorScene* iScene
+                                , const FKey& iKey ) override;
 
     //OdysseyPainterEditorTool overrides
     virtual void Commit() override;
@@ -61,6 +67,7 @@ public:
 
         UPROPERTY(EditAnywhere, Category="Primitive Drawing Tool")
         bool Uniform;
+        bool UniformAtKeyDown;
 
        ::ULIS::FVec2D mMouseDown;
 };

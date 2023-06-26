@@ -15,7 +15,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::~UOdysseyPainterEditorVectorPri
 UOdysseyPainterEditorVectorPrimitiveDrawingTool::UOdysseyPainterEditorVectorPrimitiveDrawingTool()
     : PrimitiveType ( EOdysseyVectorPrimitiveType::Ellipse )
     , StrokeWidth( 4.0f )
-    , Uniform( true )
+    , Uniform( false )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Circle64");
 }
@@ -39,6 +39,38 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::LoadVector( FOdysseyVectorEngin
 
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
+
+bool
+UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnKeyDownVector( FOdysseyVectorEngine* iEngine
+                                                                , FOdysseyVectorScene* iScene
+                                                                , const FKey& iKey )
+{
+    UniformAtKeyDown = Uniform;
+
+    if ( FSlateApplication::Get().GetModifierKeys().IsShiftDown() )
+    {
+        Uniform = true;
+    }
+
+    UOdysseyPainterEditorDefaultTool::OnKeyDownVector( iEngine, iScene, iKey );
+    //iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+
+    return false;
+}
+
+bool
+UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnKeyUpVector( FOdysseyVectorEngine* iEngine
+                                                              , FOdysseyVectorScene* iScene
+                                                              , const FKey& iKey )
+{
+    Uniform = UniformAtKeyDown;
+
+    UOdysseyPainterEditorDefaultTool::OnKeyUpVector( iEngine, iScene, iKey );
+    //iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+
+    return false;
+}
+
 
 bool
 UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDownVector( FOdysseyVectorEngine* iEngine

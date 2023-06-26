@@ -11,6 +11,27 @@ FOdysseyPainterEditorVectorGridToolHUD::FOdysseyPainterEditorVectorGridToolHUD( 
     mGridTool = iGridTool;
 }
 
+FGridNode::~FGridNode()
+{
+}
+
+FGridNode::FGridNode()
+    : mSelected( false )
+{
+}
+
+void
+FGridNode::SetSelected( bool iSelected )
+{
+    mSelected = iSelected;
+}
+
+bool
+FGridNode::IsSelected()
+{
+   return mSelected;
+}
+
 void
 FOdysseyPainterEditorVectorGridToolHUD::Deform()
 {
@@ -73,7 +94,7 @@ FOdysseyPainterEditorVectorGridToolHUD::DragSelectionRectangle( double iWorldX, 
 }
 
 void
-FOdysseyPainterEditorVectorGridToolHUD::EndSelectionRectangle( std::vector<FGridNode*>& oNodeArray )
+FOdysseyPainterEditorVectorGridToolHUD::EndSelectionRectangle( bool iClearSelection )
 {
     double xmin = ::ULIS::FMath::Min( mWorldSelDrag.x, mWorldSelStart.x );
     double ymin = ::ULIS::FMath::Min( mWorldSelDrag.y, mWorldSelStart.y );
@@ -84,49 +105,97 @@ FOdysseyPainterEditorVectorGridToolHUD::EndSelectionRectangle( std::vector<FGrid
     mWorldSelDrag.x = mWorldSelStart.x = 0.0f;
     mWorldSelDrag.y = mWorldSelStart.y = 0.0f;
 
-    PickNodes( worldRect, oNodeArray );
+    PickNodes( worldRect, iClearSelection );
 }
 
-FGridNode *
-FOdysseyPainterEditorVectorGridToolHUD::PickNode( double iWorldX, double iWorldY, double iWorldRadius )
+void
+FOdysseyPainterEditorVectorGridToolHUD::GetSelection( std::vector<FGridNode*>& oNodeArray )
 {
+    oNodeArray.clear();
+
+    for( int i = 0; i < mNodeArray.size(); i++ )
+    {
+        if( mNodeArray[i].IsSelected() )
+        {
+            oNodeArray.push_back( &mNodeArray[i] );
+        }
+    }
+}
+
+void
+FOdysseyPainterEditorVectorGridToolHUD::ClearSelection()
+{
+    for( int i = 0; i < mNodeArray.size(); i++ )
+    {
+        mNodeArray[i].SetSelected( false );
+    }
+}
+
+bool
+FOdysseyPainterEditorVectorGridToolHUD::PickNodes( double iWorldX
+                                                 , double iWorldY
+                                                 , double iWorldRadius
+                                                 , bool iClearSelection )
+{
+    bool picked = false;
+
+    if( iClearSelection )
+    {
+        ClearSelection();
+    }
+
     if( mSelectionBox.space )
     {
         BLMatrix2D worldMatrix = mSelectionBox.space->GetWorldMatrix();
 
         for( int i = 0; i < mNodeArray.size(); i++ )
         {
-            BLPoint pt = worldMatrix.mapPoint( mNodeArray[i].GetX(), mNodeArray[i].GetY() );
+            FGridNode* node = &mNodeArray[i];
+            BLPoint pt = worldMatrix.mapPoint( node->GetX(), node->GetY() );
             ::ULIS::FVec2D vec = ::ULIS::FVec2D( iWorldX - pt.x, iWorldY - pt.y );
 
             if ( vec.Distance() <= iWorldRadius )
             {
-                return &mNodeArray[i];
+                node->SetSelected( true );
+
+                picked = true;
             }
         }
     }
 
-    return nullptr;
+    return picked;
 }
 
-void
-FOdysseyPainterEditorVectorGridToolHUD::PickNodes( ::ULIS::FRectD& iWorldRect, std::vector<FGridNode*>& oNodeArray )
+bool
+FOdysseyPainterEditorVectorGridToolHUD::PickNodes( ::ULIS::FRectD& iWorldRect, bool iClearSelection )
 {
+    bool picked = false;
+
+    if( iClearSelection )
+    {
+        ClearSelection();
+    }
+
     if( mSelectionBox.space )
     {
         BLMatrix2D worldMatrix = mSelectionBox.space->GetWorldMatrix();
 
         for( int i = 0; i < mNodeArray.size(); i++ )
         {
-            BLPoint pt = worldMatrix.mapPoint( mNodeArray[i].GetX(), mNodeArray[i].GetY() );
+            FGridNode* node = &mNodeArray[i];
+            BLPoint pt = worldMatrix.mapPoint( node->GetX(), node->GetY() );
             ::ULIS::FVec2D coords = ::ULIS::FVec2D( pt.x, pt.y );
 
             if ( iWorldRect.HitTest( coords ) )
             {
-                oNodeArray.push_back( &mNodeArray[i] );
+                node->SetSelected( true );
+
+                picked = true;
             }
         }
     }
+
+    return picked;
 }
 
 void
@@ -198,7 +267,7 @@ FOdysseyPainterEditorVectorGridToolHUD::Draw( FOdysseyVectorScene* iScene, uint6
         {
             BLPoint pt = worldMatrix.mapPoint( mNodeArray[i].GetX(), mNodeArray[i].GetY() );
 
-            blctx->setFillStyle( BLRgba32( 0xFF0000FF ) );
+            blctx->setFillStyle( mNodeArray[i].IsSelected() ? BLRgba32( 0xFF00FF00 ) : BLRgba32( 0xFF0000FF ) );
             blctx->fillCircle( pt.x, pt.y, FOdysseyPainterEditorVectorGridToolHUD::HANDLE_RADIUS );
             blctx->setStrokeWidth( 1.0f );
             blctx->setStrokeStyle( BLRgba32(0xFF808080) );

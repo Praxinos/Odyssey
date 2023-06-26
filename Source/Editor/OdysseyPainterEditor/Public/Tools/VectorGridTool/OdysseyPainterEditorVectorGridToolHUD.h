@@ -17,8 +17,14 @@ FGridPoint;
 class ODYSSEYPAINTEREDITOR_API FGridNode : public FOdysseyVectorPoint
 {
     public:
-        ~FGridNode(){};
-        FGridNode(){};
+        ~FGridNode();
+        FGridNode();
+
+        void SetSelected( bool iSelected );
+        bool IsSelected();
+
+    private:
+        bool mSelected;
 };
 
 typedef struct _FGridCell
@@ -39,13 +45,15 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorGridToolHUD : public F
         virtual void Draw( FOdysseyVectorScene* iScene, uint64 iFlags ) override;
         virtual void Reset( FOdysseyVectorScene* iScene ) override;
 
-        FGridNode *PickNode( double iWorldX, double iWorldY, double iWorldRadius );
-        void PickNodes( ::ULIS::FRectD& iWorldRect, std::vector<FGridNode*>& oNodeArray );
+        bool PickNodes( double iWorldX, double iWorldY, double iWorldRadius, bool iClearSelection );
+        bool PickNodes( ::ULIS::FRectD& iWorldRect, bool iClearSelection );
+        void ClearSelection();
+        void GetSelection( std::vector<FGridNode*>& oNodeArray );
         void MakeGrid( FOdysseyVectorScene* iScene, uint32 iDivisionX, uint32 iDivisionY );
         void Deform();
         void StartSelectionRectangle( double iWorldX, double iWorldY );
         void DragSelectionRectangle( double iWorldX, double iWorldY );
-        void EndSelectionRectangle( std::vector<FGridNode*>& oNodeArray );
+        void EndSelectionRectangle( bool iClearSelection );
         void Export( std::vector<FOdysseyVectorPoint*>& oPointArray );
 
     protected:
