@@ -33,9 +33,6 @@ public:
     ::ULIS::FRectI OnMouseHoverVector( FOdysseyVectorEngine* iEngine
                                      , FOdysseyVectorScene* iScene
                                      , const FOdysseyPoint& iPointInTexture );
-    void MoveObjectSelection( FOdysseyVectorEngine* iEngine
-                            , FOdysseyVectorScene* iScene
-                            , const FOdysseyPoint& iPointInTexture );
     void OnMouseDragVector( FOdysseyVectorEngine* iEngine
                           , FOdysseyVectorScene* iScene
                           , const FOdysseyPoint& iPointInTexture );
@@ -49,6 +46,15 @@ public:
 
     //OdysseyPainterEditorTool overrides
     virtual void Commit() override;
+
+private:
+    void TranslateObjectSelection( FOdysseyVectorEngine* iEngine
+                                 , FOdysseyVectorScene* iScene
+                                 , const FOdysseyPoint& iPointInTexture );
+    void RotateObjectSelection( FOdysseyVectorEngine* iEngine
+                              , FOdysseyVectorScene* iScene
+                              , const FOdysseyPoint& iPointInTexture );
+    double GetRotationAngle( const FOdysseyPoint& iPointInTexture );
 
 private:
     FOdysseyPainterEditorVectorTransformToolHUD* mTransformHUD;

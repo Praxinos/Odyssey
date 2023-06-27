@@ -26,6 +26,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorTransformToolHUD : pub
         void SetGizmo( double iLocalX, double iLocalY );
         ::ULIS::FVec2D& GetGizmo();
         uint32 GetFlags();
+        void ShowSelectionBox( bool iShowSelectionBox );
 
     private:
         uint32 PickSelectionBox( double iWorldX, double iWorldY );
@@ -44,4 +45,5 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorTransformToolHUD : pub
         uint32 mFlags;
         ::ULIS::FVec2D mXAxis;
         ::ULIS::FVec2D mYAxis;
+        bool mShowSelectionBox;
 };

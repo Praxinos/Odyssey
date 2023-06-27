@@ -8,6 +8,7 @@ FOdysseyPainterEditorVectorTransformToolHUD::~FOdysseyPainterEditorVectorTransfo
 FOdysseyPainterEditorVectorTransformToolHUD::FOdysseyPainterEditorVectorTransformToolHUD( UOdysseyPainterEditorVectorTransformTool* iTransformTool )
     : FOdysseyVectorHUDSelection()
     , mFlags( 0 )
+    , mShowSelectionBox( true )
 {
     mTransformTool = iTransformTool;
 }
@@ -16,6 +17,12 @@ uint32
 FOdysseyPainterEditorVectorTransformToolHUD::GetFlags()
 {
     return mFlags;
+}
+
+void
+FOdysseyPainterEditorVectorTransformToolHUD::ShowSelectionBox( bool iShowSelectionBox )
+{
+    mShowSelectionBox = iShowSelectionBox;
 }
 
 uint32
@@ -244,7 +251,10 @@ FOdysseyPainterEditorVectorTransformToolHUD::Draw( FOdysseyVectorScene* iScene, 
     {
         BLMatrix2D worldMatrix = mSelectionBox.worldMatrix;
 
-        DrawSelectionBox( iScene, iFlags );
+        if( mShowSelectionBox )
+        {
+            DrawSelectionBox( iScene, iFlags );
+        }
 
         DrawGizmo( iScene, iFlags );
     }
