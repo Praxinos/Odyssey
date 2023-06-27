@@ -27,6 +27,7 @@
 #include "Tools/PaintBucketTool/OdysseyTextureEditorPaintBucketTool.h"
 #include "Tools/ColorPickerTool/OdysseyTextureEditorColorPickerTool.h"
 #include "Tools/VectorGridTool/OdysseyTextureEditorVectorGridTool.h"
+#include "Tools/VectorTransformTool/OdysseyTextureEditorVectorTransformTool.h"
 #include "Misc/OdysseyHandle.h"
 
 /**
@@ -75,6 +76,7 @@ public:
     virtual UOdysseyTextureEditorPaintBucketTool* GetPaintBucketTool() const override;
     virtual UOdysseyTextureEditorColorPickerTool* GetColorPickerTool() const override;
     virtual UOdysseyTextureEditorVectorGridTool* GetVectorGridTool() const override;
+    virtual UOdysseyTextureEditorVectorTransformTool* GetVectorTransformTool() const override;
 
 public:
     // Overrides
@@ -120,6 +122,7 @@ private:
     UOdysseyTextureEditorPaintBucketTool* mPaintBucketTool;
     UOdysseyTextureEditorColorPickerTool* mColorPickerTool;
     UOdysseyTextureEditorVectorGridTool* mVectorGridTool;
+    UOdysseyTextureEditorVectorTransformTool* mVectorTransformTool;
 
     TSharedPtr<IOdysseyHandle> mLayerStackPreloadHandle;
 };

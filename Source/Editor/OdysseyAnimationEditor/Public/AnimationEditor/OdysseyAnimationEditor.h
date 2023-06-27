@@ -57,6 +57,7 @@ public:
     virtual UOdysseyPainterEditorVectorObjectRotateTool* GetVectorObjectRotateTool() const override { return nullptr; }
     virtual UOdysseyPainterEditorVectorObjectScaleTool* GetVectorObjectScaleTool() const override { return nullptr; }
     virtual UOdysseyPainterEditorVectorGridTool* GetVectorGridTool() const override { return nullptr; }
+    virtual UOdysseyPainterEditorVectorTransformTool* GetVectorTransformTool() const override { return nullptr; }
     virtual UOdysseyPainterEditorVectorSceneScaleTool* GetVectorSceneScaleTool() const override { return nullptr; }
     virtual UOdysseyPainterEditorVectorScenePanTool* GetVectorScenePanTool() const override { return nullptr; }
     virtual UOdysseyPainterEditorVectorEraserTool* GetVectorEraserTool() const override { return nullptr; }

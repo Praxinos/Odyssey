@@ -24,6 +24,7 @@
 #include "Tools/PaintBucketTool/OdysseyPainterEditorPaintBucketTool.h"
 #include "Tools/ColorPickerTool/OdysseyPainterEditorColorPickerTool.h"
 #include "Tools/VectorGridTool/OdysseyPainterEditorVectorGridTool.h"
+#include "Tools/VectorTransformTool/OdysseyPainterEditorVectorTransformTool.h"
 #include <ULIS>
 
 class FOdysseyHUDSystem;
@@ -71,6 +72,7 @@ public:
     virtual UOdysseyPainterEditorVectorObjectRotateTool*             GetVectorObjectRotateTool() const = 0;
     virtual UOdysseyPainterEditorVectorObjectScaleTool*              GetVectorObjectScaleTool() const = 0;
     virtual UOdysseyPainterEditorVectorGridTool*                     GetVectorGridTool() const = 0;
+    virtual UOdysseyPainterEditorVectorTransformTool*                GetVectorTransformTool() const = 0;
     virtual UOdysseyPainterEditorVectorSceneScaleTool*               GetVectorSceneScaleTool() const = 0;
     virtual UOdysseyPainterEditorVectorScenePanTool*                 GetVectorScenePanTool() const = 0;
     virtual UOdysseyPainterEditorVectorEraserTool*                   GetVectorEraserTool() const = 0;

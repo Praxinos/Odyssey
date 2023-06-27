@@ -35,7 +35,7 @@ FGridNode::IsSelected()
 void
 FOdysseyPainterEditorVectorGridToolHUD::Deform()
 {
-    if( mSelectionBox.space )
+    if( mSelectionBox.rect.Area() )
     {
         for( int i = 0; i < mCellArray.size(); i++ )
         {
@@ -72,7 +72,7 @@ FOdysseyPainterEditorVectorGridToolHUD::DeformCell( FGridCell& iCell )
 
         isxCoords = p0p1s + ( sLine * isx );
 
-        worldPt = mSelectionBox.space->GetWorldMatrix().mapPoint( isxCoords.x, isxCoords.y );
+        worldPt = mSelectionBox.worldMatrix.mapPoint( isxCoords.x, isxCoords.y );
         objectPt = iCell.mPointArray[i].mDeformedObject->GetInverseWorldMatrix().mapPoint( worldPt.x, worldPt.y );
 
         iCell.mPointArray[i].mPoint->Set( objectPt.x, objectPt.y );
@@ -144,9 +144,9 @@ FOdysseyPainterEditorVectorGridToolHUD::PickNodes( double iWorldX
         ClearSelection();
     }
 
-    if( mSelectionBox.space )
+    if( mSelectionBox.rect.Area() )
     {
-        BLMatrix2D worldMatrix = mSelectionBox.space->GetWorldMatrix();
+        BLMatrix2D worldMatrix = mSelectionBox.worldMatrix;
 
         for( int i = 0; i < mNodeArray.size(); i++ )
         {
@@ -176,9 +176,9 @@ FOdysseyPainterEditorVectorGridToolHUD::PickNodes( ::ULIS::FRectD& iWorldRect, b
         ClearSelection();
     }
 
-    if( mSelectionBox.space )
+    if( mSelectionBox.rect.Area() )
     {
-        BLMatrix2D worldMatrix = mSelectionBox.space->GetWorldMatrix();
+        BLMatrix2D worldMatrix = mSelectionBox.worldMatrix;
 
         for( int i = 0; i < mNodeArray.size(); i++ )
         {
@@ -211,7 +211,7 @@ FOdysseyPainterEditorVectorGridToolHUD::DrawSelectionRectangle( FOdysseyVectorSc
 
     if( mWorldSelDrag != mWorldSelStart )
     {
-        if( mSelectionBox.space )
+        if( mSelectionBox.rect.Area() )
         {
             double xmin = ::ULIS::FMath::Min( mWorldSelDrag.x, mWorldSelStart.x );
             double ymin = ::ULIS::FMath::Min( mWorldSelDrag.y, mWorldSelStart.y );
@@ -242,9 +242,9 @@ FOdysseyPainterEditorVectorGridToolHUD::Draw( FOdysseyVectorScene* iScene, uint6
     blctx->save();
     blctx->resetMatrix();
 
-    if( mSelectionBox.space )
+    if( mSelectionBox.rect.Area() )
     {
-        BLMatrix2D worldMatrix = mSelectionBox.space->GetWorldMatrix();
+        BLMatrix2D worldMatrix = mSelectionBox.worldMatrix;
 
         DrawSelectionRectangle( iScene, iFlags );
 
@@ -327,7 +327,7 @@ FOdysseyPainterEditorVectorGridToolHUD::Map( FOdysseyVectorScene* iScene )
 uint32
 FOdysseyPainterEditorVectorGridToolHUD::MapObject( FOdysseyVectorObject* iObject )
 {
-    BLMatrix2D& spaceMatrix = mSelectionBox.space->GetInverseWorldMatrix();
+    BLMatrix2D& spaceMatrix = mSelectionBox.inverseWorldMatrix;
     std::list<FOdysseyVectorObject*>& childrenList = iObject->GetChildrenList();
     uint32 pointCount = 0;
 
@@ -343,7 +343,7 @@ FOdysseyPainterEditorVectorGridToolHUD::MapObject( FOdysseyVectorObject* iObject
         {
             FOdysseyVectorBucket* bucket = static_cast<FOdysseyVectorBucket*>(*it);
             BLPoint pt = conversionMatrix.mapPoint( bucket->GetX(), bucket->GetY() );
-            double spaceX = pt.x - mSelectionBox.rect.x; // Hi Elon :) !
+            double spaceX = pt.x - mSelectionBox.rect.x;
             double spaceY = pt.y - mSelectionBox.rect.y;
 
             pointCount++;
@@ -365,7 +365,7 @@ FOdysseyPainterEditorVectorGridToolHUD::MapObject( FOdysseyVectorObject* iObject
         {
             FOdysseyVectorVertex* cubicVertex = static_cast<FOdysseyVectorVertex*>(*it);
             BLPoint pt = conversionMatrix.mapPoint( cubicVertex->GetX(), cubicVertex->GetY() );
-            double spaceX = pt.x - mSelectionBox.rect.x; // Hi Elon :) !
+            double spaceX = pt.x - mSelectionBox.rect.x;
             double spaceY = pt.y - mSelectionBox.rect.y;
 
             pointCount++;

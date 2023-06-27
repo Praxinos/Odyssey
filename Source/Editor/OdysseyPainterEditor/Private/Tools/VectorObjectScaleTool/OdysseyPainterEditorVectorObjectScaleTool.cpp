@@ -56,9 +56,9 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDownVector( FOdysseyVectorEng
 {
     FSelectionBox& selectionBox = mObjectScaleHUD->GetSelectionBox();
 
-    if( selectionBox.space )
+    if( selectionBox.rect.Area() )
     {
-        BLPoint localCoords = selectionBox.space->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
+        BLPoint localCoords = selectionBox.inverseWorldMatrix.mapPoint( iPointInTexture.x, iPointInTexture.y );
 
         mOldLocalMouseX = localCoords.x;
         mOldLocalMouseY = localCoords.y;
@@ -100,9 +100,9 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDragVector( FOdysseyVectorEng
 
     mDragging = true;
 
-    if ( selectionBox.space )
+    if ( selectionBox.rect.Area() )
     {
-        BLPoint localCoords = selectionBox.space->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
+        BLPoint localCoords = selectionBox.inverseWorldMatrix.mapPoint( iPointInTexture.x, iPointInTexture.y );
         std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
         double difx = localCoords.x - mOldLocalMouseX;
         double dify = localCoords.y - mOldLocalMouseY;
@@ -163,7 +163,7 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDragVector( FOdysseyVectorEng
 
         if( ( mHandleFlags & FOdysseyPainterEditorVectorObjectScaleToolHUD::HANDLE_MASK ) != 0 )
         {
-            BLMatrix2D spaceMatrix = selectionBox.space->GetWorldMatrix();
+            BLMatrix2D spaceMatrix = selectionBox.worldMatrix;
             BLMatrix2D invertSpaceMatrix;
             double x2mx1 = ( x2 - x1 );
             double y2my1 = ( y2 - y1 );

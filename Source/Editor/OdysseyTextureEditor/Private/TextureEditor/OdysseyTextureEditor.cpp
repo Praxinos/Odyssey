@@ -46,7 +46,8 @@ FOdysseyTextureEditor::FOdysseyTextureEditor() :
 	mVectorPathKnotTool(nullptr),
 	mPaintBucketTool(nullptr),
 	mColorPickerTool(nullptr),
-	mVectorGridTool(nullptr)
+	mVectorGridTool(nullptr),
+	mVectorTransformTool(nullptr)
 {
 	UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw(this, &FOdysseyTextureEditor::OnCurrentLayerChanged);
 }
@@ -88,6 +89,7 @@ FOdysseyTextureEditor::InitTools()
 	mPaintBucketTool = NewObject<UOdysseyTextureEditorPaintBucketTool>();
 	mColorPickerTool = NewObject<UOdysseyTextureEditorColorPickerTool>();
 	mVectorGridTool = NewObject<UOdysseyTextureEditorVectorGridTool>();
+	mVectorTransformTool = NewObject<UOdysseyTextureEditorVectorTransformTool>();
 
 	mRasterDrawingTool->SetEditor(this);
     mVectorPrimitiveDrawingTool->SetEditor(this);
@@ -108,6 +110,7 @@ FOdysseyTextureEditor::InitTools()
 	mPaintBucketTool->SetEditor(this);
 	mColorPickerTool->SetEditor(this);
 	mVectorGridTool->SetEditor(this);
+	mVectorTransformTool->SetEditor(this);
 	mRasterDrawingTool->SetBrushContexts(mBrushContexts);
 
 	mTools.Add(mRasterDrawingTool);
@@ -129,6 +132,7 @@ FOdysseyTextureEditor::InitTools()
 	mTools.Add(mPaintBucketTool);
 	mTools.Add(mColorPickerTool);
 	mTools.Add(mVectorGridTool);
+	mTools.Add(mVectorTransformTool);
 	//mTextureRasterDrawingTool->OnApplyOverridesDelegate().AddRaw(this, &FOdysseyPainterEditor::OnApplyOverrides);
 }
 
@@ -155,6 +159,7 @@ FOdysseyTextureEditor::BindShortcuts(FBaseToolkit* iToolkit)
 	mPaintBucketTool->BindShortcuts(iToolkit);
 	mColorPickerTool->BindShortcuts(iToolkit);
 	mVectorGridTool->BindShortcuts(iToolkit);
+	mVectorTransformTool->BindShortcuts(iToolkit);
 }
 
 void
@@ -180,6 +185,7 @@ FOdysseyTextureEditor::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
 	mPaintBucketTool->ExtendMenu(iOwner, iMenuName);
 	mColorPickerTool->ExtendMenu(iOwner, iMenuName);
 	mVectorGridTool->ExtendMenu(iOwner, iMenuName);
+	mVectorTransformTool->ExtendMenu(iOwner, iMenuName);
 }
 
 //--------------------------------------------------------------------------------------
@@ -392,6 +398,12 @@ FOdysseyTextureEditor::GetVectorGridTool() const
     return mVectorGridTool;
 }
 
+UOdysseyTextureEditorVectorTransformTool*
+FOdysseyTextureEditor::GetVectorTransformTool() const
+{
+    return mVectorTransformTool;
+}
+
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------- Overrides
 
@@ -511,5 +523,6 @@ FOdysseyTextureEditor::AddReferencedObjects(FReferenceCollector& Collector)
 	Collector.AddReferencedObject(mPaintBucketTool);
 	Collector.AddReferencedObject(mColorPickerTool);
 	Collector.AddReferencedObject(mVectorGridTool);
+	Collector.AddReferencedObject(mVectorTransformTool);
 }
 #undef LOCTEXT_NAMESPACE

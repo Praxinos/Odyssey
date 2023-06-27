@@ -68,11 +68,11 @@ UOdysseyPainterEditorVectorObjectRotateTool::OnMouseDownVector( FOdysseyVectorEn
 
     mPickedPivot = mObjectRotateHUD->PickPivot( iPointInTexture.x, iPointInTexture.y ) ? &mObjectRotateHUD->GetPivot() : nullptr;
 
-    if( selectionBox.space )
+    if( selectionBox.rect.Area() )
     {
         if( mPickedPivot == nullptr )
         {
-            BLPoint pt = selectionBox.space->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
+            BLPoint pt = selectionBox.inverseWorldMatrix.mapPoint( iPointInTexture.x, iPointInTexture.y );
             ::ULIS::FVec2D& pivot = mObjectRotateHUD->GetPivot();
 
             mStartAtVector.x = pt.x - pivot.x;
@@ -109,11 +109,11 @@ UOdysseyPainterEditorVectorObjectRotateTool::OnMouseDragVector( FOdysseyVectorEn
 
     mDragging = true;
 
-    if( selectionBox.space )
+    if( selectionBox.rect.Area() )
     {
         if ( mPickedPivot )
         {
-            BLPoint localCoords = selectionBox.space->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
+            BLPoint localCoords = selectionBox.inverseWorldMatrix.mapPoint( iPointInTexture.x, iPointInTexture.y );
 
             mObjectRotateHUD->SetPivot( localCoords.x, localCoords.y );
         }
@@ -122,10 +122,10 @@ UOdysseyPainterEditorVectorObjectRotateTool::OnMouseDragVector( FOdysseyVectorEn
             std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
             //::ULIS::FRectD beforeBBox = selectedObject->GetBBox( true );
             //::ULIS::FRectD localBBox = selectedObject->GetBBox( false );
-            BLMatrix2D spaceMatrix = selectionBox.space->GetWorldMatrix();
+            BLMatrix2D spaceMatrix = selectionBox.worldMatrix;
             BLMatrix2D invertSpaceMatrix;
             ::ULIS::FVec2D& pivot = mObjectRotateHUD->GetPivot();
-            BLPoint pt = selectionBox.space->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
+            BLPoint pt = selectionBox.inverseWorldMatrix.mapPoint( iPointInTexture.x, iPointInTexture.y );
             ::ULIS::FVec2D endAtVector;
             BLMatrix2D rotateMatrix;
             double rotationAngle = 0.0f;
@@ -202,7 +202,7 @@ UOdysseyPainterEditorVectorObjectRotateTool::OnMouseDragVector( FOdysseyVectorEn
             mObjectRotateHUD->UpdateSelectionBox( iScene, false );
 
             // update vector with new matrix
-            pt = selectionBox.space->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
+            pt = selectionBox.inverseWorldMatrix.mapPoint( iPointInTexture.x, iPointInTexture.y );
 
             mStartAtVector.x = pt.x - pivot.x;
             mStartAtVector.y = pt.y - pivot.y;

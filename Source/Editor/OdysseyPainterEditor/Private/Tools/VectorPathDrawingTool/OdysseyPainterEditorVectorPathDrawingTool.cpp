@@ -42,12 +42,22 @@ UOdysseyPainterEditorVectorPathDrawingTool::UnloadVector( FOdysseyVectorEngine* 
 }
 
 void
+UOdysseyPainterEditorVectorPathDrawingTool::OnSizeChanged()
+{
+
+}
+
+void
 UOdysseyPainterEditorVectorPathDrawingTool::LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
     iEngine->ClearHUD();
     iEngine->AddHUD( mPathDrawingHUD );
 
     mPathDrawingHUD->Reset( iScene ); // creates the quadtree;
+
+//    TSharedPtr<SOdysseyPaintModifiers> widget = GetEditorAs<FOdysseyPainterEditor>()->GetGUI()->GetTopTab().Get()->GetWidget();
+
+//    widget.Get()->OnSizeChanged.AddRaw( this, &UOdysseyPainterEditorVectorPathDrawingTool::OnSizeChanged );
 
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
@@ -109,6 +119,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorEng
                                                              , const FKey& iKey )
 {
     ::ULIS::FColor color = GetEditorAs<FOdysseyPainterEditor>()->PaintColor().GetValue();
+    //TSharedPtr<SOdysseyPaintModifiers> widget = GetEditorAs<FOdysseyPainterEditor>()->GetGUI()->GetTopTab().Get()->GetWidget();
     ::ULIS::FColor rgba8 = color.ToFormat( ::ULIS::eFormat::Format_RGBA8 );
     FOdysseyVectorVertex* cubicVertex = PickVertex( iEngine, iScene, iPointInTexture.x, iPointInTexture.y, StitchingRadius );
     FOdysseyVectorPathCubic* cubicPath = nullptr;

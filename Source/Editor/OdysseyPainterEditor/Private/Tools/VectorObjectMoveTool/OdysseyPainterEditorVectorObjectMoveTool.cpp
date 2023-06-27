@@ -105,10 +105,9 @@ UOdysseyPainterEditorVectorObjectMoveTool::OnMouseDragVector( FOdysseyVectorEngi
 
     mDragging = true;
 
-    if( selectionBox.space )
+    if( selectionBox.rect.Area() )
     {
-        BLMatrix2D spaceMatrix = World ? iScene->GetWorldMatrix()
-                                       : selectionBox.space->GetWorldMatrix();
+        BLMatrix2D spaceMatrix = selectionBox.worldMatrix;
         BLMatrix2D invertSpaceMatrix;
         BLMatrix2D translateMatrix;
         BLPoint translateBy;

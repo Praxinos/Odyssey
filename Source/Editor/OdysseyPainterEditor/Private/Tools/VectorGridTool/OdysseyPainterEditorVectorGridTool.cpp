@@ -107,10 +107,10 @@ UOdysseyPainterEditorVectorGridTool::OnMouseDragVector( FOdysseyVectorEngine* iE
     {
         FSelectionBox& selectionBox = mGridHUD->GetSelectionBox();
 
-        if( selectionBox.space )
+        if( selectionBox.rect.Area() )
         {
-            BLPoint spaceDif = selectionBox.space->GetInverseWorldMatrix().mapVector( iPointInTexture.deltaPosition.X
-                                                                                    , iPointInTexture.deltaPosition.Y );
+            BLPoint spaceDif = selectionBox.inverseWorldMatrix.mapVector( iPointInTexture.deltaPosition.X
+                                                                        , iPointInTexture.deltaPosition.Y );
 
             for( int i = 0; i < mGridNodeArray.size(); i++ )
             {

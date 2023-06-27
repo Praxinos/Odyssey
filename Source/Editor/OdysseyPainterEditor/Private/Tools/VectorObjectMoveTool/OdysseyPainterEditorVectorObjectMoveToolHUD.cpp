@@ -34,7 +34,7 @@ FOdysseyPainterEditorVectorObjectMoveToolHUD::PickGizmo( double iWorldX
 
     mGizmoFlags &= (~PICK_CHANGED);
 
-    if( selectionBox.space )
+    if( selectionBox.rect.Area() )
     {
         ::ULIS::FVec2D toPivot = ::ULIS::FVec2D( mPivot.x - iWorldX
                                                , mPivot.y - iWorldY );
@@ -79,9 +79,9 @@ FOdysseyPainterEditorVectorObjectMoveToolHUD::UpdateGizmo()
 {
     FSelectionBox& selectionBox = GetSelectionBox();
 
-    if( selectionBox.space )
+    if( selectionBox.rect.Area() )
     {
-        BLMatrix2D& worldMatrix = selectionBox.space->GetWorldMatrix();
+        BLMatrix2D& worldMatrix = selectionBox.worldMatrix;
         BLPoint origin = worldMatrix.mapPoint( selectionBox.rect.x + selectionBox.rect.w * 0.5f
                                              , selectionBox.rect.y + selectionBox.rect.h * 0.5f );
         BLPoint xVector = worldMatrix.mapVector( 1.0f, 0.0f );
@@ -138,7 +138,7 @@ FOdysseyPainterEditorVectorObjectMoveToolHUD::Draw( FOdysseyVectorScene* iScene,
 {
     FSelectionBox& selectionBox = GetSelectionBox();
 
-    if( selectionBox.space )
+    if( selectionBox.rect.Area() )
     {
         DrawGizmo( iScene );
     }

@@ -20,9 +20,9 @@ FOdysseyPainterEditorVectorObjectRotateToolHUD::FOdysseyPainterEditorVectorObjec
 bool
 FOdysseyPainterEditorVectorObjectRotateToolHUD::PickPivot( double iWorldX, double iWorldY )
 {
-    if( mSelectionBox.space )
+    if( mSelectionBox.rect.Area() )
     {
-        BLMatrix2D& worldMatrix = mSelectionBox.space->GetWorldMatrix();
+        BLMatrix2D& worldMatrix = mSelectionBox.worldMatrix;
         BLPoint pivot = worldMatrix.mapPoint( mPivot.x, mPivot.y );
         ::ULIS::FVec2D dist = ::ULIS::FVec2D( iWorldX - pivot.x, iWorldY - pivot.y );
         
@@ -70,9 +70,9 @@ FOdysseyPainterEditorVectorObjectRotateToolHUD::Draw( FOdysseyVectorScene* iScen
     }
 
 
-    if( mSelectionBox.space )
+    if( mSelectionBox.rect.Area() )
     {
-        BLMatrix2D& worldMatrix = mSelectionBox.space->GetWorldMatrix();
+        BLMatrix2D& worldMatrix = mSelectionBox.worldMatrix;
         BLPoint pivot = worldMatrix.mapPoint( mPivot.x, mPivot.y );
         //char str[255];
 

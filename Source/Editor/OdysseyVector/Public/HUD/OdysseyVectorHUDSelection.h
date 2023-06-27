@@ -7,8 +7,9 @@
 
 typedef struct _FSelectionBox
 {
-    FOdysseyVectorObject* space;
     ::ULIS::FRectD rect;
+    BLMatrix2D worldMatrix;
+    BLMatrix2D inverseWorldMatrix;
 } FSelectionBox;
 
 class ODYSSEYVECTOR_API FOdysseyVectorHUDSelection : public FOdysseyVectorHUD

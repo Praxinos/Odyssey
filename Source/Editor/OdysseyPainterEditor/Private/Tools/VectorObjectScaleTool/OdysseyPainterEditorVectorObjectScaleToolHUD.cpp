@@ -19,9 +19,9 @@ FOdysseyPainterEditorVectorObjectScaleToolHUD::PickHandle( double iWorldX, doubl
 
     mHandleFlags &= (~PICK_CHANGED);
 
-    if( mSelectionBox.space )
+    if( mSelectionBox.rect.Area() )
     {
-        BLMatrix2D& worldMatrix = mSelectionBox.space->GetWorldMatrix();
+        BLMatrix2D& worldMatrix = mSelectionBox.worldMatrix;
         BLPoint point[4] = { worldMatrix.mapPoint( mSelectionBox.rect.x                       , mSelectionBox.rect.y                        )
                            , worldMatrix.mapPoint( mSelectionBox.rect.x + mSelectionBox.rect.w, mSelectionBox.rect.y                        )
                            , worldMatrix.mapPoint( mSelectionBox.rect.x + mSelectionBox.rect.w, mSelectionBox.rect.y + mSelectionBox.rect.h )
@@ -59,9 +59,9 @@ FOdysseyPainterEditorVectorObjectScaleToolHUD::Draw( FOdysseyVectorScene* iScene
 
     DrawSelectionBox( iScene, iFlags );
 
-    if( mSelectionBox.space )
+    if( mSelectionBox.rect.Area() )
     {
-        BLMatrix2D& worldMatrix = mSelectionBox.space->GetWorldMatrix();
+        BLMatrix2D& worldMatrix = mSelectionBox.worldMatrix;
         BLPoint point[4] = { worldMatrix.mapPoint( mSelectionBox.rect.x                       , mSelectionBox.rect.y                        )
                            , worldMatrix.mapPoint( mSelectionBox.rect.x + mSelectionBox.rect.w, mSelectionBox.rect.y                        )
                            , worldMatrix.mapPoint( mSelectionBox.rect.x + mSelectionBox.rect.w, mSelectionBox.rect.y + mSelectionBox.rect.h )

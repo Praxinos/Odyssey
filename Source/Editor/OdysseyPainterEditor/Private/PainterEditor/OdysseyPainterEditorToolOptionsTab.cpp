@@ -55,6 +55,7 @@ FOdysseyPainterEditorToolOptionsTab::CreateWidget()
     SetWidgetForTool(mEditor->GetVectorPathPushTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorPathPushTool()));
     SetWidgetForTool(mEditor->GetPaintBucketTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetPaintBucketTool()));
     SetWidgetForTool(mEditor->GetVectorGridTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorGridTool()));
+    SetWidgetForTool(mEditor->GetVectorTransformTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorTransformTool()));
     //mToolsTab->GetToolsTab()->SetWidgetForTool(mEditor->GetVectorDrawingTool(), SNew(SOdysseyPainterVectorDrawingTool, mEditor->GetVectorDrawingTool()));
 
     return mWidgetSwitcher;

@@ -10,7 +10,6 @@ FOdysseyVectorHUDSelection::FOdysseyVectorHUDSelection()
     , mSelecting(true)
     , mSelectionMask ( nullptr )
 {
-    mSelectionBox.space = nullptr;
 }
 
 FSelectionBox&
@@ -84,28 +83,34 @@ FOdysseyVectorHUDSelection::UpdateSelectionBox( FOdysseyVectorScene* iScene, boo
 {
     std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
 
-    mSelectionBox.space = nullptr;
+    mSelectionBox.rect = ::ULIS::FRectD( 0, 0, 0, 0 );
 
     if( selectedObjectList.size() )
     {
         if( ( selectedObjectList.size() == 1 ) && ( iForceWorld == false ) )
         {
             FOdysseyVectorObject* selectedObject = iScene->GetLastSelected();
-            BLMatrix2D& worldMatrix = selectedObject->GetWorldMatrix();
 
-            mSelectionBox.space = selectedObject;
             mSelectionBox.rect = selectedObject->GetBBox( false );
+
+            mSelectionBox.worldMatrix = selectedObject->GetWorldMatrix();
+            mSelectionBox.inverseWorldMatrix = selectedObject->GetInverseWorldMatrix();
         }
         else
         {
             BLPoint p0, p1, p2, p3;
+            ::ULIS::FRectD rect = FOdysseyVectorObject::GetBoundingBoxFromList( selectedObjectList );
+            ::ULIS::FVec2D origin = ::ULIS::FVec2D( rect.x + (rect.w * 0.5f)
+                                                  , rect.y + (rect.h * 0.5f) );
+            mSelectionBox.worldMatrix.reset();
+            mSelectionBox.worldMatrix.translate( origin.x, origin.y );
 
-            mSelectionBox.space = iScene;
-            mSelectionBox.rect = FOdysseyVectorObject::GetBoundingBoxFromList( selectedObjectList );
-            p0 = mSelectionBox.space->GetInverseWorldMatrix().mapPoint( mSelectionBox.rect.x                       , mSelectionBox.rect.y                        );
-            p1 = mSelectionBox.space->GetInverseWorldMatrix().mapPoint( mSelectionBox.rect.x + mSelectionBox.rect.w, mSelectionBox.rect.y                        );
-            p2 = mSelectionBox.space->GetInverseWorldMatrix().mapPoint( mSelectionBox.rect.x + mSelectionBox.rect.w, mSelectionBox.rect.y + mSelectionBox.rect.h );
-            p3 = mSelectionBox.space->GetInverseWorldMatrix().mapPoint( mSelectionBox.rect.x                       , mSelectionBox.rect.y + mSelectionBox.rect.h );
+            BLMatrix2D::invert( mSelectionBox.inverseWorldMatrix, mSelectionBox.worldMatrix );
+
+            p0 = mSelectionBox.inverseWorldMatrix.mapPoint( rect.x         , rect.y          );
+            p1 = mSelectionBox.inverseWorldMatrix.mapPoint( rect.x + rect.w, rect.y          );
+            p2 = mSelectionBox.inverseWorldMatrix.mapPoint( rect.x + rect.w, rect.y + rect.h );
+            p3 = mSelectionBox.inverseWorldMatrix.mapPoint( rect.x         , rect.y + rect.h );
 
             mSelectionBox.rect = ::ULIS::FRectD::FromMinMax( ::ULIS::FMath::Min4( p0.x, p1.x, p2.x, p3.x )
                                                            , ::ULIS::FMath::Min4( p0.y, p1.y, p2.y, p3.y )
@@ -118,16 +123,15 @@ FOdysseyVectorHUDSelection::UpdateSelectionBox( FOdysseyVectorScene* iScene, boo
 void
 FOdysseyVectorHUDSelection::DrawSelectionBox( FOdysseyVectorScene* iScene, uint64 iFlags )
 {
-    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
     BLContext* blctx = iScene->GetEngine()->GetBLContext();
 
     // matrix might get altered for displaying the selection rectangle of a single object. Save it.
     blctx->save();
     blctx->resetMatrix();
 
-    if( mSelectionBox.space )
+    if( mSelectionBox.rect.Area() )
     {
-        BLMatrix2D& worldMatrix = mSelectionBox.space->GetWorldMatrix();
+        BLMatrix2D& worldMatrix = mSelectionBox.worldMatrix;
         BLPoint point[4] = { worldMatrix.mapPoint( mSelectionBox.rect.x                       , mSelectionBox.rect.y                        )
                            , worldMatrix.mapPoint( mSelectionBox.rect.x + mSelectionBox.rect.w, mSelectionBox.rect.y                        )
                            , worldMatrix.mapPoint( mSelectionBox.rect.x + mSelectionBox.rect.w, mSelectionBox.rect.y + mSelectionBox.rect.h )
