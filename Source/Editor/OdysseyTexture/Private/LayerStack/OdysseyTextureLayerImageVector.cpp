@@ -65,7 +65,8 @@ UOdysseyTextureLayerImageVector::Init( uint32 iWidth, uint32 iHeight )
     mBlock = MakeShared<::ULIS::FBlock>(static_cast<uint8*>(imgData.pixelData)
                                , iWidth
                                , iHeight
-                               , ::ULIS::eFormat::Format_RGBA8
+    // ::ULIS::eFormat::Format_BGRA8 is the same as Blend2D's BL_FORMAT_PRGB32
+                               , ::ULIS::eFormat::Format_BGRA8
                                , nullptr);
 }
 

@@ -25,10 +25,13 @@ FOdysseyPainterEditorVectorScenePanToolHUD::DrawText( FOdysseyVectorScene* iScen
                                                     , ::ULIS::FRectD& iFrame )
 {
     BLContext* blctx = iScene->GetEngine()->GetBLContext();
+    FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
+    BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
+
     char str[255];
 
-    blctx->setCompOp( BL_COMP_OP_DIFFERENCE  );
-    blctx->setFillStyle( BLRgba32( 0xFFD0E040 ) );
+    blctx->setCompOp( BL_COMP_OP_SRC_OVER  );
+    blctx->setFillStyle( fgColor );
 
     // Zoom
     snprintf( str
@@ -82,6 +85,10 @@ void
 FOdysseyPainterEditorVectorScenePanToolHUD::Draw( FOdysseyVectorScene* iScene, uint64 iFlags )
 {
     BLContext* blctx = iScene->GetEngine()->GetBLContext();
+    FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
+    FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
+    BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
+    BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
     BLImage* image = iScene->GetEngine()->GetBLImage();
     BLImageData imageData;
     ::ULIS::FRectD frame;
@@ -100,14 +107,13 @@ FOdysseyPainterEditorVectorScenePanToolHUD::Draw( FOdysseyVectorScene* iScene, u
     blctx->save();
     blctx->resetMatrix();
 
-    blctx->setCompOp( BL_COMP_OP_DIFFERENCE  );
-/*
-    blctx->setStrokeStyle( BLRgba32( 0xFF000000 ) ); // teal ABGR
+    blctx->setCompOp( BL_COMP_OP_SRC_OVER );
     blctx->setStrokeWidth( 2.0f );
+    blctx->setStrokeStyle( bgColor );
     DrawFrame( iScene, frame, frameLength );
-*/
-    blctx->setStrokeStyle( BLRgba32( 0xFFD0E040 ) ); // teal ABGR
+
     blctx->setStrokeWidth( 1.0f );
+    blctx->setStrokeStyle( fgColor );
     DrawFrame( iScene, frame, frameLength );
 
     DrawText( iScene, frame );

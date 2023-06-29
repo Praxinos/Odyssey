@@ -226,3 +226,30 @@ FOdysseyVectorHUD::DrawObjectRecursive( FOdysseyVectorObject* iObj, BLContext* i
         DrawObjectRecursive( child, iBLCtx );
     }
 }
+
+// static
+FColor&
+FOdysseyVectorHUD::GetForegroundColor()
+{
+    static FColor fg = FColor( 0x40, 0xE0, 0xD0, 0xFF ); // teal
+
+    return fg;
+}
+
+// static
+FColor&
+FOdysseyVectorHUD::GetBackgroundColor()
+{
+    static FColor bg = FColor( 0x00, 0x00, 0x00, 0xFF ); // black
+
+    return bg;
+}
+
+// static
+FColor&
+FOdysseyVectorHUD::GetHighlightColor()
+{
+    static FColor hc = FColor( 0xFF, 0x00, 0x00, 0xFF ); // red
+
+    return hc;
+}

@@ -21,6 +21,10 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::Draw( FOdysseyVectorScene* iScene
 {
     BLContext* blctx = iScene->GetEngine()->GetBLContext();
     FOdysseyVectorPathBuilder* pathBuilder = mPathDrawingTool->GetPathBuilder();
+    FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
+    FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
+    BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
+    BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
 
     //mPointQuadTree->Draw( iScene, iFlags );
 
@@ -29,13 +33,12 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::Draw( FOdysseyVectorScene* iScene
     blctx->resetMatrix();
 
     blctx->setStrokeWidth( 1.0f );
-
-    blctx->setStrokeStyle( BLRgba32( 0xFF0000FF ) );
+    blctx->setStrokeStyle( fgColor );
     blctx->strokeCircle( mX, mY, mPathDrawingTool->Radius );
 
     if( mPathDrawingTool->Stitch )
     {
-        blctx->setStrokeStyle( BLRgba32( 0xFF00FF00 ) );
+        blctx->setStrokeStyle( hcColor );
         blctx->strokeCircle( mX, mY, mPathDrawingTool->StitchingRadius );
 
         if( mStitchedPointArray.size() )

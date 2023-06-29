@@ -83,6 +83,10 @@ FOdysseyVectorHUDPathCubic::DrawVertex( FOdysseyVectorPathCubic* iPath
     // TODO: compute that once and pass it as parameter for all vertices
     BLPoint worldPoint = iPath->GetWorldMatrix().mapPoint( iCubicVertex->GetX(), iCubicVertex->GetY() );
     BLPoint worldRadius = iPath->GetWorldMatrix().mapVector( ctrlX, ctrlY );
+    FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
+    FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
+    BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
+    BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
 
     if ( mDisplayMode & VIEW_POINT )
     {
@@ -91,8 +95,8 @@ FOdysseyVectorHUDPathCubic::DrawVertex( FOdysseyVectorPathCubic* iPath
                   , worldPoint.y
                   , VERTEXRADIUSOUTER
                   , VERTEXRADIUSINNER
-                  , BLRgba32( 0xFF000000 )
-                  , BLRgba32( 0xFFD0E040 ) ); // teal (ABGR)
+                  , bgColor
+                  , fgColor );
     }
 
     if ( mDisplayMode & VIEW_HANDLE_POINT )
@@ -102,16 +106,16 @@ FOdysseyVectorHUDPathCubic::DrawVertex( FOdysseyVectorPathCubic* iPath
                   , worldPoint.y + worldRadius.y
                   , HANDLERADIUSOUTER
                   , HANDLERADIUSINNER
-                  , BLRgba32( 0xFF000000 )
-                  , BLRgba32( 0xFF808080 ) );
+                  , bgColor
+                  , BLRgba32( 0x80, 0x80, 0x80, 0xFF ) );
 
         DrawCircle( blctx
                   , worldPoint.x - worldRadius.x
                   , worldPoint.y - worldRadius.y
                   , HANDLERADIUSOUTER
                   , HANDLERADIUSINNER
-                  , BLRgba32( 0xFF000000 )
-                  , BLRgba32( 0xFF808080 ) );
+                  , bgColor
+                  , BLRgba32( 0x80, 0x80, 0x80, 0xFF ) );
     }
 }
 
@@ -130,13 +134,17 @@ FOdysseyVectorHUDPathCubic::DrawSegment( FOdysseyVectorPathCubic* iPath
     BLPoint point1 = worldMatrix.mapPoint( vertex1->GetX(), vertex1->GetY() );
     BLPoint handlePoint0 = worldMatrix.mapPoint( handle0->GetX(), handle0->GetY() );
     BLPoint handlePoint1 = worldMatrix.mapPoint( handle1->GetX(), handle1->GetY() );
+    FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
+    FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
+    BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
+    BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
 
     if ( mDisplayMode & VIEW_PATH )
     {
         BLPath path;
 
         blctx->setStrokeWidth( 1.0f );
-        blctx->setStrokeStyle( BLRgba32(0xFF00FF00) );
+        blctx->setStrokeStyle( fgColor );
 
         path.moveTo( point0 );
         path.cubicTo( handlePoint0
@@ -156,8 +164,8 @@ FOdysseyVectorHUDPathCubic::DrawSegment( FOdysseyVectorPathCubic* iPath
                 , handlePoint0.y
                 , 2.0f
                 , 1.0f
-                , BLRgba32( 0xFF000000 )
-                , BLRgba32( 0xFFFFFFFF ) );
+                , BLRgba32( 0x00, 0x00, 0x00, 0xFF )
+                , BLRgba32( 0xFF, 0xFF, 0xFF, 0xFF ) );
         // line to control handle 1
         DrawLine( blctx
                 , point1.x
@@ -166,24 +174,24 @@ FOdysseyVectorHUDPathCubic::DrawSegment( FOdysseyVectorPathCubic* iPath
                 , handlePoint1.y
                 , 2.0f
                 , 1.0f
-                , BLRgba32( 0xFF000000 )
-                , BLRgba32( 0xFFFFFFFF ) );
+                , BLRgba32( 0x00, 0x00, 0x00, 0xFF )
+                , BLRgba32( 0xFF, 0xFF, 0xFF, 0xFF ) );
         // control handle 0
         DrawCircle( blctx
                   , handlePoint1.x
                   , handlePoint1.y
                   , HANDLERADIUSOUTER
                   , HANDLERADIUSINNER
-                  , BLRgba32( 0xFF000000 )
-                  , BLRgba32( 0xFFFFFFFF ) );
+                  , BLRgba32( 0x00, 0x00, 0x00, 0xFF )
+                  , BLRgba32( 0xFF, 0xFF, 0xFF, 0xFF ) );
         // control handle 1
         DrawCircle( blctx
                   , handlePoint0.x
                   , handlePoint0.y
                   , HANDLERADIUSOUTER
                   , HANDLERADIUSINNER
-                  , BLRgba32( 0xFF000000 )
-                  , BLRgba32( 0xFFFFFFFF ) );
+                  , BLRgba32( 0x00, 0x00, 0x00, 0xFF )
+                  , BLRgba32( 0xFF, 0xFF, 0xFF, 0xFF ) );
     }
 }
 

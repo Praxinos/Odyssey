@@ -93,19 +93,25 @@ void
 FOdysseyPainterEditorVectorTransformToolHUD::DrawScalers( FOdysseyVectorScene* iScene, uint64 iFlags )
 {
     BLContext* blctx = iScene->GetEngine()->GetBLContext();
+    FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
+    FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
+    FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
+    BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
+    BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
+    BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
     FSelectionBoxScaler scaler[4];
 
     GetWorldScalers( mSelectionBox, scaler);
 
     for( int i = 0; i < 4; i++ )
     {
-        BLRgba32 scalerColor = ( mFlags & scaler[i].flag ) ? BLRgba32( 0xFF0000FF )
-                                                           : BLRgba32( 0xFFD0E040 );// teal (ABGR)
+        BLRgba32 scalerColor = ( mFlags & scaler[i].flag ) ? hcColor : fgColor;
 
         blctx->setFillStyle( scalerColor );
         blctx->fillCircle( scaler[i].position.x, scaler[i].position.y, SCALER_RADIUS );
+
         blctx->setStrokeWidth( 1.0f );
-        blctx->setStrokeStyle( BLRgba32( 0xFF000000 ) );
+        blctx->setStrokeStyle( bgColor );
         blctx->strokeCircle( scaler[i].position.x, scaler[i].position.y, SCALER_RADIUS );
     }
 }
@@ -114,12 +120,15 @@ void
 FOdysseyPainterEditorVectorTransformToolHUD::DrawGizmo( FOdysseyVectorScene* iScene, uint64 iFlags )
 {
     BLContext* blctx = iScene->GetEngine()->GetBLContext();
-    BLRgba32 gizmoColor = ( mFlags & PICK_ZAXIS ) ? BLRgba32( 0xFF0000FF )
-                                                  : BLRgba32( 0xFFD0E040 );// teal (ABGR)
-    BLRgba32 xAxisColor = ( mFlags & PICK_XAXIS ) ? BLRgba32( 0xFF0000FF )
-                                                  : BLRgba32( 0xFFD0E040 );// teal (ABGR)
-    BLRgba32 yAxisColor = ( mFlags & PICK_YAXIS ) ? BLRgba32( 0xFF0000FF )
-                                                  : BLRgba32( 0xFFD0E040 );// teal (ABGR)
+    FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
+    FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
+    FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
+    BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
+    BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
+    BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
+    BLRgba32 gizmoColor = ( mFlags & PICK_ZAXIS ) ? hcColor : fgColor;
+    BLRgba32 xAxisColor = ( mFlags & PICK_XAXIS ) ? hcColor : fgColor;
+    BLRgba32 yAxisColor = ( mFlags & PICK_YAXIS ) ? hcColor : fgColor;
     ::ULIS::FVec2D worldGizmo;
     ::ULIS::FVec2D worldXAxis;
     ::ULIS::FVec2D worldYAxis;
@@ -131,33 +140,33 @@ FOdysseyPainterEditorVectorTransformToolHUD::DrawGizmo( FOdysseyVectorScene* iSc
     blctx->setFillStyle( gizmoColor );
     blctx->fillCircle( worldGizmo.x, worldGizmo.y, GIZMO_RADIUS );
     blctx->setStrokeWidth( 1.0f );
-    blctx->setStrokeStyle( BLRgba32( 0xFF000000 ) );
+    blctx->setStrokeStyle( bgColor );
     blctx->strokeCircle( worldGizmo.x, worldGizmo.y, GIZMO_RADIUS );
 
     // Axises
 
     blctx->setStrokeWidth( 2.0f );
-    blctx->setStrokeStyle( BLRgba32( 0xFF000000 ) );
+    blctx->setStrokeStyle( bgColor );
     blctx->strokeLine( worldGizmo.x + GIZMO_RADIUS
-                        , worldGizmo.y
-                        , worldGizmo.x + worldXAxis.x
-                        , worldGizmo.y + worldXAxis.y );
+                     , worldGizmo.y
+                     , worldGizmo.x + worldXAxis.x
+                     , worldGizmo.y + worldXAxis.y );
     blctx->strokeLine( worldGizmo.x
-                        , worldGizmo.y + GIZMO_RADIUS
-                        , worldGizmo.x + worldYAxis.x
-                        , worldGizmo.y + worldYAxis.y );
+                     , worldGizmo.y + GIZMO_RADIUS
+                     , worldGizmo.x + worldYAxis.x
+                     , worldGizmo.y + worldYAxis.y );
 
     blctx->setStrokeWidth( 1.0f );
     blctx->setStrokeStyle( xAxisColor );
     blctx->strokeLine( worldGizmo.x + GIZMO_RADIUS
-                        , worldGizmo.y
-                        , worldGizmo.x + worldXAxis.x
-                        , worldGizmo.y + worldXAxis.y );
+                     , worldGizmo.y
+                     , worldGizmo.x + worldXAxis.x
+                     , worldGizmo.y + worldXAxis.y );
     blctx->setStrokeStyle( yAxisColor );
     blctx->strokeLine( worldGizmo.x
-                        , worldGizmo.y + GIZMO_RADIUS
-                        , worldGizmo.x + worldYAxis.x
-                        , worldGizmo.y + worldYAxis.y );
+                     , worldGizmo.y + GIZMO_RADIUS
+                     , worldGizmo.x + worldYAxis.x
+                     , worldGizmo.y + worldYAxis.y );
 }
 
 void

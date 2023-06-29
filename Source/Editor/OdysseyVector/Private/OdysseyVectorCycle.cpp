@@ -371,16 +371,14 @@ FOdysseyVectorCycle::Draw( uint64 iFlags )
 
             linear.rotate( angle );
 
-            // Note: Blend2D color format is 0xAARRGGBB
-            BLColor0.setR( gradientColor0.B );
+            BLColor0.setR( gradientColor0.R );
             BLColor0.setG( gradientColor0.G );
-            BLColor0.setB( gradientColor0.R );
+            BLColor0.setB( gradientColor0.B );
             BLColor0.setA( gradientColor0.A );
 
-            // Note: Blend2D color format is 0xAARRGGBB
-            BLColor1.setR( gradientColor1.B );
+            BLColor1.setR( gradientColor1.R );
             BLColor1.setG( gradientColor1.G );
-            BLColor1.setB( gradientColor1.R );
+            BLColor1.setB( gradientColor1.B );
             BLColor1.setA( gradientColor1.A );
 
             linear.addStop( 0.0, BLColor0 );
@@ -394,10 +392,9 @@ FOdysseyVectorCycle::Draw( uint64 iFlags )
             FColor& color = bucket->GetColor();
             BLRgba32 BLColor;
 
-            // Note: Blend2D color format is 0xAARRGGBB
-            BLColor.setR( color.B );
+            BLColor.setR( color.R );
             BLColor.setG( color.G );
-            BLColor.setB( color.R );
+            BLColor.setB( color.B );
             BLColor.setA( color.A );
 
             blctx->setStrokeStyle( BLColor );

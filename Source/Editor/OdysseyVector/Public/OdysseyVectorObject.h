@@ -61,7 +61,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         static const uint32 VECTORGROUPPAINTTYPE = 6;
 
         // drawing mask
-        static const uint32 DRAWSTRUCTURE = ( 1 << 0 );
+        //static const uint32 DRAWSTRUCTURE = ( 1 << 0 );
 
         // update mask
         static const uint32 FREQUENTUPDATES = ( 1 << 0 );
@@ -146,7 +146,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
 
         virtual void TransferChild( FOdysseyVectorObject* iFosterChild );
         /*virtual void UpdateBoundingBox() = 0;*/
-        void DrawChildren( uint64 iFlags );
+        virtual void DrawChildren( uint64 iFlags );
         void UpdateMatrix( );
         void Translate( double iX, double iY );
         void Rotate( double iAngle );

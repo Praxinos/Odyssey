@@ -78,6 +78,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         virtual void DrawShape( uint64 iFlags ) override;
 
         virtual void Draw( uint64 iFlags ) override;
+        virtual void DrawChildren( uint64 iFlags ) override;
 
         /**
          * @brief Pick the shape.

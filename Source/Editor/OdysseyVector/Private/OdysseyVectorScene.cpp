@@ -304,10 +304,9 @@ FOdysseyVectorScene::DrawShape( uint64 iFlags )
 
 //UE_LOG(LogTemp, Warning, TEXT("Some warning message:%d %d %d %d"), roi.x, roi.y, roi.w, roi.h );
 
-    // Note: Blend2D color format is 0xAARRGGBB
-    blFillColor.setR( fillColor.B );
+    blFillColor.setR( fillColor.R );
     blFillColor.setG( fillColor.G );
-    blFillColor.setB( fillColor.R );
+    blFillColor.setB( fillColor.B );
     blFillColor.setA( fillColor.A );
 
     blctx->setFillStyle( blFillColor );

@@ -129,4 +129,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
         void SetPaintingCode( uint32 iPaintingCode );
         uint32 GetPaintingCode();
         BLPath& GetBLPath();
+        virtual void DrawStructure( FColor& iStrokeColor, double iStrokeWidth, bool iWorld ){};
 };

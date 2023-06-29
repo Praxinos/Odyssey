@@ -42,9 +42,13 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
 {
     public:
         static void DrawObjectRecursive( FOdysseyVectorObject* iObj, BLContext* iBLCtx );
+        static FColor& GetForegroundColor();
+        static FColor& GetBackgroundColor();
+        static FColor& GetHighlightColor();
 
         virtual ~FOdysseyVectorHUD();
         FOdysseyVectorHUD();
+
 
         virtual void Draw( FOdysseyVectorScene* iScene, uint64 iFlags ) = 0;
         virtual void Reset( FOdysseyVectorScene* iScene ) = 0;

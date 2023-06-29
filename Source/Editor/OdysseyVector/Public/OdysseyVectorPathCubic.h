@@ -68,6 +68,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathCubic: public FOdysseyVectorPath
                   , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray
                   , std::vector<FOdysseyVectorVertex*>& iRemovedVertexArray
                   , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray );
-
+        virtual void DrawStructure( FColor& iStrokeColor, double iStrokeWidth, bool iWorld ) override;
         uint32 GetType();
 };

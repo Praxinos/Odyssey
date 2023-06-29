@@ -124,6 +124,10 @@ void
 FOdysseyVectorHUDSelection::DrawSelectionBox( FOdysseyVectorScene* iScene, uint64 iFlags )
 {
     BLContext* blctx = iScene->GetEngine()->GetBLContext();
+    FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
+    FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
+    BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
+    BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
 
     // matrix might get altered for displaying the selection rectangle of a single object. Save it.
     blctx->save();
@@ -144,11 +148,11 @@ FOdysseyVectorHUDSelection::DrawSelectionBox( FOdysseyVectorScene* iScene, uint6
         path.lineTo( point[3] );
         path.close();
 
-        blctx->setStrokeStyle( BLRgba32( 0xFF000000 ) );
+        blctx->setStrokeStyle( bgColor );
         blctx->setStrokeWidth( 2.0f );
         blctx->strokePath( path );
 
-        blctx->setStrokeStyle( BLRgba32( 0xFFD0E040 ) );
+        blctx->setStrokeStyle( fgColor );
         blctx->setStrokeWidth( 1.0f );
         blctx->strokePath( path );
     }
@@ -160,13 +164,15 @@ void
 FOdysseyVectorHUDSelection::DrawSelecting( FOdysseyVectorScene* iScene, uint64 iFlags )
 {
     BLContext* blctx = iScene->GetEngine()->GetBLContext();
+    FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
+    BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
     BLPath path;
 
     // matrix might get altered for displaying the selection rectangle of a single object. Save it.
     blctx->save();
     blctx->resetMatrix();
 
-    blctx->setStrokeStyle( BLRgba32( 0xFF0000FF ) );
+    blctx->setStrokeStyle( hcColor );
     blctx->setStrokeWidth( 1.0f );
 
     if( mPointArray )

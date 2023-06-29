@@ -493,70 +493,67 @@ FOdysseyVectorPathCubic::DrawShape( uint64 iFlags )
 }
 
 void
+FOdysseyVectorPathCubic::DrawStructure( FColor& iStrokeColor, double iStrokeWidth, bool iWorld )
+{
+    BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
+    BLRgba32 strokeColor = BLRgba32( iStrokeColor.R
+                                   , iStrokeColor.G
+                                   , iStrokeColor.B
+                                   , iStrokeColor.A );
+
+    blctx->save();
+
+    if( iWorld )
+    {
+        blctx->resetMatrix();
+    }
+
+    blctx->setStrokeWidth( iStrokeWidth );
+    blctx->setStrokeStyle( strokeColor );
+
+    for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
+    {
+        FOdysseyVectorSegmentCubic* segment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
+        FOdysseyVectorVertex* vertex0 = segment->GetVertex(0);
+
+        segment->DrawStructure( this, iWorld );
+    }
+
+    blctx->restore();
+}
+
+void
 FOdysseyVectorPathCubic::DrawShapeVariable( uint64 iFlags )
 {
     BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
-    BLRgba32 strokeColor;
-
-    // Note: Blend2D color format is 0xAARRGGBB
-    strokeColor.setR( mObjectParam.Foreground.B );
-    strokeColor.setG( mObjectParam.Foreground.G );
-    strokeColor.setB( mObjectParam.Foreground.R );
-    strokeColor.setA( mObjectParam.Foreground.A );
+    BLRgba32 strokeColor = BLRgba32( mObjectParam.Foreground.R
+                                   , mObjectParam.Foreground.G
+                                   , mObjectParam.Foreground.B
+                                   , mObjectParam.Foreground.A );
 
     if( mSegmentList.size() )
     {
-        if( iFlags & FOdysseyVectorObject::DRAWSTRUCTURE )
+        // We fill with stroke color because our curve is made of filled shapes.
+        //blctx->setFillRule( BL_FILL_RULE_NON_ZERO );
+        blctx->setFillRule( BL_FILL_RULE_EVEN_ODD );
+        blctx->setFillStyle( strokeColor );
+        blctx->setStrokeStyle( strokeColor );
+
+        for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
         {
-    /*                    BLRgba32 wireframeColor;
+            FOdysseyVectorSegmentCubic* segment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
+            FOdysseyVectorVertex* vertex0 = segment->GetVertex(0);
 
-            // Note: Blend2D color format is 0xAARRGGBB
-            wireframeColor.r = mObjectParam.WireframeColor.B;
-            wireframeColor.g = mObjectParam.WireframeColor.G;
-            wireframeColor.b = mObjectParam.WireframeColor.R;
-            wireframeColor.a = mObjectParam.WireframeColor.A;
-    */
-            blctx->save();
-            blctx->resetMatrix();
-            blctx->setStrokeWidth( 1.0f );
-            blctx->setStrokeStyle( BLRgba32( 0xFFFFFFFF ) );
-
-            for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
-            {
-                FOdysseyVectorSegmentCubic* segment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
-                FOdysseyVectorVertex* vertex0 = segment->GetVertex(0);
-
-                segment->DrawStructure( this, true );
-            }
-
-            blctx->restore();
+            segment->Draw();
         }
-        else
+
+        for( std::list<FOdysseyVectorVertex*>::iterator it = mVertexList.begin(); it != mVertexList.end(); ++it )
         {
-            // We fill with stroke color because our curve is made of filled shapes.
-            //blctx->setFillRule( BL_FILL_RULE_NON_ZERO );
-            blctx->setFillRule( BL_FILL_RULE_EVEN_ODD );
-            blctx->setFillStyle( BLRgba32( strokeColor ) );
-            blctx->setStrokeStyle( BLRgba32( strokeColor ) );
+            FOdysseyVectorVertex* cubicVertex = static_cast<FOdysseyVectorVertex*>(*it);
 
-            for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
-            {
-                FOdysseyVectorSegmentCubic* segment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
-                FOdysseyVectorVertex* vertex0 = segment->GetVertex(0);
-
-                segment->Draw();
-            }
-
-            for( std::list<FOdysseyVectorVertex*>::iterator it = mVertexList.begin(); it != mVertexList.end(); ++it )
-            {
-                FOdysseyVectorVertex* cubicVertex = static_cast<FOdysseyVectorVertex*>(*it);
-
-                DrawJoint( cubicVertex, iFlags );
-            }
+            DrawJoint( cubicVertex, iFlags );
         }
     }
-
-
 }
 
 void

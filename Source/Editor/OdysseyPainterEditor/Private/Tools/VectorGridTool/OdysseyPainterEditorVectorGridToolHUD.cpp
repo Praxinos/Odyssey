@@ -202,11 +202,13 @@ void
 FOdysseyPainterEditorVectorGridToolHUD::DrawSelectionRectangle( FOdysseyVectorScene* iScene, uint64 iFlags  )
 {
     BLContext* blctx = iScene->GetEngine()->GetBLContext();
+    FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
+    BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
 
     blctx->save();
     blctx->resetMatrix();
 
-    blctx->setStrokeStyle( BLRgba32( 0xFF0000FF ) );
+    blctx->setStrokeStyle( BLRgba32( hc.R, hc.G, hc.B, hc.A ) );
     blctx->setStrokeWidth( 1.0f );
 
     if( mWorldSelDrag != mWorldSelStart )
@@ -238,6 +240,12 @@ void
 FOdysseyPainterEditorVectorGridToolHUD::Draw( FOdysseyVectorScene* iScene, uint64 iFlags )
 {
     BLContext* blctx = iScene->GetEngine()->GetBLContext();
+    FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
+    FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
+    FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
+    BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
+    BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
+    BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
 
     blctx->save();
     blctx->resetMatrix();
@@ -256,9 +264,9 @@ FOdysseyPainterEditorVectorGridToolHUD::Draw( FOdysseyVectorScene* iScene, uint6
                               worldMatrix.mapPoint( mCellArray[i].mNode[3]->GetX(), mCellArray[i].mNode[3]->GetY() ) };
 
             blctx->setStrokeWidth( 2.0f );
-            blctx->setStrokeStyle( BLRgba32(0xFF808080) );
+            blctx->setStrokeStyle( bgColor );
             blctx->strokePolygon( pt, 4 );
-            blctx->setStrokeStyle( BLRgba32(0xFF0000FF) );
+            blctx->setStrokeStyle( fgColor );
             blctx->setStrokeWidth( 1.0f );
             blctx->strokePolygon( pt, 4 );
         }
@@ -267,10 +275,10 @@ FOdysseyPainterEditorVectorGridToolHUD::Draw( FOdysseyVectorScene* iScene, uint6
         {
             BLPoint pt = worldMatrix.mapPoint( mNodeArray[i].GetX(), mNodeArray[i].GetY() );
 
-            blctx->setFillStyle( mNodeArray[i].IsSelected() ? BLRgba32( 0xFF00FF00 ) : BLRgba32( 0xFF0000FF ) );
+            blctx->setFillStyle( mNodeArray[i].IsSelected() ? hcColor : fgColor );
             blctx->fillCircle( pt.x, pt.y, FOdysseyPainterEditorVectorGridToolHUD::HANDLE_RADIUS );
             blctx->setStrokeWidth( 1.0f );
-            blctx->setStrokeStyle( BLRgba32(0xFF808080) );
+            blctx->setStrokeStyle( bgColor );
             blctx->strokeCircle( pt.x, pt.y, FOdysseyPainterEditorVectorGridToolHUD::HANDLE_RADIUS );
         }
     }

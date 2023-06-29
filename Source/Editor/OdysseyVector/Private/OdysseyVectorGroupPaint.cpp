@@ -207,13 +207,40 @@ FOdysseyVectorGroupPaint::Bucket( double iX, double iY, uint8 iR, uint8 iG, uint
 }
 
 void
+FOdysseyVectorGroupPaint::DrawChildren( uint64 iFlags )
+{
+    std::list<FOdysseyVectorObject*>::iterator it; 
+
+    for( it = mChildrenList.begin(); it != mChildrenList.end(); ++it )
+    {
+        // Note: all children objects are path and have no children.
+        FOdysseyVectorPath *childPath = static_cast<FOdysseyVectorPath*>(*it);
+
+        if( mGroupPaintParam.Wireframe == false )
+        {
+            childPath->Draw( iFlags );
+        }
+        else
+        {
+            childPath->DrawStructure( mGroupPaintParam.WireframeColor, 1.0f, true );
+        }
+    }
+}
+
+void
 FOdysseyVectorGroupPaint::Draw( uint64 iFlags )
 {
-    uint64 extraFlags = 0;
+    BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
 
-    extraFlags |= ( ( mGroupPaintParam.Wireframe ) ? FOdysseyVectorObject::DRAWSTRUCTURE : 0 );
+    blctx->save();
+    blctx->transform( mLocalMatrix );
 
-    FOdysseyVectorObject::Draw( iFlags | extraFlags );
+    blctx->setCompOp( BL_COMP_OP_SRC_OVER );
+
+    DrawShape( iFlags );
+    DrawChildren( iFlags );
+
+    blctx->restore();
 }
 
 void
@@ -283,12 +310,12 @@ FOdysseyVectorGroupPaint::DrawShape( uint64 iFlags )
     }
 
 
-    if( iFlags & FOdysseyVectorObject::DRAWSTRUCTURE )
+    if( mGroupPaintParam.Wireframe )
     {
         blctx->save();
         blctx->resetMatrix();
         blctx->setStrokeWidth( 1.0f );
-        blctx->setStrokeStyle( BLRgba32( 0xFF0000FF ) );
+        blctx->setStrokeStyle( BLRgba32( 0xFF, 0x00, 0x00, 0xFF ) );
 
         for( int i = 0; i < mGapSegmentBuffer.size(); i++ )
         {
