@@ -25,7 +25,7 @@ private:
     virtual TSharedRef<SWidget> GenerateHeaderWidget() override;
     FReply HandleEntryColorMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent);
     void OnSetColorFromColorPicker(FLinearColor iNewColor);
-    FLinearColor GetEntryColor() const;
+    FLinearColor GetEntryColorAsLinear() const;
 
 private:
     class UOdysseyPaletteEntryColor* mColorEntry;

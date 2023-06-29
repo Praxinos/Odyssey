@@ -33,6 +33,7 @@ public class OdysseyVector : ModuleRules
                 "CoreUObject",
                 "InputCore",
                 "Engine",
+                "EditorScriptingUtilities",
                 "Slate",
                 "SlateCore",
                 "OdysseyCore",

@@ -17,7 +17,14 @@ class ODYSSEYPALETTE_API UOdysseyPaletteEntryColor : public UOdysseyPaletteEntry
 public:
     UOdysseyPaletteEntryColor();
 
+    FColor& GetUsedColor();
+    void SetUsedColor( FColor iColor );
+
+    virtual void AddSet() override;
+
+    virtual void RemoveSet(int iIndex = -1) override;
+
 public:
     UPROPERTY(EditAnywhere, Category = Palette)
-    FColor EntryColor;
+    TArray<FColor> EntryColor;
 };

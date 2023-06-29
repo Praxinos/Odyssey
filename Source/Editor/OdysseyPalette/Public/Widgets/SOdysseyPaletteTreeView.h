@@ -7,6 +7,7 @@
 #include "OdysseyPaletteEntry.h"
 #include "Widgets/Views/STreeView.h"
 #include "DragDropOperations/OdysseyPaletteDragDropOperation.h"
+#include "SOdysseyPaletteSetView.h"
 
 class UOdysseyPalette;
 
@@ -65,6 +66,8 @@ protected:
      */
     virtual void CreateContextMenu();
 
+    void OnSetSelected(FName iSet);
+
     /**
      * @brief Extends the context menu
      * Allows us to insert entries wherever we want in the context menu
@@ -90,6 +93,12 @@ private:
      * 
      */
 	void RefreshAllExpansionStates();
+
+    /**
+     * @brief Creation of the widget to add and delete sets of palette
+     *
+     */
+    TSharedRef<SWidget> CreateSetWidget();
 
 protected:
     //CommandList Actions
@@ -196,6 +205,11 @@ public:
      */
     void ResetDropZone();
 
+    /**
+     * @brief Adds a new set to the palette represented by this view
+     */
+    FReply AddSetToPalette();
+
 protected:
     UOdysseyPalette* mPalette;
 
@@ -204,4 +218,6 @@ protected:
     bool mNeedsRefresh = false;
     bool mIsRenamePending = false;
     bool mDisplayDropZone = false;
+
+    TSharedPtr<SOdysseyPaletteSetView> mPaletteSetView;
 };

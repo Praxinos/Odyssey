@@ -16,6 +16,16 @@ enum  class  EGetEntryChildrenMethod : uint8
     BreadthFirst
 };
 
+//Used for serialization in vector objects
+USTRUCT()
+struct FPaletteEntryDescription
+{
+    GENERATED_BODY()
+
+    FName EntryId = FName(TEXT(""));
+    uint8 UsedSet = 0;
+};
+
 /////////////////////////////////////////////////////
 // OdysseyColorPaletteEntry
 UCLASS(Abstract, BlueprintType, config = EditorPerProjectUserSettings, PerObjectConfig)
@@ -75,6 +85,9 @@ public:
     UFUNCTION(BlueprintPure, Category = "Palette")
     UOdysseyPalette* GetPalette() const;
 
+    UFUNCTION(BlueprintPure, Category = "Palette")
+    uint8 GetUsedSetInPalete() const;
+
     /**
      * @brief Returns the entries children recursively
      *
@@ -124,6 +137,9 @@ public:
     UFUNCTION(BlueprintPure, Category = "Palette")
     const TArray<UOdysseyPaletteEntry*>& GetChildren() const;
 
+    virtual void AddSet();
+
+    virtual void RemoveSet( int iIndex = -1 );
 
 protected:
     //Property changed methods
@@ -170,8 +186,8 @@ public:
     bool IsExpanded = true;
 
     UPROPERTY()
-    UOdysseyPaletteEntry* Parent;
+    TObjectPtr<UOdysseyPaletteEntry> Parent;
 
     UPROPERTY()
-    TArray<UOdysseyPaletteEntry*> Children;
+    TArray< TObjectPtr<UOdysseyPaletteEntry> > Children;
 };

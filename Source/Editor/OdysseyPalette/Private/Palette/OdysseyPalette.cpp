@@ -8,6 +8,12 @@
 
 #define LOCTEXT_NAMESPACE "UOdysseyPalette"
 
+UOdysseyPalette::UOdysseyPalette()
+{
+    FString text = FString("Set 0");
+    Sets.Add(FName(text));
+}
+
 UOdysseyPalette::FOnCurrentEntryChanged& UOdysseyPalette::OnCurrentEntryChanged()
 {
     static FOnCurrentEntryChanged onCurrentEntryChanged;
@@ -426,6 +432,32 @@ void UOdysseyPalette::MoveEntries(TArray<UOdysseyPaletteEntry*> iEntries, UOdyss
     }
 }
 
+void UOdysseyPalette::AddSet()
+{
+    if (Sets.Num() < 8)
+    {
+        FString text = FString("Set") + FString::FromInt( Sets.Num() );
+        Sets.Add(FName(text));
+
+        TArray<UOdysseyPaletteEntry*> entries = GetEntries();
+        for( int i = 0; i < entries.Num(); i++ )
+            entries[i]->AddSet();
+    }
+}
+
+void UOdysseyPalette::RemoveSet(int iIndex /*= -1 */)
+{
+/*
+    if (NumSets > 1)
+    {
+        NumSets--;
+        if (UsedSet >= NumSets)
+        {
+            UsedSet--;
+        }
+    }*/
+}
+
 void UOdysseyPalette::HierarchyChanged()
 {
     OnHierarchyChanged().Broadcast(this);
@@ -473,6 +505,8 @@ void UOdysseyPalette::PostInitProperties()
 
     PaletteRoot = NewObject<UOdysseyPaletteEntry>(this, UOdysseyPaletteEntryFolder::StaticClass(), NAME_None, RF_Public | RF_Transactional);
     PaletteRoot->OnCreated();
+
+    UsedSet = 0;
 }
 
 UOdysseyPaletteEntry* UOdysseyPalette::CreateEntry(UClass* iEntryType)

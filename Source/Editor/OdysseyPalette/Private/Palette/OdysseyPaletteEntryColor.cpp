@@ -10,7 +10,29 @@ UOdysseyPaletteEntryColor::UOdysseyPaletteEntryColor()
     EntryTypeName = LOCTEXT( "EntryTypeName", "Color Entry" );
     DefaultName = LOCTEXT("DefaultName", "Color");
     Icon = *FOdysseyStyle::GetBrush("OdysseyPalette.EntryColor");
-    EntryColor = FColor::Black;
+    
+    for( int i = 0; i < 8; i++ )
+        EntryColor.Add( FColor::Black );
+}
+
+FColor& UOdysseyPaletteEntryColor::GetUsedColor()
+{
+    return EntryColor[ GetPalette()->UsedSet ];
+}
+
+void UOdysseyPaletteEntryColor::SetUsedColor(FColor iColor)
+{
+    EntryColor[GetPalette()->UsedSet] = iColor;
+}
+
+void UOdysseyPaletteEntryColor::AddSet()
+{
+    EntryColor.Add( FColor::Black );
+}
+
+void UOdysseyPaletteEntryColor::RemoveSet(int iIndex /*= -1*/)
+{
+    EntryColor.RemoveAt( iIndex );
 }
 
 #undef LOCTEXT_NAMESPACE

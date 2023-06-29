@@ -25,6 +25,9 @@ namespace FOdysseyVectorExport
                     static const uint32 CHUNK_OBJECT_TRANSFORM_TRANSLATION = 0x621d21c; // double(X)-double(Y)
                     static const uint32 CHUNK_OBJECT_TRANSFORM_ROTATION = 0xbf4d725c; // double(A)
                     static const uint32 CHUNK_OBJECT_TRANSFORM_SCALING = 0x4cc21f6d; // double(X)-double(Y)
+                static const uint32 CHUNK_OBJECT_PALETTEENTRYDESCRIPTION = 0x83de31e; // container
+                    static const uint32 CHUNK_OBJECT_PALETTEENTRYDESCRIPTION_ENTRYID = 0x86580538; //FName
+                    static const uint32 CHUNK_OBJECT_PALETTEENTRYDESCRIPTION_USEDSET = 0xcaa9e47c; //uint8
                 static const uint32 CHUNK_OBJECT_FOREGROUNDCOLOR = 0xd490269b; // uint8(R)-uint8(G)-uint8(B)-uint8(A)
                 static const uint32 CHUNK_OBJECT_BACKGROUNDCOLOR = 0xd9c2a698; // uint8(R)-uint8(G)-uint8(B)-uint8(A)
                 static const uint32 CHUNK_OBJECT_PATHCUBIC = 0x138d0bec; // container

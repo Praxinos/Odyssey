@@ -98,38 +98,6 @@ FString SOdysseyPalette::ObjectPath() const
 
 TSharedRef<SWidget> SOdysseyPalette::CreateColorPaletteWidget()
 {
-    TSharedRef<SHeaderRow> headerRow = SNew(SHeaderRow)
-        .SplitterHandleSize(0.f) //Fixes alignment between header row and actual rows
-        + SHeaderRow::Column("IsActivated")
-            .ToolTipText(LOCTEXT("OdysseyPaletteEntryIsActivatedButtonToolTip", "Toggle Entry Activation"))
-            .FixedWidth(24.f)
-            .HAlignHeader(HAlign_Center)
-            .VAlignHeader(VAlign_Center)
-            .HAlignCell(HAlign_Center)
-            .VAlignCell(VAlign_Top)
-            [
-                SNew(SImage)
-                .ColorAndOpacity(FSlateColor::UseForeground())
-                .Image(FOdysseyStyle::GetBrush("OdysseyLayerStack.Visible16"))
-            ]
-        + SHeaderRow::Column("Color")
-            .ToolTipText(LOCTEXT("OdysseyPaletteEntryColorToolTip", "Entry Color"))
-            .FixedWidth(24.f)
-            .HAlignHeader(HAlign_Center)
-            .VAlignHeader(VAlign_Center)
-            .HAlignCell(HAlign_Center)
-            .VAlignCell(VAlign_Top)
-            //.DefaultTooltip(FText::FromName(GetColumnID()))
-            //.HeaderContentPadding(FMargin(20.0f, 0.0f, 20.0f, 0.0f))
-            [
-                SNew(SColorBlock)
-                .Color( FLinearColor::Black )
-            ]
-        + SHeaderRow::Column("Header")
-            .DefaultLabel(LOCTEXT("", ""))
-            .VAlignCell(VAlign_Top)
-            .FillWidth(true);
-
     return
     
         SNew(SVerticalBox)
@@ -145,7 +113,6 @@ TSharedRef<SWidget> SOdysseyPalette::CreateColorPaletteWidget()
         .AutoHeight()
         [
             SAssignNew(mPaletteTreeView, SOdysseyPaletteTreeView)
-            //.TreeItemsSource(&mColorPalette->GetColorPalette()->mPaletteEntries)
             .Palette(mColorPalette->GetPalette())
             .OnGenerateRow(this, &SOdysseyPalette::OnGenerateRow)
         ];

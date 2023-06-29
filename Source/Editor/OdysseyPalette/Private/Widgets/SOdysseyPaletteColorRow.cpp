@@ -43,7 +43,7 @@ SOdysseyPaletteColorRow::GenerateHeaderWidget()
         .VAlign(VAlign_Center)
         [
              SAssignNew(mColorWidget, SColorBlock )
-            .Color(this, &SOdysseyPaletteColorRow::GetEntryColor)
+            .Color(this, &SOdysseyPaletteColorRow::GetEntryColorAsLinear)
             .OnMouseButtonDown(this, &SOdysseyPaletteColorRow::HandleEntryColorMouseButtonDown)
         ];
 
@@ -58,7 +58,7 @@ FReply SOdysseyPaletteColorRow::HandleEntryColorMouseButtonDown(const FGeometry&
         PickerArgs.bOnlyRefreshOnOk = false;
         PickerArgs.sRGBOverride = false;
         PickerArgs.OnColorCommitted = FOnLinearColorValueChanged::CreateSP(this, &SOdysseyPaletteColorRow::OnSetColorFromColorPicker);
-        PickerArgs.InitialColorOverride = mColorEntry->EntryColor;
+        PickerArgs.InitialColorOverride = mColorEntry->GetUsedColor();
         PickerArgs.ParentWidget = mColorWidget;
         PickerArgs.OptionalOwningDetailsView = mColorWidget;
         FWidgetPath ParentWidgetPath;
@@ -75,12 +75,12 @@ FReply SOdysseyPaletteColorRow::HandleEntryColorMouseButtonDown(const FGeometry&
 
 void SOdysseyPaletteColorRow::OnSetColorFromColorPicker(FLinearColor iNewColor)
 {
-    mColorEntry->EntryColor = iNewColor.ToFColorSRGB();
+    mColorEntry->SetUsedColor( iNewColor.ToFColorSRGB() );
 }
 
-FLinearColor SOdysseyPaletteColorRow::GetEntryColor() const
+FLinearColor SOdysseyPaletteColorRow::GetEntryColorAsLinear() const
 {
-    return FLinearColor( mColorEntry->EntryColor );
+    return FLinearColor( mColorEntry->GetUsedColor() );
 }
 
 #undef LOCTEXT_NAMESPACE

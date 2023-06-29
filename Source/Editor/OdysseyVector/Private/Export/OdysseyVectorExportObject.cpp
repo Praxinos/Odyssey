@@ -89,6 +89,44 @@ WriteObjectTransform( FOdysseyVectorObject& iObject, FArchive &Ar )
 }
 
 static void
+WriteObjectPaletteEntryDescriptionEntryId(FOdysseyVectorObject& iObject, FArchive& Ar)
+{
+    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_OBJECT_PALETTEENTRYDESCRIPTION_ENTRYID
+                                    , Ar
+                                    , [&iObject](FArchive &Ar) -> void
+    {
+        FName idEntry = iObject.GetPaletteEntryDescription().EntryId;
+
+        Ar << idEntry;
+    } );
+}
+
+static void
+WriteObjectPaletteEntryDescriptionUsedSet(FOdysseyVectorObject& iObject, FArchive& Ar)
+{
+    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_OBJECT_PALETTEENTRYDESCRIPTION_USEDSET
+                                    , Ar
+                                    , [&iObject](FArchive &Ar) -> void
+    {
+        uint8 usedSet = iObject.GetPaletteEntryDescription().UsedSet;
+
+        Ar << usedSet;
+    } );
+}
+
+static void
+WriteObjectPaletteEntryDescription( FOdysseyVectorObject& iObject, FArchive &Ar )
+{
+    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_OBJECT_PALETTEENTRYDESCRIPTION
+                                    , Ar
+                                    , [&iObject](FArchive &Ar) -> void
+    {
+        WriteObjectPaletteEntryDescriptionEntryId( iObject, Ar );
+        WriteObjectPaletteEntryDescriptionUsedSet( iObject, Ar );
+    } );
+}
+
+static void
 WriteObjectParentID( FOdysseyVectorObject& iObject, FArchive &Ar )
 {
     FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_OBJECT_PARENTID
@@ -156,6 +194,7 @@ WriteDefineObjectEntry( FOdysseyVectorObject& iObject, FArchive &Ar )
         WriteObjectID( iObject, Ar );
         WriteObjectParentID( iObject, Ar );
         WriteObjectTransform( iObject, Ar );
+        WriteObjectPaletteEntryDescription( iObject, Ar);
         WriteObjectForegroundColor( iObject, Ar );
         WriteObjectBackgroundColor( iObject, Ar );
 

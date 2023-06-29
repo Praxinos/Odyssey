@@ -38,7 +38,6 @@ struct FObjectParam
     UPROPERTY(EditAnywhere, Category="Coloring")
     FColor Foreground;
 
-    //How to store it, since vectorObject isn't an UObject ?
     UPROPERTY(EditAnywhere, Category = "PaletteEntry")
     UOdysseyPaletteEntry* Entry = nullptr;
 };
@@ -97,6 +96,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
 
         FOdysseyVectorBucket mFillBucket;
 
+        /* The Palette Entry associated with this vector object, if any. Else, the Guid inside will be 0 or invalid */
+        FPaletteEntryDescription mPaletteEntryDescription;
+
         /*uint32 mStrokeColor;*/
         /*uint32 mFillColor;*/
 
@@ -148,6 +150,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         virtual bool PickShape( const ::ULIS::FRectD& iRoi, uint32 iSelectionFlags ){ return false; };
 
         FOdysseyVectorBucket& GetFillBucket();
+
+        FPaletteEntryDescription& GetPaletteEntryDescription();
 
         virtual void TransferChild( FOdysseyVectorObject* iFosterChild );
         /*virtual void UpdateBoundingBox() = 0;*/

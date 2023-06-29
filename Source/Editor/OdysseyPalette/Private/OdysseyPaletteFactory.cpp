@@ -34,6 +34,5 @@ UObject*
 UOdysseyPaletteFactory::FactoryCreateNew( UClass* iClass, UObject* iParent, FName iName, EObjectFlags iFlags, UObject* iContext, FFeedbackContext* iWarn )
 {
     UOdysseyPalette* palette = NewObject<UOdysseyPalette>(iParent, iClass, iName, iFlags);
-
     return palette;
 }

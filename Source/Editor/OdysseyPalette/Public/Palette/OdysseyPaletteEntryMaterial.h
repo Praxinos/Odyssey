@@ -19,5 +19,5 @@ public:
 
 public:
     UPROPERTY(EditAnywhere, Category = Palette)
-    UMaterial* EntryMaterial;
+    TArray<UMaterial*> EntryMaterial;
 };

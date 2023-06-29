@@ -1,4 +1,5 @@
 #include "Import/OdysseyVectorImport.h"
+#include "AssetRegistry/AssetRegistryModule.h"
 
 void
 FOdysseyVectorImport::ReadChunks( uint64 iChunkEnd, FArchive &Ar, std::function<void(uint32, uint64, FArchive&)> iCallback )

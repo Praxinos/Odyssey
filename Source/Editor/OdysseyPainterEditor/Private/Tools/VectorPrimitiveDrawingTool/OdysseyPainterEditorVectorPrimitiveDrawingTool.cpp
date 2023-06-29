@@ -87,8 +87,8 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDownVector( FOdysseyVect
         entry = GetEditorAs<FOdysseyPainterEditor>()->GetGUI()->GetColorPaletteTab()->PaletteWidget()->GetColorPalette()->GetPalette()->CurrentEntry.Get();
         if (entry && entry->IsA(UOdysseyPaletteEntryColor::StaticClass()))
         {
-            UOdysseyPaletteEntryColor* colorEntry = Cast< UOdysseyPaletteEntryColor >(entry);
-            color = ::ULIS::FColor::RGBA8(colorEntry->EntryColor.R, colorEntry->EntryColor.G, colorEntry->EntryColor.B, colorEntry->EntryColor.A);
+            FColor colorEntry = Cast< UOdysseyPaletteEntryColor >(entry)->GetUsedColor();
+            color = ::ULIS::FColor::RGBA8(colorEntry.R, colorEntry.G, colorEntry.B, colorEntry.A);
         }
     }
 

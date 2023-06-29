@@ -627,7 +627,7 @@ FOdysseyVectorPathBuilder::DrawShape( uint64 iFlags )
 
     if (mObjectParam.Entry)
     {
-        FColor color = Cast< UOdysseyPaletteEntryColor >(mObjectParam.Entry)->EntryColor;
+        FColor color = Cast< UOdysseyPaletteEntryColor >(mObjectParam.Entry)->GetUsedColor();
         strokeColor.setR(color.B);
         strokeColor.setG(color.G);
         strokeColor.setB(color.R);

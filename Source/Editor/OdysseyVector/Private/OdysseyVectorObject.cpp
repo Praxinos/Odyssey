@@ -48,6 +48,11 @@ FOdysseyVectorObject::GetFillBucket()
     return mFillBucket;
 }
 
+FPaletteEntryDescription& FOdysseyVectorObject::GetPaletteEntryDescription()
+{
+    return mPaletteEntryDescription;
+}
+
 void
 FOdysseyVectorObject::SetName( const FString& iName )
 {
@@ -260,6 +265,7 @@ FOdysseyVectorObject::CopySettings( FOdysseyVectorObject& iDestinationObject )
 
     iDestinationObject.mObjectParam.Foreground = mObjectParam.Foreground;
     iDestinationObject.mObjectParam.Entry = mObjectParam.Entry;
+    iDestinationObject.mPaletteEntryDescription = mPaletteEntryDescription;
 
     iDestinationObject.mFillBucket.SetColor( mFillBucket.GetColor() );
     iDestinationObject.mFillBucket.SetGradient( mFillBucket.IsGradient() );
@@ -703,6 +709,17 @@ FOdysseyVectorObject::SetBackgroundColor( FColor& iColor )
 
 void FOdysseyVectorObject::SetPaletteEntry(UOdysseyPaletteEntry* iEntry)
 {
+    if (iEntry)
+    {
+        mPaletteEntryDescription.EntryId = iEntry->GetFName();
+        mPaletteEntryDescription.UsedSet = 1;
+    }
+    else
+    {
+        mPaletteEntryDescription.EntryId = FName(TEXT(""));
+        mPaletteEntryDescription.UsedSet = 0;
+    }
+
     mObjectParam.Entry = iEntry;
 }
 
@@ -793,7 +810,7 @@ FOdysseyVectorObject::GetForegroundColor()
 {
     if (mObjectParam.Entry && mObjectParam.Entry->IsA(UOdysseyPaletteEntryColor::StaticClass()))
     {
-        return Cast< UOdysseyPaletteEntryColor >(mObjectParam.Entry)->EntryColor;
+        return Cast< UOdysseyPaletteEntryColor >(mObjectParam.Entry)->GetUsedColor();
     }
     return mObjectParam.Foreground;
 }
@@ -803,7 +820,7 @@ FOdysseyVectorObject::GetBackgroundColor()
 {
     if (mObjectParam.Entry && mObjectParam.Entry->IsA(UOdysseyPaletteEntryColor::StaticClass()))
     {
-        return Cast< UOdysseyPaletteEntryColor >(mObjectParam.Entry)->EntryColor;
+        return Cast< UOdysseyPaletteEntryColor >(mObjectParam.Entry)->GetUsedColor();
     }
     return mFillBucket.GetColor();
 }

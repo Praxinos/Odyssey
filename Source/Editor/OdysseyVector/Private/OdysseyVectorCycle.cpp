@@ -397,7 +397,7 @@ FOdysseyVectorCycle::Draw( uint64 iFlags )
             // Note: Blend2D color format is 0xAARRGGBB
             if (mParent.mObjectParam.Entry)
             {
-                FColor colorParent = Cast< UOdysseyPaletteEntryColor >(mParent.mObjectParam.Entry)->EntryColor;
+                FColor colorParent = Cast< UOdysseyPaletteEntryColor >(mParent.mObjectParam.Entry)->GetUsedColor();
                 BLColor.setR(colorParent.B);
                 BLColor.setG(colorParent.G);
                 BLColor.setB(colorParent.R);

@@ -17,6 +17,9 @@ class ODYSSEYPALETTE_API UOdysseyPalette : public UObject
     GENERATED_BODY()
 
 public:
+    UOdysseyPalette();
+
+public:
     /* Called when the current entry changed */
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnCurrentEntryChanged, UOdysseyPalette*)
 
@@ -165,6 +168,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Palette")
 	void MoveEntries(TArray<UOdysseyPaletteEntry*> iEntries, UOdysseyPaletteEntry* iParentEntry = nullptr, int iIndexInParent = 0);
 
+    void AddSet();
+
+    void RemoveSet(int iIndex = -1);
+
 public:
     //Called by layers when there Parent or Children changed
     virtual void HierarchyChanged();
@@ -206,11 +213,16 @@ protected:
 
     void GetEntriesUniqueParents(TArray<UOdysseyPaletteEntry*> iEntries, TArray<UOdysseyPaletteEntry*>& oParents);
 
-
 public:
     UPROPERTY(config, DuplicateTransient, meta = (AllowedClasses = "OdysseyPaletteEntry"))
     TSoftObjectPtr<UOdysseyPaletteEntry> CurrentEntry;
 
     UPROPERTY()
     TObjectPtr<UOdysseyPaletteEntry> PaletteRoot;
+    
+    UPROPERTY()
+    TArray<FName> Sets;
+
+    UPROPERTY()
+    uint8 UsedSet;
 };

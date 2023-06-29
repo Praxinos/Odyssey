@@ -146,7 +146,7 @@ FOdysseyVectorBucket::SetColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA )
 {
     if (GetParent().mObjectParam.Entry)
     {
-        mColor = Cast< UOdysseyPaletteEntryColor >(GetParent().mObjectParam.Entry)->EntryColor;
+        mColor = Cast< UOdysseyPaletteEntryColor >(GetParent().mObjectParam.Entry)->GetUsedColor();
     }
     else
     {
@@ -162,7 +162,7 @@ FOdysseyVectorBucket::SetColor( FColor& iColor )
 {
     if (GetParent().mObjectParam.Entry)
     {
-        mColor = Cast< UOdysseyPaletteEntryColor >(GetParent().mObjectParam.Entry)->EntryColor;
+        mColor = Cast< UOdysseyPaletteEntryColor >(GetParent().mObjectParam.Entry)->GetUsedColor();
     }
     else
     {

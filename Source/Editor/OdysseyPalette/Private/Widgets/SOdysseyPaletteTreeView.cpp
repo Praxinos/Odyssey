@@ -7,6 +7,8 @@
 #include "ToolMenus.h"
 #include "Framework/Commands/GenericCommands.h"
 #include "ToolMenus/Public/ToolMenuContext.h"
+#include "AssetRegistry/AssetRegistryModule.h"
+#include "Widgets/Views/STileView.h"
 
 #define LOCTEXT_NAMESPACE "SOdysseyPaletteTreeView"
 
@@ -54,7 +56,10 @@ void SOdysseyPaletteTreeView::Construct(const FArguments& InArgs)
             .FillWidth(InArgs._HeaderFillWidth)
             .FixedWidth(InArgs._HeaderFixedWidth)
             .ManualWidth(InArgs._HeaderManualWidth)
-            .FillSized(InArgs._HeaderFillSized);
+            .FillSized(InArgs._HeaderFillSized)
+            [
+                CreateSetWidget()
+            ];
 
     for( SHeaderRow::FColumn::FArguments columnArguments : InArgs._AdditionalColumns)
     {
@@ -241,6 +246,14 @@ SOdysseyPaletteTreeView::ResetDropZone()
     mDisplayDropZone = false;
 }
 
+FReply SOdysseyPaletteTreeView::AddSetToPalette()
+{
+    mPalette->AddSet();
+    mPaletteSetView->OnSetSelected( mPalette->Sets.Last() );
+
+    return FReply::Handled();
+}
+
 //PRIVATE API-----------------------------------------------------------
 
 void
@@ -286,15 +299,6 @@ SOdysseyPaletteTreeView::SetCurrentEntryFromSelectorItem()
 
     if (SelectorItem == mPalette->CurrentEntry)
         return;
-    
-    //TODO: Get Referenced Objects
-    /*
-    UObject* object = Cast<UObject>(SelectorItem);
-    FReferencerInformationList ReferencesIncludingUndo;
-    bool bReferencedInMemoryOrUndoStack = IsReferenced(object, GARBAGE_COLLECTION_KEEPFLAGS, EInternalObjectFlags::GarbageCollectionKeepFlags, true, &ReferencesIncludingUndo);
-
-    UE_LOG(LogTemp, Display, TEXT("%d, %d"), ReferencesIncludingUndo.ExternalReferences.Num(), ReferencesIncludingUndo.InternalReferences.Num());
-    */
 
     FOdysseyObjectEditorUtils::SetPropertyValue(mPalette, "CurrentEntry", TSoftObjectPtr<UOdysseyPaletteEntry>(SelectorItem));
 }
@@ -318,6 +322,29 @@ void SOdysseyPaletteTreeView::RefreshAllExpansionStates()
         SetItemExpansion(entry, entry->IsExpanded);
     }
 }
+
+TSharedRef<SWidget> SOdysseyPaletteTreeView::CreateSetWidget()
+{
+    return SNew(SHorizontalBox)
+        + SHorizontalBox::Slot()
+        .HAlign(HAlign_Fill)
+        [
+            SAssignNew(mPaletteSetView, SOdysseyPaletteSetView)
+            .Palette(mPalette)
+            .OnSetSelected(this, &SOdysseyPaletteTreeView::OnSetSelected)
+        ]
+        + SHorizontalBox::Slot()
+        .AutoWidth()
+        .HAlign(HAlign_Right)
+        .VAlign(VAlign_Top)
+        [
+            SNew(SButton)
+            .ButtonStyle(&FOdysseyStyle::GetWidgetStyle<FButtonStyle>("PlaybackControls.PreviousKey"))
+            .HAlign(HAlign_Center)
+            .VAlign(VAlign_Center)
+            .OnClicked(this, &SOdysseyPaletteTreeView::AddSetToPalette)
+        ];
+ }
 
 void
 SOdysseyPaletteTreeView::Private_SignalSelectionChanged(ESelectInfo::Type SelectInfo)
@@ -405,6 +432,15 @@ void SOdysseyPaletteTreeView::CreateContextMenu()
         commonSection.AddMenuEntry(FGenericCommands::Get().Duplicate);
         commonSection.AddMenuEntry(FGenericCommands::Get().Rename);
     }
+}
+
+void
+SOdysseyPaletteTreeView::OnSetSelected(FName iSet)
+{
+    int index = mPalette->Sets.Find(iSet);
+
+    if( index >= 0 )
+        mPalette->UsedSet = index;
 }
 
 TArray<TSharedPtr<FExtender>>

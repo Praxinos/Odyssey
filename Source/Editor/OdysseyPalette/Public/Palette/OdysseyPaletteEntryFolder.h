@@ -18,6 +18,6 @@ public:
     UOdysseyPaletteEntryFolder();
 
 public:
-    UPROPERTY()
-    TArray<UOdysseyPaletteEntry*> mChildren;
+    UPROPERTY(AssetRegistrySearchable)
+    TArray<TObjectPtr<UOdysseyPaletteEntry>> mChildren;
 };
