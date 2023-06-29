@@ -403,8 +403,8 @@ FOdysseyVectorPathCubic::PickPoint( double iWorldX
 }
 
 void
-FOdysseyVectorPathCubic::Cut( ::ULIS::FVec2D& linePoint0
-                            , ::ULIS::FVec2D& linePoint1
+FOdysseyVectorPathCubic::Cut( const ::ULIS::FVec2D& linePoint0
+                            , const ::ULIS::FVec2D& linePoint1
                             , std::vector<FOdysseyVectorVertex*>& oNewVertexArray
                             , std::vector<FOdysseyVectorSegment*>& oNewSegmentArray
                             , std::vector<FOdysseyVectorSegment*>& oOldSegmentArray )

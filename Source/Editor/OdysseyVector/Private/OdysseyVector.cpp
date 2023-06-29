@@ -107,10 +107,10 @@ FOdysseyVector::Cross2D( const ::ULIS::FVec2D& iA, const ::ULIS::FVec2D &iB )
 
 // https://stackoverflow.com/questions/35473936/find-whether-two-line-segments-intersect-or-not-in-c
 bool
-FOdysseyVector::IntersectSegment( ::ULIS::FVec2D& line0p0
-                                , ::ULIS::FVec2D& line0p1
-                                , ::ULIS::FVec2D& line1p0
-                                , ::ULIS::FVec2D& line1p1
+FOdysseyVector::IntersectSegment( const ::ULIS::FVec2D& line0p0
+                                , const ::ULIS::FVec2D& line0p1
+                                , const ::ULIS::FVec2D& line1p0
+                                , const ::ULIS::FVec2D& line1p1
                                 , double* line0t
                                 , double* line1t )
 {

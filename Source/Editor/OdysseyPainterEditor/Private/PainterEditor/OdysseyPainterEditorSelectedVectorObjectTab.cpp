@@ -105,31 +105,32 @@ FOdysseyPainterEditorSelectedVectorObjectTab::GetGroupPaintView()
 void
 FOdysseyPainterEditorSelectedVectorObjectTab::Update( FOdysseyVectorScene* iScene )
 {
-    FOdysseyVectorObject* selectedObject = iScene->GetLastSelected();
+    uint32 objectClass = FOdysseyVectorObject::GetCommonClass( iScene->GetSelectedObjectList() );
 
-    if( selectedObject && ( iScene->GetSelectedObjectList().size() == 1 ) )
+    if( objectClass )
     {
-        if( selectedObject->GetClass() == FOdysseyVectorPathCubic::StaticClass() )
+        if( objectClass == FOdysseyVectorPathCubic::StaticClass() )
         {
-            mPathView->Update( selectedObject );
+            mPathView->Update( iScene );
             mDetailsView->SetObject( mPathView );
         }
-        else
-        if( selectedObject->GetClass() == FOdysseyVectorGroupPaint::StaticClass() )
+
+        if( objectClass == FOdysseyVectorGroupPaint::StaticClass() )
         {
-            mGroupPaintView->Update( selectedObject );
+            mGroupPaintView->Update( iScene );
             mDetailsView->SetObject( mGroupPaintView );
         }
-        else
+
+        if( objectClass == FOdysseyVectorObject::StaticClass() )
         {
             // default
-            mObjectView->Update( selectedObject );
+            mObjectView->Update( iScene );
             mDetailsView->SetObject( mObjectView );
         }
     }
     else
     {
-        mDetailsView->SetObject(nullptr);
+        mDetailsView->SetObject( nullptr );
     }
 }
 

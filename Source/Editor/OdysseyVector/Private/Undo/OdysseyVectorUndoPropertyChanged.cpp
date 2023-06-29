@@ -2,70 +2,74 @@
 
 FOdysseyVectorUndoPropertyChanged::~FOdysseyVectorUndoPropertyChanged()
 {
-
+    mPropertiesRecordArray.clear();
 }
 
-FOdysseyVectorUndoPropertyChanged::FOdysseyVectorUndoPropertyChanged( FOdysseyVectorScene* iScene, FOdysseyVectorObject* iObject )
+FOdysseyVectorUndoPropertyChanged::FOdysseyVectorUndoPropertyChanged( FOdysseyVectorScene* iScene, std::list<FOdysseyVectorObject*>& iObjectList )
     : FOdysseyVectorUndo( iScene )
-    , mObject( iObject )
 {
-    mObjectParam = mObject->mObjectParam;
+    std::list<FOdysseyVectorObject*>::iterator it;
+    int i;
 
-    if( mObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+    mPropertiesRecordArray.resize( iObjectList.size() );
+
+    for( i = 0, it = iObjectList.begin(); it != iObjectList.end(); i++, ++it )
     {
-        FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>( mObject );
+        FOdysseyVectorObject* object = (*it);
 
-        mPathParam = path->mPathParam;
-    }
+        mPropertiesRecordArray[i].mObject = object;
+        mPropertiesRecordArray[i].mObjectParam = object->mObjectParam;
 
-    if( mObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
-    {
-        FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>( mObject );
+        if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+        {
+            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>( object );
 
-        mGroupPaintParam = paintGroup->mGroupPaintParam;
-    }
+            mPropertiesRecordArray[i].mPathParam = path->mPathParam;
+        }
 
-    if( mObject->HasBaseClass( FOdysseyVectorEllipse::StaticClass() ) )
-    {
-        FOdysseyVectorEllipse* ellipse = static_cast<FOdysseyVectorEllipse*>( mObject );
+        if( object->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+        {
+            FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>( object );
 
-        mEllipseParam = ellipse->mEllipseParam;
+            mPropertiesRecordArray[i].mGroupPaintParam = paintGroup->mGroupPaintParam;
+        }
     }
 }
 
 void
 FOdysseyVectorUndoPropertyChanged::SwapParam()
 {
-    FObjectParam objectParamSwap = mObject->mObjectParam;
-
-    mObject->mObjectParam = mObjectParam;
-    mObjectParam = objectParamSwap;
-
-    if( mObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+    for( int i = 0; i < mPropertiesRecordArray.size(); i++ )
     {
-        FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>( mObject );
-        FPathParam pathParamSwap = path->mPathParam;
+        FOdysseyVectorObject* object = mPropertiesRecordArray[i].mObject;
+        FObjectParam objectParamSwap = mPropertiesRecordArray[i].mObjectParam;
 
-        path->mPathParam = mPathParam;
-        mPathParam = pathParamSwap;
-    }
+        object->mObjectParam = mPropertiesRecordArray[i].mObjectParam;
 
-    if( mObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
-    {
-        FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>( mObject );
-        FGroupPaintParam groupPaintParamSwap = paintGroup->mGroupPaintParam;
+        mPropertiesRecordArray[i].mObjectParam = objectParamSwap;
 
-        paintGroup->mGroupPaintParam = mGroupPaintParam;
-        mGroupPaintParam = groupPaintParamSwap;
-    }
+        if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+        {
+            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>( object );
+            FPathParam pathParamSwap = path->mPathParam;
 
-    if( mObject->HasBaseClass( FOdysseyVectorEllipse::StaticClass() ) )
-    {
-        FOdysseyVectorEllipse* ellipse = static_cast<FOdysseyVectorEllipse*>( mObject );
-        FEllipseParam ellipseParamSwap = ellipse->mEllipseParam;
+            path->mPathParam = mPropertiesRecordArray[i].mPathParam;
 
-        ellipse->mEllipseParam = mEllipseParam;
-        mEllipseParam = ellipseParamSwap;
+            mPropertiesRecordArray[i].mPathParam = pathParamSwap;
+        }
+
+        if( object->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+        {
+            FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>( object );
+            FGroupPaintParam groupPaintParamSwap = paintGroup->mGroupPaintParam;
+
+            paintGroup->mGroupPaintParam = mPropertiesRecordArray[i].mGroupPaintParam;
+
+            mPropertiesRecordArray[i].mGroupPaintParam = groupPaintParamSwap;
+        }
+
+        object->UpdateMatrix();
+        object->Invalidate();
     }
 }
 
@@ -75,9 +79,6 @@ FOdysseyVectorUndoPropertyChanged::Apply( UObject* iIgnored )
     FOdysseyVectorUndo::Apply( iIgnored );
 
     FOdysseyVectorUndoPropertyChanged::SwapParam();
-
-    mObject->UpdateMatrix();
-    mObject->Invalidate();
 
     // update invalidated objects
     mScene->Update(0);
@@ -94,9 +95,6 @@ FOdysseyVectorUndoPropertyChanged::Revert( UObject* iIgnored )
     FOdysseyVectorUndo::Revert( iIgnored );
 
     FOdysseyVectorUndoPropertyChanged::SwapParam();
-
-    mObject->UpdateMatrix();
-    mObject->Invalidate();
 
     // update invalidated objects
     mScene->Update(0);

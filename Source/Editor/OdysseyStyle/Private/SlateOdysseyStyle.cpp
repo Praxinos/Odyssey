@@ -365,6 +365,9 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "PainterEditor.ToolsTab.ObjectMoveTool64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/object_move_tool_64", mIcon64x64 ) );
     Set( "PainterEditor.ToolsTab.ObjectRotateTool64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/object_rotate_tool_64", mIcon64x64 ) );
     Set( "PainterEditor.ToolsTab.ObjectScaleTool64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/object_scale_tool_64", mIcon64x64 ) );
+    Set( "PainterEditor.ToolsTab.TransformTool64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/transform_tool_64", mIcon64x64 ) );
+    Set( "PainterEditor.ToolsTab.TransformTool32", new IMAGE_BRUSH( "PainterEditor/ToolsTab/transform_tool_32", mIcon32x32 ) );
+    Set( "PainterEditor.ToolsTab.TransformTool16", new IMAGE_BRUSH( "PainterEditor/ToolsTab/transform_tool_16", mIcon16x16 ) );
     Set( "PainterEditor.ToolsTab.SceneScaleTool64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/scene_scale_tool_64", mIcon64x64 ) );
     Set( "PainterEditor.ToolsTab.ScenePanTool64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/scene_pan_tool_64", mIcon64x64 ) );
     Set( "PainterEditor.ToolsTab.SceneScaleTool64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/scene_scale_tool_64", mIcon64x64 ) );

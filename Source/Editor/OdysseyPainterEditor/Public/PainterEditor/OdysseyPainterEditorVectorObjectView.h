@@ -19,16 +19,15 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectView : public UO
         ~UOdysseyPainterEditorVectorObjectView();
         UOdysseyPainterEditorVectorObjectView();
 
-        void Update( FOdysseyVectorObject* iVectorObject );
+        void Update( FOdysseyVectorScene* iScene );
         void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
 
     protected:
-        virtual void ImportParam( FOdysseyVectorObject* iObject );
-        virtual void ExportParam( FOdysseyVectorObject* iObject );
+        virtual void ImportParam();
         virtual void PropertyChanged( const FName& iPropertyName, const FName& iCategory );
 
     protected:
-        FOdysseyVectorObject* mObject;
+        FOdysseyVectorScene* mScene;
 
     public:
         UPROPERTY(EditAnywhere, Category="Object")

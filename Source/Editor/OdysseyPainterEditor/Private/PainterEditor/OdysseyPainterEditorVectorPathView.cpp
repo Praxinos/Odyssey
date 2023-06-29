@@ -10,28 +10,47 @@ UOdysseyPainterEditorVectorPathView::UOdysseyPainterEditorVectorPathView()
 }
 
 void
-UOdysseyPainterEditorVectorPathView::ImportParam( FOdysseyVectorObject* iObject )
+UOdysseyPainterEditorVectorPathView::ImportParam()
 {
-    UOdysseyPainterEditorVectorObjectView::ImportParam( iObject );
+    std::list<FOdysseyVectorObject*>& selectedObjectList = mScene->GetSelectedObjectList();
 
-     PathParam = static_cast<FOdysseyVectorPath*>(iObject)->mPathParam;
-}
+    UOdysseyPainterEditorVectorObjectView::ImportParam();
 
-void
-UOdysseyPainterEditorVectorPathView::ExportParam( FOdysseyVectorObject* iObject )
-{
-    UOdysseyPainterEditorVectorObjectView::ExportParam( iObject );
+    for ( std::list<FOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
+    {
+        FOdysseyVectorObject* selectedObject = (*it);
 
-    static_cast<FOdysseyVectorPath*>(iObject)->mPathParam = PathParam;
+        if( selectedObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+        {
+            FOdysseyVectorPath* selectedPath = static_cast<FOdysseyVectorPath*>(selectedObject);
+
+            PathParam = selectedPath->mPathParam;
+
+            break; // only one
+        }
+    }
 }
 
 void
 UOdysseyPainterEditorVectorPathView::PropertyChanged( const FName& iPropertyName, const FName& iCategory )
 {
+    std::list<FOdysseyVectorObject*>& selectedObjectList = mScene->GetSelectedObjectList();
+
     UOdysseyPainterEditorVectorObjectView::PropertyChanged( iPropertyName, iCategory );
 
-    /*if( iCategory == "Transform" )
+    for ( std::list<FOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
     {
-        mObject->UpdateMatrix();
-    }*/
+        FOdysseyVectorObject* selectedObject = (*it);
+
+        if( selectedObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+        {
+            FOdysseyVectorPath* selectedPath = static_cast<FOdysseyVectorPath*>(selectedObject);
+
+            if( iPropertyName == "JointType" )
+                selectedPath->mPathParam.JointType = PathParam.JointType;
+
+            if( iPropertyName == "Filled" )
+                selectedPath->mPathParam.Filled = PathParam.Filled;
+        }
+    }
 }

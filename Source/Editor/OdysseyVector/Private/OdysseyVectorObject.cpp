@@ -53,6 +53,49 @@ FOdysseyVectorObject::SetName( const FString& iName )
     mObjectParam.Name = iName;
 }
 
+static uint32
+CheckCommonClass( std::list<FOdysseyVectorObject*>& iObjectList, uint32 iCommonClass )
+{
+    std::list<FOdysseyVectorObject*>::iterator it;
+
+    if( iObjectList.size() )
+    {
+        for( it = iObjectList.begin(); it != iObjectList.end(); ++it )
+        {
+            FOdysseyVectorObject* object = (*it);
+
+            if( object->HasBaseClass( iCommonClass ) )
+            {
+                uint32 objectClass = object->GetClass();
+
+                if( objectClass != iCommonClass )
+                {
+                    uint32 newCommonClass = CheckCommonClass( iObjectList, objectClass );
+
+                    if( newCommonClass )
+                    {
+                        return newCommonClass;
+                    }
+                }
+            }
+            else
+            {
+                return 0;
+            }
+        }
+
+        return iCommonClass;
+    }
+
+    return 0;
+}
+
+uint32
+FOdysseyVectorObject::GetCommonClass( std::list<FOdysseyVectorObject*>& iObjectList )
+{
+    return CheckCommonClass( iObjectList, FOdysseyVectorObject::StaticClass() );
+}
+
 bool
 FOdysseyVectorObject::HasBaseClass( uint32 iBaseClassID )
 {

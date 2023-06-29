@@ -50,14 +50,6 @@ UOdysseyPainterEditorVectorPathCutTool::OnMouseDownVector( FOdysseyVectorEngine*
 
     iEngine->AddHUD( &mLineHUD );
 
-    if ( selectedObject )
-    {
-        BLPoint localCoords = selectedObject->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
-
-        mStartCutAt.x = localCoords.x;
-        mStartCutAt.y = localCoords.y;
-    }
-
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 
     return true;
@@ -87,31 +79,36 @@ UOdysseyPainterEditorVectorPathCutTool::OnMouseUpVector( FOdysseyVectorEngine* i
                                                        , const FOdysseyPoint& iPointInTexture
                                                        , const FKey& iKey )
 {
-    FOdysseyVectorObject* selectedObject = iScene->GetLastSelected();
-    std::vector<FOdysseyVectorVertex*> addedVertexArray;
-    std::vector<FOdysseyVectorSegment*> addedSegmentArray;
+    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
     std::vector<FOdysseyVectorSegment*> removedSegmentArray;
-    ::ULIS::FVec2D endCutAt;
+    std::vector<FOdysseyVectorSegment*> addedSegmentArray;
+    std::vector<FOdysseyVectorVertex*> addedVertexArray;
+
+    // crashes if I don't reserve. Why that ?
+    removedSegmentArray.reserve(50);
+    addedSegmentArray.reserve(50);
+    addedVertexArray.reserve(50);
 
     iEngine->RemoveHUD( &mLineHUD );
 
-    if ( selectedObject )
+    for( std::list<FOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
     {
-        BLPoint localCoords = selectedObject->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
-
-        endCutAt.x = localCoords.x;
-        endCutAt.y = localCoords.y;
+        FOdysseyVectorObject* selectedObject = (*it);
+        BLMatrix2D& inverseWorldMatrix = selectedObject->GetInverseWorldMatrix();
+        ::ULIS::FVec2D& p0 = mLineHUD.GetP0();
+        ::ULIS::FVec2D& p1 = mLineHUD.GetP1();
+        BLPoint localP0 = inverseWorldMatrix.mapPoint( p0.x, p0.y );
+        BLPoint localP1 = inverseWorldMatrix.mapPoint( p1.x, p1.y );
 
         if( selectedObject->GetClass() == FOdysseyVectorPathCubic::StaticClass() )
         {
             FOdysseyVectorPathCubic *cubicPath = static_cast<FOdysseyVectorPathCubic*>(selectedObject);
 
-            // crashes if I don't reserve. Why that ?
-            addedVertexArray.reserve(50);
-            addedSegmentArray.reserve(50);
-            removedSegmentArray.reserve(50);
-
-            cubicPath->Cut( mStartCutAt, endCutAt, addedVertexArray, addedSegmentArray, removedSegmentArray );
+            cubicPath->Cut( ::ULIS::FVec2D( localP0.x, localP0.y )
+                          , ::ULIS::FVec2D( localP1.x, localP1.y )
+                          , addedVertexArray
+                          , addedSegmentArray
+                          , removedSegmentArray );
             cubicPath->Invalidate();
         }
     }

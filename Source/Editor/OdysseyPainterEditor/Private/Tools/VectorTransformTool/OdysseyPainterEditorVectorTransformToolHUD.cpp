@@ -36,33 +36,77 @@ FOdysseyPainterEditorVectorTransformToolHUD::SetCursorPosition( double iWorldX, 
     return mFlags;
 }
 
-void
-FOdysseyPainterEditorVectorTransformToolHUD::GetWorldGizmo( ::ULIS::FVec2D& oWorldPosition
-                                                          , ::ULIS::FVec2D& oWorldXAxis
-                                                          , ::ULIS::FVec2D& oWorldYAxis  )
+static void
+GetWorldGizmo( FSelectionBox& iSelectionBox
+             , ::ULIS::FVec2D& iGizmo
+             , ::ULIS::FVec2D& oWorldPosition
+             , ::ULIS::FVec2D& oWorldXAxis
+             , ::ULIS::FVec2D& oWorldYAxis  )
 {
-    if( mSelectionBox.rect.Area() )
+    BLPoint worldGizmo = iSelectionBox.worldMatrix.mapPoint( iGizmo.x, iGizmo.y );
+    BLPoint worldXAxis = iSelectionBox.worldMatrix.mapVector( 1.0f, 0.0f );
+    BLPoint worldYAxis = iSelectionBox.worldMatrix.mapVector( 0.0f, 1.0f );
+    ::ULIS::FVec2D XAxis = ::ULIS::FVec2D( worldXAxis.x, worldXAxis.y );
+    ::ULIS::FVec2D YAxis = ::ULIS::FVec2D( worldYAxis.x, worldYAxis.y );
+
+    oWorldPosition = ::ULIS::FVec2D( worldGizmo.x, worldGizmo.y );
+
+    if( XAxis.DistanceSquared() )
     {
-        BLMatrix2D& worldMatrix = mSelectionBox.worldMatrix;
-        BLPoint worldGizmo = worldMatrix.mapPoint( mGizmo.x, mGizmo.y );
-        BLPoint worldXAxis = worldMatrix.mapVector( 1.0f, 0.0f );
-        BLPoint worldYAxis = worldMatrix.mapVector( 0.0f, 1.0f );
-        ::ULIS::FVec2D XAxis = ::ULIS::FVec2D( worldXAxis.x, worldXAxis.y );
-        ::ULIS::FVec2D YAxis = ::ULIS::FVec2D( worldYAxis.x, worldYAxis.y );
+        XAxis.Normalize();
+        oWorldXAxis = XAxis * 80.0f;
+    }
 
-        oWorldPosition = ::ULIS::FVec2D( worldGizmo.x, worldGizmo.y );
+    if( YAxis.DistanceSquared() )
+    {
+        YAxis.Normalize();
+        oWorldYAxis = YAxis * 80.0f;
+    }
+}
 
-        if( XAxis.DistanceSquared() )
-        {
-            XAxis.Normalize();
-            oWorldXAxis = XAxis * 80.0f;
-        }
+typedef struct _FSelectionBoxScaler
+{
+    BLPoint position;
+    uint32 flag;
+}
+FSelectionBoxScaler;
 
-        if( YAxis.DistanceSquared() )
-        {
-            YAxis.Normalize();
-            oWorldYAxis = YAxis * 80.0f;
-        }
+static void
+GetWorldScalers( FSelectionBox& iSelectionBox, FSelectionBoxScaler iScaler[4] )
+{
+    BLPoint handle[4] = { iSelectionBox.worldMatrix.mapPoint( iSelectionBox.rect.x                       , iSelectionBox.rect.y                        )
+                        , iSelectionBox.worldMatrix.mapPoint( iSelectionBox.rect.x + iSelectionBox.rect.w, iSelectionBox.rect.y                        )
+                        , iSelectionBox.worldMatrix.mapPoint( iSelectionBox.rect.x + iSelectionBox.rect.w, iSelectionBox.rect.y + iSelectionBox.rect.h )
+                        , iSelectionBox.worldMatrix.mapPoint( iSelectionBox.rect.x                       , iSelectionBox.rect.y + iSelectionBox.rect.h ) };
+
+    iScaler[0].position = handle[0];
+    iScaler[0].flag     = FOdysseyPainterEditorVectorTransformToolHUD::PICK_SCALER_TOPLEFT;
+    iScaler[1].position = handle[1];
+    iScaler[1].flag     = FOdysseyPainterEditorVectorTransformToolHUD::PICK_SCALER_TOPRIGHT;
+    iScaler[2].position = handle[2];
+    iScaler[2].flag     = FOdysseyPainterEditorVectorTransformToolHUD::PICK_SCALER_BOTTOMRIGHT;
+    iScaler[3].position = handle[3];
+    iScaler[3].flag     = FOdysseyPainterEditorVectorTransformToolHUD::PICK_SCALER_BOTTOMLEFT;
+}
+
+void
+FOdysseyPainterEditorVectorTransformToolHUD::DrawScalers( FOdysseyVectorScene* iScene, uint64 iFlags )
+{
+    BLContext* blctx = iScene->GetEngine()->GetBLContext();
+    FSelectionBoxScaler scaler[4];
+
+    GetWorldScalers( mSelectionBox, scaler);
+
+    for( int i = 0; i < 4; i++ )
+    {
+        BLRgba32 scalerColor = ( mFlags & scaler[i].flag ) ? BLRgba32( 0xFF0000FF )
+                                                           : BLRgba32( 0xFFD0E040 );// teal (ABGR)
+
+        blctx->setFillStyle( scalerColor );
+        blctx->fillCircle( scaler[i].position.x, scaler[i].position.y, SCALER_RADIUS );
+        blctx->setStrokeWidth( 1.0f );
+        blctx->setStrokeStyle( BLRgba32( 0xFF000000 ) );
+        blctx->strokeCircle( scaler[i].position.x, scaler[i].position.y, SCALER_RADIUS );
     }
 }
 
@@ -71,58 +115,49 @@ FOdysseyPainterEditorVectorTransformToolHUD::DrawGizmo( FOdysseyVectorScene* iSc
 {
     BLContext* blctx = iScene->GetEngine()->GetBLContext();
     BLRgba32 gizmoColor = ( mFlags & PICK_ZAXIS ) ? BLRgba32( 0xFF0000FF )
-                                                       : BLRgba32( 0xFFD0E040 );// teal (ABGR)
+                                                  : BLRgba32( 0xFFD0E040 );// teal (ABGR)
     BLRgba32 xAxisColor = ( mFlags & PICK_XAXIS ) ? BLRgba32( 0xFF0000FF )
-                                                       : BLRgba32( 0xFFD0E040 );// teal (ABGR)
+                                                  : BLRgba32( 0xFFD0E040 );// teal (ABGR)
     BLRgba32 yAxisColor = ( mFlags & PICK_YAXIS ) ? BLRgba32( 0xFF0000FF )
-                                                       : BLRgba32( 0xFFD0E040 );// teal (ABGR)
+                                                  : BLRgba32( 0xFFD0E040 );// teal (ABGR)
+    ::ULIS::FVec2D worldGizmo;
+    ::ULIS::FVec2D worldXAxis;
+    ::ULIS::FVec2D worldYAxis;
 
-    blctx->save();
-    blctx->resetMatrix();
+    GetWorldGizmo( mSelectionBox, mGizmo, worldGizmo, worldXAxis, worldYAxis );
 
-    if( mSelectionBox.rect.Area() )
-    {
-        ::ULIS::FVec2D worldGizmo;
-        ::ULIS::FVec2D worldXAxis;
-        ::ULIS::FVec2D worldYAxis;
+    // Central circle
 
-        GetWorldGizmo( worldGizmo, worldXAxis, worldYAxis );
+    blctx->setFillStyle( gizmoColor );
+    blctx->fillCircle( worldGizmo.x, worldGizmo.y, GIZMO_RADIUS );
+    blctx->setStrokeWidth( 1.0f );
+    blctx->setStrokeStyle( BLRgba32( 0xFF000000 ) );
+    blctx->strokeCircle( worldGizmo.x, worldGizmo.y, GIZMO_RADIUS );
 
-        // Central circle
+    // Axises
 
-        blctx->setFillStyle( gizmoColor );
-        blctx->fillCircle( worldGizmo.x, worldGizmo.y, GIZMO_RADIUS );
-        blctx->setStrokeWidth( 1.0f );
-        blctx->setStrokeStyle( BLRgba32( 0xFF000000 ) );
-        blctx->strokeCircle( worldGizmo.x, worldGizmo.y, GIZMO_RADIUS );
+    blctx->setStrokeWidth( 2.0f );
+    blctx->setStrokeStyle( BLRgba32( 0xFF000000 ) );
+    blctx->strokeLine( worldGizmo.x + GIZMO_RADIUS
+                        , worldGizmo.y
+                        , worldGizmo.x + worldXAxis.x
+                        , worldGizmo.y + worldXAxis.y );
+    blctx->strokeLine( worldGizmo.x
+                        , worldGizmo.y + GIZMO_RADIUS
+                        , worldGizmo.x + worldYAxis.x
+                        , worldGizmo.y + worldYAxis.y );
 
-        // Axises
-
-        blctx->setStrokeWidth( 2.0f );
-        blctx->setStrokeStyle( BLRgba32( 0xFF000000 ) );
-        blctx->strokeLine( worldGizmo.x + GIZMO_RADIUS
-                         , worldGizmo.y
-                         , worldGizmo.x + worldXAxis.x
-                         , worldGizmo.y + worldXAxis.y );
-        blctx->strokeLine( worldGizmo.x
-                         , worldGizmo.y + GIZMO_RADIUS
-                         , worldGizmo.x + worldYAxis.x
-                         , worldGizmo.y + worldYAxis.y );
-
-        blctx->setStrokeWidth( 1.0f );
-        blctx->setStrokeStyle( xAxisColor );
-        blctx->strokeLine( worldGizmo.x + GIZMO_RADIUS
-                         , worldGizmo.y
-                         , worldGizmo.x + worldXAxis.x
-                         , worldGizmo.y + worldXAxis.y );
-        blctx->setStrokeStyle( yAxisColor );
-        blctx->strokeLine( worldGizmo.x
-                         , worldGizmo.y + GIZMO_RADIUS
-                         , worldGizmo.x + worldYAxis.x
-                         , worldGizmo.y + worldYAxis.y );
-    }
-
-    blctx->restore();
+    blctx->setStrokeWidth( 1.0f );
+    blctx->setStrokeStyle( xAxisColor );
+    blctx->strokeLine( worldGizmo.x + GIZMO_RADIUS
+                        , worldGizmo.y
+                        , worldGizmo.x + worldXAxis.x
+                        , worldGizmo.y + worldXAxis.y );
+    blctx->setStrokeStyle( yAxisColor );
+    blctx->strokeLine( worldGizmo.x
+                        , worldGizmo.y + GIZMO_RADIUS
+                        , worldGizmo.x + worldYAxis.x
+                        , worldGizmo.y + worldYAxis.y );
 }
 
 void
@@ -132,35 +167,61 @@ FOdysseyPainterEditorVectorTransformToolHUD::Pick( double iWorldX, double iWorld
 
     mFlags &= (~PICK_CHANGED);
 
-    newFlags = PickGizmo( iWorldX, iWorldY );
-
-    if( newFlags == 0 )
+    if( mSelectionBox.rect.Area() )
     {
-        newFlags = PickSelectionBox( iWorldX, iWorldY );
+        newFlags = PickGizmo( iWorldX, iWorldY );
+
+        if( newFlags == 0 )
+        {
+            newFlags = PickScalers( iWorldX, iWorldY );
+
+            if( newFlags == 0 )
+            {
+                newFlags = PickSelectionBox( iWorldX, iWorldY );
+            }
+        }
     }
 
     mFlags = newFlags | ( ( mFlags != newFlags ) ? PICK_CHANGED : 0 );
 }
 
 uint32
-FOdysseyPainterEditorVectorTransformToolHUD::PickSelectionBox( double iWorldX, double iWorldY )
+FOdysseyPainterEditorVectorTransformToolHUD::PickScalers( double iWorldX, double iWorldY )
 {
     uint32 newFlags = 0;
+    FSelectionBoxScaler scaler[4];
 
-    if( mSelectionBox.rect.Area() )
+    GetWorldScalers( mSelectionBox, scaler );
+
+    for( int i = 0; i < 4; i++ )
     {
-        BLPoint localPt = mSelectionBox.inverseWorldMatrix.mapPoint( iWorldX, iWorldY );
+        double distToScaler = ::ULIS::FVec2D( iWorldX - scaler[i].position.x
+                                            , iWorldY - scaler[i].position.y ).Distance();
 
-        // inside = translate
-        if( mSelectionBox.rect.HitTest( ::ULIS::FVec2D( localPt.x, localPt.y ) ) )
+        if( distToScaler < mTransformTool->PickingRadius )
         {
-            newFlags = PICK_TRANSLATE;
+            newFlags = scaler[i].flag;
         }
-        // outside = rotate
-        else
-        {
-            newFlags = PICK_ROTATE;
-        }
+    }
+
+    return newFlags;
+}
+
+uint32
+FOdysseyPainterEditorVectorTransformToolHUD::PickSelectionBox( double iWorldX, double iWorldY )
+{
+    BLPoint localPt = mSelectionBox.inverseWorldMatrix.mapPoint( iWorldX, iWorldY );
+    uint32 newFlags = 0;
+
+    // inside = translate
+    if( mSelectionBox.rect.HitTest( ::ULIS::FVec2D( localPt.x, localPt.y ) ) )
+    {
+        newFlags = PICK_TRANSLATE;
+    }
+    // outside = rotate
+    else
+    {
+        newFlags = PICK_ROTATE;
     }
 
     return newFlags;
@@ -169,49 +230,45 @@ FOdysseyPainterEditorVectorTransformToolHUD::PickSelectionBox( double iWorldX, d
 uint32
 FOdysseyPainterEditorVectorTransformToolHUD::PickGizmo( double iWorldX, double iWorldY )
 {
+    ::ULIS::FVec2D worldGizmo;
+    ::ULIS::FVec2D worldXAxis;
+    ::ULIS::FVec2D worldYAxis;
+    double distToXAxis = DBL_MAX;
+    double distToYAxis = DBL_MAX;
+    ::ULIS::FVec2D toPivot;
     uint32 newFlags = 0;
 
-    if( mSelectionBox.rect.Area() )
+    GetWorldGizmo( mSelectionBox, mGizmo, worldGizmo, worldXAxis, worldYAxis );
+
+    toPivot = ::ULIS::FVec2D( worldGizmo.x - iWorldX, worldGizmo.y - iWorldY );
+
+    if( toPivot.Distance() < GIZMO_RADIUS )
     {
-        ::ULIS::FVec2D worldGizmo;
-        ::ULIS::FVec2D worldXAxis;
-        ::ULIS::FVec2D worldYAxis;
-        double distToXAxis = DBL_MAX;
-        double distToYAxis = DBL_MAX;
-        ::ULIS::FVec2D toPivot;
+        newFlags = PICK_ZAXIS;
+    }
 
-        GetWorldGizmo( worldGizmo, worldXAxis, worldYAxis );
+    FOdysseyVector::DistanceToSegment( ::ULIS::FVec2D( iWorldX, iWorldY )
+                                        , ::ULIS::FVec2D( worldGizmo.x + GIZMO_RADIUS
+                                                        , worldGizmo.y )
+                                        , ::ULIS::FVec2D( worldGizmo.x + worldXAxis.x
+                                                        , worldGizmo.y + worldXAxis.y )
+                                        , distToXAxis );
 
-        toPivot = ::ULIS::FVec2D( worldGizmo.x - iWorldX, worldGizmo.y - iWorldY );
+    if( distToXAxis < mTransformTool->PickingRadius )
+    {
+        newFlags = PICK_XAXIS;
+    }
 
-        if( toPivot.Distance() < GIZMO_RADIUS )
-        {
-            newFlags = PICK_ZAXIS;
-        }
+    FOdysseyVector::DistanceToSegment( ::ULIS::FVec2D( iWorldX, iWorldY )
+                                        , ::ULIS::FVec2D( worldGizmo.x
+                                                        , worldGizmo.y + GIZMO_RADIUS )
+                                        , ::ULIS::FVec2D( worldGizmo.x + worldYAxis.x
+                                                        , worldGizmo.y + worldYAxis.y )
+                                        , distToYAxis );
 
-        FOdysseyVector::DistanceToSegment( ::ULIS::FVec2D( iWorldX, iWorldY )
-                                         , ::ULIS::FVec2D( worldGizmo.x + GIZMO_RADIUS
-                                                         , worldGizmo.y )
-                                         , ::ULIS::FVec2D( worldGizmo.x + worldXAxis.x
-                                                         , worldGizmo.y + worldXAxis.y )
-                                         , distToXAxis );
-
-        if( distToXAxis < mTransformTool->PickingRadius )
-        {
-            newFlags = PICK_XAXIS;
-        }
-
-        FOdysseyVector::DistanceToSegment( ::ULIS::FVec2D( iWorldX, iWorldY )
-                                         , ::ULIS::FVec2D( worldGizmo.x
-                                                         , worldGizmo.y + GIZMO_RADIUS )
-                                         , ::ULIS::FVec2D( worldGizmo.x + worldYAxis.x
-                                                         , worldGizmo.y + worldYAxis.y )
-                                         , distToYAxis );
-
-        if( distToYAxis < mTransformTool->PickingRadius )
-        {
-            newFlags = PICK_YAXIS;
-        }
+    if( distToYAxis < mTransformTool->PickingRadius )
+    {
+        newFlags = PICK_YAXIS;
     }
 
     return newFlags;
@@ -254,6 +311,7 @@ FOdysseyPainterEditorVectorTransformToolHUD::Draw( FOdysseyVectorScene* iScene, 
         if( mShowSelectionBox )
         {
             DrawSelectionBox( iScene, iFlags );
+            DrawScalers( iScene, iFlags );
         }
 
         DrawGizmo( iScene, iFlags );

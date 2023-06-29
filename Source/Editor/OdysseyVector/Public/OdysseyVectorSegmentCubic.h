@@ -209,8 +209,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
          * @param oNewSegmentArray
          * @return true if there was a cut, false otherwise.
          */
-        bool Cut( ::ULIS::FVec2D& linePoint0
-                , ::ULIS::FVec2D& linePoint1
+        bool Cut( const ::ULIS::FVec2D& linePoint0
+                , const ::ULIS::FVec2D& linePoint1
                 , std::vector<FOdysseyVectorVertex*>& oNewVertexArray
                 , std::vector<FOdysseyVectorSegment*>& oNewSegmentArray );
 

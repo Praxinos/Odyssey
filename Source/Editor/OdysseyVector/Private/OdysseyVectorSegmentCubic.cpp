@@ -487,8 +487,8 @@ FOdysseyVectorSegmentCubic::GetBoundingBox( bool iWorld )
 }
 
 bool
-FOdysseyVectorSegmentCubic::Cut( ::ULIS::FVec2D& linePoint0
-                               , ::ULIS::FVec2D& linePoint1
+FOdysseyVectorSegmentCubic::Cut( const ::ULIS::FVec2D& linePoint0
+                               , const ::ULIS::FVec2D& linePoint1
                                , std::vector<FOdysseyVectorVertex*>& oNewVertexArray
                                , std::vector<FOdysseyVectorSegment*>& oNewSegmentArray )
 {

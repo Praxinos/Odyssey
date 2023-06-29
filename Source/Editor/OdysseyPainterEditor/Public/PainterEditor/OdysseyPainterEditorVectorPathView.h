@@ -21,8 +21,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathView : public UOdy
         UOdysseyPainterEditorVectorPathView();
 
     protected:
-        virtual void ImportParam( FOdysseyVectorObject* iObject ) override;
-        virtual void ExportParam( FOdysseyVectorObject* iObject ) override;
+        virtual void ImportParam() override;
         virtual void PropertyChanged( const FName& iPropertyName, const FName& iCategory ) override;
 
     public:

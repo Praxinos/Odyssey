@@ -41,7 +41,6 @@ public:
     virtual void Commit() override;
 
 private:
-    ::ULIS::FVec2D mStartCutAt;
     FOdysseyVectorHUDLine mLineHUD;
     FOdysseyVectorHUDPathCubic mCubicPathHUD;
 };

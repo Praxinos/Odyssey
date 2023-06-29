@@ -11,11 +11,20 @@
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEllipse.h"
 
+typedef struct _FPropertiesRecord
+{
+    FOdysseyVectorObject* mObject;
+    FObjectParam mObjectParam;
+    FGroupPaintParam mGroupPaintParam;
+    FPathParam mPathParam;
+}
+FPropertiesRecord;
+
 class ODYSSEYVECTOR_API FOdysseyVectorUndoPropertyChanged : public FOdysseyVectorUndo
 {
     public:
         ~FOdysseyVectorUndoPropertyChanged();
-        FOdysseyVectorUndoPropertyChanged( FOdysseyVectorScene* iScene, FOdysseyVectorObject *iObject );
+        FOdysseyVectorUndoPropertyChanged( FOdysseyVectorScene* iScene, std::list<FOdysseyVectorObject*>& iObjectList );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;
@@ -30,9 +39,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoPropertyChanged : public FOdysseyVecto
         void SwapParam();
 
     private:
-        FOdysseyVectorObject* mObject;
-        FObjectParam mObjectParam;
-        FGroupPaintParam mGroupPaintParam;
-        FEllipseParam mEllipseParam;
-        FPathParam mPathParam;
+        std::vector<FPropertiesRecord> mPropertiesRecordArray;
 };

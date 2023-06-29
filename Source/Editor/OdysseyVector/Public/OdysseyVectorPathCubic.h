@@ -57,8 +57,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathCubic: public FOdysseyVectorPath
         void DrawShapeVariable( uint64 iFlags );
 
         void Mirror( bool iMirrorX, bool iMirrorY );
-        void Cut( ::ULIS::FVec2D& linePoint0
-                , ::ULIS::FVec2D& linePoint1
+        void Cut( const ::ULIS::FVec2D& linePoint0
+                , const ::ULIS::FVec2D& linePoint1
                 , std::vector<FOdysseyVectorVertex*>& oNewVertexArray
                 , std::vector<FOdysseyVectorSegment*>& oNewSegmentArray
                 , std::vector<FOdysseyVectorSegment*>& oOldSegmentArray );

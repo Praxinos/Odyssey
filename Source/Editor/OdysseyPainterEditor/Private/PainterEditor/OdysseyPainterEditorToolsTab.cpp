@@ -39,10 +39,11 @@ FOdysseyPainterEditorToolsTab::CreateWidget()
         mEditor->GetVectorPathCutTool(),
         mEditor->GetVectorPrimitiveDrawingTool(),
         mEditor->GetVectorObjectPickTool(),
-        mEditor->GetVectorObjectMoveTool(),
-        mEditor->GetVectorObjectRotateTool(),
-        mEditor->GetVectorObjectScaleTool(),
-        mEditor->GetVectorSceneScaleTool(),
+        mEditor->GetVectorTransformTool(),
+        //mEditor->GetVectorObjectMoveTool(),
+        //mEditor->GetVectorObjectRotateTool(),
+        //mEditor->GetVectorObjectScaleTool(),
+        //mEditor->GetVectorSceneScaleTool(),
         mEditor->GetVectorScenePanTool(),
         mEditor->GetVectorPathPushTool(),
         mEditor->GetVectorPathWidthTool(),
@@ -51,8 +52,7 @@ FOdysseyPainterEditorToolsTab::CreateWidget()
         mEditor->GetVectorEraserTool(),
         mEditor->GetPaintBucketTool(),
         mEditor->GetColorPickerTool(),
-        mEditor->GetVectorGridTool(),
-        mEditor->GetVectorTransformTool()
+        mEditor->GetVectorGridTool()
     };
 
     tools = tools.FilterByPredicate([](UOdysseyPainterEditorTool* iTool){return !!iTool;});

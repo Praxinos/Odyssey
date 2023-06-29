@@ -55,6 +55,9 @@ private:
                               , FOdysseyVectorScene* iScene
                               , const FOdysseyPoint& iPointInTexture );
     double GetRotationAngle( const FOdysseyPoint& iPointInTexture );
+    void ScaleObjectSelection( FOdysseyVectorEngine* iEngine
+                             , FOdysseyVectorScene* iScene
+                             , const FOdysseyPoint& iPointInTexture );
 
 private:
     FOdysseyPainterEditorVectorTransformToolHUD* mTransformHUD;
