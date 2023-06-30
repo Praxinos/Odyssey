@@ -434,9 +434,9 @@ FOdysseyPainterEditorGUI::ResetView( FOdysseyVectorEngine* iEngine, FOdysseyVect
 }
 
 void
-FOdysseyPainterEditorGUI::RemoveSelectedObjects( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+FOdysseyPainterEditorGUI::DeleteSelection( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
-    mEditor->RemoveSelectedObjects( iEngine, iScene );
+    mEditor->DeleteSelection( iEngine, iScene );
 }
 
 void

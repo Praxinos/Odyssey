@@ -136,7 +136,7 @@ UOdysseyPainterEditorDefaultTool::OnKeyDownVector( FOdysseyVectorEngine* iEngine
 
     if( iKey == EKeys::Delete )
     {
-        GetEditorAs<FOdysseyPainterEditor>()->RemoveSelectedObjects( iEngine, iScene );
+        GetEditorAs<FOdysseyPainterEditor>()->DeleteSelection( iEngine, iScene );
     }
 
     return false;

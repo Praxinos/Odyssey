@@ -29,27 +29,15 @@ WriteBucketPosition( FOdysseyVectorBucket& iBucket, FArchive &Ar )
 }
 
 static void
-WriteBucketGradientHandlePosition( FOdysseyVectorBucket& iBucket, FArchive &Ar )
+WriteBucketRotation( FOdysseyVectorBucket& iBucket, FArchive &Ar )
 {
-    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_BUCKET_GRADIENT_HANDLE_POSITION
+    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_BUCKET_ROTATION
                                     , Ar
                                     , [&iBucket](FArchive &Ar) -> void
     {
-        ::ULIS::FVec2D& position = iBucket.GetHandle()->GetCoords();
+        double rotation = iBucket.GetRotation();
 
-        Ar << position.x;
-        Ar << position.y;
-    } );
-}
-
-static void
-WriteBucketGradientHandle( FOdysseyVectorBucket& iBucket, FArchive &Ar )
-{
-    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_BUCKET_GRADIENT_HANDLE
-                                    , Ar
-                                    , [&iBucket](FArchive &Ar) -> void
-    {
-        WriteBucketGradientHandlePosition( iBucket, Ar );
+        Ar << rotation;
     } );
 }
 
@@ -79,7 +67,6 @@ WriteBucketGradient( FOdysseyVectorBucket& iBucket, FArchive &Ar )
         FColor gradientColor0 = iBucket.GetGradientColor0();
         FColor gradientColor1 = iBucket.GetGradientColor1();
 
-        WriteBucketGradientHandle( iBucket, Ar );
         WriteBucketGradientStop( gradientColor0, 0.0f, Ar );
         WriteBucketGradientStop( gradientColor1, 1.0f, Ar );
     } );
@@ -109,6 +96,7 @@ WriteBucketEntry( FOdysseyVectorBucket& iBucket, FArchive &Ar )
                                     , [&iBucket](FArchive &Ar) -> void
     {
         WriteBucketPosition( iBucket, Ar );
+        WriteBucketRotation( iBucket, Ar );
         WriteBucketPropagated( iBucket, Ar );
 
         if( iBucket.IsGradient() == true )

@@ -52,10 +52,10 @@ FOdysseyTextureEditorVectorContextMenu::FOdysseyTextureEditorVectorContextMenu(F
         , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
         , FUIAction(FExecuteAction::CreateSP(iEditor->GetGUI(), &FOdysseyTextureEditorGUI::SendBackward)));
     mMenu.AddMenuEntry(
-          LOCTEXT("RemoveSelectedObjects","Remove Selected Objects")
-        , LOCTEXT("RemoveSelectedObjects","Remove Selected Objects")
+          LOCTEXT("DeleteSelection","Delete Selection")
+        , LOCTEXT("DeleteSelection","Delete Selection")
         , FSlateIcon("OdysseyStyle","OdysseyLogo.Iliad16")
-        , FUIAction(FExecuteAction::CreateSP(iEditor->GetGUI(), &FOdysseyTextureEditorGUI::RemoveSelectedObjects)));
+        , FUIAction(FExecuteAction::CreateSP(iEditor->GetGUI(), &FOdysseyTextureEditorGUI::DeleteSelection)));
     mMenu.AddMenuEntry(
           LOCTEXT("FlipHorizontal","Flip Horizontal")
         , LOCTEXT("FlipHorizontal","Flip Horizontal")

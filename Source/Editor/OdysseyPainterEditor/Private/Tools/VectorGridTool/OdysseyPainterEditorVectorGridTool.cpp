@@ -158,6 +158,8 @@ UOdysseyPainterEditorVectorGridTool::PropertyChangedVector( FOdysseyVectorEngine
                                                           , const FName& iPropertyName )
 {
     mGridHUD->MakeGrid( iScene, DivisionsX, DivisionsY );
+
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
 
 #undef LOCTEXT_NAMESPACE

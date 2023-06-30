@@ -350,26 +350,28 @@ FOdysseyVectorCycle::Draw( uint64 iFlags )
     BLContext* blctx = mParent.GetScene()->GetEngine()->GetBLContext();
     FOdysseyVectorBucket* bucket = mBucket ? mBucket : mPropagatedBucket;
     BLMatrix2D& worldMatrix = mParent.GetWorldMatrix();
-    BLBox bbox;
+    ::ULIS::FRectD bbox = mParent.GetBBox( false );
 
-    mContourPath.getBoundingBox( &bbox );
+    //BLBox bbox;
+    //mContourPath.getBoundingBox( &bbox );
+
+    
 
     if( bucket )
     {
         if( bucket->IsGradient() )
         {
-            double linearMinX = bbox.x0;
-            double linearMinY = bbox.y0;
-            double linearMaxX = bbox.x1;
-            double linearMaxY = bbox.y1;
+            double linearMinX = /*bbox.x0*/bbox.x;
+            double linearMinY = /*bbox.y0*/bbox.y;
+            double linearMaxX = /*bbox.x1*/bbox.x + bbox.w;
+            double linearMaxY = /*bbox.y1*/bbox.y + bbox.h;
             BLGradient linear( BLLinearGradientValues( linearMinX, linearMinY, linearMaxX, linearMaxY ) );
             FColor& gradientColor0 = bucket->GetGradientColor0();
             FColor& gradientColor1 = bucket->GetGradientColor1();
             BLRgba32 BLColor0;
             BLRgba32 BLColor1;
-            double angle = bucket->GetGradientRotationInDegrees() * M_PI / 180;
 
-            linear.rotate( angle );
+            linear.rotate( bucket->GetRotation() );
 
             BLColor0.setR( gradientColor0.R );
             BLColor0.setG( gradientColor0.G );

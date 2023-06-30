@@ -47,7 +47,7 @@ public:
     virtual void Ungroup();
     virtual void BringForward();
     virtual void SendBackward();
-    virtual void RemoveSelectedObjects();
+    virtual void DeleteSelection();
     virtual void FlipHorizontal();
     virtual void FlipVertical();
 

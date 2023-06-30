@@ -13,6 +13,7 @@
 #include "OdysseyPainterEditorPaintBucketTool.generated.h"
 
 class FOdysseyPaintEngine;
+class FOdysseyPainterEditorPaintBucketToolHUD;
 
 UCLASS()
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorPaintBucketTool : public UOdysseyPainterEditorTool
@@ -50,6 +51,15 @@ public:
                         , FOdysseyVectorScene* iScene
                         , const FOdysseyPoint& iPointInTexture
                         , const FKey& iKey );
+    bool OnKeyDownVector( FOdysseyVectorEngine* iEngine
+                        , FOdysseyVectorScene* iScene
+                        , const FKey& iKey );
+    bool OnKeyUpVector(FOdysseyVectorEngine* iEngine
+                      ,FOdysseyVectorScene* iScene
+                      ,const FKey& iKey);
+    void PropertyChangedVector( FOdysseyVectorEngine* iEngine
+                              , FOdysseyVectorScene* iScene
+                              , const FName& iPropertyName );
 
     virtual void Commit() override;
 
@@ -79,6 +89,8 @@ public:
                                            , bool iPropagate );
         void OnMouseUpVectorColorBucket( FOdysseyVectorScene* iScene
                                        , FOdysseyVectorBucket* iBucket );
+        double GetRotationAngle( FOdysseyVectorBucket* iBucket
+                               , const FOdysseyPoint& iPointInTexture );
 
 public:
     UPROPERTY(EditAnywhere,Category="Odyssey BucketFill Tool")
@@ -96,6 +108,13 @@ public:
     UPROPERTY(EditAnywhere,Category="Odyssey BucketFill Tool")
     FColor Color2;
 
+    UPROPERTY(EditAnywhere,Category="Odyssey BucketFill Tool")
+    double PickingRadius;
+
+    UPROPERTY(EditAnywhere,Category="Odyssey BucketFill Tool")
+    bool ShowControls;
+    bool ShowControlsAtKeyDown;
+
 protected:
     // protected Data Members
 
@@ -108,6 +127,8 @@ protected:
     double mDownMouseX;
     double mDownMouseY;
     ::ULIS::FVec2D mPointPosition;
-    FOdysseyVectorHUDBucket mBucketHUD;
+    FOdysseyPainterEditorPaintBucketToolHUD* mBucketHUD;
     uint32 mPickedArea;
+    TSharedPtr< SViewport > mViewportWidget; // to force keyboard focus on mouse hover.
+                                             // Prevents the user from having to click at least once in the viewport.
 };

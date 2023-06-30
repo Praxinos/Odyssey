@@ -188,7 +188,7 @@ UOdysseyTextureEditorVectorGridTool::PostEditChangeProperty( FPropertyChangedEve
 
         PropertyChangedVector( vectorEngine, vectorScene, PropertyChangedEvent.GetPropertyName());
 
-        currentVectorLayer->RenderImageChanged(false);
+        //currentVectorLayer->RenderImageChanged(false);
     }
 }
 

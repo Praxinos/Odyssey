@@ -107,14 +107,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         virtual uint32 GetType();
 
         FOdysseyVectorBucket* Bucket( double iX, double iY, uint8 iR, uint8 iG, uint8 iB, uint8 iA );
-        FOdysseyVectorBucket* PickBucket( double iX, double iY );
-        FOdysseyVectorCycle* PickCycle( double iX, double iY );
-        FOdysseyVectorHandleBucket* PickBucketHandle( double iX, double iY );
         std::list<FOdysseyVectorBucket*>& GetBucketList();
+        std::list<FOdysseyVectorCycle*>& GetCycleList();
         void AddBucket( FOdysseyVectorBucket* iBucket );
         void RemoveBucket( FOdysseyVectorBucket* iBucket );
         void Colorize();
-        void DrawBuckets( FBucketDrawingFlags iDrawingFlags );
         void MergeCycles();
         double GetGapTolerance();
         void SetGapTolerance( double iGapTolerance );
@@ -194,7 +191,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         static const uint32 BLOCKED  = 1;
         static const uint32 HASCYCLE = 2;
         std::list<FOdysseyVectorBucket*> mBucketList;
-        std::vector<FOdysseyVectorCycle*> mCycleArray;
+        std::list<FOdysseyVectorCycle*> mCycleList;
         std::vector<FOdysseyVectorIntersection*> mIntersectionArray;
         uint32 mPaintingCode;
 

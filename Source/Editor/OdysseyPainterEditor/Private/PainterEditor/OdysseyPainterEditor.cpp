@@ -372,7 +372,7 @@ FOdysseyPainterEditor::SelectAll( FOdysseyVectorEngine* iEngine, FOdysseyVectorS
 
     iEngine->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW | FOdysseyVectorScene::SIGNAL_OBJECT_SELECTED );
 }
 
 void
@@ -398,10 +398,10 @@ FOdysseyPainterEditor::ResetView( FOdysseyVectorEngine* iEngine, FOdysseyVectorS
 }
 
 void
-FOdysseyPainterEditor::RemoveSelectedObjects( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+FOdysseyPainterEditor::DeleteSelection( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
     // needed for undos
-    GEditor->BeginTransaction(LOCTEXT("RemoveSelectedObjects", "Remove selected objects"));
+    GEditor->BeginTransaction(LOCTEXT("DeleteSelection", "Delete Selection"));
     if( GUndo )
     {
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSceneRemoveSelection( iScene );

@@ -4,7 +4,6 @@
 #include "Tools/ColorPickerTool/OdysseyPainterEditorColorPickerTool.h"
 
 #include "OdysseyRasterBlock.h"
-#include "HUD/OdysseyVectorHUDBucket.h"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction

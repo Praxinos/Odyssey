@@ -104,7 +104,7 @@ FOdysseyTextureEditorGUI::BindShortcuts(FBaseToolkit* iToolkit)
     MAP_ACTION(textureEditorCommands.Ungroup, Ungroup )
     MAP_ACTION(textureEditorCommands.BringForward, BringForward )
     MAP_ACTION(textureEditorCommands.SendBackward, SendBackward )
-    MAP_ACTION(textureEditorCommands.RemoveSelectedObjects, RemoveSelectedObjects )
+    MAP_ACTION(textureEditorCommands.DeleteSelection, DeleteSelection )
     MAP_ACTION(textureEditorCommands.FlipHorizontal, FlipHorizontal )
     MAP_ACTION(textureEditorCommands.FlipVertical, FlipVertical )
 
@@ -163,9 +163,9 @@ FOdysseyTextureEditorGUI::ExtendMenuAbout( FToolMenuOwner iOwner, FName iMenuNam
             , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
             , NAME_None );
         aboutSection.AddMenuEntry(
-            FOdysseyTextureEditorCommands::Get().RemoveSelectedObjects
-            , LOCTEXT("RemoveSelectedObjects","RemoveSelectedObjects")
-            , LOCTEXT("RemoveSelectedObjects","RemoveSelectedObjects")
+            FOdysseyTextureEditorCommands::Get().DeleteSelection
+            , LOCTEXT("DeleteSelection","DeleteSelection")
+            , LOCTEXT("DeleteSelection","DeleteSelection")
             , FSlateIcon("OdysseyStyle","OdysseyLogo.Iliad16")
             , NAME_None );
         aboutSection.AddMenuEntry(
@@ -239,7 +239,7 @@ FOdysseyTextureEditorGUI::OnVectorSceneSignal( FOdysseyVectorScene* iScene, uint
 }
 
 void
-FOdysseyTextureEditorGUI::RemoveSelectedObjects()
+FOdysseyTextureEditorGUI::DeleteSelection()
 {
     TSharedPtr<FOdysseyPainterEditorSelectedVectorObjectTab>& vectorObjectTab = mEditor->GetGUI()->GetSelectedVectorObjectTab();
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(static_cast<FOdysseyTextureEditor*>(mEditor)->LayerStack());
@@ -250,7 +250,7 @@ FOdysseyTextureEditorGUI::RemoveSelectedObjects()
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
-        FOdysseyPainterEditorGUI::RemoveSelectedObjects( vectorEngine, vectorScene );
+        FOdysseyPainterEditorGUI::DeleteSelection( vectorEngine, vectorScene );
     }
 }
 

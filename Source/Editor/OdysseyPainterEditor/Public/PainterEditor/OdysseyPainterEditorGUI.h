@@ -77,7 +77,7 @@ protected:
     virtual void SwitchTabletAPI();
     void Group( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
     void ResetView( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    void RemoveSelectedObjects( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    void DeleteSelection( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
     void GroupPaint( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
     void Ungroup( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
     void SendBackward( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );

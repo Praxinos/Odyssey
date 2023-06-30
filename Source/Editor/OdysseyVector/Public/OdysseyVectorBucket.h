@@ -3,15 +3,9 @@
 #include <blend2d.h>
 #include <Core/Core.h>
 #include <Image/Block.h>
-#include "OdysseyVectorHandleBucket.h"
+#include <OdysseyVectorPoint.h>
 
 class FOdysseyVectorObject;
-
-enum FBucketDrawingFlags
-{
-    BUCKET = 1,
-    PELLET = 2
-};
 
 class ODYSSEYVECTOR_API FOdysseyVectorBucket : public FOdysseyVectorPoint
 {
@@ -29,13 +23,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorBucket : public FOdysseyVectorPoint
         void SetColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA );
 
         void SetColor( FColor& iColor );
-
-        /**
-         * @brief Draw this bucket (used for HUD).
-         * @param iRoi region-of-interest
-         * @param iFlags drawing flags
-         */
-        void Draw( FBucketDrawingFlags iDrawingFlags );
 
         void SetGradient( bool iIsGradient );
 
@@ -63,12 +50,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorBucket : public FOdysseyVectorPoint
         FColor& GetGradientColor1();
 
         /**
-         * @brief Get gradient rotation in degrees. This is computed from the handle position.
-         * @return rotation angle in degrees.
-         */
-        double GetGradientRotationInDegrees();
-
-        /**
          * @brief Get solid color
          * @return a reference to the solid color
          */
@@ -81,38 +62,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorBucket : public FOdysseyVectorPoint
         void Copy( FOdysseyVectorBucket* iDestinationBucket );
 
         /**
-         * @brief Tell whether or not this bucket is on the coordinates passed as parameters.
-         * @param iX world x coordinate on X axis
-         * @param iY world y coordinate on Y axis
-         * @return PICKNONE, PICKBUCKET, PICKCROSS or PICKHANDLE.
-         */
-        uint32 Pick( double iWorldX, double iWorldY );
-
-        /**
-         * @brief Tell whether or not this bucket's handle is on the coordinates passed as parameters.
-         * @param iX world x coordinate on X axis
-         * @param iY world y coordinate on Y axis
-         * @return a pointer to this bucket's handle.
-         */
-        FOdysseyVectorHandleBucket* PickHandle( double iWorldX, double iWorldY );
-
-        /**
-         * @brief Get the bucket's handle.
-         * @return a pointer to this bucket's handle.
-         */
-        FOdysseyVectorHandleBucket* GetHandle();
-
-        /**
          * @brief Get the bucket's parent object.
          * @return a reference to this bucket's parent object.
          */
         FOdysseyVectorObject& GetParent();
-
-        /**
-         * @brief Get the dot product between the vector to the handle and a horizontal vector.
-         * @return the dot product between the vector to the handle and a horizontal vector.
-         */
-        double GetHandleDotProduct();
 
         void SetPropagated( bool iPropagated );
         bool IsPropagated();
@@ -121,22 +74,13 @@ class ODYSSEYVECTOR_API FOdysseyVectorBucket : public FOdysseyVectorPoint
         virtual void Set( double iX, double iY ) override;
         virtual void Set( double iX, double iY, double iRadius ) override;
         void Invalidate();
-
-    private:
-        void DrawBucket( FBucketDrawingFlags iDrawingFlags );
-        void DrawPellet( FBucketDrawingFlags iDrawingFlags );
-
-    public:
-        static const uint32 PICKNONE   = 0;
-        static const uint32 PICKBUCKET = 1;
-        static const uint32 PICKCROSS  = 2;
-        static const uint32 PICKPROPAGATED = 3;
-        static const uint32 PICKHANDLE = 4;
+        double GetRotation();
+        void SetRotation( double iRotation );
 
     protected:
         FOdysseyVectorObject& mParent;
         FColor mColor;
-        FOdysseyVectorHandleBucket mCtrlPoint;
+        double mRotation;
         bool mPropagated;
         bool mIsGradient;
         FColor mGradientColor0;
