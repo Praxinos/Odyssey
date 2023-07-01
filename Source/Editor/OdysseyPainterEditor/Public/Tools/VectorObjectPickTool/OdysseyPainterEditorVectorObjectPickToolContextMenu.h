@@ -3,18 +3,18 @@
 
 #pragma once
 
-#include "OdysseyEditorContextMenu.h"
+#include "OdysseyPainterEditorContextMenu.h"
 
 class FOdysseyPainterEditor;
 class UOdysseyPainterEditorTool;
 
-class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorContextMenu :
-    public FOdysseyEditorContextMenu
+class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorObjectPickToolContextMenu :
+    public FOdysseyPainterEditorContextMenu
 {
 public:
     // Construction / Destruction
-    virtual ~FOdysseyPainterEditorVectorContextMenu();
-    FOdysseyPainterEditorVectorContextMenu(FOdysseyPainterEditor* iEditor);
+    virtual ~FOdysseyPainterEditorVectorObjectPickToolContextMenu();
+    FOdysseyPainterEditorVectorObjectPickToolContextMenu(FOdysseyPainterEditor* iEditor);
 
 public:
     // FOdysseyEditorTab interface

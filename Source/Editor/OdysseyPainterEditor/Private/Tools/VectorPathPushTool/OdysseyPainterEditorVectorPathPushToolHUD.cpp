@@ -22,8 +22,8 @@ void
 FOdysseyPainterEditorVectorPathPushToolHUD::Draw( FOdysseyVectorScene* iScene, uint64 iFlags )
 {
     BLContext* blctx = iScene->GetEngine()->GetBLContext();
-    FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
-    BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
+    FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
+    BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
 
     // matrix might get altered for displaying the selection rectangle of a single object. Save it.
     blctx->save();
@@ -45,7 +45,7 @@ FOdysseyPainterEditorVectorPathPushToolHUD::Draw( FOdysseyVectorScene* iScene, u
         FOdysseyVectorHUD::DrawObjectRecursive( iScene, blctx );
     }
 
-    blctx->setStrokeStyle( fgColor );
+    blctx->setStrokeStyle( hcColor );
     blctx->setStrokeWidth( 1.0f );
     blctx->strokeCircle( mX, mY, mPathPushTool->Radius );
 

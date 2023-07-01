@@ -83,17 +83,20 @@ public:
     virtual UOdysseyPainterEditorPaintBucketTool*                    GetPaintBucketTool() const = 0;
     virtual UOdysseyPainterEditorColorPickerTool*                    GetColorPickerTool() const = 0;
 
-    // generic reusable vector methods
-    void Group( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    void ResetView( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    void DeleteSelection( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    void GroupPaint( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    void Ungroup( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    void SendBackward( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    void BringForward( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    void FlipHorizontal( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    void FlipVertical( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    void SelectAll( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    // generic reusable vector methods. 
+    static void Group( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    static void ResetView( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    static void DeleteSelection( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    static void GroupPaint( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    static void Ungroup( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    static void SendBackward( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    static void BringForward( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    static void FlipHorizontal( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    static void FlipVertical( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    static void SelectAll( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    static void DeleteBucket( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    static void PropagateBucket( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    static void UnpropagateBucket( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
 
     void SelectDefaultTool();
 

@@ -222,7 +222,7 @@ FOdysseyPainterEditorPaintBucketToolHUD::DrawBucket( FOdysseyVectorBucket* iBuck
     FColor& bucketColor = iBucket->GetColor();
     BLRgba32 fillColor = BLRgba32( bucketColor.R, bucketColor.G, bucketColor.B, bucketColor.A );
     BLRgba32 propColor = iBucket->IsPropagated() ? BLRgba32( 0x00, 0xFF, 0x00, 0xFF )
-                                                 : BLRgba32( 0x00, 0x00, 0x00, 0xFF );
+                                                 : BLRgba32( 0xFF, 0xFF, 0xFF, 0xFF );
 
     iBLContext->save();
     iBLContext->resetMatrix();
@@ -240,9 +240,8 @@ FOdysseyPainterEditorPaintBucketToolHUD::DrawBucket( FOdysseyVectorBucket* iBuck
                               , handleWorldCoords.x, handleWorldCoords.y );
 
         // Handle
-        iBLContext->setFillStyle( fillColor );
+        iBLContext->setFillStyle( fgColor );
         iBLContext->fillCircle( handleWorldCoords.x, handleWorldCoords.y, HANDLE_RADIUS );
-
         iBLContext->setStrokeWidth( 1.0f );
         iBLContext->setStrokeStyle( bgColor );
         iBLContext->strokeCircle( handleWorldCoords.x, handleWorldCoords.y, HANDLE_RADIUS );
@@ -252,8 +251,11 @@ FOdysseyPainterEditorPaintBucketToolHUD::DrawBucket( FOdysseyVectorBucket* iBuck
     iBLContext->setFillStyle( fillColor );
     iBLContext->fillCircle( bucketWorldCoords.x, bucketWorldCoords.y, PELLET_RADIUS );
 
+    iBLContext->setStrokeWidth( 2.0f );
+    iBLContext->setStrokeStyle( BLRgba32( 0x00, 0x00, 0x00, 0xFF ) );
+    iBLContext->strokeCircle( bucketWorldCoords.x, bucketWorldCoords.y, PELLET_RADIUS );
     iBLContext->setStrokeWidth( 1.0f );
-    iBLContext->setStrokeStyle( propColor ); // green if propagated, black otherwise
+    iBLContext->setStrokeStyle( propColor ); // green if propagated, white otherwise
     iBLContext->strokeCircle( bucketWorldCoords.x, bucketWorldCoords.y, PELLET_RADIUS );
 
     iBLContext->restore();

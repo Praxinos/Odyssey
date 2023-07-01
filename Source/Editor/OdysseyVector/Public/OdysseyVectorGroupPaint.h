@@ -118,6 +118,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         bool IsWireframe();
         void SetWireframe( bool iIsWireframe );
         void UpdateBBox();
+        void SelectBucket( FOdysseyVectorBucket* iSelectedBucket );
+        FOdysseyVectorBucket* GetSelectedBucket();
 
     protected:
         /**
@@ -190,6 +192,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         static const uint32 NOCYCLE  = 0;
         static const uint32 BLOCKED  = 1;
         static const uint32 HASCYCLE = 2;
+        FOdysseyVectorBucket* mSelectedBucket;
         std::list<FOdysseyVectorBucket*> mBucketList;
         std::list<FOdysseyVectorCycle*> mCycleList;
         std::vector<FOdysseyVectorIntersection*> mIntersectionArray;

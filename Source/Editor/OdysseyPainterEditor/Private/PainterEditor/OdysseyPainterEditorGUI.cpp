@@ -49,6 +49,15 @@ FOdysseyPainterEditorGUI::CreateTabs()
 }
 
 void
+FOdysseyPainterEditorGUI::CreateContextMenus()
+{
+    FOdysseyEditorGUI::CreateContextMenus();
+
+	//ODYSSEY_ADD_CONTEXT_MENU(mObjectPickToolContextMenu, FOdysseyPainterEditorObjectPickToolContextMenu, mEditor);
+	//ODYSSEY_ADD_CONTEXT_MENU(mPaintBucketToolContextMenu, FOdysseyPainterEditorPaintBucketToolContextMenu, mEditor);
+}
+
+void
 FOdysseyPainterEditorGUI::BindShortcuts(FBaseToolkit* iToolkit)
 {
     FOdysseyEditorGUI::BindShortcuts(iToolkit);
@@ -408,7 +417,6 @@ FOdysseyPainterEditorGUI::SendBackward( FOdysseyVectorEngine* iEngine, FOdysseyV
     mEditor->SendBackward( iEngine, iScene );
 }
 
-
 void
 FOdysseyPainterEditorGUI::Ungroup( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
@@ -449,6 +457,24 @@ void
 FOdysseyPainterEditorGUI::FlipVertical( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
     mEditor->FlipVertical( iEngine, iScene );
+}
+
+void
+FOdysseyPainterEditorGUI::DeleteBucket( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+{
+    mEditor->DeleteBucket( iEngine, iScene );
+}
+
+void
+FOdysseyPainterEditorGUI::PropagateBucket( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+{
+    mEditor->PropagateBucket( iEngine, iScene );
+}
+
+void
+FOdysseyPainterEditorGUI::UnpropagateBucket( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+{
+    mEditor->UnpropagateBucket( iEngine, iScene );
 }
 
 #undef LOCTEXT_NAMESPACE

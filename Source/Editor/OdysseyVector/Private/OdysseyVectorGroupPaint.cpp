@@ -17,6 +17,7 @@ FOdysseyVectorGroupPaint::~FOdysseyVectorGroupPaint()
 
 FOdysseyVectorGroupPaint::FOdysseyVectorGroupPaint( const FString& iName )
     : FOdysseyVectorGroup( iName )
+    , mSelectedBucket( nullptr )
 {
     SetName( iName );
 
@@ -31,6 +32,18 @@ FOdysseyVectorGroupPaint::FOdysseyVectorGroupPaint( const FString& iName )
 
     //mGapSegmentBuffer.reserve( 200 );
     //mSectionBuffer.reserve( 200 );
+}
+
+void
+FOdysseyVectorGroupPaint::SelectBucket( FOdysseyVectorBucket* iSelectedBucket )
+{
+    mSelectedBucket = iSelectedBucket;
+}
+
+FOdysseyVectorBucket*
+FOdysseyVectorGroupPaint::GetSelectedBucket()
+{
+    return mSelectedBucket;
 }
 
 bool
@@ -251,7 +264,7 @@ FOdysseyVectorGroupPaint::AddBucket( FOdysseyVectorBucket* iBucket )
     mBucketList.push_back( iBucket );
 
     //iBucket->SetParent( this );
-    Invalidate();
+    Invalidate( FOdysseyVectorObject::INVALIDATE_COLOR );
 }
 
 void
@@ -259,7 +272,7 @@ FOdysseyVectorGroupPaint::RemoveBucket( FOdysseyVectorBucket* iBucket )
 {
     mBucketList.remove( iBucket );
 
-    Invalidate();
+    Invalidate( FOdysseyVectorObject::INVALIDATE_COLOR );
 }
 
 void

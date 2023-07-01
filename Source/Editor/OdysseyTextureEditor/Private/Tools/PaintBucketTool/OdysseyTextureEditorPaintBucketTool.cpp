@@ -232,6 +232,7 @@ bool
 UOdysseyTextureEditorPaintBucketTool::OnMouseUp( const FOdysseyPoint& iPointInTexture
                                                , const FKey& iKey )
 {
+    FOdysseyTextureEditor* textureEditor =  GetEditorAs<FOdysseyTextureEditor>();
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
     bool ret = false;
@@ -242,6 +243,29 @@ UOdysseyTextureEditorPaintBucketTool::OnMouseUp( const FOdysseyPoint& iPointInTe
         FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
         ret = UOdysseyPainterEditorPaintBucketTool::OnMouseUpVector( vectorEngine, vectorScene, iPointInTexture, iKey );
+
+        if( iKey == EKeys::RightMouseButton )
+        {
+            FOdysseyVectorObject* selectedObject = vectorScene->GetLastSelected();
+            FOdysseyTextureEditorPaintBucketToolContextMenu* contextMenu = textureEditor->GetGUI()->GetPaintBucketToolContextMenu().Get();
+
+            if( selectedObject )
+            {
+                if( selectedObject->GetClass() == FOdysseyVectorGroupPaint::StaticClass() )
+                {
+                    FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(selectedObject);
+
+                    if( paintGroup->GetSelectedBucket() )
+                    {
+                        FSlateApplication::Get().PushMenu( textureEditor->GetGUI()->GetViewportTab().Get()->Widget().ToSharedRef(),
+                                                           FWidgetPath(),
+                                                           contextMenu->Widget().ToSharedRef(),
+                                                           FSlateApplication::Get().GetCursorPos(),
+                                                           FPopupTransitionEffect(FPopupTransitionEffect::ContextMenu) );
+                    }
+                }
+            }
+        }
     }
 
     return ret;

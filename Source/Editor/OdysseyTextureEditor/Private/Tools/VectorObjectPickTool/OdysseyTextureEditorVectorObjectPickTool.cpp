@@ -205,7 +205,7 @@ UOdysseyTextureEditorVectorObjectPickTool::OnMouseUp( const FOdysseyPoint& iPoin
         //textureEditor->GetGUI()->GetViewportTab().Get()->GetViewport().Get()->GetViewportWidget().ToSharedRef(),
         textureEditor->GetGUI()->GetViewportTab().Get()->Widget().ToSharedRef(),
         FWidgetPath(),
-        textureEditor->GetGUI()->GetVectorContextMenu()->Widget().ToSharedRef(),
+        textureEditor->GetGUI()->GetVectorObjectPickToolContextMenu()->Widget().ToSharedRef(),
         FSlateApplication::Get().GetCursorPos(),
         FPopupTransitionEffect(FPopupTransitionEffect::ContextMenu)
         );

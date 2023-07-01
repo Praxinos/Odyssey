@@ -38,6 +38,7 @@ public:
 public:
     // Tabs
     virtual void CreateTabs();
+    virtual void CreateContextMenus();
     virtual void BindShortcuts(FBaseToolkit* iToolkit);
 
 public:
@@ -84,6 +85,9 @@ protected:
     void BringForward( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
     void FlipHorizontal( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
     void FlipVertical( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    void DeleteBucket( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    void PropagateBucket( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    void UnpropagateBucket( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
 
 private:
     FOdysseyPainterEditor*                          mEditor;
