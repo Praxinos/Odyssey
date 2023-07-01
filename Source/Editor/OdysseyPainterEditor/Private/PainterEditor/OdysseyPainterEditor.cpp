@@ -2,7 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "OdysseyPainterEditor.h"
-
+#include "Tools/OdysseyPainterEditorTool.h"
 #include "ObjectEditorUtils.h"
 
 #include "OdysseyPainterEditorTopTab.h"

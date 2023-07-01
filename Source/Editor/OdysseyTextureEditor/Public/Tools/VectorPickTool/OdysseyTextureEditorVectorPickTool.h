@@ -4,22 +4,22 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Tools/VectorObjectPickTool/OdysseyPainterEditorVectorObjectPickTool.h"
+#include "Tools/VectorPickTool/OdysseyPainterEditorVectorPickTool.h"
 #include "OdysseyBlendParameters.h"
 
-#include "OdysseyTextureEditorVectorObjectPickTool.generated.h"
+#include "OdysseyTextureEditorVectorPickTool.generated.h"
 
 UCLASS()
-class ODYSSEYTEXTUREEDITOR_API UOdysseyTextureEditorVectorObjectPickTool : public UOdysseyPainterEditorVectorObjectPickTool
+class ODYSSEYTEXTUREEDITOR_API UOdysseyTextureEditorVectorPickTool : public UOdysseyPainterEditorVectorPickTool
 {
     GENERATED_BODY()
 
 public:
     // Destructor
-    virtual ~UOdysseyTextureEditorVectorObjectPickTool();
+    virtual ~UOdysseyTextureEditorVectorPickTool();
 
     //Constructor
-    UOdysseyTextureEditorVectorObjectPickTool();
+    UOdysseyTextureEditorVectorPickTool();
 
     //OdysseyPainterEditorTool overrides
     virtual void Activate() override;
@@ -31,6 +31,7 @@ public:
     virtual bool OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
     virtual bool OnKeyDown( const FKey& iKey ) override;
     virtual bool OnKeyUp( const FKey& iKey ) override;
+    virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
 
 private:
     void Load();

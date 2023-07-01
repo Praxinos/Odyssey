@@ -45,7 +45,7 @@ FOdysseyPainterEditorToolOptionsTab::CreateWidget()
     SetWidgetForTool(mEditor->GetVectorPathKnotTool(),SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorPathKnotTool()));
     SetWidgetForTool(mEditor->GetVectorPathWidthTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorPathWidthTool()));
     SetWidgetForTool(mEditor->GetVectorPathSmoothTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorPathSmoothTool()));
-    SetWidgetForTool(mEditor->GetVectorObjectPickTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorObjectPickTool()));
+    SetWidgetForTool(mEditor->GetVectorPickTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorPickTool()));
     SetWidgetForTool(mEditor->GetVectorObjectMoveTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorObjectMoveTool()));
     SetWidgetForTool(mEditor->GetVectorObjectRotateTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorObjectRotateTool()));
     SetWidgetForTool(mEditor->GetVectorObjectScaleTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorObjectScaleTool()));

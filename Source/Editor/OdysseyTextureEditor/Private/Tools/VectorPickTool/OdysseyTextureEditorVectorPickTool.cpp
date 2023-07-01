@@ -1,19 +1,19 @@
 // IDDN FR.001.250001.005.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
-#include "Tools/VectorObjectPickTool/OdysseyTextureEditorVectorObjectPickTool.h"
+#include "Tools/VectorPickTool/OdysseyTextureEditorVectorPickTool.h"
 #include "LayerStack/OdysseyTextureLayerImageVector.h"
 #include "PainterEditor/OdysseyPainterEditorViewportTab.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyTextureEditorVectorObjectPickTool"
+#define LOCTEXT_NAMESPACE "OdysseyTextureEditorVectorPickTool"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
-UOdysseyTextureEditorVectorObjectPickTool::~UOdysseyTextureEditorVectorObjectPickTool()
+UOdysseyTextureEditorVectorPickTool::~UOdysseyTextureEditorVectorPickTool()
 {
 }
 
-UOdysseyTextureEditorVectorObjectPickTool::UOdysseyTextureEditorVectorObjectPickTool()
+UOdysseyTextureEditorVectorPickTool::UOdysseyTextureEditorVectorPickTool()
 {
 }
 
@@ -21,15 +21,15 @@ UOdysseyTextureEditorVectorObjectPickTool::UOdysseyTextureEditorVectorObjectPick
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
 void
-UOdysseyTextureEditorVectorObjectPickTool::Activate()
+UOdysseyTextureEditorVectorPickTool::Activate()
 {
-    UOdysseyTextureLayerStack::OnCurrentLayerChanged().AddUObject( this, &UOdysseyTextureEditorVectorObjectPickTool::OnCurrentLayerChanged );
+    UOdysseyTextureLayerStack::OnCurrentLayerChanged().AddUObject( this, &UOdysseyTextureEditorVectorPickTool::OnCurrentLayerChanged );
     Load();
     Super::Activate();
 }
 
 void
-UOdysseyTextureEditorVectorObjectPickTool::Load()
+UOdysseyTextureEditorVectorPickTool::Load()
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
@@ -40,12 +40,12 @@ UOdysseyTextureEditorVectorObjectPickTool::Load()
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
-        UOdysseyPainterEditorVectorObjectPickTool::LoadVector( vectorEngine, vectorScene );
+        UOdysseyPainterEditorVectorPickTool::LoadVector( vectorEngine, vectorScene );
     }
 }
 
 void
-UOdysseyTextureEditorVectorObjectPickTool::Inactivate()
+UOdysseyTextureEditorVectorPickTool::Inactivate()
 {
 	UOdysseyTextureLayerStack::OnCurrentLayerChanged().RemoveAll(this);
     Super::Inactivate();
@@ -54,7 +54,7 @@ UOdysseyTextureEditorVectorObjectPickTool::Inactivate()
 }
 
 void
-UOdysseyTextureEditorVectorObjectPickTool::Unload()
+UOdysseyTextureEditorVectorPickTool::Unload()
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
 
@@ -68,13 +68,13 @@ UOdysseyTextureEditorVectorObjectPickTool::Unload()
             FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
             FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
-            UOdysseyPainterEditorVectorObjectPickTool::UnloadVector( vectorEngine, vectorScene );
+            UOdysseyPainterEditorVectorPickTool::UnloadVector( vectorEngine, vectorScene );
         }
     }
 }
 
 bool
-UOdysseyTextureEditorVectorObjectPickTool::IsActivable() const
+UOdysseyTextureEditorVectorPickTool::IsActivable() const
 {
     if (!Super::IsActivable())
         return false; 
@@ -91,7 +91,7 @@ UOdysseyTextureEditorVectorObjectPickTool::IsActivable() const
 }
 
 void
-UOdysseyTextureEditorVectorObjectPickTool::OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStack)
+UOdysseyTextureEditorVectorPickTool::OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStack)
 {
 	//ensure iLayerstack is the one the tool is working on
 	UOdysseyTextureLayerStack* layerstack = GetEditorAs<FOdysseyTextureEditor>()->LayerStack();
@@ -120,7 +120,7 @@ UOdysseyTextureEditorVectorObjectPickTool::OnCurrentLayerChanged(UOdysseyLayerSt
 }
 
 bool
-UOdysseyTextureEditorVectorObjectPickTool::OnKeyDown( const FKey& iKey )
+UOdysseyTextureEditorVectorPickTool::OnKeyDown( const FKey& iKey )
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
@@ -131,14 +131,14 @@ UOdysseyTextureEditorVectorObjectPickTool::OnKeyDown( const FKey& iKey )
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
-        ret = UOdysseyPainterEditorVectorObjectPickTool::OnKeyDownVector( vectorEngine, vectorScene, iKey );
+        ret = UOdysseyPainterEditorVectorPickTool::OnKeyDownVector( vectorEngine, vectorScene, iKey );
     }
 
     return ret;
 }
 
 bool
-UOdysseyTextureEditorVectorObjectPickTool::OnKeyUp( const FKey& iKey )
+UOdysseyTextureEditorVectorPickTool::OnKeyUp( const FKey& iKey )
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
@@ -149,14 +149,14 @@ UOdysseyTextureEditorVectorObjectPickTool::OnKeyUp( const FKey& iKey )
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
-        ret = UOdysseyPainterEditorVectorObjectPickTool::OnKeyUpVector( vectorEngine, vectorScene, iKey );
+        ret = UOdysseyPainterEditorVectorPickTool::OnKeyUpVector( vectorEngine, vectorScene, iKey );
     }
 
     return ret;
 }
 
 bool
-UOdysseyTextureEditorVectorObjectPickTool::OnMouseDown( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
+UOdysseyTextureEditorVectorPickTool::OnMouseDown( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
 {
     FOdysseyTextureEditor* textureEditor =  GetEditorAs<FOdysseyTextureEditor>();
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(textureEditor->LayerStack());
@@ -168,14 +168,14 @@ UOdysseyTextureEditorVectorObjectPickTool::OnMouseDown( const FOdysseyPoint& iPo
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
-        ret = UOdysseyPainterEditorVectorObjectPickTool::OnMouseDownVector( vectorEngine, vectorScene, iPointInTexture, iKey );
+        ret = UOdysseyPainterEditorVectorPickTool::OnMouseDownVector( vectorEngine, vectorScene, iPointInTexture, iKey );
     }
 
     return ret;
 }
 
 void
-UOdysseyTextureEditorVectorObjectPickTool::OnMouseDrag( const FOdysseyPoint& iPointInTexture )
+UOdysseyTextureEditorVectorPickTool::OnMouseDrag( const FOdysseyPoint& iPointInTexture )
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
@@ -185,12 +185,12 @@ UOdysseyTextureEditorVectorObjectPickTool::OnMouseDrag( const FOdysseyPoint& iPo
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
-        UOdysseyPainterEditorVectorObjectPickTool::OnMouseDragVector( vectorEngine, vectorScene, iPointInTexture );
+        UOdysseyPainterEditorVectorPickTool::OnMouseDragVector( vectorEngine, vectorScene, iPointInTexture );
     }
 }
 
 bool
-UOdysseyTextureEditorVectorObjectPickTool::OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
+UOdysseyTextureEditorVectorPickTool::OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
 {
     FOdysseyTextureEditor* textureEditor =  GetEditorAs<FOdysseyTextureEditor>();
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(textureEditor->LayerStack());
@@ -205,7 +205,7 @@ UOdysseyTextureEditorVectorObjectPickTool::OnMouseUp( const FOdysseyPoint& iPoin
         //textureEditor->GetGUI()->GetViewportTab().Get()->GetViewport().Get()->GetViewportWidget().ToSharedRef(),
         textureEditor->GetGUI()->GetViewportTab().Get()->Widget().ToSharedRef(),
         FWidgetPath(),
-        textureEditor->GetGUI()->GetVectorObjectPickToolContextMenu()->Widget().ToSharedRef(),
+        textureEditor->GetGUI()->GetVectorPickToolObjectContextMenu()->Widget().ToSharedRef(),
         FSlateApplication::Get().GetCursorPos(),
         FPopupTransitionEffect(FPopupTransitionEffect::ContextMenu)
         );
@@ -217,10 +217,31 @@ UOdysseyTextureEditorVectorObjectPickTool::OnMouseUp( const FOdysseyPoint& iPoin
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
-        ret = UOdysseyPainterEditorVectorObjectPickTool::OnMouseUpVector( vectorEngine, vectorScene, iPointInTexture, iKey );
+        ret = UOdysseyPainterEditorVectorPickTool::OnMouseUpVector( vectorEngine, vectorScene, iPointInTexture, iKey );
     }
 
     return ret;
+}
+
+void
+UOdysseyTextureEditorVectorPickTool::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent )
+{
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
+    UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
+
+    //Super::PostEditChangeProperty(PropertyChangedEvent);
+
+    if (PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive)
+        return;
+
+    // redraw
+    if( currentVectorLayer )
+    {
+        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+
+        PropertyChangedVector( vectorEngine, vectorScene, PropertyChangedEvent.GetPropertyName());
+    }
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -38,7 +38,7 @@ FOdysseyPainterEditorToolsTab::CreateWidget()
         mEditor->GetVectorPathEditTool(),
         mEditor->GetVectorPathCutTool(),
         mEditor->GetVectorPrimitiveDrawingTool(),
-        mEditor->GetVectorObjectPickTool(),
+        mEditor->GetVectorPickTool(),
         mEditor->GetVectorTransformTool(),
         //mEditor->GetVectorObjectMoveTool(),
         //mEditor->GetVectorObjectRotateTool(),

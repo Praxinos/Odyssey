@@ -52,7 +52,7 @@ public:
     virtual UOdysseyPainterEditorVectorPathDrawingTool* GetVectorPathDrawingTool() const override { return nullptr; }
     virtual UOdysseyPainterEditorVectorPathEditTool* GetVectorPathEditTool() const override { return nullptr; }
     virtual UOdysseyPainterEditorVectorPathCutTool* GetVectorPathCutTool() const override { return nullptr; }
-    virtual UOdysseyPainterEditorVectorObjectPickTool* GetVectorObjectPickTool() const override { return nullptr; }
+    virtual UOdysseyPainterEditorVectorPickTool* GetVectorPickTool() const override { return nullptr; }
     virtual UOdysseyPainterEditorVectorObjectMoveTool* GetVectorObjectMoveTool() const override { return nullptr; }
     virtual UOdysseyPainterEditorVectorObjectRotateTool* GetVectorObjectRotateTool() const override { return nullptr; }
     virtual UOdysseyPainterEditorVectorObjectScaleTool* GetVectorObjectScaleTool() const override { return nullptr; }

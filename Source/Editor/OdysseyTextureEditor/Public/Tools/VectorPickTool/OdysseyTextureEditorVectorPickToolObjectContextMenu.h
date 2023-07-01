@@ -3,20 +3,20 @@
 
 #pragma once
 
-#include "Tools/VectorObjectPickTool/OdysseyPainterEditorVectorObjectPickToolContextMenu.h"
+#include "Tools/VectorPickTool/OdysseyPainterEditorVectorPickToolObjectContextMenu.h"
 
 class FOdysseyTextureEditor;
 
-class ODYSSEYTEXTUREEDITOR_API FOdysseyTextureEditorVectorObjectPickToolContextMenu :
-	public FOdysseyPainterEditorVectorObjectPickToolContextMenu
+class ODYSSEYTEXTUREEDITOR_API FOdysseyTextureEditorVectorPickToolObjectContextMenu :
+	public FOdysseyPainterEditorVectorPickToolObjectContextMenu
 {
     public:
         // Construction / Destruction
-        virtual ~FOdysseyTextureEditorVectorObjectPickToolContextMenu();
-        FOdysseyTextureEditorVectorObjectPickToolContextMenu( FOdysseyTextureEditor* iEditor );
+        virtual ~FOdysseyTextureEditorVectorPickToolObjectContextMenu();
+        FOdysseyTextureEditorVectorPickToolObjectContextMenu( FOdysseyTextureEditor* iEditor );
 
     protected:
-        // FOdysseyTextureEditorVectorObjectPickToolContextMenu interface
+        // FOdysseyTextureEditorVectorPickToolObjectContextMenu interface
         virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
         //virtual void ExtendMenu( FToolMenuOwner iOwner, FName iMenuName ) override;
         //virtual void OnToolkitInitialized( FBaseToolkit* iToolkit ) override;

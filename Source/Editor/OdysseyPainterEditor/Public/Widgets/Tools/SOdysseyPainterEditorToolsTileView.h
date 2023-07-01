@@ -6,7 +6,7 @@
 #include "CoreMinimal.h"
 #include "Widgets/Views/STileView.h"
 
-class UOdysseyPainterEditorTool;
+#include "Tools/OdysseyPainterEditorTool.h"
 
 class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorToolsTileView
     : public STileView<UOdysseyPainterEditorTool*>

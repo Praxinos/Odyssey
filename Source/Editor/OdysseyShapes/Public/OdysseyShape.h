@@ -4,7 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-
+#include "Input/OdysseyPoint.h"
 #include "OdysseyShape.generated.h"
 
 UENUM()

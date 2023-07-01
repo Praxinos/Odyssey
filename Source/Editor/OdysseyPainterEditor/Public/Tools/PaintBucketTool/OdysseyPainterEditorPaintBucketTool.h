@@ -129,6 +129,4 @@ protected:
     ::ULIS::FVec2D mPointPosition;
     FOdysseyPainterEditorPaintBucketToolHUD* mBucketHUD;
     uint32 mPickedArea;
-    TSharedPtr< SViewport > mViewportWidget; // to force keyboard focus on mouse hover.
-                                             // Prevents the user from having to click at least once in the viewport.
 };

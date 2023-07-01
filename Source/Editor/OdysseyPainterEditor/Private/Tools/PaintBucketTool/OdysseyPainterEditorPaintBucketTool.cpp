@@ -47,8 +47,13 @@ UOdysseyPainterEditorPaintBucketTool::UnloadVector( FOdysseyVectorEngine* iEngin
 void
 UOdysseyPainterEditorPaintBucketTool::LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
+    TSharedPtr< SViewport > viewportWidget; // to force keyboard focus on mouse hover.
+                                            // Prevents the user from having to click at least once in the viewport.
     // we need the focus on the viewport for keyboard 
-    mViewportWidget = GetEditorAs<FOdysseyPainterEditor>()->GetGUI()->GetViewportTab()->GetViewport()->GetViewportWidget();
+    viewportWidget = GetEditorAs<FOdysseyPainterEditor>()->GetGUI()->GetViewportTab()->GetViewport()->GetViewportWidget();
+
+    // we need the focus on the viewport for keyboard 
+    //FSlateApplication::Get().SetKeyboardFocus( viewportWidget.ToSharedRef() );
 
     iEngine->ClearHUD();
     iEngine->AddHUD( mBucketHUD );
@@ -313,9 +318,6 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseHoverVector( FOdysseyVectorEngine* 
                                                         , const FOdysseyPoint& iPointInTexture )
 {
     FOdysseyVectorObject* selectedObject = iScene->GetLastSelected();
-
-    // we need the focus on the viewport for keyboard 
-    //FSlateApplication::Get().SetKeyboardFocus( mViewportWidget.ToSharedRef() );
 
     if( selectedObject )
     {

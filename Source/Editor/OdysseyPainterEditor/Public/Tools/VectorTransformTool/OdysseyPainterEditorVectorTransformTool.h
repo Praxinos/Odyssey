@@ -69,4 +69,7 @@ public:
 
     UPROPERTY( EditAnywhere, Category="Odyssey ObjectMove Tool" )
     bool World;
+
+    UPROPERTY(EditAnywhere, Category="Odyssey ObjectScale Tool")
+    bool Uniform;
 };

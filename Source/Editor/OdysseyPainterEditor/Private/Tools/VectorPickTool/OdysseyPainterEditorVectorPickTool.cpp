@@ -1,52 +1,56 @@
 // IDDN FR.001.250001.005.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
-#include "Tools/VectorObjectPickTool/OdysseyPainterEditorVectorObjectPickTool.h"
+#include "Tools/VectorPickTool/OdysseyPainterEditorVectorPickTool.h"
+#include "Tools/VectorPickTool/OdysseyPainterEditorVectorPickToolHUD.h"
 #include <chrono>
 
-#define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorObjectPickTool"
+#define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorPickTool"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
-UOdysseyPainterEditorVectorObjectPickTool::~UOdysseyPainterEditorVectorObjectPickTool()
+UOdysseyPainterEditorVectorPickTool::~UOdysseyPainterEditorVectorPickTool()
 {
 }
 
-UOdysseyPainterEditorVectorObjectPickTool::UOdysseyPainterEditorVectorObjectPickTool()
-    : mSelectionHUD()
+UOdysseyPainterEditorVectorPickTool::UOdysseyPainterEditorVectorPickTool()
+    : EditionMode( EOdysseyVectorEditionMode::Object )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Lasso64");
+
+    mPickHUD = new FOdysseyPainterEditorVectorPickToolHUD( this );
 }
 
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
 void
-UOdysseyPainterEditorVectorObjectPickTool::UnloadVector( FOdysseyVectorEngine* iEngine
-                                                       , FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorPickTool::UnloadVector( FOdysseyVectorEngine* iEngine
+                                                 , FOdysseyVectorScene* iScene )
 {
-    iEngine->RemoveHUD( &mSelectionHUD );
+    iEngine->RemoveHUD( mPickHUD );
 
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
 
 void
-UOdysseyPainterEditorVectorObjectPickTool::LoadVector( FOdysseyVectorEngine* iEngine
-                                                     , FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorPickTool::LoadVector( FOdysseyVectorEngine* iEngine
+                                               , FOdysseyVectorScene* iScene )
 {
-    mSelectionHUD.Init( iEngine->GetBLImage()->width(), iEngine->GetBLImage()->height() );
-    mSelectionHUD.UpdateSelectionBox( iScene, false );
+    mPickHUD->Init( iEngine->GetBLImage()->width(), iEngine->GetBLImage()->height() );
 
     iEngine->ClearHUD();
-    iEngine->AddHUD( &mSelectionHUD );
+    iEngine->AddHUD( mPickHUD );
+
+    mPickHUD->Reset( iScene );
 
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
 
 bool
-UOdysseyPainterEditorVectorObjectPickTool::OnKeyDownVector( FOdysseyVectorEngine* iEngine
-                                                          , FOdysseyVectorScene* iScene
-                                                          , const FKey& iKey )
+UOdysseyPainterEditorVectorPickTool::OnKeyDownVector( FOdysseyVectorEngine* iEngine
+                                                    , FOdysseyVectorScene* iScene
+                                                    , const FKey& iKey )
 {
     // Note: this also calls iScene->Update(0)
     UOdysseyPainterEditorDefaultTool::OnKeyDownVector( iEngine, iScene, iKey );
@@ -55,9 +59,9 @@ UOdysseyPainterEditorVectorObjectPickTool::OnKeyDownVector( FOdysseyVectorEngine
 }
 
 bool
-UOdysseyPainterEditorVectorObjectPickTool::OnKeyUpVector( FOdysseyVectorEngine* iEngine
-                                                        , FOdysseyVectorScene* iScene
-                                                        , const FKey& iKey )
+UOdysseyPainterEditorVectorPickTool::OnKeyUpVector( FOdysseyVectorEngine* iEngine
+                                                  , FOdysseyVectorScene* iScene
+                                                  , const FKey& iKey )
 {
     // Note: this also calls iScene->Update(0)
     UOdysseyPainterEditorDefaultTool::OnKeyUpVector( iEngine, iScene, iKey );
@@ -66,10 +70,10 @@ UOdysseyPainterEditorVectorObjectPickTool::OnKeyUpVector( FOdysseyVectorEngine* 
 }
 
 bool
-UOdysseyPainterEditorVectorObjectPickTool::OnMouseDownVector( FOdysseyVectorEngine* iEngine
-                                                            , FOdysseyVectorScene* iScene
-                                                            , const FOdysseyPoint& iPointInTexture
-                                                            , const FKey& iKey )
+UOdysseyPainterEditorVectorPickTool::OnMouseDownVector( FOdysseyVectorEngine* iEngine
+                                                      , FOdysseyVectorScene* iScene
+                                                      , const FOdysseyPoint& iPointInTexture
+                                                      , const FKey& iKey )
 {
 /*
     if( iKey == EKeys::LeftMouseButton )
@@ -90,8 +94,6 @@ UOdysseyPainterEditorVectorObjectPickTool::OnMouseDownVector( FOdysseyVectorEngi
 
         mPointArray.clear();
 
-        mSelectionHUD.SetSelecting( true, &mPointArray );
-
         mPointArray.push_back( ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y ) );
 
         iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
@@ -101,9 +103,9 @@ UOdysseyPainterEditorVectorObjectPickTool::OnMouseDownVector( FOdysseyVectorEngi
 }
 
 ::ULIS::FRectI
-UOdysseyPainterEditorVectorObjectPickTool::OnMouseDragVector( FOdysseyVectorEngine* iEngine
-                                                            , FOdysseyVectorScene* iScene
-                                                            , const FOdysseyPoint& iPointInTexture )
+UOdysseyPainterEditorVectorPickTool::OnMouseDragVector( FOdysseyVectorEngine* iEngine
+                                                      , FOdysseyVectorScene* iScene
+                                                      , const FOdysseyPoint& iPointInTexture )
 {
     ::ULIS::FRectI redrawRegion = { 0, 0, 0, 0 };
 
@@ -136,7 +138,7 @@ SetSelectionSpace( FOdysseyVectorEngine* iVectorEngine, FOdysseyVectorObject* iS
 }
 
 bool
-UOdysseyPainterEditorVectorObjectPickTool::OnMouseUpVector( FOdysseyVectorEngine* iEngine
+UOdysseyPainterEditorVectorPickTool::OnMouseUpVector( FOdysseyVectorEngine* iEngine
                                                           , FOdysseyVectorScene* iScene
                                                           , const FOdysseyPoint& iPointInTexture
                                                           , const FKey& iKey )
@@ -188,9 +190,10 @@ UOdysseyPainterEditorVectorObjectPickTool::OnMouseUpVector( FOdysseyVectorEngine
 
         SetSelectionSpace( iEngine, iScene->GetLastSelected() );
 
-        mSelectionHUD.SetSelecting( false, nullptr );
-        mSelectionHUD.UpdateSelectionBox( iScene, false );
+        mPickHUD->Reset( iScene ); // updates the selection box
     }
+
+    mPointArray.clear();
 
     iScene->Update( 0 ); // update invalidated objects
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW | FOdysseyVectorScene::SIGNAL_OBJECT_SELECTED );
@@ -198,10 +201,24 @@ UOdysseyPainterEditorVectorObjectPickTool::OnMouseUpVector( FOdysseyVectorEngine
     return true;
 }
 
+std::vector<::ULIS::FVec2D>&
+UOdysseyPainterEditorVectorPickTool::GetPointArray()
+{
+    return mPointArray;
+}
+
 void
-UOdysseyPainterEditorVectorObjectPickTool::Commit()
+UOdysseyPainterEditorVectorPickTool::Commit()
 {
 
+}
+
+void
+UOdysseyPainterEditorVectorPickTool::PropertyChangedVector( FOdysseyVectorEngine* iEngine
+                                                          , FOdysseyVectorScene* iScene
+                                                          , const FName& iPropertyName )
+{
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
 
 #undef LOCTEXT_NAMESPACE

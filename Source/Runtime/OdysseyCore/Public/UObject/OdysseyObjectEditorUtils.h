@@ -8,33 +8,8 @@
 	
 namespace FOdysseyObjectEditorUtils
 {
-	void PreChangePropertyValue(UObject* Object, FName PropertyName)
-	{
-		// Get the property addresses for the source and destination objects.
-		FProperty* Property = FindFieldChecked<FProperty>(Object->GetClass(), PropertyName);
-
-		if ( !Object->HasAnyFlags(RF_ClassDefaultObject) )
-		{
-			FEditPropertyChain PropertyChain;
-			PropertyChain.AddHead(Property);
-
-        	Object->Modify();
-			Object->PreEditChange(PropertyChain);
-		}
-	}
-
-
-	void PostChangePropertyValue(UObject* Object, FName PropertyName, EPropertyChangeType::Type iChangeType = EPropertyChangeType::Unspecified)
-	{
-		// Get the property addresses for the source and destination objects.
-		FProperty* Property = FindFieldChecked<FProperty>(Object->GetClass(), PropertyName);
-
-		if ( !Object->HasAnyFlags(RF_ClassDefaultObject) )
-		{
-			FPropertyChangedEvent PropertyEvent(Property, iChangeType);
-			Object->PostEditChangeProperty(PropertyEvent);
-		}
-	}
+	void ODYSSEYCORE_API PreChangePropertyValue(UObject* Object, FName PropertyName);
+	void ODYSSEYCORE_API PostChangePropertyValue(UObject* Object, FName PropertyName, EPropertyChangeType::Type iChangeType = EPropertyChangeType::Unspecified);
 
 	/**
 	 * Set the value on an UObject using reflection.
@@ -110,14 +85,5 @@ namespace FOdysseyObjectEditorUtils
 	 *
 	 * @return true if the poroperty exists within the given object
 	 */
-	bool HasProperty(UObject* Object, FName PropertyName)
-	{
-		// Get the property addresses for the source and destination objects.
-		FProperty* Property = FindFieldChecked<FProperty>(Object->GetClass(), PropertyName);
-
-		if ( !Property )
-			return false;
-
-		return true;
-	}
+	bool ODYSSEYCORE_API HasProperty(UObject* Object, FName PropertyName);
 };

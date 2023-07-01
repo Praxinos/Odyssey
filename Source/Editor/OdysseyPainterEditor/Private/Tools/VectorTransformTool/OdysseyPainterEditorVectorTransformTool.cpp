@@ -18,6 +18,7 @@ UOdysseyPainterEditorVectorTransformTool::~UOdysseyPainterEditorVectorTransformT
 UOdysseyPainterEditorVectorTransformTool::UOdysseyPainterEditorVectorTransformTool()
     : PickingRadius( 10.0f )
     , mPickedPivot( nullptr )
+    , Uniform( true )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.TransformTool32");
 
@@ -382,14 +383,14 @@ UOdysseyPainterEditorVectorTransformTool::ScaleObjectSelection( FOdysseyVectorEn
 
         scalingMatrix.reset();
 
-        /*if( Uniform )
+        if( Uniform )
         {
             double newDiagonal = sqrt( ( x2mx1 * x2mx1 ) + ( y2my1 * y2my1 ) );
             double ratio = newDiagonal / oldDiagonal;
 
             scalingMatrix.scale( ratio, ratio );
         }
-        else*/
+        else
         {
             scalingMatrix.scale( x2mx1 / selectionBox.rect.w, y2my1 / selectionBox.rect.h );
         }

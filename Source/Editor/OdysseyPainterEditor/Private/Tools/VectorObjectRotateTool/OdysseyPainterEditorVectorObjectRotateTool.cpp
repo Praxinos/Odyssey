@@ -86,7 +86,7 @@ UOdysseyPainterEditorVectorObjectRotateTool::OnMouseDownVector( FOdysseyVectorEn
     }
 
     // remember for undos. we don't set undos in the mouse down event because it could conflict with the undo created by
-    // UOdysseyPainterEditorVectorObjectPickTool::OnMouseUpVector() called when no dragging was made.
+    // UOdysseyPainterEditorVectorPickTool::OnMouseUpVector() called when no dragging was made.
     mObjectTransformArray.clear();
     FObjectTransform::MakeArrayFromObjectList( iScene->GetSelectedObjectList(), mObjectTransformArray );
 
@@ -245,7 +245,7 @@ UOdysseyPainterEditorVectorObjectRotateTool::OnMouseUpVector( FOdysseyVectorEngi
         mPointArray.push_back( ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y ) );
 
         // includes its own undo record
-        UOdysseyPainterEditorVectorObjectPickTool::OnMouseUpVector( iEngine, iScene, iPointInTexture, iKey );
+        UOdysseyPainterEditorVectorPickTool::OnMouseUpVector( iEngine, iScene, iPointInTexture, iKey );
 
         mObjectRotateHUD->Reset( iScene );
     }

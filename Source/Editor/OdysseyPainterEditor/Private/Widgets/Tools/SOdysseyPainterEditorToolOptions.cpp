@@ -8,6 +8,7 @@
 #include "ISinglePropertyView.h"
 #include "Widgets/SOdysseyShapeSelector.h"
 #include "Widgets/SOdysseyShape.h"
+#include "Tools/OdysseyPainterEditorTool.h"
 
 #define LOCTEXT_NAMESPACE "SOdysseyPainterEditorToolOptions"
 

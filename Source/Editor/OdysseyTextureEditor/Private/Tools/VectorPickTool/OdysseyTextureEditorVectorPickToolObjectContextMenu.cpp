@@ -1,22 +1,22 @@
 // IDDN.FR.001.250001.006.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
-#include "Tools/VectorObjectPickTool/OdysseyTextureEditorVectorObjectPickToolContextMenu.h"
+#include "Tools/VectorPickTool/OdysseyTextureEditorVectorPickToolObjectContextMenu.h"
 #include "TextureEditor/OdysseyTextureEditorCommands.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyTextureEditorVectorObjectPickToolContextMenu"
+#define LOCTEXT_NAMESPACE "OdysseyTextureEditorVectorPickToolObjectContextMenu"
 
 /////////////////////////////////////////////////////
-// FOdysseyTextureEditorVectorObjectPickToolContextMenu
+// FOdysseyTextureEditorVectorPickToolObjectContextMenu
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
-FOdysseyTextureEditorVectorObjectPickToolContextMenu::~FOdysseyTextureEditorVectorObjectPickToolContextMenu()
+FOdysseyTextureEditorVectorPickToolObjectContextMenu::~FOdysseyTextureEditorVectorPickToolObjectContextMenu()
 {
 }
 
 // https://www.tbwrightartist.com/posts/right_click_context_menu_slate/
-FOdysseyTextureEditorVectorObjectPickToolContextMenu::FOdysseyTextureEditorVectorObjectPickToolContextMenu(FOdysseyTextureEditor* iEditor)
-	: FOdysseyPainterEditorVectorObjectPickToolContextMenu( static_cast<FOdysseyPainterEditor*>(iEditor) )
+FOdysseyTextureEditorVectorPickToolObjectContextMenu::FOdysseyTextureEditorVectorPickToolObjectContextMenu(FOdysseyTextureEditor* iEditor)
+	: FOdysseyPainterEditorVectorPickToolObjectContextMenu( static_cast<FOdysseyPainterEditor*>(iEditor) )
 {
     mMenu.BeginSection("Context");
     {
@@ -71,23 +71,23 @@ FOdysseyTextureEditorVectorObjectPickToolContextMenu::FOdysseyTextureEditorVecto
 }
 
 //--------------------------------------------------------------------------------------
-//--------------------------------------------------- FOdysseyTextureEditorVectorObjectPickToolContextMenu interface
+//--------------------------------------------------- FOdysseyTextureEditorVectorPickToolObjectContextMenu interface
 
 void
-FOdysseyTextureEditorVectorObjectPickToolContextMenu::BindShortcuts(FBaseToolkit* iToolkit)
+FOdysseyTextureEditorVectorPickToolObjectContextMenu::BindShortcuts(FBaseToolkit* iToolkit)
 {
-    FOdysseyPainterEditorVectorObjectPickToolContextMenu::BindShortcuts( iToolkit );
+    FOdysseyPainterEditorVectorPickToolObjectContextMenu::BindShortcuts( iToolkit );
 }
 
 /*
 void
-FOdysseyTextureEditorVectorObjectPickToolContextMenu::OnToolkitInitialized( FBaseToolkit* iToolkit )
+FOdysseyTextureEditorVectorPickToolObjectContextMenu::OnToolkitInitialized( FBaseToolkit* iToolkit )
 {
     FOdysseyPainterEditorVectorObjectPickToolContextMenu::OnToolkitInitialized( iToolkit );
 }
 
 void
-FOdysseyTextureEditorVectorObjectPickToolContextMenu::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
+FOdysseyTextureEditorVectorPickToolObjectContextMenu::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
 {
     FOdysseyPainterEditorVectorObjectPickToolContextMenu::ExtendMenu( iOwner, iMenuName );
 }

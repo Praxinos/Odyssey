@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 #include "ToolMenuOwner.h"
 #include "Input/OdysseyPoint.h"
+#include "OdysseyStyleSet.h"
 #include "OdysseyPainterEditorTool.generated.h"
 
 UCLASS()

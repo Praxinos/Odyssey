@@ -6,9 +6,7 @@ FOdysseyVectorHUDSelection::~FOdysseyVectorHUDSelection()
 }
 
 FOdysseyVectorHUDSelection::FOdysseyVectorHUDSelection()
-    : mPointArray(nullptr)
-    , mSelecting(true)
-    , mSelectionMask ( nullptr )
+    : mSelectionMask ( nullptr )
 {
 }
 
@@ -27,13 +25,6 @@ FOdysseyVectorHUDSelection::Init( uint32 iWidth, uint32 iHeight )
     }
 
     mSelectionMask = new BLImage( iWidth, iHeight, BL_FORMAT_A8 );
-}
-
-void
-FOdysseyVectorHUDSelection::SetSelecting( bool iSelecting, std::vector<::ULIS::FVec2D>* iPointArray )
-{
-    mSelecting = iSelecting;
-    mPointArray = iPointArray;
 }
 
 void
@@ -160,51 +151,24 @@ FOdysseyVectorHUDSelection::DrawSelectionBox( FOdysseyVectorScene* iScene, uint6
     blctx->restore();
 }
 
+/*
 void
-FOdysseyVectorHUDSelection::DrawSelecting( FOdysseyVectorScene* iScene, uint64 iFlags )
+FOdysseyVectorHUDSelection::DrawObjectSelection( FOdysseyVectorScene* iScene, uint64 iFlags )
 {
-    BLContext* blctx = iScene->GetEngine()->GetBLContext();
-    FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
-    BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
-    BLPath path;
-
-    // matrix might get altered for displaying the selection rectangle of a single object. Save it.
-    blctx->save();
-    blctx->resetMatrix();
-
-    blctx->setStrokeStyle( hcColor );
-    blctx->setStrokeWidth( 1.0f );
-
-    if( mPointArray )
-    {
-        for( int i = 0; i < mPointArray->size(); i++ )
-        {
-            int n = ( i + 1 ) % mPointArray->size();
-
-            path.moveTo( (*mPointArray)[i].x, (*mPointArray)[i].y );
-            path.lineTo( (*mPointArray)[n].x, (*mPointArray)[n].y );
-        }
-    }
-
-    blctx->strokePath( path );
-
-    blctx->restore();
+    DrawSelectionSpace( iScene, iFlags );
+    DrawSelectionBox( iScene, iFlags );
 }
 
 void
+FOdysseyVectorHUDSelection::DrawVertexSelection( FOdysseyVectorScene* iScene, uint64 iFlags )
+{
+    DrawSelectionSpace( iScene, iFlags );
+    DrawPaths( iScene, iFlags );
+}
+*/
+void
 FOdysseyVectorHUDSelection::Draw( FOdysseyVectorScene* iScene, uint64 iFlags )
 {
-    BLContext* blctx = iScene->GetEngine()->GetBLContext();
-    ::ULIS::FRectD bbox = { 0, 0, 0, 0 };
-
     DrawSelectionSpace( iScene, iFlags );
-
-    if( mSelecting )
-    {
-        DrawSelecting( iScene, iFlags );
-    }
-    else
-    {
-        DrawSelectionBox( iScene, iFlags );
-    }
+    DrawSelectionBox( iScene, iFlags );
 }

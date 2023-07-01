@@ -4,7 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Tools/VectorObjectPickTool/OdysseyPainterEditorVectorObjectPickTool.h"
+#include "Tools/VectorPickTool/OdysseyPainterEditorVectorPickTool.h"
 #include "OdysseyVector.h"
 #include "Undo/OdysseyVectorUndoObjectTransform.h"
 
@@ -13,7 +13,7 @@
 class FOdysseyPainterEditorVectorObjectRotateToolHUD;
 
 UCLASS()
-class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectRotateTool : public UOdysseyPainterEditorVectorObjectPickTool
+class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectRotateTool : public UOdysseyPainterEditorVectorPickTool
 {
 public:
     GENERATED_BODY()

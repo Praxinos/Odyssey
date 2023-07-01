@@ -6,7 +6,7 @@
 #include "CoreMinimal.h"
 #include "Widgets/Views/STableRow.h"
 
-class UOdysseyPainterEditorTool;
+#include "Tools/OdysseyPainterEditorTool.h"
 
 class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorToolTile
     : public STableRow<UOdysseyPainterEditorTool*>

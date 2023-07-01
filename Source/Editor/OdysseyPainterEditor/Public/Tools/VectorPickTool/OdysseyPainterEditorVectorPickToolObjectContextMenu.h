@@ -8,13 +8,13 @@
 class FOdysseyPainterEditor;
 class UOdysseyPainterEditorTool;
 
-class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorObjectPickToolContextMenu :
+class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPickToolObjectContextMenu :
     public FOdysseyPainterEditorContextMenu
 {
 public:
     // Construction / Destruction
-    virtual ~FOdysseyPainterEditorVectorObjectPickToolContextMenu();
-    FOdysseyPainterEditorVectorObjectPickToolContextMenu(FOdysseyPainterEditor* iEditor);
+    virtual ~FOdysseyPainterEditorVectorPickToolObjectContextMenu();
+    FOdysseyPainterEditorVectorPickToolObjectContextMenu(FOdysseyPainterEditor* iEditor);
 
 public:
     // FOdysseyEditorTab interface

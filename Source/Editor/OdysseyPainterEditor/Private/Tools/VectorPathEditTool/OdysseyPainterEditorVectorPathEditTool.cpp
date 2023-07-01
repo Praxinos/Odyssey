@@ -428,7 +428,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseHoverVector( FOdysseyVectorEngin
                                                            , const FOdysseyPoint& iPointInTexture )
 {
     // we need the focus on the viewport for keyboard 
-    FSlateApplication::Get().SetKeyboardFocus( mViewportWidget.ToSharedRef() );
+    //FSlateApplication::Get().SetKeyboardFocus( mViewportWidget.ToSharedRef() );
 
 /*
     ::ULIS::FRectI formerRegion = ::ULIS::FRectI( iPointInTexture.x - iPointInTexture.deltaPosition.X - Radius

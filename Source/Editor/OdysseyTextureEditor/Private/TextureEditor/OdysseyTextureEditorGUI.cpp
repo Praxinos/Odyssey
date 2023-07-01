@@ -63,7 +63,7 @@ FOdysseyTextureEditorGUI::CreateContextMenus()
 	FOdysseyPainterEditorGUI::CreateContextMenus();
 
 	//ADD NEW CONTEXT MENUS
-	ODYSSEY_ADD_CONTEXT_MENU(mVectorObjectPickToolContextMenu, FOdysseyTextureEditorVectorObjectPickToolContextMenu, mEditor);
+	ODYSSEY_ADD_CONTEXT_MENU(mVectorPickToolObjectContextMenu, FOdysseyTextureEditorVectorPickToolObjectContextMenu, mEditor);
 	ODYSSEY_ADD_CONTEXT_MENU(mPaintBucketToolContextMenu, FOdysseyTextureEditorPaintBucketToolContextMenu, mEditor);
 }
 
@@ -206,10 +206,10 @@ FOdysseyTextureEditorGUI::GetTextureDetailsTab()
 	return mTextureDetailsTab;
 }
 
-TSharedPtr<FOdysseyTextureEditorVectorObjectPickToolContextMenu>&
-FOdysseyTextureEditorGUI::GetVectorObjectPickToolContextMenu()
+TSharedPtr<FOdysseyTextureEditorVectorPickToolObjectContextMenu>&
+FOdysseyTextureEditorGUI::GetVectorPickToolObjectContextMenu()
 {
-	return mVectorObjectPickToolContextMenu;
+	return mVectorPickToolObjectContextMenu;
 }
 
 TSharedPtr<FOdysseyTextureEditorPaintBucketToolContextMenu>&

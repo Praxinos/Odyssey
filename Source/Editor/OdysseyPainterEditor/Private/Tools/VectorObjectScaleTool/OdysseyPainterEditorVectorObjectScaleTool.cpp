@@ -275,7 +275,7 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseUpVector( FOdysseyVectorEngin
         mPointArray.push_back( ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y ) );
 
         // includes its own undo record
-        UOdysseyPainterEditorVectorObjectPickTool::OnMouseUpVector( iEngine, iScene, iPointInTexture, iKey );
+        UOdysseyPainterEditorVectorPickTool::OnMouseUpVector( iEngine, iScene, iPointInTexture, iKey );
 
         mObjectScaleHUD->Reset( iScene );
     }
