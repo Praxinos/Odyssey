@@ -103,5 +103,11 @@ public:
     TSharedPtr<FUICommandInfo> ConvertToPath;
 
     /** Action to remove selected vector objects */
-    TSharedPtr<FUICommandInfo> RemoveSelectedObjects;
+    TSharedPtr<FUICommandInfo> DeleteSelection;
+
+    /** Action to remove selected vector objects */
+    TSharedPtr<FUICommandInfo> FlipHorizontal;
+
+    /** Action to remove selected vector objects */
+    TSharedPtr<FUICommandInfo> FlipVertical;
 };

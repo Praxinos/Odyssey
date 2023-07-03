@@ -129,7 +129,7 @@ private:
     FVector2D   GetLocalMousePosition( const FVector2D& iMouseInViewport ) const;
     FOdysseyPoint   GetLocalMousePosition( const FOdysseyPoint& iPointInViewport ) const;
     void        DrawUVsOntoViewport( const FViewport* iViewport, FCanvas* ioCanvas, int32 iUVChannel, const FStaticMeshVertexBuffer& iVertexBuffer, const FIndexArrayView& iIndices );
-
+    FKey        GetPointingDevicePressedKey();
     eState      InputChordToState();
     bool        InputKeyWithStrokePoint( const FOdysseyPoint& iPointInViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed = 1.0f, bool iGamepad = false );
     bool        OnInputEventRaw(const FOdysseyPoint& iPointInViewport, FKey iKey, EInputEvent iEvent);

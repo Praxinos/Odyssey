@@ -6,7 +6,7 @@
 #include <ULIS>
 #include "OdysseyVectorVertex.h"
 #include "OdysseyVectorSegmentCubic.h"
-#include "OdysseyVectorPathCubic.h"
+#include "OdysseyVectorPrimitive.h"
 
 #include "OdysseyVectorEllipse.generated.h"
 
@@ -16,7 +16,7 @@ struct FEllipseParam
     GENERATED_BODY()
 
     UPROPERTY(EditAnywhere, Category="Geometry")
-    double Width;
+    double StrokeWidth;
 
     UPROPERTY(EditAnywhere, Category="Geometry")
     double RadiusX;
@@ -25,7 +25,7 @@ struct FEllipseParam
     double RadiusY;
 };
 
-class ODYSSEYVECTOR_API FOdysseyVectorEllipse : public FOdysseyVectorPathCubic
+class ODYSSEYVECTOR_API FOdysseyVectorEllipse : public FOdysseyVectorPrimitive
 {
     private:
         static const uint32 mStaticClass = 0x1147fdfe; // value is crc32 FOdysseyVectorEllipse
@@ -37,15 +37,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorEllipse : public FOdysseyVectorPathCubic
         bool HasBaseClass( uint32 iBaseClassID );
 
        /**
-         * @brief Static function to allocate a new ellipse. Note: this is the proper way to allocate a new ellipse as we don't
-         * use the constructor to set parameters because UOBJECTs must have empty constructors.
-         * @param iName object's name
-         * @param iRadiusX radius on X axis
-         * @param iRadiusY radius on Y axis
-         */
-        static FOdysseyVectorEllipse* New( std::string iName, double iRadiusX, double iRadiusY );
-
-       /**
          * @brief destructor.
          */
         virtual ~FOdysseyVectorEllipse();
@@ -53,7 +44,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorEllipse : public FOdysseyVectorPathCubic
        /**
          * @brief constructor.
          */
-         FOdysseyVectorEllipse();
+         FOdysseyVectorEllipse( const FString& iName, double iRadiusX, double iRadiusY, double iStrokeWidth );
 
        /**
          * @brief Init an ellipse.
@@ -61,7 +52,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorEllipse : public FOdysseyVectorPathCubic
          * @param iRadiusX radius on X axis
          * @param iRadiusY radius on Y axis
          */
-        void Init( std::string iName, double iRadiusX, double iRadiusY );
+        void Init( const FString& iName, double iRadiusX, double iRadiusY );
 
        /**
          * @brief Set ellipse radius on both X and Y axis.
@@ -92,7 +83,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorEllipse : public FOdysseyVectorPathCubic
          * @brief Convert this ellipse to cubic path.
          * @return a newly allocated cubic path that looks the same as this ellipse.
          */
-        FOdysseyVectorPathCubic* Convert();
+        virtual FOdysseyVectorPathCubic* Convert() override;
 
        /**
          * @brief Get object type
@@ -107,14 +98,12 @@ class ODYSSEYVECTOR_API FOdysseyVectorEllipse : public FOdysseyVectorPathCubic
          */
         virtual FOdysseyVectorObject* CopyShape() override;
 
-        virtual void DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags ) override;
-        virtual bool PickShape( ::ULIS::FRectD& iRoi, uint32 iSelectionFlags ) override;
+        virtual void DrawShape( uint64 iFlags ) override;
         virtual void UpdateShape( uint32 iUpdateFlags ) override;
 
     protected :
         FOdysseyVectorVertex* mCubicVertex[4];
         FOdysseyVectorSegmentCubic* mCubicSegment[4];
-        double mStrokeWidth;
 
     public:
         FEllipseParam mEllipseParam;

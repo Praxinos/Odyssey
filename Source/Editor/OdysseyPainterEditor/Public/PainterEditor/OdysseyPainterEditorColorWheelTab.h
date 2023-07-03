@@ -3,7 +3,9 @@
 
 #pragma once
 
+#include <ULIS>
 #include "OdysseyEditorTab.h"
+#include "OdysseyEventState.h"
 
 class FOdysseyPainterEditor;
 

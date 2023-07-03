@@ -22,25 +22,24 @@ UOdysseyTextureEditorVectorPrimitiveDrawingTool::UOdysseyTextureEditorVectorPrim
 void
 UOdysseyTextureEditorVectorPrimitiveDrawingTool::Activate()
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
-    UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
-
     UOdysseyTextureLayerStack::OnCurrentLayerChanged().AddUObject( this, &UOdysseyTextureEditorVectorPrimitiveDrawingTool::OnCurrentLayerChanged );
-
     Load();
-
-    if( currentVectorLayer )
-    {
-        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
-
-        UOdysseyPainterEditorVectorPrimitiveDrawingTool::ActivateVector( vectorEngine, vectorScene );
-    }
+    Super::Activate();
 }
 
 void
 UOdysseyTextureEditorVectorPrimitiveDrawingTool::Load()
 {
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
+    UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
+
+    if( currentVectorLayer )
+    {
+        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+
+        UOdysseyPainterEditorVectorPrimitiveDrawingTool::LoadVector( vectorEngine, vectorScene );
+    }
 }
 
 void
@@ -48,11 +47,27 @@ UOdysseyTextureEditorVectorPrimitiveDrawingTool::Inactivate()
 {
 	UOdysseyTextureLayerStack::OnCurrentLayerChanged().RemoveAll(this);
     Super::Inactivate();
+    Unload();
 }
 
 void
 UOdysseyTextureEditorVectorPrimitiveDrawingTool::Unload()
 {
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
+
+    // layerStack might be NULL when closing the program
+    if( layerStack )
+    {
+        UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
+
+        if( currentVectorLayer )
+        {
+            FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+            FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+
+            UOdysseyPainterEditorVectorPrimitiveDrawingTool::UnloadVector( vectorEngine, vectorScene );
+        }
+    }
 }
 
 bool
@@ -87,6 +102,15 @@ UOdysseyTextureEditorVectorPrimitiveDrawingTool::OnCurrentLayerChanged(UOdysseyL
 		return;
 	}
 
+    // We have to redraw all layers in order to draw all layers without the HUD.
+    // This will be removed when we'll have a dedicated HUD layer.
+    TArray<UOdysseyLayer*> layers = iLayerStack->GetLayers();
+    for( int i = 0; i < layers.Num(); i++ )
+    {
+        UOdysseyTextureLayer* textureLayer = static_cast<UOdysseyTextureLayer*>(layers[i]);
+        textureLayer->RenderImageChanged(false);
+    }
+
 	//Reload the tool to edit the new layer
 	Unload();
 	Load();
@@ -102,7 +126,7 @@ UOdysseyTextureEditorVectorPrimitiveDrawingTool::OnKeyDown( const FKey& iKey )
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
         ret = UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnKeyDownVector( vectorEngine, vectorScene, iKey );
     }
@@ -120,7 +144,7 @@ UOdysseyTextureEditorVectorPrimitiveDrawingTool::OnKeyUp( const FKey& iKey )
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
         ret = UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnKeyUpVector( vectorEngine, vectorScene, iKey );
     }
@@ -139,7 +163,7 @@ UOdysseyTextureEditorVectorPrimitiveDrawingTool::OnMouseDown( const FOdysseyPoin
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
         ret = UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDownVector( vectorEngine, vectorScene, iPointInTexture,iKey  );
     }
@@ -157,7 +181,7 @@ UOdysseyTextureEditorVectorPrimitiveDrawingTool::OnMouseDrag( const FOdysseyPoin
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
         UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDragVector( vectorEngine, vectorScene, iPointInTexture );
     }
@@ -174,7 +198,7 @@ UOdysseyTextureEditorVectorPrimitiveDrawingTool::OnMouseUp( const FOdysseyPoint&
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
         ret = UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseUpVector( vectorEngine, vectorScene, iPointInTexture, iKey );
     }

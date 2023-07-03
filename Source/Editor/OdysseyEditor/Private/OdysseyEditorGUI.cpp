@@ -5,6 +5,7 @@
 
 #include "OdysseyEditor.h"
 #include "OdysseyEditorTab.h"
+#include "OdysseyEditorContextMenu.h"
 
 /////////////////////////////////////////////////////
 // FOdysseyEditorGUI
@@ -29,6 +30,9 @@ FOdysseyEditorGUI::Init()
 	CreateTabs(); //Create Tabs Objects and sets their corresponding controllers
 	InitTabs(); //Init Tabs, creating their widgets
 
+	CreateContextMenus();
+	InitContextMenus(); //Init Context menus, creating their widgets
+
 	mLayout = CreateLayout();
 	mWidget = CreateWidget();
 }
@@ -51,11 +55,30 @@ FOdysseyEditorGUI::InitTabs()
 }
 
 void
+FOdysseyEditorGUI::CreateContextMenus()
+{
+}
+
+void
+FOdysseyEditorGUI::InitContextMenus()
+{
+	for (int i = 0; i < mContextMenus.Num(); i++)
+	{
+		mContextMenus[i].Get()->Init();
+	}
+}
+
+void
 FOdysseyEditorGUI::BindShortcuts(FBaseToolkit* iToolkit)
 {
 	for (int i = 0; i < mTabs.Num(); i++)
 	{
 		mTabs[i].Get()->BindShortcuts(iToolkit);
+	}
+
+	for (int i = 0; i < mContextMenus.Num(); i++)
+	{
+		mContextMenus[i].Get()->BindShortcuts(iToolkit);
 	}
 }
 

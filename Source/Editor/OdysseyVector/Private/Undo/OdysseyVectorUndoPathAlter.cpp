@@ -4,6 +4,12 @@ FOdysseyVectorUndoPathAlter::~FOdysseyVectorUndoPathAlter()
 {
     if( mApplied )
     {
+        // Free paths
+        for( int i = 0; i < mRemovedPathArray.size(); i++ )
+        {
+            delete mRemovedPathArray[i];
+        }
+
         // Free vertices
         for( int i = 0; i < mRemovedVertexArray.size(); i++ )
         {
@@ -18,6 +24,12 @@ FOdysseyVectorUndoPathAlter::~FOdysseyVectorUndoPathAlter()
     }
     else
     {
+        // Free paths that were undone
+        for( int i = 0; i < mAddedPathArray.size(); i++ )
+        {
+            delete mAddedPathArray[i];
+        }
+
         // Free vertices that were undone
         for( int i = 0; i < mAddedVertexArray.size(); i++ )
         {
@@ -31,8 +43,10 @@ FOdysseyVectorUndoPathAlter::~FOdysseyVectorUndoPathAlter()
         }
     }
 
+    mRemovedPathArray.clear();
     mRemovedVertexArray.clear();
     mRemovedSegmentArray.clear();
+    mAddedPathArray.clear();
     mAddedVertexArray.clear();
     mAddedSegmentArray.clear();
 }
@@ -58,21 +72,26 @@ FOdysseyVectorUndoPathAlter::FOdysseyVectorUndoPathAlter( FOdysseyVectorScene* i
 }
 
 FOdysseyVectorUndoPathAlter::FOdysseyVectorUndoPathAlter( FOdysseyVectorScene* iScene
+                                                        , std::vector<FOdysseyVectorPath*>& iRemovedPathArray
                                                         , std::vector<FOdysseyVectorVertex*>& iRemovedVertexArray
                                                         , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray
+                                                        , std::vector<FOdysseyVectorPath*>& iAddedPathArray
                                                         , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
                                                         , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray )
-    : FOdysseyVectorUndoPathAlter( iScene, iAddedVertexArray, iAddedSegmentArray )
+    : FOdysseyVectorUndoPathAlter( iScene, iAddedPathArray, iAddedVertexArray, iAddedSegmentArray )
 {
+    mRemovedPathArray = iRemovedPathArray;
     mRemovedVertexArray = iRemovedVertexArray;
     mRemovedSegmentArray = iRemovedSegmentArray;
 }
 
 FOdysseyVectorUndoPathAlter::FOdysseyVectorUndoPathAlter( FOdysseyVectorScene* iScene
+                                                        , std::vector<FOdysseyVectorPath*>& iAddedPathArray
                                                         , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
                                                         , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray )
     : FOdysseyVectorUndo( iScene )
 {
+    mAddedPathArray = iAddedPathArray;
     mAddedVertexArray = iAddedVertexArray;
     mAddedSegmentArray = iAddedSegmentArray;
 }
@@ -93,6 +112,16 @@ FOdysseyVectorUndoPathAlter::Apply( UObject* iIgnored )
         mRemovedVertexArray[i]->GetPath()->RemoveVertex( mRemovedVertexArray[i] );
     }
 
+    for( int i = 0; i < mRemovedPathArray.size(); i++ )
+    {
+        mRemovedPathArray[i]->GetParent()->RemoveChild( mRemovedPathArray[i] );
+    }
+
+
+    for( int i = 0; i < mAddedPathArray.size(); i++ )
+    {
+        mAddedPathArray[i]->GetParent()->AppendChild( mAddedPathArray[i] );
+    }
 
     for( int i = 0; i < mAddedVertexArray.size(); i++ )
     {
@@ -104,8 +133,14 @@ FOdysseyVectorUndoPathAlter::Apply( UObject* iIgnored )
         mAddedSegmentArray[i]->GetPath()->AddSegment( mAddedSegmentArray[i] );
     }
 
-    // update invalidated objects and call callbacks if any (for refreshing GUI e.g)
+    // update invalidated objects
     mScene->Update(0);
+
+    mScene->GetEngine()->ResetHUD();
+    // call callbacks if any (for refreshing GUI e.g)
+    mScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW
+                  | FOdysseyVectorScene::SIGNAL_OBJECT_SELECTED
+                  | FOdysseyVectorScene::SIGNAL_OBJECT_MODIFIED );
 }
 
 void
@@ -113,6 +148,11 @@ FOdysseyVectorUndoPathAlter::Revert( UObject* iIgnored )
 {
     // call method from base class
     FOdysseyVectorUndo::Revert( iIgnored );
+
+    for( int i = 0; i < mRemovedPathArray.size(); i++ )
+    {
+        mRemovedPathArray[i]->GetParent()->AppendChild( mRemovedPathArray[i] );
+    }
 
     for( int i = 0; i < mRemovedVertexArray.size(); i++ )
     {
@@ -135,8 +175,19 @@ FOdysseyVectorUndoPathAlter::Revert( UObject* iIgnored )
         mAddedVertexArray[i]->GetPath()->RemoveVertex( mAddedVertexArray[i] );
     }
 
-    // update invalidated objects and call callbacks if any (for refreshing GUI e.g)
+    for( int i = 0; i < mAddedPathArray.size(); i++ )
+    {
+        mAddedPathArray[i]->GetParent()->RemoveChild( mAddedPathArray[i] );
+    }
+
+    // update invalidated objects
     mScene->Update(0);
+
+    mScene->GetEngine()->ResetHUD();
+    // call callbacks if any (for refreshing GUI e.g)
+    mScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW
+                  | FOdysseyVectorScene::SIGNAL_OBJECT_SELECTED
+                  | FOdysseyVectorScene::SIGNAL_OBJECT_MODIFIED );
 }
 
 /** Describes this change (for debugging) */

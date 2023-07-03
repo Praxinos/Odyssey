@@ -1,0 +1,83 @@
+// IDDN FR.001.250001.005.S.P.2019.000.00000
+// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "Tools/DefaultTool/OdysseyPainterEditorDefaultTool.h"
+#include "OdysseyVector.h"
+#include "Undo/OdysseyVectorUndoSelect.h"
+#include "OdysseyPainterEditorVectorPickTool.generated.h"
+
+UENUM()
+enum class EOdysseyVectorEditionMode : uint8
+{
+    Object,
+    Vertex
+};
+
+class FOdysseyPainterEditorVectorPickToolHUD;
+
+UCLASS()
+class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPickTool : public UOdysseyPainterEditorDefaultTool
+{
+public:
+    GENERATED_BODY()
+
+public:
+    static bool DoubleClicked();
+    // Destructor
+    virtual ~UOdysseyPainterEditorVectorPickTool();
+
+    //Constructor
+    UOdysseyPainterEditorVectorPickTool();
+ 
+    virtual void UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    virtual void LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    virtual bool OnMouseDownVector( FOdysseyVectorEngine* iEngine
+                                  , FOdysseyVectorScene* iScene
+                                  , const FOdysseyPoint& iPointInTexture
+                                  , const FKey& iKey );
+    virtual ::ULIS::FRectI OnMouseDragVector( FOdysseyVectorEngine* iEngine
+                                  , FOdysseyVectorScene* iScene
+                                  , const FOdysseyPoint& iPointInTexture );
+    virtual bool OnMouseUpVector( FOdysseyVectorEngine* iEngine
+                                , FOdysseyVectorScene* iScene
+                                , const FOdysseyPoint& iPointInTexture
+                                , const FKey& iKey );
+    virtual bool OnKeyDownVector( FOdysseyVectorEngine* iEngine
+                                , FOdysseyVectorScene* iScene
+                                , const FKey& iKey ) override;
+    virtual bool OnKeyUpVector( FOdysseyVectorEngine* iEngine
+                              , FOdysseyVectorScene* iScene
+                              , const FKey& iKey ) override;
+    void PropertyChangedVector( FOdysseyVectorEngine* iEngine
+                              , FOdysseyVectorScene* iScene
+                              , const FName& iPropertyName );
+
+    //OdysseyPainterEditorTool overrides
+    virtual void Commit() override;
+
+    void Copy( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    void Paste( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+
+    std::vector<::ULIS::FVec2D>& GetPointArray();
+
+protected:
+    void OnMouseUpVectorObjectMode( FOdysseyVectorEngine* iEngine
+                                  , FOdysseyVectorScene* iScene
+                                  , const FOdysseyPoint& iPointInTexture
+                                  , const FKey& iKey );
+    void OnMouseUpVectorVertexMode( FOdysseyVectorEngine* iEngine
+                                  , FOdysseyVectorScene* iScene
+                                  , const FOdysseyPoint& iPointInTexture
+                                  , const FKey& iKey );
+protected:
+    FOdysseyPainterEditorVectorPickToolHUD* mPickHUD;
+    std::vector<::ULIS::FVec2D> mPointArray;
+    ::ULIS::FVec2D mPressedMouseCoords;
+
+public:
+    UPROPERTY(EditAnywhere, Category="Picking Tool")
+    EOdysseyVectorEditionMode EditionMode;
+};

@@ -7,11 +7,10 @@ FOdysseyVectorVertex::~FOdysseyVectorVertex()
 FOdysseyVectorVertex::FOdysseyVectorVertex( FOdysseyVectorPath* iPath, double iX, double iY, double iRadius )
     : FOdysseyVectorPoint()
    , mPath ( iPath )
+   , mFlags( 0 )
    , mNearestSegment( nullptr )
    , mNearestVertex( nullptr )
 {
-    mCtrlPoint = FOdysseyVectorHandlePoint::New( this );
-
     Init( iX, iY, iRadius );
 }
 
@@ -43,6 +42,115 @@ FOdysseyVectorVertex::BuildExplorationPairs( std::vector<FExplorationPair>& iExp
 
         iExplorationPairsArray.push_back( FExplorationPair( returnSection, this, departSection ) );
     }
+}
+
+::ULIS::FVec2D
+FOdysseyVectorVertex::GetAverageVectorOnSegmentHandle( bool iNormalize )
+{
+    uint32 segmentCount = GetSegmentCount();
+    ::ULIS::FVec2D averageVector( 0.0f, 0.0f );
+
+    if( segmentCount )
+    {
+        for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
+        {
+            FOdysseyVectorSegment* segment = (*it);
+
+            averageVector += segment->GetHandleVector( this, true );
+        }
+
+        averageVector.x /= segmentCount;
+        averageVector.y /= segmentCount;
+
+        if ( iNormalize && averageVector.DistanceSquared() )
+        {
+            averageVector.Normalize();
+        }
+    }
+
+    return averageVector;
+}
+
+::ULIS::FVec2D
+FOdysseyVectorVertex::GetAverageStraightVectorOnSegment( bool iNormalize )
+{
+    uint32 segmentCount = GetSegmentCount();
+    ::ULIS::FVec2D averageVector( 0.0f, 0.0f );
+
+    if( segmentCount )
+    {
+        for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
+        {
+            FOdysseyVectorSegment* segment = (*it);
+
+            averageVector += segment->GetVector( this, true );
+        }
+
+        averageVector.x /= segmentCount;
+        averageVector.y /= segmentCount;
+
+        if ( iNormalize && averageVector.DistanceSquared() )
+        {
+            averageVector.Normalize();
+        }
+    }
+
+    return averageVector;
+}
+
+//static
+void
+FOdysseyVectorVertex::ArrayToSegmentArray( std::vector<FOdysseyVectorVertex*>& iVertexArray
+                                         , std::vector<FOdysseyVectorSegment*>& oSegmentArray )
+{
+
+    if( iVertexArray.size() )
+    {
+        oSegmentArray.reserve( iVertexArray.size() );
+
+        for( int i = 0; i < iVertexArray.size(); i++ )
+        {
+            FOdysseyVectorVertex* vertex = iVertexArray[i];
+            std::list<FOdysseyVectorSegment*>& segmentList = vertex->GetSegmentList();
+
+            for( std::list<FOdysseyVectorSegment*>::iterator it = segmentList.begin(); it != segmentList.end(); ++it )
+            {
+                FOdysseyVectorSegment* segment = (*it);
+
+                if( std::find( oSegmentArray.begin(), oSegmentArray.end(), segment ) == oSegmentArray.end() )
+                {
+                    oSegmentArray.push_back( segment );
+                }
+            }
+        }
+    }
+}
+
+::ULIS::FVec2D
+FOdysseyVectorVertex::GetAverageVectorOnSegment( bool iNormalize )
+{
+    uint32 segmentCount = GetSegmentCount();
+    ::ULIS::FVec2D averageVector( 0.0f, 0.0f );
+
+    if( segmentCount )
+    {
+        for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
+        {
+            FOdysseyVectorSegment* segment = (*it);
+
+            averageVector += GetVectorOnSegment( segment, true );
+        }
+
+        averageVector.x /= segmentCount;
+        averageVector.y /= segmentCount;
+
+        if ( iNormalize && averageVector.DistanceSquared() )
+        {
+            averageVector.Normalize();
+        }
+    }
+
+    return averageVector;
 }
 
 FOdysseyVectorSection*
@@ -135,13 +243,8 @@ FOdysseyVectorVertex::GetVectorOnSegment( FOdysseyVectorSegment* iSegment, bool 
 {
     ::ULIS::FVec2D vec;
 
-    vec = ( iSegment->GetVertex(0) == this ) ? iSegment->GetPointAt(0.01f) - iSegment->GetPointAt(0.0f)
-                                             : iSegment->GetPointAt(0.99f) - iSegment->GetPointAt(1.0f);
-
-    if( iNormalize && vec.DistanceSquared() )
-    {
-        vec.Normalize();
-    }
+    vec = ( iSegment->GetVertex(0) == this ) ?  iSegment->GetTangentAt(0.0f, iNormalize)
+                                             : -iSegment->GetTangentAt(1.0f, iNormalize);
 
     return vec;
 }
@@ -162,12 +265,6 @@ FOdysseyVectorVertex::IsSmooth()
     }
 
     return false;
-}
-
-FOdysseyVectorHandlePoint*
-FOdysseyVectorVertex::GetHandle()
-{
-    return mCtrlPoint;
 }
 
 double
@@ -352,6 +449,25 @@ static bool seekSection( std::list<FOdysseyVectorSection*>& iSectionList
 }
 
 void
+FOdysseyVectorVertex::SetSelected( bool iSelected )
+{
+    if( iSelected == true )
+    {
+        mFlags |= SELECTED;
+    }
+    else
+    {
+        mFlags &= (~SELECTED);
+    }
+}
+
+bool
+FOdysseyVectorVertex::IsSelected()
+{
+    return ( mFlags & SELECTED ) ? true : false;
+}
+
+void
 FOdysseyVectorVertex::SetVisited( bool iVisited )
 {
     if( iVisited == true )
@@ -409,6 +525,8 @@ FOdysseyVectorVertex::GetBoundingBox( bool iWorld )
 
         bbox.x = pt.x;
         bbox.y = pt.y;
+        bbox.w = 1;
+        bbox.h = 1;
     }
     else
     {

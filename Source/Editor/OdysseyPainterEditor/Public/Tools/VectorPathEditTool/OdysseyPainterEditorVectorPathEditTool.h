@@ -6,9 +6,30 @@
 #include "CoreMinimal.h"
 #include "Tools/OdysseyPainterEditorTool.h"
 #include "OdysseyVector.h"
-#include "Undo/OdysseyVectorUndoPointPosition.h"
 
 #include "OdysseyPainterEditorVectorPathEditTool.generated.h"
+
+typedef struct FStitchingPair
+{
+    FOdysseyVectorVertex* vertex[2];
+    ::ULIS::FVec2D handle[2];
+
+    FStitchingPair( FOdysseyVectorVertex* iVertex0, ::ULIS::FVec2D& iHandle0
+                  , FOdysseyVectorVertex* iVertex1, ::ULIS::FVec2D& iHandle1 )
+    {
+        // Note: ordering will ease comparisons between stitching pairs.
+        vertex[0] = iVertex0 < iVertex1 ? iVertex0 : iVertex1;
+        handle[0] = iVertex0 < iVertex1 ? iHandle0 : iHandle1;
+
+        vertex[1] = iVertex0 < iVertex1 ? iVertex1 : iVertex0;
+        handle[1] = iVertex0 < iVertex1 ? iHandle1 : iHandle0;
+    }
+
+    bool operator==(const FStitchingPair& rhs)
+    {
+        return ( ( vertex[0] == rhs.vertex[0] ) && ( vertex[1] == rhs.vertex[1] ) );
+    }
+} FStitchingPair;
 
 UCLASS()
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathEditTool : public UOdysseyPainterEditorTool
@@ -22,9 +43,9 @@ public:
 
     //Constructor
     UOdysseyPainterEditorVectorPathEditTool();
- 
-    void ActivateVector( FOdysseyVectorEngine* iEngine
-                       , FOdysseyVectorScene* iScene );
+
+    void UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    void LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
     bool OnMouseDownVector( FOdysseyVectorEngine* iEngine
                           , FOdysseyVectorScene* iScene
                           , const FOdysseyPoint& iPointInTexture
@@ -49,22 +70,35 @@ public:
     //OdysseyPainterEditorTool overrides
     virtual void Commit() override;
 
-protected:
+
     void PropertyChanged( const FName& iPropertyName );
 
+private:
     FOdysseyVectorPathCubic* FetchPath( FOdysseyVectorEngine* iVectorEngine
                                       , FOdysseyVectorScene* iScene
                                       , double iWorldX
                                       , double iWorldY );
+    void OnMouseDownDeletePoint( FOdysseyVectorEngine* iEngine
+                               , FOdysseyVectorScene* iScene
+                               , const FOdysseyPoint& iPointInTexture
+                               , const FKey& iKey );
+    void OnMouseDownPickPoint( FOdysseyVectorEngine* iEngine
+                             , FOdysseyVectorScene* iScene
+                             , const FOdysseyPoint& iPointInTexture
+                             , const FKey& iKey );
+
+    void DetectPickingMode();
 
 private:
-    double mOldLocalMouseX;
-    double mOldLocalMouseY;
     FOdysseyVectorHUDPathCubic mCubicPathHUD;
     FOdysseyVectorHUDPicking mPickingHUD;
     std::vector<FOdysseyVectorPoint*> mPickedPointArray;
+    uint64 mSelectionFlags;
+    ::ULIS::FVec2D mOldPointInTexture;
+    TSharedPtr< SViewport > mViewportWidget; // to force keyboard focus on mouse hover.
+                                             // Prevents the user from having to click at least once in the viewport.
 
 public:
-    UPROPERTY(EditAnywhere, Category="Odyssey PathEdit Tool")
+    UPROPERTY(EditAnywhere, Category="Odyssey PathEdit Tool", meta = (ClampMin = "0.0", UIMin = "0.0") )
     double Radius;
 };

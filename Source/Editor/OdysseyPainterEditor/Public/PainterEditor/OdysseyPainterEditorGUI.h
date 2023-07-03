@@ -6,6 +6,7 @@
 #include "OdysseyEditorGUI.h"
 
 #include "OdysseyPainterEditorBrushSelectorTab.h"
+#include "OdysseyPainterEditorColorPaletteTab.h"
 #include "OdysseyPainterEditorColorSlidersTab.h"
 #include "OdysseyPainterEditorColorWheelTab.h"
 #include "OdysseyPainterEditorHUDTab.h"
@@ -38,6 +39,7 @@ public:
 public:
     // Tabs
     virtual void CreateTabs();
+    virtual void CreateContextMenus();
     virtual void BindShortcuts(FBaseToolkit* iToolkit);
 
 public:
@@ -60,6 +62,7 @@ public:
     TSharedPtr<FOdysseyPainterEditorViewportTab>& GetViewportTab();
     TSharedPtr<FOdysseyPainterEditorBrushSelectorTab>& GetBrushSelectorTab();
     TSharedPtr<FOdysseyPainterEditorMeshSelectorTab>& GetMeshSelectorTab();
+    TSharedPtr<FOdysseyPainterEditorPaletteTab>& GetColorPaletteTab();
     TSharedPtr<FOdysseyPainterEditorColorWheelTab>& GetColorWheelTab();
     TSharedPtr<FOdysseyPainterEditorColorSlidersTab>& GetColorSlidersTab();
     TSharedPtr<FOdysseyPainterEditorTopTab>& GetTopTab();
@@ -75,13 +78,19 @@ protected:
     virtual void GetBrushPack();
     virtual void Discord();
     virtual void SwitchTabletAPI();
-    void Group( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, FOdysseyVectorUndo** iUndo );
-    void ResetView( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, FOdysseyVectorUndo** iUndo );
-    void RemoveSelectedObjects( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, FOdysseyVectorUndo** iUndo );
-    void GroupPaint( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, FOdysseyVectorUndo** iUndo );
-    void Ungroup( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, FOdysseyVectorUndo** iUndo );
-    void SendBackward( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, FOdysseyVectorUndo** iUndo );
-    void BringForward( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, FOdysseyVectorUndo** iUndo );
+    void Group( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    void ResetView( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    void DeleteSelection( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    void GroupPaint( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    void Ungroup( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    void SendBackward( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    void BringForward( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    void FlipHorizontal( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    void FlipVertical( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    void DeleteBucket( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    void PropagateBucket( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    void UnpropagateBucket( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    void KnotVertices( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
 
 private:
     FOdysseyPainterEditor*                          mEditor;
@@ -91,6 +100,7 @@ protected:
     TSharedPtr<FOdysseyPainterEditorViewportTab>                mViewportTab;
     TSharedPtr<FOdysseyPainterEditorBrushSelectorTab>           mBrushSelectorTab;
     TSharedPtr<FOdysseyPainterEditorMeshSelectorTab>            mMeshSelectorTab;
+    TSharedPtr<FOdysseyPainterEditorPaletteTab>            mColorPaletteTab;
     TSharedPtr<FOdysseyPainterEditorColorWheelTab>              mColorWheelTab;
     TSharedPtr<FOdysseyPainterEditorColorSlidersTab>            mColorSlidersTab;
     TSharedPtr<FOdysseyPainterEditorTopTab>                     mTopTab;

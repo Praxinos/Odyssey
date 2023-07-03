@@ -13,7 +13,7 @@
 #include "Tools/VectorPathDrawingTool/OdysseyTextureEditorVectorPathDrawingTool.h"
 #include "Tools/VectorPathEditTool/OdysseyTextureEditorVectorPathEditTool.h"
 #include "Tools/VectorPathCutTool/OdysseyTextureEditorVectorPathCutTool.h"
-#include "Tools/VectorObjectPickTool/OdysseyTextureEditorVectorObjectPickTool.h"
+#include "Tools/VectorPickTool/OdysseyTextureEditorVectorPickTool.h"
 #include "Tools/VectorObjectMoveTool/OdysseyTextureEditorVectorObjectMoveTool.h"
 #include "Tools/VectorObjectRotateTool/OdysseyTextureEditorVectorObjectRotateTool.h"
 #include "Tools/VectorObjectScaleTool/OdysseyTextureEditorVectorObjectScaleTool.h"
@@ -27,6 +27,7 @@
 #include "Tools/PaintBucketTool/OdysseyTextureEditorPaintBucketTool.h"
 #include "Tools/ColorPickerTool/OdysseyTextureEditorColorPickerTool.h"
 #include "Tools/VectorGridTool/OdysseyTextureEditorVectorGridTool.h"
+#include "Tools/VectorTransformTool/OdysseyTextureEditorVectorTransformTool.h"
 #include "Misc/OdysseyHandle.h"
 
 /**
@@ -61,7 +62,7 @@ public:
     virtual UOdysseyTextureEditorVectorPathDrawingTool* GetVectorPathDrawingTool() const override;
     virtual UOdysseyTextureEditorVectorPathEditTool* GetVectorPathEditTool() const override;
     virtual UOdysseyTextureEditorVectorPathCutTool* GetVectorPathCutTool() const override;
-    virtual UOdysseyTextureEditorVectorObjectPickTool* GetVectorObjectPickTool() const override;
+    virtual UOdysseyTextureEditorVectorPickTool* GetVectorPickTool() const override;
     virtual UOdysseyTextureEditorVectorObjectMoveTool* GetVectorObjectMoveTool() const override;
     virtual UOdysseyTextureEditorVectorObjectRotateTool* GetVectorObjectRotateTool() const override;
     virtual UOdysseyTextureEditorVectorObjectScaleTool* GetVectorObjectScaleTool() const override;
@@ -75,6 +76,7 @@ public:
     virtual UOdysseyTextureEditorPaintBucketTool* GetPaintBucketTool() const override;
     virtual UOdysseyTextureEditorColorPickerTool* GetColorPickerTool() const override;
     virtual UOdysseyTextureEditorVectorGridTool* GetVectorGridTool() const override;
+    virtual UOdysseyTextureEditorVectorTransformTool* GetVectorTransformTool() const override;
 
 public:
     // Overrides
@@ -106,7 +108,7 @@ private:
     UOdysseyTextureEditorVectorPathDrawingTool* mVectorPathDrawingTool;
     UOdysseyTextureEditorVectorPathEditTool* mVectorPathEditTool;
     UOdysseyTextureEditorVectorPathCutTool* mVectorPathCutTool;
-    UOdysseyTextureEditorVectorObjectPickTool* mVectorObjectPickTool;
+    UOdysseyTextureEditorVectorPickTool* mVectorPickTool;
     UOdysseyTextureEditorVectorObjectMoveTool* mVectorObjectMoveTool;
     UOdysseyTextureEditorVectorObjectRotateTool* mVectorObjectRotateTool;
     UOdysseyTextureEditorVectorObjectScaleTool* mVectorObjectScaleTool;
@@ -120,6 +122,7 @@ private:
     UOdysseyTextureEditorPaintBucketTool* mPaintBucketTool;
     UOdysseyTextureEditorColorPickerTool* mColorPickerTool;
     UOdysseyTextureEditorVectorGridTool* mVectorGridTool;
+    UOdysseyTextureEditorVectorTransformTool* mVectorTransformTool;
 
     TSharedPtr<IOdysseyHandle> mLayerStackPreloadHandle;
 };

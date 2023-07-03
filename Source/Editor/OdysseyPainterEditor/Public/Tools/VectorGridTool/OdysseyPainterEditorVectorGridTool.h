@@ -10,6 +10,9 @@
 
 #include "OdysseyPainterEditorVectorGridTool.generated.h"
 
+class FGridNode;
+class FOdysseyPainterEditorVectorGridToolHUD;
+
 UCLASS()
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorGridTool : public UOdysseyPainterEditorTool
 {
@@ -22,9 +25,8 @@ public:
 
     //Constructor
     UOdysseyPainterEditorVectorGridTool();
- 
-    void ActivateVector( FOdysseyVectorEngine* iEngine
-                       , FOdysseyVectorScene* iScene );
+    void UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    void LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
     bool OnMouseDownVector( FOdysseyVectorEngine* iEngine
                           , FOdysseyVectorScene* iScene
                           , const FOdysseyPoint& iPointInTexture
@@ -45,19 +47,17 @@ public:
 
 private:
     std::vector<FOdysseyVectorPoint*> mPointArray;
-    FOdysseyVectorHUDGrid mGridHUD;
-
-private:
+    FOdysseyPainterEditorVectorGridToolHUD* mGridHUD;
     std::vector<FGridNode *> mGridNodeArray;
     bool mMultipleSelectionMode;
 
 public:
-    UPROPERTY(EditAnywhere, Category="Odyssey Grid Tool")
+    UPROPERTY(EditAnywhere, Category="Odyssey Grid Tool", meta = (ClampMin = "1", ClampMax = "32", UIMin = "1", UIMax = "32") )
     uint32 DivisionsX;
 
-    UPROPERTY(EditAnywhere, Category="Odyssey Grid Tool")
+    UPROPERTY(EditAnywhere, Category="Odyssey Grid Tool", meta = (ClampMin = "1", ClampMax = "32", UIMin = "1", UIMax = "32") )
     uint32 DivisionsY;
 
-    UPROPERTY(EditAnywhere, Category="Odyssey Grid Tool")
+    UPROPERTY(EditAnywhere, Category="Odyssey Grid Tool", meta = (ClampMin = "0.0", UIMin = "0.0") )
     double PickingRadius;
 };

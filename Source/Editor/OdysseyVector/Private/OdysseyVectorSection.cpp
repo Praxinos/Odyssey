@@ -61,6 +61,12 @@ FOdysseyVectorSection::Init( FOdysseyVectorSegment* iSegment
     }
 }
 
+uint32
+FOdysseyVectorSection::GetFlags()
+{
+    return mFlags;
+}
+
 ::ULIS::FVec2D*
 FOdysseyVectorSection::GetBezier()
 {
@@ -71,6 +77,12 @@ FOdysseyVectorCycle*
 FOdysseyVectorSection::GetCycle( uint32 iCycleID )
 {
     return mCycle[iCycleID];
+}
+
+uint32
+FOdysseyVectorSection::GetCycleCount()
+{
+    return mCycleCount;
 }
 
 ::ULIS::FVec2D
@@ -87,8 +99,8 @@ FOdysseyVectorSection::GetVectorFromVertex( FOdysseyVectorVertex* iVertex, bool 
     {
         if( mSegment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
         {
-             tangent = ( iVertex == mVertex[0] ) ?  mSegment->GetTangentAt( iVertex->GetT( mSegment ) )
-                                                 : -mSegment->GetTangentAt( iVertex->GetT( mSegment ) );
+             tangent = ( iVertex == mVertex[0] ) ?  mSegment->GetTangentAt( iVertex->GetT( mSegment ), false )
+                                                 : -mSegment->GetTangentAt( iVertex->GetT( mSegment ), false );
         }
     }
 
@@ -150,6 +162,12 @@ FOdysseyVectorCycle*
 FOdysseyVectorSection::GetOtherCycle( FOdysseyVectorCycle* iCycle )
 {
     return ( mCycle[0] == iCycle ) ? mCycle[1] : mCycle[0];
+}
+
+bool
+FOdysseyVectorSection::HasCycle( FOdysseyVectorCycle* iCycle )
+{
+    return ( ( mCycle[0] == iCycle ) || ( mCycle[1] == iCycle ) );
 }
 
 void

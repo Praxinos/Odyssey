@@ -24,25 +24,33 @@ RestoreObjectTransform( std::vector<FObjectTransform>& objectTransformArray )
     }
 }
 
-FOdysseyVectorUndoObjectTransform::FOdysseyVectorUndoObjectTransform( FOdysseyVectorScene* iScene
-                                                                    , std::list<FOdysseyVectorObject*>& iObjectList )
-    : FOdysseyVectorUndo( iScene )
+// static
+void
+FObjectTransform::MakeArrayFromObjectList( std::list<FOdysseyVectorObject*>& iObjectList
+                                         , std::vector<FObjectTransform>& oObjectTransformArray )
 {
-    objectTransformArray.reserve( iObjectList.size() );
+    oObjectTransformArray.reserve( iObjectList.size() );
 
     for( std::list<FOdysseyVectorObject*>::iterator it = iObjectList.begin(); it != iObjectList.end(); ++it )
     {
         FOdysseyVectorObject* object = (*it);
 
-        objectTransformArray.push_back( FObjectTransform( object ) );
+        oObjectTransformArray.push_back( FObjectTransform( object ) );
     }
 }
 
 FOdysseyVectorUndoObjectTransform::FOdysseyVectorUndoObjectTransform( FOdysseyVectorScene* iScene
-                                                                    , FOdysseyVectorObject* iObject )
+                                                                    , const FObjectTransform& iObjectTransform )
     : FOdysseyVectorUndo( iScene )
 {
-    objectTransformArray.push_back( FObjectTransform( iObject ) );
+    objectTransformArray.push_back( iObjectTransform );
+}
+
+FOdysseyVectorUndoObjectTransform::FOdysseyVectorUndoObjectTransform( FOdysseyVectorScene* iScene
+                                                                    , std::vector<FObjectTransform>& iObjectTransformArray )
+    : FOdysseyVectorUndo( iScene )
+{
+    objectTransformArray = iObjectTransformArray;
 }
 
 void
@@ -53,8 +61,14 @@ FOdysseyVectorUndoObjectTransform::Apply( UObject* iIgnored )
 
     RestoreObjectTransform( objectTransformArray );
 
-    // update invalidated objects and call callbacks if any (for refreshing GUI e.g)
+    // update invalidated objects
     mScene->Update(0);
+
+    mScene->GetEngine()->ResetHUD();
+    // call callbacks if any (for refreshing GUI e.g)
+    mScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW
+                  | FOdysseyVectorScene::SIGNAL_OBJECT_SELECTED
+                  | FOdysseyVectorScene::SIGNAL_OBJECT_TRANSFORMED );
 }
 
 void
@@ -65,8 +79,14 @@ FOdysseyVectorUndoObjectTransform::Revert( UObject* iIgnored )
 
     RestoreObjectTransform( objectTransformArray );
 
-    // update invalidated objects and call callbacks if any (for refreshing GUI e.g)
+    // update invalidated objects
     mScene->Update(0);
+
+    mScene->GetEngine()->ResetHUD();
+    // call callbacks if any (for refreshing GUI e.g)
+    mScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW
+                  | FOdysseyVectorScene::SIGNAL_OBJECT_SELECTED
+                  | FOdysseyVectorScene::SIGNAL_OBJECT_TRANSFORMED );
 }
 
 /** Describes this change (for debugging) */

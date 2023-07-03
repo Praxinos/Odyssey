@@ -2,6 +2,8 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Tools/VectorScenePanTool/OdysseyPainterEditorVectorScenePanTool.h"
+#include "Tools/VectorScenePanTool/OdysseyPainterEditorVectorScenePanToolHUD.h"
+#include "Tools/VectorSceneScaleTool/OdysseyPainterEditorVectorSceneScaleTool.h"
 
 #define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorScenePanTool"
 
@@ -14,17 +16,28 @@ UOdysseyPainterEditorVectorScenePanTool::~UOdysseyPainterEditorVectorScenePanToo
 UOdysseyPainterEditorVectorScenePanTool::UOdysseyPainterEditorVectorScenePanTool()
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.ScenePanTool64");
+
+    mScenePanHUD = new FOdysseyPainterEditorVectorScenePanToolHUD( this );
 }
 
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
 void
-UOdysseyPainterEditorVectorScenePanTool::ActivateVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorScenePanTool::UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+{
+    iEngine->RemoveHUD( mScenePanHUD );
+
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+}
+
+void
+UOdysseyPainterEditorVectorScenePanTool::LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
     iEngine->ClearHUD();
+    iEngine->AddHUD( mScenePanHUD );
 
-    iScene->Update( 0 ); // update vector scene and GUI widgets via delegates.
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
 
 bool
@@ -33,20 +46,50 @@ UOdysseyPainterEditorVectorScenePanTool::OnMouseDownVector( FOdysseyVectorEngine
                                                           , const FOdysseyPoint& iPointInTexture
                                                           , const FKey& iKey )
 {
+    BLPoint localCoords = iScene->GetInverseWorldMatrix().mapPoint(iPointInTexture.x,iPointInTexture.y);
+
     // needed for valid GUndo pointer
     GEditor->BeginTransaction(LOCTEXT("VectorScenePanTool","Vector Scene Pan Tool"));
     if( GUndo )
     {
         // save selected object translation/rotation/scaling before transform
-        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoObjectTransform( iScene, iScene );
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoObjectTransform( iScene, FObjectTransform( iScene ) );
 
         GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
     }
     GEditor->EndTransaction();
 
-    iScene->Update( 0 ); // update vector scene and GUI widgets via delegates.
+    mDownLocalMouseX = localCoords.x;
+    mDownLocalMouseY = localCoords.y;
+
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 
     return true;
+}
+
+// static
+void
+UOdysseyPainterEditorVectorScenePanTool::OnMouseDragVectorStatic( FOdysseyVectorEngine* iEngine
+                                                                , FOdysseyVectorScene* iScene
+                                                                , const FOdysseyPoint& iPointInTexture )
+{
+    double factor = 1.0f;
+
+    if ( FSlateApplication::Get().GetModifierKeys().IsShiftDown() )
+    {
+        factor *= 4.0f;
+    }
+
+    if ( FSlateApplication::Get().GetModifierKeys().IsControlDown() )
+    {
+        factor *= 0.25f;
+    }
+
+    iScene->Translate( iScene->GetTranslationX() + ( iPointInTexture.deltaPosition.X * factor )
+                     , iScene->GetTranslationY() + ( iPointInTexture.deltaPosition.Y * factor ) );
+    iScene->UpdateMatrix();
+
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
 
 void
@@ -54,12 +97,19 @@ UOdysseyPainterEditorVectorScenePanTool::OnMouseDragVector( FOdysseyVectorEngine
                                                           , FOdysseyVectorScene* iScene
                                                           , const FOdysseyPoint& iPointInTexture )
 {
-    iScene->Translate( iScene->GetTranslationX() + iPointInTexture.deltaPosition.X
-                     , iScene->GetTranslationY() + iPointInTexture.deltaPosition.Y );
+    if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
+    {
+        OnMouseDragVectorStatic( iEngine, iScene, iPointInTexture );
+    }
 
-    iScene->UpdateMatrix();
-
-    iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES ); // update vector scene and GUI widgets via delegates.
+    if( iPointInTexture.keysDown.Find( EKeys::RightMouseButton ) != INDEX_NONE )
+    {
+        UOdysseyPainterEditorVectorSceneScaleTool::OnMouseDragVectorStatic( mDownLocalMouseX
+                                                                          , mDownLocalMouseY
+                                                                          , iEngine
+                                                                          , iScene
+                                                                          , iPointInTexture );
+    }
 }
 
 bool
@@ -68,7 +118,7 @@ UOdysseyPainterEditorVectorScenePanTool::OnMouseUpVector( FOdysseyVectorEngine* 
                                                         , const FOdysseyPoint& iPointInTexture
                                                         , const FKey& iKey )
 {
-    iScene->Update( 0 ); // update vector scene and GUI widgets via delegates.
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 
     return true;
 }

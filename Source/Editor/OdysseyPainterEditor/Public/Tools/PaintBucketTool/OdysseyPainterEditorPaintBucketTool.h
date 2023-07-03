@@ -13,6 +13,7 @@
 #include "OdysseyPainterEditorPaintBucketTool.generated.h"
 
 class FOdysseyPaintEngine;
+class FOdysseyPainterEditorPaintBucketToolHUD;
 
 UCLASS()
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorPaintBucketTool : public UOdysseyPainterEditorTool
@@ -31,7 +32,8 @@ public:
     void Initialize(FOdysseyPaintEngine* iPaintEngine);
 
     //OdysseyPainterEditorTool overrides
-    void ActivateVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    void UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    void LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
     // Raster Mouse Down
     bool OnMouseDownRaster( TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock, const FOdysseyPoint& iPointInTexture, const FKey& iKey );
     // Vector Mouse Down
@@ -49,8 +51,46 @@ public:
                         , FOdysseyVectorScene* iScene
                         , const FOdysseyPoint& iPointInTexture
                         , const FKey& iKey );
+    bool OnKeyDownVector( FOdysseyVectorEngine* iEngine
+                        , FOdysseyVectorScene* iScene
+                        , const FKey& iKey );
+    bool OnKeyUpVector(FOdysseyVectorEngine* iEngine
+                      ,FOdysseyVectorScene* iScene
+                      ,const FKey& iKey);
+    void PropertyChangedVector( FOdysseyVectorEngine* iEngine
+                              , FOdysseyVectorScene* iScene
+                              , const FName& iPropertyName );
 
     virtual void Commit() override;
+
+    private:
+        void SetBucketColor( FOdysseyVectorBucket* iBucket );
+
+    protected:
+        void OnMouseUpVectorClearBucket( FOdysseyVectorScene* iScene
+                                       , FOdysseyVectorBucket* iBucket );
+        void OnMouseUpVectorCreateBucket( FOdysseyVectorScene* iScene
+                                        , FOdysseyVectorGroupPaint* paintGroup
+                                        , const FOdysseyPoint& iPointInTexture
+                                        , const FKey& iKey );
+        void OnMouseUpVectorRemoveBucket( FOdysseyVectorScene* iScene
+                                        , FOdysseyVectorGroupPaint* paintGroup
+                                        , FOdysseyVectorBucket* iBucket
+                                        , const FOdysseyPoint& iPointInTexture
+                                        , const FKey& iKey );
+        void OnMouseUpVectorMovePoint( FOdysseyVectorScene* iScene
+                                     , FOdysseyVectorGroupPaint* paintGroup
+                                     , FOdysseyVectorPoint* iPoint
+                                     , ::ULIS::FVec2D iPointOriginalPosition
+                                     , const FOdysseyPoint& iPointInTexture
+                                     , const FKey& iKey );
+        void OnMouseUpVectorPropagateBucket( FOdysseyVectorScene* iScene
+                                           , FOdysseyVectorBucket* iBucket
+                                           , bool iPropagate );
+        void OnMouseUpVectorColorBucket( FOdysseyVectorScene* iScene
+                                       , FOdysseyVectorBucket* iBucket );
+        double GetRotationAngle( FOdysseyVectorBucket* iBucket
+                               , const FOdysseyPoint& iPointInTexture );
 
 public:
     UPROPERTY(EditAnywhere,Category="Odyssey BucketFill Tool")
@@ -68,17 +108,25 @@ public:
     UPROPERTY(EditAnywhere,Category="Odyssey BucketFill Tool")
     FColor Color2;
 
+    UPROPERTY(EditAnywhere,Category="Odyssey BucketFill Tool")
+    double PickingRadius;
+
+    UPROPERTY(EditAnywhere,Category="Odyssey BucketFill Tool")
+    bool ShowControls;
+    bool ShowControlsAtKeyDown;
+
 protected:
     // protected Data Members
 
     //Resources
     FOdysseyPaintEngine mPaintEngine;
-    FOdysseyVectorHandleBucket* mPickedBucketHandle;
     FOdysseyVectorBucket* mPickedBucket;
     FOdysseyVectorObject* mPickedObject;
     double mOldLocalMouseX;
     double mOldLocalMouseY;
     double mDownMouseX;
     double mDownMouseY;
-    FOdysseyVectorHUDBucket mBucketHUD;
+    ::ULIS::FVec2D mPointPosition;
+    FOdysseyPainterEditorPaintBucketToolHUD* mBucketHUD;
+    uint32 mPickedArea;
 };

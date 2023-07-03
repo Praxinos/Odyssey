@@ -20,9 +20,8 @@ public:
 
     //Constructor
     UOdysseyPainterEditorVectorPathWidthTool();
- 
-    void ActivateVector( FOdysseyVectorEngine* iEngine
-                       , FOdysseyVectorScene* iScene );
+    void UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    void LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
     bool OnMouseDownVector( FOdysseyVectorEngine* iEngine
                           , FOdysseyVectorScene* iScene
                           , const FOdysseyPoint& iPointInTexture
@@ -48,10 +47,10 @@ private:
     FOdysseyVectorHUDPicking mPickingHUD;
 
 public:
-    UPROPERTY(EditAnywhere, Category="Odyssey PathWidth Tool")
+    UPROPERTY(EditAnywhere, Category="Odyssey PathWidth Tool", meta = (ClampMin = "0.0", UIMin = "0.0"))
     double Radius;
 
-    UPROPERTY(EditAnywhere, Category="Odyssey PathWidth Tool")
+    UPROPERTY(EditAnywhere, Category="Odyssey PathWidth Tool", meta = (ClampMin = "0.0", UIMin = "0.0"))
     double Strength;
 
 };

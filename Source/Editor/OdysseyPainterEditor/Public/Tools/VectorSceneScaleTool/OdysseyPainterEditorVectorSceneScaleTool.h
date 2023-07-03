@@ -8,6 +8,8 @@
 #include "OdysseyVector.h"
 #include "OdysseyPainterEditorVectorSceneScaleTool.generated.h"
 
+class FOdysseyPainterEditorVectorScenePanToolHUD;
+
 UCLASS()
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorSceneScaleTool : public UOdysseyPainterEditorDefaultTool
 {
@@ -15,14 +17,20 @@ public:
     GENERATED_BODY()
 
 public:
+    static void OnMouseDragVectorStatic( double iLocalMouseAtDownX
+                                       , double iLocalMouseAtDownY
+                                       , FOdysseyVectorEngine* iEngine
+                                       , FOdysseyVectorScene* iScene
+                                       , const FOdysseyPoint& iPointInTexture );
     // Destructor
     virtual ~UOdysseyPainterEditorVectorSceneScaleTool();
 
     //Constructor
     UOdysseyPainterEditorVectorSceneScaleTool();
- 
-    void ActivateVector( FOdysseyVectorEngine* iEngine
-                       , FOdysseyVectorScene* iScene );
+
+
+    void UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    void LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
     bool OnMouseDownVector( FOdysseyVectorEngine* iEngine
                           , FOdysseyVectorScene* iScene
                           , const FOdysseyPoint& iPointInTexture
@@ -41,9 +49,10 @@ public:
     //OdysseyPainterEditorTool overrides
     virtual void Commit() override;
 
-private:
-    double mDownWorldMouseX;
-    double mDownWorldMouseY;
-    double mDownLocalMouseX;
-    double mDownLocalMouseY;
+    private:
+        //double mDownWorldMouseX;
+        //double mDownWorldMouseY;
+        double mDownLocalMouseX;
+        double mDownLocalMouseY;
+        FOdysseyPainterEditorVectorScenePanToolHUD* mSceneScaleHUD;
 };

@@ -19,11 +19,14 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoPathAlter : public FOdysseyVectorUndo
                                    , FOdysseyVectorVertex* iAddedVertex
                                    , FOdysseyVectorSegment* iAddedSegment );
         FOdysseyVectorUndoPathAlter( FOdysseyVectorScene* iScene
+                                   , std::vector<FOdysseyVectorPath*>& iAddedPathArray
                                    , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
                                    , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray );
         FOdysseyVectorUndoPathAlter( FOdysseyVectorScene* iScene
+                                   , std::vector<FOdysseyVectorPath*>& iRemovedPathArray
                                    , std::vector<FOdysseyVectorVertex*>& iRemovedVertexArray
                                    , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray
+                                   , std::vector<FOdysseyVectorPath*>& iAddedPathArray
                                    , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
                                    , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray );
 
@@ -36,9 +39,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoPathAlter : public FOdysseyVectorUndo
         /** Describes this change (for debugging) */
         virtual FString ToString() const override;
 
-    private:
+    protected:
+        std::vector<FOdysseyVectorPath*> mRemovedPathArray;
         std::vector<FOdysseyVectorVertex*> mRemovedVertexArray;
         std::vector<FOdysseyVectorSegment*> mRemovedSegmentArray;
+        std::vector<FOdysseyVectorPath*> mAddedPathArray;
         std::vector<FOdysseyVectorVertex*> mAddedVertexArray;
         std::vector<FOdysseyVectorSegment*> mAddedSegmentArray;
 };

@@ -26,6 +26,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorLink
 
         void Init( FOdysseyVectorPoint* iPoint0, FOdysseyVectorPoint* iPoint1 );
 
+        ::ULIS::FVec2D GetVector( FOdysseyVectorPoint* iPoint0, bool iNormalize );
         ::ULIS::FVec2D GetVector( bool iNormalize );
         FOdysseyVectorPoint* GetPoint( int iPointNum );
         void SetPoint0( FOdysseyVectorPoint* iPoint );

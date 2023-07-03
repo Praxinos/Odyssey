@@ -24,6 +24,19 @@ UOdysseyPainterEditorDefaultTool::GetCopiedObjectList()
     return copiedObjectList;
 }
 
+//static
+bool
+UOdysseyPainterEditorDefaultTool::DoubleClicked()
+{
+    uint64 clickTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    static uint64 previousClickTime = 0;
+    bool doubleClicked = ( ( clickTime - previousClickTime ) < 200 ) ? true : false;
+
+    previousClickTime = clickTime;
+
+    return doubleClicked;
+}
+
 void
 UOdysseyPainterEditorDefaultTool::Copy( FOdysseyVectorEngine* iEngine
                                       , FOdysseyVectorScene* iScene )
@@ -92,6 +105,10 @@ UOdysseyPainterEditorDefaultTool::Paste( FOdysseyVectorEngine* iEngine
     }
 
     iScene->Update( 0 );
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW
+                  | FOdysseyVectorScene::SIGNAL_OBJECT_MODIFIED
+                  | FOdysseyVectorScene::SIGNAL_OBJECT_SELECTED
+                  | FOdysseyVectorScene::SIGNAL_OBJECT_TRANSFORMED );
 }
 
 bool
@@ -110,9 +127,17 @@ UOdysseyPainterEditorDefaultTool::OnKeyDownVector( FOdysseyVectorEngine* iEngine
         {
             Paste( iEngine, iScene );
         }
+
+        if( iKey == EKeys::A )
+        {
+            GetEditorAs<FOdysseyPainterEditor>()->SelectAll( iEngine, iScene );
+        }
     }
 
-    iScene->Update( 0 ); // refresh vector scene and GUI widgets via delegates.
+    if( iKey == EKeys::Delete )
+    {
+        GetEditorAs<FOdysseyPainterEditor>()->DeleteSelection( iEngine, iScene );
+    }
 
     return false;
 }
@@ -122,8 +147,6 @@ UOdysseyPainterEditorDefaultTool::OnKeyUpVector( FOdysseyVectorEngine* iEngine
                                                , FOdysseyVectorScene* iScene
                                                , const FKey& iKey )
 {
-    iScene->Update( 0 ); // refresh vector scene and GUI widgets via delegates.
-
     return false;
 }
 

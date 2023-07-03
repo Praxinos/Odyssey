@@ -431,6 +431,17 @@ FOdysseyPainterEditorViewportClient::CapturedMouseMove( FViewport* iViewport, in
     CapturedMouseMoveWithStrokePoint( point_in_viewport );
 }
 
+FKey
+FOdysseyPainterEditorViewportClient::GetPointingDevicePressedKey()
+{
+    if( mLastKey == EKeys::RightMouseButton )
+    {
+        return EKeys::RightMouseButton;
+    }
+
+    return EKeys::LeftMouseButton;
+}
+
 void
 FOdysseyPainterEditorViewportClient::OnStylusStateChanged( const TWeakPtr<SWidget> iWidget, const FStylusState& iState, int32 iIndex )
 {
@@ -511,7 +522,7 @@ FOdysseyPainterEditorViewportClient::OnStylusStateChanged( const TWeakPtr<SWidge
 
         /* FOdysseyPoint point;
         queue.Dequeue( point ); */
-        InputKeyWithStrokePoint( stroke_point, 0, EKeys::LeftMouseButton, EInputEvent::IE_Pressed );
+        InputKeyWithStrokePoint( stroke_point, 0, GetPointingDevicePressedKey(), EInputEvent::IE_Pressed );
         mIsCapturedByStylus = true;
 
         /* while( queue.Dequeue( point ) ) // Process all the down'd points which occur before having the ue pressed event
@@ -529,7 +540,7 @@ FOdysseyPainterEditorViewportClient::OnStylusStateChanged( const TWeakPtr<SWidge
     {
         //UE_LOG( LogStylusInput, Log, TEXT( "OnStylusStateChanged Released" ) );
 
-        InputKeyWithStrokePoint( stroke_point, 0, EKeys::LeftMouseButton, EInputEvent::IE_Released );
+        InputKeyWithStrokePoint( stroke_point, 0, GetPointingDevicePressedKey(), EInputEvent::IE_Released );
         mIsCapturedByStylus = false;
 
         /* FOdysseyPoint point;
@@ -665,7 +676,7 @@ FOdysseyPainterEditorViewportClient::InputKeyWithStrokePoint(const FOdysseyPoint
 bool
 FOdysseyPainterEditorViewportClient::OnInputEventRaw(const FOdysseyPoint& iPointInViewport, FKey iKey, EInputEvent iEvent)
 {
-    if (iKey == EKeys::LeftMouseButton)
+    if ((iKey == EKeys::LeftMouseButton)||(iKey == EKeys::RightMouseButton))
     {
         if (iEvent == EInputEvent::IE_Pressed)
         {
@@ -786,7 +797,7 @@ FOdysseyPainterEditorViewportClient::OnInputEventWithState(const FOdysseyPoint& 
             FOdysseyPoint strokePoint_in_texture = GetLocalMousePosition(iPointInViewport);
             FVector2D position_in_texture(strokePoint_in_texture.x, strokePoint_in_texture.y);
             mOnPickColor.ExecuteIfBound(eOdysseyEventState::kSet, position_in_texture);
-
+            
             mIsCurrentModeActive = false;
             return true;
         }

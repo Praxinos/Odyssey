@@ -24,12 +24,20 @@ UOdysseyPainterEditorVectorPathKnotTool::UOdysseyPainterEditorVectorPathKnotTool
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
 void
-UOdysseyPainterEditorVectorPathKnotTool::ActivateVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorPathKnotTool::UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+{
+    iEngine->RemoveHUD( &mPickingHUD );
+
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+}
+
+void
+UOdysseyPainterEditorVectorPathKnotTool::LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
     iEngine->ClearHUD();
-    iEngine->AddHUD(&mPickingHUD);
+    iEngine->AddHUD( &mPickingHUD );
 
-    iScene->Update( 0 ); // update vector scene and GUI widgets via delegates.
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
 
 bool
@@ -40,17 +48,21 @@ UOdysseyPainterEditorVectorPathKnotTool::OnMouseDownVector( FOdysseyVectorEngine
 {
     ::ULIS::FRectD roi = { iPointInTexture.x - Radius, iPointInTexture.y - Radius, Radius * 2, Radius * 2 };
     std::vector<FOdysseyVectorPoint*> pickedPointArray;
-    std::vector<FOdysseyVectorVertex*> mergedVertexArray;
-    std::vector<FOdysseyVectorSegment*> mergedSegmentArray;
+    FOdysseyVectorVertex* knotVertex;
+    // for undos
+    std::vector<FOdysseyVectorPath*> addedPathArray; // stays empty
     std::vector<FOdysseyVectorVertex*> addedVertexArray;
     std::vector<FOdysseyVectorSegment*> addedSegmentArray;
+    std::vector<FOdysseyVectorPath*> removedPathArray; // receives the merged path if any
     std::vector<FOdysseyVectorSegment*> removedSegmentArray;
     std::vector<FOdysseyVectorVertex*> removedVertexArray;
-    FOdysseyVectorVertex* knotVertex;
+    std::vector<FOdysseyVectorSegment*> mergedSegmentArray;
+    std::vector<FOdysseyVectorVertex*> mergedVertexArray;
 
     pickedPointArray.reserve(500); // crashes if I don't reserve. I don't know why.
 
     iEngine->PickPoints( iScene
+                       , false
                        , iPointInTexture.x
                        , iPointInTexture.y
                        , Radius
@@ -68,10 +80,6 @@ UOdysseyPainterEditorVectorPathKnotTool::OnMouseDownVector( FOdysseyVectorEngine
             if( vertexA->GetPath() != vertexB->GetPath() )
             {
                 std::vector<FOdysseyVectorVertex*> vertexLookup;
-/*
-                FOdysseyVectorPath* newPath = static_cast<FOdysseyVectorPath*>( vertexB->GetPath()->Copy() );
-*/
-
                 // TODO: remove vertexB->GetPath() from selected objects.
                 mergedPath = vertexB->GetPath();
 
@@ -81,6 +89,8 @@ UOdysseyPainterEditorVectorPathKnotTool::OnMouseDownVector( FOdysseyVectorEngine
                 vertexB = vertexLookup[vertexB->GetID()];
 
                 iScene->Unselect( mergedPath );
+
+                removedPathArray.push_back( mergedPath );
             }
 
             knotVertex = iEngine->Knot( vertexA, vertexB, addedSegmentArray, removedSegmentArray, true );
@@ -95,15 +105,15 @@ UOdysseyPainterEditorVectorPathKnotTool::OnMouseDownVector( FOdysseyVectorEngine
                 GEditor->BeginTransaction(LOCTEXT("VectorPathKnotTool","Vector Path Knot Tool"));
                 if( GUndo )
                 {
-                    FOdysseyVectorUndo *undo = new FOdysseyVectorUndoKnot( iScene
-                                                                         , vertexA->GetPath()
-                                                                         , removedVertexArray
-                                                                         , removedSegmentArray
-                                                                         , addedVertexArray
-                                                                         , addedSegmentArray
-                                                                         , mergedPath
-                                                                         , mergedVertexArray
-                                                                         , mergedSegmentArray );
+                    FOdysseyVectorUndo *undo = new FOdysseyVectorUndoPathKnot( iScene
+                                                                              , removedPathArray
+                                                                              , removedVertexArray
+                                                                              , removedSegmentArray
+                                                                              , addedPathArray
+                                                                              , addedVertexArray
+                                                                              , addedSegmentArray
+                                                                              , mergedVertexArray
+                                                                              , mergedSegmentArray );
 
                     GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
                 }
@@ -112,7 +122,11 @@ UOdysseyPainterEditorVectorPathKnotTool::OnMouseDownVector( FOdysseyVectorEngine
         }
     }
 
-    iScene->Update( 0 ); // update vector scene and GUI widgets via delegates.
+    iScene->Update( 0 );
+
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW
+                  | FOdysseyVectorScene::SIGNAL_OBJECT_SELECTED
+                  | FOdysseyVectorScene::SIGNAL_OBJECT_MODIFIED );
 
     return true;
 }
@@ -138,7 +152,7 @@ UOdysseyPainterEditorVectorPathKnotTool::OnMouseHoverVector( FOdysseyVectorEngin
     if( rect.Area() )
     {*/
     /*}*/
-    iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES ); // update vector scene and GUI widgets via delegates.
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
 
 void
@@ -148,7 +162,7 @@ UOdysseyPainterEditorVectorPathKnotTool::OnMouseDragVector( FOdysseyVectorEngine
 {
     mPickingHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
 
-    iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES ); // update vector scene and GUI widgets via delegates.
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
 
 bool
@@ -157,7 +171,7 @@ UOdysseyPainterEditorVectorPathKnotTool::OnMouseUpVector( FOdysseyVectorEngine* 
                                                         , const FOdysseyPoint& iPointInTexture
                                                         , const FKey& iKey )
 {
-    iScene->Update( 0 ); // update vector scene and GUI widgets via delegates.
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 
     return false;
 }

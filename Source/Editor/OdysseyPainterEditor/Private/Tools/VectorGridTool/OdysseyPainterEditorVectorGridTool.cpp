@@ -2,7 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Tools/VectorGridTool/OdysseyPainterEditorVectorGridTool.h"
-
+#include "Tools/VectorGridTool/OdysseyPainterEditorVectorGridToolHUD.h"
 #define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorGridTool"
 
 #ifndef M_PI
@@ -22,24 +22,31 @@ UOdysseyPainterEditorVectorGridTool::UOdysseyPainterEditorVectorGridTool()
     , PickingRadius( 10.0f )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Grid64");
+
+    mGridHUD = new FOdysseyPainterEditorVectorGridToolHUD( this );
 }
 
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
 void
-UOdysseyPainterEditorVectorGridTool::ActivateVector( FOdysseyVectorEngine* iEngine
-                                                   , FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorGridTool::UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
-    mGridHUD.MakeGrid( iScene, DivisionsX, DivisionsY );
-    mGridHUD.Export( mPointArray );
+    iEngine->RemoveHUD( mGridHUD );
 
-    mGridNodeArray.clear();
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+}
 
-    iEngine->ClearHUD( );
-    iEngine->AddHUD( &mGridHUD );
+void
+UOdysseyPainterEditorVectorGridTool::LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+{
+    iEngine->ClearHUD();
+    iEngine->AddHUD( mGridHUD );
 
-    iScene->Update( 0 ); // refresh vector scene and GUI widgets via delegates.
+    mGridHUD->MakeGrid( iScene, DivisionsX, DivisionsY );
+    mGridHUD->Export( mPointArray );
+
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
 
 bool
@@ -58,34 +65,31 @@ UOdysseyPainterEditorVectorGridTool::OnMouseDownVector( FOdysseyVectorEngine* iE
     }
     GEditor->EndTransaction();
 
-    for( int i = 0; i < iPointInTexture.keysDown.Num(); i++ )
-    {
-        if( ( iPointInTexture.keysDown[i] == EKeys::LeftShift ) || ( iPointInTexture.keysDown[i] == EKeys::RightShift ) )
-        {
-            mMultipleSelectionMode = true;
-        }
-    }
-
     // multiple selection mode
-    if ( mMultipleSelectionMode == true )
+    if ( FSlateApplication::Get().GetModifierKeys().IsShiftDown() )
     {
         mMultipleSelectionMode = true;
 
-        mGridHUD.StartSelectionRectangle( iPointInTexture.x, iPointInTexture.y );
+        mGridHUD->StartSelectionRectangle( iPointInTexture.x, iPointInTexture.y );
     }
     else
     {
-        FGridNode* gridNode = mGridHUD.PickNode( iPointInTexture.x, iPointInTexture.y, PickingRadius );
+        bool picked;
 
-        mGridNodeArray.clear();
+        mGridHUD->GetSelection( mGridNodeArray );
 
-        if( gridNode )
+        picked = mGridHUD->PickNodes( iPointInTexture.x
+                                    , iPointInTexture.y
+                                    , PickingRadius
+                                    , FSlateApplication::Get().GetModifierKeys().IsControlDown() ? false : true );
+
+        if( picked == true )
         {
-            mGridNodeArray.push_back( gridNode );
+            mGridHUD->GetSelection( mGridNodeArray );
         }
     }
 
-    iScene->Update( 0 ); // refresh vector scene and GUI widgets via delegates.
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 
     return true;
 }
@@ -97,28 +101,30 @@ UOdysseyPainterEditorVectorGridTool::OnMouseDragVector( FOdysseyVectorEngine* iE
 {
     if( mMultipleSelectionMode == true )
     {
-        mGridHUD.DragSelectionRectangle( iPointInTexture.x, iPointInTexture.y );
+        mGridHUD->DragSelectionRectangle( iPointInTexture.x, iPointInTexture.y );
     }
     else
     {
-        FSelectionBox& selectionBox = mGridHUD.GetSelectionBox();
+        FSelectionBox& selectionBox = mGridHUD->GetSelectionBox();
 
-        if( selectionBox.space )
+        if( selectionBox.rect.Area() )
         {
-            BLPoint spaceDif = selectionBox.space->GetInverseWorldMatrix().mapVector( iPointInTexture.deltaPosition.X
-                                                                                    , iPointInTexture.deltaPosition.Y );
+            BLPoint spaceDif = selectionBox.inverseWorldMatrix.mapVector( iPointInTexture.deltaPosition.X
+                                                                        , iPointInTexture.deltaPosition.Y );
 
             for( int i = 0; i < mGridNodeArray.size(); i++ )
             {
                 mGridNodeArray[i]->Set( mGridNodeArray[i]->GetX() + spaceDif.x, mGridNodeArray[i]->GetY() + spaceDif.y );
             }
 
-            mGridHUD.Deform();
+            mGridHUD->Deform();
 
-            // refresh vector scene and GUI widgets via delegates.
+            // update invalidated objects
             iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES | FOdysseyVectorObject::KEEPINVALIDATED );
         }
     }
+
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
 
 bool
@@ -129,12 +135,11 @@ UOdysseyPainterEditorVectorGridTool::OnMouseUpVector( FOdysseyVectorEngine* iEng
 {
     if( mMultipleSelectionMode == true )
     {
-        mGridNodeArray.clear();
-
-        mGridHUD.EndSelectionRectangle( mGridNodeArray );
+        mGridHUD->EndSelectionRectangle( FSlateApplication::Get().GetModifierKeys().IsControlDown() ? false : true );
     }
 
-    iScene->Update( 0 ); // refresh vector scene and GUI widgets via delegates.
+    iScene->Update( 0 );
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 
     mMultipleSelectionMode = false;
 
@@ -152,7 +157,9 @@ UOdysseyPainterEditorVectorGridTool::PropertyChangedVector( FOdysseyVectorEngine
                                                           , FOdysseyVectorScene* iScene
                                                           , const FName& iPropertyName )
 {
-    mGridHUD.MakeGrid( iScene, DivisionsX, DivisionsY );
+    mGridHUD->MakeGrid( iScene, DivisionsX, DivisionsY );
+
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
 
 #undef LOCTEXT_NAMESPACE

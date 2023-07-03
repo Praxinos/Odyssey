@@ -23,12 +23,20 @@ UOdysseyPainterEditorVectorPathWidthTool::UOdysseyPainterEditorVectorPathWidthTo
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
 void
-UOdysseyPainterEditorVectorPathWidthTool::ActivateVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorPathWidthTool::UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+{
+    iEngine->RemoveHUD( &mPickingHUD );
+
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+}
+
+void
+UOdysseyPainterEditorVectorPathWidthTool::LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
     iEngine->ClearHUD();
-    iEngine->AddHUD(&mPickingHUD);
+    iEngine->AddHUD( &mPickingHUD );
 
-    iScene->Update( 0 ); // update vector scene and GUI widgets via delegates.
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
 
 bool
@@ -37,7 +45,7 @@ UOdysseyPainterEditorVectorPathWidthTool::OnMouseDownVector( FOdysseyVectorEngin
                                                            , const FOdysseyPoint& iPointInTexture
                                                            , const FKey& iKey)
 {
-    iScene->Update( 0 ); // update vector scene and GUI widgets via delegates.
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 
     return true;
 }
@@ -49,7 +57,7 @@ UOdysseyPainterEditorVectorPathWidthTool::OnMouseHoverVector( FOdysseyVectorEngi
 {
     mPickingHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
 
-    iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES ); // update vector scene and GUI widgets via delegates.
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
 
 void
@@ -65,6 +73,7 @@ UOdysseyPainterEditorVectorPathWidthTool::OnMouseDragVector( FOdysseyVectorEngin
     segmentArray.reserve( 500 );
 
     iEngine->PickSegments( iScene
+                         , false
                          , iPointInTexture.x
                          , iPointInTexture.y
                          , Radius
@@ -94,6 +103,7 @@ UOdysseyPainterEditorVectorPathWidthTool::OnMouseDragVector( FOdysseyVectorEngin
 
     // update vector scene and GUI widgets via delegates.
     iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES | FOdysseyVectorObject::KEEPINVALIDATED );
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
 
 bool
@@ -103,6 +113,7 @@ UOdysseyPainterEditorVectorPathWidthTool::OnMouseUpVector( FOdysseyVectorEngine*
                                                          , const FKey& iKey )
 {
     iScene->Update( 0 ); // update vector scene and GUI widgets via delegates.
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW | FOdysseyVectorScene::SIGNAL_OBJECT_MODIFIED );
 
     return false;
 }

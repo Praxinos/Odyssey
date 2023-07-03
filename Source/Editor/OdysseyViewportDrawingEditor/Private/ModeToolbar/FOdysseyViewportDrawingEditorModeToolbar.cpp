@@ -44,6 +44,10 @@ FOdysseyViewportDrawingEditorModeToolbar::~FOdysseyViewportDrawingEditorModeTool
     if (tab.IsValid())
         tab->RequestCloseTab();
 
+    tab = mLevelEditorTabManager->FindExistingLiveTab(FTabId(mGUI->GetColorPaletteTab()->ID()));
+    if (tab.IsValid())
+        tab->RequestCloseTab();
+
     tab = mLevelEditorTabManager->FindExistingLiveTab(FTabId(mGUI->GetMeshSelectorTab()->ID()));
     if (tab.IsValid())
         tab->RequestCloseTab();
@@ -107,6 +111,12 @@ void FOdysseyViewportDrawingEditorModeToolbar::SaveOpenedTabs()
     if( mLevelEditorTabManager->FindExistingLiveTab(mGUI->GetColorWheelTab()->ID() ) )
     {
         str = mGUI->GetColorWheelTab()->ID().ToString();
+        buffer << str;
+    }
+
+    if (mLevelEditorTabManager->FindExistingLiveTab(mGUI->GetColorPaletteTab()->ID()))
+    {
+        str = mGUI->GetColorPaletteTab()->ID().ToString();
         buffer << str;
     }
 
@@ -228,6 +238,14 @@ void FOdysseyViewportDrawingEditorModeToolbar::OpenColorWheelTab()
         return;
 
     mLevelEditorTabManager->TryInvokeTab(FTabId(mGUI->GetColorWheelTab()->ID()));
+}
+
+void FOdysseyViewportDrawingEditorModeToolbar::OpenColorPaletteTab()
+{
+    if (!mLevelEditorTabManager)
+        return;
+
+    mLevelEditorTabManager->TryInvokeTab(FTabId(mGUI->GetColorPaletteTab()->ID()));
 }
 
 void FOdysseyViewportDrawingEditorModeToolbar::OpenMeshSelectorTab()

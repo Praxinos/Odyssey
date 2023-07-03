@@ -38,6 +38,8 @@ FOdysseyVectorCycle::Merge( FOdysseyVectorCycle* iMergeCycle )
     }
 
     mCombinedPath.addPath( iMergeCycle->mContourPath );
+
+    //for( int i = 0; i < iMergeCycle->mSectionArray.size(); i++ )
 }
 
 FOdysseyVectorCycle*
@@ -276,18 +278,48 @@ FOdysseyVectorCycle::StrokePath( bool iWorld )
 
     if( iWorld == true )
     {
-        BLPath worldPath = mCombinedPath;
-
-        worldPath.transform( mParent.GetWorldMatrix() );
+        BLMatrix2D worldMatrix = mParent.GetWorldMatrix();
 
         blctx->save();
-        blctx->resetMatrix();
-        blctx->strokePath( worldPath );
+
+        if( iWorld )
+        {
+            blctx->resetMatrix();
+        }
+
+        for( int i = 0; i < mSectionArray.size(); i++ )
+        {
+            ::ULIS::FVec2D* bezier = mSectionArray[i]->GetBezier();
+
+            // During the merge, we merged all sections belonging to children cycles. However, some sections  may not be
+            // boundary sections. For instance, the below section noted as ====== is not a boundary section. so we have
+            // to filter to get sure we draw only boundary sections for a better visual result. Only sections linked to
+            // the cycles are drawn. See FOdysseyVectorCycle::Merge() and FOdysseyVectorSection::AddCycle() for details.
+            //   ___________________
+            //  |    ___________    |
+            //  |   |           |   |
+            //  |   |===========|   |
+            //  |   |___________|   |
+            //  |___________________|
+            //
+            // note: we use mCombinedPath only for the filling part.
+            //
+            if( mSectionArray[i]->HasCycle( this ) )
+            {
+                BLPoint pt[4] = { iWorld ? worldMatrix.mapPoint( bezier[0].x, bezier[0].y ) : BLPoint( bezier[0].x, bezier[0].y )
+                                , iWorld ? worldMatrix.mapPoint( bezier[1].x, bezier[1].y ) : BLPoint( bezier[1].x, bezier[1].y )
+                                , iWorld ? worldMatrix.mapPoint( bezier[2].x, bezier[2].y ) : BLPoint( bezier[2].x, bezier[2].y )
+                                , iWorld ? worldMatrix.mapPoint( bezier[3].x, bezier[3].y ) : BLPoint( bezier[3].x, bezier[3].y ) };
+                BLPath sectionPath;
+
+                sectionPath.moveTo ( pt[0] );
+                sectionPath.cubicTo( pt[1], pt[2], pt[3] );
+
+                blctx->strokePath( sectionPath );
+            }
+        }
+
         blctx->restore();
-    }
-    else
-    {
-        blctx->strokePath( mCombinedPath );
     }
 
     blctx->flush( BL_CONTEXT_FLUSH_SYNC );
@@ -313,42 +345,42 @@ ShowCycle( std::vector<FOdysseyVectorVertex*>& vertexArray
 }
 
 void
-FOdysseyVectorCycle::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
+FOdysseyVectorCycle::Draw( uint64 iFlags )
 {
     BLContext* blctx = mParent.GetScene()->GetEngine()->GetBLContext();
     FOdysseyVectorBucket* bucket = mBucket ? mBucket : mPropagatedBucket;
     BLMatrix2D& worldMatrix = mParent.GetWorldMatrix();
-    BLBox bbox;
+    ::ULIS::FRectD bbox = mParent.GetBBox( false );
 
-    mContourPath.getBoundingBox( &bbox );
+    //BLBox bbox;
+    //mContourPath.getBoundingBox( &bbox );
+
+    
 
     if( bucket )
     {
         if( bucket->IsGradient() )
         {
-            double linearMinX = bbox.x0;
-            double linearMinY = bbox.y0;
-            double linearMaxX = bbox.x1;
-            double linearMaxY = bbox.y1;
+            double linearMinX = /*bbox.x0*/bbox.x;
+            double linearMinY = /*bbox.y0*/bbox.y;
+            double linearMaxX = /*bbox.x1*/bbox.x + bbox.w;
+            double linearMaxY = /*bbox.y1*/bbox.y + bbox.h;
             BLGradient linear( BLLinearGradientValues( linearMinX, linearMinY, linearMaxX, linearMaxY ) );
             FColor& gradientColor0 = bucket->GetGradientColor0();
             FColor& gradientColor1 = bucket->GetGradientColor1();
             BLRgba32 BLColor0;
             BLRgba32 BLColor1;
-            double angle = bucket->GetGradientRotationInDegrees() * M_PI / 180;
 
-            linear.rotate( angle );
+            linear.rotate( bucket->GetRotation() );
 
-            // Note: Blend2D color format is 0xAARRGGBB
-            BLColor0.setR( gradientColor0.B );
+            BLColor0.setR( gradientColor0.R );
             BLColor0.setG( gradientColor0.G );
-            BLColor0.setB( gradientColor0.R );
+            BLColor0.setB( gradientColor0.B );
             BLColor0.setA( gradientColor0.A );
 
-            // Note: Blend2D color format is 0xAARRGGBB
-            BLColor1.setR( gradientColor1.B );
+            BLColor1.setR( gradientColor1.R );
             BLColor1.setG( gradientColor1.G );
-            BLColor1.setB( gradientColor1.R );
+            BLColor1.setB( gradientColor1.B );
             BLColor1.setA( gradientColor1.A );
 
             linear.addStop( 0.0, BLColor0 );
@@ -363,10 +395,22 @@ FOdysseyVectorCycle::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
             BLRgba32 BLColor;
 
             // Note: Blend2D color format is 0xAARRGGBB
-            BLColor.setR( color.B );
-            BLColor.setG( color.G );
-            BLColor.setB( color.R );
-            BLColor.setA( color.A );
+            if (mParent.mObjectParam.Entry)
+            {
+                FColor colorParent = Cast< UOdysseyPaletteEntryColor >(mParent.mObjectParam.Entry)->GetUsedColor();
+                BLColor.setR(colorParent.B);
+                BLColor.setG(colorParent.G);
+                BLColor.setB(colorParent.R);
+                BLColor.setA(colorParent.A);
+            }
+            else
+            {
+                BLColor.setR(color.B);
+                BLColor.setG(color.G);
+                BLColor.setB(color.R);
+                BLColor.setA(color.A);
+            }
+
 
             blctx->setStrokeStyle( BLColor );
             blctx->setFillStyle( BLColor );

@@ -90,6 +90,9 @@ class FOdysseyVectorSection
         void AddCycle( FOdysseyVectorCycle* iCycle );
         FOdysseyVectorCycle* GetOtherCycle( FOdysseyVectorCycle* iCycle );
         ::ULIS::FVec2D* GetBezier();
+        uint32 GetFlags();
+        uint32 GetCycleCount();
+        bool HasCycle( FOdysseyVectorCycle* iCycle );
 
     protected:
         FOdysseyVectorSegment* mSegment;

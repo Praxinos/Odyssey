@@ -37,7 +37,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
          * @param iVertex1
          * @return a pointer to the newly created segment
          */
-        FOdysseyVectorSegmentCubic ( FOdysseyVectorPathCubic* iPath
+        FOdysseyVectorSegmentCubic ( FOdysseyVectorPath* iPath
                                    , FOdysseyVectorVertex* iVertex0
                                    , FOdysseyVectorVertex* iVertex1 );
 
@@ -52,7 +52,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
          * @param iVertex1
          * @return a pointer to the newly created segment
          */
-        FOdysseyVectorSegmentCubic( FOdysseyVectorPathCubic* iPath
+        FOdysseyVectorSegmentCubic( FOdysseyVectorPath* iPath
                                   , FOdysseyVectorVertex* iVertex0
                                   , double iCtrlPoint0x
                                   , double iCtrlPoint0y
@@ -64,17 +64,14 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
 
        /**
          * @brief Init a cubic segment.
-         * @param iPath the path this segment belongs to
          * @param iVertex0
          * @param iVertex1
          */
-        void Init( FOdysseyVectorPathCubic* iPath
-                 , FOdysseyVectorVertex* iVertex0
+        void Init( FOdysseyVectorVertex* iVertex0
                  , FOdysseyVectorVertex* iVertex1 );
 
        /**
          * @brief Init a cubic segment.
-         * @param iPath the path this segment belongs to
          * @param iVertex0
          * @param iCtrlPoint0x
          * @param iCtrlPoint0y
@@ -82,8 +79,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
          * @param iCtrlPoint1y
          * @param iVertex1
          */
-        void Init( FOdysseyVectorPathCubic* iPath
-                 , FOdysseyVectorVertex* iVertex0
+        void Init( FOdysseyVectorVertex* iVertex0
                  , double iCtrlPoint0x
                  , double iCtrlPoint0y
                  , double iCtrlPoint1x
@@ -94,9 +90,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
          * @brief Draw the cubic segment
          * @param iRoi the region-of-interest
          */
-        virtual void Draw( ::ULIS::FRectD &iRoi ) override;
+        virtual void Draw() override;
 
-        virtual void DrawStructure( FOdysseyVectorObject* iParentObject, ::ULIS::FRectD &iRoi, bool iWorld ) override;
+        virtual void DrawStructure( FOdysseyVectorObject* iParentObject, bool iWorld ) override;
 
        /**
          * @brief Get the segment's bounding box.
@@ -109,7 +105,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
          */
         virtual void Update() override;
 
-        ::ULIS::FVec2D GetHandleVector( uint32 iHandleID, bool iNormalize );
+        virtual ::ULIS::FVec2D GetHandleVector( uint32 iHandleID, bool iNormalize ) override;
+        virtual ::ULIS::FVec2D GetHandleVector( FOdysseyVectorVertex* iVertex, bool iNormalize ) override;
 
         void UpdateBoundingBox();
 
@@ -200,7 +197,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
          * @param t between 0.0 and 1.0.
          * @return vector at t.
          */
-        virtual ::ULIS::FVec2D GetTangentAt( double t ) override;
+        virtual ::ULIS::FVec2D GetTangentAt( double t, bool iNormalize ) override;
 
        /**
          * @brief Cut the segment with a straight line segment passed as parameter.
@@ -212,8 +209,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
          * @param oNewSegmentArray
          * @return true if there was a cut, false otherwise.
          */
-        bool Cut( ::ULIS::FVec2D& linePoint0
-                , ::ULIS::FVec2D& linePoint1
+        bool Cut( const ::ULIS::FVec2D& linePoint0
+                , const ::ULIS::FVec2D& linePoint1
                 , std::vector<FOdysseyVectorVertex*>& oNewVertexArray
                 , std::vector<FOdysseyVectorSegment*>& oNewSegmentArray );
 
@@ -240,6 +237,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
                                   , const ::ULIS::FVec2D& iNormalizedTangentFrom
                                   , const ::ULIS::FVec2D& iNormalizedTangentTo
                                   , int32   iMaxRecurseDepth );
+        void MakeBLPath();
 
     protected:
         FOdysseyVectorHandleSegment mCtrlPoint[2];

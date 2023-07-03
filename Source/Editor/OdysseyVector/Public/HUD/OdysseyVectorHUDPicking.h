@@ -16,7 +16,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUDPicking : public FOdysseyVectorHUD
         virtual ~FOdysseyVectorHUDPicking();
         FOdysseyVectorHUDPicking();
 
-        void Draw( FOdysseyVectorScene* iScene, ::ULIS::FRectD& iRoi, uint64 iFlags );
+        virtual void Draw( FOdysseyVectorScene* iScene, uint64 iFlags ) override;
+        virtual void Reset( FOdysseyVectorScene* iScene ) override;
+
         void SetRadius( double iRadius );
         void SetPosition( double iX, double iY );
 };

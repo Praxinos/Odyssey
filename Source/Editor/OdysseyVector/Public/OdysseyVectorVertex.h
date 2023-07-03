@@ -5,7 +5,6 @@
 #include <Image/Block.h>
 
 #include "OdysseyVectorPoint.h"
-#include "OdysseyVectorHandlePoint.h"
 
 class FOdysseyVectorSegment;
 class FOdysseyVectorSection;
@@ -46,11 +45,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
          */
         FOdysseyVectorVertex ( FOdysseyVectorPath* iPath, double iX, double iY, double iRadius );
         ~FOdysseyVectorVertex();
-
-        /**
-         * @brief Get a pointer to the handle (used to set the vertex's radius).
-         */
-        FOdysseyVectorHandlePoint* GetHandle();
 
         /**
          * @brief Add a segment to the list of segments connected to this vertex
@@ -230,6 +224,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
          */
         bool IsVisited();
 
+        void SetSelected( bool iSelected );
+        bool IsSelected();
+
         double GetNearestSegmentT();
         double GetDistanceToNearestSegment();
         FOdysseyVectorSegment* GetNearestSegment();
@@ -240,9 +237,13 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
         FOdysseyVectorVertex* GetNearestVertex();
         virtual FOdysseyVectorSection* GetCycleNextSection( FOdysseyVectorSection* iLastSection, double iOrientation );
         virtual void BuildExplorationPairs( std::vector<FExplorationPair>& iExplorationPairsArray );
+        ::ULIS::FVec2D GetAverageVectorOnSegment( bool iNormalize );
+        ::ULIS::FVec2D GetAverageVectorOnSegmentHandle( bool iNormalize );
+        ::ULIS::FVec2D GetAverageStraightVectorOnSegment( bool iNormalize );
+        static void ArrayToSegmentArray( std::vector<FOdysseyVectorVertex*>& iVertexArray
+                                       , std::vector<FOdysseyVectorSegment*>& oSegmentArray );
 
     protected:
-        FOdysseyVectorHandlePoint* mCtrlPoint;
         std::list<FOdysseyVectorSegment*> mSegmentList;
         std::list<FOdysseyVectorSection*> mSectionList;
         FOdysseyVectorPath* mPath;
@@ -254,5 +255,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
         FOdysseyVectorVertex* mNearestVertex;
 
     private :
-        static const uint32 VISITED = (1 << 2);
+        static const uint32 VISITED  = ( 1 << 2 );
+        static const uint32 SELECTED = ( 1 << 3 );
 };

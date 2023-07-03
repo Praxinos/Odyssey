@@ -37,7 +37,9 @@ FOdysseyTextureEditorCommands::RegisterCommands()
     UI_CMD( SendBackward, HelpShortcuts, "SendBackward", "SendBackward",                                                                         EUserInterfaceActionType::Button, FInputChord() );
     UI_CMD( BringForward, HelpShortcuts, "BringForward", "BringForward",                                                                         EUserInterfaceActionType::Button, FInputChord() );
     UI_CMD( ConvertToPath, HelpShortcuts, "ConvertToPath", "ConvertToPath",                                                                      EUserInterfaceActionType::Button, FInputChord() );
-    UI_CMD( RemoveSelectedObjects, HelpShortcuts, "RemoveSelectedObjects", "RemoveSelectedObjects",                                              EUserInterfaceActionType::Button, FInputChord() );
+    UI_CMD( DeleteSelection, HelpShortcuts, "DeleteSelection", "DeleteSelection",                                              EUserInterfaceActionType::Button, FInputChord() );
+    UI_CMD( FlipHorizontal, HelpShortcuts, "FlipHorizontal", "FlipHorizontal",                                                                   EUserInterfaceActionType::Button, FInputChord() );
+    UI_CMD( FlipVertical, HelpShortcuts, "FlipVertical", "FlipVertical",                                                                         EUserInterfaceActionType::Button, FInputChord() );
 
 // LayerStack Shortcuts Category
     UI_CMD( CreateNewLayer, LayerStackShortcuts, "Create New Layer", "Create new image layer",                                                                                                      EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::N));

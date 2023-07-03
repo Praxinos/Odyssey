@@ -188,6 +188,13 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "OdysseyBrush.EditBrush16", new IMAGE_BRUSH( "Brush/edit_brush_16", mIcon16x16 ) );
     Set( "OdysseyBrush.EditBrush64", new IMAGE_BRUSH( "Brush/edit_brush_64", mIcon64x64 ) );
 
+    // OdysseyPalette
+    Set("ClassThumbnail.OdysseyPalette", new IMAGE_BRUSH("OdysseyPalette/OdysseyPaletteDefaultThumbnail_64", mIcon64x64));
+    Set("OdysseyPalette.EntryColor", new IMAGE_BRUSH("OdysseyPalette/OdysseyPaletteEntryColor_16", mIcon16x16));
+    Set("OdysseyPalette.EntryMaterial", new IMAGE_BRUSH("OdysseyPalette/OdysseyPaletteEntryMaterial_16", mIcon16x16));
+    Set("OdysseyPalette.PaletteTab", new IMAGE_BRUSH("OdysseyPalette/OdysseyPaletteTab_16", mIcon16x16));
+
+
     // OdysseyWidgets - AdvancedColorWheel
     FVector2D AdvancedColorWheelSize( 1024, 1024 );
     Set( "AdvancedColorWheel.WheelBG", new IMAGE_BRUSH( "Color/AdvancedColorWheel/WheelBG", AdvancedColorWheelSize ) );
@@ -373,6 +380,9 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "PainterEditor.ToolsTab.ObjectMoveTool64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/object_move_tool_64", mIcon64x64 ) );
     Set( "PainterEditor.ToolsTab.ObjectRotateTool64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/object_rotate_tool_64", mIcon64x64 ) );
     Set( "PainterEditor.ToolsTab.ObjectScaleTool64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/object_scale_tool_64", mIcon64x64 ) );
+    Set( "PainterEditor.ToolsTab.TransformTool64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/transform_tool_64", mIcon64x64 ) );
+    Set( "PainterEditor.ToolsTab.TransformTool32", new IMAGE_BRUSH( "PainterEditor/ToolsTab/transform_tool_32", mIcon32x32 ) );
+    Set( "PainterEditor.ToolsTab.TransformTool16", new IMAGE_BRUSH( "PainterEditor/ToolsTab/transform_tool_16", mIcon16x16 ) );
     Set( "PainterEditor.ToolsTab.SceneScaleTool64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/scene_scale_tool_64", mIcon64x64 ) );
     Set( "PainterEditor.ToolsTab.ScenePanTool64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/scene_pan_tool_64", mIcon64x64 ) );
     Set( "PainterEditor.ToolsTab.SceneScaleTool64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/scene_scale_tool_64", mIcon64x64 ) );
@@ -436,6 +446,10 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     //OdysseyLayerStack
     Set( "OdysseyLayerStack.ImageLayer64", new IMAGE_BRUSH( "OdysseyLayerStack/image_layer_64", mIcon64x64 ) );
     Set( "OdysseyLayerStack.ImageLayer16", new IMAGE_BRUSH( "OdysseyLayerStack/image_layer_16", mIcon16x16 ) );
+    Set( "OdysseyLayerStack.LayerBitmap64", new IMAGE_BRUSH( "OdysseyLayerStack/layer_bitmap_64", mIcon64x64 ) );
+    Set( "OdysseyLayerStack.LayerBitmap16", new IMAGE_BRUSH( "OdysseyLayerStack/layer_bitmap_16", mIcon16x16 ) );
+    Set( "OdysseyLayerStack.LayerVector64", new IMAGE_BRUSH( "OdysseyLayerStack/layer_vector_64", mIcon64x64 ) );
+    Set( "OdysseyLayerStack.LayerVector16", new IMAGE_BRUSH( "OdysseyLayerStack/layer_vector_16", mIcon16x16 ) );
     Set( "OdysseyLayerStack.NotVisible64", new IMAGE_BRUSH( "OdysseyLayerStack/not_visible_64", mIcon64x64 ) );
     Set( "OdysseyLayerStack.NotVisible16", new IMAGE_BRUSH( "OdysseyLayerStack/not_visible_16", mIcon16x16 ) );
     Set( "OdysseyLayerStack.Visible64", new IMAGE_BRUSH( "OdysseyLayerStack/visible_64", mIcon64x64 ) );

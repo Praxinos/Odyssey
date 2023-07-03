@@ -6,7 +6,7 @@
 #include "CoreMinimal.h"
 #include "Tools/DefaultTool/OdysseyPainterEditorDefaultTool.h"
 #include "OdysseyVector.h"
-#include "Undo/OdysseyVectorUndoKnot.h"
+#include "Undo/OdysseyVectorUndoPathKnot.h"
 
 #include "OdysseyPainterEditorVectorPathKnotTool.generated.h"
 
@@ -23,8 +23,8 @@ public:
     //Constructor
     UOdysseyPainterEditorVectorPathKnotTool();
 
-    void ActivateVector( FOdysseyVectorEngine* iEngine
-                       , FOdysseyVectorScene* iScene );
+    void UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    void LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
     bool OnMouseDownVector( FOdysseyVectorEngine* iEngine
                           , FOdysseyVectorScene* iScene
                           , const FOdysseyPoint& iPointInTexture
@@ -50,6 +50,6 @@ private:
         FOdysseyVectorHUDPicking mPickingHUD;
 
 public:
-    UPROPERTY(EditAnywhere, Category="Odyssey PathKnot Tool")
+    UPROPERTY(EditAnywhere, Category="Odyssey PathKnot Tool", meta = (ClampMin = "0.0", UIMin = "0.0") )
     double Radius;
 };

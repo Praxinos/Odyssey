@@ -2,17 +2,13 @@
 
 FOdysseyVectorScene::~FOdysseyVectorScene()
 {
-
+    mSelectedObjectList.clear();
 }
 
-FOdysseyVectorScene::FOdysseyVectorScene()
+FOdysseyVectorScene::FOdysseyVectorScene( const FString& iName )
+    : FOdysseyVectorGroup( iName )
 {
     mFillBucket.SetColor( 0, 0, 0, 0 );
-}
-
-void FOdysseyVectorScene::Init( std::string iName )
-{
-    SetName( iName );
 }
 
 void
@@ -27,10 +23,12 @@ FOdysseyVectorScene::GetEngine()
     return mEngine;
 }
 
-FOdysseyVectorScene::FUpdateDelegate&
-FOdysseyVectorScene::OnUpdateDelegate()
+FOdysseyVectorScene::FSignalDelegate&
+FOdysseyVectorScene::OnSignalDelegate()
 {
-    return mOnUpdateDelegate;
+    static FSignalDelegate onSignalDelegate;
+
+    return onSignalDelegate;
 }
 
 void
@@ -68,9 +66,7 @@ FOdysseyVectorScene::Select( FOdysseyVectorObject* iVecObj )
 FOdysseyVectorObject*
 FOdysseyVectorScene::CopyShape()
 {
-    FOdysseyVectorScene* rootCopy = new FOdysseyVectorScene();
-
-    rootCopy->Init( Name );
+    FOdysseyVectorScene* rootCopy = new FOdysseyVectorScene( mObjectParam.Name );
 
     return static_cast<FOdysseyVectorObject*>(rootCopy);
 }
@@ -144,6 +140,98 @@ FOdysseyVectorScene::MakePaintGroupFromSelectedObjects( std::vector<FOdysseyVect
     return nullptr;
 }
 
+::ULIS::FVec2D
+FOdysseyVectorScene::GetWorldPositionFromSelection()
+{
+    BLPoint averagePosition = BLPoint( 0.0f, 0.0f );
+
+    if ( mSelectedObjectList.size() )
+    {
+        for( std::list<FOdysseyVectorObject*>::iterator it = mSelectedObjectList.begin(); it != mSelectedObjectList.end(); ++it )
+        {
+            FOdysseyVectorObject *obj = (*it);
+            ::ULIS::FRectD bbox = obj->GetBBox( true );
+            BLPoint middle = BLPoint( bbox.x + bbox.w * 0.5f
+                                    , bbox.y + bbox.h * 0.5f );
+
+            averagePosition.x += middle.x;
+            averagePosition.y += middle.y;
+        }
+
+        averagePosition.x /= mSelectedObjectList.size();
+        averagePosition.y /= mSelectedObjectList.size();
+    }
+
+    return ::ULIS::FVec2D( averagePosition.x, averagePosition.y );
+}
+
+void
+FOdysseyVectorScene::FlipSelectionHorizontal( bool iWorld )
+{
+    FlipSelection( iWorld, -1.0f, 1.0f );
+}
+
+void
+FOdysseyVectorScene::FlipSelectionVertical( bool iWorld )
+{
+    FlipSelection( iWorld, 1.0f, -1.0f );
+}
+
+void
+FOdysseyVectorScene::FlipSelection( bool iWorld, double iXFactor, double iYFactor )
+{
+    ::ULIS::FVec2D axisPosition = GetWorldPositionFromSelection();
+    BLMatrix2D inverseAxisMatrix;
+    BLMatrix2D axisMatrix;
+    BLMatrix2D flippingMatrix;
+
+    axisMatrix.reset();
+    axisMatrix.translate( axisPosition.x, axisPosition.y );
+
+    BLMatrix2D::invert( inverseAxisMatrix, axisMatrix );
+
+    flippingMatrix.resetToScaling( iXFactor, iYFactor );
+
+    for( std::list<FOdysseyVectorObject*>::iterator it = mSelectedObjectList.begin(); it != mSelectedObjectList.end(); ++it )
+    {
+        FOdysseyVectorObject *object = (*it);
+
+        if( object->HasSelectedAncestor() == false )
+        {
+            BLMatrix2D& objectWorldMatrix = object->GetWorldMatrix();
+            BLPoint objectWorldCenter = objectWorldMatrix.mapPoint( 0.0f, 0.0f );
+            BLPoint objectLocalCenter = inverseAxisMatrix.mapPoint( objectWorldCenter ); 
+            BLPoint objectLocalFlippedCenter = flippingMatrix.mapPoint( objectLocalCenter );
+            BLPoint objectWorldFlippedCenter = axisMatrix.mapPoint( objectLocalFlippedCenter );
+
+            objectLocalCenter = object->GetParent()->GetInverseWorldMatrix().mapPoint( objectWorldFlippedCenter );
+
+            object->Translate( objectLocalCenter.x, objectLocalCenter.y );
+            object->Scale( iXFactor * object->GetScalingX(), iYFactor * object->GetScalingY() );
+            object->Rotate( -object->GetRotation() );
+
+            object->UpdateMatrix();
+        }
+    }
+            
+/*
+            BLMatrix2D objectAxisMatrix;
+            BLMatrix2D finalLocalMatrix;
+            BLMatrix2D finalWorldMatrix;
+
+            FOdysseyVector::MatrixMultiply( inverseAxisMatrix, objectWorldMatrix, objectAxisMatrix );
+            FOdysseyVector::MatrixMultiply( iFlippingMatrix, objectAxisMatrix, finalLocalMatrix );
+            FOdysseyVector::MatrixMultiply( axisMatrix, finalLocalMatrix, finalWorldMatrix );
+
+            objectWorldMatrix = finalWorldMatrix;
+
+            object->Transfer( object->GetParent()->GetWorldMatrix() );
+            object->UpdateMatrix();
+        }
+    }
+*/
+}
+
 FOdysseyVectorGroup*
 FOdysseyVectorScene::GroupSelectedObjects( std::vector<FOdysseyVectorObject*>& oObjectArray
                                          , std::vector<FOdysseyVectorObject*>& oObjectOldParentArray )
@@ -169,7 +257,7 @@ FOdysseyVectorScene::GroupSelectedObjects( std::vector<FOdysseyVectorObject*>& o
 */
     if ( mSelectedObjectList.size() )
     {
-        FOdysseyVectorGroup* group = new FOdysseyVectorGroup();
+        FOdysseyVectorGroup* group = new FOdysseyVectorGroup( FString("Group") );
 
         AppendChild ( group );
 
@@ -205,29 +293,28 @@ FOdysseyVectorScene::GetSelectedObjectList()
 }
 
 void
-FOdysseyVectorScene::DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags )
+FOdysseyVectorScene::DrawShape( uint64 iFlags )
 {
     BLContext* blctx = GetEngine()->GetBLContext();
     static ::ULIS::FRectD zeroRectangle; // static variables are always zeroed by default
     BLRgba32 blFillColor;
     FColor& fillColor = mFillBucket.GetColor();
-    uint32 width, height;
-
-    GetEngine()->GetColorImageSize( &width, &height );
 
     blctx->setCompOp( BL_COMP_OP_SRC_COPY );
 
-    // Note: Blend2D color format is 0xAARRGGBB
-    blFillColor.setR( fillColor.B );
+//UE_LOG(LogTemp, Warning, TEXT("Some warning message:%d %d %d %d"), roi.x, roi.y, roi.w, roi.h );
+
+    blFillColor.setR( fillColor.R );
     blFillColor.setG( fillColor.G );
-    blFillColor.setB( fillColor.R );
+    blFillColor.setB( fillColor.B );
     blFillColor.setA( fillColor.A );
 
     blctx->setFillStyle( blFillColor );
 
     blctx->save();
     blctx->resetMatrix();
-    blctx->fillRect( 0, 0, width, height );
+    //blctx->clearAll();
+    blctx->fillAll();
     blctx->restore();
 
     // view the updated zone ( testing purpose only )
@@ -245,8 +332,12 @@ void
 FOdysseyVectorScene::Update( uint32 iUpdateFlags )
 {
     FOdysseyVectorObject::Update( iUpdateFlags );
+}
 
-    mOnUpdateDelegate.Broadcast( this, iUpdateFlags );
+void
+FOdysseyVectorScene::Signal( uint64 iSignalFlags )
+{
+    OnSignalDelegate().Broadcast( this, iSignalFlags );
 }
 
 FOdysseyVectorObject*

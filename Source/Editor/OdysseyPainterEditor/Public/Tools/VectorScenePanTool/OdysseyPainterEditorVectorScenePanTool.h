@@ -9,36 +9,47 @@
 
 #include "OdysseyPainterEditorVectorScenePanTool.generated.h"
 
+class FOdysseyPainterEditorVectorScenePanToolHUD;
+
 UCLASS()
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorScenePanTool : public UOdysseyPainterEditorDefaultTool
 {
-public:
-    GENERATED_BODY()
+    public:
+        GENERATED_BODY()
 
-public:
-    // Destructor
-    virtual ~UOdysseyPainterEditorVectorScenePanTool();
+    public:
+        static void OnMouseDragVectorStatic( FOdysseyVectorEngine* iEngine
+                                           , FOdysseyVectorScene* iScene
+                                           , const FOdysseyPoint& iPointInTexture );
 
-    //Constructor
-    UOdysseyPainterEditorVectorScenePanTool();
- 
-    void ActivateVector( FOdysseyVectorEngine* iEngine
-                       , FOdysseyVectorScene* iScene );
-    bool OnMouseDownVector( FOdysseyVectorEngine* iEngine
-                          , FOdysseyVectorScene* iScene
-                          , const FOdysseyPoint& iPointInTexture
-                          , const FKey& iKey );
-    void OnMouseHoverVector( FOdysseyVectorEngine* iEngine
-                           , FOdysseyVectorScene* iScene
-                           , const FOdysseyPoint& iPointInTexture );
-    void OnMouseDragVector( FOdysseyVectorEngine* iEngine
-                          , FOdysseyVectorScene* iScene
-                          , const FOdysseyPoint& iPointInTexture );
-    bool OnMouseUpVector( FOdysseyVectorEngine* iEngine
-                        , FOdysseyVectorScene* iScene
-                        , const FOdysseyPoint& iPointInTexture
-                        , const FKey& iKey );
+        // Destructor
+        virtual ~UOdysseyPainterEditorVectorScenePanTool();
 
-    //OdysseyPainterEditorTool overrides
-    virtual void Commit() override;
+        //Constructor
+        UOdysseyPainterEditorVectorScenePanTool();
+
+        void UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+        void LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+        bool OnMouseDownVector( FOdysseyVectorEngine* iEngine
+                              , FOdysseyVectorScene* iScene
+                              , const FOdysseyPoint& iPointInTexture
+                              , const FKey& iKey );
+        void OnMouseHoverVector( FOdysseyVectorEngine* iEngine
+                               , FOdysseyVectorScene* iScene
+                               , const FOdysseyPoint& iPointInTexture );
+        void OnMouseDragVector( FOdysseyVectorEngine* iEngine
+                              , FOdysseyVectorScene* iScene
+                              , const FOdysseyPoint& iPointInTexture );
+        bool OnMouseUpVector( FOdysseyVectorEngine* iEngine
+                            , FOdysseyVectorScene* iScene
+                            , const FOdysseyPoint& iPointInTexture
+                            , const FKey& iKey );
+
+        //OdysseyPainterEditorTool overrides
+        virtual void Commit() override;
+
+    private:
+        double mDownLocalMouseX;
+        double mDownLocalMouseY;
+        FOdysseyPainterEditorVectorScenePanToolHUD* mScenePanHUD;
 };

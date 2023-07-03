@@ -6,18 +6,39 @@
 #include "CoreMinimal.h"
 #include "Tools/DefaultTool/OdysseyPainterEditorDefaultTool.h"
 #include "OdysseyVector.h"
-#include "Undo/OdysseyVectorUndoSegmentReshape.h"
 
 #include "OdysseyPainterEditorVectorPathPushTool.generated.h"
+
+class FOdysseyPainterEditorVectorPathPushToolHUD;
 
 typedef struct _FPushedPoint
 {
      FOdysseyVectorPoint* point;
      double ratio;
-     _FPushedPoint( FOdysseyVectorPoint* iPoint, double iRatio )
+     bool isSmooth;
+     ::ULIS::FVec2D perpendicularVector; // perpendicular vector
+
+     _FPushedPoint( FOdysseyVectorPoint* iPoint, double iRatio, bool iIsSmooth )
      {
          point = iPoint;
          ratio = ( iRatio > 1.0f ) ? 1.0f : iRatio;
+         isSmooth = iIsSmooth;
+
+         if( isSmooth )
+         {
+             if( iPoint->GetClass() == FOdysseyVectorVertex::StaticClass() )
+             {
+                 FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>(iPoint);
+                 FOdysseyVectorSegment* segment = vertex->GetFirstSegment();
+
+                 if( segment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
+                 {
+                     FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(segment);
+
+                     perpendicularVector = cubicSegment->GetHandleVector( vertex, true );
+                 }
+             }
+         }
      }
 } FPushedPoint;
 
@@ -33,9 +54,9 @@ public:
 
     //Constructor
     UOdysseyPainterEditorVectorPathPushTool();
- 
-    void ActivateVector( FOdysseyVectorEngine* iEngine
-                       , FOdysseyVectorScene* iScene );
+
+    void UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    void LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
     bool OnMouseDownVector( FOdysseyVectorEngine* iEngine
                           , FOdysseyVectorScene* iScene
                           , const FOdysseyPoint& iPointInTexture
@@ -58,18 +79,19 @@ protected:
     void PropertyChanged( const FName& iPropertyName );
 
 private:
-    // the "undo segment reshape" object is used in both the MouseDown and MouseUp events. We need to remember it.
-    FOdysseyVectorUndoSegmentReshape* mUndoSegmentReshape;
     bool HasVertex( FOdysseyVectorPoint* iPoint );
     std::vector<FPushedPoint> mPushedPointArray;
     std::vector<FOdysseyVectorSegment*> mSegmentArray;
-    FOdysseyVectorHUDPicking mPickingHUD;
+    //FOdysseyVectorHUDPicking mPickingHUD;
+    FOdysseyPainterEditorVectorPathPushToolHUD *mPathPushHUD;
 
 public:
-    UPROPERTY(EditAnywhere, Category="Odyssey PathPush Tool")
+    UPROPERTY(EditAnywhere, Category="Odyssey PathPush Tool", meta = (ClampMin = "0.0", UIMin = "0.0"))
     double Radius;
 
-    UPROPERTY(EditAnywhere,Category="Odyssey PathPush Tool")
+    UPROPERTY(EditAnywhere, Category="Odyssey PathPush Tool")
     bool PreserveSmoothness;
 
+    UPROPERTY(EditAnywhere, Category="Odyssey PathPush Tool")
+    bool RestrictToSelection;
 };

@@ -9,14 +9,6 @@
 #include "SOdysseyTabletAPISwitcher.h"
 #include "Models/OdysseyPainterEditorCommands.h"
 
-#include "OdysseyVector.h"
-#include "Undo/OdysseyVectorUndoGroup.h"
-#include "Undo/OdysseyVectorUndoUngroup.h"
-#include "Undo/OdysseyVectorUndoSendBackward.h"
-#include "Undo/OdysseyVectorUndoBringForward.h"
-#include "Undo/OdysseyVectorUndoObjectTransform.h"
-#include "Undo/OdysseyVectorUndoSceneRemoveSelection.h"
-
 #include "ToolMenus.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorGUI"
@@ -45,6 +37,7 @@ FOdysseyPainterEditorGUI::CreateTabs()
     FOdysseyEditorGUI::CreateTabs();
 
     ODYSSEY_ADD_TAB(mMeshSelectorTab, FOdysseyPainterEditorMeshSelectorTab, mEditor)
+    ODYSSEY_ADD_TAB(mColorPaletteTab, FOdysseyPainterEditorPaletteTab, mEditor)
     ODYSSEY_ADD_TAB(mViewportTab, FOdysseyPainterEditorViewportTab, mEditor);
     ODYSSEY_ADD_TAB(mHUDTab, FOdysseyPainterEditorHUDTab, mEditor);
     ODYSSEY_ADD_TAB(mBrushSelectorTab, FOdysseyPainterEditorBrushSelectorTab, mEditor);
@@ -54,6 +47,15 @@ FOdysseyPainterEditorGUI::CreateTabs()
     ODYSSEY_ADD_TAB(mSelectedVectorObjectTab, FOdysseyPainterEditorSelectedVectorObjectTab, mEditor);
     ODYSSEY_ADD_TAB(mTopTab, FOdysseyPainterEditorTopTab, mEditor);
     ODYSSEY_ADD_TAB(mToolOptionsTab, FOdysseyPainterEditorToolOptionsTab, mEditor);
+}
+
+void
+FOdysseyPainterEditorGUI::CreateContextMenus()
+{
+    FOdysseyEditorGUI::CreateContextMenus();
+
+	//ODYSSEY_ADD_CONTEXT_MENU(mObjectPickToolContextMenu, FOdysseyPainterEditorObjectPickToolContextMenu, mEditor);
+	//ODYSSEY_ADD_CONTEXT_MENU(mPaintBucketToolContextMenu, FOdysseyPainterEditorPaintBucketToolContextMenu, mEditor);
 }
 
 void
@@ -226,6 +228,14 @@ FOdysseyPainterEditorGUI::CreateRightSection()
             ->AddTab(mColorSlidersTab->ID(), ETabState::OpenedTab)
             ->SetHideTabWell(false)
             ->SetSizeCoefficient(0.3f)
+        )
+        // ColorPalette
+        ->Split
+        (
+            FTabManager::NewStack()
+            ->AddTab(mColorPaletteTab->ID(), ETabState::OpenedTab)
+            ->SetHideTabWell(true)
+            ->SetSizeCoefficient(0.3f)
         );
 }
 
@@ -324,6 +334,12 @@ FOdysseyPainterEditorGUI::GetMeshSelectorTab()
     return mMeshSelectorTab;
 }
 
+TSharedPtr<FOdysseyPainterEditorPaletteTab>& 
+FOdysseyPainterEditorGUI::GetColorPaletteTab()
+{
+    return mColorPaletteTab;
+}
+
 TSharedPtr<FOdysseyPainterEditorColorWheelTab>&
 FOdysseyPainterEditorGUI::GetColorWheelTab()
 {
@@ -405,128 +421,81 @@ FOdysseyPainterEditorGUI::SwitchTabletAPI()
 }
 
 void
-FOdysseyPainterEditorGUI::BringForward( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, FOdysseyVectorUndo** iUndo )
+FOdysseyPainterEditorGUI::BringForward( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
-    FOdysseyVectorObject* selectedObject = iScene->GetLastSelected();
-
-    if( selectedObject )
-    {
-        if( iUndo )
-           (*iUndo) = new FOdysseyVectorUndoBringForward( iScene, selectedObject );
-
-        selectedObject->MoveFront();
-
-        iScene->Update( 0 );
-    }
+    mEditor->BringForward( iEngine, iScene );
 }
 
 void
-FOdysseyPainterEditorGUI::SendBackward( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, FOdysseyVectorUndo** iUndo )
+FOdysseyPainterEditorGUI::SendBackward( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
-    FOdysseyVectorObject* selectedObject = iScene->GetLastSelected();
-
-    if( selectedObject )
-    {
-        if( iUndo )
-           (*iUndo) = new FOdysseyVectorUndoSendBackward( iScene, selectedObject );
-
-        selectedObject->MoveBack();
-
-        iScene->Update( 0 );
-    }
-}
-
-
-void
-FOdysseyPainterEditorGUI::Ungroup( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, FOdysseyVectorUndo** iUndo )
-{
-    FOdysseyVectorObject* selectedObject = iScene->GetLastSelected();
-
-    if( selectedObject )
-    {
-        if( selectedObject->HasBaseClass( FOdysseyVectorGroup::StaticClass() ) )
-        {
-            FOdysseyVectorGroup* group = static_cast<FOdysseyVectorGroup*>( selectedObject );
-            // we work on a copy of the list to be able to delete children while iterating
-            std::list<FOdysseyVectorObject*> childrenList = group->GetChildrenList();
-
-            (*iUndo) = new FOdysseyVectorUndoUngroup( iScene, group );
-
-            for( std::list<FOdysseyVectorObject*>::iterator it = childrenList.begin(); it != childrenList.end(); ++it )
-            {
-                FOdysseyVectorObject* child = (*it);
-
-                group->GetParent()->TransferChild( child );
-            }
-
-            group->GetParent()->RemoveChild( group );
-
-            iScene->ClearSelection();
-            iScene->UpdateMatrix();
-            iScene->Update( 0 );
-        }
-    }
+    mEditor->SendBackward( iEngine, iScene );
 }
 
 void
-FOdysseyPainterEditorGUI::GroupPaint( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, FOdysseyVectorUndo** iUndo )
+FOdysseyPainterEditorGUI::Ungroup( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
-    std::vector<FOdysseyVectorObject*> cubicPathArray;
-    std::vector<FOdysseyVectorObject*> cubicPathOldParentArray;
-    std::vector<FOdysseyVectorObject*> removedPaintGroupArray;
-    FOdysseyVectorGroupPaint* paintGroup = iScene->MakePaintGroupFromSelectedObjects( cubicPathArray
-                                                                                    , cubicPathOldParentArray
-                                                                                    , removedPaintGroupArray );
-
-    if( paintGroup )
-    {
-        *iUndo = new FOdysseyVectorUndoGroup( iScene
-                                            , paintGroup
-                                            , cubicPathArray
-                                            , cubicPathOldParentArray
-                                            , removedPaintGroupArray );
-
-        iScene->ClearSelection();
-        iScene->Select( paintGroup );
-        iScene->Update( 0 );
-    }
+    mEditor->Ungroup( iEngine, iScene );
 }
 
 void
-FOdysseyPainterEditorGUI::Group( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, FOdysseyVectorUndo** iUndo )
+FOdysseyPainterEditorGUI::GroupPaint( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
-
-    std::vector<FOdysseyVectorObject*> objectArray;
-    std::vector<FOdysseyVectorObject*> objectOldParentArray;
-    FOdysseyVectorGroup* group = iScene->GroupSelectedObjects( objectArray, objectOldParentArray );
-
-    if( group )
-    {
-        *iUndo = new FOdysseyVectorUndoGroup( iScene, group, objectArray, objectOldParentArray );
-
-        iScene->ClearSelection();
-        iScene->Select( group );
-        iScene->Update( 0 );
-    }
+    mEditor->GroupPaint( iEngine, iScene );
 }
 
 void
-FOdysseyPainterEditorGUI::ResetView( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, FOdysseyVectorUndo** iUndo )
+FOdysseyPainterEditorGUI::Group( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
-    (*iUndo) = new FOdysseyVectorUndoObjectTransform( iScene, iScene );
-
-    iScene->ResetTransform();
-    iScene->UpdateMatrix();
-    iScene->Update( 0 );
+    mEditor->Group( iEngine, iScene );
 }
 
 void
-FOdysseyPainterEditorGUI::RemoveSelectedObjects( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, FOdysseyVectorUndo** iUndo )
+FOdysseyPainterEditorGUI::ResetView( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
-    (*iUndo) = new FOdysseyVectorUndoSceneRemoveSelection( iScene );
+    mEditor->ResetView( iEngine, iScene );
+}
 
-    iScene->RemoveSelectedObjects();
-    iScene->Update( 0 );
+void
+FOdysseyPainterEditorGUI::DeleteSelection( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+{
+    mEditor->DeleteSelection( iEngine, iScene );
+}
+
+void
+FOdysseyPainterEditorGUI::FlipHorizontal( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+{
+    mEditor->FlipHorizontal( iEngine, iScene );
+}
+
+void
+FOdysseyPainterEditorGUI::FlipVertical( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+{
+    mEditor->FlipVertical( iEngine, iScene );
+}
+
+void
+FOdysseyPainterEditorGUI::DeleteBucket( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+{
+    mEditor->DeleteBucket( iEngine, iScene );
+}
+
+void
+FOdysseyPainterEditorGUI::PropagateBucket( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+{
+    mEditor->PropagateBucket( iEngine, iScene );
+}
+
+void
+FOdysseyPainterEditorGUI::UnpropagateBucket( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+{
+    mEditor->UnpropagateBucket( iEngine, iScene );
+}
+
+void
+FOdysseyPainterEditorGUI::KnotVertices( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+{
+    mEditor->KnotVertices( iEngine, iScene );
 }
 
 #undef LOCTEXT_NAMESPACE

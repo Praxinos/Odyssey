@@ -85,6 +85,14 @@ FOdysseyVectorPoint::Set( double iX, double iY )
     SetY( iY );
 }
 
+void 
+FOdysseyVectorPoint::Set( double iX, double iY, double iRadius )
+{
+    SetX( iX );
+    SetY( iY );
+    SetRadius( iRadius );
+}
+
 double
 FOdysseyVectorPoint::GetRadius()
 {
@@ -109,3 +117,18 @@ FOdysseyVectorPoint::GetID()
     return mID;
 }
 
+//static
+void
+FOdysseyVectorPoint::ArrayToVertexArray( std::vector<FOdysseyVectorPoint*>& iPointArray
+                                       , std::vector<FOdysseyVectorVertex*>& oVertexArray )
+{
+    if( iPointArray.size() )
+    {
+        oVertexArray.reserve( iPointArray.size() );
+
+        for( int i = 0; i < iPointArray.size(); i++ )
+        {
+            oVertexArray.push_back( static_cast<FOdysseyVectorVertex*>(iPointArray[i]) );
+        }
+    }
+}

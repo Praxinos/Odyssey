@@ -21,13 +21,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroup : public FOdysseyVectorObject
 
         bool HasBaseClass( uint32 iBaseClassID );
 
-       /**
-         * @brief Static function to allocate a new group. Note: this is the proper way to allocate a new group as we don't
-         * use the constructor to set parameters because UOBJECTs must have empty constructors.
-         * @param iName object's name
-         */
-        static FOdysseyVectorGroup* New( std::string iName );
-
         /**
          * @brief destructor
          */
@@ -36,17 +29,17 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroup : public FOdysseyVectorObject
         /**
          * @brief constructor
          */
-        FOdysseyVectorGroup(){};
+        FOdysseyVectorGroup( const FString& iName );
 
         /**
          * @brief Init a group
          * @param iName
          */
-        void Init( std::string iName );
+        void Init( FString& iName );
 
     protected:
-        virtual void DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags ) override { };
-        virtual bool PickShape( ::ULIS::FRectD& iRoi, uint32 iSelectionFlags ) override;
+        virtual void DrawShape( uint64 iFlags ) override { };
+        virtual bool PickShape( const ::ULIS::FRectD& iRoi, uint32 iSelectionFlags ) override;
         virtual FOdysseyVectorObject* CopyShape() override;
         virtual void UpdateShape( uint32 iUpdateFlags ) override;
 };

@@ -26,7 +26,7 @@ struct FGroupPaintParam
     UPROPERTY(EditAnywhere, Category="General")
     bool Realtime; // relatime updates
 
-    UPROPERTY(EditAnywhere, Category="General")
+    UPROPERTY(EditAnywhere, Category="General", meta = (ClampMin = "0.0", UIMin = "0.0"))
     double Tolerance;
 
     UPROPERTY(EditAnywhere, Category="General")
@@ -56,7 +56,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         /**
          * @brief constructor
          */
-        FOdysseyVectorGroupPaint( std::string iName );
+        FOdysseyVectorGroupPaint( const FString& iName );
 
         /**
          * @brief function called after a child has its matrix updated.
@@ -75,9 +75,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
          * @param iRoi region of interest.
          * @param iFlags drawing flags.
          */
-        virtual void DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags ) override;
+        virtual void DrawShape( uint64 iFlags ) override;
 
-        virtual void Draw( ::ULIS::FRectD& iRoi, uint64 iFlags ) override;
+        virtual void Draw( uint64 iFlags ) override;
+        virtual void DrawChildren( uint64 iFlags ) override;
 
         /**
          * @brief Pick the shape.
@@ -87,7 +88,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
              PICK_MASK_BASED : picking is according to the mask image.
          * @return true if the shape is picked, false otherwise.
          */
-        virtual bool PickShape( ::ULIS::FRectD& iRoi, uint32 iSelectionFlags ) override;
+        virtual bool PickShape( const ::ULIS::FRectD& iRoi, uint32 iSelectionFlags ) override;
 
         /**
          * @brief Copy the shape to a new object.
@@ -106,21 +107,19 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         virtual uint32 GetType();
 
         FOdysseyVectorBucket* Bucket( double iX, double iY, uint8 iR, uint8 iG, uint8 iB, uint8 iA );
-        FOdysseyVectorBucket* PickBucket( double iX, double iY );
-        FOdysseyVectorCycle* PickCycle( double iX, double iY );
-        FOdysseyVectorHandleBucket* PickBucketHandle( double iX, double iY );
         std::list<FOdysseyVectorBucket*>& GetBucketList();
+        std::list<FOdysseyVectorCycle*>& GetCycleList();
         void AddBucket( FOdysseyVectorBucket* iBucket );
         void RemoveBucket( FOdysseyVectorBucket* iBucket );
         void Colorize();
-        void DrawBuckets( FBucketDrawingFlags iDrawingFlags );
-        virtual void Invalidate();
         void MergeCycles();
         double GetGapTolerance();
         void SetGapTolerance( double iGapTolerance );
         bool IsWireframe();
         void SetWireframe( bool iIsWireframe );
         void UpdateBBox();
+        void SelectBucket( FOdysseyVectorBucket* iSelectedBucket );
+        FOdysseyVectorBucket* GetSelectedBucket();
 
     protected:
         /**
@@ -193,11 +192,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         static const uint32 NOCYCLE  = 0;
         static const uint32 BLOCKED  = 1;
         static const uint32 HASCYCLE = 2;
+        FOdysseyVectorBucket* mSelectedBucket;
         std::list<FOdysseyVectorBucket*> mBucketList;
-        std::vector<FOdysseyVectorCycle*> mCycleArray;
+        std::list<FOdysseyVectorCycle*> mCycleList;
         std::vector<FOdysseyVectorIntersection*> mIntersectionArray;
-        // need to remember them in order to clean properly
-        std::vector<uint32> pathSectionCount;
         uint32 mPaintingCode;
 
         std::vector<FOdysseyVectorSection> mSectionBuffer;

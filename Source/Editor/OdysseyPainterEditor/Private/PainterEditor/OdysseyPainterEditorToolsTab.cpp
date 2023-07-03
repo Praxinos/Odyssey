@@ -34,24 +34,25 @@ FOdysseyPainterEditorToolsTab::CreateWidget()
 {
     TArray<UOdysseyPainterEditorTool*> tools = {
         mEditor->GetRasterDrawingTool(),
-        mEditor->GetVectorPrimitiveDrawingTool(),
         mEditor->GetVectorPathDrawingTool(),
         mEditor->GetVectorPathEditTool(),
         mEditor->GetVectorPathCutTool(),
-        mEditor->GetVectorObjectPickTool(),
-        mEditor->GetVectorObjectMoveTool(),
-        mEditor->GetVectorObjectRotateTool(),
-        mEditor->GetVectorObjectScaleTool(),
-        mEditor->GetVectorSceneScaleTool(),
+        mEditor->GetVectorPrimitiveDrawingTool(),
+        mEditor->GetVectorPickTool(),
+        mEditor->GetVectorTransformTool(),
+        //mEditor->GetVectorObjectMoveTool(),
+        //mEditor->GetVectorObjectRotateTool(),
+        //mEditor->GetVectorObjectScaleTool(),
+        //mEditor->GetVectorSceneScaleTool(),
         mEditor->GetVectorScenePanTool(),
         mEditor->GetVectorPathPushTool(),
         mEditor->GetVectorPathWidthTool(),
         mEditor->GetVectorPathSmoothTool(),
-        mEditor->GetVectorPathKnotTool(),
+        //mEditor->GetVectorPathKnotTool(),
         mEditor->GetVectorEraserTool(),
         mEditor->GetPaintBucketTool(),
         mEditor->GetColorPickerTool(),
-        mEditor->GetVectorGridTool(),
+        mEditor->GetVectorGridTool()
     };
 
     tools = tools.FilterByPredicate([](UOdysseyPainterEditorTool* iTool){return !!iTool;});

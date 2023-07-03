@@ -47,14 +47,16 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
          * @brief Draw the segment
          * @param iRoi the region-of-interest
          */
-        virtual void Draw( ::ULIS::FRectD &iRoi );
+        virtual void Draw();
 
-        virtual void DrawStructure( FOdysseyVectorObject* iParentObject, ::ULIS::FRectD &iRoi, bool iWorld ){};
+        virtual void DrawStructure( FOdysseyVectorObject* iParentObject, bool iWorld ){};
 
         uint32 GetIntersectionVertexCount();
 
         void GetIntersectionVertices( std::vector<FOdysseyVectorVertex*>& oVertexArray );
         void GetAllVertices( std::vector<FOdysseyVectorVertex*>& oVertexArray );
+        virtual ::ULIS::FVec2D GetHandleVector( uint32 iHandleID, bool iNormalize );
+        virtual ::ULIS::FVec2D GetHandleVector( FOdysseyVectorVertex* iVertex, bool iNormalize );
 
        /**
          * @brief Test whether or not this segment is close to the coordinates passed as parameter
@@ -138,7 +140,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
          * @param t between 0.0 and 1.0.
          * @return vector at t.
          */
-        virtual ::ULIS::FVec2D GetTangentAt( double t );
+        virtual ::ULIS::FVec2D GetTangentAt( double t, bool iNormalize );
 
         FOdysseyVectorVertex*
         GetOtherVertex( FOdysseyVectorVertex* iVertex );

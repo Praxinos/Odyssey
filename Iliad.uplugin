@@ -149,6 +149,11 @@
 			"LoadingPhase": "Default"
 		},
 		{
+			"Name": "OdysseyPalette",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		},
+		{
 			"Name": "OdysseyTexture",
 			"Type": "Editor",
 			"LoadingPhase": "Default"

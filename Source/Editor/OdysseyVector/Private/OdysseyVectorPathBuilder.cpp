@@ -6,24 +6,25 @@ FOdysseyVectorPointSample::~FOdysseyVectorPointSample()
 
 FOdysseyVectorPointSample::FOdysseyVectorPointSample( double iX, double iY, double iRadius )
     : FOdysseyVectorPoint( iX, iY, iRadius )
-    , mIsSharp( false )
+    , mIsSharp( true )
 {
 }
 
-FOdysseyVectorPointSample::FOdysseyVectorPointSample( std::vector<FOdysseyVectorPoint*> iPointArray )
+FOdysseyVectorPointSample::FOdysseyVectorPointSample( std::vector<FOdysseyVectorPoint>& iPointBuffer )
+    : mIsSharp( true )
 {
     double averageX = 0.0f;
     double averageY = 0.0f;
     double averageRadius = 0.0f;
-    uint32 pointCount = iPointArray.size();
+    uint32 pointCount = iPointBuffer.size();
 
     if( pointCount )
     {
         for( uint32 i = 0; i < pointCount; i++ )
         {
-            averageX += iPointArray[i]->GetX();
-            averageY += iPointArray[i]->GetY();
-            averageRadius += iPointArray[i]->GetRadius();
+            averageX += iPointBuffer[i].GetX();
+            averageY += iPointBuffer[i].GetY();
+            averageRadius += iPointBuffer[i].GetRadius();
         }
 
         averageX /= pointCount;
@@ -47,36 +48,41 @@ FOdysseyVectorPointSample::IsSharp()
     return mIsSharp;
 }
 
+FOdysseyVectorLinkSample::~FOdysseyVectorLinkSample()
+{
+}
+
+void
+FOdysseyVectorLinkSample::Init( FOdysseyVectorPointSample* iSamplePoint0, FOdysseyVectorPointSample* iSamplePoint1 )
+{
+    FOdysseyVectorLink::Init( &mSamplePoint[0], &mSamplePoint[1] );
+
+    mSamplePoint[0] = *iSamplePoint0;
+    mSamplePoint[1] = *iSamplePoint1;
+}
+
 FOdysseyVectorPathBuilder::~FOdysseyVectorPathBuilder()
 {
 }
 
 FOdysseyVectorPathBuilder::FOdysseyVectorPathBuilder()
-    : mCumulAngle ( 0.0f )
-    , mCubicPath ( nullptr )
+    : FOdysseyVectorObject( FString("PathBuilder") )
+    , mCumulAngle ( 0.0f )
     , mCumulAngleLimit ( 1.5708f ) // 90 degrees
-    , mPointID( 0 )
     , mAngleLimit ( 1.0472f ) // 60 deg
     //, mAngleLimit ( 0.7071f ) // 45 deg
+    , mPointID( 0 )
+    , mCubicPath ( nullptr )
 {
     mObjectParam.Foreground.R = 128;
     mObjectParam.Foreground.G = 128;
     mObjectParam.Foreground.B = 128;
     mObjectParam.Foreground.A = 255;
 
-    mLinkBuffer.reserve(50);
-    mPointBuffer.reserve(50);
-    mSampleBuffer.reserve(50);
-
-    mPointArray.reserve(50);
-    mSampleArray.reserve(50);
+    mPointBuffer.reserve(200);
+    mSampleBuffer.reserve(100);
+    mLinkBuffer.reserve(100);
     mVertexArray.reserve(50);
-}
-
-std::vector<FOdysseyVectorPoint*>&
-FOdysseyVectorPathBuilder::GetPointArray()
-{
-    return mPointArray;
 }
 
 bool
@@ -94,6 +100,12 @@ void
 FOdysseyVectorPathBuilder::Attach( FOdysseyVectorPathCubic* iCubicPath )
 {
     mCubicPath = iCubicPath;
+}
+
+uint32
+FOdysseyVectorPathBuilder::GetPointCount()
+{
+    return mPointBuffer.size();
 }
 
 static void
@@ -149,9 +161,8 @@ Smooth( FOdysseyVectorSegmentCubic* iNewSegment, bool iSharp )
 
     if( prevSegment )
     {
-        uint32_t prevVertexIndex = ( prevSegment->GetVertex(0) == vertex ) ? 0 : 1;
-        ::ULIS::FVec2D prevVector = prevSegment->GetHandleVector( prevVertexIndex, false );
-        ::ULIS::FVec2D nsegVector = iNewSegment->GetHandleVector( 0, false );
+        ::ULIS::FVec2D prevVector = prevSegment->GetHandleVector( vertex, false );
+        ::ULIS::FVec2D nsegVector = iNewSegment->GetHandleVector( vertex, false );
 
         if( iSharp == false )
         {
@@ -180,14 +191,14 @@ FOdysseyVectorPathBuilder::RecordVertex()
     {
         FOdysseyVectorVertex* previousCubicVertex = mVertexArray.back();
         // use the penultimate sample
-        uint32 penultimateSampleIndex = mSampleArray.size() - 2;
-        uint32 penultimateSampleID = mSampleArray[penultimateSampleIndex]->GetID();
+        uint32 penultimateSampleIndex = mSampleBuffer.size() - 2;
+        uint32 penultimateSampleID = mSampleBuffer[penultimateSampleIndex].GetID();
         FOdysseyVectorVertex* cubicVertex = new FOdysseyVectorVertex( mCubicPath
-                                                                    , mSampleArray[penultimateSampleIndex]->GetX()
-                                                                    , mSampleArray[penultimateSampleIndex]->GetY()
-                                                                    , mSampleArray[penultimateSampleIndex]->GetRadius() );
+                                                                    , mSampleBuffer[penultimateSampleIndex].GetX()
+                                                                    , mSampleBuffer[penultimateSampleIndex].GetY()
+                                                                    , mSampleBuffer[penultimateSampleIndex].GetRadius() );
 
-        mSampleArray[penultimateSampleIndex]->SetSharp( angle >= mAngleLimit );
+        mSampleBuffer[penultimateSampleIndex].SetSharp( angle >= mAngleLimit );
 
         cubicVertex->SetID( penultimateSampleID );
 
@@ -210,14 +221,14 @@ FOdysseyVectorPathBuilder::RecordVertex()
 
             mCubicPath->AddSegment( mCubicSegment );
 
-            Smooth( mCubicSegment, mSampleArray[0]->IsSharp() );
+            Smooth( mCubicSegment, mSampleBuffer[0].IsSharp() );
 
             AdjustHandle( mCubicSegment, 0, 0.5f, 1 );
             AdjustHandle( mCubicSegment, 1, 0.5f, 1 );
 
             mCubicSegment->Invalidate();
 
-            mCubicPath->Update( 0 );
+            //mCubicPath->Update( 0 );
 /// end TODO
 
             ret |= FOdysseyVectorPathBuilder::NEWSEGMENT;
@@ -232,7 +243,9 @@ FOdysseyVectorPathBuilder::RecordVertex()
 uint32
 FOdysseyVectorPathBuilder::RecordSample( double iX, double iY, double iRadius, uint32 iID )
 {
-    FOdysseyVectorPoint* previousSample = mSampleArray.back();
+    //Note: at least 2 samples exists at this point, because the first one was added by RecordStart()
+    uint32 previousSampleIndex = mSampleBuffer.size() - 1;
+    FOdysseyVectorPointSample* previousSample = &mSampleBuffer[previousSampleIndex];
     ::ULIS::FVec2D dif = { iX - previousSample->GetX(), iY - previousSample->GetY() };
     BLPoint worldVector = mWorldMatrix.mapVector( dif.x, dif.y );
     uint32 ret = 0;
@@ -242,15 +255,18 @@ FOdysseyVectorPathBuilder::RecordSample( double iX, double iY, double iRadius, u
 
     if( dif.Distance() >= 8.0f )
     {
-        FOdysseyVectorPointSample sample = FOdysseyVectorPointSample( /*iX, iY, iRadius*/mPointArray ); // average
+        FOdysseyVectorPointSample sample = FOdysseyVectorPointSample( /*iX, iY, iRadius*/mPointBuffer ); // average
         uint32 sampleIndex = mSampleBuffer.size();
+        uint32 linkIndex = mLinkBuffer.size();
 
         sample.SetID( iID );
 
         mSampleBuffer.push_back( sample );
 
-        mSampleArray.push_back( &mSampleBuffer[sampleIndex] );
-        mLinkBuffer.push_back( FOdysseyVectorLink( previousSample, &mSampleBuffer[sampleIndex] ) );
+        mLinkBuffer.emplace_back();
+
+        mLinkBuffer[linkIndex].Init( previousSample, &mSampleBuffer[sampleIndex] ); // FOdysseyVectorLinkSample
+
 
         ret |= ( FOdysseyVectorPathBuilder::NEWSAMPLE | RecordVertex() );
     }
@@ -268,7 +284,6 @@ FOdysseyVectorPathBuilder::RecordPoint( double iX, double iY, double iRadius, ui
     point.SetID( iID );
 
     mPointBuffer.push_back( point );
-    mPointArray.push_back( &mPointBuffer[pointIndex] );
 
     return ret | RecordSample( iX, iY, iRadius, iID );
 }
@@ -288,14 +303,6 @@ FOdysseyVectorPathBuilder::ClearPointsUntil( uint32 iID )
     }
 
     mPointBuffer.resize( j );
-
-    // recreate pointers
-    mPointArray.clear();
-
-    for( i = rank; i < mPointBuffer.size(); i++ )
-    {
-        mPointArray.push_back( &mPointBuffer[i] );
-    }
 }
 
 void
@@ -314,23 +321,16 @@ FOdysseyVectorPathBuilder::ClearSamplesUntil( uint32 iID )
 
     mSampleBuffer.resize( j );
 
-    // recreate pointers
-    mSampleArray.clear();
-
-    for( i = 0; i < mSampleBuffer.size(); i++ )
-    {
-        mSampleArray.push_back( &mSampleBuffer[i] );
-    }
-
     // recreate links
     mLinkBuffer.clear();
 
-    for( i = 0; i < mSampleArray.size() - 1; i++ )
+    for( i = 0; i < mSampleBuffer.size() - 1; i++ )
     {
+       uint32 linkIndex = mLinkBuffer.size();
        int n = i + 1;
-       FOdysseyVectorLink link = FOdysseyVectorLink( mSampleArray[i], mSampleArray[n] );
 
-        mLinkBuffer.push_back( link );
+        mLinkBuffer.emplace_back();
+        mLinkBuffer[linkIndex].Init( &mSampleBuffer[i], &mSampleBuffer[n] ); // FOdysseyVectorLinkSample
     }
 }
 
@@ -339,12 +339,10 @@ FOdysseyVectorPathBuilder::RecordStart( FOdysseyVectorVertex *iVertex )
 {
     mPointBuffer.push_back( FOdysseyVectorPoint( iVertex->GetX(), iVertex->GetY(), iVertex->GetRadius() ) );
     mPointBuffer[0].SetID( mPointID );
-    mPointArray.push_back( &mPointBuffer[0] );
 
     mSampleBuffer.push_back( FOdysseyVectorPointSample( iVertex->GetX(), iVertex->GetY(), iVertex->GetRadius() ) );
     mSampleBuffer[0].SetID( mPointID );
     mSampleBuffer[0].SetSharp( true );
-    mSampleArray.push_back( &mSampleBuffer[0] );
 
     iVertex->SetID( mPointID );
     mVertexArray.push_back( iVertex );
@@ -363,7 +361,7 @@ FOdysseyVectorPathBuilder::RecordIntermediate( double iX
 
     if( ret & FOdysseyVectorPathBuilder::NEWSAMPLE )
     {
-        ClearPointsUntil( mSampleArray.back()->GetID() );
+        ClearPointsUntil( mSampleBuffer.back().GetID() );
     }
 
     if( ret & FOdysseyVectorPathBuilder::NEWVERTEX )
@@ -405,7 +403,7 @@ FOdysseyVectorPathBuilder::RecordEnd( FOdysseyVectorVertex *iVertex )
 
             mCubicPath->AddSegment( mCubicSegment );
 
-            Smooth( mCubicSegment, mSampleArray[0]->IsSharp() );
+            Smooth( mCubicSegment, mSampleBuffer[0].IsSharp() );
 
             AdjustHandle( mCubicSegment, 0, 0.5f, 1 );
             AdjustHandle( mCubicSegment, 1, 0.5f, 1 );
@@ -540,9 +538,12 @@ FOdysseyVectorPathBuilder::AdjustHandle( FOdysseyVectorSegmentCubic* iCubicSegme
         if ( dot0 )
         {
             double ratio = fabs( dot1 / dot0 );
-//UE_LOG(LogTemp, Warning, TEXT("Sample: %f %f"), sampledPoint.x, sampledPoint.y );
-//UE_LOG(LogTemp, Warning, TEXT("Some warning message %f %f %f %f %f"), ratio );
-
+/*
+UE_LOG(LogTemp, Warning, TEXT("Depth: %d"), iDepth );
+UE_LOG(LogTemp, Warning, TEXT("Sample: %f %f"), sampledPoint.x, sampledPoint.y );
+UE_LOG(LogTemp, Warning, TEXT("Expected: %f %f"), expectedPoint.x, expectedPoint.y );
+UE_LOG(LogTemp, Warning, TEXT("Some warning message %f %f %f"), angle0, angle1, ratio );
+*/
             segmentHandle->Set( vertexPoint.x + ( direction.x * ratio ),
                                 vertexPoint.y + ( direction.y * ratio ) );
 
@@ -618,46 +619,55 @@ FOdysseyVectorPathBuilder::FitSegment( FOdysseyVectorSegmentCubic& iSegment
 }
 
 void
-FOdysseyVectorPathBuilder::DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags )
+FOdysseyVectorPathBuilder::DrawShape( uint64 iFlags )
 {
     BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
     BLPath path;
     BLRgba32 strokeColor;
 
-    strokeColor.setR( mObjectParam.Foreground.R );
-    strokeColor.setG( mObjectParam.Foreground.G );
-    strokeColor.setB( mObjectParam.Foreground.B );
-    strokeColor.setA( mObjectParam.Foreground.A );
+    if (mObjectParam.Entry)
+    {
+        FColor color = Cast< UOdysseyPaletteEntryColor >(mObjectParam.Entry)->GetUsedColor();
+        strokeColor.setR(color.B);
+        strokeColor.setG(color.G);
+        strokeColor.setB(color.R);
+        strokeColor.setA(color.A);
+    }
+    else
+    {
+        strokeColor.setR(mObjectParam.Foreground.R);
+        strokeColor.setG(mObjectParam.Foreground.G);
+        strokeColor.setB(mObjectParam.Foreground.B);
+        strokeColor.setA(mObjectParam.Foreground.A);
+    }
 
     blctx->setCompOp(BL_COMP_OP_SRC_COPY);
-    /*iBLContext.setFillStyle(BLRgba32(0xFFFFFFFF));
-    iBLContext.setStrokeStyle(BLRgba32(0xFF000000));*/
 
     blctx->setStrokeStyle( strokeColor );
 
-    if( mSampleArray.size() > 1 )
+    if( mSampleBuffer.size() > 1 )
     {
-        for( uint32 i = 0; i < mSampleArray.size() - 1; i++ )
+        for( uint32 i = 0; i < mSampleBuffer.size() - 1; i++ )
         {
             uint32 n = i + 1;
-            ::ULIS::FVec2D& point0 = mSampleArray[i]->GetCoords();
-            ::ULIS::FVec2D& point1 = mSampleArray[n]->GetCoords();
+            ::ULIS::FVec2D& point0 = mSampleBuffer[i].GetCoords();
+            ::ULIS::FVec2D& point1 = mSampleBuffer[n].GetCoords();
 
-            blctx->setStrokeWidth( mSampleArray[i]->GetRadius() * 2.0f );
+            blctx->setStrokeWidth( mSampleBuffer[i].GetRadius() * 2.0f );
 
             blctx->strokeLine( point0.x, point0.y, point1.x, point1.y );
         }
     }
 
-    if( mPointArray.size() > 1 )
+    if( mPointBuffer.size() > 1 )
     {
-        for( uint32 i = 0; i < mPointArray.size() - 1; i++ )
+        for( uint32 i = 0; i < mPointBuffer.size() - 1; i++ )
         {
             uint32 n = i + 1;
-            ::ULIS::FVec2D& point0 = mPointArray[i]->GetCoords();
-            ::ULIS::FVec2D& point1 = mPointArray[n]->GetCoords();
+            ::ULIS::FVec2D& point0 = mPointBuffer[i].GetCoords();
+            ::ULIS::FVec2D& point1 = mPointBuffer[n].GetCoords();
 
-            blctx->setStrokeWidth( mPointArray[i]->GetRadius() * 2.0f );
+            blctx->setStrokeWidth( mPointBuffer[i].GetRadius() * 2.0f );
 
             blctx->strokeLine( point0.x, point0.y, point1.x, point1.y );
         }
@@ -666,9 +676,9 @@ FOdysseyVectorPathBuilder::DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags )
     blctx->save();
     blctx->resetMatrix();
     blctx->setFillStyle(BLRgba32(0xFFFF00FF));
-    for( uint32 i = 0; i < mSampleArray.size() - 1; i++ )
+    for( uint32 i = 0; i < mSampleBuffer.size() - 1; i++ )
     {
-        BLPoint pt = mWorldMatrix.mapPoint( mSampleArray[i]->GetX(), mSampleArray[i]->GetY() );
+        BLPoint pt = mWorldMatrix.mapPoint( mSampleBuffer[i].GetX(), mSampleBuffer[i].GetY() );
 
         blctx->fillRect( pt.x - 3, pt.y - 3, 6, 6  );
     }

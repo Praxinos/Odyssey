@@ -17,7 +17,7 @@ public:
     GENERATED_BODY()
 
 public:
-    UPROPERTY(EditAnywhere, Category="Eraser Tool")
+    UPROPERTY(EditAnywhere, Category="Eraser Tool", meta = (ClampMin = "0.0", UIMin = "0.0") )
     double Radius;
 
 public:
@@ -28,7 +28,8 @@ public:
     UOdysseyPainterEditorVectorEraserTool();
  
     //OdysseyPainterEditorTool overrides
-    void ActivateVector( FOdysseyVectorEngine* iEngine
+    void UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    void LoadVector( FOdysseyVectorEngine* iEngine
                        , FOdysseyVectorScene* iScene );
 
     bool OnMouseDownVector( FOdysseyVectorEngine* iEngine

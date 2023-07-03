@@ -27,22 +27,25 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathCubic: public FOdysseyVectorPath
 
     protected:
         FOdysseyVectorObject* CopyShape();
-        void DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags );
-        bool PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags );
+        void DrawShape( uint64 iFlags );
+        bool PickShape( const ::ULIS::FRectD &iRoi, uint32 iSelectionFlags );
 
     public:
+        static void SharpSegments( FOdysseyVectorVertex* iVertex, bool iBuildSegments, bool iPreserveHandleLength );
         static void SmoothSegments( FOdysseyVectorVertex* iVertex, bool iBuildSegments, bool iPreserveHandleLength );
-        static ::ULIS::FVec2D GetPerpendicularVector( FOdysseyVectorVertex* iVertex, bool iNormalize );
+        static void SmoothSegments( FOdysseyVectorVertex* iVertex
+                                  , ::ULIS::FVec2D iPerpendicularVector
+                                  , bool iBuildSegments
+                                  , bool iPreserveHandleLength );
 
-        FOdysseyVectorPathCubic();
-        void Init( std::string iName );
+        FOdysseyVectorPathCubic( const FString& iName );
+        void Init( FString& iName );
         bool PickPoint( double iWorldX
                       , double iWorldY
                       , double iSelectionRadius
                       , std::vector<FOdysseyVectorPoint*>& oPickedPointArray
                       , uint64 iSelectionFlags );
-        void Unselect( FOdysseyVectorVertex* iPoint );
-        void Fill( ::ULIS::FRectD& iRoi );
+        void Fill();
         void Merge( FOdysseyVectorPath* iPath
                   , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
                   , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray );
@@ -50,20 +53,21 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathCubic: public FOdysseyVectorPath
                   , std::vector<FOdysseyVectorVertex*>& iVertexLookup
                   , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
                   , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray );
-        void DrawShapeVariable( ::ULIS::FRectD& iRoi, uint64 iFlags );
+        void DrawShapeVariable( uint64 iFlags );
 
         void Mirror( bool iMirrorX, bool iMirrorY );
-        void Cut( ::ULIS::FVec2D& linePoint0
-                , ::ULIS::FVec2D& linePoint1
+        void Cut( const ::ULIS::FVec2D& linePoint0
+                , const ::ULIS::FVec2D& linePoint1
                 , std::vector<FOdysseyVectorVertex*>& oNewVertexArray
                 , std::vector<FOdysseyVectorSegment*>& oNewSegmentArray
                 , std::vector<FOdysseyVectorSegment*>& oOldSegmentArray );
         void SwitchSpace( FOdysseyVectorObject& iObject );
-        bool Erase( ::ULIS::FRectD &iRoi
+        bool Erase( const ::ULIS::FRectD &iRoi
                   , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
                   , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray
                   , std::vector<FOdysseyVectorVertex*>& iRemovedVertexArray
                   , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray );
-
+        virtual void PickVertex( std::vector<FOdysseyVectorVertex*>& oPickedVertexArray ) override;
+        virtual void DrawStructure( FColor& iStrokeColor, double iStrokeWidth, bool iWorld ) override;
         uint32 GetType();
 };

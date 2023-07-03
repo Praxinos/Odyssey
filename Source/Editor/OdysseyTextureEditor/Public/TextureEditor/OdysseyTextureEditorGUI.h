@@ -7,6 +7,9 @@
 
 #include "OdysseyTextureEditorLayerStackTab.h"
 #include "OdysseyTextureEditorTextureDetailsTab.h"
+#include "Tools/VectorPickTool/OdysseyTextureEditorVectorPickToolVertexContextMenu.h"
+#include "Tools/VectorPickTool/OdysseyTextureEditorVectorPickToolObjectContextMenu.h"
+#include "Tools/PaintBucketTool/OdysseyTextureEditorPaintBucketToolContextMenu.h"
 
 class FOdysseyTextureEditor;
 
@@ -24,6 +27,7 @@ public:
 protected:
     //Init
 	virtual void CreateTabs() override;
+    virtual void CreateContextMenus() override;
     virtual void BindShortcuts( FBaseToolkit* iToolkit ) override;
     virtual void ExtendMenuAbout( FToolMenuOwner iOwner, FName iMenuName ) override;
 
@@ -32,32 +36,43 @@ public:
 	virtual FName GetLayoutName() override;
     TSharedPtr<FOdysseyTextureEditorLayerStackTab>& GetLayerStackTab();
 	TSharedPtr<FOdysseyTextureEditorTextureDetailsTab>& GetTextureDetailsTab();
+    TSharedPtr<FOdysseyTextureEditorVectorPickToolVertexContextMenu>& GetVectorPickToolVertexContextMenu();
+	TSharedPtr<FOdysseyTextureEditorVectorPickToolObjectContextMenu>& GetVectorPickToolObjectContextMenu();
+	TSharedPtr<FOdysseyTextureEditorPaintBucketToolContextMenu>& GetPaintBucketToolContextMenu();
 
 protected:
 	virtual TSharedRef<FTabManager::FSplitter>	CreateRightSection() override;
 
 
-protected:
+public:
     virtual void ResetView();
     virtual void GroupPaint();
     virtual void Group();
     virtual void Ungroup();
     virtual void BringForward();
     virtual void SendBackward();
-    virtual void RemoveSelectedObjects();
-
+    virtual void DeleteSelection();
+    virtual void FlipHorizontal();
+    virtual void FlipVertical();
+    virtual void DeleteBucket();
+    virtual void PropagateBucket();
+    virtual void UnpropagateBucket();
+    virtual void KnotVertices();
+ 
 public:
     void BindVectorScene( FOdysseyVectorScene* iScene );
 protected:
-    void OnRefresh( FOdysseyVectorScene* iScene, uint32 iUpdateFlags );
-    void UnbindAllVectorScenes();
-    void BindAllVectorScenes( UOdysseyLayerStack* iLayerStack );
+    void OnVectorSceneSignal( FOdysseyVectorScene* iScene, uint64 iSignalFlags );
+    void OnCurrentLayerChanged( UOdysseyLayerStack* iLayerStack );
 
 private:
 	FOdysseyTextureEditor* mEditor;
 
 private:
     //Tabs
-    TSharedPtr<FOdysseyTextureEditorLayerStackTab>          mLayerStackTab;
-	TSharedPtr<FOdysseyTextureEditorTextureDetailsTab>      mTextureDetailsTab;
+    TSharedPtr<FOdysseyTextureEditorLayerStackTab>                   mLayerStackTab;
+	TSharedPtr<FOdysseyTextureEditorTextureDetailsTab>               mTextureDetailsTab;
+    TSharedPtr<FOdysseyTextureEditorVectorPickToolVertexContextMenu> mVectorPickToolVertexContextMenu;
+	TSharedPtr<FOdysseyTextureEditorVectorPickToolObjectContextMenu> mVectorPickToolObjectContextMenu;
+	TSharedPtr<FOdysseyTextureEditorPaintBucketToolContextMenu>      mPaintBucketToolContextMenu;
 };

@@ -58,7 +58,7 @@ public:
      * @param iRects 
      */
     virtual void RenderImageChanged(const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive);
-    void RenderImageChanged(bool iIsInteractive);
+    virtual void RenderImageChanged(bool iIsInteractive);
 
     /**
      * @brief Called when one of the direct children layer render image changed

@@ -1,4 +1,5 @@
 #include "OdysseyVectorObject.h"
+#include "Palette/OdysseyPaletteEntryColor.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846L
@@ -6,19 +7,29 @@
 
 FOdysseyVectorObject::~FOdysseyVectorObject()
 {
+    for( std::list<FOdysseyVectorObject*>::iterator it = mChildrenList.begin(); it != mChildrenList.end(); ++it )
+    {
+        FOdysseyVectorObject *obj = (*it);
+
+        delete obj;
+    }
+
+    mChildrenList.clear();
 }
 
-FOdysseyVectorObject::FOdysseyVectorObject()
+FOdysseyVectorObject::FOdysseyVectorObject( const FString& iName )
     : mParent( nullptr )
     , mIsSelected( false )
-    , mIsInvalidated( false )
     , mDependsOnChildren( false )
     , mFillBucket( *this, 0.0f, 0.0f, false )
+    , mInvalidationFlags ( 0 )
 {
     mLocalMatrix.reset();
     mWorldMatrix.reset();
     mInverseLocalMatrix.reset();
     mInverseWorldMatrix.reset();
+
+    SetName( iName );
 
     mObjectParam.TranslationX = 0.0f;
     mObjectParam.TranslationY = 0.0f;
@@ -37,10 +48,58 @@ FOdysseyVectorObject::GetFillBucket()
     return mFillBucket;
 }
 
-void
-FOdysseyVectorObject::SetName( std::string iName )
+FPaletteEntryDescription& FOdysseyVectorObject::GetPaletteEntryDescription()
 {
-    Name.assign( iName );
+    return mPaletteEntryDescription;
+}
+
+void
+FOdysseyVectorObject::SetName( const FString& iName )
+{
+    mObjectParam.Name = iName;
+}
+
+static uint32
+CheckCommonClass( std::list<FOdysseyVectorObject*>& iObjectList, uint32 iCommonClass )
+{
+    std::list<FOdysseyVectorObject*>::iterator it;
+
+    if( iObjectList.size() )
+    {
+        for( it = iObjectList.begin(); it != iObjectList.end(); ++it )
+        {
+            FOdysseyVectorObject* object = (*it);
+
+            if( object->HasBaseClass( iCommonClass ) )
+            {
+                uint32 objectClass = object->GetClass();
+
+                if( objectClass != iCommonClass )
+                {
+                    uint32 newCommonClass = CheckCommonClass( iObjectList, objectClass );
+
+                    if( newCommonClass )
+                    {
+                        return newCommonClass;
+                    }
+                }
+            }
+            else
+            {
+                return 0;
+            }
+        }
+
+        return iCommonClass;
+    }
+
+    return 0;
+}
+
+uint32
+FOdysseyVectorObject::GetCommonClass( std::list<FOdysseyVectorObject*>& iObjectList )
+{
+    return CheckCommonClass( iObjectList, FOdysseyVectorObject::StaticClass() );
 }
 
 bool
@@ -70,7 +129,7 @@ FOdysseyVectorObject::Update( uint32 iUpdateFlags )
 
     if( ( iUpdateFlags & FOdysseyVectorObject::KEEPINVALIDATED ) == 0 )
     {
-        mIsInvalidated = false;
+        mInvalidationFlags = 0;
     }
 }
 
@@ -78,6 +137,25 @@ void
 FOdysseyVectorObject::SetIsSelected( bool iIsSelected )
 {
     mIsSelected = iIsSelected;
+}
+
+void
+FOdysseyVectorObject::Transfer( const BLMatrix2D& iMatrix )
+{
+    BLMatrix2D inverseMatrix = iMatrix;
+    BLMatrix2D localMatrix;
+
+    inverseMatrix.invert();
+
+    FOdysseyVector::MatrixMultiply( inverseMatrix, mWorldMatrix, localMatrix );
+    FOdysseyVector::ExtractTransformations( localMatrix
+                                          , &mObjectParam.TranslationX
+                                          , &mObjectParam.TranslationY
+                                          , &mObjectParam.Rotation
+                                          , &mObjectParam.ScalingX
+                                          , &mObjectParam.ScalingY );
+
+    //UpdateMatrix();
 }
 
 void
@@ -186,6 +264,8 @@ FOdysseyVectorObject::CopySettings( FOdysseyVectorObject& iDestinationObject )
     iDestinationObject.UpdateMatrix();
 
     iDestinationObject.mObjectParam.Foreground = mObjectParam.Foreground;
+    iDestinationObject.mObjectParam.Entry = mObjectParam.Entry;
+    iDestinationObject.mPaletteEntryDescription = mPaletteEntryDescription;
 
     iDestinationObject.mFillBucket.SetColor( mFillBucket.GetColor() );
     iDestinationObject.mFillBucket.SetGradient( mFillBucket.IsGradient() );
@@ -194,8 +274,7 @@ FOdysseyVectorObject::CopySettings( FOdysseyVectorObject& iDestinationObject )
 
     iDestinationObject.mBBox = mBBox;
 
-    iDestinationObject.Name = Name;
-    iDestinationObject.Name.append("_Copy");
+    iDestinationObject.SetName( mObjectParam.Name + FString("_Copy") );
 }
 
 double
@@ -363,27 +442,29 @@ FOdysseyVectorObject::TransferChild( FOdysseyVectorObject* iFosterChild )
 }
 
 void
-FOdysseyVectorObject::DrawChildren( ::ULIS::FRectD& iRoi, uint64 iFlags )
+FOdysseyVectorObject::DrawChildren( uint64 iFlags )
 {
     for( std::list<FOdysseyVectorObject*>::iterator it = mChildrenList.begin(); it != mChildrenList.end(); ++it )
     {
         FOdysseyVectorObject *child = (*it);
 
-        child->Draw( iRoi, iFlags );
+        child->Draw( iFlags );
     }
 }
 
 void
-FOdysseyVectorObject::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
+FOdysseyVectorObject::Draw( uint64 iFlags )
 {
     BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
 
     blctx->save();
     blctx->transform( mLocalMatrix );
 
-    DrawShape( iRoi, iFlags );
+    blctx->setCompOp( BL_COMP_OP_SRC_OVER );
 
-    DrawChildren( iRoi, iFlags );
+    DrawShape( iFlags );
+
+    DrawChildren( iFlags );
 
     blctx->restore();
 }
@@ -391,7 +472,7 @@ FOdysseyVectorObject::Draw( ::ULIS::FRectD& iRoi, uint64 iFlags )
 bool
 FOdysseyVectorObject::IsInvalidated()
 {
-    return mIsInvalidated;
+    return mInvalidationFlags != 0 ? true : false;
 }
 
 bool
@@ -403,19 +484,25 @@ FOdysseyVectorObject::IsSelected()
 void
 FOdysseyVectorObject::Invalidate()
 {
-    if ( mIsInvalidated == false )
+    Invalidate( FOdysseyVectorObject::INVALIDATE_ALL );
+}
+
+void
+FOdysseyVectorObject::Invalidate( uint32 iInvalidationFlags )
+{
+    if ( mParent )
     {
-        if ( mParent )
+        if( mInvalidationFlags == 0 )
         {
             mParent->mInvalidatedChildrenList.push_back( this );
 
-            mParent->Invalidate();
-
-            // MUST have a parent to be declared as invalidated otherwise mIsInvalidated could be set
-            // even if the object has no parent because of bottom-to-top the recursive calls
-            // to Invalidate() from FOdysseyVectorVertex::Set() and then we would never reenter this "if" statement
-            mIsInvalidated = true;
+            mParent->Invalidate( mParent->mInvalidationFlags | INVALIDATE_CHILD );
         }
+
+        // MUST have a parent to be declared as invalidated otherwise mInvalidationFlags could be set
+        // even if the object has no parent because of bottom-to-top the recursive calls
+        // to Invalidate() from FOdysseyVectorVertex::Set() and then we would never reenter this "if" statement
+        mInvalidationFlags |= iInvalidationFlags;
     }
 }
 
@@ -512,7 +599,7 @@ FOdysseyVectorObject::MoveFront()
 }
 
 FOdysseyVectorObject*
-FOdysseyVectorObject::Pick( FOdysseyVectorGroup* iSelectionSpace, ::ULIS::FRectD &iRoi, uint32 iSelectionFlags )
+FOdysseyVectorObject::Pick( FOdysseyVectorGroup* iSelectionSpace, const ::ULIS::FRectD &iRoi, uint32 iSelectionFlags )
 {
     if( HasAncestor( iSelectionSpace ) )
     {
@@ -620,6 +707,22 @@ FOdysseyVectorObject::SetBackgroundColor( FColor& iColor )
     mFillBucket.SetColor( iColor );
 }
 
+void FOdysseyVectorObject::SetPaletteEntry(UOdysseyPaletteEntry* iEntry)
+{
+    if (iEntry)
+    {
+        mPaletteEntryDescription.EntryId = iEntry->GetFName();
+        mPaletteEntryDescription.UsedSet = 1;
+    }
+    else
+    {
+        mPaletteEntryDescription.EntryId = FName(TEXT(""));
+        mPaletteEntryDescription.UsedSet = 0;
+    }
+
+    mObjectParam.Entry = iEntry;
+}
+
 void
 FOdysseyVectorObject::SetForegroundColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA )
 {
@@ -705,12 +808,20 @@ FOdysseyVectorObject::TreeToArray( FOdysseyVectorObject* iObject, std::vector<FO
 FColor&
 FOdysseyVectorObject::GetForegroundColor()
 {
+    if (mObjectParam.Entry && mObjectParam.Entry->IsA(UOdysseyPaletteEntryColor::StaticClass()))
+    {
+        return Cast< UOdysseyPaletteEntryColor >(mObjectParam.Entry)->GetUsedColor();
+    }
     return mObjectParam.Foreground;
 }
 
 FColor&
 FOdysseyVectorObject::GetBackgroundColor()
 {
+    if (mObjectParam.Entry && mObjectParam.Entry->IsA(UOdysseyPaletteEntryColor::StaticClass()))
+    {
+        return Cast< UOdysseyPaletteEntryColor >(mObjectParam.Entry)->GetUsedColor();
+    }
     return mFillBucket.GetColor();
 }
 

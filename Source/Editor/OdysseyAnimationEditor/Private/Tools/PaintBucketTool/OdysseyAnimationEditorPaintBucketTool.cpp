@@ -24,20 +24,9 @@ UOdysseyAnimationEditorPaintBucketTool::UOdysseyAnimationEditorPaintBucketTool()
 void
 UOdysseyAnimationEditorPaintBucketTool::Activate()
 {
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(GetEditorAs<FOdysseyAnimationEditor>()->LayerStack());
-    UOdysseyAnimationLayerImageVector* currentVectorLayer = Cast<UOdysseyAnimationLayerImageVector>(layerStack->CurrentLayer.Get());
-
     UOdysseyAnimationLayerStack::OnCurrentLayerChanged().AddUObject( this, &UOdysseyAnimationEditorPaintBucketTool::OnCurrentLayerChanged );
-
     Load();
-
-    if( currentVectorLayer )
-    {
-        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
-
-        UOdysseyPainterEditorPaintBucketTool::ActivateVector( vectorEngine, vectorScene );
-    }
+    Super::Activate();
 }
 
 void
@@ -79,6 +68,8 @@ UOdysseyAnimationEditorPaintBucketTool::Inactivate()
 {
 	UOdysseyAnimationLayerStack::OnCurrentLayerChanged().RemoveAll(this);
     Super::Inactivate();
+
+    Unload();
 }
 
 void

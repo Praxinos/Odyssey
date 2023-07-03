@@ -60,6 +60,12 @@ FOdysseyVectorHandleSegment::Set( double iX, double iY )
 }
 
 void 
+FOdysseyVectorHandleSegment::Set( double iX, double iY, double iRadius )
+{
+    Set( iX, iY ); // radius is ignored.
+}
+
+void 
 FOdysseyVectorHandleSegment::Set( const ::ULIS::FVec2D& iCoords )
 {
     mCoords.x = iCoords.x;

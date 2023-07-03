@@ -2,6 +2,10 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Tools/VectorPathSmoothTool/OdysseyPainterEditorVectorPathSmoothTool.h"
+#include "Tools/VectorPathSmoothTool/OdysseyPainterEditorVectorPathSmoothToolHUD.h"
+#include "Undo/OdysseyVectorUndoSegmentReshape.h"
+
+#define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorPathSmoothTool"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
@@ -10,23 +14,30 @@ UOdysseyPainterEditorVectorPathSmoothTool::~UOdysseyPainterEditorVectorPathSmoot
 }
 
 UOdysseyPainterEditorVectorPathSmoothTool::UOdysseyPainterEditorVectorPathSmoothTool()
-    : mPickingHUD()
-    , Radius(20.0f)
+    : Radius(20.0f)
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathSmoothTool64");
 
     mPickedPointArray.reserve( 50 );
 
-    mPickingHUD.SetRadius( Radius );
+    mPathSmoothHUD = new FOdysseyPainterEditorVectorPathSmoothToolHUD( this );
 }
 
 void
-UOdysseyPainterEditorVectorPathSmoothTool::ActivateVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorPathSmoothTool::UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+{
+    iEngine->RemoveHUD( mPathSmoothHUD );
+
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+}
+
+void
+UOdysseyPainterEditorVectorPathSmoothTool::LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
     iEngine->ClearHUD();
-    iEngine->AddHUD(&mPickingHUD);
+    iEngine->AddHUD( mPathSmoothHUD );
 
-    iScene->Update( 0 ); // update vector scene and GUI widgets via delegates.
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
 
 bool
@@ -35,7 +46,15 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDownVector( FOdysseyVectorEngi
                                                             , const FOdysseyPoint& iPointInTexture
                                                             , const FKey& iKey )
 {
-    iScene->Update( 0 ); // update vector scene and GUI widgets via delegates.
+    mPickedPointArray.clear();
+
+    iEngine->PickPoints( iScene
+                       , RestrictToSelection
+                       , iPointInTexture.x
+                       , iPointInTexture.y
+                       , Radius
+                       , mPickedPointArray
+                       , FOdysseyVectorPath::PICK_POINT );
 
     return true;
 }
@@ -51,17 +70,9 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseHoverVector( FOdysseyVectorEng
                           , (int)diameter
                           , (int)diameter };
 
-    mPickingHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
-/*
-    if( rect.x < 0 ) rect.x = 0;
-    if( rect.y < 0 ) rect.y = 0;
+    mPathSmoothHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
 
-    rect = rect & layerStack->GetSurface()->Block()->Rect();
-
-    if( rect.Area() )
-    {*/
-    /*}*/
-    iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES ); // update vector scene and GUI widgets via delegates.
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
 
 void
@@ -69,28 +80,7 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDragVector( FOdysseyVectorEngi
                                                             , FOdysseyVectorScene* iScene
                                                             , const FOdysseyPoint& iPointInTexture )
 {
-    mPickingHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
-
-    mPickedPointArray.clear();
-
-    iEngine->PickPoints( iScene
-                       , iPointInTexture.x
-                       , iPointInTexture.y
-                       , Radius
-                       , mPickedPointArray
-                       , FOdysseyVectorPath::PICK_POINT );
-
-    for( int i = 0; i < mPickedPointArray.size(); i++ )
-    {
-        FOdysseyVectorVertex* cubicVertex = static_cast<FOdysseyVectorVertex*>(mPickedPointArray[i]);
-
-        if( cubicVertex->GetSegmentCount() == 2 )
-        {
-            FOdysseyVectorPathCubic::SmoothSegments( cubicVertex, true, true );
-        }
-    }
-
-    iScene->Update( 0 ); // update vector scene and GUI widgets via delegates.
+    mPathSmoothHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
 }
 
 bool
@@ -99,7 +89,41 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseUpVector( FOdysseyVectorEngine
                                                           , const FOdysseyPoint& iPointInTexture
                                                           , const FKey& iKey )
 {
-    iScene->Update( 0 ); // update vector scene and GUI widgets via delegates.
+    std::vector<FOdysseyVectorVertex*> vertexArray;
+    std::vector<FOdysseyVectorSegment*> segmentArray;
+
+    FOdysseyVectorPoint::ArrayToVertexArray( mPickedPointArray, vertexArray );
+    FOdysseyVectorVertex::ArrayToSegmentArray( vertexArray, segmentArray );
+
+    // needed for valid GUndo pointer
+    GEditor->BeginTransaction(LOCTEXT("VectorPathSmoothTool","Vector Path Smooth Tool"));
+    if( GUndo )
+    {
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSegmentReshape( iScene, segmentArray );
+
+        GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
+    }
+    GEditor->EndTransaction();
+
+    for( int i = 0; i < mPickedPointArray.size(); i++ )
+    {
+        FOdysseyVectorVertex* cubicVertex = static_cast<FOdysseyVectorVertex*>(mPickedPointArray[i]);
+
+        if( cubicVertex->GetSegmentCount() == 2 )
+        {
+            if( FSlateApplication::Get().GetModifierKeys().IsShiftDown() )
+            {
+                FOdysseyVectorPathCubic::SharpSegments( cubicVertex, true, false );
+            }
+            else
+            {
+                FOdysseyVectorPathCubic::SmoothSegments( cubicVertex, true, false );
+            }
+        }
+    }
+
+    iScene->Update( 0 ); // update invalidated objects
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 
     return false;
 }
@@ -113,5 +137,7 @@ UOdysseyPainterEditorVectorPathSmoothTool::Commit()
 void
 UOdysseyPainterEditorVectorPathSmoothTool::PropertyChanged( const FName& iPropertyName )
 {
-    mPickingHUD.SetRadius( Radius );
+    //mPickingHUD.SetRadius( Radius );
 }
+
+#undef LOCTEXT_NAMESPACE

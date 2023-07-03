@@ -2,11 +2,23 @@
 
 FOdysseyVectorRectangle::~FOdysseyVectorRectangle()
 {
+    delete mCubicVertex[0];
+    delete mCubicVertex[1];
+    delete mCubicVertex[2];
+    delete mCubicVertex[3];
+
+    delete mCubicSegment[0];
+    delete mCubicSegment[1];
+    delete mCubicSegment[2];
+    delete mCubicSegment[3];
 }
 
-FOdysseyVectorRectangle::FOdysseyVectorRectangle()
-    : mStrokeWidth ( 4.0f )
+FOdysseyVectorRectangle::FOdysseyVectorRectangle( const FString iName, double iWidth, double iHeight, double iStrokeWidth )
+    : FOdysseyVectorPrimitive( iName )
 {
+    mRectangleParam.StrokeWidth = iStrokeWidth;
+
+    Init( iName, iWidth, iHeight );
 }
 
 bool
@@ -17,91 +29,117 @@ FOdysseyVectorRectangle::HasBaseClass( uint32 iBaseClassID )
         return true;
     }
 
-    return FOdysseyVectorPath::HasBaseClass( iBaseClassID );
+    return FOdysseyVectorPathCubic::HasBaseClass( iBaseClassID );
 }
 
-void FOdysseyVectorRectangle::Init( std::string iName, double iWidth, double iHeight )
+void
+FOdysseyVectorRectangle::Init( const FString& iName, double iWidth, double iHeight )
 {
     SetName( iName );
     SetSize( iWidth, iHeight );
+
+    mCubicVertex[0] = new FOdysseyVectorVertex( this, 0.0f, 0.0f, mRectangleParam.StrokeWidth );
+    mCubicVertex[1] = new FOdysseyVectorVertex( this, 0.0f, 0.0f, mRectangleParam.StrokeWidth );
+    mCubicVertex[2] = new FOdysseyVectorVertex( this, 0.0f, 0.0f, mRectangleParam.StrokeWidth );
+    mCubicVertex[3] = new FOdysseyVectorVertex( this, 0.0f, 0.0f, mRectangleParam.StrokeWidth );
+
+    mCubicSegment[0] = new FOdysseyVectorSegmentCubic( static_cast<FOdysseyVectorPathCubic*>(this), mCubicVertex[0], mCubicVertex[1] );
+    mCubicSegment[1] = new FOdysseyVectorSegmentCubic( static_cast<FOdysseyVectorPathCubic*>(this), mCubicVertex[1], mCubicVertex[2] );
+    mCubicSegment[2] = new FOdysseyVectorSegmentCubic( static_cast<FOdysseyVectorPathCubic*>(this), mCubicVertex[2], mCubicVertex[3] );
+    mCubicSegment[3] = new FOdysseyVectorSegmentCubic( static_cast<FOdysseyVectorPathCubic*>(this), mCubicVertex[3], mCubicVertex[0] );
+
+    AddVertex ( mCubicVertex[0] );
+    AddVertex ( mCubicVertex[1] );
+    AddVertex ( mCubicVertex[2] );
+    AddVertex ( mCubicVertex[3] );
+
+    AddSegment ( mCubicSegment[0] );
+    AddSegment ( mCubicSegment[1] );
+    AddSegment ( mCubicSegment[2] );
+    AddSegment ( mCubicSegment[3] );
+}
+
+void
+FOdysseyVectorRectangle::UpdateShape( uint32 iUpdateFlags )
+{
+    mCubicVertex[0]->SetRadius( mRectangleParam.StrokeWidth );
+    mCubicVertex[1]->SetRadius( mRectangleParam.StrokeWidth );
+    mCubicVertex[2]->SetRadius( mRectangleParam.StrokeWidth );
+    mCubicVertex[3]->SetRadius( mRectangleParam.StrokeWidth );
+
+    mCubicVertex[0]->Set( 0.0f                 , 0.0f                 );
+    mCubicVertex[1]->Set( mRectangleParam.Width, 0.0f                 );
+    mCubicVertex[2]->Set( mRectangleParam.Width, mRectangleParam.Height );
+    mCubicVertex[3]->Set( 0.0f                 , mRectangleParam.Height );
+
+    mCubicSegment[0]->GetHandle(0)->Set(  mRectangleParam.Width  * 0.25f,  0.0f                          );
+    mCubicSegment[0]->GetHandle(1)->Set(  mRectangleParam.Width  * 0.75f,  0.0f                          );
+
+    mCubicSegment[1]->GetHandle(0)->Set(  mRectangleParam.Width         , mRectangleParam.Height * 0.25f );
+    mCubicSegment[1]->GetHandle(1)->Set(  mRectangleParam.Width         , mRectangleParam.Height * 0.75f );
+
+    mCubicSegment[2]->GetHandle(0)->Set(  mRectangleParam.Width  * 0.75f,  mRectangleParam.Height        );
+    mCubicSegment[2]->GetHandle(1)->Set(  mRectangleParam.Width  * 0.25f,  mRectangleParam.Height        );
+
+    mCubicSegment[3]->GetHandle(0)->Set(  0.0f                          , mRectangleParam.Height * 0.75f );
+    mCubicSegment[3]->GetHandle(1)->Set(  0.0f                          , mRectangleParam.Height * 0.25f );
+
+    mCubicSegment[0]->Update();
+    mCubicSegment[1]->Update();
+    mCubicSegment[2]->Update();
+    mCubicSegment[3]->Update();
 }
 
 FOdysseyVectorObject*
 FOdysseyVectorRectangle::CopyShape()
 {
-    FOdysseyVectorRectangle* rectangleCopy = new FOdysseyVectorRectangle();
-
-    rectangleCopy->Init( Name, mWidth, mHeight );
+    FOdysseyVectorRectangle* rectangleCopy = new FOdysseyVectorRectangle( mObjectParam.Name
+                                                                        , mRectangleParam.Width
+                                                                        , mRectangleParam.Height
+                                                                        , mRectangleParam.StrokeWidth );
 
     return static_cast<FOdysseyVectorObject*>( rectangleCopy );
 }
 
-void
-FOdysseyVectorRectangle::DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags )
+FOdysseyVectorPathCubic*
+FOdysseyVectorRectangle::Convert()
 {
-    BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
-    BLRgba32 strokeColor;
+    FOdysseyVectorPathCubic* path = static_cast<FOdysseyVectorPathCubic*>(this->FOdysseyVectorPathCubic::CopyShape());
 
-    strokeColor.setR( mObjectParam.Foreground.R );
-    strokeColor.setG( mObjectParam.Foreground.G );
-    strokeColor.setB( mObjectParam.Foreground.B );
-    strokeColor.setA( mObjectParam.Foreground.A );
+    this->CopySettings( *path );
 
-    blctx->setCompOp(BL_COMP_OP_SRC_COPY);
-/*
-    if( Filled )
-    {
-        BLRgba32 fillColor;
-
-        fillColor.r = Background.R;
-        fillColor.g = Background.G;
-        fillColor.b = Background.B;
-        fillColor.a = Background.A;
-
-        blctx->setFillStyle( fillColor );
-        blctx->fillRoundRect( -mWidth * 0.5f, -mHeight * 0.5f, mWidth, mHeight, 0.0f, 0.0f );
-    }
-*/
-    blctx->setStrokeStyle ( strokeColor );
-    blctx->setStrokeWidth ( mStrokeWidth );
-    blctx->strokeRoundRect( -mWidth * 0.5f, -mHeight * 0.5f, mWidth, mHeight, 0.0f, 0.0f );
+    return path;
 }
 
-bool
-FOdysseyVectorRectangle::PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags )
+void
+FOdysseyVectorRectangle::DrawShape( uint64 iFlags )
 {
-    /*double x1 = - mWidth  * 0.5f;
-    double y1 = - mHeight * 0.5f;
-    double x2 = x1 + mWidth;
-    double y2 = y1 + mHeight;
-
-    if( ( iX >= x1 ) && ( iX <= x2 ) &&
-        ( iY >= y1 ) && ( iY <= y2 ) )
+    if ( mRectangleParam.Width && mRectangleParam.Height )
     {
-        return this;
-    }*/
-
-    return false;
+        FOdysseyVectorPathCubic::DrawShape ( iFlags );
+    }
 }
 
 void
 FOdysseyVectorRectangle::SetSize( double iWidth, double iHeight )
 {
-    mWidth  = iWidth;
-    mHeight = iHeight;
+    mRectangleParam.Width  = iWidth;
+    mRectangleParam.Height = iHeight;
 
-    mBBox.x = (-mWidth * 0.5f ) - mStrokeWidth;
-    mBBox.y = (-mHeight * 0.5f ) - mStrokeWidth;
-    mBBox.w =  ( ( mWidth * 0.5f ) +  mStrokeWidth ) * 2;
-    mBBox.h =  ( ( mHeight * 0.5f ) +  mStrokeWidth ) * 2;
+    mBBox.x =    (-mRectangleParam.Width  * 0.5f ) -  mRectangleParam.StrokeWidth;
+    mBBox.y =    (-mRectangleParam.Height * 0.5f ) -  mRectangleParam.StrokeWidth;
+    mBBox.w =  ( ( mRectangleParam.Width  * 0.5f ) +  mRectangleParam.StrokeWidth ) * 2;
+    mBBox.h =  ( ( mRectangleParam.Height * 0.5f ) +  mRectangleParam.StrokeWidth ) * 2;
+
+    Invalidate();
 }
 
 double FOdysseyVectorRectangle::GetWidth()
 {
-    return mWidth;
+    return mRectangleParam.Width;
 }
 
 double FOdysseyVectorRectangle::GetHeight()
 {
-    return mHeight;
+    return mRectangleParam.Height;
 }

@@ -36,15 +36,22 @@ FOdysseyVectorHUDLine::GetP1()
 }
 
 void
-FOdysseyVectorHUDLine::Draw( FOdysseyVectorScene* iScene, ::ULIS::FRectD& iRoi, uint64 iFlags )
+FOdysseyVectorHUDLine::Reset(FOdysseyVectorScene* iScene)
+{
+}
+
+void
+FOdysseyVectorHUDLine::Draw( FOdysseyVectorScene* iScene, uint64 iFlags )
 {
     BLContext* blctx = iScene->GetEngine()->GetBLContext();
+    FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
+    BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
 
     // matrix might get altered for displaying the selection rectangle of a single object. Save it.
     blctx->save();
     blctx->resetMatrix();
 
-    blctx->setStrokeStyle( BLRgba32(0xFF0000FF) );
+    blctx->setStrokeStyle( hcColor );
     blctx->setStrokeWidth( 1.0f );
     blctx->strokeLine( mP0.x, mP0.y, mP1.x, mP1.y );
 

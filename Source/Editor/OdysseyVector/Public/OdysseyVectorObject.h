@@ -5,6 +5,7 @@
 #include <blend2d.h>
 #include <ULIS>
 #include "OdysseyVectorBucket.h"
+#include "Palette/OdysseyPaletteEntry.h"
 
 #include "OdysseyVectorObject.generated.h"
 
@@ -15,6 +16,9 @@ USTRUCT()
 struct FObjectParam
 {
     GENERATED_BODY()
+
+    UPROPERTY(EditAnywhere, Category="Identity")
+    FString Name;
 
     UPROPERTY(EditAnywhere, Category="Transform")
     double TranslationX;
@@ -33,6 +37,9 @@ struct FObjectParam
 
     UPROPERTY(EditAnywhere, Category="Coloring")
     FColor Foreground;
+
+    UPROPERTY(EditAnywhere, Category = "PaletteEntry")
+    UOdysseyPaletteEntry* Entry = nullptr;
 };
 
 class ODYSSEYVECTOR_API FOdysseyVectorObject
@@ -48,7 +55,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         static const uint32 PICK_MATH_BASED = ( 1 << 0 );
         static const uint32 PICK_MASK_BASED = ( 1 << 3 );
 
-        // DO NOT CHANGE !
+        // DO NOT CHANGE ! These values are saved in the save file.
         static const uint32 VECTORROOTTYPE       = 0;
         static const uint32 VECTOROBJECTTYPE     = 1;
         static const uint32 VECTORGROUPTYPE      = 2;
@@ -58,16 +65,19 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         static const uint32 VECTORGROUPPAINTTYPE = 6;
 
         // drawing mask
-        static const uint32 DRAWSTRUCTURE = ( 1 << 0 );
+        //static const uint32 DRAWSTRUCTURE = ( 1 << 0 );
 
         // update mask
         static const uint32 FREQUENTUPDATES = ( 1 << 0 );
         static const uint32 KEEPINVALIDATED = ( 1 << 1 );
 
-        static constexpr float BBOX_POINT_RADIUS = 4.0f;
+        // invalidation mask
+        static const uint32 INVALIDATE_CHILD = ( 1 << 0 ); // must not be set manually
+        static const uint32 INVALIDATE_SHAPE = ( 1 << 1 );
+        static const uint32 INVALIDATE_COLOR = ( 1 << 2 );
+        static const uint32 INVALIDATE_ALL   = ( INVALIDATE_SHAPE | INVALIDATE_COLOR );
 
-    protected:
-        std::string Name;
+        static constexpr float BBOX_POINT_RADIUS = 4.0f;
 
     public:
         FObjectParam mObjectParam;
@@ -81,28 +91,34 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         std::list<FOdysseyVectorObject*> mInvalidatedChildrenList;
         FOdysseyVectorObject* mParent;
         bool mIsSelected;
-        bool mIsInvalidated;
         bool mDependsOnChildren;
         ::ULIS::FRectD mBBox;
 
         FOdysseyVectorBucket mFillBucket;
+
+        /* The Palette Entry associated with this vector object, if any. Else, the Guid inside will be 0 or invalid */
+        FPaletteEntryDescription mPaletteEntryDescription;
 
         /*uint32 mStrokeColor;*/
         /*uint32 mFillColor;*/
 
         // used when saving
         uint32 mID;
+        uint32 mInvalidationFlags;
 
     public:
         static uint32 TreeToList( FOdysseyVectorObject* iObject, std::list<FOdysseyVectorObject*>& iOutList );
         static uint32 TreeToArray( FOdysseyVectorObject* iObject, std::vector<FOdysseyVectorObject*>& iOutArray );
         static ::ULIS::FRectD GetBoundingBoxFromList( std::list<FOdysseyVectorObject*>& iObjectList );
+        static uint32 GetCommonClass( std::list<FOdysseyVectorObject*>& iObjectList );
 
         virtual ~FOdysseyVectorObject();
-        FOdysseyVectorObject();
-        void SetName( std::string iName );
+        FOdysseyVectorObject( const FString& iName );
+        void SetName( const FString& iName );
         void CopySettings( FOdysseyVectorObject& iDestinationObject );
-
+        virtual void FlipHorizontal(){};
+        virtual void FlipVertical(){};
+        void Transfer( const BLMatrix2D& iMatrix );
         void GetTransform( double& oTranslationX
                          , double& oTranslationY
                          , double& oRotation
@@ -123,21 +139,23 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         virtual FOdysseyVectorObject* Copy();
         virtual FOdysseyVectorObject* CopyShape(){ return nullptr; };
 
-        virtual void Draw( ::ULIS::FRectD& iRoi, uint64 iFlags );
-        virtual void DrawShape ( ::ULIS::FRectD &roi, uint64 iFlags ){};
+        virtual void Draw( uint64 iFlags );
+        virtual void DrawShape ( uint64 iFlags ){};
 
-        virtual void DrawStructure ( ::ULIS::FRectD &roi, uint64 iFlags ){};
+        virtual void DrawStructure ( uint64 iFlags ){};
 
         virtual uint32 GetType();
 
-        FOdysseyVectorObject* Pick( FOdysseyVectorGroup* iSelectionSpace, ::ULIS::FRectD& iRoi, uint32 iSelectionFlags );
-        virtual bool PickShape( ::ULIS::FRectD& iRoi, uint32 iSelectionFlags ){ return false; };
+        FOdysseyVectorObject* Pick( FOdysseyVectorGroup* iSelectionSpace, const ::ULIS::FRectD& iRoi, uint32 iSelectionFlags );
+        virtual bool PickShape( const ::ULIS::FRectD& iRoi, uint32 iSelectionFlags ){ return false; };
 
         FOdysseyVectorBucket& GetFillBucket();
 
+        FPaletteEntryDescription& GetPaletteEntryDescription();
+
         virtual void TransferChild( FOdysseyVectorObject* iFosterChild );
         /*virtual void UpdateBoundingBox() = 0;*/
-        void DrawChildren( ::ULIS::FRectD& iRoi, uint64 iFlags );
+        virtual void DrawChildren( uint64 iFlags );
         void UpdateMatrix( );
         void Translate( double iX, double iY );
         void Rotate( double iAngle );
@@ -167,6 +185,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         void SetBackgroundColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA );
         void SetForegroundColor( FColor& iColor );
         void SetBackgroundColor( FColor& iColor );
+        void SetPaletteEntry(UOdysseyPaletteEntry* iEntry);
         void SetFilled(bool iIsFilled);
         void SetStrokeWidth( double iWidth );
         double GetStrokeWidth( );
@@ -175,6 +194,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         ::ULIS::FRectD GetBBox( bool iWorld );
         void MoveBack();
         void MoveFront();
+        virtual void Invalidate( uint32 iInvalidationFlags );
         virtual void Invalidate();
         FOdysseyVectorScene* GetScene();
         bool IsInvalidated();

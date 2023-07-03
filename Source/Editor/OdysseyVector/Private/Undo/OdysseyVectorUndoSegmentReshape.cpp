@@ -11,17 +11,12 @@ FOdysseyVectorUndoSegmentReshape::~FOdysseyVectorUndoSegmentReshape()
         // nothing to do
     }
 
-    mSegmentShapeBeforeArray.clear();
-    mSegmentShapeAfterArray.clear();
+    mSegmentShapeArray.clear();
 }
 
-FOdysseyVectorUndoSegmentReshape::FOdysseyVectorUndoSegmentReshape( FOdysseyVectorScene* iScene )
+FOdysseyVectorUndoSegmentReshape::FOdysseyVectorUndoSegmentReshape( FOdysseyVectorScene* iScene
+                                                                  , std::vector<FOdysseyVectorSegment*>& iSegmentArray )
     : FOdysseyVectorUndo( iScene )
-{
-}
-
-static void
-RecordArray( std::vector<FOdysseyVectorSegment*>& iSegmentArray, std::vector<FSegmentShape>& mSegmentShapeArray )
 {
     mSegmentShapeArray.reserve( iSegmentArray.size() );
 
@@ -32,19 +27,7 @@ RecordArray( std::vector<FOdysseyVectorSegment*>& iSegmentArray, std::vector<FSe
 }
 
 void
-FOdysseyVectorUndoSegmentReshape::RecordBefore( std::vector<FOdysseyVectorSegment*>& iSegmentArray )
-{
-    RecordArray( iSegmentArray, mSegmentShapeBeforeArray );
-}
-
-void
-FOdysseyVectorUndoSegmentReshape::RecordAfter( std::vector<FOdysseyVectorSegment*>& iSegmentArray )
-{
-    RecordArray( iSegmentArray, mSegmentShapeAfterArray );
-}
-
-static void
-LoadArray( std::vector<FSegmentShape>& mSegmentShapeArray )
+FOdysseyVectorUndoSegmentReshape::SwapArray()
 {
     for( int i = 0; i < mSegmentShapeArray.size(); i++ )
     {
@@ -55,11 +38,20 @@ LoadArray( std::vector<FSegmentShape>& mSegmentShapeArray )
             ::ULIS::FVec2D& point1 = cubicSegment->GetVertex(1)->GetCoords();
             ::ULIS::FVec2D& point2 = cubicSegment->GetHandle(0)->GetCoords();
             ::ULIS::FVec2D& point3 = cubicSegment->GetHandle(1)->GetCoords();
+            ::ULIS::FVec2D swapPoint0 = point0;
+            ::ULIS::FVec2D swapPoint1 = point1;
+            ::ULIS::FVec2D swapPoint2 = point2;
+            ::ULIS::FVec2D swapPoint3 = point3;
 
             point0 = mSegmentShapeArray[i].point[0];
             point1 = mSegmentShapeArray[i].point[1];
             point2 = mSegmentShapeArray[i].point[2];
             point3 = mSegmentShapeArray[i].point[3];
+
+            mSegmentShapeArray[i].point[0] = swapPoint0;
+            mSegmentShapeArray[i].point[1] = swapPoint1;
+            mSegmentShapeArray[i].point[2] = swapPoint2;
+            mSegmentShapeArray[i].point[3] = swapPoint3;
         }
 
         mSegmentShapeArray[i].segment->GetVertex(0)->InvalidateSegments();
@@ -73,10 +65,15 @@ FOdysseyVectorUndoSegmentReshape::Apply( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Apply( iIgnored );
 
-    LoadArray( mSegmentShapeAfterArray );
+    SwapArray();
 
-    // update invalidated objects and call callbacks if any (for refreshing GUI e.g)
+    // update invalidated objects
     mScene->Update(0);
+
+    mScene->GetEngine()->ResetHUD();
+    // call callbacks if any (for refreshing GUI e.g)
+    mScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW
+                  | FOdysseyVectorScene::SIGNAL_OBJECT_MODIFIED );
 }
 
 void
@@ -85,10 +82,15 @@ FOdysseyVectorUndoSegmentReshape::Revert( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Revert( iIgnored );
 
-    LoadArray( mSegmentShapeBeforeArray );
+    SwapArray();
 
-    // update invalidated objects and call callbacks if any (for refreshing GUI e.g)
+    // update invalidated objects
     mScene->Update(0);
+
+    mScene->GetEngine()->ResetHUD();
+    // call callbacks if any (for refreshing GUI e.g)
+    mScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW
+                  | FOdysseyVectorScene::SIGNAL_OBJECT_MODIFIED );
 }
 
 /** Describes this change (for debugging) */

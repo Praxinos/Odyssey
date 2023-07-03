@@ -14,10 +14,10 @@ namespace FOdysseyVector
                                                  , double* iScalingX
                                                  , double* iScalingY );
 
-    bool ODYSSEYVECTOR_API IntersectSegment( ::ULIS::FVec2D& line0p0
-                                           , ::ULIS::FVec2D& line0p1
-                                           , ::ULIS::FVec2D& line1p0
-                                           , ::ULIS::FVec2D& line1p1
+    bool ODYSSEYVECTOR_API IntersectSegment( const ::ULIS::FVec2D& line0p0
+                                           , const ::ULIS::FVec2D& line0p1
+                                           , const ::ULIS::FVec2D& line1p0
+                                           , const ::ULIS::FVec2D& line1p1
                                            , double* line0t
                                            , double* line1t );
 
@@ -46,11 +46,11 @@ namespace FOdysseyVector
 #include "OdysseyVectorScene.h"
 #include "OdysseyVectorPoint.h"
 #include "OdysseyVectorHandle.h"
-#include "OdysseyVectorHandlePoint.h"
 #include "OdysseyVectorHandleSegment.h"
 #include "OdysseyVectorVertex.h"
 #include "OdysseyVectorVertexIntersection.h"
 #include "OdysseyVectorSection.h"
+#include "OdysseyVectorLine.h"
 #include "OdysseyVectorLink.h"
 #include "OdysseyVectorBucket.h"
 #include "OdysseyVectorSegment.h"
@@ -68,11 +68,6 @@ namespace FOdysseyVector
 #include "HUD/OdysseyVectorHUDPicking.h"
 #include "HUD/OdysseyVectorHUDLine.h"
 #include "HUD/OdysseyVectorHUDPathCubic.h"
-#include "HUD/OdysseyVectorHUDPathDrawing.h"
 #include "HUD/OdysseyVectorHUDEraser.h"
-#include "HUD/OdysseyVectorHUDBucket.h"
 #include "HUD/OdysseyVectorHUDPicking.h"
 #include "HUD/OdysseyVectorHUDSelection.h"
-#include "HUD/OdysseyVectorHUDRotate.h"
-#include "HUD/OdysseyVectorHUDScale.h"
-#include "HUD/OdysseyVectorHUDGrid.h"

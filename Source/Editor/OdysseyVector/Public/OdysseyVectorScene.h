@@ -17,11 +17,16 @@ class FOdysseyVectorEngine;
 class ODYSSEYVECTOR_API FOdysseyVectorScene : public FOdysseyVectorGroup
 {
     public:
-        DECLARE_MULTICAST_DELEGATE_TwoParams(FUpdateDelegate, FOdysseyVectorScene*, uint32 iUpdateFlags )
-        FUpdateDelegate mOnUpdateDelegate;
+        DECLARE_MULTICAST_DELEGATE_TwoParams(FSignalDelegate, FOdysseyVectorScene*, uint64 iDelegateFlags )
 
     public:
-        FUpdateDelegate& OnUpdateDelegate();
+        static const uint64 SIGNAL_SCENE_REDRAW       = ( 1 << 0 );
+        static const uint64 SIGNAL_OBJECT_TRANSFORMED = ( 1 << 1 );
+        static const uint64 SIGNAL_OBJECT_MODIFIED    = ( 1 << 2 );
+        static const uint64 SIGNAL_OBJECT_SELECTED    = ( 1 << 3 );
+        static const uint64 SIGNAL_ALL                = 0xFFFFFFFFFFFFFFFF;
+
+        static FSignalDelegate& OnSignalDelegate();
 
 //        DECLARE_MULTICAST_DELEGATE_OneParam(FRefreshDetailsView,FOdysseyVectorScene*)
 //        FRefreshDetailsView mDetailsView;
@@ -38,23 +43,27 @@ class ODYSSEYVECTOR_API FOdysseyVectorScene : public FOdysseyVectorGroup
         void UpdateShape( uint32 iUpdateFlags );
         FOdysseyVectorObject* CopyShape();
         FOdysseyVectorEngine* mEngine;
+        void FlipSelection( bool iWorld, double iXFactor, double iYFactor );
 
     protected:
         std::list<FOdysseyVectorObject*> mSelectedObjectList;
 
     public:
         virtual ~FOdysseyVectorScene();
-        FOdysseyVectorScene();
+        FOdysseyVectorScene( const FString& iName );
+        void FlipSelectionHorizontal( bool iWorld );
+        void FlipSelectionVertical( bool iWorld );
+        void Signal( uint64 iSignalFlags );
         virtual void Update( uint32 iUpdateFlags ) override;
-        void Init( std::string iName );
+        void Init( const FString& iName );
         void Select( FOdysseyVectorObject* iVecObj );
         void Unselect( FOdysseyVectorObject* iVecObj );
         void ClearSelection();
         FOdysseyVectorObject* GetLastSelected();
         std::list<FOdysseyVectorObject*>& GetSelectedObjectList();
-        void DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags );
-        bool PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags ) { return false; };
-
+        virtual void DrawShape( uint64 iFlags ) override;
+        bool PickShape( const ::ULIS::FRectD &iRoi, uint32 iSelectionFlags ) { return false; };
+        ::ULIS::FVec2D GetWorldPositionFromSelection();
         void InvalidateObject( FOdysseyVectorObject* iObject );
         void RemoveSelectedObjects();
 

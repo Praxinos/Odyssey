@@ -14,9 +14,11 @@
 class ODYSSEYVECTOR_API FOdysseyVectorEngine
 {
     public:
-        static void AddHUD( FOdysseyVectorHUD* iHUDObject );
-        static void RemoveHUD( FOdysseyVectorHUD* iHUDObject );
-        static void ClearHUD();
+        std::list<FOdysseyVectorHUD*>& GetHUDList();
+        void AddHUD( FOdysseyVectorHUD* iHUDObject );
+        void RemoveHUD( FOdysseyVectorHUD* iHUDObject );
+        void ClearHUD();
+        void ResetHUD();
 
         /**
          * @brief Get the rendering context (Blend2D)
@@ -44,24 +46,27 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
         /**
          * @brief Constructor
          */
-        FOdysseyVectorEngine( double iWidth, double iHeight );
+        FOdysseyVectorEngine( FOdysseyVectorScene* iScene, double iWidth, double iHeight );
 
         /**
          * @brief Render the scene to the current buffer
          * @param iScene the scene (root node of the object hierarchy).
-         * @param iRect the region to render (clipping region).
          */
-        void Render( FOdysseyVectorScene* iScene, const ::ULIS::FRectI& iRect );
+        void Render( /*FOdysseyVectorScene* iScene*//*, const ::ULIS::FRectI& iRegion*/ );
 
         /**
          * @brief Pick an object
          * @param iScene the root object
-         * @param iPointArray an array defining the selection area.
+         * @param iRoi
          * @param iSelectionFlags FOdysseyVectorObject::PICK_MASK_BASED or FOdysseyVectorObject::PICK_MATH_BASED
+         * @return an array of pointers to picked objects.
          *  FOdysseyVectorObject::PICK_MASK_BASED: in that case the mask buffer must be filled with 0xFF where picking is wanted.
          *  FOdysseyVectorObject::PICK_MATH_BASED: in that case collisions are mathematically computed.
          */
-        void Pick( FOdysseyVectorScene* iScene, std::vector<::ULIS::FVec2D>& iPointArray, uint32 iSelectionFlags );
+        void Pick( FOdysseyVectorScene* iScene
+                 ,const ::ULIS::FRectD& iRoi
+                 , std::vector<FOdysseyVectorObject*>& oPickedObjectArray
+                 , uint32 iSelectionFlags );
 
         /**
          * @brief Pick segments depending on a selection circle passed as parameters.
@@ -73,6 +78,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
          *  and coordinates iX,iY. Distance is in local coordinates. Can be NULL.
          */
         void PickSegments( FOdysseyVectorScene* iScene
+                         , bool iRestrictToSelection
                          , double iX
                          , double iY
                          , double iRadius
@@ -81,6 +87,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
 
         /**
          * @brief Pick segments depending on a selection circle passed as parameters.
+         * @param iRestrictToSelection restrict to selected objects (and children objects)
          * @param iScene the root object
          * @param iX "world" x-axis coordinates for the selection circle.
          * @param iY "world" y-axis coordinates for the selection circle.
@@ -91,6 +98,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
          *  FOdysseyVectorPath::PICK_POINT : pick vertices
          */
         void PickPoints( FOdysseyVectorScene* iScene
+                       , bool iRestrictToSelection
                        , double iX
                        , double iY
                        , double iRadius
@@ -129,6 +137,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
                   , ::ULIS::FRectD &iRoi
                   , bool iSelectedOnly );
 
+        void ValidateRegion();
+
         /**
          * @brief Invalidate a region
          * @param iX
@@ -142,19 +152,15 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
          * @brief Invalidate a region (floating point).
          * @param iRegion
          */
-        void InvalidateRegion( ::ULIS::FRectD& iRegion );
+        void InvalidateRegion( const ::ULIS::FRectD& iRegion );
 
         /**
          * @brief Invalidate a region (integer).
          * @param iRegion
          */
-        void InvalidateRegion( ::ULIS::FRectI& iRegion );
+        void InvalidateRegion( const ::ULIS::FRectI& iRegion );
 
-        /**
-         * @brief Get the invalidated region.
-         * @return a reference to the invalidated region.
-         */
-        ::ULIS::FRectD& GetInvalidateRegion();
+        ::ULIS::FRectI& GetInvalidatedRegion();
 
         /**
          * @brief Set drawing flags. Currently none.
@@ -204,6 +210,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
          */
         void GetColorImageSize( uint32* iW, uint32* iH );
 
+        void GetColorImageSize( ::ULIS::FRectI& redrawRegion );
+
         /**
          * @brief Set the selection space, i.e the group we pick objects from. 
          *   Default is null, meaning the scene is the selection space.
@@ -224,11 +232,22 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
          */
         void UseImage( BLImage* iImage );
 
+        /**
+         * @brief render the current HUD.
+         * @param iDrawingFlags.
+         */
+        void RenderHUD( /*FOdysseyVectorScene* iScene*/ );
+
+        void SetScene( FOdysseyVectorScene* iScene );
+        FOdysseyVectorScene* GetScene( );
+        void SelectAllInSelectionSpace();
+
     protected:
         static void RecursivePick( FOdysseyVectorGroup* iSelectionSpace
                                  , FOdysseyVectorObject* iObj
                                  , std::vector<FOdysseyVectorObject*>& iSelectedObjectArray
-                                 , ::ULIS::FRectD& iRoi, uint32 iSelectionFlags );
+                                 , const ::ULIS::FRectD& iRoi
+                                 , uint32 iSelectionFlags );
 
         static void RecursiveErase( FOdysseyVectorObject* iObj
                                   , std::vector<FOdysseyVectorObject*>& iAddedObjectArray
@@ -237,20 +256,16 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
                                   , std::vector<FOdysseyVectorObject*>& iRemovedObjectArray
                                   , std::vector<FOdysseyVectorVertex*>& iRemovedVertexArray
                                   , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray
-                                  , ::ULIS::FRectD &iRoi
+                                  , const ::ULIS::FRectD &iRoi
                                   , bool iSelectedOnly );
-        /**
-         * @brief render the current HUD.
-         * @param iDrawingFlags.
-         */
-        void RenderHUD( FOdysseyVectorScene* iScene, ::ULIS::FRectD& iRoi );
+
 
     private:
         BLContext* mBLContext;
         BLImage* mBLImage;
         BLImage* mBLMask;
         uint64 mDrawingFlags;
-
+        std::list<FOdysseyVectorHUD*> mHUDList;
         FOdysseyVectorGroup* mSelectionSpace;
-
+        FOdysseyVectorScene* mScene;
 };

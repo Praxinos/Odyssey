@@ -21,10 +21,9 @@ FOdysseyPainterEditorSelectedVectorObjectTab::FOdysseyPainterEditorSelectedVecto
                             FSlateIcon( "OdysseyStyle", "PainterEditor.Tools16" ))
     , mEditor(iEditor)
 {
-    mObjectView = NewObject<UOdysseyVectorViewObject>();
-    mPathView = NewObject<UOdysseyVectorViewPath>();
-    mEllipseView = NewObject<UOdysseyVectorViewEllipse>();
-    mGroupPaintView = NewObject<UOdysseyVectorViewGroupPaint>();
+    mObjectView = NewObject<UOdysseyPainterEditorVectorObjectView>();
+    mPathView = NewObject<UOdysseyPainterEditorVectorPathView>();
+    mGroupPaintView = NewObject<UOdysseyPainterEditorVectorGroupPaintView>();
 /*
     mEditor->GetVectorObjectPickTool()->mSelectionChanged.AddRaw(this, &FOdysseyPainterEditorSelectedVectorObjectTab::OnSelectionChanged );
     mEditor->GetVectorPathDrawingTool()->mSelectionChanged.AddRaw(this, &FOdysseyPainterEditorSelectedVectorObjectTab::OnSelectionChanged );
@@ -38,7 +37,6 @@ FOdysseyPainterEditorSelectedVectorObjectTab::AddReferencedObjects(FReferenceCol
     // Prevent these UObjects from being destroyed by garbage collection
 	Collector.AddReferencedObject(mObjectView);
 	Collector.AddReferencedObject(mPathView);
-	Collector.AddReferencedObject(mEllipseView);
 	Collector.AddReferencedObject(mGroupPaintView);
 }
 
@@ -83,77 +81,58 @@ FOdysseyPainterEditorSelectedVectorObjectTab::BindShortcuts(FBaseToolkit* iToolk
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------------------- Widget Getters
 
-UOdysseyVectorViewObject*
+UOdysseyPainterEditorVectorObjectView*
 FOdysseyPainterEditorSelectedVectorObjectTab::GetObjectView()
 {
     return mObjectView;
 }
 
-UOdysseyVectorViewPath*
+UOdysseyPainterEditorVectorPathView*
 FOdysseyPainterEditorSelectedVectorObjectTab::GetPathView()
 {
     return mPathView;
 }
 
-UOdysseyVectorViewEllipse*
-FOdysseyPainterEditorSelectedVectorObjectTab::GetEllipseView()
-{
-    return mEllipseView;
-}
-
-UOdysseyVectorViewGroupPaint*
+UOdysseyPainterEditorVectorGroupPaintView*
 FOdysseyPainterEditorSelectedVectorObjectTab::GetGroupPaintView()
 {
     return mGroupPaintView;
 }
 
+//--------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------ Methods
+
 void
 FOdysseyPainterEditorSelectedVectorObjectTab::Update( FOdysseyVectorScene* iScene )
 {
-    FOdysseyVectorObject* selectedObject = iScene->GetLastSelected();
+    uint32 objectClass = FOdysseyVectorObject::GetCommonClass( iScene->GetSelectedObjectList() );
 
-    if( selectedObject && ( iScene->GetSelectedObjectList().size() == 1 ) )
+    if( objectClass )
     {
-        if( selectedObject->GetClass() == FOdysseyVectorPathCubic::StaticClass() )
+        if( objectClass == FOdysseyVectorPathCubic::StaticClass() )
         {
-            mPathView->Update( selectedObject );
+            mPathView->Update( iScene );
             mDetailsView->SetObject( mPathView );
         }
-        else
-        if( selectedObject->GetClass() == FOdysseyVectorEllipse::StaticClass() )
+
+        if( objectClass == FOdysseyVectorGroupPaint::StaticClass() )
         {
-            mEllipseView->Update( selectedObject );
-            mDetailsView->SetObject( mEllipseView );
-        }
-        else
-        if( selectedObject->GetClass() == FOdysseyVectorGroupPaint::StaticClass() )
-        {
-            mGroupPaintView->Update( selectedObject );
+            mGroupPaintView->Update( iScene );
             mDetailsView->SetObject( mGroupPaintView );
         }
-        else
+
+        if( objectClass == FOdysseyVectorObject::StaticClass() )
         {
             // default
-            mObjectView->Update( selectedObject );
+            mObjectView->Update( iScene );
             mDetailsView->SetObject( mObjectView );
         }
     }
     else
     {
-        mDetailsView->SetObject(nullptr);
+        mDetailsView->SetObject( nullptr );
     }
 }
 
-//--------------------------------------------------------------------------------------
-//---------------------------------------------------------------------- Event Listeners
-
-void
-FOdysseyPainterEditorSelectedVectorObjectTab::OnRefresh( FOdysseyVectorScene* iScene )
-{
-    Update( iScene );
-}
-
-//--------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------ Methods
 
 #undef LOCTEXT_NAMESPACE

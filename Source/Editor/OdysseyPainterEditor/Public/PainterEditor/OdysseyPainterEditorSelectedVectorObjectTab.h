@@ -5,10 +5,9 @@
 
 #include "OdysseyEditorTab.h"
 #include "OdysseyVector.h"
-#include "View/OdysseyVectorViewObject.h"
-#include "View/OdysseyVectorViewPath.h"
-#include "View/OdysseyVectorViewEllipse.h"
-#include "View/OdysseyVectorViewGroupPaint.h"
+#include "OdysseyPainterEditorVectorObjectView.h"
+#include "OdysseyPainterEditorVectorPathView.h"
+#include "OdysseyPainterEditorVectorGroupPaintView.h"
 #include <ULIS>
 
 class FOdysseyPainterEditor;
@@ -22,10 +21,9 @@ public:
     virtual ~FOdysseyPainterEditorSelectedVectorObjectTab();
     FOdysseyPainterEditorSelectedVectorObjectTab(FOdysseyPainterEditor* iEditor);
 
-    UOdysseyVectorViewObject* GetObjectView();
-    UOdysseyVectorViewPath* GetPathView();
-    UOdysseyVectorViewEllipse* GetEllipseView();
-    UOdysseyVectorViewGroupPaint* GetGroupPaintView();
+    UOdysseyPainterEditorVectorObjectView* GetObjectView();
+    UOdysseyPainterEditorVectorPathView* GetPathView();
+    UOdysseyPainterEditorVectorGroupPaintView* GetGroupPaintView();
 
 protected:
     // FOdysseyEditorTab interface
@@ -46,8 +44,7 @@ private:
     FOdysseyPainterEditor* mEditor;
     TSharedPtr<IDetailsView> mDetailsView;
 
-    UOdysseyVectorViewObject* mObjectView;
-    UOdysseyVectorViewPath* mPathView;
-    UOdysseyVectorViewEllipse* mEllipseView;
-    UOdysseyVectorViewGroupPaint* mGroupPaintView;
+    UOdysseyPainterEditorVectorObjectView* mObjectView;
+    UOdysseyPainterEditorVectorPathView* mPathView;
+    UOdysseyPainterEditorVectorGroupPaintView* mGroupPaintView;
 };

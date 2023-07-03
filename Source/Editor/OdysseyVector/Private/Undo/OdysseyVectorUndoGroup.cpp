@@ -77,8 +77,15 @@ FOdysseyVectorUndoGroup::Apply( UObject* iIgnored )
         mAddedObjectArray[i]->Invalidate();
     }
 
-    // update invalidated objects and call callbacks if any (for refreshing GUI e.g)
+    // update invalidated objects
     mScene->Update(0);
+
+    mScene->GetEngine()->ResetHUD();
+    // call callbacks if any (for refreshing GUI e.g)
+    mScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW
+                  | FOdysseyVectorScene::SIGNAL_OBJECT_SELECTED
+                  | FOdysseyVectorScene::SIGNAL_OBJECT_MODIFIED
+                  | FOdysseyVectorScene::SIGNAL_OBJECT_TRANSFORMED );
 }
 
 void
@@ -113,8 +120,15 @@ FOdysseyVectorUndoGroup::Revert( UObject* iIgnored )
         mAddedObjectArray[i]->Invalidate();
     }
 
-    // update invalidated objects and call callbacks if any (for refreshing GUI e.g)
+    // update invalidated objects
     mScene->Update(0);
+
+    mScene->GetEngine()->ResetHUD();
+    // call callbacks if any (for refreshing GUI e.g)
+    mScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW
+                  | FOdysseyVectorScene::SIGNAL_OBJECT_SELECTED
+                  | FOdysseyVectorScene::SIGNAL_OBJECT_MODIFIED
+                  | FOdysseyVectorScene::SIGNAL_OBJECT_TRANSFORMED );
 }
 
 /** Describes this change (for debugging) */

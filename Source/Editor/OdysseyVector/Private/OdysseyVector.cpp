@@ -1,5 +1,68 @@
 #include "OdysseyVector.h"
 
+// https://drafts.csswg.org/css-transforms/#decomposing-a-2d-matrix
+void
+FOdysseyVector::ExtractTransformations( BLMatrix2D &iMatrix
+                                      , double* iTranslationX
+                                      , double* iTranslationY
+                                      , double* iRotation
+                                      , double* iScalingX
+                                      , double* iScalingY )
+{
+    double row0x = iMatrix.m00;
+    double row0y = iMatrix.m01;
+    double row1x = iMatrix.m10;
+    double row1y = iMatrix.m11;
+    double translation[2];
+    double scale[2];
+
+    translation[0] = iMatrix.m20;
+    translation[1] = iMatrix.m21;
+
+    scale[0] = sqrt( row0x * row0x + row0y * row0y );
+    scale[1] = sqrt( row1x * row1x + row1y * row1y );
+
+    // If determinant is negative, one axis was flipped.
+    double determinant = row0x * row1y - row0y * row1x;
+
+    if( determinant < 0 )
+    {
+        // Flip axis with minimum unit vector dot product.
+        if ( row0x < row1y )
+        {
+            scale[0] = -scale[0];
+        }
+        else
+        {
+            scale[1] = -scale[1];
+        }
+    }
+
+    // Renormalize matrix to remove scale.
+
+    if( scale[0] )
+    {
+        row0x *= 1.0f / scale[0];
+        row0y *= 1.0f / scale[0];
+    }
+
+    if( scale[1] )
+    {
+        row1x *= 1.0f / scale[1];
+        row1y *= 1.0f / scale[1];
+    }
+
+    // Compute rotation and renormalize matrix.
+    double angle = atan2( row0y, row0x );
+
+    if( iTranslationX ) *iTranslationX = translation[0];
+    if( iTranslationY ) *iTranslationY = translation[1];
+    if( iRotation     ) *iRotation = angle;
+    if( iScalingX     ) *iScalingX = scale[0];
+    if( iScalingY     ) *iScalingY = scale[1];
+}
+
+/*
 // https://stackoverflow.com/questions/45159314/decompose-2d-transformation-matrix
 void
 FOdysseyVector::ExtractTransformations( BLMatrix2D &iMatrix
@@ -34,6 +97,7 @@ FOdysseyVector::ExtractTransformations( BLMatrix2D &iMatrix
         *iScalingY = sqrt( ( iMatrix.m10 * iMatrix.m10 ) + ( iMatrix.m11 * iMatrix.m11 ) );
     }
 }
+*/
 
 double
 FOdysseyVector::Cross2D( const ::ULIS::FVec2D& iA, const ::ULIS::FVec2D &iB )
@@ -43,10 +107,10 @@ FOdysseyVector::Cross2D( const ::ULIS::FVec2D& iA, const ::ULIS::FVec2D &iB )
 
 // https://stackoverflow.com/questions/35473936/find-whether-two-line-segments-intersect-or-not-in-c
 bool
-FOdysseyVector::IntersectSegment( ::ULIS::FVec2D& line0p0
-                                , ::ULIS::FVec2D& line0p1
-                                , ::ULIS::FVec2D& line1p0
-                                , ::ULIS::FVec2D& line1p1
+FOdysseyVector::IntersectSegment( const ::ULIS::FVec2D& line0p0
+                                , const ::ULIS::FVec2D& line0p1
+                                , const ::ULIS::FVec2D& line1p0
+                                , const ::ULIS::FVec2D& line1p1
                                 , double* line0t
                                 , double* line1t )
 {

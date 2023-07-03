@@ -21,12 +21,20 @@ UOdysseyPainterEditorVectorPathCutTool::UOdysseyPainterEditorVectorPathCutTool()
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
 void
-UOdysseyPainterEditorVectorPathCutTool::ActivateVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorPathCutTool::UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+{
+    iEngine->RemoveHUD( &mCubicPathHUD );
+
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+}
+
+void
+UOdysseyPainterEditorVectorPathCutTool::LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
     iEngine->ClearHUD();
-    iEngine->AddHUD(&mCubicPathHUD);
+    iEngine->AddHUD( &mCubicPathHUD );
 
-    iScene->Update( 0 ); // refresh vector scene and GUI widgets via delegates.
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
 
 bool
@@ -42,15 +50,7 @@ UOdysseyPainterEditorVectorPathCutTool::OnMouseDownVector( FOdysseyVectorEngine*
 
     iEngine->AddHUD( &mLineHUD );
 
-    if ( selectedObject )
-    {
-        BLPoint localCoords = selectedObject->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
-
-        mStartCutAt.x = localCoords.x;
-        mStartCutAt.y = localCoords.y;
-    }
-
-    iScene->Update( 0 ); // refresh vector scene and GUI widgets via delegates.
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 
     return true;
 }
@@ -70,6 +70,7 @@ UOdysseyPainterEditorVectorPathCutTool::OnMouseDragVector( FOdysseyVectorEngine*
     mLineHUD.SetP1( iPointInTexture.x, iPointInTexture.y );
 
     iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES ); // refresh vector scene and GUI widgets via delegates.
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
 
 bool
@@ -78,31 +79,36 @@ UOdysseyPainterEditorVectorPathCutTool::OnMouseUpVector( FOdysseyVectorEngine* i
                                                        , const FOdysseyPoint& iPointInTexture
                                                        , const FKey& iKey )
 {
-    FOdysseyVectorObject* selectedObject = iScene->GetLastSelected();
-    std::vector<FOdysseyVectorVertex*> addedVertexArray;
-    std::vector<FOdysseyVectorSegment*> addedSegmentArray;
+    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
     std::vector<FOdysseyVectorSegment*> removedSegmentArray;
-    ::ULIS::FVec2D endCutAt;
+    std::vector<FOdysseyVectorSegment*> addedSegmentArray;
+    std::vector<FOdysseyVectorVertex*> addedVertexArray;
+
+    // crashes if I don't reserve. Why that ?
+    removedSegmentArray.reserve(50);
+    addedSegmentArray.reserve(50);
+    addedVertexArray.reserve(50);
 
     iEngine->RemoveHUD( &mLineHUD );
 
-    if ( selectedObject )
+    for( std::list<FOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
     {
-        BLPoint localCoords = selectedObject->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
-
-        endCutAt.x = localCoords.x;
-        endCutAt.y = localCoords.y;
+        FOdysseyVectorObject* selectedObject = (*it);
+        BLMatrix2D& inverseWorldMatrix = selectedObject->GetInverseWorldMatrix();
+        ::ULIS::FVec2D& p0 = mLineHUD.GetP0();
+        ::ULIS::FVec2D& p1 = mLineHUD.GetP1();
+        BLPoint localP0 = inverseWorldMatrix.mapPoint( p0.x, p0.y );
+        BLPoint localP1 = inverseWorldMatrix.mapPoint( p1.x, p1.y );
 
         if( selectedObject->GetClass() == FOdysseyVectorPathCubic::StaticClass() )
         {
             FOdysseyVectorPathCubic *cubicPath = static_cast<FOdysseyVectorPathCubic*>(selectedObject);
 
-            // crashes if I don't reserve. Why that ?
-            addedVertexArray.reserve(50);
-            addedSegmentArray.reserve(50);
-            removedSegmentArray.reserve(50);
-
-            cubicPath->Cut( mStartCutAt, endCutAt, addedVertexArray, addedSegmentArray, removedSegmentArray );
+            cubicPath->Cut( ::ULIS::FVec2D( localP0.x, localP0.y )
+                          , ::ULIS::FVec2D( localP1.x, localP1.y )
+                          , addedVertexArray
+                          , addedSegmentArray
+                          , removedSegmentArray );
             cubicPath->Invalidate();
         }
     }
@@ -111,11 +117,15 @@ UOdysseyPainterEditorVectorPathCutTool::OnMouseUpVector( FOdysseyVectorEngine* i
     GEditor->BeginTransaction(LOCTEXT("VectorPathCutTool","Vector Path Cut Tool"));
     if( GUndo )
     {
+        std::vector<FOdysseyVectorPath*> removedPathArray; // empty on purpose.
         std::vector<FOdysseyVectorVertex*> removedVertexArray; // empty on purpose.
+        std::vector<FOdysseyVectorPath*> addedPathArray; // empty on purpose.
 
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoPathAlter( iScene
+                                                                  , removedPathArray
                                                                   , removedVertexArray
                                                                   , removedSegmentArray
+                                                                  , addedPathArray
                                                                   , addedVertexArray
                                                                   , addedSegmentArray );
 
@@ -123,7 +133,8 @@ UOdysseyPainterEditorVectorPathCutTool::OnMouseUpVector( FOdysseyVectorEngine* i
     }
     GEditor->EndTransaction();
 
-    iScene->Update( 0 ); // refresh vector scene and GUI widgets via delegates.
+    iScene->Update( 0 ); // update invalidated objects
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW | FOdysseyVectorScene::SIGNAL_OBJECT_MODIFIED );
 
     return true;
 }

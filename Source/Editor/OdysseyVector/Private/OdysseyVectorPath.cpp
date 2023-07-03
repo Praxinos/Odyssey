@@ -2,10 +2,12 @@
 
 FOdysseyVectorPath::~FOdysseyVectorPath()
 {
+   // TODO: free vertices and segments.
 }
 
-FOdysseyVectorPath::FOdysseyVectorPath()
-    : mPaintingCode( 0 )
+FOdysseyVectorPath::FOdysseyVectorPath( const FString& iName )
+    : FOdysseyVectorObject( iName )
+    , mPaintingCode( 0 )
 {
     SetJointType( eJointType::Miter );
 
@@ -24,7 +26,7 @@ FOdysseyVectorPath::HasBaseClass( uint32 iBaseClassID )
 }
 
 void
-FOdysseyVectorPath::Init( std::string iName )
+FOdysseyVectorPath::Init( const FString& iName )
 {
     SetName( iName );
 }
@@ -55,6 +57,59 @@ FOdysseyVectorPath::ToVertexAndSectionArray( std::vector<FOdysseyVectorVertex*>&
     }
 }
 
+
+void
+FOdysseyVectorPath::FlipHorizontal()
+{
+    for( std::list<FOdysseyVectorVertex*>::iterator it = mVertexList.begin(); it != mVertexList.end(); ++it )
+    {
+        FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>(*it);
+
+        vertex->SetX( -vertex->GetX() );
+    }
+
+    for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
+    {
+        FOdysseyVectorSegment* segment = static_cast<FOdysseyVectorSegment*>(*it);
+
+        if( segment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
+        {
+            FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(segment);
+            FOdysseyVectorHandleSegment* handle0 = cubicSegment->GetHandle(0);
+            FOdysseyVectorHandleSegment* handle1 = cubicSegment->GetHandle(1);
+
+            handle0->SetX( -handle0->GetX() );
+            handle1->SetX( -handle1->GetX() );
+        }
+    }
+};
+
+void
+FOdysseyVectorPath::FlipVertical()
+{
+    for( std::list<FOdysseyVectorVertex*>::iterator it = mVertexList.begin(); it != mVertexList.end(); ++it )
+    {
+        FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>(*it);
+
+        vertex->SetY( -vertex->GetY() );
+    }
+
+    for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
+    {
+        FOdysseyVectorSegment* segment = static_cast<FOdysseyVectorSegment*>(*it);
+
+        if( segment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
+        {
+            FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(segment);
+            FOdysseyVectorHandleSegment* handle0 = cubicSegment->GetHandle(0);
+            FOdysseyVectorHandleSegment* handle1 = cubicSegment->GetHandle(1);
+
+            handle0->SetY( -handle0->GetY() );
+            handle1->SetY( -handle1->GetY() );
+        }
+    }
+};
+
 bool
 FOdysseyVectorPath::HasIntersections()
 {
@@ -69,6 +124,14 @@ FOdysseyVectorPath::HasIntersections()
     }
 
     return false;
+}
+
+void
+FOdysseyVectorPath::SelectVertex( FOdysseyVectorVertex* iVertex )
+{
+    iVertex->SetSelected( true );
+
+    mSelectedVertexList.push_back( iVertex );
 }
 
 bool
@@ -101,10 +164,21 @@ FOdysseyVectorPath::SetJointType( eJointType iJointType )
     mPathParam.JointType = iJointType;
 }
 
-std::list<FOdysseyVectorPoint*>&
-FOdysseyVectorPath::GetSelectedPointList()
+void
+FOdysseyVectorPath::UnselectAllVertices()
 {
-    return mSelectedPointList;
+     mSelectedVertexList.remove_if( []( FOdysseyVectorVertex* iVertex )
+                                    { 
+                                        iVertex->SetSelected( false );
+
+                                        return true;
+                                    } );
+}
+
+std::list<FOdysseyVectorVertex*>&
+FOdysseyVectorPath::GetSelectedVertexList()
+{
+    return mSelectedVertexList;
 }
 
 FOdysseyVectorSegment*
@@ -206,9 +280,17 @@ FOdysseyVectorPath::UpdateBBox()
     mBBox = ( hasBBox ) ? ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax ) : ::ULIS::FRectD( 0.0f, 0.0f, 0.0f, 0.0f );
 }
 
+BLPath&
+FOdysseyVectorPath::GetBLPath()
+{
+    return mBLPath;
+}
+
 void
 FOdysseyVectorPath::UpdateShape( uint32 iUpdateFlags )
 {
+    mBLPath.clear();
+
     // update segments
     for ( std::list<FOdysseyVectorSegment*>::iterator it = mInvalidatedSegmentList.begin(); it != mInvalidatedSegmentList.end(); ++it )
     {
@@ -219,18 +301,27 @@ FOdysseyVectorPath::UpdateShape( uint32 iUpdateFlags )
 
     mInvalidatedSegmentList.clear();
 
-    // then update Loops
-/*
-    for ( std::list<FOdysseyVectorCycle*>::iterator it = mInvalidatedLoopList.begin(); it != mInvalidatedLoopList.end(); ++it )
-    {
-        FOdysseyVectorCycle* loop = static_cast<FOdysseyVectorCycle*>(*it);
-
-        loop->Update();
-    }
-
-    mInvalidatedLoopList.clear();
-*/
     UpdateBBox();
+
+    // cache BL Path (for drawing structure for example)
+    for ( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
+    {
+        FOdysseyVectorSegment* segment = static_cast<FOdysseyVectorSegment*>(*it);
+        ::ULIS::FVec2D& point0 = segment->GetVertex(0)->GetCoords();
+        ::ULIS::FVec2D& point1 = segment->GetVertex(1)->GetCoords();
+
+        if( segment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
+        {
+            FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(segment);
+            ::ULIS::FVec2D& ctrlPoint0 = cubicSegment->GetHandle(0)->GetCoords();
+            ::ULIS::FVec2D& ctrlPoint1 = cubicSegment->GetHandle(1)->GetCoords();
+
+            mBLPath.moveTo( point0.x, point0.y );
+            mBLPath.cubicTo( ctrlPoint0.x, ctrlPoint0.y
+                           , ctrlPoint1.x, ctrlPoint1.y
+                           , point1.x, point1.y );
+        }
+    }
 }
 
 void
@@ -268,6 +359,7 @@ FOdysseyVectorPath::AddSegment( FOdysseyVectorSegment* iSegment )
     iSegment->GetVertex(0)->AddSegment( iSegment );
     iSegment->GetVertex(1)->AddSegment( iSegment );
 
+    Invalidate();
 /*
     iSegment->GetVertex(0)->AddSection( iSegment->GetDefaultSection() );
     iSegment->GetVertex(1)->AddSection( iSegment->GetDefaultSection() );
@@ -292,13 +384,14 @@ FOdysseyVectorPath::Clear()
 void
 FOdysseyVectorPath::RemoveSegment( FOdysseyVectorSegment* iSegment )
 {
-    iSegment->ClearIntersections(); // note: re-adds the default section
+    //iSegment->ClearIntersections(); // note: re-adds the default section
 
     mSegmentList.remove( iSegment );
 
     iSegment->GetVertex(0)->RemoveSegment( iSegment );
     iSegment->GetVertex(1)->RemoveSegment( iSegment );
 
+    Invalidate();
 /*
     iSegment->GetVertex(0)->RemoveSection(iSegment->GetDefaultSection());
     iSegment->GetVertex(1)->RemoveSection(iSegment->GetDefaultSection());
@@ -350,13 +443,13 @@ FOdysseyVectorPath::GetFirstVertex()
 }
 
 void
-FOdysseyVectorPath::DrawShape( ::ULIS::FRectD& iRoi, uint64 iFlags )
+FOdysseyVectorPath::DrawShape( uint64 iFlags )
 {
     for(std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it)
     {
         FOdysseyVectorSegment *segment = (*it);
 
-        segment->Draw( iRoi );
+        segment->Draw();
     }
 
     /*DrawLoops( iRoi, iFlags );*/
@@ -629,22 +722,42 @@ FOdysseyVectorPath::InvalidateAllSegments()
 }
 
 void
-FOdysseyVectorPath::DrawJoint( FOdysseyVectorVertex* iVertex, ::ULIS::FRectD &iRoi, uint64 iFlags )
+FOdysseyVectorPath::DrawJoint( FOdysseyVectorVertex* iVertex, uint64 iFlags )
 {
     FOdysseyVectorSegment* segment0 = iVertex->GetFirstSegment();
     FOdysseyVectorSegment* segment1 = iVertex->GetLastSegment();
     double vertexRadius = iVertex->GetRadius();
+    BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
 
     if ( ( segment0 && segment1 ) && ( segment0 != segment1 ) )
     {
         ::ULIS::FVec2D segment0Vector = iVertex->GetVectorOnSegment(segment0, false);
         ::ULIS::FVec2D segment1Vector = iVertex->GetVectorOnSegment(segment1, false);
         ::ULIS::FVec2D& origin = iVertex->GetCoords();
+        BLPoint worldOrigin = mWorldMatrix.mapPoint( origin.x, origin.y );
 
         if ( segment0Vector.DistanceSquared() && segment1Vector.DistanceSquared() )
         {
+            ::ULIS::FVec2D perpendicularVector0, perpendicularVector1;
+
             segment0Vector.Normalize();
             segment1Vector.Normalize();
+
+            perpendicularVector0 = ::ULIS::FVec2D( segment0Vector.y, -segment0Vector.x );
+            perpendicularVector1 = ::ULIS::FVec2D( segment1Vector.y, -segment1Vector.x );
+
+            blctx->save();
+            blctx->resetMatrix();
+            blctx->setStrokeWidth( 1.0f );
+            blctx->strokeLine( worldOrigin, mWorldMatrix.mapPoint( origin.x + perpendicularVector0.x * vertexRadius
+                                                                 , origin.y + perpendicularVector0.y * vertexRadius ) );
+            blctx->strokeLine( worldOrigin, mWorldMatrix.mapPoint( origin.x - perpendicularVector0.x * vertexRadius
+                                                                 , origin.y - perpendicularVector0.y * vertexRadius ) );
+            blctx->strokeLine( worldOrigin, mWorldMatrix.mapPoint( origin.x + perpendicularVector1.x * vertexRadius
+                                                                 , origin.y + perpendicularVector1.y * vertexRadius ) );
+            blctx->strokeLine( worldOrigin, mWorldMatrix.mapPoint( origin.x - perpendicularVector1.x * vertexRadius
+                                                                 , origin.y - perpendicularVector1.y * vertexRadius ) );
+            blctx->restore();
 
             // if the dot product equals to 1.0f, then the point is perfectly smooth, hence there is no need for joints.
             if ( segment0Vector.DotProduct(segment1Vector) < 1.0f )
@@ -673,4 +786,79 @@ FOdysseyVectorPath::DrawJoint( FOdysseyVectorVertex* iVertex, ::ULIS::FRectD &iR
             }
         }
     }
+}
+
+// static
+::ULIS::FVec2D
+FOdysseyVectorPath::GetPerpendicularVector( FOdysseyVectorVertex* iVertex, bool iNormalize )
+{
+    std::list<FOdysseyVectorSegment*>& segmentList = iVertex->GetSegmentList();
+    ::ULIS::FVec2D parallel = { 0.0f, 0.0f };
+    ::ULIS::FVec2D perpendicular = { 0.0f, 0.0f };
+
+    if ( segmentList.size() )
+    {
+        uint32 count = 0;
+
+        for( std::list<FOdysseyVectorSegment*>::iterator it = segmentList.begin(); it != segmentList.end(); ++it )
+        {
+            FOdysseyVectorSegmentCubic *segment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
+            FOdysseyVectorVertex* p0 = segment->GetVertex(0);
+            FOdysseyVectorVertex* p1 = segment->GetVertex(1);
+            ::ULIS::FVec2D& point0 = segment->GetVertex(0)->GetCoords();
+            ::ULIS::FVec2D& point1 = segment->GetVertex(1)->GetCoords();
+            ::ULIS::FVec2D& ctrlPoint0 = segment->GetHandle(0)->GetCoords();
+            ::ULIS::FVec2D& ctrlPoint1 = segment->GetHandle(1)->GetCoords();
+
+            if( iVertex == p0 )
+            {
+                // this is less computation-heavy
+                ::ULIS::FVec2D vec = { ctrlPoint0 - point0 };
+                /*::ULIS::FVec2D vec =  { CubicBezierTangentAtParameter<::ULIS::FVec2D>( point0.GetCoords()
+                                                                     , ctrlPoint0.GetCoords()
+                                                                     , ctrlPoint1.GetCoords()
+                                                                     , point1.GetCoords()
+                                                                     , 0.0f ) };*/
+
+                if ( vec.DistanceSquared() )
+                {
+                    vec.Normalize();
+
+                    parallel.x += vec.x;
+                    parallel.y += vec.y;
+                }
+            }
+
+            if( iVertex == p1 )
+            {
+                ::ULIS::FVec2D vec = { point1 - ctrlPoint1 };
+                /*::ULIS::FVec2D vec =  { CubicBezierTangentAtParameter<::ULIS::FVec2D>( point0.GetCoords()
+                                                                     , ctrlPoint0.GetCoords()
+                                                                     , ctrlPoint1.GetCoords()
+                                                                     , point1.GetCoords()
+                                                                     , 1.0f ) };*/
+
+                if ( vec.DistanceSquared() )
+                {
+                    vec.Normalize();
+
+                    parallel.x += vec.x;
+                    parallel.y += vec.y;
+                }
+            }
+        }
+
+        if ( iNormalize == true )
+        {
+            if ( parallel.DistanceSquared() )
+            {
+                parallel.Normalize();
+            }
+
+            perpendicular.x =   parallel.y;
+            perpendicular.y = - parallel.x;
+        }
+    }
+
+    return perpendicular;
 }

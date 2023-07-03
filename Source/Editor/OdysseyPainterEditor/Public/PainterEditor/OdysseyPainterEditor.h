@@ -10,7 +10,7 @@
 #include "Tools/VectorPathDrawingTool/OdysseyPainterEditorVectorPathDrawingTool.h"
 #include "Tools/VectorPathEditTool/OdysseyPainterEditorVectorPathEditTool.h"
 #include "Tools/VectorPathCutTool/OdysseyPainterEditorVectorPathCutTool.h"
-#include "Tools/VectorObjectPickTool/OdysseyPainterEditorVectorObjectPickTool.h"
+#include "Tools/VectorPickTool/OdysseyPainterEditorVectorPickTool.h"
 #include "Tools/VectorObjectMoveTool/OdysseyPainterEditorVectorObjectMoveTool.h"
 #include "Tools/VectorObjectRotateTool/OdysseyPainterEditorVectorObjectRotateTool.h"
 #include "Tools/VectorObjectScaleTool/OdysseyPainterEditorVectorObjectScaleTool.h"
@@ -24,6 +24,7 @@
 #include "Tools/PaintBucketTool/OdysseyPainterEditorPaintBucketTool.h"
 #include "Tools/ColorPickerTool/OdysseyPainterEditorColorPickerTool.h"
 #include "Tools/VectorGridTool/OdysseyPainterEditorVectorGridTool.h"
+#include "Tools/VectorTransformTool/OdysseyPainterEditorVectorTransformTool.h"
 #include <ULIS>
 
 class FOdysseyHUDSystem;
@@ -66,11 +67,12 @@ public:
     virtual UOdysseyPainterEditorVectorPathDrawingTool*              GetVectorPathDrawingTool() const = 0;
     virtual UOdysseyPainterEditorVectorPathEditTool*                 GetVectorPathEditTool() const = 0;
     virtual UOdysseyPainterEditorVectorPathCutTool*                  GetVectorPathCutTool() const = 0;
-    virtual UOdysseyPainterEditorVectorObjectPickTool*               GetVectorObjectPickTool() const = 0;
+    virtual UOdysseyPainterEditorVectorPickTool*                     GetVectorPickTool() const = 0;
     virtual UOdysseyPainterEditorVectorObjectMoveTool*               GetVectorObjectMoveTool() const = 0;
     virtual UOdysseyPainterEditorVectorObjectRotateTool*             GetVectorObjectRotateTool() const = 0;
     virtual UOdysseyPainterEditorVectorObjectScaleTool*              GetVectorObjectScaleTool() const = 0;
     virtual UOdysseyPainterEditorVectorGridTool*                     GetVectorGridTool() const = 0;
+    virtual UOdysseyPainterEditorVectorTransformTool*                GetVectorTransformTool() const = 0;
     virtual UOdysseyPainterEditorVectorSceneScaleTool*               GetVectorSceneScaleTool() const = 0;
     virtual UOdysseyPainterEditorVectorScenePanTool*                 GetVectorScenePanTool() const = 0;
     virtual UOdysseyPainterEditorVectorEraserTool*                   GetVectorEraserTool() const = 0;
@@ -80,6 +82,22 @@ public:
     virtual UOdysseyPainterEditorVectorPathKnotTool*                 GetVectorPathKnotTool() const = 0;
     virtual UOdysseyPainterEditorPaintBucketTool*                    GetPaintBucketTool() const = 0;
     virtual UOdysseyPainterEditorColorPickerTool*                    GetColorPickerTool() const = 0;
+
+    // generic reusable vector methods. 
+    static void Group( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    static void ResetView( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    static void DeleteSelection( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    static void GroupPaint( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    static void Ungroup( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    static void SendBackward( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    static void BringForward( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    static void FlipHorizontal( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    static void FlipVertical( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    static void SelectAll( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    static void DeleteBucket( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    static void PropagateBucket( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    static void UnpropagateBucket( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    static void KnotVertices( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
 
     void SelectDefaultTool();
 

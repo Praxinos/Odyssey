@@ -2,6 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Tools/VectorObjectScaleTool/OdysseyPainterEditorVectorObjectScaleTool.h"
+#include "Tools/VectorObjectScaleTool/OdysseyPainterEditorVectorObjectScaleToolHUD.h"
 
 #define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorObjectScaleTool"
 
@@ -13,36 +14,38 @@
 //----------------------------------------------------------- Construction / Destruction
 UOdysseyPainterEditorVectorObjectScaleTool::~UOdysseyPainterEditorVectorObjectScaleTool()
 {
-    delete mTransformHUD;
 }
 
 UOdysseyPainterEditorVectorObjectScaleTool::UOdysseyPainterEditorVectorObjectScaleTool()
     : Uniform( true )
+    , PickingRadius( 25.0f )
+    , mHandleFlags( 0 )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.ObjectScaleTool64");
 
-    mTransformHUD = new FOdysseyVectorHUDScale( );
-}
-
-void
-UOdysseyPainterEditorVectorObjectScaleTool::FitHUD( FOdysseyVectorScene* iScene )
-{
-    mTransformHUD->UpdateSelectionBox( iScene );
+    mObjectScaleHUD = new FOdysseyPainterEditorVectorObjectScaleToolHUD( this );
 }
 
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
 void
-UOdysseyPainterEditorVectorObjectScaleTool::ActivateVector( FOdysseyVectorEngine* iEngine
-                                                          , FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorObjectScaleTool::UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
-    FitHUD( iScene );
+    iEngine->RemoveHUD( mObjectScaleHUD );
 
-    iEngine->ClearHUD( );
-    iEngine->AddHUD( mTransformHUD );
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+}
 
-    iScene->Update( 0 ); // refresh vector scene and GUI widgets via delegates.
+void
+UOdysseyPainterEditorVectorObjectScaleTool::LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+{
+    iEngine->ClearHUD();
+    iEngine->AddHUD( mObjectScaleHUD );
+
+    mObjectScaleHUD->Reset( iScene );
+
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
 
 bool
@@ -51,44 +54,55 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDownVector( FOdysseyVectorEng
                                                              , const FOdysseyPoint& iPointInTexture
                                                              , const FKey& iKey )
 {
-    FSelectionBox& selectionBox = mTransformHUD->GetSelectionBox();
+    FSelectionBox& selectionBox = mObjectScaleHUD->GetSelectionBox();
 
-    if( selectionBox.space )
+    if( selectionBox.rect.Area() )
     {
-        BLPoint localCoords = selectionBox.space->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
-
-        mPickedHandle = mTransformHUD->Pick( iPointInTexture.x, iPointInTexture.y );
+        BLPoint localCoords = selectionBox.inverseWorldMatrix.mapPoint( iPointInTexture.x, iPointInTexture.y );
 
         mOldLocalMouseX = localCoords.x;
         mOldLocalMouseY = localCoords.y;
     }
 
-    // needed for valid GUndo pointer
-    GEditor->BeginTransaction(LOCTEXT("VectorObjectScaleTool","Vector Object Scale Tool"));
-    if( GUndo )
-    {
-        // save selected object translation/rotation/scaling before transform
-        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoObjectTransform( iScene, iScene->GetSelectedObjectList() );
+    // remember for undos. we don't set undos in the mouse down event because it could conflict with the undo created by
+    // UOdysseyPainterEditorVectorObjectPickTool::OnMouseUpVector() called when no dragging was made.
+    mObjectTransformArray.clear();
+    FObjectTransform::MakeArrayFromObjectList( iScene->GetSelectedObjectList(), mObjectTransformArray );
 
-        GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
-    }
-    GEditor->EndTransaction();
+    mDragging = false;
 
-    iScene->Update( 0 ); // refresh vector scene and GUI widgets via delegates.
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 
     return true;
 }
 
-void
+::ULIS::FRectI
+UOdysseyPainterEditorVectorObjectScaleTool::OnMouseHoverVector( FOdysseyVectorEngine* iEngine
+                                                              , FOdysseyVectorScene* iScene
+                                                              , const FOdysseyPoint& iPointInTexture )
+{
+    ::ULIS::FRectI redrawRegion = { 0, 0, 0, 0 };
+
+    mHandleFlags = mObjectScaleHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
+
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+
+    return redrawRegion; // unused for now
+}
+
+::ULIS::FRectI
 UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDragVector( FOdysseyVectorEngine* iEngine
                                                              , FOdysseyVectorScene* iScene
                                                              , const FOdysseyPoint& iPointInTexture )
 {
-    FSelectionBox& selectionBox = mTransformHUD->GetSelectionBox();
+    FSelectionBox& selectionBox = mObjectScaleHUD->GetSelectionBox();
+    ::ULIS::FRectI redrawRegion = { 0, 0, 0, 0 };
 
-    if ( selectionBox.space )
+    mDragging = true;
+
+    if ( selectionBox.rect.Area() )
     {
-        BLPoint localCoords = selectionBox.space->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
+        BLPoint localCoords = selectionBox.inverseWorldMatrix.mapPoint( iPointInTexture.x, iPointInTexture.y );
         std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
         double difx = localCoords.x - mOldLocalMouseX;
         double dify = localCoords.y - mOldLocalMouseY;
@@ -103,7 +117,7 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDragVector( FOdysseyVectorEng
         double x1 = 0.0f, y1 = 0.0f, x2 = 0.0f, y2 = 0.0f;
         ::ULIS::FVec2D pivot;
 
-        if ( mPickedHandle == 0 )
+        if ( mHandleFlags & FOdysseyPainterEditorVectorObjectScaleToolHUD::PICK_TOPLEFT )
         {
             x1 = localCoords.x;
             y1 = localCoords.y;
@@ -114,7 +128,7 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDragVector( FOdysseyVectorEng
             pivot.y = oldY2;
         }
 
-        if ( mPickedHandle == 1 )
+        if ( mHandleFlags & FOdysseyPainterEditorVectorObjectScaleToolHUD::PICK_TOPRIGHT )
         {
             x1 = oldX1;
             y1 = localCoords.y;
@@ -125,7 +139,7 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDragVector( FOdysseyVectorEng
             pivot.y = oldY2;
         }
 
-        if ( mPickedHandle == 2 )
+        if ( mHandleFlags & FOdysseyPainterEditorVectorObjectScaleToolHUD::PICK_BOTTOMRIGHT )
         {
             x1 = oldX1;
             y1 = oldY1;
@@ -136,7 +150,7 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDragVector( FOdysseyVectorEng
             pivot.y = oldY1;
         }
 
-        if ( mPickedHandle == 3 )
+        if ( mHandleFlags & FOdysseyPainterEditorVectorObjectScaleToolHUD::PICK_BOTTOMLEFT )
         {
             x1 = localCoords.x;
             y1 = oldY1;
@@ -147,9 +161,9 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDragVector( FOdysseyVectorEng
             pivot.y = oldY1;
         }
 
-        if( mPickedHandle != -1 )
+        if( ( mHandleFlags & FOdysseyPainterEditorVectorObjectScaleToolHUD::HANDLE_MASK ) != 0 )
         {
-            BLMatrix2D spaceMatrix = selectionBox.space->GetWorldMatrix();
+            BLMatrix2D spaceMatrix = selectionBox.worldMatrix;
             BLMatrix2D invertSpaceMatrix;
             double x2mx1 = ( x2 - x1 );
             double y2my1 = ( y2 - y1 );
@@ -176,41 +190,45 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDragVector( FOdysseyVectorEng
             for( std::list<FOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
             {
                 FOdysseyVectorObject* object = (*it);
-                double translationX;
-                double translationY;
-                double rotation;
-                double scalingX;
-                double scalingY;
-                BLMatrix2D objectSpaceMatrix;
-                BLMatrix2D objectScaledMatrix;
-                BLMatrix2D objectLocalMatrix;
-                BLMatrix2D objectWorldMatrix = object->GetWorldMatrix();
-                BLMatrix2D parentInverseWorldMatrix = object->GetParent()->GetInverseWorldMatrix();
 
-                // transfer object in "Scaling Space" coordinates system
-                FOdysseyVector::MatrixMultiply( invertSpaceMatrix, objectWorldMatrix, objectSpaceMatrix );
+                if ( object->HasSelectedAncestor() == false )
+                {
+                    double translationX;
+                    double translationY;
+                    double rotation;
+                    double scalingX;
+                    double scalingY;
+                    BLMatrix2D objectSpaceMatrix;
+                    BLMatrix2D objectScaledMatrix;
+                    BLMatrix2D objectLocalMatrix;
+                    BLMatrix2D objectWorldMatrix = object->GetWorldMatrix();
+                    BLMatrix2D parentInverseWorldMatrix = object->GetParent()->GetInverseWorldMatrix();
 
-                // scale the object (local to the "Scaling Space" coordinates system)
-                FOdysseyVector::MatrixMultiply( scalingMatrix, objectSpaceMatrix, objectScaledMatrix );
+                    // transfer object in "Scaling Space" coordinates system
+                    FOdysseyVector::MatrixMultiply( invertSpaceMatrix, objectWorldMatrix, objectSpaceMatrix );
 
-                // transfer the object back to world coordinates system
-                FOdysseyVector::MatrixMultiply( spaceMatrix, objectScaledMatrix, objectWorldMatrix );
+                    // scale the object (local to the "Scaling Space" coordinates system)
+                    FOdysseyVector::MatrixMultiply( scalingMatrix, objectSpaceMatrix, objectScaledMatrix );
 
-                // Convert the object to its parent coordinate system, i.e its local coordinates system.
-                FOdysseyVector::MatrixMultiply( parentInverseWorldMatrix, objectWorldMatrix, objectLocalMatrix );
+                    // transfer the object back to world coordinates system
+                    FOdysseyVector::MatrixMultiply( spaceMatrix, objectScaledMatrix, objectWorldMatrix );
 
-                // Extract the local transformations
-                FOdysseyVector::ExtractTransformations( objectLocalMatrix
-                                                        , &translationX
-                                                        , &translationY
-                                                        , &rotation // in radians
-                                                        , &scalingX
-                                                        , &scalingY );
+                    // Convert the object to its parent coordinate system, i.e its local coordinates system.
+                    FOdysseyVector::MatrixMultiply( parentInverseWorldMatrix, objectWorldMatrix, objectLocalMatrix );
 
-                // Apply the local transformations
-                object->Translate( translationX, translationY );
-                object->Rotate( rotation / M_PI * 180 );
-                object->Scale( scalingX, scalingY );
+                    // Extract the local transformations
+                    FOdysseyVector::ExtractTransformations( objectLocalMatrix
+                                                            , &translationX
+                                                            , &translationY
+                                                            , &rotation // in radians
+                                                            , &scalingX
+                                                            , &scalingY );
+
+                    // Apply the local transformations
+                    object->Translate( translationX, translationY );
+                    object->Rotate( rotation / M_PI * 180 );
+                    object->Scale( scalingX, scalingY );
+                }
             }
         }
 
@@ -218,7 +236,7 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDragVector( FOdysseyVectorEng
         iScene->UpdateMatrix();
 
         // update the selection box with the newly modified matrices
-        mTransformHUD->UpdateSelectionBox( iScene );
+        mObjectScaleHUD->UpdateSelectionBox( iScene, false );
 
         mOldLocalMouseX = localCoords.x;
         mOldLocalMouseY = localCoords.y;
@@ -227,6 +245,9 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseDragVector( FOdysseyVectorEng
     }
 
     iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES | FOdysseyVectorObject::KEEPINVALIDATED );
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW | FOdysseyVectorScene::SIGNAL_OBJECT_TRANSFORMED );
+
+    return redrawRegion; // unused for now
 }
 
 bool
@@ -235,7 +256,31 @@ UOdysseyPainterEditorVectorObjectScaleTool::OnMouseUpVector( FOdysseyVectorEngin
                                                            , const FOdysseyPoint& iPointInTexture
                                                            , const FKey& iKey )
 {
-    iScene->Update( 0 ); // refresh vector scene and GUI widgets via delegates.
+    if( mDragging == true )
+    {
+        // needed for valid GUndo pointer
+        GEditor->BeginTransaction(LOCTEXT("VectorObjectScaleTool","Vector Object Scale Tool"));
+        if( GUndo )
+        {
+            // save selected object translation/rotation/scaling before transform
+            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoObjectTransform( iScene, mObjectTransformArray );
+
+            GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
+        }
+        GEditor->EndTransaction();
+    }
+    else
+    {
+        mPointArray.clear();
+        mPointArray.push_back( ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y ) );
+
+        // includes its own undo record
+        UOdysseyPainterEditorVectorPickTool::OnMouseUpVector( iEngine, iScene, iPointInTexture, iKey );
+
+        mObjectScaleHUD->Reset( iScene );
+    }
+
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 
     return true;
 }

@@ -20,6 +20,16 @@ ReadBucketEntry( FOdysseyVectorBucket& iBucket, uint64 iChunkEnd, FArchive &Ar )
                 }
                 break;
 
+                case FOdysseyVectorExport::CHUNK_BUCKET_ROTATION:
+                {
+                    double rotation;
+
+                    Ar << rotation;
+
+                    iBucket.SetRotation( rotation );
+                }
+                break;
+
                 case FOdysseyVectorExport::CHUNK_BUCKET_POSITION:
                 {
                     double x;
@@ -64,20 +74,6 @@ ReadBucketEntry( FOdysseyVectorBucket& iBucket, uint64 iChunkEnd, FArchive &Ar )
 
                     if( stopAt == 0.0f ) iBucket.SetGradientColor0( R, G, B, A );
                     if( stopAt == 1.0f ) iBucket.SetGradientColor1( R, G, B, A );
-                }
-                break;
-
-                case FOdysseyVectorExport::CHUNK_BUCKET_GRADIENT_HANDLE: // container
-                break;
-
-                case FOdysseyVectorExport::CHUNK_BUCKET_GRADIENT_HANDLE_POSITION:
-                {
-                    ::ULIS::FVec2D position;
-
-                    Ar << position.x;
-                    Ar << position.y;
-
-                    iBucket.GetHandle()->Set( position.x, position.y );
                 }
                 break;
 

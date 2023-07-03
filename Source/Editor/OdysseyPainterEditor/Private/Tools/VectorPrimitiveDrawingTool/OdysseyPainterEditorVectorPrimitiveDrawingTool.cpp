@@ -13,6 +13,9 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::~UOdysseyPainterEditorVectorPri
 }
 
 UOdysseyPainterEditorVectorPrimitiveDrawingTool::UOdysseyPainterEditorVectorPrimitiveDrawingTool()
+    : PrimitiveType ( EOdysseyVectorPrimitiveType::Ellipse )
+    , StrokeWidth( 4.0f )
+    , Uniform( false )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Circle64");
 }
@@ -21,12 +24,53 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::UOdysseyPainterEditorVectorPrim
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
 void
-UOdysseyPainterEditorVectorPrimitiveDrawingTool::ActivateVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorPrimitiveDrawingTool::UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
-    iEngine->ClearHUD();
+    //iEngine->RemoveHUD( &mDummyHUD );
 
-    iScene->Update( 0 ); // update vector scene and GUI widgets via delegates.
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
+
+void
+UOdysseyPainterEditorVectorPrimitiveDrawingTool::LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+{
+    //iEngine->ClearHUD();
+    //iEngine->AddHUD( &mDummyHUD );
+
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+}
+
+bool
+UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnKeyDownVector( FOdysseyVectorEngine* iEngine
+                                                                , FOdysseyVectorScene* iScene
+                                                                , const FKey& iKey )
+{
+    UniformAtKeyDown = Uniform;
+
+    if ( FSlateApplication::Get().GetModifierKeys().IsShiftDown() )
+    {
+        Uniform = true;
+    }
+
+    UOdysseyPainterEditorDefaultTool::OnKeyDownVector( iEngine, iScene, iKey );
+    //iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+
+    return false;
+}
+
+bool
+UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnKeyUpVector( FOdysseyVectorEngine* iEngine
+                                                              , FOdysseyVectorScene* iScene
+                                                              , const FKey& iKey )
+{
+    Uniform = UniformAtKeyDown;
+
+    UOdysseyPainterEditorDefaultTool::OnKeyUpVector( iEngine, iScene, iKey );
+    //iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+
+    return false;
+}
+
 
 bool
 UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDownVector( FOdysseyVectorEngine* iEngine
@@ -35,22 +79,61 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDownVector( FOdysseyVect
                                                                   , const FKey& iKey )
 {
     BLPoint localCoords = iScene->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
+
     ::ULIS::FColor color = GetEditorAs<FOdysseyPainterEditor>()->PaintColor().GetValue();
+    UOdysseyPaletteEntry* entry = nullptr;
+    if (GetEditorAs<FOdysseyPainterEditor>()->GetGUI()->GetColorPaletteTab()->PaletteWidget()->GetColorPalette()->GetPalette())
+    {
+        entry = GetEditorAs<FOdysseyPainterEditor>()->GetGUI()->GetColorPaletteTab()->PaletteWidget()->GetColorPalette()->GetPalette()->CurrentEntry.Get();
+        if (entry && entry->IsA(UOdysseyPaletteEntryColor::StaticClass()))
+        {
+            FColor colorEntry = Cast< UOdysseyPaletteEntryColor >(entry)->GetUsedColor();
+            color = ::ULIS::FColor::RGBA8(colorEntry.R, colorEntry.G, colorEntry.B, colorEntry.A);
+        }
+    }
+
     ::ULIS::FColor rgba8 = color.ToFormat( ::ULIS::eFormat::Format_RGBA8 );
-    FOdysseyVectorEllipse* circle = FOdysseyVectorEllipse::New( "Circle", 0.0f, 0.0f );
 
-    iScene->AppendChild( circle );
+    FOdysseyVectorPrimitive* primitive;
 
-    circle->SetForegroundColor( rgba8.R8(), rgba8.G8(), rgba8.B8(), rgba8.A8() );
-    circle->Translate( localCoords.x, localCoords.y );
-    circle->UpdateMatrix();
+    mMouseDown.x = iPointInTexture.x;
+    mMouseDown.y = iPointInTexture.y;
+
+    switch( PrimitiveType )
+    {
+        case EOdysseyVectorPrimitiveType::Ellipse:
+            primitive = new FOdysseyVectorEllipse( FString("Circle"), 0.0f, 0.0f, StrokeWidth );
+        break;
+
+        case EOdysseyVectorPrimitiveType::Rectangle:
+            primitive = new FOdysseyVectorRectangle( FString("Rectangle"), 0.0f, 0.0f, StrokeWidth );
+        break;
+
+        case EOdysseyVectorPrimitiveType::Line:
+            primitive = new FOdysseyVectorLine( FString("Rectangle"), 0.0f, 0.0f, StrokeWidth );
+        break;
+
+        default:
+            primitive = new FOdysseyVectorEllipse( FString("Circle"), 0.0f, 0.0f, StrokeWidth );
+        break;
+    }
+
+    if (entry && entry->IsA(UOdysseyPaletteEntryColor::StaticClass()))
+        primitive->SetPaletteEntry(entry);
+
+    iScene->AppendChild( primitive );
+
+    primitive->SetForegroundColor( rgba8.R8(), rgba8.G8(), rgba8.B8(), rgba8.A8() );
+    primitive->Translate( localCoords.x, localCoords.y );
+    primitive->UpdateMatrix();
 
     iScene->ClearSelection();
-    iScene->Select( circle );
+    iScene->Select( primitive );
 
     //mSelectionChanged.Broadcast(iScene);
 
-    iScene->Update( 0 ); // update vector scene and GUI widgets via delegates.
+    iScene->Update( 0 ); // update invalidated objects
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW | FOdysseyVectorScene::SIGNAL_OBJECT_SELECTED );
 
     return true;
 }
@@ -60,22 +143,53 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDragVector( FOdysseyVect
                                                                   , FOdysseyVectorScene* iScene
                                                                   , const FOdysseyPoint& iPointInTexture )
 {
-    FOdysseyVectorEllipse* circle = static_cast<FOdysseyVectorEllipse*>( iScene->GetLastSelected() );
+    FOdysseyVectorPrimitive* primitive = static_cast<FOdysseyVectorPrimitive*>( iScene->GetLastSelected() );
 
-    if( circle )
+    if( primitive )
     {
-        /*BLPoint localCoords = circle->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );*/
-        BLPoint bldif = circle->GetInverseWorldMatrix().mapVector( iPointInTexture.deltaPosition.X
-                                                                 , iPointInTexture.deltaPosition.Y );
-        ::ULIS::FVec2D dif = ::ULIS::FVec2D( bldif.x, bldif.y );
+        BLPoint bldif = primitive->GetInverseWorldMatrix().mapVector( iPointInTexture.x - mMouseDown.x
+                                                                    , iPointInTexture.y - mMouseDown.y );
+        ::ULIS::FVec2D size = ::ULIS::FVec2D( bldif.x, bldif.y );
 
-        circle->SetRadius( circle->GetRadiusX() + dif.x, circle->GetRadiusY() + dif.y /*difPosition.Distance()*/ );
-        circle->Invalidate();
+        if( Uniform || FSlateApplication::Get().GetModifierKeys().IsControlDown() )
+        {
+            size.x = ::ULIS::FVec2D( bldif.x, bldif.y ).Distance() * 0.7071f;
+            size.y = size.x;
+        }
 
-        //mSelectionChanged.Broadcast(iScene);
+        switch( PrimitiveType )
+        {
+            case EOdysseyVectorPrimitiveType::Ellipse:
+            {
+                FOdysseyVectorEllipse* ellipse = static_cast<FOdysseyVectorEllipse*>(primitive);
+
+                ellipse->SetRadius( size.x, size.y );
+            }
+            break;
+
+            case EOdysseyVectorPrimitiveType::Rectangle:
+            {
+                FOdysseyVectorRectangle* rectangle = static_cast<FOdysseyVectorRectangle*>(primitive);
+
+                rectangle->SetSize( size.x, size.y );
+            }
+            break;
+
+            case EOdysseyVectorPrimitiveType::Line:
+            {
+                FOdysseyVectorLine* line = static_cast<FOdysseyVectorLine*>(primitive);
+
+                line->SetSize( size.x, size.y );
+            }
+            break;
+
+            default:
+            break;
+        }
     }
 
-    iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES ); // update vector scene and GUI widgets via delegates.
+    iScene->Update( /*FOdysseyVectorObject::FREQUENTUPDATES*/0 ); // update invalidated objects
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW | FOdysseyVectorScene::SIGNAL_OBJECT_MODIFIED );
 }
 
 bool
@@ -84,11 +198,11 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseUpVector( FOdysseyVector
                                                                 , const FOdysseyPoint& iPointInTexture
                                                                 , const FKey& iKey )
 {
-    FOdysseyVectorEllipse* ellipse = static_cast<FOdysseyVectorEllipse*>( iScene->GetLastSelected() );
+    FOdysseyVectorPrimitive* primitive = static_cast<FOdysseyVectorPrimitive*>( iScene->GetLastSelected() );
 
-    if( ellipse )
+    if( primitive )
     {
-        FOdysseyVectorPathCubic* cubicPath = ellipse->Convert();
+        FOdysseyVectorPathCubic* cubicPath = primitive->Convert();
 
         // Undo must be called before association with parent object
         // needed for valid GUndo pointer
@@ -102,16 +216,20 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseUpVector( FOdysseyVector
         GEditor->EndTransaction();
 
         iScene->ClearSelection();
-        iScene->RemoveChild( ellipse );
+        iScene->RemoveChild( primitive );
 
-        delete ellipse;
+        delete primitive;
 
         iScene->AppendChild( cubicPath );
         cubicPath->UpdateMatrix();
         iScene->Select( cubicPath );
     }
 
-    iScene->Update( 0 ); // update vector scene and GUI widgets via delegates.
+    iScene->Update( 0 ); // update invalidate objects
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW
+                  | FOdysseyVectorScene::SIGNAL_OBJECT_SELECTED
+                  | FOdysseyVectorScene::SIGNAL_OBJECT_MODIFIED
+                  | FOdysseyVectorScene::SIGNAL_OBJECT_TRANSFORMED );
 
     return false;
 }

@@ -19,13 +19,29 @@ class FOdysseyVectorPointSample : public FOdysseyVectorPoint
         ~FOdysseyVectorPointSample();
         FOdysseyVectorPointSample(){};
         FOdysseyVectorPointSample( double iX, double iY, double iRadius );
-        FOdysseyVectorPointSample( std::vector<FOdysseyVectorPoint*> iPointArray ); // average values of points in array
+        FOdysseyVectorPointSample( std::vector<FOdysseyVectorPoint>& iPointBuffer ); // average values of points in array
 
         void SetSharp( bool iIsSharp );
         bool IsSharp();
 
     private:
         bool mIsSharp;
+};
+
+class FOdysseyVectorLinkSample: public FOdysseyVectorLink
+{
+    public:
+        ~FOdysseyVectorLinkSample();
+        FOdysseyVectorLinkSample(){};
+        void Init( FOdysseyVectorPointSample* iSamplePoint0, FOdysseyVectorPointSample* iSamplePoint1 );
+
+    private:
+        // Stores a copy of the sample points passed as parameters in the constructor.
+        // The reason behind this is the fact that the sample points are stored in a
+        // buffer (std::vector), and the buffer can be reallocated then the pointers 
+        // become invalid. So, it's preferable to work on a copy, we are sure that the
+        // data are always valid.
+        FOdysseyVectorPointSample mSamplePoint[2];
 };
 
 class ODYSSEYVECTOR_API FOdysseyVectorPathBuilder : public FOdysseyVectorObject
@@ -47,10 +63,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathBuilder : public FOdysseyVectorObject
 
         std::vector<FOdysseyVectorPoint> mPointBuffer;
         std::vector<FOdysseyVectorPointSample> mSampleBuffer;
-        std::vector<FOdysseyVectorLink> mLinkBuffer;
-
+        std::vector<FOdysseyVectorLinkSample> mLinkBuffer;
+/*
         std::vector<FOdysseyVectorPointSample*> mSampleArray;
         std::vector<FOdysseyVectorPoint*> mPointArray;
+*/
         std::vector<FOdysseyVectorVertex*> mVertexArray;
 
         FOdysseyVectorPathCubic* mCubicPath;
@@ -60,10 +77,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathBuilder : public FOdysseyVectorObject
         FOdysseyVectorObject* CopyShape();
 
         // Draw the sample links and points
-        void DrawShape( ::ULIS::FRectD &iRoi, uint64 iFlags );
+        void DrawShape( uint64 iFlags );
 
         // Unimplemented. Cubic Path builder cannot be picked. It should be destroyed as soon as the curve is built
-        bool PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags ) { return false; };
+        bool PickShape( const ::ULIS::FRectD &iRoi, uint32 iSelectionFlags ) { return false; };
 
         void UpdateShape( uint32 iUpdateFlags ) {};
 
@@ -139,5 +156,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathBuilder : public FOdysseyVectorObject
                                                      , std::vector<FOdysseyVectorVertex*>& oNewVertexArray
                                                      , std::vector<FOdysseyVectorSegment*>& oNewSegmentArray );
         FOdysseyVectorSegmentCubic* RecordEnd( FOdysseyVectorVertex *iVertex );
-        std::vector<FOdysseyVectorPoint*>& GetPointArray();
+        uint32 GetPointCount();
 };

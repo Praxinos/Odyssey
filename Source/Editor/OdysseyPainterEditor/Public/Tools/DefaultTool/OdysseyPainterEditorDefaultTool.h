@@ -26,7 +26,9 @@ protected:
     void Copy( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
     void Paste( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
 
+
 public:
+    static bool DoubleClicked();
     virtual bool OnKeyDownVector( FOdysseyVectorEngine* iEngine
                                 , FOdysseyVectorScene* iScene
                                 , const FKey& iKey );

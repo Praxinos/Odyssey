@@ -59,10 +59,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorCycle
 
         /**
          * @brief draw the cycle (in parent coordinates system).
-         * @param iRoi region-of-interest.
          * @param iFlags drawing flags.
          */
-        void Draw( ::ULIS::FRectD& iRoi, uint64 iFlags );
+        void Draw( uint64 iFlags );
 
         /**
          * @brief collision test with coordinates passed as parameters.

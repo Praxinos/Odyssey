@@ -25,6 +25,9 @@ namespace FOdysseyVectorExport
                     static const uint32 CHUNK_OBJECT_TRANSFORM_TRANSLATION = 0x621d21c; // double(X)-double(Y)
                     static const uint32 CHUNK_OBJECT_TRANSFORM_ROTATION = 0xbf4d725c; // double(A)
                     static const uint32 CHUNK_OBJECT_TRANSFORM_SCALING = 0x4cc21f6d; // double(X)-double(Y)
+                static const uint32 CHUNK_OBJECT_PALETTEENTRYDESCRIPTION = 0x83de31e; // container
+                    static const uint32 CHUNK_OBJECT_PALETTEENTRYDESCRIPTION_ENTRYID = 0x86580538; //FName
+                    static const uint32 CHUNK_OBJECT_PALETTEENTRYDESCRIPTION_USEDSET = 0xcaa9e47c; //uint8
                 static const uint32 CHUNK_OBJECT_FOREGROUNDCOLOR = 0xd490269b; // uint8(R)-uint8(G)-uint8(B)-uint8(A)
                 static const uint32 CHUNK_OBJECT_BACKGROUNDCOLOR = 0xd9c2a698; // uint8(R)-uint8(G)-uint8(B)-uint8(A)
                 static const uint32 CHUNK_OBJECT_PATHCUBIC = 0x138d0bec; // container
@@ -39,11 +42,10 @@ namespace FOdysseyVectorExport
                     static const uint32 CHUNK_GROUPPAINT_BUCKETS = 0x5791cb88; // container
                         static const uint32 CHUNK_BUCKET_ENTRY = 0x94267aa5; // container
                             static const uint32 CHUNK_BUCKET_POSITION = 0xd492a193; // uint8(R)-uint8(G)-uint8(B)-uint8(A)
+                            static const uint32 CHUNK_BUCKET_ROTATION =  0xbbc2dd97; // double(rotation)
                             static const uint32 CHUNK_BUCKET_COLOR = 0xd951af3c; // uint8(R)-uint8(G)-uint8(B)-uint8(A)
                             static const uint32 CHUNK_BUCKET_PROPAGATED = 0x2c1333ce; // uint32(bool)
                             static const uint32 CHUNK_BUCKET_GRADIENT = 0x5d7bbd93; // container
-                                static const uint32 CHUNK_BUCKET_GRADIENT_HANDLE =  0x575a6a77; // container
-                                static const uint32 CHUNK_BUCKET_GRADIENT_HANDLE_POSITION = 0xed18a100; // // double(X)-double(Y)
                                 static const uint32 CHUNK_BUCKET_GRADIENT_STOP = 0xd0dfb9d3; // uint8(R)-uint8(G)-uint8(B)-uint8(A)-float(stop)
                 static const uint32 CHUNK_OBJECT_ELLIPSE =  0x9c87ca8f; // container
                     static const uint32 CHUNK_ELLIPSE_FILLED = 0xf75a11b3; // uint32(bool)

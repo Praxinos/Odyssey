@@ -14,19 +14,34 @@
 //----------------------------------------------------------- Construction / Destruction
 FOdysseyTextureEditorGUI::~FOdysseyTextureEditorGUI()
 {
-    //UnbindAllVectorScenes();
+	UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll(this);
+	FOdysseyVectorScene::OnSignalDelegate().RemoveAll(this);
 }
 
 FOdysseyTextureEditorGUI::FOdysseyTextureEditorGUI(FOdysseyTextureEditor* iEditor) :
 	FOdysseyPainterEditorGUI(iEditor),
 	mEditor( iEditor )
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(static_cast<FOdysseyTextureEditor*>(mEditor)->LayerStack());
-
-    // bind refresh function to delegates on existing vector scenes at load. Needed to refresh necessary widgets.
-    BindAllVectorScenes( layerStack );
     // Get sure the binding is set up everytime we add or remove a layer in the layer stack.
-    layerStack->OnHierarchyChanged().AddRaw( this, &FOdysseyTextureEditorGUI::BindAllVectorScenes );
+	UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw( this, &FOdysseyTextureEditorGUI::OnCurrentLayerChanged );
+    // bind refresh function to delegates on existing vector scenes at load. Needed to refresh necessary widgets.
+    FOdysseyVectorScene::OnSignalDelegate().AddRaw( this, &FOdysseyTextureEditorGUI::OnVectorSceneSignal );
+}
+
+void
+FOdysseyTextureEditorGUI::OnCurrentLayerChanged( UOdysseyLayerStack* iLayerStack )
+{
+    UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(iLayerStack->CurrentLayer.Get());
+
+    if( currentVectorLayer )
+    {
+        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+
+        //FOdysseyVectorEngine::ClearHUD();
+
+        OnVectorSceneSignal( vectorScene, FOdysseyVectorScene::SIGNAL_ALL );
+    }
 }
 
 //--------------------------------------------------------------------------------------
@@ -40,6 +55,17 @@ FOdysseyTextureEditorGUI::CreateTabs()
 	//ADD NEW TABS
 	ODYSSEY_ADD_TAB(mLayerStackTab, FOdysseyTextureEditorLayerStackTab, mEditor);
 	ODYSSEY_ADD_TAB(mTextureDetailsTab, FOdysseyTextureEditorTextureDetailsTab, mEditor);
+}
+
+void
+FOdysseyTextureEditorGUI::CreateContextMenus()
+{
+	FOdysseyPainterEditorGUI::CreateContextMenus();
+
+	//ADD NEW CONTEXT MENUS
+    ODYSSEY_ADD_CONTEXT_MENU(mVectorPickToolVertexContextMenu,FOdysseyTextureEditorVectorPickToolVertexContextMenu,mEditor);
+	ODYSSEY_ADD_CONTEXT_MENU(mVectorPickToolObjectContextMenu, FOdysseyTextureEditorVectorPickToolObjectContextMenu, mEditor);
+	ODYSSEY_ADD_CONTEXT_MENU(mPaintBucketToolContextMenu, FOdysseyTextureEditorPaintBucketToolContextMenu, mEditor);
 }
 
 TSharedRef<FTabManager::FSplitter>
@@ -81,7 +107,9 @@ FOdysseyTextureEditorGUI::BindShortcuts(FBaseToolkit* iToolkit)
     MAP_ACTION(textureEditorCommands.Ungroup, Ungroup )
     MAP_ACTION(textureEditorCommands.BringForward, BringForward )
     MAP_ACTION(textureEditorCommands.SendBackward, SendBackward )
-    MAP_ACTION(textureEditorCommands.RemoveSelectedObjects, RemoveSelectedObjects )
+    MAP_ACTION(textureEditorCommands.DeleteSelection, DeleteSelection )
+    MAP_ACTION(textureEditorCommands.FlipHorizontal, FlipHorizontal )
+    MAP_ACTION(textureEditorCommands.FlipVertical, FlipVertical )
 
     #undef MAP_ACTION
 }
@@ -138,11 +166,23 @@ FOdysseyTextureEditorGUI::ExtendMenuAbout( FToolMenuOwner iOwner, FName iMenuNam
             , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
             , NAME_None );
         aboutSection.AddMenuEntry(
-            FOdysseyTextureEditorCommands::Get().RemoveSelectedObjects
-            ,LOCTEXT("RemoveSelectedObjects","RemoveSelectedObjects")
-            ,LOCTEXT("RemoveSelectedObjects","RemoveSelectedObjects")
-            ,FSlateIcon("OdysseyStyle","OdysseyLogo.Iliad16")
-            ,NAME_None);
+            FOdysseyTextureEditorCommands::Get().DeleteSelection
+            , LOCTEXT("DeleteSelection","DeleteSelection")
+            , LOCTEXT("DeleteSelection","DeleteSelection")
+            , FSlateIcon("OdysseyStyle","OdysseyLogo.Iliad16")
+            , NAME_None );
+        aboutSection.AddMenuEntry(
+            FOdysseyTextureEditorCommands::Get().FlipHorizontal
+            , LOCTEXT("FlipHorizontal","FlipHorizontal")
+            , LOCTEXT("FlipHorizontal","FlipHorizontal")
+            , FSlateIcon("OdysseyStyle","OdysseyLogo.Iliad16")
+            , NAME_None );
+        aboutSection.AddMenuEntry(
+            FOdysseyTextureEditorCommands::Get().FlipVertical
+            , LOCTEXT("FlipVertical","FlipVertical")
+            , LOCTEXT("FlipVertical","FlipVertical")
+            , FSlateIcon("OdysseyStyle","OdysseyLogo.Iliad16")
+            , NAME_None );
     }
 }
 
@@ -167,93 +207,65 @@ FOdysseyTextureEditorGUI::GetTextureDetailsTab()
 	return mTextureDetailsTab;
 }
 
-void
-FOdysseyTextureEditorGUI::BindVectorScene( FOdysseyVectorScene* iScene )
+TSharedPtr<FOdysseyTextureEditorVectorPickToolVertexContextMenu>&
+FOdysseyTextureEditorGUI::GetVectorPickToolVertexContextMenu()
 {
-    iScene->OnUpdateDelegate().RemoveAll( this ); // bind only once
-    iScene->OnUpdateDelegate().AddRaw( this, &FOdysseyTextureEditorGUI::OnRefresh );
+	return mVectorPickToolVertexContextMenu;
+}
+
+TSharedPtr<FOdysseyTextureEditorVectorPickToolObjectContextMenu>&
+FOdysseyTextureEditorGUI::GetVectorPickToolObjectContextMenu()
+{
+    return mVectorPickToolObjectContextMenu;
+}
+
+TSharedPtr<FOdysseyTextureEditorPaintBucketToolContextMenu>&
+FOdysseyTextureEditorGUI::GetPaintBucketToolContextMenu()
+{
+    return mPaintBucketToolContextMenu;
 }
 
 void
-FOdysseyTextureEditorGUI::BindAllVectorScenes( UOdysseyLayerStack* iLayerStack )
-{
-    TArray<UOdysseyLayer*> layers = iLayerStack->GetLayers();
-
-    for( int i = 0; i < layers.Num(); i++ )
-    {
-        UOdysseyTextureLayerImageVector* vectorLayer = Cast<UOdysseyTextureLayerImageVector>(layers[i]);
-
-        if( vectorLayer )
-        {
-            FOdysseyVectorScene* scene = vectorLayer->GetScene();
-
-            BindVectorScene( scene );
-        } 
-    }
-}
-/*
-void
-FOdysseyTextureEditorGUI::UnbindAllVectorScenes()
-{
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(static_cast<FOdysseyTextureEditor*>(mEditor)->LayerStack());
-    TArray<UOdysseyLayer*> layers = layerStack->GetLayers();
-
-    for( int i = 0; i < layers.Num(); i++ )
-    {
-        UOdysseyTextureLayerImageVector* vectorLayer = Cast<UOdysseyTextureLayerImageVector>(layers[i]);
-
-        if( vectorLayer )
-        {
-            FOdysseyVectorScene* scene = vectorLayer->GetScene();
-
-            scene->OnUpdateDelegate().RemoveAll( this );
-        } 
-    }
-}
-*/
-void
-FOdysseyTextureEditorGUI::OnRefresh( FOdysseyVectorScene* iScene, uint32 iUpdateFlags )
+FOdysseyTextureEditorGUI::OnVectorSceneSignal( FOdysseyVectorScene* iScene, uint64 iSignalFlags )
 {
     TSharedPtr<FOdysseyPainterEditorSelectedVectorObjectTab>& vectorObjectTab = mEditor->GetGUI()->GetSelectedVectorObjectTab();
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(static_cast<FOdysseyTextureEditor*>(mEditor)->LayerStack());
-    UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
 
-    if( currentVectorLayer )
+    // layerStack might be NULL when closing the program
+    if( layerStack )
     {
-        currentVectorLayer->RenderImageChanged( false );
-    }
+        UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
 
-    if( ( iUpdateFlags & FOdysseyVectorObject::FREQUENTUPDATES ) == 0 )
-    {
-        vectorObjectTab.Get()->Update( iScene );
+        if( currentVectorLayer && ( currentVectorLayer->GetEngine()->GetScene() == iScene ) )
+        {
+            if( iSignalFlags & FOdysseyVectorScene::SIGNAL_SCENE_REDRAW )
+            {
+                currentVectorLayer->RenderImageChanged( false );
+            }
+
+            if( ( iSignalFlags & FOdysseyVectorScene::SIGNAL_OBJECT_TRANSFORMED )
+             || ( iSignalFlags & FOdysseyVectorScene::SIGNAL_OBJECT_SELECTED    )
+             || ( iSignalFlags & FOdysseyVectorScene::SIGNAL_OBJECT_MODIFIED    ) )
+            {
+                vectorObjectTab.Get()->Update( iScene );
+            }
+        }
     }
 }
 
 void
-FOdysseyTextureEditorGUI::RemoveSelectedObjects()
+FOdysseyTextureEditorGUI::DeleteSelection()
 {
-    TSharedPtr<FOdysseyPainterEditorSelectedVectorObjectTab>& vectorObjectTab = mEditor->GetGUI()->GetSelectedVectorObjectTab();
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(static_cast<FOdysseyTextureEditor*>(mEditor)->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
-
-    // needed for undos
-    GEditor->BeginTransaction(LOCTEXT("RemoveSelectedObjects", "Remove Selected Objects"));
 
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
-        FOdysseyVectorUndo* undo = nullptr;
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
-        FOdysseyPainterEditorGUI::RemoveSelectedObjects( vectorEngine, vectorScene, &undo );
-
-        if( undo && GUndo )
-        {
-            GUndo->StoreUndo( currentVectorLayer, TUniquePtr<FOdysseyVectorUndo>(undo) );
-        }
+        FOdysseyPainterEditorGUI::DeleteSelection( vectorEngine, vectorScene );
     }
-
-    GEditor->EndTransaction();
 }
 
 void
@@ -262,24 +274,13 @@ FOdysseyTextureEditorGUI::BringForward()
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(static_cast<FOdysseyTextureEditor*>(mEditor)->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
 
-    // needed for undos
-    GEditor->BeginTransaction(LOCTEXT("BringForward", "Bring Forward"));
-
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
-        FOdysseyVectorUndo* undo = nullptr;
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
-        FOdysseyPainterEditorGUI::BringForward( vectorEngine, vectorScene, &undo );
-
-        if( undo && GUndo )
-        {
-            GUndo->StoreUndo( currentVectorLayer, TUniquePtr<FOdysseyVectorUndo>(undo) );
-        }
+        FOdysseyPainterEditorGUI::BringForward( vectorEngine, vectorScene );
     }
-
-    GEditor->EndTransaction();
 }
 
 void
@@ -288,51 +289,28 @@ FOdysseyTextureEditorGUI::SendBackward()
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(static_cast<FOdysseyTextureEditor*>(mEditor)->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
 
-    // needed for undos
-    GEditor->BeginTransaction(LOCTEXT("SendBackward", "Send Backward"));
-
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
-        FOdysseyVectorUndo* undo = nullptr;
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
-        FOdysseyPainterEditorGUI::SendBackward( vectorEngine, vectorScene, &undo );
-
-        if( undo && GUndo )
-        {
-            GUndo->StoreUndo( currentVectorLayer, TUniquePtr<FOdysseyVectorUndo>(undo) );
-        }
+        FOdysseyPainterEditorGUI::SendBackward( vectorEngine, vectorScene );
     }
-
-    GEditor->EndTransaction();
 }
 
 void
 FOdysseyTextureEditorGUI::Ungroup()
 {
-    TSharedPtr<FOdysseyPainterEditorSelectedVectorObjectTab>& vectorObjectTab = mEditor->GetGUI()->GetSelectedVectorObjectTab();
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(static_cast<FOdysseyTextureEditor*>(mEditor)->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
-
-    // needed for undos
-    GEditor->BeginTransaction(LOCTEXT("ResetView", "Reset View"));
 
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
-        FOdysseyVectorUndo* undo = nullptr;
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
-        FOdysseyPainterEditorGUI::Ungroup( vectorEngine, vectorScene, &undo );
-
-        if( undo && GUndo )
-        {
-            GUndo->StoreUndo( currentVectorLayer, TUniquePtr<FOdysseyVectorUndo>(undo) );
-        }
+        FOdysseyPainterEditorGUI::Ungroup( vectorEngine, vectorScene );
     }
-
-    GEditor->EndTransaction();
 }
 
 void
@@ -341,78 +319,133 @@ FOdysseyTextureEditorGUI::ResetView()
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(static_cast<FOdysseyTextureEditor*>(mEditor)->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
 
-    // needed for undos
-    GEditor->BeginTransaction(LOCTEXT("ResetView", "Reset View"));
-
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
-        FOdysseyVectorUndo* undo = nullptr;
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
-        FOdysseyPainterEditorGUI::ResetView( vectorEngine, vectorScene, &undo );
-
-        if( undo && GUndo )
-        {
-            GUndo->StoreUndo( currentVectorLayer, TUniquePtr<FOdysseyVectorUndo>(undo) );
-        }
+        FOdysseyPainterEditorGUI::ResetView( vectorEngine, vectorScene );
     }
-
-    GEditor->EndTransaction();
 }
 
 void
 FOdysseyTextureEditorGUI::Group()
 {
-    TSharedPtr<FOdysseyPainterEditorSelectedVectorObjectTab>& vectorObjectTab = mEditor->GetGUI()->GetSelectedVectorObjectTab();
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(static_cast<FOdysseyTextureEditor*>(mEditor)->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
-
-    // needed for undos
-    GEditor->BeginTransaction(LOCTEXT("Group", "Group"));
 
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
-        FOdysseyVectorUndo* undo = nullptr;
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
-        FOdysseyPainterEditorGUI::Group( vectorEngine, vectorScene, &undo );
-
-        if( undo && GUndo )
-        {
-            GUndo->StoreUndo( currentVectorLayer, TUniquePtr<FOdysseyVectorUndo>(undo) );
-        }
+        FOdysseyPainterEditorGUI::Group( vectorEngine, vectorScene );
     }
-
-    GEditor->EndTransaction();
 }
 
 void
 FOdysseyTextureEditorGUI::GroupPaint()
 {
-    TSharedPtr<FOdysseyPainterEditorSelectedVectorObjectTab>& vectorObjectTab = mEditor->GetGUI()->GetSelectedVectorObjectTab();
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(static_cast<FOdysseyTextureEditor*>(mEditor)->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
-
-    // needed for undos
-    GEditor->BeginTransaction(LOCTEXT("GroupPaint", "Group Paint"));
 
     if( currentVectorLayer )
     {
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        FOdysseyVectorScene* vectorScene = currentVectorLayer->GetScene();
-        FOdysseyVectorUndo* undo = nullptr;
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
-        FOdysseyPainterEditorGUI::GroupPaint( vectorEngine, vectorScene, &undo );
-
-        if( undo && GUndo )
-        {
-            GUndo->StoreUndo( currentVectorLayer, TUniquePtr<FOdysseyVectorUndo>(undo) );
-        }
+        FOdysseyPainterEditorGUI::GroupPaint( vectorEngine, vectorScene );
     }
+}
 
-    GEditor->EndTransaction();
+void
+FOdysseyTextureEditorGUI::FlipHorizontal()
+{
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(static_cast<FOdysseyTextureEditor*>(mEditor)->LayerStack());
+    UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
+
+    if( currentVectorLayer )
+    {
+        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+
+        FOdysseyPainterEditorGUI::FlipHorizontal( vectorEngine, vectorScene );
+    }
+}
+
+void
+FOdysseyTextureEditorGUI::FlipVertical()
+{
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(static_cast<FOdysseyTextureEditor*>(mEditor)->LayerStack());
+    UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
+
+    if( currentVectorLayer )
+    {
+        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+
+        FOdysseyPainterEditorGUI::FlipVertical( vectorEngine, vectorScene );
+    }
+}
+
+void
+FOdysseyTextureEditorGUI::DeleteBucket()
+{
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(static_cast<FOdysseyTextureEditor*>(mEditor)->LayerStack());
+    UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
+
+    if( currentVectorLayer )
+    {
+        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+
+        FOdysseyPainterEditor::DeleteBucket( vectorEngine, vectorScene );
+    }
+}
+
+void
+FOdysseyTextureEditorGUI::PropagateBucket()
+{
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(static_cast<FOdysseyTextureEditor*>(mEditor)->LayerStack());
+    UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
+
+    if( currentVectorLayer )
+    {
+        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+
+        FOdysseyPainterEditor::PropagateBucket( vectorEngine, vectorScene );
+    }
+}
+
+void
+FOdysseyTextureEditorGUI::UnpropagateBucket()
+{
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(static_cast<FOdysseyTextureEditor*>(mEditor)->LayerStack());
+    UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
+
+    if( currentVectorLayer )
+    {
+        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+
+        FOdysseyPainterEditor::UnpropagateBucket( vectorEngine, vectorScene );
+    }
+}
+
+void
+FOdysseyTextureEditorGUI::KnotVertices()
+{
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(static_cast<FOdysseyTextureEditor*>(mEditor)->LayerStack());
+    UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
+
+    if( currentVectorLayer )
+    {
+        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+
+        FOdysseyPainterEditor::KnotVertices( vectorEngine, vectorScene );
+    }
 }
 
 #undef LOCTEXT_NAMESPACE
