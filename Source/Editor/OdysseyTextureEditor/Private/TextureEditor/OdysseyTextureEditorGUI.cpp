@@ -63,6 +63,7 @@ FOdysseyTextureEditorGUI::CreateContextMenus()
 	FOdysseyPainterEditorGUI::CreateContextMenus();
 
 	//ADD NEW CONTEXT MENUS
+    ODYSSEY_ADD_CONTEXT_MENU(mVectorPickToolVertexContextMenu,FOdysseyTextureEditorVectorPickToolVertexContextMenu,mEditor);
 	ODYSSEY_ADD_CONTEXT_MENU(mVectorPickToolObjectContextMenu, FOdysseyTextureEditorVectorPickToolObjectContextMenu, mEditor);
 	ODYSSEY_ADD_CONTEXT_MENU(mPaintBucketToolContextMenu, FOdysseyTextureEditorPaintBucketToolContextMenu, mEditor);
 }
@@ -206,10 +207,16 @@ FOdysseyTextureEditorGUI::GetTextureDetailsTab()
 	return mTextureDetailsTab;
 }
 
+TSharedPtr<FOdysseyTextureEditorVectorPickToolVertexContextMenu>&
+FOdysseyTextureEditorGUI::GetVectorPickToolVertexContextMenu()
+{
+	return mVectorPickToolVertexContextMenu;
+}
+
 TSharedPtr<FOdysseyTextureEditorVectorPickToolObjectContextMenu>&
 FOdysseyTextureEditorGUI::GetVectorPickToolObjectContextMenu()
 {
-	return mVectorPickToolObjectContextMenu;
+    return mVectorPickToolObjectContextMenu;
 }
 
 TSharedPtr<FOdysseyTextureEditorPaintBucketToolContextMenu>&
@@ -423,6 +430,21 @@ FOdysseyTextureEditorGUI::UnpropagateBucket()
         FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
         FOdysseyPainterEditor::UnpropagateBucket( vectorEngine, vectorScene );
+    }
+}
+
+void
+FOdysseyTextureEditorGUI::KnotVertices()
+{
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(static_cast<FOdysseyTextureEditor*>(mEditor)->LayerStack());
+    UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
+
+    if( currentVectorLayer )
+    {
+        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+
+        FOdysseyPainterEditor::KnotVertices( vectorEngine, vectorScene );
     }
 }
 

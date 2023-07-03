@@ -236,9 +236,9 @@ UOdysseyPainterEditorVectorPickTool::OnMouseUpVectorVertexMode( FOdysseyVectorEn
 
 bool
 UOdysseyPainterEditorVectorPickTool::OnMouseUpVector( FOdysseyVectorEngine* iEngine
-                                                          , FOdysseyVectorScene* iScene
-                                                          , const FOdysseyPoint& iPointInTexture
-                                                          , const FKey& iKey )
+                                                    , FOdysseyVectorScene* iScene
+                                                    , const FOdysseyPoint& iPointInTexture
+                                                    , const FKey& iKey )
 {
     if( iKey == EKeys::LeftMouseButton )
     {

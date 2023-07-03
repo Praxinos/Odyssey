@@ -477,4 +477,10 @@ FOdysseyPainterEditorGUI::UnpropagateBucket( FOdysseyVectorEngine* iEngine, FOdy
     mEditor->UnpropagateBucket( iEngine, iScene );
 }
 
+void
+FOdysseyPainterEditorGUI::KnotVertices( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+{
+    mEditor->KnotVertices( iEngine, iScene );
+}
+
 #undef LOCTEXT_NAMESPACE

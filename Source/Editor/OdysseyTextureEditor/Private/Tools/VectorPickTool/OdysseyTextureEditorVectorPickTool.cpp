@@ -201,11 +201,16 @@ UOdysseyTextureEditorVectorPickTool::OnMouseUp( const FOdysseyPoint& iPointInTex
   {*/
     if( iKey == EKeys::RightMouseButton )
     {
+        TSharedPtr<SWidget> objectMenu = textureEditor->GetGUI()->GetVectorPickToolObjectContextMenu()->Widget();
+        TSharedPtr<SWidget> vertexMenu = textureEditor->GetGUI()->GetVectorPickToolVertexContextMenu()->Widget();
+        TSharedPtr<SWidget> contextMenu = ( EditionMode == EOdysseyVectorEditionMode::Object ) ? objectMenu : vertexMenu;
+
+
         FSlateApplication::Get().PushMenu(
         //textureEditor->GetGUI()->GetViewportTab().Get()->GetViewport().Get()->GetViewportWidget().ToSharedRef(),
         textureEditor->GetGUI()->GetViewportTab().Get()->Widget().ToSharedRef(),
         FWidgetPath(),
-        textureEditor->GetGUI()->GetVectorPickToolObjectContextMenu()->Widget().ToSharedRef(),
+        contextMenu.ToSharedRef(),
         FSlateApplication::Get().GetCursorPos(),
         FPopupTransitionEffect(FPopupTransitionEffect::ContextMenu)
         );

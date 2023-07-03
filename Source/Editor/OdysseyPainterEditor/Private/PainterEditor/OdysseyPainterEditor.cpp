@@ -21,6 +21,7 @@
 #include "Undo/OdysseyVectorUndoSceneRemoveSelection.h"
 #include "Undo/OdysseyVectorUndoBucketRemove.h"
 #include "Undo/OdysseyVectorUndoBucketParam.h"
+#include "Undo/OdysseyVectorUndoPathKnot.h"
 
 #define LOCTEXT_NAMESPACE "FOdysseyPainterEditor"
 
@@ -551,6 +552,107 @@ void
 FOdysseyPainterEditor::UnpropagateBucket( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
     SetBucketPropagation( iEngine, iScene, false );
+}
+
+void
+FOdysseyPainterEditor::KnotVertices( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+{
+    std::vector<FOdysseyVectorVertex*> pickedVertexArray;
+    FOdysseyVectorVertex* knotVertex;
+    // for undos
+    std::vector<FOdysseyVectorPath*> addedPathArray; // stays empty
+    std::vector<FOdysseyVectorVertex*> addedVertexArray;
+    std::vector<FOdysseyVectorSegment*> addedSegmentArray;
+    std::vector<FOdysseyVectorPath*> removedPathArray; // receives the merged path if any
+    std::vector<FOdysseyVectorSegment*> removedSegmentArray;
+    std::vector<FOdysseyVectorVertex*> removedVertexArray;
+    std::vector<FOdysseyVectorSegment*> mergedSegmentArray;
+    std::vector<FOdysseyVectorVertex*> mergedVertexArray;
+    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
+    std::list<FOdysseyVectorObject*>::iterator oit;
+
+    pickedVertexArray.reserve( 2 );
+
+    for( oit = selectedObjectList.begin(); oit != selectedObjectList.end(); ++oit )
+    {
+        FOdysseyVectorObject* selectedObject = (*oit);
+
+        if( selectedObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+        {
+            FOdysseyVectorPath* selectedPath = static_cast<FOdysseyVectorPath*>(selectedObject);
+            std::list<FOdysseyVectorVertex*>& selectedVertexList = selectedPath->GetSelectedVertexList();
+            std::list<FOdysseyVectorVertex*>::iterator vit;
+
+            for( vit = selectedVertexList.begin(); vit != selectedVertexList.end(); ++vit )
+            {
+                FOdysseyVectorVertex* vertex = (*vit);
+
+                if( vertex->IsSelected() )
+                {
+                    pickedVertexArray.push_back( vertex );
+                }
+            }
+        }
+    }
+
+    if( pickedVertexArray.size() == 2 )
+    {
+        FOdysseyVectorVertex* vertexA = pickedVertexArray[0];
+        FOdysseyVectorVertex* vertexB = pickedVertexArray[1];
+        FOdysseyVectorPath* mergedPath = nullptr;
+
+        if( ( vertexA->GetSegmentCount() == 1 ) && ( vertexB->GetSegmentCount() == 1 ) )
+        {
+            if( vertexA->GetPath() != vertexB->GetPath() )
+            {
+                std::vector<FOdysseyVectorVertex*> vertexLookup;
+                // TODO: remove vertexB->GetPath() from selected objects.
+                mergedPath = vertexB->GetPath();
+
+                vertexB->GetPath()->GetParent()->RemoveChild( mergedPath );
+                vertexA->GetPath()->Merge( mergedPath, vertexLookup, mergedVertexArray, mergedSegmentArray );
+                // update the pointer with the newly created vertex's. Note, Merge alters the original vertex's ID.
+                vertexB = vertexLookup[vertexB->GetID()];
+
+                iScene->Unselect( mergedPath );
+
+                removedPathArray.push_back( mergedPath );
+            }
+
+            knotVertex = iEngine->Knot( vertexA, vertexB, addedSegmentArray, removedSegmentArray, true );
+
+            if( knotVertex )
+            {
+                addedVertexArray.push_back( knotVertex );
+                removedVertexArray.push_back( vertexA );
+                removedVertexArray.push_back( vertexB );
+
+                // needed for valid GUndo pointer
+                GEditor->BeginTransaction(LOCTEXT("VectorPathKnotTool","Vector Path Knot Tool"));
+                if( GUndo )
+                {
+                    FOdysseyVectorUndo *undo = new FOdysseyVectorUndoPathKnot( iScene
+                                                                              , removedPathArray
+                                                                              , removedVertexArray
+                                                                              , removedSegmentArray
+                                                                              , addedPathArray
+                                                                              , addedVertexArray
+                                                                              , addedSegmentArray
+                                                                              , mergedVertexArray
+                                                                              , mergedSegmentArray );
+
+                    GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+                }
+                GEditor->EndTransaction();
+            }
+        }
+    }
+
+    iScene->Update( 0 );
+
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW
+                  | FOdysseyVectorScene::SIGNAL_OBJECT_SELECTED
+                  | FOdysseyVectorScene::SIGNAL_OBJECT_MODIFIED );
 }
 
 #undef LOCTEXT_NAMESPACE

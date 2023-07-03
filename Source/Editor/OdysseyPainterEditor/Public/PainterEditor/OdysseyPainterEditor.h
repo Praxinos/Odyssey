@@ -97,6 +97,7 @@ public:
     static void DeleteBucket( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
     static void PropagateBucket( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
     static void UnpropagateBucket( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    static void KnotVertices( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
 
     void SelectDefaultTool();
 

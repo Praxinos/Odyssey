@@ -25,7 +25,7 @@ FOdysseyTextureEditorPaintBucketToolContextMenu::FOdysseyTextureEditorPaintBucke
           LOCTEXT("DeleteBucket", "Delete Bucket")
         , LOCTEXT("DeleteBucket", "Delete Bucket")
         , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
-        , FUIAction(FExecuteAction::CreateRaw(iEditor->GetGUI(), &FOdysseyTextureEditorGUI::DeleteBucket)));
+        , FUIAction(FExecuteAction::CreateSP(iEditor->GetGUI(), &FOdysseyTextureEditorGUI::DeleteBucket)));
     mMenu.AddMenuEntry(
           LOCTEXT("PropagateBucket", "Propagate Bucket")
         , LOCTEXT("PropagateBucket", "Propagate Bucket")

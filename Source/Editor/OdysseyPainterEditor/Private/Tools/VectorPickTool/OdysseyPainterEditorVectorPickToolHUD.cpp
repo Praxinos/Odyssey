@@ -60,6 +60,7 @@ FOdysseyPainterEditorVectorPickToolHUD::Draw( FOdysseyVectorScene* iScene, uint6
         break;
 
         case EOdysseyVectorEditionMode::Vertex :
+            DrawSelectionSpace( iScene, iFlags );
             DrawVertexSelection( iScene, iFlags );
         break;
 
