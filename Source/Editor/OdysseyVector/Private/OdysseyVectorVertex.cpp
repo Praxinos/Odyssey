@@ -449,6 +449,25 @@ static bool seekSection( std::list<FOdysseyVectorSection*>& iSectionList
 }
 
 void
+FOdysseyVectorVertex::SetSelected( bool iSelected )
+{
+    if( iSelected == true )
+    {
+        mFlags |= SELECTED;
+    }
+    else
+    {
+        mFlags &= (~SELECTED);
+    }
+}
+
+bool
+FOdysseyVectorVertex::IsSelected()
+{
+    return ( mFlags & SELECTED ) ? true : false;
+}
+
+void
 FOdysseyVectorVertex::SetVisited( bool iVisited )
 {
     if( iVisited == true )

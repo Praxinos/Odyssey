@@ -224,6 +224,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
          */
         bool IsVisited();
 
+        void SetSelected( bool iSelected );
+        bool IsSelected();
+
         double GetNearestSegmentT();
         double GetDistanceToNearestSegment();
         FOdysseyVectorSegment* GetNearestSegment();
@@ -252,5 +255,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
         FOdysseyVectorVertex* mNearestVertex;
 
     private :
-        static const uint32 VISITED = (1 << 2);
+        static const uint32 VISITED  = ( 1 << 2 );
+        static const uint32 SELECTED = ( 1 << 3 );
 };

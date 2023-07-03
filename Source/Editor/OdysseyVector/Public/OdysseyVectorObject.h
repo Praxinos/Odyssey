@@ -139,8 +139,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
 
         virtual uint32 GetType();
 
-        FOdysseyVectorObject* Pick( FOdysseyVectorGroup* iSelectionSpace, ::ULIS::FRectD& iRoi, uint32 iSelectionFlags );
-        virtual bool PickShape( ::ULIS::FRectD& iRoi, uint32 iSelectionFlags ){ return false; };
+        FOdysseyVectorObject* Pick( FOdysseyVectorGroup* iSelectionSpace, const ::ULIS::FRectD& iRoi, uint32 iSelectionFlags );
+        virtual bool PickShape( const ::ULIS::FRectD& iRoi, uint32 iSelectionFlags ){ return false; };
 
         FOdysseyVectorBucket& GetFillBucket();
 

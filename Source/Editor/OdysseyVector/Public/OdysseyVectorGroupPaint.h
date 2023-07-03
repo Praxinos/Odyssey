@@ -88,7 +88,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
              PICK_MASK_BASED : picking is according to the mask image.
          * @return true if the shape is picked, false otherwise.
          */
-        virtual bool PickShape( ::ULIS::FRectD& iRoi, uint32 iSelectionFlags ) override;
+        virtual bool PickShape( const ::ULIS::FRectD& iRoi, uint32 iSelectionFlags ) override;
 
         /**
          * @brief Copy the shape to a new object.

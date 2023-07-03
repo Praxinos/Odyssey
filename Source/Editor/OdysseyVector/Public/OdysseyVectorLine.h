@@ -37,7 +37,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorLine : public FOdysseyVectorPrimitive
 
     private:
         virtual void DrawShape( uint64 iFlags ) override;
-        virtual bool PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags ) override;
         virtual FOdysseyVectorObject* CopyShape() override;
         virtual void UpdateShape( uint32 iUpdateFlags ) override;
 

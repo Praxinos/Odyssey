@@ -91,8 +91,42 @@ TraceLine( int32 iX0, int32 iY0, double iT0
     return false;
 }
 
+// Pick from mask image
+void
+FOdysseyVectorPathCubic::PickVertex( std::vector<FOdysseyVectorVertex*>& oPickedVertexArray )
+{
+    BLImage* maskImage = GetScene()->GetEngine()->GetBLMask();
+    std::list<FOdysseyVectorVertex*>::iterator it;
+    BLImageData imageData;
+
+    maskImage->getData( &imageData );
+
+    for( it = mVertexList.begin(); it != mVertexList.end(); ++it )
+    {
+        FOdysseyVectorVertex* vertex = (*it);
+        ::ULIS::FVec2D& localCoords = vertex->GetCoords();
+        // convert vertex coordinates to world coordinates. Easier to detect collision inside the picking circle.
+        BLPoint worldCoords = mWorldMatrix.mapPoint( localCoords.x, localCoords.y );
+        int32 x = (int32) worldCoords.x;
+        int32 y = (int32) worldCoords.y;
+
+        if( ( x >= 0 ) && ( x < imageData.size.w )
+         && ( y >= 0 ) && ( y < imageData.size.h ) )
+        {
+            uint8 *pixel = static_cast<uint8*>( imageData.pixelData );
+            uint32 offset = ( y * imageData.size.w ) + x;
+            uint8 pixelValue = pixel[offset];
+
+            if( pixelValue == 255 )
+            {
+                oPickedVertexArray.push_back( vertex );
+            }
+        }
+    }
+}
+
 bool
-FOdysseyVectorPathCubic::Erase( ::ULIS::FRectD &iRoi
+FOdysseyVectorPathCubic::Erase( const ::ULIS::FRectD &iRoi
                               , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
                               , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray
                               , std::vector<FOdysseyVectorVertex*>& iRemovedVertexArray
@@ -247,7 +281,7 @@ FOdysseyVectorPathCubic::Erase( ::ULIS::FRectD &iRoi
 }
 
 bool
-FOdysseyVectorPathCubic::PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags )
+FOdysseyVectorPathCubic::PickShape( const ::ULIS::FRectD &iRoi, uint32 iSelectionFlags )
 {
     BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
 
@@ -866,79 +900,4 @@ FOdysseyVectorPathCubic::SmoothSegments( FOdysseyVectorVertex* iVertex, ::ULIS::
             }
         }
     }
-}
-
-// static
-::ULIS::FVec2D
-FOdysseyVectorPathCubic::GetPerpendicularVector( FOdysseyVectorVertex* iVertex, bool iNormalize )
-{
-    std::list<FOdysseyVectorSegment*>& segmentList = iVertex->GetSegmentList();
-    ::ULIS::FVec2D parallel = { 0.0f, 0.0f };
-    ::ULIS::FVec2D perpendicular = { 0.0f, 0.0f };
-
-    if ( segmentList.size() )
-    {
-        uint32 count = 0;
-
-        for( std::list<FOdysseyVectorSegment*>::iterator it = segmentList.begin(); it != segmentList.end(); ++it )
-        {
-            FOdysseyVectorSegmentCubic *segment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
-            FOdysseyVectorVertex* p0 = segment->GetVertex(0);
-            FOdysseyVectorVertex* p1 = segment->GetVertex(1);
-            ::ULIS::FVec2D& point0 = segment->GetVertex(0)->GetCoords();
-            ::ULIS::FVec2D& point1 = segment->GetVertex(1)->GetCoords();
-            ::ULIS::FVec2D& ctrlPoint0 = segment->GetHandle(0)->GetCoords();
-            ::ULIS::FVec2D& ctrlPoint1 = segment->GetHandle(1)->GetCoords();
-
-            if( iVertex == p0 )
-            {
-                // this is less computation-heavy
-                ::ULIS::FVec2D vec = { ctrlPoint0 - point0 };
-                /*::ULIS::FVec2D vec =  { CubicBezierTangentAtParameter<::ULIS::FVec2D>( point0.GetCoords()
-                                                                     , ctrlPoint0.GetCoords()
-                                                                     , ctrlPoint1.GetCoords()
-                                                                     , point1.GetCoords()
-                                                                     , 0.0f ) };*/
-
-                if ( vec.DistanceSquared() )
-                {
-                    vec.Normalize();
-
-                    parallel.x += vec.x;
-                    parallel.y += vec.y;
-                }
-            }
-
-            if( iVertex == p1 )
-            {
-                ::ULIS::FVec2D vec = { point1 - ctrlPoint1 };
-                /*::ULIS::FVec2D vec =  { CubicBezierTangentAtParameter<::ULIS::FVec2D>( point0.GetCoords()
-                                                                     , ctrlPoint0.GetCoords()
-                                                                     , ctrlPoint1.GetCoords()
-                                                                     , point1.GetCoords()
-                                                                     , 1.0f ) };*/
-
-                if ( vec.DistanceSquared() )
-                {
-                    vec.Normalize();
-
-                    parallel.x += vec.x;
-                    parallel.y += vec.y;
-                }
-            }
-        }
-
-        if ( iNormalize == true )
-        {
-            if ( parallel.DistanceSquared() )
-            {
-                parallel.Normalize();
-            }
-
-            perpendicular.x =   parallel.y;
-            perpendicular.y = - parallel.x;
-        }
-    }
-
-    return perpendicular;
 }

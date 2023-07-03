@@ -137,60 +137,120 @@ SetSelectionSpace( FOdysseyVectorEngine* iVectorEngine, FOdysseyVectorObject* iS
     }
 }
 
+void
+UOdysseyPainterEditorVectorPickTool::OnMouseUpVectorObjectMode( FOdysseyVectorEngine* iEngine
+                                                              , FOdysseyVectorScene* iScene
+                                                              , const FOdysseyPoint& iPointInTexture
+                                                              , const FKey& iKey )
+{
+    std::vector<FOdysseyVectorObject*> pickedObjectArray;
+    ::ULIS::FRectD roi;
+
+    // needed for valid GUndo pointer
+    GEditor->BeginTransaction(LOCTEXT("VectorObjectPickTool","Vector Object Pick Tool"));
+    if( GUndo )
+    {
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelect( iScene );
+
+        GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
+    }
+    GEditor->EndTransaction();
+
+    // deselect all if control key is not pressed
+    if( FSlateApplication::Get().GetModifierKeys().IsControlDown() == false )
+    {
+        iScene->ClearSelection();
+    }
+
+    // dragging occured
+    if ( mPointArray.size() > 1 )
+    {
+        roi = iEngine->GenerateMask( mPointArray );
+
+        iEngine->Pick( iScene, roi, pickedObjectArray, FOdysseyVectorObject::PICK_MASK_BASED );
+
+        // when dragging occured, we select all objects lying in the selection area.
+        for ( int i = 0; i < pickedObjectArray.size(); i++ )
+        {
+            iScene->Select( pickedObjectArray[i] );
+        }
+    }
+
+    // no dragging occured
+    if ( mPointArray.size() == 1 )
+    {
+        roi.x = mPointArray[0].x;
+        roi.y = mPointArray[0].y;
+
+        iEngine->Pick( iScene, roi, pickedObjectArray, FOdysseyVectorObject::PICK_MATH_BASED );
+
+        // if no dragging occured, we only select the object that is the most forward
+        if( pickedObjectArray.size() )
+        {
+            iScene->Select( pickedObjectArray.back() );
+        }
+    }
+
+    SetSelectionSpace( iEngine, iScene->GetLastSelected() );
+
+    mPickHUD->Reset( iScene ); // updates the selection box
+}
+
+void
+UOdysseyPainterEditorVectorPickTool::OnMouseUpVectorVertexMode( FOdysseyVectorEngine* iEngine
+                                                              , FOdysseyVectorScene* iScene
+                                                              , const FOdysseyPoint& iPointInTexture
+                                                              , const FKey& iKey )
+{
+    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
+    std::vector<FOdysseyVectorVertex*> pickedVertexArray;
+    ::ULIS::FRectD roi;
+
+    pickedVertexArray.reserve( 50 );
+
+    roi = iEngine->GenerateMask( mPointArray );
+
+    for( std::list<FOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
+    {
+        FOdysseyVectorObject* selectedObject  = *it;
+
+        if( selectedObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+        {
+            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(selectedObject);
+
+            path->UnselectAllVertices();
+            path->PickVertex(  pickedVertexArray );
+
+            for( int i = 0; i < pickedVertexArray.size(); i++ )
+            {
+                FOdysseyVectorVertex* vertex = pickedVertexArray[i];
+
+                if( vertex->IsSelected() == false )
+                {
+                    path->SelectVertex( vertex );
+                }
+            }
+        }
+    }
+}
+
 bool
 UOdysseyPainterEditorVectorPickTool::OnMouseUpVector( FOdysseyVectorEngine* iEngine
                                                           , FOdysseyVectorScene* iScene
                                                           , const FOdysseyPoint& iPointInTexture
                                                           , const FKey& iKey )
 {
-    std::vector<FOdysseyVectorObject*> pickedObjectArray;
-    FOdysseyVectorUndoSelect* undoSelect = nullptr;
-
     if( iKey == EKeys::LeftMouseButton )
     {
-        // needed for valid GUndo pointer
-        GEditor->BeginTransaction(LOCTEXT("VectorObjectPickTool","Vector Object Pick Tool"));
-        if( GUndo )
+        if( EditionMode == EOdysseyVectorEditionMode::Object )
         {
-            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelect( iScene );
-
-            GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
-        }
-        GEditor->EndTransaction();
-
-        // deselect all if control key is not pressed
-        if( FSlateApplication::Get().GetModifierKeys().IsControlDown() == false )
-        {
-            iScene->ClearSelection();
+            OnMouseUpVectorObjectMode( iEngine, iScene, iPointInTexture, iKey );
         }
 
-        // dragging occured
-        if ( mPointArray.size() > 1 )
+        if( EditionMode == EOdysseyVectorEditionMode::Vertex )
         {
-            iEngine->Pick( iScene, mPointArray, pickedObjectArray, FOdysseyVectorObject::PICK_MASK_BASED );
-
-            // when dragging occured, we select all objects lying in the selection area.
-            for ( int i = 0; i < pickedObjectArray.size(); i++ )
-            {
-                iScene->Select( pickedObjectArray[i] );
-            }
+            OnMouseUpVectorVertexMode( iEngine, iScene, iPointInTexture, iKey );
         }
-
-        // no dragging occured
-        if ( mPointArray.size() == 1 )
-        {
-            iEngine->Pick( iScene, mPointArray, pickedObjectArray, FOdysseyVectorObject::PICK_MATH_BASED );
-
-            // if no dragging occured, we only select the object that is the most forward
-            if( pickedObjectArray.size() )
-            {
-                iScene->Select( pickedObjectArray.back() );
-            }
-        }
-
-        SetSelectionSpace( iEngine, iScene->GetLastSelected() );
-
-        mPickHUD->Reset( iScene ); // updates the selection box
     }
 
     mPointArray.clear();

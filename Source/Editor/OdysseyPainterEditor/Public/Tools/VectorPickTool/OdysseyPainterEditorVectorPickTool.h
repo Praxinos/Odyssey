@@ -64,6 +64,15 @@ public:
     std::vector<::ULIS::FVec2D>& GetPointArray();
 
 protected:
+    void OnMouseUpVectorObjectMode( FOdysseyVectorEngine* iEngine
+                                  , FOdysseyVectorScene* iScene
+                                  , const FOdysseyPoint& iPointInTexture
+                                  , const FKey& iKey );
+    void OnMouseUpVectorVertexMode( FOdysseyVectorEngine* iEngine
+                                  , FOdysseyVectorScene* iScene
+                                  , const FOdysseyPoint& iPointInTexture
+                                  , const FKey& iKey );
+protected:
     FOdysseyPainterEditorVectorPickToolHUD* mPickHUD;
     std::vector<::ULIS::FVec2D> mPointArray;
     ::ULIS::FVec2D mPressedMouseCoords;

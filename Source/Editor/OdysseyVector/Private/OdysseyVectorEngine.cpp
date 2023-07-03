@@ -211,6 +211,10 @@ UE_LOG(LogTemp, Warning, TEXT("Some warning message %d %d %d %d"), mRoi.x, mRoi.
 
     //mBLContext->restoreClipping();
 
+    //mBLMask->swap(*mBLImage);
+
+    //mBLContext->blitImage( BLPoint(0,0), *mBLMask );
+
     mBLContext->flush(BL_CONTEXT_FLUSH_SYNC);
 
     //mBLContext->end();
@@ -222,6 +226,11 @@ FOdysseyVectorEngine::GenerateMask( std::vector<::ULIS::FVec2D>& iPointArray )
     BLPath path;
     ::ULIS::FRectD rect = { 0, 0, 0, 0 };
 
+    UseMaskImage();
+
+    mBLContext->save();
+    mBLContext->resetMatrix();
+    mBLContext->setCompOp(BL_COMP_OP_SRC_COPY);
     /*blctx.setFillStyle( BLRgba32(0x00000000) );*/
     mBLContext->setFillAlpha(0.0f);
     mBLContext->clearAll();
@@ -265,6 +274,12 @@ FOdysseyVectorEngine::GenerateMask( std::vector<::ULIS::FVec2D>& iPointArray )
     mBLContext->setFillAlpha(1.0f);
     mBLContext->fillPath( path );
 
+    mBLContext->flush(BL_CONTEXT_FLUSH_SYNC);
+
+    mBLContext->restore();
+
+    UseColorImage();
+
     return rect;
 }
 
@@ -276,7 +291,7 @@ FOdysseyVectorEngine::RecursiveErase( FOdysseyVectorObject* iObject
                                     , std::vector<FOdysseyVectorObject*>& iRemovedObjectArray
                                     , std::vector<FOdysseyVectorVertex*>& iRemovedVertexArray
                                     , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray
-                                    , ::ULIS::FRectD &iRoi
+                                    , const ::ULIS::FRectD &iRoi
                                     , bool iSelectedOnly )
 {
     for( std::list<FOdysseyVectorObject*>::iterator it = iObject->GetChildrenList().begin(); it != iObject->GetChildrenList().end(); ++it )
@@ -586,7 +601,7 @@ void
 FOdysseyVectorEngine::RecursivePick( FOdysseyVectorGroup* iSelectionSpace
                                    , FOdysseyVectorObject* iObj
                                    , std::vector<FOdysseyVectorObject*>& oSelectedObjectArray
-                                   , ::ULIS::FRectD& iRoi
+                                   , const ::ULIS::FRectD& iRoi
                                    , uint32 iSelectionFlags )
 {
     FOdysseyVectorObject* pickedObject = ( iObj != iSelectionSpace ) ? iObj->Pick( iSelectionSpace, iRoi, iSelectionFlags ) : nullptr;
@@ -627,30 +642,11 @@ FOdysseyVectorEngine::UseColorImage()
 
 void
 FOdysseyVectorEngine::Pick( FOdysseyVectorScene* iScene
-                          , std::vector<::ULIS::FVec2D>& iPointArray
+                          , const ::ULIS::FRectD& iRoi
                           , std::vector<FOdysseyVectorObject*>& oPickedObjectArray
                           , uint32 iSelectionFlags )
 {
-    ::ULIS::FRectD roi;
-
-    if( iSelectionFlags & FOdysseyVectorObject::PICK_MASK_BASED )
-    {
-        UseMaskImage();
-        roi = GenerateMask( iPointArray );
-        UseColorImage();
-    }
-    else
-    {
-        if( iPointArray.size() )
-        {
-            roi.x = iPointArray[0].x;
-            roi.y = iPointArray[0].y;
-        } 
-    }
-
-    mBLContext->flush(BL_CONTEXT_FLUSH_SYNC);
-
-    RecursivePick( mSelectionSpace ? mSelectionSpace : iScene, iScene, oPickedObjectArray, roi, iSelectionFlags );
+    RecursivePick( mSelectionSpace ? mSelectionSpace : iScene, iScene, oPickedObjectArray, iRoi, iSelectionFlags );
 /*
     if( iSelectionFlags & FOdysseyVectorObject::PICK_MASK_BASED )
     {

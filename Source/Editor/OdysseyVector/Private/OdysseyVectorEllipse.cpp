@@ -128,42 +128,6 @@ FOdysseyVectorEllipse::DrawShape( uint64 iFlags )
     }
 }
 
-bool
-FOdysseyVectorEllipse::PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags )
-{
-    if( mPathParam.Filled )
-    {
-        if( iSelectionFlags & FOdysseyVectorPathCubic::PICK_MATH_BASED )
-        {
-            BLPath path;
-            BLPoint pt = mInverseWorldMatrix.mapPoint( iRoi.x, iRoi.y );
-
-            path.clear();
-
-            for( int i = 0; i < 4; i++ )
-            {
-                ::ULIS::FVec2D &point0 = mCubicSegment[i]->GetVertex(0)->GetCoords();
-                ::ULIS::FVec2D &point1 = mCubicSegment[i]->GetVertex(1)->GetCoords();
-                ::ULIS::FVec2D &ctrlPoint0 = mCubicSegment[i]->GetHandle(0)->GetCoords();
-                ::ULIS::FVec2D &ctrlPoint1 = mCubicSegment[i]->GetHandle(1)->GetCoords();
-
-                path.moveTo( point0.x, point0.y );
-                path.cubicTo( ctrlPoint0.x, ctrlPoint0.y, ctrlPoint1.x, ctrlPoint1.y, point1.x, point1.y );
-            }
-
-            path.close();
-
-            return ( path.hitTest( pt, BL_FILL_RULE_EVEN_ODD ) == BL_HIT_TEST_IN ) ? true : false;
-        }
-    }
-    else
-    {
-        return FOdysseyVectorPathCubic::PickShape( iRoi, iSelectionFlags );
-    }
-
-    return false;
-}
-
 void
 FOdysseyVectorEllipse::SetRadius( double iRadius )
 {

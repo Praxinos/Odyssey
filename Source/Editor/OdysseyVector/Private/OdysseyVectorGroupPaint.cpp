@@ -306,7 +306,7 @@ FOdysseyVectorGroupPaint::DrawShape( uint64 iFlags )
 }
 
 bool
-FOdysseyVectorGroupPaint::PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags )
+FOdysseyVectorGroupPaint::PickShape( const ::ULIS::FRectD &iRoi, uint32 iSelectionFlags )
 {
     if( iSelectionFlags & PICK_MATH_BASED )
     {

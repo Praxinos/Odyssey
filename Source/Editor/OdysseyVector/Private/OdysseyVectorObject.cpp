@@ -591,7 +591,7 @@ FOdysseyVectorObject::MoveFront()
 }
 
 FOdysseyVectorObject*
-FOdysseyVectorObject::Pick( FOdysseyVectorGroup* iSelectionSpace, ::ULIS::FRectD &iRoi, uint32 iSelectionFlags )
+FOdysseyVectorObject::Pick( FOdysseyVectorGroup* iSelectionSpace, const ::ULIS::FRectD &iRoi, uint32 iSelectionFlags )
 {
     if( HasAncestor( iSelectionSpace ) )
     {

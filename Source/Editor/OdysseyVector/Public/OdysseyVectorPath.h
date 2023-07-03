@@ -50,7 +50,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
     protected:
         virtual void UpdateShape( uint32 iUpdateFlags );
         virtual void DrawShape( uint64 iFlags );
-        bool PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags ) { return nullptr; };
+        bool PickShape( const ::ULIS::FRectD &iRoi, uint32 iSelectionFlags ) { return nullptr; };
         FOdysseyVectorObject* CopyShape();
 
     protected :
@@ -58,7 +58,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
         std::list<FOdysseyVectorSegment*> mSegmentList;
         std::list<FOdysseyVectorSegment*> mInvalidatedSegmentList;
         /*std::list<FOdysseyVectorCycle*> mInvalidatedLoopList;*/
-        std::list<FOdysseyVectorPoint*> mSelectedPointList;
+        std::list<FOdysseyVectorVertex*> mSelectedVertexList;
         BLPath mBLPath;
         uint32 mPaintingCode;
 
@@ -70,7 +70,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
         static const uint64 PICK_HANDLE_SEGMENT = 1 << 1;
         static const uint64 PICK_POINT          = 1 << 2;
 
-
+        static ::ULIS::FVec2D GetPerpendicularVector( FOdysseyVectorVertex* iVertex, bool iNormalize );
 
         virtual ~FOdysseyVectorPath();
         FOdysseyVectorPath( const FString& iName );
@@ -100,8 +100,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
         FOdysseyVectorVertex* GetLastVertex();
         FOdysseyVectorSegment* GetFirstSegment();
         FOdysseyVectorSegment* GetLastSegment();
-        std::list<FOdysseyVectorPoint*>& GetSelectedPointList();
-        virtual bool Erase( ::ULIS::FRectD &iRoi
+        std::list<FOdysseyVectorVertex*>& GetSelectedVertexList();
+        virtual bool Erase( const ::ULIS::FRectD &iRoi
                           , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
                           , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray
                           , std::vector<FOdysseyVectorVertex*>& iRemovedVertexArray
@@ -111,6 +111,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
                               , double iRadius
                               , std::vector<FOdysseyVectorPoint*>& oPickedPointArray
                               , uint64 iSelectionFlags ){ return false; };
+        void SelectVertex( FOdysseyVectorVertex* iVertex );
+        virtual void PickVertex( std::vector<FOdysseyVectorVertex*>& oPickedVertexArray ){};
         bool IsFilled();
         bool IsLoop();
         bool HasIntersections();
@@ -129,5 +131,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
         void SetPaintingCode( uint32 iPaintingCode );
         uint32 GetPaintingCode();
         BLPath& GetBLPath();
+        void UnselectAllVertices();
         virtual void DrawStructure( FColor& iStrokeColor, double iStrokeWidth, bool iWorld ){};
 };

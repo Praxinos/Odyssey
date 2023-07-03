@@ -253,3 +253,193 @@ FOdysseyVectorHUD::GetHighlightColor()
 
     return hc;
 }
+
+// static
+void
+FOdysseyVectorHUD::DrawLine( double iWorldx0
+                           , double iWorldY0
+                           , double iWorldx1
+                           , double iWorldY1
+                           , BLContext* iBLContext
+                           , const BLRgba32& fgColor
+                           , const BLRgba32& bgColor )
+{
+    // Draw 2 lines. We draw a contour and the inside with different colors,
+    // that way the background color does not interfere as it can be of only one color.
+    // outer
+    iBLContext->setStrokeWidth( 2.0f );
+    iBLContext->setStrokeStyle( bgColor );
+    iBLContext->strokeLine( iWorldx0, iWorldY0, iWorldx1, iWorldY1 );
+    // inner
+    iBLContext->setStrokeWidth( 1.0f );
+    iBLContext->setStrokeStyle( fgColor );
+    iBLContext->strokeLine( iWorldx0, iWorldY0, iWorldx1, iWorldY1 );
+}
+
+// static
+void
+FOdysseyVectorHUD::DrawCircle( double iWorldx
+                             , double iWorldY
+                             , double iRadius
+                             , BLContext* iBLContext
+                             , const BLRgba32& fgColor
+                             , const BLRgba32& bgColor )
+{
+    // inner
+    iBLContext->setFillStyle( fgColor );
+    iBLContext->fillCircle( iWorldx, iWorldY, iRadius );
+    iBLContext->setStrokeWidth( 1.0f );
+    iBLContext->setStrokeStyle( bgColor );
+    iBLContext->strokeCircle( iWorldx, iWorldY, iRadius );
+}
+
+// static
+void
+FOdysseyVectorHUD::DrawVertex( FOdysseyVectorVertex* iVertex
+                             , BLContext* iBLContext
+                             , const BLRgba32& fgColor
+                             , const BLRgba32& bgColor
+                             , const BLRgba32& hcColor
+                             , bool iWorld
+                             , bool iViewHandle )
+{
+    FOdysseyVectorPath* path = iVertex->GetPath();
+    BLMatrix2D& HUDMatrix = iWorld ? path->GetWorldMatrix() : path->GetLocalMatrix();
+    ::ULIS::FVec2D perpendicular = FOdysseyVectorPath::GetPerpendicularVector( iVertex, true );
+    ::ULIS::FVec2D ctrl = perpendicular * iVertex->GetRadius();
+    // TODO: compute that once and pass it as parameter for all vertices
+    BLPoint point = HUDMatrix.mapPoint( iVertex->GetX(), iVertex->GetY() );
+    BLPoint handle = HUDMatrix.mapVector( ctrl.x, ctrl.y );
+
+    FOdysseyVectorHUD::DrawCircle( point.x
+                                 , point.y
+                                 , VERTEXRADIUS
+                                 , iBLContext
+                                 , iVertex->IsSelected() ? hcColor : fgColor
+                                 , bgColor );
+
+    if ( iViewHandle )
+    {
+        static BLRgba32 whiteColor = BLRgba32( 0xFF, 0xFF, 0xFF, 0xFF );
+        static BLRgba32 blackColor = BLRgba32( 0x00, 0x00, 0x00, 0xFF );
+
+        FOdysseyVectorHUD::DrawCircle( point.x + handle.x
+                                     , point.y + handle.y
+                                     , HANDLERADIUS
+                                     , iBLContext
+                                     , whiteColor
+                                     , blackColor );
+
+        FOdysseyVectorHUD::DrawCircle( point.x - handle.x
+                                     , point.y - handle.y
+                                     , HANDLERADIUS
+                                     , iBLContext
+                                     , whiteColor
+                                     , blackColor );
+    }
+}
+
+// static
+void
+FOdysseyVectorHUD::DrawCubicSegment( FOdysseyVectorSegmentCubic* iCubicSegment
+                                   , BLContext* iBLContext
+                                   , const BLRgba32& fgColor
+                                   , const BLRgba32& bgColor
+                                   , const BLRgba32& hcColor
+                                   , bool iWorld
+                                   , bool iViewHandle )
+{
+    FOdysseyVectorPath* path = iCubicSegment->GetPath();
+    BLMatrix2D& HUDMatrix = iWorld ? path->GetWorldMatrix() : path->GetLocalMatrix();
+    FOdysseyVectorVertex* vertex0 = iCubicSegment->GetVertex(0);
+    FOdysseyVectorVertex* vertex1 = iCubicSegment->GetVertex(1);
+    FOdysseyVectorHandleSegment* handle0 = iCubicSegment->GetHandle(0);
+    FOdysseyVectorHandleSegment* handle1 = iCubicSegment->GetHandle(1);
+    BLPoint point[2] = { HUDMatrix.mapPoint( vertex0->GetX(), vertex0->GetY() )
+                       , HUDMatrix.mapPoint( vertex1->GetX(), vertex1->GetY() ) };
+    BLPoint handlePoint[2] = { HUDMatrix.mapPoint( handle0->GetX(), handle0->GetY() )
+                             , HUDMatrix.mapPoint( handle1->GetX(), handle1->GetY() ) };
+    BLPath segment;
+
+    segment.moveTo( point[0] );
+    segment.cubicTo( handlePoint[0]
+                   , handlePoint[1]
+                   , point[1] );
+
+    iBLContext->setStrokeWidth( 2.0f );
+    iBLContext->setStrokeStyle( bgColor );
+    iBLContext->strokePath( segment );
+
+    iBLContext->setStrokeWidth( 1.0f );
+    iBLContext->setStrokeStyle( fgColor );
+    iBLContext->strokePath( segment );
+
+    if ( iViewHandle )
+    {
+        static BLRgba32 whiteColor = BLRgba32( 0xFF, 0xFF, 0xFF, 0xFF );
+        static BLRgba32 blackColor = BLRgba32( 0x00, 0x00, 0x00, 0xFF );
+
+        for( int i = 0; i < 2; i++ )
+        {
+            FOdysseyVectorHUD::DrawLine( point[i].x
+                                       , point[i].y
+                                       , handlePoint[i].x
+                                       , handlePoint[i].y
+                                       , iBLContext
+                                       , whiteColor
+                                       , blackColor );
+
+            // control handle 0
+            FOdysseyVectorHUD::DrawCircle( handlePoint[i].x
+                                         , handlePoint[i].y
+                                         , HANDLERADIUS
+                                         , iBLContext
+                                         , whiteColor
+                                         , blackColor );
+        }
+    }
+}
+
+// static
+void
+FOdysseyVectorHUD::DrawPath( FOdysseyVectorPath* iPath
+                           , const BLRgba32& fgColor
+                           , const BLRgba32& bgColor
+                           , const BLRgba32& hcColor
+                           , bool iWorld
+                           , bool iViewVertexHandle
+                           , bool iViewSegmentHandle )
+{
+    BLContext* blctx = iPath->GetScene()->GetEngine()->GetBLContext();
+    std::list<FOdysseyVectorSegment*>& segmentList = iPath->GetSegmentList();
+    std::list<FOdysseyVectorVertex*>& vertexList = iPath->GetVertexList();
+
+    blctx->save();
+
+    if( iWorld )
+    {
+        blctx->resetMatrix();
+    }
+
+    for( std::list<FOdysseyVectorSegment*>::iterator it = segmentList.begin(); it != segmentList.end(); ++it )
+    {
+        FOdysseyVectorSegment* segment = (*it);
+
+        if( segment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
+        {
+            FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(segment);
+
+            DrawCubicSegment( cubicSegment, blctx, fgColor, bgColor, hcColor, iWorld, iViewSegmentHandle );
+        }
+    }
+
+    // Points and Point size handles
+    for( std::list<FOdysseyVectorVertex*>::iterator it = vertexList.begin(); it != vertexList.end(); ++it )
+    {
+        FOdysseyVectorVertex *vertex = (*it);
+
+        DrawVertex( vertex, blctx, fgColor, bgColor, hcColor, iWorld, iViewVertexHandle );
+    }
+
+    blctx->restore();
+}

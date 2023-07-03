@@ -80,7 +80,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathBuilder : public FOdysseyVectorObject
         void DrawShape( uint64 iFlags );
 
         // Unimplemented. Cubic Path builder cannot be picked. It should be destroyed as soon as the curve is built
-        bool PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags ) { return false; };
+        bool PickShape( const ::ULIS::FRectD &iRoi, uint32 iSelectionFlags ) { return false; };
 
         void UpdateShape( uint32 iUpdateFlags ) {};
 

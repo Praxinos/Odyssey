@@ -23,7 +23,7 @@ FOdysseyVectorGroup::HasBaseClass( uint32 iBaseClassID )
 }
 
 bool
-FOdysseyVectorGroup::PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags )
+FOdysseyVectorGroup::PickShape( const ::ULIS::FRectD &iRoi, uint32 iSelectionFlags )
 {
 
     return false;

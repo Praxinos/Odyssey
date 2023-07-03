@@ -28,7 +28,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathCubic: public FOdysseyVectorPath
     protected:
         FOdysseyVectorObject* CopyShape();
         void DrawShape( uint64 iFlags );
-        bool PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags );
+        bool PickShape( const ::ULIS::FRectD &iRoi, uint32 iSelectionFlags );
 
     public:
         static void SharpSegments( FOdysseyVectorVertex* iVertex, bool iBuildSegments, bool iPreserveHandleLength );
@@ -37,7 +37,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathCubic: public FOdysseyVectorPath
                                   , ::ULIS::FVec2D iPerpendicularVector
                                   , bool iBuildSegments
                                   , bool iPreserveHandleLength );
-        static ::ULIS::FVec2D GetPerpendicularVector( FOdysseyVectorVertex* iVertex, bool iNormalize );
 
         FOdysseyVectorPathCubic( const FString& iName );
         void Init( FString& iName );
@@ -63,11 +62,12 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathCubic: public FOdysseyVectorPath
                 , std::vector<FOdysseyVectorSegment*>& oNewSegmentArray
                 , std::vector<FOdysseyVectorSegment*>& oOldSegmentArray );
         void SwitchSpace( FOdysseyVectorObject& iObject );
-        bool Erase( ::ULIS::FRectD &iRoi
+        bool Erase( const ::ULIS::FRectD &iRoi
                   , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
                   , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray
                   , std::vector<FOdysseyVectorVertex*>& iRemovedVertexArray
                   , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray );
+        virtual void PickVertex( std::vector<FOdysseyVectorVertex*>& oPickedVertexArray ) override;
         virtual void DrawStructure( FColor& iStrokeColor, double iStrokeWidth, bool iWorld ) override;
         uint32 GetType();
 };

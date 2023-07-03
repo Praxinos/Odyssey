@@ -126,6 +126,14 @@ FOdysseyVectorPath::HasIntersections()
     return false;
 }
 
+void
+FOdysseyVectorPath::SelectVertex( FOdysseyVectorVertex* iVertex )
+{
+    iVertex->SetSelected( true );
+
+    mSelectedVertexList.push_back( iVertex );
+}
+
 bool
 FOdysseyVectorPath::IsLoop()
 {
@@ -156,10 +164,21 @@ FOdysseyVectorPath::SetJointType( eJointType iJointType )
     mPathParam.JointType = iJointType;
 }
 
-std::list<FOdysseyVectorPoint*>&
-FOdysseyVectorPath::GetSelectedPointList()
+void
+FOdysseyVectorPath::UnselectAllVertices()
 {
-    return mSelectedPointList;
+     mSelectedVertexList.remove_if( []( FOdysseyVectorVertex* iVertex )
+                                    { 
+                                        iVertex->SetSelected( false );
+
+                                        return true;
+                                    } );
+}
+
+std::list<FOdysseyVectorVertex*>&
+FOdysseyVectorPath::GetSelectedVertexList()
+{
+    return mSelectedVertexList;
 }
 
 FOdysseyVectorSegment*
@@ -767,4 +786,79 @@ FOdysseyVectorPath::DrawJoint( FOdysseyVectorVertex* iVertex, uint64 iFlags )
             }
         }
     }
+}
+
+// static
+::ULIS::FVec2D
+FOdysseyVectorPath::GetPerpendicularVector( FOdysseyVectorVertex* iVertex, bool iNormalize )
+{
+    std::list<FOdysseyVectorSegment*>& segmentList = iVertex->GetSegmentList();
+    ::ULIS::FVec2D parallel = { 0.0f, 0.0f };
+    ::ULIS::FVec2D perpendicular = { 0.0f, 0.0f };
+
+    if ( segmentList.size() )
+    {
+        uint32 count = 0;
+
+        for( std::list<FOdysseyVectorSegment*>::iterator it = segmentList.begin(); it != segmentList.end(); ++it )
+        {
+            FOdysseyVectorSegmentCubic *segment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
+            FOdysseyVectorVertex* p0 = segment->GetVertex(0);
+            FOdysseyVectorVertex* p1 = segment->GetVertex(1);
+            ::ULIS::FVec2D& point0 = segment->GetVertex(0)->GetCoords();
+            ::ULIS::FVec2D& point1 = segment->GetVertex(1)->GetCoords();
+            ::ULIS::FVec2D& ctrlPoint0 = segment->GetHandle(0)->GetCoords();
+            ::ULIS::FVec2D& ctrlPoint1 = segment->GetHandle(1)->GetCoords();
+
+            if( iVertex == p0 )
+            {
+                // this is less computation-heavy
+                ::ULIS::FVec2D vec = { ctrlPoint0 - point0 };
+                /*::ULIS::FVec2D vec =  { CubicBezierTangentAtParameter<::ULIS::FVec2D>( point0.GetCoords()
+                                                                     , ctrlPoint0.GetCoords()
+                                                                     , ctrlPoint1.GetCoords()
+                                                                     , point1.GetCoords()
+                                                                     , 0.0f ) };*/
+
+                if ( vec.DistanceSquared() )
+                {
+                    vec.Normalize();
+
+                    parallel.x += vec.x;
+                    parallel.y += vec.y;
+                }
+            }
+
+            if( iVertex == p1 )
+            {
+                ::ULIS::FVec2D vec = { point1 - ctrlPoint1 };
+                /*::ULIS::FVec2D vec =  { CubicBezierTangentAtParameter<::ULIS::FVec2D>( point0.GetCoords()
+                                                                     , ctrlPoint0.GetCoords()
+                                                                     , ctrlPoint1.GetCoords()
+                                                                     , point1.GetCoords()
+                                                                     , 1.0f ) };*/
+
+                if ( vec.DistanceSquared() )
+                {
+                    vec.Normalize();
+
+                    parallel.x += vec.x;
+                    parallel.y += vec.y;
+                }
+            }
+        }
+
+        if ( iNormalize == true )
+        {
+            if ( parallel.DistanceSquared() )
+            {
+                parallel.Normalize();
+            }
+
+            perpendicular.x =   parallel.y;
+            perpendicular.y = - parallel.x;
+        }
+    }
+
+    return perpendicular;
 }

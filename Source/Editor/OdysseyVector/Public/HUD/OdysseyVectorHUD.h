@@ -46,9 +46,50 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
         static FColor& GetBackgroundColor();
         static FColor& GetHighlightColor();
 
+        static void DrawLine( double iWorldx0
+                            , double iWorldY0
+                            , double iWorldx1
+                            , double iWorldY1
+                            , BLContext* iBLContext
+                            , const BLRgba32& fgColor
+                            , const BLRgba32& bgColor );
+
+        static void DrawCircle( double iWorldx
+                              , double iWorldY
+                              , double iRadius
+                              , BLContext* iBLContext
+                              , const BLRgba32& fgColor
+                              , const BLRgba32& bgColor );
+
+        static void DrawVertex( FOdysseyVectorVertex* iVertex
+                              , BLContext* iBLContext
+                              , const BLRgba32& fgColor
+                              , const BLRgba32& bgColor
+                              , const BLRgba32& hcColor
+                              , bool iWorld
+                              , bool iViewHandle );
+
+        static void DrawCubicSegment( FOdysseyVectorSegmentCubic* iCubicSegment
+                                    , BLContext* iBLContext
+                                    , const BLRgba32& fgColor
+                                    , const BLRgba32& bgColor
+                                    , const BLRgba32& hcColor
+                                    , bool iWorld
+                                    , bool iViewHandle );
+
+        static void DrawPath( FOdysseyVectorPath* iPath
+                            , const BLRgba32& fgColor
+                            , const BLRgba32& bgColor
+                            , const BLRgba32& hcColor
+                            , bool iWorld
+                            , bool iViewVertexHandle
+                            , bool iViewSegmentHandle );
+
         virtual ~FOdysseyVectorHUD();
         FOdysseyVectorHUD();
 
+        static const uint32 VERTEXRADIUS = 4;
+        static const uint32 HANDLERADIUS = 3;
 
         virtual void Draw( FOdysseyVectorScene* iScene, uint64 iFlags ) = 0;
         virtual void Reset( FOdysseyVectorScene* iScene ) = 0;
@@ -59,6 +100,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
                        , std::vector<FOdysseyVectorPoint*>& oPickedPointArray );
 
         void MakePointQuadTree( FOdysseyVectorScene *iScene );
+
 
     protected:
         FPointQuadTree* mPointQuadTree;

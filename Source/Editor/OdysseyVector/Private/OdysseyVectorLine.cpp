@@ -89,12 +89,6 @@ FOdysseyVectorLine::DrawShape( uint64 iFlags )
     }
 }
 
-bool
-FOdysseyVectorLine::PickShape( ::ULIS::FRectD &iRoi, uint32 iSelectionFlags )
-{
-    return false;
-}
-
 void
 FOdysseyVectorLine::SetSize( double iWidth, double iHeight )
 {

@@ -57,14 +57,14 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
         /**
          * @brief Pick an object
          * @param iScene the root object
-         * @param iPointArray an array defining the selection area.
+         * @param iRoi
          * @param iSelectionFlags FOdysseyVectorObject::PICK_MASK_BASED or FOdysseyVectorObject::PICK_MATH_BASED
          * @return an array of pointers to picked objects.
          *  FOdysseyVectorObject::PICK_MASK_BASED: in that case the mask buffer must be filled with 0xFF where picking is wanted.
          *  FOdysseyVectorObject::PICK_MATH_BASED: in that case collisions are mathematically computed.
          */
         void Pick( FOdysseyVectorScene* iScene
-                 , std::vector<::ULIS::FVec2D>& iPointArray
+                 ,const ::ULIS::FRectD& iRoi
                  , std::vector<FOdysseyVectorObject*>& oPickedObjectArray
                  , uint32 iSelectionFlags );
 
@@ -246,7 +246,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
         static void RecursivePick( FOdysseyVectorGroup* iSelectionSpace
                                  , FOdysseyVectorObject* iObj
                                  , std::vector<FOdysseyVectorObject*>& iSelectedObjectArray
-                                 , ::ULIS::FRectD& iRoi, uint32 iSelectionFlags );
+                                 , const ::ULIS::FRectD& iRoi
+                                 , uint32 iSelectionFlags );
 
         static void RecursiveErase( FOdysseyVectorObject* iObj
                                   , std::vector<FOdysseyVectorObject*>& iAddedObjectArray
@@ -255,7 +256,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
                                   , std::vector<FOdysseyVectorObject*>& iRemovedObjectArray
                                   , std::vector<FOdysseyVectorVertex*>& iRemovedVertexArray
                                   , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray
-                                  , ::ULIS::FRectD &iRoi
+                                  , const ::ULIS::FRectD &iRoi
                                   , bool iSelectedOnly );
 
 

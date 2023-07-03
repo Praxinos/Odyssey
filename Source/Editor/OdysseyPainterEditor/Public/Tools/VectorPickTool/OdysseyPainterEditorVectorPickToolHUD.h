@@ -19,6 +19,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPickToolHUD : public F
                                  , BLRgba32 fgColor
                                  , BLRgba32 bgColor
                                  , BLRgba32 hcColor );
+        void DrawVertexSelection( FOdysseyVectorScene* iScene, uint64 iFlags );
 
     private:
         UOdysseyPainterEditorVectorPickTool* mPickTool;
