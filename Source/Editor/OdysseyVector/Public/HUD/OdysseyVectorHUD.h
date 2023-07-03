@@ -5,6 +5,8 @@
 
 #include "OdysseyVectorObject.h"
 #include "OdysseyVectorPoint.h"
+#include "OdysseyVectorSegmentCubic.h"
+#include "OdysseyVectorPath.h"
 
 typedef struct _FPointQuadTreeEntry
 {
