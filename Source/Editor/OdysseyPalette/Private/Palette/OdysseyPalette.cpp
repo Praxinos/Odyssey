@@ -10,7 +10,7 @@
 
 UOdysseyPalette::UOdysseyPalette()
 {
-    FString text = FString("Set 0");
+    FString text = FString("Set0");
     Sets.Add(FName(text));
 }
 

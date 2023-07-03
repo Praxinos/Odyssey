@@ -6,11 +6,14 @@
 
 #define LOCTEXT_NAMESPACE "SOdysseyPaletteSetView"
 
+static FName contextSetMenuName = "OdysseyPaletteSetContextMenu";
+
 SOdysseyPaletteSetView::~SOdysseyPaletteSetView()
 {
 }
 
-SOdysseyPaletteSetView::SOdysseyPaletteSetView()
+SOdysseyPaletteSetView::SOdysseyPaletteSetView():
+    mCommandList(MakeShared<FUICommandList>())
 {
 }
 
@@ -31,8 +34,96 @@ SOdysseyPaletteSetView::Construct(const FArguments& InArgs)
             .ItemAlignment(EListItemAlignment::LeftAligned)
             .SelectionMode(ESelectionMode::Single)
             .OnGenerateTile(this, &SOdysseyPaletteSetView::OnGenerateTile)
+            .OnContextMenuOpening(this, &SOdysseyPaletteSetView::OnContextMenuOpening)
         );
     }
+}
+
+void
+SOdysseyPaletteSetView::DeleteSelectedSet()
+{
+/*
+    if (!mPalette)
+        return;
+
+    TArray<UOdysseyPaletteEntry*> selectedEntries = GetSelectedItems();
+    mPalette->RemoveEntries(selectedEntries);*/
+}
+
+bool
+SOdysseyPaletteSetView::CanDeleteSelectedSet()
+{
+/*
+    if (!mPalette)
+        return false;
+
+    TArray<UOdysseyPaletteEntry*> selectedEntries = GetSelectedItems();
+    if (selectedEntries.Num() <= 0)
+        return false;
+
+    //If one of the root layers is not selected, we can delete selected entries
+    const TArray<UOdysseyPaletteEntry*>& rootEntries = mPalette->GetRootEntries();
+    for (UOdysseyPaletteEntry* rootEntry : rootEntries)
+    {
+        if (!selectedEntries.Contains(rootEntry))
+            return true;
+    }
+    */
+    return false;
+}
+
+void
+SOdysseyPaletteSetView::DuplicateSelectedSet()
+{
+/*
+    if (!mPalette)
+        return;
+
+    TArray<UOdysseyPaletteEntry*> selectedEntries = GetSelectedItems();
+    if (selectedEntries.Num() <= 0)
+        return;
+
+    TArray<UOdysseyPaletteEntry*> duplicatedEntries = mPalette->DuplicateEntries(selectedEntries);
+    SetItemSelection(duplicatedEntries, true);*/
+}
+
+TArray<TSharedPtr<FExtender>> SOdysseyPaletteSetView::ExtendContextMenu()
+{
+    return TArray< TSharedPtr<FExtender> >();
+}
+
+
+void
+SOdysseyPaletteSetView::MapActionsToCommandList()
+{
+/*
+    mCommandList->MapAction(
+        FGenericCommands::Get().Delete,
+        FExecuteAction::CreateRaw(this, &SOdysseyPaletteSetView::DeleteSelectedSet),
+        FCanExecuteAction::CreateRaw(this, &SOdysseyPaletteSetView::CanDeleteSelectedSet)
+    );
+
+    mCommandList->MapAction(
+        FGenericCommands::Get().Duplicate,
+        FExecuteAction::CreateRaw(this, &SOdysseyPaletteSetView::DuplicateSelectedSet)
+    );*/
+}
+
+
+TSharedPtr<SWidget> SOdysseyPaletteSetView::OnContextMenuOpening()
+{
+    //Create a new command, so that we can add context menu specific entries 
+    TSharedRef<FUICommandList> commandList = MakeShared<FUICommandList>();
+    commandList->Append(mCommandList);
+
+    //Allows us to extend the menu context by inserting entries everywhere we want
+    //Overriding CreateContextMenu does not allow that
+    TArray<TSharedPtr<FExtender>> extenders = ExtendContextMenu();
+    TSharedPtr<FExtender> extender = FExtender::Combine(extenders);
+
+    //Build menu
+    FToolMenuContext menuContext(commandList, extender);
+    return UToolMenus::Get()->GenerateWidget(contextSetMenuName, menuContext);
 }
 
 TSharedRef<class ITableRow>

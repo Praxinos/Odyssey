@@ -28,10 +28,36 @@ public:
     void Construct(const FArguments& InArgs);
     void OnSetSelected(FName iSet);
 
+
+protected:
+    
+    void DeleteSelectedSet();
+    
+    bool CanDeleteSelectedSet();
+    
+    void DuplicateSelectedSet();
+    /**
+     * @brief Extends the context menu
+     * Allows us to insert entries wherever we want in the context menu
+     * CreateContextMenu() does not allow us to do that
+     */
+    virtual TArray<TSharedPtr<FExtender>> ExtendContextMenu();
+
+    void MapActionsToCommandList();
+
 private:
+    //Callbacks
+    /**
+     * @brief Called when the view asks for a contextmenu to be opened (rightclick)
+     *
+     * @return TSharedPtr<SWidget>
+     */
+    TSharedPtr<SWidget> OnContextMenuOpening();
+
 	TSharedRef<class ITableRow> OnGenerateTile(FName iSet, const TSharedRef< class STableViewBase >& iTable);
 
 private:
     UOdysseyPalette* mPalette;
     FOnSetSelected mOnSetSelected;
+    TSharedRef<FUICommandList> mCommandList;
 };
