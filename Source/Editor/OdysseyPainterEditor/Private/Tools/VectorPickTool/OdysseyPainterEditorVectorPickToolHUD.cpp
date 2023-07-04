@@ -71,16 +71,16 @@ FOdysseyPainterEditorVectorPickToolHUD::Draw( FOdysseyVectorScene* iScene, uint6
     blctx->save();
     blctx->resetMatrix();
 
-    DrawSelectionPolygon( blctx, fgColor, bgColor, hcColor );
+    DrawPickingArea( blctx, fgColor, bgColor, hcColor );
 
     blctx->restore();
 }
 
 void
-FOdysseyPainterEditorVectorPickToolHUD::DrawSelectionPolygon( BLContext* iBLContext
-                                                            , BLRgba32 fgColor
-                                                            , BLRgba32 bgColor
-                                                            , BLRgba32 hcColor )
+FOdysseyPainterEditorVectorPickToolHUD::DrawPickingArea( BLContext* iBLContext
+                                                       , BLRgba32 fgColor
+                                                       , BLRgba32 bgColor
+                                                       , BLRgba32 hcColor )
 {
     std::vector<::ULIS::FVec2D>& pointArray = mPickTool->GetPointArray();
     BLPath path;
@@ -90,13 +90,50 @@ FOdysseyPainterEditorVectorPickToolHUD::DrawSelectionPolygon( BLContext* iBLCont
     iBLContext->setStrokeStyle( hcColor );
     iBLContext->setStrokeWidth( 1.0f );
 
-    for( int i = 0; i < pointArray.size(); i++ )
+    if( pointArray.size() > 1 )
     {
-        int n = ( i + 1 ) % pointArray.size();
+        switch( mPickTool->GetPickingMode() )
+        {
+            case EOdysseyVectorPickingMode::Rectangle :
+            {
+                double xmin = ::ULIS::FMath::Min( pointArray[0].x, pointArray[1].x );
+                double ymin = ::ULIS::FMath::Min( pointArray[0].y, pointArray[1].y );
+                double xmax = ::ULIS::FMath::Max( pointArray[0].x, pointArray[1].x );
+                double ymax = ::ULIS::FMath::Max( pointArray[0].y, pointArray[1].y );
+                ::ULIS::FRectD rect = ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax );
 
-        path.moveTo( pointArray[i].x, pointArray[i].y );
-        path.lineTo( pointArray[n].x, pointArray[n].y );
+                iBLContext->strokeRect( rect.x, rect.y, rect.w, rect.h );
+            }
+            break;
+
+            case EOdysseyVectorPickingMode::Circle:
+            {
+                double xmin = ::ULIS::FMath::Min( pointArray[0].x, pointArray[1].x );
+                double ymin = ::ULIS::FMath::Min( pointArray[0].y, pointArray[1].y );
+                double xmax = ::ULIS::FMath::Max( pointArray[0].x, pointArray[1].x );
+                double ymax = ::ULIS::FMath::Max( pointArray[0].y, pointArray[1].y );
+                ::ULIS::FVec2D diagonal = ::ULIS::FVec2D( xmax, ymax ) - ::ULIS::FVec2D( xmin, ymin );
+                double radius = diagonal.Distance();
+
+                iBLContext->strokeCircle( pointArray[0].x, pointArray[0].y, radius );
+            }
+            break;
+
+            case EOdysseyVectorPickingMode::Freehand : 
+                for( int i = 0; i < pointArray.size(); i++ )
+                {
+                    int n = ( i + 1 ) % pointArray.size();
+
+                    path.moveTo( pointArray[i].x, pointArray[i].y );
+                    path.lineTo( pointArray[n].x, pointArray[n].y );
+                }
+
+                iBLContext->strokePath( path );
+            break;
+
+            default:
+
+            break;
+        }
     }
-
-    iBLContext->strokePath( path );
 }

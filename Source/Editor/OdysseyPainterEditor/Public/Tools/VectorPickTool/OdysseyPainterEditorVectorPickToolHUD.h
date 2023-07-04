@@ -15,10 +15,10 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPickToolHUD : public F
         virtual void Reset( FOdysseyVectorScene* iScene ) override;
 
     protected:
-        void DrawSelectionPolygon( BLContext* iBLContext
-                                 , BLRgba32 fgColor
-                                 , BLRgba32 bgColor
-                                 , BLRgba32 hcColor );
+        void DrawPickingArea( BLContext* iBLContext
+                            , BLRgba32 fgColor
+                            , BLRgba32 bgColor
+                            , BLRgba32 hcColor );
         void DrawVertexSelection( FOdysseyVectorScene* iScene, uint64 iFlags );
 
     private:

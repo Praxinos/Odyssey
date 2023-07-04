@@ -172,7 +172,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
          * @brief Fill the mask image with a shape defined by a array of points.
          * @param iPointArray a reference to the array of points.
          */
-        ::ULIS::FRectD GenerateMask( std::vector<::ULIS::FVec2D>& iPointArray );
+        ::ULIS::FRectD GenerateFreehandMask( std::vector<::ULIS::FVec2D>& iPointArray );
 
         /**
          * @brief Use the mask image as the default rendering buffer.
@@ -241,6 +241,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
         void SetScene( FOdysseyVectorScene* iScene );
         FOdysseyVectorScene* GetScene( );
         void SelectAllInSelectionSpace();
+        ::ULIS::FRectD GenerateCircleMask( std::vector<::ULIS::FVec2D>& iPointArray );
+        ::ULIS::FRectD GenerateRectangleMask( std::vector<::ULIS::FVec2D>& iPointArray );
 
     protected:
         static void RecursivePick( FOdysseyVectorGroup* iSelectionSpace

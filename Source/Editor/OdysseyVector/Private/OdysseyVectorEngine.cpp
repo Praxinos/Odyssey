@@ -221,7 +221,82 @@ UE_LOG(LogTemp, Warning, TEXT("Some warning message %d %d %d %d"), mRoi.x, mRoi.
 }
 
 ::ULIS::FRectD
-FOdysseyVectorEngine::GenerateMask( std::vector<::ULIS::FVec2D>& iPointArray )
+FOdysseyVectorEngine::GenerateCircleMask( std::vector<::ULIS::FVec2D>& iPointArray )
+{
+    BLPath path;
+    ::ULIS::FRectD rect = { 0, 0, 0, 0 };
+
+    UseMaskImage();
+
+    mBLContext->save();
+    mBLContext->resetMatrix();
+    mBLContext->setCompOp(BL_COMP_OP_SRC_COPY);
+    mBLContext->setFillAlpha(0.0f);
+    mBLContext->clearAll();
+
+    if( iPointArray.size() == 2 )
+    {
+        double xmin = ::ULIS::FMath::Min( iPointArray[0].x, iPointArray[1].x );
+        double ymin = ::ULIS::FMath::Min( iPointArray[0].y, iPointArray[1].y );
+        double xmax = ::ULIS::FMath::Max( iPointArray[0].x, iPointArray[1].x );
+        double ymax = ::ULIS::FMath::Max( iPointArray[0].y, iPointArray[1].y );
+        ::ULIS::FVec2D diagonal = ::ULIS::FVec2D( xmax, ymax ) - ::ULIS::FVec2D( xmin, ymin );
+        double radius = diagonal.Distance();
+
+        rect = ::ULIS::FRectD::FromMinMax( iPointArray[0].x - diagonal.x
+                                         , iPointArray[0].y - diagonal.y
+                                         , iPointArray[0].x + diagonal.x
+                                         , iPointArray[0].y + diagonal.y );
+
+        mBLContext->setFillAlpha( 1.0f );
+        mBLContext->fillCircle( iPointArray[0].x, iPointArray[0].y, radius );
+    }
+
+    mBLContext->flush(BL_CONTEXT_FLUSH_SYNC);
+    mBLContext->restore();
+
+    UseColorImage();
+
+    return rect;
+}
+
+::ULIS::FRectD
+FOdysseyVectorEngine::GenerateRectangleMask( std::vector<::ULIS::FVec2D>& iPointArray )
+{
+    BLPath path;
+    ::ULIS::FRectD rect = { 0, 0, 0, 0 };
+
+    UseMaskImage();
+
+    mBLContext->save();
+    mBLContext->resetMatrix();
+    mBLContext->setCompOp(BL_COMP_OP_SRC_COPY);
+    mBLContext->setFillAlpha(0.0f);
+    mBLContext->clearAll();
+
+    if( iPointArray.size() == 2 )
+    {
+        double xmin = ::ULIS::FMath::Min( iPointArray[0].x, iPointArray[1].x );
+        double ymin = ::ULIS::FMath::Min( iPointArray[0].y, iPointArray[1].y );
+        double xmax = ::ULIS::FMath::Max( iPointArray[0].x, iPointArray[1].x );
+        double ymax = ::ULIS::FMath::Max( iPointArray[0].y, iPointArray[1].y );
+
+        rect = ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax );
+
+        mBLContext->setFillAlpha( 1.0f );
+        mBLContext->fillRect( rect.x, rect.y, rect.w, rect.h );
+    }
+
+    mBLContext->flush(BL_CONTEXT_FLUSH_SYNC);
+    mBLContext->restore();
+
+    UseColorImage();
+
+    return rect;
+}
+
+::ULIS::FRectD
+FOdysseyVectorEngine::GenerateFreehandMask( std::vector<::ULIS::FVec2D>& iPointArray )
 {
     BLPath path;
     ::ULIS::FRectD rect = { 0, 0, 0, 0 };
@@ -268,14 +343,12 @@ FOdysseyVectorEngine::GenerateMask( std::vector<::ULIS::FVec2D>& iPointArray )
         }
 
         rect = ::ULIS::FRectD::FromMinMax( x1, y1, x2, y2 );
+
+        mBLContext->setFillAlpha(1.0f);
+        mBLContext->fillPath( path );
     }
 
-    /*blctx.setFillStyle( BLRgba32(0xFFFFFFFF) );*/
-    mBLContext->setFillAlpha(1.0f);
-    mBLContext->fillPath( path );
-
     mBLContext->flush(BL_CONTEXT_FLUSH_SYNC);
-
     mBLContext->restore();
 
     UseColorImage();

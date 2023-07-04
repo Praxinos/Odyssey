@@ -16,6 +16,14 @@ enum class EOdysseyVectorEditionMode : uint8
     Vertex
 };
 
+UENUM()
+enum class EOdysseyVectorPickingMode : uint8
+{
+    Freehand,
+    Circle,
+    Rectangle
+};
+
 class FOdysseyPainterEditorVectorPickToolHUD;
 
 UCLASS()
@@ -63,6 +71,8 @@ public:
 
     std::vector<::ULIS::FVec2D>& GetPointArray();
 
+    EOdysseyVectorPickingMode GetPickingMode();
+
 protected:
     void OnMouseUpVectorObjectMode( FOdysseyVectorEngine* iEngine
                                   , FOdysseyVectorScene* iScene
@@ -72,6 +82,8 @@ protected:
                                   , FOdysseyVectorScene* iScene
                                   , const FOdysseyPoint& iPointInTexture
                                   , const FKey& iKey );
+    ::ULIS::FRectD GenerateMask( FOdysseyVectorEngine* iEngine );
+
 protected:
     FOdysseyPainterEditorVectorPickToolHUD* mPickHUD;
     std::vector<::ULIS::FVec2D> mPointArray;
@@ -80,4 +92,7 @@ protected:
 public:
     UPROPERTY(EditAnywhere, Category="Picking Tool")
     EOdysseyVectorEditionMode EditionMode;
+
+    UPROPERTY(EditAnywhere, Category="Picking Tool")
+    EOdysseyVectorPickingMode PickingMode;
 };
