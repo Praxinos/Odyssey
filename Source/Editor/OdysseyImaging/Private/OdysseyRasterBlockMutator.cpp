@@ -123,7 +123,12 @@ FOdysseyRasterBlockMutator::EditTilesFromRects(const TArray<::ULIS::FRectI>& iRe
     }
     ctx.Finish();
 
-    iDelegate.ExecuteIfBound(invalidTileMap);
+    if (iDelegate.IsBound())
+    {
+        TArray<::ULIS::FEvent> delegateEvents = iDelegate.Execute(invalidTileMap);
+        if (mRasterBlock->PostProcess().IsBound())
+            mRasterBlock->PostProcess().Execute(mOriginalTileBlocks, invalidTileMap, delegateEvents);
+    }
     ctx.Finish();
 
     mRasterBlock->OnBlockChanged().Broadcast(iRects); //always send at least one interactive event

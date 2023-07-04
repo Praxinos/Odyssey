@@ -60,7 +60,7 @@ UOdysseyAnimationEditorPaintBucketTool::Load()
 	mPaintEngine.RasterBlock(rasterBlock);
 
 	//Should be managed by the tool
-	mPaintEngine.OnPreUpdateDelegate().BindUObject(this, &UOdysseyAnimationEditorPaintBucketTool::OnPaintEnginePreUpdate);
+	//mPaintEngine.OnPreUpdateDelegate().BindUObject(this, &UOdysseyAnimationEditorPaintBucketTool::OnPaintEnginePreUpdate);
 }
 
 void
@@ -75,7 +75,7 @@ UOdysseyAnimationEditorPaintBucketTool::Inactivate()
 void
 UOdysseyAnimationEditorPaintBucketTool::Unload()
 {
-	mPaintEngine.OnPreUpdateDelegate().Unbind();
+	//mPaintEngine.OnPreUpdateDelegate().Unbind();
 
     //Cleanup
 	mPaintEngine.RasterBlock(nullptr);
@@ -219,7 +219,7 @@ UOdysseyAnimationEditorPaintBucketTool::OnMouseUp( const FOdysseyPoint& iPointIn
 
     return ret;
 }
-
+/*
 FOdysseyBlendParameters
 UOdysseyAnimationEditorPaintBucketTool::OnPaintEnginePreUpdate(const FOdysseyBlendParameters& iBlendParameters)
 {
@@ -234,6 +234,6 @@ UOdysseyAnimationEditorPaintBucketTool::OnPaintEnginePreUpdate(const FOdysseyBle
 		blendParameters.AlphaMode = EOdysseyAlphaMode(::ULIS::Alpha_Back);
 
 	return blendParameters;
-}
+} */
 
 #undef LOCTEXT_NAMESPACE

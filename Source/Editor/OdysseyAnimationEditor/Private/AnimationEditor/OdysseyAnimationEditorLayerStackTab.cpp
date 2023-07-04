@@ -195,13 +195,13 @@ FOdysseyAnimationEditorLayerStackTab::ImportTextureSequence()
             rasterBlockMutator.EditTilesFromRects(
                 { invalidRect },
                 FOdysseyRasterBlockMutator::FEditDelegate::CreateLambda(
-                    [&](const FULISInvalidTileMap& iTileMap)
+                    [&](const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
                     {
                         TSharedPtr<::ULIS::FBlock> block = rasterBlock->GetBlock();
                         ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(block->Format());
                         ::ULIS::FEvent eventConvertFormat = FULISEventBuilder().RetainBlock(block).RetainBlock(textureBlock).Build();
                         ctx.ConvertFormat(*textureBlock, *block, ::ULIS::FRectI::Auto, ::ULIS::FVec2I(0), ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventConvertFormat);
-                        ctx.Finish(); //avoids having too much blocks in memory at the same time
+                        return { eventConvertFormat };
                     }
                 )
             );

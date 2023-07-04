@@ -40,7 +40,7 @@ UOdysseyTextureEditorPaintBucketTool::Load()
 	    mPaintEngine.RasterBlock(rasterBlock);
 
 	    //Should be managed by the tool
-	    mPaintEngine.OnPreUpdateDelegate().BindUObject(this, &UOdysseyTextureEditorPaintBucketTool::OnPaintEnginePreUpdate);
+	    //mPaintEngine.OnPreUpdateDelegate().BindUObject(this, &UOdysseyTextureEditorPaintBucketTool::OnPaintEnginePreUpdate);
     }
 
     if( currentVectorLayer )
@@ -74,7 +74,7 @@ UOdysseyTextureEditorPaintBucketTool::Unload()
 
         if( currentLayerRaster )
         {
-	        mPaintEngine.OnPreUpdateDelegate().Unbind();
+	        //mPaintEngine.OnPreUpdateDelegate().Unbind();
 
             //Cleanup
 	        mPaintEngine.RasterBlock(nullptr);
@@ -294,7 +294,7 @@ UOdysseyTextureEditorPaintBucketTool::PostEditChangeProperty( FPropertyChangedEv
     }
 }
 
-FOdysseyBlendParameters
+/* FOdysseyBlendParameters
 UOdysseyTextureEditorPaintBucketTool::OnPaintEnginePreUpdate(const FOdysseyBlendParameters& iBlendParameters)
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
@@ -308,6 +308,6 @@ UOdysseyTextureEditorPaintBucketTool::OnPaintEnginePreUpdate(const FOdysseyBlend
 		blendParameters.AlphaMode = EOdysseyAlphaMode(::ULIS::Alpha_Back);
 
 	return blendParameters;
-}
+} */
 
 #undef LOCTEXT_NAMESPACE

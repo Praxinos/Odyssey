@@ -402,6 +402,12 @@ FOdysseyRasterBlock::OnBlockCommited()
     return mOnBlockCommited;
 }
 
+FOdysseyRasterBlock::FPostProcess&
+FOdysseyRasterBlock::PostProcess()
+{
+    return mPostProcess;
+}
+
 /*
 FOdysseyRasterBlock::FOnUndoableBlockChanged&
 FOdysseyRasterBlock::OnUndoableBlockChanged()

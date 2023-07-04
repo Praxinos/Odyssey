@@ -24,12 +24,6 @@ public:
      * @brief Delegate called when something changed the result of RenderImage()
      * 
      */
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOnIsAlphaLockedChanged, UOdysseyAnimationLayerImageRaster*)
-
-    /**
-     * @brief Delegate called when something changed the result of RenderImage()
-     * 
-     */
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnBlendModeChanged, UOdysseyAnimationLayerImageRaster*)
 
     /**
@@ -46,7 +40,6 @@ public:
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnCellsChanged, UOdysseyAnimationLayerImageRaster*)
 
 public:
-    static FOnIsAlphaLockedChanged& OnIsAlphaLockedChanged();
     static FOnBlendModeChanged& OnBlendModeChanged();
     static FOnOpacityChanged& OnOpacityChanged();
     static FOnCellsChanged& OnCellsChanged();
@@ -114,7 +107,6 @@ public:
 
 protected:
     void IsLightTableActivatedChanged();
-    void IsAlphaLockedChanged();
     void OpacityChanged();
     void BlendModeChanged();
     void CellsChanged();
@@ -133,7 +125,7 @@ public:
     virtual void Serialize(FArchive& Ar) override;
 
 public:
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Animation | LayerStack")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, NonTransactional, Category="Animation | LayerStack")
     bool IsAlphaLocked = false;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation | LayerStack")

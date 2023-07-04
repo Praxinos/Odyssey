@@ -297,12 +297,13 @@ FOdysseyAnimationEditor::Clear()
 				mutator.EditTilesFromRects(
 					{ ::ULIS::FRectI::FromXYWH(0, 0, rasterBlock->GetWidth(), rasterBlock->GetHeight()) },
 					FOdysseyRasterBlockMutator::FEditDelegate::CreateLambda(
-						[&](const FULISInvalidTileMap& iTileMap)
+						[&](const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
 						{
 							TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ULISRasterBlock = rasterBlock->GetBlock();
 							::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(rasterBlock->GetFormat());
-							ctx.Clear(*ULISRasterBlock, ::ULIS::FRectI::Auto, ::ULIS::FSchedulePolicy::AsyncCacheEfficient);
-							ctx.Finish();
+							::ULIS::FEvent eventClear;
+							ctx.Clear(*ULISRasterBlock, ::ULIS::FRectI::Auto, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventClear);
+							return { eventClear };
 						}
 					)
 				);

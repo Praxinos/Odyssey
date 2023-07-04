@@ -75,7 +75,6 @@ SOdysseyTextureLayerImageRasterRow::GenerateHeaderWidget()
 void
 SOdysseyTextureLayerImageRasterRow::OnIsAlphaLockedCheckStateChanged(ECheckBoxState iState)
 {
-    FScopedTransaction ScopedTransaction(LOCTEXT("LayerTransaction", "Change Layer Alpha Lock"));
     FOdysseyObjectEditorUtils::SetPropertyValue(mTextureLayerImageRaster, "IsAlphaLocked", iState == ECheckBoxState::Checked);
 }
 

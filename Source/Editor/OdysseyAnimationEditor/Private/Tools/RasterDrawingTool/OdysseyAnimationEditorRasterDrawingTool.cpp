@@ -59,7 +59,7 @@ UOdysseyAnimationEditorRasterDrawingTool::Load()
 	if ( BrushInstance )
 		BrushInstance->SetBlock(mPaintEngine.PaintBlock());
 
-	mPaintEngine.OnPreUpdateDelegate().BindUObject(this, &UOdysseyAnimationEditorRasterDrawingTool::OnPaintEnginePreUpdate);
+	//mPaintEngine.OnPreUpdateDelegate().BindUObject(this, &UOdysseyAnimationEditorRasterDrawingTool::OnPaintEnginePreUpdate);
 }
 
 void
@@ -75,7 +75,7 @@ UOdysseyAnimationEditorRasterDrawingTool::Inactivate()
 void
 UOdysseyAnimationEditorRasterDrawingTool::Unload()
 {
-	mPaintEngine.OnPreUpdateDelegate().Unbind();
+	//mPaintEngine.OnPreUpdateDelegate().Unbind();
 
     //Cleanup
 	mPaintEngine.RasterBlock(nullptr);
@@ -235,7 +235,7 @@ UOdysseyAnimationEditorRasterDrawingTool::GetLayer() const
 	return Cast<UOdysseyAnimationLayerImageRaster>(layerstack->CurrentLayer.Get());
 }
 
-FOdysseyBlendParameters
+/* FOdysseyBlendParameters
 UOdysseyAnimationEditorRasterDrawingTool::OnPaintEnginePreUpdate(const FOdysseyBlendParameters& iBlendParameters)
 {
 	FOdysseyBlendParameters blendParameters = iBlendParameters;
@@ -248,6 +248,6 @@ UOdysseyAnimationEditorRasterDrawingTool::OnPaintEnginePreUpdate(const FOdysseyB
 		blendParameters.AlphaMode = EOdysseyAlphaMode(::ULIS::Alpha_Back);
 
 	return blendParameters;
-}
+} */
 
 #undef LOCTEXT_NAMESPACE

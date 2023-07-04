@@ -41,7 +41,7 @@ UOdysseyTextureEditorRasterDrawingTool::Load()
 		BrushInstance->SetBlock(mPaintEngine.PaintBlock());
 
 	//Should be managed by the tool
-	mPaintEngine.OnPreUpdateDelegate().BindUObject(this, &UOdysseyTextureEditorRasterDrawingTool::OnPaintEnginePreUpdate);
+	//mPaintEngine.OnPreUpdateDelegate().BindUObject(this, &UOdysseyTextureEditorRasterDrawingTool::OnPaintEnginePreUpdate);
 }
 
 void
@@ -57,7 +57,7 @@ UOdysseyTextureEditorRasterDrawingTool::Inactivate()
 void
 UOdysseyTextureEditorRasterDrawingTool::Unload()
 {
-	mPaintEngine.OnPreUpdateDelegate().Unbind();
+	//mPaintEngine.OnPreUpdateDelegate().Unbind();
 
     //Cleanup
 	mPaintEngine.RasterBlock(nullptr);
@@ -128,7 +128,7 @@ UOdysseyTextureEditorRasterDrawingTool::GetLayer() const
 	return Cast<UOdysseyTextureLayerImageRaster>(layerstack->CurrentLayer.Get());
 }
 
-FOdysseyBlendParameters
+/* FOdysseyBlendParameters
 UOdysseyTextureEditorRasterDrawingTool::OnPaintEnginePreUpdate(const FOdysseyBlendParameters& iBlendParameters)
 {
 	FOdysseyBlendParameters blendParameters = iBlendParameters;
@@ -141,6 +141,6 @@ UOdysseyTextureEditorRasterDrawingTool::OnPaintEnginePreUpdate(const FOdysseyBle
 		blendParameters.AlphaMode = EOdysseyAlphaMode(::ULIS::Alpha_Back);
 
 	return blendParameters;
-}
+} */
 
 #undef LOCTEXT_NAMESPACE

@@ -190,10 +190,6 @@ UOdysseyTextureLayerImageVector::PropertyChanged(const FName& iPropertyName)
         BlendModeChanged();
     if (iPropertyName == "Opacity")
         OpacityChanged();
-/*
-    if (iPropertyName == "IsAlphaLocked")
-        IsAlphaLockedChanged();
-*/
 }
 
 void

@@ -13,13 +13,6 @@
 
 #define LOCTEXT_NAMESPACE "UOdysseyAnimationLayerImageRaster"
 
-UOdysseyAnimationLayerImageRaster::FOnIsAlphaLockedChanged&
-UOdysseyAnimationLayerImageRaster::OnIsAlphaLockedChanged()
-{
-    static FOnIsAlphaLockedChanged onIsAlphaLockedChanged;
-    return onIsAlphaLockedChanged;
-}
-
 UOdysseyAnimationLayerImageRaster::FOnBlendModeChanged&
 UOdysseyAnimationLayerImageRaster::OnBlendModeChanged()
 {
@@ -279,12 +272,6 @@ UOdysseyAnimationLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
 }
 
 void
-UOdysseyAnimationLayerImageRaster::IsAlphaLockedChanged()
-{
-    OnIsAlphaLockedChanged().Broadcast(this);
-}
-
-void
 UOdysseyAnimationLayerImageRaster::IsLightTableActivatedChanged()
 {   
     UOdysseyAnimation* animation = GetAnimation();
@@ -355,8 +342,6 @@ UOdysseyAnimationLayerImageRaster::PropertyChanged(const FName& iPropertyName)
         BlendModeChanged();
     if (iPropertyName == "Opacity")
         OpacityChanged();
-    if (iPropertyName == "IsAlphaLocked")
-        IsAlphaLockedChanged();
     if (iPropertyName == "bIsLightTableActivated")
         IsLightTableActivatedChanged();
 }
