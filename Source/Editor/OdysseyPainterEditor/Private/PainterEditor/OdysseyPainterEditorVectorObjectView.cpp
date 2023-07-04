@@ -23,6 +23,9 @@ UOdysseyPainterEditorVectorObjectView::ImportParam()
 
         ObjectParam = selectedObject->mObjectParam;
 
+        ForegroundColor = selectedObject->GetForegroundBucket().GetSolidColor();
+        BackgroundColor = selectedObject->GetBackgroundBucket().GetSolidColor();
+
         break; // only one
     }
 }
@@ -62,8 +65,11 @@ UOdysseyPainterEditorVectorObjectView::PropertyChanged( const FName& iPropertyNa
         if( iPropertyName == "ScalingY" )
             selectedObject->mObjectParam.ScalingY = ObjectParam.ScalingY;
 
-        if( iPropertyName == "Foreground" )
-            selectedObject->mObjectParam.Foreground = ObjectParam.Foreground;
+        if( iPropertyName == "ForegroundColor" )
+            selectedObject->GetForegroundBucket().SetSolidColor( ForegroundColor );
+
+        if( iPropertyName == "BackgroundColor" )
+            selectedObject->GetBackgroundBucket().SetSolidColor( BackgroundColor );
 
         if( iCategory == "Transform" )
             selectedObject->UpdateMatrix();

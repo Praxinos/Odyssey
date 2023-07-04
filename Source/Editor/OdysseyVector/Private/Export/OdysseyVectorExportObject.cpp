@@ -89,44 +89,6 @@ WriteObjectTransform( FOdysseyVectorObject& iObject, FArchive &Ar )
 }
 
 static void
-WriteObjectPaletteEntryDescriptionEntryId(FOdysseyVectorObject& iObject, FArchive& Ar)
-{
-    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_OBJECT_PALETTEENTRYDESCRIPTION_ENTRYID
-                                    , Ar
-                                    , [&iObject](FArchive &Ar) -> void
-    {
-        FName idEntry = iObject.GetPaletteEntryDescription().EntryId;
-
-        Ar << idEntry;
-    } );
-}
-
-static void
-WriteObjectPaletteEntryDescriptionUsedSet(FOdysseyVectorObject& iObject, FArchive& Ar)
-{
-    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_OBJECT_PALETTEENTRYDESCRIPTION_USEDSET
-                                    , Ar
-                                    , [&iObject](FArchive &Ar) -> void
-    {
-        uint8 usedSet = iObject.GetPaletteEntryDescription().UsedSet;
-
-        Ar << usedSet;
-    } );
-}
-
-static void
-WriteObjectPaletteEntryDescription( FOdysseyVectorObject& iObject, FArchive &Ar )
-{
-    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_OBJECT_PALETTEENTRYDESCRIPTION
-                                    , Ar
-                                    , [&iObject](FArchive &Ar) -> void
-    {
-        WriteObjectPaletteEntryDescriptionEntryId( iObject, Ar );
-        WriteObjectPaletteEntryDescriptionUsedSet( iObject, Ar );
-    } );
-}
-
-static void
 WriteObjectParentID( FOdysseyVectorObject& iObject, FArchive &Ar )
 {
     FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_OBJECT_PARENTID
@@ -153,13 +115,39 @@ WriteObjectID( FOdysseyVectorObject& iObject, FArchive &Ar )
 }
 
 static void
+WriteObjectForegroundBucket( FOdysseyVectorObject& iObject, FArchive &Ar )
+{
+    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_OBJECT_FOREGROUNDBUCKET
+                                    , Ar
+                                    , [&iObject](FArchive &Ar) -> void
+    {
+        FOdysseyVectorBucket& foregroundBucket = iObject.GetForegroundBucket();
+
+        FOdysseyVectorExport::WriteBucket( foregroundBucket, Ar );
+    } );
+}
+
+static void
+WriteObjectBackgroundBucket( FOdysseyVectorObject& iObject, FArchive &Ar )
+{
+    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_OBJECT_BACKGROUNDBUCKET
+                                    , Ar
+                                    , [&iObject](FArchive &Ar) -> void
+    {
+        FOdysseyVectorBucket& backgroundBucket = iObject.GetBackgroundBucket();
+
+        FOdysseyVectorExport::WriteBucket( backgroundBucket, Ar );
+    } );
+}
+
+static void
 WriteObjectForegroundColor( FOdysseyVectorObject& iObject, FArchive &Ar )
 {
     FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_OBJECT_FOREGROUNDCOLOR
                                     , Ar
                                     , [&iObject](FArchive &Ar) -> void
     {
-        FColor foreground = iObject.GetForegroundColor();
+        FColor foreground = iObject.GetForegroundBucket().GetSolidColor();
 
         Ar << foreground.R;
         Ar << foreground.G;
@@ -175,7 +163,7 @@ WriteObjectBackgroundColor( FOdysseyVectorObject& iObject, FArchive &Ar )
                                     , Ar
                                     , [&iObject](FArchive &Ar) -> void
     {
-        FColor background = iObject.GetBackgroundColor();
+        FColor background = iObject.GetBackgroundBucket().GetSolidColor();
 
         Ar << background.R;
         Ar << background.G;
@@ -194,9 +182,10 @@ WriteDefineObjectEntry( FOdysseyVectorObject& iObject, FArchive &Ar )
         WriteObjectID( iObject, Ar );
         WriteObjectParentID( iObject, Ar );
         WriteObjectTransform( iObject, Ar );
-        WriteObjectPaletteEntryDescription( iObject, Ar);
-        WriteObjectForegroundColor( iObject, Ar );
-        WriteObjectBackgroundColor( iObject, Ar );
+        //WriteObjectForegroundColor( iObject, Ar ); // deprecated
+        //WriteObjectBackgroundColor( iObject, Ar ); // deprecated
+        WriteObjectForegroundBucket( iObject, Ar );
+        WriteObjectBackgroundBucket( iObject, Ar );
 
         switch( iObject.GetType() )
         {

@@ -5,7 +5,6 @@
 #include <blend2d.h>
 #include <ULIS>
 #include "OdysseyVectorBucket.h"
-#include "Palette/OdysseyPaletteEntry.h"
 
 #include "OdysseyVectorObject.generated.h"
 
@@ -35,11 +34,11 @@ struct FObjectParam
     UPROPERTY(EditAnywhere, Category="Transform")
     double ScalingY;
 
-    UPROPERTY(EditAnywhere, Category="Coloring")
-    FColor Foreground;
+    //UPROPERTY(EditAnywhere, Category="Coloring")
+    //FColor Foreground;
 
-    UPROPERTY(EditAnywhere, Category = "PaletteEntry")
-    UOdysseyPaletteEntry* Entry = nullptr;
+    //UPROPERTY(EditAnywhere, Category = "PaletteEntry")
+    //UOdysseyPaletteEntry* Entry = nullptr;
 };
 
 class ODYSSEYVECTOR_API FOdysseyVectorObject
@@ -94,10 +93,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         bool mDependsOnChildren;
         ::ULIS::FRectD mBBox;
 
-        FOdysseyVectorBucket mFillBucket;
-
-        /* The Palette Entry associated with this vector object, if any. Else, the Guid inside will be 0 or invalid */
-        FPaletteEntryDescription mPaletteEntryDescription;
+        FOdysseyVectorBucket mBackgroundBucket;
+        FOdysseyVectorBucket mForegroundBucket;
 
         /*uint32 mStrokeColor;*/
         /*uint32 mFillColor;*/
@@ -149,9 +146,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         FOdysseyVectorObject* Pick( FOdysseyVectorGroup* iSelectionSpace, const ::ULIS::FRectD& iRoi, uint32 iSelectionFlags );
         virtual bool PickShape( const ::ULIS::FRectD& iRoi, uint32 iSelectionFlags ){ return false; };
 
-        FOdysseyVectorBucket& GetFillBucket();
-
-        FPaletteEntryDescription& GetPaletteEntryDescription();
+        FOdysseyVectorBucket& GetBackgroundBucket();
+        FOdysseyVectorBucket& GetForegroundBucket();
 
         virtual void TransferChild( FOdysseyVectorObject* iFosterChild );
         /*virtual void UpdateBoundingBox() = 0;*/
@@ -185,7 +181,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         void SetBackgroundColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA );
         void SetForegroundColor( FColor& iColor );
         void SetBackgroundColor( FColor& iColor );
-        void SetPaletteEntry(UOdysseyPaletteEntry* iEntry);
         void SetFilled(bool iIsFilled);
         void SetStrokeWidth( double iWidth );
         double GetStrokeWidth( );

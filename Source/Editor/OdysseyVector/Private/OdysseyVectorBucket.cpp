@@ -11,7 +11,7 @@ FOdysseyVectorBucket::~FOdysseyVectorBucket()
 
 FOdysseyVectorBucket::FOdysseyVectorBucket( FOdysseyVectorObject& iParent )
     : mParent ( iParent )
-    , mColor( 128, 128, 128, 255 )
+    , mSolidColor( 128, 128, 128, 255 )
     , mRotation( 0.0f )
     , mPropagated( false )
     , mIsGradient ( false )
@@ -25,7 +25,7 @@ FOdysseyVectorBucket::FOdysseyVectorBucket( FOdysseyVectorObject& iParent, doubl
     , mIsGradient ( false )
 {
     SetCoords( iX, iY );
-    SetColor( 128, 128, 128, 255 );
+    SetSolidColor( 128, 128, 128, 255 );
     SetRotation( 0.0f );
 }
 
@@ -142,38 +142,35 @@ FOdysseyVectorBucket::SetGradientColor1( FColor& iColor )
 }
 
 void
-FOdysseyVectorBucket::SetColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA )
+FOdysseyVectorBucket::SetSolidColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA )
 {
-    if (GetParent().mObjectParam.Entry)
-    {
-        mColor = Cast< UOdysseyPaletteEntryColor >(GetParent().mObjectParam.Entry)->GetUsedColor();
-    }
-    else
-    {
-        mColor.R = iR;
-        mColor.G = iG;
-        mColor.B = iB;
-        mColor.A = iA;
-    }
+    mSolidColor.R = iR;
+    mSolidColor.G = iG;
+    mSolidColor.B = iB;
+    mSolidColor.A = iA;
 }
 
 void
-FOdysseyVectorBucket::SetColor( FColor& iColor )
+FOdysseyVectorBucket::SetSolidColor( FColor& iSolidColor )
 {
-    if (GetParent().mObjectParam.Entry)
-    {
-        mColor = Cast< UOdysseyPaletteEntryColor >(GetParent().mObjectParam.Entry)->GetUsedColor();
-    }
-    else
-    {
-        mColor = iColor;
-    }
+    mSolidColor = iSolidColor;
+}
+
+FColor&
+FOdysseyVectorBucket::GetSolidColor()
+{
+    return mSolidColor;
 }
 
 FColor&
 FOdysseyVectorBucket::GetColor()
 {
-    return mColor;
+    if( mPaletteEntry )
+    {
+        return Cast< UOdysseyPaletteEntryColor >( mPaletteEntry )->GetUsedColor();
+    }
+
+    return mSolidColor;
 }
 
 double
@@ -186,12 +183,13 @@ void
 FOdysseyVectorBucket::Copy( FOdysseyVectorBucket* iDestinationBucket )
 {
     iDestinationBucket->mCoords = mCoords;
-    iDestinationBucket->mColor = mColor;
+    iDestinationBucket->mSolidColor = mSolidColor;
     iDestinationBucket->mRotation = mRotation;
     iDestinationBucket->mPropagated = mPropagated;
     iDestinationBucket->mIsGradient = mIsGradient;
     iDestinationBucket->mGradientColor0 = mGradientColor0;
     iDestinationBucket->mGradientColor1 = mGradientColor1;
+    iDestinationBucket->mPaletteEntry = mPaletteEntry;
 
     //iDestinationBucket->Invalidate();
 }
@@ -200,4 +198,33 @@ FOdysseyVectorObject&
 FOdysseyVectorBucket::GetParent()
 {
     return mParent;
+}
+
+void
+FOdysseyVectorBucket::SetPaletteEntry( UOdysseyPaletteEntry* iPaletteEntry )
+{
+    if( iPaletteEntry )
+    {
+        mPaletteEntryDescription.EntryId = iPaletteEntry->GetFName();
+        mPaletteEntryDescription.UsedSet = 1;
+    }
+    else
+    {
+        mPaletteEntryDescription.EntryId = FName(TEXT(""));
+        mPaletteEntryDescription.UsedSet = 0;
+    }
+
+    mPaletteEntry = iPaletteEntry;
+}
+
+FPaletteEntryDescription&
+FOdysseyVectorBucket::GetPaletteEntryDescription()
+{
+    return mPaletteEntryDescription;
+}
+
+UOdysseyPaletteEntry*
+FOdysseyVectorBucket::GetPaletteEntry()
+{
+    return mPaletteEntry;
 }

@@ -74,10 +74,7 @@ FOdysseyVectorPathBuilder::FOdysseyVectorPathBuilder()
     , mPointID( 0 )
     , mCubicPath ( nullptr )
 {
-    mObjectParam.Foreground.R = 128;
-    mObjectParam.Foreground.G = 128;
-    mObjectParam.Foreground.B = 128;
-    mObjectParam.Foreground.A = 255;
+    mForegroundBucket.SetSolidColor( 128, 128, 128, 255 );
 
     mPointBuffer.reserve(200);
     mSampleBuffer.reserve(100);
@@ -624,22 +621,12 @@ FOdysseyVectorPathBuilder::DrawShape( uint64 iFlags )
     BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
     BLPath path;
     BLRgba32 strokeColor;
+    FColor color = mForegroundBucket.GetColor();
 
-    if (mObjectParam.Entry)
-    {
-        FColor color = Cast< UOdysseyPaletteEntryColor >(mObjectParam.Entry)->GetUsedColor();
-        strokeColor.setR(color.B);
-        strokeColor.setG(color.G);
-        strokeColor.setB(color.R);
-        strokeColor.setA(color.A);
-    }
-    else
-    {
-        strokeColor.setR(mObjectParam.Foreground.R);
-        strokeColor.setG(mObjectParam.Foreground.G);
-        strokeColor.setB(mObjectParam.Foreground.B);
-        strokeColor.setA(mObjectParam.Foreground.A);
-    }
+    strokeColor.setR( color.R );
+    strokeColor.setG( color.G );
+    strokeColor.setB( color.B );
+    strokeColor.setA( color.A );
 
     blctx->setCompOp(BL_COMP_OP_SRC_COPY);
 

@@ -128,7 +128,6 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorEng
         if (entry && entry->IsA(UOdysseyPaletteEntryColor::StaticClass()))
         {
             FColor colorEntry = Cast< UOdysseyPaletteEntryColor >(entry)->GetUsedColor();
-            color = ::ULIS::FColor::RGBA8(colorEntry.R, colorEntry.G, colorEntry.B, colorEntry.A);
         }
     }
 
@@ -183,10 +182,19 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorEng
     mPreviousVertex = cubicVertex;
 
     cubicPath->UpdateMatrix();
-    cubicPath->SetForegroundColor( rgba8.R8(), rgba8.G8(), rgba8.B8(), rgba8.A8() );
-    
+
+    mPathBuilder = new FOdysseyVectorPathBuilder();
+
     if (entry && entry->IsA(UOdysseyPaletteEntryColor::StaticClass()))
-        cubicPath->SetPaletteEntry( entry );
+    {
+        cubicPath->GetForegroundBucket().SetPaletteEntry( entry );
+        mPathBuilder->GetForegroundBucket().SetPaletteEntry( entry );
+    }
+    else
+    {
+        cubicPath->SetForegroundColor( rgba8.R8(), rgba8.G8(), rgba8.B8(), rgba8.A8() );
+        mPathBuilder->SetForegroundColor( rgba8.R8(), rgba8.G8(), rgba8.B8(), rgba8.A8() );
+    }
 
     localCoords = cubicPath->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
     //localRadius = cubicPath->GetInverseWorldMatrix().mapVector( 0.7071f * radius, 0.7071f * radius );
@@ -194,14 +202,12 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorEng
     cubicVertex->Set( localCoords.x, localCoords.y );
     // cubicVertex->SetRadius( ::ULIS::FVec2D( localRadius.x, localRadius.y ).Distance() );
 
-    mPathBuilder = new FOdysseyVectorPathBuilder();
-
     iScene->AppendChild( mPathBuilder );
 
     mPathBuilder->Attach( cubicPath );
     cubicPath->CopyTransformation( *cubicPath );
     mPathBuilder->UpdateMatrix();
-    mPathBuilder->SetForegroundColor( cubicPath->GetForegroundColor() );
+
     mPathBuilder->RecordStart( cubicVertex );
 
     iScene->ClearSelection();

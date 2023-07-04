@@ -471,7 +471,7 @@ FOdysseyVectorPathCubic::Fill()
     if ( firstVertex )
     {
         BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
-        FColor& fillColor = mFillBucket.GetColor();
+        FColor& fillColor = mBackgroundBucket.GetColor();
         BLRgba32 blFillColor;
         BLPath path;
 
@@ -560,10 +560,8 @@ void
 FOdysseyVectorPathCubic::DrawShapeVariable( uint64 iFlags )
 {
     BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
-    BLRgba32 strokeColor = BLRgba32( mObjectParam.Foreground.R
-                                   , mObjectParam.Foreground.G
-                                   , mObjectParam.Foreground.B
-                                   , mObjectParam.Foreground.A );
+    FColor color = mForegroundBucket.GetColor();
+    BLRgba32 strokeColor = BLRgba32( color.R, color.G, color.B, color.A );
 
     if( mSegmentList.size() )
     {

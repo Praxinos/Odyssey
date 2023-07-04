@@ -21,7 +21,8 @@ FOdysseyVectorObject::FOdysseyVectorObject( const FString& iName )
     : mParent( nullptr )
     , mIsSelected( false )
     , mDependsOnChildren( false )
-    , mFillBucket( *this, 0.0f, 0.0f, false )
+    , mBackgroundBucket( *this, 0.0f, 0.0f, false )
+    , mForegroundBucket( *this, 0.0f, 0.0f, false )
     , mInvalidationFlags ( 0 )
 {
     mLocalMatrix.reset();
@@ -36,21 +37,24 @@ FOdysseyVectorObject::FOdysseyVectorObject( const FString& iName )
     mObjectParam.Rotation = 0.0f;
     mObjectParam.ScalingX = 1.0f;
     mObjectParam.ScalingY = 1.0f;
-    mObjectParam.Foreground = FColor( 0, 0, 0, 255 );
 
-    mFillBucket.SetGradient( false );
-    mFillBucket.SetColor( 255, 255, 255, 255 );
+    mForegroundBucket.SetGradient( false );
+    mForegroundBucket.SetSolidColor( 0, 0, 0, 255 );
+
+    mBackgroundBucket.SetGradient( false );
+    mBackgroundBucket.SetSolidColor( 255, 255, 255, 255 );
 }
 
 FOdysseyVectorBucket&
-FOdysseyVectorObject::GetFillBucket()
+FOdysseyVectorObject::GetBackgroundBucket()
 {
-    return mFillBucket;
+    return mBackgroundBucket;
 }
 
-FPaletteEntryDescription& FOdysseyVectorObject::GetPaletteEntryDescription()
+FOdysseyVectorBucket&
+FOdysseyVectorObject::GetForegroundBucket()
 {
-    return mPaletteEntryDescription;
+    return mForegroundBucket;
 }
 
 void
@@ -263,14 +267,11 @@ FOdysseyVectorObject::CopySettings( FOdysseyVectorObject& iDestinationObject )
 
     iDestinationObject.UpdateMatrix();
 
-    iDestinationObject.mObjectParam.Foreground = mObjectParam.Foreground;
-    iDestinationObject.mObjectParam.Entry = mObjectParam.Entry;
-    iDestinationObject.mPaletteEntryDescription = mPaletteEntryDescription;
-
-    iDestinationObject.mFillBucket.SetColor( mFillBucket.GetColor() );
-    iDestinationObject.mFillBucket.SetGradient( mFillBucket.IsGradient() );
-    iDestinationObject.mFillBucket.SetGradientColor0( mFillBucket.GetGradientColor0() );
-    iDestinationObject.mFillBucket.SetGradientColor1( mFillBucket.GetGradientColor1() );
+    iDestinationObject.mBackgroundBucket.SetPaletteEntry( mBackgroundBucket.GetPaletteEntry() );
+    iDestinationObject.mBackgroundBucket.SetSolidColor( mBackgroundBucket.GetSolidColor() );
+    iDestinationObject.mBackgroundBucket.SetGradient( mBackgroundBucket.IsGradient() );
+    iDestinationObject.mBackgroundBucket.SetGradientColor0( mBackgroundBucket.GetGradientColor0() );
+    iDestinationObject.mBackgroundBucket.SetGradientColor1( mBackgroundBucket.GetGradientColor1() );
 
     iDestinationObject.mBBox = mBBox;
 
@@ -698,44 +699,25 @@ FOdysseyVectorObject::RemoveChild( FOdysseyVectorObject* iChild )
 void
 FOdysseyVectorObject::SetForegroundColor( FColor& iColor )
 {
-    mObjectParam.Foreground = iColor;
+    mForegroundBucket.SetSolidColor( iColor );
 }
 
 void
 FOdysseyVectorObject::SetBackgroundColor( FColor& iColor )
 {
-    mFillBucket.SetColor( iColor );
-}
-
-void FOdysseyVectorObject::SetPaletteEntry(UOdysseyPaletteEntry* iEntry)
-{
-    if (iEntry)
-    {
-        mPaletteEntryDescription.EntryId = iEntry->GetFName();
-        mPaletteEntryDescription.UsedSet = 1;
-    }
-    else
-    {
-        mPaletteEntryDescription.EntryId = FName(TEXT(""));
-        mPaletteEntryDescription.UsedSet = 0;
-    }
-
-    mObjectParam.Entry = iEntry;
+    mBackgroundBucket.SetSolidColor( iColor );
 }
 
 void
 FOdysseyVectorObject::SetForegroundColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA )
 {
-    mObjectParam.Foreground.R = iR;
-    mObjectParam.Foreground.G = iG;
-    mObjectParam.Foreground.B = iB;
-    mObjectParam.Foreground.A = iA;
+    mForegroundBucket.SetSolidColor( iR, iG, iB, iA );
 }
 
 void
 FOdysseyVectorObject::SetBackgroundColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA )
 {
-    mFillBucket.SetColor( iR, iG, iB, iA );
+    mBackgroundBucket.SetSolidColor( iR, iG, iB, iA );
 }
 
 void 
@@ -808,21 +790,13 @@ FOdysseyVectorObject::TreeToArray( FOdysseyVectorObject* iObject, std::vector<FO
 FColor&
 FOdysseyVectorObject::GetForegroundColor()
 {
-    if (mObjectParam.Entry && mObjectParam.Entry->IsA(UOdysseyPaletteEntryColor::StaticClass()))
-    {
-        return Cast< UOdysseyPaletteEntryColor >(mObjectParam.Entry)->GetUsedColor();
-    }
-    return mObjectParam.Foreground;
+    return mForegroundBucket.GetColor();
 }
 
 FColor&
 FOdysseyVectorObject::GetBackgroundColor()
 {
-    if (mObjectParam.Entry && mObjectParam.Entry->IsA(UOdysseyPaletteEntryColor::StaticClass()))
-    {
-        return Cast< UOdysseyPaletteEntryColor >(mObjectParam.Entry)->GetUsedColor();
-    }
-    return mFillBucket.GetColor();
+    return mBackgroundBucket.GetColor();
 }
 
 uint32

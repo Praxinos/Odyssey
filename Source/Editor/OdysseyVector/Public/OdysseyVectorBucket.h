@@ -4,6 +4,7 @@
 #include <Core/Core.h>
 #include <Image/Block.h>
 #include <OdysseyVectorPoint.h>
+#include "Palette/OdysseyPaletteEntry.h"
 
 class FOdysseyVectorObject;
 
@@ -20,9 +21,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorBucket : public FOdysseyVectorPoint
          * @param iB blue
          * @param iA alpha
          */
-        void SetColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA );
+        void SetSolidColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA );
 
-        void SetColor( FColor& iColor );
+        void SetSolidColor( FColor& iColor );
 
         void SetGradient( bool iIsGradient );
 
@@ -76,13 +77,22 @@ class ODYSSEYVECTOR_API FOdysseyVectorBucket : public FOdysseyVectorPoint
         void Invalidate();
         double GetRotation();
         void SetRotation( double iRotation );
+        FColor& GetSolidColor();
+
+        void SetPaletteEntry( UOdysseyPaletteEntry* iPaletteEntry );
+        UOdysseyPaletteEntry* GetPaletteEntry();
+        FPaletteEntryDescription& GetPaletteEntryDescription();
 
     protected:
         FOdysseyVectorObject& mParent;
-        FColor mColor;
+        FColor mSolidColor;
         double mRotation;
         bool mPropagated;
         bool mIsGradient;
         FColor mGradientColor0;
         FColor mGradientColor1;
+
+        UOdysseyPaletteEntry* mPaletteEntry = nullptr;
+        /* The Palette Entry associated with this vector object, if any. Else, the Guid inside will be 0 or invalid */
+        FPaletteEntryDescription mPaletteEntryDescription;
 };

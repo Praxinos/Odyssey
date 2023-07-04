@@ -265,7 +265,7 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseDownVector( FOdysseyVectorEngine* i
     // Scene
     if( selectedObject == nullptr )
     {
-        mPickedBucket = &iScene->GetFillBucket();
+        mPickedBucket = &iScene->GetBackgroundBucket();
         mPickedObject =  iScene;
     }
 
@@ -449,9 +449,10 @@ UOdysseyPainterEditorPaintBucketTool::SetBucketColor( FOdysseyVectorBucket* iBuc
         uint8 A = rgba8.A8();
 
         if (entry && entry->IsA(UOdysseyPaletteEntryColor::StaticClass()))
-            iBucket->GetParent().SetPaletteEntry( entry );
+            iBucket->SetPaletteEntry( entry );
+
         iBucket->SetGradient(false);
-        iBucket->SetColor( R, G, B, A );
+        iBucket->SetSolidColor( R, G, B, A );
     }
 
     iBucket->SetPropagated( Propagate );
@@ -597,7 +598,7 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseUpVectorClearBucket( FOdysseyVector
     }
     GEditor->EndTransaction();
 
-    iBucket->SetColor( 0, 0, 0, 0 );
+    iBucket->SetSolidColor( 0, 0, 0, 0 );
 }
 
 bool

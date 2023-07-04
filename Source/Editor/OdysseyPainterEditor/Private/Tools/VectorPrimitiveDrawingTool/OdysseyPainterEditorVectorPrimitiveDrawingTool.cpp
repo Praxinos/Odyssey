@@ -119,7 +119,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDownVector( FOdysseyVect
     }
 
     if (entry && entry->IsA(UOdysseyPaletteEntryColor::StaticClass()))
-        primitive->SetPaletteEntry(entry);
+        primitive->GetForegroundBucket().SetPaletteEntry(entry);
 
     iScene->AppendChild( primitive );
 

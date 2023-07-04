@@ -32,4 +32,10 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectView : public UO
     public:
         UPROPERTY(EditAnywhere, Category="Object")
         FObjectParam ObjectParam; // UStruct from OdysseyVectorObject.h
+
+        UPROPERTY(EditAnywhere, Category="Object")
+        FColor ForegroundColor;
+
+        UPROPERTY(EditAnywhere,Category="Object")
+        FColor BackgroundColor;
 };
