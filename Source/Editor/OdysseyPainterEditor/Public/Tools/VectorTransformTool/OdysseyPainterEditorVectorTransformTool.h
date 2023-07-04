@@ -62,6 +62,7 @@ private:
 private:
     FOdysseyPainterEditorVectorTransformToolHUD* mTransformHUD;
     ::ULIS::FVec2D* mPickedPivot;
+    bool mDragging;
 
 public:
     UPROPERTY(EditAnywhere, Category="Odyssey Transform Tool", meta = (ClampMin = "0.0", UIMin = "0.0") )

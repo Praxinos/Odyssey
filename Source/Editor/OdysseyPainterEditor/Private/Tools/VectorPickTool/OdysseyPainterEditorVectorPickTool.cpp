@@ -43,7 +43,7 @@ UOdysseyPainterEditorVectorPickTool::LoadVector( FOdysseyVectorEngine* iEngine
     iEngine->ClearHUD();
     iEngine->AddHUD( mPickHUD );
 
-    mPickHUD->Reset( iScene );
+    iEngine->ResetHUD();
 
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
@@ -242,7 +242,7 @@ UOdysseyPainterEditorVectorPickTool::OnMouseUpVectorObjectMode( FOdysseyVectorEn
 
     SetSelectionSpace( iEngine, iScene->GetLastSelected() );
 
-    mPickHUD->Reset( iScene ); // updates the selection box
+    iEngine->ResetHUD(); // updates the current HUD (in most cases wil be this tool's HUD)
 }
 
 void
@@ -295,8 +295,6 @@ UOdysseyPainterEditorVectorPickTool::OnMouseUpVector( FOdysseyVectorEngine* iEng
 {
     if( iKey == EKeys::LeftMouseButton )
     {
-    
-
         if( EditionMode == EOdysseyVectorEditionMode::Object )
         {
             OnMouseUpVectorObjectMode( iEngine, iScene, iPointInTexture, iKey );

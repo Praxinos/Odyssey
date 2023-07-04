@@ -19,6 +19,7 @@ UOdysseyPainterEditorVectorTransformTool::UOdysseyPainterEditorVectorTransformTo
     : PickingRadius( 10.0f )
     , mPickedPivot( nullptr )
     , Uniform( true )
+    , mDragging( false )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.TransformTool32");
 
@@ -77,6 +78,8 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDownVector( FOdysseyVectorEngin
     uint32 hudFlags = mTransformHUD->GetFlags();
 
     mPickedPivot = hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_ZAXIS ? &mTransformHUD->GetGizmo() : nullptr;
+
+    mDragging = false;
 
     if( selectionBox.rect.Area() )
     {
@@ -455,40 +458,52 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDragVector( FOdysseyVectorEngin
     FSelectionBox& selectionBox = mTransformHUD->GetSelectionBox();
     uint32 hudFlags = mTransformHUD->GetFlags();
 
-    if( selectionBox.rect.Area() )
+    // What do we consider dragging ? We have to move at least a few pixels, otherwise we wouldn't
+    // be able to differentiate an actual dragging from a simple down-up click, especially
+    // when using the stylus, which is too sensitive to allow a Down and a UP at the very same
+    // position, unlike the mouse. And we use the simple down-up click as a selection tool.
+    // See OnMouseUpVector() for details.
+    if( ( mDragging == true ) // if we are already dragging, don't bother checking other conditions
+     || ( ::ULIS::FVec2D( iPointInTexture.deltaPosition.X
+                        , iPointInTexture.deltaPosition.Y ).Distance() > 3.0f ) )
     {
-        if ( mPickedPivot )
+        mDragging = true;
+
+        if( selectionBox.rect.Area() )
         {
-            BLMatrix2D& inverseWorldMatrix = selectionBox.inverseWorldMatrix;
-            BLPoint localCoords = inverseWorldMatrix.mapPoint( iPointInTexture.x, iPointInTexture.y );
+            if ( mPickedPivot )
+            {
+                BLMatrix2D& inverseWorldMatrix = selectionBox.inverseWorldMatrix;
+                BLPoint localCoords = inverseWorldMatrix.mapPoint( iPointInTexture.x, iPointInTexture.y );
 
-            mTransformHUD->SetGizmo( localCoords.x, localCoords.y );
+                mTransformHUD->SetGizmo( localCoords.x, localCoords.y );
+            }
+            else
+            {
+                if( ( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_XAXIS     )
+                 || ( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_YAXIS     )
+                 || ( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_TRANSLATE ) )
+                {
+                    TranslateObjectSelection( iEngine, iScene, iPointInTexture );
+                }
+
+                if( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_ROTATE )
+                {
+                    RotateObjectSelection( iEngine, iScene, iPointInTexture );
+                }
+
+                if( ( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_SCALER_TOPLEFT     )
+                 || ( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_SCALER_TOPRIGHT    )
+                 || ( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_SCALER_BOTTOMRIGHT )
+                 || ( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_SCALER_BOTTOMLEFT  ) )
+                {
+                    ScaleObjectSelection( iEngine, iScene, iPointInTexture );
+                }
+            }
         }
-        else
-        {
-            if( ( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_XAXIS     )
-             || ( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_YAXIS     )
-             || ( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_TRANSLATE ) )
-            {
-                TranslateObjectSelection( iEngine, iScene, iPointInTexture );
-            }
 
-            if( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_ROTATE )
-            {
-                RotateObjectSelection( iEngine, iScene, iPointInTexture );
-            }
-
-            if( ( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_SCALER_TOPLEFT     )
-             || ( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_SCALER_TOPRIGHT    )
-             || ( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_SCALER_BOTTOMRIGHT )
-             || ( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_SCALER_BOTTOMLEFT  ) )
-            {
-                ScaleObjectSelection( iEngine, iScene, iPointInTexture );
-            }
-        }
+        iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
     }
-
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
 
 bool
@@ -497,12 +512,23 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseUpVector( FOdysseyVectorEngine*
                                                          , const FOdysseyPoint& iPointInTexture
                                                          , const FKey& iKey )
 {
+    FOdysseyPainterEditor* painterEditor = GetEditorAs<FOdysseyPainterEditor>();
+    bool stillClick = mDragging ? false : true;
 
     mPickedPivot = nullptr;
-
+    mDragging = false;
     mTransformHUD->ShowSelectionBox( true );
 
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    if( stillClick )
+    {
+        // use the pick tool if the Down and Up events were at the same position (no dragging )
+        painterEditor->GetVectorPickTool()->OnMouseDown(iPointInTexture, iKey);
+        painterEditor->GetVectorPickTool()->OnMouseUp(iPointInTexture, iKey);
+    }
+    else
+    {
+        iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    }
 
     return true;
 }

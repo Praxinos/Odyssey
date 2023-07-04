@@ -290,8 +290,13 @@ FOdysseyPainterEditorPaintBucketToolHUD::Draw( FOdysseyVectorScene* iScene, uint
             if ( mCycle )
             {
                 blctx->setCompOp( BL_COMP_OP_SRC_OVER );
-                blctx->setStrokeStyle( hcColor );
+
+                blctx->setStrokeStyle( bgColor );
                 blctx->setStrokeWidth( 4.0f );
+                mCycle->StrokePath( true );
+
+                blctx->setStrokeStyle( hcColor );
+                blctx->setStrokeWidth( 3.0f );
                 mCycle->StrokePath( true );
 
                 mCycle = nullptr; // reset after each draw, for safety. The tool has to set the cycle at each hovering.
