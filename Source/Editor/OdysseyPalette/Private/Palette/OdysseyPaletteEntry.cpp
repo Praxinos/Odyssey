@@ -111,6 +111,11 @@ void UOdysseyPaletteEntry::AddSet()
     
 }
 
+void UOdysseyPaletteEntry::DuplicateSetAt(int iIndex /*= -1 */)
+{
+
+}
+
 void UOdysseyPaletteEntry::RemoveSet(int iIndex /*= -1 */)
 {
 

@@ -445,17 +445,33 @@ void UOdysseyPalette::AddSet()
     }
 }
 
+void UOdysseyPalette::DuplicateSet()
+{
+    TArray<UOdysseyPaletteEntry*> entries = GetEntries();
+    for (int i = 0; i < entries.Num(); i++)
+    {
+        entries[i]->DuplicateSetAt(UsedSet);
+    }
+
+    FString text = FString("Set") + FString::FromInt(Sets.Num());
+    Sets.Add(FName(text));
+}
+
 void UOdysseyPalette::RemoveSet(int iIndex /*= -1 */)
 {
-/*
-    if (NumSets > 1)
+    TArray<UOdysseyPaletteEntry*> entries = GetEntries();
+    for (int i = 0; i < entries.Num(); i++)
+        entries[i]->RemoveSet( iIndex );
+
+    if( iIndex < 0 )
+        iIndex = 0;
+    Sets.RemoveAt( iIndex );
+
+    for (int i = 0; i < Sets.Num(); i++)
     {
-        NumSets--;
-        if (UsedSet >= NumSets)
-        {
-            UsedSet--;
-        }
-    }*/
+        FString text = FString("Set") + FString::FromInt(i);
+        Sets[i] = (FName(text));
+    }
 }
 
 void UOdysseyPalette::HierarchyChanged()
