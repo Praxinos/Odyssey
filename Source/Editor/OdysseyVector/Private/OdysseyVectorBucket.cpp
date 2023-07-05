@@ -165,6 +165,7 @@ FOdysseyVectorBucket::GetSolidColor()
 FColor&
 FOdysseyVectorBucket::GetColor()
 {
+    //TODOPALETTE: case for material
     if( mPaletteEntry )
     {
         return Cast< UOdysseyPaletteEntryColor >( mPaletteEntry )->GetUsedColor();
@@ -203,24 +204,7 @@ FOdysseyVectorBucket::GetParent()
 void
 FOdysseyVectorBucket::SetPaletteEntry( UOdysseyPaletteEntry* iPaletteEntry )
 {
-    if( iPaletteEntry )
-    {
-        mPaletteEntryDescription.EntryId = iPaletteEntry->GetFName();
-        mPaletteEntryDescription.UsedSet = 1;
-    }
-    else
-    {
-        mPaletteEntryDescription.EntryId = FName(TEXT(""));
-        mPaletteEntryDescription.UsedSet = 0;
-    }
-
     mPaletteEntry = iPaletteEntry;
-}
-
-FPaletteEntryDescription&
-FOdysseyVectorBucket::GetPaletteEntryDescription()
-{
-    return mPaletteEntryDescription;
 }
 
 UOdysseyPaletteEntry*

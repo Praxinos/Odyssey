@@ -1,40 +1,15 @@
 #include "Export/OdysseyVectorExport.h"
 
 static void
-WriteBucketPaletteEntryDescriptionEntryId( FOdysseyVectorBucket& iBucket, FArchive& Ar)
+WriteBucketPaletteEntry( FOdysseyVectorBucket& iBucket, FArchive& Ar)
 {
-    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_BUCKET_PALETTEENTRYDESCRIPTION_ENTRYID
+    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_BUCKET_PALETTEENTRY
                                     , Ar
                                     , [&iBucket](FArchive &Ar) -> void
     {
-        FName idEntry = iBucket.GetPaletteEntryDescription().EntryId;
+        FName idEntry = iBucket.GetPaletteEntry() ? iBucket.GetPaletteEntry()->GetFName() : FName();
 
         Ar << idEntry;
-    } );
-}
-
-static void
-WriteBucketPaletteEntryDescriptionUsedSet( FOdysseyVectorBucket& iBucket, FArchive& Ar)
-{
-    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_BUCKET_PALETTEENTRYDESCRIPTION_USEDSET
-                                    , Ar
-                                    , [&iBucket](FArchive &Ar) -> void
-    {
-        uint8 usedSet = iBucket.GetPaletteEntryDescription().UsedSet;
-
-        Ar << usedSet;
-    } );
-}
-
-static void
-WriteBucketPaletteEntryDescription( FOdysseyVectorBucket& iBucket, FArchive &Ar )
-{
-    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_BUCKET_PALETTEENTRYDESCRIPTION
-                                    , Ar
-                                    , [&iBucket](FArchive &Ar) -> void
-    {
-        WriteBucketPaletteEntryDescriptionEntryId( iBucket, Ar );
-        WriteBucketPaletteEntryDescriptionUsedSet( iBucket, Ar );
     } );
 }
 
@@ -132,7 +107,7 @@ FOdysseyVectorExport::WriteBucket( FOdysseyVectorBucket& iBucket, FArchive &Ar )
                                     , Ar
                                     , [&iBucket](FArchive &Ar) -> void
     {
-        WriteBucketPaletteEntryDescription( iBucket, Ar );
+        WriteBucketPaletteEntry( iBucket, Ar );
         WriteBucketPosition( iBucket, Ar );
         WriteBucketRotation( iBucket, Ar );
         WriteBucketPropagated( iBucket, Ar );

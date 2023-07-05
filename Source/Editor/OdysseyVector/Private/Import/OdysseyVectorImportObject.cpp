@@ -138,7 +138,7 @@ ReadObjectsDefineObjectBucket( FOdysseyVectorBucket& iBucket
                     Ar.Seek( Ar.Tell() + iChunkLen );
                 break;
             }    
-        } );
+        });
 }
 
 void
