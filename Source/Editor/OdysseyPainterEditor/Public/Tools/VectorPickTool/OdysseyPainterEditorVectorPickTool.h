@@ -84,6 +84,9 @@ protected:
                                   , const FKey& iKey );
     ::ULIS::FRectD GenerateMask( FOdysseyVectorEngine* iEngine );
 
+    void SelectVertexFromPaintGroup( FOdysseyVectorGroupPaint* iPaintGroup );
+    void SelectVertexFromPath( FOdysseyVectorPath* iPath );
+
 protected:
     FOdysseyPainterEditorVectorPickToolHUD* mPickHUD;
     std::vector<::ULIS::FVec2D> mPointArray;

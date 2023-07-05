@@ -79,22 +79,21 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDownVector( FOdysseyVect
                                                                   , const FKey& iKey )
 {
     BLPoint localCoords = iScene->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
-
     ::ULIS::FColor color = GetEditorAs<FOdysseyPainterEditor>()->PaintColor().GetValue();
+    ::ULIS::FColor rgba8 = color.ToFormat( ::ULIS::eFormat::Format_RGBA8 );
+    FColor ueColor = FColor( rgba8.R8(), rgba8.G8(), rgba8.B8(), rgba8.A8() );
+    FOdysseyVectorPrimitive* primitive;
     UOdysseyPaletteEntry* entry = nullptr;
+
     if (GetEditorAs<FOdysseyPainterEditor>()->GetGUI()->GetColorPaletteTab()->PaletteWidget()->GetColorPalette()->GetPalette())
     {
         entry = GetEditorAs<FOdysseyPainterEditor>()->GetGUI()->GetColorPaletteTab()->PaletteWidget()->GetColorPalette()->GetPalette()->CurrentEntry.Get();
         if (entry && entry->IsA(UOdysseyPaletteEntryColor::StaticClass()))
         {
             FColor colorEntry = Cast< UOdysseyPaletteEntryColor >(entry)->GetUsedColor();
-            color = ::ULIS::FColor::RGBA8(colorEntry.R, colorEntry.G, colorEntry.B, colorEntry.A);
+            ueColor = colorEntry;
         }
     }
-
-    ::ULIS::FColor rgba8 = color.ToFormat( ::ULIS::eFormat::Format_RGBA8 );
-
-    FOdysseyVectorPrimitive* primitive;
 
     mMouseDown.x = iPointInTexture.x;
     mMouseDown.y = iPointInTexture.y;
@@ -123,7 +122,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDownVector( FOdysseyVect
 
     iScene->AppendChild( primitive );
 
-    primitive->SetForegroundColor( rgba8.R8(), rgba8.G8(), rgba8.B8(), rgba8.A8() );
+    primitive->SetForegroundColor( ueColor );
     primitive->Translate( localCoords.x, localCoords.y );
     primitive->UpdateMatrix();
 

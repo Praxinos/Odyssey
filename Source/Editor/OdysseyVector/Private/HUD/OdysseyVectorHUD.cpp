@@ -443,3 +443,29 @@ FOdysseyVectorHUD::DrawPath( FOdysseyVectorPath* iPath
 
     blctx->restore();
 }
+
+// static
+void
+FOdysseyVectorHUD::DrawPaintGroup( FOdysseyVectorGroupPaint* iPaintGroup
+                                 , const BLRgba32& fgColor
+                                 , const BLRgba32& bgColor
+                                 , const BLRgba32& hcColor
+                                 , bool iWorld
+                                 , bool iViewVertexHandle
+                                 , bool iViewSegmentHandle )
+{
+    std::list<FOdysseyVectorObject*>& childrenObjectList = iPaintGroup->GetChildrenList();
+    std::list<FOdysseyVectorObject*>::iterator it;
+
+    for( it = childrenObjectList.begin(); it != childrenObjectList.end(); ++it )
+    {
+        FOdysseyVectorObject* child = (*it);
+
+        if( child->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+        {
+            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(child);
+
+            DrawPath( path, fgColor, bgColor, hcColor, iWorld, iViewVertexHandle, iViewSegmentHandle );
+        }
+    }
+}

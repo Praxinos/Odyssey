@@ -7,6 +7,7 @@
 #include "OdysseyVectorPoint.h"
 #include "OdysseyVectorSegmentCubic.h"
 #include "OdysseyVectorPath.h"
+#include "OdysseyVectorGroupPaint.h"
 
 typedef struct _FPointQuadTreeEntry
 {
@@ -86,6 +87,14 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
                             , bool iWorld
                             , bool iViewVertexHandle
                             , bool iViewSegmentHandle );
+
+        static void DrawPaintGroup( FOdysseyVectorGroupPaint* iPaintGroup
+                                  , const BLRgba32& fgColor
+                                  , const BLRgba32& bgColor
+                                  , const BLRgba32& hcColor
+                                  , bool iWorld
+                                  , bool iViewVertexHandle
+                                  , bool iViewSegmentHandle );
 
         virtual ~FOdysseyVectorHUD();
         FOdysseyVectorHUD();

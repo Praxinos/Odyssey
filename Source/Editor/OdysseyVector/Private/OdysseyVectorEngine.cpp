@@ -99,9 +99,9 @@ FOdysseyVectorEngine::GetColorImagePixelValue( uint32 iX, uint32 iY, uint8* oR, 
 
                 uint8 *imgBuffer =  &((uint8*)imageData.pixelData)[offset];
 
-                *oR = imgBuffer[0];
+                *oB = imgBuffer[0];
                 *oG = imgBuffer[1];
-                *oB = imgBuffer[2];
+                *oR = imgBuffer[2];
                 *oA = imgBuffer[3];
             }
             break;

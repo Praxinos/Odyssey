@@ -121,20 +121,22 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorEng
 {
     //TODO: change architecture to have a easier time getting the palette
     ::ULIS::FColor color = GetEditorAs<FOdysseyPainterEditor>()->PaintColor().GetValue();
+    ::ULIS::FColor rgba8 = color.ToFormat( ::ULIS::eFormat::Format_RGBA8 );
+    FColor ueColor = FColor( rgba8.R8(), rgba8.G8(), rgba8.B8(), rgba8.A8() );
+    FOdysseyVectorVertex* cubicVertex = PickVertex( iEngine, iScene, iPointInTexture.x, iPointInTexture.y, StitchingRadius );
+    FOdysseyVectorPathCubic* cubicPath = nullptr;
     UOdysseyPaletteEntry* entry = nullptr;
+    BLPoint localCoords;
+
     if (GetEditorAs<FOdysseyPainterEditor>()->GetGUI()->GetColorPaletteTab()->PaletteWidget()->GetColorPalette()->GetPalette())
     {
         entry = GetEditorAs<FOdysseyPainterEditor>()->GetGUI()->GetColorPaletteTab()->PaletteWidget()->GetColorPalette()->GetPalette()->CurrentEntry.Get();
         if (entry && entry->IsA(UOdysseyPaletteEntryColor::StaticClass()))
         {
             FColor colorEntry = Cast< UOdysseyPaletteEntryColor >(entry)->GetUsedColor();
+            ueColor = colorEntry;
         }
     }
-
-    ::ULIS::FColor rgba8 = color.ToFormat( ::ULIS::eFormat::Format_RGBA8 );
-    FOdysseyVectorVertex* cubicVertex = PickVertex( iEngine, iScene, iPointInTexture.x, iPointInTexture.y, StitchingRadius );
-    FOdysseyVectorPathCubic* cubicPath = nullptr;
-    BLPoint localCoords;
 
  //UE_LOG(LogTemp, Warning, TEXT("radius:%f iPointInTexture.pressure:%f"), radius, iPointInTexture.pressure ); 
 
@@ -185,15 +187,13 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorEng
 
     mPathBuilder = new FOdysseyVectorPathBuilder();
 
+    cubicPath->SetForegroundColor( ueColor );
+    mPathBuilder->SetForegroundColor( ueColor );
+
     if (entry && entry->IsA(UOdysseyPaletteEntryColor::StaticClass()))
     {
         cubicPath->GetForegroundBucket().SetPaletteEntry( entry );
         mPathBuilder->GetForegroundBucket().SetPaletteEntry( entry );
-    }
-    else
-    {
-        cubicPath->SetForegroundColor( rgba8.R8(), rgba8.G8(), rgba8.B8(), rgba8.A8() );
-        mPathBuilder->SetForegroundColor( rgba8.R8(), rgba8.G8(), rgba8.B8(), rgba8.A8() );
     }
 
     localCoords = cubicPath->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );

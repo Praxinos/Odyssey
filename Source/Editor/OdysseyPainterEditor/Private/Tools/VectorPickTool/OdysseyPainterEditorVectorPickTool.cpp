@@ -246,16 +246,54 @@ UOdysseyPainterEditorVectorPickTool::OnMouseUpVectorObjectMode( FOdysseyVectorEn
 }
 
 void
+UOdysseyPainterEditorVectorPickTool::SelectVertexFromPath( FOdysseyVectorPath* iPath )
+{
+    std::vector<FOdysseyVectorVertex*> pickedVertexArray;
+
+    pickedVertexArray.reserve( 50 );
+
+    iPath->UnselectAllVertices();
+    // Pick from mask image
+    iPath->PickVertex(  pickedVertexArray );
+
+    for( int i = 0; i < pickedVertexArray.size(); i++ )
+    {
+        FOdysseyVectorVertex* vertex = pickedVertexArray[i];
+
+        if( vertex->IsSelected() == false )
+        {
+            iPath->SelectVertex( vertex );
+        }
+    }
+}
+
+void
+UOdysseyPainterEditorVectorPickTool::SelectVertexFromPaintGroup( FOdysseyVectorGroupPaint* iPaintGroup )
+{
+    std::list<FOdysseyVectorObject*>& childrenObjectList = iPaintGroup->GetChildrenList();
+    std::list<FOdysseyVectorObject*>::iterator it;
+
+    for( it = childrenObjectList.begin(); it != childrenObjectList.end(); ++it )
+    {
+        FOdysseyVectorObject* child = (*it);
+
+        if( child->HasBaseClass(FOdysseyVectorPath::StaticClass()) )
+        {
+            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(child);
+
+            SelectVertexFromPath( path );
+        }
+    }
+}
+
+void
 UOdysseyPainterEditorVectorPickTool::OnMouseUpVectorVertexMode( FOdysseyVectorEngine* iEngine
                                                               , FOdysseyVectorScene* iScene
                                                               , const FOdysseyPoint& iPointInTexture
                                                               , const FKey& iKey )
 {
     std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
-    std::vector<FOdysseyVectorVertex*> pickedVertexArray;
     ::ULIS::FRectD roi;
-
-    pickedVertexArray.reserve( 50 );
 
     // dragging occured
     if ( mPointArray.size() > 1 )
@@ -270,18 +308,14 @@ UOdysseyPainterEditorVectorPickTool::OnMouseUpVectorVertexMode( FOdysseyVectorEn
             {
                 FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(selectedObject);
 
-                path->UnselectAllVertices();
-                path->PickVertex(  pickedVertexArray );
+                SelectVertexFromPath( path );
+            }
 
-                for( int i = 0; i < pickedVertexArray.size(); i++ )
-                {
-                    FOdysseyVectorVertex* vertex = pickedVertexArray[i];
+            if( selectedObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+            {
+                FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(selectedObject);
 
-                    if( vertex->IsSelected() == false )
-                    {
-                        path->SelectVertex( vertex );
-                    }
-                }
+                SelectVertexFromPaintGroup( paintGroup );
             }
         }
     }

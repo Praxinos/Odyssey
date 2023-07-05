@@ -267,6 +267,12 @@ FOdysseyVectorObject::CopySettings( FOdysseyVectorObject& iDestinationObject )
 
     iDestinationObject.UpdateMatrix();
 
+    iDestinationObject.mForegroundBucket.SetPaletteEntry( mForegroundBucket.GetPaletteEntry() );
+    iDestinationObject.mForegroundBucket.SetSolidColor( mForegroundBucket.GetSolidColor() );
+    iDestinationObject.mForegroundBucket.SetGradient( mForegroundBucket.IsGradient() );
+    iDestinationObject.mForegroundBucket.SetGradientColor0( mForegroundBucket.GetGradientColor0() );
+    iDestinationObject.mForegroundBucket.SetGradientColor1( mForegroundBucket.GetGradientColor1() );
+
     iDestinationObject.mBackgroundBucket.SetPaletteEntry( mBackgroundBucket.GetPaletteEntry() );
     iDestinationObject.mBackgroundBucket.SetSolidColor( mBackgroundBucket.GetSolidColor() );
     iDestinationObject.mBackgroundBucket.SetGradient( mBackgroundBucket.IsGradient() );
