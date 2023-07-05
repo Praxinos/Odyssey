@@ -3,6 +3,7 @@
 
 #include "SOdysseyPaletteSetView.h"
 #include "SOdysseyPaletteSetTile.h"
+#include "Framework/Commands/GenericCommands.h"
 
 #define LOCTEXT_NAMESPACE "SOdysseyPaletteSetView"
 
@@ -15,6 +16,7 @@ SOdysseyPaletteSetView::~SOdysseyPaletteSetView()
 SOdysseyPaletteSetView::SOdysseyPaletteSetView():
     mCommandList(MakeShared<FUICommandList>())
 {
+    MapActionsToCommandList();
 }
 
 //CONSTRUCTION/DESTRUCTION-----------------------------------------------
@@ -37,55 +39,59 @@ SOdysseyPaletteSetView::Construct(const FArguments& InArgs)
             .OnContextMenuOpening(this, &SOdysseyPaletteSetView::OnContextMenuOpening)
         );
     }
+
+    CreateContextMenu();
+
+    if (mPalette)
+        OnSetSelected(mPalette->Sets[mPalette->UsedSet] );
 }
 
 void
 SOdysseyPaletteSetView::DeleteSelectedSet()
 {
-/*
     if (!mPalette)
         return;
 
-    TArray<UOdysseyPaletteEntry*> selectedEntries = GetSelectedItems();
-    mPalette->RemoveEntries(selectedEntries);*/
+    mPalette->RemoveSet( mPalette->UsedSet );
+
+    mPalette->UsedSet = 1;
+    OnSetSelected(mPalette->Sets[0]);
 }
 
 bool
 SOdysseyPaletteSetView::CanDeleteSelectedSet()
 {
-/*
     if (!mPalette)
         return false;
 
-    TArray<UOdysseyPaletteEntry*> selectedEntries = GetSelectedItems();
-    if (selectedEntries.Num() <= 0)
-        return false;
+    if( mPalette->Sets.Num() != 1 )
+        return true;
 
-    //If one of the root layers is not selected, we can delete selected entries
-    const TArray<UOdysseyPaletteEntry*>& rootEntries = mPalette->GetRootEntries();
-    for (UOdysseyPaletteEntry* rootEntry : rootEntries)
-    {
-        if (!selectedEntries.Contains(rootEntry))
-            return true;
-    }
-    */
     return false;
 }
 
 void
 SOdysseyPaletteSetView::DuplicateSelectedSet()
 {
-/*
     if (!mPalette)
         return;
 
-    TArray<UOdysseyPaletteEntry*> selectedEntries = GetSelectedItems();
-    if (selectedEntries.Num() <= 0)
-        return;
-
-    TArray<UOdysseyPaletteEntry*> duplicatedEntries = mPalette->DuplicateEntries(selectedEntries);
-    SetItemSelection(duplicatedEntries, true);*/
+    mPalette->DuplicateSet();
+    OnSetSelected(mPalette->Sets.Last());
 }
+
+bool
+SOdysseyPaletteSetView::CanDuplicateSelectedSet()
+{
+    if( !mPalette )
+        return false;
+
+    if (mPalette->Sets.Num() < 8)
+        return true;
+
+    return false;
+}
+
 
 TArray<TSharedPtr<FExtender>> SOdysseyPaletteSetView::ExtendContextMenu()
 {
@@ -96,7 +102,6 @@ TArray<TSharedPtr<FExtender>> SOdysseyPaletteSetView::ExtendContextMenu()
 void
 SOdysseyPaletteSetView::MapActionsToCommandList()
 {
-/*
     mCommandList->MapAction(
         FGenericCommands::Get().Delete,
         FExecuteAction::CreateRaw(this, &SOdysseyPaletteSetView::DeleteSelectedSet),
@@ -105,10 +110,29 @@ SOdysseyPaletteSetView::MapActionsToCommandList()
 
     mCommandList->MapAction(
         FGenericCommands::Get().Duplicate,
-        FExecuteAction::CreateRaw(this, &SOdysseyPaletteSetView::DuplicateSelectedSet)
-    );*/
+        FExecuteAction::CreateRaw(this, &SOdysseyPaletteSetView::DuplicateSelectedSet),
+        FCanExecuteAction::CreateRaw(this, &SOdysseyPaletteSetView::CanDuplicateSelectedSet)
+    );
 }
 
+
+void SOdysseyPaletteSetView::CreateContextMenu()
+{
+    UToolMenus* ToolMenus = UToolMenus::Get();
+    if (!ensure(ToolMenus))
+        return;
+
+    if (ToolMenus->IsMenuRegistered(contextSetMenuName))
+        return;
+
+    UToolMenu* Menu = ToolMenus->RegisterMenu(contextSetMenuName);
+
+    FToolMenuSection& commonSection = Menu->AddSection("Common", LOCTEXT("PaletteSetCommonSection", "Common"));
+    {
+        commonSection.AddMenuEntry(FGenericCommands::Get().Delete);
+        commonSection.AddMenuEntry(FGenericCommands::Get().Duplicate);
+    }
+}
 
 TSharedPtr<SWidget> SOdysseyPaletteSetView::OnContextMenuOpening()
 {

@@ -36,9 +36,6 @@ struct FObjectParam
 
     //UPROPERTY(EditAnywhere, Category="Coloring")
     //FColor Foreground;
-
-    //UPROPERTY(EditAnywhere, Category = "PaletteEntry")
-    //UOdysseyPaletteEntry* Entry = nullptr;
 };
 
 class ODYSSEYVECTOR_API FOdysseyVectorObject

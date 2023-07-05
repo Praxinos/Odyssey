@@ -81,7 +81,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorBucket : public FOdysseyVectorPoint
 
         void SetPaletteEntry( UOdysseyPaletteEntry* iPaletteEntry );
         UOdysseyPaletteEntry* GetPaletteEntry();
-        FPaletteEntryDescription& GetPaletteEntryDescription();
 
     protected:
         FOdysseyVectorObject& mParent;
@@ -92,7 +91,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorBucket : public FOdysseyVectorPoint
         FColor mGradientColor0;
         FColor mGradientColor1;
 
+        /* The Palette Entry associated with this vector object, if any*/
         UOdysseyPaletteEntry* mPaletteEntry = nullptr;
-        /* The Palette Entry associated with this vector object, if any. Else, the Guid inside will be 0 or invalid */
-        FPaletteEntryDescription mPaletteEntryDescription;
 };

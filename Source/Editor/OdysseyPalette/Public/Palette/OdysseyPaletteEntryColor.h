@@ -21,10 +21,11 @@ public:
     void SetUsedColor( FColor iColor );
 
     virtual void AddSet() override;
+    virtual void DuplicateSetAt( int iIndex = -1 ) override;
 
     virtual void RemoveSet(int iIndex = -1) override;
 
 public:
     UPROPERTY(EditAnywhere, Category = Palette)
-    TArray<FColor> EntryColor;
+    TArray<FColor> EntryColors;
 };

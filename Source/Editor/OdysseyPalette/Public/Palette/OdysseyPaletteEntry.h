@@ -138,6 +138,7 @@ public:
     const TArray<UOdysseyPaletteEntry*>& GetChildren() const;
 
     virtual void AddSet();
+    virtual void DuplicateSetAt( int iIndex = -1 );
 
     virtual void RemoveSet( int iIndex = -1 );
 

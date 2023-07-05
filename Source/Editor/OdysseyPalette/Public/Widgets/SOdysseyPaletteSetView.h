@@ -36,6 +36,9 @@ protected:
     bool CanDeleteSelectedSet();
     
     void DuplicateSelectedSet();
+
+    bool CanDuplicateSelectedSet();
+
     /**
      * @brief Extends the context menu
      * Allows us to insert entries wherever we want in the context menu
@@ -44,6 +47,12 @@ protected:
     virtual TArray<TSharedPtr<FExtender>> ExtendContextMenu();
 
     void MapActionsToCommandList();
+
+    /**
+     * @brief Creates and registers palette set context menu
+     *
+     */
+    virtual void CreateContextMenu();
 
 private:
     //Callbacks

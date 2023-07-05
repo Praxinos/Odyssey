@@ -169,6 +169,7 @@ public:
 	void MoveEntries(TArray<UOdysseyPaletteEntry*> iEntries, UOdysseyPaletteEntry* iParentEntry = nullptr, int iIndexInParent = 0);
 
     void AddSet();
+    void DuplicateSet();
 
     void RemoveSet(int iIndex = -1);
 
