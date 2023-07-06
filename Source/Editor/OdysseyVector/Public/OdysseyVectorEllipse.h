@@ -15,9 +15,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorEllipse : public FOdysseyVectorPrimitive
 
     public:
         static uint32 StaticClass() { return mStaticClass; };
-        virtual uint32 GetClass() { return mStaticClass; };
-
-        bool HasBaseClass( uint32 iBaseClassID );
+        virtual uint32 GetClass() override { return mStaticClass; };
+        virtual bool HasBaseClass( uint32 iBaseClassID ) override;
 
        /**
          * @brief destructor.
@@ -61,12 +60,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorEllipse : public FOdysseyVectorPrimitive
          * @return radius on Y axis
          */
         double GetRadiusY();
-
-       /**
-         * @brief Convert this ellipse to cubic path.
-         * @return a newly allocated cubic path that looks the same as this ellipse.
-         */
-        virtual FOdysseyVectorPathCubic* Convert() override;
 
        /**
          * @brief Get object type

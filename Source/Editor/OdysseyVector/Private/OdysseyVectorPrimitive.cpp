@@ -19,3 +19,13 @@ FOdysseyVectorPrimitive::HasBaseClass( uint32 iBaseClassID )
 
     return FOdysseyVectorPathCubic::HasBaseClass( iBaseClassID );
 }
+
+FOdysseyVectorPathCubic*
+FOdysseyVectorPrimitive::Convert()
+{
+    FOdysseyVectorPathCubic* path = static_cast<FOdysseyVectorPathCubic*>(this->FOdysseyVectorPathCubic::CopyShape());
+
+    this->CopySettings( *path );
+
+    return path;
+}

@@ -17,9 +17,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroup : public FOdysseyVectorObject
 
     public:
         static uint32 StaticClass() { return mStaticClass; };
-        virtual uint32 GetClass() { return mStaticClass; };
-
-        bool HasBaseClass( uint32 iBaseClassID );
+        virtual uint32 GetClass() override { return mStaticClass; };
+        virtual bool HasBaseClass( uint32 iBaseClassID ) override;
 
         /**
          * @brief destructor

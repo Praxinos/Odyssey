@@ -51,7 +51,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorRectangle : public FOdysseyVectorPrimitive
         void SetSize( double iWidth, double iHeight );
         double GetWidth();
         double GetHeight();
-        virtual FOdysseyVectorPathCubic* Convert() override;
 
     public:
         FRectangleParam mRectangleParam;

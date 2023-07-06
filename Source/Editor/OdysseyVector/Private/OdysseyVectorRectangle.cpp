@@ -101,16 +101,6 @@ FOdysseyVectorRectangle::CopyShape()
     return static_cast<FOdysseyVectorObject*>( rectangleCopy );
 }
 
-FOdysseyVectorPathCubic*
-FOdysseyVectorRectangle::Convert()
-{
-    FOdysseyVectorPathCubic* path = static_cast<FOdysseyVectorPathCubic*>(this->FOdysseyVectorPathCubic::CopyShape());
-
-    this->CopySettings( *path );
-
-    return path;
-}
-
 void
 FOdysseyVectorRectangle::DrawShape( uint64 iFlags )
 {

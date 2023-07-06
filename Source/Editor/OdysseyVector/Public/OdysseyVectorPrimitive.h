@@ -20,8 +20,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorPrimitive : public FOdysseyVectorPathCubic
 
         bool HasBaseClass( uint32 iBaseClassID );
 
+        FOdysseyVectorPathCubic* Convert();
+
     public:
         virtual ~FOdysseyVectorPrimitive();
         FOdysseyVectorPrimitive( const FString& iName );
-        virtual FOdysseyVectorPathCubic* Convert() = 0;
 };

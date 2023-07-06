@@ -112,16 +112,6 @@ FOdysseyVectorEllipse::CopyShape()
     return static_cast<FOdysseyVectorObject*>( circleCopy );
 }
 
-FOdysseyVectorPathCubic*
-FOdysseyVectorEllipse::Convert()
-{
-    FOdysseyVectorPathCubic* path = static_cast<FOdysseyVectorPathCubic*>(this->FOdysseyVectorPathCubic::CopyShape());
-
-    this->CopySettings( *path );
-
-    return path;
-}
-
 void
 FOdysseyVectorEllipse::DrawShape( uint64 iFlags )
 {

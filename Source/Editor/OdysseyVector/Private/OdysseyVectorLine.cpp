@@ -2,18 +2,28 @@
 
 FOdysseyVectorLine::~FOdysseyVectorLine()
 {
-    delete mCubicVertex[0];
-    delete mCubicVertex[1];
+   // TODO: must be freed in OdysseyVectorPath::~destructor
+    //delete mCubicVertex[0];
+    //delete mCubicVertex[1];
 
-    delete mCubicSegment;
+    //delete mCubicSegment;
 }
 
 FOdysseyVectorLine::FOdysseyVectorLine( const FString iName, double iWidth, double iHeight, double iStrokeWidth )
     : FOdysseyVectorPrimitive( iName )
 {
-    mLineParam.StrokeWidth = iStrokeWidth;
+    mStrokeWidth = iStrokeWidth;
 
-    Init( iName, iWidth, iHeight );
+    SetSize( iWidth, iHeight );
+
+    mCubicVertex[0] = new FOdysseyVectorVertex( this, 0.0f, 0.0f, mStrokeWidth );
+    mCubicVertex[1] = new FOdysseyVectorVertex( this, 0.0f, 0.0f, mStrokeWidth );
+
+    mCubicSegment = new FOdysseyVectorSegmentCubic( static_cast<FOdysseyVectorPathCubic*>(this), mCubicVertex[0], mCubicVertex[1] );
+
+    AddVertex( mCubicVertex[0] );
+    AddVertex( mCubicVertex[1] );
+    AddSegment( mCubicSegment );
 }
 
 bool
@@ -28,33 +38,17 @@ FOdysseyVectorLine::HasBaseClass( uint32 iBaseClassID )
 }
 
 void
-FOdysseyVectorLine::Init( const FString& iName, double iWidth, double iHeight )
-{
-    SetName( iName );
-    SetSize( iWidth, iHeight );
-
-    mCubicVertex[0] = new FOdysseyVectorVertex( this, 0.0f, 0.0f, mLineParam.StrokeWidth );
-    mCubicVertex[1] = new FOdysseyVectorVertex( this, 0.0f, 0.0f, mLineParam.StrokeWidth );
-
-    mCubicSegment = new FOdysseyVectorSegmentCubic( static_cast<FOdysseyVectorPathCubic*>(this), mCubicVertex[0], mCubicVertex[1] );
-
-    AddVertex ( mCubicVertex[0] );
-    AddVertex ( mCubicVertex[1] );
-
-    AddSegment ( mCubicSegment );
-}
-
-void
 FOdysseyVectorLine::UpdateShape( uint32 iUpdateFlags )
 {
-    mCubicVertex[0]->SetRadius( mLineParam.StrokeWidth );
-    mCubicVertex[1]->SetRadius( mLineParam.StrokeWidth );
+    mCubicVertex[0]->SetRadius( mStrokeWidth );
+    mCubicVertex[1]->SetRadius( mStrokeWidth );
 
-    mCubicVertex[0]->Set( 0.0f            , 0.0f              );
-    mCubicVertex[1]->Set( mLineParam.Width, mLineParam.Height );
+    mCubicVertex[0]->Set( 0.0f  , 0.0f    );
+    mCubicVertex[1]->Set( mWidth, mHeight );
 
-    mCubicSegment->GetHandle(0)->Set( mLineParam.Width  * 0.25f, mLineParam.Height  * 0.25f );
-    mCubicSegment->GetHandle(1)->Set( mLineParam.Width  * 0.75f, mLineParam.Height  * 0.75f );
+    // a Line is a cubic segment with its handles aligned
+    mCubicSegment->GetHandle(0)->Set( mWidth  * 0.25f, mHeight  * 0.25f );
+    mCubicSegment->GetHandle(1)->Set( mWidth  * 0.75f, mHeight  * 0.75f );
 
     mCubicSegment->Update();
 }
@@ -63,52 +57,42 @@ FOdysseyVectorObject*
 FOdysseyVectorLine::CopyShape()
 {
     FOdysseyVectorLine* lineCopy = new FOdysseyVectorLine( mObjectParam.Name
-                                                         , mLineParam.Width
-                                                         , mLineParam.Height
-                                                         , mLineParam.StrokeWidth );
+                                                         , mWidth
+                                                         , mHeight
+                                                         , mStrokeWidth );
 
     return static_cast<FOdysseyVectorObject*>( lineCopy );
-}
-
-FOdysseyVectorPathCubic*
-FOdysseyVectorLine::Convert()
-{
-    FOdysseyVectorPathCubic* path = static_cast<FOdysseyVectorPathCubic*>(this->FOdysseyVectorPathCubic::CopyShape());
-
-    this->CopySettings( *path );
-
-    return path;
 }
 
 void
 FOdysseyVectorLine::DrawShape( uint64 iFlags )
 {
-    if ( mLineParam.Width && mLineParam.Height )
+    if ( mWidth && mHeight )
     {
-        FOdysseyVectorPathCubic::DrawShape ( iFlags );
+        FOdysseyVectorPathCubic::DrawShape( iFlags );
     }
 }
 
 void
 FOdysseyVectorLine::SetSize( double iWidth, double iHeight )
 {
-    mLineParam.Width  = iWidth;
-    mLineParam.Height = iHeight;
+    mWidth  = iWidth;
+    mHeight = iHeight;
 
-    mBBox.x = - mLineParam.StrokeWidth;
-    mBBox.y = - mLineParam.StrokeWidth;
-    mBBox.w = mLineParam.Width  + mLineParam.StrokeWidth;
-    mBBox.h = mLineParam.Height + mLineParam.StrokeWidth;
+    mBBox.x = - mStrokeWidth;
+    mBBox.y = - mStrokeWidth;
+    mBBox.w = mWidth  + mStrokeWidth;
+    mBBox.h = mHeight + mStrokeWidth;
 
     Invalidate();
 }
 
 double FOdysseyVectorLine::GetWidth()
 {
-    return mLineParam.Width;
+    return mWidth;
 }
 
 double FOdysseyVectorLine::GetHeight()
 {
-    return mLineParam.Height;
+    return mHeight;
 }
