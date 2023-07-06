@@ -38,8 +38,27 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroup : public FOdysseyVectorObject
         void Init( FString& iName );
 
     protected:
-        virtual void DrawShape( uint64 iFlags ) override { };
+       /**
+         * @brief Draw this group.
+         * @param iFlags drawing flags from the engine.
+         */
+        virtual void DrawShape( uint64 iFlags ) override;
+
+       /**
+         * @brief Pick this shape.
+         * @param iFlags selection flags from the engine.
+         */
         virtual bool PickShape( const ::ULIS::FRectD& iRoi, uint32 iSelectionFlags ) override;
+
+       /**
+         * @brief Copy this group (for copy-paste operations).
+         * @return a newly allocated group.
+         */
         virtual FOdysseyVectorObject* CopyShape() override;
+
+       /**
+         * @brief Update this ellipse (update cached data if any).
+         * @param iFlags update flags from the engine.
+         */
         virtual void UpdateShape( uint32 iUpdateFlags ) override;
 };

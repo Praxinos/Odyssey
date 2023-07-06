@@ -4,22 +4,22 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Tools/VectorPathKnotTool/OdysseyPainterEditorVectorPathKnotTool.h"
+#include "Tools/VectorPathStitchTool/OdysseyPainterEditorVectorPathStitchTool.h"
 #include "OdysseyBlendParameters.h"
 
-#include "OdysseyTextureEditorVectorPathKnotTool.generated.h"
+#include "OdysseyTextureEditorVectorPathStitchTool.generated.h"
 
 UCLASS()
-class ODYSSEYTEXTUREEDITOR_API UOdysseyTextureEditorVectorPathKnotTool : public UOdysseyPainterEditorVectorPathKnotTool
+class ODYSSEYTEXTUREEDITOR_API UOdysseyTextureEditorVectorPathStitchTool : public UOdysseyPainterEditorVectorPathStitchTool
 {
     GENERATED_BODY()
 
 public:
     // Destructor
-    virtual ~UOdysseyTextureEditorVectorPathKnotTool();
+    virtual ~UOdysseyTextureEditorVectorPathStitchTool();
 
     //Constructor
-    UOdysseyTextureEditorVectorPathKnotTool();
+    UOdysseyTextureEditorVectorPathStitchTool();
 
     //OdysseyPainterEditorTool overrides
     virtual void Activate() override;

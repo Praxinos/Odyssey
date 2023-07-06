@@ -90,7 +90,7 @@ protected:
     void DeleteBucket( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
     void PropagateBucket( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
     void UnpropagateBucket( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    void KnotVertices( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    void StitchVertices( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
 
 private:
     FOdysseyPainterEditor*                          mEditor;

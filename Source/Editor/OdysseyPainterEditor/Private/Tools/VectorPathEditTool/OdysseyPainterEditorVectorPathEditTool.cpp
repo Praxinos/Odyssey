@@ -39,11 +39,13 @@ UOdysseyPainterEditorVectorPathEditTool::UnloadVector( FOdysseyVectorEngine* iEn
 void
 UOdysseyPainterEditorVectorPathEditTool::LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
+    TSharedPtr< SViewport > viewportWidget; // to force keyboard focus on mouse hover.
+                                            // Prevents the user from having to click at least once in the viewport.
     // we need the focus on the viewport for keyboard 
-    mViewportWidget = GetEditorAs<FOdysseyPainterEditor>()->GetGUI()->GetViewportTab()->GetViewport()->GetViewportWidget();
+    viewportWidget = GetEditorAs<FOdysseyPainterEditor>()->GetGUI()->GetViewportTab()->GetViewport()->GetViewportWidget();
 
-    // commented out: moved to hover function
-    //FSlateApplication::Get().SetKeyboardFocus( mViewportWidget.ToSharedRef() );
+    // we need the focus on the viewport for keyboard 
+    FSlateApplication::Get().SetKeyboardFocus( viewportWidget );
 
     iEngine->ClearHUD();
     iEngine->AddHUD(&mCubicPathHUD);
@@ -467,7 +469,7 @@ GetPointParentObject( FOdysseyVectorPoint *iPoint )
     {
         FOdysseyVectorHandleSegment* handle = static_cast<FOdysseyVectorHandleSegment*>(iPoint);
 
-        object = handle->GetParent()->GetPath();
+        object = handle->GetOwner()->GetPath();
     }
 
     return object;
@@ -504,7 +506,7 @@ DragPoint( FOdysseyVectorPoint *iPoint
         if( iPoint->GetClass() == FOdysseyVectorHandleSegment::StaticClass() )
         {
             FOdysseyVectorHandleSegment* segmentHandle = static_cast<FOdysseyVectorHandleSegment*>( iPoint );
-            FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(segmentHandle->GetParent());
+            FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(segmentHandle->GetOwner());
 
             segmentHandle->Set( iPoint->GetX() + localVector.x
                               , iPoint->GetY() + localVector.y );

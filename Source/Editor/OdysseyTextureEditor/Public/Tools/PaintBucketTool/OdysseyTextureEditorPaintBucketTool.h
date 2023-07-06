@@ -41,8 +41,4 @@ private:
     //Listeners
     void OnCurrentLayerChanged(class UOdysseyLayerStack* iLayerStack);
     FOdysseyBlendParameters OnPaintEnginePreUpdate(const FOdysseyBlendParameters& iBlendParameters);
-
-protected:
-    // protected Data Members
-    ::ULIS::FBlock* mEditedBlock;
 };

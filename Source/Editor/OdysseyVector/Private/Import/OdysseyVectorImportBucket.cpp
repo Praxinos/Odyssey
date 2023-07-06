@@ -68,7 +68,7 @@ FOdysseyVectorImport::ReadBucket( FOdysseyVectorBucket& iBucket, uint64 iChunkEn
                     Ar << x;
                     Ar << y;
 
-                    iBucket.SetCoords( x, y );
+                    iBucket.Set( x, y );
                 }
                 break;
 

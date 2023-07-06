@@ -31,8 +31,8 @@ FOdysseyPainterEditorPaintBucketToolHUD::GetBucketPosition( FOdysseyVectorBucket
 
     if( iWorld )
     {
-        FOdysseyVectorObject& parentObject = iBucket->GetParent();
-        BLMatrix2D& worldMatrix = parentObject.GetWorldMatrix();
+        FOdysseyVectorObject& ownerObject = iBucket->GetOwner();
+        BLMatrix2D& worldMatrix = ownerObject.GetWorldMatrix();
         BLPoint worldPosition = worldMatrix.mapPoint( bucketCoords.x, bucketCoords.y );
 
         return ::ULIS::FVec2D( worldPosition.x, worldPosition.y );
@@ -50,8 +50,8 @@ FOdysseyPainterEditorPaintBucketToolHUD::GetHandleVector( FOdysseyVectorBucket* 
 
     if( iWorld )
     {
-        FOdysseyVectorObject& parentObject = iBucket->GetParent();
-        BLMatrix2D& worldMatrix = parentObject.GetWorldMatrix();
+        FOdysseyVectorObject& ownerObject = iBucket->GetOwner();
+        BLMatrix2D& worldMatrix = ownerObject.GetWorldMatrix();
         BLPoint worldVector = worldMatrix.mapVector( handleVector.x, handleVector.y );
         ::ULIS::FVec2D normalizedVector = ::ULIS::FVec2D( worldVector.x, worldVector.y );
 
@@ -80,7 +80,7 @@ FOdysseyPainterEditorPaintBucketToolHUD::PickBucketArea( FOdysseyVectorBucket* i
         return PICK_BUCKET;
     }
 
-    if( mPaintBucketTool->ShowControls )
+    if( mPaintBucketTool->ShowControls && iBucket->IsGradient() )
     {
         if ( handleDif.Distance() < mPaintBucketTool->PickingRadius )
         {
@@ -227,23 +227,26 @@ FOdysseyPainterEditorPaintBucketToolHUD::DrawBucket( FOdysseyVectorBucket* iBuck
     iBLContext->save();
     iBLContext->resetMatrix();
 
-    if( mPaintBucketTool->ShowControls )
+    if( mPaintBucketTool->ShowControls && iBucket ->IsGradient() )
     {
+        BLRgba32 blackColor = BLRgba32( 0x00, 0x00, 0x00, 0xFF );
+        BLRgba32 whiteColor = BLRgba32( 0xFF, 0xFF, 0xFF, 0xFF );
+
         // Bucket-to-handle line
         iBLContext->setStrokeWidth( 2.0f );
-        iBLContext->setStrokeStyle( BLRgba32( 0x00, 0x00, 0x00, 0xFF ) );
+        iBLContext->setStrokeStyle( blackColor );
         iBLContext->strokeLine( bucketWorldCoords.x, bucketWorldCoords.y
                               , handleWorldCoords.x, handleWorldCoords.y );
         iBLContext->setStrokeWidth( 1.0f );
-        iBLContext->setStrokeStyle( fgColor );
+        iBLContext->setStrokeStyle( whiteColor );
         iBLContext->strokeLine( bucketWorldCoords.x, bucketWorldCoords.y
                               , handleWorldCoords.x, handleWorldCoords.y );
 
         // Handle
-        iBLContext->setFillStyle( fgColor );
+        iBLContext->setFillStyle( whiteColor );
         iBLContext->fillCircle( handleWorldCoords.x, handleWorldCoords.y, HANDLE_RADIUS );
         iBLContext->setStrokeWidth( 1.0f );
-        iBLContext->setStrokeStyle( bgColor );
+        iBLContext->setStrokeStyle( blackColor );
         iBLContext->strokeCircle( handleWorldCoords.x, handleWorldCoords.y, HANDLE_RADIUS );
     }
 

@@ -25,7 +25,7 @@ FOdysseyVectorUndoBucketParam::FOdysseyVectorUndoBucketParam( FOdysseyVectorScen
 void
 FOdysseyVectorUndoBucketParam::Apply( UObject* iIgnored )
 {
-    FOdysseyVectorBucket tmpBucketSave( mBucketSave.GetParent() );
+    FOdysseyVectorBucket tmpBucketSave( mBucketSave.GetOwner() );
 
     // call method from base class
     FOdysseyVectorUndo::Apply( iIgnored );
@@ -47,7 +47,7 @@ FOdysseyVectorUndoBucketParam::Apply( UObject* iIgnored )
 void
 FOdysseyVectorUndoBucketParam::Revert( UObject* iIgnored )
 {
-    FOdysseyVectorBucket tmpBucketSave( mBucketSave.GetParent() );
+    FOdysseyVectorBucket tmpBucketSave( mBucketSave.GetOwner() );
 
     // call method from base class
     FOdysseyVectorUndo::Revert( iIgnored );

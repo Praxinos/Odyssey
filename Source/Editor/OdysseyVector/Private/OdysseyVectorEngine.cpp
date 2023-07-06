@@ -506,11 +506,11 @@ FOdysseyVectorEngine::PickPoints( FOdysseyVectorScene* iScene
 }
 
 FOdysseyVectorVertex*
-FOdysseyVectorEngine::Knot( FOdysseyVectorVertex* iVertexA
-                          , FOdysseyVectorVertex* iVertexB
-                          , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
-                          , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray
-                          , bool iSmooth )
+FOdysseyVectorEngine::Stitch( FOdysseyVectorVertex* iVertexA
+                            , FOdysseyVectorVertex* iVertexB
+                            , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
+                            , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray
+                            , bool iSmooth )
 {
     if( ( iVertexA->GetSegmentCount() == 1 )
      && ( iVertexB->GetSegmentCount() == 1 )
@@ -541,8 +541,8 @@ FOdysseyVectorEngine::Knot( FOdysseyVectorVertex* iVertexA
             uint32 prevVertexIndex = ( iVertexA == vertexASegment->GetVertex(0) ) ? 1 : 0;
             uint32 nextVertexIndex = ( iVertexB == vertexBSegment->GetVertex(0) ) ? 1 : 0;
 
-            newCubicSegment[0]->GetHandle(0)->SetCoords( vertexASegment->GetHandle(prevVertexIndex)->GetCoords() );
-            newCubicSegment[1]->GetHandle(1)->SetCoords( vertexBSegment->GetHandle(nextVertexIndex)->GetCoords() );
+            newCubicSegment[0]->GetHandle(0)->Set( vertexASegment->GetHandle(prevVertexIndex)->GetCoords() );
+            newCubicSegment[1]->GetHandle(1)->Set( vertexBSegment->GetHandle(nextVertexIndex)->GetCoords() );
 
             path->RemoveSegment( vertexASegment );
             path->RemoveSegment( vertexBSegment );

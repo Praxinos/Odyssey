@@ -21,7 +21,7 @@
 #include "Undo/OdysseyVectorUndoSceneRemoveSelection.h"
 #include "Undo/OdysseyVectorUndoBucketRemove.h"
 #include "Undo/OdysseyVectorUndoBucketParam.h"
-#include "Undo/OdysseyVectorUndoPathKnot.h"
+#include "Undo/OdysseyVectorUndoPathStitch.h"
 
 #define LOCTEXT_NAMESPACE "FOdysseyPainterEditor"
 
@@ -526,7 +526,7 @@ SetBucketPropagation( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene
                 GEditor->BeginTransaction(LOCTEXT("PropagateBucket","Propagate Bucket"));
                 if( GUndo )
                 {
-                    FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( iScene, selectedBucket->GetParent(), selectedBucket );
+                    FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( iScene, selectedBucket->GetOwner(), selectedBucket );
 
                     GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
                 }
@@ -555,7 +555,7 @@ FOdysseyPainterEditor::UnpropagateBucket( FOdysseyVectorEngine* iEngine, FOdysse
 }
 
 void
-FOdysseyPainterEditor::KnotVertices( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+FOdysseyPainterEditor::StitchVertices( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
     std::vector<FOdysseyVectorVertex*> pickedVertexArray;
     FOdysseyVectorVertex* knotVertex;
@@ -619,7 +619,7 @@ FOdysseyPainterEditor::KnotVertices( FOdysseyVectorEngine* iEngine, FOdysseyVect
                 removedPathArray.push_back( mergedPath );
             }
 
-            knotVertex = iEngine->Knot( vertexA, vertexB, addedSegmentArray, removedSegmentArray, true );
+            knotVertex = iEngine->Stitch( vertexA, vertexB, addedSegmentArray, removedSegmentArray, true );
 
             if( knotVertex )
             {
@@ -628,10 +628,10 @@ FOdysseyPainterEditor::KnotVertices( FOdysseyVectorEngine* iEngine, FOdysseyVect
                 removedVertexArray.push_back( vertexB );
 
                 // needed for valid GUndo pointer
-                GEditor->BeginTransaction(LOCTEXT("VectorPathKnotTool","Vector Path Knot Tool"));
+                GEditor->BeginTransaction(LOCTEXT("VectorPathStitchTool","Vector Path Stitch Tool"));
                 if( GUndo )
                 {
-                    FOdysseyVectorUndo *undo = new FOdysseyVectorUndoPathKnot( iScene
+                    FOdysseyVectorUndo *undo = new FOdysseyVectorUndoPathStitch( iScene
                                                                               , removedPathArray
                                                                               , removedVertexArray
                                                                               , removedSegmentArray

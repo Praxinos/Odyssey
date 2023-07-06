@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 #include "Layout/Visibility.h"
 #include "Widgets/DeclarativeSyntaxSupport.h"
+#include "Widgets/SViewport.h"
 #include "Widgets/SCompoundWidget.h"
 
 class FOdysseySceneViewport;

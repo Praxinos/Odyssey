@@ -9,22 +9,22 @@ FOdysseyVectorBucket::~FOdysseyVectorBucket()
 {
 }
 
-FOdysseyVectorBucket::FOdysseyVectorBucket( FOdysseyVectorObject& iParent )
-    : mParent ( iParent )
+FOdysseyVectorBucket::FOdysseyVectorBucket( FOdysseyVectorObject& iOwner )
+    : mOwner ( iOwner )
     , mSolidColor( 128, 128, 128, 255 )
     , mRotation( 0.0f )
     , mPropagated( false )
     , mIsGradient ( false )
 {
-    SetCoords( 0.0, 0.0f );
+    SetCoords( 0.0, 0.0f, 0.0f );
 }
 
-FOdysseyVectorBucket::FOdysseyVectorBucket( FOdysseyVectorObject& iParent, double iX, double iY, bool iPropagated )
-    : mParent ( iParent )
+FOdysseyVectorBucket::FOdysseyVectorBucket( FOdysseyVectorObject& iOwner, double iX, double iY, bool iPropagated )
+    : mOwner ( iOwner )
     , mPropagated( iPropagated )
     , mIsGradient ( false )
 {
-    SetCoords( iX, iY );
+    SetCoords( iX, iY, 0.0f );
     SetSolidColor( 128, 128, 128, 255 );
     SetRotation( 0.0f );
 }
@@ -35,42 +35,18 @@ FOdysseyVectorBucket::SetRotation( double iRotation )
     mRotation = iRotation;
 }
 
-void 
-FOdysseyVectorBucket::SetX( double iX )
-{
-    FOdysseyVectorPoint::SetX( iX );
-
-    mParent.Invalidate( FOdysseyVectorObject::INVALIDATE_COLOR );
-}
-
-void 
-FOdysseyVectorBucket::SetY( double iY )
-{
-    FOdysseyVectorPoint::SetY( iY );
-
-    mParent.Invalidate( FOdysseyVectorObject::INVALIDATE_COLOR );
-}
-
-void 
-FOdysseyVectorBucket::Set( double iX, double iY )
-{
-    FOdysseyVectorPoint::Set( iX, iY );
-
-    mParent.Invalidate( FOdysseyVectorObject::INVALIDATE_COLOR );
-}
-
 void
-FOdysseyVectorBucket::Set( double iX, double iY, double iRadius )
+FOdysseyVectorBucket::SetCoords( double iX, double iY, double iRadius )
 {
-    FOdysseyVectorPoint::Set( iX, iY, iRadius );
+    FOdysseyVectorPoint::SetCoords( iX, iY, iRadius );
 
-    mParent.Invalidate( FOdysseyVectorObject::INVALIDATE_COLOR );
+    mOwner.Invalidate( FOdysseyVectorObject::INVALIDATE_COLOR );
 }
 
 void
 FOdysseyVectorBucket::Invalidate()
 {
-    mParent.Invalidate( FOdysseyVectorObject::INVALIDATE_COLOR );
+    mOwner.Invalidate( FOdysseyVectorObject::INVALIDATE_COLOR );
 }
 
 void
@@ -78,7 +54,7 @@ FOdysseyVectorBucket::SetPropagated( bool iPropagated )
 {
     mPropagated = iPropagated;
 
-    mParent.Invalidate( FOdysseyVectorObject::INVALIDATE_COLOR );
+    mOwner.Invalidate( FOdysseyVectorObject::INVALIDATE_COLOR );
 }
 
 bool
@@ -196,9 +172,9 @@ FOdysseyVectorBucket::Copy( FOdysseyVectorBucket* iDestinationBucket )
 }
 
 FOdysseyVectorObject&
-FOdysseyVectorBucket::GetParent()
+FOdysseyVectorBucket::GetOwner()
 {
-    return mParent;
+    return mOwner;
 }
 
 void

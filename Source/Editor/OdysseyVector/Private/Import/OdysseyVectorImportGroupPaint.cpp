@@ -38,7 +38,7 @@ ReadBucketEntry( FOdysseyVectorBucket& iBucket, uint64 iChunkEnd, FArchive &Ar )
                     Ar << x;
                     Ar << y;
 
-                    iBucket.SetCoords( x, y );
+                    iBucket.Set( x, y );
                 }
                 break;
 

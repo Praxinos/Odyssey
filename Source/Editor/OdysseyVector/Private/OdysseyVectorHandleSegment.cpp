@@ -4,72 +4,25 @@ FOdysseyVectorHandleSegment::~FOdysseyVectorHandleSegment()
 {
 }
 
-FOdysseyVectorHandleSegment::FOdysseyVectorHandleSegment()
-    : mParentSegment ( nullptr )
+FOdysseyVectorHandleSegment::FOdysseyVectorHandleSegment( FOdysseyVectorSegment* iOwnerSegment, double iX, double iY )
+    : FOdysseyVectorPoint( iX, iY, 0.0f )
+    , mOwnerSegment ( iOwnerSegment )
 {
-}
-
-void
-FOdysseyVectorHandleSegment::Init( FOdysseyVectorSegment* iParentSegment, double iX, double iY )
-{
-    mParentSegment = iParentSegment;
-
-    FOdysseyVectorHandle::Init( iX, iY );
-}
-
-//static
-FOdysseyVectorHandleSegment*
-FOdysseyVectorHandleSegment::New( FOdysseyVectorSegment* iParentSegment, double iX, double iY )
-{
-    FOdysseyVectorHandleSegment* handleSegment = new FOdysseyVectorHandleSegment();
-
-    handleSegment->Init( iParentSegment, iX, iY );
-
-    return handleSegment;
 }
 
 FOdysseyVectorSegment*
-FOdysseyVectorHandleSegment::GetParent()
+FOdysseyVectorHandleSegment::GetOwner()
 {
-    return mParentSegment;
+    return mOwnerSegment;
 }
 
 void 
-FOdysseyVectorHandleSegment::SetX( double iX )
+FOdysseyVectorHandleSegment::SetCoords( double iX, double iY, double iRadius )
 {
-    mCoords.x  = iX;
+    FOdysseyVectorPoint::SetCoords( iX, iY, iRadius );
 
-    mParentSegment->Invalidate();
-}
-
-void 
-FOdysseyVectorHandleSegment::SetY( double iY )
-{
-    mCoords.y = iY;
-
-    mParentSegment->Invalidate();
-}
-
-void 
-FOdysseyVectorHandleSegment::Set( double iX, double iY )
-{
-    mCoords.x = iX;
-    mCoords.y = iY;
-
-    mParentSegment->Invalidate();
-}
-
-void 
-FOdysseyVectorHandleSegment::Set( double iX, double iY, double iRadius )
-{
-    Set( iX, iY ); // radius is ignored.
-}
-
-void 
-FOdysseyVectorHandleSegment::Set( const ::ULIS::FVec2D& iCoords )
-{
-    mCoords.x = iCoords.x;
-    mCoords.y = iCoords.y;
-
-    mParentSegment->Invalidate();
+    if( mOwnerSegment )
+    {
+        mOwnerSegment->Invalidate();
+    }
 }

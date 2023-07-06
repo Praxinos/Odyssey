@@ -8,9 +8,6 @@
 #include "Undo/OdysseyVectorUndo.h"
 #include "OdysseyVectorObject.h"
 #include "OdysseyVectorPoint.h"
-#include "OdysseyVectorHandle.h"
-#include "OdysseyVectorHandleSegment.h"
-#include "OdysseyVectorVertex.h"
 
 struct FPointPosition
 {

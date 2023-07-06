@@ -12,8 +12,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorBucket : public FOdysseyVectorPoint
 {
     public:
         ~FOdysseyVectorBucket();
-        FOdysseyVectorBucket( FOdysseyVectorObject& iParent, double iX, double iY,  bool iPropagated );
-        FOdysseyVectorBucket( FOdysseyVectorObject& iParent );
+        FOdysseyVectorBucket( FOdysseyVectorObject& iOwner, double iX, double iY,  bool iPropagated );
+        FOdysseyVectorBucket( FOdysseyVectorObject& iOwner );
         /**
          * @brief Set this bucket's solid color
          * @param iR red
@@ -23,14 +23,47 @@ class ODYSSEYVECTOR_API FOdysseyVectorBucket : public FOdysseyVectorPoint
          */
         void SetSolidColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA );
 
+        /**
+         * @brief Set this bucket's solid color
+         * @param iColor color in UE's FColor format
+         */
         void SetSolidColor( FColor& iColor );
 
+        /**
+         * @brief Tell this bucket to use gradient mode
+         * @param iIsGradient true or false
+        */
         void SetGradient( bool iIsGradient );
 
+        /**
+         * @brief Set gradient color 0
+         * @param iColor color in UE's FColor format
+        */
         void SetGradientColor0( FColor& iColor );
+
+        /**
+         * @brief Set gradient color 1
+         * @param iColor color in UE's FColor format
+        */
         void SetGradientColor1( FColor& iColor );
-        void SetGradientColor0( uint8 iR0, uint8 iG0, uint8 iB0, uint8 iA0 );
-        void SetGradientColor1( uint8 iR1, uint8 iG1, uint8 iB1, uint8 iA1 );
+
+        /**
+         * @brief Set gradient color 0
+         * @param iR red
+         * @param iG green
+         * @param iB blue
+         * @param iA alpha
+        */
+        void SetGradientColor0( uint8 iR, uint8 iG, uint8 iB, uint8 iA );
+
+        /**
+         * @brief Set gradient color 1
+         * @param iR red
+         * @param iG green
+         * @param iB blue
+         * @param iA alpha
+        */
+        void SetGradientColor1( uint8 iR, uint8 iG, uint8 iB, uint8 iA );
 
         /**
          * @brief Tell whether or not the bucket is in gradient mode
@@ -51,8 +84,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorBucket : public FOdysseyVectorPoint
         FColor& GetGradientColor1();
 
         /**
-         * @brief Get solid color
-         * @return a reference to the solid color
+         * @brief Get color relative to the current mode (palette or solid color)
+         * @return a reference to the color
          */
         FColor& GetColor();
 
@@ -66,14 +99,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorBucket : public FOdysseyVectorPoint
          * @brief Get the bucket's parent object.
          * @return a reference to this bucket's parent object.
          */
-        FOdysseyVectorObject& GetParent();
+        FOdysseyVectorObject& GetOwner();
 
         void SetPropagated( bool iPropagated );
         bool IsPropagated();
-        virtual void SetX( double iX ) override;
-        virtual void SetY( double iY ) override; 
-        virtual void Set( double iX, double iY ) override;
-        virtual void Set( double iX, double iY, double iRadius ) override;
+        virtual void SetCoords( double iX, double iY, double iRadius ) override;
         void Invalidate();
         double GetRotation();
         void SetRotation( double iRotation );
@@ -83,7 +113,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorBucket : public FOdysseyVectorPoint
         UOdysseyPaletteEntry* GetPaletteEntry();
 
     protected:
-        FOdysseyVectorObject& mParent;
+        FOdysseyVectorObject& mOwner;
         FColor mSolidColor;
         double mRotation;
         bool mPropagated;

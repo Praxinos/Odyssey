@@ -43,7 +43,7 @@ FOdysseyTextureEditor::FOdysseyTextureEditor() :
 	mVectorPathPushTool(nullptr),
 	mVectorPathWidthTool(nullptr),
 	mVectorPathSmoothTool(nullptr),
-	mVectorPathKnotTool(nullptr),
+	mVectorPathStitchTool(nullptr),
 	mPaintBucketTool(nullptr),
 	mColorPickerTool(nullptr),
 	mVectorGridTool(nullptr),
@@ -85,7 +85,7 @@ FOdysseyTextureEditor::InitTools()
     mVectorPathPushTool = NewObject<UOdysseyTextureEditorVectorPathPushTool>();
     mVectorPathWidthTool = NewObject<UOdysseyTextureEditorVectorPathWidthTool>();
     mVectorPathSmoothTool = NewObject<UOdysseyTextureEditorVectorPathSmoothTool>();
-    mVectorPathKnotTool = NewObject<UOdysseyTextureEditorVectorPathKnotTool>();
+    mVectorPathStitchTool = NewObject<UOdysseyTextureEditorVectorPathStitchTool>();
 	mPaintBucketTool = NewObject<UOdysseyTextureEditorPaintBucketTool>();
 	mColorPickerTool = NewObject<UOdysseyTextureEditorColorPickerTool>();
 	mVectorGridTool = NewObject<UOdysseyTextureEditorVectorGridTool>();
@@ -106,7 +106,7 @@ FOdysseyTextureEditor::InitTools()
     mVectorPathPushTool->SetEditor(this);
     mVectorPathWidthTool->SetEditor(this);
     mVectorPathSmoothTool->SetEditor(this);
-    mVectorPathKnotTool->SetEditor(this);
+    mVectorPathStitchTool->SetEditor(this);
 	mPaintBucketTool->SetEditor(this);
 	mColorPickerTool->SetEditor(this);
 	mVectorGridTool->SetEditor(this);
@@ -128,7 +128,7 @@ FOdysseyTextureEditor::InitTools()
     mTools.Add(mVectorPathPushTool);
     mTools.Add(mVectorPathWidthTool);
     mTools.Add(mVectorPathSmoothTool);
-    mTools.Add(mVectorPathKnotTool);
+    mTools.Add(mVectorPathStitchTool);
 	mTools.Add(mPaintBucketTool);
 	mTools.Add(mColorPickerTool);
 	mTools.Add(mVectorGridTool);
@@ -155,7 +155,7 @@ FOdysseyTextureEditor::BindShortcuts(FBaseToolkit* iToolkit)
 	mVectorPathPushTool->BindShortcuts(iToolkit);
 	mVectorPathWidthTool->BindShortcuts(iToolkit);
 	mVectorPathSmoothTool->BindShortcuts(iToolkit);
-	mVectorPathKnotTool->BindShortcuts(iToolkit);
+	mVectorPathStitchTool->BindShortcuts(iToolkit);
 	mPaintBucketTool->BindShortcuts(iToolkit);
 	mColorPickerTool->BindShortcuts(iToolkit);
 	mVectorGridTool->BindShortcuts(iToolkit);
@@ -181,7 +181,7 @@ FOdysseyTextureEditor::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
 	mVectorPathPushTool->ExtendMenu(iOwner, iMenuName);
 	mVectorPathWidthTool->ExtendMenu(iOwner, iMenuName);
 	mVectorPathSmoothTool->ExtendMenu(iOwner, iMenuName);
-	mVectorPathKnotTool->ExtendMenu(iOwner, iMenuName);
+	mVectorPathStitchTool->ExtendMenu(iOwner, iMenuName);
 	mPaintBucketTool->ExtendMenu(iOwner, iMenuName);
 	mColorPickerTool->ExtendMenu(iOwner, iMenuName);
 	mVectorGridTool->ExtendMenu(iOwner, iMenuName);
@@ -375,10 +375,10 @@ FOdysseyTextureEditor::GetVectorPathWidthTool() const
     return mVectorPathWidthTool;
 }
 
-UOdysseyTextureEditorVectorPathKnotTool*
-FOdysseyTextureEditor::GetVectorPathKnotTool() const
+UOdysseyTextureEditorVectorPathStitchTool*
+FOdysseyTextureEditor::GetVectorPathStitchTool() const
 {
-    return mVectorPathKnotTool;
+    return mVectorPathStitchTool;
 }
 
 UOdysseyTextureEditorPaintBucketTool*
@@ -520,7 +520,7 @@ FOdysseyTextureEditor::AddReferencedObjects(FReferenceCollector& Collector)
     Collector.AddReferencedObject(mVectorPathPushTool);
     Collector.AddReferencedObject(mVectorPathWidthTool);
     Collector.AddReferencedObject(mVectorPathSmoothTool);
-    Collector.AddReferencedObject(mVectorPathKnotTool);
+    Collector.AddReferencedObject(mVectorPathStitchTool);
 	Collector.AddReferencedObject(mPaintBucketTool);
 	Collector.AddReferencedObject(mColorPickerTool);
 	Collector.AddReferencedObject(mVectorGridTool);

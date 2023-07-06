@@ -115,11 +115,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
          * @param oRemovedSegmentArray array of pointer to removed segments.
          * @return nullptr if iVertexA and iVertexA belong to different paths and have more than 1 segment already, the joint vertex otherwise.
          */
-        FOdysseyVectorVertex* Knot( FOdysseyVectorVertex* iVertexA
-                                  , FOdysseyVectorVertex* iVertexB
-                                  , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
-                                  , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray
-                                  , bool iSmooth );
+        FOdysseyVectorVertex* Stitch( FOdysseyVectorVertex* iVertexA
+                                    , FOdysseyVectorVertex* iVertexB
+                                    , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
+                                    , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray
+                                    , bool iSmooth );
 
         /**
          * @brief Erase objects based on the mask image. Currently works with cubic paths only.
