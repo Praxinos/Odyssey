@@ -58,7 +58,7 @@ UOdysseyPainterEditorRasterDrawingTool::CreateShape(FName iName)
 void
 UOdysseyPainterEditorRasterDrawingTool::Activate()
 {
-	FOdysseyObjectEditorUtils::SetPropertyValue(BrushOptions, "Color", FOdysseyBrushColor(GetEditorAs<FOdysseyPainterEditor>()->PaintColor()));
+	FOdysseyObjectEditorUtils::SetPropertyValue(BrushOptions, "Color", FOdysseyBrushColor(mToolContext->GetEditor()->PaintColor()));
     
     //Set Default Brush
     if(!Brush)
@@ -66,19 +66,44 @@ UOdysseyPainterEditorRasterDrawingTool::Activate()
         UOdysseyPainterEditorSettings* settings = UOdysseyPainterEditorSettings::Get();
         FOdysseyObjectEditorUtils::SetPropertyValue(this, "Brush", settings->BrushDefaults.DefaultBrush.LoadSynchronous());
     }
+
+    Super::Activate();
+}
+
+void
+UOdysseyPainterEditorRasterDrawingTool::Load()
+{
+	mPaintEngine.RasterBlock(mToolContext->GetRasterBlock());
+
+	if ( BrushInstance )
+		BrushInstance->SetBlock(mPaintEngine.PaintBlock());
+}
+
+void
+UOdysseyPainterEditorRasterDrawingTool::Unload()
+{
+	mPaintEngine.RasterBlock(nullptr);
+
+	if ( BrushInstance )
+		BrushInstance->SetBlock(nullptr);
+}
+
+bool
+UOdysseyPainterEditorRasterDrawingTool::IsActivable() const
+{
+    return !!mToolContext->GetRasterBlock();
 }
 
 bool
 UOdysseyPainterEditorRasterDrawingTool::CanDraw()
 {
-    if (!IsActivable())
-        return false;
-        
-    // Check if everything is alright
     if (!BrushInstance)
         return false;
 
-    if (!mPaintEngine.PaintBlock())
+    if (!mToolContext->GetRasterBlock() && !mToolContext->CanProvideRasterBlockOnDemand())
+        return false;
+
+    if (mToolContext->IsRasterBlockReadOnly())
         return false;
 
     return true;
@@ -89,6 +114,9 @@ UOdysseyPainterEditorRasterDrawingTool::OnMouseDown(const FOdysseyPoint& iPointI
 {
     if (!CanDraw())
         return false;
+
+    if (!mToolContext->GetRasterBlock())
+        mToolContext->OnProvideRasterBlockDelegate().Execute();
 
     return SelectedShapeInstance->OnMouseDown(iPointInTexture, iKey);
 }

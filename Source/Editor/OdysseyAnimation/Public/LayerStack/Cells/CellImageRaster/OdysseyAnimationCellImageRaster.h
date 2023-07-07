@@ -9,13 +9,13 @@ class ODYSSEYANIMATION_API FOdysseyAnimationCellImageRaster
 
     
 public:
-    static TSharedPtr<FOdysseyAnimationCellImageRaster> Create(UObject* iOwner, int iWidth, int iHeight, ::ULIS::eFormat iFormat);
-    static TSharedPtr<FOdysseyAnimationCellImageRaster> Create(UObject* iOwner, TSharedPtr<::ULIS::FBlock> iBlock);
+    static TSharedPtr<FOdysseyAnimationCellImageRaster> Create(UOdysseyAnimationLayerImageRaster* iLayer, int iWidth, int iHeight, ::ULIS::eFormat iFormat);
+    static TSharedPtr<FOdysseyAnimationCellImageRaster> Create(UOdysseyAnimationLayerImageRaster* iLayer, TSharedPtr<::ULIS::FBlock> iBlock);
     static const FName& StaticType();
 
 public:
     virtual ~FOdysseyAnimationCellImageRaster();
-    FOdysseyAnimationCellImageRaster(UObject* iOwner);
+    FOdysseyAnimationCellImageRaster(UOdysseyAnimationLayerImageRaster* iLayer);
 
     void Init(int iWidth, int iHeight, ::ULIS::eFormat iFormat);
     void Init(TSharedPtr<::ULIS::FBlock> iBlock);
@@ -23,13 +23,15 @@ public:
 
 public:
     virtual const FName& GetType() const override;
+    virtual void PostLoad() override;
     virtual void PostDuplicate() override;
     virtual void Serialize(FArchive& Ar);
 
 private:
     void InitAbilities();
+    TArray<::ULIS::FEvent> RasterBlockPostProcess(const TMap<FIntPoint, TSharedPtr<::ULIS::FBlock>>& iOriginalBlocks, const FULISInvalidTileMap& iInvalidMap, const TArray<::ULIS::FEvent>& iWaitList);
 
 private:
-    UObject* mOwner;
+    UOdysseyAnimationLayerImageRaster* mLayer;
     TSharedPtr<FOdysseyRasterBlock> mRasterBlock;
 };

@@ -37,10 +37,11 @@ UOdysseyTextureLayerStack::CreateFromTexture(UTexture2D* iTexture, UObject* iOut
     rasterBlockMutator.EditTilesFromRects(
         { ::ULIS::FRectI::FromXYWH(0, 0, rasterBlock->GetWidth(), rasterBlock->GetHeight()) },
         FOdysseyRasterBlockMutator::FEditDelegate::CreateLambda(
-            [&](const FULISInvalidTileMap& iTileMap)
+            [&](const FULISInvalidTileMap& iTileMap) -> TArray<ULIS::FEvent>
             {
                 TSharedPtr<::ULIS::FBlock> block = rasterBlock->GetBlock();
                 FillOdysseyBlockFromUTextureData(block.Get(), iTexture, block->Format());
+                return {};
             }
         )
     );

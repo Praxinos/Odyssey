@@ -7,9 +7,6 @@
 #include "OdysseyAnimationEditorGUI.h"
 #include "LayerStack/OdysseyAnimationLayerStack.h"
 #include "AnimationEditor/OdysseyAnimationEditorTimeline.h"
-#include "Tools/RasterDrawingTool/OdysseyAnimationEditorRasterDrawingTool.h"
-#include "Tools/PaintBucketTool/OdysseyAnimationEditorPaintBucketTool.h"
-#include "Tools/ColorPickerTool/OdysseyAnimationEditorColorPickerTool.h"
 #include "Misc/OdysseyHandle.h"
 
 class UOdysseyAnimationPlayer;
@@ -31,6 +28,7 @@ public:
     virtual void InitTools() override;
     virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
     virtual void ExtendMenu(FToolMenuOwner iOwner, FName iMenuName) override;
+    virtual void Tick(float iDeltaTime) override;
 
 public:
     // Getters
@@ -43,28 +41,11 @@ public:
 	virtual UTexture*                           DisplayTexture() const override;
     virtual TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> GetDisplayBlock() override;
 
-    virtual UOdysseyAnimationEditorRasterDrawingTool* GetRasterDrawingTool() const override;
-    virtual UOdysseyAnimationEditorPaintBucketTool* GetPaintBucketTool() const override;
-    virtual UOdysseyAnimationEditorColorPickerTool* GetColorPickerTool() const override;
-
-
-    virtual UOdysseyPainterEditorVectorPrimitiveDrawingTool* GetVectorPrimitiveDrawingTool() const override { return nullptr; }
-    virtual UOdysseyPainterEditorVectorPathDrawingTool* GetVectorPathDrawingTool() const override { return nullptr; }
-    virtual UOdysseyPainterEditorVectorPathEditTool* GetVectorPathEditTool() const override { return nullptr; }
-    virtual UOdysseyPainterEditorVectorPathCutTool* GetVectorPathCutTool() const override { return nullptr; }
-    virtual UOdysseyPainterEditorVectorPickTool* GetVectorPickTool() const override { return nullptr; }
-    virtual UOdysseyPainterEditorVectorObjectMoveTool* GetVectorObjectMoveTool() const override { return nullptr; }
-    virtual UOdysseyPainterEditorVectorObjectRotateTool* GetVectorObjectRotateTool() const override { return nullptr; }
-    virtual UOdysseyPainterEditorVectorObjectScaleTool* GetVectorObjectScaleTool() const override { return nullptr; }
-    virtual UOdysseyPainterEditorVectorGridTool* GetVectorGridTool() const override { return nullptr; }
-    virtual UOdysseyPainterEditorVectorTransformTool* GetVectorTransformTool() const override { return nullptr; }
-    virtual UOdysseyPainterEditorVectorSceneScaleTool* GetVectorSceneScaleTool() const override { return nullptr; }
-    virtual UOdysseyPainterEditorVectorScenePanTool* GetVectorScenePanTool() const override { return nullptr; }
-    virtual UOdysseyPainterEditorVectorEraserTool* GetVectorEraserTool() const override { return nullptr; }
-    virtual UOdysseyPainterEditorVectorPathPushTool* GetVectorPathPushTool() const override { return nullptr; }
-    virtual UOdysseyPainterEditorVectorPathWidthTool* GetVectorPathWidthTool() const override { return nullptr; }
-    virtual UOdysseyPainterEditorVectorPathSmoothTool* GetVectorPathSmoothTool() const override { return nullptr; }
-    virtual UOdysseyPainterEditorVectorPathStitchTool* GetVectorPathStitchTool() const override { return nullptr; }
+    TSharedPtr<FOdysseyRasterBlock> GetCurrentRasterBlock() const;
+    bool CanProvideRasterBlockOnDemand() const;
+    void ProvideRasterBlock();
+    bool IsRasterBlockReadOnly() const;
+    FOdysseyVectorEngine* GetCurrentVectorEngine() const;
 
 public:
     // Overrides
@@ -85,6 +66,8 @@ private:
     void OnCurrentFrameChanged(UOdysseyAnimation* iAnimation);
     void OnImageRenderingCompositionCommited(const FGuid& iFrameId);
     void OnCurrentLayerChanged(class UOdysseyLayerStack* iLayerStack);
+    
+    void UpdateToolContext();
 
 private:
     UOdysseyAnimation* mAnimation;
@@ -92,10 +75,6 @@ private:
 
     FOdysseyAnimationEditorTimeline mTimeline; //Those are just the editor specific data of the timeline
     
-    UOdysseyAnimationEditorRasterDrawingTool* mRasterDrawingTool;
-    UOdysseyAnimationEditorPaintBucketTool* mPaintBucketTool;
-    UOdysseyAnimationEditorColorPickerTool* mColorPickerTool;
-
     UOdysseyAnimationPlayer* mPlayer;
     UOdysseyAnimationTexture* mTexture;
 

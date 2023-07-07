@@ -29,6 +29,15 @@ FOdysseyPainterEditorVectorPickToolVertexContextMenu::FOdysseyPainterEditorVecto
 TSharedPtr<SWidget>
 FOdysseyPainterEditorVectorPickToolVertexContextMenu::CreateWidget()
 {
+    /*mMenu.BeginSection("Context");
+    {
+    mMenu.AddMenuEntry(
+          LOCTEXT("KnotVertices", "Knot Vertices")
+        , LOCTEXT("KnotVertices", "Knot Vertices")
+        , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
+        , FUIAction(FExecuteAction::CreateSP(iEditor->GetGUI(), &FOdysseyTextureEditorGUI::KnotVertices)));
+    }
+    mMenu.EndSection();*/
     return mMenu.MakeWidget();
 }
 

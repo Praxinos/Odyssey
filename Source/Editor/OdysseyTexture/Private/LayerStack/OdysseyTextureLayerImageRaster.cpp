@@ -15,13 +15,6 @@
 
 #define LOCTEXT_NAMESPACE "UOdysseyTextureLayerImageRaster"
 
-UOdysseyTextureLayerImageRaster::FOnIsAlphaLockedChanged&
-UOdysseyTextureLayerImageRaster::OnIsAlphaLockedChanged()
-{
-    static FOnIsAlphaLockedChanged onIsAlphaLockedChanged;
-    return onIsAlphaLockedChanged;
-}
-
 UOdysseyTextureLayerImageRaster::FOnBlendModeChanged&
 UOdysseyTextureLayerImageRaster::OnBlendModeChanged()
 {
@@ -45,6 +38,7 @@ UOdysseyTextureLayerImageRaster::UOdysseyTextureLayerImageRaster()
 {
 	LayerTypeName = LOCTEXT("LayerTypeName", "Raster Image Layer");
     Icon = *FOdysseyStyle::GetBrush( "OdysseyLayerStack.LayerBitmap16");
+    RasterBlock->PostProcess().BindUObject(this, &UOdysseyTextureLayerImageRaster::RasterBlockPostProcess);    
 }
 
 void
@@ -180,7 +174,7 @@ UOdysseyTextureLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
     mutator.EditTilesFromRects(
         { ::ULIS::FRectI::FromXYWH(0, 0, RasterBlock->GetWidth(), RasterBlock->GetHeight()) },
         FOdysseyRasterBlockMutator::FEditDelegate::CreateLambda(
-            [&](const FULISInvalidTileMap& iTileMap)
+            [&](const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
             {
                 TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ULISRasterBlock = RasterBlock->GetBlock();
                 ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(RasterBlock->GetFormat());
@@ -192,17 +186,11 @@ UOdysseyTextureLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
                         continue;
                     lastEvent = textureLayer->RenderImage(ULISRasterBlock, ULISRasterBlock->Rect(), ::ULIS::FVec2I(0), lastEvent);
                 }
-                ctx.Finish();
+                return { lastEvent };
             }
         )
     );
     mutator.Commit();
-}
-
-void
-UOdysseyTextureLayerImageRaster::IsAlphaLockedChanged()
-{
-    OnIsAlphaLockedChanged().Broadcast(this);
 }
 
 void
@@ -236,8 +224,6 @@ UOdysseyTextureLayerImageRaster::PropertyChanged(const FName& iPropertyName)
         BlendModeChanged();
     if (iPropertyName == "Opacity")
         OpacityChanged();
-    if (iPropertyName == "IsAlphaLocked")
-        IsAlphaLockedChanged();
 }
 
 void
@@ -249,9 +235,11 @@ UOdysseyTextureLayerImageRaster::PostLoad()
         RasterBlock->OnBlockChanged().RemoveAll(this);
         RasterBlock->OnBlockCommited().RemoveAll(this);
         RasterBlock->OnBlockPtrChanged().RemoveAll(this);
+        RasterBlock->PostProcess().Unbind();
         RasterBlock->OnBlockChanged().AddUObject(this, &::UOdysseyTextureLayerImageRaster::OnBlockChanged);
         RasterBlock->OnBlockCommited().AddUObject(this, &::UOdysseyTextureLayerImageRaster::OnBlockCommited);
         RasterBlock->OnBlockPtrChanged().AddUObject(this, &::UOdysseyTextureLayerImageRaster::OnBlockPtrChanged);
+        RasterBlock->PostProcess().BindUObject(this, &UOdysseyTextureLayerImageRaster::RasterBlockPostProcess);   
     }
 }
 
@@ -304,5 +292,39 @@ UOdysseyTextureLayerImageRaster::Serialize(FArchive& Ar)
     Ar << *RasterBlock;
 }
 
+TArray<::ULIS::FEvent>
+UOdysseyTextureLayerImageRaster::RasterBlockPostProcess(const TMap<FIntPoint, TSharedPtr<::ULIS::FBlock>>& iOriginalBlocks, const FULISInvalidTileMap& iInvalidMap, const TArray<::ULIS::FEvent>& iWaitList)
+{
+    if (!IsAlphaLocked)
+        return iWaitList;
+
+    //Apply AlphaLock
+    TArray<::ULIS::FEvent> events;
+    TSharedPtr<::ULIS::FBlock> block = RasterBlock->GetBlock();
+    TArray<FIntPoint> invalidTiles = iInvalidMap.InvalidTiles();    
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(RasterBlock->GetFormat());
+    for (const FIntPoint& invalidTile : invalidTiles)
+    {
+        TSharedPtr<::ULIS::FBlock> originalBlock = iOriginalBlocks[invalidTile];
+        ::ULIS::FRectI rect = iInvalidMap.GetTileRect(invalidTile);
+        ::ULIS::FEvent eventBlend;
+        ctx.Blend(
+            *originalBlock
+            , *block
+            , ::ULIS::FRectI::Auto
+            , rect.Position()
+            , ::ULIS::Blend_Back
+            , ::ULIS::Alpha_Top
+            , 1.f
+            , ::ULIS::FSchedulePolicy::AsyncCacheEfficient
+            , iWaitList.Num()
+            , iWaitList.GetData()
+            , &eventBlend
+        );
+        events.Add(eventBlend);
+    }
+
+    return events;
+}
 
 #undef LOCTEXT_NAMESPACE

@@ -25,12 +25,6 @@ public:
      * @brief Delegate called when something changed the result of RenderImage()
      * 
      */
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOnIsAlphaLockedChanged, UOdysseyTextureLayerImageRaster*)
-
-    /**
-     * @brief Delegate called when something changed the result of RenderImage()
-     * 
-     */
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnBlendModeChanged, UOdysseyTextureLayerImageRaster*)
 
     /**
@@ -40,7 +34,6 @@ public:
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnOpacityChanged, UOdysseyTextureLayerImageRaster*)
 
 public:
-    static FOnIsAlphaLockedChanged& OnIsAlphaLockedChanged();
     static FOnBlendModeChanged& OnBlendModeChanged();
     static FOnOpacityChanged& OnOpacityChanged();
 
@@ -93,7 +86,6 @@ protected:
     void OnBlockCommited(const TArray<::ULIS::FRectI>& iRects);
     void OnBlockPtrChanged();
 
-    void IsAlphaLockedChanged();
     void OpacityChanged();
     void BlendModeChanged();
     virtual void PropertyChanged(const FName& iPropertyName) override;
@@ -112,6 +104,9 @@ public:
      * @param Ar
      */
     virtual void Serialize(FArchive& Ar) override;
+
+private:
+    TArray<::ULIS::FEvent> RasterBlockPostProcess(const TMap<FIntPoint, TSharedPtr<::ULIS::FBlock>>& iOriginalBlocks, const FULISInvalidTileMap& iInvalidMap, const TArray<::ULIS::FEvent>& iWaitList);
 
 private:
     TSharedPtr<FOdysseyRasterBlock> RasterBlock;

@@ -39,6 +39,14 @@ public:
 
     //Constructor
     UOdysseyPainterEditorVectorPickTool();
+
+    virtual bool IsActivable() const override;
+    virtual void Load() override;
+    virtual void Unload() override;
+
+    virtual bool OnMouseDown( const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
+    virtual void OnMouseDrag( const FOdysseyPoint& iPointInTexture ) override;
+    virtual bool OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
  
     virtual void UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
     virtual void LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
@@ -59,6 +67,8 @@ public:
     virtual bool OnKeyUpVector( FOdysseyVectorEngine* iEngine
                               , FOdysseyVectorScene* iScene
                               , const FKey& iKey ) override;
+
+    virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
     void PropertyChangedVector( FOdysseyVectorEngine* iEngine
                               , FOdysseyVectorScene* iScene
                               , const FName& iPropertyName );

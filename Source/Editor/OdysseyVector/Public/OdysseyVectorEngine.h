@@ -8,6 +8,7 @@
 #include "OdysseyVectorSegment.h"
 #include "OdysseyVectorScene.h"
 #include "HUD/OdysseyVectorHUD.h"
+#include "ULISInvalidTileMap.h"
 
 //#include "OdysseyVectorScene.generated.h"
 
@@ -227,6 +228,13 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
         FOdysseyVectorGroup* GetSelectionSpace();
 
         /**
+         * @brief Returns the invalid Tile map containing invalid rects
+         * 
+         * @return const FULISInvalidTileMap& 
+         */
+        FULISInvalidTileMap& GetInvalidTileMap();
+
+        /**
          * @brief set an image as the main rendering buffer
          * @param iImage a pointer to the image that will be used as the rendering buffer.
          */
@@ -270,4 +278,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
         std::list<FOdysseyVectorHUD*> mHUDList;
         FOdysseyVectorGroup* mSelectionSpace;
         FOdysseyVectorScene* mScene;
+        FULISInvalidTileMap mInvalidTileMap;
 };

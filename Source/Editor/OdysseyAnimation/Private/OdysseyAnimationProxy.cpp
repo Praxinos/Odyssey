@@ -501,8 +501,7 @@ FBlockData::Render(bool iForceRender)
                         clearEvents.Add(eventClearBlock);
                     }
 
-                    renderer->Copy(block, rects, clearEvents);
-                    ctx.Finish();
+                    return renderer->Copy(block, rects, clearEvents);
                 }
             )
         );

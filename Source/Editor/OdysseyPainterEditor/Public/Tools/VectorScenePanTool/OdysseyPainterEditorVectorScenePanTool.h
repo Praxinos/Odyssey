@@ -28,6 +28,14 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorScenePanTool : public 
         //Constructor
         UOdysseyPainterEditorVectorScenePanTool();
 
+        virtual bool IsActivable() const override;
+        virtual void Load() override;
+        virtual void Unload() override;
+
+        virtual bool OnMouseDown( const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
+        virtual void OnMouseDrag( const FOdysseyPoint& iPointInTexture ) override;
+        virtual bool OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
+
         void UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
         void LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
         bool OnMouseDownVector( FOdysseyVectorEngine* iEngine

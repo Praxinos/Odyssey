@@ -7,7 +7,7 @@
 
 class FOdysseyAnimationEditor;
 class UOdysseyAnimationLayerStack;
-class UAnimation;
+class UOdysseyAnimation;
 class UOdysseyAnimationPlayer;
 
 class ODYSSEYANIMATIONEDITOR_API FOdysseyAnimationEditorLayerStackTab :

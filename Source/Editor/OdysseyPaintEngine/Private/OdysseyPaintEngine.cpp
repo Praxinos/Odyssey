@@ -92,8 +92,8 @@ FOdysseyPaintEngine::AdjustBlendParameters(const FOdysseyBlendParameters& iBlend
     }
 
     //Execute PreUpdate delegate to retrieve potentially overriden blendparameters
-    if (mOnPreUpdateDelegate.IsBound())
-        blendParameters = mOnPreUpdateDelegate.Execute(blendParameters);
+    //if (mOnPreUpdateDelegate.IsBound())
+        //blendParameters = mOnPreUpdateDelegate.Execute(blendParameters);
 
     return blendParameters;
 }
@@ -241,11 +241,14 @@ FOdysseyPaintEngine::UpdateEditedBlock(const FOdysseyBlendParameters& iBlendPara
                 TArray<::ULIS::FRectI> invalidRects = iTileMap.InvalidRects();
 
                 //Blend Paint Block over OriginalBlock
+                TArray<::ULIS::FEvent> events;
                 for ( const ::ULIS::FRectI& rect : invalidRects )
                 {
-                    ctx.Blend(*mPaintBlock, *block, rect, rect.Position(), ::ULIS::eBlendMode(iBlendParameters.BlendingMode), ::ULIS::eAlphaMode(iBlendParameters.AlphaMode), iBlendParameters.Opacity / 100.f, ::ULIS::FSchedulePolicy::AsyncCacheEfficient);
+                    ::ULIS::FEvent blendEvent;
+                    ctx.Blend(*mPaintBlock, *block, rect, rect.Position(), ::ULIS::eBlendMode(iBlendParameters.BlendingMode), ::ULIS::eAlphaMode(iBlendParameters.AlphaMode), iBlendParameters.Opacity / 100.f, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &blendEvent);
+                    events.Add(blendEvent);
                 }
-                ctx.Finish();
+                return events;
             }
         )
     );

@@ -111,6 +111,21 @@ UOdysseyPainterEditorDefaultTool::Paste( FOdysseyVectorEngine* iEngine
                   | FOdysseyVectorScene::SIGNAL_OBJECT_TRANSFORMED );
 }
 
+
+bool
+UOdysseyPainterEditorDefaultTool::OnKeyDown( const FKey& iKey )
+{
+    bool ret = false;
+    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
+    if( vectorEngine )
+    {
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+        ret = UOdysseyPainterEditorDefaultTool::OnKeyDownVector( vectorEngine, vectorScene, iKey );
+    }
+
+    return ret;
+}
+
 bool
 UOdysseyPainterEditorDefaultTool::OnKeyDownVector( FOdysseyVectorEngine* iEngine
                                                  , FOdysseyVectorScene* iScene
@@ -130,16 +145,30 @@ UOdysseyPainterEditorDefaultTool::OnKeyDownVector( FOdysseyVectorEngine* iEngine
 
         if( iKey == EKeys::A )
         {
-            GetEditorAs<FOdysseyPainterEditor>()->SelectAll( iEngine, iScene );
+            mToolContext->GetEditor()->SelectAll( iEngine, iScene );
         }
     }
 
     if( iKey == EKeys::Delete )
     {
-        GetEditorAs<FOdysseyPainterEditor>()->DeleteSelection( iEngine, iScene );
+        mToolContext->GetEditor()->DeleteSelection( iEngine, iScene );
     }
 
     return false;
+}
+
+bool
+UOdysseyPainterEditorDefaultTool::OnKeyUp( const FKey& iKey )
+{
+    bool ret = false;
+    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
+    if( vectorEngine )
+    {
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+        ret = UOdysseyPainterEditorDefaultTool::OnKeyUpVector( vectorEngine, vectorScene, iKey );
+    }
+
+    return ret;
 }
 
 bool

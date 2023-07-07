@@ -3,6 +3,7 @@
 
 #include "Tools/PaintBucketTool/OdysseyPainterEditorPaintBucketToolContextMenu.h"
 #include "OdysseyPainterEditor.h"
+#include "OdysseyPainterEditorGUI.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorPaintBucketToolContextMenu"
 
@@ -21,6 +22,7 @@ FOdysseyPainterEditorPaintBucketToolContextMenu::FOdysseyPainterEditorPaintBucke
                                       , LOCTEXT( "OdysseyPainterEditorPaintBucketToolContextMenu", "Context Menu" )
                                       , FSlateIcon( "OdysseyStyle", "PainterEditor.Tools16" ) )
 {
+    
 }
 
 //--------------------------------------------------------------------------------------
@@ -28,35 +30,40 @@ FOdysseyPainterEditorPaintBucketToolContextMenu::FOdysseyPainterEditorPaintBucke
 
 TSharedPtr<SWidget>
 FOdysseyPainterEditorPaintBucketToolContextMenu::CreateWidget()
-{
-    return mMenu.MakeWidget();
+{   
+    /*
+    FOdysseyVectorEngine* vectorEngine = iToolContext->GetVectorEngine();
+    FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+
+    FMenuBuilder menu(true, nullptr);
+    menu.BeginSection("Context");
+    {
+        menu.AddMenuEntry(
+            LOCTEXT("DeleteBucket", "Delete Bucket")
+            , LOCTEXT("DeleteBucket", "Delete Bucket")
+            , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
+            , FUIAction(FExecuteAction::CreateSP(GetEditor()->GetGUI(), &FOdysseyPainterEditor::DeleteBucket, vectorEngine, vectorScene)));
+        menu.AddMenuEntry(
+            LOCTEXT("PropagateBucket", "Propagate Bucket")
+            , LOCTEXT("PropagateBucket", "Propagate Bucket")
+            , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
+            , FUIAction(FExecuteAction::CreateSP(GetEditor()->GetGUI(), &FOdysseyPainterEditor::PropagateBucket, vectorEngine, vectorScene)));
+        menu.AddMenuEntry(
+            LOCTEXT("UnpropagateBucket", "Unpropagate Bucket")
+            , LOCTEXT("UnpropagateBucket", "Unpropagate Bucket")
+            , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
+            , FUIAction(FExecuteAction::CreateSP(GetEditor()->GetGUI(), &FOdysseyPainterEditor::UnpropagateBucket, vectorEngine, vectorScene)));
+    }
+    menu.EndSection();
+    return menu.MakeWidget();
+    */
+
+    return SNullWidget::NullWidget;
 }
 
 void
 FOdysseyPainterEditorPaintBucketToolContextMenu::BindShortcuts(FBaseToolkit* iToolkit)
 {
     FOdysseyEditorContextMenu::BindShortcuts(iToolkit);
-/*
-    const TSharedRef<FUICommandList>& toolkitCommands = iToolkit->GetToolkitCommands();
-    const FOdysseyPainterEditorCommands& painterEditorCommands = FOdysseyPainterEditorCommands::Get();
-
-    #define MAP_ACTION(action, ...) toolkitCommands->MapAction( action, FExecuteAction::CreateSP( this, &FOdysseyPainterEditorPaintBucketToolContextMenu::__VA_ARGS__ ), FCanExecuteAction() );
-
-    #undef MAP_ACTION
-*/
 }
-
-/*
-void
-FOdysseyPainterEditorPaintBucketToolContextMenu::OnToolkitInitialized( FBaseToolkit* iToolkit )
-{
-    FOdysseyEditorContextMenu::OnToolkitInitialized( iToolkit );
-}
-
-void
-FOdysseyPainterEditorPaintBucketToolContextMenu::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
-{
-    FOdysseyEditorContextMenu::ExtendMenu( iOwner, iMenuName );
-}
-*/
 #undef LOCTEXT_NAMESPACE

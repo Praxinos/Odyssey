@@ -20,7 +20,7 @@ public:
     // Delegates
 
     // Any type of painting delegates (stroke, clear, fill, etc...)
-    DECLARE_DELEGATE_RetVal_OneParam(FOdysseyBlendParameters, FOnPreUpdate, const FOdysseyBlendParameters& iBlendParameters);
+    //DECLARE_DELEGATE_RetVal_OneParam(FOdysseyBlendParameters, FOnPreUpdate, const FOdysseyBlendParameters& iBlendParameters);
 
 public:
     // Destructor
@@ -42,7 +42,7 @@ public:
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> PaintBlock();
 
     // Delegates
-    FOnPreUpdate& OnPreUpdateDelegate() { return mOnPreUpdateDelegate; }
+    //FOnPreUpdate& OnPreUpdateDelegate() { return mOnPreUpdateDelegate; }
 
 public:
     // Update Edited block according to PaintBlock content without commiting
@@ -86,7 +86,7 @@ private:
     FOdysseyBlendParameters             mPreviousBlendParameters;
 
     // Delegates
-    FOnPreUpdate                        mOnPreUpdateDelegate;
+    //FOnPreUpdate                        mOnPreUpdateDelegate;
     
     //Internal
     TArray<::ULIS::FRectI>              mInvalidRects;

@@ -21,6 +21,13 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorPaintBucketTool : public UOd
     GENERATED_BODY()
 
 public:
+    //Inactivates the tool
+    virtual bool IsActivable() const override;
+
+    virtual void Load();
+    virtual void Unload();
+
+
     static bool DoubleClicked();
 
     // Destructor
@@ -34,6 +41,15 @@ public:
     //OdysseyPainterEditorTool overrides
     void UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
     void LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+
+    virtual bool OnKeyDown( const FKey& iKey ) override;
+    virtual bool OnKeyUp( const FKey& iKey ) override;
+    virtual bool OnMouseDown( const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
+    virtual void OnMouseHover( const FOdysseyPoint& iPointInTexture ) override;
+    virtual void OnMouseDrag( const FOdysseyPoint& iPointInTexture ) override;
+    virtual bool OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
+    virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
+
     // Raster Mouse Down
     bool OnMouseDownRaster( TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock, const FOdysseyPoint& iPointInTexture, const FKey& iKey );
     // Vector Mouse Down
@@ -63,34 +79,34 @@ public:
 
     virtual void Commit() override;
 
-    private:
-        void SetBucketColor( FOdysseyVectorBucket* iBucket );
+private:
+    void SetBucketColor( FOdysseyVectorBucket* iBucket );
 
-    protected:
-        void OnMouseUpVectorClearBucket( FOdysseyVectorScene* iScene
-                                       , FOdysseyVectorBucket* iBucket );
-        void OnMouseUpVectorCreateBucket( FOdysseyVectorScene* iScene
-                                        , FOdysseyVectorGroupPaint* paintGroup
-                                        , const FOdysseyPoint& iPointInTexture
-                                        , const FKey& iKey );
-        void OnMouseUpVectorRemoveBucket( FOdysseyVectorScene* iScene
-                                        , FOdysseyVectorGroupPaint* paintGroup
+protected:
+    void OnMouseUpVectorClearBucket( FOdysseyVectorScene* iScene
+                                    , FOdysseyVectorBucket* iBucket );
+    void OnMouseUpVectorCreateBucket( FOdysseyVectorScene* iScene
+                                    , FOdysseyVectorGroupPaint* paintGroup
+                                    , const FOdysseyPoint& iPointInTexture
+                                    , const FKey& iKey );
+    void OnMouseUpVectorRemoveBucket( FOdysseyVectorScene* iScene
+                                    , FOdysseyVectorGroupPaint* paintGroup
+                                    , FOdysseyVectorBucket* iBucket
+                                    , const FOdysseyPoint& iPointInTexture
+                                    , const FKey& iKey );
+    void OnMouseUpVectorMovePoint( FOdysseyVectorScene* iScene
+                                    , FOdysseyVectorGroupPaint* paintGroup
+                                    , FOdysseyVectorPoint* iPoint
+                                    , ::ULIS::FVec2D iPointOriginalPosition
+                                    , const FOdysseyPoint& iPointInTexture
+                                    , const FKey& iKey );
+    void OnMouseUpVectorPropagateBucket( FOdysseyVectorScene* iScene
                                         , FOdysseyVectorBucket* iBucket
-                                        , const FOdysseyPoint& iPointInTexture
-                                        , const FKey& iKey );
-        void OnMouseUpVectorMovePoint( FOdysseyVectorScene* iScene
-                                     , FOdysseyVectorGroupPaint* paintGroup
-                                     , FOdysseyVectorPoint* iPoint
-                                     , ::ULIS::FVec2D iPointOriginalPosition
-                                     , const FOdysseyPoint& iPointInTexture
-                                     , const FKey& iKey );
-        void OnMouseUpVectorPropagateBucket( FOdysseyVectorScene* iScene
-                                           , FOdysseyVectorBucket* iBucket
-                                           , bool iPropagate );
-        void OnMouseUpVectorColorBucket( FOdysseyVectorScene* iScene
-                                       , FOdysseyVectorBucket* iBucket );
-        double GetRotationAngle( FOdysseyVectorBucket* iBucket
-                               , const FOdysseyPoint& iPointInTexture );
+                                        , bool iPropagate );
+    void OnMouseUpVectorColorBucket( FOdysseyVectorScene* iScene
+                                    , FOdysseyVectorBucket* iBucket );
+    double GetRotationAngle( FOdysseyVectorBucket* iBucket
+                            , const FOdysseyPoint& iPointInTexture );
 
 public:
     UPROPERTY(EditAnywhere,Category="Odyssey BucketFill Tool")

@@ -17,6 +17,7 @@ public:
                                     , FName iID
                                     , FText iDisplayName
                                     , FSlateIcon iIcon );
+    FOdysseyPainterEditor* GetEditor() const { return mEditor; };
     template<class T> T* GetEditorAs() const { return static_cast<T*>(mEditor); };
 
 private:

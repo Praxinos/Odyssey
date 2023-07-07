@@ -11,7 +11,7 @@ class FOdysseyRasterBlock;
 class ODYSSEYIMAGING_API FOdysseyRasterBlockMutator
 {
 public:
-    DECLARE_DELEGATE_OneParam(FEditDelegate, const FULISInvalidTileMap&)
+    DECLARE_DELEGATE_RetVal_OneParam(TArray<::ULIS::FEvent>, FEditDelegate, const FULISInvalidTileMap&)
 
 public:
     ~FOdysseyRasterBlockMutator();

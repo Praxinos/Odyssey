@@ -7,9 +7,6 @@
 
 #include "OdysseyTextureEditorLayerStackTab.h"
 #include "OdysseyTextureEditorTextureDetailsTab.h"
-#include "Tools/VectorPickTool/OdysseyTextureEditorVectorPickToolVertexContextMenu.h"
-#include "Tools/VectorPickTool/OdysseyTextureEditorVectorPickToolObjectContextMenu.h"
-#include "Tools/PaintBucketTool/OdysseyTextureEditorPaintBucketToolContextMenu.h"
 
 class FOdysseyTextureEditor;
 
@@ -36,9 +33,6 @@ public:
 	virtual FName GetLayoutName() override;
     TSharedPtr<FOdysseyTextureEditorLayerStackTab>& GetLayerStackTab();
 	TSharedPtr<FOdysseyTextureEditorTextureDetailsTab>& GetTextureDetailsTab();
-    TSharedPtr<FOdysseyTextureEditorVectorPickToolVertexContextMenu>& GetVectorPickToolVertexContextMenu();
-	TSharedPtr<FOdysseyTextureEditorVectorPickToolObjectContextMenu>& GetVectorPickToolObjectContextMenu();
-	TSharedPtr<FOdysseyTextureEditorPaintBucketToolContextMenu>& GetPaintBucketToolContextMenu();
 
 protected:
 	virtual TSharedRef<FTabManager::FSplitter>	CreateRightSection() override;
@@ -54,9 +48,6 @@ public:
     virtual void DeleteSelection();
     virtual void FlipHorizontal();
     virtual void FlipVertical();
-    virtual void DeleteBucket();
-    virtual void PropagateBucket();
-    virtual void UnpropagateBucket();
     virtual void StitchVertices();
  
 public:
@@ -72,7 +63,4 @@ private:
     //Tabs
     TSharedPtr<FOdysseyTextureEditorLayerStackTab>                   mLayerStackTab;
 	TSharedPtr<FOdysseyTextureEditorTextureDetailsTab>               mTextureDetailsTab;
-    TSharedPtr<FOdysseyTextureEditorVectorPickToolVertexContextMenu> mVectorPickToolVertexContextMenu;
-	TSharedPtr<FOdysseyTextureEditorVectorPickToolObjectContextMenu> mVectorPickToolObjectContextMenu;
-	TSharedPtr<FOdysseyTextureEditorPaintBucketToolContextMenu>      mPaintBucketToolContextMenu;
 };

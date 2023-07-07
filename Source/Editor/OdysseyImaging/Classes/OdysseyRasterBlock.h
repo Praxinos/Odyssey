@@ -55,7 +55,17 @@ public:
      * @brief Delegate called when the block pixels content changed
      */
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnBlockCommited, const TArray<::ULIS::FRectI>&)
-    
+
+    /**
+     * @brief Delegate called to apply a post process phase whenever a change is made to pixels
+     * 
+     * 1st Argument : OriginalBlocks, contains all the original pixels (pixels values before the edit being made) for each tilemap position.
+     * 2nd Argument : InvalidTileMap, contains the tiles on which to apply the post process
+     * 3rd Argument : WaitList, contains ULIS Events on which to wait before applying any post process
+     */
+    typedef TMap<FIntPoint, TSharedPtr<::ULIS::FBlock>> tPostProcessOriginalBlocks;
+    DECLARE_DELEGATE_RetVal_ThreeParams(TArray<::ULIS::FEvent>, FPostProcess, const tPostProcessOriginalBlocks&, const FULISInvalidTileMap&, const TArray<::ULIS::FEvent>&)
+
     /**
      * @brief Delegate called when the edited block pixels content changed
      */
@@ -191,6 +201,11 @@ public:
     //Called when the block tiles content changed
     FOnBlockChanged& OnBlockCommited();
 
+    /**
+     * @brief The post process to call after each block mutation
+     */
+    FPostProcess& PostProcess();
+
     //Called when the block tiles content changed
     //FOnUndoableBlockChanged& OnUndoableBlockChanged();
 
@@ -257,6 +272,8 @@ private:
 
     //Called when the block tiles content is Commited
     FOnBlockCommited mOnBlockCommited;
+
+    FPostProcess mPostProcess;
 
     //Called when the undoable block pixels changed by an internal action (like undo)
     //FOnUndoableBlockChanged mOnUndoableBlockChanged;
