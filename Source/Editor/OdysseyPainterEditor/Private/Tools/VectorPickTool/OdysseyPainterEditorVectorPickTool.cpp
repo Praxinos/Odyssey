@@ -26,6 +26,34 @@ UOdysseyPainterEditorVectorPickTool::UOdysseyPainterEditorVectorPickTool()
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
 void
+UOdysseyPainterEditorVectorPickTool::Load()
+{
+    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
+    if( vectorEngine )
+    {
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+        UOdysseyPainterEditorVectorPickTool::LoadVector( vectorEngine, vectorScene );
+    }
+}
+
+void
+UOdysseyPainterEditorVectorPickTool::Unload()
+{
+    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
+    if( vectorEngine )
+    {
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+        UOdysseyPainterEditorVectorPickTool::UnloadVector( vectorEngine, vectorScene );
+    }
+}
+
+bool
+UOdysseyPainterEditorVectorPickTool::IsActivable() const
+{
+    return !!mToolContext->GetVectorEngine();
+}
+
+void
 UOdysseyPainterEditorVectorPickTool::UnloadVector( FOdysseyVectorEngine* iEngine
                                                  , FOdysseyVectorScene* iScene )
 {
@@ -71,6 +99,19 @@ UOdysseyPainterEditorVectorPickTool::OnKeyUpVector( FOdysseyVectorEngine* iEngin
 }
 
 bool
+UOdysseyPainterEditorVectorPickTool::OnMouseDown( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
+{
+    bool ret = false;
+    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
+    if( vectorEngine )
+    {
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+        ret = UOdysseyPainterEditorVectorPickTool::OnMouseDownVector( vectorEngine, vectorScene, iPointInTexture,iKey  );
+    }
+    return ret;
+}
+
+bool
 UOdysseyPainterEditorVectorPickTool::OnMouseDownVector( FOdysseyVectorEngine* iEngine
                                                       , FOdysseyVectorScene* iScene
                                                       , const FOdysseyPoint& iPointInTexture
@@ -80,9 +121,9 @@ UOdysseyPainterEditorVectorPickTool::OnMouseDownVector( FOdysseyVectorEngine* iE
     if( iKey == EKeys::LeftMouseButton )
     {
         FSlateApplication::Get().PushMenu(
-        GetEditorAs<FOdysseyPainterEditor>()->GetGUI()->GetViewportTab().Get()->GetViewport().Get()->GetViewportWidget().ToSharedRef(),
+        GetEditor()->GetGUI()->GetViewportTab().Get()->GetViewport().Get()->GetViewportWidget().ToSharedRef(),
         FWidgetPath(),
-        GetEditorAs<FOdysseyPainterEditor>()->GetGUI()->GetVectorContextMenu()->Widget().ToSharedRef(),
+        GetEditor()->GetGUI()->GetVectorContextMenu()->Widget().ToSharedRef(),
         FVector2D(iPointInTexture.x, iPointInTexture.y),
         FPopupTransitionEffect(FPopupTransitionEffect::ContextMenu)
         );
@@ -101,6 +142,17 @@ UOdysseyPainterEditorVectorPickTool::OnMouseDownVector( FOdysseyVectorEngine* iE
     }
 
     return true;
+}
+
+void
+UOdysseyPainterEditorVectorPickTool::OnMouseDrag( const FOdysseyPoint& iPointInTexture )
+{
+    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
+    if( vectorEngine )
+    {
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+        UOdysseyPainterEditorVectorPickTool::OnMouseDragVector( vectorEngine, vectorScene, iPointInTexture );
+    }
 }
 
 ::ULIS::FRectI
@@ -184,6 +236,44 @@ UOdysseyPainterEditorVectorPickTool::GenerateMask( FOdysseyVectorEngine* iEngine
     }
 
     return roi;
+}
+
+bool
+UOdysseyPainterEditorVectorPickTool::OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
+{   
+    bool ret = false;
+    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
+    if( vectorEngine )
+    {
+
+    /*if(FSlateApplication::Get().GetModifierKeys().IsControlDown())
+    {*/
+        if( iKey == EKeys::RightMouseButton )
+        {
+            /* TODO: Gary
+            TSharedPtr<SWidget> objectMenu = textureEditor->GetGUI()->GetVectorPickToolObjectContextMenu()->Widget();
+            TSharedPtr<SWidget> vertexMenu = textureEditor->GetGUI()->GetVectorPickToolVertexContextMenu()->Widget();
+            TSharedPtr<SWidget> contextMenu = ( EditionMode == EOdysseyVectorEditionMode::Object ) ? objectMenu : vertexMenu;
+
+
+            FSlateApplication::Get().PushMenu(
+            //textureEditor->GetGUI()->GetViewportTab().Get()->GetViewport().Get()->GetViewportWidget().ToSharedRef(),
+            textureEditor->GetGUI()->GetViewportTab().Get()->Widget().ToSharedRef(),
+            FWidgetPath(),
+            contextMenu.ToSharedRef(),
+            FSlateApplication::Get().GetCursorPos(),
+            FPopupTransitionEffect(FPopupTransitionEffect::ContextMenu)
+            ); */
+        }
+    /*}*/
+        else
+        {
+            FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+            ret = UOdysseyPainterEditorVectorPickTool::OnMouseUpVector( vectorEngine, vectorScene, iPointInTexture, iKey );
+        }
+    }
+
+    return ret;
 }
 
 void
@@ -364,6 +454,20 @@ void
 UOdysseyPainterEditorVectorPickTool::Commit()
 {
 
+}
+
+void
+UOdysseyPainterEditorVectorPickTool::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent )
+{
+    if (PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive)
+        return;
+    
+    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
+    if( vectorEngine )
+    {
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+        PropertyChangedVector( vectorEngine, vectorScene, PropertyChangedEvent.GetPropertyName() );
+    }
 }
 
 void

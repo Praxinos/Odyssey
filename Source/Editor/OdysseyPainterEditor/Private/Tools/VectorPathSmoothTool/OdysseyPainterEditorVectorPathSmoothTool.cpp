@@ -24,6 +24,34 @@ UOdysseyPainterEditorVectorPathSmoothTool::UOdysseyPainterEditorVectorPathSmooth
 }
 
 void
+UOdysseyPainterEditorVectorPathSmoothTool::Load()
+{
+    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
+    if( vectorEngine )
+    {
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+        UOdysseyPainterEditorVectorPathSmoothTool::LoadVector( vectorEngine, vectorScene );
+    }
+}
+
+void
+UOdysseyPainterEditorVectorPathSmoothTool::Unload()
+{
+    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
+    if( vectorEngine )
+    {
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+        UOdysseyPainterEditorVectorPathSmoothTool::UnloadVector( vectorEngine, vectorScene );
+    }
+}
+
+bool
+UOdysseyPainterEditorVectorPathSmoothTool::IsActivable() const
+{
+    return !!mToolContext->GetVectorEngine();
+}
+
+void
 UOdysseyPainterEditorVectorPathSmoothTool::UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
     iEngine->RemoveHUD( mPathSmoothHUD );
@@ -38,6 +66,19 @@ UOdysseyPainterEditorVectorPathSmoothTool::LoadVector( FOdysseyVectorEngine* iEn
     iEngine->AddHUD( mPathSmoothHUD );
 
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+}
+
+bool
+UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDown( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
+{
+    bool ret = false;
+    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
+    if( vectorEngine )
+    {
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+        ret = UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDownVector( vectorEngine, vectorScene, iPointInTexture,iKey  );
+    }
+    return ret;
 }
 
 bool
@@ -60,6 +101,17 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDownVector( FOdysseyVectorEngi
 }
 
 void
+UOdysseyPainterEditorVectorPathSmoothTool::OnMouseHover( const FOdysseyPoint& iPointInTexture )
+{
+    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
+    if( vectorEngine )
+    {
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+        UOdysseyPainterEditorVectorPathSmoothTool::OnMouseHoverVector( vectorEngine, vectorScene, iPointInTexture );
+    }
+}
+
+void
 UOdysseyPainterEditorVectorPathSmoothTool::OnMouseHoverVector( FOdysseyVectorEngine* iEngine
                                                              , FOdysseyVectorScene* iScene
                                                              , const FOdysseyPoint& iPointInTexture )
@@ -76,11 +128,36 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseHoverVector( FOdysseyVectorEng
 }
 
 void
+UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDrag( const FOdysseyPoint& iPointInTexture )
+{
+    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
+    if( vectorEngine )
+    {
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+        UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDragVector( vectorEngine, vectorScene, iPointInTexture );
+    }
+}
+
+void
 UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDragVector( FOdysseyVectorEngine* iEngine
                                                             , FOdysseyVectorScene* iScene
                                                             , const FOdysseyPoint& iPointInTexture )
 {
     mPathSmoothHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
+}
+
+bool
+UOdysseyPainterEditorVectorPathSmoothTool::OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
+{
+    bool ret = false;
+    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
+    if( vectorEngine )
+    {
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+        ret = UOdysseyPainterEditorVectorPathSmoothTool::OnMouseUpVector( vectorEngine, vectorScene, iPointInTexture, iKey );
+    }
+
+    return ret;
 }
 
 bool
@@ -132,6 +209,22 @@ void
 UOdysseyPainterEditorVectorPathSmoothTool::Commit()
 {
 
+}
+
+void
+UOdysseyPainterEditorVectorPathSmoothTool::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent )
+{
+    if (PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive)
+        return;
+    
+    PropertyChanged( PropertyChangedEvent.GetPropertyName() );
+    
+    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
+    if( vectorEngine )
+    {
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+        vectorScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    }
 }
 
 void

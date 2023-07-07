@@ -8,6 +8,7 @@ FOdysseyVectorEngine::~FOdysseyVectorEngine()
 FOdysseyVectorEngine::FOdysseyVectorEngine( FOdysseyVectorScene* iScene, double iWidth, double iHeight )
     : mDrawingFlags( 0 )
     , mSelectionSpace( nullptr )
+    , mInvalidTileMap(64, iWidth, iHeight)
 {
     BLContextCreateInfo createInfo {};
 
@@ -37,6 +38,12 @@ FOdysseyVectorGroup*
 FOdysseyVectorEngine::GetSelectionSpace()
 {
     return mSelectionSpace;
+}
+
+FULISInvalidTileMap&
+FOdysseyVectorEngine::GetInvalidTileMap()
+{
+    return mInvalidTileMap;
 }
 
 BLContext*

@@ -93,6 +93,14 @@ FOdysseyAnimationCellImageRaster::GetType() const
 }
 
 void
+FOdysseyAnimationCellImageRaster::PostLoad()
+{
+    FOdysseyAnimationCell::PostLoad();
+    mRasterBlock->PostProcess().Unbind();
+    mRasterBlock->PostProcess().BindRaw(this, &FOdysseyAnimationCellImageRaster::RasterBlockPostProcess);
+}
+
+void
 FOdysseyAnimationCellImageRaster::PostDuplicate()
 {
     FOdysseyAnimationCell::PostDuplicate();

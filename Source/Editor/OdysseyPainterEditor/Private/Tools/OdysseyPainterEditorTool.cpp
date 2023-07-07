@@ -16,23 +16,59 @@ UOdysseyPainterEditorTool::UOdysseyPainterEditorTool()
 {
 }
 
-void
+/* void
 UOdysseyPainterEditorTool::SetEditor(FOdysseyPainterEditor* iEditor)
 {
     mEditor = iEditor;
+} */
+
+void
+UOdysseyPainterEditorTool::SetToolContext(TSharedPtr<FOdysseyPainterEditorToolContext> iToolContext)
+{
+    mToolContext = iToolContext;
+}
+
+void
+UOdysseyPainterEditorTool::OnToolContextChanged()
+{
+	//If not activable => Inactivate
+	if (!IsActivable())
+	{
+		Inactivate(); //close the tool
+		return;
+	}
+
+	//Reload the tool to edit the new layer
+	Unload();
+	Load();
 }
 
 void
 UOdysseyPainterEditorTool::Activate()
-{
-
+{    
+    mToolContext->OnChanged().AddUObject(this, &UOdysseyPainterEditorTool::OnToolContextChanged );
+    Load();
 }
 
 void
 UOdysseyPainterEditorTool::Inactivate()
 {
+	mToolContext->OnChanged().RemoveAll(this);
     Flush(); //Finish everything
     Commit(); //Commit the jobs that has been done
+    Unload();
+}
+
+void
+UOdysseyPainterEditorTool::Load()
+{
+
+}
+
+void
+UOdysseyPainterEditorTool::Unload()
+{
+
 }
 
 bool

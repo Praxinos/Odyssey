@@ -27,27 +27,7 @@ FOdysseyTextureEditor::~FOdysseyTextureEditor()
 FOdysseyTextureEditor::FOdysseyTextureEditor() :
 	FOdysseyPainterEditor(),
 	mTexture(nullptr),
-	mGUI(nullptr),
-	mRasterDrawingTool(nullptr),
-	mVectorPrimitiveDrawingTool(nullptr),
-	mVectorPathDrawingTool(nullptr),
-	mVectorPathEditTool(nullptr),
-	mVectorPathCutTool(nullptr),
-	mVectorPickTool(nullptr),
-	mVectorObjectMoveTool(nullptr),
-	mVectorObjectRotateTool(nullptr),
-	mVectorObjectScaleTool(nullptr),
-	mVectorSceneScaleTool(nullptr),
-	mVectorScenePanTool(nullptr),
-	mVectorEraserTool(nullptr),
-	mVectorPathPushTool(nullptr),
-	mVectorPathWidthTool(nullptr),
-	mVectorPathSmoothTool(nullptr),
-	mVectorPathStitchTool(nullptr),
-	mPaintBucketTool(nullptr),
-	mColorPickerTool(nullptr),
-	mVectorGridTool(nullptr),
-	mVectorTransformTool(nullptr)
+	mGUI(nullptr)
 {
 	UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw(this, &FOdysseyTextureEditor::OnCurrentLayerChanged);
 }
@@ -70,70 +50,30 @@ FOdysseyTextureEditor::InitData(UObject* iEditedObject)
 void
 FOdysseyTextureEditor::InitTools()
 {
-	mRasterDrawingTool = NewObject<UOdysseyTextureEditorRasterDrawingTool>();
-	mVectorPrimitiveDrawingTool = NewObject<UOdysseyTextureEditorVectorPrimitiveDrawingTool>();
-	mVectorPathDrawingTool = NewObject<UOdysseyTextureEditorVectorPathDrawingTool>();
-	mVectorPathEditTool = NewObject<UOdysseyTextureEditorVectorPathEditTool>();
-	mVectorPathCutTool = NewObject<UOdysseyTextureEditorVectorPathCutTool>();
-	mVectorPickTool = NewObject<UOdysseyTextureEditorVectorPickTool>();
-	mVectorObjectMoveTool = NewObject<UOdysseyTextureEditorVectorObjectMoveTool>();
-	mVectorObjectRotateTool = NewObject<UOdysseyTextureEditorVectorObjectRotateTool>();
-	mVectorObjectScaleTool = NewObject<UOdysseyTextureEditorVectorObjectScaleTool>();
-    mVectorSceneScaleTool = NewObject<UOdysseyTextureEditorVectorSceneScaleTool>();
-    mVectorScenePanTool = NewObject<UOdysseyTextureEditorVectorScenePanTool>();
-    mVectorEraserTool = NewObject<UOdysseyTextureEditorVectorEraserTool>();
-    mVectorPathPushTool = NewObject<UOdysseyTextureEditorVectorPathPushTool>();
-    mVectorPathWidthTool = NewObject<UOdysseyTextureEditorVectorPathWidthTool>();
-    mVectorPathSmoothTool = NewObject<UOdysseyTextureEditorVectorPathSmoothTool>();
-    mVectorPathStitchTool = NewObject<UOdysseyTextureEditorVectorPathStitchTool>();
-	mPaintBucketTool = NewObject<UOdysseyTextureEditorPaintBucketTool>();
-	mColorPickerTool = NewObject<UOdysseyTextureEditorColorPickerTool>();
-	mVectorGridTool = NewObject<UOdysseyTextureEditorVectorGridTool>();
-	mVectorTransformTool = NewObject<UOdysseyTextureEditorVectorTransformTool>();
+	FOdysseyPainterEditor::InitTools();
+	UpdateToolContext();
+	
+	/* mToolContext->GetRasterBlockAttribute().BindRaw(this, &FOdysseyTextureEditor::GetCurrentRasterBlock);
+	mToolContext->GetIsRasterBlockReadOnlyAttribute().BindRaw(this, &FOdysseyTextureEditor::IsRasterBlockReadOnly);
+    mToolContext->GetVectorEngineAttribute().BindRaw(this, &FOdysseyTextureEditor::GetCurrentVectorEngine); */
+}
 
-	mRasterDrawingTool->SetEditor(this);
-    mVectorPrimitiveDrawingTool->SetEditor(this);
-    mVectorPathDrawingTool->SetEditor(this);
-    mVectorPathEditTool->SetEditor(this);
-    mVectorPathCutTool->SetEditor(this);
-    mVectorPickTool->SetEditor(this);
-    mVectorObjectMoveTool->SetEditor(this);
-    mVectorObjectRotateTool->SetEditor(this);
-    mVectorObjectScaleTool->SetEditor(this);
-    mVectorSceneScaleTool->SetEditor(this);
-    mVectorScenePanTool->SetEditor(this);
-    mVectorEraserTool->SetEditor(this);
-    mVectorPathPushTool->SetEditor(this);
-    mVectorPathWidthTool->SetEditor(this);
-    mVectorPathSmoothTool->SetEditor(this);
-    mVectorPathStitchTool->SetEditor(this);
-	mPaintBucketTool->SetEditor(this);
-	mColorPickerTool->SetEditor(this);
-	mVectorGridTool->SetEditor(this);
-	mVectorTransformTool->SetEditor(this);
-	mRasterDrawingTool->SetBrushContexts(mBrushContexts);
+void
+FOdysseyTextureEditor::Tick(float iDeltaTime)
+{
+	UpdateToolContext();
+	FOdysseyPainterEditor::Tick(iDeltaTime);
+}
 
-	mTools.Add(mRasterDrawingTool);
-    mTools.Add(mVectorPrimitiveDrawingTool);
-    mTools.Add(mVectorPathDrawingTool);
-    mTools.Add(mVectorPathEditTool);
-    mTools.Add(mVectorPathCutTool);
-    mTools.Add(mVectorPickTool);
-    mTools.Add(mVectorObjectMoveTool);
-    mTools.Add(mVectorObjectRotateTool);
-    mTools.Add(mVectorObjectScaleTool);
-    mTools.Add(mVectorSceneScaleTool);
-    mTools.Add(mVectorScenePanTool);
-    mTools.Add(mVectorEraserTool);
-    mTools.Add(mVectorPathPushTool);
-    mTools.Add(mVectorPathWidthTool);
-    mTools.Add(mVectorPathSmoothTool);
-    mTools.Add(mVectorPathStitchTool);
-	mTools.Add(mPaintBucketTool);
-	mTools.Add(mColorPickerTool);
-	mTools.Add(mVectorGridTool);
-	mTools.Add(mVectorTransformTool);
-	//mTextureRasterDrawingTool->OnApplyOverridesDelegate().AddRaw(this, &FOdysseyPainterEditor::OnApplyOverrides);
+void
+FOdysseyTextureEditor::UpdateToolContext()
+{
+	FOdysseyPainterEditorToolContext::FParams toolContextParams;
+	toolContextParams.mRasterBlock = GetCurrentRasterBlock();
+	toolContextParams.mIsRasterBlockReadOnly = IsRasterBlockReadOnly();
+	toolContextParams.mVectorEngine = GetCurrentVectorEngine();
+	
+	mToolContext->Set(toolContextParams);
 }
 
 void
@@ -146,9 +86,6 @@ FOdysseyTextureEditor::BindShortcuts(FBaseToolkit* iToolkit)
 	mVectorPathEditTool->BindShortcuts(iToolkit);
 	mVectorPathCutTool->BindShortcuts(iToolkit);
 	mVectorPickTool->BindShortcuts(iToolkit);
-	mVectorObjectMoveTool->BindShortcuts(iToolkit);
-	mVectorObjectRotateTool->BindShortcuts(iToolkit);
-	mVectorObjectScaleTool->BindShortcuts(iToolkit);
 	mVectorSceneScaleTool->BindShortcuts(iToolkit);
 	mVectorScenePanTool->BindShortcuts(iToolkit);
 	mVectorEraserTool->BindShortcuts(iToolkit);
@@ -172,9 +109,6 @@ FOdysseyTextureEditor::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
 	mVectorPathEditTool->ExtendMenu(iOwner, iMenuName);
 	mVectorPathCutTool->ExtendMenu(iOwner, iMenuName);
 	mVectorPickTool->ExtendMenu(iOwner, iMenuName);
-	mVectorObjectMoveTool->ExtendMenu(iOwner, iMenuName);
-	mVectorObjectRotateTool->ExtendMenu(iOwner, iMenuName);
-	mVectorObjectScaleTool->ExtendMenu(iOwner, iMenuName);
 	mVectorSceneScaleTool->ExtendMenu(iOwner, iMenuName);
 	mVectorScenePanTool->ExtendMenu(iOwner, iMenuName);
 	mVectorEraserTool->ExtendMenu(iOwner, iMenuName);
@@ -285,124 +219,45 @@ FOdysseyTextureEditor::TextureUserData() const
     return userData;
 }
 
-UOdysseyTextureEditorRasterDrawingTool*
-FOdysseyTextureEditor::GetRasterDrawingTool() const
+TSharedPtr<FOdysseyRasterBlock>
+FOdysseyTextureEditor::GetCurrentRasterBlock() const
 {
-	return mRasterDrawingTool;
+	if ( !LayerStack() )
+		return nullptr;
+
+    UOdysseyTextureLayerImageRaster* currentLayerRaster = Cast<UOdysseyTextureLayerImageRaster>(LayerStack()->CurrentLayer.Get());
+
+	if (!currentLayerRaster)
+		return nullptr;
+	
+	return currentLayerRaster->GetRasterBlock();
 }
 
-UOdysseyTextureEditorVectorPrimitiveDrawingTool*
-FOdysseyTextureEditor::GetVectorPrimitiveDrawingTool() const
+bool
+FOdysseyTextureEditor::IsRasterBlockReadOnly() const
 {
-	return mVectorPrimitiveDrawingTool;
+	UOdysseyTextureLayerImageRaster* currentLayerRaster = Cast<UOdysseyTextureLayerImageRaster>(LayerStack()->CurrentLayer.Get());
+	if (!currentLayerRaster)
+		return false;
+
+	bool isActive = UOdysseyLayerFunctionLibrary::IsLayerActivatedInStack(currentLayerRaster);
+	bool isLocked = UOdysseyLayerFunctionLibrary::IsLayerLockedInStack(currentLayerRaster);
+
+	return !isActive || isLocked;
 }
 
-UOdysseyTextureEditorVectorPathDrawingTool*
-FOdysseyTextureEditor::GetVectorPathDrawingTool() const
+FOdysseyVectorEngine*
+FOdysseyTextureEditor::GetCurrentVectorEngine() const
 {
-	return mVectorPathDrawingTool;
-}
+	if ( !LayerStack() )
+		return nullptr;
 
-UOdysseyTextureEditorVectorPathEditTool*
-FOdysseyTextureEditor::GetVectorPathEditTool() const
-{
-    return mVectorPathEditTool;
-}
+    UOdysseyTextureLayerImageVector* currentLayerVector = Cast<UOdysseyTextureLayerImageVector>(LayerStack()->CurrentLayer.Get());
 
-UOdysseyTextureEditorVectorPathCutTool*
-FOdysseyTextureEditor::GetVectorPathCutTool() const
-{
-    return mVectorPathCutTool;
-}
-
-UOdysseyTextureEditorVectorPickTool*
-FOdysseyTextureEditor::GetVectorPickTool() const
-{
-    return mVectorPickTool;
-}
-
-UOdysseyTextureEditorVectorObjectMoveTool*
-FOdysseyTextureEditor::GetVectorObjectMoveTool() const
-{
-    return mVectorObjectMoveTool;
-}
-
-UOdysseyTextureEditorVectorObjectRotateTool*
-FOdysseyTextureEditor::GetVectorObjectRotateTool() const
-{
-    return mVectorObjectRotateTool;
-}
-
-UOdysseyTextureEditorVectorObjectScaleTool*
-FOdysseyTextureEditor::GetVectorObjectScaleTool() const
-{
-    return mVectorObjectScaleTool;
-}
-
-UOdysseyTextureEditorVectorSceneScaleTool*
-FOdysseyTextureEditor::GetVectorSceneScaleTool() const
-{
-    return mVectorSceneScaleTool;
-}
-
-UOdysseyTextureEditorVectorScenePanTool*
-FOdysseyTextureEditor::GetVectorScenePanTool() const
-{
-    return mVectorScenePanTool;
-}
-
-UOdysseyTextureEditorVectorEraserTool*
-FOdysseyTextureEditor::GetVectorEraserTool() const
-{
-    return mVectorEraserTool;
-}
-
-UOdysseyTextureEditorVectorPathSmoothTool*
-FOdysseyTextureEditor::GetVectorPathSmoothTool() const
-{
-    return mVectorPathSmoothTool;
-}
-
-UOdysseyTextureEditorVectorPathPushTool*
-FOdysseyTextureEditor::GetVectorPathPushTool() const
-{
-    return mVectorPathPushTool;
-}
-
-UOdysseyTextureEditorVectorPathWidthTool*
-FOdysseyTextureEditor::GetVectorPathWidthTool() const
-{
-    return mVectorPathWidthTool;
-}
-
-UOdysseyTextureEditorVectorPathStitchTool*
-FOdysseyTextureEditor::GetVectorPathStitchTool() const
-{
-    return mVectorPathStitchTool;
-}
-
-UOdysseyTextureEditorPaintBucketTool*
-FOdysseyTextureEditor::GetPaintBucketTool() const
-{
-	return mPaintBucketTool;
-}
-
-UOdysseyTextureEditorColorPickerTool*
-FOdysseyTextureEditor::GetColorPickerTool() const
-{
-    return mColorPickerTool;
-}
-
-UOdysseyTextureEditorVectorGridTool*
-FOdysseyTextureEditor::GetVectorGridTool() const
-{
-    return mVectorGridTool;
-}
-
-UOdysseyTextureEditorVectorTransformTool*
-FOdysseyTextureEditor::GetVectorTransformTool() const
-{
-    return mVectorTransformTool;
+	if (!currentLayerVector)
+		return nullptr;
+	
+	return currentLayerVector->GetEngine();
 }
 
 //--------------------------------------------------------------------------------------
@@ -438,6 +293,11 @@ FOdysseyTextureEditor::RegisterTabSpawners(const TSharedRef<class FTabManager>& 
 void
 FOdysseyTextureEditor::OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStack)
 {
+    // PATCH : We have to redraw all layers in order to draw all layers without the HUD of the tool.
+    // This will be removed when we'll have a dedicated HUD layer.
+    UOdysseyTextureLayer* layerRoot = static_cast<UOdysseyTextureLayer*>(iLayerStack->LayerRoot);
+	layerRoot->RenderImageChanged(false);
+
 	//TODO: Maybe this should be done differently later, but we don't have time for that now
 	if (iLayerStack == LayerStack())
 		SelectDefaultTool(); //Refresh the current tool when we change layer
@@ -512,9 +372,6 @@ FOdysseyTextureEditor::AddReferencedObjects(FReferenceCollector& Collector)
 	Collector.AddReferencedObject(mVectorPathEditTool);
 	Collector.AddReferencedObject(mVectorPathCutTool);
 	Collector.AddReferencedObject(mVectorPickTool);
-	Collector.AddReferencedObject(mVectorObjectMoveTool);
-	Collector.AddReferencedObject(mVectorObjectRotateTool);
-	Collector.AddReferencedObject(mVectorObjectScaleTool);
     Collector.AddReferencedObject(mVectorSceneScaleTool);
     Collector.AddReferencedObject(mVectorScenePanTool);
     Collector.AddReferencedObject(mVectorEraserTool);

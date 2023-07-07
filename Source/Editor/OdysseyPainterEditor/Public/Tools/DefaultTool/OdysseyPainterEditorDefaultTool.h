@@ -28,6 +28,9 @@ protected:
 
 
 public:
+    virtual bool OnKeyDown( const FKey& iKey ) override;
+    virtual bool OnKeyUp( const FKey& iKey ) override;
+    
     static bool DoubleClicked();
     virtual bool OnKeyDownVector( FOdysseyVectorEngine* iEngine
                                 , FOdysseyVectorScene* iScene

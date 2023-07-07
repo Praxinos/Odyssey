@@ -28,6 +28,34 @@ UOdysseyPainterEditorVectorPathEditTool::UOdysseyPainterEditorVectorPathEditTool
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
 void
+UOdysseyPainterEditorVectorPathEditTool::Load()
+{
+    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
+    if( vectorEngine )
+    {
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+        UOdysseyPainterEditorVectorPathEditTool::LoadVector( vectorEngine, vectorScene );
+    }
+}
+
+void
+UOdysseyPainterEditorVectorPathEditTool::Unload()
+{
+    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
+    if( vectorEngine )
+    {
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+        UOdysseyPainterEditorVectorPathEditTool::UnloadVector( vectorEngine, vectorScene );
+    }
+}
+
+bool
+UOdysseyPainterEditorVectorPathEditTool::IsActivable() const
+{
+    return !!mToolContext->GetVectorEngine();
+}
+
+void
 UOdysseyPainterEditorVectorPathEditTool::UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
     iEngine->RemoveHUD(&mCubicPathHUD);
@@ -42,7 +70,7 @@ UOdysseyPainterEditorVectorPathEditTool::LoadVector( FOdysseyVectorEngine* iEngi
     TSharedPtr< SViewport > viewportWidget; // to force keyboard focus on mouse hover.
                                             // Prevents the user from having to click at least once in the viewport.
     // we need the focus on the viewport for keyboard 
-    viewportWidget = GetEditorAs<FOdysseyPainterEditor>()->GetGUI()->GetViewportTab()->GetViewport()->GetViewportWidget();
+    viewportWidget = mToolContext->GetEditor()->GetGUI()->GetViewportTab()->GetViewport()->GetViewportWidget();
 
     // we need the focus on the viewport for keyboard 
     FSlateApplication::Get().SetKeyboardFocus( viewportWidget );
@@ -424,6 +452,20 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownVector( FOdysseyVectorEngine
     return true;
 }
 
+bool
+UOdysseyPainterEditorVectorPathEditTool::OnMouseDown( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
+{
+    bool ret = false;
+    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
+    if( vectorEngine )
+    {
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+        ret = UOdysseyPainterEditorVectorPathEditTool::OnMouseDownVector( vectorEngine, vectorScene, iPointInTexture,iKey  );
+    }
+    GEditor->EndTransaction();
+    return ret;
+}
+
 void
 UOdysseyPainterEditorVectorPathEditTool::OnMouseHoverVector( FOdysseyVectorEngine* iEngine
                                                            , FOdysseyVectorScene* iScene
@@ -451,6 +493,17 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseHoverVector( FOdysseyVectorEngin
     //DetectPickingMode();
 
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+}
+
+void
+UOdysseyPainterEditorVectorPathEditTool::OnMouseHover( const FOdysseyPoint& iPointInTexture )
+{
+    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
+    if( vectorEngine )
+    {
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+        UOdysseyPainterEditorVectorPathEditTool::OnMouseHoverVector( vectorEngine, vectorScene, iPointInTexture );
+    }
 }
 
 static FOdysseyVectorObject*
@@ -589,6 +642,17 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDragVector( FOdysseyVectorEngine
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
 
+void
+UOdysseyPainterEditorVectorPathEditTool::OnMouseDrag( const FOdysseyPoint& iPointInTexture )
+{
+    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
+    if( vectorEngine )
+    {
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+        UOdysseyPainterEditorVectorPathEditTool::OnMouseDragVector( vectorEngine, vectorScene, iPointInTexture );
+    }
+}
+
 bool
 UOdysseyPainterEditorVectorPathEditTool::OnMouseUpVector( FOdysseyVectorEngine* iEngine
                                                         , FOdysseyVectorScene* iScene
@@ -601,10 +665,40 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseUpVector( FOdysseyVectorEngine* 
     return true;
 }
 
+bool
+UOdysseyPainterEditorVectorPathEditTool::OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
+{
+    bool ret = false;
+    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
+    if( vectorEngine )
+    {
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+        ret = UOdysseyPainterEditorVectorPathEditTool::OnMouseUpVector( vectorEngine, vectorScene, iPointInTexture, iKey );
+    }
+
+    return ret;
+}
+
 void
 UOdysseyPainterEditorVectorPathEditTool::Commit()
 {
 
+}
+
+void
+UOdysseyPainterEditorVectorPathEditTool::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent )
+{
+    if (PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive)
+        return;
+    
+    PropertyChanged( PropertyChangedEvent.GetPropertyName() );
+    
+    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
+    if( vectorEngine )
+    {
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+        vectorScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    }
 }
 
 void

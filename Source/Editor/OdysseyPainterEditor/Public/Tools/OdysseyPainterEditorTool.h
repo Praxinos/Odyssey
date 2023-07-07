@@ -7,6 +7,7 @@
 #include "ToolMenuOwner.h"
 #include "Input/OdysseyPoint.h"
 #include "OdysseyStyleSet.h"
+#include "OdysseyPainterEditorToolContext.h"
 #include "OdysseyPainterEditorTool.generated.h"
 
 UCLASS()
@@ -33,6 +34,9 @@ public:
     //Inactivates the tool
     UFUNCTION(BlueprintCallable, Category="Tools")
     virtual void Inactivate();
+
+    virtual void Load();
+    virtual void Unload();
 
 public:
     //Mouse events
@@ -65,9 +69,13 @@ protected:
     virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent) override;
     virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;
 
-public:
+/*public:
     void SetEditor(class FOdysseyPainterEditor* iEditor);
-    template<class T> T* GetEditorAs() const { return static_cast<T*>(mEditor); };
+    template<class T> T* GetEditorAs() const { return static_cast<T*>(mEditor); }; */
+
+public:
+    void SetToolContext(TSharedPtr<FOdysseyPainterEditorToolContext> iToolContext);
+    virtual void OnToolContextChanged();
 
 private:
     class FOdysseyPainterEditor*              mEditor;
@@ -75,4 +83,6 @@ private:
 public:
     UPROPERTY(EditDefaultsOnly, Category="Tool")
     FSlateBrush Icon;
+
+    TSharedPtr<FOdysseyPainterEditorToolContext> mToolContext;
 };

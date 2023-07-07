@@ -38,6 +38,7 @@ UOdysseyTextureLayerImageRaster::UOdysseyTextureLayerImageRaster()
 {
 	LayerTypeName = LOCTEXT("LayerTypeName", "Raster Image Layer");
     Icon = *FOdysseyStyle::GetBrush( "OdysseyLayerStack.LayerBitmap16");
+    RasterBlock->PostProcess().BindUObject(this, &UOdysseyTextureLayerImageRaster::RasterBlockPostProcess);    
 }
 
 void
@@ -234,9 +235,11 @@ UOdysseyTextureLayerImageRaster::PostLoad()
         RasterBlock->OnBlockChanged().RemoveAll(this);
         RasterBlock->OnBlockCommited().RemoveAll(this);
         RasterBlock->OnBlockPtrChanged().RemoveAll(this);
+        RasterBlock->PostProcess().Unbind();
         RasterBlock->OnBlockChanged().AddUObject(this, &::UOdysseyTextureLayerImageRaster::OnBlockChanged);
         RasterBlock->OnBlockCommited().AddUObject(this, &::UOdysseyTextureLayerImageRaster::OnBlockCommited);
         RasterBlock->OnBlockPtrChanged().AddUObject(this, &::UOdysseyTextureLayerImageRaster::OnBlockPtrChanged);
+        RasterBlock->PostProcess().BindUObject(this, &UOdysseyTextureLayerImageRaster::RasterBlockPostProcess);   
     }
 }
 

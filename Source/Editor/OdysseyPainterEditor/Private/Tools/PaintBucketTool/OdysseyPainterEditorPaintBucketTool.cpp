@@ -38,6 +38,42 @@ UOdysseyPainterEditorPaintBucketTool::UOdysseyPainterEditorPaintBucketTool()
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
+bool
+UOdysseyPainterEditorPaintBucketTool::IsActivable() const
+{
+    return mToolContext->GetRasterBlock() || mToolContext->CanProvideRasterBlockOnDemand() || mToolContext->GetVectorEngine();
+}
+
+void
+UOdysseyPainterEditorPaintBucketTool::Unload()
+{
+    mPaintEngine.RasterBlock(nullptr);
+
+    //TODO: That's wrong
+    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
+    if( vectorEngine )
+    {
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+        UOdysseyPainterEditorPaintBucketTool::UnloadVector( vectorEngine, vectorScene );
+    }
+}
+
+void
+UOdysseyPainterEditorPaintBucketTool::Load()
+{
+    TSharedPtr<FOdysseyRasterBlock> rasterBlock = mToolContext->GetRasterBlock();
+    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
+    if( rasterBlock )
+    {
+	    mPaintEngine.RasterBlock(rasterBlock);
+    }
+    else if( vectorEngine )
+    {
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+        UOdysseyPainterEditorPaintBucketTool::LoadVector( vectorEngine, vectorScene );
+    }
+}
+
 void
 UOdysseyPainterEditorPaintBucketTool::UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
@@ -52,7 +88,7 @@ UOdysseyPainterEditorPaintBucketTool::LoadVector( FOdysseyVectorEngine* iEngine,
     TSharedPtr< SViewport > viewportWidget; // to force keyboard focus on mouse hover.
                                             // Prevents the user from having to click at least once in the viewport.
     // we need the focus on the viewport for keyboard 
-    viewportWidget = GetEditorAs<FOdysseyPainterEditor>()->GetGUI()->GetViewportTab()->GetViewport()->GetViewportWidget();
+    viewportWidget = mToolContext->GetEditor()->GetGUI()->GetViewportTab()->GetViewport()->GetViewportWidget();
 
     // we need the focus on the viewport for keyboard 
     FSlateApplication::Get().SetKeyboardFocus( viewportWidget );
@@ -63,6 +99,79 @@ UOdysseyPainterEditorPaintBucketTool::LoadVector( FOdysseyVectorEngine* iEngine,
     mBucketHUD->Reset( iScene );
 
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+}
+
+
+bool
+UOdysseyPainterEditorPaintBucketTool::OnKeyDown( const FKey& iKey )
+{
+    bool ret = false;
+    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
+    if( vectorEngine )
+    {
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+        ret = UOdysseyPainterEditorPaintBucketTool::OnKeyDownVector( vectorEngine, vectorScene, iKey );
+    }
+
+    return ret;
+}
+
+bool
+UOdysseyPainterEditorPaintBucketTool::OnKeyUp( const FKey& iKey )
+{
+    bool ret = false;
+    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
+    if( vectorEngine )
+    {
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+        ret = UOdysseyPainterEditorPaintBucketTool::OnKeyUpVector( vectorEngine, vectorScene, iKey );
+    }
+
+    return ret;
+}
+
+bool
+UOdysseyPainterEditorPaintBucketTool::OnMouseDown( const FOdysseyPoint& iPointInTexture
+                                                 , const FKey& iKey )
+{
+    bool ret = false;
+    TSharedPtr<FOdysseyRasterBlock> rasterBlock = mToolContext->GetRasterBlock();
+    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
+
+    if( rasterBlock )
+    {
+        ret = UOdysseyPainterEditorPaintBucketTool::OnMouseDownRaster( rasterBlock->GetBlock(), iPointInTexture, iKey );
+    }
+
+    if( vectorEngine )
+    {
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+        ret = UOdysseyPainterEditorPaintBucketTool::OnMouseDownVector( vectorEngine, vectorScene, iPointInTexture, iKey );
+    }
+
+    return ret;
+}
+
+void
+UOdysseyPainterEditorPaintBucketTool::OnMouseHover( const FOdysseyPoint& iPointInTexture )
+{
+    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
+    if( vectorEngine )
+    {
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+        UOdysseyPainterEditorPaintBucketTool::OnMouseHoverVector( vectorEngine, vectorScene, iPointInTexture );
+    }
+}
+
+void
+UOdysseyPainterEditorPaintBucketTool::OnMouseDrag( const FOdysseyPoint& iPointInTexture )
+{
+    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
+    if( vectorEngine )
+    {
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+        UOdysseyPainterEditorPaintBucketTool::OnMouseDragVector( vectorEngine, vectorScene, iPointInTexture );
+    }
 }
 
 bool
@@ -200,7 +309,7 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseDownRaster( TSharedPtr<::ULIS::FBlo
                                                        , const FOdysseyPoint& iPointInTexture
                                                        , const FKey& iKey )
 {
-    ::ULIS::FColor color = GetEditorAs<FOdysseyPainterEditor>()->PaintColor().GetValue();
+    ::ULIS::FColor color = mToolContext->GetEditor()->PaintColor().GetValue();
 
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> paintBlock = mPaintEngine.PaintBlock();
     /*::ULIS::FRectI rect = paintBlock->Rect();*/
@@ -425,11 +534,11 @@ UOdysseyPainterEditorPaintBucketTool::SetBucketColor( FOdysseyVectorBucket* iBuc
     }
     else
     {
-        ::ULIS::FColor color = GetEditorAs<FOdysseyPainterEditor>()->PaintColor().GetValue();
+        ::ULIS::FColor color = mToolContext->GetEditor()->PaintColor().GetValue();
         UOdysseyPaletteEntry* entry = nullptr;
-        if (GetEditorAs<FOdysseyPainterEditor>()->GetGUI()->GetColorPaletteTab()->PaletteWidget()->GetColorPalette()->GetPalette())
+        if ( mToolContext->GetEditor()->GetGUI()->GetColorPaletteTab()->PaletteWidget()->GetColorPalette()->GetPalette())
         {
-            entry = GetEditorAs<FOdysseyPainterEditor>()->GetGUI()->GetColorPaletteTab()->PaletteWidget()->GetColorPalette()->GetPalette()->CurrentEntry.Get();
+            entry = mToolContext->GetEditor()->GetGUI()->GetColorPaletteTab()->PaletteWidget()->GetColorPalette()->GetPalette()->CurrentEntry.Get();
             if (entry && entry->IsA(UOdysseyPaletteEntryColor::StaticClass()))
             {
                 FColor colorEntry = Cast< UOdysseyPaletteEntryColor >(entry)->GetUsedColor();
@@ -708,10 +817,64 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseUpVector( FOdysseyVectorEngine* iEn
     return false;
 }
 
+bool
+UOdysseyPainterEditorPaintBucketTool::OnMouseUp( const FOdysseyPoint& iPointInTexture
+                                               , const FKey& iKey )
+{
+    bool ret = false;
+    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
+    if( vectorEngine )
+    {
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+        ret = UOdysseyPainterEditorPaintBucketTool::OnMouseUpVector( vectorEngine, vectorScene, iPointInTexture, iKey );
+
+        /* TODO: Gary
+        if( iKey == EKeys::RightMouseButton )
+        {
+            FOdysseyVectorObject* selectedObject = vectorScene->GetLastSelected();
+            FOdysseyTextureEditorPaintBucketToolContextMenu* contextMenu = textureEditor->GetGUI()->GetPaintBucketToolContextMenu().Get();
+
+            if( selectedObject )
+            {
+                if( selectedObject->GetClass() == FOdysseyVectorGroupPaint::StaticClass() )
+                {
+                    FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(selectedObject);
+
+                    if( paintGroup->GetSelectedBucket() )
+                    {
+                        FSlateApplication::Get().PushMenu( textureEditor->GetGUI()->GetViewportTab().Get()->Widget().ToSharedRef(),
+                                                           FWidgetPath(),
+                                                           contextMenu->Widget().ToSharedRef(),
+                                                           FSlateApplication::Get().GetCursorPos(),
+                                                           FPopupTransitionEffect(FPopupTransitionEffect::ContextMenu) );
+                    }
+                }
+            }
+        }*/
+    }
+
+    return ret;
+}
+
 void
 UOdysseyPainterEditorPaintBucketTool::Commit()
 {
 	mPaintEngine.Commit(FOdysseyBlendParameters());
+}
+
+void
+UOdysseyPainterEditorPaintBucketTool::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent )
+{
+    if (PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive)
+        return;
+
+    // redraw
+    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
+    if( vectorEngine )
+    {
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+        PropertyChangedVector( vectorEngine, vectorScene, PropertyChangedEvent.GetPropertyName() );
+    }
 }
 
 void

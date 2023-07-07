@@ -26,6 +26,15 @@ public:
 
     //Constructor
     UOdysseyPainterEditorVectorEraserTool();
+
+    virtual bool IsActivable() const override;
+    virtual void Load() override;
+    virtual void Unload() override;
+    
+    virtual bool OnMouseDown( const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
+    virtual void OnMouseHover( const FOdysseyPoint& iPointInTexture ) override;
+    virtual void OnMouseDrag( const FOdysseyPoint& iPointInTexture ) override;
+    virtual bool OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
  
     //OdysseyPainterEditorTool overrides
     void UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
@@ -49,6 +58,7 @@ public:
     virtual void Commit() override;
 
 protected:
+    virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
     void PropertyChanged( const FName& iPropertyName );
 
 private:

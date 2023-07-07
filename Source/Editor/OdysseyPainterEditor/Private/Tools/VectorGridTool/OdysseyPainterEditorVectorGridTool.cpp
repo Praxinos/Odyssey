@@ -29,6 +29,34 @@ UOdysseyPainterEditorVectorGridTool::UOdysseyPainterEditorVectorGridTool()
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
+bool
+UOdysseyPainterEditorVectorGridTool::IsActivable() const
+{
+    return !!mToolContext->GetVectorEngine();
+}
+
+void
+UOdysseyPainterEditorVectorGridTool::Load()
+{
+    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
+    if( vectorEngine )
+    {
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+        UOdysseyPainterEditorVectorGridTool::LoadVector( vectorEngine, vectorScene );
+    }
+}
+
+void
+UOdysseyPainterEditorVectorGridTool::Unload()
+{
+    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
+    if( vectorEngine )
+    {
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+        UOdysseyPainterEditorVectorGridTool::UnloadVector( vectorEngine, vectorScene );
+    }
+}
+
 void
 UOdysseyPainterEditorVectorGridTool::UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
@@ -47,6 +75,20 @@ UOdysseyPainterEditorVectorGridTool::LoadVector( FOdysseyVectorEngine* iEngine, 
     mGridHUD->Export( mPointArray );
 
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+}
+
+bool
+UOdysseyPainterEditorVectorGridTool::OnMouseDown( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
+{
+    bool ret = false;
+    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
+    if( vectorEngine )
+    {
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+        ret = UOdysseyPainterEditorVectorGridTool::OnMouseDownVector( vectorEngine, vectorScene, iPointInTexture, iKey );
+    }
+
+    return ret;
 }
 
 bool
@@ -95,6 +137,17 @@ UOdysseyPainterEditorVectorGridTool::OnMouseDownVector( FOdysseyVectorEngine* iE
 }
 
 void
+UOdysseyPainterEditorVectorGridTool::OnMouseDrag( const FOdysseyPoint& iPointInTexture )
+{
+    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
+    if( vectorEngine )
+    {
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+        UOdysseyPainterEditorVectorGridTool::OnMouseDragVector( vectorEngine, vectorScene, iPointInTexture );
+    }
+}
+
+void
 UOdysseyPainterEditorVectorGridTool::OnMouseDragVector( FOdysseyVectorEngine* iEngine
                                                       , FOdysseyVectorScene* iScene
                                                       , const FOdysseyPoint& iPointInTexture )
@@ -128,6 +181,20 @@ UOdysseyPainterEditorVectorGridTool::OnMouseDragVector( FOdysseyVectorEngine* iE
 }
 
 bool
+UOdysseyPainterEditorVectorGridTool::OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
+{
+    bool ret = false;
+
+    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
+    if( vectorEngine )
+    {
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+        ret = UOdysseyPainterEditorVectorGridTool::OnMouseUpVector( vectorEngine, vectorScene, iPointInTexture, iKey );
+    }
+    return ret;
+}
+
+bool
 UOdysseyPainterEditorVectorGridTool::OnMouseUpVector( FOdysseyVectorEngine* iEngine
                                                     , FOdysseyVectorScene* iScene
                                                     , const FOdysseyPoint& iPointInTexture
@@ -150,6 +217,19 @@ void
 UOdysseyPainterEditorVectorGridTool::Commit()
 {
 
+}
+
+void
+UOdysseyPainterEditorVectorGridTool::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent )
+{
+    if (PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive)
+        return;
+
+    
+    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
+    FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+
+    PropertyChangedVector( vectorEngine, vectorScene, PropertyChangedEvent.GetPropertyName());
 }
 
 void

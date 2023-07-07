@@ -24,6 +24,34 @@ UOdysseyPainterEditorVectorEraserTool::UOdysseyPainterEditorVectorEraserTool()
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
 void
+UOdysseyPainterEditorVectorEraserTool::Load()
+{
+    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
+    if( vectorEngine )
+    {
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+        UOdysseyPainterEditorVectorEraserTool::LoadVector( vectorEngine, vectorScene );
+    }
+}
+
+void
+UOdysseyPainterEditorVectorEraserTool::Unload()
+{
+    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
+    if( vectorEngine )
+    {
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+        UOdysseyPainterEditorVectorEraserTool::UnloadVector( vectorEngine, vectorScene );
+    }
+}
+
+bool
+UOdysseyPainterEditorVectorEraserTool::IsActivable() const
+{
+    return !!mToolContext->GetVectorEngine();
+}
+
+void
 UOdysseyPainterEditorVectorEraserTool::UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
     iEngine->RemoveHUD( &mEraserHUD );
@@ -38,6 +66,21 @@ UOdysseyPainterEditorVectorEraserTool::LoadVector( FOdysseyVectorEngine* iEngine
     iEngine->AddHUD( &mEraserHUD );
 
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+}
+
+bool
+UOdysseyPainterEditorVectorEraserTool::OnMouseDown( const FOdysseyPoint& iPointInTexture
+                                                  , const FKey& iKey )
+{
+    bool ret = false;
+    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
+    if( vectorEngine )
+    {
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+        ret = UOdysseyPainterEditorVectorEraserTool::OnMouseDownVector( vectorEngine, vectorScene, iPointInTexture, iKey );
+    }
+
+    return ret;
 }
 
 bool
@@ -60,6 +103,17 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseDownVector( FOdysseyVectorEngine* 
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 
     return true;
+}
+
+void
+UOdysseyPainterEditorVectorEraserTool::OnMouseHover( const FOdysseyPoint& iPointInTexture )
+{
+    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
+    if( vectorEngine )
+    {
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+        UOdysseyPainterEditorVectorEraserTool::OnMouseHoverVector( vectorEngine, vectorScene, iPointInTexture );
+    }
 }
 
 void
@@ -89,6 +143,17 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseHoverVector( FOdysseyVectorEngine*
 }
 
 void
+UOdysseyPainterEditorVectorEraserTool::OnMouseDrag( const FOdysseyPoint& iPointInTexture )
+{
+    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
+    if( vectorEngine )
+    {
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+        UOdysseyPainterEditorVectorEraserTool::OnMouseDragVector( vectorEngine, vectorScene, iPointInTexture );
+    }
+}
+
+void
 UOdysseyPainterEditorVectorEraserTool::OnMouseDragVector( FOdysseyVectorEngine* iEngine
                                                         , FOdysseyVectorScene* iScene
                                                         , const FOdysseyPoint& iPointInTexture )
@@ -107,6 +172,20 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseDragVector( FOdysseyVectorEngine* 
     iEngine->UseColorImage();
 
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+}
+
+bool
+UOdysseyPainterEditorVectorEraserTool::OnMouseUp( const FOdysseyPoint& iPointInTexture
+                                                , const FKey& iKey )
+{
+    bool ret = false;
+    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
+    if( vectorEngine )
+    {
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+        ret = UOdysseyPainterEditorVectorEraserTool::OnMouseUpVector( vectorEngine, vectorScene, iPointInTexture, iKey );
+    }
+    return ret;
 }
 
 bool
@@ -163,6 +242,18 @@ void
 UOdysseyPainterEditorVectorEraserTool::Commit()
 {
 
+}
+
+void
+UOdysseyPainterEditorVectorEraserTool::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent )
+{
+    if (PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive)
+        return;
+
+    PropertyChanged(PropertyChangedEvent.GetPropertyName());
+
+    // redraw    
+    mToolContext->GetVectorEngine()->GetScene()->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 }
 
 void

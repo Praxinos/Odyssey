@@ -23,6 +23,24 @@
 #include "Undo/OdysseyVectorUndoBucketParam.h"
 #include "Undo/OdysseyVectorUndoPathStitch.h"
 
+#include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
+#include "Tools/VectorPrimitiveDrawingTool/OdysseyPainterEditorVectorPrimitiveDrawingTool.h"
+#include "Tools/VectorPathDrawingTool/OdysseyPainterEditorVectorPathDrawingTool.h"
+#include "Tools/VectorPathEditTool/OdysseyPainterEditorVectorPathEditTool.h"
+#include "Tools/VectorPathCutTool/OdysseyPainterEditorVectorPathCutTool.h"
+#include "Tools/VectorPickTool/OdysseyPainterEditorVectorPickTool.h"
+#include "Tools/VectorSceneScaleTool/OdysseyPainterEditorVectorSceneScaleTool.h"
+#include "Tools/VectorScenePanTool/OdysseyPainterEditorVectorScenePanTool.h"
+#include "Tools/VectorEraserTool/OdysseyPainterEditorVectorEraserTool.h"
+#include "Tools/VectorPathPushTool/OdysseyPainterEditorVectorPathPushTool.h"
+#include "Tools/VectorPathWidthTool/OdysseyPainterEditorVectorPathWidthTool.h"
+#include "Tools/VectorPathSmoothTool/OdysseyPainterEditorVectorPathSmoothTool.h"
+#include "Tools/VectorPathStitchTool/OdysseyPainterEditorVectorPathStitchTool.h"
+#include "Tools/PaintBucketTool/OdysseyPainterEditorPaintBucketTool.h"
+#include "Tools/ColorPickerTool/OdysseyPainterEditorColorPickerTool.h"
+#include "Tools/VectorGridTool/OdysseyPainterEditorVectorGridTool.h"
+#include "Tools/VectorTransformTool/OdysseyPainterEditorVectorTransformTool.h"
+
 #define LOCTEXT_NAMESPACE "FOdysseyPainterEditor"
 
 /////////////////////////////////////////////////////
@@ -32,6 +50,7 @@
 
 FOdysseyPainterEditor::~FOdysseyPainterEditor()
 {
+    mToolContext->Unset();
 	delete mHUDSystem;
 }
 
@@ -40,7 +59,26 @@ FOdysseyPainterEditor::FOdysseyPainterEditor()
     , mHUDSystem(new FOdysseyHUDSystem())
 	, mBrushContexts()
 	, mPaintColor(::ULIS::FColor::Black)
+    , mToolContext()
+	, mRasterDrawingTool(nullptr)
+	, mVectorPrimitiveDrawingTool(nullptr)
+	, mVectorPathDrawingTool(nullptr)
+	, mVectorPathEditTool(nullptr)
+	, mVectorPathCutTool(nullptr)
+	, mVectorPickTool(nullptr)
+	, mVectorSceneScaleTool(nullptr)
+	, mVectorScenePanTool(nullptr)
+	, mVectorEraserTool(nullptr)
+	, mVectorPathPushTool(nullptr)
+	, mVectorPathWidthTool(nullptr)
+	, mVectorPathSmoothTool(nullptr)
+	, mVectorPathStitchTool(nullptr)
+	, mPaintBucketTool(nullptr)
+	, mColorPickerTool(nullptr)
+	, mVectorGridTool(nullptr)
+	, mVectorTransformTool(nullptr)
 {
+    mToolContext = MakeShared<FOdysseyPainterEditorToolContext>(this);
 	mBrushContexts.Add(new FOdysseyPainterEditorBrushContext(this));
 }
 
@@ -58,6 +96,60 @@ FOdysseyPainterEditor::InitData(UObject* iEditedObject)
 void
 FOdysseyPainterEditor::InitTools()
 {
+    mRasterDrawingTool = NewObject<UOdysseyPainterEditorRasterDrawingTool>();
+	mVectorPrimitiveDrawingTool = NewObject<UOdysseyPainterEditorVectorPrimitiveDrawingTool>();
+	mVectorPathDrawingTool = NewObject<UOdysseyPainterEditorVectorPathDrawingTool>();
+	mVectorPathEditTool = NewObject<UOdysseyPainterEditorVectorPathEditTool>();
+	mVectorPathCutTool = NewObject<UOdysseyPainterEditorVectorPathCutTool>();
+	mVectorPickTool = NewObject<UOdysseyPainterEditorVectorPickTool>();
+    mVectorSceneScaleTool = NewObject<UOdysseyPainterEditorVectorSceneScaleTool>();
+    mVectorScenePanTool = NewObject<UOdysseyPainterEditorVectorScenePanTool>();
+    mVectorEraserTool = NewObject<UOdysseyPainterEditorVectorEraserTool>();
+    mVectorPathPushTool = NewObject<UOdysseyPainterEditorVectorPathPushTool>();
+    mVectorPathWidthTool = NewObject<UOdysseyPainterEditorVectorPathWidthTool>();
+    mVectorPathSmoothTool = NewObject<UOdysseyPainterEditorVectorPathSmoothTool>();
+    mVectorPathStitchTool = NewObject<UOdysseyPainterEditorVectorPathStitchTool>();
+	mPaintBucketTool = NewObject<UOdysseyPainterEditorPaintBucketTool>();
+	mColorPickerTool = NewObject<UOdysseyPainterEditorColorPickerTool>();
+	mVectorGridTool = NewObject<UOdysseyPainterEditorVectorGridTool>();
+	mVectorTransformTool = NewObject<UOdysseyPainterEditorVectorTransformTool>();
+
+	mRasterDrawingTool->SetToolContext(mToolContext);
+    mVectorPrimitiveDrawingTool->SetToolContext(mToolContext);
+    mVectorPathDrawingTool->SetToolContext(mToolContext);
+    mVectorPathEditTool->SetToolContext(mToolContext);
+    mVectorPathCutTool->SetToolContext(mToolContext);
+    mVectorPickTool->SetToolContext(mToolContext);
+    mVectorSceneScaleTool->SetToolContext(mToolContext);
+    mVectorScenePanTool->SetToolContext(mToolContext);
+    mVectorEraserTool->SetToolContext(mToolContext);
+    mVectorPathPushTool->SetToolContext(mToolContext);
+    mVectorPathWidthTool->SetToolContext(mToolContext);
+    mVectorPathSmoothTool->SetToolContext(mToolContext);
+    mVectorPathStitchTool->SetToolContext(mToolContext);
+	mPaintBucketTool->SetToolContext(mToolContext);
+	mColorPickerTool->SetToolContext(mToolContext);
+	mVectorGridTool->SetToolContext(mToolContext);
+	mVectorTransformTool->SetToolContext(mToolContext);
+	mRasterDrawingTool->SetBrushContexts(mBrushContexts);
+
+	mTools.Add(mRasterDrawingTool);
+    mTools.Add(mVectorPrimitiveDrawingTool);
+    mTools.Add(mVectorPathDrawingTool);
+    mTools.Add(mVectorPathEditTool);
+    mTools.Add(mVectorPathCutTool);
+    mTools.Add(mVectorPickTool);
+    mTools.Add(mVectorSceneScaleTool);
+    mTools.Add(mVectorScenePanTool);
+    mTools.Add(mVectorEraserTool);
+    mTools.Add(mVectorPathPushTool);
+    mTools.Add(mVectorPathWidthTool);
+    mTools.Add(mVectorPathSmoothTool);
+    mTools.Add(mVectorPathStitchTool);
+	mTools.Add(mPaintBucketTool);
+	mTools.Add(mColorPickerTool);
+	mTools.Add(mVectorGridTool);
+	mTools.Add(mVectorTransformTool);
 }
 
 void
@@ -103,6 +195,109 @@ FOdysseyPainterEditor::OnSelectedToolChangedDelegate()
 
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Getters
+
+UOdysseyPainterEditorRasterDrawingTool*
+FOdysseyPainterEditor::GetRasterDrawingTool() const
+{
+    return mRasterDrawingTool;
+}
+
+UOdysseyPainterEditorVectorPrimitiveDrawingTool*
+FOdysseyPainterEditor::GetVectorPrimitiveDrawingTool() const
+{
+    return mVectorPrimitiveDrawingTool;
+}
+
+UOdysseyPainterEditorVectorPathDrawingTool*
+FOdysseyPainterEditor::GetVectorPathDrawingTool() const
+{
+    return mVectorPathDrawingTool;
+}
+
+UOdysseyPainterEditorVectorPathEditTool*
+FOdysseyPainterEditor::GetVectorPathEditTool() const
+{
+    return mVectorPathEditTool;
+}
+
+UOdysseyPainterEditorVectorPathCutTool*
+FOdysseyPainterEditor::GetVectorPathCutTool() const
+{
+    return mVectorPathCutTool;
+}
+
+UOdysseyPainterEditorVectorPickTool*
+FOdysseyPainterEditor::GetVectorPickTool() const
+{
+    return mVectorPickTool;
+}
+
+UOdysseyPainterEditorVectorGridTool*
+FOdysseyPainterEditor::GetVectorGridTool() const
+{
+    return mVectorGridTool;
+}
+
+UOdysseyPainterEditorVectorTransformTool*
+FOdysseyPainterEditor::GetVectorTransformTool() const
+{
+    return mVectorTransformTool;
+}
+
+UOdysseyPainterEditorVectorSceneScaleTool*
+FOdysseyPainterEditor::GetVectorSceneScaleTool() const
+{
+    return mVectorSceneScaleTool;
+}
+
+UOdysseyPainterEditorVectorScenePanTool*
+FOdysseyPainterEditor::GetVectorScenePanTool() const
+{
+    return mVectorScenePanTool;
+}
+
+UOdysseyPainterEditorVectorEraserTool*
+FOdysseyPainterEditor::GetVectorEraserTool() const
+{
+    return mVectorEraserTool;
+}
+
+UOdysseyPainterEditorVectorPathPushTool*
+FOdysseyPainterEditor::GetVectorPathPushTool() const
+{
+    return mVectorPathPushTool;
+}
+
+UOdysseyPainterEditorVectorPathWidthTool*
+FOdysseyPainterEditor::GetVectorPathWidthTool() const
+{
+    return mVectorPathWidthTool;
+}
+
+UOdysseyPainterEditorVectorPathSmoothTool*
+FOdysseyPainterEditor::GetVectorPathSmoothTool() const
+{
+    return mVectorPathSmoothTool;
+}
+
+UOdysseyPainterEditorVectorPathStitchTool*
+FOdysseyPainterEditor::GetVectorPathStitchTool() const
+{
+    return mVectorPathStitchTool;
+}
+
+UOdysseyPainterEditorPaintBucketTool*
+FOdysseyPainterEditor::GetPaintBucketTool() const
+{
+    return mPaintBucketTool;
+}
+
+UOdysseyPainterEditorColorPickerTool*
+FOdysseyPainterEditor::GetColorPickerTool() const
+{
+    return mColorPickerTool;
+}
+
 
 FOdysseyHUDSystem* 
 FOdysseyPainterEditor::HUDSystem() const
@@ -558,7 +753,7 @@ void
 FOdysseyPainterEditor::StitchVertices( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
     std::vector<FOdysseyVectorVertex*> pickedVertexArray;
-    FOdysseyVectorVertex* knotVertex;
+    FOdysseyVectorVertex* StitchVertex;
     // for undos
     std::vector<FOdysseyVectorPath*> addedPathArray; // stays empty
     std::vector<FOdysseyVectorVertex*> addedVertexArray;
@@ -619,11 +814,11 @@ FOdysseyPainterEditor::StitchVertices( FOdysseyVectorEngine* iEngine, FOdysseyVe
                 removedPathArray.push_back( mergedPath );
             }
 
-            knotVertex = iEngine->Stitch( vertexA, vertexB, addedSegmentArray, removedSegmentArray, true );
+            StitchVertex = iEngine->Stitch( vertexA, vertexB, addedSegmentArray, removedSegmentArray, true );
 
-            if( knotVertex )
+            if( StitchVertex )
             {
-                addedVertexArray.push_back( knotVertex );
+                addedVertexArray.push_back( StitchVertex );
                 removedVertexArray.push_back( vertexA );
                 removedVertexArray.push_back( vertexB );
 
@@ -653,6 +848,32 @@ FOdysseyPainterEditor::StitchVertices( FOdysseyVectorEngine* iEngine, FOdysseyVe
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW
                   | FOdysseyVectorScene::SIGNAL_OBJECT_SELECTED
                   | FOdysseyVectorScene::SIGNAL_OBJECT_MODIFIED );
+}
+
+//--------------------------------------------------------------------------------------
+//------------------------------------------------------------- FGCObject implementation
+
+void
+FOdysseyPainterEditor::AddReferencedObjects(FReferenceCollector& Collector)
+{
+	FOdysseyEditor::AddReferencedObjects(Collector);
+	Collector.AddReferencedObject(mRasterDrawingTool);
+	Collector.AddReferencedObject(mVectorPrimitiveDrawingTool);
+	Collector.AddReferencedObject(mVectorPathDrawingTool);
+	Collector.AddReferencedObject(mVectorPathEditTool);
+	Collector.AddReferencedObject(mVectorPathCutTool);
+	Collector.AddReferencedObject(mVectorPickTool);
+    Collector.AddReferencedObject(mVectorSceneScaleTool);
+    Collector.AddReferencedObject(mVectorScenePanTool);
+    Collector.AddReferencedObject(mVectorEraserTool);
+    Collector.AddReferencedObject(mVectorPathPushTool);
+    Collector.AddReferencedObject(mVectorPathWidthTool);
+    Collector.AddReferencedObject(mVectorPathSmoothTool);
+    Collector.AddReferencedObject(mVectorPathStitchTool);
+	Collector.AddReferencedObject(mPaintBucketTool);
+	Collector.AddReferencedObject(mColorPickerTool);
+	Collector.AddReferencedObject(mVectorGridTool);
+	Collector.AddReferencedObject(mVectorTransformTool);
 }
 
 #undef LOCTEXT_NAMESPACE

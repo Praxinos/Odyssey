@@ -35,6 +35,12 @@ FOdysseyAnimationCell::GetLength() const
 }
 
 void
+FOdysseyAnimationCell::PostLoad()
+{
+
+}
+
+void
 FOdysseyAnimationCell::PostDuplicate()
 {
 
