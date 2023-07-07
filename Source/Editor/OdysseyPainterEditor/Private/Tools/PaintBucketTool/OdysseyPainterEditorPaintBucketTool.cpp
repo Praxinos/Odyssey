@@ -16,6 +16,7 @@
 //----------------------------------------------------------- Construction / Destruction
 UOdysseyPainterEditorPaintBucketTool::~UOdysseyPainterEditorPaintBucketTool()
 {
+    delete mBucketHUD;
 }
 
 UOdysseyPainterEditorPaintBucketTool::UOdysseyPainterEditorPaintBucketTool()
@@ -54,7 +55,7 @@ UOdysseyPainterEditorPaintBucketTool::LoadVector( FOdysseyVectorEngine* iEngine,
     viewportWidget = GetEditorAs<FOdysseyPainterEditor>()->GetGUI()->GetViewportTab()->GetViewport()->GetViewportWidget();
 
     // we need the focus on the viewport for keyboard 
-    //FSlateApplication::Get().SetKeyboardFocus( viewportWidget.ToSharedRef() );
+    FSlateApplication::Get().SetKeyboardFocus( viewportWidget );
 
     iEngine->ClearHUD();
     iEngine->AddHUD( mBucketHUD );
@@ -340,34 +341,28 @@ double
 UOdysseyPainterEditorPaintBucketTool::GetRotationAngle( FOdysseyVectorBucket* iBucket
                                                       , const FOdysseyPoint& iPointInTexture )
 {
-    FOdysseyVectorObject& parent = iBucket->GetParent();
-    BLMatrix2D& inverseMatrix = parent.GetInverseWorldMatrix();
-    BLPoint pt[2] = { inverseMatrix.mapPoint( iPointInTexture.x - iPointInTexture.deltaPosition.X
-                                            , iPointInTexture.y - iPointInTexture.deltaPosition.Y )
-                    , inverseMatrix.mapPoint( iPointInTexture.x, iPointInTexture.y ) };
+    FOdysseyVectorObject& ownerObject = iBucket->GetOwner();
+    BLMatrix2D& inverseMatrix = ownerObject.GetInverseWorldMatrix();
+    double rotation = iBucket->GetRotation();
+    ::ULIS::FVec2D bucketVector = ::ULIS::FVec2D( cos( rotation ), sin( rotation ) );
+    BLPoint pt = inverseMatrix.mapPoint( iPointInTexture.x, iPointInTexture.y );
     ::ULIS::FVec2D& pivot = iBucket->GetCoords();
-    ::ULIS::FVec2D vector[2];
+    ::ULIS::FVec2D ptVector;
     double angle = 0.0f;
 
-    vector[0].x = pt[0].x - pivot.x;
-    vector[0].y = pt[0].y - pivot.y;
+    ptVector.x = pt.x - pivot.x;
+    ptVector.y = pt.y - pivot.y;
 
-    vector[1].x = pt[1].x - pivot.x;
-    vector[1].y = pt[1].y - pivot.y;
-
-    if( vector[0].DistanceSquared() )
+    if( ptVector.DistanceSquared() )
     {
-        vector[0].Normalize();
+        ptVector.Normalize();
+
+        angle = fabs( acos( bucketVector.DotProduct( ptVector ) ) );
+
+        return FOdysseyVector::Cross2D( bucketVector, ptVector ) > 0.0f ? angle : - angle;
     }
 
-    if( vector[1].DistanceSquared() )
-    {
-        vector[1].Normalize();
-    }
-
-    angle = fabs( acos( vector[0].DotProduct( vector[1] ) ) );
-
-    return FOdysseyVector::Cross2D( vector[0], vector[1] ) > 0.0f ? angle : - angle;
+    return 0.0f;
 }
 
 void
@@ -476,7 +471,7 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseUpVectorCreateBucket( FOdysseyVecto
         GEditor->BeginTransaction(LOCTEXT("PaintBucketTool","Paint Bucket"));
         if( GUndo )
         {
-            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( iScene, pickedBucket->GetParent(), pickedBucket );
+            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( iScene, pickedBucket->GetOwner(), pickedBucket );
 
             GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
         }
@@ -558,7 +553,7 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseUpVectorPropagateBucket( FOdysseyVe
     GEditor->BeginTransaction(LOCTEXT("PaintBucketTool","Paint Bucket"));
     if( GUndo )
     {
-        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( iScene, iBucket->GetParent(), iBucket );
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( iScene, iBucket->GetOwner(), iBucket );
 
         GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
     }
@@ -575,7 +570,7 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseUpVectorColorBucket( FOdysseyVector
     GEditor->BeginTransaction(LOCTEXT("PaintBucketTool","Paint Bucket"));
     if( GUndo )
     {
-        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( iScene, iBucket->GetParent(), iBucket );
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( iScene, iBucket->GetOwner(), iBucket );
 
         GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
     }
@@ -592,7 +587,7 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseUpVectorClearBucket( FOdysseyVector
     GEditor->BeginTransaction(LOCTEXT("PaintBucketTool","Paint Bucket"));
     if( GUndo )
     {
-        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( iScene, iBucket->GetParent(), iBucket );
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( iScene, iBucket->GetOwner(), iBucket );
 
         GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
     }

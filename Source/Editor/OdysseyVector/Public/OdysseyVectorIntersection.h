@@ -7,7 +7,6 @@
 #include "OdysseyVectorSection.h"
 #include "OdysseyVectorVertex.h"
 #include "OdysseyVectorVertexIntersection.h"
-//#include "OdysseyVectorCycle.h"
 
 class FOdysseyVectorIntersection
 {
@@ -30,9 +29,26 @@ class FOdysseyVectorIntersection
          */
         FOdysseyVectorVertexIntersection* GetOtherVertex( FOdysseyVectorVertexIntersection* iVertex );
 
+       /**
+         * @brief Get a vertex belonging to this intersection
+         * @param the vertex index
+         * return a pointer to the vertex
+         */
         FOdysseyVectorVertexIntersection* GetVertex( int iNum );
+
+       /**
+         * @brief Checks whether or not a vertex belongs to this intersection
+         * @param a pointer to the tested vertex
+         * return true or false
+         */
         bool HasVertex( FOdysseyVectorVertexIntersection* iVertex );
 
+       /**
+         * @brief Build the exploration pair needed to find cycles in a paint group.
+         *        An exploration pair is made of a entry section, a leaving section
+         *        and an intersection (this)
+         * return true or false
+         */
         void BuildExplorationPairs( std::vector<FExplorationPair>& iExplorationPairsArray );
 
     protected:

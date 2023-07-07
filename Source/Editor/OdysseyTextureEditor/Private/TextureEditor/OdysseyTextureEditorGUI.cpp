@@ -434,7 +434,7 @@ FOdysseyTextureEditorGUI::UnpropagateBucket()
 }
 
 void
-FOdysseyTextureEditorGUI::KnotVertices()
+FOdysseyTextureEditorGUI::StitchVertices()
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(static_cast<FOdysseyTextureEditor*>(mEditor)->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
@@ -444,7 +444,7 @@ FOdysseyTextureEditorGUI::KnotVertices()
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
-        FOdysseyPainterEditor::KnotVertices( vectorEngine, vectorScene );
+        FOdysseyPainterEditor::StitchVertices( vectorEngine, vectorScene );
     }
 }
 

@@ -1,17 +1,17 @@
 // IDDN FR.001.250001.005.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
-#include "Tools/VectorPathKnotTool/OdysseyPainterEditorVectorPathKnotTool.h"
+#include "Tools/VectorPathStitchTool/OdysseyPainterEditorVectorPathStitchTool.h"
 
-#define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorPathKnotTool"
+#define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorPathStitchTool"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
-UOdysseyPainterEditorVectorPathKnotTool::~UOdysseyPainterEditorVectorPathKnotTool()
+UOdysseyPainterEditorVectorPathStitchTool::~UOdysseyPainterEditorVectorPathStitchTool()
 {
 }
 
-UOdysseyPainterEditorVectorPathKnotTool::UOdysseyPainterEditorVectorPathKnotTool()
+UOdysseyPainterEditorVectorPathStitchTool::UOdysseyPainterEditorVectorPathStitchTool()
     : mPickingHUD()
     , Radius(20.0f)
 {
@@ -24,7 +24,7 @@ UOdysseyPainterEditorVectorPathKnotTool::UOdysseyPainterEditorVectorPathKnotTool
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
 void
-UOdysseyPainterEditorVectorPathKnotTool::UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorPathStitchTool::UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
     iEngine->RemoveHUD( &mPickingHUD );
 
@@ -32,7 +32,7 @@ UOdysseyPainterEditorVectorPathKnotTool::UnloadVector( FOdysseyVectorEngine* iEn
 }
 
 void
-UOdysseyPainterEditorVectorPathKnotTool::LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorPathStitchTool::LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
     iEngine->ClearHUD();
     iEngine->AddHUD( &mPickingHUD );
@@ -41,7 +41,7 @@ UOdysseyPainterEditorVectorPathKnotTool::LoadVector( FOdysseyVectorEngine* iEngi
 }
 
 bool
-UOdysseyPainterEditorVectorPathKnotTool::OnMouseDownVector( FOdysseyVectorEngine* iEngine
+UOdysseyPainterEditorVectorPathStitchTool::OnMouseDownVector( FOdysseyVectorEngine* iEngine
                                                           , FOdysseyVectorScene* iScene
                                                           , const FOdysseyPoint& iPointInTexture
                                                           , const FKey& iKey )
@@ -93,7 +93,7 @@ UOdysseyPainterEditorVectorPathKnotTool::OnMouseDownVector( FOdysseyVectorEngine
                 removedPathArray.push_back( mergedPath );
             }
 
-            knotVertex = iEngine->Knot( vertexA, vertexB, addedSegmentArray, removedSegmentArray, true );
+            knotVertex = iEngine->Stitch( vertexA, vertexB, addedSegmentArray, removedSegmentArray, true );
 
             if( knotVertex )
             {
@@ -102,10 +102,10 @@ UOdysseyPainterEditorVectorPathKnotTool::OnMouseDownVector( FOdysseyVectorEngine
                 removedVertexArray.push_back( vertexB );
 
                 // needed for valid GUndo pointer
-                GEditor->BeginTransaction(LOCTEXT("VectorPathKnotTool","Vector Path Knot Tool"));
+                GEditor->BeginTransaction(LOCTEXT("VectorPathStitchTool","Vector Path Stitch Tool"));
                 if( GUndo )
                 {
-                    FOdysseyVectorUndo *undo = new FOdysseyVectorUndoPathKnot( iScene
+                    FOdysseyVectorUndo *undo = new FOdysseyVectorUndoPathStitch( iScene
                                                                               , removedPathArray
                                                                               , removedVertexArray
                                                                               , removedSegmentArray
@@ -132,7 +132,7 @@ UOdysseyPainterEditorVectorPathKnotTool::OnMouseDownVector( FOdysseyVectorEngine
 }
 
 void
-UOdysseyPainterEditorVectorPathKnotTool::OnMouseHoverVector( FOdysseyVectorEngine* iEngine
+UOdysseyPainterEditorVectorPathStitchTool::OnMouseHoverVector( FOdysseyVectorEngine* iEngine
                                                            , FOdysseyVectorScene* iScene
                                                            , const FOdysseyPoint& iPointInTexture )
 {
@@ -156,7 +156,7 @@ UOdysseyPainterEditorVectorPathKnotTool::OnMouseHoverVector( FOdysseyVectorEngin
 }
 
 void
-UOdysseyPainterEditorVectorPathKnotTool::OnMouseDragVector( FOdysseyVectorEngine* iEngine
+UOdysseyPainterEditorVectorPathStitchTool::OnMouseDragVector( FOdysseyVectorEngine* iEngine
                                                           , FOdysseyVectorScene* iScene
                                                           , const FOdysseyPoint& iPointInTexture )
 {
@@ -166,7 +166,7 @@ UOdysseyPainterEditorVectorPathKnotTool::OnMouseDragVector( FOdysseyVectorEngine
 }
 
 bool
-UOdysseyPainterEditorVectorPathKnotTool::OnMouseUpVector( FOdysseyVectorEngine* iEngine
+UOdysseyPainterEditorVectorPathStitchTool::OnMouseUpVector( FOdysseyVectorEngine* iEngine
                                                         , FOdysseyVectorScene* iScene
                                                         , const FOdysseyPoint& iPointInTexture
                                                         , const FKey& iKey )
@@ -177,12 +177,12 @@ UOdysseyPainterEditorVectorPathKnotTool::OnMouseUpVector( FOdysseyVectorEngine* 
 }
 
 void
-UOdysseyPainterEditorVectorPathKnotTool::Commit()
+UOdysseyPainterEditorVectorPathStitchTool::Commit()
 {
 }
 
 void
-UOdysseyPainterEditorVectorPathKnotTool::PropertyChanged( const FName& iPropertyName )
+UOdysseyPainterEditorVectorPathStitchTool::PropertyChanged( const FName& iPropertyName )
 {
     mPickingHUD.SetRadius( Radius );
 }

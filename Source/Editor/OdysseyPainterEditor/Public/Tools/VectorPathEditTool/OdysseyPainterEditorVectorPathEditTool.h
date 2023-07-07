@@ -95,8 +95,6 @@ private:
     std::vector<FOdysseyVectorPoint*> mPickedPointArray;
     uint64 mSelectionFlags;
     ::ULIS::FVec2D mOldPointInTexture;
-    TSharedPtr< SViewport > mViewportWidget; // to force keyboard focus on mouse hover.
-                                             // Prevents the user from having to click at least once in the viewport.
 
 public:
     UPROPERTY(EditAnywhere, Category="Odyssey PathEdit Tool", meta = (ClampMin = "0.0", UIMin = "0.0") )

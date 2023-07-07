@@ -8,23 +8,6 @@
 #include "OdysseyVectorSegmentCubic.h"
 #include "OdysseyVectorPrimitive.h"
 
-#include "OdysseyVectorEllipse.generated.h"
-
-USTRUCT()
-struct FEllipseParam
-{
-    GENERATED_BODY()
-
-    UPROPERTY(EditAnywhere, Category="Geometry")
-    double StrokeWidth;
-
-    UPROPERTY(EditAnywhere, Category="Geometry")
-    double RadiusX;
-
-    UPROPERTY(EditAnywhere, Category="Geometry")
-    double RadiusY;
-};
-
 class ODYSSEYVECTOR_API FOdysseyVectorEllipse : public FOdysseyVectorPrimitive
 {
     private:
@@ -32,9 +15,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorEllipse : public FOdysseyVectorPrimitive
 
     public:
         static uint32 StaticClass() { return mStaticClass; };
-        virtual uint32 GetClass() { return mStaticClass; };
-
-        bool HasBaseClass( uint32 iBaseClassID );
+        virtual uint32 GetClass() override { return mStaticClass; };
+        virtual bool HasBaseClass( uint32 iBaseClassID ) override;
 
        /**
          * @brief destructor.
@@ -80,12 +62,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorEllipse : public FOdysseyVectorPrimitive
         double GetRadiusY();
 
        /**
-         * @brief Convert this ellipse to cubic path.
-         * @return a newly allocated cubic path that looks the same as this ellipse.
-         */
-        virtual FOdysseyVectorPathCubic* Convert() override;
-
-       /**
          * @brief Get object type
          * @return VECTORELLIPSETYPE.
          */
@@ -98,13 +74,22 @@ class ODYSSEYVECTOR_API FOdysseyVectorEllipse : public FOdysseyVectorPrimitive
          */
         virtual FOdysseyVectorObject* CopyShape() override;
 
+       /**
+         * @brief Draw this ellipse.
+         * @param iFlags drawing flags from the engine.
+         */
         virtual void DrawShape( uint64 iFlags ) override;
+
+       /**
+         * @brief Update this ellipse (update cached data).
+         * @param iFlags update flags from the engine.
+         */
         virtual void UpdateShape( uint32 iUpdateFlags ) override;
 
     protected :
         FOdysseyVectorVertex* mCubicVertex[4];
         FOdysseyVectorSegmentCubic* mCubicSegment[4];
-
-    public:
-        FEllipseParam mEllipseParam;
+        double mStrokeWidth;
+        double mRadiusX;
+        double mRadiusY;
 };

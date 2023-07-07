@@ -16,10 +16,6 @@ class FOdysseyVectorSegmentCubic;
 class ODYSSEYVECTOR_API FOdysseyVectorCycle
 {
     private:
-        void BuildSegmentCubic( FOdysseyVectorSegmentCubic& iSegment
-                              , double iFromT
-                              , double iToT );
-
         /**
          * @brief build the cycle from vertices/sections passed as parameter. Sections can belong to different paths.
          * @param iVertexArray
@@ -28,18 +24,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorCycle
         void Build( std::vector<FOdysseyVectorVertex*>& iVertexArray
                   , std::vector<FOdysseyVectorSection*>& iSectionArray );
 
-
     public:
-        /*static FOdysseyVectorCycle* Exists( uint64 iID
-                                          , std::vector<FOdysseyVectorVertex*>& iVertexArray
-                                          , std::vector<FOdysseyVectorSection*>& iSectionArray );*/
-
-        /**
-         * @brief Generate an ID by XORing the pointer value of each section composing the cycle.
-         * @return the generated ID.
-         */
-        static uint64 GenerateID( std::vector<FOdysseyVectorSection*>& iSectionArray );
-
         /**
          * @brief destructor.
          */
@@ -53,7 +38,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorCycle
          * @param iSectionArray the section array.
          */
          FOdysseyVectorCycle( FOdysseyVectorObject& iParent
-                            , uint64 iID
                             , std::vector<FOdysseyVectorVertex*>& iVertexArray
                             , std::vector<FOdysseyVectorSection*>& iSectionArray );
 
@@ -70,6 +54,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorCycle
          */
         bool HitTest( double iLocalX, double iLocalY );
 
+        /**
+         * @brief Set this cycle's parent cycle (the cycle that this one fits in).
+         * @param iParent a pointer to this cycle's parent cycle.
+         */
         void SetParentCycle( FOdysseyVectorCycle *iParent );
 
         /**
@@ -97,42 +85,45 @@ class ODYSSEYVECTOR_API FOdysseyVectorCycle
         bool FitsIn( FOdysseyVectorCycle* iParentCandidate );
 
         /**
-         * @brief Block all sections belonging to this cycle.
+         * @brief Sets a bucket that should color this cycle without being its official bucket.
+         * @param iPropagatedBucket the propagated bucket
          */
-        void Block();
-
-        /**
-         * @brief Unblock all sections belonging to this cycle.
-         */
-        void UnBlock();
-
-        /**
-         * @brief Get this cycle's ID.
-         * @return this cycle ID
-         */
-        uint64 GetID();
-
-        std::vector<FOdysseyVectorSection*>& GetSectionArray();
-
         void SetPropagatedBucket( FOdysseyVectorBucket* iPropagatedBucket );
+
+        /**
+         * @brief Gets the bucket that should color this cycle without being its official bucket.
+         * @return a pointer to the propagated bucket
+         */
         FOdysseyVectorBucket* GetPropagatedBucket();
+
+        /**
+         * @brief Gets a propagated bucket from any neighbour cycle
+         * @return true if it got any, false otherwise
+         */
         bool PropagateBucket();
+
+        /**
+         * @brief Merge this cycle's contour path with the contour path of the cycle passed as parameter
+         * thus creating a combined path.
+         * @param iMergeCycle the cycle that will be merged.
+         */
         void Merge( FOdysseyVectorCycle* iMergeCycle );
-        void FillPath();
+
+        /**
+         * @brief Stroke the path using BLend2D API. The context (path width, color) can be set before calling this method.
+         * @param iWorld true if it should be drawn in world coordinates, false otherwise
+         */
         void StrokePath( bool iWorld );
 
     protected :
         BLPath mContourPath;
         BLPath mCombinedPath;
-        FOdysseyVectorObject& mParent;
-        uint64 mID;
+        FOdysseyVectorObject& mOwner;
         FOdysseyVectorBucket* mBucket;
         FOdysseyVectorBucket* mPropagatedBucket;
         std::vector<FOdysseyVectorVertex*> mVertexArray;
         std::vector<FOdysseyVectorSection*> mSectionArray;
-        uint32 mFlags;
-        //::ULIS::FVec2D mMin;
-        //::ULIS::FVec2D mMax;
+        std::vector<FOdysseyVectorSection*> mInnerSectionArray;
         std::list<FOdysseyVectorCycle*> mChildrenList;
         FOdysseyVectorCycle* mParentCycle;
         bool mPropagated;

@@ -42,7 +42,7 @@ FOdysseyPainterEditorToolOptionsTab::CreateWidget()
     SetWidgetForTool(mEditor->GetVectorPathDrawingTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorPathDrawingTool()));
     SetWidgetForTool(mEditor->GetVectorPathEditTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorPathEditTool()));
     SetWidgetForTool(mEditor->GetVectorPathCutTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorPathCutTool()));
-    SetWidgetForTool(mEditor->GetVectorPathKnotTool(),SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorPathKnotTool()));
+    SetWidgetForTool(mEditor->GetVectorPathStitchTool(),SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorPathStitchTool()));
     SetWidgetForTool(mEditor->GetVectorPathWidthTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorPathWidthTool()));
     SetWidgetForTool(mEditor->GetVectorPathSmoothTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorPathSmoothTool()));
     SetWidgetForTool(mEditor->GetVectorPickTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorPickTool()));

@@ -9,11 +9,6 @@ FOdysseyVectorSegmentCubic::~FOdysseyVectorSegmentCubic()
 
 }
 
-FOdysseyVectorSegmentCubic::FOdysseyVectorSegmentCubic()
-    : FOdysseyVectorSegment()
-{
-}
-
 FOdysseyVectorSegmentCubic::FOdysseyVectorSegmentCubic( FOdysseyVectorPath* iPath
                                                       , FOdysseyVectorVertex* iPoint0
                                                       , double iCtrlPoint0x
@@ -22,6 +17,8 @@ FOdysseyVectorSegmentCubic::FOdysseyVectorSegmentCubic( FOdysseyVectorPath* iPat
                                                       , double iCtrlPoint1y
                                                       , FOdysseyVectorVertex* iPoint1 )
     : FOdysseyVectorSegment( iPath, iPoint0, iPoint1 )
+    , mCtrlPoint { FOdysseyVectorHandleSegment( this, 0.0f, 0.0f )
+                 , FOdysseyVectorHandleSegment( this, 0.0f, 0.0f ) }
 {
     Init ( iPoint0, iCtrlPoint0x, iCtrlPoint0y, iCtrlPoint1x, iCtrlPoint1y, iPoint1 );
 }
@@ -30,6 +27,8 @@ FOdysseyVectorSegmentCubic::FOdysseyVectorSegmentCubic( FOdysseyVectorPath* iPat
                                                       , FOdysseyVectorVertex* iPoint0
                                                       , FOdysseyVectorVertex* iPoint1 )
     : FOdysseyVectorSegment( iPath, iPoint0, iPoint1 )
+    , mCtrlPoint { FOdysseyVectorHandleSegment( this, 0.0f, 0.0f )
+                 , FOdysseyVectorHandleSegment( this, 0.0f, 0.0f ) }
 {
     Init( iPoint0, iPoint1 );
 }
@@ -67,8 +66,8 @@ FOdysseyVectorSegmentCubic::Init( FOdysseyVectorVertex* iPoint0
     mPoint[0] = iPoint0;
     mPoint[1] = iPoint1;
 
-    mCtrlPoint[0].Init( this, iCtrlPoint0x, iCtrlPoint0y );
-    mCtrlPoint[1].Init( this, iCtrlPoint1x, iCtrlPoint1y );
+    mCtrlPoint[0].Set( iCtrlPoint0x, iCtrlPoint0y );
+    mCtrlPoint[1].Set( iCtrlPoint1x, iCtrlPoint1y );
 
     Invalidate();
 }

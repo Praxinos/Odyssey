@@ -4,20 +4,14 @@ FOdysseyVectorSegment::~FOdysseyVectorSegment()
 {
 }
 
-FOdysseyVectorSegment::FOdysseyVectorSegment()
-    : mPath( nullptr )
-{
-}
-
 FOdysseyVectorSegment::FOdysseyVectorSegment( FOdysseyVectorPath* iPath
                                             , FOdysseyVectorVertex* iVertex0
                                             , FOdysseyVectorVertex* iVertex1 )
-    : FOdysseyVectorLink ()
+    : FOdysseyVectorLink( iVertex0, iVertex1 )
     , mPath ( iPath )
     , mIsInvalidated( false )
     , mPaintingCode ( 0 )
 {
-    FOdysseyVectorLink::Init ( iVertex0, iVertex1 );
 }
 
 FOdysseyVectorVertex*

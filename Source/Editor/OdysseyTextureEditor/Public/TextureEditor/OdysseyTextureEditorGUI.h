@@ -57,7 +57,7 @@ public:
     virtual void DeleteBucket();
     virtual void PropagateBucket();
     virtual void UnpropagateBucket();
-    virtual void KnotVertices();
+    virtual void StitchVertices();
  
 public:
     void BindVectorScene( FOdysseyVectorScene* iScene );

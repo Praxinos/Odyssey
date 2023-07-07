@@ -64,7 +64,7 @@ public:
     virtual UOdysseyPainterEditorVectorPathPushTool* GetVectorPathPushTool() const override { return nullptr; }
     virtual UOdysseyPainterEditorVectorPathWidthTool* GetVectorPathWidthTool() const override { return nullptr; }
     virtual UOdysseyPainterEditorVectorPathSmoothTool* GetVectorPathSmoothTool() const override { return nullptr; }
-    virtual UOdysseyPainterEditorVectorPathKnotTool* GetVectorPathKnotTool() const override { return nullptr; }
+    virtual UOdysseyPainterEditorVectorPathStitchTool* GetVectorPathStitchTool() const override { return nullptr; }
 
 public:
     // Overrides

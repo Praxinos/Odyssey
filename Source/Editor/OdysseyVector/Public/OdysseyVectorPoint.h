@@ -8,6 +8,9 @@ class FOdysseyVectorVertex;
 
 class ODYSSEYVECTOR_API FOdysseyVectorPoint
 {
+    private:
+        static const uint32 mStaticClass = 0xead829a; // value is crc32 FOdysseyVectorPoint
+
     public:
         static uint32 StaticClass() { return mStaticClass; };
         virtual uint32 GetClass() { return mStaticClass; };
@@ -55,44 +58,44 @@ class ODYSSEYVECTOR_API FOdysseyVectorPoint
          */
         double GetRadius();
 
-
         /**
          * @brief Set the point's absolute coordinate on X & Y axis
          * @param iCoords the desired coordinates of type ::ULIS::FVec2D
          */
-        void SetCoords( const ::ULIS::FVec2D& iCoords );
+        void Set( const ::ULIS::FVec2D& iCoords );
 
         /**
          * @brief Set the point's absolute coordinate on X & Y axis
          * @param iX the desired coordinate on X axis
          * @param iY the desired coordinate on Y axis
          */
-        virtual void SetCoords( double iX, double iY );
+        void Set( double iX, double iY );
+
+        /**
+         * @brief Set the point's absolute coordinate on X & Y axis
+         * @param iX the desired coordinate on X axis
+         * @param iY the desired coordinate on Y axis
+         * @param iRadius the desired point's radius
+         */
+        void Set( double iX, double iY, double iRadius );
 
         /**
          * @brief Set the point's absolute coordinate on X axis
          * @param iX the desired coordinate on X axis
          */
-        virtual void SetX( double iX );
+        void SetX( double iX );
 
         /**
          * @brief Set the point's absolute coordinate on Y axis
          * @param iY the desired coordinate on Y axis
          */
-        virtual void SetY( double iY );
+        void SetY( double iY );
 
-        /**
-         * @brief Set the point's absolute coordinates on both X and Y axis
-         * @param iX the desired coordinate on X axis
-         * @param iY the desired coordinate on Y axis
-         */
-        virtual void Set( double iX, double iY );
-        virtual void Set( double iX, double iY, double iRadius );
         /**
          * @brief Set the point's absolute radius
          * @param iRadius the desired point's radius
          */
-        virtual void SetRadius( double iRadius );
+        void SetRadius( double iRadius );
 
         /**
          * @brief Set the point's ID. This is for the programmer to use e.g as an index of an array.
@@ -111,10 +114,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorPoint
                                       , std::vector<FOdysseyVectorVertex*>& oVertexArray );
 
     protected:
+        virtual void SetCoords( double iX, double iY, double iRadius );
+
+    protected:
         uint32 mID;
         ::ULIS::FVec2D mCoords;
         double mRadius;
-
-    private:
-        static const uint32 mStaticClass = 0xead829a; // value is crc32 FOdysseyVectorPoint
 };

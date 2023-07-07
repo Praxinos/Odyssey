@@ -2,13 +2,11 @@
 
 FOdysseyVectorPoint::~FOdysseyVectorPoint()
 {
-
 }
 
 FOdysseyVectorPoint::FOdysseyVectorPoint()
 {
-    Set( 0.0f,0.0f );
-    SetRadius( 1.0f );
+    Init( 0.0f, 0.0f, 0.0f );
 }
 
 FOdysseyVectorPoint::FOdysseyVectorPoint( double iX, double iY, double iRadius )
@@ -19,22 +17,45 @@ FOdysseyVectorPoint::FOdysseyVectorPoint( double iX, double iY, double iRadius )
 void
 FOdysseyVectorPoint::Init( double iX, double iY, double iRadius )
 {
-    Set( iX, iY );
-    SetRadius( iRadius );
+    Set( iX, iY, iRadius );
 }
 
 void
-FOdysseyVectorPoint::SetCoords( const ::ULIS::FVec2D& iCoords )
+FOdysseyVectorPoint::Set( const ::ULIS::FVec2D& iCoords )
 {
-    mCoords.x  = iCoords.x;
-    mCoords.y  = iCoords.y;
+    SetCoords( iCoords.x, iCoords.y, mRadius );
 }
 
 void
-FOdysseyVectorPoint::SetCoords( double iX, double iY )
+FOdysseyVectorPoint::Set( double iX, double iY, double iRadius )
 {
-    mCoords.x  = iX;
-    mCoords.y  = iY;
+    SetCoords( iX, iY, iRadius );
+}
+
+void
+FOdysseyVectorPoint::Set( double iX, double iY )
+{
+    SetCoords( iX, iY, mRadius );
+}
+
+void 
+FOdysseyVectorPoint::SetX( double iX )
+{
+    SetCoords( iX, mCoords.y, mRadius );
+}
+
+void 
+FOdysseyVectorPoint::SetY( double iY )
+{
+    SetCoords( mCoords.x, iY, mRadius );
+}
+
+void 
+FOdysseyVectorPoint::SetCoords( double iX, double iY, double iRadius )
+{
+    mCoords.x = iX;
+    mCoords.y = iY;
+    mRadius = iRadius;
 }
 
 ::ULIS::FVec2D&
@@ -64,33 +85,6 @@ double
 FOdysseyVectorPoint::GetY()
 {
     return mCoords.y;
-}
-
-void 
-FOdysseyVectorPoint::SetX( double iX )
-{
-    mCoords.x  = iX;
-}
-
-void 
-FOdysseyVectorPoint::SetY( double iY )
-{
-    mCoords.y = iY;
-}
-
-void 
-FOdysseyVectorPoint::Set( double iX, double iY )
-{
-    SetX( iX );
-    SetY( iY );
-}
-
-void 
-FOdysseyVectorPoint::Set( double iX, double iY, double iRadius )
-{
-    SetX( iX );
-    SetY( iY );
-    SetRadius( iRadius );
 }
 
 double

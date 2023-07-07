@@ -21,10 +21,10 @@ FOdysseyTextureEditorVectorPickToolVertexContextMenu::FOdysseyTextureEditorVecto
     mMenu.BeginSection("Context");
     {
     mMenu.AddMenuEntry(
-          LOCTEXT("KnotVertices", "Knot Vertices")
-        , LOCTEXT("KnotVertices", "Knot Vertices")
+          LOCTEXT("StitchVertices", "Stitch Vertices")
+        , LOCTEXT("StitchVertices", "Stitch Vertices")
         , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
-        , FUIAction(FExecuteAction::CreateSP(iEditor->GetGUI(), &FOdysseyTextureEditorGUI::KnotVertices)));
+        , FUIAction(FExecuteAction::CreateSP(iEditor->GetGUI(), &FOdysseyTextureEditorGUI::StitchVertices)));
     }
     mMenu.EndSection();
 }

@@ -9,17 +9,14 @@ FOdysseyVectorCycle::~FOdysseyVectorCycle()
 }
 
 //static
-FOdysseyVectorCycle::FOdysseyVectorCycle( FOdysseyVectorObject& iParent
-                                        , uint64 iID
+FOdysseyVectorCycle::FOdysseyVectorCycle( FOdysseyVectorObject& iOwner
                                         , std::vector<FOdysseyVectorVertex*>& iVertexArray
                                         , std::vector<FOdysseyVectorSection*>& iSectionArray )
-    : mParent( iParent )
-    , mID( iID )
+    : mOwner( iOwner )
     , mBucket( nullptr )
     , mPropagatedBucket( nullptr )
     , mVertexArray (iVertexArray)
     , mSectionArray (iSectionArray)
-    , mFlags (0)
     , mParentCycle( nullptr )
     , mPropagated( false )
 {
@@ -29,17 +26,31 @@ FOdysseyVectorCycle::FOdysseyVectorCycle( FOdysseyVectorObject& iParent
 void
 FOdysseyVectorCycle::Merge( FOdysseyVectorCycle* iMergeCycle )
 {
-    mVertexArray.insert( mVertexArray.end(), iMergeCycle->mVertexArray.begin(), iMergeCycle->mVertexArray.end() );
-    mSectionArray.insert( mSectionArray.end(), iMergeCycle->mSectionArray.begin(), iMergeCycle->mSectionArray.end() );
-
     for( int i = 0; i < iMergeCycle->mSectionArray.size(); i++ )
     {
-        iMergeCycle->mSectionArray[i]->AddCycle( this );
+        // This will add the cycle C to the section ONLY if the section does not already
+        // belongs to 2 cycles. Indeed, in the case described below, some sections may
+        // not be boundary sections. For instance, the section noted as ===== already
+        // belongs to cycles A and B.
+        //   ___________________
+        //  |    ___________    |
+        //  |   |     A     |   |
+        //  |   |===========| C |
+        //  |   |     B     |   |
+        //  |   |___________|   |
+        //  |___________________|
+        //
+        // note: we use mCombinedPath only for the filling part.
+        //
+        if( iMergeCycle->mSectionArray[i]->GetCycleCount() < 2 )
+        {
+            iMergeCycle->mSectionArray[i]->AddCycle( this );
+
+            mInnerSectionArray.push_back( iMergeCycle->mSectionArray[i] );
+        }
     }
 
     mCombinedPath.addPath( iMergeCycle->mContourPath );
-
-    //for( int i = 0; i < iMergeCycle->mSectionArray.size(); i++ )
 }
 
 FOdysseyVectorCycle*
@@ -58,6 +69,7 @@ bool
 FOdysseyVectorCycle::FitsIn( FOdysseyVectorCycle* iParentCandidate )
 {
     // First test : get sure they don't share a common section
+    // which would in that case mean that we do not fit in the parent cycle
     for( int i = 0; i < mSectionArray.size(); i++ )
     {
         if( mSectionArray[i]->GetOtherCycle( this ) == iParentCandidate )
@@ -66,11 +78,12 @@ FOdysseyVectorCycle::FitsIn( FOdysseyVectorCycle* iParentCandidate )
         }
     }
 
+    // Then check if all vertices lies within the parent candidate
     for( int i = 0; i < mVertexArray.size(); i++ )
     {
         ::ULIS::FVec2D& vCoords = mVertexArray[i]->GetCoords();
-        BLPoint pt = { vCoords.x, vCoords.y };
-        uint32 ret =  iParentCandidate->mContourPath.hitTest( pt, BL_FILL_RULE_EVEN_ODD );
+        BLPoint pt = BLPoint( vCoords.x, vCoords.y );
+        uint32 ret = iParentCandidate->mContourPath.hitTest( pt, BL_FILL_RULE_EVEN_ODD );
 
         if( ret != BL_HIT_TEST_IN )
         {
@@ -79,56 +92,6 @@ FOdysseyVectorCycle::FitsIn( FOdysseyVectorCycle* iParentCandidate )
     }
 
     return true;
-}
-
-// static
-uint64
-FOdysseyVectorCycle::GenerateID( std::vector<FOdysseyVectorSection*>& iSectionArray )
-{
-    uint64 loopID = 0;
-
-    for( int i = 0; i < iSectionArray.size(); i++ )
-    {
-        loopID = loopID ^ ( uint64 ) iSectionArray[i];
-    }
-
-    return loopID;
-}
-
-void
-FOdysseyVectorCycle::BuildSegmentCubic( FOdysseyVectorSegmentCubic& iSegment
-                                      , double iFromT
-                                      , double iToT )
-{
-    ::ULIS::FVec2D& point0 = iSegment.GetVertex(0)->GetCoords();
-    ::ULIS::FVec2D& point1 = iSegment.GetVertex(1)->GetCoords();
-    ::ULIS::FVec2D& ctrlPoint0 = iSegment.GetHandle(0)->GetCoords();
-    ::ULIS::FVec2D& ctrlPoint1 = iSegment.GetHandle(1)->GetCoords();
-    ::ULIS::FVec2D samplePoint0;
-    ::ULIS::FVec2D samplePoint1;
-    ::ULIS::FVec2D sampleCtrlPoint0;
-    ::ULIS::FVec2D sampleCtrlPoint1;
-
-    if( iFromT < iToT )
-    {
-        FOdysseyVector::BezierExtract( point0, ctrlPoint0, ctrlPoint1, point1
-                                     , iFromT, iToT
-                                     , samplePoint0, sampleCtrlPoint0, sampleCtrlPoint1, samplePoint1 );
-
-        mContourPath.cubicTo( BLPoint( sampleCtrlPoint0.x, sampleCtrlPoint0.y )
-                            , BLPoint( sampleCtrlPoint1.x, sampleCtrlPoint1.y )
-                            , BLPoint( samplePoint1.x, samplePoint1.y ) );
-    }
-    else
-    {
-        FOdysseyVector::BezierExtract( point0, ctrlPoint0, ctrlPoint1, point1
-                                     , iToT, iFromT
-                                     , samplePoint0, sampleCtrlPoint0, sampleCtrlPoint1, samplePoint1 );
-
-        mContourPath.cubicTo( BLPoint( sampleCtrlPoint1.x, sampleCtrlPoint1.y )
-                            , BLPoint( sampleCtrlPoint0.x, sampleCtrlPoint0.y )
-                            , BLPoint( samplePoint0.x, samplePoint0.y ) );
-    }
 }
 
 void
@@ -167,7 +130,8 @@ FOdysseyVectorCycle::Build( std::vector<FOdysseyVectorVertex*>& iVertexArray
                 }
             }
 
-            // check it goes the same direction
+            // check if we need to revert the bezier. Indeed, a cycle is a combination of sections
+            // that may not go the same way. We have to run through them the same way.
             if( vertexi == sectionVertex0 )
             {
                 mContourPath.cubicTo( sectionBezier[1].x, sectionBezier[1].y
@@ -244,41 +208,26 @@ FOdysseyVectorCycle::PropagateBucket()
     return false;
 }
 
-std::vector<FOdysseyVectorSection*>&
-FOdysseyVectorCycle::GetSectionArray()
-{
-    return mSectionArray;
-}
-
 bool
 FOdysseyVectorCycle::HitTest( double iX, double iY )
 {
-    BLContext* blctx = mParent.GetScene()->GetEngine()->GetBLContext();
+    BLContext* blctx = mOwner.GetScene()->GetEngine()->GetBLContext();
     BLPoint pt = { iX, iY };
 
-    // WARNING: looks like in this version the return value is a bool (in the shape of an int) but in later version is a enum value. We will have to fix that.
     uint32 ret = mCombinedPath.hitTest( pt, BL_FILL_RULE_EVEN_ODD );
 
     return ( ret == BL_HIT_TEST_IN ) ? true : false;
 }
 
 void
-FOdysseyVectorCycle::FillPath()
-{
-    BLContext* blctx = mParent.GetScene()->GetEngine()->GetBLContext();
-
-    blctx->setFillRule( BL_FILL_RULE_EVEN_ODD );
-    blctx->fillPath( mCombinedPath );
-}
-
-void
 FOdysseyVectorCycle::StrokePath( bool iWorld )
 {
-    BLContext* blctx = mParent.GetScene()->GetEngine()->GetBLContext();
+    BLContext* blctx = mOwner.GetScene()->GetEngine()->GetBLContext();
 
     if( iWorld == true )
     {
-        BLMatrix2D worldMatrix = mParent.GetWorldMatrix();
+        BLMatrix2D worldMatrix = mOwner.GetWorldMatrix();
+        BLPath contourPath = mContourPath;
 
         blctx->save();
 
@@ -287,36 +236,26 @@ FOdysseyVectorCycle::StrokePath( bool iWorld )
             blctx->resetMatrix();
         }
 
-        for( int i = 0; i < mSectionArray.size(); i++ )
+        if( iWorld )
         {
-            ::ULIS::FVec2D* bezier = mSectionArray[i]->GetBezier();
+            contourPath.transform( worldMatrix );
+        }
 
-            // During the merge, we merged all sections belonging to children cycles. However, some sections  may not be
-            // boundary sections. For instance, the below section noted as ====== is not a boundary section. so we have
-            // to filter to get sure we draw only boundary sections for a better visual result. Only sections linked to
-            // the cycles are drawn. See FOdysseyVectorCycle::Merge() and FOdysseyVectorSection::AddCycle() for details.
-            //   ___________________
-            //  |    ___________    |
-            //  |   |           |   |
-            //  |   |===========|   |
-            //  |   |___________|   |
-            //  |___________________|
-            //
-            // note: we use mCombinedPath only for the filling part.
-            //
-            if( mSectionArray[i]->HasCycle( this ) )
-            {
-                BLPoint pt[4] = { iWorld ? worldMatrix.mapPoint( bezier[0].x, bezier[0].y ) : BLPoint( bezier[0].x, bezier[0].y )
-                                , iWorld ? worldMatrix.mapPoint( bezier[1].x, bezier[1].y ) : BLPoint( bezier[1].x, bezier[1].y )
-                                , iWorld ? worldMatrix.mapPoint( bezier[2].x, bezier[2].y ) : BLPoint( bezier[2].x, bezier[2].y )
-                                , iWorld ? worldMatrix.mapPoint( bezier[3].x, bezier[3].y ) : BLPoint( bezier[3].x, bezier[3].y ) };
-                BLPath sectionPath;
+        blctx->strokePath( contourPath );
 
-                sectionPath.moveTo ( pt[0] );
-                sectionPath.cubicTo( pt[1], pt[2], pt[3] );
+        for( int i = 0; i < mInnerSectionArray.size(); i++ )
+        {
+            ::ULIS::FVec2D* bezier = mInnerSectionArray[i]->GetBezier();
+            BLPoint pt[4] = { iWorld ? worldMatrix.mapPoint( bezier[0].x, bezier[0].y ) : BLPoint( bezier[0].x, bezier[0].y )
+                            , iWorld ? worldMatrix.mapPoint( bezier[1].x, bezier[1].y ) : BLPoint( bezier[1].x, bezier[1].y )
+                            , iWorld ? worldMatrix.mapPoint( bezier[2].x, bezier[2].y ) : BLPoint( bezier[2].x, bezier[2].y )
+                            , iWorld ? worldMatrix.mapPoint( bezier[3].x, bezier[3].y ) : BLPoint( bezier[3].x, bezier[3].y ) };
+            BLPath sectionPath;
 
-                blctx->strokePath( sectionPath );
-            }
+            sectionPath.moveTo ( pt[0] );
+            sectionPath.cubicTo( pt[1], pt[2], pt[3] );
+
+            blctx->strokePath( sectionPath );
         }
 
         blctx->restore();
@@ -325,6 +264,7 @@ FOdysseyVectorCycle::StrokePath( bool iWorld )
     blctx->flush( BL_CONTEXT_FLUSH_SYNC );
 }
 
+// for debugging purposes
 static void
 ShowCycle( std::vector<FOdysseyVectorVertex*>& vertexArray
           , std::vector<FOdysseyVectorSection*>& sectionArray)
@@ -347,10 +287,10 @@ ShowCycle( std::vector<FOdysseyVectorVertex*>& vertexArray
 void
 FOdysseyVectorCycle::Draw( uint64 iFlags )
 {
-    BLContext* blctx = mParent.GetScene()->GetEngine()->GetBLContext();
+    BLContext* blctx = mOwner.GetScene()->GetEngine()->GetBLContext();
     FOdysseyVectorBucket* bucket = mBucket ? mBucket : mPropagatedBucket;
-    BLMatrix2D& worldMatrix = mParent.GetWorldMatrix();
-    ::ULIS::FRectD bbox = mParent.GetBBox( false );
+    BLMatrix2D& worldMatrix = mOwner.GetWorldMatrix();
+    ::ULIS::FRectD bbox = mOwner.GetBBox( false );
 
     //BLBox bbox;
     //mContourPath.getBoundingBox( &bbox );
@@ -436,10 +376,4 @@ FOdysseyVectorCycle::Draw( uint64 iFlags )
     }
 
     blctx->restore();
-}
-
-uint64
-FOdysseyVectorCycle::GetID()
-{
-    return mID;
 }

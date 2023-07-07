@@ -172,7 +172,7 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDragVector( FOdysseyVectorEngine
         {
             FOdysseyVectorHandleSegment* handleSegment = static_cast<FOdysseyVectorHandleSegment*>(point);
 
-            path = handleSegment->GetParent()->GetPath();
+            path = handleSegment->GetOwner()->GetPath();
         }
         else
         {

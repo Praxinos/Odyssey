@@ -28,8 +28,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
     public:
         virtual ~FOdysseyVectorSegmentCubic();
 
-        FOdysseyVectorSegmentCubic();
-
        /**
          * @brief function to allocate a new cubic segment.
          * @param iPath the path this segment belongs to

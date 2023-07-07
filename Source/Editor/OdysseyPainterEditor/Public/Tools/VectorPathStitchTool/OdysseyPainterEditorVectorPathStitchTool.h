@@ -6,22 +6,22 @@
 #include "CoreMinimal.h"
 #include "Tools/DefaultTool/OdysseyPainterEditorDefaultTool.h"
 #include "OdysseyVector.h"
-#include "Undo/OdysseyVectorUndoPathKnot.h"
+#include "Undo/OdysseyVectorUndoPathStitch.h"
 
-#include "OdysseyPainterEditorVectorPathKnotTool.generated.h"
+#include "OdysseyPainterEditorVectorPathStitchTool.generated.h"
 
 UCLASS()
-class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathKnotTool : public UOdysseyPainterEditorDefaultTool
+class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathStitchTool : public UOdysseyPainterEditorDefaultTool
 {
 public:
     GENERATED_BODY()
 
 public:
     // Destructor
-    virtual ~UOdysseyPainterEditorVectorPathKnotTool();
+    virtual ~UOdysseyPainterEditorVectorPathStitchTool();
 
     //Constructor
-    UOdysseyPainterEditorVectorPathKnotTool();
+    UOdysseyPainterEditorVectorPathStitchTool();
 
     void UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
     void LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
@@ -50,6 +50,6 @@ private:
         FOdysseyVectorHUDPicking mPickingHUD;
 
 public:
-    UPROPERTY(EditAnywhere, Category="Odyssey PathKnot Tool", meta = (ClampMin = "0.0", UIMin = "0.0") )
+    UPROPERTY(EditAnywhere, Category="Odyssey PathStitch Tool", meta = (ClampMin = "0.0", UIMin = "0.0") )
     double Radius;
 };

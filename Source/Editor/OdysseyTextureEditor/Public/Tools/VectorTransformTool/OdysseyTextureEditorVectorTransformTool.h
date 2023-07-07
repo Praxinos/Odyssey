@@ -25,6 +25,9 @@ public:
     virtual void Activate() override;
     virtual void Inactivate() override;
     virtual bool IsActivable() const override;
+
+    virtual bool OnKeyDown( const FKey& iKey ) override;
+    virtual bool OnKeyUp( const FKey& iKey ) override;
     virtual bool OnMouseDown( const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
     virtual void OnMouseHover( const FOdysseyPoint& iPointInTexture ) override;
     virtual void OnMouseDrag( const FOdysseyPoint& iPointInTexture ) override;

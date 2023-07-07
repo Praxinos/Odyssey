@@ -345,13 +345,11 @@ CreateVertexGapSegment( FOdysseyVectorVertex* iVertex
         // or if the nearest vertex is an intersection vertex.
         ||    ( nearestVertex->GetClass() == FOdysseyVectorVertexIntersection::StaticClass() ) )
         {
-            iGapSegmentBuffer.emplace_back();
             // Warning: setting a parent path here leads to bugs, due to path update of a segment not really belonging to it.
-            iGapSegmentBuffer[gapCount].Init( nearestVertex, iVertex );
+            iGapSegmentBuffer.emplace_back( nullptr, nearestVertex, iVertex );
             //iGapSegmentBuffer[gapCount].Link(); // not necessary. saves us some cpu cycles
 
-            iSectionBuffer.emplace_back();
-            iSectionBuffer[sectionCount].Init( &iGapSegmentBuffer[gapCount], nearestVertex, iVertex );
+            iSectionBuffer.emplace_back( &iGapSegmentBuffer[gapCount], nearestVertex, iVertex );
             iSectionBuffer[sectionCount].Link();
 
             ::ULIS::FVec2D delta = iVertex->GetCoords() - nearestVertex->GetCoords();
@@ -583,7 +581,7 @@ FOdysseyVectorGroupPaint::FindPath( FOdysseyVectorSection* iReturnSection
         {
             //UE_LOG(LogTemp,Warning,TEXT("cycle accepted") );
 
-            mCycleList.push_back( new FOdysseyVectorCycle( *this, /*iCycleID*/0, iVertexArray, iSectionArray ) );
+            mCycleList.push_back( new FOdysseyVectorCycle( *this, iVertexArray, iSectionArray ) );
         }
 
         ret = FOdysseyVectorGroupPaint::HASCYCLE;
@@ -1015,7 +1013,7 @@ FOdysseyVectorGroupPaint::BuildGraph()
 
                 if( vertexArray.size() )
                 {
-                    mCycleList.push_back( new FOdysseyVectorCycle( *this, /*iCycleID*/0, vertexArray, sectionArray ) );
+                    mCycleList.push_back( new FOdysseyVectorCycle( *this, vertexArray, sectionArray ) );
                 }
             }
 
@@ -1240,7 +1238,7 @@ FOdysseyVectorGroupPaint::CopyBuckets( FOdysseyVectorGroupPaint* iDestination, b
 
         bucket->Copy( bucketCopy );
 
-        bucketCopy->SetCoords( destinationBucketPosition.x, destinationBucketPosition.y );
+        bucketCopy->Set( destinationBucketPosition.x, destinationBucketPosition.y );
 
         iDestination->AddBucket( bucketCopy );
      }   

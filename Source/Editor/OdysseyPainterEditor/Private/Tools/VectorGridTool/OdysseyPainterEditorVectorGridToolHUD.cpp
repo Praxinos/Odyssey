@@ -291,13 +291,16 @@ FOdysseyPainterEditorVectorGridToolHUD::Export( std::vector<FOdysseyVectorPoint*
 {
     uint32 count = 0;
 
-    oPointArray.resize( mPointCount );
-
-    for( uint32 i = 0; i < mCellCountY * mCellCountX; i++ )
+    if( mSelectionBox.rect.Area() ) // else, mPointCount is undefined 
     {
-        for( uint32 j = 0; j < mCellArray[i].mPointArray.size(); j++ )
+        oPointArray.resize( mPointCount );
+
+        for( uint32 i = 0; i < mCellCountY * mCellCountX; i++ )
         {
-            oPointArray[count++] = mCellArray[i].mPointArray[j].mPoint;
+            for( uint32 j = 0; j < mCellArray[i].mPointArray.size(); j++ )
+            {
+                oPointArray[count++] = mCellArray[i].mPointArray[j].mPoint;
+            }
         }
     }
 }

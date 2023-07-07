@@ -22,10 +22,15 @@ FOdysseyVectorGroup::HasBaseClass( uint32 iBaseClassID )
     return FOdysseyVectorObject::HasBaseClass( iBaseClassID );
 }
 
+void
+FOdysseyVectorGroup::DrawShape( uint64 iFlags )
+{
+
+}
+
 bool
 FOdysseyVectorGroup::PickShape( const ::ULIS::FRectD &iRoi, uint32 iSelectionFlags )
 {
-
     return false;
 }
 
@@ -40,6 +45,8 @@ FOdysseyVectorGroup::UpdateShape( uint32 iUpdateFlags )
 {
     ::ULIS::FRectD bbox;
     int init = 0;
+
+    // Update the bounding box
 
     for( std::list<FOdysseyVectorObject*>::iterator it = mChildrenList.begin(); it != mChildrenList.end(); ++it )
     {

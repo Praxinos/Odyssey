@@ -1,18 +1,18 @@
 // IDDN FR.001.250001.005.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
-#include "Tools/VectorPathKnotTool/OdysseyTextureEditorVectorPathKnotTool.h"
+#include "Tools/VectorPathStitchTool/OdysseyTextureEditorVectorPathStitchTool.h"
 #include "LayerStack/OdysseyTextureLayerImageVector.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyTextureEditorVectorPathKnotTool"
+#define LOCTEXT_NAMESPACE "OdysseyTextureEditorVectorPathStitchTool"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
-UOdysseyTextureEditorVectorPathKnotTool::~UOdysseyTextureEditorVectorPathKnotTool()
+UOdysseyTextureEditorVectorPathStitchTool::~UOdysseyTextureEditorVectorPathStitchTool()
 {
 }
 
-UOdysseyTextureEditorVectorPathKnotTool::UOdysseyTextureEditorVectorPathKnotTool()
+UOdysseyTextureEditorVectorPathStitchTool::UOdysseyTextureEditorVectorPathStitchTool()
 {
 }
 
@@ -20,15 +20,15 @@ UOdysseyTextureEditorVectorPathKnotTool::UOdysseyTextureEditorVectorPathKnotTool
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
 void
-UOdysseyTextureEditorVectorPathKnotTool::Activate()
+UOdysseyTextureEditorVectorPathStitchTool::Activate()
 {
-    UOdysseyTextureLayerStack::OnCurrentLayerChanged().AddUObject( this, &UOdysseyTextureEditorVectorPathKnotTool::OnCurrentLayerChanged );
+    UOdysseyTextureLayerStack::OnCurrentLayerChanged().AddUObject( this, &UOdysseyTextureEditorVectorPathStitchTool::OnCurrentLayerChanged );
     Load();
     Super::Activate();
 }
 
 void
-UOdysseyTextureEditorVectorPathKnotTool::Load()
+UOdysseyTextureEditorVectorPathStitchTool::Load()
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
@@ -38,12 +38,12 @@ UOdysseyTextureEditorVectorPathKnotTool::Load()
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
-        UOdysseyPainterEditorVectorPathKnotTool::LoadVector( vectorEngine, vectorScene );
+        UOdysseyPainterEditorVectorPathStitchTool::LoadVector( vectorEngine, vectorScene );
     }
 }
 
 void
-UOdysseyTextureEditorVectorPathKnotTool::Inactivate()
+UOdysseyTextureEditorVectorPathStitchTool::Inactivate()
 {
 	UOdysseyTextureLayerStack::OnCurrentLayerChanged().RemoveAll(this);
     Super::Inactivate();
@@ -51,7 +51,7 @@ UOdysseyTextureEditorVectorPathKnotTool::Inactivate()
 }
 
 void
-UOdysseyTextureEditorVectorPathKnotTool::Unload()
+UOdysseyTextureEditorVectorPathStitchTool::Unload()
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
 
@@ -65,13 +65,13 @@ UOdysseyTextureEditorVectorPathKnotTool::Unload()
             FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
             FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
-            UOdysseyPainterEditorVectorPathKnotTool::UnloadVector( vectorEngine, vectorScene );
+            UOdysseyPainterEditorVectorPathStitchTool::UnloadVector( vectorEngine, vectorScene );
         }
     }
 }
 
 bool
-UOdysseyTextureEditorVectorPathKnotTool::IsActivable() const
+UOdysseyTextureEditorVectorPathStitchTool::IsActivable() const
 {
     if (!Super::IsActivable())
         return false; 
@@ -88,7 +88,7 @@ UOdysseyTextureEditorVectorPathKnotTool::IsActivable() const
 }
 
 void
-UOdysseyTextureEditorVectorPathKnotTool::OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStack)
+UOdysseyTextureEditorVectorPathStitchTool::OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStack)
 {
 	//ensure iLayerstack is the one the tool is working on
 	UOdysseyTextureLayerStack* layerstack = GetEditorAs<FOdysseyTextureEditor>()->LayerStack();
@@ -117,7 +117,7 @@ UOdysseyTextureEditorVectorPathKnotTool::OnCurrentLayerChanged(UOdysseyLayerStac
 }
 
 bool
-UOdysseyTextureEditorVectorPathKnotTool::OnKeyDown( const FKey& iKey )
+UOdysseyTextureEditorVectorPathStitchTool::OnKeyDown( const FKey& iKey )
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
@@ -128,14 +128,14 @@ UOdysseyTextureEditorVectorPathKnotTool::OnKeyDown( const FKey& iKey )
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
-        ret = UOdysseyPainterEditorVectorPathKnotTool::OnKeyDownVector( vectorEngine, vectorScene, iKey );
+        ret = UOdysseyPainterEditorVectorPathStitchTool::OnKeyDownVector( vectorEngine, vectorScene, iKey );
     }
 
     return ret;
 }
 
 bool
-UOdysseyTextureEditorVectorPathKnotTool::OnKeyUp( const FKey& iKey )
+UOdysseyTextureEditorVectorPathStitchTool::OnKeyUp( const FKey& iKey )
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
@@ -146,14 +146,14 @@ UOdysseyTextureEditorVectorPathKnotTool::OnKeyUp( const FKey& iKey )
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
-        ret = UOdysseyPainterEditorVectorPathKnotTool::OnKeyUpVector( vectorEngine, vectorScene, iKey );
+        ret = UOdysseyPainterEditorVectorPathStitchTool::OnKeyUpVector( vectorEngine, vectorScene, iKey );
     }
 
     return ret;
 }
 
 bool
-UOdysseyTextureEditorVectorPathKnotTool::OnMouseDown( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
+UOdysseyTextureEditorVectorPathStitchTool::OnMouseDown( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
 {
     TSharedPtr<FOdysseyPainterEditorSelectedVectorObjectTab>& vectorObjectTab = GetEditorAs<FOdysseyTextureEditor>()->GetGUI()->GetSelectedVectorObjectTab();
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
@@ -165,14 +165,14 @@ UOdysseyTextureEditorVectorPathKnotTool::OnMouseDown( const FOdysseyPoint& iPoin
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
-        ret = UOdysseyPainterEditorVectorPathKnotTool::OnMouseDownVector( vectorEngine, vectorScene, iPointInTexture,iKey  );
+        ret = UOdysseyPainterEditorVectorPathStitchTool::OnMouseDownVector( vectorEngine, vectorScene, iPointInTexture,iKey  );
     }
 
     return ret;
 }
 
 void
-UOdysseyTextureEditorVectorPathKnotTool::OnMouseHover( const FOdysseyPoint& iPointInTexture )
+UOdysseyTextureEditorVectorPathStitchTool::OnMouseHover( const FOdysseyPoint& iPointInTexture )
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
@@ -182,12 +182,12 @@ UOdysseyTextureEditorVectorPathKnotTool::OnMouseHover( const FOdysseyPoint& iPoi
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
-        UOdysseyPainterEditorVectorPathKnotTool::OnMouseHoverVector( vectorEngine, vectorScene, iPointInTexture );
+        UOdysseyPainterEditorVectorPathStitchTool::OnMouseHoverVector( vectorEngine, vectorScene, iPointInTexture );
     }
 }
 
 void
-UOdysseyTextureEditorVectorPathKnotTool::OnMouseDrag( const FOdysseyPoint& iPointInTexture )
+UOdysseyTextureEditorVectorPathStitchTool::OnMouseDrag( const FOdysseyPoint& iPointInTexture )
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
@@ -197,12 +197,12 @@ UOdysseyTextureEditorVectorPathKnotTool::OnMouseDrag( const FOdysseyPoint& iPoin
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
-        UOdysseyPainterEditorVectorPathKnotTool::OnMouseDragVector( vectorEngine, vectorScene, iPointInTexture );
+        UOdysseyPainterEditorVectorPathStitchTool::OnMouseDragVector( vectorEngine, vectorScene, iPointInTexture );
     }
 }
 
 bool
-UOdysseyTextureEditorVectorPathKnotTool::OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
+UOdysseyTextureEditorVectorPathStitchTool::OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
@@ -213,14 +213,14 @@ UOdysseyTextureEditorVectorPathKnotTool::OnMouseUp( const FOdysseyPoint& iPointI
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
-        ret = UOdysseyPainterEditorVectorPathKnotTool::OnMouseUpVector( vectorEngine, vectorScene, iPointInTexture, iKey );
+        ret = UOdysseyPainterEditorVectorPathStitchTool::OnMouseUpVector( vectorEngine, vectorScene, iPointInTexture, iKey );
     }
 
     return ret;
 }
 
 void
-UOdysseyTextureEditorVectorPathKnotTool::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent )
+UOdysseyTextureEditorVectorPathStitchTool::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent )
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetEditorAs<FOdysseyTextureEditor>()->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());

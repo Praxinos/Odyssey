@@ -20,7 +20,7 @@
 #include "Tools/VectorPathPushTool/OdysseyPainterEditorVectorPathPushTool.h"
 #include "Tools/VectorPathWidthTool/OdysseyPainterEditorVectorPathWidthTool.h"
 #include "Tools/VectorPathSmoothTool/OdysseyPainterEditorVectorPathSmoothTool.h"
-#include "Tools/VectorPathKnotTool/OdysseyPainterEditorVectorPathKnotTool.h"
+#include "Tools/VectorPathStitchTool/OdysseyPainterEditorVectorPathStitchTool.h"
 #include "Tools/PaintBucketTool/OdysseyPainterEditorPaintBucketTool.h"
 #include "Tools/ColorPickerTool/OdysseyPainterEditorColorPickerTool.h"
 #include "Tools/VectorGridTool/OdysseyPainterEditorVectorGridTool.h"
@@ -79,7 +79,7 @@ public:
     virtual UOdysseyPainterEditorVectorPathPushTool*                 GetVectorPathPushTool() const = 0;
     virtual UOdysseyPainterEditorVectorPathWidthTool*                GetVectorPathWidthTool() const = 0;
     virtual UOdysseyPainterEditorVectorPathSmoothTool*               GetVectorPathSmoothTool() const = 0;
-    virtual UOdysseyPainterEditorVectorPathKnotTool*                 GetVectorPathKnotTool() const = 0;
+    virtual UOdysseyPainterEditorVectorPathStitchTool*               GetVectorPathStitchTool() const = 0;
     virtual UOdysseyPainterEditorPaintBucketTool*                    GetPaintBucketTool() const = 0;
     virtual UOdysseyPainterEditorColorPickerTool*                    GetColorPickerTool() const = 0;
 
@@ -97,7 +97,7 @@ public:
     static void DeleteBucket( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
     static void PropagateBucket( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
     static void UnpropagateBucket( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    static void KnotVertices( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    static void StitchVertices( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
 
     void SelectDefaultTool();
 

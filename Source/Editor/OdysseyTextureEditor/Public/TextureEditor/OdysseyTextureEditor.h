@@ -23,7 +23,7 @@
 #include "Tools/VectorPathPushTool/OdysseyTextureEditorVectorPathPushTool.h"
 #include "Tools/VectorPathWidthTool/OdysseyTextureEditorVectorPathWidthTool.h"
 #include "Tools/VectorPathSmoothTool/OdysseyTextureEditorVectorPathSmoothTool.h"
-#include "Tools/VectorPathKnotTool/OdysseyTextureEditorVectorPathKnotTool.h"
+#include "Tools/VectorPathStitchTool/OdysseyTextureEditorVectorPathStitchTool.h"
 #include "Tools/PaintBucketTool/OdysseyTextureEditorPaintBucketTool.h"
 #include "Tools/ColorPickerTool/OdysseyTextureEditorColorPickerTool.h"
 #include "Tools/VectorGridTool/OdysseyTextureEditorVectorGridTool.h"
@@ -72,7 +72,7 @@ public:
     virtual UOdysseyTextureEditorVectorPathPushTool* GetVectorPathPushTool() const override;
     virtual UOdysseyTextureEditorVectorPathWidthTool* GetVectorPathWidthTool() const override;
     virtual UOdysseyTextureEditorVectorPathSmoothTool* GetVectorPathSmoothTool() const override;
-    virtual UOdysseyTextureEditorVectorPathKnotTool* GetVectorPathKnotTool() const override;
+    virtual UOdysseyTextureEditorVectorPathStitchTool* GetVectorPathStitchTool() const override;
     virtual UOdysseyTextureEditorPaintBucketTool* GetPaintBucketTool() const override;
     virtual UOdysseyTextureEditorColorPickerTool* GetColorPickerTool() const override;
     virtual UOdysseyTextureEditorVectorGridTool* GetVectorGridTool() const override;
@@ -118,7 +118,7 @@ private:
     UOdysseyTextureEditorVectorPathPushTool* mVectorPathPushTool;
     UOdysseyTextureEditorVectorPathWidthTool* mVectorPathWidthTool;
     UOdysseyTextureEditorVectorPathSmoothTool* mVectorPathSmoothTool;
-    UOdysseyTextureEditorVectorPathKnotTool* mVectorPathKnotTool;
+    UOdysseyTextureEditorVectorPathStitchTool* mVectorPathStitchTool;
     UOdysseyTextureEditorPaintBucketTool* mPaintBucketTool;
     UOdysseyTextureEditorColorPickerTool* mColorPickerTool;
     UOdysseyTextureEditorVectorGridTool* mVectorGridTool;

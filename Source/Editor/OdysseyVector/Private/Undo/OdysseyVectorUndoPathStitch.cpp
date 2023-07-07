@@ -1,6 +1,6 @@
-#include "Undo/OdysseyVectorUndoPathKnot.h"
+#include "Undo/OdysseyVectorUndoPathStitch.h"
 
-FOdysseyVectorUndoPathKnot::~FOdysseyVectorUndoPathKnot()
+FOdysseyVectorUndoPathStitch::~FOdysseyVectorUndoPathStitch()
 {
     if( mApplied )
     {
@@ -24,15 +24,15 @@ FOdysseyVectorUndoPathKnot::~FOdysseyVectorUndoPathKnot()
     mMergedSegmentArray.clear();
 }
 
-FOdysseyVectorUndoPathKnot::FOdysseyVectorUndoPathKnot( FOdysseyVectorScene* iScene
-                                                      , std::vector<FOdysseyVectorPath*>& iRemovedPathArray
-                                                      , std::vector<FOdysseyVectorVertex*>& iRemovedVertexArray
-                                                      , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray
-                                                      , std::vector<FOdysseyVectorPath*>& iAddedPathArray
-                                                      , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
-                                                      , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray
-                                                      , std::vector<FOdysseyVectorVertex*>& iMergedVertexArray
-                                                      , std::vector<FOdysseyVectorSegment*>& iMergedSegmentArray )
+FOdysseyVectorUndoPathStitch::FOdysseyVectorUndoPathStitch( FOdysseyVectorScene* iScene
+                                                          , std::vector<FOdysseyVectorPath*>& iRemovedPathArray
+                                                          , std::vector<FOdysseyVectorVertex*>& iRemovedVertexArray
+                                                          , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray
+                                                          , std::vector<FOdysseyVectorPath*>& iAddedPathArray
+                                                          , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
+                                                          , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray
+                                                          , std::vector<FOdysseyVectorVertex*>& iMergedVertexArray
+                                                          , std::vector<FOdysseyVectorSegment*>& iMergedSegmentArray )
     : FOdysseyVectorUndoPathAlter( iScene
                                  , iRemovedPathArray
                                  , iRemovedVertexArray
@@ -46,7 +46,7 @@ FOdysseyVectorUndoPathKnot::FOdysseyVectorUndoPathKnot( FOdysseyVectorScene* iSc
 }
 
 void
-FOdysseyVectorUndoPathKnot::Apply( UObject* iIgnored )
+FOdysseyVectorUndoPathStitch::Apply( UObject* iIgnored )
 {
     for( int i = 0; i < mMergedVertexArray.size(); i++ )
     {
@@ -73,7 +73,7 @@ FOdysseyVectorUndoPathKnot::Apply( UObject* iIgnored )
 }
 
 void
-FOdysseyVectorUndoPathKnot::Revert( UObject* iIgnored )
+FOdysseyVectorUndoPathStitch::Revert( UObject* iIgnored )
 {
     FOdysseyVectorUndoPathAlter::Revert( iIgnored );
 
@@ -100,7 +100,7 @@ FOdysseyVectorUndoPathKnot::Revert( UObject* iIgnored )
 
 /** Describes this change (for debugging) */
 FString
-FOdysseyVectorUndoPathKnot::ToString() const
+FOdysseyVectorUndoPathStitch::ToString() const
 {
-    return FString("FOdysseyVectorUndoPathKnot");
+    return FString("FOdysseyVectorUndoPathStitch");
 }
