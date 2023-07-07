@@ -52,11 +52,10 @@ FOdysseyVectorLinkSample::~FOdysseyVectorLinkSample()
 {
 }
 
-void
-FOdysseyVectorLinkSample::Init( FOdysseyVectorPointSample* iSamplePoint0, FOdysseyVectorPointSample* iSamplePoint1 )
+FOdysseyVectorLinkSample::FOdysseyVectorLinkSample( FOdysseyVectorPointSample* iSamplePoint0
+                                                  , FOdysseyVectorPointSample* iSamplePoint1 )
+    : FOdysseyVectorLink( iSamplePoint0, iSamplePoint1 )
 {
-    FOdysseyVectorLink::Init( &mSamplePoint[0], &mSamplePoint[1] );
-
     mSamplePoint[0] = *iSamplePoint0;
     mSamplePoint[1] = *iSamplePoint1;
 }
@@ -260,10 +259,7 @@ FOdysseyVectorPathBuilder::RecordSample( double iX, double iY, double iRadius, u
 
         mSampleBuffer.push_back( sample );
 
-        mLinkBuffer.emplace_back();
-
-        mLinkBuffer[linkIndex].Init( previousSample, &mSampleBuffer[sampleIndex] ); // FOdysseyVectorLinkSample
-
+        mLinkBuffer.emplace_back( previousSample, &mSampleBuffer[sampleIndex] ); // FOdysseyVectorLinkSample
 
         ret |= ( FOdysseyVectorPathBuilder::NEWSAMPLE | RecordVertex() );
     }
@@ -326,8 +322,7 @@ FOdysseyVectorPathBuilder::ClearSamplesUntil( uint32 iID )
        uint32 linkIndex = mLinkBuffer.size();
        int n = i + 1;
 
-        mLinkBuffer.emplace_back();
-        mLinkBuffer[linkIndex].Init( &mSampleBuffer[i], &mSampleBuffer[n] ); // FOdysseyVectorLinkSample
+        mLinkBuffer.emplace_back( &mSampleBuffer[i], &mSampleBuffer[n] ); // FOdysseyVectorLinkSample
     }
 }
 

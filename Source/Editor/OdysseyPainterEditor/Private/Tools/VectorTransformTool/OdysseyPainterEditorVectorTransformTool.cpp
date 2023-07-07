@@ -42,12 +42,51 @@ void
 UOdysseyPainterEditorVectorTransformTool::LoadVector( FOdysseyVectorEngine* iEngine
                                                     , FOdysseyVectorScene* iScene )
 {
+    TSharedPtr< SViewport > viewportWidget; // to force keyboard focus on mouse hover.
+                                            // Prevents the user from having to click at least once in the viewport.
+    // we need the focus on the viewport for keyboard 
+    viewportWidget = GetEditorAs<FOdysseyPainterEditor>()->GetGUI()->GetViewportTab()->GetViewport()->GetViewportWidget();
+
+    // we need the focus on the viewport for keyboard 
+    FSlateApplication::Get().SetKeyboardFocus( viewportWidget );
+
     iEngine->ClearHUD();
     iEngine->AddHUD( mTransformHUD );
 
     mTransformHUD->Reset( iScene );
 
     iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+}
+
+bool
+UOdysseyPainterEditorVectorTransformTool::OnKeyDownVector( FOdysseyVectorEngine* iEngine
+                                                         , FOdysseyVectorScene* iScene
+                                                         , const FKey& iKey )
+{
+    UniformAtKeyDown = Uniform;
+
+    if ( FSlateApplication::Get().GetModifierKeys().IsShiftDown() )
+    {
+        Uniform = true;
+    }
+
+    UOdysseyPainterEditorDefaultTool::OnKeyDownVector( iEngine, iScene, iKey );
+    //iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+
+    return false;
+}
+
+bool
+UOdysseyPainterEditorVectorTransformTool::OnKeyUpVector( FOdysseyVectorEngine* iEngine
+                                                       , FOdysseyVectorScene* iScene
+                                                       , const FKey& iKey )
+{
+    Uniform = UniformAtKeyDown;
+
+    UOdysseyPainterEditorDefaultTool::OnKeyUpVector( iEngine, iScene, iKey );
+    //iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+
+    return false;
 }
 
 ::ULIS::FRectI
@@ -78,6 +117,11 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDownVector( FOdysseyVectorEngin
     uint32 hudFlags = mTransformHUD->GetFlags();
 
     mPickedPivot = hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_ZAXIS ? &mTransformHUD->GetGizmo() : nullptr;
+
+    // remember for undos. we don't set undos in the mouse down event because it could conflict with the undo created by
+    // UOdysseyPainterEditorVectorObjectPickTool::OnMouseUpVector() called when no dragging was made.
+    mObjectTransformArray.clear();
+    FObjectTransform::MakeArrayFromObjectList( iScene->GetSelectedObjectList(), mObjectTransformArray );
 
     mDragging = false;
 
@@ -527,6 +571,20 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseUpVector( FOdysseyVectorEngine*
     }
     else
     {
+        if( mObjectTransformArray.size() )
+        {
+            // needed for valid GUndo pointer
+            GEditor->BeginTransaction(LOCTEXT("VectorTransformTool","Vector Transform Tool"));
+            if( GUndo )
+            {
+                // save selected object translation/rotation/scaling before transform
+                FOdysseyVectorUndo* undo = new FOdysseyVectorUndoObjectTransform( iScene, mObjectTransformArray );
+
+                GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
+            }
+            GEditor->EndTransaction();
+        }
+
         iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
     }
 

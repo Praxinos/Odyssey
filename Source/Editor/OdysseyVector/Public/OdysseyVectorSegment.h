@@ -28,8 +28,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
                              , FOdysseyVectorVertex* iVertex0
                              , FOdysseyVectorVertex* iVertex1 );
 
-        FOdysseyVectorSegment();
-
         virtual ~FOdysseyVectorSegment();
 
         void SetID( uint32 iID );

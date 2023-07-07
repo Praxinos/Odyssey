@@ -345,13 +345,11 @@ CreateVertexGapSegment( FOdysseyVectorVertex* iVertex
         // or if the nearest vertex is an intersection vertex.
         ||    ( nearestVertex->GetClass() == FOdysseyVectorVertexIntersection::StaticClass() ) )
         {
-            iGapSegmentBuffer.emplace_back();
             // Warning: setting a parent path here leads to bugs, due to path update of a segment not really belonging to it.
-            iGapSegmentBuffer[gapCount].Init( nearestVertex, iVertex );
+            iGapSegmentBuffer.emplace_back( nullptr, nearestVertex, iVertex );
             //iGapSegmentBuffer[gapCount].Link(); // not necessary. saves us some cpu cycles
 
-            iSectionBuffer.emplace_back();
-            iSectionBuffer[sectionCount].Init( &iGapSegmentBuffer[gapCount], nearestVertex, iVertex );
+            iSectionBuffer.emplace_back( &iGapSegmentBuffer[gapCount], nearestVertex, iVertex );
             iSectionBuffer[sectionCount].Link();
 
             ::ULIS::FVec2D delta = iVertex->GetCoords() - nearestVertex->GetCoords();

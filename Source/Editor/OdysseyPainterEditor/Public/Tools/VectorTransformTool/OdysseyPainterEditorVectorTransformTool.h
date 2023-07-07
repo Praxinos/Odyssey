@@ -4,16 +4,17 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Tools/OdysseyPainterEditorTool.h"
+#include "Tools/DefaultTool/OdysseyPainterEditorDefaultTool.h"
 #include "OdysseyVector.h"
 #include "Undo/OdysseyVectorUndoPointPosition.h"
+#include "Undo/OdysseyVectorUndoObjectTransform.h"
 
 #include "OdysseyPainterEditorVectorTransformTool.generated.h"
 
 class FOdysseyPainterEditorVectorTransformToolHUD;
 
 UCLASS()
-class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTransformTool : public UOdysseyPainterEditorTool
+class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTransformTool : public UOdysseyPainterEditorDefaultTool
 {
 public:
     GENERATED_BODY()
@@ -26,6 +27,12 @@ public:
     UOdysseyPainterEditorVectorTransformTool();
     void UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
     void LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    bool OnKeyDownVector( FOdysseyVectorEngine* iEngine
+                        , FOdysseyVectorScene* iScene
+                        , const FKey& iKey );
+    bool OnKeyUpVector( FOdysseyVectorEngine* iEngine
+                      , FOdysseyVectorScene* iScene
+                      , const FKey& iKey );
     bool OnMouseDownVector( FOdysseyVectorEngine* iEngine
                           , FOdysseyVectorScene* iScene
                           , const FOdysseyPoint& iPointInTexture
@@ -61,6 +68,7 @@ private:
 
 private:
     FOdysseyPainterEditorVectorTransformToolHUD* mTransformHUD;
+    std::vector<FObjectTransform> mObjectTransformArray;
     ::ULIS::FVec2D* mPickedPivot;
     bool mDragging;
 
@@ -73,4 +81,5 @@ public:
 
     UPROPERTY(EditAnywhere, Category="Odyssey ObjectScale Tool")
     bool Uniform;
+    bool UniformAtKeyDown;
 };

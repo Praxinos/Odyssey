@@ -9,13 +9,6 @@ FOdysseyVectorSegmentCubic::~FOdysseyVectorSegmentCubic()
 
 }
 
-FOdysseyVectorSegmentCubic::FOdysseyVectorSegmentCubic()
-    : FOdysseyVectorSegment()
-    , mCtrlPoint { FOdysseyVectorHandleSegment( this, 0.0f, 0.0f )
-                 , FOdysseyVectorHandleSegment( this, 0.0f, 0.0f ) }
-{
-}
-
 FOdysseyVectorSegmentCubic::FOdysseyVectorSegmentCubic( FOdysseyVectorPath* iPath
                                                       , FOdysseyVectorVertex* iPoint0
                                                       , double iCtrlPoint0x

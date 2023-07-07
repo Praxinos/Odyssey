@@ -2,38 +2,12 @@
 
 FOdysseyVectorLink::~FOdysseyVectorLink()
 {
-
-}
-
-FOdysseyVectorLink::FOdysseyVectorLink()
-    : mPoint { nullptr, nullptr }
-{
-
 }
 
 FOdysseyVectorLink::FOdysseyVectorLink( FOdysseyVectorPoint* iPoint0, FOdysseyVectorPoint* iPoint1 )
 {
-    Init( iPoint0, iPoint1 );
-}
-
-void
-FOdysseyVectorLink::Init( FOdysseyVectorPoint* iPoint0
-                        , FOdysseyVectorPoint* iPoint1 )
-{
     mPoint[0] = iPoint0;
     mPoint[1] = iPoint1;
-}
-
-// static
-FOdysseyVectorLink*
-FOdysseyVectorLink::New(  FOdysseyVectorPoint* iPoint0
-                        , FOdysseyVectorPoint* iPoint1 )
-{
-    FOdysseyVectorLink* link = new FOdysseyVectorLink();
-
-    link->Init ( iPoint0, iPoint1 );
-
-    return link;
 }
 
 void
@@ -66,16 +40,7 @@ FOdysseyVectorLink::GetStraightDistance()
 ::ULIS::FVec2D
 FOdysseyVectorLink::GetVector( FOdysseyVectorPoint* iPoint, bool iNormalize )
 {
-    ::ULIS::FVec2D vec = ::ULIS::FVec2D( mPoint[1]->GetX() - mPoint[0]->GetX()
-                                       , mPoint[1]->GetY() - mPoint[0]->GetY() );
-
-    if ( iNormalize == true )
-    {
-        if ( vec.DistanceSquared() )
-        {
-            vec.Normalize();
-        }
-    }
+    ::ULIS::FVec2D vec = GetVector( iNormalize );
 
     return ( iPoint == mPoint[0] ) ? vec : -vec;
 }

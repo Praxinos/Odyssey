@@ -32,8 +32,8 @@ class FOdysseyVectorLinkSample: public FOdysseyVectorLink
 {
     public:
         ~FOdysseyVectorLinkSample();
-        FOdysseyVectorLinkSample(){};
-        void Init( FOdysseyVectorPointSample* iSamplePoint0, FOdysseyVectorPointSample* iSamplePoint1 );
+        FOdysseyVectorLinkSample( FOdysseyVectorPointSample* iSamplePoint0
+                                , FOdysseyVectorPointSample* iSamplePoint1 );
 
     private:
         // Stores a copy of the sample points passed as parameters in the constructor.
