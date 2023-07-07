@@ -23,6 +23,7 @@ class FOdysseyPainterEditor;
 //----------------------------------------------------------- Construction / Destruction
 FOdysseyPainterEditorTopTab::~FOdysseyPainterEditorTopTab()
 {
+    mEditor->OnSelectedToolChangedDelegate().RemoveAll(this);
 }
 
 FOdysseyPainterEditorTopTab::FOdysseyPainterEditorTopTab(FOdysseyPainterEditor* iEditor)
@@ -31,6 +32,7 @@ FOdysseyPainterEditorTopTab::FOdysseyPainterEditorTopTab(FOdysseyPainterEditor* 
                             FSlateIcon( "OdysseyStyle", "PainterEditor.Spark16" ))
     , mEditor( iEditor )
 {
+    mEditor->OnSelectedToolChangedDelegate().AddRaw(this, &FOdysseyPainterEditorTopTab::OnSelectedToolChanged);
 }
 
 //--------------------------------------------------------------------------------------
@@ -49,15 +51,17 @@ FOdysseyPainterEditorTopTab::SpawnTab( const FSpawnTabArgs& iArgs )
         ];
 }
 
-void FOdysseyPainterEditorTopTab::SetMeshMaxSize(float iValue /*= -1*/)
+/*
+void
+FOdysseyPainterEditorTopTab::SetMeshMaxSize(float iValue)
 {
     mWidget->SetMeshMaxSize( iValue );
-}
+} */
 
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------ Public Getter
 
-bool
+/* bool
 FOdysseyPainterEditorTopTab::IsEraserButtonActive() const
 {
     UOdysseyPainterEditorRasterDrawingTool* drawingTool = Cast<UOdysseyPainterEditorRasterDrawingTool>(mEditor->GetSelectedTool());
@@ -66,7 +70,7 @@ FOdysseyPainterEditorTopTab::IsEraserButtonActive() const
 
     FOdysseyBlendParameters blendParameters = drawingTool->GetBlendParameters();
     return blendParameters.bEraserMode;
-}
+} */
 
 bool
 FOdysseyPainterEditorTopTab::IsPackageEdited() const
@@ -85,7 +89,74 @@ FOdysseyPainterEditorTopTab::IsPackageEdited() const
 TSharedPtr<SWidget>
 FOdysseyPainterEditorTopTab::CreateWidget()
 {
-    mWidget = SNew(SOdysseyPaintModifiers)
+    return SNew( SWrapBox )
+        .UseAllottedWidth( true ) // if true put all slot horizontally   if false put all slot vertically
+        +SWrapBox::Slot()
+        .Padding( 6.f, 3.f, 3.f, 3.f )
+        [
+            SNew( SButton )
+            .ButtonStyle( FCoreStyle::Get(), "NoBorder" )
+            .ToolTipText( LOCTEXT("SaveCurrentImageButton", "Save the current image within the current project.") )
+            .VAlign( VAlign_Center )
+            .ContentPadding( FMargin( 0.0, 0.0 ) )
+            .OnClicked( this, &FOdysseyPainterEditorTopTab::OnSaveButtonClicked )
+            .IsEnabled( this, &FOdysseyPainterEditorTopTab::IsPackageEdited )
+            [
+                SNew( SImage )
+                .Image( FOdysseyStyle::GetBrush( "PainterEditor.TopBar.Save32" ) )
+            ]
+        ]
+        + SWrapBox::Slot()
+        .Padding( 3.f, 3.f, 3.f, 3.f )
+        [
+            SNew( SButton )
+            .ButtonStyle( FCoreStyle::Get(), "NoBorder" )
+            .ToolTipText( LOCTEXT("UndoActionButton", "Undo the previous action.") )
+            .VAlign( VAlign_Center )
+            .ContentPadding( FMargin( 0.0, 0.0 ) )
+            .OnClicked(this, &FOdysseyPainterEditorTopTab::OnUndoButtonClicked )
+            [
+                SNew( SImage )
+                .Image( FOdysseyStyle::GetBrush( "PainterEditor.TopBar.Undo32" ) )
+            ]
+        ]
+        + SWrapBox::Slot()
+        .Padding( 3.f, 3.f, 3.f, 3.f )
+        [
+            SNew( SButton )
+            .ButtonStyle( FCoreStyle::Get(), "NoBorder" )
+            .ToolTipText( LOCTEXT("RedoActionButton", "Redo the next action.") )
+            .VAlign( VAlign_Center )
+            .ContentPadding( FMargin( 0.0, 0.0 ) )
+            .OnClicked(this, &FOdysseyPainterEditorTopTab::OnRedoButtonClicked )
+            [
+                SNew( SImage )
+                .Image( FOdysseyStyle::GetBrush( "PainterEditor.TopBar.Redo32" ) )
+            ]
+        ]
+
+        + SWrapBox::Slot()
+        .Padding( 33.f, 3.f, 33.f, 3.f )
+        [
+            SNew( SButton )
+            .ButtonStyle( FCoreStyle::Get(), "NoBorder" )
+            .ToolTipText( LOCTEXT("ClearButton", "Clear the whole canvas.") )
+            .VAlign( VAlign_Center )
+            .ContentPadding( FMargin( 0.0, 0.0 ) )
+            .OnClicked(this, &FOdysseyPainterEditorTopTab::OnClearButtonClicked )
+            [
+                SNew( SImage )
+                .Image( FOdysseyStyle::GetBrush( "PainterEditor.TopBar.Clear32" ) )
+            ]
+        ]
+        +SWrapBox::Slot()
+        .Padding( 3.f, 3.f, 3.f, 3.f )
+        .Expose(mToolWidgetSlot)
+        [
+            SNullWidget::NullWidget
+        ];
+    
+    /* mWidget = SNew(SOdysseyPaintModifiers)
         .OnGetSize(this, &FOdysseyPainterEditorTopTab::OnGetSize)
         .OnGetOpacity(this, &FOdysseyPainterEditorTopTab::OnGetOpacity)
         .OnGetFlow(this, &FOdysseyPainterEditorTopTab::OnGetFlow)
@@ -104,7 +175,7 @@ FOdysseyPainterEditorTopTab::CreateWidget()
         .IsPackageEdited_Raw(this, &FOdysseyPainterEditorTopTab::IsPackageEdited)
         .IsEraserButtonActive_Raw(this, &FOdysseyPainterEditorTopTab::IsEraserButtonActive);
 
-    return mWidget;
+    return mWidget; */
 }
 
 void
@@ -115,7 +186,7 @@ FOdysseyPainterEditorTopTab::BindShortcuts(FBaseToolkit* iToolkit)
 
     #define MAP_ACTION(action, ...) toolkitCommands->MapAction( action, FExecuteAction::CreateSP( this, &FOdysseyPainterEditorTopTab::__VA_ARGS__ ), FCanExecuteAction() );
 
-    MAP_ACTION( painterEditorCommands.IncreaseBrushSize,              AddSize,                  1 )
+    /* MAP_ACTION( painterEditorCommands.IncreaseBrushSize,              AddSize,                  1 )
     MAP_ACTION( painterEditorCommands.DecreaseBrushSize,              AddSize,                 -1 )
     MAP_ACTION( painterEditorCommands.SetAlphaModeNormal,             SetAlphaMode,            ::ULIS::eAlphaMode::Alpha_Normal )
     MAP_ACTION( painterEditorCommands.SetAlphaModeErase,              SetAlphaMode,            ::ULIS::eAlphaMode::Alpha_Erase )
@@ -166,7 +237,7 @@ FOdysseyPainterEditorTopTab::BindShortcuts(FBaseToolkit* iToolkit)
     MAP_ACTION( painterEditorCommands.SetBlendModePartialDerivative,  SetBlendingMode,         ::ULIS::eBlendMode::Blend_PartialDerivative )
     MAP_ACTION( painterEditorCommands.SetBlendModeWhiteOut,           SetBlendingMode,         ::ULIS::eBlendMode::Blend_Whiteout )
     MAP_ACTION( painterEditorCommands.SetBlendModeAngleCorrected,     SetBlendingMode,         ::ULIS::eBlendMode::Blend_AngleCorrected )
-    MAP_ACTION( painterEditorCommands.ToggleEraserButton,             ToggleEraserButton )
+    MAP_ACTION( painterEditorCommands.ToggleEraserButton,             ToggleEraserButton ) */
 
     #undef MAP_ACTION
 }
@@ -174,6 +245,7 @@ FOdysseyPainterEditorTopTab::BindShortcuts(FBaseToolkit* iToolkit)
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------------------- Widget Getters
 
+/*
 ::ULIS::eBlendMode
 FOdysseyPainterEditorTopTab::BlendingMode() const
 {
@@ -192,12 +264,28 @@ FOdysseyPainterEditorTopTab::AlphaMode() const
         return ::ULIS::Alpha_Normal;
 
     return static_cast<::ULIS::eAlphaMode>(drawingTool->GetBlendParameters().AlphaMode);
-}
+} */
 
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------- Event Listeners
 
 void
+FOdysseyPainterEditorTopTab::OnSelectedToolChanged()
+{
+    if ( !mToolWidgetSlot )
+        return;
+
+    //Clear the tool widget content
+    mToolWidgetSlot->AttachWidget(SNullWidget::NullWidget);
+
+    UOdysseyPainterEditorTool* tool = mEditor->GetSelectedTool();
+    if(!tool)
+        return;
+
+    mToolWidgetSlot->AttachWidget(tool->CreateTopTabWidget().ToSharedRef());
+}
+
+/* void
 FOdysseyPainterEditorTopTab::OnSizeChanged( float iValue, EPropertyChangeType::Type iChangeType )
 {
     UOdysseyPainterEditorRasterDrawingTool* drawingTool = Cast<UOdysseyPainterEditorRasterDrawingTool>(mEditor->GetSelectedTool());
@@ -288,7 +376,7 @@ FOdysseyPainterEditorTopTab::OnGetFlow() const
         return 0.f;
 
     return drawingTool->GetBrushInstance()->GetBrushOptions()->Flow;
-}
+} */
 
 FReply
 FOdysseyPainterEditorTopTab::OnSaveButtonClicked()
@@ -298,7 +386,7 @@ FOdysseyPainterEditorTopTab::OnSaveButtonClicked()
     {
         packages.Add( mEditor->GetEditedObjects()[i]->GetOutermost() );
     }
-    FEditorFileUtils::PromptForCheckoutAndSave(packages, /*bCheckDirtyOnAssetSave*/ true, /*bPromptToSave=*/ false);
+    FEditorFileUtils::PromptForCheckoutAndSave(packages, true, false);
     
     return FReply::Handled();
 }
@@ -317,6 +405,7 @@ FOdysseyPainterEditorTopTab::OnRedoButtonClicked()
     return FReply::Handled();
 }
 
+/*
 void
 FOdysseyPainterEditorTopTab::ToggleEraserButton()
 {
@@ -335,6 +424,7 @@ FOdysseyPainterEditorTopTab::OnEraserButtonClicked()
     ToggleEraserButton();
     return FReply::Handled();
 }
+*/
 
 FReply
 FOdysseyPainterEditorTopTab::OnClearButtonClicked()
@@ -346,6 +436,7 @@ FOdysseyPainterEditorTopTab::OnClearButtonClicked()
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------- Event Listeners
 
+/* 
 void
 FOdysseyPainterEditorTopTab::SetAlphaMode(::ULIS::eAlphaMode iAlphaMode)
 {
@@ -379,6 +470,6 @@ FOdysseyPainterEditorTopTab::AddSize(int32 iValue)
 
     UOdysseyBrushOptions* brushOptions = drawingTool->GetBrushInstance()->GetBrushOptions();
     FOdysseyObjectEditorUtils::SetPropertyValue(brushOptions, "Size", brushOptions->Size + iValue);
-}
+} */
 
 #undef LOCTEXT_NAMESPACE

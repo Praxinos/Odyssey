@@ -20,6 +20,7 @@ UOdysseyPainterEditorRasterDrawingTool::~UOdysseyPainterEditorRasterDrawingTool(
 UOdysseyPainterEditorRasterDrawingTool::UOdysseyPainterEditorRasterDrawingTool()
     : Super()
     //Properties
+    , mBaseSize(0)
     , Brush(nullptr)
     , BrushInstance(nullptr)
     , BrushOptions(CreateDefaultSubobject<UOdysseyBrushOptions>("UOdysseyPainterEditorRasterDrawingTool::BrushOptions", true))
@@ -357,6 +358,12 @@ UOdysseyPainterEditorRasterDrawingTool::RefreshBrushInstance()
 {
     DestroyBrushInstance();
     CreateBrushInstance(true);
+}
+
+void
+UOdysseyPainterEditorRasterDrawingTool::SetBaseSize(float iValue)
+{
+    mBaseSize = iValue;
 }
 
 //--------------------------------------------------------------------------------------

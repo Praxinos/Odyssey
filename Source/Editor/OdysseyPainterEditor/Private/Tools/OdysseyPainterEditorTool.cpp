@@ -146,6 +146,12 @@ UOdysseyPainterEditorTool::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
 
 }
 
+TSharedPtr<SWidget>
+UOdysseyPainterEditorTool::CreateTopTabWidget()
+{
+    return SNullWidget::NullWidget;
+}
+
 void
 UOdysseyPainterEditorTool::PropertyChanged(const FName& iPropertyName)
 {

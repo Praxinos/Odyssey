@@ -187,10 +187,10 @@ FOdysseyPainterEditor::OnCloseRequested()
     return FOdysseyEditor::OnCloseRequested();
 }
 
-FOdysseyPainterEditor::FOnSelectedToolChange&
+FOdysseyPainterEditor::FOnSelectedToolChanged&
 FOdysseyPainterEditor::OnSelectedToolChangedDelegate()
 {
-    return mOnSelectedToolChange;
+    return mOnSelectedToolChanged;
 }
 
 //--------------------------------------------------------------------------------------
@@ -341,7 +341,7 @@ FOdysseyPainterEditor::SetSelectedTool(UOdysseyPainterEditorTool* iTool)
 	if (mSelectedTool)
 		mSelectedTool->Activate();
 
-    mOnSelectedToolChange.Broadcast(iTool);
+    mOnSelectedToolChanged.Broadcast();
 }
 
 void

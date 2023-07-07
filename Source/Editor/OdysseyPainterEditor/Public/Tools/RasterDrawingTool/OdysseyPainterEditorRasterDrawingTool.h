@@ -73,6 +73,8 @@ public:
     // Recreates the brush instance
     void RefreshBrushInstance();
 
+    void SetBaseSize(float iValue);
+
 public:
     // Getters
 
@@ -212,6 +214,7 @@ protected:
     FOdysseyPaintEngine                 mPaintEngine;
     TArray<FOdysseyBrushContext*>       mBrushContexts;
     FOdysseyPainterEditorRasterDrawingToolWorker     mWorker;
+    float mBaseSize; //Size on which the tool is based to compute its size from a percentage
 
     //---
 

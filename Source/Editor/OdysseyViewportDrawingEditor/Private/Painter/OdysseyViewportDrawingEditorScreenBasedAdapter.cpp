@@ -82,7 +82,8 @@ void FOdysseyViewportDrawingEditorScreenBasedAdapter::Tick(float iDelta)
         TexturePaintHelpers::CopyTextureToRenderTargetTexture(mEditor->Texture(), mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
 
     if( mLastKnownViewport )
-        mEditor->GetGUI()->GetTopTab()->SetMeshMaxSize((FMath::Max(mLastKnownViewport->GetSizeXY().X, mLastKnownViewport->GetSizeXY().Y) / 2) * GetStampQuality());
+        mEditor->GetRasterDrawingTool()->SetBaseSize((FMath::Max(mLastKnownViewport->GetSizeXY().X, mLastKnownViewport->GetSizeXY().Y) / 2) * GetStampQuality());
+        //mEditor->GetGUI()->GetTopTab()->SetMeshMaxSize((FMath::Max(mLastKnownViewport->GetSizeXY().X, mLastKnownViewport->GetSizeXY().Y) / 2) * GetStampQuality());
 
     if (mEditor->GetSelectedTool())
         mEditor->GetSelectedTool()->Tick(iDelta);

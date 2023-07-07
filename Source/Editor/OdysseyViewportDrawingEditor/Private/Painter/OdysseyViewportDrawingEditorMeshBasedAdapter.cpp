@@ -53,7 +53,8 @@ void FOdysseyViewportDrawingEditorMeshBasedAdapter::PrepareAdapterForPainting()
     }
 
     //We're using percentage size for this adapter, so we put the true maximum mesh size
-    mEditor->GetGUI()->GetTopTab()->SetMeshMaxSize(mEditor->GetMeshComponentMaxSize() * GetStampQuality());
+    //mEditor->GetGUI()->GetTopTab()->SetMeshMaxSize(mEditor->GetMeshComponentMaxSize() * GetStampQuality());
+    mEditor->GetRasterDrawingTool()->SetBaseSize(mEditor->GetMeshComponentMaxSize() * GetStampQuality());
     
     mState = eState::kIdleReady;
 }

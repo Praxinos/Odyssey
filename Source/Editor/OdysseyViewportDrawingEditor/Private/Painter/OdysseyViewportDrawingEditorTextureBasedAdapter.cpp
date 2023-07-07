@@ -69,7 +69,8 @@ void FOdysseyViewportDrawingEditorTextureBasedAdapter::PrepareAdapterForPainting
     }    
     
     //We're using true pixel value for this adapter, so we put 0 in meshMaxSize
-    mEditor->GetGUI()->GetTopTab()->SetMeshMaxSize(0);
+    //mEditor->GetGUI()->GetTopTab()->SetMeshMaxSize(0);
+    mEditor->GetRasterDrawingTool()->SetBaseSize(0);
 
     /*
     if (mEditor->Material())

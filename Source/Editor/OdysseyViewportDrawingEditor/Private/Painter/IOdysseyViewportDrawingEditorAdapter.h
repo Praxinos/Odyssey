@@ -58,7 +58,7 @@ private:
 protected: 
     void RemoveTextureOverride();
     virtual ::ULIS::FEvent StampOverride(UOdysseyBrushAssetBase::FStampParams iStampParams) = 0;
-    void OnToolChange(UOdysseyPainterEditorTool* iNewTool);
+    void OnToolChange();
     virtual void UnbindStampBrushInstance(UOdysseyBrushAssetBase* iUnbindBrush);
     virtual void BindStampBrushInstance(UOdysseyBrushAssetBase* iBindBrush);
 

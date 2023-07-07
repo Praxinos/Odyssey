@@ -18,7 +18,7 @@ IOdysseyViewportDrawingEditorAdapter::~IOdysseyViewportDrawingEditorAdapter()
     }
 
     mEditor->OnSelectedToolChangedDelegate().RemoveAll(this);
-    OnToolChange(nullptr);
+    OnToolChange();
     mEditor->TargetToPaintWillChangeDelegate().RemoveAll(this);
     mEditor->TargetToPaintChangedDelegate().RemoveAll(this);
     
@@ -50,7 +50,7 @@ void IOdysseyViewportDrawingEditorAdapter::PrepareAdapterForPainting()
     {
         mDrawingTool = Cast<UOdysseyPainterEditorRasterDrawingTool>(mEditor->GetSelectedTool());
         if( mDrawingTool )
-            OnToolChange(mDrawingTool);
+            OnToolChange();
     }
 }
 
@@ -339,7 +339,7 @@ void IOdysseyViewportDrawingEditorAdapter::RemoveTextureOverride()
     mPaintingTexture2DRenderTarget = nullptr;
 }
 
-void IOdysseyViewportDrawingEditorAdapter::OnToolChange(UOdysseyPainterEditorTool* iNewTool)
+void IOdysseyViewportDrawingEditorAdapter::OnToolChange()
 {
     if(mDrawingTool)
     {
@@ -348,12 +348,13 @@ void IOdysseyViewportDrawingEditorAdapter::OnToolChange(UOdysseyPainterEditorToo
         UnbindStampBrushInstance(mDrawingTool->GetBrushInstance());
     }
 
-    if (!iNewTool)
+    UOdysseyPainterEditorTool* newTool = mEditor->GetSelectedTool();
+    if (!newTool )
         return;
 
-    if (iNewTool->IsA(UOdysseyPainterEditorRasterDrawingTool::StaticClass()))
+    if ( newTool->IsA(UOdysseyPainterEditorRasterDrawingTool::StaticClass()))
     {
-        mDrawingTool = Cast<UOdysseyPainterEditorRasterDrawingTool>(iNewTool);
+        mDrawingTool = Cast<UOdysseyPainterEditorRasterDrawingTool>(newTool);
         mDrawingTool->OnCreatedBrushInstance().AddRaw(this, &IOdysseyViewportDrawingEditorAdapter::BindStampBrushInstance);
         mDrawingTool->OnDestroyBrushInstance().AddRaw(this, &IOdysseyViewportDrawingEditorAdapter::UnbindStampBrushInstance);
         BindStampBrushInstance(mDrawingTool->GetBrushInstance());
