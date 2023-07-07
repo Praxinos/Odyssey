@@ -293,14 +293,16 @@ FOdysseyTextureEditor::RegisterTabSpawners(const TSharedRef<class FTabManager>& 
 void
 FOdysseyTextureEditor::OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStack)
 {
+	if ( iLayerStack != LayerStack() )
+		return;
+
     // PATCH : We have to redraw all layers in order to draw all layers without the HUD of the tool.
     // This will be removed when we'll have a dedicated HUD layer.
     UOdysseyTextureLayer* layerRoot = static_cast<UOdysseyTextureLayer*>(iLayerStack->LayerRoot);
 	layerRoot->RenderImageChanged(false);
 
 	//TODO: Maybe this should be done differently later, but we don't have time for that now
-	if (iLayerStack == LayerStack())
-		SelectDefaultTool(); //Refresh the current tool when we change layer
+	SelectDefaultTool(); //Refresh the current tool when we change layer
 }
 
 //--------------------------------------------------------------------------------------
