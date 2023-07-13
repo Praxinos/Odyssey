@@ -1,25 +1,25 @@
 // IDDN.FR.001.250001.006.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
-#include "SOdysseyPaintModifiers.h"
-#include "Widgets/Input/NumericTypeInterface.h"
+#include "Tools/RasterDrawingTool/SOdysseyPainterEditorRasterDrawingToolTopTab copy.h"
+/*#include "Widgets/Input/NumericTypeInterface.h"
 #include "Widgets/Input/NumericUnitTypeInterface.inl"
 #include "Widgets/Input/SButton.h"
 #include "Widgets/Layout/SScrollBox.h"
 #include "Widgets/Layout/SWrapBox.h"
 #include "OdysseyStyleSet.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyPaintModifiers"
+#define LOCTEXT_NAMESPACE "OdysseyPainterEditorRasterDrawingToolTopTab"
 
 #define MinSize 1
 #define MaxSize 2000
 
 /////////////////////////////////////////////////////
-// SOdysseyPaintModifiers
+// SOdysseyPainterEditorRasterDrawingToolTopTab
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
 void
-SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
+SOdysseyPainterEditorRasterDrawingToolTopTab::Construct( const FArguments& InArgs )
 {
     mOnGetSize = InArgs._OnGetSize;
     mOnGetOpacity = InArgs._OnGetOpacity;
@@ -50,49 +50,7 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
         [
             SNew( SHorizontalBox )
 
-            +SHorizontalBox::Slot()
-            .Padding( 6.f, 3.f, 3.f, 3.f )
-            [
-             SNew( SButton )
-            .ButtonStyle( FCoreStyle::Get(), "NoBorder" )
-            .ToolTipText( LOCTEXT("SaveCurrentImageButton", "Save the current image within the current project.") )
-            .VAlign( VAlign_Center )
-            .ContentPadding( FMargin( 0.0, 0.0 ) )
-            .OnClicked( InArgs._OnSaveButtonClicked )
-            .IsEnabled( InArgs._IsPackageEdited )
-                [
-                    SNew( SImage )
-                    .Image( FOdysseyStyle::GetBrush( "PainterEditor.TopBar.Save32" ) )
-                ]
-            ]
-            +SHorizontalBox::Slot()
-            .Padding( 3.f, 3.f, 3.f, 3.f )
-            [
-            SNew( SButton )
-            .ButtonStyle( FCoreStyle::Get(), "NoBorder" )
-            .ToolTipText( LOCTEXT("UndoActionButton", "Undo the previous action.") )
-            .VAlign( VAlign_Center )
-            .ContentPadding( FMargin( 0.0, 0.0 ) )
-            .OnClicked( InArgs._OnUndoButtonClicked )
-                [
-                    SNew( SImage )
-                    .Image( FOdysseyStyle::GetBrush( "PainterEditor.TopBar.Undo32" ) )
-                ]
-            ]
-            +SHorizontalBox::Slot()
-            .Padding( 3.f, 3.f, 3.f, 3.f )
-            [
-            SNew( SButton )
-            .ButtonStyle( FCoreStyle::Get(), "NoBorder" )
-            .ToolTipText( LOCTEXT("RedoActionButton", "Redo the next action.") )
-            .VAlign( VAlign_Center )
-            .ContentPadding( FMargin( 0.0, 0.0 ) )
-            .OnClicked( InArgs._OnRedoButtonClicked )
-                [
-                    SNew( SImage )
-                    .Image( FOdysseyStyle::GetBrush( "PainterEditor.TopBar.Redo32" ) )
-                ]
-            ]
+            
             +SHorizontalBox::Slot()
             .Padding( 3.f, 3.f, 33.f, 3.f )
             [
@@ -106,20 +64,6 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
                     SNew( SImage )
                     .Image( FOdysseyStyle::GetBrush( "PainterEditor.TopBar.Eraser32" ) )
                     .ColorAndOpacity_Lambda( [this](){ return ( mIsEraserButtonActive.Get() == true ? FSlateColor( FLinearColor( 1.0f, 0.5f, 0.0f, 1.0f ) ) : FSlateColor( FLinearColor( 1.0f, 1.0f, 1.0f, 1.0f ) ) ); } )
-                ]
-            ]
-            +SHorizontalBox::Slot()
-            .Padding( 3.f, 3.f, 3.f, 3.f )
-            [
-            SNew( SButton )
-            .ButtonStyle( FCoreStyle::Get(), "NoBorder" )
-            .ToolTipText( LOCTEXT("ClearButton", "Clear the whole canvas.") )
-            .VAlign( VAlign_Center )
-            .ContentPadding( FMargin( 0.0, 0.0 ) )
-            .OnClicked( InArgs._OnClearButtonClicked )
-                [
-                    SNew( SImage )
-                    .Image( FOdysseyStyle::GetBrush( "PainterEditor.TopBar.Clear32" ) )
                 ]
             ]
         ]
@@ -162,12 +106,12 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
             .Padding( 3.f, 3.f, 13.f, 3.f )
             [
                 SAssignNew( mOpacitySpinBox, SSpinBox< int > )
-                .Value( this, &SOdysseyPaintModifiers::OnGetOpacity )
+                .Value( this, &SOdysseyPainterEditorRasterDrawingToolTopTab::OnGetOpacity )
                 .LinearDeltaSensitivity( 15 ) // Doesn't work with MinValue, MinSliderValue ...
                 .Delta( 1 )
                 .TypeInterface( MakeShared<TNumericUnitTypeInterface<int>>( EUnit::Percentage ) )
-                .OnValueCommitted( this, &SOdysseyPaintModifiers::HandleOpacitySpinBoxChanged )
-                .OnValueChanged( this, &SOdysseyPaintModifiers::SetOpacity )
+                .OnValueCommitted( this, &SOdysseyPainterEditorRasterDrawingToolTopTab::HandleOpacitySpinBoxChanged )
+                .OnValueChanged( this, &SOdysseyPainterEditorRasterDrawingToolTopTab::SetOpacity )
                 .MinDesiredWidth( 83.0f ) // Depends on the size of the text in the previous slot
             ]
         ]
@@ -189,12 +133,12 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
             .Padding( 3.f, 3.f, 13.f, 3.f )
             [
                 SAssignNew( mFlowSpinBox, SSpinBox< int > )
-                .Value( this, &SOdysseyPaintModifiers::OnGetFlow )
+                .Value( this, &SOdysseyPainterEditorRasterDrawingToolTopTab::OnGetFlow )
                 .LinearDeltaSensitivity( 15 ) // Doesn't work with MinValue, MinSliderValue ...
                 .Delta( 1 )
                 .TypeInterface( MakeShared<TNumericUnitTypeInterface<int>>( EUnit::Percentage ) )
-                .OnValueCommitted( this, &SOdysseyPaintModifiers::HandleFlowSpinBoxChanged )
-                .OnValueChanged( this, &SOdysseyPaintModifiers::SetFlow )
+                .OnValueCommitted( this, &SOdysseyPainterEditorRasterDrawingToolTopTab::HandleFlowSpinBoxChanged )
+                .OnValueChanged( this, &SOdysseyPainterEditorRasterDrawingToolTopTab::SetFlow )
                 .MinDesiredWidth( 96.0f ) // Depends on the size of the text in the previous slot
             ]
         ]
@@ -220,8 +164,8 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
                 .IsFocusable( false )
                 .OptionsSource( &mBlendingModes )
                 .InitiallySelectedItem( mBlendingModes[mBlendingMode.Get()] )
-                .OnGenerateWidget( this, &SOdysseyPaintModifiers::GenerateBlendingComboBoxItem )
-                .OnSelectionChanged( this, &SOdysseyPaintModifiers::HandleOnBlendingModeChanged )
+                .OnGenerateWidget( this, &SOdysseyPainterEditorRasterDrawingToolTopTab::GenerateBlendingComboBoxItem )
+                .OnSelectionChanged( this, &SOdysseyPainterEditorRasterDrawingToolTopTab::HandleOnBlendingModeChanged )
                 .IsEnabled_Lambda( [this](){ return ( mIsEraserButtonActive.Get() == true ? false : true ); } )
                 .Content()
                 [
@@ -251,8 +195,8 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
                 .IsFocusable( false )
                 .OptionsSource( &mAlphaModes )
                 .InitiallySelectedItem( mAlphaModes[mAlphaMode.Get()] )
-                .OnGenerateWidget( this, &SOdysseyPaintModifiers::GenerateAlphaComboBoxItem )
-                .OnSelectionChanged( this, &SOdysseyPaintModifiers::HandleOnAlphaModeChanged )
+                .OnGenerateWidget( this, &SOdysseyPainterEditorRasterDrawingToolTopTab::GenerateAlphaComboBoxItem )
+                .OnSelectionChanged( this, &SOdysseyPainterEditorRasterDrawingToolTopTab::HandleOnAlphaModeChanged )
                 .IsEnabled_Lambda( [this](){ return ( mIsEraserButtonActive.Get() == true ? false : true ); } )
                 .Content()
                 [
@@ -282,7 +226,7 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
 //--------------------------------------------------------------------- Public Callbacks
 
 void
-SOdysseyPaintModifiers::SetSize( float iValue )
+SOdysseyPainterEditorRasterDrawingToolTopTab::SetSize( float iValue )
 {
     int value = FMath::Clamp( mMeshMaxSize.Get() > 0 ? (iValue * mMeshMaxSize.Get()) / 100 : iValue, MinSize, mMeshMaxSize.Get() > 0 ? mMeshMaxSize.Get() : MaxSize);
     if (value == OnGetSize())
@@ -292,7 +236,7 @@ SOdysseyPaintModifiers::SetSize( float iValue )
 }
 
 void
-SOdysseyPaintModifiers::SetOpacity( int iValue )
+SOdysseyPainterEditorRasterDrawingToolTopTab::SetOpacity( int iValue )
 {
     int value = FMath::Clamp(iValue, 0, 100);
     if (value == OnGetOpacity())
@@ -302,7 +246,7 @@ SOdysseyPaintModifiers::SetOpacity( int iValue )
 }
 
 void
-SOdysseyPaintModifiers::SetFlow( int iValue )
+SOdysseyPainterEditorRasterDrawingToolTopTab::SetFlow( int iValue )
 {
     int value = FMath::Clamp(iValue, 0, 100);
     if (value == OnGetFlow())
@@ -312,7 +256,7 @@ SOdysseyPaintModifiers::SetFlow( int iValue )
 }
 
 void
-SOdysseyPaintModifiers::SetBlendingMode( ::ULIS::eBlendMode iValue )
+SOdysseyPainterEditorRasterDrawingToolTopTab::SetBlendingMode( ::ULIS::eBlendMode iValue )
 {
     mBlendingMode = iValue;
     TSharedPtr< FText > sel = MakeShared< FText >( GetBlendingModeAsText() );
@@ -320,33 +264,33 @@ SOdysseyPaintModifiers::SetBlendingMode( ::ULIS::eBlendMode iValue )
 }
 
 void
-SOdysseyPaintModifiers::SetAlphaMode( ::ULIS::eAlphaMode iValue )
+SOdysseyPainterEditorRasterDrawingToolTopTab::SetAlphaMode( ::ULIS::eAlphaMode iValue )
 {
     mAlphaMode = iValue;
     TSharedPtr< FText > sel = MakeShared< FText >( GetAlphaModeAsText() );
     HandleOnAlphaModeChanged( sel, ESelectInfo::Direct );
 }
 
-void SOdysseyPaintModifiers::SetMeshMaxSize(float iValue /*= -1 */)
+void SOdysseyPainterEditorRasterDrawingToolTopTab::SetMeshMaxSize(float iValue)
 {
     mMeshMaxSize.Set( iValue );
     RefreshSizeWidget();
 }
 
 ::ULIS::eBlendMode
-SOdysseyPaintModifiers::GetBlendingMode()
+SOdysseyPainterEditorRasterDrawingToolTopTab::GetBlendingMode()
 {
     return mBlendingMode.Get();
 }
 
 ::ULIS::eAlphaMode
-SOdysseyPaintModifiers::GetAlphaMode()
+SOdysseyPainterEditorRasterDrawingToolTopTab::GetAlphaMode()
 {
     return mAlphaMode.Get();
 }
 
 float
-SOdysseyPaintModifiers::OnGetSize() const
+SOdysseyPainterEditorRasterDrawingToolTopTab::OnGetSize() const
 {
     if( mOnGetSize.IsBound() )
     {
@@ -366,7 +310,7 @@ SOdysseyPaintModifiers::OnGetSize() const
 }
 
 int
-SOdysseyPaintModifiers::OnGetOpacity() const
+SOdysseyPainterEditorRasterDrawingToolTopTab::OnGetOpacity() const
 {
     if( mOnGetOpacity.IsBound() )
     {
@@ -379,7 +323,7 @@ SOdysseyPaintModifiers::OnGetOpacity() const
 }
 
 int
-SOdysseyPaintModifiers::OnGetFlow() const
+SOdysseyPainterEditorRasterDrawingToolTopTab::OnGetFlow() const
 {
     if( mOnGetFlow.IsBound() )
     {
@@ -392,19 +336,19 @@ SOdysseyPaintModifiers::OnGetFlow() const
 }
 
 void
-SOdysseyPaintModifiers::HandleSizeSpinBoxChanged( float iValue, ETextCommit::Type iType )
+SOdysseyPainterEditorRasterDrawingToolTopTab::HandleSizeSpinBoxChanged( float iValue, ETextCommit::Type iType )
 {
     mOnSizeChangedCallback.ExecuteIfBound( FMath::Clamp( mMeshMaxSize.Get() > 0 ? (iValue * mMeshMaxSize.Get()) / 100 : iValue, MinSize, mMeshMaxSize.Get() > 0 ? mMeshMaxSize.Get() : MaxSize), EPropertyChangeType::ValueSet );
 }
 
 void
-SOdysseyPaintModifiers::HandleOpacitySpinBoxChanged(int iValue, ETextCommit::Type iType )
+SOdysseyPainterEditorRasterDrawingToolTopTab::HandleOpacitySpinBoxChanged(int iValue, ETextCommit::Type iType )
 {
     mOnOpacityChangedCallback.ExecuteIfBound( FMath::Clamp( iValue, 0, 100 ), EPropertyChangeType::ValueSet );
 }
 
 void
-SOdysseyPaintModifiers::HandleFlowSpinBoxChanged(int iValue, ETextCommit::Type iType )
+SOdysseyPainterEditorRasterDrawingToolTopTab::HandleFlowSpinBoxChanged(int iValue, ETextCommit::Type iType )
 {
 
     mOnFlowChangedCallback.ExecuteIfBound( FMath::Clamp( iValue, 0, 100 ), EPropertyChangeType::ValueSet );
@@ -413,21 +357,21 @@ SOdysseyPaintModifiers::HandleFlowSpinBoxChanged(int iValue, ETextCommit::Type i
 //--------------------------------------------------------------------------------------
 //-------------------------------------------------------------- Blending mode Callbacks
 TSharedRef<SWidget>
-SOdysseyPaintModifiers::GenerateBlendingComboBoxItem( TSharedPtr<FText> InItem )
+SOdysseyPainterEditorRasterDrawingToolTopTab::GenerateBlendingComboBoxItem( TSharedPtr<FText> InItem )
 {
     return SNew(STextBlock)
            .Text(*(InItem.Get()));
 }
 
 TSharedRef<SWidget>
-SOdysseyPaintModifiers::CreateBlendingModeTextWidget()
+SOdysseyPainterEditorRasterDrawingToolTopTab::CreateBlendingModeTextWidget()
 {
     return SNew(STextBlock)
            .Text_Lambda([&](){ return GetBlendingModeAsText(); });
 }
 
 void
-SOdysseyPaintModifiers::HandleOnBlendingModeChanged(TSharedPtr<FText> NewSelection, ESelectInfo::Type SelectInfo )
+SOdysseyPainterEditorRasterDrawingToolTopTab::HandleOnBlendingModeChanged(TSharedPtr<FText> NewSelection, ESelectInfo::Type SelectInfo )
 {
     ::ULIS::eBlendMode blendingMode = ::ULIS::Blend_Normal;
     for( uint8 i = 0; i < (int)::ULIS::NumBlendModes; ++i )
@@ -443,7 +387,7 @@ SOdysseyPaintModifiers::HandleOnBlendingModeChanged(TSharedPtr<FText> NewSelecti
 }
 
 TArray< TSharedPtr< FText > >
-SOdysseyPaintModifiers::GetBlendingModesAsText()
+SOdysseyPainterEditorRasterDrawingToolTopTab::GetBlendingModesAsText()
 {
     TArray< TSharedPtr< FText > > array;
     for( int i = 0; i < (int)::ULIS::NumBlendModes; ++i )
@@ -452,7 +396,7 @@ SOdysseyPaintModifiers::GetBlendingModesAsText()
 }
 
 FText
-SOdysseyPaintModifiers::GetBlendingModeAsText() const
+SOdysseyPainterEditorRasterDrawingToolTopTab::GetBlendingModeAsText() const
 {
     return  FText::FromString( ANSI_TO_TCHAR( ::ULIS::kwBlendMode[ static_cast< int >( mBlendingMode.Get() ) ] ) );
 }
@@ -461,7 +405,7 @@ SOdysseyPaintModifiers::GetBlendingModeAsText() const
 //-------------------------------------------------------------------- SWidget overrides
 
 void
-SOdysseyPaintModifiers::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
+SOdysseyPainterEditorRasterDrawingToolTopTab::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
 {
     ::ULIS::eBlendMode blendingMode = mBlendingMode.Get();
     if (blendingMode != mCurrentBlendingMode)
@@ -481,21 +425,21 @@ SOdysseyPaintModifiers::Tick(const FGeometry& AllottedGeometry, const double InC
 //--------------------------------------------------------------------------------------
 //-------------------------------------------------------------- Alpha mode Callbacks
 TSharedRef<SWidget>
-SOdysseyPaintModifiers::GenerateAlphaComboBoxItem( TSharedPtr<FText> InItem )
+SOdysseyPainterEditorRasterDrawingToolTopTab::GenerateAlphaComboBoxItem( TSharedPtr<FText> InItem )
 {
     return SNew(STextBlock)
            .Text(*(InItem.Get()));
 }
 
 TSharedRef<SWidget>
-SOdysseyPaintModifiers::CreateAlphaModeTextWidget()
+SOdysseyPainterEditorRasterDrawingToolTopTab::CreateAlphaModeTextWidget()
 {
     return SNew(STextBlock)
            .Text_Lambda([&](){ return GetAlphaModeAsText(); });
 }
 
 void
-SOdysseyPaintModifiers::HandleOnAlphaModeChanged(TSharedPtr<FText> NewSelection, ESelectInfo::Type SelectInfo )
+SOdysseyPainterEditorRasterDrawingToolTopTab::HandleOnAlphaModeChanged(TSharedPtr<FText> NewSelection, ESelectInfo::Type SelectInfo )
 {
     ::ULIS::eAlphaMode alphaMode = ::ULIS::Alpha_Normal;
     for( uint8 i = 0; i < (int)::ULIS::NumAlphaModes; ++i )
@@ -511,7 +455,7 @@ SOdysseyPaintModifiers::HandleOnAlphaModeChanged(TSharedPtr<FText> NewSelection,
 }
 
 TArray< TSharedPtr< FText > >
-SOdysseyPaintModifiers::GetAlphaModesAsText()
+SOdysseyPainterEditorRasterDrawingToolTopTab::GetAlphaModesAsText()
 {
     TArray< TSharedPtr< FText > > array;
     for( int i = 0; i < (int)::ULIS::NumAlphaModes; ++i )
@@ -520,21 +464,21 @@ SOdysseyPaintModifiers::GetAlphaModesAsText()
 }
 
 FText
-SOdysseyPaintModifiers::GetAlphaModeAsText() const
+SOdysseyPainterEditorRasterDrawingToolTopTab::GetAlphaModeAsText() const
 {
     return  FText::FromString( ANSI_TO_TCHAR( ::ULIS::kwAlphaMode[ static_cast< int >( mAlphaMode.Get() ) ] ) );
 }
 
-void SOdysseyPaintModifiers::RefreshSizeWidget()
+void SOdysseyPainterEditorRasterDrawingToolTopTab::RefreshSizeWidget()
 {
     mSizeSpinBoxSlot->DetachWidget();
 
     if (mMeshMaxSize.Get() > 0)
     {
         mSizeSpinBoxSlot->AttachWidget( SNew(SSpinBox< float >)
-            .Value(this, &SOdysseyPaintModifiers::OnGetSize)
-            .OnValueCommitted(this, &SOdysseyPaintModifiers::HandleSizeSpinBoxChanged)
-            .OnValueChanged(this, &SOdysseyPaintModifiers::SetSize)
+            .Value(this, &SOdysseyPainterEditorRasterDrawingToolTopTab::OnGetSize)
+            .OnValueCommitted(this, &SOdysseyPainterEditorRasterDrawingToolTopTab::HandleSizeSpinBoxChanged)
+            .OnValueChanged(this, &SOdysseyPainterEditorRasterDrawingToolTopTab::SetSize)
             .TypeInterface(MakeShared<TNumericUnitTypeInterface<float>>(EUnit::Percentage))
             .MaxFractionalDigits(1)
             .ShiftMouseMovePixelPerDelta(15)
@@ -549,9 +493,9 @@ void SOdysseyPaintModifiers::RefreshSizeWidget()
     else
     {
         mSizeSpinBoxSlot->AttachWidget( SNew(SSpinBox< float >)
-            .Value(this, &SOdysseyPaintModifiers::OnGetSize)
-            .OnValueCommitted(this, &SOdysseyPaintModifiers::HandleSizeSpinBoxChanged)
-            .OnValueChanged(this, &SOdysseyPaintModifiers::SetSize)
+            .Value(this, &SOdysseyPainterEditorRasterDrawingToolTopTab::OnGetSize)
+            .OnValueCommitted(this, &SOdysseyPainterEditorRasterDrawingToolTopTab::HandleSizeSpinBoxChanged)
+            .OnValueChanged(this, &SOdysseyPainterEditorRasterDrawingToolTopTab::SetSize)
             .MaxFractionalDigits(1)
             .ShiftMouseMovePixelPerDelta(15)
             .Delta(1)
@@ -564,5 +508,5 @@ void SOdysseyPaintModifiers::RefreshSizeWidget()
     }
 }
 
-#undef LOCTEXT_NAMESPACE
+#undef LOCTEXT_NAMESPACE*/
 

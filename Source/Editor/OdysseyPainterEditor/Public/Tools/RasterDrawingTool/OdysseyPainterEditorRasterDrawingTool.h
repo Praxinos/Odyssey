@@ -64,6 +64,7 @@ public:
 
     virtual void BindShortcuts(class FBaseToolkit* iToolkit) override;
     virtual void ExtendMenu( FToolMenuOwner iOwner, FName iMenuName ) override;
+    virtual TArray<TSharedPtr<SWidget>> CreateTopTabWidgets() override;
 
 public:
     // Setters
@@ -161,6 +162,10 @@ private:
 
     // Fired when a Shape is selected
     void OnPostShapeChanged(); */
+
+private:
+    // Internal - Widgets
+    TSharedPtr<SWidget> CreatePropertyWidget(TSharedPtr<class IPropertyHandle> iPropertyHandle, const TSharedPtr<ISinglePropertyView> iView);
 
 private:
     // Internal - Callbacks

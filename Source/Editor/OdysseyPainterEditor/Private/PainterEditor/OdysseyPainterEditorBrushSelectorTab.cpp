@@ -4,7 +4,6 @@
 #include "OdysseyPainterEditorBrushSelectorTab.h"
 #include "OdysseyBrushAssetBase.h"
 #include "OdysseyPainterEditor.h"
-#include "SOdysseyPaintModifiers.h"
 #include "Models/OdysseyPainterEditorCommands.h"
 #include "Tools/RasterDrawingTool/Widgets/SOdysseyPainterEditorRasterDrawingToolBrushSelector.h"
 #include "ObjectEditorUtils.h"

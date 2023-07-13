@@ -89,10 +89,10 @@ FOdysseyPainterEditorTopTab::IsPackageEdited() const
 TSharedPtr<SWidget>
 FOdysseyPainterEditorTopTab::CreateWidget()
 {
-    return SNew( SWrapBox )
-        .UseAllottedWidth( true ) // if true put all slot horizontally   if false put all slot vertically
+    return SAssignNew( mWrapBox, SWrapBox )
+        .UseAllottedSize(true)
+        .InnerSlotPadding(FVector2D(3.f, 3.f))
         +SWrapBox::Slot()
-        .Padding( 6.f, 3.f, 3.f, 3.f )
         [
             SNew( SButton )
             .ButtonStyle( FCoreStyle::Get(), "NoBorder" )
@@ -107,7 +107,6 @@ FOdysseyPainterEditorTopTab::CreateWidget()
             ]
         ]
         + SWrapBox::Slot()
-        .Padding( 3.f, 3.f, 3.f, 3.f )
         [
             SNew( SButton )
             .ButtonStyle( FCoreStyle::Get(), "NoBorder" )
@@ -121,7 +120,7 @@ FOdysseyPainterEditorTopTab::CreateWidget()
             ]
         ]
         + SWrapBox::Slot()
-        .Padding( 3.f, 3.f, 3.f, 3.f )
+        .Padding( 0.f, 0.f, 30.f, 0.f )
         [
             SNew( SButton )
             .ButtonStyle( FCoreStyle::Get(), "NoBorder" )
@@ -136,7 +135,7 @@ FOdysseyPainterEditorTopTab::CreateWidget()
         ]
 
         + SWrapBox::Slot()
-        .Padding( 33.f, 3.f, 33.f, 3.f )
+        .Padding( 0.f, 0.f, 30.f, 0.f )
         [
             SNew( SButton )
             .ButtonStyle( FCoreStyle::Get(), "NoBorder" )
@@ -148,12 +147,6 @@ FOdysseyPainterEditorTopTab::CreateWidget()
                 SNew( SImage )
                 .Image( FOdysseyStyle::GetBrush( "PainterEditor.TopBar.Clear32" ) )
             ]
-        ]
-        +SWrapBox::Slot()
-        .Padding( 3.f, 3.f, 3.f, 3.f )
-        .Expose(mToolWidgetSlot)
-        [
-            SNullWidget::NullWidget
         ];
     
     /* mWidget = SNew(SOdysseyPaintModifiers)
@@ -272,17 +265,27 @@ FOdysseyPainterEditorTopTab::AlphaMode() const
 void
 FOdysseyPainterEditorTopTab::OnSelectedToolChanged()
 {
-    if ( !mToolWidgetSlot )
-        return;
-
     //Clear the tool widget content
-    mToolWidgetSlot->AttachWidget(SNullWidget::NullWidget);
+    for (TSharedPtr<SWidget> widget : mToolWidgets )
+    {
+        mWrapBox->RemoveSlot(widget.ToSharedRef());
+    }
 
     UOdysseyPainterEditorTool* tool = mEditor->GetSelectedTool();
     if(!tool)
         return;
 
-    mToolWidgetSlot->AttachWidget(tool->CreateTopTabWidget().ToSharedRef());
+    mToolWidgets = tool->CreateTopTabWidgets();
+    for (TSharedPtr<SWidget> widget : mToolWidgets )
+    {
+        mWrapBox->AddSlot()
+        .FillEmptySpace(true)
+        .HAlign(HAlign_Fill)
+        .VAlign(VAlign_Center)
+        [
+            widget.ToSharedRef()
+        ];
+    }
 }
 
 /* void

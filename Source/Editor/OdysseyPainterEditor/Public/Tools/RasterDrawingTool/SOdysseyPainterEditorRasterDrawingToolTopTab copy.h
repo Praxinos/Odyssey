@@ -2,7 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #pragma once
-
+/*
 #include "CoreMinimal.h"
 #include "Layout/Children.h"
 #include "Layout/Visibility.h"
@@ -18,11 +18,11 @@
 #include <ULIS>
 
 /////////////////////////////////////////////////////
-// SOdysseyPaintModifiers
-class ODYSSEYWIDGETS_API SOdysseyPaintModifiers : public SCompoundWidget
+// SOdysseyPainterEditorRasterDrawingToolTopTab
+class ODYSSEYWIDGETS_API SOdysseyPainterEditorRasterDrawingToolTopTab : public SCompoundWidget
 {
     typedef SCompoundWidget             tSuperClass;
-    typedef SOdysseyPaintModifiers      tSelf;
+    typedef SOdysseyPainterEditorRasterDrawingToolTopTab      tSelf;
     typedef TSharedPtr< FString >       FComboItemType;
 
 public:
@@ -34,7 +34,7 @@ public:
 
 public:
     // Construction / Destruction
-    SLATE_BEGIN_ARGS( SOdysseyPaintModifiers )
+    SLATE_BEGIN_ARGS( SOdysseyPainterEditorRasterDrawingToolTopTab )
         {}
         SLATE_ATTRIBUTE( ::ULIS::eBlendMode, BlendingMode )
         SLATE_ATTRIBUTE( ::ULIS::eAlphaMode, AlphaMode )
@@ -141,3 +141,4 @@ private:
 
 };
 
+*/

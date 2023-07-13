@@ -4,7 +4,6 @@
 #pragma once
 
 #include "OdysseyEditorTab.h"
-#include "SOdysseyPaintModifiers.h"
 #include "Widgets/Layout/SWrapBox.h"
 
 class FOdysseyPainterEditor;
@@ -63,6 +62,7 @@ protected:
 
 private:
     FOdysseyPainterEditor* mEditor;
-    SWrapBox::FSlot* mToolWidgetSlot;
+    TSharedPtr<SWrapBox> mWrapBox;
+    TArray<TSharedPtr<SWidget>> mToolWidgets;
 };
 

@@ -4,6 +4,7 @@
 #include "Tools/VectorSceneScaleTool/OdysseyPainterEditorVectorSceneScaleTool.h"
 #include "Tools/VectorScenePanTool/OdysseyPainterEditorVectorScenePanToolHUD.h"
 #include "Tools/VectorScenePanTool/OdysseyPainterEditorVectorScenePanTool.h"
+#include "Undo/OdysseyVectorUndoObjectTransform.h"
 
 #define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorSceneScaleTool"
 

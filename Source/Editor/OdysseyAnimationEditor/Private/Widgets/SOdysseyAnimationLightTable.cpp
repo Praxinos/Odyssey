@@ -7,6 +7,7 @@
 #include "LayerStack/LightTable/OdysseyAnimationLightTable.h"
 #include "LayerStack/LightTable/OdysseyAnimationLightTableMutator.h"
 #include "Widgets/Input/SEditableTextBox.h"
+#include "Widgets/Input/SSlider.h"
 
 SOdysseyAnimationLightTable::~SOdysseyAnimationLightTable()
 {
