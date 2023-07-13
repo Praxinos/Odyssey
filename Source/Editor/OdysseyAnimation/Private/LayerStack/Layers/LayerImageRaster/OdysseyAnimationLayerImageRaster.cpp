@@ -10,6 +10,7 @@
 #include "OdysseyStyleSet.h"
 #include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
 #include "LayerStack/LightTable/OdysseyAnimationLightTable.h"
+#include "OdysseyRasterBlockMutator.h"
 
 #define LOCTEXT_NAMESPACE "UOdysseyAnimationLayerImageRaster"
 
@@ -238,26 +239,38 @@ UOdysseyAnimationLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
         cell->SetLength(cellRange.GetUpperBoundValue() - cellRange.GetLowerBoundValue() + 1);
 
         TSharedPtr<FOdysseyRasterBlock> rasterBlock = cell->GetRasterBlock();
-        TSharedPtr<::ULIS::FBlock> ULISBlock = rasterBlock->GetBlock();
+        FOdysseyRasterBlockMutator blockMutator(rasterBlock);
+
         int frame = cellRange.GetLowerBoundValue();
         ::ULIS::FRectI rect = ::ULIS::FRectI::FromXYWH(0, 0, rasterBlock->GetWidth(), rasterBlock->GetHeight());
 
+        blockMutator.EditTilesFromRects(
+            { rect },
+            FOdysseyRasterBlockMutator::FEditDelegate::CreateLambda(
+                [&](const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+                {
+                    TSharedPtr<::ULIS::FBlock> ULISBlock = rasterBlock->GetBlock();
 
-        TArray<::ULIS::FEvent> lastEvent;
-        for (int layerIndex = 0; layerIndex < iLayers.Num(); layerIndex++)
-        {
-            UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(iLayers[layerIndex]);
-            if ( !layer )
-                continue;
+                    TArray<::ULIS::FEvent> lastEvent;
+                    for (int layerIndex = 0; layerIndex < iLayers.Num(); layerIndex++)
+                    {
+                        UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(iLayers[layerIndex]);
+                        if ( !layer )
+                            continue;
 
-            TSharedPtr<IOdysseyAnimationImageRenderingAbility> imageRenderAbility = layer->GetAbility<IOdysseyAnimationImageRenderingAbility>();
-            if ( !imageRenderAbility )
-                return;
+                        TSharedPtr<IOdysseyAnimationImageRenderingAbility> imageRenderAbility = layer->GetAbility<IOdysseyAnimationImageRenderingAbility>();
+                        if ( !imageRenderAbility )
+                            continue;
 
-            TSharedPtr<IOdysseyImageRenderer> renderer = imageRenderAbility->BuildRenderer(frame, IOdysseyImageRenderer::eRenderType::Render);
+                        TSharedPtr<IOdysseyImageRenderer> renderer = imageRenderAbility->BuildRenderer(frame, IOdysseyImageRenderer::eRenderType::Render);
 
-            lastEvent = renderer->Blend(ULISBlock, imageRenderAbility->GetBlendMode(), imageRenderAbility->GetOpacity(), rect, lastEvent);
-        }
+                        lastEvent = renderer->Blend(ULISBlock, imageRenderAbility->GetBlendMode(), imageRenderAbility->GetOpacity(), rect, lastEvent);
+                    }
+
+                    return lastEvent;
+                }
+            )
+        );
 
         cells.Add(cell);
     }
