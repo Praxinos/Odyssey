@@ -46,15 +46,16 @@ FOdysseyAnimationLayerImageRenderer::Blend(TSharedPtr<::ULIS::FBlock> ioBlock, :
         TSharedPtr<::ULIS::FBlock> childrenBlock = MakeShared<::ULIS::FBlock>(rect.w, rect.h, ioBlock->Format());
         ::ULIS::FRectI childrenBlockRect = childrenBlock->Rect();
         ::ULIS::FVec2I childrenBlockPos(0);
-        TArray<::ULIS::FEvent> clearEvents = Clear(childrenBlock, { childrenBlockRect }, { childrenBlockPos }, iWaitList);
+        TArray<::ULIS::FEvent> clearEvents = Clear(childrenBlock, { childrenBlockRect }, { childrenBlockPos }, {});
+        clearEvents.Append(iWaitList);
 
         TArray<::ULIS::FEvent> lastEvent = clearEvents;
         for (const FChildData& childData : mChildrenData)
         {
-            lastEvent = childData.mRenderer->Blend(childrenBlock, childData.mBlendMode, childData.mOpacity, { childrenBlockRect }, { childrenBlockPos }, lastEvent);
+            lastEvent = childData.mRenderer->Blend(childrenBlock, childData.mBlendMode, childData.mOpacity, { rect }, { childrenBlockPos }, lastEvent);
         }
 
-        lastEvent = ConvertAndBlend(childrenBlock, ioBlock, iBlendMode, iOpacity, { rect }, { pos }, lastEvent);
+        lastEvent = ConvertAndBlend(childrenBlock, ioBlock, iBlendMode, iOpacity, { childrenBlockRect }, { pos }, lastEvent);
 
         events.Append(lastEvent);
     }
