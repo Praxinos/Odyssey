@@ -230,94 +230,12 @@ UOdysseyPainterEditorRasterDrawingTool::ExtendMenu( FToolMenuOwner iOwner, FName
     Super::ExtendMenu(iOwner, iMenuName);
 }
 
-TSharedPtr<SWidget>
-UOdysseyPainterEditorRasterDrawingTool::CreatePropertyWidget(TSharedPtr<class IPropertyHandle> iPropertyHandle, const TSharedPtr<ISinglePropertyView> iView)
-{
-    if (!iPropertyHandle)
-        return nullptr;
-
-    TSharedRef<SWidget> nameWidget = iPropertyHandle->CreatePropertyNameWidget();
-    TSharedRef<SWidget> valueWidget = iPropertyHandle->CreatePropertyValueWidget(false);
-
-    iView->SetVisibility(EVisibility::Collapsed);
-
-    return SNew(SHorizontalBox)
-    + SHorizontalBox::Slot()
-    .AutoWidth()
-    [
-        //PATCH:
-        iView.ToSharedRef()
-    ]
-    + SHorizontalBox::Slot()
-    .AutoWidth()
-    [
-        nameWidget
-    ]
-    + SHorizontalBox::Slot()
-    [
-        valueWidget
-    ];
-}
-
 TArray<TSharedPtr<SWidget>>
 UOdysseyPainterEditorRasterDrawingTool::CreateTopTabWidgets()
 {
     return {
         SNew(SOdysseyPainterEditorRasterDrawingToolTopTab, this)
     };
-
-    /* FPropertyEditorModule& propertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
-
-    FSinglePropertyParams defaultPropertyParams;
-    const TSharedPtr<ISinglePropertyView> sizePropertyView = propertyEditorModule.CreateSingleProperty(BrushOptions, "Size", defaultPropertyParams);
-    const TSharedPtr<ISinglePropertyView> flowPropertyView = propertyEditorModule.CreateSingleProperty(BrushOptions, "Flow", defaultPropertyParams);
-    const TSharedPtr<ISinglePropertyView> blendParametersPropertyView = propertyEditorModule.CreateSingleProperty(this, "BlendParameters", defaultPropertyParams);
-
-    TSharedPtr<class IPropertyHandle> blendParametersHandle = blendParametersPropertyView->GetPropertyHandle();
-    TSharedPtr<class IPropertyHandle> sizeHandle = sizePropertyView->GetPropertyHandle();
-    TSharedPtr<class IPropertyHandle> flowHandle = flowPropertyView->GetPropertyHandle();
-    TSharedPtr<class IPropertyHandle> opacityHandle = blendParametersHandle->GetChildHandle("Opacity");
-    TSharedPtr<class IPropertyHandle> blendModeHandle = blendParametersHandle->GetChildHandle("BlendingMode");
-    TSharedPtr<class IPropertyHandle> alphaModeHandle = blendParametersHandle->GetChildHandle("AlphaMode");
-    TSharedPtr<class IPropertyHandle> eraserModeHandle = blendParametersHandle->GetChildHandle("bEraserMode");
-
-
-    return {
-        SNew(SWrapBox)
-        .InnerSlotPadding(FVector2D(3.f, 3.f))
-        .UseAllottedSize(true)
-        .HAlign(HAlign_Fill)
-        + SWrapBox::Slot()
-        .HAlign(HAlign_Fill)
-        [
-            CreatePropertyWidget(sizeHandle, sizePropertyView).ToSharedRef()
-        ]
-        + SWrapBox::Slot()
-        .HAlign(HAlign_Fill)
-        [
-            CreatePropertyWidget(opacityHandle, blendParametersPropertyView).ToSharedRef()
-        ]
-        + SWrapBox::Slot()
-        .HAlign(HAlign_Fill)
-        [
-            CreatePropertyWidget(flowHandle, flowPropertyView).ToSharedRef()
-        ]
-        + SWrapBox::Slot()
-        .HAlign(HAlign_Fill)
-        [
-            CreatePropertyWidget(blendModeHandle, blendParametersPropertyView).ToSharedRef()
-        ]
-        + SWrapBox::Slot()
-        .HAlign(HAlign_Fill)
-        [
-            CreatePropertyWidget(alphaModeHandle, blendParametersPropertyView).ToSharedRef()
-        ]
-        + SWrapBox::Slot()
-        .HAlign(HAlign_Fill)
-        [
-            CreatePropertyWidget(eraserModeHandle, blendParametersPropertyView).ToSharedRef()
-        ]
-    }; */
 }
 
 //--------------------------------------------------------------------------------------

@@ -162,11 +162,7 @@ private:
 
     // Fired when a Shape is selected
     void OnPostShapeChanged(); */
-
-private:
-    // Internal - Widgets
-    TSharedPtr<SWidget> CreatePropertyWidget(TSharedPtr<class IPropertyHandle> iPropertyHandle, const TSharedPtr<ISinglePropertyView> iView);
-
+    
 private:
     // Internal - Callbacks
 
