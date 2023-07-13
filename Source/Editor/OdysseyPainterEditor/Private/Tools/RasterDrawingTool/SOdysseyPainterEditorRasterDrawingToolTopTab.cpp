@@ -60,8 +60,6 @@ SOdysseyPainterEditorRasterDrawingToolTopTab::Construct( const FArguments& InArg
     TSharedPtr<class IPropertyHandle> flowHandle = flowPropertyView->GetPropertyHandle();
     TSharedPtr<class IPropertyHandle> opacityHandle = blendParametersHandle->GetChildHandle("Opacity");
     TSharedPtr<class IPropertyHandle> blendModeHandle = blendParametersHandle->GetChildHandle("BlendingMode");
-    TSharedPtr<class IPropertyHandle> alphaModeHandle = blendParametersHandle->GetChildHandle("AlphaMode");
-    TSharedPtr<class IPropertyHandle> eraserModeHandle = blendParametersHandle->GetChildHandle("bEraserMode");
 
     ChildSlot
     .VAlign(VAlign_Fill)
@@ -89,15 +87,10 @@ SOdysseyPainterEditorRasterDrawingToolTopTab::Construct( const FArguments& InArg
         + SWrapBox::Slot()
         .HAlign(HAlign_Fill)
         [
-            CreatePropertyWidget(blendModeHandle, blendParametersPropertyView).ToSharedRef()
-        ]
-        + SWrapBox::Slot()
-        .HAlign(HAlign_Fill)
-        [
             SNew(SHorizontalBox)
             + SHorizontalBox::Slot()
             [
-                CreatePropertyWidget(alphaModeHandle, blendParametersPropertyView).ToSharedRef()
+                CreatePropertyWidget(blendModeHandle, blendParametersPropertyView).ToSharedRef()
             ]
             + SHorizontalBox::Slot()
             .AutoWidth()
