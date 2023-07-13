@@ -129,7 +129,7 @@ private:
 private:
     //PROPERTIES
     /** Should smoothing be enabled. */
-    UPROPERTY( EditInstanceOnly, Category="Interpolation", meta = ( ClampMin = "1", ClampMax = "200", UIMin = "1", UIMax = "200", SliderExponent = "1" ) )
+    UPROPERTY( EditInstanceOnly, Category="Interpolation", meta = ( ClampMin = "1", UIMin = "1", LinearDeltaSensitivity = "15", Delta = "1", Multiple="1" ) )
     float   Step = 20.f;
 
     UPROPERTY( EditInstanceOnly, Category="Interpolation")
