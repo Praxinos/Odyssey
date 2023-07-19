@@ -537,12 +537,8 @@ FOdysseyVectorSegmentCubic::Cut( const ::ULIS::FVec2D& linePoint0
         tChain[pointCount] = 1.0f;
         pointChain[pointCount] = static_cast<FOdysseyVectorVertex*>(mPoint[1]);
 
-        mPath->RemoveSegment( this );
-
         for( uint32 i = 1; i < pointCount; i++ )
         {
-            mPath->AddVertex( pointChain[i] );
-
             oNewVertexArray.push_back( pointChain[i] );
         }
 
@@ -561,8 +557,6 @@ FOdysseyVectorSegmentCubic::Cut( const ::ULIS::FVec2D& linePoint0
                                          , tChain[i]
                                          , tChain[n]
                                          , newSegmentPoint0, newSegmentCtrlPoint0, newSegmentCtrlPoint1, newSegmentPoint1 );
-
-            mPath->AddSegment( newSegment );
 
             oNewSegmentArray.push_back( newSegment );
         }

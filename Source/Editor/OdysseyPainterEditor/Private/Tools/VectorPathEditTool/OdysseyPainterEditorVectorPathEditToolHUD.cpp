@@ -40,14 +40,15 @@ FOdysseyPainterEditorVectorPathEditToolHUD::Draw( FOdysseyVectorScene* iScene, u
         if( selectedObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
         {
             FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(selectedObject);
+            uint64 vertexHandleFlag  = ( pickingFlags & FOdysseyVectorPath::PICK_HANDLE_POINT   ) ? VIEW_VERTEX_HANDLE   : 0;
+            uint64 segmentHandleFlag = ( pickingFlags & FOdysseyVectorPath::PICK_HANDLE_SEGMENT ) ? VIEW_SEGMENT_HANDLE  : 0;
 
             FOdysseyVectorHUD::DrawPath( path
                                        , fgColor
                                        , bgColor
                                        , hcColor
                                        , true // world
-                                       , pickingFlags & FOdysseyVectorPath::PICK_HANDLE_POINT
-                                       , pickingFlags & FOdysseyVectorPath::PICK_HANDLE_SEGMENT );
+                                       , VIEW_VERTEX | VIEW_SEGMENT | vertexHandleFlag | segmentHandleFlag );
         }
     }
 

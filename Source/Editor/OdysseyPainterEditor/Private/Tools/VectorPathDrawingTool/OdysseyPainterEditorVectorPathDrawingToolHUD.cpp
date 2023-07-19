@@ -13,7 +13,7 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::FOdysseyPainterEditorVectorPathDr
 void
 FOdysseyPainterEditorVectorPathDrawingToolHUD::Reset( FOdysseyVectorScene* iScene )
 {
-    MakePointQuadTree( iScene );
+    MakePointQuadTree( iScene, false );
 }
 
 void

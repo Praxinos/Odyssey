@@ -146,16 +146,39 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
         bool IsFilled();
 
        /**
-         * @brief Mark as filled or not. The closed path is filled with the background color.
-         * @param iIsFilled true if filled, false otherwise.
-         */
-        void SetFilled( bool iIsFilled );
-
-       /**
          * @brief Is it a closed path ?
          * @return true if it is closed, false otherwise.
          */
         bool IsLoop();
+
+       /**
+         * @brief Merge this path with the one passed as parameter. The latter is kept,
+         *        its vertices and segments are only copied and converted to this path's
+         *        coordinates system. Note: The merged path vertices's ID will be renumbered.
+         *        This allows polling the output arrays with an index to know why new vertex
+         *        corresponds to which new one. E.g oAddedVertexArray[mergedVertex->GetID()]
+         * @param iPath the path to import data from.
+         * @oAddedVertexArray array of copied vertices. Useful for undoing e.g.
+         * @oAddedSegmentArray array of copied segments. Useful for undoing e.g.
+         */
+        void Merge( FOdysseyVectorPath* iPath
+                  , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
+                  , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray );
+
+       /**
+         * @brief Pick vertices
+         * @param iWorldX pick point in world coordinates.
+         * @param iWorldY pick point in world coordinates.
+         * @param iSelectionRadius picking radius.
+         * @param oPickedPointArray returned value as an array of pointers.
+         * @param picking flags PICK_*.
+         * @return true if it is closed, false otherwise.
+         */
+        bool PickPoint( double iWorldX
+                      , double iWorldY
+                      , double iSelectionRadius
+                      , std::vector<FOdysseyVectorPoint*>& oPickedPointArray
+                      , uint64 iSelectionFlags );
 
        /**
          * @brief Remove a segment from this path
@@ -178,10 +201,30 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
         void SelectVertex( FOdysseyVectorVertex* iVertex );
 
        /**
+         * @brief Mark as filled or not. The closed path is filled with the background color.
+         * @param iIsFilled true if filled, false otherwise.
+         */
+        void SetFilled( bool iIsFilled );
+
+       /**
          * @brief Set the joint type.
          * @param mJointType the joint type.
          */
         void SetJointType( eJointType mJointType );
+
+       /**
+         * @brief Cut this path's segments according to a cut line.
+         * @param iLinePoint0
+         * @param iLinePoint1
+         * @param oNewVertexArray  array of pointers to vertices that are added. Useful for undos.
+         * @param oNewSegmentArray array of pointers to segments that are added. Useful for undos.
+         * @param oOldSegmentArray array of pointers to segments that are removed. Useful for undos.
+         */
+        void Cut( const ::ULIS::FVec2D& iLinePoint0
+                , const ::ULIS::FVec2D& iLinePoint1
+                , std::vector<FOdysseyVectorVertex*>& oNewVertexArray
+                , std::vector<FOdysseyVectorSegment*>& oNewSegmentArray
+                , std::vector<FOdysseyVectorSegment*>& oOldSegmentArray );
 
        /**
          * @brief Get all vertices and sections as arrays. For use by the GroupPaint class
@@ -201,6 +244,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
          * @brief Unselect all vertices.
          */
         void UnselectAllVertices();
+
 
     protected:
         virtual void UpdateShape( uint32 iUpdateFlags ) override;
@@ -229,8 +273,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
         static const uint64 PICK_HANDLE_SEGMENT = 1 << 1;
         static const uint64 PICK_POINT          = 1 << 2;
 
-
-
         /*void InvalidateLoop( FOdysseyVectorCycle* iLoop );*/
 
         void SetPaintingCode( uint32 iPaintingCode );
@@ -239,25 +281,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
         
         using FOdysseyVectorObject::DrawStructure;
 
-        bool PickPoint( double iWorldX
-                      , double iWorldY
-                      , double iSelectionRadius
-                      , std::vector<FOdysseyVectorPoint*>& oPickedPointArray
-                      , uint64 iSelectionFlags );
 
-        void Merge( FOdysseyVectorPath* iPath
-                  , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
-                  , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray );
-        void Merge( FOdysseyVectorPath* iMergedPath
-                  , std::vector<FOdysseyVectorVertex*>& iVertexLookup
-                  , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
-                  , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray );
-        void Mirror( bool iMirrorX, bool iMirrorY );
-        void Cut( const ::ULIS::FVec2D& linePoint0
-                , const ::ULIS::FVec2D& linePoint1
-                , std::vector<FOdysseyVectorVertex*>& oNewVertexArray
-                , std::vector<FOdysseyVectorSegment*>& oNewSegmentArray
-                , std::vector<FOdysseyVectorSegment*>& oOldSegmentArray );
         void SwitchSpace( FOdysseyVectorObject& iObject );
         bool Erase( const ::ULIS::FRectD &iRoi
                   , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray

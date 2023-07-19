@@ -70,7 +70,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
                               , const BLRgba32& bgColor
                               , const BLRgba32& hcColor
                               , bool iWorld
-                              , bool iViewHandle );
+                              , uint64 iHUDFlags );
 
         static void DrawCubicSegment( FOdysseyVectorSegmentCubic* iCubicSegment
                                     , BLContext* iBLContext
@@ -78,31 +78,41 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
                                     , const BLRgba32& bgColor
                                     , const BLRgba32& hcColor
                                     , bool iWorld
-                                    , bool iViewHandle );
+                                    , uint64 iHUDFlags );
 
         static void DrawPath( FOdysseyVectorPath* iPath
                             , const BLRgba32& fgColor
                             , const BLRgba32& bgColor
                             , const BLRgba32& hcColor
                             , bool iWorld
-                            , bool iViewVertexHandle
-                            , bool iViewSegmentHandle );
+                            , uint64 iHUDFlags );
 
         static void DrawPaintGroup( FOdysseyVectorGroupPaint* iPaintGroup
                                   , const BLRgba32& fgColor
                                   , const BLRgba32& bgColor
                                   , const BLRgba32& hcColor
                                   , bool iWorld
-                                  , bool iViewVertexHandle
-                                  , bool iViewSegmentHandle );
+                                  , uint64 iHUDFlags );
 
         virtual ~FOdysseyVectorHUD();
         FOdysseyVectorHUD();
 
-        static const uint32 VERTEXRADIUS = 4;
+        static const uint32 VERTEXRADIUS = 3;
         static const uint32 HANDLERADIUS = 3;
 
-        virtual void Draw( FOdysseyVectorScene* iScene, uint64 iFlags ) = 0;
+        // HUD Drawing Flags
+        static const uint64 VIEW_VERTEX_VALENCE0 = 1 << 0;
+        static const uint64 VIEW_VERTEX_VALENCE1 = 1 << 1;
+        static const uint64 VIEW_VERTEX_VALENCE2 = 1 << 2;
+        static const uint64 VIEW_VERTEX          = VIEW_VERTEX_VALENCE0
+                                                 | VIEW_VERTEX_VALENCE1
+                                                 | VIEW_VERTEX_VALENCE2;
+        static const uint64 VIEW_VERTEX_HANDLE   = 1 << 3;
+        static const uint64 VIEW_SEGMENT_HANDLE  = 1 << 4;
+        static const uint64 VIEW_SEGMENT         = 1 << 5;
+        static const uint64 VIEW_ALL             = 0xFFFFFFFFFFFFFFFFULL;
+
+        virtual void Draw( FOdysseyVectorScene* iScene, uint64 iHUDFlags ) = 0;
         virtual void Reset( FOdysseyVectorScene* iScene ) = 0;
 
         void PickPoints( double iWorldX
@@ -110,7 +120,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
                        , double iSelectionRadius
                        , std::vector<FOdysseyVectorPoint*>& oPickedPointArray );
 
-        void MakePointQuadTree( FOdysseyVectorScene *iScene );
+        void MakePointQuadTree( FOdysseyVectorScene *iScene, bool iRestrictToSelection );
 
 
     protected:

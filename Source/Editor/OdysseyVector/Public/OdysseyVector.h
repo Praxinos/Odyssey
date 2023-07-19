@@ -39,7 +39,37 @@ namespace FOdysseyVector
                                         , ::ULIS::FVec2D& oP2
                                         , ::ULIS::FVec2D& oP3 );
 
-    bool ODYSSEYVECTOR_API IntersectRegions( const ::ULIS::FRectI& iRegion0, const ::ULIS::FRectI& iRegion1, ::ULIS::FRectI &oRegionOut );
+    template< typename T >
+    bool IntersectRegions( const ::ULIS::TRectangle<T>& iRegion0
+                         , const ::ULIS::TRectangle<T>& iRegion1
+                         ,       ::ULIS::TRectangle<T>& oRegionOut )
+    {
+        ::ULIS::TRectangle<T> resultRegion;
+
+        T r0x1 = iRegion0.x;
+        T r0x2 = iRegion0.x + iRegion0.w;
+        T r0y1 = iRegion0.y;
+        T r0y2 = iRegion0.y + iRegion0.h;
+        T r1x1 = iRegion1.x;
+        T r1x2 = iRegion1.x + iRegion1.w;
+        T r1y1 = iRegion1.y;
+        T r1y2 = iRegion1.y + iRegion1.h;
+        T x1 = ::ULIS::FMath::Max( r0x1, r1x1 );
+        T y1 = ::ULIS::FMath::Max( r0y1, r1y1 );
+        T x2 = ::ULIS::FMath::Min( r0x2, r1x2 );
+        T y2 = ::ULIS::FMath::Min( r0y2, r1y2 );
+
+        // Note: the intersect operation from the operator overload & in class FRectI assumes x1 < x2, which is not guaranted.
+        // this is why we need to check that first.
+        oRegionOut.x = x1;
+        oRegionOut.y = y1;
+        oRegionOut.w = ( x1 < x2 ) ? x2 - x1 : 0;
+        oRegionOut.h = ( y1 < y2 ) ? y2 - y1 : 0;
+
+        return oRegionOut.Area() ? true : false;
+    }
+
+    //bool ODYSSEYVECTOR_API IntersectRegions( const ::ULIS::FRectI& iRegion0, const ::ULIS::FRectI& iRegion1, ::ULIS::FRectI &oRegionOut );
 }
 
 #include "OdysseyVectorObject.h"
@@ -64,7 +94,6 @@ namespace FOdysseyVector
 #include "OdysseyVectorEngine.h"
 #include "HUD/OdysseyVectorHUD.h"
 #include "HUD/OdysseyVectorHUDPicking.h"
-#include "HUD/OdysseyVectorHUDLine.h"
 #include "HUD/OdysseyVectorHUDEraser.h"
 #include "HUD/OdysseyVectorHUDPicking.h"
 #include "HUD/OdysseyVectorHUDSelection.h"

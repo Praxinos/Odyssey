@@ -885,10 +885,10 @@ FOdysseyVectorPath::PickVertex( std::vector<FOdysseyVectorVertex*>& oPickedVerte
 
 bool
 FOdysseyVectorPath::Erase( const ::ULIS::FRectD &iRoi
-                              , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
-                              , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray
-                              , std::vector<FOdysseyVectorVertex*>& iRemovedVertexArray
-                              , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray )
+                              , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
+                              , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
+                              , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
+                              , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray )
 {
     BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
     BLImage* blimg = GetScene()->GetEngine()->GetBLMask(); // the mask image must be selected by the vector engine at this point
@@ -1030,10 +1030,10 @@ FOdysseyVectorPath::Erase( const ::ULIS::FRectD &iRoi
 
     Invalidate();
 
-    iAddedVertexArray.insert( iAddedVertexArray.end(), newVertexArray.begin(), newVertexArray.end() );
-    iAddedSegmentArray.insert( iAddedSegmentArray.end(), newSegmentArray.begin(), newSegmentArray.end() );
-    iRemovedVertexArray.insert( iRemovedVertexArray.end(), oldVertexArray.begin(), oldVertexArray.end() );
-    iRemovedSegmentArray.insert( iRemovedSegmentArray.end(), oldSegmentArray.begin(), oldSegmentArray.end() );
+    oAddedVertexArray.insert( oAddedVertexArray.end(), newVertexArray.begin(), newVertexArray.end() );
+    oAddedSegmentArray.insert( oAddedSegmentArray.end(), newSegmentArray.begin(), newSegmentArray.end() );
+    oRemovedVertexArray.insert( oRemovedVertexArray.end(), oldVertexArray.begin(), oldVertexArray.end() );
+    oRemovedSegmentArray.insert( oRemovedSegmentArray.end(), oldSegmentArray.begin(), oldSegmentArray.end() );
 
     return ( mSegmentList.size() == 0 ) ? true : false;
 }
@@ -1195,29 +1195,43 @@ FOdysseyVectorPath::PickPoint( double iWorldX
 }
 
 void
-FOdysseyVectorPath::Cut( const ::ULIS::FVec2D& linePoint0
-                            , const ::ULIS::FVec2D& linePoint1
-                            , std::vector<FOdysseyVectorVertex*>& oNewVertexArray
-                            , std::vector<FOdysseyVectorSegment*>& oNewSegmentArray
-                            , std::vector<FOdysseyVectorSegment*>& oOldSegmentArray )
+FOdysseyVectorPath::Cut( const ::ULIS::FVec2D& iLinePoint0
+                       , const ::ULIS::FVec2D& iLinePoint1
+                       , std::vector<FOdysseyVectorVertex*>& oNewVertexArray
+                       , std::vector<FOdysseyVectorSegment*>& oNewSegmentArray
+                       , std::vector<FOdysseyVectorSegment*>& oOldSegmentArray )
 {
     // let's work on a copy as we are going to remove items in the original list
     std::list<FOdysseyVectorSegment*> tmpSegmentList = mSegmentList;
+    uint32 vertexCount = oNewVertexArray.size();
+    uint32 segmentCount = oNewSegmentArray.size();
 
     while( tmpSegmentList.size () )
     {
         FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(tmpSegmentList.back());
 
-        if ( cubicSegment->Cut ( linePoint0, linePoint1, oNewVertexArray, oNewSegmentArray ) )
+        if ( cubicSegment->Cut ( iLinePoint0, iLinePoint1, oNewVertexArray, oNewSegmentArray ) )
         {
-            /*mSegmentList.remove ( cubicSegment );*/ // commented out: this is in the cut func
+            RemoveSegment ( cubicSegment );
 
-            cubicSegment->Invalidate();
+            //cubicSegment->Invalidate();
 
             oOldSegmentArray.push_back( cubicSegment );
         }
 
         tmpSegmentList.pop_back ();
+    }
+
+    for( int i = vertexCount; i < oNewVertexArray.size(); i++ )
+    {
+        AddVertex( oNewVertexArray[i] );
+    }
+
+    for( int i = segmentCount; i < oNewSegmentArray.size(); i++ )
+    {
+        AddSegment( oNewSegmentArray[i] );
+
+        oNewSegmentArray[i]->Invalidate();
     }
 }
 
@@ -1340,32 +1354,6 @@ FOdysseyVectorPath::DrawStructure( FColor& iStrokeColor, double iStrokeWidth, bo
     blctx->restore();
 }
 
-void
-FOdysseyVectorPath::Mirror( bool iMirrorX, bool iMirrorY )
-{
-    double factorX = ( iMirrorX ) ? -1.0f : 1.0f;
-    double factorY = ( iMirrorY ) ? -1.0f : 1.0f;
-
-    for( std::list<FOdysseyVectorVertex*>::iterator it = mVertexList.begin(); it != mVertexList.end(); ++it )
-    {
-        FOdysseyVectorVertex* cubicPoint = static_cast<FOdysseyVectorVertex*>(*it);
-
-        cubicPoint->Set( cubicPoint->GetX() * factorX, cubicPoint->GetY() * factorY );
-    }
-
-    for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
-    {
-        FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
-        FOdysseyVectorHandleSegment* ctrlPoint0 = static_cast<FOdysseyVectorHandleSegment*>(cubicSegment->GetHandle(0));
-        FOdysseyVectorHandleSegment* ctrlPoint1 = static_cast<FOdysseyVectorHandleSegment*>(cubicSegment->GetHandle(1));
-
-        ctrlPoint0->Set( ctrlPoint0->GetX() * factorX, ctrlPoint0->GetY() * factorY );
-        ctrlPoint1->Set( ctrlPoint1->GetX() * factorX, ctrlPoint1->GetY() * factorY );
-    }
-
-    /*Update();*/
-}
-
 FOdysseyVectorObject*
 FOdysseyVectorPath::CopyShape()
 {
@@ -1408,26 +1396,19 @@ FOdysseyVectorPath::CopyShape()
 
 void
 FOdysseyVectorPath::Merge( FOdysseyVectorPath* iMergedPath
-                              , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
-                              , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray )
-{
-    std::vector<FOdysseyVectorVertex*> vertexLookup;
-
-    Merge( iMergedPath, vertexLookup, iAddedVertexArray, iAddedSegmentArray );
-}
-
-void
-FOdysseyVectorPath::Merge( FOdysseyVectorPath* iMergedPath
-                              , std::vector<FOdysseyVectorVertex*>& iVertexLookup
-                              , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
-                              , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray )
+                         , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
+                         , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray )
 {
     std::list<FOdysseyVectorSegment*>& segmentList = iMergedPath->GetSegmentList();
     std::list<FOdysseyVectorVertex*>& vertexList = iMergedPath->GetVertexList();
     BLMatrix2D& mergedPathWorldMatrix = iMergedPath->GetWorldMatrix();
     BLMatrix2D conversionMatrix;
 
-    iVertexLookup.resize( vertexList.size() );
+    oAddedVertexArray.clear();
+    oAddedVertexArray.reserve( vertexList.size() );
+
+    oAddedSegmentArray.clear();
+    oAddedSegmentArray.reserve( segmentList.size() );
 
     if( vertexList.size() )
     {
@@ -1443,11 +1424,9 @@ FOdysseyVectorPath::Merge( FOdysseyVectorPath* iMergedPath
             ::ULIS::FVec2D radius = ::ULIS::FVec2D( rd.x, rd.y );
             FOdysseyVectorVertex* newVertex = new FOdysseyVectorVertex( this, pt.x, pt.y, radius.Distance() );
 
-            iAddedVertexArray.push_back( newVertex );
+            oAddedVertexArray.push_back( newVertex );
 
-            vertex->SetID( i );
-
-            iVertexLookup[i++] = newVertex;
+            vertex->SetID( i++ );
 
             AddVertex( newVertex );
         }
@@ -1461,8 +1440,8 @@ FOdysseyVectorPath::Merge( FOdysseyVectorPath* iMergedPath
             FOdysseyVectorHandleSegment* handle1 = segment->GetHandle(1);
             BLPoint pt[2] = { conversionMatrix.mapPoint( handle0->GetX(), handle0->GetY() )
                             , conversionMatrix.mapPoint( handle1->GetX(), handle1->GetY() ) };
-            FOdysseyVectorVertex* newCubicVertex0 = static_cast<FOdysseyVectorVertex*>(iVertexLookup[vertex0->GetID()]);
-            FOdysseyVectorVertex* newCubicVertex1 = static_cast<FOdysseyVectorVertex*>(iVertexLookup[vertex1->GetID()]);
+            FOdysseyVectorVertex* newCubicVertex0 = static_cast<FOdysseyVectorVertex*>(oAddedVertexArray[vertex0->GetID()]);
+            FOdysseyVectorVertex* newCubicVertex1 = static_cast<FOdysseyVectorVertex*>(oAddedVertexArray[vertex1->GetID()]);
             FOdysseyVectorSegmentCubic* newSegment = new FOdysseyVectorSegmentCubic( this
                                                                                    , newCubicVertex0
                                                                                    , pt[0].x
@@ -1470,11 +1449,9 @@ FOdysseyVectorPath::Merge( FOdysseyVectorPath* iMergedPath
                                                                                    , pt[1].x
                                                                                    , pt[1].y
                                                                                    , newCubicVertex1 );
-            iAddedSegmentArray.push_back( newSegment );
+            oAddedSegmentArray.push_back( newSegment );
 
-            AddSegment( newSegment );
-
-            newSegment->Invalidate();
+            AddSegment( newSegment ); // this also invalidates the segment
         }
     }
 

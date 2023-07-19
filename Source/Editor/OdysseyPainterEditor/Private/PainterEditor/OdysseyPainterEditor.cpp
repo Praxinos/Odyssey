@@ -806,14 +806,13 @@ FOdysseyPainterEditor::StitchVertices( FOdysseyVectorEngine* iEngine, FOdysseyVe
         {
             if( vertexA->GetPath() != vertexB->GetPath() )
             {
-                std::vector<FOdysseyVectorVertex*> vertexLookup;
                 // TODO: remove vertexB->GetPath() from selected objects.
                 mergedPath = vertexB->GetPath();
 
                 vertexB->GetPath()->GetParent()->RemoveChild( mergedPath );
-                vertexA->GetPath()->Merge( mergedPath, vertexLookup, mergedVertexArray, mergedSegmentArray );
+                vertexA->GetPath()->Merge( mergedPath, mergedVertexArray, mergedSegmentArray );
                 // update the pointer with the newly created vertex's. Note, Merge alters the original vertex's ID.
-                vertexB = vertexLookup[vertexB->GetID()];
+                vertexB = mergedVertexArray[vertexB->GetID()];
 
                 iScene->Unselect( mergedPath );
 
