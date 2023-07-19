@@ -109,7 +109,7 @@ FOdysseyPainterEditorSelectedVectorObjectTab::Update( FOdysseyVectorScene* iScen
 
     if( objectClass )
     {
-        if( objectClass == FOdysseyVectorPathCubic::StaticClass() )
+        if( objectClass == FOdysseyVectorPath::StaticClass() )
         {
             mPathView->Update( iScene );
             mDetailsView->SetObject( mPathView );

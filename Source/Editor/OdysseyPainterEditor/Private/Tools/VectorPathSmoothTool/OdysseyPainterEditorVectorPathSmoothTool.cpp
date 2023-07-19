@@ -184,17 +184,17 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseUpVector( FOdysseyVectorEngine
 
     for( int i = 0; i < mPickedPointArray.size(); i++ )
     {
-        FOdysseyVectorVertex* cubicVertex = static_cast<FOdysseyVectorVertex*>(mPickedPointArray[i]);
+        FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>(mPickedPointArray[i]);
 
-        if( cubicVertex->GetSegmentCount() == 2 )
+        if( vertex->GetSegmentCount() == 2 )
         {
             if( FSlateApplication::Get().GetModifierKeys().IsShiftDown() )
             {
-                FOdysseyVectorPathCubic::SharpSegments( cubicVertex, true, false );
+                FOdysseyVectorPath::SharpSegments( vertex, true, false );
             }
             else
             {
-                FOdysseyVectorPathCubic::SmoothSegments( cubicVertex, true, false );
+                FOdysseyVectorPath::SmoothSegments( vertex, true, false );
             }
         }
     }

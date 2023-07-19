@@ -1,5 +1,5 @@
 #include "Import/OdysseyVectorImport.h"
-#include "OdysseyVectorPathCubic.h"
+#include "OdysseyVectorPath.h"
 
 static FOdysseyVectorObject*
 CreateObject( uint32 iObjectType )
@@ -12,8 +12,8 @@ CreateObject( uint32 iObjectType )
             // do nothing, the scene is already created by the vector layer
         break;
 
-        case FOdysseyVectorObject::VECTORPATHCUBICTYPE :
-            newObject = new FOdysseyVectorPathCubic( FString("CubicPath"));
+        case FOdysseyVectorObject::VECTORPATHTYPE :
+            newObject = new FOdysseyVectorPath( FString("Path"));
         break;
 
         case FOdysseyVectorObject::VECTORGROUPPAINTTYPE :
@@ -219,13 +219,13 @@ FOdysseyVectorImport::ReadObjectsDefine( std::vector<FOdysseyVectorObject*>& vec
                 }
                 break;
 
-                case FOdysseyVectorExport::CHUNK_OBJECT_PATHCUBIC:
+                case FOdysseyVectorExport::CHUNK_OBJECT_PATH:
                 {
-                    FOdysseyVectorPathCubic* cubicPath = static_cast<FOdysseyVectorPathCubic*>( vectorObjectArray[objectID] );
+                    FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>( vectorObjectArray[objectID] );
 
-                    FOdysseyVectorImport::ReadObjectPathCubic( *cubicPath, Ar.Tell() + iChunkLen, Ar );
+                    FOdysseyVectorImport::ReadObjectPath( *path, Ar.Tell() + iChunkLen, Ar );
                     // immediately update invalidated segments and updates the path's BBox
-                    cubicPath->Update( 0 );
+                    path->Update( 0 );
                 }
                 break;
 

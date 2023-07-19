@@ -39,7 +39,7 @@ FOdysseyPainterEditorVectorPathEditToolHUD::Draw( FOdysseyVectorScene* iScene, u
 
         if( selectedObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
         {
-            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPathCubic*>(selectedObject);
+            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(selectedObject);
 
             FOdysseyVectorHUD::DrawPath( path
                                        , fgColor

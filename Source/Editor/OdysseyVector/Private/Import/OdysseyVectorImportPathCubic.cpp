@@ -1,7 +1,7 @@
 #include "Import/OdysseyVectorImport.h"
 
 static void
-ReadPathCubicGeometrySegments( FOdysseyVectorPathCubic& iCubicPath
+ReadPathGeometryCubicSegments( FOdysseyVectorPath& iPath
                              , std::vector<FOdysseyVectorVertex*>& vertexArray
                              , FArchive &Ar )
 {
@@ -26,7 +26,7 @@ ReadPathCubicGeometrySegments( FOdysseyVectorPathCubic& iCubicPath
         Ar << ctrlPoint1X;
         Ar << ctrlPoint1Y;
 
-        cubicSegment = new FOdysseyVectorSegmentCubic ( &iCubicPath
+        cubicSegment = new FOdysseyVectorSegmentCubic ( &iPath
                                                        , vertexArray[p0ID]
                                                        , ctrlPoint0X
                                                        , ctrlPoint0Y
@@ -34,7 +34,7 @@ ReadPathCubicGeometrySegments( FOdysseyVectorPathCubic& iCubicPath
                                                        , ctrlPoint1Y
                                                        , vertexArray[p1ID] );
 
-        iCubicPath.AddSegment( cubicSegment );
+        iPath.AddSegment( cubicSegment );
 
         // update bounding box
         /*cubicSegment->Update();*/
@@ -42,9 +42,9 @@ ReadPathCubicGeometrySegments( FOdysseyVectorPathCubic& iCubicPath
 }
 
 static void
-ReadPathCubicGeometryVertices( FOdysseyVectorPathCubic& iCubicPath
-                             , std::vector<FOdysseyVectorVertex*>& vertexArray
-                             , FArchive &Ar )
+ReadPathGeometryVertices( FOdysseyVectorPath& iPath
+                        , std::vector<FOdysseyVectorVertex*>& vertexArray
+                        , FArchive &Ar )
 {
     uint32 vertexCount;
 
@@ -61,9 +61,9 @@ ReadPathCubicGeometryVertices( FOdysseyVectorPathCubic& iCubicPath
         Ar << y;
         Ar << radius;
 
-        cubicVertex = new FOdysseyVectorVertex( &iCubicPath, x, y, radius );
+        cubicVertex = new FOdysseyVectorVertex( &iPath, x, y, radius );
 
-        iCubicPath.AddVertex( cubicVertex );
+        iPath.AddVertex( cubicVertex );
 
         // indexation required for creating segments
         vertexArray.push_back( cubicVertex );
@@ -71,13 +71,13 @@ ReadPathCubicGeometryVertices( FOdysseyVectorPathCubic& iCubicPath
 }
 
 void
-FOdysseyVectorImport::ReadObjectPathCubic( FOdysseyVectorPathCubic& iCubicPath, uint64 iChunkEnd, FArchive &Ar )
+FOdysseyVectorImport::ReadObjectPath( FOdysseyVectorPath& iPath, uint64 iChunkEnd, FArchive &Ar )
 {
     std::vector<FOdysseyVectorVertex*> vertexArray;
 
     FOdysseyVectorImport::ReadChunks( iChunkEnd
                                     , Ar
-                                    , [&iCubicPath, &vertexArray](uint32 iChunkID, uint64 iChunkLen, FArchive &Ar) -> void
+                                    , [&iPath, &vertexArray](uint32 iChunkID, uint64 iChunkLen, FArchive &Ar) -> void
         {
             switch( iChunkID )
             {
@@ -87,19 +87,19 @@ FOdysseyVectorImport::ReadObjectPathCubic( FOdysseyVectorPathCubic& iCubicPath, 
 
                     Ar << jointType;
 
-                    iCubicPath.SetJointType(static_cast<eJointType>(jointType));
+                    iPath.SetJointType(static_cast<eJointType>(jointType));
                 }
                 break;
 
-                case FOdysseyVectorExport::CHUNK_PATHCUBIC_GEOMETRY:
+                case FOdysseyVectorExport::CHUNK_PATH_GEOMETRY:
                 break;
 
-                case FOdysseyVectorExport::CHUNK_PATHCUBIC_GEOMETRY_VERTICES:
-                    ReadPathCubicGeometryVertices( iCubicPath, vertexArray, Ar );
+                case FOdysseyVectorExport::CHUNK_PATH_GEOMETRY_VERTICES:
+                    ReadPathGeometryVertices( iPath, vertexArray, Ar );
                 break;
 
-                case FOdysseyVectorExport::CHUNK_PATHCUBIC_GEOMETRY_SEGMENTS:
-                    ReadPathCubicGeometrySegments( iCubicPath, vertexArray, Ar );
+                case FOdysseyVectorExport::CHUNK_PATH_GEOMETRY_CUBICSEGMENTS:
+                    ReadPathGeometryCubicSegments( iPath, vertexArray, Ar );
                 break;
 
                 default:

@@ -433,7 +433,7 @@ RecursivePickPoints( FOdysseyVectorObject* iObject
                    , std::vector<FOdysseyVectorPoint*>& oPickedPointArray
                    , uint64 iPickingFlags )
 {
-    if( iObject->GetClass() == FOdysseyVectorPathCubic::StaticClass() )
+    if( iObject->GetClass() == FOdysseyVectorPath::StaticClass() )
     {
         FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(iObject);
         BLMatrix2D& inverseWorldMatrix = iObject->GetInverseWorldMatrix();
@@ -510,9 +510,9 @@ FOdysseyVectorEngine::Stitch( FOdysseyVectorVertex* iVertexA
         double averageRadius = ( vertexARadius + vertexBRadius ) * 0.5f;
         FOdysseyVectorPath* path = iVertexA->GetPath();
 
-        if( path->GetClass() == FOdysseyVectorPathCubic::StaticClass() )
+        if( path->GetClass() == FOdysseyVectorPath::StaticClass() )
         {
-            FOdysseyVectorPathCubic* cubicPath = static_cast<FOdysseyVectorPathCubic*>(path);
+            FOdysseyVectorPath* cubicPath = static_cast<FOdysseyVectorPath*>(path);
             FOdysseyVectorSegmentCubic* vertexBSegment = static_cast<FOdysseyVectorSegmentCubic*>(iVertexB->GetFirstSegment());
             FOdysseyVectorSegmentCubic* vertexASegment = static_cast<FOdysseyVectorSegmentCubic*>(iVertexA->GetFirstSegment());
             FOdysseyVectorVertex* prevVertex = static_cast<FOdysseyVectorVertex*>(vertexASegment->GetOtherVertex( iVertexA ));
@@ -547,7 +547,7 @@ FOdysseyVectorEngine::Stitch( FOdysseyVectorVertex* iVertexA
 
             if( iSmooth )
             {
-                FOdysseyVectorPathCubic::SmoothSegments( knotVertex, false, true );
+                FOdysseyVectorPath::SmoothSegments( knotVertex, false, true );
             }
 
             path->InvalidateAllSegments();
@@ -570,7 +570,7 @@ RecursivePickSegments( FOdysseyVectorObject* iObject
                      , std::vector<double>* oDistanceArray )
 {
     if( ( iObject->GetClass() == FOdysseyVectorPath::StaticClass()      )
-     || ( iObject->GetClass() == FOdysseyVectorPathCubic::StaticClass() ) )
+     || ( iObject->GetClass() == FOdysseyVectorPath::StaticClass() ) )
     {
         FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(iObject);
         BLPoint localVector = iObject->GetInverseWorldMatrix().mapVector( 0.7071f, 0.7071f );

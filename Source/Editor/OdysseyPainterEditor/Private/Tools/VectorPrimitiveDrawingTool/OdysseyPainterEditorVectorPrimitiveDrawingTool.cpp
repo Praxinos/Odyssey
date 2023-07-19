@@ -273,14 +273,14 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseUpVector( FOdysseyVector
 
     if( primitive )
     {
-        FOdysseyVectorPathCubic* cubicPath = primitive->Convert();
+        FOdysseyVectorPath* path = primitive->Convert();
 
         // Undo must be called before association with parent object
         // needed for valid GUndo pointer
         GEditor->BeginTransaction(LOCTEXT("VectorPrimitiveDrawingTool","Vector Primitive Drawing Tool"));
         if( GUndo )
         {
-            FOdysseyVectorUndo *undo = new FOdysseyVectorUndoObjectAdd( iScene, cubicPath );
+            FOdysseyVectorUndo *undo = new FOdysseyVectorUndoObjectAdd( iScene, path );
 
             GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
         }
@@ -291,9 +291,9 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseUpVector( FOdysseyVector
 
         delete primitive;
 
-        iScene->AppendChild( cubicPath );
-        cubicPath->UpdateMatrix();
-        iScene->Select( cubicPath );
+        iScene->AppendChild( path );
+        path->UpdateMatrix();
+        iScene->Select( path );
     }
 
     iScene->Update( 0 ); // update invalidate objects

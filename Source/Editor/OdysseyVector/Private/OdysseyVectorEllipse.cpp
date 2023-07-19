@@ -24,10 +24,10 @@ FOdysseyVectorEllipse::FOdysseyVectorEllipse( const FString& iName
     mCubicVertex[2] = new FOdysseyVectorVertex( this, 0.0f, 0.0f, mStrokeWidth );
     mCubicVertex[3] = new FOdysseyVectorVertex( this, 0.0f, 0.0f, mStrokeWidth );
 
-    mCubicSegment[0] = new FOdysseyVectorSegmentCubic( static_cast<FOdysseyVectorPathCubic*>(this), mCubicVertex[0], mCubicVertex[1] );
-    mCubicSegment[1] = new FOdysseyVectorSegmentCubic( static_cast<FOdysseyVectorPathCubic*>(this), mCubicVertex[1], mCubicVertex[2] );
-    mCubicSegment[2] = new FOdysseyVectorSegmentCubic( static_cast<FOdysseyVectorPathCubic*>(this), mCubicVertex[2], mCubicVertex[3] );
-    mCubicSegment[3] = new FOdysseyVectorSegmentCubic( static_cast<FOdysseyVectorPathCubic*>(this), mCubicVertex[3], mCubicVertex[0] );
+    mCubicSegment[0] = new FOdysseyVectorSegmentCubic( this, mCubicVertex[0], mCubicVertex[1] );
+    mCubicSegment[1] = new FOdysseyVectorSegmentCubic( this, mCubicVertex[1], mCubicVertex[2] );
+    mCubicSegment[2] = new FOdysseyVectorSegmentCubic( this, mCubicVertex[2], mCubicVertex[3] );
+    mCubicSegment[3] = new FOdysseyVectorSegmentCubic( this, mCubicVertex[3], mCubicVertex[0] );
 
     AddVertex ( mCubicVertex[0] );
     AddVertex ( mCubicVertex[1] );
@@ -50,7 +50,7 @@ FOdysseyVectorEllipse::HasBaseClass( uint32 iBaseClassID )
         return true;
     }
 
-    return FOdysseyVectorPathCubic::HasBaseClass( iBaseClassID );
+    return FOdysseyVectorPath::HasBaseClass( iBaseClassID );
 }
 
 void
@@ -109,7 +109,7 @@ FOdysseyVectorEllipse::DrawShape( uint64 iFlags )
 {
     if ( mRadiusX && mRadiusY )
     {
-        FOdysseyVectorPathCubic::DrawShape ( iFlags );
+        FOdysseyVectorPath::DrawShape ( iFlags );
     }
 }
 

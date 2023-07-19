@@ -53,7 +53,7 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::Draw( FOdysseyVectorScene* iScene
                 {
                     FOdysseyVectorPath* path = vertex->GetPath();
 
-                    if( pathBuilder == nullptr || ( pathBuilder->GetCubicPath() == path ) )
+                    if( pathBuilder == nullptr || ( pathBuilder->GetPath() == path ) )
                     {
                         BLPath blpath = path->GetBLPath();
 

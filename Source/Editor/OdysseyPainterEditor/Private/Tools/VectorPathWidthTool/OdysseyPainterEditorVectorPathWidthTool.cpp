@@ -146,8 +146,8 @@ UOdysseyPainterEditorVectorPathWidthTool::OnMouseDragVector( FOdysseyVectorEngin
     for( int i = 0; i < segmentArray.size(); i++ )
     {
         FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>( segmentArray[i] );
-        FOdysseyVectorPathCubic* cubicPath = static_cast<FOdysseyVectorPathCubic*>(cubicSegment->GetPath());
-        BLPoint localPoint = cubicPath->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
+        FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(cubicSegment->GetPath());
+        BLPoint localPoint = path->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
         FOdysseyVectorVertex* vertex0 = static_cast<FOdysseyVectorVertex*>(cubicSegment->GetVertex(0));
         FOdysseyVectorVertex* vertex1 = static_cast<FOdysseyVectorVertex*>(cubicSegment->GetVertex(1));
         ::ULIS::FVec2D& point0 = vertex0->GetCoords();

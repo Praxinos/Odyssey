@@ -130,8 +130,8 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDownVector( FOdysseyVectorEngine
 
         if( cubicSegment )
         {
-            FOdysseyVectorPathCubic* cubicPath = static_cast<FOdysseyVectorPathCubic*>(cubicSegment->GetPath());
-            BLPoint localPoint = cubicPath->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
+            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(cubicSegment->GetPath());
+            BLPoint localPoint = path->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
             ::ULIS::FVec2D& ctrlPoint0 = cubicSegment->GetHandle(0)->GetCoords();
             ::ULIS::FVec2D& ctrlPoint1 = cubicSegment->GetHandle(1)->GetCoords();
             ::ULIS::FVec2D& point0 = cubicSegment->GetVertex(0)->GetCoords();
@@ -272,7 +272,7 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDragVector( FOdysseyVectorEngine
                         perpendicularVector = ::ULIS::FVec2D( perpendicularVector.y, -perpendicularVector.x );
                     }
 
-                    FOdysseyVectorPathCubic::SmoothSegments(vertex,perpendicularVector,false,true);
+                    FOdysseyVectorPath::SmoothSegments(vertex,perpendicularVector,false,true);
                 }
             }
         }

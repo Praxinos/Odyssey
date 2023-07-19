@@ -189,11 +189,11 @@ WriteDefineObjectEntry( FOdysseyVectorObject& iObject, FArchive &Ar )
 
         switch( iObject.GetType() )
         {
-            case FOdysseyVectorObject::VECTORPATHCUBICTYPE:
+            case FOdysseyVectorObject::VECTORPATHTYPE:
             {
-                FOdysseyVectorPathCubic* cubicPath = static_cast<FOdysseyVectorPathCubic*>(&iObject);
+                FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(&iObject);
 
-                FOdysseyVectorExport::WriteObjectPathCubic( *cubicPath, Ar );
+                FOdysseyVectorExport::WriteObjectPath( *path, Ar );
             }
             break;
 

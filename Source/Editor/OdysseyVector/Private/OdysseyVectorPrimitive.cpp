@@ -5,7 +5,7 @@ FOdysseyVectorPrimitive::~FOdysseyVectorPrimitive()
 }
 
 FOdysseyVectorPrimitive::FOdysseyVectorPrimitive( const FString& iName )
-    : FOdysseyVectorPathCubic( iName )
+    : FOdysseyVectorPath( iName )
 {
 }
 
@@ -17,13 +17,13 @@ FOdysseyVectorPrimitive::HasBaseClass( uint32 iBaseClassID )
         return true;
     }
 
-    return FOdysseyVectorPathCubic::HasBaseClass( iBaseClassID );
+    return FOdysseyVectorPath::HasBaseClass( iBaseClassID );
 }
 
-FOdysseyVectorPathCubic*
+FOdysseyVectorPath*
 FOdysseyVectorPrimitive::Convert()
 {
-    FOdysseyVectorPathCubic* path = static_cast<FOdysseyVectorPathCubic*>(this->FOdysseyVectorPathCubic::CopyShape());
+    FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(this->FOdysseyVectorPath::CopyShape());
 
     this->CopySettings( *path );
 

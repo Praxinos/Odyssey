@@ -167,16 +167,16 @@ UOdysseyPainterEditorVectorPathCutTool::OnMouseUpVector( FOdysseyVectorEngine* i
         BLPoint localP0 = inverseWorldMatrix.mapPoint( p0.x, p0.y );
         BLPoint localP1 = inverseWorldMatrix.mapPoint( p1.x, p1.y );
 
-        if( selectedObject->GetClass() == FOdysseyVectorPathCubic::StaticClass() )
+        if( selectedObject->GetClass() == FOdysseyVectorPath::StaticClass() )
         {
-            FOdysseyVectorPathCubic *cubicPath = static_cast<FOdysseyVectorPathCubic*>(selectedObject);
+            FOdysseyVectorPath *path = static_cast<FOdysseyVectorPath*>(selectedObject);
 
-            cubicPath->Cut( ::ULIS::FVec2D( localP0.x, localP0.y )
-                          , ::ULIS::FVec2D( localP1.x, localP1.y )
-                          , addedVertexArray
-                          , addedSegmentArray
-                          , removedSegmentArray );
-            cubicPath->Invalidate();
+            path->Cut( ::ULIS::FVec2D( localP0.x, localP0.y )
+                     , ::ULIS::FVec2D( localP1.x, localP1.y )
+                     , addedVertexArray
+                     , addedSegmentArray
+                     , removedSegmentArray );
+            path->Invalidate();
         }
     }
 

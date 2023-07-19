@@ -164,8 +164,8 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorEng
     ::ULIS::FColor color = mToolContext->GetEditor()->PaintColor().GetValue();
     ::ULIS::FColor rgba8 = color.ToFormat( ::ULIS::eFormat::Format_RGBA8 );
     FColor ueColor = FColor( rgba8.R8(), rgba8.G8(), rgba8.B8(), rgba8.A8() );
-    FOdysseyVectorVertex* cubicVertex = PickVertex( iEngine, iScene, iPointInTexture.x, iPointInTexture.y, StitchingRadius );
-    FOdysseyVectorPathCubic* cubicPath = nullptr;
+    FOdysseyVectorVertex* vertex = PickVertex( iEngine, iScene, iPointInTexture.x, iPointInTexture.y, StitchingRadius );
+    FOdysseyVectorPath* path = nullptr;
     UOdysseyPaletteEntry* entry = nullptr;
     BLPoint localCoords;
 
@@ -188,71 +188,71 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorEng
     // this is important to know what undo operation we are going to record: an ObjectAdd or a PathDrawing.
     mStitched = true;
 
-    if( cubicVertex )
+    if( vertex )
     {
-        cubicPath = static_cast<FOdysseyVectorPathCubic*>( cubicVertex->GetPath() );
+        path = vertex->GetPath();
     }
     else
     {
-        if ( cubicPath == nullptr )
+        if ( path == nullptr )
         {
-            cubicPath = new FOdysseyVectorPathCubic( FString("CubicPath") );
+            path = new FOdysseyVectorPath( FString("Path") );
 
             // This undo must be set before association with the new parent object
             // needed for valid GUndo pointer
             GEditor->BeginTransaction(LOCTEXT("VectorPathDrawingTool","Vector Path Drawing Tool"));
             if( GUndo )
             {
-                FOdysseyVectorUndo* undo = static_cast<FOdysseyVectorUndo*>( new FOdysseyVectorUndoObjectAdd( iScene, cubicPath ) );
+                FOdysseyVectorUndo* undo = static_cast<FOdysseyVectorUndo*>( new FOdysseyVectorUndoObjectAdd( iScene, path ) );
 
                 GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
             }
             GEditor->EndTransaction();
 
-            iScene->AppendChild( cubicPath );
+            iScene->AppendChild( path );
 
             // this is important to know what undo operation we are going to record: an ObjectAdd or a PathDrawing.
             mStitched = false;
         }
 
-        cubicVertex = new FOdysseyVectorVertex( cubicPath, 0.0f, 0.0f, 0.0f );
+        vertex = new FOdysseyVectorVertex( path, 0.0f, 0.0f, 0.0f );
 
-        cubicPath->AddVertex( cubicVertex );
+        path->AddVertex( vertex );
         // record for undos
-        mVertexArray.push_back( cubicVertex );
+        mVertexArray.push_back( vertex );
     }
 
-    mPreviousVertex = cubicVertex;
+    mPreviousVertex = vertex;
 
-    cubicPath->UpdateMatrix();
+    path->UpdateMatrix();
 
     mPathBuilder = new FOdysseyVectorPathBuilder();
 
-    cubicPath->SetForegroundColor( ueColor );
+    path->SetForegroundColor( ueColor );
     mPathBuilder->SetForegroundColor( ueColor );
 
     if (entry && entry->IsA(UOdysseyPaletteEntryColor::StaticClass()))
     {
-        cubicPath->GetForegroundBucket().SetPaletteEntry( entry );
+        path->GetForegroundBucket().SetPaletteEntry( entry );
         mPathBuilder->GetForegroundBucket().SetPaletteEntry( entry );
     }
 
-    localCoords = cubicPath->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
-    //localRadius = cubicPath->GetInverseWorldMatrix().mapVector( 0.7071f * radius, 0.7071f * radius );
+    localCoords = path->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
+    //localRadius = path->GetInverseWorldMatrix().mapVector( 0.7071f * radius, 0.7071f * radius );
 
-    cubicVertex->Set( localCoords.x, localCoords.y );
-    // cubicVertex->SetRadius( ::ULIS::FVec2D( localRadius.x, localRadius.y ).Distance() );
+    vertex->Set( localCoords.x, localCoords.y );
+    // vertex->SetRadius( ::ULIS::FVec2D( localRadius.x, localRadius.y ).Distance() );
 
     iScene->AppendChild( mPathBuilder );
 
-    mPathBuilder->Attach( cubicPath );
-    cubicPath->CopyTransformation( *cubicPath );
+    mPathBuilder->Attach( path );
+    path->CopyTransformation( *path );
     mPathBuilder->UpdateMatrix();
 
-    mPathBuilder->RecordStart( cubicVertex );
+    mPathBuilder->RecordStart( vertex );
 
     iScene->ClearSelection();
-    iScene->Select( cubicPath );
+    iScene->Select( path );
 
     // update invalidated objects
     iScene->Update( 0 );
@@ -341,7 +341,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( FOdysseyVectorEng
 
     if( mPathBuilder )
     {
-        FOdysseyVectorPathCubic* cubicPath = mPathBuilder->GetCubicPath();
+        FOdysseyVectorPath* path = mPathBuilder->GetPath();
 
         BLPoint localCoords;
         BLPoint localRadiusVec;
@@ -364,8 +364,8 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( FOdysseyVectorEng
             redrawRegion = imageRegion; // needs full redraw
         }
 
-        localCoords = cubicPath->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
-        localRadiusVec = cubicPath->GetInverseWorldMatrix().mapVector( 0.7071f * mPointRadius, 0.7071f * mPointRadius );
+        localCoords = path->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
+        localRadiusVec = path->GetInverseWorldMatrix().mapVector( 0.7071f * mPointRadius, 0.7071f * mPointRadius );
         localRadius = ::ULIS::FVec2D( localRadiusVec.x, localRadiusVec.y ).Distance();
 
         // small trick to set a radius to the first point, as pressure is only valid in drag events but first point is created on down events.
@@ -427,40 +427,40 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorEngin
 {
     if( mPathBuilder )
     {
-        FOdysseyVectorVertex* cubicVertex = PickVertex( iEngine, iScene, iPointInTexture.x, iPointInTexture.y, StitchingRadius );
-        FOdysseyVectorPathCubic* cubicPath = mPathBuilder->GetCubicPath();
+        FOdysseyVectorVertex* vertex = PickVertex( iEngine, iScene, iPointInTexture.x, iPointInTexture.y, StitchingRadius );
+        FOdysseyVectorPath* path = mPathBuilder->GetPath();
         FOdysseyVectorSegmentCubic* lastSegment = nullptr;
 
-        // in some conditions (maximizing the window), you can get a Up event without a Down event. Check cubicPath exists.
-        if( cubicPath )
+        // in some conditions (maximizing the window), you can get a Up event without a Down event. Check path exists.
+        if( path )
         {
-            BLPoint localCoords = cubicPath->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
+            BLPoint localCoords = path->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
             // in MouseUp events, pressure equals 0. We then use the last pressure value recorded in the Drag event.
-            BLPoint localRadius = cubicPath->GetInverseWorldMatrix().mapVector( 0.7071f * mPointRadius, 0.7071f * mPointRadius );
+            BLPoint localRadius = path->GetInverseWorldMatrix().mapVector( 0.7071f * mPointRadius, 0.7071f * mPointRadius );
             /*float roundedUpRadius = *//*ceil (radius)*//*mPreviousVertex->GetRadius();*/
 
             // the picked cubic vertex must belong to the path we are working with
-            if( cubicVertex )
+            if( vertex )
             {
-                if ( cubicVertex->GetPath() != cubicPath )
+                if ( vertex->GetPath() != path )
                 {
-                    cubicVertex = nullptr;
+                    vertex = nullptr;
                 }
             }
 
-            if( cubicVertex == nullptr )
+            if( vertex == nullptr )
             {
-                cubicVertex = new FOdysseyVectorVertex( cubicPath
+                vertex = new FOdysseyVectorVertex( path
                                                       , localCoords.x
                                                       , localCoords.y
                                                       , ::ULIS::FVec2D( localRadius.x, localRadius.y ).Distance() );
                 // record for undos
-                mVertexArray.push_back( cubicVertex );
+                mVertexArray.push_back( vertex );
 
-                cubicPath->AddVertex( cubicVertex );
+                path->AddVertex( vertex );
             }
 
-            lastSegment = mPathBuilder->RecordEnd( cubicVertex );
+            lastSegment = mPathBuilder->RecordEnd( vertex );
 
             if( lastSegment )
             {

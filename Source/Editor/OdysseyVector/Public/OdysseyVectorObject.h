@@ -57,7 +57,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         static const uint32 VECTORGROUPTYPE      = 2;
         static const uint32 VECTORELLIPSETYPE    = 3;
         static const uint32 VECTORRECTANGLETYPE  = 4;
-        static const uint32 VECTORPATHCUBICTYPE  = 5;
+        static const uint32 VECTORPATHTYPE       = 5;
         static const uint32 VECTORGROUPPAINTTYPE = 6;
 
         // drawing mask

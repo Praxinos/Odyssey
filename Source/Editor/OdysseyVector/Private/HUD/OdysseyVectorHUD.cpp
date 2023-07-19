@@ -192,10 +192,10 @@ FOdysseyVectorHUD::PickPoints( double iWorldX
 void
 FOdysseyVectorHUD::DrawObjectRecursive( FOdysseyVectorObject* iObj, BLContext* iBLCtx )
 {
-    if( iObj->GetClass() == FOdysseyVectorPathCubic::StaticClass() )
+    if( iObj->GetClass() == FOdysseyVectorPath::StaticClass() )
     {
-        FOdysseyVectorPathCubic* cubicPath = static_cast<FOdysseyVectorPathCubic*>(iObj);
-        std::list<FOdysseyVectorVertex*>& vertexList = cubicPath->GetVertexList();
+        FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(iObj);
+        std::list<FOdysseyVectorVertex*>& vertexList = path->GetVertexList();
 
         iBLCtx->setCompOp( BL_COMP_OP_SRC_OVER );
         iBLCtx->setFillStyle( BLRgba32( 0x80FFFFFF ) );
@@ -203,9 +203,9 @@ FOdysseyVectorHUD::DrawObjectRecursive( FOdysseyVectorObject* iObj, BLContext* i
         // Points and Point size handles
         for( std::list<FOdysseyVectorVertex*>::iterator it = vertexList.begin(); it != vertexList.end(); ++it )
         {
-            FOdysseyVectorVertex *cubicVertex = static_cast<FOdysseyVectorVertex*>(*it);
-            BLMatrix2D& worldMatrix = cubicPath->GetWorldMatrix();
-            BLPoint worldPoint = worldMatrix.mapPoint( cubicVertex->GetX(), cubicVertex->GetY() );
+            FOdysseyVectorVertex *vertex = static_cast<FOdysseyVectorVertex*>(*it);
+            BLMatrix2D& worldMatrix = path->GetWorldMatrix();
+            BLPoint worldPoint = worldMatrix.mapPoint( vertex->GetX(), vertex->GetY() );
 
             iBLCtx->setFillStyle( BLRgba32( 0xFF000000 ) );
             iBLCtx->fillCircle( worldPoint.x, worldPoint.y, 2.0f );

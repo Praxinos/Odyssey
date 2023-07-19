@@ -364,14 +364,14 @@ FOdysseyPainterEditorVectorGridToolHUD::MapObject( FOdysseyVectorObject* iObject
         }
     }
 
-    if( iObject->GetClass() == FOdysseyVectorPathCubic::StaticClass() )
+    if( iObject->GetClass() == FOdysseyVectorPath::StaticClass() )
     {
-        FOdysseyVectorPathCubic* cubicPath = static_cast<FOdysseyVectorPathCubic*>(iObject);
-        std::list<FOdysseyVectorVertex*>& vertexList = cubicPath->GetVertexList();
-        std::list<FOdysseyVectorSegment*>& segmentList = cubicPath->GetSegmentList();
+        FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(iObject);
+        std::list<FOdysseyVectorVertex*>& vertexList = path->GetVertexList();
+        std::list<FOdysseyVectorSegment*>& segmentList = path->GetSegmentList();
         BLMatrix2D conversionMatrix = spaceMatrix;
 
-        conversionMatrix.transform( cubicPath->GetWorldMatrix() );
+        conversionMatrix.transform( path->GetWorldMatrix() );
 
         for( std::list<FOdysseyVectorVertex*>::iterator it = vertexList.begin(); it != vertexList.end(); ++it )
         {

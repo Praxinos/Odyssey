@@ -2,19 +2,19 @@
 #include "OdysseyVectorSegmentCubic.h"
 
 static void
-WritePathCubicGeometrySegments( FOdysseyVectorPathCubic& iCubicPath, FArchive &Ar )
+WritePathCubicGeometrySegments( FOdysseyVectorPath& iPath, FArchive &Ar )
 {
-    if( iCubicPath.GetSegmentList().size() )
+    if( iPath.GetSegmentList().size() )
     {
-        FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_PATHCUBIC_GEOMETRY_SEGMENTS
+        FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_PATH_GEOMETRY_CUBICSEGMENTS
                                         , Ar
-                                        , [&iCubicPath](FArchive &Ar) -> void
+                                        , [&iPath](FArchive &Ar) -> void
         {
-            uint32 segmentCount = iCubicPath.GetSegmentList().size();
+            uint32 segmentCount = iPath.GetSegmentList().size();
 
             Ar << segmentCount;
 
-            for( std::list<FOdysseyVectorSegment*>::iterator it = iCubicPath.GetSegmentList().begin(); it != iCubicPath.GetSegmentList().end(); ++it )
+            for( std::list<FOdysseyVectorSegment*>::iterator it = iPath.GetSegmentList().begin(); it != iPath.GetSegmentList().end(); ++it )
             {
                 FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
                 uint32 p0ID = cubicSegment->GetPoint(0)->GetID();
@@ -39,20 +39,20 @@ WritePathCubicGeometrySegments( FOdysseyVectorPathCubic& iCubicPath, FArchive &A
 }
 
 static void
-WritePathCubicGeometryVertices( FOdysseyVectorPathCubic& iCubicPath, FArchive &Ar )
+WritePathCubicGeometryVertices( FOdysseyVectorPath& iPath, FArchive &Ar )
 {
-    if ( iCubicPath.GetVertexList().size() )
+    if ( iPath.GetVertexList().size() )
     {
-        FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_PATHCUBIC_GEOMETRY_VERTICES
+        FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_PATH_GEOMETRY_VERTICES
                                         , Ar
-                                        , [&iCubicPath](FArchive &Ar) -> void
+                                        , [&iPath](FArchive &Ar) -> void
         {
             uint32 vertexID = 0;
-            uint32 vertexCount = iCubicPath.GetVertexList().size();
+            uint32 vertexCount = iPath.GetVertexList().size();
 
             Ar << vertexCount;
 
-            for( std::list<FOdysseyVectorVertex*>::iterator it = iCubicPath.GetVertexList().begin(); it != iCubicPath.GetVertexList().end(); ++it )
+            for( std::list<FOdysseyVectorVertex*>::iterator it = iPath.GetVertexList().begin(); it != iPath.GetVertexList().end(); ++it )
             {
                 FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>(*it);
                 double x = vertex->GetX();
@@ -71,14 +71,14 @@ WritePathCubicGeometryVertices( FOdysseyVectorPathCubic& iCubicPath, FArchive &A
 }
 
 static void
-WritePathCubicGeometry( FOdysseyVectorPathCubic& iCubicPath, FArchive &Ar )
+WritePathCubicGeometry( FOdysseyVectorPath& iPath, FArchive &Ar )
 {
-    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_PATHCUBIC_GEOMETRY
+    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_PATH_GEOMETRY
                                     , Ar
-                                    , [&iCubicPath](FArchive &Ar) -> void
+                                    , [&iPath](FArchive &Ar) -> void
     {
-        WritePathCubicGeometryVertices( iCubicPath, Ar );
-        WritePathCubicGeometrySegments( iCubicPath, Ar );
+        WritePathCubicGeometryVertices( iPath, Ar );
+        WritePathCubicGeometrySegments( iPath, Ar );
     } );
 }
 
@@ -96,13 +96,13 @@ WritePathJoint( FOdysseyVectorPath& iPath, FArchive &Ar )
 }
 
 void
-FOdysseyVectorExport::WriteObjectPathCubic( FOdysseyVectorPathCubic& iCubicPath, FArchive &Ar )
+FOdysseyVectorExport::WriteObjectPath( FOdysseyVectorPath& iPath, FArchive &Ar )
 {
-    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_OBJECT_PATHCUBIC
+    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_OBJECT_PATH
                                     , Ar
-                                    , [&iCubicPath](FArchive &Ar) -> void
+                                    , [&iPath](FArchive &Ar) -> void
     {
-        WritePathJoint( iCubicPath, Ar );
-        WritePathCubicGeometry( iCubicPath, Ar );
+        WritePathJoint( iPath, Ar );
+        WritePathCubicGeometry( iPath, Ar );
     } );
 }
