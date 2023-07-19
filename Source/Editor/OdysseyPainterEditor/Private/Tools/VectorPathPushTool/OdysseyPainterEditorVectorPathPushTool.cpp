@@ -15,7 +15,7 @@ UOdysseyPainterEditorVectorPathPushTool::~UOdysseyPainterEditorVectorPathPushToo
 
 UOdysseyPainterEditorVectorPathPushTool::UOdysseyPainterEditorVectorPathPushTool()
     : Radius( 20.0f )
-    , PreserveSmoothness( true )
+    , PreserveSmoothness( false )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathPushTool64");
 

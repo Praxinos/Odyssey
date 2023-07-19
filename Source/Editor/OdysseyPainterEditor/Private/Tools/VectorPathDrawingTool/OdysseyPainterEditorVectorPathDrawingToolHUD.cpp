@@ -35,12 +35,12 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::Draw( FOdysseyVectorScene* iScene
     blctx->resetMatrix();
 
     blctx->setStrokeWidth( 1.0f );
-    blctx->setStrokeStyle( fgColor );
+    blctx->setStrokeStyle( hcColor );
     blctx->strokeCircle( mX, mY, mPathDrawingTool->Radius );
 
     if( mPathDrawingTool->Stitch )
     {
-        blctx->setStrokeStyle( hcColor );
+        blctx->setStrokeStyle( fgColor );
         blctx->strokeCircle( mX, mY, mPathDrawingTool->StitchingRadius );
 
         if( mStitchedPointArray.size() )
