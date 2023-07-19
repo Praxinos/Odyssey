@@ -129,8 +129,9 @@ FOdysseyRasterBlockUndoBuilder::SaveToCache(const FString& iId, const TArray<uin
     UE::DerivedData::FRequestOwner putOwner(UE::DerivedData::EPriority::Lowest);
     UE::DerivedData::GetCache().PutValue(
         {
+            UE::DerivedData::FCachePutValueRequest
             {
-                TEXT("FOdysseyRasterBlock"),
+                UE::DerivedData::FSharedString(TEXT("FOdysseyRasterBlock")),
                 UE::DerivedData::ConvertLegacyCacheKey(CacheKey),
                 MoveTemp(derivedDataValue),
                 UE::DerivedData::ECachePolicy::StoreLocal
@@ -210,8 +211,9 @@ FOdysseyRasterBlockUndo::LoadUndoFromCache(const FString& iId)
     UE::DerivedData::FRequestOwner getOwner(UE::DerivedData::EPriority::Blocking);
     UE::DerivedData::GetCache().GetValue(
 		{
+            UE::DerivedData::FCacheGetValueRequest
             {
-                TEXT("FOdysseyRasterBlock"),
+                UE::DerivedData::FSharedString(TEXT("FOdysseyRasterBlock")),
                 UE::DerivedData::ConvertLegacyCacheKey(CacheKey),
                 UE::DerivedData::ECachePolicy::Local
             }

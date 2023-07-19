@@ -12,10 +12,10 @@ FOdysseyEditorContextMenu::~FOdysseyEditorContextMenu()
 }
 
 FOdysseyEditorContextMenu::FOdysseyEditorContextMenu(FName iID, FText iDisplayName, FSlateIcon iIcon)
-	: mID(iID)
-	, mDisplayName(iDisplayName)
-	, mIcon(iIcon)
-    , mMenu(true, NULL)
+	: mMenu(true, NULL)
+    , mID(iID)
+    , mDisplayName(iDisplayName)
+    , mIcon(iIcon)
 	, mWidget(nullptr)
 {
 }

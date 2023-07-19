@@ -61,7 +61,7 @@ public class blend2d : ModuleRules
         }
         else if ( iTarget.Platform == UnrealTargetPlatform.Mac )
         {
-            string binName = baseName + ".dylib";
+            string binName = baseName + ".dylib";;
 
             PublicSystemIncludePaths.Add( includePath );
             PublicAdditionalLibraries.Add( Path.Combine( binPath, binName ) );

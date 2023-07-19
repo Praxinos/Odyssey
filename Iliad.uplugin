@@ -24,32 +24,6 @@
 	],
 	"Modules": [
 		{
-			"Name": "OdysseyEditorBrushBlueprints",
-			"Type": "UncookedOnly",
-			"LoadingPhase": "Default",
-			"Comment": "OdysseyBrush is UncookedOnly so that its nodes can be used in FunctionLibraries. And having this module avoids switching main editor modules to UncookedOnly"
-		},
-		{
-			"Name": "OdysseyAnimation",
-			"Type": "Editor",
-			"LoadingPhase": "Default"
-		},
-		{
-			"Name": "OdysseyAnimationEditor",
-			"Type": "Editor",
-			"LoadingPhase": "Default"
-		},
-		{
-			"Name": "OdysseyAnimationPlayer",
-			"Type": "Editor",
-			"LoadingPhase": "Default"
-		},
-		{
-			"Name": "OdysseyAnimationTexture",
-			"Type": "Editor",
-			"LoadingPhase": "Default"
-		},
-		{
 			"Name": "OdysseyCore",
 			"Type": "UncookedOnly",
 			"LoadingPhase": "Default"
@@ -66,10 +40,20 @@
 			"Comment": "OdysseyMeshPaintRendering is UncookedOnly because it needs PostConfigInit as LoadingPhase (to register shaders), and it is only available in UncookedOnly"
 		},
 		{
+			"Name": "ULISLoader",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		},
+		{
 			"Name": "OdysseyBrush",
 			"Type": "UncookedOnly",
 			"LoadingPhase": "Default",
 			"Comment": "OdysseyBrush is UncookedOnly so that its nodes can be used in FunctionLibraries"
+		},
+		{
+			"Name": "OdysseyStyle",
+			"Type": "Editor",
+			"LoadingPhase": "PreDefault"
 		},
 		{
 			"Name": "OdysseyHUDSystem",
@@ -92,17 +76,7 @@
 			"LoadingPhase": "Default"
 		},
 		{
-			"Name": "ULISLoader",
-			"Type": "Editor",
-			"LoadingPhase": "Default"
-		},
-		{
 			"Name": "OdysseyBrushEditor",
-			"Type": "Editor",
-			"LoadingPhase": "Default"
-		},
-		{
-			"Name": "OdysseyContentBrowserExtensions",
 			"Type": "Editor",
 			"LoadingPhase": "Default"
 		},
@@ -112,34 +86,12 @@
 			"LoadingPhase": "Default"
 		},
 		{
-			"Name": "OdysseyFlipbook",
-			"Type": "Editor",
-			"LoadingPhase": "None",
-			"Comment": "Loaded by OdysseyModulesLoader at the PostDefault LoadingPhase if Paper2D is activated"
-		},
-		{
-			"Name": "OdysseyFlipbookEditor",
-			"Type": "Editor",
-			"LoadingPhase": "None",
-			"Comment": "Loaded by OdysseyModulesLoader at the PostDefault LoadingPhase if Paper2D is activated"
-		},
-		{
 			"Name": "OdysseyImaging",
 			"Type": "Editor",
 			"LoadingPhase": "Default"
 		},
 		{
-			"Name": "OdysseyPainterEditor",
-			"Type": "Editor",
-			"LoadingPhase": "Default"
-		},
-		{
 			"Name": "OdysseyShapes",
-			"Type": "Editor",
-			"LoadingPhase": "PreDefault"
-		},
-		{
-			"Name": "OdysseyStyle",
 			"Type": "Editor",
 			"LoadingPhase": "PreDefault"
 		},
@@ -154,6 +106,21 @@
 			"LoadingPhase": "Default"
 		},
 		{
+			"Name": "OdysseyWidgets",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "OdysseyModuleLoader",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "OdysseyVector",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		},
+		{
 			"Name": "OdysseyTexture",
 			"Type": "Editor",
 			"LoadingPhase": "Default"
@@ -164,24 +131,52 @@
 			"LoadingPhase": "Default"
 		},
 		{
-			"Name": "OdysseyVector",
-			"Type": "Editor",
-			"LoadingPhase": "Default"
-		},
-		{
 			"Name": "OdysseyViewportDrawingEditor",
 			"Type": "Editor",
 			"LoadingPhase": "Default"
 		},
 		{
-			"Name": "OdysseyWidgets",
+			"Name": "OdysseyAnimation",
 			"Type": "Editor",
 			"LoadingPhase": "Default"
 		},
 		{
-			"Name": "OdysseyModuleLoader",
+			"Name": "OdysseyAnimationEditor",
 			"Type": "Editor",
 			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "OdysseyAnimationPlayer",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "OdysseyAnimationTexture",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		},
+                {
+			"Name": "OdysseyPainterEditor",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "OdysseyEditorBrushBlueprints",
+			"Type": "UncookedOnly",
+			"LoadingPhase": "PostDefault",
+			"Comment": "OdysseyBrush is UncookedOnly so that its nodes can be used in FunctionLibraries. And having this module avoids switching main editor modules to UncookedOnly"
+		},
+		{
+			"Name": "OdysseyFlipbook",
+			"Type": "Editor",
+			"LoadingPhase": "None",
+			"Comment": "Loaded by OdysseyModulesLoader at the PostDefault LoadingPhase if Paper2D is activated"
+		},
+		{
+			"Name": "OdysseyFlipbookEditor",
+			"Type": "Editor",
+			"LoadingPhase": "None",
+			"Comment": "Loaded by OdysseyModulesLoader at the PostDefault LoadingPhase if Paper2D is activated"
 		}
 	]
 }

@@ -131,7 +131,8 @@ FOdysseyRasterBlock::CleanupBlock(uint8* iData, void* iInfo)
     infos->mAvailableCounter->Set(0);
 
     ::ULIS::OnCleanup_FreeMemory(iData, iInfo); //we have the responsability to delete the block data
-    delete iInfo;
+    //TODO: check if we really need to free iInfo: it's void*, we shouldn't
+    //delete iInfo;
 }
 
 void
@@ -438,10 +439,12 @@ FOdysseyRasterBlock::SaveBlockToCache(const ::ULIS::FBlock& iBlock, const FStrin
 
     //Store the tile in cache
     UE::DerivedData::FRequestOwner putOwner(UE::DerivedData::EPriority::Highest);
+    
     UE::DerivedData::GetCache().PutValue(
         {
+            UE::DerivedData::FCachePutValueRequest
             {
-                TEXT("FOdysseyRasterBlock"),
+                UE::DerivedData::FSharedString(TEXT("FOdysseyRasterBlock")),
                 UE::DerivedData::ConvertLegacyCacheKey(CacheKey),
                 MoveTemp(derivedDataValue),
                 UE::DerivedData::ECachePolicy::StoreLocal //Use "StoreLocal" instead of "Local" to store and override existing value
@@ -471,8 +474,9 @@ FOdysseyRasterBlock::LoadBlockFromCache(TSharedRef<::ULIS::FBlock, ESPMode::Thre
     UE::DerivedData::FRequestOwner getOwner(UE::DerivedData::EPriority::Blocking);
     UE::DerivedData::GetCache().GetValue(
 		{
+            UE::DerivedData::FCacheGetValueRequest
             {
-                TEXT("FOdysseyRasterBlock"),
+                UE::DerivedData::FSharedString(TEXT("FOdysseyRasterBlock")),
                 UE::DerivedData::ConvertLegacyCacheKey(CacheKey),
                 UE::DerivedData::ECachePolicy::Local
             }

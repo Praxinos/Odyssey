@@ -4,9 +4,9 @@
 #include <Core/Core.h>
 #include <Image/Block.h>
 #include <OdysseyVectorPoint.h>
-#include "Palette/OdysseyPaletteEntry.h"
 
 class FOdysseyVectorObject;
+class UOdysseyPaletteEntry;
 
 class ODYSSEYVECTOR_API FOdysseyVectorBucket : public FOdysseyVectorPoint
 {

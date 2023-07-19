@@ -10,43 +10,25 @@ public class OdysseyVector : ModuleRules
     {
         PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
-        PublicDependencyModuleNames.AddRange(
-            new string[] {
-                "Core",
-                "CoreUObject",
-                "InputCore",
-                "Engine",
-                "Slate",
-                "SlateCore",
-                "OdysseyCore",
-                "OdysseyStyle",
-                "OdysseyPalette",
-                "blend2d",
-                "ULIS",
-                "ULISLoader"
-            }
-        );
-
         PrivateDependencyModuleNames.AddRange(
             new string[] {
                 "Core",
                 "CoreUObject",
                 "InputCore",
                 "Engine",
-                "EditorScriptingUtilities",
                 "Slate",
                 "SlateCore",
                 "OdysseyCore",
                 "OdysseyStyle",
-                "blend2d",
-                "ULIS",
-                "ULISLoader"
+                "OdysseyPalette"
             }
         );
 
-        PublicIncludePaths.AddRange(
+        PublicDependencyModuleNames.AddRange(
             new string[] {
-                Path.Combine(ModuleDirectory, "Public"),
+                "ULIS",
+                "ULISLoader",
+                "blend2d"
             }
         );
     }

@@ -23,8 +23,8 @@ UOdysseyPainterEditorVectorPathDrawingTool::UOdysseyPainterEditorVectorPathDrawi
     , AverageStitchedRadius( true )
     , StitchingRadius( 10 )
     , mPathBuilder( nullptr )
-    , mPreviousVertex( nullptr )
     , mOldPointInTexture( 0, 0 )
+    , mPreviousVertex( nullptr )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.VectoPen64");
 

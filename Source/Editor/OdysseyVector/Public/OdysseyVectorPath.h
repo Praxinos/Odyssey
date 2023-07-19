@@ -50,7 +50,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
     protected:
         virtual void UpdateShape( uint32 iUpdateFlags );
         virtual void DrawShape( uint64 iFlags );
-        bool PickShape( const ::ULIS::FRectD &iRoi, uint32 iSelectionFlags ) { return nullptr; };
+        bool PickShape( const ::ULIS::FRectD &iRoi, uint32 iSelectionFlags ) { return false; };
         FOdysseyVectorObject* CopyShape();
 
     protected :
@@ -132,5 +132,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
         uint32 GetPaintingCode();
         BLPath& GetBLPath();
         void UnselectAllVertices();
+        
+        using FOdysseyVectorObject::DrawStructure;
         virtual void DrawStructure( FColor& iStrokeColor, double iStrokeWidth, bool iWorld ){};
 };

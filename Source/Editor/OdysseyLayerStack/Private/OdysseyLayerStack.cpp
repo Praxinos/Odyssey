@@ -335,7 +335,7 @@ UOdysseyLayerStack::CanMergeLayers(TArray<UOdysseyLayer*> iLayers)
     //Get only topmost selected layers
     TArray<UOdysseyLayer*> layersToMerge = UOdysseyLayerStackFunctionLibrary::FilterTopmostLayers(iLayers);
     if (layersToMerge.Num() <= 0) //We can have a single layer here if we selected a folder layer and one of its children, and it still works
-        return nullptr;
+        return false;
 
     return FindLayersMergeTypes(layersToMerge).Num() == 1;
 }

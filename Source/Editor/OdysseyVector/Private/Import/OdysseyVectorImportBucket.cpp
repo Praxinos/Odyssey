@@ -1,6 +1,5 @@
 #include "Import/OdysseyVectorImport.h"
 #include "Palette/OdysseyPalette.h"
-#include "EditorAssetLibrary.h"
 #include "Engine/ObjectLibrary.h"
 
 void

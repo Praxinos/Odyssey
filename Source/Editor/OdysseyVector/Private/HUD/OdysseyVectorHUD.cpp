@@ -14,8 +14,8 @@ FPointQuadTree::~FPointQuadTree()
 FPointQuadTree::FPointQuadTree( const ::ULIS::FRectD& iRect
                               , uint32 iMaxPointsPerQuad
                               , std::vector<FPointQuadTreeEntry>& iPointQuadTreeEntryArray )
-    : mRect( iRect )
-    , mChildren { nullptr, nullptr, nullptr, nullptr }
+    : mChildren { nullptr, nullptr, nullptr, nullptr }
+    , mRect( iRect )
 {
     Build( iMaxPointsPerQuad, iPointQuadTreeEntryArray );
 }

@@ -506,7 +506,7 @@ float FOdysseyViewportDrawingEditorMeshBasedAdapter::GetStampQuality()
                     brushRenderTargetResource->TextureRHI,
                     FResolveParams());									// Resolve parameters
 
-                /*TArray<FRHIGPUTextureReadback> readbufferArray;
+                TArray<FRHIGPUTextureReadback> readbufferArray;
 
                 for (int i = 0; i < rects.Num(); i++)
                 {

@@ -10,7 +10,7 @@
 
 #include "ULIS/include/Math/ShapeGeneration/Line.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyPainterEditorViewportTab"
+#define LOCTEXT_NAMESPACE "OdysseyPainterEditorHUDTab"
 
 /////////////////////////////////////////////////////
 // FOdysseyPainterEditorViewportTab

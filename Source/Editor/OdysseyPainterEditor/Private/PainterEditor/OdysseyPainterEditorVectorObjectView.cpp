@@ -108,3 +108,5 @@ UOdysseyPainterEditorVectorObjectView::PostEditChangeProperty( FPropertyChangedE
         mScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
     }
 }
+
+#undef LOCTEXT_NAMESPACE

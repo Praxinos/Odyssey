@@ -37,7 +37,7 @@ public:
     enum eFrameDisplayMode
     {
         kDefault,
-        kColor, //Full color keeps opacity
+        kColored, //Full color keeps opacity
         kTint, //Tint uses Luminosity to define color
     };
 

@@ -18,10 +18,11 @@ UOdysseyPainterEditorVectorTransformTool::~UOdysseyPainterEditorVectorTransformT
 }
 
 UOdysseyPainterEditorVectorTransformTool::UOdysseyPainterEditorVectorTransformTool()
-    : PickingRadius( 10.0f )
-    , mPickedPivot( nullptr )
-    , Uniform( true )
+    : mPickedPivot( nullptr )
     , mDragging( false )
+    , PickingRadius( 10.0f )
+    , Uniform( true )
+    
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.TransformTool32");
 

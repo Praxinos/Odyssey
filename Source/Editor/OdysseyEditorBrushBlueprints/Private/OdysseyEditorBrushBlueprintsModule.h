@@ -9,7 +9,7 @@
 /**
  * The Brush Asset module.
  */
-class FOdysseyEditorBrushBlueprints :
+class FOdysseyEditorBrushBlueprintsModule :
 	public IModuleInterface
 {
 public:

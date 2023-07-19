@@ -100,9 +100,9 @@ FOdysseyAnimationLightTable::GetKeyDisplayMode(int iIndex) const
     switch ( mDisplayMode )
     {
         case EOdysseyLightTableDisplayMode::Default: return eFrameDisplayMode::kDefault;
-        case EOdysseyLightTableDisplayMode::Color: return eFrameDisplayMode::kColor;
+        case EOdysseyLightTableDisplayMode::Color: return eFrameDisplayMode::kColored;
         case EOdysseyLightTableDisplayMode::Tint: return eFrameDisplayMode::kTint;
-        case EOdysseyLightTableDisplayMode::ColorGradient: return eFrameDisplayMode::kColor;
+        case EOdysseyLightTableDisplayMode::ColorGradient: return eFrameDisplayMode::kColored;
         case EOdysseyLightTableDisplayMode::TintGradient: return eFrameDisplayMode::kTint;
     }
 

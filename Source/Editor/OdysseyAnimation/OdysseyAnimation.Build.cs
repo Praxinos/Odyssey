@@ -10,7 +10,7 @@ namespace UnrealBuildTool.Rules
 		public OdysseyAnimation(ReadOnlyTargetRules Target) : base(Target)
         {
             PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
-			bUseRTTI = true;
+			//bUseRTTI = true;
 
             PublicIncludePaths.AddRange(
 				new string[] {

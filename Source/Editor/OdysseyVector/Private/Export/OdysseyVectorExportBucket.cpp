@@ -1,4 +1,5 @@
 #include "Export/OdysseyVectorExport.h"
+#include "Palette/OdysseyPaletteEntry.h"
 
 static void
 WriteBucketPaletteEntry( FOdysseyVectorBucket& iBucket, FArchive& Ar)
@@ -60,12 +61,13 @@ WriteBucketGradientStop( FColor& iStopColor, double iStopAt, FArchive &Ar )
                                     , Ar
                                     , [&iStopColor,iStopAt](FArchive &Ar) -> void
     {
+        double stopAt = iStopAt; //iStopAt is const in the lambda, and FArchive << doesn't like it, so we use a variable here
         Ar << iStopColor.R;
         Ar << iStopColor.G;
         Ar << iStopColor.B;
         Ar << iStopColor.A;
 
-        Ar << (double) iStopAt;
+        Ar << stopAt;
     } );
 }
 

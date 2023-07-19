@@ -18,14 +18,15 @@ SOdysseyAnimationLayerImageRasterTimeline::~SOdysseyAnimationLayerImageRasterTim
 }
 
 SOdysseyAnimationLayerImageRasterTimeline::SOdysseyAnimationLayerImageRasterTimeline()
-    : mIsRefreshPending(false)
-    , mIsRebuildPending(false)
-	, mTimingHandleBrush(nullptr)
-    , mOffsettingLayer(false)
-    , mOffset(0)
-	, mLengthHandleBrush(nullptr)
+    : mTimingHandleBrush(nullptr)
+    , mLengthHandleBrush(nullptr)
     , mAddCellsHandleRightBrush(nullptr)
     , mAddCellsHandleLeftBrush(nullptr)
+    , mIsRefreshPending(false)
+    , mIsRebuildPending(false)
+    , mOffsettingLayer(false)
+    , mOffset(0)
+
 {
 
 }
