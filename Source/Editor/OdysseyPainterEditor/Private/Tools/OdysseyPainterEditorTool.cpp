@@ -16,11 +16,17 @@ UOdysseyPainterEditorTool::UOdysseyPainterEditorTool()
 {
 }
 
-/* void
+void
 UOdysseyPainterEditorTool::SetEditor(FOdysseyPainterEditor* iEditor)
 {
     mEditor = iEditor;
-} */
+}
+
+FOdysseyPainterEditor*
+UOdysseyPainterEditorTool::GetEditor()
+{
+    return mEditor;
+}
 
 void
 UOdysseyPainterEditorTool::SetToolContext(TSharedPtr<FOdysseyPainterEditorToolContext> iToolContext)

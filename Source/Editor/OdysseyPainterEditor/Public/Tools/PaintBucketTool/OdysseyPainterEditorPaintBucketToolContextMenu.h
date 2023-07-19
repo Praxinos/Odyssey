@@ -9,19 +9,10 @@
 class FOdysseyPainterEditor;
 class UOdysseyPainterEditorTool;
 
-class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorPaintBucketToolContextMenu :
-    public FOdysseyPainterEditorContextMenu
+class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorPaintBucketToolContextMenu
 {
-public:
-    // Construction / Destruction
-    virtual ~FOdysseyPainterEditorPaintBucketToolContextMenu();
-    FOdysseyPainterEditorPaintBucketToolContextMenu( FOdysseyPainterEditor* iEditor );
-
-public:
-    // FOdysseyEditorTab interface
-    virtual TSharedPtr<SWidget> CreateWidget() override;
-    virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
-
-private:
-    FOdysseyVectorBucket* mWorkingBucket;
+    public:
+        // FOdysseyEditorTab interface
+        static TSharedPtr<SWidget> CreateWidget( FOdysseyPainterEditorToolContext* iToolContext );
+        static void BucketProperties( FOdysseyPainterEditorToolContext* iToolContext );
 };

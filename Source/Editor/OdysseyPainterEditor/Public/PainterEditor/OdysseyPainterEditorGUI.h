@@ -39,7 +39,6 @@ public:
 public:
     // Tabs
     virtual void CreateTabs();
-    virtual void CreateContextMenus();
     virtual void BindShortcuts(FBaseToolkit* iToolkit);
 
 public:

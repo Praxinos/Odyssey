@@ -14,6 +14,7 @@
 
 class FOdysseyPaintEngine;
 class FOdysseyPainterEditorPaintBucketToolHUD;
+class FOdysseyPainterEditorPaintBucketToolContextMenu;
 
 UCLASS()
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorPaintBucketTool : public UOdysseyPainterEditorTool
@@ -81,6 +82,7 @@ public:
 
 private:
     void SetBucketColor( FOdysseyVectorBucket* iBucket );
+    void PopUpMenu();
 
 protected:
     void OnMouseUpVectorClearBucket( FOdysseyVectorScene* iScene
@@ -95,16 +97,15 @@ protected:
                                     , const FOdysseyPoint& iPointInTexture
                                     , const FKey& iKey );
     void OnMouseUpVectorMovePoint( FOdysseyVectorScene* iScene
-                                    , FOdysseyVectorGroupPaint* paintGroup
-                                    , FOdysseyVectorPoint* iPoint
-                                    , ::ULIS::FVec2D iPointOriginalPosition
-                                    , const FOdysseyPoint& iPointInTexture
-                                    , const FKey& iKey );
+                                 , FOdysseyVectorPoint* iPoint
+                                 , ::ULIS::FVec2D iPointOriginalPosition );
     void OnMouseUpVectorPropagateBucket( FOdysseyVectorScene* iScene
                                         , FOdysseyVectorBucket* iBucket
                                         , bool iPropagate );
     void OnMouseUpVectorColorBucket( FOdysseyVectorScene* iScene
                                     , FOdysseyVectorBucket* iBucket );
+    void OnMouseDownVectorRotateBucket( FOdysseyVectorScene* iScene
+                                      , FOdysseyVectorBucket* iBucket );
     double GetRotationAngle( FOdysseyVectorBucket* iBucket
                             , const FOdysseyPoint& iPointInTexture );
 
@@ -143,6 +144,8 @@ protected:
     double mDownMouseX;
     double mDownMouseY;
     ::ULIS::FVec2D mPointPosition;
+    double mPointRotation;
     FOdysseyPainterEditorPaintBucketToolHUD* mBucketHUD;
+    FOdysseyPainterEditorPaintBucketToolContextMenu* mContextMenu;
     uint32 mPickedArea;
 };

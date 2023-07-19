@@ -132,6 +132,25 @@ FOdysseyPainterEditor::InitTools()
 	mVectorTransformTool->SetToolContext(mToolContext);
 	mRasterDrawingTool->SetBrushContexts(mBrushContexts);
 
+	mRasterDrawingTool->SetEditor(this);
+    mVectorPrimitiveDrawingTool->SetEditor(this);
+    mVectorPathDrawingTool->SetEditor(this);
+    mVectorPathEditTool->SetEditor(this);
+    mVectorPathCutTool->SetEditor(this);
+    mVectorPickTool->SetEditor(this);
+    mVectorSceneScaleTool->SetEditor(this);
+    mVectorScenePanTool->SetEditor(this);
+    mVectorEraserTool->SetEditor(this);
+    mVectorPathPushTool->SetEditor(this);
+    mVectorPathWidthTool->SetEditor(this);
+    mVectorPathSmoothTool->SetEditor(this);
+    mVectorPathStitchTool->SetEditor(this);
+	mPaintBucketTool->SetEditor(this);
+	mColorPickerTool->SetEditor(this);
+	mVectorGridTool->SetEditor(this);
+	mVectorTransformTool->SetEditor(this);
+	mRasterDrawingTool->SetEditor(this);
+
 	mTools.Add(mRasterDrawingTool);
     mTools.Add(mVectorPrimitiveDrawingTool);
     mTools.Add(mVectorPathDrawingTool);

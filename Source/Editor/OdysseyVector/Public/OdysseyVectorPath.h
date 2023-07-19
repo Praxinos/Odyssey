@@ -75,6 +75,43 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
         void AddVertex( FOdysseyVectorVertex* iVertex );
 
        /**
+         * @brief Cut this path's segments according to a cut line.
+         * @param iLinePoint0
+         * @param iLinePoint1
+         * @param oNewVertexArray  array of pointers to vertices that are added. Useful for undos.
+         * @param oNewSegmentArray array of pointers to segments that are added. Useful for undos.
+         * @param oOldSegmentArray array of pointers to segments that are removed. Useful for undos.
+         */
+        void Cut( const ::ULIS::FVec2D& iLinePoint0
+                , const ::ULIS::FVec2D& iLinePoint1
+                , std::vector<FOdysseyVectorVertex*>& oNewVertexArray
+                , std::vector<FOdysseyVectorSegment*>& oNewSegmentArray
+                , std::vector<FOdysseyVectorSegment*>& oOldSegmentArray );
+
+       /**
+         * @brief Draw path's structure (a simple line of fixed width).
+         * @param iStrokeColor color of the path to draw.
+         * @param iStrokeWidth width of the path to draw.
+         * @param iWorld draw in world coordinates system.
+         */
+        using FOdysseyVectorObject::DrawStructure;
+        virtual void DrawStructure( FColor& iStrokeColor, double iStrokeWidth, bool iWorld );
+
+       /**
+         * @brief Erase path according to the mask image.
+         * @param iRoi region of interest for faster discarding.
+         * @param oAddedVertexArray array of pointers to added vertices.
+         * @param oAddedSegmentArray array of pointers to added segments.
+         * @param oRemovedVertexArray array of pointers to removed vertices.
+         * @param oRemovedSegmentArray array of pointers to removed segments.
+         */
+        bool Erase( const ::ULIS::FRectD &iRoi
+                  , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
+                  , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
+                  , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
+                  , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray );
+
+       /**
          * @brief Get the joint type.
          * @return the joint type.
          */
@@ -91,6 +128,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
          * @param a pointer to the first segment of the list, or nullptr if the list is empty.
          */
         FOdysseyVectorSegment* GetFirstSegment();
+
+        uint32 GetIntersectionCount();
 
        /**
          * @brief Get the last vertex from the list of vertices.
@@ -181,6 +220,12 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
                       , uint64 iSelectionFlags );
 
        /**
+         * @brief Pick vertices according to the mask image.
+         * @param oPickedVertexArray array of pointers to picked vertices.
+         */
+        void PickVertex( std::vector<FOdysseyVectorVertex*>& oPickedVertexArray );
+
+       /**
          * @brief Remove a segment from this path
          * @param iSegment a pointer to the segment to remove.
          *          Note: the segment is only removed from the list of segments, not freed.
@@ -213,18 +258,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
         void SetJointType( eJointType mJointType );
 
        /**
-         * @brief Cut this path's segments according to a cut line.
-         * @param iLinePoint0
-         * @param iLinePoint1
-         * @param oNewVertexArray  array of pointers to vertices that are added. Useful for undos.
-         * @param oNewSegmentArray array of pointers to segments that are added. Useful for undos.
-         * @param oOldSegmentArray array of pointers to segments that are removed. Useful for undos.
+         * @brief Convert this path to the coordinate system of the object passed as parameter.
+                  The path's matrix can then be set to the identity matrix if this path is a 
+                  child of the said object.
          */
-        void Cut( const ::ULIS::FVec2D& iLinePoint0
-                , const ::ULIS::FVec2D& iLinePoint1
-                , std::vector<FOdysseyVectorVertex*>& oNewVertexArray
-                , std::vector<FOdysseyVectorSegment*>& oNewSegmentArray
-                , std::vector<FOdysseyVectorSegment*>& oOldSegmentArray );
+        void SwitchSpace( FOdysseyVectorObject& iObject );
 
        /**
          * @brief Get all vertices and sections as arrays. For use by the GroupPaint class
@@ -260,7 +298,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
         std::list<FOdysseyVectorVertex*> mVertexList;
         std::list<FOdysseyVectorSegment*> mSegmentList;
         std::list<FOdysseyVectorSegment*> mInvalidatedSegmentList;
-        /*std::list<FOdysseyVectorCycle*> mInvalidatedLoopList;*/
         std::list<FOdysseyVectorVertex*> mSelectedVertexList;
         uint32 mPaintingCode;
         BLPath mBLPath;
@@ -273,22 +310,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
         static const uint64 PICK_HANDLE_SEGMENT = 1 << 1;
         static const uint64 PICK_POINT          = 1 << 2;
 
-        /*void InvalidateLoop( FOdysseyVectorCycle* iLoop );*/
-
         void SetPaintingCode( uint32 iPaintingCode );
         uint32 GetPaintingCode();
-        BLPath& GetBLPath();
-        
-        using FOdysseyVectorObject::DrawStructure;
 
+        //BLPath& GetBLPath();
 
-        void SwitchSpace( FOdysseyVectorObject& iObject );
-        bool Erase( const ::ULIS::FRectD &iRoi
-                  , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
-                  , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray
-                  , std::vector<FOdysseyVectorVertex*>& iRemovedVertexArray
-                  , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray );
-        virtual void PickVertex( std::vector<FOdysseyVectorVertex*>& oPickedVertexArray );
-        virtual void DrawStructure( FColor& iStrokeColor, double iStrokeWidth, bool iWorld );
         uint32 GetType();
 };

@@ -57,14 +57,6 @@ FOdysseyTextureEditorGUI::CreateTabs()
 	ODYSSEY_ADD_TAB(mTextureDetailsTab, FOdysseyTextureEditorTextureDetailsTab, mEditor);
 }
 
-void
-FOdysseyTextureEditorGUI::CreateContextMenus()
-{
-	FOdysseyPainterEditorGUI::CreateContextMenus();
-
-	//ADD NEW CONTEXT MENUS
-}
-
 TSharedRef<FTabManager::FSplitter>
 FOdysseyTextureEditorGUI::CreateRightSection()
 {

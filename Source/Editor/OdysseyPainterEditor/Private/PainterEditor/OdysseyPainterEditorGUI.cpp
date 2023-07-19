@@ -50,15 +50,6 @@ FOdysseyPainterEditorGUI::CreateTabs()
 }
 
 void
-FOdysseyPainterEditorGUI::CreateContextMenus()
-{
-    FOdysseyEditorGUI::CreateContextMenus();
-
-	//ODYSSEY_ADD_CONTEXT_MENU(mObjectPickToolContextMenu, FOdysseyPainterEditorObjectPickToolContextMenu, mEditor);
-	//ODYSSEY_ADD_CONTEXT_MENU(mPaintBucketToolContextMenu, FOdysseyPainterEditorPaintBucketToolContextMenu, mEditor);
-}
-
-void
 FOdysseyPainterEditorGUI::BindShortcuts(FBaseToolkit* iToolkit)
 {
     FOdysseyEditorGUI::BindShortcuts(iToolkit);

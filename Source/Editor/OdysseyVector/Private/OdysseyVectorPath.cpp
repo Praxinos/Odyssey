@@ -63,6 +63,21 @@ FOdysseyVectorPath::ToVertexAndSectionArray( std::vector<FOdysseyVectorVertex*>&
     }
 }
 
+uint32
+FOdysseyVectorPath::GetIntersectionCount()
+{
+    uint32 count = 0;
+
+    for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
+    {
+        FOdysseyVectorSegment* segment = static_cast<FOdysseyVectorSegment*>(*it);
+
+        count += segment->GetIntersectionVertexList().size();
+    }
+
+    return count;
+}
+
 bool
 FOdysseyVectorPath::HasIntersections()
 {
@@ -146,30 +161,6 @@ FOdysseyVectorPath::GetPaintingCode()
     return mPaintingCode;
 }
 
-/*void
-FOdysseyVectorPath::AddLoop( FOdysseyVectorCycle* iLoop )
-{
-    mLoopList.push_back( iLoop );
-
-    iLoop->Attach();
-
-    iLoop->SetParent ( this );
-
-    printf("%s: Adding loop\n", __func__ );
-}*/
-
-/*void
-FOdysseyVectorPath::RemoveLoop( FOdysseyVectorCycle* iLoop )
-{
-    mLoopList.remove( iLoop );
-
-    iLoop->Detach();
-
-    iLoop->SetParent ( nullptr );
-
-    printf("%s: Removing loop\n", __func__ );
-}*/
-
 void
 FOdysseyVectorPath::UpdateBBox()
 {
@@ -211,11 +202,13 @@ FOdysseyVectorPath::UpdateBBox()
     mBBox = ( hasBBox ) ? ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax ) : ::ULIS::FRectD( 0.0f, 0.0f, 0.0f, 0.0f );
 }
 
+/*
 BLPath&
 FOdysseyVectorPath::GetBLPath()
 {
     return mBLPath;
 }
+*/
 
 void
 FOdysseyVectorPath::UpdateShape( uint32 iUpdateFlags )
@@ -248,9 +241,12 @@ FOdysseyVectorPath::UpdateShape( uint32 iUpdateFlags )
             ::ULIS::FVec2D& ctrlPoint1 = cubicSegment->GetHandle(1)->GetCoords();
 
             mBLPath.moveTo( point0.x, point0.y );
-            mBLPath.cubicTo( ctrlPoint0.x, ctrlPoint0.y
-                           , ctrlPoint1.x, ctrlPoint1.y
-                           , point1.x, point1.y );
+            mBLPath.cubicTo( ctrlPoint0.x
+                           , ctrlPoint0.y
+                           , ctrlPoint1.x
+                           , ctrlPoint1.y
+                           , point1.x
+                           , point1.y );
         }
     }
 }
@@ -303,28 +299,21 @@ FOdysseyVectorPath::AddSegment( FOdysseyVectorSegment* iSegment )
     iSegment->GetVertex(0)->AddSegment( iSegment );
     iSegment->GetVertex(1)->AddSegment( iSegment );
 
-    Invalidate();
-/*
-    iSegment->GetVertex(0)->AddSection( iSegment->GetDefaultSection() );
-    iSegment->GetVertex(1)->AddSection( iSegment->GetDefaultSection() );
-*/
+    InvalidateSegment( iSegment );
 }
 
 void
 FOdysseyVectorPath::RemoveSegment( FOdysseyVectorSegment* iSegment )
 {
-    //iSegment->ClearIntersections(); // note: re-adds the default section
-
     mSegmentList.remove( iSegment );
 
     iSegment->GetVertex(0)->RemoveSegment( iSegment );
     iSegment->GetVertex(1)->RemoveSegment( iSegment );
 
+    // DO NOT invalidate the segment here, only the path. Otherwise the segment 
+    // would be added to the list of segments to invalidate BUT the segment does
+    // not belong to the path anymore, leading to issues if it has been freed.
     Invalidate();
-/*
-    iSegment->GetVertex(0)->RemoveSection(iSegment->GetDefaultSection());
-    iSegment->GetVertex(1)->RemoveSection(iSegment->GetDefaultSection());
-*/
 }
 
 std::list<FOdysseyVectorSegment*>&
@@ -1229,9 +1218,9 @@ FOdysseyVectorPath::Cut( const ::ULIS::FVec2D& iLinePoint0
 
     for( int i = segmentCount; i < oNewSegmentArray.size(); i++ )
     {
-        AddSegment( oNewSegmentArray[i] );
+        AddSegment( oNewSegmentArray[i] ); // invalidates the segment as well
 
-        oNewSegmentArray[i]->Invalidate();
+        //oNewSegmentArray[i]->Invalidate();
     }
 }
 

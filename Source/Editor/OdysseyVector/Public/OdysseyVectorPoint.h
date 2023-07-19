@@ -18,8 +18,22 @@ class ODYSSEYVECTOR_API FOdysseyVectorPoint
         static void ArrayToVertexArray( std::vector<FOdysseyVectorPoint*>& iPointArray
                                       , std::vector<FOdysseyVectorVertex*>& oVertexArray );
 
+        /**
+         * @brief Destructor.
+         */
         virtual ~FOdysseyVectorPoint();
+
+        /**
+         * @brief Default constructor. all members are zeroed.
+         */
         FOdysseyVectorPoint();
+
+        /**
+         * @brief Constructor
+         * @param iX coordinate on X axis.
+         * @param iY coordinate on Y axis.
+         * @param iRadius radius.
+         */
         FOdysseyVectorPoint( double iX, double iY, double iRadius );
 
         ::ULIS::FVec2D& GetCoords();
@@ -49,20 +63,20 @@ class ODYSSEYVECTOR_API FOdysseyVectorPoint
         double GetRadius();
 
         /**
-         * @brief Set the point's absolute coordinate on X & Y axis
+         * @brief Set the point's coordinate on X & Y axis
          * @param iCoords the desired coordinates of type ::ULIS::FVec2D
          */
         void Set( const ::ULIS::FVec2D& iCoords );
 
         /**
-         * @brief Set the point's absolute coordinate on X & Y axis
+         * @brief Set the point's coordinate on X & Y axis
          * @param iX the desired coordinate on X axis
          * @param iY the desired coordinate on Y axis
          */
         void Set( double iX, double iY );
 
         /**
-         * @brief Set the point's absolute coordinate on X & Y axis
+         * @brief Set the point's coordinate on X & Y axis
          * @param iX the desired coordinate on X axis
          * @param iY the desired coordinate on Y axis
          * @param iRadius the desired point's radius
@@ -77,24 +91,32 @@ class ODYSSEYVECTOR_API FOdysseyVectorPoint
         void SetID( uint32 iID );
 
         /**
-         * @brief Set the point's absolute radius
+         * @brief Set the point's radius
          * @param iRadius the desired point's radius
          */
         void SetRadius( double iRadius );
 
         /**
-         * @brief Set the point's absolute coordinate on X axis
+         * @brief Set the point's coordinate on X axis
          * @param iX the desired coordinate on X axis
          */
         void SetX( double iX );
 
         /**
-         * @brief Set the point's absolute coordinate on Y axis
+         * @brief Set the point's coordinate on Y axis
          * @param iY the desired coordinate on Y axis
          */
         void SetY( double iY );
 
     protected:
+        /**
+         * @brief Set the point's coordinates. This is the function that all other
+                  positionning functions are based on and should be derived if any shape
+                  invalidation is needed after positionning.
+         * @param iX the desired coordinate on X axis.
+         * @param iY the desired coordinate on Y axis.
+         * @param iRadius the desired radius.
+         */
         virtual void SetCoords( double iX, double iY, double iRadius );
 
     protected:

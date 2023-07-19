@@ -3,6 +3,7 @@
 
 #include "Tools/PaintBucketTool/OdysseyPainterEditorPaintBucketTool.h"
 #include "Tools/PaintBucketTool/OdysseyPainterEditorPaintBucketToolHUD.h"
+#include "Tools/PaintBucketTool/OdysseyPainterEditorPaintBucketToolContextMenu.h"
 
 #include "OdysseyRasterBlock.h"
 #include "Undo/OdysseyVectorUndoBucketAdd.h"
@@ -359,6 +360,21 @@ UOdysseyPainterEditorPaintBucketTool::DoubleClicked()
     return doubleClicked;
 }
 
+void
+UOdysseyPainterEditorPaintBucketTool::OnMouseDownVectorRotateBucket( FOdysseyVectorScene* iScene
+                                                                   , FOdysseyVectorBucket* iBucket )
+{
+    // needed for valid GUndo pointer
+    GEditor->BeginTransaction(LOCTEXT("PaintBucketTool","Paint Bucket"));
+    if( GUndo )
+    {
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( iScene, iBucket->GetOwner(), iBucket );
+
+        GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
+    }
+    GEditor->EndTransaction();
+}
+
 bool
 UOdysseyPainterEditorPaintBucketTool::OnMouseDownVector( FOdysseyVectorEngine* iEngine
                                                        , FOdysseyVectorScene* iScene
@@ -406,6 +422,9 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseDownVector( FOdysseyVectorEngine* i
 
                     case FOdysseyPainterEditorPaintBucketToolHUD::PICK_HANDLE :
                         mPickedBucket = bucket;
+                        mPointRotation = mPickedBucket->GetRotation();
+
+                        OnMouseDownVectorRotateBucket( iScene, mPickedBucket );
                     break;
 
                     default :
@@ -633,17 +652,13 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseUpVectorRemoveBucket( FOdysseyVecto
 
 void
 UOdysseyPainterEditorPaintBucketTool::OnMouseUpVectorMovePoint( FOdysseyVectorScene* iScene
-                                                              , FOdysseyVectorGroupPaint* paintGroup
                                                               , FOdysseyVectorPoint* iPoint
-                                                              , ::ULIS::FVec2D iPointOriginalPosition
-                                                              , const FOdysseyPoint& iPointInTexture
-                                                              , const FKey& iKey )
+                                                              , ::ULIS::FVec2D iPointOriginalPosition )
 {
     // needed for valid GUndo pointer
     GEditor->BeginTransaction(LOCTEXT("PaintBucketTool","Paint Bucket"));
     if( GUndo )
     {
-        BLPoint localCoords = paintGroup->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoPointPosition( iScene
                                                                       , iPoint
                                                                       , iPointOriginalPosition.x
@@ -707,6 +722,55 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseUpVectorClearBucket( FOdysseyVector
     iBucket->SetSolidColor( 0, 0, 0, 0 );
 }
 
+void
+UOdysseyPainterEditorPaintBucketTool::PopUpMenu()
+{
+    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
+    FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+    FOdysseyVectorObject* selectedObject = vectorScene->GetLastSelected();
+    TSharedPtr<SWidget> contextMenu = FOdysseyPainterEditorPaintBucketToolContextMenu::CreateWidget( mToolContext.Get() );
+
+    if( selectedObject )
+    {
+        if( selectedObject->GetClass() == FOdysseyVectorGroupPaint::StaticClass() )
+        {
+            FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(selectedObject);
+
+            if( paintGroup->GetSelectedBucket() )
+            {
+                FSlateApplication::Get().PushMenu( GetEditor()->GetGUI()->GetViewportTab().Get()->Widget().ToSharedRef(),
+                                                   FWidgetPath(),
+                                                   contextMenu.ToSharedRef(),
+                                                   FSlateApplication::Get().GetCursorPos(),
+                                                   FPopupTransitionEffect(FPopupTransitionEffect::ContextMenu) );
+            }
+        }
+    }
+}
+
+bool
+UOdysseyPainterEditorPaintBucketTool::OnMouseUp( const FOdysseyPoint& iPointInTexture
+                                               , const FKey& iKey )
+{
+    bool ret = false;
+    TSharedPtr<FOdysseyRasterBlock> rasterBlock = mToolContext->GetRasterBlock();
+    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
+
+    if( rasterBlock )
+    {
+        //ret = UOdysseyPainterEditorPaintBucketTool::OnMouseUpRaster( rasterBlock->GetBlock(), iPointInTexture, iKey );
+    }
+
+    if( vectorEngine )
+    {
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+
+        ret = UOdysseyPainterEditorPaintBucketTool::OnMouseUpVector( vectorEngine, vectorScene, iPointInTexture, iKey );
+    }
+
+    return ret;
+}
+
 bool
 UOdysseyPainterEditorPaintBucketTool::OnMouseUpVector( FOdysseyVectorEngine* iEngine
                                                      , FOdysseyVectorScene* iScene
@@ -726,6 +790,8 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseUpVector( FOdysseyVectorEngine* iEn
                 {
                     case FOdysseyPainterEditorPaintBucketToolHUD::PICK_BUCKET:
                         paintGroup->SelectBucket( mPickedBucket );
+
+                        PopUpMenu();
                     break;
 
                     default:
@@ -792,19 +858,18 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseUpVector( FOdysseyVectorEngine* iEn
                     switch( mPickedArea )
                     {
                         case FOdysseyPainterEditorPaintBucketToolHUD::PICK_BUCKET :
-                            OnMouseUpVectorMovePoint( iScene, paintGroup, mPickedBucket, mPointPosition, iPointInTexture, iKey );
+                            OnMouseUpVectorMovePoint( iScene, mPickedBucket, mPointPosition );
                         break;
 
-                        /*case FOdysseyPainterEditorPaintBucketToolHUD::PICK_HANDLE:
-                            OnMouseUpVectorMovePoint( iScene, paintGroup, mPickedBucket->GetHandle(), mPointPosition, iPointInTexture, iKey );
-                        break;*/
+                        case FOdysseyPainterEditorPaintBucketToolHUD::PICK_HANDLE:
+                        // cf mouse down event
+                        break;
+
 
                         default :
                         break;
                     }
                 }
-
-                //paintGroup->Colorize();
             }
         }
     }
@@ -820,44 +885,7 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseUpVector( FOdysseyVectorEngine* iEn
     return false;
 }
 
-bool
-UOdysseyPainterEditorPaintBucketTool::OnMouseUp( const FOdysseyPoint& iPointInTexture
-                                               , const FKey& iKey )
-{
-    bool ret = false;
-    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
-    if( vectorEngine )
-    {
-        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
-        ret = UOdysseyPainterEditorPaintBucketTool::OnMouseUpVector( vectorEngine, vectorScene, iPointInTexture, iKey );
 
-        /* TODO: Gary
-        if( iKey == EKeys::RightMouseButton )
-        {
-            FOdysseyVectorObject* selectedObject = vectorScene->GetLastSelected();
-            FOdysseyTextureEditorPaintBucketToolContextMenu* contextMenu = textureEditor->GetGUI()->GetPaintBucketToolContextMenu().Get();
-
-            if( selectedObject )
-            {
-                if( selectedObject->GetClass() == FOdysseyVectorGroupPaint::StaticClass() )
-                {
-                    FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(selectedObject);
-
-                    if( paintGroup->GetSelectedBucket() )
-                    {
-                        FSlateApplication::Get().PushMenu( textureEditor->GetGUI()->GetViewportTab().Get()->Widget().ToSharedRef(),
-                                                           FWidgetPath(),
-                                                           contextMenu->Widget().ToSharedRef(),
-                                                           FSlateApplication::Get().GetCursorPos(),
-                                                           FPopupTransitionEffect(FPopupTransitionEffect::ContextMenu) );
-                    }
-                }
-            }
-        }*/
-    }
-
-    return ret;
-}
 
 void
 UOdysseyPainterEditorPaintBucketTool::Commit()

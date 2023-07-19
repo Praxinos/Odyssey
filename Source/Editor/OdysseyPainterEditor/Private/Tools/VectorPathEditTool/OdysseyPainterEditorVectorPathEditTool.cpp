@@ -534,21 +534,19 @@ DragPoint( FOdysseyVectorPoint *iPoint
     BLPoint localCoords = object->GetInverseWorldMatrix().mapPoint( iWorldX, iWorldY );
     BLPoint localVector = object->GetInverseWorldMatrix().mapVector( iDeltaX, iDeltaY );
 
-    if ( iSelectionFlags == FOdysseyVectorPath::PICK_HANDLE_POINT  )
+    if( iSelectionFlags == FOdysseyVectorPath::PICK_HANDLE_POINT  )
     {
-        if( iPoint->GetClass() == FOdysseyVectorVertex::StaticClass() )
-        {
-            FOdysseyVectorVertex* cubicVertex = static_cast<FOdysseyVectorVertex*>( iPoint );
-            ::ULIS::FVec2D dif = { cubicVertex->GetX() - localCoords.x
-                                 , cubicVertex->GetY() - localCoords.y };
+        FOdysseyVectorVertex* cubicVertex = static_cast<FOdysseyVectorVertex*>( iPoint );
+        ::ULIS::FVec2D dif = { cubicVertex->GetX() - localCoords.x
+                             , cubicVertex->GetY() - localCoords.y };
 
-            cubicVertex->SetRadius( dif.Distance() );
+        cubicVertex->SetRadius( dif.Distance() );
 
-            return cubicVertex->GetBoundingBox( false );
-        }
+        return cubicVertex->GetBoundingBox( false );
     }
 
-    if( iSelectionFlags == FOdysseyVectorPath::PICK_HANDLE_SEGMENT )
+    if( ( iSelectionFlags == FOdysseyVectorPath::PICK_POINT          )
+     || ( iSelectionFlags == FOdysseyVectorPath::PICK_HANDLE_SEGMENT ) )
     {
         if( iPoint->GetClass() == FOdysseyVectorHandleSegment::StaticClass() )
         {
@@ -560,15 +558,10 @@ DragPoint( FOdysseyVectorPoint *iPoint
 
             return cubicSegment->GetBoundingBox( false );
         }
-    }
 
-    if( iSelectionFlags == FOdysseyVectorPath::PICK_POINT )
-    {
-        // Segment handles are also included in the selection. Check we are on a vertex.
         if( iPoint->GetClass() == FOdysseyVectorVertex::StaticClass() )
         {
             FOdysseyVectorVertex* cubicVertex = static_cast<FOdysseyVectorVertex*>( iPoint );
-            std::list<FOdysseyVectorSegment*> segmentList = cubicVertex->GetSegmentList();
 
             cubicVertex->Set( iPoint->GetX() + localVector.x
                             , iPoint->GetY() + localVector.y );

@@ -70,9 +70,9 @@ protected:
     virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent) override;
     virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;
 
-/*public:
+public:
     void SetEditor(class FOdysseyPainterEditor* iEditor);
-    template<class T> T* GetEditorAs() const { return static_cast<T*>(mEditor); }; */
+    FOdysseyPainterEditor* GetEditor();
 
 public:
     void SetToolContext(TSharedPtr<FOdysseyPainterEditorToolContext> iToolContext);

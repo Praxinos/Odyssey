@@ -22,8 +22,10 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::Draw( FOdysseyVectorScene* iScene
     BLContext* blctx = iScene->GetEngine()->GetBLContext();
     FOdysseyVectorPathBuilder* pathBuilder = mPathDrawingTool->GetPathBuilder();
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
+    FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
     FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
     BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
+    BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
 
     //mPointQuadTree->Draw( iScene, iFlags );
@@ -55,14 +57,12 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::Draw( FOdysseyVectorScene* iScene
 
                     if( pathBuilder == nullptr || ( pathBuilder->GetPath() == path ) )
                     {
-                        BLPath blpath = path->GetBLPath();
-
-                        blpath.transform( path->GetWorldMatrix() );
-
-                        //blctx->save();
-                        //blctx->setMatrix( path->GetWorldMatrix() );
-                        blctx->strokePath( blpath );
-                        //blctx->restore();
+                        DrawPath( path
+                                , hcColor
+                                , bgColor
+                                , hcColor
+                                , true // World
+                                , VIEW_SEGMENT );
                     }
                 }
             }
