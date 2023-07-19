@@ -3,6 +3,7 @@
 
 #include "Tools/VectorPickTool/OdysseyPainterEditorVectorPickTool.h"
 #include "Tools/VectorPickTool/OdysseyPainterEditorVectorPickToolHUD.h"
+#include "Tools/VectorPickTool/OdysseyPainterEditorVectorPickToolObjectContextMenu.h"
 #include <chrono>
 
 #define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorPickTool"
@@ -59,7 +60,7 @@ UOdysseyPainterEditorVectorPickTool::UnloadVector( FOdysseyVectorEngine* iEngine
 {
     iEngine->RemoveHUD( mPickHUD );
 
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
 void
@@ -73,7 +74,7 @@ UOdysseyPainterEditorVectorPickTool::LoadVector( FOdysseyVectorEngine* iEngine
 
     iEngine->ResetHUD();
 
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
 bool
@@ -138,7 +139,7 @@ UOdysseyPainterEditorVectorPickTool::OnMouseDownVector( FOdysseyVectorEngine* iE
 
         mPointArray.push_back( ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y ) );
 
-        iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+        iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
     }
 
     return true;
@@ -188,7 +189,7 @@ UOdysseyPainterEditorVectorPickTool::OnMouseDragVector( FOdysseyVectorEngine* iE
         }
     }
 
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 
     return redrawRegion; // unused;
 }
@@ -217,22 +218,39 @@ UOdysseyPainterEditorVectorPickTool::GenerateMask( FOdysseyVectorEngine* iEngine
 {
     ::ULIS::FRectD roi = ::ULIS::FRectD::FromXYWH( 0, 0, 0, 0 );
 
-    switch( PickingMode )
+    iEngine->ClearMask();
+
+    if( mPointArray.size() > 1 )
     {
-        case EOdysseyVectorPickingMode::Rectangle:
-            return iEngine->GenerateRectangleMask( mPointArray );
-        break;
+        switch( PickingMode )
+        {
+            case EOdysseyVectorPickingMode::Rectangle:
+            {
+                double xmin = ::ULIS::FMath::Min( mPointArray[0].x, mPointArray[1].x );
+                double ymin = ::ULIS::FMath::Min( mPointArray[0].y, mPointArray[1].y );
+                double xmax = ::ULIS::FMath::Max( mPointArray[0].x, mPointArray[1].x );
+                double ymax = ::ULIS::FMath::Max( mPointArray[0].y, mPointArray[1].y );
+                ::ULIS::FRectD rect = ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax );
 
-        case EOdysseyVectorPickingMode::Circle:
-            return iEngine->GenerateCircleMask( mPointArray );
-        break;
+                return iEngine->GenerateRectangleMask( rect );
+            }
+            break;
 
-        case EOdysseyVectorPickingMode::Freehand:
-            return iEngine->GenerateFreehandMask( mPointArray );
-        break;
+            case EOdysseyVectorPickingMode::Circle:
+            {
+                ::ULIS::FVec2D diagonal = ::ULIS::FVec2D( mPointArray[1] - mPointArray[0] );
 
-        default:
-        break;
+                return iEngine->GenerateCircleMask( mPointArray[0].x, mPointArray[0].y, diagonal.Distance() );
+            }
+            break;
+
+            case EOdysseyVectorPickingMode::Freehand:
+                return iEngine->GenerateFreehandMask( mPointArray );
+            break;
+
+            default:
+            break;
+        }
     }
 
     return roi;
@@ -242,35 +260,33 @@ bool
 UOdysseyPainterEditorVectorPickTool::OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
 {   
     bool ret = false;
-    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
-    if( vectorEngine )
+
+/*if(FSlateApplication::Get().GetModifierKeys().IsControlDown())
+{*/
+    if( iKey == EKeys::RightMouseButton )
     {
-
-    /*if(FSlateApplication::Get().GetModifierKeys().IsControlDown())
-    {*/
-        if( iKey == EKeys::RightMouseButton )
+        if( EditionMode == EOdysseyVectorEditionMode::Object )
         {
-            /* TODO: Gary
-            TSharedPtr<SWidget> objectMenu = textureEditor->GetGUI()->GetVectorPickToolObjectContextMenu()->Widget();
-            TSharedPtr<SWidget> vertexMenu = textureEditor->GetGUI()->GetVectorPickToolVertexContextMenu()->Widget();
-            TSharedPtr<SWidget> contextMenu = ( EditionMode == EOdysseyVectorEditionMode::Object ) ? objectMenu : vertexMenu;
+            TSharedPtr<SWidget> contextMenu = FOdysseyPainterEditorVectorPickToolObjectContextMenu::CreateWidget( mToolContext.Get() );
 
-
-            FSlateApplication::Get().PushMenu(
-            //textureEditor->GetGUI()->GetViewportTab().Get()->GetViewport().Get()->GetViewportWidget().ToSharedRef(),
-            textureEditor->GetGUI()->GetViewportTab().Get()->Widget().ToSharedRef(),
-            FWidgetPath(),
-            contextMenu.ToSharedRef(),
-            FSlateApplication::Get().GetCursorPos(),
-            FPopupTransitionEffect(FPopupTransitionEffect::ContextMenu)
-            ); */
+            FSlateApplication::Get().PushMenu( GetEditor()->GetGUI()->GetViewportTab().Get()->Widget().ToSharedRef(),
+                                               FWidgetPath(),
+                                               contextMenu.ToSharedRef(),
+                                               FSlateApplication::Get().GetCursorPos(),
+                                               FPopupTransitionEffect(FPopupTransitionEffect::ContextMenu) );
         }
-    /*}*/
-        else
+
+        if( EditionMode == EOdysseyVectorEditionMode::Vertex )
         {
-            FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
-            ret = UOdysseyPainterEditorVectorPickTool::OnMouseUpVector( vectorEngine, vectorScene, iPointInTexture, iKey );
         }
+    }
+/*}*/
+    else
+    {
+        FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+
+        ret = UOdysseyPainterEditorVectorPickTool::OnMouseUpVector( vectorEngine, vectorScene, iPointInTexture, iKey );
     }
 
     return ret;
@@ -304,8 +320,6 @@ UOdysseyPainterEditorVectorPickTool::OnMouseUpVectorObjectMode( FOdysseyVectorEn
     // dragging occured
     if ( mPointArray.size() > 1 )
     {
-        roi = GenerateMask( iEngine );
-
         iEngine->Pick( iScene, roi, pickedObjectArray, FOdysseyVectorObject::PICK_MASK_BASED );
 
         // when dragging occured, we select all objects lying in the selection area.
@@ -342,7 +356,12 @@ UOdysseyPainterEditorVectorPickTool::SelectVertexFromPath( FOdysseyVectorPath* i
 
     pickedVertexArray.reserve( 50 );
 
-    iPath->UnselectAllVertices();
+    // deselect all if control key is not pressed
+    if( FSlateApplication::Get().GetModifierKeys().IsControlDown() == false )
+    {
+        iPath->UnselectAllVertices();
+    }
+
     // Pick from mask image
     iPath->PickVertex(  pickedVertexArray );
 
@@ -383,30 +402,23 @@ UOdysseyPainterEditorVectorPickTool::OnMouseUpVectorVertexMode( FOdysseyVectorEn
                                                               , const FKey& iKey )
 {
     std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
-    ::ULIS::FRectD roi;
 
-    // dragging occured
-    if ( mPointArray.size() > 1 )
+    for( std::list<FOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
     {
-        roi = GenerateMask( iEngine );
+        FOdysseyVectorObject* selectedObject  = *it;
 
-        for( std::list<FOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
+        if( selectedObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
         {
-            FOdysseyVectorObject* selectedObject  = *it;
+            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(selectedObject);
 
-            if( selectedObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
-            {
-                FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(selectedObject);
+            SelectVertexFromPath( path );
+        }
 
-                SelectVertexFromPath( path );
-            }
+        if( selectedObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+        {
+            FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(selectedObject);
 
-            if( selectedObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
-            {
-                FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(selectedObject);
-
-                SelectVertexFromPaintGroup( paintGroup );
-            }
+            SelectVertexFromPaintGroup( paintGroup );
         }
     }
 }
@@ -417,8 +429,12 @@ UOdysseyPainterEditorVectorPickTool::OnMouseUpVector( FOdysseyVectorEngine* iEng
                                                     , const FOdysseyPoint& iPointInTexture
                                                     , const FKey& iKey )
 {
+    ::ULIS::FRectD roi;
+
     if( iKey == EKeys::LeftMouseButton )
     {
+        roi = GenerateMask( iEngine );
+
         if( EditionMode == EOdysseyVectorEditionMode::Object )
         {
             OnMouseUpVectorObjectMode( iEngine, iScene, iPointInTexture, iKey );
@@ -433,7 +449,9 @@ UOdysseyPainterEditorVectorPickTool::OnMouseUpVector( FOdysseyVectorEngine* iEng
     mPointArray.clear();
 
     iScene->Update( 0 ); // update invalidated objects
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW | FOdysseyVectorScene::SIGNAL_OBJECT_SELECTED );
+
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                   | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
 
     return true;
 }
@@ -475,7 +493,7 @@ UOdysseyPainterEditorVectorPickTool::PropertyChangedVector( FOdysseyVectorEngine
                                                           , FOdysseyVectorScene* iScene
                                                           , const FName& iPropertyName )
 {
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
 #undef LOCTEXT_NAMESPACE

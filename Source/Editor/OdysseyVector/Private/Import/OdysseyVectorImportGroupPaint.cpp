@@ -51,13 +51,13 @@ ReadBucketEntry( FOdysseyVectorBucket& iBucket, uint64 iChunkEnd, FArchive &Ar )
                     Ar << B;
                     Ar << A;
 
-                    iBucket.SetGradient(false);
+                    iBucket.SetColorMode( eBucketColorMode::SolidColor );
                     iBucket.SetSolidColor( R, G, B, A );
                 }
                 break;
 
                 case FOdysseyVectorExport::CHUNK_BUCKET_GRADIENT: // container
-                    iBucket.SetGradient( true );
+                   iBucket.SetColorMode( eBucketColorMode::LinearGradient );
                 break;
 
                 case FOdysseyVectorExport::CHUNK_BUCKET_GRADIENT_STOP:
@@ -122,7 +122,7 @@ FOdysseyVectorImport::ReadObjectGroupPaint( FOdysseyVectorGroupPaint& iPaintGrou
 
                 case FOdysseyVectorExport::CHUNK_BUCKET_ENTRY:
                 {
-                    FOdysseyVectorBucket* bucket = new FOdysseyVectorBucket( iPaintGroup, 0.0f, 0.0f, false );
+                    FOdysseyVectorBucket* bucket = new FOdysseyVectorBucket( &iPaintGroup, 0.0f, 0.0f, false );
 
                     iPaintGroup.AddBucket( bucket );
 

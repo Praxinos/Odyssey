@@ -9,6 +9,8 @@
 
 #include "OdysseyPainterEditorVectorPathEditTool.generated.h"
 
+class FOdysseyPainterEditorVectorPathEditToolHUD;
+
 typedef struct FStitchingPair
 {
     FOdysseyVectorVertex* vertex[2];
@@ -52,6 +54,8 @@ public:
     virtual void OnMouseHover( const FOdysseyPoint& iPointInTexture ) override;
     virtual void OnMouseDrag( const FOdysseyPoint& iPointInTexture ) override;
     virtual bool OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
+    virtual bool OnKeyUp( const FKey& iKey ) override;
+    virtual bool OnKeyDown( const FKey& iKey ) override;
 
     void UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
     void LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
@@ -69,16 +73,11 @@ public:
                         , FOdysseyVectorScene* iScene
                         , const FOdysseyPoint& iPointInTexture
                         , const FKey& iKey );
-    bool OnKeyDownVector( FOdysseyVectorEngine* iEngine
-                        , FOdysseyVectorScene* iScene
-                        , const FKey& iKey );
-    bool OnKeyUpVector( FOdysseyVectorEngine* iEngine
-                      , FOdysseyVectorScene* iScene
-                      , const FKey& iKey );
 
     //OdysseyPainterEditorTool overrides
     virtual void Commit() override;
 
+    uint64 GetPickingFlags();
 
     virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
     void PropertyChanged( const FName& iPropertyName );
@@ -100,13 +99,13 @@ private:
     void DetectPickingMode();
 
 private:
-    FOdysseyVectorHUDPathCubic mCubicPathHUD;
-    FOdysseyVectorHUDPicking mPickingHUD;
+    FOdysseyPainterEditorVectorPathEditToolHUD *mPathEditHUD;
+
     std::vector<FOdysseyVectorPoint*> mPickedPointArray;
-    uint64 mSelectionFlags;
+    uint64 mPickingFlags;
     ::ULIS::FVec2D mOldPointInTexture;
 
 public:
     UPROPERTY(EditAnywhere, Category="Odyssey PathEdit Tool", meta = (ClampMin = "0.0", UIMin = "0.0") )
-    double Radius;
+    double PickingRadius;
 };

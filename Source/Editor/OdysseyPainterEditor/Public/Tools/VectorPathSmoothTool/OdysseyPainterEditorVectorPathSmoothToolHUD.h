@@ -7,10 +7,7 @@
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPathSmoothToolHUD : public FOdysseyVectorHUD
 {
-    private:
-        UOdysseyPainterEditorVectorPathSmoothTool* mPathSmoothTool;
-        double mX;
-        double mY;
+
 
     public:
         virtual ~FOdysseyPainterEditorVectorPathSmoothToolHUD();
@@ -19,4 +16,11 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPathSmoothToolHUD : pu
         virtual void Draw( FOdysseyVectorScene* iScene, uint64 iFlags ) override;
         virtual void Reset( FOdysseyVectorScene* iScene ) override;
         void SetCursorPosition( double iX, double iY );
+        std::vector<FOdysseyVectorPoint*>& GetPickedPointArray();
+
+    private:
+        UOdysseyPainterEditorVectorPathSmoothTool* mPathSmoothTool;
+        std::vector<FOdysseyVectorPoint*> mPickedPointArray;
+        double mX;
+        double mY;
 };

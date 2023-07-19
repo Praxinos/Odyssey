@@ -28,6 +28,19 @@ WriteBucketPropagated( FOdysseyVectorBucket& iBucket, FArchive &Ar )
 }
 
 static void
+WriteBucketSpreading( FOdysseyVectorBucket& iBucket, FArchive &Ar )
+{
+    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_BUCKET_SPREADING
+                                    , Ar
+                                    , [&iBucket](FArchive &Ar) -> void
+    {
+        uint32 spreadingPolicy = static_cast<uint32>(iBucket.GetSpreadingPolicy());
+
+        Ar << spreadingPolicy;
+    } );
+}
+
+static void
 WriteBucketPosition( FOdysseyVectorBucket& iBucket, FArchive &Ar )
 {
     FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_BUCKET_POSITION
@@ -109,17 +122,18 @@ FOdysseyVectorExport::WriteBucket( FOdysseyVectorBucket& iBucket, FArchive &Ar )
                                     , Ar
                                     , [&iBucket](FArchive &Ar) -> void
     {
+        WriteBucketSpreading( iBucket, Ar );
         WriteBucketPaletteEntry( iBucket, Ar );
         WriteBucketPosition( iBucket, Ar );
         WriteBucketRotation( iBucket, Ar );
         WriteBucketPropagated( iBucket, Ar );
 
-        if( iBucket.IsGradient() == true )
+        if( iBucket.GetColorMode() == eBucketColorMode::LinearGradient )
         {
             WriteBucketGradient( iBucket, Ar );
         }
 
-        if( iBucket.IsGradient() == false )
+        if( iBucket.GetColorMode() ==  eBucketColorMode::SolidColor  )
         {
             WriteBucketColor( iBucket, Ar );
         }

@@ -2,6 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Tools/VectorPathStitchTool/OdysseyPainterEditorVectorPathStitchTool.h"
+#include "Tools/VectorPathStitchTool/OdysseyPainterEditorVectorPathStitchToolHUD.h"
 
 #define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorPathStitchTool"
 
@@ -9,15 +10,16 @@
 //----------------------------------------------------------- Construction / Destruction
 UOdysseyPainterEditorVectorPathStitchTool::~UOdysseyPainterEditorVectorPathStitchTool()
 {
+    delete mPathStitchHUD;
 }
 
 UOdysseyPainterEditorVectorPathStitchTool::UOdysseyPainterEditorVectorPathStitchTool()
-    : mPickingHUD()
-    , Radius(20.0f)
+    : PickingRadius(20.0f)
+    , RestrictToSelection( false )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathKnotTool64");
 
-    mPickingHUD.SetRadius( Radius );
+    mPathStitchHUD = new FOdysseyPainterEditorVectorPathStitchToolHUD( this );
 }
 
 //--------------------------------------------------------------------------------------
@@ -54,18 +56,20 @@ UOdysseyPainterEditorVectorPathStitchTool::IsActivable() const
 void
 UOdysseyPainterEditorVectorPathStitchTool::UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
-    iEngine->RemoveHUD( &mPickingHUD );
+    iEngine->RemoveHUD( mPathStitchHUD );
 
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
 void
 UOdysseyPainterEditorVectorPathStitchTool::LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
     iEngine->ClearHUD();
-    iEngine->AddHUD( &mPickingHUD );
+    iEngine->AddHUD( mPathStitchHUD );
 
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    iEngine->ResetHUD();
+
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
 bool
@@ -87,8 +91,7 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseDownVector( FOdysseyVectorEngi
                                                           , const FOdysseyPoint& iPointInTexture
                                                           , const FKey& iKey )
 {
-    ::ULIS::FRectD roi = { iPointInTexture.x - Radius, iPointInTexture.y - Radius, Radius * 2, Radius * 2 };
-    std::vector<FOdysseyVectorPoint*> pickedPointArray;
+    ::ULIS::FRectD roi = { iPointInTexture.x - PickingRadius, iPointInTexture.y - PickingRadius, PickingRadius * 2, PickingRadius * 2 };
     FOdysseyVectorVertex* knotVertex;
     // for undos
     std::vector<FOdysseyVectorPath*> addedPathArray; // stays empty
@@ -99,18 +102,20 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseDownVector( FOdysseyVectorEngi
     std::vector<FOdysseyVectorVertex*> removedVertexArray;
     std::vector<FOdysseyVectorSegment*> mergedSegmentArray;
     std::vector<FOdysseyVectorVertex*> mergedVertexArray;
+    std::vector<FOdysseyVectorPoint*>& pickedPointArray = mPathStitchHUD->GetPickedPointArray();
 
-    pickedPointArray.reserve(500); // crashes if I don't reserve. I don't know why.
+    //pickedPointArray.reserve(500); // crashes if I don't reserve. I don't know why.
 
+/*
     iEngine->PickPoints( iScene
                        , false
                        , iPointInTexture.x
                        , iPointInTexture.y
-                       , Radius
+                       , PickingRadius
                        , pickedPointArray
                        , FOdysseyVectorPath::PICK_POINT );
-
-    if( pickedPointArray.size() >= 2 )
+*/
+    if( pickedPointArray.size() > 1 )
     {
         FOdysseyVectorVertex* vertexA = static_cast<FOdysseyVectorVertex*>( pickedPointArray[0] );
         FOdysseyVectorVertex* vertexB = static_cast<FOdysseyVectorVertex*>( pickedPointArray[1] );
@@ -120,14 +125,13 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseDownVector( FOdysseyVectorEngi
         {
             if( vertexA->GetPath() != vertexB->GetPath() )
             {
-                std::vector<FOdysseyVectorVertex*> vertexLookup;
                 // TODO: remove vertexB->GetPath() from selected objects.
                 mergedPath = vertexB->GetPath();
 
                 vertexB->GetPath()->GetParent()->RemoveChild( mergedPath );
-                vertexA->GetPath()->Merge( mergedPath, vertexLookup, mergedVertexArray, mergedSegmentArray );
+                vertexA->GetPath()->Merge( mergedPath, mergedVertexArray, mergedSegmentArray );
                 // update the pointer with the newly created vertex's. Note, Merge alters the original vertex's ID.
-                vertexB = vertexLookup[vertexB->GetID()];
+                vertexB = mergedVertexArray[vertexB->GetID()];
 
                 iScene->Unselect( mergedPath );
 
@@ -165,9 +169,11 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseDownVector( FOdysseyVectorEngi
 
     iScene->Update( 0 );
 
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW
-                  | FOdysseyVectorScene::SIGNAL_OBJECT_SELECTED
-                  | FOdysseyVectorScene::SIGNAL_OBJECT_MODIFIED );
+    mPathStitchHUD->Reset( iScene ); // rebuilds QuadTree after path alter.
+
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                   | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED
+                   | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
 
     return true;
 }
@@ -188,13 +194,15 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseHoverVector( FOdysseyVectorEng
                                                            , FOdysseyVectorScene* iScene
                                                            , const FOdysseyPoint& iPointInTexture )
 {
-    double diameter = Radius * 2.0f;
-    ::ULIS::FRectI rect = { (int)iPointInTexture.x - (int)Radius
-                          , (int)iPointInTexture.y - (int)Radius
+    double diameter = PickingRadius * 2.0f;
+    ::ULIS::FRectI rect = { (int)iPointInTexture.x - (int)PickingRadius
+                          , (int)iPointInTexture.y - (int)PickingRadius
                           , (int)diameter
                           , (int)diameter };
 
-    mPickingHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
+    mPathStitchHUD->SetPosition( iPointInTexture.x, iPointInTexture.y );
+
+
 /*
     if( rect.x < 0 ) rect.x = 0;
     if( rect.y < 0 ) rect.y = 0;
@@ -204,7 +212,7 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseHoverVector( FOdysseyVectorEng
     if( rect.Area() )
     {*/
     /*}*/
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
 void
@@ -223,9 +231,9 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseDragVector( FOdysseyVectorEngi
                                                           , FOdysseyVectorScene* iScene
                                                           , const FOdysseyPoint& iPointInTexture )
 {
-    mPickingHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
+    mPathStitchHUD->SetPosition( iPointInTexture.x, iPointInTexture.y );
 
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
 bool
@@ -248,7 +256,7 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseUpVector( FOdysseyVectorEngine
                                                         , const FOdysseyPoint& iPointInTexture
                                                         , const FKey& iKey )
 {
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 
     return false;
 }
@@ -261,23 +269,25 @@ UOdysseyPainterEditorVectorPathStitchTool::Commit()
 void
 UOdysseyPainterEditorVectorPathStitchTool::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent )
 {
+    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
+
     if (PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive)
         return;
     
     PropertyChanged( PropertyChangedEvent.GetPropertyName() );
     
-    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
-    if( vectorEngine )
-    {
-        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
-        vectorScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
-    }
+    vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
 void
 UOdysseyPainterEditorVectorPathStitchTool::PropertyChanged( const FName& iPropertyName )
 {
-    mPickingHUD.SetRadius( Radius );
+    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
+
+    if( iPropertyName == "RestrictToSelection" )
+    {
+        vectorEngine->ResetHUD(); // rebuild the quad tree
+    }
 }
 
 #undef LOCTEXT_NAMESPACE

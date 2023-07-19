@@ -57,7 +57,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         static const uint32 VECTORGROUPTYPE      = 2;
         static const uint32 VECTORELLIPSETYPE    = 3;
         static const uint32 VECTORRECTANGLETYPE  = 4;
-        static const uint32 VECTORPATHCUBICTYPE  = 5;
+        static const uint32 VECTORPATHTYPE       = 5;
         static const uint32 VECTORGROUPPAINTTYPE = 6;
 
         // drawing mask
@@ -110,8 +110,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         FOdysseyVectorObject( const FString& iName );
         void SetName( const FString& iName );
         void CopySettings( FOdysseyVectorObject& iDestinationObject );
-        virtual void FlipHorizontal(){};
-        virtual void FlipVertical(){};
+
         void Transfer( const BLMatrix2D& iMatrix );
         void GetTransform( double& oTranslationX
                          , double& oTranslationY
@@ -195,8 +194,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         int32 PickBBox( double iX, double iY );
         bool HasSelectedAncestor();
         bool HasAncestor( FOdysseyVectorObject* iCandidateAncestor );
-        FColor& GetForegroundColor();
-        FColor& GetBackgroundColor();
+        FColor GetForegroundColor();
+        FColor GetBackgroundColor();
         virtual void SwitchSpace( FOdysseyVectorObject& iNewSpace ){};
         //void PropertyChanged( const FName& iPropertyName );
         void UpdateMatrix( bool iRunTransformCallback );

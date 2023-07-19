@@ -10,6 +10,8 @@
 
 #include "OdysseyPainterEditorVectorPathStitchTool.generated.h"
 
+class FOdysseyPainterEditorVectorPathStitchToolHUD;
+
 UCLASS()
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathStitchTool : public UOdysseyPainterEditorDefaultTool
 {
@@ -57,9 +59,12 @@ protected:
     void PropertyChanged( const FName& iPropertyName );
 
 private:
-        FOdysseyVectorHUDPicking mPickingHUD;
+        FOdysseyPainterEditorVectorPathStitchToolHUD* mPathStitchHUD;
 
 public:
     UPROPERTY(EditAnywhere, Category="Odyssey PathStitch Tool", meta = (ClampMin = "0.0", UIMin = "0.0") )
-    double Radius;
+    double PickingRadius;
+
+    UPROPERTY(EditAnywhere, Category="Odyssey PathStitch Tool", meta = (ClampMin = "0.0", UIMin = "0.0") )
+    bool RestrictToSelection;
 };

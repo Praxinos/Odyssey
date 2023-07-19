@@ -482,7 +482,7 @@ struct BLObjectInfo {
   //! \{
 
   //! Tests a whether this \ref BLObjectInfo represents a valid \ref BLObjectCore.
-  BL_INLINE bool isObject() const noexcept { return uint32_t((int32_t(bits) >> 31)); }
+  BL_INLINE uint32_t isObject() const noexcept { return uint32_t((int32_t(bits) >> 31)); }
 
   //! Returns a whether this \ref BLObjectInfo represents a valid \ref BLObjectCore as a mask (either all zeros or all ones).
   BL_INLINE uint32_t isObjectMask() const noexcept { return uint32_t((int32_t(bits) >> 31)); }

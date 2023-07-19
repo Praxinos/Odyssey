@@ -6,16 +6,10 @@ FOdysseyVectorPoint::~FOdysseyVectorPoint()
 
 FOdysseyVectorPoint::FOdysseyVectorPoint()
 {
-    Init( 0.0f, 0.0f, 0.0f );
+    Set( 0.0f, 0.0f, 0.0f );
 }
 
 FOdysseyVectorPoint::FOdysseyVectorPoint( double iX, double iY, double iRadius )
-{
-    Init( iX, iY, iRadius );
-}
-
-void
-FOdysseyVectorPoint::Init( double iX, double iY, double iRadius )
 {
     Set( iX, iY, iRadius );
 }
@@ -64,17 +58,6 @@ FOdysseyVectorPoint::GetCoords()
     return mCoords;
 }
 
-//static
-FOdysseyVectorPoint*
-FOdysseyVectorPoint::New( double iX, double iY, double iRadius )
-{
-    FOdysseyVectorPoint* point = new FOdysseyVectorPoint();
-
-    point->Init ( iX, iY, iRadius );
-
-    return point;
-}
-
 double 
 FOdysseyVectorPoint::GetX()
 {
@@ -96,7 +79,7 @@ FOdysseyVectorPoint::GetRadius()
 void
 FOdysseyVectorPoint::SetRadius( double iRadius )
 {
-    mRadius = iRadius;
+    SetCoords( mCoords.x, mCoords.y, iRadius );
 }
 
 void

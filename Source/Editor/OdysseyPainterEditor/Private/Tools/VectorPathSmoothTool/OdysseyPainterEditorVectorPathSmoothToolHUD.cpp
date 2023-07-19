@@ -10,12 +10,15 @@ FOdysseyPainterEditorVectorPathSmoothToolHUD::FOdysseyPainterEditorVectorPathSmo
     , mX( 0.0f )
     , mY( 0.0f )
 {
-
 }
 
 void
-FOdysseyPainterEditorVectorPathSmoothToolHUD::Reset(FOdysseyVectorScene* iScene)
+FOdysseyPainterEditorVectorPathSmoothToolHUD::Reset( FOdysseyVectorScene* iScene )
 {
+    mPickedPointArray.clear();
+    mPickedPointArray.reserve( 50 );
+
+    MakePointQuadTree( iScene, mPathSmoothTool->RestrictToSelection );
 }
 
 void
@@ -23,7 +26,9 @@ FOdysseyPainterEditorVectorPathSmoothToolHUD::Draw( FOdysseyVectorScene* iScene,
 {
     BLContext* blctx = iScene->GetEngine()->GetBLContext();
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
+    FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
     BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
+    BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
 
     // matrix might get altered for displaying the selection rectangle of a single object. Save it.
     blctx->save();
@@ -45,16 +50,26 @@ FOdysseyPainterEditorVectorPathSmoothToolHUD::Draw( FOdysseyVectorScene* iScene,
         FOdysseyVectorHUD::DrawObjectRecursive( iScene, blctx );
     }
 
-    blctx->setStrokeStyle( fgColor );
+    blctx->setStrokeStyle( hcColor );
     blctx->setStrokeWidth( 1.0f );
-    blctx->strokeCircle( mX, mY, mPathSmoothTool->Radius );
+    blctx->strokeCircle( mX, mY, mPathSmoothTool->PickingRadius );
 
     blctx->restore();
 }
 
 void
-FOdysseyPainterEditorVectorPathSmoothToolHUD::SetCursorPosition( double iX, double iY )
+FOdysseyPainterEditorVectorPathSmoothToolHUD::SetCursorPosition( double iWorldX, double iWorldY )
 {
-    mX = iX;
-    mY = iY;
+    mX = iWorldX;
+    mY = iWorldY;
+
+    mPickedPointArray.clear();
+
+    PickPoints( iWorldX, iWorldY, mPathSmoothTool->PickingRadius, mPickedPointArray );
+}
+
+std::vector<FOdysseyVectorPoint*>&
+FOdysseyPainterEditorVectorPathSmoothToolHUD::GetPickedPointArray()
+{
+    return mPickedPointArray;
 }

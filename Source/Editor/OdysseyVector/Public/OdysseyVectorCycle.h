@@ -115,6 +115,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorCycle
          */
         void StrokePath( bool iWorld );
 
+        ::ULIS::FRectD GetBBox();
+
     protected :
         BLPath mContourPath;
         BLPath mCombinedPath;

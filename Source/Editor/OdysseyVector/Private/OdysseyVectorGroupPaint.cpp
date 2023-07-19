@@ -202,16 +202,20 @@ FOdysseyVectorGroupPaint::DrawChildren( uint64 iFlags )
 
     for( it = mChildrenList.begin(); it != mChildrenList.end(); ++it )
     {
-        // Note: all children objects are path and have no children.
-        FOdysseyVectorPath *childPath = static_cast<FOdysseyVectorPath*>(*it);
+        FOdysseyVectorObject *child = (*it);
 
-        if( mGroupPaintParam.Wireframe == false )
+        if( child->GetClass() == FOdysseyVectorPath::StaticClass() )
         {
-            childPath->Draw( iFlags );
-        }
-        else
-        {
-            childPath->DrawStructure( mGroupPaintParam.WireframeColor, 1.0f, true );
+            FOdysseyVectorPath *childPath = static_cast<FOdysseyVectorPath*>(child);
+
+            if( mGroupPaintParam.Wireframe == false )
+            {
+                childPath->Draw( iFlags );
+            }
+            else
+            {
+                childPath->DrawStructure( mGroupPaintParam.WireframeColor, 1.0f, true );
+            }
         }
     }
 }
@@ -1000,7 +1004,7 @@ FOdysseyVectorGroupPaint::BuildGraph()
         if( path->GetPaintingCode() == mPaintingCode )
         {
             std::list<FOdysseyVectorSegment*>& segmentList = path->GetSegmentList();
-
+//UE_LOG(LogTemp, Warning, TEXT("path:%d"), path->GetIntersectionCount() );
             CreatePathSections( path, mSectionBuffer, mGapSegmentBuffer );
 
             // create a cycle right now for untouched looped-paths
@@ -1234,7 +1238,7 @@ FOdysseyVectorGroupPaint::CopyBuckets( FOdysseyVectorGroupPaint* iDestination, b
         FOdysseyVectorBucket *bucket = static_cast<FOdysseyVectorBucket*>(*lit);
         ::ULIS::FVec2D bucketCoords = bucket->GetCoords();
         BLPoint destinationBucketPosition = conversionMatrix.mapPoint( bucketCoords.x, bucketCoords.y );
-        FOdysseyVectorBucket *bucketCopy = new FOdysseyVectorBucket( *iDestination, 0.0f, 0.0f, bucket->IsPropagated() );
+        FOdysseyVectorBucket *bucketCopy = new FOdysseyVectorBucket( iDestination, 0.0f, 0.0f, bucket->IsPropagated() );
 
         bucket->Copy( bucketCopy );
 

@@ -24,7 +24,6 @@ public:
 protected:
     //Init
 	virtual void CreateTabs() override;
-    virtual void CreateContextMenus() override;
     virtual void BindShortcuts( FBaseToolkit* iToolkit ) override;
     virtual void ExtendMenuAbout( FToolMenuOwner iOwner, FName iMenuName ) override;
 

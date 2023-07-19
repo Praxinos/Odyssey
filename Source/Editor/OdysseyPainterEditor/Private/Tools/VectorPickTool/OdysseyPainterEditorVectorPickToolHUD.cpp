@@ -37,14 +37,14 @@ FOdysseyPainterEditorVectorPickToolHUD::DrawVertexSelection( FOdysseyVectorScene
         {
             FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(selectedObject);
 
-            FOdysseyVectorHUD::DrawPath( path, fgColor, bgColor, hcColor, true, false, false );
+            FOdysseyVectorHUD::DrawPath( path, fgColor, bgColor, hcColor, true, VIEW_VERTEX | VIEW_SEGMENT );
         }
 
         if( selectedObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
         {
             FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(selectedObject);
 
-            FOdysseyVectorHUD::DrawPaintGroup( paintGroup, fgColor, bgColor, hcColor, true, false, false );
+            FOdysseyVectorHUD::DrawPaintGroup( paintGroup, fgColor, bgColor, hcColor, true, VIEW_VERTEX | VIEW_SEGMENT );
         }
     }
 }

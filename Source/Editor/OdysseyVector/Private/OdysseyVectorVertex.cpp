@@ -5,13 +5,12 @@ FOdysseyVectorVertex::~FOdysseyVectorVertex()
 }
 
 FOdysseyVectorVertex::FOdysseyVectorVertex( FOdysseyVectorPath* iPath, double iX, double iY, double iRadius )
-    : FOdysseyVectorPoint()
+    : FOdysseyVectorPoint( iX, iY, iRadius )
    , mPath ( iPath )
    , mFlags( 0 )
    , mNearestSegment( nullptr )
    , mNearestVertex( nullptr )
 {
-    Init( iX, iY, iRadius );
 }
 
 void
@@ -33,14 +32,14 @@ FOdysseyVectorVertex::GetPath()
 }
 
 void
-FOdysseyVectorVertex::BuildExplorationPairs( std::vector<FExplorationPair>& iExplorationPairsArray )
+FOdysseyVectorVertex::BuildExplorationPairs( std::vector<FExplorationPair>& oExplorationPairsArray )
 {
     for( std::list<FOdysseyVectorSection*>::iterator it = mSectionList.begin(); it != mSectionList.end(); ++it )
     {
         FOdysseyVectorSection* returnSection = static_cast<FOdysseyVectorSection*>(*it);
         FOdysseyVectorSection* departSection = GetCycleNextSection( returnSection, 1.0f );
 
-        iExplorationPairsArray.push_back( FExplorationPair( returnSection, this, departSection ) );
+        oExplorationPairsArray.push_back( FExplorationPair( returnSection, this, departSection ) );
     }
 }
 
@@ -243,8 +242,8 @@ FOdysseyVectorVertex::GetVectorOnSegment( FOdysseyVectorSegment* iSegment, bool 
 {
     ::ULIS::FVec2D vec;
 
-    vec = ( iSegment->GetVertex(0) == this ) ?  iSegment->GetTangentAt(0.0f, iNormalize)
-                                             : -iSegment->GetTangentAt(1.0f, iNormalize);
+    vec = ( iSegment->GetVertex(0) == this ) ?  iSegment->GetTangentAt( 0.0f, iNormalize )
+                                             : -iSegment->GetTangentAt( 1.0f, iNormalize );
 
     return vec;
 }
@@ -313,35 +312,10 @@ FOdysseyVectorVertex::InvalidateSegments()
     }
 }
 
-void
-FOdysseyVectorVertex::SetRadius( double iRadius )
-{
-    FOdysseyVectorPoint::SetRadius( iRadius );
-
-    InvalidateSegments();
-}
-
 void 
-FOdysseyVectorVertex::SetX( double iX )
+FOdysseyVectorVertex::SetCoords( double iX, double iY, double iRadius )
 {
-    mCoords.x  = iX;
-
-    InvalidateSegments();
-}
-
-void 
-FOdysseyVectorVertex::SetY( double iY )
-{
-    mCoords.y = iY;
-
-    InvalidateSegments();
-}
-
-void 
-FOdysseyVectorVertex::Set( double iX, double iY )
-{
-    mCoords.x = iX;
-    mCoords.y = iY;
+    FOdysseyVectorPoint::SetCoords( iX, iY, iRadius );
 
     InvalidateSegments();
 }

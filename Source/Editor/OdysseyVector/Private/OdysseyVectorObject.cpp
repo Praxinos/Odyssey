@@ -21,8 +21,8 @@ FOdysseyVectorObject::FOdysseyVectorObject( const FString& iName )
     : mParent( nullptr )
     , mIsSelected( false )
     , mDependsOnChildren( false )
-    , mBackgroundBucket( *this, 0.0f, 0.0f, false )
-    , mForegroundBucket( *this, 0.0f, 0.0f, false )
+    , mBackgroundBucket( this, 0.0f, 0.0f, false )
+    , mForegroundBucket( this, 0.0f, 0.0f, false )
     , mInvalidationFlags ( 0 )
 {
     mLocalMatrix.reset();
@@ -38,10 +38,10 @@ FOdysseyVectorObject::FOdysseyVectorObject( const FString& iName )
     mObjectParam.ScalingX = 1.0f;
     mObjectParam.ScalingY = 1.0f;
 
-    mForegroundBucket.SetGradient( false );
+    mForegroundBucket.SetColorMode( eBucketColorMode::SolidColor );
     mForegroundBucket.SetSolidColor( 0, 0, 0, 255 );
 
-    mBackgroundBucket.SetGradient( false );
+    mBackgroundBucket.SetColorMode( eBucketColorMode::SolidColor );
     mBackgroundBucket.SetSolidColor( 255, 255, 255, 255 );
 }
 
@@ -269,13 +269,13 @@ FOdysseyVectorObject::CopySettings( FOdysseyVectorObject& iDestinationObject )
 
     iDestinationObject.mForegroundBucket.SetPaletteEntry( mForegroundBucket.GetPaletteEntry() );
     iDestinationObject.mForegroundBucket.SetSolidColor( mForegroundBucket.GetSolidColor() );
-    iDestinationObject.mForegroundBucket.SetGradient( mForegroundBucket.IsGradient() );
+    iDestinationObject.mForegroundBucket.SetColorMode( mForegroundBucket.GetColorMode() );
     iDestinationObject.mForegroundBucket.SetGradientColor0( mForegroundBucket.GetGradientColor0() );
     iDestinationObject.mForegroundBucket.SetGradientColor1( mForegroundBucket.GetGradientColor1() );
 
     iDestinationObject.mBackgroundBucket.SetPaletteEntry( mBackgroundBucket.GetPaletteEntry() );
     iDestinationObject.mBackgroundBucket.SetSolidColor( mBackgroundBucket.GetSolidColor() );
-    iDestinationObject.mBackgroundBucket.SetGradient( mBackgroundBucket.IsGradient() );
+    iDestinationObject.mBackgroundBucket.SetColorMode( mBackgroundBucket.GetColorMode() );
     iDestinationObject.mBackgroundBucket.SetGradientColor0( mBackgroundBucket.GetGradientColor0() );
     iDestinationObject.mBackgroundBucket.SetGradientColor1( mBackgroundBucket.GetGradientColor1() );
 
@@ -793,13 +793,13 @@ FOdysseyVectorObject::TreeToArray( FOdysseyVectorObject* iObject, std::vector<FO
     return iOutArray.size();
 }
 
-FColor&
+FColor
 FOdysseyVectorObject::GetForegroundColor()
 {
     return mForegroundBucket.GetColor();
 }
 
-FColor&
+FColor
 FOdysseyVectorObject::GetBackgroundColor()
 {
     return mBackgroundBucket.GetColor();

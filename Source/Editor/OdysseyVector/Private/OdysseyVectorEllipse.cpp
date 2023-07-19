@@ -7,15 +7,7 @@
 
 FOdysseyVectorEllipse::~FOdysseyVectorEllipse()
 {
-    delete mCubicVertex[0];
-    delete mCubicVertex[1];
-    delete mCubicVertex[2];
-    delete mCubicVertex[3];
-
-    delete mCubicSegment[0];
-    delete mCubicSegment[1];
-    delete mCubicSegment[2];
-    delete mCubicSegment[3];
+   // vertices ans segments freed in OdysseyVectorPath::~destructor
 }
 
 FOdysseyVectorEllipse::FOdysseyVectorEllipse( const FString& iName
@@ -23,38 +15,19 @@ FOdysseyVectorEllipse::FOdysseyVectorEllipse( const FString& iName
                                             , double iRadiusY
                                             , double iStrokeWidth )
     : FOdysseyVectorPrimitive( iName )
+    , mStrokeWidth( iStrokeWidth )
+    , mRadiusX( iRadiusX )
+    , mRadiusY( iRadiusY )
 {
-    mStrokeWidth = iStrokeWidth;
-
-    Init( iName, iRadiusX, iRadiusY );
-}
-
-bool
-FOdysseyVectorEllipse::HasBaseClass( uint32 iBaseClassID )
-{
-    if( mStaticClass == iBaseClassID )
-    {
-        return true;
-    }
-
-    return FOdysseyVectorPathCubic::HasBaseClass( iBaseClassID );
-}
-
-void
-FOdysseyVectorEllipse::Init( const FString& iName, double iRadiusX, double iRadiusY )
-{
-    SetName( iName );
-    SetRadius( iRadiusX, iRadiusY );
-
     mCubicVertex[0] = new FOdysseyVectorVertex( this, 0.0f, 0.0f, mStrokeWidth );
     mCubicVertex[1] = new FOdysseyVectorVertex( this, 0.0f, 0.0f, mStrokeWidth );
     mCubicVertex[2] = new FOdysseyVectorVertex( this, 0.0f, 0.0f, mStrokeWidth );
     mCubicVertex[3] = new FOdysseyVectorVertex( this, 0.0f, 0.0f, mStrokeWidth );
 
-    mCubicSegment[0] = new FOdysseyVectorSegmentCubic( static_cast<FOdysseyVectorPathCubic*>(this), mCubicVertex[0], mCubicVertex[1] );
-    mCubicSegment[1] = new FOdysseyVectorSegmentCubic( static_cast<FOdysseyVectorPathCubic*>(this), mCubicVertex[1], mCubicVertex[2] );
-    mCubicSegment[2] = new FOdysseyVectorSegmentCubic( static_cast<FOdysseyVectorPathCubic*>(this), mCubicVertex[2], mCubicVertex[3] );
-    mCubicSegment[3] = new FOdysseyVectorSegmentCubic( static_cast<FOdysseyVectorPathCubic*>(this), mCubicVertex[3], mCubicVertex[0] );
+    mCubicSegment[0] = new FOdysseyVectorSegmentCubic( this, mCubicVertex[0], mCubicVertex[1] );
+    mCubicSegment[1] = new FOdysseyVectorSegmentCubic( this, mCubicVertex[1], mCubicVertex[2] );
+    mCubicSegment[2] = new FOdysseyVectorSegmentCubic( this, mCubicVertex[2], mCubicVertex[3] );
+    mCubicSegment[3] = new FOdysseyVectorSegmentCubic( this, mCubicVertex[3], mCubicVertex[0] );
 
     AddVertex ( mCubicVertex[0] );
     AddVertex ( mCubicVertex[1] );
@@ -65,6 +38,19 @@ FOdysseyVectorEllipse::Init( const FString& iName, double iRadiusX, double iRadi
     AddSegment ( mCubicSegment[1] );
     AddSegment ( mCubicSegment[2] );
     AddSegment ( mCubicSegment[3] );
+
+    UpdateShape( 0 );
+}
+
+bool
+FOdysseyVectorEllipse::HasBaseClass( uint32 iBaseClassID )
+{
+    if( mStaticClass == iBaseClassID )
+    {
+        return true;
+    }
+
+    return FOdysseyVectorPath::HasBaseClass( iBaseClassID );
 }
 
 void
@@ -99,6 +85,12 @@ FOdysseyVectorEllipse::UpdateShape( uint32 iUpdateFlags )
     mCubicSegment[1]->Update();
     mCubicSegment[2]->Update();
     mCubicSegment[3]->Update();
+
+    // Update the bounding box
+    mBBox.x = - mRadiusX - mStrokeWidth;
+    mBBox.y = - mRadiusY - mStrokeWidth;
+    mBBox.w =  ( mRadiusX +  mStrokeWidth ) * 2;
+    mBBox.h =  ( mRadiusY +  mStrokeWidth ) * 2;
 }
 
 FOdysseyVectorObject*
@@ -117,7 +109,7 @@ FOdysseyVectorEllipse::DrawShape( uint64 iFlags )
 {
     if ( mRadiusX && mRadiusY )
     {
-        FOdysseyVectorPathCubic::DrawShape ( iFlags );
+        FOdysseyVectorPath::DrawShape ( iFlags );
     }
 }
 
@@ -132,11 +124,6 @@ FOdysseyVectorEllipse::SetRadius( double iRadiusX, double iRadiusY )
 {
     mRadiusX = iRadiusX;
     mRadiusY = iRadiusY;
-
-    mBBox.x = - mRadiusX - mStrokeWidth;
-    mBBox.y = - mRadiusY - mStrokeWidth;
-    mBBox.w =  ( mRadiusX +  mStrokeWidth ) * 2;
-    mBBox.h =  ( mRadiusY +  mStrokeWidth ) * 2;
 
     Invalidate();
 }

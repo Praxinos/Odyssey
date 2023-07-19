@@ -88,9 +88,9 @@ public:
     static void FlipHorizontal( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
     static void FlipVertical( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
     static void SelectAll( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    static void DeleteBucket( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    static void PropagateBucket( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    static void UnpropagateBucket( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    static void DeleteBucket( FOdysseyVectorBucket* iBucket );
+    static void PropagateBucket( FOdysseyVectorBucket* iBucket );
+    static void UnpropagateBucket( FOdysseyVectorBucket* iBucket );
     static void StitchVertices( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
 
     void SelectDefaultTool();

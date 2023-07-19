@@ -177,34 +177,6 @@ FOdysseyVector::PrintMatrix( char* name, BLMatrix2D& matrix )
     UE_LOG(LogTemp,Warning,TEXT("%s -- M00:%f M01:%f // M10:%f  M11:%f // M20:%f M21:%f"), name, matrix.m00, matrix.m01, matrix.m10, matrix.m11, matrix.m20, matrix.m21 );
 }
 
-bool
-FOdysseyVector::IntersectRegions( const ::ULIS::FRectI& iRegion0, const ::ULIS::FRectI& iRegion1, ::ULIS::FRectI &oRegionOut )
-{
-    ::ULIS::FRectI resultRegion;
-
-    int r0x1 = iRegion0.x;
-    int r0x2 = iRegion0.x + iRegion0.w;
-    int r0y1 = iRegion0.y;
-    int r0y2 = iRegion0.y + iRegion0.h;
-    int r1x1 = iRegion1.x;
-    int r1x2 = iRegion1.x + iRegion1.w;
-    int r1y1 = iRegion1.y;
-    int r1y2 = iRegion1.y + iRegion1.h;
-    int x1 = ::ULIS::FMath::Max( r0x1, r1x1 );
-    int y1 = ::ULIS::FMath::Max( r0y1, r1y1 );
-    int x2 = ::ULIS::FMath::Min( r0x2, r1x2 );
-    int y2 = ::ULIS::FMath::Min( r0y2, r1y2 );
-
-    // Note: the intersect operation from the operator overload & in class FRectI assumes x1 < x2, which is not guaranted.
-    // this is why we need to check that first.
-    oRegionOut.x = x1;
-    oRegionOut.y = y1;
-    oRegionOut.w = ( x1 < x2 ) ? x2 - x1 : 0;
-    oRegionOut.h = ( y1 < y2 ) ? y2 - y1 : 0;
-
-    return oRegionOut.Area() ? true : false;
-}
-
 void
 FOdysseyVector::BezierExtract( ::ULIS::FVec2D& iP0
                              , ::ULIS::FVec2D& iP1

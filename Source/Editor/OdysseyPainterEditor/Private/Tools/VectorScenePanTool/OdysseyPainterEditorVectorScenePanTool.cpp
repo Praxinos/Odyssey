@@ -57,7 +57,7 @@ UOdysseyPainterEditorVectorScenePanTool::UnloadVector( FOdysseyVectorEngine* iEn
 {
     iEngine->RemoveHUD( mScenePanHUD );
 
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
 void
@@ -66,7 +66,7 @@ UOdysseyPainterEditorVectorScenePanTool::LoadVector( FOdysseyVectorEngine* iEngi
     iEngine->ClearHUD();
     iEngine->AddHUD( mScenePanHUD );
 
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
 bool
@@ -99,12 +99,13 @@ UOdysseyPainterEditorVectorScenePanTool::OnMouseDownVector( FOdysseyVectorEngine
 
         GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
     }
+    GEditor->EndTransaction();
 
     mDownLocalMouseX = localCoords.x;
     mDownLocalMouseY = localCoords.y;
 
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
-    GEditor->EndTransaction();
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+
 
     return true;
 }
@@ -142,7 +143,7 @@ UOdysseyPainterEditorVectorScenePanTool::OnMouseDragVectorStatic( FOdysseyVector
                      , iScene->GetTranslationY() + ( iPointInTexture.deltaPosition.Y * factor ) );
     iScene->UpdateMatrix();
 
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
 void
@@ -150,18 +151,21 @@ UOdysseyPainterEditorVectorScenePanTool::OnMouseDragVector( FOdysseyVectorEngine
                                                           , FOdysseyVectorScene* iScene
                                                           , const FOdysseyPoint& iPointInTexture )
 {
-    if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
-    {
-        OnMouseDragVectorStatic( iEngine, iScene, iPointInTexture );
-    }
 
-    if( iPointInTexture.keysDown.Find( EKeys::RightMouseButton ) != INDEX_NONE )
+    if(iPointInTexture.keysDown.Find(EKeys::RightMouseButton) != INDEX_NONE)
     {
-        UOdysseyPainterEditorVectorSceneScaleTool::OnMouseDragVectorStatic( mDownLocalMouseX
-                                                                          , mDownLocalMouseY
-                                                                          , iEngine
-                                                                          , iScene
-                                                                          , iPointInTexture );
+        UOdysseyPainterEditorVectorSceneScaleTool::OnMouseDragVectorStatic(mDownLocalMouseX
+                                                                          ,mDownLocalMouseY
+                                                                          ,iEngine
+                                                                          ,iScene
+                                                                          ,iPointInTexture);
+    }
+    else // Right-click has priority over left click
+    {
+        if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
+        {
+            OnMouseDragVectorStatic( iEngine, iScene, iPointInTexture );
+        }
     }
 }
 
@@ -185,7 +189,7 @@ UOdysseyPainterEditorVectorScenePanTool::OnMouseUpVector( FOdysseyVectorEngine* 
                                                         , const FOdysseyPoint& iPointInTexture
                                                         , const FKey& iKey )
 {
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 
     return true;
 }

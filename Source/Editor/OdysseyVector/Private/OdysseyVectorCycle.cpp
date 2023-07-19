@@ -284,23 +284,33 @@ ShowCycle( std::vector<FOdysseyVectorVertex*>& vertexArray
     }
 }
 
+::ULIS::FRectD
+FOdysseyVectorCycle::GetBBox()
+{
+    BLBox bbox;
+
+    mContourPath.getBoundingBox( &bbox );
+
+    return ::ULIS::FRectD::FromMinMax( bbox.x0, bbox.y0, bbox.x1, bbox.y1 );
+}
+
 void
 FOdysseyVectorCycle::Draw( uint64 iFlags )
 {
     BLContext* blctx = mOwner.GetScene()->GetEngine()->GetBLContext();
     FOdysseyVectorBucket* bucket = mBucket ? mBucket : mPropagatedBucket;
     BLMatrix2D& worldMatrix = mOwner.GetWorldMatrix();
-    ::ULIS::FRectD bbox = mOwner.GetBBox( false );
 
-    //BLBox bbox;
-    //mContourPath.getBoundingBox( &bbox );
 
-    
 
     if( bucket )
     {
-        if( bucket->IsGradient() )
+        eBucketColorMode colorMode = bucket->GetColorMode();
+
+        if( colorMode == eBucketColorMode::LinearGradient )
         {
+            eBucketSpreadingPolicy spreadingPolicy = bucket->GetSpreadingPolicy();
+            ::ULIS::FRectD bbox = spreadingPolicy == eBucketSpreadingPolicy::Group ? mOwner.GetBBox( false ) : GetBBox();
             double linearMinX = /*bbox.x0*/bbox.x;
             double linearMinY = /*bbox.y0*/bbox.y;
             double linearMaxX = /*bbox.x1*/bbox.x + bbox.w;
@@ -331,7 +341,7 @@ FOdysseyVectorCycle::Draw( uint64 iFlags )
         }
         else
         {
-            FColor& color = bucket->GetColor();
+            FColor color = bucket->GetColor();
             BLRgba32 BLColor = BLRgba32( color.R, color.G, color.B, color.A );
 
             blctx->setStrokeStyle( BLColor );

@@ -41,6 +41,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertexIntersection : public FOdysseyVector
 
         virtual uint32 GetSectionCount() override;
         bool SelfIntersects();
+
         virtual void BuildExplorationPairs( std::vector<FExplorationPair>& iExplorationPairsArray ) override;
 
     private:

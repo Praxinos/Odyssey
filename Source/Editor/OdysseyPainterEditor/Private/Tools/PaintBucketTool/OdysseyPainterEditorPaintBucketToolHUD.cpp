@@ -31,8 +31,8 @@ FOdysseyPainterEditorPaintBucketToolHUD::GetBucketPosition( FOdysseyVectorBucket
 
     if( iWorld )
     {
-        FOdysseyVectorObject& ownerObject = iBucket->GetOwner();
-        BLMatrix2D& worldMatrix = ownerObject.GetWorldMatrix();
+        FOdysseyVectorObject* ownerObject = iBucket->GetOwner();
+        BLMatrix2D& worldMatrix = ownerObject->GetWorldMatrix();
         BLPoint worldPosition = worldMatrix.mapPoint( bucketCoords.x, bucketCoords.y );
 
         return ::ULIS::FVec2D( worldPosition.x, worldPosition.y );
@@ -50,8 +50,8 @@ FOdysseyPainterEditorPaintBucketToolHUD::GetHandleVector( FOdysseyVectorBucket* 
 
     if( iWorld )
     {
-        FOdysseyVectorObject& ownerObject = iBucket->GetOwner();
-        BLMatrix2D& worldMatrix = ownerObject.GetWorldMatrix();
+        FOdysseyVectorObject* ownerObject = iBucket->GetOwner();
+        BLMatrix2D& worldMatrix = ownerObject->GetWorldMatrix();
         BLPoint worldVector = worldMatrix.mapVector( handleVector.x, handleVector.y );
         ::ULIS::FVec2D normalizedVector = ::ULIS::FVec2D( worldVector.x, worldVector.y );
 
@@ -80,7 +80,7 @@ FOdysseyPainterEditorPaintBucketToolHUD::PickBucketArea( FOdysseyVectorBucket* i
         return PICK_BUCKET;
     }
 
-    if( mPaintBucketTool->ShowControls && iBucket->IsGradient() )
+    if( mPaintBucketTool->ShowControls && ( iBucket->GetColorMode() == eBucketColorMode::LinearGradient )  )
     {
         if ( handleDif.Distance() < mPaintBucketTool->PickingRadius )
         {
@@ -219,7 +219,7 @@ FOdysseyPainterEditorPaintBucketToolHUD::DrawBucket( FOdysseyVectorBucket* iBuck
     ::ULIS::FVec2D bucketWorldCoords = GetBucketPosition( iBucket, true );
     ::ULIS::FVec2D handleWorldCoords = bucketWorldCoords + ( GetHandleVector( iBucket, true ) * HANDLE_DISTANCE );
 
-    FColor& bucketColor = iBucket->GetColor();
+    FColor bucketColor = iBucket->GetColor();
     BLRgba32 fillColor = BLRgba32( bucketColor.R, bucketColor.G, bucketColor.B, bucketColor.A );
     BLRgba32 propColor = iBucket->IsPropagated() ? BLRgba32( 0x00, 0xFF, 0x00, 0xFF )
                                                  : BLRgba32( 0xFF, 0xFF, 0xFF, 0xFF );
@@ -227,7 +227,7 @@ FOdysseyPainterEditorPaintBucketToolHUD::DrawBucket( FOdysseyVectorBucket* iBuck
     iBLContext->save();
     iBLContext->resetMatrix();
 
-    if( mPaintBucketTool->ShowControls && iBucket ->IsGradient() )
+    if( mPaintBucketTool->ShowControls && ( iBucket->GetColorMode() == eBucketColorMode::LinearGradient ) )
     {
         BLRgba32 blackColor = BLRgba32( 0x00, 0x00, 0x00, 0xFF );
         BLRgba32 whiteColor = BLRgba32( 0xFF, 0xFF, 0xFF, 0xFF );

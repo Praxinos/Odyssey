@@ -7,23 +7,6 @@
 #include "OdysseyVectorSegmentCubic.h"
 #include "OdysseyVectorPrimitive.h"
 
-#include "OdysseyVectorRectangle.generated.h"
-
-USTRUCT()
-struct FRectangleParam
-{
-    GENERATED_BODY()
-
-    UPROPERTY(EditAnywhere, Category="Geometry")
-    double StrokeWidth;
-
-    UPROPERTY(EditAnywhere, Category="Geometry")
-    double Width;
-
-    UPROPERTY(EditAnywhere, Category="Geometry")
-    double Height;
-};
-
 class ODYSSEYVECTOR_API FOdysseyVectorRectangle : public FOdysseyVectorPrimitive
 {
     private:
@@ -32,8 +15,36 @@ class ODYSSEYVECTOR_API FOdysseyVectorRectangle : public FOdysseyVectorPrimitive
     public:
         static uint32 StaticClass() { return mStaticClass; };
         virtual uint32 GetClass() { return mStaticClass; };
-
         bool HasBaseClass( uint32 iBaseClassID );
+
+       /**
+         * @brief destructor.
+         */
+        virtual ~FOdysseyVectorRectangle();
+
+       /**
+         * @brief constructor.
+         */
+        FOdysseyVectorRectangle( FString iName, double iWidth, double iHeight, double iStrokeWidth );
+
+       /**
+         * @brief Set rectangle size.
+         * @param iWidth the width.
+         * @param iHeight the height.
+         */
+        void SetSize( double iWidth, double iHeight );
+
+       /**
+         * @brief Get rectangle width.
+         * @return the width.
+         */
+        double GetWidth();
+
+       /**
+         * @brief Get rectangle height.
+         * @return the height.
+         */
+        double GetHeight();
 
     private:
         virtual void DrawShape( uint64 iFlags ) override;
@@ -45,13 +56,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorRectangle : public FOdysseyVectorPrimitive
         FOdysseyVectorSegmentCubic* mCubicSegment[4];
 
     public:
-        virtual ~FOdysseyVectorRectangle();
-        FOdysseyVectorRectangle( FString iName, double iWidth, double iHeight, double iStrokeWidth );
-        void Init( const FString& iName, double iWidth, double iHeight );
-        void SetSize( double iWidth, double iHeight );
-        double GetWidth();
-        double GetHeight();
-
-    public:
-        FRectangleParam mRectangleParam;
+        double mStrokeWidth;
+        double mWidth;
+        double mHeight;
 };

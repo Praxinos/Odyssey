@@ -23,14 +23,6 @@ FOdysseyVectorScene::GetEngine()
     return mEngine;
 }
 
-FOdysseyVectorScene::FSignalDelegate&
-FOdysseyVectorScene::OnSignalDelegate()
-{
-    static FSignalDelegate onSignalDelegate;
-
-    return onSignalDelegate;
-}
-
 void
 FOdysseyVectorScene::ClearSelection()
 {
@@ -96,11 +88,11 @@ FOdysseyVectorScene::MakePaintGroupFromSelectedObjects( std::vector<FOdysseyVect
                 {
                     FOdysseyVectorObject* childObject = (*cit);
 
-                    if( childObject->HasBaseClass( FOdysseyVectorPathCubic::StaticClass() ) )
+                    if( childObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
                     {
-                        FOdysseyVectorPathCubic* childCubicPath = static_cast<FOdysseyVectorPathCubic*>( childObject );
+                        FOdysseyVectorPath* childPath = static_cast<FOdysseyVectorPath*>( childObject );
 
-                        oCubicPathArray.push_back( childCubicPath );
+                        oCubicPathArray.push_back( childPath );
                     }
                 }
 
@@ -111,9 +103,9 @@ FOdysseyVectorScene::MakePaintGroupFromSelectedObjects( std::vector<FOdysseyVect
                 oRemovedPaintGroupArray.push_back( selectedPaintGroup );
             }
 
-            if( selectedObject->HasBaseClass( FOdysseyVectorPathCubic::StaticClass() ) )
+            if( selectedObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
             {
-                FOdysseyVectorPathCubic* selectedCubicPath = static_cast<FOdysseyVectorPathCubic*>( selectedObject );
+                FOdysseyVectorPath* selectedCubicPath = static_cast<FOdysseyVectorPath*>( selectedObject );
 
                 oCubicPathArray.push_back( selectedCubicPath );
             }
@@ -298,7 +290,7 @@ FOdysseyVectorScene::DrawShape( uint64 iFlags )
     BLContext* blctx = GetEngine()->GetBLContext();
     static ::ULIS::FRectD zeroRectangle; // static variables are always zeroed by default
     BLRgba32 blFillColor;
-    FColor& fillColor = mBackgroundBucket.GetColor();
+    FColor fillColor = mBackgroundBucket.GetColor();
 
     blctx->setCompOp( BL_COMP_OP_SRC_COPY );
 
@@ -332,12 +324,6 @@ void
 FOdysseyVectorScene::Update( uint32 iUpdateFlags )
 {
     FOdysseyVectorObject::Update( iUpdateFlags );
-}
-
-void
-FOdysseyVectorScene::Signal( uint64 iSignalFlags )
-{
-    OnSignalDelegate().Broadcast( this, iSignalFlags );
 }
 
 FOdysseyVectorObject*

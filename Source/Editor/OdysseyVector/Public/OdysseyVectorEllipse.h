@@ -29,14 +29,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorEllipse : public FOdysseyVectorPrimitive
          FOdysseyVectorEllipse( const FString& iName, double iRadiusX, double iRadiusY, double iStrokeWidth );
 
        /**
-         * @brief Init an ellipse.
-         * @param iName object's name
-         * @param iRadiusX radius on X axis
-         * @param iRadiusY radius on Y axis
-         */
-        void Init( const FString& iName, double iRadiusX, double iRadiusY );
-
-       /**
          * @brief Set ellipse radius on both X and Y axis.
          * @param iRadius the radius.
          */

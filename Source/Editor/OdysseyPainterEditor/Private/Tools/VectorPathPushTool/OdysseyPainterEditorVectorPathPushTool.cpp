@@ -15,7 +15,7 @@ UOdysseyPainterEditorVectorPathPushTool::~UOdysseyPainterEditorVectorPathPushToo
 
 UOdysseyPainterEditorVectorPathPushTool::UOdysseyPainterEditorVectorPathPushTool()
     : Radius( 20.0f )
-    , PreserveSmoothness( true )
+    , PreserveSmoothness( false )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathPushTool64");
 
@@ -58,7 +58,7 @@ UOdysseyPainterEditorVectorPathPushTool::UnloadVector( FOdysseyVectorEngine* iEn
 {
     iEngine->RemoveHUD( mPathPushHUD );
 
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
 void
@@ -69,7 +69,7 @@ UOdysseyPainterEditorVectorPathPushTool::LoadVector( FOdysseyVectorEngine* iEngi
 
     mPathPushHUD->Reset( iScene );
 
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
 bool
@@ -130,8 +130,8 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDownVector( FOdysseyVectorEngine
 
         if( cubicSegment )
         {
-            FOdysseyVectorPathCubic* cubicPath = static_cast<FOdysseyVectorPathCubic*>(cubicSegment->GetPath());
-            BLPoint localPoint = cubicPath->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
+            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(cubicSegment->GetPath());
+            BLPoint localPoint = path->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
             ::ULIS::FVec2D& ctrlPoint0 = cubicSegment->GetHandle(0)->GetCoords();
             ::ULIS::FVec2D& ctrlPoint1 = cubicSegment->GetHandle(1)->GetCoords();
             ::ULIS::FVec2D& point0 = cubicSegment->GetVertex(0)->GetCoords();
@@ -170,13 +170,15 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDownVector( FOdysseyVectorEngine
         // we have to include them from the picked vertices.
         std::vector<FOdysseyVectorSegment*> savedSegmentArray;
         FOdysseyVectorVertex::ArrayToSegmentArray( vertexArray, savedSegmentArray );
-        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSegmentReshape( iScene, savedSegmentArray );
+        FOdysseyVectorUndoSegmentReshape* undoReshape = new FOdysseyVectorUndoSegmentReshape( iScene );
 
-        GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
+        undoReshape->RecordSegment( savedSegmentArray );
+
+        GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undoReshape) );
     }
     GEditor->EndTransaction();
 
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 
     return true;
 }
@@ -205,7 +207,7 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseHoverVector( FOdysseyVectorEngin
 
     mPathPushHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
 
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
 void
@@ -272,7 +274,7 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDragVector( FOdysseyVectorEngine
                         perpendicularVector = ::ULIS::FVec2D( perpendicularVector.y, -perpendicularVector.x );
                     }
 
-                    FOdysseyVectorPathCubic::SmoothSegments(vertex,perpendicularVector,false,true);
+                    FOdysseyVectorPath::SmoothSegments(vertex,perpendicularVector,false,true);
                 }
             }
         }
@@ -285,7 +287,8 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDragVector( FOdysseyVectorEngine
 
     // update vector scene and GUI widgets via delegates.
     iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES | FOdysseyVectorObject::KEEPINVALIDATED );
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
 bool
@@ -309,7 +312,9 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseUpVector( FOdysseyVectorEngine* 
                                                         , const FKey& iKey )
 {
     iScene->Update( 0 ); // update invalidated objects
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW | FOdysseyVectorScene::SIGNAL_OBJECT_MODIFIED );
+
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                   | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
 
     return false;
 }
@@ -323,17 +328,14 @@ UOdysseyPainterEditorVectorPathPushTool::Commit()
 void
 UOdysseyPainterEditorVectorPathPushTool::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent )
 {
+    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
+
     if (PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive)
         return;
     
     PropertyChanged( PropertyChangedEvent.GetPropertyName() );
     
-    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
-    if( vectorEngine )
-    {
-        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
-        vectorScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
-    }
+    vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
 void

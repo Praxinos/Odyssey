@@ -3,6 +3,7 @@
 
 #include "Tools/VectorPrimitiveDrawingTool/OdysseyPainterEditorVectorPrimitiveDrawingTool.h"
 #include "Undo/OdysseyVectorUndoObjectAdd.h"
+#include "OdysseyPaletteEntryColor.h"
 
 #define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorPrimitiveDrawingTool"
 
@@ -56,7 +57,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::UnloadVector( FOdysseyVectorEng
 {
     //iEngine->RemoveHUD( &mDummyHUD );
 
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
 void
@@ -65,36 +66,38 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::LoadVector( FOdysseyVectorEngin
     //iEngine->ClearHUD();
     //iEngine->AddHUD( &mDummyHUD );
 
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
 bool
-UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnKeyDownVector( FOdysseyVectorEngine* iEngine
-                                                                , FOdysseyVectorScene* iScene
-                                                                , const FKey& iKey )
+UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnKeyDown( const FKey& iKey )
 {
+    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
+    FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+
     UniformAtKeyDown = Uniform;
 
     if ( FSlateApplication::Get().GetModifierKeys().IsShiftDown() )
     {
-        Uniform = true;
+        Uniform = !Uniform; // flip the value
     }
 
-    UOdysseyPainterEditorDefaultTool::OnKeyDownVector( iEngine, iScene, iKey );
-    //iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    UOdysseyPainterEditorDefaultTool::OnKeyDownVector( vectorEngine, vectorScene, iKey );
+    //iScene->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 
     return false;
 }
 
 bool
-UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnKeyUpVector( FOdysseyVectorEngine* iEngine
-                                                              , FOdysseyVectorScene* iScene
-                                                              , const FKey& iKey )
+UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnKeyUp( const FKey& iKey )
 {
+    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
+    FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+
     Uniform = UniformAtKeyDown;
 
-    UOdysseyPainterEditorDefaultTool::OnKeyUpVector( iEngine, iScene, iKey );
-    //iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    UOdysseyPainterEditorDefaultTool::OnKeyUpVector( vectorEngine, vectorScene, iKey );
+    //iScene->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 
     return false;
 }
@@ -173,7 +176,9 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDownVector( FOdysseyVect
     //mSelectionChanged.Broadcast(iScene);
 
     iScene->Update( 0 ); // update invalidated objects
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW | FOdysseyVectorScene::SIGNAL_OBJECT_SELECTED );
+
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                   | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
 
     return true;
 }
@@ -240,7 +245,9 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDragVector( FOdysseyVect
     }
 
     iScene->Update( /*FOdysseyVectorObject::FREQUENTUPDATES*/0 ); // update invalidated objects
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW | FOdysseyVectorScene::SIGNAL_OBJECT_MODIFIED );
+
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                   | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
 }
 
 bool
@@ -267,14 +274,14 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseUpVector( FOdysseyVector
 
     if( primitive )
     {
-        FOdysseyVectorPathCubic* cubicPath = primitive->Convert();
+        FOdysseyVectorPath* path = primitive->Convert();
 
         // Undo must be called before association with parent object
         // needed for valid GUndo pointer
         GEditor->BeginTransaction(LOCTEXT("VectorPrimitiveDrawingTool","Vector Primitive Drawing Tool"));
         if( GUndo )
         {
-            FOdysseyVectorUndo *undo = new FOdysseyVectorUndoObjectAdd( iScene, cubicPath );
+            FOdysseyVectorUndo *undo = new FOdysseyVectorUndoObjectAdd( iScene, path );
 
             GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
         }
@@ -285,16 +292,17 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseUpVector( FOdysseyVector
 
         delete primitive;
 
-        iScene->AppendChild( cubicPath );
-        cubicPath->UpdateMatrix();
-        iScene->Select( cubicPath );
+        iScene->AppendChild( path );
+        path->UpdateMatrix();
+        iScene->Select( path );
     }
 
     iScene->Update( 0 ); // update invalidate objects
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW
-                  | FOdysseyVectorScene::SIGNAL_OBJECT_SELECTED
-                  | FOdysseyVectorScene::SIGNAL_OBJECT_MODIFIED
-                  | FOdysseyVectorScene::SIGNAL_OBJECT_TRANSFORMED );
+
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                   | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED
+                   | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED
+                   | FOdysseyVectorEngine::SIGNAL_OBJECT_TRANSFORMED );
 
     return false;
 }

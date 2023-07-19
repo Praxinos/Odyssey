@@ -40,6 +40,8 @@ public:
     virtual bool OnMouseDown( const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
     virtual void OnMouseDrag( const FOdysseyPoint& iPointInTexture ) override;
     virtual bool OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
+    virtual bool OnKeyDown( const FKey& iKey ) override;
+    virtual bool OnKeyUp( const FKey& iKey ) override;
 
     void UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
     void LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
@@ -57,12 +59,6 @@ public:
                         , FOdysseyVectorScene* iScene
                         , const FOdysseyPoint& iPointInTexture
                         , const FKey& iKey );
-    virtual bool OnKeyUpVector( FOdysseyVectorEngine* iEngine
-                              , FOdysseyVectorScene* iScene
-                              , const FKey& iKey ) override;
-    virtual bool OnKeyDownVector( FOdysseyVectorEngine* iEngine
-                                , FOdysseyVectorScene* iScene
-                                , const FKey& iKey ) override;
 
     //OdysseyPainterEditorTool overrides
     virtual void Commit() override;

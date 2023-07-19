@@ -13,10 +13,9 @@ FOdysseyVectorUndoBucketParam::~FOdysseyVectorUndoBucketParam()
 }
 
 FOdysseyVectorUndoBucketParam::FOdysseyVectorUndoBucketParam( FOdysseyVectorScene* iScene
-                                                            , FOdysseyVectorObject& iBucketParent
                                                             , FOdysseyVectorBucket* iBucket )
     : FOdysseyVectorUndo( iScene )
-    , mBucketSave( iBucketParent )
+    , mBucketSave( iBucket->GetOwner(), 0.0f, 0.0f, false )
     , mBucket( iBucket )
 {
     mBucket->Copy( &mBucketSave );
@@ -25,7 +24,7 @@ FOdysseyVectorUndoBucketParam::FOdysseyVectorUndoBucketParam( FOdysseyVectorScen
 void
 FOdysseyVectorUndoBucketParam::Apply( UObject* iIgnored )
 {
-    FOdysseyVectorBucket tmpBucketSave( mBucketSave.GetOwner() );
+    FOdysseyVectorBucket tmpBucketSave( mBucketSave.GetOwner(), 0.0f, 0.0f, false );
 
     // call method from base class
     FOdysseyVectorUndo::Apply( iIgnored );
@@ -41,13 +40,13 @@ FOdysseyVectorUndoBucketParam::Apply( UObject* iIgnored )
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
 void
 FOdysseyVectorUndoBucketParam::Revert( UObject* iIgnored )
 {
-    FOdysseyVectorBucket tmpBucketSave( mBucketSave.GetOwner() );
+    FOdysseyVectorBucket tmpBucketSave( mBucketSave.GetOwner(), 0.0f, 0.0f, false );
 
     // call method from base class
     FOdysseyVectorUndo::Revert( iIgnored );
@@ -63,7 +62,7 @@ FOdysseyVectorUndoBucketParam::Revert( UObject* iIgnored )
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
 /** Describes this change (for debugging) */

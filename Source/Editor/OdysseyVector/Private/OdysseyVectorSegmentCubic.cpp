@@ -1,5 +1,5 @@
 #include "OdysseyVectorSegmentCubic.h"
-#include "OdysseyVectorPathCubic.h"
+#include "OdysseyVectorPath.h"
 
 #define MINRECURSE 4
 #define MAXRECURSE 8
@@ -405,7 +405,7 @@ FOdysseyVectorSegmentCubic::Sample( double iFromT
     double toRadius = radius0 + ( deltaRadius * iToT );
     FOdysseyVectorVertex* vertex0 = ( iFromT == 0.0f ) ? static_cast<FOdysseyVectorVertex*>(mPoint[0]) : new FOdysseyVectorVertex( mPath, pointAt0.x, pointAt0.y, fromRadius );
     FOdysseyVectorVertex* vertex1 = ( iToT   == 1.0f ) ? static_cast<FOdysseyVectorVertex*>(mPoint[1]) : new FOdysseyVectorVertex( mPath, pointAt1.x, pointAt1.y, toRadius   );
-    FOdysseyVectorSegmentCubic* sampleSegment = new FOdysseyVectorSegmentCubic( static_cast<FOdysseyVectorPathCubic*>(mPath), vertex0, vertex1 );
+    FOdysseyVectorSegmentCubic* sampleSegment = new FOdysseyVectorSegmentCubic( mPath, vertex0, vertex1 );
     ::ULIS::FVec2D& sampleCtrlPoint0 = sampleSegment->GetHandle(0)->GetCoords();
     ::ULIS::FVec2D& sampleCtrlPoint1 = sampleSegment->GetHandle(1)->GetCoords();
     ::ULIS::FVec2D& samplePoint0 = sampleSegment->GetVertex(0)->GetCoords();
@@ -537,19 +537,15 @@ FOdysseyVectorSegmentCubic::Cut( const ::ULIS::FVec2D& linePoint0
         tChain[pointCount] = 1.0f;
         pointChain[pointCount] = static_cast<FOdysseyVectorVertex*>(mPoint[1]);
 
-        mPath->RemoveSegment( this );
-
         for( uint32 i = 1; i < pointCount; i++ )
         {
-            mPath->AddVertex( pointChain[i] );
-
             oNewVertexArray.push_back( pointChain[i] );
         }
 
         for( uint32 i = 0; i < pointCount; i++ )
         {
             uint32 n = i + 1;
-            FOdysseyVectorSegmentCubic* newSegment = new FOdysseyVectorSegmentCubic( static_cast<FOdysseyVectorPathCubic*>(mPath)
+            FOdysseyVectorSegmentCubic* newSegment = new FOdysseyVectorSegmentCubic( mPath
                                                                                    , static_cast<FOdysseyVectorVertex*>(pointChain[i])
                                                                                    , static_cast<FOdysseyVectorVertex*>(pointChain[n]) );
             ::ULIS::FVec2D& newSegmentPoint0 = newSegment->GetVertex(0)->GetCoords();
@@ -561,8 +557,6 @@ FOdysseyVectorSegmentCubic::Cut( const ::ULIS::FVec2D& linePoint0
                                          , tChain[i]
                                          , tChain[n]
                                          , newSegmentPoint0, newSegmentCtrlPoint0, newSegmentCtrlPoint1, newSegmentPoint1 );
-
-            mPath->AddSegment( newSegment );
 
             oNewSegmentArray.push_back( newSegment );
         }

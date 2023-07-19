@@ -2,11 +2,7 @@
 
 FOdysseyVectorLine::~FOdysseyVectorLine()
 {
-   // TODO: must be freed in OdysseyVectorPath::~destructor
-    //delete mCubicVertex[0];
-    //delete mCubicVertex[1];
-
-    //delete mCubicSegment;
+   // vertices ans segments freed in OdysseyVectorPath::~destructor
 }
 
 FOdysseyVectorLine::FOdysseyVectorLine( const FString iName, double iWidth, double iHeight, double iStrokeWidth )
@@ -19,7 +15,7 @@ FOdysseyVectorLine::FOdysseyVectorLine( const FString iName, double iWidth, doub
     mCubicVertex[0] = new FOdysseyVectorVertex( this, 0.0f, 0.0f, mStrokeWidth );
     mCubicVertex[1] = new FOdysseyVectorVertex( this, 0.0f, 0.0f, mStrokeWidth );
 
-    mCubicSegment = new FOdysseyVectorSegmentCubic( static_cast<FOdysseyVectorPathCubic*>(this), mCubicVertex[0], mCubicVertex[1] );
+    mCubicSegment = new FOdysseyVectorSegmentCubic( this, mCubicVertex[0], mCubicVertex[1] );
 
     AddVertex( mCubicVertex[0] );
     AddVertex( mCubicVertex[1] );
@@ -34,7 +30,7 @@ FOdysseyVectorLine::HasBaseClass( uint32 iBaseClassID )
         return true;
     }
 
-    return FOdysseyVectorPathCubic::HasBaseClass( iBaseClassID );
+    return FOdysseyVectorPath::HasBaseClass( iBaseClassID );
 }
 
 void
@@ -69,7 +65,7 @@ FOdysseyVectorLine::DrawShape( uint64 iFlags )
 {
     if ( mWidth && mHeight )
     {
-        FOdysseyVectorPathCubic::DrawShape( iFlags );
+        FOdysseyVectorPath::DrawShape( iFlags );
     }
 }
 

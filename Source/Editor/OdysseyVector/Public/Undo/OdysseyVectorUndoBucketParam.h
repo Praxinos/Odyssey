@@ -15,7 +15,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoBucketParam : public FOdysseyVectorUnd
     public:
         ~FOdysseyVectorUndoBucketParam();
          FOdysseyVectorUndoBucketParam( FOdysseyVectorScene* iScene
-                                      , FOdysseyVectorObject& iBucketParent
                                       , FOdysseyVectorBucket* iBucket );
 
         /** Called when redoing */

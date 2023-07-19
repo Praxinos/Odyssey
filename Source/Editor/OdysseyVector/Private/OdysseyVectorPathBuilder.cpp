@@ -93,7 +93,7 @@ FOdysseyVectorPathBuilder::HasBaseClass( uint32 iBaseClassID )
 }
 
 void 
-FOdysseyVectorPathBuilder::Attach( FOdysseyVectorPathCubic* iCubicPath )
+FOdysseyVectorPathBuilder::Attach( FOdysseyVectorPath* iCubicPath )
 {
     mCubicPath = iCubicPath;
 }
@@ -545,8 +545,8 @@ UE_LOG(LogTemp, Warning, TEXT("Some warning message %f %f %f"), angle0, angle1, 
     }
 }
 
-FOdysseyVectorPathCubic* 
-FOdysseyVectorPathBuilder::GetCubicPath()
+FOdysseyVectorPath* 
+FOdysseyVectorPathBuilder::GetPath()
 {
     return mCubicPath;
 }

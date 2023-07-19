@@ -6,9 +6,8 @@ FOdysseyVectorEngine::~FOdysseyVectorEngine()
 }
 
 FOdysseyVectorEngine::FOdysseyVectorEngine( FOdysseyVectorScene* iScene, double iWidth, double iHeight )
-    : mDrawingFlags( 0 )
-    , mSelectionSpace( nullptr )
-    , mInvalidTileMap(64, iWidth, iHeight)
+    : mSelectionSpace( nullptr )
+    , mInvalidTileMap( 64, iWidth, iHeight )
 {
     BLContextCreateInfo createInfo {};
 
@@ -65,16 +64,16 @@ FOdysseyVectorEngine::GetBLMask()
 }
 
 void
-FOdysseyVectorEngine::GetColorImageSize( ::ULIS::FRectI& oRedrawRegion )
+FOdysseyVectorEngine::GetColorImageSize( ::ULIS::FRectI& oImageRegion )
 {
     uint32 width, height;
 
     GetColorImageSize( &width, &height );
 
-    oRedrawRegion.x = 0;
-    oRedrawRegion.y = 0;
-    oRedrawRegion.w = width;
-    oRedrawRegion.h = height;
+    oImageRegion.x = 0;
+    oImageRegion.y = 0;
+    oImageRegion.w = width;
+    oImageRegion.h = height;
 }
 
 void
@@ -166,12 +165,6 @@ FOdysseyVectorEngine::RenderHUD( /*FOdysseyVectorScene* iScene */ )
 }
 
 void
-FOdysseyVectorEngine::SetDrawingFlags( uint64 iDrawingFlags )
-{
-    mDrawingFlags = iDrawingFlags;
-}
-
-void
 FOdysseyVectorEngine::SelectAllInSelectionSpace()
 {
     // TODO: set scene as the default selection space
@@ -204,7 +197,7 @@ FOdysseyVectorEngine::Render()
 
     //mBLContext->begin( *mBLImage );
 
-    mScene->Draw( mDrawingFlags );
+    mScene->Draw( 0 );
 /*
     mBLContext->save();
     mBLContext->resetMatrix();
@@ -227,79 +220,65 @@ UE_LOG(LogTemp, Warning, TEXT("Some warning message %d %d %d %d"), mRoi.x, mRoi.
     //mBLContext->end();
 }
 
-::ULIS::FRectD
-FOdysseyVectorEngine::GenerateCircleMask( std::vector<::ULIS::FVec2D>& iPointArray )
+void
+FOdysseyVectorEngine::ClearMask()
 {
-    BLPath path;
-    ::ULIS::FRectD rect = { 0, 0, 0, 0 };
-
     UseMaskImage();
 
     mBLContext->save();
     mBLContext->resetMatrix();
-    mBLContext->setCompOp(BL_COMP_OP_SRC_COPY);
-    mBLContext->setFillAlpha(0.0f);
+
+    mBLContext->setCompOp( BL_COMP_OP_SRC_COPY );
+    mBLContext->setFillAlpha( 0.0f );
     mBLContext->clearAll();
+    mBLContext->flush( BL_CONTEXT_FLUSH_SYNC );
 
-    if( iPointArray.size() == 2 )
-    {
-        double xmin = ::ULIS::FMath::Min( iPointArray[0].x, iPointArray[1].x );
-        double ymin = ::ULIS::FMath::Min( iPointArray[0].y, iPointArray[1].y );
-        double xmax = ::ULIS::FMath::Max( iPointArray[0].x, iPointArray[1].x );
-        double ymax = ::ULIS::FMath::Max( iPointArray[0].y, iPointArray[1].y );
-        ::ULIS::FVec2D diagonal = ::ULIS::FVec2D( xmax, ymax ) - ::ULIS::FVec2D( xmin, ymin );
-        double radius = diagonal.Distance();
-
-        rect = ::ULIS::FRectD::FromMinMax( iPointArray[0].x - diagonal.x
-                                         , iPointArray[0].y - diagonal.y
-                                         , iPointArray[0].x + diagonal.x
-                                         , iPointArray[0].y + diagonal.y );
-
-        mBLContext->setFillAlpha( 1.0f );
-        mBLContext->fillCircle( iPointArray[0].x, iPointArray[0].y, radius );
-    }
-
-    mBLContext->flush(BL_CONTEXT_FLUSH_SYNC);
     mBLContext->restore();
 
     UseColorImage();
-
-    return rect;
 }
 
 ::ULIS::FRectD
-FOdysseyVectorEngine::GenerateRectangleMask( std::vector<::ULIS::FVec2D>& iPointArray )
+FOdysseyVectorEngine::GenerateCircleMask( double iX, double iY, double iRadius )
 {
-    BLPath path;
-    ::ULIS::FRectD rect = { 0, 0, 0, 0 };
-
     UseMaskImage();
 
     mBLContext->save();
     mBLContext->resetMatrix();
-    mBLContext->setCompOp(BL_COMP_OP_SRC_COPY);
-    mBLContext->setFillAlpha(0.0f);
-    mBLContext->clearAll();
 
-    if( iPointArray.size() == 2 )
-    {
-        double xmin = ::ULIS::FMath::Min( iPointArray[0].x, iPointArray[1].x );
-        double ymin = ::ULIS::FMath::Min( iPointArray[0].y, iPointArray[1].y );
-        double xmax = ::ULIS::FMath::Max( iPointArray[0].x, iPointArray[1].x );
-        double ymax = ::ULIS::FMath::Max( iPointArray[0].y, iPointArray[1].y );
+    mBLContext->setCompOp( BL_COMP_OP_SRC_COPY );
+    mBLContext->setFillAlpha( 1.0f );
+    mBLContext->fillCircle( iX, iY, iRadius );
+    mBLContext->flush( BL_CONTEXT_FLUSH_SYNC );
 
-        rect = ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax );
-
-        mBLContext->setFillAlpha( 1.0f );
-        mBLContext->fillRect( rect.x, rect.y, rect.w, rect.h );
-    }
-
-    mBLContext->flush(BL_CONTEXT_FLUSH_SYNC);
     mBLContext->restore();
 
     UseColorImage();
 
-    return rect;
+    return ::ULIS::FRectD::FromMinMax( iX - iRadius, iY - iRadius
+                                     , iX + iRadius, iY + iRadius );
+}
+
+::ULIS::FRectD
+FOdysseyVectorEngine::GenerateRectangleMask( const ::ULIS::FRectD& iRect )
+{
+    UseMaskImage();
+
+    mBLContext->save();
+    mBLContext->resetMatrix();
+
+    mBLContext->setCompOp( BL_COMP_OP_SRC_COPY );
+    mBLContext->setFillAlpha( 0.0f );
+    mBLContext->clearAll();
+    mBLContext->setFillAlpha( 1.0f );
+    mBLContext->fillRect( iRect.x, iRect.y, iRect.w, iRect.h );
+    mBLContext->flush( BL_CONTEXT_FLUSH_SYNC );
+
+    mBLContext->restore();
+
+    UseColorImage();
+
+    return iRect;
 }
 
 ::ULIS::FRectD
@@ -454,7 +433,7 @@ RecursivePickPoints( FOdysseyVectorObject* iObject
                    , std::vector<FOdysseyVectorPoint*>& oPickedPointArray
                    , uint64 iPickingFlags )
 {
-    if( iObject->GetClass() == FOdysseyVectorPathCubic::StaticClass() )
+    if( iObject->GetClass() == FOdysseyVectorPath::StaticClass() )
     {
         FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(iObject);
         BLMatrix2D& inverseWorldMatrix = iObject->GetInverseWorldMatrix();
@@ -531,9 +510,9 @@ FOdysseyVectorEngine::Stitch( FOdysseyVectorVertex* iVertexA
         double averageRadius = ( vertexARadius + vertexBRadius ) * 0.5f;
         FOdysseyVectorPath* path = iVertexA->GetPath();
 
-        if( path->GetClass() == FOdysseyVectorPathCubic::StaticClass() )
+        if( path->GetClass() == FOdysseyVectorPath::StaticClass() )
         {
-            FOdysseyVectorPathCubic* cubicPath = static_cast<FOdysseyVectorPathCubic*>(path);
+            FOdysseyVectorPath* cubicPath = static_cast<FOdysseyVectorPath*>(path);
             FOdysseyVectorSegmentCubic* vertexBSegment = static_cast<FOdysseyVectorSegmentCubic*>(iVertexB->GetFirstSegment());
             FOdysseyVectorSegmentCubic* vertexASegment = static_cast<FOdysseyVectorSegmentCubic*>(iVertexA->GetFirstSegment());
             FOdysseyVectorVertex* prevVertex = static_cast<FOdysseyVectorVertex*>(vertexASegment->GetOtherVertex( iVertexA ));
@@ -568,7 +547,7 @@ FOdysseyVectorEngine::Stitch( FOdysseyVectorVertex* iVertexA
 
             if( iSmooth )
             {
-                FOdysseyVectorPathCubic::SmoothSegments( knotVertex, false, true );
+                FOdysseyVectorPath::SmoothSegments( knotVertex, false, true );
             }
 
             path->InvalidateAllSegments();
@@ -591,7 +570,7 @@ RecursivePickSegments( FOdysseyVectorObject* iObject
                      , std::vector<double>* oDistanceArray )
 {
     if( ( iObject->GetClass() == FOdysseyVectorPath::StaticClass()      )
-     || ( iObject->GetClass() == FOdysseyVectorPathCubic::StaticClass() ) )
+     || ( iObject->GetClass() == FOdysseyVectorPath::StaticClass() ) )
     {
         FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(iObject);
         BLPoint localVector = iObject->GetInverseWorldMatrix().mapVector( 0.7071f, 0.7071f );
@@ -768,4 +747,18 @@ FOdysseyVectorEngine::ResetHUD()
 
         hud->Reset( mScene );
     }
+}
+
+FOdysseyVectorEngine::FSignalDelegate&
+FOdysseyVectorEngine::OnSignalDelegate()
+{
+    static FSignalDelegate onSignalDelegate;
+
+    return onSignalDelegate;
+}
+
+void
+FOdysseyVectorEngine::Signal( uint64 iSignalFlags )
+{
+    OnSignalDelegate().Broadcast( mScene, iSignalFlags );
 }

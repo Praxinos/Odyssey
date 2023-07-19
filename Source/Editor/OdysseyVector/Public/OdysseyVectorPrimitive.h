@@ -7,9 +7,8 @@
 #include <Image/Block.h>
 #include "OdysseyVectorObject.h"
 #include "OdysseyVectorSegment.h"
-#include "OdysseyVectorPathCubic.h"
 
-class ODYSSEYVECTOR_API FOdysseyVectorPrimitive : public FOdysseyVectorPathCubic
+class ODYSSEYVECTOR_API FOdysseyVectorPrimitive : public FOdysseyVectorPath
 {
     private:
         static const uint32 mStaticClass = 0xf3a57735; // value is crc32 FOdysseyVectorPrimitive
@@ -20,7 +19,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPrimitive : public FOdysseyVectorPathCubic
 
         bool HasBaseClass( uint32 iBaseClassID );
 
-        FOdysseyVectorPathCubic* Convert();
+        FOdysseyVectorPath* Convert();
 
     public:
         virtual ~FOdysseyVectorPrimitive();

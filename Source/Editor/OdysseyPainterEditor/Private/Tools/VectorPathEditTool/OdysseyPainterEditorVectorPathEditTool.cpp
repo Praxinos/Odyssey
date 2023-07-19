@@ -2,6 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Tools/VectorPathEditTool/OdysseyPainterEditorVectorPathEditTool.h"
+#include "Tools/VectorPathEditTool/OdysseyPainterEditorVectorPathEditToolHUD.h"
 #include "Undo/OdysseyVectorUndoPointPosition.h"
 #include "Undo/OdysseyVectorUndoPathAlter.h"
 
@@ -14,14 +15,12 @@ UOdysseyPainterEditorVectorPathEditTool::~UOdysseyPainterEditorVectorPathEditToo
 }
 
 UOdysseyPainterEditorVectorPathEditTool::UOdysseyPainterEditorVectorPathEditTool()
-    : mCubicPathHUD( FOdysseyVectorHUDPathCubic::VIEW_PATH
-                   | FOdysseyVectorHUDPathCubic::VIEW_POINT )
-    , mSelectionFlags ( FOdysseyVectorPath::PICK_POINT )
-    , Radius(10.0f)
+    : mPickingFlags ( FOdysseyVectorPath::PICK_POINT )
+    , PickingRadius(10.0f)
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.VectoEdit64");
 
-    mPickingHUD.SetRadius( Radius );
+    mPathEditHUD = new FOdysseyPainterEditorVectorPathEditToolHUD( this );
 }
 
 //--------------------------------------------------------------------------------------
@@ -31,6 +30,7 @@ void
 UOdysseyPainterEditorVectorPathEditTool::Load()
 {
     FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
+
     if( vectorEngine )
     {
         FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
@@ -58,10 +58,9 @@ UOdysseyPainterEditorVectorPathEditTool::IsActivable() const
 void
 UOdysseyPainterEditorVectorPathEditTool::UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
-    iEngine->RemoveHUD(&mCubicPathHUD);
-    iEngine->RemoveHUD(&mPickingHUD);
+    iEngine->RemoveHUD( mPathEditHUD );
 
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
 void
@@ -76,57 +75,50 @@ UOdysseyPainterEditorVectorPathEditTool::LoadVector( FOdysseyVectorEngine* iEngi
     FSlateApplication::Get().SetKeyboardFocus( viewportWidget );
 
     iEngine->ClearHUD();
-    iEngine->AddHUD(&mCubicPathHUD);
-    iEngine->AddHUD(&mPickingHUD);
+    iEngine->AddHUD( mPathEditHUD );
 
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    iEngine->ResetHUD();
+
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
 bool
-UOdysseyPainterEditorVectorPathEditTool::OnKeyDownVector( FOdysseyVectorEngine* iEngine
-                                                        , FOdysseyVectorScene* iScene
-                                                        , const FKey& iKey )
+UOdysseyPainterEditorVectorPathEditTool::OnKeyDown( const FKey& iKey )
 {
+    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
+    FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+
     // then detect which keys are pressed and set display mode
     if ( FSlateApplication::Get().GetModifierKeys().IsControlDown() )
     {
-        mSelectionFlags = FOdysseyVectorPath::PICK_HANDLE_SEGMENT;
-        mCubicPathHUD.SetDisplayMode( FOdysseyVectorHUDPathCubic::VIEW_PATH
-                                    | FOdysseyVectorHUDPathCubic::VIEW_POINT
-                                    | FOdysseyVectorHUDPathCubic::VIEW_HANDLE_SEGMENT );
+        mPickingFlags = FOdysseyVectorPath::PICK_HANDLE_SEGMENT;
     }
 
     if ( FSlateApplication::Get().GetModifierKeys().IsShiftDown() )
     {
-        mSelectionFlags = FOdysseyVectorPath::PICK_HANDLE_POINT;
-        mCubicPathHUD.SetDisplayMode( FOdysseyVectorHUDPathCubic::VIEW_PATH
-                                    | FOdysseyVectorHUDPathCubic::VIEW_POINT
-                                    | FOdysseyVectorHUDPathCubic::VIEW_HANDLE_POINT );
+        mPickingFlags = FOdysseyVectorPath::PICK_HANDLE_POINT;
     }
 
     if ( FSlateApplication::Get().GetModifierKeys().IsAltDown() )
     {
-        mSelectionFlags = FOdysseyVectorPath::PICK_POINT;
-        mCubicPathHUD.SetDisplayMode( FOdysseyVectorHUDPathCubic::VIEW_PATH
-                                    | FOdysseyVectorHUDPathCubic::VIEW_POINT );
+        mPickingFlags = FOdysseyVectorPath::PICK_POINT;
     }
 
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 
     return false;
 }
 
 bool
-UOdysseyPainterEditorVectorPathEditTool::OnKeyUpVector( FOdysseyVectorEngine* iEngine
-                                                      , FOdysseyVectorScene* iScene
-                                                      , const FKey& iKey )
+UOdysseyPainterEditorVectorPathEditTool::OnKeyUp( const FKey& iKey )
 {
-    // first reset display mode
-    mSelectionFlags = FOdysseyVectorPath::PICK_POINT;
-    mCubicPathHUD.SetDisplayMode( FOdysseyVectorHUDPathCubic::VIEW_PATH
-                                | FOdysseyVectorHUDPathCubic::VIEW_POINT );
+    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
+    FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    // first reset display mode
+    mPickingFlags = FOdysseyVectorPath::PICK_POINT;
+
+    vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 
     return false;
 }
@@ -318,7 +310,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownDeletePoint( FOdysseyVectorE
                            , removedVertexArray
                            , removedSegmentArray
                            , addedSegmentArray
-                           , Radius
+                           , PickingRadius
                            , iPointInTexture );
 
             // remove path if empty
@@ -391,6 +383,30 @@ PathPickPoint( FOdysseyVectorPath* iPath
     iPath->Invalidate();
 }
 
+static void
+GroupPaintPickPoint( FOdysseyVectorGroupPaint* iPaintGroup
+                   , std::vector<FOdysseyVectorPoint*>& iPickedPointArray
+                   , double iSelectionRadius
+                   , uint64 iSelectionFlags
+                   , const FOdysseyPoint& iPointInTexture )
+{
+    std::list<FOdysseyVectorObject*>& childrenList = iPaintGroup->GetChildrenList();
+    std::list<FOdysseyVectorObject*>::iterator it;
+
+    for( it = childrenList.begin(); it != childrenList.end(); ++it )
+    {
+        FOdysseyVectorObject* childObject = *it;
+
+        if( childObject->GetClass() == FOdysseyVectorPath::StaticClass() )
+        {
+            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(childObject);
+
+            PathPickPoint( path, iPickedPointArray, iSelectionRadius, iSelectionFlags, iPointInTexture );
+        }
+    }
+}
+
+
 void
 UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorEngine* iEngine
                                                              , FOdysseyVectorScene* iScene
@@ -405,11 +421,18 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorEng
     {
         FOdysseyVectorObject* selectedObject  = *it;
 
-        if( selectedObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+        if( selectedObject->GetClass() == FOdysseyVectorPath::StaticClass() )
         {
             FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(selectedObject);
 
-            PathPickPoint( path, mPickedPointArray, Radius, mSelectionFlags, iPointInTexture );
+            PathPickPoint( path, mPickedPointArray, PickingRadius, mPickingFlags, iPointInTexture );
+        }
+
+        if( selectedObject->GetClass() == FOdysseyVectorGroupPaint::StaticClass() )
+        {
+            FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(selectedObject);
+
+            GroupPaintPickPoint( paintGroup, mPickedPointArray, PickingRadius, mPickingFlags, iPointInTexture );
         }
     }
 
@@ -436,7 +459,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownVector( FOdysseyVectorEngine
 
     if( FSlateApplication::Get().GetModifierKeys().IsAltDown() )
     {
-        if( mCubicPathHUD.GetDisplayMode() & FOdysseyVectorHUDPathCubic::VIEW_POINT )
+        if( mPickingFlags & FOdysseyVectorPath::PICK_POINT )
         {
             OnMouseDownDeletePoint( iEngine, iScene, iPointInTexture, iKey );
         }
@@ -447,7 +470,9 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownVector( FOdysseyVectorEngine
     }
 
     iScene->Update( 0 ); // updated invalidated objects
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW | FOdysseyVectorScene::SIGNAL_OBJECT_MODIFIED );
+
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW 
+                   | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
 
     return true;
 }
@@ -486,13 +511,13 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseHoverVector( FOdysseyVectorEngin
     ::ULIS::FRectI finalRegion = currentRegion | formerRegion;
 */
 
-    mPickingHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
+    mPathEditHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
 
     // we also detect picking mode in hover events because we are not sure that the tool has keyboard focus.
     // It should not use too much CPU time.
     //DetectPickingMode();
 
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
 void
@@ -540,21 +565,19 @@ DragPoint( FOdysseyVectorPoint *iPoint
     BLPoint localCoords = object->GetInverseWorldMatrix().mapPoint( iWorldX, iWorldY );
     BLPoint localVector = object->GetInverseWorldMatrix().mapVector( iDeltaX, iDeltaY );
 
-    if ( iSelectionFlags == FOdysseyVectorPath::PICK_HANDLE_POINT  )
+    if( iSelectionFlags == FOdysseyVectorPath::PICK_HANDLE_POINT  )
     {
-        if( iPoint->GetClass() == FOdysseyVectorVertex::StaticClass() )
-        {
-            FOdysseyVectorVertex* cubicVertex = static_cast<FOdysseyVectorVertex*>( iPoint );
-            ::ULIS::FVec2D dif = { cubicVertex->GetX() - localCoords.x
-                                 , cubicVertex->GetY() - localCoords.y };
+        FOdysseyVectorVertex* cubicVertex = static_cast<FOdysseyVectorVertex*>( iPoint );
+        ::ULIS::FVec2D dif = { cubicVertex->GetX() - localCoords.x
+                             , cubicVertex->GetY() - localCoords.y };
 
-            cubicVertex->SetRadius( dif.Distance() );
+        cubicVertex->SetRadius( dif.Distance() );
 
-            return cubicVertex->GetBoundingBox( false );
-        }
+        return cubicVertex->GetBoundingBox( false );
     }
 
-    if( iSelectionFlags == FOdysseyVectorPath::PICK_HANDLE_SEGMENT )
+    if( ( iSelectionFlags == FOdysseyVectorPath::PICK_POINT          )
+     || ( iSelectionFlags == FOdysseyVectorPath::PICK_HANDLE_SEGMENT ) )
     {
         if( iPoint->GetClass() == FOdysseyVectorHandleSegment::StaticClass() )
         {
@@ -566,15 +589,10 @@ DragPoint( FOdysseyVectorPoint *iPoint
 
             return cubicSegment->GetBoundingBox( false );
         }
-    }
 
-    if( iSelectionFlags == FOdysseyVectorPath::PICK_POINT )
-    {
-        // Segment handles are also included in the selection. Check we are on a vertex.
         if( iPoint->GetClass() == FOdysseyVectorVertex::StaticClass() )
         {
             FOdysseyVectorVertex* cubicVertex = static_cast<FOdysseyVectorVertex*>( iPoint );
-            std::list<FOdysseyVectorSegment*> segmentList = cubicVertex->GetSegmentList();
 
             cubicVertex->Set( iPoint->GetX() + localVector.x
                             , iPoint->GetY() + localVector.y );
@@ -602,7 +620,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDragVector( FOdysseyVectorEngine
 
     bool inited = false;
 */
-    mPickingHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
+    mPathEditHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
 
     for( int i = 0; i < mPickedPointArray.size(); i++ )
     {
@@ -616,7 +634,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDragVector( FOdysseyVectorEngine
                         // the readings are not good when a key is pressed.
                         , iPointInTexture.x - mOldPointInTexture.x
                         , iPointInTexture.y - mOldPointInTexture.y
-                        , mSelectionFlags );
+                        , mPickingFlags );
 
         //localInvalidatedArea = ( inited == false ) ? rect : localInvalidatedArea | rect;
 
@@ -639,7 +657,8 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDragVector( FOdysseyVectorEngine
     mOldPointInTexture = ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y );
 
     iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES | FOdysseyVectorObject::KEEPINVALIDATED );
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
 void
@@ -660,7 +679,9 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseUpVector( FOdysseyVectorEngine* 
                                                         , const FKey& iKey )
 {
     iScene->Update( 0 );
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW | FOdysseyVectorScene::SIGNAL_OBJECT_MODIFIED );
+
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                   | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
 
     return true;
 }
@@ -685,26 +706,28 @@ UOdysseyPainterEditorVectorPathEditTool::Commit()
 
 }
 
+uint64
+UOdysseyPainterEditorVectorPathEditTool::GetPickingFlags()
+{
+    return mPickingFlags;
+}
+
 void
 UOdysseyPainterEditorVectorPathEditTool::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent )
 {
+    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
+
     if (PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive)
         return;
     
     PropertyChanged( PropertyChangedEvent.GetPropertyName() );
-    
-    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
-    if( vectorEngine )
-    {
-        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
-        vectorScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
-    }
+
+    vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
 void
 UOdysseyPainterEditorVectorPathEditTool::PropertyChanged( const FName& iPropertyName )
 {
-    mPickingHUD.SetRadius( Radius );
 }
 
 #undef LOCTEXT_NAMESPACE

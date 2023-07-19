@@ -122,27 +122,38 @@ FPointQuadTree::PickPoints( double iWorldX
 }
 
 static void
-MapPoints( FOdysseyVectorObject* iObject, const ::ULIS::FRectD& iRect, std::vector<FPointQuadTreeEntry>& oPointQuadTreeEntryArray )
+MapPath( FOdysseyVectorPath* iPath
+       , const ::ULIS::FRectD& iRect
+       , std::vector<FPointQuadTreeEntry>& oPointQuadTreeEntryArray )
+{
+    std::list<FOdysseyVectorVertex*>& vertexList = iPath->GetVertexList();
+
+    for( std::list<FOdysseyVectorVertex*>::iterator it = vertexList.begin(); it != vertexList.end(); ++it )
+    {
+        FOdysseyVectorVertex* vertex = (*it);
+        ::ULIS::FVec2D& coords = vertex->GetCoords();
+        BLPoint worldCoords = iPath->GetWorldMatrix().mapPoint( coords.x, coords.y );
+        ::ULIS::FVec2D screenCoords = ::ULIS::FVec2D( worldCoords.x, worldCoords.y );
+
+        if( iRect.HitTest( screenCoords ) )
+        {
+            oPointQuadTreeEntryArray.push_back( FPointQuadTreeEntry( vertex, screenCoords ) );
+        }
+    }
+}
+ 
+static void
+MapPoints( FOdysseyVectorObject* iObject
+         , const ::ULIS::FRectD& iRect
+         , std::vector<FPointQuadTreeEntry>& oPointQuadTreeEntryArray )
 {
     std::list<FOdysseyVectorObject*>& childrenList = iObject->GetChildrenList();
 
-    if( iObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+    if( iObject->GetClass() == FOdysseyVectorPath::StaticClass() )
     {
         FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>( iObject );
-        std::list<FOdysseyVectorVertex*>& vertexList = path->GetVertexList();
 
-        for( std::list<FOdysseyVectorVertex*>::iterator it = vertexList.begin(); it != vertexList.end(); ++it )
-        {
-            FOdysseyVectorVertex* vertex = (*it);
-            ::ULIS::FVec2D& coords = vertex->GetCoords();
-            BLPoint worldCoords = path->GetWorldMatrix().mapPoint( coords.x, coords.y );
-            ::ULIS::FVec2D screenCoords = ::ULIS::FVec2D( worldCoords.x, worldCoords.y );
-
-            if( iRect.HitTest( screenCoords ) )
-            {
-                oPointQuadTreeEntryArray.push_back( FPointQuadTreeEntry( vertex, screenCoords ) );
-            }
-        }
+        MapPath( path, iRect, oPointQuadTreeEntryArray );
     }
 
     for( std::list<FOdysseyVectorObject*>::iterator it = childrenList.begin(); it != childrenList.end(); ++it )
@@ -154,7 +165,7 @@ MapPoints( FOdysseyVectorObject* iObject, const ::ULIS::FRectD& iRect, std::vect
 }
 
 void
-FOdysseyVectorHUD::MakePointQuadTree( FOdysseyVectorScene *iScene )
+FOdysseyVectorHUD::MakePointQuadTree( FOdysseyVectorScene *iScene, bool iRestrictToSelection )
 {
     std::vector<FPointQuadTreeEntry> pointQuadTreeEntryArray;
     uint32 width, height;
@@ -166,7 +177,22 @@ FOdysseyVectorHUD::MakePointQuadTree( FOdysseyVectorScene *iScene )
 
     pointQuadTreeEntryArray.reserve( 200 );
 
-    MapPoints( iScene, screenRect, pointQuadTreeEntryArray );
+    if( iRestrictToSelection )
+    {
+        std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
+        std::list<FOdysseyVectorObject*>::iterator it;
+
+        for( it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
+        {
+            FOdysseyVectorObject* selectedObject = (*it);
+
+            MapPoints( selectedObject, screenRect, pointQuadTreeEntryArray );
+        }
+    }
+    else
+    {
+        MapPoints( iScene, screenRect, pointQuadTreeEntryArray );
+    }
 
     if( mPointQuadTree )
     {
@@ -192,10 +218,10 @@ FOdysseyVectorHUD::PickPoints( double iWorldX
 void
 FOdysseyVectorHUD::DrawObjectRecursive( FOdysseyVectorObject* iObj, BLContext* iBLCtx )
 {
-    if( iObj->GetClass() == FOdysseyVectorPathCubic::StaticClass() )
+    if( iObj->GetClass() == FOdysseyVectorPath::StaticClass() )
     {
-        FOdysseyVectorPathCubic* cubicPath = static_cast<FOdysseyVectorPathCubic*>(iObj);
-        std::list<FOdysseyVectorVertex*>& vertexList = cubicPath->GetVertexList();
+        FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(iObj);
+        std::list<FOdysseyVectorVertex*>& vertexList = path->GetVertexList();
 
         iBLCtx->setCompOp( BL_COMP_OP_SRC_OVER );
         iBLCtx->setFillStyle( BLRgba32( 0x80FFFFFF ) );
@@ -203,9 +229,9 @@ FOdysseyVectorHUD::DrawObjectRecursive( FOdysseyVectorObject* iObj, BLContext* i
         // Points and Point size handles
         for( std::list<FOdysseyVectorVertex*>::iterator it = vertexList.begin(); it != vertexList.end(); ++it )
         {
-            FOdysseyVectorVertex *cubicVertex = static_cast<FOdysseyVectorVertex*>(*it);
-            BLMatrix2D& worldMatrix = cubicPath->GetWorldMatrix();
-            BLPoint worldPoint = worldMatrix.mapPoint( cubicVertex->GetX(), cubicVertex->GetY() );
+            FOdysseyVectorVertex *vertex = static_cast<FOdysseyVectorVertex*>(*it);
+            BLMatrix2D& worldMatrix = path->GetWorldMatrix();
+            BLPoint worldPoint = worldMatrix.mapPoint( vertex->GetX(), vertex->GetY() );
 
             iBLCtx->setFillStyle( BLRgba32( 0xFF000000 ) );
             iBLCtx->fillCircle( worldPoint.x, worldPoint.y, 2.0f );
@@ -301,7 +327,7 @@ FOdysseyVectorHUD::DrawVertex( FOdysseyVectorVertex* iVertex
                              , const BLRgba32& bgColor
                              , const BLRgba32& hcColor
                              , bool iWorld
-                             , bool iViewHandle )
+                             , uint64 iHUDFlags )
 {
     FOdysseyVectorPath* path = iVertex->GetPath();
     BLMatrix2D& HUDMatrix = iWorld ? path->GetWorldMatrix() : path->GetLocalMatrix();
@@ -318,7 +344,7 @@ FOdysseyVectorHUD::DrawVertex( FOdysseyVectorVertex* iVertex
                                  , iVertex->IsSelected() ? hcColor : fgColor
                                  , bgColor );
 
-    if ( iViewHandle )
+    if ( iHUDFlags & VIEW_VERTEX_HANDLE )
     {
         static BLRgba32 whiteColor = BLRgba32( 0xFF, 0xFF, 0xFF, 0xFF );
         static BLRgba32 blackColor = BLRgba32( 0x00, 0x00, 0x00, 0xFF );
@@ -347,7 +373,7 @@ FOdysseyVectorHUD::DrawCubicSegment( FOdysseyVectorSegmentCubic* iCubicSegment
                                    , const BLRgba32& bgColor
                                    , const BLRgba32& hcColor
                                    , bool iWorld
-                                   , bool iViewHandle )
+                                   , uint64 iHUDFlags )
 {
     FOdysseyVectorPath* path = iCubicSegment->GetPath();
     BLMatrix2D& HUDMatrix = iWorld ? path->GetWorldMatrix() : path->GetLocalMatrix();
@@ -374,7 +400,7 @@ FOdysseyVectorHUD::DrawCubicSegment( FOdysseyVectorSegmentCubic* iCubicSegment
     iBLContext->setStrokeStyle( fgColor );
     iBLContext->strokePath( segment );
 
-    if ( iViewHandle )
+    if ( iHUDFlags & VIEW_SEGMENT_HANDLE )
     {
         static BLRgba32 whiteColor = BLRgba32( 0xFF, 0xFF, 0xFF, 0xFF );
         static BLRgba32 blackColor = BLRgba32( 0x00, 0x00, 0x00, 0xFF );
@@ -407,8 +433,7 @@ FOdysseyVectorHUD::DrawPath( FOdysseyVectorPath* iPath
                            , const BLRgba32& bgColor
                            , const BLRgba32& hcColor
                            , bool iWorld
-                           , bool iViewVertexHandle
-                           , bool iViewSegmentHandle )
+                           , uint64 iHUDFlags )
 {
     BLContext* blctx = iPath->GetScene()->GetEngine()->GetBLContext();
     std::list<FOdysseyVectorSegment*>& segmentList = iPath->GetSegmentList();
@@ -421,24 +446,44 @@ FOdysseyVectorHUD::DrawPath( FOdysseyVectorPath* iPath
         blctx->resetMatrix();
     }
 
-    for( std::list<FOdysseyVectorSegment*>::iterator it = segmentList.begin(); it != segmentList.end(); ++it )
+    if( iHUDFlags & VIEW_SEGMENT )
     {
-        FOdysseyVectorSegment* segment = (*it);
-
-        if( segment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
+        for( std::list<FOdysseyVectorSegment*>::iterator it = segmentList.begin(); it != segmentList.end(); ++it )
         {
-            FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(segment);
+            FOdysseyVectorSegment* segment = (*it);
 
-            DrawCubicSegment( cubicSegment, blctx, fgColor, bgColor, hcColor, iWorld, iViewSegmentHandle );
+            if( segment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
+            {
+                FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(segment);
+
+                DrawCubicSegment( cubicSegment, blctx, fgColor, bgColor, hcColor, iWorld, iHUDFlags );
+            }
         }
     }
 
-    // Points and Point size handles
-    for( std::list<FOdysseyVectorVertex*>::iterator it = vertexList.begin(); it != vertexList.end(); ++it )
+    if( iHUDFlags & VIEW_VERTEX )
     {
-        FOdysseyVectorVertex *vertex = (*it);
+        // Points and Point size handles
+        for( std::list<FOdysseyVectorVertex*>::iterator it = vertexList.begin(); it != vertexList.end(); ++it )
+        {
+            FOdysseyVectorVertex *vertex = (*it);
+            uint32 valence = vertex->GetSegmentCount();
 
-        DrawVertex( vertex, blctx, fgColor, bgColor, hcColor, iWorld, iViewVertexHandle );
+            if( ( valence == 0 ) && ( iHUDFlags & VIEW_VERTEX_VALENCE0 ) )
+            {
+                DrawVertex( vertex, blctx, fgColor, bgColor, hcColor, iWorld, iHUDFlags );
+            }
+            else
+            if( ( valence == 1 ) && ( iHUDFlags & VIEW_VERTEX_VALENCE1 ) )
+            {
+                DrawVertex( vertex, blctx, fgColor, bgColor, hcColor, iWorld, iHUDFlags );
+            }
+            else
+            if( ( valence == 2 ) && ( iHUDFlags & VIEW_VERTEX_VALENCE2 ) )
+            {
+                DrawVertex( vertex, blctx, fgColor, bgColor, hcColor, iWorld, iHUDFlags );
+            }
+        }
     }
 
     blctx->restore();
@@ -451,8 +496,7 @@ FOdysseyVectorHUD::DrawPaintGroup( FOdysseyVectorGroupPaint* iPaintGroup
                                  , const BLRgba32& bgColor
                                  , const BLRgba32& hcColor
                                  , bool iWorld
-                                 , bool iViewVertexHandle
-                                 , bool iViewSegmentHandle )
+                                 , uint64 iHUDFlags )
 {
     std::list<FOdysseyVectorObject*>& childrenObjectList = iPaintGroup->GetChildrenList();
     std::list<FOdysseyVectorObject*>::iterator it;
@@ -465,7 +509,7 @@ FOdysseyVectorHUD::DrawPaintGroup( FOdysseyVectorGroupPaint* iPaintGroup
         {
             FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(child);
 
-            DrawPath( path, fgColor, bgColor, hcColor, iWorld, iViewVertexHandle, iViewSegmentHandle );
+            DrawPath( path, fgColor, bgColor, hcColor, iWorld, iHUDFlags );
         }
     }
 }

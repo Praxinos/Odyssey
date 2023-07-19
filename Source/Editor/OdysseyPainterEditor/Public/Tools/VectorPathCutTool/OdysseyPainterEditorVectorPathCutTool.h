@@ -10,6 +10,8 @@
 
 #include "OdysseyPainterEditorVectorPathCutTool.generated.h"
 
+class FOdysseyPainterEditorVectorPathCutToolHUD;
+
 UCLASS()
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathCutTool : public UOdysseyPainterEditorDefaultTool
 {
@@ -48,7 +50,16 @@ public:
     //OdysseyPainterEditorTool overrides
     virtual void Commit() override;
 
+    protected:
+        void CutPath( FOdysseyVectorPath* iPath
+                    , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
+                    , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
+                    , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray );
+        void CutPaintGroup( FOdysseyVectorGroupPaint* iPaintGroup
+                          , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
+                          , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
+                          , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray  );
 private:
-    FOdysseyVectorHUDLine mLineHUD;
-    FOdysseyVectorHUDPathCubic mCubicPathHUD;
+    FOdysseyPainterEditorVectorPathCutToolHUD* mPathCutHUD;
+    //FOdysseyVectorHUDPathCubic mCubicPathHUD;
 };

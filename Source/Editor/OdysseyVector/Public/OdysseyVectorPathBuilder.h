@@ -9,7 +9,6 @@
 #include "OdysseyVectorObject.h"
 #include "OdysseyVectorSegment.h"
 #include "OdysseyVectorPath.h"
-#include "OdysseyVectorPathCubic.h"
 
 //#include "OdysseyVectorPathBuilder.generated.h"
 
@@ -70,7 +69,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathBuilder : public FOdysseyVectorObject
 */
         std::vector<FOdysseyVectorVertex*> mVertexArray;
 
-        FOdysseyVectorPathCubic* mCubicPath;
+        FOdysseyVectorPath* mCubicPath;
         FOdysseyVectorSegmentCubic* mCubicSegment;
 
         // Unimplemented. Cubic Path builder cannot be copied. It should be destroyed as soon as the curve is built
@@ -140,14 +139,14 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathBuilder : public FOdysseyVectorObject
          * @param iCubicPath the cubic path
          * @param iStitchVertex start from this vertex (must be an end-point)
          */
-        void Attach( FOdysseyVectorPathCubic* iCubicPath );
+        void Attach( FOdysseyVectorPath* iCubicPath );
 
         /**
          * @brief Get the attached cubic path
          *
          * @return the attached cubic path
          */
-        FOdysseyVectorPathCubic* GetCubicPath( );
+        FOdysseyVectorPath* GetPath( );
 
         void RecordStart( FOdysseyVectorVertex *iVertex );
         FOdysseyVectorVertex* RecordIntermediate( double iX
