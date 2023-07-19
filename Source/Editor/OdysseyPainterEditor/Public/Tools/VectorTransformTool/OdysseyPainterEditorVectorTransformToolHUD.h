@@ -30,12 +30,12 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorTransformToolHUD : pub
         ::ULIS::FVec2D& GetGizmo();
         uint32 GetFlags();
         void ShowSelectionBox( bool iShowSelectionBox );
+        uint32 Pick( double iWorldX, double iWorldY );
 
     private:
        uint32 PickScalers( double iWorldX, double iWorldY );
         uint32 PickSelectionBox( double iWorldX, double iWorldY );
         uint32 PickGizmo( double iWorldX, double iWorldY );
-        void Pick( double iWorldX, double iWorldY );
         void UpdateGizmo();
         void DrawGizmo( FOdysseyVectorScene* iScene, uint64 iFlags );
         void DrawScalers( FOdysseyVectorScene* iScene, uint64 iFlags );

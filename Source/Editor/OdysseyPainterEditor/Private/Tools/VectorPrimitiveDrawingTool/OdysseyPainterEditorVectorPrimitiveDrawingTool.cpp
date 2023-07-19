@@ -69,31 +69,33 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::LoadVector( FOdysseyVectorEngin
 }
 
 bool
-UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnKeyDownVector( FOdysseyVectorEngine* iEngine
-                                                                , FOdysseyVectorScene* iScene
-                                                                , const FKey& iKey )
+UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnKeyDown( const FKey& iKey )
 {
+    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
+    FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+
     UniformAtKeyDown = Uniform;
 
     if ( FSlateApplication::Get().GetModifierKeys().IsShiftDown() )
     {
-        Uniform = true;
+        Uniform = !Uniform; // flip the value
     }
 
-    UOdysseyPainterEditorDefaultTool::OnKeyDownVector( iEngine, iScene, iKey );
+    UOdysseyPainterEditorDefaultTool::OnKeyDownVector( vectorEngine, vectorScene, iKey );
     //iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 
     return false;
 }
 
 bool
-UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnKeyUpVector( FOdysseyVectorEngine* iEngine
-                                                              , FOdysseyVectorScene* iScene
-                                                              , const FKey& iKey )
+UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnKeyUp( const FKey& iKey )
 {
+    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
+    FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+
     Uniform = UniformAtKeyDown;
 
-    UOdysseyPainterEditorDefaultTool::OnKeyUpVector( iEngine, iScene, iKey );
+    UOdysseyPainterEditorDefaultTool::OnKeyUpVector( vectorEngine, vectorScene, iKey );
     //iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 
     return false;

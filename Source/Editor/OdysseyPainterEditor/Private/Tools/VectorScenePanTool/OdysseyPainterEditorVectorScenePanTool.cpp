@@ -150,18 +150,21 @@ UOdysseyPainterEditorVectorScenePanTool::OnMouseDragVector( FOdysseyVectorEngine
                                                           , FOdysseyVectorScene* iScene
                                                           , const FOdysseyPoint& iPointInTexture )
 {
-    if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
-    {
-        OnMouseDragVectorStatic( iEngine, iScene, iPointInTexture );
-    }
 
-    if( iPointInTexture.keysDown.Find( EKeys::RightMouseButton ) != INDEX_NONE )
+    if(iPointInTexture.keysDown.Find(EKeys::RightMouseButton) != INDEX_NONE)
     {
-        UOdysseyPainterEditorVectorSceneScaleTool::OnMouseDragVectorStatic( mDownLocalMouseX
-                                                                          , mDownLocalMouseY
-                                                                          , iEngine
-                                                                          , iScene
-                                                                          , iPointInTexture );
+        UOdysseyPainterEditorVectorSceneScaleTool::OnMouseDragVectorStatic(mDownLocalMouseX
+                                                                          ,mDownLocalMouseY
+                                                                          ,iEngine
+                                                                          ,iScene
+                                                                          ,iPointInTexture);
+    }
+    else // Right-click has priority over left click
+    {
+        if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
+        {
+            OnMouseDragVectorStatic( iEngine, iScene, iPointInTexture );
+        }
     }
 }
 

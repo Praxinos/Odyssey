@@ -50,5 +50,5 @@ public:
 
 private:
     FOdysseyVectorHUDLine mLineHUD;
-    FOdysseyVectorHUDPathCubic mCubicPathHUD;
+    //FOdysseyVectorHUDPathCubic mCubicPathHUD;
 };

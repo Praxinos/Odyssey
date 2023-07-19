@@ -34,15 +34,11 @@ public:
     virtual void OnMouseHover( const FOdysseyPoint& iPointInTexture ) override;
     virtual void OnMouseDrag( const FOdysseyPoint& iPointInTexture ) override;
     virtual bool OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
+    virtual bool OnKeyDown( const FKey& iKey ) override;
+    virtual bool OnKeyUp( const FKey& iKey ) override;
 
     void UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
     void LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    bool OnKeyDownVector( FOdysseyVectorEngine* iEngine
-                        , FOdysseyVectorScene* iScene
-                        , const FKey& iKey );
-    bool OnKeyUpVector( FOdysseyVectorEngine* iEngine
-                      , FOdysseyVectorScene* iScene
-                      , const FKey& iKey );
     bool OnMouseDownVector( FOdysseyVectorEngine* iEngine
                           , FOdysseyVectorScene* iScene
                           , const FOdysseyPoint& iPointInTexture
@@ -83,6 +79,7 @@ private:
     std::vector<FObjectTransform> mObjectTransformArray;
     ::ULIS::FVec2D* mPickedPivot;
     bool mDragging;
+    FVector2D mScreenMouseAtDown;
 
 public:
     UPROPERTY(EditAnywhere, Category="Odyssey Transform Tool", meta = (ClampMin = "0.0", UIMin = "0.0") )

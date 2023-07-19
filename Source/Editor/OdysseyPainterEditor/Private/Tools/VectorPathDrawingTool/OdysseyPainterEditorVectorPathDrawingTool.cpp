@@ -308,6 +308,8 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseHoverVector( FOdysseyVectorEn
         redrawRegion = imageRegion;
     }
 
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+
     return redrawRegion;
 }
 
@@ -397,9 +399,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( FOdysseyVectorEng
     mOldPointInTexture.x = iPointInTexture.x;
     mOldPointInTexture.y = iPointInTexture.y;
 
-    //iEngine->InvalidateRegion( redrawRegion );
-    // commented out: redrawing will be performed by the caller function
-    //iScene->Signal( FOdysseyVectorScene::SCENE_REDRAW );
+    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
 
     return redrawRegion;
 }

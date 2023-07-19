@@ -78,7 +78,7 @@ public:
     void SetToolContext(TSharedPtr<FOdysseyPainterEditorToolContext> iToolContext);
     virtual void OnToolContextChanged();
 
-private:
+protected:
     class FOdysseyPainterEditor*              mEditor;
 
 public:

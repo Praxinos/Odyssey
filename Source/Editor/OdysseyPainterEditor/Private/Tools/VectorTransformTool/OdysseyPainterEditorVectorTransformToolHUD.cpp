@@ -169,7 +169,7 @@ FOdysseyPainterEditorVectorTransformToolHUD::DrawGizmo( FOdysseyVectorScene* iSc
                      , worldGizmo.y + worldYAxis.y );
 }
 
-void
+uint32
 FOdysseyPainterEditorVectorTransformToolHUD::Pick( double iWorldX, double iWorldY )
 {
     uint32 newFlags = 0;
@@ -192,6 +192,8 @@ FOdysseyPainterEditorVectorTransformToolHUD::Pick( double iWorldX, double iWorld
     }
 
     mFlags = newFlags | ( ( mFlags != newFlags ) ? PICK_CHANGED : 0 );
+
+    return mFlags;
 }
 
 uint32
