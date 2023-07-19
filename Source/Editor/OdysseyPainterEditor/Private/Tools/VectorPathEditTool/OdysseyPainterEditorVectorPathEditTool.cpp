@@ -383,6 +383,30 @@ PathPickPoint( FOdysseyVectorPath* iPath
     iPath->Invalidate();
 }
 
+static void
+GroupPaintPickPoint( FOdysseyVectorGroupPaint* iPaintGroup
+                   , std::vector<FOdysseyVectorPoint*>& iPickedPointArray
+                   , double iSelectionRadius
+                   , uint64 iSelectionFlags
+                   , const FOdysseyPoint& iPointInTexture )
+{
+    std::list<FOdysseyVectorObject*>& childrenList = iPaintGroup->GetChildrenList();
+    std::list<FOdysseyVectorObject*>::iterator it;
+
+    for( it = childrenList.begin(); it != childrenList.end(); ++it )
+    {
+        FOdysseyVectorObject* childObject = *it;
+
+        if( childObject->GetClass() == FOdysseyVectorPath::StaticClass() )
+        {
+            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(childObject);
+
+            PathPickPoint( path, iPickedPointArray, iSelectionRadius, iSelectionFlags, iPointInTexture );
+        }
+    }
+}
+
+
 void
 UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorEngine* iEngine
                                                              , FOdysseyVectorScene* iScene
@@ -397,11 +421,18 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorEng
     {
         FOdysseyVectorObject* selectedObject  = *it;
 
-        if( selectedObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+        if( selectedObject->GetClass() == FOdysseyVectorPath::StaticClass() )
         {
             FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(selectedObject);
 
             PathPickPoint( path, mPickedPointArray, PickingRadius, mPickingFlags, iPointInTexture );
+        }
+
+        if( selectedObject->GetClass() == FOdysseyVectorGroupPaint::StaticClass() )
+        {
+            FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(selectedObject);
+
+            GroupPaintPickPoint( paintGroup, mPickedPointArray, PickingRadius, mPickingFlags, iPointInTexture );
         }
     }
 

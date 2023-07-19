@@ -194,8 +194,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         int32 PickBBox( double iX, double iY );
         bool HasSelectedAncestor();
         bool HasAncestor( FOdysseyVectorObject* iCandidateAncestor );
-        FColor& GetForegroundColor();
-        FColor& GetBackgroundColor();
+        FColor GetForegroundColor();
+        FColor GetBackgroundColor();
         virtual void SwitchSpace( FOdysseyVectorObject& iNewSpace ){};
         //void PropertyChanged( const FName& iPropertyName );
         void UpdateMatrix( bool iRunTransformCallback );

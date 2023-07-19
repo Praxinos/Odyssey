@@ -79,7 +79,7 @@ FOdysseyVectorPoint::GetRadius()
 void
 FOdysseyVectorPoint::SetRadius( double iRadius )
 {
-    mRadius = iRadius;
+    SetCoords( mCoords.x, mCoords.y, iRadius );
 }
 
 void

@@ -39,6 +39,16 @@ FOdysseyVectorImport::ReadBucket( FOdysseyVectorBucket& iBucket, uint64 iChunkEn
                 }
                 break;
 
+                case FOdysseyVectorExport::CHUNK_BUCKET_SPREADING:
+                {
+                    uint32 spreadingPolicy;
+
+                    Ar << spreadingPolicy;
+
+                    iBucket.SetSpreadingPolicy(static_cast<eBucketSpreadingPolicy>(spreadingPolicy));
+                }
+                break;
+
                 case FOdysseyVectorExport::CHUNK_BUCKET_PROPAGATED:
                 {
                     uint32 propagated;
@@ -80,13 +90,13 @@ FOdysseyVectorImport::ReadBucket( FOdysseyVectorBucket& iBucket, uint64 iChunkEn
                     Ar << B;
                     Ar << A;
 
-                    iBucket.SetGradient(false);
+                    iBucket.SetColorMode( eBucketColorMode::SolidColor );
                     iBucket.SetSolidColor( R, G, B, A );
                 }
                 break;
 
                 case FOdysseyVectorExport::CHUNK_BUCKET_GRADIENT: // container
-                    iBucket.SetGradient( true );
+                    iBucket.SetColorMode( eBucketColorMode::LinearGradient );
                 break;
 
                 case FOdysseyVectorExport::CHUNK_BUCKET_GRADIENT_STOP:

@@ -44,6 +44,7 @@ namespace FOdysseyVectorExport
                         static const uint32 CHUNK_GROUPPAINT_GAP_TOLERANCE = 0x960a3861; // double(tolerance)
                     static const uint32 CHUNK_GROUPPAINT_BUCKETS = 0x5791cb88; // container
                         static const uint32 CHUNK_BUCKET_ENTRY = 0x94267aa5; // container
+                            static const uint32 CHUNK_BUCKET_SPREADING = 0x402c03f1;  // uint32(spreadingPolicy)
                             static const uint32 CHUNK_BUCKET_PALETTEENTRY = 0xac23cabe; // FName to load PaletteEntry
                             static const uint32 CHUNK_BUCKET_POSITION = 0xd492a193; // uint8(R)-uint8(G)-uint8(B)-uint8(A)
                             static const uint32 CHUNK_BUCKET_ROTATION =  0xbbc2dd97; // double(rotation)

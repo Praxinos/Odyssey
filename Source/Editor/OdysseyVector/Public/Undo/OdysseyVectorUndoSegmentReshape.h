@@ -35,7 +35,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoSegmentReshape : public FOdysseyVector
 {
     public:
         ~FOdysseyVectorUndoSegmentReshape();
-        FOdysseyVectorUndoSegmentReshape( FOdysseyVectorScene* iScene, std::vector<FOdysseyVectorSegment*>& iSegmentArray );
+        FOdysseyVectorUndoSegmentReshape( FOdysseyVectorScene* iScene );
+
+        void RecordSegment( std::vector<FOdysseyVectorSegment*>& iSegmentArray );
+        void RecordSegment( FOdysseyVectorSegment* iSegment );
+        bool HasSegment( FOdysseyVectorSegment* iSegment );
 
         void SwapArray();
 

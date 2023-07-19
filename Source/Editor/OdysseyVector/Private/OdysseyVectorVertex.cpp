@@ -320,7 +320,6 @@ FOdysseyVectorVertex::SetCoords( double iX, double iY, double iRadius )
     InvalidateSegments();
 }
 
-
 void
 FOdysseyVectorVertex::SetPath( FOdysseyVectorPath* iPath )
 {

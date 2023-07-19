@@ -3,7 +3,8 @@
 
 #pragma once
 
-#include "OdysseyPainterEditorContextMenu.h"
+#include "OdysseyPainterEditor.h"
+#include "OdysseyPainterEditorGUI.h"
 #include "OdysseyVector.h"
 
 class FOdysseyPainterEditor;
@@ -13,6 +14,8 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorPaintBucketToolContextMenu
 {
     public:
         // FOdysseyEditorTab interface
-        static TSharedPtr<SWidget> CreateWidget( FOdysseyPainterEditorToolContext* iToolContext );
-        static void BucketProperties( FOdysseyPainterEditorToolContext* iToolContext );
+        static TSharedPtr<SWidget> CreateWidget( FOdysseyPainterEditorToolContext* iToolContext
+                                               , FOdysseyVectorBucket* iBucket );
+        static void BucketProperties( FOdysseyPainterEditorToolContext* iToolContext
+                                    , FOdysseyVectorBucket* iBucket );
 };

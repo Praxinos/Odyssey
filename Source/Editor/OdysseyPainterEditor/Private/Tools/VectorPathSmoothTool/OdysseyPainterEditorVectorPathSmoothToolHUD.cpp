@@ -10,12 +10,15 @@ FOdysseyPainterEditorVectorPathSmoothToolHUD::FOdysseyPainterEditorVectorPathSmo
     , mX( 0.0f )
     , mY( 0.0f )
 {
-
 }
 
 void
-FOdysseyPainterEditorVectorPathSmoothToolHUD::Reset(FOdysseyVectorScene* iScene)
+FOdysseyPainterEditorVectorPathSmoothToolHUD::Reset( FOdysseyVectorScene* iScene )
 {
+    mPickedPointArray.clear();
+    mPickedPointArray.reserve( 50 );
+
+    MakePointQuadTree( iScene, mPathSmoothTool->RestrictToSelection );
 }
 
 void
@@ -47,14 +50,24 @@ FOdysseyPainterEditorVectorPathSmoothToolHUD::Draw( FOdysseyVectorScene* iScene,
 
     blctx->setStrokeStyle( fgColor );
     blctx->setStrokeWidth( 1.0f );
-    blctx->strokeCircle( mX, mY, mPathSmoothTool->Radius );
+    blctx->strokeCircle( mX, mY, mPathSmoothTool->PickingRadius );
 
     blctx->restore();
 }
 
 void
-FOdysseyPainterEditorVectorPathSmoothToolHUD::SetCursorPosition( double iX, double iY )
+FOdysseyPainterEditorVectorPathSmoothToolHUD::SetCursorPosition( double iWorldX, double iWorldY )
 {
-    mX = iX;
-    mY = iY;
+    mX = iWorldX;
+    mY = iWorldY;
+
+    mPickedPointArray.clear();
+
+    PickPoints( iWorldX, iWorldY, mPathSmoothTool->PickingRadius, mPickedPointArray );
+}
+
+std::vector<FOdysseyVectorPoint*>&
+FOdysseyPainterEditorVectorPathSmoothToolHUD::GetPickedPointArray()
+{
+    return mPickedPointArray;
 }

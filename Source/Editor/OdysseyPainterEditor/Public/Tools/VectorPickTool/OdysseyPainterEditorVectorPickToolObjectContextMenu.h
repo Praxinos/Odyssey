@@ -3,26 +3,14 @@
 
 #pragma once
 
-#include "OdysseyPainterEditorContextMenu.h"
-
-class FOdysseyPainterEditor;
-class UOdysseyPainterEditorTool;
+#include "OdysseyPainterEditor.h"
+#include "OdysseyPainterEditorGUI.h"
+#include "OdysseyVector.h"
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPickToolObjectContextMenu :
     public FOdysseyPainterEditorContextMenu
 {
 public:
-    // Construction / Destruction
-    virtual ~FOdysseyPainterEditorVectorPickToolObjectContextMenu();
-    FOdysseyPainterEditorVectorPickToolObjectContextMenu(FOdysseyPainterEditor* iEditor);
-
-public:
     // FOdysseyEditorTab interface
-    virtual TSharedPtr<SWidget> CreateWidget() override;
-    virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
-    //virtual void OnToolkitInitialized( FBaseToolkit* iToolkit ) override;
-    //virtual void ExtendMenu( FToolMenuOwner iOwner, FName iMenuName ) override;
-
-private:
-    FOdysseyPainterEditor* mEditor;
+    static TSharedPtr<SWidget> CreateWidget( FOdysseyPainterEditorToolContext* iToolContext );
 };

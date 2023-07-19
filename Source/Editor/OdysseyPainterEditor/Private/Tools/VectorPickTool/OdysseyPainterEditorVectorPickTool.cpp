@@ -3,6 +3,7 @@
 
 #include "Tools/VectorPickTool/OdysseyPainterEditorVectorPickTool.h"
 #include "Tools/VectorPickTool/OdysseyPainterEditorVectorPickToolHUD.h"
+#include "Tools/VectorPickTool/OdysseyPainterEditorVectorPickToolObjectContextMenu.h"
 #include <chrono>
 
 #define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorPickTool"
@@ -259,35 +260,33 @@ bool
 UOdysseyPainterEditorVectorPickTool::OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
 {   
     bool ret = false;
-    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
-    if( vectorEngine )
+
+/*if(FSlateApplication::Get().GetModifierKeys().IsControlDown())
+{*/
+    if( iKey == EKeys::RightMouseButton )
     {
-
-    /*if(FSlateApplication::Get().GetModifierKeys().IsControlDown())
-    {*/
-        if( iKey == EKeys::RightMouseButton )
+        if( EditionMode == EOdysseyVectorEditionMode::Object )
         {
-            /* TODO: Gary
-            TSharedPtr<SWidget> objectMenu = textureEditor->GetGUI()->GetVectorPickToolObjectContextMenu()->Widget();
-            TSharedPtr<SWidget> vertexMenu = textureEditor->GetGUI()->GetVectorPickToolVertexContextMenu()->Widget();
-            TSharedPtr<SWidget> contextMenu = ( EditionMode == EOdysseyVectorEditionMode::Object ) ? objectMenu : vertexMenu;
+            TSharedPtr<SWidget> contextMenu = FOdysseyPainterEditorVectorPickToolObjectContextMenu::CreateWidget( mToolContext.Get() );
 
-
-            FSlateApplication::Get().PushMenu(
-            //textureEditor->GetGUI()->GetViewportTab().Get()->GetViewport().Get()->GetViewportWidget().ToSharedRef(),
-            textureEditor->GetGUI()->GetViewportTab().Get()->Widget().ToSharedRef(),
-            FWidgetPath(),
-            contextMenu.ToSharedRef(),
-            FSlateApplication::Get().GetCursorPos(),
-            FPopupTransitionEffect(FPopupTransitionEffect::ContextMenu)
-            ); */
+            FSlateApplication::Get().PushMenu( GetEditor()->GetGUI()->GetViewportTab().Get()->Widget().ToSharedRef(),
+                                               FWidgetPath(),
+                                               contextMenu.ToSharedRef(),
+                                               FSlateApplication::Get().GetCursorPos(),
+                                               FPopupTransitionEffect(FPopupTransitionEffect::ContextMenu) );
         }
-    /*}*/
-        else
+
+        if( EditionMode == EOdysseyVectorEditionMode::Vertex )
         {
-            FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
-            ret = UOdysseyPainterEditorVectorPickTool::OnMouseUpVector( vectorEngine, vectorScene, iPointInTexture, iKey );
         }
+    }
+/*}*/
+    else
+    {
+        FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
+        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+
+        ret = UOdysseyPainterEditorVectorPickTool::OnMouseUpVector( vectorEngine, vectorScene, iPointInTexture, iKey );
     }
 
     return ret;
@@ -411,12 +410,6 @@ UOdysseyPainterEditorVectorPickTool::OnMouseUpVectorVertexMode( FOdysseyVectorEn
         if( selectedObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
         {
             FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(selectedObject);
-
-            // deselect all if control key is not pressed
-            if( FSlateApplication::Get().GetModifierKeys().IsControlDown() == false )
-            {
-                iScene->ClearSelection();
-            }
 
             SelectVertexFromPath( path );
         }

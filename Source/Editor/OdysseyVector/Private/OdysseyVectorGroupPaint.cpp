@@ -1238,7 +1238,7 @@ FOdysseyVectorGroupPaint::CopyBuckets( FOdysseyVectorGroupPaint* iDestination, b
         FOdysseyVectorBucket *bucket = static_cast<FOdysseyVectorBucket*>(*lit);
         ::ULIS::FVec2D bucketCoords = bucket->GetCoords();
         BLPoint destinationBucketPosition = conversionMatrix.mapPoint( bucketCoords.x, bucketCoords.y );
-        FOdysseyVectorBucket *bucketCopy = new FOdysseyVectorBucket( *iDestination, 0.0f, 0.0f, bucket->IsPropagated() );
+        FOdysseyVectorBucket *bucketCopy = new FOdysseyVectorBucket( iDestination, 0.0f, 0.0f, bucket->IsPropagated() );
 
         bucket->Copy( bucketCopy );
 

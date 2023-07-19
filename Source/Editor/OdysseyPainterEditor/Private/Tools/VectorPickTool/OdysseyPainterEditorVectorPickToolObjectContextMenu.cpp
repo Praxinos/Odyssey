@@ -6,109 +6,66 @@
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorVectorPickToolObjectContextMenu"
 
-/////////////////////////////////////////////////////
-// FOdysseyPainterEditorVectorPickToolObjectContextMenu
-//--------------------------------------------------------------------------------------
-//----------------------------------------------------------- Construction / Destruction
-FOdysseyPainterEditorVectorPickToolObjectContextMenu::~FOdysseyPainterEditorVectorPickToolObjectContextMenu()
-{
-
-}
-
-FOdysseyPainterEditorVectorPickToolObjectContextMenu::FOdysseyPainterEditorVectorPickToolObjectContextMenu( FOdysseyPainterEditor* iEditor )
-    : FOdysseyPainterEditorContextMenu( iEditor
-                                      , TEXT("OdysseyPainterEditor_VectorPickToolObjectContextMenu")
-                                      , LOCTEXT( "OdysseyPainterEditorVectorPickToolObjectContextMenu", "Context Menu" )
-                                      , FSlateIcon( "OdysseyStyle", "PainterEditor.Tools16" ) )
-{
-}
-
-//--------------------------------------------------------------------------------------
-//---------------------------------------------------------- FOdysseyPainterEditorVectorPickToolObjectContextMenu interface
-
+// static
 TSharedPtr<SWidget>
-FOdysseyPainterEditorVectorPickToolObjectContextMenu::CreateWidget()
+FOdysseyPainterEditorVectorPickToolObjectContextMenu::CreateWidget( FOdysseyPainterEditorToolContext* iToolContext )
 {
-    /*
-    mMenu.BeginSection("Context");
+    FOdysseyVectorEngine* vectorEngine = iToolContext->GetVectorEngine();
+    FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+    FMenuBuilder menu( true, nullptr );
+
+    menu.BeginSection("Context");
     {
 
-    mMenu.AddMenuEntry(
+    menu.AddMenuEntry(
           LOCTEXT("ResetView", "Reset View")
         , LOCTEXT("ResetView", "Reset View")
         , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
-        , FUIAction(FExecuteAction::CreateSP(iEditor->GetGUI(), &FOdysseyTextureEditorGUI::ResetView)));
-    mMenu.AddMenuEntry(
+        , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::ResetView, vectorEngine, vectorScene)));
+    menu.AddMenuEntry(
           LOCTEXT("GroupPaint", "Make Paint Group")
         , LOCTEXT("GroupPaint", "Make Paint Group")
         , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
-        , FUIAction(FExecuteAction::CreateSP(iEditor->GetGUI(), &FOdysseyTextureEditorGUI::GroupPaint)));
-    mMenu.AddMenuEntry(
+        , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::GroupPaint, vectorEngine, vectorScene)));
+    menu.AddMenuEntry(
           LOCTEXT("Group", "Group")
         , LOCTEXT("Group", "Group")
         , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
-        , FUIAction(FExecuteAction::CreateSP(iEditor->GetGUI(), &FOdysseyTextureEditorGUI::Group)));
-    mMenu.AddMenuEntry(
+        , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::Group, vectorEngine, vectorScene)));
+    menu.AddMenuEntry(
           LOCTEXT("Ungroup", "Ungroup")
         , LOCTEXT("Ungroup", "Ungroup")
         , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
-        , FUIAction(FExecuteAction::CreateSP(iEditor->GetGUI(), &FOdysseyTextureEditorGUI::Ungroup)));
-    mMenu.AddMenuEntry(
+        , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::Ungroup, vectorEngine, vectorScene)));
+    menu.AddMenuEntry(
           LOCTEXT("BringForward", "Bring forward")
         , LOCTEXT("BringForward", "Bring forward")
         , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
-        , FUIAction(FExecuteAction::CreateSP(iEditor->GetGUI(), &FOdysseyTextureEditorGUI::BringForward)));
-    mMenu.AddMenuEntry(
+        , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::BringForward, vectorEngine, vectorScene)));
+    menu.AddMenuEntry(
           LOCTEXT("SendBackward", "Send backward")
         , LOCTEXT("SendBackward", "Send backward")
         , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
-        , FUIAction(FExecuteAction::CreateSP(iEditor->GetGUI(), &FOdysseyTextureEditorGUI::SendBackward)));
-    mMenu.AddMenuEntry(
+        , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::SendBackward, vectorEngine, vectorScene)));
+    menu.AddMenuEntry(
           LOCTEXT("DeleteSelection","Delete Selection")
         , LOCTEXT("DeleteSelection","Delete Selection")
         , FSlateIcon("OdysseyStyle","OdysseyLogo.Iliad16")
-        , FUIAction(FExecuteAction::CreateSP(iEditor->GetGUI(), &FOdysseyTextureEditorGUI::DeleteSelection)));
-    mMenu.AddMenuEntry(
+        , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::DeleteSelection, vectorEngine, vectorScene)));
+    menu.AddMenuEntry(
           LOCTEXT("FlipHorizontal","Flip Horizontal")
         , LOCTEXT("FlipHorizontal","Flip Horizontal")
         , FSlateIcon("OdysseyStyle","OdysseyLogo.Iliad16")
-        , FUIAction(FExecuteAction::CreateSP(iEditor->GetGUI(), &FOdysseyTextureEditorGUI::FlipHorizontal)));
-    mMenu.AddMenuEntry(
+        , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::FlipHorizontal, vectorEngine, vectorScene)));
+    menu.AddMenuEntry(
           LOCTEXT("FlipVertical","Flip Vertical")
         , LOCTEXT("FlipVertical","Flip Vertical")
         , FSlateIcon("OdysseyStyle","OdysseyLogo.Iliad16")
-        , FUIAction(FExecuteAction::CreateSP(iEditor->GetGUI(), &FOdysseyTextureEditorGUI::FlipVertical)));
+        , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::FlipVertical, vectorEngine, vectorScene)));
     }
-    mMenu.EndSection();
-    */
-    return mMenu.MakeWidget();
+    menu.EndSection();
+
+    return menu.MakeWidget();
 }
 
-void
-FOdysseyPainterEditorVectorPickToolObjectContextMenu::BindShortcuts(FBaseToolkit* iToolkit)
-{
-    FOdysseyEditorContextMenu::BindShortcuts(iToolkit);
-/*
-    const TSharedRef<FUICommandList>& toolkitCommands = iToolkit->GetToolkitCommands();
-    const FOdysseyPainterEditorCommands& painterEditorCommands = FOdysseyPainterEditorCommands::Get();
-
-    #define MAP_ACTION(action, ...) toolkitCommands->MapAction( action, FExecuteAction::CreateSP( this, &FOdysseyPainterEditorVectorPickToolObjectContextMenu::__VA_ARGS__ ), FCanExecuteAction() );
-
-    #undef MAP_ACTION
-*/
-}
-
-/*
-void
-FOdysseyPainterEditorVectorPickToolObjectContextMenu::OnToolkitInitialized( FBaseToolkit* iToolkit )
-{
-    FOdysseyEditorContextMenu::OnToolkitInitialized( iToolkit );
-}
-
-void
-FOdysseyPainterEditorVectorPickToolObjectContextMenu::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
-{
-    FOdysseyEditorContextMenu::ExtendMenu( iOwner, iMenuName );
-}
-*/
 #undef LOCTEXT_NAMESPACE

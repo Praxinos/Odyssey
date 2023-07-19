@@ -6,10 +6,18 @@
 #include "CoreMinimal.h"
 #include "Tools/DefaultTool/OdysseyPainterEditorDefaultTool.h"
 #include "OdysseyVector.h"
+#include "Undo/OdysseyVectorUndoSegmentReshape.h"
 
 #include "OdysseyPainterEditorVectorPathSmoothTool.generated.h"
 
 class FOdysseyPainterEditorVectorPathSmoothToolHUD;
+
+UENUM()
+enum class ePathSmoothingMode : uint8
+{
+    Round = 0,
+    Sharp = 1
+};
 
 UCLASS()
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathSmoothTool : public UOdysseyPainterEditorDefaultTool
@@ -28,6 +36,8 @@ public:
     virtual void Load() override;
     virtual void Unload() override;
 
+    virtual bool OnKeyDown( const FKey& iKey ) override;
+    virtual bool OnKeyUp( const FKey& iKey ) override;
     virtual bool OnMouseDown( const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
     virtual void OnMouseHover( const FOdysseyPoint& iPointInTexture ) override;
     virtual void OnMouseDrag( const FOdysseyPoint& iPointInTexture ) override;
@@ -58,13 +68,20 @@ protected:
     void PropertyChanged( const FName& iPropertyName );
 
 private:
-    std::vector<FOdysseyVectorPoint*> mPickedPointArray;
     FOdysseyPainterEditorVectorPathSmoothToolHUD* mPathSmoothHUD;
+    FOdysseyVectorUndoSegmentReshape* mUndoSegmentReshape;
 
 public:
+    UPROPERTY(EditAnywhere, Category="Odyssey PathSmooth Tool")
+    ePathSmoothingMode SmoothingMode;
+    ePathSmoothingMode SmoothingModeAtKeyDown; // when pressing shift
+
     UPROPERTY(EditAnywhere, Category="Odyssey PathSmooth Tool", meta = (ClampMin = "0.0", UIMin = "0.0"))
-    double Radius;
+    double PickingRadius;
 
     UPROPERTY(EditAnywhere, Category="Odyssey PathSmooth Tool")
     bool RestrictToSelection;
+
+    UPROPERTY(EditAnywhere, Category="Odyssey PathSmooth Tool")
+    bool PreserveHandleLength;
 };

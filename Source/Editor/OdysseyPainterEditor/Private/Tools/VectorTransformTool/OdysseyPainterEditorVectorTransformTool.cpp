@@ -3,8 +3,8 @@
 
 #include "Tools/VectorTransformTool/OdysseyPainterEditorVectorTransformTool.h"
 #include "Tools/VectorTransformTool/OdysseyPainterEditorVectorTransformToolHUD.h"
-#include "PainterEditor/OdysseyPainterEditor.h"
-#include "SOdysseyViewport.h"
+#include "OdysseyPainterEditor.h"
+
 #define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorTransformTool"
 
 #ifndef M_PI

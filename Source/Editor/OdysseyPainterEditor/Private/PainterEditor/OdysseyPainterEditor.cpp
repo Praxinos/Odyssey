@@ -694,84 +694,65 @@ FOdysseyPainterEditor::FlipVertical( FOdysseyVectorEngine* iEngine, FOdysseyVect
 }
 
 void
-FOdysseyPainterEditor::DeleteBucket( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+FOdysseyPainterEditor::DeleteBucket( FOdysseyVectorBucket* iBucket )
 {
-    FOdysseyVectorObject* selectedObject = iScene->GetLastSelected();
+    FOdysseyVectorObject* ownerObject = iBucket->GetOwner();
+    FOdysseyVectorScene* scene = ownerObject->GetScene();
 
-    if( selectedObject )
+    if( ownerObject->GetClass() == FOdysseyVectorGroupPaint::StaticClass() )
     {
-        if( selectedObject->GetClass() == FOdysseyVectorGroupPaint::StaticClass() )
+        FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(ownerObject);
+
+        paintGroup->RemoveBucket( iBucket );
+
+        // needed for valid GUndo pointer
+        GEditor->BeginTransaction(LOCTEXT("DeleteBucket","Delete Bucket"));
+        if( GUndo )
         {
-            FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(selectedObject);
-            FOdysseyVectorBucket* selectedBucket = paintGroup->GetSelectedBucket();
+            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketRemove( scene, paintGroup, iBucket );
 
-            if( selectedBucket )
-            {
-                paintGroup->RemoveBucket( selectedBucket );
-
-                // needed for valid GUndo pointer
-                GEditor->BeginTransaction(LOCTEXT("DeleteBucket","Delete Bucket"));
-                if( GUndo )
-                {
-                    FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketRemove( iScene, paintGroup, selectedBucket );
-
-                    GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-                }
-                GEditor->EndTransaction();
-            }
+            GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
         }
+        GEditor->EndTransaction();
     }
 
-    iScene->Update( 0 ); // re-colorize paint group
-
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+    scene->Update( 0 ); // re-colorize paint group
+    scene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
 
 static void
-SetBucketPropagation( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene, bool iPropagate )
+SetBucketPropagation( FOdysseyVectorBucket* iBucket, bool iPropagate )
 {
-    FOdysseyVectorObject* selectedObject = iScene->GetLastSelected();
+    FOdysseyVectorObject* ownerObject = iBucket->GetOwner();
+    FOdysseyVectorScene* scene = ownerObject->GetScene();
 
-    if( selectedObject )
+    // needed for valid GUndo pointer
+    GEditor->BeginTransaction(LOCTEXT("PropagateBucket","Propagate Bucket"));
+    if( GUndo )
     {
-        if( selectedObject->GetClass() == FOdysseyVectorGroupPaint::StaticClass() )
-        {
-            FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(selectedObject);
-            FOdysseyVectorBucket* selectedBucket = paintGroup->GetSelectedBucket();
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( scene, iBucket );
 
-            if( selectedBucket )
-            {
-                // needed for valid GUndo pointer
-                GEditor->BeginTransaction(LOCTEXT("PropagateBucket","Propagate Bucket"));
-                if( GUndo )
-                {
-                    FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( iScene, selectedBucket->GetOwner(), selectedBucket );
-
-                    GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-                }
-                GEditor->EndTransaction();
-
-                selectedBucket->SetPropagated( iPropagate );
-            }
-        }
+        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
     }
+    GEditor->EndTransaction();
 
-    iScene->Update( 0 ); // re-colorize paint group
+    iBucket->SetPropagated( iPropagate );
 
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+    scene->Update( 0 ); // re-colorize paint group
+    scene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
 void
-FOdysseyPainterEditor::PropagateBucket( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+FOdysseyPainterEditor::PropagateBucket( FOdysseyVectorBucket* iBucket )
 {
-    SetBucketPropagation( iEngine, iScene, true );
+    SetBucketPropagation( iBucket, true );
 }
 
 void
-FOdysseyPainterEditor::UnpropagateBucket( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+FOdysseyPainterEditor::UnpropagateBucket( FOdysseyVectorBucket* iBucket )
 {
-    SetBucketPropagation( iEngine, iScene, false );
+    SetBucketPropagation( iBucket, false );
 }
 
 void

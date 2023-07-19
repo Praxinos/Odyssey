@@ -1232,7 +1232,7 @@ FOdysseyVectorPath::Fill()
     if ( firstVertex )
     {
         BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
-        FColor& fillColor = mBackgroundBucket.GetColor();
+        FColor fillColor = mBackgroundBucket.GetColor();
         BLRgba32 blFillColor;
         BLPath path;
 
@@ -1550,7 +1550,8 @@ FOdysseyVectorPath::SmoothSegments( FOdysseyVectorVertex* iVertex, ::ULIS::FVec2
 
             if ( iVertex == cubicSegment->GetPoint(0) )
             {
-                ::ULIS::FVec2D segmentVector = iVertex->GetVectorOnSegment( cubicSegment, true );
+                //::ULIS::FVec2D segmentVector = iVertex->GetVectorOnSegment( cubicSegment, true );
+                ::ULIS::FVec2D segmentVector = cubicSegment->GetVector( iVertex, true );
                 double dot = iPerpendicularVector.DotProduct( segmentVector );
                 ::ULIS::FVec2D tangentVector = ::ULIS::FVec2D( iPerpendicularVector.y, -iPerpendicularVector.x );
                 double distance;
@@ -1579,7 +1580,8 @@ FOdysseyVectorPath::SmoothSegments( FOdysseyVectorVertex* iVertex, ::ULIS::FVec2
 
             if ( iVertex == cubicSegment->GetPoint(1) )
             {
-                ::ULIS::FVec2D segmentVector = iVertex->GetVectorOnSegment( cubicSegment, true );
+                //::ULIS::FVec2D segmentVector = iVertex->GetVectorOnSegment( cubicSegment, true );
+                ::ULIS::FVec2D segmentVector = cubicSegment->GetVector( iVertex, true );
                 double dot = iPerpendicularVector.DotProduct( segmentVector );
                 ::ULIS::FVec2D tangentVector = ::ULIS::FVec2D( iPerpendicularVector.y, -iPerpendicularVector.x );
                 double distance;

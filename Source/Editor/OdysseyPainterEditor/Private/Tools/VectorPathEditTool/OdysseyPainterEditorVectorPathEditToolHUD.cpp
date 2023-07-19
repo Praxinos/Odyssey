@@ -27,6 +27,8 @@ FOdysseyPainterEditorVectorPathEditToolHUD::Draw( FOdysseyVectorScene* iScene, u
     BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
     uint64 pickingFlags = mPathEditTool->GetPickingFlags();
+    uint64 vertexHandleFlag  = ( pickingFlags & FOdysseyVectorPath::PICK_HANDLE_POINT   ) ? VIEW_VERTEX_HANDLE   : 0;
+    uint64 segmentHandleFlag = ( pickingFlags & FOdysseyVectorPath::PICK_HANDLE_SEGMENT ) ? VIEW_SEGMENT_HANDLE  : 0;
 
     blctx->save();
 
@@ -40,8 +42,6 @@ FOdysseyPainterEditorVectorPathEditToolHUD::Draw( FOdysseyVectorScene* iScene, u
         if( selectedObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
         {
             FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(selectedObject);
-            uint64 vertexHandleFlag  = ( pickingFlags & FOdysseyVectorPath::PICK_HANDLE_POINT   ) ? VIEW_VERTEX_HANDLE   : 0;
-            uint64 segmentHandleFlag = ( pickingFlags & FOdysseyVectorPath::PICK_HANDLE_SEGMENT ) ? VIEW_SEGMENT_HANDLE  : 0;
 
             FOdysseyVectorHUD::DrawPath( path
                                        , fgColor
@@ -49,6 +49,18 @@ FOdysseyPainterEditorVectorPathEditToolHUD::Draw( FOdysseyVectorScene* iScene, u
                                        , hcColor
                                        , true // world
                                        , VIEW_VERTEX | VIEW_SEGMENT | vertexHandleFlag | segmentHandleFlag );
+        }
+
+        if( selectedObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+        {
+            FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(selectedObject);
+
+            FOdysseyVectorHUD::DrawPaintGroup( paintGroup
+                                             , fgColor
+                                             , bgColor
+                                             , hcColor
+                                             , true // world
+                                             , VIEW_VERTEX | VIEW_SEGMENT | vertexHandleFlag | segmentHandleFlag );
         }
     }
 

@@ -14,9 +14,13 @@ FOdysseyVectorUndoSegmentReshape::~FOdysseyVectorUndoSegmentReshape()
     mSegmentShapeArray.clear();
 }
 
-FOdysseyVectorUndoSegmentReshape::FOdysseyVectorUndoSegmentReshape( FOdysseyVectorScene* iScene
-                                                                  , std::vector<FOdysseyVectorSegment*>& iSegmentArray )
+FOdysseyVectorUndoSegmentReshape::FOdysseyVectorUndoSegmentReshape( FOdysseyVectorScene* iScene )
     : FOdysseyVectorUndo( iScene )
+{
+}
+
+void
+FOdysseyVectorUndoSegmentReshape::RecordSegment( std::vector<FOdysseyVectorSegment*>& iSegmentArray )
 {
     mSegmentShapeArray.reserve( iSegmentArray.size() );
 
@@ -24,6 +28,26 @@ FOdysseyVectorUndoSegmentReshape::FOdysseyVectorUndoSegmentReshape( FOdysseyVect
     {
         mSegmentShapeArray.push_back( FSegmentShape( iSegmentArray[i] ) );
     }
+}
+
+void
+FOdysseyVectorUndoSegmentReshape::RecordSegment( FOdysseyVectorSegment* iSegment )
+{
+    mSegmentShapeArray.push_back( FSegmentShape( iSegment ) );
+}
+
+bool
+FOdysseyVectorUndoSegmentReshape::HasSegment( FOdysseyVectorSegment* iSegment )
+{
+    for( int i = 0; i < mSegmentShapeArray.size(); i++ )
+    {
+        if( mSegmentShapeArray[i].segment == iSegment )
+        {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 void

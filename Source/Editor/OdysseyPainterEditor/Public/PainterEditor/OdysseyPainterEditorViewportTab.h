@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "SOdysseyViewport.h"
 #include "OdysseyEditorTab.h"
 #include "OdysseyEventState.h"
 

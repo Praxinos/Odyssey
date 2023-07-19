@@ -170,9 +170,11 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDownVector( FOdysseyVectorEngine
         // we have to include them from the picked vertices.
         std::vector<FOdysseyVectorSegment*> savedSegmentArray;
         FOdysseyVectorVertex::ArrayToSegmentArray( vertexArray, savedSegmentArray );
-        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSegmentReshape( iScene, savedSegmentArray );
+        FOdysseyVectorUndoSegmentReshape* undoReshape = new FOdysseyVectorUndoSegmentReshape( iScene );
 
-        GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
+        undoReshape->RecordSegment( savedSegmentArray );
+
+        GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undoReshape) );
     }
     GEditor->EndTransaction();
 

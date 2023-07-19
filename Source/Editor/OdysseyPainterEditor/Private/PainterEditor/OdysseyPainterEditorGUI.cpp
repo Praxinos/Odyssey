@@ -466,24 +466,6 @@ FOdysseyPainterEditorGUI::FlipVertical( FOdysseyVectorEngine* iEngine, FOdysseyV
 }
 
 void
-FOdysseyPainterEditorGUI::DeleteBucket( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
-{
-    mEditor->DeleteBucket( iEngine, iScene );
-}
-
-void
-FOdysseyPainterEditorGUI::PropagateBucket( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
-{
-    mEditor->PropagateBucket( iEngine, iScene );
-}
-
-void
-FOdysseyPainterEditorGUI::UnpropagateBucket( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
-{
-    mEditor->UnpropagateBucket( iEngine, iScene );
-}
-
-void
 FOdysseyPainterEditorGUI::StitchVertices( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
     mEditor->StitchVertices( iEngine, iScene );

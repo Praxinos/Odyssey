@@ -82,7 +82,7 @@ public:
 
 private:
     void SetBucketColor( FOdysseyVectorBucket* iBucket );
-    void PopUpMenu();
+    void PopUpMenu( FOdysseyVectorBucket* iBucket );
 
 protected:
     void OnMouseUpVectorClearBucket( FOdysseyVectorScene* iScene

@@ -2,20 +2,15 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Tools/PaintBucketTool/OdysseyPainterEditorPaintBucketToolContextMenu.h"
-#include "OdysseyPainterEditor.h"
-#include "OdysseyPainterEditorGUI.h"
+#include "OdysseyPainterEditorVectorBucketView.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorPaintBucketToolContextMenu"
 
-//--------------------------------------------------------------------------------------
-//---------------------------------------------------------- FOdysseyPainterEditorPaintBucketToolContextMenu interface
-
 //static
 TSharedPtr<SWidget>
-FOdysseyPainterEditorPaintBucketToolContextMenu::CreateWidget( FOdysseyPainterEditorToolContext* iToolContext )
+FOdysseyPainterEditorPaintBucketToolContextMenu::CreateWidget( FOdysseyPainterEditorToolContext* iToolContext
+                                                             , FOdysseyVectorBucket* iBucket )
 {
-    FOdysseyVectorEngine* vectorEngine = iToolContext->GetVectorEngine();
-    FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
     FMenuBuilder menu( true, nullptr );
 
     menu.BeginSection("Context");
@@ -24,22 +19,22 @@ FOdysseyPainterEditorPaintBucketToolContextMenu::CreateWidget( FOdysseyPainterEd
             LOCTEXT("DeleteBucket", "Delete Bucket")
             , LOCTEXT("DeleteBucket", "Delete Bucket")
             , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
-            , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::DeleteBucket, vectorEngine, vectorScene )));
+            , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::DeleteBucket, iBucket )));
         menu.AddMenuEntry(
             LOCTEXT("PropagateBucket", "Propagate Bucket")
             , LOCTEXT("PropagateBucket", "Propagate Bucket")
             , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
-            , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::PropagateBucket, vectorEngine, vectorScene )));
+            , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::PropagateBucket, iBucket )));
         menu.AddMenuEntry(
             LOCTEXT("UnpropagateBucket", "Unpropagate Bucket")
             , LOCTEXT("UnpropagateBucket", "Unpropagate Bucket")
             , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
-            , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::UnpropagateBucket, vectorEngine, vectorScene )));
+            , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::UnpropagateBucket, iBucket )));
         menu.AddMenuEntry(
             LOCTEXT("BucketProperties", "Bucket properties")
             , LOCTEXT("BucketProperties", "Bucket Properties")
             , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
-            , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditorPaintBucketToolContextMenu::BucketProperties, iToolContext )));
+            , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditorPaintBucketToolContextMenu::BucketProperties, iToolContext, iBucket )));
     }
     menu.EndSection();
 
@@ -48,11 +43,15 @@ FOdysseyPainterEditorPaintBucketToolContextMenu::CreateWidget( FOdysseyPainterEd
 
 //static
 void
-FOdysseyPainterEditorPaintBucketToolContextMenu::BucketProperties( FOdysseyPainterEditorToolContext* iToolContext )
+FOdysseyPainterEditorPaintBucketToolContextMenu::BucketProperties( FOdysseyPainterEditorToolContext* iToolContext
+                                                                 , FOdysseyVectorBucket* iBucket )
 {
     FPropertyEditorModule& PropertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
     TSharedPtr<IDetailsView> detailsView;
     FDetailsViewArgs DetailsViewArgs;
+    UOdysseyPainterEditorVectorBucketView* bucketView = NewObject<UOdysseyPainterEditorVectorBucketView>();
+
+    bucketView->Update( iBucket );
 
     DetailsViewArgs.bUpdatesFromSelection = false;
     DetailsViewArgs.bLockable = false;
@@ -60,11 +59,12 @@ FOdysseyPainterEditorPaintBucketToolContextMenu::BucketProperties( FOdysseyPaint
     DetailsViewArgs.NameAreaSettings = FDetailsViewArgs::HideNameArea;
 
     detailsView = PropertyEditorModule.CreateDetailView(DetailsViewArgs);
-    detailsView->SetObject(nullptr);
+    detailsView->SetObject(bucketView);
 
     TSharedRef<SWindow> CookbookWindow = SNew(SWindow)
-    .Title(FText::FromString(TEXT("Cookbook Window")))
-    .ClientSize(FVector2D(800, 400))
+    .Title(FText::FromString(TEXT("Bucket Properties")))
+    //.ClientSize(FVector2D(800, 400))
+    .SizingRule(ESizingRule::Autosized)
     .SupportsMaximize(false)
     .SupportsMinimize(false)
     [
@@ -85,6 +85,8 @@ FOdysseyPainterEditorPaintBucketToolContextMenu::BucketProperties( FOdysseyPaint
         iToolContext->GetEditor()->GetGUI()->GetViewportTab().Get()->Widget(),
         false
     );
+
+    bucketView->ConditionalBeginDestroy();
 }
 
 #undef LOCTEXT_NAMESPACE

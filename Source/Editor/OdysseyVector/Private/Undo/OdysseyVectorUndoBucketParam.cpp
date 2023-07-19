@@ -13,10 +13,9 @@ FOdysseyVectorUndoBucketParam::~FOdysseyVectorUndoBucketParam()
 }
 
 FOdysseyVectorUndoBucketParam::FOdysseyVectorUndoBucketParam( FOdysseyVectorScene* iScene
-                                                            , FOdysseyVectorObject& iBucketParent
                                                             , FOdysseyVectorBucket* iBucket )
     : FOdysseyVectorUndo( iScene )
-    , mBucketSave( iBucketParent, 0.0f, 0.0f, false )
+    , mBucketSave( iBucket->GetOwner(), 0.0f, 0.0f, false )
     , mBucket( iBucket )
 {
     mBucket->Copy( &mBucketSave );
