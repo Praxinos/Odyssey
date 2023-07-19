@@ -56,7 +56,7 @@ UOdysseyPainterEditorVectorPathStitchTool::UnloadVector( FOdysseyVectorEngine* i
 {
     iEngine->RemoveHUD( &mPickingHUD );
 
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
 void
@@ -65,7 +65,7 @@ UOdysseyPainterEditorVectorPathStitchTool::LoadVector( FOdysseyVectorEngine* iEn
     iEngine->ClearHUD();
     iEngine->AddHUD( &mPickingHUD );
 
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
 bool
@@ -165,9 +165,9 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseDownVector( FOdysseyVectorEngi
 
     iScene->Update( 0 );
 
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW
-                  | FOdysseyVectorScene::SIGNAL_OBJECT_SELECTED
-                  | FOdysseyVectorScene::SIGNAL_OBJECT_MODIFIED );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                   | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED
+                   | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
 
     return true;
 }
@@ -204,7 +204,7 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseHoverVector( FOdysseyVectorEng
     if( rect.Area() )
     {*/
     /*}*/
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
 void
@@ -225,7 +225,7 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseDragVector( FOdysseyVectorEngi
 {
     mPickingHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
 
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
 bool
@@ -248,7 +248,7 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseUpVector( FOdysseyVectorEngine
                                                         , const FOdysseyPoint& iPointInTexture
                                                         , const FKey& iKey )
 {
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 
     return false;
 }
@@ -261,17 +261,14 @@ UOdysseyPainterEditorVectorPathStitchTool::Commit()
 void
 UOdysseyPainterEditorVectorPathStitchTool::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent )
 {
+    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
+
     if (PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive)
         return;
     
     PropertyChanged( PropertyChangedEvent.GetPropertyName() );
     
-    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
-    if( vectorEngine )
-    {
-        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
-        vectorScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
-    }
+    vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
 void

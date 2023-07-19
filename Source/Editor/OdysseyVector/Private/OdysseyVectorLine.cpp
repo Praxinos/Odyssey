@@ -2,11 +2,7 @@
 
 FOdysseyVectorLine::~FOdysseyVectorLine()
 {
-   // TODO: must be freed in OdysseyVectorPath::~destructor
-    //delete mCubicVertex[0];
-    //delete mCubicVertex[1];
-
-    //delete mCubicSegment;
+   // vertices ans segments freed in OdysseyVectorPath::~destructor
 }
 
 FOdysseyVectorLine::FOdysseyVectorLine( const FString iName, double iWidth, double iHeight, double iStrokeWidth )

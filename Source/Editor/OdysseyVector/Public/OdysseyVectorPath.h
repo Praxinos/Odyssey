@@ -75,8 +75,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
         virtual ~FOdysseyVectorPath();
         FOdysseyVectorPath( const FString& iName );
         void Init( const FString& iName );
-        virtual void FlipHorizontal() override;
-        virtual void FlipVertical() override;
         void AddSegment(FOdysseyVectorSegment* iSegment);
         void RemoveSegment(FOdysseyVectorSegment* iSegment);
         void AddVertex( FOdysseyVectorVertex* iVertex );

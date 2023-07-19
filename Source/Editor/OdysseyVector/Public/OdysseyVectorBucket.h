@@ -13,7 +13,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorBucket : public FOdysseyVectorPoint
     public:
         ~FOdysseyVectorBucket();
         FOdysseyVectorBucket( FOdysseyVectorObject& iOwner, double iX, double iY,  bool iPropagated );
-        FOdysseyVectorBucket( FOdysseyVectorObject& iOwner );
         /**
          * @brief Set this bucket's solid color
          * @param iR red

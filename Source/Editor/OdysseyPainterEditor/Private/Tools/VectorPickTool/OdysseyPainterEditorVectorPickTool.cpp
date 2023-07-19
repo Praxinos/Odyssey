@@ -59,7 +59,7 @@ UOdysseyPainterEditorVectorPickTool::UnloadVector( FOdysseyVectorEngine* iEngine
 {
     iEngine->RemoveHUD( mPickHUD );
 
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
 void
@@ -73,7 +73,7 @@ UOdysseyPainterEditorVectorPickTool::LoadVector( FOdysseyVectorEngine* iEngine
 
     iEngine->ResetHUD();
 
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
 bool
@@ -138,7 +138,7 @@ UOdysseyPainterEditorVectorPickTool::OnMouseDownVector( FOdysseyVectorEngine* iE
 
         mPointArray.push_back( ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y ) );
 
-        iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+        iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
     }
 
     return true;
@@ -188,7 +188,7 @@ UOdysseyPainterEditorVectorPickTool::OnMouseDragVector( FOdysseyVectorEngine* iE
         }
     }
 
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 
     return redrawRegion; // unused;
 }
@@ -217,22 +217,39 @@ UOdysseyPainterEditorVectorPickTool::GenerateMask( FOdysseyVectorEngine* iEngine
 {
     ::ULIS::FRectD roi = ::ULIS::FRectD::FromXYWH( 0, 0, 0, 0 );
 
-    switch( PickingMode )
+    iEngine->ClearMask();
+
+    if( mPointArray.size() > 1 )
     {
-        case EOdysseyVectorPickingMode::Rectangle:
-            return iEngine->GenerateRectangleMask( mPointArray );
-        break;
+        switch( PickingMode )
+        {
+            case EOdysseyVectorPickingMode::Rectangle:
+            {
+                double xmin = ::ULIS::FMath::Min( mPointArray[0].x, mPointArray[1].x );
+                double ymin = ::ULIS::FMath::Min( mPointArray[0].y, mPointArray[1].y );
+                double xmax = ::ULIS::FMath::Max( mPointArray[0].x, mPointArray[1].x );
+                double ymax = ::ULIS::FMath::Max( mPointArray[0].y, mPointArray[1].y );
+                ::ULIS::FRectD rect = ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax );
 
-        case EOdysseyVectorPickingMode::Circle:
-            return iEngine->GenerateCircleMask( mPointArray );
-        break;
+                return iEngine->GenerateRectangleMask( rect );
+            }
+            break;
 
-        case EOdysseyVectorPickingMode::Freehand:
-            return iEngine->GenerateFreehandMask( mPointArray );
-        break;
+            case EOdysseyVectorPickingMode::Circle:
+            {
+                ::ULIS::FVec2D diagonal = ::ULIS::FVec2D( mPointArray[1] - mPointArray[0] );
 
-        default:
-        break;
+                return iEngine->GenerateCircleMask( mPointArray[0].x, mPointArray[0].y, diagonal.Distance() );
+            }
+            break;
+
+            case EOdysseyVectorPickingMode::Freehand:
+                return iEngine->GenerateFreehandMask( mPointArray );
+            break;
+
+            default:
+            break;
+        }
     }
 
     return roi;
@@ -304,8 +321,6 @@ UOdysseyPainterEditorVectorPickTool::OnMouseUpVectorObjectMode( FOdysseyVectorEn
     // dragging occured
     if ( mPointArray.size() > 1 )
     {
-        roi = GenerateMask( iEngine );
-
         iEngine->Pick( iScene, roi, pickedObjectArray, FOdysseyVectorObject::PICK_MASK_BASED );
 
         // when dragging occured, we select all objects lying in the selection area.
@@ -342,7 +357,12 @@ UOdysseyPainterEditorVectorPickTool::SelectVertexFromPath( FOdysseyVectorPath* i
 
     pickedVertexArray.reserve( 50 );
 
-    iPath->UnselectAllVertices();
+    // deselect all if control key is not pressed
+    if( FSlateApplication::Get().GetModifierKeys().IsControlDown() == false )
+    {
+        iPath->UnselectAllVertices();
+    }
+
     // Pick from mask image
     iPath->PickVertex(  pickedVertexArray );
 
@@ -383,30 +403,29 @@ UOdysseyPainterEditorVectorPickTool::OnMouseUpVectorVertexMode( FOdysseyVectorEn
                                                               , const FKey& iKey )
 {
     std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
-    ::ULIS::FRectD roi;
 
-    // dragging occured
-    if ( mPointArray.size() > 1 )
+    for( std::list<FOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
     {
-        roi = GenerateMask( iEngine );
+        FOdysseyVectorObject* selectedObject  = *it;
 
-        for( std::list<FOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
+        if( selectedObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
         {
-            FOdysseyVectorObject* selectedObject  = *it;
+            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(selectedObject);
 
-            if( selectedObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+            // deselect all if control key is not pressed
+            if( FSlateApplication::Get().GetModifierKeys().IsControlDown() == false )
             {
-                FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(selectedObject);
-
-                SelectVertexFromPath( path );
+                iScene->ClearSelection();
             }
 
-            if( selectedObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
-            {
-                FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(selectedObject);
+            SelectVertexFromPath( path );
+        }
 
-                SelectVertexFromPaintGroup( paintGroup );
-            }
+        if( selectedObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+        {
+            FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(selectedObject);
+
+            SelectVertexFromPaintGroup( paintGroup );
         }
     }
 }
@@ -417,8 +436,12 @@ UOdysseyPainterEditorVectorPickTool::OnMouseUpVector( FOdysseyVectorEngine* iEng
                                                     , const FOdysseyPoint& iPointInTexture
                                                     , const FKey& iKey )
 {
+    ::ULIS::FRectD roi;
+
     if( iKey == EKeys::LeftMouseButton )
     {
+        roi = GenerateMask( iEngine );
+
         if( EditionMode == EOdysseyVectorEditionMode::Object )
         {
             OnMouseUpVectorObjectMode( iEngine, iScene, iPointInTexture, iKey );
@@ -433,7 +456,9 @@ UOdysseyPainterEditorVectorPickTool::OnMouseUpVector( FOdysseyVectorEngine* iEng
     mPointArray.clear();
 
     iScene->Update( 0 ); // update invalidated objects
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW | FOdysseyVectorScene::SIGNAL_OBJECT_SELECTED );
+
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                   | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
 
     return true;
 }
@@ -475,7 +500,7 @@ UOdysseyPainterEditorVectorPickTool::PropertyChangedVector( FOdysseyVectorEngine
                                                           , FOdysseyVectorScene* iScene
                                                           , const FName& iPropertyName )
 {
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
 #undef LOCTEXT_NAMESPACE

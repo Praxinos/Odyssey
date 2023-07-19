@@ -105,7 +105,8 @@ UOdysseyPainterEditorVectorObjectView::PostEditChangeProperty( FPropertyChangedE
         //scene->mRefreshLayer.Broadcast(scene);
 
         mScene->Update( 0 );
-        mScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+
+        mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
     }
 }
 

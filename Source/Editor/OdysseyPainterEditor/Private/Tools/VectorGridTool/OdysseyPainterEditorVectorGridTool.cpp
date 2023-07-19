@@ -62,7 +62,7 @@ UOdysseyPainterEditorVectorGridTool::UnloadVector( FOdysseyVectorEngine* iEngine
 {
     iEngine->RemoveHUD( mGridHUD );
 
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
 void
@@ -74,7 +74,7 @@ UOdysseyPainterEditorVectorGridTool::LoadVector( FOdysseyVectorEngine* iEngine, 
     mGridHUD->MakeGrid( iScene, DivisionsX, DivisionsY );
     mGridHUD->Export( mPointArray );
 
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
 bool
@@ -131,7 +131,7 @@ UOdysseyPainterEditorVectorGridTool::OnMouseDownVector( FOdysseyVectorEngine* iE
         }
     }
 
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 
     return true;
 }
@@ -177,7 +177,7 @@ UOdysseyPainterEditorVectorGridTool::OnMouseDragVector( FOdysseyVectorEngine* iE
         }
     }
 
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
 bool
@@ -206,7 +206,8 @@ UOdysseyPainterEditorVectorGridTool::OnMouseUpVector( FOdysseyVectorEngine* iEng
     }
 
     iScene->Update( 0 );
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 
     mMultipleSelectionMode = false;
 
@@ -239,7 +240,7 @@ UOdysseyPainterEditorVectorGridTool::PropertyChangedVector( FOdysseyVectorEngine
 {
     mGridHUD->MakeGrid( iScene, DivisionsX, DivisionsY );
 
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
 #undef LOCTEXT_NAMESPACE

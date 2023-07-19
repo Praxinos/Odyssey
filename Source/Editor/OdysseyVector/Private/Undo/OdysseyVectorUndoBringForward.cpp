@@ -32,7 +32,7 @@ FOdysseyVectorUndoBringForward::Apply( UObject* iIgnored )
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
 void
@@ -48,7 +48,7 @@ FOdysseyVectorUndoBringForward::Revert( UObject* iIgnored )
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
 /** Describes this change (for debugging) */

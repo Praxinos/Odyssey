@@ -110,8 +110,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         FOdysseyVectorObject( const FString& iName );
         void SetName( const FString& iName );
         void CopySettings( FOdysseyVectorObject& iDestinationObject );
-        virtual void FlipHorizontal(){};
-        virtual void FlipVertical(){};
+
         void Transfer( const BLMatrix2D& iMatrix );
         void GetTransform( double& oTranslationX
                          , double& oTranslationY

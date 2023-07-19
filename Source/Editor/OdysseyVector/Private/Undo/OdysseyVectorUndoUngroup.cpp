@@ -44,7 +44,8 @@ FOdysseyVectorUndoUngroup::Apply( UObject* iIgnored )
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW | FOdysseyVectorScene::SIGNAL_OBJECT_SELECTED );
+    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                               | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
 }
 
 void
@@ -69,7 +70,8 @@ FOdysseyVectorUndoUngroup::Revert( UObject* iIgnored )
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW | FOdysseyVectorScene::SIGNAL_OBJECT_SELECTED );
+    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                               | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
 }
 
 /** Describes this change (for debugging) */

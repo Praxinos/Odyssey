@@ -56,7 +56,7 @@ UOdysseyPainterEditorVectorPathSmoothTool::UnloadVector( FOdysseyVectorEngine* i
 {
     iEngine->RemoveHUD( mPathSmoothHUD );
 
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
 void
@@ -65,7 +65,7 @@ UOdysseyPainterEditorVectorPathSmoothTool::LoadVector( FOdysseyVectorEngine* iEn
     iEngine->ClearHUD();
     iEngine->AddHUD( mPathSmoothHUD );
 
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
 bool
@@ -124,7 +124,7 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseHoverVector( FOdysseyVectorEng
 
     mPathSmoothHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
 
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
 void
@@ -200,7 +200,8 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseUpVector( FOdysseyVectorEngine
     }
 
     iScene->Update( 0 ); // update invalidated objects
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 
     return false;
 }
@@ -214,17 +215,14 @@ UOdysseyPainterEditorVectorPathSmoothTool::Commit()
 void
 UOdysseyPainterEditorVectorPathSmoothTool::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent )
 {
+    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
+
     if (PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive)
         return;
     
     PropertyChanged( PropertyChangedEvent.GetPropertyName() );
-    
-    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
-    if( vectorEngine )
-    {
-        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
-        vectorScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
-    }
+
+    vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
 void

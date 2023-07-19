@@ -9,22 +9,12 @@ FOdysseyVectorBucket::~FOdysseyVectorBucket()
 {
 }
 
-FOdysseyVectorBucket::FOdysseyVectorBucket( FOdysseyVectorObject& iOwner )
-    : mOwner ( iOwner )
-    , mSolidColor( 128, 128, 128, 255 )
-    , mRotation( 0.0f )
-    , mPropagated( false )
-    , mIsGradient ( false )
-{
-    SetCoords( 0.0, 0.0f, 0.0f );
-}
-
 FOdysseyVectorBucket::FOdysseyVectorBucket( FOdysseyVectorObject& iOwner, double iX, double iY, bool iPropagated )
-    : mOwner ( iOwner )
+    : FOdysseyVectorPoint( iX, iY, 0.0f )
+    , mOwner ( iOwner )
     , mPropagated( iPropagated )
     , mIsGradient ( false )
 {
-    SetCoords( iX, iY, 0.0f );
     SetSolidColor( 128, 128, 128, 255 );
     SetRotation( 0.0f );
 }

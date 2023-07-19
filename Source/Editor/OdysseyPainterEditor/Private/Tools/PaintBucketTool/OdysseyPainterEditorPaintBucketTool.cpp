@@ -79,7 +79,7 @@ UOdysseyPainterEditorPaintBucketTool::UnloadVector( FOdysseyVectorEngine* iEngin
 {
     iEngine->RemoveHUD( mBucketHUD );
 
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
 void
@@ -98,7 +98,7 @@ UOdysseyPainterEditorPaintBucketTool::LoadVector( FOdysseyVectorEngine* iEngine,
 
     mBucketHUD->Reset( iScene );
 
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
 
@@ -187,7 +187,7 @@ UOdysseyPainterEditorPaintBucketTool::OnKeyDownVector( FOdysseyVectorEngine* iEn
     }
 
     //UOdysseyPainterEditorDefaultTool::OnKeyDownVector( iEngine, iScene, iKey );
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 
     return false;
 }
@@ -200,7 +200,7 @@ UOdysseyPainterEditorPaintBucketTool::OnKeyUpVector( FOdysseyVectorEngine* iEngi
     ShowControls = ShowControlsAtKeyDown;
 
     //UOdysseyPainterEditorDefaultTool::OnKeyUpVector( iEngine, iScene, iKey );
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 
     return false;
 }
@@ -419,7 +419,8 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseDownVector( FOdysseyVectorEngine* i
     }
 
     iScene->Update( 0 ); // paint group could be invalidated after bucket deletion / adding. Update it.
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 
     return true;
 }
@@ -443,7 +444,7 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseHoverVector( FOdysseyVectorEngine* 
         }
     }
 
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
 double
@@ -520,7 +521,8 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseDragVector( FOdysseyVectorEngine* i
     }
 
     iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES | FOdysseyVectorObject::KEEPINVALIDATED ); // update vector scene
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
 void
@@ -811,8 +813,9 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseUpVector( FOdysseyVectorEngine* iEn
     mPickedObject = nullptr;
 
     iScene->Update( 0 );
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW
-                  | FOdysseyVectorScene::SIGNAL_OBJECT_MODIFIED );
+
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                   | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
 
     return false;
 }
@@ -882,7 +885,7 @@ UOdysseyPainterEditorPaintBucketTool::PropertyChangedVector( FOdysseyVectorEngin
                                                            , FOdysseyVectorScene* iScene
                                                            , const FName& iPropertyName )
 {
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
 #undef LOCTEXT_NAMESPACE

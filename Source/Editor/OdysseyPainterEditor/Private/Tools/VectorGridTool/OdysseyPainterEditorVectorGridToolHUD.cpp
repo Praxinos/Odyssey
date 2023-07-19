@@ -16,7 +16,8 @@ FGridNode::~FGridNode()
 }
 
 FGridNode::FGridNode()
-    : mSelected( false )
+    : FOdysseyVectorPoint( 0.0f, 0.0f, 0.0f )
+    , mSelected( false )
 {
 }
 

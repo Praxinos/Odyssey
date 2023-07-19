@@ -56,7 +56,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::UnloadVector( FOdysseyVectorEng
 {
     //iEngine->RemoveHUD( &mDummyHUD );
 
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
 void
@@ -65,7 +65,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::LoadVector( FOdysseyVectorEngin
     //iEngine->ClearHUD();
     //iEngine->AddHUD( &mDummyHUD );
 
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
 bool
@@ -82,7 +82,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnKeyDown( const FKey& iKey )
     }
 
     UOdysseyPainterEditorDefaultTool::OnKeyDownVector( vectorEngine, vectorScene, iKey );
-    //iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    //iScene->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 
     return false;
 }
@@ -96,7 +96,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnKeyUp( const FKey& iKey )
     Uniform = UniformAtKeyDown;
 
     UOdysseyPainterEditorDefaultTool::OnKeyUpVector( vectorEngine, vectorScene, iKey );
-    //iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    //iScene->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 
     return false;
 }
@@ -175,7 +175,9 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDownVector( FOdysseyVect
     //mSelectionChanged.Broadcast(iScene);
 
     iScene->Update( 0 ); // update invalidated objects
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW | FOdysseyVectorScene::SIGNAL_OBJECT_SELECTED );
+
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                   | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
 
     return true;
 }
@@ -242,7 +244,9 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDragVector( FOdysseyVect
     }
 
     iScene->Update( /*FOdysseyVectorObject::FREQUENTUPDATES*/0 ); // update invalidated objects
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW | FOdysseyVectorScene::SIGNAL_OBJECT_MODIFIED );
+
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                   | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
 }
 
 bool
@@ -293,10 +297,11 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseUpVector( FOdysseyVector
     }
 
     iScene->Update( 0 ); // update invalidate objects
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW
-                  | FOdysseyVectorScene::SIGNAL_OBJECT_SELECTED
-                  | FOdysseyVectorScene::SIGNAL_OBJECT_MODIFIED
-                  | FOdysseyVectorScene::SIGNAL_OBJECT_TRANSFORMED );
+
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                   | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED
+                   | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED
+                   | FOdysseyVectorEngine::SIGNAL_OBJECT_TRANSFORMED );
 
     return false;
 }

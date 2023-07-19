@@ -15,28 +15,20 @@ class ODYSSEYVECTOR_API FOdysseyVectorPoint
         static uint32 StaticClass() { return mStaticClass; };
         virtual uint32 GetClass() { return mStaticClass; };
 
-       /**
-         * @brief Static function to allocate a new point. Note: this is the proper way to allocate a new point as we don't
-         * use the constructor to set parameters so that this can be derived from an UOBJECT if needed in future devs. Indeed,
-         * UOBJECTs have empty constructors.
-         * @param iX coordinates on X axis
-         * @param iY coordinates on Y axis
-         * @param iRadius radius
-         */
-        static FOdysseyVectorPoint* New( double iX, double iY, double iRadius );
+        static void ArrayToVertexArray( std::vector<FOdysseyVectorPoint*>& iPointArray
+                                      , std::vector<FOdysseyVectorVertex*>& oVertexArray );
 
         virtual ~FOdysseyVectorPoint();
         FOdysseyVectorPoint();
-
         FOdysseyVectorPoint( double iX, double iY, double iRadius );
 
+        ::ULIS::FVec2D& GetCoords();
+
         /**
-         * @brief Inits the point with coordinates and radius
-         * @param iX coordinates on X axis
-         * @param iY coordinates on Y axis
-         * @param iRadius radius
+         * @brief Get the point's ID. This is for the programmer to use e.g as an index of an array.
+         * it should no be considered consistent through the whole execution of the program.
          */
-        void Init( double iX, double iY, double iRadius );
+        uint32 GetID();
 
         /**
          * @brief Get the point's coordinate on X axis
@@ -49,8 +41,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorPoint
          * @return the point's coordinate on Y axis
          */
         double GetY();
-
-        ::ULIS::FVec2D& GetCoords();
 
         /**
          * @brief Get the point's radius
@@ -80,6 +70,19 @@ class ODYSSEYVECTOR_API FOdysseyVectorPoint
         void Set( double iX, double iY, double iRadius );
 
         /**
+         * @brief Set the point's ID. This is for the programmer to use e.g as an index of an array.
+         * it should no be considered consistent through the whole execution of the program.
+         * @param iID the desired point's ID
+         */
+        void SetID( uint32 iID );
+
+        /**
+         * @brief Set the point's absolute radius
+         * @param iRadius the desired point's radius
+         */
+        void SetRadius( double iRadius );
+
+        /**
          * @brief Set the point's absolute coordinate on X axis
          * @param iX the desired coordinate on X axis
          */
@@ -90,28 +93,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorPoint
          * @param iY the desired coordinate on Y axis
          */
         void SetY( double iY );
-
-        /**
-         * @brief Set the point's absolute radius
-         * @param iRadius the desired point's radius
-         */
-        void SetRadius( double iRadius );
-
-        /**
-         * @brief Set the point's ID. This is for the programmer to use e.g as an index of an array.
-         * it should no be considered consistent through the whole execution of the program.
-         * @param iID the desired point's ID
-         */
-        void SetID( uint32 iID );
-
-        /**
-         * @brief Get the point's ID. This is for the programmer to use e.g as an index of an array.
-         * it should no be considered consistent through the whole execution of the program.
-         */
-        uint32 GetID();
-
-        static void ArrayToVertexArray( std::vector<FOdysseyVectorPoint*>& iPointArray
-                                      , std::vector<FOdysseyVectorVertex*>& oVertexArray );
 
     protected:
         virtual void SetCoords( double iX, double iY, double iRadius );

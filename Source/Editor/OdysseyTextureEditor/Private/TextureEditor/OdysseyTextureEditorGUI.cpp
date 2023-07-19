@@ -15,7 +15,7 @@
 FOdysseyTextureEditorGUI::~FOdysseyTextureEditorGUI()
 {
 	UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll(this);
-	FOdysseyVectorScene::OnSignalDelegate().RemoveAll(this);
+	FOdysseyVectorEngine::OnSignalDelegate().RemoveAll(this);
 }
 
 FOdysseyTextureEditorGUI::FOdysseyTextureEditorGUI(FOdysseyTextureEditor* iEditor) :
@@ -25,7 +25,7 @@ FOdysseyTextureEditorGUI::FOdysseyTextureEditorGUI(FOdysseyTextureEditor* iEdito
     // Get sure the binding is set up everytime we add or remove a layer in the layer stack.
 	UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw( this, &FOdysseyTextureEditorGUI::OnCurrentLayerChanged );
     // bind refresh function to delegates on existing vector scenes at load. Needed to refresh necessary widgets.
-    FOdysseyVectorScene::OnSignalDelegate().AddRaw( this, &FOdysseyTextureEditorGUI::OnVectorSceneSignal );
+    FOdysseyVectorEngine::OnSignalDelegate().AddRaw( this, &FOdysseyTextureEditorGUI::OnVectorSceneSignal );
 }
 
 void
@@ -40,7 +40,7 @@ FOdysseyTextureEditorGUI::OnCurrentLayerChanged( UOdysseyLayerStack* iLayerStack
 
         //FOdysseyVectorEngine::ClearHUD();
 
-        OnVectorSceneSignal( vectorScene, FOdysseyVectorScene::SIGNAL_ALL );
+        OnVectorSceneSignal( vectorScene, FOdysseyVectorEngine::SIGNAL_ALL );
     }
 }
 
@@ -217,14 +217,14 @@ FOdysseyTextureEditorGUI::OnVectorSceneSignal( FOdysseyVectorScene* iScene, uint
 
         if( currentVectorLayer && ( currentVectorLayer->GetEngine()->GetScene() == iScene ) )
         {
-            if( iSignalFlags & FOdysseyVectorScene::SIGNAL_SCENE_REDRAW )
+            if( iSignalFlags & FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW )
             {
                 currentVectorLayer->RenderImageChanged( false );
             }
 
-            if( ( iSignalFlags & FOdysseyVectorScene::SIGNAL_OBJECT_TRANSFORMED )
-             || ( iSignalFlags & FOdysseyVectorScene::SIGNAL_OBJECT_SELECTED    )
-             || ( iSignalFlags & FOdysseyVectorScene::SIGNAL_OBJECT_MODIFIED    ) )
+            if( ( iSignalFlags & FOdysseyVectorEngine::SIGNAL_OBJECT_TRANSFORMED )
+             || ( iSignalFlags & FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED    )
+             || ( iSignalFlags & FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED    ) )
             {
                 vectorObjectTab.Get()->Update( iScene );
             }

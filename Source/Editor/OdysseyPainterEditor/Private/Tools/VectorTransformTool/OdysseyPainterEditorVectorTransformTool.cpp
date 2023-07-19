@@ -67,7 +67,7 @@ UOdysseyPainterEditorVectorTransformTool::UnloadVector( FOdysseyVectorEngine* iE
 {
     iEngine->RemoveHUD( mTransformHUD );
 
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
 void
@@ -87,7 +87,7 @@ UOdysseyPainterEditorVectorTransformTool::LoadVector( FOdysseyVectorEngine* iEng
 
     mTransformHUD->Reset( iScene );
 
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
 bool
@@ -104,7 +104,7 @@ UOdysseyPainterEditorVectorTransformTool::OnKeyDown( const FKey& iKey )
     }
 
     UOdysseyPainterEditorDefaultTool::OnKeyDownVector( vectorEngine, vectorScene, iKey );
-    //iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    //iScene->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 
     return false;
 }
@@ -118,7 +118,7 @@ UOdysseyPainterEditorVectorTransformTool::OnKeyUp( const FKey& iKey )
     Uniform = UniformAtKeyDown;
 
     UOdysseyPainterEditorDefaultTool::OnKeyUpVector( vectorEngine, vectorScene, iKey );
-    //iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    //iScene->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 
     return false;
 }
@@ -135,7 +135,7 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseHover( const FOdysseyPoint& iPo
         if( redrawRect.Area() )
         {
             vectorEngine->GetInvalidTileMap().Invalidate(redrawRect);
-            vectorScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+            vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
         }
     }
 }
@@ -617,7 +617,7 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDrag( const FOdysseyPoint& iPoi
             }
         }
 
-        vectorScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+        vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
     }
 }
 
@@ -660,7 +660,7 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseUp( const FOdysseyPoint& iPoint
             GEditor->EndTransaction();
         }
 
-        vectorScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+        vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
     }
 
     mDragging = false;
@@ -696,7 +696,7 @@ UOdysseyPainterEditorVectorTransformTool::PropertyChangedVector( FOdysseyVectorE
 {
     //mTransformHUD->MakeTransform( iScene, DivisionsX, DivisionsY );
 
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
 #undef LOCTEXT_NAMESPACE

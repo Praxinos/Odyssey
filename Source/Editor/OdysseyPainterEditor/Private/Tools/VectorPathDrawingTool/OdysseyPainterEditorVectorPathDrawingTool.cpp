@@ -67,7 +67,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::UnloadVector( FOdysseyVectorEngine* 
 {
     iEngine->RemoveHUD( mPathDrawingHUD );
 
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
 void
@@ -88,7 +88,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::LoadVector( FOdysseyVectorEngine* iE
 
 //    widget.Get()->OnSizeChanged.AddRaw( this, &UOdysseyPainterEditorVectorPathDrawingTool::OnSizeChanged );
 
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
 static ::ULIS::FRectI
@@ -256,10 +256,11 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorEng
 
     // update invalidated objects
     iScene->Update( 0 );
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW
-                  | FOdysseyVectorScene::SIGNAL_OBJECT_SELECTED
-                  | FOdysseyVectorScene::SIGNAL_OBJECT_MODIFIED
-                  | FOdysseyVectorScene::SIGNAL_OBJECT_TRANSFORMED );
+
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                   | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED
+                   | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED
+                   | FOdysseyVectorEngine::SIGNAL_OBJECT_TRANSFORMED );
 
     mPathDrawingHUD->Reset( iScene ); // re-creates the quadtree;
 
@@ -308,7 +309,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseHoverVector( FOdysseyVectorEn
         redrawRegion = imageRegion;
     }
 
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 
     return redrawRegion;
 }
@@ -399,7 +400,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( FOdysseyVectorEng
     mOldPointInTexture.x = iPointInTexture.x;
     mOldPointInTexture.y = iPointInTexture.y;
 
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 
     return redrawRegion;
 }
@@ -493,7 +494,9 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorEngin
     mPathDrawingHUD->Reset( iScene ); // refreshes the quadtree;
 
     iScene->Update( 0 ); // update invalidated objects
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW | FOdysseyVectorScene::SIGNAL_OBJECT_MODIFIED );
+
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                   | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
 
     return true;
 }
@@ -544,7 +547,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::PropertyChangedVector( FOdysseyVecto
 */
     mPathDrawingHUD->Reset( iScene ); // rebuilds quadtree if stitch mode changes
 
-    iScene->Signal( FOdysseyVectorScene::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
 #undef LOCTEXT_NAMESPACE

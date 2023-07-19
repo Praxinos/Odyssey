@@ -2,7 +2,19 @@
 
 FOdysseyVectorPath::~FOdysseyVectorPath()
 {
-   // TODO: free vertices and segments.
+   // Free vertices and clear list in one go.
+    mVertexList.remove_if( []( FOdysseyVectorVertex* iVertex )
+                           {
+                               delete iVertex;
+                               return true;
+                           });
+
+   // Free segments and clear list in one go.
+    mSegmentList.remove_if( []( FOdysseyVectorSegment* iSegment )
+                           {
+                               delete iSegment;
+                               return true;
+                           });
 }
 
 FOdysseyVectorPath::FOdysseyVectorPath( const FString& iName )
@@ -56,59 +68,6 @@ FOdysseyVectorPath::ToVertexAndSectionArray( std::vector<FOdysseyVectorVertex*>&
         while( segment && ( vertex != firstVertex ) );
     }
 }
-
-
-void
-FOdysseyVectorPath::FlipHorizontal()
-{
-    for( std::list<FOdysseyVectorVertex*>::iterator it = mVertexList.begin(); it != mVertexList.end(); ++it )
-    {
-        FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>(*it);
-
-        vertex->SetX( -vertex->GetX() );
-    }
-
-    for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
-    {
-        FOdysseyVectorSegment* segment = static_cast<FOdysseyVectorSegment*>(*it);
-
-        if( segment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
-        {
-            FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(segment);
-            FOdysseyVectorHandleSegment* handle0 = cubicSegment->GetHandle(0);
-            FOdysseyVectorHandleSegment* handle1 = cubicSegment->GetHandle(1);
-
-            handle0->SetX( -handle0->GetX() );
-            handle1->SetX( -handle1->GetX() );
-        }
-    }
-};
-
-void
-FOdysseyVectorPath::FlipVertical()
-{
-    for( std::list<FOdysseyVectorVertex*>::iterator it = mVertexList.begin(); it != mVertexList.end(); ++it )
-    {
-        FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>(*it);
-
-        vertex->SetY( -vertex->GetY() );
-    }
-
-    for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
-    {
-        FOdysseyVectorSegment* segment = static_cast<FOdysseyVectorSegment*>(*it);
-
-        if( segment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
-        {
-            FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(segment);
-            FOdysseyVectorHandleSegment* handle0 = cubicSegment->GetHandle(0);
-            FOdysseyVectorHandleSegment* handle1 = cubicSegment->GetHandle(1);
-
-            handle0->SetY( -handle0->GetY() );
-            handle1->SetY( -handle1->GetY() );
-        }
-    }
-};
 
 bool
 FOdysseyVectorPath::HasIntersections()

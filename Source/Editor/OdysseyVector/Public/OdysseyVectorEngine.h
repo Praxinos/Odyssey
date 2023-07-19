@@ -1,5 +1,7 @@
 #pragma once
 
+#include "CoreMinimal.h"
+
 #include <ULIS>
 #include <blend2d.h>
 #include <Core/Core.h>
@@ -15,11 +17,28 @@
 class ODYSSEYVECTOR_API FOdysseyVectorEngine
 {
     public:
+        DECLARE_MULTICAST_DELEGATE_TwoParams( FSignalDelegate, FOdysseyVectorScene*, uint64 iDelegateFlags )
+
+    public:
+        // signal flags
+        static const uint64 SIGNAL_SCENE_REDRAW       = ( 1 << 0 );
+        static const uint64 SIGNAL_OBJECT_TRANSFORMED = ( 1 << 1 );
+        static const uint64 SIGNAL_OBJECT_MODIFIED    = ( 1 << 2 );
+        static const uint64 SIGNAL_OBJECT_SELECTED    = ( 1 << 3 );
+        static const uint64 SIGNAL_ALL                = 0xFFFFFFFFFFFFFFFF;
+
+        static FSignalDelegate& OnSignalDelegate();
+
         std::list<FOdysseyVectorHUD*>& GetHUDList();
         void AddHUD( FOdysseyVectorHUD* iHUDObject );
         void RemoveHUD( FOdysseyVectorHUD* iHUDObject );
         void ClearHUD();
         void ResetHUD();
+
+        /**
+         * @brief Clear the mask image
+         */
+        void ClearMask();
 
         /**
          * @brief Get the rendering context (Blend2D)
@@ -50,10 +69,58 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
         FOdysseyVectorEngine( FOdysseyVectorScene* iScene, double iWidth, double iHeight );
 
         /**
-         * @brief Render the scene to the current buffer
-         * @param iScene the scene (root node of the object hierarchy).
+         * @brief Erase objects based on the mask image. Currently works with cubic paths only.
+         * @param iScene a pointer to the root object
+         * @param iRoi the region of interest.
+         * @param iSelectedOnly restrict erasure to selected objects only.
          */
-        void Render( /*FOdysseyVectorScene* iScene*//*, const ::ULIS::FRectI& iRegion*/ );
+        void Erase( FOdysseyVectorScene* iScene
+                  , std::vector<FOdysseyVectorObject*>& iAddedObjectArray
+                  , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
+                  , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray
+                  , std::vector<FOdysseyVectorObject*>& iRemovedObjectArray
+                  , std::vector<FOdysseyVectorVertex*>& iRemovedVertexArray
+                  , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray
+                  , ::ULIS::FRectD &iRoi
+                  , bool iSelectedOnly );
+
+        /**
+         * @brief Fill the mask image with a shape defined by a array of points.
+         * @param iPointArray a reference to the array of points.
+         */
+        ::ULIS::FRectD GenerateFreehandMask( std::vector<::ULIS::FVec2D>& iPointArray );
+
+        /**
+         * @brief Get the color at coordinates.
+         * @param iX x-axis coordinates.
+         * @param iY y-axis coordinates.
+         * @param oR pointer to output 8-bit Red channel.
+         * @param oG pointer to output 8-bit Green channel.
+         * @param oB pointer to output 8-bit Blue channel.
+         * @param oA pointer to output 8-bit Alpha channel.
+         */
+        void GetColorImagePixelValue( uint32 iX, uint32 iY, uint8* oR, uint8* oG, uint8* oB, uint8* oA );
+
+        /**
+         * @brief Get the color at coordinates.
+         * @param iX x-axis coordinates.
+         * @param iY y-axis coordinates.
+         * @return the color at coordinates {iX,iY}
+         */
+        FColor GetColorImagePixelValue( uint32 iX, uint32 iY );
+
+        /**
+         * @brief Get the color image dimensions.
+         * @param oW width
+         * @param oH height
+         */
+        void GetColorImageSize( uint32* iW, uint32* iH );
+
+        /**
+         * @brief Get the color image dimensions.
+         * @param oImageRegion a rectangle receiving the image's size
+         */
+        void GetColorImageSize( ::ULIS::FRectI& oImageRegion );
 
         /**
          * @brief Pick an object
@@ -107,6 +174,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
                        , uint64 iPickingFlags );
 
         /**
+         * @brief Render the scene to the current buffer
+         */
+        void Render();
+
+        /**
          * @brief Attach to separated segments. They MUST belong to the same path. Use FOdysseyVectorPath::Merge() if necessary.
             Note: iVertexA and iVertexB  will be removed from the path.
          * @param iScene the root object
@@ -123,95 +195,15 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
                                     , bool iSmooth );
 
         /**
-         * @brief Erase objects based on the mask image. Currently works with cubic paths only.
-         * @param iScene a pointer to the root object
-         * @param iRoi the region of interest.
-         * @param iSelectedOnly restrict erasure to selected objects only.
+         * @brief Use the color image as the default rendering buffer.
          */
-        void Erase( FOdysseyVectorScene* iScene
-                  , std::vector<FOdysseyVectorObject*>& iAddedObjectArray
-                  , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
-                  , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray
-                  , std::vector<FOdysseyVectorObject*>& iRemovedObjectArray
-                  , std::vector<FOdysseyVectorVertex*>& iRemovedVertexArray
-                  , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray
-                  , ::ULIS::FRectD &iRoi
-                  , bool iSelectedOnly );
-
-        void ValidateRegion();
-
-        /**
-         * @brief Invalidate a region
-         * @param iX
-         * @param iY
-         * @param iW
-         * @param iH
-         */
-        void InvalidateRegion( double iX, double iY, double iW, double iH );
-
-        /**
-         * @brief Invalidate a region (floating point).
-         * @param iRegion
-         */
-        void InvalidateRegion( const ::ULIS::FRectD& iRegion );
-
-        /**
-         * @brief Invalidate a region (integer).
-         * @param iRegion
-         */
-        void InvalidateRegion( const ::ULIS::FRectI& iRegion );
-
-        ::ULIS::FRectI& GetInvalidatedRegion();
-
-        /**
-         * @brief Set drawing flags. Currently none.
-         * @param iDrawingFlags.
-         */
-        void SetDrawingFlags( uint64 iDrawingFlags );
-
-        /**
-         * @brief Fill the mask image with a shape defined by a array of points.
-         * @param iPointArray a reference to the array of points.
-         */
-        ::ULIS::FRectD GenerateFreehandMask( std::vector<::ULIS::FVec2D>& iPointArray );
+        void UseColorImage(); // TODO : rename UseDefaultImage
 
         /**
          * @brief Use the mask image as the default rendering buffer.
          */
         void UseMaskImage();
 
-        /**
-         * @brief Use the color image as the default rendering buffer.
-         */
-        void UseColorImage(); // TODO : rename UseDefaultImage
-
-        /**
-         * @brief Get the color at coordinates.
-         * @param iX x-axis coordinates.
-         * @param iY y-axis coordinates.
-         * @param oR pointer to output 8-bit Red channel.
-         * @param oG pointer to output 8-bit Green channel.
-         * @param oB pointer to output 8-bit Blue channel.
-         * @param oA pointer to output 8-bit Alpha channel.
-         */
-        void GetColorImagePixelValue( uint32 iX, uint32 iY, uint8* oR, uint8* oG, uint8* oB, uint8* oA );
-
-        /**
-         * @brief Get the color at coordinates.
-         * @param iX x-axis coordinates.
-         * @param iY y-axis coordinates.
-         * @return the color at coordinates {iX,iY}
-         */
-        FColor GetColorImagePixelValue( uint32 iX, uint32 iY );
-
-        /**
-         * @brief Get the color image dimensions.
-         * @param oW width
-         * @param oH height
-         */
-        void GetColorImageSize( uint32* iW, uint32* iH );
-
-        void GetColorImageSize( ::ULIS::FRectI& redrawRegion );
 
         /**
          * @brief Set the selection space, i.e the group we pick objects from. 
@@ -242,15 +234,47 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
 
         /**
          * @brief render the current HUD.
-         * @param iDrawingFlags.
          */
-        void RenderHUD( /*FOdysseyVectorScene* iScene*/ );
+        void RenderHUD();
 
+        /**
+         * @brief Send a signal to methods registered to this delegate.
+         * @param iSignalFlags SIGNAL_* flags that can be interpreted by the receiver of the signal.
+         */
+        void Signal( uint64 iSignalFlags );
+
+        /**
+         * @brief Set the attached scene
+         * @param iScene the attached scene
+         */
         void SetScene( FOdysseyVectorScene* iScene );
+
+        /**
+         * @brief Get the attached scene
+         * @return a pointer to the attached scene
+         */
         FOdysseyVectorScene* GetScene( );
+
+        /**
+         * @brief Select all objects that lies within the selection space
+         */
         void SelectAllInSelectionSpace();
-        ::ULIS::FRectD GenerateCircleMask( std::vector<::ULIS::FVec2D>& iPointArray );
-        ::ULIS::FRectD GenerateRectangleMask( std::vector<::ULIS::FVec2D>& iPointArray );
+
+        /**
+         * @brief Fill the mask image with an alpha Circle.
+         * @param iX the circle's center on X axis.
+         * @param iY the circle's center on Y axis.
+         * @param iRadius the circle's radius.
+         * @return the bounding box including the circle.
+         */
+        ::ULIS::FRectD GenerateCircleMask( double iX, double iY, double iRadius );
+
+        /**
+         * @brief Fill the mask image with an alpha Rectangle.
+         * @param iRect the rectangle
+         * @return the bounding box including the rectangle.
+         */
+        ::ULIS::FRectD GenerateRectangleMask( const ::ULIS::FRectD& iRect );
 
     protected:
         static void RecursivePick( FOdysseyVectorGroup* iSelectionSpace
@@ -274,7 +298,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
         BLContext* mBLContext;
         BLImage* mBLImage;
         BLImage* mBLMask;
-        uint64 mDrawingFlags;
         std::list<FOdysseyVectorHUD*> mHUDList;
         FOdysseyVectorGroup* mSelectionSpace;
         FOdysseyVectorScene* mScene;

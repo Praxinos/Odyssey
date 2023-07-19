@@ -23,14 +23,6 @@ FOdysseyVectorScene::GetEngine()
     return mEngine;
 }
 
-FOdysseyVectorScene::FSignalDelegate&
-FOdysseyVectorScene::OnSignalDelegate()
-{
-    static FSignalDelegate onSignalDelegate;
-
-    return onSignalDelegate;
-}
-
 void
 FOdysseyVectorScene::ClearSelection()
 {
@@ -332,12 +324,6 @@ void
 FOdysseyVectorScene::Update( uint32 iUpdateFlags )
 {
     FOdysseyVectorObject::Update( iUpdateFlags );
-}
-
-void
-FOdysseyVectorScene::Signal( uint64 iSignalFlags )
-{
-    OnSignalDelegate().Broadcast( this, iSignalFlags );
 }
 
 FOdysseyVectorObject*
