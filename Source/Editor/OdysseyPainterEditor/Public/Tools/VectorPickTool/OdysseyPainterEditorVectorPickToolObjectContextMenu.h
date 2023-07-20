@@ -3,14 +3,12 @@
 
 #pragma once
 
-#include "OdysseyPainterEditor.h"
-#include "OdysseyPainterEditorGUI.h"
-#include "OdysseyVector.h"
+#include "OdysseyPainterEditorContextMenu.h"
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPickToolObjectContextMenu :
     public FOdysseyPainterEditorContextMenu
 {
 public:
     // FOdysseyEditorTab interface
-    static TSharedPtr<SWidget> CreateWidget( FOdysseyPainterEditorToolContext* iToolContext );
+    static TSharedPtr<SWidget> CreateWidget( class FOdysseyPainterEditor* iPainterEditor );
 };

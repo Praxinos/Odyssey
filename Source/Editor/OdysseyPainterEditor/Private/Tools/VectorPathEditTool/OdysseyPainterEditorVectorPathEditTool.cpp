@@ -29,30 +29,40 @@ UOdysseyPainterEditorVectorPathEditTool::UOdysseyPainterEditorVectorPathEditTool
 void
 UOdysseyPainterEditorVectorPathEditTool::Load()
 {
-    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
+    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+    if (!hasVector)
+        return;
 
-    if( vectorEngine )
-    {
-        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
-        UOdysseyPainterEditorVectorPathEditTool::LoadVector( vectorEngine, vectorScene );
-    }
+    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
+    if (mediaVectors.Num() <= 0)
+        return;
+
+    FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
+    UOdysseyPainterEditorVectorPathEditTool::LoadVector( vectorEngine, vectorScene );
 }
 
 void
 UOdysseyPainterEditorVectorPathEditTool::Unload()
 {
-    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
-    if( vectorEngine )
-    {
-        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
-        UOdysseyPainterEditorVectorPathEditTool::UnloadVector( vectorEngine, vectorScene );
-    }
+    
+    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+    if (!hasVector)
+        return;
+
+    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
+    if (mediaVectors.Num() <= 0)
+        return;
+
+    FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
+    UOdysseyPainterEditorVectorPathEditTool::UnloadVector( vectorEngine, vectorScene );
 }
 
 bool
 UOdysseyPainterEditorVectorPathEditTool::IsActivable() const
 {
-    return !!mToolContext->GetVectorEngine();
+    return GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
 }
 
 void
@@ -69,7 +79,7 @@ UOdysseyPainterEditorVectorPathEditTool::LoadVector( FOdysseyVectorEngine* iEngi
     TSharedPtr< SViewport > viewportWidget; // to force keyboard focus on mouse hover.
                                             // Prevents the user from having to click at least once in the viewport.
     // we need the focus on the viewport for keyboard 
-    viewportWidget = mToolContext->GetEditor()->GetGUI()->GetViewportTab()->GetViewport()->GetViewportWidget();
+    viewportWidget = GetEditor()->GetGUI()->GetViewportTab()->GetViewport()->GetViewportWidget();
 
     // we need the focus on the viewport for keyboard 
     FSlateApplication::Get().SetKeyboardFocus( viewportWidget );
@@ -85,8 +95,16 @@ UOdysseyPainterEditorVectorPathEditTool::LoadVector( FOdysseyVectorEngine* iEngi
 bool
 UOdysseyPainterEditorVectorPathEditTool::OnKeyDown( const FKey& iKey )
 {
-    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
-    FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+    if (!hasVector)
+        return false;
+
+    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
+    if (mediaVectors.Num() <= 0)
+        return false;
+
+    FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
 
     // then detect which keys are pressed and set display mode
     if ( FSlateApplication::Get().GetModifierKeys().IsControlDown() )
@@ -112,8 +130,16 @@ UOdysseyPainterEditorVectorPathEditTool::OnKeyDown( const FKey& iKey )
 bool
 UOdysseyPainterEditorVectorPathEditTool::OnKeyUp( const FKey& iKey )
 {
-    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
-    FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+    if (!hasVector)
+        return false;
+
+    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
+    if (mediaVectors.Num() <= 0)
+        return false;
+
+    FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
 
     // first reset display mode
     mPickingFlags = FOdysseyVectorPath::PICK_POINT;
@@ -480,13 +506,18 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownVector( FOdysseyVectorEngine
 bool
 UOdysseyPainterEditorVectorPathEditTool::OnMouseDown( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
 {
-    bool ret = false;
-    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
-    if( vectorEngine )
-    {
-        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
-        ret = UOdysseyPainterEditorVectorPathEditTool::OnMouseDownVector( vectorEngine, vectorScene, iPointInTexture,iKey  );
-    }
+    
+    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+    if (!hasVector)
+        return false;
+
+    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaVector>();
+    if (mediaVectors.Num() <= 0)
+        return false;
+
+    FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
+    bool ret = UOdysseyPainterEditorVectorPathEditTool::OnMouseDownVector( vectorEngine, vectorScene, iPointInTexture,iKey  );
     GEditor->EndTransaction();
     return ret;
 }
@@ -523,12 +554,17 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseHoverVector( FOdysseyVectorEngin
 void
 UOdysseyPainterEditorVectorPathEditTool::OnMouseHover( const FOdysseyPoint& iPointInTexture )
 {
-    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
-    if( vectorEngine )
-    {
-        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
-        UOdysseyPainterEditorVectorPathEditTool::OnMouseHoverVector( vectorEngine, vectorScene, iPointInTexture );
-    }
+    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+    if (!hasVector)
+        return;
+
+    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
+    if (mediaVectors.Num() <= 0)
+        return;
+
+    FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
+    UOdysseyPainterEditorVectorPathEditTool::OnMouseHoverVector( vectorEngine, vectorScene, iPointInTexture );
 }
 
 static FOdysseyVectorObject*
@@ -664,12 +700,17 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDragVector( FOdysseyVectorEngine
 void
 UOdysseyPainterEditorVectorPathEditTool::OnMouseDrag( const FOdysseyPoint& iPointInTexture )
 {
-    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
-    if( vectorEngine )
-    {
-        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
-        UOdysseyPainterEditorVectorPathEditTool::OnMouseDragVector( vectorEngine, vectorScene, iPointInTexture );
-    }
+    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+    if (!hasVector)
+        return;
+
+    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
+    if (mediaVectors.Num() <= 0)
+        return;
+
+    FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
+    UOdysseyPainterEditorVectorPathEditTool::OnMouseDragVector( vectorEngine, vectorScene, iPointInTexture );
 }
 
 bool
@@ -689,15 +730,17 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseUpVector( FOdysseyVectorEngine* 
 bool
 UOdysseyPainterEditorVectorPathEditTool::OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
 {
-    bool ret = false;
-    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
-    if( vectorEngine )
-    {
-        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
-        ret = UOdysseyPainterEditorVectorPathEditTool::OnMouseUpVector( vectorEngine, vectorScene, iPointInTexture, iKey );
-    }
+    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+    if (!hasVector)
+        return false;
 
-    return ret;
+    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
+    if (mediaVectors.Num() <= 0)
+        return false;
+
+    FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
+    return UOdysseyPainterEditorVectorPathEditTool::OnMouseUpVector( vectorEngine, vectorScene, iPointInTexture, iKey );
 }
 
 void
@@ -715,12 +758,21 @@ UOdysseyPainterEditorVectorPathEditTool::GetPickingFlags()
 void
 UOdysseyPainterEditorVectorPathEditTool::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent )
 {
-    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
-
     if (PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive)
         return;
     
     PropertyChanged( PropertyChangedEvent.GetPropertyName() );
+
+    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+    if (!hasVector)
+        return;
+
+    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
+    if (mediaVectors.Num() <= 0)
+        return;
+
+    FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
 
     vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }

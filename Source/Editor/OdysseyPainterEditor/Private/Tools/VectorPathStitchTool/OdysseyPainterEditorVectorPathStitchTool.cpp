@@ -28,29 +28,39 @@ UOdysseyPainterEditorVectorPathStitchTool::UOdysseyPainterEditorVectorPathStitch
 void
 UOdysseyPainterEditorVectorPathStitchTool::Load()
 {
-    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
-    if( vectorEngine )
-    {
-        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
-        UOdysseyPainterEditorVectorPathStitchTool::LoadVector( vectorEngine, vectorScene );
-    }
+    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+    if (!hasVector)
+        return;
+
+    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
+    if (mediaVectors.Num() <= 0)
+        return;
+
+    FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
+    UOdysseyPainterEditorVectorPathStitchTool::LoadVector( vectorEngine, vectorScene );
 }
 
 void
 UOdysseyPainterEditorVectorPathStitchTool::Unload()
 {
-    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
-    if( vectorEngine )
-    {
-        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
-        UOdysseyPainterEditorVectorPathStitchTool::UnloadVector( vectorEngine, vectorScene );
-    }
+    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+    if (!hasVector)
+        return;
+
+    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
+    if (mediaVectors.Num() <= 0)
+        return;
+
+    FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
+    UOdysseyPainterEditorVectorPathStitchTool::UnloadVector( vectorEngine, vectorScene );
 }
 
 bool
 UOdysseyPainterEditorVectorPathStitchTool::IsActivable() const
 {
-    return !!mToolContext->GetVectorEngine();
+    return GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
 }
 
 void
@@ -75,14 +85,17 @@ UOdysseyPainterEditorVectorPathStitchTool::LoadVector( FOdysseyVectorEngine* iEn
 bool
 UOdysseyPainterEditorVectorPathStitchTool::OnMouseDown( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
 {
-    bool ret = false;
-    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
-    if( vectorEngine )
-    {
-        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
-        ret = UOdysseyPainterEditorVectorPathStitchTool::OnMouseDownVector( vectorEngine, vectorScene, iPointInTexture,iKey  );
-    }
-    return ret;
+    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+    if (!hasVector)
+        return false;
+
+    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaVector>();
+    if (mediaVectors.Num() <= 0)
+        return false;
+
+    FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
+    return UOdysseyPainterEditorVectorPathStitchTool::OnMouseDownVector( vectorEngine, vectorScene, iPointInTexture,iKey );
 }
 
 bool
@@ -181,12 +194,17 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseDownVector( FOdysseyVectorEngi
 void
 UOdysseyPainterEditorVectorPathStitchTool::OnMouseHover( const FOdysseyPoint& iPointInTexture )
 {
-    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
-    if( vectorEngine )
-    {
-        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
-        UOdysseyPainterEditorVectorPathStitchTool::OnMouseHoverVector( vectorEngine, vectorScene, iPointInTexture );
-    }
+    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+    if (!hasVector)
+        return;
+
+    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
+    if (mediaVectors.Num() <= 0)
+        return;
+
+    FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
+    UOdysseyPainterEditorVectorPathStitchTool::OnMouseHoverVector( vectorEngine, vectorScene, iPointInTexture );
 }
 
 void
@@ -218,12 +236,17 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseHoverVector( FOdysseyVectorEng
 void
 UOdysseyPainterEditorVectorPathStitchTool::OnMouseDrag( const FOdysseyPoint& iPointInTexture )
 {
-    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
-    if( vectorEngine )
-    {
-        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
-        UOdysseyPainterEditorVectorPathStitchTool::OnMouseDragVector( vectorEngine, vectorScene, iPointInTexture );
-    }
+    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+    if (!hasVector)
+        return;
+
+    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
+    if (mediaVectors.Num() <= 0)
+        return;
+
+    FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
+    UOdysseyPainterEditorVectorPathStitchTool::OnMouseDragVector( vectorEngine, vectorScene, iPointInTexture );
 }
 
 void
@@ -239,15 +262,17 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseDragVector( FOdysseyVectorEngi
 bool
 UOdysseyPainterEditorVectorPathStitchTool::OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
 {
-    bool ret = false;
-    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
-    if( vectorEngine )
-    {
-        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
-        ret = UOdysseyPainterEditorVectorPathStitchTool::OnMouseUpVector( vectorEngine, vectorScene, iPointInTexture, iKey );
-    }
+    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+    if (!hasVector)
+        return false;
 
-    return ret;
+    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
+    if (mediaVectors.Num() <= 0)
+        return false;
+
+    FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
+    return UOdysseyPainterEditorVectorPathStitchTool::OnMouseUpVector( vectorEngine, vectorScene, iPointInTexture, iKey );
 }
 
 bool
@@ -269,20 +294,38 @@ UOdysseyPainterEditorVectorPathStitchTool::Commit()
 void
 UOdysseyPainterEditorVectorPathStitchTool::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent )
 {
-    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
-
     if (PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive)
         return;
     
     PropertyChanged( PropertyChangedEvent.GetPropertyName() );
     
+    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+    if (!hasVector)
+        return;
+
+    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
+    if (mediaVectors.Num() <= 0)
+        return;
+
+    FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
+
     vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
 void
 UOdysseyPainterEditorVectorPathStitchTool::PropertyChanged( const FName& iPropertyName )
 {
-    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
+    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+    if (!hasVector)
+        return;
+
+    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
+    if (mediaVectors.Num() <= 0)
+        return;
+
+    FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
 
     if( iPropertyName == "RestrictToSelection" )
     {

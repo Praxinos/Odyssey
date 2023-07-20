@@ -14,8 +14,6 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorPaintBucketToolContextMenu
 {
     public:
         // FOdysseyEditorTab interface
-        static TSharedPtr<SWidget> CreateWidget( FOdysseyPainterEditorToolContext* iToolContext
-                                               , FOdysseyVectorBucket* iBucket );
-        static void BucketProperties( FOdysseyPainterEditorToolContext* iToolContext
-                                    , FOdysseyVectorBucket* iBucket );
+        static TSharedPtr<SWidget> CreateWidget( FOdysseyPainterEditor* iEditor, FOdysseyVectorBucket* iBucket );
+        static void BucketProperties( FOdysseyPainterEditor* iEditor, FOdysseyVectorBucket* iBucket );
 };

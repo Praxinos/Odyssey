@@ -3,15 +3,25 @@
 
 #include "Tools/VectorPickTool/OdysseyPainterEditorVectorPickToolObjectContextMenu.h"
 #include "OdysseyPainterEditor.h"
+#include "OdysseyMediaVector.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorVectorPickToolObjectContextMenu"
 
 // static
 TSharedPtr<SWidget>
-FOdysseyPainterEditorVectorPickToolObjectContextMenu::CreateWidget( FOdysseyPainterEditorToolContext* iToolContext )
+FOdysseyPainterEditorVectorPickToolObjectContextMenu::CreateWidget( FOdysseyPainterEditor* iEditor )
 {
-    FOdysseyVectorEngine* vectorEngine = iToolContext->GetVectorEngine();
-    FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+    bool hasVector = iEditor->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+    if (!hasVector)
+        return nullptr;
+
+    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = iEditor->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
+    if (mediaVectors.Num() <= 0)
+        return nullptr;
+
+    FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
+
     FMenuBuilder menu( true, nullptr );
 
     menu.BeginSection("Context");

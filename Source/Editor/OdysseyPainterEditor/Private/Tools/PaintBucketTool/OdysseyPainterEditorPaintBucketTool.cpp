@@ -6,6 +6,8 @@
 #include "Tools/PaintBucketTool/OdysseyPainterEditorPaintBucketToolContextMenu.h"
 
 #include "OdysseyRasterBlock.h"
+#include "OdysseyMediaRaster.h"
+#include "OdysseyMediaVector.h"
 #include "Undo/OdysseyVectorUndoBucketAdd.h"
 #include "Undo/OdysseyVectorUndoBucketRemove.h"
 #include "Undo/OdysseyVectorUndoBucketParam.h"
@@ -42,7 +44,9 @@ UOdysseyPainterEditorPaintBucketTool::UOdysseyPainterEditorPaintBucketTool()
 bool
 UOdysseyPainterEditorPaintBucketTool::IsActivable() const
 {
-    return mToolContext->GetRasterBlock() || mToolContext->CanProvideRasterBlockOnDemand() || mToolContext->GetVectorEngine();
+    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+    bool hasRaster = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaRaster>();
+    return hasRaster || hasVector;
 }
 
 void
@@ -51,27 +55,48 @@ UOdysseyPainterEditorPaintBucketTool::Unload()
     mPaintEngine.RasterBlock(nullptr);
 
     //TODO: That's wrong
-    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
-    if( vectorEngine )
+    
+    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+    if (hasVector)
     {
-        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
-        UOdysseyPainterEditorPaintBucketTool::UnloadVector( vectorEngine, vectorScene );
+        //Should be done in UnloadVector directly
+        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
+        if (mediaVectors.Num() > 0)
+        {
+            FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+            FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
+            UOdysseyPainterEditorPaintBucketTool::UnloadVector( vectorEngine, vectorScene );
+        }
     }
 }
 
 void
 UOdysseyPainterEditorPaintBucketTool::Load()
 {
-    TSharedPtr<FOdysseyRasterBlock> rasterBlock = mToolContext->GetRasterBlock();
-    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
-    if( rasterBlock )
+    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+    bool hasRaster = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaRaster>();
+    if (hasRaster)
     {
-	    mPaintEngine.RasterBlock(rasterBlock);
+        /* It would be better if this is done in OnMouseDown()
+
+        TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaRaster>();
+        if( mediaRasters.Num() > 0 )
+        {
+            mPaintEngine.RasterBlock(mediaRasters[0].GetRasterBlock());
+        }
+        */
     }
-    else if( vectorEngine )
+
+    if (hasVector)
     {
-        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
-        UOdysseyPainterEditorPaintBucketTool::LoadVector( vectorEngine, vectorScene );
+        // It would be better if this is done in OnMouseDown()
+        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
+        if (mediaVectors.Num() > 0)
+        {
+            FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+            FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
+            UOdysseyPainterEditorPaintBucketTool::LoadVector( vectorEngine, vectorScene );
+        }
     }
 }
 
@@ -89,7 +114,7 @@ UOdysseyPainterEditorPaintBucketTool::LoadVector( FOdysseyVectorEngine* iEngine,
     TSharedPtr< SViewport > viewportWidget; // to force keyboard focus on mouse hover.
                                             // Prevents the user from having to click at least once in the viewport.
     // we need the focus on the viewport for keyboard 
-    viewportWidget = mToolContext->GetEditor()->GetGUI()->GetViewportTab()->GetViewport()->GetViewportWidget();
+    viewportWidget = GetEditor()->GetGUI()->GetViewportTab()->GetViewport()->GetViewportWidget();
 
     // we need the focus on the viewport for keyboard 
     FSlateApplication::Get().SetKeyboardFocus( viewportWidget );
@@ -107,11 +132,18 @@ bool
 UOdysseyPainterEditorPaintBucketTool::OnKeyDown( const FKey& iKey )
 {
     bool ret = false;
-    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
-    if( vectorEngine )
+    
+    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+    if (hasVector)
     {
-        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
-        ret = UOdysseyPainterEditorPaintBucketTool::OnKeyDownVector( vectorEngine, vectorScene, iKey );
+        //Should be done in OnKeyDownVector directly
+        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
+        if (mediaVectors.Num() > 0)
+        {
+            FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+            FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
+            ret = UOdysseyPainterEditorPaintBucketTool::OnKeyDownVector( vectorEngine, vectorScene, iKey );
+        }
     }
 
     return ret;
@@ -121,11 +153,18 @@ bool
 UOdysseyPainterEditorPaintBucketTool::OnKeyUp( const FKey& iKey )
 {
     bool ret = false;
-    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
-    if( vectorEngine )
+    
+    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+    if (hasVector)
     {
-        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
-        ret = UOdysseyPainterEditorPaintBucketTool::OnKeyUpVector( vectorEngine, vectorScene, iKey );
+        //Should be done in OnKeyUpVector directly
+        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
+        if (mediaVectors.Num() > 0)
+        {
+            FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+            FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
+            ret = UOdysseyPainterEditorPaintBucketTool::OnKeyUpVector( vectorEngine, vectorScene, iKey );
+        }
     }
 
     return ret;
@@ -136,18 +175,30 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseDown( const FOdysseyPoint& iPointIn
                                                  , const FKey& iKey )
 {
     bool ret = false;
-    TSharedPtr<FOdysseyRasterBlock> rasterBlock = mToolContext->GetRasterBlock();
-    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
 
-    if( rasterBlock )
+    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+    bool hasRaster = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaRaster>();
+    if (hasRaster)
     {
-        ret = UOdysseyPainterEditorPaintBucketTool::OnMouseDownRaster( rasterBlock->GetBlock(), iPointInTexture, iKey );
+        TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaRaster>();
+        if( mediaRasters.Num() > 0 )
+        {
+            TSharedPtr<FOdysseyRasterBlock> rasterBlock = mediaRasters[0]->GetRasterBlock();
+            mPaintEngine.RasterBlock(rasterBlock);
+            ret = UOdysseyPainterEditorPaintBucketTool::OnMouseDownRaster( rasterBlock->GetBlock(), iPointInTexture, iKey );
+        }
     }
 
-    if( vectorEngine )
+    if (hasVector)
     {
-        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
-        ret = UOdysseyPainterEditorPaintBucketTool::OnMouseDownVector( vectorEngine, vectorScene, iPointInTexture, iKey );
+        // It would be better if this is done in OnMouseDown()
+        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaVector>();
+        if (mediaVectors.Num() > 0)
+        {
+            FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+            FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
+            ret = UOdysseyPainterEditorPaintBucketTool::OnMouseDownVector( vectorEngine, vectorScene, iPointInTexture, iKey );
+        }
     }
 
     return ret;
@@ -156,22 +207,34 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseDown( const FOdysseyPoint& iPointIn
 void
 UOdysseyPainterEditorPaintBucketTool::OnMouseHover( const FOdysseyPoint& iPointInTexture )
 {
-    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
-    if( vectorEngine )
+    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+    if (hasVector)
     {
-        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
-        UOdysseyPainterEditorPaintBucketTool::OnMouseHoverVector( vectorEngine, vectorScene, iPointInTexture );
+        //Should be done in OnKeyUpVector directly
+        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
+        if (mediaVectors.Num() > 0)
+        {
+            FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+            FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
+            UOdysseyPainterEditorPaintBucketTool::OnMouseHoverVector( vectorEngine, vectorScene, iPointInTexture );
+        }
     }
 }
 
 void
 UOdysseyPainterEditorPaintBucketTool::OnMouseDrag( const FOdysseyPoint& iPointInTexture )
 {
-    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
-    if( vectorEngine )
+    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+    if (hasVector)
     {
-        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
-        UOdysseyPainterEditorPaintBucketTool::OnMouseDragVector( vectorEngine, vectorScene, iPointInTexture );
+        //Should be done in OnKeyUpVector directly
+        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
+        if (mediaVectors.Num() > 0)
+        {
+            FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+            FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
+            UOdysseyPainterEditorPaintBucketTool::OnMouseDragVector( vectorEngine, vectorScene, iPointInTexture );
+        }
     }
 }
 
@@ -310,14 +373,11 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseDownRaster( TSharedPtr<::ULIS::FBlo
                                                        , const FOdysseyPoint& iPointInTexture
                                                        , const FKey& iKey )
 {
-    ::ULIS::FColor color = mToolContext->GetEditor()->PaintColor().GetValue();
+    ::ULIS::FColor color = GetEditor()->PaintColor().GetValue();
 
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> paintBlock = mPaintEngine.PaintBlock();
     /*::ULIS::FRectI rect = paintBlock->Rect();*/
     ::ULIS::eFormat format = paintBlock->Format();
-
-    /*if (!CanDraw())
-        return false;*/
 
     if (!paintBlock)
         return false;
@@ -555,11 +615,11 @@ UOdysseyPainterEditorPaintBucketTool::SetBucketColor( FOdysseyVectorBucket* iBuc
     }
     else
     {
-        ::ULIS::FColor color = mToolContext->GetEditor()->PaintColor().GetValue();
+        ::ULIS::FColor color = GetEditor()->PaintColor().GetValue();
 
-        if ( mToolContext->GetEditor()->GetGUI()->GetColorPaletteTab()->PaletteWidget()->GetColorPalette()->GetPalette())
+        if ( GetEditor()->GetGUI()->GetColorPaletteTab()->PaletteWidget()->GetColorPalette()->GetPalette())
         {
-            UOdysseyPaletteEntry* entry = mToolContext->GetEditor()->GetGUI()->GetColorPaletteTab()->PaletteWidget()->GetColorPalette()->GetPalette()->CurrentEntry.Get();
+            UOdysseyPaletteEntry* entry = GetEditor()->GetGUI()->GetColorPaletteTab()->PaletteWidget()->GetColorPalette()->GetPalette()->CurrentEntry.Get();
 
             if (entry && entry->IsA(UOdysseyPaletteEntryColor::StaticClass()))
             {
@@ -730,7 +790,7 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseUpVectorClearBucket( FOdysseyVector
 void
 UOdysseyPainterEditorPaintBucketTool::PopUpMenu( FOdysseyVectorBucket* iBucket )
 {
-    TSharedPtr<SWidget> contextMenu = FOdysseyPainterEditorPaintBucketToolContextMenu::CreateWidget( mToolContext.Get(), iBucket );
+    TSharedPtr<SWidget> contextMenu = FOdysseyPainterEditorPaintBucketToolContextMenu::CreateWidget( GetEditor(), iBucket );
 
     FSlateApplication::Get().PushMenu( GetEditor()->GetGUI()->GetViewportTab().Get()->Widget().ToSharedRef(),
                                        FWidgetPath(),
@@ -744,19 +804,18 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseUp( const FOdysseyPoint& iPointInTe
                                                , const FKey& iKey )
 {
     bool ret = false;
-    TSharedPtr<FOdysseyRasterBlock> rasterBlock = mToolContext->GetRasterBlock();
-    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
-
-    if( rasterBlock )
+    
+    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+    if (hasVector)
     {
-        //ret = UOdysseyPainterEditorPaintBucketTool::OnMouseUpRaster( rasterBlock->GetBlock(), iPointInTexture, iKey );
-    }
-
-    if( vectorEngine )
-    {
-        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
-
-        ret = UOdysseyPainterEditorPaintBucketTool::OnMouseUpVector( vectorEngine, vectorScene, iPointInTexture, iKey );
+        //Should be done in OnKeyUpVector directly
+        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
+        if (mediaVectors.Num() > 0)
+        {
+            FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+            FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
+            ret = UOdysseyPainterEditorPaintBucketTool::OnMouseUpVector( vectorEngine, vectorScene, iPointInTexture, iKey );
+        }
     }
 
     return ret;
@@ -891,11 +950,17 @@ UOdysseyPainterEditorPaintBucketTool::PostEditChangeProperty( FPropertyChangedEv
         return;
 
     // redraw
-    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
-    if( vectorEngine )
+    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+    if (hasVector)
     {
-        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
-        PropertyChangedVector( vectorEngine, vectorScene, PropertyChangedEvent.GetPropertyName() );
+        //Should be done in OnKeyUpVector directly
+        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
+        if (mediaVectors.Num() > 0)
+        {
+            FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+            FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
+            PropertyChangedVector( vectorEngine, vectorScene, PropertyChangedEvent.GetPropertyName() );
+        }
     }
 }
 

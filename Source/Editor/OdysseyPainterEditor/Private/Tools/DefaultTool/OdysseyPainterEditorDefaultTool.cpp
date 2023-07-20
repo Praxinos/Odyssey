@@ -117,11 +117,18 @@ bool
 UOdysseyPainterEditorDefaultTool::OnKeyDown( const FKey& iKey )
 {
     bool ret = false;
-    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
-    if( vectorEngine )
+
+    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+    if (hasVector)
     {
-        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
-        ret = UOdysseyPainterEditorDefaultTool::OnKeyDownVector( vectorEngine, vectorScene, iKey );
+        //Should be done in OnKeyDownVector directly
+        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
+        if (mediaVectors.Num() > 0)
+        {
+            FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+            FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
+            ret = UOdysseyPainterEditorDefaultTool::OnKeyDownVector( vectorEngine, vectorScene, iKey );
+        }
     }
 
     return ret;
@@ -146,13 +153,13 @@ UOdysseyPainterEditorDefaultTool::OnKeyDownVector( FOdysseyVectorEngine* iEngine
 
         if( iKey == EKeys::A )
         {
-            mToolContext->GetEditor()->SelectAll( iEngine, iScene );
+            GetEditor()->SelectAll( iEngine, iScene );
         }
     }
 
     if( iKey == EKeys::Delete )
     {
-        mToolContext->GetEditor()->DeleteSelection( iEngine, iScene );
+        GetEditor()->DeleteSelection( iEngine, iScene );
     }
 
     return false;
@@ -162,11 +169,19 @@ bool
 UOdysseyPainterEditorDefaultTool::OnKeyUp( const FKey& iKey )
 {
     bool ret = false;
-    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
-    if( vectorEngine )
+    
+    
+    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+    if (hasVector)
     {
-        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
-        ret = UOdysseyPainterEditorDefaultTool::OnKeyUpVector( vectorEngine, vectorScene, iKey );
+        //Should be done in OnKeyUpVector directly
+        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
+        if (mediaVectors.Num() > 0)
+        {
+            FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+            FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
+            ret = UOdysseyPainterEditorDefaultTool::OnKeyUpVector( vectorEngine, vectorScene, iKey );
+        }
     }
 
     return ret;

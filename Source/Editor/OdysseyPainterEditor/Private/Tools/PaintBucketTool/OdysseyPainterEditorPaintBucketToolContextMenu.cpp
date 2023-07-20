@@ -8,8 +8,7 @@
 
 //static
 TSharedPtr<SWidget>
-FOdysseyPainterEditorPaintBucketToolContextMenu::CreateWidget( FOdysseyPainterEditorToolContext* iToolContext
-                                                             , FOdysseyVectorBucket* iBucket )
+FOdysseyPainterEditorPaintBucketToolContextMenu::CreateWidget( FOdysseyPainterEditor* iEditor, FOdysseyVectorBucket* iBucket )
 {
     FMenuBuilder menu( true, nullptr );
 
@@ -34,7 +33,7 @@ FOdysseyPainterEditorPaintBucketToolContextMenu::CreateWidget( FOdysseyPainterEd
             LOCTEXT("BucketProperties", "Bucket properties")
             , LOCTEXT("BucketProperties", "Bucket Properties")
             , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
-            , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditorPaintBucketToolContextMenu::BucketProperties, iToolContext, iBucket )));
+            , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditorPaintBucketToolContextMenu::BucketProperties, iEditor, iBucket )));
     }
     menu.EndSection();
 
@@ -43,8 +42,7 @@ FOdysseyPainterEditorPaintBucketToolContextMenu::CreateWidget( FOdysseyPainterEd
 
 //static
 void
-FOdysseyPainterEditorPaintBucketToolContextMenu::BucketProperties( FOdysseyPainterEditorToolContext* iToolContext
-                                                                 , FOdysseyVectorBucket* iBucket )
+FOdysseyPainterEditorPaintBucketToolContextMenu::BucketProperties( FOdysseyPainterEditor* iEditor, FOdysseyVectorBucket* iBucket )
 {
     FPropertyEditorModule& PropertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
     TSharedPtr<IDetailsView> detailsView;
@@ -82,7 +80,7 @@ FOdysseyPainterEditorPaintBucketToolContextMenu::BucketProperties( FOdysseyPaint
     FSlateApplication::Get().AddModalWindow
     (
         CookbookWindow,
-        iToolContext->GetEditor()->GetGUI()->GetViewportTab().Get()->Widget(),
+        iEditor->GetGUI()->GetViewportTab().Get()->Widget(),
         false
     );
 

@@ -3,7 +3,7 @@
 
 #include "Tools/ColorPickerTool/OdysseyPainterEditorColorPickerTool.h"
 
-#include "OdysseyRasterBlock.h"
+#include "OdysseyMediaVector.h"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
@@ -19,44 +19,23 @@ UOdysseyPainterEditorColorPickerTool::UOdysseyPainterEditorColorPickerTool()
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
-void
-UOdysseyPainterEditorColorPickerTool::Load()
-{
-    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedia<FOdysseyMediaVector>();
-    if (mediaVectors.Num() > 0)
-        mScene = mediaVectors[0].GetScene();
-
-    UOdysseyPainterEditorTool::Load();
-}
-
-void
-UOdysseyPainterEditorColorPickerTool::Unload()
-{
-    mScene = nullptr;
-
-    UOdysseyPainterEditorTool::Unload();
-}
-
-bool
-UOdysseyPainterEditorColorPickerTool::CanDraw()
-{
-    return IsActivable();
-}
-
 bool
 UOdysseyPainterEditorColorPickerTool::OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
 {
     bool ret = false;
 
-    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedia<FOdysseyMediaVector>();
-    if (mediaVectors.Num() > 0)
-        mScene = mediaVectors[0].GetScene();
-
-    FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
-    if( vectorEngine )
+    
+    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+    if (hasVector)
     {
-        FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
-        ret = UOdysseyPainterEditorColorPickerTool::OnMouseUpVector( vectorEngine, vectorScene, iPointInTexture, iKey );
+        //Should be done in OnMouseUpVector directly
+        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
+        if (mediaVectors.Num() > 0)
+        {
+            FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+            FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
+            ret = UOdysseyPainterEditorColorPickerTool::OnMouseUpVector( vectorEngine, vectorScene, iPointInTexture, iKey );
+        }
     }
 
     return ret;
@@ -71,7 +50,7 @@ UOdysseyPainterEditorColorPickerTool::OnMouseUpVector( FOdysseyVectorEngine* iEn
     FColor color = iEngine->GetColorImagePixelValue( iPointInTexture.x, iPointInTexture.y );
     ::ULIS::FColor ulisColor = ::ULIS::FColor::RGBA8( color.R, color.G, color.B, color.A );
 
-    mToolContext->GetEditor()->PaintColor(ulisColor, true);
+    GetEditor()->PaintColor(ulisColor, true);
 
     return false;
 }

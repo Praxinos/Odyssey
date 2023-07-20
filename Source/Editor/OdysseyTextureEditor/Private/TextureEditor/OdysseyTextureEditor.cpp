@@ -263,7 +263,11 @@ FOdysseyTextureEditor::GetCurrentVectorEngine() const
 FOdysseyMediaProvider
 FOdysseyTextureEditor::GetCurrentMediaProvider()
 {
-	UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(LayerStack()->CurrentLayer.Get());
+	UOdysseyTextureLayerStack* layerStack = LayerStack();
+	if (!layerStack)
+		return FOdysseyMediaProvider();
+
+	UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
 	if (!currentLayer)
 		return FOdysseyMediaProvider();
 

@@ -133,9 +133,6 @@ public:
     //Aborts the stroke
     bool Abort();
 
-    //Wether the tool can draw or not
-    virtual bool CanDraw();
-
 private:
     // Internal - BrushInstance
 

@@ -3,6 +3,8 @@
 
 #include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationCellsMutator.h"
 #include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
+#include "Abilities/IOdysseyAnimationMediaAbility.h"
+
 
 FOdysseyAnimationCellsMutator::FOdysseyAnimationCellsMutator(UOdysseyAnimationLayerImageRaster* iLayer)
     : FOdysseyMutator(iLayer, "FOdysseyAnimationCellsMutator")
@@ -12,6 +14,7 @@ FOdysseyAnimationCellsMutator::FOdysseyAnimationCellsMutator(UOdysseyAnimationLa
         [iLayer]()
         {
             iLayer->CellsChanged();
+            IOdysseyAnimationMediaAbility::OnChanged().Broadcast();
         }
     );
 }

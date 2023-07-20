@@ -46,14 +46,14 @@ UOdysseyPainterEditorTool::OnToolContextChanged()
 void
 UOdysseyPainterEditorTool::Activate()
 {    
-    mToolContext->OnChanged().AddUObject(this, &UOdysseyPainterEditorTool::OnToolContextChanged );
+    //mToolContext->OnChanged().AddUObject(this, &UOdysseyPainterEditorTool::OnToolContextChanged );
     Load();
 }
 
 void
 UOdysseyPainterEditorTool::Inactivate()
 {
-	mToolContext->OnChanged().RemoveAll(this);
+	//mToolContext->OnChanged().RemoveAll(this);
     Flush(); //Finish everything
     Commit(); //Commit the jobs that has been done
     Unload();
