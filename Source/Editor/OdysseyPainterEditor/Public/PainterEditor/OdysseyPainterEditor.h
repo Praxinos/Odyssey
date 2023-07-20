@@ -22,6 +22,7 @@
 #include "Tools/ColorPickerTool/OdysseyPainterEditorColorPickerTool.h"
 #include "Tools/VectorGridTool/OdysseyPainterEditorVectorGridTool.h"
 #include "Tools/VectorTransformTool/OdysseyPainterEditorVectorTransformTool.h"
+#include "OdysseyMediaProvider.h"
 #include <ULIS>
 
 class FOdysseyHUDSystem;
@@ -58,6 +59,7 @@ public:
     virtual const FOdysseyBrushColor&                       PaintColor() const;
     virtual UOdysseyPainterEditorTool*                      GetSelectedTool() const;
     virtual TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> GetDisplayBlock() = 0;
+    virtual FOdysseyMediaProvider                           GetCurrentMediaProvider() = 0;
 
     virtual UOdysseyPainterEditorRasterDrawingTool*                  GetRasterDrawingTool() const;
     virtual UOdysseyPainterEditorVectorPrimitiveDrawingTool*         GetVectorPrimitiveDrawingTool() const;
@@ -130,7 +132,7 @@ protected:
     TArray<FOdysseyBrushContext*>   mBrushContexts;
     FOdysseyBrushColor              mPaintColor;
     FOnSelectedToolChanged mOnSelectedToolChanged;
-    TSharedPtr<FOdysseyPainterEditorToolContext> mToolContext;
+    //TSharedPtr<FOdysseyPainterEditorToolContext> mToolContext;
     
     UOdysseyPainterEditorRasterDrawingTool* mRasterDrawingTool;
     UOdysseyPainterEditorVectorPrimitiveDrawingTool* mVectorPrimitiveDrawingTool;

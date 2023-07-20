@@ -13,8 +13,8 @@ class ODYSSEYLAYERSTACK_API UOdysseyLayerFunctionLibrary : public UBlueprintFunc
 
 public:
     UFUNCTION(BlueprintPure, Category="LayerStack|Layer", meta = (HidePin="Layer", DefaultToSelf="Layer"))
-    static bool IsLayerActivatedInStack(UOdysseyLayer* Layer);
+    static bool IsLayerActivatedInStack(const UOdysseyLayer* Layer);
 
     UFUNCTION(BlueprintPure, Category="LayerStack|Layer", meta = (HidePin="Layer", DefaultToSelf="Layer"))
-    static bool IsLayerLockedInStack(UOdysseyLayer* Layer);
+    static bool IsLayerLockedInStack(const UOdysseyLayer* Layer);
 };

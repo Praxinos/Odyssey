@@ -7,10 +7,12 @@
 #include "ULISEventBuilder.h"
 #include "ULISLoaderModule.h"
 #include "OdysseyStyleSet.h"
+#include "OdysseyMediaRaster.h"
 #include "OdysseyRasterBlock.h"
 #include "OdysseyRasterBlockMutator.h"
 #include "OdysseyRasterBlockUndo.h"
 #include "OdysseyTextureLayerImageRaster.h"
+#include "OdysseyLayerFunctionLibrary.h"
 #include "OdysseySurfaceTexture2DEditable.h"
 
 #define LOCTEXT_NAMESPACE "UOdysseyTextureLayerImageRaster"
@@ -282,6 +284,18 @@ TSharedPtr<IOdysseyHandle>
 UOdysseyTextureLayerImageRaster::Preload()
 {
     return RasterBlock->Preload();
+}
+
+FOdysseyMediaProvider
+UOdysseyTextureLayerImageRaster::GetMediaProvider() const
+{
+    FOdysseyMediaProvider mediaProvider;
+    TSharedPtr<FOdysseyMediaRaster> mediaRaster = MakeShared<FOdysseyMediaRaster>(RasterBlock);
+    bool isActive = UOdysseyLayerFunctionLibrary::IsLayerActivatedInStack(this);
+    bool isLocked = UOdysseyLayerFunctionLibrary::IsLayerLockedInStack(this);
+    mediaRaster->IsLocked(!isActive || isLocked);
+    mediaProvider.Add(mediaRaster);
+    return mediaProvider;
 }
 
 void

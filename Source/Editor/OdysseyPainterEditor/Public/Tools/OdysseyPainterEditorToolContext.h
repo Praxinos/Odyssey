@@ -16,7 +16,7 @@ public:
     DECLARE_DELEGATE(FOnProvideRasterBlock)
     DECLARE_MULTICAST_DELEGATE(FOnChanged)
 
-public:
+public:                         
     class ODYSSEYPAINTEREDITOR_API FParams
     {
     public:
@@ -66,10 +66,12 @@ public:
     FOdysseyVectorEngine* GetVectorEngine() const;
 
     //Other
-    FOnProvideRasterBlock& OnProvideRasterBlockDelegate();
+    FOnProvideRasterBlock& OnProvideRasterBlockDelegate(); 
     FOnChanged& OnChanged();
 
 private:
+    //TSharedPtr<FOdysseyMediaSet> mMediaSet; 
+
     FOdysseyPainterEditor* mEditor;
     FParams mParams;
     FOnChanged mOnChanged;

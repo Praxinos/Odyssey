@@ -23,18 +23,12 @@ UOdysseyPainterEditorTool::SetEditor(FOdysseyPainterEditor* iEditor)
 }
 
 FOdysseyPainterEditor*
-UOdysseyPainterEditorTool::GetEditor()
+UOdysseyPainterEditorTool::GetEditor() const
 {
     return mEditor;
 }
 
-void
-UOdysseyPainterEditorTool::SetToolContext(TSharedPtr<FOdysseyPainterEditorToolContext> iToolContext)
-{
-    mToolContext = iToolContext;
-}
-
-void
+/* void
 UOdysseyPainterEditorTool::OnToolContextChanged()
 {
 	//If not activable => Inactivate
@@ -47,7 +41,7 @@ UOdysseyPainterEditorTool::OnToolContextChanged()
 	//Reload the tool to edit the new layer
 	Unload();
 	Load();
-}
+} */
 
 void
 UOdysseyPainterEditorTool::Activate()

@@ -49,7 +49,7 @@
 
 FOdysseyPainterEditor::~FOdysseyPainterEditor()
 {
-    mToolContext->Unset();
+    //mToolContext->Unset();
 	delete mHUDSystem;
 }
 
@@ -58,7 +58,7 @@ FOdysseyPainterEditor::FOdysseyPainterEditor()
     , mHUDSystem(new FOdysseyHUDSystem())
 	, mBrushContexts()
 	, mPaintColor(::ULIS::FColor::Black)
-    , mToolContext()
+    //, mToolContext()
 	, mRasterDrawingTool(nullptr)
 	, mVectorPrimitiveDrawingTool(nullptr)
 	, mVectorPathDrawingTool(nullptr)
@@ -77,7 +77,7 @@ FOdysseyPainterEditor::FOdysseyPainterEditor()
 	, mVectorGridTool(nullptr)
 	, mVectorTransformTool(nullptr)
 {
-    mToolContext = MakeShared<FOdysseyPainterEditorToolContext>(this);
+    //mToolContext = MakeShared<FOdysseyPainterEditorToolContext>(this);
 	mBrushContexts.Add(new FOdysseyPainterEditorBrushContext(this));
 }
 
@@ -113,23 +113,23 @@ FOdysseyPainterEditor::InitTools()
 	mVectorGridTool = NewObject<UOdysseyPainterEditorVectorGridTool>();
 	mVectorTransformTool = NewObject<UOdysseyPainterEditorVectorTransformTool>();
 
-	mRasterDrawingTool->SetToolContext(mToolContext);
-    mVectorPrimitiveDrawingTool->SetToolContext(mToolContext);
-    mVectorPathDrawingTool->SetToolContext(mToolContext);
-    mVectorPathEditTool->SetToolContext(mToolContext);
-    mVectorPathCutTool->SetToolContext(mToolContext);
-    mVectorPickTool->SetToolContext(mToolContext);
-    mVectorSceneScaleTool->SetToolContext(mToolContext);
-    mVectorScenePanTool->SetToolContext(mToolContext);
-    mVectorEraserTool->SetToolContext(mToolContext);
-    mVectorPathPushTool->SetToolContext(mToolContext);
-    mVectorPathWidthTool->SetToolContext(mToolContext);
-    mVectorPathSmoothTool->SetToolContext(mToolContext);
-    mVectorPathStitchTool->SetToolContext(mToolContext);
-	mPaintBucketTool->SetToolContext(mToolContext);
-	mColorPickerTool->SetToolContext(mToolContext);
-	mVectorGridTool->SetToolContext(mToolContext);
-	mVectorTransformTool->SetToolContext(mToolContext);
+	mRasterDrawingTool->SetEditor(this);
+    mVectorPrimitiveDrawingTool->SetEditor(this);
+    mVectorPathDrawingTool->SetEditor(this);
+    mVectorPathEditTool->SetEditor(this);
+    mVectorPathCutTool->SetEditor(this);
+    mVectorPickTool->SetEditor(this);
+    mVectorSceneScaleTool->SetEditor(this);
+    mVectorScenePanTool->SetEditor(this);
+    mVectorEraserTool->SetEditor(this);
+    mVectorPathPushTool->SetEditor(this);
+    mVectorPathWidthTool->SetEditor(this);
+    mVectorPathSmoothTool->SetEditor(this);
+    mVectorPathStitchTool->SetEditor(this);
+	mPaintBucketTool->SetEditor(this);
+	mColorPickerTool->SetEditor(this);
+	mVectorGridTool->SetEditor(this);
+	mVectorTransformTool->SetEditor(this);
 	mRasterDrawingTool->SetBrushContexts(mBrushContexts);
 
 	mRasterDrawingTool->SetEditor(this);

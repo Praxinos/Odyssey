@@ -4,8 +4,8 @@
 #include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
 
 #include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
-#include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRasterImageRasterEditingAbility.h"
 #include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRasterImageRenderingAbility.h"
+#include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRasterMediaAbility.h"
 #include "ULISLoaderModule.h"
 
 #define LOCTEXT_NAMESPACE "FOdysseyAnimationCellImageRaster"
@@ -83,7 +83,7 @@ FOdysseyAnimationCellImageRaster::InitAbilities()
 {
     //Set Abilities
     SetAbility(MakeShared<FOdysseyAnimationCellImageRasterImageRenderingAbility>(SharedThis(this)));
-    SetAbility(MakeShared<FOdysseyAnimationCellImageRasterImageRasterEditingAbility>(SharedThis(this)));
+    SetAbility(MakeShared<FOdysseyAnimationCellImageRasterMediaAbility>(SharedThis(this)));
 }
 
 const FName&

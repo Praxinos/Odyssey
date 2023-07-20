@@ -72,11 +72,8 @@ protected:
 
 public:
     void SetEditor(class FOdysseyPainterEditor* iEditor);
-    FOdysseyPainterEditor* GetEditor();
-
-public:
-    void SetToolContext(TSharedPtr<FOdysseyPainterEditorToolContext> iToolContext);
-    virtual void OnToolContextChanged();
+    class FOdysseyPainterEditor* GetEditor() const;
+    //template<class T> T* GetEditorAs() const { return static_cast<T*>(mEditor); };
 
 protected:
     class FOdysseyPainterEditor*              mEditor;
@@ -84,6 +81,4 @@ protected:
 public:
     UPROPERTY(EditDefaultsOnly, Category="Tool")
     FSlateBrush Icon;
-
-    TSharedPtr<FOdysseyPainterEditorToolContext> mToolContext;
 };

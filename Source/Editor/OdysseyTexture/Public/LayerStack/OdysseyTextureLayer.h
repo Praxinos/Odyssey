@@ -7,6 +7,7 @@
 
 #include "UObject/OdysseyObjectPropertyTracker.h"
 #include "Misc/OdysseyHandle.h"
+#include "OdysseyMediaProvider.h"
 #include <ULIS>
 
 #include "OdysseyTextureLayer.generated.h"
@@ -72,6 +73,8 @@ public:
      * One handle corresponds to something being held in memory
      */
     virtual TSharedPtr<IOdysseyHandle> Preload();
+
+    virtual FOdysseyMediaProvider GetMediaProvider() const;
 
 private:
     void OnTrackerChildrenChanged(const TArray<UOdysseyLayer*>& iOldChildren);

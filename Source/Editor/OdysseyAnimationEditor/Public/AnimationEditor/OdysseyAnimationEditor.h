@@ -29,6 +29,7 @@ public:
     virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
     virtual void ExtendMenu(FToolMenuOwner iOwner, FName iMenuName) override;
     virtual void Tick(float iDeltaTime) override;
+    virtual FOdysseyMediaProvider GetCurrentMediaProvider() override;
 
 public:
     // Getters
@@ -41,7 +42,7 @@ public:
 	virtual UTexture*                           DisplayTexture() const override;
     virtual TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> GetDisplayBlock() override;
 
-    TSharedPtr<FOdysseyRasterBlock> GetCurrentRasterBlock() const;
+    // TSharedPtr<FOdysseyRasterBlock> GetCurrentRasterBlock() const;
     bool CanProvideRasterBlockOnDemand() const;
     void ProvideRasterBlock();
     bool IsRasterBlockReadOnly() const;
@@ -66,6 +67,7 @@ private:
     void OnCurrentFrameChanged(UOdysseyAnimation* iAnimation);
     void OnImageRenderingCompositionCommited(const FGuid& iFrameId);
     void OnCurrentLayerChanged(class UOdysseyLayerStack* iLayerStack);
+    void OnLayerStackElementMediaChanged();
     
     void UpdateToolContext();
 

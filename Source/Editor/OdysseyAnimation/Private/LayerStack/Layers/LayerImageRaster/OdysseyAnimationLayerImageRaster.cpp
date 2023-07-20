@@ -3,6 +3,7 @@
 
 #include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
 #include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRasterImageRenderingAbility.h"
+#include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRasterMediaAbility.h"
 
 #include "OdysseyPixelFormat.h"
 #include "ULISEventBuilder.h"
@@ -366,6 +367,7 @@ UOdysseyAnimationLayerImageRaster::PostInitProperties()
 
     mLightTable = FOdysseyAnimationLightTable::Create(this);
     SetAbility(MakeShared<FOdysseyAnimationLayerImageRasterImageRenderingAbility>(this));
+    SetAbility(MakeShared<FOdysseyAnimationLayerImageRasterMediaAbility>(this));
 }
 
 void

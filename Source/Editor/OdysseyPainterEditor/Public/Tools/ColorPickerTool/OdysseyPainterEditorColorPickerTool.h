@@ -27,6 +27,9 @@ public:
     
     void Initialize(FOdysseyPaintEngine* iPaintEngine);
 
+    virtual void Load() override;
+    virtual void Unload() override;
+
     //OdysseyPainterEditorTool overrides
     virtual bool OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
     bool OnMouseUpVector( FOdysseyVectorEngine* iEngine

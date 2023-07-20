@@ -15,9 +15,11 @@
 #include "OdysseyAnimation.h"
 #include "OdysseyAnimationPlayer.h"
 #include "OdysseyAnimationTexture.h"
+#include "OdysseyMediaRaster.h"
 #include "Abilities/IOdysseyAnimationImageRenderingAbility.h"
-#include "Abilities/IOdysseyAnimationImageRasterEditingAbility.h"
+#include "Abilities/IOdysseyAnimationMediaAbility.h"
 #include "ULISLoaderModule.h"
+
 
 #define LOCTEXT_NAMESPACE "OdysseyAnimationEditor"
 
@@ -73,6 +75,7 @@ FOdysseyAnimationEditor::InitData(UObject* iEditedObject)
 	mPlayer->OnStop().AddRaw(this, &FOdysseyAnimationEditor::OnPlayerStop);
 	mAnimation->OnCurrentFrameChanged().AddRaw(this, &FOdysseyAnimationEditor::OnCurrentFrameChanged);
 	IOdysseyAnimationImageRenderingAbility::OnCompositionCommited().AddRaw(this, &FOdysseyAnimationEditor::OnImageRenderingCompositionCommited);
+	IOdysseyAnimationMediaAbility::OnChanged().AddRaw(this, &FOdysseyAnimationEditor::OnLayerStackElementMediaChanged);
 
 	FOdysseyPainterEditor::InitData(iEditedObject);
 }
@@ -81,7 +84,7 @@ void
 FOdysseyAnimationEditor::InitTools()
 {
 	FOdysseyPainterEditor::InitTools();
-	UpdateToolContext();
+	//UpdateToolContext();
 
 	/* mToolContext->GetRasterBlockAttribute().BindRaw(this, &FOdysseyAnimationEditor::GetCurrentRasterBlock);
     mToolContext->GetCanProvideRasterBlockOnDemandAttribute().BindRaw(this, &FOdysseyAnimationEditor::CanProvideRasterBlockOnDemand);
@@ -93,11 +96,11 @@ FOdysseyAnimationEditor::InitTools()
 void
 FOdysseyAnimationEditor::Tick(float iDeltaTime)
 {
-	UpdateToolContext();
+	//UpdateToolContext();
 	FOdysseyPainterEditor::Tick(iDeltaTime);
 }
 
-void
+/* void
 FOdysseyAnimationEditor::UpdateToolContext()
 {
 	FOdysseyPainterEditorToolContext::FParams toolContextParams;
@@ -108,7 +111,7 @@ FOdysseyAnimationEditor::UpdateToolContext()
 	toolContextParams.mVectorEngine = GetCurrentVectorEngine();
 	
 	mToolContext->Set(toolContextParams);
-}
+} */
 
 void
 FOdysseyAnimationEditor::BindShortcuts(FBaseToolkit* iToolkit)
@@ -170,7 +173,28 @@ FOdysseyAnimationEditor::GetDisplayBlock()
 	return nullptr;
 }
 
-TSharedPtr<FOdysseyRasterBlock>
+void
+FOdysseyAnimationEditor::OnLayerStackElementMediaChanged()
+{
+	SelectDefaultTool(); //Refresh the current tool
+    Timeline()->SetSelectedFrames(FInt32Range()); //Clear Selected frames when changing layer
+}
+
+FOdysseyMediaProvider
+FOdysseyAnimationEditor::GetCurrentMediaProvider()
+{
+	UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(LayerStack()->CurrentLayer.Get());
+	if (!currentLayer)
+		return FOdysseyMediaProvider();
+
+	TSharedPtr<IOdysseyAnimationMediaAbility> mediaAbility = currentLayer->GetAbility<IOdysseyAnimationMediaAbility>();
+	if ( !mediaAbility )
+		return FOdysseyMediaProvider();
+
+	return mediaAbility->GetMediaProvider(Animation()->CurrentFrame);
+}
+
+/* TSharedPtr<FOdysseyRasterBlock>
 FOdysseyAnimationEditor::GetCurrentRasterBlock() const
 {
 	UOdysseyAnimationLayerImageRaster* currentLayerRaster = Cast<UOdysseyAnimationLayerImageRaster>(LayerStack()->CurrentLayer.Get());
@@ -187,7 +211,7 @@ FOdysseyAnimationEditor::GetCurrentRasterBlock() const
 		return nullptr;
 	
 	return rasterEditableAbility->GetRasterBlock(celFrameIndex);
-}
+} */
 
 bool
 FOdysseyAnimationEditor::CanProvideRasterBlockOnDemand() const
@@ -394,36 +418,45 @@ FOdysseyAnimationEditor::OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStack)
 void
 FOdysseyAnimationEditor::Clear()
 {
-    UOdysseyAnimationLayerImageRaster* currentLayerRaster = Cast<UOdysseyAnimationLayerImageRaster>(LayerStack()->CurrentLayer.Get());
-	if (currentLayerRaster)
+    UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(LayerStack()->CurrentLayer.Get());
+	if (currentLayer)
 	{		
 	#ifdef WITH_EDITOR
-		FScopedTransaction ScopedTransaction(LOCTEXT("Layer Image Raster", "Clear Canvas"));
+		FScopedTransaction ScopedTransaction(LOCTEXT("Layer Image Raster", "Clear"));
 	#endif
 
-		int celFrameIndex = INDEX_NONE;
-		TSharedPtr<FOdysseyAnimationCell> cell = currentLayerRaster->GetCellAtFrame(Animation()->CurrentFrame, celFrameIndex);
-		if (cell)
+		TSharedPtr<IOdysseyAnimationMediaAbility> mediaAbility = currentLayer->GetAbility<IOdysseyAnimationMediaAbility>();
+		if ( mediaAbility )
 		{
-			TSharedPtr<IOdysseyAnimationImageRasterEditingAbility> rasterEditableAbility = cell->GetAbility<IOdysseyAnimationImageRasterEditingAbility>();
-			if ( rasterEditableAbility )
+			FOdysseyMediaProvider mediaProvider = mediaAbility->GetMediaProvider(Animation()->CurrentFrame);
+			if ( mediaProvider.HasMedia<FOdysseyMediaRaster>() )
 			{
-				TSharedPtr<FOdysseyRasterBlock> rasterBlock = rasterEditableAbility->GetRasterBlock(celFrameIndex);
-				FOdysseyRasterBlockMutator mutator(rasterBlock);
-				mutator.EditTilesFromRects(
-					{ ::ULIS::FRectI::FromXYWH(0, 0, rasterBlock->GetWidth(), rasterBlock->GetHeight()) },
-					FOdysseyRasterBlockMutator::FEditDelegate::CreateLambda(
-						[&](const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
-						{
-							TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ULISRasterBlock = rasterBlock->GetBlock();
-							::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(rasterBlock->GetFormat());
-							::ULIS::FEvent eventClear;
-							ctx.Clear(*ULISRasterBlock, ::ULIS::FRectI::Auto, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventClear);
-							return { eventClear };
-						}
-					)
-				);
-				mutator.Commit();
+				TArray<TSharedPtr<FOdysseyMediaRaster>> mediasRaster = mediaProvider.GetOrCreateMedias<FOdysseyMediaRaster>();
+				for (TSharedPtr<FOdysseyMediaRaster> mediaRaster : mediasRaster)
+				{
+					if (mediaRaster->IsLocked())
+						continue;
+
+					TSharedPtr<FOdysseyRasterBlock> rasterBlock = mediaRaster->GetRasterBlock();
+					if (!rasterBlock)
+						continue;
+
+					FOdysseyRasterBlockMutator mutator(rasterBlock);
+					mutator.EditTilesFromRects(
+						{ ::ULIS::FRectI::FromXYWH(0, 0, rasterBlock->GetWidth(), rasterBlock->GetHeight()) },
+						FOdysseyRasterBlockMutator::FEditDelegate::CreateLambda(
+							[&](const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+							{
+								TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ULISRasterBlock = rasterBlock->GetBlock();
+								::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(rasterBlock->GetFormat());
+								::ULIS::FEvent eventClear;
+								ctx.Clear(*ULISRasterBlock, ::ULIS::FRectI::Auto, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventClear);
+								return { eventClear };
+							}
+						)
+					);
+					mutator.Commit();
+				}
 			}
 		}
 	}

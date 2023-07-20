@@ -27,6 +27,7 @@ public:
     virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
     virtual void ExtendMenu(FToolMenuOwner iOwner, FName iMenuName) override;
     virtual void Tick(float iDeltaTime) override;
+    virtual FOdysseyMediaProvider GetCurrentMediaProvider() override;
 
 public:
     // Getters
@@ -36,11 +37,11 @@ public:
     virtual TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> GetDisplayBlock() override;
     
     virtual void				        SetTexture(UTexture2D* iTexture);
-    UOdysseyTextureLayerStackUserData*       TextureUserData() const;
+    UOdysseyTextureLayerStackUserData*  TextureUserData() const;
 
-    TSharedPtr<FOdysseyRasterBlock> GetCurrentRasterBlock() const;
-    bool IsRasterBlockReadOnly() const;
-    FOdysseyVectorEngine* GetCurrentVectorEngine() const;
+    //TSharedPtr<FOdysseyRasterBlock> GetCurrentRasterBlock() const;
+    //bool IsRasterBlockReadOnly() const;
+    //FOdysseyVectorEngine* GetCurrentVectorEngine() const;
 
 public:
     // Overrides
@@ -64,7 +65,7 @@ protected:
     virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
 
 private:
-    void UpdateToolContext();
+    //void UpdateToolContext();
 
 private:
     UTexture2D* mTexture;

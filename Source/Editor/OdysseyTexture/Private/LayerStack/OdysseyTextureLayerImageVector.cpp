@@ -6,6 +6,7 @@
 #include "OdysseyTextureLayerStack.h"
 #include "OdysseyPixelFormat.h"
 #include "EditorStyleSet.h"
+#include "OdysseyMediaVector.h"
 #include "ULISLoaderModule.h"
 #include "ULISUtils.h"
 #include "Export/OdysseyVectorExport.h"
@@ -74,6 +75,20 @@ FOdysseyVectorEngine*
 UOdysseyTextureLayerImageVector::GetEngine()
 {
     return mEngine;
+}
+
+FOdysseyMediaProvider
+UOdysseyTextureLayerImageVector::GetMediaProvider() const
+{
+    FOdysseyMediaProvider mediaProvider;
+    TSharedPtr<FOdysseyMediaVector> mediaVector = MakeShared<FOdysseyMediaVector>(mEngine->GetScene());
+
+    bool isActive = UOdysseyLayerFunctionLibrary::IsLayerActivatedInStack(this);
+    bool isLocked = UOdysseyLayerFunctionLibrary::IsLayerLockedInStack(this);
+    mediaVector->IsLocked(!isActive || isLocked);
+
+    mediaProvider.Add(mediaVector);
+    return mediaProvider;
 }
 
 void

@@ -161,6 +161,12 @@ UOdysseyTextureLayer::Preload()
     return handle;
 }
 
+FOdysseyMediaProvider
+UOdysseyTextureLayer::GetMediaProvider() const
+{
+    return FOdysseyMediaProvider();
+}
+
 void
 UOdysseyTextureLayer::OnTrackerChildrenChanged(const TArray<UOdysseyLayer*>& iOldChildren)
 {

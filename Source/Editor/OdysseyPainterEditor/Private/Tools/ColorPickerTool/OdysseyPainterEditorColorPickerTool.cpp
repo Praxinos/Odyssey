@@ -19,6 +19,24 @@ UOdysseyPainterEditorColorPickerTool::UOdysseyPainterEditorColorPickerTool()
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
+void
+UOdysseyPainterEditorColorPickerTool::Load()
+{
+    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedia<FOdysseyMediaVector>();
+    if (mediaVectors.Num() > 0)
+        mScene = mediaVectors[0].GetScene();
+
+    UOdysseyPainterEditorTool::Load();
+}
+
+void
+UOdysseyPainterEditorColorPickerTool::Unload()
+{
+    mScene = nullptr;
+
+    UOdysseyPainterEditorTool::Unload();
+}
+
 bool
 UOdysseyPainterEditorColorPickerTool::CanDraw()
 {
@@ -29,6 +47,10 @@ bool
 UOdysseyPainterEditorColorPickerTool::OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
 {
     bool ret = false;
+
+    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedia<FOdysseyMediaVector>();
+    if (mediaVectors.Num() > 0)
+        mScene = mediaVectors[0].GetScene();
 
     FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
     if( vectorEngine )

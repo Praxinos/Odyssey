@@ -54,6 +54,7 @@ public class OdysseyPainterEditor : ModuleRules
                 "OdysseyShapes",
                 "OdysseyVector",
                 "OdysseyPalette",
+                "OdysseyMedia",
                 "ULIS",
                 "ULISLoader"
              }

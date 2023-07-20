@@ -89,6 +89,7 @@ protected:
     void OpacityChanged();
     void BlendModeChanged();
     virtual void PropertyChanged(const FName& iPropertyName) override;
+    virtual FOdysseyMediaProvider GetMediaProvider() const override;
 
 public:
     // UObject overrides

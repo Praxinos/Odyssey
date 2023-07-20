@@ -5,7 +5,7 @@
 #include "OdysseyLayerStack.h"
 
 bool
-UOdysseyLayerFunctionLibrary::IsLayerActivatedInStack(UOdysseyLayer* iLayer)
+UOdysseyLayerFunctionLibrary::IsLayerActivatedInStack(const UOdysseyLayer* iLayer)
 {
 	if ( !iLayer )
 		return false;
@@ -28,7 +28,7 @@ UOdysseyLayerFunctionLibrary::IsLayerActivatedInStack(UOdysseyLayer* iLayer)
 }
 
 bool
-UOdysseyLayerFunctionLibrary::IsLayerLockedInStack(UOdysseyLayer* iLayer)
+UOdysseyLayerFunctionLibrary::IsLayerLockedInStack(const UOdysseyLayer* iLayer)
 {
 	if ( !iLayer )
 		return true;

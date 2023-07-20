@@ -80,6 +80,8 @@ class ODYSSEYTEXTURE_API UOdysseyTextureLayerImageVector
         void Serialize(FArchive& Ar);
         virtual void PropertyChanged(const FName& iPropertyName) override;
 
+        virtual FOdysseyMediaProvider GetMediaProvider() const override;
+
     public:
         // Event Listeners
         void OnRefresh(FOdysseyVectorScene* iScene);

@@ -51,7 +51,7 @@ void
 FOdysseyTextureEditor::InitTools()
 {
 	FOdysseyPainterEditor::InitTools();
-	UpdateToolContext();
+	//UpdateToolContext();
 	
 	/* mToolContext->GetRasterBlockAttribute().BindRaw(this, &FOdysseyTextureEditor::GetCurrentRasterBlock);
 	mToolContext->GetIsRasterBlockReadOnlyAttribute().BindRaw(this, &FOdysseyTextureEditor::IsRasterBlockReadOnly);
@@ -61,11 +61,11 @@ FOdysseyTextureEditor::InitTools()
 void
 FOdysseyTextureEditor::Tick(float iDeltaTime)
 {
-	UpdateToolContext();
+	//UpdateToolContext();
 	FOdysseyPainterEditor::Tick(iDeltaTime);
 }
 
-void
+/* void
 FOdysseyTextureEditor::UpdateToolContext()
 {
 	FOdysseyPainterEditorToolContext::FParams toolContextParams;
@@ -74,7 +74,7 @@ FOdysseyTextureEditor::UpdateToolContext()
 	toolContextParams.mVectorEngine = GetCurrentVectorEngine();
 	
 	mToolContext->Set(toolContextParams);
-}
+} */
 
 void
 FOdysseyTextureEditor::BindShortcuts(FBaseToolkit* iToolkit)
@@ -219,7 +219,7 @@ FOdysseyTextureEditor::TextureUserData() const
     return userData;
 }
 
-TSharedPtr<FOdysseyRasterBlock>
+/* TSharedPtr<FOdysseyRasterBlock>
 FOdysseyTextureEditor::GetCurrentRasterBlock() const
 {
 	if ( !LayerStack() )
@@ -258,6 +258,16 @@ FOdysseyTextureEditor::GetCurrentVectorEngine() const
 		return nullptr;
 	
 	return currentLayerVector->GetEngine();
+} */
+
+FOdysseyMediaProvider
+FOdysseyTextureEditor::GetCurrentMediaProvider()
+{
+	UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(LayerStack()->CurrentLayer.Get());
+	if (!currentLayer)
+		return FOdysseyMediaProvider();
+
+	return currentLayer->GetMediaProvider();
 }
 
 //--------------------------------------------------------------------------------------
