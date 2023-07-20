@@ -84,6 +84,8 @@ void
 FOdysseyAnimationEditor::InitTools()
 {
 	FOdysseyPainterEditor::InitTools();
+	SelectDefaultTool();
+
 	//UpdateToolContext();
 
 	/* mToolContext->GetRasterBlockAttribute().BindRaw(this, &FOdysseyAnimationEditor::GetCurrentRasterBlock);
@@ -171,6 +173,55 @@ FOdysseyAnimationEditor::GetDisplayBlock()
 	//Find a way to do it without having that method
 
 	return nullptr;
+}
+
+void
+FOdysseyAnimationEditor::OnSelectedToolChanged()
+{
+	UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(LayerStack()->CurrentLayer.Get());
+	if (!currentLayer)
+		return;
+
+	UClass* layerClass = currentLayer->GetClass();
+	if (!mCurrentToolPerLayerClass.Contains(layerClass))
+		mCurrentToolPerLayerClass.Add(layerClass, nullptr);
+
+	mCurrentToolPerLayerClass[layerClass] = mSelectedTool;
+}
+
+UOdysseyPainterEditorTool*
+FOdysseyAnimationEditor::FindDefaultToolForCurrentLayer()
+{
+	for (UOdysseyPainterEditorTool* tool : mTools)
+	{
+		if ( !tool->IsActivable() )
+			continue;
+
+		return tool;
+	}
+	return nullptr;
+}
+
+void
+FOdysseyAnimationEditor::SelectDefaultTool()
+{
+	UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(LayerStack()->CurrentLayer.Get());
+	if (!currentLayer)
+	{
+		SetSelectedTool(nullptr);
+		return;
+	}
+
+	UOdysseyPainterEditorTool* tool = nullptr;
+
+	UClass* layerClass = currentLayer->GetClass();
+	if (mCurrentToolPerLayerClass.Contains(layerClass))
+		tool = mCurrentToolPerLayerClass[layerClass];
+	
+	if (!tool || !tool->IsActivable())
+		tool = FindDefaultToolForCurrentLayer();
+
+	SetSelectedTool(tool);
 }
 
 void

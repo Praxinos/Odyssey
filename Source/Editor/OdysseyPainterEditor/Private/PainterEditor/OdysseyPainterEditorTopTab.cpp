@@ -89,7 +89,7 @@ FOdysseyPainterEditorTopTab::IsPackageEdited() const
 TSharedPtr<SWidget>
 FOdysseyPainterEditorTopTab::CreateWidget()
 {
-    return SAssignNew( mWrapBox, SWrapBox )
+    TSharedPtr<SWidget> widget = SAssignNew( mWrapBox, SWrapBox )
         .UseAllottedSize(true)
         .InnerSlotPadding(FVector2D(3.f, 3.f))
         +SWrapBox::Slot()
@@ -148,27 +148,9 @@ FOdysseyPainterEditorTopTab::CreateWidget()
                 .Image( FOdysseyStyle::GetBrush( "PainterEditor.TopBar.Clear32" ) )
             ]
         ];
-    
-    /* mWidget = SNew(SOdysseyPaintModifiers)
-        .OnGetSize(this, &FOdysseyPainterEditorTopTab::OnGetSize)
-        .OnGetOpacity(this, &FOdysseyPainterEditorTopTab::OnGetOpacity)
-        .OnGetFlow(this, &FOdysseyPainterEditorTopTab::OnGetFlow)
-        .BlendingMode(this, &FOdysseyPainterEditorTopTab::BlendingMode)
-        .AlphaMode(this, &FOdysseyPainterEditorTopTab::AlphaMode)
-        .OnSizeChanged_Raw(this, &FOdysseyPainterEditorTopTab::OnSizeChanged)
-        .OnOpacityChanged_Raw(this, &FOdysseyPainterEditorTopTab::OnOpacityChanged)
-        .OnFlowChanged_Raw(this, &FOdysseyPainterEditorTopTab::OnFlowChanged)
-        .OnBlendingModeChanged_Raw(this, &FOdysseyPainterEditorTopTab::OnBlendingModeChanged)
-        .OnAlphaModeChanged_Raw(this, &FOdysseyPainterEditorTopTab::OnAlphaModeChanged)
-        .OnSaveButtonClicked_Raw(this, &FOdysseyPainterEditorTopTab::OnSaveButtonClicked)
-        .OnUndoButtonClicked_Raw(this, &FOdysseyPainterEditorTopTab::OnUndoButtonClicked)
-        .OnRedoButtonClicked_Raw(this, &FOdysseyPainterEditorTopTab::OnRedoButtonClicked)
-        .OnEraserButtonClicked_Raw(this, &FOdysseyPainterEditorTopTab::OnEraserButtonClicked)
-        .OnClearButtonClicked_Raw(this, &FOdysseyPainterEditorTopTab::OnClearButtonClicked)
-        .IsPackageEdited_Raw(this, &FOdysseyPainterEditorTopTab::IsPackageEdited)
-        .IsEraserButtonActive_Raw(this, &FOdysseyPainterEditorTopTab::IsEraserButtonActive);
 
-    return mWidget; */
+    UpdateToolWidget();
+    return widget;
 }
 
 void
@@ -263,7 +245,7 @@ FOdysseyPainterEditorTopTab::AlphaMode() const
 //---------------------------------------------------------------------- Event Listeners
 
 void
-FOdysseyPainterEditorTopTab::OnSelectedToolChanged()
+FOdysseyPainterEditorTopTab::UpdateToolWidget()
 {
     //Clear the tool widget content
     for (TSharedPtr<SWidget> widget : mToolWidgets )
@@ -286,6 +268,12 @@ FOdysseyPainterEditorTopTab::OnSelectedToolChanged()
             widget.ToSharedRef()
         ];
     }
+}
+
+void
+FOdysseyPainterEditorTopTab::OnSelectedToolChanged()
+{
+    UpdateToolWidget();
 }
 
 /* void

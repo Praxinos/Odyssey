@@ -41,6 +41,7 @@ protected:
 
 protected:
     // Event Listeners
+    void UpdateToolWidget();
     void OnSelectedToolChanged();
     /*virtual void OnSizeChanged( float iValue, EPropertyChangeType::Type iChangeType);
     virtual void OnOpacityChanged( int32 iValue, EPropertyChangeType::Type iChangeType);

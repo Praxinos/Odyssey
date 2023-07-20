@@ -89,7 +89,6 @@ FOdysseyPainterEditor::InitData(UObject* iEditedObject)
 {
 	//Init Tools
 	InitTools();
-	SelectDefaultTool();
 }
 
 void
@@ -203,6 +202,11 @@ FOdysseyPainterEditor::OnCloseRequested()
         mSelectedTool->Inactivate();
 
     return FOdysseyEditor::OnCloseRequested();
+}
+
+void
+FOdysseyPainterEditor::OnSelectedToolChanged()
+{
 }
 
 FOdysseyPainterEditor::FOnSelectedToolChanged&
@@ -358,27 +362,9 @@ FOdysseyPainterEditor::SetSelectedTool(UOdysseyPainterEditorTool* iTool)
 
 	if (mSelectedTool)
 		mSelectedTool->Activate();
-
+    
+    OnSelectedToolChanged();
     mOnSelectedToolChanged.Broadcast();
-}
-
-void
-FOdysseyPainterEditor::SelectDefaultTool()
-{
-	if ( mSelectedTool && mSelectedTool->IsActivable() )
-		return;
-
-	UOdysseyPainterEditorTool* toolToSelect = nullptr;
-    for (UOdysseyPainterEditorTool* tool : mTools)
-    {
-		if ( !tool->IsActivable() )
-			continue;
-
-		toolToSelect = tool;
-		break;
-    }
-
-	SetSelectedTool(toolToSelect);
 }
 
 //--------------------------------------------------------------------------------------

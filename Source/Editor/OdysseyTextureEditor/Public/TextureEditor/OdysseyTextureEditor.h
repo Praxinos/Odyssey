@@ -29,6 +29,10 @@ public:
     virtual void Tick(float iDeltaTime) override;
     virtual FOdysseyMediaProvider GetCurrentMediaProvider() override;
 
+    UOdysseyPainterEditorTool* FindDefaultToolForCurrentLayer();
+    void SelectDefaultTool();
+    virtual void OnSelectedToolChanged() override;
+
 public:
     // Getters
 	virtual UTexture2D*				    Texture() const;
@@ -72,4 +76,5 @@ private:
 	TSharedPtr<FOdysseyTextureEditorGUI> mGUI;
 
     TSharedPtr<IOdysseyHandle> mLayerStackPreloadHandle;
+    TMap<UClass*, UOdysseyPainterEditorTool*> mCurrentToolPerLayerClass;
 };

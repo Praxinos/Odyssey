@@ -51,7 +51,11 @@ protected:
 
 public:
     // Getters
+    
     FOnSelectedToolChanged&                              OnSelectedToolChangedDelegate();
+    
+    virtual void OnSelectedToolChanged();
+
     virtual FOdysseyPainterEditorGUI*                   GetGUI() = 0;
 
     virtual FOdysseyHUDSystem*                              HUDSystem() const;
@@ -95,8 +99,6 @@ public:
     static void UnpropagateBucket( FOdysseyVectorBucket* iBucket );
     static void StitchVertices( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
 
-    void SelectDefaultTool();
-
 public:
     // Setters
     void  PaintColor(const FOdysseyBrushColor& iColor, bool iIsCommit);
@@ -131,7 +133,7 @@ protected:
     FOdysseyHUDSystem*              mHUDSystem;
     TArray<FOdysseyBrushContext*>   mBrushContexts;
     FOdysseyBrushColor              mPaintColor;
-    FOnSelectedToolChanged mOnSelectedToolChanged;
+    FOnSelectedToolChanged          mOnSelectedToolChanged;
     //TSharedPtr<FOdysseyPainterEditorToolContext> mToolContext;
     
     UOdysseyPainterEditorRasterDrawingTool* mRasterDrawingTool;

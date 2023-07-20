@@ -51,6 +51,7 @@ void
 FOdysseyTextureEditor::InitTools()
 {
 	FOdysseyPainterEditor::InitTools();
+	SelectDefaultTool();
 	//UpdateToolContext();
 	
 	/* mToolContext->GetRasterBlockAttribute().BindRaw(this, &FOdysseyTextureEditor::GetCurrentRasterBlock);
@@ -165,6 +166,61 @@ FOdysseyTextureEditor::SetTexture(UTexture2D* iTexture)
 		//select the best tool
 		SelectDefaultTool();
 	}
+}
+
+void
+FOdysseyTextureEditor::OnSelectedToolChanged()
+{
+	if (!LayerStack())
+		return;
+
+	UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(LayerStack()->CurrentLayer.Get());
+	if (!currentLayer)
+		return;
+
+	UClass* layerClass = currentLayer->GetClass();
+	if (!mCurrentToolPerLayerClass.Contains(layerClass))
+		mCurrentToolPerLayerClass.Add(layerClass, nullptr);
+
+	mCurrentToolPerLayerClass[layerClass] = mSelectedTool;
+}
+
+UOdysseyPainterEditorTool*
+FOdysseyTextureEditor::FindDefaultToolForCurrentLayer()
+{
+	for (UOdysseyPainterEditorTool* tool : mTools)
+	{
+		if ( !tool->IsActivable() )
+			continue;
+
+		return tool;
+	}
+	return nullptr;
+}
+
+void
+FOdysseyTextureEditor::SelectDefaultTool()
+{
+	if (!LayerStack())
+		return;
+
+	UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(LayerStack()->CurrentLayer.Get());
+	if (!currentLayer)
+	{
+		SetSelectedTool(nullptr);
+		return;
+	}
+
+	UOdysseyPainterEditorTool* tool = nullptr;
+
+	UClass* layerClass = currentLayer->GetClass();
+	if (mCurrentToolPerLayerClass.Contains(layerClass))
+		tool = mCurrentToolPerLayerClass[layerClass];
+	
+	if (!tool || !tool->IsActivable())
+		tool = FindDefaultToolForCurrentLayer();
+
+	SetSelectedTool(tool);
 }
 
 UTexture2D*
