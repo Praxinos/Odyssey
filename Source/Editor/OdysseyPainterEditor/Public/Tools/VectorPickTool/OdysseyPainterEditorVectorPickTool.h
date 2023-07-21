@@ -10,13 +10,6 @@
 #include "OdysseyPainterEditorVectorPickTool.generated.h"
 
 UENUM()
-enum class EOdysseyVectorEditionMode : uint8
-{
-    Object,
-    Vertex
-};
-
-UENUM()
 enum class EOdysseyVectorPickingMode : uint8
 {
     Freehand,
@@ -54,7 +47,7 @@ public:
                                   , FOdysseyVectorScene* iScene
                                   , const FOdysseyPoint& iPointInTexture
                                   , const FKey& iKey );
-    virtual ::ULIS::FRectI OnMouseDragVector( FOdysseyVectorEngine* iEngine
+    virtual void OnMouseDragVector( FOdysseyVectorEngine* iEngine
                                   , FOdysseyVectorScene* iScene
                                   , const FOdysseyPoint& iPointInTexture );
     virtual bool OnMouseUpVector( FOdysseyVectorEngine* iEngine
@@ -63,10 +56,10 @@ public:
                                 , const FKey& iKey );
     virtual bool OnKeyDownVector( FOdysseyVectorEngine* iEngine
                                 , FOdysseyVectorScene* iScene
-                                , const FKey& iKey ) override;
+                                , const FKey& iKey );
     virtual bool OnKeyUpVector( FOdysseyVectorEngine* iEngine
                               , FOdysseyVectorScene* iScene
-                              , const FKey& iKey ) override;
+                              , const FKey& iKey );
 
     virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
     void PropertyChangedVector( FOdysseyVectorEngine* iEngine
@@ -78,6 +71,8 @@ public:
 
     void Copy( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
     void Paste( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+
+    virtual TArray<TSharedPtr<SWidget>> CreateTopTabWidgets() override;
 
     std::vector<::ULIS::FVec2D>& GetPointArray();
 
@@ -104,8 +99,8 @@ protected:
 
 public:
     UPROPERTY(EditAnywhere, Category="Picking Tool")
-    EOdysseyVectorEditionMode EditionMode;
-
-    UPROPERTY(EditAnywhere, Category="Picking Tool")
     EOdysseyVectorPickingMode PickingMode;
+
+    UPROPERTY(EditAnywhere,Category="Odyssey ObjectMove Tool")
+    bool World;
 };

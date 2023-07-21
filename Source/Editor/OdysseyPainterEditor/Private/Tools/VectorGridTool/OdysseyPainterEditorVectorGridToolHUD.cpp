@@ -6,7 +6,7 @@ FOdysseyPainterEditorVectorGridToolHUD::~FOdysseyPainterEditorVectorGridToolHUD(
 }
 
 FOdysseyPainterEditorVectorGridToolHUD::FOdysseyPainterEditorVectorGridToolHUD( UOdysseyPainterEditorVectorGridTool* iGridTool )
-    : FOdysseyVectorHUDSelection()
+    : FOdysseyPainterEditorVectorPickToolHUD( iGridTool )
 {
     mGridTool = iGridTool;
 }

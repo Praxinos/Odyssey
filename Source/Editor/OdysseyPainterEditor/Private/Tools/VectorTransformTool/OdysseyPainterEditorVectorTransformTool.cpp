@@ -3,6 +3,7 @@
 
 #include "Tools/VectorTransformTool/OdysseyPainterEditorVectorTransformTool.h"
 #include "Tools/VectorTransformTool/OdysseyPainterEditorVectorTransformToolHUD.h"
+#include "Tools/VectorTransformTool/SOdysseyPainterEditorVectorTransformToolTopTab.h"
 #include "OdysseyPainterEditor.h"
 
 #define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorTransformTool"
@@ -99,6 +100,14 @@ UOdysseyPainterEditorVectorTransformTool::LoadVector( FOdysseyVectorEngine* iEng
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
+TArray<TSharedPtr<SWidget>>
+UOdysseyPainterEditorVectorTransformTool::CreateTopTabWidgets()
+{
+    return {
+        SNew(SOdysseyPainterEditorVectorTransformToolTopTab, this)
+    };
+}
+
 bool
 UOdysseyPainterEditorVectorTransformTool::OnKeyDown( const FKey& iKey )
 {
@@ -161,17 +170,11 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseHover( const FOdysseyPoint& iPo
 
     FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
     FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-    
-    ::ULIS::FRectI redrawRect = UOdysseyPainterEditorVectorTransformTool::OnMouseHoverVector( vectorEngine, vectorScene, iPointInTexture );
 
-    if( redrawRect.Area() )
-    {
-        vectorEngine->GetInvalidTileMap().Invalidate(redrawRect);
-        vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
-    }
+    UOdysseyPainterEditorVectorTransformTool::OnMouseHoverVector( vectorEngine, vectorScene, iPointInTexture );
 }
 
-::ULIS::FRectI
+void
 UOdysseyPainterEditorVectorTransformTool::OnMouseHoverVector( FOdysseyVectorEngine* iEngine
                                                             , FOdysseyVectorScene* iScene
                                                             , const FOdysseyPoint& iPointInTexture )
@@ -189,7 +192,12 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseHoverVector( FOdysseyVectorEngi
         }
     }
 
-    return redrawRegion;
+
+    if( redrawRegion.Area() )
+    {
+        iEngine->GetInvalidTileMap().Invalidate(redrawRegion);
+        iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+    }
 }
 
 bool
@@ -340,7 +348,7 @@ UOdysseyPainterEditorVectorTransformTool::TranslateObjectSelection( FOdysseyVect
     iScene->UpdateMatrix();
 
     // update the selection box with the newly modified matrices
-    mTransformHUD->UpdateSelectionBox( iScene, World );
+    iEngine->ResetHUD();
 }
 
 double
@@ -444,7 +452,7 @@ UOdysseyPainterEditorVectorTransformTool::RotateObjectSelection( FOdysseyVectorE
     iScene->UpdateMatrix();
 
     // update the selection box with the newly modified matrices
-    mTransformHUD->UpdateSelectionBox( iScene, World );
+    iEngine->ResetHUD();
 
     // replace pivot correctly.
     BLPoint spacePivot = selectionBox.inverseWorldMatrix.mapPoint( worldPivot.x, worldPivot.y );
@@ -594,7 +602,7 @@ UOdysseyPainterEditorVectorTransformTool::ScaleObjectSelection( FOdysseyVectorEn
     iScene->UpdateMatrix();
 
     // update the selection box with the newly modified matrices
-    mTransformHUD->UpdateSelectionBox( iScene, World );
+    iEngine->ResetHUD();
 }
 
 void

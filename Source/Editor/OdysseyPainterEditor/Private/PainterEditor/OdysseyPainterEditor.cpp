@@ -55,6 +55,7 @@ FOdysseyPainterEditor::~FOdysseyPainterEditor()
 
 FOdysseyPainterEditor::FOdysseyPainterEditor()
     : mSelectedTool(nullptr)
+    , mVectorEditionMode(eVectorEditionMode::Object)
     , mHUDSystem(new FOdysseyHUDSystem())
 	, mBrushContexts()
 	, mPaintColor(::ULIS::FColor::Black)
@@ -365,6 +366,18 @@ FOdysseyPainterEditor::SetSelectedTool(UOdysseyPainterEditorTool* iTool)
     
     OnSelectedToolChanged();
     mOnSelectedToolChanged.Broadcast();
+}
+
+void
+FOdysseyPainterEditor::SetVectorEditionMode(eVectorEditionMode iVectorEditionMode)
+{
+    mVectorEditionMode = iVectorEditionMode;
+}
+
+eVectorEditionMode
+FOdysseyPainterEditor::GetVectorEditionMode()
+{
+    return mVectorEditionMode;
 }
 
 //--------------------------------------------------------------------------------------

@@ -3,9 +3,11 @@
 
 #include "Tools/VectorPickTool/OdysseyPainterEditorVectorPickTool.h"
 #include "Tools/VectorPickTool/OdysseyPainterEditorVectorPickToolHUD.h"
+#include "Tools/VectorPickTool/SOdysseyPainterEditorVectorPickToolTopTab.h"
 #include "Tools/VectorPickTool/OdysseyPainterEditorVectorPickToolObjectContextMenu.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyMediaVector.h"
+
 #include <chrono>
 
 #define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorPickTool"
@@ -17,8 +19,7 @@ UOdysseyPainterEditorVectorPickTool::~UOdysseyPainterEditorVectorPickTool()
 }
 
 UOdysseyPainterEditorVectorPickTool::UOdysseyPainterEditorVectorPickTool()
-    : EditionMode( EOdysseyVectorEditionMode::Object )
-    , PickingMode( EOdysseyVectorPickingMode::Freehand )
+    : PickingMode( EOdysseyVectorPickingMode::Freehand )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Lasso64");
 
@@ -87,6 +88,14 @@ UOdysseyPainterEditorVectorPickTool::LoadVector( FOdysseyVectorEngine* iEngine
     iEngine->ResetHUD();
 
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+}
+
+TArray<TSharedPtr<SWidget>>
+UOdysseyPainterEditorVectorPickTool::CreateTopTabWidgets()
+{
+    return {
+        SNew(SOdysseyPainterEditorVectorPickToolTopTab, this)
+    };
 }
 
 bool
@@ -176,12 +185,12 @@ UOdysseyPainterEditorVectorPickTool::OnMouseDrag( const FOdysseyPoint& iPointInT
     UOdysseyPainterEditorVectorPickTool::OnMouseDragVector( vectorEngine, vectorScene, iPointInTexture );
 }
 
-::ULIS::FRectI
+void
 UOdysseyPainterEditorVectorPickTool::OnMouseDragVector( FOdysseyVectorEngine* iEngine
                                                       , FOdysseyVectorScene* iScene
                                                       , const FOdysseyPoint& iPointInTexture )
 {
-    ::ULIS::FRectI redrawRegion = { 0, 0, 0, 0 };
+    //::ULIS::FRectI redrawRegion = { 0, 0, 0, 0 };
 
     if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
     {
@@ -211,7 +220,7 @@ UOdysseyPainterEditorVectorPickTool::OnMouseDragVector( FOdysseyVectorEngine* iE
 
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 
-    return redrawRegion; // unused;
+    //return redrawRegion; // unused;
 }
 
 static void
@@ -285,7 +294,7 @@ UOdysseyPainterEditorVectorPickTool::OnMouseUp( const FOdysseyPoint& iPointInTex
 {*/
     if( iKey == EKeys::RightMouseButton )
     {
-        if( EditionMode == EOdysseyVectorEditionMode::Object )
+        if( mEditor->GetVectorEditionMode() == eVectorEditionMode::Object )
         {
             TSharedPtr<SWidget> contextMenu = FOdysseyPainterEditorVectorPickToolObjectContextMenu::CreateWidget( GetEditor() );
 
@@ -296,7 +305,7 @@ UOdysseyPainterEditorVectorPickTool::OnMouseUp( const FOdysseyPoint& iPointInTex
                                                FPopupTransitionEffect(FPopupTransitionEffect::ContextMenu) );
         }
 
-        if( EditionMode == EOdysseyVectorEditionMode::Vertex )
+        if( mEditor->GetVectorEditionMode() == eVectorEditionMode::Vertex )
         {
         }
     }
@@ -463,12 +472,12 @@ UOdysseyPainterEditorVectorPickTool::OnMouseUpVector( FOdysseyVectorEngine* iEng
     {
         roi = GenerateMask( iEngine );
 
-        if( EditionMode == EOdysseyVectorEditionMode::Object )
+        if( mEditor->GetVectorEditionMode() == eVectorEditionMode::Object )
         {
             OnMouseUpVectorObjectMode( iEngine, iScene, iPointInTexture, iKey );
         }
 
-        if( EditionMode == EOdysseyVectorEditionMode::Vertex )
+        if( mEditor->GetVectorEditionMode() == eVectorEditionMode::Vertex )
         {
             OnMouseUpVectorVertexMode( iEngine, iScene, iPointInTexture, iKey );
         }

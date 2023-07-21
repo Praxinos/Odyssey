@@ -3,6 +3,7 @@
 
 #include "Tools/VectorPathDrawingTool/OdysseyPainterEditorVectorPathDrawingTool.h"
 #include "Tools/VectorPathDrawingTool/OdysseyPainterEditorVectorPathDrawingToolHUD.h"
+#include "Tools/VectorPathDrawingTool/SOdysseyPainterEditorVectorPathDrawingToolTopTab.h"
 #include "Undo/OdysseyVectorUndoObjectAdd.h"
 #include "Undo/OdysseyVectorUndoPathAlter.h"
 #include "Palette/OdysseyPaletteEntryColor.h"
@@ -18,6 +19,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::~UOdysseyPainterEditorVectorPathDraw
 
 UOdysseyPainterEditorVectorPathDrawingTool::UOdysseyPainterEditorVectorPathDrawingTool()
     : Radius( 5.0f )
+    , Opacity( 1.0f )
     , Absolute( true )
     , Stitch( false )
     , AverageStitchedRadius( true )
@@ -78,6 +80,14 @@ UOdysseyPainterEditorVectorPathDrawingTool::UnloadVector( FOdysseyVectorEngine* 
     iEngine->RemoveHUD( mPathDrawingHUD );
 
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+}
+
+TArray<TSharedPtr<SWidget>>
+UOdysseyPainterEditorVectorPathDrawingTool::CreateTopTabWidgets()
+{
+    return {
+        SNew(SOdysseyPainterEditorVectorPathDrawingToolTopTab, this)
+    };
 }
 
 void

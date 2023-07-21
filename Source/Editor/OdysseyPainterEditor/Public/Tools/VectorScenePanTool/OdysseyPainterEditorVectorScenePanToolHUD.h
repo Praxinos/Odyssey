@@ -5,7 +5,7 @@
 #include "HUD/OdysseyVectorHUD.h"
 #include "Tools/VectorScenePanTool/OdysseyPainterEditorVectorScenePanTool.h"
 
-class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorScenePanToolHUD : public FOdysseyVectorHUDSelection
+class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorScenePanToolHUD : public FOdysseyVectorHUD
 {
     private:
         UOdysseyPainterEditorVectorScenePanTool* mScenePanTool;

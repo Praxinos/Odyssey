@@ -1,0 +1,31 @@
+// IDDN.FR.001.250001.006.S.P.2019.000.00000
+// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
+
+#pragma once
+
+#include "CoreMinimal.h"
+
+#include "Tools/OdysseyPainterEditorTool.h"
+
+class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorEditionMode : public SCompoundWidget
+{
+    public:
+        // Construction / Destruction
+        SLATE_BEGIN_ARGS( SOdysseyPainterEditorVectorEditionMode )
+            {}
+        //SLATE_ARGUMENT(FOdysseyPainterEditor*,Editor)
+        SLATE_ARGUMENT(UOdysseyPainterEditorTool*,Tool)
+        SLATE_END_ARGS()
+
+        void  Construct( const  FArguments&  InArgs, UOdysseyPainterEditorTool* iTool/*FOdysseyPainterEditor* iEditor*/ );
+
+    private:
+        void SetVectorEditionMode( ECheckBoxState iNewState, eVectorEditionMode iVectorEditionMode );
+
+    private:
+        //FOdysseyPainterEditor* mEditor;
+        UOdysseyPainterEditorTool* mTool;
+
+        TSharedPtr<SCheckBox> mObjectModeCheckbox;
+        TSharedPtr<SCheckBox> mVertexModeCheckbox;
+};
