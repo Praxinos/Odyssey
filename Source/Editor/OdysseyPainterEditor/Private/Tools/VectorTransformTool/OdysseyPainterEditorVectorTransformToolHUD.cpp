@@ -6,7 +6,7 @@ FOdysseyPainterEditorVectorTransformToolHUD::~FOdysseyPainterEditorVectorTransfo
 }
 
 FOdysseyPainterEditorVectorTransformToolHUD::FOdysseyPainterEditorVectorTransformToolHUD( UOdysseyPainterEditorVectorTransformTool* iTransformTool )
-    : FOdysseyVectorHUDSelection()
+    : FOdysseyPainterEditorVectorPickToolHUD( iTransformTool )
     , mFlags( 0 )
     , mShowSelectionBox( true )
 {
@@ -301,7 +301,7 @@ FOdysseyPainterEditorVectorTransformToolHUD::SetGizmo( double iLocalX, double iL
 void
 FOdysseyPainterEditorVectorTransformToolHUD::Reset(FOdysseyVectorScene* iScene)
 {
-    FOdysseyVectorHUDSelection::Reset( iScene ); // Updates the selection box
+    FOdysseyPainterEditorVectorPickToolHUD::Reset( iScene ); // Updates the selection box
 
     SetGizmo( mSelectionBox.rect.x + ( mSelectionBox.rect.w * 0.5f )
             , mSelectionBox.rect.y + ( mSelectionBox.rect.h * 0.5f ) );

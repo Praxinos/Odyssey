@@ -5,8 +5,7 @@
 
 #include "OdysseyPainterEditorContextMenu.h"
 
-class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPickToolObjectContextMenu :
-    public FOdysseyPainterEditorContextMenu
+class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPickToolObjectContextMenu
 {
 public:
     // FOdysseyEditorTab interface

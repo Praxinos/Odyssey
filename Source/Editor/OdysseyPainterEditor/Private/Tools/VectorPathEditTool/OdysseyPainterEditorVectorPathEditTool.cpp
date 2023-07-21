@@ -495,6 +495,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownVector( FOdysseyVectorEngine
         OnMouseDownPickPoint( iEngine, iScene, iPointInTexture, iKey );
     }
 
+    // TODO: debug why this slows down the tool at mouse down when only picking a vertex from a paintgroup
     iScene->Update( 0 ); // updated invalidated objects
 
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW 

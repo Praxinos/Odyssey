@@ -2,7 +2,7 @@
 
 #include <blend2d.h>
 #include <ULIS>
-#include "HUD/OdysseyVectorHUDSelection.h"
+#include "Tools/VectorPickTool/OdysseyPainterEditorVectorPickToolHUD.h"
 #include "Tools/VectorGridTool/OdysseyPainterEditorVectorGridTool.h"
 
 typedef struct _FGridPoint
@@ -34,7 +34,7 @@ typedef struct _FGridCell
 }
 FGridCell;
 
-class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorGridToolHUD : public FOdysseyVectorHUDSelection
+class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorGridToolHUD : public FOdysseyPainterEditorVectorPickToolHUD
 {
     public:
         static const uint32 HANDLE_RADIUS = 5;

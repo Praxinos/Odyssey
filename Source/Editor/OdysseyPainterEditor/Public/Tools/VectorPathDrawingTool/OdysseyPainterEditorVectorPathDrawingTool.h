@@ -55,6 +55,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
                             , FOdysseyVectorScene* iScene
                             , const FOdysseyPoint& iPointInTexture
                             , const FKey& iKey );
+        virtual TArray<TSharedPtr<SWidget>> CreateTopTabWidgets() override;
 
         //OdysseyPainterEditorTool overrides
         virtual void Commit() override;
@@ -83,6 +84,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
         double Radius;
         // computed based upon whether or not the pencil size is relative to the object's transformation matrix
         double mRealSize;
+
+        UPROPERTY(EditAnywhere,Category="Odyssey PathDrawing Tool",meta = (ClampMin = "0.0",UIMin = "0.0", ClampMax = "1.0", UIMax = "1.0" ))
+        double Opacity;
 
         UPROPERTY( EditAnywhere, Category="Odyssey PathDrawing Tool" )
         bool Absolute;

@@ -374,6 +374,8 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "PainterEditor.TopBar.Save32", new IMAGE_BRUSH( "PainterEditor/save_32", mIcon32x32 ) );
     Set( "PainterEditor.TopBar.Eraser32", new IMAGE_BRUSH( "PainterEditor/eraser_32", mIcon32x32 ) );
     Set( "PainterEditor.TopBar.Clear32", new IMAGE_BRUSH( "PainterEditor/clear_32", mIcon32x32 ) );
+    Set( "PainterEditor.TopBar.VectorModeVertex32",new IMAGE_BRUSH("PainterEditor/vector_mode_vertex_32",mIcon32x32));
+    Set( "PainterEditor.TopBar.VectorModeObject32",new IMAGE_BRUSH("PainterEditor/vector_mode_object_32",mIcon32x32));
 
     //PainterEditor - ToolsTab
     Set( "PainterEditor.ToolsTab.ObjectPickTool64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/object_pick_tool_64", mIcon64x64 ) );

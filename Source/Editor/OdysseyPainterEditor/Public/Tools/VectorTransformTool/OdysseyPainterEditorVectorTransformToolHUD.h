@@ -2,10 +2,10 @@
 
 #include <blend2d.h>
 #include <ULIS>
-#include "HUD/OdysseyVectorHUDSelection.h"
 #include "Tools/VectorTransformTool/OdysseyPainterEditorVectorTransformTool.h"
+#include "Tools/VectorPickTool/OdysseyPainterEditorVectorPickToolHUD.h"
 
-class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorTransformToolHUD : public FOdysseyVectorHUDSelection
+class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorTransformToolHUD : public FOdysseyPainterEditorVectorPickToolHUD
 {
     public:
         static const uint32 PICK_XAXIS              = ( 1      );
@@ -33,7 +33,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorTransformToolHUD : pub
         uint32 Pick( double iWorldX, double iWorldY );
 
     private:
-       uint32 PickScalers( double iWorldX, double iWorldY );
+        uint32 PickScalers( double iWorldX, double iWorldY );
         uint32 PickSelectionBox( double iWorldX, double iWorldY );
         uint32 PickGizmo( double iWorldX, double iWorldY );
         void UpdateGizmo();

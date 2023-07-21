@@ -30,6 +30,12 @@ class IOdysseySurfaceEditable;
 class UOdysseyPainterEditorTool;
 class FOdysseyBrushContext;
 
+enum class eVectorEditionMode : uint8
+{
+    Object = 0,
+    Vertex = 1
+};
+
 /**
  * Base class for a Painting Editor
  */
@@ -99,6 +105,9 @@ public:
     static void UnpropagateBucket( FOdysseyVectorBucket* iBucket );
     static void StitchVertices( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
 
+    void SetVectorEditionMode(eVectorEditionMode iVectorEditionMode);
+    eVectorEditionMode GetVectorEditionMode();
+
 public:
     // Setters
     void  PaintColor(const FOdysseyBrushColor& iColor, bool iIsCommit);
@@ -129,6 +138,8 @@ protected:
     //Tools
     UOdysseyPainterEditorTool*               mSelectedTool;
     TArray<UOdysseyPainterEditorTool*>       mTools;
+
+    eVectorEditionMode                       mVectorEditionMode;
 
     FOdysseyHUDSystem*              mHUDSystem;
     TArray<FOdysseyBrushContext*>   mBrushContexts;
