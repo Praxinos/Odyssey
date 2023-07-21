@@ -121,6 +121,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         void SelectBucket( FOdysseyVectorBucket* iSelectedBucket );
         FOdysseyVectorBucket* GetSelectedBucket();
 
+        void GetSelectedVertices( std::vector<FOdysseyVectorPoint*>& oPointArray );
+        bool GetBBoxFromSelectedVertices( ::ULIS::FRectD& oBBox, bool iWorld );
+
     protected:
         /**
          * @brief Intersect a cubic segment. It creates the intersection vertices and the section (sub-segments).

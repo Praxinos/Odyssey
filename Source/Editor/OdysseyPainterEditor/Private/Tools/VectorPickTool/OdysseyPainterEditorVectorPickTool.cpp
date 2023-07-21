@@ -458,6 +458,8 @@ UOdysseyPainterEditorVectorPickTool::OnMouseUpVectorVertexMode( FOdysseyVectorEn
             SelectVertexFromPaintGroup( paintGroup );
         }
     }
+
+    iEngine->ResetHUD(); // updates the current HUD (in most cases wil be this tool's HUD)
 }
 
 bool

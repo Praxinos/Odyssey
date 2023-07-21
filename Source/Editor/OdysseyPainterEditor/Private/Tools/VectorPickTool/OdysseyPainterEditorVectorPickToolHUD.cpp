@@ -26,6 +26,36 @@ FOdysseyPainterEditorVectorPickToolHUD::GetSelectionBox()
 }
 
 void
+FOdysseyPainterEditorVectorPickToolHUD::GetSelectedVertices( FOdysseyVectorScene* iScene
+                                                           , std::vector<FOdysseyVectorPoint*>& oPointArray )
+{
+    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
+    std::list<FOdysseyVectorObject*>::iterator it;
+
+    // avoir to many reallocation by reserving a decent amount of memory
+    oPointArray.reserve( 200 );
+
+    for( it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
+    {
+        FOdysseyVectorObject* selectedObject = *it;
+
+        if( selectedObject->GetClass() == FOdysseyVectorPath::StaticClass() )
+        {
+            FOdysseyVectorPath* selectedPath = static_cast<FOdysseyVectorPath*>(selectedObject);
+
+            selectedPath->GetSelectedVertices( oPointArray );
+        }
+
+        if( selectedObject->GetClass() == FOdysseyVectorGroupPaint::StaticClass() )
+        {
+            FOdysseyVectorGroupPaint* selectedPaintGroup = static_cast<FOdysseyVectorGroupPaint*>(selectedObject);
+
+            selectedPaintGroup->GetSelectedVertices( oPointArray );
+        }
+    }
+}
+
+void
 FOdysseyPainterEditorVectorPickToolHUD::Init( uint32 iWidth, uint32 iHeight )
 {
     if( mSelectionMask )
@@ -78,8 +108,52 @@ FOdysseyPainterEditorVectorPickToolHUD::UpdateSelectionBoxVertexMode( FOdysseyVe
                                                                     , bool iForceWorld )
 {
     std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
+    std::list<FOdysseyVectorObject*>::iterator it;
+    bool inited = false;
 
     mSelectionBox.rect = ::ULIS::FRectD( 0, 0, 0, 0 );
+    mSelectionBox.worldMatrix.reset();
+
+    for( it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
+    {
+        FOdysseyVectorObject* selectedObject = *it;
+
+        if( selectedObject->GetClass() == FOdysseyVectorPath::StaticClass() )
+        {
+            FOdysseyVectorPath* selectedPath = static_cast<FOdysseyVectorPath*>(selectedObject);
+            ::ULIS::FRectD selectedPathBBox;
+
+            if( selectedPath->GetBBoxFromSelectedVertices( selectedPathBBox, true ) )
+            {
+                mSelectionBox.rect = inited ? mSelectionBox.rect | selectedPathBBox
+                                            : selectedPathBBox;
+
+                inited = true;
+            }
+        }
+
+        if( selectedObject->GetClass() == FOdysseyVectorGroupPaint::StaticClass() )
+        {
+            FOdysseyVectorGroupPaint* selectedPaintGroup = static_cast<FOdysseyVectorGroupPaint*>(selectedObject);
+            ::ULIS::FRectD selectedPaintGroupBBox;
+
+            if( selectedPaintGroup->GetBBoxFromSelectedVertices( selectedPaintGroupBBox, true ) )
+            {
+                mSelectionBox.rect = inited ? mSelectionBox.rect | selectedPaintGroupBBox
+                                            : selectedPaintGroupBBox;
+
+                inited = true;
+            }
+        }
+    }
+
+    /*if( inited )
+    {
+        ::ULIS::FVec2D origin = ::ULIS::FVec2D( mSelectionBox.rect.x + ( mSelectionBox.rect.w * 0.5f )
+                                              , mSelectionBox.rect.y + ( mSelectionBox.rect.h * 0.5f ) );
+
+        mSelectionBox.worldMatrix.translate( origin.x, origin.y );
+    }*/
 }
 
 void

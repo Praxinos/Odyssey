@@ -85,6 +85,7 @@ SOdysseyPainterEditorVectorEditionMode::SetVectorEditionMode( ECheckBoxState iNe
         FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
 
         vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+        vectorEngine->ResetHUD();
     }
 }
 

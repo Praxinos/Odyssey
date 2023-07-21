@@ -283,6 +283,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
          */
         void UnselectAllVertices();
 
+        void GetSelectedVertices( std::vector<FOdysseyVectorPoint*>& oPointArray );
+        bool GetBBoxFromSelectedVertices( ::ULIS::FRectD& oBBox, bool iWorld );
 
     protected:
         virtual void UpdateShape( uint32 iUpdateFlags ) override;

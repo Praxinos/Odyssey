@@ -23,6 +23,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPickToolHUD : public F
 
         FSelectionBox& GetSelectionBox();
         void Init( uint32 iWidth, uint32 iHeight );
+        void GetSelectedVertices( FOdysseyVectorScene* iScene, std::vector<FOdysseyVectorPoint*>& oPointArray );
 
     protected:
         void DrawPickingArea( BLContext* iBLContext
@@ -36,6 +37,9 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPickToolHUD : public F
         void UpdateSelectionBoxVertexMode( FOdysseyVectorScene* iScene, bool iForceWorld );
         void UpdateSelectionBox( FOdysseyVectorScene* iScene, bool iForceWorld );
         void DrawSelectionBox( FOdysseyVectorScene* iScene, uint64 iFlags );
+
+        bool PathGetBBoxFromSelectedVertices( FOdysseyVectorPath* iPath, ::ULIS::FRectD& oBBox );
+        bool GroupPaintGetBBoxFromSelectedVertices( FOdysseyVectorGroupPaint* iPaintGroup, ::ULIS::FRectD& oBBox );
 
     protected:
         UOdysseyPainterEditorVectorPickTool* mPickTool;

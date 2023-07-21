@@ -260,6 +260,13 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
          */
         void SetVisited( bool iVisited );
 
+        static bool GetMinMaxFromList( std::list<FOdysseyVectorVertex*>& iVertexList
+                                     , double& oXMin
+                                     , double& oYMin
+                                     , double& oXMax
+                                     , double& oYMax );
+
+        ::ULIS::FVec2D GetWorldCoords();
 
     protected:
         /**

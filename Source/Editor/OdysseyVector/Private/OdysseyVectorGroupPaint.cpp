@@ -1259,3 +1259,67 @@ FOdysseyVectorGroupPaint::CopyShape()
 
     return groupPaintCopy;
 }
+
+void
+FOdysseyVectorGroupPaint::GetSelectedVertices( std::vector<FOdysseyVectorPoint*>& oPointArray )
+{
+    for( std::list<FOdysseyVectorObject*>::iterator oit = mChildrenList.begin(); oit != mChildrenList.end(); ++oit )
+    {
+        FOdysseyVectorObject *child = (*oit);
+
+        if( child->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+        {
+            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(child);
+
+            path->GetSelectedVertices( oPointArray );
+        }
+    }
+}
+
+bool
+FOdysseyVectorGroupPaint::GetBBoxFromSelectedVertices( ::ULIS::FRectD& oBBox, bool iWorld )
+{
+    std::list<FOdysseyVectorObject*>::iterator it;
+    bool inited = false;
+
+    for( it = mChildrenList.begin(); it != mChildrenList.end(); ++it )
+    {
+        FOdysseyVectorObject* child = *it;
+
+        if( child->GetClass() == FOdysseyVectorPath::StaticClass() )
+        {
+            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(child);
+            ::ULIS::FRectD childBBox;
+
+            if( path->GetBBoxFromSelectedVertices( childBBox, true ) )
+            {
+                oBBox = inited ? oBBox | childBBox
+                               : childBBox;
+
+                inited = true;
+            }
+        }
+    }
+
+    if( inited )
+    {
+        if( iWorld == false )
+        {
+            double xmin = oBBox.x;
+            double xmax = oBBox.x + oBBox.w;
+            double ymin = oBBox.y;
+            double ymax = oBBox.y + oBBox.h;
+            BLPoint p[4] = { mInverseWorldMatrix.mapPoint( xmin, ymin )
+                           , mInverseWorldMatrix.mapPoint( xmax, ymin )
+                           , mInverseWorldMatrix.mapPoint( xmax, ymax )
+                           , mInverseWorldMatrix.mapPoint( xmin, ymax ) };
+
+            oBBox = ::ULIS::FRectD::FromMinMax( ::ULIS::FMath::Min4( p[0].x, p[1].x, p[2].x, p[3].x )
+                                              , ::ULIS::FMath::Min4( p[0].y, p[1].y, p[2].y, p[3].y )
+                                              , ::ULIS::FMath::Max4( p[0].x, p[1].x, p[2].x, p[3].x )
+                                              , ::ULIS::FMath::Max4( p[0].y, p[1].y, p[2].y, p[3].y ) );
+        }
+    }
+
+    return inited;
+}

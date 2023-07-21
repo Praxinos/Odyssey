@@ -251,6 +251,49 @@ FOdysseyVectorPath::UpdateShape( uint32 iUpdateFlags )
     }
 }
 
+bool
+FOdysseyVectorPath::GetBBoxFromSelectedVertices( ::ULIS::FRectD& oBBox, bool iWorld )
+{
+    double xmin, ymin, xmax, ymax;
+
+    if( FOdysseyVectorVertex::GetMinMaxFromList( mSelectedVertexList, xmin, ymin, xmax, ymax ) )
+    {
+        if( iWorld )
+        {
+            BLPoint p[4] = { mWorldMatrix.mapPoint( xmin, ymin )
+                           , mWorldMatrix.mapPoint( xmax, ymin )
+                           , mWorldMatrix.mapPoint( xmax, ymax )
+                           , mWorldMatrix.mapPoint( xmin, ymax ) };
+
+            oBBox = ::ULIS::FRectD::FromMinMax( ::ULIS::FMath::Min4( p[0].x, p[1].x, p[2].x, p[3].x )
+                                              , ::ULIS::FMath::Min4( p[0].y, p[1].y, p[2].y, p[3].y )
+                                              , ::ULIS::FMath::Max4( p[0].x, p[1].x, p[2].x, p[3].x )
+                                              , ::ULIS::FMath::Max4( p[0].y, p[1].y, p[2].y, p[3].y ) );
+        }
+        else
+        {
+            oBBox = ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax );
+        }
+
+        return true;
+    }
+
+    return false;
+}
+
+void
+FOdysseyVectorPath::GetSelectedVertices( std::vector<FOdysseyVectorPoint*>& oPointArray )
+{
+    std::list<FOdysseyVectorVertex*>::iterator it;
+
+    for( it = mSelectedVertexList.begin(); it != mSelectedVertexList.end(); ++it )
+    {
+        FOdysseyVectorVertex* vertex = *it;
+
+        oPointArray.push_back( vertex );
+    }
+}
+
 void
 FOdysseyVectorPath::InvalidateSegment( FOdysseyVectorSegment* iSegment )
 {
