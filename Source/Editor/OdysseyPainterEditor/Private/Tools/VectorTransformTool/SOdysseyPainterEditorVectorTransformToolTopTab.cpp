@@ -28,7 +28,7 @@ SOdysseyPainterEditorVectorTransformToolTopTab::Construct( const FArguments& InA
         + SWrapBox::Slot()
         .HAlign(HAlign_Fill)
         [
-            SNew(SOdysseyPainterEditorVectorEditionMode, mTool/*->GetEditor()*/)
+            SNew(SOdysseyPainterEditorVectorEditionMode, mTool->GetEditor() )
         ]
     ];
 }

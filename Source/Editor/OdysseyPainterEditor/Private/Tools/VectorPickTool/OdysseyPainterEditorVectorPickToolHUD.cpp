@@ -1,5 +1,6 @@
 #include "Tools/VectorPickTool/OdysseyPainterEditorVectorPickToolHUD.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyPainterEditor.h"
 
 FOdysseyPainterEditorVectorPickToolHUD::~FOdysseyPainterEditorVectorPickToolHUD()
 {

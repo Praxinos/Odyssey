@@ -169,7 +169,7 @@
 		{
 			"Name": "OdysseyMedia",
 			"Type": "Editor",
-			"LoadingPhase": "Default",
+			"LoadingPhase": "Default"
 		},
 		{
 			"Name": "OdysseyFlipbook",

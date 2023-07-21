@@ -13,19 +13,16 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorEditionMode : public S
         // Construction / Destruction
         SLATE_BEGIN_ARGS( SOdysseyPainterEditorVectorEditionMode )
             {}
-        //SLATE_ARGUMENT(FOdysseyPainterEditor*,Editor)
-        SLATE_ARGUMENT(UOdysseyPainterEditorTool*,Tool)
+        SLATE_ARGUMENT(FOdysseyPainterEditor*,Editor)
         SLATE_END_ARGS()
 
-        void  Construct( const  FArguments&  InArgs, UOdysseyPainterEditorTool* iTool/*FOdysseyPainterEditor* iEditor*/ );
+        void  Construct( const  FArguments&  InArgs, FOdysseyPainterEditor* iEditor );
 
     private:
         void SetVectorEditionMode( ECheckBoxState iNewState, eVectorEditionMode iVectorEditionMode );
 
     private:
-        //FOdysseyPainterEditor* mEditor;
-        UOdysseyPainterEditorTool* mTool;
-
+        FOdysseyPainterEditor* mEditor;
         TSharedPtr<SCheckBox> mObjectModeCheckbox;
         TSharedPtr<SCheckBox> mVertexModeCheckbox;
 };

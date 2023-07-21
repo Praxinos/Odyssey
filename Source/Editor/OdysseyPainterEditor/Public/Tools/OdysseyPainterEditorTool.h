@@ -10,6 +10,8 @@
 #include "OdysseyPainterEditorToolContext.h"
 #include "OdysseyPainterEditorTool.generated.h"
 
+class FOdysseyPainterEditor;
+
 UCLASS()
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorTool : public UObject
 {
@@ -72,11 +74,11 @@ protected:
 
 public:
     void SetEditor(class FOdysseyPainterEditor* iEditor);
-    class FOdysseyPainterEditor* GetEditor() const;
+    FOdysseyPainterEditor* GetEditor() const;
     //template<class T> T* GetEditorAs() const { return static_cast<T*>(mEditor); };
 
 protected:
-    class FOdysseyPainterEditor*              mEditor;
+    FOdysseyPainterEditor*              mEditor;
 
 public:
     UPROPERTY(EditDefaultsOnly, Category="Tool")

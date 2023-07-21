@@ -12,10 +12,9 @@
 //----------------------------------------------------------- Construction / Destruction
 
 void
-SOdysseyPainterEditorVectorEditionMode::Construct( const FArguments& InArgs, UOdysseyPainterEditorTool* iTool /*FOdysseyPainterEditor* iEditor*/ )
+SOdysseyPainterEditorVectorEditionMode::Construct( const FArguments& InArgs, FOdysseyPainterEditor* iEditor )
 {
-    //mEditor = iEditor;
-    mTool = iTool; // temporary: waiting for OdysseyMedia to allow us to refresh the layer.
+    mEditor = iEditor;
 
     mObjectModeCheckbox =
     SNew(SCheckBox)
@@ -26,8 +25,7 @@ SOdysseyPainterEditorVectorEditionMode::Construct( const FArguments& InArgs, UOd
    .UncheckedImage(FOdysseyStyle::GetBrush("PainterEditor.TopBar.VectorModeObject32"))
    .UncheckedPressedImage(FOdysseyStyle::GetBrush("PainterEditor.TopBar.VectorModeObject32"))
    .OnCheckStateChanged(FOnCheckStateChanged::CreateSP(this, &SOdysseyPainterEditorVectorEditionMode::SetVectorEditionMode, eVectorEditionMode::Object))
-   .IsChecked( mTool->GetEditor()->GetVectorEditionMode() == eVectorEditionMode::Object ? ECheckBoxState::Checked
-//   .IsChecked( mEditor->GetVectorEditionMode() == eVectorEditionMode::Object ? ECheckBoxState::Checked
+   .IsChecked( mEditor->GetVectorEditionMode() == eVectorEditionMode::Object ? ECheckBoxState::Checked
                                                                              : ECheckBoxState::Unchecked );
 
     mVertexModeCheckbox =
@@ -39,8 +37,7 @@ SOdysseyPainterEditorVectorEditionMode::Construct( const FArguments& InArgs, UOd
    .UncheckedImage(FOdysseyStyle::GetBrush("PainterEditor.TopBar.VectorModeVertex32"))
    .UncheckedPressedImage(FOdysseyStyle::GetBrush("PainterEditor.TopBar.VectorModeVertex32"))
    .OnCheckStateChanged(FOnCheckStateChanged::CreateSP(this, &SOdysseyPainterEditorVectorEditionMode::SetVectorEditionMode, eVectorEditionMode::Vertex))
-   .IsChecked( mTool->GetEditor()->GetVectorEditionMode() == eVectorEditionMode::Vertex ? ECheckBoxState::Checked
-//   .IsChecked( mEditor->GetVectorEditionMode() == eVectorEditionMode::Vertex ? ECheckBoxState::Checked
+   .IsChecked( mEditor->GetVectorEditionMode() == eVectorEditionMode::Vertex ? ECheckBoxState::Checked
                                                                              : ECheckBoxState::Unchecked );
 
 
@@ -68,8 +65,9 @@ SOdysseyPainterEditorVectorEditionMode::Construct( const FArguments& InArgs, UOd
 void
 SOdysseyPainterEditorVectorEditionMode::SetVectorEditionMode( ECheckBoxState iNewState, eVectorEditionMode iVectorEditionMode )
 {
-    //mEditor->SetVectorEditionMode( iVectorEditionMode );
-    mTool->GetEditor()->SetVectorEditionMode( iVectorEditionMode );
+    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = mEditor->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
+
+    mEditor->SetVectorEditionMode( iVectorEditionMode );
 
     if( iVectorEditionMode == eVectorEditionMode::Object )
     {
@@ -81,11 +79,11 @@ SOdysseyPainterEditorVectorEditionMode::SetVectorEditionMode( ECheckBoxState iNe
         mObjectModeCheckbox.Get()->SetIsChecked(ECheckBoxState::Unchecked);
     }
 
-// temporary: waiting for OdysseyMedia to allow us to refresh the layer.
-    FOdysseyVectorEngine* vectorEngine = mTool->mToolContext->GetVectorEngine();
-
-    if( vectorEngine )
+    if( mediaVectors.Num() )
     {
+        FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+        FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
+
         vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
     }
 }
