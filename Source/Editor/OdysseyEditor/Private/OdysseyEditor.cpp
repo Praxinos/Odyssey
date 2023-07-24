@@ -43,26 +43,6 @@ FOdysseyEditor::InitGUI()
 {
     GetGUI()->Init();
 }
-//--------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------ Getters
-
-void
-FOdysseyEditor::Undo()
-{
-    GEditor->UndoTransaction(true);
-}
-
-void
-FOdysseyEditor::Redo()
-{
-    GEditor->RedoTransaction();
-}
-
-void
-FOdysseyEditor::ClearUndo()
-{
-    
-}
 
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Getters
@@ -93,12 +73,6 @@ FOdysseyEditor::GetEditedObjects()
 
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------- Listeners
-
-void
-FOdysseyEditor::OnToolkitInitialized(FBaseToolkit* iToolkit)
-{
-    GetGUI()->OnToolkitInitialized(iToolkit);
-}
 
 void
 FOdysseyEditor::BindShortcuts(FBaseToolkit* iToolkit)

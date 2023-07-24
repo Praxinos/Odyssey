@@ -94,19 +94,6 @@ FOdysseyEditorGUI::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
 }
 
 //--------------------------------------------------------------------------------------
-//---------------------------------------------------------------------------- Listeners
-
-void
-FOdysseyEditorGUI::OnToolkitInitialized(FBaseToolkit* iToolkit)
-{
-	for (int i = 0; i < mTabs.Num(); i++)
-	{
-		mTabs[i].Get()->OnToolkitInitialized(iToolkit);
-	}
-}
-
-
-//--------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------- Layout
 
 TSharedPtr<FTabManager::FLayout>

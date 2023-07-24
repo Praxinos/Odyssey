@@ -36,17 +36,7 @@ void
 FOdysseyEditorContextMenu::BindShortcuts(FBaseToolkit* iToolkit)
 {
 }
-/*
-void
-FOdysseyEditorContextMenu::OnToolkitInitialized( FBaseToolkit* iToolkit )
-{
-}
 
-void
-FOdysseyEditorContextMenu::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
-{
-}
-*/
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Getters
 

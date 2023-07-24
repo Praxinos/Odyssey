@@ -36,9 +36,9 @@ protected:
 
 public:
     // Undo
-    virtual void Undo();
+    /* virtual void Undo();
     virtual void Redo();
-    virtual void ClearUndo();
+    virtual void ClearUndo(); */
 
 public:
     // Getters
@@ -50,7 +50,6 @@ public:
 
 public:
     // Listeners
-    virtual void OnToolkitInitialized(FBaseToolkit* iToolkit);
     virtual bool OnCloseRequested();
 
 public:

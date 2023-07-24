@@ -38,10 +38,6 @@ public:
     // Menu And Toolbar
     virtual void ExtendMenu( FToolMenuOwner iOwnerFName, FName iMenuName );
 
-public:
-    // Listeners
-    virtual void OnToolkitInitialized(FBaseToolkit* iToolkit);
-
 protected:
 	// Layout
 

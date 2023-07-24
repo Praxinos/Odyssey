@@ -37,11 +37,6 @@ FOdysseyEditorTab::BindShortcuts(FBaseToolkit* iToolkit)
 }
 
 void
-FOdysseyEditorTab::OnToolkitInitialized(FBaseToolkit* iToolkit)
-{
-}
-
-void
 FOdysseyEditorTab::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
 {
 }

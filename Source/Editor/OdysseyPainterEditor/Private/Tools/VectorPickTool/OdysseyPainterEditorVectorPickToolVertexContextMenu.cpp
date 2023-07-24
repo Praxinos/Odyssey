@@ -55,17 +55,4 @@ FOdysseyPainterEditorVectorPickToolVertexContextMenu::BindShortcuts(FBaseToolkit
 */
 }
 
-/*
-void
-FOdysseyPainterEditorVectorPickToolVertexContextMenu::OnToolkitInitialized( FBaseToolkit* iToolkit )
-{
-    FOdysseyEditorContextMenu::OnToolkitInitialized( iToolkit );
-}
-
-void
-FOdysseyPainterEditorVectorPickToolVertexContextMenu::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
-{
-    FOdysseyEditorContextMenu::ExtendMenu( iOwner, iMenuName );
-}
-*/
 #undef LOCTEXT_NAMESPACE

@@ -385,14 +385,14 @@ FOdysseyPainterEditorTopTab::OnSaveButtonClicked()
 FReply
 FOdysseyPainterEditorTopTab::OnUndoButtonClicked()
 {
-    mEditor->Undo();
+    GEditor->UndoTransaction(true);
     return FReply::Handled();
 }
 
 FReply
 FOdysseyPainterEditorTopTab::OnRedoButtonClicked()
 {
-    mEditor->Redo();
+    GEditor->RedoTransaction();
     return FReply::Handled();
 }
 

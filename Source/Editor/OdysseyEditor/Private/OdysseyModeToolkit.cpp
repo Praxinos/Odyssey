@@ -50,7 +50,6 @@ void FOdysseyModeToolkit::Init(const TSharedPtr<IToolkitHost>& iInitToolkitHost,
     FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>(TEXT("LevelEditor"));
     mEditor->RegisterTabSpawners(LevelEditorModule.GetLevelEditorTabManager()->AsShared());
 
-    mEditor->OnToolkitInitialized(this);
     mEditor->BindShortcuts(this);
 }
 

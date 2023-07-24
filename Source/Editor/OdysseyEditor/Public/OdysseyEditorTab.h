@@ -17,7 +17,6 @@ public:
 public:
     virtual TSharedPtr<SWidget> CreateWidget() = 0;
     virtual void BindShortcuts(FBaseToolkit* iToolkit);
-    virtual void OnToolkitInitialized(FBaseToolkit* iToolkit);
     virtual TSharedRef<SDockTab> SpawnTab(const FSpawnTabArgs& iArgs);
     virtual void ExtendMenu( FToolMenuOwner iOwner, FName iMenuName );
 
