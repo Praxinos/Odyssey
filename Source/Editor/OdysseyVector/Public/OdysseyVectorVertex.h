@@ -36,7 +36,12 @@ struct FExplorationPair
 
 class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
 {
+    private:
+        static const uint32 mStaticClass =  0xc591efcf; // value is crc32 FOdysseyVectorVertex
+
     public:
+        static uint32 StaticClass() { return mStaticClass; };
+        virtual uint32 GetClass() { return mStaticClass; };
        /**
          * @brief function to allocate a new vertex.
          * @param iX coordinates on X axis

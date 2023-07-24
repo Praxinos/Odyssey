@@ -43,14 +43,18 @@ FOdysseyPainterEditorVectorPickToolHUD::GetSelectedVertices( FOdysseyVectorScene
         {
             FOdysseyVectorPath* selectedPath = static_cast<FOdysseyVectorPath*>(selectedObject);
 
-            selectedPath->GetSelectedVertices( oPointArray );
+            selectedPath->GetSelectedPoints( oPointArray
+                                           , ePointSelectionFlags::Vertex
+                                           | ePointSelectionFlags::SegmentHandle );
         }
 
         if( selectedObject->GetClass() == FOdysseyVectorGroupPaint::StaticClass() )
         {
             FOdysseyVectorGroupPaint* selectedPaintGroup = static_cast<FOdysseyVectorGroupPaint*>(selectedObject);
 
-            selectedPaintGroup->GetSelectedVertices( oPointArray );
+            selectedPaintGroup->GetSelectedPoints( oPointArray
+                                                 , ePointSelectionFlags::Vertex
+                                                 | ePointSelectionFlags::SegmentHandle );
         }
     }
 }
@@ -146,6 +150,8 @@ FOdysseyPainterEditorVectorPickToolHUD::UpdateSelectionBoxVertexMode( FOdysseyVe
             }
         }
     }
+
+    BLMatrix2D::invert( mSelectionBox.inverseWorldMatrix, mSelectionBox.worldMatrix );
 
     /*if( inited )
     {

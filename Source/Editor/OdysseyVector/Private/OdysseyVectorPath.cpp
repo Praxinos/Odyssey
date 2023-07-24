@@ -281,16 +281,87 @@ FOdysseyVectorPath::GetBBoxFromSelectedVertices( ::ULIS::FRectD& oBBox, bool iWo
     return false;
 }
 
-void
-FOdysseyVectorPath::GetSelectedVertices( std::vector<FOdysseyVectorPoint*>& oPointArray )
+
+static void
+GetSelectedCubicSegmentHandles( FOdysseyVectorSegmentCubic* iCubicSegment
+                              , std::vector<FOdysseyVectorPoint*>& oPointArray
+                              , ePointSelectionFlags iPointSelectionFlags )
 {
-    std::list<FOdysseyVectorVertex*>::iterator it;
+    FOdysseyVectorVertex* vertex0 = iCubicSegment->GetVertex(0);
+    FOdysseyVectorVertex* vertex1 = iCubicSegment->GetVertex(1);
+    bool isSelected0 = vertex0->IsSelected();
+    bool isSelected1 = vertex1->IsSelected();
 
-    for( it = mSelectedVertexList.begin(); it != mSelectedVertexList.end(); ++it )
+    if( isSelected0 || isSelected1 )
     {
-        FOdysseyVectorVertex* vertex = *it;
+        FOdysseyVectorHandleSegment* segmentHandle0 = iCubicSegment->GetHandle(0);
+        FOdysseyVectorHandleSegment* segmentHandle1 = iCubicSegment->GetHandle(1);
 
-        oPointArray.push_back( vertex );
+        if( isSelected0 )
+        {
+            if( iPointSelectionFlags & ePointSelectionFlags::Strict )
+            {
+                if( isSelected1 )
+                {
+                    oPointArray.push_back( segmentHandle0 );
+                }
+            }
+            else
+            {
+                oPointArray.push_back( segmentHandle0 );
+            }
+        }
+
+        if( isSelected1 )
+        {
+            if( iPointSelectionFlags & ePointSelectionFlags::Strict )
+            {
+                if( isSelected0 )
+                {
+                    oPointArray.push_back( segmentHandle1 );
+                }
+            }
+            else
+            {
+                oPointArray.push_back( segmentHandle1 );
+            }
+        }
+    }
+}
+
+void
+FOdysseyVectorPath::GetSelectedPoints( std::vector<FOdysseyVectorPoint*>& oPointArray
+                                     , ePointSelectionFlags iPointSelectionFlags )
+{
+    // vertex selection part
+    if( iPointSelectionFlags & ePointSelectionFlags::Vertex )
+    {
+        std::list<FOdysseyVectorVertex*>::iterator vit;
+
+        for( vit = mSelectedVertexList.begin(); vit != mSelectedVertexList.end(); ++vit )
+        {
+            FOdysseyVectorVertex* vertex = *vit;
+
+            oPointArray.push_back( vertex );
+        }
+    }
+
+    // segment handle selection part
+    if( iPointSelectionFlags & ePointSelectionFlags::SegmentHandle )
+    {
+        std::list<FOdysseyVectorSegment*>::iterator sit;
+
+        for( sit = mSegmentList.begin(); sit != mSegmentList.end(); ++sit )
+        {
+            FOdysseyVectorSegment* segment = *sit;
+
+            if( segment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
+            {
+                FOdysseyVectorSegmentCubic* cubicSegment= static_cast<FOdysseyVectorSegmentCubic*>(segment);
+ 
+                GetSelectedCubicSegmentHandles( cubicSegment, oPointArray, iPointSelectionFlags );
+            }
+        }
     }
 }
 

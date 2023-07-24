@@ -10,7 +10,7 @@
 class ODYSSEYVECTOR_API FOdysseyVectorLine : public FOdysseyVectorPrimitive
 {
     private:
-        static const uint32 mStaticClass = 0x9ee34077; // value is crc32 FOdysseyVectorRectangle
+        static const uint32 mStaticClass =  0xbfb10380; // value is crc32 FOdysseyVectorLine
 
     public:
         static uint32 StaticClass() { return mStaticClass; };

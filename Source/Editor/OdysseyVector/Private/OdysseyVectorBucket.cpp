@@ -12,6 +12,7 @@ FOdysseyVectorBucket::~FOdysseyVectorBucket()
 FOdysseyVectorBucket::FOdysseyVectorBucket( FOdysseyVectorObject* iOwner, double iX, double iY, bool iPropagated )
     : FOdysseyVectorPoint( iX, iY, 0.0f )
     , mOwner ( iOwner )
+    , mIsSelected( false )
 {
     SetSolidColor( 128, 128, 128, 255 );
 
@@ -51,6 +52,18 @@ void
 FOdysseyVectorBucket::SetRotation( double iRotation )
 {
     mBucketParam.Rotation = iRotation;
+}
+
+bool
+FOdysseyVectorBucket::IsSelected()
+{
+    return mIsSelected;
+}
+
+void
+FOdysseyVectorBucket::SetSelected( bool iIsSelected )
+{
+    mIsSelected = iIsSelected;
 }
 
 void

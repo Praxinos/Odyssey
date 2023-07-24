@@ -17,7 +17,6 @@ FOdysseyVectorGroupPaint::~FOdysseyVectorGroupPaint()
 
 FOdysseyVectorGroupPaint::FOdysseyVectorGroupPaint( const FString& iName )
     : FOdysseyVectorGroup( iName )
-    , mSelectedBucket( nullptr )
 {
     SetName( iName );
 
@@ -35,15 +34,36 @@ FOdysseyVectorGroupPaint::FOdysseyVectorGroupPaint( const FString& iName )
 }
 
 void
-FOdysseyVectorGroupPaint::SelectBucket( FOdysseyVectorBucket* iSelectedBucket )
+FOdysseyVectorGroupPaint::UnselectAllBuckets()
 {
-    mSelectedBucket = iSelectedBucket;
+    mSelectedBucketList.remove_if( []( FOdysseyVectorBucket* iSelectedBucket )
+                                   {
+                                       iSelectedBucket->SetSelected( false );
+
+                                       return true;
+                                   } );
 }
 
-FOdysseyVectorBucket*
-FOdysseyVectorGroupPaint::GetSelectedBucket()
+void
+FOdysseyVectorGroupPaint::UnselectBucket( FOdysseyVectorBucket* iSelectedBucket )
 {
-    return mSelectedBucket;
+    mSelectedBucketList.remove( iSelectedBucket );
+
+    iSelectedBucket->SetSelected( false );
+}
+
+void
+FOdysseyVectorGroupPaint::SelectBucket( FOdysseyVectorBucket* iSelectedBucket )
+{
+    mSelectedBucketList.push_back( iSelectedBucket );
+
+    iSelectedBucket->SetSelected( true );
+}
+
+std::list<FOdysseyVectorBucket*>&
+FOdysseyVectorGroupPaint::GetSelectedBucketList()
+{
+    return mSelectedBucketList;
 }
 
 bool
@@ -275,6 +295,11 @@ void
 FOdysseyVectorGroupPaint::RemoveBucket( FOdysseyVectorBucket* iBucket )
 {
     mBucketList.remove( iBucket );
+
+    if( iBucket->IsSelected() )
+    {
+        UnselectBucket( iBucket );
+    }
 
     Invalidate( FOdysseyVectorObject::INVALIDATE_COLOR );
 }
@@ -1261,7 +1286,8 @@ FOdysseyVectorGroupPaint::CopyShape()
 }
 
 void
-FOdysseyVectorGroupPaint::GetSelectedVertices( std::vector<FOdysseyVectorPoint*>& oPointArray )
+FOdysseyVectorGroupPaint::GetSelectedPoints( std::vector<FOdysseyVectorPoint*>& oPointArray
+                                           , ePointSelectionFlags iPointSelectionFlags )
 {
     for( std::list<FOdysseyVectorObject*>::iterator oit = mChildrenList.begin(); oit != mChildrenList.end(); ++oit )
     {
@@ -1271,7 +1297,7 @@ FOdysseyVectorGroupPaint::GetSelectedVertices( std::vector<FOdysseyVectorPoint*>
         {
             FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(child);
 
-            path->GetSelectedVertices( oPointArray );
+            path->GetSelectedPoints( oPointArray, iPointSelectionFlags );
         }
     }
 }

@@ -21,6 +21,37 @@ enum class eJointType : uint8
     Miter  = 3
 };
 
+enum ePointSelectionFlags
+{
+    Vertex        = 1,
+    SegmentHandle = 2,
+    Bucket        = 4,
+    Strict        = 8
+};
+
+constexpr enum ePointSelectionFlags operator~( const enum ePointSelectionFlags a )
+{
+    return (enum ePointSelectionFlags)(~uint32(a));
+}
+
+constexpr enum ePointSelectionFlags operator &( const enum ePointSelectionFlags a
+                                              , const enum ePointSelectionFlags b )
+{
+    return (enum ePointSelectionFlags)(uint32(a) & uint32(b));
+}
+
+constexpr enum ePointSelectionFlags operator |( const enum ePointSelectionFlags a
+                                              , const enum ePointSelectionFlags b )
+{
+    return (enum ePointSelectionFlags)(uint32(a) | uint32(b));
+}
+
+constexpr enum ePointSelectionFlags operator ^( const enum ePointSelectionFlags a
+                                              , const enum ePointSelectionFlags b )
+{
+    return (enum ePointSelectionFlags)(uint32(a) ^ uint32(b));
+}
+
 USTRUCT()
 struct FPathParam
 {
@@ -283,7 +314,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
          */
         void UnselectAllVertices();
 
-        void GetSelectedVertices( std::vector<FOdysseyVectorPoint*>& oPointArray );
+        void GetSelectedPoints( std::vector<FOdysseyVectorPoint*>& oPointArray
+                              , ePointSelectionFlags iPointSelectionFlags );
+
         bool GetBBoxFromSelectedVertices( ::ULIS::FRectD& oBBox, bool iWorld );
 
     protected:
