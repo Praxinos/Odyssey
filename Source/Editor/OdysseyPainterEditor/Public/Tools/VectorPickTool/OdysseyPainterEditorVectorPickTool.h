@@ -89,6 +89,7 @@ protected:
                                   , const FKey& iKey );
     ::ULIS::FRectD GenerateMask( FOdysseyVectorEngine* iEngine );
 
+    void SelectBucketFromPaintGroup( FOdysseyVectorGroupPaint* iPaintGroup );
     void SelectVertexFromPaintGroup( FOdysseyVectorGroupPaint* iPaintGroup );
     void SelectVertexFromPath( FOdysseyVectorPath* iPath );
 

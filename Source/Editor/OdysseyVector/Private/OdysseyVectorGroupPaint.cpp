@@ -1289,9 +1289,9 @@ void
 FOdysseyVectorGroupPaint::GetSelectedPoints( std::vector<FOdysseyVectorPoint*>& oPointArray
                                            , ePointSelectionFlags iPointSelectionFlags )
 {
-    for( std::list<FOdysseyVectorObject*>::iterator oit = mChildrenList.begin(); oit != mChildrenList.end(); ++oit )
+    for( std::list<FOdysseyVectorObject*>::iterator it = mChildrenList.begin(); it != mChildrenList.end(); ++it )
     {
-        FOdysseyVectorObject *child = (*oit);
+        FOdysseyVectorObject *child = (*it);
 
         if( child->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
         {
@@ -1299,6 +1299,13 @@ FOdysseyVectorGroupPaint::GetSelectedPoints( std::vector<FOdysseyVectorPoint*>& 
 
             path->GetSelectedPoints( oPointArray, iPointSelectionFlags );
         }
+    }
+
+    for( std::list<FOdysseyVectorBucket*>::iterator it = mSelectedBucketList.begin(); it != mSelectedBucketList.end(); ++it )
+    {
+        FOdysseyVectorBucket *bucket = (*it);
+
+        oPointArray.push_back( bucket );
     }
 }
 
@@ -1348,4 +1355,38 @@ FOdysseyVectorGroupPaint::GetBBoxFromSelectedVertices( ::ULIS::FRectD& oBBox, bo
     }
 
     return inited;
+}
+
+// Pick from mask image
+void
+FOdysseyVectorGroupPaint::PickBucket( std::vector<FOdysseyVectorBucket*>& oPickedBucketArray )
+{
+    BLImage* maskImage = GetScene()->GetEngine()->GetBLMask();
+    std::list<FOdysseyVectorBucket*>::iterator it;
+    BLImageData imageData;
+
+    maskImage->getData( &imageData );
+
+    for( it = mBucketList.begin(); it != mBucketList.end(); ++it )
+    {
+        FOdysseyVectorBucket* bucket = (*it);
+        ::ULIS::FVec2D& localCoords = bucket->GetCoords();
+        // convert vertex coordinates to world coordinates. Easier to detect collision inside the picking circle.
+        BLPoint worldCoords = mWorldMatrix.mapPoint( localCoords.x, localCoords.y );
+        int32 x = (int32) worldCoords.x;
+        int32 y = (int32) worldCoords.y;
+
+        if( ( x >= 0 ) && ( x < imageData.size.w )
+         && ( y >= 0 ) && ( y < imageData.size.h ) )
+        {
+            uint8 *pixel = static_cast<uint8*>( imageData.pixelData );
+            uint32 offset = ( y * imageData.size.w ) + x;
+            uint8 pixelValue = pixel[offset];
+
+            if( pixelValue == 255 )
+            {
+                oPickedBucketArray.push_back( bucket );
+            }
+        }
+    }
 }

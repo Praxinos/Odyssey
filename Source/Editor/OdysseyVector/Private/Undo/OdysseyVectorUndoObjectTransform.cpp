@@ -2,7 +2,7 @@
 
 FOdysseyVectorUndoObjectTransform::~FOdysseyVectorUndoObjectTransform()
 {
-    objectTransformArray.clear();
+    mObjectTransformArray.clear();
 }
 
 static void
@@ -40,17 +40,17 @@ FObjectTransform::MakeArrayFromObjectList( std::list<FOdysseyVectorObject*>& iOb
 }
 
 FOdysseyVectorUndoObjectTransform::FOdysseyVectorUndoObjectTransform( FOdysseyVectorScene* iScene
-                                                                    , const FObjectTransform& iObjectTransform )
+                                                                    , FOdysseyVectorObject* iObject )
     : FOdysseyVectorUndo( iScene )
 {
-    objectTransformArray.push_back( iObjectTransform );
+    mObjectTransformArray.emplace_back( iObject );
 }
 
 FOdysseyVectorUndoObjectTransform::FOdysseyVectorUndoObjectTransform( FOdysseyVectorScene* iScene
-                                                                    , std::vector<FObjectTransform>& iObjectTransformArray )
+                                                                    , std::list<FOdysseyVectorObject*>& iObjectList )
     : FOdysseyVectorUndo( iScene )
 {
-    objectTransformArray = iObjectTransformArray;
+    FObjectTransform::MakeArrayFromObjectList( iObjectList, mObjectTransformArray );
 }
 
 void
@@ -59,7 +59,7 @@ FOdysseyVectorUndoObjectTransform::Apply( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Apply( iIgnored );
 
-    RestoreObjectTransform( objectTransformArray );
+    RestoreObjectTransform( mObjectTransformArray );
 
     // update invalidated objects
     mScene->Update(0);
@@ -77,7 +77,7 @@ FOdysseyVectorUndoObjectTransform::Revert( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Revert( iIgnored );
 
-    RestoreObjectTransform( objectTransformArray );
+    RestoreObjectTransform( mObjectTransformArray );
 
     // update invalidated objects
     mScene->Update(0);

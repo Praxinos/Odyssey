@@ -57,8 +57,10 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorGridToolHUD : public F
         void Export( std::vector<FOdysseyVectorPoint*>& oPointArray );
 
     protected:
-        void MapPoint( FOdysseyVectorObject* iDeformedObject, FOdysseyVectorPoint* iPoint, double iSpaceX, double iSpaceY );
+        uint32 MapPoint( FOdysseyVectorObject* iDeformedObject, FOdysseyVectorPoint* iPoint, double iSpaceX, double iSpaceY );
         uint32 MapObject( FOdysseyVectorObject* iObject );
+        uint32 MapPath( FOdysseyVectorPath* iPath, BLMatrix2D& iInverseGridMatrix );
+        uint32 MapPaintGroup( FOdysseyVectorGroupPaint* iPaintGroup, BLMatrix2D& iInverseGridMatrix );
         void MakeNodes( uint32 iCellCountX, uint32 iCellCountY );
         void MakeCells( uint32 iCellCountX, uint32 iCellCountY );
         void Map( FOdysseyVectorScene* iScene );

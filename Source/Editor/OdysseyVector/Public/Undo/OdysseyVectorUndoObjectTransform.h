@@ -33,8 +33,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoObjectTransform : public FOdysseyVecto
 {
     public:
         ~FOdysseyVectorUndoObjectTransform();
-        FOdysseyVectorUndoObjectTransform( FOdysseyVectorScene* iScene, const FObjectTransform& iObjectTransform );
-        FOdysseyVectorUndoObjectTransform( FOdysseyVectorScene* iScene, std::vector<FObjectTransform>& iObjectTransformArray );
+        FOdysseyVectorUndoObjectTransform( FOdysseyVectorScene* iScene, FOdysseyVectorObject* iObject );
+        FOdysseyVectorUndoObjectTransform( FOdysseyVectorScene* iScene, std::list<FOdysseyVectorObject*>& iObjectList );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;
@@ -46,5 +46,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoObjectTransform : public FOdysseyVecto
         virtual FString ToString() const override;
 
     private:
-        std::vector<FObjectTransform> objectTransformArray;
+        std::vector<FObjectTransform> mObjectTransformArray;
 };

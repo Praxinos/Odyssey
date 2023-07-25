@@ -75,8 +75,8 @@ private:
 
 private:
     FOdysseyPainterEditorVectorTransformToolHUD* mTransformHUD;
-    std::vector<FObjectTransform> mObjectTransformArray;
     std::vector<FOdysseyVectorPoint*> mSelectedPoints;
+    FOdysseyVectorUndo* mUndo;
 
     ::ULIS::FVec2D* mPickedPivot;
     bool mDragging;

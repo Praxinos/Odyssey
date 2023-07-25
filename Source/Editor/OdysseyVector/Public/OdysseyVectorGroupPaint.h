@@ -126,6 +126,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         void GetSelectedPoints( std::vector<FOdysseyVectorPoint*>& oPointArray
                               , ePointSelectionFlags iPointSelectionFlags  );
         bool GetBBoxFromSelectedVertices( ::ULIS::FRectD& oBBox, bool iWorld );
+        void PickBucket( std::vector<FOdysseyVectorBucket*>& oPickedBucketArray );
 
     protected:
         /**

@@ -312,6 +312,9 @@ FOdysseyPainterEditorVectorTransformToolHUD::Draw( FOdysseyVectorScene* iScene, 
 {
     BLContext* blctx = iScene->GetEngine()->GetBLContext();
 
+    // draws nothing in object mode, vertices in vertex mode
+    FOdysseyPainterEditorVectorPickToolHUD::Draw( iScene, iFlags );
+
     blctx->save();
     blctx->resetMatrix();
 
@@ -321,7 +324,7 @@ FOdysseyPainterEditorVectorTransformToolHUD::Draw( FOdysseyVectorScene* iScene, 
 
         if( mShowSelectionBox )
         {
-            DrawSelectionBox( iScene, iFlags );
+            //DrawSelectionBox( iScene, iFlags ); // commented out: now called from super::draw()
             DrawScalers( iScene, iFlags );
         }
 

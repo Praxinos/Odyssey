@@ -45,6 +45,7 @@ FOdysseyPainterEditorVectorPickToolHUD::GetSelectedVertices( FOdysseyVectorScene
 
             selectedPath->GetSelectedPoints( oPointArray
                                            , ePointSelectionFlags::Vertex
+                                           | ePointSelectionFlags::Strict
                                            | ePointSelectionFlags::SegmentHandle );
         }
 
@@ -54,7 +55,8 @@ FOdysseyPainterEditorVectorPickToolHUD::GetSelectedVertices( FOdysseyVectorScene
 
             selectedPaintGroup->GetSelectedPoints( oPointArray
                                                  , ePointSelectionFlags::Vertex
-                                                 | ePointSelectionFlags::SegmentHandle );
+                                                 | ePointSelectionFlags::SegmentHandle
+                                                 | ePointSelectionFlags::Bucket );
         }
     }
 }

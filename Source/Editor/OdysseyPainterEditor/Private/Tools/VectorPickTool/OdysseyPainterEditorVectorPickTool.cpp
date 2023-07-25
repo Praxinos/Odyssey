@@ -433,6 +433,23 @@ UOdysseyPainterEditorVectorPickTool::SelectVertexFromPaintGroup( FOdysseyVectorG
 }
 
 void
+UOdysseyPainterEditorVectorPickTool::SelectBucketFromPaintGroup( FOdysseyVectorGroupPaint* iPaintGroup )
+{
+    std::vector<FOdysseyVectorBucket*> pickedBucketArray;
+
+    pickedBucketArray.reserve( 50 );
+
+    iPaintGroup->PickBucket( pickedBucketArray );
+
+    for( int i = 0; i < pickedBucketArray.size(); i++ )
+    {
+        FOdysseyVectorBucket* bucket = pickedBucketArray[i];
+
+        iPaintGroup->SelectBucket( bucket );
+    }
+}
+
+void
 UOdysseyPainterEditorVectorPickTool::OnMouseUpVectorVertexMode( FOdysseyVectorEngine* iEngine
                                                               , FOdysseyVectorScene* iScene
                                                               , const FOdysseyPoint& iPointInTexture
@@ -456,6 +473,7 @@ UOdysseyPainterEditorVectorPickTool::OnMouseUpVectorVertexMode( FOdysseyVectorEn
             FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(selectedObject);
 
             SelectVertexFromPaintGroup( paintGroup );
+            SelectBucketFromPaintGroup( paintGroup );
         }
     }
 
