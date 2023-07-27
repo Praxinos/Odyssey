@@ -548,7 +548,7 @@ UOdysseyPainterEditorPaintBucketTool::GetRotationAngle( FOdysseyVectorBucket* iB
 
         angle = fabs( acos( bucketVector.DotProduct( ptVector ) ) );
 
-        return FOdysseyVector::Cross2D( bucketVector, ptVector ) > 0.0f ? angle : - angle;
+        return FOdysseyVector::Cross2D( bucketVector, ptVector ) >= 0.0f ? angle : - angle;
     }
 
     return 0.0f;
@@ -845,7 +845,7 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseUpVector( FOdysseyVectorEngine* iEn
                     break;
 
                     default:
-                        paintGroup->SelectBucket( nullptr );
+                        paintGroup->UnselectAllBuckets();
                     break;
                 }
             }

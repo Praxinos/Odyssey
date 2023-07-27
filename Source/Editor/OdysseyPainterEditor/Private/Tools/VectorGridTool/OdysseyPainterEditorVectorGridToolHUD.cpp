@@ -342,7 +342,7 @@ FOdysseyPainterEditorVectorGridToolHUD::Map( FOdysseyVectorScene* iScene )
     {
         FOdysseyVectorObject *obj = (*it);
 
-        mPointCount += MapObject( obj );
+        mPointCount += MapObjectRecurse( obj );
     }
 }
 
@@ -350,12 +350,12 @@ uint32
 FOdysseyPainterEditorVectorGridToolHUD::MapPath( FOdysseyVectorPath* iPath
                                                , BLMatrix2D& iInverseGridMatrix )
 {
-    std::list<FOdysseyVectorVertex*>& vertexList = path->GetVertexList();
-    std::list<FOdysseyVectorSegment*>& segmentList = path->GetSegmentList();
+    std::list<FOdysseyVectorVertex*>& vertexList = iPath->GetVertexList();
+    std::list<FOdysseyVectorSegment*>& segmentList = iPath->GetSegmentList();
     BLMatrix2D conversionMatrix = iInverseGridMatrix;
     uint32 pointCount = 0;
 
-    conversionMatrix.transform( path->GetWorldMatrix() );
+    conversionMatrix.transform( iPath->GetWorldMatrix() );
 
     for( std::list<FOdysseyVectorVertex*>::iterator it = vertexList.begin(); it != vertexList.end(); ++it )
     {
@@ -364,7 +364,7 @@ FOdysseyPainterEditorVectorGridToolHUD::MapPath( FOdysseyVectorPath* iPath
         double spaceX = pt.x - mSelectionBox.rect.x;
         double spaceY = pt.y - mSelectionBox.rect.y;
 
-        pointCount += MapPoint( iObject, cubicVertex, spaceX, spaceY );
+        pointCount += MapPoint( iPath, cubicVertex, spaceX, spaceY );
     }
 
     for( std::list<FOdysseyVectorSegment*>::iterator it = segmentList.begin(); it != segmentList.end(); ++it )
@@ -378,7 +378,7 @@ FOdysseyPainterEditorVectorGridToolHUD::MapPath( FOdysseyVectorPath* iPath
             double spaceX = pt.x - mSelectionBox.rect.x; // Hi again, Elon :) !
             double spaceY = pt.y - mSelectionBox.rect.y;
 
-            pointCount += MapPoint( iObject, point[i], spaceX, spaceY );
+            pointCount += MapPoint( iPath, point[i], spaceX, spaceY );
         }
     }
 
@@ -386,31 +386,16 @@ FOdysseyPainterEditorVectorGridToolHUD::MapPath( FOdysseyVectorPath* iPath
 }
 
 uint32
-FOdysseyPainterEditorVectorGridToolHUD::MapPaintGroup( FOdysseyVectorGroupPaint* iPaintGroup
-                                                     , BLMatrix2D& iInverseGridMatrix )
+FOdysseyPainterEditorVectorGridToolHUD::MapPaintGroupBuckets( FOdysseyVectorGroupPaint* iPaintGroup
+                                                            , BLMatrix2D& iInverseGridMatrix )
 {
-    std::list<FOdysseyVectorObject*>& childrenList = iPaintGroup->GetChildrenList();
-    std::list<FOdysseyVectorObject*>::iterator oit;
     std::list<FOdysseyVectorBucket*>& bucketList = iPaintGroup->GetBucketList();
     std::list<FOdysseyVectorBucket*>::iterator bit;
     BLMatrix2D conversionMatrix = iInverseGridMatrix;
     uint32 pointCount = 0;
 
-    conversionMatrix.transform( path->GetWorldMatrix() );
+    conversionMatrix.transform( iPaintGroup->GetWorldMatrix() );
 
-    // map paths
-    for( oit = childrenList.begin(); oit != childrenList.end(); ++oit )
-    {
-        FOdysseyVectorObject* child = *oit;
-
-        if( child->GetClass() == FOdysseyVectorPath::StaticClass() )
-        {
-            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(child);
-
-            pointCount += MapPath( path, iInverseGridMatrix );
-        }
-    }
- 
     // map buckets
     for( bit = bucketList.begin(); bit != bucketList.end(); ++bit )
     {
@@ -426,7 +411,68 @@ FOdysseyPainterEditorVectorGridToolHUD::MapPaintGroup( FOdysseyVectorGroupPaint*
 }
 
 uint32
-FOdysseyPainterEditorVectorGridToolHUD::MapObject( FOdysseyVectorObject* iObject )
+FOdysseyPainterEditorVectorGridToolHUD::MapPaintGroup( FOdysseyVectorGroupPaint* iPaintGroup
+                                                     , BLMatrix2D& iInverseGridMatrix )
+{
+    std::list<FOdysseyVectorObject*>& childrenList = iPaintGroup->GetChildrenList();
+    std::list<FOdysseyVectorObject*>::iterator oit;
+    BLMatrix2D conversionMatrix = iInverseGridMatrix;
+    uint32 pointCount = 0;
+
+    conversionMatrix.transform( iPaintGroup->GetWorldMatrix() );
+
+    // map paths
+    for( oit = childrenList.begin(); oit != childrenList.end(); ++oit )
+    {
+        FOdysseyVectorObject* child = *oit;
+
+        if( child->GetClass() == FOdysseyVectorPath::StaticClass() )
+        {
+            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(child);
+
+            pointCount += MapPath( path, iInverseGridMatrix );
+        }
+    }
+ 
+    pointCount += MapPaintGroupBuckets( iPaintGroup, iInverseGridMatrix );
+
+    return pointCount;
+}
+
+uint32
+FOdysseyPainterEditorVectorGridToolHUD::MapObjectRecurse( FOdysseyVectorObject* iObject )
+{
+    BLMatrix2D& inverseSpaceMatrix = mSelectionBox.inverseWorldMatrix;
+    std::list<FOdysseyVectorObject*>& childrenList = iObject->GetChildrenList();
+    uint32 pointCount = 0;
+
+    if( iObject->GetClass() == FOdysseyVectorGroupPaint::StaticClass() )
+    {
+        FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(iObject);
+
+        pointCount += MapPaintGroupBuckets( paintGroup, inverseSpaceMatrix );
+    }
+
+    if( iObject->GetClass() == FOdysseyVectorPath::StaticClass() )
+    {
+        FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(iObject);
+
+        pointCount += MapPath( path, inverseSpaceMatrix );
+    }
+
+    // Recurse
+    for( std::list<FOdysseyVectorObject*>::iterator it = childrenList.begin(); it != childrenList.end(); ++it )
+    {
+        FOdysseyVectorObject *child = (*it);
+
+        pointCount += MapObjectRecurse( child );
+    }
+
+    return pointCount;
+}
+
+uint32
+FOdysseyPainterEditorVectorGridToolHUD::MapObjectNoRecurse( FOdysseyVectorObject* iObject )
 {
     BLMatrix2D& inverseSpaceMatrix = mSelectionBox.inverseWorldMatrix;
     std::list<FOdysseyVectorObject*>& childrenList = iObject->GetChildrenList();
@@ -445,14 +491,6 @@ FOdysseyPainterEditorVectorGridToolHUD::MapObject( FOdysseyVectorObject* iObject
 
         pointCount += MapPath( path, inverseSpaceMatrix );
     }
-
-    // Recurse
-    /*for( std::list<FOdysseyVectorObject*>::iterator it = childrenList.begin(); it != childrenList.end(); ++it )
-    {
-        FOdysseyVectorObject *child = (*it);
-
-        pointCount += MapObject( child );
-    }*/
 
     return pointCount;
 }

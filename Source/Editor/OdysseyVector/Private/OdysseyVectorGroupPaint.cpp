@@ -195,26 +195,7 @@ FOdysseyVectorGroupPaint::TransferChild( FOdysseyVectorObject* iFosterChild )
 
     OnChildTransform( path );
 }
-/*
-FOdysseyVectorBucket*
-FOdysseyVectorGroupPaint::Bucket( double iX, double iY, uint8 iR, uint8 iG, uint8 iB, uint8 iA )
-{
-    FOdysseyVectorBucket* bucket = PickBucket( iX, iY );
 
-    if( bucket == nullptr )
-    {
-        bucket = new FOdysseyVectorBucket( *this, iX, iY, false );
-
-        AddBucket( bucket );
-    }
-
-    bucket->SetColor( iR, iG, iB, iA );
-
-    ApplyBucket( bucket );
-
-    return bucket;
-}
-*/
 void
 FOdysseyVectorGroupPaint::DrawChildren( uint64 iFlags )
 {

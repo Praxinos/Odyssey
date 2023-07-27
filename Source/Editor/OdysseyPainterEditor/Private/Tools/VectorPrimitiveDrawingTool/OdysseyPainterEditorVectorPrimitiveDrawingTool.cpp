@@ -5,6 +5,10 @@
 #include "Undo/OdysseyVectorUndoObjectAdd.h"
 #include "OdysseyPaletteEntryColor.h"
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846L
+#endif
+
 #define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorPrimitiveDrawingTool"
 
 //--------------------------------------------------------------------------------------
@@ -228,6 +232,27 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDrag( const FOdysseyPoin
     UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDragVector( vectorEngine, vectorScene, iPointInTexture );
 }
 
+double
+UOdysseyPainterEditorVectorPrimitiveDrawingTool::GetLineRotationAngle( FOdysseyVectorLine* iLine
+                                                                     , const FOdysseyPoint& iPointInTexture )
+{
+    BLPoint pt = iLine->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
+    ::ULIS::FVec2D hzVector = ::ULIS::FVec2D( 1.0f, 0.0f );
+    ::ULIS::FVec2D ptVector = ::ULIS::FVec2D( pt.x, pt.y );
+    double angle = 0.0f;
+
+    if( ptVector.DistanceSquared() )
+    {
+        ptVector.Normalize();
+
+        angle = fabs( acos( hzVector.DotProduct( ptVector ) ) );
+
+        return FOdysseyVector::Cross2D( hzVector, ptVector ) >= 0.0f ? angle : ( M_PI * 2.0f ) - angle;
+    }
+
+    return 0.0f;
+}
+
 void
 UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDragVector( FOdysseyVectorEngine* iEngine
                                                                   , FOdysseyVectorScene* iScene
@@ -241,17 +266,17 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDragVector( FOdysseyVect
                                                                     , iPointInTexture.y - mMouseDown.y );
         ::ULIS::FVec2D size = ::ULIS::FVec2D( bldif.x, bldif.y );
 
-        if( Uniform || FSlateApplication::Get().GetModifierKeys().IsControlDown() )
-        {
-            size.x = ::ULIS::FVec2D( bldif.x, bldif.y ).Distance() * 0.7071f;
-            size.y = size.x;
-        }
-
         switch( PrimitiveType )
         {
             case EOdysseyVectorPrimitiveType::Ellipse:
             {
                 FOdysseyVectorEllipse* ellipse = static_cast<FOdysseyVectorEllipse*>(primitive);
+
+                if( Uniform )
+                {
+                    size.x = ::ULIS::FVec2D( bldif.x, bldif.y ).Distance() * 0.7071f;
+                    size.y = size.x;
+                }
 
                 ellipse->SetRadius( size.x, size.y );
             }
@@ -261,6 +286,12 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDragVector( FOdysseyVect
             {
                 FOdysseyVectorRectangle* rectangle = static_cast<FOdysseyVectorRectangle*>(primitive);
 
+                if( Uniform )
+                {
+                    size.x = ::ULIS::FVec2D( bldif.x, bldif.y ).Distance() * 0.7071f;
+                    size.y = size.x;
+                }
+
                 rectangle->SetSize( size.x, size.y );
             }
             break;
@@ -269,7 +300,24 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDragVector( FOdysseyVect
             {
                 FOdysseyVectorLine* line = static_cast<FOdysseyVectorLine*>(primitive);
 
-                line->SetSize( size.x, size.y );
+                if( Uniform )
+                {
+                    BLMatrix2D& inverseMatrix = line->GetInverseWorldMatrix();
+                    BLPoint pt = inverseMatrix.mapPoint( iPointInTexture.x, iPointInTexture.y );
+                    double distance = ::ULIS::FVec2D( pt.x, pt.y ).Distance();
+                    int rotation = GetLineRotationAngle( line, iPointInTexture ) / M_PI * 180.0f;
+
+                     // to force the tip of the line in the middle of the 45 degrees steps
+                    rotation += 22;
+                    // 45 deg by 45 deg
+                    double angle = ( ( rotation / 45 ) * 45 ) * M_PI / 180.0f;
+
+                    line->SetSize( cos( angle ) * distance, sin( angle ) * distance );
+                }
+                else
+                {
+                    line->SetSize( size.x, size.y );
+                }
             }
             break;
 
