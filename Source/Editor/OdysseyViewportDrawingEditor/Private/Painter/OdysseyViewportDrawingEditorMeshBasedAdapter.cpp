@@ -319,11 +319,7 @@ float FOdysseyViewportDrawingEditorMeshBasedAdapter::GetStampQuality()
         .SetRealtimeUpdate(viewportClient->IsRealtime()));
     FSceneView* view = viewportClient->CalcSceneView(&viewFamily);
 
-    //We need to shift the coordinates of the stamp, because here, we're working in viewport coordinates, not texture coordinates (1 px in viewport != 1px in coord)
-    iStampParams.mPosition.x = iStampParams.mPosition.x + iStampParams.mBlock->Width() / 2.f;
-    iStampParams.mPosition.y = iStampParams.mPosition.y + iStampParams.mBlock->Height() / 2.f;
-
-    const FViewportCursorLocation mouseViewportRay(view, viewportClient, iStampParams.mPosition.x, iStampParams.mPosition.y);
+    const FViewportCursorLocation mouseViewportRay(view, viewportClient, viewportClient->GetCachedMouseX(), viewportClient->GetCachedMouseY());
 
     FHitResult traceHitResult(1.0f);
     const FVector rayEnd(mouseViewportRay.GetOrigin() + mouseViewportRay.GetDirection() * HALF_WORLD_MAX);
@@ -334,17 +330,7 @@ float FOdysseyViewportDrawingEditorMeshBasedAdapter::GetStampQuality()
     traceHitResult.Normal.FindBestAxisVectors(brushXAxis,brushYAxis);
     const FMatrix worldToBrushMatrix = FMatrix(brushXAxis, brushYAxis, traceHitResult.Normal, traceHitResult.Location).Inverse();
 
-
-    // Convert trace to UV position
-    FVector2D coord;
-    if (UGameplayStatics::FindCollisionUV(traceHitResult, mEditor->GetUVIndexUsedByCurrentTexture(), coord))
-    {
-        //And here we shift back the coordinates, because we converted it to texture coordinates
-        iStampParams.mPosition.x = coord.X * mEditor->Texture()->GetSurfaceWidth() - iStampParams.mBlock->Width() / 2.f;
-        iStampParams.mPosition.y = coord.Y * mEditor->Texture()->GetSurfaceHeight() - iStampParams.mBlock->Height() / 2.f;
-
-        mStrokeBufferTexture2D = NewRGBAFTextureFromBlockData(iStampParams.mBlock);
-    }
+    mStrokeBufferTexture2D = NewRGBAFTextureFromBlockData(iStampParams.mBlock);
 
     TRefCountPtr< FOdysseyMeshPaintBatchedElementParameters > meshPaintBatchedElementParameters(new FOdysseyMeshPaintBatchedElementParameters());
     {

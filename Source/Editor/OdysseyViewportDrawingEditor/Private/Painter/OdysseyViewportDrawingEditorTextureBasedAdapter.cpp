@@ -130,8 +130,13 @@ void FOdysseyViewportDrawingEditorTextureBasedAdapter::RenderInteractorWidget(co
     if (mEditor->GetSelectedTool()->IsA(UOdysseyPainterEditorRasterDrawingTool::StaticClass()))
         drawingTool = Cast<UOdysseyPainterEditorRasterDrawingTool>(mEditor->GetSelectedTool());
 
-    checkf(drawingTool != nullptr, TEXT("Drawing tool is non existent"));
+    if(drawingTool)
+        return drawingTool->GetBrushInstance()->StampInternal(iStampParams);
+    else
+        return iStampParams.mEvent;
 
+    //TODO: LOOP check here
+    /*
     //Check if we're currently drawing on the level editor viewport. If not, we're drawing normally
     if (!GCurrentLevelEditingViewportClient->GetEditorViewportWidget()->GetSceneViewport()->HasFocus())
         return drawingTool->GetBrushInstance()->StampInternal(iStampParams);
@@ -177,7 +182,7 @@ void FOdysseyViewportDrawingEditorTextureBasedAdapter::RenderInteractorWidget(co
         return iStampParams.mEvent;
     }
 
-    return drawingTool->GetBrushInstance()->StampInternal(iStampParams);
+    return drawingTool->GetBrushInstance()->StampInternal(iStampParams);*/
 }
 
 #undef LOCTEXT_NAMESPACE

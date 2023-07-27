@@ -37,6 +37,7 @@ public:
 
     virtual void RenderInteractorWidget(const FSceneView* iView, FViewport* iViewport, FPrimitiveDrawInterface* iPDI) = 0;
 
+    FVector2D ViewportCoordinatesToTextureCoordinates( FVector2D iPositionInViewport, FEditorViewportClient* iViewportClient);
 
 public:
     bool IsReadyToDraw() const;

@@ -7,6 +7,7 @@
 #include "UObject/SavePackage.h"
 #include "TextureCompiler.h"
 #include "FileHelpers.h"
+#include "Kismet/GameplayStatics.h"
 
 #define LOCTEXT_NAMESPACE "IOdysseyViewportDrawingEditorAdapter"
 
@@ -54,6 +55,40 @@ void IOdysseyViewportDrawingEditorAdapter::PrepareAdapterForPainting()
     }
 }
 
+FVector2D IOdysseyViewportDrawingEditorAdapter::ViewportCoordinatesToTextureCoordinates(FVector2D iPositionInViewport, FEditorViewportClient* iViewportClient)
+{
+    const TSharedPtr<IMeshPaintGeometryAdapter>* meshAdapterPtr = mEditor->ComponentToAdapterMap().Find(mEditor->Component());
+    if (!meshAdapterPtr)
+        return FVector2D( 0, 0 );
+
+    TSharedPtr<IMeshPaintGeometryAdapter> meshAdapter = *meshAdapterPtr;
+
+    // Compute a world space ray from the screen space mouse coordinates
+    FSceneViewFamilyContext viewFamily(FSceneViewFamily::ConstructionValues(
+        iViewportClient->Viewport,
+        iViewportClient->GetScene(),
+        iViewportClient->EngineShowFlags)
+        .SetRealtimeUpdate(iViewportClient->IsRealtime()));
+    FSceneView* view = iViewportClient->CalcSceneView(&viewFamily);
+
+    const FViewportCursorLocation mouseViewportRay(view, iViewportClient, iPositionInViewport.X, iPositionInViewport.Y);
+
+    FHitResult traceHitResult(1.0f);
+    const FVector rayEnd(mouseViewportRay.GetOrigin() + mouseViewportRay.GetDirection() * HALF_WORLD_MAX);
+
+    meshAdapter->LineTraceComponent(traceHitResult, mouseViewportRay.GetOrigin(), rayEnd, FCollisionQueryParams(SCENE_QUERY_STAT(Paint), true));
+
+    // Convert trace to UV position
+    FVector2D coord;
+    if (UGameplayStatics::FindCollisionUV(traceHitResult, mEditor->GetUVIndexUsedByCurrentTexture(), coord))
+    {
+        iPositionInViewport.X = coord.X * mEditor->Texture()->GetSurfaceWidth();
+        iPositionInViewport.Y = coord.Y * mEditor->Texture()->GetSurfaceHeight();
+    }
+
+    return iPositionInViewport;
+}
+
 bool IOdysseyViewportDrawingEditorAdapter::IsReadyToDraw() const
 {
     return !(mState == eState::kIdle);
@@ -73,13 +108,15 @@ bool IOdysseyViewportDrawingEditorAdapter::MouseMove(FEditorViewportClient* iVie
     FSceneView* view = iViewportClient->CalcSceneView(&viewFamily);
     const FViewportCursorLocation mouseViewportRay(view, (FEditorViewportClient*)iViewport->GetClient(), iViewport->GetMouseX(), iViewport->GetMouseY());
 
+    FVector2D texturePos = ViewportCoordinatesToTextureCoordinates(FVector2D(iViewport->GetMouseX(), iViewport->GetMouseY()), iViewportClient);
+
     mLastStrokeRay = mCurrentStrokeRay;
     
     mCurrentStrokeRay.mRayOrigin = mouseViewportRay.GetOrigin();
     mCurrentStrokeRay.mRayDirection = mouseViewportRay.GetDirection();
     mCurrentStrokeRay.mPoint = FOdysseyPoint::DefaultPoint();
-    mCurrentStrokeRay.mPoint.x = iViewport->GetMouseX();
-    mCurrentStrokeRay.mPoint.y = iViewport->GetMouseY();
+    mCurrentStrokeRay.mPoint.x = texturePos.X;
+    mCurrentStrokeRay.mPoint.y = texturePos.Y;
     mCurrentStrokeRay.mPoint.keysDown = mKeysPressed;
 
     return true;
@@ -152,13 +189,15 @@ bool IOdysseyViewportDrawingEditorAdapter::InputKey(FEditorViewportClient* iView
     FSceneView* view = iViewportClient->CalcSceneView(&viewFamily);
     const FViewportCursorLocation mouseViewportRay(view,(FEditorViewportClient*)iViewport->GetClient(),iViewport->GetMouseX(),iViewport->GetMouseY());
 
+    FVector2D texturePos = ViewportCoordinatesToTextureCoordinates(FVector2D(iViewport->GetMouseX(), iViewport->GetMouseY()), iViewportClient);
+
     //Init our StrokeRay, having all the basic info to draw 
     FOdysseyRay strokeRay;
     strokeRay.mRayOrigin = mouseViewportRay.GetOrigin();
     strokeRay.mRayDirection = mouseViewportRay.GetDirection();
     strokeRay.mPoint = FOdysseyPoint::DefaultPoint();
-    strokeRay.mPoint.x = iViewport->GetMouseX();
-    strokeRay.mPoint.y = iViewport->GetMouseY();
+    strokeRay.mPoint.x = texturePos.X;
+    strokeRay.mPoint.y = texturePos.Y;
     strokeRay.mPoint.keysDown = mKeysPressed;
 
     return InputKeyWithStrokeRay(strokeRay, iViewportClient, iViewport, iKey, iEvent);
@@ -211,13 +250,15 @@ bool IOdysseyViewportDrawingEditorAdapter::CapturedMouseMove(FEditorViewportClie
     FSceneView* view = iViewportClient->CalcSceneView(&viewFamily);
     const FViewportCursorLocation mouseViewportRay(view, (FEditorViewportClient*)iViewport->GetClient(), iViewport->GetMouseX(), iViewport->GetMouseY());
 
+    FVector2D texturePos = ViewportCoordinatesToTextureCoordinates(FVector2D(iViewport->GetMouseX(), iViewport->GetMouseY()), iViewportClient);
+
     //Init our StrokeRay, having all the basic info to draw 
     FOdysseyRay strokeRay;
     strokeRay.mRayOrigin = mouseViewportRay.GetOrigin();
     strokeRay.mRayDirection = mouseViewportRay.GetDirection();
     strokeRay.mPoint = FOdysseyPoint::DefaultPoint();
-    strokeRay.mPoint.x = iMouseX;
-    strokeRay.mPoint.y = iMouseY;
+    strokeRay.mPoint.x = texturePos.X;
+    strokeRay.mPoint.y = texturePos.Y;
     strokeRay.mPoint.keysDown = mKeysPressed;
 
     return CapturedMouseMoveWithStrokeRay(strokeRay, iViewportClient, iViewport, iMouseX, iMouseY);
@@ -268,11 +309,14 @@ void IOdysseyViewportDrawingEditorAdapter::OnStylusStateChanged(const TWeakPtr<S
     //Init our StrokeRay, having all the basic info to draw 
     float scaleDPI = iWidget.Pin().Get()->GetCachedGeometry().GetAccumulatedLayoutTransform().GetScale();
     FVector2D positionInViewport = iWidget.Pin().Get()->GetCachedGeometry().AbsoluteToLocal(iState.GetPosition()) * scaleDPI;
+
+    FVector2D texturePos = ViewportCoordinatesToTextureCoordinates(positionInViewport, viewportClient);
+
     FOdysseyRay strokeRay;
     strokeRay.mRayOrigin = mouseViewportRay.GetOrigin();
     strokeRay.mRayDirection = mouseViewportRay.GetDirection();
-    strokeRay.mPoint = FOdysseyPoint( positionInViewport.X
-                                                , positionInViewport.Y
+    strokeRay.mPoint = FOdysseyPoint(             texturePos.X
+                                                , texturePos.Y
                                                 , iState.GetZ()
                                                 , iState.GetPressure()
                                                 , iState.GetTimer()

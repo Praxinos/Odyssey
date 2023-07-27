@@ -309,7 +309,6 @@ float FOdysseyViewportDrawingEditorScreenBasedAdapter::GetStampQuality()
 
     TSharedPtr<IMeshPaintGeometryAdapter> meshAdapter = *meshAdapterPtr;
 
-
     FEditorViewportClient* viewportClient = (FEditorViewportClient*)mLastKnownViewport->GetClient();
     // Compute a world space ray from the screen space mouse coordinates
     FSceneViewFamilyContext viewFamily(FSceneViewFamily::ConstructionValues(
@@ -319,11 +318,7 @@ float FOdysseyViewportDrawingEditorScreenBasedAdapter::GetStampQuality()
         .SetRealtimeUpdate(viewportClient->IsRealtime()));
     FSceneView* view = viewportClient->CalcSceneView(&viewFamily);
 
-    //We need to shift the coordinates of the stamp, because here, we're working in viewport coordinates, not texture coordinates (1 px in viewport != 1px in coord)
-    iStampParams.mPosition.x = iStampParams.mPosition.x + iStampParams.mBlock->Width() / 2.f;
-    iStampParams.mPosition.y = iStampParams.mPosition.y + iStampParams.mBlock->Height() / 2.f;
-
-    const FViewportCursorLocation mouseViewportRay(view, viewportClient, iStampParams.mPosition.x, iStampParams.mPosition.y);
+    const FViewportCursorLocation mouseViewportRay(view, viewportClient, viewportClient->GetCachedMouseX(), viewportClient->GetCachedMouseY());
 
     FHitResult traceHitResult(1.0f);
     const FVector rayEnd(mouseViewportRay.GetOrigin() + mouseViewportRay.GetDirection() * HALF_WORLD_MAX);
@@ -385,17 +380,7 @@ float FOdysseyViewportDrawingEditorScreenBasedAdapter::GetStampQuality()
 
     //Screen axis calculations -----------------------------------------------------
 
-
-    // Convert trace to UV position
-    FVector2D coord;
-    if (UGameplayStatics::FindCollisionUV(traceHitResult, mEditor->GetUVIndexUsedByCurrentTexture(), coord))
-    {
-        //And here we shift back the coordinates, because we converted it to texture coordinates
-        iStampParams.mPosition.x = coord.X * mEditor->Texture()->GetSurfaceWidth() - iStampParams.mBlock->Width() / 2.f;
-        iStampParams.mPosition.y = coord.Y * mEditor->Texture()->GetSurfaceHeight() - iStampParams.mBlock->Height() / 2.f;
-
-        mStrokeBufferTexture2D = NewRGBAFTextureFromBlockData(iStampParams.mBlock);
-    }
+    mStrokeBufferTexture2D = NewRGBAFTextureFromBlockData(iStampParams.mBlock);
 
     if( !mStrokeBufferTexture2D )
         return iStampParams.mEvent;
