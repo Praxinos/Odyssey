@@ -509,11 +509,11 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseHoverVector( FOdysseyVectorEngine* 
                                                         , FOdysseyVectorScene* iScene
                                                         , const FOdysseyPoint& iPointInTexture )
 {
-    FOdysseyVectorObject* selectedObject = iScene->GetLastSelected();
+    FOdysseyVectorObject* selectedObject = iScene->GetLastSelected() ? iScene->GetLastSelected() : iScene;
 
     if( selectedObject )
     {
-        if( selectedObject->GetClass() == FOdysseyVectorGroupPaint::StaticClass() )
+        if( selectedObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
         {
             FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>( selectedObject );
 
@@ -599,7 +599,7 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseDragVector( FOdysseyVectorEngine* i
         }
     }
 
-    iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES | FOdysseyVectorObject::KEEPINVALIDATED ); // update vector scene
+    iScene->Update( FOdysseyVectorObject::KEEPINVALIDATED ); // update vector scene
 
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
@@ -832,7 +832,7 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseUpVector( FOdysseyVectorEngine* iEn
     {
         if( mPickedObject )
         {
-            if( mPickedObject->GetClass() == FOdysseyVectorGroupPaint::StaticClass() )
+            if( mPickedObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
             {
                 FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(mPickedObject);
 
@@ -857,6 +857,7 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseUpVector( FOdysseyVectorEngine* iEn
     {
         if( mPickedObject )
         {
+/*
             if( mPickedObject->GetClass() == FOdysseyVectorScene::StaticClass() )
             {
                 FOdysseyVectorScene* scene = static_cast<FOdysseyVectorScene*>(mPickedObject);
@@ -874,8 +875,8 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseUpVector( FOdysseyVectorEngine* iEn
                     }
                 }
             }
-
-            if( mPickedObject->GetClass() == FOdysseyVectorGroupPaint::StaticClass() )
+*/
+            if( mPickedObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
             {
                 FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(mPickedObject);
 
@@ -927,7 +928,7 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseUpVector( FOdysseyVectorEngine* iEn
     mPickedBucket = nullptr;
     mPickedObject = nullptr;
 
-    iScene->Update( 0 );
+    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
                    | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );

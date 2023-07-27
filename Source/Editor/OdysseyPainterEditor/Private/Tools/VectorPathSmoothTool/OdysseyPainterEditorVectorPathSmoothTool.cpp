@@ -262,8 +262,7 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDragVector( FOdysseyVectorEngi
         }
     }
 
-    iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES
-                  | FOdysseyVectorObject::KEEPINVALIDATED );
+    iScene->Update( FOdysseyVectorObject::KEEPINVALIDATED );
 
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
@@ -294,7 +293,7 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseUpVector( FOdysseyVectorEngine
     std::vector<FOdysseyVectorSegment*> segmentArray;
     std::vector<FOdysseyVectorPoint*> pickedPointArray = mPathSmoothHUD->GetPickedPointArray();
 
-    iScene->Update( 0 ); // update invalidated objects
+    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS ); // update invalidated objects
 
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 

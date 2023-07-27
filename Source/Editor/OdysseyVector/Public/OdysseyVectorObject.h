@@ -64,14 +64,16 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         //static const uint32 DRAWSTRUCTURE = ( 1 << 0 );
 
         // update mask
-        static const uint32 FREQUENTUPDATES = ( 1 << 0 );
-        static const uint32 KEEPINVALIDATED = ( 1 << 1 );
+        //static const uint32 FREQUENTUPDATES = ( 1 << 0 );
+        static const uint32 KEEPINVALIDATED   = ( 1 << 1 );
+        static const uint32 UPDATEPAINTGROUPS = ( 1 << 2 );
 
         // invalidation mask
-        static const uint32 INVALIDATE_CHILD = ( 1 << 0 ); // must not be set manually
-        static const uint32 INVALIDATE_SHAPE = ( 1 << 1 );
-        static const uint32 INVALIDATE_COLOR = ( 1 << 2 );
-        static const uint32 INVALIDATE_ALL   = ( INVALIDATE_SHAPE | INVALIDATE_COLOR );
+        static const uint32 INVALIDATE_CHILD       = ( 1 << 0 ); // must not be set manually
+        static const uint32 INVALIDATE_PARENT      = ( 1 << 1 ); // must not be set manually
+        static const uint32 INVALIDATE_SHAPE       = ( 1 << 2 );
+        static const uint32 INVALIDATE_COLOR       = ( 1 << 3 );
+        static const uint32 INVALIDATE_ALL         = ( INVALIDATE_SHAPE | INVALIDATE_COLOR );
 
         static constexpr float BBOX_POINT_RADIUS = 4.0f;
 
@@ -154,8 +156,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         void Scale( double iX, double iY );
         void PrependChild( FOdysseyVectorObject* iChild );
         void AppendChild( FOdysseyVectorObject* iChild );
-        void AddChild( FOdysseyVectorObject* iChild, bool iPrepend );
-        void RemoveChild( FOdysseyVectorObject* iChild );
+
+        virtual void AddChild( FOdysseyVectorObject* iChild, bool iPrepend );
+        virtual void RemoveChild( FOdysseyVectorObject* iChild );
+
         void ImportChild( FOdysseyVectorObject* iChild, BLMatrix2D& iInverseWorldMatrix );
         double GetScalingX();
         double GetScalingY();

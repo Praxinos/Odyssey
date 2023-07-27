@@ -171,29 +171,26 @@ FOdysseyVectorGroupPaint::ApplyBucket( FOdysseyVectorBucket* iBucket )
     /*Invalidate();*/
 }
 
+// TODO: Rename this method. this is not a callback anymore
 void
 FOdysseyVectorGroupPaint::OnChildTransform( FOdysseyVectorObject* iChild )
 {
-    // we don't check the type of the object. Normally they should be
-    // all of base type PathCubic, otherwise there is a bug somewhere.
-    FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(iChild);
+    if( iChild->GetClass() == FOdysseyVectorPath::StaticClass() )
+    {
+        FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(iChild);
 
-    path->SwitchSpace( *this );
-    path->ResetTransform();
-    path->UpdateMatrix( false );// pass false to prevent loop
-    path->InvalidateAllSegments();
+        path->SwitchSpace( *this );
+        path->ResetTransform();
+        path->UpdateMatrix( false );// pass false to prevent loop
+        path->InvalidateAllSegments();
+        path->Update(0);
+    }
 }
 
 void
 FOdysseyVectorGroupPaint::TransferChild( FOdysseyVectorObject* iFosterChild )
 {
-    FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(iFosterChild);
-
-    iFosterChild->GetParent()->RemoveChild( iFosterChild );
-
-    AppendChild( iFosterChild );
-
-    OnChildTransform( path );
+    FOdysseyVectorObject::TransferChild( iFosterChild );
 }
 
 void
@@ -218,6 +215,10 @@ FOdysseyVectorGroupPaint::DrawChildren( uint64 iFlags )
                 childPath->DrawStructure( mGroupPaintParam.WireframeColor, 1.0f, true );
             }
         }
+        else
+        {
+            child->Draw( iFlags );
+        }
     }
 }
 
@@ -240,12 +241,25 @@ FOdysseyVectorGroupPaint::Draw( uint64 iFlags )
 void
 FOdysseyVectorGroupPaint::UpdateShape( uint32 iUpdateFlags )
 {
+    std::list<FOdysseyVectorPath*>::iterator it;
+   BLMatrix2D identityMatrix = BLMatrix2D( BLMatrix2D::makeIdentity() );
+
+    for( it = mPathList.begin(); it != mPathList.end(); ++it )
+    {
+        FOdysseyVectorPath* path = *it;
+
+        if( path->GetLocalMatrix() != identityMatrix )
+        {
+            OnChildTransform( path );
+        }
+    }
+
     FOdysseyVectorGroup::UpdateShape( iUpdateFlags ); // updates BBox
 
     UpdateBBox();
 
     if( ( mGroupPaintParam.Realtime == true  )
-   || ( ( mGroupPaintParam.Realtime == false ) && ( ( iUpdateFlags & FOdysseyVectorObject::FREQUENTUPDATES ) == 0 ) ) )
+   || ( ( mGroupPaintParam.Realtime == false ) && ( iUpdateFlags & FOdysseyVectorObject::UPDATEPAINTGROUPS ) ) )
     {
         if( ( mInvalidationFlags & FOdysseyVectorObject::INVALIDATE_SHAPE )
          || ( mInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD ) )
@@ -889,9 +903,35 @@ FOdysseyVectorGroupPaint::SetWireframe( bool iIsWireframe )
 }
 
 void
+FOdysseyVectorGroupPaint::AddChild( FOdysseyVectorObject* iChild, bool iPrepend )
+{
+    FOdysseyVectorObject::AddChild( iChild, iPrepend );
+
+    if( iChild->GetClass() == FOdysseyVectorPath::StaticClass() )
+    {
+        FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(iChild);
+
+        mPathList.push_back( path );
+    }
+}
+
+void
+FOdysseyVectorGroupPaint::RemoveChild( FOdysseyVectorObject* iChild )
+{
+    FOdysseyVectorObject::RemoveChild( iChild );
+
+    if( iChild->GetClass() == FOdysseyVectorPath::StaticClass() )
+    {
+        FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(iChild);
+
+        mPathList.remove( path );
+    }
+}
+
+void
 FOdysseyVectorGroupPaint::BuildGraph()
 {
-    std::list<FOdysseyVectorObject*> pathList = mChildrenList; // copy
+    std::list<FOdysseyVectorPath*> intersectedPathList = mPathList; // copy
     uint32 totalGapSegmentCount = 0;
     uint32 totalSectionCount = 0;
     // act as boolean without the need to reinitialize its value
@@ -901,9 +941,9 @@ FOdysseyVectorGroupPaint::BuildGraph()
 
     Clear();
 
-    for( std::list<FOdysseyVectorObject*>::iterator oit = mChildrenList.begin(); oit != mChildrenList.end(); ++oit )
+    for( std::list<FOdysseyVectorPath*>::iterator pit = mPathList.begin(); pit != mPathList.end(); ++pit )
     {
-        FOdysseyVectorPath *path = static_cast<FOdysseyVectorPath*>(*oit);
+        FOdysseyVectorPath *path = (*pit);
         std::list<FOdysseyVectorSegment*>& segmentList = path->GetSegmentList();
         std::list<FOdysseyVectorVertex*>& vertexList = path->GetVertexList();
         uint32 intersectionCount = 0;
@@ -912,10 +952,10 @@ FOdysseyVectorGroupPaint::BuildGraph()
         {
             FOdysseyVectorSegment *segment = static_cast<FOdysseyVectorSegment*>(*sit);
 
-            for( std::list<FOdysseyVectorObject*>::iterator pit = pathList.begin(); pit != pathList.end(); ++pit )
+            for( std::list<FOdysseyVectorPath*>::iterator iit = intersectedPathList.begin(); iit != intersectedPathList.end(); ++iit )
             {
-                FOdysseyVectorPath *intersectPath = static_cast<FOdysseyVectorPath*>(*pit);
-                std::list<FOdysseyVectorSegment*>& intersectPathSegmentList = intersectPath->GetSegmentList();
+                FOdysseyVectorPath *intersectedPath = (*iit);
+                std::list<FOdysseyVectorSegment*>& intersectPathSegmentList = intersectedPath->GetSegmentList();
 
                 intersectionCount += IntersectSegment ( segment, intersectPathSegmentList, mIntersectionArray );
             }
@@ -948,7 +988,7 @@ FOdysseyVectorGroupPaint::BuildGraph()
             path->SetPaintingCode( mPaintingCode );
         }
 
-        pathList.pop_front(); // we don't need the path anymore. By and by the list will empty by itself.
+        intersectedPathList.pop_front(); // we don't need the path anymore. By and by the list will empty by itself.
     }
 
     // we now need another loop to count and to reserve the memory in one block to create the sections.

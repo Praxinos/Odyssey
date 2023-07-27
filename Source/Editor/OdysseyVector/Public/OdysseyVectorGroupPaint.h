@@ -127,6 +127,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
                               , ePointSelectionFlags iPointSelectionFlags  );
         bool GetBBoxFromSelectedVertices( ::ULIS::FRectD& oBBox, bool iWorld );
         void PickBucket( std::vector<FOdysseyVectorBucket*>& oPickedBucketArray );
+        virtual void AddChild( FOdysseyVectorObject* iChild, bool iPrepend ) override;
+        virtual void RemoveChild( FOdysseyVectorObject* iChild ) override;
 
     protected:
         /**
@@ -199,6 +201,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         static const uint32 NOCYCLE  = 0;
         static const uint32 BLOCKED  = 1;
         static const uint32 HASCYCLE = 2;
+        std::list<FOdysseyVectorPath*> mPathList;
         std::list<FOdysseyVectorBucket*> mSelectedBucketList;
         std::list<FOdysseyVectorBucket*> mBucketList;
         std::list<FOdysseyVectorCycle*> mCycleList;

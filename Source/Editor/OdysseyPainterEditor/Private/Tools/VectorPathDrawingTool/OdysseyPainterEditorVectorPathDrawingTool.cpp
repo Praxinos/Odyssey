@@ -427,7 +427,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( FOdysseyVectorEng
 
         mPreviousVertex = nextVertex;
 
-        iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES | FOdysseyVectorObject::KEEPINVALIDATED );
+        iScene->Update( FOdysseyVectorObject::KEEPINVALIDATED );
     }
 
     mOldPointInTexture.x = iPointInTexture.x;
@@ -529,7 +529,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorEngin
 
     mPathDrawingHUD->Reset( iScene ); // refreshes the quadtree;
 
-    iScene->Update( 0 ); // update invalidated objects
+    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS ); // update invalidated objects
 
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
                    | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );

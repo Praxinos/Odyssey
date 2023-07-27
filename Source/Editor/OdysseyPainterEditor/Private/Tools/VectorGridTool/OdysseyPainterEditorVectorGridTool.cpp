@@ -190,7 +190,7 @@ UOdysseyPainterEditorVectorGridTool::OnMouseDragVector( FOdysseyVectorEngine* iE
             mGridHUD->Deform();
 
             // update invalidated objects
-            iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES | FOdysseyVectorObject::KEEPINVALIDATED );
+            iScene->Update( FOdysseyVectorObject::KEEPINVALIDATED );
         }
     }
 
@@ -224,7 +224,7 @@ UOdysseyPainterEditorVectorGridTool::OnMouseUpVector( FOdysseyVectorEngine* iEng
         mGridHUD->EndSelectionRectangle( FSlateApplication::Get().GetModifierKeys().IsControlDown() ? false : true );
     }
 
-    iScene->Update( 0 );
+    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 

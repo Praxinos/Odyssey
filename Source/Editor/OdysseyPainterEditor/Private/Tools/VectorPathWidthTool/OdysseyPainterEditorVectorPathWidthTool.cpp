@@ -188,7 +188,7 @@ UOdysseyPainterEditorVectorPathWidthTool::OnMouseDragVector( FOdysseyVectorEngin
     }
 
     // update vector scene and GUI widgets via delegates.
-    iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES | FOdysseyVectorObject::KEEPINVALIDATED );
+    iScene->Update( FOdysseyVectorObject::KEEPINVALIDATED );
 
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
@@ -215,7 +215,7 @@ UOdysseyPainterEditorVectorPathWidthTool::OnMouseUpVector( FOdysseyVectorEngine*
                                                          , const FOdysseyPoint& iPointInTexture
                                                          , const FKey& iKey )
 {
-    iScene->Update( 0 ); // update vector scene and GUI widgets via delegates.
+    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS ); // update vector scene and GUI widgets via delegates.
 
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
                    | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );

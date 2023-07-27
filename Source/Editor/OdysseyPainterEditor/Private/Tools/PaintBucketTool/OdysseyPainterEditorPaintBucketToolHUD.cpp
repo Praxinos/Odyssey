@@ -267,7 +267,7 @@ FOdysseyPainterEditorPaintBucketToolHUD::DrawBucket( FOdysseyVectorBucket* iBuck
 void
 FOdysseyPainterEditorPaintBucketToolHUD::Draw( FOdysseyVectorScene* iScene, uint64 iFlags )
 {
-    FOdysseyVectorObject* selectedObject = iScene->GetLastSelected();
+    FOdysseyVectorObject* selectedObject = iScene->GetLastSelected() ? iScene->GetLastSelected() : iScene;
     BLContext* blctx = iScene->GetEngine()->GetBLContext();
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
@@ -281,7 +281,7 @@ FOdysseyPainterEditorPaintBucketToolHUD::Draw( FOdysseyVectorScene* iScene, uint
 
     if( selectedObject )
     {
-        if( selectedObject->GetClass() == FOdysseyVectorGroupPaint::StaticClass() )
+        if( selectedObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
         {
             FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(selectedObject);
             std::list<FOdysseyVectorBucket*>& bucketList = paintGroup->GetBucketList();

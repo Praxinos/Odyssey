@@ -394,8 +394,7 @@ UOdysseyPainterEditorVectorTransformTool::TranslateObjectSelection( FOdysseyVect
     // Update the matrix for all objects
     iScene->UpdateMatrix();
 
-    iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES
-                  | FOdysseyVectorObject::KEEPINVALIDATED );
+    iScene->Update( FOdysseyVectorObject::KEEPINVALIDATED );
 
     // update the selection box with the newly modified matrices
     iEngine->ResetHUD();
@@ -515,8 +514,7 @@ UOdysseyPainterEditorVectorTransformTool::RotateObjectSelection( FOdysseyVectorE
     // Update the matrix for all objects
     iScene->UpdateMatrix();
 
-    iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES
-                  | FOdysseyVectorObject::KEEPINVALIDATED );
+    iScene->Update( FOdysseyVectorObject::KEEPINVALIDATED );
 
     // update the selection box with the newly modified matrices
     //iEngine->ResetHUD();
@@ -801,7 +799,7 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseUp( const FOdysseyPoint& iPoint
             GEditor->EndTransaction();
         }
 
-        vectorScene->Update( 0 );
+        vectorScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
         vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
     }

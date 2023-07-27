@@ -345,13 +345,13 @@ FOdysseyVectorObject::UpdateMatrix( bool iRunTransformCallback )
     }
 
     //TODO: design issue. there will be a call on parent's callback when parent matrix is updated. Need to fix that.
-    if( iRunTransformCallback )
+    /*if( iRunTransformCallback )
     {
         if( this->GetParent() )
         {
             this->GetParent()->OnChildTransform( this );
         }
-    }
+    }*/
 }
 
 //static
@@ -499,18 +499,17 @@ FOdysseyVectorObject::Invalidate( uint32 iInvalidationFlags )
 {
     if ( mParent )
     {
-        if( mInvalidationFlags == 0 )
+        if( ( mInvalidationFlags & INVALIDATE_PARENT ) == 0 )
         {
             mParent->mInvalidatedChildrenList.push_back( this );
 
             mParent->Invalidate( mParent->mInvalidationFlags | INVALIDATE_CHILD );
         }
 
-        // MUST have a parent to be declared as invalidated otherwise mInvalidationFlags could be set
-        // even if the object has no parent because of bottom-to-top the recursive calls
-        // to Invalidate() from FOdysseyVectorVertex::Set() and then we would never reenter this "if" statement
-        mInvalidationFlags |= iInvalidationFlags;
+        mInvalidationFlags |= INVALIDATE_PARENT;
     }
+
+    mInvalidationFlags |= iInvalidationFlags;
 }
 
 FOdysseyVectorScene*

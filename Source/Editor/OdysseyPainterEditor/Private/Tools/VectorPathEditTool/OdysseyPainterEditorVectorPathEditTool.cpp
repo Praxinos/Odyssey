@@ -693,7 +693,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDragVector( FOdysseyVectorEngine
 */
     mOldPointInTexture = ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y );
 
-    iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES | FOdysseyVectorObject::KEEPINVALIDATED );
+    iScene->Update( FOdysseyVectorObject::KEEPINVALIDATED );
 
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
@@ -720,7 +720,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseUpVector( FOdysseyVectorEngine* 
                                                         , const FOdysseyPoint& iPointInTexture
                                                         , const FKey& iKey )
 {
-    iScene->Update( 0 );
+    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
                    | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );

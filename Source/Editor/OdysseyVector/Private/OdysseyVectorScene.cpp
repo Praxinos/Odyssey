@@ -6,7 +6,7 @@ FOdysseyVectorScene::~FOdysseyVectorScene()
 }
 
 FOdysseyVectorScene::FOdysseyVectorScene( const FString& iName )
-    : FOdysseyVectorGroup( iName )
+    : FOdysseyVectorGroupPaint( iName )
 {
     mBackgroundBucket.SetSolidColor( 0, 0, 0, 0 );
 }
@@ -34,6 +34,9 @@ FOdysseyVectorScene::ClearSelection()
     }
 
     mSelectedObjectList.clear();
+
+    // tmp
+    if( mSelectedObjectList.size() == 0 ) mSelectedObjectList.push_back( this );
 }
 
 void
@@ -42,11 +45,17 @@ FOdysseyVectorScene::Unselect( FOdysseyVectorObject* iVecObj )
     iVecObj->SetIsSelected( false );
 
     mSelectedObjectList.remove( iVecObj );
+
+    // tmp
+    if( mSelectedObjectList.size() == 0 ) mSelectedObjectList.push_back( this );
 }
 
 void
 FOdysseyVectorScene::Select( FOdysseyVectorObject* iVecObj )
 {
+    // tmp
+    if( mSelectedObjectList.size() && mSelectedObjectList.front() == this ) mSelectedObjectList.clear();
+
     if( std::find( mSelectedObjectList.begin(), mSelectedObjectList.end(), iVecObj ) == mSelectedObjectList.end() )
     {
         iVecObj->SetIsSelected( true );
@@ -309,21 +318,12 @@ FOdysseyVectorScene::DrawShape( uint64 iFlags )
     blctx->fillAll();
     blctx->restore();
 
+    FOdysseyVectorGroupPaint::DrawShape( iFlags );
+
     // view the updated zone ( testing purpose only )
     /*blctx.setStrokeStyle(BLRgba32(0xFFFF0000));
     blctx.setStrokeWidth(1.0f);
     blctx.strokeRect( mRoi.x, mRoi.y, mRoi.w, mRoi.h );*/
-}
-
-void
-FOdysseyVectorScene::UpdateShape( uint32 iUpdateFlags )
-{
-}
-
-void
-FOdysseyVectorScene::Update( uint32 iUpdateFlags )
-{
-    FOdysseyVectorObject::Update( iUpdateFlags );
 }
 
 FOdysseyVectorObject*
