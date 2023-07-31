@@ -18,5 +18,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPathPushToolHUD : publ
 
         virtual void Draw( FOdysseyVectorScene* iScene, uint64 iFlags ) override;
         virtual void Reset( FOdysseyVectorScene* iScene ) override;
+        virtual void Load( FOdysseyVectorScene* iScene ) override;
+
         void SetCursorPosition( double iX, double iY );
 };

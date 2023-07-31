@@ -9,7 +9,7 @@ FOdysseyVectorCycle::~FOdysseyVectorCycle()
 }
 
 //static
-FOdysseyVectorCycle::FOdysseyVectorCycle( FOdysseyVectorObject& iOwner
+FOdysseyVectorCycle::FOdysseyVectorCycle( FOdysseyVectorObject* iOwner
                                         , std::vector<FOdysseyVectorVertex*>& iVertexArray
                                         , std::vector<FOdysseyVectorSection*>& iSectionArray )
     : mOwner( iOwner )
@@ -51,6 +51,29 @@ FOdysseyVectorCycle::Merge( FOdysseyVectorCycle* iMergeCycle )
     }
 
     mCombinedPath.addPath( iMergeCycle->mContourPath );
+}
+
+//static
+void
+FOdysseyVectorCycle::ToBucketArray( std::vector<FOdysseyVectorCycle*>& iCyleArray
+                                  , std::vector<FOdysseyVectorBucket*>& oBucketArray )
+{
+    oBucketArray.clear();
+
+    if( iCyleArray.size() ) 
+    {
+        oBucketArray.reserve( iCyleArray.size() );
+
+        for( int i = 0; i < iCyleArray.size(); i++ )
+        {
+            FOdysseyVectorBucket* bucket = iCyleArray[i]->GetBucket();
+
+            if( bucket )
+            {
+                oBucketArray.push_back( bucket );
+            }
+        }
+    }
 }
 
 FOdysseyVectorCycle*
@@ -211,7 +234,7 @@ FOdysseyVectorCycle::PropagateBucket()
 bool
 FOdysseyVectorCycle::HitTest( double iX, double iY )
 {
-    BLContext* blctx = mOwner.GetScene()->GetEngine()->GetBLContext();
+    BLContext* blctx = mOwner->GetScene()->GetEngine()->GetBLContext();
     BLPoint pt = { iX, iY };
 
     uint32 ret = mCombinedPath.hitTest( pt, BL_FILL_RULE_EVEN_ODD );
@@ -219,14 +242,20 @@ FOdysseyVectorCycle::HitTest( double iX, double iY )
     return ( ret == BL_HIT_TEST_IN ) ? true : false;
 }
 
+FOdysseyVectorObject*
+FOdysseyVectorCycle::GetOwner()
+{
+    return mOwner;
+}
+
 void
 FOdysseyVectorCycle::StrokePath( bool iWorld )
 {
-    BLContext* blctx = mOwner.GetScene()->GetEngine()->GetBLContext();
+    BLContext* blctx = mOwner->GetScene()->GetEngine()->GetBLContext();
 
     if( iWorld == true )
     {
-        BLMatrix2D worldMatrix = mOwner.GetWorldMatrix();
+        BLMatrix2D worldMatrix = mOwner->GetWorldMatrix();
         BLPath contourPath = mContourPath;
 
         blctx->save();
@@ -297,9 +326,9 @@ FOdysseyVectorCycle::GetBBox()
 void
 FOdysseyVectorCycle::Draw( uint64 iFlags )
 {
-    BLContext* blctx = mOwner.GetScene()->GetEngine()->GetBLContext();
+    BLContext* blctx = mOwner->GetScene()->GetEngine()->GetBLContext();
     FOdysseyVectorBucket* bucket = mBucket ? mBucket : mPropagatedBucket;
-    BLMatrix2D& worldMatrix = mOwner.GetWorldMatrix();
+    BLMatrix2D& worldMatrix = mOwner->GetWorldMatrix();
 
     if( bucket )
     {
@@ -308,7 +337,7 @@ FOdysseyVectorCycle::Draw( uint64 iFlags )
             case eBucketColorMode::LinearGradient :
             {
                 eBucketSpreadingPolicy spreadingPolicy = bucket->GetSpreadingPolicy();
-                ::ULIS::FRectD bbox = spreadingPolicy == eBucketSpreadingPolicy::Group ? mOwner.GetBBox( false ) : GetBBox();
+                ::ULIS::FRectD bbox = spreadingPolicy == eBucketSpreadingPolicy::Group ? mOwner->GetBBox( false ) : GetBBox();
                 double linearMinX = /*bbox.x0*/bbox.x;
                 double linearMinY = /*bbox.y0*/bbox.y;
                 double linearMaxX = /*bbox.x1*/bbox.x + bbox.w;
@@ -353,7 +382,7 @@ FOdysseyVectorCycle::Draw( uint64 iFlags )
             case eBucketColorMode::RadialGradient :
             {
                 eBucketSpreadingPolicy spreadingPolicy = bucket->GetSpreadingPolicy();
-                ::ULIS::FRectD bbox = spreadingPolicy == eBucketSpreadingPolicy::Group ? mOwner.GetBBox( false ) : GetBBox();
+                ::ULIS::FRectD bbox = spreadingPolicy == eBucketSpreadingPolicy::Group ? mOwner->GetBBox( false ) : GetBBox();
                 double radialMinX = /*bbox.x0*/bbox.x;
                 double radialMinY = /*bbox.y0*/bbox.y;
                 double radialMaxX = /*bbox.x1*/bbox.x + bbox.w;

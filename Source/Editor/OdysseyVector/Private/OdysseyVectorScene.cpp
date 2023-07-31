@@ -11,6 +11,17 @@ FOdysseyVectorScene::FOdysseyVectorScene( const FString& iName )
     mBackgroundBucket.SetSolidColor( 0, 0, 0, 0 );
 }
 
+bool
+FOdysseyVectorScene::HasBaseClass( uint32 iBaseClassID )
+{
+    if( mStaticClass == iBaseClassID )
+    {
+        return true;
+    }
+
+    return FOdysseyVectorGroupPaint::HasBaseClass( iBaseClassID );
+}
+
 void
 FOdysseyVectorScene::SetEngine( FOdysseyVectorEngine* iEngine )
 {
@@ -34,9 +45,6 @@ FOdysseyVectorScene::ClearSelection()
     }
 
     mSelectedObjectList.clear();
-
-    // tmp
-    if( mSelectedObjectList.size() == 0 ) mSelectedObjectList.push_back( this );
 }
 
 void
@@ -45,17 +53,11 @@ FOdysseyVectorScene::Unselect( FOdysseyVectorObject* iVecObj )
     iVecObj->SetIsSelected( false );
 
     mSelectedObjectList.remove( iVecObj );
-
-    // tmp
-    if( mSelectedObjectList.size() == 0 ) mSelectedObjectList.push_back( this );
 }
 
 void
 FOdysseyVectorScene::Select( FOdysseyVectorObject* iVecObj )
 {
-    // tmp
-    if( mSelectedObjectList.size() && mSelectedObjectList.front() == this ) mSelectedObjectList.clear();
-
     if( std::find( mSelectedObjectList.begin(), mSelectedObjectList.end(), iVecObj ) == mSelectedObjectList.end() )
     {
         iVecObj->SetIsSelected( true );

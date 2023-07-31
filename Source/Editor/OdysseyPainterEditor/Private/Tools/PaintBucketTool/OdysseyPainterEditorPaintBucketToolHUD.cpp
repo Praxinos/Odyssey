@@ -14,7 +14,11 @@ FOdysseyPainterEditorPaintBucketToolHUD::FOdysseyPainterEditorPaintBucketToolHUD
 void
 FOdysseyPainterEditorPaintBucketToolHUD::Reset( FOdysseyVectorScene* iScene )
 {
+}
 
+void
+FOdysseyPainterEditorPaintBucketToolHUD::Load(FOdysseyVectorScene* iScene)
+{
 }
 
 void
@@ -91,46 +95,111 @@ FOdysseyPainterEditorPaintBucketToolHUD::PickBucketArea( FOdysseyVectorBucket* i
     return PICK_NONE;
 }
 
-FOdysseyVectorBucket*
-FOdysseyPainterEditorPaintBucketToolHUD::PickBucket( FOdysseyVectorGroupPaint* paintGroup
-                                                   , double iWorldX
-                                                   , double iWorldY )
+//static
+void
+FOdysseyPainterEditorPaintBucketToolHUD::RecursivePickCycles( FOdysseyVectorObject* iObject
+                                                            , double iWorldX
+                                                            , double iWorldY
+                                                            , std::vector<FOdysseyVectorCycle*>& oPickedCycleArray )
 {
-    std::list<FOdysseyVectorBucket*>& bucketList = paintGroup->GetBucketList();
-    std::list<FOdysseyVectorBucket*>::iterator it;
+    std::list<FOdysseyVectorObject*>& childrenList = iObject->GetChildrenList();
+    std::list<FOdysseyVectorObject*>::iterator it;
 
-    for( it = bucketList.begin(); it != bucketList.end(); ++it )
+    if( iObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
     {
-        FOdysseyVectorBucket *bucket = (*it);
+        FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(iObject);
+        FOdysseyVectorCycle* pickedCycle = paintGroup->PickCycle( iWorldX, iWorldY );
 
-        if( PickBucketArea( bucket, iWorldX, iWorldY ) )
+        if( pickedCycle )
         {
-            return bucket;
+            oPickedCycleArray.push_back( pickedCycle );
         }
     }
 
-    return nullptr;
+    for( it = childrenList.begin(); it != childrenList.end(); ++it )
+    {
+        FOdysseyVectorObject* child = (*it);
+
+        RecursivePickCycles( child, iWorldX, iWorldY, oPickedCycleArray );
+    }
 }
 
-FOdysseyVectorCycle*
-FOdysseyPainterEditorPaintBucketToolHUD::PickCycle( FOdysseyVectorGroupPaint* paintGroup
-                                                  , double iWorldX
-                                                  , double iWorldY )
+void
+FOdysseyPainterEditorPaintBucketToolHUD::PickCycles( FOdysseyVectorScene* iScene
+                                                   , double iWorldX
+                                                   , double iWorldY
+                                                   , std::vector<FOdysseyVectorCycle*>& oPickedCycleArray )
 {
-    BLContext* blctx = paintGroup->GetScene()->GetEngine()->GetBLContext();
-    BLMatrix2D& inverseWorldMatrix = paintGroup->GetInverseWorldMatrix();
-    BLPoint localCoord = inverseWorldMatrix.mapPoint( iWorldX, iWorldY );
-    std::list<FOdysseyVectorCycle*>& cycleList = paintGroup->GetCycleList();
-    std::list<FOdysseyVectorCycle*>::iterator it;
+    std::list<FOdysseyVectorObject*>& focusedObjectList = mPaintBucketTool->GetFocusedObjectList( iScene );
+    std::list<FOdysseyVectorObject*>::iterator oit;
 
-    for( it = cycleList.begin(); it != cycleList.end(); ++it )
+    oPickedCycleArray.clear();
+
+    for( oit = focusedObjectList.begin(); oit != focusedObjectList.end(); ++oit )
     {
-        FOdysseyVectorCycle *cycle = (*it);
+        FOdysseyVectorObject* focusedObject = *oit;
 
-        // TODO: Bounding volume for cycles for faster search
-        if( cycle->HitTest( localCoord.x, localCoord.y ) == true )
+        RecursivePickCycles( focusedObject, iWorldX, iWorldY, oPickedCycleArray );
+    }
+}
+
+FOdysseyVectorBucket*
+FOdysseyPainterEditorPaintBucketToolHUD::RecursivePickBucket( FOdysseyVectorObject* iObject
+                                                            , double iWorldX
+                                                            , double iWorldY )
+{
+    std::list<FOdysseyVectorObject*>& childrenList = iObject->GetChildrenList();
+    std::list<FOdysseyVectorObject*>::iterator oit;
+    FOdysseyVectorBucket *pickedBucket = nullptr;
+
+    if( iObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+    {
+        FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(iObject);
+        std::list<FOdysseyVectorBucket*>& bucketList = paintGroup->GetBucketList();
+        std::list<FOdysseyVectorBucket*>::iterator bit;
+
+        for( bit = bucketList.begin(); bit != bucketList.end(); ++bit )
         {
-            return cycle;
+            FOdysseyVectorBucket *bucket = (*bit);
+
+            if( PickBucketArea( bucket, iWorldX, iWorldY ) )
+            {
+                return bucket;
+            }
+        }
+    }
+
+    for( oit = childrenList.begin(); oit != childrenList.end(); ++oit )
+    {
+        FOdysseyVectorObject *child = (*oit);
+
+        pickedBucket = RecursivePickBucket( child, iWorldX, iWorldY );
+
+        if( pickedBucket )
+            break;
+    }
+
+    return pickedBucket;
+}
+
+FOdysseyVectorBucket*
+FOdysseyPainterEditorPaintBucketToolHUD::PickBucket( FOdysseyVectorScene* iScene
+                                                   , double iWorldX
+                                                   , double iWorldY )
+{
+    std::list<FOdysseyVectorObject*>& focusedObjectList = mPaintBucketTool->GetFocusedObjectList( iScene );
+    std::list<FOdysseyVectorObject*>::iterator oit;
+    FOdysseyVectorBucket* pickedBucket = nullptr;
+
+    for( oit = focusedObjectList.begin(); oit != focusedObjectList.end(); ++oit )
+    {
+        FOdysseyVectorObject* focusedObject = *oit;
+
+        pickedBucket = RecursivePickBucket( focusedObject, iWorldX, iWorldY );
+
+        if( pickedBucket )
+        {
+            return pickedBucket;
         }
     }
 
@@ -264,10 +333,43 @@ FOdysseyPainterEditorPaintBucketToolHUD::DrawBucket( FOdysseyVectorBucket* iBuck
     iBLContext->restore();
 }
 
+// static
+void
+FOdysseyPainterEditorPaintBucketToolHUD::RecursiveDrawObject( FOdysseyVectorObject* iObject
+                                                            , BLContext* iBLContext
+                                                            , BLRgba32 fgColor
+                                                            , BLRgba32 bgColor
+                                                            , BLRgba32 hcColor )
+{
+    std::list<FOdysseyVectorObject*>& childrenList = iObject->GetChildrenList();
+
+    if( iObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+    {
+        FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(iObject);
+        std::list<FOdysseyVectorBucket*>& bucketList = paintGroup->GetBucketList();
+        std::list<FOdysseyVectorBucket*>::iterator it;
+        BLMatrix2D& worldMatrix = paintGroup->GetWorldMatrix();
+
+        iBLContext->setMatrix( worldMatrix );
+
+        for( it = bucketList.begin(); it != bucketList.end(); ++it )
+        {
+            FOdysseyVectorBucket *bucket = static_cast<FOdysseyVectorBucket*>(*it);
+
+            DrawBucket( bucket, iBLContext, fgColor, bgColor, hcColor );
+        }
+    }
+
+    for( FOdysseyVectorObject* child : childrenList )
+    {
+        RecursiveDrawObject( child, iBLContext, fgColor, bgColor, hcColor );
+    }
+}
+
 void
 FOdysseyPainterEditorPaintBucketToolHUD::Draw( FOdysseyVectorScene* iScene, uint64 iFlags )
 {
-    FOdysseyVectorObject* selectedObject = iScene->GetLastSelected() ? iScene->GetLastSelected() : iScene;
+    std::list<FOdysseyVectorObject*>& focusedObjectList = mPaintBucketTool->GetFocusedObjectList( iScene );
     BLContext* blctx = iScene->GetEngine()->GetBLContext();
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
@@ -275,43 +377,39 @@ FOdysseyPainterEditorPaintBucketToolHUD::Draw( FOdysseyVectorScene* iScene, uint
     BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
     BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
+    std::vector<FOdysseyVectorCycle*>& pickedCycleArray = mPaintBucketTool->GetPickedCycleArray();
 
     blctx->save();
     blctx->resetMatrix();
 
-    if( selectedObject )
+    for( int i = 0; i < pickedCycleArray.size(); i++ )
     {
-        if( selectedObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
-        {
-            FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(selectedObject);
-            std::list<FOdysseyVectorBucket*>& bucketList = paintGroup->GetBucketList();
-            std::list<FOdysseyVectorBucket*>::iterator it;
-            BLMatrix2D& worldMatrix = paintGroup->GetWorldMatrix();
+        FOdysseyVectorCycle* cycle = pickedCycleArray[i];
+        FOdysseyVectorObject* owner = cycle->GetOwner();
+        BLMatrix2D& worldMatrix = owner->GetWorldMatrix();
 
-            blctx->setMatrix( worldMatrix );
+        blctx->setMatrix( worldMatrix );
 
-            if ( mCycle )
-            {
-                blctx->setCompOp( BL_COMP_OP_SRC_OVER );
+        blctx->setCompOp( BL_COMP_OP_SRC_OVER );
+        blctx->setStrokeStyle( bgColor );
+        blctx->setStrokeWidth( 4.0f );
 
-                blctx->setStrokeStyle( bgColor );
-                blctx->setStrokeWidth( 4.0f );
-                mCycle->StrokePath( true );
+        cycle->StrokePath( true );
 
-                blctx->setStrokeStyle( hcColor );
-                blctx->setStrokeWidth( 3.0f );
-                mCycle->StrokePath( true );
+        blctx->setStrokeStyle( hcColor );
+        blctx->setStrokeWidth( 3.0f );
 
-                mCycle = nullptr; // reset after each draw, for safety. The tool has to set the cycle at each hovering.
-            }
+        cycle->StrokePath( true );
+    }
 
-            for( it = bucketList.begin(); it != bucketList.end(); ++it )
-            {
-                FOdysseyVectorBucket *bucket = static_cast<FOdysseyVectorBucket*>(*it);
+    blctx->restore();
 
-                DrawBucket( bucket, blctx, fgColor, bgColor, hcColor );
-            }
-        }
+    blctx->save();
+    blctx->resetMatrix();
+
+    for( FOdysseyVectorObject* focusedObject : focusedObjectList )
+    {
+        RecursiveDrawObject( focusedObject, blctx, fgColor, bgColor, hcColor );
     }
 
     blctx->restore();

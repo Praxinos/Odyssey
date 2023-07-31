@@ -15,25 +15,27 @@ UOdysseyPainterEditorVectorObjectView::UOdysseyPainterEditorVectorObjectView()
 void
 UOdysseyPainterEditorVectorObjectView::ImportParam()
 {
-    std::list<FOdysseyVectorObject*>& selectedObjectList = mScene->GetSelectedObjectList();
+    std::list<FOdysseyVectorObject*>::iterator it;
 
-    for ( std::list<FOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
+    for( it = mFocusedObjectList.begin(); it != mFocusedObjectList.end(); ++it )
     {
-        FOdysseyVectorObject* selectedObject = (*it);
+        FOdysseyVectorObject* focusedObject = (*it);
 
-        ObjectParam = selectedObject->mObjectParam;
+        ObjectParam = focusedObject->mObjectParam;
 
-        ForegroundColor = selectedObject->GetForegroundBucket().GetSolidColor();
-        BackgroundColor = selectedObject->GetBackgroundBucket().GetSolidColor();
+        ForegroundColor = focusedObject->GetForegroundBucket().GetSolidColor();
+        BackgroundColor = focusedObject->GetBackgroundBucket().GetSolidColor();
 
         break; // only one
     }
 }
 
 void 
-UOdysseyPainterEditorVectorObjectView::Update( FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorObjectView::Update( FOdysseyVectorScene* iScene
+                                             , std::list<FOdysseyVectorObject*>& iFocusedObjectList )
 {
     mScene = iScene;
+    mFocusedObjectList = iFocusedObjectList;
 
     ImportParam();
 }
@@ -41,9 +43,9 @@ UOdysseyPainterEditorVectorObjectView::Update( FOdysseyVectorScene* iScene )
 void
 UOdysseyPainterEditorVectorObjectView::PropertyChanged( const FName& iPropertyName, const FName& iCategory )
 {
-    std::list<FOdysseyVectorObject*>& selectedObjectList = mScene->GetSelectedObjectList();
+    std::list<FOdysseyVectorObject*>::iterator it;
 
-    for ( std::list<FOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
+    for( it = mFocusedObjectList.begin(); it != mFocusedObjectList.end(); ++it )
     {
         FOdysseyVectorObject* selectedObject = (*it);
 
@@ -90,7 +92,7 @@ UOdysseyPainterEditorVectorObjectView::PostEditChangeProperty( FPropertyChangedE
         GEditor->BeginTransaction(LOCTEXT("PropertyChanged","Property Changed"));
         if( GUndo )
         {
-            FOdysseyVectorUndo *undo = new FOdysseyVectorUndoPropertyChanged( mScene, mScene->GetSelectedObjectList() );
+            FOdysseyVectorUndo *undo = new FOdysseyVectorUndoPropertyChanged( mScene, mFocusedObjectList );
             // We use GEditor as the UObject, otherwise if we use "this", at each UNDO, PostEditChangeProperty() will be called
             // which will again call StoreUndo + this will lead to a crash. I don't know however what will be the consequences
             // of a call to GEditor::PostEditChangeProperty()

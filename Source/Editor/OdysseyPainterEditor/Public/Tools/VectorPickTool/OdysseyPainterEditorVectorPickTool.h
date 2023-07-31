@@ -78,6 +78,8 @@ public:
 
     EOdysseyVectorPickingMode GetPickingMode();
 
+    std::list<FOdysseyVectorObject*>& GetFocusedObjectList( FOdysseyVectorScene* iScene );
+
 protected:
     void OnMouseUpVectorObjectMode( FOdysseyVectorEngine* iEngine
                                   , FOdysseyVectorScene* iScene

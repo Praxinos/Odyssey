@@ -12,11 +12,11 @@ UOdysseyPainterEditorVectorPathView::UOdysseyPainterEditorVectorPathView()
 void
 UOdysseyPainterEditorVectorPathView::ImportParam()
 {
-    std::list<FOdysseyVectorObject*>& selectedObjectList = mScene->GetSelectedObjectList();
+    std::list<FOdysseyVectorObject*>::iterator it;
 
     UOdysseyPainterEditorVectorObjectView::ImportParam();
 
-    for ( std::list<FOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
+    for( it = mFocusedObjectList.begin(); it != mFocusedObjectList.end(); ++it )
     {
         FOdysseyVectorObject* selectedObject = (*it);
 
@@ -34,11 +34,11 @@ UOdysseyPainterEditorVectorPathView::ImportParam()
 void
 UOdysseyPainterEditorVectorPathView::PropertyChanged( const FName& iPropertyName, const FName& iCategory )
 {
-    std::list<FOdysseyVectorObject*>& selectedObjectList = mScene->GetSelectedObjectList();
+    std::list<FOdysseyVectorObject*>::iterator it;
 
     UOdysseyPainterEditorVectorObjectView::PropertyChanged( iPropertyName, iCategory );
 
-    for ( std::list<FOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
+    for( it = mFocusedObjectList.begin(); it != mFocusedObjectList.end(); ++it )
     {
         FOdysseyVectorObject* selectedObject = (*it);
 

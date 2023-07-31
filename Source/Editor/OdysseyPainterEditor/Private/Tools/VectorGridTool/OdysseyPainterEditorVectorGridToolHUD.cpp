@@ -334,7 +334,7 @@ FOdysseyPainterEditorVectorGridToolHUD::MapPoint( FOdysseyVectorObject* iObject,
 void
 FOdysseyPainterEditorVectorGridToolHUD::Map( FOdysseyVectorScene* iScene )
 {
-    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
+    std::list<FOdysseyVectorObject*>& selectedObjectList = mPickTool->GetFocusedObjectList( iScene );
 
     mPointCount = 0;
 

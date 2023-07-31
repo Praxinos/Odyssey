@@ -12,11 +12,11 @@ UOdysseyPainterEditorVectorGroupPaintView::UOdysseyPainterEditorVectorGroupPaint
 void
 UOdysseyPainterEditorVectorGroupPaintView::ImportParam()
 {
-    std::list<FOdysseyVectorObject*>& selectedObjectList = mScene->GetSelectedObjectList();
+    std::list<FOdysseyVectorObject*>::iterator it;
 
     UOdysseyPainterEditorVectorObjectView::ImportParam();
 
-    for ( std::list<FOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
+    for( it = mFocusedObjectList.begin(); it != mFocusedObjectList.end(); ++it )
     {
         FOdysseyVectorObject* selectedObject = (*it);
 
@@ -34,11 +34,11 @@ UOdysseyPainterEditorVectorGroupPaintView::ImportParam()
 void
 UOdysseyPainterEditorVectorGroupPaintView::PropertyChanged( const FName& iPropertyName, const FName& iCategory )
 {
-    std::list<FOdysseyVectorObject*>& selectedObjectList = mScene->GetSelectedObjectList();
+    std::list<FOdysseyVectorObject*>::iterator it;
 
     UOdysseyPainterEditorVectorObjectView::PropertyChanged( iPropertyName, iCategory );
 
-    for ( std::list<FOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
+    for( it = mFocusedObjectList.begin(); it != mFocusedObjectList.end(); ++it )
     {
         FOdysseyVectorObject* selectedObject = (*it);
 
@@ -63,4 +63,6 @@ UOdysseyPainterEditorVectorGroupPaintView::PropertyChanged( const FName& iProper
                 selectedPaintGroup->mGroupPaintParam.WireframeColor =  GroupPaintParam.WireframeColor;
         }
     }
+
+    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 }

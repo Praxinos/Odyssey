@@ -18,6 +18,11 @@ FOdysseyPainterEditorVectorPathStitchToolHUD::Reset( FOdysseyVectorScene* iScene
     MakePointQuadTree( iScene, mPathStitchTool->RestrictToSelection );
 }
 
+void
+FOdysseyPainterEditorVectorPathStitchToolHUD::Load( FOdysseyVectorScene* iScene )
+{
+}
+
 std::vector<FOdysseyVectorPoint*>&
 FOdysseyPainterEditorVectorPathStitchToolHUD::GetPickedPointArray()
 {

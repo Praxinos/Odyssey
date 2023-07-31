@@ -14,6 +14,21 @@ FOdysseyPainterEditorVectorPickToolHUD::FOdysseyPainterEditorVectorPickToolHUD( 
 }
 
 void
+FOdysseyPainterEditorVectorPickToolHUD::Load( FOdysseyVectorScene* iScene )
+{
+    uint32 width, height;
+
+    iScene->GetEngine()->GetColorImageSize( &width, &height );
+
+    if( mSelectionMask )
+    {
+        delete mSelectionMask;
+    }
+
+    mSelectionMask = new BLImage( width, height, BL_FORMAT_A8 );
+}
+
+void
 FOdysseyPainterEditorVectorPickToolHUD::Reset( FOdysseyVectorScene* iScene )
 {
     UpdateSelectionBox( iScene, mPickTool->World );
@@ -59,17 +74,6 @@ FOdysseyPainterEditorVectorPickToolHUD::GetSelectedVertices( FOdysseyVectorScene
                                                  | ePointSelectionFlags::Bucket );
         }
     }
-}
-
-void
-FOdysseyPainterEditorVectorPickToolHUD::Init( uint32 iWidth, uint32 iHeight )
-{
-    if( mSelectionMask )
-    {
-        delete mSelectionMask;
-    }
-
-    mSelectionMask = new BLImage( iWidth, iHeight, BL_FORMAT_A8 );
 }
 
 void
@@ -168,7 +172,7 @@ void
 FOdysseyPainterEditorVectorPickToolHUD::UpdateSelectionBoxObjectMode( FOdysseyVectorScene* iScene
                                                                     , bool iForceWorld )
 {
-    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
+    std::list<FOdysseyVectorObject*>& selectedObjectList = mPickTool->GetFocusedObjectList( iScene );
 
     mSelectionBox.rect = ::ULIS::FRectD( 0, 0, 0, 0 );
 
@@ -176,7 +180,7 @@ FOdysseyPainterEditorVectorPickToolHUD::UpdateSelectionBoxObjectMode( FOdysseyVe
     {
         if( ( selectedObjectList.size() == 1 ) && ( iForceWorld == false ) )
         {
-            FOdysseyVectorObject* selectedObject = iScene->GetLastSelected();
+            FOdysseyVectorObject* selectedObject = selectedObjectList.front();
 
             mSelectionBox.rect = selectedObject->GetBBox( false );
 

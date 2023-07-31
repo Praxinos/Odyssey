@@ -2,6 +2,8 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Tools/VectorPathWidthTool/OdysseyPainterEditorVectorPathWidthTool.h"
+#include "OdysseyPainterEditor.h"
+#include "OdysseyMediaVector.h"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction

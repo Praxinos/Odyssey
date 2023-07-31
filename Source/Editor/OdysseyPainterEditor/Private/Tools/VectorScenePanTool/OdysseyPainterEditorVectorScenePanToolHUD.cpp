@@ -21,6 +21,11 @@ FOdysseyPainterEditorVectorScenePanToolHUD::Reset(FOdysseyVectorScene* iScene)
 }
 
 void
+FOdysseyPainterEditorVectorScenePanToolHUD::Load(FOdysseyVectorScene* iScene)
+{
+}
+
+void
 FOdysseyPainterEditorVectorScenePanToolHUD::DrawText( FOdysseyVectorScene* iScene
                                                     , ::ULIS::FRectD& iFrame )
 {

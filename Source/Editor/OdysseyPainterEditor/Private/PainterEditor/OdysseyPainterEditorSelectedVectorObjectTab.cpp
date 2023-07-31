@@ -105,26 +105,32 @@ FOdysseyPainterEditorSelectedVectorObjectTab::GetGroupPaintView()
 void
 FOdysseyPainterEditorSelectedVectorObjectTab::Update( FOdysseyVectorScene* iScene )
 {
-    uint32 objectClass = FOdysseyVectorObject::GetCommonClass( iScene->GetSelectedObjectList() );
+    // defaults to scene
+    std::list<FOdysseyVectorObject*> sceneAsList { iScene };
+    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
+    std::list<FOdysseyVectorObject*>& focusedObjectList = selectedObjectList.size() ? selectedObjectList
+                                                                                    : sceneAsList;
+    uint32 objectClass = FOdysseyVectorObject::GetCommonClass( focusedObjectList );
 
     if( objectClass )
     {
         if( objectClass == FOdysseyVectorPath::StaticClass() )
         {
-            mPathView->Update( iScene );
+            mPathView->Update( iScene, focusedObjectList );
             mDetailsView->SetObject( mPathView );
         }
 
-        if( objectClass == FOdysseyVectorGroupPaint::StaticClass() )
+        if( ( objectClass == FOdysseyVectorGroupPaint::StaticClass() )
+         || ( objectClass == FOdysseyVectorScene::StaticClass() ) )
         {
-            mGroupPaintView->Update( iScene );
+            mGroupPaintView->Update( iScene, focusedObjectList );
             mDetailsView->SetObject( mGroupPaintView );
         }
 
         if( objectClass == FOdysseyVectorObject::StaticClass() )
         {
             // default
-            mObjectView->Update( iScene );
+            mObjectView->Update( iScene, focusedObjectList );
             mDetailsView->SetObject( mObjectView );
         }
     }

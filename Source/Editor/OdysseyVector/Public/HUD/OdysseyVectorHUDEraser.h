@@ -19,6 +19,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUDEraser : public FOdysseyVectorHUD
 
         virtual void Draw( FOdysseyVectorScene* iScene, uint64 iFlags ) override;
         virtual void Reset( FOdysseyVectorScene* iScene ) override;
+        virtual void Load( FOdysseyVectorScene* iScene ) override;
 
         void SetRadius( double iRadius );
         void SetPosition( double iX, double iY );

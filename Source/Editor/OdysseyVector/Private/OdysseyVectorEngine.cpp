@@ -6,7 +6,8 @@ FOdysseyVectorEngine::~FOdysseyVectorEngine()
 }
 
 FOdysseyVectorEngine::FOdysseyVectorEngine( FOdysseyVectorScene* iScene, double iWidth, double iHeight )
-    : mSelectionSpace( nullptr )
+    : FOdysseyVectorObject( "Engine" )
+    , mSelectionSpace( nullptr )
     , mInvalidTileMap( 64, iWidth, iHeight )
 {
     BLContextCreateInfo createInfo {};
@@ -25,6 +26,17 @@ FOdysseyVectorEngine::FOdysseyVectorEngine( FOdysseyVectorScene* iScene, double 
 
     mBLContext->begin( *mBLImage, createInfo );
     //UseColorImage();
+}
+
+bool
+FOdysseyVectorEngine::HasBaseClass( uint32 iBaseClassID )
+{
+    if( mStaticClass == iBaseClassID )
+    {
+        return true;
+    }
+
+    return FOdysseyVectorObject::HasBaseClass( iBaseClassID );
 }
 
 void
@@ -132,6 +144,10 @@ void
 FOdysseyVectorEngine::SetScene( FOdysseyVectorScene* iScene )
 {
     mScene = iScene;
+
+    // todo: replace with RemoveAllChildren();
+    mChildrenList.clear();
+    AppendChild( iScene );
 
     mScene->SetEngine( this );
 

@@ -8,17 +8,18 @@ FOdysseyVectorUndoBucketAdd::~FOdysseyVectorUndoBucketAdd()
     }
     else
     {
-        delete mBucket;
+        for( int i = 0; i < mBucketArray.size(); i++ )
+        {
+            delete mBucketArray[i];
+        }
     }
 }
 
 FOdysseyVectorUndoBucketAdd::FOdysseyVectorUndoBucketAdd( FOdysseyVectorScene* iScene
-                                                        , FOdysseyVectorGroupPaint* iPaintGroup
-                                                        , FOdysseyVectorBucket* iBucket )
+                                                        , std::vector<FOdysseyVectorBucket*>& iBucketArray )
     : FOdysseyVectorUndo( iScene )
-    , mPaintGroup( iPaintGroup )
-    , mBucket( iBucket )
 {
+    mBucketArray = iBucketArray;
 }
 
 void
@@ -27,11 +28,15 @@ FOdysseyVectorUndoBucketAdd::Apply( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Apply( iIgnored );
 
-    mPaintGroup->AddBucket( mBucket );
-    mPaintGroup->Colorize();
+    for( int i = 0; i < mBucketArray.size(); i++ )
+    {
+        FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>( mBucketArray[i]->GetOwner() );
+
+        paintGroup->AddBucket( mBucketArray[i] );
+    }
 
     // update invalidated objects
-    mScene->Update(0);
+    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
@@ -45,11 +50,15 @@ FOdysseyVectorUndoBucketAdd::Revert( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Revert( iIgnored );
 
-    mPaintGroup->RemoveBucket( mBucket );
-    mPaintGroup->Colorize();
+    for(int i = 0; i < mBucketArray.size(); i++)
+    {
+        FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>( mBucketArray[i]->GetOwner() );
+
+        paintGroup->RemoveBucket( mBucketArray[i] );
+    }
 
     // update invalidated objects
-    mScene->Update(0);
+    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)

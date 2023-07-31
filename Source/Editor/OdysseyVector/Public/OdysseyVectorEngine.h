@@ -14,12 +14,19 @@
 
 //#include "OdysseyVectorScene.generated.h"
 
-class ODYSSEYVECTOR_API FOdysseyVectorEngine
+class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
 {
     public:
         DECLARE_MULTICAST_DELEGATE_TwoParams( FSignalDelegate, FOdysseyVectorScene*, uint64 iDelegateFlags )
 
+    private:
+        static const uint32 mStaticClass = 0xC4C88C77; // value is crc32 FOdysseyVectorEngine
+
     public:
+        static uint32 StaticClass() { return mStaticClass; };
+        virtual uint32 GetClass() { return mStaticClass; };
+        virtual bool HasBaseClass( uint32 iBaseClassID );
+
         // signal flags
         static const uint64 SIGNAL_SCENE_REDRAW       = ( 1 << 0 );
         static const uint64 SIGNAL_OBJECT_TRANSFORMED = ( 1 << 1 );
@@ -172,6 +179,16 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
                        , double iRadius
                        , std::vector<FOdysseyVectorPoint*>& oPickedPointArray
                        , uint64 iPickingFlags );
+
+        static void RecursivePickCycles( FOdysseyVectorObject* iObj
+                                       , double iWorldX
+                                       , double iWorldY
+                                       , std::vector<FOdysseyVectorCycle*>& oPickedCycleArray );
+
+        void PickCycles( FOdysseyVectorScene* iScene
+                       , double iWorldX
+                       , double iWorldY
+                       , std::vector<FOdysseyVectorCycle*>& oPickedCycleArray );
 
         /**
          * @brief Render the scene to the current buffer

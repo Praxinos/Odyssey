@@ -17,7 +17,7 @@ UOdysseyPainterEditorVectorPathCutTool::UOdysseyPainterEditorVectorPathCutTool()
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathCutTool64");
 
-   mPathCutHUD = new FOdysseyPainterEditorVectorPathCutToolHUD( this );
+    mPathCutHUD = new FOdysseyPainterEditorVectorPathCutToolHUD( this );
 }
 
 //--------------------------------------------------------------------------------------

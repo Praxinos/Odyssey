@@ -20,6 +20,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPickToolHUD : public F
 
         virtual void Draw( FOdysseyVectorScene* iScene, uint64 iFlags ) override;
         virtual void Reset( FOdysseyVectorScene* iScene ) override;
+        virtual void Load( FOdysseyVectorScene* iScene ) override;
 
         FSelectionBox& GetSelectionBox();
         void Init( uint32 iWidth, uint32 iHeight );

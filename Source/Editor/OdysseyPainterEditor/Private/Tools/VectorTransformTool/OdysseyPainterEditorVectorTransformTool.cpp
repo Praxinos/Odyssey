@@ -31,6 +31,7 @@ UOdysseyPainterEditorVectorTransformTool::UOdysseyPainterEditorVectorTransformTo
     mTransformHUD = new FOdysseyPainterEditorVectorTransformToolHUD( this );
 }
 
+
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
@@ -92,6 +93,8 @@ UOdysseyPainterEditorVectorTransformTool::LoadVector( FOdysseyVectorEngine* iEng
 
     // we need the focus on the viewport for keyboard 
     FSlateApplication::Get().SetKeyboardFocus( viewportWidget );
+
+    mTransformHUD->Load( iScene );
 
     iEngine->ClearHUD();
     iEngine->AddHUD( mTransformHUD );
@@ -305,7 +308,7 @@ UOdysseyPainterEditorVectorTransformTool::TranslateObjectSelection( FOdysseyVect
                                                                   , FOdysseyVectorScene* iScene
                                                                   , const FOdysseyPoint& iPointInTexture )
 {
-    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
+    std::list<FOdysseyVectorObject*>& selectedObjectList = GetFocusedObjectList( iScene );
     FSelectionBox& selectionBox = mTransformHUD->GetSelectionBox();
     uint32 hudFlags = mTransformHUD->GetFlags();
     ::ULIS::FVec2D& gizmo = mTransformHUD->GetGizmo();
@@ -438,7 +441,7 @@ UOdysseyPainterEditorVectorTransformTool::RotateObjectSelection( FOdysseyVectorE
                                                                , FOdysseyVectorScene* iScene
                                                                , const FOdysseyPoint& iPointInTexture )
 {
-    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
+    std::list<FOdysseyVectorObject*>& selectedObjectList = GetFocusedObjectList( iScene );
     FSelectionBox& selectionBox = mTransformHUD->GetSelectionBox();
     BLMatrix2D spaceMatrix = selectionBox.worldMatrix;
     BLMatrix2D inverseSpaceMatrix;
@@ -530,7 +533,7 @@ UOdysseyPainterEditorVectorTransformTool::ScaleObjectSelection( FOdysseyVectorEn
                                                               , FOdysseyVectorScene* iScene
                                                               , const FOdysseyPoint& iPointInTexture )
 {
-    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
+    std::list<FOdysseyVectorObject*>& selectedObjectList =  GetFocusedObjectList( iScene );
     FSelectionBox& selectionBox = mTransformHUD->GetSelectionBox();
     //::ULIS::FRectI redrawRegion = { 0, 0, 0, 0 };
     uint32 hudFlags = mTransformHUD->GetFlags();

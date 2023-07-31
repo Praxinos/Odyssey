@@ -495,7 +495,7 @@ FOdysseyPainterEditor::Ungroup( FOdysseyVectorEngine* iEngine, FOdysseyVectorSce
 
             iScene->ClearSelection();
             iScene->UpdateMatrix();
-            iScene->Update( 0 );
+            iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
         }
     }
 
@@ -533,7 +533,7 @@ FOdysseyPainterEditor::GroupPaint( FOdysseyVectorEngine* iEngine, FOdysseyVector
 
         iScene->ClearSelection();
         iScene->Select( paintGroup );
-        iScene->Update( 0 );
+        iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
     }
 
     iEngine->ResetHUD();
@@ -630,7 +630,7 @@ FOdysseyPainterEditor::DeleteSelection( FOdysseyVectorEngine* iEngine, FOdysseyV
     GEditor->EndTransaction();
 
     iScene->RemoveSelectedObjects();
-    iScene->Update( 0 );
+    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
     iEngine->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
@@ -653,7 +653,7 @@ FOdysseyPainterEditor::FlipHorizontal( FOdysseyVectorEngine* iEngine, FOdysseyVe
 
     iScene->FlipSelectionHorizontal( true /*ignored for now*/ );
 
-    iScene->Update( 0 );
+    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
     iEngine->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
@@ -700,14 +700,14 @@ FOdysseyPainterEditor::DeleteBucket( FOdysseyVectorBucket* iBucket )
         GEditor->BeginTransaction(LOCTEXT("DeleteBucket","Delete Bucket"));
         if( GUndo )
         {
-            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketRemove( scene, paintGroup, iBucket );
+            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketRemove( scene, iBucket );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
         }
         GEditor->EndTransaction();
     }
 
-    scene->Update( 0 ); // re-colorize paint group
+    scene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS ); // re-colorize paint group
     scene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
@@ -730,7 +730,7 @@ SetBucketPropagation( FOdysseyVectorBucket* iBucket, bool iPropagate )
 
     iBucket->SetPropagated( iPropagate );
 
-    scene->Update( 0 ); // re-colorize paint group
+    scene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
     scene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
@@ -839,7 +839,7 @@ FOdysseyPainterEditor::StitchVertices( FOdysseyVectorEngine* iEngine, FOdysseyVe
         }
     }
 
-    iScene->Update( 0 );
+    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
                    | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED

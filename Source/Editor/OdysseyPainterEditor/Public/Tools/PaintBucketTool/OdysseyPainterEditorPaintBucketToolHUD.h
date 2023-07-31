@@ -21,16 +21,39 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorPaintBucketToolHUD : public 
 
         virtual void Draw( FOdysseyVectorScene* iScene, uint64 iFlags ) override;
         virtual void Reset( FOdysseyVectorScene* iScene ) override;
+        virtual void Load( FOdysseyVectorScene* iScene ) override;
+
         void SetCycle( FOdysseyVectorCycle* iCycle );
-        uint32 PickBucketArea( FOdysseyVectorBucket* iBucket, double iWorldX, double iWorldY );
-        FOdysseyVectorBucket* PickBucket( FOdysseyVectorGroupPaint* paintGroup
-                                        , double iWorldX
-                                        , double iWorldY );
-        FOdysseyVectorCycle* PickCycle( FOdysseyVectorGroupPaint* paintGroup
+
+        FOdysseyVectorBucket* PickBucket( FOdysseyVectorScene* iScene
                                         , double iWorldX
                                         , double iWorldY );
 
+        void PickCycles( FOdysseyVectorScene* iScene
+                       , double iWorldX
+                       , double iWorldY
+                       , std::vector<FOdysseyVectorCycle*>& oPickedCycleArray );
+
+        uint32 PickBucketArea( FOdysseyVectorBucket* iBucket
+                             , double iWorldX
+                             , double iWorldY );
+
     private:
+        void RecursiveDrawObject( FOdysseyVectorObject* iObject
+                                 , BLContext* iBLContext
+                                 , BLRgba32 fgColor
+                                 , BLRgba32 bgColor
+                                 , BLRgba32 hcColor );
+
+        FOdysseyVectorBucket* RecursivePickBucket( FOdysseyVectorObject* iObject
+                                                 , double iWorldX
+                                                 , double iWorldY );
+
+        static void RecursivePickCycles( FOdysseyVectorObject* iObject
+                                       , double iWorldX
+                                       , double iWorldY
+                                       , std::vector<FOdysseyVectorCycle*>& oPickedCycleArray );
+
         void DrawBucket( FOdysseyVectorBucket* iBucket
                        , BLContext* iBLContext
                        , BLRgba32 fgColor

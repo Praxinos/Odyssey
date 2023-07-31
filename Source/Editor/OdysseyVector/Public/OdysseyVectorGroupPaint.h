@@ -129,6 +129,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         void PickBucket( std::vector<FOdysseyVectorBucket*>& oPickedBucketArray );
         virtual void AddChild( FOdysseyVectorObject* iChild, bool iPrepend ) override;
         virtual void RemoveChild( FOdysseyVectorObject* iChild ) override;
+        FOdysseyVectorCycle* PickCycle( double iWorldX, double iWorldY );
+        FOdysseyVectorBucket* PickBucket( double iWorldX, double iWorldY );
 
     protected:
         /**

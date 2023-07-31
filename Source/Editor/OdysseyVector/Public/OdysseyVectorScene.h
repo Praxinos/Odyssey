@@ -26,8 +26,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorScene : public FOdysseyVectorGroupPaint
 
     public:
         static uint32 StaticClass() { return mStaticClass; };
-        virtual uint32 GetClass() { return mStaticClass; };
-
+        virtual uint32 GetClass() override { return mStaticClass; };
+        virtual bool HasBaseClass( uint32 iBaseClassID ) override;
 
     private:
         FOdysseyVectorObject* CopyShape();

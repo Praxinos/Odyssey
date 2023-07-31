@@ -26,6 +26,19 @@ UOdysseyPainterEditorVectorPickTool::UOdysseyPainterEditorVectorPickTool()
     mPickHUD = new FOdysseyPainterEditorVectorPickToolHUD( this );
 }
 
+std::list<FOdysseyVectorObject*>&
+UOdysseyPainterEditorVectorPickTool::GetFocusedObjectList( FOdysseyVectorScene* iScene )
+{
+    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
+
+    if( selectedObjectList.size() )
+    {
+        return selectedObjectList;
+    }
+
+    return iScene->GetEngine()->GetChildrenList();
+}
+
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
@@ -80,7 +93,7 @@ void
 UOdysseyPainterEditorVectorPickTool::LoadVector( FOdysseyVectorEngine* iEngine
                                                , FOdysseyVectorScene* iScene )
 {
-    mPickHUD->Init( iEngine->GetBLImage()->width(), iEngine->GetBLImage()->height() );
+    mPickHUD->Load( iScene );
 
     iEngine->ClearHUD();
     iEngine->AddHUD( mPickHUD );

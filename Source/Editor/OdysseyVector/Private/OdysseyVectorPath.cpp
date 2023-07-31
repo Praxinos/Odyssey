@@ -1150,13 +1150,16 @@ FOdysseyVectorPath::PickShape( const ::ULIS::FRectD &iRoi, uint32 iSelectionFlag
     {
         BLPoint pt = mInverseWorldMatrix.mapPoint( iRoi.x, iRoi.y );
 
-        for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
+        if( mBBox.HitTest( ::ULIS::FVec2D( pt.x, pt.y ) ) )
         {
-            FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
- 
-            if( cubicSegment->Pick( pt.x, pt.y, 0.0f ) )
+            for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
             {
-                return true;
+                FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
+ 
+                if( cubicSegment->Pick( pt.x, pt.y, 0.0f ) )
+                {
+                    return true;
+                }
             }
         }
     }

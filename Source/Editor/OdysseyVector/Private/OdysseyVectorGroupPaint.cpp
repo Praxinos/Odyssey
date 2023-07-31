@@ -605,7 +605,7 @@ FOdysseyVectorGroupPaint::FindPath( FOdysseyVectorSection* iReturnSection
         {
             //UE_LOG(LogTemp,Warning,TEXT("cycle accepted") );
 
-            mCycleList.push_back( new FOdysseyVectorCycle( *this, iVertexArray, iSectionArray ) );
+            mCycleList.push_back( new FOdysseyVectorCycle( this, iVertexArray, iSectionArray ) );
         }
 
         ret = FOdysseyVectorGroupPaint::HASCYCLE;
@@ -1063,7 +1063,7 @@ FOdysseyVectorGroupPaint::BuildGraph()
 
                 if( vertexArray.size() )
                 {
-                    mCycleList.push_back( new FOdysseyVectorCycle( *this, vertexArray, sectionArray ) );
+                    mCycleList.push_back( new FOdysseyVectorCycle( this, vertexArray, sectionArray ) );
                 }
             }
 
@@ -1410,4 +1410,28 @@ FOdysseyVectorGroupPaint::PickBucket( std::vector<FOdysseyVectorBucket*>& oPicke
             }
         }
     }
+}
+
+FOdysseyVectorCycle*
+FOdysseyVectorGroupPaint::PickCycle( double iWorldX, double iWorldY )
+{
+    BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
+    BLPoint localCoord = mInverseWorldMatrix.mapPoint( iWorldX, iWorldY );
+    std::list<FOdysseyVectorCycle*>::iterator it;
+
+    if( mBBox.HitTest( ::ULIS::FVec2D( localCoord.x, localCoord.y ) ) )
+    {
+        for( it = mCycleList.begin(); it != mCycleList.end(); ++it )
+        {
+            FOdysseyVectorCycle *cycle = (*it);
+
+            // TODO: Bounding volume for cycles for faster search
+            if( cycle->HitTest( localCoord.x, localCoord.y ) == true )
+            {
+                return cycle;
+            }
+        }
+    }
+
+    return nullptr;
 }
