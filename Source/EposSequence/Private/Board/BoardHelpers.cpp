@@ -3,6 +3,7 @@
 
 #include "Board/BoardHelpers.h"
 
+#include "AssetRegistry/AssetData.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "EngineGlobals.h"
 #include "Engine/Engine.h"

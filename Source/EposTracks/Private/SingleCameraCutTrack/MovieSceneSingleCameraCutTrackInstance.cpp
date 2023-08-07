@@ -3,6 +3,7 @@
 
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrackInstance.h"
 #include "ContentStreaming.h"
+#include "Engine/World.h"
 #include "Evaluation/MovieSceneEvaluation.h"
 #include "GameFramework/Actor.h"
 #include "Generators/MovieSceneEasingCurves.h"
@@ -13,6 +14,8 @@
 #include "EntitySystem/MovieSceneEntitySystemLinker.h"
 #include "EntitySystem/MovieSceneInstanceRegistry.h"
 #include "MovieSceneCommonHelpers.h"
+
+#include UE_INLINE_GENERATED_CPP_BY_NAME(MovieSceneSingleCameraCutTrackInstance)
 
 DECLARE_CYCLE_STAT( TEXT( "Single Camera Cut Track Token Execute" ), MovieSceneEval_SingleCameraCutTrack_TokenExecute, STATGROUP_MovieSceneEval );
 
@@ -27,9 +30,7 @@ struct FBlendedCameraCutEasingInfo
     float RootBlendTime = -1.f;
     TOptional<EMovieSceneBuiltInEasing> BlendType;
 
-    FBlendedCameraCutEasingInfo()
-    {
-    }
+    FBlendedCameraCutEasingInfo() {}
     FBlendedCameraCutEasingInfo( float InRootBlendTime, const TScriptInterface<IMovieSceneEasingFunction>& EasingFunction )
     {
         RootBlendTime = InRootBlendTime;
@@ -48,6 +49,7 @@ struct FBlendedCameraCutEasingInfo
 struct FBlendedCameraCut
 {
     FInstanceHandle InstanceHandle;
+    TObjectPtr<UMovieSceneSection> Section;
 
     FMovieSceneObjectBindingID CameraBindingID;
     FMovieSceneSequenceID OperandSequenceID;
@@ -69,14 +71,13 @@ struct FBlendedCameraCut
     bool bCanBlend = false;
 
     FBlendedCameraCut()
-    {
-    }
-    FBlendedCameraCut( FInstanceHandle InInstanceHandle, FMovieSceneObjectBindingID InCameraBindingID, FMovieSceneSequenceID InOperandSequenceID )
-        : InstanceHandle( InInstanceHandle )
+    {}
+    FBlendedCameraCut( const FMovieSceneTrackInstanceInput & InInput, FMovieSceneObjectBindingID InCameraBindingID, FMovieSceneSequenceID InOperandSequenceID )
+        : InstanceHandle( InInput.InstanceHandle )
+        , Section( InInput.Section )
         , CameraBindingID( InCameraBindingID )
         , OperandSequenceID( InOperandSequenceID )
-    {
-    }
+    {}
 };
 
 /** Pre-roll camera cut info struct. */
@@ -96,7 +97,7 @@ struct FCameraCutPreAnimatedToken : IMovieScenePreAnimatedGlobalToken
         return TMovieSceneAnimTypeID<FCameraCutPreAnimatedToken>();
     }
 
-    virtual void RestoreState( const UE::MovieScene::FRestoreStateParams& RestoreParams ) override
+    virtual void RestoreState( const FRestoreStateParams& RestoreParams ) override
     {
         IMovieScenePlayer* Player = RestoreParams.GetTerminalPlayer();
         if( !ensure( Player ) )
@@ -130,6 +131,20 @@ struct FCameraCutAnimator
         return nullptr;
     }
 
+    static bool MatchesCameraCutCache( UObject* CameraActor, const FBlendedCameraCut& Params, const UMovieSceneSingleCameraCutTrackInstance::FCameraCutCache& CameraCutCache )
+    {
+        return CameraActor == CameraCutCache.LastLockedCamera.Get() &&
+            Params.InstanceHandle == CameraCutCache.LastInstanceHandle &&
+            Params.Section == CameraCutCache.LastSection;
+    }
+
+    static void UpdateCameraCutCache( UObject* CameraActor, const FBlendedCameraCut& Params, UMovieSceneSingleCameraCutTrackInstance::FCameraCutCache& OutCameraCutCache )
+    {
+        OutCameraCutCache.LastLockedCamera = CameraActor;
+        OutCameraCutCache.LastInstanceHandle = Params.InstanceHandle;
+        OutCameraCutCache.LastSection = Params.Section;
+    }
+
     static void AnimatePreRoll( const UE::MovieScene::FPreRollCameraCut& Params, const FMovieSceneContext& Context, const FMovieSceneSequenceID& SequenceID, IMovieScenePlayer& Player )
     {
         if( Params.bHasCutTransform )
@@ -151,8 +166,6 @@ struct FCameraCutAnimator
 
     static bool AnimateBlendedCameraCut( const UE::MovieScene::FBlendedCameraCut& Params, UMovieSceneSingleCameraCutTrackInstance::FCameraCutCache& CameraCutCache, const FMovieSceneContext& Context, IMovieScenePlayer& Player )
     {
-        using namespace UE::MovieScene;
-
         UObject* CameraActor = FindBoundObject( Params.CameraBindingID, Params.OperandSequenceID, Player );
 
         EMovieSceneCameraCutParams CameraCutParams;
@@ -170,13 +183,14 @@ struct FCameraCutAnimator
 
         static const FMovieSceneAnimTypeID CameraAnimTypeID = FMovieSceneAnimTypeID::Unique();
 
-        if( CameraCutCache.LastLockedCamera.Get() != CameraActor )
+        const bool bMatchesCache = MatchesCameraCutCache( CameraActor, Params, CameraCutCache );
+        if( !bMatchesCache )
         {
             Player.SavePreAnimatedState( CameraAnimTypeID, FCameraCutPreAnimatedTokenProducer() );
 
             CameraCutParams.UnlockIfCameraObject = CameraCutCache.LastLockedCamera.Get();
             Player.UpdateCameraCut( CameraActor, CameraCutParams );
-            CameraCutCache.LastLockedCamera = CameraActor;
+            UpdateCameraCutCache( CameraActor, Params, CameraCutCache );
             return true;
         }
         else if( CameraActor || CameraCutParams.BlendTime > 0.f )
@@ -236,7 +250,7 @@ void UMovieSceneSingleCameraCutTrackInstance::OnAnimate()
             const UMovieSceneSingleCameraCutTrack* Track = Section->GetTypedOuter<UMovieSceneSingleCameraCutTrack>();
             const FMovieSceneTimeTransform SequenceToRootTransform = Context.GetSequenceToRootTransform();
 
-            FBlendedCameraCut Params( Input.InstanceHandle, CameraBindingID, SequenceInstance.GetSequenceID() );
+            FBlendedCameraCut Params( Input, CameraBindingID, SequenceInstance.GetSequenceID() );
             Params.bCanBlend = false; // Track->bCanBlend; // ??????????????????????????????????????????????????
 
             // Get start/current/end time.
