@@ -446,7 +446,7 @@ FOdysseyPainterEditorVectorGridToolHUD::MapObjectRecurse( FOdysseyVectorObject* 
     std::list<FOdysseyVectorObject*>& childrenList = iObject->GetChildrenList();
     uint32 pointCount = 0;
 
-    if( iObject->GetClass() == FOdysseyVectorGroupPaint::StaticClass() )
+    if( iObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
     {
         FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(iObject);
 
@@ -478,7 +478,7 @@ FOdysseyPainterEditorVectorGridToolHUD::MapObjectNoRecurse( FOdysseyVectorObject
     std::list<FOdysseyVectorObject*>& childrenList = iObject->GetChildrenList();
     uint32 pointCount = 0;
 
-    if( iObject->GetClass() == FOdysseyVectorGroupPaint::StaticClass() )
+    if( iObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
     {
         FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(iObject);
 

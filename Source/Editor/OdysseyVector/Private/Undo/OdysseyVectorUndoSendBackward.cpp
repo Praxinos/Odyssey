@@ -25,10 +25,10 @@ FOdysseyVectorUndoSendBackward::Apply( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Apply( iIgnored );
 
-    mObject->MoveBack();
+    mObject->SendBackward();
 
     // update invalidated objects
-    mScene->Update(0);
+    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
@@ -41,10 +41,10 @@ FOdysseyVectorUndoSendBackward::Revert( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Revert( iIgnored );
 
-    mObject->MoveFront();
+    mObject->BringForward();
 
     // update invalidated objects
-    mScene->Update(0);
+    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)

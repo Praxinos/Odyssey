@@ -107,6 +107,52 @@ FOdysseyVectorImport::ReadObjectGroupPaint( FOdysseyVectorGroupPaint& iPaintGrou
                 }
                 break;
 
+                case FOdysseyVectorExport::CHUNK_GROUPPAINT_WIREFRAMECOLOR:
+                {
+                    uint8 R, G, B, A;
+
+                    Ar << R;
+                    Ar << G;
+                    Ar << B;
+                    Ar << A;
+
+                    iPaintGroup.SetWireframeColor( R, G, B, A );
+                }
+                break;
+
+                case FOdysseyVectorExport::CHUNK_GROUPPAINT_MONOCHROME:
+                {
+                    uint32 monochrome;
+
+                    Ar << monochrome;
+
+                    iPaintGroup.SetMonochrome( monochrome ? true : false );
+                }
+                break;
+
+                case FOdysseyVectorExport::CHUNK_GROUPPAINT_MONOCHROMECOLOR:
+                {
+                    uint8 R, G, B, A;
+
+                    Ar << R;
+                    Ar << G;
+                    Ar << B;
+                    Ar << A;
+
+                    iPaintGroup.SetMonochromeColor( R, G, B, A );
+                }
+                break;
+
+                case FOdysseyVectorExport::CHUNK_GROUPPAINT_PAINTED:
+                {
+                    uint32 painted;
+
+                    Ar << painted;
+
+                    iPaintGroup.SetPainted( painted ? true : false );
+                }
+                break;
+
                 case FOdysseyVectorExport::CHUNK_GROUPPAINT_GAP:
                 break;
 

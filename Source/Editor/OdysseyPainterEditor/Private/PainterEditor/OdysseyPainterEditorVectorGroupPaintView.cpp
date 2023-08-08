@@ -46,15 +46,20 @@ UOdysseyPainterEditorVectorGroupPaintView::PropertyChanged( const FName& iProper
         {
             FOdysseyVectorGroupPaint* selectedPaintGroup = static_cast<FOdysseyVectorGroupPaint*>(selectedObject);
 
+            if( iPropertyName == "Painted" )
+                selectedPaintGroup->SetPainted( GroupPaintParam.Painted );
+
+            if( iPropertyName == "Monochrome" )
+                selectedPaintGroup->SetMonochrome( GroupPaintParam.Monochrome );
+
+            if( iPropertyName == "MonochromeColor" )
+                selectedPaintGroup->mGroupPaintParam.MonochromeColor =  GroupPaintParam.MonochromeColor;
+
             if( iPropertyName == "Realtime" )
                 selectedPaintGroup->mGroupPaintParam.Realtime =  GroupPaintParam.Realtime;
 
-            if( iPropertyName == "Tolerance" )
-            {
-                selectedPaintGroup->mGroupPaintParam.Tolerance =  GroupPaintParam.Tolerance;
-
-                selectedPaintGroup->Invalidate( FOdysseyVectorObject::INVALIDATE_ALL );
-            }
+            if( iPropertyName == "GapTolerance" )
+                selectedPaintGroup->SetGapTolerance( GroupPaintParam.GapTolerance );
 
             if( iPropertyName == "Wireframe" )
                 selectedPaintGroup->mGroupPaintParam.Wireframe =  GroupPaintParam.Wireframe;

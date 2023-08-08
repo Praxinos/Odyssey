@@ -5,6 +5,7 @@
 #include "Tools/VectorPickTool/OdysseyPainterEditorVectorPickToolHUD.h"
 #include "Tools/VectorPickTool/SOdysseyPainterEditorVectorPickToolTopTab.h"
 #include "Tools/VectorPickTool/OdysseyPainterEditorVectorPickToolObjectContextMenu.h"
+#include "Tools/VectorPickTool/OdysseyPainterEditorVectorPickToolVertexContextMenu.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyMediaVector.h"
 
@@ -320,6 +321,13 @@ UOdysseyPainterEditorVectorPickTool::OnMouseUp( const FOdysseyPoint& iPointInTex
 
         if( mEditor->GetVectorEditionMode() == eVectorEditionMode::Vertex )
         {
+            TSharedPtr<SWidget> contextMenu = FOdysseyPainterEditorVectorPickToolVertexContextMenu::CreateWidget( GetEditor() );
+
+            FSlateApplication::Get().PushMenu( GetEditor()->GetGUI()->GetViewportTab().Get()->Widget().ToSharedRef(),
+                                               FWidgetPath(),
+                                               contextMenu.ToSharedRef(),
+                                               FSlateApplication::Get().GetCursorPos(),
+                                               FPopupTransitionEffect(FPopupTransitionEffect::ContextMenu) );
         }
     }
 /*}*/
@@ -451,6 +459,12 @@ UOdysseyPainterEditorVectorPickTool::SelectBucketFromPaintGroup( FOdysseyVectorG
     std::vector<FOdysseyVectorBucket*> pickedBucketArray;
 
     pickedBucketArray.reserve( 50 );
+
+    // deselect all if control key is not pressed
+    if( FSlateApplication::Get().GetModifierKeys().IsControlDown() == false )
+    {
+        iPaintGroup->UnselectAllBuckets();
+    }
 
     iPaintGroup->PickBucket( pickedBucketArray );
 

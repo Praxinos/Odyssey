@@ -187,8 +187,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         ::ULIS::FVec2D WorldCoordinatesToLocal( double iX, double iY );
         void SetIsSelected( bool iIsSelected );
         ::ULIS::FRectD GetBBox( bool iWorld );
-        void MoveBack();
-        void MoveFront();
+        void SendBackward();
+        void BringForward();
         virtual void Invalidate( uint32 iInvalidationFlags );
         virtual void Invalidate();
         FOdysseyVectorScene* GetScene();

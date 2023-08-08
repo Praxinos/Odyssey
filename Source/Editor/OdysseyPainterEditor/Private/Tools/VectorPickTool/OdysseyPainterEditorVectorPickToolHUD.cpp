@@ -9,6 +9,7 @@ FOdysseyPainterEditorVectorPickToolHUD::~FOdysseyPainterEditorVectorPickToolHUD(
 
 FOdysseyPainterEditorVectorPickToolHUD::FOdysseyPainterEditorVectorPickToolHUD( UOdysseyPainterEditorVectorPickTool* iPickTool )
     : mSelectionMask ( nullptr )
+    , mShowSelectionBox( true )
 {
     mPickTool = iPickTool;
 }
@@ -38,6 +39,12 @@ FSelectionBox&
 FOdysseyPainterEditorVectorPickToolHUD::GetSelectionBox()
 {
     return mSelectionBox;
+}
+
+void
+FOdysseyPainterEditorVectorPickToolHUD::ShowSelectionBox( bool iShowSelectionBox )
+{
+    mShowSelectionBox = iShowSelectionBox;
 }
 
 void
@@ -398,7 +405,11 @@ FOdysseyPainterEditorVectorPickToolHUD::Draw( FOdysseyVectorScene* iScene, uint6
     }
 
     DrawSelectionSpace( iScene, iFlags );
-    DrawSelectionBox( iScene, iFlags );
+
+    if( mShowSelectionBox )
+    {
+        DrawSelectionBox( iScene, iFlags );
+    }
 
     blctx->save();
     blctx->resetMatrix();

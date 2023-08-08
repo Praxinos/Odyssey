@@ -106,7 +106,7 @@ UOdysseyPainterEditorVectorObjectView::PostEditChangeProperty( FPropertyChangedE
         // call delegates
         //scene->mRefreshLayer.Broadcast(scene);
 
-        mScene->Update( 0 );
+        mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
         mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
     }

@@ -324,112 +324,128 @@ FOdysseyVectorCycle::GetBBox()
 }
 
 void
-FOdysseyVectorCycle::Draw( uint64 iFlags )
+FOdysseyVectorCycle::Draw( uint64 iFlags, bool iMonochrome, FColor iMonochromeColor )
 {
     BLContext* blctx = mOwner->GetScene()->GetEngine()->GetBLContext();
     FOdysseyVectorBucket* bucket = mBucket ? mBucket : mPropagatedBucket;
     BLMatrix2D& worldMatrix = mOwner->GetWorldMatrix();
 
-    if( bucket )
+    if( iMonochrome )
     {
-        switch ( bucket->GetColorMode() )
-        {
-            case eBucketColorMode::LinearGradient :
-            {
-                eBucketSpreadingPolicy spreadingPolicy = bucket->GetSpreadingPolicy();
-                ::ULIS::FRectD bbox = spreadingPolicy == eBucketSpreadingPolicy::Group ? mOwner->GetBBox( false ) : GetBBox();
-                double linearMinX = /*bbox.x0*/bbox.x;
-                double linearMinY = /*bbox.y0*/bbox.y;
-                double linearMaxX = /*bbox.x1*/bbox.x + bbox.w;
-                double linearMaxY = /*bbox.y1*/bbox.y + bbox.h;
-                BLGradient linear( BLLinearGradientValues( 0, 0, bbox.w, 0 ) );
-                FColor& gradientColor0 = bucket->GetGradientColor0();
-                FColor& gradientColor1 = bucket->GetGradientColor1();
-                BLRgba32 BLColor0;
-                BLRgba32 BLColor1;
-                // easier to deal with degrees to position the gradient
-                double rotate = bucket->GetRotation() / M_PI * 180.0f;
+        BLRgba32 BLColor = BLRgba32( iMonochromeColor.R
+                                   , iMonochromeColor.G
+                                   , iMonochromeColor.B
+                                   , iMonochromeColor.A );
 
-                if( ( rotate >=  0.0f ) && ( rotate <  90.0f ) )
-                    linear.translate( linearMinX, linearMinY );
-                if( ( rotate >  90.0f ) && ( rotate < 180.0f ) )
-                    linear.translate( linearMaxX, linearMinY );
-                if( ( rotate > 180.0f ) && ( rotate < 270.0f ) )
-                    linear.translate( linearMaxX, linearMaxY );
-                if( ( rotate > 270.0f ) && ( rotate < 360.0f ) )
-                    linear.translate( linearMinX, linearMaxY );
-
-                linear.rotate( bucket->GetRotation() );
-
-                BLColor0.setR( gradientColor0.R );
-                BLColor0.setG( gradientColor0.G );
-                BLColor0.setB( gradientColor0.B );
-                BLColor0.setA( gradientColor0.A );
-
-                BLColor1.setR( gradientColor1.R );
-                BLColor1.setG( gradientColor1.G );
-                BLColor1.setB( gradientColor1.B );
-                BLColor1.setA( gradientColor1.A );
-
-                linear.addStop( 0.0, BLColor0 );
-                linear.addStop( 1.0, BLColor1 );
-
-                blctx->setStrokeStyle( linear );
-                blctx->setFillStyle( linear );
-            }
-            break;
-
-            case eBucketColorMode::RadialGradient :
-            {
-                eBucketSpreadingPolicy spreadingPolicy = bucket->GetSpreadingPolicy();
-                ::ULIS::FRectD bbox = spreadingPolicy == eBucketSpreadingPolicy::Group ? mOwner->GetBBox( false ) : GetBBox();
-                double radialMinX = /*bbox.x0*/bbox.x;
-                double radialMinY = /*bbox.y0*/bbox.y;
-                double radialMaxX = /*bbox.x1*/bbox.x + bbox.w;
-                double radialMaxY = /*bbox.y1*/bbox.y + bbox.h;
-                BLGradient radial( BLRadialGradientValues( bbox.x + (bbox.w * 0.5f)
-                                                         , bbox.y + (bbox.h * 0.5f)
-                                                         , bbox.x + (bbox.w * 0.5f)
-                                                         , bbox.y + (bbox.h * 0.5f)
-                                                         , 45.0f ) );
-                FColor& gradientColor0 = bucket->GetGradientColor0();
-                FColor& gradientColor1 = bucket->GetGradientColor1();
-                BLRgba32 BLColor0;
-                BLRgba32 BLColor1;
-
-                BLColor0.setR( gradientColor0.R );
-                BLColor0.setG( gradientColor0.G );
-                BLColor0.setB( gradientColor0.B );
-                BLColor0.setA( gradientColor0.A );
-
-                BLColor1.setR( gradientColor1.R );
-                BLColor1.setG( gradientColor1.G );
-                BLColor1.setB( gradientColor1.B );
-                BLColor1.setA( gradientColor1.A );
-
-                radial.addStop( 0.0, BLColor0 );
-                radial.addStop( 1.0, BLColor1 );
-
-                blctx->setStrokeStyle( radial );
-                blctx->setFillStyle( radial );
-            }
-            break;
-
-            default:
-            {
-                FColor color = bucket->GetColor();
-                BLRgba32 BLColor = BLRgba32( color.R, color.G, color.B, color.A );
-
-                blctx->setStrokeStyle( BLColor );
-                blctx->setFillStyle( BLColor );
-            }
-            break;
-        }
+        blctx->setStrokeStyle( BLColor );
+        blctx->setFillStyle( BLColor );
     }
     else
     {
-       blctx->setStrokeStyle( BLRgba32( 0xFFA0A0A0 ) );
-       blctx->setFillStyle( BLRgba32( 0xFFA0A0A0 ) );
+        if( bucket )
+        {
+            switch ( bucket->GetColorMode() )
+            {
+                case eBucketColorMode::LinearGradient :
+                {
+                    eBucketSpreadingPolicy spreadingPolicy = bucket->GetSpreadingPolicy();
+                    ::ULIS::FRectD bbox = spreadingPolicy == eBucketSpreadingPolicy::Group ? mOwner->GetBBox( false ) : GetBBox();
+                    double linearMinX = /*bbox.x0*/bbox.x;
+                    double linearMinY = /*bbox.y0*/bbox.y;
+                    double linearMaxX = /*bbox.x1*/bbox.x + bbox.w;
+                    double linearMaxY = /*bbox.y1*/bbox.y + bbox.h;
+                    BLGradient linear( BLLinearGradientValues( 0, 0, bbox.w, 0 ) );
+                    FColor& gradientColor0 = bucket->GetGradientColor0();
+                    FColor& gradientColor1 = bucket->GetGradientColor1();
+                    BLRgba32 BLColor0;
+                    BLRgba32 BLColor1;
+                    // easier to deal with degrees to position the gradient
+                    double rotate = bucket->GetRotation() / M_PI * 180.0f;
+
+                    if( ( rotate >=  0.0f ) && ( rotate <  90.0f ) )
+                        linear.translate( linearMinX, linearMinY );
+                    if( ( rotate >  90.0f ) && ( rotate < 180.0f ) )
+                        linear.translate( linearMaxX, linearMinY );
+                    if( ( rotate > 180.0f ) && ( rotate < 270.0f ) )
+                        linear.translate( linearMaxX, linearMaxY );
+                    if( ( rotate > 270.0f ) && ( rotate < 360.0f ) )
+                        linear.translate( linearMinX, linearMaxY );
+
+                    linear.rotate( bucket->GetRotation() );
+
+                    BLColor0.setR( gradientColor0.R );
+                    BLColor0.setG( gradientColor0.G );
+                    BLColor0.setB( gradientColor0.B );
+                    BLColor0.setA( gradientColor0.A );
+
+                    BLColor1.setR( gradientColor1.R );
+                    BLColor1.setG( gradientColor1.G );
+                    BLColor1.setB( gradientColor1.B );
+                    BLColor1.setA( gradientColor1.A );
+
+                    linear.addStop( 0.0, BLColor0 );
+                    linear.addStop( 1.0, BLColor1 );
+
+                    blctx->setStrokeStyle( linear );
+                    blctx->setFillStyle( linear );
+                }
+                break;
+
+                case eBucketColorMode::RadialGradient :
+                {
+                    eBucketSpreadingPolicy spreadingPolicy = bucket->GetSpreadingPolicy();
+                    ::ULIS::FRectD bbox = spreadingPolicy == eBucketSpreadingPolicy::Group ? mOwner->GetBBox( false ) : GetBBox();
+                    double radialMinX = /*bbox.x0*/bbox.x;
+                    double radialMinY = /*bbox.y0*/bbox.y;
+                    double radialMaxX = /*bbox.x1*/bbox.x + bbox.w;
+                    double radialMaxY = /*bbox.y1*/bbox.y + bbox.h;
+                    BLGradient radial( BLRadialGradientValues( bbox.x + (bbox.w * 0.5f)
+                                                             , bbox.y + (bbox.h * 0.5f)
+                                                             , bbox.x + (bbox.w * 0.5f)
+                                                             , bbox.y + (bbox.h * 0.5f)
+                                                             , 45.0f ) );
+                    FColor& gradientColor0 = bucket->GetGradientColor0();
+                    FColor& gradientColor1 = bucket->GetGradientColor1();
+                    BLRgba32 BLColor0;
+                    BLRgba32 BLColor1;
+
+                    BLColor0.setR( gradientColor0.R );
+                    BLColor0.setG( gradientColor0.G );
+                    BLColor0.setB( gradientColor0.B );
+                    BLColor0.setA( gradientColor0.A );
+
+                    BLColor1.setR( gradientColor1.R );
+                    BLColor1.setG( gradientColor1.G );
+                    BLColor1.setB( gradientColor1.B );
+                    BLColor1.setA( gradientColor1.A );
+
+                    radial.addStop( 0.0, BLColor0 );
+                    radial.addStop( 1.0, BLColor1 );
+
+                    blctx->setStrokeStyle( radial );
+                    blctx->setFillStyle( radial );
+                }
+                break;
+
+                default:
+                {
+                    FColor color = bucket->GetColor();
+                    BLRgba32 BLColor = BLRgba32( color.R, color.G, color.B, color.A );
+
+                    blctx->setStrokeStyle( BLColor );
+                    blctx->setFillStyle( BLColor );
+                }
+                break;
+            }
+        }
+        else
+        {
+            FColor& color = mOwner->GetBackgroundBucket().GetSolidColor();
+            BLRgba32 BLColor = BLRgba32( color.R, color.G, color.B, color.A );
+
+           blctx->setStrokeStyle( BLColor );
+           blctx->setFillStyle( BLColor );
+        }
     }
 
     blctx->setFillRule( BL_FILL_RULE_EVEN_ODD );

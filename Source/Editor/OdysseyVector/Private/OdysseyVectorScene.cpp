@@ -132,7 +132,7 @@ FOdysseyVectorScene::MakePaintGroupFromSelectedObjects( std::vector<FOdysseyVect
         }
 
         // first update to update paths' segments.
-        Update( 0 );
+        Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
         ClearSelection();
         Select( paintGroup );

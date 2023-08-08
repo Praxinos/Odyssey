@@ -75,11 +75,15 @@ WriteBucketGradientStop( FColor& iStopColor, double iStopAt, FArchive &Ar )
                                     , [&iStopColor,iStopAt](FArchive &Ar) -> void
     {
         double stopAt = iStopAt; //iStopAt is const in the lambda, and FArchive << doesn't like it, so we use a variable here
-        Ar << iStopColor.R;
-        Ar << iStopColor.G;
-        Ar << iStopColor.B;
-        Ar << iStopColor.A;
+        uint8 R = iStopColor.R;
+        uint8 G = iStopColor.G;
+        uint8 B = iStopColor.B;
+        uint8 A = iStopColor.A;
 
+        Ar << R;
+        Ar << G;
+        Ar << B;
+        Ar << A;
         Ar << stopAt;
     } );
 }
@@ -107,11 +111,15 @@ WriteBucketColor( FOdysseyVectorBucket& iBucket, FArchive &Ar )
                                     , [&iBucket](FArchive &Ar) -> void
     {
         FColor fillColor = iBucket.GetSolidColor();
+        uint8 R = fillColor.R;
+        uint8 G = fillColor.G;
+        uint8 B = fillColor.B;
+        uint8 A = fillColor.A;
 
-        Ar << fillColor.R;
-        Ar << fillColor.G;
-        Ar << fillColor.B;
-        Ar << fillColor.A;
+        Ar << R;
+        Ar << G;
+        Ar << B;
+        Ar << A;
     } );
 }
 

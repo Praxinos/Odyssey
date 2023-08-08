@@ -6,66 +6,36 @@
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorVectorPickToolVertexContextMenu"
 
-/////////////////////////////////////////////////////
-// FOdysseyPainterEditorVectorPickToolVertexContextMenu
-//--------------------------------------------------------------------------------------
-//----------------------------------------------------------- Construction / Destruction
-FOdysseyPainterEditorVectorPickToolVertexContextMenu::~FOdysseyPainterEditorVectorPickToolVertexContextMenu()
-{
-
-}
-
-FOdysseyPainterEditorVectorPickToolVertexContextMenu::FOdysseyPainterEditorVectorPickToolVertexContextMenu( FOdysseyPainterEditor* iEditor )
-    : FOdysseyPainterEditorContextMenu( iEditor
-                                      , TEXT("OdysseyPainterEditor_VectorPickToolVertexContextMenu")
-                                      , LOCTEXT( "OdysseyPainterEditorVectorPickToolVertexContextMenu", "Context Menu" )
-                                      , FSlateIcon( "OdysseyStyle", "PainterEditor.Tools16" ) )
-{
-}
-
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------- FOdysseyPainterEditorVectorPickToolVertexContextMenu interface
 
 TSharedPtr<SWidget>
-FOdysseyPainterEditorVectorPickToolVertexContextMenu::CreateWidget()
+FOdysseyPainterEditorVectorPickToolVertexContextMenu::CreateWidget( FOdysseyPainterEditor* iEditor )
 {
-    /*mMenu.BeginSection("Context");
+    bool hasVector = iEditor->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+    if (!hasVector)
+        return nullptr;
+
+    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = iEditor->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
+    if (mediaVectors.Num() <= 0)
+        return nullptr;
+
+    FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
+
+    FMenuBuilder menu( true, nullptr );
+
+    menu.BeginSection("Context");
     {
-    mMenu.AddMenuEntry(
-          LOCTEXT("KnotVertices", "Knot Vertices")
-        , LOCTEXT("KnotVertices", "Knot Vertices")
+    menu.AddMenuEntry(
+          LOCTEXT("DeleteSelection", "Delete Selection")
+        , LOCTEXT("DeleteSelection", "Delete Selection")
         , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
-        , FUIAction(FExecuteAction::CreateSP(iEditor->GetGUI(), &FOdysseyTextureEditorGUI::KnotVertices)));
+        , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::DeletePointSelection, vectorEngine, vectorScene)));
     }
-    mMenu.EndSection();*/
-    return mMenu.MakeWidget();
+    menu.EndSection();
+
+    return menu.MakeWidget();
 }
 
-void
-FOdysseyPainterEditorVectorPickToolVertexContextMenu::BindShortcuts(FBaseToolkit* iToolkit)
-{
-    FOdysseyEditorContextMenu::BindShortcuts(iToolkit);
-/*
-    const TSharedRef<FUICommandList>& toolkitCommands = iToolkit->GetToolkitCommands();
-    const FOdysseyPainterEditorCommands& painterEditorCommands = FOdysseyPainterEditorCommands::Get();
-
-    #define MAP_ACTION(action, ...) toolkitCommands->MapAction( action, FExecuteAction::CreateSP( this, &FOdysseyPainterEditorVectorPickToolVertexContextMenu::__VA_ARGS__ ), FCanExecuteAction() );
-
-    #undef MAP_ACTION
-*/
-}
-
-/*
-void
-FOdysseyPainterEditorVectorPickToolVertexContextMenu::OnToolkitInitialized( FBaseToolkit* iToolkit )
-{
-    FOdysseyEditorContextMenu::OnToolkitInitialized( iToolkit );
-}
-
-void
-FOdysseyPainterEditorVectorPickToolVertexContextMenu::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
-{
-    FOdysseyEditorContextMenu::ExtendMenu( iOwner, iMenuName );
-}
-*/
 #undef LOCTEXT_NAMESPACE

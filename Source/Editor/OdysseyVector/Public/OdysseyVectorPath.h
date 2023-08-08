@@ -81,6 +81,13 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
                                   , ::ULIS::FVec2D iPerpendicularVector
                                   , bool iBuildSegments
                                   , bool iPreserveHandleLength );
+        //static
+        static void DeletePoint( FOdysseyVectorPath* iPath
+                               , std::vector<FOdysseyVectorPoint*>& iPickedPointArray
+                               , std::vector<FOdysseyVectorVertex*>& iRemovedVertexArray
+                               , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray
+                               , std::vector<FOdysseyVectorPath*>& iRemovedPathArray
+                               , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray );
 
        /**
          * @brief Destructor

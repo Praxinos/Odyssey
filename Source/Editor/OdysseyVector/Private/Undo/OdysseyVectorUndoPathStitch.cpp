@@ -62,7 +62,7 @@ FOdysseyVectorUndoPathStitch::Apply( UObject* iIgnored )
 
     FOdysseyVectorUndoPathAlter::Apply( iIgnored );
 
-    mScene->Update( 0 );
+    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
@@ -88,7 +88,7 @@ FOdysseyVectorUndoPathStitch::Revert( UObject* iIgnored )
     }
 
     // Update the bbox
-    mScene->Update( 0 );
+    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)

@@ -24,10 +24,15 @@ FOdysseyVectorGroupPaint::FOdysseyVectorGroupPaint( const FString& iName )
 
     mIntersectionArray.reserve( 60 );
 
-    mGroupPaintParam.Tolerance = 0.0f;
+    mGroupPaintParam.Painted = true;
+    mGroupPaintParam.Monochrome = false;
+    mGroupPaintParam.MonochromeColor = FColor( 128, 128, 128, 255 );
+    mGroupPaintParam.GapTolerance = 12.0f;
     mGroupPaintParam.Realtime = false;
     mGroupPaintParam.Wireframe = false;
     mGroupPaintParam.WireframeColor = FColor( 255, 255, 255, 255 );
+ 
+    mBackgroundBucket.SetSolidColor( 128, 128, 128, 0 );
 
     //mGapSegmentBuffer.reserve( 200 );
     //mSectionBuffer.reserve( 200 );
@@ -55,9 +60,12 @@ FOdysseyVectorGroupPaint::UnselectBucket( FOdysseyVectorBucket* iSelectedBucket 
 void
 FOdysseyVectorGroupPaint::SelectBucket( FOdysseyVectorBucket* iSelectedBucket )
 {
-    mSelectedBucketList.push_back( iSelectedBucket );
+    if( iSelectedBucket->IsSelected() == false )
+    {
+        mSelectedBucketList.push_back( iSelectedBucket );
 
-    iSelectedBucket->SetSelected( true );
+        iSelectedBucket->SetSelected( true );
+    }
 }
 
 std::list<FOdysseyVectorBucket*>&
@@ -258,16 +266,26 @@ FOdysseyVectorGroupPaint::UpdateShape( uint32 iUpdateFlags )
 
     UpdateBBox();
 
-    if( ( mGroupPaintParam.Realtime == true  )
-   || ( ( mGroupPaintParam.Realtime == false ) && ( iUpdateFlags & FOdysseyVectorObject::UPDATEPAINTGROUPS ) ) )
-    {
-        if( ( mInvalidationFlags & FOdysseyVectorObject::INVALIDATE_SHAPE )
-         || ( mInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD ) )
-        {
-            FindCycles();
-        }
 
-        Colorize();
+
+    if( mGroupPaintParam.Painted )
+    {
+        if( ( mGroupPaintParam.Realtime == true  )
+       || ( ( mGroupPaintParam.Realtime == false ) && ( iUpdateFlags & FOdysseyVectorObject::UPDATEPAINTGROUPS ) ) )
+        {
+            if( ( mInvalidationFlags & FOdysseyVectorObject::INVALIDATE_SHAPE )
+             || ( mInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD ) )
+            {
+                Clear();
+                FindCycles();
+            }
+
+            Colorize();
+        }
+    }
+    else
+    {
+        Clear();
     }
 }
 
@@ -309,9 +327,8 @@ FOdysseyVectorGroupPaint::DrawShape( uint64 iFlags )
     {
         FOdysseyVectorCycle *cycle = (*it);
 
-        cycle->Draw( iFlags );
+        cycle->Draw( iFlags, mGroupPaintParam.Monochrome, mGroupPaintParam.MonochromeColor );
     }
-
 
     if( mGroupPaintParam.Wireframe )
     {
@@ -469,7 +486,7 @@ FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegment* iSegment
             if( intersectRect.Area() )
             {
                 intersectionCount += iSegment->Intersect( intersectSegment
-                                                        , mGroupPaintParam.Tolerance
+                                                        , mGroupPaintParam.GapTolerance
                                                         , iIntersectionArray );
             }
         }
@@ -879,15 +896,51 @@ CreateNearIntersection( FOdysseyVectorVertex *iVertex
 double
 FOdysseyVectorGroupPaint::GetGapTolerance()
 {
-    return mGroupPaintParam.Tolerance;
+    return mGroupPaintParam.GapTolerance;
 }
 
 void
 FOdysseyVectorGroupPaint::SetGapTolerance( double iGapTolerance )
 {
-    mGroupPaintParam.Tolerance = iGapTolerance;
+    mGroupPaintParam.GapTolerance = iGapTolerance;
 
     Invalidate();
+}
+
+bool
+FOdysseyVectorGroupPaint::IsMonochrome()
+{
+    return mGroupPaintParam.Monochrome;
+}
+
+void
+FOdysseyVectorGroupPaint::SetMonochrome( bool iIsMonochrome )
+{
+    mGroupPaintParam.Monochrome = iIsMonochrome;
+}
+
+FColor&
+FOdysseyVectorGroupPaint::GetMonochromeColor()
+{
+    return mGroupPaintParam.MonochromeColor;
+}
+
+void
+FOdysseyVectorGroupPaint::SetMonochromeColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA )
+{
+    mGroupPaintParam.MonochromeColor.R = iR;
+    mGroupPaintParam.MonochromeColor.G = iG;
+    mGroupPaintParam.MonochromeColor.B = iB;
+    mGroupPaintParam.MonochromeColor.A = iA;
+}
+
+void
+FOdysseyVectorGroupPaint::GetMonochromeColor( uint8 &oR, uint8 &oG, uint8& oB, uint8& oA )
+{
+    oR = mGroupPaintParam.MonochromeColor.R;
+    oG = mGroupPaintParam.MonochromeColor.G;
+    oB = mGroupPaintParam.MonochromeColor.B;
+    oA = mGroupPaintParam.MonochromeColor.A;
 }
 
 bool
@@ -900,6 +953,44 @@ void
 FOdysseyVectorGroupPaint::SetWireframe( bool iIsWireframe )
 {
     mGroupPaintParam.Wireframe = iIsWireframe;
+}
+
+FColor&
+FOdysseyVectorGroupPaint::GetWireframeColor()
+{
+    return mGroupPaintParam.WireframeColor;
+}
+
+void
+FOdysseyVectorGroupPaint::SetWireframeColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA )
+{
+    mGroupPaintParam.WireframeColor.R = iR;
+    mGroupPaintParam.WireframeColor.G = iG;
+    mGroupPaintParam.WireframeColor.B = iB;
+    mGroupPaintParam.WireframeColor.A = iA;
+}
+
+void
+FOdysseyVectorGroupPaint::GetWireframeColor( uint8 &oR, uint8 &oG, uint8& oB, uint8& oA )
+{
+    oR = mGroupPaintParam.WireframeColor.R;
+    oG = mGroupPaintParam.WireframeColor.G;
+    oB = mGroupPaintParam.WireframeColor.B;
+    oA = mGroupPaintParam.WireframeColor.A;
+}
+
+bool
+FOdysseyVectorGroupPaint::IsPainted()
+{
+    return mGroupPaintParam.Painted;
+}
+
+void
+FOdysseyVectorGroupPaint::SetPainted( bool iPainted )
+{
+    mGroupPaintParam.Painted = iPainted;
+
+    Invalidate();
 }
 
 void
@@ -939,7 +1030,7 @@ FOdysseyVectorGroupPaint::BuildGraph()
 
     mPaintingCode = ++paintingCode;
 
-    Clear();
+    //Clear();
 
     for( std::list<FOdysseyVectorPath*>::iterator pit = mPathList.begin(); pit != mPathList.end(); ++pit )
     {
@@ -1250,8 +1341,8 @@ FOdysseyVectorGroupPaint::Clear()
                 FOdysseyVectorSegment *segment = static_cast<FOdysseyVectorSegment*>(*sit);
 
                 // reset nearest segment
-                segment->GetVertex(0)->SetNearestSegment( nullptr, mGroupPaintParam.Tolerance/*DBL_MAX*/, 0.0f );
-                segment->GetVertex(1)->SetNearestSegment( nullptr, mGroupPaintParam.Tolerance/*DBL_MAX*/, 0.0f );
+                segment->GetVertex(0)->SetNearestSegment( nullptr, mGroupPaintParam.GapTolerance/*DBL_MAX*/, 0.0f );
+                segment->GetVertex(1)->SetNearestSegment( nullptr, mGroupPaintParam.GapTolerance/*DBL_MAX*/, 0.0f );
             }
         }
     }
@@ -1322,11 +1413,14 @@ FOdysseyVectorGroupPaint::GetSelectedPoints( std::vector<FOdysseyVectorPoint*>& 
         }
     }
 
-    for( std::list<FOdysseyVectorBucket*>::iterator it = mSelectedBucketList.begin(); it != mSelectedBucketList.end(); ++it )
+    if( iPointSelectionFlags & ePointSelectionFlags::Bucket )
     {
-        FOdysseyVectorBucket *bucket = (*it);
+        for( std::list<FOdysseyVectorBucket*>::iterator it = mSelectedBucketList.begin(); it != mSelectedBucketList.end(); ++it )
+        {
+            FOdysseyVectorBucket *bucket = (*it);
 
-        oPointArray.push_back( bucket );
+            oPointArray.push_back( bucket );
+        }
     }
 }
 
@@ -1392,7 +1486,7 @@ FOdysseyVectorGroupPaint::PickBucket( std::vector<FOdysseyVectorBucket*>& oPicke
     {
         FOdysseyVectorBucket* bucket = (*it);
         ::ULIS::FVec2D& localCoords = bucket->GetCoords();
-        // convert vertex coordinates to world coordinates. Easier to detect collision inside the picking circle.
+        // convert bucket coordinates to world coordinates. Easier to detect collision inside the picking circle.
         BLPoint worldCoords = mWorldMatrix.mapPoint( localCoords.x, localCoords.y );
         int32 x = (int32) worldCoords.x;
         int32 y = (int32) worldCoords.y;

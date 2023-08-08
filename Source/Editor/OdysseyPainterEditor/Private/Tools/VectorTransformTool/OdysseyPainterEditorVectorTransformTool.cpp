@@ -311,11 +311,12 @@ UOdysseyPainterEditorVectorTransformTool::TranslateObjectSelection( FOdysseyVect
     std::list<FOdysseyVectorObject*>& selectedObjectList = GetFocusedObjectList( iScene );
     FSelectionBox& selectionBox = mTransformHUD->GetSelectionBox();
     uint32 hudFlags = mTransformHUD->GetFlags();
-    ::ULIS::FVec2D& gizmo = mTransformHUD->GetGizmo();
+    ::ULIS::FVec2D& pivot = mTransformHUD->GetGizmo();
     BLMatrix2D spaceMatrix = selectionBox.worldMatrix;
     BLMatrix2D inverseSpaceMatrix;
     BLMatrix2D translateMatrix;
     BLPoint translateBy;
+    BLPoint spacePivot = BLPoint( pivot.x, pivot.y );
 
     BLMatrix2D::invert( inverseSpaceMatrix, spaceMatrix );
 
@@ -401,6 +402,10 @@ UOdysseyPainterEditorVectorTransformTool::TranslateObjectSelection( FOdysseyVect
 
     // update the selection box with the newly modified matrices
     iEngine->ResetHUD();
+
+    // replace pivot correctly.
+    pivot.x = spacePivot.x;
+    pivot.y = spacePivot.y;
 }
 
 double
@@ -520,7 +525,7 @@ UOdysseyPainterEditorVectorTransformTool::RotateObjectSelection( FOdysseyVectorE
     iScene->Update( FOdysseyVectorObject::KEEPINVALIDATED );
 
     // update the selection box with the newly modified matrices
-    //iEngine->ResetHUD();
+    iEngine->ResetHUD();
 
     // replace pivot correctly.
     BLPoint spacePivot = selectionBox.inverseWorldMatrix.mapPoint( worldPivot.x, worldPivot.y );

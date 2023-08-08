@@ -159,7 +159,19 @@ UOdysseyPainterEditorDefaultTool::OnKeyDownVector( FOdysseyVectorEngine* iEngine
 
     if( iKey == EKeys::Delete )
     {
-        GetEditor()->DeleteSelection( iEngine, iScene );
+        switch( GetEditor()->GetVectorEditionMode() )
+        {
+            case eVectorEditionMode::Object :
+                GetEditor()->DeleteObjectSelection( iEngine, iScene );
+            break;
+
+            case eVectorEditionMode::Vertex :
+                GetEditor()->DeletePointSelection( iEngine, iScene );
+            break;
+
+            default:
+            break;
+        }
     }
 
     return false;

@@ -438,7 +438,7 @@ FOdysseyVectorEngine::Erase( FOdysseyVectorScene* iScene
         }
     }
 
-    iScene->Update( 0 );
+    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 }
 
 static void
@@ -540,10 +540,14 @@ FOdysseyVectorEngine::Stitch( FOdysseyVectorVertex* iVertexA
                                                                new FOdysseyVectorSegmentCubic( cubicPath
                                                                                             ,  knotVertex
                                                                                             ,  nextVertex ) };
-            uint32 prevVertexIndex = ( iVertexA == vertexASegment->GetVertex(0) ) ? 1 : 0;
-            uint32 nextVertexIndex = ( iVertexB == vertexBSegment->GetVertex(0) ) ? 1 : 0;
+            uint32 aVertexIndex    = ( iVertexA == vertexASegment->GetVertex(0) ) ? 0 : 1;
+            uint32 prevVertexIndex = ( aVertexIndex == 0 ) ? 1 : 0;
+            uint32 bVertexIndex    = ( iVertexB == vertexBSegment->GetVertex(0) ) ? 0 : 1;
+            uint32 nextVertexIndex = ( bVertexIndex == 0 ) ? 1 : 0;
 
             newCubicSegment[0]->GetHandle(0)->Set( vertexASegment->GetHandle(prevVertexIndex)->GetCoords() );
+            newCubicSegment[0]->GetHandle(1)->Set( vertexASegment->GetHandle(aVertexIndex   )->GetCoords() );
+            newCubicSegment[1]->GetHandle(0)->Set( vertexBSegment->GetHandle(bVertexIndex   )->GetCoords() );
             newCubicSegment[1]->GetHandle(1)->Set( vertexBSegment->GetHandle(nextVertexIndex)->GetCoords() );
 
             path->RemoveSegment( vertexASegment );

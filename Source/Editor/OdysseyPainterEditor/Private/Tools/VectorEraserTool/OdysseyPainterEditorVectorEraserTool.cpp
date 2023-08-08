@@ -242,8 +242,6 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseUpVector( FOdysseyVectorEngine* iE
                   , false );
     iEngine->UseColorImage();
 
-    iScene->Update( 0 ); // update invalidated objects
-
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
 
     // needed for valid GUndo pointer

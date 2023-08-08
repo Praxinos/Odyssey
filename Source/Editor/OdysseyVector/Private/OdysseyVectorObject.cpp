@@ -42,7 +42,7 @@ FOdysseyVectorObject::FOdysseyVectorObject( const FString& iName )
     mForegroundBucket.SetSolidColor( 0, 0, 0, 255 );
 
     mBackgroundBucket.SetColorMode( eBucketColorMode::SolidColor );
-    mBackgroundBucket.SetSolidColor( 255, 255, 255, 255 );
+    mBackgroundBucket.SetSolidColor( 0, 0, 0, 0 );
 }
 
 FOdysseyVectorBucket&
@@ -555,7 +555,7 @@ FOdysseyVectorObject::GetParent()
 }
 
 void
-FOdysseyVectorObject::MoveBack()
+FOdysseyVectorObject::SendBackward()
 {
     if ( mParent )
     {
@@ -580,7 +580,7 @@ FOdysseyVectorObject::MoveBack()
 }
 
 void
-FOdysseyVectorObject::MoveFront()
+FOdysseyVectorObject::BringForward()
 {
     if ( mParent )
     {

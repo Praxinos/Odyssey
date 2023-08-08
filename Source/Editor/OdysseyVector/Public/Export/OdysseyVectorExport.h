@@ -39,7 +39,11 @@ namespace FOdysseyVectorExport
                         static const uint32 CHUNK_PATH_GEOMETRY_VERTICES = 0x1116a85d; // uint32(count), array[double(X)-double(Y)-double(Radius)]
                         static const uint32 CHUNK_PATH_GEOMETRY_CUBICSEGMENTS = 0x76cacf19; // uint32(count), array[uint32(P0ID)-uint32(P1ID)-double(CX0)-double(CY0)-double(CX1)-double(CY1)]
                 static const uint32 CHUNK_OBJECT_GROUPPAINT = 0xac92b85d; // container
-                    static const uint32 CHUNK_GROUPPAINT_WIREFRAME =  0x54f22893; // uint32(bool)
+                    static const uint32 CHUNK_GROUPPAINT_PAINTED = 0x89854E17; // uint32(bool)
+                    static const uint32 CHUNK_GROUPPAINT_MONOCHROME = 0x8278C142; // uint32(bool)
+                    static const uint32 CHUNK_GROUPPAINT_MONOCHROMECOLOR = 0x2E97CB32; //uint8(R)-uint8(G)-uint8(B)-uint8(A)
+                    static const uint32 CHUNK_GROUPPAINT_WIREFRAME =  0x54F22893; // uint32(bool)
+                    static const uint32 CHUNK_GROUPPAINT_WIREFRAMECOLOR = 0x0AB56FA6; //uint8(R)-uint8(G)-uint8(B)-uint8(A)
                     static const uint32 CHUNK_GROUPPAINT_GAP = 0x7602b7f4; // container
                         static const uint32 CHUNK_GROUPPAINT_GAP_TOLERANCE = 0x960a3861; // double(tolerance)
                     static const uint32 CHUNK_GROUPPAINT_BUCKETS = 0x5791cb88; // container

@@ -450,7 +450,7 @@ FOdysseyPainterEditorGUI::ResetView( FOdysseyVectorEngine* iEngine, FOdysseyVect
 void
 FOdysseyPainterEditorGUI::DeleteSelection( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
-    mEditor->DeleteSelection( iEngine, iScene );
+    mEditor->DeleteObjectSelection( iEngine, iScene );
 }
 
 void

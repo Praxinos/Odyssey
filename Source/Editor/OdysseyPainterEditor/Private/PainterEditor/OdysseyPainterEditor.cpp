@@ -423,7 +423,7 @@ FOdysseyPainterEditor::BringForward( FOdysseyVectorEngine* iEngine, FOdysseyVect
         }
         GEditor->EndTransaction();
 
-        selectedObject->MoveFront();
+        selectedObject->BringForward();
 
         iScene->Update( 0 );
     }
@@ -450,7 +450,7 @@ FOdysseyPainterEditor::SendBackward( FOdysseyVectorEngine* iEngine, FOdysseyVect
         }
         GEditor->EndTransaction();
 
-        selectedObject->MoveBack();
+        selectedObject->SendBackward();
 
         iScene->Update( 0 );
     }
@@ -616,11 +616,121 @@ FOdysseyPainterEditor::ResetView( FOdysseyVectorEngine* iEngine, FOdysseyVectorS
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
+static void
+GroupPaintDeletePoint( FOdysseyVectorGroupPaint* iGroupPaint
+                     , std::vector<FOdysseyVectorVertex*>& iRemovedVertexArray
+                     , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray
+                     , std::vector<FOdysseyVectorPath*>& iRemovedPathArray
+                     , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray )
+{
+    std::list<FOdysseyVectorObject*>& childrenList = iGroupPaint->GetChildrenList();
+    std::list<FOdysseyVectorObject*>::iterator it;
+
+    for( it = childrenList.begin(); it != childrenList.end(); ++it )
+    {
+        FOdysseyVectorObject* child = *it;
+
+        if( child->GetClass() == FOdysseyVectorPath::StaticClass() )
+        {
+            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(child);
+            std::vector<FOdysseyVectorPoint*> selectedPointArray;
+
+            path->GetSelectedPoints( selectedPointArray, ePointSelectionFlags::Vertex );
+
+            FOdysseyVectorPath::DeletePoint( path
+                                           , selectedPointArray
+                                           , iRemovedVertexArray
+                                           , iRemovedSegmentArray
+                                           , iRemovedPathArray
+                                           , iAddedSegmentArray );
+        }
+    }
+}
+
 void
-FOdysseyPainterEditor::DeleteSelection( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+FOdysseyPainterEditor::DeletePointSelection( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+{
+    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
+    std::vector<FOdysseyVectorPath*> removedPathArray;
+    std::vector<FOdysseyVectorVertex*> removedVertexArray;
+    std::vector<FOdysseyVectorSegment*> removedSegmentArray;
+    std::vector<FOdysseyVectorPath*> addedPathArray;
+    std::vector<FOdysseyVectorVertex*> addedVertexArray; // not filled, here just for the undo record
+    std::vector<FOdysseyVectorSegment*> addedSegmentArray;
+
+    removedPathArray.reserve( 10 );
+    removedVertexArray.reserve( 10 );
+    removedSegmentArray.reserve( 10 );
+    addedSegmentArray.reserve( 10 );
+
+    for( std::list<FOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
+    {
+        FOdysseyVectorObject* selectedObject  = *it;
+
+        if( selectedObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+        {
+            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(selectedObject);
+            std::vector<FOdysseyVectorPoint*> selectedPointArray;
+
+            path->GetSelectedPoints( selectedPointArray, ePointSelectionFlags::Vertex );
+
+            FOdysseyVectorPath::DeletePoint( path
+                                           , selectedPointArray
+                                           , removedVertexArray
+                                           , removedSegmentArray
+                                           , removedPathArray
+                                           , addedSegmentArray );
+        }
+
+        if( selectedObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+        {
+            FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(selectedObject);
+
+            GroupPaintDeletePoint( paintGroup
+                                 , removedVertexArray
+                                 , removedSegmentArray
+                                 , removedPathArray
+                                 , addedSegmentArray );
+        }
+    }
+
+
+    for( int i = 0; i < removedPathArray.size(); i++ )
+    {
+        FOdysseyVectorPath* path = removedPathArray[i];
+
+        path->GetParent()->RemoveChild( path );
+    }
+
+    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS ); // updated invalidated objects
+
+    // needed for valid GUndo pointer
+    GEditor->BeginTransaction(LOCTEXT("DeletePointSelection","Delete Point Selection"));
+    if( GUndo )
+    {
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoPathAlter( iScene
+                                                                  , removedPathArray
+                                                                  , removedVertexArray
+                                                                  , removedSegmentArray
+                                                                  , addedPathArray
+                                                                  , addedVertexArray
+                                                                  , addedSegmentArray );
+
+        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+    }
+    GEditor->EndTransaction();
+
+    iEngine->ResetHUD();
+    // call callbacks if any (for refreshing GUI e.g)
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                   | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
+}
+
+void
+FOdysseyPainterEditor::DeleteObjectSelection( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
     // needed for undos
-    GEditor->BeginTransaction(LOCTEXT("DeleteSelection", "Delete Selection"));
+    GEditor->BeginTransaction(LOCTEXT("DeleteObjectSelection", "Delete Object Selection"));
     if( GUndo )
     {
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSceneRemoveSelection( iScene );
@@ -690,7 +800,7 @@ FOdysseyPainterEditor::DeleteBucket( FOdysseyVectorBucket* iBucket )
     FOdysseyVectorObject* ownerObject = iBucket->GetOwner();
     FOdysseyVectorScene* scene = ownerObject->GetScene();
 
-    if( ownerObject->GetClass() == FOdysseyVectorGroupPaint::StaticClass() )
+    if( ownerObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
     {
         FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(ownerObject);
 

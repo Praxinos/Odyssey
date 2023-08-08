@@ -24,10 +24,19 @@ struct FGroupPaintParam
     GENERATED_BODY()
 
     UPROPERTY(EditAnywhere, Category="General")
+    bool Painted;
+
+    UPROPERTY(EditAnywhere,Category="General")
+    bool Monochrome;
+
+    UPROPERTY(EditAnywhere,Category="General")
+    FColor MonochromeColor;
+
+    UPROPERTY(EditAnywhere, Category="General")
     bool Realtime; // relatime updates
 
     UPROPERTY(EditAnywhere, Category="General", meta = (ClampMin = "0.0", UIMin = "0.0"))
-    double Tolerance;
+    double GapTolerance;
 
     UPROPERTY(EditAnywhere, Category="General")
     bool Wireframe;
@@ -117,6 +126,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         void SetGapTolerance( double iGapTolerance );
         bool IsWireframe();
         void SetWireframe( bool iIsWireframe );
+        FColor& GetWireframeColor();
+        void GetWireframeColor( uint8 &oR, uint8 &oG, uint8& oB, uint8& oA );
+        void SetWireframeColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA );
+
         void UpdateBBox();
         void SelectBucket( FOdysseyVectorBucket* iSelectedBucket );
         void UnselectBucket( FOdysseyVectorBucket* iSelectedBucket );
@@ -131,6 +144,14 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         virtual void RemoveChild( FOdysseyVectorObject* iChild ) override;
         FOdysseyVectorCycle* PickCycle( double iWorldX, double iWorldY );
         FOdysseyVectorBucket* PickBucket( double iWorldX, double iWorldY );
+        bool IsMonochrome();
+        void SetMonochrome( bool iIsMonochrome );
+        FColor& GetMonochromeColor();
+        void GetMonochromeColor( uint8 &oR, uint8 &oG, uint8& oB, uint8& oA );
+        void SetMonochromeColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA );
+
+        bool IsPainted();
+        void SetPainted( bool iPainted );
 
     protected:
         /**

@@ -44,6 +44,55 @@ WriteGroupPaintGap( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar )
 }
 
 static void
+WriteGroupPaintMonochromeColor( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar )
+{
+    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_GROUPPAINT_MONOCHROMECOLOR
+                                    , Ar
+                                    , [&iPaintGroup](FArchive &Ar) -> void
+    {
+        uint8 R, G, B, A;
+
+        iPaintGroup.GetMonochromeColor( R, G, B, A );
+
+        Ar << R;
+        Ar << G;
+        Ar << B;
+        Ar << A;
+    } );
+}
+
+static void
+WriteGroupPaintMonochrome( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar )
+{
+    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_GROUPPAINT_MONOCHROME
+                                    , Ar
+                                    , [&iPaintGroup](FArchive &Ar) -> void
+    {
+        uint32 monochrome = static_cast<uint32>(iPaintGroup.IsMonochrome());
+
+        Ar << monochrome;
+    } );
+}
+
+static void
+WriteGroupPaintWireframeColor( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar )
+{
+    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_GROUPPAINT_WIREFRAMECOLOR
+                                    , Ar
+                                    , [&iPaintGroup](FArchive &Ar) -> void
+    {
+        uint8 R, G, B, A;
+
+        iPaintGroup.GetWireframeColor( R, G, B, A );
+
+        Ar << R;
+        Ar << G;
+        Ar << B;
+        Ar << A;
+    } );
+}
+
+static void
 WriteGroupPaintWireframe( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar )
 {
     FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_GROUPPAINT_WIREFRAME
@@ -56,6 +105,19 @@ WriteGroupPaintWireframe( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar )
     } );
 }
 
+static void
+WriteGroupPaintPainted( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar )
+{
+    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_GROUPPAINT_PAINTED
+                                    , Ar
+                                    , [&iPaintGroup](FArchive &Ar) -> void
+    {
+        uint32 painted = static_cast<uint32>(iPaintGroup.IsPainted());
+
+        Ar << painted;
+    } );
+}
+
 void
 FOdysseyVectorExport::WriteObjectGroupPaint( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar )
 {
@@ -63,7 +125,11 @@ FOdysseyVectorExport::WriteObjectGroupPaint( FOdysseyVectorGroupPaint& iPaintGro
                                     , Ar
                                     , [&iPaintGroup](FArchive &Ar) -> void
     {
+        WriteGroupPaintPainted( iPaintGroup, Ar );
+        WriteGroupPaintMonochrome( iPaintGroup, Ar );
+        WriteGroupPaintMonochromeColor( iPaintGroup, Ar );
         WriteGroupPaintWireframe( iPaintGroup, Ar );
+        WriteGroupPaintWireframeColor( iPaintGroup, Ar );
         WriteGroupPaintGap( iPaintGroup, Ar );
         WriteGroupPaintBuckets( iPaintGroup, Ar );
     } );

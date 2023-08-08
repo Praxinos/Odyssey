@@ -59,7 +59,7 @@ FOdysseyVectorUndoObjectAdd::Apply( UObject* iIgnored )
     }
 
     // update invalidated objects and call callbacks if any (for refreshing GUI e.g)
-    mScene->Update(0);
+    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
@@ -95,7 +95,7 @@ FOdysseyVectorUndoObjectAdd::Revert( UObject* iIgnored )
     mScene->ClearSelection();
 
     // update invalidated objects
-    mScene->Update(0);
+    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
