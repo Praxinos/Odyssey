@@ -180,7 +180,7 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseDownVector( FOdysseyVectorEngi
         }
     }
 
-    iScene->Update( 0 );
+    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
     mPathStitchHUD->Reset( iScene ); // rebuilds QuadTree after path alter.
 

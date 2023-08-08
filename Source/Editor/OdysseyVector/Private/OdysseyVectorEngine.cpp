@@ -540,15 +540,11 @@ FOdysseyVectorEngine::Stitch( FOdysseyVectorVertex* iVertexA
                                                                new FOdysseyVectorSegmentCubic( cubicPath
                                                                                             ,  knotVertex
                                                                                             ,  nextVertex ) };
-            uint32 aVertexIndex    = ( iVertexA == vertexASegment->GetVertex(0) ) ? 0 : 1;
-            uint32 prevVertexIndex = ( aVertexIndex == 0 ) ? 1 : 0;
-            uint32 bVertexIndex    = ( iVertexB == vertexBSegment->GetVertex(0) ) ? 0 : 1;
-            uint32 nextVertexIndex = ( bVertexIndex == 0 ) ? 1 : 0;
 
-            newCubicSegment[0]->GetHandle(0)->Set( vertexASegment->GetHandle(prevVertexIndex)->GetCoords() );
-            newCubicSegment[0]->GetHandle(1)->Set( vertexASegment->GetHandle(aVertexIndex   )->GetCoords() );
-            newCubicSegment[1]->GetHandle(0)->Set( vertexBSegment->GetHandle(bVertexIndex   )->GetCoords() );
-            newCubicSegment[1]->GetHandle(1)->Set( vertexBSegment->GetHandle(nextVertexIndex)->GetCoords() );
+            newCubicSegment[0]->GetHandle(0)->Set( vertexASegment->GetHandle(prevVertex)->GetCoords() );
+            newCubicSegment[0]->GetHandle(1)->Set( vertexASegment->GetHandle(iVertexA  )->GetCoords() );
+            newCubicSegment[1]->GetHandle(0)->Set( vertexBSegment->GetHandle(iVertexB  )->GetCoords() );
+            newCubicSegment[1]->GetHandle(1)->Set( vertexBSegment->GetHandle(nextVertex)->GetCoords() );
 
             path->RemoveSegment( vertexASegment );
             path->RemoveSegment( vertexBSegment );
@@ -564,12 +560,12 @@ FOdysseyVectorEngine::Stitch( FOdysseyVectorVertex* iVertexA
 
             oAddedSegmentArray.push_back( newCubicSegment[0] );
             oAddedSegmentArray.push_back( newCubicSegment[1] );
-
+/*
             if( iSmooth )
             {
                 FOdysseyVectorPath::SmoothSegments( knotVertex, false, true );
             }
-
+*/
             path->InvalidateAllSegments();
 
             //mScene->Update( 0 );
