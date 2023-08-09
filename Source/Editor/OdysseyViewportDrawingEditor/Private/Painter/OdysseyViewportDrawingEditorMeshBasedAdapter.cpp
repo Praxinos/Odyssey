@@ -319,7 +319,11 @@ float FOdysseyViewportDrawingEditorMeshBasedAdapter::GetStampQuality()
         .SetRealtimeUpdate(viewportClient->IsRealtime()));
     FSceneView* view = viewportClient->CalcSceneView(&viewFamily);
 
-    const FViewportCursorLocation mouseViewportRay(view, viewportClient, viewportClient->GetCachedMouseX(), viewportClient->GetCachedMouseY());
+    //We need to shift the coordinates of the stamp, because here, we're working in viewport coordinates, not texture coordinates (1 px in viewport != 1px in coord)
+    iStampParams.mPosition.x = iStampParams.mPosition.x + iStampParams.mBlock->Width() / 2.f;
+    iStampParams.mPosition.y = iStampParams.mPosition.y + iStampParams.mBlock->Height() / 2.f;
+
+    const FViewportCursorLocation mouseViewportRay(view, viewportClient, iStampParams.mPosition.x, iStampParams.mPosition.y);
 
     FHitResult traceHitResult(1.0f);
     const FVector rayEnd(mouseViewportRay.GetOrigin() + mouseViewportRay.GetDirection() * HALF_WORLD_MAX);
@@ -327,10 +331,20 @@ float FOdysseyViewportDrawingEditorMeshBasedAdapter::GetStampQuality()
     meshAdapter->LineTraceComponent(traceHitResult, mouseViewportRay.GetOrigin(), rayEnd, FCollisionQueryParams(SCENE_QUERY_STAT(Paint), true));
 
     FVector brushXAxis, brushYAxis;
-    traceHitResult.Normal.FindBestAxisVectors(brushXAxis,brushYAxis);
+    traceHitResult.Normal.FindBestAxisVectors(brushXAxis, brushYAxis);
     const FMatrix worldToBrushMatrix = FMatrix(brushXAxis, brushYAxis, traceHitResult.Normal, traceHitResult.Location).Inverse();
 
-    mStrokeBufferTexture2D = NewRGBAFTextureFromBlockData(iStampParams.mBlock);
+
+    // Convert trace to UV position
+    FVector2D coord;
+    if (UGameplayStatics::FindCollisionUV(traceHitResult, mEditor->GetUVIndexUsedByCurrentTexture(), coord))
+    {
+        //And here we shift back the coordinates, because we converted it to texture coordinates
+        iStampParams.mPosition.x = coord.X * mEditor->Texture()->GetSurfaceWidth() - iStampParams.mBlock->Width() / 2.f;
+        iStampParams.mPosition.y = coord.Y * mEditor->Texture()->GetSurfaceHeight() - iStampParams.mBlock->Height() / 2.f;
+
+        mStrokeBufferTexture2D = NewRGBAFTextureFromBlockData(iStampParams.mBlock);
+    }
 
     TRefCountPtr< FOdysseyMeshPaintBatchedElementParameters > meshPaintBatchedElementParameters(new FOdysseyMeshPaintBatchedElementParameters());
     {
@@ -348,7 +362,7 @@ float FOdysseyViewportDrawingEditorMeshBasedAdapter::GetStampQuality()
     FBatchedElements* strokePaintBatchedElements = strokePaintCanvas.GetBatchedElements(FCanvas::ET_Triangle, meshPaintBatchedElementParameters, nullptr, SE_BLEND_Opaque);
 
     const FMatrix& componentToWorldMatrix = meshAdapter->GetComponentToWorldMatrix();
-    const FVector componentSpaceCameraPosition(componentToWorldMatrix.InverseTransformPosition(mouseViewportRay.GetOrigin()));
+    const FVector componentSpaceCameraPosition(componentToWorldMatrix.InverseTransformPosition(mCurrentStrokeRay.mRayOrigin));
     const FVector componentSpaceBrushPosition(componentToWorldMatrix.InverseTransformPosition(traceHitResult.Location));
 
     //Todo: make ellipseIntersectTriangles ?

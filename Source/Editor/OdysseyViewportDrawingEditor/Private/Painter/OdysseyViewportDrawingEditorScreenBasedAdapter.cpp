@@ -318,7 +318,11 @@ float FOdysseyViewportDrawingEditorScreenBasedAdapter::GetStampQuality()
         .SetRealtimeUpdate(viewportClient->IsRealtime()));
     FSceneView* view = viewportClient->CalcSceneView(&viewFamily);
 
-    const FViewportCursorLocation mouseViewportRay(view, viewportClient, viewportClient->GetCachedMouseX(), viewportClient->GetCachedMouseY());
+    //We need to shift the coordinates of the stamp, because here, we're working in viewport coordinates, not texture coordinates (1 px in viewport != 1px in coord)
+    iStampParams.mPosition.x = iStampParams.mPosition.x + iStampParams.mBlock->Width() / 2.f;
+    iStampParams.mPosition.y = iStampParams.mPosition.y + iStampParams.mBlock->Height() / 2.f;
+
+    const FViewportCursorLocation mouseViewportRay(view, viewportClient, iStampParams.mPosition.x, iStampParams.mPosition.y);
 
     FHitResult traceHitResult(1.0f);
     const FVector rayEnd(mouseViewportRay.GetOrigin() + mouseViewportRay.GetDirection() * HALF_WORLD_MAX);

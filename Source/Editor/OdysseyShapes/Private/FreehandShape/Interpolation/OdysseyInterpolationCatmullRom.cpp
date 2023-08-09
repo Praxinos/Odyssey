@@ -114,6 +114,7 @@ const TArray< FOdysseyPoint >& FOdysseyInterpolationCatmullRom::ComputePoints()
     }
 
     mInputPoints.RemoveAt(0, 1);
+
     return  mResultPoints;
 }
 

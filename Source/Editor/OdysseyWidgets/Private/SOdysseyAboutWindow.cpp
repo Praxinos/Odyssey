@@ -151,7 +151,7 @@ SOdysseyAboutWindow::Construct( const FArguments& iArgs )
                 .Padding( FMargin( 0.f, 2.f, 0.f, 12.f ) )
                 [
                     SNew( STextBlock )
-                    .Text( LOCTEXT( "copyright.iddn", "IDDN.FR.001.220036.001.S.P.2021.000.00000" ) )
+                    .Text( LOCTEXT( "copyright.iddn", "IDDN.FR.001.250001.006.S.P.2019.000.00000" ) )
                     .TextStyle( FOdysseyStyle::Get(), "About.SmallText" )
                 ]
                 + SVerticalBox::Slot()
