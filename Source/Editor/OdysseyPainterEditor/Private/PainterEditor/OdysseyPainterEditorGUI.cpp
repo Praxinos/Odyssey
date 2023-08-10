@@ -47,6 +47,7 @@ FOdysseyPainterEditorGUI::CreateTabs()
     ODYSSEY_ADD_TAB(mSelectedVectorObjectTab, FOdysseyPainterEditorSelectedVectorObjectTab, mEditor);
     ODYSSEY_ADD_TAB(mTopTab, FOdysseyPainterEditorTopTab, mEditor);
     ODYSSEY_ADD_TAB(mToolOptionsTab, FOdysseyPainterEditorToolOptionsTab, mEditor);
+    ODYSSEY_ADD_TAB(mVectorSceneTreeViewTab, FOdysseyPainterEditorVectorSceneTreeViewTab, mEditor);
 }
 
 void
@@ -365,6 +366,12 @@ TSharedPtr<FOdysseyPainterEditorSelectedVectorObjectTab>&
 FOdysseyPainterEditorGUI::GetSelectedVectorObjectTab()
 {
     return mSelectedVectorObjectTab;
+}
+
+TSharedPtr<FOdysseyPainterEditorVectorSceneTreeViewTab>&
+FOdysseyPainterEditorGUI::GetVectorSceneTreeViewTab()
+{
+    return mVectorSceneTreeViewTab;
 }
 
 //--------------------------------------------------------------------------------------

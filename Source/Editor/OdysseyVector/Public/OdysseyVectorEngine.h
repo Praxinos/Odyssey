@@ -29,9 +29,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
 
         // signal flags
         static const uint64 SIGNAL_SCENE_REDRAW       = ( 1 << 0 );
-        static const uint64 SIGNAL_OBJECT_TRANSFORMED = ( 1 << 1 );
-        static const uint64 SIGNAL_OBJECT_MODIFIED    = ( 1 << 2 );
-        static const uint64 SIGNAL_OBJECT_SELECTED    = ( 1 << 3 );
+        static const uint64 SIGNAL_SCENE_HIERARCHY    = ( 1 << 1 );
+        static const uint64 SIGNAL_OBJECT_TRANSFORMED = ( 1 << 2 );
+        static const uint64 SIGNAL_OBJECT_MODIFIED    = ( 1 << 3 );
+        static const uint64 SIGNAL_OBJECT_SELECTED    = ( 1 << 4 );
         static const uint64 SIGNAL_ALL                = 0xFFFFFFFFFFFFFFFF;
 
         static FSignalDelegate& OnSignalDelegate();

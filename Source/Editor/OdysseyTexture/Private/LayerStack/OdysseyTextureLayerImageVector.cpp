@@ -193,6 +193,9 @@ UOdysseyTextureLayerImageVector::Serialize(FArchive& Ar)
         }
 
         FOdysseyVectorImport::Read( mEngine->GetScene(), Ar );
+
+        mEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                       | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY );
     }
 }
 

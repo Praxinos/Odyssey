@@ -142,6 +142,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
          * @param oAddedSegmentArray array of pointers to added segments.
          * @param oRemovedVertexArray array of pointers to removed vertices.
          * @param oRemovedSegmentArray array of pointers to removed segments.
+         * @return true if the path is empty, false otherwise.
          */
         bool Erase( const ::ULIS::FRectD &iRoi
                   , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
