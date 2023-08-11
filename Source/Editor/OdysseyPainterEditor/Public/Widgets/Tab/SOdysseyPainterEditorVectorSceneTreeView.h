@@ -4,15 +4,30 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Widgets/Views/STableViewBase.h"
+#include "Widgets/Views/STableRow.h"
 #include "Widgets/Views/STreeView.h"
 
 class FOdysseyVectorObject;
+
+class FVectorSceneTreeViewItem
+{
+    public:
+        ~FVectorSceneTreeViewItem();
+        FVectorSceneTreeViewItem(FOdysseyVectorObject* iVectorObject);
+
+        FOdysseyVectorObject* GetVectorObject();
+
+    public:
+        FOdysseyVectorObject* mVectorObject;
+        TArray<TSharedPtr<FVectorSceneTreeViewItem>> mChildren;
+};
 
 /**
  * Implements the Scene Tree View Widget
  */
 class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorSceneTreeView
-    : public STreeView<TSharedPtr<FOdysseyVectorObject>>
+    : public STreeView<TSharedPtr<FVectorSceneTreeViewItem>>
 {
     public:
         SLATE_BEGIN_ARGS(SOdysseyPainterEditorVectorSceneTreeView)
@@ -26,6 +41,8 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorSceneTreeView
     
         void Construct(const FArguments& InArgs);
 
+        void Update( FOdysseyVectorScene* iScene );
+
     protected:
         /**
          * @brief Called when the treeview asks for the children of a specific item
@@ -33,5 +50,23 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorSceneTreeView
          * @param iParent 
          * @param oChildren 
          */
-        void OnGetChildren(TSharedPtr<FOdysseyVectorObject> iParent, TArray<TSharedPtr<FOdysseyVectorObject>>& oChildren) const;
+        void OnGetChildren(TSharedPtr<FVectorSceneTreeViewItem> iParent, TArray<TSharedPtr<FVectorSceneTreeViewItem>>& oChildren) const;
+
+        TSharedRef<ITableRow> OnGenerateRow( TSharedPtr<FVectorSceneTreeViewItem> iItem, const TSharedRef<STableViewBase>& iOwnerTable );
+        void OnSelectionChanged( TSharedPtr<FVectorSceneTreeViewItem> iItem, ESelectInfo::Type SelectInfo );
+
+        void BuildTree( const TSharedPtr<FVectorSceneTreeViewItem> iParent );
+        FReply OnDragOver( const FGeometry& MyGeometry, const FDragDropEvent& DragDropEvent );
+
+        void MapActionsToCommandList();
+
+        void CopyObjectSelection();
+        void PasteObjectSelection();
+        void DeleteObjectSelection();
+        void SelectAll();
+        FReply OnKeyDown( const FGeometry& iGeometry, const FKeyEvent& iKeyEvent );
+
+    protected:
+        TArray<TSharedPtr<FVectorSceneTreeViewItem>> mItemsSource;
+        TSharedRef<FUICommandList> mCommandList;
 };

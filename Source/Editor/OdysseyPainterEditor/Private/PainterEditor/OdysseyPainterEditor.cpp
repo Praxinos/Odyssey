@@ -21,6 +21,7 @@
 #include "Undo/OdysseyVectorUndoBucketRemove.h"
 #include "Undo/OdysseyVectorUndoBucketParam.h"
 #include "Undo/OdysseyVectorUndoPathStitch.h"
+#include "Undo/OdysseyVectorUndoObjectAdd.h"
 
 #include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
 #include "Tools/VectorPrimitiveDrawingTool/OdysseyPainterEditorVectorPrimitiveDrawingTool.h"
@@ -430,7 +431,8 @@ FOdysseyPainterEditor::BringForward( FOdysseyVectorEngine* iEngine, FOdysseyVect
 
     iEngine->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                   | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY );
 }
 
 void
@@ -457,7 +459,8 @@ FOdysseyPainterEditor::SendBackward( FOdysseyVectorEngine* iEngine, FOdysseyVect
 
     iEngine->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                   | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY );
 }
 
 
@@ -502,6 +505,7 @@ FOdysseyPainterEditor::Ungroup( FOdysseyVectorEngine* iEngine, FOdysseyVectorSce
     iEngine->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                   | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
                    | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
 }
 
@@ -539,6 +543,7 @@ FOdysseyPainterEditor::GroupPaint( FOdysseyVectorEngine* iEngine, FOdysseyVector
     iEngine->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                   | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
                    | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
 }
 
@@ -570,6 +575,7 @@ FOdysseyPainterEditor::Group( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene
     iEngine->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                   | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
                    | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
 }
 
@@ -745,6 +751,7 @@ FOdysseyPainterEditor::DeleteObjectSelection( FOdysseyVectorEngine* iEngine, FOd
     iEngine->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                   | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
                    | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
 }
 
@@ -854,6 +861,91 @@ void
 FOdysseyPainterEditor::UnpropagateBucket( FOdysseyVectorBucket* iBucket )
 {
     SetBucketPropagation( iBucket, false );
+}
+
+static std::list<FOdysseyVectorObject*>&
+GetCopiedObjectList()
+{
+    static std::list<FOdysseyVectorObject*> copiedObjectList;
+
+    return copiedObjectList;
+}
+
+// static
+void
+FOdysseyPainterEditor::CopyObjectSelection( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+{
+    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
+
+    if( selectedObjectList.size() )
+    {
+        // First step : clear previously copied objects
+        GetCopiedObjectList().remove_if( []( FOdysseyVectorObject* iCopiedObject ){ delete iCopiedObject; return true; } );
+
+        // second step : copy selection.
+        for( std::list<FOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
+        {
+            FOdysseyVectorObject* selectedObject = (*it);
+
+            if( selectedObject->HasSelectedAncestor() == false )
+            {
+                GetCopiedObjectList().push_back( selectedObject->Copy() );
+            }
+        }
+    }
+}
+
+// static
+void
+FOdysseyPainterEditor::PasteObjectSelection( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+{
+    std::list<FOdysseyVectorObject*> pastedObjectList;
+
+    // First copy all objects. This is needed to record their state-before-addition for the UNDO operation.
+    for( std::list<FOdysseyVectorObject*>::iterator it = GetCopiedObjectList().begin(); it != GetCopiedObjectList().end(); ++it )
+    {
+        FOdysseyVectorObject* copiedObject = (*it);
+
+        pastedObjectList.push_back( copiedObject->Copy() );
+    }
+
+    iScene->ClearSelection();
+
+    // This undo must be set before association with the new parent object
+    // needed for valid GUndo pointer
+    GEditor->BeginTransaction(LOCTEXT("DefaultTool","Paste"));
+    if( GUndo )
+    {
+        FOdysseyVectorUndo* undo = static_cast<FOdysseyVectorUndo*>( new FOdysseyVectorUndoObjectAdd( iScene, pastedObjectList ) );
+
+        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+    }
+    GEditor->EndTransaction();
+
+    for( std::list<FOdysseyVectorObject*>::iterator it = pastedObjectList.begin(); it != pastedObjectList.end(); ++it )
+    {
+        FOdysseyVectorObject* pastedObject = (*it);
+        //BLPoint shifting;
+
+        iScene->AppendChild( pastedObject );
+
+        //shifting = iScene->GetInverseWorldMatrix().mapVector( 10.0f, 10.0f ); // shift object by 10 pixels
+
+        pastedObject->Invalidate();
+        //pastedObject->Translate( newObject->GetTranslationX() + shifting.x, newObject->GetTranslationY() + shifting.y );
+        pastedObject->UpdateMatrix();
+
+        iScene->Select( pastedObject );
+    }
+
+    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+
+    iEngine->ResetHUD();
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                   | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
+                   | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED
+                   | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED
+                   | FOdysseyVectorEngine::SIGNAL_OBJECT_TRANSFORMED );
 }
 
 void

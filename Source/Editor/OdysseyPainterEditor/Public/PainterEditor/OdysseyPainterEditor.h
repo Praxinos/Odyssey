@@ -105,6 +105,8 @@ public:
     static void PropagateBucket( FOdysseyVectorBucket* iBucket );
     static void UnpropagateBucket( FOdysseyVectorBucket* iBucket );
     static void StitchVertices( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    static void CopyObjectSelection( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    static void PasteObjectSelection( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
 
     void SetVectorEditionMode(eVectorEditionMode iVectorEditionMode);
     eVectorEditionMode GetVectorEditionMode();

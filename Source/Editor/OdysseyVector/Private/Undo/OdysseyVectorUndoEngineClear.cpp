@@ -26,6 +26,7 @@ FOdysseyVectorUndoEngineClear::Apply( UObject* iIgnored )
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
     mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                               | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
                                | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
 
     mScene = savedScene;
@@ -43,6 +44,7 @@ FOdysseyVectorUndoEngineClear::Revert( UObject* iIgnored )
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
     mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                               | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
                                | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
 
     mScene = savedScene;

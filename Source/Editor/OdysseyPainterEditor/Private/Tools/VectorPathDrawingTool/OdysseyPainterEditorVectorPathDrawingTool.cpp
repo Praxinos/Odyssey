@@ -533,6 +533,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorEngin
     iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS ); // update invalidated objects
 
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                   | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY // important to remove the path builder from the hierarchy widget
                    | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
 
     return true;

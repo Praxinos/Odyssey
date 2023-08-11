@@ -8,6 +8,7 @@
 
 class FOdysseyPainterEditor;
 class SOdysseyPainterEditorVectorSceneTreeView;
+class FVectorSceneTreeViewItem;
 class FOdysseyVectorScene;
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorSceneTreeViewTab :
@@ -29,6 +30,5 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorSceneTreeViewTab :
 
     private:
         FOdysseyPainterEditor* mEditor;
-        TArray<TSharedPtr<FOdysseyVectorObject>> mItemsSource;
         TSharedPtr<SOdysseyPainterEditorVectorSceneTreeView> mVectorSceneTreeView;
 };

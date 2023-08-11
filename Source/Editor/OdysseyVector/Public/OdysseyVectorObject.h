@@ -203,4 +203,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         virtual void SwitchSpace( FOdysseyVectorObject& iNewSpace ){};
         //void PropertyChanged( const FName& iPropertyName );
         void UpdateMatrix( bool iRunTransformCallback );
+        FString& GetName();
 };

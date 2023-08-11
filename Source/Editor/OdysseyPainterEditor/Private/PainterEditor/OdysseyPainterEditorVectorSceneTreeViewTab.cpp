@@ -46,10 +46,12 @@ FOdysseyPainterEditorVectorSceneTreeViewTab::OnRefresh( FOdysseyVectorScene* iSc
 void
 FOdysseyPainterEditorVectorSceneTreeViewTab::Update( FOdysseyVectorScene* iScene )
 {
-    mItemsSource.Empty();
-    mItemsSource.Add( TSharedPtr<FOdysseyVectorObject>(iScene) );
+    //mItemsSource.Empty();
+    //mItemsSource.Add( MakeShared<FVectorSceneTreeViewItem>(iScene) );
 
-    mVectorSceneTreeView.Get()->SetTreeItemsSource( &mItemsSource );
+    //mVectorSceneTreeView.Get()->SetTreeItemsSource( &mItemsSource );
+
+    mVectorSceneTreeView.Get()->Update( iScene );
 }
 
 #undef LOCTEXT_NAMESPACE

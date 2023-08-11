@@ -39,6 +39,4 @@ public:
                               , FOdysseyVectorScene* iScene
                               , const FKey& iKey );
 
-    protected:
-        static std::list<FOdysseyVectorObject*>& GetCopiedObjectList();
 };

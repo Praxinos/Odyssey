@@ -63,6 +63,12 @@ FOdysseyVectorObject::SetName( const FString& iName )
     mObjectParam.Name = iName;
 }
 
+FString&
+FOdysseyVectorObject::GetName()
+{
+    return mObjectParam.Name;
+}
+
 static uint32
 CheckCommonClass( std::list<FOdysseyVectorObject*>& iObjectList, uint32 iCommonClass )
 {
