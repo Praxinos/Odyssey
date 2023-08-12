@@ -7,21 +7,7 @@
 #include "Widgets/Views/STableViewBase.h"
 #include "Widgets/Views/STableRow.h"
 #include "Widgets/Views/STreeView.h"
-
-class FOdysseyVectorObject;
-
-class FVectorSceneTreeViewItem
-{
-    public:
-        ~FVectorSceneTreeViewItem();
-        FVectorSceneTreeViewItem(FOdysseyVectorObject* iVectorObject);
-
-        FOdysseyVectorObject* GetVectorObject();
-
-    public:
-        FOdysseyVectorObject* mVectorObject;
-        TArray<TSharedPtr<FVectorSceneTreeViewItem>> mChildren;
-};
+#include "Widgets/Views/STreeView.h"
 
 /**
  * Implements the Scene Tree View Widget
@@ -56,7 +42,7 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorSceneTreeView
         void OnSelectionChanged( TSharedPtr<FVectorSceneTreeViewItem> iItem, ESelectInfo::Type SelectInfo );
 
         void BuildTree( const TSharedPtr<FVectorSceneTreeViewItem> iParent );
-        FReply OnDragOver( const FGeometry& MyGeometry, const FDragDropEvent& DragDropEvent );
+        //FReply OnDragOver( const FGeometry& MyGeometry, const FDragDropEvent& DragDropEvent );
 
         void MapActionsToCommandList();
 

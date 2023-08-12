@@ -2,27 +2,13 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Widgets/Tab/SOdysseyPainterEditorVectorSceneTreeView.h"
+#include "Widgets/Tab/SOdysseyPainterEditorVectorSceneTreeViewRow.h"
 #include "OdysseyStyleSet.h"
 #include "Framework/Commands/GenericCommands.h"
 #include "OdysseyVector.h"
 
 #define LOCTEXT_NAMESPACE "SOdysseyPainterEditorVectorSceneTreeView"
 
-
-FVectorSceneTreeViewItem::~FVectorSceneTreeViewItem()
-{
-}
-
-FVectorSceneTreeViewItem::FVectorSceneTreeViewItem(FOdysseyVectorObject* iVectorObject)
-{
-    mVectorObject = iVectorObject;
-}
-
-FOdysseyVectorObject*
-FVectorSceneTreeViewItem::GetVectorObject()
-{
-    return mVectorObject;
-}
 
 SOdysseyPainterEditorVectorSceneTreeView::~SOdysseyPainterEditorVectorSceneTreeView()
 {
@@ -34,7 +20,8 @@ SOdysseyPainterEditorVectorSceneTreeView::SOdysseyPainterEditorVectorSceneTreeVi
     MapActionsToCommandList();
 }
 
-void SOdysseyPainterEditorVectorSceneTreeView::Construct( const FArguments& InArgs )
+void
+SOdysseyPainterEditorVectorSceneTreeView::Construct( const FArguments& InArgs )
 {
     STreeView<TSharedPtr<FVectorSceneTreeViewItem>>::Construct(
         STreeView<TSharedPtr<FVectorSceneTreeViewItem>>::FArguments()
@@ -58,14 +45,14 @@ SOdysseyPainterEditorVectorSceneTreeView::OnKeyDown( const FGeometry& iGeometry,
 
     return STreeView<TSharedPtr<FVectorSceneTreeViewItem>>::OnKeyDown( iGeometry, iKeyEvent );
 }
-
+/*
 FReply
 SOdysseyPainterEditorVectorSceneTreeView::OnDragOver( const FGeometry& MyGeometry
                                                     , const FDragDropEvent& DragDropEvent )
 {
 	return FReply::Handled();
 }
-
+*/
 void
 SOdysseyPainterEditorVectorSceneTreeView::BuildTree( const TSharedPtr<FVectorSceneTreeViewItem> iParent )
 {
@@ -112,17 +99,24 @@ SOdysseyPainterEditorVectorSceneTreeView::OnGetChildren( TSharedPtr<FVectorScene
 TSharedRef<ITableRow>
 SOdysseyPainterEditorVectorSceneTreeView::OnGenerateRow( TSharedPtr<FVectorSceneTreeViewItem> iItem, const TSharedRef<STableViewBase>& iOwnerTable )
 {
-    return SNew( STableRow<TSharedPtr<FVectorSceneTreeViewItem>>, iOwnerTable )
+    return SNew( SOdysseyPainterEditorVectorSceneTreeViewRow, iOwnerTable )
     [
         SNew(STextBlock)
         .Text( FText::FromString( iItem.Get()->GetVectorObject()->GetName() ) )
+        //.OnMouseButtonDown( this, SOdysseyPainterEditorVectorSceneTreeView::OnRowMouseButtonDown )
         //.Font(FSlateFontInfo(FPaths::EngineContentDir() / TEXT("Slate/Fonts/Roboto-Bold.ttf"), 12))
         //.ColorAndOpacity(FLinearColor(1,0,1,1))
         //.ShadowColorAndOpacity(FLinearColor::Black)
         //.ShadowOffset(FIntPoint(-2, 2))
     ];
 }
-
+/*
+void
+SOdysseyPainterEditorVectorSceneTreeView::OnRowMouseButtonDown( const FGeometry& MyGeometry,
+                                                               , const FPointerEvent& MouseEvent)
+{
+}
+*/
 void
 SOdysseyPainterEditorVectorSceneTreeView::OnSelectionChanged( TSharedPtr<FVectorSceneTreeViewItem> iItem, ESelectInfo::Type SelectInfo )
 {
@@ -231,3 +225,5 @@ SOdysseyPainterEditorVectorSceneTreeView::MapActionsToCommandList()
     );
 */
 }
+
+#undef LOCTEXT_NAMESPACE
