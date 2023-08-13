@@ -9,6 +9,8 @@ FOdysseyVectorScene::FOdysseyVectorScene( const FString& iName )
     : FOdysseyVectorGroupPaint( iName )
 {
     mBackgroundBucket.SetSolidColor( 0, 0, 0, 0 );
+
+    SetExpanded( true );
 }
 
 bool

@@ -40,8 +40,10 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorSceneTreeView
 
         TSharedRef<ITableRow> OnGenerateRow( TSharedPtr<FVectorSceneTreeViewItem> iItem, const TSharedRef<STableViewBase>& iOwnerTable );
         void OnSelectionChanged( TSharedPtr<FVectorSceneTreeViewItem> iItem, ESelectInfo::Type SelectInfo );
-
-        void BuildTree( const TSharedPtr<FVectorSceneTreeViewItem> iParent );
+        void OnExpansionChanged( TSharedPtr<FVectorSceneTreeViewItem> iItem, bool mExpanded );
+        void ExpandTree( const TSharedPtr<FVectorSceneTreeViewItem> iItem );
+        void BuildTree( const TSharedPtr<FVectorSceneTreeViewItem> iItem );
+        void SelectTree( const TSharedPtr<FVectorSceneTreeViewItem> iItem );
         //FReply OnDragOver( const FGeometry& MyGeometry, const FDragDropEvent& DragDropEvent );
 
         void MapActionsToCommandList();

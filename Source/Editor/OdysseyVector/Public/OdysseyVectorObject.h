@@ -89,6 +89,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         std::list<FOdysseyVectorObject*> mInvalidatedChildrenList;
         FOdysseyVectorObject* mParent;
         bool mIsSelected;
+        bool mIsExpanded;
         bool mDependsOnChildren;
         ::ULIS::FRectD mBBox;
 
@@ -194,6 +195,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         FOdysseyVectorScene* GetScene();
         bool IsInvalidated();
         bool IsSelected();
+        void SetExpanded( bool iIsExpanded );
+        bool IsExpanded();
         void DrawBBox( ::ULIS::FRectD& iRoi,uint64 iFlags );
         int32 PickBBox( double iX, double iY );
         bool HasSelectedAncestor();

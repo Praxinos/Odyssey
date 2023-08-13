@@ -20,6 +20,7 @@ FOdysseyVectorObject::~FOdysseyVectorObject()
 FOdysseyVectorObject::FOdysseyVectorObject( const FString& iName )
     : mParent( nullptr )
     , mIsSelected( false )
+    , mIsExpanded( false )
     , mDependsOnChildren( false )
     , mBackgroundBucket( this, 0.0f, 0.0f, false )
     , mForegroundBucket( this, 0.0f, 0.0f, false )
@@ -67,6 +68,18 @@ FString&
 FOdysseyVectorObject::GetName()
 {
     return mObjectParam.Name;
+}
+
+void
+FOdysseyVectorObject::SetExpanded( bool iIsExpanded )
+{
+    mIsExpanded = iIsExpanded;
+}
+
+bool
+FOdysseyVectorObject::IsExpanded()
+{
+    return mIsExpanded;
 }
 
 static uint32

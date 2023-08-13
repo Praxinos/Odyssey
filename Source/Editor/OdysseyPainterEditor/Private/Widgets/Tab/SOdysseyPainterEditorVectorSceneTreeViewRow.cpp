@@ -55,7 +55,7 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnDrop( const FGeometry& iGeometry
         vectorObject->TransferChild( selectedObject );
     }
 
-    UE_LOG(LogTemp, Warning, TEXT("Some warning message %s"), *(vectorObject->GetName()) );
+    //UE_LOG(LogTemp, Warning, TEXT("Some warning message %s"), *(vectorObject->GetName()) );
 
     mDropZone = DROPZONE_NONE;
 

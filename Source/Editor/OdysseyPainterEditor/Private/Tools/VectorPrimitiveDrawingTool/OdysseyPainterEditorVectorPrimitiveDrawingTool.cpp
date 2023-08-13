@@ -384,6 +384,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseUpVector( FOdysseyVector
     iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS ); // update invalidate objects
 
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                   | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
                    | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED
                    | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED
                    | FOdysseyVectorEngine::SIGNAL_OBJECT_TRANSFORMED );

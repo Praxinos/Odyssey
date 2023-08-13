@@ -28,7 +28,7 @@ SOdysseyPainterEditorVectorSceneTreeView::Construct( const FArguments& InArgs )
         .TreeItemsSource(&mItemsSource)
         .OnGenerateRow( this, &SOdysseyPainterEditorVectorSceneTreeView::OnGenerateRow ) 
         .OnGetChildren( this, &SOdysseyPainterEditorVectorSceneTreeView::OnGetChildren )
-        //.OnExpansionChanged( this, &SOdysseyLayerStackTreeView::OnExpansionChanged )
+        .OnExpansionChanged( this, &SOdysseyPainterEditorVectorSceneTreeView::OnExpansionChanged )
         .OnSelectionChanged( this, &SOdysseyPainterEditorVectorSceneTreeView::OnSelectionChanged )
         //.OnItemScrolledIntoView(this, &SOdysseyLayerStackTreeView::OnItemScrolledIntoView)
         //.OnContextMenuOpening( this, &SOdysseyLayerStackTreeView::OnContextMenuOpening )
@@ -54,11 +54,11 @@ SOdysseyPainterEditorVectorSceneTreeView::OnDragOver( const FGeometry& MyGeometr
 }
 */
 void
-SOdysseyPainterEditorVectorSceneTreeView::BuildTree( const TSharedPtr<FVectorSceneTreeViewItem> iParent )
+SOdysseyPainterEditorVectorSceneTreeView::BuildTree( const TSharedPtr<FVectorSceneTreeViewItem> iItem )
 {
-    std::list<FOdysseyVectorObject*>& childrenList = iParent.Get()->GetVectorObject()->GetChildrenList();
+    std::list<FOdysseyVectorObject*>& childrenList = iItem.Get()->GetVectorObject()->GetChildrenList();
 
-    iParent.Get()->mChildren.Empty();
+    iItem.Get()->mChildren.Empty();
 
     for( FOdysseyVectorObject* child : childrenList )
     {
@@ -66,13 +66,44 @@ SOdysseyPainterEditorVectorSceneTreeView::BuildTree( const TSharedPtr<FVectorSce
         {
             TSharedPtr<FVectorSceneTreeViewItem> childItem = MakeShareable(new FVectorSceneTreeViewItem(child));
 
-            SetItemExpansion( childItem, true );
-
-    //SetItemSelection( childItem, true, ESelectInfo::Type::Direct);
-
-            iParent.Get()->mChildren.Add( childItem );
+            iItem.Get()->mChildren.Add( childItem );
 
             BuildTree( childItem );
+        }
+    }
+}
+
+void
+SOdysseyPainterEditorVectorSceneTreeView::SelectTree( const TSharedPtr<FVectorSceneTreeViewItem> iItem )
+{
+    FOdysseyVectorObject* itemObject = iItem.Get()->GetVectorObject();
+
+    if( itemObject->IsSelected() )
+    {
+        if( IsItemSelected( iItem ) == false )
+        {
+            SelectedItems.Add( iItem );
+        }
+    }
+
+    for( int i = 0; i < iItem.Get()->mChildren.Num(); i++ )
+    {
+        SelectTree( iItem.Get()->mChildren[i] );
+    }
+}
+
+void
+SOdysseyPainterEditorVectorSceneTreeView::ExpandTree( const TSharedPtr<FVectorSceneTreeViewItem> iItem )
+{
+    FOdysseyVectorObject* itemObject = iItem.Get()->GetVectorObject();
+
+    if( itemObject->IsExpanded() )
+    {
+        SetItemExpansion( iItem, true );
+
+        for( int i = 0; i < iItem.Get()->mChildren.Num(); i++ )
+        {
+            ExpandTree( iItem.Get()->mChildren[i] );
         }
     }
 }
@@ -87,6 +118,11 @@ SOdysseyPainterEditorVectorSceneTreeView::Update( FOdysseyVectorScene* iScene )
     BuildTree( mItemsSource[0] );
 
     RequestTreeRefresh();
+
+    ExpandTree( mItemsSource[0] );
+
+    SelectedItems.Empty();
+    SelectTree( mItemsSource[0] );
 }
 
 void
@@ -118,35 +154,60 @@ SOdysseyPainterEditorVectorSceneTreeView::OnRowMouseButtonDown( const FGeometry&
 }
 */
 void
+SOdysseyPainterEditorVectorSceneTreeView::OnExpansionChanged( TSharedPtr<FVectorSceneTreeViewItem> iItem, bool mExpanded )
+{
+    FOdysseyVectorObject* expandedObject = iItem.Get()->GetVectorObject();
+
+    expandedObject->SetExpanded( mExpanded );
+
+    // Reselect
+    SelectedItems.Empty();
+    SelectTree( mItemsSource[0] );
+}
+
+void
 SOdysseyPainterEditorVectorSceneTreeView::OnSelectionChanged( TSharedPtr<FVectorSceneTreeViewItem> iItem, ESelectInfo::Type SelectInfo )
 {
-    if( iItem == nullptr ) return;
-
-    FOdysseyVectorObject* iSelectedObject = iItem.Get()->GetVectorObject();
-    FOdysseyVectorScene* scene = iSelectedObject->GetScene();
-
-    // needed for valid GUndo pointer
-    GEditor->BeginTransaction(LOCTEXT("VectorSceneTreeView","Selection Changed"));
-    if( GUndo )
+    // can be null if no selection, from what I understand
+    if( iItem )
     {
-        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelect( scene );
+        TArray<TSharedPtr<FVectorSceneTreeViewItem>> selectedItems = GetSelectedItems();
 
-        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+        // no need to create an undo record or do anything if the selection is empty
+        if( selectedItems.Num() )
+        {
+            FOdysseyVectorObject* vectorObject = iItem.Get()->GetVectorObject();
+            FOdysseyVectorScene* scene = vectorObject->GetScene();
+
+            // needed for valid GUndo pointer
+            GEditor->BeginTransaction(LOCTEXT("VectorSceneTreeView","Selection Changed"));
+            if( GUndo )
+            {
+                FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelect( scene );
+
+                GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+            }
+            GEditor->EndTransaction();
+
+            // deselect all if control key is not pressed
+            if( FSlateApplication::Get().GetModifierKeys().IsControlDown() == false )
+            {
+                scene->ClearSelection();
+            }
+
+            for( int i = 0; i < selectedItems.Num(); i++ )
+            {
+                FOdysseyVectorObject* selectedObject = selectedItems[i].Get()->GetVectorObject();
+
+                scene->Select( selectedObject );
+            }
+
+            scene->GetEngine()->ResetHUD();
+
+            scene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                                      | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
+        }
     }
-    GEditor->EndTransaction();
-
-    // deselect all if control key is not pressed
-    if( FSlateApplication::Get().GetModifierKeys().IsControlDown() == false )
-    {
-        scene->ClearSelection();
-    }
-
-    scene->Select( iSelectedObject );
-
-    scene->GetEngine()->ResetHUD();
-
-    scene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                              | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
 }
 
 void
