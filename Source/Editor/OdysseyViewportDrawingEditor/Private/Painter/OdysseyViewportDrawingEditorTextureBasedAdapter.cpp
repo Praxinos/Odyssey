@@ -107,6 +107,7 @@ void FOdysseyViewportDrawingEditorTextureBasedAdapter::Paint()
 
 void FOdysseyViewportDrawingEditorTextureBasedAdapter::FinishPainting()
 {
+    mStopDrawing = false;
     mEditor->GetSelectedTool()->OnMouseUp(mCurrentStrokeRay.mPoint, EKeys::LeftMouseButton);
 
     //A simple copy is all we need for the texture based algorithm
@@ -130,59 +131,36 @@ void FOdysseyViewportDrawingEditorTextureBasedAdapter::RenderInteractorWidget(co
     if (mEditor->GetSelectedTool()->IsA(UOdysseyPainterEditorRasterDrawingTool::StaticClass()))
         drawingTool = Cast<UOdysseyPainterEditorRasterDrawingTool>(mEditor->GetSelectedTool());
 
-    if(drawingTool)
-        return drawingTool->GetBrushInstance()->StampInternal(iStampParams);
-    else
-        return iStampParams.mEvent;
-
-    //TODO: LOOP check here
-    /*
-    //Check if we're currently drawing on the level editor viewport. If not, we're drawing normally
-    if (!GCurrentLevelEditingViewportClient->GetEditorViewportWidget()->GetSceneViewport()->HasFocus())
-        return drawingTool->GetBrushInstance()->StampInternal(iStampParams);
-    
-    // Check if we have a proper meshComponent to paint on
     const TSharedPtr<IMeshPaintGeometryAdapter>* meshAdapterPtr = mEditor->ComponentToAdapterMap().Find(mEditor->Component());
-    if (!meshAdapterPtr)
-        return drawingTool->GetBrushInstance()->StampInternal(iStampParams);
-
 
     TSharedPtr<IMeshPaintGeometryAdapter> meshAdapter = *meshAdapterPtr;
 
-    FEditorViewportClient* viewportClient = (FEditorViewportClient*)mLastKnownViewport->GetClient();
-    // Compute a world space ray from the screen space mouse coordinates
-    FSceneViewFamilyContext viewFamily(FSceneViewFamily::ConstructionValues(
-        viewportClient->Viewport,
-        viewportClient->GetScene(),
-        viewportClient->EngineShowFlags)
-        .SetRealtimeUpdate(viewportClient->IsRealtime()));
-    FSceneView* view = viewportClient->CalcSceneView(&viewFamily);
-    
-    //We need to shift the coordinates of the stamp, because here, we're working in viewport coordinates, not texture coordinates (1 px in viewport != 1px in coord)
-    iStampParams.mPosition.x = iStampParams.mPosition.x + iStampParams.mBlock->Width() / 2.f;
-    iStampParams.mPosition.y = iStampParams.mPosition.y + iStampParams.mBlock->Height() / 2.f;
+    FHitResult lastTraceHitResult(1.0f);
+    const FVector lastRayEnd(mLastStrokeRay.mRayOrigin + mLastStrokeRay.mRayDirection * HALF_WORLD_MAX);
 
-    const FViewportCursorLocation mouseViewportRay(view, viewportClient, iStampParams.mPosition.x, iStampParams.mPosition.y);
+    FHitResult currentTraceHitResult(1.0f);
+    const FVector currentRayEnd(mCurrentStrokeRay.mRayOrigin + mCurrentStrokeRay.mRayDirection * HALF_WORLD_MAX);
 
-    FHitResult traceHitResult(1.0f);
-    const FVector rayEnd(mouseViewportRay.GetOrigin() + mouseViewportRay.GetDirection() * HALF_WORLD_MAX);
-
-    meshAdapter->LineTraceComponent(traceHitResult, mouseViewportRay.GetOrigin(), rayEnd, FCollisionQueryParams(SCENE_QUERY_STAT(Paint), true));
+    meshAdapter->LineTraceComponent(lastTraceHitResult, mLastStrokeRay.mRayOrigin, lastRayEnd, FCollisionQueryParams(SCENE_QUERY_STAT(Paint), true));
+    meshAdapter->LineTraceComponent(currentTraceHitResult, mCurrentStrokeRay.mRayOrigin, currentRayEnd, FCollisionQueryParams(SCENE_QUERY_STAT(Paint), true));
 
     // Convert trace to UV position
-    FVector2D coord;
-    if (UGameplayStatics::FindCollisionUV(traceHitResult, mEditor->GetUVIndexUsedByCurrentTexture(), coord))
+    FVector2D lastCoord;
+    FVector2D currentCoord;
+    UGameplayStatics::FindCollisionUV(lastTraceHitResult, mEditor->GetUVIndexUsedByCurrentTexture(), lastCoord);
+    UGameplayStatics::FindCollisionUV(currentTraceHitResult, mEditor->GetUVIndexUsedByCurrentTexture(), currentCoord);
+
+    if (::ULIS::FMath::Dist(lastCoord.X, lastCoord.Y, currentCoord.X, currentCoord.Y) > 0.1f)
     {
-        //And here we shift back the coordinates, because we converted it to texture coordinates
-        iStampParams.mPosition.x = coord.X * mEditor->Texture()->GetSurfaceWidth() - iStampParams.mBlock->Width() / 2.f;
-        iStampParams.mPosition.y = coord.Y * mEditor->Texture()->GetSurfaceHeight() - iStampParams.mBlock->Height() / 2.f;
-    }
-    else
-    {
+        mStopDrawing = true;
         return iStampParams.mEvent;
     }
 
-    return drawingTool->GetBrushInstance()->StampInternal(iStampParams);*/
+    if(drawingTool && mStopDrawing == false)
+        return drawingTool->GetBrushInstance()->StampInternal(iStampParams);
+    else
+        return iStampParams.mEvent;
+
 }
 
 #undef LOCTEXT_NAMESPACE

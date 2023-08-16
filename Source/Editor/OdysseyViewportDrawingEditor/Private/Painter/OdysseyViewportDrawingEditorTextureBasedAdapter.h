@@ -29,4 +29,6 @@ private:
     void OnToolChange(UOdysseyPainterEditorTool* iNewTool);
     virtual ::ULIS::FEvent StampOverride(UOdysseyBrushAssetBase::FStampParams iStampParams) override;
 
+    //A useful boolean to stop the drawing when we crossed a big seam in the mesh (for texture adapter, handling of seams/loops)
+    bool mStopDrawing = false;
 };
