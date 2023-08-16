@@ -148,7 +148,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         FOdysseyVectorBucket& GetBackgroundBucket();
         FOdysseyVectorBucket& GetForegroundBucket();
 
-        virtual void TransferChild( FOdysseyVectorObject* iFosterChild );
+        virtual void TransferChild( FOdysseyVectorObject* iFosterChild, FOdysseyVectorObject* iInsertAfter );
         /*virtual void UpdateBoundingBox() = 0;*/
         virtual void DrawChildren( uint64 iFlags );
         void UpdateMatrix( );
@@ -158,7 +158,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         void PrependChild( FOdysseyVectorObject* iChild );
         void AppendChild( FOdysseyVectorObject* iChild );
 
-        virtual void AddChild( FOdysseyVectorObject* iChild, bool iPrepend );
+
+        virtual void AddChild( FOdysseyVectorObject* iChild, FOdysseyVectorObject* iInsertAfter );
         virtual void RemoveChild( FOdysseyVectorObject* iChild );
 
         void ImportChild( FOdysseyVectorObject* iChild, BLMatrix2D& iInverseWorldMatrix );
@@ -207,4 +208,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         //void PropertyChanged( const FName& iPropertyName );
         void UpdateMatrix( bool iRunTransformCallback );
         FString& GetName();
+        FOdysseyVectorObject* GetLastChild();
+        FOdysseyVectorObject* GetPreviousChild( FOdysseyVectorObject* iChild );
 };

@@ -196,12 +196,6 @@ FOdysseyVectorGroupPaint::OnChildTransform( FOdysseyVectorObject* iChild )
 }
 
 void
-FOdysseyVectorGroupPaint::TransferChild( FOdysseyVectorObject* iFosterChild )
-{
-    FOdysseyVectorObject::TransferChild( iFosterChild );
-}
-
-void
 FOdysseyVectorGroupPaint::DrawChildren( uint64 iFlags )
 {
     std::list<FOdysseyVectorObject*>::iterator it; 
@@ -994,9 +988,9 @@ FOdysseyVectorGroupPaint::SetPainted( bool iPainted )
 }
 
 void
-FOdysseyVectorGroupPaint::AddChild( FOdysseyVectorObject* iChild, bool iPrepend )
+FOdysseyVectorGroupPaint::AddChild( FOdysseyVectorObject* iChild, FOdysseyVectorObject* iInsertAfter )
 {
-    FOdysseyVectorObject::AddChild( iChild, iPrepend );
+    FOdysseyVectorObject::AddChild( iChild, iInsertAfter );
 
     if( iChild->GetClass() == FOdysseyVectorPath::StaticClass() )
     {

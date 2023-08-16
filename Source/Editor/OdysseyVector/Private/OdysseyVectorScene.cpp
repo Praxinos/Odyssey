@@ -130,7 +130,7 @@ FOdysseyVectorScene::MakePaintGroupFromSelectedObjects( std::vector<FOdysseyVect
         {
             oCubicPathOldParentArray[i] = oCubicPathArray[i]->GetParent();
 
-            paintGroup->TransferChild( oCubicPathArray[i] );
+            paintGroup->TransferChild( oCubicPathArray[i], paintGroup->GetLastChild() );
         }
 
         // first update to update paths' segments.
@@ -279,7 +279,7 @@ FOdysseyVectorScene::GroupSelectedObjects( std::vector<FOdysseyVectorObject*>& o
             oObjectArray.push_back( obj );
             oObjectOldParentArray.push_back( obj->GetParent() );
 
-            group->TransferChild( obj );
+            group->TransferChild( obj, group->GetLastChild() );
         }
 
         group->Invalidate();

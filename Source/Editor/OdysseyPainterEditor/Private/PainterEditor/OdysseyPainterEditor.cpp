@@ -474,6 +474,7 @@ FOdysseyPainterEditor::Ungroup( FOdysseyVectorEngine* iEngine, FOdysseyVectorSce
         if( selectedObject->HasBaseClass( FOdysseyVectorGroup::StaticClass() ) )
         {
             FOdysseyVectorGroup* group = static_cast<FOdysseyVectorGroup*>( selectedObject );
+            FOdysseyVectorObject* groupParent = group->GetParent();
             // we work on a copy of the list to be able to delete children while iterating
             std::list<FOdysseyVectorObject*> childrenList = group->GetChildrenList();
 
@@ -491,10 +492,10 @@ FOdysseyPainterEditor::Ungroup( FOdysseyVectorEngine* iEngine, FOdysseyVectorSce
             {
                 FOdysseyVectorObject* child = (*it);
 
-                group->GetParent()->TransferChild( child );
+                groupParent->TransferChild( child, groupParent->GetLastChild() );
             }
 
-            group->GetParent()->RemoveChild( group );
+            groupParent->RemoveChild( group );
 
             iScene->ClearSelection();
             iScene->UpdateMatrix();

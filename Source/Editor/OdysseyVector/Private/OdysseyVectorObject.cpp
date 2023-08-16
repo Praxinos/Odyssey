@@ -300,7 +300,7 @@ FOdysseyVectorObject::CopySettings( FOdysseyVectorObject& iDestinationObject )
 
     iDestinationObject.mBBox = mBBox;
 
-    iDestinationObject.SetName( mObjectParam.Name + FString("_Copy") );
+    iDestinationObject.SetName( mObjectParam.Name );
 }
 
 double
@@ -449,8 +449,32 @@ FOdysseyVectorObject::GetBBox( bool iWorld )
     return mBBox;
 }
 
+FOdysseyVectorObject*
+FOdysseyVectorObject::GetPreviousChild( FOdysseyVectorObject* iChild )
+{
+    FOdysseyVectorObject* previousItem = nullptr;
+
+    for( FOdysseyVectorObject* item : mChildrenList )
+    {
+        if( item == iChild )
+        {
+            return previousItem;
+        }
+
+        previousItem = item;
+    }
+
+    return previousItem;
+}
+
+FOdysseyVectorObject*
+FOdysseyVectorObject::GetLastChild()
+{
+    return mChildrenList.size() ? mChildrenList.back() : nullptr;
+}
+
 void
-FOdysseyVectorObject::TransferChild( FOdysseyVectorObject* iFosterChild )
+FOdysseyVectorObject::TransferChild( FOdysseyVectorObject* iFosterChild, FOdysseyVectorObject* iInsertAfter )
 {
     double translationX, translationY, rotation, scalingX, scalingY;
     BLMatrix2D localMatrix;
@@ -460,7 +484,7 @@ FOdysseyVectorObject::TransferChild( FOdysseyVectorObject* iFosterChild )
 
     iFosterChild->GetParent()->RemoveChild( iFosterChild );
     
-    AppendChild( iFosterChild );
+    AddChild( iFosterChild, iInsertAfter );
 
     iFosterChild->SetTransform( translationX, translationY, rotation, scalingX, scalingY );
 
@@ -669,41 +693,48 @@ FOdysseyVectorObject::Pick( FOdysseyVectorGroup* iSelectionSpace, const ::ULIS::
 void
 FOdysseyVectorObject::AppendChild( FOdysseyVectorObject* iChild )
 {
-    AddChild ( iChild, false );
+    FOdysseyVectorObject* lastItem = mChildrenList.size() ? mChildrenList.back() : nullptr;
+
+    AddChild( iChild, lastItem );
 }
 
 void
 FOdysseyVectorObject::PrependChild( FOdysseyVectorObject* iChild )
 {
-    AddChild ( iChild, true );
+    AddChild( iChild, nullptr );
 }
 
 void
-FOdysseyVectorObject::AddChild( FOdysseyVectorObject* iChild, bool iPrepend )
+FOdysseyVectorObject::AddChild( FOdysseyVectorObject* iChild, FOdysseyVectorObject* iInsertAfter )
 {
-/*
-    BLMatrix2D localMatrix = this->GetInverseWorldMatrix();
+    FOdysseyVectorObject* lastItem = GetLastChild();
 
-    localMatrix.transform( iChild->GetWorldMatrix() );
-
-    ExtractTransformations ( localMatrix
-                           , &iChild->TranslationX
-                           , &iChild->TranslationY
-                           , &iChild->Rotation
-                           , &iChild->ScalingX
-                           , &iChild->ScalingY );
-
-    iChild->UpdateMatrix();
-*/
     iChild->mParent = this;
 
-    if ( iPrepend == true )
+    if( iInsertAfter == nullptr )
     {
         mChildrenList.push_front( iChild );
     }
     else
+    if( iInsertAfter == lastItem )
     {
         mChildrenList.push_back( iChild );
+    }
+    else
+    {
+        std::list<FOdysseyVectorObject*>::iterator it;
+
+        for( it = mChildrenList.begin(); it != mChildrenList.end(); ++it )
+        {
+            FOdysseyVectorObject* item = (*it);
+
+            if( item == iInsertAfter )
+            {
+                mChildrenList.insert( ++it, iChild );
+
+                break;
+            }
+        }
     }
 
     iChild->Invalidate();

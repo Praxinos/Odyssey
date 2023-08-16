@@ -29,6 +29,10 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorSceneTreeView
 
         void Update( FOdysseyVectorScene* iScene );
 
+        void RenameSelectedItem();
+
+        TSharedPtr<FVectorSceneTreeViewItem> GetRootItem();
+
     protected:
         /**
          * @brief Called when the treeview asks for the children of a specific item
@@ -37,7 +41,7 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorSceneTreeView
          * @param oChildren 
          */
         void OnGetChildren(TSharedPtr<FVectorSceneTreeViewItem> iParent, TArray<TSharedPtr<FVectorSceneTreeViewItem>>& oChildren) const;
-
+        TSharedPtr<SWidget> OnContextMenuOpening();
         TSharedRef<ITableRow> OnGenerateRow( TSharedPtr<FVectorSceneTreeViewItem> iItem, const TSharedRef<STableViewBase>& iOwnerTable );
         void OnSelectionChanged( TSharedPtr<FVectorSceneTreeViewItem> iItem, ESelectInfo::Type SelectInfo );
         void OnExpansionChanged( TSharedPtr<FVectorSceneTreeViewItem> iItem, bool mExpanded );
@@ -55,6 +59,7 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorSceneTreeView
         FReply OnKeyDown( const FGeometry& iGeometry, const FKeyEvent& iKeyEvent );
 
     protected:
+        TSharedPtr<FVectorSceneTreeViewItem> mRootItem;
         TArray<TSharedPtr<FVectorSceneTreeViewItem>> mItemsSource;
         TSharedRef<FUICommandList> mCommandList;
 };

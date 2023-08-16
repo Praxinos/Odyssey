@@ -34,13 +34,16 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorSceneTreeViewRow
         ~SOdysseyPainterEditorVectorSceneTreeViewRow();
         SOdysseyPainterEditorVectorSceneTreeViewRow();
 
-        static const uint32 DROPZONE_NONE   = 0;
-        static const uint32 DROPZONE_ON     = 1;
-        static const uint32 DROPZONE_BEFORE = 2;
-        static const uint32 DROPZONE_AFTER  = 3;
+        static const uint32 DROPZONE_NONE  = 0;
+        static const uint32 DROPZONE_ONTO  = 1;
+        static const uint32 DROPZONE_ABOVE = 2;
+        static const uint32 DROPZONE_BELOW = 3;
 
         void Construct( const typename STableRow<TSharedPtr<FVectorSceneTreeViewItem>>::FArguments& InArgs
-                      , const TSharedRef< STableViewBase >& InOwnerTableView );
+                      , const TSharedRef< STableViewBase >& InOwnerTableView
+                      , const TSharedPtr<FVectorSceneTreeViewItem> iItem );
+
+        void Rename();
 
     protected:
         virtual FReply OnDragDetected ( const FGeometry& MyGeometry,
@@ -59,8 +62,11 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorSceneTreeViewRow
                              , int32 LayerId
                              , const FWidgetStyle& InWidgetStyle
                              , bool bParentEnabled ) const override;
+        void OnTextChanged( const FText& InText, ETextCommit::Type CommitInfo );
+        bool OnVerifyTextChanged( const FText& NewText, FText& OutErrorMessage );
 
     protected:
         uint32 mDropZone;
-
+        TSharedPtr<FVectorSceneTreeViewItem> mItem;
+        TSharedPtr<SInlineEditableTextBlock> mTextBlockWidget;
 };

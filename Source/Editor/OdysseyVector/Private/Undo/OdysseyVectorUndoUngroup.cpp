@@ -34,7 +34,7 @@ FOdysseyVectorUndoUngroup::Apply( UObject* iIgnored )
         FOdysseyVectorObject *child = (*it);
 
         // transfer the child to the group's parent object
-        mGroup->GetParent()->TransferChild( child );
+        mGroup->GetParent()->TransferChild( child, mGroup->GetLastChild() );
     }
 
     mGroup->GetParent()->RemoveChild( mGroup );
@@ -63,7 +63,7 @@ FOdysseyVectorUndoUngroup::Revert( UObject* iIgnored )
     {
         FOdysseyVectorObject *child = (*it);
 
-        mGroup->TransferChild( child );
+        mGroup->TransferChild( child, mGroup->GetLastChild() );
     }
 
     // update invalidated objects

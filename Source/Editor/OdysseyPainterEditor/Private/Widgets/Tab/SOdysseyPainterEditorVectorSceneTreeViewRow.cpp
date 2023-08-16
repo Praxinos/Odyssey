@@ -2,6 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Widgets/Tab/SOdysseyPainterEditorVectorSceneTreeViewRow.h"
+#include "Widgets/Text/SInlineEditableTextBlock.h"
 #include "OdysseyStyleSet.h"
 #include "OdysseyVector.h"
 
@@ -33,9 +34,41 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::SOdysseyPainterEditorVectorSceneTre
 
 void
 SOdysseyPainterEditorVectorSceneTreeViewRow::Construct( const typename STableRow<TSharedPtr<FVectorSceneTreeViewItem>>::FArguments& InArgs
-                                                      , const TSharedRef< STableViewBase >& InOwnerTableView )
+                                                      , const TSharedRef< STableViewBase >& InOwnerTableView
+                                                      , const TSharedPtr<FVectorSceneTreeViewItem> iItem )
 {
     STableRow<TSharedPtr<FVectorSceneTreeViewItem>>::Construct( InArgs, InOwnerTableView );
+
+    mItem = iItem;
+
+    mTextBlockWidget = SNew(SInlineEditableTextBlock)
+                       .Text( FText::FromString( mItem.Get()->GetVectorObject()->GetName() ) )
+                       .OnVerifyTextChanged( this, &SOdysseyPainterEditorVectorSceneTreeViewRow::OnVerifyTextChanged )
+                       .OnTextCommitted( this, &SOdysseyPainterEditorVectorSceneTreeViewRow::OnTextChanged );
+
+    SetContent( mTextBlockWidget.ToSharedRef() );
+}
+
+bool
+SOdysseyPainterEditorVectorSceneTreeViewRow::OnVerifyTextChanged( const FText& NewText
+                                                                , FText& OutErrorMessage )
+{
+    return true;
+}
+
+void
+SOdysseyPainterEditorVectorSceneTreeViewRow::Rename()
+{
+    mTextBlockWidget.Get()->EnterEditingMode();
+}
+
+void
+SOdysseyPainterEditorVectorSceneTreeViewRow::OnTextChanged( const FText& InText
+                                                          , ETextCommit::Type CommitInfo )
+{
+    mItem.Get()->GetVectorObject()->SetName( InText.ToString() );
+
+    mTextBlockWidget.Get()->SetText( FText::FromString( mItem.Get()->GetVectorObject()->GetName() ) );
 }
 
 FReply
@@ -44,27 +77,52 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnDrop( const FGeometry& iGeometry
 {
     TSharedPtr<FDragDropOperation> Operation = iDragDropEvent.GetOperation();
     //FVector2D position = iGeometry.GetAbsolutePosition();
-
-    const TSharedPtr<FVectorSceneTreeViewItem>* item = GetItemForThis( OwnerTablePtr.Pin().ToSharedRef() );
-    FOdysseyVectorObject* vectorObject = item->Get()->GetVectorObject();
-    FOdysseyVectorScene* vectorScene = vectorObject->GetScene();
-    std::list<FOdysseyVectorObject*>& selectedObjectList = vectorScene->GetSelectedObjectList();
+    FOdysseyVectorObject* itemObject = mItem.Get()->GetVectorObject();
+    FOdysseyVectorScene* itemScene = itemObject->GetScene();
+    std::list<FOdysseyVectorObject*>& selectedObjectList = itemScene->GetSelectedObjectList();
+    FOdysseyVectorObject* insertObject = itemObject;
 
     for( FOdysseyVectorObject* selectedObject : selectedObjectList )
     {
-        vectorObject->TransferChild( selectedObject );
-    }
+        switch( mDropZone )
+        {
+            case DROPZONE_ABOVE:
+            {
+                FOdysseyVectorObject* parentObject = itemObject->GetParent();
 
-    //UE_LOG(LogTemp, Warning, TEXT("Some warning message %s"), *(vectorObject->GetName()) );
+                parentObject->TransferChild( selectedObject, parentObject->GetPreviousChild( insertObject ) );
+
+                insertObject = selectedObject;
+            }
+            break;
+
+            case DROPZONE_ONTO:
+                itemObject->TransferChild( selectedObject, itemObject->GetLastChild() );
+            break;
+
+            case DROPZONE_BELOW:
+            {
+                FOdysseyVectorObject* parentObject = itemObject->GetParent();
+
+                parentObject->TransferChild( selectedObject, insertObject );
+
+                insertObject = selectedObject;
+            }
+            break;
+
+            default :
+            break;
+        }
+    }
 
     mDropZone = DROPZONE_NONE;
 
-    vectorScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+    itemScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
-    vectorScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                                    | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
-                                    | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED
-                                    | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
+    itemScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                                  | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
+                                  | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED
+                                  | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
 
     return FReply::Handled();
 }
@@ -78,15 +136,8 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnPaint( const FPaintArgs& Args
                                                     , const FWidgetStyle& InWidgetStyle
                                                     , bool bParentEnabled ) const
 {
-    //const FSlateBrush* DropIndicatorBrush = &InWidgetStyle.DropIndicator_Above;
-
-    FSlateBrush myBrush = FSlateImageBrush(
-                TEXT(""),
-                FVector2D(1,1),
-                FSlateColor(FColor::Red),
-                ESlateBrushTileType::NoTile,
-                ESlateBrushImageType::NoImage
-    );
+    const FTableRowStyle& style = FOdysseyStyle::GetWidgetStyle<FTableRowStyle>("OdysseyLayerStack.AlternatedRows");
+    const FSlateBrush* DropIndicatorBrush = nullptr;
 
     int32 rowLayerId = STableRow<TSharedPtr<FVectorSceneTreeViewItem>>::OnPaint( Args
                                                                                , AllottedGeometry
@@ -97,14 +148,32 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnPaint( const FPaintArgs& Args
                                                                                , bParentEnabled );
     if( mDropZone )
     {
+        switch( mDropZone )
+        {
+            case DROPZONE_ABOVE :
+                DropIndicatorBrush = &style.DropIndicator_Above;
+            break;
+
+            case DROPZONE_ONTO :
+                DropIndicatorBrush = &style.DropIndicator_Onto;
+            break;
+
+            case DROPZONE_BELOW :
+                DropIndicatorBrush = &style.DropIndicator_Below;
+            break;
+
+            default :
+            break;
+        }
+
         FSlateDrawElement::MakeBox
         (
-            OutDrawElements,
-            rowLayerId++,
-            AllottedGeometry.ToPaintGeometry(),
-            &myBrush,
-            ESlateDrawEffect::None,
-            myBrush.GetTint(InWidgetStyle) * InWidgetStyle.GetColorAndOpacityTint()
+            OutDrawElements
+          , rowLayerId++
+          , AllottedGeometry.ToPaintGeometry()
+          , DropIndicatorBrush //&myBrush
+          , ESlateDrawEffect::None
+          , DropIndicatorBrush->GetTint(InWidgetStyle) * InWidgetStyle.GetColorAndOpacityTint()
         );
     }
 
@@ -115,15 +184,15 @@ void
 SOdysseyPainterEditorVectorSceneTreeViewRow::OnDragEnter( const FGeometry& MyGeometry
                                                         , const FDragDropEvent& DragDropEvent )
 {
-    const TSharedPtr<FVectorSceneTreeViewItem>* item = GetItemForThis( OwnerTablePtr.Pin().ToSharedRef() );
+    //const TSharedPtr<FVectorSceneTreeViewItem>* item = GetItemForThis( OwnerTablePtr.Pin().ToSharedRef() );
 
-    mDropZone = DROPZONE_ON;
+    mDropZone = DROPZONE_ONTO;
 }
 
 void
 SOdysseyPainterEditorVectorSceneTreeViewRow::OnDragLeave( const FDragDropEvent& DragDropEvent )
 {
-    const TSharedPtr<FVectorSceneTreeViewItem>* item = GetItemForThis( OwnerTablePtr.Pin().ToSharedRef() );
+    //const TSharedPtr<FVectorSceneTreeViewItem>* item = GetItemForThis( OwnerTablePtr.Pin().ToSharedRef() );
 
     mDropZone = DROPZONE_NONE;
 }
@@ -134,6 +203,22 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnDragOver( const FGeometry& iGeome
 {
     TSharedPtr<FDragDropOperation> Operation = iDragDropEvent.GetOperation();
     //FVector2D position = iGeometry.GetAbsolutePosition();
+    const FVector2D localPointerPos = iGeometry.AbsoluteToLocal( iDragDropEvent.GetScreenSpacePosition() );
+    const FVector2D& widgetSize = iGeometry.GetLocalSize();
+
+    if( localPointerPos.Y < 5 )
+    {
+        mDropZone = DROPZONE_ABOVE;
+    }
+    else
+    if( localPointerPos.Y > widgetSize.Y - 5 )
+    {
+        mDropZone = DROPZONE_BELOW;
+    }
+    else
+    {
+        mDropZone = DROPZONE_ONTO;
+    }
 
     return FReply::Handled();
 }

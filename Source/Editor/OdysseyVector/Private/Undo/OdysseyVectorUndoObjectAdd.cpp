@@ -36,6 +36,8 @@ FOdysseyVectorUndoObjectAdd::FOdysseyVectorUndoObjectAdd( FOdysseyVectorScene* i
     }
 }
 
+
+
 void
 FOdysseyVectorUndoObjectAdd::Apply( UObject* iIgnored )
 {
@@ -48,7 +50,7 @@ FOdysseyVectorUndoObjectAdd::Apply( UObject* iIgnored )
 
         if( currentParent )
         {
-            mFormerParentArray[i]->TransferChild( mObjectArray[i] );
+            mFormerParentArray[i]->TransferChild( mObjectArray[i], mFormerParentArray[i]->GetLastChild() );
         }
         else
         {
@@ -81,7 +83,7 @@ FOdysseyVectorUndoObjectAdd::Revert( UObject* iIgnored )
 
         if( mFormerParentArray[i] )
         {
-            mFormerParentArray[i]->TransferChild( mObjectArray[i] );
+            mFormerParentArray[i]->TransferChild( mObjectArray[i], mFormerParentArray[i]->GetLastChild() );
         }
         else
         {

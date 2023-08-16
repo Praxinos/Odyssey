@@ -60,8 +60,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
          */
         virtual ~FOdysseyVectorGroupPaint();
 
-        virtual void TransferChild( FOdysseyVectorObject* iFosterChild );
-
         /**
          * @brief constructor
          */
@@ -140,7 +138,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
                               , ePointSelectionFlags iPointSelectionFlags  );
         bool GetBBoxFromSelectedVertices( ::ULIS::FRectD& oBBox, bool iWorld );
         void PickBucket( std::vector<FOdysseyVectorBucket*>& oPickedBucketArray );
-        virtual void AddChild( FOdysseyVectorObject* iChild, bool iPrepend ) override;
+        virtual void AddChild( FOdysseyVectorObject* iChild, FOdysseyVectorObject* iInsertAfter ) override;
         virtual void RemoveChild( FOdysseyVectorObject* iChild ) override;
         FOdysseyVectorCycle* PickCycle( double iWorldX, double iWorldY );
         FOdysseyVectorBucket* PickBucket( double iWorldX, double iWorldY );
