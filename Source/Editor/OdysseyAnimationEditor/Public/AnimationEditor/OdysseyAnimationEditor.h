@@ -36,12 +36,6 @@ public:
     void ProvideRasterBlock();
     bool IsRasterBlockReadOnly() const;
     FOdysseyVectorEngine* GetCurrentVectorEngine() const;
-    
-    UOdysseyPainterEditorTool* FindDefaultToolForCurrentLayer();
-    virtual void SelectDefaultTool() override;
-    virtual void OnSelectedToolChanged() override;
-    virtual void OnSourceInactivated() override;
-    virtual void OnSourceActivated() override;
 
 public:
     // Overrides
@@ -55,8 +49,6 @@ private:
     void OnImageRenderingCompositionCommited(const FGuid& iFrameId);
     void OnCurrentLayerChanged(class UOdysseyLayerStack* iLayerStack);
     void OnLayerStackElementMediaChanged();
-    
-    void UpdateToolContext();
 
 private:
 	TSharedPtr<FOdysseyAnimationEditorGUI> mGUI;
@@ -65,5 +57,4 @@ private:
 
     float mPlaybackFramesPerSecond;
     TArray<FGuid> mImageRenderingComposition;
-    TMap<UClass*, UOdysseyPainterEditorTool*> mCurrentToolPerLayerClass;
 };

@@ -56,22 +56,17 @@ protected:
 
 public:
     // Getters
-    
-    FSimpleMulticastDelegate& OnSelectedToolChangedDelegate();
+    FSimpleMulticastDelegate& OnSourceChanged();
+    FSimpleMulticastDelegate& OnSelectedToolChanged();
     
     TSharedPtr<FOdysseyPainterEditorSource>              GetSource() const;
-    virtual void OnSourceInactivated();
-    virtual void OnSourceActivated();
-
-    virtual void OnSelectedToolChanged();
-
     virtual FOdysseyPainterEditorGUI*                   GetGUI() = 0;
 
     virtual FOdysseyHUDSystem*                              HUDSystem() const;
 	virtual const FOdysseyBrushColor&                       PaintColor() const;
     virtual UOdysseyPainterEditorTool*                      GetSelectedTool() const;
     virtual FOdysseyMediaProvider                           GetCurrentMediaProvider();
-    virtual UOdysseyLayerStack*                      LayerStack() const;
+    virtual UOdysseyLayerStack*                             LayerStack() const;
     
     virtual UOdysseyPainterEditorRasterDrawingTool*                  GetRasterDrawingTool() const;
     virtual UOdysseyPainterEditorVectorPrimitiveDrawingTool*         GetVectorPrimitiveDrawingTool() const;
@@ -115,7 +110,7 @@ public:
     void  SetSource(TSharedPtr<FOdysseyPainterEditorSource> iSource);
     void  PaintColor(const FOdysseyBrushColor& iColor, bool iIsCommit);
     void  SetSelectedTool( UOdysseyPainterEditorTool* iSelectedTool );
-    virtual void SelectDefaultTool() = 0;
+    void  RefreshCurrentTool();
 
 public:
     // Interface
@@ -126,6 +121,7 @@ public:
 protected:
     //Callbacks
     virtual void OnApplyOverrides(const TMap<FName, UObject*>& iOverrides);
+    void OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStack);
     
     // FTickableEditorObject implementation
 	virtual void Tick(float DeltaTime) override;
@@ -133,6 +129,9 @@ protected:
 protected:
     // FGCObject implementation
     virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
+
+private:
+    UOdysseyPainterEditorTool* FindDefaultToolForCurrentLayer();
 
 protected:
     //Tools
@@ -146,7 +145,7 @@ protected:
     TArray<FOdysseyBrushContext*>   mBrushContexts;
     FOdysseyBrushColor              mPaintColor;
     FSimpleMulticastDelegate        mOnSelectedToolChanged;
-    //TSharedPtr<FOdysseyPainterEditorToolContext> mToolContext;
+    FSimpleMulticastDelegate        mOnSourceChanged;
     
     UOdysseyPainterEditorRasterDrawingTool* mRasterDrawingTool;
     UOdysseyPainterEditorVectorPrimitiveDrawingTool* mVectorPrimitiveDrawingTool;
@@ -165,4 +164,6 @@ protected:
     UOdysseyPainterEditorColorPickerTool* mColorPickerTool;
     UOdysseyPainterEditorVectorGridTool* mVectorGridTool;
     UOdysseyPainterEditorVectorTransformTool* mVectorTransformTool;
+
+    TMap<UClass*, UOdysseyPainterEditorTool*> mCurrentToolPerLayerClass;
 };

@@ -15,9 +15,8 @@ public:
     FOdysseyPainterEditorExtension( FOdysseyPainterEditor* iEditor );
 
 public:
-    virtual void Install();
-    virtual void Uninstall();
-    bool IsInstalled() const;
+    virtual void Initialize() = 0;
+    virtual void Finalize() = 0;
 
     FOdysseyPainterEditor* GetEditor() const;
     
@@ -26,6 +25,5 @@ public:
     virtual FString GetReferencerName() const;
 
 public:
-    bool mIsInstalled;
     FOdysseyPainterEditor* mEditor;
 };

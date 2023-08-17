@@ -23,7 +23,7 @@ class FOdysseyPainterEditor;
 //----------------------------------------------------------- Construction / Destruction
 FOdysseyPainterEditorTopTab::~FOdysseyPainterEditorTopTab()
 {
-    mEditor->OnSelectedToolChangedDelegate().RemoveAll(this);
+    mEditor->OnSelectedToolChanged().RemoveAll(this);
 }
 
 FOdysseyPainterEditorTopTab::FOdysseyPainterEditorTopTab(FOdysseyPainterEditor* iEditor)
@@ -32,7 +32,7 @@ FOdysseyPainterEditorTopTab::FOdysseyPainterEditorTopTab(FOdysseyPainterEditor* 
                             FSlateIcon( "OdysseyStyle", "PainterEditor.Spark16" ))
     , mEditor( iEditor )
 {
-    mEditor->OnSelectedToolChangedDelegate().AddRaw(this, &FOdysseyPainterEditorTopTab::OnSelectedToolChanged);
+    mEditor->OnSelectedToolChanged().AddRaw(this, &FOdysseyPainterEditorTopTab::OnSelectedToolChanged);
 }
 
 //--------------------------------------------------------------------------------------

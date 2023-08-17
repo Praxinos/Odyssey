@@ -32,7 +32,7 @@ FOdysseyTextureEditor::FOdysseyTextureEditor() :
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Getters
 
-void
+/* void
 FOdysseyTextureEditor::OnSourceInactivated()
 {
 	FOdysseyPainterEditor::OnSourceInactivated();
@@ -48,62 +48,7 @@ FOdysseyTextureEditor::OnSourceActivated()
 		return;
 	
 	UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw(this, &FOdysseyTextureEditor::OnCurrentLayerChanged);
-}
-
-void
-FOdysseyTextureEditor::OnSelectedToolChanged()
-{
-	if (!LayerStack())
-		return;
-
-	UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(LayerStack()->CurrentLayer.Get());
-	if (!currentLayer)
-		return;
-
-	UClass* layerClass = currentLayer->GetClass();
-	if (!mCurrentToolPerLayerClass.Contains(layerClass))
-		mCurrentToolPerLayerClass.Add(layerClass, nullptr);
-
-	mCurrentToolPerLayerClass[layerClass] = mSelectedTool;
-}
-
-UOdysseyPainterEditorTool*
-FOdysseyTextureEditor::FindDefaultToolForCurrentLayer()
-{
-	for (UOdysseyPainterEditorTool* tool : mTools)
-	{
-		if ( !tool->IsActivable() )
-			continue;
-
-		return tool;
-	}
-	return nullptr;
-}
-
-void
-FOdysseyTextureEditor::SelectDefaultTool()
-{
-	if (!LayerStack())
-		return;
-
-	UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(LayerStack()->CurrentLayer.Get());
-	if (!currentLayer)
-	{
-		SetSelectedTool(nullptr);
-		return;
-	}
-
-	UOdysseyPainterEditorTool* tool = nullptr;
-
-	UClass* layerClass = currentLayer->GetClass();
-	if (mCurrentToolPerLayerClass.Contains(layerClass))
-		tool = mCurrentToolPerLayerClass[layerClass];
-	
-	if (!tool || !tool->IsActivable())
-		tool = FindDefaultToolForCurrentLayer();
-
-	SetSelectedTool(tool);
-}
+} */
 
 UTexture2D*
 FOdysseyTextureEditor::Texture() const
@@ -135,7 +80,6 @@ FOdysseyTextureEditor::RegisterTabSpawners(const TSharedRef<class FTabManager>& 
 	GetGUI()->RegisterTabSpawners(iTabManager, workspaceMenuCategoryRef);
 	return workspaceMenuCategory;
 }
-
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------- Events
 
@@ -149,9 +93,6 @@ FOdysseyTextureEditor::OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStack)
     // This will be removed when we'll have a dedicated HUD layer.
     UOdysseyTextureLayer* layerRoot = static_cast<UOdysseyTextureLayer*>(iLayerStack->LayerRoot);
 	layerRoot->RenderImageChanged(false);
-
-	//TODO: Maybe this should be done differently later, but we don't have time for that now
-	SelectDefaultTool(); //Refresh the current tool when we change layer
 }
 
 #undef LOCTEXT_NAMESPACE

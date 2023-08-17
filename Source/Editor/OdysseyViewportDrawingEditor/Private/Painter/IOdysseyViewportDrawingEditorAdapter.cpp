@@ -18,7 +18,7 @@ IOdysseyViewportDrawingEditorAdapter::~IOdysseyViewportDrawingEditorAdapter()
         UnbindStampBrushInstance(mDrawingTool->GetBrushInstance());
     }
 
-    mEditor->OnSelectedToolChangedDelegate().RemoveAll(this);
+    mEditor->OnSelectedToolChanged().RemoveAll(this);
     OnToolChange();
     mEditor->TargetToPaintWillChangeDelegate().RemoveAll(this);
     mEditor->TargetToPaintChangedDelegate().RemoveAll(this);
@@ -46,7 +46,7 @@ IOdysseyViewportDrawingEditorAdapter::IOdysseyViewportDrawingEditorAdapter(TShar
 
 void IOdysseyViewportDrawingEditorAdapter::PrepareAdapterForPainting()
 {
-    mEditor->OnSelectedToolChangedDelegate().AddRaw(this, &IOdysseyViewportDrawingEditorAdapter::OnToolChange);
+    mEditor->OnSelectedToolChanged().AddRaw(this, &IOdysseyViewportDrawingEditorAdapter::OnToolChange);
     if (mEditor->GetSelectedTool())
     {
         mDrawingTool = Cast<UOdysseyPainterEditorRasterDrawingTool>(mEditor->GetSelectedTool());

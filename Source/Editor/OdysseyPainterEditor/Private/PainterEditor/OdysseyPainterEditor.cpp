@@ -11,6 +11,8 @@
 #include "ULISLoaderModule.h"
 #include "OdysseyPainterEditorGUI.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
+#include "OdysseyLayer.h"
+#include "OdysseyLayerStack.h"
 
 #include "OdysseyVector.h"
 #include "Undo/OdysseyVectorUndoGroup.h"
@@ -50,7 +52,7 @@
 
 FOdysseyPainterEditor::~FOdysseyPainterEditor()
 {
-    //mToolContext->Unset();
+    UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll(this);
 	delete mHUDSystem;
 }
 
@@ -61,7 +63,6 @@ FOdysseyPainterEditor::FOdysseyPainterEditor()
     , mHUDSystem(new FOdysseyHUDSystem())
 	, mBrushContexts()
 	, mPaintColor(::ULIS::FColor::Black)
-    //, mToolContext()
 	, mRasterDrawingTool(nullptr)
 	, mVectorPrimitiveDrawingTool(nullptr)
 	, mVectorPathDrawingTool(nullptr)
@@ -80,7 +81,7 @@ FOdysseyPainterEditor::FOdysseyPainterEditor()
 	, mVectorGridTool(nullptr)
 	, mVectorTransformTool(nullptr)
 {
-    //mToolContext = MakeShared<FOdysseyPainterEditorToolContext>(this);
+    UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw(this, &FOdysseyPainterEditor::OnCurrentLayerChanged);
 	mBrushContexts.Add(new FOdysseyPainterEditorBrushContext(this));
 }
 
@@ -226,44 +227,22 @@ FOdysseyPainterEditor::OnCloseRequested()
     return FOdysseyEditor::OnCloseRequested();
 }
 
-void
+FSimpleMulticastDelegate&
 FOdysseyPainterEditor::OnSelectedToolChanged()
 {
+    return mOnSelectedToolChanged;
 }
 
 FSimpleMulticastDelegate&
-FOdysseyPainterEditor::OnSelectedToolChangedDelegate()
+FOdysseyPainterEditor::OnSourceChanged()
 {
-    return mOnSelectedToolChanged;
+    return mOnSourceChanged;
 }
 
 TSharedPtr<FOdysseyPainterEditorSource>
 FOdysseyPainterEditor::GetSource() const
 {
     return mSource;
-}
-
-void
-FOdysseyPainterEditor::OnSourceInactivated()
-{
-	if ( mSelectedTool )
-		//just reload the tool
-		mSelectedTool->Inactivate();
-}
-
-void
-FOdysseyPainterEditor::OnSourceActivated()
-{
-    if ( mSelectedTool && mSelectedTool->IsActivable() )
-	{
-		//just reload the tool
-		mSelectedTool->Activate();
-	}
-	else
-	{
-		//select the best tool
-		SelectDefaultTool();
-	}
 }
 
 //--------------------------------------------------------------------------------------
@@ -420,15 +399,28 @@ FOdysseyPainterEditor::SetSource(TSharedPtr<FOdysseyPainterEditorSource> iSource
     {
         mSource->Inactivate();
         mSource = nullptr;
-        OnSourceInactivated();
+		
+        mSelectedTool->Inactivate();
     }
 
     if (iSource)
     {
         mSource = iSource;
         mSource->Activate();
-        OnSourceActivated();
+        
+        if ( mSelectedTool && mSelectedTool->IsActivable() )
+        {
+            //just reload the tool
+            mSelectedTool->Activate();
+        }
+        else
+        {
+            //select the best tool
+            RefreshCurrentTool();
+        }
     }
+
+    OnSourceChanged().Broadcast();
 }
 
 void
@@ -451,9 +443,63 @@ FOdysseyPainterEditor::SetSelectedTool(UOdysseyPainterEditorTool* iTool)
 
 	if (mSelectedTool)
 		mSelectedTool->Activate();
-    
-    OnSelectedToolChanged();
+
+
+    UOdysseyLayer* currentLayer = LayerStack()->CurrentLayer.Get();
+	if (currentLayer)
+    {
+        UClass* layerClass = currentLayer->GetClass();
+        if (!mCurrentToolPerLayerClass.Contains(layerClass))
+            mCurrentToolPerLayerClass.Add(layerClass, nullptr);
+
+        mCurrentToolPerLayerClass[layerClass] = mSelectedTool;
+    }
+
     mOnSelectedToolChanged.Broadcast();
+}
+
+UOdysseyPainterEditorTool*
+FOdysseyPainterEditor::FindDefaultToolForCurrentLayer()
+{
+	for (UOdysseyPainterEditorTool* tool : mTools)
+	{
+		if ( !tool->IsActivable() )
+			continue;
+
+		return tool;
+	}
+	return nullptr;
+}
+
+void
+FOdysseyPainterEditor::RefreshCurrentTool()
+{
+	UOdysseyLayer* currentLayer = LayerStack()->CurrentLayer.Get();
+	if (!currentLayer)
+	{
+		SetSelectedTool(nullptr);
+		return;
+	}
+
+	UOdysseyPainterEditorTool* tool = nullptr;
+
+	UClass* layerClass = currentLayer->GetClass();
+	if (mCurrentToolPerLayerClass.Contains(layerClass))
+		tool = mCurrentToolPerLayerClass[layerClass];
+	
+	if (!tool || !tool->IsActivable())
+		tool = FindDefaultToolForCurrentLayer();
+
+	SetSelectedTool(tool);
+}
+
+void
+FOdysseyPainterEditor::OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStack)
+{
+	if ( iLayerStack != LayerStack() )
+		return;
+
+	RefreshCurrentTool(); //Refresh the current tool when we change layer
 }
 
 void

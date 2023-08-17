@@ -43,39 +43,6 @@ FOdysseyAnimationEditor::FOdysseyAnimationEditor() :
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------------------- Initialization
 
-void
-FOdysseyAnimationEditor::OnSourceInactivated()
-{
-	if (!mAnimation)
-		return;
-
-	//TODO: CurrentFrame should not be in the animation itself, it's an editor specific data
-	mAnimation->OnCurrentFrameChanged().RemoveAll(this);
-	IOdysseyAnimationImageRenderingAbility::OnCompositionCommited().RemoveAll(this);
-	UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll(this);
-	IOdysseyAnimationMediaAbility::OnChanged().RemoveAll(this);
-
-	mAnimation = nullptr;
-}
-
-void
-FOdysseyAnimationEditor::OnSourceActivated()
-{
-	mAnimation = Animation();
-	if (!mAnimation)
-		return;
-
-	TSharedPtr<IOdysseyAnimationImageRenderingAbility> imageRenderAbility = mAnimation->GetAbility<IOdysseyAnimationImageRenderingAbility>();
-	mImageRenderingComposition = imageRenderAbility->GetComposition(mAnimation->CurrentFrame, IOdysseyImageRenderer::eRenderType::Render);
-	mPlaybackFramesPerSecond = mAnimation->GetFramesPerSecond();
-
-	//Set Media player and Animation callbacks
-	mAnimation->OnCurrentFrameChanged().AddRaw(this, &FOdysseyAnimationEditor::OnCurrentFrameChanged);
-	IOdysseyAnimationImageRenderingAbility::OnCompositionCommited().AddRaw(this, &FOdysseyAnimationEditor::OnImageRenderingCompositionCommited);
-	IOdysseyAnimationMediaAbility::OnChanged().AddRaw(this, &FOdysseyAnimationEditor::OnLayerStackElementMediaChanged);
-	UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw(this, &FOdysseyAnimationEditor::OnCurrentLayerChanged);
-}
-
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Getters
 
@@ -124,55 +91,6 @@ FOdysseyAnimationEditor::PlaybackFramesPerSecond() const
 	return mPlaybackFramesPerSecond;
 }
 
-void
-FOdysseyAnimationEditor::OnSelectedToolChanged()
-{
-	UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(LayerStack()->CurrentLayer.Get());
-	if (!currentLayer)
-		return;
-
-	UClass* layerClass = currentLayer->GetClass();
-	if (!mCurrentToolPerLayerClass.Contains(layerClass))
-		mCurrentToolPerLayerClass.Add(layerClass, nullptr);
-
-	mCurrentToolPerLayerClass[layerClass] = mSelectedTool;
-}
-
-UOdysseyPainterEditorTool*
-FOdysseyAnimationEditor::FindDefaultToolForCurrentLayer()
-{
-	for (UOdysseyPainterEditorTool* tool : mTools)
-	{
-		if ( !tool->IsActivable() )
-			continue;
-
-		return tool;
-	}
-	return nullptr;
-}
-
-void
-FOdysseyAnimationEditor::SelectDefaultTool()
-{
-	UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(LayerStack()->CurrentLayer.Get());
-	if (!currentLayer)
-	{
-		SetSelectedTool(nullptr);
-		return;
-	}
-
-	UOdysseyPainterEditorTool* tool = nullptr;
-
-	UClass* layerClass = currentLayer->GetClass();
-	if (mCurrentToolPerLayerClass.Contains(layerClass))
-		tool = mCurrentToolPerLayerClass[layerClass];
-	
-	if (!tool || !tool->IsActivable())
-		tool = FindDefaultToolForCurrentLayer();
-
-	SetSelectedTool(tool);
-}
-
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------- Overrides
 
@@ -202,7 +120,7 @@ FOdysseyAnimationEditor::OnLayerStackElementMediaChanged()
 	if (!mAnimation)
 		return;
 
-	SelectDefaultTool(); //Refresh the current tool
+	RefreshCurrentTool(); //Refresh the current tool
 }
 
 void
@@ -250,8 +168,8 @@ FOdysseyAnimationEditor::OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStack)
 {
 	if ( iLayerStack != LayerStack() )
 		return;
+
 	//TODO: Maybe this should be done differently later, but we don't have time for that now
-	SelectDefaultTool(); //Refresh the current tool when we change layer
     Timeline()->SetSelectedFrames(FInt32Range()); //Clear Selected frames when changing layer
 }
 

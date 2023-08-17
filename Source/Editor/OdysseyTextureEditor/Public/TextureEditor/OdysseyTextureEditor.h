@@ -22,15 +22,12 @@ public:
     FOdysseyTextureEditor(); //Non Initialized constructor
 
 public:
-    UOdysseyPainterEditorTool* FindDefaultToolForCurrentLayer();
-    virtual void SelectDefaultTool() override;
-    virtual void OnSelectedToolChanged() override;
     UTexture2D* Texture() const;
 
 public:
     // Overrides
-    virtual void OnSourceInactivated() override;
-    virtual void OnSourceActivated() override;
+    //virtual void OnSourceInactivated() override;
+    //virtual void OnSourceActivated() override;
 
 public:
     // Overrides
@@ -43,5 +40,4 @@ public:
 
 private:
 	TSharedPtr<FOdysseyTextureEditorGUI> mGUI;
-    TMap<UClass*, UOdysseyPainterEditorTool*> mCurrentToolPerLayerClass;
 };

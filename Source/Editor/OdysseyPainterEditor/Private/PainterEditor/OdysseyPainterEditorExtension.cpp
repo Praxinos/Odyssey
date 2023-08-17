@@ -9,29 +9,11 @@ FOdysseyPainterEditorExtension::~FOdysseyPainterEditorExtension()
 }
 
 FOdysseyPainterEditorExtension::FOdysseyPainterEditorExtension(FOdysseyPainterEditor* iEditor)
-    : mIsInstalled(false)
-    , mEditor(iEditor)
+    : mEditor(iEditor)
 {
 
 }
 
-void
-FOdysseyPainterEditorExtension::Install()
-{
-    mIsInstalled = true;
-}
-
-void
-FOdysseyPainterEditorExtension::Uninstall()
-{
-    mIsInstalled = false;
-}
-
-bool
-FOdysseyPainterEditorExtension::IsInstalled() const
-{
-    return mIsInstalled;
-}
 
 FOdysseyPainterEditor*
 FOdysseyPainterEditorExtension::GetEditor() const
