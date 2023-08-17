@@ -3,7 +3,6 @@
 
 #include "OdysseyViewportDrawingEditorGUI.h"
 
-#include "OdysseyViewportDrawingEditorMasterTab.h"
 #include "Widgets/Layout/SExpandableArea.h"
 #include "Widgets/Layout/SScrollBox.h"
 
@@ -27,13 +26,6 @@ FOdysseyViewportDrawingEditorGUI::FOdysseyViewportDrawingEditorGUI(FOdysseyViewp
 //----------------------------------------------------------------------- Initialization
 
 void
-FOdysseyViewportDrawingEditorGUI::CreateTabs()
-{
-    mMasterTab = MakeShareable(new FOdysseyViewportDrawingEditorMasterTab(mExtension));
-    mMasterTab->Init();
-}
-
-void
 FOdysseyViewportDrawingEditorGUI::BindShortcuts(FBaseToolkit* iToolkit)
 {
     iToolkit->GetToolkitCommands()->Append(mCommandList.ToSharedRef());
@@ -45,6 +37,8 @@ FOdysseyViewportDrawingEditorGUI::BindShortcuts(FBaseToolkit* iToolkit)
 TSharedPtr<SWidget>
 FOdysseyViewportDrawingEditorGUI::CreateWidget()
 {
+    return SNullWidget::NullWidget;
+    /*
     FMargin StandardPadding(6.f, 3.f);
 
     return SNew(SScrollBox)
@@ -57,7 +51,7 @@ FOdysseyViewportDrawingEditorGUI::CreateWidget()
 	        [
                 mMasterTab->Widget()->AsShared()
             ]
-        ];
+        ]; */
 }
 
 #undef LOCTEXT_NAMESPACE

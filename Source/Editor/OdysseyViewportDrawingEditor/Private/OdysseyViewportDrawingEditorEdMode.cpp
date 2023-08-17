@@ -146,20 +146,13 @@ void FOdysseyViewportDrawingEditorEdMode::Enter()
 		"OdysseyViewportDrawingEditor_Layout"
 	);
 
-    mEditor->SetTabsSaveFilename("IliadEdModeLayout.save");
-
-	TSharedRef<FOdysseyTextureEditorExtension> textureExtension = MakeShared<FOdysseyTextureEditorExtension>(mEditor.Get());
-    TSharedRef<FOdysseyViewportDrawingEditorExtension> viewportDrawingExtension = MakeShared<FOdysseyViewportDrawingEditorExtension>(mEditor.Get()/*, flipbookExtension*/);
-	mEditor->AddExtension(textureExtension);
-    mEditor->AddExtension(viewportDrawingExtension);
-
-    mViewportDrawingEditorPainter = new FOdysseyViewportDrawingEditorPainter(&viewportDrawingExtension.Get());
-
     if (UsesToolkits() && !Toolkit.IsValid())
     {
-        TSharedPtr<FOdysseyViewportDrawingEditorToolkit> viewportToolkit = MakeShared<FOdysseyViewportDrawingEditorToolkit>();
+        TSharedPtr<FOdysseyViewportDrawingEditorToolkit> viewportToolkit = MakeShared<FOdysseyViewportDrawingEditorToolkit>(mEditor.ToSharedRef(), this);
         Toolkit = viewportToolkit;
-        viewportToolkit->Initialize(mEditor, this, Owner->GetToolkitHost());
+        viewportToolkit->Initialize(this, Owner->GetToolkitHost());
+
+        mViewportDrawingEditorPainter = new FOdysseyViewportDrawingEditorPainter(&viewportToolkit->GetViewportDrawingExtension().Get());
         
         TSharedPtr< ILevelEditor > levelEditor = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor").GetFirstLevelEditor();
         levelEditor->AppendCommands( Toolkit->GetToolkitCommands() );

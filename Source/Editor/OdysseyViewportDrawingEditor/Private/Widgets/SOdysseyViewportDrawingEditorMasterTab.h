@@ -3,27 +3,23 @@
 
 #pragma once
 
-#include "OdysseyEditorTab.h"
-#include "Widgets/SBoxPanel.h"
-#include <ULIS>
+#include "CoreMinimal.h"
 
 class FOdysseyViewportDrawingEditorExtension;
 
-class ODYSSEYVIEWPORTDRAWINGEDITOR_API FOdysseyViewportDrawingEditorMasterTab :
-	public FOdysseyEditorTab
+class ODYSSEYVIEWPORTDRAWINGEDITOR_API SOdysseyViewportDrawingEditorMasterTab
+	: public SCompoundWidget
 {
 public:
-    static const FName& StaticId();
+	SLATE_BEGIN_ARGS(SOdysseyViewportDrawingEditorMasterTab)
+		{}
+	SLATE_END_ARGS()
 
-public:
-    // Construction / Destruction
-    virtual ~FOdysseyViewportDrawingEditorMasterTab();
-    FOdysseyViewportDrawingEditorMasterTab(FOdysseyViewportDrawingEditorExtension* iExtension);
+	// Construct the widget
+	void Construct(const FArguments& InArgs, FOdysseyViewportDrawingEditorExtension* iExtension);
 
 protected:
     // FOdysseyEditorTab interface
-    virtual const FName& GetId() const override;
-    virtual TSharedPtr<SWidget> CreateWidget() override;
     TSharedRef<SWidget> OnGetMenuContent();
     void OnMenuClosed( bool iOpen );
     FText CreateTextMeshSelector() const;

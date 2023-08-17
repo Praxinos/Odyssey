@@ -28,19 +28,18 @@ FOdysseyModeToolkit::~FOdysseyModeToolkit()
     mEditor->UnregisterTabSpawners(LevelEditorModule.GetLevelEditorTabManager()->AsShared());
 }
 
-FOdysseyModeToolkit::FOdysseyModeToolkit()
+FOdysseyModeToolkit::FOdysseyModeToolkit(TSharedRef<FOdysseyEditor> iEditor)
+    : mEditor(iEditor)
 {
 }
 
 
 void
 FOdysseyModeToolkit::Initialize(
-    TSharedPtr<FOdysseyEditor> iEditor,
     FEdMode* iEditorMode,
     const TSharedPtr<IToolkitHost>& iInitToolkitHost
 )
 {
-    mEditor = iEditor;
     mEditor->Initialize();
 
     TArray<UObject*> objects = mEditor->GetAdditionalEditedObjects();

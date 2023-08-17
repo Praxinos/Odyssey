@@ -31,6 +31,7 @@ public:
 public:
     // Construction / Destruction
     virtual ~FOdysseyViewportDrawingEditorExtension();
+    FOdysseyViewportDrawingEditorExtension();
     FOdysseyViewportDrawingEditorExtension( FOdysseyPainterEditor* iEditor );
 
 public:

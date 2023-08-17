@@ -16,6 +16,15 @@ FOdysseyViewportDrawingEditorExtension::~FOdysseyViewportDrawingEditorExtension(
 	int a = 0;
 }
 
+FOdysseyViewportDrawingEditorExtension::FOdysseyViewportDrawingEditorExtension()
+	: FOdysseyPainterEditorExtension(nullptr)
+	, mGUI(nullptr)
+	, mPaintingAdapterMethod(EOdysseyViewportDrawingPaintingAdapterMethod::OdysseyTextureBased)
+    , mActor(nullptr)
+    , mComponent(nullptr)
+    , mMaterial(nullptr)
+{}
+
 FOdysseyViewportDrawingEditorExtension::FOdysseyViewportDrawingEditorExtension(FOdysseyPainterEditor* iEditor)
 	: FOdysseyPainterEditorExtension(iEditor)
 	, mGUI(nullptr)

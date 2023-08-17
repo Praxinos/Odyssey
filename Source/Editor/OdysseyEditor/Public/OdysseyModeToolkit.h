@@ -16,11 +16,10 @@ class ODYSSEYEDITOR_API FOdysseyModeToolkit
 public:
     // Construction / Destruction
     virtual ~FOdysseyModeToolkit();
-    FOdysseyModeToolkit();
+    FOdysseyModeToolkit(TSharedRef<FOdysseyEditor> iEditor);
 
 public:
     void Initialize(
-		TSharedPtr<FOdysseyEditor> iEditor,
 		FEdMode* iEditorMode,
 		const TSharedPtr<IToolkitHost>& iInitToolkitHost
 	);
