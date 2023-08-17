@@ -6,10 +6,13 @@
 #include "CoreMinimal.h"
 #include "PainterEditor/OdysseyPainterEditorExtension.h"
 #include "MeshPaintTypes.h"
+#include "ISequencer.h"
 
 class FOdysseyPainterEditor;
 class FOdysseyViewportDrawingEditorGUI;
 class IMeshPaintGeometryAdapter;
+class FOdysseyPainterEditorSource;
+class IOdysseyViewportDrawingEditorAdapter;
 
 UENUM()
 enum EOdysseyViewportDrawingPaintingAdapterMethod
@@ -24,8 +27,6 @@ class ODYSSEYVIEWPORTDRAWINGEDITOR_API FOdysseyViewportDrawingEditorExtension
     : public FOdysseyPainterEditorExtension
 {
 public:
-    DECLARE_MULTICAST_DELEGATE(FOdysseyPaintingTargetToPaintWillChange);
-    DECLARE_MULTICAST_DELEGATE(FOdysseyPaintingTargetToPaintChanged);
     DECLARE_MULTICAST_DELEGATE(FOdysseyPaintingAdapterChanged);
 
 public:
@@ -38,6 +39,9 @@ public:
     virtual void Initialize() override;
     virtual void Finalize() override;
 
+    void InitializeRenderTarget();
+    void FinalizeRenderTarget();
+
 public:
     //Getters
     AActor* Actor() const;
@@ -45,9 +49,9 @@ public:
     UMaterialInterface* Material() const;
     UTexture2D* Texture() const;
 
+	IOdysseyViewportDrawingEditorAdapter* GetOdysseyViewportDrawingEditorAdapter();
+
     // Delegates
-    FOdysseyPaintingTargetToPaintWillChange& TargetToPaintWillChangeDelegate();
-    FOdysseyPaintingTargetToPaintChanged& TargetToPaintChangedDelegate();
     FOdysseyPaintingAdapterChanged& AdapterChangedDelegate();
 
     const TArray<UMeshComponent*>& SelectableComponents() const;
@@ -57,7 +61,6 @@ public:
     const TMap<UMeshComponent*, TSharedPtr<IMeshPaintGeometryAdapter>>& ComponentToAdapterMap() const;
 
     EOdysseyViewportDrawingPaintingAdapterMethod PaintingAdapterMethod() const;
-    FOdysseyViewportDrawingEditorGUI* GetGUI();
     
     int32 GetUVIndexUsedByCurrentTexture();
     float  GetMeshComponentMaxSize() const;
@@ -73,6 +76,7 @@ public:
 private:
     // Listeners
     void OnObjectPropertyChanged(UObject* iObject, struct FPropertyChangedEvent& iPropertyChangedEvent);
+	void OnSourceChanged();
 
 private:
     // Private Methods
@@ -86,9 +90,21 @@ private:
     void SelectDefaultTexture();
 
 private:
+    /** Sequencer related */
+    void OnSequencersChanged();
+    void OnSyncPaintingWithSequencer();
+    void OnSyncPaintingWithSequencerMovieSceneChanged( EMovieSceneDataChangeType iChangedType );
+	void DisableDelegatesSequencer();
+	void EnableDelegatesSequencer();
+    void SetAllDelegatesSequencers();
+	void ClearAllDelegatesSequencers();
+
+private:
+    // FGCObject implementation
+    virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
+
+private:
     TSharedPtr<FOdysseyViewportDrawingEditorGUI> mGUI;
-    FOdysseyPaintingTargetToPaintChanged mTargetToPaintChangedDelegate;
-    FOdysseyPaintingTargetToPaintWillChange mTargetToPaintWillChangeDelegate;
     FOdysseyPaintingAdapterChanged mAdapterChangedDelegate;
 
     /** Struct representing the selected settings for a mesh
@@ -125,4 +141,24 @@ private:
 
 	/** Map of geometry adapters for each selectable mesh component, so that we don't recreate a GeometryAdapter each time we select a mesh to paint */
 	TMap<UMeshComponent*, TSharedPtr<IMeshPaintGeometryAdapter>> mComponentToAdapterMap;
+
+    /** The corresponding render target for the Texture of the editor above */
+    UTextureRenderTarget2D* mPaintingTexture2DRenderTarget;
+
+    /** A render target to store the stroke pixels we want to stamp */
+    UTextureRenderTarget2D* mStrokeBufferRenderTarget2D;
+
+    /** A render target to store the pixels of the seams */
+    UTextureRenderTarget2D* mSeamRenderTarget2D;
+
+    TSharedPtr<FOdysseyPainterEditorSource> mCurrentSource;
+
+    /** Temporary variable (until overrides are fixed) that keep the mip settings of the texture on which we draw*/
+    TextureMipGenSettings mPreviousMipSettings;
+
+    //Sequencers used thorough the editor. They may change the current actor selected, so we need to keep track of what they are doing
+    TArray<TWeakPtr<ISequencer>> mSequencers;
+
+	/** Painting Extension: describes the method by which we draw in the viewport */
+	TSharedPtr<IOdysseyViewportDrawingEditorAdapter> mPaintingAdapter;
 };

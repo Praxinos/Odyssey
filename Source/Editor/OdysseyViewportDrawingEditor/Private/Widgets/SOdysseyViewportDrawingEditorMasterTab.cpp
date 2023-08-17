@@ -7,6 +7,7 @@
 #include "Widgets/Layout/SSeparator.h"
 #include "UnrealEdGlobals.h"
 #include "Editor/UnrealEdEngine.h"
+#include "Widgets/Layout/SScrollBox.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyViewportDrawingEditorMasterTab"
 

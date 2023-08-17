@@ -16,12 +16,7 @@ public:
     FOdysseyViewportDrawingEditorTextureBasedAdapter(FOdysseyViewportDrawingEditorExtension* iExtension);
 
 public:
-    virtual void PrepareAdapterForPainting() override;
-    virtual void StartPainting() override;
-    virtual void Paint() override;
-    virtual void FinishPainting() override;
-
-    virtual void Tick(float iDelta) override;
+    virtual void Initialize() override;
 
     virtual void RenderInteractorWidget(const FSceneView* iView, FViewport* iViewport, FPrimitiveDrawInterface* iPDI) override;
 

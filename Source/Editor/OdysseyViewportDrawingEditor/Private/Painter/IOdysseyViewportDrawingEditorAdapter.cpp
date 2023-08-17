@@ -6,6 +6,7 @@
 #include "PainterEditor/OdysseyPainterEditorSource.h"
 #include "TextureEditor/OdysseyTextureEditorSource.h"
 #include "OdysseyBrushAssetBase.h"
+#include "IOdysseyStylusInputModule.h"
 
 #include "IMeshPaintGeometryAdapter.h"
 #include "Tools/OdysseyPainterEditorTool.h"
@@ -13,51 +14,130 @@
 #include "TextureCompiler.h"
 #include "FileHelpers.h"
 #include "Kismet/GameplayStatics.h"
+#include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
+#include "TexturePaintHelpers.h"
 
 #define LOCTEXT_NAMESPACE "IOdysseyViewportDrawingEditorAdapter"
 
 IOdysseyViewportDrawingEditorAdapter::~IOdysseyViewportDrawingEditorAdapter()
 {
-    if( mDrawingTool )
-    {
-        UnbindStampBrushInstance(mDrawingTool->GetBrushInstance());
-    }
-
-    mExtension->GetEditor()->OnSelectedToolChanged().RemoveAll(this);
-    OnToolChange();
-    mExtension->TargetToPaintWillChangeDelegate().RemoveAll(this);
-    mExtension->TargetToPaintChangedDelegate().RemoveAll(this);
-    
-    UOdysseyStylusInputSubsystem* inputSubsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
-    inputSubsystem->RemoveMessageHandler(*this);
-
-    RemoveTextureOverride();
 }
 
 IOdysseyViewportDrawingEditorAdapter::IOdysseyViewportDrawingEditorAdapter(FOdysseyViewportDrawingEditorExtension* iExtension) :
+    mTexture(nullptr),
     mExtension(iExtension),
-    mPaintingTexture2DRenderTarget(nullptr),
     mState( eState::kIdle ),
     mLastKnownViewport(nullptr),
-    mIsCapturedByStylus(false)
+    mIsCapturedByStylus(false),
+    mTool(nullptr)
 {
-    mExtension->TargetToPaintWillChangeDelegate().AddRaw(this, &IOdysseyViewportDrawingEditorAdapter::RemoveTextureOverride);
-    mExtension->TargetToPaintChangedDelegate().AddRaw(this, &IOdysseyViewportDrawingEditorAdapter::PrepareAdapterForPainting);
-    PrepareAdapterForPainting();
+}
+
+void
+IOdysseyViewportDrawingEditorAdapter::Initialize()
+{
+    mExtension->GetEditor()->OnSelectedToolChanged().AddRaw(this, &IOdysseyViewportDrawingEditorAdapter::OnSelectedToolChanged);
 
     UOdysseyStylusInputSubsystem* inputSubsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
     inputSubsystem->AddMessageHandler(*this);
+
+    SetTool(mExtension->GetEditor()->GetSelectedTool());
+
+    mState = eState::kIdleReady;
 }
 
-void IOdysseyViewportDrawingEditorAdapter::PrepareAdapterForPainting()
+void
+IOdysseyViewportDrawingEditorAdapter::Finalize()
 {
-    mExtension->GetEditor()->OnSelectedToolChanged().AddRaw(this, &IOdysseyViewportDrawingEditorAdapter::OnToolChange);
-    if (mExtension->GetEditor()->GetSelectedTool())
+    mState = eState::kIdle;
+    SetTexture(nullptr);
+    SetTool(nullptr);
+    mExtension->GetEditor()->OnSelectedToolChanged().RemoveAll(this);
+    
+    UOdysseyStylusInputSubsystem* inputSubsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
+    inputSubsystem->RemoveMessageHandler(*this);
+}
+
+void
+IOdysseyViewportDrawingEditorAdapter::SetTexture(UTexture2D* iTexture)
+{
+    mTexture = iTexture;
+    mState = mTexture ? eState::kIdleReady : eState::kIdle;
+}
+
+UTexture2D*
+IOdysseyViewportDrawingEditorAdapter::GetTexture() const
+{
+    return mTexture;
+}
+
+void
+IOdysseyViewportDrawingEditorAdapter::OnSelectedToolChanged()
+{
+    //If the tool is a drawing tool, we need to prepare the brushInstance to draw in a 3D Context
+    SetTool(mExtension->GetEditor()->GetSelectedTool());
+}
+
+void
+IOdysseyViewportDrawingEditorAdapter::SetTool(UOdysseyPainterEditorTool* iTool)
+{
+    UOdysseyPainterEditorRasterDrawingTool* drawingTool = GetDrawingTool();    
+    if (drawingTool)
     {
-        mDrawingTool = Cast<UOdysseyPainterEditorRasterDrawingTool>(mExtension->GetEditor()->GetSelectedTool());
-        if( mDrawingTool )
-            OnToolChange();
+        drawingTool->OnCreatedBrushInstance().RemoveAll(this);
+        drawingTool->OnDestroyBrushInstance().RemoveAll(this);
+        UnbindStampBrushInstance(drawingTool->GetBrushInstance());
     }
+    
+    mTool = iTool;
+
+    drawingTool = GetDrawingTool();    
+    if (drawingTool)
+    {
+        drawingTool->OnCreatedBrushInstance().AddRaw(this, &IOdysseyViewportDrawingEditorAdapter::BindStampBrushInstance);
+        drawingTool->OnDestroyBrushInstance().AddRaw(this, &IOdysseyViewportDrawingEditorAdapter::UnbindStampBrushInstance);
+        BindStampBrushInstance(drawingTool->GetBrushInstance());
+    }
+}
+
+UOdysseyPainterEditorRasterDrawingTool*
+IOdysseyViewportDrawingEditorAdapter::GetDrawingTool()
+{
+    return Cast<UOdysseyPainterEditorRasterDrawingTool>(mTool);
+}
+
+void IOdysseyViewportDrawingEditorAdapter::UnbindStampBrushInstance(UOdysseyBrushAssetBase* iUnbindBrush)
+{
+    if (iUnbindBrush)
+        iUnbindBrush->GetStampOverrideDelegate().Unbind();
+}
+
+void IOdysseyViewportDrawingEditorAdapter::BindStampBrushInstance(UOdysseyBrushAssetBase* iBindBrush)
+{
+    if (iBindBrush)
+        iBindBrush->GetStampOverrideDelegate().BindRaw(this, &IOdysseyViewportDrawingEditorAdapter::StampOverride);
+}
+
+void IOdysseyViewportDrawingEditorAdapter::StartPainting()
+{
+    if (mTool)
+        mTool->OnMouseDown(mCurrentStrokeRay.mPoint, EKeys::LeftMouseButton);
+}
+
+void IOdysseyViewportDrawingEditorAdapter::Paint()
+{
+    if (!mTool)
+        return;
+
+    mTool->OnMouseDrag(mCurrentStrokeRay.mPoint);
+}
+
+void IOdysseyViewportDrawingEditorAdapter::FinishPainting()
+{
+    if (!mTool)
+        return;
+    
+    mTool->OnMouseUp(mCurrentStrokeRay.mPoint, EKeys::LeftMouseButton);
 }
 
 FVector2D IOdysseyViewportDrawingEditorAdapter::ViewportCoordinatesToTextureCoordinates(FVector2D iPositionInViewport, FEditorViewportClient* iViewportClient)
@@ -87,8 +167,8 @@ FVector2D IOdysseyViewportDrawingEditorAdapter::ViewportCoordinatesToTextureCoor
     FVector2D coord;
     if (UGameplayStatics::FindCollisionUV(traceHitResult, mExtension->GetUVIndexUsedByCurrentTexture(), coord))
     {
-        iPositionInViewport.X = coord.X * mExtension->Texture()->GetSurfaceWidth();
-        iPositionInViewport.Y = coord.Y * mExtension->Texture()->GetSurfaceHeight();
+        iPositionInViewport.X = coord.X * mTexture->GetSurfaceWidth();
+        iPositionInViewport.Y = coord.Y * mTexture->GetSurfaceHeight();
     }
 
     return iPositionInViewport;
@@ -381,69 +461,6 @@ void IOdysseyViewportDrawingEditorAdapter::OnStylusStateChanged(const TWeakPtr<S
     }
 
     mStylusLastEventTime = std::chrono::steady_clock::now();
-}
-
-void IOdysseyViewportDrawingEditorAdapter::RemoveTextureOverride()
-{
-    mState = eState::kIdle;
-
-    TSharedPtr<FOdysseyPainterEditorSource> source = mExtension->GetEditor()->GetSource();
-    if (!source || source->Id() != FOdysseyTextureEditorSource::StaticId())
-        return;
-
-    TSharedPtr<FOdysseyTextureEditorSource> textureSource = StaticCastSharedPtr<FOdysseyTextureEditorSource>(source);
-
-    if (mExtension->Component() != nullptr && textureSource->GetTexture() != nullptr)
-    {
-        textureSource->GetTexture()->MipGenSettings = mPreviousMipSettings;
-        textureSource->GetTexture()->UpdateResource();
-        FTextureCompilingManager::Get().FinishCompilation({ textureSource->GetTexture() });
-        TArray<UPackage*> packages;
-        packages.Add(textureSource->GetTexture()->GetPackage());
-        UEditorLoadingAndSavingUtils::SavePackages(packages, true);
-    }
-
-    if (!mPaintingTexture2DRenderTarget || !mPaintingTexture2DRenderTarget->IsValidLowLevel())
-    {
-        return;
-    }
-
-    mPaintingTexture2DRenderTarget->ConditionalBeginDestroy();
-    mPaintingTexture2DRenderTarget = nullptr;
-}
-
-void IOdysseyViewportDrawingEditorAdapter::OnToolChange()
-{
-    if(mDrawingTool)
-    {
-        mDrawingTool->OnCreatedBrushInstance().RemoveAll(this);
-        mDrawingTool->OnDestroyBrushInstance().RemoveAll(this);
-        UnbindStampBrushInstance(mDrawingTool->GetBrushInstance());
-    }
-
-    UOdysseyPainterEditorTool* newTool = mExtension->GetEditor()->GetSelectedTool();
-    if (!newTool )
-        return;
-
-    if ( newTool->IsA(UOdysseyPainterEditorRasterDrawingTool::StaticClass()))
-    {
-        mDrawingTool = Cast<UOdysseyPainterEditorRasterDrawingTool>(newTool);
-        mDrawingTool->OnCreatedBrushInstance().AddRaw(this, &IOdysseyViewportDrawingEditorAdapter::BindStampBrushInstance);
-        mDrawingTool->OnDestroyBrushInstance().AddRaw(this, &IOdysseyViewportDrawingEditorAdapter::UnbindStampBrushInstance);
-        BindStampBrushInstance(mDrawingTool->GetBrushInstance());
-    }
-}
-
-void IOdysseyViewportDrawingEditorAdapter::UnbindStampBrushInstance(UOdysseyBrushAssetBase* iUnbindBrush)
-{
-    if (iUnbindBrush)
-        iUnbindBrush->GetStampOverrideDelegate().Unbind();
-}
-
-void IOdysseyViewportDrawingEditorAdapter::BindStampBrushInstance(UOdysseyBrushAssetBase* iBindBrush)
-{
-    if (iBindBrush)
-        iBindBrush->GetStampOverrideDelegate().BindRaw(this, &IOdysseyViewportDrawingEditorAdapter::StampOverride);
 }
 
 #undef LOCTEXT_NAMESPACE

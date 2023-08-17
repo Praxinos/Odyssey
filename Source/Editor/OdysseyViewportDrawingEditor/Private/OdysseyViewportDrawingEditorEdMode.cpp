@@ -17,14 +17,16 @@
 #include "MeshPaintHelpers.h"
 #include "MeshPaintSettings.h"
 #include "ToolMenus.h"
+#include "Selection.h"
 
 #include "EditorWorldExtension.h"
 #include "ViewportWorldInteraction.h"
 
 #include "OdysseyViewportDrawingEditor.h"
 #include "OdysseyViewportDrawingEditorToolkit.h"
-#include "OdysseyViewportDrawingEditorPainter.h"
+//#include "OdysseyViewportDrawingEditorPainter.h"
 #include "TextureEditor/OdysseyTextureEditorExtension.h"
+#include "IOdysseyViewportDrawingEditorAdapter.h"
 
 #include "UObject/UObjectGlobals.h"
 #include "Editor/EditorPerProjectUserSettings.h"
@@ -55,64 +57,57 @@ void FOdysseyViewportDrawingEditorEdMode::AddReferencedObjects(FReferenceCollect
 {
     // Call parent implementation
     FEdMode::AddReferencedObjects(Collector);
-    if (mViewportDrawingEditorPainter)
-        mViewportDrawingEditorPainter->AddReferencedObjects(Collector);
+    //if (mViewportDrawingEditorPainter)
+        //mViewportDrawingEditorPainter->AddReferencedObjects(Collector);
 }
 
 void FOdysseyViewportDrawingEditorEdMode::Render(const FSceneView* View,FViewport* Viewport,FPrimitiveDrawInterface* PDI)
 {
-    if (mViewportDrawingEditorPainter && mViewportDrawingEditorPainter->GetOdysseyViewportDrawingEditorAdapter())
-    {
-        mViewportDrawingEditorPainter->GetOdysseyViewportDrawingEditorAdapter()->RenderInteractorWidget(View, Viewport, PDI);
-    }
+    if (!mViewportDrawingEditorExtension)
+        return;
+
+    IOdysseyViewportDrawingEditorAdapter* adapter = mViewportDrawingEditorExtension->GetOdysseyViewportDrawingEditorAdapter();
+    if (!adapter)
+        return;
+    
+    adapter->RenderInteractorWidget(View, Viewport, PDI);
 }
 
 bool FOdysseyViewportDrawingEditorEdMode::Select(AActor* InActor, bool bInSelected)
 {
-    mViewportDrawingEditorPainter->SelectActor(InActor);
+    mViewportDrawingEditorExtension->SetActor(InActor);
 
     return false;
 }
 
 bool FOdysseyViewportDrawingEditorEdMode::MouseMove(FEditorViewportClient* iViewportClient, FViewport* iViewport, int32 iMouseX, int32 iMouseY)
 {
-    bool bHandled = false;
+    IOdysseyViewportDrawingEditorAdapter* adapter = mViewportDrawingEditorExtension->GetOdysseyViewportDrawingEditorAdapter();
+    if (!adapter)
+        return false;
 
-    if (mViewportDrawingEditorPainter->GetOdysseyViewportDrawingEditorAdapter())
-        bHandled = mViewportDrawingEditorPainter->GetOdysseyViewportDrawingEditorAdapter()->MouseMove(iViewportClient, iViewport, iMouseX, iMouseY);
-
-    return bHandled;
+    return adapter->MouseMove(iViewportClient, iViewport, iMouseX, iMouseY);
 }
 
 bool FOdysseyViewportDrawingEditorEdMode::InputKey(FEditorViewportClient* iViewportClient, FViewport* iViewport, FKey iKey, EInputEvent iEvent)
 {
     if (!IsEditingEnabled())
-    {
         return false;
-    }
 
-    bool bHandled = false;
+    IOdysseyViewportDrawingEditorAdapter* adapter = mViewportDrawingEditorExtension->GetOdysseyViewportDrawingEditorAdapter();
+    if (!adapter)
+        return false;
 
-    if (mViewportDrawingEditorPainter->GetOdysseyViewportDrawingEditorAdapter())
-        bHandled = mViewportDrawingEditorPainter->GetOdysseyViewportDrawingEditorAdapter()->InputKey(iViewportClient, iViewport, iKey, iEvent);
-
-    return bHandled;
+    return adapter->InputKey(iViewportClient, iViewport, iKey, iEvent);
 }
 
 bool FOdysseyViewportDrawingEditorEdMode::CapturedMouseMove(FEditorViewportClient* iViewportClient, FViewport* iViewport, int32 iMouseX, int32 iMouseY)
 {
-    bool bHandled = false;
+    IOdysseyViewportDrawingEditorAdapter* adapter = mViewportDrawingEditorExtension->GetOdysseyViewportDrawingEditorAdapter();
+    if (!adapter)
+        return false;
 
-    if (mViewportDrawingEditorPainter->GetOdysseyViewportDrawingEditorAdapter())
-        bHandled = mViewportDrawingEditorPainter->GetOdysseyViewportDrawingEditorAdapter()->CapturedMouseMove(iViewportClient, iViewport, iMouseX, iMouseY);
-
-    return bHandled;
-}
-
-void FOdysseyViewportDrawingEditorEdMode::Tick(FEditorViewportClient* ViewportClient, float DeltaTime)
-{
-    FEdMode::Tick(ViewportClient, DeltaTime);
-    mViewportDrawingEditorPainter->Tick(DeltaTime);
+    return adapter->CapturedMouseMove(iViewportClient, iViewport, iMouseX, iMouseY);
 }
 
 bool FOdysseyViewportDrawingEditorEdMode::IsEditingEnabled() const
@@ -152,7 +147,7 @@ void FOdysseyViewportDrawingEditorEdMode::Enter()
         Toolkit = viewportToolkit;
         viewportToolkit->Initialize(this, Owner->GetToolkitHost());
 
-        mViewportDrawingEditorPainter = new FOdysseyViewportDrawingEditorPainter(&viewportToolkit->GetViewportDrawingExtension().Get());
+        mViewportDrawingEditorExtension = viewportToolkit->GetViewportDrawingExtension();
         
         TSharedPtr< ILevelEditor > levelEditor = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor").GetFirstLevelEditor();
         levelEditor->AppendCommands( Toolkit->GetToolkitCommands() );
@@ -180,8 +175,14 @@ void FOdysseyViewportDrawingEditorEdMode::Enter()
         }
     }
 
-    mViewportDrawingEditorPainter->Initialize();
-
+    //Set Default Selected Actor to the one selected in the viewport
+    USelection* actorSelection = GEditor->GetSelectedActors();
+    if (actorSelection->Num() > 0)
+    {
+        AActor* selectedActor = Cast<AActor>(actorSelection->GetSelectedObject(0));
+        if (selectedActor)
+            mViewportDrawingEditorExtension->SetActor(selectedActor);
+    }
 
     if( !UPhysicsSettings::Get()->bSupportUVFromHitResults )
     {
@@ -208,9 +209,11 @@ void FOdysseyViewportDrawingEditorEdMode::Exit()
         Toolkit.Reset();
     }
 
-    mViewportDrawingEditorPainter->Finalize();
-    delete mViewportDrawingEditorPainter;
-    mViewportDrawingEditorPainter = nullptr;
+    mViewportDrawingEditorExtension = nullptr;
+
+    //mViewportDrawingEditorPainter->Finalize();
+    //delete mViewportDrawingEditorPainter;
+    //mViewportDrawingEditorPainter = nullptr;
 
     mEditor->OnClose();
     mEditor = nullptr;

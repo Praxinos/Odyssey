@@ -10,13 +10,19 @@
 
 #include <ULIS>
 
+class UOdysseyPainterEditorRasterDrawingTool;
+class FOdysseyViewportDrawingEditorExtension;
+class UOdysseyPainterEditorTool;
+
 /** Painting adapter for the painter. Describes the method of painting in the viewport*/
-class IOdysseyViewportDrawingEditorAdapter : public IStylusMessageHandler
+class IOdysseyViewportDrawingEditorAdapter
+    : public IStylusMessageHandler
+    
 {
 public:
     enum class eState
     {
-        kIdle, //Idle, but preparations (made in PrepareAdapterForPainting()) are not made yet
+        kIdle, //Idle, but preparations are not made yet
         kIdleReady, //Idle, but we're now ready to paint
         kDrawing,
     };
@@ -29,13 +35,16 @@ public:
     IOdysseyViewportDrawingEditorAdapter(FOdysseyViewportDrawingEditorExtension* iExtension);
 
 public:
-    /** Painting Methods **/
-    virtual void PrepareAdapterForPainting();
-    virtual void StartPainting() = 0;
-    virtual void Paint() = 0;
-    virtual void FinishPainting() = 0;
+    virtual void Initialize();
+    virtual void Finalize();
 
-    virtual void Tick(float iDeltaTime) = 0;
+    virtual void SetTexture(UTexture2D* iTexture);
+    UTexture2D* GetTexture() const;
+
+    /** Painting Methods **/
+    virtual void StartPainting();
+    virtual void Paint();
+    virtual void FinishPainting();
 
     virtual void RenderInteractorWidget(const FSceneView* iView, FViewport* iViewport, FPrimitiveDrawInterface* iPDI) = 0;
 
@@ -59,18 +68,19 @@ private:
     virtual void OnStylusStateChanged(const TWeakPtr<SWidget> iWidget, const FStylusState& iState, int32 iIndex) override;
 
 protected: 
-    void RemoveTextureOverride();
     virtual ::ULIS::FEvent StampOverride(UOdysseyBrushAssetBase::FStampParams iStampParams) = 0;
-    void OnToolChange();
+    void OnSelectedToolChanged();
+    virtual void SetTool(UOdysseyPainterEditorTool* iTool);
+    UOdysseyPainterEditorRasterDrawingTool* GetDrawingTool();
+
     virtual void UnbindStampBrushInstance(UOdysseyBrushAssetBase* iUnbindBrush);
     virtual void BindStampBrushInstance(UOdysseyBrushAssetBase* iBindBrush);
 
 protected:
+    UTexture2D* mTexture;
+
     /** The editor we need help to paint with*/
     FOdysseyViewportDrawingEditorExtension* mExtension;
-
-    /** The corresponding render target for the Texture of the editor above */
-    UTextureRenderTarget2D* mPaintingTexture2DRenderTarget;
 
     /** The list of currently pressed keys */
     TArray<FKey> mKeysPressed;
@@ -91,9 +101,7 @@ protected:
     std::chrono::steady_clock::time_point   mStylusLastEventTime;
     bool mIsCapturedByStylus;
 
-    /** Temporary variable (until overrides are fixed) that keep the mip settings of the texture on which we draw*/
-    TextureMipGenSettings mPreviousMipSettings;
-
     /** Current or previous selected tool which still has delegates on this adapter, we keep it here so that we can handle said delegates */
-    UOdysseyPainterEditorRasterDrawingTool* mDrawingTool;
+    UOdysseyPainterEditorTool* mTool;
+    //UOdysseyPainterEditorRasterDrawingTool* mDrawingTool;
 };
