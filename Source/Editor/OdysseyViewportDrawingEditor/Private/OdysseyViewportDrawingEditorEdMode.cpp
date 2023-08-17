@@ -151,7 +151,7 @@ void FOdysseyViewportDrawingEditorEdMode::Enter()
     TSharedRef<FOdysseyViewportDrawingEditorExtension> viewportDrawingExtension = MakeShared<FOdysseyViewportDrawingEditorExtension>(mEditor.Get()/*, flipbookExtension*/);
 	mEditor->AddExtension(MakeShared<FOdysseyTextureEditorExtension>(mEditor.Get()));
 
-    mViewportDrawingEditorPainter = new FOdysseyViewportDrawingEditorPainter(viewportDrawingExtension.Get());
+    mViewportDrawingEditorPainter = new FOdysseyViewportDrawingEditorPainter(&viewportDrawingExtension.Get());
 
     if (UsesToolkits() && !Toolkit.IsValid())
     {

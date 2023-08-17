@@ -72,3 +72,5 @@ UOdysseyPainterEditorVectorBucketView::PostEditChangeProperty( FPropertyChangedE
         vectorScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
     }
 }
+
+#undef LOCTEXT_NAMESPACE

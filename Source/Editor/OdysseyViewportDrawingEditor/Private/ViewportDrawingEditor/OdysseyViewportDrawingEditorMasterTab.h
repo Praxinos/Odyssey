@@ -7,7 +7,7 @@
 #include "Widgets/SBoxPanel.h"
 #include <ULIS>
 
-class FOdysseyViewportDrawingEditor;
+class FOdysseyViewportDrawingEditorExtension;
 
 class ODYSSEYVIEWPORTDRAWINGEDITOR_API FOdysseyViewportDrawingEditorMasterTab :
 	public FOdysseyEditorTab
@@ -18,7 +18,7 @@ public:
 public:
     // Construction / Destruction
     virtual ~FOdysseyViewportDrawingEditorMasterTab();
-    FOdysseyViewportDrawingEditorMasterTab(FOdysseyViewportDrawingEditor* iEditor);
+    FOdysseyViewportDrawingEditorMasterTab(FOdysseyViewportDrawingEditorExtension* iExtension);
 
 protected:
     // FOdysseyEditorTab interface
@@ -51,7 +51,7 @@ protected:
     void OnTextureChanged(const FAssetData& iAssetData);
 
 private:
-    FOdysseyViewportDrawingEditor* mEditor;
+    FOdysseyViewportDrawingEditorExtension* mExtension;
     TSharedPtr<SVerticalBox> mMeshSelectorVerticalBox;
     TSharedPtr<SComboButton> mMeshSelectComboButton;
     TArray<TSharedPtr<EOdysseyViewportDrawingPaintingAdapterMethod>> mOptions;

@@ -23,7 +23,6 @@ UOdysseyPainterEditorRasterDrawingTool::~UOdysseyPainterEditorRasterDrawingTool(
 UOdysseyPainterEditorRasterDrawingTool::UOdysseyPainterEditorRasterDrawingTool()
     : Super()
     //Properties
-    , mBaseSize(0)
     , Brush(nullptr)
     , BrushInstance(nullptr)
     , BrushOptions(CreateDefaultSubobject<UOdysseyBrushOptions>("UOdysseyPainterEditorRasterDrawingTool::BrushOptions", true))
@@ -31,6 +30,7 @@ UOdysseyPainterEditorRasterDrawingTool::UOdysseyPainterEditorRasterDrawingTool()
     , SelectedShapeInstance(nullptr)
     //Internal
     , mPaintEngine()
+    , mBaseSize(0)
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.DrawingTool64");
     //GEditor->OnBlueprintCompiled().AddUObject(this, &UOdysseyPainterEditorRasterDrawingTool::OnBlueprintCompiled);

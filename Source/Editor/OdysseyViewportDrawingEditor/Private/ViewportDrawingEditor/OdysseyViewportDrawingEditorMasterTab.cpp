@@ -9,6 +9,7 @@
 #include "UnrealEdGlobals.h"
 #include "Widgets/Layout/SSeparator.h"
 #include "EditorStyleSet.h"
+#include "PropertyCustomizationHelpers.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyViewportDrawingEditorMasterTab"
 
@@ -29,10 +30,10 @@ FOdysseyViewportDrawingEditorMasterTab::~FOdysseyViewportDrawingEditorMasterTab(
 {
 }
 
-FOdysseyViewportDrawingEditorMasterTab::FOdysseyViewportDrawingEditorMasterTab(FOdysseyViewportDrawingEditor* iEditor)
+FOdysseyViewportDrawingEditorMasterTab::FOdysseyViewportDrawingEditorMasterTab(FOdysseyViewportDrawingEditorExtension* iExtension)
     : FOdysseyEditorTab(LOCTEXT( "OdysseyViewportDrawingEditorMasterTab", "Master Tab" ),
                         FSlateIcon( "OdysseyStyle", "PainterEditor.TextureSelector_16" ))
-    , mEditor(iEditor)
+    , mExtension(iExtension)
 {
 }
 
@@ -164,7 +165,7 @@ FOdysseyViewportDrawingEditorMasterTab::CreateWidget()
                                 SNew(STextBlock)
                                 .TextStyle(FAppStyle::Get(), "PropertyEditor.AssetClass")
                                 .Font(FAppStyle::GetFontStyle("PropertyWindow.NormalFont"))
-                                .Text_Lambda([=] { return FOdysseyViewportDrawingEditorMasterTab::GetMethodAsText(mEditor->PaintingAdapterMethod());})
+                                .Text_Lambda([=] { return FOdysseyViewportDrawingEditorMasterTab::GetMethodAsText(mExtension->PaintingAdapterMethod());})
                             ]
                         ]
                     //---
@@ -176,7 +177,7 @@ FOdysseyViewportDrawingEditorMasterTab::OnGetMenuContent()
 {
     mMeshSelectorVerticalBox = SNew( SVerticalBox );
 
-    for( int i = 0; i < mEditor->SelectableComponents().Num(); i++ )
+    for( int i = 0; i < mExtension->SelectableComponents().Num(); i++ )
     {
         mMeshSelectorVerticalBox->AddSlot()
             .Padding(2)
@@ -185,8 +186,8 @@ FOdysseyViewportDrawingEditorMasterTab::OnGetMenuContent()
                 SNew( SButton )
                     .ButtonStyle( FAppStyle::Get(), "HoverHintOnly" )
                     .ForegroundColor( FAppStyle::GetColor("PropertyEditor.AssetName.ColorAndOpacity"))
-                    .Text( FText::FromString( mEditor->SelectableComponents()[i]->GetName() ) )
-                    .OnClicked( this, &FOdysseyViewportDrawingEditorMasterTab::OnMeshComponentChanged, mEditor->SelectableComponents()[i]->GetName() )
+                    .Text( FText::FromString( mExtension->SelectableComponents()[i]->GetName() ) )
+                    .OnClicked( this, &FOdysseyViewportDrawingEditorMasterTab::OnMeshComponentChanged, mExtension->SelectableComponents()[i]->GetName() )
             ];
     }
 
@@ -204,9 +205,9 @@ FOdysseyViewportDrawingEditorMasterTab::OnMenuClosed( bool iOpen)
 FText
 FOdysseyViewportDrawingEditorMasterTab::CreateTextMeshSelector() const
 {
-    if( mEditor->Component() )
+    if( mExtension->Component() )
     {
-        return FText::FromString( mEditor->Component()->GetName() );
+        return FText::FromString( mExtension->Component()->GetName() );
     }
     return FText::FromString( "None" );
 }
@@ -263,7 +264,7 @@ TSharedRef<SWidget> FOdysseyViewportDrawingEditorMasterTab::GeneratePaintingMeth
 
 void FOdysseyViewportDrawingEditorMasterTab::ChangeSelectionPaintingMethodComboBoxItem(TSharedPtr<EOdysseyViewportDrawingPaintingAdapterMethod> iNewSelection, ESelectInfo::Type iSelectInfo)
 {
-    mEditor->SetPaintingAdapterMethod(*(iNewSelection.Get()));
+    mExtension->SetPaintingAdapterMethod(*(iNewSelection.Get()));
 }
 
 FText FOdysseyViewportDrawingEditorMasterTab::GetMethodAsText(EOdysseyViewportDrawingPaintingAdapterMethod iMethod)
@@ -296,42 +297,42 @@ FText FOdysseyViewportDrawingEditorMasterTab::GetTooltipAsText(EOdysseyViewportD
 FString
 FOdysseyViewportDrawingEditorMasterTab::PaintActorPath() const
 {
-    if ( !mEditor->Actor() )
+    if ( !mExtension->Actor() )
         return FString();
 
-    return mEditor->Actor()->GetPathName();
+    return mExtension->Actor()->GetPathName();
 }
 
 FString
 FOdysseyViewportDrawingEditorMasterTab::PaintMaterialPath() const
 {
-    if ( !mEditor->Material() )
+    if ( !mExtension->Material() )
         return FString();
 
-    return mEditor->Material()->GetPathName();
+    return mExtension->Material()->GetPathName();
 }
 
 FString
 FOdysseyViewportDrawingEditorMasterTab::PaintTexturePath() const
 {
-    if( !mEditor->Texture() )
+    if( !mExtension->Texture() )
         return FString();
 
-    return mEditor->Texture()->GetPathName();
+    return mExtension->Texture()->GetPathName();
 }
 
 bool
 FOdysseyViewportDrawingEditorMasterTab::ShouldFilterMaterialAsset(const FAssetData& iAssetData) const
 {
     TArray<UMaterialInterface*> materialsArray;
-    mEditor->SelectableMaterials( materialsArray );
+    mExtension->SelectableMaterials( materialsArray );
     return !(materialsArray.ContainsByPredicate([=](const UMaterialInterface* iMaterial) { return iMaterial->GetFullName() == iAssetData.GetFullName(); }));
 }
 
 bool
 FOdysseyViewportDrawingEditorMasterTab::ShouldFilterTextureAsset(const FAssetData& iAssetData) const
 {
-    return !(mEditor->SelectableTextures().ContainsByPredicate([=](const FPaintableTexture& iTexture) { return iTexture.Texture->GetFullName() == iAssetData.GetFullName(); }));
+    return !(mExtension->SelectableTextures().ContainsByPredicate([=](const FPaintableTexture& iTexture) { return iTexture.Texture->GetFullName() == iAssetData.GetFullName(); }));
 }
 
 //--------------------------------------------------------------------------------------
@@ -353,19 +354,19 @@ FOdysseyViewportDrawingEditorMasterTab::OnActorChanged(const FAssetData& iAssetD
 FReply
 FOdysseyViewportDrawingEditorMasterTab::OnMeshComponentChanged(const FString iName)
 {
-    if( mEditor->Component()->GetName() == iName ) return FReply::Handled();
+    if( mExtension->Component()->GetName() == iName ) return FReply::Handled();
 
-    for( int i = 0; i < mEditor->SelectableComponents().Num(); i++ )
+    for( int i = 0; i < mExtension->SelectableComponents().Num(); i++ )
     {
-        if( mEditor->SelectableComponents()[i]->GetName() == iName )
+        if( mExtension->SelectableComponents()[i]->GetName() == iName )
         {
-            mEditor->SetComponent( mEditor->SelectableComponents()[i] );
+            mExtension->SetComponent( mExtension->SelectableComponents()[i] );
         }
     }
 
     //TODO: use the right max size from current adapter
-    mEditor->GetRasterDrawingTool()->SetBaseSize(mEditor->GetMeshComponentMaxSize());
-    //mEditor->GetGUI()->GetTopTab()->SetMeshMaxSize( mEditor->GetMeshComponentMaxSize() );
+    mExtension->GetEditor()->GetRasterDrawingTool()->SetBaseSize(mExtension->GetMeshComponentMaxSize());
+    //mExtension->GetGUI()->GetTopTab()->SetMeshMaxSize( mExtension->GetMeshComponentMaxSize() );
 
     return FReply::Handled();
 }
@@ -377,7 +378,7 @@ FOdysseyViewportDrawingEditorMasterTab::OnMaterialChanged(const FAssetData& iAss
 
     if ( material )
     {
-        mEditor->SetMaterial( material );
+        mExtension->SetMaterial( material );
     }
     
 }
@@ -391,14 +392,14 @@ FOdysseyViewportDrawingEditorMasterTab::OnTextureChanged(const FAssetData& iAsse
     {
         //check if texture is already edited by an other editor
         UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
-        if (texture != mEditor->Texture() && AssetEditorSubsystem->FindEditorForAsset(texture, true) != nullptr)
+        if (texture != mExtension->Texture() && AssetEditorSubsystem->FindEditorForAsset(texture, true) != nullptr)
         {
             FText Title = LOCTEXT("TitleSelectedTextureAlreadyOpenedTitle", "Selected Texture Already Opened");
             FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("SelectedTextureAlreadyOpened", "The selected texture is already opened in an other editor. Please close the editor before selecting this texture."), &Title);
             return;
         }
 
-        mEditor->SetTexture( texture );
+        mExtension->SetTexture( texture );
     }
 }
 

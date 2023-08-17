@@ -11,6 +11,7 @@ class ODYSSEYANIMATION_API FOdysseyAnimationCellImageRasterMediaAbility
     : public IOdysseyAnimationMediaAbility
 {
 public:
+    virtual ~FOdysseyAnimationCellImageRasterMediaAbility();
     FOdysseyAnimationCellImageRasterMediaAbility(TSharedPtr<FOdysseyAnimationCellImageRaster> iCellImageRaster);
     
 public:

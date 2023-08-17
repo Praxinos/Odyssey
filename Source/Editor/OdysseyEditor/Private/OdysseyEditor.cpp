@@ -188,7 +188,7 @@ FOdysseyEditor::LoadOpenedTabs()
     const TArray<TSharedPtr<FOdysseyEditorTab>>& tabs = GetTabs();
     for (TSharedPtr<FOdysseyEditorTab> tab : tabs)
     {
-        if (tabNames.Contains(tab->GetId()))
+        if (tabNames.Contains(tab->GetId().ToString()))
             tab->Open();
     }
 }

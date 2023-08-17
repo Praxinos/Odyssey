@@ -55,7 +55,7 @@ FOdysseyViewportDrawingEditorGUI::CreateWidget()
             .Padding(StandardPadding)
 	        .AutoHeight()
 	        [
-                GetMasterTab()->Widget()->AsShared()
+                mMasterTab->Widget()->AsShared()
             ]
         ];
 }

@@ -22,12 +22,12 @@ public:
 
 public:
     // Initialization
-    virtual void CreateTabs() override;
-    virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
+    void CreateTabs();
+    void BindShortcuts(FBaseToolkit* iToolkit);
 
 public:
     // Layout
-	virtual TSharedPtr<SWidget> CreateWidget() override;
+	TSharedPtr<SWidget> CreateWidget();
 
 private:
 	FOdysseyViewportDrawingEditorExtension* mExtension;
