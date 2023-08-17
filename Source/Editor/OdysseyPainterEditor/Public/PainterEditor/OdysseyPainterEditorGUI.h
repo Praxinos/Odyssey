@@ -22,7 +22,11 @@ public:
     FOdysseyPainterEditorGUI(FOdysseyPainterEditor* iEditor);
 
 public:
-    void Init();
+    static void ExtendLevelEditorLayout(FLayoutExtender& Extender);
+
+public:
+    void Initialize();
+    void Finalize();
 	void BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder);
 
 public:

@@ -40,6 +40,7 @@ public:
     void SetTabsSaveFilename(const FString& iFilename);
     void SaveOpenedTabs();
     void LoadOpenedTabs();
+    void InvokeModeLayout();
 
     void RegisterTabSpawners( const TSharedRef<FTabManager>& iTabManager );
     void UnregisterTabSpawners( const TSharedRef<FTabManager>& iTabManager );
@@ -51,6 +52,7 @@ public:
     // Interface
     virtual void Initialize() = 0;
     virtual TSharedRef<FTabManager::FLayout> CreateLayout() = 0;
+    virtual void BuildModeLayout(TSharedPtr<FAssetEditorModeUILayer> iModeUILayerPtr);
 
 public:
     // Overridable Methods

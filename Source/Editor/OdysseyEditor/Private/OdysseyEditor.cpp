@@ -8,6 +8,7 @@
 #include "ToolMenus.h"
 #include "ToolMenuOwner.h"
 #include "Serialization/BufferArchive.h"
+#include "Toolkits/AssetEditorModeUILayer.h"
 
 /////////////////////////////////////////////////////
 // FOdysseyEditor
@@ -133,6 +134,15 @@ FOdysseyEditor::UnregisterTabSpawners( const TSharedRef< FTabManager >& iTabMana
 }
 
 void
+FOdysseyEditor::BuildModeLayout(TSharedPtr<FAssetEditorModeUILayer> iModeUILayerPtr)
+{
+    for (TSharedPtr<FOdysseyEditorTab> tab : mTabs)
+	{
+        iModeUILayerPtr->SetModePanelInfo(tab->GetId(), tab->GetMinorTabConfig());
+	}
+}
+
+void
 FOdysseyEditor::SaveOpenedTabs()
 {
     FString tabsOpenedPath = FPaths::Combine(FPaths::EngineSavedDir(), *mTabsSaveFilename);
@@ -147,13 +157,16 @@ FOdysseyEditor::SaveOpenedTabs()
     FString str;
 
     const TArray<TSharedPtr<FOdysseyEditorTab>>& tabs = GetTabs();
+
+    int numTabs = tabs.Num();
+    buffer << numTabs;
     for (TSharedPtr<FOdysseyEditorTab> tab : tabs)
     {
-        if (tab->IsOpened())
-        {
-            str = tab->GetId().ToString();
-            buffer << str;
-        }
+        str = tab->GetId().ToString();
+        buffer << str;
+
+        bool isOpened = tab->IsOpened();
+        buffer << isOpened;
     }
 
     fileHandle->Seek(0);
@@ -165,6 +178,12 @@ FOdysseyEditor::SaveOpenedTabs()
 }
 
 void
+FOdysseyEditor::InvokeModeLayout()
+{
+    LoadOpenedTabs();
+}
+
+void
 FOdysseyEditor::LoadOpenedTabs()
 {
     FString tabsOpenedPath = FPaths::Combine(FPaths::EngineSavedDir(), *mTabsSaveFilename);
@@ -172,20 +191,37 @@ FOdysseyEditor::LoadOpenedTabs()
     IFileHandle* fileHandle = platformFile.OpenRead(*tabsOpenedPath, true);
 
     if( !fileHandle )
+    {
+        const TArray<TSharedPtr<FOdysseyEditorTab>>& tabs = GetTabs();
+        for (TSharedPtr<FOdysseyEditorTab> tab : tabs)
+        {
+            if (tab->ShouldOpenByDefault())
+                tab->Open();
+        }
         return;
+    }
 
     FBufferArchive buffer;
     buffer.SetNum( fileHandle->Size() );
 
+    FBufferReader bufferReader( buffer.GetData(), fileHandle->Size(), false );
+
     fileHandle->Seek(0);
     fileHandle->Read(buffer.GetData(), fileHandle->Size() );
 
-    TArray<FString> tabNames;
-    int start = 4;
-    while (start < fileHandle->Size() )
+    int numTabs = 0;
+    bufferReader << numTabs;
+
+    TMap<FString, bool> tabStates;
+    for(int i = 0; i < numTabs; i++)
     {
-        tabNames.Add( FString( (char*) buffer.GetData() + start ) );
-        start += tabNames[tabNames.Num() - 1].Len() + 5;
+        FString str;
+        bufferReader << str;
+
+        bool isOpened = false;
+        bufferReader << isOpened;
+
+        tabStates.Add(str, isOpened);
     }
 
     fileHandle->Flush(true);
@@ -194,7 +230,14 @@ FOdysseyEditor::LoadOpenedTabs()
     const TArray<TSharedPtr<FOdysseyEditorTab>>& tabs = GetTabs();
     for (TSharedPtr<FOdysseyEditorTab> tab : tabs)
     {
-        if (tabNames.Contains(tab->GetId().ToString()))
+        if (tabStates.Contains(tab->GetId().ToString()))
+        {
+            if (tabStates[tab->GetId().ToString()])
+                tab->Open();
+            continue;
+        }
+
+        if (tab->ShouldOpenByDefault())
             tab->Open();
     }
 }

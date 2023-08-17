@@ -42,7 +42,13 @@ public:
 	virtual double GetLastActivationTime() override;
 	virtual void RemoveEditingAsset(UObject* Asset) override;
 	virtual void ExtendMenu();
+	virtual void RequestModeUITabs() override;
+	virtual void InvokeUI() override;
+
+private:
+	void OnWindowClosed(const TSharedRef<SWindow>& Window);
 
 public:
 	TSharedPtr<FOdysseyEditor> mEditor;
+	bool mTabSaved;
 };

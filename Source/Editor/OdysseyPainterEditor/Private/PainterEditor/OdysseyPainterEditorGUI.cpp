@@ -21,7 +21,10 @@
 #include "OdysseyPainterEditorSelectedVectorObjectTab.h"
 #include "OdysseyPainterEditorViewportTab.h"
 
+#include "Framework/Docking/LayoutExtender.h"
+#include "LevelEditor.h"
 #include "ToolMenus.h"
+#include "Toolkits/AssetEditorModeUILayer.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorGUI"
 
@@ -43,25 +46,95 @@ FOdysseyPainterEditorGUI::FOdysseyPainterEditorGUI(FOdysseyPainterEditor* iEdito
 //--------------------------------------------------------------------------------- Tabs
 
 void
-FOdysseyPainterEditorGUI::Init()
+FOdysseyPainterEditorGUI::Initialize()
 {
     CreateTabs();
 }
 
 void
+FOdysseyPainterEditorGUI::Finalize()
+{
+}
+
+void
+FOdysseyPainterEditorGUI::ExtendLevelEditorLayout(FLayoutExtender& Extender)
+{
+    Extender.ExtendArea(TEXT("TopLevelArea"),
+        [](TSharedRef<FTabManager::FArea> iArea)
+        {
+            iArea->SplitAt(
+                0,
+                FTabManager::NewStack()
+                ->SetHideTabWell(true)
+                ->AddTab(
+                    FTabManager::FTab(
+                        FOdysseyPainterEditorTopTab::StaticId(),
+                        ETabState::ClosedTab
+                    )
+                )
+            );
+        }
+    );
+
+    Extender.ExtendLayout(FTabId(TEXT("PlacementBrowser")), ELayoutExtensionPosition::Below, FTabManager::FTab(FOdysseyPainterEditorToolsTab::StaticId(), ETabState::ClosedTab));
+    Extender.ExtendLayout(FTabId(TEXT("PlacementBrowser")), ELayoutExtensionPosition::Below, FTabManager::FTab(FOdysseyPainterEditorSelectedVectorObjectTab::StaticId(), ETabState::ClosedTab));
+    Extender.ExtendLayout(FTabId(TEXT("PlacementBrowser")), ELayoutExtensionPosition::Below, FTabManager::FTab(FOdysseyPainterEditorToolOptionsTab::StaticId(), ETabState::ClosedTab));
+    Extender.ExtendLayout(FTabId(TEXT("PlacementBrowser")), ELayoutExtensionPosition::Below, FTabManager::FTab(FOdysseyPainterEditorBrushSelectorTab::StaticId(), ETabState::ClosedTab));
+    
+    
+    Extender.ExtendLayout(FTabId(TEXT("LevelEditorSceneOutliner")), ELayoutExtensionPosition::Below, FTabManager::FTab(FOdysseyPainterEditorPaletteTab::StaticId(), ETabState::ClosedTab));
+    Extender.ExtendLayout(FTabId(TEXT("LevelEditorSceneOutliner")), ELayoutExtensionPosition::Below, FTabManager::FTab(FOdysseyPainterEditorColorSlidersTab::StaticId(), ETabState::ClosedTab));
+    Extender.ExtendLayout(FTabId(TEXT("LevelEditorSceneOutliner")), ELayoutExtensionPosition::Below, FTabManager::FTab(FOdysseyPainterEditorColorWheelTab::StaticId(), ETabState::ClosedTab));
+
+    //Extender.ExtendLayout(LevelEditorTabIds::PlacementBrowser, ELayoutExtensionPosition::Before, FTabManager::FTab(UAssetEditorUISubsystem::TopLeftTabID, ETabState::ClosedTab));
+    
+	/*
+    Extender.ExtendLayout(LevelEditorTabIds::PlacementBrowser, ELayoutExtensionPosition::Before, FTabManager::FTab(UAssetEditorUISubsystem::TopLeftTabID, ETabState::ClosedTab));
+	Extender.ExtendStack("BottomLeftPanel", ELayoutExtensionPosition::Before, FTabManager::FTab(UAssetEditorUISubsystem::BottomLeftTabID, ETabState::ClosedTab));
+	Extender.ExtendStack("VerticalToolbar", ELayoutExtensionPosition::Before, FTabManager::FTab(UAssetEditorUISubsystem::VerticalToolbarID, ETabState::ClosedTab));
+	Extender.ExtendLayout(LevelEditorTabIds::LevelEditorSceneOutliner, ELayoutExtensionPosition::Before, FTabManager::FTab(UAssetEditorUISubsystem::TopRightTabID, ETabState::ClosedTab));
+	Extender.ExtendLayout(LevelEditorTabIds::LevelEditorSelectionDetails, ELayoutExtensionPosition::Before, FTabManager::FTab(UAssetEditorUISubsystem::BottomRightTabID, ETabState::ClosedTab));
+    */
+}
+
+void
 FOdysseyPainterEditorGUI::CreateTabs()
 {
-    mEditor->AddTab(MakeShared<FOdysseyPainterEditorMeshSelectorTab>(mEditor));
-    mEditor->AddTab(MakeShared<FOdysseyPainterEditorPaletteTab>(mEditor));
-    mEditor->AddTab(MakeShared<FOdysseyPainterEditorViewportTab>(mEditor));
-    mEditor->AddTab(MakeShared<FOdysseyPainterEditorHUDTab>(mEditor));
-    mEditor->AddTab(MakeShared<FOdysseyPainterEditorBrushSelectorTab>(mEditor));
-    mEditor->AddTab(MakeShared<FOdysseyPainterEditorColorWheelTab>(mEditor));
-    mEditor->AddTab(MakeShared<FOdysseyPainterEditorColorSlidersTab>(mEditor));
-    mEditor->AddTab(MakeShared<FOdysseyPainterEditorToolsTab>(mEditor));
-    mEditor->AddTab(MakeShared<FOdysseyPainterEditorSelectedVectorObjectTab>(mEditor));
-    mEditor->AddTab(MakeShared<FOdysseyPainterEditorTopTab>(mEditor));
-    mEditor->AddTab(MakeShared<FOdysseyPainterEditorToolOptionsTab>(mEditor));
+    TSharedRef<FOdysseyPainterEditorMeshSelectorTab> meshSelectorTab = MakeShared<FOdysseyPainterEditorMeshSelectorTab>(mEditor);
+    TSharedRef<FOdysseyPainterEditorPaletteTab> paletteTab = MakeShared<FOdysseyPainterEditorPaletteTab>(mEditor);
+    TSharedRef<FOdysseyPainterEditorViewportTab> viewportTab = MakeShared<FOdysseyPainterEditorViewportTab>(mEditor);
+    TSharedRef<FOdysseyPainterEditorHUDTab> HUDTab = MakeShared<FOdysseyPainterEditorHUDTab>(mEditor);
+    TSharedRef<FOdysseyPainterEditorBrushSelectorTab> brushSelectorTab = MakeShared<FOdysseyPainterEditorBrushSelectorTab>(mEditor);
+    TSharedRef<FOdysseyPainterEditorColorWheelTab> colorWheelTab = MakeShared<FOdysseyPainterEditorColorWheelTab>(mEditor);
+    TSharedRef<FOdysseyPainterEditorColorSlidersTab> colorSlidersTab = MakeShared<FOdysseyPainterEditorColorSlidersTab>(mEditor);
+    TSharedRef<FOdysseyPainterEditorToolsTab> toolsTab = MakeShared<FOdysseyPainterEditorToolsTab>(mEditor);
+    TSharedRef<FOdysseyPainterEditorSelectedVectorObjectTab> selectedVectorObjectTab = MakeShared<FOdysseyPainterEditorSelectedVectorObjectTab>(mEditor);
+    TSharedRef<FOdysseyPainterEditorTopTab> topTab = MakeShared<FOdysseyPainterEditorTopTab>(mEditor);
+    TSharedRef<FOdysseyPainterEditorToolOptionsTab> toolOptionsTab = MakeShared<FOdysseyPainterEditorToolOptionsTab>(mEditor);
+
+    //Used for the viewport drawing editor to know which tab to open by default
+    paletteTab->ShouldOpenByDefault(true);
+    brushSelectorTab->ShouldOpenByDefault(true);
+    colorWheelTab->ShouldOpenByDefault(true);
+    colorSlidersTab->ShouldOpenByDefault(true);
+    toolsTab->ShouldOpenByDefault(true);
+    selectedVectorObjectTab->ShouldOpenByDefault(true);
+    topTab->ShouldOpenByDefault(true);
+    toolOptionsTab->ShouldOpenByDefault(true);
+
+
+    mEditor->AddTab(brushSelectorTab);
+    mEditor->AddTab(toolOptionsTab);
+    mEditor->AddTab(selectedVectorObjectTab);
+    mEditor->AddTab(toolsTab);
+
+    mEditor->AddTab(meshSelectorTab);
+    mEditor->AddTab(paletteTab);
+    mEditor->AddTab(viewportTab);
+    mEditor->AddTab(HUDTab);
+    mEditor->AddTab(colorWheelTab);
+    mEditor->AddTab(colorSlidersTab);
+    mEditor->AddTab(topTab);
 }
 
 void

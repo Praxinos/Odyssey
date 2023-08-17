@@ -12,7 +12,7 @@ FOdysseyViewportDrawingEditorToolkit::FOdysseyViewportDrawingEditorToolkit(TShar
 	: FOdysseyModeToolkit(iEditor)
     , mEdMode(iEdMode)
 {
-    iEditor->SetTabsSaveFilename("IliadEdModeLayout.save");
+    iEditor->SetTabsSaveFilename("IliadEditorModeLayout.save");
 
 	TSharedRef<FOdysseyTextureEditorExtension> textureExtension = MakeShared<FOdysseyTextureEditorExtension>(&iEditor.Get());
     mViewportDrawingExtension = MakeShared<FOdysseyViewportDrawingEditorExtension>(&iEditor.Get());
@@ -82,6 +82,5 @@ FOdysseyViewportDrawingEditorToolkit::BuildToolPalette( FName iPalette, class FT
         );
     }
 }
-
 
 #undef LOCTEXT_NAMESPACE // "OdysseyViewportDrawingEditorToolkit"

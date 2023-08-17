@@ -59,8 +59,13 @@ void
 FOdysseyTextureEditorGUI::CreateTabs()
 {
 	//ADD NEW TABS
-    mExtension->GetEditor()->AddTab(MakeShared<FOdysseyTextureEditorLayerStackTab>(mExtension));
-    mExtension->GetEditor()->AddTab(MakeShared<FOdysseyTextureEditorTextureDetailsTab>(mExtension));
+    TSharedRef<FOdysseyTextureEditorLayerStackTab> layerStackTab = MakeShared<FOdysseyTextureEditorLayerStackTab>(mExtension);
+    TSharedRef<FOdysseyTextureEditorTextureDetailsTab> textureDetailsTab = MakeShared<FOdysseyTextureEditorTextureDetailsTab>(mExtension);
+
+    layerStackTab->ShouldOpenByDefault(true);
+
+    mExtension->GetEditor()->AddTab(layerStackTab);
+    mExtension->GetEditor()->AddTab(textureDetailsTab);
 }
 
 void

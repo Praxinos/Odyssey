@@ -100,7 +100,7 @@ FOdysseyPainterEditor::Initialize()
     
     //Init the GUI
     mGUI = MakeShareable(new FOdysseyPainterEditorGUI(this));
-    mGUI->Init();
+    mGUI->Initialize();
     
     //Init the extensions
     for (TSharedPtr<FOdysseyPainterEditorExtension> extension : mExtensions)
@@ -182,8 +182,8 @@ FOdysseyPainterEditor::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
         extension->ExtendMenu(iOwner, iMenuName);
 }
 
-bool
-FOdysseyPainterEditor::OnCloseRequested()
+void 
+FOdysseyPainterEditor::OnClose()
 {
     //Cleanup
     if (mSelectedTool)
@@ -198,10 +198,12 @@ FOdysseyPainterEditor::OnCloseRequested()
     for (TSharedPtr<FOdysseyPainterEditorExtension> extension : mExtensions)
         extension->Finalize();
 
+    mGUI->Finalize();
+
     UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll(this);
 	delete mHUDSystem;
 
-    return true;
+    FOdysseyEditor::OnClose();
 }
 
 void

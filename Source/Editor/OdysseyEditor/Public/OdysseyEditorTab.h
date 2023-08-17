@@ -18,6 +18,10 @@ public:
     bool IsOpened() const;
     const FText& GetName() const;
     const FSlateIcon& GetIcon() const;
+    FMinorTabConfig GetMinorTabConfig();
+
+    bool ShouldOpenByDefault() const;
+    void ShouldOpenByDefault(bool iShouldOpenByDefault);
 
 public:
     virtual bool CanOpen() const;
@@ -40,6 +44,7 @@ public:
 private:
     FText mDisplayName;
     FSlateIcon mIcon;
+    bool mShouldOpenByDefault;
     TSharedPtr<SWidget> mWidget;
     TWeakPtr< FTabManager > mTabManager;
 };

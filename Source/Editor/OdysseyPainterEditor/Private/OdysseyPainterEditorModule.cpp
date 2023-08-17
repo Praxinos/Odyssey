@@ -16,6 +16,8 @@
 #include "Tools/RasterDrawingTool/OdysseyBrushOptionsOverrides.h"
 #include "Tools/RasterDrawingTool/OdysseyBlendParametersOverrides.h"
 #include "FreehandShape/OdysseyFreehandShapeOverrides.h"
+
+#include "PainterEditor/OdysseyPainterEditorGUI.h"
 #include <ULIS>
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorModule"
@@ -31,6 +33,7 @@ FOdysseyPainterEditorModule::StartupModule()
     RegisterBrushOverrides(); //First thing to do, as it modifies the Brush CDO
     RegisterSettings();
     RegisterCommands();
+    RegisterLevelEditorLayoutExtensions();
 }
 
 void
@@ -39,6 +42,7 @@ FOdysseyPainterEditorModule::ShutdownModule()
     UnregisterBrushOverrides();
     UnregisterSettings();
     UnregisterCommands();
+    UnregisterLevelEditorLayoutExtensions();
 }
 
 void
@@ -90,6 +94,20 @@ void
 FOdysseyPainterEditorModule::UnregisterBrushOverrides()
 {
 
+}
+
+void
+FOdysseyPainterEditorModule::RegisterLevelEditorLayoutExtensions()
+{
+    FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor");
+	mExtendLevelEditorLayout = LevelEditorModule.OnRegisterLayoutExtensions().AddStatic(&FOdysseyPainterEditorGUI::ExtendLevelEditorLayout);
+}
+
+void
+FOdysseyPainterEditorModule::UnregisterLevelEditorLayoutExtensions()
+{
+    FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor");
+	LevelEditorModule.OnRegisterLayoutExtensions().Remove(mExtendLevelEditorLayout);
 }
 
 IMPLEMENT_MODULE( FOdysseyPainterEditorModule, OdysseyPainterEditor );

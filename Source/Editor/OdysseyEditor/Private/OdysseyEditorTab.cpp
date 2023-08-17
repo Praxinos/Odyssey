@@ -14,6 +14,7 @@ FOdysseyEditorTab::~FOdysseyEditorTab()
 FOdysseyEditorTab::FOdysseyEditorTab(FText iDisplayName, FSlateIcon iIcon)
 	: mDisplayName(iDisplayName)
 	, mIcon(iIcon)
+	, mShouldOpenByDefault(false)
 	, mWidget(nullptr)
 {
 }
@@ -107,6 +108,31 @@ TSharedPtr< FTabManager >
 FOdysseyEditorTab::GetTabManager() const
 {
 	return mTabManager.Pin();
+}
+
+FMinorTabConfig
+FOdysseyEditorTab::GetMinorTabConfig()
+{
+	//Used to register tabs into the mode toolkit
+	//Also allows us to define a default layout
+	FMinorTabConfig config(GetId());
+	config.OnSpawnTab = FOnSpawnTab::CreateSP( AsShared(), &FOdysseyEditorTab::SpawnTab );
+	config.TabLabel = DisplayName();
+	config.TabIcon = Icon();
+
+	return config;
+}
+
+bool
+FOdysseyEditorTab::ShouldOpenByDefault() const
+{
+	return mShouldOpenByDefault;
+}
+
+void
+FOdysseyEditorTab::ShouldOpenByDefault(bool iShouldOpenByDefault)
+{
+	mShouldOpenByDefault = iShouldOpenByDefault;
 }
 
 void

@@ -3,6 +3,7 @@
 
 #include "OdysseyModeToolkit.h"
 #include "LevelEditor.h"
+#include "Interfaces/IMainFrameModule.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyModeToolkit"
 
@@ -23,13 +24,18 @@ FOdysseyModeToolkit::~FOdysseyModeToolkit()
 
     FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>(TEXT("LevelEditor"));
 
-    mEditor->SaveOpenedTabs();
+    if (!mTabSaved)
+    {
+        mEditor->SaveOpenedTabs();
+        mTabSaved = true;
+    }
     mEditor->CloseAllTabs();
     mEditor->UnregisterTabSpawners(LevelEditorModule.GetLevelEditorTabManager()->AsShared());
 }
 
 FOdysseyModeToolkit::FOdysseyModeToolkit(TSharedRef<FOdysseyEditor> iEditor)
     : mEditor(iEditor)
+    , mTabSaved(false)
 {
 }
 
@@ -54,7 +60,7 @@ FOdysseyModeToolkit::Initialize(
 
     FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>(TEXT("LevelEditor"));
     mEditor->RegisterTabSpawners(LevelEditorModule.GetLevelEditorTabManager()->AsShared());
-    mEditor->LoadOpenedTabs();
+    //mEditor->LoadOpenedTabs();
 
     mEditor->ExtendMenu( this, FName("LevelEditor.MainMenu") );
     mEditor->BindShortcuts(this);
@@ -63,9 +69,25 @@ FOdysseyModeToolkit::Initialize(
     mEditor->OnRemoveEditedObjectDelegate().AddRaw(this, &FOdysseyModeToolkit::OnRemoveEditedObject);
 
     UToolMenus::Get()->RefreshAllWidgets(); //Requested after ExtendMenu
+
+    IMainFrameModule& mainFrameModule = FModuleManager::LoadModuleChecked<IMainFrameModule>(TEXT("MainFrame"));
+    const TSharedPtr<SWindow>& mainFrameParentWindow = mainFrameModule.GetParentWindow();
+    mainFrameParentWindow->SetOnWindowClosed(FOnWindowClosed::CreateSP(this, &FOdysseyModeToolkit::OnWindowClosed));
 }
 
-TSharedPtr<SWidget> FOdysseyModeToolkit::GetInlineContent() const
+void
+FOdysseyModeToolkit::OnWindowClosed(const TSharedRef<SWindow>& Window)
+{
+    //PATCH: Needed to save layout when closing Unreal Engine directly while being in ILIAD Mode
+    if (!mTabSaved)
+    {
+        mEditor->SaveOpenedTabs();
+        mTabSaved = true;
+    }
+}
+
+TSharedPtr<SWidget>
+FOdysseyModeToolkit::GetInlineContent() const
 {
     //TODO: Create the widget in ViewportDrawingEditorToolkit
 	//return mEditor->GetGUI()->GetWidget();
@@ -142,6 +164,23 @@ FOdysseyModeToolkit::RemoveEditingAsset(UObject* Asset)
 void FOdysseyModeToolkit::ExtendMenu()
 {
     
+}
+
+void
+FOdysseyModeToolkit::RequestModeUITabs()
+{
+	FModeToolkit::RequestModeUITabs();
+	if (TSharedPtr<FAssetEditorModeUILayer> modeUILayerPtr = ModeUILayer.Pin())
+	{
+        mEditor->BuildModeLayout(modeUILayerPtr);
+    }
+}
+
+void
+FOdysseyModeToolkit::InvokeUI()
+{
+	FModeToolkit::InvokeUI();
+    mEditor->InvokeModeLayout();
 }
 
 #undef LOCTEXT_NAMESPACE // "OdysseyModeToolkit"

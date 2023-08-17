@@ -56,7 +56,7 @@ public:
     virtual TSharedRef<FTabManager::FLayout> CreateLayout() override;
     virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
     virtual void ExtendMenu( FToolMenuOwner iOwner, FName iMenuName ) override;
-    virtual bool OnCloseRequested() override;
+    virtual void OnClose() override;
 
 public:
     // Getters

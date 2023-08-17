@@ -88,7 +88,11 @@ void
 FOdysseyFlipbookEditorGUI::CreateTabs()
 {
 	//ADD NEW TABS
-	mExtension->GetEditor()->AddTab(MakeShared<FOdysseyFlipbookEditorTimelineTab>(mExtension));
+	TSharedRef<FOdysseyFlipbookEditorTimelineTab> timelineTab = MakeShared<FOdysseyFlipbookEditorTimelineTab>(mExtension);
+
+	timelineTab->ShouldOpenByDefault(true);
+
+	mExtension->GetEditor()->AddTab(timelineTab);
 }
 
 /* TSharedRef<FTabManager::FSplitter>

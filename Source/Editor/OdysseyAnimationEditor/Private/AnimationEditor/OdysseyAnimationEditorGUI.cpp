@@ -56,8 +56,13 @@ void
 FOdysseyAnimationEditorGUI::CreateTabs()
 {
 	//ADD NEW TABS
-	mExtension->GetEditor()->AddTab(MakeShared<FOdysseyAnimationEditorLayerStackTab>(mExtension));
-	mExtension->GetEditor()->AddTab(MakeShared<FOdysseyAnimationEditorLightTableTab>(mExtension));
+	TSharedRef<FOdysseyAnimationEditorLayerStackTab> layerStackTab = MakeShared<FOdysseyAnimationEditorLayerStackTab>(mExtension);
+	TSharedRef<FOdysseyAnimationEditorLightTableTab> lightTableTab = MakeShared<FOdysseyAnimationEditorLightTableTab>(mExtension);
+
+	layerStackTab->ShouldOpenByDefault(true);
+
+	mExtension->GetEditor()->AddTab(layerStackTab);
+	mExtension->GetEditor()->AddTab(lightTableTab);
 }
 
 /* TSharedRef<FTabManager::FSplitter>
