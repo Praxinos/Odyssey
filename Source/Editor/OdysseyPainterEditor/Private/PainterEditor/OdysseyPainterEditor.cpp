@@ -5,6 +5,7 @@
 #include "Tools/OdysseyPainterEditorTool.h"
 #include "ObjectEditorUtils.h"
 
+#include "OdysseyPainterEditorSource.h"
 #include "OdysseyPainterEditorTopTab.h"
 #include "OdysseyHUDSystem.h"
 #include "ULISLoaderModule.h"
@@ -54,7 +55,8 @@ FOdysseyPainterEditor::~FOdysseyPainterEditor()
 }
 
 FOdysseyPainterEditor::FOdysseyPainterEditor()
-    : mSelectedTool(nullptr)
+    : mSource(nullptr)
+    , mSelectedTool(nullptr)
     , mVectorEditionMode(eVectorEditionMode::Object)
     , mHUDSystem(new FOdysseyHUDSystem())
 	, mBrushContexts()
@@ -201,6 +203,12 @@ FOdysseyPainterEditor::OnCloseRequested()
     //Cleanup
     if (mSelectedTool)
         mSelectedTool->Inactivate();
+    
+    if (mSource)
+    {
+        mSource->Inactivate();
+        mSource = nullptr;
+    }
 
     return FOdysseyEditor::OnCloseRequested();
 }
@@ -210,10 +218,28 @@ FOdysseyPainterEditor::OnSelectedToolChanged()
 {
 }
 
-FOdysseyPainterEditor::FOnSelectedToolChanged&
+FSimpleMulticastDelegate&
 FOdysseyPainterEditor::OnSelectedToolChangedDelegate()
 {
     return mOnSelectedToolChanged;
+}
+
+TSharedPtr<FOdysseyPainterEditorSource>
+FOdysseyPainterEditor::GetSource() const
+{
+    return mSource;
+}
+
+void
+FOdysseyPainterEditor::OnSourceInactivated()
+{
+
+}
+
+void
+FOdysseyPainterEditor::OnSourceActivated()
+{
+
 }
 
 //--------------------------------------------------------------------------------------
@@ -340,8 +366,46 @@ FOdysseyPainterEditor::GetSelectedTool() const
     return mSelectedTool;
 }
 
+FOdysseyMediaProvider
+FOdysseyPainterEditor::GetCurrentMediaProvider()
+{
+    TSharedPtr<FOdysseyPainterEditorSource> source = GetSource(); 
+    if (!source)
+        return FOdysseyMediaProvider();
+
+    return source->GetCurrentMediaProvider();
+}
+
+UOdysseyLayerStack*
+FOdysseyPainterEditor::LayerStack() const
+{
+	TSharedPtr<FOdysseyPainterEditorSource> source = GetSource();
+	if (!source)
+		return nullptr;
+
+	return source->GetLayerStack();
+}
+
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Setters
+
+void
+FOdysseyPainterEditor::SetSource(TSharedPtr<FOdysseyPainterEditorSource> iSource)
+{
+    if (mSource)
+    {
+        mSource->Inactivate();
+        mSource = nullptr;
+        OnSourceInactivated();
+    }
+
+    if (iSource)
+    {
+        mSource = iSource;
+        mSource->Activate();
+        OnSourceActivated();
+    }
+}
 
 void
 FOdysseyPainterEditor::PaintColor(const FOdysseyBrushColor& iColor, bool iIsCommit)

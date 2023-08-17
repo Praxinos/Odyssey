@@ -29,6 +29,8 @@ class FOdysseyHUDSystem;
 class IOdysseySurfaceEditable;
 class UOdysseyPainterEditorTool;
 class FOdysseyBrushContext;
+class FOdysseyPainterEditorSource;
+class UOdysseyLayerStack;
 
 enum class eVectorEditionMode : uint8
 {
@@ -43,9 +45,6 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditor
     : public FOdysseyEditor
 {
 public:
-    DECLARE_MULTICAST_DELEGATE(FOnSelectedToolChanged);
-
-public:
     // Construction / Destruction
     virtual ~FOdysseyPainterEditor();
     FOdysseyPainterEditor();
@@ -58,19 +57,22 @@ protected:
 public:
     // Getters
     
-    FOnSelectedToolChanged&                              OnSelectedToolChangedDelegate();
+    FSimpleMulticastDelegate& OnSelectedToolChangedDelegate();
     
+    TSharedPtr<FOdysseyPainterEditorSource>              GetSource() const;
+    virtual void OnSourceInactivated();
+    virtual void OnSourceActivated();
+
     virtual void OnSelectedToolChanged();
 
     virtual FOdysseyPainterEditorGUI*                   GetGUI() = 0;
 
     virtual FOdysseyHUDSystem*                              HUDSystem() const;
-	virtual UTexture*                                       DisplayTexture() const = 0;
-    virtual const FOdysseyBrushColor&                       PaintColor() const;
+	virtual const FOdysseyBrushColor&                       PaintColor() const;
     virtual UOdysseyPainterEditorTool*                      GetSelectedTool() const;
-    virtual TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> GetDisplayBlock() = 0;
-    virtual FOdysseyMediaProvider                           GetCurrentMediaProvider() = 0;
-
+    virtual FOdysseyMediaProvider                           GetCurrentMediaProvider();
+    virtual UOdysseyLayerStack*                      LayerStack() const;
+    
     virtual UOdysseyPainterEditorRasterDrawingTool*                  GetRasterDrawingTool() const;
     virtual UOdysseyPainterEditorVectorPrimitiveDrawingTool*         GetVectorPrimitiveDrawingTool() const;
     virtual UOdysseyPainterEditorVectorPathDrawingTool*              GetVectorPathDrawingTool() const;
@@ -110,6 +112,7 @@ public:
 
 public:
     // Setters
+    void  SetSource(TSharedPtr<FOdysseyPainterEditorSource> iSource);
     void  PaintColor(const FOdysseyBrushColor& iColor, bool iIsCommit);
     void  SetSelectedTool( UOdysseyPainterEditorTool* iSelectedTool );
 
@@ -136,6 +139,7 @@ protected:
 
 protected:
     //Tools
+    TSharedPtr<FOdysseyPainterEditorSource>  mSource;
     UOdysseyPainterEditorTool*               mSelectedTool;
     TArray<UOdysseyPainterEditorTool*>       mTools;
 
@@ -144,7 +148,7 @@ protected:
     FOdysseyHUDSystem*              mHUDSystem;
     TArray<FOdysseyBrushContext*>   mBrushContexts;
     FOdysseyBrushColor              mPaintColor;
-    FOnSelectedToolChanged          mOnSelectedToolChanged;
+    FSimpleMulticastDelegate        mOnSelectedToolChanged;
     //TSharedPtr<FOdysseyPainterEditorToolContext> mToolContext;
     
     UOdysseyPainterEditorRasterDrawingTool* mRasterDrawingTool;

@@ -7,6 +7,7 @@
 #include "OdysseyFlipbookEditorTimelineTab.h"
 #include "OdysseySurfaceTexture2D.h"
 #include "SOdysseyFlipbookTimelineView.h"
+#include "TextureEditor/OdysseyTextureEditorSource.h"
 
 #include <ULIS>
 
@@ -72,7 +73,9 @@ FOdysseyFlipbookEditor::InitData(UObject* iEditedObject)
     //We don't need to initialize Texture if there is no keyFrames
     if (mFlipbookWrapper->Flipbook()->GetNumKeyFrames() > 0)
 	{
-    	SetTexture(mFlipbookWrapper->GetKeyframeTexture(0));
+		UTexture2D* texture = mFlipbookWrapper->GetKeyframeTexture(0);
+		TSharedPtr<FOdysseyTextureEditorSource> source = MakeShared<FOdysseyTextureEditorSource>(texture);
+		SetSource(source);
 	}
 	
 	FOdysseyTextureEditor::InitData(iEditedObject);
@@ -133,7 +136,8 @@ FOdysseyFlipbookEditor::SetTextureAtKeyframeIndex(int32 iKeyframeIndex)
 		return;
 	}
 
-    SetTexture(texture);
+	TSharedPtr<FOdysseyTextureEditorSource> source = MakeShared<FOdysseyTextureEditorSource>(texture);
+	SetSource(source);
 }
 
 void

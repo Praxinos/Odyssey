@@ -31,7 +31,13 @@ FOdysseyFlipbookEditorViewportTab::Texture() const
     if (!mEditor->GetGUI()->GetTimelineTab()->Timeline())
         return nullptr;
 
-    return mEditor->GetGUI()->GetTimelineTab()->Timeline()->IsScrubbing() ? mEditor->PreviewTexture() : mEditor->DisplayTexture();
+    if (mEditor->GetGUI()->GetTimelineTab()->Timeline()->IsScrubbing())
+        return mEditor->PreviewTexture();
+
+    if (!mEditor->GetSource())
+        return nullptr;
+
+    return mEditor->GetSource()->DisplayTexture();
 }
 
 //--------------------------------------------------------------------------------------

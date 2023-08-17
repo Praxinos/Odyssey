@@ -13,9 +13,12 @@ class FOdysseyAnimationEditor;
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerStack
     : public SCompoundWidget
 {
+    SLATE_DECLARE_WIDGET(SOdysseyAnimationLayerStack, SCompoundWidget)
+
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationLayerStack)
         {}
+        SLATE_ATTRIBUTE( UOdysseyAnimationLayerStack*, LayerStack )
     SLATE_END_ARGS()
 
 public:
@@ -32,9 +35,11 @@ private:
 private:
     TSharedRef<ITableRow> OnGenerateRow(UOdysseyLayer* iLayer, const TSharedRef<STableViewBase>& iOwnerTable);
     void OnTimelineScrollBarScrolled(float iOffset);
+    void RebuildWidgets();
 
 private:
     FOdysseyAnimationEditor* mEditor;
+    TSlateAttribute<UOdysseyAnimationLayerStack*> mLayerStack;
     TSharedPtr<SOdysseyLayerStackTreeView> mTreeView;
 	TSharedPtr<SScrollBar> mTimelineScrollBar;
     TSharedPtr<class SOdysseyAnimationTimelineControl> mTimelineControl;

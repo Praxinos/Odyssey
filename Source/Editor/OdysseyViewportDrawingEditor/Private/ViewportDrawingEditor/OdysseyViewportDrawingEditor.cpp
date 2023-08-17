@@ -7,6 +7,7 @@
 #include "FOdysseyViewportDrawingEditorModeToolbar.h"
 #include "Materials/MaterialExpressionTextureCoordinate.h"
 #include "OdysseyViewportDrawingEditorUtils.h"
+#include "TextureEditor/OdysseyTextureEditorSource.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyViewportDrawingEditor"
 
@@ -225,15 +226,20 @@ void
 FOdysseyViewportDrawingEditor::SetTexture(UTexture2D* iTexture)
 {
 	mTargetToPaintWillChangeDelegate.Broadcast();
-	UTexture2D* texture = Texture();
+	/* UTexture2D* texture = Texture();
 	if ( texture )
-		RemoveEditedObject(texture);
+		RemoveEditedObject(texture); */
 
-	FOdysseyTextureEditor::SetTexture(iTexture);
+	SetSource(nullptr);
+	if (iTexture)
+	{
+		TSharedPtr<FOdysseyTextureEditorSource> source = MakeShared<FOdysseyTextureEditorSource>(iTexture);
+		SetSource(source);
+	}
 
-	texture = Texture();
+	/* texture = Texture();
 	if ( texture )
-		AddEditedObject(texture);
+		AddEditedObject(texture); */
 
 	mTargetToPaintChangedDelegate.Broadcast();
 }

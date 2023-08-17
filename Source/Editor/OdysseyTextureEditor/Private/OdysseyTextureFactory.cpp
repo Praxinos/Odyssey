@@ -9,12 +9,10 @@
 
 #include "ULISLoaderModule.h"
 #include "OdysseySurfaceTexture2DEditable.h"
-#include "SOdysseyTextureConfigureWindow.h"
+#include "Widgets/SOdysseyTextureConfigureWindow.h"
 
 #include <ULIS>
 
-/////////////////////////////////////////////////////
-// UOdysseyTextureFactory
 UOdysseyTextureFactory::UOdysseyTextureFactory( const FObjectInitializer& iObjectInitializer )
     : Super( iObjectInitializer )
 {

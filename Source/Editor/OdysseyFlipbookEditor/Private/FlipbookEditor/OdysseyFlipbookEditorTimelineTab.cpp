@@ -7,6 +7,7 @@
 #include "OdysseyFlipbookEditorCommands.h"
 #include "SOdysseyFlipbookTimelineView.h"
 #include "Types/NavigationMetaData.h"
+#include "TextureEditor/OdysseyTextureEditorSource.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyFlipbookEditorTimelineTab"
 
@@ -155,7 +156,8 @@ FOdysseyFlipbookEditorTimelineTab::SetTextureAtKeyframeIndex(int32 iKeyframeInde
 		return;
 	}
 
-    mEditor->SetTexture(texture);
+	TSharedPtr<FOdysseyTextureEditorSource> source = MakeShared<FOdysseyTextureEditorSource>(texture);
+	mEditor->SetSource(source);
 }
 
 void

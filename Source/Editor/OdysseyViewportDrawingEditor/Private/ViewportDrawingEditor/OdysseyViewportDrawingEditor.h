@@ -81,7 +81,7 @@ public:
     void SetActor(AActor* iActor);
     void SetComponent(UMeshComponent* iComponent);
     void SetMaterial(UMaterialInterface* iMaterial);
-    void SetTexture(UTexture2D* iTexture) override;
+    void SetTexture(UTexture2D* iTexture);
     void SetPaintingAdapterMethod(EOdysseyViewportDrawingPaintingAdapterMethod iNewMethod);
 
 public:

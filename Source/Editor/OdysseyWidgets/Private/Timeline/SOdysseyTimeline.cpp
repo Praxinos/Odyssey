@@ -103,8 +103,8 @@ int32 SOdysseyTimeline::OnPaint(const FPaintArgs& Args, const FGeometry& Allotte
 	const bool bActiveFeedback = IsHovered() || mIsScrubbing;
 
 	const FSlateBrush* GenericBrush = FCoreStyle::Get().GetBrush( "GenericWhiteBox" );
-	const FLinearColor& backgroundColorEven = FOdysseyStyle::GetColor("ScrubWidget.backgroundColorEven");
-	const FLinearColor& backgroundColorOdd = FOdysseyStyle::GetColor("ScrubWidget.backgroundColorOdd");
+	const FLinearColor& backgroundColorEven = FOdysseyStyle::GetColor("FlipbookTimeline.BackgroundColorEven");
+	const FLinearColor& backgroundColorOdd = FOdysseyStyle::GetColor("FlipbookTimeline.BackgroundColorOdd");
 
 	FAppStyle::GetBrush( TEXT( "ProgressBar.Background" ) );
 

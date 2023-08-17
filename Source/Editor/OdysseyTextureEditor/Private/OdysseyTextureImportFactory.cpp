@@ -13,8 +13,6 @@
 #include "ULISLoaderModule.h"
 #include <ULIS>
 
-/////////////////////////////////////////////////////
-// UOdysseyTextureFactory
 UOdysseyTextureImportFactory::UOdysseyTextureImportFactory( const FObjectInitializer& iObjectInitializer )
     : Super( iObjectInitializer )
 {

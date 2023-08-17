@@ -10,8 +10,6 @@
 
 #include <ULIS>
 
-/////////////////////////////////////////////////////
-// UOdysseyTextureFactory
 UOdysseyPaletteFactory::UOdysseyPaletteFactory( const FObjectInitializer& iObjectInitializer )
     : Super( iObjectInitializer )
 {

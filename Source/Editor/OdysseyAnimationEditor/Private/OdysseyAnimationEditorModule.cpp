@@ -31,6 +31,10 @@ FOdysseyAnimationEditorModule::CreateOdysseyAnimationEditor( UOdysseyAnimation* 
     TSharedPtr<FOdysseyAnimationEditorToolkit> toolkit = MakeShareable( new FOdysseyAnimationEditorToolkit(editor) );
 	editor->Initialize(iAnimation);
     toolkit->Initialize();
+
+	TSharedPtr<FOdysseyAnimationEditorSource> source = MakeShared<FOdysseyAnimationEditorSource>(iAnimation);
+	editor->SetSource(source);
+
     return toolkit.ToSharedRef();
 }
 

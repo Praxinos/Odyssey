@@ -39,7 +39,10 @@ FOdysseyAnimationEditorLayerStackTab::FOdysseyAnimationEditorLayerStackTab(FOdys
 TSharedPtr<SWidget>
 FOdysseyAnimationEditorLayerStackTab::CreateWidget()
 {
-    return SNew(SVerticalBox)
+    return SNew(SOdysseyAnimationLayerStack, mEditor)
+        .LayerStack(this, &FOdysseyAnimationEditorLayerStackTab::LayerStack);
+
+    /* return SNew(SVerticalBox)
             + SVerticalBox::Slot()
             .AutoHeight()
             [
@@ -64,7 +67,7 @@ FOdysseyAnimationEditorLayerStackTab::CreateWidget()
             .FillHeight(1.0)
             [
                 SNew(SOdysseyAnimationLayerStack, mEditor)
-            ];
+            ]; */
 }
 
 void

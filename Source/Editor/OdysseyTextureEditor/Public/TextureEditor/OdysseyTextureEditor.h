@@ -26,30 +26,16 @@ public:
     virtual void InitTools() override;
     virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
     virtual void ExtendMenu(FToolMenuOwner iOwner, FName iMenuName) override;
-    virtual void Tick(float iDeltaTime) override;
-    virtual FOdysseyMediaProvider GetCurrentMediaProvider() override;
 
     UOdysseyPainterEditorTool* FindDefaultToolForCurrentLayer();
     void SelectDefaultTool();
     virtual void OnSelectedToolChanged() override;
-
-public:
-    // Getters
-	virtual UTexture2D*				    Texture() const;
-    virtual UOdysseyTextureLayerStack*	LayerStack() const;
-	virtual UTexture*                   DisplayTexture() const override;
-    virtual TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> GetDisplayBlock() override;
-    
-    virtual void				        SetTexture(UTexture2D* iTexture);
-    UOdysseyTextureLayerStackUserData*  TextureUserData() const;
-
-    //TSharedPtr<FOdysseyRasterBlock> GetCurrentRasterBlock() const;
-    //bool IsRasterBlockReadOnly() const;
-    //FOdysseyVectorEngine* GetCurrentVectorEngine() const;
+    UTexture2D* Texture() const;
 
 public:
     // Overrides
-    virtual bool OnCloseRequested() override;
+    virtual void OnSourceInactivated() override;
+    virtual void OnSourceActivated() override;
 
 public:
     // Overrides
@@ -72,9 +58,6 @@ private:
     //void UpdateToolContext();
 
 private:
-    UTexture2D* mTexture;
 	TSharedPtr<FOdysseyTextureEditorGUI> mGUI;
-
-    TSharedPtr<IOdysseyHandle> mLayerStackPreloadHandle;
     TMap<UClass*, UOdysseyPainterEditorTool*> mCurrentToolPerLayerClass;
 };

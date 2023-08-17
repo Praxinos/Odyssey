@@ -4,6 +4,7 @@
 #include "TextureEditor/OdysseyTextureEditor.h"
 
 #include "TextureEditor/OdysseyTextureEditorGUI.h"
+#include "TextureEditor/OdysseyTextureEditorSource.h"
 #include "OdysseyLayerFunctionLibrary.h"
 #include "LayerStack/OdysseyTextureLayerStack.h"
 #include "LayerStack/OdysseyTextureLayerImageRaster.h"
@@ -20,16 +21,12 @@
 //----------------------------------------------------------- Construction / Destruction
 FOdysseyTextureEditor::~FOdysseyTextureEditor()
 {
-	UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll(this);
-	SetTexture(nullptr);
 }
 
 FOdysseyTextureEditor::FOdysseyTextureEditor() :
 	FOdysseyPainterEditor(),
-	mTexture(nullptr),
 	mGUI(nullptr)
 {
-	UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw(this, &FOdysseyTextureEditor::OnCurrentLayerChanged);
 }
 
 //--------------------------------------------------------------------------------------
@@ -39,9 +36,15 @@ void
 FOdysseyTextureEditor::InitData(UObject* iEditedObject)
 {
 	
-	UTexture2D* texture = Cast<UTexture2D>(iEditedObject);
+	/* UTexture2D* texture = Cast<UTexture2D>(iEditedObject);
 	if (texture)
-		SetTexture(texture);
+		SetTexture(texture); 
+	
+
+	TSharedPtr<FOdysseyPainterEditorSource> source = MakeShared<FOdysseyPainterEditorSource>(iTexture);
+	SetSource(source);
+
+		*/
 
 	//Call it there so that tools are initialized after basic data
 	FOdysseyPainterEditor::InitData(iEditedObject);
@@ -52,30 +55,7 @@ FOdysseyTextureEditor::InitTools()
 {
 	FOdysseyPainterEditor::InitTools();
 	SelectDefaultTool();
-	//UpdateToolContext();
-	
-	/* mToolContext->GetRasterBlockAttribute().BindRaw(this, &FOdysseyTextureEditor::GetCurrentRasterBlock);
-	mToolContext->GetIsRasterBlockReadOnlyAttribute().BindRaw(this, &FOdysseyTextureEditor::IsRasterBlockReadOnly);
-    mToolContext->GetVectorEngineAttribute().BindRaw(this, &FOdysseyTextureEditor::GetCurrentVectorEngine); */
 }
-
-void
-FOdysseyTextureEditor::Tick(float iDeltaTime)
-{
-	//UpdateToolContext();
-	FOdysseyPainterEditor::Tick(iDeltaTime);
-}
-
-/* void
-FOdysseyTextureEditor::UpdateToolContext()
-{
-	FOdysseyPainterEditorToolContext::FParams toolContextParams;
-	toolContextParams.mRasterBlock = GetCurrentRasterBlock();
-	toolContextParams.mIsRasterBlockReadOnly = IsRasterBlockReadOnly();
-	toolContextParams.mVectorEngine = GetCurrentVectorEngine();
-	
-	mToolContext->Set(toolContextParams);
-} */
 
 void
 FOdysseyTextureEditor::BindShortcuts(FBaseToolkit* iToolkit)
@@ -127,38 +107,26 @@ FOdysseyTextureEditor::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
 //------------------------------------------------------------------------------ Getters
 
 void
-FOdysseyTextureEditor::SetTexture(UTexture2D* iTexture)
+FOdysseyTextureEditor::OnSourceInactivated()
 {
-	if (mSelectedTool)
+	if ( mSelectedTool )
+		//just reload the tool
 		mSelectedTool->Inactivate();
 
-    //Inactivate Fast Update
-	UOdysseyTextureLayerStack* layerStack = LayerStack();
-	if ( layerStack )
-		layerStack->InactivateTextureFastUpdate();
+	UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll(this);
+}
 
-	//Set the texture
-    mTexture = iTexture;
-	if ( !mTexture )
-	{
-		SetSelectedTool(nullptr);
-		mLayerStackPreloadHandle = nullptr;
+void
+FOdysseyTextureEditor::OnSourceActivated()
+{
+	if (mSource->Id() != FOdysseyTextureEditorSource::StaticId())
 		return;
-	}
-
-	layerStack = LayerStack();
-	if ( layerStack )
-	{
-		//Do it in 3 lines to avoid unexpected handles destruction in the process
-		mLayerStackPreloadHandle = layerStack->Preload();
-		
-		layerStack->ActivateTextureFastUpdate();
-	}
+	
+	UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw(this, &FOdysseyTextureEditor::OnCurrentLayerChanged);
 
 	if ( mSelectedTool && mSelectedTool->IsActivable() )
 	{
 		//just reload the tool
-		mSelectedTool->Inactivate();
 		mSelectedTool->Activate();
 	}
 	else
@@ -226,119 +194,16 @@ FOdysseyTextureEditor::SelectDefaultTool()
 UTexture2D*
 FOdysseyTextureEditor::Texture() const
 {
-	return mTexture;
-}
-
-UOdysseyTextureLayerStack*
-FOdysseyTextureEditor::LayerStack() const
-{
-	UOdysseyTextureLayerStackUserData* userData = TextureUserData();
-	if (!userData)
-		return nullptr;
-	
-	return userData->GetLayerStack();
-}
-
-UTexture*
-FOdysseyTextureEditor::DisplayTexture() const
-{
-	return mTexture;
-}
-
-TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>
-FOdysseyTextureEditor::GetDisplayBlock()
-{
-	UOdysseyTextureLayerStack* layerStack = LayerStack();
-	if (!layerStack)
+	TSharedPtr<FOdysseyPainterEditorSource> source = GetSource();
+	if (!source || source->Id() != FOdysseyTextureEditorSource::StaticId())
 		return nullptr;
 
-	return layerStack->GetSurface()->Block();
-}
-
-UOdysseyTextureLayerStackUserData*
-FOdysseyTextureEditor::TextureUserData() const
-{
-	if ( !mTexture )
-		return nullptr;
-
-    UOdysseyTextureLayerStackUserData* userData = Cast<UOdysseyTextureLayerStackUserData>(mTexture->GetAssetUserDataOfClass(UOdysseyTextureLayerStackUserData::StaticClass()));
-    if (userData)
-        return userData;
-
-    //Init user data
-	userData = NewObject<UOdysseyTextureLayerStackUserData>(mTexture, NAME_None, RF_Public);
-    userData->InitWithDefaultLayerStack();
-
-    // Notify for changes
-    mTexture->AddAssetUserData( userData );
-    mTexture->PostEditChange();
-    return userData;
-}
-
-/* TSharedPtr<FOdysseyRasterBlock>
-FOdysseyTextureEditor::GetCurrentRasterBlock() const
-{
-	if ( !LayerStack() )
-		return nullptr;
-
-    UOdysseyTextureLayerImageRaster* currentLayerRaster = Cast<UOdysseyTextureLayerImageRaster>(LayerStack()->CurrentLayer.Get());
-
-	if (!currentLayerRaster)
-		return nullptr;
-	
-	return currentLayerRaster->GetRasterBlock();
-}
-
-bool
-FOdysseyTextureEditor::IsRasterBlockReadOnly() const
-{
-	UOdysseyTextureLayerImageRaster* currentLayerRaster = Cast<UOdysseyTextureLayerImageRaster>(LayerStack()->CurrentLayer.Get());
-	if (!currentLayerRaster)
-		return false;
-
-	bool isActive = UOdysseyLayerFunctionLibrary::IsLayerActivatedInStack(currentLayerRaster);
-	bool isLocked = UOdysseyLayerFunctionLibrary::IsLayerLockedInStack(currentLayerRaster);
-
-	return !isActive || isLocked;
-}
-
-FOdysseyVectorEngine*
-FOdysseyTextureEditor::GetCurrentVectorEngine() const
-{
-	if ( !LayerStack() )
-		return nullptr;
-
-    UOdysseyTextureLayerImageVector* currentLayerVector = Cast<UOdysseyTextureLayerImageVector>(LayerStack()->CurrentLayer.Get());
-
-	if (!currentLayerVector)
-		return nullptr;
-	
-	return currentLayerVector->GetEngine();
-} */
-
-FOdysseyMediaProvider
-FOdysseyTextureEditor::GetCurrentMediaProvider()
-{
-	UOdysseyTextureLayerStack* layerStack = LayerStack();
-	if (!layerStack)
-		return FOdysseyMediaProvider();
-
-	UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
-	if (!currentLayer)
-		return FOdysseyMediaProvider();
-
-	return currentLayer->GetMediaProvider();
+	TSharedPtr<FOdysseyTextureEditorSource> textureSource = StaticCastSharedPtr<FOdysseyTextureEditorSource>(source);
+	return textureSource->GetTexture();
 }
 
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------- Overrides
-
-bool
-FOdysseyTextureEditor::OnCloseRequested()
-{
-	SetTexture(nullptr); //close properly the currently loaded texture
-	return true;
-}
 
 FOdysseyTextureEditorGUI*
 FOdysseyTextureEditor::GetGUI()

@@ -12,7 +12,7 @@ class ODYSSEYTEXTUREEDITOR_API SOdysseyTextureLayerStack
     : public SCompoundWidget
 {
 
-SLATE_DECLARE_WIDGET(SOdysseyTextureLayerStack, STreeView<UOdysseyLayer*>)
+SLATE_DECLARE_WIDGET(SOdysseyTextureLayerStack, SCompoundWidget)
 
 public:
     SLATE_BEGIN_ARGS(SOdysseyTextureLayerStack)

@@ -102,7 +102,10 @@ FOdysseyPainterEditorViewportTab::GetViewport()
 UTexture*
 FOdysseyPainterEditorViewportTab::Texture() const
 {
-    return mEditor->DisplayTexture();
+    if (!mEditor->GetSource())
+        return nullptr;
+
+    return mEditor->GetSource()->DisplayTexture();
 }
 
 //--------------------------------------------------------------------------------------
@@ -111,7 +114,10 @@ FOdysseyPainterEditorViewportTab::Texture() const
 void
 FOdysseyPainterEditorViewportTab::HandleViewportColorPicked(eOdysseyEventState::Type iEventState, const FVector2D& iPositionInTexture)
 {
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = mEditor->GetDisplayBlock();
+    if (!mEditor->GetSource())
+        return;
+
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = mEditor->GetSource()->GetDisplayBlock();
     if ( !block )
         return;
 

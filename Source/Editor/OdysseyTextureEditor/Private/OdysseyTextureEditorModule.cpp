@@ -18,6 +18,7 @@
 #include "OdysseyTextureAssetTypeActions.h"
 #include "OdysseyTextureAssetTypeActions.h"
 #include "TextureEditor/OdysseyTextureEditorCommands.h"
+#include "TextureEditor/OdysseyTextureEditorSource.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyTextureEditorModule"
 
@@ -32,6 +33,10 @@ FOdysseyTextureEditorModule::CreateOdysseyTextureEditor( UTexture2D* iTexture )
     TSharedPtr<FOdysseyTextureEditorToolkit> toolkit = MakeShareable( new FOdysseyTextureEditorToolkit(editor) );
 	editor->Initialize(iTexture);
     toolkit->Initialize();
+
+	TSharedPtr<FOdysseyTextureEditorSource> source = MakeShared<FOdysseyTextureEditorSource>(iTexture);
+	editor->SetSource(source);
+
     return toolkit.ToSharedRef();
 }
 

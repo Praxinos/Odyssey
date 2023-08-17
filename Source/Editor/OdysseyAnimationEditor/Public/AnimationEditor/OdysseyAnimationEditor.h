@@ -28,8 +28,6 @@ public:
     virtual void InitTools() override;
     virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
     virtual void ExtendMenu(FToolMenuOwner iOwner, FName iMenuName) override;
-    virtual void Tick(float iDeltaTime) override;
-    virtual FOdysseyMediaProvider GetCurrentMediaProvider() override;
 
 public:
     // Getters
@@ -38,9 +36,6 @@ public:
     virtual UOdysseyAnimationPlayer*            Player() const;
     virtual FOdysseyAnimationEditorTimeline*    Timeline();
     virtual float                               PlaybackFramesPerSecond() const;
-
-	virtual UTexture*                           DisplayTexture() const override;
-    virtual TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> GetDisplayBlock() override;
 
     // TSharedPtr<FOdysseyRasterBlock> GetCurrentRasterBlock() const;
     bool CanProvideRasterBlockOnDemand() const;
@@ -51,6 +46,8 @@ public:
     UOdysseyPainterEditorTool* FindDefaultToolForCurrentLayer();
     void SelectDefaultTool();
     virtual void OnSelectedToolChanged() override;
+    virtual void OnSourceInactivated() override;
+    virtual void OnSourceActivated() override;
 
 public:
     // Overrides
@@ -76,13 +73,13 @@ private:
     void UpdateToolContext();
 
 private:
-    UOdysseyAnimation* mAnimation;
 	TSharedPtr<FOdysseyAnimationEditorGUI> mGUI;
+
 
     FOdysseyAnimationEditorTimeline mTimeline; //Those are just the editor specific data of the timeline
     
+    UOdysseyAnimation* mAnimation;
     UOdysseyAnimationPlayer* mPlayer;
-    UOdysseyAnimationTexture* mTexture;
 
     float mPlaybackFramesPerSecond;
     TArray<FGuid> mImageRenderingComposition;
