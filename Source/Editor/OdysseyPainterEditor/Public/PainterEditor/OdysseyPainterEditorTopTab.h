@@ -19,6 +19,8 @@ public:
     virtual ~FOdysseyPainterEditorTopTab();
     FOdysseyPainterEditorTopTab( FOdysseyPainterEditor* iEditor );
 
+    void Init() override;
+
     // Spawner callback
     virtual TSharedRef<SDockTab> SpawnTab(const FSpawnTabArgs& iArgs) override;
 

@@ -30,18 +30,23 @@ class FOdysseyPainterEditor;
 //----------------------------------------------------------- Construction / Destruction
 FOdysseyPainterEditorTopTab::~FOdysseyPainterEditorTopTab()
 {
-    mEditor->OnSelectedToolChanged().RemoveAll(this);
 }
 
 FOdysseyPainterEditorTopTab::FOdysseyPainterEditorTopTab(FOdysseyPainterEditor* iEditor)
 	: FOdysseyEditorTab(LOCTEXT( "OdysseyPainterEditorTopTab", "Top Bar" ), FSlateIcon( "OdysseyStyle", "PainterEditor.Spark16" ))
     , mEditor( iEditor )
-{
-    mEditor->OnSelectedToolChanged().AddRaw(this, &FOdysseyPainterEditorTopTab::OnSelectedToolChanged);
+{   
 }
 
 //--------------------------------------------------------------------------------------
 //--------------------------------------------------------------------- Spawner callback
+
+void
+FOdysseyPainterEditorTopTab::Init()
+{
+    mEditor->OnSelectedToolChanged().AddSP(SharedThis<FOdysseyPainterEditorTopTab>(this), &FOdysseyPainterEditorTopTab::OnSelectedToolChanged);
+    FOdysseyEditorTab::Init();
+}
 
 TSharedRef< SDockTab >
 FOdysseyPainterEditorTopTab::SpawnTab( const FSpawnTabArgs& iArgs )

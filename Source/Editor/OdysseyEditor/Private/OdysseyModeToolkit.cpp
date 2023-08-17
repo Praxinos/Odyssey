@@ -66,11 +66,6 @@ FOdysseyModeToolkit::Initialize(
     UToolMenus::Get()->RefreshAllWidgets(); //Requested after ExtendMenu
 }
 
-class FEdMode* FOdysseyModeToolkit::GetEditorMode() const
-{
-	return nullptr;//mEditorMode;
-}
-
 TSharedPtr<SWidget> FOdysseyModeToolkit::GetInlineContent() const
 {
     //TODO: Create the widget in ViewportDrawingEditorToolkit

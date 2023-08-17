@@ -26,7 +26,6 @@ public:
 	);
 
 	/** IToolkit interface */
-	virtual class FEdMode* GetEditorMode() const override;
 	virtual TSharedPtr<class SWidget> GetInlineContent() const override;
 
     void OnAddEditedObject(UObject* iObject);
@@ -45,10 +44,6 @@ public:
 	virtual void RemoveEditingAsset(UObject* Asset) override;
 	virtual void ExtendMenu();
 
-
+public:
 	TSharedPtr<FOdysseyEditor> mEditor;
-	
-private:
-	/** Owning editor mode */
-	class FEdMode* mEditorMode;
 };

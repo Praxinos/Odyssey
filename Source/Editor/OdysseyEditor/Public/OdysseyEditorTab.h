@@ -12,7 +12,7 @@ public:
     FOdysseyEditorTab(FText iDisplayName, FSlateIcon iIcon);
 
 public:
-    void Init();
+    virtual void Init();
     void Open();
     void Close();
     bool IsOpened() const;
