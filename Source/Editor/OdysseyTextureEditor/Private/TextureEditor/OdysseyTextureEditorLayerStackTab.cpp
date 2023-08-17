@@ -101,7 +101,7 @@ UOdysseyLayerStack*
 FOdysseyTextureEditorLayerStackTab::LayerStack() const
 {
     TSharedPtr<FOdysseyPainterEditorSource> source = mExtension->GetEditor()->GetSource();
-    if (!source)
+    if (!source || source->Id() != FOdysseyTextureEditorSource::StaticId())
         return nullptr;
 
     return mExtension->GetEditor()->GetSource()->GetLayerStack();

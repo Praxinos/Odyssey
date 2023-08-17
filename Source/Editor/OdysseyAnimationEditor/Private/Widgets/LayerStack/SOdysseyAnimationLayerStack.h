@@ -37,6 +37,9 @@ private:
     void OnTimelineScrollBarScrolled(float iOffset);
     void RebuildWidgets();
 
+    void OnLayerAdded(UOdysseyLayer* iLayer);
+    float PlaybackFramesPerSecond() const;
+
 private:
     FOdysseyAnimationEditorExtension* mExtension;
     TSlateAttribute<UOdysseyAnimationLayerStack*> mLayerStack;

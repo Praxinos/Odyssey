@@ -3,6 +3,9 @@
 
 #include "Widgets/LayerStack/SOdysseyAnimationLayerStack.h"
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineHeader.h"
+#include "Widgets/SOdysseyLayerStackAddLayerButton.h"
+#include "Widgets/SOdysseyAnimationPlaybackControls.h"
+#include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
 
 #define LOCTEXT_NAMESPACE "SOdysseyAnimationLayerStack"
 
@@ -52,6 +55,26 @@ SOdysseyAnimationLayerStack::RebuildWidgets()
     if (layerstack)
     {
         widget = SNew(SVerticalBox)
+        + SVerticalBox::Slot()
+        .AutoHeight()
+        [
+            SNew(SHorizontalBox)
+            + SHorizontalBox::Slot()
+            .AutoWidth()
+            [
+                SNew(SOdysseyLayerStackAddLayerButton)
+                .LayerStack(mExtension->LayerStack())
+                .OnAdded( this, &SOdysseyAnimationLayerStack::OnLayerAdded)
+            ]
+            + SHorizontalBox::Slot()
+            .FillWidth(1.f)
+            .HAlign( HAlign_Center )
+            .VAlign( VAlign_Center )
+            [
+                SNew(SOdysseyAnimationPlaybackControls, mExtension)
+                .PlaybackFramesPerSecond(this, &SOdysseyAnimationLayerStack::PlaybackFramesPerSecond)
+            ]
+        ]
         +SVerticalBox::Slot()
         .FillHeight(1.0f)
         [
@@ -139,6 +162,9 @@ SOdysseyAnimationLayerStack::Tick( const FGeometry& AllottedGeometry, const doub
 {
     if (!mTreeView)
         return;
+        
+    if (!mExtension->Animation())
+        return;
 
     TSharedPtr<SHeaderRow> headerRow = mTreeView->GetHeaderRow();
     if (!headerRow)
@@ -168,6 +194,31 @@ SOdysseyAnimationLayerStack::Tick( const FGeometry& AllottedGeometry, const doub
 
         break;
     }
+}
+
+void
+SOdysseyAnimationLayerStack::OnLayerAdded(UOdysseyLayer* iLayer)
+{
+    if (iLayer->GetClass() == UOdysseyAnimationLayerImageRaster::StaticClass())
+    {
+        UOdysseyAnimationLayerImageRaster* layer = Cast<UOdysseyAnimationLayerImageRaster>(iLayer);
+        TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(layer, mExtension->Animation()->Width(), mExtension->Animation()->Height(), mExtension->Animation()->Format());
+
+#ifdef WITH_EDITOR
+        FScopedTransaction ScopedTransaction(LOCTEXT("Layer Image Raster", "Add Frame"));
+#endif
+        FOdysseyAnimationCellsMutator mutator(layer);
+        mutator.Add({ cell });
+        mutator.Commit();
+
+        return;
+    }
+}
+
+float
+SOdysseyAnimationLayerStack::PlaybackFramesPerSecond() const
+{
+    return mExtension->PlaybackFramesPerSecond();
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -7,6 +7,11 @@
 #include "PainterEditor/OdysseyPainterEditorSource.h"
 #include "LevelEditorSequencerIntegration.h"
 #include "MeshPaintAdapterFactory.h"
+#include "MediaTexture.h"
+#include "MediaPlayer.h"
+#include "MediaPlaylist.h"
+#include "OdysseyAnimation.h"
+#include "AnimationEditor/OdysseyAnimationEditorSource.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyViewportDrawingEditorExtension"
 
@@ -24,6 +29,7 @@ FOdysseyViewportDrawingEditorExtension::FOdysseyViewportDrawingEditorExtension()
     , mActor(nullptr)
     , mComponent(nullptr)
     , mMaterial(nullptr)
+	, mTexture(nullptr)
 	, mCurrentSource(nullptr)
 {}
 
@@ -34,6 +40,7 @@ FOdysseyViewportDrawingEditorExtension::FOdysseyViewportDrawingEditorExtension(F
     , mActor(nullptr)
     , mComponent(nullptr)
     , mMaterial(nullptr)
+	, mTexture(nullptr)
 	, mCurrentSource(nullptr)
 {
 }
@@ -299,6 +306,24 @@ FOdysseyViewportDrawingEditorExtension::SetTexture(UTexture* iTexture)
 		UTexture2D* texture = Cast<UTexture2D>(iTexture);
 		TSharedPtr<FOdysseyTextureEditorSource> source = MakeShared<FOdysseyTextureEditorSource>(texture);
 		mEditor->SetSource(source);
+	}
+
+	if (iTexture->IsA(UMediaTexture::StaticClass()))
+	{
+		UMediaTexture* texture = Cast<UMediaTexture>(iTexture);
+		UMediaPlayer* mediaPlayer = texture->GetMediaPlayer();
+		if (mediaPlayer)
+		{
+			UMediaPlaylist& playlist = mediaPlayer->GetPlaylistRef();
+			int32 index = mediaPlayer->GetPlaylistIndex();
+			UMediaSource* mediaSource = playlist.Get(index);
+			if (mediaSource && mediaSource->IsA(UOdysseyAnimation::StaticClass()))
+			{
+				UOdysseyAnimation* animation = Cast<UOdysseyAnimation>(mediaSource);
+				TSharedPtr<FOdysseyAnimationEditorSource> animationSource = MakeShared<FOdysseyAnimationEditorSource>(animation);
+				mEditor->SetSource(animationSource);
+			}
+		}
 	}
 }
 
