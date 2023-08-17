@@ -59,23 +59,6 @@ FOdysseyPainterEditorGUI::Finalize()
 void
 FOdysseyPainterEditorGUI::ExtendLevelEditorLayout(FLayoutExtender& Extender)
 {
-    Extender.ExtendArea(TEXT("TopLevelArea"),
-        [](TSharedRef<FTabManager::FArea> iArea)
-        {
-            iArea->SplitAt(
-                0,
-                FTabManager::NewStack()
-                ->SetHideTabWell(true)
-                ->AddTab(
-                    FTabManager::FTab(
-                        FOdysseyPainterEditorTopTab::StaticId(),
-                        ETabState::ClosedTab
-                    )
-                )
-            );
-        }
-    );
-
     Extender.ExtendLayout(FTabId(TEXT("PlacementBrowser")), ELayoutExtensionPosition::Below, FTabManager::FTab(FOdysseyPainterEditorToolsTab::StaticId(), ETabState::ClosedTab));
     Extender.ExtendLayout(FTabId(TEXT("PlacementBrowser")), ELayoutExtensionPosition::Below, FTabManager::FTab(FOdysseyPainterEditorSelectedVectorObjectTab::StaticId(), ETabState::ClosedTab));
     Extender.ExtendLayout(FTabId(TEXT("PlacementBrowser")), ELayoutExtensionPosition::Below, FTabManager::FTab(FOdysseyPainterEditorToolOptionsTab::StaticId(), ETabState::ClosedTab));
@@ -85,16 +68,6 @@ FOdysseyPainterEditorGUI::ExtendLevelEditorLayout(FLayoutExtender& Extender)
     Extender.ExtendLayout(FTabId(TEXT("LevelEditorSceneOutliner")), ELayoutExtensionPosition::Below, FTabManager::FTab(FOdysseyPainterEditorPaletteTab::StaticId(), ETabState::ClosedTab));
     Extender.ExtendLayout(FTabId(TEXT("LevelEditorSceneOutliner")), ELayoutExtensionPosition::Below, FTabManager::FTab(FOdysseyPainterEditorColorSlidersTab::StaticId(), ETabState::ClosedTab));
     Extender.ExtendLayout(FTabId(TEXT("LevelEditorSceneOutliner")), ELayoutExtensionPosition::Below, FTabManager::FTab(FOdysseyPainterEditorColorWheelTab::StaticId(), ETabState::ClosedTab));
-
-    //Extender.ExtendLayout(LevelEditorTabIds::PlacementBrowser, ELayoutExtensionPosition::Before, FTabManager::FTab(UAssetEditorUISubsystem::TopLeftTabID, ETabState::ClosedTab));
-    
-	/*
-    Extender.ExtendLayout(LevelEditorTabIds::PlacementBrowser, ELayoutExtensionPosition::Before, FTabManager::FTab(UAssetEditorUISubsystem::TopLeftTabID, ETabState::ClosedTab));
-	Extender.ExtendStack("BottomLeftPanel", ELayoutExtensionPosition::Before, FTabManager::FTab(UAssetEditorUISubsystem::BottomLeftTabID, ETabState::ClosedTab));
-	Extender.ExtendStack("VerticalToolbar", ELayoutExtensionPosition::Before, FTabManager::FTab(UAssetEditorUISubsystem::VerticalToolbarID, ETabState::ClosedTab));
-	Extender.ExtendLayout(LevelEditorTabIds::LevelEditorSceneOutliner, ELayoutExtensionPosition::Before, FTabManager::FTab(UAssetEditorUISubsystem::TopRightTabID, ETabState::ClosedTab));
-	Extender.ExtendLayout(LevelEditorTabIds::LevelEditorSelectionDetails, ELayoutExtensionPosition::Before, FTabManager::FTab(UAssetEditorUISubsystem::BottomRightTabID, ETabState::ClosedTab));
-    */
 }
 
 void
@@ -119,7 +92,6 @@ FOdysseyPainterEditorGUI::CreateTabs()
     colorSlidersTab->ShouldOpenByDefault(true);
     toolsTab->ShouldOpenByDefault(true);
     selectedVectorObjectTab->ShouldOpenByDefault(true);
-    topTab->ShouldOpenByDefault(true);
     toolOptionsTab->ShouldOpenByDefault(true);
 
 

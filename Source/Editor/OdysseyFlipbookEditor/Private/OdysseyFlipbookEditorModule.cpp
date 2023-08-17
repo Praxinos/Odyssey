@@ -7,6 +7,8 @@
 #include "FlipbookEditor/OdysseyFlipbookEditorExtension.h"
 #include "OdysseyFlipbookEditorToolkit.h"
 #include "ISettingsModule.h"
+#include "FlipbookEditor/OdysseyFlipbookEditorGUI.h"
+#include "LevelEditor.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyFlipbookEditorModule"
 
@@ -35,6 +37,8 @@ FOdysseyFlipbookEditorModule::StartupModule()
 	{
 		FOdysseyFlipbookContentBrowserExtensions::InstallHooks();
 	}
+
+	RegisterLevelEditorLayoutExtensions();
 }
 
 void
@@ -54,6 +58,8 @@ FOdysseyFlipbookEditorModule::ShutdownModule()
 
 	// Unregister Assets Type Actions
 	UnregisterAssetTypeActions();
+
+	UnregisterLevelEditorLayoutExtensions();
 }
 
 void
@@ -161,6 +167,20 @@ void
 FOdysseyFlipbookEditorModule::UnregisterCommands()
 {
 	FOdysseyFlipbookEditorCommands::Unregister();
+}
+
+void
+FOdysseyFlipbookEditorModule::RegisterLevelEditorLayoutExtensions()
+{
+    FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor");
+	mExtendLevelEditorLayout = LevelEditorModule.OnRegisterLayoutExtensions().AddStatic(&FOdysseyFlipbookEditorGUI::ExtendLevelEditorLayout);
+}
+
+void
+FOdysseyFlipbookEditorModule::UnregisterLevelEditorLayoutExtensions()
+{
+    FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor");
+	LevelEditorModule.OnRegisterLayoutExtensions().Remove(mExtendLevelEditorLayout);
 }
 
 IMPLEMENT_MODULE( FOdysseyFlipbookEditorModule, OdysseyFlipbookEditor );

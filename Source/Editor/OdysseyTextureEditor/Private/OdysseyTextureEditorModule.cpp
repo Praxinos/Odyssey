@@ -20,6 +20,7 @@
 #include "OdysseyTextureAssetTypeActions.h"
 #include "TextureEditor/OdysseyTextureEditorCommands.h"
 #include "TextureEditor/OdysseyTextureEditorSource.h"
+#include "TextureEditor/OdysseyTextureEditorGUI.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyTextureEditorModule"
 
@@ -66,6 +67,8 @@ FOdysseyTextureEditorModule::StartupModule()
 	{
 		FOdysseyTextureContentBrowserExtensions::InstallHooks();
 	}
+
+	RegisterLevelEditorLayoutExtensions();
 }
 
 void
@@ -85,6 +88,8 @@ FOdysseyTextureEditorModule::ShutdownModule()
 
 	// Unregister Assets Type Actions
 	UnregisterAssetTypeActions();
+
+	UnregisterLevelEditorLayoutExtensions();
 }
 
 void
@@ -146,6 +151,20 @@ void
 FOdysseyTextureEditorModule::UnregisterCommands()
 {
 	FOdysseyTextureEditorCommands::Unregister();
+}
+
+void
+FOdysseyTextureEditorModule::RegisterLevelEditorLayoutExtensions()
+{
+    FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor");
+	mExtendLevelEditorLayout = LevelEditorModule.OnRegisterLayoutExtensions().AddStatic(&FOdysseyTextureEditorGUI::ExtendLevelEditorLayout);
+}
+
+void
+FOdysseyTextureEditorModule::UnregisterLevelEditorLayoutExtensions()
+{
+    FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor");
+	LevelEditorModule.OnRegisterLayoutExtensions().Remove(mExtendLevelEditorLayout);
 }
 
 IMPLEMENT_MODULE( FOdysseyTextureEditorModule, OdysseyTextureEditor );

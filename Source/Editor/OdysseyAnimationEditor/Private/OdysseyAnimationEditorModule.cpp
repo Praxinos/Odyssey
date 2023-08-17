@@ -18,6 +18,7 @@
 #include "OdysseyAnimationAssetTypeActions.h"
 #include "AnimationEditor/OdysseyAnimationEditorCommands.h"
 #include "AnimationEditor/OdysseyAnimationEditorExtension.h"
+#include "AnimationEditor/OdysseyAnimationEditorGUI.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyAnimationEditorModule"
 
@@ -63,6 +64,8 @@ FOdysseyAnimationEditorModule::StartupModule()
 
 	// Register Commands
 	RegisterCommands();
+
+	RegisterLevelEditorLayoutExtensions();
 }
 
 void
@@ -73,6 +76,8 @@ FOdysseyAnimationEditorModule::ShutdownModule()
 
 	// Unregister Assets Type Actions
 	UnregisterAssetTypeActions();
+
+	UnregisterLevelEditorLayoutExtensions();
 }
 
 void
@@ -110,6 +115,20 @@ void
 FOdysseyAnimationEditorModule::UnregisterCommands()
 {
 	FOdysseyAnimationEditorCommands::Unregister();
+}
+
+void
+FOdysseyAnimationEditorModule::RegisterLevelEditorLayoutExtensions()
+{
+    FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor");
+	mExtendLevelEditorLayout = LevelEditorModule.OnRegisterLayoutExtensions().AddStatic(&FOdysseyAnimationEditorGUI::ExtendLevelEditorLayout);
+}
+
+void
+FOdysseyAnimationEditorModule::UnregisterLevelEditorLayoutExtensions()
+{
+    FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor");
+	LevelEditorModule.OnRegisterLayoutExtensions().Remove(mExtendLevelEditorLayout);
 }
 
 IMPLEMENT_MODULE( FOdysseyAnimationEditorModule, OdysseyAnimationEditor );

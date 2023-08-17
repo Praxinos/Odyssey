@@ -14,6 +14,9 @@ class FOdysseyFlipbookEditorTimelineTab;
 class ODYSSEYFLIPBOOKEDITOR_API FOdysseyFlipbookEditorGUI
 {
 public:
+    static void ExtendLevelEditorLayout(FLayoutExtender& Extender);
+    
+public:
     // Construction / Destruction
     virtual ~FOdysseyFlipbookEditorGUI();
     FOdysseyFlipbookEditorGUI(FOdysseyFlipbookEditorExtension* iExtension);

@@ -29,8 +29,5 @@ private:
     void UnregisterLevelEditorLayoutExtensions();
 
 private:
-    void ExtendLevelEditorLayout(FLayoutExtender& Extender);
-
-private:
     FDelegateHandle mExtendLevelEditorLayout;
 };

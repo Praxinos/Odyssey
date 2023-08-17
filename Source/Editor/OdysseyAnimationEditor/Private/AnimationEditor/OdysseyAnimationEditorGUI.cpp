@@ -6,6 +6,7 @@
 #include "AnimationEditor/OdysseyAnimationEditorExtension.h"
 #include "AnimationEditor/OdysseyAnimationEditorLightTableTab.h"
 #include "AnimationEditor/OdysseyAnimationEditorLayerStackTab.h"
+#include "Framework/Docking/LayoutExtender.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyAnimationEditorGUI"
 
@@ -50,6 +51,12 @@ FOdysseyAnimationEditorGUI::BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder)
 	(
 		animationTimelineStack
 	);
+}
+
+void
+FOdysseyAnimationEditorGUI::ExtendLevelEditorLayout(FLayoutExtender& Extender)
+{   
+    Extender.ExtendLayout(FTabId(TEXT("LevelEditorSelectionDetails")), ELayoutExtensionPosition::Above, FTabManager::FTab(FOdysseyAnimationEditorLayerStackTab::StaticId(), ETabState::ClosedTab));
 }
 
 void

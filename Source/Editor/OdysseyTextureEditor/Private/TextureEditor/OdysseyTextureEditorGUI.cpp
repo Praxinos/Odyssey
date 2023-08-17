@@ -8,6 +8,7 @@
 #include "OdysseyTextureEditorTextureDetailsTab.h"
 #include "TextureEditor/OdysseyTextureEditorExtension.h"
 #include "PainterEditor/OdysseyPainterEditorSelectedVectorObjectTab.h"
+#include "Framework/Docking/LayoutExtender.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyTextureEditorGUI"
 
@@ -48,6 +49,12 @@ FOdysseyTextureEditorGUI::OnCurrentLayerChanged( UOdysseyLayerStack* iLayerStack
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------------------- Initialization
+
+void
+FOdysseyTextureEditorGUI::ExtendLevelEditorLayout(FLayoutExtender& Extender)
+{   
+    Extender.ExtendLayout(FTabId(TEXT("LevelEditorSelectionDetails")), ELayoutExtensionPosition::Above, FTabManager::FTab(FOdysseyTextureEditorLayerStackTab::StaticId(), ETabState::ClosedTab));
+}
 
 void
 FOdysseyTextureEditorGUI::Init()

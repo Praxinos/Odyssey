@@ -15,6 +15,9 @@ class ODYSSEYTEXTUREEDITOR_API FOdysseyTextureEditorGUI
     : public TSharedFromThis<FOdysseyTextureEditorGUI>
 {
 public:
+    static void ExtendLevelEditorLayout(FLayoutExtender& Extender);
+    
+public:
     // Construction / Destruction
     ~FOdysseyTextureEditorGUI();
     FOdysseyTextureEditorGUI(FOdysseyTextureEditorExtension* iExtension);

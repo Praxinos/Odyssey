@@ -5,6 +5,7 @@
 
 #include "OdysseyFlipbookEditorTimelineTab.h"
 #include "PainterEditor/OdysseyPainterEditorViewportTab.h"
+#include "Framework/Docking/LayoutExtender.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyFlipbookEditorToolkit"
 
@@ -83,6 +84,12 @@ FOdysseyFlipbookEditorGUI::OnFlipbookChanged()
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------------------- Initialization
+
+void
+FOdysseyFlipbookEditorGUI::ExtendLevelEditorLayout(FLayoutExtender& Extender)
+{   
+    Extender.ExtendLayout(FTabId(TEXT("LevelEditorSelectionDetails")), ELayoutExtensionPosition::Above, FTabManager::FTab(FOdysseyFlipbookEditorTimelineTab::StaticId(), ETabState::ClosedTab));
+}
 
 void
 FOdysseyFlipbookEditorGUI::CreateTabs()

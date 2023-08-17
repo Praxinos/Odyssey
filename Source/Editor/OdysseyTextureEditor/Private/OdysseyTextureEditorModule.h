@@ -30,8 +30,13 @@ private:
 	//Commands
 	void RegisterCommands();
 	void UnregisterCommands();
+
+    //Level Editor Layout
+    void RegisterLevelEditorLayoutExtensions();
+    void UnregisterLevelEditorLayoutExtensions();
     
 private:
 	/** All created asset type actions. Cached here so that we can unregister them during shutdown. */
 	TSharedPtr<IAssetTypeActions> mIliadTypeActions;
+    FDelegateHandle mExtendLevelEditorLayout;
 };
