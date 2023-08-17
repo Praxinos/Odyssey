@@ -6,6 +6,8 @@
 #include "ToolMenuOwner.h"
 
 class FOdysseyEditorGUI;
+class FOdysseyEditorTab;
+class FTabManager;
 
 /**
  * Base class for a Painting Editor
@@ -21,45 +23,41 @@ public:
 public:
     // Construction / Destruction
     virtual ~FOdysseyEditor();
-    FOdysseyEditor();
+    FOdysseyEditor(const FText& iName, UObject* iEditedObject);
 
 public:
-    // Initialization
-    void Initialize(UObject* iEditedObject);
+    //Non Overridable Methods
+    UObject* GetEditedObject() const;
 
-protected:
-    // Protected Initialization
+    void AddEditedObject(UObject* iObject);
+    void RemoveEditedObject(UObject* iObject);
 
-    // Seperating Init from InitGUI allows us to seperate Data and GUI initialization also in derived classes
-    virtual void InitData(UObject* iEditedObject);
-    virtual void InitGUI();
+    void AddTab(TSharedRef<FOdysseyEditorTab> iTab);
+    template<class T> TSharedPtr<T> FindTab() const;
+    const TArray<TSharedPtr<FOdysseyEditorTab>>& GetTabs() const;
+    void CloseAllTabs();
 
-public:
-    // Undo
-    /* virtual void Undo();
-    virtual void Redo();
-    virtual void ClearUndo(); */
+    void SetTabsSaveFilename(const FString& iFilename);
+    void SaveOpenedTabs();
+    void LoadOpenedTabs();
 
-public:
-    // Getters
+    void RegisterTabSpawners( const TSharedRef<FTabManager>& iTabManager );
+    void UnregisterTabSpawners( const TSharedRef<FTabManager>& iTabManager );
+
     FOnAddEditedObject& OnAddEditedObjectDelegate();
     FOnRemoveEditedObject& OnRemoveEditedObjectDelegate();
-    virtual TSharedRef<FTabManager::FLayout> GetLayout();
-    virtual TArray<UObject*> GetEditedObjects();
-    virtual FOdysseyEditorGUI* GetGUI() = 0;
-
-public:
-    // Listeners
-    virtual bool OnCloseRequested();
 
 public:
     // Interface
-    virtual void BindShortcuts(FBaseToolkit* iToolkit);
+    virtual void Initialize() = 0;
+    virtual TSharedRef<FTabManager::FLayout> CreateLayout() = 0;
+
+public:
+    // Overridable Methods
     virtual void ExtendMenu( FToolMenuOwner iOwner, FName iMenuName );
-    virtual TSharedPtr<FWorkspaceItem> RegisterTabSpawners( const TSharedRef<class FTabManager>& iTabManager ) = 0;
-    virtual void UnregisterTabSpawners( const TSharedRef<class FTabManager>& iTabManager );
-    virtual void AddEditedObject(UObject* iObject);
-    virtual void RemoveEditedObject(UObject* iObject);
+    virtual void BindShortcuts(FBaseToolkit* iToolkit);
+    virtual bool OnCloseRequested();
+    virtual TArray<UObject*> GetAdditionalEditedObjects();
 
 protected:
     // FGCObject implementation
@@ -71,8 +69,25 @@ protected:
 	virtual TStatId GetStatId() const override { RETURN_QUICK_DECLARE_CYCLE_STAT( FOdysseyEditor, STATGROUP_Tickables); }
 
 public:
-    TArray<UObject*> mEditedObjects;
+    FText mName;
+    UObject* mEditedObject;
+    TArray<TSharedPtr<FOdysseyEditorTab>> mTabs;
+    TArray<UObject*> mAdditionalEditedObjects;
+    FString mTabsSaveFilename;
 
     FOnAddEditedObject mOnAddEditedObject;
     FOnRemoveEditedObject mOnRemoveEditedObject;
 };
+
+template<class T>
+TSharedPtr<T>
+FOdysseyEditor::FindTab() const
+{
+    const FName& id = T::StaticId();
+    for (const TSharedPtr<FOdysseyEditorTab> tab : mTabs)
+    {
+        if (tab->GetId() == id)
+            return StaticCastSharedPtr<T>(tab);
+    }
+    return nullptr;
+}

@@ -5,6 +5,7 @@
 #include "Tools/PaintBucketTool/OdysseyPainterEditorPaintBucketToolHUD.h"
 #include "Tools/PaintBucketTool/OdysseyPainterEditorPaintBucketToolContextMenu.h"
 
+#include "PainterEditor/OdysseyPainterEditorColorPaletteTab.h"
 #include "OdysseyRasterBlock.h"
 #include "OdysseyMediaRaster.h"
 #include "OdysseyMediaVector.h"
@@ -114,7 +115,8 @@ UOdysseyPainterEditorPaintBucketTool::LoadVector( FOdysseyVectorEngine* iEngine,
     TSharedPtr< SViewport > viewportWidget; // to force keyboard focus on mouse hover.
                                             // Prevents the user from having to click at least once in the viewport.
     // we need the focus on the viewport for keyboard 
-    viewportWidget = GetEditor()->GetGUI()->GetViewportTab()->GetViewport()->GetViewportWidget();
+    TSharedPtr<FOdysseyPainterEditorViewportTab> viewportTab = GetEditor()->FindTab<FOdysseyPainterEditorViewportTab>();
+    viewportWidget = viewportTab->GetViewport()->GetViewportWidget();
 
     // we need the focus on the viewport for keyboard 
     FSlateApplication::Get().SetKeyboardFocus( viewportWidget );
@@ -617,9 +619,10 @@ UOdysseyPainterEditorPaintBucketTool::SetBucketColor( FOdysseyVectorBucket* iBuc
     {
         ::ULIS::FColor color = GetEditor()->PaintColor().GetValue();
 
-        if ( GetEditor()->GetGUI()->GetColorPaletteTab()->PaletteWidget()->GetColorPalette()->GetPalette())
+        TSharedPtr<FOdysseyPainterEditorPaletteTab> colorPaletteTab = GetEditor()->FindTab<FOdysseyPainterEditorPaletteTab>();
+        if ( colorPaletteTab->PaletteWidget()->GetColorPalette()->GetPalette())
         {
-            UOdysseyPaletteEntry* entry = GetEditor()->GetGUI()->GetColorPaletteTab()->PaletteWidget()->GetColorPalette()->GetPalette()->CurrentEntry.Get();
+            UOdysseyPaletteEntry* entry = colorPaletteTab->PaletteWidget()->GetColorPalette()->GetPalette()->CurrentEntry.Get();
 
             if (entry && entry->IsA(UOdysseyPaletteEntryColor::StaticClass()))
             {
@@ -792,7 +795,9 @@ UOdysseyPainterEditorPaintBucketTool::PopUpMenu( FOdysseyVectorBucket* iBucket )
 {
     TSharedPtr<SWidget> contextMenu = FOdysseyPainterEditorPaintBucketToolContextMenu::CreateWidget( GetEditor(), iBucket );
 
-    FSlateApplication::Get().PushMenu( GetEditor()->GetGUI()->GetViewportTab().Get()->Widget().ToSharedRef(),
+    TSharedPtr<FOdysseyPainterEditorViewportTab> viewportTab = GetEditor()->FindTab<FOdysseyPainterEditorViewportTab>();
+
+    FSlateApplication::Get().PushMenu( viewportTab->Widget().ToSharedRef(),
                                        FWidgetPath(),
                                        contextMenu.ToSharedRef(),
                                        FSlateApplication::Get().GetCursorPos(),

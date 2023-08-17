@@ -2,7 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "TextureEditor/OdysseyTextureEditor.h"
-
+/*
 #include "TextureEditor/OdysseyTextureEditorGUI.h"
 #include "TextureEditor/OdysseyTextureEditorSource.h"
 #include "OdysseyLayerFunctionLibrary.h"
@@ -31,24 +31,6 @@ FOdysseyTextureEditor::FOdysseyTextureEditor() :
 
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Getters
-
-/* void
-FOdysseyTextureEditor::OnSourceInactivated()
-{
-	FOdysseyPainterEditor::OnSourceInactivated();
-	UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll(this);
-}
-
-void
-FOdysseyTextureEditor::OnSourceActivated()
-{
-	FOdysseyPainterEditor::OnSourceActivated();
-
-	if (mSource->Id() != FOdysseyTextureEditorSource::StaticId())
-		return;
-	
-	UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw(this, &FOdysseyTextureEditor::OnCurrentLayerChanged);
-} */
 
 UTexture2D*
 FOdysseyTextureEditor::Texture() const
@@ -95,4 +77,4 @@ FOdysseyTextureEditor::OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStack)
 	layerRoot->RenderImageChanged(false);
 }
 
-#undef LOCTEXT_NAMESPACE
+#undef LOCTEXT_NAMESPACE */

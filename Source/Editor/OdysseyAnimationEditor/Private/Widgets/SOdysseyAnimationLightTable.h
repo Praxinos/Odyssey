@@ -6,7 +6,7 @@
 #include "CoreMinimal.h"
 #include "Widgets/Input/SButton.h"
 
-class FOdysseyAnimationEditor;
+class FOdysseyAnimationEditorExtension;
 
 //////////////////////////////////////////////////////////////////////////
 // SOdysseyAnimationLightTable
@@ -17,7 +17,7 @@ public:
 		{}
 	SLATE_END_ARGS()
 
-	void Construct(const FArguments& InArgs, FOdysseyAnimationEditor* iEditor);
+	void Construct(const FArguments& InArgs, FOdysseyAnimationEditorExtension* iExtension);
 
 	SOdysseyAnimationLightTable();
 	~SOdysseyAnimationLightTable();
@@ -40,7 +40,7 @@ private:
 	float GetKeyOpacity( int iKeyIndex ) const;
 
 private:
-	FOdysseyAnimationEditor* mEditor;
+	FOdysseyAnimationEditorExtension* mExtension;
 	TSharedPtr<SHorizontalBox> mSlidersBox;
 	bool mRebuildRequested;
 };

@@ -4,17 +4,17 @@
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineCurrentFrame.h"
 
 SOdysseyAnimationTimelineCurrentFrame::SOdysseyAnimationTimelineCurrentFrame()
-	: mEditor(nullptr)
+	: mExtension(nullptr)
 {
 }
 
 void
 SOdysseyAnimationTimelineCurrentFrame::Construct(
     const FArguments& iArgs,
-	FOdysseyAnimationEditor* iEditor
+	FOdysseyAnimationEditorExtension* iExtension
 )
 {
-    mEditor = iEditor;
+    mExtension = iExtension;
 }
 
 int32
@@ -24,13 +24,13 @@ SOdysseyAnimationTimelineCurrentFrame::OnPaint(const FPaintArgs& Args, const FGe
 
 	const float height = AllottedGeometry.GetLocalSize().Y;
 	const float width = AllottedGeometry.GetLocalSize().X;
-	float offset = mEditor->Timeline()->GetOffset();
-	const float frameSize = mEditor->Timeline()->GetFrameWidth();
+	float offset = mExtension->Timeline()->GetOffset();
+	const float frameSize = mExtension->Timeline()->GetFrameWidth();
 
 	FLinearColor lineColor = FLinearColor::Red;
 	lineColor.A = 0.3f;
 
-	int currentFrame = mEditor->Animation()->GetFrameIndexAtTime(mEditor->Player()->GetCurrentTime());
+	int currentFrame = mExtension->Animation()->GetFrameIndexAtTime(mExtension->Player()->GetCurrentTime());
 	float currentFramePos = (currentFrame - offset) * frameSize;
 
 	FSlateDrawElement::MakeBox(

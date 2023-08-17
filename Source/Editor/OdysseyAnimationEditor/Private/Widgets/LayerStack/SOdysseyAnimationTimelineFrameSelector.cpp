@@ -11,10 +11,10 @@
 void
 SOdysseyAnimationTimelineFrameSelector::Construct(
 	const FArguments& InArgs,
-	FOdysseyAnimationEditor* iEditor
+	FOdysseyAnimationEditorExtension* iExtension
 )
 {
-	mEditor = iEditor;
+	mExtension = iExtension;
 	mOnBuildContextMenu = InArgs._OnBuildContextMenu;
 	mOnMapActions = InArgs._OnMapActions;
 
@@ -25,7 +25,7 @@ SOdysseyAnimationTimelineFrameSelector::Construct(
 		[
 			//use this scrollbox to display other widgets in the FrameSelector area
 			//for now there is no wodgets to display, but I can clearly imagine some
-			SNew(SOdysseyAnimationTimelineScrollBox, iEditor)
+			SNew(SOdysseyAnimationTimelineScrollBox, iExtension)
 		]
 	];
 }
@@ -40,8 +40,8 @@ int32 SOdysseyAnimationTimelineFrameSelector::OnPaint(const FPaintArgs& Args, co
 
 	const float height = AllottedGeometry.GetLocalSize().Y;  
 	const float width = AllottedGeometry.GetLocalSize().X;
-	float offset = mEditor->Timeline()->GetOffset();
-	const float frameSize = mEditor->Timeline()->GetFrameWidth();
+	float offset = mExtension->Timeline()->GetOffset();
+	const float frameSize = mExtension->Timeline()->GetFrameWidth();
 
 	FLinearColor lineColor = FLinearColor::Green;
 	lineColor.A = 0.3f;
@@ -77,9 +77,9 @@ SOdysseyAnimationTimelineFrameSelector::OnMouseButtonDown(const FGeometry& MyGeo
 	{
 		mIsSelecting = true;
 
-		int timelineOffset = mEditor->Timeline()->GetOffset();
+		int timelineOffset = mExtension->Timeline()->GetOffset();
 		float posX = MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition()).X;
-		float frameWidth = mEditor->Timeline()->GetFrameWidth();
+		float frameWidth = mExtension->Timeline()->GetFrameWidth();
 		float frame = (int)(posX / frameWidth + timelineOffset);
 
 		mSelectionData.mCursorFrame = frame;
@@ -97,9 +97,9 @@ SOdysseyAnimationTimelineFrameSelector::OnMouseMove(const FGeometry& MyGeometry,
 {
 	if(mIsSelecting)
 	{
-		int timelineOffset = mEditor->Timeline()->GetOffset();
+		int timelineOffset = mExtension->Timeline()->GetOffset();
 		float posX = MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition()).X;
-		float frameWidth = mEditor->Timeline()->GetFrameWidth();
+		float frameWidth = mExtension->Timeline()->GetFrameWidth();
 		float frame = (int)(posX / frameWidth + timelineOffset);
 
 		if (frame < mSelectionData.mCursorFrame)
@@ -122,7 +122,7 @@ SOdysseyAnimationTimelineFrameSelector::OnMouseButtonUp(const FGeometry& MyGeome
 	if (mIsSelecting)
 	{
 		mIsSelecting = false;
-		mEditor->Timeline()->SetSelectedFrames(mSelectionData.mSelectedFrames);
+		mExtension->Timeline()->SetSelectedFrames(mSelectionData.mSelectedFrames);
 		return FReply::Handled().ReleaseMouseCapture();
 	}
 	/* else if (iEvent.GetEffectingButton() == EKeys::RightMouseButton)
@@ -145,13 +145,13 @@ SOdysseyAnimationTimelineFrameSelector::OnMouseButtonUp(const FGeometry& MyGeome
 bool
 SOdysseyAnimationTimelineFrameSelector::GetSelectedFrames(int& oStartFrame, int& oEndFrame) const
 {
-	bool isLowerClosed = mEditor->Timeline()->GetSelectedFrames().GetLowerBound().IsClosed();
-	bool isUpperClosed = mEditor->Timeline()->GetSelectedFrames().GetUpperBound().IsClosed();
+	bool isLowerClosed = mExtension->Timeline()->GetSelectedFrames().GetLowerBound().IsClosed();
+	bool isUpperClosed = mExtension->Timeline()->GetSelectedFrames().GetUpperBound().IsClosed();
 	if (!mIsSelecting && (!isLowerClosed || !isUpperClosed))
 		return false;
 
-	oStartFrame = mIsSelecting ? mSelectionData.mSelectedFrames.GetLowerBoundValue() : mEditor->Timeline()->GetSelectedFrames().GetLowerBoundValue();
-	oEndFrame = mIsSelecting ? mSelectionData.mSelectedFrames.GetUpperBoundValue() : mEditor->Timeline()->GetSelectedFrames().GetUpperBoundValue();
+	oStartFrame = mIsSelecting ? mSelectionData.mSelectedFrames.GetLowerBoundValue() : mExtension->Timeline()->GetSelectedFrames().GetLowerBoundValue();
+	oEndFrame = mIsSelecting ? mSelectionData.mSelectedFrames.GetUpperBoundValue() : mExtension->Timeline()->GetSelectedFrames().GetUpperBoundValue();
 	return true;
 }
 

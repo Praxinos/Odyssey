@@ -17,10 +17,9 @@ FOdysseyViewportDrawingEditorGUI::~FOdysseyViewportDrawingEditorGUI()
 {
 }
 
-FOdysseyViewportDrawingEditorGUI::FOdysseyViewportDrawingEditorGUI(FOdysseyViewportDrawingEditor* iEditor) :
-	FOdysseyTextureEditorGUI(iEditor),
-	mEditor( iEditor ),
-    mCommandList(MakeShareable(new FUICommandList()))
+FOdysseyViewportDrawingEditorGUI::FOdysseyViewportDrawingEditorGUI(FOdysseyViewportDrawingEditorExtension* iExtension)
+	: mExtension( iExtension )
+    , mCommandList(MakeShareable(new FUICommandList()))
 {
 }
 
@@ -30,39 +29,14 @@ FOdysseyViewportDrawingEditorGUI::FOdysseyViewportDrawingEditorGUI(FOdysseyViewp
 void
 FOdysseyViewportDrawingEditorGUI::CreateTabs()
 {
-	FOdysseyTextureEditorGUI::CreateTabs();
-
-    mMasterTab = MakeShareable(new FOdysseyViewportDrawingEditorMasterTab(mEditor));
+    mMasterTab = MakeShareable(new FOdysseyViewportDrawingEditorMasterTab(mExtension));
     mMasterTab->Init();
-}
-
-TSharedRef<FTabManager::FSplitter>
-FOdysseyViewportDrawingEditorGUI::CreateMainSection()
-{
-	return FOdysseyTextureEditorGUI::CreateMainSection();
 }
 
 void
 FOdysseyViewportDrawingEditorGUI::BindShortcuts(FBaseToolkit* iToolkit)
 {
-	FOdysseyTextureEditorGUI::BindShortcuts(iToolkit);
     iToolkit->GetToolkitCommands()->Append(mCommandList.ToSharedRef());
-}
-
-//--------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------ Getters
-
-FName
-FOdysseyViewportDrawingEditorGUI::GetLayoutName()
-{
-	return "OdysseyViewportDrawingEditor_Layout";
-}
-
-
-TSharedPtr<FOdysseyViewportDrawingEditorMasterTab>&
-FOdysseyViewportDrawingEditorGUI::GetMasterTab()
-{
-    return mMasterTab;
 }
 
 //--------------------------------------------------------------------------------------

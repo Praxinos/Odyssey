@@ -13,12 +13,16 @@ class ODYSSEYVIEWPORTDRAWINGEDITOR_API FOdysseyViewportDrawingEditorMasterTab :
 	public FOdysseyEditorTab
 {
 public:
+    static const FName& StaticId();
+
+public:
     // Construction / Destruction
     virtual ~FOdysseyViewportDrawingEditorMasterTab();
     FOdysseyViewportDrawingEditorMasterTab(FOdysseyViewportDrawingEditor* iEditor);
 
 protected:
     // FOdysseyEditorTab interface
+    virtual const FName& GetId() const override;
     virtual TSharedPtr<SWidget> CreateWidget() override;
     TSharedRef<SWidget> OnGetMenuContent();
     void OnMenuClosed( bool iOpen );

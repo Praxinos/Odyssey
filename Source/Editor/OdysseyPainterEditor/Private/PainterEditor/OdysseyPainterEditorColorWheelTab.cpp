@@ -9,6 +9,13 @@
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorColorWheelTab"
 
+const FName&
+FOdysseyPainterEditorColorWheelTab::StaticId()
+{
+    static FName Id = TEXT("OdysseyPainterEditor_ColorSelector"); //Keep ColorSelector instead of ColorWheel because changing that ID would show an empty panel to users who already opened the previous ColorSelector Panel
+    return Id;
+}
+
 /////////////////////////////////////////////////////
 // FOdysseyPainterEditorColorWheelTab
 //--------------------------------------------------------------------------------------
@@ -18,9 +25,7 @@ FOdysseyPainterEditorColorWheelTab::~FOdysseyPainterEditorColorWheelTab()
 }
 
 FOdysseyPainterEditorColorWheelTab::FOdysseyPainterEditorColorWheelTab(FOdysseyPainterEditor* iEditor)
-	: FOdysseyEditorTab(TEXT("OdysseyPainterEditor_ColorSelector")//Keep ColorSelector instead of ColorWheel because changing that ID would show an empty panel to users who already opened the previous ColorSelector Panel
-    , LOCTEXT( "OdysseyPainterEditorColorWheelTab", "Color Wheel" )
-    , FSlateIcon( "OdysseyStyle", "PainterEditor.ColorWheel16" ))
+	: FOdysseyEditorTab(LOCTEXT( "OdysseyPainterEditorColorWheelTab", "Color Wheel" ), FSlateIcon( "OdysseyStyle", "PainterEditor.ColorWheel16" ))
     , mEditor(iEditor)
 {
 }
@@ -38,6 +43,12 @@ FOdysseyPainterEditorColorWheelTab::CreateWidget()
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------------------- Widget Getters
+
+const FName&
+FOdysseyPainterEditorColorWheelTab::GetId() const
+{
+    return StaticId();
+}
 
 ::ULIS::FColor
 FOdysseyPainterEditorColorWheelTab::Color() const

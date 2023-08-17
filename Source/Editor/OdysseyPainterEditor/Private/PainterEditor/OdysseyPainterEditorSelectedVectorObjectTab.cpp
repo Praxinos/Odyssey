@@ -6,6 +6,13 @@
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorSelectedVectorObjectTab"
 
+const FName&
+FOdysseyPainterEditorSelectedVectorObjectTab::StaticId()
+{
+    static FName Id = TEXT("OdysseyPainterEditor_SelectedVectorObject"); //Keep ColorSelector instead of ColorWheel because changing that ID would show an empty panel to users who already opened the previous ColorSelector Panel
+    return Id;
+}
+
 /////////////////////////////////////////////////////
 // FOdysseyPainterEditorSelectedVectorObjectTab
 //--------------------------------------------------------------------------------------
@@ -16,9 +23,7 @@ FOdysseyPainterEditorSelectedVectorObjectTab::~FOdysseyPainterEditorSelectedVect
 }
 
 FOdysseyPainterEditorSelectedVectorObjectTab::FOdysseyPainterEditorSelectedVectorObjectTab(FOdysseyPainterEditor* iEditor)
-    : FOdysseyEditorTab(TEXT("OdysseyPainterEditor_SelectedVectorObject"),
-                            LOCTEXT( "OdysseyPainterEditorSelectedVectorObjectTab", "Vector Selection" ),
-                            FSlateIcon( "OdysseyStyle", "PainterEditor.Tools16" ))
+    : FOdysseyEditorTab(LOCTEXT( "OdysseyPainterEditorSelectedVectorObjectTab", "Vector Selection" ), FSlateIcon( "OdysseyStyle", "PainterEditor.Tools16" ))
     , mEditor(iEditor)
 {
     mObjectView = NewObject<UOdysseyPainterEditorVectorObjectView>();
@@ -48,6 +53,12 @@ FOdysseyPainterEditorSelectedVectorObjectTab::GetReferencerName() const
 
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------- FOdysseyEditorTab interface
+
+const FName&
+FOdysseyPainterEditorSelectedVectorObjectTab::GetId() const
+{
+    return StaticId();
+}
 
 TSharedPtr<SWidget>
 FOdysseyPainterEditorSelectedVectorObjectTab::CreateWidget()

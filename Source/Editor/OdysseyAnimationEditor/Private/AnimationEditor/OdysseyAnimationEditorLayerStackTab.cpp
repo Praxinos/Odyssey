@@ -3,19 +3,25 @@
 
 #include "AnimationEditor/OdysseyAnimationEditorLayerStackTab.h"
 
-#include "Widgets/LayerStack/SOdysseyAnimationLayerStack.h"
-#include "Widgets/SOdysseyAnimationPlaybackControls.h"
-#include "Widgets/SOdysseyLayerStackAddLayerButton.h"
-#include "UObject/OdysseyObjectEditorUtils.h"
-#include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
+#include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
 #include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationCellsMutator.h"
+#include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
+#include "Widgets/LayerStack/SOdysseyAnimationLayerStack.h"
+#include "ULISEventBuilder.h"
+#include "ULISLoaderModule.h"
 #include "IContentBrowserSingleton.h"
 #include "ContentBrowserModule.h"
-#include "ULISLoaderModule.h"
-#include "ULISEventBuilder.h"
 #include "Misc/ScopedSlowTask.h"
+#include "OdysseySurfaceTexture2DEditable.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyAnimationEditorLayerStackTab"
+
+const FName&
+FOdysseyAnimationEditorLayerStackTab::StaticId()
+{
+    static FName Id = TEXT("OdysseyAnimationEditor_LayerStack");
+    return Id;
+}
 
 /////////////////////////////////////////////////////
 // FOdysseyAnimationEditorLayerStackTab
@@ -25,49 +31,26 @@ FOdysseyAnimationEditorLayerStackTab::~FOdysseyAnimationEditorLayerStackTab()
 {
 }
 
-FOdysseyAnimationEditorLayerStackTab::FOdysseyAnimationEditorLayerStackTab(FOdysseyAnimationEditor* iEditor)
-	: FOdysseyEditorTab(TEXT("OdysseyAnimationEditor_LayerStack")
-    , LOCTEXT( "OdysseyAnimationEditorLayerStackTab", "Layer Stack" )
-    , FSlateIcon( "OdysseyStyle", "PainterEditor.Layers16" ))
-    , mEditor(iEditor)
+FOdysseyAnimationEditorLayerStackTab::FOdysseyAnimationEditorLayerStackTab(FOdysseyAnimationEditorExtension* iExtension)
+	: FOdysseyEditorTab(LOCTEXT( "OdysseyAnimationEditorLayerStackTab", "Layer Stack" ), FSlateIcon( "OdysseyStyle", "PainterEditor.Layers16" ))
+    , mExtension(iExtension)
 {
 }
 
 //--------------------------------------------------------------------------------------
 //--------------------------------------------------- FOdysseyAnimationEditorTab interface
 
+const FName&
+FOdysseyAnimationEditorLayerStackTab::GetId() const
+{
+    return StaticId();
+}
+
 TSharedPtr<SWidget>
 FOdysseyAnimationEditorLayerStackTab::CreateWidget()
 {
-    return SNew(SOdysseyAnimationLayerStack, mEditor)
+    return SNew(SOdysseyAnimationLayerStack, mExtension)
         .LayerStack(this, &FOdysseyAnimationEditorLayerStackTab::LayerStack);
-
-    /* return SNew(SVerticalBox)
-            + SVerticalBox::Slot()
-            .AutoHeight()
-            [
-                SNew(SHorizontalBox)
-                + SHorizontalBox::Slot()
-                .AutoWidth()
-                [
-                    SNew(SOdysseyLayerStackAddLayerButton)
-                    .LayerStack(LayerStack())
-                    .OnAdded( this, &FOdysseyAnimationEditorLayerStackTab::OnLayerAdded)
-                ]
-                + SHorizontalBox::Slot()
-                .FillWidth(1.f)
-                .HAlign( HAlign_Center )
-                .VAlign( VAlign_Center )
-                [
-                    SNew(SOdysseyAnimationPlaybackControls, mEditor)
-                    .PlaybackFramesPerSecond(this, &FOdysseyAnimationEditorLayerStackTab::PlaybackFramesPerSecond)
-                ]
-            ]
-            + SVerticalBox::Slot()
-            .FillHeight(1.0)
-            [
-                SNew(SOdysseyAnimationLayerStack, mEditor)
-            ]; */
 }
 
 void
@@ -106,25 +89,25 @@ FOdysseyAnimationEditorLayerStackTab::ExtendMenu(FToolMenuOwner iOwner, FName iM
 UOdysseyAnimationLayerStack*
 FOdysseyAnimationEditorLayerStackTab::LayerStack() const
 {
-    return mEditor->LayerStack();
+    return mExtension->LayerStack();
 }
 
 UOdysseyAnimation*
 FOdysseyAnimationEditorLayerStackTab::Animation() const
 {
-    return mEditor->Animation();
+    return mExtension->Animation();
 }
 
 UOdysseyAnimationPlayer*
 FOdysseyAnimationEditorLayerStackTab::Player() const
 {
-    return mEditor->Player();
+    return mExtension->Player();
 }
 
 float
 FOdysseyAnimationEditorLayerStackTab::PlaybackFramesPerSecond() const
 {
-    return mEditor->PlaybackFramesPerSecond();
+    return mExtension->PlaybackFramesPerSecond();
 }
 
 //--------------------------------------------------------------------------------------
@@ -147,7 +130,7 @@ FOdysseyAnimationEditorLayerStackTab::ExtendMenuFile( FToolMenuOwner iOwner, FNa
 void           
 FOdysseyAnimationEditorLayerStackTab::ImportTextureSequence()
 {
-    UOdysseyLayerStack* layerStack = mEditor->LayerStack();
+    UOdysseyLayerStack* layerStack = LayerStack();
     if ( !layerStack )
         return;
 
@@ -155,7 +138,7 @@ FOdysseyAnimationEditorLayerStackTab::ImportTextureSequence()
 
     FOpenAssetDialogConfig openAssetDialogConfig;
     openAssetDialogConfig.DialogTitleOverride = LOCTEXT( "ImportTextureDialogTitle", "Import Textures Sequence" );
-    openAssetDialogConfig.DefaultPath = FPaths::GetPath(mEditor->Animation()->GetPathName() );
+    openAssetDialogConfig.DefaultPath = FPaths::GetPath(mExtension->Animation()->GetPathName() );
     openAssetDialogConfig.bAllowMultipleSelection = true;
     openAssetDialogConfig.AssetClassNames.Add( UTexture2D::StaticClass()->GetClassPathName() );
 
@@ -163,7 +146,7 @@ FOdysseyAnimationEditorLayerStackTab::ImportTextureSequence()
     TArray < FAssetData > assetsData = contentBrowserModule.Get().CreateModalOpenAssetDialog( openAssetDialogConfig );
     assetsData.Sort();
 
-    UOdysseyAnimation* animation = mEditor->Animation();
+    UOdysseyAnimation* animation = mExtension->Animation();
 
     if ( assetsData.Num() <= 0 )
         return;
@@ -223,7 +206,7 @@ FOdysseyAnimationEditorLayerStackTab::ImportTextureSequence()
 void
 FOdysseyAnimationEditorLayerStackTab::CreateNewLayer()
 {
-    UOdysseyLayerStack* layerStack = mEditor->LayerStack();
+    UOdysseyLayerStack* layerStack = LayerStack();
     if ( !layerStack )
         return;
 
@@ -233,7 +216,7 @@ FOdysseyAnimationEditorLayerStackTab::CreateNewLayer()
 void
 FOdysseyAnimationEditorLayerStackTab::ChangeLayerOpacity( float iOpacity )
 {
-    UOdysseyLayerStack* layerStack = mEditor->LayerStack();
+    UOdysseyLayerStack* layerStack = LayerStack();
     if ( !layerStack )
         return;
 

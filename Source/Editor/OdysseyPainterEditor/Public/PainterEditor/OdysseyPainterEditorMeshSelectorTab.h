@@ -12,17 +12,17 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorMeshSelectorTab :
 	public FOdysseyEditorTab
 {
 public:
+    static const FName& StaticId();
+
+public:
     // Construction / Destruction
     virtual ~FOdysseyPainterEditorMeshSelectorTab();
     FOdysseyPainterEditorMeshSelectorTab(FOdysseyPainterEditor* iEditor);
 
 protected:
     // FOdysseyEditorTab interface
+    virtual const FName& GetId() const override;
     virtual TSharedPtr<SWidget> CreateWidget() override;
-
-public:
-    // Public Getters
-    TSharedPtr<SOdysseyMeshSelector> MeshSelector();
 
 protected:
     // Event Listeners
@@ -30,7 +30,5 @@ protected:
 
 private:
     FOdysseyPainterEditor* mEditor;
-
-    TSharedPtr<SOdysseyMeshSelector> mMeshSelector;
 };
 

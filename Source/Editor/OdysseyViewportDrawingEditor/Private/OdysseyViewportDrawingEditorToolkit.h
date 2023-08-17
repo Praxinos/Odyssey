@@ -10,7 +10,7 @@ class FOdysseyViewportDrawingEditor;
 class FOdysseyViewportDrawingEditorToolkit : public FOdysseyModeToolkit
 {
 public:
-	FOdysseyViewportDrawingEditorToolkit(TSharedPtr<FOdysseyViewportDrawingEditor> iEditor, class FEdMode* iEditorMode);
+	FOdysseyViewportDrawingEditorToolkit();
 
 	/** IToolkit interface */
 	virtual FName GetToolkitFName() const override;

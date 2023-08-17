@@ -3,6 +3,7 @@
 
 #pragma once
 
+/*
 #include "OdysseyPainterEditor.h"
 #include "Engine/Texture2D.h"
 #include "OdysseyTextureEditorGUI.h"
@@ -10,9 +11,6 @@
 #include "LayerStack/OdysseyTextureLayerStack.h"
 #include "Misc/OdysseyHandle.h"
 
-/**
- * Implements an Editor for textures.
- */
 class ODYSSEYTEXTUREEDITOR_API FOdysseyTextureEditor
     : public FOdysseyPainterEditor
 {
@@ -40,4 +38,4 @@ public:
 
 private:
 	TSharedPtr<FOdysseyTextureEditorGUI> mGUI;
-};
+}; */

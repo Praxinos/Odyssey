@@ -11,9 +11,44 @@ FOdysseyPainterEditorExtension::~FOdysseyPainterEditorExtension()
 FOdysseyPainterEditorExtension::FOdysseyPainterEditorExtension(FOdysseyPainterEditor* iEditor)
     : mEditor(iEditor)
 {
+    
+}
+
+void
+FOdysseyPainterEditorExtension::Initialize()
+{
 
 }
 
+void
+FOdysseyPainterEditorExtension::Finalize()
+{
+
+}
+
+void
+FOdysseyPainterEditorExtension::ExtendMenu( FToolMenuOwner iOwnerFName, FName iMenuName )
+{
+
+}
+
+void
+FOdysseyPainterEditorExtension::BindShortcuts(FBaseToolkit* iToolkit)
+{
+
+}
+
+void
+FOdysseyPainterEditorExtension::RegisterTabSpawners(const TSharedRef< class FTabManager >& iTabManager, TSharedRef<FWorkspaceItem>& iWorkspaceMenuCategoryRef)
+{
+
+}
+
+void
+FOdysseyPainterEditorExtension::UnregisterTabSpawners(const TSharedRef< class FTabManager >& iTabManager)
+{
+
+}
 
 FOdysseyPainterEditor*
 FOdysseyPainterEditorExtension::GetEditor() const

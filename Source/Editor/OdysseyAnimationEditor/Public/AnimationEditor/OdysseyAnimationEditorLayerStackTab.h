@@ -5,7 +5,7 @@
 
 #include "OdysseyEditorTab.h"
 
-class FOdysseyAnimationEditor;
+class FOdysseyAnimationEditorExtension;
 class UOdysseyAnimationLayerStack;
 class UOdysseyAnimation;
 class UOdysseyAnimationPlayer;
@@ -14,12 +14,16 @@ class ODYSSEYANIMATIONEDITOR_API FOdysseyAnimationEditorLayerStackTab :
 	public FOdysseyEditorTab
 {
 public:
+    static const FName& StaticId();
+    
+public:
     // Construction / Destruction
     virtual ~FOdysseyAnimationEditorLayerStackTab();
-    FOdysseyAnimationEditorLayerStackTab(FOdysseyAnimationEditor* iEditor);
+    FOdysseyAnimationEditorLayerStackTab(FOdysseyAnimationEditorExtension* iExtension);
 
 protected:
     // FOdysseyAnimationEditorTab interface
+    virtual const FName& GetId() const override;
     virtual TSharedPtr<SWidget> CreateWidget() override;
     virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
     virtual void ExtendMenu(FToolMenuOwner iOwner, FName iMenuName) override;
@@ -47,6 +51,6 @@ private:
     virtual void ChangeLayerOpacity(float iOpacity);
 
 private:
-    FOdysseyAnimationEditor* mEditor;
+    FOdysseyAnimationEditorExtension* mExtension;
 };
 

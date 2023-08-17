@@ -3,30 +3,17 @@
 
 #pragma once
 
-#include "OdysseyEditorGUI.h"
-
-#include "OdysseyPainterEditorBrushSelectorTab.h"
-#include "OdysseyPainterEditorColorPaletteTab.h"
-#include "OdysseyPainterEditorColorSlidersTab.h"
-#include "OdysseyPainterEditorColorWheelTab.h"
-#include "OdysseyPainterEditorHUDTab.h"
-#include "OdysseyPainterEditorMeshSelectorTab.h"
-#include "OdysseyPainterEditorTopTab.h"
-#include "OdysseyPainterEditorToolsTab.h"
-#include "OdysseyPainterEditorToolOptionsTab.h"
-#include "OdysseyPainterEditorSelectedVectorObjectTab.h"
-#include "OdysseyPainterEditorViewportTab.h"
-
-#include "Undo/OdysseyVectorUndo.h"
+#include "CoreMinimal.h"
 
 class FOdysseyPainterEditor;
-class FOdysseyPainterEditorController;
+class FOdysseyVectorEngine;
+class FOdysseyVectorScene;
 
 /**
  * Implements an Editor toolkit for textures.
  */
-class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorGUI :
-	public FOdysseyEditorGUI
+class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorGUI
+    : public TSharedFromThis<FOdysseyPainterEditorGUI>
 {
 public:
     // Construction / Destruction
@@ -35,30 +22,29 @@ public:
 
 public:
     void Init();
+	void CreateLayout(TSharedPtr<FTabManager::FLayout> iLayout);
 
 public:
     // Tabs
-    virtual void CreateTabs();
-    virtual void BindShortcuts(FBaseToolkit* iToolkit);
+    void CreateTabs();
+    void BindShortcuts(FBaseToolkit* iToolkit);
 
 public:
     // Menu And Toolbar
-    virtual void ExtendMenu( FToolMenuOwner iOwner, FName iMenuName );
-    virtual void ExtendMenuAbout(FToolMenuOwner iOwner, FName iMenuName );
+    void ExtendMenu( FToolMenuOwner iOwner, FName iMenuName );
+    void ExtendMenuAbout(FToolMenuOwner iOwner, FName iMenuName );
 
 protected:
 	// Layout
-    virtual FName GetLayoutName() override;
-	virtual TSharedPtr<FTabManager::FLayout> CreateLayout() override;
-	virtual TSharedRef<FTabManager::FSplitter>	CreateMainSection();
-	virtual TSharedRef<FTabManager::FSplitter>	CreateLeftSection();
-	virtual TSharedRef<FTabManager::FSplitter>	CreateRightSection();
-	virtual TSharedRef<FTabManager::FSplitter>	CreateMiddleSection();
-    virtual TSharedRef<FTabManager::FSplitter>	CreateBottomSection();
+	TSharedRef<FTabManager::FSplitter>	CreateMainSection();
+	TSharedRef<FTabManager::FSplitter>	CreateLeftSection();
+	TSharedRef<FTabManager::FSplitter>	CreateRightSection();
+	TSharedRef<FTabManager::FSplitter>	CreateMiddleSection();
+    TSharedRef<FTabManager::FSplitter>	CreateBottomSection();
 
 public:
     // Getters
-    TSharedPtr<FOdysseyPainterEditorHUDTab>& GetHUDTab();
+    /* TSharedPtr<FOdysseyPainterEditorHUDTab>& GetHUDTab();
     TSharedPtr<FOdysseyPainterEditorViewportTab>& GetViewportTab();
     TSharedPtr<FOdysseyPainterEditorBrushSelectorTab>& GetBrushSelectorTab();
     TSharedPtr<FOdysseyPainterEditorMeshSelectorTab>& GetMeshSelectorTab();
@@ -68,16 +54,16 @@ public:
     TSharedPtr<FOdysseyPainterEditorTopTab>& GetTopTab();
     TSharedPtr<FOdysseyPainterEditorToolsTab>& GetToolsTab();
     TSharedPtr<FOdysseyPainterEditorToolOptionsTab>& GetToolOptionsTab();
-    TSharedPtr<FOdysseyPainterEditorSelectedVectorObjectTab>& GetSelectedVectorObjectTab();
+    TSharedPtr<FOdysseyPainterEditorSelectedVectorObjectTab>& GetSelectedVectorObjectTab(); */
 
 protected:
     // Shortcuts
-    virtual void AboutIliad();
-    virtual void VisitPraxinosWebsite();
-    virtual void ManualAndReleaseNotes();
-    virtual void GetBrushPack();
-    virtual void Discord();
-    virtual void SwitchTabletAPI();
+    void AboutIliad();
+    void VisitPraxinosWebsite();
+    void ManualAndReleaseNotes();
+    void GetBrushPack();
+    void Discord();
+    void SwitchTabletAPI();
     void Group( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
     void ResetView( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
     void DeleteSelection( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
@@ -91,8 +77,11 @@ protected:
 
 private:
     FOdysseyPainterEditor*                          mEditor;
+	TSharedPtr<FTabManager::FLayout>                mLayout;
+    TSharedPtr<SWidget>                             mWidget;
 
 protected:
+    /*
     TSharedPtr<FOdysseyPainterEditorHUDTab>                     mHUDTab;
     TSharedPtr<FOdysseyPainterEditorViewportTab>                mViewportTab;
     TSharedPtr<FOdysseyPainterEditorBrushSelectorTab>           mBrushSelectorTab;
@@ -103,6 +92,6 @@ protected:
     TSharedPtr<FOdysseyPainterEditorTopTab>                     mTopTab;
     TSharedPtr<FOdysseyPainterEditorToolsTab>                   mToolsTab;
     TSharedPtr<FOdysseyPainterEditorToolOptionsTab>             mToolOptionsTab;
-    TSharedPtr<FOdysseyPainterEditorSelectedVectorObjectTab>    mSelectedVectorObjectTab;
+    TSharedPtr<FOdysseyPainterEditorSelectedVectorObjectTab>    mSelectedVectorObjectTab; */
 };
 

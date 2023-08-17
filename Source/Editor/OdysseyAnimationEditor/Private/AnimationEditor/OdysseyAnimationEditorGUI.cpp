@@ -3,8 +3,9 @@
 
 #include "AnimationEditor/OdysseyAnimationEditorGUI.h"
 
-#include "AnimationEditor/OdysseyAnimationEditor.h"
+#include "AnimationEditor/OdysseyAnimationEditorExtension.h"
 #include "AnimationEditor/OdysseyAnimationEditorLightTableTab.h"
+#include "AnimationEditor/OdysseyAnimationEditorLayerStackTab.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyAnimationEditorGUI"
 
@@ -16,9 +17,8 @@ FOdysseyAnimationEditorGUI::~FOdysseyAnimationEditorGUI()
 {
 }
 
-FOdysseyAnimationEditorGUI::FOdysseyAnimationEditorGUI(FOdysseyAnimationEditor* iEditor) :
-	FOdysseyPainterEditorGUI(iEditor),
-	mEditor( iEditor )
+FOdysseyAnimationEditorGUI::FOdysseyAnimationEditorGUI(FOdysseyAnimationEditorExtension* iExtension)
+	: mExtension(iExtension)
 {
 }
 
@@ -28,14 +28,12 @@ FOdysseyAnimationEditorGUI::FOdysseyAnimationEditorGUI(FOdysseyAnimationEditor* 
 void
 FOdysseyAnimationEditorGUI::CreateTabs()
 {
-	FOdysseyPainterEditorGUI::CreateTabs();
-
 	//ADD NEW TABS
-	ODYSSEY_ADD_TAB(mLayerStackTab, FOdysseyAnimationEditorLayerStackTab, mEditor);
-	ODYSSEY_ADD_TAB(mLightTableTab, FOdysseyAnimationEditorLightTableTab, mEditor);
+	mExtension->GetEditor()->AddTab(MakeShared<FOdysseyAnimationEditorLayerStackTab>(mExtension));
+	mExtension->GetEditor()->AddTab(MakeShared<FOdysseyAnimationEditorLightTableTab>(mExtension));
 }
 
-TSharedRef<FTabManager::FSplitter>
+/* TSharedRef<FTabManager::FSplitter>
 FOdysseyAnimationEditorGUI::CreateBottomSection()
 {
 	return FOdysseyPainterEditorGUI::CreateBottomSection()
@@ -47,16 +45,10 @@ FOdysseyAnimationEditorGUI::CreateBottomSection()
 			->SetHideTabWell(false)
 			->SetSizeCoefficient(0.35f)
 		);
-}
+} */
 
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Getters
-
-FName
-FOdysseyAnimationEditorGUI::GetLayoutName()
-{
-	return "OdysseyAnimationEditor_Layout";
-}
 
 TSharedPtr<FOdysseyAnimationEditorLayerStackTab>&
 FOdysseyAnimationEditorGUI::GetLayerStackTab()

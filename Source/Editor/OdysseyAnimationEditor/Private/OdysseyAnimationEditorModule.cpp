@@ -28,11 +28,16 @@
 TSharedRef<FOdysseyAnimationEditorToolkit>
 FOdysseyAnimationEditorModule::CreateOdysseyAnimationEditor( UOdysseyAnimation* iAnimation )
 {
-	TSharedPtr<FOdysseyPainterEditor> editor = MakeShareable(new FOdysseyPainterEditor());
-    TSharedPtr<FOdysseyAnimationEditorToolkit> toolkit = MakeShareable( new FOdysseyAnimationEditorToolkit(editor) );
+	TSharedPtr<FOdysseyPainterEditor> editor = MakeShared<FOdysseyPainterEditor>(
+		LOCTEXT("WorkspaceMenu_OdysseyAnimationEditor", "Odyssey Animation Editor"),
+		iAnimation,
+		"OdysseyAnimationEditor_Layout"
+	);
+
 	editor->AddExtension(MakeShared<FOdysseyAnimationEditorExtension>(editor.Get()));
-	editor->Initialize(iAnimation);
-    toolkit->Initialize();
+
+    TSharedPtr<FOdysseyAnimationEditorToolkit> toolkit = MakeShared<FOdysseyAnimationEditorToolkit>();
+    toolkit->Initialize(iAnimation, editor);
 
 	TSharedPtr<FOdysseyAnimationEditorSource> source = MakeShared<FOdysseyAnimationEditorSource>(iAnimation);
 	editor->SetSource(source);

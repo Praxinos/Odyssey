@@ -10,6 +10,13 @@
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorColorSlidersTab"
 
+const FName&
+FOdysseyPainterEditorColorSlidersTab::StaticId()
+{
+    static FName Id = TEXT("OdysseyPainterEditor_ColorSliders");
+    return Id;
+}
+
 /////////////////////////////////////////////////////
 // FOdysseyPainterEditorColorSlidersTab
 //--------------------------------------------------------------------------------------
@@ -19,15 +26,19 @@ FOdysseyPainterEditorColorSlidersTab::~FOdysseyPainterEditorColorSlidersTab()
 }
 
 FOdysseyPainterEditorColorSlidersTab::FOdysseyPainterEditorColorSlidersTab(FOdysseyPainterEditor* iEditor)
-	: FOdysseyEditorTab(TEXT("OdysseyPainterEditor_ColorSliders"),
-                            LOCTEXT( "OdysseyPainterEditorColorSlidersTab", "Color Sliders" ),
-                            FSlateIcon( "OdysseyStyle", "PainterEditor.ColorSliders_2_16" ))
+	: FOdysseyEditorTab(LOCTEXT( "OdysseyPainterEditorColorSlidersTab", "Color Sliders" ), FSlateIcon( "OdysseyStyle", "PainterEditor.ColorSliders_2_16" ))
     , mEditor(iEditor)
 {
 }
 
 //--------------------------------------------------------------------------------------
 //--------------------------------------------------- FOdysseyEditorTab interface
+
+const FName&
+FOdysseyPainterEditorColorSlidersTab::GetId() const
+{
+    return StaticId();
+}
 
 TSharedPtr<SWidget>
 FOdysseyPainterEditorColorSlidersTab::CreateWidget()

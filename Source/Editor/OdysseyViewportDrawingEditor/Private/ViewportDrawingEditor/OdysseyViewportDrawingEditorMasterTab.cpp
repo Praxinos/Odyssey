@@ -12,6 +12,15 @@
 
 #define LOCTEXT_NAMESPACE "OdysseyViewportDrawingEditorMasterTab"
 
+
+const FName&
+FOdysseyViewportDrawingEditorMasterTab::StaticId()
+{
+    static FName Id = TEXT("OdysseyViewportDrawingEditor_MasterTab");
+    return Id;
+}
+
+
 /////////////////////////////////////////////////////
 // FOdysseyViewportDrawingEditorMasterTab
 //--------------------------------------------------------------------------------------
@@ -21,15 +30,20 @@ FOdysseyViewportDrawingEditorMasterTab::~FOdysseyViewportDrawingEditorMasterTab(
 }
 
 FOdysseyViewportDrawingEditorMasterTab::FOdysseyViewportDrawingEditorMasterTab(FOdysseyViewportDrawingEditor* iEditor)
-    : FOdysseyEditorTab(TEXT("OdysseyPainterEditor_TextureSelector"),
-                            LOCTEXT( "OdysseyViewportDrawingEditorMasterTab", "Texture Selector" ),
-                            FSlateIcon( "OdysseyStyle", "PainterEditor.TextureSelector_16" ))
+    : FOdysseyEditorTab(LOCTEXT( "OdysseyViewportDrawingEditorMasterTab", "Master Tab" ),
+                        FSlateIcon( "OdysseyStyle", "PainterEditor.TextureSelector_16" ))
     , mEditor(iEditor)
 {
 }
 
 //--------------------------------------------------------------------------------------
 //--------------------------------------------------- FOdysseyEditorTab interface
+
+const FName&
+FOdysseyViewportDrawingEditorMasterTab::GetId() const
+{
+    return StaticId();
+}
 
 TSharedPtr<SWidget>
 FOdysseyViewportDrawingEditorMasterTab::CreateWidget()

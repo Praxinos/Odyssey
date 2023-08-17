@@ -15,27 +15,41 @@ FOdysseyAssetEditorToolkit::~FOdysseyAssetEditorToolkit()
 {
 }
 
-FOdysseyAssetEditorToolkit::FOdysseyAssetEditorToolkit(const FName& iAppIdentifier, TSharedPtr<FOdysseyEditor> iEditor) :
-    TOdysseyToolkit<FAssetEditorToolkit>(iAppIdentifier, iEditor)
+FOdysseyAssetEditorToolkit::FOdysseyAssetEditorToolkit(const FName& iAppIdentifier)
+    : mAppIdentifier(iAppIdentifier)
+    , mEditor(nullptr)
 {
 }
 
 void
-FOdysseyAssetEditorToolkit::Initialize()
+FOdysseyAssetEditorToolkit::Initialize(UObject* iEditedObject, TSharedPtr<FOdysseyEditor> iEditor)
 {
+    //TArray<UObject*> editedObjects = mEditor->GetEditedObjects();
+    mEditor = iEditor;
+    mEditor->Initialize();
+
+    TArray<UObject*> editedObjects = mEditor->GetAdditionalEditedObjects(); //Editor can add some side edited objects
+    editedObjects.Add(iEditedObject);
+
+    FAssetEditorToolkit::InitAssetEditor( EToolkitMode::Standalone, NULL, mAppIdentifier, mEditor->CreateLayout(), true, false, editedObjects);
+    
+    mEditor->ExtendMenu( this, GetToolMenuName() );
+    mEditor->BindShortcuts( this );
+
     mEditor->OnAddEditedObjectDelegate().AddRaw(this, &FOdysseyAssetEditorToolkit::OnAddEditedObject);
     mEditor->OnRemoveEditedObjectDelegate().AddRaw(this, &FOdysseyAssetEditorToolkit::OnRemoveEditedObject);
-    
-    TArray<UObject*> editedObjects = mEditor->GetEditedObjects();
-    FAssetEditorToolkit::InitAssetEditor( EToolkitMode::Standalone, NULL, mAppIdentifier, mEditor->GetLayout(), true, false, editedObjects);
-    ExtendMenu();
 
-    //Finish Initialization
-    TOdysseyToolkit<FAssetEditorToolkit>::Initialize();
+    UToolMenus::Get()->RefreshAllWidgets(); //Requested after ExtendMenu
 }
 
 //--------------------------------------------------------------------------------------
 //-------------------------------------------------------- FAssetEditorToolkit interface
+
+FLinearColor
+FOdysseyAssetEditorToolkit::GetWorldCentricTabColorScale() const
+{
+    return FLinearColor( 0.3f, 0.2f, 0.5f, 0.5f );
+}
 
 void
 FOdysseyAssetEditorToolkit::SaveAssetAs_Execute()
@@ -58,7 +72,7 @@ void
 FOdysseyAssetEditorToolkit::RegisterTabSpawners(const TSharedRef<class FTabManager>& iTabManager)
 {
     FAssetEditorToolkit::RegisterTabSpawners(iTabManager);
-    WorkspaceMenuCategory = mEditor->RegisterTabSpawners(iTabManager);
+    mEditor->RegisterTabSpawners(iTabManager);
 }
 
 void
@@ -94,12 +108,6 @@ FOdysseyAssetEditorToolkit::GetToolkitToolTipText() const
 
 //--------------------------------------------------------------------------------------
 //-------------------------------------------------------------------- Commands building
-
-void
-FOdysseyAssetEditorToolkit::ExtendMenu()
-{
-    mEditor->ExtendMenu( this, GetToolMenuName() );
-}
 
 void
 FOdysseyAssetEditorToolkit::OnAddEditedObject(UObject* iObject)

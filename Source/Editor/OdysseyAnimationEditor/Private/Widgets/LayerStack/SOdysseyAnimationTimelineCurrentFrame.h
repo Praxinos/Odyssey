@@ -5,7 +5,7 @@
 
 #include "CoreMinimal.h"
 
-class FOdysseyAnimationEditor;
+class FOdysseyAnimationEditorExtension;
 
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineCurrentFrame
     : public SLeafWidget
@@ -22,7 +22,7 @@ public:
 
     void Construct(
         const FArguments& iArgs,
-        FOdysseyAnimationEditor* iEditor
+        FOdysseyAnimationEditorExtension* iExtension
     );
 
 public:
@@ -39,5 +39,5 @@ public:
     virtual FReply OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
 
 private:
-    FOdysseyAnimationEditor*            mEditor;
+    FOdysseyAnimationEditorExtension*            mExtension;
 };

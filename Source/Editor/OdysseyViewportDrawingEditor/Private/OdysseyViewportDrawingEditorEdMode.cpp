@@ -2,6 +2,10 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "OdysseyViewportDrawingEditorEdMode.h"
+
+#include "PainterEditor/OdysseyPainterEditor.h"
+#include "ViewportDrawingEditor/OdysseyViewportDrawingEditorExtension.h"
+
 #include "EdMode.h"
 #include "EditorModeManager.h"
 #include "LevelEditor.h"
@@ -20,6 +24,7 @@
 #include "OdysseyViewportDrawingEditor.h"
 #include "OdysseyViewportDrawingEditorToolkit.h"
 #include "OdysseyViewportDrawingEditorPainter.h"
+#include "TextureEditor/OdysseyTextureEditorExtension.h"
 
 #include "UObject/UObjectGlobals.h"
 #include "Editor/EditorPerProjectUserSettings.h"
@@ -44,10 +49,6 @@ FOdysseyViewportDrawingEditorEdMode::~FOdysseyViewportDrawingEditorEdMode()
 
 void FOdysseyViewportDrawingEditorEdMode::Initialize()
 {
-    mEditor = MakeShareable(new FOdysseyViewportDrawingEditor());
-    mEditor->Initialize(nullptr);
-
-    mViewportDrawingEditorPainter = new FOdysseyViewportDrawingEditorPainter(mEditor);
 }
 
 void FOdysseyViewportDrawingEditorEdMode::AddReferencedObjects(FReferenceCollector& Collector)
@@ -118,14 +119,6 @@ bool FOdysseyViewportDrawingEditorEdMode::IsEditingEnabled() const
 	return GetWorld() ? GetWorld()->FeatureLevel >= ERHIFeatureLevel::SM5 : false;
 }
 
-void FOdysseyViewportDrawingEditorEdMode::CleanupTabsToolbar(const TSharedRef<SWindow>& Window)
-{
-    FLevelEditorModule& levelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>(FName("LevelEditor"));
-    TSharedRef<FTabManager> tabManager = levelEditorModule.GetLevelEditorTabManager()->AsShared();
-
-    mEditor->UnregisterTabSpawners( tabManager );
-}
-
 void FOdysseyViewportDrawingEditorEdMode::OnResetViewMode()
 {
     // Reset viewport color mode for all active viewports
@@ -144,12 +137,27 @@ void FOdysseyViewportDrawingEditorEdMode::Enter()
 {
     FEdMode::Enter();
 
-    checkf(mViewportDrawingEditorPainter != nullptr, TEXT("ViewportDrawingEditorPainter was not created"));
+    //checkf(mViewportDrawingEditorPainter != nullptr, TEXT("ViewportDrawingEditorPainter was not created"));
+
+    mEditor = MakeShared<FOdysseyPainterEditor>(
+		LOCTEXT("WorkspaceMenu_OdysseyViewportDrawingEditor", "Odyssey Viewport Drawing Editor"),
+		nullptr,
+		"OdysseyViewportDrawingEditor_Layout"
+	);
+
+    mEditor->SetTabsSaveFilename("IliadEdModeLayout.save");
+
+	TSharedRef<FOdysseyTextureEditorExtension> textureExtension = MakeShared<FOdysseyTextureEditorExtension>(mEditor.Get());
+    TSharedRef<FOdysseyViewportDrawingEditorExtension> viewportDrawingExtension = MakeShared<FOdysseyViewportDrawingEditorExtension>(mEditor.Get()/*, flipbookExtension*/);
+	mEditor->AddExtension(MakeShared<FOdysseyTextureEditorExtension>(mEditor.Get()));
+
+    mViewportDrawingEditorPainter = new FOdysseyViewportDrawingEditorPainter(viewportDrawingExtension.Get());
 
     if (UsesToolkits() && !Toolkit.IsValid())
     {
-        Toolkit = MakeShareable(new FOdysseyViewportDrawingEditorToolkit(mEditor, this));
-        Toolkit->Init(Owner->GetToolkitHost());
+        TSharedPtr<FOdysseyViewportDrawingEditorToolkit> viewportToolkit = MakeShared<FOdysseyViewportDrawingEditorToolkit>();
+        Toolkit = viewportToolkit;
+        viewportToolkit->Initialize(mEditor, this, Owner->GetToolkitHost());
         
         TSharedPtr< ILevelEditor > levelEditor = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor").GetFirstLevelEditor();
         levelEditor->AppendCommands( Toolkit->GetToolkitCommands() );
@@ -185,10 +193,6 @@ void FOdysseyViewportDrawingEditorEdMode::Enter()
         FText Title = LOCTEXT("TitleCollisionUVNoSupport","CollisionUVNoSupport");
         FMessageDialog::Open(EAppMsgType::Ok,LOCTEXT("Enable FindCollisionUV","'Support UV From Hit Results' doesn't seem to be enabled. Enable it from project settings in order to use this paint editor properly."),&Title);
     }
-
-    IMainFrameModule& mainFrameModule = FModuleManager::LoadModuleChecked<IMainFrameModule>(TEXT("MainFrame"));
-    const TSharedPtr<SWindow>& mainFrameParentWindow = mainFrameModule.GetParentWindow();
-    mainFrameParentWindow->SetOnWindowClosed(FOnWindowClosed::CreateSP(this, &FOdysseyViewportDrawingEditorEdMode::CleanupTabsToolbar));
 }
 
 void FOdysseyViewportDrawingEditorEdMode::Exit()
@@ -210,6 +214,10 @@ void FOdysseyViewportDrawingEditorEdMode::Exit()
     }
 
     mViewportDrawingEditorPainter->Finalize();
+    delete mViewportDrawingEditorPainter;
+    mViewportDrawingEditorPainter = nullptr;
+
+    mEditor = nullptr;
 
     // Call parent implementation
     FEdMode::Exit();

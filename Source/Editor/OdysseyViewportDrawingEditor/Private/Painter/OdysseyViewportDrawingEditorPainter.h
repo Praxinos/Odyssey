@@ -15,6 +15,7 @@
 
 #include "IOdysseyStylusInputModule.h"
 
+class FOdysseyViewportDrawingEditorExtension;
 class UOdysseyViewportDrawingEditorSettings;
 class IMeshPaintGeometryAdapter;
 struct FAssetData;
@@ -32,7 +33,7 @@ public:
 	virtual ~FOdysseyViewportDrawingEditorPainter();
 
 	/** constructor */
-	FOdysseyViewportDrawingEditorPainter(TSharedPtr<FOdysseyViewportDrawingEditor> iEditor);
+	FOdysseyViewportDrawingEditorPainter(FOdysseyViewportDrawingEditorExtension* iExtension);
 
 public:
 	void Initialize();
@@ -63,7 +64,7 @@ private:
 	void ClearAllDelegatesSequencers();
 
 protected:	
-	TSharedPtr<FOdysseyViewportDrawingEditor> mEditor;
+	FOdysseyViewportDrawingEditorExtension* mExtension;
 
 	/** Painting Extension: describes the method by which we draw in the viewport */
 	TSharedPtr<IOdysseyViewportDrawingEditorAdapter> mPaintingAdapter;

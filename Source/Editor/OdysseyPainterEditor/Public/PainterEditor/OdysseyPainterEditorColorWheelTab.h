@@ -13,12 +13,16 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorColorWheelTab :
 	public FOdysseyEditorTab
 {
 public:
+    static const FName& StaticId();
+
+public:
     // Construction / Destruction
     virtual ~FOdysseyPainterEditorColorWheelTab();
     FOdysseyPainterEditorColorWheelTab(FOdysseyPainterEditor* iEditor);
 
 protected:
     // FOdysseyEditorTab interface
+    virtual const FName& GetId() const override;
     virtual TSharedPtr<SWidget> CreateWidget() override;
 
 protected:

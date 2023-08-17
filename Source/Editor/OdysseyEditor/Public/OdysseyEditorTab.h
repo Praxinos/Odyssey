@@ -9,27 +9,38 @@ class ODYSSEYEDITOR_API FOdysseyEditorTab :
 public:
     // Construction / Destruction
     virtual ~FOdysseyEditorTab();
-    FOdysseyEditorTab(FName iID, FText iDisplayName, FSlateIcon iIcon);
+    FOdysseyEditorTab(FText iDisplayName, FSlateIcon iIcon);
 
 public:
     void Init();
+    void Open();
+    void Close();
+    bool IsOpened() const;
+    const FText& GetName() const;
+    const FSlateIcon& GetIcon() const;
 
 public:
+    virtual bool CanOpen() const;
+    virtual const FName& GetId() const = 0;
     virtual TSharedPtr<SWidget> CreateWidget() = 0;
     virtual void BindShortcuts(FBaseToolkit* iToolkit);
     virtual TSharedRef<SDockTab> SpawnTab(const FSpawnTabArgs& iArgs);
     virtual void ExtendMenu( FToolMenuOwner iOwner, FName iMenuName );
+    
+    void SetTabManager(TSharedPtr< FTabManager > iTabManager);
+    TSharedPtr< FTabManager > GetTabManager() const;
+    void Register(TSharedRef<FWorkspaceItem>& iWorkspaceMenuCategoryRef);
+    void Unregister();
 
 public:
-    const FName&                        ID() const;
     const FText&                        DisplayName() const;
     const FSlateIcon&                   Icon() const;
     virtual const TSharedPtr<SWidget>&  Widget() const;
 
 private:
-    FName mID;
     FText mDisplayName;
     FSlateIcon mIcon;
     TSharedPtr<SWidget> mWidget;
+    TWeakPtr< FTabManager > mTabManager;
 };
 

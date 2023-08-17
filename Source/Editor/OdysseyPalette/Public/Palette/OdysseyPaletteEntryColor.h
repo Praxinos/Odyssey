@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Palette/OdysseyPaletteEntry.h"
 
 #include "OdysseyPaletteEntryColor.generated.h"
 

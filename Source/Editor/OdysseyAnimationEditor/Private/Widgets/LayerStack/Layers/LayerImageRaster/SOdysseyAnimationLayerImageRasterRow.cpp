@@ -14,7 +14,7 @@
 void SOdysseyAnimationLayerImageRasterRow::Construct(
     const FArguments& InArgs,
     const TSharedRef<SOdysseyLayerStackTreeView>& iOwnerTableView,
-    FOdysseyAnimationEditor* iEditor,
+    FOdysseyAnimationEditorExtension* iExtension,
     UOdysseyAnimationLayerImageRaster* iAnimationLayerImageRaster
 )
 {
@@ -24,7 +24,7 @@ void SOdysseyAnimationLayerImageRasterRow::Construct(
     SOdysseyAnimationLayerRow::Construct(
         SOdysseyAnimationLayerRow::FArguments(),
         iOwnerTableView,
-        iEditor,
+        iExtension,
 		iAnimationLayerImageRaster
     );
 
@@ -113,7 +113,7 @@ SOdysseyAnimationLayerImageRasterRow::GenerateOptionsWidget()
 TSharedRef<SWidget>
 SOdysseyAnimationLayerImageRasterRow::GenerateTimelineWidget()
 {
-    return SNew(SOdysseyAnimationLayerImageRasterTimeline, GetEditor(), mAnimationLayerImageRaster);
+    return SNew(SOdysseyAnimationLayerImageRasterTimeline, GetExtension(), mAnimationLayerImageRaster);
 }
 
 void

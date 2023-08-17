@@ -8,6 +8,8 @@
 #include "OdysseyViewportDrawingEditorTextureBasedAdapter.h"
 #include "OdysseyViewportDrawingEditorScreenBasedAdapter.h"
 
+#include "ViewportDrawingEditor/OdysseyViewportDrawingEditorExtension.h"
+
 #include "MeshPaintModule.h"
 #include "MeshPaintAdapterFactory.h"
 #include "IMeshPaintGeometryAdapter.h"
@@ -30,9 +32,9 @@ FOdysseyViewportDrawingEditorPainter::~FOdysseyViewportDrawingEditorPainter()
 	Finalize();
 }
 
-FOdysseyViewportDrawingEditorPainter::FOdysseyViewportDrawingEditorPainter(TSharedPtr<FOdysseyViewportDrawingEditor> iEditor)
-    : mEditor(iEditor),
-    mPaintSettings(UOdysseyViewportDrawingEditorSettings::Get())
+FOdysseyViewportDrawingEditorPainter::FOdysseyViewportDrawingEditorPainter(FOdysseyViewportDrawingEditorExtension* iExtension)
+    : mExtension(iExtension)
+    , mPaintSettings(UOdysseyViewportDrawingEditorSettings::Get())
 {
 }
 
@@ -44,12 +46,12 @@ void FOdysseyViewportDrawingEditorPainter::Initialize()
         AActor* selectedActor = Cast<AActor>(actorSelection->GetSelectedObject(selectionIndex));
         if (selectedActor)
         {
-            mEditor->SetActor(selectedActor);
+            mExtension->SetActor(selectedActor);
         }
     }
 
     FLevelEditorSequencerIntegration::Get().GetOnSequencersChanged().AddRaw( this, &FOdysseyViewportDrawingEditorPainter::OnSequencersChanged );
-    mEditor->AdapterChangedDelegate().AddRaw( this, &FOdysseyViewportDrawingEditorPainter::CreatePaintingAdapter );
+    mExtension->AdapterChangedDelegate().AddRaw( this, &FOdysseyViewportDrawingEditorPainter::CreatePaintingAdapter );
     CreatePaintingAdapter();
     
     OnSequencersChanged(); //Init the potential sequencers already present
@@ -57,9 +59,9 @@ void FOdysseyViewportDrawingEditorPainter::Initialize()
 
 void FOdysseyViewportDrawingEditorPainter::Finalize()
 {
-    mEditor->SetActor(nullptr); //Unselect the actor to cleanup the editor
+    mExtension->SetActor(nullptr); //Unselect the actor to cleanup the editor
     FLevelEditorSequencerIntegration::Get().GetOnSequencersChanged().RemoveAll(this);
-    mEditor->AdapterChangedDelegate().RemoveAll(this);
+    mExtension->AdapterChangedDelegate().RemoveAll(this);
     ClearAllDelegatesSequencers();
 
     if (mPaintingAdapter)
@@ -73,26 +75,26 @@ void FOdysseyViewportDrawingEditorPainter::CreatePaintingAdapter()
     if (mPaintingAdapter)
         mPaintingAdapter.Reset();
 
-    switch (mEditor->PaintingAdapterMethod())
+    switch (mExtension->PaintingAdapterMethod())
     {
         case EOdysseyViewportDrawingPaintingAdapterMethod::OdysseyTextureBased :
-            mPaintingAdapter = MakeShared<FOdysseyViewportDrawingEditorTextureBasedAdapter>(mEditor);
+            mPaintingAdapter = MakeShared<FOdysseyViewportDrawingEditorTextureBasedAdapter>(mExtension);
         break;
         case EOdysseyViewportDrawingPaintingAdapterMethod::OdysseyScreenBased:
-            mPaintingAdapter = MakeShared<FOdysseyViewportDrawingEditorScreenBasedAdapter>(mEditor);
+            mPaintingAdapter = MakeShared<FOdysseyViewportDrawingEditorScreenBasedAdapter>(mExtension);
         break;
         case EOdysseyViewportDrawingPaintingAdapterMethod::OdysseyMeshBasedPlanar:
-            mPaintingAdapter = MakeShared<FOdysseyViewportDrawingEditorMeshBasedAdapter>(mEditor);
+            mPaintingAdapter = MakeShared<FOdysseyViewportDrawingEditorMeshBasedAdapter>(mExtension);
         break;
         default :
-            mPaintingAdapter = MakeShared<FOdysseyViewportDrawingEditorTextureBasedAdapter>(mEditor);
+            mPaintingAdapter = MakeShared<FOdysseyViewportDrawingEditorTextureBasedAdapter>(mExtension);
         break;
     }
 }
 
 void FOdysseyViewportDrawingEditorPainter::SelectActor(AActor* iActor)
 {
-    mEditor->SetActor(iActor);
+    mExtension->SetActor(iActor);
 }
 
 IOdysseyViewportDrawingEditorAdapter* FOdysseyViewportDrawingEditorPainter::GetOdysseyViewportDrawingEditorAdapter()
@@ -106,7 +108,7 @@ void FOdysseyViewportDrawingEditorPainter::AddReferencedObjects(FReferenceCollec
 {
 	FMeshPaintAdapterFactory::AddReferencedObjectsGlobals(iCollector);
 
-    TMap<UMeshComponent*, TSharedPtr<IMeshPaintGeometryAdapter>> map = mEditor->ComponentToAdapterMap();
+    TMap<UMeshComponent*, TSharedPtr<IMeshPaintGeometryAdapter>> map = mExtension->ComponentToAdapterMap();
 	for (TMap< UMeshComponent*, TSharedPtr<IMeshPaintGeometryAdapter>>::TIterator It(map); It; ++It)
 	{
         //Prevent GC on the components we save painting settings for
@@ -148,7 +150,7 @@ void FOdysseyViewportDrawingEditorPainter::GatherTextureTriangles(IMeshPaintGeom
 
 TSharedPtr<IMeshPaintGeometryAdapter> FOdysseyViewportDrawingEditorPainter::GetMeshAdapterForComponent(const UMeshComponent* iComponent)
 {
-	return mEditor->ComponentToAdapterMap().FindChecked(iComponent);
+	return mExtension->ComponentToAdapterMap().FindChecked(iComponent);
 }
 
 // Sequencer related ------------------------------------------
@@ -182,19 +184,25 @@ void FOdysseyViewportDrawingEditorPainter::OnSequencersChanged()
 
 void FOdysseyViewportDrawingEditorPainter::OnSyncPaintingWithSequencer()
 {
+    TSharedPtr<FOdysseyPainterEditorSource> source = mExtension->GetEditor()->GetSource();
+    if (!source || source->Id() != FOdysseyTextureEditorSource::StaticId())
+        return;
+
+    TSharedPtr<FOdysseyTextureEditorSource> textureSource = StaticCastSharedPtr<FOdysseyTextureEditorSource>(source);
+
     //Security, in case we're flipping in sequencer while drawing at the same time
-    if( mEditor->Texture() )
+    if( textureSource->GetTexture() )
         mPaintingAdapter->FinishPainting();
 
-    if (mEditor->Component())
+    if (mExtension->Component())
     {
         TArray<UMaterialInterface*> selectableMaterials;
-        mEditor->Component()->GetUsedMaterials(selectableMaterials);
+        mExtension->Component()->GetUsedMaterials(selectableMaterials);
         if (selectableMaterials.Num() > 0)
         {
-            if (selectableMaterials.Find(mEditor->Material()) == INDEX_NONE)
+            if (selectableMaterials.Find(mExtension->Material()) == INDEX_NONE)
             {
-                mEditor->SetMaterial(selectableMaterials[0]);
+                mExtension->SetMaterial(selectableMaterials[0]);
             }
         }
     }

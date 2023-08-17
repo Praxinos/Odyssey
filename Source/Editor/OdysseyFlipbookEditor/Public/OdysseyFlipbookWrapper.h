@@ -32,7 +32,7 @@ public:
 	~FOdysseyFlipbookWrapper();
 
     /** The constructor */
-	FOdysseyFlipbookWrapper(UPaperFlipbook* iFlipbook);
+	FOdysseyFlipbookWrapper();
 
 public:
     // 
@@ -73,11 +73,8 @@ public:
     FOnSpriteTextureChanged& OnSpriteTextureChanged();
 
 public:
-    //tmp
-    UPaperFlipbook* Flipbook()
-    {
-        return mFlipbook;
-    }
+    UPaperFlipbook* GetFlipbook() const;
+    void SetFlipbook(UPaperFlipbook* iFlipbook);
 
 private:
     void CreateEmptyKeyFrame(int32 iIndex);

@@ -54,11 +54,10 @@ public:
 	bool IsEditingEnabled() const;
 
 private:
-    void CleanupTabsToolbar(const TSharedRef<SWindow>& Window);
     void OnResetViewMode();
 
 private:
-	TSharedPtr<FOdysseyViewportDrawingEditor> mEditor;
+	TSharedPtr<FOdysseyPainterEditor> mEditor;
 	//TSharedPtr<FOdysseyViewportDrawingEditorToolkit> mToolkit;
 	FOdysseyViewportDrawingEditorPainter* mViewportDrawingEditorPainter;
 };

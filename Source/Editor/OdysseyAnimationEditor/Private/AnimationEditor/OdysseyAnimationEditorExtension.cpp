@@ -3,7 +3,12 @@
 
 #include "AnimationEditor/OdysseyAnimationEditorExtension.h"
 
+#include "PainterEditor/OdysseyPainterEditor.h"
+#include "OdysseyAnimation.h"
+#include "Abilities/IOdysseyAnimationImageRenderingAbility.h"
+#include "Abilities/IOdysseyAnimationMediaAbility.h"
 #include "AnimationEditor/OdysseyAnimationEditorGUI.h"
+#include "AnimationEditor/OdysseyAnimationEditorSource.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyAnimationEditorExtension"
 
@@ -15,10 +20,10 @@ FOdysseyAnimationEditorExtension::~FOdysseyAnimationEditorExtension()
 }
 
 FOdysseyAnimationEditorExtension::FOdysseyAnimationEditorExtension(FOdysseyPainterEditor* iEditor)
-	: FOdysseyPainterEditorExtension(iEditor),
-	mAnimationSource(nullptr),
-	mGUI(nullptr),
-	mPlaybackFramesPerSecond(0)
+	: FOdysseyPainterEditorExtension(iEditor)
+	, mAnimationSource(nullptr)
+	, mGUI(nullptr)
+	, mPlaybackFramesPerSecond(0)
 {
 }
 
@@ -41,18 +46,16 @@ void
 FOdysseyAnimationEditorExtension::OnSourceChanged()
 {
     //Is the source an animation
-	if (mAnimationSource)
-    {
-        //TODO: CurrentFrame should not be in the animation itself, it's an editor specific data
-        UOdysseyAnimation::OnCurrentFrameChanged().RemoveAll(this);
+    TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
+	if (!source || source->Id() != FOdysseyAnimationEditorSource::StaticId())
+	{
+		mAnimationSource = nullptr;
+		UOdysseyAnimation::OnCurrentFrameChanged().RemoveAll(this);
         IOdysseyAnimationImageRenderingAbility::OnCompositionCommited().RemoveAll(this);
         UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll(this);
         IOdysseyAnimationMediaAbility::OnChanged().RemoveAll(this);
-    }
-
-    TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
-	if (!source || source->Id() != FOdysseyAnimationEditorSource::StaticId())
 		return;
+	}
 
 	mAnimationSource = StaticCastSharedPtr<FOdysseyAnimationEditorSource>(source);
     

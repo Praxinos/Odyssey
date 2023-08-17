@@ -3,9 +3,7 @@
 
 #pragma once
 
-#include "TextureEditor/OdysseyTextureEditorGUI.h"
-
-class FOdysseyViewportDrawingEditor;
+class FOdysseyViewportDrawingEditorExtension;
 class FOdysseyViewportDrawingEditorMasterTab;
 
 enum class EOdysseyViewportSelectedView: uint8
@@ -15,31 +13,24 @@ enum class EOdysseyViewportSelectedView: uint8
     kTools
 };
 
-class ODYSSEYVIEWPORTDRAWINGEDITOR_API FOdysseyViewportDrawingEditorGUI :
-	public FOdysseyTextureEditorGUI
+class ODYSSEYVIEWPORTDRAWINGEDITOR_API FOdysseyViewportDrawingEditorGUI
 {
 public:
     // Construction / Destruction
     virtual ~FOdysseyViewportDrawingEditorGUI();
-    FOdysseyViewportDrawingEditorGUI(FOdysseyViewportDrawingEditor* iEditor);
+    FOdysseyViewportDrawingEditorGUI(FOdysseyViewportDrawingEditorExtension* iExtension);
 
 public:
     // Initialization
     virtual void CreateTabs() override;
-    TSharedRef<FTabManager::FSplitter> CreateMainSection() override;
     virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
-
-public:
-    // GettersFName
-	virtual FName GetLayoutName() override;
-    TSharedPtr<FOdysseyViewportDrawingEditorMasterTab>& GetMasterTab();
 
 public:
     // Layout
 	virtual TSharedPtr<SWidget> CreateWidget() override;
 
 private:
-	FOdysseyViewportDrawingEditor* mEditor;
+	FOdysseyViewportDrawingEditorExtension* mExtension;
     TSharedPtr<FOdysseyViewportDrawingEditorMasterTab> mMasterTab;
 
 private:

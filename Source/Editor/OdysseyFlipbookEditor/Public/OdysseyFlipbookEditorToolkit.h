@@ -22,7 +22,7 @@ class FOdysseyFlipbookEditorToolkit
 public:
     // Construction / Destruction
     virtual ~FOdysseyFlipbookEditorToolkit();
-    FOdysseyFlipbookEditorToolkit(TSharedPtr<FOdysseyFlipbookEditor> iEditor);
+    FOdysseyFlipbookEditorToolkit();
 
 protected:
 	virtual void OpenAsset(UObject* iObject) override;

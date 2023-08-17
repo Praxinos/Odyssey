@@ -2,6 +2,8 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "OdysseyViewportDrawingEditorMeshBasedAdapter.h"
+#include "PainterEditor/OdysseyPainterEditorSource.h"
+#include "TextureEditor/OdysseyTextureEditorSource.h"
 #include "MeshPaintHelpers.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetRenderingLibrary.h"
@@ -33,15 +35,21 @@ FOdysseyViewportDrawingEditorMeshBasedAdapter::~FOdysseyViewportDrawingEditorMes
     }
 }
 
-FOdysseyViewportDrawingEditorMeshBasedAdapter::FOdysseyViewportDrawingEditorMeshBasedAdapter(TSharedPtr<FOdysseyViewportDrawingEditor> iEditor) :
-    IOdysseyViewportDrawingEditorAdapter::IOdysseyViewportDrawingEditorAdapter(iEditor)
+FOdysseyViewportDrawingEditorMeshBasedAdapter::FOdysseyViewportDrawingEditorMeshBasedAdapter(FOdysseyViewportDrawingEditorExtension* iExtension) :
+    IOdysseyViewportDrawingEditorAdapter::IOdysseyViewportDrawingEditorAdapter(iExtension)
 {
     PrepareAdapterForPainting();
 }
 
 void FOdysseyViewportDrawingEditorMeshBasedAdapter::PrepareAdapterForPainting()
 {    
-    if (mEditor->Component() == nullptr || mEditor->Texture() == nullptr)
+    TSharedPtr<FOdysseyPainterEditorSource> source = mExtension->GetEditor()->GetSource();
+    if (!source || source->Id() != FOdysseyTextureEditorSource::StaticId())
+        return;
+
+    TSharedPtr<FOdysseyTextureEditorSource> textureSource = StaticCastSharedPtr<FOdysseyTextureEditorSource>(source);
+
+    if (mExtension->Component() == nullptr || textureSource->GetTexture() == nullptr)
         return;
 
     IOdysseyViewportDrawingEditorAdapter::PrepareAdapterForPainting();
@@ -49,56 +57,74 @@ void FOdysseyViewportDrawingEditorMeshBasedAdapter::PrepareAdapterForPainting()
     if( mState == eState::kIdle )
     {
         BuildPaintingTexture2DRenderTarget();
-        TexturePaintHelpers::GenerateSeamMask(mEditor->Component(), mEditor->GetUVIndexUsedByCurrentTexture(), mSeamRenderTarget2D, mEditor->Texture(), mPaintingTexture2DRenderTarget);
+        TexturePaintHelpers::GenerateSeamMask(mExtension->Component(), mExtension->GetUVIndexUsedByCurrentTexture(), mSeamRenderTarget2D, textureSource->GetTexture(), mPaintingTexture2DRenderTarget);
     }
 
     //We're using percentage size for this adapter, so we put the true maximum mesh size
-    //mEditor->GetGUI()->GetTopTab()->SetMeshMaxSize(mEditor->GetMeshComponentMaxSize() * GetStampQuality());
-    mEditor->GetRasterDrawingTool()->SetBaseSize(mEditor->GetMeshComponentMaxSize() * GetStampQuality());
+    //mExtension->GetGUI()->GetTopTab()->SetMeshMaxSize(mExtension->GetMeshComponentMaxSize() * GetStampQuality());
+    mExtension->GetEditor()->GetRasterDrawingTool()->SetBaseSize(mExtension->GetMeshComponentMaxSize() * GetStampQuality());
     
     mState = eState::kIdleReady;
 }
 
 void FOdysseyViewportDrawingEditorMeshBasedAdapter::StartPainting()
 {
-    mEditor->GetSelectedTool()->OnMouseDown(mCurrentStrokeRay.mPoint, EKeys::LeftMouseButton);
+    TSharedPtr<FOdysseyPainterEditorSource> source = mExtension->GetEditor()->GetSource();
+    if (!source || source->Id() != FOdysseyTextureEditorSource::StaticId())
+        return;
+
+    TSharedPtr<FOdysseyTextureEditorSource> textureSource = StaticCastSharedPtr<FOdysseyTextureEditorSource>(source);
+
+    mExtension->GetEditor()->GetSelectedTool()->OnMouseDown(mCurrentStrokeRay.mPoint, EKeys::LeftMouseButton);
 
     if (mPaintingTexture2DRenderTarget)
-        TexturePaintHelpers::CopyTextureToRenderTargetTexture(mEditor->Texture(), mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
+        TexturePaintHelpers::CopyTextureToRenderTargetTexture(textureSource->GetTexture(), mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
 }
 
 void FOdysseyViewportDrawingEditorMeshBasedAdapter::Paint()
 {
-    mEditor->GetSelectedTool()->OnMouseDrag(mCurrentStrokeRay.mPoint);
+    mExtension->GetEditor()->GetSelectedTool()->OnMouseDrag(mCurrentStrokeRay.mPoint);
 }
 
 void FOdysseyViewportDrawingEditorMeshBasedAdapter::FinishPainting()
 {
-    mEditor->GetSelectedTool()->OnMouseUp( mCurrentStrokeRay.mPoint, EKeys::LeftMouseButton );
+    TSharedPtr<FOdysseyPainterEditorSource> source = mExtension->GetEditor()->GetSource();
+    if (!source || source->Id() != FOdysseyTextureEditorSource::StaticId())
+        return;
+
+    TSharedPtr<FOdysseyTextureEditorSource> textureSource = StaticCastSharedPtr<FOdysseyTextureEditorSource>(source);
+
+    mExtension->GetEditor()->GetSelectedTool()->OnMouseUp( mCurrentStrokeRay.mPoint, EKeys::LeftMouseButton );
 
     if (mPaintingTexture2DRenderTarget)
-        TexturePaintHelpers::CopyTextureToRenderTargetTexture(mEditor->Texture(), mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
+        TexturePaintHelpers::CopyTextureToRenderTargetTexture(textureSource->GetTexture(), mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
 }
 
 void FOdysseyViewportDrawingEditorMeshBasedAdapter::Tick(float iDelta)
 {
-    if (mEditor->Texture() && mPaintingTexture2DRenderTarget)
-        TexturePaintHelpers::CopyTextureToRenderTargetTexture(mEditor->Texture(), mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
+    TSharedPtr<FOdysseyPainterEditorSource> source = mExtension->GetEditor()->GetSource();
+    if (!source || source->Id() != FOdysseyTextureEditorSource::StaticId())
+        return;
 
-    if (mEditor->GetSelectedTool() )
-        mEditor->GetSelectedTool()->Tick(iDelta);
+    TSharedPtr<FOdysseyTextureEditorSource> textureSource = StaticCastSharedPtr<FOdysseyTextureEditorSource>(source);
+
+    if (textureSource->GetTexture() && mPaintingTexture2DRenderTarget)
+        TexturePaintHelpers::CopyTextureToRenderTargetTexture(textureSource->GetTexture(), mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
+
+    if (mExtension->GetEditor()->GetSelectedTool() )
+        mExtension->GetEditor()->GetSelectedTool()->Tick(iDelta);
 }
 
 
 void FOdysseyViewportDrawingEditorMeshBasedAdapter::RenderInteractorWidget(const FSceneView* iView, FViewport* iViewport, FPrimitiveDrawInterface* iPDI)
 {
     UOdysseyPainterEditorRasterDrawingTool* drawingTool = nullptr;
-    if (mEditor->GetSelectedTool() && mEditor->GetSelectedTool()->IsA(UOdysseyPainterEditorRasterDrawingTool::StaticClass()))
-        drawingTool = Cast<UOdysseyPainterEditorRasterDrawingTool>(mEditor->GetSelectedTool());
+    if (mExtension->GetEditor()->GetSelectedTool() && mExtension->GetEditor()->GetSelectedTool()->IsA(UOdysseyPainterEditorRasterDrawingTool::StaticClass()))
+        drawingTool = Cast<UOdysseyPainterEditorRasterDrawingTool>(mExtension->GetEditor()->GetSelectedTool());
     else
         return;
 
-    const TSharedPtr<IMeshPaintGeometryAdapter>* meshAdapterPtr = mEditor->ComponentToAdapterMap().Find(mEditor->Component());
+    const TSharedPtr<IMeshPaintGeometryAdapter>* meshAdapterPtr = mExtension->ComponentToAdapterMap().Find(mExtension->Component());
     if (!meshAdapterPtr)
         return;
 
@@ -139,11 +165,17 @@ void FOdysseyViewportDrawingEditorMeshBasedAdapter::RenderInteractorWidget(const
 
 void FOdysseyViewportDrawingEditorMeshBasedAdapter::BuildPaintingTexture2DRenderTarget()
 {
-    if (mEditor->Component() == nullptr || mEditor->Texture() == nullptr)
+    TSharedPtr<FOdysseyPainterEditorSource> source = mExtension->GetEditor()->GetSource();
+    if (!source || source->Id() != FOdysseyTextureEditorSource::StaticId())
         return;
 
-    const int32 textureWidth = mEditor->Texture()->Source.GetSizeX();
-    const int32 textureHeight = mEditor->Texture()->Source.GetSizeY();
+    TSharedPtr<FOdysseyTextureEditorSource> textureSource = StaticCastSharedPtr<FOdysseyTextureEditorSource>(source);
+
+    if (mExtension->Component() == nullptr || textureSource->GetTexture() == nullptr)
+        return;
+
+    const int32 textureWidth = textureSource->GetTexture()->Source.GetSizeX();
+    const int32 textureHeight = textureSource->GetTexture()->Source.GetSizeY();
     
     
     mPaintingTexture2DRenderTarget = NewObject<UTextureRenderTarget2D>(GetTransientPackage(), NAME_None, RF_Transient);
@@ -167,11 +199,11 @@ void FOdysseyViewportDrawingEditorMeshBasedAdapter::BuildPaintingTexture2DRender
     mSeamRenderTarget2D->UpdateResourceImmediate();
     mSeamRenderTarget2D->AddToRoot();
 
-    mPreviousMipSettings = mEditor->Texture()->MipGenSettings;
-    mEditor->Texture()->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
-    mEditor->Texture()->UpdateResource();
-    FTextureCompilingManager::Get().FinishCompilation({ mEditor->Texture() });
-    TexturePaintHelpers::CopyTextureToRenderTargetTexture(mEditor->Texture(), mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
+    mPreviousMipSettings = textureSource->GetTexture()->MipGenSettings;
+    textureSource->GetTexture()->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
+    textureSource->GetTexture()->UpdateResource();
+    FTextureCompilingManager::Get().FinishCompilation({ textureSource->GetTexture() });
+    TexturePaintHelpers::CopyTextureToRenderTargetTexture(textureSource->GetTexture(), mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
 }
 
 void FOdysseyViewportDrawingEditorMeshBasedAdapter::GatherTextureTriangles(IMeshPaintGeometryAdapter* iAdapter, int32 iTriangleIndex, const int32 iVertexIndices[3], TArray<FTexturePaintTriangleInfo>* iTriangleInfo, TArray<FTexturePaintMeshSectionInfo>* iSectionInfos, int32 iUVChannelIndex)
@@ -283,9 +315,15 @@ TArray<::ULIS::FRectI> FOdysseyViewportDrawingEditorMeshBasedAdapter::GetMinimal
 
 float FOdysseyViewportDrawingEditorMeshBasedAdapter::GetStampQuality()
 {
-    if (mEditor->Texture() && mEditor->Component())
+    TSharedPtr<FOdysseyPainterEditorSource> source = mExtension->GetEditor()->GetSource();
+    if (!source || source->Id() != FOdysseyTextureEditorSource::StaticId())
+        return 0.f;
+
+    TSharedPtr<FOdysseyTextureEditorSource> textureSource = StaticCastSharedPtr<FOdysseyTextureEditorSource>(source);
+
+    if (textureSource->GetTexture() && mExtension->Component())
     {
-        return ((FMath::Max( mEditor->Texture()->GetSizeX(), mEditor->Texture()->GetSizeY() ) / mEditor->GetMeshComponentMaxSize()) + 1.f);
+        return ((FMath::Max( textureSource->GetTexture()->GetSizeX(), textureSource->GetTexture()->GetSizeY() ) / mExtension->GetMeshComponentMaxSize()) + 1.f);
     }
 
     return 1.f;
@@ -294,8 +332,8 @@ float FOdysseyViewportDrawingEditorMeshBasedAdapter::GetStampQuality()
 ::ULIS::FEvent FOdysseyViewportDrawingEditorMeshBasedAdapter::StampOverride(UOdysseyBrushAssetBase::FStampParams iStampParams)
 {
     UOdysseyPainterEditorRasterDrawingTool* drawingTool = nullptr;
-    if (mEditor->GetSelectedTool()->IsA(UOdysseyPainterEditorRasterDrawingTool::StaticClass()))
-        drawingTool = Cast<UOdysseyPainterEditorRasterDrawingTool>(mEditor->GetSelectedTool());
+    if (mExtension->GetEditor()->GetSelectedTool()->IsA(UOdysseyPainterEditorRasterDrawingTool::StaticClass()))
+        drawingTool = Cast<UOdysseyPainterEditorRasterDrawingTool>(mExtension->GetEditor()->GetSelectedTool());
 
     if( !drawingTool )
         return iStampParams.mEvent;
@@ -303,9 +341,15 @@ float FOdysseyViewportDrawingEditorMeshBasedAdapter::GetStampQuality()
     if (!GCurrentLevelEditingViewportClient->GetEditorViewportWidget()->GetSceneViewport()->HasFocus())
         return drawingTool->GetBrushInstance()->StampInternal(iStampParams);
 
-    const TSharedPtr<IMeshPaintGeometryAdapter>* meshAdapterPtr = mEditor->ComponentToAdapterMap().Find(mEditor->Component());
+    const TSharedPtr<IMeshPaintGeometryAdapter>* meshAdapterPtr = mExtension->ComponentToAdapterMap().Find(mExtension->Component());
     if (!meshAdapterPtr)
         return iStampParams.mEvent;
+
+    TSharedPtr<FOdysseyPainterEditorSource> source = mExtension->GetEditor()->GetSource();
+    if (!source || source->Id() != FOdysseyTextureEditorSource::StaticId())
+        return iStampParams.mEvent;
+
+    TSharedPtr<FOdysseyTextureEditorSource> textureSource = StaticCastSharedPtr<FOdysseyTextureEditorSource>(source);
 
     TSharedPtr<IMeshPaintGeometryAdapter> meshAdapter = *meshAdapterPtr;
 
@@ -337,11 +381,11 @@ float FOdysseyViewportDrawingEditorMeshBasedAdapter::GetStampQuality()
 
     // Convert trace to UV position
     FVector2D coord;
-    if (UGameplayStatics::FindCollisionUV(traceHitResult, mEditor->GetUVIndexUsedByCurrentTexture(), coord))
+    if (UGameplayStatics::FindCollisionUV(traceHitResult, mExtension->GetUVIndexUsedByCurrentTexture(), coord))
     {
         //And here we shift back the coordinates, because we converted it to texture coordinates
-        iStampParams.mPosition.x = coord.X * mEditor->Texture()->GetSurfaceWidth() - iStampParams.mBlock->Width() / 2.f;
-        iStampParams.mPosition.y = coord.Y * mEditor->Texture()->GetSurfaceHeight() - iStampParams.mBlock->Height() / 2.f;
+        iStampParams.mPosition.x = coord.X * textureSource->GetTexture()->GetSurfaceWidth() - iStampParams.mBlock->Width() / 2.f;
+        iStampParams.mPosition.y = coord.Y * textureSource->GetTexture()->GetSurfaceHeight() - iStampParams.mBlock->Height() / 2.f;
 
         mStrokeBufferTexture2D = NewRGBAFTextureFromBlockData(iStampParams.mBlock);
     }
@@ -354,7 +398,7 @@ float FOdysseyViewportDrawingEditorMeshBasedAdapter::GetStampQuality()
         meshPaintBatchedElementParameters->ShaderParams.StampQuality = GetStampQuality();
     }
 
-    const ERHIFeatureLevel::Type featureLevel = mEditor->Component()->GetWorld()->FeatureLevel;
+    const ERHIFeatureLevel::Type featureLevel = mExtension->Component()->GetWorld()->FeatureLevel;
 
     FTextureRenderTargetResource* strokeRenderTargetResource = mStrokeBufferRenderTarget2D->GameThread_GetRenderTargetResource();
     FCanvas strokePaintCanvas(strokeRenderTargetResource, nullptr, 0, 0, 0, featureLevel);
@@ -367,7 +411,7 @@ float FOdysseyViewportDrawingEditorMeshBasedAdapter::GetStampQuality()
 
     //Todo: make ellipseIntersectTriangles ?
     TArray<uint32> triangles;
-    float brushSize = FMath::Max(iStampParams.mBlock->Width(), iStampParams.mBlock->Height());// * FMath::Max3(mEditor->Actor()->GetActorScale().X, mEditor->Actor()->GetActorScale().Y, mEditor->Actor()->GetActorScale().Z);
+    float brushSize = FMath::Max(iStampParams.mBlock->Width(), iStampParams.mBlock->Height());// * FMath::Max3(mExtension->Actor()->GetActorScale().X, mExtension->Actor()->GetActorScale().Y, mExtension->Actor()->GetActorScale().Z);
     brushSize *= brushSize;
     brushSize /= GetStampQuality();
     triangles = meshAdapter->SphereIntersectTriangles(brushSize, componentSpaceBrushPosition, componentSpaceCameraPosition, true);
@@ -379,7 +423,7 @@ float FOdysseyViewportDrawingEditorMeshBasedAdapter::GetStampQuality()
     for (int i = 0; i < triangles.Num(); i++)
     {
         const int32 indices[3] = { int32(vertexIndices[triangles[i] * 3]), int32(vertexIndices[triangles[i] * 3 + 1]), int32(vertexIndices[triangles[i] * 3 + 2]) };
-        GatherTextureTriangles(meshAdapter.Get(), triangles[i], indices, &triangleInfo, &sectionInfo, mEditor->GetUVIndexUsedByCurrentTexture());
+        GatherTextureTriangles(meshAdapter.Get(), triangles[i], indices, &triangleInfo, &sectionInfo, mExtension->GetUVIndexUsedByCurrentTexture());
     }
 
     // Process the influenced triangles - storing off a large list is much slower than processing in a single loop

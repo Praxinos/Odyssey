@@ -4,6 +4,7 @@
 #pragma once
 
 #include "TextureEditor/OdysseyTextureEditorSource.h"
+#include "Undo/OdysseyVectorUndoEngineClear.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyTextureEditorSource"
 

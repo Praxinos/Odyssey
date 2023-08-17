@@ -13,11 +13,11 @@ void
 SOdysseyAnimationLayerRow::Construct(
     const FArguments& iArgs,
     const TSharedRef<SOdysseyLayerStackTreeView>& iOwnerTableView,
-    FOdysseyAnimationEditor* iEditor,
+    FOdysseyAnimationEditorExtension* iExtension,
     UOdysseyAnimationLayer* iLayer
 )
 {
-    mEditor = iEditor;
+    mExtension = iExtension;
 
     SOdysseyLayerRow::Construct(
         SOdysseyLayerRow::FArguments(),
@@ -26,10 +26,10 @@ SOdysseyAnimationLayerRow::Construct(
     );
 }
 
-FOdysseyAnimationEditor*
-SOdysseyAnimationLayerRow::GetEditor()
+FOdysseyAnimationEditorExtension*
+SOdysseyAnimationLayerRow::GetExtension()
 {
-    return mEditor;
+    return mExtension;
 }
 
 TSharedRef<SWidget>
@@ -41,7 +41,7 @@ SOdysseyAnimationLayerRow::GenerateWidgetForColumn( const FName& InColumnName )
             SNew(SBorder)
             .Padding(FMargin(4.f, 0.f, 0.f, 0.f)) //Patch
             [
-                SNew(SOdysseyAnimationTimelineControl, mEditor)
+                SNew(SOdysseyAnimationTimelineControl, mExtension)
                 .Clipping(EWidgetClipping::ClipToBoundsAlways)
                 [
                     GenerateTimelineWidget()

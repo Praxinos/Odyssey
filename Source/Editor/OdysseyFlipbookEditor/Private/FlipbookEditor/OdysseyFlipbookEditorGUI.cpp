@@ -3,10 +3,6 @@
 
 #include "OdysseyFlipbookEditorGUI.h"
 
-#include "OdysseyStyleSet.h"
-#include "OdysseyFlipbookEditor.h"
-#include "OdysseyFlipbookEditorToolkit.h"
-#include "OdysseyFlipbookEditorViewportTab.h"
 #include "OdysseyFlipbookEditorTimelineTab.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyFlipbookEditorToolkit"
@@ -19,9 +15,8 @@ FOdysseyFlipbookEditorGUI::~FOdysseyFlipbookEditorGUI()
 {
 }
 
-FOdysseyFlipbookEditorGUI::FOdysseyFlipbookEditorGUI(FOdysseyFlipbookEditor* iEditor)
-	: FOdysseyTextureEditorGUI(iEditor)
-	, mEditor(iEditor)
+FOdysseyFlipbookEditorGUI::FOdysseyFlipbookEditorGUI(FOdysseyFlipbookEditorExtension* iExtension)
+	: mExtension(iExtension)
 {
 }
 
@@ -32,16 +27,14 @@ FOdysseyFlipbookEditorGUI::FOdysseyFlipbookEditorGUI(FOdysseyFlipbookEditor* iEd
 void
 FOdysseyFlipbookEditorGUI::CreateTabs()
 {
-	FOdysseyTextureEditorGUI::CreateTabs();
-
 	//REPLACE TABS
-	ODYSSEY_SET_TAB(mViewportTab, FOdysseyFlipbookEditorViewportTab, mEditor);
+	//mEditor->AddTab(MakeShared<FOdysseyFlipbookEditorViewportTab>());
 
 	//ADD NEW TABS
-	ODYSSEY_ADD_TAB(mTimelineTab, FOdysseyFlipbookEditorTimelineTab, mEditor);
+	mExtension->GetEditor()->AddTab(MakeShared<FOdysseyFlipbookEditorTimelineTab>(mExtension));
 }
 
-TSharedRef<FTabManager::FSplitter>
+/* TSharedRef<FTabManager::FSplitter>
 FOdysseyFlipbookEditorGUI::CreateMainSection()
 {
 	return FOdysseyTextureEditorGUI::CreateMainSection()
@@ -54,16 +47,10 @@ FOdysseyFlipbookEditorGUI::CreateMainSection()
 			->SetHideTabWell(false)
 			->SetSizeCoefficient(0.2f)
 		);
-}
+} */
 
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Getters
-
-FName
-FOdysseyFlipbookEditorGUI::GetLayoutName()
-{
-	return "OdysseyFlipbookEditor_Layout";
-}
 
 TSharedPtr<FOdysseyFlipbookEditorTimelineTab>&
 FOdysseyFlipbookEditorGUI::GetTimelineTab()

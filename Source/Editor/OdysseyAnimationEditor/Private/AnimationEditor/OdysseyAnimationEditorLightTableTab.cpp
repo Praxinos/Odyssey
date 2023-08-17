@@ -7,6 +7,14 @@
 
 #define LOCTEXT_NAMESPACE "OdysseyAnimationEditorLightTableTab"
 
+
+const FName&
+FOdysseyAnimationEditorLightTableTab::StaticId()
+{
+    static FName Id = TEXT("OdysseyAnimationEditor_LightTable");
+    return Id;
+}
+
 /////////////////////////////////////////////////////
 // FOdysseyAnimationEditorLightTableTab
 //--------------------------------------------------------------------------------------
@@ -15,21 +23,26 @@ FOdysseyAnimationEditorLightTableTab::~FOdysseyAnimationEditorLightTableTab()
 {
 }
 
-FOdysseyAnimationEditorLightTableTab::FOdysseyAnimationEditorLightTableTab(FOdysseyAnimationEditor* iEditor)
-	: FOdysseyEditorTab(TEXT("OdysseyAnimationEditor_LightTable")
-    , LOCTEXT( "OdysseyAnimationEditorLightTableTab", "LightTable" )
+FOdysseyAnimationEditorLightTableTab::FOdysseyAnimationEditorLightTableTab(FOdysseyAnimationEditorExtension* iExtension)
+	: FOdysseyEditorTab( LOCTEXT( "OdysseyAnimationEditorLightTableTab", "LightTable" )
     , FSlateIcon( "OdysseyStyle", "Animation.LightTable16" ))
-    , mEditor(iEditor)
+    , mExtension(iExtension)
 {
 }
 
 //--------------------------------------------------------------------------------------
 //--------------------------------------------------- FOdysseyAnimationEditorTab interface
 
+const FName&
+FOdysseyAnimationEditorLightTableTab::GetId() const
+{
+    return StaticId();
+}
+
 TSharedPtr<SWidget>
 FOdysseyAnimationEditorLightTableTab::CreateWidget()
 {
-    return SNew(SOdysseyAnimationLightTable, mEditor);
+    return SNew(SOdysseyAnimationLightTable, mExtension);
 }
 
 #undef LOCTEXT_NAMESPACE

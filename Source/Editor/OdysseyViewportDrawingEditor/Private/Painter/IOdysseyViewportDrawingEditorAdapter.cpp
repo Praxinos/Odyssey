@@ -2,6 +2,11 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "IOdysseyViewportDrawingEditorAdapter.h"
+
+#include "PainterEditor/OdysseyPainterEditorSource.h"
+#include "TextureEditor/OdysseyTextureEditorSource.h"
+#include "OdysseyBrushAssetBase.h"
+
 #include "IMeshPaintGeometryAdapter.h"
 #include "Tools/OdysseyPainterEditorTool.h"
 #include "UObject/SavePackage.h"
@@ -18,10 +23,10 @@ IOdysseyViewportDrawingEditorAdapter::~IOdysseyViewportDrawingEditorAdapter()
         UnbindStampBrushInstance(mDrawingTool->GetBrushInstance());
     }
 
-    mEditor->OnSelectedToolChanged().RemoveAll(this);
+    mExtension->GetEditor()->OnSelectedToolChanged().RemoveAll(this);
     OnToolChange();
-    mEditor->TargetToPaintWillChangeDelegate().RemoveAll(this);
-    mEditor->TargetToPaintChangedDelegate().RemoveAll(this);
+    mExtension->TargetToPaintWillChangeDelegate().RemoveAll(this);
+    mExtension->TargetToPaintChangedDelegate().RemoveAll(this);
     
     UOdysseyStylusInputSubsystem* inputSubsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
     inputSubsystem->RemoveMessageHandler(*this);
@@ -29,15 +34,15 @@ IOdysseyViewportDrawingEditorAdapter::~IOdysseyViewportDrawingEditorAdapter()
     RemoveTextureOverride();
 }
 
-IOdysseyViewportDrawingEditorAdapter::IOdysseyViewportDrawingEditorAdapter(TSharedPtr<FOdysseyViewportDrawingEditor> iEditor) :
-    mEditor(iEditor),
+IOdysseyViewportDrawingEditorAdapter::IOdysseyViewportDrawingEditorAdapter(FOdysseyViewportDrawingEditorExtension* iExtension) :
+    mExtension(iExtension),
     mPaintingTexture2DRenderTarget(nullptr),
     mState( eState::kIdle ),
     mLastKnownViewport(nullptr),
     mIsCapturedByStylus(false)
 {
-    mEditor->TargetToPaintWillChangeDelegate().AddRaw(this, &IOdysseyViewportDrawingEditorAdapter::RemoveTextureOverride);
-    mEditor->TargetToPaintChangedDelegate().AddRaw(this, &IOdysseyViewportDrawingEditorAdapter::PrepareAdapterForPainting);
+    mExtension->TargetToPaintWillChangeDelegate().AddRaw(this, &IOdysseyViewportDrawingEditorAdapter::RemoveTextureOverride);
+    mExtension->TargetToPaintChangedDelegate().AddRaw(this, &IOdysseyViewportDrawingEditorAdapter::PrepareAdapterForPainting);
     PrepareAdapterForPainting();
 
     UOdysseyStylusInputSubsystem* inputSubsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
@@ -46,10 +51,10 @@ IOdysseyViewportDrawingEditorAdapter::IOdysseyViewportDrawingEditorAdapter(TShar
 
 void IOdysseyViewportDrawingEditorAdapter::PrepareAdapterForPainting()
 {
-    mEditor->OnSelectedToolChanged().AddRaw(this, &IOdysseyViewportDrawingEditorAdapter::OnToolChange);
-    if (mEditor->GetSelectedTool())
+    mExtension->GetEditor()->OnSelectedToolChanged().AddRaw(this, &IOdysseyViewportDrawingEditorAdapter::OnToolChange);
+    if (mExtension->GetEditor()->GetSelectedTool())
     {
-        mDrawingTool = Cast<UOdysseyPainterEditorRasterDrawingTool>(mEditor->GetSelectedTool());
+        mDrawingTool = Cast<UOdysseyPainterEditorRasterDrawingTool>(mExtension->GetEditor()->GetSelectedTool());
         if( mDrawingTool )
             OnToolChange();
     }
@@ -382,13 +387,19 @@ void IOdysseyViewportDrawingEditorAdapter::RemoveTextureOverride()
 {
     mState = eState::kIdle;
 
-    if (mEditor->Component() != nullptr && mEditor->Texture() != nullptr)
+    TSharedPtr<FOdysseyPainterEditorSource> source = mExtension->GetEditor()->GetSource();
+    if (!source || source->Id() != FOdysseyTextureEditorSource::StaticId())
+        return;
+
+    TSharedPtr<FOdysseyTextureEditorSource> textureSource = StaticCastSharedPtr<FOdysseyTextureEditorSource>(source);
+
+    if (mExtension->Component() != nullptr && textureSource->GetTexture() != nullptr)
     {
-        mEditor->Texture()->MipGenSettings = mPreviousMipSettings;
-        mEditor->Texture()->UpdateResource();
-        FTextureCompilingManager::Get().FinishCompilation({ mEditor->Texture() });
+        textureSource->GetTexture()->MipGenSettings = mPreviousMipSettings;
+        textureSource->GetTexture()->UpdateResource();
+        FTextureCompilingManager::Get().FinishCompilation({ textureSource->GetTexture() });
         TArray<UPackage*> packages;
-        packages.Add(mEditor->Texture()->GetPackage());
+        packages.Add(textureSource->GetTexture()->GetPackage());
         UEditorLoadingAndSavingUtils::SavePackages(packages, true);
     }
 
@@ -410,7 +421,7 @@ void IOdysseyViewportDrawingEditorAdapter::OnToolChange()
         UnbindStampBrushInstance(mDrawingTool->GetBrushInstance());
     }
 
-    UOdysseyPainterEditorTool* newTool = mEditor->GetSelectedTool();
+    UOdysseyPainterEditorTool* newTool = mExtension->GetEditor()->GetSelectedTool();
     if (!newTool )
         return;
 

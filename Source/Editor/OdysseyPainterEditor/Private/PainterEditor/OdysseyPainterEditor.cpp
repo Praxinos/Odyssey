@@ -56,8 +56,11 @@ FOdysseyPainterEditor::~FOdysseyPainterEditor()
     
 }
 
-FOdysseyPainterEditor::FOdysseyPainterEditor()
-    : mSource(nullptr)
+FOdysseyPainterEditor::FOdysseyPainterEditor(const FText& iName, UObject* iEditedObject, const FName& iLayoutName)
+    : FOdysseyEditor(iName, iEditedObject)
+    , mLayoutName(iLayoutName)
+    , mSource(nullptr)
+    , mMeshSelector(MakeShared<FOdysseyMeshSelector>())
     , mSelectedTool(nullptr)
     , mVectorEditionMode(eVectorEditionMode::Object)
     , mHUDSystem(new FOdysseyHUDSystem())
@@ -89,14 +92,110 @@ FOdysseyPainterEditor::FOdysseyPainterEditor()
 //----------------------------------------------------------------------- Initialization
 
 void
-FOdysseyPainterEditor::InitData(UObject* iEditedObject)
+FOdysseyPainterEditor::Initialize()
 {
-	//Init Tools
+    //Init Tools
 	InitTools();
+    
+    //Init the GUI
+    mGUI->Init();
+    
+    //Init the extensions
     for (TSharedPtr<FOdysseyPainterEditorExtension> extension : mExtensions)
-    {
         extension->Initialize();
+
+}
+
+TSharedRef<FTabManager::FLayout>
+FOdysseyPainterEditor::CreateLayout()
+{
+    TSharedRef<FTabManager::FLayout> layout = FTabManager::NewLayout("OdysseyPainterEditor_Layout");
+    mGUI->CreateLayout(layout);
+    return layout;
+}
+
+void
+FOdysseyPainterEditor::BindShortcuts(FBaseToolkit* iToolkit)
+{
+    GetGUI()->BindShortcuts(iToolkit);
+
+    mRasterDrawingTool->BindShortcuts(iToolkit);
+	mVectorPrimitiveDrawingTool->BindShortcuts(iToolkit);
+	mVectorPathDrawingTool->BindShortcuts(iToolkit);
+	mVectorPathEditTool->BindShortcuts(iToolkit);
+	mVectorPathCutTool->BindShortcuts(iToolkit);
+	mVectorPickTool->BindShortcuts(iToolkit);
+	mVectorSceneScaleTool->BindShortcuts(iToolkit);
+	mVectorScenePanTool->BindShortcuts(iToolkit);
+	mVectorEraserTool->BindShortcuts(iToolkit);
+	mVectorPathPushTool->BindShortcuts(iToolkit);
+	mVectorPathWidthTool->BindShortcuts(iToolkit);
+	mVectorPathSmoothTool->BindShortcuts(iToolkit);
+	mVectorPathStitchTool->BindShortcuts(iToolkit);
+	mPaintBucketTool->BindShortcuts(iToolkit);
+	mColorPickerTool->BindShortcuts(iToolkit);
+	mVectorGridTool->BindShortcuts(iToolkit);
+	mVectorTransformTool->BindShortcuts(iToolkit);
+
+	//---
+
+	const TSharedRef<FUICommandList>& toolkitCommands = iToolkit->GetToolkitCommands();
+    const FOdysseyPainterEditorCommands& painterEditorCommands = FOdysseyPainterEditorCommands::Get();
+
+	#define MAP_ACTION(action, ...) toolkitCommands->MapAction( action, FExecuteAction::CreateRaw( this, &FOdysseyPainterEditor::__VA_ARGS__ ), FCanExecuteAction() );
+	#undef MAP_ACTION
+
+    for (TSharedPtr<FOdysseyPainterEditorExtension> extension : mExtensions)
+        extension->BindShortcuts(iToolkit);
+}
+
+void
+FOdysseyPainterEditor::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
+{
+    GetGUI()->ExtendMenu(iOwner, iMenuName);
+
+    mRasterDrawingTool->ExtendMenu(iOwner, iMenuName);
+	mVectorPrimitiveDrawingTool->ExtendMenu(iOwner, iMenuName);
+	mVectorPathDrawingTool->ExtendMenu(iOwner, iMenuName);
+	mVectorPathEditTool->ExtendMenu(iOwner, iMenuName);
+	mVectorPathCutTool->ExtendMenu(iOwner, iMenuName);
+	mVectorPickTool->ExtendMenu(iOwner, iMenuName);
+	mVectorSceneScaleTool->ExtendMenu(iOwner, iMenuName);
+	mVectorScenePanTool->ExtendMenu(iOwner, iMenuName);
+	mVectorEraserTool->ExtendMenu(iOwner, iMenuName);
+	mVectorPathPushTool->ExtendMenu(iOwner, iMenuName);
+	mVectorPathWidthTool->ExtendMenu(iOwner, iMenuName);
+	mVectorPathSmoothTool->ExtendMenu(iOwner, iMenuName);
+	mVectorPathStitchTool->ExtendMenu(iOwner, iMenuName);
+	mPaintBucketTool->ExtendMenu(iOwner, iMenuName);
+	mColorPickerTool->ExtendMenu(iOwner, iMenuName);
+	mVectorGridTool->ExtendMenu(iOwner, iMenuName);
+	mVectorTransformTool->ExtendMenu(iOwner, iMenuName);
+
+    for (TSharedPtr<FOdysseyPainterEditorExtension> extension : mExtensions)
+        extension->ExtendMenu(iOwner, iMenuName);
+}
+
+bool
+FOdysseyPainterEditor::OnCloseRequested()
+{
+    //Cleanup
+    if (mSelectedTool)
+        mSelectedTool->Inactivate();
+    
+    if (mSource)
+    {
+        mSource->Inactivate();
+        mSource = nullptr;
     }
+
+    for (TSharedPtr<FOdysseyPainterEditorExtension> extension : mExtensions)
+        extension->Finalize();
+
+    UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll(this);
+	delete mHUDSystem;
+
+    return true;
 }
 
 void
@@ -156,97 +255,6 @@ FOdysseyPainterEditor::InitTools()
 	mTools.Add(mColorPickerTool);
 	mTools.Add(mVectorGridTool);
 	mTools.Add(mVectorTransformTool);
-}
-
-void
-FOdysseyPainterEditor::BindShortcuts(FBaseToolkit* iToolkit)
-{
-	FOdysseyEditor::BindShortcuts(iToolkit);
-
-	mRasterDrawingTool->BindShortcuts(iToolkit);
-	mVectorPrimitiveDrawingTool->BindShortcuts(iToolkit);
-	mVectorPathDrawingTool->BindShortcuts(iToolkit);
-	mVectorPathEditTool->BindShortcuts(iToolkit);
-	mVectorPathCutTool->BindShortcuts(iToolkit);
-	mVectorPickTool->BindShortcuts(iToolkit);
-	mVectorSceneScaleTool->BindShortcuts(iToolkit);
-	mVectorScenePanTool->BindShortcuts(iToolkit);
-	mVectorEraserTool->BindShortcuts(iToolkit);
-	mVectorPathPushTool->BindShortcuts(iToolkit);
-	mVectorPathWidthTool->BindShortcuts(iToolkit);
-	mVectorPathSmoothTool->BindShortcuts(iToolkit);
-	mVectorPathStitchTool->BindShortcuts(iToolkit);
-	mPaintBucketTool->BindShortcuts(iToolkit);
-	mColorPickerTool->BindShortcuts(iToolkit);
-	mVectorGridTool->BindShortcuts(iToolkit);
-	mVectorTransformTool->BindShortcuts(iToolkit);
-
-	//---
-
-	const TSharedRef<FUICommandList>& toolkitCommands = iToolkit->GetToolkitCommands();
-    const FOdysseyPainterEditorCommands& painterEditorCommands = FOdysseyPainterEditorCommands::Get();
-
-	#define MAP_ACTION(action, ...) toolkitCommands->MapAction( action, FExecuteAction::CreateRaw( this, &FOdysseyPainterEditor::__VA_ARGS__ ), FCanExecuteAction() );
-
-	#undef MAP_ACTION
-}
-
-void
-FOdysseyPainterEditor::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
-{
-	FOdysseyEditor::ExtendMenu(iOwner, iMenuName);
-    
-	mRasterDrawingTool->ExtendMenu(iOwner, iMenuName);
-	mVectorPrimitiveDrawingTool->ExtendMenu(iOwner, iMenuName);
-	mVectorPathDrawingTool->ExtendMenu(iOwner, iMenuName);
-	mVectorPathEditTool->ExtendMenu(iOwner, iMenuName);
-	mVectorPathCutTool->ExtendMenu(iOwner, iMenuName);
-	mVectorPickTool->ExtendMenu(iOwner, iMenuName);
-	mVectorSceneScaleTool->ExtendMenu(iOwner, iMenuName);
-	mVectorScenePanTool->ExtendMenu(iOwner, iMenuName);
-	mVectorEraserTool->ExtendMenu(iOwner, iMenuName);
-	mVectorPathPushTool->ExtendMenu(iOwner, iMenuName);
-	mVectorPathWidthTool->ExtendMenu(iOwner, iMenuName);
-	mVectorPathSmoothTool->ExtendMenu(iOwner, iMenuName);
-	mVectorPathStitchTool->ExtendMenu(iOwner, iMenuName);
-	mPaintBucketTool->ExtendMenu(iOwner, iMenuName);
-	mColorPickerTool->ExtendMenu(iOwner, iMenuName);
-	mVectorGridTool->ExtendMenu(iOwner, iMenuName);
-	mVectorTransformTool->ExtendMenu(iOwner, iMenuName);
-}
-
-
-TSharedPtr<FWorkspaceItem>
-FOdysseyPainterEditor::RegisterTabSpawners( const TSharedRef<class FTabManager>& iTabManager )
-{
-    TSharedPtr<FWorkspaceItem> workspaceMenuCategory = iTabManager->AddLocalWorkspaceMenuCategory(LOCTEXT("WorkspaceMenu_OdysseyAnimationEditor", "Odyssey Painter Editor"));
-	TSharedRef<FWorkspaceItem> workspaceMenuCategoryRef = workspaceMenuCategory.ToSharedRef();
-	GetGUI()->RegisterTabSpawners(iTabManager, workspaceMenuCategoryRef);
-	return workspaceMenuCategory;
-}
-
-bool
-FOdysseyPainterEditor::OnCloseRequested()
-{
-    //Cleanup
-    if (mSelectedTool)
-        mSelectedTool->Inactivate();
-    
-    if (mSource)
-    {
-        mSource->Inactivate();
-        mSource = nullptr;
-    }
-
-    for (TSharedPtr<FOdysseyPainterEditorExtension> extension : mExtensions)
-    {
-        extension->Finalize();
-    }
-
-    UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll(this);
-	delete mHUDSystem;
-
-    return FOdysseyEditor::OnCloseRequested();
 }
 
 FSimpleMulticastDelegate&
@@ -409,6 +417,12 @@ FOdysseyPainterEditor::LayerStack() const
 		return nullptr;
 
 	return source->GetLayerStack();
+}
+
+TSharedPtr<FOdysseyMeshSelector>
+FOdysseyPainterEditor::GetMeshSelector() const
+{
+    return mMeshSelector;
 }
 
 //--------------------------------------------------------------------------------------

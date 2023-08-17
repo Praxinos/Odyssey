@@ -3,6 +3,7 @@
 
 #pragma once
 
+/*
 #include "OdysseyPainterEditor.h"
 #include "OdysseyAnimationEditorGUI.h"
 #include "LayerStack/OdysseyAnimationLayerStack.h"
@@ -12,9 +13,6 @@
 class UOdysseyAnimationPlayer;
 class UOdysseyAnimationTexture;
 
-/**
- * Implements an Editor for animations.
- */
 class ODYSSEYANIMATIONEDITOR_API FOdysseyAnimationEditor
     : public FOdysseyPainterEditor
 {
@@ -39,8 +37,7 @@ public:
 
 public:
     // Overrides
-    virtual FOdysseyAnimationEditorGUI* GetGUI() override;
-    virtual TSharedPtr<FWorkspaceItem> RegisterTabSpawners( const TSharedRef<class FTabManager>& iTabManager ) override;
+    FOdysseyAnimationEditorGUI* GetGUI();
 
 private:
     //Called when the media player has seeked successfully
@@ -58,3 +55,4 @@ private:
     float mPlaybackFramesPerSecond;
     TArray<FGuid> mImageRenderingComposition;
 };
+*/

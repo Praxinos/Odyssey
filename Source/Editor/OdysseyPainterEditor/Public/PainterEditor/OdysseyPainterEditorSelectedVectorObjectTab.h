@@ -17,6 +17,9 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorSelectedVectorObjectTab :
     public FOdysseyEditorTab, public FNotifyHook, public FGCObject
 {
 public:
+    static const FName& StaticId();
+
+public:
     // Construction / Destruction
     virtual ~FOdysseyPainterEditorSelectedVectorObjectTab();
     FOdysseyPainterEditorSelectedVectorObjectTab(FOdysseyPainterEditor* iEditor);
@@ -27,6 +30,7 @@ public:
 
 protected:
     // FOdysseyEditorTab interface
+    virtual const FName& GetId() const override;
     virtual TSharedPtr<SWidget> CreateWidget() override;
     virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
     virtual void AddReferencedObjects(FReferenceCollector& Collector) override;

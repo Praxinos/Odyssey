@@ -24,7 +24,7 @@ public:
     SOdysseyAnimationLayerImageRasterTimeline();
     void Construct(
         const FArguments& iArgs, 
-        FOdysseyAnimationEditor* iEditor,
+        FOdysseyAnimationEditorExtension* iExtension,
         class UOdysseyAnimationLayerImageRaster* iAnimationLayerImageRaster
     );
 
@@ -102,7 +102,7 @@ private:
     void OnFrameSelectorBuildContextMenu(FMenuBuilder& iMenuBuilder);
 
 private:
-    FOdysseyAnimationEditor* mEditor;
+    FOdysseyAnimationEditorExtension* mExtension;
     class UOdysseyAnimationLayerImageRaster* mAnimationLayerImageRaster;
 
     TSharedPtr<SBorder> mCellsBorder;

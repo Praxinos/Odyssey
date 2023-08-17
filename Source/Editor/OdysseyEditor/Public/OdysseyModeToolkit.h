@@ -7,7 +7,7 @@
 #include "Toolkits/IToolkitHost.h"
 #include "Toolkits/BaseToolkit.h"
 
-#include "OdysseyToolkit.h"
+class FOdysseyEditor;
 
 class ODYSSEYEDITOR_API FOdysseyModeToolkit
 	: public FModeToolkit,
@@ -16,12 +16,14 @@ class ODYSSEYEDITOR_API FOdysseyModeToolkit
 public:
     // Construction / Destruction
     virtual ~FOdysseyModeToolkit();
-    FOdysseyModeToolkit(const FName& iAppIdentifier, TSharedPtr<FOdysseyEditor> iEditor, class FEdMode* iEditorMode);
+    FOdysseyModeToolkit();
 
 public:
-    //virtual void Initialize();
-    virtual void Init(const TSharedPtr<IToolkitHost>& iInitToolkitHost, TWeakObjectPtr<UEdMode> iOwningMode);
-
+    void Initialize(
+		TSharedPtr<FOdysseyEditor> iEditor,
+		FEdMode* iEditorMode,
+		const TSharedPtr<IToolkitHost>& iInitToolkitHost
+	);
 
 	/** IToolkit interface */
 	virtual class FEdMode* GetEditorMode() const override;

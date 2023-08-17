@@ -25,9 +25,9 @@ FOdysseyFlipbookWrapper::~FOdysseyFlipbookWrapper()
 	FCoreUObjectDelegates::OnObjectPropertyChanged.Remove(mOnPropertyChangedDelegateHandle);
 }
 
-FOdysseyFlipbookWrapper::FOdysseyFlipbookWrapper(UPaperFlipbook* iFlipbook)
-    : mFlipbook(iFlipbook),
-    mSpritePreviousTexture(NULL)
+FOdysseyFlipbookWrapper::FOdysseyFlipbookWrapper()
+    : mFlipbook(nullptr)
+    , mSpritePreviousTexture(NULL)
 {
     mOnPrePropertyChangedDelegateHandle = FCoreUObjectDelegates::OnPreObjectPropertyChanged.AddRaw(this, &FOdysseyFlipbookWrapper::OnPreGlobalObjectPropertyChanged);
     mOnPropertyChangedDelegateHandle = FCoreUObjectDelegates::OnObjectPropertyChanged.AddRaw(this, &FOdysseyFlipbookWrapper::OnGlobalObjectPropertyChanged);
@@ -43,6 +43,18 @@ FOdysseyFlipbookWrapper::CreateEmptyKeyFrame(int32 iIndex)
 	mFlipbook->MarkPackageDirty();
 
     //TODO: Do it by changing UProperties
+}
+
+UPaperFlipbook*
+FOdysseyFlipbookWrapper::GetFlipbook() const
+{
+    return mFlipbook;
+}
+
+void
+FOdysseyFlipbookWrapper::SetFlipbook(UPaperFlipbook* iFlipbook)
+{
+    mFlipbook = iFlipbook;
 }
 
 bool

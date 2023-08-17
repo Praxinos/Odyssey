@@ -8,6 +8,13 @@
 
 #define LOCTEXT_NAMESPACE "OdysseyTextureEditorTextureDetailsTab"
 
+const FName&
+FOdysseyTextureEditorTextureDetailsTab::StaticId()
+{
+    static FName Id = TEXT("OdysseyTextureEditor_TextureDetails"); //Keep ColorSelector instead of ColorWheel because changing that ID would show an empty panel to users who already opened the previous ColorSelector Panel
+    return Id;
+}
+
 /////////////////////////////////////////////////////
 // FOdysseyTextureEditorTextureDetailsTab
 //--------------------------------------------------------------------------------------
@@ -16,16 +23,20 @@ FOdysseyTextureEditorTextureDetailsTab::~FOdysseyTextureEditorTextureDetailsTab(
 {
 }
 
-FOdysseyTextureEditorTextureDetailsTab::FOdysseyTextureEditorTextureDetailsTab(FOdysseyTextureEditor* iEditor)
-	: FOdysseyEditorTab(TEXT("OdysseyTextureEditor_TextureDetails")
-    , LOCTEXT( "OdysseyTextureEditorTextureDetailsTab", "Texture Details" )
-    , FSlateIcon( "OdysseyStyle", "PainterEditor.Trombone16" ))
-    , mEditor(iEditor)
+FOdysseyTextureEditorTextureDetailsTab::FOdysseyTextureEditorTextureDetailsTab(FOdysseyTextureEditorExtension* iExtension)
+	: FOdysseyEditorTab( LOCTEXT( "OdysseyTextureEditorTextureDetailsTab", "Texture Details" ), FSlateIcon( "OdysseyStyle", "PainterEditor.Trombone16" ))
+    , mExtension(iExtension)
 {
 }
 
 //--------------------------------------------------------------------------------------
 //--------------------------------------------------- FOdysseyTextureEditorTab interface
+
+const FName&
+FOdysseyTextureEditorTextureDetailsTab::GetId() const
+{
+    return StaticId();
+}
 
 TSharedPtr<SWidget>
 FOdysseyTextureEditorTextureDetailsTab::CreateWidget()
@@ -40,7 +51,13 @@ FOdysseyTextureEditorTextureDetailsTab::CreateWidget()
 UTexture*
 FOdysseyTextureEditorTextureDetailsTab::Texture() const
 {
-    return mEditor->Texture();
+    TSharedPtr<FOdysseyPainterEditorSource> source = mExtension->GetEditor()->GetSource();
+    if (!source || source->Id() != FOdysseyTextureEditorSource::StaticId())
+        return nullptr;
+
+    TSharedPtr<FOdysseyTextureEditorSource> textureSource = StaticCastSharedPtr<FOdysseyTextureEditorSource>(source);
+
+    return textureSource->GetTexture();
 }
 
 //--------------------------------------------------------------------------------------

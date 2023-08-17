@@ -5,7 +5,7 @@
 
 #include "CoreMinimal.h"
 
-class FOdysseyAnimationEditor;
+class FOdysseyAnimationEditorExtension;
 
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineControl
     : public SCompoundWidget
@@ -21,7 +21,7 @@ public:
 
     void Construct(
         const FArguments& iArgs,
-        FOdysseyAnimationEditor* iEditor
+        FOdysseyAnimationEditorExtension* iExtension
     );
 
 public:
@@ -31,7 +31,7 @@ public:
 	virtual FReply OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
 
 private:
-    FOdysseyAnimationEditor*            mEditor;
+    FOdysseyAnimationEditorExtension*            mExtension;
 	FVector2D 					        mOffsetMousePosition;
 	bool 						        mIsOffsetting;
 };

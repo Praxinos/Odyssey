@@ -2,7 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "AnimationEditor/OdysseyAnimationEditor.h"
-
+/*
 #include "AnimationEditor/OdysseyAnimationEditorGUI.h"
 #include "OdysseyLayerFunctionLibrary.h"
 #include "LayerStack/OdysseyAnimationLayerStack.h"
@@ -102,15 +102,6 @@ FOdysseyAnimationEditor::GetGUI()
 	return mGUI.Get();
 }
 
-TSharedPtr<FWorkspaceItem>
-FOdysseyAnimationEditor::RegisterTabSpawners(const TSharedRef<class FTabManager>& iTabManager)
-{
-    TSharedPtr<FWorkspaceItem> workspaceMenuCategory = iTabManager->AddLocalWorkspaceMenuCategory(LOCTEXT("WorkspaceMenu_OdysseyAnimationEditor", "Odyssey Animation2D Editor"));
-	TSharedRef<FWorkspaceItem> workspaceMenuCategoryRef = workspaceMenuCategory.ToSharedRef();
-	GetGUI()->RegisterTabSpawners(iTabManager, workspaceMenuCategoryRef);
-	return workspaceMenuCategory;
-}
-
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------- Events
 
@@ -174,3 +165,4 @@ FOdysseyAnimationEditor::OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStack)
 }
 
 #undef LOCTEXT_NAMESPACE
+*/

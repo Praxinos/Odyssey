@@ -2,7 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #pragma once
-
+/*
 #include "TextureEditor/OdysseyTextureEditor.h"
 
 #include "OdysseyFlipbookEditorGUI.h"
@@ -11,9 +11,6 @@
 
 class FOdysseyFlipbookEditorGUI;
 
-/**
- * Implements an Editor for flipbooks.
- */
 class ODYSSEYFLIPBOOKEDITOR_API FOdysseyFlipbookEditor
     : public FOdysseyTextureEditor
 {
@@ -48,4 +45,4 @@ private:
 
 	TSharedPtr<FOdysseyFlipbookEditorGUI> mGUI;
 };
-
+*/

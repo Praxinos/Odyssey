@@ -5,7 +5,7 @@
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineCurrentFrame.h"
 
 SOdysseyAnimationTimelineControl::SOdysseyAnimationTimelineControl()
-	: mEditor(nullptr)
+	: mExtension(nullptr)
 	, mOffsetMousePosition(0)
 	, mIsOffsetting(false)
 {
@@ -14,10 +14,10 @@ SOdysseyAnimationTimelineControl::SOdysseyAnimationTimelineControl()
 void
 SOdysseyAnimationTimelineControl::Construct(
     const FArguments& iArgs,
-	FOdysseyAnimationEditor* iEditor
+	FOdysseyAnimationEditorExtension* iExtension
 )
 {
-    mEditor = iEditor;
+    mExtension = iExtension;
 	ChildSlot
 	[
 		SNew(SOverlay)
@@ -27,7 +27,7 @@ SOdysseyAnimationTimelineControl::Construct(
 		]
 		+ SOverlay::Slot()
 		[
-			SNew(SOdysseyAnimationTimelineCurrentFrame, mEditor)
+			SNew(SOdysseyAnimationTimelineCurrentFrame, mExtension)
 		]
 	];
 }
@@ -39,11 +39,11 @@ SOdysseyAnimationTimelineControl::OnMouseWheel(const FGeometry& MyGeometry, cons
 	{
 		if (MouseEvent.GetWheelDelta() > 0.f)
 		{
-			mEditor->Timeline()->ZoomOut();
+			mExtension->Timeline()->ZoomOut();
 		}
 		else
 		{
-			mEditor->Timeline()->ZoomIn();
+			mExtension->Timeline()->ZoomIn();
 		}
 		return FReply::Handled();
 	}
@@ -62,7 +62,7 @@ SOdysseyAnimationTimelineControl::OnPreviewMouseButtonDown(const FGeometry& MyGe
 		{
 			mIsOffsetting = true;
 			mOffsetMousePosition = MouseEvent.GetScreenSpacePosition();
-			mOffsetMousePosition.Y = mEditor->Timeline()->GetOffset();
+			mOffsetMousePosition.Y = mExtension->Timeline()->GetOffset();
     		return FReply::Handled().CaptureMouse(AsShared()).PreventThrottling();
 		}
 	}
@@ -78,7 +78,7 @@ SOdysseyAnimationTimelineControl::OnMouseMove(const FGeometry& MyGeometry, const
 		const float minOffset = 0.0f;
 		float mouseOffset = MouseEvent.GetScreenSpacePosition().X - mOffsetMousePosition.X;
         //mOffsetMousePosition.Y contains the starting offset instead of the Y position
-		mEditor->Timeline()->SetOffset(FMath::Max(minOffset, mOffsetMousePosition.Y - (mouseOffset / mEditor->Timeline()->GetFrameWidth())));
+		mExtension->Timeline()->SetOffset(FMath::Max(minOffset, mOffsetMousePosition.Y - (mouseOffset / mExtension->Timeline()->GetFrameWidth())));
 		return FReply::Handled();
 	}
 	return FReply::Unhandled();

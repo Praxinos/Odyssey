@@ -15,8 +15,8 @@ FOdysseyFlipbookEditorToolkit::~FOdysseyFlipbookEditorToolkit()
 {
 }
 
-FOdysseyFlipbookEditorToolkit::FOdysseyFlipbookEditorToolkit(TSharedPtr<FOdysseyFlipbookEditor> iEditor) :
-	FOdysseyAssetEditorToolkit( TEXT("OdysseyFlipbookEditorApp"), iEditor )
+FOdysseyFlipbookEditorToolkit::FOdysseyFlipbookEditorToolkit() :
+	FOdysseyAssetEditorToolkit( TEXT("OdysseyFlipbookEditorApp"))
 {
 }
 

@@ -9,6 +9,18 @@
 #include "SOdysseyTabletAPISwitcher.h"
 #include "Models/OdysseyPainterEditorCommands.h"
 
+#include "OdysseyPainterEditorBrushSelectorTab.h"
+#include "OdysseyPainterEditorColorPaletteTab.h"
+#include "OdysseyPainterEditorColorSlidersTab.h"
+#include "OdysseyPainterEditorColorWheelTab.h"
+#include "OdysseyPainterEditorHUDTab.h"
+#include "OdysseyPainterEditorMeshSelectorTab.h"
+#include "OdysseyPainterEditorTopTab.h"
+#include "OdysseyPainterEditorToolsTab.h"
+#include "OdysseyPainterEditorToolOptionsTab.h"
+#include "OdysseyPainterEditorSelectedVectorObjectTab.h"
+#include "OdysseyPainterEditorViewportTab.h"
+
 #include "ToolMenus.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorGUI"
@@ -22,8 +34,7 @@ FOdysseyPainterEditorGUI::~FOdysseyPainterEditorGUI()
 }
 
 FOdysseyPainterEditorGUI::FOdysseyPainterEditorGUI(FOdysseyPainterEditor* iEditor)
-    : FOdysseyEditorGUI(iEditor)
-    , mEditor(iEditor)
+    : mEditor(iEditor)
 {
 
 }
@@ -32,30 +43,30 @@ FOdysseyPainterEditorGUI::FOdysseyPainterEditorGUI(FOdysseyPainterEditor* iEdito
 //--------------------------------------------------------------------------------- Tabs
 
 void
+FOdysseyPainterEditorGUI::Init()
+{
+    CreateTabs();
+}
+
+void
 FOdysseyPainterEditorGUI::CreateTabs()
 {
-    FOdysseyEditorGUI::CreateTabs();
-
-    ODYSSEY_ADD_TAB(mMeshSelectorTab, FOdysseyPainterEditorMeshSelectorTab, mEditor)
-    ODYSSEY_ADD_TAB(mColorPaletteTab, FOdysseyPainterEditorPaletteTab, mEditor)
-    ODYSSEY_ADD_TAB(mViewportTab, FOdysseyPainterEditorViewportTab, mEditor);
-    ODYSSEY_ADD_TAB(mHUDTab, FOdysseyPainterEditorHUDTab, mEditor);
-    ODYSSEY_ADD_TAB(mBrushSelectorTab, FOdysseyPainterEditorBrushSelectorTab, mEditor);
-    ODYSSEY_ADD_TAB(mColorWheelTab, FOdysseyPainterEditorColorWheelTab, mEditor);
-    ODYSSEY_ADD_TAB(mColorSlidersTab, FOdysseyPainterEditorColorSlidersTab, mEditor);
-    ODYSSEY_ADD_TAB(mToolsTab, FOdysseyPainterEditorToolsTab, mEditor);
-    ODYSSEY_ADD_TAB(mSelectedVectorObjectTab, FOdysseyPainterEditorSelectedVectorObjectTab, mEditor);
-    ODYSSEY_ADD_TAB(mTopTab, FOdysseyPainterEditorTopTab, mEditor);
-    ODYSSEY_ADD_TAB(mToolOptionsTab, FOdysseyPainterEditorToolOptionsTab, mEditor);
+    mEditor->AddTab(MakeShared<FOdysseyPainterEditorMeshSelectorTab>(mEditor));
+    mEditor->AddTab(MakeShared<FOdysseyPainterEditorPaletteTab>(mEditor));
+    mEditor->AddTab(MakeShared<FOdysseyPainterEditorViewportTab>(mEditor));
+    mEditor->AddTab(MakeShared<FOdysseyPainterEditorHUDTab>(mEditor));
+    mEditor->AddTab(MakeShared<FOdysseyPainterEditorBrushSelectorTab>(mEditor));
+    mEditor->AddTab(MakeShared<FOdysseyPainterEditorColorWheelTab>(mEditor));
+    mEditor->AddTab(MakeShared<FOdysseyPainterEditorColorSlidersTab>(mEditor));
+    mEditor->AddTab(MakeShared<FOdysseyPainterEditorToolsTab>(mEditor));
+    mEditor->AddTab(MakeShared<FOdysseyPainterEditorSelectedVectorObjectTab>(mEditor));
+    mEditor->AddTab(MakeShared<FOdysseyPainterEditorTopTab>(mEditor));
+    mEditor->AddTab(MakeShared<FOdysseyPainterEditorToolOptionsTab>(mEditor));
 }
 
 void
 FOdysseyPainterEditorGUI::BindShortcuts(FBaseToolkit* iToolkit)
 {
-    FOdysseyEditorGUI::BindShortcuts(iToolkit);
-
-    //---
-
     const TSharedRef<FUICommandList>& toolkitCommands = iToolkit->GetToolkitCommands();
     const FOdysseyPainterEditorCommands& painterEditorCommands = FOdysseyPainterEditorCommands::Get();
 
@@ -77,8 +88,6 @@ FOdysseyPainterEditorGUI::BindShortcuts(FBaseToolkit* iToolkit)
 void
 FOdysseyPainterEditorGUI::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
 {
-    FOdysseyEditorGUI::ExtendMenu( iOwner, iMenuName );
-
     ExtendMenuAbout( iOwner, iMenuName );
 }
 
@@ -140,17 +149,10 @@ FOdysseyPainterEditorGUI::ExtendMenuAbout( FToolMenuOwner iOwner, FName iMenuNam
 //--------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------- Layout
 
-FName
-FOdysseyPainterEditorGUI::GetLayoutName()
+void
+FOdysseyPainterEditorGUI::CreateLayout(TSharedPtr<FTabManager::FLayout> iLayout)
 {
-    return "OdysseyAnimationEditor_Layout";
-}
-
-TSharedPtr<FTabManager::FLayout>
-FOdysseyPainterEditorGUI::CreateLayout()
-{
-    return FOdysseyEditorGUI::CreateLayout()
-        ->AddArea
+    iLayout->AddArea
         (
             FTabManager::NewPrimaryArea()
             ->SetOrientation(Orient_Horizontal)
@@ -171,7 +173,7 @@ FOdysseyPainterEditorGUI::CreateLeftSection()
         ->Split
         (
             FTabManager::NewStack()
-            ->AddTab(mBrushSelectorTab->ID(), ETabState::OpenedTab)
+            ->AddTab(FOdysseyPainterEditorBrushSelectorTab::StaticId(), ETabState::OpenedTab)
             ->SetHideTabWell(false)
             ->SetSizeCoefficient(0.33f)
         )
@@ -182,11 +184,11 @@ FOdysseyPainterEditorGUI::CreateLeftSection()
             ->SetHideTabWell(false)
             ->SetSizeCoefficient(0.33f)
             // Tool Options
-            ->AddTab(mToolOptionsTab->ID(), ETabState::OpenedTab)
+            ->AddTab(FOdysseyPainterEditorToolOptionsTab::StaticId(), ETabState::OpenedTab)
             ->SetHideTabWell(false)
             ->SetSizeCoefficient(0.33f)
             // Selected vector object properties
-            ->AddTab(mSelectedVectorObjectTab->ID(),ETabState::OpenedTab)
+            ->AddTab(FOdysseyPainterEditorSelectedVectorObjectTab::StaticId(),ETabState::OpenedTab)
             ->SetHideTabWell(false)
             ->SetSizeCoefficient(0.33f)
         )
@@ -194,11 +196,11 @@ FOdysseyPainterEditorGUI::CreateLeftSection()
         ->Split
         (
             FTabManager::NewStack()
-            ->AddTab(mToolsTab->ID(), ETabState::OpenedTab)
+            ->AddTab(FOdysseyPainterEditorToolsTab::StaticId(), ETabState::OpenedTab)
             ->SetHideTabWell(false)
             ->SetSizeCoefficient(0.33f)
             // Mesh Selector
-            ->AddTab(mMeshSelectorTab->ID(), ETabState::OpenedTab)
+            ->AddTab(FOdysseyPainterEditorMeshSelectorTab::StaticId(), ETabState::OpenedTab)
             ->SetHideTabWell(false)
             ->SetSizeCoefficient(0.33f)
         );
@@ -214,7 +216,7 @@ FOdysseyPainterEditorGUI::CreateRightSection()
         ->Split
         (
             FTabManager::NewStack()
-            ->AddTab(mColorWheelTab->ID(), ETabState::OpenedTab)
+            ->AddTab(FOdysseyPainterEditorColorWheelTab::StaticId(), ETabState::OpenedTab)
             ->SetHideTabWell(false)
             ->SetSizeCoefficient(0.3f)
         )
@@ -222,7 +224,7 @@ FOdysseyPainterEditorGUI::CreateRightSection()
         ->Split
         (
             FTabManager::NewStack()
-            ->AddTab(mColorSlidersTab->ID(), ETabState::OpenedTab)
+            ->AddTab(FOdysseyPainterEditorColorSlidersTab::StaticId(), ETabState::OpenedTab)
             ->SetHideTabWell(false)
             ->SetSizeCoefficient(0.3f)
         )
@@ -230,7 +232,7 @@ FOdysseyPainterEditorGUI::CreateRightSection()
         ->Split
         (
             FTabManager::NewStack()
-            ->AddTab(mColorPaletteTab->ID(), ETabState::OpenedTab)
+            ->AddTab(FOdysseyPainterEditorPaletteTab::StaticId(), ETabState::OpenedTab)
             ->SetHideTabWell(true)
             ->SetSizeCoefficient(0.3f)
         );
@@ -247,7 +249,7 @@ FOdysseyPainterEditorGUI::CreateMiddleSection()
         ->Split
         (
             FTabManager::NewStack()
-            ->AddTab(mTopTab->ID(), ETabState::OpenedTab)
+            ->AddTab(FOdysseyPainterEditorTopTab::StaticId(), ETabState::OpenedTab)
             ->SetHideTabWell(true)
             ->SetSizeCoefficient(0.025f)
         )
@@ -255,7 +257,7 @@ FOdysseyPainterEditorGUI::CreateMiddleSection()
         ->Split
         (
             FTabManager::NewStack()
-            ->AddTab(mViewportTab->ID(), ETabState::OpenedTab)
+            ->AddTab(FOdysseyPainterEditorViewportTab::StaticId(), ETabState::OpenedTab)
             ->SetHideTabWell(false)
             ->SetSizeCoefficient(0.975f)
         );
@@ -306,7 +308,7 @@ FOdysseyPainterEditorGUI::CreateMainSection()
 
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Getters
-
+/*
 TSharedPtr<FOdysseyPainterEditorHUDTab>&
 FOdysseyPainterEditorGUI::GetHUDTab()
 {
@@ -371,7 +373,7 @@ TSharedPtr<FOdysseyPainterEditorSelectedVectorObjectTab>&
 FOdysseyPainterEditorGUI::GetSelectedVectorObjectTab()
 {
     return mSelectedVectorObjectTab;
-}
+}*/
 
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------- Shortcuts

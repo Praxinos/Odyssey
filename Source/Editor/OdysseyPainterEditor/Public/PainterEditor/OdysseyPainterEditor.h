@@ -32,6 +32,7 @@ class FOdysseyBrushContext;
 class FOdysseyPainterEditorSource;
 class FOdysseyPainterEditorExtension;
 class UOdysseyLayerStack;
+class FOdysseyMeshSelector;
 
 enum class eVectorEditionMode : uint8
 {
@@ -48,12 +49,14 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditor
 public:
     // Construction / Destruction
     virtual ~FOdysseyPainterEditor();
-    FOdysseyPainterEditor();
+    FOdysseyPainterEditor(const FText& iName, UObject* iEditedObject, const FName& iLayoutName);
 
-protected:
-    // Protected Initialization
-    virtual void InitData(UObject* iEditedObject);
-    virtual void InitTools();
+public:
+    virtual void Initialize() override;
+    virtual TSharedRef<FTabManager::FLayout> CreateLayout() override;
+    virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
+    virtual void ExtendMenu( FToolMenuOwner iOwner, FName iMenuName ) override;
+    virtual bool OnCloseRequested() override;
 
 public:
     // Getters
@@ -68,6 +71,8 @@ public:
     virtual UOdysseyPainterEditorTool*                      GetSelectedTool() const;
     virtual FOdysseyMediaProvider                           GetCurrentMediaProvider();
     virtual UOdysseyLayerStack*                             LayerStack() const;
+    
+    TSharedPtr<FOdysseyMeshSelector>                        GetMeshSelector() const;
     
     virtual UOdysseyPainterEditorRasterDrawingTool*                  GetRasterDrawingTool() const;
     virtual UOdysseyPainterEditorVectorPrimitiveDrawingTool*         GetVectorPrimitiveDrawingTool() const;
@@ -114,15 +119,10 @@ public:
     void  SetSelectedTool( UOdysseyPainterEditorTool* iSelectedTool );
     void  RefreshCurrentTool();
 
-public:
-    // Interface
-    virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
-    virtual void ExtendMenu( FToolMenuOwner iOwner, FName iMenuName ) override;
-    virtual bool OnCloseRequested() override;
+
 
 protected:
     //Callbacks
-    virtual TSharedPtr<FWorkspaceItem> RegisterTabSpawners( const TSharedRef<class FTabManager>& iTabManager ) override;
     virtual void OnApplyOverrides(const TMap<FName, UObject*>& iOverrides);
     void OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStack);
     
@@ -134,11 +134,17 @@ protected:
     virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
 
 private:
+    void InitTools();
     UOdysseyPainterEditorTool* FindDefaultToolForCurrentLayer();
 
 protected:
+    FText                                    mName;
+    FName                                    mLayoutName;
+    TSharedPtr<FTabManager::FLayout>         mLayout;
+
     //Tools
     TSharedPtr<FOdysseyPainterEditorSource>  mSource;
+    TSharedPtr<FOdysseyMeshSelector>         mMeshSelector;
     TArray<TSharedPtr<FOdysseyPainterEditorExtension>> mExtensions;
     UOdysseyPainterEditorTool*               mSelectedTool;
     TArray<UOdysseyPainterEditorTool*>       mTools;

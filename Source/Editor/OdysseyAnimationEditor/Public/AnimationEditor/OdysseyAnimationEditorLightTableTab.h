@@ -9,12 +9,16 @@ class ODYSSEYANIMATIONEDITOR_API FOdysseyAnimationEditorLightTableTab :
 	public FOdysseyEditorTab
 {
 public:
+    static const FName& StaticId();
+
+public:
     // Construction / Destruction
     virtual ~FOdysseyAnimationEditorLightTableTab();
-    FOdysseyAnimationEditorLightTableTab(FOdysseyAnimationEditor* iEditor);
+    FOdysseyAnimationEditorLightTableTab(FOdysseyAnimationEditorExtension* iEditor);
 
 protected:
     // FOdysseyAnimationEditorTab interface
+    virtual const FName& GetId() const override;
     virtual TSharedPtr<SWidget> CreateWidget() override;
 
 protected:
@@ -27,6 +31,6 @@ private:
     //Methods
 
 private:
-    FOdysseyAnimationEditor* mEditor;
+    FOdysseyAnimationEditorExtension* mExtension;
 };
 

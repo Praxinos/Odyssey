@@ -10,6 +10,13 @@
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorToolsTab"
 
+const FName&
+FOdysseyPainterEditorToolsTab::StaticId()
+{
+    static FName Id = TEXT("OdysseyPainterEditor_Tools"); //Keep ColorSelector instead of ColorWheel because changing that ID would show an empty panel to users who already opened the previous ColorSelector Panel
+    return Id;
+}
+
 /////////////////////////////////////////////////////
 // FOdysseyPainterEditorToolsTab
 //--------------------------------------------------------------------------------------
@@ -19,15 +26,19 @@ FOdysseyPainterEditorToolsTab::~FOdysseyPainterEditorToolsTab()
 }
 
 FOdysseyPainterEditorToolsTab::FOdysseyPainterEditorToolsTab(FOdysseyPainterEditor* iEditor)
-    : FOdysseyEditorTab(TEXT("OdysseyPainterEditor_Tools"),
-                            LOCTEXT( "OdysseyPainterEditorToolsTab", "Tools" ),
-                            FSlateIcon( "OdysseyStyle", "PainterEditor.Tools16" ))
+    : FOdysseyEditorTab(LOCTEXT( "OdysseyPainterEditorToolsTab", "Tools" ), FSlateIcon( "OdysseyStyle", "PainterEditor.Tools16" ))
     , mEditor(iEditor)
 {
 }
 
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------- FOdysseyEditorTab interface
+
+const FName&
+FOdysseyPainterEditorToolsTab::GetId() const
+{
+    return StaticId();
+}
 
 TSharedPtr<SWidget>
 FOdysseyPainterEditorToolsTab::CreateWidget()

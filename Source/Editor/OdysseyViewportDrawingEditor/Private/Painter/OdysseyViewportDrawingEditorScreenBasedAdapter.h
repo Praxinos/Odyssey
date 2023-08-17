@@ -57,7 +57,7 @@ public:
 	~FOdysseyViewportDrawingEditorScreenBasedAdapter();
 
 	/** constructor */
-	FOdysseyViewportDrawingEditorScreenBasedAdapter(TSharedPtr<FOdysseyViewportDrawingEditor> iEditor);
+	FOdysseyViewportDrawingEditorScreenBasedAdapter(FOdysseyViewportDrawingEditorExtension* iExtension);
 
 public:      
     virtual void PrepareAdapterForPainting() override;

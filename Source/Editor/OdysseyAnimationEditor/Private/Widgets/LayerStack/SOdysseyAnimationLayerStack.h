@@ -9,7 +9,7 @@
  * Implements the Animation Layer stack widget
  */
 
-class FOdysseyAnimationEditor;
+class FOdysseyAnimationEditorExtension;
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerStack
     : public SCompoundWidget
 {
@@ -26,7 +26,7 @@ public:
     ~SOdysseyAnimationLayerStack();
     SOdysseyAnimationLayerStack();
     
-    void Construct(const FArguments& InArgs, FOdysseyAnimationEditor* iAnimationEditor);
+    void Construct(const FArguments& InArgs, FOdysseyAnimationEditorExtension* iAnimationExtension);
     TSharedPtr<SOdysseyLayerStackTreeView> GetTreeView() const;
 
 private:
@@ -38,7 +38,7 @@ private:
     void RebuildWidgets();
 
 private:
-    FOdysseyAnimationEditor* mEditor;
+    FOdysseyAnimationEditorExtension* mExtension;
     TSlateAttribute<UOdysseyAnimationLayerStack*> mLayerStack;
     TSharedPtr<SOdysseyLayerStackTreeView> mTreeView;
 	TSharedPtr<SScrollBar> mTimelineScrollBar;

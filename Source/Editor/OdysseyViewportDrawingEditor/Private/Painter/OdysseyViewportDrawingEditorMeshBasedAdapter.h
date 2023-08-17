@@ -57,7 +57,7 @@ public:
 	~FOdysseyViewportDrawingEditorMeshBasedAdapter();
 
 	/** constructor */
-	FOdysseyViewportDrawingEditorMeshBasedAdapter(TSharedPtr<FOdysseyViewportDrawingEditor> iEditor);
+	FOdysseyViewportDrawingEditorMeshBasedAdapter(FOdysseyViewportDrawingEditorExtension* iExtension);
 
 public:      
     virtual void PrepareAdapterForPainting() override;

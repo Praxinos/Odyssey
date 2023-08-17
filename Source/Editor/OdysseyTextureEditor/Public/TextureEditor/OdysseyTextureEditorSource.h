@@ -5,6 +5,10 @@
 
 #include "PainterEditor/OdysseyPainterEditorSource.h"
 
+#include "LayerStack/OdysseyTextureLayerStack.h"
+
+class UOdysseyTextureLayerStackUserData;
+
 /**
  * Base class for an Editor Source
  */

@@ -3,10 +3,12 @@
 
 #pragma once
 
+#include "OdysseyBrushAssetBase.h"
 #include "IStylusState.h"
 #include <chrono>
 #include "Input/OdysseyRay.h"
 
+#include <ULIS>
 
 /** Painting adapter for the painter. Describes the method of painting in the viewport*/
 class IOdysseyViewportDrawingEditorAdapter : public IStylusMessageHandler
@@ -24,7 +26,7 @@ public:
     virtual ~IOdysseyViewportDrawingEditorAdapter();
 
     /** constructor */
-    IOdysseyViewportDrawingEditorAdapter(TSharedPtr<FOdysseyViewportDrawingEditor> iEditor);
+    IOdysseyViewportDrawingEditorAdapter(FOdysseyViewportDrawingEditorExtension* iExtension);
 
 public:
     /** Painting Methods **/
@@ -65,7 +67,7 @@ protected:
 
 protected:
     /** The editor we need help to paint with*/
-    TSharedPtr<FOdysseyViewportDrawingEditor> mEditor;
+    FOdysseyViewportDrawingEditorExtension* mExtension;
 
     /** The corresponding render target for the Texture of the editor above */
     UTextureRenderTarget2D* mPaintingTexture2DRenderTarget;

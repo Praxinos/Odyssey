@@ -13,7 +13,7 @@ public:
     ~FOdysseyViewportDrawingEditorTextureBasedAdapter();
 
     /** constructor */
-    FOdysseyViewportDrawingEditorTextureBasedAdapter(TSharedPtr<FOdysseyViewportDrawingEditor> iEditor);
+    FOdysseyViewportDrawingEditorTextureBasedAdapter(FOdysseyViewportDrawingEditorExtension* iExtension);
 
 public:
     virtual void PrepareAdapterForPainting() override;

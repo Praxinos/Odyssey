@@ -15,6 +15,13 @@
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorTopTab"
 
+const FName&
+FOdysseyPainterEditorTopTab::StaticId()
+{
+    static FName Id = TEXT("OdysseyPainterEditor_TopBar"); //Keep ColorSelector instead of ColorWheel because changing that ID would show an empty panel to users who already opened the previous ColorSelector Panel
+    return Id;
+}
+
 class FOdysseyPainterEditor;
 
 /////////////////////////////////////////////////////
@@ -27,9 +34,7 @@ FOdysseyPainterEditorTopTab::~FOdysseyPainterEditorTopTab()
 }
 
 FOdysseyPainterEditorTopTab::FOdysseyPainterEditorTopTab(FOdysseyPainterEditor* iEditor)
-	: FOdysseyEditorTab(TEXT("OdysseyPainterEditor_TopBar"),
-                            LOCTEXT( "OdysseyPainterEditorTopTab", "Top Bar" ),
-                            FSlateIcon( "OdysseyStyle", "PainterEditor.Spark16" ))
+	: FOdysseyEditorTab(LOCTEXT( "OdysseyPainterEditorTopTab", "Top Bar" ), FSlateIcon( "OdysseyStyle", "PainterEditor.Spark16" ))
     , mEditor( iEditor )
 {
     mEditor->OnSelectedToolChanged().AddRaw(this, &FOdysseyPainterEditorTopTab::OnSelectedToolChanged);
@@ -41,8 +46,6 @@ FOdysseyPainterEditorTopTab::FOdysseyPainterEditorTopTab(FOdysseyPainterEditor* 
 TSharedRef< SDockTab >
 FOdysseyPainterEditorTopTab::SpawnTab( const FSpawnTabArgs& iArgs )
 {
-    check( iArgs.GetTabId() == ID() );
-
     return SNew( SDockTab )
         .Label( DisplayName() )
         .ShouldAutosize( true )
@@ -75,9 +78,14 @@ FOdysseyPainterEditorTopTab::IsEraserButtonActive() const
 bool
 FOdysseyPainterEditorTopTab::IsPackageEdited() const
 {
-    for( int i=0; i<mEditor->GetEditedObjects().Num(); i++ )
+    UObject* editedObject = mEditor->GetEditedObject();
+    if (editedObject && editedObject->GetOutermost()->IsDirty())
+        return true;
+
+    TArray<UObject*> additionalEditedObjects = mEditor->GetAdditionalEditedObjects();
+    for( UObject* additionalEditedObject : additionalEditedObjects )
     {
-        if( mEditor->GetEditedObjects()[i]->GetOutermost()->IsDirty() )
+        if( additionalEditedObject->GetOutermost()->IsDirty() )
             return true;
     }
     return false;
@@ -85,6 +93,12 @@ FOdysseyPainterEditorTopTab::IsPackageEdited() const
 
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------- FOdysseyEditorTab interface
+
+const FName&
+FOdysseyPainterEditorTopTab::GetId() const
+{
+    return StaticId();
+}
 
 TSharedPtr<SWidget>
 FOdysseyPainterEditorTopTab::CreateWidget()
@@ -373,10 +387,16 @@ FReply
 FOdysseyPainterEditorTopTab::OnSaveButtonClicked()
 {
     TArray<UPackage*> packages;
-    for( int i=0; i<mEditor->GetEditedObjects().Num(); i++ )
+    UObject* editedObject = mEditor->GetEditedObject();
+    if (editedObject)
+        packages.Add(editedObject->GetOutermost());
+
+    TArray<UObject*> additionalEditedObjects = mEditor->GetAdditionalEditedObjects();
+    for( UObject* additionalEditedObject : additionalEditedObjects )
     {
-        packages.Add( mEditor->GetEditedObjects()[i]->GetOutermost() );
+        packages.Add( additionalEditedObject->GetOutermost() );
     }
+
     FEditorFileUtils::PromptForCheckoutAndSave(packages, true, false);
     
     return FReply::Handled();

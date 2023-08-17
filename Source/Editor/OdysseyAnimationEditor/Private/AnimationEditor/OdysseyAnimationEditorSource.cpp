@@ -5,6 +5,7 @@
 
 #include "AnimationEditor/OdysseyAnimationEditorSource.h"
 #include "OdysseyAnimationTexture.h"
+#include "OdysseyMediaRaster.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyAnimationEditorSource"
 

@@ -3,7 +3,16 @@
 
 #pragma once
 
+#include "CoreMinimal.h"
 #include "PainterEditor/OdysseyPainterEditorExtension.h"
+#include "OdysseyAnimationEditorTimeline.h"
+
+class FOdysseyPainterEditor;
+class UOdysseyAnimation;
+class UOdysseyAnimationLayerStack;
+class UOdysseyAnimationPlayer;
+class FOdysseyAnimationEditorSource;
+class FOdysseyAnimationEditorGUI;
 
 class ODYSSEYANIMATIONEDITOR_API FOdysseyAnimationEditorExtension
     : public FOdysseyPainterEditorExtension
@@ -23,11 +32,6 @@ public:
     UOdysseyAnimationPlayer*            Player() const;
     FOdysseyAnimationEditorTimeline*    Timeline();
     float                               PlaybackFramesPerSecond() const;
-
-public:
-    // Overrides
-    //virtual FOdysseyAnimationEditorGUI* GetGUI() override;
-    //virtual TSharedPtr<FWorkspaceItem> RegisterTabSpawners( const TSharedRef<class FTabManager>& iTabManager ) override;
 
 private:
     void OnSourceChanged();

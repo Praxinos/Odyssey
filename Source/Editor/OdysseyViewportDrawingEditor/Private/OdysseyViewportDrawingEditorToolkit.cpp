@@ -2,13 +2,13 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "OdysseyViewportDrawingEditorToolkit.h"
-#include "ModeToolbar/FOdysseyViewportDrawingEditorModeToolbar.h"
 #include "OdysseyStyleSet.h"
+#include "OdysseyEditorTab.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyViewportDrawingEditorToolkit"
 
-FOdysseyViewportDrawingEditorToolkit::FOdysseyViewportDrawingEditorToolkit(TSharedPtr<FOdysseyViewportDrawingEditor> iEditor, class FEdMode* iEditorMode)
-	: FOdysseyModeToolkit( FName("OdysseyViewportDrawingApp"), iEditor, iEditorMode )
+FOdysseyViewportDrawingEditorToolkit::FOdysseyViewportDrawingEditorToolkit()
+	: FOdysseyModeToolkit()
 {
 }
 
@@ -33,10 +33,28 @@ FOdysseyViewportDrawingEditorToolkit::GetToolPaletteNames( TArray<FName>& ioPale
 void
 FOdysseyViewportDrawingEditorToolkit::BuildToolPalette( FName iPalette, class FToolBarBuilder& ioToolbarBuilder )
 {
-    FOdysseyViewportDrawingEditor* viewportDrawingEditor = static_cast<FOdysseyViewportDrawingEditor*>( mEditor.Get() );
-    if( !viewportDrawingEditor ) return;
+    const TArray<TSharedPtr<FOdysseyEditorTab>>& tabs = mEditor->GetTabs();
+    for (TSharedPtr<FOdysseyEditorTab> tab : tabs)
+    {
+        FFormatNamedArguments Args;
+        Args.Add("TabName", tab->GetName());
 
-    ioToolbarBuilder.AddToolBarButton(
+        FText description = FText::Format(
+            LOCTEXT("ViewportDrawingEditorToggleTopTabTooltip", "Display {TabName}"),
+            Args
+        );
+
+        ioToolbarBuilder.AddToolBarButton(
+            FUIAction(FExecuteAction::CreateSP( tab.ToSharedRef(), &FOdysseyEditorTab::Open) ),
+            NAME_None,
+            tab->GetName(),
+            description,
+            tab->GetIcon()
+        );
+    }
+
+
+    /* ioToolbarBuilder.AddToolBarButton(
         FUIAction(FExecuteAction::CreateSP( viewportDrawingEditor->GetToolbar(), &FOdysseyViewportDrawingEditorModeToolbar::OpenTopTab) ),
         NAME_None,
         LOCTEXT("ViewportDrawingEditorToggleTopTab", "Top Bar"),
@@ -114,7 +132,7 @@ FOdysseyViewportDrawingEditorToolkit::BuildToolPalette( FName iPalette, class FT
         LOCTEXT("ViewportDrawingEditorToggleMeshSelectorTab", "Mesh Selector"),
         LOCTEXT("ViewportDrawingEditorToggleMeshSelectorTabTooltip", "Display Mesh Selector"),
         FSlateIcon( "OdysseyStyle", "PainterEditor.Mesh20" )
-    );
+    ); */
 }
 
 

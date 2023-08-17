@@ -14,7 +14,7 @@ class SOdysseyFlipbookTimelineTrack : public SCompoundWidget
 public:
 	SLATE_BEGIN_ARGS(SOdysseyFlipbookTimelineTrack)
         {}
-		SLATE_ARGUMENT( TSharedPtr<FOdysseyFlipbookWrapper>, FlipbookWrapper )
+		SLATE_ARGUMENT( FOdysseyFlipbookWrapper*, FlipbookWrapper )
         SLATE_ATTRIBUTE( float, FrameSize )
 		SLATE_EVENT( FOnFlipbookChanged, OnFlipbookChanged)
         SLATE_EVENT( FOnKeyframeRemoved, OnKeyframeRemoved)
@@ -32,7 +32,7 @@ public:
 
 public:
 	//Accessors
-	const TSharedPtr<FOdysseyFlipbookWrapper>& FlipbookWrapper() const;
+	FOdysseyFlipbookWrapper* FlipbookWrapper() const;
 	float FrameSize() const;
 
 public:
@@ -79,7 +79,7 @@ private:
     void OnSpriteTextureChanged(UPaperSprite* iSprite, UTexture2D* iOldTexture);
 
 private:
-	TSharedPtr<FOdysseyFlipbookWrapper> mFlipbookWrapper;
+	FOdysseyFlipbookWrapper* mFlipbookWrapper;
     TAttribute<float> 	mFrameSize;
 	TSharedPtr<SOdysseyTimelineFrameList> mFrameList;
 	TSharedPtr<FAssetThumbnailPool> mAssetThumbnailPool;

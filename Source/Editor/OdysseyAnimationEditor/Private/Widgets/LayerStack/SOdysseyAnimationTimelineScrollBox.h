@@ -6,7 +6,7 @@
 #include "CoreMinimal.h"
 
 class SOdysseyAnimationTimelineScrollPanel;
-class FOdysseyAnimationEditor;
+class FOdysseyAnimationEditorExtension;
 
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineScrollBox
     : public SCompoundWidget
@@ -25,19 +25,19 @@ public:
 
     void Construct(
         const FArguments& iArgs,
-        FOdysseyAnimationEditor* iEditor
+        FOdysseyAnimationEditorExtension* iExtension
     );
 
 public:
     /** @return a new slot. Slots contain children */
     static FSlot::FSlotArguments Slot();
 
-    FOdysseyAnimationEditor* GetEditor() const;
+    FOdysseyAnimationEditorExtension* GetExtension() const;
     void ClearChildren();
     FScopedWidgetSlotArguments AddChild();
 
 private:
-    FOdysseyAnimationEditor*            mEditor;
+    FOdysseyAnimationEditorExtension*            mExtension;
     TSharedPtr<SOdysseyAnimationTimelineScrollPanel> mPanel;
 };
 
@@ -55,7 +55,7 @@ public:
     void Construct(
         const FArguments& iArgs,
         TArray<SOdysseyAnimationTimelineScrollBox::FSlot::FSlotArguments> iSlots,
-        FOdysseyAnimationEditor* iEditor
+        FOdysseyAnimationEditorExtension* iExtension
     );
 
 public:
@@ -78,7 +78,7 @@ private:
     float ArrangeChildHorizontalAndReturnOffset(const FGeometry& AllottedGeometry, FArrangedChildren& ArrangedChildren, const SOdysseyAnimationTimelineScrollBox::FSlot& ThisSlot, float CurChildOffset) const;
 
 private:
-    FOdysseyAnimationEditor*            mEditor;
+    FOdysseyAnimationEditorExtension*            mExtension;
 
 	//State
 	TPanelChildren<SOdysseyAnimationTimelineScrollBox::FSlot>   mChildren;

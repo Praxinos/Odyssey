@@ -9,12 +9,16 @@ class ODYSSEYTEXTUREEDITOR_API FOdysseyTextureEditorTextureDetailsTab :
 	public FOdysseyEditorTab
 {
 public:
+    static const FName& StaticId();
+
+public:
     // Construction / Destruction
     virtual ~FOdysseyTextureEditorTextureDetailsTab();
-    FOdysseyTextureEditorTextureDetailsTab(FOdysseyTextureEditor* iEditor);
+    FOdysseyTextureEditorTextureDetailsTab(FOdysseyTextureEditorExtension* iExtension);
 
 protected:
     // FOdysseyTextureEditorTab interface
+    virtual const FName& GetId() const override;
     virtual TSharedPtr<SWidget> CreateWidget() override;
 
 protected:
@@ -25,6 +29,6 @@ protected:
     // Event Listeners
 
 private:
-    FOdysseyTextureEditor* mEditor;
+    FOdysseyTextureEditorExtension* mExtension;
 };
 

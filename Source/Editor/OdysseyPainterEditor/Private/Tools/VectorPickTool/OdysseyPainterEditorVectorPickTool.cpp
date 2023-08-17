@@ -6,6 +6,7 @@
 #include "Tools/VectorPickTool/SOdysseyPainterEditorVectorPickToolTopTab.h"
 #include "Tools/VectorPickTool/OdysseyPainterEditorVectorPickToolObjectContextMenu.h"
 #include "OdysseyPainterEditor.h"
+#include "PainterEditor/OdysseyPainterEditorViewportTab.h"
 #include "OdysseyMediaVector.h"
 
 #include <chrono>
@@ -297,8 +298,9 @@ UOdysseyPainterEditorVectorPickTool::OnMouseUp( const FOdysseyPoint& iPointInTex
         if( mEditor->GetVectorEditionMode() == eVectorEditionMode::Object )
         {
             TSharedPtr<SWidget> contextMenu = FOdysseyPainterEditorVectorPickToolObjectContextMenu::CreateWidget( GetEditor() );
-
-            FSlateApplication::Get().PushMenu( GetEditor()->GetGUI()->GetViewportTab().Get()->Widget().ToSharedRef(),
+            
+            TSharedPtr<FOdysseyPainterEditorViewportTab> viewportTab = GetEditor()->FindTab<FOdysseyPainterEditorViewportTab>();
+            FSlateApplication::Get().PushMenu( viewportTab->Widget().ToSharedRef(),
                                                FWidgetPath(),
                                                contextMenu.ToSharedRef(),
                                                FSlateApplication::Get().GetCursorPos(),

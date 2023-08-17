@@ -12,7 +12,8 @@
 #include "Settings/ContentBrowserSettings.h"
 #include "Toolkits/AssetEditorToolkit.h"
 
-#include "TextureEditor/OdysseyTextureEditor.h"
+#include "PainterEditor/OdysseyPainterEditor.h"
+#include "TextureEditor/OdysseyTextureEditorExtension.h"
 #include "OdysseyTextureEditorSettings.h"
 #include "OdysseyTextureEditorToolkit.h"
 #include "OdysseyTextureAssetTypeActions.h"
@@ -29,10 +30,17 @@
 TSharedRef<FOdysseyTextureEditorToolkit>
 FOdysseyTextureEditorModule::CreateOdysseyTextureEditor( UTexture2D* iTexture )
 {
-	TSharedPtr<FOdysseyTextureEditor> editor = MakeShareable(new FOdysseyTextureEditor());
-    TSharedPtr<FOdysseyTextureEditorToolkit> toolkit = MakeShareable( new FOdysseyTextureEditorToolkit(editor) );
-	editor->Initialize(iTexture);
-    toolkit->Initialize();
+	TSharedPtr<FOdysseyPainterEditor> editor = MakeShared<FOdysseyPainterEditor>(
+		LOCTEXT("WorkspaceMenu_OdysseyTextureEditor", "Odyssey Texture2D Editor"),
+		iTexture,
+		"OdysseyTextureEditor_Layout"
+	);
+
+	TSharedRef<FOdysseyTextureEditorExtension> textureExtension = MakeShared<FOdysseyTextureEditorExtension>(editor.Get());
+	editor->AddExtension(MakeShared<FOdysseyTextureEditorExtension>(editor.Get()));
+
+    TSharedPtr<FOdysseyTextureEditorToolkit> toolkit = MakeShared<FOdysseyTextureEditorToolkit>();
+    toolkit->Initialize(iTexture, editor);
 
 	TSharedPtr<FOdysseyTextureEditorSource> source = MakeShared<FOdysseyTextureEditorSource>(iTexture);
 	editor->SetSource(source);

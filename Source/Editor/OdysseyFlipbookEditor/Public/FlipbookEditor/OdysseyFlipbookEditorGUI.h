@@ -5,38 +5,36 @@
 
 #include "TextureEditor/OdysseyTextureEditorGUI.h"
 
-class FOdysseyFlipbookEditor;
+class FOdysseyFlipbookEditorExtension;
 class FOdysseyFlipbookEditorTimelineTab;
 
 /**
  * Implements an Editor toolkit for Flipbooks.
  */
-class ODYSSEYFLIPBOOKEDITOR_API FOdysseyFlipbookEditorGUI :
-	public FOdysseyTextureEditorGUI
+class ODYSSEYFLIPBOOKEDITOR_API FOdysseyFlipbookEditorGUI
 {
 public:
     // Construction / Destruction
     virtual ~FOdysseyFlipbookEditorGUI();
-    FOdysseyFlipbookEditorGUI(FOdysseyFlipbookEditor* iEditor);
+    FOdysseyFlipbookEditorGUI(FOdysseyFlipbookEditorExtension* iExtension);
 
 protected:
     //Init
-	virtual void CreateTabs() override;
+	void CreateTabs();
 
 public:
     // Getters
-	virtual FName GetLayoutName() override;
 	TSharedPtr<FOdysseyFlipbookEditorTimelineTab>& GetTimelineTab();
 
 protected:
 	// Internal widget creation
-	virtual TSharedRef<FTabManager::FSplitter>	CreateMainSection() override;
+	//TSharedRef<FTabManager::FSplitter>	CreateMainSection();
 
 private:
-	FOdysseyFlipbookEditor*						mEditor;
+	FOdysseyFlipbookEditorExtension*				mExtension;
 
 protected:
     //Tabs
-	TSharedPtr<FOdysseyFlipbookEditorTimelineTab>    mTimelineTab;
+	TSharedPtr<FOdysseyFlipbookEditorTimelineTab>   mTimelineTab;
 };
 

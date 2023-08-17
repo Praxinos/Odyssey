@@ -5,7 +5,7 @@
 
 #include "CoreMinimal.h"
 
-class FOdysseyAnimationEditor;
+class FOdysseyAnimationEditorExtension;
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineHeader
 	: public SCompoundWidget
 {
@@ -16,7 +16,7 @@ public:
 
 	void Construct(
 		const FArguments& InArgs,
-		FOdysseyAnimationEditor* iEditor);
+		FOdysseyAnimationEditorExtension* iExtension);
 
 	// SWidget interface
 	virtual int32 OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const override;
@@ -27,5 +27,5 @@ public:
 
 private:
 	bool mIsScrubbing = false;
-	FOdysseyAnimationEditor* mEditor;
+	FOdysseyAnimationEditorExtension* mExtension;
 };

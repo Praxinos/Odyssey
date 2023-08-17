@@ -6,10 +6,10 @@
 void
 SOdysseyAnimationTimelineSection::Construct(
 	const FArguments& iArgs, 
-	FOdysseyAnimationEditor* iEditor
+	FOdysseyAnimationEditorExtension* iExtension
 )
 {
-	mEditor = iEditor;
+	mExtension = iExtension;
     mWidthInFrames = iArgs._WidthInFrames;
     mHeightInScreenUnits = iArgs._HeightInScreenUnits;
 
@@ -26,16 +26,16 @@ SOdysseyAnimationTimelineSection::Construct(
 	];
 }
 
-FOdysseyAnimationEditor*
-SOdysseyAnimationTimelineSection::GetEditor() const
+FOdysseyAnimationEditorExtension*
+SOdysseyAnimationTimelineSection::GetExtension() const
 {
-    return mEditor;
+    return mExtension;
 }
 
 FOptionalSize
 SOdysseyAnimationTimelineSection::GetSectionWidth() const
 {
-	return mWidthInFrames.Get() * mEditor->Timeline()->GetFrameWidth();
+	return mWidthInFrames.Get() * mExtension->Timeline()->GetFrameWidth();
 }
 
 FOptionalSize

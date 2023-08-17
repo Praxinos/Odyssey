@@ -3,20 +3,10 @@
 
 #include "OdysseyFlipbookEditorModule.h"
 
-#include "AssetToolsModule.h"
-#include "CoreMinimal.h"
-#include "ISettingsModule.h"
-#include "LevelEditor.h"
-#include "Modules/ModuleManager.h"
-#include "PropertyEditorModule.h"
-#include "Settings/ContentBrowserSettings.h"
-#include "Toolkits/AssetEditorToolkit.h"
-#include "PaperFlipbook.h"
-
-#include "OdysseyFlipbookEditor.h"
-#include "OdysseyFlipbookEditorSettings.h"
+#include "TextureEditor/OdysseyTextureEditorExtension.h"
+#include "FlipbookEditor/OdysseyFlipbookEditorExtension.h"
 #include "OdysseyFlipbookEditorToolkit.h"
-#include "OdysseyFlipbookAssetTypeActions.h"
+#include "ISettingsModule.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyFlipbookEditorModule"
 
@@ -135,11 +125,30 @@ FOdysseyFlipbookEditorModule::UnregisterSettings()
 TSharedRef<FOdysseyFlipbookEditorToolkit>
 FOdysseyFlipbookEditorModule::CreateOdysseyFlipbookEditor( UPaperFlipbook* iFlipbook )
 {
-	TSharedPtr<FOdysseyFlipbookEditor> editor = MakeShareable(new FOdysseyFlipbookEditor(iFlipbook));
+	TSharedPtr<FOdysseyPainterEditor> editor = MakeShared<FOdysseyPainterEditor>(
+		LOCTEXT("WorkspaceMenu_OdysseyFlipbookEditor", "Odyssey Flipbook Editor"),
+		iFlipbook,
+		"OdysseyFlipbookEditor_Layout"
+	);
+
+	TSharedRef<FOdysseyTextureEditorExtension> textureExtension = MakeShared<FOdysseyTextureEditorExtension>(editor.Get());
+	TSharedRef<FOdysseyFlipbookEditorExtension> flipbookExtension = MakeShared<FOdysseyFlipbookEditorExtension>(editor.Get());
+
+	editor->AddExtension(MakeShared<FOdysseyTextureEditorExtension>(editor.Get()));
+	editor->AddExtension(MakeShared<FOdysseyFlipbookEditorExtension>(editor.Get()));
+
+    TSharedPtr<FOdysseyFlipbookEditorToolkit> toolkit = MakeShared<FOdysseyFlipbookEditorToolkit>();
+    toolkit->Initialize(iFlipbook, editor);
+
+	flipbookExtension->SetFlipbook(iFlipbook);
+
+    return toolkit.ToSharedRef();
+
+	/* TSharedPtr<FOdysseyFlipbookEditor> editor = MakeShareable(new FOdysseyFlipbookEditor(iFlipbook));
 	TSharedRef<FOdysseyFlipbookEditorToolkit> toolkit = MakeShareable(new FOdysseyFlipbookEditorToolkit(editor));
 	editor->Initialize(iFlipbook);
 	toolkit->Initialize();
-    return toolkit;
+    return toolkit; */
 }
 
 void
