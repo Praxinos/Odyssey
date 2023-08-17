@@ -142,6 +142,9 @@ void IOdysseyViewportDrawingEditorAdapter::FinishPainting()
 
 FVector2D IOdysseyViewportDrawingEditorAdapter::ViewportCoordinatesToTextureCoordinates(FVector2D iPositionInViewport, FEditorViewportClient* iViewportClient)
 {
+    if (!mTexture)
+        return FVector2D( 0, 0 );
+
     const TSharedPtr<IMeshPaintGeometryAdapter>* meshAdapterPtr = mExtension->ComponentToAdapterMap().Find(mExtension->Component());
     if (!meshAdapterPtr)
         return FVector2D( 0, 0 );
