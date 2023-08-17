@@ -17,6 +17,10 @@ public:
     virtual ~FOdysseyAnimationEditorGUI();
     FOdysseyAnimationEditorGUI(FOdysseyAnimationEditorExtension* iExtension);
 
+public:
+    void Initialize();
+    void Finalize();
+
 protected:
     //Init
 	void CreateTabs();

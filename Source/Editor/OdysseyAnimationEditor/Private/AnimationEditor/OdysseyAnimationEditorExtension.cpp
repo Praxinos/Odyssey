@@ -31,6 +31,8 @@ void
 FOdysseyAnimationEditorExtension::Initialize()
 {
     GetEditor()->OnSourceChanged().AddRaw(this, &FOdysseyAnimationEditorExtension::OnSourceChanged);
+	mGUI = MakeShareable(new FOdysseyAnimationEditorGUI(this));
+	mGUI->Initialize();
 }
 
 void
@@ -112,26 +114,6 @@ FOdysseyAnimationEditorExtension::PlaybackFramesPerSecond() const
 {
 	return mPlaybackFramesPerSecond;
 }
-
-//--------------------------------------------------------------------------------------
-//---------------------------------------------------------------------------- Overrides
-
-/* FOdysseyAnimationEditorGUI*
-FOdysseyAnimationEditorExtension::GetGUI()
-{
-	if (!mGUI)
-		mGUI = MakeShareable(new FOdysseyAnimationEditorGUI(GetEditor()));
-	return mGUI.Get();
-}
-
-TSharedPtr<FWorkspaceItem>
-FOdysseyAnimationEditorExtension::RegisterTabSpawners(const TSharedRef<class FTabManager>& iTabManager)
-{
-    TSharedPtr<FWorkspaceItem> workspaceMenuCategory = iTabManager->AddLocalWorkspaceMenuCategory(LOCTEXT("WorkspaceMenu_OdysseyAnimationEditor", "Odyssey Animation2D Editor"));
-	TSharedRef<FWorkspaceItem> workspaceMenuCategoryRef = workspaceMenuCategory.ToSharedRef();
-	GetGUI()->RegisterTabSpawners(iTabManager, workspaceMenuCategoryRef);
-	return workspaceMenuCategory;
-} */
 
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------- Events

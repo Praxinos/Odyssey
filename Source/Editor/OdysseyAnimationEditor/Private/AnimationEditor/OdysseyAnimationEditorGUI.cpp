@@ -26,6 +26,18 @@ FOdysseyAnimationEditorGUI::FOdysseyAnimationEditorGUI(FOdysseyAnimationEditorEx
 //----------------------------------------------------------------------- Initialization
 
 void
+FOdysseyAnimationEditorGUI::Initialize()
+{
+	CreateTabs();
+}
+
+void
+FOdysseyAnimationEditorGUI::Finalize()
+{
+
+}
+
+void
 FOdysseyAnimationEditorGUI::CreateTabs()
 {
 	//ADD NEW TABS
