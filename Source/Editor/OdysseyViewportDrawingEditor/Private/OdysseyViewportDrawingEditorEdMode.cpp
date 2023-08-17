@@ -219,6 +219,7 @@ void FOdysseyViewportDrawingEditorEdMode::Exit()
     delete mViewportDrawingEditorPainter;
     mViewportDrawingEditorPainter = nullptr;
 
+    mEditor->OnClose();
     mEditor = nullptr;
 
     // Call parent implementation

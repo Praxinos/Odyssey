@@ -68,7 +68,7 @@ FOdysseyModeToolkit::Initialize(
 
 class FEdMode* FOdysseyModeToolkit::GetEditorMode() const
 {
-	return mEditorMode;
+	return nullptr;//mEditorMode;
 }
 
 TSharedPtr<SWidget> FOdysseyModeToolkit::GetInlineContent() const
