@@ -41,6 +41,12 @@ FOdysseyAnimationEditorExtension::Finalize()
     GetEditor()->OnSourceChanged().RemoveAll(this);
 }
 
+void
+FOdysseyAnimationEditorExtension::BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder)
+{
+	mGUI->BuildLayout(iBuilder);
+}
+
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------------------- Initialization
 

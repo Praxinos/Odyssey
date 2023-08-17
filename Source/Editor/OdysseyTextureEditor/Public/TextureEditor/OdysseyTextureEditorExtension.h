@@ -23,6 +23,7 @@ public:
     virtual void Finalize() override;
     virtual void ExtendMenu( FToolMenuOwner iOwnerFName, FName iMenuName ) override;
     virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
+    virtual void BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder) override;
 
 public:
     UTexture2D* Texture() const;

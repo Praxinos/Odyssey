@@ -33,6 +33,20 @@ FOdysseyFlipbookEditorGUI::Finalize()
 }
 
 void
+FOdysseyFlipbookEditorGUI::BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder)
+{	
+	TSharedRef<FTabManager::FSplitter> mainVerticalSplitter = iBuilder.GetSplitter("MainVerticalSplitter");	
+	TSharedRef<FTabManager::FStack> flipbookTimelineStack = iBuilder.CreateStack("FlipbookTimelineStack");
+	flipbookTimelineStack->SetHideTabWell(false);
+	flipbookTimelineStack->SetSizeCoefficient(0.2f);
+	flipbookTimelineStack->AddTab(FOdysseyFlipbookEditorTimelineTab::StaticId(), ETabState::OpenedTab);
+	mainVerticalSplitter->Split
+	(
+		flipbookTimelineStack
+	);
+}
+
+void
 FOdysseyFlipbookEditorGUI::OnFlipbookChanged()
 {
 	//Override displayed texture only if a flipbook is being edited
@@ -73,9 +87,6 @@ FOdysseyFlipbookEditorGUI::OnFlipbookChanged()
 void
 FOdysseyFlipbookEditorGUI::CreateTabs()
 {
-	//REPLACE TABS
-	//mEditor->AddTab(MakeShared<FOdysseyFlipbookEditorViewportTab>());
-
 	//ADD NEW TABS
 	mExtension->GetEditor()->AddTab(MakeShared<FOdysseyFlipbookEditorTimelineTab>(mExtension));
 }

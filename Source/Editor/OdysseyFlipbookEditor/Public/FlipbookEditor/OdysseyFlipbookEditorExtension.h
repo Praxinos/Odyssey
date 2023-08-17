@@ -22,6 +22,7 @@ public:
 public:
     virtual void Initialize() override;
     virtual void Finalize() override;
+    virtual void BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder) override;
 
 public:
     void SetFlipbook(UPaperFlipbook* iFlipbook);

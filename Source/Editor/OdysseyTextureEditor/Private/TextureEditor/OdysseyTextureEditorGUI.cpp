@@ -63,6 +63,32 @@ FOdysseyTextureEditorGUI::CreateTabs()
     mExtension->GetEditor()->AddTab(MakeShared<FOdysseyTextureEditorTextureDetailsTab>(mExtension));
 }
 
+void
+FOdysseyTextureEditorGUI::BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder)
+{	
+	TSharedRef<FTabManager::FSplitter> rightSplitter = iBuilder.GetSplitter("RightSplitter");
+    
+    TSharedRef<FTabManager::FStack> textureLayerStackStack = iBuilder.CreateStack("TextureLayerStackStack");
+	textureLayerStackStack->SetHideTabWell(false);
+	textureLayerStackStack->SetSizeCoefficient(0.35f);
+	textureLayerStackStack->AddTab(FOdysseyTextureEditorLayerStackTab::StaticId(), ETabState::OpenedTab);
+
+    TSharedRef<FTabManager::FStack> textureDetailsStack = iBuilder.CreateStack("TextureDetailsStack");
+	textureDetailsStack->SetHideTabWell(false);
+	textureDetailsStack->SetSizeCoefficient(0.15f);
+	textureDetailsStack->AddTab(FOdysseyTextureEditorLayerStackTab::StaticId(), ETabState::OpenedTab);
+	
+    rightSplitter->Split
+	(
+		textureLayerStackStack
+	);
+
+    rightSplitter->Split
+	(
+		textureDetailsStack
+	);
+}
+
 /* TSharedRef<FTabManager::FSplitter>
 FOdysseyTextureEditorGUI::CreateRightSection()
 {

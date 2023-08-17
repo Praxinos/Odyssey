@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "OdysseyEditorLayoutBuilder.h"
+
 class FOdysseyPainterEditor;
 
 /**
@@ -21,6 +23,7 @@ public:
     virtual void Finalize();
     virtual void ExtendMenu( FToolMenuOwner iOwnerFName, FName iMenuName );
     virtual void BindShortcuts(FBaseToolkit* iToolkit);
+	virtual void BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder);
 
     FOdysseyPainterEditor* GetEditor() const;
     

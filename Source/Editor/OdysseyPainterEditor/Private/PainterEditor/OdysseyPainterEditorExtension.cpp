@@ -38,6 +38,12 @@ FOdysseyPainterEditorExtension::BindShortcuts(FBaseToolkit* iToolkit)
 
 }
 
+void
+FOdysseyPainterEditorExtension::BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder)
+{
+    
+}
+
 FOdysseyPainterEditor*
 FOdysseyPainterEditorExtension::GetEditor() const
 {

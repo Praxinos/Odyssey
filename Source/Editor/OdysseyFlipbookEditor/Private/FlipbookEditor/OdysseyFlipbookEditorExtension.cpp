@@ -40,6 +40,12 @@ FOdysseyFlipbookEditorExtension::Finalize()
 }
 
 void
+FOdysseyFlipbookEditorExtension::BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder)
+{
+	mGUI->BuildLayout(iBuilder);
+}
+
+void
 FOdysseyFlipbookEditorExtension::SetFlipbook(UPaperFlipbook* iFlipbook)
 {
 	if (iFlipbook == GetFlipbook())

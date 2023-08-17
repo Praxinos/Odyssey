@@ -150,230 +150,163 @@ FOdysseyPainterEditorGUI::ExtendMenuAbout( FToolMenuOwner iOwner, FName iMenuNam
 //--------------------------------------------------------------------------------- Layout
 
 void
-FOdysseyPainterEditorGUI::CreateLayout(TSharedPtr<FTabManager::FLayout> iLayout)
+FOdysseyPainterEditorGUI::BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder)
 {
-    iLayout->AddArea
-        (
-            FTabManager::NewPrimaryArea()
-            ->SetOrientation(Orient_Horizontal)
-            ->Split
-            (
-                CreateMainSection()
-            )
-        );
+    TSharedRef<FTabManager::FLayout> layout = iBuilder.GetLayout();
+
+    TSharedRef<FTabManager::FArea> mainArea = iBuilder.CreateArea("MainArea");
+    mainArea->SetOrientation(Orient_Horizontal);
+    layout->AddArea(mainArea);
+
+    TSharedRef<FTabManager::FSplitter> mainVerticalSplitter = iBuilder.CreateSplitter("MainVerticalSplitter");
+    mainVerticalSplitter->SetOrientation(Orient_Vertical);
+    mainVerticalSplitter->SetSizeCoefficient(1.f);
+
+    mainArea->Split
+    (
+        mainVerticalSplitter
+    );
+
+    TSharedRef<FTabManager::FSplitter> mainHorizontalSplitter = iBuilder.CreateSplitter("MainHorizontalSplitter");
+    mainHorizontalSplitter->SetOrientation(Orient_Horizontal);
+    mainHorizontalSplitter->SetSizeCoefficient(1.f);
+
+    mainVerticalSplitter->Split
+    (
+        mainHorizontalSplitter
+    );
+
+    TSharedRef<FTabManager::FSplitter> leftSplitter = iBuilder.CreateSplitter("LeftSplitter");
+    leftSplitter->SetOrientation(Orient_Vertical);
+    leftSplitter->SetSizeCoefficient(0.15f);
+
+    TSharedRef<FTabManager::FSplitter> centerSplitter = iBuilder.CreateSplitter("CenterSplitter");
+    centerSplitter->SetOrientation(Orient_Vertical);
+    centerSplitter->SetSizeCoefficient(0.7f);
+
+    TSharedRef<FTabManager::FSplitter> rightSplitter = iBuilder.CreateSplitter("RightSplitter");
+    rightSplitter->SetOrientation(Orient_Vertical);
+    rightSplitter->SetSizeCoefficient(0.15f);
+
+    mainHorizontalSplitter->Split
+    (
+        leftSplitter
+    );
+
+    mainHorizontalSplitter->Split
+    (
+        centerSplitter
+    );
+
+    mainHorizontalSplitter->Split
+    (
+        rightSplitter
+    );
+
+    CreateLeftSection(iBuilder);
+    CreateCenterSection(iBuilder);
+    CreateRightSection(iBuilder);
 }
 
-TSharedRef<FTabManager::FSplitter>
-FOdysseyPainterEditorGUI::CreateLeftSection()
+void
+FOdysseyPainterEditorGUI::CreateLeftSection(FOdysseyEditorLayoutBuilder& iBuilder)
 {
-    return FTabManager::NewSplitter()
-        ->SetOrientation(Orient_Vertical)
-        ->SetSizeCoefficient(0.15f)
-        // Brush Selector
-        ->Split
-        (
-            FTabManager::NewStack()
-            ->AddTab(FOdysseyPainterEditorBrushSelectorTab::StaticId(), ETabState::OpenedTab)
-            ->SetHideTabWell(false)
-            ->SetSizeCoefficient(0.33f)
-        )
-        // Tool Options
-        ->Split
-        (
-            FTabManager::NewStack()
-            ->SetHideTabWell(false)
-            ->SetSizeCoefficient(0.33f)
-            // Tool Options
-            ->AddTab(FOdysseyPainterEditorToolOptionsTab::StaticId(), ETabState::OpenedTab)
-            ->SetHideTabWell(false)
-            ->SetSizeCoefficient(0.33f)
-            // Selected vector object properties
-            ->AddTab(FOdysseyPainterEditorSelectedVectorObjectTab::StaticId(),ETabState::OpenedTab)
-            ->SetHideTabWell(false)
-            ->SetSizeCoefficient(0.33f)
-        )
-        // Tools / Mesh Selector
-        ->Split
-        (
-            FTabManager::NewStack()
-            ->AddTab(FOdysseyPainterEditorToolsTab::StaticId(), ETabState::OpenedTab)
-            ->SetHideTabWell(false)
-            ->SetSizeCoefficient(0.33f)
-            // Mesh Selector
-            ->AddTab(FOdysseyPainterEditorMeshSelectorTab::StaticId(), ETabState::OpenedTab)
-            ->SetHideTabWell(false)
-            ->SetSizeCoefficient(0.33f)
-        );
+    TSharedRef<FTabManager::FSplitter> leftSplitter = iBuilder.GetSplitter("LeftSplitter");
+
+    TSharedRef<FTabManager::FStack> brushStack = iBuilder.CreateStack("BrushStack");
+    brushStack->SetHideTabWell(false);
+    brushStack->SetSizeCoefficient(0.33f);
+    brushStack->AddTab(FOdysseyPainterEditorBrushSelectorTab::StaticId(), ETabState::OpenedTab);
+
+    TSharedRef<FTabManager::FStack> currentToolStack = iBuilder.CreateStack("CurrentToolStack");
+    currentToolStack->SetHideTabWell(false);
+    currentToolStack->SetSizeCoefficient(0.33f);
+    currentToolStack->AddTab(FOdysseyPainterEditorToolOptionsTab::StaticId(), ETabState::OpenedTab);
+    currentToolStack->AddTab(FOdysseyPainterEditorSelectedVectorObjectTab::StaticId(),ETabState::OpenedTab);
+    currentToolStack->SetForegroundTab(FOdysseyPainterEditorToolOptionsTab::StaticId());
+
+    TSharedRef<FTabManager::FStack> toolsStack = iBuilder.CreateStack("ToolsStack");
+    toolsStack->SetHideTabWell(false);
+    toolsStack->SetSizeCoefficient(0.33f);
+    toolsStack->AddTab(FOdysseyPainterEditorToolsTab::StaticId(), ETabState::OpenedTab);
+
+    leftSplitter->Split
+    (
+        brushStack
+    );
+
+    leftSplitter->Split
+    (
+        currentToolStack
+    );
+
+    leftSplitter->Split
+    (
+        toolsStack
+    );
 }
 
-TSharedRef<FTabManager::FSplitter>
-FOdysseyPainterEditorGUI::CreateRightSection()
+void
+FOdysseyPainterEditorGUI::CreateRightSection(FOdysseyEditorLayoutBuilder& iBuilder)
 {
-    return FTabManager::NewSplitter()
-        ->SetSizeCoefficient(0.15f)
-        ->SetOrientation(Orient_Vertical)
-        // ColorSelector
-        ->Split
-        (
-            FTabManager::NewStack()
-            ->AddTab(FOdysseyPainterEditorColorWheelTab::StaticId(), ETabState::OpenedTab)
-            ->SetHideTabWell(false)
-            ->SetSizeCoefficient(0.3f)
-        )
-        // ColorSliders
-        ->Split
-        (
-            FTabManager::NewStack()
-            ->AddTab(FOdysseyPainterEditorColorSlidersTab::StaticId(), ETabState::OpenedTab)
-            ->SetHideTabWell(false)
-            ->SetSizeCoefficient(0.3f)
-        )
-        // ColorPalette
-        ->Split
-        (
-            FTabManager::NewStack()
-            ->AddTab(FOdysseyPainterEditorPaletteTab::StaticId(), ETabState::OpenedTab)
-            ->SetHideTabWell(true)
-            ->SetSizeCoefficient(0.3f)
-        );
+    TSharedRef<FTabManager::FSplitter> rightSplitter = iBuilder.GetSplitter("RightSplitter");
+
+    TSharedRef<FTabManager::FStack> colorWheelStack = iBuilder.CreateStack("ColorWheelStack");
+    colorWheelStack->SetHideTabWell(false);
+    colorWheelStack->SetSizeCoefficient(0.3f);
+    colorWheelStack->AddTab(FOdysseyPainterEditorColorWheelTab::StaticId(), ETabState::OpenedTab);
+
+    TSharedRef<FTabManager::FStack> colorSliderStack = iBuilder.CreateStack("ColorSliderStack");
+    colorSliderStack->SetHideTabWell(false);
+    colorSliderStack->SetSizeCoefficient(0.3f);
+    colorSliderStack->AddTab(FOdysseyPainterEditorColorSlidersTab::StaticId(), ETabState::OpenedTab);
+
+    TSharedRef<FTabManager::FStack> colorPaletteStack = iBuilder.CreateStack("ColorPaletteStack");
+    colorPaletteStack->SetHideTabWell(false);
+    colorPaletteStack->SetSizeCoefficient(0.33f);
+    colorPaletteStack->AddTab(FOdysseyPainterEditorPaletteTab::StaticId(), ETabState::OpenedTab);
+
+    rightSplitter->Split
+    (
+        colorWheelStack
+    );
+
+    rightSplitter->Split
+    (
+        colorSliderStack
+    );
+
+    rightSplitter->Split
+    (
+        colorPaletteStack
+    );
 }
 
-TSharedRef<FTabManager::FSplitter>
-FOdysseyPainterEditorGUI::CreateMiddleSection()
+void
+FOdysseyPainterEditorGUI::CreateCenterSection(FOdysseyEditorLayoutBuilder& iBuilder)
 {
+    TSharedRef<FTabManager::FSplitter> centerSplitter = iBuilder.GetSplitter("CenterSplitter");
 
-    return FTabManager::NewSplitter()
-        ->SetOrientation(Orient_Vertical)
-        ->SetSizeCoefficient(0.7f)
-        // Top Bar
-        ->Split
-        (
-            FTabManager::NewStack()
-            ->AddTab(FOdysseyPainterEditorTopTab::StaticId(), ETabState::OpenedTab)
-            ->SetHideTabWell(true)
-            ->SetSizeCoefficient(0.025f)
-        )
-        // Viewport
-        ->Split
-        (
-            FTabManager::NewStack()
-            ->AddTab(FOdysseyPainterEditorViewportTab::StaticId(), ETabState::OpenedTab)
-            ->SetHideTabWell(false)
-            ->SetSizeCoefficient(0.975f)
-        );
+    TSharedRef<FTabManager::FStack> topTabStack = iBuilder.CreateStack("TopTabStack");
+    topTabStack->SetHideTabWell(true);
+    topTabStack->SetSizeCoefficient(0.025f);
+    topTabStack->AddTab(FOdysseyPainterEditorTopTab::StaticId(), ETabState::OpenedTab);
+
+    TSharedRef<FTabManager::FStack> viewportStack = iBuilder.CreateStack("viewportStack");
+    viewportStack->SetHideTabWell(false);
+    viewportStack->SetSizeCoefficient(0.975f);
+    viewportStack->AddTab(FOdysseyPainterEditorViewportTab::StaticId(), ETabState::OpenedTab);
+
+    centerSplitter->Split
+    (
+        topTabStack
+    );
+
+    centerSplitter->Split
+    (
+        viewportStack
+    );
 }
-
-TSharedRef<FTabManager::FSplitter>
-FOdysseyPainterEditorGUI::CreateBottomSection()
-{
-    return FTabManager::NewSplitter()
-        ->SetSizeCoefficient(0.15f)
-        ->SetOrientation(Orient_Horizontal);
-}
-
-TSharedRef<FTabManager::FSplitter>
-FOdysseyPainterEditorGUI::CreateMainSection()
-{
-    return FTabManager::NewSplitter()
-        ->SetOrientation(Orient_Vertical)
-        ->SetSizeCoefficient(1.f)
-        // TopMost Part
-        ->Split
-        (
-            FTabManager::NewSplitter()
-            ->SetSizeCoefficient(1.f)
-            ->SetOrientation(Orient_Horizontal)
-            // Left Bar
-            ->Split
-            (
-                CreateLeftSection()
-            )
-            // Middle bar
-            ->Split
-            (
-                CreateMiddleSection()
-            )
-            // Right bar
-            ->Split
-            (
-                CreateRightSection()
-            )
-        )
-        // Bottom Part
-        ->Split
-        (
-            CreateBottomSection()
-        );
-}
-
-//--------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------ Getters
-/*
-TSharedPtr<FOdysseyPainterEditorHUDTab>&
-FOdysseyPainterEditorGUI::GetHUDTab()
-{
-    return mHUDTab;
-}
-
-TSharedPtr<FOdysseyPainterEditorViewportTab>&
-FOdysseyPainterEditorGUI::GetViewportTab()
-{
-    return mViewportTab;
-}
-
-TSharedPtr<FOdysseyPainterEditorBrushSelectorTab>&
-FOdysseyPainterEditorGUI::GetBrushSelectorTab()
-{
-    return mBrushSelectorTab;
-}
-
-TSharedPtr<FOdysseyPainterEditorMeshSelectorTab>&
-FOdysseyPainterEditorGUI::GetMeshSelectorTab()
-{
-    return mMeshSelectorTab;
-}
-
-TSharedPtr<FOdysseyPainterEditorPaletteTab>& 
-FOdysseyPainterEditorGUI::GetColorPaletteTab()
-{
-    return mColorPaletteTab;
-}
-
-TSharedPtr<FOdysseyPainterEditorColorWheelTab>&
-FOdysseyPainterEditorGUI::GetColorWheelTab()
-{
-    return mColorWheelTab;
-}
-
-TSharedPtr<FOdysseyPainterEditorColorSlidersTab>&
-FOdysseyPainterEditorGUI::GetColorSlidersTab()
-{
-    return mColorSlidersTab;
-}
-
-TSharedPtr<FOdysseyPainterEditorTopTab>&
-FOdysseyPainterEditorGUI::GetTopTab()
-{
-    return mTopTab;
-}
-
-TSharedPtr<FOdysseyPainterEditorToolsTab>&
-FOdysseyPainterEditorGUI::GetToolsTab()
-{
-    return mToolsTab;
-}
-
-TSharedPtr<FOdysseyPainterEditorToolOptionsTab>&
-FOdysseyPainterEditorGUI::GetToolOptionsTab()
-{
-    return mToolOptionsTab;
-}
-
-TSharedPtr<FOdysseyPainterEditorSelectedVectorObjectTab>&
-FOdysseyPainterEditorGUI::GetSelectedVectorObjectTab()
-{
-    return mSelectedVectorObjectTab;
-}*/
 
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------- Shortcuts

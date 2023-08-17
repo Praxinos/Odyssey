@@ -14,6 +14,7 @@
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "OdysseyLayer.h"
 #include "OdysseyLayerStack.h"
+#include "OdysseyEditorLayoutBuilder.h"
 
 #include "OdysseyVector.h"
 #include "Undo/OdysseyVectorUndoGroup.h"
@@ -110,9 +111,13 @@ FOdysseyPainterEditor::Initialize()
 TSharedRef<FTabManager::FLayout>
 FOdysseyPainterEditor::CreateLayout()
 {
-    TSharedRef<FTabManager::FLayout> layout = FTabManager::NewLayout(mLayoutName);
-    mGUI->CreateLayout(layout);
-    return layout;
+    FOdysseyEditorLayoutBuilder builder(mLayoutName);
+    mGUI->BuildLayout(builder);
+
+    for (TSharedPtr<FOdysseyPainterEditorExtension> extension : mExtensions)
+        extension->BuildLayout(builder);
+
+    return builder.GetLayout();
 }
 
 void

@@ -38,6 +38,21 @@ FOdysseyAnimationEditorGUI::Finalize()
 }
 
 void
+FOdysseyAnimationEditorGUI::BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder)
+{	
+	TSharedRef<FTabManager::FSplitter> mainVerticalSplitter = iBuilder.GetSplitter("MainVerticalSplitter");
+	TSharedRef<FTabManager::FStack> animationTimelineStack = iBuilder.CreateStack("AnimationTimelineStack");
+	animationTimelineStack->SetHideTabWell(false);
+	animationTimelineStack->SetSizeCoefficient(0.2f);
+	animationTimelineStack->AddTab(FOdysseyAnimationEditorLayerStackTab::StaticId(), ETabState::OpenedTab);
+
+	mainVerticalSplitter->Split
+	(
+		animationTimelineStack
+	);
+}
+
+void
 FOdysseyAnimationEditorGUI::CreateTabs()
 {
 	//ADD NEW TABS

@@ -48,6 +48,12 @@ FOdysseyTextureEditorExtension::BindShortcuts(FBaseToolkit* iToolkit)
 	mGUI->BindShortcuts(iToolkit);
 }
 
+void
+FOdysseyTextureEditorExtension::BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder)
+{
+    mGUI->BuildLayout(iBuilder);
+}
+
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------- Overrides
 

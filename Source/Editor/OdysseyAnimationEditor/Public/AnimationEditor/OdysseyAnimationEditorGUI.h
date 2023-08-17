@@ -20,6 +20,7 @@ public:
 public:
     void Initialize();
     void Finalize();
+	void BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder);
 
 protected:
     //Init

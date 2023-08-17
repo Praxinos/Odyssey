@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "OdysseyEditorLayoutBuilder.h"
 
 class FOdysseyPainterEditor;
 class FOdysseyVectorEngine;
@@ -22,7 +23,7 @@ public:
 
 public:
     void Init();
-	void CreateLayout(TSharedPtr<FTabManager::FLayout> iLayout);
+	void BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder);
 
 public:
     // Tabs
@@ -36,25 +37,9 @@ public:
 
 protected:
 	// Layout
-	TSharedRef<FTabManager::FSplitter>	CreateMainSection();
-	TSharedRef<FTabManager::FSplitter>	CreateLeftSection();
-	TSharedRef<FTabManager::FSplitter>	CreateRightSection();
-	TSharedRef<FTabManager::FSplitter>	CreateMiddleSection();
-    TSharedRef<FTabManager::FSplitter>	CreateBottomSection();
-
-public:
-    // Getters
-    /* TSharedPtr<FOdysseyPainterEditorHUDTab>& GetHUDTab();
-    TSharedPtr<FOdysseyPainterEditorViewportTab>& GetViewportTab();
-    TSharedPtr<FOdysseyPainterEditorBrushSelectorTab>& GetBrushSelectorTab();
-    TSharedPtr<FOdysseyPainterEditorMeshSelectorTab>& GetMeshSelectorTab();
-    TSharedPtr<FOdysseyPainterEditorPaletteTab>& GetColorPaletteTab();
-    TSharedPtr<FOdysseyPainterEditorColorWheelTab>& GetColorWheelTab();
-    TSharedPtr<FOdysseyPainterEditorColorSlidersTab>& GetColorSlidersTab();
-    TSharedPtr<FOdysseyPainterEditorTopTab>& GetTopTab();
-    TSharedPtr<FOdysseyPainterEditorToolsTab>& GetToolsTab();
-    TSharedPtr<FOdysseyPainterEditorToolOptionsTab>& GetToolOptionsTab();
-    TSharedPtr<FOdysseyPainterEditorSelectedVectorObjectTab>& GetSelectedVectorObjectTab(); */
+	void	CreateLeftSection(FOdysseyEditorLayoutBuilder& iBuilder);
+	void	CreateRightSection(FOdysseyEditorLayoutBuilder& iBuilder);
+	void	CreateCenterSection(FOdysseyEditorLayoutBuilder& iBuilder);
 
 protected:
     // Shortcuts

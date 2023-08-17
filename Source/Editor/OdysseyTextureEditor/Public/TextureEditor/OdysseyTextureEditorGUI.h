@@ -23,6 +23,7 @@ public:
     void Init();
     void BindShortcuts( FBaseToolkit* iToolkit );
     void ExtendMenu( FToolMenuOwner iOwner, FName iMenuName );
+	void BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder);
 
 private:
     //Init
