@@ -17,6 +17,7 @@
 #include "OdysseyAnimationAssetTypeActions.h"
 #include "OdysseyAnimationAssetTypeActions.h"
 #include "AnimationEditor/OdysseyAnimationEditorCommands.h"
+#include "AnimationEditor/OdysseyAnimationEditorExtension.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyAnimationEditorModule"
 
@@ -27,8 +28,9 @@
 TSharedRef<FOdysseyAnimationEditorToolkit>
 FOdysseyAnimationEditorModule::CreateOdysseyAnimationEditor( UOdysseyAnimation* iAnimation )
 {
-	TSharedPtr<FOdysseyAnimationEditor> editor = MakeShareable(new FOdysseyAnimationEditor());
+	TSharedPtr<FOdysseyPainterEditor> editor = MakeShareable(new FOdysseyPainterEditor());
     TSharedPtr<FOdysseyAnimationEditorToolkit> toolkit = MakeShareable( new FOdysseyAnimationEditorToolkit(editor) );
+	editor->AddExtension(MakeShared<FOdysseyAnimationEditorExtension>(editor.Get()));
 	editor->Initialize(iAnimation);
     toolkit->Initialize();
 
@@ -36,6 +38,16 @@ FOdysseyAnimationEditorModule::CreateOdysseyAnimationEditor( UOdysseyAnimation* 
 	editor->SetSource(source);
 
     return toolkit.ToSharedRef();
+
+	/* TSharedPtr<FOdysseyAnimationEditor> editor = MakeShareable(new FOdysseyAnimationEditor());
+    TSharedPtr<FOdysseyAnimationEditorToolkit> toolkit = MakeShareable( new FOdysseyAnimationEditorToolkit(editor) );
+	editor->Initialize(iAnimation);
+    toolkit->Initialize();
+
+	TSharedPtr<FOdysseyAnimationEditorSource> source = MakeShared<FOdysseyAnimationEditorSource>(iAnimation);
+	editor->SetSource(source);
+
+    return toolkit.ToSharedRef(); */
 }
 
 void

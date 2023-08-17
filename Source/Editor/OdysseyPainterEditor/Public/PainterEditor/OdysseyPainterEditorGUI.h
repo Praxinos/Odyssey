@@ -48,6 +48,7 @@ public:
 
 protected:
 	// Layout
+    virtual FName GetLayoutName() override;
 	virtual TSharedPtr<FTabManager::FLayout> CreateLayout() override;
 	virtual TSharedRef<FTabManager::FSplitter>	CreateMainSection();
 	virtual TSharedRef<FTabManager::FSplitter>	CreateLeftSection();

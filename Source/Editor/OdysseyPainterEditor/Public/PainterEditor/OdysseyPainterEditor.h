@@ -30,6 +30,7 @@ class IOdysseySurfaceEditable;
 class UOdysseyPainterEditorTool;
 class FOdysseyBrushContext;
 class FOdysseyPainterEditorSource;
+class FOdysseyPainterEditorExtension;
 class UOdysseyLayerStack;
 
 enum class eVectorEditionMode : uint8
@@ -60,7 +61,7 @@ public:
     FSimpleMulticastDelegate& OnSelectedToolChanged();
     
     TSharedPtr<FOdysseyPainterEditorSource>              GetSource() const;
-    virtual FOdysseyPainterEditorGUI*                   GetGUI() = 0;
+    virtual FOdysseyPainterEditorGUI*                    GetGUI();
 
     virtual FOdysseyHUDSystem*                              HUDSystem() const;
 	virtual const FOdysseyBrushColor&                       PaintColor() const;
@@ -107,6 +108,7 @@ public:
 
 public:
     // Setters
+    void  AddExtension(TSharedPtr<FOdysseyPainterEditorExtension> iExtension);
     void  SetSource(TSharedPtr<FOdysseyPainterEditorSource> iSource);
     void  PaintColor(const FOdysseyBrushColor& iColor, bool iIsCommit);
     void  SetSelectedTool( UOdysseyPainterEditorTool* iSelectedTool );
@@ -120,6 +122,7 @@ public:
 
 protected:
     //Callbacks
+    virtual TSharedPtr<FWorkspaceItem> RegisterTabSpawners( const TSharedRef<class FTabManager>& iTabManager ) override;
     virtual void OnApplyOverrides(const TMap<FName, UObject*>& iOverrides);
     void OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStack);
     
@@ -136,8 +139,10 @@ private:
 protected:
     //Tools
     TSharedPtr<FOdysseyPainterEditorSource>  mSource;
+    TArray<TSharedPtr<FOdysseyPainterEditorExtension>> mExtensions;
     UOdysseyPainterEditorTool*               mSelectedTool;
     TArray<UOdysseyPainterEditorTool*>       mTools;
+    TSharedPtr<FOdysseyPainterEditorGUI>     mGUI;
 
     eVectorEditionMode                       mVectorEditionMode;
 

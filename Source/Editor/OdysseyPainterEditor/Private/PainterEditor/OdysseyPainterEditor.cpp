@@ -10,6 +10,7 @@
 #include "OdysseyHUDSystem.h"
 #include "ULISLoaderModule.h"
 #include "OdysseyPainterEditorGUI.h"
+#include "OdysseyPainterEditorExtension.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "OdysseyLayer.h"
 #include "OdysseyLayerStack.h"
@@ -52,8 +53,7 @@
 
 FOdysseyPainterEditor::~FOdysseyPainterEditor()
 {
-    UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll(this);
-	delete mHUDSystem;
+    
 }
 
 FOdysseyPainterEditor::FOdysseyPainterEditor()
@@ -93,6 +93,10 @@ FOdysseyPainterEditor::InitData(UObject* iEditedObject)
 {
 	//Init Tools
 	InitTools();
+    for (TSharedPtr<FOdysseyPainterEditorExtension> extension : mExtensions)
+    {
+        extension->Initialize();
+    }
 }
 
 void
@@ -211,6 +215,16 @@ FOdysseyPainterEditor::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
 	mVectorTransformTool->ExtendMenu(iOwner, iMenuName);
 }
 
+
+TSharedPtr<FWorkspaceItem>
+FOdysseyPainterEditor::RegisterTabSpawners( const TSharedRef<class FTabManager>& iTabManager )
+{
+    TSharedPtr<FWorkspaceItem> workspaceMenuCategory = iTabManager->AddLocalWorkspaceMenuCategory(LOCTEXT("WorkspaceMenu_OdysseyAnimationEditor", "Odyssey Painter Editor"));
+	TSharedRef<FWorkspaceItem> workspaceMenuCategoryRef = workspaceMenuCategory.ToSharedRef();
+	GetGUI()->RegisterTabSpawners(iTabManager, workspaceMenuCategoryRef);
+	return workspaceMenuCategory;
+}
+
 bool
 FOdysseyPainterEditor::OnCloseRequested()
 {
@@ -223,6 +237,14 @@ FOdysseyPainterEditor::OnCloseRequested()
         mSource->Inactivate();
         mSource = nullptr;
     }
+
+    for (TSharedPtr<FOdysseyPainterEditorExtension> extension : mExtensions)
+    {
+        extension->Finalize();
+    }
+
+    UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll(this);
+	delete mHUDSystem;
 
     return FOdysseyEditor::OnCloseRequested();
 }
@@ -469,6 +491,20 @@ FOdysseyPainterEditor::FindDefaultToolForCurrentLayer()
 		return tool;
 	}
 	return nullptr;
+}
+
+FOdysseyPainterEditorGUI*
+FOdysseyPainterEditor::GetGUI()
+{
+	if (!mGUI)
+		mGUI = MakeShareable(new FOdysseyPainterEditorGUI(this));
+	return mGUI.Get();
+}
+
+void
+FOdysseyPainterEditor::AddExtension(TSharedPtr<FOdysseyPainterEditorExtension> iExtension)
+{
+    mExtensions.Add(iExtension);
 }
 
 void

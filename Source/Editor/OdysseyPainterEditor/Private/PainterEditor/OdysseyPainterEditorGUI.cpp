@@ -140,6 +140,12 @@ FOdysseyPainterEditorGUI::ExtendMenuAbout( FToolMenuOwner iOwner, FName iMenuNam
 //--------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------- Layout
 
+FName
+FOdysseyPainterEditorGUI::GetLayoutName()
+{
+    return "OdysseyAnimationEditor_Layout";
+}
+
 TSharedPtr<FTabManager::FLayout>
 FOdysseyPainterEditorGUI::CreateLayout()
 {
