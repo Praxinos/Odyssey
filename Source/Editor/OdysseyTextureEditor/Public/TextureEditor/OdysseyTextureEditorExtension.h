@@ -21,9 +21,10 @@ public:
 public:
     virtual void Initialize() override;
     virtual void Finalize() override;
+    virtual void ExtendMenu( FToolMenuOwner iOwnerFName, FName iMenuName ) override;
+    virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
 
 public:
-    FOdysseyTextureEditorGUI* GetGUI();
     UTexture2D* Texture() const;
 
 private:

@@ -38,18 +38,6 @@ FOdysseyPainterEditorExtension::BindShortcuts(FBaseToolkit* iToolkit)
 
 }
 
-void
-FOdysseyPainterEditorExtension::RegisterTabSpawners(const TSharedRef< class FTabManager >& iTabManager, TSharedRef<FWorkspaceItem>& iWorkspaceMenuCategoryRef)
-{
-
-}
-
-void
-FOdysseyPainterEditorExtension::UnregisterTabSpawners(const TSharedRef< class FTabManager >& iTabManager)
-{
-
-}
-
 FOdysseyPainterEditor*
 FOdysseyPainterEditorExtension::GetEditor() const
 {

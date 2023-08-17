@@ -13,6 +13,7 @@
 
 FOdysseyViewportDrawingEditorExtension::~FOdysseyViewportDrawingEditorExtension()
 {
+	int a = 0;
 }
 
 FOdysseyViewportDrawingEditorExtension::FOdysseyViewportDrawingEditorExtension(FOdysseyPainterEditor* iEditor)
@@ -23,6 +24,7 @@ FOdysseyViewportDrawingEditorExtension::FOdysseyViewportDrawingEditorExtension(F
     , mComponent(nullptr)
     , mMaterial(nullptr)
 {
+	int a = 0;
 }
 
 void

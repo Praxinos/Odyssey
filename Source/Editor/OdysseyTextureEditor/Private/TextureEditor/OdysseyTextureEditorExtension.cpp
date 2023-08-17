@@ -24,6 +24,9 @@ FOdysseyTextureEditorExtension::FOdysseyTextureEditorExtension(FOdysseyPainterEd
 void
 FOdysseyTextureEditorExtension::Initialize()
 {
+	mGUI = MakeShared<FOdysseyTextureEditorGUI>(this);
+	mGUI->Init();
+
     GetEditor()->OnSourceChanged().AddRaw(this, &FOdysseyTextureEditorExtension::OnSourceChanged);
 }
 
@@ -33,9 +36,20 @@ FOdysseyTextureEditorExtension::Finalize()
     GetEditor()->OnSourceChanged().RemoveAll(this);
 }
 
+void
+FOdysseyTextureEditorExtension::ExtendMenu( FToolMenuOwner iOwnerFName, FName iMenuName )
+{
+	mGUI->ExtendMenu(iOwnerFName, iMenuName);
+}
+
+void
+FOdysseyTextureEditorExtension::BindShortcuts(FBaseToolkit* iToolkit)
+{
+	mGUI->BindShortcuts(iToolkit);
+}
+
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------- Overrides
-
 
 void
 FOdysseyTextureEditorExtension::OnSourceChanged()
@@ -52,23 +66,6 @@ FOdysseyTextureEditorExtension::OnSourceChanged()
 	mTextureSource = StaticCastSharedPtr<FOdysseyTextureEditorSource>(source);
 	UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw(this, &FOdysseyTextureEditorExtension::OnCurrentLayerChanged);
 }
-
-FOdysseyTextureEditorGUI*
-FOdysseyTextureEditorExtension::GetGUI()
-{
-	if (!mGUI)
-		mGUI = MakeShared<FOdysseyTextureEditorGUI>(this);
-	return mGUI.Get();
-}
-
-/* TSharedPtr<FWorkspaceItem>
-FOdysseyTextureEditorExtension::RegisterTabSpawners(const TSharedRef<FTabManager>& iTabManager)
-{
-    TSharedPtr<FWorkspaceItem> workspaceMenuCategory = iTabManager->AddLocalWorkspaceMenuCategory(LOCTEXT("WorkspaceMenu_OdysseyTextureEditor", "Odyssey Animation2D Editor"));
-	TSharedRef<FWorkspaceItem> workspaceMenuCategoryRef = workspaceMenuCategory.ToSharedRef();
-	GetGUI()->RegisterTabSpawners(iTabManager, workspaceMenuCategoryRef);
-	return workspaceMenuCategory;
-} */
 
 UTexture2D*
 FOdysseyTextureEditorExtension::Texture() const

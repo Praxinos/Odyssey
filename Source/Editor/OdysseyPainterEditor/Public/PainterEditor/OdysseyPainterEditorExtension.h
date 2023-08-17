@@ -21,8 +21,6 @@ public:
     virtual void Finalize();
     virtual void ExtendMenu( FToolMenuOwner iOwnerFName, FName iMenuName );
     virtual void BindShortcuts(FBaseToolkit* iToolkit);
-	virtual void RegisterTabSpawners(const TSharedRef< class FTabManager >& iTabManager, TSharedRef<FWorkspaceItem>& iWorkspaceMenuCategoryRef);
-	virtual void UnregisterTabSpawners(const TSharedRef< class FTabManager >& iTabManager);
 
     FOdysseyPainterEditor* GetEditor() const;
     

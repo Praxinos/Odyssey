@@ -98,6 +98,7 @@ FOdysseyPainterEditor::Initialize()
 	InitTools();
     
     //Init the GUI
+    mGUI = MakeShareable(new FOdysseyPainterEditorGUI(this));
     mGUI->Init();
     
     //Init the extensions

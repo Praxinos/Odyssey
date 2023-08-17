@@ -19,10 +19,14 @@ public:
     ~FOdysseyTextureEditorGUI();
     FOdysseyTextureEditorGUI(FOdysseyTextureEditorExtension* iExtension);
 
-protected:
+public:
+    void Init();
+    void BindShortcuts( FBaseToolkit* iToolkit );
+    void ExtendMenu( FToolMenuOwner iOwner, FName iMenuName );
+
+private:
     //Init
 	void CreateTabs();
-    void BindShortcuts( FBaseToolkit* iToolkit );
     void ExtendMenuAbout( FToolMenuOwner iOwner, FName iMenuName );
 
 protected:

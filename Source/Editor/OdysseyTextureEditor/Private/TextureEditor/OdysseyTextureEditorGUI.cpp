@@ -50,6 +50,12 @@ FOdysseyTextureEditorGUI::OnCurrentLayerChanged( UOdysseyLayerStack* iLayerStack
 //----------------------------------------------------------------------- Initialization
 
 void
+FOdysseyTextureEditorGUI::Init()
+{
+    CreateTabs();
+}
+
+void
 FOdysseyTextureEditorGUI::CreateTabs()
 {
 	//ADD NEW TABS
@@ -79,6 +85,12 @@ FOdysseyTextureEditorGUI::CreateRightSection()
 } */
 
 void
+FOdysseyTextureEditorGUI::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
+{
+    ExtendMenuAbout(iOwner, iMenuName);
+}
+
+void
 FOdysseyTextureEditorGUI::BindShortcuts(FBaseToolkit* iToolkit)
 {
     const TSharedRef<FUICommandList>& toolkitCommands = iToolkit->GetToolkitCommands();
@@ -101,7 +113,6 @@ FOdysseyTextureEditorGUI::BindShortcuts(FBaseToolkit* iToolkit)
 
 //--------------------------------------------------------------------------------------
 //--------------------------------------------------------------------- Menu and Toolbar
-
 void
 FOdysseyTextureEditorGUI::ExtendMenuAbout( FToolMenuOwner iOwner, FName iMenuName )
 {
