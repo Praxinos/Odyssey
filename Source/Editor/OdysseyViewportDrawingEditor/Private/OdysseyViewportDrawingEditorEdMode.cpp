@@ -22,7 +22,6 @@
 #include "EditorWorldExtension.h"
 #include "ViewportWorldInteraction.h"
 
-#include "OdysseyViewportDrawingEditor.h"
 #include "OdysseyViewportDrawingEditorToolkit.h"
 //#include "OdysseyViewportDrawingEditorPainter.h"
 #include "TextureEditor/OdysseyTextureEditorExtension.h"

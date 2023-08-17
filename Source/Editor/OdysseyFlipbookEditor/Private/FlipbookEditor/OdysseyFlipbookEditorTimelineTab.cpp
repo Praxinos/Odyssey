@@ -3,7 +3,6 @@
 
 #include "OdysseyFlipbookEditorTimelineTab.h"
 
-#include "OdysseyFlipbookEditor.h"
 #include "OdysseyFlipbookEditorCommands.h"
 #include "SOdysseyFlipbookTimelineView.h"
 #include "Types/NavigationMetaData.h"

@@ -12,7 +12,6 @@
 #include "Settings/ContentBrowserSettings.h"
 #include "Toolkits/AssetEditorToolkit.h"
 
-#include "AnimationEditor/OdysseyAnimationEditor.h"
 #include "OdysseyAnimationEditorToolkit.h"
 #include "OdysseyAnimationAssetTypeActions.h"
 #include "OdysseyAnimationAssetTypeActions.h"
