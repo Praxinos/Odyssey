@@ -110,7 +110,7 @@ FOdysseyPainterEditor::Initialize()
 TSharedRef<FTabManager::FLayout>
 FOdysseyPainterEditor::CreateLayout()
 {
-    TSharedRef<FTabManager::FLayout> layout = FTabManager::NewLayout("OdysseyPainterEditor_Layout");
+    TSharedRef<FTabManager::FLayout> layout = FTabManager::NewLayout(mLayoutName);
     mGUI->CreateLayout(layout);
     return layout;
 }

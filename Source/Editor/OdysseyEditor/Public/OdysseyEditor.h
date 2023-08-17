@@ -57,6 +57,7 @@ public:
     virtual void ExtendMenu( FToolMenuOwner iOwner, FName iMenuName );
     virtual void BindShortcuts(FBaseToolkit* iToolkit);
     virtual bool OnCloseRequested();
+    virtual void OnClose();
     virtual TArray<UObject*> GetAdditionalEditedObjects();
 
 protected:

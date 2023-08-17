@@ -69,6 +69,13 @@ FOdysseyAssetEditorToolkit::OnRequestClose()
 }
 
 void
+FOdysseyAssetEditorToolkit::OnClose()
+{
+    //Here is where we should clean everything prior to editor destruction
+    mEditor->OnClose();
+}
+
+void
 FOdysseyAssetEditorToolkit::RegisterTabSpawners(const TSharedRef<class FTabManager>& iTabManager)
 {
     FAssetEditorToolkit::RegisterTabSpawners(iTabManager);

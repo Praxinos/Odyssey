@@ -54,13 +54,20 @@ FOdysseyEditor::BindShortcuts(FBaseToolkit* iToolkit)
     for (TSharedPtr<FOdysseyEditorTab> tab : mTabs)
     {
         tab->BindShortcuts(iToolkit);
-    }   
+    }
 }
 
 bool
 FOdysseyEditor::OnCloseRequested()
 {
     return true;
+}
+
+void
+FOdysseyEditor::OnClose()
+{
+    //Here is where we should clean everything prior to editor destruction
+    mTabs.Empty(); //ensure all tabs are destroyed, because some need the editor on destruction
 }
 
 //--------------------------------------------------------------------------------------
@@ -114,7 +121,6 @@ FOdysseyEditor::RegisterTabSpawners( const TSharedRef< FTabManager >& iTabManage
         tab->SetTabManager(iTabManager);
         tab->Register(workspaceMenuCategoryRef);
 	}
-
 }
 
 void

@@ -55,7 +55,8 @@ void FOdysseyViewportDrawingEditorEdMode::AddReferencedObjects(FReferenceCollect
 {
     // Call parent implementation
     FEdMode::AddReferencedObjects(Collector);
-    mViewportDrawingEditorPainter->AddReferencedObjects(Collector);
+    if (mViewportDrawingEditorPainter)
+        mViewportDrawingEditorPainter->AddReferencedObjects(Collector);
 }
 
 void FOdysseyViewportDrawingEditorEdMode::Render(const FSceneView* View,FViewport* Viewport,FPrimitiveDrawInterface* PDI)
