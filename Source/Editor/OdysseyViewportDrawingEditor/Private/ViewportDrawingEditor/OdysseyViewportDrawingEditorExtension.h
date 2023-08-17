@@ -47,7 +47,7 @@ public:
     AActor* Actor() const;
     UMeshComponent* Component() const;
     UMaterialInterface* Material() const;
-    UTexture2D* Texture() const;
+    UTexture* Texture() const;
 
 	IOdysseyViewportDrawingEditorAdapter* GetOdysseyViewportDrawingEditorAdapter();
 
@@ -70,7 +70,7 @@ public:
     void SetActor(AActor* iActor);
     void SetComponent(UMeshComponent* iComponent);
     void SetMaterial(UMaterialInterface* iMaterial);
-    void SetTexture(UTexture2D* iTexture);
+    void SetTexture(UTexture* iTexture);
     void SetPaintingAdapterMethod(EOdysseyViewportDrawingPaintingAdapterMethod iNewMethod);
 
 private:
@@ -126,7 +126,7 @@ private:
             mSelectedTexture = iSrcSettings.mSelectedTexture;
         }
 
-        UTexture2D* mSelectedTexture;
+        UTexture* mSelectedTexture;
     };
 
     /** This one allows us to remember the selected settings for a given component (like knowing which texture of the component was selected) */
@@ -136,6 +136,7 @@ private:
     AActor* mActor;
     UMeshComponent* mComponent;
     UMaterialInterface* mMaterial; //Storage purposes only for the GUI -> Get path for it
+    UTexture* mTexture; //Storage purposes only for the GUI -> Get path for it
     TArray<UMeshComponent*> mSelectableComponents;
     TArray<FPaintableTexture> mSelectableTextures;
 

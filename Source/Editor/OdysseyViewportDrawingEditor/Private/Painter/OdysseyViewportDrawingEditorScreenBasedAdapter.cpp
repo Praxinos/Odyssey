@@ -29,7 +29,7 @@ FOdysseyViewportDrawingEditorScreenBasedAdapter::FOdysseyViewportDrawingEditorSc
 }
 
 void
-FOdysseyViewportDrawingEditorScreenBasedAdapter::SetTexture(UTexture2D* iTexture)
+FOdysseyViewportDrawingEditorScreenBasedAdapter::SetTexture(UTexture* iTexture)
 {
     FinalizeRenderTarget();
     IOdysseyViewportDrawingEditorAdapter::SetTexture(iTexture);
@@ -39,7 +39,7 @@ FOdysseyViewportDrawingEditorScreenBasedAdapter::SetTexture(UTexture2D* iTexture
 void
 FOdysseyViewportDrawingEditorScreenBasedAdapter::InitializeRenderTarget()
 {	
-	UTexture2D* texture = GetTexture();
+	UTexture* texture = GetTexture();
     if (!texture)
         return;
 
@@ -67,7 +67,7 @@ FOdysseyViewportDrawingEditorScreenBasedAdapter::InitializeRenderTarget()
     mSeamRenderTarget2D->UpdateResourceImmediate();
     mSeamRenderTarget2D->AddToRoot();
 
-    TexturePaintHelpers::GenerateSeamMask(mExtension->Component(), mExtension->GetUVIndexUsedByCurrentTexture(), mSeamRenderTarget2D, texture, mPaintingTexture2DRenderTarget);
+    FOdysseyViewportDrawingEditorUtils::GenerateSeamMask(mExtension->Component(), mExtension->GetUVIndexUsedByCurrentTexture(), mSeamRenderTarget2D, texture, mPaintingTexture2DRenderTarget);
 	TexturePaintHelpers::CopyTextureToRenderTargetTexture(texture, mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
 }
 
@@ -252,7 +252,7 @@ float FOdysseyViewportDrawingEditorScreenBasedAdapter::GetStampQuality()
 {
     if (mTexture && mExtension->Component())
     {
-        return ((FMath::Max(mTexture->GetSizeX(), mTexture->GetSizeY()) / mExtension->GetMeshComponentMaxSize()) + 1.f);
+        return ((FMath::Max(mTexture->GetSurfaceWidth(), mTexture->GetSurfaceHeight()) / mExtension->GetMeshComponentMaxSize()) + 1.f);
     }
 
     return 1.f;

@@ -11,7 +11,7 @@
 const FGuid&
 FOdysseyTextureEditorSource::StaticId()
 {
-	static FGuid id;
+	static FGuid id = FGuid::NewGuid();
 	return id;
 }
 

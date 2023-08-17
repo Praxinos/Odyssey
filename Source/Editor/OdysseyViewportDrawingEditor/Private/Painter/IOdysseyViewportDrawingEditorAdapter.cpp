@@ -59,13 +59,13 @@ IOdysseyViewportDrawingEditorAdapter::Finalize()
 }
 
 void
-IOdysseyViewportDrawingEditorAdapter::SetTexture(UTexture2D* iTexture)
+IOdysseyViewportDrawingEditorAdapter::SetTexture(UTexture* iTexture)
 {
     mTexture = iTexture;
     mState = mTexture ? eState::kIdleReady : eState::kIdle;
 }
 
-UTexture2D*
+UTexture*
 IOdysseyViewportDrawingEditorAdapter::GetTexture() const
 {
     return mTexture;

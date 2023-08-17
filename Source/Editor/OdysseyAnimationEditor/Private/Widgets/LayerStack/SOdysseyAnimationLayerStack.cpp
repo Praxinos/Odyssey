@@ -137,6 +137,9 @@ SOdysseyAnimationLayerStack::GetTreeView() const
 void
 SOdysseyAnimationLayerStack::Tick( const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime )
 {
+    if (!mTreeView)
+        return;
+
     TSharedPtr<SHeaderRow> headerRow = mTreeView->GetHeaderRow();
     if (!headerRow)
         return;

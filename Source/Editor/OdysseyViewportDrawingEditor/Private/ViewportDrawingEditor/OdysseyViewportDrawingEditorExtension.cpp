@@ -137,14 +137,16 @@ FOdysseyViewportDrawingEditorExtension::Material() const
     return mMaterial;
 }
 
-UTexture2D*
+UTexture*
 FOdysseyViewportDrawingEditorExtension::Texture() const
 {
-    if (!mCurrentSource || mCurrentSource->Id() != FOdysseyTextureEditorSource::StaticId())
+	return mTexture;
+
+    /* if (!mCurrentSource || mCurrentSource->Id() != FOdysseyTextureEditorSource::StaticId())
         return nullptr;
 
     TSharedPtr<FOdysseyTextureEditorSource> textureSource = StaticCastSharedPtr<FOdysseyTextureEditorSource>(mCurrentSource);
-	return textureSource->GetTexture();
+	return textureSource->GetTexture(); */
 }
 
 IOdysseyViewportDrawingEditorAdapter*
@@ -284,12 +286,18 @@ FOdysseyViewportDrawingEditorExtension::SetMaterial(UMaterialInterface* iMateria
 }
 
 void
-FOdysseyViewportDrawingEditorExtension::SetTexture(UTexture2D* iTexture)
+FOdysseyViewportDrawingEditorExtension::SetTexture(UTexture* iTexture)
 {
+	mTexture = nullptr;
 	mEditor->SetSource(nullptr);
-	if (iTexture)
+	if (!iTexture)
+		return;
+
+	mTexture = iTexture;
+	if (iTexture->IsA(UTexture2D::StaticClass()))
 	{
-		TSharedPtr<FOdysseyTextureEditorSource> source = MakeShared<FOdysseyTextureEditorSource>(iTexture);
+		UTexture2D* texture = Cast<UTexture2D>(iTexture);
+		TSharedPtr<FOdysseyTextureEditorSource> source = MakeShared<FOdysseyTextureEditorSource>(texture);
 		mEditor->SetSource(source);
 	}
 }
@@ -469,11 +477,10 @@ FOdysseyViewportDrawingEditorExtension::SelectDefaultTexture()
 	// select the first texture available for edition
 	for (FPaintableTexture& paintableTexture : mSelectableTextures)
 	{
-		UTexture2D* texture = Cast<UTexture2D>(paintableTexture.Texture);
-		if (texture == Texture()) //if the texture is already selected we assume we have nothing to do
+		if (paintableTexture.Texture == Texture()) //if the texture is already selected we assume we have nothing to do
 			break;
 
-		if (AssetEditorSubsystem->FindEditorForAsset(texture, true) != nullptr)
+		if (AssetEditorSubsystem->FindEditorForAsset(paintableTexture.Texture, true) != nullptr)
 		{
 			if (displayWarning) //only display the Warning Message for the first texture
 			{
@@ -484,7 +491,7 @@ FOdysseyViewportDrawingEditorExtension::SelectDefaultTexture()
 			continue;
 		}
 
-		SetTexture(texture);
+		SetTexture(paintableTexture.Texture);
 		break;
 	}
 }

@@ -50,6 +50,8 @@ public class OdysseyViewportDrawingEditor : ModuleRules
                 "PropertyEditor",
                 "MainFrame",
                 "MeshPaint",
+                "OdysseyAnimation",
+                "OdysseyAnimationEditor",
                 "OdysseyCore",
                 "OdysseyBrush",
                 "OdysseyMeshPaintRendering",
