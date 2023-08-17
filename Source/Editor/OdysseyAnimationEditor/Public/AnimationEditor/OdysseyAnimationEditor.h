@@ -38,7 +38,7 @@ public:
     FOdysseyVectorEngine* GetCurrentVectorEngine() const;
     
     UOdysseyPainterEditorTool* FindDefaultToolForCurrentLayer();
-    void SelectDefaultTool();
+    virtual void SelectDefaultTool() override;
     virtual void OnSelectedToolChanged() override;
     virtual void OnSourceInactivated() override;
     virtual void OnSourceActivated() override;

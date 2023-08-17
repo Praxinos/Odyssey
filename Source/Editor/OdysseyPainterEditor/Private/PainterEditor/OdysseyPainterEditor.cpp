@@ -134,25 +134,6 @@ FOdysseyPainterEditor::InitTools()
 	mVectorTransformTool->SetEditor(this);
 	mRasterDrawingTool->SetBrushContexts(mBrushContexts);
 
-	mRasterDrawingTool->SetEditor(this);
-    mVectorPrimitiveDrawingTool->SetEditor(this);
-    mVectorPathDrawingTool->SetEditor(this);
-    mVectorPathEditTool->SetEditor(this);
-    mVectorPathCutTool->SetEditor(this);
-    mVectorPickTool->SetEditor(this);
-    mVectorSceneScaleTool->SetEditor(this);
-    mVectorScenePanTool->SetEditor(this);
-    mVectorEraserTool->SetEditor(this);
-    mVectorPathPushTool->SetEditor(this);
-    mVectorPathWidthTool->SetEditor(this);
-    mVectorPathSmoothTool->SetEditor(this);
-    mVectorPathStitchTool->SetEditor(this);
-	mPaintBucketTool->SetEditor(this);
-	mColorPickerTool->SetEditor(this);
-	mVectorGridTool->SetEditor(this);
-	mVectorTransformTool->SetEditor(this);
-	mRasterDrawingTool->SetEditor(this);
-
 	mTools.Add(mRasterDrawingTool);
     mTools.Add(mVectorPrimitiveDrawingTool);
     mTools.Add(mVectorPathDrawingTool);
@@ -177,16 +158,30 @@ FOdysseyPainterEditor::BindShortcuts(FBaseToolkit* iToolkit)
 {
 	FOdysseyEditor::BindShortcuts(iToolkit);
 
+	mRasterDrawingTool->BindShortcuts(iToolkit);
+	mVectorPrimitiveDrawingTool->BindShortcuts(iToolkit);
+	mVectorPathDrawingTool->BindShortcuts(iToolkit);
+	mVectorPathEditTool->BindShortcuts(iToolkit);
+	mVectorPathCutTool->BindShortcuts(iToolkit);
+	mVectorPickTool->BindShortcuts(iToolkit);
+	mVectorSceneScaleTool->BindShortcuts(iToolkit);
+	mVectorScenePanTool->BindShortcuts(iToolkit);
+	mVectorEraserTool->BindShortcuts(iToolkit);
+	mVectorPathPushTool->BindShortcuts(iToolkit);
+	mVectorPathWidthTool->BindShortcuts(iToolkit);
+	mVectorPathSmoothTool->BindShortcuts(iToolkit);
+	mVectorPathStitchTool->BindShortcuts(iToolkit);
+	mPaintBucketTool->BindShortcuts(iToolkit);
+	mColorPickerTool->BindShortcuts(iToolkit);
+	mVectorGridTool->BindShortcuts(iToolkit);
+	mVectorTransformTool->BindShortcuts(iToolkit);
+
 	//---
 
 	const TSharedRef<FUICommandList>& toolkitCommands = iToolkit->GetToolkitCommands();
     const FOdysseyPainterEditorCommands& painterEditorCommands = FOdysseyPainterEditorCommands::Get();
 
 	#define MAP_ACTION(action, ...) toolkitCommands->MapAction( action, FExecuteAction::CreateRaw( this, &FOdysseyPainterEditor::__VA_ARGS__ ), FCanExecuteAction() );
-
-	/* MAP_ACTION(painterEditorCommands.Undo, Undo)
-	MAP_ACTION(painterEditorCommands.Redo, Redo )
-    MAP_ACTION(painterEditorCommands.ClearUndo, ClearUndo ) */
 
 	#undef MAP_ACTION
 }
@@ -195,6 +190,24 @@ void
 FOdysseyPainterEditor::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
 {
 	FOdysseyEditor::ExtendMenu(iOwner, iMenuName);
+    
+	mRasterDrawingTool->ExtendMenu(iOwner, iMenuName);
+	mVectorPrimitiveDrawingTool->ExtendMenu(iOwner, iMenuName);
+	mVectorPathDrawingTool->ExtendMenu(iOwner, iMenuName);
+	mVectorPathEditTool->ExtendMenu(iOwner, iMenuName);
+	mVectorPathCutTool->ExtendMenu(iOwner, iMenuName);
+	mVectorPickTool->ExtendMenu(iOwner, iMenuName);
+	mVectorSceneScaleTool->ExtendMenu(iOwner, iMenuName);
+	mVectorScenePanTool->ExtendMenu(iOwner, iMenuName);
+	mVectorEraserTool->ExtendMenu(iOwner, iMenuName);
+	mVectorPathPushTool->ExtendMenu(iOwner, iMenuName);
+	mVectorPathWidthTool->ExtendMenu(iOwner, iMenuName);
+	mVectorPathSmoothTool->ExtendMenu(iOwner, iMenuName);
+	mVectorPathStitchTool->ExtendMenu(iOwner, iMenuName);
+	mPaintBucketTool->ExtendMenu(iOwner, iMenuName);
+	mColorPickerTool->ExtendMenu(iOwner, iMenuName);
+	mVectorGridTool->ExtendMenu(iOwner, iMenuName);
+	mVectorTransformTool->ExtendMenu(iOwner, iMenuName);
 }
 
 bool
@@ -233,13 +246,24 @@ FOdysseyPainterEditor::GetSource() const
 void
 FOdysseyPainterEditor::OnSourceInactivated()
 {
-
+	if ( mSelectedTool )
+		//just reload the tool
+		mSelectedTool->Inactivate();
 }
 
 void
 FOdysseyPainterEditor::OnSourceActivated()
 {
-
+    if ( mSelectedTool && mSelectedTool->IsActivable() )
+	{
+		//just reload the tool
+		mSelectedTool->Activate();
+	}
+	else
+	{
+		//select the best tool
+		SelectDefaultTool();
+	}
 }
 
 //--------------------------------------------------------------------------------------

@@ -22,13 +22,8 @@ public:
     FOdysseyTextureEditor(); //Non Initialized constructor
 
 public:
-    virtual void InitData(UObject* iEditedObject) override;
-    virtual void InitTools() override;
-    virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
-    virtual void ExtendMenu(FToolMenuOwner iOwner, FName iMenuName) override;
-
     UOdysseyPainterEditorTool* FindDefaultToolForCurrentLayer();
-    void SelectDefaultTool();
+    virtual void SelectDefaultTool() override;
     virtual void OnSelectedToolChanged() override;
     UTexture2D* Texture() const;
 
@@ -45,13 +40,6 @@ public:
 public:
     // Events
     void OnCurrentLayerChanged(class UOdysseyLayerStack* iLayerStack);
-
-protected:
-    // FGCObject implementation
-    virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
-
-private:
-    //void UpdateToolContext();
 
 private:
 	TSharedPtr<FOdysseyTextureEditorGUI> mGUI;

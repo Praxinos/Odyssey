@@ -115,6 +115,7 @@ public:
     void  SetSource(TSharedPtr<FOdysseyPainterEditorSource> iSource);
     void  PaintColor(const FOdysseyBrushColor& iColor, bool iIsCommit);
     void  SetSelectedTool( UOdysseyPainterEditorTool* iSelectedTool );
+    virtual void SelectDefaultTool() = 0;
 
 public:
     // Interface
