@@ -5,19 +5,23 @@
 
 #include "OdysseyEditorTab.h"
 
-class FOdysseyTextureEditor;
+class FOdysseyTextureEditorExtension;
 class UOdysseyLayerStack;
 
 class ODYSSEYTEXTUREEDITOR_API FOdysseyTextureEditorLayerStackTab :
 	public FOdysseyEditorTab
 {
 public:
+    static const FName& StaticId();
+
+public:
     // Construction / Destruction
     virtual ~FOdysseyTextureEditorLayerStackTab();
-    FOdysseyTextureEditorLayerStackTab(FOdysseyTextureEditor* iEditor);
+    FOdysseyTextureEditorLayerStackTab(FOdysseyTextureEditorExtension* iExtension);
 
 protected:
     // FOdysseyTextureEditorTab interface
+    virtual const FName& GetId() const override;
     virtual TSharedPtr<SWidget> CreateWidget() override;
     virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
     virtual void ExtendMenu( FToolMenuOwner iOwner, FName iMenuName ) override;
@@ -42,6 +46,6 @@ private:
     virtual void ChangeLayerOpacity(float iOpacity);
 
 private:
-    FOdysseyTextureEditor* mEditor;
+    FOdysseyTextureEditorExtension* mExtension;
 };
 

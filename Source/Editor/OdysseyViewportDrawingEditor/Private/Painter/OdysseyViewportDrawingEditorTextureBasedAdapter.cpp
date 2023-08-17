@@ -5,120 +5,30 @@
 
 #include "OdysseyViewportDrawingEditorTextureBasedAdapter.h"
 #include "MeshPaintHelpers.h"
+#include "Kismet/GameplayStatics.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyViewportDrawingEditorTextureBasedAdapter"
 
 FOdysseyViewportDrawingEditorTextureBasedAdapter::~FOdysseyViewportDrawingEditorTextureBasedAdapter()
 {
-    RemoveTextureOverride();
 }
 
-FOdysseyViewportDrawingEditorTextureBasedAdapter::FOdysseyViewportDrawingEditorTextureBasedAdapter(TSharedPtr<FOdysseyViewportDrawingEditor> iEditor) :
-    IOdysseyViewportDrawingEditorAdapter::IOdysseyViewportDrawingEditorAdapter(iEditor)
+FOdysseyViewportDrawingEditorTextureBasedAdapter::FOdysseyViewportDrawingEditorTextureBasedAdapter(FOdysseyViewportDrawingEditorExtension* iExtension) :
+    IOdysseyViewportDrawingEditorAdapter(iExtension)
 {
-    PrepareAdapterForPainting();
 }
 
-
-void FOdysseyViewportDrawingEditorTextureBasedAdapter::PrepareAdapterForPainting()
+void
+FOdysseyViewportDrawingEditorTextureBasedAdapter::Initialize()
 {
-    if( mEditor->Component() == nullptr || mEditor->Texture() == nullptr )
-        return;
-
-    if (mEditor->Texture()->MipGenSettings == TextureMipGenSettings::TMGS_NoMipmaps)
-    {
-        mState = eState::kIdleReady;
-        return;
-    }
-
-    IOdysseyViewportDrawingEditorAdapter::PrepareAdapterForPainting();
-
-    /*
-    if (mEditor->Material())
-    {
-        UE_LOG(LogTemp, Warning, TEXT("BeforeOverride: GetUsedTextures:"));
-        TArray<UTexture*> Textures;
-        mEditor->Material()->GetUsedTextures(Textures, EMaterialQualityLevel::Num, true, GMaxRHIFeatureLevel, true);
-        UE_LOG(LogTemp, Warning, TEXT("Does material Use Texture %d"), DoesMaterialUseTexture(mEditor->Material(), mEditor->Texture()));
-        for (int i = 0; i < Textures.Num(); i++)
-        {
-            UE_LOG(LogTemp, Warning, TEXT("%s"), *(Textures[i]->GetFName()).ToString())
-        }
-        UE_LOG(LogTemp, Warning, TEXT("----------------------------------"))
-    }*/
-
-    if( mState == eState::kIdle )
-    {
-        const int32 textureWidth = mEditor->Texture()->Source.GetSizeX();
-        const int32 textureHeight = mEditor->Texture()->Source.GetSizeY();
-        
-        mPaintingTexture2DRenderTarget = NewObject<UTextureRenderTarget2D>(GetTransientPackage(), NAME_None, RF_Transient);
-        mPaintingTexture2DRenderTarget->ClearColor = FLinearColor(0, 0, 0, 0);
-        mPaintingTexture2DRenderTarget->bNeedsTwoCopies = false;
-        mPaintingTexture2DRenderTarget->InitAutoFormat(textureWidth, textureHeight);
-        mPaintingTexture2DRenderTarget->UpdateResourceImmediate();
-        mPaintingTexture2DRenderTarget->AddToRoot();
-        
-        mPreviousMipSettings = mEditor->Texture()->MipGenSettings;
-        mEditor->Texture()->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
-        mEditor->Texture()->UpdateResource();
-        FTextureCompilingManager::Get().FinishCompilation({ mEditor->Texture() });
-        TexturePaintHelpers::CopyTextureToRenderTargetTexture(mEditor->Texture(), mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
-
-        mState = eState::kIdleReady;
-    }    
-    
-    //We're using true pixel value for this adapter, so we put 0 in meshMaxSize
-    //mEditor->GetGUI()->GetTopTab()->SetMeshMaxSize(0);
-    mEditor->GetRasterDrawingTool()->SetBaseSize(0);
-
-    /*
-    if (mEditor->Material())
-    {
-        UE_LOG(LogTemp, Warning, TEXT("AfterOverride: GetUsedTextures:"));
-        TArray<UTexture*> Textures;
-        mEditor->Material()->GetUsedTextures(Textures, EMaterialQualityLevel::Num, true, GMaxRHIFeatureLevel, true);
-        UE_LOG(LogTemp, Warning, TEXT("Does material Use Texture %d"), DoesMaterialUseTexture(mEditor->Material(), mEditor->Texture()));
-        for (int i = 0; i < Textures.Num(); i++)
-        {
-            UE_LOG(LogTemp, Warning, TEXT("%s"), *(Textures[i]->GetFName()).ToString())
-        }
-        UE_LOG(LogTemp, Warning, TEXT("----------------------------------"))
-    }*/
-}
-
-void FOdysseyViewportDrawingEditorTextureBasedAdapter::StartPainting()
-{
-    mEditor->GetSelectedTool()->OnMouseDown(mCurrentStrokeRay.mPoint, EKeys::LeftMouseButton);
-
-    //A simple copy is all we need for the texture based algorithm
-    if( mPaintingTexture2DRenderTarget)
-        TexturePaintHelpers::CopyTextureToRenderTargetTexture(mEditor->Texture(), mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
-}
-
-void FOdysseyViewportDrawingEditorTextureBasedAdapter::Paint()
-{
-    mEditor->GetSelectedTool()->OnMouseDrag(mCurrentStrokeRay.mPoint);
-
-    //A simple copy is all we need for the texture based algorithm
-    if (mPaintingTexture2DRenderTarget)
-        TexturePaintHelpers::CopyTextureToRenderTargetTexture(mEditor->Texture(), mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
+    IOdysseyViewportDrawingEditorAdapter::Initialize();
+    mExtension->GetEditor()->GetRasterDrawingTool()->SetBaseSize(0);
 }
 
 void FOdysseyViewportDrawingEditorTextureBasedAdapter::FinishPainting()
 {
     mStopDrawing = false;
-    mEditor->GetSelectedTool()->OnMouseUp(mCurrentStrokeRay.mPoint, EKeys::LeftMouseButton);
-
-    //A simple copy is all we need for the texture based algorithm
-    if ( mPaintingTexture2DRenderTarget )
-        TexturePaintHelpers::CopyTextureToRenderTargetTexture(mEditor->Texture(), mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
-}
-
-void FOdysseyViewportDrawingEditorTextureBasedAdapter::Tick(float iDelta)
-{
-    if( mEditor->Texture() && mPaintingTexture2DRenderTarget )
-        TexturePaintHelpers::CopyTextureToRenderTargetTexture(mEditor->Texture(), mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
+    IOdysseyViewportDrawingEditorAdapter::FinishPainting();
 }
 
 void FOdysseyViewportDrawingEditorTextureBasedAdapter::RenderInteractorWidget(const FSceneView* iView, FViewport* iViewport, FPrimitiveDrawInterface* iPDI)
@@ -128,10 +38,10 @@ void FOdysseyViewportDrawingEditorTextureBasedAdapter::RenderInteractorWidget(co
 ::ULIS::FEvent FOdysseyViewportDrawingEditorTextureBasedAdapter::StampOverride(UOdysseyBrushAssetBase::FStampParams iStampParams)
 {
     UOdysseyPainterEditorRasterDrawingTool* drawingTool = nullptr;
-    if (mEditor->GetSelectedTool()->IsA(UOdysseyPainterEditorRasterDrawingTool::StaticClass()))
-        drawingTool = Cast<UOdysseyPainterEditorRasterDrawingTool>(mEditor->GetSelectedTool());
+    if (mExtension->GetEditor()->GetSelectedTool()->IsA(UOdysseyPainterEditorRasterDrawingTool::StaticClass()))
+        drawingTool = Cast<UOdysseyPainterEditorRasterDrawingTool>(mExtension->GetEditor()->GetSelectedTool());
 
-    const TSharedPtr<IMeshPaintGeometryAdapter>* meshAdapterPtr = mEditor->ComponentToAdapterMap().Find(mEditor->Component());
+    const TSharedPtr<IMeshPaintGeometryAdapter>* meshAdapterPtr = mExtension->ComponentToAdapterMap().Find(mExtension->Component());
 
     TSharedPtr<IMeshPaintGeometryAdapter> meshAdapter = *meshAdapterPtr;
 
@@ -147,8 +57,8 @@ void FOdysseyViewportDrawingEditorTextureBasedAdapter::RenderInteractorWidget(co
     // Convert trace to UV position
     FVector2D lastCoord;
     FVector2D currentCoord;
-    UGameplayStatics::FindCollisionUV(lastTraceHitResult, mEditor->GetUVIndexUsedByCurrentTexture(), lastCoord);
-    UGameplayStatics::FindCollisionUV(currentTraceHitResult, mEditor->GetUVIndexUsedByCurrentTexture(), currentCoord);
+    UGameplayStatics::FindCollisionUV(lastTraceHitResult, mExtension->GetUVIndexUsedByCurrentTexture(), lastCoord);
+    UGameplayStatics::FindCollisionUV(currentTraceHitResult, mExtension->GetUVIndexUsedByCurrentTexture(), currentCoord);
 
     if (::ULIS::FMath::Dist(lastCoord.X, lastCoord.Y, currentCoord.X, currentCoord.Y) > 0.1f)
     {

@@ -243,7 +243,7 @@ FOdysseyVectorSegmentCubic::Pick( double iLocalX
 {
     for ( int i = 0; i < mPolygonCache.size(); i++ )
     {
-        double refQuantity;
+        double refQuantity = 0;
         bool collide = true;
 
         for ( int j = 0; j < 4; j++ )

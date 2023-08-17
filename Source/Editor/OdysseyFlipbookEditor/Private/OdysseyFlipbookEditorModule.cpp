@@ -3,20 +3,12 @@
 
 #include "OdysseyFlipbookEditorModule.h"
 
-#include "AssetToolsModule.h"
-#include "CoreMinimal.h"
-#include "ISettingsModule.h"
-#include "LevelEditor.h"
-#include "Modules/ModuleManager.h"
-#include "PropertyEditorModule.h"
-#include "Settings/ContentBrowserSettings.h"
-#include "Toolkits/AssetEditorToolkit.h"
-#include "PaperFlipbook.h"
-
-#include "OdysseyFlipbookEditor.h"
-#include "OdysseyFlipbookEditorSettings.h"
+#include "TextureEditor/OdysseyTextureEditorExtension.h"
+#include "FlipbookEditor/OdysseyFlipbookEditorExtension.h"
 #include "OdysseyFlipbookEditorToolkit.h"
-#include "OdysseyFlipbookAssetTypeActions.h"
+#include "ISettingsModule.h"
+#include "FlipbookEditor/OdysseyFlipbookEditorGUI.h"
+#include "LevelEditor.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyFlipbookEditorModule"
 
@@ -45,6 +37,8 @@ FOdysseyFlipbookEditorModule::StartupModule()
 	{
 		FOdysseyFlipbookContentBrowserExtensions::InstallHooks();
 	}
+
+	RegisterLevelEditorLayoutExtensions();
 }
 
 void
@@ -64,6 +58,8 @@ FOdysseyFlipbookEditorModule::ShutdownModule()
 
 	// Unregister Assets Type Actions
 	UnregisterAssetTypeActions();
+
+	UnregisterLevelEditorLayoutExtensions();
 }
 
 void
@@ -135,11 +131,30 @@ FOdysseyFlipbookEditorModule::UnregisterSettings()
 TSharedRef<FOdysseyFlipbookEditorToolkit>
 FOdysseyFlipbookEditorModule::CreateOdysseyFlipbookEditor( UPaperFlipbook* iFlipbook )
 {
-	TSharedPtr<FOdysseyFlipbookEditor> editor = MakeShareable(new FOdysseyFlipbookEditor(iFlipbook));
+	TSharedPtr<FOdysseyPainterEditor> editor = MakeShared<FOdysseyPainterEditor>(
+		LOCTEXT("WorkspaceMenu_OdysseyFlipbookEditor", "Odyssey Flipbook Editor"),
+		iFlipbook,
+		"OdysseyFlipbookEditor_Layout"
+	);
+
+	TSharedRef<FOdysseyTextureEditorExtension> textureExtension = MakeShared<FOdysseyTextureEditorExtension>(editor.Get());
+	TSharedRef<FOdysseyFlipbookEditorExtension> flipbookExtension = MakeShared<FOdysseyFlipbookEditorExtension>(editor.Get());
+
+	editor->AddExtension(textureExtension);
+	editor->AddExtension(flipbookExtension);
+
+    TSharedPtr<FOdysseyFlipbookEditorToolkit> toolkit = MakeShared<FOdysseyFlipbookEditorToolkit>();
+    toolkit->Initialize(iFlipbook, editor);
+
+	flipbookExtension->SetFlipbook(iFlipbook);
+
+    return toolkit.ToSharedRef();
+
+	/* TSharedPtr<FOdysseyFlipbookEditor> editor = MakeShareable(new FOdysseyFlipbookEditor(iFlipbook));
 	TSharedRef<FOdysseyFlipbookEditorToolkit> toolkit = MakeShareable(new FOdysseyFlipbookEditorToolkit(editor));
 	editor->Initialize(iFlipbook);
 	toolkit->Initialize();
-    return toolkit;
+    return toolkit; */
 }
 
 void
@@ -152,6 +167,20 @@ void
 FOdysseyFlipbookEditorModule::UnregisterCommands()
 {
 	FOdysseyFlipbookEditorCommands::Unregister();
+}
+
+void
+FOdysseyFlipbookEditorModule::RegisterLevelEditorLayoutExtensions()
+{
+    FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor");
+	mExtendLevelEditorLayout = LevelEditorModule.OnRegisterLayoutExtensions().AddStatic(&FOdysseyFlipbookEditorGUI::ExtendLevelEditorLayout);
+}
+
+void
+FOdysseyFlipbookEditorModule::UnregisterLevelEditorLayoutExtensions()
+{
+    FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor");
+	LevelEditorModule.OnRegisterLayoutExtensions().Remove(mExtendLevelEditorLayout);
 }
 
 IMPLEMENT_MODULE( FOdysseyFlipbookEditorModule, OdysseyFlipbookEditor );

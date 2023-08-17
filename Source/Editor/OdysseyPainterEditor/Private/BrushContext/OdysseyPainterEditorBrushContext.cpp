@@ -32,25 +32,29 @@ FOdysseyPainterEditorBrushContext::Editor()
 float
 FOdysseyPainterEditorBrushContext::Zoom()
 {
-    if (!mEditor->GetGUI()->GetViewportTab())
+    TSharedPtr<FOdysseyPainterEditorViewportTab> viewportTab = mEditor->FindTab<FOdysseyPainterEditorViewportTab>();
+    if (!viewportTab)
         return 1.0f;
-    return mEditor->GetGUI()->GetViewportTab()->GetViewport()->GetZoom();
+
+    return viewportTab->GetViewport()->GetZoom();
 }
 
 float
 FOdysseyPainterEditorBrushContext::Rotation()
 {
-    if (!mEditor->GetGUI()->GetViewportTab())
+    TSharedPtr<FOdysseyPainterEditorViewportTab> viewportTab = mEditor->FindTab<FOdysseyPainterEditorViewportTab>();
+    if (!viewportTab)
         return 0.0f;
-    return mEditor->GetGUI()->GetViewportTab()->GetViewport()->GetGuiRotationValue();
+    return viewportTab->GetViewport()->GetGuiRotationValue();
 }
 
 FVector2D
 FOdysseyPainterEditorBrushContext::Pan()
 {
-    if (!mEditor->GetGUI()->GetViewportTab())
+    TSharedPtr<FOdysseyPainterEditorViewportTab> viewportTab = mEditor->FindTab<FOdysseyPainterEditorViewportTab>();
+    if (!viewportTab)
         return FVector2D(0.0f, 0.0f);
-    return mEditor->GetGUI()->GetViewportTab()->GetViewport()->GetPan();
+    return viewportTab->GetViewport()->GetPan();
 }
 
 float

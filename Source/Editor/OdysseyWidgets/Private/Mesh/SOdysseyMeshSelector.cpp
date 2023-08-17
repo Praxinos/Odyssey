@@ -15,14 +15,13 @@
 //----------------------------------------------------------- Construction / Destruction
 SOdysseyMeshSelector::~SOdysseyMeshSelector()
 {
-    MeshSelector.Reset();
     AssetThumbnailPool.Reset();
 }
 
 
 void SOdysseyMeshSelector::Construct(const FArguments& InArgs)
 {
-    MeshSelector = MakeShareable(new FOdysseyMeshSelector());
+    MeshSelector = InArgs._MeshSelector;
     OnMeshChanged = InArgs._OnMeshChanged;
 
     AssetThumbnailPool = MakeShareable( new FAssetThumbnailPool( 1024 ) );
@@ -311,7 +310,5 @@ FLinearColor SOdysseyMeshSelector::GetMeshColor() const
 {
     return MeshSelector->GetMeshColor();
 }
-
-
 
 #undef LOCTEXT_NAMESPACE

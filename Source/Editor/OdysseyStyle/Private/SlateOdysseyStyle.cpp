@@ -573,6 +573,8 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
 	Set("FlipbookTimeline.TimelineFrameTimingHandle", new IMAGE_BRUSH("OdysseyFlipbook/TimelineFrameTimingHandle", FVector2D(16.f, 16.f)));
 	Set("FlipbookTimeline.TimelineFrameLengthHandle", new IMAGE_BRUSH("OdysseyFlipbook/TimelineFrameLengthHandle", FVector2D(16.f, 16.f)));
     Set("FlipbookTimeline.TimelineFrameWarning", new IMAGE_BRUSH("OdysseyFlipbook/icon_warning_16x", FVector2D(16.f, 16.f)));
+    Set("FlipbookTimeline.BackgroundColorEven", FLinearColor(1.0f, 1.0f, 1.0f, 0.05f));
+    Set("FlipbookTimeline.BackgroundColorOdd", FLinearColor(0.0f, 0.0f, 0.0f, 0.05f));
 	
 
 	//PlaybackControls

@@ -128,7 +128,7 @@ namespace OdysseyMeshPaintRendering
         iGraphicsPSOInit.BoundShaderState.PixelShaderRHI = PixelShader.GetPixelShader();
         iGraphicsPSOInit.PrimitiveType = PT_TriangleList;
 
-        SetGraphicsPipelineState(iRHICmdList, iGraphicsPSOInit, EApplyRendertargetOption::ForceApply);
+        SetGraphicsPipelineState(iRHICmdList, iGraphicsPSOInit, 0, EApplyRendertargetOption::ForceApply);
 
         // Set vertex shader parameters
         VertexShader->SetParameters(iRHICmdList, iTransform);

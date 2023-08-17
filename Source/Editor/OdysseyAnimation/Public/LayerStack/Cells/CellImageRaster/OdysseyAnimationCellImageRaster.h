@@ -3,11 +3,14 @@
 
 #pragma once
 
+#include "LayerStack/Cells/OdysseyAnimationCell.h"
+
+class UOdysseyAnimationLayerImageRaster;
+class FOdysseyRasterBlock;
+
 class ODYSSEYANIMATION_API FOdysseyAnimationCellImageRaster
     : public FOdysseyAnimationCell
-{
-
-    
+{    
 public:
     static TSharedPtr<FOdysseyAnimationCellImageRaster> Create(UOdysseyAnimationLayerImageRaster* iLayer, int iWidth, int iHeight, ::ULIS::eFormat iFormat);
     static TSharedPtr<FOdysseyAnimationCellImageRaster> Create(UOdysseyAnimationLayerImageRaster* iLayer, TSharedPtr<::ULIS::FBlock> iBlock);

@@ -3,6 +3,7 @@
 
 #include "OdysseyModeToolkit.h"
 #include "LevelEditor.h"
+#include "Interfaces/IMainFrameModule.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyModeToolkit"
 
@@ -12,7 +13,7 @@
 //----------------------------------------------------------- Construction / Destruction
 FOdysseyModeToolkit::~FOdysseyModeToolkit()
 {
-    TArray<UObject*> objects = mEditor->GetEditedObjects();
+    TArray<UObject*> objects = mEditor->GetAdditionalEditedObjects();
     for (int i = 0; i < objects.Num(); i++)
     {
         if (objects[i])
@@ -22,45 +23,75 @@ FOdysseyModeToolkit::~FOdysseyModeToolkit()
     mEditor->OnRemoveEditedObjectDelegate().RemoveAll(this);
 
     FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>(TEXT("LevelEditor"));
+
+    if (!mTabSaved)
+    {
+        mEditor->SaveOpenedTabs();
+        mTabSaved = true;
+    }
+    mEditor->CloseAllTabs();
     mEditor->UnregisterTabSpawners(LevelEditorModule.GetLevelEditorTabManager()->AsShared());
 }
 
-FOdysseyModeToolkit::FOdysseyModeToolkit(const FName& iAppIdentifier, TSharedPtr<FOdysseyEditor> iEditor, class FEdMode* iEditorMode)
-	: mEditor( iEditor )
-	, mEditorMode(iEditorMode)
+FOdysseyModeToolkit::FOdysseyModeToolkit(TSharedRef<FOdysseyEditor> iEditor)
+    : mEditor(iEditor)
+    , mTabSaved(false)
 {
 }
 
-void FOdysseyModeToolkit::Init(const TSharedPtr<IToolkitHost>& iInitToolkitHost, TWeakObjectPtr<UEdMode> iOwningMode)
+
+void
+FOdysseyModeToolkit::Initialize(
+    FEdMode* iEditorMode,
+    const TSharedPtr<IToolkitHost>& iInitToolkitHost
+)
 {
-    TArray<UObject*> objects = mEditor->GetEditedObjects();
+    mEditor->Initialize();
+
+    TArray<UObject*> objects = mEditor->GetAdditionalEditedObjects();
     for (int i = 0; i < objects.Num(); i++)
     {
         if (objects[i])
             OnAddEditedObject(objects[i]);
     }
 
-    mEditor->OnAddEditedObjectDelegate().AddRaw(this, &FOdysseyModeToolkit::OnAddEditedObject);
-    mEditor->OnRemoveEditedObjectDelegate().AddRaw(this, &FOdysseyModeToolkit::OnRemoveEditedObject);
-
     //Finish Initialization
-    FModeToolkit::Init(iInitToolkitHost, iOwningMode);
-    ExtendMenu();
+    Init(iInitToolkitHost);
 
     FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>(TEXT("LevelEditor"));
     mEditor->RegisterTabSpawners(LevelEditorModule.GetLevelEditorTabManager()->AsShared());
+    //mEditor->LoadOpenedTabs();
 
+    mEditor->ExtendMenu( this, FName("LevelEditor.MainMenu") );
     mEditor->BindShortcuts(this);
+
+    mEditor->OnAddEditedObjectDelegate().AddRaw(this, &FOdysseyModeToolkit::OnAddEditedObject);
+    mEditor->OnRemoveEditedObjectDelegate().AddRaw(this, &FOdysseyModeToolkit::OnRemoveEditedObject);
+
+    UToolMenus::Get()->RefreshAllWidgets(); //Requested after ExtendMenu
+
+    IMainFrameModule& mainFrameModule = FModuleManager::LoadModuleChecked<IMainFrameModule>(TEXT("MainFrame"));
+    const TSharedPtr<SWindow>& mainFrameParentWindow = mainFrameModule.GetParentWindow();
+    mainFrameParentWindow->SetOnWindowClosed(FOnWindowClosed::CreateSP(this, &FOdysseyModeToolkit::OnWindowClosed));
 }
 
-class FEdMode* FOdysseyModeToolkit::GetEditorMode() const
+void
+FOdysseyModeToolkit::OnWindowClosed(const TSharedRef<SWindow>& Window)
 {
-	return mEditorMode;
+    //PATCH: Needed to save layout when closing Unreal Engine directly while being in ILIAD Mode
+    if (!mTabSaved)
+    {
+        mEditor->SaveOpenedTabs();
+        mTabSaved = true;
+    }
 }
 
-TSharedPtr<SWidget> FOdysseyModeToolkit::GetInlineContent() const
+TSharedPtr<SWidget>
+FOdysseyModeToolkit::GetInlineContent() const
 {
-	return mEditor->GetGUI()->GetWidget();
+    //TODO: Create the widget in ViewportDrawingEditorToolkit
+	//return mEditor->GetGUI()->GetWidget();
+    return SNullWidget::NullWidget;
 }
 
 void
@@ -132,7 +163,24 @@ FOdysseyModeToolkit::RemoveEditingAsset(UObject* Asset)
 
 void FOdysseyModeToolkit::ExtendMenu()
 {
-    mEditor->ExtendMenu( this, FName("LevelEditor.MainMenu") );
+    
+}
+
+void
+FOdysseyModeToolkit::RequestModeUITabs()
+{
+	FModeToolkit::RequestModeUITabs();
+	if (TSharedPtr<FAssetEditorModeUILayer> modeUILayerPtr = ModeUILayer.Pin())
+	{
+        mEditor->BuildModeLayout(modeUILayerPtr);
+    }
+}
+
+void
+FOdysseyModeToolkit::InvokeUI()
+{
+	FModeToolkit::InvokeUI();
+    mEditor->InvokeModeLayout();
 }
 
 #undef LOCTEXT_NAMESPACE // "OdysseyModeToolkit"

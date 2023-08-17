@@ -12,12 +12,16 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorPaletteTab :
 	public FOdysseyEditorTab
 {
 public:
+    static const FName& StaticId();
+
+public:
     // Construction / Destruction
     virtual ~FOdysseyPainterEditorPaletteTab();
     FOdysseyPainterEditorPaletteTab(FOdysseyPainterEditor* iEditor);
 
 protected:
     // FOdysseyEditorTab interface
+    virtual const FName& GetId() const override;
     virtual TSharedPtr<SWidget> CreateWidget() override;
 
 public:

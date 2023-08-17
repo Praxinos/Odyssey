@@ -71,10 +71,8 @@ public class OdysseyViewportDrawingEditor : ModuleRules
                 Path.Combine(ModuleDirectory, "Private", "Models"),
                 Path.Combine(ModuleDirectory, "Private", "ViewportDrawingEditor"),
                 Path.Combine(ModuleDirectory, "Private", "Settings"),
-                Path.Combine(ModuleDirectory, "Private", "ModeToolbar"),
                 Path.Combine(ModuleDirectory, "Private", "Painter"),
                 Path.Combine(ModuleDirectory, "Private", "Utils"),
-
             }
         );
 

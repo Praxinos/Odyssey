@@ -22,7 +22,7 @@ public:
 public:
     void Construct(
         const FArguments& iArgs,
-        FOdysseyAnimationEditor* iEditor,
+        FOdysseyAnimationEditorExtension* iExtension,
         UOdysseyAnimationLayerImageRaster* iLayer
     );
 
@@ -32,7 +32,7 @@ public:
     virtual FReply OnKeyDown( const FGeometry& iGeometry, const FKeyEvent& iKeyEvent ) override;
 
 private:
-    FOdysseyAnimationEditor* mEditor;
+    FOdysseyAnimationEditorExtension* mExtension;
     UOdysseyAnimationLayerImageRaster* mLayer;
 
     FOnBuildContextMenu mOnBuildContextMenu;

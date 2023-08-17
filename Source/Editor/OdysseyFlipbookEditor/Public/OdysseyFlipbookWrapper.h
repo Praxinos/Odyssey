@@ -4,7 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "SOdysseyTextureConfigureWindow.h"
+#include "Widgets/SOdysseyTextureConfigureWindow.h"
 
 #include <ULIS>
 
@@ -25,14 +25,14 @@ DECLARE_MULTICAST_DELEGATE_TwoParams(FOnSpriteTextureChanged, UPaperSprite*, UTe
  * Each Keyframe can have a Sprite (or null)
  * Each Sprite can have a Texture (or null)
 */
-class ODYSSEYFLIPBOOK_API FOdysseyFlipbookWrapper : public TSharedFromThis<FOdysseyFlipbookWrapper>
+class ODYSSEYFLIPBOOKEDITOR_API FOdysseyFlipbookWrapper : public TSharedFromThis<FOdysseyFlipbookWrapper>
 {
 public:
     /** The destructor */
 	~FOdysseyFlipbookWrapper();
 
     /** The constructor */
-	FOdysseyFlipbookWrapper(UPaperFlipbook* iFlipbook);
+	FOdysseyFlipbookWrapper();
 
 public:
     // 
@@ -73,11 +73,8 @@ public:
     FOnSpriteTextureChanged& OnSpriteTextureChanged();
 
 public:
-    //tmp
-    UPaperFlipbook* Flipbook()
-    {
-        return mFlipbook;
-    }
+    UPaperFlipbook* GetFlipbook() const;
+    void SetFlipbook(UPaperFlipbook* iFlipbook);
 
 private:
     void CreateEmptyKeyFrame(int32 iIndex);

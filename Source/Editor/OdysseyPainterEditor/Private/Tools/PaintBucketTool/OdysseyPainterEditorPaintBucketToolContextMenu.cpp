@@ -77,10 +77,12 @@ FOdysseyPainterEditorPaintBucketToolContextMenu::BucketProperties( FOdysseyPaint
       ]*/
     ];
 
+    TSharedPtr<FOdysseyPainterEditorViewportTab> viewportTab = iEditor->FindTab<FOdysseyPainterEditorViewportTab>();
+
     FSlateApplication::Get().AddModalWindow
     (
         CookbookWindow,
-        iEditor->GetGUI()->GetViewportTab().Get()->Widget(),
+        viewportTab->Widget(),
         false
     );
 

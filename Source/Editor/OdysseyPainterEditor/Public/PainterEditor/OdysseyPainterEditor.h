@@ -29,6 +29,10 @@ class FOdysseyHUDSystem;
 class IOdysseySurfaceEditable;
 class UOdysseyPainterEditorTool;
 class FOdysseyBrushContext;
+class FOdysseyPainterEditorSource;
+class FOdysseyPainterEditorExtension;
+class UOdysseyLayerStack;
+class FOdysseyMeshSelector;
 
 enum class eVectorEditionMode : uint8
 {
@@ -43,34 +47,33 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditor
     : public FOdysseyEditor
 {
 public:
-    DECLARE_MULTICAST_DELEGATE(FOnSelectedToolChanged);
-
-public:
     // Construction / Destruction
     virtual ~FOdysseyPainterEditor();
-    FOdysseyPainterEditor();
+    FOdysseyPainterEditor(const FText& iName, UObject* iEditedObject, const FName& iLayoutName);
 
-protected:
-    // Protected Initialization
-    virtual void InitData(UObject* iEditedObject);
-    virtual void InitTools();
+public:
+    virtual void Initialize() override;
+    virtual TSharedRef<FTabManager::FLayout> CreateLayout() override;
+    virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
+    virtual void ExtendMenu( FToolMenuOwner iOwner, FName iMenuName ) override;
+    virtual void OnClose() override;
 
 public:
     // Getters
+    FSimpleMulticastDelegate& OnSourceChanged();
+    FSimpleMulticastDelegate& OnSelectedToolChanged();
     
-    FOnSelectedToolChanged&                              OnSelectedToolChangedDelegate();
-    
-    virtual void OnSelectedToolChanged();
-
-    virtual FOdysseyPainterEditorGUI*                   GetGUI() = 0;
+    TSharedPtr<FOdysseyPainterEditorSource>              GetSource() const;
+    virtual FOdysseyPainterEditorGUI*                    GetGUI();
 
     virtual FOdysseyHUDSystem*                              HUDSystem() const;
-	virtual UTexture*                                       DisplayTexture() const = 0;
-    virtual const FOdysseyBrushColor&                       PaintColor() const;
+	virtual const FOdysseyBrushColor&                       PaintColor() const;
     virtual UOdysseyPainterEditorTool*                      GetSelectedTool() const;
-    virtual TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> GetDisplayBlock() = 0;
-    virtual FOdysseyMediaProvider                           GetCurrentMediaProvider() = 0;
-
+    virtual FOdysseyMediaProvider                           GetCurrentMediaProvider();
+    virtual UOdysseyLayerStack*                             LayerStack() const;
+    
+    TSharedPtr<FOdysseyMeshSelector>                        GetMeshSelector() const;
+    
     virtual UOdysseyPainterEditorRasterDrawingTool*                  GetRasterDrawingTool() const;
     virtual UOdysseyPainterEditorVectorPrimitiveDrawingTool*         GetVectorPrimitiveDrawingTool() const;
     virtual UOdysseyPainterEditorVectorPathDrawingTool*              GetVectorPathDrawingTool() const;
@@ -110,22 +113,18 @@ public:
 
 public:
     // Setters
+    void  AddExtension(TSharedPtr<FOdysseyPainterEditorExtension> iExtension);
+    void  SetSource(TSharedPtr<FOdysseyPainterEditorSource> iSource);
     void  PaintColor(const FOdysseyBrushColor& iColor, bool iIsCommit);
     void  SetSelectedTool( UOdysseyPainterEditorTool* iSelectedTool );
+    void  RefreshCurrentTool();
 
-public:
-    // Interface
-    virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
-    virtual void ExtendMenu( FToolMenuOwner iOwner, FName iMenuName ) override;
-    virtual bool OnCloseRequested() override;
 
-public:
-    //Common Actions
-    virtual void Clear() = 0;
 
 protected:
     //Callbacks
     virtual void OnApplyOverrides(const TMap<FName, UObject*>& iOverrides);
+    void OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStack);
     
     // FTickableEditorObject implementation
 	virtual void Tick(float DeltaTime) override;
@@ -134,18 +133,30 @@ protected:
     // FGCObject implementation
     virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
 
+private:
+    void InitTools();
+    UOdysseyPainterEditorTool* FindDefaultToolForCurrentLayer();
+
 protected:
+    FText                                    mName;
+    FName                                    mLayoutName;
+    TSharedPtr<FTabManager::FLayout>         mLayout;
+
     //Tools
+    TSharedPtr<FOdysseyPainterEditorSource>  mSource;
+    TSharedPtr<FOdysseyMeshSelector>         mMeshSelector;
+    TArray<TSharedPtr<FOdysseyPainterEditorExtension>> mExtensions;
     UOdysseyPainterEditorTool*               mSelectedTool;
     TArray<UOdysseyPainterEditorTool*>       mTools;
+    TSharedPtr<FOdysseyPainterEditorGUI>     mGUI;
 
     eVectorEditionMode                       mVectorEditionMode;
 
     FOdysseyHUDSystem*              mHUDSystem;
     TArray<FOdysseyBrushContext*>   mBrushContexts;
     FOdysseyBrushColor              mPaintColor;
-    FOnSelectedToolChanged          mOnSelectedToolChanged;
-    //TSharedPtr<FOdysseyPainterEditorToolContext> mToolContext;
+    FSimpleMulticastDelegate        mOnSelectedToolChanged;
+    FSimpleMulticastDelegate        mOnSourceChanged;
     
     UOdysseyPainterEditorRasterDrawingTool* mRasterDrawingTool;
     UOdysseyPainterEditorVectorPrimitiveDrawingTool* mVectorPrimitiveDrawingTool;
@@ -164,4 +175,6 @@ protected:
     UOdysseyPainterEditorColorPickerTool* mColorPickerTool;
     UOdysseyPainterEditorVectorGridTool* mVectorGridTool;
     UOdysseyPainterEditorVectorTransformTool* mVectorTransformTool;
+
+    TMap<UClass*, UOdysseyPainterEditorTool*> mCurrentToolPerLayerClass;
 };

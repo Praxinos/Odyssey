@@ -50,28 +50,38 @@ public:
 };
 
 /** Painting adapter for the painter. Describes the method of mesh based painting in the viewport*/
-class FOdysseyViewportDrawingEditorScreenBasedAdapter : public IOdysseyViewportDrawingEditorAdapter
+class FOdysseyViewportDrawingEditorScreenBasedAdapter
+    : public IOdysseyViewportDrawingEditorAdapter
+    , public FTickableEditorObject //Allows us to react to Tick events
 {
 public:
 	/** destructor */
 	~FOdysseyViewportDrawingEditorScreenBasedAdapter();
 
 	/** constructor */
-	FOdysseyViewportDrawingEditorScreenBasedAdapter(TSharedPtr<FOdysseyViewportDrawingEditor> iEditor);
+	FOdysseyViewportDrawingEditorScreenBasedAdapter(FOdysseyViewportDrawingEditorExtension* iExtension);
 
-public:      
-    virtual void PrepareAdapterForPainting() override;
-    virtual void StartPainting() override;
-	virtual void Paint() override;
-    virtual void FinishPainting() override;
+public:
+    virtual void SetTexture(UTexture2D* iTexture) override;
 
-    virtual void Tick(float iDelta) override;
+    void InitializeRenderTarget();
+    void FinalizeRenderTarget(); 
 
     virtual void RenderInteractorWidget(const FSceneView* iView, FViewport* iViewport, FPrimitiveDrawInterface* iPDI) override;
 
-    void BuildPaintingTexture2DRenderTarget();
     void GatherTextureTriangles(IMeshPaintGeometryAdapter* iAdapter, int32 iTriangleIndex, const int32 iVertexIndices[3], TArray<FTexturePaintTriangleInfo>* iTriangleInfo, TArray<FTexturePaintMeshSectionInfo>* iSectionInfos, int32 iUVChannelIndex);
     TArray<::ULIS::FRectI> GetMinimalRectanglesForTriangleSet( TArray<FTexturePaintTriangleInfo>& iTriangles, int iMaxWidth, int iMaxHeight );
+
+public:
+    /** Painting Methods **/
+    virtual void StartPainting() override;
+    virtual void Paint() override;
+    virtual void FinishPainting() override;
+
+private:
+    // FTickableEditorObject implementation
+	virtual void Tick(float DeltaTime) override;
+	virtual TStatId GetStatId() const override { RETURN_QUICK_DECLARE_CYCLE_STAT( FOdysseyViewportDrawingEditorScreenBasedAdapter, STATGROUP_Tickables); }
 
 private:
     float GetStampQuality();
@@ -83,13 +93,11 @@ protected:
 private:
     UTexture2D* mStrokeBufferTexture2D;
 
-    /** A render target to store the stroke pixels we want to stamp */
-    UTextureRenderTarget2D* mStrokeBufferRenderTarget2D;
-
-    /** A render target to store the pixels of the seams */
-    UTextureRenderTarget2D* mSeamRenderTarget2D;
-
     TArray<TArray<FLinearColor>> mColorData;
     //TArray<FColor*> mColorDataPtr;
     FRenderCommandFence mPixelFence;
+
+    UTextureRenderTarget2D* mPaintingTexture2DRenderTarget;
+    UTextureRenderTarget2D* mStrokeBufferRenderTarget2D;
+    UTextureRenderTarget2D* mSeamRenderTarget2D;
 };

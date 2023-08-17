@@ -34,13 +34,13 @@ SOdysseyAnimationLayerImageRasterTimeline::SOdysseyAnimationLayerImageRasterTime
 void
 SOdysseyAnimationLayerImageRasterTimeline::Construct(
     const FArguments& InArgs,
-    FOdysseyAnimationEditor* iEditor,
+    FOdysseyAnimationEditorExtension* iExtension,
     UOdysseyAnimationLayerImageRaster* iAnimationLayerImageRaster
 )
 {
     ensure(iAnimationLayerImageRaster);
 
-    mEditor = iEditor;
+    mExtension = iExtension;
     mTimingHandleBrush = FOdysseyStyle::GetBrush("Animation.CellTimingHandle");
 	mLengthHandleBrush = FOdysseyStyle::GetBrush("Animation.CellLengthHandle");
     mAddCellsHandleLeftBrush = FOdysseyStyle::GetBrush("Animation.AddCellsHandleLeft");
@@ -52,14 +52,14 @@ SOdysseyAnimationLayerImageRasterTimeline::Construct(
         + SVerticalBox::Slot()
         .AutoHeight()
         [
-            SNew(SOdysseyAnimationTimelineScrollBox, iEditor)
+            SNew(SOdysseyAnimationTimelineScrollBox, mExtension)
             + SOdysseyAnimationTimelineScrollBox::Slot()
             [
                 SNew(SHorizontalBox)
                 + SHorizontalBox::Slot()
                 .AutoWidth()
                 [
-                    SNew(SOdysseyAnimationTimelineSection, mEditor)
+                    SNew(SOdysseyAnimationTimelineSection, mExtension)
                     .WidthInFrames(this, &SOdysseyAnimationLayerImageRasterTimeline::GetLayerOffset)
                     .HeightInScreenUnits(this, &SOdysseyAnimationLayerImageRasterTimeline::GetCellHeight)
                     [
@@ -112,7 +112,7 @@ SOdysseyAnimationLayerImageRasterTimeline::Construct(
         + SVerticalBox::Slot()
         .AutoHeight()
         [
-            SNew(SOdysseyAnimationTimelineFrameSelector, mEditor)
+            SNew(SOdysseyAnimationTimelineFrameSelector, mExtension)
             .Visibility(this, &SOdysseyAnimationLayerImageRasterTimeline::GetFrameSelectorVisibility)
             .OnMapActions(this, &SOdysseyAnimationLayerImageRasterTimeline::OnFrameSelectorMapActions)
             .OnBuildContextMenu(this, &SOdysseyAnimationLayerImageRasterTimeline::OnFrameSelectorBuildContextMenu)
@@ -162,7 +162,7 @@ SOdysseyAnimationLayerImageRasterTimeline::GetLayerOffset() const
 float
 SOdysseyAnimationLayerImageRasterTimeline::GetCellHeight() const
 {
-    return mEditor->Timeline()->GetBaseFrameSize();
+    return mExtension->Timeline()->GetBaseFrameSize();
 }
 
 float
@@ -215,14 +215,14 @@ SOdysseyAnimationLayerImageRasterTimeline::RemoveCellData(int iIndex)
 void
 SOdysseyAnimationLayerImageRasterTimeline::InsertCellSection(int iIndex, TSharedPtr<FCellData> iCellData)
 {
-    iCellData->mCellSectionWidget = SNew(SOdysseyAnimationTimelineSection, mEditor)
+    iCellData->mCellSectionWidget = SNew(SOdysseyAnimationTimelineSection, mExtension)
         .WidthInFrames(this, &SOdysseyAnimationLayerImageRasterTimeline::GetCellLength, iCellData)
         .HeightInScreenUnits(this, &SOdysseyAnimationLayerImageRasterTimeline::GetCellHeight)
         [
             CreateCellWidget(iCellData)
         ];
 
-    iCellData->mHandlesSectionWidget = SNew(SOdysseyAnimationTimelineSection, mEditor)
+    iCellData->mHandlesSectionWidget = SNew(SOdysseyAnimationTimelineSection, mExtension)
         .WidthInFrames(this, &SOdysseyAnimationLayerImageRasterTimeline::GetCellLength, iCellData)
         .HeightInScreenUnits(this, &SOdysseyAnimationLayerImageRasterTimeline::GetCellHeight)
         [
@@ -365,11 +365,11 @@ SOdysseyAnimationLayerImageRasterTimeline::CreateAddCellsHandleLeftWidget()
 TSharedRef<SWidget>
 SOdysseyAnimationLayerImageRasterTimeline::CreateCellWidget(TSharedPtr<FCellData> iCellData)
 {
-    return SNew(SOdysseyAnimationTimelineSection, mEditor)
+    return SNew(SOdysseyAnimationTimelineSection, mExtension)
     .WidthInFrames(this, &SOdysseyAnimationLayerImageRasterTimeline::GetCellLength, iCellData)
     .HeightInScreenUnits(this, &SOdysseyAnimationLayerImageRasterTimeline::GetCellHeight)
     [
-        SNew(SOdysseyAnimationLayerImageRasterCell, mEditor, mAnimationLayerImageRaster)
+        SNew(SOdysseyAnimationLayerImageRasterCell, mExtension, mAnimationLayerImageRaster)
         .Visibility(this, &SOdysseyAnimationLayerImageRasterTimeline::GetCellVisibility, iCellData)
         .OnMapActions(this, &SOdysseyAnimationLayerImageRasterTimeline::OnCellsMapActions)
         .OnBuildContextMenu(this, &SOdysseyAnimationLayerImageRasterTimeline::OnCellsBuildContextMenu)
@@ -456,7 +456,7 @@ SOdysseyAnimationLayerImageRasterTimeline::OnCellsMouseMove(const FGeometry& iGe
     {
         const int minOffset = 0;
         float mouseOffset = iEvent.GetScreenSpacePosition().X - mLayerOffsetData.mMousePosition;
-        int offset = (int)(mAnimationLayerImageRaster->GetOffset() + (mouseOffset / mEditor->Timeline()->GetFrameWidth()));
+        int offset = (int)(mAnimationLayerImageRaster->GetOffset() + (mouseOffset / mExtension->Timeline()->GetFrameWidth()));
         mOffset = FMath::Max(minOffset, offset);
 
         mEditingOffset = mOffset != mAnimationLayerImageRaster->GetOffset();
@@ -545,14 +545,14 @@ SOdysseyAnimationLayerImageRasterTimeline::GetFrameSelectorVisibility() const
 EVisibility
 SOdysseyAnimationLayerImageRasterTimeline::GetTimingHandleVisibility(TSharedPtr<FCellData> iCellData) const
 {
-    bool isZoomedEnough = mEditor->Timeline()->GetFrameWidth() > mTimingHandleBrush->ImageSize.X;
+    bool isZoomedEnough = mExtension->Timeline()->GetFrameWidth() > mTimingHandleBrush->ImageSize.X;
 	return (isZoomedEnough && iCellData->mIsTimingHandleVisible) ? EVisibility::Visible : EVisibility::Collapsed;
 }
 
 EVisibility
 SOdysseyAnimationLayerImageRasterTimeline::GetLengthHandleVisibility(TSharedPtr<FCellData> iCellData) const
 {
-    bool isZoomedEnough = mEditor->Timeline()->GetFrameWidth() > mLengthHandleBrush->ImageSize.X;
+    bool isZoomedEnough = mExtension->Timeline()->GetFrameWidth() > mLengthHandleBrush->ImageSize.X;
     return (isZoomedEnough && iCellData->mIsLengthHandleVisible) ? EVisibility::Visible : EVisibility::Collapsed;
 }
 
@@ -578,9 +578,9 @@ SOdysseyAnimationLayerImageRasterTimeline::OnLengthHandleDragged(const FGeometry
     float mouseOffset = iEvent.GetScreenSpacePosition().X - mLengthHandleDragData.mMousePosition;
     int mouseOffsetInt = 0;
     if ( mouseOffset > 0 )
-        mouseOffsetInt = (int)(mouseOffset / mEditor->Timeline()->GetFrameWidth() + 0.5f);
+        mouseOffsetInt = (int)(mouseOffset / mExtension->Timeline()->GetFrameWidth() + 0.5f);
     else
-        mouseOffsetInt = (int)(mouseOffset / mEditor->Timeline()->GetFrameWidth() - 0.5f);
+        mouseOffsetInt = (int)(mouseOffset / mExtension->Timeline()->GetFrameWidth() - 0.5f);
 
     int length = mLengthHandleDragData.mCellData->mCell->GetLength() + mouseOffsetInt;
     mLengthHandleDragData.mCellData->mLength = FMath::Max(minLength, length);
@@ -620,9 +620,9 @@ SOdysseyAnimationLayerImageRasterTimeline::OnTimingHandleDragged(const FGeometry
     float mouseOffset = iEvent.GetScreenSpacePosition().X - mTimingHandleDragData.mMousePosition;
     int mouseOffsetInt = 0;
     if ( mouseOffset > 0 )
-        mouseOffsetInt = (int)(mouseOffset / mEditor->Timeline()->GetFrameWidth() + 0.5f);
+        mouseOffsetInt = (int)(mouseOffset / mExtension->Timeline()->GetFrameWidth() + 0.5f);
     else
-        mouseOffsetInt = (int)(mouseOffset / mEditor->Timeline()->GetFrameWidth() - 0.5f);
+        mouseOffsetInt = (int)(mouseOffset / mExtension->Timeline()->GetFrameWidth() - 0.5f);
 
     mouseOffsetInt = FMath::Max(mouseOffsetInt, mTimingHandleDragData.mMinOffset);
 
@@ -784,14 +784,14 @@ SOdysseyAnimationLayerImageRasterTimeline::OnTimingHandleDragStopped(const FGeom
 EVisibility
 SOdysseyAnimationLayerImageRasterTimeline::GetAddCellsHandleRightVisibility() const
 {
-    bool isZoomedEnough = mEditor->Timeline()->GetFrameWidth() > mAddCellsHandleRightBrush->ImageSize.X;
+    bool isZoomedEnough = mExtension->Timeline()->GetFrameWidth() > mAddCellsHandleRightBrush->ImageSize.X;
     return isZoomedEnough ? EVisibility::Visible : EVisibility::Collapsed;
 }
 
 EVisibility
 SOdysseyAnimationLayerImageRasterTimeline::GetAddCellsHandleLeftVisibility() const
 {
-    bool isZoomedEnough = mEditor->Timeline()->GetFrameWidth() > mAddCellsHandleLeftBrush->ImageSize.X;
+    bool isZoomedEnough = mExtension->Timeline()->GetFrameWidth() > mAddCellsHandleLeftBrush->ImageSize.X;
     return (isZoomedEnough && GetLayerOffset() > 0) ? EVisibility::Visible : EVisibility::Collapsed;
 }
 
@@ -836,9 +836,9 @@ SOdysseyAnimationLayerImageRasterTimeline::OnAddCellsHandleDragged(const FGeomet
     float mouseOffset = iEvent.GetScreenSpacePosition().X - mAddCellsHandleDragData.mMousePosition;
     int mouseOffsetInt = 0;
     if ( mouseOffset > 0 )
-        mouseOffsetInt = (int)(mouseOffset / mEditor->Timeline()->GetFrameWidth() + 0.5f);
+        mouseOffsetInt = (int)(mouseOffset / mExtension->Timeline()->GetFrameWidth() + 0.5f);
     else
-        mouseOffsetInt = (int)(mouseOffset / mEditor->Timeline()->GetFrameWidth() - 0.5f);
+        mouseOffsetInt = (int)(mouseOffset / mExtension->Timeline()->GetFrameWidth() - 0.5f);
 
     mouseOffsetInt = FMath::Max(mouseOffsetInt, mAddCellsHandleDragData.mMinOffset);
 
@@ -1049,7 +1049,7 @@ void
 SOdysseyAnimationLayerImageRasterTimeline::SelectAllFrames()
 {
     FInt32Range frameRange = mAnimationLayerImageRaster->GetFrameRange();
-    mEditor->Timeline()->SetSelectedFrames(frameRange);
+    mExtension->Timeline()->SetSelectedFrames(frameRange);
 }
 
 void
@@ -1057,15 +1057,15 @@ SOdysseyAnimationLayerImageRasterTimeline::DeleteSelectedFrames()
 {
     //TODO: Simplify this
 
-    bool isLowerClosed = mEditor->Timeline()->GetSelectedFrames().GetLowerBound().IsClosed();
-    bool isUpperClosed = mEditor->Timeline()->GetSelectedFrames().GetUpperBound().IsClosed();
+    bool isLowerClosed = mExtension->Timeline()->GetSelectedFrames().GetLowerBound().IsClosed();
+    bool isUpperClosed = mExtension->Timeline()->GetSelectedFrames().GetUpperBound().IsClosed();
 
-    int startFrame = mEditor->Animation()->CurrentFrame;
-    int endFrame = mEditor->Animation()->CurrentFrame;
+    int startFrame = mExtension->Animation()->CurrentFrame;
+    int endFrame = mExtension->Animation()->CurrentFrame;
     if ( isLowerClosed && isUpperClosed )
     {
-        startFrame = mEditor->Timeline()->GetSelectedFrames().GetLowerBoundValue();
-        endFrame = mEditor->Timeline()->GetSelectedFrames().GetUpperBoundValue();
+        startFrame = mExtension->Timeline()->GetSelectedFrames().GetLowerBoundValue();
+        endFrame = mExtension->Timeline()->GetSelectedFrames().GetUpperBoundValue();
     }
 
     TMap<int, int> cellsLength;

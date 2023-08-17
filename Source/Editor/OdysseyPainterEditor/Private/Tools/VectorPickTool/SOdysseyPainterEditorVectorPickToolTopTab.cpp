@@ -4,6 +4,7 @@
 #include "Tools/VectorPickTool/SOdysseyPainterEditorVectorPickToolTopTab.h"
 #include "Widgets/Tools/SOdysseyPainterEditorVectorEditionMode.h"
 #include "ISinglePropertyView.h"
+#include "Widgets/Layout/SWrapBox.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorVectorPickToolTopTab"
 

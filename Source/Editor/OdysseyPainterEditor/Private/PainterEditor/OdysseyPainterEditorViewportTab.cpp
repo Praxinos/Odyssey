@@ -11,6 +11,13 @@
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorViewportTab"
 
+const FName&
+FOdysseyPainterEditorViewportTab::StaticId()
+{
+    static FName Id = TEXT("OdysseyPainterEditor_Viewport"); //Keep ColorSelector instead of ColorWheel because changing that ID would show an empty panel to users who already opened the previous ColorSelector Panel
+    return Id;
+}
+
 /////////////////////////////////////////////////////
 // FOdysseyPainterEditorViewportTab
 //--------------------------------------------------------------------------------------
@@ -22,17 +29,22 @@ FOdysseyPainterEditorViewportTab::~FOdysseyPainterEditorViewportTab()
 }
 
 FOdysseyPainterEditorViewportTab::FOdysseyPainterEditorViewportTab(FOdysseyPainterEditor* iEditor)
-	: FOdysseyEditorTab(TEXT("OdysseyPainterEditor_Viewport"),
-                            LOCTEXT( "OdysseyPainterEditorViewportTab", "Viewport" ),
-                            FSlateIcon( "OdysseyStyle", "PainterEditor.Viewport16" ))
+	: FOdysseyEditorTab(LOCTEXT( "OdysseyPainterEditorViewportTab", "Viewport" ), FSlateIcon( "OdysseyStyle", "PainterEditor.Viewport16" ))
     , mEditor(iEditor)
     , mViewport(nullptr)
     , mViewportClient(nullptr)
 {
+    SetDefaultTexture();
 }
 
 //--------------------------------------------------------------------------------------
 //--------------------------------------------------- FOdysseyEditorTab interface
+
+const FName&
+FOdysseyPainterEditorViewportTab::GetId() const
+{
+    return StaticId();
+}
 
 TSharedPtr<SWidget>
 FOdysseyPainterEditorViewportTab::CreateWidget()
@@ -41,7 +53,7 @@ FOdysseyPainterEditorViewportTab::CreateWidget()
         .Texture_Raw(this, &FOdysseyPainterEditorViewportTab::Texture);
 
     //TODO: not cool to have to go through the whole GUI for an info, move that in the painterEditor Data
-	mViewportClient = MakeShareable(new FOdysseyPainterEditorViewportClient(mEditor, mViewport, mEditor->GetGUI()->GetMeshSelectorTab()->MeshSelector()->GetMeshSelectorPtr()));
+	mViewportClient = MakeShareable(new FOdysseyPainterEditorViewportClient(mEditor, mViewport, mEditor->GetMeshSelector().Get()));
 	
     //TODO: manage colorpicking here, viewportClient itself should not know the action to pick a color
     mViewportClient->OnPickColor().BindRaw(this, &FOdysseyPainterEditorViewportTab::HandleViewportColorPicked);
@@ -97,12 +109,35 @@ FOdysseyPainterEditorViewportTab::GetViewport()
 }
 
 //--------------------------------------------------------------------------------------
+//----------------------------------------------------------------------- Widget Setters
+
+void
+FOdysseyPainterEditorViewportTab::SetDefaultTexture()
+{
+    mTexture = TAttribute<UTexture*>::CreateLambda(
+        [this]() -> UTexture*
+        {
+            if (!mEditor->GetSource())
+                return nullptr;
+
+            return mEditor->GetSource()->DisplayTexture();
+        }
+    );
+}
+
+void
+FOdysseyPainterEditorViewportTab::SetTexture(const TAttribute<UTexture*>& iTexture )
+{
+    mTexture = iTexture;
+}
+
+//--------------------------------------------------------------------------------------
 //----------------------------------------------------------------------- Widget Getters
 
 UTexture*
 FOdysseyPainterEditorViewportTab::Texture() const
 {
-    return mEditor->DisplayTexture();
+    return mTexture.Get();
 }
 
 //--------------------------------------------------------------------------------------
@@ -111,7 +146,10 @@ FOdysseyPainterEditorViewportTab::Texture() const
 void
 FOdysseyPainterEditorViewportTab::HandleViewportColorPicked(eOdysseyEventState::Type iEventState, const FVector2D& iPositionInTexture)
 {
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = mEditor->GetDisplayBlock();
+    if (!mEditor->GetSource())
+        return;
+
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = mEditor->GetSource()->GetDisplayBlock();
     if ( !block )
         return;
 

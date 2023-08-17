@@ -7,9 +7,9 @@ FOdysseyVectorRectangle::~FOdysseyVectorRectangle()
 
 FOdysseyVectorRectangle::FOdysseyVectorRectangle( const FString iName, double iWidth, double iHeight, double iStrokeWidth )
     : FOdysseyVectorPrimitive( iName )
+    , mStrokeWidth( iStrokeWidth )
     , mWidth( iWidth )
     , mHeight( iHeight )
-    , mStrokeWidth( iStrokeWidth )
 {
     mCubicVertex[0] = new FOdysseyVectorVertex( this, 0.0f, 0.0f, mStrokeWidth );
     mCubicVertex[1] = new FOdysseyVectorVertex( this, 0.0f, 0.0f, mStrokeWidth );

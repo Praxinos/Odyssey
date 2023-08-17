@@ -13,7 +13,7 @@ namespace
 }
 
 FOdysseyAnimationEditorCommands::FOdysseyAnimationEditorCommands()
-    : TCommands<FOdysseyAnimationEditorCommands>( "IliadAnimationEditor", NSLOCTEXT( "Contexts", "IliadAnimationEditor", "Iliad Texture Editor" ), NAME_None, FEditorStyle::GetStyleSetName() )
+    : TCommands<FOdysseyAnimationEditorCommands>( "IliadAnimationEditor", NSLOCTEXT( "Contexts", "IliadAnimationEditor", "Iliad Texture Editor" ), NAME_None, FAppStyle::GetAppStyleSetName() )
 {
     AddBundle(ImportExportShortcuts, LOCTEXT("ImportExportShortcutsCategory", "Import & Export Shortcuts"));
     AddBundle(LayerStackShortcuts, LOCTEXT("LayerStackShortcutsCategory", "LayerStack Shortcuts"));

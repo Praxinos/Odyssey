@@ -17,8 +17,8 @@ FOdysseyAnimationEditorToolkit::~FOdysseyAnimationEditorToolkit()
 {
 }
 
-FOdysseyAnimationEditorToolkit::FOdysseyAnimationEditorToolkit(TSharedPtr<FOdysseyAnimationEditor> iEditor) :
-	FOdysseyAssetEditorToolkit( TEXT( "OdysseyAnimationEditorApp" ), iEditor )
+FOdysseyAnimationEditorToolkit::FOdysseyAnimationEditorToolkit() :
+	FOdysseyAssetEditorToolkit( TEXT( "OdysseyAnimationEditorApp" ) )
 {
 }
 

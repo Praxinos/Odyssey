@@ -23,4 +23,11 @@ private:
     //BrushOverrides
 	void RegisterBrushOverrides();
 	void UnregisterBrushOverrides();
+
+    //Level Editor Layout
+    void RegisterLevelEditorLayoutExtensions();
+    void UnregisterLevelEditorLayoutExtensions();
+
+private:
+    FDelegateHandle mExtendLevelEditorLayout;
 };

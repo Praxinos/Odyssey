@@ -20,11 +20,11 @@ SOdysseyAnimationLightTable::SOdysseyAnimationLightTable()
 }
 
 void
-SOdysseyAnimationLightTable::Construct(const FArguments& InArgs, FOdysseyAnimationEditor* iEditor)
+SOdysseyAnimationLightTable::Construct(const FArguments& InArgs, FOdysseyAnimationEditorExtension* iExtension)
 {
 	UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw(this, &SOdysseyAnimationLightTable::OnCurrentLayerChanged);
 
-    mEditor = iEditor;
+    mExtension = iExtension;
     
 	ChildSlot
 	[
@@ -37,7 +37,7 @@ SOdysseyAnimationLightTable::Construct(const FArguments& InArgs, FOdysseyAnimati
 TSharedPtr<FOdysseyAnimationLightTable>
 SOdysseyAnimationLightTable::GetLightTable() const
 {
-	UOdysseyAnimationLayerStack* layerStack = mEditor->LayerStack();
+	UOdysseyAnimationLayerStack* layerStack = mExtension->LayerStack();
 	UOdysseyAnimationLayerImageRaster* currentLayer = Cast<UOdysseyAnimationLayerImageRaster>(layerStack->CurrentLayer.Get());
 	if (!currentLayer)
 		return nullptr;
@@ -110,7 +110,7 @@ SOdysseyAnimationLightTable::Rebuild()
 void
 SOdysseyAnimationLightTable::OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStack)
 {
-	if (mEditor->LayerStack() != iLayerStack)
+	if (mExtension->LayerStack() != iLayerStack)
 		return;
 
 	RequestRebuild();

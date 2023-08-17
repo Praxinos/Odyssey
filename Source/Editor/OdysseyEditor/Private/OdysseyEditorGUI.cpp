@@ -2,7 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "OdysseyEditorGUI.h"
-
+/*
 #include "OdysseyEditor.h"
 #include "OdysseyEditorTab.h"
 #include "OdysseyEditorContextMenu.h"
@@ -28,7 +28,6 @@ void
 FOdysseyEditorGUI::Init()
 {
 	CreateTabs(); //Create Tabs Objects and sets their corresponding controllers
-	InitTabs(); //Init Tabs, creating their widgets
 
 	mLayout = CreateLayout();
 	mWidget = CreateWidget();
@@ -43,54 +42,15 @@ FOdysseyEditorGUI::CreateTabs()
 }
 
 void
-FOdysseyEditorGUI::InitTabs()
-{
-	for (int i = 0; i < mTabs.Num(); i++)
-	{
-		mTabs[i].Get()->Init();
-	}
-}
-
-void
 FOdysseyEditorGUI::BindShortcuts(FBaseToolkit* iToolkit)
 {
-	for (int i = 0; i < mTabs.Num(); i++)
-	{
-		mTabs[i].Get()->BindShortcuts(iToolkit);
-	}
+
 }
 
 void
-FOdysseyEditorGUI::RegisterTabSpawners( const TSharedRef< class FTabManager >& iTabManager, TSharedRef<FWorkspaceItem>& iWorkspaceMenuCategoryRef)
+FOdysseyEditorGUI::ExtendMenu( FToolMenuOwner iOwnerFName, FName iMenuName )
 {
-	for (int i = 0; i < mTabs.Num(); i++)
-	{
-		iTabManager->RegisterTabSpawner(mTabs[i].Get()->ID(), FOnSpawnTab::CreateSP( mTabs[i].Get().ToSharedRef(), &FOdysseyEditorTab::SpawnTab ) )
-			.SetDisplayName( mTabs[i].Get()->DisplayName() )
-			.SetGroup(iWorkspaceMenuCategoryRef)
-			.SetIcon( mTabs[i].Get()->Icon() );
-	}
-}
 
-void
-FOdysseyEditorGUI::UnregisterTabSpawners( const TSharedRef< class FTabManager >& iTabManager )
-{
-	for (int i = 0; i < mTabs.Num(); i++)
-	{
-		iTabManager->UnregisterTabSpawner( mTabs[i].Get()->ID() );
-	}
-}
-
-//--------------------------------------------------------------------------------------
-//--------------------------------------------------------------------- Menu and Toolbar
-
-void
-FOdysseyEditorGUI::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
-{
-	for (int i = 0; i < mTabs.Num(); i++)
-	{
-		mTabs[i].Get()->ExtendMenu( iOwner, iMenuName );
-	}
 }
 
 //--------------------------------------------------------------------------------------
@@ -122,3 +82,4 @@ FOdysseyEditorGUI::GetWidget()
 {
 	return mWidget.ToSharedRef();
 }
+*/

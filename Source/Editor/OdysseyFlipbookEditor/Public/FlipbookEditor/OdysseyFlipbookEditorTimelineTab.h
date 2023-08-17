@@ -5,19 +5,23 @@
 
 #include "OdysseyEditorTab.h"
 
-class FOdysseyFlipbookEditor;
+class FOdysseyFlipbookEditorExtension;
 class SOdysseyFlipbookTimelineView;
 
 class ODYSSEYFLIPBOOKEDITOR_API FOdysseyFlipbookEditorTimelineTab :
 	public FOdysseyEditorTab
 {
 public:
+    static const FName& StaticId();
+
+public:
     // Construction / Destruction
     virtual ~FOdysseyFlipbookEditorTimelineTab();
-    FOdysseyFlipbookEditorTimelineTab(FOdysseyFlipbookEditor* iEditor);
+    FOdysseyFlipbookEditorTimelineTab(FOdysseyFlipbookEditorExtension* iExtension);
 
 protected:
     // FOdysseyEditorTab interface
+    virtual const FName& GetId() const override;
     virtual TSharedPtr<SWidget> CreateWidget() override;
     virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
 
@@ -27,7 +31,7 @@ public:
 
 public:
     // Widget Getters
-    virtual TSharedPtr<FOdysseyFlipbookWrapper> FlipbookWrapper() const;
+    virtual FOdysseyFlipbookWrapper* FlipbookWrapper() const;
 
 protected:
     // Event Listeners    
@@ -45,7 +49,7 @@ private:
     void BindNavigationShortcuts(FBaseToolkit* iToolkit);
 
 private:
-    FOdysseyFlipbookEditor* mEditor;
+    FOdysseyFlipbookEditorExtension* mExtension;
 
     TSharedPtr<SOdysseyFlipbookTimelineView> mTimeline;
 };

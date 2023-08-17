@@ -5,6 +5,10 @@
 #include "OdysseyRectUtils.h"
 #include "OdysseyMediaRaster.h"
 
+FOdysseyAnimationCellImageRasterMediaAbility::~FOdysseyAnimationCellImageRasterMediaAbility()
+{
+}
+
 FOdysseyAnimationCellImageRasterMediaAbility::FOdysseyAnimationCellImageRasterMediaAbility(TSharedPtr<FOdysseyAnimationCellImageRaster> iCellImageRaster)
     : mCellImageRaster(iCellImageRaster)
 {

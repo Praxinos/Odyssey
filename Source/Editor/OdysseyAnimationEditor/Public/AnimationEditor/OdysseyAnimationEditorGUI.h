@@ -3,41 +3,43 @@
 
 #pragma once
 
-#include "OdysseyPainterEditorGUI.h"
-
-#include "OdysseyAnimationEditorLayerStackTab.h"
-
-class FOdysseyAnimationEditor;
+class FOdysseyAnimationEditorExtension;
 class FOdysseyAnimationEditorLightTableTab;
+class FOdysseyAnimationEditorLayerStackTab;
 
 /**
  * Implements an Editor toolkit for textures.
  */
-class ODYSSEYANIMATIONEDITOR_API FOdysseyAnimationEditorGUI :
-	public FOdysseyPainterEditorGUI
+class ODYSSEYANIMATIONEDITOR_API FOdysseyAnimationEditorGUI
 {
+public:
+    static void ExtendLevelEditorLayout(FLayoutExtender& Extender);
+    
 public:
     // Construction / Destruction
     virtual ~FOdysseyAnimationEditorGUI();
-    FOdysseyAnimationEditorGUI(FOdysseyAnimationEditor* iEditor);
+    FOdysseyAnimationEditorGUI(FOdysseyAnimationEditorExtension* iExtension);
+
+public:
+    void Initialize();
+    void Finalize();
+	void BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder);
 
 protected:
     //Init
-	virtual void CreateTabs() override;
+	void CreateTabs();
 
 public:
     // GettersFName
-	virtual FName GetLayoutName() override;
     TSharedPtr<FOdysseyAnimationEditorLayerStackTab>& GetLayerStackTab();
     TSharedPtr<FOdysseyAnimationEditorLightTableTab>& GetLightTableTab();
 
 protected:
-	virtual TSharedRef<FTabManager::FSplitter>	CreateBottomSection() override;
+	//virtual TSharedRef<FTabManager::FSplitter>	CreateBottomSection() override;
 
 private:
-	FOdysseyAnimationEditor* mEditor;
+    FOdysseyAnimationEditorExtension* mExtension;
 
-private:
     //Tabs
     TSharedPtr<FOdysseyAnimationEditorLayerStackTab> mLayerStackTab;
     TSharedPtr<FOdysseyAnimationEditorLightTableTab> mLightTableTab;

@@ -16,8 +16,17 @@
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "OdysseyRasterBlock.h"
 #include "OdysseySurfaceTexture2DEditable.h"
+#include "LayerStack/OdysseyTextureLayerImageRaster.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyTextureEditorLayerStackTab"
+
+
+const FName&
+FOdysseyTextureEditorLayerStackTab::StaticId()
+{
+    static FName Id = TEXT("OdysseyTextureEditor_LayerStack"); //Keep ColorSelector instead of ColorWheel because changing that ID would show an empty panel to users who already opened the previous ColorSelector Panel
+    return Id;
+}
 
 /////////////////////////////////////////////////////
 // FOdysseyTextureEditorLayerStackTab
@@ -27,16 +36,20 @@ FOdysseyTextureEditorLayerStackTab::~FOdysseyTextureEditorLayerStackTab()
 {
 }
 
-FOdysseyTextureEditorLayerStackTab::FOdysseyTextureEditorLayerStackTab(FOdysseyTextureEditor* iEditor)
-	: FOdysseyEditorTab(TEXT("OdysseyTextureEditor_LayerStack")
-    , LOCTEXT( "OdysseyTextureEditorLayerStackTab", "Layer Stack" )
-    , FSlateIcon( "OdysseyStyle", "PainterEditor.Layers16" ))
-    , mEditor(iEditor)
+FOdysseyTextureEditorLayerStackTab::FOdysseyTextureEditorLayerStackTab(FOdysseyTextureEditorExtension* iExtension)
+	: FOdysseyEditorTab(LOCTEXT( "OdysseyTextureEditorLayerStackTab", "Layer Stack" ), FSlateIcon( "OdysseyStyle", "PainterEditor.Layers16" ))
+    , mExtension(iExtension)
 {
 }
 
 //--------------------------------------------------------------------------------------
 //--------------------------------------------------- FOdysseyTextureEditorTab interface
+
+const FName&
+FOdysseyTextureEditorLayerStackTab::GetId() const
+{
+    return StaticId();
+}
 
 TSharedPtr<SWidget>
 FOdysseyTextureEditorLayerStackTab::CreateWidget()
@@ -87,7 +100,11 @@ FOdysseyTextureEditorLayerStackTab::ExtendMenu( FToolMenuOwner iOwner, FName iMe
 UOdysseyLayerStack*
 FOdysseyTextureEditorLayerStackTab::LayerStack() const
 {
-    return mEditor->LayerStack();
+    TSharedPtr<FOdysseyPainterEditorSource> source = mExtension->GetEditor()->GetSource();
+    if (!source)
+        return nullptr;
+
+    return mExtension->GetEditor()->GetSource()->GetLayerStack();
 }
 
 //--------------------------------------------------------------------------------------
@@ -113,7 +130,13 @@ FOdysseyTextureEditorLayerStackTab::ExtendMenuFile( FToolMenuOwner iOwner, FName
 void
 FOdysseyTextureEditorLayerStackTab::ExportTextureToOperatingSystem()
 {
-    UTexture* currentTexture = mEditor->Texture();
+    TSharedPtr<FOdysseyPainterEditorSource> source = mExtension->GetEditor()->GetSource();
+    if (!source || source->Id() != FOdysseyTextureEditorSource::StaticId())
+        return;
+
+    TSharedPtr<FOdysseyTextureEditorSource> textureSource = StaticCastSharedPtr<FOdysseyTextureEditorSource>(source);
+
+    UTexture* currentTexture = textureSource->GetTexture();
     IDesktopPlatform* desktopPlatformHandle = FDesktopPlatformModule::Get();
     TArray< FString > filenames;
     bool saveSuccess = desktopPlatformHandle->SaveFileDialog(
@@ -210,22 +233,28 @@ FOdysseyTextureEditorLayerStackTab::ExportTextureToOperatingSystem()
 void           
 FOdysseyTextureEditorLayerStackTab::ImportTexturesAsLayers()
 {
-    UOdysseyLayerStack* layerStack = mEditor->LayerStack();
+    UOdysseyLayerStack* layerStack = LayerStack();
     if ( !layerStack )
         return;
+
+    TSharedPtr<FOdysseyPainterEditorSource> source = mExtension->GetEditor()->GetSource();
+    if (!source || source->Id() != FOdysseyTextureEditorSource::StaticId())
+        return;
+
+    TSharedPtr<FOdysseyTextureEditorSource> textureSource = StaticCastSharedPtr<FOdysseyTextureEditorSource>(source);
+    UTexture* currentTexture = textureSource->GetTexture();
 
     FScopedTransaction ScopedTransaction(LOCTEXT("LayerStack", "Import Textures As Layers"));
 
     FOpenAssetDialogConfig openAssetDialogConfig;
     openAssetDialogConfig.DialogTitleOverride = LOCTEXT( "ImportTextureDialogTitle", "Import Textures As Layers" );
-    openAssetDialogConfig.DefaultPath = FPaths::GetPath(mEditor->Texture()->GetPathName() );
+    openAssetDialogConfig.DefaultPath = FPaths::GetPath(currentTexture->GetPathName() );
     openAssetDialogConfig.bAllowMultipleSelection = true;
     openAssetDialogConfig.AssetClassNames.Add( UTexture2D::StaticClass()->GetClassPathName() );
 
     FContentBrowserModule& contentBrowserModule = FModuleManager::LoadModuleChecked<FContentBrowserModule>( "ContentBrowser" );
     TArray < FAssetData > assetsData = contentBrowserModule.Get().CreateModalOpenAssetDialog( openAssetDialogConfig );
 
-    UTexture* currentTexture = mEditor->Texture();
     ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(currentTexture->Source.GetFormat());
 
     if ( assetsData.Num() > 0 )
@@ -247,11 +276,16 @@ FOdysseyTextureEditorLayerStackTab::ImportTexturesAsLayers()
 void           
 FOdysseyTextureEditorLayerStackTab::ExportLayersAsTextures()
 {
-    UOdysseyLayerStack* layerStack = mEditor->LayerStack();
+    UOdysseyLayerStack* layerStack = LayerStack();
     if ( !layerStack )
         return;
 
-    UTexture* texture = mEditor->Texture();
+    TSharedPtr<FOdysseyPainterEditorSource> source = mExtension->GetEditor()->GetSource();
+    if (!source || source->Id() != FOdysseyTextureEditorSource::StaticId())
+        return;
+
+    TSharedPtr<FOdysseyTextureEditorSource> textureSource = StaticCastSharedPtr<FOdysseyTextureEditorSource>(source);
+    UTexture* texture = textureSource->GetTexture();
 
     FSaveAssetDialogConfig saveAssetDialogConfig;
     saveAssetDialogConfig.DialogTitleOverride = LOCTEXT( "ExportLayerDialogTitle", "Export Layers As Texture" );
@@ -314,7 +348,7 @@ FOdysseyTextureEditorLayerStackTab::ExportLayersAsTextures()
 void           
 FOdysseyTextureEditorLayerStackTab::ExportCurrentLayerAsTexture()
 {
-    UOdysseyLayerStack* layerStack = mEditor->LayerStack();
+    UOdysseyLayerStack* layerStack = LayerStack();
     if ( !layerStack )
         return;
 
@@ -331,7 +365,13 @@ FOdysseyTextureEditorLayerStackTab::ExportCurrentLayerAsTexture()
     if (!object)
         return;
 
-    UTexture* texture = mEditor->Texture();
+    TSharedPtr<FOdysseyPainterEditorSource> source = mExtension->GetEditor()->GetSource();
+    if (!source || source->Id() != FOdysseyTextureEditorSource::StaticId())
+        return;
+
+    TSharedPtr<FOdysseyTextureEditorSource> textureSource = StaticCastSharedPtr<FOdysseyTextureEditorSource>(source);
+    UTexture* texture = textureSource->GetTexture();
+
     TArray<UOdysseyLayer*> layers = layerStack->GetLayers();
     ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = MakeShared<::ULIS::FBlock>(texture->Source.GetSizeX(), texture->Source.GetSizeY(), format);
@@ -355,7 +395,7 @@ FOdysseyTextureEditorLayerStackTab::ExportCurrentLayerAsTexture()
 void
 FOdysseyTextureEditorLayerStackTab::CreateNewLayer()
 {
-    UOdysseyLayerStack* layerStack = mEditor->LayerStack();
+    UOdysseyLayerStack* layerStack = LayerStack();
     if ( !layerStack )
         return;
 
@@ -365,7 +405,7 @@ FOdysseyTextureEditorLayerStackTab::CreateNewLayer()
 void
 FOdysseyTextureEditorLayerStackTab::ChangeLayerOpacity( float iOpacity )
 {
-    UOdysseyLayerStack* layerStack = mEditor->LayerStack();
+    UOdysseyLayerStack* layerStack = LayerStack();
     if ( !layerStack )
         return;
 

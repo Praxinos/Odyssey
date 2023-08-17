@@ -15,6 +15,9 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorToolOptionsTab :
 	public FOdysseyEditorTab
 {
 public:
+    static const FName& StaticId();
+
+public:
     // Construction / Destruction
     virtual ~FOdysseyPainterEditorToolOptionsTab();
     FOdysseyPainterEditorToolOptionsTab(FOdysseyPainterEditor* iEditor);
@@ -25,6 +28,7 @@ public:
 
 protected:
     // FOdysseyEditorTab interface
+    virtual const FName& GetId() const override;
     virtual TSharedPtr<SWidget> CreateWidget() override;
     virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
 

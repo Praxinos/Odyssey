@@ -5,11 +5,16 @@
 #include "Tools/OdysseyPainterEditorTool.h"
 #include "ObjectEditorUtils.h"
 
+#include "OdysseyPainterEditorSource.h"
 #include "OdysseyPainterEditorTopTab.h"
 #include "OdysseyHUDSystem.h"
 #include "ULISLoaderModule.h"
 #include "OdysseyPainterEditorGUI.h"
+#include "OdysseyPainterEditorExtension.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
+#include "OdysseyLayer.h"
+#include "OdysseyLayerStack.h"
+#include "OdysseyEditorLayoutBuilder.h"
 
 #include "OdysseyVector.h"
 #include "Undo/OdysseyVectorUndoGroup.h"
@@ -49,17 +54,19 @@
 
 FOdysseyPainterEditor::~FOdysseyPainterEditor()
 {
-    //mToolContext->Unset();
-	delete mHUDSystem;
+    
 }
 
-FOdysseyPainterEditor::FOdysseyPainterEditor()
-    : mSelectedTool(nullptr)
+FOdysseyPainterEditor::FOdysseyPainterEditor(const FText& iName, UObject* iEditedObject, const FName& iLayoutName)
+    : FOdysseyEditor(iName, iEditedObject)
+    , mLayoutName(iLayoutName)
+    , mSource(nullptr)
+    , mMeshSelector(MakeShared<FOdysseyMeshSelector>())
+    , mSelectedTool(nullptr)
     , mVectorEditionMode(eVectorEditionMode::Object)
     , mHUDSystem(new FOdysseyHUDSystem())
 	, mBrushContexts()
 	, mPaintColor(::ULIS::FColor::Black)
-    //, mToolContext()
 	, mRasterDrawingTool(nullptr)
 	, mVectorPrimitiveDrawingTool(nullptr)
 	, mVectorPathDrawingTool(nullptr)
@@ -78,7 +85,7 @@ FOdysseyPainterEditor::FOdysseyPainterEditor()
 	, mVectorGridTool(nullptr)
 	, mVectorTransformTool(nullptr)
 {
-    //mToolContext = MakeShared<FOdysseyPainterEditorToolContext>(this);
+    UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw(this, &FOdysseyPainterEditor::OnCurrentLayerChanged);
 	mBrushContexts.Add(new FOdysseyPainterEditorBrushContext(this));
 }
 
@@ -86,10 +93,117 @@ FOdysseyPainterEditor::FOdysseyPainterEditor()
 //----------------------------------------------------------------------- Initialization
 
 void
-FOdysseyPainterEditor::InitData(UObject* iEditedObject)
+FOdysseyPainterEditor::Initialize()
 {
-	//Init Tools
+    //Init Tools
 	InitTools();
+    
+    //Init the GUI
+    mGUI = MakeShareable(new FOdysseyPainterEditorGUI(this));
+    mGUI->Initialize();
+    
+    //Init the extensions
+    for (TSharedPtr<FOdysseyPainterEditorExtension> extension : mExtensions)
+        extension->Initialize();
+
+}
+
+TSharedRef<FTabManager::FLayout>
+FOdysseyPainterEditor::CreateLayout()
+{
+    FOdysseyEditorLayoutBuilder builder(mLayoutName);
+    mGUI->BuildLayout(builder);
+
+    for (TSharedPtr<FOdysseyPainterEditorExtension> extension : mExtensions)
+        extension->BuildLayout(builder);
+
+    return builder.GetLayout();
+}
+
+void
+FOdysseyPainterEditor::BindShortcuts(FBaseToolkit* iToolkit)
+{
+    GetGUI()->BindShortcuts(iToolkit);
+
+    mRasterDrawingTool->BindShortcuts(iToolkit);
+	mVectorPrimitiveDrawingTool->BindShortcuts(iToolkit);
+	mVectorPathDrawingTool->BindShortcuts(iToolkit);
+	mVectorPathEditTool->BindShortcuts(iToolkit);
+	mVectorPathCutTool->BindShortcuts(iToolkit);
+	mVectorPickTool->BindShortcuts(iToolkit);
+	mVectorSceneScaleTool->BindShortcuts(iToolkit);
+	mVectorScenePanTool->BindShortcuts(iToolkit);
+	mVectorEraserTool->BindShortcuts(iToolkit);
+	mVectorPathPushTool->BindShortcuts(iToolkit);
+	mVectorPathWidthTool->BindShortcuts(iToolkit);
+	mVectorPathSmoothTool->BindShortcuts(iToolkit);
+	mVectorPathStitchTool->BindShortcuts(iToolkit);
+	mPaintBucketTool->BindShortcuts(iToolkit);
+	mColorPickerTool->BindShortcuts(iToolkit);
+	mVectorGridTool->BindShortcuts(iToolkit);
+	mVectorTransformTool->BindShortcuts(iToolkit);
+
+	//---
+
+	const TSharedRef<FUICommandList>& toolkitCommands = iToolkit->GetToolkitCommands();
+    const FOdysseyPainterEditorCommands& painterEditorCommands = FOdysseyPainterEditorCommands::Get();
+
+	#define MAP_ACTION(action, ...) toolkitCommands->MapAction( action, FExecuteAction::CreateRaw( this, &FOdysseyPainterEditor::__VA_ARGS__ ), FCanExecuteAction() );
+	#undef MAP_ACTION
+
+    for (TSharedPtr<FOdysseyPainterEditorExtension> extension : mExtensions)
+        extension->BindShortcuts(iToolkit);
+}
+
+void
+FOdysseyPainterEditor::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
+{
+    GetGUI()->ExtendMenu(iOwner, iMenuName);
+
+    mRasterDrawingTool->ExtendMenu(iOwner, iMenuName);
+	mVectorPrimitiveDrawingTool->ExtendMenu(iOwner, iMenuName);
+	mVectorPathDrawingTool->ExtendMenu(iOwner, iMenuName);
+	mVectorPathEditTool->ExtendMenu(iOwner, iMenuName);
+	mVectorPathCutTool->ExtendMenu(iOwner, iMenuName);
+	mVectorPickTool->ExtendMenu(iOwner, iMenuName);
+	mVectorSceneScaleTool->ExtendMenu(iOwner, iMenuName);
+	mVectorScenePanTool->ExtendMenu(iOwner, iMenuName);
+	mVectorEraserTool->ExtendMenu(iOwner, iMenuName);
+	mVectorPathPushTool->ExtendMenu(iOwner, iMenuName);
+	mVectorPathWidthTool->ExtendMenu(iOwner, iMenuName);
+	mVectorPathSmoothTool->ExtendMenu(iOwner, iMenuName);
+	mVectorPathStitchTool->ExtendMenu(iOwner, iMenuName);
+	mPaintBucketTool->ExtendMenu(iOwner, iMenuName);
+	mColorPickerTool->ExtendMenu(iOwner, iMenuName);
+	mVectorGridTool->ExtendMenu(iOwner, iMenuName);
+	mVectorTransformTool->ExtendMenu(iOwner, iMenuName);
+
+    for (TSharedPtr<FOdysseyPainterEditorExtension> extension : mExtensions)
+        extension->ExtendMenu(iOwner, iMenuName);
+}
+
+void 
+FOdysseyPainterEditor::OnClose()
+{
+    //Cleanup
+    if (mSelectedTool)
+        mSelectedTool->Inactivate();
+    
+    if (mSource)
+    {
+        mSource->Inactivate();
+        mSource = nullptr;
+    }
+
+    for (TSharedPtr<FOdysseyPainterEditorExtension> extension : mExtensions)
+        extension->Finalize();
+
+    mGUI->Finalize();
+
+    UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll(this);
+	delete mHUDSystem;
+
+    FOdysseyEditor::OnClose();
 }
 
 void
@@ -132,25 +246,6 @@ FOdysseyPainterEditor::InitTools()
 	mVectorTransformTool->SetEditor(this);
 	mRasterDrawingTool->SetBrushContexts(mBrushContexts);
 
-	mRasterDrawingTool->SetEditor(this);
-    mVectorPrimitiveDrawingTool->SetEditor(this);
-    mVectorPathDrawingTool->SetEditor(this);
-    mVectorPathEditTool->SetEditor(this);
-    mVectorPathCutTool->SetEditor(this);
-    mVectorPickTool->SetEditor(this);
-    mVectorSceneScaleTool->SetEditor(this);
-    mVectorScenePanTool->SetEditor(this);
-    mVectorEraserTool->SetEditor(this);
-    mVectorPathPushTool->SetEditor(this);
-    mVectorPathWidthTool->SetEditor(this);
-    mVectorPathSmoothTool->SetEditor(this);
-    mVectorPathStitchTool->SetEditor(this);
-	mPaintBucketTool->SetEditor(this);
-	mColorPickerTool->SetEditor(this);
-	mVectorGridTool->SetEditor(this);
-	mVectorTransformTool->SetEditor(this);
-	mRasterDrawingTool->SetEditor(this);
-
 	mTools.Add(mRasterDrawingTool);
     mTools.Add(mVectorPrimitiveDrawingTool);
     mTools.Add(mVectorPathDrawingTool);
@@ -170,50 +265,22 @@ FOdysseyPainterEditor::InitTools()
 	mTools.Add(mVectorTransformTool);
 }
 
-void
-FOdysseyPainterEditor::BindShortcuts(FBaseToolkit* iToolkit)
-{
-	FOdysseyEditor::BindShortcuts(iToolkit);
-
-	//---
-
-	const TSharedRef<FUICommandList>& toolkitCommands = iToolkit->GetToolkitCommands();
-    const FOdysseyPainterEditorCommands& painterEditorCommands = FOdysseyPainterEditorCommands::Get();
-
-	#define MAP_ACTION(action, ...) toolkitCommands->MapAction( action, FExecuteAction::CreateRaw( this, &FOdysseyPainterEditor::__VA_ARGS__ ), FCanExecuteAction() );
-
-	/* MAP_ACTION(painterEditorCommands.Undo, Undo)
-	MAP_ACTION(painterEditorCommands.Redo, Redo )
-    MAP_ACTION(painterEditorCommands.ClearUndo, ClearUndo ) */
-
-	#undef MAP_ACTION
-}
-
-void
-FOdysseyPainterEditor::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
-{
-	FOdysseyEditor::ExtendMenu(iOwner, iMenuName);
-}
-
-bool
-FOdysseyPainterEditor::OnCloseRequested()
-{
-    //Cleanup
-    if (mSelectedTool)
-        mSelectedTool->Inactivate();
-
-    return FOdysseyEditor::OnCloseRequested();
-}
-
-void
+FSimpleMulticastDelegate&
 FOdysseyPainterEditor::OnSelectedToolChanged()
 {
+    return mOnSelectedToolChanged;
 }
 
-FOdysseyPainterEditor::FOnSelectedToolChanged&
-FOdysseyPainterEditor::OnSelectedToolChangedDelegate()
+FSimpleMulticastDelegate&
+FOdysseyPainterEditor::OnSourceChanged()
 {
-    return mOnSelectedToolChanged;
+    return mOnSourceChanged;
+}
+
+TSharedPtr<FOdysseyPainterEditorSource>
+FOdysseyPainterEditor::GetSource() const
+{
+    return mSource;
 }
 
 //--------------------------------------------------------------------------------------
@@ -340,8 +407,65 @@ FOdysseyPainterEditor::GetSelectedTool() const
     return mSelectedTool;
 }
 
+FOdysseyMediaProvider
+FOdysseyPainterEditor::GetCurrentMediaProvider()
+{
+    TSharedPtr<FOdysseyPainterEditorSource> source = GetSource(); 
+    if (!source)
+        return FOdysseyMediaProvider();
+
+    return source->GetCurrentMediaProvider();
+}
+
+UOdysseyLayerStack*
+FOdysseyPainterEditor::LayerStack() const
+{
+	TSharedPtr<FOdysseyPainterEditorSource> source = GetSource();
+	if (!source)
+		return nullptr;
+
+	return source->GetLayerStack();
+}
+
+TSharedPtr<FOdysseyMeshSelector>
+FOdysseyPainterEditor::GetMeshSelector() const
+{
+    return mMeshSelector;
+}
+
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Setters
+
+void
+FOdysseyPainterEditor::SetSource(TSharedPtr<FOdysseyPainterEditorSource> iSource)
+{
+    if (mSource)
+    {
+        mSource->Inactivate();
+        mSource = nullptr;
+		
+        mSelectedTool->Inactivate();
+    }
+
+    if (iSource)
+    {
+        mSource = iSource;
+        mSource->Activate();
+        
+        if ( mSelectedTool && mSelectedTool->IsActivable() )
+        {
+            //just reload the tool
+            mSelectedTool->Activate();
+        }
+        else
+        {
+            //select the best tool
+            RefreshCurrentTool();
+        }
+    }
+
+    OnSourceChanged().Broadcast();
+}
 
 void
 FOdysseyPainterEditor::PaintColor(const FOdysseyBrushColor& iColor, bool iIsCommit)
@@ -363,9 +487,77 @@ FOdysseyPainterEditor::SetSelectedTool(UOdysseyPainterEditorTool* iTool)
 
 	if (mSelectedTool)
 		mSelectedTool->Activate();
-    
-    OnSelectedToolChanged();
+
+
+    UOdysseyLayer* currentLayer = LayerStack()->CurrentLayer.Get();
+	if (currentLayer)
+    {
+        UClass* layerClass = currentLayer->GetClass();
+        if (!mCurrentToolPerLayerClass.Contains(layerClass))
+            mCurrentToolPerLayerClass.Add(layerClass, nullptr);
+
+        mCurrentToolPerLayerClass[layerClass] = mSelectedTool;
+    }
+
     mOnSelectedToolChanged.Broadcast();
+}
+
+UOdysseyPainterEditorTool*
+FOdysseyPainterEditor::FindDefaultToolForCurrentLayer()
+{
+	for (UOdysseyPainterEditorTool* tool : mTools)
+	{
+		if ( !tool->IsActivable() )
+			continue;
+
+		return tool;
+	}
+	return nullptr;
+}
+
+FOdysseyPainterEditorGUI*
+FOdysseyPainterEditor::GetGUI()
+{
+	if (!mGUI)
+		mGUI = MakeShareable(new FOdysseyPainterEditorGUI(this));
+	return mGUI.Get();
+}
+
+void
+FOdysseyPainterEditor::AddExtension(TSharedPtr<FOdysseyPainterEditorExtension> iExtension)
+{
+    mExtensions.Add(iExtension);
+}
+
+void
+FOdysseyPainterEditor::RefreshCurrentTool()
+{
+	UOdysseyLayer* currentLayer = LayerStack()->CurrentLayer.Get();
+	if (!currentLayer)
+	{
+		SetSelectedTool(nullptr);
+		return;
+	}
+
+	UOdysseyPainterEditorTool* tool = nullptr;
+
+	UClass* layerClass = currentLayer->GetClass();
+	if (mCurrentToolPerLayerClass.Contains(layerClass))
+		tool = mCurrentToolPerLayerClass[layerClass];
+	
+	if (!tool || !tool->IsActivable())
+		tool = FindDefaultToolForCurrentLayer();
+
+	SetSelectedTool(tool);
+}
+
+void
+FOdysseyPainterEditor::OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStack)
+{
+	if ( iLayerStack != LayerStack() )
+		return;
+
+	RefreshCurrentTool(); //Refresh the current tool when we change layer
 }
 
 void

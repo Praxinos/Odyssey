@@ -3,12 +3,19 @@
 
 #include "OdysseyFlipbookEditorTimelineTab.h"
 
-#include "OdysseyFlipbookEditor.h"
 #include "OdysseyFlipbookEditorCommands.h"
 #include "SOdysseyFlipbookTimelineView.h"
 #include "Types/NavigationMetaData.h"
+#include "TextureEditor/OdysseyTextureEditorSource.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyFlipbookEditorTimelineTab"
+
+const FName&
+FOdysseyFlipbookEditorTimelineTab::StaticId()
+{
+    static FName Id = TEXT("OdysseyFlipbookEditor_Timeline");
+    return Id;
+}
 
 /////////////////////////////////////////////////////
 // FOdysseyFlipbookEditorTimelineTab
@@ -18,17 +25,22 @@ FOdysseyFlipbookEditorTimelineTab::~FOdysseyFlipbookEditorTimelineTab()
 {
 }
 
-FOdysseyFlipbookEditorTimelineTab::FOdysseyFlipbookEditorTimelineTab(FOdysseyFlipbookEditor* iEditor)
-	: FOdysseyEditorTab(TEXT("OdysseyFlipbookEditor_Timeline"),
-                            LOCTEXT( "OdysseyFlipbookEditorTimelineTab", "Timeline" ),
-                            FSlateIcon( "OdysseyStyle", "FlipbookEditor.Layers16" )) //TODO: Timeline Icon
-    , mEditor(iEditor)
+FOdysseyFlipbookEditorTimelineTab::FOdysseyFlipbookEditorTimelineTab(FOdysseyFlipbookEditorExtension* iExtension)
+	: FOdysseyEditorTab(LOCTEXT( "OdysseyFlipbookEditorTimelineTab", "Timeline" ),
+                        FSlateIcon( "OdysseyStyle", "FlipbookEditor.Layers16" )) //TODO: Timeline Icon
+    , mExtension(iExtension)
     , mTimeline(nullptr)
 {
 }
 
 //--------------------------------------------------------------------------------------
 //--------------------------------------------------- FOdysseyFlipbookEditorTab interface
+
+const FName&
+FOdysseyFlipbookEditorTimelineTab::GetId() const
+{
+    return StaticId();
+}
 
 TSharedPtr<SWidget>
 FOdysseyFlipbookEditorTimelineTab::CreateWidget()
@@ -75,10 +87,10 @@ FOdysseyFlipbookEditorTimelineTab::Timeline()
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------------------- Widget Getters
 
-TSharedPtr<FOdysseyFlipbookWrapper>
+FOdysseyFlipbookWrapper*
 FOdysseyFlipbookEditorTimelineTab::FlipbookWrapper() const
 {
-    return mEditor->FlipbookWrapper();
+    return &mExtension->FlipbookWrapper();
 }
 
 //--------------------------------------------------------------------------------------
@@ -104,7 +116,7 @@ FOdysseyFlipbookEditorTimelineTab::OnTimelineScrubStopped()
 	SetTextureAtKeyframeIndex(mTimeline->GetCurrentKeyframeIndex());
 
 	//Cleanup Preview Surface
-	mEditor->PreviewTexture(NULL);
+	mExtension->PreviewTexture(NULL);
 }
 
 void
@@ -116,13 +128,13 @@ FOdysseyFlipbookEditorTimelineTab::OnFlipbookChanged()
 void
 FOdysseyFlipbookEditorTimelineTab::OnSpriteCreated(UPaperSprite* iSprite)
 {
-	mEditor->AddEditedObject(iSprite);
+	mExtension->GetEditor()->AddEditedObject(iSprite);
 }
 
 void
 FOdysseyFlipbookEditorTimelineTab::OnTextureCreated(UTexture2D* iTexture)
 {
-	mEditor->AddEditedObject(iTexture);
+	mExtension->GetEditor()->AddEditedObject(iTexture);
 }
 
 void
@@ -131,13 +143,13 @@ FOdysseyFlipbookEditorTimelineTab::OnKeyframeRemoved(FPaperFlipbookKeyFrame& iKe
 	if (!iKeyframe.Sprite)
 		return;
 
-	mEditor->RemoveEditedObject(iKeyframe.Sprite);
+	mExtension->GetEditor()->RemoveEditedObject(iKeyframe.Sprite);
 
 	UTexture2D* texture = iKeyframe.Sprite->GetSourceTexture();
 	if (!texture)
 		return;
 
-	mEditor->RemoveEditedObject(texture);
+	mExtension->GetEditor()->RemoveEditedObject(texture);
 }
 
 //--------------------------------------------------------------------------------------
@@ -146,16 +158,24 @@ FOdysseyFlipbookEditorTimelineTab::OnKeyframeRemoved(FPaperFlipbookKeyFrame& iKe
 void
 FOdysseyFlipbookEditorTimelineTab::SetTextureAtKeyframeIndex(int32 iKeyframeIndex)
 {
-	UTexture2D* texture = mEditor->FlipbookWrapper()->GetKeyframeTexture(iKeyframeIndex);
+	UTexture2D* texture = FlipbookWrapper()->GetKeyframeTexture(iKeyframeIndex);
 
     //TODO: Instead of going through the GUI, make a Player class in the data and get the condition from there
 	if (mTimeline->IsScrubbing())
 	{
-		mEditor->PreviewTexture(texture);
+		mExtension->PreviewTexture(texture);
 		return;
 	}
 
-    mEditor->SetTexture(texture);
+	if (texture)
+	{
+		TSharedPtr<FOdysseyTextureEditorSource> source = MakeShared<FOdysseyTextureEditorSource>(texture);
+		mExtension->GetEditor()->SetSource(source);
+	}
+	else
+	{
+		mExtension->GetEditor()->SetSource(nullptr);
+	}
 }
 
 void

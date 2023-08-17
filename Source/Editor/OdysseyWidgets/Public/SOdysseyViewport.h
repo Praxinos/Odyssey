@@ -8,6 +8,7 @@
 #include "Widgets/DeclarativeSyntaxSupport.h"
 #include "Widgets/SViewport.h"
 #include "Widgets/SCompoundWidget.h"
+#include "Widgets/Input/SSpinBox.h"
 
 class FOdysseySceneViewport;
 class SScrollBar;
@@ -199,7 +200,7 @@ private:
     TSharedPtr<SViewport>               mViewportWidget;
     TSharedPtr<SScrollBar>              mVerticalScrollBar;
     TSharedPtr<SScrollBar>              mHorizontalScrollBar;
-    TSharedPtr<SSpinBox<float>>         mZoomSpinBox;
+    TSharedPtr<SSpinBox<float>>   mZoomSpinBox;
     FTransform2D                        mTransform;
     bool                                mIsFitToViewport;
 

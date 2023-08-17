@@ -46,7 +46,7 @@ struct FPsdLayerInfo
     uint32_t mDividerType;
 };
 
-class FOdysseyPsdOperations
+class ODYSSEYTEXTURE_API FOdysseyPsdOperations
 {
 public:
     // Construction / Destruction

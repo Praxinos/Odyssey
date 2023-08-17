@@ -7,9 +7,7 @@
 
 #include <ULIS>
 
-class FOdysseyTextureEditorData;
-class FOdysseyTextureEditorGUI;
-class FOdysseyTextureEditorController;
+class FOdysseyPainterEditor;
 
 class UTexture;
 
@@ -22,7 +20,7 @@ class FOdysseyTextureEditorToolkit
 public:
     // Construction / Destruction
     virtual ~FOdysseyTextureEditorToolkit();
-    FOdysseyTextureEditorToolkit(TSharedPtr<FOdysseyTextureEditor> iEditor);
+    FOdysseyTextureEditorToolkit();
 
 protected:
 	virtual void OpenAsset(UObject* iObject) override;

@@ -12,12 +12,15 @@
 #include "Settings/ContentBrowserSettings.h"
 #include "Toolkits/AssetEditorToolkit.h"
 
-#include "TextureEditor/OdysseyTextureEditor.h"
+#include "PainterEditor/OdysseyPainterEditor.h"
+#include "TextureEditor/OdysseyTextureEditorExtension.h"
 #include "OdysseyTextureEditorSettings.h"
 #include "OdysseyTextureEditorToolkit.h"
 #include "OdysseyTextureAssetTypeActions.h"
 #include "OdysseyTextureAssetTypeActions.h"
 #include "TextureEditor/OdysseyTextureEditorCommands.h"
+#include "TextureEditor/OdysseyTextureEditorSource.h"
+#include "TextureEditor/OdysseyTextureEditorGUI.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyTextureEditorModule"
 
@@ -28,10 +31,21 @@
 TSharedRef<FOdysseyTextureEditorToolkit>
 FOdysseyTextureEditorModule::CreateOdysseyTextureEditor( UTexture2D* iTexture )
 {
-	TSharedPtr<FOdysseyTextureEditor> editor = MakeShareable(new FOdysseyTextureEditor());
-    TSharedPtr<FOdysseyTextureEditorToolkit> toolkit = MakeShareable( new FOdysseyTextureEditorToolkit(editor) );
-	editor->Initialize(iTexture);
-    toolkit->Initialize();
+	TSharedPtr<FOdysseyPainterEditor> editor = MakeShared<FOdysseyPainterEditor>(
+		LOCTEXT("WorkspaceMenu_OdysseyTextureEditor", "Odyssey Texture2D Editor"),
+		iTexture,
+		"OdysseyTextureEditor_Layout"
+	);
+
+	TSharedRef<FOdysseyTextureEditorExtension> textureExtension = MakeShared<FOdysseyTextureEditorExtension>(editor.Get());
+	editor->AddExtension(textureExtension);
+
+    TSharedPtr<FOdysseyTextureEditorToolkit> toolkit = MakeShared<FOdysseyTextureEditorToolkit>();
+    toolkit->Initialize(iTexture, editor);
+
+	TSharedPtr<FOdysseyTextureEditorSource> source = MakeShared<FOdysseyTextureEditorSource>(iTexture);
+	editor->SetSource(source);
+
     return toolkit.ToSharedRef();
 }
 
@@ -53,6 +67,8 @@ FOdysseyTextureEditorModule::StartupModule()
 	{
 		FOdysseyTextureContentBrowserExtensions::InstallHooks();
 	}
+
+	RegisterLevelEditorLayoutExtensions();
 }
 
 void
@@ -72,6 +88,8 @@ FOdysseyTextureEditorModule::ShutdownModule()
 
 	// Unregister Assets Type Actions
 	UnregisterAssetTypeActions();
+
+	UnregisterLevelEditorLayoutExtensions();
 }
 
 void
@@ -133,6 +151,20 @@ void
 FOdysseyTextureEditorModule::UnregisterCommands()
 {
 	FOdysseyTextureEditorCommands::Unregister();
+}
+
+void
+FOdysseyTextureEditorModule::RegisterLevelEditorLayoutExtensions()
+{
+    FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor");
+	mExtendLevelEditorLayout = LevelEditorModule.OnRegisterLayoutExtensions().AddStatic(&FOdysseyTextureEditorGUI::ExtendLevelEditorLayout);
+}
+
+void
+FOdysseyTextureEditorModule::UnregisterLevelEditorLayoutExtensions()
+{
+    FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor");
+	LevelEditorModule.OnRegisterLayoutExtensions().Remove(mExtendLevelEditorLayout);
 }
 
 IMPLEMENT_MODULE( FOdysseyTextureEditorModule, OdysseyTextureEditor );

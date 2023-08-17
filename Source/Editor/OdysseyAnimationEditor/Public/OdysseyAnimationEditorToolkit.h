@@ -20,7 +20,7 @@ class FOdysseyAnimationEditorToolkit
 public:
     // Construction / Destruction
     virtual ~FOdysseyAnimationEditorToolkit();
-    FOdysseyAnimationEditorToolkit(TSharedPtr<FOdysseyAnimationEditor> iEditor);
+    FOdysseyAnimationEditorToolkit();
 
 protected:
 	virtual void OpenAsset(UObject* iObject) override;

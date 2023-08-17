@@ -10,29 +10,29 @@ SOdysseyAnimationTimelineScrollBox::Slot()
 }
 
 SOdysseyAnimationTimelineScrollBox::SOdysseyAnimationTimelineScrollBox()
-	: mEditor(nullptr)
+	: mExtension(nullptr)
 {
 }
 
 void
 SOdysseyAnimationTimelineScrollBox::Construct(
     const FArguments& iArgs,
-	FOdysseyAnimationEditor* iEditor
+	FOdysseyAnimationEditorExtension* iExtension
 )
 {
-    mEditor = iEditor;
+    mExtension = iExtension;
 
 	ChildSlot
 	[
-		SAssignNew(mPanel, SOdysseyAnimationTimelineScrollPanel, MoveTemp(const_cast<TArray<FSlot::FSlotArguments>&>(iArgs._Slots)),  iEditor)
+		SAssignNew(mPanel, SOdysseyAnimationTimelineScrollPanel, MoveTemp(const_cast<TArray<FSlot::FSlotArguments>&>(iArgs._Slots)),  iExtension)
 		.Clipping(EWidgetClipping::ClipToBounds)
 	];
 }
 
-FOdysseyAnimationEditor*
-SOdysseyAnimationTimelineScrollBox::GetEditor() const
+FOdysseyAnimationEditorExtension*
+SOdysseyAnimationTimelineScrollBox::GetExtension() const
 {
-    return mEditor;
+    return mExtension;
 }
 
 void
@@ -60,10 +60,10 @@ void
 SOdysseyAnimationTimelineScrollPanel::Construct(
     const FArguments& iArgs,
     TArray<SOdysseyAnimationTimelineScrollBox::FSlot::FSlotArguments> iSlots,
-	FOdysseyAnimationEditor* iEditor
+	FOdysseyAnimationEditorExtension* iExtension
 )
 {
-    mEditor = iEditor;
+    mExtension = iExtension;
 	mChildren.AddSlots(MoveTemp(iSlots));
 }
 
@@ -106,7 +106,7 @@ void
 SOdysseyAnimationTimelineScrollPanel::OnArrangeChildren(const FGeometry& AllottedGeometry, FArrangedChildren& ArrangedChildren) const
 {
 	float scrollPadding = AllottedGeometry.GetLocalSize().X;
-	float currentChildOffset = -mEditor->Timeline()->GetOffset() * mEditor->Timeline()->GetFrameWidth();
+	float currentChildOffset = -mExtension->Timeline()->GetOffset() * mExtension->Timeline()->GetFrameWidth();
 
 	for (int32 SlotIndex = 0; SlotIndex < mChildren.Num(); ++SlotIndex)
 	{

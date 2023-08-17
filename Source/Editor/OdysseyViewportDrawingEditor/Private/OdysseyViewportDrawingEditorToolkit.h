@@ -6,11 +6,15 @@
 #include "OdysseyModeToolkit.h"
 
 class FOdysseyViewportDrawingEditor;
+class FEdMode;
 
 class FOdysseyViewportDrawingEditorToolkit : public FOdysseyModeToolkit
 {
 public:
-	FOdysseyViewportDrawingEditorToolkit(TSharedPtr<FOdysseyViewportDrawingEditor> iEditor, class FEdMode* iEditorMode);
+	FOdysseyViewportDrawingEditorToolkit(TSharedRef<FOdysseyPainterEditor> iEditor, FEdMode* iEdMode);
+
+	virtual TSharedPtr<SWidget> GetInlineContent() const override;
+	virtual FEdMode* GetEditorMode() const override;
 
 	/** IToolkit interface */
 	virtual FName GetToolkitFName() const override;
@@ -19,4 +23,10 @@ public:
     //If we fill the array with names, a mode toolbar will pop in our edMode
     virtual void GetToolPaletteNames( TArray<FName>& ioPaletteNames ) const override;
     virtual void BuildToolPalette( FName iPalette, class FToolBarBuilder& ioToolbarBuilder ) override;
+
+	TSharedRef<FOdysseyViewportDrawingEditorExtension> GetViewportDrawingExtension() const;
+
+private:
+	TSharedPtr<FOdysseyViewportDrawingEditorExtension> mViewportDrawingExtension;
+	FEdMode* mEdMode;
 };

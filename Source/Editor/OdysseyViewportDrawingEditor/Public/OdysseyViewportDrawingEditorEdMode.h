@@ -44,8 +44,6 @@ public:
     virtual bool MouseMove(FEditorViewportClient* iViewportClient,FViewport* iViewport,int32 iMouseX,int32 iMouseY) override;
 	virtual bool InputKey(FEditorViewportClient* iViewportClient, FViewport* iViewport, FKey iKey, EInputEvent iEvent) override;
     virtual bool CapturedMouseMove(FEditorViewportClient* iViewportClient, FViewport* iViewport, int32 iMouseX, int32 iMouseY) override;
-    
-    virtual void Tick(FEditorViewportClient* ViewportClient, float DeltaTime) override;
 
     virtual bool AllowWidgetMove() override { return false; }
     virtual bool ShouldDrawWidget() const override { return false; }
@@ -54,11 +52,11 @@ public:
 	bool IsEditingEnabled() const;
 
 private:
-    void CleanupTabsToolbar(const TSharedRef<SWindow>& Window);
     void OnResetViewMode();
 
 private:
-	TSharedPtr<FOdysseyViewportDrawingEditor> mEditor;
+	TSharedPtr<FOdysseyPainterEditor> mEditor;
 	//TSharedPtr<FOdysseyViewportDrawingEditorToolkit> mToolkit;
 	FOdysseyViewportDrawingEditorPainter* mViewportDrawingEditorPainter;
+    TSharedPtr<FOdysseyViewportDrawingEditorExtension> mViewportDrawingEditorExtension;
 };

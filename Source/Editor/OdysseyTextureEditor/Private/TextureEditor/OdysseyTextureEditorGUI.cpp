@@ -4,7 +4,11 @@
 #include "TextureEditor/OdysseyTextureEditorGUI.h"
 #include "LayerStack/OdysseyTextureLayerStack.h"
 #include "LayerStack/OdysseyTextureLayerImageVector.h"
-#include "TextureEditor/OdysseyTextureEditor.h"
+#include "OdysseyTextureEditorLayerStackTab.h"
+#include "OdysseyTextureEditorTextureDetailsTab.h"
+#include "TextureEditor/OdysseyTextureEditorExtension.h"
+#include "PainterEditor/OdysseyPainterEditorSelectedVectorObjectTab.h"
+#include "Framework/Docking/LayoutExtender.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyTextureEditorGUI"
 
@@ -18,9 +22,8 @@ FOdysseyTextureEditorGUI::~FOdysseyTextureEditorGUI()
 	FOdysseyVectorEngine::OnSignalDelegate().RemoveAll(this);
 }
 
-FOdysseyTextureEditorGUI::FOdysseyTextureEditorGUI(FOdysseyTextureEditor* iEditor) :
-	FOdysseyPainterEditorGUI(iEditor),
-	mEditor( iEditor )
+FOdysseyTextureEditorGUI::FOdysseyTextureEditorGUI(FOdysseyTextureEditorExtension* iExtension) :
+	mExtension( iExtension )
 {
     // Get sure the binding is set up everytime we add or remove a layer in the layer stack.
 	UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw( this, &FOdysseyTextureEditorGUI::OnCurrentLayerChanged );
@@ -48,16 +51,57 @@ FOdysseyTextureEditorGUI::OnCurrentLayerChanged( UOdysseyLayerStack* iLayerStack
 //----------------------------------------------------------------------- Initialization
 
 void
-FOdysseyTextureEditorGUI::CreateTabs()
-{
-	FOdysseyPainterEditorGUI::CreateTabs();
-
-	//ADD NEW TABS
-	ODYSSEY_ADD_TAB(mLayerStackTab, FOdysseyTextureEditorLayerStackTab, mEditor);
-	ODYSSEY_ADD_TAB(mTextureDetailsTab, FOdysseyTextureEditorTextureDetailsTab, mEditor);
+FOdysseyTextureEditorGUI::ExtendLevelEditorLayout(FLayoutExtender& Extender)
+{   
+    Extender.ExtendLayout(FTabId(TEXT("LevelEditorSelectionDetails")), ELayoutExtensionPosition::Above, FTabManager::FTab(FOdysseyTextureEditorLayerStackTab::StaticId(), ETabState::ClosedTab));
 }
 
-TSharedRef<FTabManager::FSplitter>
+void
+FOdysseyTextureEditorGUI::Init()
+{
+    CreateTabs();
+}
+
+void
+FOdysseyTextureEditorGUI::CreateTabs()
+{
+	//ADD NEW TABS
+    TSharedRef<FOdysseyTextureEditorLayerStackTab> layerStackTab = MakeShared<FOdysseyTextureEditorLayerStackTab>(mExtension);
+    TSharedRef<FOdysseyTextureEditorTextureDetailsTab> textureDetailsTab = MakeShared<FOdysseyTextureEditorTextureDetailsTab>(mExtension);
+
+    layerStackTab->ShouldOpenByDefault(true);
+
+    mExtension->GetEditor()->AddTab(layerStackTab);
+    mExtension->GetEditor()->AddTab(textureDetailsTab);
+}
+
+void
+FOdysseyTextureEditorGUI::BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder)
+{	
+	TSharedRef<FTabManager::FSplitter> rightSplitter = iBuilder.GetSplitter("RightSplitter");
+    
+    TSharedRef<FTabManager::FStack> textureLayerStackStack = iBuilder.CreateStack("TextureLayerStackStack");
+	textureLayerStackStack->SetHideTabWell(false);
+	textureLayerStackStack->SetSizeCoefficient(0.35f);
+	textureLayerStackStack->AddTab(FOdysseyTextureEditorLayerStackTab::StaticId(), ETabState::OpenedTab);
+
+    TSharedRef<FTabManager::FStack> textureDetailsStack = iBuilder.CreateStack("TextureDetailsStack");
+	textureDetailsStack->SetHideTabWell(false);
+	textureDetailsStack->SetSizeCoefficient(0.15f);
+	textureDetailsStack->AddTab(FOdysseyTextureEditorLayerStackTab::StaticId(), ETabState::OpenedTab);
+	
+    rightSplitter->Split
+	(
+		textureLayerStackStack
+	);
+
+    rightSplitter->Split
+	(
+		textureDetailsStack
+	);
+}
+
+/* TSharedRef<FTabManager::FSplitter>
 FOdysseyTextureEditorGUI::CreateRightSection()
 {
 	return FOdysseyPainterEditorGUI::CreateRightSection()
@@ -65,26 +109,28 @@ FOdysseyTextureEditorGUI::CreateRightSection()
 		->Split
 		(
 			FTabManager::NewStack()
-			->AddTab(mLayerStackTab->ID(), ETabState::OpenedTab)
+			->AddTab(FOdysseyTextureEditorLayerStackTab::StaticId(), ETabState::OpenedTab)
 			->SetHideTabWell(false)
 			->SetSizeCoefficient(0.35f)
 		)
 		->Split
 		(
 			FTabManager::NewStack()
-			->AddTab(mTextureDetailsTab->ID(), ETabState::OpenedTab)
+			->AddTab(FOdysseyTextureEditorTextureDetailsTab::StaticId(), ETabState::OpenedTab)
 			->SetHideTabWell(false)
 			->SetSizeCoefficient(0.15f)
 		);
+} */
+
+void
+FOdysseyTextureEditorGUI::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
+{
+    ExtendMenuAbout(iOwner, iMenuName);
 }
 
 void
 FOdysseyTextureEditorGUI::BindShortcuts(FBaseToolkit* iToolkit)
 {
-    FOdysseyPainterEditorGUI::BindShortcuts(iToolkit);
-
-    //---
-
     const TSharedRef<FUICommandList>& toolkitCommands = iToolkit->GetToolkitCommands();
     const FOdysseyTextureEditorCommands& textureEditorCommands = FOdysseyTextureEditorCommands::Get();
 
@@ -105,14 +151,9 @@ FOdysseyTextureEditorGUI::BindShortcuts(FBaseToolkit* iToolkit)
 
 //--------------------------------------------------------------------------------------
 //--------------------------------------------------------------------- Menu and Toolbar
-
 void
 FOdysseyTextureEditorGUI::ExtendMenuAbout( FToolMenuOwner iOwner, FName iMenuName )
 {
-    FOdysseyPainterEditorGUI::ExtendMenuAbout( iOwner, iMenuName );
-
-    //---
-
     UToolMenu* menu = UToolMenus::Get()->FindMenu(*(iMenuName.ToString() + FString(".Iliad")));
 
     //Adding entries in our menu
@@ -178,29 +219,11 @@ FOdysseyTextureEditorGUI::ExtendMenuAbout( FToolMenuOwner iOwner, FName iMenuNam
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Getters
 
-FName
-FOdysseyTextureEditorGUI::GetLayoutName()
-{
-	return "OdysseyTextureEditor_Layout";
-}
-
-TSharedPtr<FOdysseyTextureEditorLayerStackTab>&
-FOdysseyTextureEditorGUI::GetLayerStackTab()
-{
-	return mLayerStackTab;
-}
-
-TSharedPtr<FOdysseyTextureEditorTextureDetailsTab>&
-FOdysseyTextureEditorGUI::GetTextureDetailsTab()
-{
-	return mTextureDetailsTab;
-}
-
 void
 FOdysseyTextureEditorGUI::OnVectorSceneSignal( FOdysseyVectorScene* iScene, uint64 iSignalFlags )
 {
-    TSharedPtr<FOdysseyPainterEditorSelectedVectorObjectTab>& vectorObjectTab = mEditor->GetGUI()->GetSelectedVectorObjectTab();
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(static_cast<FOdysseyTextureEditor*>(mEditor)->LayerStack());
+    TSharedPtr<FOdysseyPainterEditorSelectedVectorObjectTab> vectorObjectTab = mExtension->GetEditor()->FindTab<FOdysseyPainterEditorSelectedVectorObjectTab>();
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(mExtension->GetEditor()->GetSource()->GetLayerStack());
 
     // layerStack might be NULL when closing the program
     if( layerStack )
@@ -227,7 +250,7 @@ FOdysseyTextureEditorGUI::OnVectorSceneSignal( FOdysseyVectorScene* iScene, uint
 void
 FOdysseyTextureEditorGUI::DeleteSelection()
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(static_cast<FOdysseyTextureEditor*>(mEditor)->LayerStack());
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(mExtension->GetEditor()->GetSource()->GetLayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
 
     if( currentVectorLayer )
@@ -235,14 +258,14 @@ FOdysseyTextureEditorGUI::DeleteSelection()
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
-        FOdysseyPainterEditorGUI::DeleteSelection( vectorEngine, vectorScene );
+        mExtension->GetEditor()->DeleteSelection( vectorEngine, vectorScene );
     }
 }
 
 void
 FOdysseyTextureEditorGUI::BringForward()
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(static_cast<FOdysseyTextureEditor*>(mEditor)->LayerStack());
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(mExtension->GetEditor()->GetSource()->GetLayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
 
     if( currentVectorLayer )
@@ -250,14 +273,14 @@ FOdysseyTextureEditorGUI::BringForward()
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
-        FOdysseyPainterEditorGUI::BringForward( vectorEngine, vectorScene );
+        mExtension->GetEditor()->BringForward( vectorEngine, vectorScene );
     }
 }
 
 void
 FOdysseyTextureEditorGUI::SendBackward()
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(static_cast<FOdysseyTextureEditor*>(mEditor)->LayerStack());
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(mExtension->GetEditor()->GetSource()->GetLayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
 
     if( currentVectorLayer )
@@ -265,14 +288,14 @@ FOdysseyTextureEditorGUI::SendBackward()
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
-        FOdysseyPainterEditorGUI::SendBackward( vectorEngine, vectorScene );
+        mExtension->GetEditor()->SendBackward( vectorEngine, vectorScene );
     }
 }
 
 void
 FOdysseyTextureEditorGUI::Ungroup()
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(static_cast<FOdysseyTextureEditor*>(mEditor)->LayerStack());
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(mExtension->GetEditor()->GetSource()->GetLayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
 
     if( currentVectorLayer )
@@ -280,14 +303,14 @@ FOdysseyTextureEditorGUI::Ungroup()
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
-        FOdysseyPainterEditorGUI::Ungroup( vectorEngine, vectorScene );
+        mExtension->GetEditor()->Ungroup( vectorEngine, vectorScene );
     }
 }
 
 void
 FOdysseyTextureEditorGUI::ResetView()
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(static_cast<FOdysseyTextureEditor*>(mEditor)->LayerStack());
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(mExtension->GetEditor()->GetSource()->GetLayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
 
     if( currentVectorLayer )
@@ -295,14 +318,14 @@ FOdysseyTextureEditorGUI::ResetView()
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
-        FOdysseyPainterEditorGUI::ResetView( vectorEngine, vectorScene );
+        mExtension->GetEditor()->ResetView( vectorEngine, vectorScene );
     }
 }
 
 void
 FOdysseyTextureEditorGUI::Group()
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(static_cast<FOdysseyTextureEditor*>(mEditor)->LayerStack());
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(mExtension->GetEditor()->GetSource()->GetLayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
 
     if( currentVectorLayer )
@@ -310,14 +333,14 @@ FOdysseyTextureEditorGUI::Group()
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
-        FOdysseyPainterEditorGUI::Group( vectorEngine, vectorScene );
+        mExtension->GetEditor()->Group( vectorEngine, vectorScene );
     }
 }
 
 void
 FOdysseyTextureEditorGUI::GroupPaint()
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(static_cast<FOdysseyTextureEditor*>(mEditor)->LayerStack());
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(mExtension->GetEditor()->GetSource()->GetLayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
 
     if( currentVectorLayer )
@@ -325,14 +348,14 @@ FOdysseyTextureEditorGUI::GroupPaint()
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
-        FOdysseyPainterEditorGUI::GroupPaint( vectorEngine, vectorScene );
+        mExtension->GetEditor()->GroupPaint( vectorEngine, vectorScene );
     }
 }
 
 void
 FOdysseyTextureEditorGUI::FlipHorizontal()
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(static_cast<FOdysseyTextureEditor*>(mEditor)->LayerStack());
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(mExtension->GetEditor()->GetSource()->GetLayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
 
     if( currentVectorLayer )
@@ -340,14 +363,14 @@ FOdysseyTextureEditorGUI::FlipHorizontal()
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
-        FOdysseyPainterEditorGUI::FlipHorizontal( vectorEngine, vectorScene );
+        mExtension->GetEditor()->FlipHorizontal( vectorEngine, vectorScene );
     }
 }
 
 void
 FOdysseyTextureEditorGUI::FlipVertical()
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(static_cast<FOdysseyTextureEditor*>(mEditor)->LayerStack());
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(mExtension->GetEditor()->GetSource()->GetLayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
 
     if( currentVectorLayer )
@@ -355,14 +378,14 @@ FOdysseyTextureEditorGUI::FlipVertical()
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
-        FOdysseyPainterEditorGUI::FlipVertical( vectorEngine, vectorScene );
+        mExtension->GetEditor()->FlipVertical( vectorEngine, vectorScene );
     }
 }
 
 void
 FOdysseyTextureEditorGUI::StitchVertices()
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(static_cast<FOdysseyTextureEditor*>(mEditor)->LayerStack());
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(mExtension->GetEditor()->GetSource()->GetLayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
 
     if( currentVectorLayer )
@@ -370,7 +393,7 @@ FOdysseyTextureEditorGUI::StitchVertices()
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
-        FOdysseyPainterEditor::StitchVertices( vectorEngine, vectorScene );
+        mExtension->GetEditor()->StitchVertices( vectorEngine, vectorScene );
     }
 }
 

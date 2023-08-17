@@ -17,8 +17,8 @@ FOdysseyTextureEditorToolkit::~FOdysseyTextureEditorToolkit()
 {
 }
 
-FOdysseyTextureEditorToolkit::FOdysseyTextureEditorToolkit(TSharedPtr<FOdysseyTextureEditor> iEditor) :
-	FOdysseyAssetEditorToolkit( TEXT( "OdysseyTextureEditorApp" ), iEditor )
+FOdysseyTextureEditorToolkit::FOdysseyTextureEditorToolkit()
+	: FOdysseyAssetEditorToolkit( TEXT( "OdysseyTextureEditorApp" ) )
 {
 }
 

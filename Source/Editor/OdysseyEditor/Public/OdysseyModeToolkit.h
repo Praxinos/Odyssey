@@ -7,7 +7,7 @@
 #include "Toolkits/IToolkitHost.h"
 #include "Toolkits/BaseToolkit.h"
 
-#include "OdysseyToolkit.h"
+class FOdysseyEditor;
 
 class ODYSSEYEDITOR_API FOdysseyModeToolkit
 	: public FModeToolkit,
@@ -16,15 +16,15 @@ class ODYSSEYEDITOR_API FOdysseyModeToolkit
 public:
     // Construction / Destruction
     virtual ~FOdysseyModeToolkit();
-    FOdysseyModeToolkit(const FName& iAppIdentifier, TSharedPtr<FOdysseyEditor> iEditor, class FEdMode* iEditorMode);
+    FOdysseyModeToolkit(TSharedRef<FOdysseyEditor> iEditor);
 
 public:
-    //virtual void Initialize();
-    virtual void Init(const TSharedPtr<IToolkitHost>& iInitToolkitHost, TWeakObjectPtr<UEdMode> iOwningMode);
-
+    void Initialize(
+		FEdMode* iEditorMode,
+		const TSharedPtr<IToolkitHost>& iInitToolkitHost
+	);
 
 	/** IToolkit interface */
-	virtual class FEdMode* GetEditorMode() const override;
 	virtual TSharedPtr<class SWidget> GetInlineContent() const override;
 
     void OnAddEditedObject(UObject* iObject);
@@ -42,11 +42,13 @@ public:
 	virtual double GetLastActivationTime() override;
 	virtual void RemoveEditingAsset(UObject* Asset) override;
 	virtual void ExtendMenu();
+	virtual void RequestModeUITabs() override;
+	virtual void InvokeUI() override;
 
-
-	TSharedPtr<FOdysseyEditor> mEditor;
-	
 private:
-	/** Owning editor mode */
-	class FEdMode* mEditorMode;
+	void OnWindowClosed(const TSharedRef<SWindow>& Window);
+
+public:
+	TSharedPtr<FOdysseyEditor> mEditor;
+	bool mTabSaved;
 };

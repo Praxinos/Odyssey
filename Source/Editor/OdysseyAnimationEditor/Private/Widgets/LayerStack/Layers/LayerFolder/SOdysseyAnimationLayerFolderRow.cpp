@@ -15,7 +15,7 @@
 void SOdysseyAnimationLayerFolderRow::Construct(
     const FArguments& iArgs,
     const TSharedRef<SOdysseyLayerStackTreeView>& iOwnerTableView,
-    FOdysseyAnimationEditor* iEditor,
+    FOdysseyAnimationEditorExtension* iExtension,
     class UOdysseyAnimationLayerFolder* iAnimationLayerFolder
 )
 {
@@ -25,7 +25,7 @@ void SOdysseyAnimationLayerFolderRow::Construct(
     SOdysseyAnimationLayerRow::Construct(
         SOdysseyAnimationLayerRow::FArguments(),
         iOwnerTableView,
-        iEditor,
+        iExtension,
 		iAnimationLayerFolder
     );
 

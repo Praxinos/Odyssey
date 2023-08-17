@@ -5,49 +5,48 @@
 
 #include "OdysseyPainterEditorGUI.h"
 
-#include "OdysseyTextureEditorLayerStackTab.h"
-#include "OdysseyTextureEditorTextureDetailsTab.h"
-
-class FOdysseyTextureEditor;
+class FOdysseyTextureEditorExtension;
+class UOdysseyLayerStack;
 
 /**
  * Implements an Editor toolkit for textures.
  */
-class ODYSSEYTEXTUREEDITOR_API FOdysseyTextureEditorGUI :
-	public FOdysseyPainterEditorGUI
+class ODYSSEYTEXTUREEDITOR_API FOdysseyTextureEditorGUI
+    : public TSharedFromThis<FOdysseyTextureEditorGUI>
 {
 public:
+    static void ExtendLevelEditorLayout(FLayoutExtender& Extender);
+    
+public:
     // Construction / Destruction
-    virtual ~FOdysseyTextureEditorGUI();
-    FOdysseyTextureEditorGUI(FOdysseyTextureEditor* iEditor);
+    ~FOdysseyTextureEditorGUI();
+    FOdysseyTextureEditorGUI(FOdysseyTextureEditorExtension* iExtension);
 
-protected:
+public:
+    void Init();
+    void BindShortcuts( FBaseToolkit* iToolkit );
+    void ExtendMenu( FToolMenuOwner iOwner, FName iMenuName );
+	void BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder);
+
+private:
     //Init
-	virtual void CreateTabs() override;
-    virtual void BindShortcuts( FBaseToolkit* iToolkit ) override;
-    virtual void ExtendMenuAbout( FToolMenuOwner iOwner, FName iMenuName ) override;
-
-public:
-    // GettersFName
-	virtual FName GetLayoutName() override;
-    TSharedPtr<FOdysseyTextureEditorLayerStackTab>& GetLayerStackTab();
-	TSharedPtr<FOdysseyTextureEditorTextureDetailsTab>& GetTextureDetailsTab();
+	void CreateTabs();
+    void ExtendMenuAbout( FToolMenuOwner iOwner, FName iMenuName );
 
 protected:
-	virtual TSharedRef<FTabManager::FSplitter>	CreateRightSection() override;
-
+	TSharedRef<FTabManager::FSplitter>	CreateRightSection();
 
 public:
-    virtual void ResetView();
-    virtual void GroupPaint();
-    virtual void Group();
-    virtual void Ungroup();
-    virtual void BringForward();
-    virtual void SendBackward();
-    virtual void DeleteSelection();
-    virtual void FlipHorizontal();
-    virtual void FlipVertical();
-    virtual void StitchVertices();
+    void ResetView();
+    void GroupPaint();
+    void Group();
+    void Ungroup();
+    void BringForward();
+    void SendBackward();
+    void DeleteSelection();
+    void FlipHorizontal();
+    void FlipVertical();
+    void StitchVertices();
  
 public:
     void BindVectorScene( FOdysseyVectorScene* iScene );
@@ -56,10 +55,5 @@ protected:
     void OnCurrentLayerChanged( UOdysseyLayerStack* iLayerStack );
 
 private:
-	FOdysseyTextureEditor* mEditor;
-
-private:
-    //Tabs
-    TSharedPtr<FOdysseyTextureEditorLayerStackTab>                   mLayerStackTab;
-	TSharedPtr<FOdysseyTextureEditorTextureDetailsTab>               mTextureDetailsTab;
+	FOdysseyTextureEditorExtension* mExtension;
 };

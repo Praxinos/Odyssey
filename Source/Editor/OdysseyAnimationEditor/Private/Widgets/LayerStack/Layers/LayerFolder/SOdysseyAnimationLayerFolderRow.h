@@ -6,7 +6,7 @@
 #include "CoreMinimal.h"
 #include "Widgets/LayerStack/Layers/SOdysseyAnimationLayerRow.h"
 
-class FOdysseyAnimationEditor;
+class FOdysseyAnimationEditorExtension;
 
 /**
  * Implements a layer row widget
@@ -24,7 +24,7 @@ public:
     void Construct(
         const FArguments& iArgs,
         const TSharedRef<SOdysseyLayerStackTreeView>& iOwnerTableView,
-        FOdysseyAnimationEditor* iEditor,
+        FOdysseyAnimationEditorExtension* iExtension,
         class UOdysseyAnimationLayerFolder* iAnimationLayerFolder
     );
     

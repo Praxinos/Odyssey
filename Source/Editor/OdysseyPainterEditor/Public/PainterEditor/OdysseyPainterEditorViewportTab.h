@@ -15,14 +15,23 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorViewportTab :
 	public FOdysseyEditorTab
 {
 public:
+    static const FName& StaticId();
+
+public:
     // Construction / Destruction
     virtual ~FOdysseyPainterEditorViewportTab();
     FOdysseyPainterEditorViewportTab(FOdysseyPainterEditor* iEditor);
 
 protected:
     // FOdysseyEditorTab interface
+    virtual const FName& GetId() const override;
     virtual TSharedPtr<SWidget> CreateWidget() override;
     virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
+
+public:
+    // Public Setters
+    void SetTexture(const TAttribute<UTexture*>& mTexture);
+    void SetDefaultTexture();
 
 public:
     // Public Getters
@@ -58,6 +67,7 @@ protected:
     virtual void OnViewportSizeChanged(FViewport* iViewport, uint32 iUnused);
 
 private:
+    TAttribute<UTexture*> mTexture;
     FOdysseyPainterEditor* mEditor;
 
     TSharedPtr<SOdysseyViewport> mViewport;

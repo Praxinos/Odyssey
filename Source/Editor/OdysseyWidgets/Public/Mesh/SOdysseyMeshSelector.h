@@ -25,6 +25,7 @@ public:
     SLATE_BEGIN_ARGS(SOdysseyMeshSelector)
         {}
         /** Called when the object value changes */
+        SLATE_ARGUMENT(TSharedPtr< FOdysseyMeshSelector >, MeshSelector)
         SLATE_EVENT( FOnMeshChanged, OnMeshChanged )
     SLATE_END_ARGS()
 

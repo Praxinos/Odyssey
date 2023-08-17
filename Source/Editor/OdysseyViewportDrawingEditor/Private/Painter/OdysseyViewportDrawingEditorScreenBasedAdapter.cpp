@@ -18,9 +18,70 @@
 
 FOdysseyViewportDrawingEditorScreenBasedAdapter::~FOdysseyViewportDrawingEditorScreenBasedAdapter()
 {
-    RemoveTextureOverride();
+}
 
-    if (mStrokeBufferRenderTarget2D && mStrokeBufferRenderTarget2D->IsValidLowLevel())
+FOdysseyViewportDrawingEditorScreenBasedAdapter::FOdysseyViewportDrawingEditorScreenBasedAdapter(FOdysseyViewportDrawingEditorExtension* iExtension) :
+    IOdysseyViewportDrawingEditorAdapter(iExtension),
+    mPaintingTexture2DRenderTarget(nullptr),
+    mStrokeBufferRenderTarget2D(nullptr),
+    mSeamRenderTarget2D(nullptr)
+{
+}
+
+void
+FOdysseyViewportDrawingEditorScreenBasedAdapter::SetTexture(UTexture2D* iTexture)
+{
+    FinalizeRenderTarget();
+    IOdysseyViewportDrawingEditorAdapter::SetTexture(iTexture);
+    InitializeRenderTarget();
+}
+
+void
+FOdysseyViewportDrawingEditorScreenBasedAdapter::InitializeRenderTarget()
+{	
+	UTexture2D* texture = GetTexture();
+    if (!texture)
+        return;
+
+    const int32 textureWidth = texture->Source.GetSizeX();
+    const int32 textureHeight = texture->Source.GetSizeY();
+    
+    mPaintingTexture2DRenderTarget = NewObject<UTextureRenderTarget2D>(GetTransientPackage(), NAME_None, RF_Transient);
+    mPaintingTexture2DRenderTarget->ClearColor = FLinearColor(0, 0, 0, 0);
+    mPaintingTexture2DRenderTarget->bNeedsTwoCopies = false;
+    mPaintingTexture2DRenderTarget->InitAutoFormat(textureWidth, textureHeight);
+    mPaintingTexture2DRenderTarget->UpdateResourceImmediate();
+    mPaintingTexture2DRenderTarget->AddToRoot();
+    
+    mStrokeBufferRenderTarget2D = NewObject<UTextureRenderTarget2D>(GetTransientPackage(), NAME_None, RF_Transient);
+    mStrokeBufferRenderTarget2D->ClearColor = FLinearColor(0, 0, 0, 0);
+    mStrokeBufferRenderTarget2D->bNeedsTwoCopies = false;
+    mStrokeBufferRenderTarget2D->InitAutoFormat(textureWidth, textureHeight);
+    mStrokeBufferRenderTarget2D->UpdateResourceImmediate();
+    mStrokeBufferRenderTarget2D->AddToRoot();
+
+    mSeamRenderTarget2D = NewObject<UTextureRenderTarget2D>(GetTransientPackage(), NAME_None, RF_Transient);
+    mSeamRenderTarget2D->ClearColor = FLinearColor(0, 0, 0, 0);
+    mSeamRenderTarget2D->bNeedsTwoCopies = false;
+    mSeamRenderTarget2D->InitAutoFormat(textureWidth, textureHeight);
+    mSeamRenderTarget2D->UpdateResourceImmediate();
+    mSeamRenderTarget2D->AddToRoot();
+
+    TexturePaintHelpers::GenerateSeamMask(mExtension->Component(), mExtension->GetUVIndexUsedByCurrentTexture(), mSeamRenderTarget2D, texture, mPaintingTexture2DRenderTarget);
+	TexturePaintHelpers::CopyTextureToRenderTargetTexture(texture, mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
+}
+
+void
+FOdysseyViewportDrawingEditorScreenBasedAdapter::FinalizeRenderTarget()
+{
+	//Destroy the render target
+	if (mPaintingTexture2DRenderTarget && mPaintingTexture2DRenderTarget->IsValidLowLevel())
+    {
+		mPaintingTexture2DRenderTarget->ConditionalBeginDestroy();
+    	mPaintingTexture2DRenderTarget = nullptr;
+    }
+
+    if ( mStrokeBufferRenderTarget2D && mStrokeBufferRenderTarget2D->IsValidLowLevel())
     {
         mStrokeBufferRenderTarget2D->ConditionalBeginDestroy();
         mStrokeBufferRenderTarget2D = nullptr;
@@ -33,72 +94,15 @@ FOdysseyViewportDrawingEditorScreenBasedAdapter::~FOdysseyViewportDrawingEditorS
     }
 }
 
-FOdysseyViewportDrawingEditorScreenBasedAdapter::FOdysseyViewportDrawingEditorScreenBasedAdapter(TSharedPtr<FOdysseyViewportDrawingEditor> iEditor) :
-    IOdysseyViewportDrawingEditorAdapter::IOdysseyViewportDrawingEditorAdapter(iEditor)
-{
-    PrepareAdapterForPainting();
-}
-
-void FOdysseyViewportDrawingEditorScreenBasedAdapter::PrepareAdapterForPainting()
-{    
-    if (mEditor->Component() == nullptr || mEditor->Texture() == nullptr)
-        return;
-
-    IOdysseyViewportDrawingEditorAdapter::PrepareAdapterForPainting();
-
-    if( mState == eState::kIdle )
-    {
-        BuildPaintingTexture2DRenderTarget();
-        TexturePaintHelpers::GenerateSeamMask(mEditor->Component(), mEditor->GetUVIndexUsedByCurrentTexture(), mSeamRenderTarget2D, mEditor->Texture(), mPaintingTexture2DRenderTarget);
-    }
-
-    mState = eState::kIdleReady;
-}
-
-void FOdysseyViewportDrawingEditorScreenBasedAdapter::StartPainting()
-{
-    mEditor->GetSelectedTool()->OnMouseDown(mCurrentStrokeRay.mPoint, EKeys::LeftMouseButton);
-
-    if (mPaintingTexture2DRenderTarget)
-        TexturePaintHelpers::CopyTextureToRenderTargetTexture(mEditor->Texture(), mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
-}
-
-void FOdysseyViewportDrawingEditorScreenBasedAdapter::Paint()
-{
-    mEditor->GetSelectedTool()->OnMouseDrag(mCurrentStrokeRay.mPoint);
-}
-
-void FOdysseyViewportDrawingEditorScreenBasedAdapter::FinishPainting()
-{
-    mEditor->GetSelectedTool()->OnMouseUp( mCurrentStrokeRay.mPoint, EKeys::LeftMouseButton );
-
-    if (mPaintingTexture2DRenderTarget)
-        TexturePaintHelpers::CopyTextureToRenderTargetTexture(mEditor->Texture(), mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
-}
-
-void FOdysseyViewportDrawingEditorScreenBasedAdapter::Tick(float iDelta)
-{
-    if (mEditor->Texture() && mPaintingTexture2DRenderTarget)
-        TexturePaintHelpers::CopyTextureToRenderTargetTexture(mEditor->Texture(), mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
-
-    if( mLastKnownViewport )
-        mEditor->GetRasterDrawingTool()->SetBaseSize((FMath::Max(mLastKnownViewport->GetSizeXY().X, mLastKnownViewport->GetSizeXY().Y) / 2) * GetStampQuality());
-        //mEditor->GetGUI()->GetTopTab()->SetMeshMaxSize((FMath::Max(mLastKnownViewport->GetSizeXY().X, mLastKnownViewport->GetSizeXY().Y) / 2) * GetStampQuality());
-
-    if (mEditor->GetSelectedTool())
-        mEditor->GetSelectedTool()->Tick(iDelta);
-}
-
-
 void FOdysseyViewportDrawingEditorScreenBasedAdapter::RenderInteractorWidget(const FSceneView* iView, FViewport* iViewport, FPrimitiveDrawInterface* iPDI)
 {
     UOdysseyPainterEditorRasterDrawingTool* drawingTool = nullptr;
-    if (mEditor->GetSelectedTool() && mEditor->GetSelectedTool()->IsA(UOdysseyPainterEditorRasterDrawingTool::StaticClass()))
-        drawingTool = Cast<UOdysseyPainterEditorRasterDrawingTool>(mEditor->GetSelectedTool());
+    if (mExtension->GetEditor()->GetSelectedTool() && mExtension->GetEditor()->GetSelectedTool()->IsA(UOdysseyPainterEditorRasterDrawingTool::StaticClass()))
+        drawingTool = Cast<UOdysseyPainterEditorRasterDrawingTool>(mExtension->GetEditor()->GetSelectedTool());
     else
         return;
 
-    const TSharedPtr<IMeshPaintGeometryAdapter>* meshAdapterPtr = mEditor->ComponentToAdapterMap().Find(mEditor->Component());
+    const TSharedPtr<IMeshPaintGeometryAdapter>* meshAdapterPtr = mExtension->ComponentToAdapterMap().Find(mExtension->Component());
     if (!meshAdapterPtr)
         return;
 
@@ -135,43 +139,6 @@ void FOdysseyViewportDrawingEditorScreenBasedAdapter::RenderInteractorWidget(con
         }
     }
 
-}
-
-void FOdysseyViewportDrawingEditorScreenBasedAdapter::BuildPaintingTexture2DRenderTarget()
-{
-    if (mEditor->Component() == nullptr || mEditor->Texture() == nullptr)
-        return;
-
-    const int32 textureWidth = mEditor->Texture()->Source.GetSizeX();
-    const int32 textureHeight = mEditor->Texture()->Source.GetSizeY();
-
-    mPaintingTexture2DRenderTarget = NewObject<UTextureRenderTarget2D>(GetTransientPackage(), NAME_None, RF_Transient);
-    mPaintingTexture2DRenderTarget->ClearColor = FLinearColor(0, 0, 0, 0);
-    mPaintingTexture2DRenderTarget->bNeedsTwoCopies = false;
-    mPaintingTexture2DRenderTarget->InitAutoFormat(textureWidth, textureHeight);
-    mPaintingTexture2DRenderTarget->UpdateResourceImmediate();
-    mPaintingTexture2DRenderTarget->AddToRoot();
-
-
-    mStrokeBufferRenderTarget2D = NewObject<UTextureRenderTarget2D>(GetTransientPackage(), NAME_None, RF_Transient);
-    mStrokeBufferRenderTarget2D->ClearColor = FLinearColor(0, 0, 0, 0);
-    mStrokeBufferRenderTarget2D->bNeedsTwoCopies = false;
-    mStrokeBufferRenderTarget2D->InitAutoFormat( textureWidth, textureHeight );
-    mStrokeBufferRenderTarget2D->UpdateResourceImmediate();
-    mStrokeBufferRenderTarget2D->AddToRoot();
-
-    mSeamRenderTarget2D = NewObject<UTextureRenderTarget2D>(GetTransientPackage(), NAME_None, RF_Transient);
-    mSeamRenderTarget2D->ClearColor = FLinearColor(0, 0, 0, 0);
-    mSeamRenderTarget2D->bNeedsTwoCopies = false;
-    mSeamRenderTarget2D->InitAutoFormat(textureWidth, textureHeight);
-    mSeamRenderTarget2D->UpdateResourceImmediate();
-    mSeamRenderTarget2D->AddToRoot();
-
-    mPreviousMipSettings = mEditor->Texture()->MipGenSettings;
-    mEditor->Texture()->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
-    mEditor->Texture()->UpdateResource();
-    FTextureCompilingManager::Get().FinishCompilation({ mEditor->Texture() });
-    TexturePaintHelpers::CopyTextureToRenderTargetTexture(mEditor->Texture(), mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
 }
 
 void FOdysseyViewportDrawingEditorScreenBasedAdapter::GatherTextureTriangles(IMeshPaintGeometryAdapter* iAdapter, int32 iTriangleIndex, const int32 iVertexIndices[3], TArray<FTexturePaintTriangleInfo>* iTriangleInfo, TArray<FTexturePaintMeshSectionInfo>* iSectionInfos, int32 iUVChannelIndex)
@@ -283,9 +250,9 @@ TArray<::ULIS::FRectI> FOdysseyViewportDrawingEditorScreenBasedAdapter::GetMinim
 
 float FOdysseyViewportDrawingEditorScreenBasedAdapter::GetStampQuality()
 {
-    if (mEditor->Texture() && mEditor->Component())
+    if (mTexture && mExtension->Component())
     {
-        return ((FMath::Max(mEditor->Texture()->GetSizeX(), mEditor->Texture()->GetSizeY()) / mEditor->GetMeshComponentMaxSize()) + 1.f);
+        return ((FMath::Max(mTexture->GetSizeX(), mTexture->GetSizeY()) / mExtension->GetMeshComponentMaxSize()) + 1.f);
     }
 
     return 1.f;
@@ -294,8 +261,8 @@ float FOdysseyViewportDrawingEditorScreenBasedAdapter::GetStampQuality()
 ::ULIS::FEvent FOdysseyViewportDrawingEditorScreenBasedAdapter::StampOverride(UOdysseyBrushAssetBase::FStampParams iStampParams)
 {
     UOdysseyPainterEditorRasterDrawingTool* drawingTool = nullptr;
-    if (mEditor->GetSelectedTool()->IsA(UOdysseyPainterEditorRasterDrawingTool::StaticClass()))
-        drawingTool = Cast<UOdysseyPainterEditorRasterDrawingTool>(mEditor->GetSelectedTool());
+    if (mExtension->GetEditor()->GetSelectedTool()->IsA(UOdysseyPainterEditorRasterDrawingTool::StaticClass()))
+        drawingTool = Cast<UOdysseyPainterEditorRasterDrawingTool>(mExtension->GetEditor()->GetSelectedTool());
 
     if( !drawingTool )
         return iStampParams.mEvent;
@@ -303,7 +270,7 @@ float FOdysseyViewportDrawingEditorScreenBasedAdapter::GetStampQuality()
     if (!GCurrentLevelEditingViewportClient->GetEditorViewportWidget()->GetSceneViewport()->HasFocus())
         return drawingTool->GetBrushInstance()->StampInternal(iStampParams);
 
-    const TSharedPtr<IMeshPaintGeometryAdapter>* meshAdapterPtr = mEditor->ComponentToAdapterMap().Find(mEditor->Component());
+    const TSharedPtr<IMeshPaintGeometryAdapter>* meshAdapterPtr = mExtension->ComponentToAdapterMap().Find(mExtension->Component());
     if (!meshAdapterPtr)
         return iStampParams.mEvent;
 
@@ -399,7 +366,7 @@ float FOdysseyViewportDrawingEditorScreenBasedAdapter::GetStampQuality()
         screenPaintBatchedElementParameters->ShaderParams.yScreenAxis = yScreenAxis;
     }
 
-    const ERHIFeatureLevel::Type featureLevel = mEditor->Component()->GetWorld()->FeatureLevel;
+    const ERHIFeatureLevel::Type featureLevel = mExtension->Component()->GetWorld()->FeatureLevel;
 
     FTextureRenderTargetResource* strokeRenderTargetResource = mStrokeBufferRenderTarget2D->GameThread_GetRenderTargetResource();
     FCanvas strokePaintCanvas(strokeRenderTargetResource, nullptr, 0, 0, 0, featureLevel);
@@ -414,7 +381,7 @@ float FOdysseyViewportDrawingEditorScreenBasedAdapter::GetStampQuality()
      for (uint32 i = 0; i < triIndices; i++)
      {
          const int32 indices[3] = { int32(vertexIndices[i * 3]), int32(vertexIndices[i * 3 + 1]), int32(vertexIndices[i * 3 + 2]) };
-         GatherTextureTriangles(meshAdapter.Get(), i, indices, &triangleInfo, &sectionInfo, mEditor->GetUVIndexUsedByCurrentTexture());
+         GatherTextureTriangles(meshAdapter.Get(), i, indices, &triangleInfo, &sectionInfo, mExtension->GetUVIndexUsedByCurrentTexture());
      }*/
 
      //This gathers all triangles that are front facing
@@ -434,7 +401,7 @@ float FOdysseyViewportDrawingEditorScreenBasedAdapter::GetStampQuality()
     for (int i = 0; i < triangles.Num(); i++)
     {
         const int32 indices[3] = { int32(vertexIndices[triangles[i] * 3]), int32(vertexIndices[triangles[i] * 3 + 1]), int32(vertexIndices[triangles[i] * 3 + 2]) };
-        GatherTextureTriangles(meshAdapter.Get(), triangles[i], indices, &triangleInfo, &sectionInfo, mEditor->GetUVIndexUsedByCurrentTexture());
+        GatherTextureTriangles(meshAdapter.Get(), triangles[i], indices, &triangleInfo, &sectionInfo, mExtension->GetUVIndexUsedByCurrentTexture());
     }
 
 
@@ -649,6 +616,46 @@ void FOdysseyViewportDrawingEditorScreenBasedAdapter::BindStampBrushInstance(UOd
     {
         iBindBrush->AddContext( new FOdysseyViewportEditorBrushContext() );
     }
+}
+
+void FOdysseyViewportDrawingEditorScreenBasedAdapter::Tick(float iDelta)
+{
+    if (!mTexture)
+        return;
+
+    if ( mPaintingTexture2DRenderTarget )
+        TexturePaintHelpers::CopyTextureToRenderTargetTexture(mTexture, mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
+        
+    if (!mLastKnownViewport)
+        return;
+
+    UOdysseyPainterEditorRasterDrawingTool* drawingTool = GetDrawingTool();
+    if (!drawingTool)
+        return;
+
+    drawingTool->SetBaseSize((FMath::Max(mLastKnownViewport->GetSizeXY().X, mLastKnownViewport->GetSizeXY().Y) / 2) * GetStampQuality());
+}
+
+void FOdysseyViewportDrawingEditorScreenBasedAdapter::StartPainting()
+{
+    IOdysseyViewportDrawingEditorAdapter::StartPainting();
+
+    if (mPaintingTexture2DRenderTarget)
+        TexturePaintHelpers::CopyTextureToRenderTargetTexture(GetTexture(), mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
+}
+
+void FOdysseyViewportDrawingEditorScreenBasedAdapter::Paint()
+{
+    IOdysseyViewportDrawingEditorAdapter::Paint();
+    if ( mPaintingTexture2DRenderTarget )
+        TexturePaintHelpers::CopyTextureToRenderTargetTexture(GetTexture(), mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
+}
+
+void FOdysseyViewportDrawingEditorScreenBasedAdapter::FinishPainting()
+{
+    IOdysseyViewportDrawingEditorAdapter::FinishPainting();
+    if ( mPaintingTexture2DRenderTarget )
+        TexturePaintHelpers::CopyTextureToRenderTargetTexture(GetTexture(), mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
 }
 
 #undef LOCTEXT_NAMESPACE

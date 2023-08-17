@@ -12,11 +12,12 @@
 #include "Settings/ContentBrowserSettings.h"
 #include "Toolkits/AssetEditorToolkit.h"
 
-#include "AnimationEditor/OdysseyAnimationEditor.h"
 #include "OdysseyAnimationEditorToolkit.h"
 #include "OdysseyAnimationAssetTypeActions.h"
 #include "OdysseyAnimationAssetTypeActions.h"
 #include "AnimationEditor/OdysseyAnimationEditorCommands.h"
+#include "AnimationEditor/OdysseyAnimationEditorExtension.h"
+#include "AnimationEditor/OdysseyAnimationEditorGUI.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyAnimationEditorModule"
 
@@ -27,11 +28,32 @@
 TSharedRef<FOdysseyAnimationEditorToolkit>
 FOdysseyAnimationEditorModule::CreateOdysseyAnimationEditor( UOdysseyAnimation* iAnimation )
 {
-	TSharedPtr<FOdysseyAnimationEditor> editor = MakeShareable(new FOdysseyAnimationEditor());
+	TSharedPtr<FOdysseyPainterEditor> editor = MakeShared<FOdysseyPainterEditor>(
+		LOCTEXT("WorkspaceMenu_OdysseyAnimationEditor", "Odyssey Animation Editor"),
+		iAnimation,
+		"OdysseyAnimationEditor_Layout"
+	);
+
+	TSharedRef<FOdysseyAnimationEditorExtension> animationExtension = MakeShared<FOdysseyAnimationEditorExtension>(editor.Get());
+	editor->AddExtension(animationExtension);
+
+    TSharedPtr<FOdysseyAnimationEditorToolkit> toolkit = MakeShared<FOdysseyAnimationEditorToolkit>();
+    toolkit->Initialize(iAnimation, editor);
+
+	TSharedPtr<FOdysseyAnimationEditorSource> source = MakeShared<FOdysseyAnimationEditorSource>(iAnimation);
+	editor->SetSource(source);
+
+    return toolkit.ToSharedRef();
+
+	/* TSharedPtr<FOdysseyAnimationEditor> editor = MakeShareable(new FOdysseyAnimationEditor());
     TSharedPtr<FOdysseyAnimationEditorToolkit> toolkit = MakeShareable( new FOdysseyAnimationEditorToolkit(editor) );
 	editor->Initialize(iAnimation);
     toolkit->Initialize();
-    return toolkit.ToSharedRef();
+
+	TSharedPtr<FOdysseyAnimationEditorSource> source = MakeShared<FOdysseyAnimationEditorSource>(iAnimation);
+	editor->SetSource(source);
+
+    return toolkit.ToSharedRef(); */
 }
 
 void
@@ -41,6 +63,8 @@ FOdysseyAnimationEditorModule::StartupModule()
 
 	// Register Commands
 	RegisterCommands();
+
+	RegisterLevelEditorLayoutExtensions();
 }
 
 void
@@ -51,6 +75,8 @@ FOdysseyAnimationEditorModule::ShutdownModule()
 
 	// Unregister Assets Type Actions
 	UnregisterAssetTypeActions();
+
+	UnregisterLevelEditorLayoutExtensions();
 }
 
 void
@@ -88,6 +114,20 @@ void
 FOdysseyAnimationEditorModule::UnregisterCommands()
 {
 	FOdysseyAnimationEditorCommands::Unregister();
+}
+
+void
+FOdysseyAnimationEditorModule::RegisterLevelEditorLayoutExtensions()
+{
+    FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor");
+	mExtendLevelEditorLayout = LevelEditorModule.OnRegisterLayoutExtensions().AddStatic(&FOdysseyAnimationEditorGUI::ExtendLevelEditorLayout);
+}
+
+void
+FOdysseyAnimationEditorModule::UnregisterLevelEditorLayoutExtensions()
+{
+    FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor");
+	LevelEditorModule.OnRegisterLayoutExtensions().Remove(mExtendLevelEditorLayout);
 }
 
 IMPLEMENT_MODULE( FOdysseyAnimationEditorModule, OdysseyAnimationEditor );

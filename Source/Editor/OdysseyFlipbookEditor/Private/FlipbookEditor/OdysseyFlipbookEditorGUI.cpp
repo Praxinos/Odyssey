@@ -3,11 +3,9 @@
 
 #include "OdysseyFlipbookEditorGUI.h"
 
-#include "OdysseyStyleSet.h"
-#include "OdysseyFlipbookEditor.h"
-#include "OdysseyFlipbookEditorToolkit.h"
-#include "OdysseyFlipbookEditorViewportTab.h"
 #include "OdysseyFlipbookEditorTimelineTab.h"
+#include "PainterEditor/OdysseyPainterEditorViewportTab.h"
+#include "Framework/Docking/LayoutExtender.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyFlipbookEditorToolkit"
 
@@ -19,29 +17,92 @@ FOdysseyFlipbookEditorGUI::~FOdysseyFlipbookEditorGUI()
 {
 }
 
-FOdysseyFlipbookEditorGUI::FOdysseyFlipbookEditorGUI(FOdysseyFlipbookEditor* iEditor)
-	: FOdysseyTextureEditorGUI(iEditor)
-	, mEditor(iEditor)
+FOdysseyFlipbookEditorGUI::FOdysseyFlipbookEditorGUI(FOdysseyFlipbookEditorExtension* iExtension)
+	: mExtension(iExtension)
 {
+}
+
+void
+FOdysseyFlipbookEditorGUI::Initialize()
+{
+	CreateTabs();
+}
+
+void
+FOdysseyFlipbookEditorGUI::Finalize()
+{
+}
+
+void
+FOdysseyFlipbookEditorGUI::BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder)
+{	
+	TSharedRef<FTabManager::FSplitter> mainVerticalSplitter = iBuilder.GetSplitter("MainVerticalSplitter");	
+	TSharedRef<FTabManager::FStack> flipbookTimelineStack = iBuilder.CreateStack("FlipbookTimelineStack");
+	flipbookTimelineStack->SetHideTabWell(false);
+	flipbookTimelineStack->SetSizeCoefficient(0.2f);
+	flipbookTimelineStack->AddTab(FOdysseyFlipbookEditorTimelineTab::StaticId(), ETabState::OpenedTab);
+	mainVerticalSplitter->Split
+	(
+		flipbookTimelineStack
+	);
+}
+
+void
+FOdysseyFlipbookEditorGUI::OnFlipbookChanged()
+{
+	//Override displayed texture only if a flipbook is being edited
+	if (mExtension->GetFlipbook())
+	{
+		TSharedPtr<FOdysseyPainterEditorViewportTab> viewportTab = mExtension->GetEditor()->FindTab<FOdysseyPainterEditorViewportTab>();
+		TAttribute<UTexture*> textureAttr = TAttribute<UTexture*>::CreateLambda(
+			[this]() -> UTexture*
+			{
+				TSharedPtr<FOdysseyFlipbookEditorTimelineTab> timelineTab = mExtension->GetEditor()->FindTab<FOdysseyFlipbookEditorTimelineTab>();
+
+				if (!timelineTab->Timeline())
+					return nullptr;
+
+				if (timelineTab->Timeline()->IsScrubbing())
+					return mExtension->PreviewTexture();
+
+				TSharedPtr<FOdysseyPainterEditorSource> source = mExtension->GetEditor()->GetSource();
+				if (!source)
+					return nullptr;
+
+				return source->DisplayTexture();
+			}
+		);
+
+		viewportTab->SetTexture(textureAttr);
+	}
+	else
+	{
+		TSharedPtr<FOdysseyPainterEditorViewportTab> viewportTab = mExtension->GetEditor()->FindTab<FOdysseyPainterEditorViewportTab>();
+		viewportTab->SetDefaultTexture();
+	}
 }
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------------------- Initialization
 
+void
+FOdysseyFlipbookEditorGUI::ExtendLevelEditorLayout(FLayoutExtender& Extender)
+{   
+    Extender.ExtendLayout(FTabId(TEXT("LevelEditorSelectionDetails")), ELayoutExtensionPosition::Above, FTabManager::FTab(FOdysseyFlipbookEditorTimelineTab::StaticId(), ETabState::ClosedTab));
+}
 
 void
 FOdysseyFlipbookEditorGUI::CreateTabs()
 {
-	FOdysseyTextureEditorGUI::CreateTabs();
-
-	//REPLACE TABS
-	ODYSSEY_SET_TAB(mViewportTab, FOdysseyFlipbookEditorViewportTab, mEditor);
-
 	//ADD NEW TABS
-	ODYSSEY_ADD_TAB(mTimelineTab, FOdysseyFlipbookEditorTimelineTab, mEditor);
+	TSharedRef<FOdysseyFlipbookEditorTimelineTab> timelineTab = MakeShared<FOdysseyFlipbookEditorTimelineTab>(mExtension);
+
+	timelineTab->ShouldOpenByDefault(true);
+
+	mExtension->GetEditor()->AddTab(timelineTab);
 }
 
-TSharedRef<FTabManager::FSplitter>
+/* TSharedRef<FTabManager::FSplitter>
 FOdysseyFlipbookEditorGUI::CreateMainSection()
 {
 	return FOdysseyTextureEditorGUI::CreateMainSection()
@@ -54,16 +115,10 @@ FOdysseyFlipbookEditorGUI::CreateMainSection()
 			->SetHideTabWell(false)
 			->SetSizeCoefficient(0.2f)
 		);
-}
+} */
 
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Getters
-
-FName
-FOdysseyFlipbookEditorGUI::GetLayoutName()
-{
-	return "OdysseyFlipbookEditor_Layout";
-}
 
 TSharedPtr<FOdysseyFlipbookEditorTimelineTab>&
 FOdysseyFlipbookEditorGUI::GetTimelineTab()

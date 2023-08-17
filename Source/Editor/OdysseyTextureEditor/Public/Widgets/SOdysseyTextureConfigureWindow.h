@@ -8,7 +8,7 @@
 #include "Widgets/SWindow.h"
 
 
-class ODYSSEYTEXTURE_API SOdysseyTextureConfigureWindow
+class ODYSSEYTEXTUREEDITOR_API SOdysseyTextureConfigureWindow
     : public SWindow
 {
 public:
@@ -20,7 +20,7 @@ public:
     };
 
 public:
-    struct ODYSSEYTEXTURE_API FProperties
+    struct ODYSSEYTEXTUREEDITOR_API FProperties
     {
         FProperties();
         int                     mWidth;

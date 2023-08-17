@@ -192,9 +192,10 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorEng
     UOdysseyPaletteEntry* entry = nullptr;
     BLPoint localCoords;
 
-    if (GetEditor()->GetGUI()->GetColorPaletteTab()->PaletteWidget()->GetColorPalette()->GetPalette())
+    TSharedPtr<FOdysseyPainterEditorPaletteTab> colorPaletteTab = GetEditor()->FindTab<FOdysseyPainterEditorPaletteTab>();
+    if (colorPaletteTab->PaletteWidget()->GetColorPalette()->GetPalette())
     {
-        entry = GetEditor()->GetGUI()->GetColorPaletteTab()->PaletteWidget()->GetColorPalette()->GetPalette()->CurrentEntry.Get();
+        entry = colorPaletteTab->PaletteWidget()->GetColorPalette()->GetPalette()->CurrentEntry.Get();
         if (entry && entry->IsA(UOdysseyPaletteEntryColor::StaticClass()))
         {
             FColor colorEntry = Cast< UOdysseyPaletteEntryColor >(entry)->GetUsedColor();
