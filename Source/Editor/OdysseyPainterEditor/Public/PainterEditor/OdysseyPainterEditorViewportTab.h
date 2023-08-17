@@ -29,6 +29,11 @@ protected:
     virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
 
 public:
+    // Public Setters
+    void SetTexture(const TAttribute<UTexture*>& mTexture);
+    void SetDefaultTexture();
+
+public:
     // Public Getters
     TSharedPtr<SOdysseyViewport> GetViewport();
 
@@ -62,6 +67,7 @@ protected:
     virtual void OnViewportSizeChanged(FViewport* iViewport, uint32 iUnused);
 
 private:
+    TAttribute<UTexture*> mTexture;
     FOdysseyPainterEditor* mEditor;
 
     TSharedPtr<SOdysseyViewport> mViewport;

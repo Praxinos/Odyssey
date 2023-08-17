@@ -37,7 +37,7 @@ FOdysseyTextureEditorModule::CreateOdysseyTextureEditor( UTexture2D* iTexture )
 	);
 
 	TSharedRef<FOdysseyTextureEditorExtension> textureExtension = MakeShared<FOdysseyTextureEditorExtension>(editor.Get());
-	editor->AddExtension(MakeShared<FOdysseyTextureEditorExtension>(editor.Get()));
+	editor->AddExtension(textureExtension);
 
     TSharedPtr<FOdysseyTextureEditorToolkit> toolkit = MakeShared<FOdysseyTextureEditorToolkit>();
     toolkit->Initialize(iTexture, editor);

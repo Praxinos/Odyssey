@@ -28,11 +28,14 @@ FOdysseyFlipbookEditorExtension::FOdysseyFlipbookEditorExtension(FOdysseyPainter
 void
 FOdysseyFlipbookEditorExtension::Initialize()
 {
+	mGUI = MakeShared<FOdysseyFlipbookEditorGUI>(this);
+	mGUI->Initialize();
 }
 
 void
 FOdysseyFlipbookEditorExtension::Finalize()
 {
+	mGUI->Finalize();
 	SetFlipbook(nullptr);
 }
 
@@ -132,28 +135,13 @@ FOdysseyFlipbookEditorExtension::PreviewTexture(UTexture2D* iTexture)
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------- Overrides
 
-FOdysseyFlipbookEditorGUI*
-FOdysseyFlipbookEditorExtension::GetGUI()
-{
-	if (!mGUI)
-		mGUI = MakeShared<FOdysseyFlipbookEditorGUI>(this);
-	return mGUI.Get();
-}
-
-/* TSharedPtr<FWorkspaceItem>
-FOdysseyFlipbookEditorExtension::RegisterTabSpawners(const TSharedRef<FTabManager>& iTabManager)
-{
-    TSharedPtr<FWorkspaceItem> workspaceMenuCategory = iTabManager->AddLocalWorkspaceMenuCategory(LOCTEXT("WorkspaceMenu_OdysseyFlipbookEditor", "Odyssey Animation2D Editor"));
-	TSharedRef<FWorkspaceItem> workspaceMenuCategoryRef = workspaceMenuCategory.ToSharedRef();
-	GetGUI()->RegisterTabSpawners(iTabManager, workspaceMenuCategoryRef);
-	return workspaceMenuCategory;
-} */
-
 void
 FOdysseyFlipbookEditorExtension::SetTextureAtKeyframeIndex(int32 iKeyframeIndex)
 {
+	TSharedPtr<FOdysseyFlipbookEditorTimelineTab> timelineTab = GetEditor()->FindTab<FOdysseyFlipbookEditorTimelineTab>();
+	
 	UTexture2D* texture = mFlipbookWrapper.GetKeyframeTexture(iKeyframeIndex);
-	if (GetGUI()->GetTimelineTab()->Timeline()->IsScrubbing())
+	if (timelineTab->Timeline()->IsScrubbing())
 	{
 		mPreviewSurface.Texture(texture);
 		return;
@@ -181,7 +169,8 @@ FOdysseyFlipbookEditorExtension::OnSpriteTextureChanged(UPaperSprite* iSprite, U
 		}
 	}
 
-	int32 index = GetGUI()->GetTimelineTab()->Timeline()->GetCurrentKeyframeIndex();
+	TSharedPtr<FOdysseyFlipbookEditorTimelineTab> timelineTab = GetEditor()->FindTab<FOdysseyFlipbookEditorTimelineTab>();
+	int32 index = timelineTab->Timeline()->GetCurrentKeyframeIndex();
 
 	UPaperSprite* sprite = mFlipbookWrapper.GetKeyframeSprite(index);
 	if (sprite != iSprite)

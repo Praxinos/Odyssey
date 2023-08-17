@@ -34,7 +34,8 @@ FOdysseyAnimationEditorModule::CreateOdysseyAnimationEditor( UOdysseyAnimation* 
 		"OdysseyAnimationEditor_Layout"
 	);
 
-	editor->AddExtension(MakeShared<FOdysseyAnimationEditorExtension>(editor.Get()));
+	TSharedRef<FOdysseyAnimationEditorExtension> animationExtension = MakeShared<FOdysseyAnimationEditorExtension>(editor.Get());
+	editor->AddExtension(animationExtension);
 
     TSharedPtr<FOdysseyAnimationEditorToolkit> toolkit = MakeShared<FOdysseyAnimationEditorToolkit>();
     toolkit->Initialize(iAnimation, editor);

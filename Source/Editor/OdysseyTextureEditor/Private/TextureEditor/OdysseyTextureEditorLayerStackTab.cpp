@@ -100,6 +100,10 @@ FOdysseyTextureEditorLayerStackTab::ExtendMenu( FToolMenuOwner iOwner, FName iMe
 UOdysseyLayerStack*
 FOdysseyTextureEditorLayerStackTab::LayerStack() const
 {
+    TSharedPtr<FOdysseyPainterEditorSource> source = mExtension->GetEditor()->GetSource();
+    if (!source)
+        return nullptr;
+
     return mExtension->GetEditor()->GetSource()->GetLayerStack();
 }
 

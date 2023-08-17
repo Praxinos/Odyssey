@@ -18,6 +18,10 @@ public:
     virtual ~FOdysseyFlipbookEditorGUI();
     FOdysseyFlipbookEditorGUI(FOdysseyFlipbookEditorExtension* iExtension);
 
+public:
+    void Initialize();
+    void Finalize();
+
 protected:
     //Init
 	void CreateTabs();

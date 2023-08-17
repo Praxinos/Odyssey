@@ -134,8 +134,8 @@ FOdysseyFlipbookEditorModule::CreateOdysseyFlipbookEditor( UPaperFlipbook* iFlip
 	TSharedRef<FOdysseyTextureEditorExtension> textureExtension = MakeShared<FOdysseyTextureEditorExtension>(editor.Get());
 	TSharedRef<FOdysseyFlipbookEditorExtension> flipbookExtension = MakeShared<FOdysseyFlipbookEditorExtension>(editor.Get());
 
-	editor->AddExtension(MakeShared<FOdysseyTextureEditorExtension>(editor.Get()));
-	editor->AddExtension(MakeShared<FOdysseyFlipbookEditorExtension>(editor.Get()));
+	editor->AddExtension(textureExtension);
+	editor->AddExtension(flipbookExtension);
 
     TSharedPtr<FOdysseyFlipbookEditorToolkit> toolkit = MakeShared<FOdysseyFlipbookEditorToolkit>();
     toolkit->Initialize(iFlipbook, editor);

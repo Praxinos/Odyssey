@@ -4,6 +4,7 @@
 #include "OdysseyFlipbookEditorGUI.h"
 
 #include "OdysseyFlipbookEditorTimelineTab.h"
+#include "PainterEditor/OdysseyPainterEditorViewportTab.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyFlipbookEditorToolkit"
 
@@ -20,9 +21,44 @@ FOdysseyFlipbookEditorGUI::FOdysseyFlipbookEditorGUI(FOdysseyFlipbookEditorExten
 {
 }
 
+void
+FOdysseyFlipbookEditorGUI::Initialize()
+{
+	CreateTabs();
+
+	TSharedPtr<FOdysseyPainterEditorViewportTab> viewportTab = mExtension->GetEditor()->FindTab<FOdysseyPainterEditorViewportTab>();
+
+	TAttribute<UTexture*> textureAttr = TAttribute<UTexture*>::CreateLambda(
+		[this]() -> UTexture*
+		{
+			TSharedPtr<FOdysseyFlipbookEditorTimelineTab> timelineTab = mExtension->GetEditor()->FindTab<FOdysseyFlipbookEditorTimelineTab>();
+
+			if (!timelineTab->Timeline())
+				return nullptr;
+
+			if (timelineTab->Timeline()->IsScrubbing())
+				return mExtension->PreviewTexture();
+
+			TSharedPtr<FOdysseyPainterEditorSource> source = mExtension->GetEditor()->GetSource();
+			if (!source)
+				return nullptr;
+
+			return source->DisplayTexture();
+		}
+	);
+
+	viewportTab->SetTexture(textureAttr);
+}
+
+void
+FOdysseyFlipbookEditorGUI::Finalize()
+{
+	TSharedPtr<FOdysseyPainterEditorViewportTab> viewportTab = mExtension->GetEditor()->FindTab<FOdysseyPainterEditorViewportTab>();
+	viewportTab->SetDefaultTexture();
+}
+
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------------------- Initialization
-
 
 void
 FOdysseyFlipbookEditorGUI::CreateTabs()

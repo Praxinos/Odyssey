@@ -34,6 +34,7 @@ FOdysseyPainterEditorViewportTab::FOdysseyPainterEditorViewportTab(FOdysseyPaint
     , mViewport(nullptr)
     , mViewportClient(nullptr)
 {
+    SetDefaultTexture();
 }
 
 //--------------------------------------------------------------------------------------
@@ -108,15 +109,35 @@ FOdysseyPainterEditorViewportTab::GetViewport()
 }
 
 //--------------------------------------------------------------------------------------
+//----------------------------------------------------------------------- Widget Setters
+
+void
+FOdysseyPainterEditorViewportTab::SetDefaultTexture()
+{
+    mTexture = TAttribute<UTexture*>::CreateLambda(
+        [this]() -> UTexture*
+        {
+            if (!mEditor->GetSource())
+                return nullptr;
+
+            return mEditor->GetSource()->DisplayTexture();
+        }
+    );
+}
+
+void
+FOdysseyPainterEditorViewportTab::SetTexture(const TAttribute<UTexture*>& iTexture )
+{
+    mTexture = iTexture;
+}
+
+//--------------------------------------------------------------------------------------
 //----------------------------------------------------------------------- Widget Getters
 
 UTexture*
 FOdysseyPainterEditorViewportTab::Texture() const
 {
-    if (!mEditor->GetSource())
-        return nullptr;
-
-    return mEditor->GetSource()->DisplayTexture();
+    return mTexture.Get();
 }
 
 //--------------------------------------------------------------------------------------

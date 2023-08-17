@@ -27,8 +27,6 @@ public:
     void SetFlipbook(UPaperFlipbook* iFlipbook);
     UPaperFlipbook* GetFlipbook();
 
-    FOdysseyFlipbookEditorGUI* GetGUI();
-
 public:
     FOdysseyFlipbookWrapper&    FlipbookWrapper();
     UTexture*			        PreviewTexture();
