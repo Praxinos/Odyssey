@@ -5,6 +5,7 @@
 
 #include "OdysseyViewportDrawingEditorTextureBasedAdapter.h"
 #include "MeshPaintHelpers.h"
+#include "Kismet/GameplayStatics.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyViewportDrawingEditorTextureBasedAdapter"
 
@@ -40,7 +41,7 @@ void FOdysseyViewportDrawingEditorTextureBasedAdapter::RenderInteractorWidget(co
     if (mExtension->GetEditor()->GetSelectedTool()->IsA(UOdysseyPainterEditorRasterDrawingTool::StaticClass()))
         drawingTool = Cast<UOdysseyPainterEditorRasterDrawingTool>(mExtension->GetEditor()->GetSelectedTool());
 
-    const TSharedPtr<IMeshPaintGeometryAdapter>* meshAdapterPtr = mEditor->ComponentToAdapterMap().Find(mEditor->Component());
+    const TSharedPtr<IMeshPaintGeometryAdapter>* meshAdapterPtr = mExtension->ComponentToAdapterMap().Find(mExtension->Component());
 
     TSharedPtr<IMeshPaintGeometryAdapter> meshAdapter = *meshAdapterPtr;
 
@@ -56,8 +57,8 @@ void FOdysseyViewportDrawingEditorTextureBasedAdapter::RenderInteractorWidget(co
     // Convert trace to UV position
     FVector2D lastCoord;
     FVector2D currentCoord;
-    UGameplayStatics::FindCollisionUV(lastTraceHitResult, mEditor->GetUVIndexUsedByCurrentTexture(), lastCoord);
-    UGameplayStatics::FindCollisionUV(currentTraceHitResult, mEditor->GetUVIndexUsedByCurrentTexture(), currentCoord);
+    UGameplayStatics::FindCollisionUV(lastTraceHitResult, mExtension->GetUVIndexUsedByCurrentTexture(), lastCoord);
+    UGameplayStatics::FindCollisionUV(currentTraceHitResult, mExtension->GetUVIndexUsedByCurrentTexture(), currentCoord);
 
     if (::ULIS::FMath::Dist(lastCoord.X, lastCoord.Y, currentCoord.X, currentCoord.Y) > 0.1f)
     {

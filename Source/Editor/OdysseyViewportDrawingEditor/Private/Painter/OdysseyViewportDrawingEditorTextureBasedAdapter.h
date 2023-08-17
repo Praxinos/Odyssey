@@ -17,6 +17,7 @@ public:
 
 public:
     virtual void Initialize() override;
+    virtual void FinishPainting() override;
 
     virtual void RenderInteractorWidget(const FSceneView* iView, FViewport* iViewport, FPrimitiveDrawInterface* iPDI) override;
 
