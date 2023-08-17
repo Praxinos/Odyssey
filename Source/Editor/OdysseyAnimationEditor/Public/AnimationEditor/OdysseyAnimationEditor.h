@@ -24,12 +24,6 @@ public:
     FOdysseyAnimationEditor(); //Non Initialized constructor
 
 public:
-    virtual void InitData(UObject* iEditedObject) override;
-    virtual void InitTools() override;
-    virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
-    virtual void ExtendMenu(FToolMenuOwner iOwner, FName iMenuName) override;
-
-public:
     // Getters
 	virtual UOdysseyAnimation*				    Animation() const;
     virtual UOdysseyAnimationLayerStack*	    LayerStack() const;
@@ -54,14 +48,6 @@ public:
     virtual FOdysseyAnimationEditorGUI* GetGUI() override;
     virtual TSharedPtr<FWorkspaceItem> RegisterTabSpawners( const TSharedRef<class FTabManager>& iTabManager ) override;
 
-public:
-    //Common Actions
-    virtual void Clear() override;
-
-protected:
-    // FGCObject implementation
-    virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
-
 private:
     //Called when the media player has seeked successfully
     void OnPlayerStop();
@@ -74,12 +60,8 @@ private:
 
 private:
 	TSharedPtr<FOdysseyAnimationEditorGUI> mGUI;
-
-
-    FOdysseyAnimationEditorTimeline mTimeline; //Those are just the editor specific data of the timeline
-    
     UOdysseyAnimation* mAnimation;
-    UOdysseyAnimationPlayer* mPlayer;
+    FOdysseyAnimationEditorTimeline mTimeline; //Those are just the editor specific data of the timeline    
 
     float mPlaybackFramesPerSecond;
     TArray<FGuid> mImageRenderingComposition;

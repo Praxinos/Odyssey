@@ -75,6 +75,15 @@ UOdysseyAnimationPlayer::OnStop()
 void
 UOdysseyAnimationPlayer::SetAnimation(UOdysseyAnimation* iAnimation)
 {
+	if (!iAnimation)
+	{
+		Animation = nullptr;
+		Texture = nullptr;
+		mOnAnimationChanged.Broadcast();
+		mOnTextureChanged.Broadcast();
+		return;
+	}
+
 	Animation = iAnimation;
 	Texture = UTexture2D::CreateTransient(Animation->Width(), Animation->Height(), PF_B8G8R8A8);
 	Texture->UpdateResource();

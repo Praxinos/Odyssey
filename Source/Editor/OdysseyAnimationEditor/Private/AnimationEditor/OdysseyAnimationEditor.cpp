@@ -36,7 +36,6 @@ FOdysseyAnimationEditor::FOdysseyAnimationEditor() :
 	FOdysseyPainterEditor(),
 	mGUI(nullptr),
 	mAnimation(nullptr),
-	mPlayer(nullptr),
 	mPlaybackFramesPerSecond(0)
 {
 }
@@ -47,78 +46,36 @@ FOdysseyAnimationEditor::FOdysseyAnimationEditor() :
 void
 FOdysseyAnimationEditor::OnSourceInactivated()
 {
-	mPlayer->OnStop().RemoveAll(this);
-	mPlayer->Stop();
-	mPlayer->SetAnimation(nullptr);
+	if (!mAnimation)
+		return;
 
 	//TODO: CurrentFrame should not be in the animation itself, it's an editor specific data
 	mAnimation->OnCurrentFrameChanged().RemoveAll(this);
 	IOdysseyAnimationImageRenderingAbility::OnCompositionCommited().RemoveAll(this);
 	UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll(this);
 	IOdysseyAnimationMediaAbility::OnChanged().RemoveAll(this);
+
+	mAnimation = nullptr;
 }
 
 void
 FOdysseyAnimationEditor::OnSourceActivated()
 {
-	if (mSource->Id() != FOdysseyAnimationEditorSource::StaticId())
-		return;
-
-	TSharedPtr<FOdysseyAnimationEditorSource> animationSource = StaticCastSharedPtr<FOdysseyAnimationEditorSource>(mSource);
-
-	mAnimation = animationSource->GetAnimation();
+	mAnimation = Animation();
 	if (!mAnimation)
 		return;
-
-	UOdysseyAnimationTexture* animationTexture = animationSource->GetAnimationTexture();
 
 	TSharedPtr<IOdysseyAnimationImageRenderingAbility> imageRenderAbility = mAnimation->GetAbility<IOdysseyAnimationImageRenderingAbility>();
 	mImageRenderingComposition = imageRenderAbility->GetComposition(mAnimation->CurrentFrame, IOdysseyImageRenderer::eRenderType::Render);
 	mPlaybackFramesPerSecond = mAnimation->GetFramesPerSecond();
 
-	mPlayer->SetAnimation(mAnimation);
-	animationTexture->SetPlayer(mPlayer);
-	animationTexture->UpdateResource();
-
-	//Seek at current frame 
-    mPlayer->SeekToFrame(mAnimation->CurrentFrame);
-
 	//Set Media player and Animation callbacks
-	mPlayer->OnStop().AddRaw(this, &FOdysseyAnimationEditor::OnPlayerStop);
 	mAnimation->OnCurrentFrameChanged().AddRaw(this, &FOdysseyAnimationEditor::OnCurrentFrameChanged);
 	IOdysseyAnimationImageRenderingAbility::OnCompositionCommited().AddRaw(this, &FOdysseyAnimationEditor::OnImageRenderingCompositionCommited);
 	IOdysseyAnimationMediaAbility::OnChanged().AddRaw(this, &FOdysseyAnimationEditor::OnLayerStackElementMediaChanged);
 	UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw(this, &FOdysseyAnimationEditor::OnCurrentLayerChanged);
 
 	SelectDefaultTool();
-}
-
-void
-FOdysseyAnimationEditor::InitData(UObject* iEditedObject)
-{
-	//Configure a Media player and media texture to be able to display and play the animation
-	mPlayer = NewObject<UOdysseyAnimationPlayer>();
-
-	mPlayer->SetRenderType(IOdysseyImageRenderer::eRenderType::Editor);
-	FOdysseyPainterEditor::InitData(iEditedObject);
-}
-
-void
-FOdysseyAnimationEditor::InitTools()
-{
-	FOdysseyPainterEditor::InitTools();
-}
-
-void
-FOdysseyAnimationEditor::BindShortcuts(FBaseToolkit* iToolkit)
-{
-	FOdysseyPainterEditor::BindShortcuts(iToolkit);
-}
-
-void
-FOdysseyAnimationEditor::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
-{
-	FOdysseyPainterEditor::ExtendMenu(iOwner, iMenuName);
 }
 
 //--------------------------------------------------------------------------------------
@@ -149,7 +106,12 @@ FOdysseyAnimationEditor::LayerStack() const
 UOdysseyAnimationPlayer*
 FOdysseyAnimationEditor::Player() const
 {
-	return mPlayer;
+	TSharedPtr<FOdysseyPainterEditorSource> source = GetSource();
+	if (!source || source->Id() != FOdysseyAnimationEditorSource::StaticId())
+		return nullptr;
+
+	TSharedPtr<FOdysseyAnimationEditorSource> animationSource = StaticCastSharedPtr<FOdysseyAnimationEditorSource>(source);
+	return animationSource->GetAnimationPlayer();
 }
 
 FOdysseyAnimationEditorTimeline*
@@ -234,16 +196,6 @@ FOdysseyAnimationEditor::RegisterTabSpawners(const TSharedRef<class FTabManager>
 }
 
 //--------------------------------------------------------------------------------------
-//------------------------------------------------------------- FGCObject implementation
-
-void
-FOdysseyAnimationEditor::AddReferencedObjects(FReferenceCollector& Collector)
-{
-	FOdysseyPainterEditor::AddReferencedObjects(Collector);
-	Collector.AddReferencedObject(mPlayer);
-}
-
-//--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------- Events
 
 void
@@ -253,15 +205,6 @@ FOdysseyAnimationEditor::OnLayerStackElementMediaChanged()
 		return;
 
 	SelectDefaultTool(); //Refresh the current tool
-}
-
-void
-FOdysseyAnimationEditor::OnPlayerStop()
-{
-	if (!mAnimation)
-		return;
-
-	mPlayer->SeekToFrame(mAnimation->CurrentFrame);
 }
 
 void
@@ -292,12 +235,11 @@ FOdysseyAnimationEditor::OnCurrentFrameChanged(UOdysseyAnimation* iAnimation)
 
 	//Preload the new current frame for edition
 	TSharedPtr<IOdysseyAnimationImageRenderingAbility> imageRenderAbility = mAnimation->GetAbility<IOdysseyAnimationImageRenderingAbility>();
-	mImageRenderingComposition = imageRenderAbility->GetComposition(mAnimation->CurrentFrame, IOdysseyImageRenderer::eRenderType::Render);
+	TArray<FGuid> imageRenderingComposition = imageRenderAbility->GetComposition(mAnimation->CurrentFrame, IOdysseyImageRenderer::eRenderType::Render);
+	if ( imageRenderingComposition == mImageRenderingComposition )
+		return;
 
-	//Display the new current frame
-	mPlayer->SeekToFrame(mAnimation->CurrentFrame);
-	mPlayer->Stop();
-
+	mImageRenderingComposition = imageRenderingComposition;
 	//Reload the tool
 	//TODO: we should maybe do this in a different way, it feels a bit weird to unselect and reselect the whole tool
 	UOdysseyPainterEditorTool* tool = GetSelectedTool();
@@ -313,56 +255,6 @@ FOdysseyAnimationEditor::OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStack)
 	//TODO: Maybe this should be done differently later, but we don't have time for that now
 	SelectDefaultTool(); //Refresh the current tool when we change layer
     Timeline()->SetSelectedFrames(FInt32Range()); //Clear Selected frames when changing layer
-}
-
-//--------------------------------------------------------------------------------------
-//----------------------------------------------------------------------- Common Actions
-
-void
-FOdysseyAnimationEditor::Clear()
-{
-    UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(LayerStack()->CurrentLayer.Get());
-	if (currentLayer)
-	{		
-	#ifdef WITH_EDITOR
-		FScopedTransaction ScopedTransaction(LOCTEXT("Layer Image Raster", "Clear"));
-	#endif
-
-		TSharedPtr<IOdysseyAnimationMediaAbility> mediaAbility = currentLayer->GetAbility<IOdysseyAnimationMediaAbility>();
-		if ( mediaAbility )
-		{
-			FOdysseyMediaProvider mediaProvider = mediaAbility->GetMediaProvider(Animation()->CurrentFrame);
-			if ( mediaProvider.HasMedia<FOdysseyMediaRaster>() )
-			{
-				TArray<TSharedPtr<FOdysseyMediaRaster>> mediasRaster = mediaProvider.GetOrCreateMedias<FOdysseyMediaRaster>();
-				for (TSharedPtr<FOdysseyMediaRaster> mediaRaster : mediasRaster)
-				{
-					if (mediaRaster->IsLocked())
-						continue;
-
-					TSharedPtr<FOdysseyRasterBlock> rasterBlock = mediaRaster->GetRasterBlock();
-					if (!rasterBlock)
-						continue;
-
-					FOdysseyRasterBlockMutator mutator(rasterBlock);
-					mutator.EditTilesFromRects(
-						{ ::ULIS::FRectI::FromXYWH(0, 0, rasterBlock->GetWidth(), rasterBlock->GetHeight()) },
-						FOdysseyRasterBlockMutator::FEditDelegate::CreateLambda(
-							[&](const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
-							{
-								TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ULISRasterBlock = rasterBlock->GetBlock();
-								::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(rasterBlock->GetFormat());
-								::ULIS::FEvent eventClear;
-								ctx.Clear(*ULISRasterBlock, ::ULIS::FRectI::Auto, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventClear);
-								return { eventClear };
-							}
-						)
-					);
-					mutator.Commit();
-				}
-			}
-		}
-	}
 }
 
 #undef LOCTEXT_NAMESPACE

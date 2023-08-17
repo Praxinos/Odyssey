@@ -241,62 +241,6 @@ FOdysseyTextureEditor::OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStack)
 }
 
 //--------------------------------------------------------------------------------------
-//----------------------------------------------------------------------- Common Actions
-
-void
-FOdysseyTextureEditor::Clear()
-{
-	if ( !LayerStack() )
-		return;
-
-    UOdysseyTextureLayerImageRaster* currentLayerRaster = Cast<UOdysseyTextureLayerImageRaster>(LayerStack()->CurrentLayer.Get());
-    UOdysseyTextureLayerImageVector* currentLayerVector = Cast<UOdysseyTextureLayerImageVector>(LayerStack()->CurrentLayer.Get());
-
-	if (currentLayerRaster)
-	{		
-	#ifdef WITH_EDITOR
-		FScopedTransaction ScopedTransaction(LOCTEXT("Layer Image Raster", "Clear Canvas"));
-	#endif
-		
-		TSharedPtr<FOdysseyRasterBlock> rasterBlock = currentLayerRaster->GetRasterBlock();
-		FOdysseyRasterBlockMutator mutator(rasterBlock);
-		mutator.EditTilesFromRects(
-			{ ::ULIS::FRectI::FromXYWH(0, 0, rasterBlock->GetWidth(), rasterBlock->GetHeight()) },
-			FOdysseyRasterBlockMutator::FEditDelegate::CreateLambda(
-				[&](const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
-				{
-					TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ULISRasterBlock = rasterBlock->GetBlock();
-					::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(rasterBlock->GetFormat());
-					::ULIS::FEvent clearEvent;
-					ctx.Clear(*ULISRasterBlock, ::ULIS::FRectI::Auto, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &clearEvent);
-					return { clearEvent };
-				}
-			)
-		);
-		mutator.Commit();
-	}
-
-    if( currentLayerVector )
-    {
-        FOdysseyVectorEngine* vectorEngine = currentLayerVector->GetEngine();
-
-        // needed for undos
-        GEditor->BeginTransaction(LOCTEXT("ClearVectorScene", "Clear Vector Scene"));
-        if( GUndo )
-        {
-            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoEngineClear( vectorEngine );
-
-            GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-        }
-        GEditor->EndTransaction();
-
-        vectorEngine->SetScene( new FOdysseyVectorScene("Scene") );
-
-        currentLayerVector->RenderImageChanged(false);
-    }
-}
-
-//--------------------------------------------------------------------------------------
 //------------------------------------------------------------- FGCObject implementation
 
 void

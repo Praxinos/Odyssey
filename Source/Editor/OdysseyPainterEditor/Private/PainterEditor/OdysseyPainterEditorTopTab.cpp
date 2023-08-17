@@ -420,7 +420,11 @@ FOdysseyPainterEditorTopTab::OnEraserButtonClicked()
 FReply
 FOdysseyPainterEditorTopTab::OnClearButtonClicked()
 {
-    mEditor->Clear();
+    TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
+    if (!source)
+        return FReply::Unhandled();
+    
+    source->Clear();
     return FReply::Handled();
 }
 

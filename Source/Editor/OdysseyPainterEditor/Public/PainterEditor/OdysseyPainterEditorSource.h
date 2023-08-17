@@ -32,6 +32,7 @@ public:
     virtual TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> GetDisplayBlock() = 0;
     virtual FOdysseyMediaProvider GetCurrentMediaProvider() = 0;
     virtual UOdysseyLayerStack* GetLayerStack() const = 0;
+    virtual void Clear() = 0;
     FOnAddEditedObject& OnAddEditedObjectDelegate();
     FOnRemoveEditedObject& OnRemoveEditedObjectDelegate();
     const TArray<UObject*>& GetEditedObjects() const;
