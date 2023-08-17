@@ -168,8 +168,15 @@ FOdysseyFlipbookEditorTimelineTab::SetTextureAtKeyframeIndex(int32 iKeyframeInde
 		return;
 	}
 
-	TSharedPtr<FOdysseyTextureEditorSource> source = MakeShared<FOdysseyTextureEditorSource>(texture);
-	mExtension->GetEditor()->SetSource(source);
+	if (texture)
+	{
+		TSharedPtr<FOdysseyTextureEditorSource> source = MakeShared<FOdysseyTextureEditorSource>(texture);
+		mExtension->GetEditor()->SetSource(source);
+	}
+	else
+	{
+		mExtension->GetEditor()->SetSource(nullptr);
+	}
 }
 
 void

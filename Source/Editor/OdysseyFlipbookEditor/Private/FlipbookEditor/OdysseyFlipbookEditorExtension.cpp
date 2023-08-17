@@ -70,6 +70,7 @@ FOdysseyFlipbookEditorExtension::SetFlipbook(UPaperFlipbook* iFlipbook)
 		GetEditor()->SetSource(nullptr);
 		mFlipbookWrapper.SetFlipbook(nullptr);
 		mFlipbookWrapper.OnSpriteTextureChanged().RemoveAll(this);
+		mGUI->OnFlipbookChanged();
 		return;
 	}
 	
@@ -103,6 +104,8 @@ FOdysseyFlipbookEditorExtension::SetFlipbook(UPaperFlipbook* iFlipbook)
 		TSharedPtr<FOdysseyTextureEditorSource> source = MakeShared<FOdysseyTextureEditorSource>(texture);
 		GetEditor()->SetSource(source);
 	}
+
+	mGUI->OnFlipbookChanged();
 }
 
 UPaperFlipbook*

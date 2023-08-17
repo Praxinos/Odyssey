@@ -22,6 +22,8 @@ public:
     void Initialize();
     void Finalize();
 
+    void OnFlipbookChanged();
+
 protected:
     //Init
 	void CreateTabs();

@@ -25,36 +25,46 @@ void
 FOdysseyFlipbookEditorGUI::Initialize()
 {
 	CreateTabs();
-
-	TSharedPtr<FOdysseyPainterEditorViewportTab> viewportTab = mExtension->GetEditor()->FindTab<FOdysseyPainterEditorViewportTab>();
-
-	TAttribute<UTexture*> textureAttr = TAttribute<UTexture*>::CreateLambda(
-		[this]() -> UTexture*
-		{
-			TSharedPtr<FOdysseyFlipbookEditorTimelineTab> timelineTab = mExtension->GetEditor()->FindTab<FOdysseyFlipbookEditorTimelineTab>();
-
-			if (!timelineTab->Timeline())
-				return nullptr;
-
-			if (timelineTab->Timeline()->IsScrubbing())
-				return mExtension->PreviewTexture();
-
-			TSharedPtr<FOdysseyPainterEditorSource> source = mExtension->GetEditor()->GetSource();
-			if (!source)
-				return nullptr;
-
-			return source->DisplayTexture();
-		}
-	);
-
-	viewportTab->SetTexture(textureAttr);
 }
 
 void
 FOdysseyFlipbookEditorGUI::Finalize()
 {
-	TSharedPtr<FOdysseyPainterEditorViewportTab> viewportTab = mExtension->GetEditor()->FindTab<FOdysseyPainterEditorViewportTab>();
-	viewportTab->SetDefaultTexture();
+}
+
+void
+FOdysseyFlipbookEditorGUI::OnFlipbookChanged()
+{
+	//Override displayed texture only if a flipbook is being edited
+	if (mExtension->GetFlipbook())
+	{
+		TSharedPtr<FOdysseyPainterEditorViewportTab> viewportTab = mExtension->GetEditor()->FindTab<FOdysseyPainterEditorViewportTab>();
+		TAttribute<UTexture*> textureAttr = TAttribute<UTexture*>::CreateLambda(
+			[this]() -> UTexture*
+			{
+				TSharedPtr<FOdysseyFlipbookEditorTimelineTab> timelineTab = mExtension->GetEditor()->FindTab<FOdysseyFlipbookEditorTimelineTab>();
+
+				if (!timelineTab->Timeline())
+					return nullptr;
+
+				if (timelineTab->Timeline()->IsScrubbing())
+					return mExtension->PreviewTexture();
+
+				TSharedPtr<FOdysseyPainterEditorSource> source = mExtension->GetEditor()->GetSource();
+				if (!source)
+					return nullptr;
+
+				return source->DisplayTexture();
+			}
+		);
+
+		viewportTab->SetTexture(textureAttr);
+	}
+	else
+	{
+		TSharedPtr<FOdysseyPainterEditorViewportTab> viewportTab = mExtension->GetEditor()->FindTab<FOdysseyPainterEditorViewportTab>();
+		viewportTab->SetDefaultTexture();
+	}
 }
 
 //--------------------------------------------------------------------------------------
