@@ -12,6 +12,7 @@
 #include "MediaPlaylist.h"
 #include "OdysseyAnimation.h"
 #include "AnimationEditor/OdysseyAnimationEditorSource.h"
+#include "UObject/OdysseyObjectEditorUtils.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyViewportDrawingEditorExtension"
 
@@ -295,6 +296,10 @@ FOdysseyViewportDrawingEditorExtension::SetMaterial(UMaterialInterface* iMateria
 void
 FOdysseyViewportDrawingEditorExtension::SetTexture(UTexture* iTexture)
 {
+	//TODO: if mTexture is a UTexture2D : undo changes done to the texture for display
+	//TODO: if mTexture is was a UMediaTexture containing an animation : unregister all delegates and remove MediaPlayer from the animationExtension
+	//TODO: PainterAdapter->SetTexture(nullptr)
+
 	mTexture = nullptr;
 	mEditor->SetSource(nullptr);
 	if (!iTexture)
@@ -304,6 +309,9 @@ FOdysseyViewportDrawingEditorExtension::SetTexture(UTexture* iTexture)
 	if (iTexture->IsA(UTexture2D::StaticClass()))
 	{
 		UTexture2D* texture = Cast<UTexture2D>(iTexture);
+
+		//TODO: change the texture for display
+
 		TSharedPtr<FOdysseyTextureEditorSource> source = MakeShared<FOdysseyTextureEditorSource>(texture);
 		mEditor->SetSource(source);
 	}
@@ -323,6 +331,34 @@ FOdysseyViewportDrawingEditorExtension::SetTexture(UTexture* iTexture)
 				TSharedPtr<FOdysseyAnimationEditorSource> animationSource = MakeShared<FOdysseyAnimationEditorSource>(animation);
 				mEditor->SetSource(animationSource);
 			}
+		}
+	}
+
+	//TODO: PainterAdapter->SetTexture(mTexture)
+}
+
+void
+FOdysseyViewportDrawingEditorExtension::Tick(float iDeltaTime)
+{
+	if (mTexture && mTexture->IsA(UMediaTexture::StaticClass()))
+	{
+		/**
+		 * We need to do this here, because using OnMediaEvent with EMediaEvent::SeekCompleted is always one frame behind
+		 * 
+		 */
+		UMediaTexture* texture = Cast<UMediaTexture>(mTexture);
+		UMediaPlayer* mediaPlayer = texture->GetMediaPlayer();
+		if (mediaPlayer)
+		{				
+			TSharedPtr<FOdysseyAnimationEditorSource> animationSource = StaticCastSharedPtr<FOdysseyAnimationEditorSource>(mCurrentSource);
+			UOdysseyAnimation* animation = animationSource->GetAnimation();
+
+			FTimespan timespan = mediaPlayer->GetTime() + FTimespan(1); //for precision purposes, otherwise "frame" can be the previous frame because of double imprecision
+			double seconds = timespan.GetTotalSeconds();
+			int frame = seconds * animation->GetFramesPerSecond();
+
+			if (frame != animation->CurrentFrame)
+				FOdysseyObjectEditorUtils::SetPropertyValue(animation, "CurrentFrame", frame);
 		}
 	}
 }

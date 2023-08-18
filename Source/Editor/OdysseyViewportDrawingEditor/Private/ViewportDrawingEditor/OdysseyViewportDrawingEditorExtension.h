@@ -25,6 +25,7 @@ enum EOdysseyViewportDrawingPaintingAdapterMethod
 
 class ODYSSEYVIEWPORTDRAWINGEDITOR_API FOdysseyViewportDrawingEditorExtension
     : public FOdysseyPainterEditorExtension
+    , public FTickableEditorObject //Allows us to react to Tick events
 {
 public:
     DECLARE_MULTICAST_DELEGATE(FOdysseyPaintingAdapterChanged);
@@ -77,6 +78,11 @@ private:
     // Listeners
     void OnObjectPropertyChanged(UObject* iObject, struct FPropertyChangedEvent& iPropertyChangedEvent);
 	void OnSourceChanged();
+
+private:
+    // FTickableEditorObject implementation
+	virtual void Tick(float DeltaTime) override;
+	virtual TStatId GetStatId() const override { RETURN_QUICK_DECLARE_CYCLE_STAT( FOdysseyViewportDrawingEditorExtension, STATGROUP_Tickables); }
 
 private:
     // Private Methods
@@ -162,4 +168,7 @@ private:
 
 	/** Painting Extension: describes the method by which we draw in the viewport */
 	TSharedPtr<IOdysseyViewportDrawingEditorAdapter> mPaintingAdapter;
+
+    /** Used to track the animation media being scrubbed */
+    FTimespan mAnimationMediaTimespan;
 };

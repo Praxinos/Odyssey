@@ -18,6 +18,7 @@ FOdysseyViewportDrawingEditorToolkit::FOdysseyViewportDrawingEditorToolkit(TShar
 	TSharedRef<FOdysseyTextureEditorExtension> textureExtension = MakeShared<FOdysseyTextureEditorExtension>(&iEditor.Get());
     TSharedRef<FOdysseyAnimationEditorExtension> animationExtension = MakeShared<FOdysseyAnimationEditorExtension>(&iEditor.Get());
     mViewportDrawingExtension = MakeShared<FOdysseyViewportDrawingEditorExtension>(&iEditor.Get());
+
 	iEditor->AddExtension(textureExtension);
     iEditor->AddExtension(animationExtension);
     iEditor->AddExtension(mViewportDrawingExtension.ToSharedRef());
