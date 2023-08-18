@@ -306,6 +306,8 @@ SCinematicBoardSectionNotes::Construct( const FArguments& InArgs, TSharedRef<FCi
 
     check( !mNotes.Num() );
 
+    RebuildNoteList();
+
     //---
 
     auto CreateNote = [this]()
@@ -371,8 +373,6 @@ SCinematicBoardSectionNotes::Construct( const FArguments& InArgs, TSharedRef<FCi
             ]
         ]
     ];
-
-    RebuildNoteList();
 }
 
 //-

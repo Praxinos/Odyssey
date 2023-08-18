@@ -171,6 +171,15 @@ SectionsHelpersMove::FixMoveSections( TArray< UMovieSceneSection* >& ioSections,
 }
 
 //static
+TArray< UMovieSceneSection* >
+SectionsHelpersMove::GetOrderedSections( const TArray< UMovieSceneSection* > iSections )
+{
+    TArray< UMovieSceneSection* > ordered_sections = iSections;
+    MovieSceneHelpers::SortConsecutiveSections( ordered_sections );
+    return ordered_sections;
+}
+
+//static
 void
 SectionsHelpersMove::FixPostMoveSections( TArray< UMovieSceneSection* >& ioSections, TRange<FFrameNumber> iLastGapMove, UMovieSceneSection* iSection, FMoveResult iMoveResult )
 {

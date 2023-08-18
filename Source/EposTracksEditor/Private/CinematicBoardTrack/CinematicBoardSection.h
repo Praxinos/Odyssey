@@ -120,6 +120,7 @@ private:
 
 private:
     TSharedPtr<SCinematicBoardSectionContent> mWidgetSectionContent;
+    mutable float mLastSectionValidHeight = 100.f;
 
 public:
     /** Get the painter (named root) provided by OnPaintSection()

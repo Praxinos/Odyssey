@@ -258,11 +258,13 @@ UMovieSceneCinematicBoardTrack::OnSectionMoved( UMovieSceneSection& ioSection, c
 
         if( board_section->IsMoving() )
         {
+            TArray< UMovieSceneSection* > ordered_sections = SectionsHelpersMove::GetOrderedSections( Sections );
+
             TRange<FFrameNumber>& previous_range = mPreviousMove.FindChecked( board_section );
             TRange<FFrameNumber>& last_gap = mLastGapMove.FindChecked( board_section );
 
-            FMoveResult move_result = SectionsHelpersMove::GetMoveInfo( Sections, previous_range, last_gap, board_section );
-            SectionsHelpersMove::FixMoveSections( Sections, &last_gap, &ioSection, move_result );
+            FMoveResult move_result = SectionsHelpersMove::GetMoveInfo( ordered_sections, previous_range, last_gap, board_section );
+            SectionsHelpersMove::FixMoveSections( ordered_sections, &last_gap, &ioSection, move_result );
 
             if( iParams.MoveType == EPropertyChangeType::ValueSet )
             {
@@ -270,8 +272,8 @@ UMovieSceneCinematicBoardTrack::OnSectionMoved( UMovieSceneSection& ioSection, c
                 last_gap = mLastGapMove.FindChecked( board_section );
                 int32& cache_priority = mCacheOverlapPriority.FindChecked( board_section );
 
-                move_result = SectionsHelpersMove::GetMoveInfo( Sections, previous_range, last_gap, board_section );
-                SectionsHelpersMove::FixPostMoveSections( Sections, last_gap, &ioSection, move_result );
+                move_result = SectionsHelpersMove::GetMoveInfo( ordered_sections, previous_range, last_gap, board_section );
+                SectionsHelpersMove::FixPostMoveSections( ordered_sections, last_gap, &ioSection, move_result );
                 ArrangeSections();
 
                 board_section->SetOverlapPriority( cache_priority );
@@ -281,6 +283,11 @@ UMovieSceneCinematicBoardTrack::OnSectionMoved( UMovieSceneSection& ioSection, c
                 mPreviousMove.Remove( board_section );
                 mLastGapMove.Remove( board_section );
                 mCacheOverlapPriority.Remove( board_section );
+
+                // Now we must reorder physically the sections
+                // And this is what it made some flickering
+                // But now it's just at the end of the drag and not during the drag
+                MovieSceneHelpers::SortConsecutiveSections( Sections );
 
                 return EMovieSceneSectionMovedResult::SectionsChanged;
             }
@@ -346,12 +353,14 @@ UMovieSceneCinematicBoardTrack::ArrangeSections()
     if( !Sections.Num() )
         return;
 
+    TArray< UMovieSceneSection* > ordered_sections = SectionsHelpersMove::GetOrderedSections( Sections );
+
     if( mArrangeSections == EArrangeSections::Manually )
     {
     }
     else if( mArrangeSections == EArrangeSections::OnOneRow )
     {
-        for( auto section : Sections )
+        for( auto section : ordered_sections )
         {
             section->Modify();
             section->SetRowIndex( 0 );
@@ -359,10 +368,10 @@ UMovieSceneCinematicBoardTrack::ArrangeSections()
     }
     else if( mArrangeSections == EArrangeSections::OnTwoRowsShifted )
     {
-        int start = Sections[0]->GetRowIndex();
-        for( int i = 0; i < Sections.Num(); i++ )
+        int start = ordered_sections[0]->GetRowIndex();
+        for( int i = 0; i < ordered_sections.Num(); i++ )
         {
-            auto section = Sections[i];
+            auto section = ordered_sections[i];
             section->Modify();
 
             section->SetRowIndex( ( start + i ) % 2 );

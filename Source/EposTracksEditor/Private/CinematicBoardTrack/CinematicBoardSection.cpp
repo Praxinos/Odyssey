@@ -159,7 +159,13 @@ FCinematicBoardSection::FCinematicBoardSection( TSharedPtr<ISequencer> iSequence
 {
     AdditionalDrawEffect = ESlateDrawEffect::NoGamma;
 
-    iSection.SetWidgetHeight( MakeAttributeLambda( [this] () -> float { return mWidgetSectionContent.IsValid() ? mWidgetSectionContent->GetDesiredSize().Y : 100.f; } ) );
+    iSection.SetWidgetHeight( MakeAttributeLambda( [this]() -> float
+                                                   {
+                                                       if( !mWidgetSectionContent.IsValid() )
+                                                           return 0.f;
+
+                                                       return mWidgetSectionContent->GetDesiredSize().Y; // May be 0.f
+                                                   } ) );
     auto SequenceChanged = [this]( UMovieSceneSequence* iSequence )
     {
         mNeedRebuild = true;
@@ -293,7 +299,7 @@ FCinematicBoardSection::GetSectionToolTip() const
 float
 FCinematicBoardSection::GetSectionHeight() const
 {
-    float height = 100.f; // Arbitrary value which should only be used for one (or some) tick(s) waiting the creation of the layout widget in the section
+    float height = mLastSectionValidHeight; // Use the last known height, this remove some track height flickering when dragging sections
 
     UMovieSceneCinematicBoardTrack* track = Section->GetTypedOuter<UMovieSceneCinematicBoardTrack>();
     if( track )
@@ -301,11 +307,14 @@ FCinematicBoardSection::GetSectionHeight() const
         for( auto section : track->GetAllSections() )
         {
             UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( section );
-            height = FMath::Max( height, board_section->GetWidgetHeight() );
+            int current_height = board_section->GetWidgetHeight();
+            height = FMath::Max( height, current_height );
         }
     }
 
-    return height;
+    mLastSectionValidHeight = FMath::Max( 100.f, height ); // Arbitrary value which should only be used for one (or some) tick(s) waiting the creation of the layout widget in the section
+
+    return mLastSectionValidHeight;
 }
 
 FMargin

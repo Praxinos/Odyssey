@@ -1938,6 +1938,8 @@ SCinematicBoardSectionPlanes::Construct( const FArguments& InArgs, TSharedRef<FC
 
     check( !mPossessables.Num() );
 
+    RebuildPlaneList();
+
     //---
 
     FSlimHorizontalToolBarBuilder MiddleToolbarBuilder( nullptr, FMultiBoxCustomization::None );
@@ -1984,8 +1986,6 @@ SCinematicBoardSectionPlanes::Construct( const FArguments& InArgs, TSharedRef<FC
             middle_toolbar
         ]
     ];
-
-    RebuildPlaneList();
 }
 
 void
