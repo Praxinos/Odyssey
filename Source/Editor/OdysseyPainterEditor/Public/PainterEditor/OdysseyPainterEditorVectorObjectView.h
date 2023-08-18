@@ -24,7 +24,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectView : public UO
 
     protected:
         virtual void ImportParam();
-        virtual void PropertyChanged( const FName& iPropertyName, const FName& iCategory );
+        virtual uint64 PropertyChanged( const FName& iPropertyName, const FName& iCategory );
 
     protected:
         FOdysseyVectorScene* mScene;

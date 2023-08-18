@@ -1583,7 +1583,6 @@ FOdysseyVectorPath::DeletePoint( FOdysseyVectorPath* iPath
 void
 FOdysseyVectorPath::DrawShape( uint64 iFlags )
 {
-
     if ( mPathParam.Filled )
     {
         // TODO: precompute the filling (build the BLPath )
@@ -1620,7 +1619,7 @@ FOdysseyVectorPath::DrawShape( uint64 iFlags )
 }
 
 void
-FOdysseyVectorPath::DrawStructure( FColor& iStrokeColor, double iStrokeWidth, bool iWorld )
+FOdysseyVectorPath::DrawStructure( const FColor& iStrokeColor, double iStrokeWidth, bool iWorld )
 {
     BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
     BLRgba32 strokeColor = BLRgba32( iStrokeColor.R

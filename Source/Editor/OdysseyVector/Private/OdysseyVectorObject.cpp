@@ -35,6 +35,7 @@ FOdysseyVectorObject::FOdysseyVectorObject( const FString& iName )
 
     mObjectParam.TranslationX = 0.0f;
     mObjectParam.TranslationY = 0.0f;
+    //mObjectParam.TranslationZ = 1.0f;
     mObjectParam.Rotation = 0.0f;
     mObjectParam.ScalingX = 1.0f;
     mObjectParam.ScalingY = 1.0f;
@@ -324,9 +325,11 @@ FOdysseyVectorObject::UpdateMatrix()
 void
 FOdysseyVectorObject::UpdateMatrix( bool iRunTransformCallback )
 {
-    if( GetScene() )
+    FOdysseyVectorScene* scene = GetScene();
+
+    if( scene )
     {
-        BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
+        BLContext* blctx = scene->GetEngine()->GetBLContext();
 
         blctx->save();
 
@@ -362,15 +365,6 @@ FOdysseyVectorObject::UpdateMatrix( bool iRunTransformCallback )
 
         blctx->restore();
     }
-
-    //TODO: design issue. there will be a call on parent's callback when parent matrix is updated. Need to fix that.
-    /*if( iRunTransformCallback )
-    {
-        if( this->GetParent() )
-        {
-            this->GetParent()->OnChildTransform( this );
-        }
-    }*/
 }
 
 //static

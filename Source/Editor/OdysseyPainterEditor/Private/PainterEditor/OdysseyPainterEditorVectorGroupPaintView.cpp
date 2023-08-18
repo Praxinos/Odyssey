@@ -31,17 +31,13 @@ UOdysseyPainterEditorVectorGroupPaintView::ImportParam()
     }
 }
 
-void
+uint64
 UOdysseyPainterEditorVectorGroupPaintView::PropertyChanged( const FName& iPropertyName, const FName& iCategory )
 {
-    std::list<FOdysseyVectorObject*>::iterator it;
+    uint64 signalFlags = UOdysseyPainterEditorVectorObjectView::PropertyChanged( iPropertyName, iCategory );
 
-    UOdysseyPainterEditorVectorObjectView::PropertyChanged( iPropertyName, iCategory );
-
-    for( it = mFocusedObjectList.begin(); it != mFocusedObjectList.end(); ++it )
+    for( FOdysseyVectorObject* selectedObject : mFocusedObjectList )
     {
-        FOdysseyVectorObject* selectedObject = (*it);
-
         if( selectedObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
         {
             FOdysseyVectorGroupPaint* selectedPaintGroup = static_cast<FOdysseyVectorGroupPaint*>(selectedObject);
@@ -69,5 +65,5 @@ UOdysseyPainterEditorVectorGroupPaintView::PropertyChanged( const FName& iProper
         }
     }
 
-    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+    return signalFlags;
 }

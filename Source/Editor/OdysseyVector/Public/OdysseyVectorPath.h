@@ -133,7 +133,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
          * @param iWorld draw in world coordinates system.
          */
         using FOdysseyVectorObject::DrawStructure;
-        virtual void DrawStructure( FColor& iStrokeColor, double iStrokeWidth, bool iWorld );
+        virtual void DrawStructure( const FColor& iStrokeColor, double iStrokeWidth, bool iWorld );
 
        /**
          * @brief Erase path according to the mask image.

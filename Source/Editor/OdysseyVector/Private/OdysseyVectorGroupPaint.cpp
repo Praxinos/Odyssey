@@ -260,8 +260,6 @@ FOdysseyVectorGroupPaint::UpdateShape( uint32 iUpdateFlags )
 
     UpdateBBox();
 
-
-
     if( mGroupPaintParam.Painted )
     {
         if( ( mGroupPaintParam.Realtime == true  )

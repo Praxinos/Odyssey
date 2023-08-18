@@ -1,17 +1,17 @@
-#include "Import/OdysseyVectorImport.h"
+#include "Import/v1/OdysseyVectorImport.h"
 #include "Palette/OdysseyPalette.h"
 #include "Engine/ObjectLibrary.h"
 
 void
-FOdysseyVectorImport::ReadBucket( FOdysseyVectorBucket& iBucket, uint64 iChunkEnd, FArchive &Ar )
+FOdysseyVectorImportV1::ReadBucket( FOdysseyVectorBucket& iBucket, uint64 iChunkEnd, FArchive &Ar )
 {
-    FOdysseyVectorImport::ReadChunks( iChunkEnd
+    FOdysseyVectorImportV1::ReadChunks( iChunkEnd
                                     , Ar
                                     , [&iBucket](uint32 iChunkID, uint64 iChunkLen, FArchive &Ar) -> void
         {
             switch( iChunkID )
             {
-                case FOdysseyVectorExport::CHUNK_BUCKET_PALETTEENTRY:
+                case FOdysseyVectorExportV1::CHUNK_BUCKET_PALETTEENTRY:
                 {
                     FName nameEntry;
                     Ar << nameEntry;
@@ -39,7 +39,7 @@ FOdysseyVectorImport::ReadBucket( FOdysseyVectorBucket& iBucket, uint64 iChunkEn
                 }
                 break;
 
-                case FOdysseyVectorExport::CHUNK_BUCKET_SPREADING:
+                case FOdysseyVectorExportV1::CHUNK_BUCKET_SPREADING:
                 {
                     uint32 spreadingPolicy;
 
@@ -49,7 +49,7 @@ FOdysseyVectorImport::ReadBucket( FOdysseyVectorBucket& iBucket, uint64 iChunkEn
                 }
                 break;
 
-                case FOdysseyVectorExport::CHUNK_BUCKET_PROPAGATED:
+                case FOdysseyVectorExportV1::CHUNK_BUCKET_PROPAGATED:
                 {
                     uint32 propagated;
 
@@ -59,7 +59,7 @@ FOdysseyVectorImport::ReadBucket( FOdysseyVectorBucket& iBucket, uint64 iChunkEn
                 }
                 break;
 
-                case FOdysseyVectorExport::CHUNK_BUCKET_ROTATION:
+                case FOdysseyVectorExportV1::CHUNK_BUCKET_ROTATION:
                 {
                     double rotation;
 
@@ -69,7 +69,7 @@ FOdysseyVectorImport::ReadBucket( FOdysseyVectorBucket& iBucket, uint64 iChunkEn
                 }
                 break;
 
-                case FOdysseyVectorExport::CHUNK_BUCKET_POSITION:
+                case FOdysseyVectorExportV1::CHUNK_BUCKET_POSITION:
                 {
                     double x;
                     double y;
@@ -81,7 +81,7 @@ FOdysseyVectorImport::ReadBucket( FOdysseyVectorBucket& iBucket, uint64 iChunkEn
                 }
                 break;
 
-                case FOdysseyVectorExport::CHUNK_BUCKET_SOLIDCOLOR:
+                case FOdysseyVectorExportV1::CHUNK_BUCKET_SOLIDCOLOR:
                 {
                     uint8 R, G, B, A;
 
@@ -95,11 +95,11 @@ FOdysseyVectorImport::ReadBucket( FOdysseyVectorBucket& iBucket, uint64 iChunkEn
                 }
                 break;
 
-                case FOdysseyVectorExport::CHUNK_BUCKET_GRADIENT: // container
+                case FOdysseyVectorExportV1::CHUNK_BUCKET_GRADIENT: // container
                     iBucket.SetColorMode( eBucketColorMode::LinearGradient );
                 break;
 
-                case FOdysseyVectorExport::CHUNK_BUCKET_GRADIENT_STOP:
+                case FOdysseyVectorExportV1::CHUNK_BUCKET_GRADIENT_STOP:
                 {
                     uint8 R,G,B,A;
                     double stopAt;

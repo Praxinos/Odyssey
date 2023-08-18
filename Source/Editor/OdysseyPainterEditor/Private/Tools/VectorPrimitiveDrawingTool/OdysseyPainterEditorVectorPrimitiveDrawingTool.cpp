@@ -161,6 +161,8 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDownVector( FOdysseyVect
     FColor ueColor = FColor( rgba8.R8(), rgba8.G8(), rgba8.B8(), rgba8.A8() );
     FOdysseyVectorPrimitive* primitive;
     UOdysseyPaletteEntry* entry = nullptr;
+    BLPoint widthVector = iScene->GetInverseWorldMatrix().mapVector( 0.7071f, 0.7071f );
+    ::ULIS::FVec2D width = ::ULIS::FVec2D( widthVector.x, widthVector.y );
 
     if (GetEditor()->GetGUI()->GetColorPaletteTab()->PaletteWidget()->GetColorPalette()->GetPalette())
     {
@@ -177,20 +179,16 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDownVector( FOdysseyVect
 
     switch( PrimitiveType )
     {
-        case EOdysseyVectorPrimitiveType::Ellipse:
-            primitive = new FOdysseyVectorEllipse( FString("Circle"), 0.0f, 0.0f, StrokeWidth );
-        break;
-
         case EOdysseyVectorPrimitiveType::Rectangle:
-            primitive = new FOdysseyVectorRectangle( FString("Rectangle"), 0.0f, 0.0f, StrokeWidth );
+            primitive = new FOdysseyVectorRectangle( FString("Rectangle"), 0.0f, 0.0f, width.Distance() );
         break;
 
         case EOdysseyVectorPrimitiveType::Line:
-            primitive = new FOdysseyVectorLine( FString("Rectangle"), 0.0f, 0.0f, StrokeWidth );
+            primitive = new FOdysseyVectorLine( FString("Rectangle"), 0.0f, 0.0f, width.Distance() );
         break;
 
         default:
-            primitive = new FOdysseyVectorEllipse( FString("Circle"), 0.0f, 0.0f, StrokeWidth );
+            primitive = new FOdysseyVectorEllipse( FString("Circle"), 0.0f, 0.0f, width.Distance() );
         break;
     }
 

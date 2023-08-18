@@ -73,7 +73,13 @@ private:
                              , FOdysseyVectorScene* iScene
                              , const FOdysseyPoint& iPointInTexture
                              , const FKey& iKey );
-
+    void GroupPaintDeletePoint( FOdysseyVectorGroupPaint* iGroupPaint
+                              , std::vector<FOdysseyVectorVertex*>& iRemovedVertexArray
+                              , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray
+                              , std::vector<FOdysseyVectorPath*>& iRemovedPathArray
+                              , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray
+                              , double iSelectionRadius
+                              , const FOdysseyPoint& iPointInTexture );
     void DetectPickingMode();
 
 private:

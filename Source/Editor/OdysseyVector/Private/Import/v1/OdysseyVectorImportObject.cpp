@@ -1,8 +1,8 @@
-#include "Import/OdysseyVectorImport.h"
+#include "Import/v1/OdysseyVectorImport.h"
 #include "OdysseyVectorPath.h"
 
-static FOdysseyVectorObject*
-CreateObject( uint32 iObjectType )
+FOdysseyVectorObject*
+FOdysseyVectorImportV1::CreateObject( uint32 iObjectType )
 {
     FOdysseyVectorObject* newObject = nullptr;
 
@@ -19,11 +19,7 @@ CreateObject( uint32 iObjectType )
         case FOdysseyVectorObject::VECTORGROUPPAINTTYPE :
             newObject = new FOdysseyVectorGroupPaint( FString("PaintGroup") );
         break;
-/*
-        case FOdysseyVectorObject::VECTORELLIPSETYPE :
-            newObject = new FOdysseyVectorEllipse( FString("Ellipse"), 0.0f, 0.0f, 4.0f );
-        break;
-*/
+
         default :
             newObject = new FOdysseyVectorObject( FString("Object") );
         break;
@@ -33,15 +29,15 @@ CreateObject( uint32 iObjectType )
 }
 
 void
-FOdysseyVectorImport::ReadObjectsDeclare( std::vector<FOdysseyVectorObject*>& vectorObjectArray, uint64 iChunkEnd, FArchive &Ar )
+FOdysseyVectorImportV1::ReadObjectsDeclare( std::vector<FOdysseyVectorObject*>& vectorObjectArray, uint64 iChunkEnd, FArchive &Ar )
 {
-    FOdysseyVectorImport::ReadChunks( iChunkEnd
+    FOdysseyVectorImportV1::ReadChunks( iChunkEnd
                                     , Ar
                                     , [&vectorObjectArray](uint32 iChunkID, uint64 iChunkLen, FArchive &Ar) -> void
         {
             switch ( iChunkID )
             {
-                case FOdysseyVectorExport::CHUNK_DECLARE_OBJECT_ENTRY :
+                case FOdysseyVectorExportV1::CHUNK_DECLARE_OBJECT_ENTRY :
                 {
                     FOdysseyVectorObject* newObject;
                     uint32 objectType;
@@ -65,16 +61,16 @@ FOdysseyVectorImport::ReadObjectsDeclare( std::vector<FOdysseyVectorObject*>& ve
         } );
 }
 
-static void
-ReadObjectsDefineObjectTransform( FOdysseyVectorObject& iObject, uint64 iChunkEnd, FArchive &Ar )
+void
+FOdysseyVectorImportV1::ReadObjectsDefineObjectTransform( FOdysseyVectorObject& iObject, uint64 iChunkEnd, FArchive &Ar )
 {
-    FOdysseyVectorImport::ReadChunks( iChunkEnd
+    FOdysseyVectorImportV1::ReadChunks( iChunkEnd
                                     , Ar
                                     , [&iObject](uint32 iChunkID, uint64 iChunkLen, FArchive &Ar) -> void
         {
             switch ( iChunkID )
             {
-                case FOdysseyVectorExport::CHUNK_OBJECT_TRANSFORM_TRANSLATION:
+                case FOdysseyVectorExportV1::CHUNK_OBJECT_TRANSFORM_TRANSLATION:
                 {
                     double translationX;
                     double translationY;
@@ -86,7 +82,7 @@ ReadObjectsDefineObjectTransform( FOdysseyVectorObject& iObject, uint64 iChunkEn
                 }
                 break;
 
-                case FOdysseyVectorExport::CHUNK_OBJECT_TRANSFORM_ROTATION:
+                case FOdysseyVectorExportV1::CHUNK_OBJECT_TRANSFORM_ROTATION:
                 {
                     double rotation;
 
@@ -96,7 +92,7 @@ ReadObjectsDefineObjectTransform( FOdysseyVectorObject& iObject, uint64 iChunkEn
                 }
                 break;
 
-                case FOdysseyVectorExport::CHUNK_OBJECT_TRANSFORM_SCALING:
+                case FOdysseyVectorExportV1::CHUNK_OBJECT_TRANSFORM_SCALING:
                 {
                     double scalingX;
                     double scalingY;
@@ -116,20 +112,20 @@ ReadObjectsDefineObjectTransform( FOdysseyVectorObject& iObject, uint64 iChunkEn
         } );
 }
 
-static void
-ReadObjectsDefineObjectBucket( FOdysseyVectorBucket& iBucket
-                             , uint64 iChunkEnd
-                             , FArchive &Ar )
+void
+FOdysseyVectorImportV1::ReadObjectsDefineObjectBucket( FOdysseyVectorBucket& iBucket
+                                                     , uint64 iChunkEnd
+                                                     , FArchive &Ar )
 {
-    FOdysseyVectorImport::ReadChunks( iChunkEnd
+    FOdysseyVectorImportV1::ReadChunks( iChunkEnd
                                     , Ar
                                     , [&iBucket](uint32 iChunkID, uint64 iChunkLen, FArchive &Ar) -> void
         {
             switch ( iChunkID )
             {
-                case FOdysseyVectorExport::CHUNK_BUCKET_ENTRY:
+                case FOdysseyVectorExportV1::CHUNK_BUCKET_ENTRY:
                 {
-                    FOdysseyVectorImport::ReadBucket( iBucket, Ar.Tell() + iChunkLen, Ar);
+                    FOdysseyVectorImportV1::ReadBucket( iBucket, Ar.Tell() + iChunkLen, Ar);
                 }
                 break;
 
@@ -142,9 +138,9 @@ ReadObjectsDefineObjectBucket( FOdysseyVectorBucket& iBucket
 }
 
 void
-FOdysseyVectorImport::ReadObjectsDefine( std::vector<FOdysseyVectorObject*>& vectorObjectArray, uint64 iChunkEnd, FArchive &Ar )
+FOdysseyVectorImportV1::ReadObjectsDefine( std::vector<FOdysseyVectorObject*>& vectorObjectArray, uint64 iChunkEnd, FArchive &Ar )
 {
-    FOdysseyVectorImport::ReadChunks( iChunkEnd
+    FOdysseyVectorImportV1::ReadChunks( iChunkEnd
                                     , Ar
                                     , [&vectorObjectArray](uint32 iChunkID, uint64 iChunkLen, FArchive &Ar) -> void
         {
@@ -152,14 +148,14 @@ FOdysseyVectorImport::ReadObjectsDefine( std::vector<FOdysseyVectorObject*>& vec
 
             switch( iChunkID )
             {
-                case FOdysseyVectorExport::CHUNK_DEFINE_OBJECT_ENTRY :
+                case FOdysseyVectorExportV1::CHUNK_DEFINE_OBJECT_ENTRY :
                 break;
 
-                case FOdysseyVectorExport::CHUNK_OBJECT_ID:
+                case FOdysseyVectorExportV1::CHUNK_OBJECT_ID:
                     Ar << objectID;
                 break;
 
-                case FOdysseyVectorExport::CHUNK_OBJECT_PARENTID:
+                case FOdysseyVectorExportV1::CHUNK_OBJECT_PARENTID:
                 {
                     uint32 parentID;
 
@@ -173,11 +169,11 @@ FOdysseyVectorImport::ReadObjectsDefine( std::vector<FOdysseyVectorObject*>& vec
                 }
                 break;
 
-                case FOdysseyVectorExport::CHUNK_OBJECT_TRANSFORM:
+                case FOdysseyVectorExportV1::CHUNK_OBJECT_TRANSFORM:
                     ReadObjectsDefineObjectTransform( *vectorObjectArray[objectID], Ar.Tell() + iChunkLen, Ar );
                 break;
 
-                case FOdysseyVectorExport::CHUNK_OBJECT_FOREGROUNDBUCKET:
+                case FOdysseyVectorExportV1::CHUNK_OBJECT_FOREGROUNDBUCKET:
                 {
                     FOdysseyVectorBucket& foregroundBucket = vectorObjectArray[objectID]->GetForegroundBucket();
 
@@ -185,7 +181,7 @@ FOdysseyVectorImport::ReadObjectsDefine( std::vector<FOdysseyVectorObject*>& vec
                 }
                 break;
 
-                case FOdysseyVectorExport::CHUNK_OBJECT_BACKGROUNDBUCKET:
+                case FOdysseyVectorExportV1::CHUNK_OBJECT_BACKGROUNDBUCKET:
                 {
                     FOdysseyVectorBucket& backgroundBucket = vectorObjectArray[objectID]->GetBackgroundBucket();
 
@@ -193,7 +189,7 @@ FOdysseyVectorImport::ReadObjectsDefine( std::vector<FOdysseyVectorObject*>& vec
                 }
                 break;
 
-                case FOdysseyVectorExport::CHUNK_OBJECT_FOREGROUNDCOLOR:
+                case FOdysseyVectorExportV1::CHUNK_OBJECT_FOREGROUNDCOLOR:
                 {
                     uint8 R, G, B, A;
 
@@ -206,7 +202,7 @@ FOdysseyVectorImport::ReadObjectsDefine( std::vector<FOdysseyVectorObject*>& vec
                 }
                 break;
 
-                case FOdysseyVectorExport::CHUNK_OBJECT_BACKGROUNDCOLOR:
+                case FOdysseyVectorExportV1::CHUNK_OBJECT_BACKGROUNDCOLOR:
                 {
                     uint8 R, G, B, A;
 
@@ -219,33 +215,23 @@ FOdysseyVectorImport::ReadObjectsDefine( std::vector<FOdysseyVectorObject*>& vec
                 }
                 break;
 
-                case FOdysseyVectorExport::CHUNK_OBJECT_PATH:
+                case FOdysseyVectorExportV1::CHUNK_OBJECT_PATH:
                 {
                     FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>( vectorObjectArray[objectID] );
 
-                    FOdysseyVectorImport::ReadObjectPath( *path, Ar.Tell() + iChunkLen, Ar );
+                    FOdysseyVectorImportV1::ReadPath( *path, Ar.Tell() + iChunkLen, Ar );
                     // immediately update invalidated segments and updates the path's BBox
                     path->Update( 0 );
                 }
                 break;
 
-                case FOdysseyVectorExport::CHUNK_OBJECT_GROUPPAINT:
+                case FOdysseyVectorExportV1::CHUNK_OBJECT_GROUPPAINT:
                 {
                     FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>( vectorObjectArray[objectID] );
 
-                    FOdysseyVectorImport::ReadObjectGroupPaint( *paintGroup, Ar.Tell() + iChunkLen, Ar );
+                    FOdysseyVectorImportV1::ReadGroupPaint( *paintGroup, Ar.Tell() + iChunkLen, Ar );
 
                     paintGroup->Invalidate();
-                }
-                break;
-
-                case FOdysseyVectorExport::CHUNK_OBJECT_ELLIPSE:
-                {
-                    FOdysseyVectorEllipse* circle = static_cast<FOdysseyVectorEllipse*>( vectorObjectArray[objectID] );
-
-                    FOdysseyVectorImport::ReadObjectEllipse( *circle, Ar.Tell() + iChunkLen, Ar );
-
-                    circle->Invalidate();
                 }
                 break;
 

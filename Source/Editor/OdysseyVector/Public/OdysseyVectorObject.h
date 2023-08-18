@@ -25,6 +25,9 @@ struct FObjectParam
     UPROPERTY(EditAnywhere, Category="Transform")
     double TranslationY;
 
+    //UPROPERTY(EditAnywhere, Category="Transform")
+    //double TranslationZ;
+
     UPROPERTY(EditAnywhere, Category="Transform")
     double Rotation;
 

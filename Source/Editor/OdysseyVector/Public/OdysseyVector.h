@@ -39,6 +39,11 @@ namespace FOdysseyVector
                                         , ::ULIS::FVec2D& oP2
                                         , ::ULIS::FVec2D& oP3 );
 
+    bool ProjectPoint( const ::ULIS::FVec2D& iPt
+                     , const ::ULIS::FVec2D& iSegmentP0
+                     , const ::ULIS::FVec2D& iSegmentP1
+                     ,       ::ULIS::FVec2D& oProjected );
+
     template< typename T >
     bool IntersectRegions( const ::ULIS::TRectangle<T>& iRegion0
                          , const ::ULIS::TRectangle<T>& iRegion1

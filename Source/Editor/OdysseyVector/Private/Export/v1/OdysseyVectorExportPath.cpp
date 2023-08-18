@@ -1,12 +1,12 @@
-#include "Export/OdysseyVectorExport.h"
+#include "Export/v1/OdysseyVectorExport.h"
 #include "OdysseyVectorSegmentCubic.h"
 
-static void
-WritePathCubicGeometrySegments( FOdysseyVectorPath& iPath, FArchive &Ar )
+void
+FOdysseyVectorExportV1::WritePathCubicGeometrySegments( FOdysseyVectorPath& iPath, FArchive &Ar )
 {
     if( iPath.GetSegmentList().size() )
     {
-        FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_PATH_GEOMETRY_CUBICSEGMENTS
+        FOdysseyVectorExportV1::WriteChunk( FOdysseyVectorExportV1::CHUNK_PATH_GEOMETRY_CUBICSEGMENTS
                                         , Ar
                                         , [&iPath](FArchive &Ar) -> void
         {
@@ -38,12 +38,12 @@ WritePathCubicGeometrySegments( FOdysseyVectorPath& iPath, FArchive &Ar )
     }
 }
 
-static void
-WritePathCubicGeometryVertices( FOdysseyVectorPath& iPath, FArchive &Ar )
+void
+FOdysseyVectorExportV1::WritePathCubicGeometryVertices( FOdysseyVectorPath& iPath, FArchive &Ar )
 {
     if ( iPath.GetVertexList().size() )
     {
-        FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_PATH_GEOMETRY_VERTICES
+        FOdysseyVectorExportV1::WriteChunk( FOdysseyVectorExportV1::CHUNK_PATH_GEOMETRY_VERTICES
                                         , Ar
                                         , [&iPath](FArchive &Ar) -> void
         {
@@ -70,10 +70,10 @@ WritePathCubicGeometryVertices( FOdysseyVectorPath& iPath, FArchive &Ar )
     }
 }
 
-static void
-WritePathCubicGeometry( FOdysseyVectorPath& iPath, FArchive &Ar )
+void
+FOdysseyVectorExportV1::WritePathCubicGeometry( FOdysseyVectorPath& iPath, FArchive &Ar )
 {
-    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_PATH_GEOMETRY
+    FOdysseyVectorExportV1::WriteChunk( FOdysseyVectorExportV1::CHUNK_PATH_GEOMETRY
                                     , Ar
                                     , [&iPath](FArchive &Ar) -> void
     {
@@ -82,10 +82,10 @@ WritePathCubicGeometry( FOdysseyVectorPath& iPath, FArchive &Ar )
     } );
 }
 
-static void
-WritePathJoint( FOdysseyVectorPath& iPath, FArchive &Ar )
+void
+FOdysseyVectorExportV1::WritePathJoint( FOdysseyVectorPath& iPath, FArchive &Ar )
 {
-    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_PATH_JOINT
+    FOdysseyVectorExportV1::WriteChunk( FOdysseyVectorExportV1::CHUNK_PATH_JOINT
                                     , Ar
                                     , [&iPath](FArchive &Ar) -> void
     {
@@ -96,9 +96,9 @@ WritePathJoint( FOdysseyVectorPath& iPath, FArchive &Ar )
 }
 
 void
-FOdysseyVectorExport::WriteObjectPath( FOdysseyVectorPath& iPath, FArchive &Ar )
+FOdysseyVectorExportV1::WritePath( FOdysseyVectorPath& iPath, FArchive &Ar )
 {
-    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_OBJECT_PATH
+    FOdysseyVectorExportV1::WriteChunk( FOdysseyVectorExportV1::CHUNK_OBJECT_PATH
                                     , Ar
                                     , [&iPath](FArchive &Ar) -> void
     {

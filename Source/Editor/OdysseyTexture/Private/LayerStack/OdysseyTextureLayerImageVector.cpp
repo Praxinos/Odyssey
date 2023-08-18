@@ -9,8 +9,8 @@
 #include "OdysseyMediaVector.h"
 #include "ULISLoaderModule.h"
 #include "ULISUtils.h"
-#include "Export/OdysseyVectorExport.h"
-#include "Import/OdysseyVectorImport.h"
+#include "Import/v2/OdysseyVectorImport.h"
+#include "Import/v1/OdysseyVectorImport.h"
 
 #include "blend2d.h"
 
@@ -173,11 +173,21 @@ UOdysseyTextureLayerImageVector::Serialize(FArchive& Ar)
 
     if( Ar.IsSaving() )
     {
-        FOdysseyVectorExport::Write( mEngine ? mEngine->GetScene() : nullptr, Ar );
+        FOdysseyVectorExportV2::Write( mEngine ? mEngine->GetScene() : nullptr, Ar );
     }
 
     if( Ar.IsLoading() )
     {
+        uint32 chunkID;
+        uint64 chunkLen;
+        uint64 chunkEnd;
+
+        // Reads the first chunk (CHUNK_VECTOR_MAGIC)
+        Ar << chunkID;
+        Ar << chunkLen;
+
+        chunkEnd = Ar.Tell() + chunkLen;
+
         if ( mEngine == nullptr )
         {
             // commented out: at that point, the texture owning the layer stack doe snot have width and height values. 
@@ -192,7 +202,28 @@ UOdysseyTextureLayerImageVector::Serialize(FArchive& Ar)
             Init( Width, Height );
         }
 
-        FOdysseyVectorImport::Read( mEngine->GetScene(), Ar );
+        switch( chunkID )
+        {
+            case FOdysseyVectorExportV1::CHUNK_VECTOR_MAGIC_V1 :
+                UE_LOG(LogTemp, Warning, TEXT("CHUNK_VECTOR_MAGIC_V1") );
+
+                FOdysseyVectorImportV1::Read( mEngine->GetScene(), Ar, chunkEnd );
+            break;
+
+            case FOdysseyVectorExportV2::CHUNK_VECTOR_MAGIC_V2 :
+            {
+                FOdysseyVectorImportV2 importerV2 = FOdysseyVectorImportV2();
+
+                UE_LOG(LogTemp, Warning, TEXT("CHUNK_VECTOR_MAGIC_V2") );
+
+                importerV2.Read( mEngine->GetScene(), Ar, chunkEnd );
+            }
+            break;
+
+            default:
+                Ar.Seek( chunkEnd );
+            break;
+        }
 
         mEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
                        | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY );

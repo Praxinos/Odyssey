@@ -1,7 +1,7 @@
-#include "Export/OdysseyVectorExport.h"
+#include "Export/v1/OdysseyVectorExport.h"
 
 void
-FOdysseyVectorExport::WriteChunk( uint32 iChunkID, FArchive &Ar, std::function<void(FArchive &Ar)> iCallback )
+FOdysseyVectorExportV1::WriteChunk( uint32 iChunkID, FArchive &Ar, std::function<void(FArchive &Ar)> iCallback )
 {
     uint64 chunkLen = 0;
     uint64 chunkLenAddress;
@@ -27,13 +27,13 @@ FOdysseyVectorExport::WriteChunk( uint32 iChunkID, FArchive &Ar, std::function<v
 }
 
 void
-FOdysseyVectorExport::Write( FOdysseyVectorScene* iScene, FArchive &Ar )
+FOdysseyVectorExportV1::Write( FOdysseyVectorScene* iScene, FArchive &Ar )
 {
     // write the chunk even if iVEngine is nullptr to prevent "expected size mismatch" when unreal reads the data.
     // iVEngine is nullptr when unreal preloads the file.
     // The reading process can then just skip the chunk no matter its size.
 
-    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_VECTOR_MAGIC
+    FOdysseyVectorExportV1::WriteChunk( FOdysseyVectorExportV1::CHUNK_VECTOR_MAGIC_V1
                                     , Ar
                                     , [iScene](FArchive &Ar) -> void
     {
@@ -43,8 +43,8 @@ FOdysseyVectorExport::Write( FOdysseyVectorScene* iScene, FArchive &Ar )
 
             FOdysseyVectorObject::TreeToArray ( iScene, vectorObjectArray );
 
-            FOdysseyVectorExport::WriteDeclareObjects( vectorObjectArray, Ar );
-            FOdysseyVectorExport::WriteDefineObjects( vectorObjectArray, Ar );
+            FOdysseyVectorExportV1::WriteDeclareObjects( vectorObjectArray, Ar );
+            FOdysseyVectorExportV1::WriteDefineObjects( vectorObjectArray, Ar );
         }
     } );
 }

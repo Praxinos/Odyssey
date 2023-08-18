@@ -1,11 +1,11 @@
-#include "Export/OdysseyVectorExport.h"
+#include "Export/v2/OdysseyVectorExport.h"
 
-static void
-WriteGroupPaintBuckets( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar )
+void
+FOdysseyVectorExportV2::WriteGroupPaintBuckets( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar )
 {
     if ( iPaintGroup.GetBucketList().size() )
     {
-        FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_GROUPPAINT_BUCKETS
+        FOdysseyVectorExportV2::WriteChunk( FOdysseyVectorExportV2::CHUNK_GROUPPAINT_BUCKETS
                                         , Ar
                                         , [&iPaintGroup](FArchive &Ar) -> void
         {
@@ -13,16 +13,16 @@ WriteGroupPaintBuckets( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar )
             {
                 FOdysseyVectorBucket* bucket = static_cast<FOdysseyVectorBucket*>(*it);
 
-                FOdysseyVectorExport::WriteBucket( *bucket, Ar );
+                FOdysseyVectorExportV2::WriteBucket( *bucket, Ar );
             }
         } );
     }
 }
 
-static void
-WriteGroupPaintGapTolerance( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar )
+void
+FOdysseyVectorExportV2::WriteGroupPaintGapTolerance( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar )
 {
-    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_GROUPPAINT_GAP_TOLERANCE
+    FOdysseyVectorExportV2::WriteChunk( FOdysseyVectorExportV2::CHUNK_GROUPPAINT_GAP_TOLERANCE
                                     , Ar
                                     , [&iPaintGroup](FArchive &Ar) -> void
     {
@@ -32,10 +32,10 @@ WriteGroupPaintGapTolerance( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar
     } );
 }
 
-static void
-WriteGroupPaintGap( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar )
+void
+FOdysseyVectorExportV2::WriteGroupPaintGap( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar )
 {
-    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_GROUPPAINT_GAP
+    FOdysseyVectorExportV2::WriteChunk( FOdysseyVectorExportV2::CHUNK_GROUPPAINT_GAP
                                     , Ar
                                     , [&iPaintGroup](FArchive &Ar) -> void
     {
@@ -43,10 +43,10 @@ WriteGroupPaintGap( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar )
     } );
 }
 
-static void
-WriteGroupPaintMonochromeColor( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar )
+void
+FOdysseyVectorExportV2::WriteGroupPaintMonochromeColor( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar )
 {
-    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_GROUPPAINT_MONOCHROMECOLOR
+    FOdysseyVectorExportV2::WriteChunk( FOdysseyVectorExportV2::CHUNK_GROUPPAINT_MONOCHROMECOLOR
                                     , Ar
                                     , [&iPaintGroup](FArchive &Ar) -> void
     {
@@ -61,10 +61,10 @@ WriteGroupPaintMonochromeColor( FOdysseyVectorGroupPaint& iPaintGroup, FArchive 
     } );
 }
 
-static void
-WriteGroupPaintMonochrome( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar )
+void
+FOdysseyVectorExportV2::WriteGroupPaintMonochrome( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar )
 {
-    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_GROUPPAINT_MONOCHROME
+    FOdysseyVectorExportV2::WriteChunk( FOdysseyVectorExportV2::CHUNK_GROUPPAINT_MONOCHROME
                                     , Ar
                                     , [&iPaintGroup](FArchive &Ar) -> void
     {
@@ -74,10 +74,10 @@ WriteGroupPaintMonochrome( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar )
     } );
 }
 
-static void
-WriteGroupPaintWireframeColor( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar )
+void
+FOdysseyVectorExportV2::WriteGroupPaintWireframeColor( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar )
 {
-    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_GROUPPAINT_WIREFRAMECOLOR
+    FOdysseyVectorExportV2::WriteChunk( FOdysseyVectorExportV2::CHUNK_GROUPPAINT_WIREFRAMECOLOR
                                     , Ar
                                     , [&iPaintGroup](FArchive &Ar) -> void
     {
@@ -92,10 +92,10 @@ WriteGroupPaintWireframeColor( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &
     } );
 }
 
-static void
-WriteGroupPaintWireframe( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar )
+void
+FOdysseyVectorExportV2::WriteGroupPaintWireframe( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar )
 {
-    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_GROUPPAINT_WIREFRAME
+    FOdysseyVectorExportV2::WriteChunk( FOdysseyVectorExportV2::CHUNK_GROUPPAINT_WIREFRAME
                                     , Ar
                                     , [&iPaintGroup](FArchive &Ar) -> void
     {
@@ -105,10 +105,10 @@ WriteGroupPaintWireframe( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar )
     } );
 }
 
-static void
-WriteGroupPaintPainted( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar )
+void
+FOdysseyVectorExportV2::WriteGroupPaintPainted( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar )
 {
-    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_GROUPPAINT_PAINTED
+    FOdysseyVectorExportV2::WriteChunk( FOdysseyVectorExportV2::CHUNK_GROUPPAINT_PAINTED
                                     , Ar
                                     , [&iPaintGroup](FArchive &Ar) -> void
     {
@@ -119,12 +119,15 @@ WriteGroupPaintPainted( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar )
 }
 
 void
-FOdysseyVectorExport::WriteObjectGroupPaint( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar )
+FOdysseyVectorExportV2::WriteGroupPaint( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar )
 {
-    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_OBJECT_GROUPPAINT
+    FOdysseyVectorExportV2::WriteChunk( FOdysseyVectorExportV2::CHUNK_GROUPPAINT
                                     , Ar
                                     , [&iPaintGroup](FArchive &Ar) -> void
     {
+        // inherited chunks
+        WriteObjectChunks( iPaintGroup, Ar );
+        // own chunks
         WriteGroupPaintPainted( iPaintGroup, Ar );
         WriteGroupPaintMonochrome( iPaintGroup, Ar );
         WriteGroupPaintMonochromeColor( iPaintGroup, Ar );

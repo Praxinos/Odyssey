@@ -84,34 +84,37 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnDrop( const FGeometry& iGeometry
 
     for( FOdysseyVectorObject* selectedObject : selectedObjectList )
     {
-        switch( mDropZone )
+        if( selectedObject != itemObject )
         {
-            case DROPZONE_ABOVE:
+            switch( mDropZone )
             {
-                FOdysseyVectorObject* parentObject = itemObject->GetParent();
+                case DROPZONE_ABOVE:
+                {
+                    FOdysseyVectorObject* parentObject = itemObject->GetParent();
 
-                parentObject->TransferChild( selectedObject, parentObject->GetPreviousChild( insertObject ) );
+                    parentObject->TransferChild( selectedObject, parentObject->GetPreviousChild( insertObject ) );
 
-                insertObject = selectedObject;
+                    insertObject = selectedObject;
+                }
+                break;
+
+                case DROPZONE_ONTO:
+                    itemObject->TransferChild( selectedObject, itemObject->GetLastChild() );
+                break;
+
+                case DROPZONE_BELOW:
+                {
+                    FOdysseyVectorObject* parentObject = itemObject->GetParent();
+
+                    parentObject->TransferChild( selectedObject, insertObject );
+
+                    insertObject = selectedObject;
+                }
+                break;
+
+                default :
+                break;
             }
-            break;
-
-            case DROPZONE_ONTO:
-                itemObject->TransferChild( selectedObject, itemObject->GetLastChild() );
-            break;
-
-            case DROPZONE_BELOW:
-            {
-                FOdysseyVectorObject* parentObject = itemObject->GetParent();
-
-                parentObject->TransferChild( selectedObject, insertObject );
-
-                insertObject = selectedObject;
-            }
-            break;
-
-            default :
-            break;
         }
     }
 

@@ -59,6 +59,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathBuilder : public FOdysseyVectorObject
         double mCumulAngleLimit;
         double mAngleLimit;
         uint32 mPointID;
+        double mSampleDistance;
 
         std::vector<FOdysseyVectorPoint> mPointBuffer;
         std::vector<FOdysseyVectorPointSample> mSampleBuffer;
