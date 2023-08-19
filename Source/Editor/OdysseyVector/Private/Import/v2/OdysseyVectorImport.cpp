@@ -6,6 +6,7 @@ FOdysseyVectorImportV2::~FOdysseyVectorImportV2()
 }
 
 FOdysseyVectorImportV2::FOdysseyVectorImportV2()
+    : mScene( nullptr )
 {
 }
 
@@ -16,13 +17,14 @@ FOdysseyVectorImportV2::ReadChunks( uint64 iChunkEnd, FArchive &Ar, std::functio
 
     while( Ar.Tell() != iChunkEnd )
     {
-        uint64 chunkLen;
         uint32 chunkID;
+        uint64 chunkLen;
+        uint64 chunkAddress = Ar.Tell();
 
         Ar << chunkID;
         Ar << chunkLen;
 
-        UE_LOG( LogTemp, Warning, TEXT("Reading Chunk %X %d"), chunkID, chunkLen );
+        UE_LOG( LogTemp, Warning, TEXT("Reading Chunk %X %d at %X"), chunkID, chunkLen, chunkAddress );
 
         /*if ( chunkLen )
         {*/
@@ -38,8 +40,8 @@ FOdysseyVectorImportV2::Read( FOdysseyVectorScene* iScene, FArchive &Ar, uint64 
     {
         mObjectArray.clear();
         mObjectArray.reserve( 400 );
-        // first record must be the scene
-        mObjectArray.push_back( iScene );
+
+        mScene = iScene;
 
         FOdysseyVectorImportV2::ReadChunks( iChunkEnd
                                           , Ar

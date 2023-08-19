@@ -109,6 +109,7 @@ FOdysseyVectorExportV2::WritePath( FOdysseyVectorPath& iPath, FArchive &Ar )
     {
         // inherited chunks
         WriteObjectChunks( iPath, Ar );
+
         // own chunks
         WritePathJoint( iPath, Ar );
         WritePathGeometry( iPath, Ar );

@@ -180,15 +180,26 @@ FOdysseyVectorExportV2::WriteObject( FOdysseyVectorObject& iObject, FArchive &Ar
 }
 
 void
-FOdysseyVectorExportV2::WriteDefineObjectEntry( FOdysseyVectorObject& iObject, FArchive &Ar )
+FOdysseyVectorExportV2::WriteDefineObjectID( FOdysseyVectorObject& iObject, FArchive &Ar )
 {
-    FOdysseyVectorExportV2::WriteChunk( FOdysseyVectorExportV2::CHUNK_DEFINE_OBJECT_ENTRY
+    FOdysseyVectorExportV2::WriteChunk( FOdysseyVectorExportV2::CHUNK_DEFINE_OBJECT_ID
                                     , Ar
                                     , [&iObject](FArchive &Ar) -> void
     {
         uint32 objectID = iObject.GetID();
 
         Ar << objectID;
+    } );
+}
+
+void
+FOdysseyVectorExportV2::WriteDefineObjectEntry( FOdysseyVectorObject& iObject, FArchive &Ar )
+{
+    FOdysseyVectorExportV2::WriteChunk( FOdysseyVectorExportV2::CHUNK_DEFINE_OBJECT_ENTRY
+                                    , Ar
+                                    , [&iObject](FArchive &Ar) -> void
+    {
+        WriteDefineObjectID( iObject, Ar );
 
         switch( iObject.GetType() )
         {
@@ -205,6 +216,14 @@ FOdysseyVectorExportV2::WriteDefineObjectEntry( FOdysseyVectorObject& iObject, F
                 FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(&iObject);
 
                 FOdysseyVectorExportV2::WriteGroupPaint( *paintGroup, Ar );
+            }
+            break;
+
+            case FOdysseyVectorObject::VECTORROOTTYPE:
+            {
+                FOdysseyVectorScene* scene = static_cast<FOdysseyVectorScene*>(&iObject);
+
+                FOdysseyVectorExportV2::WriteScene( *scene, Ar );
             }
             break;
 

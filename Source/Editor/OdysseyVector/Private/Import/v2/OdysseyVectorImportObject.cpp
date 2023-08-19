@@ -9,7 +9,8 @@ FOdysseyVectorImportV2::CreateObject( uint32 iObjectType )
     switch ( iObjectType )
     {
         case FOdysseyVectorObject::VECTORROOTTYPE :
-            // do nothing, the scene is already created by the vector layer
+            // don't create anything, the scene is already created by the vector layer
+            newObject = mScene;
         break;
 
         case FOdysseyVectorObject::VECTORPATHTYPE :
@@ -139,6 +140,56 @@ FOdysseyVectorImportV2::ReadObjectBucket( FOdysseyVectorBucket& iBucket
         });
 }
 
+// function to use when the chunk header is already read.
+void
+FOdysseyVectorImportV2::ParseObjectChunks( FOdysseyVectorObject& iObject
+                                         , uint32 iChunkID
+                                         , uint64 iChunkLen
+                                         , FArchive &Ar )
+{
+    switch( iChunkID )
+    {
+        case FOdysseyVectorExportV2::CHUNK_OBJECT_PARENTID:
+        {
+            uint32 parentID;
+
+            Ar << parentID;
+
+            // objectID = 0 if we are on the root node. Ignore it.
+            if( iObject.GetID() )
+            {
+                mObjectArray[parentID]->AppendChild( &iObject );
+            }
+        }
+        break;
+
+        case FOdysseyVectorExportV2::CHUNK_OBJECT_TRANSFORM:
+            ReadObjectTransform( iObject, Ar.Tell() + iChunkLen, Ar );
+        break;
+
+        case FOdysseyVectorExportV2::CHUNK_OBJECT_FOREGROUNDBUCKET:
+        {
+            FOdysseyVectorBucket& foregroundBucket = iObject.GetForegroundBucket();
+
+            ReadObjectBucket( foregroundBucket, Ar.Tell() + iChunkLen, Ar);
+        }
+        break;
+
+        case FOdysseyVectorExportV2::CHUNK_OBJECT_BACKGROUNDBUCKET:
+        {
+            FOdysseyVectorBucket& backgroundBucket = iObject.GetBackgroundBucket();
+
+            ReadObjectBucket( backgroundBucket, Ar.Tell() + iChunkLen, Ar);
+        }
+        break;
+
+        default:
+        // Mandatory
+            Ar.Seek( Ar.Tell() + iChunkLen );
+        break;
+    }    
+}
+
 void
 FOdysseyVectorImportV2::ReadObject( FOdysseyVectorObject& iObject, uint64 iChunkEnd, FArchive &Ar )
 {
@@ -146,47 +197,7 @@ FOdysseyVectorImportV2::ReadObject( FOdysseyVectorObject& iObject, uint64 iChunk
                                     , Ar
                                     , [this,&iObject](uint32 iChunkID, uint64 iChunkLen, FArchive &Ar) -> void
         {
-            switch( iChunkID )
-            {
-                case FOdysseyVectorExportV2::CHUNK_OBJECT_PARENTID:
-                {
-                    uint32 parentID;
-
-                    Ar << parentID;
-
-                    // objectID = 0 if we are on the root node. Ignore it.
-                    if( iObject.GetID() )
-                    {
-                        mObjectArray[parentID]->AppendChild( &iObject );
-                    }
-                }
-                break;
-
-                case FOdysseyVectorExportV2::CHUNK_OBJECT_TRANSFORM:
-                    ReadObjectTransform( iObject, Ar.Tell() + iChunkLen, Ar );
-                break;
-
-                case FOdysseyVectorExportV2::CHUNK_OBJECT_FOREGROUNDBUCKET:
-                {
-                    FOdysseyVectorBucket& foregroundBucket = iObject.GetForegroundBucket();
-
-                    ReadObjectBucket( foregroundBucket, Ar.Tell() + iChunkLen, Ar);
-                }
-                break;
-
-                case FOdysseyVectorExportV2::CHUNK_OBJECT_BACKGROUNDBUCKET:
-                {
-                    FOdysseyVectorBucket& backgroundBucket = iObject.GetBackgroundBucket();
-
-                    ReadObjectBucket( backgroundBucket, Ar.Tell() + iChunkLen, Ar);
-                }
-                break;
-
-                default:
-                // Mandatory
-                    Ar.Seek( Ar.Tell() + iChunkLen );
-                break;
-            }    
+            ParseObjectChunks( iObject, iChunkID, iChunkLen, Ar );
         } );
 }
 
@@ -197,40 +208,55 @@ FOdysseyVectorImportV2::ReadObjectsDefine( uint64 iChunkEnd, FArchive &Ar )
                                     , Ar
                                     , [this](uint32 iChunkID, uint64 iChunkLen, FArchive &Ar) -> void
         {
-            static uint32 objectID;
+            static FOdysseyVectorObject* vectorObject;
 
             switch( iChunkID )
             {
                 case FOdysseyVectorExportV2::CHUNK_DEFINE_OBJECT_ENTRY :
+                break;
+
+                case FOdysseyVectorExportV2::CHUNK_DEFINE_OBJECT_ID :
                 {
-                    FOdysseyVectorObject* vectorObject = nullptr;
+                    uint32 objectID;
 
                     Ar << objectID;
 
                     vectorObject = mObjectArray[objectID];
-
-                    if( vectorObject->GetClass() == FOdysseyVectorPath::StaticClass() )
-                    {
-                        FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(vectorObject);
-
-                        FOdysseyVectorImportV2::ReadPath( *path, Ar.Tell() + iChunkLen - sizeof(uint32), Ar );
-                        // immediately update invalidated segments and updates the path's BBox
-                        path->Update( 0 );
-                    }
-                    else
-                    if( vectorObject->GetClass() == FOdysseyVectorGroupPaint::StaticClass() )
-                    {
-                        FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(vectorObject);
-
-                        FOdysseyVectorImportV2::ReadGroupPaint( *paintGroup, Ar.Tell() + iChunkLen - sizeof(uint32), Ar );
-
-                        paintGroup->Invalidate();
-                    }
-                    else
-                    {
-                        FOdysseyVectorImportV2::ReadObject( *vectorObject, Ar.Tell() + iChunkLen - sizeof(uint32), Ar );
-                    }
                 }
+                break;
+
+                case FOdysseyVectorExportV2::CHUNK_PATH :
+                {
+                    FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(vectorObject);
+
+                    FOdysseyVectorImportV2::ReadPath( *path, Ar.Tell() + iChunkLen, Ar );
+                    // immediately update invalidated segments and updates the path's BBox
+                    path->Update( 0 );
+                }
+                break;
+
+                case FOdysseyVectorExportV2::CHUNK_GROUPPAINT :
+                {
+                    FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(vectorObject);
+
+                    FOdysseyVectorImportV2::ReadGroupPaint( *paintGroup, Ar.Tell() + iChunkLen, Ar );
+
+                    paintGroup->Invalidate();
+                }
+                break;
+
+                case FOdysseyVectorExportV2::CHUNK_SCENE:
+                {
+                    FOdysseyVectorScene* scene = static_cast<FOdysseyVectorScene*>(vectorObject);
+
+                    FOdysseyVectorImportV2::ReadScene( *scene, Ar.Tell() + iChunkLen, Ar );
+
+                    scene->Invalidate();
+                }
+                break;
+
+                case FOdysseyVectorExportV2::CHUNK_OBJECT :
+                    FOdysseyVectorImportV2::ReadObject( *vectorObject, Ar.Tell() + iChunkLen, Ar );
                 break;
 
                 default:

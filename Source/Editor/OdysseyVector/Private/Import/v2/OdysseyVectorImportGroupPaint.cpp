@@ -85,99 +85,108 @@ FOdysseyVectorImportV2::ReadBucketEntry( FOdysseyVectorBucket& iBucket, uint64 i
 }
 
 void
+FOdysseyVectorImportV2::ParseGroupPaintChunks( FOdysseyVectorGroupPaint& iPaintGroup
+                                             , uint32 iChunkID
+                                             , uint64 iChunkLen
+                                             , FArchive &Ar )
+{
+    switch( iChunkID )
+    {
+        case FOdysseyVectorExportV2::CHUNK_GROUPPAINT_BUCKETS:
+        break;
+
+        case FOdysseyVectorExportV2::CHUNK_GROUPPAINT_WIREFRAME:
+        {
+            uint32 wireframe;
+
+            Ar << wireframe;
+
+            iPaintGroup.SetWireframe( wireframe ? true : false );
+        }
+        break;
+
+        case FOdysseyVectorExportV2::CHUNK_GROUPPAINT_WIREFRAMECOLOR:
+        {
+            uint8 R, G, B, A;
+
+            Ar << R;
+            Ar << G;
+            Ar << B;
+            Ar << A;
+
+            iPaintGroup.SetWireframeColor( R, G, B, A );
+        }
+        break;
+
+        case FOdysseyVectorExportV2::CHUNK_GROUPPAINT_MONOCHROME:
+        {
+            uint32 monochrome;
+
+            Ar << monochrome;
+
+            iPaintGroup.SetMonochrome( monochrome ? true : false );
+        }
+        break;
+
+        case FOdysseyVectorExportV2::CHUNK_GROUPPAINT_MONOCHROMECOLOR:
+        {
+            uint8 R, G, B, A;
+
+            Ar << R;
+            Ar << G;
+            Ar << B;
+            Ar << A;
+
+            iPaintGroup.SetMonochromeColor( R, G, B, A );
+        }
+        break;
+
+        case FOdysseyVectorExportV2::CHUNK_GROUPPAINT_PAINTED:
+        {
+            uint32 painted;
+
+            Ar << painted;
+
+            iPaintGroup.SetPainted( painted ? true : false );
+        }
+        break;
+
+        case FOdysseyVectorExportV2::CHUNK_GROUPPAINT_GAP:
+        break;
+
+        case FOdysseyVectorExportV2::CHUNK_GROUPPAINT_GAP_TOLERANCE:
+        {
+            double gapTolerance;
+
+            Ar << gapTolerance;
+
+            iPaintGroup.SetGapTolerance( gapTolerance );
+        }
+        break;
+
+        case FOdysseyVectorExportV2::CHUNK_BUCKET_ENTRY:
+        {
+            FOdysseyVectorBucket* bucket = new FOdysseyVectorBucket( &iPaintGroup, 0.0f, 0.0f, false );
+
+            iPaintGroup.AddBucket( bucket );
+
+            ReadBucket( *bucket, Ar.Tell() + iChunkLen, Ar );
+        }
+        break;
+
+        default:
+            FOdysseyVectorImportV2::ParseObjectChunks( iPaintGroup, iChunkID, iChunkLen, Ar );
+        break;
+    }    
+}
+
+void
 FOdysseyVectorImportV2::ReadGroupPaint( FOdysseyVectorGroupPaint& iPaintGroup, uint64 iChunkEnd, FArchive &Ar )
 {
     FOdysseyVectorImportV2::ReadChunks( iChunkEnd
                                     , Ar
                                     , [this,&iPaintGroup](uint32 iChunkID, uint64 iChunkLen, FArchive &Ar) -> void
         {
-            switch( iChunkID )
-            {
-                case FOdysseyVectorExportV2::CHUNK_GROUPPAINT_BUCKETS:
-                break;
-
-                case FOdysseyVectorExportV2::CHUNK_GROUPPAINT_WIREFRAME:
-                {
-                    uint32 wireframe;
-
-                    Ar << wireframe;
-
-                    iPaintGroup.SetWireframe( wireframe ? true : false );
-                }
-                break;
-
-                case FOdysseyVectorExportV2::CHUNK_GROUPPAINT_WIREFRAMECOLOR:
-                {
-                    uint8 R, G, B, A;
-
-                    Ar << R;
-                    Ar << G;
-                    Ar << B;
-                    Ar << A;
-
-                    iPaintGroup.SetWireframeColor( R, G, B, A );
-                }
-                break;
-
-                case FOdysseyVectorExportV2::CHUNK_GROUPPAINT_MONOCHROME:
-                {
-                    uint32 monochrome;
-
-                    Ar << monochrome;
-
-                    iPaintGroup.SetMonochrome( monochrome ? true : false );
-                }
-                break;
-
-                case FOdysseyVectorExportV2::CHUNK_GROUPPAINT_MONOCHROMECOLOR:
-                {
-                    uint8 R, G, B, A;
-
-                    Ar << R;
-                    Ar << G;
-                    Ar << B;
-                    Ar << A;
-
-                    iPaintGroup.SetMonochromeColor( R, G, B, A );
-                }
-                break;
-
-                case FOdysseyVectorExportV2::CHUNK_GROUPPAINT_PAINTED:
-                {
-                    uint32 painted;
-
-                    Ar << painted;
-
-                    iPaintGroup.SetPainted( painted ? true : false );
-                }
-                break;
-
-                case FOdysseyVectorExportV2::CHUNK_GROUPPAINT_GAP:
-                break;
-
-                case FOdysseyVectorExportV2::CHUNK_GROUPPAINT_GAP_TOLERANCE:
-                {
-                    double gapTolerance;
-
-                    Ar << gapTolerance;
-
-                    iPaintGroup.SetGapTolerance( gapTolerance );
-                }
-                break;
-
-                case FOdysseyVectorExportV2::CHUNK_BUCKET_ENTRY:
-                {
-                    FOdysseyVectorBucket* bucket = new FOdysseyVectorBucket( &iPaintGroup, 0.0f, 0.0f, false );
-
-                    iPaintGroup.AddBucket( bucket );
-
-                    ReadBucket( *bucket, Ar.Tell() + iChunkLen, Ar );
-                }
-                break;
-
-                default:
-                    FOdysseyVectorImportV2::ReadObject( iPaintGroup, Ar.Tell() + iChunkLen, Ar );
-                break;
-            }    
+            ParseGroupPaintChunks( iPaintGroup, iChunkID, iChunkLen, Ar );
         } );
 }

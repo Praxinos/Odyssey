@@ -118,6 +118,23 @@ FOdysseyVectorExportV2::WriteGroupPaintPainted( FOdysseyVectorGroupPaint& iPaint
     } );
 }
 
+// Write chunks without encapsulation within the GroupPaint chunk header
+void
+FOdysseyVectorExportV2::WriteGroupPaintChunks( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar )
+{
+    // inherited chunks
+    WriteObjectChunks( iPaintGroup, Ar );
+    // own chunks
+    WriteGroupPaintPainted( iPaintGroup, Ar );
+    WriteGroupPaintMonochrome( iPaintGroup, Ar );
+    WriteGroupPaintMonochromeColor( iPaintGroup, Ar );
+    WriteGroupPaintWireframe( iPaintGroup, Ar );
+    WriteGroupPaintWireframeColor( iPaintGroup, Ar );
+    WriteGroupPaintGap( iPaintGroup, Ar );
+    WriteGroupPaintBuckets( iPaintGroup, Ar );
+}
+
+// Write chunks with encapsulation within the GroupPaint chunk header
 void
 FOdysseyVectorExportV2::WriteGroupPaint( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar )
 {
@@ -125,15 +142,6 @@ FOdysseyVectorExportV2::WriteGroupPaint( FOdysseyVectorGroupPaint& iPaintGroup, 
                                     , Ar
                                     , [&iPaintGroup](FArchive &Ar) -> void
     {
-        // inherited chunks
-        WriteObjectChunks( iPaintGroup, Ar );
-        // own chunks
-        WriteGroupPaintPainted( iPaintGroup, Ar );
-        WriteGroupPaintMonochrome( iPaintGroup, Ar );
-        WriteGroupPaintMonochromeColor( iPaintGroup, Ar );
-        WriteGroupPaintWireframe( iPaintGroup, Ar );
-        WriteGroupPaintWireframeColor( iPaintGroup, Ar );
-        WriteGroupPaintGap( iPaintGroup, Ar );
-        WriteGroupPaintBuckets( iPaintGroup, Ar );
+        WriteGroupPaintChunks( iPaintGroup, Ar );
     } );
 }

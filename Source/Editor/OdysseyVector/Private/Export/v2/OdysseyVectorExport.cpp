@@ -6,12 +6,16 @@ FOdysseyVectorExportV2::WriteChunk( uint32 iChunkID, FArchive &Ar, std::function
     uint64 chunkLen = 0;
     uint64 chunkLenAddress;
     uint64 currentAddress;
+    uint64 chunkAddress = Ar.Tell();
 
     Ar << iChunkID;
 
     chunkLenAddress = Ar.Tell();
     // write dummy value, we will set it at the end
     Ar << chunkLen;
+
+//    UE_LOG( LogTemp, Warning, TEXT("Writing Chunk %X at %X"), iChunkID, chunkAddress );
+
     // write data
     iCallback( Ar );
 
@@ -24,6 +28,8 @@ FOdysseyVectorExportV2::WriteChunk( uint32 iChunkID, FArchive &Ar, std::function
     Ar << chunkLen;
 
     Ar.Seek( currentAddress );
+
+//    UE_LOG( LogTemp, Warning, TEXT("Chunk %X Size: %d"), iChunkID, chunkLen );
 }
 
 void

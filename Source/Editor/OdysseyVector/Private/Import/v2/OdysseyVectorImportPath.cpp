@@ -103,7 +103,7 @@ FOdysseyVectorImportV2::ReadPath( FOdysseyVectorPath& iPath, uint64 iChunkEnd, F
                 break;
 
                 default:
-                    FOdysseyVectorImportV2::ReadObject( iPath, Ar.Tell() + iChunkLen, Ar );
+                    FOdysseyVectorImportV2::ParseObjectChunks( iPath, iChunkID, iChunkLen, Ar );
                 break;
             }    
         } );
