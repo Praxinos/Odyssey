@@ -60,13 +60,13 @@ void
 FOdysseyPainterEditorGUI::ExtendLevelEditorLayout(FLayoutExtender& Extender)
 {
     Extender.ExtendLayout(FTabId(TEXT("PlacementBrowser")), ELayoutExtensionPosition::Below, FTabManager::FTab(FOdysseyPainterEditorToolsTab::StaticId(), ETabState::ClosedTab));
-    Extender.ExtendLayout(FTabId(TEXT("PlacementBrowser")), ELayoutExtensionPosition::Below, FTabManager::FTab(FOdysseyPainterEditorSelectedVectorObjectTab::StaticId(), ETabState::ClosedTab));
+    //Extender.ExtendLayout(FTabId(TEXT("PlacementBrowser")), ELayoutExtensionPosition::Below, FTabManager::FTab(FOdysseyPainterEditorSelectedVectorObjectTab::StaticId(), ETabState::ClosedTab));
     Extender.ExtendLayout(FTabId(TEXT("PlacementBrowser")), ELayoutExtensionPosition::Below, FTabManager::FTab(FOdysseyPainterEditorToolOptionsTab::StaticId(), ETabState::ClosedTab));
     Extender.ExtendLayout(FTabId(TEXT("PlacementBrowser")), ELayoutExtensionPosition::Below, FTabManager::FTab(FOdysseyPainterEditorBrushSelectorTab::StaticId(), ETabState::ClosedTab));
     
     
-    Extender.ExtendLayout(FTabId(TEXT("LevelEditorSceneOutliner")), ELayoutExtensionPosition::Below, FTabManager::FTab(FOdysseyPainterEditorPaletteTab::StaticId(), ETabState::ClosedTab));
-    Extender.ExtendLayout(FTabId(TEXT("LevelEditorSceneOutliner")), ELayoutExtensionPosition::Below, FTabManager::FTab(FOdysseyPainterEditorColorSlidersTab::StaticId(), ETabState::ClosedTab));
+    //Extender.ExtendLayout(FTabId(TEXT("LevelEditorSceneOutliner")), ELayoutExtensionPosition::Below, FTabManager::FTab(FOdysseyPainterEditorPaletteTab::StaticId(), ETabState::ClosedTab));
+    //Extender.ExtendLayout(FTabId(TEXT("LevelEditorSceneOutliner")), ELayoutExtensionPosition::Below, FTabManager::FTab(FOdysseyPainterEditorColorSlidersTab::StaticId(), ETabState::ClosedTab));
     Extender.ExtendLayout(FTabId(TEXT("LevelEditorSceneOutliner")), ELayoutExtensionPosition::Below, FTabManager::FTab(FOdysseyPainterEditorColorWheelTab::StaticId(), ETabState::ClosedTab));
 }
 
@@ -86,12 +86,12 @@ FOdysseyPainterEditorGUI::CreateTabs()
     TSharedRef<FOdysseyPainterEditorToolOptionsTab> toolOptionsTab = MakeShared<FOdysseyPainterEditorToolOptionsTab>(mEditor);
 
     //Used for the viewport drawing editor to know which tab to open by default
-    paletteTab->ShouldOpenByDefault(true);
+    //paletteTab->ShouldOpenByDefault(true);
     brushSelectorTab->ShouldOpenByDefault(true);
     colorWheelTab->ShouldOpenByDefault(true);
-    colorSlidersTab->ShouldOpenByDefault(true);
+    //colorSlidersTab->ShouldOpenByDefault(true);
     toolsTab->ShouldOpenByDefault(true);
-    selectedVectorObjectTab->ShouldOpenByDefault(true);
+    //selectedVectorObjectTab->ShouldOpenByDefault(true);
     toolOptionsTab->ShouldOpenByDefault(true);
 
 
