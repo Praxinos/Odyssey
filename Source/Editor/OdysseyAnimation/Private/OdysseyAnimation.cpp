@@ -162,9 +162,51 @@ void
 UOdysseyAnimation::PostInitProperties()
 {
 	Super::PostInitProperties();
+
+    if (HasAnyFlags(RF_ClassDefaultObject))
+        return;
 	
 	mProxy = MakeShared<FOdysseyAnimationProxy>(this);
 	SetAbility(MakeShared<FOdysseyAnimationImageRenderingAbility>(this));
+
+	FOdysseyAnimationImageRenderingAbility::OnCommited().AddUObject(this, &UOdysseyAnimation::OnImageRenderingCommited);
+	FOdysseyAnimationImageRenderingAbility::OnCompositionCommited().AddUObject(this, &UOdysseyAnimation::OnImageRenderingCompositionCommited);
+}
+
+void
+UOdysseyAnimation::OnImageRenderingCommited(const FGuid& iId, const TArray<::ULIS::FRectI>& iRects)
+{
+	TSharedPtr<FOdysseyAnimationImageRenderingAbility> ability = GetAbility<FOdysseyAnimationImageRenderingAbility>();
+	FInt32Range frameRange = GetFrameRange();
+	int startFrame = frameRange.GetUpperBound().IsInclusive() ? frameRange.GetLowerBoundValue() : frameRange.GetLowerBoundValue() + 1;
+	int endFrame = frameRange.GetUpperBound().IsInclusive() ? frameRange.GetUpperBoundValue() : frameRange.GetUpperBoundValue() - 1;
+	for (int i = startFrame; i <= endFrame; i++)
+	{
+		TArray<FGuid> composition = ability->GetComposition(i, IOdysseyImageRenderer::eRenderType::Editor);
+		if (composition.Contains(iId))
+		{
+			MarkPackageDirty();
+			break;
+		}
+	}
+}
+
+void
+UOdysseyAnimation::OnImageRenderingCompositionCommited(const FGuid& iId)
+{
+	TSharedPtr<FOdysseyAnimationImageRenderingAbility> ability = GetAbility<FOdysseyAnimationImageRenderingAbility>();
+	FInt32Range frameRange = GetFrameRange();
+	int startFrame = frameRange.GetUpperBound().IsInclusive() ? frameRange.GetLowerBoundValue() : frameRange.GetLowerBoundValue() + 1;
+	int endFrame = frameRange.GetUpperBound().IsInclusive() ? frameRange.GetUpperBoundValue() : frameRange.GetUpperBoundValue() - 1;
+	for (int i = startFrame; i <= endFrame; i++)
+	{
+		TArray<FGuid> composition = ability->GetComposition(i, IOdysseyImageRenderer::eRenderType::Editor);
+		if (composition.Contains(iId))
+		{
+			MarkPackageDirty();
+			break;
+		}
+	}
 }
 
 void

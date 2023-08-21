@@ -97,6 +97,10 @@ protected:
     virtual void CurrentFrameChanged();
 	virtual void FramesPerSecondChanged();
 
+private:
+	void OnImageRenderingCommited(const FGuid& iId, const TArray<::ULIS::FRectI>& iRects);
+	void OnImageRenderingCompositionCommited(const FGuid& iId);
+
 public:
 	//CurrentFrame is specific to the user, not to the animation itself
     //So we save it in user's config, instead of the animation
