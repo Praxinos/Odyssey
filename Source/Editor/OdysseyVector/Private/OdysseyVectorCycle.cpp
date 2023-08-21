@@ -209,11 +209,12 @@ FOdysseyVectorCycle::GetPropagatedBucket()
 }
 
 bool
-FOdysseyVectorCycle::PropagateBucket()
+FOdysseyVectorCycle::PropagateBucket( std::vector<FOdysseyVectorSection*> iSectionArray )
 {
-    for( int i = 0; i < mSectionArray.size(); i++ )
+    // test outer sections
+    for( int i = 0; i < iSectionArray.size(); i++ )
     {
-        FOdysseyVectorCycle* neighbourCycle = mSectionArray[i]->GetOtherCycle( this );
+        FOdysseyVectorCycle* neighbourCycle = iSectionArray[i]->GetOtherCycle( this );
 
         if( neighbourCycle )
         {
@@ -229,6 +230,24 @@ FOdysseyVectorCycle::PropagateBucket()
     }
 
     return false;
+}
+
+bool
+FOdysseyVectorCycle::PropagateBucket()
+{
+    // check outer sections for a propagated bucket
+    if( PropagateBucket( mSectionArray ) == false )
+    {
+        // check inner sections for a propagated bucket
+        if( PropagateBucket( mInnerSectionArray ) )
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    return true;
 }
 
 bool

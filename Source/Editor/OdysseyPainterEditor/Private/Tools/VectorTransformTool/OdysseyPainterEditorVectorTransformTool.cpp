@@ -628,12 +628,18 @@ UOdysseyPainterEditorVectorTransformTool::ScaleObjectSelection( FOdysseyVectorEn
 
         if( mEditor->GetVectorEditionMode() == eVectorEditionMode::Vertex )
         {
+            double selectionBoxArea = selectionBox.rect.Area();
+             // side note: the sqrt() is there because surface rises at the square of dimension factor. We have to correct that.
+            double radiusRatio = selectionBoxArea ? sqrt ( ( x2mx1 * y2my1 ) / selectionBoxArea ) : 1.0f;
+
             for( int i = 0; i < mSelectedPoints.size(); i++ )
             {
                 TransformPoint( mSelectedPoints[i]
                               , spaceMatrix
                               , inverseSpaceMatrix
                               , scalingMatrix );
+
+                mSelectedPoints[i]->SetRadius( mSelectedPoints[i]->GetRadius() * radiusRatio );
             }
         }
 

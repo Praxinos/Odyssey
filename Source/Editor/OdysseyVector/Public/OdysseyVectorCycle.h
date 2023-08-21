@@ -122,6 +122,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorCycle
 
         FOdysseyVectorObject* GetOwner();
 
+    private :
+        bool PropagateBucket( std::vector<FOdysseyVectorSection*> iSectionArray );
+
     protected :
         BLPath mContourPath;
         BLPath mCombinedPath;

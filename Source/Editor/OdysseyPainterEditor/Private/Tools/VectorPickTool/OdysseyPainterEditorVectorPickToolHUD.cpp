@@ -51,7 +51,7 @@ void
 FOdysseyPainterEditorVectorPickToolHUD::GetSelectedVertices( FOdysseyVectorScene* iScene
                                                            , std::vector<FOdysseyVectorPoint*>& oPointArray )
 {
-    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
+    std::list<FOdysseyVectorObject*>& selectedObjectList = mPickTool->GetFocusedObjectList( iScene );
     std::list<FOdysseyVectorObject*>::iterator it;
 
     // avoir to many reallocation by reserving a decent amount of memory
@@ -61,7 +61,7 @@ FOdysseyPainterEditorVectorPickToolHUD::GetSelectedVertices( FOdysseyVectorScene
     {
         FOdysseyVectorObject* selectedObject = *it;
 
-        if( selectedObject->GetClass() == FOdysseyVectorPath::StaticClass() )
+        if( selectedObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
         {
             FOdysseyVectorPath* selectedPath = static_cast<FOdysseyVectorPath*>(selectedObject);
 
@@ -71,7 +71,7 @@ FOdysseyPainterEditorVectorPickToolHUD::GetSelectedVertices( FOdysseyVectorScene
                                            | ePointSelectionFlags::SegmentHandle );
         }
 
-        if( selectedObject->GetClass() == FOdysseyVectorGroupPaint::StaticClass() )
+        if( selectedObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
         {
             FOdysseyVectorGroupPaint* selectedPaintGroup = static_cast<FOdysseyVectorGroupPaint*>(selectedObject);
 
@@ -124,7 +124,7 @@ void
 FOdysseyPainterEditorVectorPickToolHUD::UpdateSelectionBoxVertexMode( FOdysseyVectorScene* iScene
                                                                     , bool iForceWorld )
 {
-    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
+    std::list<FOdysseyVectorObject*>& selectedObjectList = mPickTool->GetFocusedObjectList( iScene );
     std::list<FOdysseyVectorObject*>::iterator it;
     bool inited = false;
 
@@ -135,7 +135,7 @@ FOdysseyPainterEditorVectorPickToolHUD::UpdateSelectionBoxVertexMode( FOdysseyVe
     {
         FOdysseyVectorObject* selectedObject = *it;
 
-        if( selectedObject->GetClass() == FOdysseyVectorPath::StaticClass() )
+        if( selectedObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
         {
             FOdysseyVectorPath* selectedPath = static_cast<FOdysseyVectorPath*>(selectedObject);
             ::ULIS::FRectD selectedPathBBox;
@@ -149,7 +149,7 @@ FOdysseyPainterEditorVectorPickToolHUD::UpdateSelectionBoxVertexMode( FOdysseyVe
             }
         }
 
-        if( selectedObject->GetClass() == FOdysseyVectorGroupPaint::StaticClass() )
+        if( selectedObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
         {
             FOdysseyVectorGroupPaint* selectedPaintGroup = static_cast<FOdysseyVectorGroupPaint*>(selectedObject);
             ::ULIS::FRectD selectedPaintGroupBBox;
@@ -288,7 +288,7 @@ void
 FOdysseyPainterEditorVectorPickToolHUD::DrawVertexSelection( FOdysseyVectorScene* iScene
                                                            , uint64 iFlags )
 {
-    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
+    std::list<FOdysseyVectorObject*>& selectedObjectList = mPickTool->GetFocusedObjectList( iScene );
     std::list<FOdysseyVectorObject*>::iterator it;
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();

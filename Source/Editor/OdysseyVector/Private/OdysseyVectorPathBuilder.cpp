@@ -1,5 +1,7 @@
 #include "OdysseyVectorPathBuilder.h"
 
+#define ADJUSTRECURSE 1
+
 FOdysseyVectorPointSample::~FOdysseyVectorPointSample()
 {
 }
@@ -220,8 +222,8 @@ FOdysseyVectorPathBuilder::RecordVertex()
 
             Smooth( mCubicSegment, mSampleBuffer[0].IsSharp() );
 
-            AdjustHandle( mCubicSegment, 0, 0.5f, 2 );
-            AdjustHandle( mCubicSegment, 1, 0.5f, 2 );
+            AdjustHandle( mCubicSegment, 0, 0.5f, ADJUSTRECURSE );
+            AdjustHandle( mCubicSegment, 1, 0.5f, ADJUSTRECURSE );
 
             mCubicSegment->Invalidate();
 
@@ -398,8 +400,8 @@ FOdysseyVectorPathBuilder::RecordEnd( FOdysseyVectorVertex *iVertex )
 
             Smooth( mCubicSegment, mSampleBuffer[0].IsSharp() );
 
-            AdjustHandle( mCubicSegment, 0, 0.5f, 2 );
-            AdjustHandle( mCubicSegment, 1, 0.5f, 2 );
+            AdjustHandle( mCubicSegment, 0, 0.5f, ADJUSTRECURSE );
+            AdjustHandle( mCubicSegment, 1, 0.5f, ADJUSTRECURSE );
 
             mCubicSegment->Invalidate();
 
@@ -551,12 +553,12 @@ FOdysseyVectorPathBuilder::AdjustHandle( FOdysseyVectorSegmentCubic* iCubicSegme
         if ( angle1 > 0.1f )
         {
             double ratio = angle0 / angle1;
-UE_LOG(LogTemp, Warning, TEXT("Some warning message %f: %f <-> %f - %f %f %f"), ratio, angle0, angle1 );
+//UE_LOG(LogTemp, Warning, TEXT("Some warning message %f: %f <-> %f - %f %f %f"), ratio, angle0, angle1 );
             segmentHandle->Set( vertexPoint.x + ( direction.x * ratio ),
                                 vertexPoint.y + ( direction.y * ratio ) );
 
-            //if( iDepth > 0 )
-            //    AdjustHandle( iCubicSegment, iHandleID, ( cubicVertex->GetT( iCubicSegment ) + iCheckAt) * 0.5f, iDepth - 1 );
+            if( iDepth > 0 )
+                AdjustHandle( iCubicSegment, iHandleID, ( cubicVertex->GetT( iCubicSegment ) + iCheckAt) * 0.5f, iDepth - 1 );
         }
 
     }

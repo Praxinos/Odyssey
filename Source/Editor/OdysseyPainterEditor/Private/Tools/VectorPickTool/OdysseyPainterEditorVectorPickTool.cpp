@@ -37,6 +37,7 @@ UOdysseyPainterEditorVectorPickTool::GetFocusedObjectList( FOdysseyVectorScene* 
         return selectedObjectList;
     }
 
+    // return scene as list
     return iScene->GetEngine()->GetChildrenList();
 }
 
@@ -482,7 +483,7 @@ UOdysseyPainterEditorVectorPickTool::OnMouseUpVectorVertexMode( FOdysseyVectorEn
                                                               , const FOdysseyPoint& iPointInTexture
                                                               , const FKey& iKey )
 {
-    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
+    std::list<FOdysseyVectorObject*>& selectedObjectList = GetFocusedObjectList( iScene );
 
     for( std::list<FOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
     {

@@ -51,6 +51,7 @@ UOdysseyPainterEditorPaintBucketTool::GetFocusedObjectList( FOdysseyVectorScene*
         }
     }
 
+    // return scene as list
     return iScene->GetEngine()->GetChildrenList();
 }
 
@@ -716,9 +717,13 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseUpVectorCreateBucket( FOdysseyVecto
                                                                  , const FOdysseyPoint& iPointInTexture
                                                                  , const FKey& iKey )
 {
-    std::vector<FOdysseyVectorBucket*> pickedBucketArray;
+    std::vector<FOdysseyVectorBucket*> addedBucketArray;
+    std::vector<FOdysseyVectorBucket*> paramBucketArray;
 
     //mBucketHUD->PickCycles( iScene, iPointInTexture.x, iPointInTexture.y, mPickedCycleArray );
+
+    addedBucketArray.reserve( mPickedCycleArray.size() );
+    paramBucketArray.reserve( mPickedCycleArray.size() );
 
     for( int i = 0; i < mPickedCycleArray.size(); i++ )
     {
@@ -734,48 +739,29 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseUpVectorCreateBucket( FOdysseyVecto
             bucket = new FOdysseyVectorBucket( paintGroup, localCoords.x, localCoords.y, Propagate );
 
             paintGroup->AddBucket( bucket );
+
+            addedBucketArray.push_back( bucket );
         }
 
-        SetBucketColor( bucket );
+        paramBucketArray.push_back( bucket );
     }
 
-/*
-    if( cycleBucket )
+    // needed for valid GUndo pointer
+    GEditor->BeginTransaction(LOCTEXT("PaintBucketTool","Paint Bucket"));
+    if( GUndo )
     {
-        pickedBucket = cycleBucket;
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( iScene
+                                                                    , addedBucketArray
+                                                                    , paramBucketArray );
 
-        // needed for valid GUndo pointer
-        GEditor->BeginTransaction(LOCTEXT("PaintBucketTool","Paint Bucket"));
-        if( GUndo )
-        {
-            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( iScene, pickedBucketArray );
-
-            GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
-        }
-        GEditor->EndTransaction();
+        GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
     }
-    else
+    GEditor->EndTransaction();
+
+    for( int i = 0; i < paramBucketArray.size(); i++ )
     {
-        BLMatrix2D& inverseWorldMatrix = paintGroup->GetInverseWorldMatrix();
-        BLPoint localCoords = inverseWorldMatrix.mapPoint( iPointInTexture.x, iPointInTexture.y );
-
-        pickedBucket = new FOdysseyVectorBucket( paintGroup, localCoords.x, localCoords.y, Propagate );
-
-        paintGroup->AddBucket( pickedBucket );
-
-        // needed for valid GUndo pointer
-        GEditor->BeginTransaction(LOCTEXT("PaintBucketTool","Paint Bucket"));
-        if( GUndo )
-        {
-            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketAdd( iScene, paintGroup, pickedBucketArray );
-
-            GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
-        }
-        GEditor->EndTransaction();
+        SetBucketColor( paramBucketArray[i] );
     }
-
-    SetBucketColor( pickedBucket );
-*/
 }
 
 void

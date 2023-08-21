@@ -8,7 +8,10 @@ FOdysseyVectorUndoBucketParam::~FOdysseyVectorUndoBucketParam()
     }
     else
     {
-        // nothing to do
+        for( int i = 0; i < mAddedBucketArray.size(); i++ )
+        {
+            delete mAddedBucketArray[i];
+        }
     }
 }
 
@@ -16,41 +19,64 @@ FOdysseyVectorUndoBucketParam::FOdysseyVectorUndoBucketParam( FOdysseyVectorScen
                                                             , FOdysseyVectorBucket* iBucket )
     : FOdysseyVectorUndo( iScene )
 {
-    mBucketSaveArray.emplace_back( iBucket->GetOwner(), 0.0f, 0.0f, false );
-    mBucketArray.push_back( iBucket );
+    mParamBucketSaveArray.emplace_back( iBucket->GetOwner(), 0.0f, 0.0f, false );
+    mParamBucketArray.push_back( iBucket );
 }
 
 FOdysseyVectorUndoBucketParam::FOdysseyVectorUndoBucketParam( FOdysseyVectorScene* iScene
-                                                            , std::vector<FOdysseyVectorBucket*>& iBucketArray )
+                                                            , std::vector<FOdysseyVectorBucket*>& iAddedBucketArray
+                                                            , std::vector<FOdysseyVectorBucket*>& iParamBucketArray )
     : FOdysseyVectorUndo( iScene )
 {
-    mBucketArray = iBucketArray;
+    mAddedBucketArray = iAddedBucketArray;
+    mParamBucketArray = iParamBucketArray;
 
-    for( int i = 0; i < mBucketArray.size(); i++ )
+    for( int i = 0; i < mParamBucketArray.size(); i++ )
     {
-        mBucketSaveArray.emplace_back( mBucketArray[i]->GetOwner(), 0.0f, 0.0f, false );
+        mParamBucketSaveArray.emplace_back( mParamBucketArray[i]->GetOwner(), 0.0f, 0.0f, false );
 
-        mBucketArray[i]->Copy( &mBucketSaveArray[i] );
+        mParamBucketArray[i]->Copy( &mParamBucketSaveArray[i] );
     }
 }
 
 void
 FOdysseyVectorUndoBucketParam::Swap()
 {
-    for( int i = 0; i < mBucketArray.size(); i++ )
+    for( int i = 0; i < mParamBucketArray.size(); i++ )
     {
         // Note: setting the owner does not make sense per se, as the bucket is only
         // temporary, but is mandatory in the ctor
-        FOdysseyVectorBucket tmpBucketSave( mBucketSaveArray[i].GetOwner(), 0.0f, 0.0f, false );
+        FOdysseyVectorBucket tmpBucketSave( mParamBucketSaveArray[i].GetOwner(), 0.0f, 0.0f, false );
 
         // save data to tmp
-        mBucketArray[i]->Copy( &tmpBucketSave );
+        mParamBucketArray[i]->Copy( &tmpBucketSave );
         // restore bucket data
-        mBucketSaveArray[i].Copy( mBucketArray[i] );
+        mParamBucketSaveArray[i].Copy( mParamBucketArray[i] );
         // swap data from tmp
-        tmpBucketSave.Copy( &mBucketSaveArray[i] );
+        tmpBucketSave.Copy( &mParamBucketSaveArray[i] );
 
-        mBucketArray[i]->Invalidate();
+        mParamBucketArray[i]->Invalidate();
+    }
+}
+
+void
+FOdysseyVectorUndoBucketParam::Apply( UObject* iIgnored )
+{
+    // call method from base class
+    FOdysseyVectorUndo::Apply( iIgnored );
+
+    Swap();
+
+    for( int i = 0; i < mAddedBucketArray.size(); i++ )
+    {
+        FOdysseyVectorObject* ownerObject = mAddedBucketArray[i]->GetOwner();
+
+        if( ownerObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+        {
+            FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(ownerObject);
+
+            paintGroup->AddBucket( mAddedBucketArray[i] );
+        }
     }
 
     // update invalidated objects
@@ -62,21 +88,31 @@ FOdysseyVectorUndoBucketParam::Swap()
 }
 
 void
-FOdysseyVectorUndoBucketParam::Apply( UObject* iIgnored )
-{
-    // call method from base class
-    FOdysseyVectorUndo::Apply( iIgnored );
-
-    Swap();
-}
-
-void
 FOdysseyVectorUndoBucketParam::Revert( UObject* iIgnored )
 {
     // call method from base class
     FOdysseyVectorUndo::Revert( iIgnored );
 
     Swap();
+
+    for( int i = 0; i < mAddedBucketArray.size(); i++ )
+    {
+        FOdysseyVectorObject* ownerObject = mAddedBucketArray[i]->GetOwner();
+
+        if( ownerObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+        {
+            FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(ownerObject);
+
+            paintGroup->RemoveBucket( mAddedBucketArray[i] );
+        }
+    }
+
+    // update invalidated objects
+    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+
+    mScene->GetEngine()->ResetHUD();
+    // call callbacks if any (for refreshing GUI e.g)
+    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
 /** Describes this change (for debugging) */

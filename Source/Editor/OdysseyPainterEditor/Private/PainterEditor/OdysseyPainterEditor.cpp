@@ -495,7 +495,7 @@ FOdysseyPainterEditor::Ungroup( FOdysseyVectorEngine* iEngine, FOdysseyVectorSce
                 groupParent->TransferChild( child, groupParent->GetLastChild() );
             }
 
-            groupParent->RemoveChild( group );
+            //groupParent->RemoveChild( group );
 
             iScene->ClearSelection();
             iScene->UpdateMatrix();

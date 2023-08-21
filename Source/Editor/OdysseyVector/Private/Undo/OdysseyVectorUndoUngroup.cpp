@@ -5,7 +5,7 @@ FOdysseyVectorUndoUngroup::~FOdysseyVectorUndoUngroup()
     // if Grouping action confirmed
     if( mApplied )
     {
-        delete mGroup;
+        //delete mGroup;
     }
     else
     {
@@ -37,7 +37,7 @@ FOdysseyVectorUndoUngroup::Apply( UObject* iIgnored )
         mGroup->GetParent()->TransferChild( child, mGroup->GetLastChild() );
     }
 
-    mGroup->GetParent()->RemoveChild( mGroup );
+    //mGroup->GetParent()->RemoveChild( mGroup );
 
     // update invalidated objects
     mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
@@ -57,7 +57,7 @@ FOdysseyVectorUndoUngroup::Revert( UObject* iIgnored )
     mScene->ClearSelection();
 
     // Note: GetParent() stills holds a valid pointer to the former parent.
-    mGroup->GetParent()->AppendChild( mGroup );
+    //mGroup->GetParent()->AppendChild( mGroup );
 
     for( std::list<FOdysseyVectorObject*>::iterator it = mUngroupedObjectList.begin(); it != mUngroupedObjectList.end(); ++it )
     {
