@@ -143,6 +143,9 @@ UOdysseyPainterEditorPaintBucketTool::LoadVector( FOdysseyVectorEngine* iEngine,
 
     mBucketHUD->Reset( iScene );
 
+    // redetect paintgroups cycles in case the path drawing tool is not set to do so
+    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 

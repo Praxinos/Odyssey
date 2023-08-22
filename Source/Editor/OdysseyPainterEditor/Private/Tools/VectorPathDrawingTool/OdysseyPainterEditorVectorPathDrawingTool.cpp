@@ -21,6 +21,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::UOdysseyPainterEditorVectorPathDrawi
     : Radius( 5.0f )
     , Opacity( 1.0f )
     , Absolute( true )
+    , UpdatePaintGroups( true )
     , Stitch( false )
     , AverageStitchedRadius( true )
     , StitchingRadius( 10 )
@@ -107,6 +108,9 @@ UOdysseyPainterEditorVectorPathDrawingTool::LoadVector( FOdysseyVectorEngine* iE
 //    TSharedPtr<SOdysseyPaintModifiers> widget = GetEditor()->GetGUI()->GetTopTab().Get()->GetWidget();
 
 //    widget.Get()->OnSizeChanged.AddRaw( this, &UOdysseyPainterEditorVectorPathDrawingTool::OnSizeChanged );
+
+    // redetect paintgroups cycles in case the path drawing tool is not set to do so
+    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
@@ -530,7 +534,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorEngin
 
     mPathDrawingHUD->Reset( iScene ); // refreshes the quadtree;
 
-    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS ); // update invalidated objects
+    iScene->Update( UpdatePaintGroups ? FOdysseyVectorObject::UPDATEPAINTGROUPS : 0 ); // update invalidated objects
 
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
                    | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY // important to remove the path builder from the hierarchy widget

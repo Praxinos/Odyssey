@@ -198,7 +198,7 @@ FOdysseyVectorEngine::SelectAllInSelectionSpace()
 }
 
 void
-FOdysseyVectorEngine::Render()
+FOdysseyVectorEngine::UpdateShape( uint32 iUpdateFlags )
 {
     // Blend2D part
    /* BLContextCreateInfo createInfo{};*/

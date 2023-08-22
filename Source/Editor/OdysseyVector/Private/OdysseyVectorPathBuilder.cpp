@@ -112,11 +112,11 @@ Shape( FOdysseyVectorSegmentCubic& iCubicSegment, ::ULIS::FVec2D iEntryVector, :
 {
     double length = iCubicSegment.GetVector( false ).Distance();
 
-    iCubicSegment.GetHandle(0)->Set( iCubicSegment.GetPoint(0)->GetX() + iEntryVector.x * length * 0.35f
-                                   , iCubicSegment.GetPoint(0)->GetY() + iEntryVector.y * length * 0.35f );
+    iCubicSegment.GetHandle(0)->Set( iCubicSegment.GetPoint(0)->GetX() + iEntryVector.x * length * 0.25f
+                                   , iCubicSegment.GetPoint(0)->GetY() + iEntryVector.y * length * 0.25f );
 
-    iCubicSegment.GetHandle(1)->Set( iCubicSegment.GetPoint(1)->GetX() - iExitVector.x * length * 0.35f
-                                   , iCubicSegment.GetPoint(1)->GetY() - iExitVector.y * length * 0.35f );
+    iCubicSegment.GetHandle(1)->Set( iCubicSegment.GetPoint(1)->GetX() - iExitVector.x * length * 0.25f
+                                   , iCubicSegment.GetPoint(1)->GetY() - iExitVector.y * length * 0.25f );
 
     iCubicSegment.Update();
 }

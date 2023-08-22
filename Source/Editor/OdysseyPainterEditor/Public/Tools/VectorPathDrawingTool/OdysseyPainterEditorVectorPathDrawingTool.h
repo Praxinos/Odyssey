@@ -92,6 +92,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
         bool Absolute;
 
         UPROPERTY( EditAnywhere, Category="Odyssey PathDrawing Tool" )
+        bool UpdatePaintGroups;
+
+        UPROPERTY( EditAnywhere, Category="Odyssey PathDrawing Tool" )
         bool Stitch;
 
         UPROPERTY(EditAnywhere,Category="Odyssey PathDrawing Tool")

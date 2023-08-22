@@ -194,7 +194,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
         /**
          * @brief Render the scene to the current buffer
          */
-        void Render();
+        //void Render();
 
         /**
          * @brief Attach to separated segments. They MUST belong to the same path. Use FOdysseyVectorPath::Merge() if necessary.
@@ -310,6 +310,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
                                   , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray
                                   , const ::ULIS::FRectD &iRoi
                                   , bool iSelectedOnly );
+
+        virtual void UpdateShape( uint32 iUpdateFlags );
 
 
     private:

@@ -101,6 +101,9 @@ UOdysseyPainterEditorVectorTransformTool::LoadVector( FOdysseyVectorEngine* iEng
 
     mTransformHUD->Reset( iScene );
 
+    // redetect paintgroups cycles in case the path drawing tool is not set to do so
+    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
@@ -391,12 +394,14 @@ UOdysseyPainterEditorVectorTransformTool::TranslateObjectSelection( FOdysseyVect
                 object->Translate( translationX, translationY );
                 object->Rotate( rotation / M_PI * 180 ); // in degrees
                 object->Scale( scalingX, scalingY );
+
+                object->UpdateMatrix();
             }
         }
     }
 
     // Update the matrix for all objects
-    iScene->UpdateMatrix();
+    //iScene->UpdateMatrix();
 
     iScene->Update( FOdysseyVectorObject::KEEPINVALIDATED );
 
@@ -515,12 +520,14 @@ UOdysseyPainterEditorVectorTransformTool::RotateObjectSelection( FOdysseyVectorE
                 object->Translate( translationX, translationY );
                 object->Rotate( rotation / M_PI * 180 ); // in degrees
                 object->Scale( scalingX, scalingY );
+
+                object->UpdateMatrix();
             }
         }
     }
 
     // Update the matrix for all objects
-    iScene->UpdateMatrix();
+    //iScene->UpdateMatrix();
 
     iScene->Update( FOdysseyVectorObject::KEEPINVALIDATED );
 
@@ -686,13 +693,15 @@ UOdysseyPainterEditorVectorTransformTool::ScaleObjectSelection( FOdysseyVectorEn
                     object->Translate( translationX, translationY );
                     object->Rotate( rotation / M_PI * 180 );
                     object->Scale( scalingX, scalingY );
+
+                    object->UpdateMatrix();
                 }
             }
         }
     }
 
     // Update the matrix for all objects
-    iScene->UpdateMatrix();
+    //iScene->UpdateMatrix();
 
     // update the selection box with the newly modified matrices
     iEngine->ResetHUD();

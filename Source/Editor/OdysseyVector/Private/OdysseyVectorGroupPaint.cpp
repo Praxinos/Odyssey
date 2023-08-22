@@ -241,18 +241,33 @@ FOdysseyVectorGroupPaint::Draw( uint64 iFlags )
 }
 
 void
+FOdysseyVectorGroupPaint::TransferChild( FOdysseyVectorObject* iFosterChild, FOdysseyVectorObject* iInsertAfter )
+{
+    OnChildTransform( iFosterChild );
+
+    FOdysseyVectorGroup::TransferChild( iFosterChild, iInsertAfter );
+}
+
+void
 FOdysseyVectorGroupPaint::UpdateShape( uint32 iUpdateFlags )
 {
     std::list<FOdysseyVectorPath*>::iterator it;
    BLMatrix2D identityMatrix = BLMatrix2D( BLMatrix2D::makeIdentity() );
 
-    for( it = mPathList.begin(); it != mPathList.end(); ++it )
+    if( mGroupPaintParam.Painted )
     {
-        FOdysseyVectorPath* path = *it;
-
-        if( path->GetLocalMatrix() != identityMatrix )
+        if( ( mGroupPaintParam.Realtime == true  )
+       || ( ( mGroupPaintParam.Realtime == false ) && ( iUpdateFlags & FOdysseyVectorObject::UPDATEPAINTGROUPS ) ) )
         {
-            OnChildTransform( path );
+            for( it = mPathList.begin(); it != mPathList.end(); ++it )
+            {
+                FOdysseyVectorPath* path = *it;
+
+                if( path->GetLocalMatrix() != identityMatrix )
+                {
+                    OnChildTransform( path );
+                }
+            }
         }
     }
 
@@ -265,14 +280,34 @@ FOdysseyVectorGroupPaint::UpdateShape( uint32 iUpdateFlags )
         if( ( mGroupPaintParam.Realtime == true  )
        || ( ( mGroupPaintParam.Realtime == false ) && ( iUpdateFlags & FOdysseyVectorObject::UPDATEPAINTGROUPS ) ) )
         {
-            if( ( mInvalidationFlags & FOdysseyVectorObject::INVALIDATE_SHAPE )
-             || ( mInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD ) )
+            if( mInvalidationFlags & FOdysseyVectorObject::INVALIDATE_SHAPE )
             {
                 Clear();
                 FindCycles();
+
+                if( ( iUpdateFlags & FOdysseyVectorObject::KEEPINVALIDATED ) == 0 )
+                {
+                    mInvalidationFlags &= (~INVALIDATE_SHAPE);
+                }
+            }
+
+            if( mInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD )
+            {
+                Clear();
+                FindCycles();
+
+                if( ( iUpdateFlags & FOdysseyVectorObject::KEEPINVALIDATED ) == 0 )
+                {
+                    mInvalidationFlags &= (~INVALIDATE_CHILD);
+                }
             }
 
             Colorize();
+
+            if( ( iUpdateFlags & FOdysseyVectorObject::KEEPINVALIDATED ) == 0 )
+            {
+                mInvalidationFlags &= (~INVALIDATE_COLOR);
+            }
         }
     }
     else

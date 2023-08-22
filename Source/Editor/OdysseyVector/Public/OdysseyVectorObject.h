@@ -72,8 +72,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         static const uint32 UPDATEPAINTGROUPS = ( 1 << 2 );
 
         // invalidation mask
-        static const uint32 INVALIDATE_CHILD       = ( 1 << 0 ); // must not be set manually
-        static const uint32 INVALIDATE_PARENT      = ( 1 << 1 ); // must not be set manually
+        static const uint32 INVALIDATE_CHILD       = ( 1 << 0 );
+        //static const uint32 INVALIDATE_PARENT      = ( 1 << 1 ); // must not be set manually
         static const uint32 INVALIDATE_SHAPE       = ( 1 << 2 );
         static const uint32 INVALIDATE_COLOR       = ( 1 << 3 );
         static const uint32 INVALIDATE_ALL         = ( INVALIDATE_SHAPE | INVALIDATE_COLOR );
@@ -133,7 +133,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         virtual void OnChildTransform( FOdysseyVectorObject* iChild ) {};
 
         virtual void Update( uint32 iUpdateFlags );
-        virtual void UpdateShape( uint32 iUpdateFlags ) {};
+        virtual void UpdateShape( uint32 iUpdateFlags );
 
         virtual FOdysseyVectorObject* Copy();
         virtual FOdysseyVectorObject* CopyShape(){ return nullptr; };

@@ -150,6 +150,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
 
         bool IsPainted();
         void SetPainted( bool iPainted );
+        virtual void TransferChild( FOdysseyVectorObject* iFosterChild, FOdysseyVectorObject* iInsertAfter );
 
     protected:
         /**

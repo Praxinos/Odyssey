@@ -112,16 +112,7 @@ UOdysseyTextureLayerImageVector::RenderImageChanged( bool iIsInteractive )
 void
 UOdysseyTextureLayerImageVector::RenderImageChanged( const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive )
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetLayerStack());
-
-    // render once to buffer, then the call to RenderImageChanged() will copy each rectangle from the buffer to the layer
-    mEngine->Render();
-
-    // HUD displaying only for the current layer.
-    if( layerStack->CurrentLayer.Get() == this )
-    {
-        mEngine->RenderHUD();
-    }
+    mEngine->Invalidate();
 
     UOdysseyTextureLayer::RenderImageChanged( iRects, iIsInteractive );
 }
@@ -129,11 +120,21 @@ UOdysseyTextureLayerImageVector::RenderImageChanged( const TArray<::ULIS::FRectI
 TArray<::ULIS::FEvent>
 UOdysseyTextureLayerImageVector::RenderImage(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ioBlock, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList)
 {
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetLayerStack());
+
     if (!IsActivated)
         return iWaitList;
 
     if (!ioBlock)
         return iWaitList;
+
+    mEngine->Update( 0 );
+
+    // HUD displaying only for the current layer.
+    if( layerStack->CurrentLayer.Get() == this )
+    {
+        mEngine->RenderHUD();
+    }
 
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(mBlock->Format());
 

@@ -137,23 +137,31 @@ FOdysseyVectorObject::HasBaseClass( uint32 iBaseClassID )
     return false;
 }
 
+
 void
-FOdysseyVectorObject::Update( uint32 iUpdateFlags )
+FOdysseyVectorObject::UpdateShape( uint32 iUpdateFlags )
 {
-    // update children first by recursively calling the Update function and, if needed,
-    // removing the object from the invalidated object list, in the same call.
-    mInvalidatedChildrenList.remove_if( [iUpdateFlags] ( FOdysseyVectorObject* child )
-                                        {
-                                            child->Update( iUpdateFlags );
-
-                                            return child->IsInvalidated() == false;
-                                        } );
-
-    UpdateShape( iUpdateFlags );
-
     if( ( iUpdateFlags & FOdysseyVectorObject::KEEPINVALIDATED ) == 0 )
     {
         mInvalidationFlags = 0;
+    }
+}
+
+void
+FOdysseyVectorObject::Update( uint32 iUpdateFlags )
+{
+    if( mInvalidationFlags )
+    {
+        // update children first by recursively calling the Update function and, if needed,
+        // removing the object from the invalidated object list, in the same call.
+        mInvalidatedChildrenList.remove_if( [iUpdateFlags] ( FOdysseyVectorObject* child )
+                                            {
+                                                child->Update( iUpdateFlags );
+
+                                                return child->IsInvalidated() == false;
+                                            } );
+
+        UpdateShape( iUpdateFlags );
     }
 }
 
@@ -323,7 +331,7 @@ FOdysseyVectorObject::UpdateMatrix()
 }
 
 void
-FOdysseyVectorObject::UpdateMatrix( bool iRunTransformCallback )
+FOdysseyVectorObject::UpdateMatrix( bool iInvalidate )
 {
     FOdysseyVectorScene* scene = GetScene();
 
@@ -360,10 +368,18 @@ FOdysseyVectorObject::UpdateMatrix( bool iRunTransformCallback )
         {
             FOdysseyVectorObject *child = (*it);
 
-            child->UpdateMatrix( iRunTransformCallback );
+            child->UpdateMatrix( false );
         }
 
         blctx->restore();
+    }
+
+    if( iInvalidate )
+    {
+        if( mParent )
+        {
+            mParent->Invalidate( mParent->mInvalidationFlags | INVALIDATE_CHILD );
+        }
     }
 }
 
@@ -536,14 +552,14 @@ FOdysseyVectorObject::Invalidate( uint32 iInvalidationFlags )
 {
     if ( mParent )
     {
-        if( ( mInvalidationFlags & INVALIDATE_PARENT ) == 0 )
+        // this is temporary and should be optimized somehow
+        if( std::find( mParent->mInvalidatedChildrenList.begin(), mParent->mInvalidatedChildrenList.end(), this ) == mParent->mInvalidatedChildrenList.end() )
+            /*mInvalidationFlags & INVALIDATE_PARENT ) == 0*/
         {
             mParent->mInvalidatedChildrenList.push_back( this );
 
             mParent->Invalidate( mParent->mInvalidationFlags | INVALIDATE_CHILD );
         }
-
-        mInvalidationFlags |= INVALIDATE_PARENT;
     }
 
     mInvalidationFlags |= iInvalidationFlags;

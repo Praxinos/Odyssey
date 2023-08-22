@@ -234,9 +234,9 @@ FOdysseyPainterEditorVectorGridToolHUD::DrawSelectionRectangle( FOdysseyVectorSc
 }
 
 void
-FOdysseyPainterEditorVectorGridToolHUD::Reset(FOdysseyVectorScene* iScene)
+FOdysseyPainterEditorVectorGridToolHUD::Reset( FOdysseyVectorScene* iScene )
 {
-    MakeGrid( iScene, mCellCountX, mCellCountY );
+    MakeGrid( iScene );
 }
 
 void
@@ -298,7 +298,7 @@ FOdysseyPainterEditorVectorGridToolHUD::Export( std::vector<FOdysseyVectorPoint*
     {
         oPointArray.resize( mPointCount );
 
-        for( uint32 i = 0; i < mCellCountY * mCellCountX; i++ )
+        for( uint32 i = 0; i < mGridTool->DivisionsY * mGridTool->DivisionsX; i++ )
         {
             for( uint32 j = 0; j < mCellArray[i].mPointArray.size(); j++ )
             {
@@ -316,9 +316,9 @@ FOdysseyPainterEditorVectorGridToolHUD::MapPoint( FOdysseyVectorObject* iObject,
 
     if( ( paramX >= 0.0f ) && ( paramX < 1.0f ) && ( paramY >= 0.0f ) && ( paramY < 1.0f ) )
     {
-        uint32 rowid = paramX * mCellCountX;
-        uint32 colid = paramY * mCellCountY;
-        uint32 offset = ( colid * mCellCountX ) + rowid;
+        uint32 rowid = paramX * mGridTool->DivisionsX;
+        uint32 colid = paramY * mGridTool->DivisionsY;
+        uint32 offset = ( colid * mGridTool->DivisionsX ) + rowid;
         double s = ( iSpaceX - (double) rowid * mCellSizeX ) / mCellSizeX;
         double t = ( iSpaceY - (double) colid * mCellSizeY ) / mCellSizeY;
         FGridPoint gridPoint = { iObject, iPoint, s, t };
@@ -496,17 +496,17 @@ FOdysseyPainterEditorVectorGridToolHUD::MapObjectNoRecurse( FOdysseyVectorObject
 }
 
 void
-FOdysseyPainterEditorVectorGridToolHUD::MakeNodes( uint32 iCellCountX, uint32 iCellCountY  )
+FOdysseyPainterEditorVectorGridToolHUD::MakeNodes()
 {
     double y = mSelectionBox.rect.y;
 
     mNodeArray.clear();
 
-    mCellSizeX = mSelectionBox.rect.w / iCellCountX;
-    mCellSizeY = mSelectionBox.rect.h / iCellCountY;
+    mCellSizeX = mSelectionBox.rect.w / mGridTool->DivisionsX;
+    mCellSizeY = mSelectionBox.rect.h / mGridTool->DivisionsY;
 
-    mNodeCountX = iCellCountX + 1;
-    mNodeCountY = iCellCountY + 1;
+    mNodeCountX = mGridTool->DivisionsX + 1;
+    mNodeCountY = mGridTool->DivisionsY + 1;
 
     mNodeArray.resize( mNodeCountX * mNodeCountY );
 
@@ -527,27 +527,24 @@ FOdysseyPainterEditorVectorGridToolHUD::MakeNodes( uint32 iCellCountX, uint32 iC
 }
 
 void
-FOdysseyPainterEditorVectorGridToolHUD::MakeCells( uint32 iCellCountX, uint32 iCellCountY )
+FOdysseyPainterEditorVectorGridToolHUD::MakeCells()
 {
     mCellArray.clear();
 
-    mCellCountX = iCellCountX;
-    mCellCountY = iCellCountY;
+    mCellArray.resize( mGridTool->DivisionsX * mGridTool->DivisionsY );
 
-    mCellArray.resize( mCellCountX * mCellCountY );
-
-    for( uint32 i = 0; i < mCellCountY; i++ )
+    for( uint32 i = 0; i < mGridTool->DivisionsY; i++ )
     {
         uint32 n = i + 1;
 
-        for( uint32 j = 0; j < mCellCountX; j++ )
+        for( uint32 j = 0; j < mGridTool->DivisionsX; j++ )
         {
             uint32 k = j + 1;
             uint32 node0idx = ( i * mNodeCountX ) + j;
             uint32 node1idx = ( i * mNodeCountX ) + k;
             uint32 node2idx = ( n * mNodeCountX ) + k;
             uint32 node3idx = ( n * mNodeCountX ) + j;
-            uint32 offset = ( i * mCellCountX ) + j;
+            uint32 offset = ( i * mGridTool->DivisionsX ) + j;
 
             mCellArray[offset].mNode[0] = &mNodeArray[node0idx];
             mCellArray[offset].mNode[1] = &mNodeArray[node1idx];
@@ -558,7 +555,7 @@ FOdysseyPainterEditorVectorGridToolHUD::MakeCells( uint32 iCellCountX, uint32 iC
 }
 
 void
-FOdysseyPainterEditorVectorGridToolHUD::MakeGrid( FOdysseyVectorScene* iScene, uint32 iCellCountX, uint32 iCellCountY )
+FOdysseyPainterEditorVectorGridToolHUD::MakeGrid( FOdysseyVectorScene* iScene )
 {
     UpdateSelectionBox( iScene, false );
 
@@ -570,8 +567,8 @@ FOdysseyPainterEditorVectorGridToolHUD::MakeGrid( FOdysseyVectorScene* iScene, u
         mSelectionBox.rect.w += ( mSelectionBox.rect.w * 0.02f );
         mSelectionBox.rect.h += ( mSelectionBox.rect.h * 0.02f );
 
-        MakeNodes( iCellCountX, iCellCountY );
-        MakeCells( iCellCountX, iCellCountY );
+        MakeNodes();
+        MakeCells();
 
         Map( iScene );
     }

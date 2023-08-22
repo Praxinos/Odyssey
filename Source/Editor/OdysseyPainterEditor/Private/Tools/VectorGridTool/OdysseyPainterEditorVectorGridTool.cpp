@@ -81,8 +81,12 @@ UOdysseyPainterEditorVectorGridTool::LoadVector( FOdysseyVectorEngine* iEngine, 
     iEngine->ClearHUD();
     iEngine->AddHUD( mGridHUD );
 
-    mGridHUD->MakeGrid( iScene, DivisionsX, DivisionsY );
+    iEngine->ResetHUD(); // reset the Grid HUD
+
     mGridHUD->Export( mPointArray );
+
+    // redetect paintgroups cycles in case the path drawing tool is not set to do so
+    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
@@ -264,7 +268,7 @@ UOdysseyPainterEditorVectorGridTool::PropertyChangedVector( FOdysseyVectorEngine
                                                           , FOdysseyVectorScene* iScene
                                                           , const FName& iPropertyName )
 {
-    mGridHUD->MakeGrid( iScene, DivisionsX, DivisionsY );
+    iEngine->ResetHUD();
 
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }

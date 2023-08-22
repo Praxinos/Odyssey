@@ -80,6 +80,9 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::LoadVector( FOdysseyVectorEngin
     //iEngine->ClearHUD();
     //iEngine->AddHUD( &mDummyHUD );
 
+    // redetect paintgroups cycles in case the path drawing tool is not set to do so
+    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
