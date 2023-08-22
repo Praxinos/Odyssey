@@ -95,7 +95,8 @@ public:
     // generic reusable vector methods. 
     static void Group( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
     static void ResetView( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    static void DeleteSelection( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    static void DeleteObjectSelection( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    static void DeletePointSelection( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
     static void GroupPaint( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
     static void Ungroup( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
     static void SendBackward( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
@@ -107,6 +108,8 @@ public:
     static void PropagateBucket( FOdysseyVectorBucket* iBucket );
     static void UnpropagateBucket( FOdysseyVectorBucket* iBucket );
     static void StitchVertices( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    static void CopyObjectSelection( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    static void PasteObjectSelection( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
 
     void SetVectorEditionMode(eVectorEditionMode iVectorEditionMode);
     eVectorEditionMode GetVectorEditionMode();

@@ -75,7 +75,7 @@ protected:
     TSharedPtr<FOdysseyPainterEditorViewportTab>                mViewportTab;
     TSharedPtr<FOdysseyPainterEditorBrushSelectorTab>           mBrushSelectorTab;
     TSharedPtr<FOdysseyPainterEditorMeshSelectorTab>            mMeshSelectorTab;
-    TSharedPtr<FOdysseyPainterEditorPaletteTab>            mColorPaletteTab;
+    TSharedPtr<FOdysseyPainterEditorPaletteTab>                 mColorPaletteTab;
     TSharedPtr<FOdysseyPainterEditorColorWheelTab>              mColorWheelTab;
     TSharedPtr<FOdysseyPainterEditorColorSlidersTab>            mColorSlidersTab;
     TSharedPtr<FOdysseyPainterEditorTopTab>                     mTopTab;

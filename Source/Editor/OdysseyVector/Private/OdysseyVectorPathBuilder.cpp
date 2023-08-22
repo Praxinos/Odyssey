@@ -1,5 +1,7 @@
 #include "OdysseyVectorPathBuilder.h"
 
+#define ADJUSTRECURSE 1
+
 FOdysseyVectorPointSample::~FOdysseyVectorPointSample()
 {
 }
@@ -71,6 +73,7 @@ FOdysseyVectorPathBuilder::FOdysseyVectorPathBuilder()
     , mAngleLimit ( 1.0472f ) // 60 deg
     //, mAngleLimit ( 0.7071f ) // 45 deg
     , mPointID( 0 )
+    , mSampleDistance( 12.0f )
     , mCubicPath ( nullptr )
 {
     mForegroundBucket.SetSolidColor( 128, 128, 128, 255 );
@@ -109,11 +112,11 @@ Shape( FOdysseyVectorSegmentCubic& iCubicSegment, ::ULIS::FVec2D iEntryVector, :
 {
     double length = iCubicSegment.GetVector( false ).Distance();
 
-    iCubicSegment.GetHandle(0)->Set( iCubicSegment.GetPoint(0)->GetX() + iEntryVector.x * length * 0.35f
-                                   , iCubicSegment.GetPoint(0)->GetY() + iEntryVector.y * length * 0.35f );
+    iCubicSegment.GetHandle(0)->Set( iCubicSegment.GetPoint(0)->GetX() + iEntryVector.x * length * 0.25f
+                                   , iCubicSegment.GetPoint(0)->GetY() + iEntryVector.y * length * 0.25f );
 
-    iCubicSegment.GetHandle(1)->Set( iCubicSegment.GetPoint(1)->GetX() - iExitVector.x * length * 0.35f
-                                   , iCubicSegment.GetPoint(1)->GetY() - iExitVector.y * length * 0.35f );
+    iCubicSegment.GetHandle(1)->Set( iCubicSegment.GetPoint(1)->GetX() - iExitVector.x * length * 0.25f
+                                   , iCubicSegment.GetPoint(1)->GetY() - iExitVector.y * length * 0.25f );
 
     iCubicSegment.Update();
 }
@@ -219,8 +222,8 @@ FOdysseyVectorPathBuilder::RecordVertex()
 
             Smooth( mCubicSegment, mSampleBuffer[0].IsSharp() );
 
-            AdjustHandle( mCubicSegment, 0, 0.5f, 1 );
-            AdjustHandle( mCubicSegment, 1, 0.5f, 1 );
+            AdjustHandle( mCubicSegment, 0, 0.5f, ADJUSTRECURSE );
+            AdjustHandle( mCubicSegment, 1, 0.5f, ADJUSTRECURSE );
 
             mCubicSegment->Invalidate();
 
@@ -249,7 +252,7 @@ FOdysseyVectorPathBuilder::RecordSample( double iX, double iY, double iRadius, u
     dif.x = worldVector.x;
     dif.y = worldVector.y;
 
-    if( dif.Distance() >= 8.0f )
+    if( dif.Distance() >= mSampleDistance )
     {
         FOdysseyVectorPointSample sample = FOdysseyVectorPointSample( /*iX, iY, iRadius*/mPointBuffer ); // average
         uint32 sampleIndex = mSampleBuffer.size();
@@ -397,8 +400,8 @@ FOdysseyVectorPathBuilder::RecordEnd( FOdysseyVectorVertex *iVertex )
 
             Smooth( mCubicSegment, mSampleBuffer[0].IsSharp() );
 
-            AdjustHandle( mCubicSegment, 0, 0.5f, 1 );
-            AdjustHandle( mCubicSegment, 1, 0.5f, 1 );
+            AdjustHandle( mCubicSegment, 0, 0.5f, ADJUSTRECURSE );
+            AdjustHandle( mCubicSegment, 1, 0.5f, ADJUSTRECURSE );
 
             mCubicSegment->Invalidate();
 
@@ -517,7 +520,13 @@ FOdysseyVectorPathBuilder::AdjustHandle( FOdysseyVectorSegmentCubic* iCubicSegme
     if ( vertexPointToExpectedPoint.DistanceSquared() && vertexPointToSampledPoint.DistanceSquared() && vertexPointToHandlePoint.DistanceSquared() )
     {
         ::ULIS::FVec2D direction = vertexPointToHandlePoint;
-
+/*
+        UE_LOG(LogTemp,Warning,TEXT("Point0 - x:%f y:%f"), point0.x, point0.y );
+        UE_LOG(LogTemp,Warning,TEXT("Point1 - x:%f y:%f"), point1.x, point1.y );
+        UE_LOG(LogTemp,Warning,TEXT("EPoint - x:%f y:%f"), expectedPoint.x, expectedPoint.y );
+        UE_LOG(LogTemp,Warning,TEXT("SPoint - x:%f y:%f"), sampledPoint.x, sampledPoint.y );
+        UE_LOG(LogTemp,Warning,TEXT("HPoint - x:%f y:%f"), handlePoint.x, handlePoint.y );
+*/
         vertexPointToExpectedPoint.Normalize();
         vertexPointToSampledPoint.Normalize();
         vertexPointToHandlePoint.Normalize();
@@ -526,22 +535,32 @@ FOdysseyVectorPathBuilder::AdjustHandle( FOdysseyVectorSegmentCubic* iCubicSegme
         double angle0 = acos( ULIS::FMath::Clamp<double>( dot0, -1.0f, 1.0f ) );
         double dot1 = vertexPointToHandlePoint.DotProduct( vertexPointToSampledPoint );
         double angle1 = acos( ULIS::FMath::Clamp<double>( dot1, -1.0f, 1.0f ) );
-
-        if ( dot0 )
-        {
-            double ratio = fabs( dot1 / dot0 );
 /*
-UE_LOG(LogTemp, Warning, TEXT("Depth: %d"), iDepth );
-UE_LOG(LogTemp, Warning, TEXT("Sample: %f %f"), sampledPoint.x, sampledPoint.y );
-UE_LOG(LogTemp, Warning, TEXT("Expected: %f %f"), expectedPoint.x, expectedPoint.y );
-UE_LOG(LogTemp, Warning, TEXT("Some warning message %f %f %f"), angle0, angle1, ratio );
+        ::ULIS::FVec2D averageVector = ( vertexPointToExpectedPoint + vertexPointToSampledPoint ) * 0.5f;
+
+        if( averageVector.Distance() )
+        {
+            averageVector.Normalize();
+
+            segmentHandle->Set( vertexPoint.x + ( averageVector.x * direction.Distance() ),
+                                vertexPoint.y + ( averageVector.y * direction.Distance() ) );
+
+            if( iDepth > 0 )
+                AdjustHandle( iCubicSegment, iHandleID, ( cubicVertex->GetT( iCubicSegment ) + iCheckAt) * 0.5f, iDepth - 1 );
+        }
 */
+
+        if ( angle1 > 0.1f )
+        {
+            double ratio = angle0 / angle1;
+//UE_LOG(LogTemp, Warning, TEXT("Some warning message %f: %f <-> %f - %f %f %f"), ratio, angle0, angle1 );
             segmentHandle->Set( vertexPoint.x + ( direction.x * ratio ),
                                 vertexPoint.y + ( direction.y * ratio ) );
 
             if( iDepth > 0 )
                 AdjustHandle( iCubicSegment, iHandleID, ( cubicVertex->GetT( iCubicSegment ) + iCheckAt) * 0.5f, iDepth - 1 );
         }
+
     }
 }
 
@@ -662,7 +681,7 @@ FOdysseyVectorPathBuilder::DrawShape( uint64 iFlags )
     {
         BLPoint pt = mWorldMatrix.mapPoint( mSampleBuffer[i].GetX(), mSampleBuffer[i].GetY() );
 
-        blctx->fillRect( pt.x - 3, pt.y - 3, 6, 6  );
+        blctx->fillRect( pt.x - 0, pt.y - 0, 1, 1 );
     }
     blctx->restore();
 }

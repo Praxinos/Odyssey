@@ -21,6 +21,37 @@ enum class eJointType : uint8
     Miter  = 3
 };
 
+enum ePointSelectionFlags
+{
+    Vertex        = 1,
+    SegmentHandle = 2,
+    Bucket        = 4,
+    Strict        = 8
+};
+
+constexpr enum ePointSelectionFlags operator~( const enum ePointSelectionFlags a )
+{
+    return (enum ePointSelectionFlags)(~uint32(a));
+}
+
+constexpr enum ePointSelectionFlags operator &( const enum ePointSelectionFlags a
+                                              , const enum ePointSelectionFlags b )
+{
+    return (enum ePointSelectionFlags)(uint32(a) & uint32(b));
+}
+
+constexpr enum ePointSelectionFlags operator |( const enum ePointSelectionFlags a
+                                              , const enum ePointSelectionFlags b )
+{
+    return (enum ePointSelectionFlags)(uint32(a) | uint32(b));
+}
+
+constexpr enum ePointSelectionFlags operator ^( const enum ePointSelectionFlags a
+                                              , const enum ePointSelectionFlags b )
+{
+    return (enum ePointSelectionFlags)(uint32(a) ^ uint32(b));
+}
+
 USTRUCT()
 struct FPathParam
 {
@@ -50,6 +81,13 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
                                   , ::ULIS::FVec2D iPerpendicularVector
                                   , bool iBuildSegments
                                   , bool iPreserveHandleLength );
+        //static
+        static void DeletePoint( FOdysseyVectorPath* iPath
+                               , std::vector<FOdysseyVectorPoint*>& iPickedPointArray
+                               , std::vector<FOdysseyVectorVertex*>& iRemovedVertexArray
+                               , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray
+                               , std::vector<FOdysseyVectorPath*>& iRemovedPathArray
+                               , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray );
 
        /**
          * @brief Destructor
@@ -95,7 +133,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
          * @param iWorld draw in world coordinates system.
          */
         using FOdysseyVectorObject::DrawStructure;
-        virtual void DrawStructure( FColor& iStrokeColor, double iStrokeWidth, bool iWorld );
+        virtual void DrawStructure( const FColor& iStrokeColor, double iStrokeWidth, bool iWorld );
 
        /**
          * @brief Erase path according to the mask image.
@@ -104,6 +142,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
          * @param oAddedSegmentArray array of pointers to added segments.
          * @param oRemovedVertexArray array of pointers to removed vertices.
          * @param oRemovedSegmentArray array of pointers to removed segments.
+         * @return true if the path is empty, false otherwise.
          */
         bool Erase( const ::ULIS::FRectD &iRoi
                   , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
@@ -283,6 +322,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
          */
         void UnselectAllVertices();
 
+        void GetSelectedPoints( std::vector<FOdysseyVectorPoint*>& oPointArray
+                              , ePointSelectionFlags iPointSelectionFlags );
+
+        bool GetBBoxFromSelectedVertices( ::ULIS::FRectD& oBBox, bool iWorld );
 
     protected:
         virtual void UpdateShape( uint32 iUpdateFlags ) override;

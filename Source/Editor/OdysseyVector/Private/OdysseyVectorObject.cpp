@@ -20,6 +20,7 @@ FOdysseyVectorObject::~FOdysseyVectorObject()
 FOdysseyVectorObject::FOdysseyVectorObject( const FString& iName )
     : mParent( nullptr )
     , mIsSelected( false )
+    , mIsExpanded( false )
     , mDependsOnChildren( false )
     , mBackgroundBucket( this, 0.0f, 0.0f, false )
     , mForegroundBucket( this, 0.0f, 0.0f, false )
@@ -34,6 +35,7 @@ FOdysseyVectorObject::FOdysseyVectorObject( const FString& iName )
 
     mObjectParam.TranslationX = 0.0f;
     mObjectParam.TranslationY = 0.0f;
+    //mObjectParam.TranslationZ = 1.0f;
     mObjectParam.Rotation = 0.0f;
     mObjectParam.ScalingX = 1.0f;
     mObjectParam.ScalingY = 1.0f;
@@ -42,7 +44,7 @@ FOdysseyVectorObject::FOdysseyVectorObject( const FString& iName )
     mForegroundBucket.SetSolidColor( 0, 0, 0, 255 );
 
     mBackgroundBucket.SetColorMode( eBucketColorMode::SolidColor );
-    mBackgroundBucket.SetSolidColor( 255, 255, 255, 255 );
+    mBackgroundBucket.SetSolidColor( 0, 0, 0, 0 );
 }
 
 FOdysseyVectorBucket&
@@ -61,6 +63,24 @@ void
 FOdysseyVectorObject::SetName( const FString& iName )
 {
     mObjectParam.Name = iName;
+}
+
+FString&
+FOdysseyVectorObject::GetName()
+{
+    return mObjectParam.Name;
+}
+
+void
+FOdysseyVectorObject::SetExpanded( bool iIsExpanded )
+{
+    mIsExpanded = iIsExpanded;
+}
+
+bool
+FOdysseyVectorObject::IsExpanded()
+{
+    return mIsExpanded;
 }
 
 static uint32
@@ -117,23 +137,31 @@ FOdysseyVectorObject::HasBaseClass( uint32 iBaseClassID )
     return false;
 }
 
+
 void
-FOdysseyVectorObject::Update( uint32 iUpdateFlags )
+FOdysseyVectorObject::UpdateShape( uint32 iUpdateFlags )
 {
-    // update children first by recursively calling the Update function and, if needed,
-    // removing the object from the invalidated object list, in the same call.
-    mInvalidatedChildrenList.remove_if( [iUpdateFlags] ( FOdysseyVectorObject* child )
-                                        {
-                                            child->Update( iUpdateFlags );
-
-                                            return child->IsInvalidated() == false;
-                                        } );
-
-    UpdateShape( iUpdateFlags );
-
     if( ( iUpdateFlags & FOdysseyVectorObject::KEEPINVALIDATED ) == 0 )
     {
         mInvalidationFlags = 0;
+    }
+}
+
+void
+FOdysseyVectorObject::Update( uint32 iUpdateFlags )
+{
+    if( mInvalidationFlags )
+    {
+        // update children first by recursively calling the Update function and, if needed,
+        // removing the object from the invalidated object list, in the same call.
+        mInvalidatedChildrenList.remove_if( [iUpdateFlags] ( FOdysseyVectorObject* child )
+                                            {
+                                                child->Update( iUpdateFlags );
+
+                                                return child->IsInvalidated() == false;
+                                            } );
+
+        UpdateShape( iUpdateFlags );
     }
 }
 
@@ -281,7 +309,7 @@ FOdysseyVectorObject::CopySettings( FOdysseyVectorObject& iDestinationObject )
 
     iDestinationObject.mBBox = mBBox;
 
-    iDestinationObject.SetName( mObjectParam.Name + FString("_Copy") );
+    iDestinationObject.SetName( mObjectParam.Name );
 }
 
 double
@@ -303,11 +331,13 @@ FOdysseyVectorObject::UpdateMatrix()
 }
 
 void
-FOdysseyVectorObject::UpdateMatrix( bool iRunTransformCallback )
+FOdysseyVectorObject::UpdateMatrix( bool iInvalidate )
 {
-    if( GetScene() )
+    FOdysseyVectorScene* scene = GetScene();
+
+    if( scene )
     {
-        BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
+        BLContext* blctx = scene->GetEngine()->GetBLContext();
 
         blctx->save();
 
@@ -338,18 +368,17 @@ FOdysseyVectorObject::UpdateMatrix( bool iRunTransformCallback )
         {
             FOdysseyVectorObject *child = (*it);
 
-            child->UpdateMatrix( iRunTransformCallback );
+            child->UpdateMatrix( false );
         }
 
         blctx->restore();
     }
 
-    //TODO: design issue. there will be a call on parent's callback when parent matrix is updated. Need to fix that.
-    if( iRunTransformCallback )
+    if( iInvalidate )
     {
-        if( this->GetParent() )
+        if( mParent )
         {
-            this->GetParent()->OnChildTransform( this );
+            mParent->Invalidate( mParent->mInvalidationFlags | INVALIDATE_CHILD );
         }
     }
 }
@@ -430,8 +459,32 @@ FOdysseyVectorObject::GetBBox( bool iWorld )
     return mBBox;
 }
 
+FOdysseyVectorObject*
+FOdysseyVectorObject::GetPreviousChild( FOdysseyVectorObject* iChild )
+{
+    FOdysseyVectorObject* previousItem = nullptr;
+
+    for( FOdysseyVectorObject* item : mChildrenList )
+    {
+        if( item == iChild )
+        {
+            return previousItem;
+        }
+
+        previousItem = item;
+    }
+
+    return previousItem;
+}
+
+FOdysseyVectorObject*
+FOdysseyVectorObject::GetLastChild()
+{
+    return mChildrenList.size() ? mChildrenList.back() : nullptr;
+}
+
 void
-FOdysseyVectorObject::TransferChild( FOdysseyVectorObject* iFosterChild )
+FOdysseyVectorObject::TransferChild( FOdysseyVectorObject* iFosterChild, FOdysseyVectorObject* iInsertAfter )
 {
     double translationX, translationY, rotation, scalingX, scalingY;
     BLMatrix2D localMatrix;
@@ -441,7 +494,7 @@ FOdysseyVectorObject::TransferChild( FOdysseyVectorObject* iFosterChild )
 
     iFosterChild->GetParent()->RemoveChild( iFosterChild );
     
-    AppendChild( iFosterChild );
+    AddChild( iFosterChild, iInsertAfter );
 
     iFosterChild->SetTransform( translationX, translationY, rotation, scalingX, scalingY );
 
@@ -499,18 +552,17 @@ FOdysseyVectorObject::Invalidate( uint32 iInvalidationFlags )
 {
     if ( mParent )
     {
-        if( mInvalidationFlags == 0 )
+        // this is temporary and should be optimized somehow
+        if( std::find( mParent->mInvalidatedChildrenList.begin(), mParent->mInvalidatedChildrenList.end(), this ) == mParent->mInvalidatedChildrenList.end() )
+            /*mInvalidationFlags & INVALIDATE_PARENT ) == 0*/
         {
             mParent->mInvalidatedChildrenList.push_back( this );
 
             mParent->Invalidate( mParent->mInvalidationFlags | INVALIDATE_CHILD );
         }
-
-        // MUST have a parent to be declared as invalidated otherwise mInvalidationFlags could be set
-        // even if the object has no parent because of bottom-to-top the recursive calls
-        // to Invalidate() from FOdysseyVectorVertex::Set() and then we would never reenter this "if" statement
-        mInvalidationFlags |= iInvalidationFlags;
     }
+
+    mInvalidationFlags |= iInvalidationFlags;
 }
 
 FOdysseyVectorScene*
@@ -526,7 +578,7 @@ FOdysseyVectorObject::GetScene()
         parent = parent->GetParent();
     }
 
-    return ( root->GetClass() == FOdysseyVectorScene::StaticClass() ) ?  static_cast<FOdysseyVectorScene*>(root) : nullptr;
+    return ( root->GetClass() == FOdysseyVectorEngine::StaticClass() ) ?  static_cast<FOdysseyVectorEngine*>(root)->GetScene() : nullptr;
 }
 
 void
@@ -556,7 +608,7 @@ FOdysseyVectorObject::GetParent()
 }
 
 void
-FOdysseyVectorObject::MoveBack()
+FOdysseyVectorObject::SendBackward()
 {
     if ( mParent )
     {
@@ -581,7 +633,7 @@ FOdysseyVectorObject::MoveBack()
 }
 
 void
-FOdysseyVectorObject::MoveFront()
+FOdysseyVectorObject::BringForward()
 {
     if ( mParent )
     {
@@ -651,41 +703,48 @@ FOdysseyVectorObject::Pick( FOdysseyVectorGroup* iSelectionSpace, const ::ULIS::
 void
 FOdysseyVectorObject::AppendChild( FOdysseyVectorObject* iChild )
 {
-    AddChild ( iChild, false );
+    FOdysseyVectorObject* lastItem = mChildrenList.size() ? mChildrenList.back() : nullptr;
+
+    AddChild( iChild, lastItem );
 }
 
 void
 FOdysseyVectorObject::PrependChild( FOdysseyVectorObject* iChild )
 {
-    AddChild ( iChild, true );
+    AddChild( iChild, nullptr );
 }
 
 void
-FOdysseyVectorObject::AddChild( FOdysseyVectorObject* iChild, bool iPrepend )
+FOdysseyVectorObject::AddChild( FOdysseyVectorObject* iChild, FOdysseyVectorObject* iInsertAfter )
 {
-/*
-    BLMatrix2D localMatrix = this->GetInverseWorldMatrix();
+    FOdysseyVectorObject* lastItem = GetLastChild();
 
-    localMatrix.transform( iChild->GetWorldMatrix() );
-
-    ExtractTransformations ( localMatrix
-                           , &iChild->TranslationX
-                           , &iChild->TranslationY
-                           , &iChild->Rotation
-                           , &iChild->ScalingX
-                           , &iChild->ScalingY );
-
-    iChild->UpdateMatrix();
-*/
     iChild->mParent = this;
 
-    if ( iPrepend == true )
+    if( iInsertAfter == nullptr )
     {
         mChildrenList.push_front( iChild );
     }
     else
+    if( iInsertAfter == lastItem )
     {
         mChildrenList.push_back( iChild );
+    }
+    else
+    {
+        std::list<FOdysseyVectorObject*>::iterator it;
+
+        for( it = mChildrenList.begin(); it != mChildrenList.end(); ++it )
+        {
+            FOdysseyVectorObject* item = (*it);
+
+            if( item == iInsertAfter )
+            {
+                mChildrenList.insert( ++it, iChild );
+
+                break;
+            }
+        }
     }
 
     iChild->Invalidate();

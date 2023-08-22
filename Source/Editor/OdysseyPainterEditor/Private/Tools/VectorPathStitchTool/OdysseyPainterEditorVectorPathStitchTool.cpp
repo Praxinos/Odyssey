@@ -79,6 +79,9 @@ UOdysseyPainterEditorVectorPathStitchTool::LoadVector( FOdysseyVectorEngine* iEn
 
     iEngine->ResetHUD();
 
+    // redetect paintgroups cycles in case the path drawing tool is not set to do so
+    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
@@ -180,7 +183,7 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseDownVector( FOdysseyVectorEngi
         }
     }
 
-    iScene->Update( 0 );
+    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
     mPathStitchHUD->Reset( iScene ); // rebuilds QuadTree after path alter.
 

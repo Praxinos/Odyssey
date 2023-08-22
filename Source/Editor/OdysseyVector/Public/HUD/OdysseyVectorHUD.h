@@ -114,6 +114,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
 
         virtual void Draw( FOdysseyVectorScene* iScene, uint64 iHUDFlags ) = 0;
         virtual void Reset( FOdysseyVectorScene* iScene ) = 0;
+        virtual void Load( FOdysseyVectorScene* iScene ) = 0;
 
         void PickPoints( double iWorldX
                        , double iWorldY

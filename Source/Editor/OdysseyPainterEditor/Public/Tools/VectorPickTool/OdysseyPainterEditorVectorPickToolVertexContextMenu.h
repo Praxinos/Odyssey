@@ -3,24 +3,11 @@
 
 #pragma once
 
-#include "OdysseyPainterEditorContextMenu.h"
-
 class FOdysseyPainterEditor;
-class UOdysseyPainterEditorTool;
 
-class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPickToolVertexContextMenu :
-    public FOdysseyPainterEditorContextMenu
+class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPickToolVertexContextMenu
 {
 public:
-    // Construction / Destruction
-    virtual ~FOdysseyPainterEditorVectorPickToolVertexContextMenu();
-    FOdysseyPainterEditorVectorPickToolVertexContextMenu(FOdysseyPainterEditor* iEditor);
-
-public:
     // FOdysseyEditorTab interface
-    virtual TSharedPtr<SWidget> CreateWidget() override;
-    virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
-
-private:
-    FOdysseyPainterEditor* mEditor;
+    static TSharedPtr<SWidget> CreateWidget( class FOdysseyPainterEditor* iPainterEditor );
 };

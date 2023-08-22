@@ -13,6 +13,48 @@ FOdysseyVectorVertex::FOdysseyVectorVertex( FOdysseyVectorPath* iPath, double iX
 {
 }
 
+::ULIS::FVec2D
+FOdysseyVectorVertex::GetWorldCoords()
+{
+    BLPoint worldPoint = GetPath()->GetWorldMatrix().mapPoint( mCoords.x, mCoords.y );
+
+    return ::ULIS::FVec2D( worldPoint.x, worldPoint.y );
+}
+
+// static
+bool
+FOdysseyVectorVertex::GetMinMaxFromList( std::list<FOdysseyVectorVertex*>& iVertexList
+                                       , double& oXMin
+                                       , double& oYMin
+                                       , double& oXMax
+                                       , double& oYMax )
+{
+    if( iVertexList.size() )
+    {
+        FOdysseyVectorVertex* firstVertex = iVertexList.front();
+        ::ULIS::FVec2D& firstVertexCoords = firstVertex->GetCoords();
+        std::list<FOdysseyVectorVertex*>::iterator it;
+
+        oXMin = oXMax = firstVertexCoords.x;
+        oYMin = oYMax = firstVertexCoords.y;
+
+        for( it = iVertexList.begin(); it != iVertexList.end(); ++it )
+        {
+            FOdysseyVectorVertex* vertex = *it;
+            ::ULIS::FVec2D& vertexCoords = vertex->GetCoords();
+
+            if( vertexCoords.x < oXMin ) oXMin = vertexCoords.x;
+            if( vertexCoords.y < oYMin ) oYMin = vertexCoords.y;
+            if( vertexCoords.x > oXMax ) oXMax = vertexCoords.x;
+            if( vertexCoords.y > oYMax ) oYMax = vertexCoords.y;
+        }
+
+        return true;
+    }
+
+    return false;
+}
+
 void
 FOdysseyVectorVertex::SetNearestVertex( FOdysseyVectorVertex* iNearestVertex )
 {

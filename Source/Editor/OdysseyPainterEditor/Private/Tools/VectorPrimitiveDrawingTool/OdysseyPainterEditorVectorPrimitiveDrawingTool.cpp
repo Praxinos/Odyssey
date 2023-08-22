@@ -6,6 +6,10 @@
 #include "OdysseyPaletteEntryColor.h"
 #include "PainterEditor/OdysseyPainterEditorColorPaletteTab.h"
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846L
+#endif
+
 #define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorPrimitiveDrawingTool"
 
 //--------------------------------------------------------------------------------------
@@ -76,6 +80,9 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::LoadVector( FOdysseyVectorEngin
 {
     //iEngine->ClearHUD();
     //iEngine->AddHUD( &mDummyHUD );
+
+    // redetect paintgroups cycles in case the path drawing tool is not set to do so
+    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
@@ -158,6 +165,8 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDownVector( FOdysseyVect
     FColor ueColor = FColor( rgba8.R8(), rgba8.G8(), rgba8.B8(), rgba8.A8() );
     FOdysseyVectorPrimitive* primitive;
     UOdysseyPaletteEntry* entry = nullptr;
+    BLPoint widthVector = iScene->GetInverseWorldMatrix().mapVector( 0.7071f, 0.7071f );
+    ::ULIS::FVec2D width = ::ULIS::FVec2D( widthVector.x, widthVector.y );
 
     TSharedPtr<FOdysseyPainterEditorPaletteTab> colorPaletteTab = GetEditor()->FindTab<FOdysseyPainterEditorPaletteTab>();
     if (colorPaletteTab->PaletteWidget()->GetColorPalette()->GetPalette())
@@ -175,20 +184,16 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDownVector( FOdysseyVect
 
     switch( PrimitiveType )
     {
-        case EOdysseyVectorPrimitiveType::Ellipse:
-            primitive = new FOdysseyVectorEllipse( FString("Circle"), 0.0f, 0.0f, StrokeWidth );
-        break;
-
         case EOdysseyVectorPrimitiveType::Rectangle:
-            primitive = new FOdysseyVectorRectangle( FString("Rectangle"), 0.0f, 0.0f, StrokeWidth );
+            primitive = new FOdysseyVectorRectangle( FString("Rectangle"), 0.0f, 0.0f, width.Distance() );
         break;
 
         case EOdysseyVectorPrimitiveType::Line:
-            primitive = new FOdysseyVectorLine( FString("Rectangle"), 0.0f, 0.0f, StrokeWidth );
+            primitive = new FOdysseyVectorLine( FString("Rectangle"), 0.0f, 0.0f, width.Distance() );
         break;
 
         default:
-            primitive = new FOdysseyVectorEllipse( FString("Circle"), 0.0f, 0.0f, StrokeWidth );
+            primitive = new FOdysseyVectorEllipse( FString("Circle"), 0.0f, 0.0f, width.Distance() );
         break;
     }
 
@@ -230,6 +235,27 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDrag( const FOdysseyPoin
     UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDragVector( vectorEngine, vectorScene, iPointInTexture );
 }
 
+double
+UOdysseyPainterEditorVectorPrimitiveDrawingTool::GetLineRotationAngle( FOdysseyVectorLine* iLine
+                                                                     , const FOdysseyPoint& iPointInTexture )
+{
+    BLPoint pt = iLine->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
+    ::ULIS::FVec2D hzVector = ::ULIS::FVec2D( 1.0f, 0.0f );
+    ::ULIS::FVec2D ptVector = ::ULIS::FVec2D( pt.x, pt.y );
+    double angle = 0.0f;
+
+    if( ptVector.DistanceSquared() )
+    {
+        ptVector.Normalize();
+
+        angle = fabs( acos( hzVector.DotProduct( ptVector ) ) );
+
+        return FOdysseyVector::Cross2D( hzVector, ptVector ) >= 0.0f ? angle : ( M_PI * 2.0f ) - angle;
+    }
+
+    return 0.0f;
+}
+
 void
 UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDragVector( FOdysseyVectorEngine* iEngine
                                                                   , FOdysseyVectorScene* iScene
@@ -243,17 +269,17 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDragVector( FOdysseyVect
                                                                     , iPointInTexture.y - mMouseDown.y );
         ::ULIS::FVec2D size = ::ULIS::FVec2D( bldif.x, bldif.y );
 
-        if( Uniform || FSlateApplication::Get().GetModifierKeys().IsControlDown() )
-        {
-            size.x = ::ULIS::FVec2D( bldif.x, bldif.y ).Distance() * 0.7071f;
-            size.y = size.x;
-        }
-
         switch( PrimitiveType )
         {
             case EOdysseyVectorPrimitiveType::Ellipse:
             {
                 FOdysseyVectorEllipse* ellipse = static_cast<FOdysseyVectorEllipse*>(primitive);
+
+                if( Uniform )
+                {
+                    size.x = ::ULIS::FVec2D( bldif.x, bldif.y ).Distance() * 0.7071f;
+                    size.y = size.x;
+                }
 
                 ellipse->SetRadius( size.x, size.y );
             }
@@ -263,6 +289,12 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDragVector( FOdysseyVect
             {
                 FOdysseyVectorRectangle* rectangle = static_cast<FOdysseyVectorRectangle*>(primitive);
 
+                if( Uniform )
+                {
+                    size.x = ::ULIS::FVec2D( bldif.x, bldif.y ).Distance() * 0.7071f;
+                    size.y = size.x;
+                }
+
                 rectangle->SetSize( size.x, size.y );
             }
             break;
@@ -271,7 +303,24 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDragVector( FOdysseyVect
             {
                 FOdysseyVectorLine* line = static_cast<FOdysseyVectorLine*>(primitive);
 
-                line->SetSize( size.x, size.y );
+                if( Uniform )
+                {
+                    BLMatrix2D& inverseMatrix = line->GetInverseWorldMatrix();
+                    BLPoint pt = inverseMatrix.mapPoint( iPointInTexture.x, iPointInTexture.y );
+                    double distance = ::ULIS::FVec2D( pt.x, pt.y ).Distance();
+                    int rotation = GetLineRotationAngle( line, iPointInTexture ) / M_PI * 180.0f;
+
+                     // to force the tip of the line in the middle of the 45 degrees steps
+                    rotation += 22;
+                    // 45 deg by 45 deg
+                    double angle = ( ( rotation / 45 ) * 45 ) * M_PI / 180.0f;
+
+                    line->SetSize( cos( angle ) * distance, sin( angle ) * distance );
+                }
+                else
+                {
+                    line->SetSize( size.x, size.y );
+                }
             }
             break;
 
@@ -335,9 +384,10 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseUpVector( FOdysseyVector
         iScene->Select( path );
     }
 
-    iScene->Update( 0 ); // update invalidate objects
+    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS ); // update invalidate objects
 
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                   | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
                    | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED
                    | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED
                    | FOdysseyVectorEngine::SIGNAL_OBJECT_TRANSFORMED );

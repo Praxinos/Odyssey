@@ -1,3 +1,4 @@
+
 // IDDN FR.001.250001.005.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
@@ -90,6 +91,9 @@ UOdysseyPainterEditorVectorPathEditTool::LoadVector( FOdysseyVectorEngine* iEngi
 
     iEngine->ResetHUD();
 
+    // redetect paintgroups cycles in case the path drawing tool is not set to do so
+    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
@@ -150,160 +154,44 @@ UOdysseyPainterEditorVectorPathEditTool::OnKeyUp( const FKey& iKey )
     return false;
 }
 
-static FOdysseyVectorVertex*
-GetStitchingVertex( FOdysseyVectorVertex* iVertex
-                  , FOdysseyVectorSegment* iSegment
-                  , std::vector<FOdysseyVectorPoint*>& iPickedPointArray
-                  , ::ULIS::FVec2D& oHandle )
+void
+UOdysseyPainterEditorVectorPathEditTool::GroupPaintDeletePoint( FOdysseyVectorGroupPaint* iGroupPaint
+                                                              , std::vector<FOdysseyVectorVertex*>& iRemovedVertexArray
+                                                              , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray
+                                                              , std::vector<FOdysseyVectorPath*>& iRemovedPathArray
+                                                              , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray
+                                                              , double iSelectionRadius
+                                                              , const FOdysseyPoint& iPointInTexture )
 {
-    FOdysseyVectorVertex *currentVertex = iVertex;
-    FOdysseyVectorSegment *currentSegment = iSegment;
+    std::list<FOdysseyVectorObject*>& childrenList = iGroupPaint->GetChildrenList();
+    std::list<FOdysseyVectorObject*>::iterator it;
 
-    do
+    mPickedPointArray.clear();
+
+    for( it = childrenList.begin(); it != childrenList.end(); ++it )
     {
-        // return the nextVertex if it is not marked for deletion. Then it will be stitched with its counterpart, if any.
-        if( std::find( iPickedPointArray.begin(), iPickedPointArray.end(), currentVertex ) == iPickedPointArray.end() )
+        FOdysseyVectorObject* child = *it;
+
+        if( child->GetClass() == FOdysseyVectorPath::StaticClass() )
         {
-            if( currentSegment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
-            {
-                FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>( currentSegment );
+            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(child);
 
-                oHandle = cubicSegment->GetHandle( currentVertex )->GetCoords();
-            }
+            mPickedPointArray.reserve( 10 );
 
-            return currentVertex;
-        }
+            path->PickPoint( iPointInTexture.x
+                           , iPointInTexture.y
+                           , iSelectionRadius
+                           , mPickedPointArray
+                           , FOdysseyVectorPath::PICK_POINT );
 
-        // move to the next segment
-        currentSegment = currentVertex->GetOtherSegment( currentSegment );
-        currentVertex = currentSegment ? currentSegment->GetOtherVertex( currentVertex ) : nullptr;
-
-    } while( ( currentVertex ) && ( currentVertex != iVertex ) );
-                                  // loop detection
-
-    return nullptr;
-}
-
-static void
-PathDeletePoint( FOdysseyVectorPath* iPath
-               , std::vector<FOdysseyVectorVertex*>& iRemovedVertexArray
-               , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray
-               , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray
-               , double iSelectionRadius
-               , const FOdysseyPoint& iPointInTexture )
-{
-    BLPoint localCoords = iPath->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
-    std::vector<FOdysseyVectorPoint*> pickedPointArray;
-    std::vector<FOdysseyVectorPoint*> extendedPointArray;
-    std::vector<FStitchingPair> stitchingPairArray;
-
-    pickedPointArray.reserve( 10 );
-    stitchingPairArray.reserve( 10 );
-    extendedPointArray.reserve( 10 );
-
-    iPath->PickPoint( iPointInTexture.x, iPointInTexture.y, iSelectionRadius, pickedPointArray, FOdysseyVectorPath::PICK_POINT );
-
-    extendedPointArray = pickedPointArray;
-
-    // first step
-    // Build stitching pairs by finding a vertex that is not doomed for deletion on both sides.
-    for( int i = 0; i < pickedPointArray.size(); i++ )
-    {
-        FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>( pickedPointArray[i] );
-        std::list<FOdysseyVectorSegment*>& segmentList = vertex->GetSegmentList();
-        uint32 segmentCount = segmentList.size();
-
-        if( segmentCount )
-        {
-            ::ULIS::FVec2D handle[2];
-            FOdysseyVectorSegment* segment0 = segmentList.front();
-            FOdysseyVectorSegment* segment1 = ( segmentCount > 1  ) ? segmentList.back() : nullptr;
-            FOdysseyVectorVertex* stitchingVertex[2] = { segment0 ? GetStitchingVertex( segment0->GetOtherVertex(vertex)
-                                                                                      , segment0
-                                                                                      , pickedPointArray
-                                                                                      , handle[0] ) : nullptr
-                                                       , segment1 ? GetStitchingVertex( segment1->GetOtherVertex(vertex)
-                                                                                      , segment1
-                                                                                      , pickedPointArray
-                                                                                      , handle[1] ) : nullptr };
-
-            if( stitchingVertex[0] == stitchingVertex[1] ) // e.g loops
-            {
-                if( stitchingVertex[0] )
-                {
-                    // for vertices that were not picked but that cannot be stitched, delete them as well.
-                    extendedPointArray.push_back( stitchingVertex[0] );
-                }
-            }
-            else // stitchingVertex[0] != stitchingVertex[1]
-            {
-                if ( stitchingVertex[0] && stitchingVertex[1] )
-                {
-                    FStitchingPair stitchingPair = FStitchingPair( stitchingVertex[0], handle[0]
-                                                                 , stitchingVertex[1], handle[1] );
-
-                    if( std::find( stitchingPairArray.begin(), stitchingPairArray.end(), stitchingPair ) == stitchingPairArray.end() )
-                    {
-                        stitchingPairArray.push_back( stitchingPair );
-                    }
-                }
-                else
-                {
-                    // for vertices that were not picked but that cannot be stitched, delete them as well.
-                    extendedPointArray.push_back( stitchingVertex[0] ? stitchingVertex[0] : stitchingVertex[1] );
-                }
-            }
-        }
-        else
-        {
+            FOdysseyVectorPath::DeletePoint( path
+                                           , mPickedPointArray
+                                           , iRemovedVertexArray
+                                           , iRemovedSegmentArray
+                                           , iRemovedPathArray
+                                           , iAddedSegmentArray );
         }
     }
-
-    // second step
-    // the actual deletion
-    for( int i = 0; i < extendedPointArray.size(); i++ )
-    {
-        FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>( extendedPointArray[i] );
-        // Note: work on a copy of the list, because deletion will alter the segment list
-        std::list<FOdysseyVectorSegment*> segmentList = vertex->GetSegmentList();
-
-        for( std::list<FOdysseyVectorSegment*>::iterator sit = segmentList.begin(); sit != segmentList.end(); ++sit )
-        {
-            FOdysseyVectorSegment* segment = *sit;
-
-            iPath->RemoveSegment( segment );
-            // for undoing
-            iRemovedSegmentArray.push_back( segment );
-        }
-
-        iPath->RemoveVertex( vertex );
-        // for undoing
-        iRemovedVertexArray.push_back( vertex );  
-    }
-
-    // thid step
-    // stitch
-    for( int i = 0; i < stitchingPairArray.size(); i++ )
-    {
-        FOdysseyVectorVertex* stitchingVertex0 = stitchingPairArray[i].vertex[0];
-        FOdysseyVectorVertex* stitchingVertex1 = stitchingPairArray[i].vertex[1];
-        ::ULIS::FVec2D handle0 = stitchingPairArray[i].handle[0];
-        ::ULIS::FVec2D handle1 = stitchingPairArray[i].handle[1];
-        FOdysseyVectorSegmentCubic* stitchedSegment = new FOdysseyVectorSegmentCubic( iPath
-                                                                                    , stitchingVertex0
-                                                                                    , handle0.x
-                                                                                    , handle0.y
-                                                                                    , handle1.x
-                                                                                    , handle1.y
-                                                                                    , stitchingVertex1 );
-
-
-        iPath->AddSegment( stitchedSegment );
-        // for undoing
-        iAddedSegmentArray.push_back( stitchedSegment );
-    }
-
-    iPath->InvalidateAllSegments();
 }
 
 void
@@ -325,6 +213,8 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownDeletePoint( FOdysseyVectorE
     removedSegmentArray.reserve( 10 );
     addedSegmentArray.reserve( 10 );
 
+    mPickedPointArray.clear();
+
     for( std::list<FOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
     {
         FOdysseyVectorObject* selectedObject  = *it;
@@ -333,38 +223,63 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownDeletePoint( FOdysseyVectorE
         {
             FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(selectedObject);
 
-            PathDeletePoint( path
-                           , removedVertexArray
-                           , removedSegmentArray
-                           , addedSegmentArray
-                           , PickingRadius
-                           , iPointInTexture );
+            mPickedPointArray.reserve( 10 );
 
-            // remove path if empty
-            if( path->GetSegmentList().size() == 0 )
-            {
-                path->GetParent()->RemoveChild( path );
-                // for undoing
-                removedPathArray.push_back( path );
-            }
+            path->PickPoint( iPointInTexture.x
+                           , iPointInTexture.y
+                           , PickingRadius
+                           , mPickedPointArray
+                           , FOdysseyVectorPath::PICK_POINT );
+
+            FOdysseyVectorPath::DeletePoint( path
+                                           , mPickedPointArray
+                                           , removedVertexArray
+                                           , removedSegmentArray
+                                           , removedPathArray
+                                           , addedSegmentArray );
+        }
+
+        if( selectedObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+        {
+            FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(selectedObject);
+
+            GroupPaintDeletePoint( paintGroup
+                                 , removedVertexArray
+                                 , removedSegmentArray
+                                 , removedPathArray
+                                 , addedSegmentArray
+                                 , PickingRadius
+                                 , iPointInTexture );
         }
     }
 
-    // needed for valid GUndo pointer
-    GEditor->BeginTransaction(LOCTEXT("VectorPathEditTool","Vector Path Edit Tool"));
-    if( GUndo )
+    if( mPickedPointArray.size() )
     {
-        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoPathAlter( iScene
-                                                                  , removedPathArray
-                                                                  , removedVertexArray
-                                                                  , removedSegmentArray
-                                                                  , addedPathArray
-                                                                  , addedVertexArray
-                                                                  , addedSegmentArray );
+        for( int i = 0; i < removedPathArray.size(); i++ )
+        {
+            FOdysseyVectorPath* path = removedPathArray[i];
 
-        GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
+            path->GetParent()->RemoveChild( path );
+        }
+
+        iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS ); // updated invalidated objects
+
+        // needed for valid GUndo pointer
+        GEditor->BeginTransaction(LOCTEXT("VectorPathEditTool","Vector Path Edit Tool"));
+        if( GUndo )
+        {
+            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoPathAlter( iScene
+                                                                      , removedPathArray
+                                                                      , removedVertexArray
+                                                                      , removedSegmentArray
+                                                                      , addedPathArray
+                                                                      , addedVertexArray
+                                                                      , addedSegmentArray );
+
+            GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
+        }
+        GEditor->EndTransaction();
     }
-    GEditor->EndTransaction();
 }
 
 static void
@@ -463,15 +378,18 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorEng
         }
     }
 
-    // needed for valid GUndo pointer
-    GEditor->BeginTransaction(LOCTEXT("VectorPathEditTool","Vector Path Edit Tool"));
-    if( GUndo )
+    if( mPickedPointArray.size() )
     {
-        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoPointPosition( iScene, mPickedPointArray );
+        // needed for valid GUndo pointer
+        GEditor->BeginTransaction(LOCTEXT("VectorPathEditTool","Vector Path Edit Tool"));
+        if( GUndo )
+        {
+            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoPointPosition( iScene, mPickedPointArray );
 
-        GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
+            GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
+        }
+        GEditor->EndTransaction();
     }
-    GEditor->EndTransaction();
 }
 
 bool
@@ -495,9 +413,6 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownVector( FOdysseyVectorEngine
     {
         OnMouseDownPickPoint( iEngine, iScene, iPointInTexture, iKey );
     }
-
-    // TODO: debug why this slows down the tool at mouse down when only picking a vertex from a paintgroup
-    iScene->Update( 0 ); // updated invalidated objects
 
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW 
                    | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
@@ -658,6 +573,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDragVector( FOdysseyVectorEngine
 
     bool inited = false;
 */
+
     mPathEditHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
 
     for( int i = 0; i < mPickedPointArray.size(); i++ )
@@ -678,6 +594,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDragVector( FOdysseyVectorEngine
 
         //inited = true;
     }
+
 /*
     worldAreaP1 = cubicPath->GetWorldMatrix().mapPoint( localInvalidatedArea.x, localInvalidatedArea.y );
     worldAreaP2 = cubicPath->GetWorldMatrix().mapPoint( localInvalidatedArea.x + localInvalidatedArea.w
@@ -694,7 +611,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDragVector( FOdysseyVectorEngine
 */
     mOldPointInTexture = ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y );
 
-    iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES | FOdysseyVectorObject::KEEPINVALIDATED );
+    iScene->Update( FOdysseyVectorObject::KEEPINVALIDATED );
 
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
@@ -721,7 +638,14 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseUpVector( FOdysseyVectorEngine* 
                                                         , const FOdysseyPoint& iPointInTexture
                                                         , const FKey& iKey )
 {
-    iScene->Update( 0 );
+    if( mPickedPointArray.size() == 0 )
+    {
+        // use the pick tool if the Down and Up events were at the same position (no dragging )
+        GetEditor()->GetVectorPickTool()->OnMouseDown( iPointInTexture, iKey );
+        GetEditor()->GetVectorPickTool()->OnMouseUp( iPointInTexture, iKey );
+    }
+
+    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
                    | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );

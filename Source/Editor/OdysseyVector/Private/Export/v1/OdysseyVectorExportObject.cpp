@@ -1,9 +1,9 @@
-#include "Export/OdysseyVectorExport.h"
+#include "Export/v1/OdysseyVectorExport.h"
 
-static void
-WriteDeclareObjectEntry( FOdysseyVectorObject& iObject, FArchive &Ar )
+void
+FOdysseyVectorExportV1::WriteDeclareObjectEntry( FOdysseyVectorObject& iObject, FArchive &Ar )
 {
-    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_DECLARE_OBJECT_ENTRY
+    FOdysseyVectorExportV1::WriteChunk( FOdysseyVectorExportV1::CHUNK_DECLARE_OBJECT_ENTRY
                                     , Ar
                                     , [&iObject](FArchive &Ar) -> void
     {
@@ -14,9 +14,9 @@ WriteDeclareObjectEntry( FOdysseyVectorObject& iObject, FArchive &Ar )
 }
 
 void
-FOdysseyVectorExport::WriteDeclareObjects( std::vector<FOdysseyVectorObject*>& vectorObjectArray, FArchive &Ar )
+FOdysseyVectorExportV1::WriteDeclareObjects( std::vector<FOdysseyVectorObject*>& vectorObjectArray, FArchive &Ar )
 {
-    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_DECLARE_OBJECTS
+    FOdysseyVectorExportV1::WriteChunk( FOdysseyVectorExportV1::CHUNK_DECLARE_OBJECTS
                                     , Ar
                                     , [&vectorObjectArray](FArchive &Ar) -> void
     {
@@ -32,10 +32,10 @@ FOdysseyVectorExport::WriteDeclareObjects( std::vector<FOdysseyVectorObject*>& v
     } );
 }
 
-static void
-WriteObjectTransformScaling( FOdysseyVectorObject& iObject, FArchive &Ar )
+void
+FOdysseyVectorExportV1::WriteObjectTransformScaling( FOdysseyVectorObject& iObject, FArchive &Ar )
 {
-    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_OBJECT_TRANSFORM_SCALING
+    FOdysseyVectorExportV1::WriteChunk( FOdysseyVectorExportV1::CHUNK_OBJECT_TRANSFORM_SCALING
                                     , Ar
                                     , [&iObject](FArchive &Ar) -> void
     {
@@ -47,10 +47,10 @@ WriteObjectTransformScaling( FOdysseyVectorObject& iObject, FArchive &Ar )
     } );
 }
 
-static void
-WriteObjectTransformRotation( FOdysseyVectorObject& iObject, FArchive &Ar )
+void
+FOdysseyVectorExportV1::WriteObjectTransformRotation( FOdysseyVectorObject& iObject, FArchive &Ar )
 {
-    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_OBJECT_TRANSFORM_ROTATION
+    FOdysseyVectorExportV1::WriteChunk( FOdysseyVectorExportV1::CHUNK_OBJECT_TRANSFORM_ROTATION
                                     , Ar
                                     , [&iObject](FArchive &Ar) -> void
     {
@@ -60,10 +60,10 @@ WriteObjectTransformRotation( FOdysseyVectorObject& iObject, FArchive &Ar )
     } );
 }
 
-static void
-WriteObjectTransformTranslation( FOdysseyVectorObject& iObject, FArchive &Ar )
+void
+FOdysseyVectorExportV1::WriteObjectTransformTranslation( FOdysseyVectorObject& iObject, FArchive &Ar )
 {
-    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_OBJECT_TRANSFORM_TRANSLATION
+    FOdysseyVectorExportV1::WriteChunk( FOdysseyVectorExportV1::CHUNK_OBJECT_TRANSFORM_TRANSLATION
                                     , Ar
                                     , [&iObject](FArchive &Ar) -> void
     {
@@ -75,10 +75,10 @@ WriteObjectTransformTranslation( FOdysseyVectorObject& iObject, FArchive &Ar )
     } );
 }
 
-static void
-WriteObjectTransform( FOdysseyVectorObject& iObject, FArchive &Ar )
+void
+FOdysseyVectorExportV1::WriteObjectTransform( FOdysseyVectorObject& iObject, FArchive &Ar )
 {
-    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_OBJECT_TRANSFORM
+    FOdysseyVectorExportV1::WriteChunk( FOdysseyVectorExportV1::CHUNK_OBJECT_TRANSFORM
                                     , Ar
                                     , [&iObject](FArchive &Ar) -> void
     {
@@ -88,10 +88,10 @@ WriteObjectTransform( FOdysseyVectorObject& iObject, FArchive &Ar )
     } );
 }
 
-static void
-WriteObjectParentID( FOdysseyVectorObject& iObject, FArchive &Ar )
+void
+FOdysseyVectorExportV1::WriteObjectParentID( FOdysseyVectorObject& iObject, FArchive &Ar )
 {
-    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_OBJECT_PARENTID
+    FOdysseyVectorExportV1::WriteChunk( FOdysseyVectorExportV1::CHUNK_OBJECT_PARENTID
                                     , Ar
                                     , [&iObject](FArchive &Ar) -> void
     {
@@ -101,10 +101,10 @@ WriteObjectParentID( FOdysseyVectorObject& iObject, FArchive &Ar )
     } );
 }
 
-static void
-WriteObjectID( FOdysseyVectorObject& iObject, FArchive &Ar )
+void
+FOdysseyVectorExportV1::WriteObjectID( FOdysseyVectorObject& iObject, FArchive &Ar )
 {
-    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_OBJECT_ID
+    FOdysseyVectorExportV1::WriteChunk( FOdysseyVectorExportV1::CHUNK_OBJECT_ID
                                     , Ar
                                     , [&iObject](FArchive &Ar) -> void
     {
@@ -114,36 +114,36 @@ WriteObjectID( FOdysseyVectorObject& iObject, FArchive &Ar )
     } );
 }
 
-static void
-WriteObjectForegroundBucket( FOdysseyVectorObject& iObject, FArchive &Ar )
+void
+FOdysseyVectorExportV1::WriteObjectForegroundBucket( FOdysseyVectorObject& iObject, FArchive &Ar )
 {
-    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_OBJECT_FOREGROUNDBUCKET
+    FOdysseyVectorExportV1::WriteChunk( FOdysseyVectorExportV1::CHUNK_OBJECT_FOREGROUNDBUCKET
                                     , Ar
                                     , [&iObject](FArchive &Ar) -> void
     {
         FOdysseyVectorBucket& foregroundBucket = iObject.GetForegroundBucket();
 
-        FOdysseyVectorExport::WriteBucket( foregroundBucket, Ar );
+        FOdysseyVectorExportV1::WriteBucket( foregroundBucket, Ar );
     } );
 }
 
-static void
-WriteObjectBackgroundBucket( FOdysseyVectorObject& iObject, FArchive &Ar )
+void
+FOdysseyVectorExportV1::WriteObjectBackgroundBucket( FOdysseyVectorObject& iObject, FArchive &Ar )
 {
-    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_OBJECT_BACKGROUNDBUCKET
+    FOdysseyVectorExportV1::WriteChunk( FOdysseyVectorExportV1::CHUNK_OBJECT_BACKGROUNDBUCKET
                                     , Ar
                                     , [&iObject](FArchive &Ar) -> void
     {
         FOdysseyVectorBucket& backgroundBucket = iObject.GetBackgroundBucket();
 
-        FOdysseyVectorExport::WriteBucket( backgroundBucket, Ar );
+        FOdysseyVectorExportV1::WriteBucket( backgroundBucket, Ar );
     } );
 }
 
-static void
-WriteObjectForegroundColor( FOdysseyVectorObject& iObject, FArchive &Ar )
+void
+FOdysseyVectorExportV1::WriteObjectForegroundColor( FOdysseyVectorObject& iObject, FArchive &Ar )
 {
-    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_OBJECT_FOREGROUNDCOLOR
+    FOdysseyVectorExportV1::WriteChunk( FOdysseyVectorExportV1::CHUNK_OBJECT_FOREGROUNDCOLOR
                                     , Ar
                                     , [&iObject](FArchive &Ar) -> void
     {
@@ -156,10 +156,10 @@ WriteObjectForegroundColor( FOdysseyVectorObject& iObject, FArchive &Ar )
     } );
 }
 
-static void
-WriteObjectBackgroundColor( FOdysseyVectorObject& iObject, FArchive &Ar )
+void
+FOdysseyVectorExportV1::WriteObjectBackgroundColor( FOdysseyVectorObject& iObject, FArchive &Ar )
 {
-    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_OBJECT_BACKGROUNDCOLOR
+    FOdysseyVectorExportV1::WriteChunk( FOdysseyVectorExportV1::CHUNK_OBJECT_BACKGROUNDCOLOR
                                     , Ar
                                     , [&iObject](FArchive &Ar) -> void
     {
@@ -172,10 +172,10 @@ WriteObjectBackgroundColor( FOdysseyVectorObject& iObject, FArchive &Ar )
     } );
 }
 
-static void
-WriteDefineObjectEntry( FOdysseyVectorObject& iObject, FArchive &Ar )
+void
+FOdysseyVectorExportV1::WriteDefineObjectEntry( FOdysseyVectorObject& iObject, FArchive &Ar )
 {
-    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_DEFINE_OBJECT_ENTRY
+    FOdysseyVectorExportV1::WriteChunk( FOdysseyVectorExportV1::CHUNK_DEFINE_OBJECT_ENTRY
                                     , Ar
                                     , [&iObject](FArchive &Ar) -> void
     {
@@ -193,7 +193,7 @@ WriteDefineObjectEntry( FOdysseyVectorObject& iObject, FArchive &Ar )
             {
                 FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(&iObject);
 
-                FOdysseyVectorExport::WriteObjectPath( *path, Ar );
+                FOdysseyVectorExportV1::WritePath( *path, Ar );
             }
             break;
 
@@ -201,15 +201,7 @@ WriteDefineObjectEntry( FOdysseyVectorObject& iObject, FArchive &Ar )
             {
                 FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(&iObject);
 
-                FOdysseyVectorExport::WriteObjectGroupPaint( *paintGroup, Ar );
-            }
-            break;
-
-            case FOdysseyVectorObject::VECTORELLIPSETYPE:
-            {
-                FOdysseyVectorEllipse* circle = static_cast<FOdysseyVectorEllipse*>(&iObject);
-
-                FOdysseyVectorExport::WriteObjectEllipse( *circle, Ar );
+                FOdysseyVectorExportV1::WriteGroupPaint( *paintGroup, Ar );
             }
             break;
 
@@ -220,9 +212,9 @@ WriteDefineObjectEntry( FOdysseyVectorObject& iObject, FArchive &Ar )
 }
 
 void
-FOdysseyVectorExport::WriteDefineObjects( std::vector<FOdysseyVectorObject*>& vectorObjectArray, FArchive &Ar )
+FOdysseyVectorExportV1::WriteDefineObjects( std::vector<FOdysseyVectorObject*>& vectorObjectArray, FArchive &Ar )
 {
-    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_DEFINE_OBJECTS
+    FOdysseyVectorExportV1::WriteChunk( FOdysseyVectorExportV1::CHUNK_DEFINE_OBJECTS
                                     , Ar
                                     , [&vectorObjectArray](FArchive &Ar) -> void
     {

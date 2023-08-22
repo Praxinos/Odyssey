@@ -84,6 +84,7 @@ FOdysseyPainterEditorGUI::CreateTabs()
     TSharedRef<FOdysseyPainterEditorSelectedVectorObjectTab> selectedVectorObjectTab = MakeShared<FOdysseyPainterEditorSelectedVectorObjectTab>(mEditor);
     TSharedRef<FOdysseyPainterEditorTopTab> topTab = MakeShared<FOdysseyPainterEditorTopTab>(mEditor);
     TSharedRef<FOdysseyPainterEditorToolOptionsTab> toolOptionsTab = MakeShared<FOdysseyPainterEditorToolOptionsTab>(mEditor);
+    TSharedRef<FOdysseyPainterEditorVectorSceneTreeViewTab> vectorSceneTreeViewTab = MakeShared<FOdysseyPainterEditorVectorSceneTreeViewTab>(mEditor);
 
     //Used for the viewport drawing editor to know which tab to open by default
     //paletteTab->ShouldOpenByDefault(true);
@@ -107,6 +108,7 @@ FOdysseyPainterEditorGUI::CreateTabs()
     mEditor->AddTab(colorWheelTab);
     mEditor->AddTab(colorSlidersTab);
     mEditor->AddTab(topTab);
+    mEditor->AddTab(vectorSceneTreeViewTab);
 }
 
 void
@@ -353,6 +355,12 @@ FOdysseyPainterEditorGUI::CreateCenterSection(FOdysseyEditorLayoutBuilder& iBuil
     );
 }
 
+TSharedPtr<FOdysseyPainterEditorVectorSceneTreeViewTab>&
+FOdysseyPainterEditorGUI::GetVectorSceneTreeViewTab()
+{
+    return mVectorSceneTreeViewTab;
+}
+
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------- Shortcuts
 
@@ -436,7 +444,7 @@ FOdysseyPainterEditorGUI::ResetView( FOdysseyVectorEngine* iEngine, FOdysseyVect
 void
 FOdysseyPainterEditorGUI::DeleteSelection( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
-    mEditor->DeleteSelection( iEngine, iScene );
+    mEditor->DeleteObjectSelection( iEngine, iScene );
 }
 
 void

@@ -5,6 +5,7 @@
 #include "Tools/VectorPickTool/OdysseyPainterEditorVectorPickToolHUD.h"
 #include "Tools/VectorPickTool/SOdysseyPainterEditorVectorPickToolTopTab.h"
 #include "Tools/VectorPickTool/OdysseyPainterEditorVectorPickToolObjectContextMenu.h"
+#include "Tools/VectorPickTool/OdysseyPainterEditorVectorPickToolVertexContextMenu.h"
 #include "OdysseyPainterEditor.h"
 #include "PainterEditor/OdysseyPainterEditorViewportTab.h"
 #include "OdysseyMediaVector.h"
@@ -25,6 +26,20 @@ UOdysseyPainterEditorVectorPickTool::UOdysseyPainterEditorVectorPickTool()
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Lasso64");
 
     mPickHUD = new FOdysseyPainterEditorVectorPickToolHUD( this );
+}
+
+std::list<FOdysseyVectorObject*>&
+UOdysseyPainterEditorVectorPickTool::GetFocusedObjectList( FOdysseyVectorScene* iScene )
+{
+    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
+
+    if( selectedObjectList.size() )
+    {
+        return selectedObjectList;
+    }
+
+    // return scene as list
+    return iScene->GetEngine()->GetChildrenList();
 }
 
 //--------------------------------------------------------------------------------------
@@ -81,12 +96,15 @@ void
 UOdysseyPainterEditorVectorPickTool::LoadVector( FOdysseyVectorEngine* iEngine
                                                , FOdysseyVectorScene* iScene )
 {
-    mPickHUD->Init( iEngine->GetBLImage()->width(), iEngine->GetBLImage()->height() );
+    mPickHUD->Load( iScene );
 
     iEngine->ClearHUD();
     iEngine->AddHUD( mPickHUD );
 
     iEngine->ResetHUD();
+
+    // redetect paintgroups cycles in case the path drawing tool is not set to do so
+    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
@@ -309,6 +327,13 @@ UOdysseyPainterEditorVectorPickTool::OnMouseUp( const FOdysseyPoint& iPointInTex
 
         if( mEditor->GetVectorEditionMode() == eVectorEditionMode::Vertex )
         {
+            TSharedPtr<SWidget> contextMenu = FOdysseyPainterEditorVectorPickToolVertexContextMenu::CreateWidget( GetEditor() );
+
+            FSlateApplication::Get().PushMenu( GetEditor()->GetGUI()->GetViewportTab().Get()->Widget().ToSharedRef(),
+                                               FWidgetPath(),
+                                               contextMenu.ToSharedRef(),
+                                               FSlateApplication::Get().GetCursorPos(),
+                                               FPopupTransitionEffect(FPopupTransitionEffect::ContextMenu) );
         }
     }
 /*}*/
@@ -435,12 +460,35 @@ UOdysseyPainterEditorVectorPickTool::SelectVertexFromPaintGroup( FOdysseyVectorG
 }
 
 void
+UOdysseyPainterEditorVectorPickTool::SelectBucketFromPaintGroup( FOdysseyVectorGroupPaint* iPaintGroup )
+{
+    std::vector<FOdysseyVectorBucket*> pickedBucketArray;
+
+    pickedBucketArray.reserve( 50 );
+
+    // deselect all if control key is not pressed
+    if( FSlateApplication::Get().GetModifierKeys().IsControlDown() == false )
+    {
+        iPaintGroup->UnselectAllBuckets();
+    }
+
+    iPaintGroup->PickBucket( pickedBucketArray );
+
+    for( int i = 0; i < pickedBucketArray.size(); i++ )
+    {
+        FOdysseyVectorBucket* bucket = pickedBucketArray[i];
+
+        iPaintGroup->SelectBucket( bucket );
+    }
+}
+
+void
 UOdysseyPainterEditorVectorPickTool::OnMouseUpVectorVertexMode( FOdysseyVectorEngine* iEngine
                                                               , FOdysseyVectorScene* iScene
                                                               , const FOdysseyPoint& iPointInTexture
                                                               , const FKey& iKey )
 {
-    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
+    std::list<FOdysseyVectorObject*>& selectedObjectList = GetFocusedObjectList( iScene );
 
     for( std::list<FOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
     {
@@ -458,8 +506,11 @@ UOdysseyPainterEditorVectorPickTool::OnMouseUpVectorVertexMode( FOdysseyVectorEn
             FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(selectedObject);
 
             SelectVertexFromPaintGroup( paintGroup );
+            SelectBucketFromPaintGroup( paintGroup );
         }
     }
+
+    iEngine->ResetHUD(); // updates the current HUD (in most cases wil be this tool's HUD)
 }
 
 bool
@@ -490,6 +541,7 @@ UOdysseyPainterEditorVectorPickTool::OnMouseUpVector( FOdysseyVectorEngine* iEng
     iScene->Update( 0 ); // update invalidated objects
 
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                   | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
                    | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
 
     return true;

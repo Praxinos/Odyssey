@@ -19,6 +19,11 @@ FOdysseyPainterEditorVectorPathPushToolHUD::Reset(FOdysseyVectorScene* iScene)
 }
 
 void
+FOdysseyPainterEditorVectorPathPushToolHUD::Load(FOdysseyVectorScene* iScene)
+{
+}
+
+void
 FOdysseyPainterEditorVectorPathPushToolHUD::Draw( FOdysseyVectorScene* iScene, uint64 iFlags )
 {
     BLContext* blctx = iScene->GetEngine()->GetBLContext();

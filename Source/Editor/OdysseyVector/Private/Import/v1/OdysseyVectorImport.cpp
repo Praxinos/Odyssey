@@ -1,8 +1,8 @@
-#include "Import/OdysseyVectorImport.h"
+#include "Import/v1/OdysseyVectorImport.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 
 void
-FOdysseyVectorImport::ReadChunks( uint64 iChunkEnd, FArchive &Ar, std::function<void(uint32, uint64, FArchive&)> iCallback )
+FOdysseyVectorImportV1::ReadChunks( uint64 iChunkEnd, FArchive &Ar, std::function<void(uint32, uint64, FArchive&)> iCallback )
 {
     UE_LOG( LogTemp, Warning, TEXT("ReadChunks") );
 
@@ -24,24 +24,8 @@ FOdysseyVectorImport::ReadChunks( uint64 iChunkEnd, FArchive &Ar, std::function<
 }
 
 void
-FOdysseyVectorImport::Read( FOdysseyVectorScene* iScene, FArchive &Ar )
+FOdysseyVectorImportV1::Read( FOdysseyVectorScene* iScene, FArchive &Ar, uint64 iChunkEnd )
 {
-    uint32 chunkID;
-    uint64 chunkLen;
-    uint64 currentAddress;
-    uint64 chunkEnd;
-
-
-    // Reads the first chunk (CHUNK_VECTOR_MAGIC)
-    Ar << chunkID;
-    Ar << chunkLen;
-
-    currentAddress = Ar.Tell();
-
-    chunkEnd = currentAddress + chunkLen;
-
-    UE_LOG(LogTemp,Warning,TEXT("chunkID %X %d"), chunkID, chunkLen );
-
     if( iScene )
     {
         std::vector<FOdysseyVectorObject*> vectorObjectArray;
@@ -49,19 +33,19 @@ FOdysseyVectorImport::Read( FOdysseyVectorScene* iScene, FArchive &Ar )
         // first record must be the scene
         vectorObjectArray.push_back( iScene );
 
-        FOdysseyVectorImport::ReadChunks( chunkEnd
-                                        , Ar
-                                        , [&vectorObjectArray](uint32 iChunkID, uint64 iChunkLen, FArchive &Ar) -> void
+        FOdysseyVectorImportV1::ReadChunks( iChunkEnd
+                                          , Ar
+                                          , [&vectorObjectArray](uint32 iChunkID, uint64 iChunkLen, FArchive &Ar) -> void
             {
                 switch ( iChunkID )
                 {
-                    case FOdysseyVectorExport::CHUNK_DECLARE_OBJECTS :
+                    case FOdysseyVectorExportV1::CHUNK_DECLARE_OBJECTS :
                          // this call populates vectorObjectArray
-                         FOdysseyVectorImport::ReadObjectsDeclare( vectorObjectArray, Ar.Tell() + iChunkLen, Ar );
+                         FOdysseyVectorImportV1::ReadObjectsDeclare( vectorObjectArray, Ar.Tell() + iChunkLen, Ar );
                     break;
 
-                    case FOdysseyVectorExport::CHUNK_DEFINE_OBJECTS :
-                         FOdysseyVectorImport::ReadObjectsDefine( vectorObjectArray, Ar.Tell() + iChunkLen, Ar );
+                    case FOdysseyVectorExportV1::CHUNK_DEFINE_OBJECTS :
+                         FOdysseyVectorImportV1::ReadObjectsDefine( vectorObjectArray, Ar.Tell() + iChunkLen, Ar );
                     break;
 
                     default:
@@ -72,10 +56,10 @@ FOdysseyVectorImport::Read( FOdysseyVectorScene* iScene, FArchive &Ar )
             } );
 
         iScene->UpdateMatrix();
-        iScene->Update( 0 );
+        iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
     }
 
     // Jump to the end of the junk, regardless of the fact that we've read nested chunks or not.
     // if we have read them, we'll just jump to the location where we already are.
-    Ar.Seek( chunkEnd );
+    Ar.Seek( iChunkEnd );
 }

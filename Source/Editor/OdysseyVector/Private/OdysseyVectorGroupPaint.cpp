@@ -17,7 +17,6 @@ FOdysseyVectorGroupPaint::~FOdysseyVectorGroupPaint()
 
 FOdysseyVectorGroupPaint::FOdysseyVectorGroupPaint( const FString& iName )
     : FOdysseyVectorGroup( iName )
-    , mSelectedBucket( nullptr )
 {
     SetName( iName );
 
@@ -25,25 +24,54 @@ FOdysseyVectorGroupPaint::FOdysseyVectorGroupPaint( const FString& iName )
 
     mIntersectionArray.reserve( 60 );
 
-    mGroupPaintParam.Tolerance = 0.0f;
+    mGroupPaintParam.Painted = true;
+    mGroupPaintParam.Monochrome = false;
+    mGroupPaintParam.MonochromeColor = FColor( 128, 128, 128, 255 );
+    mGroupPaintParam.GapTolerance = 12.0f;
     mGroupPaintParam.Realtime = false;
     mGroupPaintParam.Wireframe = false;
     mGroupPaintParam.WireframeColor = FColor( 255, 255, 255, 255 );
+ 
+    mBackgroundBucket.SetSolidColor( 128, 128, 128, 0 );
 
     //mGapSegmentBuffer.reserve( 200 );
     //mSectionBuffer.reserve( 200 );
 }
 
 void
-FOdysseyVectorGroupPaint::SelectBucket( FOdysseyVectorBucket* iSelectedBucket )
+FOdysseyVectorGroupPaint::UnselectAllBuckets()
 {
-    mSelectedBucket = iSelectedBucket;
+    mSelectedBucketList.remove_if( []( FOdysseyVectorBucket* iSelectedBucket )
+                                   {
+                                       iSelectedBucket->SetSelected( false );
+
+                                       return true;
+                                   } );
 }
 
-FOdysseyVectorBucket*
-FOdysseyVectorGroupPaint::GetSelectedBucket()
+void
+FOdysseyVectorGroupPaint::UnselectBucket( FOdysseyVectorBucket* iSelectedBucket )
 {
-    return mSelectedBucket;
+    mSelectedBucketList.remove( iSelectedBucket );
+
+    iSelectedBucket->SetSelected( false );
+}
+
+void
+FOdysseyVectorGroupPaint::SelectBucket( FOdysseyVectorBucket* iSelectedBucket )
+{
+    if( iSelectedBucket->IsSelected() == false )
+    {
+        mSelectedBucketList.push_back( iSelectedBucket );
+
+        iSelectedBucket->SetSelected( true );
+    }
+}
+
+std::list<FOdysseyVectorBucket*>&
+FOdysseyVectorGroupPaint::GetSelectedBucketList()
+{
+    return mSelectedBucketList;
 }
 
 bool
@@ -151,50 +179,22 @@ FOdysseyVectorGroupPaint::ApplyBucket( FOdysseyVectorBucket* iBucket )
     /*Invalidate();*/
 }
 
+// TODO: Rename this method. this is not a callback anymore
 void
 FOdysseyVectorGroupPaint::OnChildTransform( FOdysseyVectorObject* iChild )
 {
-    // we don't check the type of the object. Normally they should be
-    // all of base type PathCubic, otherwise there is a bug somewhere.
-    FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(iChild);
-
-    path->SwitchSpace( *this );
-    path->ResetTransform();
-    path->UpdateMatrix( false );// pass false to prevent loop
-    path->InvalidateAllSegments();
-}
-
-void
-FOdysseyVectorGroupPaint::TransferChild( FOdysseyVectorObject* iFosterChild )
-{
-    FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(iFosterChild);
-
-    iFosterChild->GetParent()->RemoveChild( iFosterChild );
-
-    AppendChild( iFosterChild );
-
-    OnChildTransform( path );
-}
-/*
-FOdysseyVectorBucket*
-FOdysseyVectorGroupPaint::Bucket( double iX, double iY, uint8 iR, uint8 iG, uint8 iB, uint8 iA )
-{
-    FOdysseyVectorBucket* bucket = PickBucket( iX, iY );
-
-    if( bucket == nullptr )
+    if( iChild->GetClass() == FOdysseyVectorPath::StaticClass() )
     {
-        bucket = new FOdysseyVectorBucket( *this, iX, iY, false );
+        FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(iChild);
 
-        AddBucket( bucket );
+        path->SwitchSpace( *this );
+        path->ResetTransform();
+        path->UpdateMatrix( false );// pass false to prevent loop
+        path->InvalidateAllSegments();
+        path->Update(0);
     }
-
-    bucket->SetColor( iR, iG, iB, iA );
-
-    ApplyBucket( bucket );
-
-    return bucket;
 }
-*/
+
 void
 FOdysseyVectorGroupPaint::DrawChildren( uint64 iFlags )
 {
@@ -217,6 +217,10 @@ FOdysseyVectorGroupPaint::DrawChildren( uint64 iFlags )
                 childPath->DrawStructure( mGroupPaintParam.WireframeColor, 1.0f, true );
             }
         }
+        else
+        {
+            child->Draw( iFlags );
+        }
     }
 }
 
@@ -237,22 +241,78 @@ FOdysseyVectorGroupPaint::Draw( uint64 iFlags )
 }
 
 void
+FOdysseyVectorGroupPaint::TransferChild( FOdysseyVectorObject* iFosterChild, FOdysseyVectorObject* iInsertAfter )
+{
+    OnChildTransform( iFosterChild );
+
+    FOdysseyVectorGroup::TransferChild( iFosterChild, iInsertAfter );
+}
+
+void
 FOdysseyVectorGroupPaint::UpdateShape( uint32 iUpdateFlags )
 {
+    std::list<FOdysseyVectorPath*>::iterator it;
+   BLMatrix2D identityMatrix = BLMatrix2D( BLMatrix2D::makeIdentity() );
+
+    if( mGroupPaintParam.Painted )
+    {
+        if( ( mGroupPaintParam.Realtime == true  )
+       || ( ( mGroupPaintParam.Realtime == false ) && ( iUpdateFlags & FOdysseyVectorObject::UPDATEPAINTGROUPS ) ) )
+        {
+            for( it = mPathList.begin(); it != mPathList.end(); ++it )
+            {
+                FOdysseyVectorPath* path = *it;
+
+                if( path->GetLocalMatrix() != identityMatrix )
+                {
+                    OnChildTransform( path );
+                }
+            }
+        }
+    }
+
     FOdysseyVectorGroup::UpdateShape( iUpdateFlags ); // updates BBox
 
     UpdateBBox();
 
-    if( ( mGroupPaintParam.Realtime == true  )
-   || ( ( mGroupPaintParam.Realtime == false ) && ( ( iUpdateFlags & FOdysseyVectorObject::FREQUENTUPDATES ) == 0 ) ) )
+    if( mGroupPaintParam.Painted )
     {
-        if( ( mInvalidationFlags & FOdysseyVectorObject::INVALIDATE_SHAPE )
-         || ( mInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD ) )
+        if( ( mGroupPaintParam.Realtime == true  )
+       || ( ( mGroupPaintParam.Realtime == false ) && ( iUpdateFlags & FOdysseyVectorObject::UPDATEPAINTGROUPS ) ) )
         {
-            FindCycles();
-        }
+            if( mInvalidationFlags & FOdysseyVectorObject::INVALIDATE_SHAPE )
+            {
+                Clear();
+                FindCycles();
 
-        Colorize();
+                if( ( iUpdateFlags & FOdysseyVectorObject::KEEPINVALIDATED ) == 0 )
+                {
+                    mInvalidationFlags &= (~INVALIDATE_SHAPE);
+                }
+            }
+
+            if( mInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD )
+            {
+                Clear();
+                FindCycles();
+
+                if( ( iUpdateFlags & FOdysseyVectorObject::KEEPINVALIDATED ) == 0 )
+                {
+                    mInvalidationFlags &= (~INVALIDATE_CHILD);
+                }
+            }
+
+            Colorize();
+
+            if( ( iUpdateFlags & FOdysseyVectorObject::KEEPINVALIDATED ) == 0 )
+            {
+                mInvalidationFlags &= (~INVALIDATE_COLOR);
+            }
+        }
+    }
+    else
+    {
+        Clear();
     }
 }
 
@@ -276,6 +336,11 @@ FOdysseyVectorGroupPaint::RemoveBucket( FOdysseyVectorBucket* iBucket )
 {
     mBucketList.remove( iBucket );
 
+    if( iBucket->IsSelected() )
+    {
+        UnselectBucket( iBucket );
+    }
+
     Invalidate( FOdysseyVectorObject::INVALIDATE_COLOR );
 }
 
@@ -289,9 +354,8 @@ FOdysseyVectorGroupPaint::DrawShape( uint64 iFlags )
     {
         FOdysseyVectorCycle *cycle = (*it);
 
-        cycle->Draw( iFlags );
+        cycle->Draw( iFlags, mGroupPaintParam.Monochrome, mGroupPaintParam.MonochromeColor );
     }
-
 
     if( mGroupPaintParam.Wireframe )
     {
@@ -449,7 +513,7 @@ FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegment* iSegment
             if( intersectRect.Area() )
             {
                 intersectionCount += iSegment->Intersect( intersectSegment
-                                                        , mGroupPaintParam.Tolerance
+                                                        , mGroupPaintParam.GapTolerance
                                                         , iIntersectionArray );
             }
         }
@@ -585,7 +649,7 @@ FOdysseyVectorGroupPaint::FindPath( FOdysseyVectorSection* iReturnSection
         {
             //UE_LOG(LogTemp,Warning,TEXT("cycle accepted") );
 
-            mCycleList.push_back( new FOdysseyVectorCycle( *this, iVertexArray, iSectionArray ) );
+            mCycleList.push_back( new FOdysseyVectorCycle( this, iVertexArray, iSectionArray ) );
         }
 
         ret = FOdysseyVectorGroupPaint::HASCYCLE;
@@ -859,15 +923,51 @@ CreateNearIntersection( FOdysseyVectorVertex *iVertex
 double
 FOdysseyVectorGroupPaint::GetGapTolerance()
 {
-    return mGroupPaintParam.Tolerance;
+    return mGroupPaintParam.GapTolerance;
 }
 
 void
 FOdysseyVectorGroupPaint::SetGapTolerance( double iGapTolerance )
 {
-    mGroupPaintParam.Tolerance = iGapTolerance;
+    mGroupPaintParam.GapTolerance = iGapTolerance;
 
     Invalidate();
+}
+
+bool
+FOdysseyVectorGroupPaint::IsMonochrome()
+{
+    return mGroupPaintParam.Monochrome;
+}
+
+void
+FOdysseyVectorGroupPaint::SetMonochrome( bool iIsMonochrome )
+{
+    mGroupPaintParam.Monochrome = iIsMonochrome;
+}
+
+FColor&
+FOdysseyVectorGroupPaint::GetMonochromeColor()
+{
+    return mGroupPaintParam.MonochromeColor;
+}
+
+void
+FOdysseyVectorGroupPaint::SetMonochromeColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA )
+{
+    mGroupPaintParam.MonochromeColor.R = iR;
+    mGroupPaintParam.MonochromeColor.G = iG;
+    mGroupPaintParam.MonochromeColor.B = iB;
+    mGroupPaintParam.MonochromeColor.A = iA;
+}
+
+void
+FOdysseyVectorGroupPaint::GetMonochromeColor( uint8 &oR, uint8 &oG, uint8& oB, uint8& oA )
+{
+    oR = mGroupPaintParam.MonochromeColor.R;
+    oG = mGroupPaintParam.MonochromeColor.G;
+    oB = mGroupPaintParam.MonochromeColor.B;
+    oA = mGroupPaintParam.MonochromeColor.A;
 }
 
 bool
@@ -882,10 +982,74 @@ FOdysseyVectorGroupPaint::SetWireframe( bool iIsWireframe )
     mGroupPaintParam.Wireframe = iIsWireframe;
 }
 
+FColor&
+FOdysseyVectorGroupPaint::GetWireframeColor()
+{
+    return mGroupPaintParam.WireframeColor;
+}
+
+void
+FOdysseyVectorGroupPaint::SetWireframeColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA )
+{
+    mGroupPaintParam.WireframeColor.R = iR;
+    mGroupPaintParam.WireframeColor.G = iG;
+    mGroupPaintParam.WireframeColor.B = iB;
+    mGroupPaintParam.WireframeColor.A = iA;
+}
+
+void
+FOdysseyVectorGroupPaint::GetWireframeColor( uint8 &oR, uint8 &oG, uint8& oB, uint8& oA )
+{
+    oR = mGroupPaintParam.WireframeColor.R;
+    oG = mGroupPaintParam.WireframeColor.G;
+    oB = mGroupPaintParam.WireframeColor.B;
+    oA = mGroupPaintParam.WireframeColor.A;
+}
+
+bool
+FOdysseyVectorGroupPaint::IsPainted()
+{
+    return mGroupPaintParam.Painted;
+}
+
+void
+FOdysseyVectorGroupPaint::SetPainted( bool iPainted )
+{
+    mGroupPaintParam.Painted = iPainted;
+
+    Invalidate();
+}
+
+void
+FOdysseyVectorGroupPaint::AddChild( FOdysseyVectorObject* iChild, FOdysseyVectorObject* iInsertAfter )
+{
+    FOdysseyVectorObject::AddChild( iChild, iInsertAfter );
+
+    if( iChild->GetClass() == FOdysseyVectorPath::StaticClass() )
+    {
+        FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(iChild);
+
+        mPathList.push_back( path );
+    }
+}
+
+void
+FOdysseyVectorGroupPaint::RemoveChild( FOdysseyVectorObject* iChild )
+{
+    FOdysseyVectorObject::RemoveChild( iChild );
+
+    if( iChild->GetClass() == FOdysseyVectorPath::StaticClass() )
+    {
+        FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(iChild);
+
+        mPathList.remove( path );
+    }
+}
+
 void
 FOdysseyVectorGroupPaint::BuildGraph()
 {
-    std::list<FOdysseyVectorObject*> pathList = mChildrenList; // copy
+    std::list<FOdysseyVectorPath*> intersectedPathList = mPathList; // copy
     uint32 totalGapSegmentCount = 0;
     uint32 totalSectionCount = 0;
     // act as boolean without the need to reinitialize its value
@@ -893,11 +1057,11 @@ FOdysseyVectorGroupPaint::BuildGraph()
 
     mPaintingCode = ++paintingCode;
 
-    Clear();
+    //Clear();
 
-    for( std::list<FOdysseyVectorObject*>::iterator oit = mChildrenList.begin(); oit != mChildrenList.end(); ++oit )
+    for( std::list<FOdysseyVectorPath*>::iterator pit = mPathList.begin(); pit != mPathList.end(); ++pit )
     {
-        FOdysseyVectorPath *path = static_cast<FOdysseyVectorPath*>(*oit);
+        FOdysseyVectorPath *path = (*pit);
         std::list<FOdysseyVectorSegment*>& segmentList = path->GetSegmentList();
         std::list<FOdysseyVectorVertex*>& vertexList = path->GetVertexList();
         uint32 intersectionCount = 0;
@@ -906,10 +1070,10 @@ FOdysseyVectorGroupPaint::BuildGraph()
         {
             FOdysseyVectorSegment *segment = static_cast<FOdysseyVectorSegment*>(*sit);
 
-            for( std::list<FOdysseyVectorObject*>::iterator pit = pathList.begin(); pit != pathList.end(); ++pit )
+            for( std::list<FOdysseyVectorPath*>::iterator iit = intersectedPathList.begin(); iit != intersectedPathList.end(); ++iit )
             {
-                FOdysseyVectorPath *intersectPath = static_cast<FOdysseyVectorPath*>(*pit);
-                std::list<FOdysseyVectorSegment*>& intersectPathSegmentList = intersectPath->GetSegmentList();
+                FOdysseyVectorPath *intersectedPath = (*iit);
+                std::list<FOdysseyVectorSegment*>& intersectPathSegmentList = intersectedPath->GetSegmentList();
 
                 intersectionCount += IntersectSegment ( segment, intersectPathSegmentList, mIntersectionArray );
             }
@@ -942,7 +1106,7 @@ FOdysseyVectorGroupPaint::BuildGraph()
             path->SetPaintingCode( mPaintingCode );
         }
 
-        pathList.pop_front(); // we don't need the path anymore. By and by the list will empty by itself.
+        intersectedPathList.pop_front(); // we don't need the path anymore. By and by the list will empty by itself.
     }
 
     // we now need another loop to count and to reserve the memory in one block to create the sections.
@@ -1017,7 +1181,7 @@ FOdysseyVectorGroupPaint::BuildGraph()
 
                 if( vertexArray.size() )
                 {
-                    mCycleList.push_back( new FOdysseyVectorCycle( *this, vertexArray, sectionArray ) );
+                    mCycleList.push_back( new FOdysseyVectorCycle( this, vertexArray, sectionArray ) );
                 }
             }
 
@@ -1204,8 +1368,8 @@ FOdysseyVectorGroupPaint::Clear()
                 FOdysseyVectorSegment *segment = static_cast<FOdysseyVectorSegment*>(*sit);
 
                 // reset nearest segment
-                segment->GetVertex(0)->SetNearestSegment( nullptr, mGroupPaintParam.Tolerance/*DBL_MAX*/, 0.0f );
-                segment->GetVertex(1)->SetNearestSegment( nullptr, mGroupPaintParam.Tolerance/*DBL_MAX*/, 0.0f );
+                segment->GetVertex(0)->SetNearestSegment( nullptr, mGroupPaintParam.GapTolerance/*DBL_MAX*/, 0.0f );
+                segment->GetVertex(1)->SetNearestSegment( nullptr, mGroupPaintParam.GapTolerance/*DBL_MAX*/, 0.0f );
             }
         }
     }
@@ -1258,4 +1422,137 @@ FOdysseyVectorGroupPaint::CopyShape()
     CopyBuckets( groupPaintCopy, false );
 
     return groupPaintCopy;
+}
+
+void
+FOdysseyVectorGroupPaint::GetSelectedPoints( std::vector<FOdysseyVectorPoint*>& oPointArray
+                                           , ePointSelectionFlags iPointSelectionFlags )
+{
+    for( std::list<FOdysseyVectorObject*>::iterator it = mChildrenList.begin(); it != mChildrenList.end(); ++it )
+    {
+        FOdysseyVectorObject *child = (*it);
+
+        if( child->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+        {
+            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(child);
+
+            path->GetSelectedPoints( oPointArray, iPointSelectionFlags );
+        }
+    }
+
+    if( iPointSelectionFlags & ePointSelectionFlags::Bucket )
+    {
+        for( std::list<FOdysseyVectorBucket*>::iterator it = mSelectedBucketList.begin(); it != mSelectedBucketList.end(); ++it )
+        {
+            FOdysseyVectorBucket *bucket = (*it);
+
+            oPointArray.push_back( bucket );
+        }
+    }
+}
+
+bool
+FOdysseyVectorGroupPaint::GetBBoxFromSelectedVertices( ::ULIS::FRectD& oBBox, bool iWorld )
+{
+    std::list<FOdysseyVectorObject*>::iterator it;
+    bool inited = false;
+
+    for( it = mChildrenList.begin(); it != mChildrenList.end(); ++it )
+    {
+        FOdysseyVectorObject* child = *it;
+
+        if( child->GetClass() == FOdysseyVectorPath::StaticClass() )
+        {
+            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(child);
+            ::ULIS::FRectD childBBox;
+
+            if( path->GetBBoxFromSelectedVertices( childBBox, true ) )
+            {
+                oBBox = inited ? oBBox | childBBox
+                               : childBBox;
+
+                inited = true;
+            }
+        }
+    }
+
+    if( inited )
+    {
+        if( iWorld == false )
+        {
+            double xmin = oBBox.x;
+            double xmax = oBBox.x + oBBox.w;
+            double ymin = oBBox.y;
+            double ymax = oBBox.y + oBBox.h;
+            BLPoint p[4] = { mInverseWorldMatrix.mapPoint( xmin, ymin )
+                           , mInverseWorldMatrix.mapPoint( xmax, ymin )
+                           , mInverseWorldMatrix.mapPoint( xmax, ymax )
+                           , mInverseWorldMatrix.mapPoint( xmin, ymax ) };
+
+            oBBox = ::ULIS::FRectD::FromMinMax( ::ULIS::FMath::Min4( p[0].x, p[1].x, p[2].x, p[3].x )
+                                              , ::ULIS::FMath::Min4( p[0].y, p[1].y, p[2].y, p[3].y )
+                                              , ::ULIS::FMath::Max4( p[0].x, p[1].x, p[2].x, p[3].x )
+                                              , ::ULIS::FMath::Max4( p[0].y, p[1].y, p[2].y, p[3].y ) );
+        }
+    }
+
+    return inited;
+}
+
+// Pick from mask image
+void
+FOdysseyVectorGroupPaint::PickBucket( std::vector<FOdysseyVectorBucket*>& oPickedBucketArray )
+{
+    BLImage* maskImage = GetScene()->GetEngine()->GetBLMask();
+    std::list<FOdysseyVectorBucket*>::iterator it;
+    BLImageData imageData;
+
+    maskImage->getData( &imageData );
+
+    for( it = mBucketList.begin(); it != mBucketList.end(); ++it )
+    {
+        FOdysseyVectorBucket* bucket = (*it);
+        ::ULIS::FVec2D& localCoords = bucket->GetCoords();
+        // convert bucket coordinates to world coordinates. Easier to detect collision inside the picking circle.
+        BLPoint worldCoords = mWorldMatrix.mapPoint( localCoords.x, localCoords.y );
+        int32 x = (int32) worldCoords.x;
+        int32 y = (int32) worldCoords.y;
+
+        if( ( x >= 0 ) && ( x < imageData.size.w )
+         && ( y >= 0 ) && ( y < imageData.size.h ) )
+        {
+            uint8 *pixel = static_cast<uint8*>( imageData.pixelData );
+            uint32 offset = ( y * imageData.size.w ) + x;
+            uint8 pixelValue = pixel[offset];
+
+            if( pixelValue == 255 )
+            {
+                oPickedBucketArray.push_back( bucket );
+            }
+        }
+    }
+}
+
+FOdysseyVectorCycle*
+FOdysseyVectorGroupPaint::PickCycle( double iWorldX, double iWorldY )
+{
+    BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
+    BLPoint localCoord = mInverseWorldMatrix.mapPoint( iWorldX, iWorldY );
+    std::list<FOdysseyVectorCycle*>::iterator it;
+
+    if( mBBox.HitTest( ::ULIS::FVec2D( localCoord.x, localCoord.y ) ) )
+    {
+        for( it = mCycleList.begin(); it != mCycleList.end(); ++it )
+        {
+            FOdysseyVectorCycle *cycle = (*it);
+
+            // TODO: Bounding volume for cycles for faster search
+            if( cycle->HitTest( localCoord.x, localCoord.y ) == true )
+            {
+                return cycle;
+            }
+        }
+    }
+
+    return nullptr;
 }

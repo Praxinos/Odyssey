@@ -15,7 +15,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoBucketRemove : public FOdysseyVectorUn
     public:
         ~FOdysseyVectorUndoBucketRemove();
         FOdysseyVectorUndoBucketRemove( FOdysseyVectorScene* iScene
-                                      , FOdysseyVectorGroupPaint* iPaintGroup
                                       , FOdysseyVectorBucket* iBucket );
 
         /** Called when redoing */
@@ -28,6 +27,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoBucketRemove : public FOdysseyVectorUn
         virtual FString ToString() const override;
 
     private:
-        FOdysseyVectorGroupPaint* mPaintGroup;
         FOdysseyVectorBucket* mBucket;
 };

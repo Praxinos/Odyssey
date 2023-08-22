@@ -6,7 +6,8 @@ FOdysseyVectorEngine::~FOdysseyVectorEngine()
 }
 
 FOdysseyVectorEngine::FOdysseyVectorEngine( FOdysseyVectorScene* iScene, double iWidth, double iHeight )
-    : mSelectionSpace( nullptr )
+    : FOdysseyVectorObject( "Engine" )
+    , mSelectionSpace( nullptr )
     , mInvalidTileMap( 64, iWidth, iHeight )
 {
     BLContextCreateInfo createInfo {};
@@ -25,6 +26,17 @@ FOdysseyVectorEngine::FOdysseyVectorEngine( FOdysseyVectorScene* iScene, double 
 
     mBLContext->begin( *mBLImage, createInfo );
     //UseColorImage();
+}
+
+bool
+FOdysseyVectorEngine::HasBaseClass( uint32 iBaseClassID )
+{
+    if( mStaticClass == iBaseClassID )
+    {
+        return true;
+    }
+
+    return FOdysseyVectorObject::HasBaseClass( iBaseClassID );
 }
 
 void
@@ -133,6 +145,10 @@ FOdysseyVectorEngine::SetScene( FOdysseyVectorScene* iScene )
 {
     mScene = iScene;
 
+    // todo: replace with RemoveAllChildren();
+    mChildrenList.clear();
+    AppendChild( iScene );
+
     mScene->SetEngine( this );
 
     ResetHUD();
@@ -182,7 +198,7 @@ FOdysseyVectorEngine::SelectAllInSelectionSpace()
 }
 
 void
-FOdysseyVectorEngine::Render()
+FOdysseyVectorEngine::UpdateShape( uint32 iUpdateFlags )
 {
     // Blend2D part
    /* BLContextCreateInfo createInfo{};*/
@@ -422,7 +438,7 @@ FOdysseyVectorEngine::Erase( FOdysseyVectorScene* iScene
         }
     }
 
-    iScene->Update( 0 );
+    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 }
 
 static void
@@ -524,11 +540,11 @@ FOdysseyVectorEngine::Stitch( FOdysseyVectorVertex* iVertexA
                                                                new FOdysseyVectorSegmentCubic( cubicPath
                                                                                             ,  knotVertex
                                                                                             ,  nextVertex ) };
-            uint32 prevVertexIndex = ( iVertexA == vertexASegment->GetVertex(0) ) ? 1 : 0;
-            uint32 nextVertexIndex = ( iVertexB == vertexBSegment->GetVertex(0) ) ? 1 : 0;
 
-            newCubicSegment[0]->GetHandle(0)->Set( vertexASegment->GetHandle(prevVertexIndex)->GetCoords() );
-            newCubicSegment[1]->GetHandle(1)->Set( vertexBSegment->GetHandle(nextVertexIndex)->GetCoords() );
+            newCubicSegment[0]->GetHandle(0)->Set( vertexASegment->GetHandle(prevVertex)->GetCoords() );
+            newCubicSegment[0]->GetHandle(1)->Set( vertexASegment->GetHandle(iVertexA  )->GetCoords() );
+            newCubicSegment[1]->GetHandle(0)->Set( vertexBSegment->GetHandle(iVertexB  )->GetCoords() );
+            newCubicSegment[1]->GetHandle(1)->Set( vertexBSegment->GetHandle(nextVertex)->GetCoords() );
 
             path->RemoveSegment( vertexASegment );
             path->RemoveSegment( vertexBSegment );
@@ -544,12 +560,12 @@ FOdysseyVectorEngine::Stitch( FOdysseyVectorVertex* iVertexA
 
             oAddedSegmentArray.push_back( newCubicSegment[0] );
             oAddedSegmentArray.push_back( newCubicSegment[1] );
-
+/*
             if( iSmooth )
             {
                 FOdysseyVectorPath::SmoothSegments( knotVertex, false, true );
             }
-
+*/
             path->InvalidateAllSegments();
 
             //mScene->Update( 0 );

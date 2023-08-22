@@ -63,10 +63,7 @@ FOdysseyVectorLine::CopyShape()
 void
 FOdysseyVectorLine::DrawShape( uint64 iFlags )
 {
-    if ( mWidth && mHeight )
-    {
-        FOdysseyVectorPath::DrawShape( iFlags );
-    }
+    FOdysseyVectorPath::DrawShape( iFlags );
 }
 
 void

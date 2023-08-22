@@ -49,7 +49,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorGridToolHUD : public F
         bool PickNodes( ::ULIS::FRectD& iWorldRect, bool iClearSelection );
         void ClearSelection();
         void GetSelection( std::vector<FGridNode*>& oNodeArray );
-        void MakeGrid( FOdysseyVectorScene* iScene, uint32 iDivisionX, uint32 iDivisionY );
+        void MakeGrid( FOdysseyVectorScene* iScene );
         void Deform();
         void StartSelectionRectangle( double iWorldX, double iWorldY );
         void DragSelectionRectangle( double iWorldX, double iWorldY );
@@ -57,10 +57,14 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorGridToolHUD : public F
         void Export( std::vector<FOdysseyVectorPoint*>& oPointArray );
 
     protected:
-        void MapPoint( FOdysseyVectorObject* iDeformedObject, FOdysseyVectorPoint* iPoint, double iSpaceX, double iSpaceY );
-        uint32 MapObject( FOdysseyVectorObject* iObject );
-        void MakeNodes( uint32 iCellCountX, uint32 iCellCountY );
-        void MakeCells( uint32 iCellCountX, uint32 iCellCountY );
+        uint32 MapPoint( FOdysseyVectorObject* iDeformedObject, FOdysseyVectorPoint* iPoint, double iSpaceX, double iSpaceY );
+        uint32 MapObjectRecurse( FOdysseyVectorObject* iObject );
+        uint32 MapObjectNoRecurse( FOdysseyVectorObject* iObject );
+        uint32 MapPath( FOdysseyVectorPath* iPath, BLMatrix2D& iInverseGridMatrix );
+        uint32 MapPaintGroup( FOdysseyVectorGroupPaint* iPaintGroup, BLMatrix2D& iInverseGridMatrix );
+        uint32 MapPaintGroupBuckets( FOdysseyVectorGroupPaint* iPaintGroup, BLMatrix2D& iInverseGridMatrix );
+        void MakeNodes();
+        void MakeCells();
         void Map( FOdysseyVectorScene* iScene );
         void DeformCell( FGridCell& iCell );
         void UnselectNodes();
@@ -72,8 +76,6 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorGridToolHUD : public F
         ::ULIS::FVec2D mWorldSelDrag; // selection rectangle is in world coordinates (to be aligned with world axis)
         std::vector<FGridNode> mNodeArray;
         std::vector<FGridCell> mCellArray;
-        uint32 mCellCountX;
-        uint32 mCellCountY;
         uint32 mNodeCountX;
         uint32 mNodeCountY;
         double mCellSizeX;

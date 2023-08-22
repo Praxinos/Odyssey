@@ -12,11 +12,11 @@ UOdysseyPainterEditorVectorPathView::UOdysseyPainterEditorVectorPathView()
 void
 UOdysseyPainterEditorVectorPathView::ImportParam()
 {
-    std::list<FOdysseyVectorObject*>& selectedObjectList = mScene->GetSelectedObjectList();
+    std::list<FOdysseyVectorObject*>::iterator it;
 
     UOdysseyPainterEditorVectorObjectView::ImportParam();
 
-    for ( std::list<FOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
+    for( it = mFocusedObjectList.begin(); it != mFocusedObjectList.end(); ++it )
     {
         FOdysseyVectorObject* selectedObject = (*it);
 
@@ -31,17 +31,13 @@ UOdysseyPainterEditorVectorPathView::ImportParam()
     }
 }
 
-void
+uint64
 UOdysseyPainterEditorVectorPathView::PropertyChanged( const FName& iPropertyName, const FName& iCategory )
 {
-    std::list<FOdysseyVectorObject*>& selectedObjectList = mScene->GetSelectedObjectList();
+    uint64 signalFlags = UOdysseyPainterEditorVectorObjectView::PropertyChanged( iPropertyName, iCategory );
 
-    UOdysseyPainterEditorVectorObjectView::PropertyChanged( iPropertyName, iCategory );
-
-    for ( std::list<FOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
+    for( FOdysseyVectorObject* selectedObject : mFocusedObjectList )
     {
-        FOdysseyVectorObject* selectedObject = (*it);
-
         if( selectedObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
         {
             FOdysseyVectorPath* selectedPath = static_cast<FOdysseyVectorPath*>(selectedObject);
@@ -53,4 +49,6 @@ UOdysseyPainterEditorVectorPathView::PropertyChanged( const FName& iPropertyName
                 selectedPath->mPathParam.Filled = PathParam.Filled;
         }
     }
+
+    return signalFlags;
 }

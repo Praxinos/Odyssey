@@ -80,6 +80,10 @@ public:
 
     virtual void Commit() override;
 
+    std::vector<FOdysseyVectorCycle*>& GetPickedCycleArray();
+
+    std::list<FOdysseyVectorObject*>& GetFocusedObjectList( FOdysseyVectorScene* iScene );
+
 private:
     void SetBucketColor( FOdysseyVectorBucket* iBucket );
     void PopUpMenu( FOdysseyVectorBucket* iBucket );
@@ -88,14 +92,10 @@ protected:
     void OnMouseUpVectorClearBucket( FOdysseyVectorScene* iScene
                                     , FOdysseyVectorBucket* iBucket );
     void OnMouseUpVectorCreateBucket( FOdysseyVectorScene* iScene
-                                    , FOdysseyVectorGroupPaint* paintGroup
                                     , const FOdysseyPoint& iPointInTexture
                                     , const FKey& iKey );
     void OnMouseUpVectorRemoveBucket( FOdysseyVectorScene* iScene
-                                    , FOdysseyVectorGroupPaint* paintGroup
-                                    , FOdysseyVectorBucket* iBucket
-                                    , const FOdysseyPoint& iPointInTexture
-                                    , const FKey& iKey );
+                                    , FOdysseyVectorBucket* iBucket );
     void OnMouseUpVectorMovePoint( FOdysseyVectorScene* iScene
                                  , FOdysseyVectorPoint* iPoint
                                  , ::ULIS::FVec2D iPointOriginalPosition );
@@ -112,6 +112,9 @@ protected:
 public:
     UPROPERTY(EditAnywhere,Category="Odyssey BucketFill Tool")
     uint8 Tolerance;
+
+    UPROPERTY(EditAnywhere,Category="Odyssey BucketFill Tool")
+    bool RestrictToSelection;
 
     UPROPERTY(EditAnywhere,Category="Odyssey BucketFill Tool")
     bool Propagate;
@@ -133,12 +136,10 @@ public:
     bool ShowControlsAtKeyDown;
 
 protected:
-    // protected Data Members
-
-    //Resources
+    std::vector<FOdysseyVectorCycle*> mPickedCycleArray;
     FOdysseyPaintEngine mPaintEngine;
     FOdysseyVectorBucket* mPickedBucket;
-    FOdysseyVectorObject* mPickedObject;
+    //FOdysseyVectorObject* mPickedObject;
     double mOldLocalMouseX;
     double mOldLocalMouseY;
     double mDownMouseX;

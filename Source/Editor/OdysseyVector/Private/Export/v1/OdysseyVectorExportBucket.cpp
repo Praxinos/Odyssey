@@ -1,10 +1,10 @@
-#include "Export/OdysseyVectorExport.h"
+#include "Export/v1/OdysseyVectorExport.h"
 #include "Palette/OdysseyPaletteEntry.h"
 
-static void
-WriteBucketPaletteEntry( FOdysseyVectorBucket& iBucket, FArchive& Ar)
+void
+FOdysseyVectorExportV1::WriteBucketPaletteEntry( FOdysseyVectorBucket& iBucket, FArchive& Ar)
 {
-    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_BUCKET_PALETTEENTRY
+    FOdysseyVectorExportV1::WriteChunk( FOdysseyVectorExportV1::CHUNK_BUCKET_PALETTEENTRY
                                     , Ar
                                     , [&iBucket](FArchive &Ar) -> void
     {
@@ -14,10 +14,10 @@ WriteBucketPaletteEntry( FOdysseyVectorBucket& iBucket, FArchive& Ar)
     } );
 }
 
-static void
-WriteBucketPropagated( FOdysseyVectorBucket& iBucket, FArchive &Ar )
+void
+FOdysseyVectorExportV1::WriteBucketPropagated( FOdysseyVectorBucket& iBucket, FArchive &Ar )
 {
-    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_BUCKET_PROPAGATED
+    FOdysseyVectorExportV1::WriteChunk( FOdysseyVectorExportV1::CHUNK_BUCKET_PROPAGATED
                                     , Ar
                                     , [&iBucket](FArchive &Ar) -> void
     {
@@ -27,10 +27,10 @@ WriteBucketPropagated( FOdysseyVectorBucket& iBucket, FArchive &Ar )
     } );
 }
 
-static void
-WriteBucketSpreading( FOdysseyVectorBucket& iBucket, FArchive &Ar )
+void
+FOdysseyVectorExportV1::WriteBucketSpreading( FOdysseyVectorBucket& iBucket, FArchive &Ar )
 {
-    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_BUCKET_SPREADING
+    FOdysseyVectorExportV1::WriteChunk( FOdysseyVectorExportV1::CHUNK_BUCKET_SPREADING
                                     , Ar
                                     , [&iBucket](FArchive &Ar) -> void
     {
@@ -40,10 +40,10 @@ WriteBucketSpreading( FOdysseyVectorBucket& iBucket, FArchive &Ar )
     } );
 }
 
-static void
-WriteBucketPosition( FOdysseyVectorBucket& iBucket, FArchive &Ar )
+void
+FOdysseyVectorExportV1::WriteBucketPosition( FOdysseyVectorBucket& iBucket, FArchive &Ar )
 {
-    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_BUCKET_POSITION
+    FOdysseyVectorExportV1::WriteChunk( FOdysseyVectorExportV1::CHUNK_BUCKET_POSITION
                                     , Ar
                                     , [&iBucket](FArchive &Ar) -> void
     {
@@ -54,10 +54,10 @@ WriteBucketPosition( FOdysseyVectorBucket& iBucket, FArchive &Ar )
     } );
 }
 
-static void
-WriteBucketRotation( FOdysseyVectorBucket& iBucket, FArchive &Ar )
+void
+FOdysseyVectorExportV1::WriteBucketRotation( FOdysseyVectorBucket& iBucket, FArchive &Ar )
 {
-    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_BUCKET_ROTATION
+    FOdysseyVectorExportV1::WriteChunk( FOdysseyVectorExportV1::CHUNK_BUCKET_ROTATION
                                     , Ar
                                     , [&iBucket](FArchive &Ar) -> void
     {
@@ -67,27 +67,31 @@ WriteBucketRotation( FOdysseyVectorBucket& iBucket, FArchive &Ar )
     } );
 }
 
-static void
-WriteBucketGradientStop( FColor& iStopColor, double iStopAt, FArchive &Ar )
+void
+FOdysseyVectorExportV1::WriteBucketGradientStop( FColor& iStopColor, double iStopAt, FArchive &Ar )
 {
-    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_BUCKET_GRADIENT_STOP
+    FOdysseyVectorExportV1::WriteChunk( FOdysseyVectorExportV1::CHUNK_BUCKET_GRADIENT_STOP
                                     , Ar
                                     , [&iStopColor,iStopAt](FArchive &Ar) -> void
     {
         double stopAt = iStopAt; //iStopAt is const in the lambda, and FArchive << doesn't like it, so we use a variable here
-        Ar << iStopColor.R;
-        Ar << iStopColor.G;
-        Ar << iStopColor.B;
-        Ar << iStopColor.A;
+        uint8 R = iStopColor.R;
+        uint8 G = iStopColor.G;
+        uint8 B = iStopColor.B;
+        uint8 A = iStopColor.A;
 
+        Ar << R;
+        Ar << G;
+        Ar << B;
+        Ar << A;
         Ar << stopAt;
     } );
 }
 
-static void
-WriteBucketGradient( FOdysseyVectorBucket& iBucket, FArchive &Ar )
+void
+FOdysseyVectorExportV1::WriteBucketGradient( FOdysseyVectorBucket& iBucket, FArchive &Ar )
 {
-    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_BUCKET_GRADIENT
+    FOdysseyVectorExportV1::WriteChunk( FOdysseyVectorExportV1::CHUNK_BUCKET_GRADIENT
                                     , Ar
                                     , [&iBucket](FArchive &Ar) -> void
     {
@@ -99,26 +103,30 @@ WriteBucketGradient( FOdysseyVectorBucket& iBucket, FArchive &Ar )
     } );
 }
 
-static void
-WriteBucketColor( FOdysseyVectorBucket& iBucket, FArchive &Ar )
+void
+FOdysseyVectorExportV1::WriteBucketColor( FOdysseyVectorBucket& iBucket, FArchive &Ar )
 {
-    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_BUCKET_SOLIDCOLOR
+    FOdysseyVectorExportV1::WriteChunk( FOdysseyVectorExportV1::CHUNK_BUCKET_SOLIDCOLOR
                                     , Ar
                                     , [&iBucket](FArchive &Ar) -> void
     {
         FColor fillColor = iBucket.GetSolidColor();
+        uint8 R = fillColor.R;
+        uint8 G = fillColor.G;
+        uint8 B = fillColor.B;
+        uint8 A = fillColor.A;
 
-        Ar << fillColor.R;
-        Ar << fillColor.G;
-        Ar << fillColor.B;
-        Ar << fillColor.A;
+        Ar << R;
+        Ar << G;
+        Ar << B;
+        Ar << A;
     } );
 }
 
 void
-FOdysseyVectorExport::WriteBucket( FOdysseyVectorBucket& iBucket, FArchive &Ar )
+FOdysseyVectorExportV1::WriteBucket( FOdysseyVectorBucket& iBucket, FArchive &Ar )
 {
-    FOdysseyVectorExport::WriteChunk( FOdysseyVectorExport::CHUNK_BUCKET_ENTRY
+    FOdysseyVectorExportV1::WriteChunk( FOdysseyVectorExportV1::CHUNK_BUCKET_ENTRY
                                     , Ar
                                     , [&iBucket](FArchive &Ar) -> void
     {

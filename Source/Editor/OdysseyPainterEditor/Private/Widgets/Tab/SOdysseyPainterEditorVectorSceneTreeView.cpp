@@ -1,0 +1,299 @@
+// IDDN FR.001.250001.005.S.P.2019.000.00000
+// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
+
+#include "Widgets/Tab/SOdysseyPainterEditorVectorSceneTreeView.h"
+#include "Widgets/Tab/SOdysseyPainterEditorVectorSceneTreeViewRow.h"
+#include "Widgets/Tab/SOdysseyPainterEditorVectorSceneTreeViewContextMenu.h"
+#include "OdysseyStyleSet.h"
+#include "Framework/Commands/GenericCommands.h"
+#include "OdysseyVector.h"
+
+#define LOCTEXT_NAMESPACE "SOdysseyPainterEditorVectorSceneTreeView"
+
+
+SOdysseyPainterEditorVectorSceneTreeView::~SOdysseyPainterEditorVectorSceneTreeView()
+{
+}
+
+SOdysseyPainterEditorVectorSceneTreeView::SOdysseyPainterEditorVectorSceneTreeView()
+    : mCommandList(MakeShared<FUICommandList>())
+{
+    MapActionsToCommandList();
+}
+
+void
+SOdysseyPainterEditorVectorSceneTreeView::Construct( const FArguments& InArgs )
+{
+    STreeView<TSharedPtr<FVectorSceneTreeViewItem>>::Construct(
+        STreeView<TSharedPtr<FVectorSceneTreeViewItem>>::FArguments()
+        // for some reason, SetTreeItemsSource does not work, so we have to use an array that we
+        // call mItemsSource and that we will updates with the desired items
+        .TreeItemsSource(&mItemsSource)
+        .OnGenerateRow( this, &SOdysseyPainterEditorVectorSceneTreeView::OnGenerateRow ) 
+        .OnGetChildren( this, &SOdysseyPainterEditorVectorSceneTreeView::OnGetChildren )
+        .OnExpansionChanged( this, &SOdysseyPainterEditorVectorSceneTreeView::OnExpansionChanged )
+        .OnSelectionChanged( this, &SOdysseyPainterEditorVectorSceneTreeView::OnSelectionChanged )
+        //.OnItemScrolledIntoView(this, &SOdysseyLayerStackTreeView::OnItemScrolledIntoView)
+        .OnContextMenuOpening( this, &SOdysseyPainterEditorVectorSceneTreeView::OnContextMenuOpening )
+        .SelectionMode( ESelectionMode::Multi )
+        //.HeaderRow(headerRow)
+    );
+}
+
+void
+SOdysseyPainterEditorVectorSceneTreeView::RenameSelectedItem()
+{
+    TArray<TSharedPtr<FVectorSceneTreeViewItem>> selectedItems = GetSelectedItems();
+
+    // no need to create an undo record or do anything if the selection is empty
+    if( selectedItems.Num() )
+    {
+        TSharedPtr<ITableRow> tableRow = WidgetFromItem( selectedItems[0] );
+        TSharedPtr<SOdysseyPainterEditorVectorSceneTreeViewRow> itemWidget = StaticCastSharedPtr<SOdysseyPainterEditorVectorSceneTreeViewRow>(tableRow);
+
+        itemWidget->Rename();
+    }
+}
+
+TSharedPtr<SWidget>
+SOdysseyPainterEditorVectorSceneTreeView::OnContextMenuOpening()
+{
+    return SOdysseyPainterEditorVectorSceneTreeViewContextMenu::CreateWidget( this );
+}
+
+FReply
+SOdysseyPainterEditorVectorSceneTreeView::OnKeyDown( const FGeometry& iGeometry, const FKeyEvent& iKeyEvent )
+{
+	if (mCommandList->ProcessCommandBindings(iKeyEvent))
+        return FReply::Handled();
+
+    return STreeView<TSharedPtr<FVectorSceneTreeViewItem>>::OnKeyDown( iGeometry, iKeyEvent );
+}
+
+TSharedPtr<FVectorSceneTreeViewItem>
+SOdysseyPainterEditorVectorSceneTreeView::GetRootItem()
+{
+	return mRootItem;
+}
+
+void
+SOdysseyPainterEditorVectorSceneTreeView::BuildTree( const TSharedPtr<FVectorSceneTreeViewItem> iItem )
+{
+    std::list<FOdysseyVectorObject*>& childrenList = iItem.Get()->GetVectorObject()->GetChildrenList();
+
+    iItem.Get()->mChildren.Empty();
+
+    for( FOdysseyVectorObject* child : childrenList )
+    {
+        if( child->GetClass() != FOdysseyVectorPathBuilder::StaticClass() )
+        {
+            TSharedPtr<FVectorSceneTreeViewItem> childItem = MakeShareable(new FVectorSceneTreeViewItem(child));
+
+            iItem.Get()->mChildren.Add( childItem );
+
+            BuildTree( childItem );
+        }
+    }
+}
+
+void
+SOdysseyPainterEditorVectorSceneTreeView::SelectTree( const TSharedPtr<FVectorSceneTreeViewItem> iItem )
+{
+    FOdysseyVectorObject* itemObject = iItem.Get()->GetVectorObject();
+
+    if( itemObject->IsSelected() )
+    {
+        if( IsItemSelected( iItem ) == false )
+        {
+            SelectedItems.Add( iItem );
+        }
+    }
+
+    for( int i = 0; i < iItem.Get()->mChildren.Num(); i++ )
+    {
+        SelectTree( iItem.Get()->mChildren[i] );
+    }
+}
+
+void
+SOdysseyPainterEditorVectorSceneTreeView::ExpandTree( const TSharedPtr<FVectorSceneTreeViewItem> iItem )
+{
+    FOdysseyVectorObject* itemObject = iItem.Get()->GetVectorObject();
+
+    if( itemObject->IsExpanded() )
+    {
+        SetItemExpansion( iItem, true );
+
+        for( int i = 0; i < iItem.Get()->mChildren.Num(); i++ )
+        {
+            ExpandTree( iItem.Get()->mChildren[i] );
+        }
+    }
+}
+
+void
+SOdysseyPainterEditorVectorSceneTreeView::Update( FOdysseyVectorScene* iScene )
+{
+    mRootItem = MakeShareable(new FVectorSceneTreeViewItem(iScene));
+
+    BuildTree( mRootItem );
+
+    mItemsSource.Empty();
+    // We don't show the root item (the Scene) as it must not be selected
+    // so we set its children as the TreeItemsSource
+    mItemsSource = mRootItem.Get()->mChildren;
+
+    RequestTreeRefresh();
+
+    // Expand items if need
+    ExpandTree( mRootItem );
+    // Select items if needed
+    SelectedItems.Empty();
+    SelectTree( mRootItem );
+}
+
+void
+SOdysseyPainterEditorVectorSceneTreeView::OnGetChildren( TSharedPtr<FVectorSceneTreeViewItem> iParent
+                                                       , TArray<TSharedPtr<FVectorSceneTreeViewItem>>& oChildren) const
+{
+    oChildren = iParent.Get()->mChildren;
+}
+
+TSharedRef<ITableRow>
+SOdysseyPainterEditorVectorSceneTreeView::OnGenerateRow( TSharedPtr<FVectorSceneTreeViewItem> iItem, const TSharedRef<STableViewBase>& iOwnerTable )
+{
+    return SNew( SOdysseyPainterEditorVectorSceneTreeViewRow, iOwnerTable, iItem );
+}
+
+void
+SOdysseyPainterEditorVectorSceneTreeView::OnExpansionChanged( TSharedPtr<FVectorSceneTreeViewItem> iItem, bool mExpanded )
+{
+    FOdysseyVectorObject* expandedObject = iItem.Get()->GetVectorObject();
+
+    expandedObject->SetExpanded( mExpanded );
+
+    // Reselect
+    SelectedItems.Empty();
+    SelectTree( mRootItem );
+}
+
+void
+SOdysseyPainterEditorVectorSceneTreeView::OnSelectionChanged( TSharedPtr<FVectorSceneTreeViewItem> iItem, ESelectInfo::Type SelectInfo )
+{
+    // can be null if no selection, from what I understand
+    if( iItem )
+    {
+        TArray<TSharedPtr<FVectorSceneTreeViewItem>> selectedItems = GetSelectedItems();
+
+        // no need to create an undo record or do anything if the selection is empty
+        if( selectedItems.Num() )
+        {
+            FOdysseyVectorObject* vectorObject = iItem.Get()->GetVectorObject();
+            FOdysseyVectorScene* scene = vectorObject->GetScene();
+
+            // needed for valid GUndo pointer
+            GEditor->BeginTransaction(LOCTEXT("VectorSceneTreeView","Selection Changed"));
+            if( GUndo )
+            {
+                FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelect( scene );
+
+                GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+            }
+            GEditor->EndTransaction();
+
+            // deselect all if control key is not pressed
+            if( FSlateApplication::Get().GetModifierKeys().IsControlDown() == false )
+            {
+                scene->ClearSelection();
+            }
+
+            for( int i = 0; i < selectedItems.Num(); i++ )
+            {
+                FOdysseyVectorObject* selectedObject = selectedItems[i].Get()->GetVectorObject();
+
+                scene->Select( selectedObject );
+            }
+
+            scene->GetEngine()->ResetHUD();
+
+            scene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                                      | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
+        }
+    }
+}
+
+void
+SOdysseyPainterEditorVectorSceneTreeView::SelectAll()
+{
+    TArray<TSharedPtr<FVectorSceneTreeViewItem>> selectedItems = GetSelectedItems();
+/*
+    for( int i = 0; selectedItems.Num(); i++ )
+    {
+    }
+*/
+}
+
+void
+SOdysseyPainterEditorVectorSceneTreeView::DeleteObjectSelection()
+{
+    if( mRootItem )
+    {
+        FOdysseyVectorScene* scene = static_cast<FOdysseyVectorScene*>(mRootItem.Get()->GetVectorObject());
+
+        FOdysseyPainterEditor::DeleteObjectSelection( scene->GetEngine(), scene );
+    }
+}
+
+void
+SOdysseyPainterEditorVectorSceneTreeView::CopyObjectSelection()
+{
+    if( mRootItem )
+    {
+        FOdysseyVectorScene* scene = static_cast<FOdysseyVectorScene*>(mRootItem.Get()->GetVectorObject());
+
+        FOdysseyPainterEditor::CopyObjectSelection( scene->GetEngine(), scene );
+    }
+}
+
+void
+SOdysseyPainterEditorVectorSceneTreeView::PasteObjectSelection()
+{
+    if( mRootItem )
+    {
+        FOdysseyVectorScene* scene = static_cast<FOdysseyVectorScene*>(mRootItem.Get()->GetVectorObject());
+
+        FOdysseyPainterEditor::PasteObjectSelection( scene->GetEngine(), scene );
+    }
+}
+
+void
+SOdysseyPainterEditorVectorSceneTreeView::MapActionsToCommandList()
+{
+    mCommandList->MapAction(
+        FGenericCommands::Get().SelectAll,
+        FExecuteAction::CreateRaw(this, &SOdysseyPainterEditorVectorSceneTreeView::SelectAll)
+    );
+
+    mCommandList->MapAction(
+        FGenericCommands::Get().Delete,
+        FExecuteAction::CreateRaw(this, &SOdysseyPainterEditorVectorSceneTreeView::DeleteObjectSelection)
+    );
+
+    mCommandList->MapAction(
+        FGenericCommands::Get().Copy,
+        FExecuteAction::CreateRaw(this, &SOdysseyPainterEditorVectorSceneTreeView::CopyObjectSelection)
+    );
+
+    mCommandList->MapAction(
+        FGenericCommands::Get().Paste,
+        FExecuteAction::CreateRaw(this, &SOdysseyPainterEditorVectorSceneTreeView::PasteObjectSelection)
+    );
+/*
+    mCommandList->MapAction(
+        FGenericCommands::Get().Rename,
+        FExecuteAction::CreateRaw(this, &SOdysseyPainterEditorVectorSceneTreeView::RenameCurrentLayer)
+    );
+*/
+}
+
+#undef LOCTEXT_NAMESPACE

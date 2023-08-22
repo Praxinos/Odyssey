@@ -78,6 +78,8 @@ public:
 
     EOdysseyVectorPickingMode GetPickingMode();
 
+    std::list<FOdysseyVectorObject*>& GetFocusedObjectList( FOdysseyVectorScene* iScene );
+
 protected:
     void OnMouseUpVectorObjectMode( FOdysseyVectorEngine* iEngine
                                   , FOdysseyVectorScene* iScene
@@ -89,6 +91,7 @@ protected:
                                   , const FKey& iKey );
     ::ULIS::FRectD GenerateMask( FOdysseyVectorEngine* iEngine );
 
+    void SelectBucketFromPaintGroup( FOdysseyVectorGroupPaint* iPaintGroup );
     void SelectVertexFromPaintGroup( FOdysseyVectorGroupPaint* iPaintGroup );
     void SelectVertexFromPath( FOdysseyVectorPath* iPath );
 

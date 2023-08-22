@@ -20,6 +20,11 @@ FOdysseyPainterEditorVectorPathCutToolHUD::Reset( FOdysseyVectorScene* iScene )
 }
 
 void
+FOdysseyPainterEditorVectorPathCutToolHUD::Load( FOdysseyVectorScene* iScene )
+{
+}
+
+void
 FOdysseyPainterEditorVectorPathCutToolHUD::SetP0( double iX, double iY )
 {
     mPoint[0].x = iX;

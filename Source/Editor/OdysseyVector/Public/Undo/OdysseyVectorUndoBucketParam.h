@@ -16,6 +16,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoBucketParam : public FOdysseyVectorUnd
         ~FOdysseyVectorUndoBucketParam();
          FOdysseyVectorUndoBucketParam( FOdysseyVectorScene* iScene
                                       , FOdysseyVectorBucket* iBucket );
+        FOdysseyVectorUndoBucketParam( FOdysseyVectorScene* iScene
+                                     , std::vector<FOdysseyVectorBucket*>& iAddedBucketArray
+                                     , std::vector<FOdysseyVectorBucket*>& iParamBucketArray );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;
@@ -26,7 +29,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoBucketParam : public FOdysseyVectorUnd
         /** Describes this change (for debugging) */
         virtual FString ToString() const override;
 
+    protected:
+        void Swap();
+
     private:
-        FOdysseyVectorBucket mBucketSave;
-        FOdysseyVectorBucket* mBucket;
+        std::vector<FOdysseyVectorBucket*> mAddedBucketArray;
+        std::vector<FOdysseyVectorBucket*> mParamBucketArray;
+        std::vector<FOdysseyVectorBucket> mParamBucketSaveArray;
 };

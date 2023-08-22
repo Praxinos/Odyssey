@@ -13,10 +13,8 @@ FOdysseyVectorUndoBucketRemove::~FOdysseyVectorUndoBucketRemove()
 }
 
 FOdysseyVectorUndoBucketRemove::FOdysseyVectorUndoBucketRemove( FOdysseyVectorScene* iScene
-                                                              , FOdysseyVectorGroupPaint* iPaintGroup
                                                               , FOdysseyVectorBucket* iBucket )
     : FOdysseyVectorUndo( iScene )
-    , mPaintGroup( iPaintGroup )
     , mBucket( iBucket )
 {
 }
@@ -24,14 +22,21 @@ FOdysseyVectorUndoBucketRemove::FOdysseyVectorUndoBucketRemove( FOdysseyVectorSc
 void
 FOdysseyVectorUndoBucketRemove::Apply( UObject* iIgnored )
 {
+    FOdysseyVectorObject* ownerObject = mBucket->GetOwner();
+
     // call method from base class
     FOdysseyVectorUndo::Apply( iIgnored );
 
-    mPaintGroup->RemoveBucket( mBucket );
-    mPaintGroup->Colorize();
+    if( ownerObject->GetClass() == FOdysseyVectorGroupPaint::StaticClass() )
+    {
+        FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(ownerObject);
+
+        paintGroup->RemoveBucket( mBucket );
+        paintGroup->Colorize();
+    }
 
     // update invalidated objects
-    mScene->Update(0);
+    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
@@ -42,14 +47,21 @@ FOdysseyVectorUndoBucketRemove::Apply( UObject* iIgnored )
 void
 FOdysseyVectorUndoBucketRemove::Revert( UObject* iIgnored )
 {
+    FOdysseyVectorObject* ownerObject = mBucket->GetOwner();
+
     // call method from base class
     FOdysseyVectorUndo::Revert( iIgnored );
 
-    mPaintGroup->AddBucket( mBucket );
-    mPaintGroup->Colorize();
+    if( ownerObject->GetClass() == FOdysseyVectorGroupPaint::StaticClass() )
+    {
+        FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(ownerObject);
+
+        paintGroup->AddBucket( mBucket );
+        paintGroup->Colorize();
+    }
 
     // update invalidated objects
-    mScene->Update(0);
+    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)

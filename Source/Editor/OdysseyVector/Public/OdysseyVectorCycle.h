@@ -25,6 +25,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorCycle
                   , std::vector<FOdysseyVectorSection*>& iSectionArray );
 
     public:
+        void ToBucketArray( std::vector<FOdysseyVectorCycle*>& iCyleArray
+                          , std::vector<FOdysseyVectorBucket*>& oBucketArray );
+
         /**
          * @brief destructor.
          */
@@ -37,7 +40,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorCycle
          * @param iVertexArray the vertex array.
          * @param iSectionArray the section array.
          */
-         FOdysseyVectorCycle( FOdysseyVectorObject& iParent
+         FOdysseyVectorCycle( FOdysseyVectorObject* iOwner
                             , std::vector<FOdysseyVectorVertex*>& iVertexArray
                             , std::vector<FOdysseyVectorSection*>& iSectionArray );
 
@@ -45,7 +48,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorCycle
          * @brief draw the cycle (in parent coordinates system).
          * @param iFlags drawing flags.
          */
-        void Draw( uint64 iFlags );
+        void Draw( uint64 iFlags, bool iMonochrome, FColor iMonochromeColor );
 
         /**
          * @brief collision test with coordinates passed as parameters.
@@ -117,10 +120,15 @@ class ODYSSEYVECTOR_API FOdysseyVectorCycle
 
         ::ULIS::FRectD GetBBox();
 
+        FOdysseyVectorObject* GetOwner();
+
+    private :
+        bool PropagateBucket( std::vector<FOdysseyVectorSection*> iSectionArray );
+
     protected :
         BLPath mContourPath;
         BLPath mCombinedPath;
-        FOdysseyVectorObject& mOwner;
+        FOdysseyVectorObject* mOwner;
         FOdysseyVectorBucket* mBucket;
         FOdysseyVectorBucket* mPropagatedBucket;
         std::vector<FOdysseyVectorVertex*> mVertexArray;

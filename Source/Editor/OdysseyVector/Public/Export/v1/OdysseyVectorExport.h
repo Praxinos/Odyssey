@@ -8,12 +8,12 @@
 #include <Image/Block.h>
 #include "OdysseyVector.h"
 
-namespace FOdysseyVectorExport
+namespace FOdysseyVectorExportV1
 {
     // constants were initially computed from the CRC32 checksum of the constant's name, even though the constant's name may have changed over time
     // Just be sure the Chunk ID is unique and any ID will make it.
     // You can use website https://crc32.online/ to generate a code
-    static const uint32 CHUNK_VECTOR_MAGIC = 0x9680b8e1; // container
+    static const uint32 CHUNK_VECTOR_MAGIC_V1 = 0x9680b8e1; // container
         static const uint32 CHUNK_DECLARE_OBJECTS = 0xfcde81bf ; // container
             static const uint32 CHUNK_DECLARE_OBJECT_ENTRY = 0x58c21bfa ; // uint32(Type)
 
@@ -39,7 +39,11 @@ namespace FOdysseyVectorExport
                         static const uint32 CHUNK_PATH_GEOMETRY_VERTICES = 0x1116a85d; // uint32(count), array[double(X)-double(Y)-double(Radius)]
                         static const uint32 CHUNK_PATH_GEOMETRY_CUBICSEGMENTS = 0x76cacf19; // uint32(count), array[uint32(P0ID)-uint32(P1ID)-double(CX0)-double(CY0)-double(CX1)-double(CY1)]
                 static const uint32 CHUNK_OBJECT_GROUPPAINT = 0xac92b85d; // container
-                    static const uint32 CHUNK_GROUPPAINT_WIREFRAME =  0x54f22893; // uint32(bool)
+                    static const uint32 CHUNK_GROUPPAINT_PAINTED = 0x89854E17; // uint32(bool)
+                    static const uint32 CHUNK_GROUPPAINT_MONOCHROME = 0x8278C142; // uint32(bool)
+                    static const uint32 CHUNK_GROUPPAINT_MONOCHROMECOLOR = 0x2E97CB32; //uint8(R)-uint8(G)-uint8(B)-uint8(A)
+                    static const uint32 CHUNK_GROUPPAINT_WIREFRAME =  0x54F22893; // uint32(bool)
+                    static const uint32 CHUNK_GROUPPAINT_WIREFRAMECOLOR = 0x0AB56FA6; //uint8(R)-uint8(G)-uint8(B)-uint8(A)
                     static const uint32 CHUNK_GROUPPAINT_GAP = 0x7602b7f4; // container
                         static const uint32 CHUNK_GROUPPAINT_GAP_TOLERANCE = 0x960a3861; // double(tolerance)
                     static const uint32 CHUNK_GROUPPAINT_BUCKETS = 0x5791cb88; // container
@@ -60,10 +64,49 @@ namespace FOdysseyVectorExport
     void ODYSSEYVECTOR_API WriteChunk( uint32 iChunkID, FArchive &Ar, std::function<void(FArchive &Ar)> iCallback );
 
     void ODYSSEYVECTOR_API Write( FOdysseyVectorScene* iScene, FArchive &Ar );
-    void ODYSSEYVECTOR_API WriteDeclareObjects( std::vector<FOdysseyVectorObject*>& vectorObjectArray, FArchive &Ar );
-    void ODYSSEYVECTOR_API WriteDefineObjects( std::vector<FOdysseyVectorObject*>& vectorObjectArray, FArchive &Ar );
-    void ODYSSEYVECTOR_API WriteObjectPath( FOdysseyVectorPath& iPath, FArchive &Ar );
-    void ODYSSEYVECTOR_API WriteObjectGroupPaint( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar );
-    void ODYSSEYVECTOR_API WriteObjectEllipse( FOdysseyVectorEllipse& iCircle, FArchive &Ar );
+
+    ////////////////////////////////////
+    void WriteDefineObjects( std::vector<FOdysseyVectorObject*>& vectorObjectArray, FArchive &Ar );
+    void WriteDefineObjectEntry( FOdysseyVectorObject& iObject, FArchive &Ar );
+    void WriteObjectBackgroundColor( FOdysseyVectorObject& iObject, FArchive &Ar );
+    void WriteObjectForegroundColor( FOdysseyVectorObject& iObject, FArchive &Ar );
+    void WriteObjectBackgroundBucket( FOdysseyVectorObject& iObject, FArchive &Ar );
+    void WriteObjectForegroundBucket( FOdysseyVectorObject& iObject, FArchive &Ar );
+    void WriteObjectID( FOdysseyVectorObject& iObject, FArchive &Ar );
+    void WriteObjectParentID( FOdysseyVectorObject& iObject, FArchive &Ar );
+    void WriteObjectTransform( FOdysseyVectorObject& iObject, FArchive &Ar );
+    void WriteObjectTransformTranslation( FOdysseyVectorObject& iObject, FArchive &Ar );
+    void WriteObjectTransformRotation( FOdysseyVectorObject& iObject, FArchive &Ar );
+    void WriteObjectTransformScaling( FOdysseyVectorObject& iObject, FArchive &Ar );
+    void WriteDeclareObjects( std::vector<FOdysseyVectorObject*>& vectorObjectArray, FArchive &Ar );
+    void WriteDeclareObjectEntry( FOdysseyVectorObject& iObject, FArchive &Ar );
+
+    ////////////////////////////////////
     void ODYSSEYVECTOR_API WriteBucket( FOdysseyVectorBucket& iBucket, FArchive &Ar );
-};
+    void WriteBucketColor( FOdysseyVectorBucket& iBucket, FArchive &Ar );
+    void WriteBucketGradient( FOdysseyVectorBucket& iBucket, FArchive &Ar );
+    void WriteBucketGradientStop( FColor& iStopColor, double iStopAt, FArchive &Ar );
+    void WriteBucketRotation( FOdysseyVectorBucket& iBucket, FArchive &Ar );
+    void WriteBucketPosition( FOdysseyVectorBucket& iBucket, FArchive &Ar );
+    void WriteBucketSpreading( FOdysseyVectorBucket& iBucket, FArchive &Ar );
+    void WriteBucketPropagated( FOdysseyVectorBucket& iBucket, FArchive &Ar );
+    void WriteBucketPaletteEntry( FOdysseyVectorBucket& iBucket, FArchive& Ar);
+
+    ////////////////////////////////////
+    void ODYSSEYVECTOR_API WritePath( FOdysseyVectorPath& iPath, FArchive &Ar );
+    void WritePathCubicGeometrySegments( FOdysseyVectorPath& iPath, FArchive &Ar );
+    void WritePathCubicGeometryVertices( FOdysseyVectorPath& iPath, FArchive &Ar );
+    void WritePathCubicGeometry( FOdysseyVectorPath& iPath, FArchive &Ar );
+    void WritePathJoint( FOdysseyVectorPath& iPath, FArchive &Ar );
+
+    ////////////////////////////////////
+    void ODYSSEYVECTOR_API WriteGroupPaint( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar );
+    void WriteGroupPaintBuckets( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar );
+    void WriteGroupPaintGapTolerance( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar );
+    void WriteGroupPaintGap( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar );
+    void WriteGroupPaintMonochromeColor( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar );
+    void WriteGroupPaintMonochrome( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar );
+    void WriteGroupPaintWireframeColor( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar );
+    void WriteGroupPaintWireframe( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar );
+    void WriteGroupPaintPainted( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar );
+}

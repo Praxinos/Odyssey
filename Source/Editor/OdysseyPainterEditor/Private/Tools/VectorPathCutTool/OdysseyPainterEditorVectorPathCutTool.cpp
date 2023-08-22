@@ -17,7 +17,7 @@ UOdysseyPainterEditorVectorPathCutTool::UOdysseyPainterEditorVectorPathCutTool()
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathCutTool64");
 
-   mPathCutHUD = new FOdysseyPainterEditorVectorPathCutToolHUD( this );
+    mPathCutHUD = new FOdysseyPainterEditorVectorPathCutToolHUD( this );
 }
 
 //--------------------------------------------------------------------------------------
@@ -76,6 +76,9 @@ UOdysseyPainterEditorVectorPathCutTool::LoadVector( FOdysseyVectorEngine* iEngin
     iEngine->AddHUD( mPathCutHUD );
 
     iEngine->ResetHUD();
+
+    // redetect paintgroups cycles in case the path drawing tool is not set to do so
+    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }

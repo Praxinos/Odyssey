@@ -8,6 +8,10 @@
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorTransformToolHUD : public FOdysseyPainterEditorVectorPickToolHUD
 {
     public:
+        static const uint32 AXIS_LENGTH   = 70;
+        static const uint32 GIZMO_RADIUS  = 10;
+        static const uint32 SCALER_RADIUS = 5;
+
         static const uint32 PICK_XAXIS              = ( 1      );
         static const uint32 PICK_YAXIS              = ( 1 << 1 );
         static const uint32 PICK_ZAXIS              = ( 1 << 2 );
@@ -29,7 +33,6 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorTransformToolHUD : pub
         void SetGizmo( double iLocalX, double iLocalY );
         ::ULIS::FVec2D& GetGizmo();
         uint32 GetFlags();
-        void ShowSelectionBox( bool iShowSelectionBox );
         uint32 Pick( double iWorldX, double iWorldY );
 
     private:
@@ -42,11 +45,8 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorTransformToolHUD : pub
 
     private:
         UOdysseyPainterEditorVectorTransformTool* mTransformTool;
-        static const uint32 GIZMO_RADIUS = 10;
-        static const uint32 SCALER_RADIUS  = 5;
         ::ULIS::FVec2D mGizmo;
         uint32 mFlags;
         ::ULIS::FVec2D mXAxis;
         ::ULIS::FVec2D mYAxis;
-        bool mShowSelectionBox;
 };

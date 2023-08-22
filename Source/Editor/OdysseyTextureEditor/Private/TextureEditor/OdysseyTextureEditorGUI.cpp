@@ -223,6 +223,8 @@ void
 FOdysseyTextureEditorGUI::OnVectorSceneSignal( FOdysseyVectorScene* iScene, uint64 iSignalFlags )
 {
     TSharedPtr<FOdysseyPainterEditorSelectedVectorObjectTab> vectorObjectTab = mExtension->GetEditor()->FindTab<FOdysseyPainterEditorSelectedVectorObjectTab>();
+    TSharedPtr<FOdysseyPainterEditorVectorSceneTreeViewTab> vectorSceneTreeViewTab = mExtension->GetEditor()->FindTab<FOdysseyPainterEditorVectorSceneTreeViewTab>();
+    
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(mExtension->GetEditor()->GetSource()->GetLayerStack());
 
     // layerStack might be NULL when closing the program
@@ -235,6 +237,11 @@ FOdysseyTextureEditorGUI::OnVectorSceneSignal( FOdysseyVectorScene* iScene, uint
             if( iSignalFlags & FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW )
             {
                 currentVectorLayer->RenderImageChanged( false );
+            }
+
+            if( iSignalFlags & FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY )
+            {
+                vectorSceneTreeViewTab.Get()->Update( iScene );
             }
 
             if( ( iSignalFlags & FOdysseyVectorEngine::SIGNAL_OBJECT_TRANSFORMED )

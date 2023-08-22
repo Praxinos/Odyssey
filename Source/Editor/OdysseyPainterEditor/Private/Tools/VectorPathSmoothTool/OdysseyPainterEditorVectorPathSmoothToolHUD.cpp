@@ -22,6 +22,11 @@ FOdysseyPainterEditorVectorPathSmoothToolHUD::Reset( FOdysseyVectorScene* iScene
 }
 
 void
+FOdysseyPainterEditorVectorPathSmoothToolHUD::Load( FOdysseyVectorScene* iScene )
+{
+}
+
+void
 FOdysseyPainterEditorVectorPathSmoothToolHUD::Draw( FOdysseyVectorScene* iScene, uint64 iFlags )
 {
     BLContext* blctx = iScene->GetEngine()->GetBLContext();

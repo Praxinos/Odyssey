@@ -14,7 +14,7 @@
 
 class FOdysseyVectorEngine;
 
-class ODYSSEYVECTOR_API FOdysseyVectorScene : public FOdysseyVectorGroup
+class ODYSSEYVECTOR_API FOdysseyVectorScene : public FOdysseyVectorGroupPaint
 {
     public:
 
@@ -26,11 +26,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorScene : public FOdysseyVectorGroup
 
     public:
         static uint32 StaticClass() { return mStaticClass; };
-        virtual uint32 GetClass() { return mStaticClass; };
-
+        virtual uint32 GetClass() override { return mStaticClass; };
+        virtual bool HasBaseClass( uint32 iBaseClassID ) override;
 
     private:
-        void UpdateShape( uint32 iUpdateFlags );
         FOdysseyVectorObject* CopyShape();
         FOdysseyVectorEngine* mEngine;
         void FlipSelection( bool iWorld, double iXFactor, double iYFactor );
@@ -44,7 +43,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorScene : public FOdysseyVectorGroup
         void FlipSelectionHorizontal( bool iWorld );
         void FlipSelectionVertical( bool iWorld );
 
-        virtual void Update( uint32 iUpdateFlags ) override;
         void Init( const FString& iName );
         void Select( FOdysseyVectorObject* iVecObj );
         void Unselect( FOdysseyVectorObject* iVecObj );

@@ -57,7 +57,13 @@ struct FBucketParam
 
 class ODYSSEYVECTOR_API FOdysseyVectorBucket : public FOdysseyVectorPoint
 {
+    private:
+        static const uint32 mStaticClass = 0xcb5fa05c; // value is crc32 FOdysseyVectorBucket
+
     public:
+        static uint32 StaticClass() { return mStaticClass; };
+        virtual uint32 GetClass() { return mStaticClass; };
+
         ~FOdysseyVectorBucket();
         FOdysseyVectorBucket( FOdysseyVectorObject* iOwner, double iX, double iY,  bool iPropagated );
         /**
@@ -146,6 +152,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorBucket : public FOdysseyVectorPoint
 
         void SetPropagated( bool iPropagated );
         bool IsPropagated();
+        void SetSelected( bool iIsSelected );
+        bool IsSelected();
+
         void Invalidate();
         double GetRotation();
         void SetRotation( double iRotation );
@@ -156,6 +165,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorBucket : public FOdysseyVectorPoint
 
     protected:
         FOdysseyVectorObject* mOwner;
+        bool mIsSelected;
 
         /* The Palette Entry associated with this vector object, if any*/
         UOdysseyPaletteEntry* mPaletteEntry = nullptr;

@@ -1,8 +1,8 @@
 #include "OdysseyVectorSegmentCubic.h"
 #include "OdysseyVectorPath.h"
 
-#define MINRECURSE 4
-#define MAXRECURSE 8
+#define MINRECURSE 3
+#define MAXRECURSE 7
 
 FOdysseyVectorSegmentCubic::~FOdysseyVectorSegmentCubic()
 {

@@ -63,6 +63,9 @@ public:
     //OdysseyPainterEditorTool overrides
     virtual void Commit() override;
 
+    private:
+        double GetLineRotationAngle( FOdysseyVectorLine* iLine, const FOdysseyPoint& iPointInTexture );
+
     public:
         UPROPERTY(EditAnywhere, Category="Primitive Drawing Tool")
         EOdysseyVectorPrimitiveType PrimitiveType;

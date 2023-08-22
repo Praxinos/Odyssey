@@ -36,6 +36,8 @@ FOdysseyVectorUndoObjectAdd::FOdysseyVectorUndoObjectAdd( FOdysseyVectorScene* i
     }
 }
 
+
+
 void
 FOdysseyVectorUndoObjectAdd::Apply( UObject* iIgnored )
 {
@@ -48,7 +50,7 @@ FOdysseyVectorUndoObjectAdd::Apply( UObject* iIgnored )
 
         if( currentParent )
         {
-            mFormerParentArray[i]->TransferChild( mObjectArray[i] );
+            mFormerParentArray[i]->TransferChild( mObjectArray[i], mFormerParentArray[i]->GetLastChild() );
         }
         else
         {
@@ -59,11 +61,12 @@ FOdysseyVectorUndoObjectAdd::Apply( UObject* iIgnored )
     }
 
     // update invalidated objects and call callbacks if any (for refreshing GUI e.g)
-    mScene->Update(0);
+    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
     mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                               | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
                                | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED
                                | FOdysseyVectorEngine::SIGNAL_OBJECT_TRANSFORMED );
 }
@@ -80,7 +83,7 @@ FOdysseyVectorUndoObjectAdd::Revert( UObject* iIgnored )
 
         if( mFormerParentArray[i] )
         {
-            mFormerParentArray[i]->TransferChild( mObjectArray[i] );
+            mFormerParentArray[i]->TransferChild( mObjectArray[i], mFormerParentArray[i]->GetLastChild() );
         }
         else
         {
@@ -95,11 +98,12 @@ FOdysseyVectorUndoObjectAdd::Revert( UObject* iIgnored )
     mScene->ClearSelection();
 
     // update invalidated objects
-    mScene->Update(0);
+    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
     mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                               | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
                                | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED
                                | FOdysseyVectorEngine::SIGNAL_OBJECT_TRANSFORMED );
 }

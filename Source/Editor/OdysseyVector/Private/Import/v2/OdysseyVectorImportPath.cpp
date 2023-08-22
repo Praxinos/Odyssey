@@ -1,9 +1,9 @@
-#include "Import/OdysseyVectorImport.h"
+#include "Import/v2/OdysseyVectorImport.h"
 
-static void
-ReadPathGeometryCubicSegments( FOdysseyVectorPath& iPath
-                             , std::vector<FOdysseyVectorVertex*>& vertexArray
-                             , FArchive &Ar )
+void
+FOdysseyVectorImportV2::ReadPathGeometryCubicSegments( FOdysseyVectorPath& iPath
+                                                     , std::vector<FOdysseyVectorVertex*>& vertexArray
+                                                     , FArchive &Ar )
 {
     uint32 segmentCount;
 
@@ -41,10 +41,10 @@ ReadPathGeometryCubicSegments( FOdysseyVectorPath& iPath
     }
 }
 
-static void
-ReadPathGeometryVertices( FOdysseyVectorPath& iPath
-                        , std::vector<FOdysseyVectorVertex*>& vertexArray
-                        , FArchive &Ar )
+void
+FOdysseyVectorImportV2::ReadPathGeometryVertices( FOdysseyVectorPath& iPath
+                                                , std::vector<FOdysseyVectorVertex*>& vertexArray
+                                                , FArchive &Ar )
 {
     uint32 vertexCount;
 
@@ -71,17 +71,17 @@ ReadPathGeometryVertices( FOdysseyVectorPath& iPath
 }
 
 void
-FOdysseyVectorImport::ReadObjectPath( FOdysseyVectorPath& iPath, uint64 iChunkEnd, FArchive &Ar )
+FOdysseyVectorImportV2::ReadPath( FOdysseyVectorPath& iPath, uint64 iChunkEnd, FArchive &Ar )
 {
     std::vector<FOdysseyVectorVertex*> vertexArray;
 
-    FOdysseyVectorImport::ReadChunks( iChunkEnd
+    FOdysseyVectorImportV2::ReadChunks( iChunkEnd
                                     , Ar
-                                    , [&iPath, &vertexArray](uint32 iChunkID, uint64 iChunkLen, FArchive &Ar) -> void
+                                    , [this,&iPath, &vertexArray](uint32 iChunkID, uint64 iChunkLen, FArchive &Ar) -> void
         {
             switch( iChunkID )
             {
-                case FOdysseyVectorExport::CHUNK_PATH_JOINT:
+                case FOdysseyVectorExportV2::CHUNK_PATH_JOINT:
                 {
                     uint32 jointType;
 
@@ -91,20 +91,19 @@ FOdysseyVectorImport::ReadObjectPath( FOdysseyVectorPath& iPath, uint64 iChunkEn
                 }
                 break;
 
-                case FOdysseyVectorExport::CHUNK_PATH_GEOMETRY:
+                case FOdysseyVectorExportV2::CHUNK_PATH_GEOMETRY:
                 break;
 
-                case FOdysseyVectorExport::CHUNK_PATH_GEOMETRY_VERTICES:
+                case FOdysseyVectorExportV2::CHUNK_PATH_GEOMETRY_VERTICES:
                     ReadPathGeometryVertices( iPath, vertexArray, Ar );
                 break;
 
-                case FOdysseyVectorExport::CHUNK_PATH_GEOMETRY_CUBICSEGMENTS:
+                case FOdysseyVectorExportV2::CHUNK_PATH_GEOMETRY_CUBICSEGMENTS:
                     ReadPathGeometryCubicSegments( iPath, vertexArray, Ar );
                 break;
 
                 default:
-                // Mandatory
-                    Ar.Seek( Ar.Tell() + iChunkLen );
+                    FOdysseyVectorImportV2::ParseObjectChunks( iPath, iChunkID, iChunkLen, Ar );
                 break;
             }    
         } );

@@ -21,6 +21,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::UOdysseyPainterEditorVectorPathDrawi
     : Radius( 5.0f )
     , Opacity( 1.0f )
     , Absolute( true )
+    , UpdatePaintGroups( true )
     , Stitch( false )
     , AverageStitchedRadius( true )
     , StitchingRadius( 10 )
@@ -107,6 +108,9 @@ UOdysseyPainterEditorVectorPathDrawingTool::LoadVector( FOdysseyVectorEngine* iE
 //    TSharedPtr<SOdysseyPaintModifiers> widget = GetEditor()->GetGUI()->GetTopTab().Get()->GetWidget();
 
 //    widget.Get()->OnSizeChanged.AddRaw( this, &UOdysseyPainterEditorVectorPathDrawingTool::OnSizeChanged );
+
+    // redetect paintgroups cycles in case the path drawing tool is not set to do so
+    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
@@ -282,6 +286,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorEng
     iScene->Update( 0 );
 
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                   | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
                    | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED
                    | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED
                    | FOdysseyVectorEngine::SIGNAL_OBJECT_TRANSFORMED );
@@ -428,7 +433,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( FOdysseyVectorEng
 
         mPreviousVertex = nextVertex;
 
-        iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES | FOdysseyVectorObject::KEEPINVALIDATED );
+        iScene->Update( FOdysseyVectorObject::KEEPINVALIDATED );
     }
 
     mOldPointInTexture.x = iPointInTexture.x;
@@ -530,9 +535,10 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorEngin
 
     mPathDrawingHUD->Reset( iScene ); // refreshes the quadtree;
 
-    iScene->Update( 0 ); // update invalidated objects
+    iScene->Update( UpdatePaintGroups ? FOdysseyVectorObject::UPDATEPAINTGROUPS : 0 ); // update invalidated objects
 
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                   | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY // important to remove the path builder from the hierarchy widget
                    | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
 
     return true;

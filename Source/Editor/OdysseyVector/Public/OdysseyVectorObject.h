@@ -25,6 +25,9 @@ struct FObjectParam
     UPROPERTY(EditAnywhere, Category="Transform")
     double TranslationY;
 
+    //UPROPERTY(EditAnywhere, Category="Transform")
+    //double TranslationZ;
+
     UPROPERTY(EditAnywhere, Category="Transform")
     double Rotation;
 
@@ -64,14 +67,16 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         //static const uint32 DRAWSTRUCTURE = ( 1 << 0 );
 
         // update mask
-        static const uint32 FREQUENTUPDATES = ( 1 << 0 );
-        static const uint32 KEEPINVALIDATED = ( 1 << 1 );
+        //static const uint32 FREQUENTUPDATES = ( 1 << 0 );
+        static const uint32 KEEPINVALIDATED   = ( 1 << 1 );
+        static const uint32 UPDATEPAINTGROUPS = ( 1 << 2 );
 
         // invalidation mask
-        static const uint32 INVALIDATE_CHILD = ( 1 << 0 ); // must not be set manually
-        static const uint32 INVALIDATE_SHAPE = ( 1 << 1 );
-        static const uint32 INVALIDATE_COLOR = ( 1 << 2 );
-        static const uint32 INVALIDATE_ALL   = ( INVALIDATE_SHAPE | INVALIDATE_COLOR );
+        static const uint32 INVALIDATE_CHILD       = ( 1 << 0 );
+        //static const uint32 INVALIDATE_PARENT      = ( 1 << 1 ); // must not be set manually
+        static const uint32 INVALIDATE_SHAPE       = ( 1 << 2 );
+        static const uint32 INVALIDATE_COLOR       = ( 1 << 3 );
+        static const uint32 INVALIDATE_ALL         = ( INVALIDATE_SHAPE | INVALIDATE_COLOR );
 
         static constexpr float BBOX_POINT_RADIUS = 4.0f;
 
@@ -87,6 +92,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         std::list<FOdysseyVectorObject*> mInvalidatedChildrenList;
         FOdysseyVectorObject* mParent;
         bool mIsSelected;
+        bool mIsExpanded;
         bool mDependsOnChildren;
         ::ULIS::FRectD mBBox;
 
@@ -127,7 +133,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         virtual void OnChildTransform( FOdysseyVectorObject* iChild ) {};
 
         virtual void Update( uint32 iUpdateFlags );
-        virtual void UpdateShape( uint32 iUpdateFlags ) {};
+        virtual void UpdateShape( uint32 iUpdateFlags );
 
         virtual FOdysseyVectorObject* Copy();
         virtual FOdysseyVectorObject* CopyShape(){ return nullptr; };
@@ -145,7 +151,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         FOdysseyVectorBucket& GetBackgroundBucket();
         FOdysseyVectorBucket& GetForegroundBucket();
 
-        virtual void TransferChild( FOdysseyVectorObject* iFosterChild );
+        virtual void TransferChild( FOdysseyVectorObject* iFosterChild, FOdysseyVectorObject* iInsertAfter );
         /*virtual void UpdateBoundingBox() = 0;*/
         virtual void DrawChildren( uint64 iFlags );
         void UpdateMatrix( );
@@ -154,8 +160,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         void Scale( double iX, double iY );
         void PrependChild( FOdysseyVectorObject* iChild );
         void AppendChild( FOdysseyVectorObject* iChild );
-        void AddChild( FOdysseyVectorObject* iChild, bool iPrepend );
-        void RemoveChild( FOdysseyVectorObject* iChild );
+
+
+        virtual void AddChild( FOdysseyVectorObject* iChild, FOdysseyVectorObject* iInsertAfter );
+        virtual void RemoveChild( FOdysseyVectorObject* iChild );
+
         void ImportChild( FOdysseyVectorObject* iChild, BLMatrix2D& iInverseWorldMatrix );
         double GetScalingX();
         double GetScalingY();
@@ -183,13 +192,15 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         ::ULIS::FVec2D WorldCoordinatesToLocal( double iX, double iY );
         void SetIsSelected( bool iIsSelected );
         ::ULIS::FRectD GetBBox( bool iWorld );
-        void MoveBack();
-        void MoveFront();
+        void SendBackward();
+        void BringForward();
         virtual void Invalidate( uint32 iInvalidationFlags );
         virtual void Invalidate();
         FOdysseyVectorScene* GetScene();
         bool IsInvalidated();
         bool IsSelected();
+        void SetExpanded( bool iIsExpanded );
+        bool IsExpanded();
         void DrawBBox( ::ULIS::FRectD& iRoi,uint64 iFlags );
         int32 PickBBox( double iX, double iY );
         bool HasSelectedAncestor();
@@ -199,4 +210,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         virtual void SwitchSpace( FOdysseyVectorObject& iNewSpace ){};
         //void PropertyChanged( const FName& iPropertyName );
         void UpdateMatrix( bool iRunTransformCallback );
+        FString& GetName();
+        FOdysseyVectorObject* GetLastChild();
+        FOdysseyVectorObject* GetPreviousChild( FOdysseyVectorObject* iChild );
 };

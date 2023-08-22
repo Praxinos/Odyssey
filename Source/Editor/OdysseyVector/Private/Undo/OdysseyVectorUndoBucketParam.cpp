@@ -8,35 +8,79 @@ FOdysseyVectorUndoBucketParam::~FOdysseyVectorUndoBucketParam()
     }
     else
     {
-        // nothing to do
+        for( int i = 0; i < mAddedBucketArray.size(); i++ )
+        {
+            delete mAddedBucketArray[i];
+        }
     }
 }
 
 FOdysseyVectorUndoBucketParam::FOdysseyVectorUndoBucketParam( FOdysseyVectorScene* iScene
                                                             , FOdysseyVectorBucket* iBucket )
     : FOdysseyVectorUndo( iScene )
-    , mBucketSave( iBucket->GetOwner(), 0.0f, 0.0f, false )
-    , mBucket( iBucket )
 {
-    mBucket->Copy( &mBucketSave );
+    mParamBucketSaveArray.emplace_back( iBucket->GetOwner(), 0.0f, 0.0f, false );
+    mParamBucketArray.push_back( iBucket );
+}
+
+FOdysseyVectorUndoBucketParam::FOdysseyVectorUndoBucketParam( FOdysseyVectorScene* iScene
+                                                            , std::vector<FOdysseyVectorBucket*>& iAddedBucketArray
+                                                            , std::vector<FOdysseyVectorBucket*>& iParamBucketArray )
+    : FOdysseyVectorUndo( iScene )
+{
+    mAddedBucketArray = iAddedBucketArray;
+    mParamBucketArray = iParamBucketArray;
+
+    for( int i = 0; i < mParamBucketArray.size(); i++ )
+    {
+        mParamBucketSaveArray.emplace_back( mParamBucketArray[i]->GetOwner(), 0.0f, 0.0f, false );
+
+        mParamBucketArray[i]->Copy( &mParamBucketSaveArray[i] );
+    }
+}
+
+void
+FOdysseyVectorUndoBucketParam::Swap()
+{
+    for( int i = 0; i < mParamBucketArray.size(); i++ )
+    {
+        // Note: setting the owner does not make sense per se, as the bucket is only
+        // temporary, but is mandatory in the ctor
+        FOdysseyVectorBucket tmpBucketSave( mParamBucketSaveArray[i].GetOwner(), 0.0f, 0.0f, false );
+
+        // save data to tmp
+        mParamBucketArray[i]->Copy( &tmpBucketSave );
+        // restore bucket data
+        mParamBucketSaveArray[i].Copy( mParamBucketArray[i] );
+        // swap data from tmp
+        tmpBucketSave.Copy( &mParamBucketSaveArray[i] );
+
+        mParamBucketArray[i]->Invalidate();
+    }
 }
 
 void
 FOdysseyVectorUndoBucketParam::Apply( UObject* iIgnored )
 {
-    FOdysseyVectorBucket tmpBucketSave( mBucketSave.GetOwner(), 0.0f, 0.0f, false );
-
     // call method from base class
     FOdysseyVectorUndo::Apply( iIgnored );
 
-    mBucket->Copy( &tmpBucketSave );
-    mBucketSave.Copy( mBucket );
-    tmpBucketSave.Copy( &mBucketSave );
+    Swap();
 
-    mBucket->Invalidate();
+    for( int i = 0; i < mAddedBucketArray.size(); i++ )
+    {
+        FOdysseyVectorObject* ownerObject = mAddedBucketArray[i]->GetOwner();
+
+        if( ownerObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+        {
+            FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(ownerObject);
+
+            paintGroup->AddBucket( mAddedBucketArray[i] );
+        }
+    }
 
     // update invalidated objects
-    mScene->Update(0);
+    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
@@ -46,19 +90,25 @@ FOdysseyVectorUndoBucketParam::Apply( UObject* iIgnored )
 void
 FOdysseyVectorUndoBucketParam::Revert( UObject* iIgnored )
 {
-    FOdysseyVectorBucket tmpBucketSave( mBucketSave.GetOwner(), 0.0f, 0.0f, false );
-
     // call method from base class
     FOdysseyVectorUndo::Revert( iIgnored );
 
-    mBucket->Copy( &tmpBucketSave );
-    mBucketSave.Copy( mBucket );
-    tmpBucketSave.Copy( &mBucketSave );
+    Swap();
 
-    mBucket->Invalidate();
+    for( int i = 0; i < mAddedBucketArray.size(); i++ )
+    {
+        FOdysseyVectorObject* ownerObject = mAddedBucketArray[i]->GetOwner();
+
+        if( ownerObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+        {
+            FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(ownerObject);
+
+            paintGroup->RemoveBucket( mAddedBucketArray[i] );
+        }
+    }
 
     // update invalidated objects
-    mScene->Update(0);
+    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)

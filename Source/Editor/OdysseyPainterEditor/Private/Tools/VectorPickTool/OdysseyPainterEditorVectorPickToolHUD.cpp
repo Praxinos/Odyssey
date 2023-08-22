@@ -9,8 +9,24 @@ FOdysseyPainterEditorVectorPickToolHUD::~FOdysseyPainterEditorVectorPickToolHUD(
 
 FOdysseyPainterEditorVectorPickToolHUD::FOdysseyPainterEditorVectorPickToolHUD( UOdysseyPainterEditorVectorPickTool* iPickTool )
     : mSelectionMask ( nullptr )
+    , mShowSelectionBox( true )
 {
     mPickTool = iPickTool;
+}
+
+void
+FOdysseyPainterEditorVectorPickToolHUD::Load( FOdysseyVectorScene* iScene )
+{
+    uint32 width, height;
+
+    iScene->GetEngine()->GetColorImageSize( &width, &height );
+
+    if( mSelectionMask )
+    {
+        delete mSelectionMask;
+    }
+
+    mSelectionMask = new BLImage( width, height, BL_FORMAT_A8 );
 }
 
 void
@@ -26,14 +42,45 @@ FOdysseyPainterEditorVectorPickToolHUD::GetSelectionBox()
 }
 
 void
-FOdysseyPainterEditorVectorPickToolHUD::Init( uint32 iWidth, uint32 iHeight )
+FOdysseyPainterEditorVectorPickToolHUD::ShowSelectionBox( bool iShowSelectionBox )
 {
-    if( mSelectionMask )
-    {
-        delete mSelectionMask;
-    }
+    mShowSelectionBox = iShowSelectionBox;
+}
 
-    mSelectionMask = new BLImage( iWidth, iHeight, BL_FORMAT_A8 );
+void
+FOdysseyPainterEditorVectorPickToolHUD::GetSelectedVertices( FOdysseyVectorScene* iScene
+                                                           , std::vector<FOdysseyVectorPoint*>& oPointArray )
+{
+    std::list<FOdysseyVectorObject*>& selectedObjectList = mPickTool->GetFocusedObjectList( iScene );
+    std::list<FOdysseyVectorObject*>::iterator it;
+
+    // avoir to many reallocation by reserving a decent amount of memory
+    oPointArray.reserve( 200 );
+
+    for( it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
+    {
+        FOdysseyVectorObject* selectedObject = *it;
+
+        if( selectedObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+        {
+            FOdysseyVectorPath* selectedPath = static_cast<FOdysseyVectorPath*>(selectedObject);
+
+            selectedPath->GetSelectedPoints( oPointArray
+                                           , ePointSelectionFlags::Vertex
+                                           | ePointSelectionFlags::Strict
+                                           | ePointSelectionFlags::SegmentHandle );
+        }
+
+        if( selectedObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+        {
+            FOdysseyVectorGroupPaint* selectedPaintGroup = static_cast<FOdysseyVectorGroupPaint*>(selectedObject);
+
+            selectedPaintGroup->GetSelectedPoints( oPointArray
+                                                 , ePointSelectionFlags::Vertex
+                                                 | ePointSelectionFlags::SegmentHandle
+                                                 | ePointSelectionFlags::Bucket );
+        }
+    }
 }
 
 void
@@ -77,16 +124,62 @@ void
 FOdysseyPainterEditorVectorPickToolHUD::UpdateSelectionBoxVertexMode( FOdysseyVectorScene* iScene
                                                                     , bool iForceWorld )
 {
-    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
+    std::list<FOdysseyVectorObject*>& selectedObjectList = mPickTool->GetFocusedObjectList( iScene );
+    std::list<FOdysseyVectorObject*>::iterator it;
+    bool inited = false;
 
     mSelectionBox.rect = ::ULIS::FRectD( 0, 0, 0, 0 );
+    mSelectionBox.worldMatrix.reset();
+
+    for( it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
+    {
+        FOdysseyVectorObject* selectedObject = *it;
+
+        if( selectedObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+        {
+            FOdysseyVectorPath* selectedPath = static_cast<FOdysseyVectorPath*>(selectedObject);
+            ::ULIS::FRectD selectedPathBBox;
+
+            if( selectedPath->GetBBoxFromSelectedVertices( selectedPathBBox, true ) )
+            {
+                mSelectionBox.rect = inited ? mSelectionBox.rect | selectedPathBBox
+                                            : selectedPathBBox;
+
+                inited = true;
+            }
+        }
+
+        if( selectedObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+        {
+            FOdysseyVectorGroupPaint* selectedPaintGroup = static_cast<FOdysseyVectorGroupPaint*>(selectedObject);
+            ::ULIS::FRectD selectedPaintGroupBBox;
+
+            if( selectedPaintGroup->GetBBoxFromSelectedVertices( selectedPaintGroupBBox, true ) )
+            {
+                mSelectionBox.rect = inited ? mSelectionBox.rect | selectedPaintGroupBBox
+                                            : selectedPaintGroupBBox;
+
+                inited = true;
+            }
+        }
+    }
+
+    BLMatrix2D::invert( mSelectionBox.inverseWorldMatrix, mSelectionBox.worldMatrix );
+
+    /*if( inited )
+    {
+        ::ULIS::FVec2D origin = ::ULIS::FVec2D( mSelectionBox.rect.x + ( mSelectionBox.rect.w * 0.5f )
+                                              , mSelectionBox.rect.y + ( mSelectionBox.rect.h * 0.5f ) );
+
+        mSelectionBox.worldMatrix.translate( origin.x, origin.y );
+    }*/
 }
 
 void
 FOdysseyPainterEditorVectorPickToolHUD::UpdateSelectionBoxObjectMode( FOdysseyVectorScene* iScene
                                                                     , bool iForceWorld )
 {
-    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
+    std::list<FOdysseyVectorObject*>& selectedObjectList = mPickTool->GetFocusedObjectList( iScene );
 
     mSelectionBox.rect = ::ULIS::FRectD( 0, 0, 0, 0 );
 
@@ -94,7 +187,7 @@ FOdysseyPainterEditorVectorPickToolHUD::UpdateSelectionBoxObjectMode( FOdysseyVe
     {
         if( ( selectedObjectList.size() == 1 ) && ( iForceWorld == false ) )
         {
-            FOdysseyVectorObject* selectedObject = iScene->GetLastSelected();
+            FOdysseyVectorObject* selectedObject = selectedObjectList.front();
 
             mSelectionBox.rect = selectedObject->GetBBox( false );
 
@@ -195,7 +288,7 @@ void
 FOdysseyPainterEditorVectorPickToolHUD::DrawVertexSelection( FOdysseyVectorScene* iScene
                                                            , uint64 iFlags )
 {
-    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
+    std::list<FOdysseyVectorObject*>& selectedObjectList = mPickTool->GetFocusedObjectList( iScene );
     std::list<FOdysseyVectorObject*>::iterator it;
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
@@ -312,7 +405,11 @@ FOdysseyPainterEditorVectorPickToolHUD::Draw( FOdysseyVectorScene* iScene, uint6
     }
 
     DrawSelectionSpace( iScene, iFlags );
-    DrawSelectionBox( iScene, iFlags );
+
+    if( mShowSelectionBox )
+    {
+        DrawSelectionBox( iScene, iFlags );
+    }
 
     blctx->save();
     blctx->resetMatrix();

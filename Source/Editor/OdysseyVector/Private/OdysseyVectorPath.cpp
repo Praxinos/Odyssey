@@ -249,6 +249,125 @@ FOdysseyVectorPath::UpdateShape( uint32 iUpdateFlags )
                            , point1.y );
         }
     }
+
+    if( ( iUpdateFlags & FOdysseyVectorObject::KEEPINVALIDATED ) == 0 )
+    {
+        mInvalidationFlags = 0;
+    }
+}
+
+bool
+FOdysseyVectorPath::GetBBoxFromSelectedVertices( ::ULIS::FRectD& oBBox, bool iWorld )
+{
+    double xmin, ymin, xmax, ymax;
+
+    if( FOdysseyVectorVertex::GetMinMaxFromList( mSelectedVertexList, xmin, ymin, xmax, ymax ) )
+    {
+        if( iWorld )
+        {
+            BLPoint p[4] = { mWorldMatrix.mapPoint( xmin, ymin )
+                           , mWorldMatrix.mapPoint( xmax, ymin )
+                           , mWorldMatrix.mapPoint( xmax, ymax )
+                           , mWorldMatrix.mapPoint( xmin, ymax ) };
+
+            oBBox = ::ULIS::FRectD::FromMinMax( ::ULIS::FMath::Min4( p[0].x, p[1].x, p[2].x, p[3].x )
+                                              , ::ULIS::FMath::Min4( p[0].y, p[1].y, p[2].y, p[3].y )
+                                              , ::ULIS::FMath::Max4( p[0].x, p[1].x, p[2].x, p[3].x )
+                                              , ::ULIS::FMath::Max4( p[0].y, p[1].y, p[2].y, p[3].y ) );
+        }
+        else
+        {
+            oBBox = ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax );
+        }
+
+        return true;
+    }
+
+    return false;
+}
+
+
+static void
+GetSelectedCubicSegmentHandles( FOdysseyVectorSegmentCubic* iCubicSegment
+                              , std::vector<FOdysseyVectorPoint*>& oPointArray
+                              , ePointSelectionFlags iPointSelectionFlags )
+{
+    FOdysseyVectorVertex* vertex0 = iCubicSegment->GetVertex(0);
+    FOdysseyVectorVertex* vertex1 = iCubicSegment->GetVertex(1);
+    bool isSelected0 = vertex0->IsSelected();
+    bool isSelected1 = vertex1->IsSelected();
+
+    if( isSelected0 || isSelected1 )
+    {
+        FOdysseyVectorHandleSegment* segmentHandle0 = iCubicSegment->GetHandle(0);
+        FOdysseyVectorHandleSegment* segmentHandle1 = iCubicSegment->GetHandle(1);
+
+        if( isSelected0 )
+        {
+            if( iPointSelectionFlags & ePointSelectionFlags::Strict )
+            {
+                if( isSelected1 )
+                {
+                    oPointArray.push_back( segmentHandle0 );
+                }
+            }
+            else
+            {
+                oPointArray.push_back( segmentHandle0 );
+            }
+        }
+
+        if( isSelected1 )
+        {
+            if( iPointSelectionFlags & ePointSelectionFlags::Strict )
+            {
+                if( isSelected0 )
+                {
+                    oPointArray.push_back( segmentHandle1 );
+                }
+            }
+            else
+            {
+                oPointArray.push_back( segmentHandle1 );
+            }
+        }
+    }
+}
+
+void
+FOdysseyVectorPath::GetSelectedPoints( std::vector<FOdysseyVectorPoint*>& oPointArray
+                                     , ePointSelectionFlags iPointSelectionFlags )
+{
+    // vertex selection part
+    if( iPointSelectionFlags & ePointSelectionFlags::Vertex )
+    {
+        std::list<FOdysseyVectorVertex*>::iterator vit;
+
+        for( vit = mSelectedVertexList.begin(); vit != mSelectedVertexList.end(); ++vit )
+        {
+            FOdysseyVectorVertex* vertex = *vit;
+
+            oPointArray.push_back( vertex );
+        }
+    }
+
+    // segment handle selection part
+    if( iPointSelectionFlags & ePointSelectionFlags::SegmentHandle )
+    {
+        std::list<FOdysseyVectorSegment*>::iterator sit;
+
+        for( sit = mSegmentList.begin(); sit != mSegmentList.end(); ++sit )
+        {
+            FOdysseyVectorSegment* segment = *sit;
+
+            if( segment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
+            {
+                FOdysseyVectorSegmentCubic* cubicSegment= static_cast<FOdysseyVectorSegmentCubic*>(segment);
+ 
+                GetSelectedCubicSegmentHandles( cubicSegment, oPointArray, iPointSelectionFlags );
+            }
+        }
+    }
 }
 
 void
@@ -1036,13 +1155,16 @@ FOdysseyVectorPath::PickShape( const ::ULIS::FRectD &iRoi, uint32 iSelectionFlag
     {
         BLPoint pt = mInverseWorldMatrix.mapPoint( iRoi.x, iRoi.y );
 
-        for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
+        if( mBBox.HitTest( ::ULIS::FVec2D( pt.x, pt.y ) ) )
         {
-            FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
- 
-            if( cubicSegment->Pick( pt.x, pt.y, 0.0f ) )
+            for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
             {
-                return true;
+                FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
+ 
+                if( cubicSegment->Pick( pt.x, pt.y, 0.0f ) )
+                {
+                    return true;
+                }
             }
         }
     }
@@ -1092,10 +1214,10 @@ FOdysseyVectorPath::PickShape( const ::ULIS::FRectD &iRoi, uint32 iSelectionFlag
 
 bool
 FOdysseyVectorPath::PickPoint( double iWorldX
-                                  , double iWorldY
-                                  , double iSelectionRadius
-                                  , std::vector<FOdysseyVectorPoint*>& oPickedPointArray
-                                  , uint64 iSelectionFlags )
+                             , double iWorldY
+                             , double iSelectionRadius
+                             , std::vector<FOdysseyVectorPoint*>& oPickedPointArray
+                             , uint64 iSelectionFlags )
 {
     for(std::list<FOdysseyVectorVertex*>::iterator it = mVertexList.begin(); it != mVertexList.end(); ++it)
     {
@@ -1274,10 +1396,198 @@ FOdysseyVectorPath::Fill()
     }
 }
 
+// only used internally by FOdysseyVectorPath::DeletePoint(). Declare in CPP file
+static FOdysseyVectorVertex*
+GetStitchingVertex( FOdysseyVectorVertex* iVertex
+                  , FOdysseyVectorSegment* iSegment
+                  , std::vector<FOdysseyVectorPoint*>& iPickedPointArray
+                  , ::ULIS::FVec2D& oHandle )
+{
+    FOdysseyVectorVertex *currentVertex = iVertex;
+    FOdysseyVectorSegment *currentSegment = iSegment;
+
+    do
+    {
+        // return the nextVertex if it is not marked for deletion. Then it will be stitched with its counterpart, if any.
+        if( std::find( iPickedPointArray.begin(), iPickedPointArray.end(), currentVertex ) == iPickedPointArray.end() )
+        {
+            if( currentSegment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
+            {
+                FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>( currentSegment );
+
+                oHandle = cubicSegment->GetHandle( currentVertex )->GetCoords();
+            }
+
+            return currentVertex;
+        }
+
+        // move to the next segment
+        currentSegment = currentVertex->GetOtherSegment( currentSegment );
+        currentVertex = currentSegment ? currentSegment->GetOtherVertex( currentVertex ) : nullptr;
+
+    } while( ( currentVertex ) && ( currentVertex != iVertex ) );
+                                  // loop detection
+
+    return nullptr;
+}
+
+// only used internally by FOdysseyVectorPath::DeletePoint(). Declare in CPP file
+typedef struct FStitchingPair
+{
+    FOdysseyVectorVertex* vertex[2];
+    ::ULIS::FVec2D handle[2];
+
+    FStitchingPair( FOdysseyVectorVertex* iVertex0, ::ULIS::FVec2D& iHandle0
+                  , FOdysseyVectorVertex* iVertex1, ::ULIS::FVec2D& iHandle1 )
+    {
+        // Note: ordering will ease comparisons between stitching pairs.
+        vertex[0] = iVertex0 < iVertex1 ? iVertex0 : iVertex1;
+        handle[0] = iVertex0 < iVertex1 ? iHandle0 : iHandle1;
+
+        vertex[1] = iVertex0 < iVertex1 ? iVertex1 : iVertex0;
+        handle[1] = iVertex0 < iVertex1 ? iHandle1 : iHandle0;
+    }
+
+    bool operator==(const FStitchingPair& rhs)
+    {
+        return ( ( vertex[0] == rhs.vertex[0] ) && ( vertex[1] == rhs.vertex[1] ) );
+    }
+} FStitchingPair;
+
+//static
+void
+FOdysseyVectorPath::DeletePoint( FOdysseyVectorPath* iPath
+                               , std::vector<FOdysseyVectorPoint*>& iPickedPointArray
+                               , std::vector<FOdysseyVectorVertex*>& iRemovedVertexArray
+                               , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray
+                               , std::vector<FOdysseyVectorPath*>& iRemovedPathArray
+                               , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray )
+{
+    std::vector<FOdysseyVectorPoint*> extendedPointArray;
+    std::vector<FStitchingPair> stitchingPairArray;
+
+    stitchingPairArray.reserve( 10 );
+    extendedPointArray.reserve( 10 );
+
+    extendedPointArray = iPickedPointArray;
+
+    // first step
+    // Build stitching pairs by finding a vertex that is not doomed for deletion on both sides.
+    for( int i = 0; i < iPickedPointArray.size(); i++ )
+    {
+        FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>( iPickedPointArray[i] );
+        std::list<FOdysseyVectorSegment*>& segmentList = vertex->GetSegmentList();
+        uint32 segmentCount = segmentList.size();
+
+        if( segmentCount )
+        {
+            ::ULIS::FVec2D handle[2];
+            FOdysseyVectorSegment* segment0 = segmentList.front();
+            FOdysseyVectorSegment* segment1 = ( segmentCount > 1  ) ? segmentList.back() : nullptr;
+            FOdysseyVectorVertex* stitchingVertex[2] = { segment0 ? GetStitchingVertex( segment0->GetOtherVertex(vertex)
+                                                                                      , segment0
+                                                                                      , iPickedPointArray
+                                                                                      , handle[0] ) : nullptr
+                                                       , segment1 ? GetStitchingVertex( segment1->GetOtherVertex(vertex)
+                                                                                      , segment1
+                                                                                      , iPickedPointArray
+                                                                                      , handle[1] ) : nullptr };
+
+            if( stitchingVertex[0] == stitchingVertex[1] ) // e.g loops
+            {
+                if( stitchingVertex[0] )
+                {
+                    // for vertices that were not picked but that cannot be stitched, delete them as well.
+                    extendedPointArray.push_back( stitchingVertex[0] );
+                }
+            }
+            else // stitchingVertex[0] != stitchingVertex[1]
+            {
+                if ( stitchingVertex[0] && stitchingVertex[1] )
+                {
+                    FStitchingPair stitchingPair = FStitchingPair( stitchingVertex[0], handle[0]
+                                                                 , stitchingVertex[1], handle[1] );
+
+                    if( std::find( stitchingPairArray.begin(), stitchingPairArray.end(), stitchingPair ) == stitchingPairArray.end() )
+                    {
+                        stitchingPairArray.push_back( stitchingPair );
+                    }
+                }
+                else
+                {
+                    if( stitchingVertex[0] && ( stitchingVertex[0]->GetSegmentCount() == 1 ) )
+                    {
+                        // for vertices that were not picked but that cannot be stitched, delete them as well.
+                        extendedPointArray.push_back( stitchingVertex[0] );
+                    }
+
+                    if( stitchingVertex[1] && ( stitchingVertex[1]->GetSegmentCount() == 1 ) )
+                    {
+                        // for vertices that were not picked but that cannot be stitched, delete them as well.
+                        extendedPointArray.push_back( stitchingVertex[1] );
+                    }
+                }
+            }
+        }
+    }
+
+    // second step
+    // the actual deletion
+    for( int i = 0; i < extendedPointArray.size(); i++ )
+    {
+        FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>( extendedPointArray[i] );
+        // Note: work on a copy of the list, because deletion will alter the segment list
+        std::list<FOdysseyVectorSegment*> segmentList = vertex->GetSegmentList();
+
+        for( std::list<FOdysseyVectorSegment*>::iterator sit = segmentList.begin(); sit != segmentList.end(); ++sit )
+        {
+            FOdysseyVectorSegment* segment = *sit;
+
+            iPath->RemoveSegment( segment );
+            // for undoing
+            iRemovedSegmentArray.push_back( segment );
+        }
+
+        iPath->RemoveVertex( vertex );
+        // for undoing
+        iRemovedVertexArray.push_back( vertex );  
+    }
+
+    // third step
+    // stitch
+    for( int i = 0; i < stitchingPairArray.size(); i++ )
+    {
+        FOdysseyVectorVertex* stitchingVertex0 = stitchingPairArray[i].vertex[0];
+        FOdysseyVectorVertex* stitchingVertex1 = stitchingPairArray[i].vertex[1];
+        ::ULIS::FVec2D handle0 = stitchingPairArray[i].handle[0];
+        ::ULIS::FVec2D handle1 = stitchingPairArray[i].handle[1];
+        FOdysseyVectorSegmentCubic* stitchedSegment = new FOdysseyVectorSegmentCubic( iPath
+                                                                                    , stitchingVertex0
+                                                                                    , handle0.x
+                                                                                    , handle0.y
+                                                                                    , handle1.x
+                                                                                    , handle1.y
+                                                                                    , stitchingVertex1 );
+
+
+        iPath->AddSegment( stitchedSegment );
+        // for undoing
+        iAddedSegmentArray.push_back( stitchedSegment );
+    }
+
+    iPath->InvalidateAllSegments();
+
+    // remove path if empty
+    if( iPath->GetSegmentList().size() == 0 )
+    {
+        // for undoing
+        iRemovedPathArray.push_back( iPath );
+    }
+}
+
 void
 FOdysseyVectorPath::DrawShape( uint64 iFlags )
 {
-
     if ( mPathParam.Filled )
     {
         // TODO: precompute the filling (build the BLPath )
@@ -1314,7 +1624,7 @@ FOdysseyVectorPath::DrawShape( uint64 iFlags )
 }
 
 void
-FOdysseyVectorPath::DrawStructure( FColor& iStrokeColor, double iStrokeWidth, bool iWorld )
+FOdysseyVectorPath::DrawStructure( const FColor& iStrokeColor, double iStrokeWidth, bool iWorld )
 {
     BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
     BLRgba32 strokeColor = BLRgba32( iStrokeColor.R

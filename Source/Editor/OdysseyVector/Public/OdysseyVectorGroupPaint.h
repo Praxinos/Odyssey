@@ -24,10 +24,19 @@ struct FGroupPaintParam
     GENERATED_BODY()
 
     UPROPERTY(EditAnywhere, Category="General")
+    bool Painted;
+
+    UPROPERTY(EditAnywhere,Category="General")
+    bool Monochrome;
+
+    UPROPERTY(EditAnywhere,Category="General")
+    FColor MonochromeColor;
+
+    UPROPERTY(EditAnywhere, Category="General")
     bool Realtime; // relatime updates
 
     UPROPERTY(EditAnywhere, Category="General", meta = (ClampMin = "0.0", UIMin = "0.0"))
-    double Tolerance;
+    double GapTolerance;
 
     UPROPERTY(EditAnywhere, Category="General")
     bool Wireframe;
@@ -50,8 +59,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
          * @brief destructor
          */
         virtual ~FOdysseyVectorGroupPaint();
-
-        virtual void TransferChild( FOdysseyVectorObject* iFosterChild );
 
         /**
          * @brief constructor
@@ -117,9 +124,33 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         void SetGapTolerance( double iGapTolerance );
         bool IsWireframe();
         void SetWireframe( bool iIsWireframe );
+        FColor& GetWireframeColor();
+        void GetWireframeColor( uint8 &oR, uint8 &oG, uint8& oB, uint8& oA );
+        void SetWireframeColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA );
+
         void UpdateBBox();
         void SelectBucket( FOdysseyVectorBucket* iSelectedBucket );
-        FOdysseyVectorBucket* GetSelectedBucket();
+        void UnselectBucket( FOdysseyVectorBucket* iSelectedBucket );
+        void UnselectAllBuckets();
+        std::list<FOdysseyVectorBucket*>& GetSelectedBucketList();
+
+        void GetSelectedPoints( std::vector<FOdysseyVectorPoint*>& oPointArray
+                              , ePointSelectionFlags iPointSelectionFlags  );
+        bool GetBBoxFromSelectedVertices( ::ULIS::FRectD& oBBox, bool iWorld );
+        void PickBucket( std::vector<FOdysseyVectorBucket*>& oPickedBucketArray );
+        virtual void AddChild( FOdysseyVectorObject* iChild, FOdysseyVectorObject* iInsertAfter ) override;
+        virtual void RemoveChild( FOdysseyVectorObject* iChild ) override;
+        FOdysseyVectorCycle* PickCycle( double iWorldX, double iWorldY );
+        FOdysseyVectorBucket* PickBucket( double iWorldX, double iWorldY );
+        bool IsMonochrome();
+        void SetMonochrome( bool iIsMonochrome );
+        FColor& GetMonochromeColor();
+        void GetMonochromeColor( uint8 &oR, uint8 &oG, uint8& oB, uint8& oA );
+        void SetMonochromeColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA );
+
+        bool IsPainted();
+        void SetPainted( bool iPainted );
+        virtual void TransferChild( FOdysseyVectorObject* iFosterChild, FOdysseyVectorObject* iInsertAfter );
 
     protected:
         /**
@@ -192,7 +223,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         static const uint32 NOCYCLE  = 0;
         static const uint32 BLOCKED  = 1;
         static const uint32 HASCYCLE = 2;
-        FOdysseyVectorBucket* mSelectedBucket;
+        std::list<FOdysseyVectorPath*> mPathList;
+        std::list<FOdysseyVectorBucket*> mSelectedBucketList;
         std::list<FOdysseyVectorBucket*> mBucketList;
         std::list<FOdysseyVectorCycle*> mCycleList;
         std::vector<FOdysseyVectorIntersection*> mIntersectionArray;

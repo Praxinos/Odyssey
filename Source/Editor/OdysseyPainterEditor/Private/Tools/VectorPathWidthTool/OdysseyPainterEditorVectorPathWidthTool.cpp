@@ -2,6 +2,8 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Tools/VectorPathWidthTool/OdysseyPainterEditorVectorPathWidthTool.h"
+#include "OdysseyPainterEditor.h"
+#include "OdysseyMediaVector.h"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
@@ -73,6 +75,9 @@ UOdysseyPainterEditorVectorPathWidthTool::LoadVector( FOdysseyVectorEngine* iEng
 {
     iEngine->ClearHUD();
     iEngine->AddHUD( &mPickingHUD );
+
+    // redetect paintgroups cycles in case the path drawing tool is not set to do so
+    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
@@ -188,7 +193,7 @@ UOdysseyPainterEditorVectorPathWidthTool::OnMouseDragVector( FOdysseyVectorEngin
     }
 
     // update vector scene and GUI widgets via delegates.
-    iScene->Update( FOdysseyVectorObject::FREQUENTUPDATES | FOdysseyVectorObject::KEEPINVALIDATED );
+    iScene->Update( FOdysseyVectorObject::KEEPINVALIDATED );
 
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
@@ -215,7 +220,7 @@ UOdysseyPainterEditorVectorPathWidthTool::OnMouseUpVector( FOdysseyVectorEngine*
                                                          , const FOdysseyPoint& iPointInTexture
                                                          , const FKey& iKey )
 {
-    iScene->Update( 0 ); // update vector scene and GUI widgets via delegates.
+    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS ); // update vector scene and GUI widgets via delegates.
 
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
                    | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );

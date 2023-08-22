@@ -76,6 +76,9 @@ UOdysseyPainterEditorVectorEraserTool::LoadVector( FOdysseyVectorEngine* iEngine
     iEngine->ClearHUD();
     iEngine->AddHUD( &mEraserHUD );
 
+    // redetect paintgroups cycles in case the path drawing tool is not set to do so
+    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
@@ -241,8 +244,6 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseUpVector( FOdysseyVectorEngine* iE
                   , roi
                   , false );
     iEngine->UseColorImage();
-
-    iScene->Update( 0 ); // update invalidated objects
 
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
 

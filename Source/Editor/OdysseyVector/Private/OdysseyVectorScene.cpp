@@ -6,9 +6,22 @@ FOdysseyVectorScene::~FOdysseyVectorScene()
 }
 
 FOdysseyVectorScene::FOdysseyVectorScene( const FString& iName )
-    : FOdysseyVectorGroup( iName )
+    : FOdysseyVectorGroupPaint( iName )
 {
     mBackgroundBucket.SetSolidColor( 0, 0, 0, 0 );
+
+    SetExpanded( true );
+}
+
+bool
+FOdysseyVectorScene::HasBaseClass( uint32 iBaseClassID )
+{
+    if( mStaticClass == iBaseClassID )
+    {
+        return true;
+    }
+
+    return FOdysseyVectorGroupPaint::HasBaseClass( iBaseClassID );
 }
 
 void
@@ -117,11 +130,11 @@ FOdysseyVectorScene::MakePaintGroupFromSelectedObjects( std::vector<FOdysseyVect
         {
             oCubicPathOldParentArray[i] = oCubicPathArray[i]->GetParent();
 
-            paintGroup->TransferChild( oCubicPathArray[i] );
+            paintGroup->TransferChild( oCubicPathArray[i], paintGroup->GetLastChild() );
         }
 
         // first update to update paths' segments.
-        Update( 0 );
+        Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
         ClearSelection();
         Select( paintGroup );
@@ -266,7 +279,7 @@ FOdysseyVectorScene::GroupSelectedObjects( std::vector<FOdysseyVectorObject*>& o
             oObjectArray.push_back( obj );
             oObjectOldParentArray.push_back( obj->GetParent() );
 
-            group->TransferChild( obj );
+            group->TransferChild( obj, group->GetLastChild() );
         }
 
         group->Invalidate();
@@ -309,21 +322,12 @@ FOdysseyVectorScene::DrawShape( uint64 iFlags )
     blctx->fillAll();
     blctx->restore();
 
+    FOdysseyVectorGroupPaint::DrawShape( iFlags );
+
     // view the updated zone ( testing purpose only )
     /*blctx.setStrokeStyle(BLRgba32(0xFFFF0000));
     blctx.setStrokeWidth(1.0f);
     blctx.strokeRect( mRoi.x, mRoi.y, mRoi.w, mRoi.h );*/
-}
-
-void
-FOdysseyVectorScene::UpdateShape( uint32 iUpdateFlags )
-{
-}
-
-void
-FOdysseyVectorScene::Update( uint32 iUpdateFlags )
-{
-    FOdysseyVectorObject::Update( iUpdateFlags );
 }
 
 FOdysseyVectorObject*

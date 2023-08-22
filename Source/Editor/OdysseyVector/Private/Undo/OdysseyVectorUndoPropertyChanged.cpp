@@ -81,7 +81,7 @@ FOdysseyVectorUndoPropertyChanged::Apply( UObject* iIgnored )
     FOdysseyVectorUndoPropertyChanged::SwapParam();
 
     // update invalidated objects
-    mScene->Update(0);
+    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
@@ -97,7 +97,7 @@ FOdysseyVectorUndoPropertyChanged::Revert( UObject* iIgnored )
     FOdysseyVectorUndoPropertyChanged::SwapParam();
 
     // update invalidated objects
-    mScene->Update(0);
+    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)

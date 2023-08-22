@@ -134,7 +134,7 @@ FOdysseyVectorUndoPathAlter::Apply( UObject* iIgnored )
     }
 
     // update invalidated objects
-    mScene->Update(0);
+    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
@@ -181,7 +181,7 @@ FOdysseyVectorUndoPathAlter::Revert( UObject* iIgnored )
     }
 
     // update invalidated objects
-    mScene->Update(0);
+    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)

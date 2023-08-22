@@ -17,6 +17,11 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::Reset( FOdysseyVectorScene* iScen
 }
 
 void
+FOdysseyPainterEditorVectorPathDrawingToolHUD::Load( FOdysseyVectorScene* iScene )
+{
+}
+
+void
 FOdysseyPainterEditorVectorPathDrawingToolHUD::Draw( FOdysseyVectorScene* iScene, uint64 iFlags )
 {
     BLContext* blctx = iScene->GetEngine()->GetBLContext();
@@ -33,16 +38,18 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::Draw( FOdysseyVectorScene* iScene
     // matrix might get altered for displaying the selection rectangle of a single object. Save it.
     blctx->save();
     blctx->resetMatrix();
-
+/*
     blctx->setStrokeWidth( 1.0f );
     blctx->setStrokeStyle( hcColor );
     blctx->strokeCircle( mX, mY, mPathDrawingTool->Radius );
-
+*/
     if( mPathDrawingTool->Stitch )
     {
+/*
+        blctx->setStrokeWidth( 1.0f );
         blctx->setStrokeStyle( fgColor );
         blctx->strokeCircle( mX, mY, mPathDrawingTool->StitchingRadius );
-
+*/
         if( mStitchedPointArray.size() )
         {
             FOdysseyVectorPoint* point = mStitchedPointArray[0];

@@ -12,11 +12,11 @@ UOdysseyPainterEditorVectorGroupPaintView::UOdysseyPainterEditorVectorGroupPaint
 void
 UOdysseyPainterEditorVectorGroupPaintView::ImportParam()
 {
-    std::list<FOdysseyVectorObject*>& selectedObjectList = mScene->GetSelectedObjectList();
+    std::list<FOdysseyVectorObject*>::iterator it;
 
     UOdysseyPainterEditorVectorObjectView::ImportParam();
 
-    for ( std::list<FOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
+    for( it = mFocusedObjectList.begin(); it != mFocusedObjectList.end(); ++it )
     {
         FOdysseyVectorObject* selectedObject = (*it);
 
@@ -31,30 +31,31 @@ UOdysseyPainterEditorVectorGroupPaintView::ImportParam()
     }
 }
 
-void
+uint64
 UOdysseyPainterEditorVectorGroupPaintView::PropertyChanged( const FName& iPropertyName, const FName& iCategory )
 {
-    std::list<FOdysseyVectorObject*>& selectedObjectList = mScene->GetSelectedObjectList();
+    uint64 signalFlags = UOdysseyPainterEditorVectorObjectView::PropertyChanged( iPropertyName, iCategory );
 
-    UOdysseyPainterEditorVectorObjectView::PropertyChanged( iPropertyName, iCategory );
-
-    for ( std::list<FOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
+    for( FOdysseyVectorObject* selectedObject : mFocusedObjectList )
     {
-        FOdysseyVectorObject* selectedObject = (*it);
-
         if( selectedObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
         {
             FOdysseyVectorGroupPaint* selectedPaintGroup = static_cast<FOdysseyVectorGroupPaint*>(selectedObject);
 
+            if( iPropertyName == "Painted" )
+                selectedPaintGroup->SetPainted( GroupPaintParam.Painted );
+
+            if( iPropertyName == "Monochrome" )
+                selectedPaintGroup->SetMonochrome( GroupPaintParam.Monochrome );
+
+            if( iPropertyName == "MonochromeColor" )
+                selectedPaintGroup->mGroupPaintParam.MonochromeColor =  GroupPaintParam.MonochromeColor;
+
             if( iPropertyName == "Realtime" )
                 selectedPaintGroup->mGroupPaintParam.Realtime =  GroupPaintParam.Realtime;
 
-            if( iPropertyName == "Tolerance" )
-            {
-                selectedPaintGroup->mGroupPaintParam.Tolerance =  GroupPaintParam.Tolerance;
-
-                selectedPaintGroup->Invalidate( FOdysseyVectorObject::INVALIDATE_ALL );
-            }
+            if( iPropertyName == "GapTolerance" )
+                selectedPaintGroup->SetGapTolerance( GroupPaintParam.GapTolerance );
 
             if( iPropertyName == "Wireframe" )
                 selectedPaintGroup->mGroupPaintParam.Wireframe =  GroupPaintParam.Wireframe;
@@ -63,4 +64,6 @@ UOdysseyPainterEditorVectorGroupPaintView::PropertyChanged( const FName& iProper
                 selectedPaintGroup->mGroupPaintParam.WireframeColor =  GroupPaintParam.WireframeColor;
         }
     }
+
+    return signalFlags;
 }

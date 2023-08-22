@@ -61,7 +61,7 @@ FOdysseyPainterEditorVectorPickToolObjectContextMenu::CreateWidget( FOdysseyPain
           LOCTEXT("DeleteSelection","Delete Selection")
         , LOCTEXT("DeleteSelection","Delete Selection")
         , FSlateIcon("OdysseyStyle","OdysseyLogo.Iliad16")
-        , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::DeleteSelection, vectorEngine, vectorScene)));
+        , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::DeleteObjectSelection, vectorEngine, vectorScene)));
     menu.AddMenuEntry(
           LOCTEXT("FlipHorizontal","Flip Horizontal")
         , LOCTEXT("FlipHorizontal","Flip Horizontal")

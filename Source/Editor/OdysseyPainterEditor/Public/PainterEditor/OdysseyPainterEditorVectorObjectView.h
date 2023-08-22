@@ -19,15 +19,16 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectView : public UO
         ~UOdysseyPainterEditorVectorObjectView();
         UOdysseyPainterEditorVectorObjectView();
 
-        void Update( FOdysseyVectorScene* iScene );
+        void Update( FOdysseyVectorScene* iScene, std::list<FOdysseyVectorObject*>& iFocusedObjectList );
         void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
 
     protected:
         virtual void ImportParam();
-        virtual void PropertyChanged( const FName& iPropertyName, const FName& iCategory );
+        virtual uint64 PropertyChanged( const FName& iPropertyName, const FName& iCategory );
 
     protected:
         FOdysseyVectorScene* mScene;
+        std::list<FOdysseyVectorObject*> mFocusedObjectList;
 
     public:
         UPROPERTY(EditAnywhere, Category="Object")
