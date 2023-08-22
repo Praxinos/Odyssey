@@ -95,5 +95,5 @@ private:
 private:
     UOdysseyLayer* mLayer = nullptr;
     TSharedPtr<SInlineEditableTextBlock> mNameWidget = nullptr;
-    bool mIsOptionsDisplayed = false;
+    bool mIsOptionsDisplayed = true;
 };
