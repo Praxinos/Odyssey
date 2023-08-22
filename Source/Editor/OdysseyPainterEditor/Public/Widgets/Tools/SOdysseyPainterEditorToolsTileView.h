@@ -9,7 +9,7 @@
 #include "Tools/OdysseyPainterEditorTool.h"
 
 class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorToolsTileView
-    : public STileView<UOdysseyPainterEditorTool*>
+    : public SCompoundWidget
 {
 public:
     DECLARE_DELEGATE_OneParam( FOnToolSelected, UOdysseyPainterEditorTool* );
@@ -29,8 +29,9 @@ public:
     void Construct(const FArguments& InArgs);
     
 private:
-	TSharedRef<class ITableRow> OnGenerateTile(UOdysseyPainterEditorTool* iTool, const TSharedRef< class STableViewBase >& iTable);
-    void OnToolSelected(UOdysseyPainterEditorTool* iTool);
+    void OnToolCheckStateChanged(ECheckBoxState InValue, UOdysseyPainterEditorTool* iTool);
+    EVisibility ToolVisibility(UOdysseyPainterEditorTool* iTool) const;
+    ECheckBoxState IsToolChecked(UOdysseyPainterEditorTool* iTool) const;
 
 private:
     TArray<UOdysseyPainterEditorTool*> mTools;

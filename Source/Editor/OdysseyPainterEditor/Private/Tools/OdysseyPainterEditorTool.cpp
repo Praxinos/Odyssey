@@ -13,6 +13,7 @@ UOdysseyPainterEditorTool::~UOdysseyPainterEditorTool()
 
 UOdysseyPainterEditorTool::UOdysseyPainterEditorTool()
     : mEditor (nullptr)
+    , mIsActivated(false)
 {
 }
 
@@ -47,6 +48,7 @@ void
 UOdysseyPainterEditorTool::Activate()
 {    
     //mToolContext->OnChanged().AddUObject(this, &UOdysseyPainterEditorTool::OnToolContextChanged );
+    mIsActivated = true;
     Load();
 }
 
@@ -57,6 +59,7 @@ UOdysseyPainterEditorTool::Inactivate()
     Flush(); //Finish everything
     Commit(); //Commit the jobs that has been done
     Unload();
+    mIsActivated = false;
 }
 
 void
@@ -75,6 +78,12 @@ bool
 UOdysseyPainterEditorTool::IsActivable() const
 {
     return true;
+}
+
+bool
+UOdysseyPainterEditorTool::IsActivated() const
+{
+    return mIsActivated;
 }
 
 //--------------------------------------------------------------------------------------

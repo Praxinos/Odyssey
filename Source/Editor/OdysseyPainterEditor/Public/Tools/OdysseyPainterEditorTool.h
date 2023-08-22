@@ -34,6 +34,10 @@ public:
     virtual bool IsActivable() const;
 
     //Inactivates the tool
+    UFUNCTION(BlueprintPure, Category="Tools")
+    virtual bool IsActivated() const;
+
+    //Inactivates the tool
     UFUNCTION(BlueprintCallable, Category="Tools")
     virtual void Inactivate();
 
@@ -83,4 +87,6 @@ protected:
 public:
     UPROPERTY(EditDefaultsOnly, Category="Tool")
     FSlateBrush Icon;
+
+    bool mIsActivated;
 };
