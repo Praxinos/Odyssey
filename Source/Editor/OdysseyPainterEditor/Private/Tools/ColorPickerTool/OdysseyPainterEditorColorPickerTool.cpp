@@ -24,7 +24,6 @@ UOdysseyPainterEditorColorPickerTool::OnMouseUp( const FOdysseyPoint& iPointInTe
 {
     bool ret = false;
 
-    
     bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
     if (hasVector)
     {
@@ -36,6 +35,25 @@ UOdysseyPainterEditorColorPickerTool::OnMouseUp( const FOdysseyPoint& iPointInTe
             FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
             ret = UOdysseyPainterEditorColorPickerTool::OnMouseUpVector( vectorEngine, vectorScene, iPointInTexture, iKey );
         }
+    }
+    else
+    {
+        UTexture* texture = GetEditor()->GetSource()->DisplayTexture();
+
+        TArray<FLinearColor> colors;
+        ENQUEUE_RENDER_COMMAND(GetPixel)(
+            [&](FRHICommandListImmediate& RHICmdList)
+            {
+                RHICmdList.ReadSurfaceData(texture->GetResource()->TextureRHI, FIntRect(iPointInTexture.x, iPointInTexture.y, iPointInTexture.x + 1, iPointInTexture.y + 1), colors, FReadSurfaceDataFlags());
+            }
+        );
+        
+        FRenderCommandFence fence;
+        fence.BeginFence();
+        fence.Wait();
+
+        ::ULIS::FColor ulisColor = ::ULIS::FColor::RGBAF( colors[0].R, colors[0].G, colors[0].B, colors[0].A );
+        GetEditor()->PaintColor(ulisColor, true);
     }
 
     return ret;
