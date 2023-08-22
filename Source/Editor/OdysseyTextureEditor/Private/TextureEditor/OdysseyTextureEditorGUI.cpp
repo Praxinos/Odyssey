@@ -9,6 +9,7 @@
 #include "TextureEditor/OdysseyTextureEditorExtension.h"
 #include "PainterEditor/OdysseyPainterEditorSelectedVectorObjectTab.h"
 #include "Framework/Docking/LayoutExtender.h"
+#include "OdysseyPainterEditorVectorSceneTreeViewTab.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyTextureEditorGUI"
 
@@ -265,7 +266,7 @@ FOdysseyTextureEditorGUI::DeleteSelection()
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
 
-        mExtension->GetEditor()->DeleteSelection( vectorEngine, vectorScene );
+        mExtension->GetEditor()->DeleteObjectSelection( vectorEngine, vectorScene );
     }
 }
 

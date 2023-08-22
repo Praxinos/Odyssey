@@ -8,6 +8,13 @@
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorVectorSceneTreeViewTab"
 
+const FName&
+FOdysseyPainterEditorVectorSceneTreeViewTab::StaticId()
+{
+    static FName Id = TEXT("OdysseyPainterEditor_VectorSceneTreeView"); //Keep ColorSelector instead of ColorWheel because changing that ID would show an empty panel to users who already opened the previous ColorSelector Panel
+    return Id;
+}
+
 /////////////////////////////////////////////////////
 // FOdysseyPainterEditorVectorSceneTreeViewTab
 //--------------------------------------------------------------------------------------
@@ -18,9 +25,8 @@ FOdysseyPainterEditorVectorSceneTreeViewTab::~FOdysseyPainterEditorVectorSceneTr
 }
 
 FOdysseyPainterEditorVectorSceneTreeViewTab::FOdysseyPainterEditorVectorSceneTreeViewTab(FOdysseyPainterEditor* iEditor)
-    : FOdysseyEditorTab(TEXT("OdysseyPainterEditor_VectorSceneTreeView"),
-                            LOCTEXT( "OdysseyPainterEditorVectorSceneTreeViewTab", "Vector Scene Tree View" ),
-                            FSlateIcon( "OdysseyStyle", "PainterEditor.Tools16" ))
+    : FOdysseyEditorTab( LOCTEXT( "OdysseyPainterEditorVectorSceneTreeViewTab", "Vector Scene Tree View" ),
+                         FSlateIcon( "OdysseyStyle", "PainterEditor.Tools16" ))
     , mEditor(iEditor)
 {
 
@@ -28,6 +34,12 @@ FOdysseyPainterEditorVectorSceneTreeViewTab::FOdysseyPainterEditorVectorSceneTre
 
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------- FOdysseyEditorTab interface
+
+const FName&
+FOdysseyPainterEditorVectorSceneTreeViewTab::GetId() const
+{
+    return StaticId();
+}
 
 TSharedPtr<SWidget>
 FOdysseyPainterEditorVectorSceneTreeViewTab::CreateWidget()

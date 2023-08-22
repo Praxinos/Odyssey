@@ -20,6 +20,7 @@
 #include "OdysseyPainterEditorToolOptionsTab.h"
 #include "OdysseyPainterEditorSelectedVectorObjectTab.h"
 #include "OdysseyPainterEditorViewportTab.h"
+#include "OdysseyPainterEditorVectorSceneTreeViewTab.h"
 
 #include "Framework/Docking/LayoutExtender.h"
 #include "LevelEditor.h"
@@ -353,12 +354,6 @@ FOdysseyPainterEditorGUI::CreateCenterSection(FOdysseyEditorLayoutBuilder& iBuil
     (
         viewportStack
     );
-}
-
-TSharedPtr<FOdysseyPainterEditorVectorSceneTreeViewTab>&
-FOdysseyPainterEditorGUI::GetVectorSceneTreeViewTab()
-{
-    return mVectorSceneTreeViewTab;
 }
 
 //--------------------------------------------------------------------------------------

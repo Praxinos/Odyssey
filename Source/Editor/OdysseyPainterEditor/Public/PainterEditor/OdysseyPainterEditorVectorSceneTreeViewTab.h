@@ -15,12 +15,16 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorSceneTreeViewTab :
     public FOdysseyEditorTab
 {
     public:
+        static const FName& StaticId();
+
+    public:
         // Construction / Destruction
         virtual ~FOdysseyPainterEditorVectorSceneTreeViewTab();
         FOdysseyPainterEditorVectorSceneTreeViewTab( FOdysseyPainterEditor* iEditor );
 
     protected:
         // FOdysseyEditorTab interface
+        virtual const FName& GetId() const override;
         virtual TSharedPtr<SWidget> CreateWidget() override;
 
     public:
