@@ -39,6 +39,13 @@ void
 FOdysseyAnimationEditorExtension::Finalize()
 {
     GetEditor()->OnSourceChanged().RemoveAll(this);
+
+	//Ensure all deleates are removed
+	mAnimationSource = nullptr;
+	UOdysseyAnimation::OnCurrentFrameChanged().RemoveAll(this);
+	IOdysseyAnimationImageRenderingAbility::OnCompositionCommited().RemoveAll(this);
+	UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll(this);
+	IOdysseyAnimationMediaAbility::OnChanged().RemoveAll(this);
 }
 
 void

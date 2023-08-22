@@ -115,9 +115,13 @@ FOdysseyAnimationCellImageRaster::Serialize(FArchive& Ar)
     {
         mRasterBlock = MakeShared<FOdysseyRasterBlock>(mLayer);
     }
+    
     Ar << *mRasterBlock;
 
-    InitAbilities();
+    if ( Ar.IsLoading() )
+    {
+        InitAbilities();
+    }
 }
 
 TArray<::ULIS::FEvent>

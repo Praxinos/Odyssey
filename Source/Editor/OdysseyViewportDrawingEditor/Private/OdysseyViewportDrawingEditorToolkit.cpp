@@ -5,6 +5,7 @@
 #include "OdysseyStyleSet.h"
 #include "OdysseyEditorTab.h"
 #include "Widgets/SOdysseyViewportDrawingEditorMasterTab.h"
+#include "AnimationEditor/OdysseyAnimationEditorExtension.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyViewportDrawingEditorToolkit"
 
@@ -15,8 +16,11 @@ FOdysseyViewportDrawingEditorToolkit::FOdysseyViewportDrawingEditorToolkit(TShar
     iEditor->SetTabsSaveFilename("IliadEditorModeLayout.save");
 
 	TSharedRef<FOdysseyTextureEditorExtension> textureExtension = MakeShared<FOdysseyTextureEditorExtension>(&iEditor.Get());
+    TSharedRef<FOdysseyAnimationEditorExtension> animationExtension = MakeShared<FOdysseyAnimationEditorExtension>(&iEditor.Get());
     mViewportDrawingExtension = MakeShared<FOdysseyViewportDrawingEditorExtension>(&iEditor.Get());
+
 	iEditor->AddExtension(textureExtension);
+    iEditor->AddExtension(animationExtension);
     iEditor->AddExtension(mViewportDrawingExtension.ToSharedRef());
 }
 

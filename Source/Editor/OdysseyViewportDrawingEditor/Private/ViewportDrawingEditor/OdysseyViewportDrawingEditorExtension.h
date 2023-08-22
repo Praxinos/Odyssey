@@ -25,6 +25,7 @@ enum EOdysseyViewportDrawingPaintingAdapterMethod
 
 class ODYSSEYVIEWPORTDRAWINGEDITOR_API FOdysseyViewportDrawingEditorExtension
     : public FOdysseyPainterEditorExtension
+    , public FTickableEditorObject //Allows us to react to Tick events
 {
 public:
     DECLARE_MULTICAST_DELEGATE(FOdysseyPaintingAdapterChanged);
@@ -47,7 +48,7 @@ public:
     AActor* Actor() const;
     UMeshComponent* Component() const;
     UMaterialInterface* Material() const;
-    UTexture2D* Texture() const;
+    UTexture* Texture() const;
 
 	IOdysseyViewportDrawingEditorAdapter* GetOdysseyViewportDrawingEditorAdapter();
 
@@ -70,13 +71,18 @@ public:
     void SetActor(AActor* iActor);
     void SetComponent(UMeshComponent* iComponent);
     void SetMaterial(UMaterialInterface* iMaterial);
-    void SetTexture(UTexture2D* iTexture);
+    void SetTexture(UTexture* iTexture);
     void SetPaintingAdapterMethod(EOdysseyViewportDrawingPaintingAdapterMethod iNewMethod);
 
 private:
     // Listeners
     void OnObjectPropertyChanged(UObject* iObject, struct FPropertyChangedEvent& iPropertyChangedEvent);
 	void OnSourceChanged();
+
+private:
+    // FTickableEditorObject implementation
+	virtual void Tick(float DeltaTime) override;
+	virtual TStatId GetStatId() const override { RETURN_QUICK_DECLARE_CYCLE_STAT( FOdysseyViewportDrawingEditorExtension, STATGROUP_Tickables); }
 
 private:
     // Private Methods
@@ -126,7 +132,7 @@ private:
             mSelectedTexture = iSrcSettings.mSelectedTexture;
         }
 
-        UTexture2D* mSelectedTexture;
+        UTexture* mSelectedTexture;
     };
 
     /** This one allows us to remember the selected settings for a given component (like knowing which texture of the component was selected) */
@@ -136,6 +142,7 @@ private:
     AActor* mActor;
     UMeshComponent* mComponent;
     UMaterialInterface* mMaterial; //Storage purposes only for the GUI -> Get path for it
+    UTexture* mTexture; //Storage purposes only for the GUI -> Get path for it
     TArray<UMeshComponent*> mSelectableComponents;
     TArray<FPaintableTexture> mSelectableTextures;
 
@@ -161,4 +168,7 @@ private:
 
 	/** Painting Extension: describes the method by which we draw in the viewport */
 	TSharedPtr<IOdysseyViewportDrawingEditorAdapter> mPaintingAdapter;
+
+    /** Used to track the animation media being scrubbed */
+    FTimespan mAnimationMediaTimespan;
 };

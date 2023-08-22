@@ -62,7 +62,7 @@ public:
 	FOdysseyViewportDrawingEditorScreenBasedAdapter(FOdysseyViewportDrawingEditorExtension* iExtension);
 
 public:
-    virtual void SetTexture(UTexture2D* iTexture) override;
+    virtual void SetTexture(UTexture* iTexture) override;
 
     void InitializeRenderTarget();
     void FinalizeRenderTarget(); 

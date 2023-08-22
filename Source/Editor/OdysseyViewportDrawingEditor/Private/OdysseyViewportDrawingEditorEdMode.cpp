@@ -176,11 +176,16 @@ void FOdysseyViewportDrawingEditorEdMode::Enter()
 
     //Set Default Selected Actor to the one selected in the viewport
     USelection* actorSelection = GEditor->GetSelectedActors();
-    if (actorSelection->Num() > 0)
+    int numObjects = actorSelection->Num();
+    for (int i = 0; i < numObjects; i++)
     {
-        AActor* selectedActor = Cast<AActor>(actorSelection->GetSelectedObject(0));
+        UObject* selectedObject = actorSelection->GetSelectedObject(i);
+        AActor* selectedActor = Cast<AActor>(selectedObject);
         if (selectedActor)
+        {
             mViewportDrawingEditorExtension->SetActor(selectedActor);
+            break;
+        }
     }
 
     if( !UPhysicsSettings::Get()->bSupportUVFromHitResults )

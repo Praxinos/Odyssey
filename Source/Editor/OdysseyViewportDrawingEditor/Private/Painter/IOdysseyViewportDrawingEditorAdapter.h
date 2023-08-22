@@ -38,8 +38,8 @@ public:
     virtual void Initialize();
     virtual void Finalize();
 
-    virtual void SetTexture(UTexture2D* iTexture);
-    UTexture2D* GetTexture() const;
+    virtual void SetTexture(UTexture* iTexture);
+    UTexture* GetTexture() const;
 
     /** Painting Methods **/
     virtual void StartPainting();
@@ -77,7 +77,7 @@ protected:
     virtual void BindStampBrushInstance(UOdysseyBrushAssetBase* iBindBrush);
 
 protected:
-    UTexture2D* mTexture;
+    UTexture* mTexture;
 
     /** The editor we need help to paint with*/
     FOdysseyViewportDrawingEditorExtension* mExtension;

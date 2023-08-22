@@ -12,7 +12,7 @@
 const FGuid&
 FOdysseyAnimationEditorSource::StaticId()
 {
-	static FGuid id;
+	static FGuid id = FGuid::NewGuid();
 	return id;
 }
 
