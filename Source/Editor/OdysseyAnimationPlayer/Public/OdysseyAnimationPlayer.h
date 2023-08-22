@@ -107,7 +107,7 @@ private:
 	double FramesPerSecond = 0.0f;
 
 	UPROPERTY()
-	bool IsLooping = false;
+	bool IsLooping = true;
 
 
 private:
