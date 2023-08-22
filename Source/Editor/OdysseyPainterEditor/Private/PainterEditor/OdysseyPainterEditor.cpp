@@ -185,6 +185,9 @@ FOdysseyPainterEditor::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
 void 
 FOdysseyPainterEditor::OnClose()
 {
+    //BE CAREFUL: OnClose can be called twice when quiting Unreal Engine
+    // due to a bug in Unreal code
+
     //Cleanup
     if (mSelectedTool)
         mSelectedTool->Inactivate();
@@ -202,6 +205,7 @@ FOdysseyPainterEditor::OnClose()
 
     UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll(this);
 	delete mHUDSystem;
+    mHUDSystem = nullptr;
 
     FOdysseyEditor::OnClose();
 }
