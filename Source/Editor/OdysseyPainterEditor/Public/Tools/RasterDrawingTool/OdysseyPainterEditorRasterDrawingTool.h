@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "UObject/UObjectGlobals.h"
 #include "InputCoreTypes.h"
 #include "Tools/OdysseyPainterEditorTool.h"
 #include "OdysseyBrushBlueprint.h"
@@ -142,8 +143,12 @@ private:
     //Creates the Brush Instance and applies brush overrides if asked
     void CreateBrushInstance(bool iApplyOverrides);
 
+    void ConfigureBrushInstance(UOdysseyBrushAssetBase* iBrushInstance);
+
     // Fired when the Brush is compiled
     //void OnBlueprintCompiled(UBlueprint* iBlueprint);
+
+    void OnBlueprintReinstanced(const FCoreUObjectDelegates::FReplacementObjectMap& iObjectMap);
 
     //Apply brush Overrides
     void ApplyOverrides(UOdysseyBrushAssetBase* iBrushInstance);

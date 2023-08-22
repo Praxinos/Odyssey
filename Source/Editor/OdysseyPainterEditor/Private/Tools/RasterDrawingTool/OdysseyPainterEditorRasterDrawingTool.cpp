@@ -17,7 +17,6 @@
 //----------------------------------------------------------- Construction / Destruction
 UOdysseyPainterEditorRasterDrawingTool::~UOdysseyPainterEditorRasterDrawingTool()
 {
-    //GEditor->OnBlueprintCompiled().RemoveAll(this);
 }
 
 UOdysseyPainterEditorRasterDrawingTool::UOdysseyPainterEditorRasterDrawingTool()
@@ -33,7 +32,6 @@ UOdysseyPainterEditorRasterDrawingTool::UOdysseyPainterEditorRasterDrawingTool()
     , mBaseSize(0)
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.DrawingTool64");
-    //GEditor->OnBlueprintCompiled().AddUObject(this, &UOdysseyPainterEditorRasterDrawingTool::OnBlueprintCompiled);
 
     AvailableShapes.Add(EOdysseyShape::kFreehand, CreateShape<UOdysseyFreehandShape>("UOdysseyPainterEditorRasterDrawingTool::FreehandShape"));
     SelectedShapeInstance = AvailableShapes[SelectedShape];
@@ -77,6 +75,9 @@ UOdysseyPainterEditorRasterDrawingTool::Activate()
 void
 UOdysseyPainterEditorRasterDrawingTool::Load()
 {
+    //GEditor->OnBlueprintCompiled().AddUObject(this, &UOdysseyPainterEditorRasterDrawingTool::OnBlueprintCompiled);
+    FCoreUObjectDelegates::OnObjectsReinstanced.AddUObject(this, &UOdysseyPainterEditorRasterDrawingTool::OnBlueprintReinstanced);
+
 	/* TODO: Done in OnMouseDown(), but check if we need to do something here too or not
     mPaintEngine.RasterBlock(mToolContext->GetRasterBlock());
 
@@ -91,6 +92,8 @@ UOdysseyPainterEditorRasterDrawingTool::Unload()
 
 	if ( BrushInstance )
 		BrushInstance->SetBlock(nullptr);
+
+    FCoreUObjectDelegates::OnObjectsReinstanced.RemoveAll(this);
 }
 
 bool
@@ -523,23 +526,13 @@ UOdysseyPainterEditorRasterDrawingTool::CreateBrushInstance(bool iApplyOverrides
 		return;
 
 	UOdysseyBrushAssetBase* brushInstance = NewObject< UOdysseyBrushAssetBase >(GetTransientPackage(), Brush->GeneratedClass);
-	
-    brushInstance->SetBrushOptions(BrushOptions); //Share BrushOptions between every selected brushes
-    //Set BrushContexts
-    for (int i = 0; i < mBrushContexts.Num(); i++)
-    {
-        brushInstance->AddContext(mBrushContexts[i]); //Set the brush context so that context nodes can be used
-    }
-    brushInstance->SetBlock(mPaintEngine.PaintBlock());
-
 	//Apply Overrides before setting the brushInstance in the strokeEngine properties
     if (iApplyOverrides)
 	    ApplyOverrides(brushInstance);
-
+	
     FOdysseyObjectEditorUtils::SetPropertyValue(this, "BrushInstance", brushInstance);
-    
-    brushInstance->ExecuteSelected();
-    brushInstance->ExecuteStateChanged();
+
+    ConfigureBrushInstance(brushInstance);
 
     mOnCreatedBrushInstance.Broadcast(BrushInstance);
 }
@@ -593,6 +586,32 @@ UOdysseyPainterEditorRasterDrawingTool::BrushChanged()
     CreateBrushInstance(true);
 
     mOnBrushChanged.Broadcast();
+}
+
+void
+UOdysseyPainterEditorRasterDrawingTool::ConfigureBrushInstance(UOdysseyBrushAssetBase* iBrushInstance)
+{
+    iBrushInstance->SetBrushOptions(BrushOptions); //Share BrushOptions between every selected brushes
+    //Set BrushContexts
+    for (int i = 0; i < mBrushContexts.Num(); i++)
+    {
+        iBrushInstance->AddContext(mBrushContexts[i]); //Set the brush context so that context nodes can be used
+    }
+    iBrushInstance->SetBlock(mPaintEngine.PaintBlock());
+    iBrushInstance->ExecuteSelected();
+    iBrushInstance->ExecuteStateChanged();
+}
+
+void
+UOdysseyPainterEditorRasterDrawingTool::OnBlueprintReinstanced(const FCoreUObjectDelegates::FReplacementObjectMap& iObjectMap)
+{
+    TArray<UObject*> newObjects;
+    iObjectMap.GenerateValueArray(newObjects);
+
+    if (newObjects.Contains(BrushInstance))
+    {
+        ConfigureBrushInstance(BrushInstance);
+    }
 }
 
 void
