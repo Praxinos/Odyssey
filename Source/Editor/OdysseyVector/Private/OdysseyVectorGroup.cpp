@@ -46,11 +46,9 @@ FOdysseyVectorGroup::UpdateShape( uint32 iUpdateFlags )
     ::ULIS::FRectD bbox;
     int init = 0;
 
-    mBBox = ::ULIS::FRectD( 0.0f, 0.0f, 0.0f, 0.0f );
-
     // Update the bounding box
-    if( ( iUpdateFlags & INVALIDATE_CHILD )
-     || ( iUpdateFlags & INVALIDATE_SHAPE ) )
+    if( ( mInvalidationFlags & INVALIDATE_CHILD )
+     || ( mInvalidationFlags & INVALIDATE_SHAPE ) )
     {
         for( std::list<FOdysseyVectorObject*>::iterator it = mChildrenList.begin(); it != mChildrenList.end(); ++it )
         {
@@ -73,6 +71,10 @@ FOdysseyVectorGroup::UpdateShape( uint32 iUpdateFlags )
                                               , ::ULIS::FMath::Min4( p0.y, p1.y, p2.y, p3.y )
                                               , ::ULIS::FMath::Max4( p0.x, p1.x, p2.x, p3.x )
                                               , ::ULIS::FMath::Max4( p0.y, p1.y, p2.y, p3.y ) );
+        }
+        else
+        {
+            mBBox = ::ULIS::FRectD( 0.0f, 0.0f, 0.0f, 0.0f );
         }
     }
 }

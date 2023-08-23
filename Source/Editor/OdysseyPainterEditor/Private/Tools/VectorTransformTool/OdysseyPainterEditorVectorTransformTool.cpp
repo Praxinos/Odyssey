@@ -320,7 +320,6 @@ UOdysseyPainterEditorVectorTransformTool::TranslateObjectSelection( FOdysseyVect
     BLMatrix2D spaceMatrix = selectionBox.worldMatrix;
     BLMatrix2D inverseSpaceMatrix;
     BLMatrix2D translateMatrix;
-    BLPoint spacePivot = BLPoint( pivot.x, pivot.y );
     BLPoint translateBy;
     BLPoint localDelta;
 
@@ -369,6 +368,9 @@ UOdysseyPainterEditorVectorTransformTool::TranslateObjectSelection( FOdysseyVect
 
     if( mEditor->GetVectorEditionMode() == eVectorEditionMode::Object )
     {
+        BLPoint spacePivot = BLPoint( pivot.x - selectionBox.rect.x
+                                    , pivot.y - selectionBox.rect.y );
+
         for( std::list<FOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
         {
             FOdysseyVectorObject* object = (*it);
@@ -424,8 +426,8 @@ UOdysseyPainterEditorVectorTransformTool::TranslateObjectSelection( FOdysseyVect
         iEngine->ResetHUD();
 
         // replace pivot correctly.
-        pivot.x = spacePivot.x;
-        pivot.y = spacePivot.y;
+        pivot.x = selectionBox.rect.x + spacePivot.x;
+        pivot.y = selectionBox.rect.y + spacePivot.y;
     }
 }
 
@@ -819,6 +821,8 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseUp( const FOdysseyPoint& iPoint
         GetEditor()->GetVectorPickTool()->OnMouseDown( iPointInTexture, iKey );
         GetEditor()->GetVectorPickTool()->OnMouseUp( iPointInTexture, iKey );
 
+        mTransformHUD->CenterGizmo();
+
         // cancel the undo object that we created in the down event.
         if( mUndo )
         {
@@ -840,9 +844,33 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseUp( const FOdysseyPoint& iPoint
 
         vectorScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
+        // quick fix to place the gizmo at the right place
+        FSelectionBox& selectionBox = mTransformHUD->GetSelectionBox();
+        ::ULIS::FVec2D& gizmo = mTransformHUD->GetGizmo(); 
+        BLPoint worldGizmo = selectionBox.worldMatrix.mapPoint( gizmo.x, gizmo.y );
+        // endof quickfix
+
+        vectorEngine->ResetHUD();
+
+        // quick fix to place the gizmo at the right place
+        BLPoint localGizmo = selectionBox.inverseWorldMatrix.mapPoint( worldGizmo );
+        mTransformHUD->SetGizmo( localGizmo.x, localGizmo.y );
+        // endof quickfix
+
         vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
     }
+/*
+    // quick fix. Will be removed later after refactoring paint groups
+    if( mEditor->GetVectorEditionMode() == eVectorEditionMode::Object )
+    {
+        FSelectionBox& selectionBox = mTransformHUD->GetSelectionBox();
+        BLPoint spacePivot = BLPoint( pivot.x - selectionBox.rect.x
+                                    , pivot.y - selectionBox.rect.y );
 
+        pivot.x = selectionBox.rect.x + spacePivot.x;
+        pivot.y = selectionBox.rect.y + spacePivot.y;
+    }
+*/
     mUndo = nullptr;
     mDragging = false;
     mPickedPivot = nullptr;
