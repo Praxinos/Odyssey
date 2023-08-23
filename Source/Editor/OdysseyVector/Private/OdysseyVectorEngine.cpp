@@ -213,27 +213,34 @@ FOdysseyVectorEngine::UpdateShape( uint32 iUpdateFlags )
 
     //mBLContext->begin( *mBLImage );
 
-    mScene->Draw( 0 );
-/*
-    mBLContext->save();
-    mBLContext->resetMatrix();
-UE_LOG(LogTemp, Warning, TEXT("Some warning message %d %d %d %d"), mRoi.x, mRoi.y, mRoi.w, mRoi.h );
-    mBLContext->setStrokeStyle(BLRgba32(0xFF0000FF));
-    mBLContext->setStrokeWidth(2.0f);
-    mBLContext->strokeRect(mRoi.x,mRoi.y,mRoi.w,mRoi.h);
-    mBLContext->restore();
-*/
-    //RenderHUD( iScene );
+    if( mInvalidationFlags )
+    {
+        mScene->Draw( 0 );
+    /*
+        mBLContext->save();
+        mBLContext->resetMatrix();
+    UE_LOG(LogTemp, Warning, TEXT("Some warning message %d %d %d %d"), mRoi.x, mRoi.y, mRoi.w, mRoi.h );
+        mBLContext->setStrokeStyle(BLRgba32(0xFF0000FF));
+        mBLContext->setStrokeWidth(2.0f);
+        mBLContext->strokeRect(mRoi.x,mRoi.y,mRoi.w,mRoi.h);
+        mBLContext->restore();
+    */
+        //RenderHUD( iScene );
 
-    //mBLContext->restoreClipping();
+        //mBLContext->restoreClipping();
 
-    //mBLMask->swap(*mBLImage);
+        //mBLMask->swap(*mBLImage);
 
-    //mBLContext->blitImage( BLPoint(0,0), *mBLMask );
+        //mBLContext->blitImage( BLPoint(0,0), *mBLMask );
 
-    mBLContext->flush(BL_CONTEXT_FLUSH_SYNC);
+        mBLContext->flush(BL_CONTEXT_FLUSH_SYNC);
+    }
 
     //mBLContext->end();
+    if( ( iUpdateFlags & FOdysseyVectorObject::KEEPINVALIDATED ) == 0 )
+    {
+        mInvalidationFlags = 0;
+    }
 }
 
 void

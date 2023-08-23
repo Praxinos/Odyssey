@@ -244,6 +244,7 @@ FOdysseyPainterEditorVectorPickToolHUD::DrawSelectionBox( FOdysseyVectorScene* i
     BLContext* blctx = iScene->GetEngine()->GetBLContext();
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
+    BLRgba32 white = BLRgba32( 255, 255, 255, 255 );
     BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
     BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
 
@@ -270,7 +271,8 @@ FOdysseyPainterEditorVectorPickToolHUD::DrawSelectionBox( FOdysseyVectorScene* i
         blctx->setStrokeWidth( 2.0f );
         blctx->strokePath( path );
 
-        blctx->setStrokeStyle( fgColor );
+        // draw box as white if nothing is selected, colored if something is selected
+        blctx->setStrokeStyle( ( iScene->GetSelectedObjectList().size() == 0 ) ? white : fgColor );
         blctx->setStrokeWidth( 1.0f );
         blctx->strokePath( path );
     }

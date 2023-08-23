@@ -47,24 +47,34 @@ FOdysseyVectorGroup::UpdateShape( uint32 iUpdateFlags )
     int init = 0;
 
     // Update the bounding box
-
-    for( std::list<FOdysseyVectorObject*>::iterator it = mChildrenList.begin(); it != mChildrenList.end(); ++it )
+    if( ( mInvalidationFlags & INVALIDATE_CHILD )
+     || ( mInvalidationFlags & INVALIDATE_SHAPE ) )
     {
-        FOdysseyVectorObject *child = (*it);
-        ::ULIS::FRectD childBBox = child->GetBBox( true );
+        for( std::list<FOdysseyVectorObject*>::iterator it = mChildrenList.begin(); it != mChildrenList.end(); ++it )
+        {
+            FOdysseyVectorObject *child = (*it);
+            ::ULIS::FRectD childBBox = child->GetBBox( true );
 
-        bbox = ( init == 0 ) ? childBBox : bbox | childBBox;
+            bbox = ( init == 0 ) ? childBBox : bbox | childBBox;
 
-        init = 1;
+            init = 1;
+        }
+
+        if( init )
+        {
+            BLPoint p0 = mInverseWorldMatrix.mapPoint( bbox.x         , bbox.y          );
+            BLPoint p1 = mInverseWorldMatrix.mapPoint( bbox.x + bbox.w, bbox.y          );
+            BLPoint p2 = mInverseWorldMatrix.mapPoint( bbox.x + bbox.w, bbox.y + bbox.h );
+            BLPoint p3 = mInverseWorldMatrix.mapPoint( bbox.x         , bbox.y + bbox.h );
+
+            mBBox = ::ULIS::FRectD::FromMinMax( ::ULIS::FMath::Min4( p0.x, p1.x, p2.x, p3.x )
+                                              , ::ULIS::FMath::Min4( p0.y, p1.y, p2.y, p3.y )
+                                              , ::ULIS::FMath::Max4( p0.x, p1.x, p2.x, p3.x )
+                                              , ::ULIS::FMath::Max4( p0.y, p1.y, p2.y, p3.y ) );
+        }
+        else
+        {
+            mBBox = ::ULIS::FRectD( 0.0f, 0.0f, 0.0f, 0.0f );
+        }
     }
-
-    BLPoint p0 = mInverseWorldMatrix.mapPoint( bbox.x         , bbox.y          );
-    BLPoint p1 = mInverseWorldMatrix.mapPoint( bbox.x + bbox.w, bbox.y          );
-    BLPoint p2 = mInverseWorldMatrix.mapPoint( bbox.x + bbox.w, bbox.y + bbox.h );
-    BLPoint p3 = mInverseWorldMatrix.mapPoint( bbox.x         , bbox.y + bbox.h );
-
-    mBBox = ::ULIS::FRectD::FromMinMax( ::ULIS::FMath::Min4( p0.x, p1.x, p2.x, p3.x )
-                                      , ::ULIS::FMath::Min4( p0.y, p1.y, p2.y, p3.y )
-                                      , ::ULIS::FMath::Max4( p0.x, p1.x, p2.x, p3.x )
-                                      , ::ULIS::FMath::Max4( p0.y, p1.y, p2.y, p3.y ) );
 }

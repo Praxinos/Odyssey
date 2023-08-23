@@ -33,12 +33,7 @@ FOdysseyVectorObject::FOdysseyVectorObject( const FString& iName )
 
     SetName( iName );
 
-    mObjectParam.TranslationX = 0.0f;
-    mObjectParam.TranslationY = 0.0f;
-    //mObjectParam.TranslationZ = 1.0f;
-    mObjectParam.Rotation = 0.0f;
-    mObjectParam.ScalingX = 1.0f;
-    mObjectParam.ScalingY = 1.0f;
+    SetTransform( 0.0f, 0.0f, 0.0f, 1.0f, 1.0f );
 
     mForegroundBucket.SetColorMode( eBucketColorMode::SolidColor );
     mForegroundBucket.SetSolidColor( 0, 0, 0, 255 );
@@ -195,12 +190,16 @@ FOdysseyVectorObject::Translate( double iX, double iY )
 {
     mObjectParam.TranslationX = iX;
     mObjectParam.TranslationY = iY;
+
+    Invalidate( INVALIDATE_MATRIX );
 }
 
 void
 FOdysseyVectorObject::Rotate( double iAngle )
 {
     mObjectParam.Rotation = iAngle;
+
+    Invalidate( INVALIDATE_MATRIX );
 }
 
 void
@@ -208,6 +207,8 @@ FOdysseyVectorObject::Scale( double iX, double iY )
 {
     mObjectParam.ScalingX = iX;
     mObjectParam.ScalingY = iY;
+
+    Invalidate( INVALIDATE_MATRIX );
 }
 
 double
@@ -254,6 +255,8 @@ FOdysseyVectorObject::SetTransform( double iTranslationX
     mObjectParam.Rotation = iRotation;
     mObjectParam.ScalingX = iScalingX;
     mObjectParam.ScalingY = iScalingY;
+
+    Invalidate( INVALIDATE_MATRIX );
 }
 
 void
@@ -372,8 +375,10 @@ FOdysseyVectorObject::UpdateMatrix( bool iInvalidate )
         }
 
         blctx->restore();
-    }
 
+        mInvalidationFlags &= (~INVALIDATE_MATRIX);
+    }
+/*
     if( iInvalidate )
     {
         if( mParent )
@@ -381,6 +386,7 @@ FOdysseyVectorObject::UpdateMatrix( bool iInvalidate )
             mParent->Invalidate( mParent->mInvalidationFlags | INVALIDATE_CHILD );
         }
     }
+*/
 }
 
 //static
@@ -557,9 +563,9 @@ FOdysseyVectorObject::Invalidate( uint32 iInvalidationFlags )
             /*mInvalidationFlags & INVALIDATE_PARENT ) == 0*/
         {
             mParent->mInvalidatedChildrenList.push_back( this );
-
-            mParent->Invalidate( mParent->mInvalidationFlags | INVALIDATE_CHILD );
         }
+
+        mParent->Invalidate( INVALIDATE_CHILD );
     }
 
     mInvalidationFlags |= iInvalidationFlags;
@@ -788,11 +794,11 @@ FOdysseyVectorObject::SetBackgroundColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA
 void 
 FOdysseyVectorObject::CopyTransformation( FOdysseyVectorObject& iObject )
 {
-    iObject.mObjectParam.Rotation     = mObjectParam.Rotation;
-    iObject.mObjectParam.ScalingX     = mObjectParam.ScalingX;
-    iObject.mObjectParam.ScalingY     = mObjectParam.ScalingY;
-    iObject.mObjectParam.TranslationX = mObjectParam.TranslationX;
-    iObject.mObjectParam.TranslationY = mObjectParam.TranslationY;
+    iObject.SetTransform( mObjectParam.TranslationX
+                        , mObjectParam.TranslationY
+                        , mObjectParam.Rotation
+                        , mObjectParam.ScalingX
+                        , mObjectParam.ScalingY );
 }
 
 std::list<FOdysseyVectorObject*>&

@@ -273,8 +273,6 @@ FOdysseyVectorGroupPaint::UpdateShape( uint32 iUpdateFlags )
 
     FOdysseyVectorGroup::UpdateShape( iUpdateFlags ); // updates BBox
 
-    UpdateBBox();
-
     if( mGroupPaintParam.Painted )
     {
         if( ( mGroupPaintParam.Realtime == true  )
@@ -1280,54 +1278,6 @@ FOdysseyVectorGroupPaint::SimplifyGraph()
             }
         }
     } while ( keepSimplifying );
-}
-
-void
-FOdysseyVectorGroupPaint::UpdateBBox()
-{
-    double xmin = DBL_MAX, ymin = DBL_MAX, xmax = -DBL_MAX, ymax = -DBL_MAX;
-    bool hasBBox = false;
-
-    for( std::list<FOdysseyVectorObject*>::iterator oit = mChildrenList.begin(); oit != mChildrenList.end(); ++oit )
-    {
-        FOdysseyVectorObject *child = (*oit);
-
-        if( child->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
-        {
-            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(child);
-            ::ULIS::FRectD pathBBox = path->GetBBox( false );
-
-            if( pathBBox.Area() )
-            {
-                double x1 = pathBBox.x
-                     , y1 = pathBBox.y
-                     , x2 = pathBBox.x + pathBBox.w
-                     , y2 = pathBBox.y + pathBBox.h;
-
-                hasBBox = true;
-
-                if( x1 < xmin ) xmin = x1;
-                if( y1 < ymin ) ymin = y1;
-                if( x2 > xmax ) xmax = x2;
-                if( y2 > ymax ) ymax = y2;
-            }
-        }
-    }
-
-    for( std::list<FOdysseyVectorBucket*>::iterator bit = mBucketList.begin(); bit != mBucketList.end(); ++bit )
-    {
-        FOdysseyVectorBucket *bucket = (*bit);
-        ::ULIS::FVec2D& bucketCoords = bucket->GetCoords();
-
-        hasBBox = true;
-
-        if( bucketCoords.x < xmin ) xmin = bucketCoords.x;
-        if( bucketCoords.y < ymin ) ymin = bucketCoords.y;
-        if( bucketCoords.x > xmax ) xmax = bucketCoords.x;
-        if( bucketCoords.y > ymax ) ymax = bucketCoords.y;
-    }
-
-    mBBox = ( hasBBox ) ? ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax ) : ::ULIS::FRectD( 0.0f, 0.0f, 0.0f, 0.0f );
 }
 
 void

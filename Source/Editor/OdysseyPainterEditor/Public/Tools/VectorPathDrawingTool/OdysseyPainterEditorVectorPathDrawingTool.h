@@ -89,6 +89,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
         double Opacity;
 
         UPROPERTY( EditAnywhere, Category="Odyssey PathDrawing Tool" )
+        bool PressureSensitive;
+
+        UPROPERTY( EditAnywhere, Category="Odyssey PathDrawing Tool" )
         bool Absolute;
 
         UPROPERTY( EditAnywhere, Category="Odyssey PathDrawing Tool" )

@@ -191,6 +191,8 @@ SOdysseyPainterEditorVectorSceneTreeView::OnSelectionChanged( TSharedPtr<FVector
             FOdysseyVectorObject* vectorObject = iItem.Get()->GetVectorObject();
             FOdysseyVectorScene* scene = vectorObject->GetScene();
 
+            scene->ClearSelection();
+
             // needed for valid GUndo pointer
             GEditor->BeginTransaction(LOCTEXT("VectorSceneTreeView","Selection Changed"));
             if( GUndo )
@@ -200,12 +202,6 @@ SOdysseyPainterEditorVectorSceneTreeView::OnSelectionChanged( TSharedPtr<FVector
                 GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
             }
             GEditor->EndTransaction();
-
-            // deselect all if control key is not pressed
-            if( FSlateApplication::Get().GetModifierKeys().IsControlDown() == false )
-            {
-                scene->ClearSelection();
-            }
 
             for( int i = 0; i < selectedItems.Num(); i++ )
             {
