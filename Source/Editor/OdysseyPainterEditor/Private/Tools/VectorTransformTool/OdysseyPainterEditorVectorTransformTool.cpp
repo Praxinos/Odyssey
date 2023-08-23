@@ -101,6 +101,7 @@ UOdysseyPainterEditorVectorTransformTool::LoadVector( FOdysseyVectorEngine* iEng
     iEngine->AddHUD( mTransformHUD );
 
     mTransformHUD->Reset( iScene );
+    mTransformHUD->CenterGizmo();
 
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
     iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
@@ -319,25 +320,30 @@ UOdysseyPainterEditorVectorTransformTool::TranslateObjectSelection( FOdysseyVect
     BLMatrix2D spaceMatrix = selectionBox.worldMatrix;
     BLMatrix2D inverseSpaceMatrix;
     BLMatrix2D translateMatrix;
-    BLPoint translateBy;
     BLPoint spacePivot = BLPoint( pivot.x, pivot.y );
+    BLPoint translateBy;
+    BLPoint localDelta;
 
     BLMatrix2D::invert( inverseSpaceMatrix, spaceMatrix );
 
-    translateBy = inverseSpaceMatrix.mapVector( iPointInTexture.deltaPosition.X
-                                              , iPointInTexture.deltaPosition.Y );
+    localDelta = inverseSpaceMatrix.mapVector( iPointInTexture.deltaPosition.X
+                                             , iPointInTexture.deltaPosition.Y );
 
     translateMatrix.reset();
 
     if( ( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_XAXIS     )
      || ( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_TRANSLATE ) )
     {
+        translateBy.x = localDelta.x;
+
         translateMatrix.translate( translateBy.x, 0 );
     }
 
     if( ( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_YAXIS     )
      || ( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_TRANSLATE ) )
     {
+        translateBy.y = localDelta.y;
+
         translateMatrix.translate( 0, translateBy.y );
     }
 
@@ -350,6 +356,15 @@ UOdysseyPainterEditorVectorTransformTool::TranslateObjectSelection( FOdysseyVect
                           , inverseSpaceMatrix
                           , translateMatrix );
         }
+
+        iScene->Update( FOdysseyVectorObject::KEEPINVALIDATED );
+
+        // update the selection box with the newly modified matrices
+        iEngine->ResetHUD();
+
+        // replace pivot correctly.
+        pivot.x += translateBy.x;
+        pivot.y += translateBy.y;
     }
 
     if( mEditor->GetVectorEditionMode() == eVectorEditionMode::Object )
@@ -399,19 +414,19 @@ UOdysseyPainterEditorVectorTransformTool::TranslateObjectSelection( FOdysseyVect
                 object->UpdateMatrix();
             }
         }
+
+        // Update the matrix for all objects
+        //iScene->UpdateMatrix();
+
+        iScene->Update( FOdysseyVectorObject::KEEPINVALIDATED );
+
+        // update the selection box with the newly modified matrices
+        iEngine->ResetHUD();
+
+        // replace pivot correctly.
+        pivot.x = spacePivot.x;
+        pivot.y = spacePivot.y;
     }
-
-    // Update the matrix for all objects
-    //iScene->UpdateMatrix();
-
-    iScene->Update( FOdysseyVectorObject::KEEPINVALIDATED );
-
-    // update the selection box with the newly modified matrices
-    iEngine->ResetHUD();
-
-    // replace pivot correctly.
-    pivot.x = spacePivot.x;
-    pivot.y = spacePivot.y;
 }
 
 double

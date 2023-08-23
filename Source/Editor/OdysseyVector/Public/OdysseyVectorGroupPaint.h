@@ -128,7 +128,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         void GetWireframeColor( uint8 &oR, uint8 &oG, uint8& oB, uint8& oA );
         void SetWireframeColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA );
 
-        void UpdateBBox();
         void SelectBucket( FOdysseyVectorBucket* iSelectedBucket );
         void UnselectBucket( FOdysseyVectorBucket* iSelectedBucket );
         void UnselectAllBuckets();

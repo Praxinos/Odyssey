@@ -254,6 +254,8 @@ FOdysseyVectorObject::SetTransform( double iTranslationX
     mObjectParam.Rotation = iRotation;
     mObjectParam.ScalingX = iScalingX;
     mObjectParam.ScalingY = iScalingY;
+
+    //Invalidate( INVALIDATE_MATRIX );
 }
 
 void
@@ -557,9 +559,9 @@ FOdysseyVectorObject::Invalidate( uint32 iInvalidationFlags )
             /*mInvalidationFlags & INVALIDATE_PARENT ) == 0*/
         {
             mParent->mInvalidatedChildrenList.push_back( this );
-
-            mParent->Invalidate( mParent->mInvalidationFlags | INVALIDATE_CHILD );
         }
+
+        mParent->Invalidate( mParent->mInvalidationFlags | INVALIDATE_CHILD );
     }
 
     mInvalidationFlags |= iInvalidationFlags;

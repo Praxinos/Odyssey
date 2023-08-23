@@ -20,6 +20,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::~UOdysseyPainterEditorVectorPathDraw
 UOdysseyPainterEditorVectorPathDrawingTool::UOdysseyPainterEditorVectorPathDrawingTool()
     : Radius( 5.0f )
     , Opacity( 1.0f )
+    , PressureSensitive( true )
     , Absolute( true )
     , UpdatePaintGroups( true )
     , Stitch( false )
@@ -190,7 +191,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorEng
     //TODO: change architecture to have a easier time getting the palette
     ::ULIS::FColor color = GetEditor()->PaintColor().GetValue();
     ::ULIS::FColor rgba8 = color.ToFormat( ::ULIS::eFormat::Format_RGBA8 );
-    FColor ueColor = FColor( rgba8.R8(), rgba8.G8(), rgba8.B8(), rgba8.A8() );
+    FColor ueColor = FColor( rgba8.R8(), rgba8.G8(), rgba8.B8(), /*rgba8.A8()*/ Opacity * 255.0f );
     FOdysseyVectorVertex* vertex = PickVertex( iEngine, iScene, iPointInTexture.x, iPointInTexture.y, StitchingRadius );
     FOdysseyVectorPath* path = nullptr;
     UOdysseyPaletteEntry* entry = nullptr;
@@ -374,7 +375,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( FOdysseyVectorEng
 
     iEngine->GetColorImageSize( imageRegion );
 
-    mPointRadius = iPointInTexture.pressure * Radius;
+    mPointRadius = PressureSensitive ? ( iPointInTexture.pressure * Radius ) : Radius;
 
 //UE_LOG(LogTemp, Warning, TEXT("Some warning message %f %f"), iPointInTexture.x, iPointInTexture.y );
 

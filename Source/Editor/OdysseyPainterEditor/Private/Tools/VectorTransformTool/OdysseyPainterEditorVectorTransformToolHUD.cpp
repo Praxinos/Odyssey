@@ -314,12 +314,20 @@ FOdysseyPainterEditorVectorTransformToolHUD::SetGizmo( double iLocalX, double iL
 }
 
 void
+FOdysseyPainterEditorVectorTransformToolHUD::CenterGizmo()
+{
+    SetGizmo( mSelectionBox.rect.x + ( mSelectionBox.rect.w * 0.5f )
+            , mSelectionBox.rect.y + ( mSelectionBox.rect.h * 0.5f ) );
+}
+
+void
 FOdysseyPainterEditorVectorTransformToolHUD::Reset(FOdysseyVectorScene* iScene)
 {
     FOdysseyPainterEditorVectorPickToolHUD::Reset( iScene ); // Updates the selection box
-
+/*
     SetGizmo( mSelectionBox.rect.x + ( mSelectionBox.rect.w * 0.5f )
             , mSelectionBox.rect.y + ( mSelectionBox.rect.h * 0.5f ) );
+*/
 }
 
 void
