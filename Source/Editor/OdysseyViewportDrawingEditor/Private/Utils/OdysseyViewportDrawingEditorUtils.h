@@ -9,7 +9,9 @@ public:
 	/** IToolkit interface */
     static void RetrieveTexturesForComponent(const UMeshComponent* Component, TArray<FPaintableTexture>& OutTextures);
     static bool GenerateSeamMask(UMeshComponent* MeshComponent, int32 UVSet, UTextureRenderTarget2D* SeamRenderTexture, UTexture* Texture, UTextureRenderTarget2D* RenderTargetTexture);
+    static void CopyTextureToRenderTargetTexture(UTexture* SourceTexture, UTextureRenderTarget2D* RenderTargetTexture, ERHIFeatureLevel::Type FeatureLevel);
 
 private:
     static void InternalQueryPaintableTextures(int32 MaterialIndex, const UMeshComponent* MeshComponent, int32& OutDefaultIndex, TArray<struct FPaintableTexture>& InOutTextureList);
+    static bool OdysseyDoesMaterialUseTexture(UMaterialInterface* iMaterial, UTexture* iTexture);
 };

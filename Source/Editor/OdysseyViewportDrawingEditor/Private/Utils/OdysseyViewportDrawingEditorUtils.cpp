@@ -6,6 +6,82 @@
 
 #define LOCTEXT_NAMESPACE "OdysseyViewportDrawingEditorUtils"
 
+
+void FOdysseyViewportDrawingEditorUtils::CopyTextureToRenderTargetTexture(UTexture* SourceTexture, UTextureRenderTarget2D* RenderTargetTexture, ERHIFeatureLevel::Type FeatureLevel)
+{
+	check(SourceTexture != nullptr);
+	check(RenderTargetTexture != nullptr);
+
+	// Grab the actual render target resource from the texture.  Note that we're absolutely NOT ALLOWED to
+	// dereference this pointer.  We're just passing it along to other functions that will use it on the render
+	// thread.  The only thing we're allowed to do is check to see if it's nullptr or not.
+	FTextureRenderTargetResource* RenderTargetResource = RenderTargetTexture->GameThread_GetRenderTargetResource();
+	check(RenderTargetResource != nullptr);
+	
+	// Create a canvas for the render target and clear it to black
+	FCanvas Canvas(RenderTargetResource, nullptr, FGameTime(), FeatureLevel);
+
+	const uint32 Width = RenderTargetTexture->GetSurfaceWidth();
+	const uint32 Height = RenderTargetTexture->GetSurfaceHeight();
+
+	// @todo MeshPaint: Need full color/alpha writes enabled to get alpha
+	// @todo MeshPaint: Texels need to line up perfectly to avoid bilinear artifacts
+	// @todo MeshPaint: Potential gamma issues here
+	// @todo MeshPaint: Probably using CLAMP address mode when reading from source (if texels line up, shouldn't matter though.)
+
+	// @todo MeshPaint: Should use scratch texture built from original source art (when possible!)
+	//		-> Current method will have compression artifacts!
+	
+	// Grab the texture resource.  We only support 2D textures and render target textures here.
+	FTexture* TextureResource = nullptr;
+	TextureResource = SourceTexture->GetResource();
+	check(TextureResource != nullptr);
+	
+	// Draw a quad to copy the texture over to the render target
+	{
+		const float MinU = 0.0f;
+		const float MinV = 0.0f;
+		const float MaxU = 1.0f;
+		const float MaxV = 1.0f;
+		const float MinX = 0.0f;
+		const float MinY = 0.0f;
+		const float MaxX = Width;
+		const float MaxY = Height;
+
+		FCanvasUVTri Tri1;
+		FCanvasUVTri Tri2;
+		Tri1.V0_Pos = FVector2D(MinX, MinY);
+		Tri1.V0_UV = FVector2D(MinU, MinV);
+		Tri1.V1_Pos = FVector2D(MaxX, MinY);
+		Tri1.V1_UV = FVector2D(MaxU, MinV);
+		Tri1.V2_Pos = FVector2D(MaxX, MaxY);
+		Tri1.V2_UV = FVector2D(MaxU, MaxV);
+
+		Tri2.V0_Pos = FVector2D(MaxX, MaxY);
+		Tri2.V0_UV = FVector2D(MaxU, MaxV);
+		Tri2.V1_Pos = FVector2D(MinX, MaxY);
+		Tri2.V1_UV = FVector2D(MinU, MaxV);
+		Tri2.V2_Pos = FVector2D(MinX, MinY);
+		Tri2.V2_UV = FVector2D(MinU, MinV);
+		Tri1.V0_Color = Tri1.V1_Color = Tri1.V2_Color = Tri2.V0_Color = Tri2.V1_Color = Tri2.V2_Color = FLinearColor::White;
+		TArray< FCanvasUVTri > List;
+		List.Add(Tri1);
+		List.Add(Tri2);
+		FCanvasTriangleItem TriItem(List, TextureResource);
+		TriItem.BlendMode = SE_BLEND_Opaque;
+		Canvas.DrawItem(TriItem);
+	}
+
+	// Tell the rendering thread to draw any remaining batched elements
+	Canvas.Flush_GameThread(true);
+	
+	ENQUEUE_RENDER_COMMAND(UpdateMeshPaintRTCommand)(
+		[RenderTargetResource](FRHICommandListImmediate& RHICmdList)
+		{
+			TransitionAndCopyTexture(RHICmdList, RenderTargetResource->GetRenderTargetTexture(), RenderTargetResource->TextureRHI, {});
+		});		
+}
+
 void FOdysseyViewportDrawingEditorUtils::RetrieveTexturesForComponent(const UMeshComponent* iComponent, TArray<FPaintableTexture>& oTextures)
 {
     // Get the materials used by the mesh
@@ -80,6 +156,22 @@ void FOdysseyViewportDrawingEditorUtils::InternalQueryPaintableTextures(int32 iM
 }
 
 bool
+FOdysseyViewportDrawingEditorUtils::OdysseyDoesMaterialUseTexture(UMaterialInterface* iMaterial, UTexture* iTexture)
+{
+    if (!iMaterial)
+		return false;
+
+	// Only grab the textures from the top level of samples
+	for ( UMaterialExpression* expression : iMaterial->GetMaterial()->GetExpressions())
+	{
+		UMaterialExpressionTextureBase* textureBase = Cast<UMaterialExpressionTextureBase>(expression);
+		if (textureBase != NULL && textureBase->Texture == iTexture)
+			return true;
+	}
+	return false;
+}
+
+bool
 FOdysseyViewportDrawingEditorUtils::GenerateSeamMask(UMeshComponent* MeshComponent, int32 UVSet, UTextureRenderTarget2D* SeamRenderTexture, UTexture* Texture, UTextureRenderTarget2D* RenderTargetTexture)
 {
 	UStaticMeshComponent* StaticMeshComponent = Cast<UStaticMeshComponent>(MeshComponent);
@@ -122,13 +214,13 @@ FOdysseyViewportDrawingEditorUtils::GenerateSeamMask(UMeshComponent* MeshCompone
 		UMaterialInterface* ElementMat = StaticMeshComponent->GetMaterial(ElementIndex);
 		if (ElementMat != nullptr)
 		{
-			ElementUsesTargetTexture[ElementIndex] |= DoesMaterialUseTexture(ElementMat, TargetTexture2D);
+			ElementUsesTargetTexture[ElementIndex] |= OdysseyDoesMaterialUseTexture(ElementMat, TargetTexture2D);
 
 			if (ElementUsesTargetTexture[ElementIndex] == false && RenderTargetTexture != nullptr)
 			{
 				// If we didn't get a match on our selected texture, we'll check to see if the the material uses a
 				//  render target texture override that we put on during painting.
-				ElementUsesTargetTexture[ElementIndex] |= DoesMaterialUseTexture(ElementMat, RenderTargetTexture);
+				ElementUsesTargetTexture[ElementIndex] |= OdysseyDoesMaterialUseTexture(ElementMat, RenderTargetTexture);
 			}
 		}
 	}

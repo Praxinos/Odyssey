@@ -121,21 +121,21 @@ void FOdysseyViewportDrawingEditorMeshBasedAdapter::StartPainting()
     IOdysseyViewportDrawingEditorAdapter::StartPainting();
 
     if (mPaintingTexture2DRenderTarget)
-        TexturePaintHelpers::CopyTextureToRenderTargetTexture(GetTexture(), mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
+        FOdysseyViewportDrawingEditorUtils::CopyTextureToRenderTargetTexture(GetTexture(), mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
 }
 
 void FOdysseyViewportDrawingEditorMeshBasedAdapter::Paint()
 {
     IOdysseyViewportDrawingEditorAdapter::Paint();
     if ( mPaintingTexture2DRenderTarget )
-        TexturePaintHelpers::CopyTextureToRenderTargetTexture(GetTexture(), mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
+        FOdysseyViewportDrawingEditorUtils::CopyTextureToRenderTargetTexture(GetTexture(), mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
 }
 
 void FOdysseyViewportDrawingEditorMeshBasedAdapter::FinishPainting()
 {
     IOdysseyViewportDrawingEditorAdapter::FinishPainting();
     if ( mPaintingTexture2DRenderTarget )
-        TexturePaintHelpers::CopyTextureToRenderTargetTexture(GetTexture(), mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
+        FOdysseyViewportDrawingEditorUtils::CopyTextureToRenderTargetTexture(GetTexture(), mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
 }
 
 void FOdysseyViewportDrawingEditorMeshBasedAdapter::RenderInteractorWidget(const FSceneView* iView, FViewport* iViewport, FPrimitiveDrawInterface* iPDI)
@@ -643,7 +643,7 @@ void FOdysseyViewportDrawingEditorMeshBasedAdapter::Tick(float iDelta)
         return;
 
     if ( mPaintingTexture2DRenderTarget )
-        TexturePaintHelpers::CopyTextureToRenderTargetTexture(mTexture, mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
+        FOdysseyViewportDrawingEditorUtils::CopyTextureToRenderTargetTexture(mTexture, mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
 }
 
 #undef LOCTEXT_NAMESPACE
