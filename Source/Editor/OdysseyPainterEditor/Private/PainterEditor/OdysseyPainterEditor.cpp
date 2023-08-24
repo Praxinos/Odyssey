@@ -493,15 +493,17 @@ FOdysseyPainterEditor::SetSelectedTool(UOdysseyPainterEditorTool* iTool)
 	if (mSelectedTool)
 		mSelectedTool->Activate();
 
-
-    UOdysseyLayer* currentLayer = LayerStack()->CurrentLayer.Get();
-	if (currentLayer)
+    if (LayerStack())
     {
-        UClass* layerClass = currentLayer->GetClass();
-        if (!mCurrentToolPerLayerClass.Contains(layerClass))
-            mCurrentToolPerLayerClass.Add(layerClass, nullptr);
+        UOdysseyLayer* currentLayer = LayerStack()->CurrentLayer.Get();
+        if (currentLayer)
+        {
+            UClass* layerClass = currentLayer->GetClass();
+            if (!mCurrentToolPerLayerClass.Contains(layerClass))
+                mCurrentToolPerLayerClass.Add(layerClass, nullptr);
 
-        mCurrentToolPerLayerClass[layerClass] = mSelectedTool;
+            mCurrentToolPerLayerClass[layerClass] = mSelectedTool;
+        }
     }
 
     mOnSelectedToolChanged.Broadcast();

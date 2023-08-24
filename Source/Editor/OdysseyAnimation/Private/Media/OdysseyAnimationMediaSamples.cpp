@@ -35,6 +35,8 @@ FOdysseyAnimationMediaSamples::OnOpen(UOdysseyAnimation* iAnimation)
 	mTexture2 = TStrongObjectPtr<UTexture2D>(UTexture2D::CreateTransient(mAnimation->Width(), mAnimation->Height(), PF_B8G8R8A8));
 	mSample = MakeShared<FOdysseyAnimationMediaTextureSample>(mAnimation->Width(), mAnimation->Height(), mTexture1.Get(), mTexture2.Get());
 
+	mInvalidTileMap = FULISInvalidTileMap(64, mAnimation->Width(), mAnimation->Height());
+
 	mTexture1->UpdateResource();
 	mTexture2->UpdateResource();
 }
@@ -44,6 +46,9 @@ FOdysseyAnimationMediaSamples::OnClose()
 {
 	IOdysseyAnimationImageRenderingAbility::OnChanged().RemoveAll(this);
 	IOdysseyAnimationImageRenderingAbility::OnCompositionChanged().RemoveAll(this);
+	
+	mInvalidTileMap.Clear();
+
 	mAnimation = nullptr;
 	mSample = nullptr;
 	mTexture1 = nullptr;
@@ -354,8 +359,7 @@ FOdysseyAnimationMediaSamples::OnImageRenderingChanged(const FGuid& iFrameId, co
     if ( mImageRenderingComposition.Contains(iFrameId) )
     {
         //delay rects update to tick
-        mInvalidRects.Append(iRects);
-        mInvalidRects = OdysseyRectUtils::MergeRects(mInvalidRects);
+		mInvalidTileMap.Invalidate(iRects);
     }
 }
 
@@ -368,7 +372,8 @@ FOdysseyAnimationMediaSamples::OnImageRenderingCompositionChanged(const FGuid& i
 	if ( mImageRenderingComposition.Contains(iFrameId) )
 	{
 		//delay rects update to tick
-		mInvalidRects = { ::ULIS::FRectI::FromXYWH( 0, 0, mAnimation->Width(), mAnimation->Height() ) };
+		//TODO: InvalidTileMap
+		mInvalidTileMap.Invalidate(::ULIS::FRectI::FromXYWH( 0, 0, mAnimation->Width(), mAnimation->Height() ));
 
 		TSharedPtr<IOdysseyAnimationImageRenderingAbility> imageRenderAbility = mAnimation->GetAbility<IOdysseyAnimationImageRenderingAbility>();
 		TArray<FGuid> imageRenderingComposition = imageRenderAbility->GetComposition(mCurrentFrameIndex, IOdysseyImageRenderer::eRenderType::Render);
@@ -385,20 +390,20 @@ FOdysseyAnimationMediaSamples::Tick(float DeltaTime)
 	if ( !mAnimation )
 		return;
 
-    if ( mInvalidRects.IsEmpty() )
+    if ( mInvalidTileMap.InvalidTiles().IsEmpty() )
         return;
 
 	TSharedPtr<IOdysseyAnimationImageRenderingAbility> imageRenderAbility = mAnimation->GetAbility<IOdysseyAnimationImageRenderingAbility>();
 	TSharedPtr<IOdysseyImageRenderer> renderer = imageRenderAbility->BuildRenderer(mCurrentFrameIndex, IOdysseyImageRenderer::eRenderType::Render);
 	
 	TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(mAnimation->Width(), mAnimation->Height(), mAnimation->Format());
-	renderer->Copy(block, mInvalidRects, {});
+	renderer->Copy(block, mInvalidTileMap.InvalidRects(), {});
 
 	::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(mAnimation->Format());
 	ctx.Finish();
 
-	CopyBlockToTexture(block, mInvalidRects);
-    mInvalidRects.Empty();
+	CopyBlockToTexture(block, mInvalidTileMap.InvalidRects());
+    mInvalidTileMap.Clear();
 }
 
 #undef LOCTEXT_NAMESPACE

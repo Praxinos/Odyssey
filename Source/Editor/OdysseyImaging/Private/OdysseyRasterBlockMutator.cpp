@@ -116,9 +116,10 @@ FOdysseyRasterBlockMutator::EditTilesFromRects(const TArray<::ULIS::FRectI>& iRe
     {
         if (mOriginalTileBlocks.Contains(tileIndex))
             continue;
-
+        
+        ::ULIS::FRectI rect = mInvalidTileMap.GetTileRect(tileIndex);
         TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> tileBlock = MakeShared<::ULIS::FBlock>(tileSize, tileSize, mRasterBlock->GetFormat());
-        ctx.Copy(*block, *tileBlock, invalidTileMap.GetTileRect(tileIndex), ::ULIS::FVec2I(0), ::ULIS::FSchedulePolicy::AsyncCacheEfficient);
+        ctx.Copy(*block, *tileBlock, rect, ::ULIS::FVec2I(0), ::ULIS::FSchedulePolicy::AsyncCacheEfficient);
         mOriginalTileBlocks.Add(tileIndex, tileBlock);
     }
     ctx.Finish();
@@ -131,7 +132,7 @@ FOdysseyRasterBlockMutator::EditTilesFromRects(const TArray<::ULIS::FRectI>& iRe
     }
     ctx.Finish();
 
-    mRasterBlock->OnBlockChanged().Broadcast(iRects); //always send at least one interactive event
+    mRasterBlock->OnBlockChanged().Broadcast(invalidTileMap.InvalidRects()); //always send at least one interactive event
 }
 
 void
@@ -171,14 +172,21 @@ FOdysseyRasterBlockMutator::Abort()
     TArray<FIntPoint> tileIndexes;
     TArray<::ULIS::FRectI> rects;
     mOriginalTileBlocks.GetKeys(tileIndexes);
+    ctx.Finish();
     for (const FIntPoint& tileIndex : tileIndexes)
     {
+        if (!mOriginalTileBlocks.Contains(tileIndex))
+            continue;
+
+        TSharedPtr<::ULIS::FBlock> originalBlock = mOriginalTileBlocks[tileIndex];
+
         ::ULIS::FRectI rect = mInvalidTileMap.GetTileRect(tileIndex);
         rects.Add(rect);
-        ctx.Copy(*mOriginalTileBlocks[tileIndex], *block, mInvalidTileMap.GetTileRect(tileIndex), rect.Position(), ::ULIS::FSchedulePolicy::AsyncCacheEfficient);
+        ctx.Copy(*originalBlock, *block, originalBlock->Rect(), rect.Position(), ::ULIS::FSchedulePolicy::AsyncCacheEfficient);
     }
     ctx.Finish();
 
     mInvalidTileMap.Clear();
     mOriginalTileBlocks.Empty();
+    mRasterBlock->OnBlockChanged().Broadcast(rects); //always send at least one interactive event
 }

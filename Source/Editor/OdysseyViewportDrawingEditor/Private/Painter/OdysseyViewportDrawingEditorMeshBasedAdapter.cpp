@@ -66,8 +66,8 @@ FOdysseyViewportDrawingEditorMeshBasedAdapter::InitializeRenderTarget()
     if (!texture)
         return;
 
-    const int32 textureWidth = texture->Source.GetSizeX();
-    const int32 textureHeight = texture->Source.GetSizeY();
+    const int32 textureWidth = texture->GetSurfaceWidth();
+    const int32 textureHeight = texture->GetSurfaceHeight();
     
     mPaintingTexture2DRenderTarget = NewObject<UTextureRenderTarget2D>(GetTransientPackage(), NAME_None, RF_Transient);
     mPaintingTexture2DRenderTarget->ClearColor = FLinearColor(0, 0, 0, 0);

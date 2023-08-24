@@ -44,10 +44,6 @@ struct FSegment
 TArray< ::ULIS::FRectI >
 MergeRects(const TArray< ::ULIS::FRectI >& iInputRects)
 {
-    if ( iInputRects.Num() > 1000 )
-        int a = 0;
-
-    //store a map with key being the x coordinate and value being an array of 
     TMap<int, FInputSegments> segmentsForX;
     for(int i = 0; i < iInputRects.Num(); i++)
     {

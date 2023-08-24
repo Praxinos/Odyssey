@@ -6,6 +6,7 @@
 #include "OdysseyLayerStack.h"
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "Misc/OdysseyHandle.h"
+#include "ULISInvalidTileMap.h"
 
 #include <ULIS>
 
@@ -145,5 +146,5 @@ private:
     int mTextureCompressionNone;
 
     EOdysseyTextureLayerStackTextureUpdateMode mTextureUpdateMode = EOdysseyTextureLayerStackTextureUpdateMode::OnTick;
-    TArray<::ULIS::FRectI> mInvalidRects;
+    FULISInvalidTileMap mInvalidTileMap;
 };

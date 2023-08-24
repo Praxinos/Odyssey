@@ -20,13 +20,16 @@ UOdysseyTextureLayerStack::OnRenderImageChanged()
 UOdysseyTextureLayerStack*
 UOdysseyTextureLayerStack::CreateEmptyFromTexture(UTexture2D* iTexture, UObject* iOuter)
 {
-    return NewObject<UOdysseyTextureLayerStack>(iOuter, "LayerStack", RF_Public | RF_Transactional);
+    UOdysseyTextureLayerStack* layerStack = NewObject<UOdysseyTextureLayerStack>(iOuter, "LayerStack", RF_Public | RF_Transactional);
+    layerStack->mInvalidTileMap = FULISInvalidTileMap(64, iTexture->Source.GetSizeX(), iTexture->Source.GetSizeY());
+    return layerStack;
 }
 
 UOdysseyTextureLayerStack*
 UOdysseyTextureLayerStack::CreateFromTexture(UTexture2D* iTexture, UObject* iOuter)
 {
     UOdysseyTextureLayerStack* layerStack = NewObject<UOdysseyTextureLayerStack>(iOuter, "LayerStack", RF_Public | RF_Transactional);
+    layerStack->mInvalidTileMap = FULISInvalidTileMap(64, iTexture->Source.GetSizeX(), iTexture->Source.GetSizeY());
 
     //Add first layer image
     UOdysseyTextureLayerImageRaster* layer = Cast<UOdysseyTextureLayerImageRaster>(layerStack->CreateLayer(UOdysseyTextureLayerImageRaster::StaticClass()));
@@ -142,9 +145,8 @@ UOdysseyTextureLayerStack::OnRootLayerRenderImageChanged(UOdysseyTextureLayer* i
     //PATCH END:
 
     OnRenderImageChanged().Broadcast(this, iRects, iIsInteractive);
-
-    mInvalidRects.Append(iRects);
-    mInvalidRects = OdysseyRectUtils::MergeRects(mInvalidRects);
+    
+    mInvalidTileMap.Invalidate(iRects);
 
     if (mTextureUpdateMode == EOdysseyTextureLayerStackTextureUpdateMode::Instantaneous)
         UpdateTexture();
@@ -319,7 +321,7 @@ UOdysseyTextureLayerStack::GetTextureUpdateMode()
 void
 UOdysseyTextureLayerStack::UpdateTexture()
 {
-    if (mInvalidRects.Num() <= 0)
+    if (mInvalidTileMap.InvalidTiles().IsEmpty())
         return;
 
     UTexture2D* texture = GetTexture();
@@ -328,7 +330,7 @@ UOdysseyTextureLayerStack::UpdateTexture()
 
     if ( mTextureFastUpdateSurface.IsValid() )
     {
-        FastUpdateTexture(mInvalidRects);
+        FastUpdateTexture(mInvalidTileMap.InvalidRects());
     }
     else
     {
@@ -337,7 +339,8 @@ UOdysseyTextureLayerStack::UpdateTexture()
         ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
         TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = MakeShareable(NewBlockFromUTextureData(texture, format));
 
-        for ( ::ULIS::FRectI& rect : mInvalidRects )
+        TArray<::ULIS::FRectI> invalidRects = mInvalidTileMap.InvalidRects();
+        for ( ::ULIS::FRectI& rect : invalidRects )
             RenderImage(block, rect, rect.Position(), TArray<::ULIS::FEvent>());
 
         ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(block->Format());
@@ -348,7 +351,7 @@ UOdysseyTextureLayerStack::UpdateTexture()
         texture->UpdateResource();
     }
 
-    mInvalidRects.Empty();
+    mInvalidTileMap.Clear();
 }
 
 void

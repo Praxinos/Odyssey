@@ -380,6 +380,7 @@ UOdysseyPainterEditorRasterDrawingTool::OnShapePathAbort()
     }
 
     BrushInstance->StrokeFlush();
+    BrushInstance->StrokeAbort();
 
     //Update immediately the changes
     mPaintEngine.Update(BlendParameters);
@@ -394,9 +395,11 @@ UOdysseyPainterEditorRasterDrawingTool::OnShapePathReset()
         return;
     }
 
-    mWorker.Clear();
 
-    BrushInstance->StrokeReset();
+    //mWorker.Clear();
+    mWorker.Finish();
+    BrushInstance->StrokeFlush();
+    BrushInstance->StrokeAbort();
     
     //Reset the PaintEngine as if didn't draw on it
     mPaintEngine.Abort();
