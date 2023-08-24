@@ -189,15 +189,7 @@ FOdysseyPainterEditor::OnClose()
     //BE CAREFUL: OnClose can be called twice when quiting Unreal Engine
     // due to a bug in Unreal code
 
-    //Cleanup
-    if (mSelectedTool)
-        mSelectedTool->Inactivate();
-    
-    if (mSource)
-    {
-        mSource->Inactivate();
-        mSource = nullptr;
-    }
+    SetSource(nullptr);
 
     for (TSharedPtr<FOdysseyPainterEditorExtension> extension : mExtensions)
         extension->Finalize();
@@ -449,7 +441,8 @@ FOdysseyPainterEditor::SetSource(TSharedPtr<FOdysseyPainterEditorSource> iSource
         mSource->Inactivate();
         mSource = nullptr;
 		
-        mSelectedTool->Inactivate();
+        if (mSelectedTool)
+            mSelectedTool->Inactivate();
     }
 
     if (iSource)

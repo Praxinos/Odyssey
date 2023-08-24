@@ -60,14 +60,13 @@ FOdysseyTextureEditorExtension::BuildLayout(FOdysseyEditorLayoutBuilder& iBuilde
 void
 FOdysseyTextureEditorExtension::OnSourceChanged()
 {
+	mTextureSource = nullptr;
+	UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll(this);
+
     //Is the source an texture
     TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
-	if (!source || source->Id() != FOdysseyTextureEditorSource::StaticId())
-	{
-		mTextureSource = nullptr;
-		UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll(this);
+	if (!source || source->Id() != FOdysseyTextureEditorSource::StaticId())	
 		return;
-	}
 
 	mTextureSource = StaticCastSharedPtr<FOdysseyTextureEditorSource>(source);
 	UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw(this, &FOdysseyTextureEditorExtension::OnCurrentLayerChanged);
