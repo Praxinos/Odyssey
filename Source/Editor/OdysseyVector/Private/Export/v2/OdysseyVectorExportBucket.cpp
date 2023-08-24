@@ -2,6 +2,19 @@
 #include "Palette/OdysseyPaletteEntry.h"
 
 void
+FOdysseyVectorExportV2::WriteBucketColorMode( FOdysseyVectorBucket& iBucket, FArchive &Ar )
+{
+    FOdysseyVectorExportV2::WriteChunk( FOdysseyVectorExportV2::CHUNK_BUCKET_COLORMODE
+                                    , Ar
+                                    , [&iBucket](FArchive &Ar) -> void
+    {
+        uint32 colorMode = static_cast<uint32>(iBucket.GetColorMode());
+
+        Ar << colorMode;
+    } );
+}
+
+void
 FOdysseyVectorExportV2::WriteBucketPaletteEntry( FOdysseyVectorBucket& iBucket, FArchive& Ar)
 {
     FOdysseyVectorExportV2::WriteChunk( FOdysseyVectorExportV2::CHUNK_BUCKET_PALETTEENTRY
@@ -131,19 +144,13 @@ FOdysseyVectorExportV2::WriteBucket( FOdysseyVectorBucket& iBucket, FArchive &Ar
                                     , [&iBucket](FArchive &Ar) -> void
     {
         WriteBucketSpreading( iBucket, Ar );
-        WriteBucketPaletteEntry( iBucket, Ar );
         WriteBucketPosition( iBucket, Ar );
         WriteBucketRotation( iBucket, Ar );
         WriteBucketPropagated( iBucket, Ar );
 
-        if( iBucket.GetColorMode() == eBucketColorMode::LinearGradient )
-        {
-            WriteBucketGradient( iBucket, Ar );
-        }
-
-        if( iBucket.GetColorMode() ==  eBucketColorMode::SolidColor  )
-        {
-            WriteBucketColor( iBucket, Ar );
-        }
+        WriteBucketColorMode( iBucket, Ar );
+        WriteBucketPaletteEntry( iBucket, Ar );
+        WriteBucketGradient( iBucket, Ar );
+        WriteBucketColor( iBucket, Ar );
     } );
 }

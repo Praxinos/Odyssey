@@ -32,6 +32,16 @@ FOdysseyPainterEditorVectorPickToolVertexContextMenu::CreateWidget( FOdysseyPain
         , LOCTEXT("DeleteSelection", "Delete Selection")
         , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
         , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::DeletePointSelection, vectorEngine, vectorScene)));
+    menu.AddMenuEntry(
+          LOCTEXT("AlignPointSelection", "Align Point Selection")
+        , LOCTEXT("AlignPointSelection", "Align Point Selection")
+        , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
+        , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::AlignPointSelection, vectorScene)));
+    menu.AddMenuEntry(
+          LOCTEXT("UnalignPointSelection", "Unalign Point Selection")
+        , LOCTEXT("UnalignPointSelection", "Unalign Point Selection")
+        , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
+        , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::UnalignPointSelection, vectorScene)));
     }
     menu.EndSection();
 

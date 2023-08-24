@@ -11,6 +11,16 @@ FOdysseyVectorImportV2::ReadBucket( FOdysseyVectorBucket& iBucket, uint64 iChunk
         {
             switch( iChunkID )
             {
+                case FOdysseyVectorExportV2::CHUNK_BUCKET_COLORMODE:
+                {
+                    uint32 colorMode;
+
+                    Ar << colorMode;
+
+                    iBucket.SetColorMode( static_cast<eBucketColorMode>(colorMode) );
+                }
+                break;
+
                 case FOdysseyVectorExportV2::CHUNK_BUCKET_PALETTEENTRY:
                 {
                     FName nameEntry;
@@ -90,13 +100,11 @@ FOdysseyVectorImportV2::ReadBucket( FOdysseyVectorBucket& iBucket, uint64 iChunk
                     Ar << B;
                     Ar << A;
 
-                    iBucket.SetColorMode( eBucketColorMode::SolidColor );
                     iBucket.SetSolidColor( R, G, B, A );
                 }
                 break;
 
                 case FOdysseyVectorExportV2::CHUNK_BUCKET_GRADIENT: // container
-                    iBucket.SetColorMode( eBucketColorMode::LinearGradient );
                 break;
 
                 case FOdysseyVectorExportV2::CHUNK_BUCKET_GRADIENT_STOP:

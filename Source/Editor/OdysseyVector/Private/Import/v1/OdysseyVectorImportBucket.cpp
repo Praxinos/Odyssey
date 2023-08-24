@@ -30,6 +30,7 @@ FOdysseyVectorImportV1::ReadBucket( FOdysseyVectorBucket& iBucket, uint64 iChunk
                             {
                                 if (entries[j]->GetFName().IsEqual(nameEntry, ENameCase::CaseSensitive))
                                 {
+                                    iBucket.SetColorMode( eBucketColorMode::Palette );
                                     iBucket.SetPaletteEntry(entries[j]);
                                     break;
                                 }

@@ -21,6 +21,9 @@ typedef struct _FPolygon {
 
 class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegment
 {
+    private:
+        static const uint32 mStaticClass = 0xccff2d66 ; // value is crc32 FOdysseyVectorSegmentCubic
+
     public:
         static uint32 StaticClass() { return mStaticClass; };
         virtual uint32 GetClass() override { return mStaticClass; };
@@ -238,10 +241,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
         void MakeBLPath();
 
     protected:
+        //::ULIS::FVec2D mWidthBezier[2][4];
         FOdysseyVectorHandleSegment mCtrlPoint[2];
         std::vector<FPolygon> mPolygonCache;
         BLPath mBLPath;
-
-    private:
-        static const uint32 mStaticClass = 0xccff2d66 ; // value is crc32 FOdysseyVectorSegmentCubic
 };
