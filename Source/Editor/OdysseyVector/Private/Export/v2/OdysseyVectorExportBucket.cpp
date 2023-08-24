@@ -148,9 +148,14 @@ FOdysseyVectorExportV2::WriteBucket( FOdysseyVectorBucket& iBucket, FArchive &Ar
         WriteBucketRotation( iBucket, Ar );
         WriteBucketPropagated( iBucket, Ar );
 
-        WriteBucketColorMode( iBucket, Ar );
-        WriteBucketPaletteEntry( iBucket, Ar );
+        if( iBucket.GetColorMode() == eBucketColorMode::Palette )
+        {
+            WriteBucketPaletteEntry( iBucket, Ar );
+        }
+
         WriteBucketGradient( iBucket, Ar );
         WriteBucketColor( iBucket, Ar );
+
+        WriteBucketColorMode( iBucket, Ar );
     } );
 }
