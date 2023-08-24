@@ -66,6 +66,15 @@ UOdysseyTextureLayerStack::UOdysseyTextureLayerStack()
     LayerRootClass = UOdysseyTextureLayerRoot::StaticClass();
 }
 
+void
+UOdysseyTextureLayerStack::PostLoad()
+{
+    Super::PostLoad();
+    UTexture2D* texture = GetTexture();
+    if (texture)
+        mInvalidTileMap = FULISInvalidTileMap(64, texture->Source.GetSizeX(), texture->Source.GetSizeY());
+}
+
 UTexture2D*
 UOdysseyTextureLayerStack::GetTexture() const
 {

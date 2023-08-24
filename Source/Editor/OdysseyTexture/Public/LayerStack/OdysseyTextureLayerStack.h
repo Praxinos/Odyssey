@@ -34,6 +34,7 @@ public:
     static UOdysseyTextureLayerStack* CreateFromTexture(UTexture2D* iTexture, UObject* iOuter);
     UOdysseyTextureLayerStack();
 
+    virtual void PostLoad() override;
 public:
     /**
      * @brief Delegate called when something changed the result of RenderImage()
