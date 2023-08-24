@@ -223,10 +223,14 @@ FOdysseyTextureEditorGUI::ExtendMenuAbout( FToolMenuOwner iOwner, FName iMenuNam
 void
 FOdysseyTextureEditorGUI::OnVectorSceneSignal( FOdysseyVectorScene* iScene, uint64 iSignalFlags )
 {
+    TSharedPtr<FOdysseyPainterEditorSource> source = mExtension->GetEditor()->GetSource();
+    if (!source)
+        return;
+
     TSharedPtr<FOdysseyPainterEditorSelectedVectorObjectTab> vectorObjectTab = mExtension->GetEditor()->FindTab<FOdysseyPainterEditorSelectedVectorObjectTab>();
     TSharedPtr<FOdysseyPainterEditorVectorSceneTreeViewTab> vectorSceneTreeViewTab = mExtension->GetEditor()->FindTab<FOdysseyPainterEditorVectorSceneTreeViewTab>();
     
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(mExtension->GetEditor()->GetSource()->GetLayerStack());
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(source->GetLayerStack());
 
     // layerStack might be NULL when closing the program
     if( layerStack )
@@ -258,7 +262,7 @@ FOdysseyTextureEditorGUI::OnVectorSceneSignal( FOdysseyVectorScene* iScene, uint
 void
 FOdysseyTextureEditorGUI::DeleteSelection()
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(mExtension->GetEditor()->GetSource()->GetLayerStack());
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(mExtension->GetEditor()->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
 
     if( currentVectorLayer )
@@ -273,7 +277,7 @@ FOdysseyTextureEditorGUI::DeleteSelection()
 void
 FOdysseyTextureEditorGUI::BringForward()
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(mExtension->GetEditor()->GetSource()->GetLayerStack());
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(mExtension->GetEditor()->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
 
     if( currentVectorLayer )
@@ -288,7 +292,7 @@ FOdysseyTextureEditorGUI::BringForward()
 void
 FOdysseyTextureEditorGUI::SendBackward()
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(mExtension->GetEditor()->GetSource()->GetLayerStack());
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(mExtension->GetEditor()->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
 
     if( currentVectorLayer )
@@ -303,7 +307,7 @@ FOdysseyTextureEditorGUI::SendBackward()
 void
 FOdysseyTextureEditorGUI::Ungroup()
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(mExtension->GetEditor()->GetSource()->GetLayerStack());
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(mExtension->GetEditor()->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
 
     if( currentVectorLayer )
@@ -318,7 +322,7 @@ FOdysseyTextureEditorGUI::Ungroup()
 void
 FOdysseyTextureEditorGUI::ResetView()
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(mExtension->GetEditor()->GetSource()->GetLayerStack());
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(mExtension->GetEditor()->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
 
     if( currentVectorLayer )
@@ -333,7 +337,7 @@ FOdysseyTextureEditorGUI::ResetView()
 void
 FOdysseyTextureEditorGUI::Group()
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(mExtension->GetEditor()->GetSource()->GetLayerStack());
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(mExtension->GetEditor()->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
 
     if( currentVectorLayer )
@@ -348,7 +352,7 @@ FOdysseyTextureEditorGUI::Group()
 void
 FOdysseyTextureEditorGUI::GroupPaint()
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(mExtension->GetEditor()->GetSource()->GetLayerStack());
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(mExtension->GetEditor()->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
 
     if( currentVectorLayer )
@@ -363,7 +367,7 @@ FOdysseyTextureEditorGUI::GroupPaint()
 void
 FOdysseyTextureEditorGUI::FlipHorizontal()
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(mExtension->GetEditor()->GetSource()->GetLayerStack());
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(mExtension->GetEditor()->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
 
     if( currentVectorLayer )
@@ -378,7 +382,7 @@ FOdysseyTextureEditorGUI::FlipHorizontal()
 void
 FOdysseyTextureEditorGUI::FlipVertical()
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(mExtension->GetEditor()->GetSource()->GetLayerStack());
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(mExtension->GetEditor()->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
 
     if( currentVectorLayer )
@@ -393,7 +397,7 @@ FOdysseyTextureEditorGUI::FlipVertical()
 void
 FOdysseyTextureEditorGUI::StitchVertices()
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(mExtension->GetEditor()->GetSource()->GetLayerStack());
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(mExtension->GetEditor()->LayerStack());
     UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
 
     if( currentVectorLayer )

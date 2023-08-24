@@ -104,7 +104,7 @@ FOdysseyTextureEditorLayerStackTab::LayerStack() const
     if (!source || source->Id() != FOdysseyTextureEditorSource::StaticId())
         return nullptr;
 
-    return mExtension->GetEditor()->GetSource()->GetLayerStack();
+    return source->GetLayerStack();
 }
 
 //--------------------------------------------------------------------------------------
