@@ -34,6 +34,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoBucketParam : public FOdysseyVectorUnd
 
     private:
         std::vector<FOdysseyVectorBucket*> mAddedBucketArray;
-        std::vector<FOdysseyVectorBucket*> mParamBucketArray;
+        std::vector<FOdysseyVectorBucket*> mBucketArray;
         std::vector<FOdysseyVectorBucket> mParamBucketSaveArray;
 };
