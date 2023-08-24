@@ -283,12 +283,10 @@ UOdysseyPainterEditorRasterDrawingTool::ExtendMenu( FToolMenuOwner iOwner, FName
     Super::ExtendMenu(iOwner, iMenuName);
 }
 
-TArray<TSharedPtr<SWidget>>
-UOdysseyPainterEditorRasterDrawingTool::CreateTopTabWidgets()
+TSharedRef<SWidget>
+UOdysseyPainterEditorRasterDrawingTool::CreateTopTabWidget()
 {
-    return {
-        SNew(SOdysseyPainterEditorRasterDrawingToolTopTab, this)
-    };
+    return SNew(SOdysseyPainterEditorRasterDrawingToolTopTab, this);
 }
 
 //--------------------------------------------------------------------------------------

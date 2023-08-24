@@ -72,7 +72,7 @@ public:
     void Copy( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
     void Paste( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
 
-    virtual TArray<TSharedPtr<SWidget>> CreateTopTabWidgets() override;
+    virtual TSharedRef<SWidget> CreateTopTabWidget() override;
 
     std::vector<::ULIS::FVec2D>& GetPointArray();
 

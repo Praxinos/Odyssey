@@ -155,10 +155,10 @@ UOdysseyPainterEditorTool::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
 
 }
 
-TArray<TSharedPtr<SWidget>>
-UOdysseyPainterEditorTool::CreateTopTabWidgets()
+TSharedRef<SWidget>
+UOdysseyPainterEditorTool::CreateTopTabWidget()
 {
-    return {};
+    return SNullWidget::NullWidget;
 }
 
 void

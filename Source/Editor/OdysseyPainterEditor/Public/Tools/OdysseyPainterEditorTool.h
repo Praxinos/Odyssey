@@ -66,7 +66,7 @@ public:
     // Interface
     virtual void BindShortcuts(class FBaseToolkit* iToolkit);
     virtual void ExtendMenu( FToolMenuOwner iOwner, FName iMenuName );
-    virtual TArray<TSharedPtr<SWidget>> CreateTopTabWidgets();
+    virtual TSharedRef<SWidget> CreateTopTabWidget();
 
 protected:
     virtual void PropertyChanged(const FName& iPropertyName);

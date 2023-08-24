@@ -50,7 +50,7 @@ public:
                                   , FOdysseyVectorScene* iScene
                                   , const FOdysseyPoint& iPointInTexture ) override;
 
-    virtual TArray<TSharedPtr<SWidget>> CreateTopTabWidgets() override;
+    virtual TSharedRef<SWidget> CreateTopTabWidget() override;
 
 
     virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;

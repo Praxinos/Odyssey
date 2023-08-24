@@ -20,7 +20,7 @@ public:
     SLATE_END_ARGS()
 
     void  Construct( const  FArguments&  InArgs, UOdysseyPainterEditorRasterDrawingTool* iTool);
-    TSharedPtr<SWidget> CreatePropertyWidget(TSharedPtr<class IPropertyHandle> iPropertyHandle, const TSharedPtr<ISinglePropertyView> iView);
+    TSharedPtr<SWidget> CreatePropertyWidget(TSharedPtr<class IPropertyHandle> iPropertyHandle);
 
 private:
     FReply OnEraserButtonClicked();
@@ -28,5 +28,8 @@ private:
 
 private:
     UOdysseyPainterEditorRasterDrawingTool* mTool;
+    TSharedPtr<ISinglePropertyView> mSizePropertyView;
+    TSharedPtr<ISinglePropertyView> mFlowPropertyView;
+    TSharedPtr<ISinglePropertyView> mBlendParametersPropertyView;
 };
 

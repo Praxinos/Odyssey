@@ -55,7 +55,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
                             , FOdysseyVectorScene* iScene
                             , const FOdysseyPoint& iPointInTexture
                             , const FKey& iKey );
-        virtual TArray<TSharedPtr<SWidget>> CreateTopTabWidgets() override;
+        virtual TSharedRef<SWidget> CreateTopTabWidget() override;
 
         //OdysseyPainterEditorTool overrides
         virtual void Commit() override;

@@ -65,7 +65,7 @@ public:
 
     virtual void BindShortcuts(class FBaseToolkit* iToolkit) override;
     virtual void ExtendMenu( FToolMenuOwner iOwner, FName iMenuName ) override;
-    virtual TArray<TSharedPtr<SWidget>> CreateTopTabWidgets() override;
+    virtual TSharedRef<SWidget> CreateTopTabWidget() override;
 
 public:
     // Setters

@@ -110,12 +110,10 @@ UOdysseyPainterEditorVectorTransformTool::LoadVector( FOdysseyVectorEngine* iEng
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
-TArray<TSharedPtr<SWidget>>
-UOdysseyPainterEditorVectorTransformTool::CreateTopTabWidgets()
+TSharedRef<SWidget>
+UOdysseyPainterEditorVectorTransformTool::CreateTopTabWidget()
 {
-    return {
-        SNew(SOdysseyPainterEditorVectorTransformToolTopTab, this)
-    };
+    return SNew(SOdysseyPainterEditorVectorTransformToolTopTab, this);
 }
 
 bool

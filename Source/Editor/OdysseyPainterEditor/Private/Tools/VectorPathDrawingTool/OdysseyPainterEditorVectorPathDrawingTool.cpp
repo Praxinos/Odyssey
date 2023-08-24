@@ -84,12 +84,10 @@ UOdysseyPainterEditorVectorPathDrawingTool::UnloadVector( FOdysseyVectorEngine* 
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
-TArray<TSharedPtr<SWidget>>
-UOdysseyPainterEditorVectorPathDrawingTool::CreateTopTabWidgets()
+TSharedRef<SWidget>
+UOdysseyPainterEditorVectorPathDrawingTool::CreateTopTabWidget()
 {
-    return {
-        SNew(SOdysseyPainterEditorVectorPathDrawingToolTopTab, this)
-    };
+    return SNew(SOdysseyPainterEditorVectorPathDrawingToolTopTab, this);
 }
 
 void

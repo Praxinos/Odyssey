@@ -4,6 +4,7 @@
 #include "Tools/RasterDrawingTool/SOdysseyPainterEditorRasterDrawingToolTopTab.h"
 #include "ISinglePropertyView.h"
 #include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
+#include "Widgets/Layout/SUniformWrapPanel.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorRasterDrawingToolTopTab"
 
@@ -14,7 +15,7 @@
 
 
 TSharedPtr<SWidget>
-SOdysseyPainterEditorRasterDrawingToolTopTab::CreatePropertyWidget(TSharedPtr<class IPropertyHandle> iPropertyHandle, const TSharedPtr<ISinglePropertyView> iView)
+SOdysseyPainterEditorRasterDrawingToolTopTab::CreatePropertyWidget(TSharedPtr<class IPropertyHandle> iPropertyHandle)
 {
     if (!iPropertyHandle)
         return nullptr;
@@ -22,15 +23,20 @@ SOdysseyPainterEditorRasterDrawingToolTopTab::CreatePropertyWidget(TSharedPtr<cl
     TSharedRef<SWidget> nameWidget = iPropertyHandle->CreatePropertyNameWidget();
     TSharedRef<SWidget> valueWidget = iPropertyHandle->CreatePropertyValueWidget(false);
 
-    iView->SetVisibility(EVisibility::Collapsed);
+    /* return SNew(SVerticalBox)
+    + SVerticalBox::Slot()
+    .AutoHeight()
+    //.Padding(0.f, 0.f, 3.f, 0.f)
+    [
+        nameWidget
+    ]
+    + SVerticalBox::Slot()
+    .AutoHeight()
+    [
+        valueWidget
+    ]; */
 
     return SNew(SHorizontalBox)
-    + SHorizontalBox::Slot()
-    .AutoWidth()
-    [
-        //PATCH:
-        iView.ToSharedRef()
-    ]
     + SHorizontalBox::Slot()
     .AutoWidth()
     .Padding(0.f, 0.f, 3.f, 0.f)
@@ -51,46 +57,42 @@ SOdysseyPainterEditorRasterDrawingToolTopTab::Construct( const FArguments& InArg
     FPropertyEditorModule& propertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
 
     FSinglePropertyParams defaultPropertyParams;
-    const TSharedPtr<ISinglePropertyView> sizePropertyView = propertyEditorModule.CreateSingleProperty(mTool->GetBrushOptions(), "Size", defaultPropertyParams);
-    const TSharedPtr<ISinglePropertyView> flowPropertyView = propertyEditorModule.CreateSingleProperty(mTool->GetBrushOptions(), "Flow", defaultPropertyParams);
-    const TSharedPtr<ISinglePropertyView> blendParametersPropertyView = propertyEditorModule.CreateSingleProperty(mTool, "BlendParameters", defaultPropertyParams);
+    mSizePropertyView = propertyEditorModule.CreateSingleProperty(mTool->GetBrushOptions(), "Size", defaultPropertyParams);
+    mFlowPropertyView = propertyEditorModule.CreateSingleProperty(mTool->GetBrushOptions(), "Flow", defaultPropertyParams);
+    mBlendParametersPropertyView = propertyEditorModule.CreateSingleProperty(mTool, "BlendParameters", defaultPropertyParams);
 
-    TSharedPtr<class IPropertyHandle> blendParametersHandle = blendParametersPropertyView->GetPropertyHandle();
-    TSharedPtr<class IPropertyHandle> sizeHandle = sizePropertyView->GetPropertyHandle();
-    TSharedPtr<class IPropertyHandle> flowHandle = flowPropertyView->GetPropertyHandle();
+    TSharedPtr<class IPropertyHandle> blendParametersHandle = mBlendParametersPropertyView->GetPropertyHandle();
+    TSharedPtr<class IPropertyHandle> sizeHandle = mSizePropertyView->GetPropertyHandle();
+    TSharedPtr<class IPropertyHandle> flowHandle = mSizePropertyView->GetPropertyHandle();
     TSharedPtr<class IPropertyHandle> opacityHandle = blendParametersHandle->GetChildHandle("Opacity");
     TSharedPtr<class IPropertyHandle> blendModeHandle = blendParametersHandle->GetChildHandle("BlendingMode");
 
     ChildSlot
-    .VAlign(VAlign_Fill)
     .HAlign(HAlign_Fill)
+    //.VAlign(VAlign_Center)
     [
-        SNew(SWrapBox)
-        .InnerSlotPadding(FVector2D(10.f, 3.f))
-        .UseAllottedSize(true)
+        SNew(SUniformWrapPanel)
+        .SlotPadding(FVector2D(3.f, 3.f))
+        .EvenRowDistribution(true)
         .HAlign(HAlign_Fill)
-        + SWrapBox::Slot()
-        .HAlign(HAlign_Fill)
+        + SUniformWrapPanel::Slot()
         [
-            CreatePropertyWidget(sizeHandle, sizePropertyView).ToSharedRef()
+            CreatePropertyWidget(sizeHandle).ToSharedRef()
         ]
-        + SWrapBox::Slot()
-        .HAlign(HAlign_Fill)
+        + SUniformWrapPanel::Slot()
         [
-            CreatePropertyWidget(opacityHandle, blendParametersPropertyView).ToSharedRef()
+            CreatePropertyWidget(opacityHandle).ToSharedRef()
         ]
-        + SWrapBox::Slot()
-        .HAlign(HAlign_Fill)
+        + SUniformWrapPanel::Slot()
         [
-            CreatePropertyWidget(flowHandle, flowPropertyView).ToSharedRef()
+            CreatePropertyWidget(flowHandle).ToSharedRef()
         ]
-        + SWrapBox::Slot()
-        .HAlign(HAlign_Fill)
+        + SUniformWrapPanel::Slot()
         [
             SNew(SHorizontalBox)
             + SHorizontalBox::Slot()
             [
-                CreatePropertyWidget(blendModeHandle, blendParametersPropertyView).ToSharedRef()
+                CreatePropertyWidget(blendModeHandle).ToSharedRef()
             ]
             + SHorizontalBox::Slot()
             .AutoWidth()

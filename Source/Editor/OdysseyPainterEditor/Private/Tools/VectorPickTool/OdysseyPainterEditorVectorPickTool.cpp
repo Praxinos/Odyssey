@@ -109,12 +109,10 @@ UOdysseyPainterEditorVectorPickTool::LoadVector( FOdysseyVectorEngine* iEngine
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
-TArray<TSharedPtr<SWidget>>
-UOdysseyPainterEditorVectorPickTool::CreateTopTabWidgets()
+TSharedRef<SWidget>
+UOdysseyPainterEditorVectorPickTool::CreateTopTabWidget()
 {
-    return {
-        SNew(SOdysseyPainterEditorVectorPickToolTopTab, this)
-    };
+    return SNew(SOdysseyPainterEditorVectorPickToolTopTab, this);
 }
 
 bool

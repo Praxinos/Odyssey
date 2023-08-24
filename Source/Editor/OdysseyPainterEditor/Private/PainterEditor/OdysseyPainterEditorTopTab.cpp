@@ -35,6 +35,8 @@ FOdysseyPainterEditorTopTab::~FOdysseyPainterEditorTopTab()
 FOdysseyPainterEditorTopTab::FOdysseyPainterEditorTopTab(FOdysseyPainterEditor* iEditor)
 	: FOdysseyEditorTab(LOCTEXT( "OdysseyPainterEditorTopTab", "Top Bar" ), FSlateIcon( "OdysseyStyle", "PainterEditor.Spark16" ))
     , mEditor( iEditor )
+    , mToolWidgetSlot(nullptr)
+    , mCurrentTool(nullptr)
 {   
 }
 
@@ -92,7 +94,7 @@ FOdysseyPainterEditorTopTab::CreateWidget()
 {
     TSharedPtr<SWidget> widget = SAssignNew( mWrapBox, SWrapBox )
         .UseAllottedSize(true)
-        .InnerSlotPadding(FVector2D(3.f, 3.f))
+        //.InnerSlotPadding(FVector2D(3.f, 3.f))
         +SWrapBox::Slot()
         [
             SNew( SButton )
@@ -148,6 +150,14 @@ FOdysseyPainterEditorTopTab::CreateWidget()
                 SNew( SImage )
                 .Image( FOdysseyStyle::GetBrush( "PainterEditor.TopBar.Clear32" ) )
             ]
+        ]
+        
+        + SWrapBox::Slot()
+        .FillEmptySpace(true)
+        .VAlign(VAlign_Center)
+        .Expose(mToolWidgetSlot)
+        [
+            SNullWidget::NullWidget
         ];
 
     UpdateToolWidget();
@@ -225,26 +235,18 @@ void
 FOdysseyPainterEditorTopTab::UpdateToolWidget()
 {
     //Clear the tool widget content
-    for (TSharedPtr<SWidget> widget : mToolWidgets )
-    {
-        mWrapBox->RemoveSlot(widget.ToSharedRef());
-    }
+    //mToolWidgetSlot->DetachWidget();
+    if (mCurrentTool == mEditor->GetSelectedTool())
+        return; //Fix jumping UI when moving in animation timeline
 
-    UOdysseyPainterEditorTool* tool = mEditor->GetSelectedTool();
-    if(!tool)
+    mCurrentTool = mEditor->GetSelectedTool();
+    if(!mCurrentTool)
+    {
+        mToolWidgetSlot->AttachWidget(SNullWidget::NullWidget);
         return;
-
-    mToolWidgets = tool->CreateTopTabWidgets();
-    for (TSharedPtr<SWidget> widget : mToolWidgets )
-    {
-        mWrapBox->AddSlot()
-        .FillEmptySpace(true)
-        .HAlign(HAlign_Fill)
-        .VAlign(VAlign_Center)
-        [
-            widget.ToSharedRef()
-        ];
     }
+
+    mToolWidgetSlot->AttachWidget(mCurrentTool->CreateTopTabWidget());
 }
 
 void

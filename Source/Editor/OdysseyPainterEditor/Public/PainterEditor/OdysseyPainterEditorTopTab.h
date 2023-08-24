@@ -47,6 +47,7 @@ protected:
 private:
     FOdysseyPainterEditor* mEditor;
     TSharedPtr<SWrapBox> mWrapBox;
-    TArray<TSharedPtr<SWidget>> mToolWidgets;
+    SWrapBox::FSlot* mToolWidgetSlot;
+    UOdysseyPainterEditorTool* mCurrentTool;
 };
 
