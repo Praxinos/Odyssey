@@ -10,7 +10,7 @@ class UOdysseyAnimationLayerStack;
 class UOdysseyAnimation;
 class UOdysseyAnimationPlayer;
 
-class ODYSSEYANIMATIONEDITOR_API FOdysseyAnimationEditorLayerStackTab :
+class ODYSSEYANIMATIONEDITOR_API FOdysseyAnimationEditorTimelineTab :
 	public FOdysseyEditorTab
 {
 public:
@@ -18,8 +18,8 @@ public:
     
 public:
     // Construction / Destruction
-    virtual ~FOdysseyAnimationEditorLayerStackTab();
-    FOdysseyAnimationEditorLayerStackTab(FOdysseyAnimationEditorExtension* iExtension);
+    virtual ~FOdysseyAnimationEditorTimelineTab();
+    FOdysseyAnimationEditorTimelineTab(FOdysseyAnimationEditorExtension* iExtension);
 
 protected:
     // FOdysseyAnimationEditorTab interface

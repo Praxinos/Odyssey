@@ -5,7 +5,7 @@
 
 #include "AnimationEditor/OdysseyAnimationEditorExtension.h"
 #include "AnimationEditor/OdysseyAnimationEditorLightTableTab.h"
-#include "AnimationEditor/OdysseyAnimationEditorLayerStackTab.h"
+#include "AnimationEditor/OdysseyAnimationEditorTimelineTab.h"
 #include "Framework/Docking/LayoutExtender.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyAnimationEditorGUI"
@@ -45,7 +45,7 @@ FOdysseyAnimationEditorGUI::BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder)
 	TSharedRef<FTabManager::FStack> animationTimelineStack = iBuilder.CreateStack("AnimationTimelineStack");
 	animationTimelineStack->SetHideTabWell(false);
 	animationTimelineStack->SetSizeCoefficient(0.2f);
-	animationTimelineStack->AddTab(FOdysseyAnimationEditorLayerStackTab::StaticId(), ETabState::OpenedTab);
+	animationTimelineStack->AddTab(FOdysseyAnimationEditorTimelineTab::StaticId(), ETabState::OpenedTab);
 
 	mainVerticalSplitter->Split
 	(
@@ -56,14 +56,14 @@ FOdysseyAnimationEditorGUI::BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder)
 void
 FOdysseyAnimationEditorGUI::ExtendLevelEditorLayout(FLayoutExtender& Extender)
 {   
-    Extender.ExtendLayout(FTabId(TEXT("Sequencer")), ELayoutExtensionPosition::Above, FTabManager::FTab(FOdysseyAnimationEditorLayerStackTab::StaticId(), ETabState::ClosedTab));
+    Extender.ExtendLayout(FTabId(TEXT("Sequencer")), ELayoutExtensionPosition::Above, FTabManager::FTab(FOdysseyAnimationEditorTimelineTab::StaticId(), ETabState::ClosedTab));
 }
 
 void
 FOdysseyAnimationEditorGUI::CreateTabs()
 {
 	//ADD NEW TABS
-	TSharedRef<FOdysseyAnimationEditorLayerStackTab> layerStackTab = MakeShared<FOdysseyAnimationEditorLayerStackTab>(mExtension);
+	TSharedRef<FOdysseyAnimationEditorTimelineTab> layerStackTab = MakeShared<FOdysseyAnimationEditorTimelineTab>(mExtension);
 	TSharedRef<FOdysseyAnimationEditorLightTableTab> lightTableTab = MakeShared<FOdysseyAnimationEditorLightTableTab>(mExtension);
 
 	layerStackTab->ShouldOpenByDefault(true);
@@ -89,10 +89,10 @@ FOdysseyAnimationEditorGUI::CreateBottomSection()
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Getters
 
-TSharedPtr<FOdysseyAnimationEditorLayerStackTab>&
-FOdysseyAnimationEditorGUI::GetLayerStackTab()
+TSharedPtr<FOdysseyAnimationEditorTimelineTab>&
+FOdysseyAnimationEditorGUI::GetTimelineTab()
 {
-	return mLayerStackTab;
+	return mTimelineTab;
 }
 
 TSharedPtr<FOdysseyAnimationEditorLightTableTab>&

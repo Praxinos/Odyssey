@@ -7,6 +7,7 @@
 #include "Widgets/Input/SButton.h"
 
 class FOdysseyAnimationEditorExtension;
+class FOdysseyAnimationLightTable;
 
 //////////////////////////////////////////////////////////////////////////
 // SOdysseyAnimationLightTable

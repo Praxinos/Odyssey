@@ -112,7 +112,7 @@ SOdysseyAnimationLayerStack::RebuildWidgets()
          * 
          */
         widget = SNew(STextBlock)
-        .Text(LOCTEXT("EmptyLayerStackInstructions", "No Layer Stack can be displayed"));
+        .Text(LOCTEXT("EmptyLayerStackInstructions", "No Timeline can be displayed"));
     }
 
     this->ChildSlot.AttachWidget(widget.ToSharedRef());

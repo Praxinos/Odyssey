@@ -5,7 +5,7 @@
 
 class FOdysseyAnimationEditorExtension;
 class FOdysseyAnimationEditorLightTableTab;
-class FOdysseyAnimationEditorLayerStackTab;
+class FOdysseyAnimationEditorTimelineTab;
 
 /**
  * Implements an Editor toolkit for textures.
@@ -31,7 +31,7 @@ protected:
 
 public:
     // GettersFName
-    TSharedPtr<FOdysseyAnimationEditorLayerStackTab>& GetLayerStackTab();
+    TSharedPtr<FOdysseyAnimationEditorTimelineTab>& GetTimelineTab();
     TSharedPtr<FOdysseyAnimationEditorLightTableTab>& GetLightTableTab();
 
 protected:
@@ -41,6 +41,6 @@ private:
     FOdysseyAnimationEditorExtension* mExtension;
 
     //Tabs
-    TSharedPtr<FOdysseyAnimationEditorLayerStackTab> mLayerStackTab;
+    TSharedPtr<FOdysseyAnimationEditorTimelineTab> mTimelineTab;
     TSharedPtr<FOdysseyAnimationEditorLightTableTab> mLightTableTab;
 };

@@ -1,7 +1,7 @@
 // IDDN.FR.001.250001.006.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
-#include "AnimationEditor/OdysseyAnimationEditorLayerStackTab.h"
+#include "AnimationEditor/OdysseyAnimationEditorTimelineTab.h"
 
 #include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
 #include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationCellsMutator.h"
@@ -14,25 +14,25 @@
 #include "Misc/ScopedSlowTask.h"
 #include "OdysseySurfaceTexture2DEditable.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyAnimationEditorLayerStackTab"
+#define LOCTEXT_NAMESPACE "OdysseyAnimationEditorTimelineTab"
 
 const FName&
-FOdysseyAnimationEditorLayerStackTab::StaticId()
+FOdysseyAnimationEditorTimelineTab::StaticId()
 {
-    static FName Id = TEXT("OdysseyAnimationEditor_LayerStack");
+    static FName Id = TEXT("OdysseyAnimationEditor_LayerStack"); //Keep this name
     return Id;
 }
 
 /////////////////////////////////////////////////////
-// FOdysseyAnimationEditorLayerStackTab
+// FOdysseyAnimationEditorTimelineTab
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
-FOdysseyAnimationEditorLayerStackTab::~FOdysseyAnimationEditorLayerStackTab()
+FOdysseyAnimationEditorTimelineTab::~FOdysseyAnimationEditorTimelineTab()
 {
 }
 
-FOdysseyAnimationEditorLayerStackTab::FOdysseyAnimationEditorLayerStackTab(FOdysseyAnimationEditorExtension* iExtension)
-	: FOdysseyEditorTab(LOCTEXT( "OdysseyAnimationEditorLayerStackTab", "Layer Stack" ), FSlateIcon( "OdysseyStyle", "PainterEditor.Layers16" ))
+FOdysseyAnimationEditorTimelineTab::FOdysseyAnimationEditorTimelineTab(FOdysseyAnimationEditorExtension* iExtension)
+	: FOdysseyEditorTab(LOCTEXT( "OdysseyAnimationEditorTimelineTab", "Timeline" ), FSlateIcon( "OdysseyStyle", "PainterEditor.Layers16" ))
     , mExtension(iExtension)
 {
 }
@@ -41,25 +41,25 @@ FOdysseyAnimationEditorLayerStackTab::FOdysseyAnimationEditorLayerStackTab(FOdys
 //--------------------------------------------------- FOdysseyAnimationEditorTab interface
 
 const FName&
-FOdysseyAnimationEditorLayerStackTab::GetId() const
+FOdysseyAnimationEditorTimelineTab::GetId() const
 {
     return StaticId();
 }
 
 TSharedPtr<SWidget>
-FOdysseyAnimationEditorLayerStackTab::CreateWidget()
+FOdysseyAnimationEditorTimelineTab::CreateWidget()
 {
     return SNew(SOdysseyAnimationLayerStack, mExtension)
-        .LayerStack(this, &FOdysseyAnimationEditorLayerStackTab::LayerStack);
+        .LayerStack(this, &FOdysseyAnimationEditorTimelineTab::LayerStack);
 }
 
 void
-FOdysseyAnimationEditorLayerStackTab::BindShortcuts(FBaseToolkit* iToolkit)
+FOdysseyAnimationEditorTimelineTab::BindShortcuts(FBaseToolkit* iToolkit)
 {
     const TSharedRef<FUICommandList>& toolkitCommands = iToolkit->GetToolkitCommands();
     const FOdysseyAnimationEditorCommands& AnimationEditorCommands = FOdysseyAnimationEditorCommands::Get();
 
-    #define MAP_ACTION(action, ...) toolkitCommands->MapAction( action, FExecuteAction::CreateSP( this, &FOdysseyAnimationEditorLayerStackTab::__VA_ARGS__ ), FCanExecuteAction() );
+    #define MAP_ACTION(action, ...) toolkitCommands->MapAction( action, FExecuteAction::CreateSP( this, &FOdysseyAnimationEditorTimelineTab::__VA_ARGS__ ), FCanExecuteAction() );
 
     MAP_ACTION(AnimationEditorCommands.ImportTextureSequence, ImportTextureSequence )
     MAP_ACTION(AnimationEditorCommands.CreateNewAnimationLayerImageRaster, CreateNewLayer )
@@ -78,7 +78,7 @@ FOdysseyAnimationEditorLayerStackTab::BindShortcuts(FBaseToolkit* iToolkit)
 }
 
 void
-FOdysseyAnimationEditorLayerStackTab::ExtendMenu(FToolMenuOwner iOwner, FName iMenuName)
+FOdysseyAnimationEditorTimelineTab::ExtendMenu(FToolMenuOwner iOwner, FName iMenuName)
 {
     ExtendMenuFile(iOwner, iMenuName);
 }
@@ -87,25 +87,25 @@ FOdysseyAnimationEditorLayerStackTab::ExtendMenu(FToolMenuOwner iOwner, FName iM
 //----------------------------------------------------------------------- Widget Getters
 
 UOdysseyAnimationLayerStack*
-FOdysseyAnimationEditorLayerStackTab::LayerStack() const
+FOdysseyAnimationEditorTimelineTab::LayerStack() const
 {
     return mExtension->LayerStack();
 }
 
 UOdysseyAnimation*
-FOdysseyAnimationEditorLayerStackTab::Animation() const
+FOdysseyAnimationEditorTimelineTab::Animation() const
 {
     return mExtension->Animation();
 }
 
 UOdysseyAnimationPlayer*
-FOdysseyAnimationEditorLayerStackTab::Player() const
+FOdysseyAnimationEditorTimelineTab::Player() const
 {
     return mExtension->Player();
 }
 
 float
-FOdysseyAnimationEditorLayerStackTab::PlaybackFramesPerSecond() const
+FOdysseyAnimationEditorTimelineTab::PlaybackFramesPerSecond() const
 {
     return mExtension->PlaybackFramesPerSecond();
 }
@@ -117,7 +117,7 @@ FOdysseyAnimationEditorLayerStackTab::PlaybackFramesPerSecond() const
 //------------------------------------------------------------------------------ Methods
 
 void
-FOdysseyAnimationEditorLayerStackTab::ExtendMenuFile( FToolMenuOwner iOwner, FName iMenuName )
+FOdysseyAnimationEditorTimelineTab::ExtendMenuFile( FToolMenuOwner iOwner, FName iMenuName )
 {
     UToolMenu* menu = UToolMenus::Get()->FindMenu(*(iMenuName.ToString() + FString(".File")));
 
@@ -128,7 +128,7 @@ FOdysseyAnimationEditorLayerStackTab::ExtendMenuFile( FToolMenuOwner iOwner, FNa
 }
 
 void           
-FOdysseyAnimationEditorLayerStackTab::ImportTextureSequence()
+FOdysseyAnimationEditorTimelineTab::ImportTextureSequence()
 {
     UOdysseyLayerStack* layerStack = LayerStack();
     if ( !layerStack )
@@ -204,7 +204,7 @@ FOdysseyAnimationEditorLayerStackTab::ImportTextureSequence()
 
 
 void
-FOdysseyAnimationEditorLayerStackTab::CreateNewLayer()
+FOdysseyAnimationEditorTimelineTab::CreateNewLayer()
 {
     UOdysseyLayerStack* layerStack = LayerStack();
     if ( !layerStack )
@@ -214,7 +214,7 @@ FOdysseyAnimationEditorLayerStackTab::CreateNewLayer()
 }
 
 void
-FOdysseyAnimationEditorLayerStackTab::ChangeLayerOpacity( float iOpacity )
+FOdysseyAnimationEditorTimelineTab::ChangeLayerOpacity( float iOpacity )
 {
     UOdysseyLayerStack* layerStack = LayerStack();
     if ( !layerStack )
@@ -230,7 +230,7 @@ FOdysseyAnimationEditorLayerStackTab::ChangeLayerOpacity( float iOpacity )
 }
 
 void
-FOdysseyAnimationEditorLayerStackTab::OnLayerAdded(UOdysseyLayer* iLayer)
+FOdysseyAnimationEditorTimelineTab::OnLayerAdded(UOdysseyLayer* iLayer)
 {
     if (iLayer->GetClass() == UOdysseyAnimationLayerImageRaster::StaticClass())
     {
